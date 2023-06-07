@@ -70,9 +70,9 @@ uint8_t mpsiHandleMessageGetAppsInfo(MpsiMessage_t* mpsiMessage)
   appsInfoMessage.applicationVersion = CUSTOMER_APPLICATION_VERSION;
   appsInfoMessage.maxMessageIdSupported = MPSI_MESSAGE_ID_MAX_ID;
 
-  bytesSerialized = emAfPluginMpsiSerializeSpecificMessage(&appsInfoMessage,
-                                                           response.messageId,
-                                                           response.payload);
+  bytesSerialized = sli_mpsi_serialize_specific_message(&appsInfoMessage,
+                                                        response.messageId,
+                                                        response.payload);
   if (0 == bytesSerialized) {
     mpsiPrintln("MPSI (0x%x) error: serialize error with len %d",
                 response.messageId, sizeof(appsInfoMessage));
@@ -92,7 +92,7 @@ uint8_t mpsiHandleMessageGetAppsInfo(MpsiMessage_t* mpsiMessage)
     appsInfoMessage.applicationVersion = slotInfo.slotAppInfo.version;
     appsInfoMessage.maxMessageIdSupported =
       getMaxMessageIdSupportedBySlot(slot, slotInfo.slotAppInfo.capabilities);
-    bytesSerialized = emAfPluginMpsiSerializeSpecificMessage(
+    bytesSerialized = sli_mpsi_serialize_specific_message(
       &appsInfoMessage,
       response.messageId,
       response.payload + response.payloadLength);
@@ -137,7 +137,7 @@ uint8_t mpsiHandleMessageBootloadSlot(MpsiMessage_t* mpsiMessage)
     return MPSI_INVALID_PARAMETER;
   }
 
-  bytesDeserialized = emAfPluginMpsiDeserializeSpecificMessage(
+  bytesDeserialized = sli_mpsi_deserialize_specific_message(
     mpsiMessage->payload,
     mpsiMessage->messageId,
     &message);
@@ -183,7 +183,7 @@ uint8_t mpsiHandleMessageInitiateJoining(MpsiMessage_t* mpsiMessage)
     return MPSI_INVALID_PARAMETER;
   }
 
-  bytesDeserialized = emAfPluginMpsiDeserializeSpecificMessage(
+  bytesDeserialized = sli_mpsi_deserialize_specific_message(
     mpsiMessage->payload,
     mpsiMessage->messageId,
     &message);
@@ -250,7 +250,7 @@ uint8_t mpsiHandleMessageSetZigbeeJoiningDeviceInfo(MpsiMessage_t* mpsiMessage)
     return MPSI_INVALID_PARAMETER;
   }
 
-  bytesDeserialized = emAfPluginMpsiDeserializeSpecificMessage(
+  bytesDeserialized = sli_mpsi_deserialize_specific_message(
     mpsiMessage->payload,
     mpsiMessage->messageId,
     &message);
@@ -281,7 +281,7 @@ uint8_t mpsiHandleMessageSetZigbeeJoiningDeviceInfo(MpsiMessage_t* mpsiMessage)
   }
 
   // Set the key in the transient key table
-  status = addTransientLinkKey(message.eui64, &key);
+  status = addTransientLinkKey(message.eui64, (sl_zb_sec_man_key_t*)&key);
   if (EMBER_SUCCESS != status) {
     mpsiPrintln("MPSI (0x%x) error: failed to update key table (0x%x)",
                 mpsiMessage->messageId, status);
@@ -334,7 +334,7 @@ uint8_t mpsiHandleMessageGetZigbeeTrustCenterJoiningCredentials(
           key.contents,
           COUNTOF(tcJoiningCredentialsMessage.preconfiguredKey));
 
-  response.payloadLength = emAfPluginMpsiSerializeSpecificMessage(
+  response.payloadLength = sli_mpsi_serialize_specific_message(
     &tcJoiningCredentialsMessage,
     response.messageId,
     response.payload);
@@ -346,7 +346,7 @@ uint8_t mpsiHandleMessageGetZigbeeTrustCenterJoiningCredentials(
   }
 
   // Add the key in the key table with a wildcard EUI
-  status = addTransientLinkKey(wildcardEui64, &key);
+  status = addTransientLinkKey(wildcardEui64, (sl_zb_sec_man_key_t*)&key);
   if (EMBER_SUCCESS != status) {
     mpsiPrintln("MPSI (0x%x) error: failed to update key table (0x%x)",
                 mpsiMessage->messageId, status);
@@ -392,7 +392,7 @@ uint8_t mpsiHandleMessageSetZigbeeTrustCenterJoiningCredentials(
     return MPSI_INVALID_PARAMETER;
   }
 
-  bytesDeserialized = emAfPluginMpsiDeserializeSpecificMessage(
+  bytesDeserialized = sli_mpsi_deserialize_specific_message(
     mpsiMessage->payload,
     mpsiMessage->messageId,
     &message);

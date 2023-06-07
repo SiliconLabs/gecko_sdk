@@ -41,7 +41,7 @@ template_contribution:
     value:
       group: price-client
       name: init
-      handler: emAfPriceClientCliInit
+      handler: sli_zigbee_af_price_client_cli_init
       help: Initializes the price info for the provided endpoint.
       argument:
       - type: uint8
@@ -50,7 +50,7 @@ template_contribution:
     value:
       group: price-client
       name: print
-      handler: emAfPriceClientCliPrint
+      handler: sli_zigbee_af_price_client_cli_print
       help: Prints the price info for the provided endpoint.
       argument:
       - type: uint8
@@ -59,7 +59,7 @@ template_contribution:
     value:
       group: price-client
       name: printEvent
-      handler: emAfPriceClientCliPrintEvent
+      handler: sli_zigbee_af_price_client_cli_printEvent
       help: Prints the price info for the provided endpoint and event ID.
       argument:
       - type: uint8
@@ -75,7 +75,7 @@ template_contribution:
     value:
       group: conv-factor
       name: printEvent
-      handler: emAfPriceClientCliConversionFactorPrintByEventId
+      handler: sli_zigbee_af_price_client_cli_conversion_factor_print_by_event_id
       help: Prints the conversion factor table entry with a matching event ID.
       argument:
       - type: uint8
@@ -91,7 +91,7 @@ template_contribution:
     value:
       group: calf-value
       name: printEvent
-      handler: emAfPriceClientCliCalorificValuePrintByEventId
+      handler: sli_zigbee_af_price_client_cli_calorific_value_print_by_event_id
       help: Prints the calorific value table entry with a matching event ID.
       argument:
       - type: uint8
@@ -107,7 +107,7 @@ template_contribution:
     value:
       group: co2-value
       name: printCurrent
-      handler: emAfPriceClientCliCo2ValueTablePrintCurrent
+      handler: sli_zigbee_af_price_client_cli_co2_value_table_print_current
       help: Prints the active CO2 value.
       argument:
       - type: uint8
@@ -121,7 +121,7 @@ template_contribution:
     value:
       group: bill-period
       name: printCurrent
-      handler: emAfPriceClientCliBillingPeriodPrintCurrent
+      handler: sli_zigbee_af_price_client_cli_billing_period_print_current
       help: Prints the billing period table entry that is currently active.
       argument:
       - type: uint8
@@ -135,7 +135,7 @@ template_contribution:
     value:
       group: block-period
       name: printEvent
-      handler: emAfPriceClientCliBlockPeriodPrintEntryByEventId
+      handler: sli_zigbee_af_price_client_cli_block_period_print_entry_by_event_id
       help: Prints the entry of the Block Period table with a matching event ID.
       argument:
       - type: uint8
@@ -151,7 +151,7 @@ template_contribution:
     value:
       group: tier-label
       name: printTariff
-      handler: emAfPriceClientCliTierLabelTablePrintTariffId
+      handler: sli_zigbee_af_price_client_cli_tier_label_table_print_tariff_id
       help: Prints the tier label table entry with a matching tariff ID.
       argument:
       - type: uint8
@@ -162,7 +162,7 @@ template_contribution:
     value:
       group: price-client
       name: table-clear
-      handler: emAfPriceClientCliTableClear
+      handler: sli_zigbee_af_price_client_cli_table_clear
       help: Clears out the currently set price for the supplied endpoint.
       argument:
       - type: uint8
@@ -177,7 +177,7 @@ template_contribution:
     value:
       group: console-bill-1
       name: print
-      handler: emAfPriceClientCliConsolidatedBillTablePrint
+      handler: sli_zigbee_af_price_client_cli_consolidated_bill_table_print
       help: Prints the entry of the consolidated bill table.
       argument:
       - type: uint8
@@ -188,7 +188,7 @@ template_contribution:
     value:
       group: console-bill-1
       name: printCurrent
-      handler: emAfPriceClientCliConsolidatedBillPrintCurrentEntry
+      handler: sli_zigbee_af_price_client_cli_consolidated_bill_print_current_entry
       help: Prints the entry of the active consolidated bill in the consolidated bills table.
       argument:
       - type: uint8
@@ -197,7 +197,7 @@ template_contribution:
     value:
       group: console-bill-1
       name: printEvent
-      handler: emAfPriceClientCliConsolidatedBillPrintEntryByEventId
+      handler: sli_zigbee_af_price_client_cli_consolidated_bill_print_entry_by_event_id
       help: Prints the entry of the consolidated bill table with a matching event ID.
       argument:
       - type: uint8
@@ -214,7 +214,7 @@ template_contribution:
     value:
       group: cpp-event-1
       name: setAuth
-      handler: emAfPriceClientCliSetCppEventAuth
+      handler: sli_zigbee_af_price_client_cli_set_cpp_event_auth
       help: Sets the authorization status for future CPP events.
       argument:
       - type: uint8
@@ -223,7 +223,7 @@ template_contribution:
     value:
       group: cpp-event-1
       name: print
-      handler: emAfPriceClientCliCppEventPrint
+      handler: sli_zigbee_af_price_client_cli_cpp_event_print
       help: Prints the entry of the CPP event table.
       argument:
       - type: uint8
@@ -236,7 +236,7 @@ template_contribution:
     value:
       group: credit-pmt
       name: print
-      handler: emAfPriceClientCliCreditPaymentTablePrint
+      handler: sli_zigbee_af_price_client_cli_credit_payment_table_print
       help: Prints the entry of the credit payment table.
       argument:
       - type: uint8
@@ -247,7 +247,7 @@ template_contribution:
     value:
       group: credit-pmt
       name: printEvent
-      handler: emAfPriceClientCliCreditPaymentPrintEntryByEventId
+      handler: sli_zigbee_af_price_client_cli_credit_payment_print_entry_by_event_id
       help: Prints the entry of the credit payment table with a matching issuer event ID.
       argument:
       - type: uint8
@@ -263,7 +263,7 @@ template_contribution:
     value:
       group: currency-convers
       name: printEvent
-      handler: emAfPriceClientCliCurrencyConversionPrintByEventId
+      handler: sli_zigbee_af_price_client_cli_currency_conversion_print_by_event_id
       help: Prints the entry of the currency conversion table with a matching issuer event ID.
       argument:
       - type: uint8
@@ -274,7 +274,7 @@ template_contribution:
     value:
       group: currency-convers
       name: printCurrent
-      handler: emAfPriceClientClieCurrencyConversionPrintCurrentCurrency
+      handler: sli_zigbee_af_price_client_clie_currency_conversion_print_current_currency
       help: Prints the active entry of the currency conversion table.
       argument:
       - type: uint8

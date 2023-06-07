@@ -11,7 +11,7 @@ quality: production
 
 filter:
   - name: "Wireless Technology"
-    value: ["Bluetooth", "Connect"]
+    value: ["Bluetooth"]
   - name: "Capability"
     value: ["Multiprotocol"]
   - name: "Device Type"
@@ -55,7 +55,7 @@ component:
     instance:
       - btn0
       - btn1
-  - id: simple_timer_freertos
+  - id: app_timer_freertos
   - id: bt_rail_compatibility_fix
   - id: bt_post_build
 # ------------------ Require list ----------------------

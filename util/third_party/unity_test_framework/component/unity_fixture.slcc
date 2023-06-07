@@ -14,7 +14,6 @@ include:
       - path: "unity_fixture.h"
       - path: "unity_fixture_internals.h"
 provides:
-  - name: test_framwork_unity_fixture
   - name: test_framework_unity_fixture
 requires:
   - name: test_framework_unity

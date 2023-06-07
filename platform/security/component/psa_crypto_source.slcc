@@ -12,12 +12,6 @@ component_root_path: util/third_party/mbedtls/library
 provides:
   - name: psa_crypto_source
 
-requires:
-  - name: psa_driver
-    condition: [device_series_1]
-  - name: psa_driver
-    condition: [device_series_2]
-
 conflicts:
   - name: tz_secure_key_library_ns
 
@@ -36,7 +30,7 @@ source:
   - path: psa_crypto_rsa.c
   - path: psa_crypto_se.c
   - path: psa_its_file.c
-    unless: [psa_its]
+    condition: [native]
 
 include:
   - path: .

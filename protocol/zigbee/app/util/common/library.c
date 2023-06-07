@@ -30,18 +30,14 @@
   #include "hal/hal.h"
 #endif
 
-#ifdef UC_BUILD
 #include "serial/serial.h"
-#else
-#include "plugin/serial/serial.h"
-#endif
 #include "app/util/common/common.h"
 
 static const char * libraryNames[] = {
   EMBER_LIBRARY_NAMES
 };
 
-#if defined(UC_BUILD) && !defined(PRO_COMPLIANCE)
+#if !defined(PRO_COMPLIANCE)
 uint8_t serialPort = APP_SERIAL;
 #endif
 
@@ -51,15 +47,10 @@ void printAllLibraryStatus(SL_CLI_COMMAND_ARG)
   while (i < EMBER_NUMBER_OF_LIBRARIES) {
     EmberLibraryStatus status = emberGetLibraryStatus(i);
     if (status == EMBER_LIBRARY_ERROR) {
-      (void) emberSerialPrintfLine(serialPort, "Error retrieving info for library ID %d",
+      sl_zigbee_core_debug_println("Error retrieving info for library ID %d",
                                    i);
     } else {
-      (void) emberSerialPrintfLine(serialPort,
-        #ifdef UC_BUILD
-                                   "%s library%s present",
-        #else
-                                   "%p library%p present",
-        #endif
+      sl_zigbee_core_debug_println("%s library%s present",
                                    libraryNames[i],
                                    ((status & EMBER_LIBRARY_PRESENT_MASK)
                                     ? ""
@@ -67,8 +58,7 @@ void printAllLibraryStatus(SL_CLI_COMMAND_ARG)
       if ((status & EMBER_LIBRARY_PRESENT_MASK) != 0U) {
         if (i == EMBER_ZIGBEE_PRO_LIBRARY_ID
             || i == EMBER_SECURITY_CORE_LIBRARY_ID) {
-          (void) emberSerialPrintfLine(serialPort,
-                                       ((status
+          sl_zigbee_core_debug_println(((status
                                          & EMBER_ZIGBEE_PRO_LIBRARY_HAVE_ROUTER_CAPABILITY)
                                         ? "  Have Router Support"
                                         : "  End Device Only"));
@@ -76,8 +66,7 @@ void printAllLibraryStatus(SL_CLI_COMMAND_ARG)
         if (i == EMBER_PACKET_VALIDATE_LIBRARY_ID
             && (status
                 & EMBER_LIBRARY_PRESENT_MASK)) {
-          (void) emberSerialPrintfLine(serialPort,
-                                       ((status & EMBER_PACKET_VALIDATE_LIBRARY_ENABLED)
+          sl_zigbee_core_debug_println(((status & EMBER_PACKET_VALIDATE_LIBRARY_ENABLED)
                                         ? "  Enabled"
                                         : "  Disabled"));
         }

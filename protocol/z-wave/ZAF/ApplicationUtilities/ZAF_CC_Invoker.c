@@ -24,11 +24,8 @@ extern const  zaf_cc_config_entry_latest_t __stop__zaf_cc_config;
 #define cc_config_stop __stop__zaf_cc_config
 
 received_frame_status_t ZAF_CC_invoke_specific(CC_handler_map_latest_t const * const p_cc_entry,
-                             RECEIVE_OPTIONS_TYPE_EX *rxOpt,
-                             ZW_APPLICATION_TX_BUFFER *pFrameIn,
-                             uint8_t cmdLength,
-                             ZW_APPLICATION_TX_BUFFER *pFrameOut,
-                             uint8_t *pLengthOut)
+                                               cc_handler_input_t *input,
+                                               cc_handler_output_t *output)
 {
   if (NULL == p_cc_entry->handler) {
     return RECEIVED_FRAME_STATUS_NO_SUPPORT;
@@ -37,12 +34,17 @@ received_frame_status_t ZAF_CC_invoke_specific(CC_handler_map_latest_t const * c
     case 1:
     {
       cc_handler_v1_t handler = (cc_handler_v1_t)p_cc_entry->handler;
-      return handler(rxOpt, pFrameIn, cmdLength);
+      return handler(input->rx_options, input->frame, input->length);
     }
     case 2:
     {
       cc_handler_v2_t handler = (cc_handler_v2_t)p_cc_entry->handler;
-      return handler(rxOpt, pFrameIn, cmdLength, pFrameOut, pLengthOut);
+      return handler(input->rx_options, input->frame, input->length, output->frame, &output->length);
+    }
+    case 3:
+    {
+      cc_handler_v3_t handler = (cc_handler_v3_t)p_cc_entry->handler;
+      return handler(input, output);
     }
     default:
       // Handler API version is not supported.
@@ -50,22 +52,14 @@ received_frame_status_t ZAF_CC_invoke_specific(CC_handler_map_latest_t const * c
   }
 }
 
-received_frame_status_t invoke_cc_handler(RECEIVE_OPTIONS_TYPE_EX *rxOpt,
-                                          ZW_APPLICATION_TX_BUFFER *pFrameIn,
-                                          uint8_t cmdLength,
-                                          ZW_APPLICATION_TX_BUFFER * pFrameOut,
-                                          uint8_t * pLengthOut)
+received_frame_status_t invoke_cc_handler(cc_handler_input_t * input,
+                                          cc_handler_output_t * output)
 {
   CC_handler_map_latest_t const * iter = &cc_handlers_start;
   for ( ; iter < &cc_handlers_stop; ++iter)
   {
-    if (iter->CC == pFrameIn->ZW_Common.cmdClass) {
-      return ZAF_CC_invoke_specific(iter,
-                  rxOpt,
-                  pFrameIn,
-                  cmdLength,
-                  pFrameOut,
-                  pLengthOut);
+    if (iter->CC == input->frame->ZW_Common.cmdClass) {
+      return ZAF_CC_invoke_specific(iter, input, output);
     }
   }
 
@@ -76,7 +70,7 @@ void ZAF_CC_init_specific(uint8_t cmdClass)
 {
   CC_handler_map_latest_t const * iter = &cc_handlers_start;
   for ( ; iter < &cc_handlers_stop; ++iter) {
-    if (iter->CC == cmdClass) {
+    if ((iter->CC == cmdClass) && (NULL != iter->init)) {
       iter->init();
       break;
     }
@@ -87,7 +81,7 @@ void ZAF_CC_reset_specific(uint8_t cmdClass)
 {
   CC_handler_map_latest_t const * iter = &cc_handlers_start;
   for ( ; iter < &cc_handlers_stop; ++iter) {
-    if (iter->CC == cmdClass) {
+    if ((iter->CC == cmdClass) && (NULL != iter->reset)) {
       iter->reset();
       break;
     }

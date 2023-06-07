@@ -17,3 +17,14 @@ upgrade:
           - cpc_secondary_driver_uart_usart
         remove:
           - cpc_secondary_driver_uart
+  - sdk:
+      id: gecko_sdk
+      version: "4.3.0"
+    component:
+      - script: platform/service/component/upgrade_component_power_manager.lua
+        description: >
+          Component power_manager_core now requires power_manager_energy_mode_impl. To satisfy the power_manager_energy_mode_impl requirement,
+          power_manager_core recommends power_manager_deepsleep signifying that the lowest energy mode is EM2 or
+          EM3, unless power_manager_no_deepsleep is added to the project signifying the lowest energy mode is restricted to EM1.
+    configuration:
+      - script: platform/service/component/upgrade_configuration_power_manager.lua

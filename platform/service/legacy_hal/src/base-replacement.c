@@ -362,7 +362,7 @@ void halStackSymbolDelayAIsr(void)
   // may also be built for legacy parts.
 }
 
-EmberStatus emDebugInit(void)
+EmberStatus sli_util_debug_init(void)
 {
 #if defined(SL_CATALOG_IOSTREAM_VUART_PRESENT)
   sl_status_t status = sl_iostream_vuart_init();
@@ -375,7 +375,7 @@ EmberStatus emDebugInit(void)
   return EMBER_ERR_FATAL;
 }
 
-void emRadioSeedRandom(void)
+void sli_802154phy_radio_seed_random(void)
 {
   uint32_t seed;
   uint16_t bytes = RAIL_GetRadioEntropy(NULL, (uint8_t *)(&seed), sizeof(seed));

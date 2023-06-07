@@ -18,12 +18,13 @@ component:
   - id: bluetooth_rtos_adaptation
   - id: iot_ble
   # Bluetooth features
+  - id: bluetooth_feature_legacy_scanner
+  - id: bluetooth_feature_legacy_advertiser
   - id: bluetooth_feature_dynamic_gattdb
   - id: bluetooth_feature_system
   - id: bluetooth_feature_connection
   - id: bluetooth_feature_gatt
   - id: bluetooth_feature_gatt_server
-  - id: bluetooth_feature_advertiser
   - id: bluetooth_feature_sm
   - id: bluetooth_feature_nvm
   # CommonIO instances

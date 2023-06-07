@@ -46,14 +46,12 @@ EmberStatus emberAfEzspGetTransientLinkKeyCommandCallback(const EmberEUI64 eui,
 
 EmberStatus emberAfEzspUpdateLinkKeyCommandCallback(void);
 
-#ifndef UC_BUILD
 void emberAfPluginEzspSecurityGetValueCommandCallback(EmberAfPluginEzspValueCommandContext* context);
 void emberAfPluginEzspSecuritySetValueCommandCallback(EmberAfPluginEzspValueCommandContext *context);
 void emberAfPluginEzspSecuritySetValueCommandCallback(EmberAfPluginEzspValueCommandContext* context);
 void emberAfPluginEzspSecurityGetConfigurationValueCommandCallback(EmberAfPluginEzspConfigurationValueCommandContext* context);
 void emberAfPluginEzspSecuritySetConfigurationValueCommandCallback(EmberAfPluginEzspConfigurationValueCommandContext* context);
 void emberAfPluginEzspSecurityPolicyCommandCallback(EmberAfPluginEzspPolicyCommandContext* context);
-#endif  // UC_BUILD
 
 EmberJoinDecision emberAfPluginEzspSecurityTrustCenterJoinCallback(EmberNodeId newNodeId,
                                                                    const EmberEUI64 newNodeEui64,

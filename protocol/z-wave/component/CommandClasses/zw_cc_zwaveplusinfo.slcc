@@ -10,12 +10,11 @@ description: >
 package: Z-Wave
 quality: production
 source:
-  - path: protocol/z-wave/ZAF/CommandClasses/ZWavePlusInfo/CC_ZWavePlusInfo.c
-  - path: protocol/z-wave/ZAF/CommandClasses/ZWavePlusInfo/cc_zwave_plus_info_config_api.c
+  - path: protocol/z-wave/ZAF/CommandClasses/ZWavePlusInfo/src/CC_ZWavePlusInfo.c
+  - path: protocol/z-wave/ZAF/CommandClasses/ZWavePlusInfo/src/cc_zwave_plus_info_config_api.c
 include:
-  - path: protocol/z-wave/ZAF/CommandClasses/ZWavePlusInfo/
+  - path: protocol/z-wave/ZAF/CommandClasses/ZWavePlusInfo/inc/
     file_list:
      - path: cc_zwave_plus_info_config_api.h
-     - path: ZW_plus_version.h
 provides:
   - name: zw_cc_zwaveplusinfo

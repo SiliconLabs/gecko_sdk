@@ -20,32 +20,16 @@
 
 #include PLATFORM_HEADER
 #include "../include/af.h"
-
-#if defined(UC_BUILD)
-
+#if defined(SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT) || (defined(EMBER_AF_NCP) && defined(SL_CATALOG_ZIGBEE_AF_SUPPORT_PRESENT))
 #include "zap-config.h"
-
-#else
-
-#if !defined(ATTRIBUTE_STORAGE_CONFIGURATION) && defined(EMBER_TEST)
-#define ATTRIBUTE_STORAGE_CONFIGURATION "attribute-storage-test.h"
 #endif
-
-// ATTRIBUTE_STORAGE_CONFIGURATION macro
-// contains the file that contains the initial set-up of the
-// attribute data structures. If it is missing
-// we use the provider sample.
-#ifndef ATTRIBUTE_STORAGE_CONFIGURATION
-  #error "Must define ATTRIBUTE_STORAGE_CONFIGURATION to specify the App. Builder default attributes file."
-#else
-  #include ATTRIBUTE_STORAGE_CONFIGURATION
-#endif
-
-#endif // UC_BUILD
-
 // If we have fixed number of endpoints, then max is the same.
+#ifdef EMBER_SCRIPTED_TEST
+#define MAX_ENDPOINT_COUNT 10
+#else
 #ifdef FIXED_ENDPOINT_COUNT
 #define MAX_ENDPOINT_COUNT FIXED_ENDPOINT_COUNT
+#endif
 #endif
 
 #define CLUSTER_TICK_FREQ_ALL            (0x00)
@@ -57,7 +41,7 @@ extern uint8_t attributeData[]; // main storage bucket for all attributes
 
 extern uint8_t attributeDefaults[]; // storage bucked for > 2b default values
 
-void emAfCallInits(void);
+void sli_zigbee_af_call_inits(void);
 
 #define emberAfClusterIsClient(cluster) ((bool)(((cluster)->mask & CLUSTER_MASK_CLIENT) != 0))
 #define emberAfClusterIsServer(cluster) ((bool)(((cluster)->mask & CLUSTER_MASK_SERVER) != 0))
@@ -77,17 +61,17 @@ bool emberAfExtractCommandIds(bool outgoing,
                               uint8_t startId,
                               uint8_t maxIdCount);
 
-EmberAfStatus emAfReadOrWriteAttribute(EmberAfAttributeSearchRecord *attRecord,
-                                       EmberAfAttributeMetadata **metadata,
-                                       uint8_t *buffer,
-                                       uint16_t readLength,
-                                       bool write);
+EmberAfStatus sli_zigbee_af_read_or_write_attribute(EmberAfAttributeSearchRecord *attRecord,
+                                                    EmberAfAttributeMetadata **metadata,
+                                                    uint8_t *buffer,
+                                                    uint16_t readLength,
+                                                    bool write);
 
-bool emAfMatchCluster(EmberAfCluster *cluster,
-                      EmberAfAttributeSearchRecord *attRecord);
-bool emAfMatchAttribute(EmberAfCluster *cluster,
-                        EmberAfAttributeMetadata *am,
-                        EmberAfAttributeSearchRecord *attRecord);
+bool sli_zigbee_af_match_cluster(EmberAfCluster *cluster,
+                                 EmberAfAttributeSearchRecord *attRecord);
+bool sli_zigbee_af_match_attribute(EmberAfCluster *cluster,
+                                   EmberAfAttributeMetadata *am,
+                                   EmberAfAttributeSearchRecord *attRecord);
 
 EmberAfCluster *emberAfFindClusterInTypeWithMfgCode(EmberAfEndpointType *endpointType,
                                                     EmberAfClusterId clusterId,
@@ -154,37 +138,37 @@ void emberAfInitializeAttributes(uint8_t endpoint);
 void emberAfResetAttributes(uint8_t endpoint);
 
 // Loads the attributes from built-in default and / or tokens
-void emAfLoadAttributeDefaults(uint8_t endpoint, bool writeTokens);
+void sli_zigbee_af_load_attribute_defaults(uint8_t endpoint, bool writeTokens);
 
 // This function loads from tokens all the attributes that
 // are defined to be stored in tokens.
-void emAfLoadAttributesFromTokens(uint8_t endpoint);
+void sli_zigbee_af_load_attributes_from_tokens(uint8_t endpoint);
 
 // After the RAM value has changed, code should call this
 // function. If this attribute has been
 // tagged as stored-to-token, then code will store
 // the attribute to token.
-void emAfSaveAttributeToToken(uint8_t *data,
-                              uint8_t endpoint,
-                              EmberAfClusterId clusterId,
-                              EmberAfAttributeMetadata *metadata);
+void sli_zigbee_af_save_attribute_to_token(uint8_t *data,
+                                           uint8_t endpoint,
+                                           EmberAfClusterId clusterId,
+                                           EmberAfAttributeMetadata *metadata);
 
 // Calls the attribute changed callback
-void emAfClusterAttributeChangedCallback(uint8_t endpoint,
-                                         EmberAfClusterId clusterId,
-                                         EmberAfAttributeId attributeId,
-                                         uint8_t clientServerMask,
-                                         uint16_t manufacturerCode);
+void sli_zigbee_af_cluster_attribute_changed_callback(uint8_t endpoint,
+                                                      EmberAfClusterId clusterId,
+                                                      EmberAfAttributeId attributeId,
+                                                      uint8_t clientServerMask,
+                                                      uint16_t manufacturerCode);
 
 // Calls the attribute changed callback for a specific cluster.
-EmberAfStatus emAfClusterPreAttributeChangedCallback(uint8_t endpoint,
-                                                     EmberAfClusterId clusterId,
-                                                     EmberAfAttributeId attributeId,
-                                                     uint8_t clientServerMask,
-                                                     uint16_t manufacturerCode,
-                                                     EmberAfAttributeType attributeType,
-                                                     uint8_t size,
-                                                     uint8_t* value);
+EmberAfStatus sli_zigbee_af_cluster_pre_attribute_changed_callback(uint8_t endpoint,
+                                                                   EmberAfClusterId clusterId,
+                                                                   EmberAfAttributeId attributeId,
+                                                                   uint8_t clientServerMask,
+                                                                   uint16_t manufacturerCode,
+                                                                   EmberAfAttributeType attributeType,
+                                                                   uint8_t size,
+                                                                   uint8_t* value);
 
 // Calls the default response callback for a specific cluster, and wraps emberAfClusterDefaultResponseWithMfgCodeCallback
 // with the EMBER_NULL_MANUFACTURER_CODE
@@ -220,9 +204,9 @@ void emberAfClusterMessageSentWithMfgCodeCallback(EmberOutgoingMessageType type,
                                                   uint16_t manufacturerCode);
 
 // Used to retrieve a manufacturer code from an attribute metadata
-uint16_t emAfGetManufacturerCodeForCluster(EmberAfCluster *cluster);
-uint16_t emAfGetManufacturerCodeForAttribute(EmberAfCluster *cluster,
-                                             EmberAfAttributeMetadata *attMetaData);
+uint16_t sli_zigbee_af_get_manufacturer_code_for_cluster(EmberAfCluster *cluster);
+uint16_t sli_zigbee_af_get_manufacturer_code_for_attribute(EmberAfCluster *cluster,
+                                                           EmberAfAttributeMetadata *attMetaData);
 
 // Checks a cluster mask byte against ticks passed bitmask
 // returns true if the mask matches a passed interval
@@ -247,9 +231,9 @@ EmberAfProfileId emberAfGetProfileIdForEndpoint(uint8_t endpoint);
 uint16_t emberAfGetDeviceIdForEndpoint(uint8_t endpoint);
 
 // Resolve mfg code for command discovery with mfg code wildcard
-uint16_t emAfResolveMfgCodeForDiscoverCommand(bool outgoing,
-                                              EmberAfClusterCommand *cmd,
-                                              uint16_t clusterId,
-                                              uint8_t startId);
+uint16_t sli_zigbee_af_resolve_mfg_code_for_discover_command(bool outgoing,
+                                                             EmberAfClusterCommand *cmd,
+                                                             uint16_t clusterId,
+                                                             uint8_t startId);
 
 #endif // __AF_ATTRIBUTE_STORAGE__

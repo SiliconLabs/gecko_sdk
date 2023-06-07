@@ -31,6 +31,11 @@
 #ifndef SL_GATT_SERVICE_RGB_H
 #define SL_GATT_SERVICE_RGB_H
 
+/***********************************************************************************************//**
+ * @addtogroup gatt_service_rgb
+ * @{
+ **************************************************************************************************/
+
 #include "sl_bt_api.h"
 
 /**************************************************************************//**
@@ -56,4 +61,5 @@ void sl_gatt_service_rgb_set_led(uint8_t m, uint8_t r, uint8_t g, uint8_t b);
  *****************************************************************************/
 uint8_t sl_gatt_service_rgb_get_led_mask(void);
 
+/** @} (end addtogroup gatt_service_rgb) */
 #endif // SL_GATT_SERVICE_RGB_H

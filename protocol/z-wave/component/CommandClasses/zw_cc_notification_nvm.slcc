@@ -14,7 +14,7 @@ description: >
 package: Z-Wave
 quality: production
 source:
-  - path: protocol/z-wave/ZAF/CommandClasses/Notification/cc_notification_nvm.c
+  - path: protocol/z-wave/ZAF/CommandClasses/Notification/src/cc_notification_nvm.c
 provides:
   - name: zw_cc_notification_nvm
 requires:

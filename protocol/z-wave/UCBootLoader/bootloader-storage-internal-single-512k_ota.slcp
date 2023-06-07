@@ -1,0 +1,82 @@
+project_name: bootloader-storage-internal-single-zwave
+package: Z-Wave
+quality: production
+label: Bootloader - SoC Internal Storage (For Z-Wave Applications)
+description: >
+  This sample configuration of the Gecko bootloader configures the bootloader 
+  to use the internal main flash to store firmware update images. The storage 
+  configuration is set up to store a single firmware update image at a time, 
+  in a single storage slot.  
+category: Z-Wave|Bootloaders
+
+filter:
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]
+  - name: "Wireless Technology"
+    value: ["Z-Wave"]
+  - name: "MCU"
+    value: ["Bootloader"]
+    
+component:
+  - id: bootloader_core
+  - id: bootloader_crc
+  - id: bootloader_aes_sha_ecdsa
+  - id: bootloader_internal_storage
+  - id: bootloader_storage_slots
+  - id: bootloader_image_parser
+  - id: bootloader_common_storage
+  - id: bootloader_token_management
+  - id: bootloader_app_upgrade_version
+
+requires:  
+  - name: bootloader_gbl_compression_lz4
+    condition: [device_series_1]
+  - name: bootloader_compression_lzma
+    condition: [device_series_2]
+
+configuration:
+  - name: BOOTLOADER_ENFORCE_SIGNED_UPGRADE
+    value: 1
+  - name: BOOTLOADER_WRITE_DISABLE
+    value: 1
+  - name: APPLICATION_VERIFICATION_SKIP_EM4_RST
+    value: 1
+  - name: SLOT0_ENABLE
+    value: 1
+  ## device_series_1 ##
+  - name: BOOTLOADER_FALLBACK_LEGACY_KEY
+    value: 0
+    condition: [device_series_1]
+  - name: BOOTLOADER_VERSION_MAIN_CUSTOMER
+    value: 1
+    condition: [device_series_1]
+  - name: SLOT0_START
+    value: 237568
+    condition: [device_series_1]
+  - name: SLOT0_SIZE
+    value: 237568
+    condition: [device_series_1]
+## device_series_2 ##
+  - name: BOOTLOADER_VERSION_MAIN_CUSTOMER
+    value: 2
+    condition: [device_series_2]
+  - name: BOOTLOADER_FALLBACK_LEGACY_KEY
+    value: 1
+    condition: [device_series_2]
+  - name: SLOT_OVERLAP_ENABLE
+    value: 1
+    condition: [device_series_2]
+  - name: SLOT0_START
+    value: 134504448
+    condition: [device_series_2]
+  - name: SLOT0_SIZE
+    value: 196608
+    condition: [device_series_2]
+  - name: BOOTLOADER_SE_UPGRADE_NO_STAGING
+    value: 1
+    condition: [device_series_2]
+
+post_build:
+  profile: bootloader

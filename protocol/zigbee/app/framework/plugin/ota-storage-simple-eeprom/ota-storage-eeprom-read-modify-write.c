@@ -20,11 +20,7 @@
 #include "app/framework/plugin/ota-common/ota.h"
 #include "app/framework/plugin/ota-storage-common/ota-storage.h"
 
-#ifdef UC_BUILD
 #include "eeprom.h"
-#else // !UC_BUILD
-#include "util/plugin/plugin-common/eeprom/eeprom.h"
-#endif // UC_BUILD
 
 #define OTA_STORAGE_EEPROM_INTERNAL_HEADER
 #include "ota-storage-eeprom.h"
@@ -41,11 +37,11 @@ uint32_t emberAfOtaStorageDriverRetrieveLastStoredOffsetCallback(void)
 {
   uint32_t offset;
 
-  if (!emAfOtaStorageCheckDownloadMetaData()) {
+  if (!sli_zigbee_af_ota_storage_check_download_meta_data()) {
     return 0;
   }
 
-  offset = emAfOtaStorageReadInt32uFromEeprom(
+  offset = sli_zigbee_af_ota_storage_read_int32u_from_eeprom(
     otaStorageEepromGetImageInfoStartAddress()
     + SAVED_DOWNLOAD_OFFSET_INDEX);
   if (offset == 0xFFFFFFFFL) {
@@ -54,7 +50,7 @@ uint32_t emberAfOtaStorageDriverRetrieveLastStoredOffsetCallback(void)
   return offset;
 }
 
-void emAfStorageEepromUpdateDownloadOffset(uint32_t offset, bool finalOffset)
+void sli_zigbee_af_storage_eeprom_update_download_offset(uint32_t offset, bool finalOffset)
 {
   uint32_t oldDownloadOffset =
     emberAfOtaStorageDriverRetrieveLastStoredOffsetCallback();
@@ -70,9 +66,9 @@ void emAfStorageEepromUpdateDownloadOffset(uint32_t offset, bool finalOffset)
     debugPrint("Recording download offset: 0x%4X", offset);
     debugFlush();
 
-    emAfOtaStorageWriteInt32uToEeprom(offset,
-                                      otaStorageEepromGetImageInfoStartAddress()
-                                      + SAVED_DOWNLOAD_OFFSET_INDEX);
+    sli_zigbee_af_ota_storage_write_int32u_to_eeprom(offset,
+                                                     otaStorageEepromGetImageInfoStartAddress()
+                                                     + SAVED_DOWNLOAD_OFFSET_INDEX);
     //printImageInfoStartData();
   }
 }
@@ -81,8 +77,8 @@ EmberAfOtaStorageStatus emberAfOtaStorageDriverInvalidateImageCallback(void)
 {
   uint8_t zeroMagicNumber[] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
-  if (!emAfOtaStorageCheckDownloadMetaData()) {
-    emAfOtaStorageWriteDownloadMetaData();
+  if (!sli_zigbee_af_ota_storage_check_download_meta_data()) {
+    sli_zigbee_af_ota_storage_write_download_meta_data();
   }
 
   // Wipe out the magic number in the OTA file and the Header length field.
@@ -100,12 +96,12 @@ EmberAfOtaStorageStatus emberAfOtaStorageDriverInvalidateImageCallback(void)
   return EMBER_AF_OTA_STORAGE_SUCCESS;
 }
 
-void emberAfPluginOtaStorageSimpleEepromPageEraseEventHandler(SLXU_UC_EVENT)
+void emberAfPluginOtaStorageSimpleEepromPageEraseEventHandler(sl_zigbee_event_t * event)
 {
   // This event should never fire.
 }
 
-void emAfOtaStorageEepromInit(void)
+void sli_zigbee_af_ota_storage_eeprom_init(void)
 {
   // Older drivers do not have an EEPROM info structure that we can reference
   // so we must just assume they are okay.

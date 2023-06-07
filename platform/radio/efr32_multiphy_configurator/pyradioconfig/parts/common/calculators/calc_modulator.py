@@ -48,7 +48,7 @@ class CALC_Modulator(ICalculator):
             ['DSSS', 2, 'Direct Sequence Spread Spectrum Coding'],
         ]
         # Only Nerio (and Panther) support LINECODE Encoding, used for BLE Long Range
-        if model.part_family.lower() not in ["dumbo", "jumbo", "nixi"]:
+        if model.part_family.lower() not in ["dumbo", "jumbo", "nixi", "unit_test_part"]:
             member_data.append(['LINECODE', 3, 'Maps 0 to 0011 symbol and 1 to 1100 symbol'])
         var.var_enum = CreateModelVariableEnum(
             'SymbolEncodingEnum',

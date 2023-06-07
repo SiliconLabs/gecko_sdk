@@ -16,7 +16,7 @@ requires:
 template_contribution:
   - name: psa_crypto_config
     value: PSA_WANT_ALG_MD5
-  - name: psa_crypto_config
+  - name: psa_crypto_builtin_config
     value: "MBEDTLS_PSA_BUILTIN_ALG_MD5 1"
 documentation:
   url: https://armmbed.github.io/mbed-crypto/html/api/ops/hashes.html#c.PSA_ALG_MD5

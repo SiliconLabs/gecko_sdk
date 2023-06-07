@@ -3,7 +3,7 @@ label: HCI Three-Wire UART
 package: Bluetooth
 description: Three-Wire UART Transport Layer for HCI
 
-category: Bluetooth|Controller
+category: Bluetooth|Host Controller Interface (HCI)
 quality: evaluation
 root_path: protocol/bluetooth/bgstack/ll/utils/hci_packet
 source:

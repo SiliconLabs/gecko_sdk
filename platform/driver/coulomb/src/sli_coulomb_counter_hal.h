@@ -45,7 +45,11 @@ extern "C" {
 #define NANOCOULOMB_TO_COULOMB  1000000000
 
 // Constants for Calibration Current Load
+#if SL_COULOMB_COUNTER_DRIVER_PERIPHERAL == SL_COULOMB_COUNTER_DRIVER_PERIPHERAL_EFP
 #define CCL_LEVEL_LOW     (0x3)
+#else
+#define CCL_LEVEL_LOW     (0x2)
+#endif
 #define CCL_LEVEL_HIGH    (0x7)
 /// @endcond
 

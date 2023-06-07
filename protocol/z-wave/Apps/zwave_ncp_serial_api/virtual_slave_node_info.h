@@ -1,5 +1,5 @@
 /**
- * @file virtual_slave_node_info.h
+ * @file
  * @copyright 2022 Silicon Laboratories Inc.
  */
 
@@ -8,7 +8,7 @@
 
 #include <ZW_application_transport_interface.h>
 #include <SizeOf.h>
-#include "serialappl.h"
+#include "app.h"
 
 #ifdef ZW_CONTROLLER_BRIDGE
 // Virtual slave node info storage

@@ -55,27 +55,27 @@ bool emberAfReadSequentialAttributesAddToResponse(uint8_t endpoint,
                                                   uint8_t maxAttributeIds,
                                                   bool includeAccessControl);
 
-EmberAfStatus emAfWriteAttribute(uint8_t endpoint,
-                                 EmberAfClusterId cluster,
-                                 EmberAfAttributeId attributeID,
-                                 uint8_t mask,
-                                 uint16_t manufacturerCode,
-                                 uint8_t* data,
-                                 EmberAfAttributeType dataType,
-                                 bool overrideReadOnlyAndDataType,
-                                 bool justTest);
+EmberAfStatus sli_zigbee_af_write_attribute(uint8_t endpoint,
+                                            EmberAfClusterId cluster,
+                                            EmberAfAttributeId attributeID,
+                                            uint8_t mask,
+                                            uint16_t manufacturerCode,
+                                            uint8_t* data,
+                                            EmberAfAttributeType dataType,
+                                            bool overrideReadOnlyAndDataType,
+                                            bool justTest);
 
-EmberAfStatus emAfReadAttribute(uint8_t endpoint,
-                                EmberAfClusterId cluster,
-                                EmberAfAttributeId attributeID,
-                                uint8_t mask,
-                                uint16_t manufacturerCode,
-                                uint8_t* dataPtr,
-                                uint16_t readLength,
-                                EmberAfAttributeType* dataType);
+EmberAfStatus sli_zigbee_af_read_attribute(uint8_t endpoint,
+                                           EmberAfClusterId cluster,
+                                           EmberAfAttributeId attributeID,
+                                           uint8_t mask,
+                                           uint16_t manufacturerCode,
+                                           uint8_t* dataPtr,
+                                           uint16_t readLength,
+                                           EmberAfAttributeType* dataType);
 
-uint16_t emAfResolveMfgCodeForDiscoverAttribute(uint8_t endpoint,
-                                                EmberAfClusterId clusterId,
-                                                EmberAfAttributeId startAttributeId,
-                                                uint8_t clientServerMask);
+uint16_t sli_zigbee_af_resolve_mfg_code_for_discover_attribute(uint8_t endpoint,
+                                                               EmberAfClusterId clusterId,
+                                                               EmberAfAttributeId startAttributeId,
+                                                               uint8_t clientServerMask);
 #endif // ZCL_UTIL_ATTRIBUTE_TABLE_H

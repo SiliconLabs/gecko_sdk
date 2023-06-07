@@ -31,6 +31,11 @@
 #ifndef SL_BT_OTS_DATATYPES_H
 #define SL_BT_OTS_DATATYPES_H
 
+/***********************************************************************************************//**
+ * @addtogroup ots_client
+ * @{
+ **************************************************************************************************/
+
 #include <stdbool.h>
 #include <stdint.h>
 #include "sl_bt_api.h"
@@ -237,6 +242,7 @@ SL_ENUM(sl_bt_ots_characteristic_uuid_index) {
   SL_BT_OTS_CHARACTERISTIC_UUID_INDEX_OLCP                 = 9,
   SL_BT_OTS_CHARACTERISTIC_UUID_INDEX_OBJECT_LIST_FILTER   = 10,
   SL_BT_OTS_CHARACTERISTIC_UUID_INDEX_OBJECT_CHANGED       = 11,
+  SL_BT_OTS_CHARACTERISTIC_UUID_INDEX_SIZE                 = 12,
   SL_BT_OTS_CHARACTERISTIC_UUID_INDEX_INVALID              = 0xFF
 };
 
@@ -746,4 +752,5 @@ typedef PACKSTRUCT (struct {
 };
 #endif
 
+/** @} (end addtogroup ots_client) */
 #endif // SL_BT_OTS_DATATYPES_H

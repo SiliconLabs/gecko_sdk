@@ -27,9 +27,7 @@
 #include "app/framework/include/af.h"
 #include "prepayment-client.h"
 
-#ifdef UC_BUILD
 #include "zap-cluster-command-parser.h"
-#endif
 
 void emberAfPluginPrepaymentClientChangePaymentMode(EmberNodeId nodeId, uint8_t srcEndpoint, uint8_t dstEndpoint, uint32_t providerId, uint32_t issuerEventId, uint32_t implementationDateTime, uint16_t proposedPaymentControlConfiguration, uint32_t cutOffValue)
 {
@@ -50,8 +48,6 @@ void emberAfPluginPrepaymentClientChangePaymentMode(EmberNodeId nodeId, uint8_t 
 
 //-----------------------
 // ZCL commands callbacks
-
-#ifdef UC_BUILD
 
 bool emberAfPrepaymentClusterChangePaymentModeResponseCallback(EmberAfClusterCommand *cmd)
 {
@@ -101,45 +97,6 @@ bool emberAfPrepaymentClusterPublishDebtLogCallback(EmberAfClusterCommand *cmd)
   return true;
 }
 
-#else // !UC_BUILD
-
-bool emberAfPrepaymentClusterChangePaymentModeResponseCallback(uint8_t friendlyCredit, uint32_t friendlyCreditCalendarId,
-                                                               uint32_t emergencyCreditLimit, uint32_t emergencyCreditThreshold)
-{
-  emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
-  emberAfAppPrintln("RX: Change Payment Mode Response Callback");
-  return true;
-}
-
-bool emberAfPrepaymentClusterPublishPrepaySnapshotCallback(uint32_t snapshotId, uint32_t snapshotTime, uint8_t totalSnapshotsFound,
-                                                           uint8_t commandIndex, uint8_t totalNumberOfCommands,
-                                                           uint32_t snapshotCause, uint8_t snapshotPayloadType, uint8_t *snapshotPayload)
-{
-  emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
-  emberAfAppPrintln("RX: Publish Prepay Snapshot Callback");
-  return true;
-}
-
-bool emberAfPrepaymentClusterPublishTopUpLogCallback(uint8_t commandIndex, uint8_t totalNumberOfCommands, uint8_t *topUpPayload)
-{
-  emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
-  emberAfAppPrintln("RX: Publish TopUp Log Callback");
-  return true;
-}
-
-bool emberAfPrepaymentClusterPublishDebtLogCallback(uint8_t commandIndex, uint8_t totalNumberOfCommands, uint8_t *debtPayload)
-{
-  emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
-  emberAfAppPrintln("RX: Publish Debt Log Callback");
-  emberAfPrepaymentClusterPrintln("  commandIndex=%d", commandIndex);
-  emberAfPrepaymentClusterPrintln("  totalNumberOfCommands=%d", totalNumberOfCommands);
-  return true;
-}
-
-#endif // UC_BUILD
-
-#ifdef UC_BUILD
-
 uint32_t emberAfPrepaymentClusterClientCommandParse(sl_service_opcode_t opcode,
                                                     sl_service_function_context_t *context)
 {
@@ -177,5 +134,3 @@ uint32_t emberAfPrepaymentClusterClientCommandParse(sl_service_opcode_t opcode,
           ? EMBER_ZCL_STATUS_SUCCESS
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
-
-#endif // UC_BUILD

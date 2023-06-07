@@ -7,6 +7,7 @@ quality: "production"
 root_path: "app/flex/component/rail/sl_range_test_core"
 
 requires:
+  - name: "sl_flex_rail_config"
   - name: "device_has_radio"
   - name: "sleeptimer"
 

@@ -30,9 +30,9 @@
 #ifndef SL_SE_MANAGER_H
 #define SL_SE_MANAGER_H
 
-#include "em_device.h"
+#include "sli_se_manager_features.h"
 
-#if defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT) || defined(DOXYGEN)
+#if defined(SLI_MAILBOX_COMMAND_SUPPORTED) || defined(SLI_VSE_MAILBOX_COMMAND_SUPPORTED)
 
 /***************************************************************************//**
  * @addtogroup sl_se_manager Secure Engine Manager
@@ -99,7 +99,7 @@ sl_status_t sl_se_init(void);
  ******************************************************************************/
 sl_status_t sl_se_deinit(void);
 
-#if !defined(SL_CATALOG_TZ_SECURE_KEY_LIBRARY_NS_PRESENT) || defined(DOXYGEN)
+#if !defined(SL_CATALOG_TZ_SECURE_KEY_LIBRARY_NS_PRESENT)
 /***************************************************************************//**
  * @brief
  *   Set the yield attribute of the SE command context object.
@@ -118,9 +118,9 @@ sl_status_t sl_se_deinit(void);
  ******************************************************************************/
 sl_status_t sl_se_set_yield(sl_se_command_context_t *cmd_ctx,
                             bool yield);
-#endif // !SL_CATALOG_TZ_SECURE_KEY_LIBRARY_NS_PRESENT || DOXYGEN
+#endif // !SL_CATALOG_TZ_SECURE_KEY_LIBRARY_NS_PRESENT
 
-#if defined(CRYPTOACC_PRESENT) || defined(DOXYGEN)
+#if defined(SLI_VSE_MAILBOX_COMMAND_SUPPORTED)
 /***************************************************************************//**
  * @brief
  *   From VSE mailbox read which command, if any, was executed.
@@ -151,7 +151,7 @@ sl_status_t sl_se_read_executed_command(sl_se_command_context_t *cmd_ctx);
  *   Status code, @ref sl_status.h.
  ******************************************************************************/
 sl_status_t sl_se_ack_command(sl_se_command_context_t *cmd_ctx);
-#endif //defined(CRYPTOACC_PRESENT)
+#endif //defined(SLI_VSE_MAILBOX_COMMAND_SUPPORTED)
 
 /***************************************************************************//**
  * @brief
@@ -198,7 +198,7 @@ sl_status_t sl_se_deinit_command_context(sl_se_command_context_t *cmd_ctx);
 /// @} (end addtogroup sl_se_manager_core)
 /// @} (end addtogroup sl_se_manager)
 
-#endif // defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT)
+#endif // defined(SLI_MAILBOX_COMMAND_SUPPORTED) || defined(SLI_VSE_MAILBOX_COMMAND_SUPPORTED)
 
 #endif // SL_SE_MANAGER_H
 
@@ -213,7 +213,7 @@ sl_status_t sl_se_deinit_command_context(sl_se_command_context_t *cmd_ctx);
 /// The Secure Engine (SE) Manager provides thread-safe APIs for the Secure Engine's mailbox interface. Note that PSA Crypto is the main device independant crypto API and should be used
 /// whenever possible. Visit the <a href="https://mbed-tls.readthedocs.io/en/latest/">Mbed TLS & PSA Crypto documentation hub</a> for more details. The SE manager APIs can be used directly
 /// for performance or space constrained applications.
-
+///
 /// Available functionality will vary between devices: device management, such as secure firmware upgrade, secure boot and secure debug implementation, is available on all series 2 devices.
 /// Devices with the SE subsystem includes a low level crypto API where the SE Manager will use the SE hardware peripherals to accelerate cryptographic operations. Finally, Vault High
 /// devices also include secure key storage functionality, anti-tamper protection, advanced crypto API and attestation.
@@ -409,9 +409,10 @@ sl_status_t sl_se_deinit_command_context(sl_se_command_context_t *cmd_ctx);
 ///                                                                         <li>Trigger threshold
 ///                                                                       </ul>
 ///                                                                   These options can be set to the values given in the tables in the Response Filter section. Please see the examples section for a suggested use of the tamper filter signal.
-/// <tr><td>Flags                                         <td>On EFR32MG21 the tamper flags is only used to configure one option:
+/// <tr><td>Flags                                         <td>The tamper flags is used to configure two options:
 ///                                                                       <ul>
 ///                                                                         <li>Digital Glitch Detector Always On – This option will keep the digital glitch detector running even while the SE is not performing any operations. This leads to increased energy consumption.
+///                                                                         <li>Keep Tamper Alive During Sleep (not available on EFR32xG21B devices) – If set, the tamper module keeps running at sleep mode (down to EM3).
 ///                                                                       </ul>
 /// <tr><td>Reset threshold                       <td>The number of consecutive tamper resets before the the part enters debug mode.\n\n
 ///                                                                           If the threshold is set to 0, the part will never enter the debug mode due to tamper reset.

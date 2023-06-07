@@ -19,7 +19,7 @@
 #define MODEL_RECOGNIZE_COMMANDS_H_
 
 #include "tensorflow/lite/c/common.h"
-#include "tensorflow/lite/micro/micro_error_reporter.h"
+#include "tensorflow/lite/micro/tflite_bridge/micro_error_reporter.h"
 
 constexpr int kCategoryCount = 4;
 extern const char* kCategoryLabels[kCategoryCount];

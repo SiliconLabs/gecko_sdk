@@ -32,22 +32,22 @@
 // <<< sl:start pin_tool >>>
 // <usart signal=TX,RX,CLK,(CS)> SL_USART_EXTFLASH
 // $[USART_SL_USART_EXTFLASH]
-#define SL_USART_EXTFLASH_PERIPHERAL             USART0
-#define SL_USART_EXTFLASH_PERIPHERAL_NO          0
+#define SL_USART_EXTFLASH_PERIPHERAL             USART2
+#define SL_USART_EXTFLASH_PERIPHERAL_NO          2
 
-// USART0 TX on PD00
+// USART2 TX on PD00
 #define SL_USART_EXTFLASH_TX_PORT                gpioPortD
 #define SL_USART_EXTFLASH_TX_PIN                 0
 
-// USART0 RX on PD01
+// USART2 RX on PD01
 #define SL_USART_EXTFLASH_RX_PORT                gpioPortD
 #define SL_USART_EXTFLASH_RX_PIN                 1
 
-// USART0 CLK on PD02
+// USART2 CLK on PD02
 #define SL_USART_EXTFLASH_CLK_PORT               gpioPortD
 #define SL_USART_EXTFLASH_CLK_PIN                2
 
-// USART0 CS on PD03
+// USART2 CS on PD03
 #define SL_USART_EXTFLASH_CS_PORT                gpioPortD
 #define SL_USART_EXTFLASH_CS_PIN                 3
 

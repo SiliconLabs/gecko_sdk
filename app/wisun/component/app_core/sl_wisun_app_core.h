@@ -46,6 +46,10 @@ extern "C" {
 
 #include "sl_wisun_trace_util.h"
 #include "sl_wisun_app_core_util.h"
+#include "sl_component_catalog.h"
+#if defined(SL_CATALOG_WISUN_LFN_DEVICE_SUPPORT_PRESENT)
+  #include "sl_wisun_lfn_params_api.h"
+#endif
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -198,6 +202,32 @@ bool app_wisun_get_regulation_thresholds(regulation_thresholds_t* thresholds_out
  * @return sl_wisun_join_state_t Join state value.
  *****************************************************************************/
 sl_wisun_join_state_t app_wisun_get_join_state(void);
+
+#if defined(SL_CATALOG_WISUN_LFN_DEVICE_SUPPORT_PRESENT)
+
+/**************************************************************************//**
+ * @brief Get Wi-SUN device type
+ * @details Getter to get device type.
+ *          Device type can be SL_WISUN_LFN or SL_WISUN_ROUTER (FFN)
+ * @return l_wisun_device_type_t Device type.
+ *****************************************************************************/
+sl_wisun_device_type_t app_wisun_get_device_type(void);
+
+/**************************************************************************//**
+ * @brief Get Wi-SUN LFN profile
+ * @details Getter to get LFN profile.
+ *          Device type can be SL_WISUN_LFN_PROFILE_TEST,
+ *          SL_WISUN_LFN_PROFILE_BALANCED or SL_WISUN_LFN_PROFILE_BALANCED
+ * @return sl_wisun_lfn_profile_t LFN profile.
+ *****************************************************************************/
+sl_wisun_lfn_profile_t app_wisun_get_lfn_profile(void);
+
+/**************************************************************************//**
+ * @brief Get LFN parameters
+ * @return sl_wisun_lfn_params_t pointer to the set profile paramaters of LFN.
+ *****************************************************************************/
+const sl_wisun_lfn_params_t *app_wisun_get_lfn_params(void);
+#endif
 
 /** @}*/
 

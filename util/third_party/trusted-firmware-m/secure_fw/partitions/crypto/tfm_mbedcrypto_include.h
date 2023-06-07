@@ -25,8 +25,4 @@
 #endif
 #include "psa/crypto.h"
 
-#if defined(TFM_CONFIG_SL_SECURE_LIBRARY)
-#include "psa_crypto_config_autogen.h"
-#endif
-
 #endif /* __TFM_MBEDCRYPTO_INCLUDE_H__ */

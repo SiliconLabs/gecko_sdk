@@ -27,7 +27,6 @@ recommends:
 
 define:
   - name: DEBUG_EFM_USER
-  - name: WISUN_RCP_USE_CPC
 
 source:
   - path: sl_wsrcp_cpc.h

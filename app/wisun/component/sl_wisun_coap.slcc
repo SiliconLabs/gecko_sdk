@@ -58,6 +58,11 @@ config_file:
 
 #-------------- Template Contribution ----------------
 template_contribution:
+  - name: "event_handler"
+    value:
+      event: "stack_init"
+      include: "sl_wisun_coap.h"
+      handler: "sl_wisun_coap_init_default"
 #---------------- Component Catalog ------------------
   - name: component_catalog
     value: wisun_coap

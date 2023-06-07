@@ -17,7 +17,6 @@ requires:
   - name: sl_system_init
   - name: wisun_mac
   - name: wisun_radioconf
-  - name: micriumos_kernel
   - name: dmadrv
   - name: cpc_secondary
     condition: [cpc_secondary_driver]
@@ -31,8 +30,13 @@ requires:
   - name: wisun_rcp_interface
   - name: wisun_rcp_cpc
     condition: [cpc_secondary]
+  - name: wisun_rcp_uart_plt
+    condition: [iostream_usart]
+  - name: wisun_rcp_uart_plt
+    condition: [iostream_eusart]
 
 recommends:
+  - id: freertos
   - id: wisun_rcp_uart
 
 define:
@@ -43,6 +47,7 @@ source:
   - path: sl_wsrcp.c
   - path: sl_micrium_debug.h
   - path: sl_micrium_debug.c
+    condition: [micriumos_kernel]
   - path: sl_ring.h
   - path: sl_ring.c
   - path: sl_wsrcp_os_main.c

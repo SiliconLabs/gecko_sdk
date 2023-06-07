@@ -36,9 +36,22 @@
 #include "app_log.h"
 
 #include "sl_btmesh_api.h"
+
+#ifdef SL_COMPONENT_CATALOG_PRESENT
+#include "sl_component_catalog.h"
+#endif // SL_COMPONENT_CATALOG_PRESENT
+
+#ifdef SL_CATALOG_BTMESH_LPN_PRESENT
 #include "sl_btmesh_lpn.h"
+#endif // SL_CATALOG_BTMESH_LPN_PRESENT
+
+#ifdef SL_CATALOG_BTMESH_FACTORY_RESET_PRESENT
 #include "sl_btmesh_factory_reset.h"
+#endif // SL_CATALOG_BTMESH_FACTORY_RESET_PRESENT
+
+#ifdef SL_CATALOG_BTMESH_PROVISIONING_DECORATOR_PRESENT
 #include "sl_btmesh_provisioning_decorator.h"
+#endif // SL_CATALOG_BTMESH_PROVISIONING_DECORATOR_PRESENT
 
 /***************************************************************************//**
  * @addtogroup btmesh_lpn_cb

@@ -31,6 +31,11 @@
 #ifndef SL_SENSOR_RHT_H
 #define SL_SENSOR_RHT_H
 
+/***********************************************************************************************//**
+ * @addtogroup sensor_rht
+ * @{
+ **************************************************************************************************/
+
 #include <stdint.h>
 #include "sl_status.h"
 
@@ -61,4 +66,5 @@ void sl_sensor_rht_deinit(void);
  *****************************************************************************/
 sl_status_t sl_sensor_rht_get(uint32_t *rh, int32_t *t);
 
+/** @} (end addtogroup sensor_rht) */
 #endif // SL_SENSOR_RHT_H

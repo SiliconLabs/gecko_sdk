@@ -53,6 +53,35 @@ extern "C" {
 #include <stdbool.h>
 #include <stdarg.h>
 #include <inttypes.h>
+#include "sl_wisun_types.h"
+
+// Redefine C99 8-bits string formats
+#undef PRId8
+#undef PRIi8
+#undef PRIo8
+#undef PRIu8
+#undef PRIx8
+#undef PRIX8
+#define PRId8 PRId16
+#define PRIi8 PRIi16
+#define PRIo8 PRIo16
+#define PRIu8 PRIu16
+#define PRIx8 PRIx16
+#define PRIX8 PRIX16
+
+// Redefine C99 64-bits string formats
+#undef PRId64
+#undef PRIi64
+#undef PRIo64
+#undef PRIu64
+#undef PRIx64
+#undef PRIX64
+#define PRId64 PRId32
+#define PRIi64 PRIi32
+#define PRIo64 PRIo32
+#define PRIu64 PRIu32
+#define PRIx64 PRIx32
+#define PRIX64 PRIX32
 
 #ifndef YOTTA_CFG_MBED_TRACE
 #define YOTTA_CFG_MBED_TRACE 0
@@ -90,8 +119,8 @@ extern "C" {
 #define TRACE_MODE_PLAIN          0x80
 /** color mode */
 #define TRACE_MODE_COLOR          0x40
-/** Use print CR before trace line */
-#define TRACE_CARRIAGE_RETURN     0x20
+/** Use print LF after trace line */
+#define TRACE_LINE_FEED           0x20
 
 /** used to activate all trace levels */
 #define TRACE_ACTIVE_LEVEL_ALL    0x1F
@@ -103,8 +132,6 @@ extern "C" {
 #define TRACE_ACTIVE_LEVEL_WARN   0x07
 /** print only error trace */
 #define TRACE_ACTIVE_LEVEL_ERROR  0x03
-/** print only cmd line data */
-#define TRACE_ACTIVE_LEVEL_CMD    0x01
 /** trace nothing  */
 #define TRACE_ACTIVE_LEVEL_NONE   0x00
 
@@ -116,8 +143,6 @@ extern "C" {
 #define TRACE_LEVEL_WARN          0x04
 /** Error prints, which causes probably problems, e.g. out of mem. */
 #define TRACE_LEVEL_ERROR         0x02
-/** special level for cmdline. Behaviors like "plain mode" */
-#define TRACE_LEVEL_CMD           0x01
 
 #ifndef MBED_TRACE_MAX_LEVEL
 #define MBED_TRACE_MAX_LEVEL TRACE_LEVEL_DEBUG
@@ -151,8 +176,6 @@ extern "C" {
 #define tr_error(...)
 #define tr_err(...)
 #endif
-
-#define tr_cmdline(...)         mbed_tracef(TRACE_LEVEL_CMD, TRACE_GROUP, __VA_ARGS__)       //!< Special print for cmdline. See more from TRACE_LEVEL_CMD -level
 
 //aliases for the most commonly used functions and the helper functions
 #define tracef(dlevel, grp, ...)                mbed_tracef(dlevel, grp, __VA_ARGS__)       //!< Alias for mbed_tracef()
@@ -197,17 +220,16 @@ void mbed_trace_buffer_sizes(int lineLength, int tmpLength);
  *
  *   TRACE_MODE_COLOR
  *   TRACE_MODE_PLAIN (this exclude color mode)
- *   TRACE_CARRIAGE_RETURN (print CR before trace line)
+ *   TRACE_LINE_FEED (print LF after trace line)
  *
  *   TRACE_ACTIVE_LEVEL_ALL - to activate all trace levels
  *   or TRACE_ACTIVE_LEVEL_DEBUG (alternative)
  *   TRACE_ACTIVE_LEVEL_INFO
  *   TRACE_ACTIVE_LEVEL_WARN
  *   TRACE_ACTIVE_LEVEL_ERROR
- *   TRACE_ACTIVE_LEVEL_CMD
  *   TRACE_LEVEL_NONE - to deactivate all traces
  *
- * @param config  Byte size Bit-mask. Bits are described above.
+ * @param config  Byte size Bit-mask. Bits are descripted above.
  * usage e.g.
  * @code
  *  mbed_trace_config_set( TRACE_ACTIVE_LEVEL_ALL|TRACE_MODE_COLOR );
@@ -218,8 +240,13 @@ void mbed_trace_config_set(uint8_t config);
  * @return trace configuration byte
  */
 uint8_t mbed_trace_config_get(void);
+/** set trace level for 1 group
+ * @param group_id trace group to configure
+ * @param trace_level level of trace allowed
+ */
+void mbed_trace_level_set(uint8_t group_id, uint8_t trace_level);
 /**
- * Set trace prefix function.
+ * Set trace prefix function
  * pref_f -function return string with null terminated
  * Can be used for e.g. time string
  * e.g.
@@ -228,7 +255,7 @@ uint8_t mbed_trace_config_get(void);
  */
 void mbed_trace_prefix_function_set(char *(*pref_f)(size_t));
 /**
- * Set trace suffix function.
+ * Set trace suffix function
  * suffix -function return string with null terminated
  * Can be used for e.g. time string
  * e.g.
@@ -237,18 +264,14 @@ void mbed_trace_prefix_function_set(char *(*pref_f)(size_t));
  */
 void mbed_trace_suffix_function_set(char *(*suffix_f)(void));
 /**
- * Set trace print function.
+ * Set trace print function
  * By default, trace module print using printf() function,
  * but with this you can write own print function,
  * for e.g. to other IO device.
  */
 void mbed_trace_print_function_set(void (*print_f)(const char *));
 /**
- * Set trace print function for tr_cmdline()
- */
-void mbed_trace_cmdprint_function_set(void (*printf)(const char *));
-/**
- * Set trace mutex wait function.
+ * Set trace mutex wait function
  * By default, trace calls are not thread safe.
  * If thread safety is required this can be used to set a callback function that will be called before each trace call.
  * The specific implementation is up to the application developer, but the mutex must count so it can
@@ -256,38 +279,20 @@ void mbed_trace_cmdprint_function_set(void (*printf)(const char *));
  */
 void mbed_trace_mutex_wait_function_set(void (*mutex_wait_f)(void));
 /**
- * Set trace mutex release function.
+ * Set trace mutex release function
  * By default, trace calls are not thread safe.
  * If thread safety is required this can be used to set a callback function that will be called before returning from
  * each trace call. The specific implementation is up to the application developer, but the mutex must count so it can
  * be acquired from a single thread repeatedly.
  */
 void mbed_trace_mutex_release_function_set(void (*mutex_release_f)(void));
-/**
- * When trace group contains text in filters,
- * trace print will be ignored.
- * e.g.:
- *  mbed_trace_exclude_filters_set("mygr");
- *  mbed_tracef(TRACE_ACTIVE_LEVEL_DEBUG, "ougr", "This is not printed");
- */
-void mbed_trace_exclude_filters_set(char *filters);
-/** get trace exclude filters
- */
-const char *mbed_trace_exclude_filters_get(void);
-/**
- * When trace group contains text in filter,
- * trace will be printed.
- * e.g.:
- *  set_trace_include_filters("mygr");
- *  mbed_tracef(TRACE_ACTIVE_LEVEL_DEBUG, "mygr", "Hi There");
- *  mbed_tracef(TRACE_ACTIVE_LEVEL_DEBUG, "grp2", "This is not printed");
- */
-void mbed_trace_include_filters_set(char *filters);
+
+void mbed_trace_include_filters_set(const uint8_t filter[SL_WISUN_FILTER_BITFIELD_SIZE]);
 /** get trace include filters
  */
 const char *mbed_trace_include_filters_get(void);
 /**
- * General trace function.
+ * General trace function
  * This should be used every time when user want to print out something important thing
  * Usage e.g.
  *   mbed_tracef( TRACE_LEVEL_INFO, "mygr", "Hello world!");
@@ -298,12 +303,12 @@ const char *mbed_trace_include_filters_get(void);
  * @param ...    variable arguments related to fmt
  */
 #if defined(__GNUC__) || defined(__CC_ARM)
-void mbed_tracef(uint8_t dlevel, const char *grp, const char *fmt, ...) __attribute__((__format__(__printf__, 3, 4)));
+void mbed_tracef(uint8_t dlevel, const uint8_t grp, const char *fmt, ...) __attribute__((__format__(__printf__, 3, 4)));
 #else
-void mbed_tracef(uint8_t dlevel, const char *grp, const char *fmt, ...);
+void mbed_tracef(uint8_t dlevel, const uint8_t grp, const char *fmt, ...);
 #endif
 /**
- * General trace function.
+ * General trace function
  * This should be used every time when user want to print out something important thing
  * and vprintf functionality is desired
  * Usage e.g.
@@ -318,18 +323,18 @@ void mbed_tracef(uint8_t dlevel, const char *grp, const char *fmt, ...);
  * @param ap     variable arguments list (like vprintf)
  */
 #if defined(__GNUC__) || defined(__CC_ARM)
-void mbed_vtracef(uint8_t dlevel, const char *grp, const char *fmt, va_list ap) __attribute__((__format__(__printf__, 3, 0)));
+void mbed_vtracef(uint8_t dlevel, const uint8_t grp, const char *fmt, va_list ap) __attribute__((__format__(__printf__, 3, 0)));
 #else
-void mbed_vtracef(uint8_t dlevel, const char *grp, const char *fmt, va_list ap);
+void mbed_vtracef(uint8_t dlevel, const uint8_t grp, const char *fmt, va_list ap);
 #endif
 
 /**
- *  Get the last trace from the buffer.
+ *  Get last trace from buffer
  */
 const char *mbed_trace_last(void);
 #if MBED_CONF_MBED_TRACE_FEA_IPV6 == 1
 /**
- * Convert IPv6
+ * mbed_tracef helping function for convert ipv6
  * table to human readable string.
  * usage e.g.
  * char ipv6[16] = {...}; // ! array length is 16 bytes !
@@ -340,7 +345,7 @@ const char *mbed_trace_last(void);
  */
 char *mbed_trace_ipv6(const void *addr_ptr);
 /**
- * Print IPv6 prefix.
+ * mbed_tracef helping function for print ipv6 prefix
  * usage e.g.
  * char ipv6[16] = {...}; // ! array length is 16 bytes !
  * mbed_tracef(TRACE_LEVEL_INFO, "mygr", "ipv6 addr: %s", mbed_trace_ipv6_prefix(ipv6, 4));
@@ -352,7 +357,7 @@ char *mbed_trace_ipv6(const void *addr_ptr);
 char *mbed_trace_ipv6_prefix(const uint8_t *prefix, uint8_t prefix_len);
 #endif
 /**
- * Convert hex-array to string.
+ * mbed_tracef helping function for convert hex-array to string.
  * usage e.g.
  *  char myarr[] = {0x10, 0x20};
  *  mbed_tracef(TRACE_LEVEL_INFO, "mygr", "arr: %s", mbed_trace_array(myarr, 2));
@@ -387,14 +392,12 @@ char *mbed_trace_array(const uint8_t *buf, uint16_t len);
 #undef mbed_trace_buffer_sizes
 #undef mbed_trace_config_set
 #undef mbed_trace_config_get
+#undef mbed_trace_level_set
 #undef mbed_trace_prefix_function_set
 #undef mbed_trace_suffix_function_set
 #undef mbed_trace_print_function_set
-#undef mbed_trace_cmdprint_function_set
 #undef mbed_trace_mutex_wait_function_set
 #undef mbed_trace_mutex_release_function_set
-#undef mbed_trace_exclude_filters_set
-#undef mbed_trace_exclude_filters_get
 #undef mbed_trace_include_filters_set
 #undef mbed_trace_include_filters_get
 #undef mbed_tracef
@@ -411,15 +414,13 @@ char *mbed_trace_array(const uint8_t *buf, uint16_t len);
 #define mbed_trace_free(...)                        ((void) 0)
 #define mbed_trace_buffer_sizes(...)                ((void) 0)
 #define mbed_trace_config_set(...)                  ((void) 0)
+#define mbed_trace_level_set(...)                   ((void) 0)
 #define mbed_trace_config_get(...)                  ((uint8_t) 0)
 #define mbed_trace_prefix_function_set(...)         ((void) 0)
 #define mbed_trace_suffix_function_set(...)         ((void) 0)
 #define mbed_trace_print_function_set(...)          ((void) 0)
-#define mbed_trace_cmdprint_function_set(...)       ((void) 0)
 #define mbed_trace_mutex_wait_function_set(...)     ((void) 0)
 #define mbed_trace_mutex_release_function_set(...)  ((void) 0)
-#define mbed_trace_exclude_filters_set(...)         ((void) 0)
-#define mbed_trace_exclude_filters_get(...)         ((const char *) 0)
 #define mbed_trace_include_filters_set(...)         ((void) 0)
 #define mbed_trace_include_filters_get(...)         ((const char *) 0)
 #define mbed_trace_last(...)                        ((const char *) 0)

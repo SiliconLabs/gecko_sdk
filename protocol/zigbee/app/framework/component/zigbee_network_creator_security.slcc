@@ -33,7 +33,7 @@ template_contribution:
   - name: zigbee_stack_callback
     value:
       callback_type: stack_status
-      function_name: emAfPluginNetworkCreatorSecurityStackStatusCallback
+      function_name: sli_zigbee_af_network_creator_security_stack_status_callback
   - name: zigbee_stack_callback
     value:
       callback_type: zigbee_key_establishment
@@ -47,7 +47,7 @@ template_contribution:
     value:
       group: network-creator-security
       name: set-joining-link-key
-      handler: emAfPluginNetworkCreatorSecuritySetJoiningLinkKeyCommand
+      handler: sli_zigbee_af_network_creator_security_set_joining_link_key_command
       help: Sets the link key that a specific joining device will use when joining the network. This command can be also be used to add install code-derived link keys. If all FFs are entered for the EUI64 for the joining device, then this link key will be used for all joining devices without a joining key entry.
       argument:
       - type: hex
@@ -58,25 +58,25 @@ template_contribution:
     value:
       group: network-creator-security
       name: clear-joining-link-keys
-      handler: emAfPluginNetworkCreatorSecurityClearJoiningLinkKeyCommand
+      handler: sli_zigbee_af_network_creator_security_clear_joining_link_key_command
       help: Clears all of the joining link keys stored in the stack.
   - name: cli_command
     value:
       group: network-creator-security
       name: open-network
-      handler: emAfPluginNetworkCreatorSecurityOpenOrCloseNetworkCommand
+      handler: sli_zigbee_af_network_creator_security_open_or_close_network_command
       help: Opens the network for joining.
   - name: cli_command
     value:
       group: network-creator-security
       name: close-network
-      handler: emAfPluginNetworkCreatorSecurityOpenOrCloseNetworkCommand
+      handler: sli_zigbee_af_network_creator_security_open_or_close_network_command
       help: Closes the network for joining.
   - name: cli_command
     value:
       group: network-creator-security
       name: open-with-key
-      handler: emAfPluginNetworkCreatorSecurityOpenNetworkWithKeyCommand
+      handler: sli_zigbee_af_network_creator_security_open_network_with_key_command
       help: Opens the network that would only allow the node with the specified EUI and link key pair to join.
       argument:
       - type: hex
@@ -87,7 +87,7 @@ template_contribution:
     value:
       group: network-creator-security
       name: set-distributed-key
-      handler: emAfPluginNetworkCreatorSecurityConfigureDistributedKey
+      handler: sli_zigbee_af_network_creator_security_configure_distributed_key
       help: Sets the TC Link key for a distributed network.
       argument:
       - type: hex

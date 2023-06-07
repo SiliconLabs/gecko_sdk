@@ -3,9 +3,9 @@ package: platform
 quality: production
 label: Machine Learning - Voice Control Light
 description: >
-  This application uses TensorFlow Lite for Microcontrollers to detect the spoken 
-  words "on" and "off" from audio data recorded on the microphone in a Micrium OS 
-  kernel task. The detected keywords are used to control an LED on the board. 
+  This application uses TensorFlow Lite for Microcontrollers to detect the spoken
+  words "on" and "off" from audio data recorded on the microphone in a Micrium OS
+  kernel task. The detected keywords are used to control an LED on the board.
 category: Example|Machine Learning
 filter:
   - name: "Device Type"

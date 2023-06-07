@@ -20,13 +20,13 @@
 #include "stack/include/ember-types.h"
 #include "stack/include/library.h"
 
-const EmberLibraryStatus emSecurityLinkKeysLibraryStatus = EMBER_LIBRARY_IS_STUB;
+const EmberLibraryStatus sli_zigbee_security_link_keys_library_status = EMBER_LIBRARY_IS_STUB;
 
-void emApsSecurityReadFrameCounters(void)
+void sli_zigbee_aps_security_read_frame_counters(void)
 {
 }
 
-EmberStatus emGetKeyTableEntry(uint8_t index, EmberKeyStruct *result)
+EmberStatus sli_zigbee_get_key_table_entry(uint8_t index, EmberKeyStruct *result)
 {
   (void)index;
   (void)result;
@@ -59,9 +59,9 @@ EmberStatus emberSetKeyTableEntry(uint8_t index,
   return EMBER_LIBRARY_NOT_PRESENT;
 }
 
-EmberStatus emSetKeyTableEntry(bool erase,
-                               uint8_t index,
-                               EmberKeyStruct* keyStruct)
+EmberStatus sli_zigbee_af_set_key_table_entry(bool erase,
+                                              uint8_t index,
+                                              EmberKeyStruct* keyStruct)
 {
   (void)erase;
   (void)index;
@@ -85,9 +85,9 @@ EmberStatus emberEraseKeyTableEntry(uint8_t index)
   return EMBER_LIBRARY_NOT_PRESENT;
 }
 
-bool emProcessApplicationLinkKey(EmberEUI64 partnerEui64,
-                                 bool amInitiator,
-                                 EmberKeyData* keyData)
+bool sli_zigbee_process_application_link_key(EmberEUI64 partnerEui64,
+                                             bool amInitiator,
+                                             EmberKeyData* keyData)
 {
   (void)partnerEui64;
   (void)amInitiator;
@@ -95,9 +95,9 @@ bool emProcessApplicationLinkKey(EmberEUI64 partnerEui64,
   return false;
 }
 
-EmberStatus emUpdateKeyState(uint8_t index,
-                             uint8_t setFlags,
-                             uint8_t clearFlags)
+EmberStatus sli_zigbee_update_key_state(uint8_t index,
+                                        uint8_t setFlags,
+                                        uint8_t clearFlags)
 {
   (void)index;
   (void)setFlags;
@@ -105,7 +105,7 @@ EmberStatus emUpdateKeyState(uint8_t index,
   return EMBER_LIBRARY_NOT_PRESENT;
 }
 
-void emNoteSleepyDeviceInKeyTable(EmberEUI64 eui64, bool sleepy)
+void sli_zigbee_note_sleepy_device_in_key_table(EmberEUI64 eui64, bool sleepy)
 {
   (void)eui64;
   (void)sleepy;
@@ -116,7 +116,7 @@ EmberStatus emberClearKeyTable(void)
   return EMBER_LIBRARY_NOT_PRESENT;
 }
 
-uint8_t emFindKeyTableEntry(EmberEUI64 address, bool linkKey)
+uint8_t sli_zigbee_find_key_table_entry(EmberEUI64 address, bool linkKey, uint8_t bitmask)
 {
   return 0xFF;
 }

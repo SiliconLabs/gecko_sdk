@@ -29,19 +29,19 @@ template_contribution:
   - name: zigbee_af_callback
     value:
       callback_type: event_init
-      function_name: emAfPluginZllCommissioningNetworkInitCallback  
+      function_name: sli_zigbee_af_zll_commissioning_network_init_callback  
   - name: zigbee_stack_callback
     value:
       callback_type: stack_status
-      function_name: emAfPluginZllCommissioningNetworkStackStatusCallback
+      function_name: sli_zigbee_af_zll_commissioning_network_stack_status_callback
   - name: zigbee_stack_callback
     value:
       callback_type: unused_pan_id_found
-      function_name: emAfPluginZllCommissioningNetworkUnusedPanIdFoundCallback
+      function_name: sli_zigbee_af_zll_commissioning_network_unused_pan_id_found_callback
   - name: zigbee_stack_callback
     value:
       callback_type: scan_error
-      function_name: emAfPluginZllCommissioningNetworkScanErrorCallback
+      function_name: sli_zigbee_af_zll_commissioning_network_scan_error_callback
 documentation:
   docset: zigbee
   document: zigbee-af-api/zll-commissioning-network

@@ -38,7 +38,6 @@ if(NOT DEFINED OT_PLATFORM_LIB_FTD)
 endif()
 
 target_link_libraries(ot-ncp-ftd PRIVATE
-    $<$<BOOL:${OT_LINKER_MAP}>:-Wl,-Map=bin/ot-ncp-ftd.map>
     openthread-ncp-ftd
     ${OT_PLATFORM_LIB_FTD}
     openthread-ftd
@@ -48,5 +47,13 @@ target_link_libraries(ot-ncp-ftd PRIVATE
     ot-config-ftd
     ot-config
 )
+
+if(OT_LINKER_MAP)
+    if("${CMAKE_CXX_COMPILER_ID}" MATCHES "AppleClang")
+        target_link_libraries(ot-ncp-ftd PRIVATE -Wl,-map,ot-ncp-ftd.map)
+    else()
+        target_link_libraries(ot-ncp-ftd PRIVATE -Wl,-Map=ot-ncp-ftd.map)
+    endif()
+endif()
 
 install(TARGETS ot-ncp-ftd DESTINATION bin)

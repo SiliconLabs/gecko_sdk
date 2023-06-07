@@ -1,0 +1,13 @@
+label: bootloader-apploader-workspace
+quality: production
+description: >
+  TrustZone is used to split into a Secure and Non-Secure bootloader. This workspace contains the secure and non-secure part of the bootloader and builds them together.
+project:
+  - path: bootloader-apploader-secure.slcp
+    id: bootloader-apploader-secure
+    output: bootloader-apploader-secure
+  - path: bootloader-apploader-nonsecure.slcp
+    id: bootloader-apploader-nonsecure
+    output: bootloader-apploader-nonsecure
+post_build:
+  profile: bootloader_tz_workspace

@@ -46,8 +46,8 @@
 // -----------------------------------------------------------------------------
 // Globals
 
-extern uint32_t emAfPluginNetworkCreatorPrimaryChannelMask;
-extern uint32_t emAfPluginNetworkCreatorSecondaryChannelMask;
+extern uint32_t sli_zigbee_af_network_creator_primary_channel_mask;
+extern uint32_t sli_zigbee_af_network_creator_secondary_channel_mask;
 
 /**
  * @name API

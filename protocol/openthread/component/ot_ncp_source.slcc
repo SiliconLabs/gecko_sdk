@@ -39,7 +39,7 @@ include:
 source:
       - path: ../examples/apps/ncp/ncp.c
         unless:
-          - ot_ncp_cpc
+          - ot_ncp_vendor_extension
       - path: ncp/changed_props_set.cpp
       - path: ncp/ncp_base.cpp
       - path: ncp/ncp_base_dispatcher.cpp
@@ -57,8 +57,6 @@ define:
   - name: SPINEL_PLATFORM_HEADER
     value: "\"spinel_platform.h\""
   - name: _GNU_SOURCE
-  - name: OPENTHREAD_COPROCESSOR
-    value: 1
 template_contribution:
   - name: component_catalog
     value: openthread_ncp

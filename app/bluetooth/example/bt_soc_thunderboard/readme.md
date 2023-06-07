@@ -1,16 +1,16 @@
-# SoC - Thunderboard
+# SoC - Thunderboard / DevKit
 
-This example collects and processes sensor data from the Thunderboard Sense 2 or the Thunderboard EFR32BG22 board, and gives immediate graphical feedback through the Thunderboard iOS/Android application.
+This example collects and processes sensor data from a Thunderboard or DevKit board and gives immediate graphical feedback through the EFR Connect iOS/Android application.
 
-> Note: some Thunderboards on the market do not have the full sensor set mounted on the board. If a sensor is missing, the sample application detects it and provides dummy data to imitate the sensor.
+> Note: not all Thunderboards and DevKits have the full sensor set available. The app will only show the available sensors.
 
-> Note: this example expects a specific Gecko Bootloader to be present on your device. For details see the Troubleshooting section.
+> Note: this example expects a specific Gecko Bootloader to be present on your Thunderboard / DevKit device. For details see the Troubleshooting section.
 
 ## Getting Started
 
-To get started with Silicon Labs Bluetooth and Simplicity Studio, see [QSG169: Bluetooth SDK v3.x Quick Start Guide](https://www.silabs.com/documents/public/quick-start-guides/qsg169-bluetooth-sdk-v3x-quick-start-guide.pdf).
+To get started with Silicon Labs Bluetooth and Simplicity Studio, see [QSG169: Bluetooth® Quick-Start Guide for SDK v3.x and Higher](https://www.silabs.com/documents/public/quick-start-guides/qsg169-bluetooth-sdk-v3x-quick-start-guide.pdf).
 
-To run this example, you need either a Thunderboard Sense 2 or a Thunderboard EFR32BG22 board, a mobile device, and the Thunderboard mobile application, available for [iOS](https://apps.apple.com/us/app/thunderboard/id1097181650) and [Android](https://play.google.com/store/apps/details?id=com.silabs.thunderboard).
+To run this example, you need either a Thunderboard or a DevKit board, a mobile device, and the EFR Connect mobile application, available for [iOS](https://apps.apple.com/us/app/efr-connect-ble-mobile-app/id1030932759) and [Android](https://play.google.com/store/apps/details?id=com.siliconlabs.bledemo).
 
 ### Project Setup
 
@@ -20,24 +20,29 @@ The available sensors are different based on the board you use. For a list of th
 
 [UG309: Thunderboard Sense 2 User's Guide](https://www.silabs.com/documents/public/user-guides/ug309-sltb004a-user-guide.pdf)
 
-After flashing the demo, the board starts to advertise, and after a 30-second timeout it goes into sleep mode. It wakes up when the left button (BTN0) is pressed. The state diagram of the firmware is shown below.
+[UG524: xG24 Dev Kit User's Guide](https://www.silabs.com/documents/public/user-guides/ug524-brd2601b-user-guide.pdf)
 
-![](image/readme_img1.png)
+After flashing the demo, the board starts to advertise, and after a 30-second timeout it goes into sleep mode. It wakes up when the left button (BTN0) is pressed.
 
-You can connect the device by tapping its name in the Thunderboard app. After the connection is established, you will see the dashboard. There, you can select the categories of the different sensor types and the controls to see.
+The state diagram of the firmware is shown below.
 
-The screenshots are taken with the Thunderboard Sense 2. The same categories apply for the EFR32BG22, but with a reduced set of sensors and LEDs.
+![](image/readme_img1.png) ![](image/readme_img0.png)
 
-By selecting the environment data, you can see the values of the different sensors mounted on the board, as shown below:
+There are a number of tiles available in the EFR Connect app under the Demo tab. Select a demo by tapping it, then connect to a Thunderboard or DevKit board.
 
-![](image/readme_img2.png)  ![](image/readme_img3.png)
+By selecting the *Environment* tile you can see the values of the different sensors mounted on the board, as shown below:
 
-Within the I/O you can control the LEDs on the board and see the state of the push buttons. Inside the Motion part, you will see a 3D image of the board. Note that the orientation changes when you move the board, as shown below.
+![](image/readme_img2.png) ![](image/readme_img3.png)
+
+Within the *Blinky* tile you can control the LEDs on the board and see the state of the push buttons.
+
+Inside the *Motion* tile, you will see a 3D image of the board. Note, that the orientation changes when you move the board, as shown below:
+
 ![](image/readme_img4.png) ![](image/readme_img5.png)
 
 ## Project Structure
 
-The project code is the same for both boards. The different sensor configurations are set in the automatically-generated *sl_component_catalog.h*. The main application file, *app.c*, configures the project accordingly.
+The project code is the same for all Thunderboard / DevKit boards. The different sensor configurations are set in the automatically-generated *sl_component_catalog.h*. The main application file, *app.c*, configures the project accordingly.
 
 The Bluetooth-related event handling is implemented in the function `sl_bt_on_event`.
 
@@ -80,13 +85,7 @@ Note that Example Projects do not include a bootloader. However, Bluetooth-based
 
 For more information on bootloaders, see [UG103.6: Bootloader Fundamentals](https://www.silabs.com/documents/public/user-guides/ug103-06-fundamentals-bootloading.pdf) and [UG489: Silicon Labs Gecko Bootloader User's Guide for GSDK 4.0 and Higher](https://cn.silabs.com/documents/public/user-guides/ug489-gecko-bootloader-user-guide-gsdk-4.pdf).
 
-
-### Programming the Radio Board
-
-Before programming the radio board mounted on the mainboard, make sure the power supply switch is in the AEM position (right side) as shown below.
-
-![Radio board power supply switch](image/readme_img0.png)
-
+Note: This Thunderboard / DevKit example needs the *bootloader-apploader* type of bootloader to be installed to work out of the box.
 
 ## Resources
 
@@ -96,7 +95,7 @@ Before programming the radio board mounted on the mainboard, make sure the power
 
 [QSG169: Bluetooth SDK v3.x Quick Start Guide](https://www.silabs.com/documents/public/quick-start-guides/qsg169-bluetooth-sdk-v3x-quick-start-guide.pdf)
 
-[UG434: Silicon Labs Bluetooth ® C Application Developer's Guide for SDK v3.x](https://www.silabs.com/documents/public/user-guides/ug434-bluetooth-c-soc-dev-guide-sdk-v3x.pdf)
+[UG434: Silicon Labs Bluetooth® C Application Developer's Guide for SDK v3.x](https://www.silabs.com/documents/public/user-guides/ug434-bluetooth-c-soc-dev-guide-sdk-v3x.pdf)
 
 [Bluetooth Training](https://www.silabs.com/support/training/bluetooth)
 

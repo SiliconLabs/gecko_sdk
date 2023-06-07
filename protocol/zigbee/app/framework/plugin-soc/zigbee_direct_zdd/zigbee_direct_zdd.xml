@@ -1,0 +1,84 @@
+<gatt> 
+
+ <!--Zigbee Comissioning-->
+  <service advertise="false" id="comissioning_service" name="Zigbee Direct Comissioning" requirement="mandatory" sourceId="com.lighting.service.zigbee_commissioning" type="primary" uuid="FFF7">
+    <informativeText>Abstract:</informativeText>
+    
+    <!--Form Network-->
+    <characteristic id="form_network" name="Form Network" sourceId="com.lighting.characteristic.form_network" uuid="7072377D-0001-421C-B163-491C27333A61">
+      <informativeText/>
+      <value length="1" type="user" variable_length="true">0</value>
+      <properties write="true" write_requirement="mandatory"/>
+    </characteristic>
+    
+    <!--Join Network-->
+    <characteristic id="join_network" name="Join Network" sourceId="com.lighting.characteristic.join_network" uuid="7072377D-0002-421C-B163-491C27333A61">
+      <informativeText/>
+      <value length="1" type="user" variable_length="true">0</value>
+      <properties write="true" write_requirement="mandatory"/>
+    </characteristic>
+    
+    <!--Permit Joining-->
+    <characteristic id="permit_joining" name="Permit Joining" sourceId="com.lighting.characteristic.open_close_network" uuid="7072377D-0003-421C-B163-491C27333A61">
+      <informativeText/>
+      <value length="1" type="user" variable_length="false">0</value>
+      <properties write="true" write_requirement="mandatory"/>
+    </characteristic>
+    
+    <!--Leave Network-->
+    <characteristic id="leave_network" name="Leave Network" sourceId="com.lighting.characteristic.leave_network" uuid="7072377D-0004-421C-B163-491C27333A61">
+      <informativeText/>
+      <value length="2" type="user" variable_length="false">0</value>
+      <properties write="true" write_requirement="mandatory"/>
+    </characteristic>
+    
+    <!--Commissioning Status-->
+    <characteristic id="commissioning_status" name="Commissioning Status" sourceId="com.lighting.characteristic.network_status" uuid="7072377D-0005-421C-B163-491C27333A61">
+      <informativeText/>
+      <value length="30" type="user" variable_length="true">0</value>
+      <properties notify="true" notify_requirement="mandatory" read="true" read_requirement="mandatory"/>
+    </characteristic>
+    
+    <!--Manage Joiners-->
+    <characteristic id="manage_joiners" name="Manage Joiners" sourceId="com.lighting.characteristic.manage_joiners" uuid="7072377D-0006-421C-B163-491C27333A61">
+      <informativeText>Custom characteristic</informativeText>
+      <value length="1" type="user" variable_length="true">0x00</value>
+      <properties write="true" write_requirement="mandatory"/>
+    </characteristic>
+    
+    <!--Identify-->
+    <characteristic id="identify" name="Identify" sourceId="com.lighting.characteristic.identify" uuid="7072377D-0007-421C-B163-491C27333A61">
+      <informativeText>Custom characteristic</informativeText>
+      <value length="2" type="user" variable_length="false">0x00</value>
+      <properties read="true" read_requirement="mandatory" write="true" write_requirement="mandatory"/>
+    </characteristic>
+    
+    <!--Finding_Binding-->
+    <characteristic id="finding_binding" name="Finding_Binding" sourceId="com.lighting.characteristic.finding_binding" uuid="7072377D-0008-421C-B163-491C27333A61">
+      <informativeText>Custom characteristic</informativeText>
+      <value length="2" type="user" variable_length="false">0x00</value>
+      <properties write="true" write_requirement="mandatory"/>
+    </characteristic>
+  </service>
+    
+	 <!--Security Service-->
+  <service advertise="false" id="security_service" name="Zigbee Direct Security Service" requirement="mandatory" sourceId="com.lighting.service.security_service" type="primary" uuid="29144af4-0000-4481-bfe9-6d0299b429e3">
+    <informativeText>Abstract:</informativeText>
+	
+    <!--Authenticate_25519-->
+    <characteristic id="authenticate_25519" name="Authenticate_25519" sourceId="com.lighting.characteristic.authenticate_25519" uuid="29144af4-0001-4481-bfe9-6d0299b429e3">
+      <informativeText/>
+      <value length="1" type="user" variable_length="true">0</value>
+      <properties indicate="true" indicate_requirement="mandatory" write="true" write_requirement="mandatory"/>
+    </characteristic>
+
+        
+    <!--Authenticate_p256-->
+    <characteristic id="authenticate_p256" name="Authenticate_p256" sourceId="com.lighting.characteristic.authenticate_p256" uuid="29144af4-0003-4481-bfe9-6d0299b429e3">
+      <informativeText/>
+      <value length="1" type="user" variable_length="true">0</value>
+      <properties indicate="true" indicate_requirement="mandatory" write="true" write_requirement="mandatory"/>
+    </characteristic>
+    </service> 
+	
+</gatt>

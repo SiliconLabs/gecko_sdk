@@ -49,7 +49,7 @@
 #endif // SL_CATALOG_APP_LOG_PRESENT
 
 #include "app_assert.h"
-#include "sl_simple_timer.h"
+#include "app_timer.h"
 #include "sl_btmesh_blob_storage.h"
 
 #include "sl_btmesh_blob_transfer_client.h"
@@ -203,8 +203,8 @@ typedef struct {
 } blob_data_provider_t;
 
 typedef struct {
-  struct sl_simple_timer retry_timer;
-  struct sl_simple_timer separation_timer;
+  struct app_timer retry_timer;
+  struct app_timer separation_timer;
   sl_btmesh_blob_transfer_client_notify_cb_t notify;
   blob_data_provider_t data_provider;
   uint32_t blob_size;
@@ -296,7 +296,7 @@ static void handle_transfer_complete(blob_transfer_client_t *const self);
  * @param timer Timer handler
  * @param data Callback data
  ******************************************************************************/
-static void retry_timer_cb(sl_simple_timer_t *timer, void *data);
+static void retry_timer_cb(app_timer_t *timer, void *data);
 
 /***************************************************************************//**
  * Callback for separation timer
@@ -304,7 +304,7 @@ static void retry_timer_cb(sl_simple_timer_t *timer, void *data);
  * @param timer Timer handler
  * @param data Callback data
  ******************************************************************************/
-static void separation_timer_cb(sl_simple_timer_t *timer, void *data);
+static void separation_timer_cb(app_timer_t *timer, void *data);
 
 /***************************************************************************//**
  * Callback for chunk request response retry timer
@@ -312,7 +312,7 @@ static void separation_timer_cb(sl_simple_timer_t *timer, void *data);
  * @param timer Timer handler
  * @param data Callback data
  ******************************************************************************/
-static void send_chunk_request_response(sl_simple_timer_t *timer, void *data);
+static void send_chunk_request_response(app_timer_t *timer, void *data);
 
 // -----------------------------------------------------------------------------
 //                      Static Inline Function Declarations
@@ -843,11 +843,11 @@ static void start_retry_timer(blob_transfer_client_t *const self)
     // Wait for the retry time to provide some time for the servers to respond
     // This also spares bandwidth, because the BLOB transfer client does not
     // flood the mesh network with messages
-    sc = sl_simple_timer_start(&self->retry_timer,
-                               self->retry_time_ms,
-                               retry_timer_cb,
-                               self,
-                               false);
+    sc = app_timer_start(&self->retry_timer,
+                         self->retry_time_ms,
+                         retry_timer_cb,
+                         self,
+                         false);
     app_assert_status_f(sc,
                         "Failed to start retry timer (elem=%d)",
                         self->elem_index);
@@ -868,7 +868,7 @@ static void stop_retry_timer(blob_transfer_client_t *const self)
 {
   // It is not considered an error, if stop is requested for a timer which is
   // not running therefore stop is always called here to be safe
-  sl_status_t sc = sl_simple_timer_stop(&self->retry_timer);
+  sl_status_t sc = app_timer_stop(&self->retry_timer);
 
   app_assert_status_f(sc,
                       "Failed to stop retry timer (elem=%d)",
@@ -890,11 +890,11 @@ static void start_separation_timer(blob_transfer_client_t *const self)
      * Wait the separation time to have some idle time between mesh messages
      * to avoid flooding the mesh network with messages
      */
-    sc = sl_simple_timer_start(&self->separation_timer,
-                               self->separation_time_ms,
-                               separation_timer_cb,
-                               self,
-                               false);
+    sc = app_timer_start(&self->separation_timer,
+                         self->separation_time_ms,
+                         separation_timer_cb,
+                         self,
+                         false);
     app_assert_status_f(sc,
                         "Failed to start separation timer (elem=%d)",
                         self->elem_index);
@@ -905,7 +905,7 @@ static void stop_separation_timer(blob_transfer_client_t *const self)
 {
   // It is not considered an error, if stop is requested for a timer which is
   // not running therefore stop is always called here to be safe
-  sl_status_t sc = sl_simple_timer_stop(&self->separation_timer);
+  sl_status_t sc = app_timer_stop(&self->separation_timer);
 
   app_assert_status_f(sc,
                       "Failed to stop separation timer (elem=%d)",
@@ -1635,7 +1635,7 @@ static void handle_transfer_complete(blob_transfer_client_t *const self)
   }
 }
 
-static void retry_timer_cb(sl_simple_timer_t *timer, void *data)
+static void retry_timer_cb(app_timer_t *timer, void *data)
 {
   (void) timer;
   blob_transfer_client_t *const self = data;
@@ -1654,7 +1654,7 @@ static void retry_timer_cb(sl_simple_timer_t *timer, void *data)
   state_transition(self, self->state);
 }
 
-static void separation_timer_cb(sl_simple_timer_t *timer, void *data)
+static void separation_timer_cb(app_timer_t *timer, void *data)
 {
   (void) timer;
   blob_transfer_client_t *const self = data;
@@ -1668,7 +1668,7 @@ static void separation_timer_cb(sl_simple_timer_t *timer, void *data)
   }
 }
 
-static void send_chunk_request_response(sl_simple_timer_t *timer, void *data)
+static void send_chunk_request_response(app_timer_t *timer, void *data)
 {
   sl_status_t sc;
 
@@ -1689,11 +1689,11 @@ static void send_chunk_request_response(sl_simple_timer_t *timer, void *data)
     case SL_STATUS_BUSY:
     case SL_STATUS_NO_MORE_RESOURCE:
       // In these two cases, start the retry timer with this callback function
-      sc = sl_simple_timer_start(timer,
-                                 self->retry_time_ms,
-                                 send_chunk_request_response,
-                                 &data,
-                                 false);
+      sc = app_timer_start(timer,
+                           self->retry_time_ms,
+                           send_chunk_request_response,
+                           &data,
+                           false);
       app_assert_status_f(sc,
                           "Failed to start chunk request response retry timer (elem=%d)",
                           self->elem_index);
@@ -1808,7 +1808,7 @@ static void state_transition(blob_transfer_client_t *const self,
   target_state_flags = state_flags[target_state];
 
   // No state can support the separation and retry at the same time because
-  // only one simple timer data structure is allocated, therefore only one timer
+  // only one app timer data structure is allocated, therefore only one timer
   // can run at any point of time in the BLOB Transfer Client
   app_assert_s((0 == source_state_flags.retry)
                || (0 == source_state_flags.separation));
@@ -1817,13 +1817,13 @@ static void state_transition(blob_transfer_client_t *const self,
   // be stopped, even in case of a retry self-transition, because in this case
   // the retry timer is started again by the tx complete event handler
   // Note: it is not considered as an error if a non-running timer is stopped
-  //       in the simple timer component
+  //       in the app timer component
   stop_retry_timer(self);
 
   // If a state with separation feature is exited, then the separation timer
   // shall be stopped
   // Note: it is not considered an error, if a non-running timer is stopped
-  //       in the simple timer component
+  //       in the app timer component
   stop_separation_timer(self);
 
   self->state = target_state;

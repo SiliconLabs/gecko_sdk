@@ -191,7 +191,7 @@ typedef struct {
 #define LDMA_CTRL_CORERST_DEFAULT               (_LDMA_CTRL_CORERST_DEFAULT << 31)      /**< Shifted mode DEFAULT for LDMA_CTRL          */
 
 /* Bit fields for LDMA STATUS */
-#define _LDMA_STATUS_RESETVALUE                 0x1F100000UL                            /**< Default value for LDMA_STATUS               */
+#define _LDMA_STATUS_RESETVALUE                 0x08100000UL                            /**< Default value for LDMA_STATUS               */
 #define _LDMA_STATUS_MASK                       0x1F1F1FFBUL                            /**< Mask for LDMA_STATUS                        */
 #define LDMA_STATUS_ANYBUSY                     (0x1UL << 0)                            /**< Any DMA Channel Busy                        */
 #define _LDMA_STATUS_ANYBUSY_SHIFT              0                                       /**< Shift value for LDMA_ANYBUSY                */
@@ -217,7 +217,7 @@ typedef struct {
 #define LDMA_STATUS_FIFOLEVEL_DEFAULT           (_LDMA_STATUS_FIFOLEVEL_DEFAULT << 16)  /**< Shifted mode DEFAULT for LDMA_STATUS        */
 #define _LDMA_STATUS_CHNUM_SHIFT                24                                      /**< Shift value for LDMA_CHNUM                  */
 #define _LDMA_STATUS_CHNUM_MASK                 0x1F000000UL                            /**< Bit mask for LDMA_CHNUM                     */
-#define _LDMA_STATUS_CHNUM_DEFAULT              0x0000001FUL                            /**< Mode DEFAULT for LDMA_STATUS                */
+#define _LDMA_STATUS_CHNUM_DEFAULT              0x00000008UL                            /**< Mode DEFAULT for LDMA_STATUS                */
 #define LDMA_STATUS_CHNUM_DEFAULT               (_LDMA_STATUS_CHNUM_DEFAULT << 24)      /**< Shifted mode DEFAULT for LDMA_STATUS        */
 
 /* Bit fields for LDMA SYNCSWSET */

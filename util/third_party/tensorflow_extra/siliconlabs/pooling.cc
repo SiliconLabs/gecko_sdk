@@ -48,7 +48,7 @@ TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node)
       micro_context->AllocateTempInputTensor(node, kInputTensor);
   TfLiteTensor* output =
       micro_context->AllocateTempOutputTensor(node, kOutputTensor);
-      
+
   data->op_params.padding       = params->padding == kTfLitePaddingSame;
   data->op_params.stride_height = params->stride_height;
   data->op_params.stride_width  = params->stride_width;
@@ -135,7 +135,7 @@ TfLiteStatus AveragePrepare(TfLiteContext* context, TfLiteNode* node)
 
   micro_context->DeallocateTempTfLiteTensor(input);
   micro_context->DeallocateTempTfLiteTensor(output);
-  
+
   return status;
 }
 
@@ -228,7 +228,7 @@ TfLiteStatus AverageEval(TfLiteContext* context, TfLiteNode* node)
                        data->op_params.input, &filter_dims,
                        &output_dims,
                        data->op_params.output),
-        ARM_MATH_SUCCESS);
+        ARM_CMSIS_NN_SUCCESS);
   } else if (data->supported == kTFLMrefF32) {
     // Use TFLM reference kernel.
     tflite::PoolParams op_params;
@@ -309,7 +309,7 @@ TfLiteStatus MaxEval(TfLiteContext* context, TfLiteNode* node)
                         data->op_params.input, &filter_dims,
                         &output_dims,
                         data->op_params.output),
-        ARM_MATH_SUCCESS);
+        ARM_CMSIS_NN_SUCCESS);
   } else if (data->supported == kTFLMrefF32) {
     // Use TFLM reference kernel.
     tflite::PoolParams op_params;
@@ -346,7 +346,8 @@ TfLiteRegistration Register_MAX_POOL_2D() {
     /*profiling_string=*/nullptr,
     /*builtin_code=*/0,
     /*custom_name=*/nullptr,
-    /*version=*/0
+    /*version=*/0,
+    /*registration_external=*/nullptr
   };
 
   return max_pool_registration;
@@ -362,7 +363,8 @@ TfLiteRegistration Register_AVERAGE_POOL_2D() {
     /*profiling_string=*/nullptr,
     /*builtin_code=*/0,
     /*custom_name=*/nullptr,
-    /*version=*/0
+    /*version=*/0,
+    /*registration_external=*/nullptr
   };
 
   return avg_pool_registration;

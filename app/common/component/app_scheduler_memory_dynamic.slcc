@@ -8,7 +8,7 @@ description: >
   Note:
   Allocated resource must be freed to avoid memory leakages.
 package: platform
-quality: experimental
+quality: evaluation
 
 provides:
   - name: app_scheduler_memory

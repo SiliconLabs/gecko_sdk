@@ -1,0 +1,104 @@
+id: esl_tag_core
+package: Bluetooth
+label: ESL Tag core
+description: >
+  Implements the ESL Tag role of the Bluetooth Electronic Shelf Label Profile.
+  It contains the mandatory ESL Tag characteristics, only. Optional features
+  has to be added to the project as separate components, if needed. This
+  component implements all the core functionalities, while also declares the
+  interface of the optional features (and provides the WEAK implementations for
+  them).
+
+  This is a No-Code component, any additional feature can be added as a component.
+category: Bluetooth|Application|GATT Profiles
+quality: production
+root_path: app/bluetooth/common/esl_tag_core
+tag:
+  - No-Code
+
+config_file:
+  - path: config/esl_tag_core.xml
+    file_id: esl_tag_core_service
+    directory: btconf
+  - path: config/esl_tag_core_config.h
+    file_id: esl_tag_core_config
+
+include:
+  - path: ./inc
+    file_list:
+      - path: esl_tag_log.h
+      - path: esl_tag_tlv.h
+      - path: esl_tag_core.h
+      - path: esl_tag_crypto.h
+      - path: esl_tag_errors.h
+      - path: esl_tag_opcodes.h
+      - path: esl_tag_internal.h
+      - path: esl_tag_response.h
+      - path: esl_tag_led_core.h
+      - path: esl_tag_image_core.h
+      - path: esl_tag_sensor_core.h
+      - path: esl_tag_display_core.h
+      - path: esl_tag_battery_internal.h
+
+source:
+  - path: src/esl_tag_log.c
+  - path: src/esl_tag_core.c
+  - path: src/esl_tag_crypto.c
+  - path: src/esl_tag_errors.c
+  - path: src/esl_tag_opcodes.c
+  - path: src/esl_tag_response.c
+  - path: src/esl_tag_led_core.c
+  - path: src/esl_tag_image_core.c
+  - path: src/esl_tag_sensor_core.c
+  - path: src/esl_tag_display_core.c
+  - path: src/esl_tag_battery_iadc.c
+    condition:
+      - device_has_iadc
+  - path: src/esl_tag_battery_adc.c
+    condition:
+      - device_has_adc
+
+provides:
+  - name: esl_tag_core
+
+requires:
+  - name: bluetooth_stack
+  - name: gatt_configuration
+  - name: silabs_core_circular_queue
+  - name: bluetooth_feature_gatt_server
+  - name: bluetooth_feature_legacy_advertiser
+  - name: bluetooth_feature_past_receiver
+  - name: bluetooth_feature_connection
+  - name: bluetooth_feature_pawr_sync
+  - name: bluetooth_feature_system
+  - name: bluetooth_feature_sm
+  - name: component_catalog
+  - name: app_scheduler
+  - name: power_manager
+  - name: emlib_iadc
+    condition:
+      - device_has_iadc
+  - name: emlib_adc
+    condition:
+      - device_has_adc
+  - name: ead_core
+
+template_contribution:
+  - name: bluetooth_on_event
+    value:
+      include: esl_tag_core.h
+      function: esl_core_bt_on_event
+    priority: -8192
+  - name: event_handler
+    value:
+      event: internal_app_init
+      include: esl_tag_core.h
+      handler: esl_core_init
+    priority: 8
+
+validation_library:
+  - path: ../../../common/validation/autonumber_common.lua
+    name: autonumber_common
+
+validation_helper:
+  - path: "config/validator.lua"

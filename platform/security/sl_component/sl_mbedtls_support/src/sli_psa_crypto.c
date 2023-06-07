@@ -1,6 +1,6 @@
 /***************************************************************************//**
  * @file
- * @brief Silicon Labs PSA CRYPTO utility functions
+ * @brief Silicon Labs internal PSA Crypto utility functions.
  *******************************************************************************
  * # License
  * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
@@ -27,6 +27,7 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
+
 #include "sli_psa_crypto.h"
 
 size_t sli_psa_context_get_size(sli_psa_context_name_t ctx_type)

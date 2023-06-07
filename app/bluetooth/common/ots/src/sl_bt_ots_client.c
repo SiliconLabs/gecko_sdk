@@ -34,7 +34,7 @@
 #include "sl_status.h"
 #include "app_queue.h"
 #include "em_core.h"
-#include "sl_simple_timer.h"
+#include "app_timer.h"
 
 // -----------------------------------------------------------------------------
 // Definitions
@@ -202,7 +202,8 @@ static sl_slist_node_t *client_list = NULL;
 sl_status_t sl_bt_ots_client_init(sl_bt_ots_client_handle_t    client,
                                   uint8_t                      connection,
                                   uint32_t                     service,
-                                  sl_bt_ots_client_callbacks_t *callbacks)
+                                  sl_bt_ots_client_callbacks_t *callbacks,
+                                  sl_bt_ots_gattdb_handles_t   *gattdb_handles)
 {
   sl_status_t sc = SL_STATUS_OK;
 
@@ -216,8 +217,36 @@ sl_status_t sl_bt_ots_client_init(sl_bt_ots_client_handle_t    client,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  // Clear GATT data
-  memset(&client->gattdb_handles, 0, sizeof(client->gattdb_handles));
+  // Check connection handle in table
+  uint8_t index = client_index(connection);
+  if (index == INVALID_INDEX) {
+    return SL_STATUS_INVALID_HANDLE;
+  }
+
+  // Check if connection handle is in use
+  sl_bt_ots_client_t *handle;
+  SL_SLIST_FOR_EACH_ENTRY(client_list, handle, sl_bt_ots_client_t, node) {
+    if (handle->connection == connection) {
+      return SL_STATUS_ALREADY_INITIALIZED;
+    }
+  }
+
+  if (gattdb_handles != NULL) {
+    // Check if not valid
+    if (!check_characteristics(client)) {
+      return SL_STATUS_INVALID_PARAMETER;
+    } else {
+      // Copy GATT data
+      memcpy(&client->gattdb_handles,
+             gattdb_handles,
+             sizeof(client->gattdb_handles));
+    }
+  } else {
+    // Clear GATT data
+    for (uint8_t i = 0; i < SL_BT_OTS_CHARACTERISTIC_UUID_INDEX_SIZE; i++ ) {
+      client->gattdb_handles.characteristics.array[i] = INVALID_CHARACTERISTIC_HANDLE;
+    }
+  }
 
   // Assign requested service
   client->gattdb_handles.service = service;
@@ -1031,13 +1060,22 @@ void sli_bt_ots_client_step(void)
     if (connection_index != INVALID_INDEX
         && handle->status == CLIENT_STATUS_BEGIN
         && active_client[connection_index] == NULL) {
-      // Try to start init with the discovery
-      sc = sl_bt_gatt_discover_characteristics(handle->connection,
-                                               handle->gattdb_handles.service);
+      if (handle->gattdb_handles.characteristics.handles.object_action_control_point
+          != INVALID_CHARACTERISTIC_HANDLE) {
+        // Handles are known, subscribe to next
+        subscribe(handle, CLIENT_STATUS_SUBSCRIBE_OACP);
+      } else {
+        // Try to start init with the discovery
+        sc = sl_bt_gatt_discover_characteristics(handle->connection,
+                                                 handle->gattdb_handles.service);
+        if (sc == SL_STATUS_OK) {
+          // Initialize status to discovery
+          handle->status = CLIENT_STATUS_DISCOVERY;
+        }
+      }
       if (sc == SL_STATUS_OK) {
         // Initialize status to discovery
         active_client[connection_index] = handle;
-        handle->status = CLIENT_STATUS_DISCOVERY;
       } else {
         finish_init(handle, SL_STATUS_ABORT);
       }
@@ -1103,6 +1141,7 @@ void sli_bt_ots_client_on_bt_event(sl_bt_msg_t *evt)
   sl_bt_ots_client_t *handle;
   sl_status_t sc;
   uint8_t index = INVALID_INDEX;
+  uint8_t active_handle_index = 0;
 
   switch (SL_BT_MSG_ID(evt->header)) {
     case sl_bt_evt_system_boot_id:
@@ -1143,6 +1182,8 @@ void sli_bt_ots_client_on_bt_event(sl_bt_msg_t *evt)
             CALL_SAFE(handle, on_disconnect, handle);
           }
         }
+        // Clean index
+        connection_handle_table[index] = INVALID_CONNECTION_HANDLE;
       }
 
       break;
@@ -1154,38 +1195,49 @@ void sli_bt_ots_client_on_bt_event(sl_bt_msg_t *evt)
         if (handle != NULL) {
           switch (handle->status) {
             case CLIENT_STATUS_WAIT_READ:
+              // Clear state
+              active_handle_index = handle->active_handle_index;
+              CLEAR_STATE(handle);
               if (evt->data.evt_gatt_procedure_completed.result != 0) {
-                // Send read response with failure
-                CALL_SAFE(handle,
-                          on_metadata_read_finished,
-                          handle,
-                          &handle->current_object,
-                          evt->data.evt_gatt_procedure_completed.result,
-                          handle->active_handle_index,
-                          NULL);
+                if (active_handle_index == SL_BT_OTS_CHARACTERISTIC_UUID_INDEX_OTS_FEATURE) {
+                  sl_bt_ots_features_t features = { 0, 0 };
+                  CALL_SAFE(handle,
+                            on_features_read,
+                            handle,
+                            evt->data.evt_gatt_procedure_completed.result,
+                            features);
+                } else {
+                  // Send read response with failure
+                  CALL_SAFE(handle,
+                            on_metadata_read_finished,
+                            handle,
+                            &handle->current_object,
+                            evt->data.evt_gatt_procedure_completed.result,
+                            active_handle_index,
+                            NULL);
+                }
               } else {
                 handle_gatt_read_response(handle,
-                                          handle->gattdb_handles.characteristics.array[handle->active_handle_index],
+                                          handle->gattdb_handles.characteristics.array[active_handle_index],
                                           0,
                                           (uint8array *)&handle->received_buffer);
               }
-
-              // Clear state
-              CLEAR_STATE(handle);
               // Clear active client
               active_client[index] = NULL;
               break;
             case CLIENT_STATUS_WAIT_WRITE:
+              // Handle write response
+              // State is cleared within the call
               handle_gatt_write_response(handle,
                                          evt->data.evt_gatt_procedure_completed.result);
-              // Clear state
-              CLEAR_STATE(handle);
               // Clear active client
               active_client[index] = NULL;
               break;
             case CLIENT_STATUS_WAIT_OACP:
               // OACP write finished
               if (evt->data.evt_gatt_procedure_completed.result != 0) {
+                // Clear state
+                CLEAR_STATE(handle);
                 CALL_SAFE(handle,
                           on_oacp_response,
                           handle,
@@ -1194,7 +1246,6 @@ void sli_bt_ots_client_on_bt_event(sl_bt_msg_t *evt)
                           evt->data.evt_gatt_procedure_completed.result,
                           SL_BT_OTS_OACP_RESPONSE_CODE_OPERATION_FAILED,
                           NULL);
-                CLEAR_STATE(handle);
                 // Clear active client
                 active_client[index] = NULL;
               } else {
@@ -1204,6 +1255,7 @@ void sli_bt_ots_client_on_bt_event(sl_bt_msg_t *evt)
               break;
             case CLIENT_STATUS_WAIT_OLCP:
               if (evt->data.evt_gatt_procedure_completed.result != 0) {
+                CLEAR_STATE(handle);
                 CALL_SAFE(handle,
                           on_olcp_response,
                           handle,
@@ -1212,7 +1264,6 @@ void sli_bt_ots_client_on_bt_event(sl_bt_msg_t *evt)
                           evt->data.evt_gatt_procedure_completed.result,
                           SL_BT_OTS_OLCP_RESPONSE_CODE_OPEATION_FAILED,
                           0);
-                CLEAR_STATE(handle);
                 // Clear active client
                 active_client[index] = NULL;
               } else {
@@ -1220,7 +1271,6 @@ void sli_bt_ots_client_on_bt_event(sl_bt_msg_t *evt)
               }
               break;
             case CLIENT_STATUS_DISCOVERY:
-
               // Discovery finished, check the result
               if (check_characteristics(handle)) {
                 if (handle->gattdb_handles.characteristics.handles.object_id == INVALID_CHARACTERISTIC_HANDLE
@@ -1587,14 +1637,14 @@ static void l2cap_transfer_transfer_finished(sl_bt_l2cap_transfer_transfer_handl
       handle->active_transfer_offset = 0;
       handle->active_transfer_sdu    = 0;
       handle->active_transfer_pdu    = 0;
+      // Clear state of the client
+      CLEAR_STATE(handle);
 
       CALL_SAFE(handle,
                 on_data_transfer_finished,
                 handle,
                 &handle->current_object,
                 result);
-      // Clear state of the client
-      CLEAR_STATE(handle);
     }
   }
 }
@@ -1607,8 +1657,6 @@ static void client_initialized(uint8_t connection)
       active_client[index]->status = CLIENT_STATUS_INITIALIZED;
     }
     sl_bt_ots_client_handle_t client = active_client[index];
-    // Call back
-    CALL_SAFE(client, on_init, client, client->error);
 
     // Clear active client for connection
     uint8_t index = client_index(client->connection);
@@ -1622,6 +1670,9 @@ static void client_initialized(uint8_t connection)
     } else {
       client->status = CLIENT_STATUS_ERROR;
     }
+
+    // Call back
+    CALL_SAFE(client, on_init, client, client->error, &client->gattdb_handles);
   }
 }
 
@@ -1643,11 +1694,13 @@ static void handle_gatt_write_response(sl_bt_ots_client_t *client,
 {
   if (client->active_handle_index == SL_BT_OTS_CHARACTERISTIC_UUID_INDEX_OBJECT_LIST_FILTER) {
     if (client->callbacks->on_filter_write != NULL) {
+      CLEAR_STATE(client);
       client->callbacks->on_filter_write(client, result);
     }
   } else {
     sl_bt_ots_object_metadata_write_event_type_t event_type;
     event_type = (sl_bt_ots_object_metadata_write_event_type_t)client->active_handle_index;
+    CLEAR_STATE(client);
     CALL_SAFE(client,
               on_metadata_write_finished,
               client,

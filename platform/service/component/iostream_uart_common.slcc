@@ -19,12 +19,17 @@ source:
 template_contribution:
   - name: component_catalog
     value: iostream_uart_common
+  - name: enable_config_over_swo
+    value: true
+    condition: [hardware_board_has_vcom]
 requires:
   - name: iostream
   - name: sl_string
   - name: dmadrv
   - name: status
   - name: atomic
+  - name: configuration_over_swo
+    condition: [hardware_board_has_vcom]
 documentation:
     docset: gecko-platform
     document: service/api/group-iostream-uart

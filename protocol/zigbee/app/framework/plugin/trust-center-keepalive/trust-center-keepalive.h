@@ -64,10 +64,10 @@
 
 /** @brief Tick the network event.
  *
- * @param SLXU_UC_EVENT Ver.: always
+ * @param sl_zigbee_event_t * event Ver.: always
  *
  */
-void emberAfPluginTrustCenterKeepaliveTickNetworkEventHandler(SLXU_UC_EVENT);
+void emberAfPluginTrustCenterKeepaliveTickNetworkEventHandler(sl_zigbee_event_t * event);
 
 /** @brief Enable keep alive.
  *
@@ -122,8 +122,8 @@ bool emberAfTrustCenterKeepaliveOverwriteDefaultTimingCallback(uint16_t *baseTim
  * @param bufLen Ver.: always
  *
  */
-void emAfPluginTrustCenterKeepaliveReadAttributesResponseCallback(uint8_t *buffer,
-                                                                  uint16_t bufLen);
+void sli_zigbee_af_trust_center_keepalive_read_attributes_response_callback(uint8_t *buffer,
+                                                                            uint16_t bufLen);
 
 /** @brief Timeout.
  *
@@ -184,14 +184,14 @@ bool emberAfTrustCenterKeepaliveServerlessIsEnabledCallback(void);
 /** @} */ // end of name Callbacks
 /** @} */ // end of trust-center-keepalive
 
-bool emAfPluginTrustCenterKeepaliveTcHasServerCluster(void);
+bool sli_zigbee_af_trust_center_keepalive_tc_has_server_cluster(void);
 
-void emAfSendKeepaliveSignal(void);
+void sli_zigbee_af_send_keepalive_signal(void);
 
-uint8_t emAfPluginTrustCenterKeepaliveGetBaseTimeMinutes(void);
+uint8_t sli_zigbee_af_trust_center_keepalive_get_base_time_minutes(void);
 
-uint16_t emAfPluginTrustCenterKeepaliveGetBaseTimeSeconds(void);
+uint16_t sli_zigbee_af_trust_center_keepalive_get_base_time_seconds(void);
 
-uint16_t emAfPluginTrustCenterKeepaliveGetJitterTimeSeconds(void);
+uint16_t sli_zigbee_af_trust_center_keepalive_get_jitter_time_seconds(void);
 
 #endif // SILABS_TRUST_CENTER_KEEPALIVE_H

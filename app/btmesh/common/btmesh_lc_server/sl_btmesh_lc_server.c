@@ -47,7 +47,7 @@
 #include "sl_btmesh_sensor.h"
 
 #include "app_assert.h"
-#include "sl_simple_timer.h"
+#include "app_timer.h"
 
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
@@ -143,19 +143,19 @@
 /*******************************************************************************
  * Timer handle definitions.
  ******************************************************************************/
-static sl_simple_timer_t lc_save_state_timer;
-static sl_simple_timer_t lc_save_property_state_timer;
-static sl_simple_timer_t lc_onoff_transition_timer;
-static sl_simple_timer_t lc_delayed_onoff_timer;
+static app_timer_t lc_save_state_timer;
+static app_timer_t lc_save_property_state_timer;
+static app_timer_t lc_onoff_transition_timer;
+static app_timer_t lc_delayed_onoff_timer;
 
 // Timer callbacks
-static void lc_save_state_timer_cb(sl_simple_timer_t *handle,
+static void lc_save_state_timer_cb(app_timer_t *handle,
                                    void *data);
-static void lc_save_property_state_timer_cb(sl_simple_timer_t *handle,
+static void lc_save_property_state_timer_cb(app_timer_t *handle,
                                             void *data);
-static void lc_onoff_transition_timer_cb(sl_simple_timer_t *handle,
+static void lc_onoff_transition_timer_cb(app_timer_t *handle,
                                          void *data);
-static void lc_delayed_onoff_timer_cb(sl_simple_timer_t *handle,
+static void lc_delayed_onoff_timer_cb(app_timer_t *handle,
                                       void *data);
 
 /// LC state
@@ -295,11 +295,11 @@ static int lc_state_store(void)
  ******************************************************************************/
 static void lc_state_changed(void)
 {
-  sl_status_t sc = sl_simple_timer_start(&lc_save_state_timer,
-                                         SL_BTMESH_LC_SERVER_NVM_SAVE_TIME_CFG_VAL,
-                                         lc_save_state_timer_cb,
-                                         NO_CALLBACK_DATA,
-                                         false);
+  sl_status_t sc = app_timer_start(&lc_save_state_timer,
+                                   SL_BTMESH_LC_SERVER_NVM_SAVE_TIME_CFG_VAL,
+                                   lc_save_state_timer_cb,
+                                   NO_CALLBACK_DATA,
+                                   false);
   app_assert_status_f(sc, "Failed to start LC State save timer");
 }
 
@@ -477,11 +477,11 @@ static int lc_property_state_store(void)
  ******************************************************************************/
 static void lc_property_state_changed(void)
 {
-  sl_status_t sc = sl_simple_timer_start(&lc_save_property_state_timer,
-                                         SL_BTMESH_LC_SERVER_NVM_SAVE_TIME_CFG_VAL,
-                                         lc_save_property_state_timer_cb,
-                                         NO_CALLBACK_DATA,
-                                         false);
+  sl_status_t sc = app_timer_start(&lc_save_property_state_timer,
+                                   SL_BTMESH_LC_SERVER_NVM_SAVE_TIME_CFG_VAL,
+                                   lc_save_property_state_timer_cb,
+                                   NO_CALLBACK_DATA,
+                                   false);
   app_assert_status_f(sc, "Failed to start LC Property Save timer");
 }
 
@@ -1333,11 +1333,11 @@ static void lc_onoff_request(uint16_t model_id,
       // that will trigger the change after the given delay
       // Current state remains as is for now
       lc_state.onoff_target = request->on_off;
-      sc = sl_simple_timer_start(&lc_delayed_onoff_timer,
-                                 delay_ms,
-                                 lc_delayed_onoff_timer_cb,
-                                 NO_CALLBACK_DATA,
-                                 false);
+      sc = app_timer_start(&lc_delayed_onoff_timer,
+                           delay_ms,
+                           lc_delayed_onoff_timer_cb,
+                           NO_CALLBACK_DATA,
+                           false);
       app_assert_status_f(sc, "Failed to start LC Delayed Onoff Timer");
       // store transition parameter for later use
       delayed_lc_onoff_trans = transition_ms;
@@ -1350,11 +1350,11 @@ static void lc_onoff_request(uint16_t model_id,
       lc_onoff_update(element_index, transition_ms);
 
       // lc current state will be updated when transition is complete
-      sc = sl_simple_timer_start(&lc_onoff_transition_timer,
-                                 transition_ms,
-                                 lc_onoff_transition_timer_cb,
-                                 NO_CALLBACK_DATA,
-                                 false);
+      sc = app_timer_start(&lc_onoff_transition_timer,
+                           transition_ms,
+                           lc_onoff_transition_timer_cb,
+                           NO_CALLBACK_DATA,
+                           false);
       app_assert_status_f(sc, "Failed to start LC Onoff Transition timer");
     }
     lc_state_changed();
@@ -1448,11 +1448,11 @@ static void lc_onoff_recall(uint16_t model_id,
         lc_state.onoff_current = MESH_GENERIC_ON_OFF_STATE_ON;
       }
       // lc current state will be updated when transition is complete
-      sl_status_t sc = sl_simple_timer_start(&lc_onoff_transition_timer,
-                                             transition_ms,
-                                             lc_onoff_transition_timer_cb,
-                                             NO_CALLBACK_DATA,
-                                             false);
+      sl_status_t sc = app_timer_start(&lc_onoff_transition_timer,
+                                       transition_ms,
+                                       lc_onoff_transition_timer_cb,
+                                       NO_CALLBACK_DATA,
+                                       false);
       app_assert_status_f(sc, "Failed to start LC Onoff Transition timer");
     }
     lc_state_changed();
@@ -1502,11 +1502,11 @@ static void delayed_lc_onoff_request(void)
     }
 
     // state is updated when transition is complete
-    sl_status_t sc = sl_simple_timer_start(&lc_onoff_transition_timer,
-                                           delayed_lc_onoff_trans,
-                                           lc_onoff_transition_timer_cb,
-                                           NO_CALLBACK_DATA,
-                                           false);
+    sl_status_t sc = app_timer_start(&lc_onoff_transition_timer,
+                                     delayed_lc_onoff_trans,
+                                     lc_onoff_transition_timer_cb,
+                                     NO_CALLBACK_DATA,
+                                     false);
     app_assert_status_f(sc, "Failed to start LC Onoff Transition timer");
   }
 }
@@ -1532,7 +1532,7 @@ static void init_models(void)
 /**************************************************************************//**
  * Timer Callbacks
  *****************************************************************************/
-static void lc_save_state_timer_cb(sl_simple_timer_t *handle,
+static void lc_save_state_timer_cb(app_timer_t *handle,
                                    void *data)
 {
   (void)data;
@@ -1541,7 +1541,7 @@ static void lc_save_state_timer_cb(sl_simple_timer_t *handle,
   lc_state_store();
 }
 
-static void lc_save_property_state_timer_cb(sl_simple_timer_t *handle,
+static void lc_save_property_state_timer_cb(app_timer_t *handle,
                                             void *data)
 {
   (void)data;
@@ -1550,7 +1550,7 @@ static void lc_save_property_state_timer_cb(sl_simple_timer_t *handle,
   lc_property_state_store();
 }
 
-static void lc_onoff_transition_timer_cb(sl_simple_timer_t *handle,
+static void lc_onoff_transition_timer_cb(app_timer_t *handle,
                                          void *data)
 {
   (void)data;
@@ -1559,7 +1559,7 @@ static void lc_onoff_transition_timer_cb(sl_simple_timer_t *handle,
   lc_onoff_transition_complete();
 }
 
-static void lc_delayed_onoff_timer_cb(sl_simple_timer_t *handle,
+static void lc_delayed_onoff_timer_cb(app_timer_t *handle,
                                       void *data)
 {
   (void)data;

@@ -38,7 +38,6 @@ if(NOT DEFINED OT_PLATFORM_LIB_MTD)
 endif()
 
 target_link_libraries(ot-ncp-mtd PRIVATE
-    $<$<BOOL:${OT_LINKER_MAP}>:-Wl,-Map=bin/ot-ncp-mtd.map>
     openthread-ncp-mtd
     ${OT_PLATFORM_LIB_MTD}
     openthread-mtd
@@ -48,5 +47,13 @@ target_link_libraries(ot-ncp-mtd PRIVATE
     ot-config-mtd
     ot-config
 )
+
+if(OT_LINKER_MAP)
+    if("${CMAKE_CXX_COMPILER_ID}" MATCHES "AppleClang")
+        target_link_libraries(ot-ncp-mtd PRIVATE -Wl,-map,ot-ncp-mtd.map)
+    else()
+        target_link_libraries(ot-ncp-mtd PRIVATE -Wl,-Map=ot-ncp-mtd.map)
+    endif()
+endif()
 
 install(TARGETS ot-ncp-mtd DESTINATION bin)

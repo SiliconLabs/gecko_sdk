@@ -18,9 +18,6 @@
  ******************************************************************************/
 
 #include "app/framework/include/af.h"
-#ifndef UC_BUILD
-#include "callback.h"
-#endif
 
 #if defined(EZSP_HOST)
   #include "stack/include/ember-types.h"
@@ -121,9 +118,9 @@ static void debugDigestPrint(const EmberAesMmoHashContext* context);
 // Functions
 //------------------------------------------------------------------------------
 
-EmberAfImageVerifyStatus emAfOtaImageSignatureVerify(uint16_t maxHashCalculations,
-                                                     const EmberAfOtaImageId* id,
-                                                     bool newVerification)
+EmberAfImageVerifyStatus sli_zigbee_af_ota_image_signature_verify(uint16_t maxHashCalculations,
+                                                                  const EmberAfOtaImageId* id,
+                                                                  bool newVerification)
 {
   // Smart Energy policy requires verification of the signature of the
   // downloaded file.
@@ -187,7 +184,7 @@ EmberAfImageVerifyStatus emAfOtaImageSignatureVerify(uint16_t maxHashCalculation
 
   // Step 1: extract the signature, check signer
 
-  if ((EMBER_AF_OTA_STORAGE_SUCCESS == emAfOtaStorageGetTagDataFromImage(
+  if ((EMBER_AF_OTA_STORAGE_SUCCESS == sli_zigbee_af_ota_storage_get_tag_data_from_image(
          id,
          OTA_TAG_ECDSA_SIGNATURE,
          signature,
@@ -196,7 +193,7 @@ EmberAfImageVerifyStatus emAfOtaImageSignatureVerify(uint16_t maxHashCalculation
       && (dataLength == SIGNATURE_TAG_DATA_SIZE)) {
     is163k1 = true;
   }
-  if ((EMBER_AF_OTA_STORAGE_SUCCESS == emAfOtaStorageGetTagDataFromImage(
+  if ((EMBER_AF_OTA_STORAGE_SUCCESS == sli_zigbee_af_ota_storage_get_tag_data_from_image(
          id,
          OTA_TAG_ECDSA_SIGNATURE_283K1,
          signature,
@@ -231,7 +228,7 @@ EmberAfImageVerifyStatus emAfOtaImageSignatureVerify(uint16_t maxHashCalculation
   uint32_t tagSize = is163k1 ? EMBER_CERTIFICATE_SIZE
                      : EMBER_CERTIFICATE_283K1_SIZE;
 
-  if (EMBER_AF_OTA_STORAGE_SUCCESS != emAfOtaStorageGetTagDataFromImage(
+  if (EMBER_AF_OTA_STORAGE_SUCCESS != sli_zigbee_af_ota_storage_get_tag_data_from_image(
         id,
         tag,
         certificate,
@@ -331,7 +328,7 @@ EmberAfImageVerifyStatus emAfOtaImageSignatureVerify(uint16_t maxHashCalculation
       // This indicates that the stack is going to do crypto operations so the
       // application should hold off on normal message sending until that is
       // complete.
-      emAfSetCryptoOperationInProgress();
+      sli_zigbee_af_set_crypto_operation_in_progress();
       return EMBER_AF_IMAGE_VERIFY_WAIT;
     }
   } else {
@@ -343,7 +340,7 @@ EmberAfImageVerifyStatus emAfOtaImageSignatureVerify(uint16_t maxHashCalculation
       // This indicates that the stack is going to do crypto operations so the
       // application should hold off on normal message sending until that is
       // complete.
-      emAfSetCryptoOperationInProgress();
+      sli_zigbee_af_set_crypto_operation_in_progress();
       return EMBER_AF_IMAGE_VERIFY_WAIT;
     }
   }
@@ -365,9 +362,9 @@ static DigestCalculateStatus calculateDigest(uint16_t maxHashCalculations,
   uint16_t iterations = 0;
 
   status
-    = emAfOtaStorageGetHeaderLengthAndImageSize(id,
-                                                NULL, // header length (don't care)
-                                                &imageSize);
+    = sli_zigbee_af_ota_storage_get_header_length_and_image_size(id,
+                                                                 NULL, // header length (don't care)
+                                                                 &imageSize);
   if (status) {
     return DIGEST_CALCULATE_ERROR;
   }
@@ -377,7 +374,7 @@ static DigestCalculateStatus calculateDigest(uint16_t maxHashCalculations,
   if (currentOffset == 0) {
     otaPrintln("Starting new digest calculation");
     emberAesMmoHashInit(&context);
-    emAfPrintPercentageSetStartAndEnd(0, dataLeftToRead);
+    sli_zigbee_af_print_percentage_set_start_and_end(0, dataLeftToRead);
   }
 
   readSize = (dataLeftToRead < MAX_BLOCK_SIZE_FOR_HASH
@@ -412,9 +409,9 @@ static DigestCalculateStatus calculateDigest(uint16_t maxHashCalculations,
     readSize = (dataLeftToRead < MAX_BLOCK_SIZE_FOR_HASH
                 ? dataLeftToRead
                 : MAX_BLOCK_SIZE_FOR_HASH);
-    emAfPrintPercentageUpdate("Digest Calculate",
-                              DIGEST_CALCULATE_PRINT_UPDATE_RATE,
-                              currentOffset);
+    sli_zigbee_af_print_percentage_update("Digest Calculate",
+                                          DIGEST_CALCULATE_PRINT_UPDATE_RATE,
+                                          currentOffset);
     iterations++;
     if (dataLeftToRead
         && maxHashCalculations != 0
@@ -437,9 +434,9 @@ static DigestCalculateStatus calculateDigest(uint16_t maxHashCalculations,
   currentOffset += remainder;
   debugDigestPrint(&context);
 
-  emAfPrintPercentageUpdate("Digest Calculate",
-                            DIGEST_CALCULATE_PRINT_UPDATE_RATE,
-                            currentOffset);
+  sli_zigbee_af_print_percentage_update("Digest Calculate",
+                                        DIGEST_CALCULATE_PRINT_UPDATE_RATE,
+                                        currentOffset);
 
   MEMMOVE(digest->contents,
           context.result,
@@ -479,7 +476,7 @@ static bool checkSigner(const uint8_t* bigEndianSignerEui64)
   return false;
 }
 
-void emAfOtaClientSignatureVerifyPrintSigners(void)
+void sli_zigbee_af_ota_client_signature_verify_print_signers(void)
 {
   uint8_t i;
   emberAfCoreFlush();
@@ -514,54 +511,35 @@ static void dsaVerifyHandler(EmberStatus status)
   // This notes that the stack is done doing crypto and has
   // resumed normal operations.  The application's normal
   // behavior will no longer be held off.
-  emAfCryptoOperationComplete();
+  sli_zigbee_af_crypto_operation_complete();
 
   // Any error status is treated as an image verification failure.
   // One could argue that we could retry an operation after a transient
   // failure (out of buffers) but for now we don't.
-  emAfOtaVerifyStoredDataFinish(status == EMBER_SUCCESS
-                                ? EMBER_AF_IMAGE_GOOD
-                                : EMBER_AF_IMAGE_BAD);
+  sli_zigbee_af_ota_verify_stored_data_finish(status == EMBER_SUCCESS
+                                              ? EMBER_AF_IMAGE_GOOD
+                                              : EMBER_AF_IMAGE_BAD);
 }
 
-#if defined (EZSP_HOST)
-#ifdef UC_BUILD
-void emAfDsaVerifyCallback(EmberStatus status)
-#else // !UC_BUILD
-void ezspDsaVerifyHandler(EmberStatus status)
-#endif // UC_BUILD
+void sli_zigbee_af_dsa_verify_callback(EmberStatus status)
 {
   dsaVerifyHandler(status);
 }
-
-#else
-#ifdef UC_BUILD
-void emAfDsaVerifyCallback(EmberStatus status)
-#else // !UC_BUILD
-void emberDsaVerifyHandler(EmberStatus status)
-#endif  // UC_BUILD
-{
-  dsaVerifyHandler(status);
-}
-
-#endif
 
 //------------------------------------------------------------------------------
 #else //  !defined(SIGNATURE_VERIFICATION_SUPPORT)
 
-EmberAfImageVerifyStatus emAfOtaImageSignatureVerify(uint16_t maxHashCalculations,
-                                                     const EmberAfOtaImageId* id,
-                                                     bool newVerification)
+EmberAfImageVerifyStatus sli_zigbee_af_ota_image_signature_verify(uint16_t maxHashCalculations,
+                                                                  const EmberAfOtaImageId* id,
+                                                                  bool newVerification)
 {
   return EMBER_AF_NO_IMAGE_VERIFY_SUPPORT;
 }
 
-#ifdef UC_BUILD
-void emAfDsaVerifyCallback(EmberStatus status)
+void sli_zigbee_af_dsa_verify_callback(EmberStatus status)
 {
   (void)status;
 }
-#endif // UC_BUILD
 
 #endif
 

@@ -31,5 +31,5 @@ template_contribution:
   - name: zigbee_af_callback
     value:
       callback_type: event_init
-      function_name: emAfPluginIdentifyInitCallback
+      function_name: sli_zigbee_af_identify_init_callback
 

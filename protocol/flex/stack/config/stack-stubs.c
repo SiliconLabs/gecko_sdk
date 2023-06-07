@@ -36,6 +36,7 @@
 #include "hal/hal.h"
 #include "sl_component_catalog.h"
 #include "stack/include/radio-stream.h"
+#include "stack/core/sli-connect-api.h"
 
 // Frequency Hopping
 
@@ -115,7 +116,7 @@ bool emFrequencyHoppingClientMaybeResync(ClientResyncCallback callback)
   return false;
 }
 
-EmberStatus emberFrequencyHoppingSetChannelMask(uint8_t channelMaskLength,
+EmberStatus emApiFrequencyHoppingSetChannelMask(uint8_t channelMaskLength,
                                                 uint8_t *channelMask)
 {
   (void)channelMaskLength;
@@ -124,12 +125,12 @@ EmberStatus emberFrequencyHoppingSetChannelMask(uint8_t channelMaskLength,
   return EMBER_LIBRARY_NOT_PRESENT;
 }
 
-EmberStatus emberFrequencyHoppingStartServer(void)
+EmberStatus emApiFrequencyHoppingStartServer(void)
 {
   return EMBER_LIBRARY_NOT_PRESENT;
 }
 
-EmberStatus emberFrequencyHoppingStartClient(EmberNodeId serverNodeId,
+EmberStatus emApiFrequencyHoppingStartClient(EmberNodeId serverNodeId,
                                              EmberPanId serverPanId)
 {
   (void)serverNodeId;
@@ -138,7 +139,7 @@ EmberStatus emberFrequencyHoppingStartClient(EmberNodeId serverNodeId,
   return EMBER_LIBRARY_NOT_PRESENT;
 }
 
-EmberStatus emberFrequencyHoppingStop(void)
+EmberStatus emApiFrequencyHoppingStop(void)
 {
   return EMBER_LIBRARY_NOT_PRESENT;
 }
@@ -156,7 +157,7 @@ EmberStatus emGetParentSupportLibraryStatus(void)
   return EMBER_LIBRARY_IS_STUB;
 }
 
-EmberStatus emberRemoveChild(EmberMacAddress *address)
+EmberStatus emApiRemoveChild(EmberMacAddress *address)
 {
   (void)address;
 
@@ -289,12 +290,12 @@ EmberStatus emIndirectQueueAddPacket(EmberNodeId source,
   return EMBER_LIBRARY_NOT_PRESENT;
 }
 
-EmberStatus emberPurgeIndirectMessages(void)
+EmberStatus emApiPurgeIndirectMessages(void)
 {
   return EMBER_LIBRARY_NOT_PRESENT;
 }
 
-EmberStatus emberSetIndirectQueueTimeout(uint32_t timeoutMs)
+EmberStatus emApiSetIndirectQueueTimeout(uint32_t timeoutMs)
 {
   (void)timeoutMs;
 
@@ -303,7 +304,7 @@ EmberStatus emberSetIndirectQueueTimeout(uint32_t timeoutMs)
 
 // Child Table
 
-EmberStatus emberGetChildFlags(EmberMacAddress *address,
+EmberStatus emApiGetChildFlags(EmberMacAddress *address,
                                EmberChildFlags *flags)
 {
   (void)address;
@@ -312,7 +313,7 @@ EmberStatus emberGetChildFlags(EmberMacAddress *address,
   return EMBER_INVALID_CALL;
 }
 
-EmberStatus emberGetChildInfo(EmberMacAddress *address,
+EmberStatus emApiGetChildInfo(EmberMacAddress *address,
                               EmberMacAddress *addressResp,
                               EmberChildFlags *flags)
 {
@@ -537,7 +538,7 @@ void emCounterHandler(EmberCounterType counterType, uint8_t count)
   (void)count;
 }
 
-EmberStatus emberGetCounter(EmberCounterType counterType, uint32_t *count)
+EmberStatus emApiGetCounter(EmberCounterType counterType, uint32_t *count)
 {
   (void)counterType;
   (void)count;
@@ -584,7 +585,7 @@ EmberLibraryStatus emGetAesSecurityLibraryStatus(void)
 }
 
 typedef void* mbedtls_svc_key_id_t;
-EmberStatus emberSetPsaSecurityKey(mbedtls_svc_key_id_t key_id)
+EmberStatus emApiSetPsaSecurityKey(mbedtls_svc_key_id_t key_id)
 {
   (void)key_id;
   return EMBER_LIBRARY_IS_STUB;
@@ -658,7 +659,7 @@ EmberLibraryStatus emGetRadioStreamLibraryStatus(void)
   return EMBER_LIBRARY_IS_STUB;
 }
 
-EmberStatus emberStartTxStream(EmberTxStreamParameters parameters, uint16_t channel)
+EmberStatus emApiStartTxStream(EmberTxStreamParameters parameters, uint16_t channel)
 {
   (void)parameters;
   (void)channel;
@@ -666,7 +667,7 @@ EmberStatus emberStartTxStream(EmberTxStreamParameters parameters, uint16_t chan
   return EMBER_LIBRARY_NOT_PRESENT;
 }
 
-EmberStatus emberStopTxStream(void)
+EmberStatus emApiStopTxStream(void)
 {
   return EMBER_LIBRARY_NOT_PRESENT;
 }

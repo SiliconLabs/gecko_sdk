@@ -38,9 +38,9 @@ requires:
   - name: btmesh_stack
   - name: nvm3_lib
   - name: silabs_core_sl_malloc
-  - name: simple_timer
+  - name: app_timer
 recommends:
-  - id: simple_timer
+  - id: app_timer
 
 template_contribution:
   - name: btmesh_on_event

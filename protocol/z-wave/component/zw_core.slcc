@@ -26,12 +26,15 @@ template_contribution:
   - name: application_type
     value: "APPLICATION_TYPE_ZWAVE"
 requires:
+  # Z-Wave
   - name: zw_build_mode
   - name: zw_quality_mode
   - name: zw_versions
   - name: zw_series
   - name: zw_target_boards
+  - name: zaf_protocol_config
   - name: sleeptimer
+  # Platform
   - name: power_manager
   - name: freertos
   - name: bootloader_interface
@@ -90,10 +93,6 @@ include:
   - path: "protocol/z-wave/Components/Assert"
     file_list:
       - path: "Assert.h"
-  - path: "protocol/z-wave/ZAF/ApplicationUtilities/EventHandling"
-    file_list:
-      - path: "zaf_event_helper.h"
-      - path: "zaf_job_helper.h"
   - path: "protocol/z-wave/platform/SiliconLabs/PAL/inc"
     file_list:
       - path: "system_startup.h"

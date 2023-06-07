@@ -26,9 +26,7 @@
 #ifndef SILABS_PARTNER_LINK_KEY_EXCHANGE_H
 #define SILABS_PARTNER_LINK_KEY_EXCHANGE_H
 
-#ifdef UC_BUILD
 #include "partner-link-key-exchange-config.h"
-#endif
 
 /**
  * @defgroup partner-link-key-exchange  Partner Link Key Exchange
@@ -54,6 +52,6 @@
 
 /** @} */ // end of partner-link-key-exchange
 
-extern bool emAfAllowPartnerLinkKey;
+extern bool sli_zigbee_af_allow_partner_link_key;
 
 #endif // SILABS_PARTNER_LINK_KEY_EXCHANGE_H

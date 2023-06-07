@@ -36,16 +36,16 @@
 #if SL_BOOTLOADER_STORAGE_USE_CUSTOM_SIZE
   #define _SL_BOOTLOADER_STORAGE_SIZE  SL_BOOTLOADER_STORAGE_SIZE
 #else
-  // Default storage size is 16 kB less than half the flash size
+// Default storage size is 16 kB less than half the flash size
   #define _SL_BOOTLOADER_STORAGE_SIZE  ((FLASH_SIZE / 2UL) - 0x4000UL)
 #endif
 
 #if defined(__GNUC__)
-  __attribute__((used)) uint8_t bootloader_storage[_SL_BOOTLOADER_STORAGE_SIZE] __attribute__ ((section(".internal_storage")));
-  extern char linker_storage_begin;
+__attribute__((used)) uint8_t bootloader_storage[_SL_BOOTLOADER_STORAGE_SIZE] __attribute__ ((section(".internal_storage")));
+extern char linker_storage_begin;
   #define SL_BOOTLOADER_STORAGE_ADDR   (&linker_storage_begin)
 #elif defined(__ICCARM__)
-  __root uint8_t bootloader_storage[_SL_BOOTLOADER_STORAGE_SIZE] @ "INTERNAL_STORAGE";
+__root uint8_t bootloader_storage[_SL_BOOTLOADER_STORAGE_SIZE] @ "INTERNAL_STORAGE";
   #define SL_BOOTLOADER_STORAGE_ADDR   (&bootloader_storage[0])
 #endif
 

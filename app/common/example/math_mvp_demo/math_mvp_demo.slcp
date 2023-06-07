@@ -1,0 +1,42 @@
+project_name: math_mvp_demo
+package: platform
+quality: production
+label: Platform - Demonstrate the MVP math library
+description: > 
+  This example project shows how to use the MVP math library.
+category: Example|Platform
+filter:
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "MCU"
+    value: ["32-bit MCU"]
+  - name: "Project Difficulty"
+    value: ["Beginner"]
+source:
+  - path: app.c
+  - path: main.c
+include:
+  - path: .
+    file_list:
+    - path: app.h
+component:
+  - id: sl_system
+  - id: device_init
+  - id: math_mvp
+  - id: iostream_recommended_stream
+  - id: iostream_retarget_stdio
+  - id: status_string
+configuration:
+  - name: SL_BOARD_ENABLE_VCOM
+    value: 1
+  - name: SL_IOSTREAM_EUSART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
+    value: 1
+define:
+  - name: DEBUG_EFM
+toolchain_settings:
+  - option: gcc_linker_option
+    value: "-u _printf_float"
+readme:
+  - path: readme.md
+ui_hints:
+  highlight: readme.md

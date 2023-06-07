@@ -56,7 +56,7 @@ void emberStoreLowHighInt16u(uint8_t *contents, uint16_t value);
 void emberStoreHighLowInt16u(uint8_t *contents, uint16_t value);
 
 #if !defined DOXYGEN_SHOULD_SKIP_THIS
-uint32_t emFetchInt32u(bool lowHigh, const uint8_t* contents);
+uint32_t sli_util_fetch_int32u(bool lowHigh, const uint8_t* contents);
 #endif
 
 /** @brief Return the value built from the four \c uint8_t values
@@ -67,7 +67,7 @@ uint32_t emFetchInt32u(bool lowHigh, const uint8_t* contents);
 uint32_t emberFetchLowHighInt32u(const uint8_t *contents);
 #else
 #define emberFetchLowHighInt32u(contents) \
-  (emFetchInt32u(true, contents))
+  (sli_util_fetch_int32u(true, contents))
 #endif
 
 /** @description Return the value built from the four \c uint8_t values
@@ -78,11 +78,11 @@ uint32_t emberFetchLowHighInt32u(const uint8_t *contents);
 uint32_t emberFetchHighLowInt32u(const uint8_t *contents);
 #else
 #define emberFetchHighLowInt32u(contents) \
-  (emFetchInt32u(false, contents))
+  (sli_util_fetch_int32u(false, contents))
 #endif
 
 #if !defined DOXYGEN_SHOULD_SKIP_THIS
-void emStoreInt32u(bool lowHigh, uint8_t* contents, uint32_t value);
+void sli_util_store_int32u(bool lowHigh, uint8_t* contents, uint32_t value);
 #endif
 
 /** @brief Store \c value in \c contents[0], \c contents[1], \c
@@ -92,7 +92,7 @@ void emStoreInt32u(bool lowHigh, uint8_t* contents, uint32_t value);
 void emberStoreLowHighInt32u(uint8_t *contents, uint32_t value);
 #else
 #define emberStoreLowHighInt32u(contents, value) \
-  (emStoreInt32u(true, contents, value))
+  (sli_util_store_int32u(true, contents, value))
 #endif
 
 /** @description Store \c value in \c contents[0], \c contents[1], \c
@@ -102,7 +102,7 @@ void emberStoreLowHighInt32u(uint8_t *contents, uint32_t value);
 void emberStoreHighLowInt32u(uint8_t *contents, uint32_t value);
 #else
 #define emberStoreHighLowInt32u(contents, value) \
-  (emStoreInt32u(false, contents, value))
+  (sli_util_store_int32u(false, contents, value))
 #endif
 
 /** @} END addtogroup */

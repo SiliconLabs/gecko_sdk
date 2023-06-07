@@ -28,5 +28,6 @@ requires:
   - name: zw_cc
   - name: zw_role_type
   - name: zw_apputilities
+  - name: zaf_transport
 provides:
   - name: zw_zaf

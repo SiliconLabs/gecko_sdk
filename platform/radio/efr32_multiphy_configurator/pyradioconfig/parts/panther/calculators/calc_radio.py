@@ -447,6 +447,33 @@ class CALC_Radio_panther(CALC_Radio):
             self._reg_write(model.vars.SYNTH_DSMCTRLRX_DITHERDACRX , 0)
             self._reg_write(model.vars.SYNTH_DSMCTRLRX_DITHERDSMOUTPUTRX , 0)
             self._reg_write(model.vars.SYNTH_DSMCTRLRX_DITHERDSMINPUTRX , 0)
+        if pll_bandwidth_rx == model.vars.pll_bandwidth_rx.var_enum.FASTSWITCH:
+            self._reg_write(model.vars.SYNTH_LPFCTRL1RX_OP1BWRX , 5)
+            self._reg_write(model.vars.SYNTH_LPFCTRL1RX_OP1COMPRX , 13)
+            self._reg_write(model.vars.SYNTH_LPFCTRL1RX_RZVALRX , 3)
+            self._reg_write(model.vars.SYNTH_LPFCTRL1RX_RPVALRX , 0)
+            self._reg_write(model.vars.SYNTH_LPFCTRL1RX_RFBVALRX , 0)
+
+            self._reg_write(model.vars.SYNTH_LPFCTRL2RX_LPFSWENRX , 1)
+            self._reg_write(model.vars.SYNTH_LPFCTRL2RX_LPFINCAPRX , 2)
+            self._reg_write(model.vars.SYNTH_LPFCTRL2RX_LPFGNDSWENRX , 0)
+            self._reg_write(model.vars.SYNTH_LPFCTRL2RX_CASELRX , 1)
+            self._reg_write(model.vars.SYNTH_LPFCTRL2RX_CAVALRX , 8)
+            self._reg_write(model.vars.SYNTH_LPFCTRL2RX_CFBSELRX , 0)
+            self._reg_write(model.vars.SYNTH_LPFCTRL2RX_CZSELRX , 1)
+            self._reg_write(model.vars.SYNTH_LPFCTRL2RX_CZVALRX , 70)
+            self._reg_write(model.vars.SYNTH_LPFCTRL2RX_MODESELRX , 0)
+            self._reg_write(model.vars.SYNTH_LPFCTRL2RX_VCMLVLRX , 0)
+
+            self._reg_write(model.vars.SYNTH_DSMCTRLRX_REQORDERRX , 0)
+            self._reg_write(model.vars.SYNTH_DSMCTRLRX_MASHORDERRX , 0)
+            self._reg_write(model.vars.SYNTH_DSMCTRLRX_DEMMODERX , 1)
+            self._reg_write(model.vars.SYNTH_DSMCTRLRX_LSBFORCERX , 0)
+            self._reg_write(model.vars.SYNTH_DSMCTRLRX_DSMMODERX , 0)
+            self._reg_write(model.vars.SYNTH_DSMCTRLRX_DITHERDACRX , 3)
+            self._reg_write(model.vars.SYNTH_DSMCTRLRX_DITHERDSMOUTPUTRX , 7)
+            self._reg_write(model.vars.SYNTH_DSMCTRLRX_DITHERDSMINPUTRX , 1)
+
 
     def calc_iffilt_bw_actual(self, model):
         # The Panther calculations use the analog IF filter bandwidth calculation, even though it doesn't actually

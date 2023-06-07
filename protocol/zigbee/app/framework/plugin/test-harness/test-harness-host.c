@@ -94,7 +94,7 @@ static void resetOrAdvanceApsFrameCounter(bool advance)
                      status);
 }
 
-void emAfTestHarnessResetApsFrameCounter(void)
+void sli_zigbee_af_test_harness_reset_aps_frame_counter(void)
 {
   // Reseting the outgoing APS frame counter is non-standard and not
   // a good idea, especially on the TC.  This is necessary for Smart Energy
@@ -108,7 +108,7 @@ void emAfTestHarnessResetApsFrameCounter(void)
   resetOrAdvanceApsFrameCounter(RESET_FRAME_COUNTER);
 }
 
-void emAfTestHarnessAdvanceApsFrameCounter(void)
+void sli_zigbee_af_test_harness_advance_aps_frame_counter(void)
 {
   resetOrAdvanceApsFrameCounter(ADVANCE_FRAME_COUNTER);
 }

@@ -25,14 +25,9 @@
 
 // ****************************************************************************
 // Globals
-#ifdef UC_BUILD
 sl_zigbee_event_t emberAfPluginFormAndJoinCleanupEvent;
 #define cleanupEvent (&emberAfPluginFormAndJoinCleanupEvent)
-void emberAfPluginFormAndJoinCleanupEventHandler(SLXU_UC_EVENT);
-#else
-EmberEventControl emberAfPluginFormAndJoinCleanupEventControl;
-#define cleanupEvent emberAfPluginFormAndJoinCleanupEventControl
-#endif
+void emberAfPluginFormAndJoinCleanupEventHandler(sl_zigbee_event_t * event);
 
 // ****************************************************************************
 // Forward Declarations
@@ -54,20 +49,16 @@ void emberJoinableNetworkFoundHandler(EmberZigbeeNetwork *networkFound,
   emberAfPluginFormAndJoinNetworkFoundCallback(networkFound, lqi, rssi);
 }
 
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #if (!defined(SL_CATALOG_ZIGBEE_NETWORK_FIND_PRESENT)              \
   && !defined(SL_CATALOG_ZIGBEE_ZLL_COMMISSIONING_NETWORK_PRESENT) \
   && !defined(EZSP_HOST))
 #define PERFORM_JOIN_CLEANUP
 #endif
-#else // !UC_BUILD
-#if !defined(EMBER_AF_DISABLE_FORM_AND_JOIN_TICK) && !defined(EZSP_HOST)
-#define PERFORM_JOIN_CLEANUP
-#endif
-#endif // UC_BUILD
 
-void emberAfPluginFormAndJoinCleanupEventHandler(SLXU_UC_EVENT)
+void emberAfPluginFormAndJoinCleanupEventHandler(sl_zigbee_event_t * event)
 {
   // This takes a bit of explaining.
   // Prior to this release the form-and-join library was not a plugin and was
@@ -97,7 +88,7 @@ void emberAfPluginFormAndJoinCleanupEventHandler(SLXU_UC_EVENT)
   // no action, leaving the event in an active state.  The event then has no
   // means by which it can be made inactive, so the scheduler indefinitely
   // calls the empty event, which prevents the device from sleeping.
-  slxu_zigbee_event_set_inactive(cleanupEvent);
+  sl_zigbee_event_set_inactive(cleanupEvent);
 #endif
 }
 
@@ -109,10 +100,10 @@ void emberAfPluginFormAndJoinMarker(void)
 #endif
 }
 
-void emAfPluginFormAndJoinInitCallback(SLXU_INIT_ARG)
+void sli_zigbee_af_form_and_join_init_callback(uint8_t init_level)
 {
-  SLXU_INIT_UNUSED_ARG;
+  (void)init_level;
 
-  slxu_zigbee_event_init(cleanupEvent,
-                         emberAfPluginFormAndJoinCleanupEventHandler);
+  sl_zigbee_event_init(cleanupEvent,
+                       emberAfPluginFormAndJoinCleanupEventHandler);
 }

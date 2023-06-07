@@ -40,19 +40,19 @@ template_contribution:
   - name: zigbee_stack_callback
     value:
       callback_type: incoming_route_record
-      function_name: emAfIncomingRouteRecordCallback
+      function_name: sli_zigbee_af_incoming_route_record_callback
     condition:  
        - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: override_furthur_index_for_source_route_add_entry
-      function_name: emAfOverrideFurthurIndexForSourceRouteAddEntryCallback
+      function_name: sli_zigbee_af_override_furthur_index_for_source_route_add_entry_callback
     condition:  
        - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: override_incoming_route_record
-      function_name: emAfOverrideIncomingRouteRecordCallback
+      function_name: sli_zigbee_af_override_incoming_route_record_callback
     condition:  
        - zigbee_ncp
 

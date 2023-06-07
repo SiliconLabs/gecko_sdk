@@ -2,6 +2,7 @@ from pyradioconfig.calculator_model_framework.interfaces.icalculator import ICal
 from pycalcmodel.core.variable import ModelVariableFormat, CreateModelVariableEnum
 from pyradioconfig.parts.common.calculators.calc_frame_detect import CALC_Frame_Detect
 from pyradioconfig.parts.ocelot.calculators.calc_demodulator import CALC_Demodulator_ocelot
+from pyradioconfig.calculator_model_framework.Utils.LogMgr import LogMgr
 from enum import Enum
 from math import *
 
@@ -31,15 +32,6 @@ class calc_softmodem_sol(ICalculator):
             ])
 
         self._addModelVariable(model, 'ofdm_symbol_rate', float, ModelVariableFormat.DECIMAL, desc='Symbol rate for OFDM')
-
-        self._addModelVariable(model, 'fcs_type_802154', Enum, ModelVariableFormat.DECIMAL, desc='FCS type for 802154 PHYs')
-        model.vars.fcs_type_802154.var_enum = CreateModelVariableEnum(
-            enum_name='FcsTypeEnum',
-            enum_desc='802154 FCS Type',
-            member_data=[
-                ['TWO_BYTE', 1, '16-bit ITU-T CRC'],
-                ['FOUR_BYTE', 0, '32-bit ANSI X3.66-1979 CRC'],
-            ])
 
         self._addModelVariable(model, 'sun_oqpsk_chiprate', Enum, ModelVariableFormat.DECIMAL, desc='Chiprate for SUN OQPSK PHYs')
         model.vars.sun_oqpsk_chiprate.var_enum = CreateModelVariableEnum(
@@ -317,7 +309,7 @@ class calc_softmodem_sol(ICalculator):
 
     def calc_softmodem_sunofdm_version_regs(self, model):
         self._reg_write(model.vars.SUNOFDM_VREGS_MAJORVERSION, 1)
-        self._reg_write(model.vars.SUNOFDM_VREGS_MINORVERSION, 0)
+        self._reg_write(model.vars.SUNOFDM_VREGS_MINORVERSION, 1)
 
     def calc_softmodem_sunofdm_cfg1_regs(self, model):
 
@@ -360,7 +352,15 @@ class calc_softmodem_sol(ICalculator):
         self._reg_write(model.vars.SUNOFDM_CFG1_XTALFREQ, int(xtal_freq_field))
 
     def calc_softmodem_sunofdm_cfg2_regs(self, model):
-        self._reg_write(model.vars.SUNOFDM_CFG2_NBSTF, 5)
+
+        antdivmode = model.vars.antdivmode.value
+
+        if antdivmode == model.vars.antdivmode.var_enum.DISABLE:
+            cfg2_nbstf = 10
+        else:
+            cfg2_nbstf = 25
+
+        self._reg_write(model.vars.SUNOFDM_CFG2_NBSTF, cfg2_nbstf)
 
     def calc_softmodem_sunofdm_rxcfg1_regs(self, model):
 
@@ -452,37 +452,102 @@ class calc_softmodem_sol(ICalculator):
         self._reg_write(model.vars.SUNOFDM_TXCFG1_TXROTATERAMP, 1)  # Enabled
         self._reg_write(model.vars.SUNOFDM_TXCFG1_TXHCSERRORS, 0)  # Disabled
         self._reg_write(model.vars.SUNOFDM_TXCFG1_TXFCSERRORS, 0)  # Disabled
+        self._reg_write(model.vars.SUNOFDM_TXCFG1_TXFCSBYP, 0)  # Disabled
 
     def calc_softmodem_sunofdm_ant_regs(self, model):
-        self._reg_write(model.vars.SUNOFDM_ANT_ANTDIV, 0)  # Disabled
-        self._reg_write(model.vars.SUNOFDM_ANT_ANTSEL, 0)  # Auto
+
+        antdivmode = model.vars.antdivmode.value
+        soft_demod = (model.vars.demod_select.value == model.vars.demod_select.var_enum.SOFT_DEMOD)
+
+        # Handle supported softmodem antdiv modes here
+
+        if (antdivmode == model.vars.antdivmode.var_enum.PHDEMODANTDIV) and soft_demod:
+            LogMgr.Error("Antenna diversity mode PHDEMODANTDIV not supported by softmodem. "
+                         "Available modes are: [DISABLE, ANTENNA1, ANTSELFIRST, ANTSELCORR, ANTSELRSSI]."
+                         "Configuring for ANTSELCORR instead.")
+            sunofdm_ant_antsel = 3
+        elif antdivmode == model.vars.antdivmode.var_enum.ANTENNA1:
+            sunofdm_ant_antsel = 1
+        elif antdivmode == model.vars.antdivmode.var_enum.ANTSELFIRST:
+            sunofdm_ant_antsel = 2
+        elif antdivmode == model.vars.antdivmode.var_enum.ANTSELCORR:
+            sunofdm_ant_antsel = 3
+        elif antdivmode == model.vars.antdivmode.var_enum.ANTSELRSSI:
+            sunofdm_ant_antsel = 4
+        else:
+            sunofdm_ant_antsel = 0
+
+        self._reg_write(model.vars.SUNOFDM_ANT_ANTSEL, sunofdm_ant_antsel)
 
     def calc_softmodem_sunofdm_pdet_regs(self, model):
 
         # Read in model variables
         softmodem_modulation_type = model.vars.softmodem_modulation_type.value
+        antdivmode = model.vars.antdivmode.value
+
 
         if softmodem_modulation_type == model.vars.softmodem_modulation_type.var_enum.SUN_OFDM:
             ofdm_option = model.vars.ofdm_option.value
 
-            pdetcorrelwidth_field = 5
-            pdetcf_field = 12
-            pdetexcludecw_field = 1
-            pdetcwthrgain_field = 3
-            pdetcwthratt_field = 4
+            if antdivmode == model.vars.antdivmode.var_enum.DISABLE:
+                pdetcorrelwidth_field = 5
+                pdetexcludecw_field = 1
+                pdetcwthrgain_field = 3
+                pdetcwthratt_field = 4
+            elif antdivmode == model.vars.antdivmode.var_enum.ANTSELCORR:
+                """
+                In antdiv mode, the preamble is too short to perform the full correlation (I mean the same correlation 
+                size as the single antenna case), hence the field pdetcorrelwidth_field passing from 5 (meaning 2.5Nfft) 
+                to 4 (meaning 2Nfft). Consequently the thresholds had to be updated to reflect the change of correlation 
+                size. Unfortunately, we can't derive those numbers from calculation and they have been set according to 
+                Matlab simulations and various tests on the chip."""
+                pdetcorrelwidth_field = 4
+                pdetexcludecw_field = 1
+                pdetcwthrgain_field = 6
+                pdetcwthratt_field = 6
 
             if ofdm_option == model.vars.ofdm_option.var_enum.OPT1:
-                pdetthrgain_field = 2
-                pdet_thr_att_field = 4
+
+                if antdivmode == model.vars.antdivmode.var_enum.DISABLE:
+                    pdetthrgain_field = 2
+                    pdet_thr_att_field = 4
+                    pdetcf_field = 12
+                elif antdivmode == model.vars.antdivmode.var_enum.ANTSELCORR:
+                    pdetthrgain_field = 3
+                    pdet_thr_att_field = 5
+                    pdetcf_field = 8
+
             elif ofdm_option == model.vars.ofdm_option.var_enum.OPT2:
-                pdetthrgain_field = 2
-                pdet_thr_att_field = 4
+
+                if antdivmode == model.vars.antdivmode.var_enum.DISABLE:
+                    pdetthrgain_field = 2
+                    pdet_thr_att_field = 4
+                    pdetcf_field = 12
+                elif antdivmode == model.vars.antdivmode.var_enum.ANTSELCORR:
+                    pdetthrgain_field = 3
+                    pdet_thr_att_field = 5
+                    pdetcf_field = 8
+
             elif ofdm_option == model.vars.ofdm_option.var_enum.OPT3:
-                pdetthrgain_field = 2
-                pdet_thr_att_field = 4
+
+                if antdivmode == model.vars.antdivmode.var_enum.DISABLE:
+                    pdetthrgain_field = 2
+                    pdet_thr_att_field = 4
+                    pdetcf_field = 12
+                elif antdivmode == model.vars.antdivmode.var_enum.ANTSELCORR:
+                    pdetthrgain_field = 5
+                    pdet_thr_att_field = 5
+                    pdetcf_field = 9
             else:
-                pdetthrgain_field = 6
-                pdet_thr_att_field = 4
+                if antdivmode == model.vars.antdivmode.var_enum.DISABLE:
+                    pdetthrgain_field = 6
+                    pdet_thr_att_field = 4
+                    pdetcf_field = 12
+                elif antdivmode == model.vars.antdivmode.var_enum.ANTSELCORR:
+                    pdetthrgain_field = 13
+                    pdet_thr_att_field = 5
+                    pdetcf_field = 14
+
         else:
             pdetcorrelwidth_field = 0
             pdetcf_field = 0
@@ -962,9 +1027,12 @@ class calc_softmodem_sol(ICalculator):
     def calc_softmodem_clken(self, model):
         #Read in model vars
         demod_select = model.vars.demod_select.value
+        conc_ofdm_option = model.vars.conc_ofdm_option.value
+
         #Need to set CLKEN=1 for RTL sims, but this is ignored in rail_scripts
         #Avoid disabling clock for hardmodem PHYs as this could impact LabATE testing
-        if demod_select == model.vars.demod_select.var_enum.SOFT_DEMOD:
+        if (demod_select == model.vars.demod_select.var_enum.SOFT_DEMOD) or \
+                (conc_ofdm_option != model.vars.conc_ofdm_option.var_enum.NONE):
             self._reg_write(model.vars.RAC_SOFTMCTRL_CLKEN, 1)
         else:
             self._reg_do_not_care(model.vars.RAC_SOFTMCTRL_CLKEN)
@@ -972,3 +1040,50 @@ class calc_softmodem_sol(ICalculator):
     def calc_sunfsk_mode_reg(self, model):
         # MODE = 0 forces FW to read parameters from the calculator settings of SUNFSK_CFG registers
         self._reg_sat_write(model.vars.SUNFSK_CFG16_MODE, 0)
+
+    def calc_sunofdm_antdivdly_reg(self, model):
+
+        # Read in model variables
+        softmodem_modulation_type = model.vars.softmodem_modulation_type.value
+        antdivmode = model.vars.antdivmode.value
+
+        if softmodem_modulation_type == model.vars.softmodem_modulation_type.var_enum.SUN_OFDM and \
+                antdivmode != model.vars.antdivmode.var_enum.DISABLE:
+            ofdm_option = model.vars.ofdm_option.value
+
+            """Values obtained from designers - to annotate"""
+            if ofdm_option == model.vars.ofdm_option.var_enum.OPT1:
+                agcreldly = 20
+                agcconvdly = 155
+                settlingtime = 45
+                anticpswitch = 0
+
+            elif ofdm_option == model.vars.ofdm_option.var_enum.OPT2:
+                agcreldly = 20
+                agcconvdly = 155
+                settlingtime = 24
+                anticpswitch = 11
+
+            elif ofdm_option == model.vars.ofdm_option.var_enum.OPT3:
+                agcreldly = 20
+                agcconvdly = 155
+                settlingtime = 14
+                anticpswitch = 19
+
+            else:
+                agcreldly = 20
+                agcconvdly = 165
+                settlingtime = 11
+                anticpswitch = 18
+
+
+            self._reg_write(model.vars.SUNOFDM_ANTDIVDLY_AGCRELDLY, agcreldly)
+            self._reg_write(model.vars.SUNOFDM_ANTDIVDLY_AGCCONVDLY, agcconvdly)
+            self._reg_write(model.vars.SUNOFDM_ANTDIVDLY_SETTLINGTIME, settlingtime)
+            self._reg_write(model.vars.SUNOFDM_ANTDIVDLY_ANTICPSWITCH, anticpswitch)
+
+        else:
+            self._reg_do_not_care(model.vars.SUNOFDM_ANTDIVDLY_AGCRELDLY)
+            self._reg_do_not_care(model.vars.SUNOFDM_ANTDIVDLY_AGCCONVDLY)
+            self._reg_do_not_care(model.vars.SUNOFDM_ANTDIVDLY_SETTLINGTIME)
+            self._reg_do_not_care(model.vars.SUNOFDM_ANTDIVDLY_ANTICPSWITCH)

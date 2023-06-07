@@ -30,6 +30,11 @@
 #ifndef SL_SENSOR_RHT_CONFIG_H
 #define SL_SENSOR_RHT_CONFIG_H
 
+/***********************************************************************************************//**
+ * @addtogroup sensor_rht
+ * @{
+ **************************************************************************************************/
+
 // <<< Use Configuration Wizard in Context Menu >>>
 
 #define SENSOR_THERMOMETER_STATUS_TRIGGER_TYPE_DISCRETE_VALUE     0
@@ -112,7 +117,7 @@
 // <i> triggers publication of a Sensor Status message. The format is defined by the Status Trigger Type field.
 // <i> In case of percentage Status Trigger Type the value is represented unitless with a resolution of 0.01 percent,
 // <i> e.g. value 1534 represents 15.34%. In case of discrete Status Trigger Type the format is degree Celsius
-// <i> with a resolution of 0.5, e.g. value 8 represents 4°C.
+// <i> with a resolution of 0.5, e.g. value 8 represents 4Â°C.
 #define SENSOR_THERMOMETER_STATUS_TRIGGER_DELTA_DOWN    0
 
 // <o SENSOR_THERMOMETER_STATUS_TRIGGER_DELTA_UP> Status Trigger Delta Up
@@ -121,7 +126,7 @@
 // <i> triggers publication of a Sensor Status message. The format is defined by the Status Trigger Type field.
 // <i> In case of percentage Status Trigger Type the value is represented unitless with a resolution of 0.01 percent,
 // <i> e.g. value 1534 represents 15.34%. In case of discrete Status Trigger Type the format is degree Celsius
-// <i> with a resolution of 0.5, e.g. value 8 represents 4°C.
+// <i> with a resolution of 0.5, e.g. value 8 represents 4Â°C.
 #define SENSOR_THERMOMETER_STATUS_TRIGGER_DELTA_UP      0
 
 // <o SENSOR_THERMOMETER_STATUS_MIN_INTERVAL> Status Min Interval
@@ -137,7 +142,7 @@
 // <i> Default: 0
 // <i> The Fast Cadence Low field shall define the lower boundary of a range of measured quantities when
 // <i> the publishing cadence is increased as defined by the Fast Cadence Period Divisor field.
-// <i> The format is degree Celsius with a resolution of 0.5, e.g. value 8 represents 4°C.
+// <i> The format is degree Celsius with a resolution of 0.5, e.g. value 8 represents 4Â°C.
 #define SENSOR_THERMOMETER_FAST_CADENCE_LOW             0
 
 // <o SENSOR_THERMOMETER_FAST_CADENCE_HIGH> Fast Cadence High
@@ -145,7 +150,7 @@
 // <i> Default: 0
 // <i> The Fast Cadence High field shall define the upper boundary of a range of measured quantities when
 // <i> the publishing cadence is increased as defined by the Fast Cadence Period Divisor field.
-// <i> The format is degree Celsius with a resolution of 0.5, e.g. value 8 represents 4°C.
+// <i> The format is degree Celsius with a resolution of 0.5, e.g. value 8 represents 4Â°C.
 #define SENSOR_THERMOMETER_FAST_CADENCE_HIGH            0
 
 // </e>
@@ -174,4 +179,5 @@
   and 'Status Trigger Delta Up' values valid range should be between <0..65535>"
 #endif
 
+/** @} (end addtogroup sensor_rht) */
 #endif // SL_SENSOR_RHT_CONFIG_H

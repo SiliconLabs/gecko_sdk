@@ -2,9 +2,26 @@ id: health_thermometer
 label: Health Thermometer API
 package: Bluetooth
 description: API for the Health Thermometer GATT service
-category: Bluetooth|GATT
+
+  This is a Low-Code component. At start, the temperature sensor has to be
+  initialized. Once the BLE connection is established, the
+
+  sl_bt_ht_temperature_measurement_indication_changed_cb()
+
+  function will be called where either a single measurement can be done,
+  or a timer started. A reference implementation for this function can be
+  found in Bluetooth - SoC Thermometer example, in app.c file. The result
+  of the measurement can be send using
+
+  sl_bt_ht_temperature_measurement_indicate()
+
+  function.
+category: Bluetooth|Application|GATT Services
 quality: production
 root_path: app/bluetooth/common/health_thermometer
+tag:
+  - Low-Code
+
 config_file:
   - path: config/sl_health_thermometer_config.h
   - path: health_thermometer.xml

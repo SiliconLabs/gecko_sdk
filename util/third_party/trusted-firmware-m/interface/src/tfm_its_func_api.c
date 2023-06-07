@@ -67,19 +67,23 @@ psa_status_t psa_its_get(psa_storage_uid_t uid,
         { .base = p_data, .len = data_size }
     };
 
-    if (p_data_length == NULL) {
-        return PSA_ERROR_INVALID_ARGUMENT;
-    }
 
     status = tfm_ns_interface_dispatch((veneer_fn)sli_tz_s_interface_dispatch_its,
                                        (uint32_t)in_vec, IOVEC_LEN(in_vec),
                                        (uint32_t)out_vec, IOVEC_LEN(out_vec));
 
-    if (status == (psa_status_t)TFM_ERROR_INVALID_PARAMETER) {
-        return PSA_ERROR_INVALID_ARGUMENT;
-    }
+    if(status != PSA_SUCCESS){
 
-    *p_data_length = out_vec[0].len;
+        if (status == (psa_status_t)TFM_ERROR_INVALID_PARAMETER) {
+            return PSA_ERROR_INVALID_ARGUMENT;  
+        }
+    }
+    else{
+        if (p_data_length == NULL) {
+            return PSA_ERROR_INVALID_ARGUMENT;
+        }
+        *p_data_length = out_vec[0].len;
+    }
 
     return status;
 }

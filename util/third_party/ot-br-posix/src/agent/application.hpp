@@ -85,12 +85,16 @@ public:
      * @param[in] aBackboneInterfaceName Name of the backbone network interface.
      * @param[in] aRadioUrls             The radio URLs (can be IEEE802.15.4 or TREL radio).
      * @param[in] aEnableAutoAttach      Whether or not to automatically attach to the saved network.
+     * @param[in] aRestListenAddress     Network address to listen on.
+     * @param[in] aRestListenPort        Network port to listen on.
      *
      */
-    explicit Application(const std::string &              aInterfaceName,
+    explicit Application(const std::string               &aInterfaceName,
                          const std::vector<const char *> &aBackboneInterfaceNames,
                          const std::vector<const char *> &aRadioUrls,
-                         bool                             aEnableAutoAttach);
+                         bool                             aEnableAutoAttach,
+                         const std::string               &aRestListenAddress,
+                         int                              aRestListenPort);
 
     /**
      * This method initializes the Application instance.
@@ -123,7 +127,7 @@ private:
 #if __linux__
     otbr::Utils::InfraLinkSelector mInfraLinkSelector;
 #endif
-    const char *              mBackboneInterfaceName;
+    const char               *mBackboneInterfaceName;
     Ncp::ControllerOpenThread mNcp;
 #if OTBR_ENABLE_BORDER_AGENT
     BorderAgent mBorderAgent;

@@ -4,7 +4,7 @@ tag:
   - hardware:
       device:
         memory:
-          flash: 128
+          flash: 134
           ram: 12
         sdid:
           - '!80'

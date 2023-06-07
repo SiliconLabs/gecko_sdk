@@ -182,12 +182,32 @@ public:
      */
     bool IsTmfMessage(const Ip6::Address &aSourceAddress, const Ip6::Address &aDestAddress, uint16_t aDestPort) const;
 
+    /**
+     * This static method converts a TMF message priority to IPv6 header DSCP value.
+     *
+     * @param[in] aPriority  The message priority to convert.
+     *
+     * @returns The DSCP value corresponding to @p aPriority.
+     *
+     */
+    static uint8_t PriorityToDscp(Message::Priority aPriority);
+
+    /**
+     * This static method converts a IPv6 header DSCP value to message priority for TMF message.
+     *
+     * @param[in] aDscp      The IPv6 header DSCP value in a TMF message.
+     *
+     * @returns The message priority corresponding to the @p aDscp.
+     *
+     */
+    static Message::Priority DscpToPriority(uint8_t aDscp);
+
 private:
     template <Uri kUri> void HandleTmf(Message &aMessage, const Ip6::MessageInfo &aMessageInfo);
 
-    static bool HandleResource(CoapBase &              aCoapBase,
-                               const char *            aUriPath,
-                               Message &               aMessage,
+    static bool HandleResource(CoapBase               &aCoapBase,
+                               const char             *aUriPath,
+                               Message                &aMessage,
                                const Ip6::MessageInfo &aMessageInfo);
     bool        HandleResource(const char *aUriPath, Message &aMessage, const Ip6::MessageInfo &aMessageInfo);
 
@@ -212,9 +232,9 @@ public:
     explicit SecureAgent(Instance &aInstance);
 
 private:
-    static bool HandleResource(CoapBase &              aCoapBase,
-                               const char *            aUriPath,
-                               Message &               aMessage,
+    static bool HandleResource(CoapBase               &aCoapBase,
+                               const char             *aUriPath,
+                               Message                &aMessage,
                                const Ip6::MessageInfo &aMessageInfo);
     bool        HandleResource(const char *aUriPath, Message &aMessage, const Ip6::MessageInfo &aMessageInfo);
 };

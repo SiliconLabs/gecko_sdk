@@ -20,9 +20,9 @@
 #include "stack/include/ember-types.h"
 #include "stack/include/library.h"
 
-const EmberLibraryStatus emCbkeLibraryStatus = EMBER_LIBRARY_IS_STUB;
+const EmberLibraryStatus sli_zigbee_cbke_library_status = EMBER_LIBRARY_IS_STUB;
 
-bool emRealECCLibraryPresent(void)
+bool sli_zigbee_real_ecc_library_present(void)
 {
   return false;
 }
@@ -91,7 +91,7 @@ void invalidatePartnerData(void)
 }
 
 // From cbke-crypto-engine-storage-{platform}.c
-void emInitializeCbke(void)
+void sli_zigbee_initialize_cbke(void)
 {
 }
 
@@ -111,9 +111,9 @@ EmberStatus emberGetCertificate(EmberCertificateData* result)
   return EMBER_LIBRARY_NOT_PRESENT;
 }
 
-EmberStatus emGetCbkeData(EmberCertificateData* myCertPtr,
-                          EmberPrivateKeyData* myStaticPrivateKeyPtr,
-                          EmberPublicKeyData* caPublicKeyPtr)
+EmberStatus sli_zigbee_get_cbke_data(EmberCertificateData* myCertPtr,
+                                     EmberPrivateKeyData* myStaticPrivateKeyPtr,
+                                     EmberPublicKeyData* caPublicKeyPtr)
 {
   (void)myCertPtr;
   (void)myStaticPrivateKeyPtr;
@@ -127,15 +127,15 @@ bool emberGetStackCertificateEui64(EmberEUI64 certEui64)
   return false;
 }
 
-EmberStatus emRetrieveAndClearUnverifiedLinkKey(EmberKeyData* key,
-                                                EmberEUI64 ieee)
+EmberStatus sli_zigbee_retrieve_and_clear_unverified_link_key(EmberKeyData* key,
+                                                              EmberEUI64 ieee)
 {
   (void)key;
   (void)ieee;
   return EMBER_LIBRARY_NOT_PRESENT;
 }
 
-void emClearAllTemporaryCryptoData(void)
+void sli_zigbee_clear_all_temporary_crypto_data(void)
 {
 }
 

@@ -40,7 +40,7 @@ include $(SDK_DIR)/app/bluetooth/component_host/aoa_cte.mk
 include $(SDK_DIR)/app/bluetooth/component_host/aoa_angle.mk
 include $(SDK_DIR)/app/bluetooth/component_host/rtl_lib.mk
 include $(SDK_DIR)/app/bluetooth/component_host/antenna_array.mk
-include ${SDK_DIR}/app/bluetooth/component_host/simple_timer.mk
+include ${SDK_DIR}/app/bluetooth/component_host/app_timer.mk
 include ${SDK_DIR}/app/bluetooth/component_host/ncp_reset.mk
 include ${SDK_DIR}/app/bluetooth/component_host/ncp_version.mk
 ifneq ($(MQTT_COMPONENT), 0)

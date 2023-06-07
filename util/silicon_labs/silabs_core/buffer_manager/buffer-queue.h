@@ -18,46 +18,46 @@
 #ifndef BUFFER_QUEUE_H
 #define BUFFER_QUEUE_H
 
-bool emBufferQueueIsEmpty(Buffer *queue);
-Buffer emGenericQueueHead(Buffer *queue, uint16_t i);
-#define emBufferQueueHead(queue) (emGenericQueueHead((queue), QUEUE_LINK))
-#define emPayloadQueueHead(queue) (emGenericQueueHead((queue), PAYLOAD_LINK))
+bool sli_legacy_buffer_manager_buffer_queue_is_empty(Buffer *queue);
+Buffer sli_legacy_buffer_manager_generic_queue_head(Buffer *queue, uint16_t i);
+#define sli_legacy_buffer_manager_buffer_queue_head(queue) (sli_legacy_buffer_manager_generic_queue_head((queue), QUEUE_LINK))
+#define sli_legacy_buffer_manager_payload_queue_head(queue) (sli_legacy_buffer_manager_generic_queue_head((queue), PAYLOAD_LINK))
 
-void emGenericQueueAdd(Buffer *queue, Buffer newTail, uint16_t i);
-#define emBufferQueueAdd(queue, newTail) \
-  (emGenericQueueAdd((queue), (newTail), QUEUE_LINK))
-#define emPayloadQueueAdd(queue, newTail) \
-  (emGenericQueueAdd((queue), (newTail), PAYLOAD_LINK))
+void sli_legacy_buffer_manager_generic_queue_add(Buffer *queue, Buffer newTail, uint16_t i);
+#define sli_legacy_buffer_manager_buffer_queue_add(queue, newTail) \
+  (sli_legacy_buffer_manager_generic_queue_add((queue), (newTail), QUEUE_LINK))
+#define sli_legacy_buffer_manager_payload_queue_add(queue, newTail) \
+  (sli_legacy_buffer_manager_generic_queue_add((queue), (newTail), PAYLOAD_LINK))
 
-void emBufferQueuePreInsertBuffer(Buffer *queue, Buffer bufferToInsert, Buffer bufferToInsertBefore);
+void sli_legacy_buffer_manager_buffer_queue_pre_insert_buffer(Buffer *queue, Buffer bufferToInsert, Buffer bufferToInsertBefore);
 
 // Add as the head, not the tail.
-void emBufferQueueAddToHead(Buffer *queue, Buffer newHead);
+void sli_legacy_buffer_manager_buffer_queue_addToHead(Buffer *queue, Buffer newHead);
 
-Buffer emGenericQueueRemoveHead(Buffer *queue, uint16_t i);
-#define emBufferQueueRemoveHead(queue) \
-  (emGenericQueueRemoveHead((queue), QUEUE_LINK))
-#define emPayloadQueueRemoveHead(queue) \
-  (emGenericQueueRemoveHead((queue), PAYLOAD_LINK))
+Buffer sli_legacy_buffer_manager_generic_queue_removeHead(Buffer *queue, uint16_t i);
+#define sli_legacy_buffer_manager_buffer_queue_remove_head(queue) \
+  (sli_legacy_buffer_manager_generic_queue_removeHead((queue), QUEUE_LINK))
+#define sli_legacy_buffer_manager_payload_queue_remove_head(queue) \
+  (sli_legacy_buffer_manager_generic_queue_removeHead((queue), PAYLOAD_LINK))
 
-uint16_t emGenericQueueRemove(Buffer *queue, Buffer buffer, uint16_t i);
-#define emBufferQueueRemove(queue, buffer) \
-  (emGenericQueueRemove((queue), (buffer), QUEUE_LINK))
+uint16_t sli_legacy_buffer_manager_generic_queue_remove(Buffer *queue, Buffer buffer, uint16_t i);
+#define sli_legacy_buffer_manager_buffer_queue_remove(queue, buffer) \
+  (sli_legacy_buffer_manager_generic_queue_remove((queue), (buffer), QUEUE_LINK))
 
 // The number of buffers in the queue, not the number of bytes.
-uint16_t emBufferQueueLength(Buffer *queue);
+uint16_t sli_legacy_buffer_manager_buffer_queue_length(Buffer *queue);
 
-// Doubled up with emBufferQueueRemove() to save flash.
-#define emBufferQueueByteLength(queueIndex) \
-  (emGenericQueueRemove((queueIndex), NULL_BUFFER, QUEUE_LINK))
-#define emPayloadQueueByteLength(queueIndex) \
-  (emGenericQueueRemove((queueIndex), NULL_BUFFER, PAYLOAD_LINK))
+// Doubled up with sli_legacy_buffer_manager_buffer_queue_remove() to save flash.
+#define sli_legacy_buffer_manager_buffer_queue_byte_length(queueIndex) \
+  (sli_legacy_buffer_manager_generic_queue_remove((queueIndex), NULL_BUFFER, QUEUE_LINK))
+#define sli_legacy_buffer_manager_payload_queue_byte_length(queueIndex) \
+  (sli_legacy_buffer_manager_generic_queue_remove((queueIndex), NULL_BUFFER, PAYLOAD_LINK))
 
 // How to walk down a queue:
-//   Buffer finger = emBufferQueueHead(queue);
+//   Buffer finger = sli_legacy_buffer_manager_buffer_queue_head(queue);
 //   while (finger != NULL_BUFFER) {
 //     ...
-//     finger = emBufferQueueNext(queue, finger);
+//     finger = sli_legacy_buffer_manager_buffer_queue_next(queue, finger);
 //   }
 //
 // To remove one or more elements while walking a queue, put all the
@@ -66,33 +66,33 @@ uint16_t emBufferQueueLength(Buffer *queue);
 //
 //  Buffer temp = queue;
 //  queue = NULL_BUFFER;
-//  while (! emBufferQueueIsEmpty(&temp)) {
-//    Buffer next = emBufferQueueRemoveHead(&temp);
+//  while (! sli_legacy_buffer_manager_buffer_queue_is_empty(&temp)) {
+//    Buffer next = sli_legacy_buffer_manager_buffer_queue_remove_head(&temp);
 //    if (isLive next) {
-//      emBufferQueueAdd(&queue, next);
+//      sli_legacy_buffer_manager_buffer_queue_add(&queue, next);
 //    }
 //  }
 
-Buffer emBufferQueueNext(Buffer *queue, Buffer finger);
+Buffer sli_legacy_buffer_manager_buffer_queue_next(Buffer *queue, Buffer finger);
 
 // Remove the first 'count' bytes from the queue of buffers, truncating
 // the final head if necessary;
 
-uint16_t emRemoveBytesFromGenericQueue(Buffer *queue, uint16_t count, uint16_t i);
-#define emRemoveBytesFromBufferQueue(queue, count) \
-  (emRemoveBytesFromGenericQueue((queue), (count), QUEUE_LINK))
-#define emRemoveBytesFromPayloadQueue(queue, count) \
-  (emRemoveBytesFromGenericQueue((queue), (count), PAYLOAD_LINK))
+uint16_t sli_legacy_buffer_manager_remove_bytes_from_generic_queue(Buffer *queue, uint16_t count, uint16_t i);
+#define sli_legacy_buffer_manager_remove_bytes_from_buffer_queue(queue, count) \
+  (sli_legacy_buffer_manager_remove_bytes_from_generic_queue((queue), (count), QUEUE_LINK))
+#define sli_legacy_buffer_manager_remove_bytes_from_payload_queue(queue, count) \
+  (sli_legacy_buffer_manager_remove_bytes_from_generic_queue((queue), (count), PAYLOAD_LINK))
 
-void emCopyFromGenericQueue(Buffer *queue, uint16_t count, uint8_t *to, uint16_t i);
-#define emCopyFromBufferQueue(queue, count, to) \
-  (emCopyFromGenericQueue((queue), (count), (to), QUEUE_LINK))
-#define emCopyFromPayloadQueue(queue, count, to) \
-  (emCopyFromGenericQueue((queue), (count), (to), PAYLOAD_LINK))
+void sli_legacy_buffer_manager_copy_from_generic_queue(Buffer *queue, uint16_t count, uint8_t *to, uint16_t i);
+#define sli_legacy_buffer_manager_copy_from_buffer_queue(queue, count, to) \
+  (sli_legacy_buffer_manager_copy_from_generic_queue((queue), (count), (to), QUEUE_LINK))
+#define sli_legacy_buffer_manager_copy_from_payload_queue(queue, count, to) \
+  (sli_legacy_buffer_manager_copy_from_generic_queue((queue), (count), (to), PAYLOAD_LINK))
 
 // Converting back and forth between linked payloads and queues.
-void emLinkedPayloadToPayloadQueue(Buffer *queue);
-void emPayloadQueueToLinkedPayload(Buffer *queue);
+void sli_legacy_buffer_manager_linked_payload_to_payload_queue(Buffer *queue);
+void sli_legacy_buffer_manager_payload_queue_to_linked_payload(Buffer *queue);
 
 //----------------------------------------------------------------
 // Experimental utilities to use a queue of buffers as an extensible
@@ -123,11 +123,11 @@ void *emVectorAdd(Vector *vector, uint16_t quanta);
 
 // Returns the index of 'value' in 'vector', or -1 if it isn't there.
 // This is intended for use in debugging.
-uint16_t emVectorFindIndex(Vector *vector, const uint8_t *value);
+uint16_t sli_legacy_buffer_manager_vector_find_index(Vector *vector, const uint8_t *value);
 
 // Returns the number of elements that match predicate(element, target)
-uint16_t emVectorMatchCount(Vector *vector,
-                            EqualityPredicate predicate,
-                            const void *target);
+uint16_t sli_legacy_buffer_manager_vector_match_count(Vector *vector,
+                                                      EqualityPredicate predicate,
+                                                      const void *target);
 
 #endif // BUFFER_QUEUE_H

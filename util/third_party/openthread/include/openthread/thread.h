@@ -90,15 +90,18 @@ typedef struct otLinkModeConfig
 typedef struct
 {
     otExtAddress mExtAddress;           ///< IEEE 802.15.4 Extended Address
-    uint32_t     mAge;                  ///< Time last heard
+    uint32_t     mAge;                  ///< Seconds since last heard
+    uint32_t     mConnectionTime;       ///< Seconds since link establishment (requires `CONFIG_UPTIME_ENABLE`)
     uint16_t     mRloc16;               ///< RLOC16
     uint32_t     mLinkFrameCounter;     ///< Link Frame Counter
     uint32_t     mMleFrameCounter;      ///< MLE Frame Counter
     uint8_t      mLinkQualityIn;        ///< Link Quality In
     int8_t       mAverageRssi;          ///< Average RSSI
     int8_t       mLastRssi;             ///< Last observed RSSI
+    uint8_t      mLinkMargin;           ///< Link Margin
     uint16_t     mFrameErrorRate;       ///< Frame error rate (0xffff->100%). Requires error tracking feature.
     uint16_t     mMessageErrorRate;     ///< (IPv6) msg error rate (0xffff->100%). Requires error tracking feature.
+    uint16_t     mVersion;              ///< Thread version of the neighbor
     bool         mRxOnWhenIdle : 1;     ///< rx-on-when-idle
     bool         mFullThreadDevice : 1; ///< Full Thread Device
     bool         mFullNetworkData : 1;  ///< Full Network Data
@@ -262,6 +265,8 @@ bool otThreadIsSingleton(otInstance *aInstance);
 /**
  * This function starts a Thread Discovery scan.
  *
+ * @note A successful call to this function enables the rx-on-when-idle mode for the entire scan procedure.
+ *
  * @param[in]  aInstance              A pointer to an OpenThread instance.
  * @param[in]  aScanChannels          A bit vector indicating which channels to scan (e.g. OT_CHANNEL_11_MASK).
  * @param[in]  aPanId                 The PAN ID filter (set to Broadcast PAN to disable filter).
@@ -277,13 +282,13 @@ bool otThreadIsSingleton(otInstance *aInstance);
  * @retval OT_ERROR_BUSY           Thread Discovery Scan is already in progress.
  *
  */
-otError otThreadDiscover(otInstance *             aInstance,
+otError otThreadDiscover(otInstance              *aInstance,
                          uint32_t                 aScanChannels,
                          uint16_t                 aPanId,
                          bool                     aJoiner,
                          bool                     aEnableEui64Filtering,
                          otHandleActiveScanResult aCallback,
-                         void *                   aCallbackContext);
+                         void                    *aCallbackContext);
 
 /**
  * This function determines if an MLE Thread Discovery is currently in progress.
@@ -310,7 +315,7 @@ bool otThreadIsDiscoverInProgress(otInstance *aInstance);
  * @retval OT_ERROR_INVALID_ARGS Invalid AdvData.
  *
  */
-otError otThreadSetJoinerAdvertisement(otInstance *   aInstance,
+otError otThreadSetJoinerAdvertisement(otInstance    *aInstance,
                                        uint32_t       aOui,
                                        const uint8_t *aAdvData,
                                        uint8_t        aAdvDataLength);
@@ -412,7 +417,7 @@ otError otThreadSetLinkMode(otInstance *aInstance, otLinkModeConfig aConfig);
  * Get the Thread Network Key.
  *
  * @param[in]   aInstance     A pointer to an OpenThread instance.
- * @param[out]  aNetworkKey   A pointer to an `otNetworkkey` to return the Thread Network Key.
+ * @param[out]  aNetworkKey   A pointer to an `otNetworkKey` to return the Thread Network Key.
  *
  * @sa otThreadSetNetworkKey
  *
@@ -918,6 +923,8 @@ void otThreadResetMleCounters(otInstance *aInstance);
 /**
  * This function pointer is called every time an MLE Parent Response message is received.
  *
+ * This is used in `otThreadRegisterParentResponseCallback()`.
+ *
  * @param[in]  aInfo     A pointer to a location on stack holding the stats data.
  * @param[in]  aContext  A pointer to callback client-specific context.
  *
@@ -927,14 +934,16 @@ typedef void (*otThreadParentResponseCallback)(otThreadParentResponseInfo *aInfo
 /**
  * This function registers a callback to receive MLE Parent Response data.
  *
+ * This function requires `OPENTHREAD_CONFIG_MLE_PARENT_RESPONSE_CALLBACK_API_ENABLE`.
+ *
  * @param[in]  aInstance  A pointer to an OpenThread instance.
  * @param[in]  aCallback  A pointer to a function that is called upon receiving an MLE Parent Response message.
  * @param[in]  aContext   A pointer to callback client-specific context.
  *
  */
-void otThreadRegisterParentResponseCallback(otInstance *                   aInstance,
+void otThreadRegisterParentResponseCallback(otInstance                    *aInstance,
                                             otThreadParentResponseCallback aCallback,
-                                            void *                         aContext);
+                                            void                          *aContext);
 
 /**
  * This structure represents the Thread Discovery Request data.
@@ -964,9 +973,9 @@ typedef void (*otThreadDiscoveryRequestCallback)(const otThreadDiscoveryRequestI
  * @param[in]  aContext   A pointer to callback application-specific context.
  *
  */
-void otThreadSetDiscoveryRequestCallback(otInstance *                     aInstance,
+void otThreadSetDiscoveryRequestCallback(otInstance                      *aInstance,
                                          otThreadDiscoveryRequestCallback aCallback,
-                                         void *                           aContext);
+                                         void                            *aContext);
 
 /**
  * This function pointer type defines the callback to notify the outcome of a `otThreadLocateAnycastDestination()`
@@ -981,7 +990,7 @@ void otThreadSetDiscoveryRequestCallback(otInstance *                     aInsta
  * @param[in] aRloc16             The RLOC16 of the destination if found, otherwise invalid RLOC16 (0xfffe).
  *
  */
-typedef void (*otThreadAnycastLocatorCallback)(void *              aContext,
+typedef void (*otThreadAnycastLocatorCallback)(void               *aContext,
                                                otError             aError,
                                                const otIp6Address *aMeshLocalAddress,
                                                uint16_t            aRloc16);
@@ -1003,10 +1012,10 @@ typedef void (*otThreadAnycastLocatorCallback)(void *              aContext,
  * @retval OT_ERROR_NO_BUFS       Out of buffer to prepare and send the request message.
  *
  */
-otError otThreadLocateAnycastDestination(otInstance *                   aInstance,
-                                         const otIp6Address *           aAnycastAddress,
+otError otThreadLocateAnycastDestination(otInstance                    *aInstance,
+                                         const otIp6Address            *aAnycastAddress,
                                          otThreadAnycastLocatorCallback aCallback,
-                                         void *                         aContext);
+                                         void                          *aContext);
 
 /**
  * This function indicates whether an anycast locate request is currently in progress.
@@ -1031,9 +1040,9 @@ bool otThreadIsAnycastLocateInProgress(otInstance *aInstance);
  * @param[in]  aMlIid        The ML-IID of the ADDR_NTF.ntf message.
  *
  */
-void otThreadSendAddressNotification(otInstance *              aInstance,
-                                     otIp6Address *            aDestination,
-                                     otIp6Address *            aTarget,
+void otThreadSendAddressNotification(otInstance               *aInstance,
+                                     otIp6Address             *aDestination,
+                                     otIp6Address             *aTarget,
                                      otIp6InterfaceIdentifier *aMlIid);
 
 /**
@@ -1050,8 +1059,8 @@ void otThreadSendAddressNotification(otInstance *              aInstance,
  * @retval OT_ERROR_NO_BUFS        If insufficient message buffers available.
  *
  */
-otError otThreadSendProactiveBackboneNotification(otInstance *              aInstance,
-                                                  otIp6Address *            aTarget,
+otError otThreadSendProactiveBackboneNotification(otInstance               *aInstance,
+                                                  otIp6Address             *aTarget,
                                                   otIp6InterfaceIdentifier *aMlIid,
                                                   uint32_t                  aTimeSinceLastTransaction);
 
@@ -1069,6 +1078,28 @@ otError otThreadSendProactiveBackboneNotification(otInstance *              aIns
  *
  */
 otError otThreadDetachGracefully(otInstance *aInstance, otDetachGracefullyCallback aCallback, void *aContext);
+
+#define OT_DURATION_STRING_SIZE 21 ///< Recommended size for string representation of `uint32_t` duration in seconds.
+
+/**
+ * This function converts an `uint32_t` duration (in seconds) to a human-readable string.
+ *
+ * This function requires `OPENTHREAD_CONFIG_UPTIME_ENABLE` to be enabled.
+ *
+ * The string follows the format "<hh>:<mm>:<ss>" for hours, minutes, seconds (if duration is shorter than one day) or
+ * "<dd>d.<hh>:<mm>:<ss>" (if longer than a day).
+ *
+ * If the resulting string does not fit in @p aBuffer (within its @p aSize characters), the string will be truncated
+ * but the outputted string is always null-terminated.
+ *
+ * This function is intended for use with `mAge` or `mConnectionTime` in `otNeighborInfo` or `otChildInfo` structures.
+ *
+ * @param[in]  aDuration A duration interval in seconds.
+ * @param[out] aBuffer   A pointer to a char array to output the string.
+ * @param[in]  aSize     The size of @p aBuffer (in bytes). Recommended to use `OT_DURATION_STRING_SIZE`.
+ *
+ */
+void otConvertDurationInSecondsToString(uint32_t aDuration, char *aBuffer, uint16_t aSize);
 
 /**
  * @}

@@ -29,8 +29,6 @@
 
 //------------------------------------------------------------------------------
 
-#ifdef UC_BUILD
-
 #include "sl_malloc.h"
 
 EmberAfStatus emberAfClusterSpecificCommandParse(EmberAfClusterCommand *cmd)
@@ -64,7 +62,7 @@ EmberAfStatus emberAfClusterSpecificCommandParse(EmberAfClusterCommand *cmd)
   return zcl_status;
 }
 
-bool emAfProcessClusterSpecificCommand(EmberAfClusterCommand *cmd)
+bool sli_zigbee_af_process_cluster_specific_command(EmberAfClusterCommand *cmd)
 {
   EmberAfStatus zcl_status = EMBER_ZCL_STATUS_UNSUPPORTED_CLUSTER;
 
@@ -142,65 +140,3 @@ sl_status_t sl_zigbee_subscribe_to_zcl_commands(uint16_t cluster_id,
 
   return SL_STATUS_OK;
 }
-
-#else // !UC_BUILD
-
-extern EmberAfStatus emberAfClusterSpecificCommandParse(EmberAfClusterCommand *cmd);
-
-bool emAfProcessClusterSpecificCommand(EmberAfClusterCommand *cmd)
-{
-  EmberAfStatus status;
-
-  // if we are disabled then we can only respond to read or write commands
-  // or identify cluster (see device enabled attr of basic cluster)
-  if (!emberAfIsDeviceEnabled(cmd->apsFrame->destinationEndpoint)
-      && cmd->apsFrame->clusterId != ZCL_IDENTIFY_CLUSTER_ID) {
-    emberAfCorePrintln("%pd, dropping ep 0x%x clus 0x%2x cmd 0x%x",
-                       "disable",
-                       cmd->apsFrame->destinationEndpoint,
-                       cmd->apsFrame->clusterId,
-                       cmd->commandId);
-    emberAfSendDefaultResponse(cmd, EMBER_ZCL_STATUS_FAILURE);
-    return true;
-  }
-
-#ifdef ZCL_USING_KEY_ESTABLISHMENT_CLUSTER_CLIENT
-  if (cmd->apsFrame->clusterId == ZCL_KEY_ESTABLISHMENT_CLUSTER_ID
-      && cmd->direction == ZCL_DIRECTION_SERVER_TO_CLIENT
-      && emberAfKeyEstablishmentClusterClientCommandReceivedCallback(cmd)) {
-    return true;
-  }
-#endif
-#ifdef ZCL_USING_KEY_ESTABLISHMENT_CLUSTER_SERVER
-  if (cmd->apsFrame->clusterId == ZCL_KEY_ESTABLISHMENT_CLUSTER_ID
-      && cmd->direction == ZCL_DIRECTION_CLIENT_TO_SERVER
-      && emberAfKeyEstablishmentClusterServerCommandReceivedCallback(cmd)) {
-    return true;
-  }
-#endif
-
-#ifdef ZCL_USING_OTA_BOOTLOAD_CLUSTER_CLIENT
-  if (cmd->apsFrame->clusterId == ZCL_OTA_BOOTLOAD_CLUSTER_ID
-      && cmd->direction == ZCL_DIRECTION_SERVER_TO_CLIENT
-      && emberAfOtaClientIncomingMessageRawCallback(cmd)) {
-    return true;
-  }
-#endif
-#ifdef ZCL_USING_OTA_BOOTLOAD_CLUSTER_SERVER
-  if (cmd->apsFrame->clusterId == ZCL_OTA_BOOTLOAD_CLUSTER_ID
-      && cmd->direction == ZCL_DIRECTION_CLIENT_TO_SERVER
-      && emberAfOtaServerIncomingMessageRawCallback(cmd)) {
-    return true;
-  }
-#endif
-
-  // Pass the command to the generated command parser for processing
-  status = emberAfClusterSpecificCommandParse(cmd);
-  if (status != EMBER_ZCL_STATUS_SUCCESS) {
-    emberAfSendDefaultResponse(cmd, status);
-  }
-
-  return true;
-}
-
-#endif // UC_BUILD

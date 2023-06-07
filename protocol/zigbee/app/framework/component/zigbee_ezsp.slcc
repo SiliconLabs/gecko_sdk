@@ -24,6 +24,8 @@ requires:
   - name: "sl_system_init"
   - name: "sl_system_process_action"
   - name: "toolchain_gcc"
+  - name: "zigbee_security_manager_host"
+
 recommends:
   - id: zigbee_ezsp_spi
 
@@ -57,6 +59,7 @@ source:
   - path: "protocol/zigbee/app/ezsp-host/ezsp-host-queues.c"
   - path: "protocol/zigbee/app/ezsp-host/ezsp-host-ui.c"
   - path: "protocol/zigbee/app/framework/plugin-host/ezsp/ezsp-cb.c"
+  - path: "protocol/zigbee/stack/config/ember-configuration-host-access.c"
 
 template_contribution:
   - name: component_catalog

@@ -27,13 +27,12 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
-#include "em_device.h"
-
-#if defined(SEMAILBOX_PRESENT)
 
 #include <string.h>
-
 #include "sl_se_manager.h"
+
+#if defined(SLI_MAILBOX_COMMAND_SUPPORTED)
+
 #include "sli_se_manager_internal.h"
 #include "sl_se_manager_key_handling.h"
 
@@ -1190,4 +1189,4 @@ sl_status_t sl_se_delete_key(sl_se_command_context_t *cmd_ctx,
 
 /** @} (end addtogroup sl_se_key) */
 
-#endif // defined(SEMAILBOX_PRESENT)
+#endif // defined(SLI_MAILBOX_COMMAND_SUPPORTED)

@@ -26,7 +26,7 @@ template_contribution:
   - name: zigbee_af_callback
     value:
       callback_type: event_init
-      function_name: emAfPluginTrustCenterNwkKeyUpdateUnicastInitCallback     
+      function_name: sli_zigbee_af_trust_center_nwk_key_update_unicast_init_callback     
 documentation:
   docset: zigbee
   document: zigbee-af-api/trust-center-nwk-key-update-unicast

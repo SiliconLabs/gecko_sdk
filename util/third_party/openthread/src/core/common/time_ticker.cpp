@@ -96,12 +96,10 @@ void TimeTicker::HandleTimer(void)
     }
 #endif
 
-#if OPENTHREAD_CONFIG_CHILD_SUPERVISION_ENABLE
     if (mReceivers & Mask(kChildSupervisor))
     {
-        Get<Utils::ChildSupervisor>().HandleTimeTick();
+        Get<ChildSupervisor>().HandleTimeTick();
     }
-#endif
 #endif // OPENTHREAD_FTD
 
 #if OPENTHREAD_CONFIG_IP6_FRAGMENTATION_ENABLE
@@ -124,6 +122,11 @@ void TimeTicker::HandleTimer(void)
         Get<MlrManager>().HandleTimeTick();
     }
 #endif
+
+    if (mReceivers & Mask(kIp6Mpl))
+    {
+        Get<Ip6::Mpl>().HandleTimeTick();
+    }
 }
 
 } // namespace ot

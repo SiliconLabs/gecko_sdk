@@ -39,15 +39,6 @@
 // <i> Default: 32
 #define SL_WISUN_COLLECTOR_MAX_REG_METER                                32U
 
-// <o SL_WISUN_COLLECTOR_PERIOD_MS> Collecting period time [ms]
-// <i> Default: 5000
-// <i> Collector period time for iterating registered Meters
-#define SL_WISUN_COLLECTOR_PERIOD_MS                                    5000U
-
-// <o SL_WISUN_COLLECTOR_TIMEOUT_MS> Meter response timeout [ms]
-// <i> Default: 20000
-// <i> Timeout for getting measurement result from Meter
-#define SL_WISUN_COLLECTOR_TIMEOUT_MS                                   20000U
 // </h>
 
 // <o SL_WISUN_COLLECTOR_STACK_SIZE_WORD> Collector thread stack size in word

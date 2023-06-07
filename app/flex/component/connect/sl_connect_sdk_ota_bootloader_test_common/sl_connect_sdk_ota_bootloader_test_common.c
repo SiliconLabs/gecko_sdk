@@ -37,6 +37,7 @@
 #include "sl_connect_sdk_ota_bootloader_test_common.h"
 #include "sl_connect_sdk_btl-interface.h"
 #include "sl_cli.h"
+#include "bootloader_test_common_config.h"
 
 // -----------------------------------------------------------------------------
 //                                Global Variables
@@ -158,7 +159,7 @@ void cli_bootloader_flash_read(sl_cli_command_arg_t *arguments)
 
   uint32_t address = sl_cli_get_argument_uint32(arguments, 0);
   uint8_t length = sl_cli_get_argument_uint8(arguments, 1);
-  uint8_t buff[255];
+  uint8_t buff[SL_FLEX_CONNECT_BOOTLOADER_BUFFER_SIZE];
 
   if (emberAfPluginBootloaderInterfaceRead(address, length, buff)) {
     app_log_info("flash read succeeded!\n");

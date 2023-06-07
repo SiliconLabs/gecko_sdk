@@ -205,15 +205,15 @@ typedef struct {
 #define SYSCFG_IEN_RAMERR2B_DEFAULT                     (_SYSCFG_IEN_RAMERR2B_DEFAULT << 17) /**< Shifted mode DEFAULT for SYSCFG_IEN         */
 
 /* Bit fields for SYSCFG CHIPREVHW */
-#define _SYSCFG_CHIPREVHW_RESETVALUE                    0x00000C01UL                            /**< Default value for SYSCFG_CHIPREVHW          */
+#define _SYSCFG_CHIPREVHW_RESETVALUE                    0x00000D02UL                            /**< Default value for SYSCFG_CHIPREVHW          */
 #define _SYSCFG_CHIPREVHW_MASK                          0xFF0FFFFFUL                            /**< Mask for SYSCFG_CHIPREVHW                   */
 #define _SYSCFG_CHIPREVHW_MAJOR_SHIFT                   0                                       /**< Shift value for SYSCFG_MAJOR                */
 #define _SYSCFG_CHIPREVHW_MAJOR_MASK                    0x3FUL                                  /**< Bit mask for SYSCFG_MAJOR                   */
-#define _SYSCFG_CHIPREVHW_MAJOR_DEFAULT                 0x00000001UL                            /**< Mode DEFAULT for SYSCFG_CHIPREVHW           */
+#define _SYSCFG_CHIPREVHW_MAJOR_DEFAULT                 0x00000002UL                            /**< Mode DEFAULT for SYSCFG_CHIPREVHW           */
 #define SYSCFG_CHIPREVHW_MAJOR_DEFAULT                  (_SYSCFG_CHIPREVHW_MAJOR_DEFAULT << 0)  /**< Shifted mode DEFAULT for SYSCFG_CHIPREVHW   */
 #define _SYSCFG_CHIPREVHW_FAMILY_SHIFT                  6                                       /**< Shift value for SYSCFG_FAMILY               */
 #define _SYSCFG_CHIPREVHW_FAMILY_MASK                   0xFC0UL                                 /**< Bit mask for SYSCFG_FAMILY                  */
-#define _SYSCFG_CHIPREVHW_FAMILY_DEFAULT                0x00000030UL                            /**< Mode DEFAULT for SYSCFG_CHIPREVHW           */
+#define _SYSCFG_CHIPREVHW_FAMILY_DEFAULT                0x00000034UL                            /**< Mode DEFAULT for SYSCFG_CHIPREVHW           */
 #define SYSCFG_CHIPREVHW_FAMILY_DEFAULT                 (_SYSCFG_CHIPREVHW_FAMILY_DEFAULT << 6) /**< Shifted mode DEFAULT for SYSCFG_CHIPREVHW   */
 #define _SYSCFG_CHIPREVHW_MINOR_SHIFT                   12                                      /**< Shift value for SYSCFG_MINOR                */
 #define _SYSCFG_CHIPREVHW_MINOR_MASK                    0xFF000UL                               /**< Bit mask for SYSCFG_MINOR                   */

@@ -31,7 +31,7 @@
 #include "em_common.h"
 #include "sl_status.h"
 #include "sl_simple_button_instances.h"
-#include "sl_simple_timer.h"
+#include "app_timer.h"
 #include "app_log.h"
 #include "app_assert.h"
 #include "sl_bluetooth.h"
@@ -55,10 +55,10 @@ static uint8_t advertising_set_handle = 0xff;
 static volatile bool app_btn0_pressed = false;
 
 // Periodic timer handle.
-static sl_simple_timer_t app_periodic_timer;
+static app_timer_t app_periodic_timer;
 
 // Periodic timer callback.
-static void app_periodic_timer_cb(sl_simple_timer_t *timer, void *data);
+static void app_periodic_timer_cb(app_timer_t *timer, void *data);
 
 /**************************************************************************//**
  * Application Init.
@@ -209,7 +209,7 @@ void sl_bt_connection_closed_cb(uint16_t reason, uint8_t connection)
   sl_status_t sc;
 
   // Stop timer.
-  sc = sl_simple_timer_stop(&app_periodic_timer);
+  sc = app_timer_stop(&app_periodic_timer);
   app_assert_status(sc);
 }
 
@@ -228,11 +228,11 @@ void sl_bt_ht_temperature_measurement_indication_changed_cb(uint8_t connection,
   // Indication or notification enabled.
   if (sl_bt_gatt_disable != client_config) {
     // Start timer used for periodic indications.
-    sc = sl_simple_timer_start(&app_periodic_timer,
-                               SL_BT_HT_MEASUREMENT_INTERVAL_SEC * 1000,
-                               app_periodic_timer_cb,
-                               NULL,
-                               true);
+    sc = app_timer_start(&app_periodic_timer,
+                         SL_BT_HT_MEASUREMENT_INTERVAL_SEC * 1000,
+                         app_periodic_timer_cb,
+                         NULL,
+                         true);
     app_assert_status(sc);
     // Send first indication.
     app_periodic_timer_cb(&app_periodic_timer, NULL);
@@ -240,7 +240,7 @@ void sl_bt_ht_temperature_measurement_indication_changed_cb(uint8_t connection,
   // Indications disabled.
   else {
     // Stop timer used for periodic indications.
-    (void)sl_simple_timer_stop(&app_periodic_timer);
+    (void)app_timer_stop(&app_periodic_timer);
   }
 }
 
@@ -269,7 +269,7 @@ void sl_button_on_change(const sl_button_t *handle)
  * Timer callback
  * Called periodically to time periodic temperature measurements and indications.
  *****************************************************************************/
-static void app_periodic_timer_cb(sl_simple_timer_t *timer, void *data)
+static void app_periodic_timer_cb(app_timer_t *timer, void *data)
 {
   (void)data;
   (void)timer;

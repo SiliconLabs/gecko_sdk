@@ -38,7 +38,6 @@ if(NOT DEFINED OT_PLATFORM_LIB_MTD)
 endif()
 
 target_link_libraries(ot-cli-mtd PRIVATE
-    $<$<BOOL:${OT_LINKER_MAP}>:-Wl,-Map=bin/ot-cli-mtd.map>
     openthread-cli-mtd
     ${OT_PLATFORM_LIB_MTD}
     openthread-mtd
@@ -48,6 +47,14 @@ target_link_libraries(ot-cli-mtd PRIVATE
     ot-config-mtd
     ot-config
 )
+
+if(OT_LINKER_MAP)
+    if("${CMAKE_CXX_COMPILER_ID}" MATCHES "AppleClang")
+        target_link_libraries(ot-cli-mtd PRIVATE -Wl,-map,ot-cli-mtd.map)
+    else()
+        target_link_libraries(ot-cli-mtd PRIVATE -Wl,-Map=ot-cli-mtd.map)
+    endif()
+endif()
 
 install(TARGETS ot-cli-mtd
     DESTINATION bin)

@@ -1,0 +1,50 @@
+id: zigbee_direct_cli
+label: Zigbee Direct Command Line Interface
+package: Zigbee
+category: Zigbee|Zigbee Direct ZDD
+quality: production
+
+description: Zigbee Direct Command Line Interface
+
+provides:
+  - name: zigbee_direct_cli
+
+requires:
+  - name: zigbee_direct_zdd
+
+source:  
+  - path: protocol/zigbee/app/framework/plugin-soc/zigbee_direct_cli/zigbee_direct_cli.c
+    condition: 
+      - cli
+
+template_contribution:
+  - name: component_catalog
+    value: zigbee_direct_cli
+
+# CLI Commands < plugin zigbee-direct >
+  - name: cli_group
+    value:
+      group: plugin
+      name: zigbee-direct
+      help: Contributes CLI commands to be used for Zigbee Direct development and testing.
+  - name: cli_command
+    value:
+      group: zigbee-direct
+      name: keysprint
+      handler: sli_zigbee_direct_print_keys
+      help: Print Zigbee Direct Basic and Admin Key.
+  - name: cli_command
+    value:
+      group: zigbee-direct
+      name: reset-outcounter
+      handler: sl_zigbee_direct_reset_outgoing_counter
+      help: Reset outgoing packet counter.
+  - name: cli_command
+    value:
+      group: zigbee-direct
+      name: set-join-timeout
+      handler: sl_zigbee_direct_set_anonymous_join_timeout
+      help: Set the anonymous join timeout.
+      argument:
+      - type: uint32
+        help: The value of the anonymous join timeout.

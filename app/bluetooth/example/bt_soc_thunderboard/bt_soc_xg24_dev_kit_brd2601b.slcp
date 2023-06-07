@@ -34,7 +34,7 @@ component:
   - id: iostream_recommended_stream
   - id: iostream_retarget_stdio
   - id: printf
-  - id: simple_timer
+  - id: app_timer
   - id: mpu
   - id: power_supply
 

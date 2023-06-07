@@ -116,6 +116,11 @@ RAIL_ENUM(sl_rail_util_ieee802154_radio_config_t) {
  * optimized for radio coexistence and a front end module
  */
   SL_RAIL_UTIL_IEEE802154_RADIO_CONFIG_2P4_ANTDIV_COEX_FEM,
+/**
+ * @def SL_RAIL_UTIL_IEEE802154_RADIO_CONFIG_2P4_2MBPS
+ * @brief IEEE802.15.4 2.4Ghz radio configuration for high speed communication
+ */
+  SL_RAIL_UTIL_IEEE802154_RADIO_CONFIG_2P4_2MBPS
 };
 
 /**

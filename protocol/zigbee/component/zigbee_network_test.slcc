@@ -14,7 +14,6 @@ config_file:
   - path: protocol/zigbee/app/framework/plugin/network_test/config/network_test_config.h
 requires:
   - name: "zigbee_app_framework_common"
-  - name: "zigbee_zcl_framework_core"
 
 source:  
   - path: "protocol/zigbee/app/test/zigbee_network_test.c"

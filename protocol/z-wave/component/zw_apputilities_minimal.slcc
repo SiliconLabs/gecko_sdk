@@ -23,5 +23,7 @@ source:
   - path: "protocol/z-wave/ZAF/ApplicationUtilities/_commonIF/ZAF_Common_interface.c"
   - path: "protocol/z-wave/ZAF/ApplicationUtilities/ZAF_nvm.c"
   - path: "protocol/z-wave/ZAF/ApplicationUtilities/ZAF_nvm_app.c"
+requires:
+  - name: zaf_appname
 provides:
   - name: zw_apputilities_minimal

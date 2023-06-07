@@ -3,7 +3,7 @@
  * @brief
  *******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -28,6 +28,19 @@
  *
  ******************************************************************************/
 #include "sl_wisun_config.h"
+
+{% if config.allowedChannels is not none and only_radio is sameas false %}
+//! Wi-SUN Allow channel list
+const sl_wisun_channel_mask_t wisun_config_allowed_channels_mask = {
+    .mask = {
+    {% for mask in config.allowedChannels-%}
+    {{ mask }}{%- if loop.index0 < loop.length - 1 -%}{{", "}}{%- endif -%}
+    {%- if loop.index0 % 8 == 7 -%}{{"\n    "}}{%- endif -%}
+    {% endfor -%}
+    }
+};
+{%- endif -%}
+
 {% if config.macAddress is not none %}
 
 //! Wi-SUN MAC address
@@ -40,6 +53,7 @@ const sl_wisun_mac_address_t wisun_config_mac_address = {
   }
 };
 {%- endif -%}
+{% if config.macList is not none %}
 {% if (config.macList|length > 0) and (config.isDenyList is sameas false) %}
 
 //! Wi-SUN MAC allow list
@@ -63,7 +77,8 @@ const wisun_config_mac_list_t wisun_config_mac_allow_list = {
   }
 };
 {%- endif -%}
-
+{%- endif -%}
+{% if config.macList is not none %}
 {% if (config.macList|length > 0) and (config.isDenyList is sameas true) %}
 
 //! Wi-SUN MAC deny list
@@ -87,7 +102,18 @@ const wisun_config_mac_list_t wisun_config_mac_deny_list = {
   }
 };
 {%- endif -%}
+{%- endif -%}
+{% if config.modeSwitchPhys is not none %}
+{% if (config.modeSwitchPhys|length > 0) and (config.modeSwitchPhys is not none) %}
+//! Wi-SUN Mode Switch PHYs
+const uint8_t wisun_config_ms_phys[WISUN_CONFIG_MODE_SWITCH_PHYS_NUMBER] = {
+  {% for phy in config.modeSwitchPhys -%}
+  {{ phy['phyModeId'] }}{%- if loop.index0 < loop.length - 1 -%}{{", "}}{%- endif -%}
+  {%- endfor %}
+};
 
+{%- endif -%}
+{%- endif -%}
 {% if config.devicePrivateKey is not none %}
 
 //! Wi-SUN Device private key

@@ -4,6 +4,8 @@
 {% for periph in cpc_periph_type %}
 #include "sl_cpc_drv_secondary_uart_{{ periph }}_{{ instance }}_config.h"
 
+#define SL_CPC_DRV_PERIPH_IS_{{ periph | upper }}
+
 #define {{ periph }}HwFlowControlNone_D         0
 #define {{ periph }}HwFlowControlCtsAndRts_D    1
 

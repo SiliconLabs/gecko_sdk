@@ -12,9 +12,9 @@ description: >
 package: Z-Wave
 quality: production
 source:
-  - path: protocol/z-wave/ZAF/CommandClasses/Basic/CC_BasicController.c
+  - path: protocol/z-wave/ZAF/CommandClasses/Basic/src/CC_BasicController.c
 include:
-  - path: protocol/z-wave/ZAF/CommandClasses/Basic/
+  - path: protocol/z-wave/ZAF/CommandClasses/Basic/inc/
     file_list:
     - path: CC_Basic.h
 provides:

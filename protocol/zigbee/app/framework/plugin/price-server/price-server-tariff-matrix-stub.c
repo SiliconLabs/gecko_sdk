@@ -20,9 +20,9 @@
 #include "price-server.h"
 #include "price-server-tick.h"
 
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
-#endif // UC_BUILD
+#endif
 
 void emberAfPriceClearTariffTable(uint8_t endpoint)
 {
@@ -70,6 +70,24 @@ bool emberAfPriceAddTariffTableEntry(uint8_t endpoint,
   (void) endpoint;
   (void) *info;
   (void) *curTariff;
+  return false;
+}
+
+bool emberAfPriceClusterGetTariffInformationCallback(uint32_t earliestStartTime,
+                                                     uint32_t minIssuerEventId,
+                                                     uint8_t numberOfCommands,
+                                                     uint8_t tariffType)
+{
+  return false;
+}
+
+bool emberAfPriceClusterGetPriceMatrixCallback(uint32_t issuerTariffId)
+{
+  return false;
+}
+
+bool emberAfPriceClusterGetBlockThresholdsCallback(uint32_t issuerTariffId)
+{
   return false;
 }
 

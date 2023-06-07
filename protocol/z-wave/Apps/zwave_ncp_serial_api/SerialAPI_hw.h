@@ -8,11 +8,6 @@
 #define SERIALAPI_HW_H_
 
 /**
- * Initialize hardware modules specific to Serial API application.
- */
-void SerialAPI_hw_init(void);
-
-/**
  * Get zpal-uart config extension.
  */
 const void* SerialAPI_get_uart_config_ext(void);

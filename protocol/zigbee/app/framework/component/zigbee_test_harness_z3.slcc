@@ -37,7 +37,7 @@ template_contribution:
   - name: zigbee_af_callback
     value:
       callback_type: event_init
-      function_name: emAfPluginTestHarnessZ3InitCallback    
+      function_name: sli_zigbee_af_test_harness_z3_init_callback    
   - name: zigbee_stack_callback
     value:
       callback_type: stack_status
@@ -61,13 +61,13 @@ template_contribution:
     value:
       group: beacon-printing
       name: enable
-      handler: emAfPluginTestHarnessZ3PrintingCommand
+      handler: sli_zigbee_af_test_harness_z3_printing_command
       help: Enables printing beacon requests and received beacons.
   - name: cli_command
     value:
       group: beacon-printing
       name: disable
-      handler: emAfPluginTestHarnessZ3PrintingCommand
+      handler: sli_zigbee_af_test_harness_z3_printing_command
       help: Disables printing beacon requests and received beacons.
   - name: cli_group
     value:
@@ -78,13 +78,13 @@ template_contribution:
     value:
       group: zdo-printing
       name: enable
-      handler: emAfPluginTestHarnessZ3PrintingCommand
+      handler: sli_zigbee_af_test_harness_z3_printing_command
       help: Enables printing ZDO commands.
   - name: cli_command
     value:
       group: zdo-printing
       name: disable
-      handler: emAfPluginTestHarnessZ3PrintingCommand
+      handler: sli_zigbee_af_test_harness_z3_printing_command
       help: Disables printing ZDO commands.
   - name: cli_group
     value:
@@ -95,13 +95,13 @@ template_contribution:
     value:
       group: nwk-printing
       name: enable
-      handler: emAfPluginTestHarnessZ3PrintingCommand
+      handler: sli_zigbee_af_test_harness_z3_printing_command
       help: Enables printing network commands.
   - name: cli_command
     value:
       group: nwk-printing
       name: disable
-      handler: emAfPluginTestHarnessZ3PrintingCommand
+      handler: sli_zigbee_af_test_harness_z3_printing_command
       help: Disables printing network commands.
   - name: cli_group
     value:
@@ -112,13 +112,13 @@ template_contribution:
     value:
       group: aps-printing
       name: enable
-      handler: emAfPluginTestHarnessZ3PrintingCommand
+      handler: sli_zigbee_af_test_harness_z3_printing_command
       help: Enables printing APS commands.
   - name: cli_command
     value:
       group: aps-printing
       name: disable
-      handler: emAfPluginTestHarnessZ3PrintingCommand
+      handler: sli_zigbee_af_test_harness_z3_printing_command
       help: Disables printing APS commands.
   - name: cli_group
     value:
@@ -129,13 +129,13 @@ template_contribution:
     value:
       group: raw-printing
       name: enable
-      handler: emAfPluginTestHarnessZ3PrintingCommand
+      handler: sli_zigbee_af_test_harness_z3_printing_command
       help: Enables printing raw MAC commands.
   - name: cli_command
     value:
       group: raw-printing
       name: disable
-      handler: emAfPluginTestHarnessZ3PrintingCommand
+      handler: sli_zigbee_af_test_harness_z3_printing_command
       help: Disables printing raw MAC commands.
   - name: cli_group
     value:
@@ -151,13 +151,13 @@ template_contribution:
     value:
       group: beacon
       name: beacon-req
-      handler: emAfPluginTestHarnessZ3BeaconBeaconReqCommand
+      handler: sli_zigbee_af_test_harness_z3_beacon_beacon_req_command
       help: Sends a beacon request.
   - name: cli_command
     value:
       group: beacon
       name: beacons-config
-      handler: emAfPluginTestHarnessZ3BeaconBeaconsConfigCommand
+      handler: sli_zigbee_af_test_harness_z3_beacon_beacons_config_command
       help: Sends a beacon.
       argument:
       - type: uint32
@@ -171,7 +171,7 @@ template_contribution:
     value:
       group: nwk
       name: nwk-rejoin-request
-      handler: emAfPluginTestHarnessZ3NwkNwkRejoinRequestCommand
+      handler: sli_zigbee_af_test_harness_z3_nwk_nwk_rejoin_request_command
       help: Sends a Rejoin Request command.
       argument:
       - type: uint16
@@ -180,7 +180,7 @@ template_contribution:
     value:
       group: nwk
       name: nwk-rejoin-response
-      handler: emAfPluginTestHarnessZ3NwkNwkRejoinResponseCommand
+      handler: sli_zigbee_af_test_harness_z3_nwk_nwk_rejoin_response_command
       help: Sends a Rejoin Response command.
       argument:
       - type: uint16
@@ -193,7 +193,7 @@ template_contribution:
     value:
       group: nwk
       name: nwk-leave
-      handler: emAfPluginTestHarnessZ3NwkNwkLeaveCommand
+      handler: sli_zigbee_af_test_harness_z3_nwk_nwk_leave_command
       help: Sends a Network Leave command.
       argument:
       - type: int8
@@ -215,13 +215,13 @@ template_contribution:
     value:
       group: nwk-leave-supression
       name: "on"
-      handler: emAfPluginTestHarnessZ3NwkNwkLeaveSupression
+      handler: sli_zigbee_af_test_harness_z3_nwk_nwk_leave_supression
       help: Suppresses network leave commands.
   - name: cli_command
     value:
       group: nwk-leave-supression
       name: "off"
-      handler: emAfPluginTestHarnessZ3NwkNwkLeaveSupression
+      handler: sli_zigbee_af_test_harness_z3_nwk_nwk_leave_supression
       help: Do not suppress network leave commands.
   - name: cli_group
     value:
@@ -232,25 +232,25 @@ template_contribution:
     value:
       group: nwk-key-supression
       name: "on"
-      handler: emAfPluginTestHarnessZ3NwkNwkKeySupression
+      handler: sli_zigbee_af_test_harness_z3_nwk_nwk_key_supression
       help: Suppresses network leave commands.
   - name: cli_command
     value:
       group: nwk-key-supression
       name: "off"
-      handler: emAfPluginTestHarnessZ3NwkNwkKeySupression
+      handler: sli_zigbee_af_test_harness_z3_nwk_nwk_key_supression
       help: Do not suppress network leave commands.
   - name: cli_command
     value:
       group: nwk
       name: get-network-update-id
-      handler: emAfPluginTestHarnessZ3NwkGetNetworkUpdateId
+      handler: sli_zigbee_af_test_harness_z3_nwk_get_network_update_id
       help: Gets the current network update ID.
   - name: cli_command
     value:
       group: nwk
       name: set-network-update-id
-      handler: emAfPluginTestHarnessZ3NwkSetNetworkUpdateId
+      handler: sli_zigbee_af_test_harness_z3_nwk_set_network_update_id
       help: Sets the network update ID in the current network parameters block.
       argument:
       - type: uint8
@@ -264,7 +264,7 @@ template_contribution:
     value:
       group: aps
       name: aps-remove-device
-      handler: emAfPluginTestHarnessZ3ApsApsRemoveDevice
+      handler: sli_zigbee_af_test_harness_z3_aps_aps_remove_device
       help: Sends an APS remove device command.
       argument:
       - type: hex
@@ -277,7 +277,7 @@ template_contribution:
     value:
       group: aps
       name: aps-remove-device-config
-      handler: emAfPluginTestHarnessZ3ApsApsRemoveDeviceConfig
+      handler: sli_zigbee_af_test_harness_z3_aps_aps_remove_device_config
       help: Configures the APS remove device command handling.
       argument:
       - type: uint32
@@ -286,7 +286,7 @@ template_contribution:
     value:
       group: aps
       name: aps-request-key
-      handler: emAfPluginTestHarnessZ3ApsApsRequestKeyCommand
+      handler: sli_zigbee_af_test_harness_z3_aps_aps_request_key_command
       help: Sends an APS request key command.
       argument:
       - type: uint16
@@ -306,7 +306,7 @@ template_contribution:
     value:
       group: touchlink
       name: scan-request-process
-      handler: emAfPluginTestHarnessZ3TouchlinkScanRequestProcessCommand
+      handler: sli_zigbee_af_test_harness_z3_touchlink_scan_request_process_command
       help: Starts the scan request process.
       argument:
       - type: uint8
@@ -319,7 +319,7 @@ template_contribution:
     value:
       group: touchlink
       name: start-as-router
-      handler: emAfPluginTestHarnessZ3TouchlinkStartAsRouterCommand
+      handler: sli_zigbee_af_test_harness_z3_touchlink_start_as_router_command
       help: Starts a distributed network on which to perform ZLL operations.
       argument:
       - type: uint16
@@ -330,13 +330,13 @@ template_contribution:
     value:
       group: touchlink
       name: is-scanning
-      handler: emAfPluginTestHarnessZ3TouchlinkIsScanningCommand
+      handler: sli_zigbee_af_test_harness_z3_touchlink_is_scanning_command
       help: Prints out whether or not the device is currently performing the scan process for touchlinking.
   - name: cli_command
     value:
       group: touchlink
       name: device-information-request
-      handler: emAfPluginTestHarnessZ3TouchlinkDeviceInformationRequestCommand
+      handler: sli_zigbee_af_test_harness_z3_touchlink_device_information_request_command
       help: Sends a device information request to the target found in the scan request process.
       argument:
       - type: uint8
@@ -347,7 +347,7 @@ template_contribution:
     value:
       group: touchlink
       name: device-information-request-w-target
-      handler: emAfPluginTestHarnessZ3TouchlinkDeviceInformationRequestWTargetCommand
+      handler: sli_zigbee_af_test_harness_z3_touchlink_device_information_request_w_target_command
       help: Sends a device information request to the target specified with the short address in the command.
       argument:
       - type: uint8
@@ -360,7 +360,7 @@ template_contribution:
     value:
       group: touchlink
       name: identify-request
-      handler: emAfPluginTestHarnessZ3TouchlinkIdentifyRequestCommand
+      handler: sli_zigbee_af_test_harness_z3_touchlink_identify_request_command
       help: Sends an identify request to the target found in the scan request process.
       argument:
       - type: uint16
@@ -371,7 +371,7 @@ template_contribution:
     value:
       group: touchlink
       name: reset-to-factory-new-request
-      handler: emAfPluginTestHarnessZ3TouchlinkRTFNRequestCommand
+      handler: sli_zigbee_af_test_harness_z3_touchlink_rtfn_request_command
       help: Sends a reset to factory new request to the target found in the scan request process.
       argument:
       - type: uint32
@@ -380,7 +380,7 @@ template_contribution:
     value:
       group: touchlink
       name: network-start-request
-      handler: emAfPluginTestHarnessZ3TouchlinkNetworkCommand
+      handler: sli_zigbee_af_test_harness_z3_touchlink_network_command
       help: Sends a network start request to the target found in the scan request process.
       argument:
       - type: uint16
@@ -399,7 +399,7 @@ template_contribution:
     value:
       group: touchlink
       name: network-join-router-request
-      handler: emAfPluginTestHarnessZ3TouchlinkNetworkCommand
+      handler: sli_zigbee_af_test_harness_z3_touchlink_network_command
       help: Sends a network router join request to the target found in the scan request process.
       argument:
       - type: uint16
@@ -418,7 +418,7 @@ template_contribution:
     value:
       group: touchlink
       name: network-join-end-device-request
-      handler: emAfPluginTestHarnessZ3TouchlinkNetworkCommand
+      handler: sli_zigbee_af_test_harness_z3_touchlink_network_command
       help: Sends a network end device join request to the target found in the scan request process.
       argument:
       - type: uint16
@@ -437,7 +437,7 @@ template_contribution:
     value:
       group: touchlink
       name: network-update-request
-      handler: emAfPluginTestHarnessZ3TouchlinkNetworkUpdateRequestCommand
+      handler: sli_zigbee_af_test_harness_z3_touchlink_network_update_request_command
       help: Sends a network update request.
       argument:
       - type: uint32
@@ -446,7 +446,7 @@ template_contribution:
     value:
       group: touchlink
       name: get-group-identifiers-request
-      handler: emAfPluginTestHarnessZ3TouchlinkGetGroupIdentifiersRequestCommand
+      handler: sli_zigbee_af_test_harness_z3_touchlink_get_group_identifiers_request_command
       help: Sends a get group identifiers request.
       argument:
       - type: uint8
@@ -455,7 +455,7 @@ template_contribution:
     value:
       group: touchlink
       name: get-endpoint-list-request
-      handler: emAfPluginTestHarnessZ3TouchlinkGetEndpointListRequestCommand
+      handler: sli_zigbee_af_test_harness_z3_touchlink_get_endpoint_list_request_command
       help: Sends a get endpoint list request.
       argument:
       - type: uint8
@@ -464,7 +464,7 @@ template_contribution:
     value:
       group: touchlink
       name: scan-response-config
-      handler: emAfPluginTestHarnessZ3TouchlinkScanResponseConfigCommand
+      handler: sli_zigbee_af_test_harness_z3_touchlink_scan_response_config_command
       help: Configures the next scan response.
       argument:
       - type: uint32
@@ -473,7 +473,7 @@ template_contribution:
     value:
       group: touchlink
       name: network-start-response-config
-      handler: emAfPluginTestHarnessZ3TouchlinkNetworkStartResponseConfig
+      handler: sli_zigbee_af_test_harness_z3_touchlink_network_start_response_config
       help: Configures the next outgoing network start response command.
       argument:
       - type: uint32
@@ -482,7 +482,7 @@ template_contribution:
     value:
       group: touchlink
       name: network-join-router-response-config
-      handler: emAfPluginTestHarnessZ3TouchlinkNetworkJoinRouterResponseConfig
+      handler: sli_zigbee_af_test_harness_z3_touchlink_network_join_router_response_config
       help: Configures the next outgoing network join router response command.
       argument:
       - type: uint32
@@ -491,7 +491,7 @@ template_contribution:
     value:
       group: touchlink
       name: device-information-response-config
-      handler: emAfPluginTestHarnessZ3TouchlinkDeviceInformationResponseConfigCommand
+      handler: sli_zigbee_af_test_harness_z3_touchlink_device_information_response_config_command
       help: Configures the next device information response.
       argument:
       - type: uint32
@@ -505,7 +505,7 @@ template_contribution:
     value:
       group: mgmt
       name: permit-joining-req
-      handler: emAfPluginTestHarnessZ3MgmtPermitJoiningReqCommand
+      handler: sli_zigbee_af_test_harness_z3_mgmt_permit_joining_req_command
       help: Unicasts a permit joining command.
       argument:
       - type: uint16
@@ -518,7 +518,7 @@ template_contribution:
     value:
       group: mgmt
       name: leave
-      handler: emAfPluginTestHarnessZ3MgmtLeaveCommand
+      handler: sli_zigbee_af_test_harness_z3_mgmt_leave_command
       help: Unicasts a permit joining command.
       argument:
       - type: uint16
@@ -533,7 +533,7 @@ template_contribution:
     value:
       group: mgmt
       name: nwk-update-request
-      handler: emAfPluginTestHarnessZ3MgmtNwkUpdateRequestCommand
+      handler: sli_zigbee_af_test_harness_z3_mgmt_nwk_update_request_command
       help: Unicasts a network update command.
       argument:
       - type: uint16
@@ -555,13 +555,13 @@ template_contribution:
     value:
       group: zdo
       name: zdo-reset
-      handler: emAfPluginTestHarnessZ3ZdoZdoResetCommand
+      handler: sli_zigbee_af_test_harness_z3_zdo_zdo_reset_command
       help: Resets any pending negative ZDO behavior.
   - name: cli_command
     value:
       group: zdo
       name: node-desc-req
-      handler: emAfPluginTestHarnessZ3ZdoNodeDescReqCommand
+      handler: sli_zigbee_af_test_harness_z3_zdo_node_desc_req_command
       help: Unicasts a node descriptor request.
       argument:
       - type: uint16
@@ -570,7 +570,7 @@ template_contribution:
     value:
       group: zdo
       name: zdo-node-desc-rsp-config
-      handler: emAfPluginTestHarnessZ3ZdoZdoNodeDescRspConfigCommand
+      handler: sli_zigbee_af_test_harness_z3_zdo_zdo_node_desc_rsp_config_command
       help: Configure the next outgoing node descriptor response.
       argument:
       - type: uint32
@@ -579,7 +579,7 @@ template_contribution:
     value:
       group: zdo
       name: active-endpoint-request
-      handler: emAfPluginTestHarnessZ3ZdoActiveEndpointRequestCommand
+      handler: sli_zigbee_af_test_harness_z3_zdo_active_endpoint_request_command
       help: Unicasts an active endpoint request.
       argument:
       - type: uint16
@@ -592,7 +592,7 @@ template_contribution:
     value:
       group: zdo
       name: match-desc-req
-      handler: emAfPluginTestHarnessZ3ZdoMatchDescReqCommand
+      handler: sli_zigbee_af_test_harness_z3_zdo_match_desc_req_command
       help: Unicasts a match descriptor request.
       argument:
       - type: uint16
@@ -607,7 +607,7 @@ template_contribution:
     value:
       group: zdo
       name: match-desc-rsp-config
-      handler: emAfPluginTestHarnessZ3ZdoMatchDescRspConfigCommand
+      handler: sli_zigbee_af_test_harness_z3_zdo_match_desc_rsp_config_command
       help: Configures the next outgoing match descriptor response.
       argument:
       - type: uint16
@@ -620,7 +620,7 @@ template_contribution:
     value:
       group: zdo
       name: simple-desc-req
-      handler: emAfPluginTestHarnessZ3ZdoSimpleDescReqCommand
+      handler: sli_zigbee_af_test_harness_z3_zdo_simple_desc_req_command
       help: Unicasts a simple descriptor request.
       argument:
       - type: uint16
@@ -635,7 +635,7 @@ template_contribution:
     value:
       group: zdo
       name: simple-desc-rsp-config
-      handler: emAfPluginTestHarnessZ3ZdoSimpleDescRspConfigCommand
+      handler: sli_zigbee_af_test_harness_z3_zdo_simple_desc_rsp_config_command
       help: Configures the next outgoing simple descriptor response.
       argument:
       - type: uint16
@@ -665,7 +665,7 @@ template_contribution:
     value:
       group: zdo
       name: bind-group
-      handler: emAfPluginTestHarnessZ3ZdoBindGroupCommand
+      handler: sli_zigbee_af_test_harness_z3_zdo_bind_group_command
       help: Sends a ZDO bind command to a device specified to create a groupcast binding.
       argument:
       - type: uint16
@@ -684,7 +684,7 @@ template_contribution:
     value:
       group: zdo
       name: nwk-addr-req
-      handler: emAfPluginTestHarnessZ3ZdoNwkAddrReqCommand
+      handler: sli_zigbee_af_test_harness_z3_zdo_nwk_addr_req_command
       help: Sends a ZDO address request.
       argument:
       - type: hex
@@ -701,7 +701,7 @@ template_contribution:
     value:
       group: zdo
       name: ieee-addr-req
-      handler: emAfPluginTestHarnessZ3ZdoIeeeAddrReqCommand
+      handler: sli_zigbee_af_test_harness_z3_zdo_ieee_addr_req_command
       help: Sends an IEEE address request.
       argument:
       - type: uint16
@@ -723,25 +723,25 @@ template_contribution:
     value:
       group: ieee-addr-rsp-config
       name: reset
-      handler: emAfPluginTestHarnessZ3ZdoIeeeAddrRspConfigCommand
+      handler: sli_zigbee_af_test_harness_z3_zdo_ieee_addr_rsp_config_command
       help: Configures the next outgoing IEEE address request.
   - name: cli_command
     value:
       group: ieee-addr-rsp-config
       name: issuer-nwk-address-remote-dev
-      handler: emAfPluginTestHarnessZ3ZdoIeeeAddrRspConfigCommand
+      handler: sli_zigbee_af_test_harness_z3_zdo_ieee_addr_rsp_config_command
       help: Configures the next outgoing IEEE address request.
   - name: cli_command
     value:
       group: ieee-addr-rsp-config
       name: status-device-not-found
-      handler: emAfPluginTestHarnessZ3ZdoIeeeAddrRspConfigCommand
+      handler: sli_zigbee_af_test_harness_z3_zdo_ieee_addr_rsp_config_command
       help: Configures the next outgoing IEEE address request.
   - name: cli_command
     value:
       group: zdo
       name: bc-device-announce
-      handler: emAfPluginTestHarnessZ3ZdoBcDeviceAnnounceCommand
+      handler: sli_zigbee_af_test_harness_z3_zdo_bc_device_announce_command
       help: Rebroadcasts a `fake` ZDO device announce. The device sets random frame counter values to appear as though the DeviceAnnounce has been rebroadcasted from another device on the network out of range of the DUT.
       argument:
       - type: uint16
@@ -757,7 +757,7 @@ template_contribution:
     value:
       group: ota-server
       name: activate
-      handler: emAfPluginTestHarnessZ3OtaServerActivateCommand
+      handler: sli_zigbee_af_test_harness_z3_ota_server_activate_command
       help: Configuration command to set up OTA server.
       argument:
       - type: uint16
@@ -776,7 +776,7 @@ template_contribution:
     value:
       group: ota-server
       name: deactivate
-      handler: emAfPluginTestHarnessZ3OtaServerDeActivateCommand
+      handler: sli_zigbee_af_test_harness_z3_ota_server_de_activate_command
       help: Configuration command to set up OTA server.
   - name: cli_group
     value:
@@ -787,7 +787,7 @@ template_contribution:
     value:
       group: zcl
       name: read
-      handler: emAfPluginTestHarnessZ3ZclReadCommand
+      handler: sli_zigbee_af_test_harness_z3_zcl_read_command
       help: Sends a ZCL ReadAttribute command.
       argument:
       - type: uint16
@@ -806,19 +806,19 @@ template_contribution:
     value:
       group: z3
       name: reset
-      handler: emAfPluginTestHarnessZ3ResetCommand
+      handler: sli_zigbee_af_test_harness_z3_reset_command
       help: Resets the device to a factory new state (empty tables, attributes at default values, no events queued etc) without resetting the any of the physical hardware that could cause the device to not operate on the same serial connection.
   - name: cli_command
     value:
       group: z3
       name: platform
-      handler: emAfPluginTestHarnessZ3PlatformCommand
+      handler: sli_zigbee_af_test_harness_z3_platform_command
       help: Prints the platform information for this device.
   - name: cli_command
     value:
       group: z3
       name: set-pan-id
-      handler: emAfPluginTestHarnessSetNetworkCreatorPanId
+      handler: sli_zigbee_af_test_harness_set_network_creator_pan_id
       help: Sets the PAN ID to be used by the Network Creator component.
       argument:
       - type: uint16
@@ -827,7 +827,7 @@ template_contribution:
     value:
       group: z3
       name: set-short-address
-      handler: emAfPluginTestHarnessZ3SetShortAddressCommand
+      handler: sli_zigbee_af_test_harness_z3_set_short_address_command
       help: Sets the node ID to be used on the device.
       argument:
       - type: uint16
@@ -841,19 +841,19 @@ template_contribution:
     value:
       group: legacy-profile
       name: enable
-      handler: emAfPluginTestHarnessZ3LegacyProfileCommand
+      handler: sli_zigbee_af_test_harness_z3_legacy_profile_command
       help: Enables using the legacy profile of 0xC05E for ZLL commands.
   - name: cli_command
     value:
       group: legacy-profile
       name: disable
-      handler: emAfPluginTestHarnessZ3LegacyProfileCommand
+      handler: sli_zigbee_af_test_harness_z3_legacy_profile_command
       help: Disables using the legacy profile of 0xC05E for ZLL commands.
   - name: cli_command
     value:
       group: z3
       name: set-device-mode
-      handler: emAfPluginTestHarnessZ3SetDeviceModeCommand
+      handler: sli_zigbee_af_test_harness_z3_set_device_mode_command
       help: Sets the node ID to be used on the device.
       argument:
       - type: uint8
@@ -867,13 +867,13 @@ template_contribution:
     value:
       group: install-code
       name: clear
-      handler: emAfPluginTestHarnessZ3InstallCodeClearOrSetCommand
+      handler: sli_zigbee_af_test_harness_z3_install_code_clear_or_set_command
       help: Clears the install code from the device.
   - name: cli_command
     value:
       group: install-code
       name: set
-      handler: emAfPluginTestHarnessZ3InstallCodeClearOrSetCommand
+      handler: sli_zigbee_af_test_harness_z3_install_code_clear_or_set_command
       help: Clears the install code from the device.
       argument:
       - type: hex

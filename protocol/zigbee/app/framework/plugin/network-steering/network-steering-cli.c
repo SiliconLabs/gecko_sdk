@@ -34,36 +34,34 @@ static void addOrSubtractChannel(uint8_t maskToAddTo,
     emberAfCorePrintln("Channel not valid: %d", channelToAdd);
   } else if (maskToAddTo == 1) {
     if (operationIsAdd) {
-      SETBIT(emAfPluginNetworkSteeringPrimaryChannelMask, channelToAdd);
+      SETBIT(sli_zigbee_af_network_steering_primary_channel_mask, channelToAdd);
     } else {
-      CLEARBIT(emAfPluginNetworkSteeringPrimaryChannelMask, channelToAdd);
+      CLEARBIT(sli_zigbee_af_network_steering_primary_channel_mask, channelToAdd);
     }
 
     emberAfCorePrintln("%p mask now 0x%4X",
                        "Primary",
-                       emAfPluginNetworkSteeringPrimaryChannelMask);
+                       sli_zigbee_af_network_steering_primary_channel_mask);
   } else if (maskToAddTo == 2) {
     if (operationIsAdd) {
-      SETBIT(emAfPluginNetworkSteeringSecondaryChannelMask, channelToAdd);
+      SETBIT(sli_zigbee_af_network_steering_secondary_channel_mask, channelToAdd);
     } else {
-      CLEARBIT(emAfPluginNetworkSteeringSecondaryChannelMask, channelToAdd);
+      CLEARBIT(sli_zigbee_af_network_steering_secondary_channel_mask, channelToAdd);
     }
 
     emberAfCorePrintln("%p mask now 0x%4X",
                        "Secondary",
-                       emAfPluginNetworkSteeringSecondaryChannelMask);
+                       sli_zigbee_af_network_steering_secondary_channel_mask);
   } else {
     emberAfCorePrintln("Mask not valid: %d", maskToAddTo);
   }
 }
 
-#ifdef UC_BUILD
-
 #include "app/util/serial/sl_zigbee_command_interpreter.h"
 
 void emberAfPluginNetworkSteeringStartCommand(sl_cli_command_arg_t *arguments)
 {
-  emAfPluginNetworkSteeringOptionsMask = sl_cli_get_argument_uint8(arguments, 0);
+  sli_zigbee_af_network_steering_options_mask = sl_cli_get_argument_uint8(arguments, 0);
   emberAfPluginNetworkSteeringStart();
 }
 // // -----------------------------------------------------------------------------
@@ -88,11 +86,11 @@ void emberAfPluginNetworkSteeringChannelSetCommand(sl_cli_command_arg_t *argumen
   bool maskIsPrimary = (sl_cli_get_argument_uint8(arguments, 0) == 1);
   uint32_t value = sl_cli_get_argument_uint32(arguments, 1);
   uint32_t *mask = (maskIsPrimary
-                    ? &emAfPluginNetworkSteeringPrimaryChannelMask
-                    : &emAfPluginNetworkSteeringSecondaryChannelMask);
+                    ? &sli_zigbee_af_network_steering_primary_channel_mask
+                    : &sli_zigbee_af_network_steering_secondary_channel_mask);
 
   emberAfCorePrintln("%p: Set %p mask to 0x%4X",
-                     emAfNetworkSteeringPluginName,
+                     sli_zigbee_af_network_steering_plugin_name,
                      (maskIsPrimary ? "primary" : "secondary"),
                      (*mask = value));
 }
@@ -101,32 +99,32 @@ void emberAfPluginNetworkSteeringChannelSetCommand(sl_cli_command_arg_t *argumen
 void emberAfPluginNetworkSteeringStatusCommand(sl_cli_command_arg_t *arguments)
 {
   emberAfCorePrintln("%p: %p:",
-                     emAfNetworkSteeringPluginName,
+                     sli_zigbee_af_network_steering_plugin_name,
                      "Status");
 
   emberAfCorePrintln("Channel mask:");
   emberAfCorePrint("    (1) 0x%4X [",
-                   emAfPluginNetworkSteeringPrimaryChannelMask);
-  emberAfPrintChannelListFromMask(emAfPluginNetworkSteeringPrimaryChannelMask);
+                   sli_zigbee_af_network_steering_primary_channel_mask);
+  emberAfPrintChannelListFromMask(sli_zigbee_af_network_steering_primary_channel_mask);
   emberAfCorePrintln("]");
   emberAfCorePrint("    (2) 0x%4X [",
-                   emAfPluginNetworkSteeringSecondaryChannelMask);
-  emberAfPrintChannelListFromMask(emAfPluginNetworkSteeringSecondaryChannelMask);
+                   sli_zigbee_af_network_steering_secondary_channel_mask);
+  emberAfPrintChannelListFromMask(sli_zigbee_af_network_steering_secondary_channel_mask);
   emberAfCorePrintln("]");
 
   emberAfCorePrintln("State: 0x%X (%s)",
-                     emAfPluginNetworkSteeringState,
-                     emAfPluginNetworkSteeringStateNames[emAfPluginNetworkSteeringState]);
+                     sli_zigbee_af_network_steering_state,
+                     sli_zigbee_af_network_steering_stateNames[sli_zigbee_af_network_steering_state]);
 #ifndef OPTIMIZE_SCANS
   emberAfCorePrintln("Pan ID index: %d",
-                     emAfPluginNetworkSteeringPanIdIndex);
+                     sli_zigbee_af_network_steering_pan_id_index);
 #endif //  OPTIMIZE_SCANS
   emberAfCorePrintln("Current channel: %d",
-                     emAfPluginNetworkSteeringGetCurrentChannel());
+                     sli_zigbee_af_network_steering_get_current_channel());
   emberAfCorePrintln("Total beacons: %d",
-                     emAfPluginNetworkSteeringTotalBeacons);
+                     sli_zigbee_af_network_steering_total_beacons);
   emberAfCorePrintln("Join attempts: %d",
-                     emAfPluginNetworkSteeringJoinAttempts);
+                     sli_zigbee_af_network_steering_join_attempts);
   emberAfCorePrintln("Network state: 0x%X",
                      emberAfNetworkState());
 }
@@ -134,7 +132,7 @@ void emberAfPluginNetworkSteeringStatusCommand(sl_cli_command_arg_t *arguments)
 void emberAfPluginNetworkSteeringStopCommand(sl_cli_command_arg_t *arguments)
 {
   emberAfCorePrintln("%s: %s: 0x%X",
-                     emAfNetworkSteeringPluginName,
+                     sli_zigbee_af_network_steering_plugin_name,
                      "Stop",
                      emberAfPluginNetworkSteeringStop());
 }
@@ -148,112 +146,10 @@ void emberAfPluginNetworkSteeringSetPreconfiguredKeyCommand(sl_cli_command_arg_t
   MEMSET(keyData.contents, 0, EMBER_ENCRYPTION_KEY_SIZE);
   MEMMOVE(keyData.contents, ptr_string, EMBER_ENCRYPTION_KEY_SIZE); // Is the padding correct?
 
-  emAfPluginNetworkSteeringSetConfiguredKey(keyData.contents, true);
+  sli_zigbee_af_network_steering_set_configured_key(keyData.contents, true);
 #else // OPTIMIZE_SCANS
   emberAfCorePrintln("Unsupported feature when using optimized scans. To use"
                      " a configured key when joining, add the key to the"
                      " transient key table using the wildcard EUI (all FFs).");
 #endif // OPTIMIZE_SCANS
 }
-
-#else // !UC_BUILD
-
-#if defined(EMBER_AF_GENERATE_CLI) || defined(EMBER_AF_API_COMMAND_INTERPRETER2)
-
-// -----------------------------------------------------------------------------
-// Command definitions
-
-// plugin network-steering mask add <[1=primary|2=secondary]:1> <channel:1>
-// plugin network-steering mask subtract <[1=primary|2=secondary]:1> <channel:1>
-void emberAfPluginNetworkSteeringChannelAddOrSubtractCommand(void)
-{
-  bool operationIsAdd = (emberStringCommandArgument(-1, NULL)[0] == 'a');
-  uint8_t maskToAddTo  = (uint8_t)emberUnsignedCommandArgument(0);
-  uint8_t channelToAdd = (uint8_t)emberUnsignedCommandArgument(1);
-
-  addOrSubtractChannel(maskToAddTo,
-                       channelToAdd,
-                       operationIsAdd);
-}
-
-void emberAfPluginNetworkSteeringChannelSetCommand(void)
-{
-  bool maskIsPrimary = (((uint8_t)emberUnsignedCommandArgument(0)) == 1);
-  uint32_t value = (uint32_t)emberUnsignedCommandArgument(1);
-  uint32_t *mask = (maskIsPrimary
-                    ? &emAfPluginNetworkSteeringPrimaryChannelMask
-                    : &emAfPluginNetworkSteeringSecondaryChannelMask);
-
-  emberAfCorePrintln("%p: Set %p mask to 0x%4X",
-                     emAfNetworkSteeringPluginName,
-                     (maskIsPrimary ? "primary" : "secondary"),
-                     (*mask = value));
-}
-
-// plugin network-steering status
-void emberAfPluginNetworkSteeringStatusCommand(void)
-{
-  emberAfCorePrintln("%p: %p:",
-                     emAfNetworkSteeringPluginName,
-                     "Status");
-
-  emberAfCorePrintln("Channel mask:");
-  emberAfCorePrint("    (1) 0x%4X [",
-                   emAfPluginNetworkSteeringPrimaryChannelMask);
-  emberAfPrintChannelListFromMask(emAfPluginNetworkSteeringPrimaryChannelMask);
-  emberAfCorePrintln("]");
-  emberAfCorePrint("    (2) 0x%4X [",
-                   emAfPluginNetworkSteeringSecondaryChannelMask);
-  emberAfPrintChannelListFromMask(emAfPluginNetworkSteeringSecondaryChannelMask);
-  emberAfCorePrintln("]");
-
-  emberAfCorePrintln("State: 0x%X (%p)",
-                     emAfPluginNetworkSteeringState,
-                     emAfPluginNetworkSteeringStateNames[emAfPluginNetworkSteeringState]);
-#ifndef EMBER_AF_PLUGIN_NETWORK_STEERING_OPTIMIZE_SCANS
-  emberAfCorePrintln("Pan ID index: %d",
-                     emAfPluginNetworkSteeringPanIdIndex);
-#endif //  EMBER_AF_PLUGIN_NETWORK_STEERING_OPTIMIZE_SCANS
-  emberAfCorePrintln("Current channel: %d",
-                     emAfPluginNetworkSteeringGetCurrentChannel());
-  emberAfCorePrintln("Total beacons: %d",
-                     emAfPluginNetworkSteeringTotalBeacons);
-  emberAfCorePrintln("Join attempts: %d",
-                     emAfPluginNetworkSteeringJoinAttempts);
-  emberAfCorePrintln("Network state: 0x%X",
-                     emberAfNetworkState());
-}
-
-void emberAfPluginNetworkSteeringStartCommand(void)
-{
-  emAfPluginNetworkSteeringOptionsMask = (uint8_t)emberUnsignedCommandArgument(0);
-  emberAfPluginNetworkSteeringStart();
-}
-
-void emberAfPluginNetworkSteeringStopCommand(void)
-{
-  emberAfCorePrintln("%p: %p: 0x%X",
-                     emAfNetworkSteeringPluginName,
-                     "Stop",
-                     emberAfPluginNetworkSteeringStop());
-}
-
-void emberAfPluginNetworkSteeringSetPreconfiguredKeyCommand(void)
-{
-#ifndef EMBER_AF_PLUGIN_NETWORK_STEERING_OPTIMIZE_SCANS
-  EmberKeyData keyData;
-  emberCopyKeyArgument(0, &keyData);
-  emAfPluginNetworkSteeringSetConfiguredKey(keyData.contents, true);
-#else // EMBER_AF_PLUGIN_NETWORK_STEERING_OPTIMIZE_SCANS
-  emberAfCorePrintln("Unsupported feature when using optimized scans. To use"
-                     " a configured key when joining, add the key to the"
-                     " transient key table using the wildcard EUI (all FFs).");
-#endif // EMBER_AF_PLUGIN_NETWORK_STEERING_OPTIMIZE_SCANS
-}
-
-#endif /*
-          defined(EMBER_AF_GENERATE_CLI)
-        || defined(EMBER_AF_API_COMMAND_INTERPRETER2)
-        */
-
-#endif // !UC_BUILD

@@ -3022,12 +3022,6 @@ sl_power_manager_on_isr_exit_t sl_uartdrv_sleep_on_isr_exit(void)
    The source files for the UART driver library, uartdrv.c and uartdrv.h, are in the
    emdrv/uartdrv folder.
 
-   @li @ref uartdrv_intro
-   @li @ref uartdrv_conf
-   @li @ref uartdrv_api
-   @li @ref uartdrv_fc
-   @li @ref uartdrv_example
-
    @n @section uartdrv_intro Introduction
    The UART driver supports the UART capabilities of the USART, UART, and LEUART
    peripherals. The driver is fully reentrant and supports multiple driver instances.
@@ -3087,8 +3081,8 @@ sl_power_manager_on_isr_exit_t sl_uartdrv_sleep_on_isr_exit(void)
 
    @ref UARTDRV_InitUart(), @ref UARTDRV_InitLeuart() and @ref UARTDRV_DeInit() @n
     These functions initialize and deinitialize the UARTDRV driver. Typically,
-    @htmlonly UARTDRV_InitUart() @endhtmlonly (for UART/USART) or
-    @htmlonly UARTDRV_InitLeuart() @endhtmlonly (for LEUART) are called once in
+    UARTDRV_InitUart() (for UART/USART) or
+    UARTDRV_InitLeuart() (for LEUART) are called once in
     the startup code.
 
    @ref UARTDRV_GetReceiveStatus() and @ref UARTDRV_GetTransmitStatus() @n

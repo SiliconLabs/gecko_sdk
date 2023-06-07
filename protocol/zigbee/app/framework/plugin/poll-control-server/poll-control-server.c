@@ -52,7 +52,6 @@
 // clients are forgetten, and a new fast poll period begins with the selection
 // of new clients and the sending of new CheckIn commands.
 
-#ifdef UC_BUILD
 #include "zap-cluster-command-parser.h"
 #include "poll-control-server-config.h"
 #include "poll-control-server.h"
@@ -64,16 +63,6 @@
 #endif
 sl_zigbee_event_t emberAfPluginPollControlServerCheckInEndpointEvents[FIXED_ENDPOINT_COUNT];
 #define endpointEvent emberAfPluginPollControlServerCheckInEndpointEvents
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_POLL_CONTROL_SERVER_ACCEPT_SET_LONG_POLL_INTERVAL_COMMAND
-#define ACCEPT_SET_LONG_POLL_INTERVAL_COMMAND
-#endif
-#ifdef EMBER_AF_PLUGIN_POLL_CONTROL_SERVER_ACCEPT_SET_SHORT_POLL_INTERVAL_COMMAND
-#define ACCEPT_SET_SHORT_POLL_INTERVAL_COMMAND
-#endif
-extern EmberEventControl emberAfPluginPollControlServerCheckInEndpointEventControls[];
-#define endpointEvent emberAfPluginPollControlServerCheckInEndpointEventControls
-#endif // UC_BUILD
 typedef struct {
   uint8_t bindingIndex;
   uint16_t fastPollTimeoutQs;
@@ -136,16 +125,16 @@ static EmberAfStatus writeServerAttribute(uint8_t endpoint,
 
 static EmberStatus scheduleServerTick(uint8_t endpoint, uint32_t delayMs)
 {
-  return slxu_zigbee_zcl_schedule_server_tick_extended(endpoint,
-                                                       ZCL_POLL_CONTROL_CLUSTER_ID,
-                                                       delayMs,
-                                                       EMBER_AF_SHORT_POLL,
-                                                       EMBER_AF_OK_TO_SLEEP);
+  return sl_zigbee_zcl_schedule_server_tick_extended(endpoint,
+                                                     ZCL_POLL_CONTROL_CLUSTER_ID,
+                                                     delayMs,
+                                                     EMBER_AF_SHORT_POLL,
+                                                     EMBER_AF_OK_TO_SLEEP);
 }
 
 static EmberStatus deactivateServerTick(uint8_t endpoint)
 {
-  return slxu_zigbee_zcl_deactivate_server_tick(endpoint, ZCL_POLL_CONTROL_CLUSTER_ID);
+  return sl_zigbee_zcl_deactivate_server_tick(endpoint, ZCL_POLL_CONTROL_CLUSTER_ID);
 }
 
 static void scheduleCheckIn(uint8_t endpoint)
@@ -158,13 +147,13 @@ static void scheduleCheckIn(uint8_t endpoint)
                                (uint8_t *)&checkInIntervalQs,
                                sizeof(checkInIntervalQs));
   if (status == EMBER_ZCL_STATUS_SUCCESS && checkInIntervalQs != 0) {
-    slxu_zigbee_endpoint_event_set_delay_ms(endpointEvent,
-                                            endpoint,
-                                            (checkInIntervalQs
-                                             * MILLISECOND_TICKS_PER_QUARTERSECOND));
+    sl_zigbee_endpoint_event_set_delay_ms(endpointEvent,
+                                          endpoint,
+                                          (checkInIntervalQs
+                                           * MILLISECOND_TICKS_PER_QUARTERSECOND));
   } else {
-    slxu_zigbee_endpoint_event_set_inactive(endpointEvent,
-                                            endpoint);
+    sl_zigbee_endpoint_event_set_inactive(endpointEvent,
+                                          endpoint);
   }
 }
 
@@ -570,10 +559,8 @@ void emberAfPluginPollControlServerCheckInEndpointEventHandler(uint8_t endpoint)
   scheduleCheckIn(endpoint);
 }
 
-#ifdef UC_BUILD
-
 // Templated to event_init
-void emAfPluginPollControlServerInitCallback(uint8_t init_level)
+void sli_zigbee_af_poll_control_server_init_callback(uint8_t init_level)
 {
   (void)init_level;
 
@@ -586,8 +573,6 @@ void emAfPluginPollControlServerInitCallback(uint8_t init_level)
                                   endpoint_array[i]);
   }
 }
-
-#endif // UC_BUILD
 
 EmberAfStatus emberAfPollControlClusterServerPreAttributeChangedCallback(uint8_t endpoint,
                                                                          EmberAfAttributeId attributeId,
@@ -716,8 +701,6 @@ bool emberAfPollControlClusterFastPollStopCallback(void)
   emberAfSendImmediateDefaultResponse(status);
   return true;
 }
-
-#ifdef UC_BUILD
 
 bool emberAfPollControlClusterCheckInResponseCallback(EmberAfClusterCommand *cmd)
 {
@@ -850,125 +833,7 @@ bool emberAfPollControlClusterSetShortPollIntervalCallback(EmberAfClusterCommand
 #endif // ACCEPT_SET_SHORT_POLL_INTERVAL_COMMAND
 }
 
-#else // !UC_BUILD
-
-bool emberAfPollControlClusterCheckInResponseCallback(uint8_t startFastPolling,
-                                                      uint16_t fastPollTimeoutQs)
-{
-  EmberAfStatus status = EMBER_ZCL_STATUS_FAILURE;
-  uint8_t clientIndex = findClientIndex();
-
-  emberAfPollControlClusterPrintln("RX: CheckInResponse 0x%x, 0x%2x",
-                                   startFastPolling,
-                                   fastPollTimeoutQs);
-
-  // clientIndex will always be less than EMBER_AF_PLUGIN_POLL_CONTROL_SERVER_MAX_CLIENTS
-  if (clientIndex != NULL_INDEX
-      && clientIndex < EMBER_AF_PLUGIN_POLL_CONTROL_SERVER_MAX_CLIENTS) {
-    if (state == WAITING) {
-      uint8_t endpoint = emberAfCurrentEndpoint();
-
-      if (isPollControlBindingTrustCenter(endpoint, clients[clientIndex].bindingIndex)) {
-        trustCenterCheckInResponseReceived = true;
-        if (trustCenterCheckInFailureCount > 0) {
-          emberAfPollControlClusterPrintln("Poll Control: trust center "
-                                           "responding to checkins after %d"
-                                           "failure%s",
-                                           trustCenterCheckInFailureCount,
-                                           trustCenterCheckInFailureCount == 1
-                                           ? "" : "s");
-        }
-        trustCenterCheckInFailureCount = 0;
-      }
-
-      if (startFastPolling) {
-        if (fastPollTimeoutQs == 0) {
-          status = readServerAttribute(endpoint,
-                                       ZCL_FAST_POLL_TIMEOUT_ATTRIBUTE_ID,
-                                       "fast poll timeout",
-                                       (uint8_t *)&fastPollTimeoutQs,
-                                       sizeof(fastPollTimeoutQs));
-        } else {
-          status = validateFastPollInterval(endpoint, fastPollTimeoutQs);
-        }
-        if (status == EMBER_ZCL_STATUS_SUCCESS) {
-          clients[clientIndex].fastPollTimeoutQs = fastPollTimeoutQs;
-        } else {
-          clients[clientIndex].bindingIndex = NULL_INDEX;
-        }
-      } else {
-        status = EMBER_ZCL_STATUS_SUCCESS;
-        clients[clientIndex].bindingIndex = NULL_INDEX;
-      }
-
-      // Calling the tick directly when in the waiting state will cause the
-      // temporarily fast poll mode to stop and will begin the actual fast poll
-      // mode if applicable.
-      if (!pendingCheckInResponses()) {
-        emberAfPollControlClusterServerTickCallback(endpoint);
-      }
-    }
-  }
-
-  emberAfSendImmediateDefaultResponse(status);
-  return true;
-}
-
-bool emberAfPollControlClusterSetLongPollIntervalCallback(uint32_t newLongPollIntervalQs)
-{
-#ifdef ACCEPT_SET_LONG_POLL_INTERVAL_COMMAND
-  EmberAfStatus status;
-  uint8_t endpoint = emberAfCurrentEndpoint();
-
-  emberAfPollControlClusterPrintln("RX: SetLongPollInterval 0x%4x",
-                                   newLongPollIntervalQs);
-
-  // Trying to write the attribute will trigger the PreAttributeChanged
-  // callback, which will handle validation.  If the write is successful, the
-  // AttributeChanged callback will fire, which will handle setting the new
-  // long poll interval.
-  status = writeServerAttribute(endpoint,
-                                ZCL_LONG_POLL_INTERVAL_ATTRIBUTE_ID,
-                                "long poll interval",
-                                (uint8_t *)&newLongPollIntervalQs,
-                                ZCL_INT32U_ATTRIBUTE_TYPE);
-
-  emberAfSendImmediateDefaultResponse(status);
-  return true;
-#else // !ACCEPT_SET_LONG_POLL_INTERVAL_COMMAND
-  return false;
-#endif // ACCEPT_SET_LONG_POLL_INTERVAL_COMMAND
-}
-
-bool emberAfPollControlClusterSetShortPollIntervalCallback(uint16_t newShortPollIntervalQs)
-{
-#ifdef ACCEPT_SET_SHORT_POLL_INTERVAL_COMMAND
-  EmberAfStatus status;
-  uint8_t endpoint = emberAfCurrentEndpoint();
-
-  emberAfPollControlClusterPrintln("RX: SetShortPollInterval 0x%2x",
-                                   newShortPollIntervalQs);
-
-  // Trying to write the attribute will trigger the PreAttributeChanged
-  // callback, which will handle validation.  If the write is successful, the
-  // AttributeChanged callback will fire, which will handle setting the new
-  // short poll interval.
-  status = writeServerAttribute(endpoint,
-                                ZCL_SHORT_POLL_INTERVAL_ATTRIBUTE_ID,
-                                "short poll interval",
-                                (uint8_t *)&newShortPollIntervalQs,
-                                ZCL_INT16U_ATTRIBUTE_TYPE);
-
-  emberAfSendImmediateDefaultResponse(status);
-  return true;
-#else // !ACCEPT_SET_SHORT_POLL_INTERVAL_COMMAND
-  return false;
-#endif // ACCEPT_SET_SHORT_POLL_INTERVAL_COMMAND
-}
-
-#endif // UC_BUILD
-
-void emAfPluginPollControlServerResetAttributesCallback(uint8_t endpointId)
+void sli_zigbee_af_poll_control_server_reset_attributes_callback(uint8_t endpointId)
 {
   // EMAPPFWKV2-1437: when we reset our attributes, we need to re-sync with
   // the consumers of our attribute values. For example, the consumers of
@@ -996,8 +861,6 @@ bool emberAfPluginPollControlServerGetIgnoreNonTrustCenter(void)
 {
   return ignoreNonTrustCenter;
 }
-
-#ifdef UC_BUILD
 
 uint32_t emberAfPollControlClusterServerCommandParse(sl_service_opcode_t opcode,
                                                      sl_service_function_context_t *context)
@@ -1036,5 +899,3 @@ uint32_t emberAfPollControlClusterServerCommandParse(sl_service_opcode_t opcode,
           ? EMBER_ZCL_STATUS_SUCCESS
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
-
-#endif // UC_BUILD

@@ -17,24 +17,27 @@ component:
   - id: "nvm3_default"
   - id: "micriumos_kernel"
   - id: "silabs_core_sl_malloc"
-# radio config
-  - id: "wisun_full_radioconf"
-# SDK components
-  - id: "sl_wisun_trace_util"
-  - id: "sl_wisun_app_cli"
-  - id: "sl_wisun_ping"
-  - id: "sl_wisun_network_measurement"
-  - id: "sl_iperf"
-  - id: "sl_iperf_cli"
-  - id: "sl_wisun_iperf_posix_port"
-  - id: "sl_wisun_coap"
+# other periphery
   - id: "simple_button"
     instance:
       - btn0
       - btn1
-  - id: cli
+# radio config
+  - id: "wisun_full_radioconf"
+# SDK components
+  - id: "sl_wisun_lfn_device_support"
+  - id: "sl_wisun_trace_util"
+  - id: "sl_wisun_app_core"
+  - id: "sl_wisun_app_setting"
+  - id: "sl_wisun_app_cli"
+  - id: "sl_wisun_ping"
+  - id: "sl_wisun_network_measurement"
+  - id: "sl_iperf"
+  - id: "sl_wisun_iperf_posix_port"
+  - id: "sl_wisun_coap"
+  - id: "cli"
     instance:
-    - example
+      - vcom
 
 requires:
   - name: "cmsis_rtos2"
@@ -87,7 +90,7 @@ configuration:
     value: "1"
     condition: [micriumos_kernel]
   - name: SL_RAIL_UTIL_PA_SELECTION_SUBGHZ
-    value: "RAIL_TX_POWER_MODE_SUBGIG_EFF_20DBM"
+    value: "RAIL_TX_POWER_MODE_SUBGIG_EFF_POWERSETTING_TABLE"
     condition: [hardware_board_has_eff]
   - name: RAIL_UTIL_EFF_MAX_TX_CONTINUOUS_POWER_DBM
     value: 20
@@ -103,7 +106,7 @@ configuration:
     value: "1024"
   - name: "SL_WISUN_PING_PACKET_INTERVAL"
     value: "1"
-  - name: "SOCKET_BUFFER_SIZE"
+  - name: "SL_SOCKET_BUFFER_SIZE"
     value: "2048"
   - name: "WISUN_NETWORK_SIZE"
     value: "SL_WISUN_NETWORK_SIZE_SMALL"

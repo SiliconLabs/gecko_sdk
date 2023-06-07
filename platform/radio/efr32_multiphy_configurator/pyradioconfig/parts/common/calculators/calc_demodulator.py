@@ -84,7 +84,7 @@ class CALC_Demodulator(ICalculator):
         self._addModelVariable(model, 'viterbi_demod_expect_patt_head_tail', int, ModelVariableFormat.DECIMAL)
 
 
-        if model.part_family.lower() not in ["dumbo", "jumbo", "nerio", "nixi"]:
+        if model.part_family.lower() not in ["dumbo", "jumbo", "nerio", "nixi", "unit_test_part"]:
             # 40nm Series 2 enable optional input for SRC range minimum
             self._addModelVariable(model, 'src1_range_available_minimum', int, ModelVariableFormat.DECIMAL, 'SRC range minimum')
             self._addModelVariable(model, 'viterbidemod_disdemodof_viterbi_demod_disable_overflow_detect', int, ModelVariableFormat.DECIMAL)
@@ -409,7 +409,7 @@ class CALC_Demodulator(ICalculator):
             # in dumbo and jumbo we have two dec0 filters wide and narrow
             # choose between them based on bw
             # for other chips set this to 1
-            if family == "dumbo" or family == "jumbo":
+            if family in ["dumbo", "jumbo", "unit_test_part"]:
                 if bw > fxo * 0.037:
                     reg = 1
                 else:
@@ -1319,7 +1319,7 @@ class CALC_Demodulator(ICalculator):
         dec1 = model.vars.dec1.value
         part_family = model.part_family.lower()
 
-        if part_family != "dumbo":
+        if part_family not in ["dumbo","unit_test_part"]:
             src1_ratio_actual = model.vars.src1_ratio_actual.value
             src2_ratio_actual = model.vars.src2_ratio_actual.value
         else:

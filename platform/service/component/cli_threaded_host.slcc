@@ -19,7 +19,7 @@ provides:
 requires:
   - name: cli
   - name: cmsis_core
-  - name: linux
+  - name: operating_system
   - name: device_host
 template_contribution:
   - name: event_handler

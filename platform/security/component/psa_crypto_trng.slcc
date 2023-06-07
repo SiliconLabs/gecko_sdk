@@ -46,7 +46,7 @@ requires:
     condition: [trustzone_unaware]
   - name: psa_crypto_common
     condition: [trustzone_secure]
-  - name: device
+
   - name: emlib_cmu
     condition: [device_has_trng]
 template_contribution:

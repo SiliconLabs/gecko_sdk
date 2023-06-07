@@ -33,7 +33,7 @@
 
 #include "btmesh_conf_types.h"
 #include "btmesh_conf_job.h"
-#include "sl_simple_timer.h"
+#include "app_timer.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -153,7 +153,7 @@ typedef struct btmesh_conf_executor {
   /// Stack timeout which indicates lost configuration messages.
   uint16_t communication_retry_max;
   /// Timer to measure event timeout and configuration request retry interval
-  sl_simple_timer_t timer;
+  app_timer_t timer;
   /// @brief Timer is active from the the moment it is started until it elapses
   /// or until it is stopped explicitly.
   bool timer_active;

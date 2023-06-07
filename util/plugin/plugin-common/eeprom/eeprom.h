@@ -143,7 +143,7 @@ void emberAfPluginEepromStateChangeCallback(HalEepromState oldEepromState, HalEe
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
 #if defined(EMBER_TEST)
-void emAfPluginEepromFakeEepromCallback(void);
+void sli_eeprom_fake_eeprom_callback(void);
 #endif
 
 // Word sizes of up to 4 bytes are permitted. Having a word size of 4
@@ -159,10 +159,10 @@ typedef struct {
   uint32_t address;
   uint8_t data[EM_AF_EEPROM_MAX_WORD_SIZE];
   uint8_t count;
-} EmAfPartialWriteStruct;
+} sli_eeprom_partial_write_struct;
 
-extern EmAfPartialWriteStruct emAfEepromSavedPartialWrites[];
-bool emAfIsEepromInitialized(void);
+extern sli_eeprom_partial_write_struct sli_eeprom_saved_partial_writes[];
+bool sli_eeprom_is_eeprom_initialized(void);
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 

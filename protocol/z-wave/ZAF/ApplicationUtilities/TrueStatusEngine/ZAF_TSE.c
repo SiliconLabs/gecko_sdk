@@ -8,6 +8,7 @@
 #include "AppTimer.h"
 #include "association_plus_base.h"
 #include "misc.h"
+#include "ZW_TransportEndpoint.h"
 
 //#define DEBUGPRINT
 #include "DebugPrint.h"
@@ -18,7 +19,7 @@
 typedef struct _s_zaf_tse_resource_t_
 {
   /* Pointer to the function to call back at the end, to transmit the status */
-  void (*pCallback)(TRANSMIT_OPTIONS_TYPE_SINGLE_EX, void*);
+  void (*pCallback)(zaf_tx_options_t*, void*);
   /* Data pointer, the pointed struct must contain a RECEIVE_OPTIONS_TYPE_EX object first.
   see s_zaf_tse_data_input_template_t definition below */
   void* pData;
@@ -200,16 +201,18 @@ static void InvokeRegisteredCallback(void)
           pCurrentTrigger->pCurrentNode->node.nodeId, pCurrentTrigger->pCurrentNode->node.endpoint);
 
   /* Build a txOptionEx */
-  TRANSMIT_OPTIONS_TYPE_SINGLE_EX txOptionsEx;
+  zaf_tx_options_t tx_options;
 
-  txOptionsEx.pDestNode = pCurrentTrigger->pCurrentNode;
-  txOptionsEx.sourceEndpoint = RxOptions.destNode.endpoint;
-  txOptionsEx.txOptions = TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_EXPLORE | ZWAVE_PLUS_TX_OPTIONS;
+  tx_options.dest_node_id = pCurrentTrigger->pCurrentNode->node.nodeId;
+  tx_options.dest_endpoint = pCurrentTrigger->pCurrentNode->node.endpoint;
+  tx_options.bit_addressing = pCurrentTrigger->pCurrentNode->node.BitAddress;
+  tx_options.security_key = pCurrentTrigger->pCurrentNode->nodeInfo.security;
+  tx_options.source_endpoint = RxOptions.destNode.endpoint;
+  tx_options.tx_options = TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_EXPLORE | ZWAVE_PLUS_TX_OPTIONS;
   if (RxOptions.rxStatus & RECEIVE_STATUS_LOW_POWER)
   {
-    txOptionsEx.txOptions |= TRANSMIT_OPTION_LOW_POWER;
+    tx_options.tx_options |= TRANSMIT_OPTION_LOW_POWER;
   }
-  txOptionsEx.txSecOptions = 0;
 
   /*
    * Invoke the callback if it's different from NULL. We should never end up here with pCallback
@@ -217,7 +220,7 @@ static void InvokeRegisteredCallback(void)
    */
   if (NULL != pCurrentTrigger->pCallback)
   {
-    pCurrentTrigger->pCallback(txOptionsEx, pCurrentTrigger->pData);
+    pCurrentTrigger->pCallback(&tx_options, pCurrentTrigger->pData);
   }
 }
 

@@ -17,6 +17,7 @@
  ******************************************************************************/
 
 #include "app/framework/include/af.h"
+#include "app/framework/plugin/debug-print/sl_zigbee_debug_print.h"
 
 //------------------------------------------------------------------------------
 // Globals
@@ -44,34 +45,12 @@ uint16_t emberAfPrintActiveArea = 0;
 
 //------------------------------------------------------------------------------
 
-#ifdef UC_BUILD
 // In the first stage of Zigbee/UC there is no run-time enabling/disabling of
 // debug prints
 bool emberAfPrintEnabled(uint16_t area)
 {
   return true;
 }
-#else
-
-// Returns true if the area print is enabled
-bool emberAfPrintEnabled(uint16_t area)
-{
-#ifndef EMBER_AF_PRINT_BITS
-  return false;
-#else
-  uint8_t index = (uint8_t)(area >> 8);
-  if ( area == 0xFFFF ) {
-    return true;
-  }
-  if ( index >= sizeof(enablementBytes) ) {
-    return false;
-  } else {
-    uint8_t byte = enablementBytes[index];
-    return ( (byte & (uint8_t)(area & 0xFF) ) != 0x00);
-  }
-#endif // EMBER_AF_PRINT_BITS
-}
-#endif //UC_BUILD
 
 static void printEnable(uint16_t area, bool on)
 {
@@ -116,17 +95,17 @@ static void reallyPrintAreaName(uint16_t area)
 
   if (area != 0xFFFF
       && index < EMBER_AF_PRINT_NAME_NUMBER) {
-    (void) emberSerialPrintf(EMBER_AF_PRINT_OUTPUT, "%p:", areaNames[index]);
+    sl_zigbee_core_debug_print("%p:", areaNames[index]);
   }
 #endif // EMBER_AF_PRINT_NAMES
 }
 #endif //EMBER_AF_PRINT_AREA_NAME
 
 // Prints the trace if trace is enabled
-static void emAfPrintInternalVarArg(uint16_t area,
-                                    bool newLine,
-                                    const char * formatString,
-                                    va_list ap)
+static void sli_zigbee_af_print_internal_var_arg(uint16_t area,
+                                                 bool newLine,
+                                                 const char * formatString,
+                                                 va_list ap)
 {
   if ( !emberAfPrintEnabled(area) ) {
     return;
@@ -136,7 +115,7 @@ static void emAfPrintInternalVarArg(uint16_t area,
   (void) emberSerialPrintfVarArg(EMBER_AF_PRINT_OUTPUT, formatString, ap);
 
   if (newLine) {
-    (void) emberSerialPrintf(EMBER_AF_PRINT_OUTPUT, "\r\n");
+    sl_zigbee_core_debug_println("\r\n");
   }
   emberAfPrintActiveArea = area;
 }
@@ -145,7 +124,7 @@ void emberAfPrintln(uint16_t area, const char * formatString, ...)
 {
   va_list ap = { 0 };
   va_start(ap, formatString);
-  emAfPrintInternalVarArg(area, true, formatString, ap);
+  sli_zigbee_af_print_internal_var_arg(area, true, formatString, ap);
   va_end(ap);
 }
 
@@ -153,7 +132,7 @@ void emberAfPrint(uint16_t area, const char * formatString, ...)
 {
   va_list ap = { 0 };
   va_start(ap, formatString);
-  emAfPrintInternalVarArg(area, false, formatString, ap);
+  sli_zigbee_af_print_internal_var_arg(area, false, formatString, ap);
   va_end(ap);
 }
 
@@ -162,7 +141,7 @@ void emberAfPrintStatus(void)
 #ifdef EMBER_AF_PRINT_NAMES
   uint8_t i;
   for (i = 0; i < EMBER_AF_PRINT_NAME_NUMBER; i++) {
-    (void) emberSerialPrintfLine(EMBER_AF_PRINT_OUTPUT, "[%d] %p : %p",
+    sl_zigbee_core_debug_println("[%d] %p : %p",
                                  i,
                                  areaNames[i],
                                  (emberAfPrintEnabled(

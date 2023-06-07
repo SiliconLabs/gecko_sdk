@@ -82,10 +82,7 @@ void VerifyRawRssValue(int8_t aAverage, uint16_t aRawValue)
 }
 
 // This function prints the values in the passed in link info instance. It is invoked as the final step in test-case.
-void PrintOutcome(LinkQualityInfo &aLinkInfo)
-{
-    printf("%s -> PASS \n", aLinkInfo.ToInfoString().AsCString());
-}
+void PrintOutcome(LinkQualityInfo &aLinkInfo) { printf("%s -> PASS \n", aLinkInfo.ToInfoString().AsCString()); }
 
 void TestLinkQualityData(RssTestData aRssData)
 {
@@ -138,10 +135,7 @@ void VerifyRawRssValue(RssAverager &aRssAverager)
 }
 
 // This function prints the values in the passed link info instance. It is invoked as the final step in test-case.
-void PrintOutcome(RssAverager &aRssAverager)
-{
-    printf("%s -> PASS\n", aRssAverager.ToString().AsCString());
-}
+void PrintOutcome(RssAverager &aRssAverager) { printf("%s -> PASS\n", aRssAverager.ToString().AsCString()); }
 
 int8_t GetRandomRss(void)
 {
@@ -339,30 +333,30 @@ void TestLinkQualityCalculations(void)
 {
     const int8_t      rssList1[] = {-81, -80, -79, -78, -76, -80, -77, -75, -77, -76, -77, -74};
     const RssTestData rssData1   = {
-        rssList1,         // mRssList
-        sizeof(rssList1), // mRssListSize
-        3                 // mExpectedLinkQuality
+          rssList1,         // mRssList
+          sizeof(rssList1), // mRssListSize
+          3                 // mExpectedLinkQuality
     };
 
     const int8_t      rssList2[] = {-90, -80, -85};
     const RssTestData rssData2   = {
-        rssList2,         // mRssList
-        sizeof(rssList2), // mRssListSize
-        2                 // mExpectedLinkQuality
+          rssList2,         // mRssList
+          sizeof(rssList2), // mRssListSize
+          2                 // mExpectedLinkQuality
     };
 
     const int8_t      rssList3[] = {-95, -96, -98, -99, -100, -100, -98, -99, -100, -100, -100, -100, -100};
     const RssTestData rssData3   = {
-        rssList3,         // mRssList
-        sizeof(rssList3), // mRssListSize
-        0                 // mExpectedLinkQuality
+          rssList3,         // mRssList
+          sizeof(rssList3), // mRssListSize
+          0                 // mExpectedLinkQuality
     };
 
     const int8_t      rssList4[] = {-75, -100, -100, -100, -100, -100, -95, -92, -93, -94, -93, -93};
     const RssTestData rssData4   = {
-        rssList4,         // mRssList
-        sizeof(rssList4), // mRssListSize
-        1                 // mExpectedLinkQuality
+          rssList4,         // mRssList
+          sizeof(rssList4), // mRssListSize
+          1                 // mExpectedLinkQuality
     };
 
     TestLinkQualityData(rssData1);
@@ -500,13 +494,13 @@ public:
 
             printf("\nLinkMargin : %-3u -> Scaled : %.1f (rounded:%u)", linkMargin, scaled, scaledAsU8);
 
-            VerifyOrQuit(LinkMetrics::LinkMetrics::ScaleLinkMarginToRawValue(linkMargin) == scaledAsU8);
-            VerifyOrQuit(LinkMetrics::LinkMetrics::ScaleRawValueToLinkMargin(scaledAsU8) == linkMargin);
+            VerifyOrQuit(LinkMetrics::ScaleLinkMarginToRawValue(linkMargin) == scaledAsU8);
+            VerifyOrQuit(LinkMetrics::ScaleRawValueToLinkMargin(scaledAsU8) == linkMargin);
         }
 
-        VerifyOrQuit(LinkMetrics::LinkMetrics::ScaleLinkMarginToRawValue(131) == 255);
-        VerifyOrQuit(LinkMetrics::LinkMetrics::ScaleLinkMarginToRawValue(150) == 255);
-        VerifyOrQuit(LinkMetrics::LinkMetrics::ScaleLinkMarginToRawValue(255) == 255);
+        VerifyOrQuit(LinkMetrics::ScaleLinkMarginToRawValue(131) == 255);
+        VerifyOrQuit(LinkMetrics::ScaleLinkMarginToRawValue(150) == 255);
+        VerifyOrQuit(LinkMetrics::ScaleLinkMarginToRawValue(255) == 255);
 
         // Test RSSI scaling from [-130, 0] -> [0, 255]
 
@@ -517,13 +511,13 @@ public:
 
             printf("\nRSSI : %-3d -> Scaled :%.1f (rounded:%u)", rssi, scaled, scaledAsU8);
 
-            VerifyOrQuit(LinkMetrics::LinkMetrics::ScaleRssiToRawValue(rssi) == scaledAsU8);
-            VerifyOrQuit(LinkMetrics::LinkMetrics::ScaleRawValueToRssi(scaledAsU8) == rssi);
+            VerifyOrQuit(LinkMetrics::ScaleRssiToRawValue(rssi) == scaledAsU8);
+            VerifyOrQuit(LinkMetrics::ScaleRawValueToRssi(scaledAsU8) == rssi);
         }
 
-        VerifyOrQuit(LinkMetrics::LinkMetrics::ScaleRssiToRawValue(1) == 255);
-        VerifyOrQuit(LinkMetrics::LinkMetrics::ScaleRssiToRawValue(10) == 255);
-        VerifyOrQuit(LinkMetrics::LinkMetrics::ScaleRssiToRawValue(127) == 255);
+        VerifyOrQuit(LinkMetrics::ScaleRssiToRawValue(1) == 255);
+        VerifyOrQuit(LinkMetrics::ScaleRssiToRawValue(10) == 255);
+        VerifyOrQuit(LinkMetrics::ScaleRssiToRawValue(127) == 255);
     }
 };
 

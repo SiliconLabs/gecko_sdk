@@ -78,6 +78,22 @@ extern const uint8_t wisun_modeSwitchPhrsLength;
 extern const RAIL_IEEE802154_ModeSwitchPhr_t wisun_modeSwitchPhrs[WISUN_MODESWITCHPHRS_ARRAY_SIZE];
 {% endif %}
 
+{%- for struct_name, struct_obj in multiPhyConfig.commonStructures.stackInfoProtocolTableEntries.items() %}
+{%- if struct_obj['enable'] == True %}
+typedef struct {{struct_name}} {
+  RAIL_StackInfoCommon_t stackInfoCommon;
+{%- for field_name, field_value in struct_obj.items() %}
+  {%- if field_name != 'enable' %}
+  uint8_t {{field_name}};
+  {%- endif %}
+  {%- if field_name == 'wisunChannelParam' -%}
+  // wisunOperatingClass for version=0, wisunChannelPlanId for version=1
+  {%- endif %}
+{%- endfor %}
+} {{struct_name}}_t;
+{% endif %}
+{%- endfor %}
+
 {%- if multiPhyConfig.commonStructures.stackInfoEntries.items() %}
 #ifdef RADIO_CONFIG_ENABLE_STACK_INFO
 {%- for stackName, stackInfoEntry in multiPhyConfig.commonStructures.stackInfoEntries.items() %}

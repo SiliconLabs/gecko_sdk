@@ -34,7 +34,7 @@ template_contribution:
   - name: zigbee_af_callback
     value:
       callback_type: event_init
-      function_name: emAfPluginUpdateTcLinkKeyBeginTcLinkKeyUpdateInit    
+      function_name: sli_zigbee_af_update_tc_link_key_begin_tc_link_key_update_init    
   - name: cli_group
     value:
       group: plugin

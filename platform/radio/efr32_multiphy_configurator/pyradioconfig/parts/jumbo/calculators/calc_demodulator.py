@@ -212,7 +212,7 @@ class CALC_Demodulator_jumbo(CALC_Demodulator):
             dec0_choices += [3]
         flag_allow_dec0_dec_by_8 = model.vars.input_decimation_filter_allow_dec8.value
 
-        if model.part_family.lower() in ["dumbo", "jumbo", "nerio", "nixi"]:
+        if model.part_family.lower() in ["dumbo", "jumbo", "nerio", "nixi", "unit_test_part"]:
             dumbo_jumbo_nerio_nixi = True
         else:
             dumbo_jumbo_nerio_nixi = False

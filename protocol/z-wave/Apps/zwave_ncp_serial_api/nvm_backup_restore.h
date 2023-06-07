@@ -1,5 +1,5 @@
 /**
- * @file nvm_backup_restore.h
+ * @file
  * @copyright 2022 Silicon Laboratories Inc.
  */
 

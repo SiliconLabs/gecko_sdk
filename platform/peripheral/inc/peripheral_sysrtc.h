@@ -130,6 +130,12 @@ typedef struct {
     SL_SYSRTC_COMPARE_MATCH_OUT_ACTION_PULSE        \
   }
 
+/// Compare channel configuration for starting HFXO using PRS.
+#define SYSRTC_GROUP_CHANNEL_COMPARE_CONFIG_EARLY_WAKEUP \
+  {                                                      \
+    SL_SYSRTC_COMPARE_MATCH_OUT_ACTION_CMPIF             \
+  }
+
 /// Suggested default values for capture channel configuration structure.
 #define SYSRTC_GROUP_CHANNEL_CAPTURE_CONFIG_DEFAULT \
   {                                                 \

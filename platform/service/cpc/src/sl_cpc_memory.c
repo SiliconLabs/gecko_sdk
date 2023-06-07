@@ -42,23 +42,10 @@
 #include "sli_cpc_drv.h"
 #include "sl_assert.h"
 #include "sl_common.h"
+#include "sl_slist.h"
 
 #if defined(SL_COMPONENT_CATALOG_PRESENT)
 #include "sl_component_catalog.h"
-#endif
-
-/*******************************************************************************
- *********************************   DEFINES   *********************************
- ******************************************************************************/
-
-#if (SL_CPC_DEBUG_MEMORY_ALLOCATOR_COUNTERS == 1)
-#define MEM_POOL_ALLOC(mempool, block) { if (block != NULL) \
-                                         { mempool->used_block_cnt++; } }
-
-#define MEM_POOL_FREE(mempool) mempool->used_block_cnt--
-#else
-#define MEM_POOL_ALLOC(mempool, block)
-#define MEM_POOL_FREE(mempool)
 #endif
 
 /*******************************************************************************
@@ -91,7 +78,7 @@ static sl_cpc_mem_pool_handle_t cpc_mempool_hdlc_reject =
 
 static sli_mem_pool_handle_t mempool_rx_buffer;
 SLI_MEM_POOL_DECLARE_BUFFER(mempool_rx_buffer,
-                            SLI_CPC_RX_DATA_MAX_LENGTH,
+                            SLI_CPC_RX_FRAME_MAX_LENGTH,
                             SL_CPC_RX_BUFFER_MAX_COUNT);
 static sl_cpc_mem_pool_handle_t cpc_mempool_rx_buffer =
 { .pool_handle = &mempool_rx_buffer,
@@ -155,6 +142,8 @@ static sl_cpc_mem_pool_handle_t cpc_mempool_tx_security_tag =
   .used_block_cnt = 0 };
 #endif
 
+sl_slist_node_t *postponed_free_rx_queue_item;
+
 extern sli_cpc_drv_capabilities_t sli_cpc_driver_capabilities;
 
 /*******************************************************************************
@@ -165,6 +154,10 @@ static void* alloc_object(sl_cpc_mem_pool_handle_t *pool);
 
 static void free_object(sl_cpc_mem_pool_handle_t *pool,
                         void *block);
+
+static sl_status_t free_receive_queue_item(sl_cpc_receive_queue_item_t *item);
+
+static sl_status_t free_receive_queue_item_from_postponed_list();
 
 /*******************************************************************************
  **************************   GLOBAL FUNCTIONS   *******************************
@@ -196,7 +189,7 @@ void sli_cpc_init_buffers(void)
                       sizeof(mempool_hdlc_reject_buffer));
 
   sli_mem_pool_create((sli_mem_pool_handle_t *)cpc_mempool_rx_buffer.pool_handle,
-                      SLI_CPC_RX_DATA_MAX_LENGTH,
+                      SLI_CPC_RX_FRAME_MAX_LENGTH,
                       SL_CPC_RX_BUFFER_MAX_COUNT,
                       mempool_rx_buffer_buffer,
                       sizeof(mempool_rx_buffer_buffer));
@@ -250,6 +243,8 @@ void sli_cpc_init_buffers(void)
                       mempool_tx_security_tag_buffer,
                       sizeof(mempool_tx_security_tag_buffer));
 #endif
+
+  sl_slist_init(&postponed_free_rx_queue_item);
 
   SLI_CPC_DEBUG_MEMORY_POOL_INIT();
 }
@@ -511,8 +506,24 @@ sl_status_t sl_cpc_free_rx_buffer(void *data)
 
   free_object(&cpc_mempool_rx_buffer, data);
 
+  free_receive_queue_item_from_postponed_list();
+
   // Notify that at least one RX buffer is available
   sli_cpc_memory_on_rx_buffer_free();
+
+  return SL_STATUS_OK;
+}
+
+/***************************************************************************//**
+ * Free internal rx buffer; Not pushed in RX Queue.
+ ******************************************************************************/
+sl_status_t sli_cpc_free_rx_buffer(void *data)
+{
+  if (data == NULL) {
+    return SL_STATUS_NULL_POINTER;
+  }
+
+  free_object(&cpc_mempool_rx_buffer, data);
 
   return SL_STATUS_OK;
 }
@@ -551,16 +562,11 @@ sl_status_t sli_cpc_get_receive_queue_item(sl_cpc_receive_queue_item_t **item)
 /***************************************************************************//**
  * Free receive queue item
  ******************************************************************************/
-sl_status_t sli_cpc_free_receive_queue_item(sl_cpc_receive_queue_item_t *item,
-                                            void **data,
-                                            uint16_t *data_length)
+static sl_status_t free_receive_queue_item(sl_cpc_receive_queue_item_t *item)
 {
   if (item == NULL) {
     return SL_STATUS_NULL_POINTER;
   }
-
-  *data = item->data;
-  *data_length = item->data_length;
 
   free_object(&cpc_mempool_rx_queue_item, item);
 
@@ -588,6 +594,32 @@ void sli_cpc_drop_receive_queue_item(sl_cpc_receive_queue_item_t *item)
   }
 
   free_object(&cpc_mempool_rx_queue_item, item);
+}
+
+/***************************************************************************//**
+ * Push receive queue item queued to the postponed free list
+ ******************************************************************************/
+sl_status_t sli_cpc_push_receive_queue_item_to_postponed_list(sl_cpc_receive_queue_item_t *rx_queue_item,
+                                                              void **data,
+                                                              uint16_t * data_length)
+{
+  *data = rx_queue_item->data;
+  *data_length = rx_queue_item->data_length;
+
+  sl_slist_push(&postponed_free_rx_queue_item, &rx_queue_item->node);
+  return SL_STATUS_OK;
+}
+
+/***************************************************************************//**
+ * Free receive queue item queued in the postponed free list
+ ******************************************************************************/
+static sl_status_t free_receive_queue_item_from_postponed_list()
+{
+  sl_slist_node_t *node = sl_slist_pop(&postponed_free_rx_queue_item);
+  sl_cpc_receive_queue_item_t *item = SL_SLIST_ENTRY(node, sl_cpc_receive_queue_item_t, node);
+  EFM_ASSERT(item != NULL);
+  free_receive_queue_item(item);
+  return SL_STATUS_OK;
 }
 
 /***************************************************************************//**
@@ -805,8 +837,19 @@ static void* alloc_object(sl_cpc_mem_pool_handle_t *pool)
 {
   void *block;
 
+  #if (SL_CPC_DEBUG_MEMORY_ALLOCATOR_COUNTERS == 1)
+  CORE_DECLARE_IRQ_STATE;
+  CORE_ENTER_ATOMIC();
+  #endif
+
   block = sli_mem_pool_alloc((sli_mem_pool_handle_t *)pool->pool_handle);
-  MEM_POOL_ALLOC(pool, block);
+
+  #if (SL_CPC_DEBUG_MEMORY_ALLOCATOR_COUNTERS == 1)
+  if (block != NULL) {
+    pool->used_block_cnt++;
+  }
+  CORE_EXIT_ATOMIC();
+  #endif
 
   return block;
 }
@@ -817,6 +860,15 @@ static void* alloc_object(sl_cpc_mem_pool_handle_t *pool)
 static void free_object(sl_cpc_mem_pool_handle_t *pool,
                         void *block)
 {
+  #if (SL_CPC_DEBUG_MEMORY_ALLOCATOR_COUNTERS == 1)
+  CORE_DECLARE_IRQ_STATE;
+  CORE_ENTER_ATOMIC();
+  #endif
+
   sli_mem_pool_free((sli_mem_pool_handle_t *)pool->pool_handle, block);
-  MEM_POOL_FREE(pool);
+
+  #if (SL_CPC_DEBUG_MEMORY_ALLOCATOR_COUNTERS == 1)
+  pool->used_block_cnt--;
+  CORE_EXIT_ATOMIC();
+  #endif
 }

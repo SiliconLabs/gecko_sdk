@@ -1,6 +1,6 @@
 #include "sl_component_catalog.h"
-#include "sl_wsrcp_log.h"
 #include "sl_wsrcp_mac.h"
+#include "sl_wsrcp_log.h"
 #if (defined(SL_CATALOG_GECKO_BOOTLOADER_INTERFACE_PRESENT))
 #include <btl_interface.h>
 #endif // SL_CATALOG_GECKO_BOOTLOADER_INTERFACE_PRESENT
@@ -19,6 +19,6 @@ void wisun_rcp_btl_reset(struct sl_wsrcp_mac *rcp_mac)
 #endif  // RMU_PRESENT
     wsmac_on_reset_req(rcp_mac);
 #else
-    (void) rcp_mac;
+    (void)rcp_mac;
 #endif  // SL_CATALOG_GECKO_BOOTLOADER_INTERFACE_PRESENT
 }

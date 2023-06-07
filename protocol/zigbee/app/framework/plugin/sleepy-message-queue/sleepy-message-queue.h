@@ -18,9 +18,7 @@
 #ifndef SILABS_SLEEPY_MESSAGE_QUEUE_H
 #define SILABS_SLEEPY_MESSAGE_QUEUE_H
 
-#ifdef UC_BUILD
 #include "sleepy-message-queue-config.h"
-#endif // UC_BUILD
 
 /**
  * @defgroup sleepy-message-queue Sleepy Message Queue
@@ -75,7 +73,7 @@ EmberAfSleepyMessageId emberAfPluginSleepyMessageQueueStoreMessage(EmberAfSleepy
  * @return The number of milliseconds until the specified message expires,
  * or 0xFFFFFFFF if a matching active message cannot be found.
  **/
-uint32_t emMessageMSecRemaining(EmberAfSleepyMessageId sleepyMsgId);
+uint32_t sli_zigbee_af_message_m_sec_remaining(EmberAfSleepyMessageId sleepyMsgId);
 
 /**
  * @brief Return the next EmberAfSleepyMessageId value (that will expire next) for a given EmberEUI64.
@@ -145,7 +143,6 @@ void emberAfPluginSleepyMessageQueueRemoveAllMessages(EmberEUI64 dstEui64);
  * @{
  */
 
-#ifdef UC_BUILD
 /**
  * @brief Initialize the sleepy message queue.
  *
@@ -154,13 +151,6 @@ void emberAfPluginSleepyMessageQueueRemoveAllMessages(EmberEUI64 dstEui64);
  *                    - SL_ZIGBEE_INIT_LEVEL_LOCAL_DATA (0x01)
  **/
 void emberAfPluginSleepyMessageQueueInitCallback(uint8_t init_level);
-#else // !UC_BUILD
-/**
- * @brief Initialize the sleepy message queue.
- *
- **/
-void  emberAfPluginSleepyMessageQueueInitCallback(void);
-#endif  // UC_BUILD
 
 /** @brief Message time out.
  *

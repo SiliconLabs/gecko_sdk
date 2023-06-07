@@ -32,3 +32,5 @@ template_contribution:
     value:
       include: "sl_btmesh_friend.h"
       function: "sl_btmesh_friend_on_event"
+  - name: component_catalog
+    value: "btmesh_friend"

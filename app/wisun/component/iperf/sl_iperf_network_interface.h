@@ -51,7 +51,7 @@ extern "C" {
   #define __STATIC_INLINE             static inline
 #endif
 #if !defined(__GNUC__)
-  // IAR
+// IAR
   #if !defined(SL_WEAK)
     #define SL_WEAK                   __weak
   #endif
@@ -61,12 +61,12 @@ extern "C" {
     #define SL_PACK_END()             _Pragma("pack()")
   #endif
 #else
-  // GCC
+// GCC
   #if !defined(SL_WEAK) && defined(__GNUC__)
     #define SL_WEAK                   __attribute__ ((weak))
   #endif
   #if !defined(SL_PACK_START)
-    // GCC always uses 1 byte maximum aligment
+// GCC always uses 1 byte maximum aligment
     #define SL_PACK_START(x)
     #define SL_PACK_END()
   #endif

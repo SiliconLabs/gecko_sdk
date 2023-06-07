@@ -47,19 +47,19 @@ template_contribution:
     value:
       group: mn-price-passthrough
       name: start
-      handler: emAfPluginMnPriceStartCommand
+      handler: sli_zigbee_af_mn_price_start_command
       help: Starts polling and forwarding.
   - name: cli_command
     value:
       group: mn-price-passthrough
       name: stop
-      handler: emAfPluginMnPriceStopCommand
+      handler: sli_zigbee_af_mn_price_stop_command
       help: Stops polling and forwarding.
   - name: cli_command
     value:
       group: mn-price-passthrough
       name: set-routing
-      handler: emAfPluginMnPriceSetRoutingCommand
+      handler: sli_zigbee_af_mn_price_set_routing_command
       help: Sets the routing parameters.
       argument:
       - type: uint16
@@ -72,7 +72,7 @@ template_contribution:
     value:
       group: mn-price-passthrough
       name: print
-      handler: emAfPluginMnPricePrintCommand
+      handler: sli_zigbee_af_mn_price_print_command
       help: Print the current price known to the proxy ESI.
 documentation:
   docset: zigbee

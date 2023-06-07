@@ -59,17 +59,13 @@ Publisher::Publisher(Instance &aInstance)
 #if OPENTHREAD_CONFIG_TMF_NETDATA_SERVICE_ENABLE
     , mDnsSrpServiceEntry(aInstance)
 #endif
-#if OPENTHREAD_CONFIG_BORDER_ROUTER_ENABLE
-    , mPrefixCallback(nullptr)
-    , mPrefixCallbackContext(nullptr)
-#endif
     , mTimer(aInstance)
 {
 #if OPENTHREAD_CONFIG_BORDER_ROUTER_ENABLE
     // Since the `PrefixEntry` type is used in an array,
     // we cannot use a constructor with an argument (e.g.,
-    // we cannot use `InstacneLocator`) so we use
-    // `IntanceLocatorInit`  and `Init()` the entries one
+    // we cannot use `InstanceLocator`) so we use
+    // `InstanceLocatorInit`  and `Init()` the entries one
     // by one.
 
     for (PrefixEntry &entry : mPrefixEntries)
@@ -80,12 +76,6 @@ Publisher::Publisher(Instance &aInstance)
 }
 
 #if OPENTHREAD_CONFIG_BORDER_ROUTER_ENABLE
-
-void Publisher::SetPrefixCallback(PrefixCallback aCallback, void *aContext)
-{
-    mPrefixCallback        = aCallback;
-    mPrefixCallbackContext = aContext;
-}
 
 Error Publisher::PublishOnMeshPrefix(const OnMeshPrefixConfig &aConfig, Requester aRequester)
 {
@@ -106,13 +96,20 @@ exit:
 
 Error Publisher::PublishExternalRoute(const ExternalRouteConfig &aConfig, Requester aRequester)
 {
+    return ReplacePublishedExternalRoute(aConfig.GetPrefix(), aConfig, aRequester);
+}
+
+Error Publisher::ReplacePublishedExternalRoute(const Ip6::Prefix         &aPrefix,
+                                               const ExternalRouteConfig &aConfig,
+                                               Requester                  aRequester)
+{
     Error        error = kErrorNone;
     PrefixEntry *entry;
 
     VerifyOrExit(aConfig.IsValid(GetInstance()), error = kErrorInvalidArgs);
     VerifyOrExit(aConfig.mStable, error = kErrorInvalidArgs);
 
-    entry = FindOrAllocatePrefixEntry(aConfig.GetPrefix(), aRequester);
+    entry = FindOrAllocatePrefixEntry(aPrefix, aRequester);
     VerifyOrExit(entry != nullptr, error = kErrorNoBufs);
 
     entry->Publish(aConfig, aRequester);
@@ -223,10 +220,7 @@ bool Publisher::IsAPrefixEntry(const Entry &aEntry) const
 
 void Publisher::NotifyPrefixEntryChange(Event aEvent, const Ip6::Prefix &aPrefix) const
 {
-    if (mPrefixCallback != nullptr)
-    {
-        mPrefixCallback(static_cast<otNetDataPublisherEvent>(aEvent), &aPrefix, mPrefixCallbackContext);
-    }
+    mPrefixCallback.InvokeIfSet(static_cast<otNetDataPublisherEvent>(aEvent), &aPrefix);
 }
 
 #endif // OPENTHREAD_CONFIG_BORDER_ROUTER_ENABLE
@@ -343,7 +337,7 @@ void Publisher::Entry::UpdateState(uint8_t aNumEntries, uint8_t aNumPreferredEnt
 
             if (aNumPreferredEntries < aDesiredNumEntries)
             {
-                mUpdateTime += kExtraDelayToRemovePeferred;
+                mUpdateTime += kExtraDelayToRemovePreferred;
             }
 
             SetState(kRemoving);
@@ -499,18 +493,7 @@ const char *Publisher::Entry::StateToString(State aState)
 //---------------------------------------------------------------------------------------------------------------------
 // Publisher::DnsSrpServiceEntry
 
-Publisher::DnsSrpServiceEntry::DnsSrpServiceEntry(Instance &aInstance)
-    : mCallback(nullptr)
-    , mCallbackContext(nullptr)
-{
-    Init(aInstance);
-}
-
-void Publisher::DnsSrpServiceEntry::SetCallback(DnsSrpServiceCallback aCallback, void *aContext)
-{
-    mCallback        = aCallback;
-    mCallbackContext = aContext;
-}
+Publisher::DnsSrpServiceEntry::DnsSrpServiceEntry(Instance &aInstance) { Init(aInstance); }
 
 void Publisher::DnsSrpServiceEntry::PublishAnycast(uint8_t aSequenceNumber)
 {
@@ -649,10 +632,7 @@ void Publisher::DnsSrpServiceEntry::Notify(Event aEvent) const
     Get<Srp::Server>().HandleNetDataPublisherEvent(aEvent);
 #endif
 
-    if (mCallback != nullptr)
-    {
-        mCallback(static_cast<otNetDataPublisherEvent>(aEvent), mCallbackContext);
-    }
+    mCallback.InvokeIfSet(static_cast<otNetDataPublisherEvent>(aEvent));
 }
 
 void Publisher::DnsSrpServiceEntry::Process(void)
@@ -699,7 +679,7 @@ void Publisher::DnsSrpServiceEntry::CountAnycastEntries(uint8_t &aNumEntries, ui
     // smaller RLCO16.
 
     Service::DnsSrpAnycast::ServiceData serviceData(mInfo.GetSequenceNumber());
-    const ServiceTlv *                  serviceTlv = nullptr;
+    const ServiceTlv                   *serviceTlv = nullptr;
     ServiceData                         data;
 
     data.Init(&serviceData, serviceData.GetLength());
@@ -833,23 +813,24 @@ void Publisher::PrefixEntry::Publish(const Ip6::Prefix &aPrefix,
 
     if (GetState() != kNoEntry)
     {
-        // If this is an existing entry, first we check that there is
-        // a change in either type or flags. We remove the old entry
-        // from Network Data if it was added. If the only change is
-        // to flags (e.g., change to the preference level) and the
-        // entry was previously added in Network Data, we re-add it
-        // with the new flags. This ensures that changes to flags are
-        // immediately reflected in the Network Data.
+        // If this is an existing entry, check if there is a change in
+        // type, flags, or the prefix itself. If not, everything is
+        // as before. If something is different, first, remove the
+        // old entry from Network Data if it was added. Then, re-add
+        // the new prefix/flags (replacing the old entry). This
+        // ensures the changes are immediately reflected in the
+        // Network Data.
 
         State oldState = GetState();
 
-        VerifyOrExit((mType != aNewType) || (mFlags != aNewFlags));
+        VerifyOrExit((mType != aNewType) || (mFlags != aNewFlags) || (mPrefix != aPrefix));
 
         Remove(/* aNextState */ kNoEntry);
 
         if ((mType == aNewType) && ((oldState == kAdded) || (oldState == kRemoving)))
         {
-            mFlags = aNewFlags;
+            mPrefix = aPrefix;
+            mFlags  = aNewFlags;
             Add();
         }
     }
@@ -986,7 +967,7 @@ exit:
 
 void Publisher::PrefixEntry::CountOnMeshPrefixEntries(uint8_t &aNumEntries, uint8_t &aNumPreferredEntries) const
 {
-    const PrefixTlv *      prefixTlv;
+    const PrefixTlv       *prefixTlv;
     const BorderRouterTlv *brSubTlv;
     int8_t                 preference             = BorderRouterEntry::PreferenceFromFlags(mFlags);
     uint16_t               flagsWithoutPreference = BorderRouterEntry::FlagsWithoutPreference(mFlags);
@@ -1033,7 +1014,7 @@ exit:
 
 void Publisher::PrefixEntry::CountExternalRouteEntries(uint8_t &aNumEntries, uint8_t &aNumPreferredEntries) const
 {
-    const PrefixTlv *  prefixTlv;
+    const PrefixTlv   *prefixTlv;
     const HasRouteTlv *hrSubTlv;
     int8_t             preference             = HasRouteEntry::PreferenceFromFlags(static_cast<uint8_t>(mFlags));
     uint8_t            flagsWithoutPreference = HasRouteEntry::FlagsWithoutPreference(static_cast<uint8_t>(mFlags));

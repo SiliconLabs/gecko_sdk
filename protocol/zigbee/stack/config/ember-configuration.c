@@ -25,9 +25,9 @@
 #include "hal.h"
 #include "stack/include/ember.h"
 #include "stack/include/error.h"
-#include "stack/include/ember-static-struct.h" // Required typedefs
 #include "stack/include/message.h" // Required for packetHandlers
 #include "mac-child.h" // unified-mac
+#include "scan.h" // Required for PG_CH_BITMASK32
 
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
@@ -46,7 +46,7 @@
 //------------------------------------------------------------------------------
 // API Version
 
-const uint8_t emApiVersion
+const uint8_t sli_zigbee_api_version
   = (EMBER_API_MAJOR_VERSION << 4) + EMBER_API_MINOR_VERSION;
 
 //------------------------------------------------------------------------------
@@ -59,13 +59,15 @@ const uint8_t emApiVersion
 #define NUM_MULTI_PAN_FORKS    (EMBER_ZC_AND_ZR_DEVICE_COUNT == 0 \
                                 ? 1                               \
                                 : EMBER_ZC_AND_ZR_DEVICE_COUNT)
-uint8_t emNumMultiPanForks = NUM_MULTI_PAN_FORKS;
+uint8_t sli_zigbee_num_multi_pan_forks = NUM_MULTI_PAN_FORKS;
 
 uint8_t blackListedIdByteArray[NUM_MULTI_PAN_FORKS] = { 0 };
 EmberMessageBuffer blacklistedIdsArray[NUM_MULTI_PAN_FORKS] = { EMBER_NULL_MESSAGE_BUFFER };
 uint8_t panConflictMeters[NUM_MULTI_PAN_FORKS];
 uint16_t trustCenterPolicies[NUM_MULTI_PAN_FORKS];
-
+bool sl_permit_panid_conflict_reports[NUM_MULTI_PAN_FORKS] = { true };
+uint16_t sl_zigbee_local_panid_conflict_count[NUM_MULTI_PAN_FORKS];
+uint16_t sl_local_panid_conflict_last_reset_sec[NUM_MULTI_PAN_FORKS];
 //------------------------------------------------------------------------------
 // Multi PAN events
 
@@ -77,20 +79,20 @@ uint16_t trustCenterPolicies[NUM_MULTI_PAN_FORKS];
 // The following are not resizable, and we especially don't want their addresses
 // to change, so we don't allocate them from emAvailableMemory
 
-EmberEvent emBeaconEvents[NUM_MULTI_PAN_FORKS];
-EmberEvent emPermitJoiningEvents[NUM_MULTI_PAN_FORKS];
-EmberEvent emNetworkManagementEvents[NUM_MULTI_PAN_FORKS];
-EmberEvent emNeighborExchangeEvents[NUM_MULTI_PAN_FORKS];
-EmberEvent emRequestKeyEvents[NUM_MULTI_PAN_FORKS];
+EmberEvent sli_zigbee_beacon_events[NUM_MULTI_PAN_FORKS];
+EmberEvent sli_zigbee_permit_joiningEvents[NUM_MULTI_PAN_FORKS];
+EmberEvent sli_zigbee_network_management_events[NUM_MULTI_PAN_FORKS];
+EmberEvent sli_zigbee_neighbor_exchange_events[NUM_MULTI_PAN_FORKS];
+EmberEvent sli_zigbee_request_key_events[NUM_MULTI_PAN_FORKS];
 
 #if !defined(SL_ZIGBEE_LEAF_STACK) || defined (CSL_SUPPORT)
-EmberEvent emSendParentAnnounceEvents[NUM_MULTI_PAN_FORKS];
+EmberEvent sli_zigbee_send_parent_announce_events[NUM_MULTI_PAN_FORKS];
 #endif
-EmberEvent emTransientLinkKeyEvents[NUM_MULTI_PAN_FORKS];
-EmberEvent emGpTxEvents[NUM_MULTI_PAN_FORKS];
-EmberEvent emSourceRouteUpdateEvents[NUM_MULTI_PAN_FORKS];
+EmberEvent sli_zigbee_transient_link_key_events[NUM_MULTI_PAN_FORKS];
+EmberEvent sli_zigbee_gp_tx_events[NUM_MULTI_PAN_FORKS];
+EmberEvent sli_zigbee_source_route_update_events[NUM_MULTI_PAN_FORKS];
 #if !(defined(SL_ZIGBEE_ROUTER_STACK))
-EmberEvent emAllowTcRejoinsUsingWellKnownKeyEvents[NUM_MULTI_PAN_FORKS];
+EmberEvent sli_zigbee_allow_tc_rejoins_using_well_known_key_events[NUM_MULTI_PAN_FORKS];
 #endif
 
 //------------------------------------------------------------------------------
@@ -99,8 +101,11 @@ EmberEvent emAllowTcRejoinsUsingWellKnownKeyEvents[NUM_MULTI_PAN_FORKS];
 // before the entry in the transient table will be purged or
 // copied into the relevant table (child / neighbor)
 // It is also the proposed apsSecurityTimeoutPeriod
-uint16_t emTransientDeviceTimeout = SL_ZIGBEE_TRANSIENT_DEVICE_DEFAULT_TIMEOUT_MS;
+uint16_t sli_zigbee_transient_device_timeout = SL_ZIGBEE_TRANSIENT_DEVICE_DEFAULT_TIMEOUT_MS;
 
+//Allows the aps acks for APSME commands to be turned off or on
+//This should be "true" by default but to keep it consistend with the current stack behaviour this is "false" by default.
+bool sl_zigbee_enable_aps_ack_for_cmds = SL_ZIGBEE_ENABLE_APS_ACKS_FOR_COMMANDS;
 //------------------------------------------------------------------------------
 // MAC Layer
 
@@ -140,60 +145,60 @@ const EmberMacFilterMatchData zigbeeMacFilterList[] = {
 };
 
 // Pass a pointer to child table in memory to the unified mac layer.
-//sl_mac_child_entry_t *emChildTableData = (sl_mac_child_entry_t *) &emAvailableMemory[0];
-sl_mac_child_entry_t emChildTableData[1 + EMBER_CHILD_TABLE_SIZE * EMBER_ZC_AND_ZR_DEVICE_COUNT];
+//sl_mac_child_entry_t *sli_zigbee_child_table_data = (sl_mac_child_entry_t *) &emAvailableMemory[0];
+sl_mac_child_entry_t sli_zigbee_child_table_data[1 + EMBER_CHILD_TABLE_SIZE * EMBER_ZC_AND_ZR_DEVICE_COUNT];
 uint8_t emberChildTableSize = EMBER_CHILD_TABLE_SIZE;
 
 //------------------------------------------------------------------------------
 // NWK Layer
 
 #ifdef EMBER_DISABLE_RELAY
-uint8_t emAllowRelay = false;
+uint8_t sli_zigbee_allow_relay = false;
 #else
-uint8_t emAllowRelay = true;
+uint8_t sli_zigbee_allow_relay = true;
 #endif
 
-uint16_t emChildStatusData[1 + EMBER_CHILD_TABLE_SIZE * EMBER_ZC_AND_ZR_DEVICE_COUNT];
+uint16_t sli_zigbee_child_status_data[1 + EMBER_CHILD_TABLE_SIZE * EMBER_ZC_AND_ZR_DEVICE_COUNT];
 
-uint32_t emChildTimersData[1 + EMBER_CHILD_TABLE_SIZE * EMBER_ZC_AND_ZR_DEVICE_COUNT];
+uint32_t sli_zigbee_child_timers_data[1 + EMBER_CHILD_TABLE_SIZE * EMBER_ZC_AND_ZR_DEVICE_COUNT];
 
-int8_t emChildPower[1 + EMBER_CHILD_TABLE_SIZE];
+int8_t sli_zigbee_child_power[1 + EMBER_CHILD_TABLE_SIZE];
 
-// emChildLqi >> 8 keeps the average Lqi values mapped from 0-255 to 1-255 after initialization
+// sli_zigbee_child_lqi >> 8 keeps the average Lqi values mapped from 0-255 to 1-255 after initialization
 // LQI data (0-255) is stored in a 16 bit variable so we end up with greater
 // precision after the weighted averaging operation
-uint16_t emChildLqiData[1 + EMBER_CHILD_TABLE_SIZE * EMBER_ZC_AND_ZR_DEVICE_COUNT];
+uint16_t sli_zigbee_child_lqi_data[1 + EMBER_CHILD_TABLE_SIZE * EMBER_ZC_AND_ZR_DEVICE_COUNT];
 
-EmRouteTableEntry emRouteData[1 + EMBER_ROUTE_TABLE_SIZE];
-uint8_t emRouteTableSize = EMBER_ROUTE_TABLE_SIZE;
+sli_zigbee_route_table_entry_t sli_zigbee_route_table[1 + EMBER_ROUTE_TABLE_SIZE];
+uint8_t sli_zigbee_route_table_size = EMBER_ROUTE_TABLE_SIZE;
 
 // Duplicate the table for multi PAN mode depending on how many ZC and ZR devices are present.
-uint8_t emRouteRecordTableData[1 + (((EMBER_CHILD_TABLE_SIZE + 7) >> 3) * EMBER_ROUTE_TABLE_SIZE * EMBER_ZC_AND_ZR_DEVICE_COUNT)];
+uint8_t sli_zigbee_route_record_table_data[1 + (((EMBER_CHILD_TABLE_SIZE + 7) >> 3) * EMBER_ROUTE_TABLE_SIZE * EMBER_ZC_AND_ZR_DEVICE_COUNT)];
 
-EmDiscoveryTableEntry emDiscoveryTable[EMBER_DISCOVERY_TABLE_SIZE];
-uint8_t emDiscoveryTableSize = EMBER_DISCOVERY_TABLE_SIZE;
+sli_zigbee_discovery_table_entry_t sli_zigbee_discovery_table[EMBER_DISCOVERY_TABLE_SIZE];
+uint8_t sli_zigbee_discovery_table_size = EMBER_DISCOVERY_TABLE_SIZE;
 
 EmberMulticastTableEntry emberMulticastTable[EMBER_MULTICAST_TABLE_SIZE];
 uint8_t emberMulticastTableSize = EMBER_MULTICAST_TABLE_SIZE;
 
 // Broadcast table exists in all device types so we allocate memory to it even if no ZC and ZR device present.
 // Duplicate the table if more than one ZC and ZR devices present.
-EmBroadcastTableEntry emBroadcastTableData[EMBER_BROADCAST_TABLE_SIZE * NUM_MULTI_PAN_FORKS];
-uint8_t emBroadcastTableSize = EMBER_BROADCAST_TABLE_SIZE;
+sli_zigbee_broadcast_table_entry_t sli_zigbee_broadcast_table_data[EMBER_BROADCAST_TABLE_SIZE * NUM_MULTI_PAN_FORKS];
+uint8_t sli_zigbee_broadcast_table_size = EMBER_BROADCAST_TABLE_SIZE;
 
 //------------------------------------------------------------------------------
 // Network descriptor (multi-network support)
 
 #if !defined(EMBER_MULTI_NETWORK_STRIPPED)
-EmberNetworkInfo emNetworkDescriptor[EMBER_SUPPORTED_NETWORKS];
-uint8_t emSupportedNetworks = EMBER_SUPPORTED_NETWORKS;
+EmberNetworkInfo sli_zigbee_network_descriptor[EMBER_SUPPORTED_NETWORKS];
+uint8_t sli_zigbee_supported_networks = EMBER_SUPPORTED_NETWORKS;
 
 // PAN info exists in all device types so we allocate memory to it even if no ZC and ZR device present.
 // Duplicate it if more than one ZC and ZR devices present.
-EmPanInfo emPanInfoData[NUM_MULTI_PAN_FORKS];
+sli_zigbee_pan_info_t sli_zigbee_pan_info_table[NUM_MULTI_PAN_FORKS];
 #else
-uint8_t emSupportedNetworks = 1;
-#define END_emPanInfoData END_emberBroadcastTable
+uint8_t sli_zigbee_supported_networks = 1;
+#define END_sli_zigbee_pan_info_data END_emberBroadcastTable
 #endif // !defined(EMBER_MULTI_NETWORK_STRIPPED)
 
 //------------------------------------------------------------------------------
@@ -201,40 +206,40 @@ uint8_t emSupportedNetworks = 1;
 // Neighbor and frame counter table exist on end device as well but it contains only one entry.
 // Duplicate neighbor and frame counter tables per ZC and ZR device.
 // If there is no ZC and ZR device present, then allocate one entry for each end device.
-EmNeighborTableEntry emNeighborData[((EMBER_NEIGHBOR_TABLE_SIZE * EMBER_ZC_AND_ZR_DEVICE_COUNT) + EMBER_SUPPORTED_NETWORKS)];
-uint8_t emRouterNeighborTableSize = EMBER_NEIGHBOR_TABLE_SIZE;
+sli_zigbee_neighbor_table_entry_t sli_zigbee_neighbor_data[((EMBER_NEIGHBOR_TABLE_SIZE * EMBER_ZC_AND_ZR_DEVICE_COUNT) + EMBER_SUPPORTED_NETWORKS)];
+uint8_t sli_zigbee_router_neighbor_table_size = EMBER_NEIGHBOR_TABLE_SIZE;
 
-uint32_t emFrameCountersTable[((EMBER_NEIGHBOR_TABLE_SIZE + EMBER_CHILD_TABLE_SIZE) * EMBER_ZC_AND_ZR_DEVICE_COUNT + EMBER_SUPPORTED_NETWORKS)];
+uint32_t sli_zigbee_frame_countersTable[((EMBER_NEIGHBOR_TABLE_SIZE + EMBER_CHILD_TABLE_SIZE) * EMBER_ZC_AND_ZR_DEVICE_COUNT + EMBER_SUPPORTED_NETWORKS)];
 
 //------------------------------------------------------------------------------
 // NWK Retry Queue
 
-EmRetryQueueEntry emRetryQueue[EMBER_RETRY_QUEUE_SIZE];
-uint8_t emRetryQueueSize = EMBER_RETRY_QUEUE_SIZE;
+sli_zigbee_retry_queue_entry_t sli_zigbee_retry_queue[EMBER_RETRY_QUEUE_SIZE];
+uint8_t sli_zigbee_retry_queue_size = EMBER_RETRY_QUEUE_SIZE;
 
 // NWK Store And Forward Queue
 
-EmStoreAndForwardQueueEntry emStoreAndForwardQueue[EMBER_STORE_AND_FORWARD_QUEUE_SIZE];
-uint8_t emStoreAndForwardQueueSize = EMBER_STORE_AND_FORWARD_QUEUE_SIZE;
+sli_zigbee_store_and_forward_queue_entry_t sli_zigbee_store_and_forward_queue[EMBER_STORE_AND_FORWARD_QUEUE_SIZE];
+uint8_t sli_zigbee_store_and_forward_queue_size = EMBER_STORE_AND_FORWARD_QUEUE_SIZE;
 
 //------------------------------------------------------------------------------
 // Green Power stack tables
-uint8_t emGpIncomingFCTokenTableSize = EMBER_GP_INCOMING_FC_TOKEN_TABLE_SIZE;
-uint8_t emGpIncomingFCTokenTimeout = EMBER_GP_INCOMING_FC_TOKEN_TIMEOUT;
+uint8_t sli_zigbee_gp_incoming_fc_token_table_size = EMBER_GP_INCOMING_FC_TOKEN_TABLE_SIZE;
+uint8_t sli_zigbee_gp_incoming_fc_token_timeout = EMBER_GP_INCOMING_FC_TOKEN_TIMEOUT;
 
-EmberGpProxyTableEntry emGpProxyTable[EMBER_GP_PROXY_TABLE_SIZE];
-uint8_t emGpProxyTableSize = EMBER_GP_PROXY_TABLE_SIZE;
+EmberGpProxyTableEntry sli_zigbee_gp_proxy_table[EMBER_GP_PROXY_TABLE_SIZE];
+uint8_t sli_zigbee_gp_proxy_table_size = EMBER_GP_PROXY_TABLE_SIZE;
 
-uint8_t emGpIncomingFCInSinkTokenTableSize = EMBER_GP_INCOMING_FC_IN_SINK_TOKEN_TABLE_SIZE;
-uint8_t emGpIncomingFCInSinkTokenTimeout = EMBER_GP_INCOMING_FC_IN_SINK_TOKEN_TIMEOUT;
+uint8_t sli_zigbee_gp_incoming_fc_in_sink_token_table_size = EMBER_GP_INCOMING_FC_IN_SINK_TOKEN_TABLE_SIZE;
+uint8_t sli_zigbee_gp_incoming_fc_in_sink_token_timeout = EMBER_GP_INCOMING_FC_IN_SINK_TOKEN_TIMEOUT;
 
 #if (EMBER_GP_SINK_TABLE_SIZE > 0)
-EmberGpSinkTableEntry emGpSinkTable[EMBER_GP_SINK_TABLE_SIZE];
+EmberGpSinkTableEntry sli_zigbee_gp_sink_table[EMBER_GP_SINK_TABLE_SIZE];
 #else
 // Provide a dummy entry to avoid 0 length array
-EmberGpSinkTableEntry emGpSinkTable[1];
+EmberGpSinkTableEntry sli_zigbee_gp_sink_table[1];
 #endif
-uint8_t emGpSinkTableSize = EMBER_GP_SINK_TABLE_SIZE;
+uint8_t sli_zigbee_gp_sink_table_size = EMBER_GP_SINK_TABLE_SIZE;
 
 //------------------------------------------------------------------------------
 // Source routing
@@ -256,55 +261,59 @@ EmberNodeId sourceRouteUpdateNodeIdWithBrokenRoute[NUM_MULTI_PAN_FORKS];
 bool sourceRouteUpdateSendAddressDiscoveryNextEvent[NUM_MULTI_PAN_FORKS];
 bool sourceRouteUpdateActiveEvent[NUM_MULTI_PAN_FORKS];
 
-SourceRouteTableEntry emSourceRouteTableData[EMBER_SOURCE_ROUTE_TABLE_SIZE * NUM_MULTI_PAN_FORKS];
-uint8_t emSourceRouteTableSize = EMBER_SOURCE_ROUTE_TABLE_SIZE;
+SourceRouteTableEntry sli_zigbee_source_route_table_data[EMBER_SOURCE_ROUTE_TABLE_SIZE * NUM_MULTI_PAN_FORKS];
+uint8_t sli_zigbee_source_route_table_size = EMBER_SOURCE_ROUTE_TABLE_SIZE;
 #else
-SourceRouteTableEntry *emSourceRouteTableData = NULL;
-uint8_t emSourceRouteTableSize = 0;
-#define END_emSourceRouteTable END_emGpSinkTable
+SourceRouteTableEntry *sli_zigbee_source_route_table_data = NULL;
+uint8_t sli_zigbee_source_route_table_size = 0;
+#define END_sli_zigbee_source_route_table END_sli_zigbee_gp_sink_table
 #endif // EMBER_AF_PLUGIN_SOURCE_ROUTE_LIBRARY || SL_CATALOG_ZIGBEE_SOURCE_ROUTE_PRESENT
 
 //------------------------------------------------------------------------------
 // Binding Table
 
-uint16_t emBindingRemoteNode[1 + EMBER_BINDING_TABLE_SIZE];
+uint16_t sli_zigbee_binding_remote_node[1 + EMBER_BINDING_TABLE_SIZE];
 uint8_t emberBindingTableSize = EMBER_BINDING_TABLE_SIZE;
 
-uint8_t emBindingFlags[1 + EMBER_BINDING_TABLE_SIZE];
+uint8_t sli_zigbee_binding_flags[1 + EMBER_BINDING_TABLE_SIZE];
 
 //------------------------------------------------------------------------------
 //End Device Timeouts
 
-uint8_t emEndDeviceTimeoutData[1 + EMBER_CHILD_TABLE_SIZE * EMBER_ZC_AND_ZR_DEVICE_COUNT];
+uint8_t sli_zigbee_end_device_timeout_data[1 + EMBER_CHILD_TABLE_SIZE * EMBER_ZC_AND_ZR_DEVICE_COUNT];
 
 //------------------------------------------------------------------------------
 
 // APS Layer
+uint8_t  sli_zigbee_aps_duplicate_rejection_max_size = SL_ZIGBEE_APS_DUPLICATE_REJECTION_MAX_ENTRIES;
+sl_zigbee_aps_duplicate_msg_entry_t sli_zigbee_aps_duplicate_rejection_entries[SL_ZIGBEE_APS_DUPLICATE_REJECTION_MAX_ENTRIES];
 
-uint8_t emAddressTableSize = EMBER_ADDRESS_TABLE_SIZE;
-uint8_t emAddressTableMaxSize = EMBER_ADDRESS_TABLE_SIZE + 4;
-EmAddressTableEntry emAddressTable[EMBER_ADDRESS_TABLE_SIZE + 4];
+uint8_t sli_zigbee_address_table_size = EMBER_ADDRESS_TABLE_SIZE;
+uint8_t sli_zigbee_address_tableMaxSize = EMBER_ADDRESS_TABLE_SIZE + 4;
+sli_zigbee_address_table_entry_t sli_zigbee_address_table[EMBER_ADDRESS_TABLE_SIZE + 4];
 
-uint8_t emMaxApsUnicastMessages = EMBER_APS_UNICAST_MESSAGE_COUNT;
-EmApsUnicastMessageData emApsUnicastMessageData[EMBER_APS_UNICAST_MESSAGE_COUNT];
+uint8_t sli_zigbee_max_aps_unicast_messages = EMBER_APS_UNICAST_MESSAGE_COUNT;
+sli_zigbee_aps_unicast_message_data_t sli_zigbee_aps_unicast_message_data[EMBER_APS_UNICAST_MESSAGE_COUNT];
 
 uint16_t emberApsAckTimeoutMs =
   ((EMBER_APSC_MAX_ACK_WAIT_HOPS_MULTIPLIER_MS
     * EMBER_MAX_HOPS)
    + EMBER_APSC_MAX_ACK_WAIT_TERMINAL_SECURITY_MS);
 
-uint8_t emFragmentDelayMs = EMBER_FRAGMENT_DELAY_MS;
+uint8_t sli_zigbee_fragment_delay_ms = EMBER_FRAGMENT_DELAY_MS;
 uint8_t emberFragmentWindowSize = EMBER_FRAGMENT_WINDOW_SIZE;
 
 uint8_t emberKeyTableSize = EMBER_KEY_TABLE_SIZE;
-uint32_t emIncomingApsFrameCounters[1 + EMBER_KEY_TABLE_SIZE];
+uint32_t sli_zigbee_incoming_aps_frame_counters[1 + EMBER_KEY_TABLE_SIZE];
 
 EmberTcLinkKeyRequestPolicy emberTrustCenterLinkKeyRequestPolicies[NUM_MULTI_PAN_FORKS];
 EmberAppLinkKeyRequestPolicy emberAppLinkKeyRequestPolicies[NUM_MULTI_PAN_FORKS];
 
-uint8_t emCertificateTableSize = EMBER_CERTIFICATE_TABLE_SIZE;
+uint8_t sli_zigbee_certificate_table_size = EMBER_CERTIFICATE_TABLE_SIZE;
 
-uint8_t emAppZdoConfigurationFlags =
+uint8_t sli_zigbee_zdo_beacon_survey_unique_nwks = SL_ZIGBEE_ZDO_BEACON_SURVEY_MAX_UNIQUE_NETWORKS;
+
+uint8_t sli_zigbee_app_zdo_configuration_flags =
   0
 
 // Define this in order to receive supported ZDO request messages via
@@ -366,7 +375,7 @@ EmberAssumeTrustCenterConcentratorType emberAssumedTrustCenterConcentratorType =
   EMBER_ASSUME_TRUST_CENTER_IS_LOW_RAM_CONCENTRATOR;
 //
 // Packet Buffers
-uint8_t emPacketBufferCount = EMBER_PACKET_BUFFER_COUNT;
+uint8_t sli_zigbee_packet_buffer_count = EMBER_PACKET_BUFFER_COUNT;
 const uint32_t heapMemorySize = EMBER_PACKET_BUFFER_COUNT * 32;
 
 // The actual memory for buffers.
@@ -377,15 +386,11 @@ uint16_t heapMemory[EMBER_PACKET_BUFFER_COUNT * 16] SL_ATTRIBUTE_ALIGN(4);
 uint16_t heapMemory[EMBER_PACKET_BUFFER_COUNT * 16] __attribute__ ((aligned(4)));
 #endif
 
-void emCheckAvailableMemory(void)
-{
-}
-
 // *****************************************
 // Non-dynamically configurable structures
 // *****************************************
-const uint8_t emTaskCount = EMBER_TASK_COUNT;
-EmberTaskControl emTasks[EMBER_TASK_COUNT];
+//const uint8_t sli_event_control_task_count = EMBER_TASK_COUNT;
+//EmberTaskControl sli_event_control_tasks[EMBER_TASK_COUNT];
 
 // *****************************************
 // Stack Profile Parameters
@@ -393,43 +398,43 @@ EmberTaskControl emTasks[EMBER_TASK_COUNT];
 
 const uint8_t emberStackProfileId[8] = { 0, };
 
-uint8_t emDefaultStackProfile = EMBER_STACK_PROFILE;
-uint8_t emDefaultSecurityLevel = EMBER_SECURITY_LEVEL;
-uint8_t emMaxEndDeviceChildren = EMBER_MAX_END_DEVICE_CHILDREN;
-uint8_t emMaxHops = EMBER_MAX_HOPS;
+uint8_t sli_zigbee_default_stack_profile = EMBER_STACK_PROFILE;
+uint8_t sli_zigbee_default_security_level = EMBER_SECURITY_LEVEL;
+uint8_t sli_zigbee_max_end_device_children = EMBER_MAX_END_DEVICE_CHILDREN;
+uint8_t sli_zigbee_max_hops = EMBER_MAX_HOPS;
 uint16_t emberMacIndirectTimeout = EMBER_INDIRECT_TRANSMISSION_TIMEOUT;
 uint8_t emberEndDevicekeepAliveSupportMode = EMBER_END_DEVICE_KEEP_ALIVE_SUPPORT_MODE;
 uint8_t emberEndDevicePollTimeout = EMBER_END_DEVICE_POLL_TIMEOUT;
 //STATIC_ASSERT(EMBER_END_DEVICE_POLL_TIMEOUT <= MINUTES_16384, "End device timeout out of range");
 uint16_t emberLinkPowerDeltaInterval = EMBER_LINK_POWER_DELTA_INTERVAL;
-uint8_t emEndDeviceBindTimeout = EMBER_END_DEVICE_BIND_TIMEOUT;
-uint8_t emRequestKeyTimeout = EMBER_REQUEST_KEY_TIMEOUT;
-uint8_t emPanIdConflictReportThreshold = EMBER_PAN_ID_CONFLICT_REPORT_THRESHOLD;
-uint8_t emZcAndZrCount = EMBER_ZC_AND_ZR_DEVICE_COUNT;
-uint8_t emZigbeeMaxNetworkRetries = EMBER_ZIGBEE_NUM_NETWORK_RETRIES_DEFAULT;
+uint8_t sli_zigbee_end_device_bind_timeout = EMBER_END_DEVICE_BIND_TIMEOUT;
+uint8_t sli_zigbee_request_key_timeout = EMBER_REQUEST_KEY_TIMEOUT;
+uint8_t sli_zigbee_pan_id_conflict_report_threshold = EMBER_PAN_ID_CONFLICT_REPORT_THRESHOLD;
+uint8_t sli_zigbee_zc_and_zr_count = EMBER_ZC_AND_ZR_DEVICE_COUNT;
+uint8_t sli_zigbee_max_network_retries = EMBER_ZIGBEE_NUM_NETWORK_RETRIES_DEFAULT;
 
 #ifndef EMBER_NO_STACK
-uint8_t emEndDeviceConfiguration = EMBER_END_DEVICE_CONFIG_PERSIST_DATA_ON_PARENT;
+uint8_t sli_zigbee_end_device_configuration = EMBER_END_DEVICE_CONFIG_PERSIST_DATA_ON_PARENT;
 #endif
 
 // Normally multicasts do NOT go to the sleepy address (0xFFFF), they go to
 // RxOnWhenIdle=true (0xFFFD).  This can be changed, but doing so is not
 // ZigBee Pro Compliant and is possibly NOT interoperable.
-bool emSendMulticastsToSleepyAddress = EMBER_SEND_MULTICASTS_TO_SLEEPY_ADDRESS;
+bool sli_zigbee_send_multicasts_to_sleepy_address = EMBER_SEND_MULTICASTS_TO_SLEEPY_ADDRESS;
 
 // *****************************************
 // ZigBee Light Link
 // *****************************************
 
-EmberZllPolicy emZllPolicy = EMBER_ZLL_POLICY_DISABLED;
+EmberZllPolicy sli_zigbee_zll_policy = EMBER_ZLL_POLICY_DISABLED;
 
 // The number of groups required by the ZLL application.
-uint8_t emZllGroupAddressesNeeded = EMBER_ZLL_GROUP_ADDRESSES;
-int8_t emZllRssiThreshold = EMBER_ZLL_RSSI_THRESHOLD;
+uint8_t sli_zigbee_zll_group_addresses_needed = EMBER_ZLL_GROUP_ADDRESSES;
+int8_t sli_zigbee_zll_rssi_threshold = EMBER_ZLL_RSSI_THRESHOLD;
 #ifdef EMBER_ZLL_APPLY_THRESHOLD_TO_ALL_INTERPANS
-bool emZllApplyThresholdToAllInterpans = true;
+bool sli_zigbee_zll_apply_threshold_to_all_interpans = true;
 #else
-bool emZllApplyThresholdToAllInterpans = false;
+bool sli_zigbee_zll_apply_threshold_to_all_interpans = false;
 #endif
 
 // *****************************************
@@ -462,7 +467,7 @@ WEAK(EmberJoinDecision emberTrustCenterJoinHandler(EmberNodeId newNodeId,
     // because we should get here only if the new child is not our
     // direct child and it is multiple hops away?
     bool deviceLeft = (status == EMBER_DEVICE_LEFT);
-    emChangeSourceRouteEntry(newNodeId, parentOfNewNode, false, deviceLeft);
+    sli_zigbee_change_source_route_entry(newNodeId, parentOfNewNode, false, deviceLeft);
   }
 #endif
 
@@ -730,6 +735,11 @@ uint16_t emberGetEndpointCluster(uint8_t endpoint,
   return 0;
 }
 
+uint8_t emberGetEndpointCount(void)
+{
+  return emberEndpointCount;
+}
+
 #endif // defined EMBER_APPLICATION_HAS_GET_ENDPOINT
 
 // Inform the application that an orphan notification has been received.
@@ -955,22 +965,23 @@ WEAK(EmberPacketAction emberPacketHandoffOutgoingHandler(EmberZigbeePacketType p
 #if (defined(EMBER_AF_NCP) || defined(SL_CATALOG_ZIGBEE_NCP_FRAMEWORK_PRESENT) || defined(EMBER_TEST))
 // The buffer to host tag map needs to keep track of messages that we send
 // from the host. In handleSendCommand(), there are three different types of
-// messages that consume a emBufferToHostTagMap entry:
-// a) unicasts, which are limited by emMaxApsUnicastMessages
-// b) broadcasts, which are limited by emBroadcastTableSize
-// c) multicasts, which are limited by emBroadcastTableSize
+// messages that consume a sli_legacy_buffer_manager_buffer_to_host_tag_map entry:
+// a) unicasts, which are limited by sli_zigbee_max_aps_unicast_messages
+// b) broadcasts, which are limited by sli_zigbee_broadcast_table_size
+// c) multicasts, which are limited by sli_zigbee_broadcast_table_size
 // To give enough space for all message types, we size the
-// emBufferToHostTagMap buffer to be of size emMaxApsUnicastMessages +
-// emBroadcastTableSize.
+// sli_legacy_buffer_manager_buffer_to_host_tag_map buffer to be of size sli_zigbee_max_aps_unicast_messages +
+// sli_zigbee_broadcast_table_size.
 #define TAG_MAP_EXTRA_ENTRIES 5
 
 #define BUFFER_TO_HOST_TAG_MAP_SIZE  (EMBER_APS_UNICAST_MESSAGE_COUNT \
                                       + EMBER_BROADCAST_TABLE_SIZE * NUM_MULTI_PAN_FORKS)
-EmberTagMapEntry emBufferToHostTagMap[BUFFER_TO_HOST_TAG_MAP_SIZE]; //XXXJAR temp
-uint8_t emBufferToHostTagMapSize = BUFFER_TO_HOST_TAG_MAP_SIZE;
+
+EmberTagMapEntry sli_legacy_buffer_manager_buffer_to_host_tag_map[BUFFER_TO_HOST_TAG_MAP_SIZE]; //XXXJAR temp
+uint16_t sli_legacy_buffer_manager_buffer_to_host_tag_map_size = BUFFER_TO_HOST_TAG_MAP_SIZE;
 
 uint8_t customMacFilterTableSize = EMBER_CUSTOM_MAC_FILTER_TABLE_SIZE;
-EmberMacFilterMatchData emCustomMacFilterMatchListData[EMBER_CUSTOM_MAC_FILTER_TABLE_SIZE];
+EmberMacFilterMatchData sli_zigbee_custom_mac_filter_match_list_data[EMBER_CUSTOM_MAC_FILTER_TABLE_SIZE];
 
 #endif
 // Stubs that apply to both SoC and NCP
@@ -981,3 +992,16 @@ EmberMacFilterMatchData emCustomMacFilterMatchListData[EMBER_CUSTOM_MAC_FILTER_T
 #include "stack/framework/zigbee-event-logger-stub-gen.c"
 #endif // !EMBER_AF_PLUGIN_ZIGBEE_EVENT_LOGGER
 #endif // UC_BUILD
+
+// The following function is called for a Multi-MAC end device to allow the user configuration of
+// the device to update channel mask for the scenario where a rejoin is initated due to end device
+// timeout event. Based on the Multi-MAC end device configuration this call is expected to update
+// the mask so that the rejoin interface will be selected. As per the SE 1.4 errata, the
+// "Multi-MAC Selection" end device can change the rejoin interface (this is default) where as the
+// Multi-MAC Joining end devices shall not, hence supply the channel mask based on the joined interface.
+WEAK(void emberUpdateMultiMacRejoinChannelMaskForSelectionOrJoiningDevice(uint32_t *rejoinChannelMask))
+{
+#ifdef SL_CATALOG_ZIGBEE_PHY_2_4_SUBGHZ_JOINING_END_DEVICE_PRESENT
+  *rejoinChannelMask = PG_CH_BITMASK32(emberGetLogicalChannel());
+#endif
+}

@@ -5,7 +5,7 @@
 
 #include <string.h>
 #include <utils.h>
-#include <serialappl.h>
+#include <app.h>
 #include <ZAF_Common_interface.h>
 
 static TaskHandle_t task_handle;

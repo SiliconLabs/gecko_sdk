@@ -2,9 +2,12 @@ id: bt_post_build
 package: Bluetooth
 label: BLE Post Build
 description: Post build scripts for BLE applications.
-category: Bluetooth|Application
+category: Bluetooth|Application|Miscellaneous
 quality: production
 root_path: app/bluetooth/script
+tag:
+  - No-Code
+
 other_file:
   - path: create_bl_files.bat
     condition:

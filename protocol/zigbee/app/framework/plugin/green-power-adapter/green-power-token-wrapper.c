@@ -20,6 +20,7 @@
 * Token stub functions
 * Customer should define these in their own application code
 ***************************************************************************/
+#if (EMBER_AF_PLUGIN_GREEN_POWER_ADAPTER_USE_CUSTOM_TOKEN_SYSTEM == 1)
 WEAK(void halCommonSetTokenWrapper(uint16_t token, void *data))
 {
 }
@@ -35,3 +36,4 @@ WEAK(void halCommonSetIndexedTokenWrapper(uint16_t token, uint8_t index, void *d
 WEAK(void halCommonGetIndexedTokenWrapper(void *data, uint16_t token, uint8_t index))
 {
 }
+#endif // (EMBER_AF_PLUGIN_GREEN_POWER_ADAPTER_USE_CUSTOM_TOKEN_SYSTEM == 1)

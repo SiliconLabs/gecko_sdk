@@ -40,3 +40,5 @@ documentation:
       condition: [device_sdid_200]
     - page: emlib/api/efr32xg22/group-rtcc
       condition: [device_sdid_205]
+    - page: emlib/api/efr32xg27/group-rtcc
+      condition: [device_sdid_230]

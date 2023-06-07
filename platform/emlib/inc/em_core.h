@@ -1,6 +1,6 @@
 /***************************************************************************//**
  * @file
- * @brief Core interrupt handling API
+ * @brief Core interrupt handling API (Device Specific)
  *******************************************************************************
  * # License
  * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
@@ -31,9 +31,8 @@
 #define EM_CORE_H
 
 #include "em_device.h"
+#include "em_core_generic.h"
 #include "sl_common.h"
-
-#include <stdbool.h>
 
 #if defined(EMLIB_USER_CONFIG)
 #include "emlib_config.h"
@@ -63,12 +62,6 @@
 /*******************************************************************************
  *******************************   DEFINES   ***********************************
  ******************************************************************************/
-
-/** Use PRIMASK register to disable interrupts in ATOMIC sections. */
-#define CORE_ATOMIC_METHOD_PRIMASK  0
-
-/** Use BASEPRI register to disable interrupts in ATOMIC sections. */
-#define CORE_ATOMIC_METHOD_BASEPRI  1
 
 /** Number of words in a NVIC mask set. */
 #define CORE_NVIC_REG_WORDS   ((EXT_IRQ_COUNT + 31) / 32)
@@ -106,13 +99,6 @@
 #define CORE_ATOMIC_METHOD_DEFAULT  CORE_ATOMIC_METHOD_PRIMASK
 #endif
 
-#if !defined(CORE_ATOMIC_BASE_PRIORITY_LEVEL)
-/** The interrupt priority level disabled within ATOMIC regions. Interrupts
- *  with priority level equal to or lower than this definition will be disabled
- *  within ATOMIC regions. */
-#define CORE_ATOMIC_BASE_PRIORITY_LEVEL  3
-#endif
-
 #if !defined(CORE_ATOMIC_METHOD)
 /** Specify which method to use when implementing ATOMIC sections. You can
  *  select between BASEPRI or PRIMASK method.
@@ -136,74 +122,6 @@ extern "C" {
 /*******************************************************************************
  ************************   MACRO API   ***************************************
  ******************************************************************************/
-
-//
-//  CRITICAL section macro API.
-//
-
-/** Allocate storage for PRIMASK or BASEPRI value for use by
- *  CORE_ENTER/EXIT_ATOMIC() and CORE_ENTER/EXIT_CRITICAL() macros. */
-#define CORE_DECLARE_IRQ_STATE        CORE_irqState_t irqState
-
-/** CRITICAL style interrupt disable. */
-#define CORE_CRITICAL_IRQ_DISABLE() CORE_CriticalDisableIrq()
-
-/** CRITICAL style interrupt enable. */
-#define CORE_CRITICAL_IRQ_ENABLE()  CORE_CriticalEnableIrq()
-
-/** Convenience macro for implementing a CRITICAL section. */
-#define CORE_CRITICAL_SECTION(yourcode) \
-  {                                     \
-    CORE_DECLARE_IRQ_STATE;             \
-    CORE_ENTER_CRITICAL();              \
-    {                                   \
-      yourcode                          \
-    }                                   \
-    CORE_EXIT_CRITICAL();               \
-  }
-
-/** Enter CRITICAL section. Assumes that a @ref CORE_DECLARE_IRQ_STATE exist in
- *  scope. */
-#define CORE_ENTER_CRITICAL()   irqState = CORE_EnterCritical()
-
-/** Exit CRITICAL section. Assumes that a @ref CORE_DECLARE_IRQ_STATE exist in
- *  scope. */
-#define CORE_EXIT_CRITICAL()    CORE_ExitCritical(irqState)
-
-/** CRITICAL style yield. */
-#define CORE_YIELD_CRITICAL()   CORE_YieldCritical()
-
-//
-//  ATOMIC section macro API.
-//
-
-/** ATOMIC style interrupt disable. */
-#define CORE_ATOMIC_IRQ_DISABLE()   CORE_AtomicDisableIrq()
-
-/** ATOMIC style interrupt enable. */
-#define CORE_ATOMIC_IRQ_ENABLE()    CORE_AtomicEnableIrq()
-
-/** Convenience macro for implementing an ATOMIC section. */
-#define CORE_ATOMIC_SECTION(yourcode) \
-  {                                   \
-    CORE_DECLARE_IRQ_STATE;           \
-    CORE_ENTER_ATOMIC();              \
-    {                                 \
-      yourcode                        \
-    }                                 \
-    CORE_EXIT_ATOMIC();               \
-  }
-
-/** Enter ATOMIC section. Assumes that a @ref CORE_DECLARE_IRQ_STATE exist in
- *  scope. */
-#define CORE_ENTER_ATOMIC()   irqState = CORE_EnterAtomic()
-
-/** Exit ATOMIC section. Assumes that a @ref CORE_DECLARE_IRQ_STATE exist in
- *  scope. */
-#define CORE_EXIT_ATOMIC()    CORE_ExitAtomic(irqState)
-
-/** ATOMIC style yield. */
-#define CORE_YIELD_ATOMIC()   CORE_YieldAtomic()
 
 //
 //  NVIC mask section macro API.
@@ -267,12 +185,6 @@ extern "C" {
 //  Miscellaneous macros.
 //
 
-/** Check if IRQ is disabled. */
-#define CORE_IRQ_DISABLED()       CORE_IrqIsDisabled()
-
-/** Check if inside an IRQ handler. */
-#define CORE_IN_IRQ_CONTEXT()     CORE_InIrqContext()
-
 // Support for cycle counter
 #if (SL_EMLIB_CORE_ENABLE_INTERRUPT_DISABLED_TIMING == 1)
 /** Start counter. */
@@ -290,9 +202,6 @@ extern "C" {
  *************************   TYPEDEFS   ****************************************
  ******************************************************************************/
 
-/** Storage for PRIMASK or BASEPRI value. */
-typedef uint32_t CORE_irqState_t;
-
 /** Storage for NVIC interrupt masks. */
 typedef struct {
   uint32_t a[CORE_NVIC_REG_WORDS];    /*!< Array of NVIC mask words. */
@@ -302,21 +211,7 @@ typedef struct {
  *****************************   PROTOTYPES   **********************************
  ******************************************************************************/
 
-void CORE_CriticalDisableIrq(void);
-void CORE_CriticalEnableIrq(void);
-void CORE_ExitCritical(CORE_irqState_t irqState);
-void CORE_YieldCritical(void);
-CORE_irqState_t CORE_EnterCritical(void);
-
-void  CORE_AtomicDisableIrq(void);
-void  CORE_AtomicEnableIrq(void);
-void  CORE_ExitAtomic(CORE_irqState_t irqState);
-void  CORE_YieldAtomic(void);
-CORE_irqState_t CORE_EnterAtomic(void);
-
-bool  CORE_InIrqContext(void);
 bool  CORE_IrqIsBlocked(IRQn_Type irqN);
-bool  CORE_IrqIsDisabled(void);
 
 void  CORE_GetNvicEnabledMask(CORE_nvicMask_t *mask);
 bool  CORE_GetNvicMaskDisableState(const CORE_nvicMask_t *mask);
@@ -342,6 +237,8 @@ void  CORE_InitNvicVectorTable(uint32_t *sourceTable,
 #if (SL_EMLIB_CORE_ENABLE_INTERRUPT_DISABLED_TIMING == 1)
 uint32_t CORE_get_max_time_critical_section(void);
 uint32_t CORE_get_max_time_atomic_section(void);
+void CORE_clear_max_time_critical_section(void);
+void CORE_clear_max_time_atomic_section(void);
 #endif
 
 #ifdef __cplusplus

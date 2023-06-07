@@ -80,6 +80,11 @@ source:
 
 config_file:
   - path: "config/zcl/zcl_config.zap"
+    unless:
+      - zigbee_af_support
+  - path: "config/zcl/zcl_config_without_gp.zap"
+    condition:
+      - zigbee_af_support
 
 # Custom CLI for this application
 template_contribution:

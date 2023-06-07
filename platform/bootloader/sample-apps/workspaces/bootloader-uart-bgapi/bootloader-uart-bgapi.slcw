@@ -1,0 +1,13 @@
+label: bootloader-uart-bgapi-workspace
+quality: production
+description: >
+  TrustZone is used to split into a Secure and Non-Secure bootloader. This workspace contains the secure and non-secure part of the bootloader and builds them together. 
+project:
+  - path: bootloader-uart-bgapi-secure.slcp
+    id: bootloader-uart-bgapi-secure
+    output: bootloader-uart-bgapi-secure
+  - path: bootloader-uart-bgapi-nonsecure.slcp
+    id: bootloader-uart-bgapi-nonsecure
+    output: bootloader-uart-bgapi-nonsecure
+post_build:
+  profile: bootloader_tz_workspace

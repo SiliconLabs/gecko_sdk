@@ -38,6 +38,8 @@
 #include "em_chip.h"
 #include "app_log.h"
 #include "app_framework_common.h"
+#include "sl_connect_config.h"
+
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
@@ -155,7 +157,7 @@ void emberAfStackStatusCallback(EmberStatus status)
  *****************************************************************************/
 static EmberStatus sendTxTestPacket(void)
 {
-  uint8_t tx_test_packet[127];
+  uint8_t tx_test_packet[SL_FLEX_CONNECT_BUFFER_SIZE];
 
   for (uint8_t i = 0; i < tx_test_packet_size; i++) {
     tx_test_packet[i] = i;

@@ -17,9 +17,6 @@
  ******************************************************************************/
 
 #include "app/framework/include/af.h"
-#ifndef UC_BUILD
-#include "callback.h"
-#endif
 
 #include "app/framework/util/util.h"
 #include "app/framework/util/common.h"
@@ -32,19 +29,18 @@
 #include "ota-client.h"
 #include "ota-client-signature-verify.h"
 #include "ota-client-page-request.h"
+#include "stack/include/zigbee-security-manager.h"
 
-#ifdef UC_BUILD
 #include "zap-cluster-command-parser.h"
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #ifdef SL_CATALOG_ZIGBEE_PARTNER_LINK_KEY_EXCHANGE_PRESENT
   #include "partner-link-key-exchange.h"
 #endif //SL_CATALOG_ZIGBEE_PARTNER_LINK_KEY_EXCHANGE_PRESENT
 #ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
   #include "test-harness-config.h"
 #endif //SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
-#else // !UC_BUILD
-#include "app/framework/plugin/partner-link-key-exchange/partner-link-key-exchange.h"
-#endif // UC_BUILD
 
 #if defined(EZSP_HOST)
 // For emberIeeeAddressRequest()
@@ -257,7 +253,7 @@ static CustomVerifyStatus customVerifyStatus = NO_CUSTOM_VERIFY;
 // with the generated CLI
 //#if defined(EMBER_TEST)
 // If set to 100, will not stop download.
-uint8_t emAfOtaClientStopDownloadPercentage = 100;
+uint8_t sli_zigbee_af_ota_client_stopDownloadPercentage = 100;
 //#endif
 
 // The spec says pick a random number up to 5 minutes.  We limit
@@ -463,7 +459,7 @@ static bool setTimer(uint32_t timeMs)
   // in App. Builder and passed through to here since I am expecting multiple
   // messages coming back from the server.
   if (waitingForResponse
-      && emAfGetCurrentPageRequestStatus() != EM_AF_WAITING_PAGE_REQUEST_REPLIES) {
+      && sli_zigbee_af_get_current_page_request_status() != EM_AF_WAITING_PAGE_REQUEST_REPLIES) {
     timer = MESSAGE_TIMEOUT_MS;
     nextEventTimer = timeMs;
   } else {
@@ -483,15 +479,15 @@ static bool setTimer(uint32_t timeMs)
     if (currentBootloadState == BOOTLOAD_STATE_VERIFY_IMAGE) {
       sleepControl = EMBER_AF_STAY_AWAKE;
     } else if (!waitingForResponse
-               && (emAfGetCurrentPageRequestStatus()
+               && (sli_zigbee_af_get_current_page_request_status()
                    == EM_AF_NO_PAGE_REQUEST)) {
       pollControl = EMBER_AF_LONG_POLL;
     }
-    slxu_zigbee_zcl_schedule_client_tick_extended(myEndpoint,
-                                                  ZCL_OTA_BOOTLOAD_CLUSTER_ID,
-                                                  timer,
-                                                  pollControl,
-                                                  sleepControl);
+    sl_zigbee_zcl_schedule_client_tick_extended(myEndpoint,
+                                                ZCL_OTA_BOOTLOAD_CLUSTER_ID,
+                                                timer,
+                                                pollControl,
+                                                sleepControl);
   }
   return (timer != 0);
 }
@@ -523,7 +519,7 @@ static void otaClientTick(void)
   // Getting here means either we timed out our last operation,
   // or we need to kick off a periodic event.
 
-  emAfPageRequestTimerExpired();
+  sli_zigbee_af_page_request_timer_expired();
 
   if (waitingForResponse) {
     otaPrintln("Timeout waiting for message.");
@@ -631,10 +627,14 @@ static void getPartnerLinkKey(void)
                              EUI64_SIZE);
 
   for (i = 0; i < emberAfGetKeyTableSize(); i++) {
-    EmberKeyStruct keyStruct;
-    if (EMBER_SUCCESS == emberGetKeyTableEntry(i, &keyStruct)
-        && EMBER_APPLICATION_LINK_KEY == keyStruct.type
-        && 0 == MEMCOMPARE(keyStruct.partnerEUI64, serverEui64, EUI64_SIZE)) {
+    sl_zb_sec_man_aps_key_metadata_t key_info;
+    sl_zb_sec_man_context_t context;
+    context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_APP_LINK;
+    context.flags |= ZB_SEC_MAN_FLAG_KEY_INDEX_IS_VALID;
+    context.key_index = i;
+
+    if (SL_STATUS_OK == sl_zb_sec_man_get_aps_key_info(&context, &key_info)
+        && 0 == MEMCOMPARE(context.eui64, serverEui64, EUI64_SIZE)) {
       goto partnerLinkKeyDone;
     }
   }
@@ -715,16 +715,16 @@ void emberAfOtaClientStartCallback(void)
   }
 }
 
-void emAfOtaClientStop(void)
+void sli_zigbee_af_ota_client_stop(void)
 {
   downloadAndVerifyFinish(EMBER_AF_OTA_CLIENT_ABORTED);
   recordUpgradeStatus(BOOTLOAD_STATE_NONE);
   waitingForResponse = false;
   discoverBusy = false;
-  slxu_zigbee_zcl_deactivate_client_tick(myEndpoint, ZCL_OTA_BOOTLOAD_CLUSTER_ID);
+  sl_zigbee_zcl_deactivate_client_tick(myEndpoint, ZCL_OTA_BOOTLOAD_CLUSTER_ID);
 }
 
-void emAfOtaClientPrintState(void)
+void sli_zigbee_af_ota_client_print_state(void)
 {
   otaPrintln(" State:   %p",
              bootloadStateNames[currentBootloadState]);
@@ -735,8 +735,8 @@ void emAfOtaClientPrintState(void)
   }
   otaPrintln(" Current Download Offset: 0x%4X (%d%%)",
              getCurrentOffset(),
-             emAfCalculatePercentage(getCurrentOffset(),
-                                     totalImageSize));
+             sli_zigbee_af_calculate_percentage(getCurrentOffset(),
+                                                totalImageSize));
 }
 
 static void recordServerEuiAndGoToNextState(EmberEUI64 eui64)
@@ -751,7 +751,7 @@ static void recordServerEuiAndGoToNextState(EmberEUI64 eui64)
   getPartnerLinkKey();;
 }
 
-void emAfOtaClientServiceDiscoveryCallback(const EmberAfServiceDiscoveryResult *result)
+void sli_zigbee_af_ota_client_service_discovery_callback(const EmberAfServiceDiscoveryResult *result)
 {
   // We only look at the first result.  How multiple OTA servers are handled
   // has not been spelled out by the spec yet, but the spec does say to just
@@ -838,7 +838,7 @@ static void startServerDiscovery(void)
       emberAfProfileIdFromIndex(index),
       ZCL_OTA_BOOTLOAD_CLUSTER_ID,
       EMBER_AF_SERVER_CLUSTER_DISCOVERY,
-      emAfOtaClientServiceDiscoveryCallback);
+      sli_zigbee_af_ota_client_service_discovery_callback);
 
   if (status != EMBER_SUCCESS) {
     otaPrintln("Failed to initiate service discovery.");
@@ -875,7 +875,7 @@ static void euiLookup(void)
   if (status != EMBER_SUCCESS) {
     // New discovery of the Server's EUI
     status = emberAfFindIeeeAddress(serverNodeId,
-                                    emAfOtaClientServiceDiscoveryCallback);
+                                    sli_zigbee_af_ota_client_service_discovery_callback);
     if (status != EMBER_SUCCESS) {
       // Discovery was never initiated.
       euiLookupErrorOccurred();
@@ -914,7 +914,7 @@ static BootloadState determineDownloadFileStatus(void)
     otaPrintFlush();
     updateCurrentOffset(currentOffset);
     updateDownloadFileVersion(currentDownloadFile.firmwareVersion);
-    emAfPrintPercentageSetStartAndEnd(0, totalImageSize);
+    sli_zigbee_af_print_percentage_set_start_and_end(0, totalImageSize);
     return BOOTLOAD_STATE_DOWNLOAD;
   } else if (status == EMBER_AF_OTA_STORAGE_SUCCESS) {
     EmberAfOtaImageId currentVersionInfo;
@@ -1007,11 +1007,11 @@ static EmberAfStatus commandParse(bool defaultResponse,
     return EMBER_ZCL_STATUS_INVALID_FIELD;
   }
 
-  if (!defaultResponse && message->bufLen < emAfOtaMinMessageLengths[commandId]) {
+  if (!defaultResponse && message->bufLen < sli_zigbee_af_ota_min_message_lengths[commandId]) {
     otaPrintln("OTA command 0x%X too short (len %d < min %d)",
                commandId,
                message->bufLen,
-               emAfOtaMinMessageLengths[commandId]);
+               sli_zigbee_af_ota_min_message_lengths[commandId]);
     return EMBER_ZCL_STATUS_MALFORMED_COMMAND;
   }
 
@@ -1298,7 +1298,7 @@ static void startDownload(uint32_t newVersion)
   EmberAfOtaStorageStatus status;
   otaPrintln("Starting download, Version 0x%4X",
              newVersion);
-  emAfPrintPercentageSetStartAndEnd(0, totalImageSize);
+  sli_zigbee_af_print_percentage_set_start_and_end(0, totalImageSize);
   updateDownloadFileVersion(newVersion);
   updateCurrentOffset(0);
   updateMinBlockRequestPeriodAttribute(0);
@@ -1343,7 +1343,7 @@ static void startDownload(uint32_t newVersion)
   } else if (status == EMBER_AF_OTA_STORAGE_OPERATION_IN_PROGRESS) {
     // Disable the timer since we are waiting for the erase event to complete
     // and execute our callback, not the timer to expire.
-    slxu_zigbee_zcl_deactivate_client_tick(myEndpoint, ZCL_OTA_BOOTLOAD_CLUSTER_ID);
+    sl_zigbee_zcl_deactivate_client_tick(myEndpoint, ZCL_OTA_BOOTLOAD_CLUSTER_ID);
   } else {
     otaPrintln("Error: Failed to erase old temp data.");
     downloadAndVerifyFinish(EMBER_AF_OTA_CLIENT_ABORTED);
@@ -1382,9 +1382,9 @@ static EmberAfStatus queryNextImageResponseParse(uint8_t* buffer,
   otaPrintln("%p: New image is available for download.",
              "Query next image response");
 
-  index += emAfOtaParseImageIdFromMessage(&imageId,
-                                          &(buffer[index]),
-                                          length - index);
+  index += sli_zigbee_af_ota_parse_image_id_from_message(&imageId,
+                                                         &(buffer[index]),
+                                                         length - index);
   totalImageSize = emberAfGetInt32u(buffer, index, length);
 
   if (imageId.manufacturerId != currentDownloadFile.manufacturerId
@@ -1599,15 +1599,15 @@ static void continueImageDownload(void)
     #endif
     // Set the current offset for page request
     // or, Get the current offset if retrying image blocks
-    EmAfPageRequestClientStatus status = emAfGetCurrentPageRequestStatus();
+    sli_zigbee_af_page_request_client_status status = sli_zigbee_af_get_current_page_request_status();
     if (status == EM_AF_NO_PAGE_REQUEST) {
-      timer = emAfInitPageRequestClient(getCurrentOffset(),
-                                        totalImageSize);
+      timer = sli_zigbee_af_init_page_request_client(getCurrentOffset(),
+                                                     totalImageSize);
       commandId = ZCL_IMAGE_PAGE_REQUEST_COMMAND_ID;
     } else {
       uint32_t offset;
       if (EM_AF_PAGE_REQUEST_ERROR
-          == emAfNextMissedBlockRequestOffset(&offset)) {
+          == sli_zigbee_af_next_missed_block_request_offset(&offset)) {
         // Server is unreachable because page request caused us to get 0
         // response packets from the server when we should have received
         // a lot.
@@ -1629,7 +1629,7 @@ static void continueImageDownload(void)
 }
 
 // A callback fired by the verification code.
-void emAfOtaVerifyStoredDataFinish(EmberAfImageVerifyStatus status)
+void sli_zigbee_af_ota_verify_stored_data_finish(EmberAfImageVerifyStatus status)
 {
   if (currentBootloadState == BOOTLOAD_STATE_VERIFY_IMAGE) {
     continueImageVerification(status);
@@ -1730,11 +1730,11 @@ static void continueImageVerification(EmberAfImageVerifyStatus status)
                                                     &currentDownloadFile);
       customVerifyStatus = CUSTOM_VERIFY_IN_PROGRESS;
     } else {
-      status = emAfOtaImageSignatureVerify(MAX_DIGEST_CALCULATIONS_PER_CALL,
-                                           &currentDownloadFile,
-                                           (status == EMBER_AF_IMAGE_UNKNOWN
-                                            ? EMBER_AF_NEW_IMAGE_VERIFICATION
-                                            : EMBER_AF_CONTINUE_IMAGE_VERIFY));
+      status = sli_zigbee_af_ota_image_signature_verify(MAX_DIGEST_CALCULATIONS_PER_CALL,
+                                                        &currentDownloadFile,
+                                                        (status == EMBER_AF_IMAGE_UNKNOWN
+                                                         ? EMBER_AF_NEW_IMAGE_VERIFICATION
+                                                         : EMBER_AF_CONTINUE_IMAGE_VERIFY));
     }
 
     if (status == EMBER_AF_IMAGE_VERIFY_IN_PROGRESS) {
@@ -1811,7 +1811,7 @@ static EmberAfStatus imageBlockResponseParse(uint8_t* buffer, uint8_t index, uin
   uint8_t status;
   uint32_t nextOffset;
   const uint8_t* imageData;
-  EmAfPageRequestClientStatus pageRequestStatus = EM_AF_NO_PAGE_REQUEST;
+  sli_zigbee_af_page_request_client_status pageRequestStatus = EM_AF_NO_PAGE_REQUEST;
 
   if (NULL == buffer) {
     otaPrintln("OTA: ImageBlockReponse contains invalid or incomplete data");
@@ -1858,7 +1858,7 @@ static EmberAfStatus imageBlockResponseParse(uint8_t* buffer, uint8_t index, uin
     setTimer(calculatedTimerMs);
     // Abort the page request, else when the timer fires, it will be
     // misinterpreted as a page response timeout
-    emAfAbortPageRequest();
+    sli_zigbee_af_abort_page_request();
     return EMBER_ZCL_STATUS_SUCCESS;
   } else if (status == EMBER_ZCL_STATUS_ABORT
              || status == EMBER_ZCL_STATUS_NO_IMAGE_AVAILABLE) {
@@ -1866,10 +1866,10 @@ static EmberAfStatus imageBlockResponseParse(uint8_t* buffer, uint8_t index, uin
     downloadAndVerifyFinish(EMBER_AF_OTA_SERVER_ABORTED);
     return EMBER_ZCL_STATUS_SUCCESS;
   } else if (status == EMBER_ZCL_STATUS_UNSUP_COMMAND) {
-    if (usePageRequest && emAfHandlingPageRequestClient()) {
+    if (usePageRequest && sli_zigbee_af_handling_page_request_client()) {
       otaPrintln("Server doesn't support page request, only using block request.");
       usePageRequest = false;
-      emAfAbortPageRequest();
+      sli_zigbee_af_abort_page_request();
       continueImageDownload();
       return EMBER_ZCL_STATUS_SUCCESS;
     } else {
@@ -1888,9 +1888,9 @@ static EmberAfStatus imageBlockResponseParse(uint8_t* buffer, uint8_t index, uin
     return EMBER_ZCL_STATUS_MALFORMED_COMMAND;
   }
 
-  index += emAfOtaParseImageIdFromMessage(&imageId,
-                                          &(buffer[index]),
-                                          length);
+  index += sli_zigbee_af_ota_parse_image_id_from_message(&imageId,
+                                                         &(buffer[index]),
+                                                         length);
   offset = emberAfGetInt32u(buffer, index, length);
   index += 4;
   dataSize = emberAfGetInt8u(buffer, index, length);
@@ -1906,7 +1906,7 @@ static EmberAfStatus imageBlockResponseParse(uint8_t* buffer, uint8_t index, uin
   }
 
   if (!usePageRequest
-      || emAfGetCurrentPageRequestStatus() != EM_AF_WAITING_PAGE_REQUEST_REPLIES) {
+      || sli_zigbee_af_get_current_page_request_status() != EM_AF_WAITING_PAGE_REQUEST_REPLIES) {
     // For normal image block request transactions, all blocks should be in order.
     // For page request, we may receive them out of order, or just miss packets.
     currentOffset = getCurrentOffset();
@@ -1937,8 +1937,8 @@ static EmberAfStatus imageBlockResponseParse(uint8_t* buffer, uint8_t index, uin
 
   // We want to make sure we don't write the same block twice.  For
   // page-erase-required EEPROM parts this won't work.
-  if (usePageRequest && emAfHandlingPageRequestClient()) {
-    pageRequestStatus = emAfNoteReceivedBlockForPageRequestClient(offset);
+  if (usePageRequest && sli_zigbee_af_handling_page_request_client()) {
+    pageRequestStatus = sli_zigbee_af_note_received_block_for_page_request_client(offset);
     if (pageRequestStatus == EM_AF_BLOCK_ALREADY_RECEIVED) {
       return EMBER_ZCL_STATUS_SUCCESS;
     }
@@ -1954,7 +1954,7 @@ static EmberAfStatus imageBlockResponseParse(uint8_t* buffer, uint8_t index, uin
 
   nextOffset = offset + dataSize;
 
-  if (usePageRequest && emAfHandlingPageRequestClient()) {
+  if (usePageRequest && sli_zigbee_af_handling_page_request_client()) {
     if (pageRequestStatus == EM_AF_PAGE_REQUEST_ERROR) {
       downloadAndVerifyFinish(EMBER_AF_OTA_CLIENT_ABORTED);
       // We still return success to indicate we processed the message correctly.
@@ -1962,9 +1962,9 @@ static EmberAfStatus imageBlockResponseParse(uint8_t* buffer, uint8_t index, uin
     } else if (pageRequestStatus == EM_AF_WAITING_PAGE_REQUEST_REPLIES) {
       return EMBER_ZCL_STATUS_SUCCESS;
     } else if (pageRequestStatus == EM_AF_PAGE_REQUEST_COMPLETE) {
-      nextOffset = emAfGetFinishedPageRequestOffset();
+      nextOffset = sli_zigbee_af_get_finished_page_request_offset();
     } else { // EM_AF_RETRY_MISSED_PACKETS
-      timerMs = emAfGetPageRequestMissedPacketDelayMs();
+      timerMs = sli_zigbee_af_get_page_request_missed_packet_delay_ms();
     }
   }
 
@@ -1973,18 +1973,18 @@ static EmberAfStatus imageBlockResponseParse(uint8_t* buffer, uint8_t index, uin
 #if defined(EMBER_TEST)
   {
     uint8_t percentageComplete =
-      emAfPrintPercentageUpdate("Download",
-                                DOWNLOAD_PERCENTAGE_UPDATE_RATE,
-                                offset);
-    if (percentageComplete != 100 && percentageComplete >= emAfOtaClientStopDownloadPercentage) {
-      otaPrintln("Artificially stopping download at %d%%", emAfOtaClientStopDownloadPercentage);
+      sli_zigbee_af_print_percentage_update("Download",
+                                            DOWNLOAD_PERCENTAGE_UPDATE_RATE,
+                                            offset);
+    if (percentageComplete != 100 && percentageComplete >= sli_zigbee_af_ota_client_stopDownloadPercentage) {
+      otaPrintln("Artificially stopping download at %d%%", sli_zigbee_af_ota_client_stopDownloadPercentage);
       return EMBER_ZCL_STATUS_SUCCESS;
     }
   }
 #else
-  emAfPrintPercentageUpdate("Download",
-                            DOWNLOAD_PERCENTAGE_UPDATE_RATE,
-                            offset);
+  sli_zigbee_af_print_percentage_update("Download",
+                                        DOWNLOAD_PERCENTAGE_UPDATE_RATE,
+                                        offset);
 #endif
 
   if (offset >= totalImageSize) {
@@ -2017,9 +2017,9 @@ static EmberAfStatus upgradeEndResponseParse(uint8_t status,
     return EMBER_ZCL_STATUS_SUCCESS;
   }
 
-  index += emAfOtaParseImageIdFromMessage(&serverSentId,
-                                          &(buffer[index]),
-                                          length);
+  index += sli_zigbee_af_ota_parse_image_id_from_message(&serverSentId,
+                                                         &(buffer[index]),
+                                                         length);
 
   if ((serverSentId.manufacturerId != currentDownloadFile.manufacturerId)
       && (serverSentId.manufacturerId != MFG_ID_WILD_CARD)) {
@@ -2149,7 +2149,7 @@ static void updateDownloadedZigbeeStackVersionAttribute(void)
 {
 #if defined(ZCL_USING_OTA_BOOTLOAD_CLUSTER_DOWNLOADED_ZIGBEE_STACK_VERSION_ATTRIBUTE)
   uint16_t downloadedZigbeeStackVersion = 0;
-  if (emAfOtaStorageGetZigbeeStackVersion(&currentDownloadFile, &downloadedZigbeeStackVersion) != EMBER_AF_OTA_STORAGE_SUCCESS) {
+  if (sli_zigbee_af_ota_storage_get_zigbee_stack_version(&currentDownloadFile, &downloadedZigbeeStackVersion) != EMBER_AF_OTA_STORAGE_SUCCESS) {
     downloadedZigbeeStackVersion = 0xFFFF;
   }
   (void) emberAfWriteAttribute(myEndpoint,
@@ -2175,7 +2175,7 @@ static void updateImageTypeIdAttribute(uint16_t imageTypeId)
 
 // Sends an image block request for a file the server should
 // not have.  Test harness only (test case 9.5.6 - Missing File)
-void emAfSendImageBlockRequestTest(void)
+void sli_zigbee_af_send_image_block_request_test(void)
 {
   if (currentBootloadState != BOOTLOAD_STATE_NONE) {
     otaPrintln("Image block request test only works when state is BOOTLOAD_STATE_NONE");
@@ -2193,12 +2193,12 @@ void emAfSendImageBlockRequestTest(void)
               0);  // timer
 }
 
-void emAfSetPageRequest(bool pageRequestOn)
+void sli_zigbee_af_set_page_request(bool pageRequestOn)
 {
   usePageRequest = pageRequestOn;
 }
 
-bool emAfUsingPageRequest(void)
+bool sli_zigbee_af_using_page_request(void)
 {
   return usePageRequest;
 }
@@ -2270,7 +2270,7 @@ void emberAfPluginOtaClientSetIgnoreNonTrustCenter(bool ignoreNonTc)
 {
   if (ignoreNonTrustCenter != ignoreNonTc) {
     ignoreNonTrustCenter = ignoreNonTc;
-    emAfOtaClientStop();
+    sli_zigbee_af_ota_client_stop();
   } // ignore otherwise.
 }
 
@@ -2289,8 +2289,6 @@ bool emberAfPluginGetDisableOtaDowngrades()
   return disableOtaDowngrades;
 }
 
-#ifdef UC_BUILD
-
 uint32_t emberAfOtaClusterClientCommandParse(sl_service_opcode_t opcode,
                                              sl_service_function_context_t *context)
 {
@@ -2303,5 +2301,3 @@ uint32_t emberAfOtaClusterClientCommandParse(sl_service_opcode_t opcode,
           ? EMBER_ZCL_STATUS_SUCCESS
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
-
-#endif // UC_BUILD

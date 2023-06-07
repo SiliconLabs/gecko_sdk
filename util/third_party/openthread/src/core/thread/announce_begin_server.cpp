@@ -66,10 +66,9 @@ void AnnounceBeginServer::SendAnnounce(uint32_t aChannelMask, uint8_t aCount, ui
 template <>
 void AnnounceBeginServer::HandleTmf<kUriAnnounceBegin>(Coap::Message &aMessage, const Ip6::MessageInfo &aMessageInfo)
 {
-    uint32_t         mask;
-    uint8_t          count;
-    uint16_t         period;
-    Ip6::MessageInfo responseInfo(aMessageInfo);
+    uint32_t mask;
+    uint8_t  count;
+    uint16_t period;
 
     VerifyOrExit(aMessage.IsPostRequest());
     VerifyOrExit((mask = MeshCoP::ChannelMaskTlv::GetChannelMask(aMessage)) != 0);
@@ -81,8 +80,8 @@ void AnnounceBeginServer::HandleTmf<kUriAnnounceBegin>(Coap::Message &aMessage, 
 
     if (aMessage.IsConfirmable() && !aMessageInfo.GetSockAddr().IsMulticast())
     {
-        SuccessOrExit(Get<Tmf::Agent>().SendEmptyAck(aMessage, responseInfo));
-        LogInfo("Sent announce begin response");
+        SuccessOrExit(Get<Tmf::Agent>().SendEmptyAck(aMessage, aMessageInfo));
+        LogInfo("Sent %s response", UriToString<kUriAnnounceBegin>());
     }
 
 exit:

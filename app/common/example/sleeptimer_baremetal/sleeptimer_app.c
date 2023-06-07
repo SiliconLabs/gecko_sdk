@@ -52,6 +52,8 @@ static sl_sleeptimer_timer_handle_t periodic_timer;
 static sl_sleeptimer_timer_handle_t one_shot_timer;
 static sl_sleeptimer_timer_handle_t status_timer;
 static bool print_status = false;
+static bool on_periodic_callback_print_status = false;
+static bool on_one_shot_expire_print_status = false;
 
 /*******************************************************************************
  ************************   LOCAL FUNCTIONS ************************************
@@ -64,6 +66,7 @@ static void on_periodic_timeout(sl_sleeptimer_timer_handle_t *handle,
   (void)&handle;
   (void)&data;
   sl_led_toggle(&LED_INSTANCE_0);
+  on_periodic_callback_print_status = true;
 }
 
 // One-shot timer callback
@@ -73,6 +76,7 @@ static void on_one_shot_timeout(sl_sleeptimer_timer_handle_t *handle,
   (void)&handle;
   (void)&data;
   sl_led_toggle(&LED_INSTANCE_1);
+  on_one_shot_expire_print_status = true;
 }
 
 // Status timer callback
@@ -138,6 +142,14 @@ void sleeptimer_app_process_action(void)
       printf("Periodic timer has %lu ms remaining\r\n", sl_sleeptimer_tick_to_ms(remaining));
     }
   }
+  if (on_periodic_callback_print_status == true) {
+    on_periodic_callback_print_status = false;
+    printf("Led 0 toggles as Periodic timer expired\r\n");
+  }
+  if (on_one_shot_expire_print_status == true) {
+    on_one_shot_expire_print_status = false;
+    printf("Led 1 toggles as One-shot timer expired\r\n");
+  }
 }
 
 /***************************************************************************//**
@@ -152,9 +164,11 @@ void sl_button_on_change(const sl_button_t *handle)
       if (sl_sleeptimer_is_timer_running(&one_shot_timer, &is_running) == 0) {
         if (is_running) {
           // If timer is running, stop it
+          printf("Oneshot timer is stopped by Button 1\r\n");
           sl_sleeptimer_stop_timer(&one_shot_timer);
         } else {
           // If timer is stopped, restart it
+          printf("Oneshot timer is restarted by Button 1\r\n");
           sl_sleeptimer_restart_timer_ms(&one_shot_timer,
                                          TIMEOUT_MS,
                                          on_one_shot_timeout, NULL,
@@ -168,9 +182,11 @@ void sl_button_on_change(const sl_button_t *handle)
       if (sl_sleeptimer_is_timer_running(&periodic_timer, &is_running) == 0) {
         if (is_running) {
           // If timer is running, stop it
+          printf("Periodic timer is stopped by Button 0\r\n");
           sl_sleeptimer_stop_timer(&periodic_timer);
         } else {
           // If timer is stopped, restart it
+          printf("Periodic timer is restarted by Button 0\r\n");
           sl_sleeptimer_restart_periodic_timer_ms(&periodic_timer,
                                                   TIMEOUT_MS,
                                                   on_periodic_timeout, NULL,

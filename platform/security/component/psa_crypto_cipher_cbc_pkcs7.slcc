@@ -17,7 +17,7 @@ requires:
 template_contribution:
   - name: psa_crypto_config
     value: PSA_WANT_ALG_CBC_PKCS7
-  - name: psa_crypto_config
+  - name: psa_crypto_builtin_config
     value: "MBEDTLS_PSA_BUILTIN_ALG_CBC_PKCS7 1"
     condition: [mbedtls_cipher_cbc, mbedtls_cipher_padding_pkcs7]
 documentation:

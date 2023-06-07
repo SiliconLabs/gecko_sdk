@@ -66,9 +66,6 @@
  *        - <i></i>
  *
  */
-
-#ifdef UC_BUILD
-
 void otaStartStopClientCommand(bool starting)
 {
   emberAfCorePrintln("%p" "ing OTA client state machine",
@@ -76,7 +73,7 @@ void otaStartStopClientCommand(bool starting)
   if (starting) {
     emberAfOtaClientStartCallback();
   } else {
-    emAfOtaClientStop();
+    sli_zigbee_af_ota_client_stop();
   }
 }
 
@@ -93,7 +90,7 @@ void otaStopClientCommand(sl_cli_command_arg_t *arguments)
 void otaCliBootload(sl_cli_command_arg_t *arguments)
 {
   uint8_t index = sl_cli_get_argument_uint8(arguments, 0);
-  EmberAfOtaImageId id = emAfOtaFindImageIdByIndex(index);
+  EmberAfOtaImageId id = sli_zigbee_af_ota_find_image_id_by_index(index);
   if (!emberAfIsOtaImageIdValid(&id)) {
     otaPrintln("Error: No image at index %d", index);
     return;
@@ -105,14 +102,14 @@ void otaCliVerify(sl_cli_command_arg_t *arguments)
 {
 #if defined(SIGNATURE_VERIFICATION_SUPPORT)
   uint8_t index = sl_cli_get_argument_uint8(arguments, 0);
-  EmberAfOtaImageId id = emAfOtaFindImageIdByIndex(index);
+  EmberAfOtaImageId id = sli_zigbee_af_ota_find_image_id_by_index(index);
   if (!emberAfIsOtaImageIdValid(&id)) {
     otaPrintln("Error: No image at index %d", index);
     return;
   }
-  emAfOtaImageSignatureVerify(0,       // max number of hash calculations
-                              &id,     //   (0 = keep going until hashing is done)
-                              true);   // new verification?
+  sli_zigbee_af_ota_image_signature_verify(0,       // max number of hash calculations
+                                           &id, //   (0 = keep going until hashing is done)
+                                           true); // new verification?
 #else
   otaPrintln("Not supported.");
 #endif
@@ -147,7 +144,7 @@ void otaPrintClientInfo(sl_cli_command_arg_t *arguments)
   emberAfCoreFlush();
 
 #if defined(USE_PAGE_REQUEST)
-  otaPrintln("Use Page Request: %s", emAfUsingPageRequest() ? "yes" : "no");
+  otaPrintln("Use Page Request: %s", sli_zigbee_af_using_page_request() ? "yes" : "no");
   otaPrintln("Page Request Size: %d bytes",
              EMBER_AF_PLUGIN_OTA_CLIENT_PAGE_REQUEST_SIZE);
   otaPrintln("Page Request Timeout: %d sec.",
@@ -156,14 +153,14 @@ void otaPrintClientInfo(sl_cli_command_arg_t *arguments)
 
 #if defined(SIGNATURE_VERIFICATION_SUPPORT)
   otaPrintln("");
-  emAfOtaClientSignatureVerifyPrintSigners();
+  sli_zigbee_af_ota_client_signature_verify_print_signers();
 #endif
 }
 
 void setPageRequest(sl_cli_command_arg_t *arguments)
 {
   bool pageRequest = sl_cli_get_argument_uint8(arguments, 0);
-  emAfSetPageRequest(pageRequest);
+  sli_zigbee_af_set_page_request(pageRequest);
 }
 
 // TODO: need to gate this when we're better equipped to do so
@@ -171,7 +168,7 @@ void setPageRequest(sl_cli_command_arg_t *arguments)
 //#if defined(EMBER_TEST)
 void setPausePercentage(sl_cli_command_arg_t *arguments)
 {
-  emAfOtaClientStopDownloadPercentage = sl_cli_get_argument_uint8(arguments, 0);
+  sli_zigbee_af_ota_client_stopDownloadPercentage = sl_cli_get_argument_uint8(arguments, 0);
 }
 //#endif
 
@@ -180,198 +177,14 @@ void otaSendUpgradeRequest(sl_cli_command_arg_t *arguments)
   emberAfOtaServerSendUpgradeRequest();
 }
 
-void emAfOtaClientDisableDowngrades(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_ota_client_disable_downgrades(sl_cli_command_arg_t *arguments)
 {
   otaPrintln("OTA Downgrades: Disabled");
   emberAfPluginSetDisableOtaDowngrades(true);
 }
 
-void emAfOtaClientEnableDowngrades(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_ota_client_enable_downgrades(sl_cli_command_arg_t *arguments)
 {
   otaPrintln("OTA Downgrades: Enabled");
   emberAfPluginSetDisableOtaDowngrades(false);
 }
-
-#else //UC_BUILD
-
-#define EMBER_AF_DOXYGEN_CLI__OTA_CLIENT_COMMANDS
-/** @} END addtogroup */
-
-#ifdef EMBER_AF_PLUGIN_OTA_CLIENT
-
-//------------------------------------------------------------------------------
-// Forward Declarations
-
-void otaCliBootload(void);
-void otaPrintClientInfo(void);
-void otaCliVerify(void);
-void otaStartClientCommand(void);
-void otaStopClientCommand(void);
-void setPageRequest(void);
-void emAfOtaClientDisableDowngrades(void);
-void emAfOtaClientEnableDowngrades(void);
-
-// TODO: need to gate this when we're better equipped to do so
-// with the generated CLI
-//#if defined(EMBER_TEST)
-void setPausePercentage(void);
-//#endif
-
-#if defined(EMBER_TEST)
-#define PAUSE_AT_COMMAND emberCommandEntryAction("pause-at", setPausePercentage, "u", ""),
-#else
-#define PAUSE_AT_COMMAND
-#endif
-
-#ifndef EMBER_AF_GENERATE_CLI
-#define OTA_CLIENT_COMMANDS                                                     \
-  emberCommandEntryAction("bootload", otaCliBootload, "u", ""),                 \
-  emberCommandEntryAction("verify", otaCliVerify, "u", ""),                     \
-  emberCommandEntryAction("info", otaPrintClientInfo, "", ""),                  \
-  emberCommandEntryAction("start", otaStartClientCommand, "", ""),              \
-  emberCommandEntryAction("stop", otaStopClientCommand, "", ""),                \
-  emberCommandEntryAction("status", emAfOtaClientPrintState, "", ""),           \
-  emberCommandEntryAction("block-test", emAfSendImageBlockRequestTest, "", ""), \
-  emberCommandEntryAction("page-request", setPageRequest, "u", ""),             \
-  PAUSE_AT_COMMAND                                                              \
-  emberCommandEntryTerminator(),
-#endif // EMBER_AF_GENERATE_CLI
-
-//------------------------------------------------------------------------------
-// Globals
-EmberCommandEntry emberAfPluginOtaClientCommands[] = {
-#ifndef EMBER_AF_GENERATE_CLI
-  OTA_CLIENT_COMMANDS
-#endif // EMBER_AF_GENERATE_CLI
-
-  emberCommandEntryTerminator(),
-};
-
-//------------------------------------------------------------------------------
-// Functions
-
-void otaStartStopClientCommand(bool starting)
-{
-  emberAfCorePrintln("%p" "ing OTA client state machine",
-                     starting ? "start" : "stopp");
-  if (starting) {
-    emberAfOtaClientStartCallback();
-  } else {
-    emAfOtaClientStop();
-  }
-}
-
-void otaStartClientCommand(void)
-{
-  otaStartStopClientCommand(true);
-}
-
-void otaStopClientCommand(void)
-{
-  otaStartStopClientCommand(false);
-}
-
-void otaCliBootload(void)
-{
-  uint8_t index = (uint8_t)emberUnsignedCommandArgument(0);
-  EmberAfOtaImageId id = emAfOtaFindImageIdByIndex(index);
-  if (!emberAfIsOtaImageIdValid(&id)) {
-    otaPrintln("Error: No image at index %d", index);
-    return;
-  }
-  emberAfOtaClientBootloadCallback(&id);
-}
-
-void otaCliVerify(void)
-{
-#if defined(SIGNATURE_VERIFICATION_SUPPORT)
-  uint8_t index = (uint8_t)emberUnsignedCommandArgument(0);
-  EmberAfOtaImageId id = emAfOtaFindImageIdByIndex(index);
-  if (!emberAfIsOtaImageIdValid(&id)) {
-    otaPrintln("Error: No image at index %d", index);
-    return;
-  }
-  emAfOtaImageSignatureVerify(0,       // max number of hash calculations
-                              &id,     //   (0 = keep going until hashing is done)
-                              true);   // new verification?
-#else
-  otaPrintln("Not supported.");
-#endif
-}
-
-void otaPrintClientInfo(void)
-{
-  EmberAfOtaImageId myId;
-  uint16_t hardwareVersion;
-  emberAfOtaClientVersionInfoCallback(&myId, &hardwareVersion);
-  otaPrintln("Client image query info");
-  otaPrintln("Manuf ID:         0x%2X", myId.manufacturerId);
-  otaPrintln("Image Type ID:    0x%2X", myId.imageTypeId);
-  otaPrintln("Current Version:  0x%4X", myId.firmwareVersion);
-  emberAfOtaBootloadClusterPrint("Hardware Version: ");
-  if (hardwareVersion != EMBER_AF_INVALID_HARDWARE_VERSION) {
-    otaPrintln("0x%2X", hardwareVersion);
-  } else {
-    otaPrintln("NA");
-  }
-  emberAfCoreFlush();
-
-  otaPrintln("Query Delay ms:            %l", (uint32_t)EMBER_AF_OTA_QUERY_DELAY_MS);
-  emberAfCoreFlush();
-  otaPrintln("Server Discovery Delay ms: %l", (uint32_t)EMBER_AF_OTA_SERVER_DISCOVERY_DELAY_MS);
-  otaPrintln("Download Delay ms:         %l", (uint32_t)EMBER_AF_PLUGIN_OTA_CLIENT_DOWNLOAD_DELAY_MS);
-  otaPrintln("Run Upgrade Delay ms:      %l", (uint32_t)EMBER_AF_RUN_UPGRADE_REQUEST_DELAY_MS);
-  emberAfCoreFlush();
-  otaPrintln("Verify Delay ms:           %l", (uint32_t)EMBER_AF_PLUGIN_OTA_CLIENT_VERIFY_DELAY_MS);
-  otaPrintln("Download Error Threshold:  %d", EMBER_AF_PLUGIN_OTA_CLIENT_DOWNLOAD_ERROR_THRESHOLD);
-  otaPrintln("Upgrade Wait Threshold:    %d", EMBER_AF_PLUGIN_OTA_CLIENT_UPGRADE_WAIT_THRESHOLD);
-  emberAfCoreFlush();
-
-#if defined(USE_PAGE_REQUEST)
-  otaPrintln("Use Page Request: %s", emAfUsingPageRequest() ? "yes" : "no");
-  otaPrintln("Page Request Size: %d bytes",
-             EMBER_AF_PLUGIN_OTA_CLIENT_PAGE_REQUEST_SIZE);
-  otaPrintln("Page Request Timeout: %d sec.",
-             EMBER_AF_PLUGIN_OTA_CLIENT_PAGE_REQUEST_TIMEOUT_SECONDS);
-#endif
-
-#if defined(SIGNATURE_VERIFICATION_SUPPORT)
-  otaPrintln("");
-  emAfOtaClientSignatureVerifyPrintSigners();
-#endif
-}
-
-void setPageRequest(void)
-{
-  bool pageRequest = (bool)emberUnsignedCommandArgument(0);
-  emAfSetPageRequest(pageRequest);
-}
-
-// TODO: need to gate this when we're better equipped to do so
-// with the generated CLI
-//#if defined(EMBER_TEST)
-void setPausePercentage(void)
-{
-  emAfOtaClientStopDownloadPercentage = (uint8_t)emberUnsignedCommandArgument(0);
-}
-//#endif
-
-void otaSendUpgradeRequest(void)
-{
-  emberAfOtaServerSendUpgradeRequest();
-}
-
-void emAfOtaClientDisableDowngrades(void)
-{
-  otaPrintln("OTA Downgrades: Disabled");
-  emberAfPluginSetDisableOtaDowngrades(true);
-}
-
-void emAfOtaClientEnableDowngrades(void)
-{
-  otaPrintln("OTA Downgrades: Enabled");
-  emberAfPluginSetDisableOtaDowngrades(false);
-}
-
-#endif //EMBER_AF_PLUGIN_OTA_CLIENT
-#endif

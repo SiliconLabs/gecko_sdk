@@ -66,7 +66,7 @@ static void _iperf_udp_finack(sl_iperf_test_t * const test);
  * @return sl_iperf_ts_ms_t Converted timestamp in ms
  *****************************************************************************/
 __STATIC_INLINE sl_iperf_ts_ms_t _get_ms_ts_from_clnt_header(const sl_iperf_udp_clnt_hdr_t
-                                                           * const hdr);
+                                                             * const hdr);
 
 /**************************************************************************//**
  * @brief iPerf get absolute delta time

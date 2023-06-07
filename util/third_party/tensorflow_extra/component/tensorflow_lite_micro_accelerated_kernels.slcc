@@ -2,11 +2,11 @@ id: tensorflow_lite_micro_accelerated_kernels
 package: platform
 label: MVP Accelerated Kernels
 description: >
-  This component includes kernel implementations that are accelerated 
+  This component includes kernel implementations that are accelerated
   using the MVP accelerator on compatible devices. By including this
   component, the MVP kernel implementations will be used instead of the
   optimized kernels.
-  
+
   The kernels which have MVP accelerated implementations are:
   pooling, fully_connected, add, conv, depthwise_conv and transpose_conv.
   Remaining kernels fall back to using optimized or reference kernel
@@ -17,20 +17,22 @@ provides:
   - name: tensorflow_lite_micro_accelerated_kernels
   - name: tensorflow_kernel_implementation
     allow_multiple: true
-  - name: tensorflow_kernel_accelerated_pooling
-  - name: tensorflow_kernel_accelerated_fully_connected
   - name: tensorflow_kernel_accelerated_add
   - name: tensorflow_kernel_accelerated_conv
   - name: tensorflow_kernel_accelerated_depthwise_conv
+  - name: tensorflow_kernel_accelerated_fully_connected
+  - name: tensorflow_kernel_accelerated_mul
+  - name: tensorflow_kernel_accelerated_pooling
   - name: tensorflow_kernel_accelerated_transpose_conv
 requires:
   - name: tensorflow_lite_micro_optimized_kernels
-  - name: mvp
+  - name: nn_mvp
 root_path: util/third_party/tensorflow_extra/siliconlabs
 source:
-  - path: pooling.cc
-  - path: fully_connected.cc
   - path: add.cc
   - path: conv.cc
   - path: depthwise_conv.cc
+  - path: fully_connected.cc
+  - path: mul.cc
+  - path: pooling.cc
   - path: transpose_conv.cc

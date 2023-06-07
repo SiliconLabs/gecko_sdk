@@ -71,19 +71,19 @@ HIDDEN void padding(const uint8_t *x, uint8_t length, uint8_t *out)
   }
 }
 
-extern void emGetKeyFromCore(uint8_t* key);
-extern void emLoadKeyIntoCore(const uint8_t* key);
-extern void emStandAloneEncryptBlock(uint8_t *block);
+extern void sli_zigbee_get_key_from_core(uint8_t* key);
+extern void sli_util_load_key_into_core(const uint8_t* key);
+extern void sli_util_stand_alone_encrypt_block(uint8_t *block);
 
 HIDDEN void aesEncrypt(uint8_t *block, const uint8_t *key)
 {
   uint8_t temp[16];
 
   ATOMIC(
-    emGetKeyFromCore(temp);
-    emLoadKeyIntoCore((uint8_t*)key);
-    emStandAloneEncryptBlock(block);
-    emLoadKeyIntoCore(temp);
+    sli_zigbee_get_key_from_core(temp);
+    sli_util_load_key_into_core((uint8_t*)key);
+    sli_util_stand_alone_encrypt_block(block);
+    sli_util_load_key_into_core(temp);
     )
 }
 

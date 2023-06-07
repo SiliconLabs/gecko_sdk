@@ -18,18 +18,15 @@
 #ifndef _SILABS_GREEN_POWER_TRANSLATION_TABLE_H_
 #define _SILABS_GREEN_POWER_TRANSLATION_TABLE_H_
 
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 // This translation table header is included by the green power server to perform default
 // command translation, even without the translation table component. Hence the
 // the following configuration header inclusion is conditionalized.
 #ifdef SL_CATALOG_ZIGBEE_GREEN_POWER_TRANSLATION_TABLE_PRESENT
 #include "green-power-translation-table-config.h"
 #endif // SL_CATALOG_ZIGBEE_GREEN_POWER_TRANSLATION_TABLE_PRESENT
-#else
-// The following flag is defined for non-UC builds.
-#define SL_CATALOG_ZIGBEE_GREEN_POWER_TRANSLATION_TABLE_PRESENT
-#endif // UC_BUILD
 
 /**
  * @defgroup green-power-translation-table Green Power Translation Table
@@ -44,15 +41,6 @@
  * @addtogroup green-power-translation-table
  * @{
  */
-#ifndef UC_BUILD
-#ifndef EMBER_AF_PLUGIN_GREEN_POWER_TRANSLATION_TABLE_CUSTOMIZED_GPD_TRANSLATION_TABLE_SIZE
-#define EMBER_AF_PLUGIN_GREEN_POWER_TRANSLATION_TABLE_CUSTOMIZED_GPD_TRANSLATION_TABLE_SIZE (20)
-#endif
-
-#ifndef EMBER_AF_PLUGIN_GREEN_POWER_TRANSLATION_TABLE_TRANSLATION_TABLE_SIZE
-#define EMBER_AF_PLUGIN_GREEN_POWER_TRANSLATION_TABLE_TRANSLATION_TABLE_SIZE 30
-#endif
-#endif // !UC_BUILD
 #define EMBER_AF_PLUGIN_GREEN_POWER_SERVER_ADDITIONALINFO_TABLE_SIZE EMBER_AF_PLUGIN_GREEN_POWER_TRANSLATION_TABLE_TRANSLATION_TABLE_SIZE
 
 #define EMBER_AF_GREEN_POWER_SERVER_TRANSLATION_TABLE_ENTRY_ZCL_PAYLOAD_LEN (7)
@@ -78,7 +66,7 @@
 
 typedef uint8_t GpTableType;
 #ifdef DOXYGEN_SHOULD_SKIP_THIS
-enum EmGpTableType
+enum sli_zigbee_af_gp_table_type
 #else
 enum
 #endif //DOXYGEN_SHOULD_SKIP_THIS
@@ -86,7 +74,7 @@ enum
   NO_ENTRY,
   DEFAULT_TABLE_ENTRY,
   CUSTOMIZED_TABLE_ENTRY,
-}; //EmGpTableType
+}; //sli_zigbee_af_gp_table_type
 
 #ifdef DOXYGEN_SHOULD_SKIP_THIS
 enum IncomingReqType
@@ -135,7 +123,7 @@ typedef struct {
   uint8_t       nbOfIdentifiedContacts;
   uint8_t       nbOfTTEntriesNeeded;
   uint8_t       indicativeBitmask;
-} EmGpSwitchTypeData;
+} sli_zigbee_af_gp_switch_type_data;
 
 typedef struct {
   bool            infoBlockPresent;
@@ -146,7 +134,7 @@ typedef struct {
   EmberGpAddress  gpAddr;
   EmberGpApplicationId gpApplicationId;
   uint8_t         additionalInfoOffset;
-} EmGpCommandTranslationTableEntry;
+} sli_zigbee_af_gp_command_translation_table_entry;
 
 typedef struct {
   uint8_t       endpoint;
@@ -155,9 +143,9 @@ typedef struct {
 } EmberAfGreenPowerServerMultiSensorTranslation;
 
 typedef struct {
-  EmGpCommandTranslationTableEntry TableEntry[EMBER_AF_PLUGIN_GREEN_POWER_TRANSLATION_TABLE_TRANSLATION_TABLE_SIZE];
+  sli_zigbee_af_gp_command_translation_table_entry TableEntry[EMBER_AF_PLUGIN_GREEN_POWER_TRANSLATION_TABLE_TRANSLATION_TABLE_SIZE];
   uint8_t totalNoOfEntries;
-} EmGpCommandTranslationTable;
+} sli_zigbee_af_gp_command_translation_table;
 
 typedef struct {
   EmberGpTranslationTableAdditionalInfoBlockOptionRecordField additionalInfoBlock[EMBER_AF_PLUGIN_GREEN_POWER_SERVER_ADDITIONALINFO_TABLE_SIZE];
@@ -166,7 +154,7 @@ typedef struct {
 } EmberGpTranslationTableAdditionalInfoBlockField;
 
 typedef struct {
-  EmGpSwitchTypeData  SwitchType;
+  sli_zigbee_af_gp_switch_type_data  SwitchType;
   EmberAfGreenPowerServerGpdSubTranslationTableEntry genericSwitchDefaultTableEntry;
 } EmberAfGreenPowerServerDefautGenericSwTranslation;
 
@@ -213,81 +201,81 @@ void emberAfGreenPowerClusterPassFrameWithoutTranslationCallback(EmberGpAddress 
 /** @} */ // end of name Callbacks
 /** @} */ // end of green-power-translation-table
 
-EmGpCommandTranslationTable* emGpTransTableGetTranslationTable(void);
+sli_zigbee_af_gp_command_translation_table* sli_zigbee_af_gp_trans_table_get_translation_table(void);
 
-void emGpTransTableClearTranslationTable(void);
-void emGpSetTranslationTableEntry(uint8_t index);
-EmberAfGreenPowerServerGpdSubTranslationTableEntry* emGpGetCustomizedTable(void);
-void emGpClearCustomizedTable(void);
-void emGpSetCustomizedTableEntry(uint8_t index);
-EmberGpTranslationTableAdditionalInfoBlockField * emGpGetAdditionalInfoTable(void);
-void embGpClearAdditionalInfoBlockTable(void);
-void emGpSetAdditionalInfoBlockTableEntry(uint8_t index);
-uint8_t emGpTransTableGetTranslationTableEntry(uint8_t entryIndex,
-                                               EmberAfGreenPowerServerGpdSubTranslationTableEntry *TranslationTableEntry);
-uint8_t emGpTransTableReplaceTranslationTableEntryUpdateCommand(uint8_t Index,
-                                                                bool infoBlockPresent,
-                                                                EmberGpAddress * gpdAddr,
-                                                                uint8_t gpdCommandId,
-                                                                uint8_t ZbEndpoint,
-                                                                uint16_t zigbeeProfile,
-                                                                uint16_t zigbeeCluster,
-                                                                uint8_t  zigbeeCommandId,
-                                                                uint8_t payloadLength,
-                                                                uint8_t* payload,
-                                                                uint8_t payloadSrc,
-                                                                uint8_t additionalInfoLength,
-                                                                EmberGpTranslationTableAdditionalInfoBlockOptionRecordField* AdditionalInfoBlock);
-uint8_t emGpTransTableAddTranslationTableEntryUpdateCommand(uint8_t Index,
-                                                            bool infoBlockPresent,
-                                                            EmberGpAddress * gpdAddr,
-                                                            uint8_t gpdCommandId,
-                                                            uint8_t ZbEndpoint,
-                                                            uint16_t zigbeeProfile,
-                                                            uint16_t zigbeeCluster,
-                                                            uint8_t  zigbeeCommandId,
-                                                            uint8_t payloadLength,
-                                                            uint8_t* payload,
-                                                            uint8_t payloadSrc,
-                                                            uint8_t additionalInfoLength,
-                                                            EmberGpTranslationTableAdditionalInfoBlockOptionRecordField* AdditionalInfoBlock);
-uint16_t emGpCopyAdditionalInfoBlockArrayToStructure(uint8_t * additionalInfoBlockIn,
-                                                     EmberGpTranslationTableAdditionalInfoBlockOptionRecordField * additionalInfoBlockOut,
-                                                     uint8_t gpdCommandId);
-uint8_t emGpTransTableFindMatchingTranslationTableEntry(uint8_t levelOfScan,
-                                                        bool infoBlockPresent,
-                                                        EmberGpAddress  * gpAddr,
-                                                        uint8_t gpdCommandId,
-                                                        uint8_t zbEndpoint,
-                                                        uint8_t * gpdCmdPayload,
-                                                        EmberGpTranslationTableAdditionalInfoBlockOptionRecordField* additionalInfoBlock,
-                                                        uint8_t *outIndex,
-                                                        uint8_t startIndex);
-uint8_t emGpTransTableDeletePairedDevicefromTranslationTableEntry(EmberGpAddress * gpdAddr);
-void emGpRemoveGpdEndpointFromTranslationTable (EmberGpAddress *gpdAddr, uint8_t zbEndpoint);
-void emGpForwardGpdCommandBasedOnTranslationTable(EmberGpAddress *addr,
-                                                  uint8_t gpdCommandId,
-                                                  uint8_t * gpdCommandPayload);
-uint8_t emGpFindMatchingGenericTranslationTableEntry(uint8_t entryType,
-                                                     uint8_t incomingReqType,
-                                                     uint8_t offset,
-                                                     bool infoBlockPresent,
-                                                     uint8_t gpdCommandId,
-                                                     uint16_t zigbeeProfile,
-                                                     uint16_t zigbeeCluster,
-                                                     uint8_t  zigbeeCommandId,
-                                                     uint8_t payloadLength,
-                                                     uint8_t* payload,
-                                                     uint8_t* outIndex);
+void sli_zigbee_af_gp_trans_table_clear_translation_table(void);
+void sli_zigbee_af_gp_set_translation_table_entry(uint8_t index);
+EmberAfGreenPowerServerGpdSubTranslationTableEntry* sli_zigbee_af_gp_get_customized_table(void);
+void sli_zigbee_af_gp_clear_customized_table(void);
+void sli_zigbee_af_gp_set_customized_table_entry(uint8_t index);
+EmberGpTranslationTableAdditionalInfoBlockField * sli_zigbee_af_gp_get_additional_info_table(void);
+void sli_zigbee_gp_clear_additional_info_block_table(void);
+void sli_zigbee_af_gp_set_additional_info_block_table_entry(uint8_t index);
+uint8_t sli_zigbee_af_gp_trans_table_get_translation_table_entry(uint8_t entryIndex,
+                                                                 EmberAfGreenPowerServerGpdSubTranslationTableEntry *TranslationTableEntry);
+uint8_t sli_zigbee_af_gp_trans_table_replace_translation_table_entry_update_command(uint8_t Index,
+                                                                                    bool infoBlockPresent,
+                                                                                    EmberGpAddress * gpdAddr,
+                                                                                    uint8_t gpdCommandId,
+                                                                                    uint8_t ZbEndpoint,
+                                                                                    uint16_t zigbeeProfile,
+                                                                                    uint16_t zigbeeCluster,
+                                                                                    uint8_t  zigbeeCommandId,
+                                                                                    uint8_t payloadLength,
+                                                                                    uint8_t* payload,
+                                                                                    uint8_t payloadSrc,
+                                                                                    uint8_t additionalInfoLength,
+                                                                                    EmberGpTranslationTableAdditionalInfoBlockOptionRecordField* AdditionalInfoBlock);
+uint8_t sli_zigbee_af_gp_trans_table_add_translation_table_entry_update_command(uint8_t Index,
+                                                                                bool infoBlockPresent,
+                                                                                EmberGpAddress * gpdAddr,
+                                                                                uint8_t gpdCommandId,
+                                                                                uint8_t ZbEndpoint,
+                                                                                uint16_t zigbeeProfile,
+                                                                                uint16_t zigbeeCluster,
+                                                                                uint8_t  zigbeeCommandId,
+                                                                                uint8_t payloadLength,
+                                                                                uint8_t* payload,
+                                                                                uint8_t payloadSrc,
+                                                                                uint8_t additionalInfoLength,
+                                                                                EmberGpTranslationTableAdditionalInfoBlockOptionRecordField* AdditionalInfoBlock);
+uint16_t sli_zigbee_af_gp_copy_additional_info_block_array_to_structure(uint8_t * additionalInfoBlockIn,
+                                                                        EmberGpTranslationTableAdditionalInfoBlockOptionRecordField * additionalInfoBlockOut,
+                                                                        uint8_t gpdCommandId);
+uint8_t sli_zigbee_af_gp_trans_table_find_matching_translation_table_entry(uint8_t levelOfScan,
+                                                                           bool infoBlockPresent,
+                                                                           EmberGpAddress  * gpAddr,
+                                                                           uint8_t gpdCommandId,
+                                                                           uint8_t zbEndpoint,
+                                                                           uint8_t * gpdCmdPayload,
+                                                                           EmberGpTranslationTableAdditionalInfoBlockOptionRecordField* additionalInfoBlock,
+                                                                           uint8_t *outIndex,
+                                                                           uint8_t startIndex);
+uint8_t sli_zigbee_af_gp_trans_table_delete_paired_devicefrom_translation_table_entry(EmberGpAddress * gpdAddr);
+void sli_zigbee_af_gp_remove_gpd_endpoint_from_translation_table (EmberGpAddress *gpdAddr, uint8_t zbEndpoint);
+void sli_zigbee_af_gp_forward_gpd_command_based_on_translation_table(EmberGpAddress *addr,
+                                                                     uint8_t gpdCommandId,
+                                                                     uint8_t * gpdCommandPayload);
+uint8_t sli_zigbee_af_gp_find_matching_generic_translation_table_entry(uint8_t entryType,
+                                                                       uint8_t incomingReqType,
+                                                                       uint8_t offset,
+                                                                       bool infoBlockPresent,
+                                                                       uint8_t gpdCommandId,
+                                                                       uint16_t zigbeeProfile,
+                                                                       uint16_t zigbeeCluster,
+                                                                       uint8_t  zigbeeCommandId,
+                                                                       uint8_t payloadLength,
+                                                                       uint8_t* payload,
+                                                                       uint8_t* outIndex);
 
-const EmberAfGreenPowerServerGpdSubTranslationTableEntry* emGpGetDefaultTable(void);
-void emGpPairingDoneThusSetCustomizedTranslationTable(EmberGpAddress * gpdAddr,
-                                                      uint8_t gpdCommandId,
-                                                      uint8_t endpoint);
-extern EmberStatus emGpForwardGpdToMappedEndpoint(EmberGpAddress *addr,
-                                                  uint8_t gpdCommandId,
-                                                  uint8_t * gpdCommandPayload,
-                                                  const EmberAfGreenPowerServerGpdSubTranslationTableEntry * genericTranslationTable,
-                                                  uint8_t endpoint);
+const EmberAfGreenPowerServerGpdSubTranslationTableEntry* sli_zigbee_af_gp_get_default_table(void);
+void sli_zigbee_af_gp_pairing_done_thus_set_customized_translation_table(EmberGpAddress * gpdAddr,
+                                                                         uint8_t gpdCommandId,
+                                                                         uint8_t endpoint);
+extern EmberStatus sli_zigbee_af_gp_forward_gpd_to_mapped_endpoint(EmberGpAddress *addr,
+                                                                   uint8_t gpdCommandId,
+                                                                   uint8_t * gpdCommandPayload,
+                                                                   const EmberAfGreenPowerServerGpdSubTranslationTableEntry * genericTranslationTable,
+                                                                   uint8_t endpoint);
 #endif // SL_CATALOG_ZIGBEE_GREEN_POWER_TRANSLATION_TABLE_PRESENT
 #endif //_SILABS_GREEN_POWER_TRANSLATION_TABLE_H_

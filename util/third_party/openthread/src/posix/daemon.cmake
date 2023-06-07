@@ -37,7 +37,6 @@ target_compile_options(ot-daemon PRIVATE
 )
 
 target_link_libraries(ot-daemon PRIVATE
-    $<$<BOOL:${OT_LINKER_MAP}>:-Wl,-Map=ot-daemon.map>
     openthread-cli-ftd
     openthread-posix
     openthread-ftd
@@ -49,6 +48,14 @@ target_link_libraries(ot-daemon PRIVATE
     ot-config-ftd
     ot-config
 )
+
+if(OT_LINKER_MAP)
+    if("${CMAKE_CXX_COMPILER_ID}" MATCHES "AppleClang")
+        target_link_libraries(ot-daemon PRIVATE -Wl,-map,ot-daemon.map)
+    else()
+        target_link_libraries(ot-daemon PRIVATE -Wl,-Map=ot-daemon.map)
+    endif()
+endif()
 
 add_executable(ot-ctl
     client.cpp
@@ -64,11 +71,18 @@ target_compile_options(ot-ctl PRIVATE
 )
 
 target_link_libraries(ot-ctl PRIVATE
-    $<$<BOOL:${OT_LINKER_MAP}>:-Wl,-Map=ot-ctl.map>
     ${READLINE_LINK_LIBRARIES}
     ot-posix-config
     ot-config
 )
+
+if(OT_LINKER_MAP)
+    if("${CMAKE_CXX_COMPILER_ID}" MATCHES "AppleClang")
+        target_link_libraries(ot-ctl PRIVATE -Wl,-map,ot-ctl.map)
+    else()
+        target_link_libraries(ot-ctl PRIVATE -Wl,-Map=ot-ctl.map)
+    endif()
+endif()
 
 target_include_directories(ot-ctl PRIVATE ${COMMON_INCLUDES})
 

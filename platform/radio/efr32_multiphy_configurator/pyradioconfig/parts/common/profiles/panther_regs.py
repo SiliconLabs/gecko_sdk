@@ -1,7 +1,7 @@
 from pycalcmodel.core.output import ModelOutput, ModelOutputType
 
 
-def build_modem_regs_panther(model,profile, family):
+def build_modem_regs_panther(model,profile):
 
     # These were extracted from Panther register model. Only writeable registers that are new (do not exist in EFR90nm) are listed here.
     # Must have a corresponding _addModelRegister entry in pyradioconfig/parts/panther/calculators/calc_global.py buildAdditionalPantherVariables
@@ -62,13 +62,13 @@ def build_modem_regs_panther(model,profile, family):
     # AGC.MIRRORIF.IFMIRRORCLEAR
 
     # This function is too big for Jython, so had to split it up into multiple functions
-    build_modem_regs_panther_lynx_common_part1(model, profile, family)
-    build_modem_regs_panther_lynx_common_part2(model, profile, family)
+    build_modem_regs_panther_lynx_common_part1(model, profile)
+    build_modem_regs_panther_lynx_common_part2(model, profile)
     # Panther-specific. Not in Lynx.
     if model.part_family.lower() in ["panther"]:
-        build_modem_regs_panther_only(model, profile, family)
+        build_modem_regs_panther_only(model, profile)
 
-def build_modem_regs_panther_lynx_common_part1(model, profile, family):
+def build_modem_regs_panther_lynx_common_part1(model, profile):
     profile.outputs.append(ModelOutput(model.vars.AGC_CTRL0_PWRTARGET, '',         ModelOutputType.SVD_REG_FIELD, readable_name='AGC.CTRL0.PWRTARGET'           ))
     profile.outputs.append(ModelOutput(model.vars.AGC_CTRL0_MODE, '',         ModelOutputType.SVD_REG_FIELD, readable_name='AGC.CTRL0.MODE'           ))
     profile.outputs.append(ModelOutput(model.vars.AGC_CTRL0_DISCFLOOPADJ, '',         ModelOutputType.SVD_REG_FIELD, readable_name='AGC.CTRL0.DISCFLOOPADJ'           ))
@@ -462,7 +462,7 @@ def build_modem_regs_panther_lynx_common_part1(model, profile, family):
     profile.outputs.append(ModelOutput(model.vars.MODEM_VTBLETIMING_TIMINGDELAY, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.VTBLETIMING.TIMINGDELAY'           ))
     profile.outputs.append(ModelOutput(model.vars.MODEM_VTBLETIMING_FLENOFF, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.VTBLETIMING.FLENOFF'           ))
 
-def build_modem_regs_panther_lynx_common_part2(model, profile, family):
+def build_modem_regs_panther_lynx_common_part2(model, profile):
     # MSW: this is write-only... do not touch it!
     # profile.outputs.append(ModelOutput(model.vars.MODEM_CMD_PRESTOP, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.CMD.PRESTOP'           ))
     # profile.outputs.append(ModelOutput(model.vars.MODEM_CMD_AFCTXLOCK, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.CMD.AFCTXLOCK'           ))
@@ -580,7 +580,7 @@ def build_modem_regs_panther_lynx_common_part2(model, profile, family):
         profile.outputs.append(ModelOutput(model.vars.RAC_SYNTHCTRL_MMDPOWERBALANCEDISABLE, '',         ModelOutputType.SVD_REG_FIELD, readable_name='RAC.SYNTHCTRL.MMDPOWERBALANCEDISABLE'           ))
     profile.outputs.append(ModelOutput(model.vars.RAC_SYNTHREGCTRL_MMDLDOVREFTRIM, '',         ModelOutputType.SVD_REG_FIELD, readable_name='RAC.SYNTHREGCTRL.MMDLDOVREFTRIM'           ))
 
-def build_modem_regs_panther_only(model, profile, family):
+def build_modem_regs_panther_only(model, profile):
     profile.outputs.append(ModelOutput(model.vars.AGC_STATUS0_ADCINDEX, '', ModelOutputType.SVD_REG_FIELD, readable_name='AGC.STATUS0.ADCINDEX'))
     profile.outputs.append(ModelOutput(model.vars.AGC_CTRL0_AGCCLKUNDIVREQ, '',         ModelOutputType.SVD_REG_FIELD, readable_name='AGC.CTRL0.AGCCLKUNDIVREQ'           ))
     profile.outputs.append(ModelOutput(model.vars.MODEM_CTRL5_DSSSCTD, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.CTRL5.DSSSCTD'           ))

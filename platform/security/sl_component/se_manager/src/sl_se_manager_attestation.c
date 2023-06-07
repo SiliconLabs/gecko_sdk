@@ -28,9 +28,9 @@
  *
  ******************************************************************************/
 
-#include "em_device.h"
+#include "sl_se_manager.h"
 
-#if defined(SEMAILBOX_PRESENT) \
+#if defined(SLI_MAILBOX_COMMAND_SUPPORTED) \
   && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
 
 #include "sl_se_manager.h"
@@ -293,4 +293,4 @@ sl_status_t sl_se_attestation_get_config_token_size(sl_se_command_context_t *cmd
 
 /** @} (end addtogroup sl_se_manager) */
 
-#endif // SEMAILBOX_PRESENT && VAULT
+#endif // SLI_MAILBOX_COMMAND_SUPPORTED && VAULT

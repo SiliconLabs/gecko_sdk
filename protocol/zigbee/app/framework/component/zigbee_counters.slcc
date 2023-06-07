@@ -38,13 +38,13 @@ template_contribution:
   - name: zigbee_stack_callback
     value:
       callback_type: counter
-      function_name: emAfPluginCountersCounterCallback
+      function_name: sli_zigbee_af_counters_counter_callback
     unless:
       - zigbee_ezsp
   - name: zigbee_stack_callback
     value:
       callback_type: counter_rollover
-      function_name: emAfCounterRolloverCallback
+      function_name: sli_zigbee_af_counter_rollover_callback
     condition:
       - zigbee_ezsp
   - name: zigbee_af_callback

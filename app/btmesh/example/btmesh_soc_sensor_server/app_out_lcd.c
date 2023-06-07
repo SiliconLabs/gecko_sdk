@@ -39,7 +39,10 @@
 #include "sl_btmesh_api.h"
 #include "sl_btmesh_wstk_lcd.h"
 
+#ifdef SL_CATALOG_BTMESH_FACTORY_RESET_PRESENT
 #include "sl_btmesh_factory_reset.h"
+#endif // SL_CATALOG_BTMESH_FACTORY_RESET_PRESENT
+
 #include "sl_btmesh_sensor_server.h"
 #include "sl_btmesh_sensor_people_count.h"
 #include "sl_btmesh_sensor_people_count_config.h"
@@ -51,7 +54,7 @@
 /// Integer part of temperature
 #define INT_TEMP(x)   (x / 2)
 /// Fractional part of temperature
-#define FRAC_TEMP(x)  ((x * 5) % 10)
+#define FRAC_TEMP(x)  ((x % 2) ? 5 : 0)
 
 // -----------------------------------------------------------------------------
 // Factory Reset Callbacks

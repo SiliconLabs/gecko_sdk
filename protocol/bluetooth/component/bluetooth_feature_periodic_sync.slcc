@@ -1,0 +1,21 @@
+id: "bluetooth_feature_periodic_sync"
+label: "Synchronization to Periodic Advertising without responses trains"
+package: "Bluetooth"
+description: >
+  Provides events and control for synchronized periodic advertising trains that
+  do not have subevents or response slots. Synchronization is achieved by
+  scanning (see <bluetooth_feature_sync_scanner>) or by receiving Periodic
+  Advertising Synchronization Transfer (PAST) from a remote device (see
+  <bluetooth_feature_past_receiver>).
+category: Bluetooth|Bluetooth LE Controller (Link Layer)|Features with Commands and Events
+quality: "production"
+root_path: "protocol/bluetooth"
+requires:
+  - name: "bluetooth_controller"
+  - name: "bluetooth_feature_sync"
+  - name: "device_supports_bluetooth_advertising_extensions"
+provides:
+  - name: "bluetooth_feature_periodic_sync"
+template_contribution:
+  - name: component_catalog
+    value: bluetooth_feature_periodic_sync

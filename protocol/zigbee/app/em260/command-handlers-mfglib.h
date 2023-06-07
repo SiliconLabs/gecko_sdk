@@ -22,7 +22,6 @@ EmberStatus emberAfEzspMfglibStartCommandCallback(bool rxCallback);
 
 EmberStatus emberAfEzspMfglibSendPacketCommandCallback(uint8_t packetLength,
                                                        uint8_t packetContents[]);
-#ifndef UC_BUILD
+
 void emberAfPluginEzspMfglibGetValueCommandCallback(EmberAfPluginEzspValueCommandContext* context);
 void emberAfPluginEzspMfglibSetValueCommandCallback(EmberAfPluginEzspValueCommandContext* context);
-#endif  // UC_BUILD

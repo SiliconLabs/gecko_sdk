@@ -58,6 +58,8 @@ component:
 #----------------- Require list ----------------------
 requires:
   - name: a_radio_config
+  - name: sl_flex_rail_config
+  - name: sl_flex_rail_channel_selector
   - name: sl_simple_rail_os
     condition:
       - "kernel"
@@ -219,9 +221,6 @@ configuration:
     value: "1"
     condition:
       - dmd_memlcd
-#------------- POWER Settings ----------------
-  - name: SL_POWER_MANAGER_LOWEST_EM_ALLOWED
-    value: "2"
 #------------- RFFPLL init ----------------
   - name: SL_DEVICE_INIT_RFFPLL_BAND
     value: "1"

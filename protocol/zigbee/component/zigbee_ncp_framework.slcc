@@ -101,43 +101,43 @@ template_contribution:
   - name: zigbee_stack_callback
     value:
       callback_type: counter
-      function_name: emAfCounterCallback
+      function_name: sli_zigbee_af_counter_callback
   - name: zigbee_stack_callback
     value:
       callback_type: counter_rollover
-      function_name: emAfCounterRolloverCallback
+      function_name: sli_zigbee_af_counter_rollover_callback
   - name: zigbee_stack_callback
     value:
       callback_type: stack_token_changed
-      function_name: emAfStackTokenChangedCallback
+      function_name: sli_zigbee_af_stack_token_changed_callback
   - name: zigbee_stack_callback
     value:
       callback_type: poll
-      function_name: emAfPollCallback
+      function_name: sli_zigbee_af_poll_callback
   - name: zigbee_stack_callback
     value:
       callback_type: poll_complete
-      function_name: emAfPollCompleteCallback
+      function_name: sli_zigbee_af_poll_complete_callback
   - name: zigbee_stack_callback
     value:
       callback_type: unused_pan_id_found
-      function_name: emAfUnusedPanIdFoundCallback
+      function_name: sli_zigbee_af_unused_pan_id_found_callback
   - name: zigbee_stack_callback
     value:
       callback_type: energy_scan_result
-      function_name: emAfEnergyScanResultCallback
+      function_name: sli_zigbee_af_energy_scan_result_callback
   # The priority has been set to -9900 here because
-  # when we call emAfPluginNetworkCreatorSecurityStackStatusCallback
+  # when we call sli_zigbee_af_network_creator_security_stack_status_callback
   # after form a network, the NodeID is not set to EMBER_TRUST_CENTER_NODE_ID
   - name: zigbee_stack_callback
     value:
       callback_type: stack_status
-      function_name: emAfStackStatusCallback
+      function_name: sli_zigbee_af_stack_status_callback
     priority: -9900
   - name: zigbee_stack_callback
     value:
       callback_type: mark_buffers
-      function_name: emAfMarkBuffersCallback      
+      function_name: sli_zigbee_af_mark_buffers_callback      
   - name: zigbee_ncp_callback
     value:
       callback_type: set_configuration_value

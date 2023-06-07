@@ -1,0 +1,34 @@
+id: connect_cpc
+label: Connect stack CPC
+package: Flex
+description: CPC Connect stack component
+category: Services|Co-Processor Communication
+quality: production
+ui_hints:
+  visibility: never
+
+provides:
+  - name: connect_cpc
+
+requires:
+  - name: cpc_secondary
+
+include: 
+  - path: "protocol/flex/ncp"
+    file_list:
+      - path: "ncp-cpc-interface.h"
+
+source:
+ - path: "protocol/flex/ncp/ncp-cpc-interface.c"
+
+template_contribution:
+  - name: event_handler
+    value:
+      event: stack_init
+      include: ncp/ncp-cpc-interface.h
+      handler: connect_stack_cpc_init
+    priority: -9000
+  - name: event_system
+    value:
+      event_control: "sl_connect_ncp_endpoint_deconnection_event"
+      event_handler: "sl_connect_ncp_endpoint_deconnection_handler"

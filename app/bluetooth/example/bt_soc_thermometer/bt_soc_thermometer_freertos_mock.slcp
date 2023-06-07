@@ -39,7 +39,7 @@ component:
       - vcom
   - id: iostream_retarget_stdio
   - id: printf
-  - id: simple_timer_freertos
+  - id: app_timer_freertos
   - id: health_thermometer
   - id: sensor_rht_mock
   - id: simple_button

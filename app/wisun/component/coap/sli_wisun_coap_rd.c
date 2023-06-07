@@ -171,8 +171,8 @@ static const coap_rd_attribute_t *_get_attr_by_type(const coap_rd_attribute_type
  * @return true if the c_ptr is in the buffer, otherwise false
  *****************************************************************************/
 __STATIC_INLINE bool _check_str_buff_ptr(const char *str,
-                                       const size_t str_len,
-                                       const char *c_ptr);
+                                         const size_t str_len,
+                                         const char *c_ptr);
 
 /**************************************************************************//**
  * @brief Check string cache is not NULL
@@ -216,7 +216,7 @@ __STATIC_INLINE bool _is_uri_querry(const sl_wisun_coap_packet_t * const packet)
  * @return const char* Attribute value of resource
  *****************************************************************************/
 __STATIC_INLINE const char * _get_resource_attr(const sl_wisun_coap_rhnd_resource_t * const resource,
-                                              const coap_rd_attribute_t *const attr);
+                                                const coap_rd_attribute_t *const attr);
 
 /**************************************************************************//**
  * @brief Is pattern matched
@@ -563,8 +563,8 @@ static const coap_rd_attribute_t *_get_attr_by_type(const coap_rd_attribute_type
 }
 
 __STATIC_INLINE bool _check_str_buff_ptr(const char *str,
-                                       const size_t str_len,
-                                       const char *c_ptr)
+                                         const size_t str_len,
+                                         const char *c_ptr)
 {
   return (bool) (c_ptr >= str && c_ptr < (str + str_len));
 }
@@ -617,7 +617,7 @@ __STATIC_INLINE bool _is_uri_querry(const sl_wisun_coap_packet_t * const packet)
 }
 
 __STATIC_INLINE const char * _get_resource_attr(const sl_wisun_coap_rhnd_resource_t * const resource,
-                                              const coap_rd_attribute_t * const attr)
+                                                const coap_rd_attribute_t * const attr)
 {
   switch (attr->type) {
     case COAP_RD_RT: return resource->data.resource_type;
@@ -1059,7 +1059,7 @@ static sl_status_t _add_all_discoverable_resource(const sl_wisun_coap_rhnd_resou
 
   iter = (sl_wisun_coap_rhnd_resource_t *) resources;
   while (iter != NULL) {
-    if (_add_resource(iter, (coap_rd_querry_parse_t *) parse) == SL_STATUS_FAIL) {
+    if (iter->discoverable && _add_resource(iter, (coap_rd_querry_parse_t *) parse) == SL_STATUS_FAIL) {
       return SL_STATUS_FAIL;
     }
     iter = iter->next;

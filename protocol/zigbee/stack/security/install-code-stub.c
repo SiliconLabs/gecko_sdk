@@ -23,12 +23,12 @@
 //------------------------------------------------------------------------------
 // Globals
 
-const EmberLibraryStatus emInstallCodeLibraryStatus = EMBER_LIBRARY_IS_STUB;
+const EmberLibraryStatus sli_zigbee_install_code_library_status = EMBER_LIBRARY_IS_STUB;
 
 //------------------------------------------------------------------------------
 // API
 
-EmberStatus emGetKeyFromInstallCode(EmberKeyData *key)
+EmberStatus sli_zigbee_get_key_from_install_code(EmberKeyData *key)
 {
   (void)key;
   return EMBER_LIBRARY_NOT_PRESENT;

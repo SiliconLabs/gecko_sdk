@@ -3,7 +3,7 @@ label: Bluetooth Feature Pack - SoC Default
 package: Bluetooth
 description: >
   Includes selection of Bluetooth stack default SoC features.
-category: Bluetooth|Application
+category: Bluetooth|Application|Miscellaneous
 quality: production
 root_path: app/bluetooth
 requires:

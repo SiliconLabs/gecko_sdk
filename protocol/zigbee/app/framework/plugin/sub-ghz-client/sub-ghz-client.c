@@ -17,14 +17,12 @@
 
 #include "app/framework/include/af.h"
 #include "app/framework/util/util.h"
-#include "app/framework/util/af-main.h"                 // emAfSend()
+#include "app/framework/util/af-main.h"                 // sli_zigbee_af_send()
 #include "app/util/zigbee-framework/zigbee-device-common.h"      // emberNextZigDevRequestSequence()
 
 #include "sub-ghz-client.h"
 
-#ifdef UC_BUILD
 #include "zap-cluster-command-parser.h"
-#endif
 
 //------------------------------------------------------------------------------
 // Internal declarations
@@ -91,7 +89,7 @@ EmberStatus emberAfPluginSubGhzClientSendUnsolicitedEnhancedUpdateNotify(EmberNo
   uint8_t i = 0;
 
   // Sanity check. Allow only page 0, 28, 29, 30 or 31 and only channel 0-26.
-  if (emAfValidateChannelPages(channelPage, channel) != EMBER_SUCCESS) {
+  if (sli_zigbee_af_validate_channel_pages(channelPage, channel) != EMBER_SUCCESS) {
     return EMBER_BAD_ARGUMENT;
   }
 
@@ -119,14 +117,14 @@ EmberStatus emberAfPluginSubGhzClientSendUnsolicitedEnhancedUpdateNotify(EmberNo
 
   assert(i == NWK_UNSOLICITED_ENHANCED_UPDATE_NOTIFY_CMD_PAYLOAD_LENGTH);
 
-  return emAfSend(EMBER_OUTGOING_DIRECT,
-                  destination,
-                  &apsFrame,
-                  sizeof payload,
-                  payload,
-                  &messageTag,
-                  0,    // alias
-                  0);   // sequence
+  return sli_zigbee_af_send(EMBER_OUTGOING_DIRECT,
+                            destination,
+                            &apsFrame,
+                            sizeof payload,
+                            payload,
+                            &messageTag,
+                            0, // alias
+                            0); // sequence
 }
 
 /** Return the current suspend status.
@@ -178,8 +176,6 @@ void emberAfSubGhzClusterClientTickCallback(uint8_t endpoint)
 //-----------------------
 // ZCL commands callbacks
 
-#ifdef UC_BUILD
-
 bool emberAfSubGhzClusterSuspendZclMessagesCallback(EmberAfClusterCommand *cmd)
 {
   sl_zcl_sub_g_hz_cluster_suspend_zcl_messages_command_t cmd_data;
@@ -209,8 +205,8 @@ bool emberAfSubGhzClusterSuspendZclMessagesCallback(EmberAfClusterCommand *cmd)
 
     // Set a timer to clear the suspend status.
     const uint8_t sourceEndpoint = emberAfPrimaryEndpointForCurrentNetworkIndex();
-    slxu_zigbee_zcl_schedule_client_tick(sourceEndpoint, ZCL_SUB_GHZ_CLUSTER_ID,
-                                         cmd_data.period * MILLISECOND_TICKS_PER_MINUTE);
+    sl_zigbee_zcl_schedule_client_tick(sourceEndpoint, ZCL_SUB_GHZ_CLUSTER_ID,
+                                       cmd_data.period * MILLISECOND_TICKS_PER_MINUTE);
   }
 
   if (cmd_data.period == 0) {
@@ -222,48 +218,6 @@ bool emberAfSubGhzClusterSuspendZclMessagesCallback(EmberAfClusterCommand *cmd)
   }
   return true;
 }
-
-#else // !UC_BUILD
-
-bool emberAfSubGhzClusterSuspendZclMessagesCallback(uint8_t period)
-{
-  // Check we are on the sub-GHz interface
-  EmberNodeType nodeType;
-  EmberNetworkParameters parameters;
-  if (emberAfGetNetworkParameters(&nodeType, &parameters) != EMBER_SUCCESS) {
-    emberAfDebugPrintln("Error: Could not determine node type");
-    return false;
-  } else if (parameters.radioChannel < 128) {
-    emberAfDebugPrintln("Ignoring SuspendZclMessages received on a 2.4GHz channel");
-    return false;
-  }
-
-  if (!emberAfPluginSubGhzSuspendZclMessagesCallback(period)) {
-    // Suspend ZCL messages for 'period' minutes.
-    suspendStatus |= SUSPEND_STATUS_SUSPENDED;
-
-    emberAfDebugPrintln("%p suspended for %d minutes",
-                        "Sub-GHz client: sending of ZCL messages",
-                        period);
-
-    // Set a timer to clear the suspend status.
-    const uint8_t sourceEndpoint = emberAfPrimaryEndpointForCurrentNetworkIndex();
-    slxu_zigbee_zcl_schedule_client_tick(sourceEndpoint, ZCL_SUB_GHZ_CLUSTER_ID, period * MILLISECOND_TICKS_PER_MINUTE);
-  }
-
-  if (period == 0) {
-    // Send Default Response
-    EmberAfClusterCommand * const cmd = emberAfCurrentCommand();
-    if (cmd) {  // sanity, in case emberAfCurrentCommand() returns NULL
-      emberAfSendDefaultResponse(cmd, EMBER_ZCL_STATUS_SUCCESS);
-    }
-  }
-  return true;
-}
-
-#endif // UC_BUILD
-
-#ifdef UC_BUILD
 
 uint32_t emberAfSubGhzClusterClientCommandParse(sl_service_opcode_t opcode,
                                                 sl_service_function_context_t *context)
@@ -281,5 +235,3 @@ uint32_t emberAfSubGhzClusterClientCommandParse(sl_service_opcode_t opcode,
           ? EMBER_ZCL_STATUS_SUCCESS
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
-
-#endif // UC_BUILD

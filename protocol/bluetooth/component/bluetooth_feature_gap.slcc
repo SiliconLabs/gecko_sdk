@@ -8,7 +8,7 @@ description: >
   by the Bluetooth host. As a result, the accept list filtering does not work
   with advertisers that use resolvable private addresses (RPA). RPA addresses
   may be rejected by the filtering since they are unknown to the controller.
-category: "Bluetooth|Stack"
+category: Bluetooth|Bluetooth Host (Stack)|Features with Commands and Events
 quality: "production"
 root_path: "protocol/bluetooth"
 requires:

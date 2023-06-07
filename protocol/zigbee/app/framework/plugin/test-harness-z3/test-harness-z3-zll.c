@@ -23,17 +23,12 @@
 #include "app/framework/plugin/zll-commissioning-common/zll-commissioning.h"
 #include "app/framework/plugin/interpan/interpan.h"
 
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #ifdef SL_CATALOG_ZIGBEE_NETWORK_CREATOR_PRESENT
 #include "network-creator.h"
 #endif
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_NETWORK_CREATOR
-#include EMBER_AF_API_NETWORK_CREATOR
-#define SL_CATALOG_ZIGBEE_NETWORK_CREATOR_PRESENT
-#endif
-#endif // UC_BUILD
 
 #include "app/framework/util/common.h"
 
@@ -52,11 +47,11 @@ typedef struct {
 
 // -----------------------------------------------------------------------------
 // Globals
-extern uint8_t emSetNwkUpdateId(uint8_t id);
+extern uint8_t sli_zigbee_set_nwk_update_id(uint8_t id);
 // We need this extern'd for unit tests since the zll-commissioning.h extern
 // might not be compiled in.
 #if defined(EMBER_SCRIPTED_TEST)
-extern uint32_t emAfZllSecondaryChannelMask;
+extern uint32_t sli_zigbee_af_zll_secondary_channel_mask;
 #endif
 
 static EmberZllNetwork zllNetwork = { { 0, }, { 0, 0, 0 }, };
@@ -87,14 +82,9 @@ static bool setInteropBit = true;  // bit setting in scan request
 
 static ScanResponseData globalScanResponseData = { 0, };
 
-#ifdef UC_BUILD
 sl_zigbee_event_t emberAfPluginTestHarnessZ3ZllStuffEvent;
 #define z3ZllStuffEventControl (&emberAfPluginTestHarnessZ3ZllStuffEvent)
-void emberAfPluginTestHarnessZ3ZllStuffEventHandler(SLXU_UC_EVENT);
-#else
-EmberEventControl emberAfPluginTestHarnessZ3ZllStuffEventControl;
-#define z3ZllStuffEventControl emberAfPluginTestHarnessZ3ZllStuffEventControl
-#endif
+void emberAfPluginTestHarnessZ3ZllStuffEventHandler(sl_zigbee_event_t * event);
 
 #define ZLL_STUFF_EVENT_CONTROL_ACTION_SCAN_RESPONSE (0x00)
 #define ZLL_STUFF_EVENT_CONTROL_ACTION_NULL          (0xFF)
@@ -108,11 +98,11 @@ static uint8_t zllStuffEventControlAction;
 #define GROUP_COUNT    0x00
 
 // private stack API's in zll-address-assignment.c
-void emZllSetForcedAddressAssignment(EmberZllAddressAssignment *assignment);
-void emZllClearForcedAddressAssignment(void);
+void sli_zigbee_af_zll_set_forced_address_assignment(EmberZllAddressAssignment *assignment);
+void sli_zigbee_af_zll_clear_forced_address_assignment(void);
 
 // private plugin API's.
-EmberStatus emAfZllFormNetworkForRouterInitiator(uint8_t channel, int8_t radioPower, EmberPanId panId);
+EmberStatus sli_zigbee_af_zll_form_networkForRouterInitiator(uint8_t channel, int8_t radioPower, EmberPanId panId);
 
 // MAC header constants (see interpan.c for details)
 //ToDo: EMZIGBEE-4854 instead of this we need to use the umac version
@@ -134,21 +124,21 @@ static EmberStatus startScan(void)
 {
   EmberNodeType nodeType;
 
-  nodeType = (((emAfPluginTestHarnessZ3DeviceMode
+  nodeType = (((sli_zigbee_af_test_harness_z3_device_mode
                 == EM_AF_PLUGIN_TEST_HARNESS_Z3_DEVICE_MODE_ZR_NOT_ADDRESS_ASSIGNABLE)
-               || (emAfPluginTestHarnessZ3DeviceMode
+               || (sli_zigbee_af_test_harness_z3_device_mode
                    == EM_AF_PLUGIN_TEST_HARNESS_Z3_DEVICE_MODE_ZR_ADDRESS_ASSIGNABLE))
               ? EMBER_ROUTER
               : EMBER_END_DEVICE);
 
-  emberAfDebugPrintln("startScan: dev mode = %d, nodeType = %d", emAfPluginTestHarnessZ3DeviceMode, nodeType);
+  emberAfDebugPrintln("startScan: dev mode = %d, nodeType = %d", sli_zigbee_af_test_harness_z3_device_mode, nodeType);
 
   EmberTokTypeStackZllData token;
   emberZllGetTokenStackZllData(&token);
 
-  if ((emAfPluginTestHarnessZ3DeviceMode
+  if ((sli_zigbee_af_test_harness_z3_device_mode
        == EM_AF_PLUGIN_TEST_HARNESS_Z3_DEVICE_MODE_ZR_NOT_ADDRESS_ASSIGNABLE)
-      || (emAfPluginTestHarnessZ3DeviceMode
+      || (sli_zigbee_af_test_harness_z3_device_mode
           == EM_AF_PLUGIN_TEST_HARNESS_Z3_DEVICE_MODE_ZED_NOT_ADDRESS_ASSIGNABLE)) {
     token.bitmask &= ~EMBER_ZLL_STATE_ADDRESS_ASSIGNMENT_CAPABLE;
   }
@@ -171,7 +161,7 @@ static EmberNodeType getLogicalNodeType(void)
   // Note, we only report as a coordinator if we are a currently
   // coordinator on a centralized network.
   if (status == EMBER_NOT_JOINED) {
-    nodeType = emAfCurrentZigbeeProNetwork->nodeType;
+    nodeType = sli_zigbee_af_current_zigbee_pro_network->nodeType;
     if (nodeType == EMBER_COORDINATOR) {
       nodeType = EMBER_ROUTER;
     }
@@ -216,7 +206,7 @@ static uint8_t zllInformation(void)
   emberZllGetTokenStackZllData(&token);
   byte = BYTE_0(token.bitmask);
 
-  switch (emAfPluginTestHarnessZ3DeviceMode) {
+  switch (sli_zigbee_af_test_harness_z3_device_mode) {
     case EM_AF_PLUGIN_TEST_HARNESS_Z3_DEVICE_MODE_ZR_NOT_ADDRESS_ASSIGNABLE:
     case EM_AF_PLUGIN_TEST_HARNESS_Z3_DEVICE_MODE_ZED_NOT_ADDRESS_ASSIGNABLE:
     case EM_AF_PLUGIN_TEST_HARNESS_Z3_DEVICE_MODE_SLEEPY_ZED_NOT_ADDRESS_ASSIGNABLE:
@@ -309,17 +299,14 @@ static uint8_t networkUpdateId(void)
 
 // plugin test-harness z3 touchlink scan-request-process <linkInitiator:1>
 // <unused:1> <options:4>
-void emAfPluginTestHarnessZ3TouchlinkScanRequestProcessCommand(SL_CLI_COMMAND_ARG)
+void sli_zigbee_af_test_harness_z3_touchlink_scan_request_process_command(SL_CLI_COMMAND_ARG)
 {
   EmberStatus status = EMBER_INVALID_CALL;
 
 #ifndef EZSP_HOST
-  uint8_t linkInitiator = (uint8_t)emberUnsignedCommandArgument(0);
-#ifdef UC_BUILD
-  uint32_t options      = emAfPluginTestHarnessZ3GetSignificantBit(arguments, 2);
-#else
-  uint32_t options      = emAfPluginTestHarnessZ3GetSignificantBit(2);
-#endif //UC_BUILD
+
+  uint8_t linkInitiator = sl_cli_get_argument_uint8(arguments, 0);
+  uint32_t options      = sli_zigbee_af_test_harness_z3_get_significant_bit(arguments, 2);
 
   setInteropBit = true;  // Set interop bit in scan request
 
@@ -361,24 +348,22 @@ void emAfPluginTestHarnessZ3TouchlinkScanRequestProcessCommand(SL_CLI_COMMAND_AR
 }
 
 // plugin test-harness z3 touchlink start-as-router
-void emAfPluginTestHarnessZ3TouchlinkStartAsRouterCommand(SL_CLI_COMMAND_ARG)
+void sli_zigbee_af_test_harness_z3_touchlink_start_as_router_command(SL_CLI_COMMAND_ARG)
 {
 #ifdef SL_CATALOG_ZIGBEE_NETWORK_CREATOR_PRESENT
-  EmberPanId panId = (EmberPanId)emberUnsignedCommandArgument(0);
-#ifdef UC_BUILD
-  uint32_t options      = emAfPluginTestHarnessZ3GetSignificantBit(arguments, 1);
-#else
-  uint32_t options      = emAfPluginTestHarnessZ3GetSignificantBit(1);
-#endif //UC_BUILD
+
+  EmberPanId panId = sl_cli_get_argument_uint16(arguments, 0);
+  uint32_t options      = sli_zigbee_af_test_harness_z3_get_significant_bit(arguments, 1);
+
   EmberStatus status = EMBER_INVALID_CALL;
 
   // This options bitmask is currently unused.
   (void)options;
 
   if (zllNetworkIsInit()) {
-    status = emAfZllFormNetworkForRouterInitiator(zllNetwork.zigbeeNetwork.channel,
-                                                  EMBER_AF_PLUGIN_ZLL_COMMISSIONING_COMMON_RADIO_TX_POWER,
-                                                  panId);
+    status = sli_zigbee_af_zll_form_networkForRouterInitiator(zllNetwork.zigbeeNetwork.channel,
+                                                              EMBER_AF_PLUGIN_ZLL_COMMISSIONING_COMMON_RADIO_TX_POWER,
+                                                              panId);
   }
 
   emberAfCorePrintln("%s: %s: 0x%X",
@@ -389,7 +374,7 @@ void emAfPluginTestHarnessZ3TouchlinkStartAsRouterCommand(SL_CLI_COMMAND_ARG)
 }
 
 // plugin test-harness z3 touchlink is-scanning
-void emAfPluginTestHarnessZ3TouchlinkIsScanningCommand(SL_CLI_COMMAND_ARG)
+void sli_zigbee_af_test_harness_z3_touchlink_is_scanning_command(SL_CLI_COMMAND_ARG)
 {
   emberAfCorePrintln("scanning:%s",
                      (state & STATE_SCANNING ? "true" : "false"));
@@ -397,14 +382,11 @@ void emAfPluginTestHarnessZ3TouchlinkIsScanningCommand(SL_CLI_COMMAND_ARG)
 
 // plugin test-harness z3 touchlink device-information-request
 // <startIndex:1> <options:4>
-void emAfPluginTestHarnessZ3TouchlinkDeviceInformationRequestCommand(SL_CLI_COMMAND_ARG)
+void sli_zigbee_af_test_harness_z3_touchlink_device_information_request_command(SL_CLI_COMMAND_ARG)
 {
-  uint8_t startIndex = (uint8_t)emberUnsignedCommandArgument(0);
-#ifdef UC_BUILD
-  uint32_t options      = emAfPluginTestHarnessZ3GetSignificantBit(arguments, 1);
-#else
-  uint32_t options      = emAfPluginTestHarnessZ3GetSignificantBit(1);
-#endif //UC_BUILD
+  uint8_t startIndex = sl_cli_get_argument_uint8(arguments, 0);
+  uint32_t options      = sli_zigbee_af_test_harness_z3_get_significant_bit(arguments, 1);
+
   EmberStatus status = EMBER_INVALID_CALL;
 
   uint32_t interpanTransactionId = zllNetwork.securityAlgorithm.transactionId;
@@ -424,7 +406,7 @@ void emAfPluginTestHarnessZ3TouchlinkDeviceInformationRequestCommand(SL_CLI_COMM
                                         zllNetwork.eui64,
                                         EMBER_NULL_NODE_ID,    // node id - ignored
                                         0x0000,                // group id - ignored
-                                        emAfPluginTestHarnessZ3TouchlinkProfileId);
+                                        sli_zigbee_af_test_harness_z3_touchlink_profile_id);
   }
 
   emberAfCorePrintln("%s: %s: 0x%X",
@@ -435,15 +417,12 @@ void emAfPluginTestHarnessZ3TouchlinkDeviceInformationRequestCommand(SL_CLI_COMM
 
 // plugin test-harness z3 touchlink device-information-request-w-target
 // <startIndex:1> <shortAddress:2> <options:4>
-void emAfPluginTestHarnessZ3TouchlinkDeviceInformationRequestWTargetCommand(SL_CLI_COMMAND_ARG)
+void sli_zigbee_af_test_harness_z3_touchlink_device_information_request_w_target_command(SL_CLI_COMMAND_ARG)
 {
-  uint8_t startIndex = (uint8_t)emberUnsignedCommandArgument(0);
-  uint16_t shortAddress = (uint16_t)emberUnsignedCommandArgument(1);
-#ifdef UC_BUILD
-  uint32_t options      = emAfPluginTestHarnessZ3GetSignificantBit(arguments, 2);
-#else
-  uint32_t options      = emAfPluginTestHarnessZ3GetSignificantBit(2);
-#endif //UC_BUILD
+  uint8_t startIndex = sl_cli_get_argument_uint8(arguments, 0);
+  uint16_t shortAddress = sl_cli_get_argument_uint16(arguments, 1);
+  uint32_t options      = sli_zigbee_af_test_harness_z3_get_significant_bit(arguments, 2);
+
   EmberStatus status = EMBER_INVALID_CALL;
 
   uint32_t interpanTransactionId = zllNetwork.securityAlgorithm.transactionId;
@@ -465,7 +444,7 @@ void emAfPluginTestHarnessZ3TouchlinkDeviceInformationRequestWTargetCommand(SL_C
                                         zllNetwork.eui64,  // to keep NWK happy
                                         shortAddress, // node id
                                         0x0000,       // group id - ignored
-                                        emAfPluginTestHarnessZ3TouchlinkProfileId);
+                                        sli_zigbee_af_test_harness_z3_touchlink_profile_id);
   }
 
   emberAfCorePrintln("%s: %s: 0x%X",
@@ -475,14 +454,11 @@ void emAfPluginTestHarnessZ3TouchlinkDeviceInformationRequestWTargetCommand(SL_C
 }
 
 // plugin test-harness z3 touchlink identify-request <duration:2> <options:4>
-void emAfPluginTestHarnessZ3TouchlinkIdentifyRequestCommand(SL_CLI_COMMAND_ARG)
+void sli_zigbee_af_test_harness_z3_touchlink_identify_request_command(SL_CLI_COMMAND_ARG)
 {
-  uint16_t duration = (uint16_t)emberUnsignedCommandArgument(0);
-#ifdef UC_BUILD
-  uint32_t options      = emAfPluginTestHarnessZ3GetSignificantBit(arguments, 1);
-#else
-  uint32_t options      = emAfPluginTestHarnessZ3GetSignificantBit(1);
-#endif //UC_BUILD
+  uint16_t duration = sl_cli_get_argument_uint16(arguments, 0);
+  uint32_t options      = sli_zigbee_af_test_harness_z3_get_significant_bit(arguments, 1);
+
   EmberStatus status = EMBER_INVALID_CALL;
 
   uint32_t interpanTransactionId = zllNetwork.securityAlgorithm.transactionId;
@@ -501,7 +477,7 @@ void emAfPluginTestHarnessZ3TouchlinkIdentifyRequestCommand(SL_CLI_COMMAND_ARG)
                                         zllNetwork.eui64,
                                         EMBER_NULL_NODE_ID, // node id - ignored
                                         0x0000,           // group id - ignored
-                                        emAfPluginTestHarnessZ3TouchlinkProfileId);
+                                        sli_zigbee_af_test_harness_z3_touchlink_profile_id);
   }
 
   emberAfCorePrintln("%s: %s: 0x%X",
@@ -511,13 +487,9 @@ void emAfPluginTestHarnessZ3TouchlinkIdentifyRequestCommand(SL_CLI_COMMAND_ARG)
 }
 
 // plugin test-harness z3 touchlink reset-to-factory-new-request <options:4>
-void emAfPluginTestHarnessZ3TouchlinkRTFNRequestCommand(SL_CLI_COMMAND_ARG)
+void sli_zigbee_af_test_harness_z3_touchlink_rtfn_request_command(SL_CLI_COMMAND_ARG)
 {
-#ifdef UC_BUILD
-  uint32_t options      = emAfPluginTestHarnessZ3GetSignificantBit(arguments, 0);
-#else
-  uint32_t options      = emAfPluginTestHarnessZ3GetSignificantBit(0);
-#endif //UC_BUILD
+  uint32_t options      = sli_zigbee_af_test_harness_z3_get_significant_bit(arguments, 0);
   EmberStatus status = EMBER_INVALID_CALL;
 
   // We currently do not have a way to use the option bitmask.
@@ -534,13 +506,13 @@ void emAfPluginTestHarnessZ3TouchlinkRTFNRequestCommand(SL_CLI_COMMAND_ARG)
                                           NULL,       // long id - ignored
                                           EMBER_BROADCAST_ADDRESS,// bcast
                                           0x0000,     // group id - ignored
-                                          emAfPluginTestHarnessZ3TouchlinkProfileId);
+                                          sli_zigbee_af_test_harness_z3_touchlink_profile_id);
     } else {
       status = emberAfSendCommandInterPan(0xFFFF,     // destination pan id
                                           zllNetwork.eui64,
                                           EMBER_NULL_NODE_ID,// node id- ignored
                                           0x0000,          // group id - ignored
-                                          emAfPluginTestHarnessZ3TouchlinkProfileId);
+                                          sli_zigbee_af_test_harness_z3_touchlink_profile_id);
     }
   }
 
@@ -556,18 +528,14 @@ void emAfPluginTestHarnessZ3TouchlinkRTFNRequestCommand(SL_CLI_COMMAND_ARG)
 // <freeAddrBegin:2> <freeAddrEnd:2> <groupIdBegin:2> <groupIdEnd:2> <options:4>
 // plugin test-harness z3 touchlink network-join-end-device-request <dstAddress:2>
 // <freeAddrBegin:2> <freeAddrEnd:2> <groupIdBegin:2> <groupIdEnd:2> <options:4>
-void emAfPluginTestHarnessZ3TouchlinkNetworkCommand(SL_CLI_COMMAND_ARG)
+void sli_zigbee_af_test_harness_z3_touchlink_network_command(SL_CLI_COMMAND_ARG)
 {
-  EmberNodeId nodeId              = (EmberNodeId)emberUnsignedCommandArgument(0);
-  EmberNodeId freeAddrBegin       = (EmberNodeId)emberUnsignedCommandArgument(1);
-  EmberNodeId freeAddrEnd         = (EmberNodeId)emberUnsignedCommandArgument(2);
-  EmberMulticastId freeGroupBegin = (EmberMulticastId)emberUnsignedCommandArgument(3);
-  EmberMulticastId freeGroupEnd   = (EmberMulticastId)emberUnsignedCommandArgument(4);
-#ifdef UC_BUILD
-  uint32_t options      = emAfPluginTestHarnessZ3GetSignificantBit(arguments, 5);
-#else
-  uint32_t options      = emAfPluginTestHarnessZ3GetSignificantBit(5);
-#endif //UC_BUILD
+  EmberNodeId nodeId              = sl_cli_get_argument_uint16(arguments, 0);
+  EmberNodeId freeAddrBegin       = sl_cli_get_argument_uint16(arguments, 1);
+  EmberNodeId freeAddrEnd         = sl_cli_get_argument_uint16(arguments, 2);
+  EmberMulticastId freeGroupBegin = sl_cli_get_argument_uint16(arguments, 3);
+  EmberMulticastId freeGroupEnd   = sl_cli_get_argument_uint16(arguments, 4);
+  uint32_t options      = sli_zigbee_af_test_harness_z3_get_significant_bit(arguments, 5);
 
   uint8_t command = 0;
   EmberTokTypeStackZllData token;
@@ -578,7 +546,7 @@ void emAfPluginTestHarnessZ3TouchlinkNetworkCommand(SL_CLI_COMMAND_ARG)
     goto done;
   }
 
-  switch (emberStringCommandArgument(-1, NULL)[13]) {
+  switch (sl_zigbee_cli_get_argument_string_and_length(arguments, -1, NULL)[13]) {
     case '-':
       command = ZCL_NETWORK_START_REQUEST_COMMAND_ID;
       break;
@@ -663,12 +631,12 @@ void emAfPluginTestHarnessZ3TouchlinkNetworkCommand(SL_CLI_COMMAND_ARG)
   forcedAssignment.freeNodeIdMax  = freeAddrEnd;
   forcedAssignment.freeGroupIdMin = freeGroupBegin;
   forcedAssignment.freeGroupIdMax = freeGroupEnd;
-  emZllSetForcedAddressAssignment(&forcedAssignment);
+  sli_zigbee_af_zll_set_forced_address_assignment(&forcedAssignment);
 
   emberAfZllSetInitialSecurityState();
   status = emberZllJoinTarget(&mangledNetwork);
 
-  emZllClearForcedAddressAssignment();
+  sli_zigbee_af_zll_clear_forced_address_assignment();
 
   done:
   emberAfCorePrintln("%s: %s: 0x%X",
@@ -682,13 +650,9 @@ void emAfPluginTestHarnessZ3TouchlinkNetworkCommand(SL_CLI_COMMAND_ARG)
 }
 
 // plugin test-harness z3 touchlink network-update-request <options:4>
-void emAfPluginTestHarnessZ3TouchlinkNetworkUpdateRequestCommand(SL_CLI_COMMAND_ARG)
+void sli_zigbee_af_test_harness_z3_touchlink_network_update_request_command(SL_CLI_COMMAND_ARG)
 {
-#ifdef UC_BUILD
-  uint32_t options      = emAfPluginTestHarnessZ3GetSignificantBit(arguments, 0);
-#else
-  uint32_t options      = emAfPluginTestHarnessZ3GetSignificantBit(0);
-#endif //UC_BUILD
+  uint32_t options      = sli_zigbee_af_test_harness_z3_get_significant_bit(arguments, 0);
 
   EmberStatus status = EMBER_INVALID_CALL;
   EmberNodeType nodeType;
@@ -717,7 +681,7 @@ void emAfPluginTestHarnessZ3TouchlinkNetworkUpdateRequestCommand(SL_CLI_COMMAND_
                                         zllNetwork.eui64,
                                         EMBER_NULL_NODE_ID, // node id - ignored
                                         0x0000,            // group id - ignored
-                                        emAfPluginTestHarnessZ3TouchlinkProfileId);
+                                        sli_zigbee_af_test_harness_z3_touchlink_profile_id);
   }
 
   emberAfCorePrintln("%s: %s: 0x%X",
@@ -728,9 +692,9 @@ void emAfPluginTestHarnessZ3TouchlinkNetworkUpdateRequestCommand(SL_CLI_COMMAND_
 
 // plugin test-harness z3 touchlink get-group-identifiers-request
 // <startIndex:1>
-void emAfPluginTestHarnessZ3TouchlinkGetGroupIdentifiersRequestCommand(SL_CLI_COMMAND_ARG)
+void sli_zigbee_af_test_harness_z3_touchlink_get_group_identifiers_request_command(SL_CLI_COMMAND_ARG)
 {
-  uint8_t startIndex = emberUnsignedCommandArgument(0);
+  uint8_t startIndex = sl_cli_get_argument_uint8(arguments, 0);
   EmberStatus status = EMBER_INVALID_CALL;
   EmberNodeId destination;
 
@@ -751,9 +715,9 @@ void emAfPluginTestHarnessZ3TouchlinkGetGroupIdentifiersRequestCommand(SL_CLI_CO
 
 // plugin test-harness z3 touchlink get-endpoint-list-request
 // <startIndex:1>
-void emAfPluginTestHarnessZ3TouchlinkGetEndpointListRequestCommand(SL_CLI_COMMAND_ARG)
+void sli_zigbee_af_test_harness_z3_touchlink_get_endpoint_list_request_command(SL_CLI_COMMAND_ARG)
 {
-  uint8_t startIndex = emberUnsignedCommandArgument(0);
+  uint8_t startIndex = sl_cli_get_argument_uint8(arguments, 0);
   EmberStatus status = EMBER_INVALID_CALL;
   EmberNodeId destination;
 
@@ -773,13 +737,9 @@ void emAfPluginTestHarnessZ3TouchlinkGetEndpointListRequestCommand(SL_CLI_COMMAN
 }
 
 // plugin test-harness z3 touchlink scan-response-config <options:4>
-void emAfPluginTestHarnessZ3TouchlinkScanResponseConfigCommand(SL_CLI_COMMAND_ARG)
+void sli_zigbee_af_test_harness_z3_touchlink_scan_response_config_command(SL_CLI_COMMAND_ARG)
 {
-#ifdef UC_BUILD
-  uint32_t options      = emAfPluginTestHarnessZ3GetSignificantBit(arguments, 0);
-#else
-  uint32_t options      = emAfPluginTestHarnessZ3GetSignificantBit(0);
-#endif //UC_BUILD
+  uint32_t options      = sli_zigbee_af_test_harness_z3_get_significant_bit(arguments, 0);
 
   globalScanResponseData.keyBitmask = EMBER_ZLL_KEY_MASK_CERTIFICATION;
   globalScanResponseData.profileId = HA_PROFILE_ID; // use HA profile for endpoint info
@@ -840,7 +800,7 @@ void emAfPluginTestHarnessZ3TouchlinkScanResponseConfigCommand(SL_CLI_COMMAND_AR
   }
   // Set the network update Id so that the scan responses to
   // multiple scan request produces the same id
-  emSetNwkUpdateId(globalScanResponseData.networkUpdateId);
+  sli_zigbee_set_nwk_update_id(globalScanResponseData.networkUpdateId);
   negativeBehaviorCommandId = ZCL_SCAN_REQUEST_COMMAND_ID;
 
   emberAfCorePrintln("%s: %s: 0x%X",
@@ -850,9 +810,9 @@ void emAfPluginTestHarnessZ3TouchlinkScanResponseConfigCommand(SL_CLI_COMMAND_AR
 }
 
 // plugin test-harness z3 touchlink network-start-response-config <options:4>
-void emAfPluginTestHarnessZ3TouchlinkNetworkStartResponseConfig(SL_CLI_COMMAND_ARG)
+void sli_zigbee_af_test_harness_z3_touchlink_network_start_response_config(SL_CLI_COMMAND_ARG)
 {
-  uint32_t options = emberUnsignedCommandArgument(0);
+  uint32_t options = sl_cli_get_argument_uint32(arguments, 0);
 
   responseBehaviorMask = 0;
   if (options) {
@@ -881,9 +841,9 @@ void emAfPluginTestHarnessZ3TouchlinkNetworkStartResponseConfig(SL_CLI_COMMAND_A
 }
 
 // plugin test-harness z3 touchlink network-join-router-response-config <options:4>
-void emAfPluginTestHarnessZ3TouchlinkNetworkJoinRouterResponseConfig(SL_CLI_COMMAND_ARG)
+void sli_zigbee_af_test_harness_z3_touchlink_network_join_router_response_config(SL_CLI_COMMAND_ARG)
 {
-  uint32_t options = emberUnsignedCommandArgument(0);
+  uint32_t options = sl_cli_get_argument_uint32(arguments, 0);
 
   responseBehaviorMask = 0;
   if (options) {
@@ -913,9 +873,9 @@ void emAfPluginTestHarnessZ3TouchlinkNetworkJoinRouterResponseConfig(SL_CLI_COMM
 
 // plugin test-harness z3 touchlink device-information-response-config
 // <options:4>
-void emAfPluginTestHarnessZ3TouchlinkDeviceInformationResponseConfigCommand(SL_CLI_COMMAND_ARG)
+void sli_zigbee_af_test_harness_z3_touchlink_device_information_response_config_command(SL_CLI_COMMAND_ARG)
 {
-  uint32_t options = emberUnsignedCommandArgument(0);
+  uint32_t options = sl_cli_get_argument_uint32(arguments, 0);
 
   negativeBehaviorMask = 0;
   if (options & BIT32(0)) {
@@ -933,7 +893,7 @@ void emAfPluginTestHarnessZ3TouchlinkDeviceInformationResponseConfigCommand(SL_C
 // -----------------------------------------------------------------------------
 // Framework callbacks
 
-void emAfPluginTestHarnessZ3ZllNetworkFoundCallback(const EmberZllNetwork *networkInfo)
+void sli_zigbee_af_test_harness_z3_zll_network_found_callback(const EmberZllNetwork *networkInfo)
 {
   emberAfCorePrintln("%p: %p: node type = %d, zll state = 0x%2X, node id = 0x%2X, pan id = 0x%2X",
                      TEST_HARNESS_Z3_PRINT_NAME,
@@ -945,7 +905,7 @@ void emAfPluginTestHarnessZ3ZllNetworkFoundCallback(const EmberZllNetwork *netwo
   initZllNetwork(networkInfo);
 }
 
-void emAfPluginTestHarnessZ3ZllScanCompleteCallback(EmberStatus status)
+void sli_zigbee_af_test_harness_z3_zll_scan_complete_callback(EmberStatus status)
 {
   emberAfDebugPrintln("Scan Complete: status = %X, state = %X", status, state);
 
@@ -971,8 +931,8 @@ void emAfPluginTestHarnessZ3ZllScanCompleteCallback(EmberStatus status)
   }
 }
 
-EmberPacketAction emAfPluginTestHarnessZ3ZllCommandCallback(uint8_t  *command,
-                                                            EmberEUI64 sourceEui64)
+EmberPacketAction sli_zigbee_af_test_harness_z3_zll_command_callback(uint8_t  *command,
+                                                                     EmberEUI64 sourceEui64)
 {
   // The start index points at the beginning of the ZCL frame.
   // FRAME_CONTROL:1 | SEQUENCE:1 | COMMAND_ID:1 | start of transaction...
@@ -1011,12 +971,12 @@ EmberPacketAction emAfPluginTestHarnessZ3ZllCommandCallback(uint8_t  *command,
 
     if (negativeBehaviorMask & NEGATIVE_BEHAVIOR_DELAY_RESPONSE) {
       // Delay 8 seconds, since this is the transaction ID lifetime.
-      slxu_zigbee_event_set_delay_ms(z3ZllStuffEventControl,
-                                     MILLISECOND_TICKS_PER_SECOND * 8);
+      sl_zigbee_event_set_delay_ms(z3ZllStuffEventControl,
+                                   MILLISECOND_TICKS_PER_SECOND * 8);
       zllStuffEventControlAction = ZLL_STUFF_EVENT_CONTROL_ACTION_SCAN_RESPONSE;
     } else if (negativeBehaviorMask & NEGATIVE_BEHAVIOR_IMMEDIATE_RESPONSE) {
       // Send our own response immediately.
-      slxu_zigbee_event_set_active(z3ZllStuffEventControl);
+      sl_zigbee_event_set_active(z3ZllStuffEventControl);
       zllStuffEventControlAction = ZLL_STUFF_EVENT_CONTROL_ACTION_SCAN_RESPONSE;
     }
   } else if (negativeBehaviorMask & NEGATIVE_BEHAVIOR_BAD_TRANSACTION_ID) {
@@ -1024,18 +984,18 @@ EmberPacketAction emAfPluginTestHarnessZ3ZllCommandCallback(uint8_t  *command,
     act = EMBER_MANGLE_PACKET;
   }
 
-  if (!slxu_zigbee_event_is_active(z3ZllStuffEventControl)) {
+  if (!sl_zigbee_event_is_scheduled(z3ZllStuffEventControl)) {
     negativeBehaviorMask = 0;
     negativeBehaviorCommandId = 0xFF;
   }
   return act;
 }
 
-void emberAfPluginTestHarnessZ3ZllStuffEventHandler(SLXU_UC_EVENT)
+void emberAfPluginTestHarnessZ3ZllStuffEventHandler(sl_zigbee_event_t * event)
 {
   EmberStatus status;
 
-  slxu_zigbee_event_set_inactive(z3ZllStuffEventControl);
+  sl_zigbee_event_set_inactive(z3ZllStuffEventControl);
 
   switch (zllStuffEventControlAction) {
     case ZLL_STUFF_EVENT_CONTROL_ACTION_SCAN_RESPONSE:
@@ -1056,8 +1016,8 @@ void emberAfPluginTestHarnessZ3ZllStuffEventHandler(SLXU_UC_EVENT)
   zllStuffEventControlAction = ZLL_STUFF_EVENT_CONTROL_ACTION_NULL;
 }
 
-EmberPacketAction emAfPluginTestHarnessZ3ZllModifyInterpanCommand(uint8_t *commandData,
-                                                                  uint8_t macHeaderLength)
+EmberPacketAction sli_zigbee_af_test_harness_z3_zll_modify_interpan_command(uint8_t *commandData,
+                                                                            uint8_t macHeaderLength)
 {
   static const EmberEUI64 badEui64 = { 0xde, 0xed, 0xdd, 0xde, 0xed, 0xdd, 0xde, 0xdd };
   EmberPacketAction act = EMBER_ACCEPT_PACKET;

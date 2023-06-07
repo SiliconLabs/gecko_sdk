@@ -19,17 +19,15 @@
 #include "app/framework/util/common.h"
 #include "prepayment-topup.h"
 
-#ifdef UC_BUILD
 #include "prepayment-server-config.h"
 #include "zap-cluster-command-parser.h"
-#endif // UC_BUILD
 
 // This function is called when a top up command is received.  The callback must determine if the top up
 // command is valid or not.
 //extern bool emberAfPluginPrepaymentServerConsumerTopUpCallback(uint8_t originatingDevice, uint8_t* topUpCode);
 
 bool consumerTopUpIsValid(uint8_t *topUpCode);
-void emAfPrintPublishTopUpPayload(TopUpPayload *ptopUpPayload, uint8_t index);
+void sli_zigbee_af_print_publish_top_up_payload(TopUpPayload *ptopUpPayload, uint8_t index);
 
 #define UTRN_HIGH_WORD_BASE_VALUE  0x669D529B
 #define UTRN_LOW_WORD_BASE_VALUE   0x714A0000
@@ -88,8 +86,6 @@ void emAfPrintPublishTopUpPayload(TopUpPayload *ptopUpPayload, uint8_t index);
 
 //-----------------------
 // ZCL commands callbacks
-
-#ifdef UC_BUILD
 
 bool emberAfPrepaymentClusterConsumerTopUpCallback(EmberAfClusterCommand *cmd)
 {
@@ -213,121 +209,6 @@ bool emberAfPrepaymentClusterGetTopUpLogCallback(EmberAfClusterCommand *cmd)
   return true;
 }
 
-#else // !UC_BUILD
-
-bool emberAfPrepaymentClusterConsumerTopUpCallback(uint8_t originatingDevice, uint8_t* topUpCode)
-{
-  EmberAfStatus status;
-  uint8_t  endpoint;
-  uint16_t attributeId;
-  uint32_t topUpDateTime;
-  int32_t topUpAmount;
-  uint8_t  topUpOriginatingDevice;
-  uint8_t  topUpCodeRead[27];
-  uint8_t  dataType;
-
-  uint8_t i;
-
-  topUpDateTime = emberAfGetCurrentTime();
-
-  emberAfPrepaymentClusterPrintln("RX: Consumer Top Up Callback, time=%d", topUpDateTime);
-  endpoint = emberAfCurrentEndpoint();
-
-  if ( !emberAfPluginPrepaymentServerConsumerTopUpCallback(originatingDevice, topUpCode) ) {
-    // TODO:  Do what?  -- Send default response?
-    return false;
-  }
-
-  // Before updating the Top Up #1 attribute set, push the existing #1,#2,#3,#4 attributes down.
-  // So Date/Time#1 becomes Date/Time#2, Amount#1 becomes Amount#2, etc.
-  // These are optional attributes, so don't care about the read/write return status.
-  //for( i=0; i<4; i++ ){
-  for ( i = 4; i > 0; ) {
-    i--;
-    attributeId = (ZCL_TOP_UP_DATE_TIME_1_ATTRIBUTE_ID + (i * TOP_UP_ATTRIBUTE_GROUP_DELTA) );
-    status = emberAfReadAttribute(endpoint, ZCL_PREPAYMENT_CLUSTER_ID,
-                                  attributeId, CLUSTER_MASK_SERVER, (uint8_t *)&topUpDateTime, 4, &dataType);
-    if ( status == EMBER_ZCL_STATUS_SUCCESS ) {
-      (void) emberAfWriteAttribute(endpoint, ZCL_PREPAYMENT_CLUSTER_ID, (attributeId + TOP_UP_ATTRIBUTE_GROUP_DELTA),
-                                   CLUSTER_MASK_SERVER, (uint8_t *)&topUpDateTime, dataType);
-    }
-
-    attributeId = (ZCL_TOP_UP_AMOUNT_1_ATTRIBUTE_ID + (i * TOP_UP_ATTRIBUTE_GROUP_DELTA) );
-    status = emberAfReadAttribute(endpoint, ZCL_PREPAYMENT_CLUSTER_ID,
-                                  attributeId, CLUSTER_MASK_SERVER, (uint8_t *)&topUpAmount, 4, &dataType);
-    if ( status == EMBER_ZCL_STATUS_SUCCESS ) {
-      (void) emberAfWriteAttribute(endpoint, ZCL_PREPAYMENT_CLUSTER_ID, (attributeId + TOP_UP_ATTRIBUTE_GROUP_DELTA),
-                                   CLUSTER_MASK_SERVER, (uint8_t *)&topUpAmount, dataType);
-    }
-
-    attributeId = (ZCL_TOP_UP_ORIGINATING_DEVICE_1_ATTRIBUTE_ID + (i * TOP_UP_ATTRIBUTE_GROUP_DELTA) );
-    status = emberAfReadAttribute(endpoint, ZCL_PREPAYMENT_CLUSTER_ID,
-                                  attributeId, CLUSTER_MASK_SERVER, &topUpOriginatingDevice, 1, &dataType);
-    if ( status == EMBER_ZCL_STATUS_SUCCESS ) {
-      (void) emberAfWriteAttribute(endpoint, ZCL_PREPAYMENT_CLUSTER_ID, (attributeId + TOP_UP_ATTRIBUTE_GROUP_DELTA),
-                                   CLUSTER_MASK_SERVER, &topUpOriginatingDevice, dataType);
-    }
-
-    attributeId = (ZCL_TOP_UP_CODE_1_ATTRIBUTE_ID + (i * TOP_UP_ATTRIBUTE_GROUP_DELTA) );
-    status = emberAfReadAttribute(endpoint, ZCL_PREPAYMENT_CLUSTER_ID,
-                                  attributeId, CLUSTER_MASK_SERVER, topUpCodeRead, 26, &dataType);
-    if ( status == EMBER_ZCL_STATUS_SUCCESS ) {
-      status = emberAfWriteAttribute(endpoint, ZCL_PREPAYMENT_CLUSTER_ID, (attributeId + TOP_UP_ATTRIBUTE_GROUP_DELTA),
-                                     CLUSTER_MASK_SERVER, topUpCodeRead, dataType);
-    }
-  }
-
-  // Now write the #1 attribute set with values from the top up command.
-
-  topUpDateTime = emberAfGetCurrentTime();
-  status = emberAfWriteAttribute(endpoint, ZCL_PREPAYMENT_CLUSTER_ID, ZCL_TOP_UP_DATE_TIME_1_ATTRIBUTE_ID,
-                                 CLUSTER_MASK_SERVER, (uint8_t *)&topUpDateTime, ZCL_UTC_TIME_ATTRIBUTE_TYPE);
-
-  status = emberAfWriteAttribute(endpoint, ZCL_PREPAYMENT_CLUSTER_ID, ZCL_TOP_UP_ORIGINATING_DEVICE_1_ATTRIBUTE_ID,
-                                 CLUSTER_MASK_SERVER, &originatingDevice, ZCL_ENUM8_ATTRIBUTE_TYPE);
-
-  status = emberAfWriteAttribute(endpoint, ZCL_PREPAYMENT_CLUSTER_ID, ZCL_TOP_UP_CODE_1_ATTRIBUTE_ID,
-                                 CLUSTER_MASK_SERVER, topUpCode, ZCL_OCTET_STRING_ATTRIBUTE_TYPE);
-
-// TODO:   How to extract the amount from the Top Up command??
-
-//  topUpAmount = (((uint32_t)topUpCode[0]) << 8) + topUpCode[1];
-//  topUpAmount <<= 16;
-//  topUpAmount += (((uint32_t)topUpCode[2]) << 8) + topUpCode[3];
-//  topUpAmount -= UTRN_HIGH_WORD_BASE_VALUE;
-// topUpAmount &= PTUT_VALUE_BITMASK;
-// topUpAmount >>= PTUT_VALUE_DOWNSHIFT;
-// status = emberAfWriteAttribute( endpoint, ZCL_PREPAYMENT_CLUSTER_ID, ZCL_TOP_UP_AMOUNT_1_ATTRIBUTE_ID,
-//                                 CLUSTER_MASK_SERVER, topUpAmount, ZCL_INT32S_ATTRIBUTE_TYPE );
-
-  return true;
-}
-
-#define MAX_TOP_UPS   5
-
-bool emberAfPrepaymentClusterGetTopUpLogCallback(uint32_t latestEndTime, uint8_t numberOfRecords)
-{
-  EmberNodeId nodeId;
-  uint8_t srcEndpoint, dstEndpoint;
-
-  if ( numberOfRecords == 0 ) {
-    // Requesting maximum possible.
-    numberOfRecords = MAX_TOP_UPS;
-  }
-
-  emberAfPrepaymentClusterPrintln("RX: GetTopUpLog, endTime=0x%4x, numRec=%d", latestEndTime, numberOfRecords);
-
-  nodeId = emberAfCurrentCommand()->source;
-  srcEndpoint = emberAfGetCommandApsFrame()->destinationEndpoint;
-  dstEndpoint = emberAfGetCommandApsFrame()->sourceEndpoint;
-
-  emberAfPluginSendPublishTopUpLog(nodeId, srcEndpoint, dstEndpoint, latestEndTime, numberOfRecords);
-
-  return true;
-}
-
-#endif // UC_BUILD
-
 static uint8_t NumTopUpPayloads;
 #define CMD_INDEX_LAST_CMD  0xFE
 
@@ -398,7 +279,7 @@ void emberAfPluginSendPublishTopUpLog(EmberNodeId nodeId, uint8_t srcEndpoint, u
   }
 }
 
-void emAfPrintPublishTopUpPayload(TopUpPayload *ptopUpPayload, uint8_t index)
+void sli_zigbee_af_print_publish_top_up_payload(TopUpPayload *ptopUpPayload, uint8_t index)
 {
   emberAfPrepaymentClusterPrintln("= Top Up Payload %d", index);
   emberAfPrepaymentClusterPrintln("  Code=%s", ptopUpPayload->topUpCode);
@@ -429,7 +310,7 @@ void emberAfPluginPrepaymentServerPublishTopUpLog(EmberNodeId nodeId, uint8_t sr
     (void) emberAfPutStringInResp(topUpPayload[i].topUpCode);
     (void) emberAfPutInt32uInResp(topUpPayload[i].topUpAmount);
     (void) emberAfPutInt32uInResp(topUpPayload[i].topUpTime);
-    emAfPrintPublishTopUpPayload(&topUpPayload[i], i);
+    sli_zigbee_af_print_publish_top_up_payload(&topUpPayload[i], i);
   }
 
   emberAfGetCommandApsFrame()->options |= EMBER_APS_OPTION_SOURCE_EUI64;

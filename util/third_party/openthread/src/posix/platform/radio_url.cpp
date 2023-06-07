@@ -63,15 +63,7 @@ const char *otSysGetRadioUrlHelpString(void)
     "    spi-small-packet=[n]          Specify the smallest packet we can receive in a single transaction.\n"  \
     "                                  (larger packets will require two transactions). Default value is 32.\n"
 
-#elif OPENTHREAD_POSIX_CONFIG_RCP_BUS == OT_POSIX_RCP_BUS_CPC
-
-#define OT_RADIO_URL_HELP_BUS                                        \
-    "    spinel+cpc://cpcd_0?${Parameters} for connecting to cpcd\n" \
-    "Parameters:\n"                                                  \
-    "    cpc-bus-speed[=speed]         CPC bus speed used for communicating with RCP.\n"
-
-#else
-
+#elif OPENTHREAD_POSIX_CONFIG_RCP_BUS == OT_POSIX_RCP_BUS_UART
 #define OT_RADIO_URL_HELP_BUS                                                                        \
     "    forkpty-arg[=argument string]  Command line arguments for subprocess, can be repeated.\n"   \
     "    spinel+hdlc+uart://${PATH_TO_UART_DEVICE}?${Parameters} for real uart device\n"             \
@@ -82,6 +74,14 @@ const char *otSysGetRadioUrlHelpString(void)
     "    uart-baudrate[=baudrate]       Uart baud rate, default is 115200.\n"                        \
     "    uart-flow-control              Enable flow control, disabled by default.\n"                 \
     "    uart-reset                     Reset connection after hard resetting RCP(USB CDC ACM).\n"
+
+#elif OPENTHREAD_POSIX_CONFIG_RCP_BUS == OT_POSIX_RCP_BUS_VENDOR
+
+#ifndef OT_VENDOR_RADIO_URL_HELP_BUS
+#define OT_VENDOR_RADIO_URL_HELP_BUS "\n"
+#endif // OT_VENDOR_RADIO_URL_HELP_BUS
+
+#define OT_RADIO_URL_HELP_BUS OT_VENDOR_RADIO_URL_HELP_BUS
 
 #endif // OPENTHREAD_POSIX_CONFIG_RCP_BUS == OT_POSIX_RCP_BUS_SPI
 
@@ -105,8 +105,10 @@ const char *otSysGetRadioUrlHelpString(void)
            "    ncp-dataset                   Retrieve dataset from ncp.\n"
            "    no-reset                      Do not send Spinel reset command to RCP on initialization.\n"
            "    skip-rcp-compatibility-check  Skip checking RCP API version and capabilities during initialization.\n"
-           "    iid                           Set the Spinel Interface ID for this process. Valid values are 1-3.\n";
-    ;
+#if OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE
+           "    iid                           Set the Spinel Interface ID for this process. Valid values are 1-3.\n"
+#endif
+        ;
 }
 
 namespace ot {

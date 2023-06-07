@@ -330,7 +330,7 @@ sl_status_t emberStartScan(EmberNetworkScanType scanType, uint32_t channelMask, 
  *
  * NOTE: SoC only
  */
-typedef bool (*EmberNetworkFoundCallback)(EmberZigbeeNetwork *network, uint8_t rssi, int8_t lqi, uint16_t senderNodeId, uint8_t parentPriority);
+typedef bool (*EmberNetworkFoundCallback)(EmberZigbeeNetwork *network, EmberBeaconData *beacon);
 
 /** @brief Handle the conclusion of an active
  * or energy scan.
@@ -358,6 +358,7 @@ typedef bool (*EmberScanCompleteCallback)(uint8_t channel, EmberStatus status);
  * NOTE: SoC only
  */
 EmberStatus emberSurveyBeacons(bool useStandardBeacons,
+                               uint32_t channel_mask,
                                EmberNetworkFoundCallback networkFoundCallback,
                                EmberScanCompleteCallback scanCompleteCallback);
 #endif
@@ -483,7 +484,7 @@ EmberStatus emberSetBeaconJitterDuration(uint8_t beaconJitterDuration);
  * @brief Set the policy decision for Trust Center (insecure)
  *   rejoins for devices using the well-known link key. If rejoining using the
  *   well-known key is allowed, it is disabled again after
- *   emAllowTcRejoinsUsingWellKnownKeyTimeoutSec seconds.
+ *   sli_zigbee_allow_tc_rejoins_using_well_known_key_timeout_sec seconds.
  */
 void emberSetTcRejoinsUsingWellKnownKeyAllowed(bool allow);
 

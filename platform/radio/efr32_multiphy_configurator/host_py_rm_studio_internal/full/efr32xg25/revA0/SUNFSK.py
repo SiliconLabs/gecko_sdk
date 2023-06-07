@@ -12,11 +12,21 @@ class RM_Peripheral_SUNFSK(Base_RM_Peripheral):
         super(RM_Peripheral_SUNFSK, self).__init__(rmio, label,
             0xB500FC00, 'SUNFSK',
             u"",
-            ['CW', 'LEGOQPSK', 'SUNOFDM', 'SUNOQPSK'])
+            ['LRSWKOFDM', 'SUNOFDM', 'SUNOQPSK'])
         self.CFG1 = RM_Register_SUNFSK_CFG1(self.zz_rmio, self.zz_label)
         self.zz_rdict['CFG1'] = self.CFG1
         self.CFG2 = RM_Register_SUNFSK_CFG2(self.zz_rmio, self.zz_label)
         self.zz_rdict['CFG2'] = self.CFG2
+        self.VREGS = RM_Register_SUNFSK_VREGS(self.zz_rmio, self.zz_label)
+        self.zz_rdict['VREGS'] = self.VREGS
+        self.COLLDET = RM_Register_SUNFSK_COLLDET(self.zz_rmio, self.zz_label)
+        self.zz_rdict['COLLDET'] = self.COLLDET
+        self.AFC = RM_Register_SUNFSK_AFC(self.zz_rmio, self.zz_label)
+        self.zz_rdict['AFC'] = self.AFC
+        self.TXCFG1 = RM_Register_SUNFSK_TXCFG1(self.zz_rmio, self.zz_label)
+        self.zz_rdict['TXCFG1'] = self.TXCFG1
+        self.ANT = RM_Register_SUNFSK_ANT(self.zz_rmio, self.zz_label)
+        self.zz_rdict['ANT'] = self.ANT
         self.CFG3 = RM_Register_SUNFSK_CFG3(self.zz_rmio, self.zz_label)
         self.zz_rdict['CFG3'] = self.CFG3
         self.CFG4 = RM_Register_SUNFSK_CFG4(self.zz_rmio, self.zz_label)

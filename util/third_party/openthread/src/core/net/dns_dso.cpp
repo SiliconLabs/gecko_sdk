@@ -81,9 +81,9 @@ extern "C" void otPlatDsoHandleDisconnected(otPlatDsoConnection *aConnection, ot
 //---------------------------------------------------------------------------------------------------------------------
 // Dso::Connection
 
-Dso::Connection::Connection(Instance &           aInstance,
+Dso::Connection::Connection(Instance            &aInstance,
                             const Ip6::SockAddr &aPeerSockAddr,
-                            Callbacks &          aCallbacks,
+                            Callbacks           &aCallbacks,
                             uint32_t             aInactivityTimeout,
                             uint32_t             aKeepAliveInterval)
     : InstanceLocator(aInstance)
@@ -322,7 +322,7 @@ exit:
 Error Dso::Connection::SendRetryDelayMessage(uint32_t aDelay, Dns::Header::Response aResponseCode)
 {
     Error         error   = kErrorNone;
-    Message *     message = nullptr;
+    Message      *message = nullptr;
     RetryDelayTlv retryDelayTlv;
     MessageId     messageId;
 
@@ -412,7 +412,7 @@ Error Dso::Connection::SendKeepAliveMessage(MessageType aMessageType, MessageId 
     // `kResponseMessage`.
 
     Error        error   = kErrorNone;
-    Message *    message = nullptr;
+    Message     *message = nullptr;
     KeepAliveTlv keepAliveTlv;
 
     switch (mState)
@@ -480,9 +480,9 @@ exit:
     return error;
 }
 
-Error Dso::Connection::SendMessage(Message &             aMessage,
+Error Dso::Connection::SendMessage(Message              &aMessage,
                                    MessageType           aMessageType,
-                                   MessageId &           aMessageId,
+                                   MessageId            &aMessageId,
                                    Dns::Header::Response aResponseCode,
                                    uint32_t              aResponseTimeout)
 {
@@ -788,7 +788,7 @@ exit:
 }
 
 Error Dso::Connection::ProcessRequestOrUnidirectionalMessage(const Dns::Header &aHeader,
-                                                             const Message &    aMessage,
+                                                             const Message     &aMessage,
                                                              Tlv::Type          aPrimaryTlvType)
 {
     Error error = kErrorAbort;
@@ -847,7 +847,7 @@ Error Dso::Connection::ProcessRequestOrUnidirectionalMessage(const Dns::Header &
 }
 
 Error Dso::Connection::ProcessResponseMessage(const Dns::Header &aHeader,
-                                              const Message &    aMessage,
+                                              const Message     &aMessage,
                                               Tlv::Type          aPrimaryTlvType)
 {
     Error     error = kErrorAbort;
@@ -1030,7 +1030,7 @@ exit:
 
 void Dso::Connection::SendErrorResponse(const Dns::Header &aHeader, Dns::Header::Response aResponseCode)
 {
-    Message *   response = NewMessage();
+    Message    *response = NewMessage();
     Dns::Header header;
 
     VerifyOrExit(response != nullptr);
@@ -1408,10 +1408,7 @@ exit:
     return error;
 }
 
-void Dso::Connection::PendingRequests::Remove(MessageId aMessageId)
-{
-    mRequests.RemoveMatching(aMessageId);
-}
+void Dso::Connection::PendingRequests::Remove(MessageId aMessageId) { mRequests.RemoveMatching(aMessageId); }
 
 bool Dso::Connection::PendingRequests::HasAnyTimedOut(TimeMilli aNow) const
 {
@@ -1459,10 +1456,7 @@ void Dso::StartListening(AcceptHandler aAcceptHandler)
     otPlatDsoEnableListening(&GetInstance(), true);
 }
 
-void Dso::StopListening(void)
-{
-    otPlatDsoEnableListening(&GetInstance(), false);
-}
+void Dso::StopListening(void) { otPlatDsoEnableListening(&GetInstance(), false); }
 
 Dso::Connection *Dso::FindClientConnection(const Ip6::SockAddr &aPeerSockAddr)
 {

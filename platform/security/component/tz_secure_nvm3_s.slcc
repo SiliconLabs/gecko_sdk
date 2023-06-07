@@ -21,10 +21,6 @@ include:
     file_list:
       - path: sli_tz_service_nvm3.h
 
-  - path: inc/secure
-    file_list:
-      - path: tfm_nvm3_include.h
-
 source:
   - path: src/sli_tz_service_nvm3_s.c
 

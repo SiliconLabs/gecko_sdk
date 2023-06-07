@@ -35,7 +35,7 @@ class profile_base_leopard(Profile_Base_Lynx):
         self.build_frame_configuration_inputs(model, profile)
 
         # Modem Advanced Inputs
-        buildModemAdvancedInputs(model, profile, family)
+        buildModemAdvancedInputs(model, profile)
 
         # Informational Output
         buildModemInfoOutputs(model, profile)
@@ -44,8 +44,8 @@ class profile_base_leopard(Profile_Base_Lynx):
         buildRailOutputs(model, profile)
 
         # Output fields
-        buildFrameOutputs(model, profile, family=family)
-        buildCrcOutputs(model, profile, family)
+        buildFrameOutputs(model, profile)
+        buildCrcOutputs(model, profile)
         buildWhiteOutputs(model, profile)
         buildFecOutputs(model, profile)
 
@@ -75,7 +75,7 @@ class profile_base_leopard(Profile_Base_Lynx):
         self.make_required_input(profile, model.vars.syncword_1, "syncword", readable_name="Sync Word 1",
                                      value_limit_min=0, value_limit_max=0xffffffff)
         self.make_required_input(profile, model.vars.syncword_length, "syncword",
-                                     readable_name="Sync Word Length", value_limit_min=0, value_limit_max=32)
+                                     readable_name="Sync Word Length", value_limit_min=2, value_limit_max=32)
         self.make_required_input(profile, model.vars.preamble_pattern_len, "preamble",
                                      readable_name="Preamble Pattern Length", value_limit_min=0, value_limit_max=4)
         self.make_required_input(profile, model.vars.preamble_length, "preamble",
@@ -143,11 +143,11 @@ class profile_base_leopard(Profile_Base_Lynx):
 
     def build_frame_configuration_inputs(self, model, profile):
 
-        buildFrameInputs(model, profile, family=self._family)
+        buildFrameInputs(model, profile)
         buildCrcInputs(model, profile)
         buildWhiteInputs(model, profile)
         buildFecInputs(model, profile)
 
     def buildRegisterOutputs(self, model, profile):
 
-        build_modem_regs_leopard(model, profile, family=self._family)
+        build_modem_regs_leopard(model, profile)

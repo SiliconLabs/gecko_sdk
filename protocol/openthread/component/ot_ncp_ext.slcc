@@ -1,0 +1,24 @@
+id: ot_ncp_vendor_extension
+label: NCP Vendor Extensions
+package: OpenThread
+category: OpenThread
+quality: production
+description: This component extends the behavior of the OpenThread NCP controller to allow the processing and handling of vendor defined Spinel attributes.
+provides:
+  - name: ot_ncp_vendor_extension
+requires:
+  - name: ot_stack
+  - name: ot_ncp
+include:
+  - path: util/third_party/openthread/src/
+    file_list:
+      - path: ncp/ncp_base.hpp
+  - path: protocol/openthread/platform-abstraction/include/
+    file_list:
+      - path: vendor_spinel.hpp
+source:
+  - path: protocol/openthread/platform-abstraction/ncp/ncp_init.cpp
+  - path: protocol/openthread/platform-abstraction/ncp/ncp_dispatcher.cpp
+define:
+  - name: OPENTHREAD_ENABLE_NCP_VENDOR_HOOK
+    value: 1

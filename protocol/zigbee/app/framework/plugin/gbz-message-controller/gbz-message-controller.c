@@ -21,19 +21,19 @@
 #include "gbz-message-controller.h"
 
 // forward declarations
-static uint16_t emAfPluginGbzMessageControllerAppendInNewMem(EmberAfGbzMessageCreatorState * state,
-                                                             EmberAfGbzZclCommand * zclCmd,
-                                                             EmberAfGbzMessageData * data);
-static uint16_t emAfPluginGbzMessageControllerAppendInPlace(EmberAfGbzMessageCreatorState * state,
-                                                            EmberAfGbzZclCommand * zclCmd,
-                                                            EmberAfGbzMessageData * data);
-uint16_t emAfPluginGbzMessageControllerGetLength(EmberAfGbzZclCommand * cmd, EmberAfGbzMessageData * msg);
-static uint16_t emAfPluginGbzMessageControllerGetResponsesLength(EmAfGbzUseCaseSpecificComponent * comp);
-static uint16_t emAfPluginGbzMessageControllerAppendResponses(uint8_t * dst,
-                                                              uint16_t maxLen,
-                                                              EmAfGbzUseCaseSpecificComponent * responses);
-static void emAfPluginGbzMessageControllerCreatorFreeResponses(EmberAfGbzMessageCreatorState * comp);
-static void emAfPluginGbzMessageControllerFreeHeader(EmAfGbzPayloadHeader * header);
+static uint16_t sli_zigbee_af_gbz_message_controller_append_in_new_mem(EmberAfGbzMessageCreatorState * state,
+                                                                       EmberAfGbzZclCommand * zclCmd,
+                                                                       EmberAfGbzMessageData * data);
+static uint16_t sli_zigbee_af_gbz_message_controller_append_in_place(EmberAfGbzMessageCreatorState * state,
+                                                                     EmberAfGbzZclCommand * zclCmd,
+                                                                     EmberAfGbzMessageData * data);
+uint16_t sli_zigbee_af_gbz_message_controller_get_length(EmberAfGbzZclCommand * cmd, EmberAfGbzMessageData * msg);
+static uint16_t sli_zigbee_af_gbz_message_controller_get_responses_length(sli_zigbee_af_gbz_use_case_specific_component * comp);
+static uint16_t sli_zigbee_af_gbz_message_controller_append_responses(uint8_t * dst,
+                                                                      uint16_t maxLen,
+                                                                      sli_zigbee_af_gbz_use_case_specific_component * responses);
+static void sli_zigbee_af_gbz_message_controller_creator_free_responses(EmberAfGbzMessageCreatorState * comp);
+static void sli_zigbee_af_gbz_message_controller_free_header(sli_zigbee_af_gbz_payload_header * header);
 
 void emberAfPluginGbzMessageControllerNextCommand(EmberAfGbzMessageParserState * state,
                                                   EmberAfGbzZclCommand * gbzZclCommand)
@@ -129,10 +129,10 @@ void emberAfPluginGbzMessageControllerNextCommand(EmberAfGbzMessageParserState *
 /*
  * @ Get ZCL portions (header & payload) of the GBZ messages' command length
  */
-static uint16_t emAfPluginGbzMessageControllerGetCommandLength(EmberAfGbzZclCommand * cmd,
-                                                               EmberAfGbzMessageData * data)
+static uint16_t sli_zigbee_af_gbz_message_controller_get_command_length(EmberAfGbzZclCommand * cmd,
+                                                                        EmberAfGbzMessageData * data)
 {
-  uint16_t len = emAfPluginGbzMessageControllerGetLength(cmd, data);
+  uint16_t len = sli_zigbee_af_gbz_message_controller_get_length(cmd, data);
   if (len != 0) {
     return len - GAS_PROXY_FUNCTION_GBZ_COMPONENT_EXT_HEADER_FIELDS_LENGTH;
   } else {
@@ -143,8 +143,8 @@ static uint16_t emAfPluginGbzMessageControllerGetCommandLength(EmberAfGbzZclComm
 /*
  * @ Get the length of the overall GBZ message
  */
-uint16_t emAfPluginGbzMessageControllerGetLength(EmberAfGbzZclCommand * cmd,
-                                                 EmberAfGbzMessageData * msg)
+uint16_t sli_zigbee_af_gbz_message_controller_get_length(EmberAfGbzZclCommand * cmd,
+                                                         EmberAfGbzMessageData * msg)
 {
   uint16_t len = GAS_PROXY_FUNCTION_GBZ_COMPONENT_EXT_HEADER_FIELDS_LENGTH;
 
@@ -300,7 +300,7 @@ uint16_t emberAfPluginGbzMessageControllerCreatorInit(EmberAfGbzMessageCreatorSt
     }
 
     // allocate mem for the header struct / header payload
-    state->header = (EmAfGbzPayloadHeader *)malloc(sizeof(EmAfGbzPayloadHeader));
+    state->header = (sli_zigbee_af_gbz_payload_header *)malloc(sizeof(sli_zigbee_af_gbz_payload_header));
     if (state->header == NULL) {
       emberAfPluginGbzMessageControllerPrintln("GBZ: ERR: GBZ creator unable to allocate memory!");
       return 0;
@@ -399,13 +399,13 @@ uint16_t emberAfPluginGbzMessageControllerAppendCommand(EmberAfGbzMessageCreator
   }
 
   if (creator->allocateMemoryForResponses) {
-    result = emAfPluginGbzMessageControllerAppendInNewMem(creator,
-                                                          zclCmd,
-                                                          &data);
+    result = sli_zigbee_af_gbz_message_controller_append_in_new_mem(creator,
+                                                                    zclCmd,
+                                                                    &data);
   } else {
-    result = emAfPluginGbzMessageControllerAppendInPlace(creator,
-                                                         zclCmd,
-                                                         &data);
+    result = sli_zigbee_af_gbz_message_controller_append_in_place(creator,
+                                                                  zclCmd,
+                                                                  &data);
   }
   return result;
 }
@@ -435,7 +435,7 @@ EmberAfGbzMessageCreatorResult * emberAfPluginGbzMessageControllerCreatorAssembl
 
     // count overall length
     len = state->header->payloadLength;
-    len += emAfPluginGbzMessageControllerGetResponsesLength(state->responses);
+    len += sli_zigbee_af_gbz_message_controller_get_responses_length(state->responses);
 
     responsePayload = (uint8_t *)malloc(sizeof(uint8_t) * len);
     if (responsePayload == NULL) {
@@ -450,14 +450,14 @@ EmberAfGbzMessageCreatorResult * emberAfPluginGbzMessageControllerCreatorAssembl
 
     // copy over payload
     MEMCOPY(responsePayload, state->header->payload, state->header->payloadLength);
-    emAfPluginGbzMessageControllerAppendResponses(&responsePayload[state->header->payloadLength],
-                                                  len - state->header->payloadLength,
-                                                  state->responses);
+    sli_zigbee_af_gbz_message_controller_append_responses(&responsePayload[state->header->payloadLength],
+                                                          len - state->header->payloadLength,
+                                                          state->responses);
 
     // clean up
-    emAfPluginGbzMessageControllerCreatorFreeResponses(state);
+    sli_zigbee_af_gbz_message_controller_creator_free_responses(state);
     state->lastResponse = NULL;
-    emAfPluginGbzMessageControllerFreeHeader(state->header);
+    sli_zigbee_af_gbz_message_controller_free_header(state->header);
   } else {
     result->payload = state->command;
     result->payloadLength = state->commandIndex;
@@ -471,7 +471,7 @@ void emberAfPluginGbzMessageControllerCreatorCleanup(EmberAfGbzMessageCreatorSta
 {
   // Try to free up respones as well in case user never called Assemble().
   if (state->allocateMemoryForResponses) {
-    emAfPluginGbzMessageControllerCreatorFreeResponses(state);
+    sli_zigbee_af_gbz_message_controller_creator_free_responses(state);
   }
 
   if (state->result.freeRequired) {
@@ -480,17 +480,17 @@ void emberAfPluginGbzMessageControllerCreatorCleanup(EmberAfGbzMessageCreatorSta
   MEMSET(state, 0x00, sizeof(EmberAfGbzMessageCreatorState));
 }
 
-static uint16_t emAfPluginGbzMessageControllerAppendInNewMem(EmberAfGbzMessageCreatorState * state,
-                                                             EmberAfGbzZclCommand * zclCmd,
-                                                             EmberAfGbzMessageData * data)
+static uint16_t sli_zigbee_af_gbz_message_controller_append_in_new_mem(EmberAfGbzMessageCreatorState * state,
+                                                                       EmberAfGbzZclCommand * zclCmd,
+                                                                       EmberAfGbzMessageData * data)
 {
-  uint16_t len = emAfPluginGbzMessageControllerGetLength(zclCmd, data);
+  uint16_t len = sli_zigbee_af_gbz_message_controller_get_length(zclCmd, data);
   uint16_t index = 0;
 
   if (len > 0) {
-    EmAfGbzUseCaseSpecificComponent * comp;
+    sli_zigbee_af_gbz_use_case_specific_component * comp;
     uint8_t * payload;
-    comp = (EmAfGbzUseCaseSpecificComponent*) malloc(sizeof(EmAfGbzUseCaseSpecificComponent));
+    comp = (sli_zigbee_af_gbz_use_case_specific_component*) malloc(sizeof(sli_zigbee_af_gbz_use_case_specific_component));
     comp->payload = payload = (uint8_t *) malloc(sizeof(uint8_t) * len);
     comp->payloadLength = len;
     comp->next = NULL;
@@ -517,7 +517,7 @@ static uint16_t emAfPluginGbzMessageControllerAppendInNewMem(EmberAfGbzMessageCr
 
     //Extended Header GBZ Command Length
     {
-      uint16_t len = emAfPluginGbzMessageControllerGetCommandLength(zclCmd, data);
+      uint16_t len = sli_zigbee_af_gbz_message_controller_get_command_length(zclCmd, data);
       payload[index++] = HIGH_BYTE(len);
       payload[index++] = LOW_BYTE(len);
     }
@@ -566,15 +566,15 @@ static uint16_t emAfPluginGbzMessageControllerAppendInNewMem(EmberAfGbzMessageCr
   return len;
 }
 
-static uint16_t emAfPluginGbzMessageControllerAppendInPlace(EmberAfGbzMessageCreatorState * state,
-                                                            EmberAfGbzZclCommand * zclCmd,
-                                                            EmberAfGbzMessageData * data)
+static uint16_t sli_zigbee_af_gbz_message_controller_append_in_place(EmberAfGbzMessageCreatorState * state,
+                                                                     EmberAfGbzZclCommand * zclCmd,
+                                                                     EmberAfGbzMessageData * data)
 {
   // will new cmd fit into the current gbz message struct?
   uint16_t zclCommandLength;
   uint16_t numberOfAppendedBytes = state->commandIndex; // snapshot of state->commandIndex
 
-  zclCommandLength = emAfPluginGbzMessageControllerGetLength(zclCmd, data);
+  zclCommandLength = sli_zigbee_af_gbz_message_controller_get_length(zclCmd, data);
 
   if (state->commandLength < state->commandIndex + zclCommandLength) {
     emberAfPluginGbzMessageControllerPrintln("GBZ: ERR: Unable to append ZCL command to GBZ message: out of space (%d/%d).",
@@ -611,7 +611,7 @@ static uint16_t emAfPluginGbzMessageControllerAppendInPlace(EmberAfGbzMessageCre
 
   // allocate extended header command length
   {
-    uint16_t len = emAfPluginGbzMessageControllerGetCommandLength(zclCmd, data);
+    uint16_t len = sli_zigbee_af_gbz_message_controller_get_command_length(zclCmd, data);
     state->command[state->commandIndex++] = HIGH_BYTE(len);
     state->command[state->commandIndex++] = LOW_BYTE(len);
   }
@@ -671,10 +671,10 @@ EmberAfStatus emberAfPluginGbzMessageControllerGetZclDefaultResponse(EmberAfGbzZ
   }
 }
 
-static void emAfPluginGbzMessageControllerCreatorFreeResponses(EmberAfGbzMessageCreatorState * state)
+static void sli_zigbee_af_gbz_message_controller_creator_free_responses(EmberAfGbzMessageCreatorState * state)
 {
-  EmAfGbzUseCaseSpecificComponent * next;
-  EmAfGbzUseCaseSpecificComponent * cur = state->responses;
+  sli_zigbee_af_gbz_use_case_specific_component * next;
+  sli_zigbee_af_gbz_use_case_specific_component * cur = state->responses;
 
   while (cur != NULL) {
     next = cur->next;
@@ -691,7 +691,7 @@ static void emAfPluginGbzMessageControllerCreatorFreeResponses(EmberAfGbzMessage
 /*
  * @brief Cleanup dynamic memory used to store GBZ message header.
  * */
-void emAfPluginGbzMessageControllerFreeHeader(EmAfGbzPayloadHeader * header)
+void sli_zigbee_af_gbz_message_controller_free_header(sli_zigbee_af_gbz_payload_header * header)
 {
   if (header == NULL) {
     return;
@@ -707,11 +707,11 @@ void emAfPluginGbzMessageControllerFreeHeader(EmAfGbzPayloadHeader * header)
  *  @return number of bytes
  *
  */
-uint16_t emAfPluginGbzMessageControllerGetResponsesLength(EmAfGbzUseCaseSpecificComponent * comp)
+uint16_t sli_zigbee_af_gbz_message_controller_get_responses_length(sli_zigbee_af_gbz_use_case_specific_component * comp)
 {
   uint16_t length = 0;
-  EmAfGbzUseCaseSpecificComponent * next;
-  EmAfGbzUseCaseSpecificComponent * cur = comp;
+  sli_zigbee_af_gbz_use_case_specific_component * next;
+  sli_zigbee_af_gbz_use_case_specific_component * cur = comp;
   while (cur != NULL) {
     next = cur->next;
     length += cur->payloadLength;
@@ -723,13 +723,13 @@ uint16_t emAfPluginGbzMessageControllerGetResponsesLength(EmAfGbzUseCaseSpecific
 /*
  * @brief returns number of appended bytes
  */
-static uint16_t emAfPluginGbzMessageControllerAppendResponses(uint8_t * dst,
-                                                              uint16_t maxLen,
-                                                              EmAfGbzUseCaseSpecificComponent * responses)
+static uint16_t sli_zigbee_af_gbz_message_controller_append_responses(uint8_t * dst,
+                                                                      uint16_t maxLen,
+                                                                      sli_zigbee_af_gbz_use_case_specific_component * responses)
 {
   uint16_t index = 0;
-  EmAfGbzUseCaseSpecificComponent * next;
-  EmAfGbzUseCaseSpecificComponent * cur = responses;
+  sli_zigbee_af_gbz_use_case_specific_component * next;
+  sli_zigbee_af_gbz_use_case_specific_component * cur = responses;
   while (cur != NULL) {
     next = cur->next;
 

@@ -14,14 +14,16 @@ config_file:
   - path: protocol/z-wave/platform/SiliconLabs/PAL/config/cc_supervision/cc_supervision_config.h
     file_id: cc_supervision_config
 source:
-  - path: protocol/z-wave/ZAF/CommandClasses/Supervision/CC_Supervision.c
-  - path: protocol/z-wave/ZAF/CommandClasses/Supervision/cc_supervision_config_api.c
+  - path: protocol/z-wave/ZAF/CommandClasses/Supervision/src/CC_Supervision.c
+  - path: protocol/z-wave/ZAF/CommandClasses/Supervision/src/cc_supervision_config_api.c
 include:
-  - path: protocol/z-wave/ZAF/CommandClasses/Supervision/
+  - path: protocol/z-wave/ZAF/CommandClasses/Supervision/inc
     file_list:
     - path: CC_Supervision.h
-    - path: cc_supervision_config_api.h
     - path: cc_supervision_handlers.h
+  - path: protocol/z-wave/ZAF/CommandClasses/Supervision/src
+    file_list:
+    - path: cc_supervision_config_api.h
 provides:
   - name: zw_cc_supervision
 requires:

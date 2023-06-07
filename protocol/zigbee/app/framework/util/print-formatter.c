@@ -21,10 +21,10 @@
 
 //------------------------------------------------------------------------------
 
-static void emAfPrintBuffer(uint16_t area,
-                            const uint8_t *buffer,
-                            uint16_t bufferLen,
-                            const char * formatString)
+static void sli_zigbee_af_print_buffer(uint16_t area,
+                                       const uint8_t *buffer,
+                                       uint16_t bufferLen,
+                                       const char * formatString)
 {
   if (emberAfPrintEnabled(area)) {
     uint16_t index = 0;
@@ -39,17 +39,17 @@ void emberAfPrintBuffer(uint16_t area,
                         uint16_t bufferLen,
                         bool withSpace)
 {
-  emAfPrintBuffer(area, buffer, bufferLen, (withSpace ? "%x " : "%x"));
+  sli_zigbee_af_print_buffer(area, buffer, bufferLen, (withSpace ? "%x " : "%x"));
 }
 
 void emberAfPrintString(uint16_t area, const uint8_t *buffer)
 {
-  emAfPrintBuffer(area, buffer + 1, emberAfStringLength(buffer), "%c");
+  sli_zigbee_af_print_buffer(area, buffer + 1, emberAfStringLength(buffer), "%c");
 }
 
 void emberAfPrintLongString(uint16_t area, const uint8_t *buffer)
 {
-  emAfPrintBuffer(area, buffer + 2, emberAfLongStringLength(buffer), "%c");
+  sli_zigbee_af_print_buffer(area, buffer + 2, emberAfLongStringLength(buffer), "%c");
 }
 
 void emberAfPrintLittleEndianEui64(const EmberEUI64 eui64)

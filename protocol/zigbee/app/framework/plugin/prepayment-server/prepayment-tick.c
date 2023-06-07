@@ -20,9 +20,7 @@
 #include "prepayment-debt-schedule.h"
 #include "prepayment-modes-table.h"
 
-#ifdef UC_BUILD
 #include "prepayment-server-config.h"
-#endif // UC_BUILD
 
 static uint16_t PendingPrepaymentEvents;
 
@@ -87,5 +85,5 @@ void emberAfPrepaymentClusterServerTickCallback(uint8_t endpoint)
     }
   }
   emberAfPrepaymentClusterPrintln("Scheduling Tick Callback in %d sec, eventBitFlag=%d, pendingEvents=%d", minEventDelaySec, minTimeEvent, PendingPrepaymentEvents);
-  slxu_zigbee_zcl_schedule_server_tick(endpoint, ZCL_PREPAYMENT_CLUSTER_ID, (minEventDelaySec * MILLISECOND_TICKS_PER_SECOND) );
+  sl_zigbee_zcl_schedule_server_tick(endpoint, ZCL_PREPAYMENT_CLUSTER_ID, (minEventDelaySec * MILLISECOND_TICKS_PER_SECOND) );
 }

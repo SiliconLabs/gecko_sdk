@@ -15,8 +15,9 @@
  *
  ******************************************************************************/
 
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #ifdef SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
 #include "app/framework/include/af.h"
 #include "app/framework/util/af-main.h"
@@ -24,23 +25,18 @@
 #else // !SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
 #include "green-power-adapter.h"
 #endif //SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
-#else //!UC_BUILD
-#include "app/framework/include/af.h"
-#include "app/framework/util/af-main.h"
-#include "app/framework/util/common.h"
-#endif //UC_BUILD
 
 #include "green-power-common.h"
 
-extern bool emGpAddressMatch(const EmberGpAddress *a1, const EmberGpAddress *a2);
-extern void emSpoofDeviceAnnouncement(uint16_t shortId,
-                                      uint8_t *sourceEUI64,
-                                      EmberEUI64 deviceAnnounceEui,
-                                      uint8_t capabilities);
+extern bool sli_zigbee_af_gp_address_match(const EmberGpAddress *a1, const EmberGpAddress *a2);
+extern void sli_zigbee_spoof_device_announcement(uint16_t shortId,
+                                                 uint8_t *sourceEUI64,
+                                                 EmberEUI64 deviceAnnounceEui,
+                                                 uint8_t capabilities);
 
-uint16_t emCopyAdditionalInfoBlockStructureToArray(uint8_t commandId,
-                                                   EmberGpTranslationTableAdditionalInfoBlockOptionRecordField *additionalInfoBlockIn,
-                                                   uint8_t *additionalInfoBlockOut)
+uint16_t sli_zigbee_af_copy_additional_info_block_structure_to_array(uint8_t commandId,
+                                                                     EmberGpTranslationTableAdditionalInfoBlockOptionRecordField *additionalInfoBlockIn,
+                                                                     uint8_t *additionalInfoBlockOut)
 {
   uint8_t charCount = 0;
   uint8_t *additionalInfoBlockOutPtr = additionalInfoBlockOut;
@@ -362,9 +358,9 @@ uint16_t emberAfFillCommandGreenPowerClusterGpTranslationTableUpdateSmart(uint16
   if (emberAfGreenPowerTTUpdateGetAdditionalInfoBlockPresent(options) != 0
       && additionalInfoBlock) {
     uint8_t tempBuffer[32] = { 0 }; // Two records maximum per cli
-    uint16_t length = emCopyAdditionalInfoBlockStructureToArray(translations->gpdCommandId,
-                                                                additionalInfoBlock,
-                                                                tempBuffer);
+    uint16_t length = sli_zigbee_af_copy_additional_info_block_structure_to_array(translations->gpdCommandId,
+                                                                                  additionalInfoBlock,
+                                                                                  tempBuffer);
     (void) emberAfPutInt8uInResp(length);
     charCount += 1;
     emberAfPutBlockInResp(tempBuffer, length);
@@ -797,7 +793,7 @@ bool emberAfGreenPowerCommonGpAddrCompare(const EmberGpAddress * a1,
                                           const EmberGpAddress * a2)
 {
 #ifndef EZSP_HOST
-  return emGpAddressMatch(a1, a2);
+  return sli_zigbee_af_gp_address_match(a1, a2);
 #else
   if (a1->applicationId == EMBER_GP_APPLICATION_SOURCE_ID
       && a2->applicationId == EMBER_GP_APPLICATION_SOURCE_ID) {
@@ -820,11 +816,11 @@ bool emberAfGreenPowerCommonGpAddrCompare(const EmberGpAddress * a1,
 #endif
 }
 
-bool emGpMakeAddr(EmberGpAddress *addr,
-                  EmberGpApplicationId appId,
-                  EmberGpSourceId srcId,
-                  uint8_t *gpdIeee,
-                  uint8_t endpoint)
+bool sli_zigbee_af_gp_make_addr(EmberGpAddress *addr,
+                                EmberGpApplicationId appId,
+                                EmberGpSourceId srcId,
+                                uint8_t *gpdIeee,
+                                uint8_t endpoint)
 {
   if (addr == NULL) {
     return false;
@@ -848,9 +844,9 @@ bool emGpMakeAddr(EmberGpAddress *addr,
   return true;
 }
 
-void emGpSpoofDeviceAnnce(uint16_t nodeId,
-                          EmberEUI64 eui64,
-                          uint8_t capabilities)
+void sli_zigbee_af_gp_spoof_device_annce(uint16_t nodeId,
+                                         EmberEUI64 eui64,
+                                         uint8_t capabilities)
 {
 #ifdef EZSP_HOST
   EmberApsFrame apsFrameDevAnnce;
@@ -880,9 +876,9 @@ void emGpSpoofDeviceAnnce(uint16_t nodeId,
                      &apsSequence);
 #else // !EZSP_HOST
   // Use the stack private function to save code space in case of SoC.
-  emSpoofDeviceAnnouncement(nodeId,
-                            NULL,
-                            eui64,
-                            capabilities);
+  sli_zigbee_spoof_device_announcement(nodeId,
+                                       NULL,
+                                       eui64,
+                                       capabilities);
 #endif // EZSP_HOST
 }

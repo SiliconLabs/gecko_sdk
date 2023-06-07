@@ -22,7 +22,6 @@ component:
   - id: app_log
   - id: bluetooth_feature_system
   - id: bootloader_interface
-  - id: btmesh_event_log
   - id: btmesh_factory_reset
   - id: btmesh_stack_gatt_prov_bearer
   - id: btmesh_stack_relay
@@ -49,14 +48,11 @@ component:
       - vcom
   - id: mpu
   - id: rail_util_pti
-  - id: simple_button
-    instance:
-      - btn0
-      - btn1
+  - id: simple_button_recommended_instance
   - id: simple_rgb_pwm_led
     instance:
       - rgb_led0
-  - id: simple_timer
+  - id: app_timer
 
 source:
   - path: app.c
@@ -104,6 +100,8 @@ other_file:
 configuration:
   - name: APP_LOG_LEVEL
     value: "APP_LOG_LEVEL_INFO"
+  - name: NVM3_DEFAULT_NVM_SIZE
+    value: "0x6000"
   - name: SL_BTMESH_CONFIG_MAX_PROV_BEARERS
     value: "3"
   - name: SL_BTMESH_FW_UPDATE_SERVER_FWID_CFG_VAL

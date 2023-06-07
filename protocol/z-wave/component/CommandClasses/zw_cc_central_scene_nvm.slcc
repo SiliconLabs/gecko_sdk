@@ -9,7 +9,7 @@ description: >
 package: Z-Wave
 quality: production
 source:
-  - path: protocol/z-wave/ZAF/CommandClasses/CentralScene/cc_central_scene_nvm.c
+  - path: protocol/z-wave/ZAF/CommandClasses/CentralScene/src/cc_central_scene_nvm.c
 provides:
   - name: zw_cc_central_scene_nvm
 requires:

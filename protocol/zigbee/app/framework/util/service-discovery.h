@@ -22,132 +22,29 @@
 #include "../include/af.h"
 #define EMBER_SUPPORTED_SERVICE_DISCOVERY_STATES_PER_NETWORK 4u
 // Internal Functions
-void emAfServiceDiscoveryMatched(EmberNodeId nodeId,
-                                 uint8_t endpointListLength,
-                                 uint8_t* endpointList);
+void sli_zigbee_af_service_discovery_matched(EmberNodeId nodeId,
+                                             uint8_t endpointListLength,
+                                             uint8_t* endpointList);
 
 // Platform specific call to send a match descriptor request.
-EmberStatus emAfSendMatchDescriptor(EmberNodeId target,
-                                    EmberAfProfileId profileId,
-                                    EmberAfClusterId clusterId,
-                                    bool serverCluster);
+EmberStatus sli_zigbee_af_send_match_descriptor(EmberNodeId target,
+                                                EmberAfProfileId profileId,
+                                                EmberAfClusterId clusterId,
+                                                bool serverCluster);
 
-bool emAfServiceDiscoveryIncoming(EmberNodeId sender,
-                                  EmberApsFrame* apsFrame,
-                                  const uint8_t* message,
-                                  uint16_t length);
+bool sli_zigbee_af_service_discovery_incoming(EmberNodeId sender,
+                                              EmberApsFrame* apsFrame,
+                                              const uint8_t* message,
+                                              uint16_t length);
 
-void emAfServiceDiscoveryComplete(uint8_t networkIndex, uint8_t sequenceNumber);
+void sli_zigbee_af_service_discovery_complete(uint8_t networkIndex, uint8_t sequenceNumber);
 
 #ifndef EMBER_AF_DISCOVERY_TIMEOUT_QS
-  #define EMBER_AF_DISCOVERY_TIMEOUT_QS (2u * 4u)
+// NOTE 2.25 seconds
+  #define EMBER_AF_DISCOVERY_TIMEOUT_QS (2u * 4u + 1u)
 #endif
 
-#ifdef UC_BUILD
+extern sl_zigbee_event_t sli_zigbee_af_service_discovery_events[EMBER_SUPPORTED_SERVICE_DISCOVERY_STATES_PER_NETWORK][EMBER_SUPPORTED_NETWORKS];
+void sli_zigbee_af_service_discovery_timeout_handler(sl_zigbee_event_t *event);
 
-extern sl_zigbee_event_t emAfServiceDiscoveryEvents[EMBER_SUPPORTED_SERVICE_DISCOVERY_STATES_PER_NETWORK][EMBER_SUPPORTED_NETWORKS];
-void emAfServiceDiscoveryTimeoutHandler(sl_zigbee_event_t *event);
-
-#else // !UC_BUILD
-
-extern EmberEventControl emAfServiceDiscoveryEventControls[EMBER_SUPPORTED_SERVICE_DISCOVERY_STATES_PER_NETWORK][EMBER_SUPPORTED_NETWORKS];
-void emAfServiceDiscoveryTimeoutHandler(EmberEventControl *control);
-
-#if EMBER_SUPPORTED_NETWORKS == 1
-  #define EM_AF_SERVICE_DISCOVERY_EVENT_STRINGS \
-  "Svc Disc Request State 0 NWK 0",             \
-  "Svc Disc Request State 1 NWK 0",             \
-  "Svc Disc Request State 2 NWK 0",             \
-  "Svc Disc Request State 3 NWK 0",
-  #define EM_AF_SERVICE_DISCOVERY_EVENTS                                                           \
-  { &emAfServiceDiscoveryEventControls[0][0], (void(*)(void))emAfServiceDiscoveryTimeoutHandler }, \
-  { &emAfServiceDiscoveryEventControls[1][0], (void(*)(void))emAfServiceDiscoveryTimeoutHandler }, \
-  { &emAfServiceDiscoveryEventControls[2][0], (void(*)(void))emAfServiceDiscoveryTimeoutHandler }, \
-  { &emAfServiceDiscoveryEventControls[3][0], (void(*)(void))emAfServiceDiscoveryTimeoutHandler },
-#elif EMBER_SUPPORTED_NETWORKS == 2
-  #define EM_AF_SERVICE_DISCOVERY_EVENT_STRINGS \
-  "Svc Disc Request State 0 NWK 0",             \
-  "Svc Disc Request State 1 NWK 0",             \
-  "Svc Disc Request State 2 NWK 0",             \
-  "Svc Disc Request State 3 NWK 0",             \
-  "Svc Disc Request State 0 NWK 1",             \
-  "Svc Disc Request State 1 NWK 1",             \
-  "Svc Disc Request State 2 NWK 1",             \
-  "Svc Disc Request State 3 NWK 1",
-  #define EM_AF_SERVICE_DISCOVERY_EVENTS                                                           \
-  { &emAfServiceDiscoveryEventControls[0][0], (void(*)(void))emAfServiceDiscoveryTimeoutHandler }, \
-  { &emAfServiceDiscoveryEventControls[1][0], (void(*)(void))emAfServiceDiscoveryTimeoutHandler }, \
-  { &emAfServiceDiscoveryEventControls[2][0], (void(*)(void))emAfServiceDiscoveryTimeoutHandler }, \
-  { &emAfServiceDiscoveryEventControls[3][0], (void(*)(void))emAfServiceDiscoveryTimeoutHandler }, \
-  { &emAfServiceDiscoveryEventControls[0][1], (void(*)(void))emAfServiceDiscoveryTimeoutHandler }, \
-  { &emAfServiceDiscoveryEventControls[1][1], (void(*)(void))emAfServiceDiscoveryTimeoutHandler }, \
-  { &emAfServiceDiscoveryEventControls[2][1], (void(*)(void))emAfServiceDiscoveryTimeoutHandler }, \
-  { &emAfServiceDiscoveryEventControls[3][1], (void(*)(void))emAfServiceDiscoveryTimeoutHandler },
-#elif EMBER_SUPPORTED_NETWORKS == 3
-  #define EM_AF_SERVICE_DISCOVERY_EVENT_STRINGS \
-  "Svc Disc Request State 0 NWK 0",             \
-  "Svc Disc Request State 1 NWK 0",             \
-  "Svc Disc Request State 2 NWK 0",             \
-  "Svc Disc Request State 3 NWK 0",             \
-  "Svc Disc Request State 0 NWK 1",             \
-  "Svc Disc Request State 1 NWK 1",             \
-  "Svc Disc Request State 2 NWK 1",             \
-  "Svc Disc Request State 3 NWK 1",             \
-  "Svc Disc Request State 0 NWK 2",             \
-  "Svc Disc Request State 1 NWK 2",             \
-  "Svc Disc Request State 2 NWK 2",             \
-  "Svc Disc Request State 3 NWK 2",
-  #define EM_AF_SERVICE_DISCOVERY_EVENTS                                                           \
-  { &emAfServiceDiscoveryEventControls[0][0], (void(*)(void))emAfServiceDiscoveryTimeoutHandler }, \
-  { &emAfServiceDiscoveryEventControls[1][0], (void(*)(void))emAfServiceDiscoveryTimeoutHandler }, \
-  { &emAfServiceDiscoveryEventControls[2][0], (void(*)(void))emAfServiceDiscoveryTimeoutHandler }, \
-  { &emAfServiceDiscoveryEventControls[3][0], (void(*)(void))emAfServiceDiscoveryTimeoutHandler }, \
-  { &emAfServiceDiscoveryEventControls[0][1], (void(*)(void))emAfServiceDiscoveryTimeoutHandler }, \
-  { &emAfServiceDiscoveryEventControls[1][1], (void(*)(void))emAfServiceDiscoveryTimeoutHandler }, \
-  { &emAfServiceDiscoveryEventControls[2][1], (void(*)(void))emAfServiceDiscoveryTimeoutHandler }, \
-  { &emAfServiceDiscoveryEventControls[3][1], (void(*)(void))emAfServiceDiscoveryTimeoutHandler }, \
-  { &emAfServiceDiscoveryEventControls[0][2], (void(*)(void))emAfServiceDiscoveryTimeoutHandler }, \
-  { &emAfServiceDiscoveryEventControls[1][2], (void(*)(void))emAfServiceDiscoveryTimeoutHandler }, \
-  { &emAfServiceDiscoveryEventControls[2][2], (void(*)(void))emAfServiceDiscoveryTimeoutHandler }, \
-  { &emAfServiceDiscoveryEventControls[3][2], (void(*)(void))emAfServiceDiscoveryTimeoutHandler },
-#elif EMBER_SUPPORTED_NETWORKS == 4
-  #define EM_AF_SERVICE_DISCOVERY_EVENT_STRINGS \
-  "Svc Disc Request State 0 NWK 0",             \
-  "Svc Disc Request State 1 NWK 0",             \
-  "Svc Disc Request State 2 NWK 0",             \
-  "Svc Disc Request State 3 NWK 0",             \
-  "Svc Disc Request State 0 NWK 1",             \
-  "Svc Disc Request State 1 NWK 1",             \
-  "Svc Disc Request State 2 NWK 1",             \
-  "Svc Disc Request State 3 NWK 1",             \
-  "Svc Disc Request State 0 NWK 2",             \
-  "Svc Disc Request State 1 NWK 2",             \
-  "Svc Disc Request State 2 NWK 2",             \
-  "Svc Disc Request State 3 NWK 2",             \
-  "Svc Disc Request State 0 NWK 3",             \
-  "Svc Disc Request State 1 NWK 3",             \
-  "Svc Disc Request State 2 NWK 3",             \
-  "Svc Disc Request State 3 NWK 3",
-  #define EM_AF_SERVICE_DISCOVERY_EVENTS                                                           \
-  { &emAfServiceDiscoveryEventControls[0][0], (void(*)(void))emAfServiceDiscoveryTimeoutHandler }, \
-  { &emAfServiceDiscoveryEventControls[1][0], (void(*)(void))emAfServiceDiscoveryTimeoutHandler }, \
-  { &emAfServiceDiscoveryEventControls[2][0], (void(*)(void))emAfServiceDiscoveryTimeoutHandler }, \
-  { &emAfServiceDiscoveryEventControls[3][0], (void(*)(void))emAfServiceDiscoveryTimeoutHandler }, \
-  { &emAfServiceDiscoveryEventControls[0][1], (void(*)(void))emAfServiceDiscoveryTimeoutHandler }, \
-  { &emAfServiceDiscoveryEventControls[1][1], (void(*)(void))emAfServiceDiscoveryTimeoutHandler }, \
-  { &emAfServiceDiscoveryEventControls[2][1], (void(*)(void))emAfServiceDiscoveryTimeoutHandler }, \
-  { &emAfServiceDiscoveryEventControls[3][1], (void(*)(void))emAfServiceDiscoveryTimeoutHandler }, \
-  { &emAfServiceDiscoveryEventControls[0][2], (void(*)(void))emAfServiceDiscoveryTimeoutHandler }, \
-  { &emAfServiceDiscoveryEventControls[1][2], (void(*)(void))emAfServiceDiscoveryTimeoutHandler }, \
-  { &emAfServiceDiscoveryEventControls[2][2], (void(*)(void))emAfServiceDiscoveryTimeoutHandler }, \
-  { &emAfServiceDiscoveryEventControls[3][2], (void(*)(void))emAfServiceDiscoveryTimeoutHandler }, \
-  { &emAfServiceDiscoveryEventControls[0][3], (void(*)(void))emAfServiceDiscoveryTimeoutHandler }, \
-  { &emAfServiceDiscoveryEventControls[1][3], (void(*)(void))emAfServiceDiscoveryTimeoutHandler }, \
-  { &emAfServiceDiscoveryEventControls[2][3], (void(*)(void))emAfServiceDiscoveryTimeoutHandler }, \
-  { &emAfServiceDiscoveryEventControls[3][3], (void(*)(void))emAfServiceDiscoveryTimeoutHandler },
-#else
-  #error
-#endif
-
-#endif // !UC_BUILD
 #endif // SILABS_SERVICE_DISCOVERY_H

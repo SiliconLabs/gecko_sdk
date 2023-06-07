@@ -142,16 +142,14 @@ void platformInit(otPlatformConfig *aPlatformConfig)
     platformBackboneInit(aPlatformConfig->mBackboneInterfaceName);
 #endif
 
-#if OPENTHREAD_CONFIG_BORDER_ROUTING_ENABLE
+#if OPENTHREAD_POSIX_CONFIG_INFRA_IF_ENABLE
     ot::Posix::InfraNetif::Get().Init(aPlatformConfig->mBackboneInterfaceName);
 #endif
 
     gNetifName[0] = '\0';
 
 #if OPENTHREAD_CONFIG_NAT64_TRANSLATOR_ENABLE
-    if ((sscanf(OPENTHREAD_POSIX_CONFIG_NAT64_CIDR, "%" SCNu8 ".%" SCNu8 ".%" SCNu8 ".%" SCNu8 "/%" SCNu8,
-                &gNat64Cidr.mAddress.mFields.m8[0], &gNat64Cidr.mAddress.mFields.m8[1],
-                &gNat64Cidr.mAddress.mFields.m8[2], &gNat64Cidr.mAddress.mFields.m8[3], &gNat64Cidr.mLength)) != 5)
+    if (otIp4CidrFromString(OPENTHREAD_POSIX_CONFIG_NAT64_CIDR, &gNat64Cidr) != OT_ERROR_NONE)
     {
         gNat64Cidr.mLength = 0;
     }
@@ -181,7 +179,7 @@ void platformSetUp(void)
     platformBackboneSetUp();
 #endif
 
-#if OPENTHREAD_CONFIG_BORDER_ROUTING_ENABLE
+#if OPENTHREAD_POSIX_CONFIG_INFRA_IF_ENABLE
     ot::Posix::InfraNetif::Get().SetUp();
 #endif
 
@@ -236,7 +234,7 @@ void platformTearDown(void)
     platformNetifTearDown();
 #endif
 
-#if OPENTHREAD_CONFIG_BORDER_ROUTING_ENABLE
+#if OPENTHREAD_POSIX_CONFIG_INFRA_IF_ENABLE
     ot::Posix::InfraNetif::Get().TearDown();
 #endif
 
@@ -268,7 +266,7 @@ void platformDeinit(void)
     platformTrelDeinit();
 #endif
 
-#if OPENTHREAD_CONFIG_BORDER_ROUTING_ENABLE
+#if OPENTHREAD_POSIX_CONFIG_INFRA_IF_ENABLE
     ot::Posix::InfraNetif::Get().Deinit();
 #endif
 
@@ -410,7 +408,4 @@ void otSysMainloopProcess(otInstance *aInstance, const otSysMainloopContext *aMa
 #endif
 }
 
-bool IsSystemDryRun(void)
-{
-    return gDryRun;
-}
+bool IsSystemDryRun(void) { return gDryRun; }

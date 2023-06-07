@@ -30,7 +30,7 @@
 
 #ifndef NVM3_DEFAULT_H
 #define NVM3_DEFAULT_H
-#include "nvm3.h"
+#include "nvm3_generic.h"
 
 /***************************************************************************//**
  * @addtogroup nvm3

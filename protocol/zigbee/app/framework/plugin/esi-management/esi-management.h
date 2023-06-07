@@ -30,14 +30,11 @@
  * @addtogroup esi-management
  * @{
  */
-
-#ifdef UC_BUILD
+#ifdef EMBER_SCRIPTED_TEST
+#include "config/esi-management-config.h"
+#else
 #include "esi-management-config.h"
-#else // !UC_BUILD
-#ifndef EMBER_AF_PLUGIN_ESI_MANAGEMENT_ESI_TABLE_SIZE
-#define EMBER_AF_PLUGIN_ESI_MANAGEMENT_ESI_TABLE_SIZE 3
-#endif //EMBER_AF_PLUGIN_ESI_MANAGEMENT_ESI_TABLE_SIZE
-#endif // UC_BUILD
+#endif
 
 #ifndef EMBER_AF_PLUGIN_ESI_MANAGEMENT_MIN_ERASING_AGE
 #define EMBER_AF_PLUGIN_ESI_MANAGEMENT_MIN_ERASING_AGE 3

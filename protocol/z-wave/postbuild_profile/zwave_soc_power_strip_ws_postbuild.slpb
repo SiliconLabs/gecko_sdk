@@ -1,0 +1,17 @@
+parameters: []
+constants:
+  - name: workspace_name
+    value: zwave_soc_power_strip_workspace
+steps:
+  - task: convert
+    input:
+      - "{{application_binary}}"
+      - "{{bootloader_binary}}"
+    output: artifact/{{workspace_name}}-full.s37
+  - task: create_gbl
+    bootloader: "{{bootloader_binary}}"
+    app: "{{application_binary}}"
+    output: artifact/{{workspace_name}}-full.gbl
+  - task: create_gbl
+    app: "{{application_binary}}"
+    output: artifact/{{workspace_name}}-app-only.gbl

@@ -136,8 +136,9 @@ Instance::Instance(void)
     , mNetworkDataPublisher(*this)
 #endif
     , mNetworkDataServiceManager(*this)
-#if OPENTHREAD_FTD || OPENTHREAD_CONFIG_TMF_NETWORK_DIAG_MTD_ENABLE
-    , mNetworkDiagnostic(*this)
+    , mNetworkDiagnosticServer(*this)
+#if OPENTHREAD_CONFIG_TMF_NETDIAG_CLIENT_ENABLE
+    , mNetworkDiagnosticClient(*this)
 #endif
 #if OPENTHREAD_CONFIG_BORDER_AGENT_ENABLE
     , mBorderAgent(*this)
@@ -175,13 +176,10 @@ Instance::Instance(void)
 #if OPENTHREAD_CONFIG_SRP_SERVER_ENABLE
     , mSrpServer(*this)
 #endif
-
-#if OPENTHREAD_CONFIG_CHILD_SUPERVISION_ENABLE
 #if OPENTHREAD_FTD
     , mChildSupervisor(*this)
 #endif
     , mSupervisionListener(*this)
-#endif
     , mAnnounceBegin(*this)
     , mPanIdQuery(*this)
     , mEnergyScan(*this)
@@ -191,8 +189,11 @@ Instance::Instance(void)
 #if OPENTHREAD_CONFIG_TIME_SYNC_ENABLE
     , mTimeSync(*this)
 #endif
-#if OPENTHREAD_CONFIG_MLE_LINK_METRICS_INITIATOR_ENABLE || OPENTHREAD_CONFIG_MLE_LINK_METRICS_SUBJECT_ENABLE
-    , mLinkMetrics(*this)
+#if OPENTHREAD_CONFIG_MLE_LINK_METRICS_INITIATOR_ENABLE
+    , mInitiator(*this)
+#endif
+#if OPENTHREAD_CONFIG_MLE_LINK_METRICS_SUBJECT_ENABLE
+    , mSubject(*this)
 #endif
 #if OPENTHREAD_CONFIG_COAP_API_ENABLE
     , mApplicationCoap(*this)
@@ -208,6 +209,9 @@ Instance::Instance(void)
 #endif
 #if OPENTHREAD_CONFIG_CHANNEL_MANAGER_ENABLE && OPENTHREAD_FTD
     , mChannelManager(*this)
+#endif
+#if OPENTHREAD_CONFIG_MESH_DIAG_ENABLE && OPENTHREAD_FTD
+    , mMeshDiag(*this)
 #endif
 #if OPENTHREAD_CONFIG_HISTORY_TRACKER_ENABLE
     , mHistoryTracker(*this)
@@ -234,11 +238,11 @@ Instance::Instance(void)
 #if OPENTHREAD_ENABLE_VENDOR_EXTENSION
     , mExtension(Extension::ExtensionBase::Init(*this))
 #endif
-#if OPENTHREAD_CONFIG_COPROCESSOR_RPC_ENABLE
-    , mCRPC(*this)
-#endif
 #if OPENTHREAD_CONFIG_DIAG_ENABLE
     , mDiags(*this)
+#endif
+#if OPENTHREAD_CONFIG_POWER_CALIBRATION_ENABLE && OPENTHREAD_CONFIG_PLATFORM_POWER_CALIBRATION_ENABLE
+    , mPowerCalibration(*this)
 #endif
     , mIsInitialized(false)
 {
@@ -302,10 +306,7 @@ exit:
 
 #endif // OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
 
-void Instance::Reset(void)
-{
-    otPlatReset(this);
-}
+void Instance::Reset(void) { otPlatReset(this); }
 
 #if OPENTHREAD_RADIO
 void Instance::ResetRadioStack(void)
@@ -347,7 +348,10 @@ void Instance::Finalize(void)
     IgnoreError(otIp6SetEnabled(this, false));
     IgnoreError(otLinkSetEnabled(this, false));
 
-    Get<KeyManager>().DeleteSecurityKeys();
+#if OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE
+    Get<KeyManager>().DestroyTemporaryKeys();
+#endif
+
     Get<Settings>().Deinit();
 #endif
 
@@ -371,8 +375,11 @@ exit:
 
 void Instance::FactoryReset(void)
 {
-    Get<KeyManager>().DeleteSecurityKeys();
     Get<Settings>().Wipe();
+#if OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE
+    Get<KeyManager>().DestroyTemporaryKeys();
+    Get<KeyManager>().DestroyPersistentKeys();
+#endif
     otPlatReset(this);
 }
 
@@ -381,8 +388,11 @@ Error Instance::ErasePersistentInfo(void)
     Error error = kErrorNone;
 
     VerifyOrExit(Get<Mle::MleRouter>().IsDisabled(), error = kErrorInvalidState);
-    Get<KeyManager>().DeleteSecurityKeys();
     Get<Settings>().Wipe();
+#if OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE
+    Get<KeyManager>().DestroyTemporaryKeys();
+    Get<KeyManager>().DestroyPersistentKeys();
+#endif
 
 exit:
     return error;
@@ -392,8 +402,9 @@ void Instance::GetBufferInfo(BufferInfo &aInfo)
 {
     aInfo.Clear();
 
-    aInfo.mTotalBuffers = Get<MessagePool>().GetTotalBufferCount();
-    aInfo.mFreeBuffers  = Get<MessagePool>().GetFreeBufferCount();
+    aInfo.mTotalBuffers   = Get<MessagePool>().GetTotalBufferCount();
+    aInfo.mFreeBuffers    = Get<MessagePool>().GetFreeBufferCount();
+    aInfo.mMaxUsedBuffers = Get<MessagePool>().GetMaxUsedBufferCount();
 
     Get<MeshForwarder>().GetSendQueue().GetInfo(aInfo.m6loSendQueue);
     Get<MeshForwarder>().GetReassemblyQueue().GetInfo(aInfo.m6loReassemblyQueue);
@@ -419,6 +430,8 @@ void Instance::GetBufferInfo(BufferInfo &aInfo)
 #endif
 }
 
+void Instance::ResetBufferInfo(void) { Get<MessagePool>().ResetMaxUsedBufferCount(); }
+
 #endif // OPENTHREAD_MTD || OPENTHREAD_FTD
 
 #if OPENTHREAD_CONFIG_LOG_LEVEL_DYNAMIC_ENABLE
@@ -432,10 +445,7 @@ void Instance::SetLogLevel(LogLevel aLogLevel)
     }
 }
 
-extern "C" OT_TOOL_WEAK void otPlatLogHandleLevelChanged(otLogLevel aLogLevel)
-{
-    OT_UNUSED_VARIABLE(aLogLevel);
-}
+extern "C" OT_TOOL_WEAK void otPlatLogHandleLevelChanged(otLogLevel aLogLevel) { OT_UNUSED_VARIABLE(aLogLevel); }
 
 #endif
 

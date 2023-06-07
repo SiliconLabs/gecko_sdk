@@ -65,29 +65,29 @@
 //------------------------------------------------------------------------------
 // Internal functions and handlers.
 
-EzspStatus emSecureEzspInit(void);
-EzspStatus emSecureEzspDeInit(void);
+EzspStatus sli_zigbee_secure_ezsp_init(void);
+EzspStatus sli_zigbee_secure_ezsp_de_init(void);
 
-bool emSecureEzspIsOn(void);
-bool emSecureEzspParametersArePending(void);
-bool emSecureEzspIsSecurityKeySet(void);
+bool sli_zigbee_secure_ezsp_is_on(void);
+bool sli_zigbee_secure_ezsp_parameters_are_pending(void);
+bool sli_zigbee_secure_ezsp_is_security_key_set(void);
 
-EzspStatus emSecureEzspEncode(void);
-EzspStatus emSecureEzspDecode(void);
-void emSecureEzspGenerateSessionIds(SecureEzspRandomNumber *hostRandomNumber,
-                                    SecureEzspRandomNumber *ncpRandomNumber);
-EzspStatus emSecureEzspReset(void);
+EzspStatus sli_zigbee_secure_ezsp_encode(void);
+EzspStatus sli_zigbee_secure_ezsp_decode(void);
+void sli_zigbee_secure_ezsp_generate_session_ids(SecureEzspRandomNumber *hostRandomNumber,
+                                                 SecureEzspRandomNumber *ncpRandomNumber);
+EzspStatus sli_zigbee_secure_ezsp_reset(void);
 
 // Setters
-void emSecureEzspSetState(uint8_t state);
-EzspStatus emSecureEzspSetSecurityKey(EmberKeyData *securityKey);
-void emSecureEzspSetSecurityType(SecureEzspSecurityType securityType);
-void emSecureEzspSetSecurityLevel(SecureEzspSecurityLevel securityLevel);
+void sli_zigbee_secure_ezsp_set_state(uint8_t state);
+EzspStatus sli_zigbee_secure_ezsp_set_security_key(EmberKeyData *securityKey);
+void sli_zigbee_secure_ezsp_set_security_type(SecureEzspSecurityType securityType);
+void sli_zigbee_secure_ezsp_set_security_level(SecureEzspSecurityLevel securityLevel);
 
 // Getters
-uint8_t emSecureEzspGetState(void);
-EmberKeyData* emSecureEzspGetSecurityKey(void);
-SecureEzspSecurityType emSecureEzspGetSecurityType(void);
+uint8_t sli_zigbee_secure_ezsp_get_state(void);
+EmberKeyData* sli_zigbee_secure_ezsp_get_security_key(void);
+SecureEzspSecurityType sli_zigbee_secure_ezsp_get_security_type(void);
 
 //------------------------------------------------------------------------------
 // EZSP functions

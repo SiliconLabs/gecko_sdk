@@ -26,18 +26,18 @@
 #include "stack/config/ember-configuration-defaults.h"
 
 #define DEFAULT_TC_POLICY (EZSP_DECISION_ALLOW_JOINS | EZSP_DECISION_ALLOW_UNSECURED_REJOINS)
-extern uint8_t emNumMultiPanForks;
+extern uint8_t sli_zigbee_num_multi_pan_forks;
 extern uint16_t trustCenterPolicies[];
 
 //------------------------------------------------------------------------------
 // Common APIs
 
-void emXncpInit(void)
+void sli_zigbee_xncp_init(void)
 {
 #ifdef EMBER_MULTI_NETWORK_STRIPPED
   trustCenterPolicies[0] = DEFAULT_TC_POLICY;
 #else // EMBER_MULTI_NETWORK_STRIPPED
-  for (uint8_t i = 0; i < emNumMultiPanForks; i++) {
+  for (uint8_t i = 0; i < sli_zigbee_num_multi_pan_forks; i++) {
     trustCenterPolicies[i] = DEFAULT_TC_POLICY;
   }
 #endif  // EMBER_MULTI_NETWORK_STRIPPED
@@ -54,6 +54,41 @@ void emXncpInit(void)
 // *****************************************
 // Convenience Stubs
 // *****************************************
+
+// The stub when the AF Support component is not present.
+WEAK(bool sli_zigbee_af_get_endpoint_description(uint8_t endpoint,
+                                                 EmberEndpointDescription *result))
+{
+  (void)endpoint;
+  (void)result;
+  // always return false if AF Support component is not present
+  return false;
+}
+
+WEAK(uint16_t sli_zigbee_af_get_endpoint_cluster(uint8_t endpoint,
+                                                 EmberClusterListId listId,
+                                                 uint8_t listIndex))
+{
+  (void)endpoint;
+  (void)listId;
+  (void)listIndex;
+  // always return 0xFFFF if AF Support component is not present
+  return 0xFFFF;
+}
+
+WEAK(uint8_t sli_zigbee_af_get_endpoint(uint8_t index))
+{
+  (void)index;
+  // always return 0xFF if AF Support component is not present
+  return 0xFF;
+}
+
+// Hook from command handler for the af support related commands
+WEAK(bool sli_zigbee_af_process_ezsp_af_support_commands(uint16_t commandId))
+{
+  (void)commandId;
+  return false;
+}
 
 #ifndef __NCP_CONFIG__
 

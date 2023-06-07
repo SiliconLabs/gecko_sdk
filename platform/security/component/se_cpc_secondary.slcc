@@ -1,0 +1,23 @@
+id: se_cpc_secondary
+package: platform
+label: Secure Engine Co-Processor Communcation Secondary
+description: >-
+  Provides secondary support for Secure Engine mailbox communication over CPC
+category: Platform|Security|Secure Engine CPC
+quality: evaluation
+root_path: platform/security/sl_component/sl_secure_engine_cpc
+include:
+  - path: inc/secondary
+    file_list:
+      - path: sl_se_cpc_secondary.h
+source:
+  - path: src/sl_se_cpc_secondary.c
+provides:
+  - name: se_cpc_secondary
+requires:
+  - name: device_cortexm
+  - name: se_cpc_common
+  - name: se_manager
+template_contribution:
+  - name: component_catalog
+    value: se_cpc

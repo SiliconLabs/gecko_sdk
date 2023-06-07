@@ -34,6 +34,10 @@
 #include "em_core.h"
 #include "em_cmu.h"
 
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+#include "sl_power_manager.h"
+#endif
+
 #if SL_SLEEPTIMER_PERIPHERAL == SL_SLEEPTIMER_PERIPHERAL_RTCC
 
 // Minimum difference between current count value and what the comparator of the timer can be set to.
@@ -274,4 +278,44 @@ uint16_t sleeptimer_hal_get_clock_accuracy(void)
 #endif
 }
 
+/***************************************************************************//**
+ * Set lowest energy mode based on a project's configurations and clock source
+ *
+ * @note If power_manager_no_deepsleep component is included in a project, the
+ *       lowest possible energy mode is EM1, else lowest energy mode is
+ *       determined by clock source.
+ ******************************************************************************/
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+void sli_sleeptimer_set_pm_em_requirement(void)
+{
+#if defined(_CMU_RTCCCLKCTRL_CLKSEL_MASK)
+  switch (CMU->RTCCCLKCTRL & _CMU_RTCCCLKCTRL_CLKSEL_MASK) {
+    case CMU_RTCCCLKCTRL_CLKSEL_LFRCO:
+    case CMU_RTCCCLKCTRL_CLKSEL_LFXO:
+      sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM2);
+      break;
+    default:
+      break;
+  }
+#elif defined(_CMU_LFECLKEN0_RTCC_MASK)
+  switch ((CMU->LFECLKSEL & _CMU_LFECLKSEL_LFE_MASK) >> _CMU_LFECLKSEL_LFE_SHIFT) {
+    case CMU_LFECLKSEL_LFE_LFRCO:
+    case CMU_LFECLKSEL_LFE_LFXO:
+      sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM2);
+      break;
+    default:
+      break;
+  }
+#elif defined(_CMU_LFACLKEN0_RTCC_MASK)
+  switch ((CMU->LFACLKSEL & _CMU_LFACLKSEL_LFA_MASK) >> _CMU_LFACLKSEL_LFA_SHIFT) {
+    case CMU_LFACLKSEL_LFA_LFRCO:
+    case CMU_LFACLKSEL_LFA_LFXO:
+      sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM2);
+      break;
+    default:
+      break;
+  }
+#endif
+}
+#endif
 #endif

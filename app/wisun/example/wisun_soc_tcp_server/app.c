@@ -62,7 +62,7 @@ void app_task(void *args)
   socklen_t len                                   = 0UL;
   int32_t sockd_tcp_srv                           = SOCKET_INVALID_ID;
   int32_t sockd_tcp_clnt                          = SOCKET_INVALID_ID;
-  int32_t r                                       = RETVAL_ERROR;
+  int32_t r                                       = SOCKET_RETVAL_ERROR;
   bool client_connected                           = false;
   const char *ip_str                              = NULL;
 

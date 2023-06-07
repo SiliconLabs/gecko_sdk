@@ -1,4 +1,4 @@
-/* Copyright 2021 The TensorFlow Authors. All Rights Reserved.
+/* Copyright 2022 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ limitations under the License.
 #include "tensorflow/lite/kernels/kernel_util.h"
 #include "tensorflow/lite/micro/kernels/kernel_util.h"
 #include "tensorflow/lite/micro/memory_helpers.h"
-#include "tensorflow/lite/micro/micro_error_reporter.h"
+#include "tensorflow/lite/micro/micro_log.h"
 
 namespace tflite {
 
@@ -44,6 +44,7 @@ TfLiteStatus MulEval(TfLiteContext* context, TfLiteNode* node) {
 
   switch (input1->type) {
     case kTfLiteInt8:
+    case kTfLiteInt16:
     case kTfLiteInt32:
       EvalMulQuantizedReference(context, node, data, input1, input2, output);
       break;
@@ -61,14 +62,7 @@ TfLiteStatus MulEval(TfLiteContext* context, TfLiteNode* node) {
 }
 
 TfLiteRegistration Register_MUL() {
-  return {/*init=*/MulInit,
-          /*free=*/nullptr,
-          /*prepare=*/MulPrepare,
-          /*invoke=*/MulEval,
-          /*profiling_string=*/nullptr,
-          /*builtin_code=*/0,
-          /*custom_name=*/nullptr,
-          /*version=*/0};
+  return tflite::micro::RegisterOp(MulInit, MulPrepare, MulEval);
 }
 
 }  // namespace tflite

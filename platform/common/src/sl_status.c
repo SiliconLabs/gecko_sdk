@@ -6,17 +6,31 @@
  * <b>Copyright 2019 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
- * The licensor of this software is Silicon Laboratories Inc. Your use of this
- * software is governed by the terms of Silicon Labs Master Software License
- * Agreement (MSLA) available at
- * www.silabs.com/about-us/legal/master-software-license-agreement. This
- * software is distributed to you in Source Code format and is governed by the
- * sections of the MSLA applicable to Source Code.
+ * SPDX-License-Identifier: Zlib
+ *
+ * The licensor of this software is Silicon Laboratories Inc.
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty. In no event will the authors be held liable for any damages
+ * arising from the use of this software.
+ *
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
+ *
+ * 1. The origin of this software must not be misrepresented; you must not
+ *    claim that you wrote the original software. If you use this software
+ *    in a product, an acknowledgment in the product documentation would be
+ *    appreciated but is not required.
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.
+ * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
 
 #include <stddef.h>
 #include <stdio.h>
+#include <inttypes.h>
 #include "sl_status.h"
 #include "sl_string.h"
 #include "sl_status_string_config.h"
@@ -108,6 +122,12 @@ static const char *sli_status_group_name[] =
   "",
   "",
   "",
+  "",
+#endif
+  "",
+#if SL_STATUS_STRING_ENABLE_COMPUTE == 1
+  "COMPUTE_",
+#else
   "",
 #endif
 };
@@ -695,6 +715,35 @@ static const char *sli_status_group_wifi[] =
 };
 #endif
 
+// Status code names for MVP driver and MVP Math library
+#if SL_STATUS_STRING_ENABLE_COMPUTE == 1
+static const char *sli_status_group_compute[] =
+{
+  "",
+  "DRIVER_FAULT",
+  "DRIVER_ALU_NAN",
+  "DRIVER_ALU_OVERFLOW",
+  "DRIVER_ALU_UNDERFLOW",
+  "DRIVER_STORE_CONVERSION_OVERFLOW",
+  "DRIVER_STORE_CONVERSION_UNDERFLOW",
+  "DRIVER_STORE_CONVERSION_INFINITY",
+  "DRIVER_STORE_CONVERSION_NAN",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "MATH_FAULT",
+  "MATH_NAN",
+  "MATH_INFINITY",
+  "MATH_OVERFLOW",
+  "MATH_UNDERFLOW"
+};
+#endif
+
 // Table of pointers to groups status codes
 static const char **sli_status_group[] =
 {
@@ -736,7 +785,13 @@ static const char **sli_status_group[] =
   NULL,
   NULL,
   NULL,
-  NULL
+  NULL,
+#endif
+  NULL,
+#if SL_STATUS_STRING_ENABLE_COMPUTE == 1
+  sli_status_group_compute,
+#else
+  NULL,
 #endif
 };
 
@@ -786,12 +841,18 @@ static const uint8_t sli_status_group_table_length[] =
   (sizeof(sli_status_group_bluetooth_ctrl) / sizeof(char *) - 1),
   (sizeof(sli_status_group_bluetooth_att) / sizeof(char *) - 1),
   (sizeof(sli_status_group_bluetooth_smp) / sizeof(char *) - 1),
-  (sizeof(sli_status_group_bluetooth_mesh_foundation) / sizeof(char *) - 1)
+  (sizeof(sli_status_group_bluetooth_mesh_foundation) / sizeof(char *) - 1),
 #else
   0u,
   0u,
   0u,
-  0u
+  0u,
+#endif
+  0u,
+#if SL_STATUS_STRING_ENABLE_COMPUTE == 1
+  (sizeof(sli_status_group_compute) / sizeof(char *) - 1),
+#else
+  0u,
 #endif
 };
 
@@ -815,7 +876,7 @@ int32_t sl_status_get_string_n(sl_status_t status, char *buffer, uint32_t buffer
 
   if (sli_status_group[group_number] == NULL) {
     uint32_t status_hex = status & (SL_STATUS_SPACE_MASK | (sl_status_t)0xFF);
-    cnt = snprintf(buffer, buffer_length, "%s0x%04lX", sli_status_prefix, status_hex);
+    cnt = snprintf(buffer, buffer_length, "%s0x%04" PRIX32, sli_status_prefix, status_hex);
   } else {
     if (error_number > sli_status_group_table_length[group_number]) {
       return cnt;
@@ -848,7 +909,7 @@ void sl_status_print(sl_status_t status)
 
   if (sli_status_group[group_number] == NULL) {
     uint32_t status_hex = status & (SL_STATUS_SPACE_MASK | (sl_status_t)0xFF);
-    printf("%s0x%04lX", sli_status_prefix, status_hex);
+    printf("%s0x%04" PRIX32, sli_status_prefix, status_hex);
   } else {
     if (error_number > sli_status_group_table_length[group_number]) {
       return;

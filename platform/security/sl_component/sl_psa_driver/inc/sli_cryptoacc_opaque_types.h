@@ -37,6 +37,7 @@
 
 #if defined(CRYPTOACC_PRESENT) && defined(SEPUF_PRESENT)
 
+#include "sli_psa_driver_features.h"
 #include "sl_psa_values.h"
 
 #if defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS)

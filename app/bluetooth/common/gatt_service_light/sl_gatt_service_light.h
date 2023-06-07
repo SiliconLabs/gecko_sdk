@@ -31,6 +31,11 @@
 #ifndef SL_GATT_SERVICE_LIGHT_H
 #define SL_GATT_SERVICE_LIGHT_H
 
+/***********************************************************************************************//**
+ * @addtogroup gatt_service_light
+ * @{
+ **************************************************************************************************/
+
 #include "sl_bt_api.h"
 
 /**************************************************************************//**
@@ -48,4 +53,5 @@ void sl_gatt_service_light_on_event(sl_bt_msg_t *evt);
  *****************************************************************************/
 sl_status_t sl_gatt_service_light_get(float *lux, float *uvi);
 
+/** @} (end addtogroup gatt_service_light) */
 #endif // SL_GATT_SERVICE_LIGHT_H

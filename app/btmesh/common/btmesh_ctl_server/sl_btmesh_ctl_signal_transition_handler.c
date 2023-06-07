@@ -36,7 +36,7 @@
 #include "sl_status.h"
 
 #include "app_assert.h"
-#include "sl_simple_timer.h"
+#include "app_timer.h"
 
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
@@ -81,10 +81,10 @@ static uint32_t temp_transtime_elapsed;
 /// non-zero if temperature transition is active
 static uint8_t temp_transitioning;
 
-static sl_simple_timer_t transition_timer;
+static app_timer_t transition_timer;
 
 // Timer callbacks
-static void transition_timer_cb(sl_simple_timer_t *timer, void *data);
+static void transition_timer_cb(app_timer_t *timer, void *data);
 
 ////////////////////////////////////////////////////////////////////////////////
 //    Lighting  Callbacks                                                     //
@@ -105,7 +105,7 @@ SL_WEAK void sl_btmesh_ctl_on_ui_update(uint16_t temperature,
 /***************************************************************************//**
  * Handler for Transition Timer, which manages LEDs transitions.
  ******************************************************************************/
-static void transition_timer_cb(sl_simple_timer_t *timer, void *data)
+static void transition_timer_cb(app_timer_t *timer, void *data)
 {
   (void)data;
   (void)timer;
@@ -114,7 +114,7 @@ static void transition_timer_cb(sl_simple_timer_t *timer, void *data)
   static uint16_t time_elapsed_since_ui_update = SL_BTMESH_CTL_SERVER_UI_UPDATE_PERIOD_CFG_VAL;
 
   if (!temp_transitioning) {
-    sl_status_t sc = sl_simple_timer_stop(&transition_timer);
+    sl_status_t sc = app_timer_stop(&transition_timer);
     app_assert_status_f(sc, "Failed to stop Periodic Level Transition Timer\n");
     return;
   } else {
@@ -200,7 +200,7 @@ void sl_btmesh_ctl_set_temperature_deltauv_level(uint16_t temperature,
     /* if a transition was in progress, cancel it */
     if (temp_transitioning) {
       temp_transitioning = 0;
-      sl_status_t sc = sl_simple_timer_stop(&transition_timer);
+      sl_status_t sc = app_timer_stop(&transition_timer);
       app_assert_status_f(sc, "Failed to stop Periodic Level Transition Timer\n");
     }
     sl_btmesh_ctl_on_ui_update(current_temperature, current_deltauv);
@@ -220,11 +220,11 @@ void sl_btmesh_ctl_set_temperature_deltauv_level(uint16_t temperature,
 
   // enabling timer IRQ -> the temperature is adjusted in timer interrupt
   // gradually until target temperature is reached.
-  sl_status_t sc = sl_simple_timer_start(&transition_timer,
-                                         SL_BTMESH_CTL_SERVER_PWM_UPDATE_PERIOD_CFG_VAL,
-                                         transition_timer_cb,
-                                         NO_CALLBACK_DATA,
-                                         true);
+  sl_status_t sc = app_timer_start(&transition_timer,
+                                   SL_BTMESH_CTL_SERVER_PWM_UPDATE_PERIOD_CFG_VAL,
+                                   transition_timer_cb,
+                                   NO_CALLBACK_DATA,
+                                   true);
   app_assert_status_f(sc, "Failed to start periodic Transition Timer\n");
 
   return;

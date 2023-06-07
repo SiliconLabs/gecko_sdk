@@ -134,9 +134,9 @@ sl_status_t sl_iostream_cpc_init(void)
 
   ret = sli_cpc_open_service_endpoint(&sl_iostream_cpc_endpoint_handle, SL_CPC_ENDPOINT_CLI, 0, 1);
   if (ret == SL_STATUS_OK) {
-    ret = sl_cpc_set_endpoint_option(&sl_iostream_cpc_endpoint_handle, SL_CPC_ENDPOINT_ON_IFRAME_WRITE_COMPLETED, cpc_on_write_completed);
+    ret = sl_cpc_set_endpoint_option(&sl_iostream_cpc_endpoint_handle, SL_CPC_ENDPOINT_ON_IFRAME_WRITE_COMPLETED, (void*)cpc_on_write_completed);
     if (ret == SL_STATUS_OK) {
-      ret = sl_cpc_set_endpoint_option(&sl_iostream_cpc_endpoint_handle, SL_CPC_ENDPOINT_ON_ERROR, cpc_on_endpoint_error);
+      ret = sl_cpc_set_endpoint_option(&sl_iostream_cpc_endpoint_handle, SL_CPC_ENDPOINT_ON_ERROR, (void*)cpc_on_endpoint_error);
       if (ret == SL_STATUS_OK) {
         ret = sl_iostream_set_system_default(sl_iostream_cpc_handle);
         if (ret != SL_STATUS_OK) {
@@ -361,7 +361,7 @@ static sl_status_t cpc_write(void *context,
   // Not all bytes can be copied without wrapping around?
   if (buffer_length != cnt) {
     // Copy remaining bytes at the beginning of the transmit buffer.
-    memcpy(tx_buf.buf, buffer + cnt, buffer_length - cnt);
+    memcpy(tx_buf.buf, (const uint8_t*)buffer + cnt, buffer_length - cnt);
   }
   // Copy the bytes that could be copied without wrapping around.
   memcpy(tx_buf.buf + idx, buffer, cnt);

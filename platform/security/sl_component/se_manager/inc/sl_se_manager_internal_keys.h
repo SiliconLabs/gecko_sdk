@@ -30,12 +30,12 @@
 #ifndef SL_SE_MANAGER_INTERNAL_KEYS
 #define SL_SE_MANAGER_INTERNAL_KEYS
 
-#include "em_device.h"
+#include "sli_se_manager_features.h"
 #include "sl_se_manager_defines.h"
 
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || defined(DOXYGEN)
+#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
 
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
+#if defined(SLI_SE_MAJOR_VERSION_ONE)
 /// Key descriptor for internal application attestation key
   #define SL_SE_APPLICATION_ATTESTATION_KEY                     \
   {                                                             \

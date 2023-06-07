@@ -3,7 +3,7 @@
  * @brief Core application logic.
  *******************************************************************************
  * # License
- * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -36,17 +36,6 @@
 #include "app_memlcd.h"
 #include "sl_apploader_util.h"
 
-//--------------------------------
-// Connection parameters
-#define ADVERTISING_INTERVAL      32 // milliseconds * 1.6
-#define RESPONDER_LATENCY_DEFAULT 0 // 0 interval
-#define SUPV_TIMEOUT_DEFAULT      200 // 2 seconds
-#define CE_LENGTH_DEFAULT         0xFFFF // Unlimited connection event length
-#define BONDING_DISABLED          0x00
-#define BONDING_ENABLED           0x01
-#define BONDING_WITHOUT_MITM      0x00
-#define BONDING_WITH_MITM         0x01
-
 static uint8_t connection_id = 0xff;
 
 // The advertising set handle allocated from Bluetooth stack.
@@ -55,7 +44,7 @@ static uint8_t advertising_set_handle = 0xff;
 /***************************************************************************//**
  * Application Init.
  ******************************************************************************/
-SL_WEAK void app_init(void)
+void app_init(void)
 {
   app_test_data_init();
   app_memlcd_init();
@@ -64,8 +53,9 @@ SL_WEAK void app_init(void)
 /***************************************************************************//**
  * Application Process Action.
  ******************************************************************************/
-SL_WEAK void app_process_action(void)
+void app_process_action(void)
 {
+  app_throughput_step();
 }
 
 /***************************************************************************//**
@@ -106,6 +96,22 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
 
       set_display(IDLE);
 
+      // Set default connection parameters
+      sc = sl_bt_connection_set_default_parameters(DEFAULT_CONNECTION_INTERVAL,
+                                                   DEFAULT_CONNECTION_INTERVAL,
+                                                   DEFAULT_RESPONDER_LATENCY,
+                                                   DEFAULT_SUPV_TIMEOUT,
+                                                   DEFAULT_CE_LENGTH_MIN,
+                                                   DEFAULT_CE_LENGTH_MAX);
+      app_log_status_error(sc);
+
+      sc = sl_bt_connection_set_default_preferred_phy(DEFAULT_PHY,
+                                                      0xff); // Any PHYs
+      app_log_status_error(sc);
+
+      sc = sl_bt_connection_set_default_data_length(DEFAULT_PDU);
+      app_log_status_error(sc);
+
       // Delete bondings.
       sc = sl_bt_sm_delete_bondings();
       app_log_status_error(sc);
@@ -131,8 +137,8 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
       // Default advertisement parameters: 32 (20 ms) interval. Other optional
       // parameters for phones: 244 (152.5 ms), 338 (211.25 ms) 160 (100 ms).
       sc = sl_bt_advertiser_set_timing(advertising_set_handle,
-                                       ADVERTISING_INTERVAL,
-                                       ADVERTISING_INTERVAL,
+                                       DEFAULT_ADVERTISING_INTERVAL,
+                                       DEFAULT_ADVERTISING_INTERVAL,
                                        0,   // adv. duration
                                        0);  // max. num. adv. events
       app_log_status_error(sc);
@@ -170,18 +176,6 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
           != SL_BT_INVALID_BONDING_HANDLE) {
         app_log_info("Mobile is already bonded." APP_LOG_NL);
       }
-
-      // Request connection parameter update.
-      sc = sl_bt_connection_set_parameters(evt->data.evt_connection_opened.connection,
-                                           connection_interval,
-                                           connection_interval,
-                                           RESPONDER_LATENCY_DEFAULT,
-                                           SUPV_TIMEOUT_DEFAULT,
-                                           CE_LENGTH_DEFAULT,
-                                           CE_LENGTH_DEFAULT);
-      app_log_status_error(sc);
-      app_log_info("Request to change connection parameters to defaults."
-                   APP_LOG_NL);
       break;
     }
 
@@ -228,36 +222,38 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
     //--------------------------------
     // Triggered whenever the connection parameters are changed
     case sl_bt_evt_connection_parameters_id: {
-      pdu_size = evt->data.evt_connection_parameters.txsize;
       connection_interval = evt->data.evt_connection_parameters.interval;
       responder_latency = evt->data.evt_connection_parameters.latency;
-      supv_timeout = (uint16_t)((evt->data.evt_connection_parameters.timeout) * 10);
-      app_log_info("Connection parameters are changed: "
-                   "pdu_size=%d, connection_interval=%d, "
-                   "responder_latency=%d, supv_timeout=%d" APP_LOG_NL,
-                   (int)pdu_size,
-                   (int)connection_interval,
-                   (int)responder_latency,
-                   (int)supv_timeout);
+      supv_timeout = (uint16_t)((evt->data.evt_connection_parameters.timeout));
+
+      uint8_t interval_whole = (connection_interval * 1.25f);
+      uint8_t interval_partial = (100 * (connection_interval * 1.25f)) - 100 * interval_whole;
+
+      app_log_info("Connection parameters are changed: Connection Interval = %u.%2u[ms], "
+                   "Responder Latency = %u, Supervision Timeout = %u[ms] ",
+                   interval_whole,
+                   interval_partial,
+                   responder_latency,
+                   supv_timeout * 10);
 
       switch (evt->data.evt_connection_parameters.security_mode) {
         case sl_bt_connection_mode1_level1: {
-          app_log_info("Connection security: No Security." APP_LOG_NL);
+          app_log_append_info("Security: No Security." APP_LOG_NL);
           break;
         }
 
         case sl_bt_connection_mode1_level2: {
-          app_log_info("Connection security: Unauthenticated pairing." APP_LOG_NL);
+          app_log_append_info("Security: Unauthenticated pairing." APP_LOG_NL);
           break;
         }
 
         case sl_bt_connection_mode1_level3: {
-          app_log_info("Connection security: Authenticated pairing." APP_LOG_NL);
+          app_log_append_info("Security: Authenticated pairing." APP_LOG_NL);
           break;
         }
 
         case sl_bt_connection_mode1_level4: {
-          app_log_info("Connection security: Bonded." APP_LOG_NL);
+          app_log_append_info("Security: Bonded." APP_LOG_NL);
           break;
         }
 
@@ -268,10 +264,31 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
       break;
     }
 
+    //--------------------------------
+    // Reports a change to the maximum payload length or maximum TX time in
+    // either direction of a connection.
+    case sl_bt_evt_connection_data_length_id: {
+      pdu_size = evt->data.evt_connection_data_length.tx_data_len;
+      app_log_info("Connection parameters are changed: PDU = %u." APP_LOG_NL,
+                   pdu_size);
+      break;
+    }
+
+    //--------------------------------
     // Indicates that an ATT_MTU exchange procedure is completed.
     case sl_bt_evt_gatt_mtu_exchanged_id: {
       mtu_size = evt->data.evt_gatt_mtu_exchanged.mtu;
-      app_log_info("MTU value: %d." APP_LOG_NL, mtu_size);
+      app_log_info("Connection parameters are changed: MTU = %u." APP_LOG_NL,
+                   mtu_size);
+      break;
+    }
+
+    //--------------------------------
+    // Indicates that PHY update procedure is completed.
+    case sl_bt_evt_connection_phy_status_id: {
+      phy = evt->data.evt_connection_phy_status.phy;
+      app_log_info("Connection parameters are changed: PHY = %u." APP_LOG_NL,
+                   phy);
       break;
     }
 

@@ -3,7 +3,7 @@
  * @brief Helper functions for BLE interoperability test.
  *******************************************************************************
  * # License
- * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -30,7 +30,7 @@
 #include <stdio.h>
 #include "sl_bluetooth.h"
 #include "gatt_db.h"
-#include "sl_simple_timer.h"
+#include "app_timer.h"
 #include "app_log.h"
 #include "app_iop.h"
 #include "app_memlcd.h"
@@ -40,9 +40,6 @@
 #define ANDROID 0x01
 #define IOS     0x02
 static uint8_t mobile_os = ANDROID;
-// Number of packages per connection interval
-#define PACK_NUM_ANDROID  6
-#define PACK_NUM_IOS      4
 
 // Size of the arrays for sending and receiving data
 #define DATA_SIZE_MAX     255
@@ -74,14 +71,15 @@ static uint8_t iop_test_chr_user_var_4_len;
 
 //--------------------------------
 // Connection parameters
-uint16_t mtu_size = 23;
-uint16_t pdu_size = 0;
-uint16_t connection_interval = 12; // 15 ms / 1.25
-uint16_t responder_latency;
-uint16_t supv_timeout;
+uint16_t connection_interval = DEFAULT_CONNECTION_INTERVAL;
+uint16_t responder_latency = DEFAULT_RESPONDER_LATENCY;
+uint16_t supv_timeout = DEFAULT_SUPV_TIMEOUT;
+uint16_t mtu_size = DEFAULT_PDU - 4;
+uint16_t pdu_size = DEFAULT_PDU;
+uint8_t phy = DEFAULT_PHY;
 
 // Storage for the connection parameters, defined in iop_test_connection.
-static uint8_t iop_connection_arr[10];
+static uint8_t iop_connection_arr[11];
 
 //--------------------------------
 // Security
@@ -94,13 +92,13 @@ bool ota_dfu_request = false;
 
 //--------------------------------
 // Throughput
-#define CONN_PARAM_MULTIPLIER (1.25f)
-static bool throughput_enabled = true;
+#define THROUGHPUT_TIMEOUT (10000) // [ms]
+static bool throughput_in_progress = false;
 
 //--------------------------------
-// Simple timer
-#define TIMER_TRIGGER 100 // [ms] timeout
-static sl_simple_timer_t timer;
+// Timer
+#define TIMER_TRIGGER (100) // [ms]
+static app_timer_t timer;
 static uint16_t timer_cb_data;
 
 /***************************************************************************//**
@@ -108,7 +106,7 @@ static uint16_t timer_cb_data;
  * @param[in] handle pointer to handle instance
  * @param[in] data pointer to input data
  ******************************************************************************/
-static void timer_cb(sl_simple_timer_t *handle, void *data);
+static void timer_cb(app_timer_t *handle, void *data);
 
 //--------------------------------
 // Display operations
@@ -140,6 +138,18 @@ void app_test_data_init(void)
   iop_test_chr_user_var_4_len = 1;
 }
 
+// Throughput test process step. Sends out a single notification.
+void app_throughput_step(void)
+{
+  sl_status_t sc;
+  if (throughput_in_progress) {
+    sc = sl_bt_gatt_server_notify_all(gattdb_iop_test_throughput,
+                                      pdu_size - 4 - 3,
+                                      iop_test_notification_250_arr);
+    (void)sc;
+  }
+}
+
 // Handle read operation for user-type characteristics.
 sl_status_t handle_user_read(sl_bt_evt_gatt_server_user_read_request_t *user_read_req)
 {
@@ -166,14 +176,23 @@ sl_status_t handle_user_read(sl_bt_evt_gatt_server_user_read_request_t *user_rea
       // Packing Supervision Timeout.
       iop_connection_arr[8] = supv_timeout & 0xff;
       iop_connection_arr[9] = supv_timeout >> 8;
+      // Packing PHY
+      iop_connection_arr[10] = phy;
 
-      app_log_info("Getting MTU size: %d, PDU Size:%d, Connection Interval:%d, "
-                   "Responder Latency:%d, Supervision Timeout:%d ms." APP_LOG_NL,
-                   (int)mtu_size,
-                   (int)pdu_size,
-                   (int)connection_interval,
-                   (int)responder_latency,
-                   (int)supv_timeout);
+      uint8_t interval_whole = (connection_interval * 1.25f);
+      uint8_t interval_partial = (100 * (connection_interval * 1.25f)) - 100 * interval_whole;
+
+      app_log_info("Getting connection parameters: "
+                   "MTU = %u, PDU = %u, Connection Interval = %u.%2u[ms], "
+                   "Responder Latency = %u, Supervision Timeout = %u[ms] PHY = %u" APP_LOG_NL,
+                   mtu_size,
+                   pdu_size,
+                   interval_whole,
+                   interval_partial,
+                   responder_latency,
+                   supv_timeout * 10,
+                   phy);
+
       sc = sl_bt_gatt_server_send_user_read_response(user_read_req->connection,
                                                      user_read_req->characteristic,
                                                      (uint8_t)SL_STATUS_OK,
@@ -216,7 +235,7 @@ sl_status_t handle_user_read(sl_bt_evt_gatt_server_user_read_request_t *user_rea
                                                        (uint8_t *)&iop_test_chr_user_255_arr[user_read_req->offset],
                                                        &sent_len);
         if (sc == SL_STATUS_OK) {
-          app_log_info("Length of data:%d; mtu:%d; result:%x; req len:%d; "
+          app_log_info("Length of data:%d; mtu:%u; result:%x; req len:%d; "
                        "sent len:%d." APP_LOG_NL,
                        sizeof(iop_test_chr_user_255_arr),
                        mtu_size,
@@ -507,11 +526,11 @@ sl_status_t handle_timer_start(sl_bt_evt_gatt_server_characteristic_status_t *ch
     case gattdb_iop_test_notify_len_1: {
       if (char_stat->client_config_flags == sl_bt_gatt_notification) {
         // Test 4.7 (iop_test_notify_len_1) takes place now.
-        sc = sl_simple_timer_start(&timer,
-                                   TIMER_TRIGGER,
-                                   timer_cb,
-                                   (void *)&timer_cb_data,
-                                   false);
+        sc = app_timer_start(&timer,
+                             TIMER_TRIGGER,
+                             timer_cb,
+                             (void *)&timer_cb_data,
+                             false);
       }
       break;
     }
@@ -519,11 +538,11 @@ sl_status_t handle_timer_start(sl_bt_evt_gatt_server_characteristic_status_t *ch
     case gattdb_iop_test_notify_len_mtu_3: {
       if (char_stat->client_config_flags == sl_bt_gatt_notification) {
         // Test 4.8 (iop_test_notify_len_mtu_3) takes place now.
-        sc = sl_simple_timer_start(&timer,
-                                   TIMER_TRIGGER,
-                                   timer_cb,
-                                   (void *)&timer_cb_data,
-                                   false);
+        sc = app_timer_start(&timer,
+                             TIMER_TRIGGER,
+                             timer_cb,
+                             (void *)&timer_cb_data,
+                             false);
       }
       break;
     }
@@ -531,11 +550,11 @@ sl_status_t handle_timer_start(sl_bt_evt_gatt_server_characteristic_status_t *ch
     case gattdb_iop_test_indicate_len_1: {
       if (char_stat->client_config_flags == sl_bt_gatt_indication) {
         // Test 4.9 (iop_test_indicate_len_1) takes place now.
-        sc = sl_simple_timer_start(&timer,
-                                   TIMER_TRIGGER,
-                                   timer_cb,
-                                   (void *)&timer_cb_data,
-                                   false);
+        sc = app_timer_start(&timer,
+                             TIMER_TRIGGER,
+                             timer_cb,
+                             (void *)&timer_cb_data,
+                             false);
       }
       break;
     }
@@ -543,11 +562,11 @@ sl_status_t handle_timer_start(sl_bt_evt_gatt_server_characteristic_status_t *ch
     case gattdb_iop_test_indicate_len_mtu_3: {
       if (char_stat->client_config_flags == sl_bt_gatt_indication) {
         // Test 4.10 (iop_test_indicate_len_mtu_3) takes place now.
-        sc = sl_simple_timer_start(&timer,
-                                   TIMER_TRIGGER,
-                                   timer_cb,
-                                   (void *)&timer_cb_data,
-                                   false);
+        sc = app_timer_start(&timer,
+                             TIMER_TRIGGER,
+                             timer_cb,
+                             (void *)&timer_cb_data,
+                             false);
       }
       break;
     }
@@ -556,30 +575,30 @@ sl_status_t handle_timer_start(sl_bt_evt_gatt_server_characteristic_status_t *ch
     case gattdb_iop_test_throughput: {
       if (char_stat->client_config_flags == sl_bt_gatt_notification) {
         // Test 7.1 (Throughput) takes place now.
-        uint32_t timeout_ms;
+        throughput_in_progress = true;
 
-        if (mobile_os == IOS) {
-          // IOS
-          timeout_ms = (int)(CONN_PARAM_MULTIPLIER
-                             * connection_interval
-                             / PACK_NUM_IOS);
-        } else {
-          // Android
-          timeout_ms = (int)(CONN_PARAM_MULTIPLIER
-                             * connection_interval
-                             / PACK_NUM_ANDROID);
-        }
+        uint8_t interval_whole = (connection_interval * 1.25f);
+        uint8_t interval_partial = (100 * (connection_interval * 1.25f)) - 100 * interval_whole;
 
-        sc = sl_simple_timer_start(&timer,
-                                   timeout_ms,
-                                   timer_cb,
-                                   (void *)&timer_cb_data,
-                                   true);
-        if (sc == SL_STATUS_OK) {
-          app_log_info("Simple timer for throughput started." APP_LOG_NL);
-        }
+        app_log_info("Throughput start. Connection parameters: "
+                     "MTU = %u, PDU = %u, Connection Interval = %u.%2u[ms], PHY = %u" APP_LOG_NL,
+                     mtu_size,
+                     pdu_size,
+                     interval_whole,
+                     interval_partial,
+                     phy);
+
+        // Start timer for timeout checking
+        sc = app_timer_start(&timer,
+                             THROUGHPUT_TIMEOUT,
+                             timer_cb,
+                             (void *)&timer_cb_data,
+                             false);
       } else if (char_stat->client_config_flags == sl_bt_gatt_disable) {
-        throughput_enabled = false;
+        sc = app_timer_stop(&timer);
+
+        throughput_in_progress = false;
+        app_log_info("Throughput stop." APP_LOG_NL);
       }
       break;
     }
@@ -592,7 +611,7 @@ sl_status_t handle_timer_start(sl_bt_evt_gatt_server_characteristic_status_t *ch
 }
 
 // Timer Callback
-static void timer_cb(sl_simple_timer_t *handle, void *data)
+static void timer_cb(app_timer_t *handle, void *data)
 {
   (void)handle;
   sl_status_t sc = SL_STATUS_OK;
@@ -627,16 +646,9 @@ static void timer_cb(sl_simple_timer_t *handle, void *data)
     }
 
     case gattdb_iop_test_throughput: {
-      if (throughput_enabled) {
-        sc = sl_bt_gatt_server_notify_all(gattdb_iop_test_throughput,
-                                          pdu_size - 7,
-                                          iop_test_notification_250_arr);
-      } else {
-        sc = sl_simple_timer_stop(&timer); // Throughput finished, stop timer.
-        if (sc == SL_STATUS_OK) {
-          app_log_info("Simple timer for throughput stopped." APP_LOG_NL);
-        }
-      }
+      // Throughput test timeout
+      throughput_in_progress = false;
+      app_log_error("Throughput test timeout." APP_LOG_NL);
       break;
     }
 

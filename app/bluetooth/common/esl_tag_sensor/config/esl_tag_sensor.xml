@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<gatt>
+  <!--Silicon Labs ESL Tag Sensor-->
+  <service advertise="true" id="esl_tag_service" name="Silicon Labs ESL Tag" requirement="mandatory" sourceId="" type="primary" uuid="1857" instance_id="silabs_esl">
+    <!--Sensor Information-->
+    <characteristic const="false" id="esl_sensor_info" name="Sensor Information" sourceId="" uuid="2bfc">
+      <informativeText>The Sensor Information characteristic is an array of zero or more Sensor Data Structures. Each individual Sensor Data Structure shall consist of a pair of fields (Size and Sensor_Type) having either the short or long format as described in Electronic Shelf Label Service Specification (rev.:d09r08), section 3.8.1. The value of this characteristic should remain constant for the lifetime of the ESL - however, it is an optional attribute. If there's no sensor support exists in a given ESL Tag implementation then this characteristic shall be omitted from ESL Service, entirely.</informativeText>
+      <value length="0" type="user" variable_length="true">000000</value>
+      <properties>
+        <read authenticated="false" bonded="true" encrypted="true"/>
+      </properties>
+    </characteristic>
+  </service>
+</gatt>

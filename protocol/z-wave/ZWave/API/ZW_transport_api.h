@@ -1,5 +1,5 @@
 /**
- * @file ZW_transport_api.h
+ * @file
  *
  * @copyright 2019 Silicon Laboratories Inc.
  */

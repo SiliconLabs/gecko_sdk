@@ -13,40 +13,64 @@ provides:
 include:
   - path: config
     file_list:
-      - path: config-device-acceleration.h
+      - path: sli_mbedtls_acceleration.h
+      - path: sli_mbedtls_omnipresent.h
+
+  - path: config/preset
+    file_list:
+      - path: sli_mbedtls_config_se_cpc_primary.h
+        condition: [se_cpc_primary]
 
 template_file:
-  - path: config/template/mbedtls_config_autogen.h.jinja
-    # Use the unless condition since secure projects might also require the config files
-    unless: [tz_secure_key_library_s, trustzone_nonsecure]
-  - path: config/template/mbedtls_config_autogen.h.jinja
+  - path: config/template/sli_mbedtls_config_autogen.h.jinja
+    # We use tz_secure_key_library_s instead of trustzone_secure since the
+    # secure bootloader will need this file to build.
+    unless: [tz_secure_key_library_s, trustzone_nonsecure, se_cpc_primary]
+  - path: config/template/sli_mbedtls_config_autogen.h.jinja
     export: true
     condition: [trustzone_nonsecure]
-  - path: config/template/sl_mbedtls_config_transform_autogen.h.jinja
+
+  - path: config/template/sli_mbedtls_config_transform_autogen.h.jinja
+    # We use tz_secure_key_library_s instead of trustzone_secure since the
+    # secure bootloader will need this file to build.
     unless: [tz_secure_key_library_s, trustzone_nonsecure]
-  - path: config/template/sl_mbedtls_config_transform_autogen.h.jinja
+  - path: config/template/sli_mbedtls_config_transform_autogen.h.jinja
     export: true
     condition: [trustzone_nonsecure]
 
 config_file:
   - path: config/template/sl_mbedtls_config.h
     file_id: mbedtls_config
-    # Use the unless condition since secure projects might also require the config files
+    # We use tz_secure_key_library_s instead of trustzone_secure since the
+    # secure bootloader will need this file to build.
     unless: [tz_secure_key_library_s, trustzone_nonsecure]
   - path: config/template/sl_mbedtls_config.h
     file_id: mbedtls_config
     export: true
     condition: [trustzone_nonsecure]
 
+  - path: config/template/sl_mbedtls_device_config.h
+    file_id: sl_mbedtls_device_config
+    # We use tz_secure_key_library_s instead of trustzone_secure since the
+    # secure bootloader will need this file to build.
+    unless: [tz_secure_key_library_s, trustzone_nonsecure]
+  - path: config/template/sl_mbedtls_device_config.h
+    file_id: sl_mbedtls_device_config
+    export: true
+    condition: [trustzone_nonsecure]
+
 define:
+  - name: SLI_MBEDTLS_CONFIG_AUTOGEN_OVERRIDE_FILE
+    value: "<sli_mbedtls_config_se_cpc_primary.h>"
+    condition: [se_cpc_primary]
+
   - name: MBEDTLS_CONFIG_FILE
     value: "<sl_mbedtls_config.h>"
-    # Uses a custom test config.
     unless: [test_mbedtls_classic_common]
 
 requires:
-  - name: emlib_se
-    condition: [device_has_semailbox]
+  - name: component_catalog
+
   - name: mbedtls_platform_dynamic_memory_allocation_config
     condition: [device_cortexm]
 

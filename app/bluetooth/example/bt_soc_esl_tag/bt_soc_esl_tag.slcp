@@ -1,0 +1,173 @@
+project_name: bt_soc_esl_tag
+package: Bluetooth
+label: Bluetooth - SoC ESL Tag
+description: >
+  This example is an evaluation showcase for a Bluetooth Electronic Shelf Label
+  (ESL) Tag application. This demo includes image and display capabilities of
+  an ESL Tag, utilizing the memory LCD display on the WSTK board while images
+  are stored in RAM, only.
+category: Bluetooth Examples
+quality: production
+
+filter:
+  - name: "Wireless Technology"
+    value: ["Bluetooth"]
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]
+
+component:
+  - id: bluetooth_stack
+  - id: gatt_service_device_information
+  - id: bootloader_interface
+  - id: component_catalog
+  - id: mpu
+  - id: in_place_ota_dfu
+  - id: sl_memory
+  - id: simple_led
+    instance:
+      - led1
+  - id: esl_tag_core
+  - id: esl_tag_led
+  - id: esl_tag_display
+  - id: esl_tag_ram_image
+  - id: esl_tag_wstk_lcd_driver
+  - id: esl_tag_sensor
+  - id: sensor_rht_mock
+  - id: simple_button
+    instance:
+      - btn0
+  - id: bt_post_build
+
+source:
+  - path: main.c
+  - path: app.c
+
+include:
+  - path: .
+    file_list:
+      - path: app.h
+
+config_file:
+  - override:
+      component: gatt_configuration
+      file_id: gatt_configuration_file_id
+    path: gatt_configuration.btconf
+    directory: btconf
+
+readme:
+  - path: readme.md
+
+other_file:
+  - path: create_bl_files_lzma.bat
+  - path: create_bl_files_lzma.sh
+  - path: image/aem.png
+  - path: image/components.png
+  - path: image/folder-struct.png
+  - path: image/nvm-config.png
+  - path: image/ram-config.png
+  - path: image/esltag.png
+  - path: image/core-config.png
+  - path: image/sensor-config.png
+  - path: image/slot-setup.png
+  - path: image/common-storage.png
+  - path: image/default-nvm3-config.png
+
+configuration:
+  - name: SL_STACK_SIZE
+    value: "2752"
+  - name: SL_HEAP_SIZE
+    value: "9200"
+  - name: SL_BT_EAD_CORE_ACCELERATOR
+    value: "SL_BT_EAD_CORE_USE_RADIOAES"
+  - name: SL_PSA_KEY_USER_SLOT_COUNT
+    value: "1"
+    condition:
+      - psa_crypto
+  - name: SL_BT_CONFIG_MAX_CONNECTIONS
+    value: "2"
+  - name: SL_BT_CONFIG_USER_ADVERTISERS
+    value: "2"
+  - name: SL_DEVICE_INIT_LFRCO_PRECISION
+    value: "cmuPrecisionDefault"
+  - name: SL_DEVICE_INIT_LFXO_PRECISION
+    value: "250"
+    condition:
+      - hardware_board_has_lfxo
+  - name: SL_DEVICE_INIT_LFXO_CTUNE
+    value: "37"
+    condition:
+      - hardware_board_has_lfxo
+  - name: SL_DEBUG_SWO_SAMPLE_PC
+    value: "0"
+    condition:
+      - debug_swo
+    unless:
+      - iostream_swo
+  - name: NVM3_DEFAULT_NVM_SIZE
+    value: "24576"
+    unless:
+      - esl_tag_nvm_image
+  - name: NVM3_DEFAULT_NVM_SIZE
+    value: "49152"
+    condition:
+      - esl_tag_nvm_image
+  - name: NVM3_DEFAULT_MAX_OBJECT_SIZE
+    value: "516"
+    condition:
+      - esl_tag_nvm_image
+  - name: NVM3_DEFAULT_CACHE_SIZE
+    value: "96"
+    condition:
+      - esl_tag_nvm_image
+  - name: SL_IOSTREAM_USART_VCOM_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
+    value: "1"
+    condition:
+      - esl_tag_cli_test_harness
+  - name: SL_SLEEPTIMER_WALLCLOCK_CONFIG
+    value: "1"
+    condition:
+      - esl_tag_sensor
+  - name: APP_ASSERT_LOG_ENABLE
+    value: "0"
+  - name: CIRCULAR_QUEUE_LEN_MAX
+    value: "48"
+  - name: APP_SCHEDULER_MAX_DATA_SIZE
+    value: "18"
+  - name: APP_SCHEDULER_MAX_QUEUE_SIZE
+    value: "4"
+  - name: APP_LOG_TIME_ENABLE
+    value: "1"
+  - name: ESL_TAG_MAX_DISPLAYS
+    value: "2"
+    condition:
+      - esl_tag_display
+      - esl_tag_user_display_driver
+  - name: ESL_TAG_MAX_IMAGES
+    value: "2"
+  - name: ESL_TAG_RAM_IMAGE_POOL_SIZE
+    value: "4096"
+  - name: ESL_TAG_NVM_IMAGE_POOL_SIZE
+    value: "24576"
+    condition:
+      - esl_tag_nvm_image
+      - esl_tag_wstk_lcd_driver
+    unless:
+      - esl_tag_user_display_driver
+  - name: ESL_TAG_MAX_LEDS
+    value: "2"
+
+tag:
+  - hardware:device:flash:512
+  - hardware:device:ram:32
+  - hardware:rf:band:2400
+  - hardware:component:button:1+
+  - hardware:component:led:1+
+
+ui_hints:
+  highlight:
+    - path: config/btconf/gatt_configuration.btconf
+      focus: false
+    - path: readme.md
+      focus: true

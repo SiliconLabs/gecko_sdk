@@ -33,7 +33,7 @@
 
 // If the CMSIS ICP is present, most of the stack callbacks are implemented
 // there.
-#if !defined(SL_CATALOG_CONNECT_CMSIS_STACK_IPC_PRESENT)
+#if !defined(SL_CATALOG_CONNECT_CMSIS_STACK_IPC_PRESENT) && !defined(CONNECT_NCP)
 
 void emberStackStatusHandler(EmberStatus status)
 {

@@ -25,14 +25,14 @@
 #endif
 #include "sl_zigbee_debug_print.h"
 
-extern EmberEventQueue emStackEventQueue;
+extern EmberEventQueue sli_zigbee_stack_event_queue;
 //externed from lower-mac-rail-802.15.4.c
 extern void sli_mac_lower_mac_force_sleep(bool sleep);
 
 //externed from mac-dispatch.h
-extern void emMacCancelPolls(void);
-extern void emMacPurgeTransmitQueue(void);
-extern void emMacPurgeIncomingQueue(void);
+extern void sli_802154mac_cancel_polls(void);
+extern void sli_802154mac_purge_transmit_queue(void);
+extern void sli_802154mac_purge_incoming_queue(void);
 
 bool force_sleep = false;
 
@@ -40,12 +40,12 @@ void sl_zigbee_app_framework_force_stop(void)
 {
   sl_zigbee_core_debug_print("Sleep\n");
 
-  emMacCancelPolls();
-  emMacPurgeTransmitQueue();
-  emMacPurgeIncomingQueue();
+  sli_802154mac_cancel_polls();
+  sli_802154mac_purge_transmit_queue();
+  sli_802154mac_purge_incoming_queue();
 
-  emberCancelAllEvents(&emStackEventQueue);
-  emberCancelAllEvents(&emAppEventQueue);
+  emberCancelAllEvents(&sli_zigbee_stack_event_queue);
+  emberCancelAllEvents(&sli_zigbee_af_app_event_queue);
 
   sli_mac_lower_mac_force_sleep(true);
   force_sleep = true;

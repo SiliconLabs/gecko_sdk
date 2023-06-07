@@ -1,0 +1,12 @@
+<gatt> 
+  <!--Zigbee Tunnel-->
+  <service advertise="false" id="zigbee_tunnel" name="Zigbee Direct Tunneling Service" requirement="mandatory" sourceId="com.lighting.service.zigbee_tunnel" type="primary" uuid="8BD178FD-0000-45F4-8120-B2378BD5313F">
+    <informativeText/>
+    <!--Zigbee Tunnel-->
+    <characteristic id="zigbee_tunnel_2" name="Zigbee Tunnel" sourceId="com.lighting.characteristic.zigbee_tunnel" uuid="8BD178FD-0001-45F4-8120-B2378BD5313F">
+      <informativeText/>
+      <value length="1" type="user" variable_length="true">0</value>
+      <properties indicate="true" indicate_requirement="mandatory" write="true" write_requirement="mandatory"/>
+    </characteristic>
+  </service>
+</gatt>

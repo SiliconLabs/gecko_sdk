@@ -401,7 +401,7 @@ static const char *_flags_to_str(const sl_iperf_cli_opt_flags_t flags);
  * @return sl_iperf_cli_property_t* Property ptr if it's found or NULL
  *****************************************************************************/
 __STATIC_INLINE sl_iperf_cli_property_t * _get_property(const char *domain,
-                                                      const char *key);
+                                                        const char *key);
 
 /**************************************************************************//**
  * @brief Get domain and key
@@ -423,7 +423,7 @@ static void _get_domain_key(const char *str_src,
  * @return false Non-valid value
  *****************************************************************************/
 __STATIC_INLINE bool _check_arg_uint_val(const sl_iperf_cli_arg_type_t arg_type,
-                                       const int64_t val);
+                                         const int64_t val);
 
 // -----------------------------------------------------------------------------
 //                                Static Variables
@@ -1096,7 +1096,7 @@ static void _get_domain_key(const char *str_src,
 }
 
 __STATIC_INLINE bool _check_arg_uint_val(const sl_iperf_cli_arg_type_t arg_type,
-                                       const int64_t val)
+                                         const int64_t val)
 {
   if (val < 0LL
       || (arg_type == SL_IPERF_CLI_ARG_TYPE_UINT32 && val > UINT32_MAX)

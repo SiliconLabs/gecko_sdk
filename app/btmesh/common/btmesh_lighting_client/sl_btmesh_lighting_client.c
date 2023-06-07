@@ -3,7 +3,7 @@
  * @brief Bt Mesh Lighting Client module
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -43,7 +43,7 @@
 #include "sl_btmesh_lib.h"
 
 #include "app_assert.h"
-#include "sl_simple_timer.h"
+#include "app_timer.h"
 
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
@@ -77,20 +77,22 @@
 #define NO_CALLBACK_DATA               (void *)NULL
 /// Maximum lightness percentage value
 #define LIGHTNESS_PCT_MAX              100
+/// Maximum lightness value
+#define LIGHTNESS_VALUE_MAX            0xFFFF
 /// Delay unit value for request for ctl messages in millisecond
 #define REQ_DELAY_MS                   50
 
 /// periodic timer handle
-static sl_simple_timer_t onoff_retransmission_timer;
+static app_timer_t onoff_retransmission_timer;
 
 /// periodic timer callback
-static void onoff_retransmission_timer_cb(sl_simple_timer_t *handle,
+static void onoff_retransmission_timer_cb(app_timer_t *handle,
                                           void *data);
 /// periodic timer handle
-static sl_simple_timer_t light_retransmission_timer;
+static app_timer_t light_retransmission_timer;
 
 /// periodic timer callback
-static void light_retransmission_timer_cb(sl_simple_timer_t *handle,
+static void light_retransmission_timer_cb(app_timer_t *handle,
                                           void *data);
 
 /// current position of the switch
@@ -99,10 +101,8 @@ static uint8_t switch_pos = 0;
 static uint8_t onoff_request_count;
 /// on/off transaction identifier
 static uint8_t onoff_trid = 0;
-/// lightness level percentage
-static uint8_t lightness_percent = 0;
-/// lightness level percentage when switching ON
-static uint8_t lightness_percent_switch_on = LIGHTNESS_PCT_MAX;
+/// lightness level when switching ON
+static uint16_t lightness_level_switch_on = UINT16_MAX;
 /// lightness level converted from percentage to actual value, range 0..65535
 static uint16_t lightness_level = 0;
 /// number of lightness requests to be sent
@@ -117,7 +117,7 @@ static uint8_t lightness_trid = 0;
  * switch_pos = 1 -> PB1 was pressed long (above 1s), turn lights on
  * switch_pos = 0 -> PB0 was pressed long (above 1s), turn lights off
  *
- * param[in] retrans  Indicates if this is the first request or a retransmission,
+ * @param[in] retrans Indicates if this is the first request or a retransmission,
  *                    possible values are 0 = first request, 1 = retransmission.
  *
  * @note This application sends multiple generic on/off requests for each
@@ -170,7 +170,7 @@ static void send_onoff_request(uint8_t retrans)
  * level of light(s) in the group. Global variable lightness_level holds
  * the latest desired light level.
  *
- * param[in] retrans  Indicates if this is the first request or a retransmission,
+ * @param[in] retrans Indicates if this is the first request or a retransmission,
  *                    possible values are 0 = first request, 1 = retransmission.
  *
  * @note This application sends multiple lightness requests for each
@@ -220,60 +220,23 @@ static void send_lightness_request(uint8_t retrans)
 }
 
 /*******************************************************************************
- * This function change the lightness and sends it to the server.
- *
- * @param[in] change_percentage  Defines lightness percentage change,
- * possible values are  -100% - + 100%.
- *
- ******************************************************************************/
-void sl_btmesh_change_lightness(int8_t change_percentage)
-{
-  // Adjust light brightness, using Light Lightness model
-  if (change_percentage > 0) {
-    lightness_percent += change_percentage;
-    if (lightness_percent > LIGHTNESS_PCT_MAX) {
-#if (SL_BTMESH_LIGHT_LIGHTNESS_WRAP_ENABLED_CFG_VAL != 0)
-      lightness_percent = 0;
-#else
-      lightness_percent = LIGHTNESS_PCT_MAX;
-#endif
-    }
-  } else {
-    if (lightness_percent < (-change_percentage)) {
-#if (SL_BTMESH_LIGHT_LIGHTNESS_WRAP_ENABLED_CFG_VAL != 0)
-      lightness_percent = LIGHTNESS_PCT_MAX;
-#else
-      lightness_percent = 0;
-#endif
-    } else {
-      lightness_percent += change_percentage;
-    }
-  }
-
-  if (lightness_percent != 0) {
-    lightness_percent_switch_on = lightness_percent;
-  }
-  sl_btmesh_set_lightness(lightness_percent);
-}
-
-/*******************************************************************************
  * This function change the lightness and send it to the server.
  *
- * @param[in] new_lightness_percentage  Defines new lightness value as percentage
+ * @param[in] lightness_percent  Defines new lightness value as percentage
  *    Valid values 0-100 %
  *
- *
  ******************************************************************************/
-void sl_btmesh_set_lightness(uint8_t new_lightness_percentage)
+void sl_btmesh_set_lightness(uint8_t lightness_percent)
 {
   // Adjust light brightness, using Light Lightness model
-  if (new_lightness_percentage <= LIGHTNESS_PCT_MAX) {
-    lightness_percent = new_lightness_percentage;
-  } else {
+  if (lightness_percent > LIGHTNESS_PCT_MAX) {
     return;
   }
 
-  lightness_level = lightness_percent * 0xFFFF / LIGHTNESS_PCT_MAX;
+  lightness_level = lightness_percent * LIGHTNESS_VALUE_MAX / LIGHTNESS_PCT_MAX;
+  if (lightness_level != 0) {
+    lightness_level_switch_on = lightness_level;
+  }
   log("Set lightness to %u %% / level %u K" NL, lightness_percent, lightness_level);
   // Request is sent multiple times to improve reliability
   lightness_request_count = SL_BTMESH_LIGHT_RETRANSMISSION_COUNT_CFG_VAL;
@@ -283,11 +246,11 @@ void sl_btmesh_set_lightness(uint8_t new_lightness_percentage)
   // If there are more requests to send, start a repeating soft timer
   // to trigger retransmission of the request after 50 ms delay
   if (lightness_request_count > 0) {
-    sl_status_t sc = sl_simple_timer_start(&light_retransmission_timer,
-                                           SL_BTMESH_LIGHT_RETRANSMISSION_TIMEOUT_CFG_VAL,
-                                           light_retransmission_timer_cb,
-                                           NO_CALLBACK_DATA,
-                                           true);
+    sl_status_t sc = app_timer_start(&light_retransmission_timer,
+                                     SL_BTMESH_LIGHT_RETRANSMISSION_TIMEOUT_CFG_VAL,
+                                     light_retransmission_timer_cb,
+                                     NO_CALLBACK_DATA,
+                                     true);
     app_assert_status_f(sc, "Failed to start periodic timer");
   }
 }
@@ -312,10 +275,10 @@ void sl_btmesh_change_switch_position(uint8_t position)
   // Turns light ON or OFF, using Generic OnOff model
   if (switch_pos) {
     log("Turn light(s) on" NL);
-    lightness_percent = lightness_percent_switch_on;
+    lightness_level = lightness_level_switch_on;
   } else {
     log("Turn light(s) off" NL);
-    lightness_percent = 0;
+    lightness_level = 0;
   }
   // Request is sent 3 times to improve reliability
   onoff_request_count = SL_BTMESH_ONOFF_RETRANSMISSION_COUNT_CFG_VAL;
@@ -325,11 +288,11 @@ void sl_btmesh_change_switch_position(uint8_t position)
   // If there are more requests to send, start a repeating soft timer
   // to trigger retransmission of the request after 50 ms delay
   if (onoff_request_count > 0) {
-    sl_status_t sc = sl_simple_timer_start(&onoff_retransmission_timer,
-                                           SL_BTMESH_ONOFF_RETRANSMISSION_TIMEOUT_CFG_VAL,
-                                           onoff_retransmission_timer_cb,
-                                           NO_CALLBACK_DATA,
-                                           true);
+    sl_status_t sc = app_timer_start(&onoff_retransmission_timer,
+                                     SL_BTMESH_ONOFF_RETRANSMISSION_TIMEOUT_CFG_VAL,
+                                     onoff_retransmission_timer_cb,
+                                     NO_CALLBACK_DATA,
+                                     true);
     app_assert_status_f(sc, "Failed to start periodic timer");
   }
 }
@@ -348,7 +311,7 @@ uint16_t sl_btmesh_get_lightness(void)
  * @param[in] handle pointer to handle instance
  * @param[in] data pointer to input data
  ******************************************************************************/
-static void onoff_retransmission_timer_cb(sl_simple_timer_t *handle, void *data)
+static void onoff_retransmission_timer_cb(app_timer_t *handle, void *data)
 {
   (void)data;
   (void)handle;
@@ -356,7 +319,7 @@ static void onoff_retransmission_timer_cb(sl_simple_timer_t *handle, void *data)
   send_onoff_request(1);   // param 1 indicates that this is a retransmission
   // stop retransmission timer if it was the last attempt
   if (onoff_request_count == 0) {
-    sl_status_t sc = sl_simple_timer_stop(&onoff_retransmission_timer);
+    sl_status_t sc = app_timer_stop(&onoff_retransmission_timer);
     app_assert_status_f(sc, "Failed to stop periodic timer");
   }
 }
@@ -366,7 +329,7 @@ static void onoff_retransmission_timer_cb(sl_simple_timer_t *handle, void *data)
  * @param[in] handle pointer to handle instance
  * @param[in] data pointer to input data
  ******************************************************************************/
-static void light_retransmission_timer_cb(sl_simple_timer_t *handle, void *data)
+static void light_retransmission_timer_cb(app_timer_t *handle, void *data)
 {
   (void)data;
   (void)handle;
@@ -374,7 +337,7 @@ static void light_retransmission_timer_cb(sl_simple_timer_t *handle, void *data)
   send_lightness_request(1);   // Retransmit lightness message
   // Stop retransmission timer if it was the last attempt
   if (lightness_request_count == 0) {
-    sl_status_t sc = sl_simple_timer_stop(&light_retransmission_timer);
+    sl_status_t sc = app_timer_stop(&light_retransmission_timer);
     app_assert_status_f(sc, "Failed to stop periodic timer");
   }
 }

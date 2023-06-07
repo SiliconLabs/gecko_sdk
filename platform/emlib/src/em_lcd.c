@@ -300,8 +300,8 @@ void LCD_SegmentRangeEnable(LCD_SegmentRange_TypeDef segmentRange, bool enable)
  ******************************************************************************/
 void LCD_SegmentEnable(uint32_t seg_nbr, bool enable)
 {
-  /* Series 2 supports up to 20 segment lines. */
-  EFM_ASSERT(seg_nbr < 20);
+  /* Series 2 parts support up to 20 segment lines except for xG28, which supports up to 28 segment lines. */
+  EFM_ASSERT(seg_nbr < (int)LCD_SEGMENT_LINES_MAX);
 
   if (enable) {
     GPIO->LCDSEG_SET = 1 << seg_nbr;
@@ -324,14 +324,27 @@ void LCD_SegmentEnable(uint32_t seg_nbr, bool enable)
  ******************************************************************************/
 void LCD_ComEnable(uint8_t com, bool enable)
 {
-  /* Series 2 supports up to 4 COM lines. */
+  /* Series 2 parts support up to 4 COM lines except for xG28, which supports up to 8 COM lines. */
   EFM_ASSERT(com < LCD_COM_LINES_MAX);
 
-  if (enable) {
-    GPIO->LCDCOM_SET = 1 << com;
-  } else {
-    GPIO->LCDCOM_CLR = 1 << com;
+  if (com < LCD_COM_NUM) {
+    if (enable) {
+      GPIO->LCDCOM_SET = 1 << com;
+    } else {
+      GPIO->LCDCOM_CLR = 1 << com;
+    }
   }
+#if defined(LCD_OCTAPLEX) && (LCD_OCTAPLEX == 1)
+  else {
+    /* On xG28, SEG lines shall be configured as COM lines  */
+    /* for COM support above 4 COM lines                    */
+    if (enable) {
+      GPIO->LCDSEG_SET = 1 << ((com - LCD_COM_NUM) + LCD_SEGASCOM_SEGSTART);
+    } else {
+      GPIO->LCDSEG_CLR = 1 << ((com - LCD_COM_NUM) + LCD_SEGASCOM_SEGSTART);
+    }
+  }
+#endif
 }
 #endif
 
@@ -358,6 +371,8 @@ void LCD_DmaModeSet(LCD_DmaMode_Typedef mode)
  *    For the Gecko Family, the maximum configuration is (COM-lines x Segment-Lines) 4x40.
  *    For the Tiny Gecko Family, the maximum configuration is 8x20 or 4x24.
  *    For the Giant Gecko Family, the maximum configuration is 8x36 or 4x40.
+ *    For the Series 2 Family, the maximum configuration is 4x20.
+ *    For the Series 2 xG28, the maximum configuration is 8x24 or 4x28.
  *
  * @param[in] com
  *   A COM line to change.
@@ -371,11 +386,11 @@ void LCD_DmaModeSet(LCD_DmaMode_Typedef mode)
 void LCD_SegmentSet(int com, int bit, bool enable)
 {
 #if defined(_SILICON_LABS_32B_SERIES_2)
-  /* Series 2 supports up to 4 COM lines. */
-  EFM_ASSERT(com < LCD_COM_LINES_MAX);
+  /* Series 2 parts support up to 4 COM lines except for xG28, which supports up to 8 COM lines. */
+  EFM_ASSERT(com < (int)LCD_COM_LINES_MAX);
 
-  /* Series 2 supports up to 20 segment lines. */
-  EFM_ASSERT(bit < LCD_SEGMENT_LINES_MAX);
+  /* Series 2 parts support up to 20 segment lines except for xG28, which supports up to 28 segment lines. */
+  EFM_ASSERT(bit < (int)LCD_SEGMENT_LINES_MAX);
 
   /* Use a bitband access for atomic bit set/clear of the segment. */
   switch (com) {
@@ -394,6 +409,30 @@ void LCD_SegmentSet(int com, int bit, bool enable)
     case 3:
       BUS_RegBitWrite(&(LCD->SEGD3), bit, enable);
       break;
+
+#if defined(_LCD_SEGD4_MASK)
+    case 4:
+      BUS_RegBitWrite(&(LCD->SEGD4), bit, enable);
+      break;
+#endif
+
+#if defined(_LCD_SEGD5_MASK)
+    case 5:
+      BUS_RegBitWrite(&(LCD->SEGD5), bit, enable);
+      break;
+#endif
+
+#if defined(_LCD_SEGD6_MASK)
+    case 6:
+      BUS_RegBitWrite(&(LCD->SEGD6), bit, enable);
+      break;
+#endif
+
+#if defined(_LCD_SEGD7_MASK)
+    case 7:
+      BUS_RegBitWrite(&(LCD->SEGD7), bit, enable);
+      break;
+#endif
 
     default:
       EFM_ASSERT(0);
@@ -540,10 +579,10 @@ void LCD_SegmentSetLow(int com, uint32_t mask, uint32_t bits)
 #if defined(_SILICON_LABS_32B_SERIES_2)
   uint32_t segData;
 
-  /* Series 2 supports up to 4 COM lines. */
-  EFM_ASSERT(com < LCD_COM_LINES_MAX);
+  /* Series 2 parts support up to 4 COM lines except for xG28, which supports up to 8 COM lines. */
+  EFM_ASSERT(com < (int)LCD_COM_LINES_MAX);
 
-  /* Series 2 supports up to 20 segment lines. */
+  /* Series 2 parts support up to 20 segment lines except for xG28, which supports up to 28 segment lines. */
   EFM_ASSERT(!(mask & (~_LCD_SEGD0_MASK)));
   EFM_ASSERT(!(bits & (~_LCD_SEGD0_MASK)));
 
@@ -575,6 +614,42 @@ void LCD_SegmentSetLow(int com, uint32_t mask, uint32_t bits)
       segData    |= (mask & bits);
       LCD->SEGD3 = segData;
       break;
+
+#if defined(_LCD_SEGD4_MASK)
+    case 4:
+      segData     = LCD->SEGD4;
+      segData    &= ~(mask);
+      segData    |= (mask & bits);
+      LCD->SEGD4 = segData;
+      break;
+#endif
+
+#if defined(_LCD_SEGD5_MASK)
+    case 5:
+      segData     = LCD->SEGD5;
+      segData    &= ~(mask);
+      segData    |= (mask & bits);
+      LCD->SEGD5 = segData;
+      break;
+#endif
+
+#if defined(_LCD_SEGD6_MASK)
+    case 6:
+      segData     = LCD->SEGD6;
+      segData    &= ~(mask);
+      segData    |= (mask & bits);
+      LCD->SEGD6 = segData;
+      break;
+#endif
+
+#if defined(_LCD_SEGD7_MASK)
+    case 7:
+      segData     = LCD->SEGD7;
+      segData    &= ~(mask);
+      segData    |= (mask & bits);
+      LCD->SEGD7 = segData;
+      break;
+#endif
 
     default:
       EFM_ASSERT(0);

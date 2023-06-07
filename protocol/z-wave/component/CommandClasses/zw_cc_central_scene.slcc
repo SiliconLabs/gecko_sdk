@@ -6,20 +6,20 @@ description: >
   controller using the lifeline concept. The central scene controller must configure
   lifeline association in relevant nodes before the home control application can take action in the
   central scene controller.
+  Note that this Command Class supports advanced configuration.
+  To use it, please make sure that configuration related to your project is added to cc_config file located in
+  <app_location>/config/cc_config/<app_name>.cc_config.
+  See protocol/z-wave/ZAF/tool/cc_configurator/README.md for more details.
 package: Z-Wave
 quality: production
 source:
-  - path: protocol/z-wave/ZAF/CommandClasses/CentralScene/CC_CentralScene.c
-  - path: protocol/z-wave/ZAF/CommandClasses/CentralScene/cc_central_scene_io_weak.c
-  - path: protocol/z-wave/ZAF/CommandClasses/CentralScene/cc_central_scene_config_api.c
+  - path: protocol/z-wave/ZAF/CommandClasses/CentralScene/src/CC_CentralScene.c
+  - path: protocol/z-wave/ZAF/CommandClasses/CentralScene/src/cc_central_scene_io_weak.c
+  # Private header
+  - path: protocol/z-wave/ZAF/CommandClasses/CentralScene/src/cc_central_scene_io.h
 include:
-  - path: protocol/z-wave/ZAF/CommandClasses/CentralScene/
+  - path: protocol/z-wave/ZAF/CommandClasses/CentralScene/inc
     file_list:
     - path: CC_CentralScene.h
-    - path: cc_central_scene_io.h
-    - path: cc_central_scene_config_api.h
-config_file:
-  - path: protocol/z-wave/platform/SiliconLabs/PAL/config/cc_central_scene/cc_central_scene_config.h
-    file_id: cc_central_scene_config
 provides:
   - name: zw_cc_central_scene

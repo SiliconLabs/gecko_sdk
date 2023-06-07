@@ -4,9 +4,9 @@
  */
 #include <stdint.h>
 #include "cmd_handlers.h"
-#include "config_app.h"
-#include "serialappl.h"
+#include "app.h"
 #include "zaf_config.h"
+#include "zw_version_config.h"
 
 #define CAPABILITIES_SIZE (8 + 32) // Info + supported commands
 

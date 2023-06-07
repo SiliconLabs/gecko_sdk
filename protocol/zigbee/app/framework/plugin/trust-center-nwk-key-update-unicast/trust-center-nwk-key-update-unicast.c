@@ -44,16 +44,14 @@
 #include "app/framework/util/af-main.h"
 
 #include "trust-center-nwk-key-update-unicast.h"
+#include "stack/include/zigbee-security-manager.h"
 
 #include "app/framework/plugin/concentrator/concentrator-support.h"
+#include "stack/include/zigbee-security-manager.h"
 
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_TEST_HARNESS
-#define SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
 #endif
-#endif // UC_BUILD
 
 // *****************************************************************************
 // Globals
@@ -77,9 +75,7 @@ typedef uint8_t KeyUpdateStateId;
     "Broadcast Key Switch",        \
 }
 
-#if ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_SECURITY)) || defined(UC_BUILD))
 const char * keyUpdateStateStrings[] = KEY_UPDATE_STATE_STRINGS;
-#endif
 
 #define KEY_MASK (EMBER_KEY_IS_AUTHORIZED \
                   | EMBER_KEY_PARTNER_IS_SLEEPY)
@@ -98,14 +94,9 @@ typedef struct {
   KeyUpdateStateId stateId;
 } KeyUpdateState;
 
-#ifdef UC_BUILD
 sl_zigbee_event_t emberAfPluginTrustCenterNwkKeyUpdateUnicastMyEvent;
 #define myEvent (&emberAfPluginTrustCenterNwkKeyUpdateUnicastMyEvent)
-void emberAfPluginTrustCenterNwkKeyUpdateUnicastMyEventHandler(SLXU_UC_EVENT);
-#else
-EmberEventControl emberAfPluginTrustCenterNwkKeyUpdateUnicastMyEventControl;
-#define myEvent emberAfPluginTrustCenterNwkKeyUpdateUnicastMyEventControl
-#endif
+void emberAfPluginTrustCenterNwkKeyUpdateUnicastMyEventHandler(sl_zigbee_event_t * event);
 
 static KeyUpdateStateId currentStateId = KEY_UPDATE_NONE;
 
@@ -163,19 +154,19 @@ static void keyUpdateGotoState(KeyUpdateStateId state);
 #define keyUpdateGotoNextState() keyUpdateGotoState(currentStateId + 1)
 
 //-------internal callback
-void emAfPluginTrustCenterNwkKeyUpdateUnicastInitCallback(SLXU_INIT_ARG)
+void sli_zigbee_af_trust_center_nwk_key_update_unicast_init_callback(uint8_t init_level)
 {
-  SLXU_INIT_UNUSED_ARG;
+  (void)init_level;
 
-  slxu_zigbee_event_init(myEvent,
-                         emberAfPluginTrustCenterNwkKeyUpdateUnicastMyEventHandler);
+  sl_zigbee_event_init(myEvent,
+                       emberAfPluginTrustCenterNwkKeyUpdateUnicastMyEventHandler);
 }
 
 // *****************************************************************************
 // Functions
-void emberAfPluginTrustCenterNwkKeyUpdateUnicastMyEventHandler(SLXU_UC_EVENT)
+void emberAfPluginTrustCenterNwkKeyUpdateUnicastMyEventHandler(sl_zigbee_event_t * event)
 {
-  slxu_zigbee_event_set_inactive(myEvent);
+  sl_zigbee_event_set_inactive(myEvent);
   if (stateTable[currentStateId].function != NULL) {
     stateTable[currentStateId].function(TIMER_EXPIRED);
   }
@@ -189,7 +180,7 @@ static void keyUpdateGotoStateAfterDelay(KeyUpdateStateId stateId, uint32_t dela
                          delayQs >> 2,
                          keyUpdateStateStrings[currentStateId]);
   emberAfSecurityFlush();
-  slxu_zigbee_event_set_delay_qs(myEvent, delayQs);
+  sl_zigbee_event_set_delay_qs(myEvent, delayQs);
 }
 
 static void keyUpdateGotoState(KeyUpdateStateId stateId)
@@ -212,19 +203,24 @@ static void broadcastMtorr(KeyUpdateResult result)
   delayQs = emberAfPluginConcentratorQueueDiscovery() + EXTRA_MTORR_DELAY_QS;
   emberAfSecurityPrintln("NWK Key Update: Sending MTORR in %d sec.",
                          delayQs >> 2);
-  slxu_zigbee_event_set_delay_qs(myEvent, delayQs);
+  sl_zigbee_event_set_delay_qs(myEvent, delayQs);
 }
 
 static void traverseKeyTable(KeyUpdateResult result)
 {
   keyTableIndex++;
+  sl_zb_sec_man_context_t context;
+  sl_zb_sec_man_init_context(&context);
+  context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_APP_LINK;
 
   for (; keyTableIndex < emberAfGetKeyTableSize(); keyTableIndex++) {
-    EmberKeyStruct keyStruct;
-    EmberStatus status = emberGetKeyTableEntry(keyTableIndex,
-                                               &keyStruct);
-    if (status == EMBER_SUCCESS) {
-      if ((keyStruct.bitmask & KEY_MASK)
+    sl_zb_sec_man_aps_key_metadata_t key_data;
+    context.key_index = keyTableIndex;
+    context.flags |= ZB_SEC_MAN_FLAG_KEY_INDEX_IS_VALID;
+    sl_status_t status = sl_zb_sec_man_get_aps_key_info(&context,
+                                                        &key_data);
+    if (status == SL_STATUS_OK) {
+      if ((key_data.bitmask & KEY_MASK)
           == EMBER_KEY_IS_AUTHORIZED) {
         emberAfSecurityPrintln("Updating NWK key at key table index %d",
                                keyTableIndex);
@@ -238,8 +234,8 @@ static void traverseKeyTable(KeyUpdateResult result)
   }
   emberAfSecurityPrintln("Finishing traversing key table.");
   currentStateId = BROADCAST_KEY_SWITCH;
-  slxu_zigbee_event_set_delay_qs(myEvent,
-                                 BROADCAST_KEY_SWITCH_DELAY_QS);
+  sl_zigbee_event_set_delay_qs(myEvent,
+                               BROADCAST_KEY_SWITCH_DELAY_QS);
 }
 
 EMBER_TEST_PUBLIC void zdoDiscoveryCallback(const EmberAfServiceDiscoveryResult* result)
@@ -263,13 +259,19 @@ EMBER_TEST_PUBLIC void zdoDiscoveryCallback(const EmberAfServiceDiscoveryResult*
 
 static EmberStatus getEui64OfCurrentKeyTableIndex(EmberEUI64 returnEui64)
 {
-  EmberKeyStruct linkKey;
-  EmberStatus status = emberGetKeyTableEntry(keyTableIndex, &linkKey);
+  sl_zb_sec_man_aps_key_metadata_t key_data;
+  sl_zb_sec_man_context_t context;
+  sl_zb_sec_man_init_context(&context);
+  context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_APP_LINK;
+  context.key_index = keyTableIndex;
+  context.flags |= ZB_SEC_MAN_FLAG_KEY_INDEX_IS_VALID;
 
-  if (status == EMBER_SUCCESS) {
-    MEMMOVE(returnEui64, linkKey.partnerEUI64, EUI64_SIZE);
+  sl_status_t status = sl_zb_sec_man_get_aps_key_info(&context, &key_data);
+
+  if (status == SL_STATUS_OK) {
+    MEMMOVE(returnEui64, context.eui64, EUI64_SIZE);
   }
-  return status;
+  return ((status == SL_STATUS_OK) ? EMBER_SUCCESS : EMBER_NOT_FOUND);
 }
 
 static void zdoDiscovery(KeyUpdateResult result)
@@ -310,25 +312,32 @@ static void zdoDiscovery(KeyUpdateResult result)
                            keyTableIndex);
     traverseKeyTable(OPERATION_FAILED);
   } else {
-    slxu_zigbee_event_set_delay_qs(myEvent,
-                                   ZDO_DELAY_AFTER_FAILURE_QS);
+    sl_zigbee_event_set_delay_qs(myEvent,
+                                 ZDO_DELAY_AFTER_FAILURE_QS);
   }
 }
 
 static bool nextNetworkKeyIsNewer(EmberKeyStruct* nextNwkKey)
 {
-  EmberKeyStruct currentNwkKey;
-  EmberStatus status;
+  sl_status_t status;
+  sl_zb_sec_man_context_t context;
+  sl_zb_sec_man_key_t plaintext_key;
+  sl_zb_sec_man_network_key_info_t key_info;
+
+  sl_zb_sec_man_init_context(&context);
+  context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_NETWORK;
+  context.key_index = 1;
+
+  status = sl_zb_sec_man_export_key(&context, &plaintext_key);
+  MEMMOVE(&(nextNwkKey->key),
+          &plaintext_key.key,
+          EMBER_ENCRYPTION_KEY_SIZE);
 
   // It is assumed that the current nwk key has valid data.
-  emberGetKey(EMBER_CURRENT_NETWORK_KEY,
-              &currentNwkKey);
-
-  status = emberGetKey(EMBER_NEXT_NETWORK_KEY,
-                       nextNwkKey);
-  if (status != EMBER_SUCCESS
-      || (timeGTorEqualInt8u(currentNwkKey.sequenceNumber,
-                             nextNwkKey->sequenceNumber))) {
+  (void)sl_zb_sec_man_get_network_key_info(&key_info);
+  if (status != SL_STATUS_OK
+      || (timeGTorEqualInt8u(key_info.network_key_sequence_number,
+                             key_info.alt_network_key_sequence_number))) {
     return false;
   }
 
@@ -392,8 +401,8 @@ static void sendKeyUpdate(KeyUpdateResult result)
       return;
     }
 
-    slxu_zigbee_event_set_delay_qs(myEvent,
-                                   SEND_KEY_FAILURE_DELAY_QS);
+    sl_zigbee_event_set_delay_qs(myEvent,
+                                 SEND_KEY_FAILURE_DELAY_QS);
   } else {
     keyUpdateGotoStateAfterDelay(TRAVERSE_KEY_TABLE,
                                  KEY_UPDATE_DELAY_QS);
@@ -414,8 +423,8 @@ static void broadcastKeySwitch(KeyUpdateResult result)
     if (failureCount >= FAILURE_COUNT_THRESHOLD) {
       emberAfSecurityPrintln("Max fail count hit (%d), aborting key update.");
     } else {
-      slxu_zigbee_event_set_delay_qs(myEvent,
-                                     BROADCAST_KEY_SWITCH_DELAY_AFTER_FAILURE_QS);
+      sl_zigbee_event_set_delay_qs(myEvent,
+                                   BROADCAST_KEY_SWITCH_DELAY_AFTER_FAILURE_QS);
     }
   }
   emberAfSecurityPrintln("Sent NWK key switch.");

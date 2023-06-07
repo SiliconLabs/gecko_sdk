@@ -1,6 +1,13 @@
 from pyradioconfig.parts.ocelot.calculators.calc_misc import CALC_Misc_ocelot
+from pycalcmodel.core.variable import ModelVariableFormat
 
 class Calc_Misc_Sol(CALC_Misc_ocelot):
+
+    def buildVariables(self, model):
+        super().buildVariables(model)
+
+        self._addModelVariable(model, 'alt_stack_info', int, ModelVariableFormat.DECIMAL,
+                               desc='information dedicated to stack for alternate PHY', is_array=True)
 
     def calc_misc_Ocelot(self, model):
         pass

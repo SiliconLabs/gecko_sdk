@@ -176,11 +176,14 @@ class BtmeshDfuCmd(BtmeshCmd):
         )
         self.add_appkey_index_arg(self.dfu_info_parser)
         self.add_ttl_arg(self.dfu_info_parser)
-        self.add_btmesh_basic_retry_args(
+        self.add_btmesh_multicast_basic_retry_args(
             self.dfu_info_parser,
             retry_max_default=app_cfg.dfu_clt.dfu_retry_max_default,
             retry_interval_default=app_cfg.dfu_clt.dfu_retry_interval_default,
             retry_interval_lpn_default=app_cfg.dfu_clt.dfu_retry_interval_lpn_default,
+            retry_multicast_threshold_default=(
+                app_cfg.dfu_clt.dfu_retry_multicast_threshold_default
+            ),
             retry_max_help=(
                 "Maximum number of additional Firmware Update Information Get "
                 "messages which are sent until the corresponding status message "
@@ -197,6 +200,15 @@ class BtmeshDfuCmd(BtmeshCmd):
                 "Interval in seconds between Firmware Update Information Get "
                 "messages when the corresponding status message is not received "
                 "from the Firmware Update Server model of a Low Power Node. "
+                "(default: %(default)s)"
+            ),
+            retry_multicast_threshold_help=(
+                "Multicast threshold used during Check For Current Firmware "
+                "procedure. If the number of uncompleted servers with missing "
+                "FW Information Status messages exceeds or is equal to this "
+                "number then the group address is used. "
+                "Otherwise, servers are looped through one by one. "
+                "Zero value means unicast addressing. "
                 "(default: %(default)s)"
             ),
         )
@@ -308,22 +320,61 @@ class BtmeshDfuCmd(BtmeshCmd):
         self.add_chunk_size_arg(
             self.dfu_start_parser, default=app_cfg.dfu_clt.dfu_chunk_size_default
         )
-        self.dfu_start_parser.add_argument(
-            "--multicast-threshold",
-            "--mct",
-            type=int,
-            default=app_cfg.dfu_clt.dfu_multicast_threshold_default,
-            help=(
+        self.add_appkey_index_arg(self.dfu_start_parser)
+        self.add_ttl_arg(self.dfu_start_parser)
+        self.add_btmesh_multicast_basic_retry_args(
+            self.dfu_start_parser,
+            retry_max_default=app_cfg.dfu_clt.dfu_retry_max_default,
+            retry_interval_default=app_cfg.dfu_clt.dfu_retry_interval_default,
+            retry_interval_lpn_default=app_cfg.dfu_clt.dfu_retry_interval_lpn_default,
+            retry_multicast_threshold_default=(
+                app_cfg.dfu_clt.dfu_retry_multicast_threshold_default
+            ),
+            retry_max_help=(
+                f"Maximum number of additional Firmware Update Firmware Metadata "
+                f"Check messages which are sent until the corresponding Firmware "
+                f"Update status messages are received from the Firmware Update "
+                f"Server model of each selected updating nodes. "
+                f"This configuration option is used during Firmware Compatibility "
+                f"Check (Metadata Check) procedures and it is not used during "
+                f"Standalone Firmware Update procedure. "
+                f"The default maximum number of retransmissions in each Standalone "
+                f"Firmware Update phase is determined by the timeout base and "
+                f"{self.RETRY_INT_OPTS} and {self.RETRY_INT_LPN_OPTS}. "
+                "(default: %(default)s)"
+            ),
+            retry_interval_help=(
+                "Interval in seconds between Firmware Update and BLOB Transfer "
+                "messages when the corresponding status messages are not received "
+                "from the Firmware Update Server or BLOB Transfer Server model "
+                "of each selected updating nodes. "
+                "This parameter affects those BLOB Transfers which are initiated "
+                "by the Standalone Firmware Update procedure. "
+                "(default: %(default)s)"
+            ),
+            retry_interval_lpn_help=(
+                "Interval in seconds between Firmware Update and BLOB Transfer "
+                "messages when the corresponding status messages are not received "
+                "from the Firmware Update Server or BLOB Transfer Server model "
+                "of each selected low power updating nodes. "
+                "This parameter affects those BLOB Transfers which are initiated "
+                "by the Standalone Firmware Update procedure. "
+                "(default: %(default)s)"
+            ),
+            retry_multicast_threshold_help=(
+                "Multicast threshold used during the Firmware Compatibility Check "
+                "(Metadata Check) and BLOB Transfer phase of FW update. "
                 "If the number of uncompleted servers (missing status messages) "
-                "during any BLOB transfer procedure step exceeds or is equal to "
-                "this number then the group address is used. "
-                "Otherwise, servers are looped through one by one. "
-                "Value of 0 disables the feature. "
+                "during FW Update procedures or during any BLOB Transfer procedure "
+                "step exceeds or is equal to this number then the group address "
+                "is used. Otherwise, servers are looped through one by one. "
+                "WARNING! The FW Update Start, Get (Verification), Cancel and "
+                "Apply steps of FW Update uses unicast addressing only and loops "
+                "through each server on by one. "
+                "Zero value means unicast addressing. "
                 "(default: %(default)s)"
             ),
         )
-        self.add_appkey_index_arg(self.dfu_start_parser)
-        self.add_ttl_arg(self.dfu_start_parser)
         self.add_group_nodes_args(
             self.dfu_start_parser,
             add_elem_arg=True,
@@ -391,8 +442,10 @@ class BtmeshDfuCmd(BtmeshCmd):
             nodes_order_property="name",
             group_order_property="name",
         )
-        retry_params_default = app_cfg.common.btmesh_retry_params_default
-        retry_params = self.process_btmesh_retry_params(pargs, retry_params_default)
+        retry_params_default = app_cfg.common.btmesh_multicast_retry_params_default
+        retry_params = self.process_btmesh_multicast_retry_params(
+            pargs, retry_params_default
+        )
         fw_info_list = app_btmesh.dfu_clt.get_info(
             elem_index=app_cfg.dfu_clt.elem_index,
             server_addrs=elem_addrs,
@@ -405,7 +458,7 @@ class BtmeshDfuCmd(BtmeshCmd):
         )
         rows = []
         columns = self.process_column_args(pargs, self.DFU_INFO_COLUMNS)
-        for fw_info in fw_info_list:
+        for fw_info in fw_info_list.values():
             elem_str = app_ui.elem_str(fw_info.server_addr)
             fw_idx_str = str(pargs.fw_idx)
             status_str = fw_info.status.pretty_name
@@ -424,6 +477,7 @@ class BtmeshDfuCmd(BtmeshCmd):
                     "uri": uri_str,
                 }
             )
+        rows.sort(key=lambda row: row["elem"])
         app_ui.table_info(rows, columns=columns)
 
     def dfu_start_cmd(self, pargs):
@@ -443,8 +497,10 @@ class BtmeshDfuCmd(BtmeshCmd):
             nodes_order_property="name",
             group_order_property="name",
         )
-        retry_params_default = app_cfg.common.btmesh_retry_params_default
-        retry_params = self.process_btmesh_retry_params(pargs, retry_params_default)
+        retry_params_default = app_cfg.common.btmesh_multicast_retry_params_default
+        retry_params = self.process_btmesh_multicast_retry_params(
+            pargs, retry_params_default
+        )
         fw_idxs = [pargs.fw_idx] * len(elem_addrs)
         receivers = [
             FwReceiver(addr, fw_idx) for addr, fw_idx in zip(elem_addrs, fw_idxs)
@@ -456,11 +512,10 @@ class BtmeshDfuCmd(BtmeshCmd):
         fwid = pargs.fwid
         metadata = pargs.metadata
         timeout_base = pargs.timeout_base
-        multicast_threshold = pargs.multicast_threshold
         appkey_index = pargs.appkey_idx
         ttl = pargs.ttl
         chunk_size_pref = pargs.chunk_size
-        app_btmesh.subscribe(
+        app_btmesh.core.subscribe(
             "btmesh_levt_dfu_fw_update_progress",
             self.handle_fw_update_progress,
         )
@@ -476,7 +531,6 @@ class BtmeshDfuCmd(BtmeshCmd):
                 transfer_mode=transfer_mode,
                 chunk_size_pref=chunk_size_pref,
                 virtual_addr=bytes(),
-                multicast_threshold=multicast_threshold,
                 appkey_index=appkey_index,
                 ttl=ttl,
                 retry_params=retry_params,
@@ -529,7 +583,7 @@ class BtmeshDfuCmd(BtmeshCmd):
                 f"on the Initiator."
             )
         finally:
-            app_btmesh.unsubscribe(
+            app_btmesh.core.unsubscribe(
                 "btmesh_levt_dfu_fw_update_progress",
                 self.handle_fw_update_progress,
             )

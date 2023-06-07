@@ -38,7 +38,7 @@ template_contribution:
     value:
       group: device-management-client
       name: print
-      handler: emAfDeviceManagementClientCliPrint
+      handler: sli_zigbee_af_device_management_client_cli_print
       help: Prints the info relevant to device management.
   - name: cluster_functions
     value:

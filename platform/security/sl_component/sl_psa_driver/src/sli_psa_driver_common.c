@@ -27,7 +27,9 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
+
 #include "sli_psa_driver_common.h"
+
 #include "psa/crypto.h"
 
 psa_status_t sli_psa_validate_pkcs7_padding(uint8_t *padded_data,

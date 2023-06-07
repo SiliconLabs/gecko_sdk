@@ -373,11 +373,14 @@ class BtmeshDistCmd(BtmeshCmd):
                 "(default: %(default)s)"
             ),
         )
-        self.add_btmesh_basic_retry_args(
+        self.add_btmesh_multicast_basic_retry_args(
             self.dist_start_parser,
             retry_max_default=app_cfg.dist_clt.dist_retry_max_default,
             retry_interval_default=app_cfg.dist_clt.dist_retry_interval_default,
             retry_interval_lpn_default=app_cfg.dist_clt.dist_retry_interval_lpn_default,
+            retry_multicast_threshold_default=(
+                app_cfg.dist_clt.dist_retry_multicast_threshold_default
+            ),
             retry_max_help=(
                 "Maximum number of additional Firmware Distribution messages "
                 "which are sent until the corresponding status message is not "
@@ -412,6 +415,20 @@ class BtmeshDistCmd(BtmeshCmd):
                 "updating node. "
                 "Note: Distributor should not be Low Power Node so this argument "
                 "doesn't affect the retransmission of Distribution messages. "
+                "(default: %(default)s)"
+            ),
+            retry_multicast_threshold_help=(
+                "Multicast threshold used during the Firmware Compatibility Check "
+                "(Metadata Check) at the beginning of the Firmware Distribution "
+                "procedure. If the number of uncompleted servers (missing status "
+                "messages) during the aforementioned Firmware Compatibility Check "
+                "procedure exceeds or is equal to this number then the group "
+                "address is used. "
+                "Otherwise, servers are looped through one by one. "
+                "Zero value means unicast addressing. "
+                "WARNING! The multicast threshold of distribution process is "
+                "determined by the configuration of Firmware Distribution Server "
+                "component on the Distributor node. "
                 "(default: %(default)s)"
             ),
         )
@@ -599,7 +616,7 @@ class BtmeshDistCmd(BtmeshCmd):
             timeout_base=pargs.timeout_base,
             ttl=pargs.ttl,
         )
-        app_btmesh.subscribe(
+        app_btmesh.core.subscribe(
             "btmesh_levt_dist_upload_progress",
             self.handle_dist_upload_progress,
         )
@@ -630,7 +647,7 @@ class BtmeshDistCmd(BtmeshCmd):
             )
             app_ui.info("Firmware upload canceled.")
         finally:
-            app_btmesh.unsubscribe(
+            app_btmesh.core.unsubscribe(
                 "btmesh_levt_dist_upload_progress",
                 self.handle_dist_upload_progress,
             )
@@ -679,8 +696,10 @@ class BtmeshDistCmd(BtmeshCmd):
             nodes_order_property="name",
             group_order_property="name",
         )
-        retry_params_default = app_cfg.common.btmesh_retry_params_default
-        retry_params = self.process_btmesh_retry_params(pargs, retry_params_default)
+        retry_params_default = app_cfg.common.btmesh_multicast_retry_params_default
+        retry_params = self.process_btmesh_multicast_retry_params(
+            pargs, retry_params_default
+        )
         fw_list_idx = pargs.fw_list_idx
         fwid = pargs.fwid
         if fwid:
@@ -691,7 +710,7 @@ class BtmeshDistCmd(BtmeshCmd):
                 appkey_index=pargs.appkey_idx,
                 ttl=pargs.ttl,
                 err_on_fw_miss=False,
-                retry_params=retry_params.to_base(),
+                retry_params=retry_params,
             )
             if fw_status.status == FwDistStatus.FWID_NOT_FOUND:
                 raise ValueError(
@@ -707,7 +726,7 @@ class BtmeshDistCmd(BtmeshCmd):
                 appkey_index=pargs.appkey_idx,
                 ttl=pargs.ttl,
                 err_on_fw_miss=False,
-                retry_params=retry_params.to_base(),
+                retry_params=retry_params,
             )
             if fw_status.status == FwDistStatus.FWID_NOT_FOUND:
                 raise ValueError(
@@ -723,7 +742,7 @@ class BtmeshDistCmd(BtmeshCmd):
             transfer_mode = BlobTransferMode.PUSH
         else:
             transfer_mode = BlobTransferMode.PULL
-        app_btmesh.subscribe(
+        app_btmesh.core.subscribe(
             "btmesh_levt_dist_distribution_progress",
             self.handle_distribution_progress,
         )
@@ -793,14 +812,14 @@ class BtmeshDistCmd(BtmeshCmd):
                 appkey_index=pargs.appkey_idx,
                 ttl=pargs.ttl,
                 dist_poll_int=pargs.poll_int,
-                retry_params=retry_params.to_base(),
+                retry_params=retry_params,
             )
             app_ui.info(
                 f"The FW distribution of {fw_list_idx} FW list index "
                 f"is cancelled on the Distributor (0x{dist_addr:04X})."
             )
         finally:
-            app_btmesh.unsubscribe(
+            app_btmesh.core.unsubscribe(
                 "btmesh_levt_dist_distribution_progress",
                 self.handle_distribution_progress,
             )

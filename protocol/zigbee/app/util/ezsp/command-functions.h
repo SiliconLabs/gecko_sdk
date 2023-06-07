@@ -63,6 +63,70 @@ EzspStatus ezspSetConfigurationValue(
   return sendStatus;
 }
 
+EmberStatus ezspReadAttribute(
+  uint8_t endpoint,
+  uint16_t cluster,
+  uint16_t attributeId,
+  uint8_t mask,
+  uint16_t manufacturerCode,
+  uint8_t *dataType,
+  uint8_t *readLength,
+  uint8_t *dataPtr)
+{
+  EmberStatus status;
+  uint8_t maxReadLength = *readLength;
+  startCommand(EZSP_READ_ATTRIBUTE);
+  appendInt8u(endpoint);
+  appendInt16u(cluster);
+  appendInt16u(attributeId);
+  appendInt8u(mask);
+  appendInt16u(manufacturerCode);
+  EzspStatus sendStatus = sendCommand();
+  if (sendStatus == EZSP_SUCCESS) {
+    status = fetchInt8u();
+    *dataType = fetchInt8u();
+    *readLength = fetchInt8u();
+    if (*readLength > maxReadLength) {
+      return EZSP_ERROR_INVALID_VALUE;
+    }
+    fetchInt8uArray(*readLength, dataPtr);
+    return status;
+  }
+  return sendStatus;
+}
+
+EmberStatus ezspWriteAttribute(
+  uint8_t endpoint,
+  uint16_t cluster,
+  uint16_t attributeId,
+  uint8_t mask,
+  uint16_t manufacturerCode,
+  bool overrideReadOnlyAndDataType,
+  bool justTest,
+  uint8_t dataType,
+  uint8_t dataLength,
+  uint8_t *data)
+{
+  EmberStatus status;
+  startCommand(EZSP_WRITE_ATTRIBUTE);
+  appendInt8u(endpoint);
+  appendInt16u(cluster);
+  appendInt16u(attributeId);
+  appendInt8u(mask);
+  appendInt16u(manufacturerCode);
+  appendInt8u(overrideReadOnlyAndDataType);
+  appendInt8u(justTest);
+  appendInt8u(dataType);
+  appendInt8u(dataLength);
+  appendInt8uArray(dataLength, data);
+  EzspStatus sendStatus = sendCommand();
+  if (sendStatus == EZSP_SUCCESS) {
+    status = fetchInt8u();
+    return status;
+  }
+  return sendStatus;
+}
+
 EzspStatus ezspAddEndpoint(
   uint8_t endpoint,
   uint16_t profileId,
@@ -2008,6 +2072,36 @@ EmberStatus ezspGetKey(
   return sendStatus;
 }
 
+void ezspExportKey(
+  sl_zb_sec_man_context_t *context,
+  sl_zb_sec_man_key_t *key,
+  sl_status_t *status)
+{
+  startCommand(EZSP_EXPORT_KEY);
+  append_sl_zb_sec_man_context_t(context);
+  EzspStatus sendStatus = sendCommand();
+  if (sendStatus == EZSP_SUCCESS) {
+    fetch_sl_zb_sec_man_key_t(key);
+    *status = fetchInt32u();
+  }
+}
+
+sl_status_t ezspImportKey(
+  sl_zb_sec_man_context_t *context,
+  sl_zb_sec_man_key_t *key)
+{
+  sl_status_t status;
+  startCommand(EZSP_IMPORT_KEY);
+  append_sl_zb_sec_man_context_t(context);
+  append_sl_zb_sec_man_key_t(key);
+  EzspStatus sendStatus = sendCommand();
+  if (sendStatus == EZSP_SUCCESS) {
+    status = fetchInt32u();
+    return status;
+  }
+  return sendStatus;
+}
+
 EmberStatus ezspGetKeyTableEntry(
   uint8_t index,
   EmberKeyStruct *keyStruct)
@@ -2205,6 +2299,158 @@ EmberStatus ezspGetTransientKeyTableEntry(
   return sendStatus;
 }
 
+sl_status_t ezspGetNetworkKeyInfo(
+  sl_zb_sec_man_network_key_info_t *network_key_info)
+{
+  sl_status_t status;
+  startCommand(EZSP_GET_NETWORK_KEY_INFO);
+  EzspStatus sendStatus = sendCommand();
+  if (sendStatus == EZSP_SUCCESS) {
+    status = fetchInt32u();
+    fetch_sl_zb_sec_man_network_key_info_t(network_key_info);
+    return status;
+  }
+  return sendStatus;
+}
+
+void ezspGetApsKeyInfo(
+  sl_zb_sec_man_context_t *context_in,
+  EmberEUI64 eui,
+  sl_zb_sec_man_aps_key_metadata_t *key_data,
+  sl_status_t *status)
+{
+  startCommand(EZSP_GET_APS_KEY_INFO);
+  append_sl_zb_sec_man_context_t(context_in);
+  EzspStatus sendStatus = sendCommand();
+  if (sendStatus == EZSP_SUCCESS) {
+    fetchInt8uArray(8, eui);
+    fetch_sl_zb_sec_man_aps_key_metadata_t(key_data);
+    *status = fetchInt32u();
+  }
+}
+
+sl_status_t ezspImportLinkKey(
+  uint8_t index,
+  EmberEUI64 address,
+  sl_zb_sec_man_key_t *plaintext_key)
+{
+  sl_status_t status;
+  startCommand(EZSP_IMPORT_LINK_KEY);
+  appendInt8u(index);
+  appendInt8uArray(8, address);
+  append_sl_zb_sec_man_key_t(plaintext_key);
+  EzspStatus sendStatus = sendCommand();
+  if (sendStatus == EZSP_SUCCESS) {
+    status = fetchInt32u();
+    return status;
+  }
+  return sendStatus;
+}
+
+void ezspExportLinkKeyByIndex(
+  uint8_t index,
+  EmberEUI64 eui,
+  sl_zb_sec_man_key_t *plaintext_key,
+  sl_zb_sec_man_aps_key_metadata_t *key_data,
+  sl_status_t *status)
+{
+  startCommand(EZSP_EXPORT_LINK_KEY_BY_INDEX);
+  appendInt8u(index);
+  EzspStatus sendStatus = sendCommand();
+  if (sendStatus == EZSP_SUCCESS) {
+    fetchInt8uArray(8, eui);
+    fetch_sl_zb_sec_man_key_t(plaintext_key);
+    fetch_sl_zb_sec_man_aps_key_metadata_t(key_data);
+    *status = fetchInt32u();
+  }
+}
+
+void ezspExportLinkKeyByEui(
+  EmberEUI64 eui,
+  sl_zb_sec_man_key_t *plaintext_key,
+  uint8_t *index,
+  sl_zb_sec_man_aps_key_metadata_t *key_data,
+  sl_status_t *status)
+{
+  startCommand(EZSP_EXPORT_LINK_KEY_BY_EUI);
+  appendInt8uArray(8, eui);
+  EzspStatus sendStatus = sendCommand();
+  if (sendStatus == EZSP_SUCCESS) {
+    fetch_sl_zb_sec_man_key_t(plaintext_key);
+    *index = fetchInt8u();
+    fetch_sl_zb_sec_man_aps_key_metadata_t(key_data);
+    *status = fetchInt32u();
+  }
+}
+
+sl_status_t ezspCheckKeyContext(
+  sl_zb_sec_man_context_t *context)
+{
+  sl_status_t status;
+  startCommand(EZSP_CHECK_KEY_CONTEXT);
+  append_sl_zb_sec_man_context_t(context);
+  EzspStatus sendStatus = sendCommand();
+  if (sendStatus == EZSP_SUCCESS) {
+    status = fetchInt32u();
+    return status;
+  }
+  return sendStatus;
+}
+
+sl_status_t ezspImportTransientKey(
+  EmberEUI64 eui64,
+  sl_zb_sec_man_key_t *plaintext_key,
+  sl_zigbee_sec_man_flags_t flags)
+{
+  sl_status_t status;
+  startCommand(EZSP_IMPORT_TRANSIENT_KEY);
+  appendInt8uArray(8, eui64);
+  append_sl_zb_sec_man_key_t(plaintext_key);
+  appendInt8u(flags);
+  EzspStatus sendStatus = sendCommand();
+  if (sendStatus == EZSP_SUCCESS) {
+    status = fetchInt32u();
+    return status;
+  }
+  return sendStatus;
+}
+
+void ezspExportTransientKeyByIndex(
+  uint8_t index,
+  sl_zb_sec_man_context_t *context,
+  sl_zb_sec_man_key_t *plaintext_key,
+  sl_zb_sec_man_aps_key_metadata_t *key_data,
+  sl_status_t *status)
+{
+  startCommand(EZSP_EXPORT_TRANSIENT_KEY_BY_INDEX);
+  appendInt8u(index);
+  EzspStatus sendStatus = sendCommand();
+  if (sendStatus == EZSP_SUCCESS) {
+    fetch_sl_zb_sec_man_context_t(context);
+    fetch_sl_zb_sec_man_key_t(plaintext_key);
+    fetch_sl_zb_sec_man_aps_key_metadata_t(key_data);
+    *status = fetchInt32u();
+  }
+}
+
+void ezspExportTransientKeyByEui(
+  EmberEUI64 eui,
+  sl_zb_sec_man_context_t *context,
+  sl_zb_sec_man_key_t *plaintext_key,
+  sl_zb_sec_man_aps_key_metadata_t *key_data,
+  sl_status_t *status)
+{
+  startCommand(EZSP_EXPORT_TRANSIENT_KEY_BY_EUI);
+  appendInt8uArray(8, eui);
+  EzspStatus sendStatus = sendCommand();
+  if (sendStatus == EZSP_SUCCESS) {
+    fetch_sl_zb_sec_man_context_t(context);
+    fetch_sl_zb_sec_man_key_t(plaintext_key);
+    fetch_sl_zb_sec_man_aps_key_metadata_t(key_data);
+    *status = fetchInt32u();
+  }
+}
+
 //------------------------------------------------------------------------------
 // Trust Center Frames
 //------------------------------------------------------------------------------
@@ -2227,20 +2473,6 @@ EmberStatus ezspBroadcastNetworkKeySwitch(void)
 {
   EmberStatus status;
   startCommand(EZSP_BROADCAST_NETWORK_KEY_SWITCH);
-  EzspStatus sendStatus = sendCommand();
-  if (sendStatus == EZSP_SUCCESS) {
-    status = fetchInt8u();
-    return status;
-  }
-  return sendStatus;
-}
-
-EmberStatus ezspBecomeTrustCenter(
-  EmberKeyData *newNetworkKey)
-{
-  EmberStatus status;
-  startCommand(EZSP_BECOME_TRUST_CENTER);
-  appendEmberKeyData(newNetworkKey);
   EzspStatus sendStatus = sendCommand();
   if (sendStatus == EZSP_SUCCESS) {
     status = fetchInt8u();
@@ -3257,6 +3489,35 @@ void ezspGpSinkTableSetSecurityFrameCounter(
   }
 }
 
+EmberStatus ezspGpSinkCommission(
+  uint8_t options,
+  uint16_t gpmAddrForSecurity,
+  uint16_t gpmAddrForPairing,
+  uint8_t sinkEndpoint)
+{
+  EmberStatus status;
+  startCommand(EZSP_GP_SINK_COMMISSION);
+  appendInt8u(options);
+  appendInt16u(gpmAddrForSecurity);
+  appendInt16u(gpmAddrForPairing);
+  appendInt8u(sinkEndpoint);
+  EzspStatus sendStatus = sendCommand();
+  if (sendStatus == EZSP_SUCCESS) {
+    status = fetchInt8u();
+    return status;
+  }
+  return sendStatus;
+}
+
+void ezspGpTranslationTableClear(void)
+{
+  startCommand(EZSP_GP_TRANSLATION_TABLE_CLEAR);
+  EzspStatus sendStatus = sendCommand();
+  if (sendStatus == EZSP_SUCCESS) {
+    EZSP_ASH_TRACE("%s(): sendCommand() error: 0x%x", __func__, sendStatus);
+  }
+}
+
 //------------------------------------------------------------------------------
 // Secure EZSP Frames
 //------------------------------------------------------------------------------
@@ -3402,7 +3663,7 @@ static void callbackDispatch(void)
 {
   callbackPointerInit();
 
-  switch (emEzspGetFrameId()) {
+  switch (sli_zigbee_ezsp_get_frame_id()) {
     case EZSP_NO_CALLBACKS: {
       ezspNoCallbacks();
       break;

@@ -42,7 +42,7 @@ template_contribution:
     value:
       group: identify
       name: print
-      handler: emAfPluginIdentifyCliPrint
+      handler: sli_zigbee_af_identify_cli_print
       help: Print which endpoints are reporting.
   - name: cluster_service
     value:

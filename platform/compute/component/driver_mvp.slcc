@@ -1,0 +1,46 @@
+id: driver_mvp
+label: MVP Driver
+package: platform
+description: >
+  This component provides a driver for using the MVP hardware capable of
+  accelerating mathematical operations. This component can be used to accelerate
+  machine learning kernel operations as well as other general math operations.
+
+  The API of this component is marked as internal.
+category: Platform|Compute
+quality: production
+root_path: platform/compute/driver/mvp
+config_file:
+  - path: config/sl_driver_mvp_config.h
+source:
+  - path: src/sl_mvp.c
+  - path: src/sl_mvp_program_area.c
+  - path: src/sl_mvp_util.c
+include:
+  - path: inc
+    file_list:
+      - path: sl_mvp.h
+      - path: sl_mvp_program_area.h
+      - path: sl_mvp_types.h
+      - path: sl_mvp_util.h
+      - path: sl_mvp_hal.h
+provides:
+  - name: driver_mvp
+requires:
+  - name: status
+  - name: device_has_mvp
+  - name: driver_mvp_hal
+  - name: math_types
+  - name: component_catalog
+recommends:
+  - id: driver_mvp_hal_efr32
+    condition:
+      - device_series_2
+template_contribution:
+  - name: component_catalog
+    value: mvp
+  - name: event_handler
+    value:
+      event: driver_init
+      include: sl_mvp.h
+      handler: sli_mvp_init

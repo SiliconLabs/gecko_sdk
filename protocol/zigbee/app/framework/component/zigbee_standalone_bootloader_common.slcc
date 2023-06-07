@@ -26,11 +26,11 @@ template_contribution:
   - name: zigbee_stack_callback
     value: 
       callback_type: incoming_bootload_message
-      function_name: emAfPluginStandaloneBootloaderCommonIncomingBootloadMessageCallback
+      function_name: sli_zigbee_af_standalone_bootloader_common_incoming_bootload_message_callback
   - name: zigbee_stack_callback
     value: 
       callback_type: bootload_transmit_complete
-      function_name: emAfPluginStandaloneBootloaderCommonBootloadTransmitCompleteCallback
+      function_name: sli_zigbee_af_standalone_bootloader_common_bootload_transmit_complete_callback
 
 documentation:
   docset: zigbee

@@ -31,6 +31,7 @@
 #include <errno.h>
 #include <sys/time.h>
 
+#include <openthread/cli.h>
 #include <openthread/dataset.h>
 #include <openthread/link.h>
 #include <openthread/random_noncrypto.h>
@@ -166,55 +167,96 @@ static otMacKeyMaterial sCurrKey;
 static otMacKeyMaterial sNextKey;
 static otRadioKeyType   sKeyType;
 
-enum
-{
-    SIM_GPIO = 0,
-};
-
-static bool sGpioValue = false;
-
 static int8_t GetRssi(uint16_t aChannel);
 
 #if OPENTHREAD_SIMULATION_VIRTUAL_TIME == 0
-static uint8_t sDeniedNodeIdsBitVector[(MAX_NETWORK_SIZE + 7) / 8];
+
+static enum {
+    kFilterOff,
+    kFilterDenyList,
+    kFilterAllowList,
+} sFilterMode = kFilterOff;
+
+static uint8_t sFilterNodeIdsBitVector[(MAX_NETWORK_SIZE + 7) / 8];
+
+static bool FilterContainsId(uint16_t aNodeId)
+{
+    uint16_t index = aNodeId - 1;
+
+    return (sFilterNodeIdsBitVector[index / 8] & (0x80 >> (index % 8))) != 0;
+}
 
 static bool NodeIdFilterIsConnectable(uint16_t aNodeId)
 {
-    uint16_t index = aNodeId - 1;
+    bool isConnectable = true;
 
-    return (sDeniedNodeIdsBitVector[index / 8] & (0x80 >> (index % 8))) == 0;
+    switch (sFilterMode)
+    {
+    case kFilterOff:
+        break;
+    case kFilterDenyList:
+        isConnectable = !FilterContainsId(aNodeId);
+        break;
+    case kFilterAllowList:
+        isConnectable = FilterContainsId(aNodeId);
+        break;
+    }
+
+    return isConnectable;
 }
 
-static void NodeIdFilterDeny(uint16_t aNodeId)
+static void AddNodeIdToFilter(uint16_t aNodeId)
 {
     uint16_t index = aNodeId - 1;
 
-    sDeniedNodeIdsBitVector[index / 8] |= 0x80 >> (index % 8);
+    sFilterNodeIdsBitVector[index / 8] |= 0x80 >> (index % 8);
 }
 
-static void NodeIdFilterClear(void)
-{
-    memset(sDeniedNodeIdsBitVector, 0, sizeof(sDeniedNodeIdsBitVector));
-}
+OT_TOOL_WEAK void otCliOutputFormat(const char *aFmt, ...) { OT_UNUSED_VARIABLE(aFmt); }
 
 otError ProcessNodeIdFilter(void *aContext, uint8_t aArgsLength, char *aArgs[])
 {
     OT_UNUSED_VARIABLE(aContext);
 
     otError error = OT_ERROR_NONE;
+    bool    deny  = false;
 
-    otEXPECT_ACTION(aArgsLength > 0, error = OT_ERROR_INVALID_COMMAND);
+    if (aArgsLength == 0)
+    {
+        switch (sFilterMode)
+        {
+        case kFilterOff:
+            otCliOutputFormat("off");
+            break;
+        case kFilterDenyList:
+            otCliOutputFormat("deny-list");
+            break;
+        case kFilterAllowList:
+            otCliOutputFormat("allow-list");
+            break;
+        }
 
-    if (!strcmp(aArgs[0], "clear"))
+        for (uint16_t nodeId = 0; nodeId <= MAX_NETWORK_SIZE; nodeId++)
+        {
+            if (FilterContainsId(nodeId))
+            {
+                otCliOutputFormat(" %d", nodeId);
+            }
+        }
+
+        otCliOutputFormat("\r\n");
+    }
+    else if (!strcmp(aArgs[0], "clear"))
     {
         otEXPECT_ACTION(aArgsLength == 1, error = OT_ERROR_INVALID_ARGS);
 
-        NodeIdFilterClear();
+        memset(sFilterNodeIdsBitVector, 0, sizeof(sFilterNodeIdsBitVector));
+        sFilterMode = kFilterOff;
     }
-    else if (!strcmp(aArgs[0], "deny"))
+    else if ((deny = !strcmp(aArgs[0], "deny")) || !strcmp(aArgs[0], "allow"))
     {
         uint16_t nodeId;
-        char *   endptr;
+        char    *endptr;
 
         otEXPECT_ACTION(aArgsLength == 2, error = OT_ERROR_INVALID_ARGS);
 
@@ -223,7 +265,10 @@ otError ProcessNodeIdFilter(void *aContext, uint8_t aArgsLength, char *aArgs[])
         otEXPECT_ACTION(*endptr == '\0', error = OT_ERROR_INVALID_ARGS);
         otEXPECT_ACTION(1 <= nodeId && nodeId <= MAX_NETWORK_SIZE, error = OT_ERROR_INVALID_ARGS);
 
-        NodeIdFilterDeny(nodeId);
+        otEXPECT_ACTION(sFilterMode != (deny ? kFilterAllowList : kFilterDenyList), error = OT_ERROR_INVALID_STATE);
+
+        AddNodeIdToFilter(nodeId);
+        sFilterMode = deny ? kFilterDenyList : kFilterAllowList;
     }
     else
     {
@@ -244,10 +289,7 @@ otError ProcessNodeIdFilter(void *aContext, uint8_t aArgsLength, char *aArgs[])
 }
 #endif // OPENTHREAD_SIMULATION_VIRTUAL_TIME == 0
 
-static bool IsTimeAfterOrEqual(uint32_t aTimeA, uint32_t aTimeB)
-{
-    return (aTimeA - aTimeB) < (1U << 31);
-}
+static bool IsTimeAfterOrEqual(uint32_t aTimeA, uint32_t aTimeB) { return (aTimeA - aTimeB) < (1U << 31); }
 
 static void ReverseExtAddress(otExtAddress *aReversed, const otExtAddress *aOrigin)
 {
@@ -268,14 +310,14 @@ static bool hasFramePending(const otRadioFrame *aFrame)
     switch (src.mType)
     {
     case OT_MAC_ADDRESS_TYPE_SHORT:
-        rval = utilsSoftSrcMatchShortFindEntry(0, src.mAddress.mShortAddress) >= 0;
+        rval = utilsSoftSrcMatchShortFindEntry(src.mAddress.mShortAddress) >= 0;
         break;
     case OT_MAC_ADDRESS_TYPE_EXTENDED:
     {
         otExtAddress extAddr;
 
         ReverseExtAddress(&extAddr, &src.mAddress.mExtAddress);
-        rval = utilsSoftSrcMatchExtFindEntry(0, &extAddr) >= 0;
+        rval = utilsSoftSrcMatchExtFindEntry(&extAddr) >= 0;
         break;
     }
     default:
@@ -335,7 +377,7 @@ void otPlatRadioSetPanId(otInstance *aInstance, otPanId aPanid)
     assert(aInstance != NULL);
 
     sPanid = aPanid;
-    utilsSoftSrcMatchSetPanId(0, aPanid);
+    utilsSoftSrcMatchSetPanId(aPanid);
 }
 
 void otPlatRadioSetExtendedAddress(otInstance *aInstance, const otExtAddress *aExtAddress)
@@ -801,10 +843,7 @@ exit:
     return;
 }
 
-bool platformRadioIsTransmitPending(void)
-{
-    return sState == OT_RADIO_STATE_TRANSMIT && !sTxWait;
-}
+bool platformRadioIsTransmitPending(void) { return sState == OT_RADIO_STATE_TRANSMIT && !sTxWait; }
 
 #if OPENTHREAD_SIMULATION_VIRTUAL_TIME
 void platformRadioReceive(otInstance *aInstance, uint8_t *aBuf, uint16_t aBufLength)
@@ -1283,7 +1322,7 @@ static uint8_t generateAckIeData(uint8_t *aLinkMetricsIeData, uint8_t aLinkMetri
 #endif
 
 #if OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
-otError otPlatRadioEnableCsl(otInstance *        aInstance,
+otError otPlatRadioEnableCsl(otInstance         *aInstance,
                              uint32_t            aCslPeriod,
                              otShortAddress      aShortAddr,
                              const otExtAddress *aExtAddr)
@@ -1314,7 +1353,7 @@ uint8_t otPlatRadioGetCslAccuracy(otInstance *aInstance)
 }
 #endif // OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
 
-void otPlatRadioSetMacKey(otInstance *            aInstance,
+void otPlatRadioSetMacKey(otInstance             *aInstance,
                           uint8_t                 aKeyIdMode,
                           uint8_t                 aKeyId,
                           const otMacKeyMaterial *aPrevKey,
@@ -1358,10 +1397,10 @@ exit:
 }
 
 #if OPENTHREAD_CONFIG_MLE_LINK_METRICS_SUBJECT_ENABLE
-otError otPlatRadioConfigureEnhAckProbing(otInstance *         aInstance,
+otError otPlatRadioConfigureEnhAckProbing(otInstance          *aInstance,
                                           otLinkMetrics        aLinkMetrics,
                                           const otShortAddress aShortAddress,
-                                          const otExtAddress * aExtAddress)
+                                          const otExtAddress  *aExtAddress)
 {
     OT_UNUSED_VARIABLE(aInstance);
 
@@ -1405,26 +1444,4 @@ void parseFromEnvAsUint16(const char *aEnvName, uint16_t *aValue)
             exit(EXIT_FAILURE);
         }
     }
-}
-
-otError otPlatDiagGpioSet(uint32_t aGpio, bool aValue)
-{
-    otError error = OT_ERROR_NONE;
-
-    otEXPECT_ACTION(aGpio == SIM_GPIO, error = OT_ERROR_INVALID_ARGS);
-    sGpioValue = aValue;
-
-exit:
-    return error;
-}
-
-otError otPlatDiagGpioGet(uint32_t aGpio, bool *aValue)
-{
-    otError error = OT_ERROR_NONE;
-
-    otEXPECT_ACTION((aGpio == SIM_GPIO) && (aValue != NULL), error = OT_ERROR_INVALID_ARGS);
-    *aValue = sGpioValue;
-
-exit:
-    return error;
 }

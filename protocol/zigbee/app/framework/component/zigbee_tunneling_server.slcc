@@ -53,7 +53,7 @@ template_contribution:
     value:
       group: tunneling-server
       name: transfer
-      handler: emAfPluginTunnelingServerCliTransfer
+      handler: sli_zigbee_af_tunneling_server_cli_transfer
       help: Transfers data to a client through a Tunneling cluster tunnel.
       argument:
       - type: uint16
@@ -70,7 +70,7 @@ template_contribution:
     value:
       group: tunneling-server
       name: print
-      handler: emAfPluginTunnelingServerPrintCliCommand
+      handler: sli_zigbee_af_tunneling_server_printCliCommand
       help: Prints the status of active tunnels.
   - name: cluster_functions
     value:

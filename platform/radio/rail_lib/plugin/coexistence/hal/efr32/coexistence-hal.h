@@ -407,24 +407,21 @@ extern COEX_HAL_GpioConfig_t sli_coex_wifiTxCfg;
 #if COEX_HAL_FAST_REQUEST
 static inline void COEX_HAL_SetPriorityAndPwmRequest(void)
 {
-  uint8_t pins = 0U;
 #if defined(SL_RAIL_UTIL_COEX_PWM_REQ_PORT) && defined(SL_RAIL_UTIL_COEX_PRI_PORT) && SL_RAIL_UTIL_COEX_PRI_ASSERT_LEVEL == SL_RAIL_UTIL_COEX_PWM_REQ_ASSERT_LEVEL
   if (SL_RAIL_UTIL_COEX_PWM_REQ_PORT == SL_RAIL_UTIL_COEX_PRI_PORT) {
-    pins = (1UL << SL_RAIL_UTIL_COEX_PRI_PIN) | (1UL << SL_RAIL_UTIL_COEX_PWM_REQ_PIN);
-  }
-#endif
-  if (pins != 0U) {
     COEX_HAL_SetGpioPort(SL_RAIL_UTIL_COEX_PRI_PORT,
-                         pins,
+                         (1UL << SL_RAIL_UTIL_COEX_PRI_PIN) | (1UL << SL_RAIL_UTIL_COEX_PWM_REQ_PIN),
                          SL_RAIL_UTIL_COEX_PRI_ASSERT_LEVEL);
-  } else {
-#ifdef COEX_HAL_CONFIG_DP_PRS
-    COEX_HAL_SetPriority();
-    COEX_HAL_SetPwmRequest();
-#else
-    COEX_HAL_SetPwmRequest();
-    COEX_HAL_SetPriority();
+  } else
 #endif
+  {
+  #ifdef COEX_HAL_CONFIG_DP_PRS
+    COEX_HAL_SetPriority();
+    COEX_HAL_SetPwmRequest();
+  #else
+    COEX_HAL_SetPwmRequest();
+    COEX_HAL_SetPriority();
+  #endif
   }
 }
 
@@ -433,12 +430,13 @@ static inline void COEX_HAL_SetPwmRequestAndRequestAndPriority(void)
   uint32_t pri_and_pwm_req_pins = 0U;
   uint32_t pri_and_req_pins = 0U;
 
-#if defined(SL_RAIL_UTIL_COEX_PWM_REQ_PORT) && defined(SL_RAIL_UTIL_COEX_PRI_PORT) && SL_RAIL_UTIL_COEX_PRI_ASSERT_LEVEL == SL_RAIL_UTIL_COEX_PWM_REQ_ASSERT_LEVEL
+#ifdef SL_RAIL_UTIL_COEX_PRI_PORT
+#if defined(SL_RAIL_UTIL_COEX_PWM_REQ_PORT) && SL_RAIL_UTIL_COEX_PRI_ASSERT_LEVEL == SL_RAIL_UTIL_COEX_PWM_REQ_ASSERT_LEVEL
   if (SL_RAIL_UTIL_COEX_PWM_REQ_PORT == SL_RAIL_UTIL_COEX_PRI_PORT) {
     pri_and_pwm_req_pins = (1UL << SL_RAIL_UTIL_COEX_PRI_PIN) | (1UL << SL_RAIL_UTIL_COEX_PWM_REQ_PIN);
   }
 #endif
-#if defined(SL_RAIL_UTIL_COEX_REQ_PORT) && defined(SL_RAIL_UTIL_COEX_PRI_PORT) && SL_RAIL_UTIL_COEX_PRI_ASSERT_LEVEL == SL_RAIL_UTIL_COEX_REQ_ASSERT_LEVEL
+#if defined(SL_RAIL_UTIL_COEX_REQ_PORT) && SL_RAIL_UTIL_COEX_PRI_ASSERT_LEVEL == SL_RAIL_UTIL_COEX_REQ_ASSERT_LEVEL
   if (SL_RAIL_UTIL_COEX_REQ_PORT == SL_RAIL_UTIL_COEX_PRI_PORT) {
     pri_and_req_pins = (1UL << SL_RAIL_UTIL_COEX_PRI_PIN) | (1UL << SL_RAIL_UTIL_COEX_REQ_PIN);
   }
@@ -459,7 +457,9 @@ static inline void COEX_HAL_SetPwmRequestAndRequestAndPriority(void)
     COEX_HAL_SetGpioPort(SL_RAIL_UTIL_COEX_PRI_PORT,
                          pri_and_req_pins,
                          SL_RAIL_UTIL_COEX_PRI_ASSERT_LEVEL);
-  } else {
+  } else
+#endif //SL_RAIL_UTIL_COEX_PRI_PORT
+  {
 #ifdef COEX_HAL_CONFIG_DP_PRS
     COEX_HAL_SetPriority();
     COEX_HAL_SetRequest();
@@ -477,4 +477,4 @@ static inline void COEX_HAL_SetPwmRequestAndRequestAndPriority(void)
 }
 #endif
 
-#endif  // __COEXISTENCE_HAL_H__
+#endif // __COEXISTENCE_HAL_H__

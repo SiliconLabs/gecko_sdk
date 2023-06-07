@@ -249,15 +249,9 @@ typedef struct {
 #define _DCDC_EM01CTRL0_DRVSPEED_SHIFT                8                                               /**< Shift value for DCDC_DRVSPEED               */
 #define _DCDC_EM01CTRL0_DRVSPEED_MASK                 0x300UL                                         /**< Bit mask for DCDC_DRVSPEED                  */
 #define _DCDC_EM01CTRL0_DRVSPEED_DEFAULT              0x00000001UL                                    /**< Mode DEFAULT for DCDC_EM01CTRL0             */
-#define _DCDC_EM01CTRL0_DRVSPEED_BEST_EMI             0x00000000UL                                    /**< Mode BEST_EMI for DCDC_EM01CTRL0            */
 #define _DCDC_EM01CTRL0_DRVSPEED_DEFAULT_SETTING      0x00000001UL                                    /**< Mode DEFAULT_SETTING for DCDC_EM01CTRL0     */
-#define _DCDC_EM01CTRL0_DRVSPEED_INTERMEDIATE         0x00000002UL                                    /**< Mode INTERMEDIATE for DCDC_EM01CTRL0        */
-#define _DCDC_EM01CTRL0_DRVSPEED_BEST_EFFICIENCY      0x00000003UL                                    /**< Mode BEST_EFFICIENCY for DCDC_EM01CTRL0     */
 #define DCDC_EM01CTRL0_DRVSPEED_DEFAULT               (_DCDC_EM01CTRL0_DRVSPEED_DEFAULT << 8)         /**< Shifted mode DEFAULT for DCDC_EM01CTRL0     */
-#define DCDC_EM01CTRL0_DRVSPEED_BEST_EMI              (_DCDC_EM01CTRL0_DRVSPEED_BEST_EMI << 8)        /**< Shifted mode BEST_EMI for DCDC_EM01CTRL0    */
 #define DCDC_EM01CTRL0_DRVSPEED_DEFAULT_SETTING       (_DCDC_EM01CTRL0_DRVSPEED_DEFAULT_SETTING << 8) /**< Shifted mode DEFAULT_SETTING for DCDC_EM01CTRL0*/
-#define DCDC_EM01CTRL0_DRVSPEED_INTERMEDIATE          (_DCDC_EM01CTRL0_DRVSPEED_INTERMEDIATE << 8)    /**< Shifted mode INTERMEDIATE for DCDC_EM01CTRL0*/
-#define DCDC_EM01CTRL0_DRVSPEED_BEST_EFFICIENCY       (_DCDC_EM01CTRL0_DRVSPEED_BEST_EFFICIENCY << 8) /**< Shifted mode BEST_EFFICIENCY for DCDC_EM01CTRL0*/
 
 /* Bit fields for DCDC EM23CTRL0 */
 #define _DCDC_EM23CTRL0_RESETVALUE                    0x00000103UL                                    /**< Default value for DCDC_EM23CTRL0            */
@@ -273,15 +267,9 @@ typedef struct {
 #define _DCDC_EM23CTRL0_DRVSPEED_SHIFT                8                                               /**< Shift value for DCDC_DRVSPEED               */
 #define _DCDC_EM23CTRL0_DRVSPEED_MASK                 0x300UL                                         /**< Bit mask for DCDC_DRVSPEED                  */
 #define _DCDC_EM23CTRL0_DRVSPEED_DEFAULT              0x00000001UL                                    /**< Mode DEFAULT for DCDC_EM23CTRL0             */
-#define _DCDC_EM23CTRL0_DRVSPEED_BEST_EMI             0x00000000UL                                    /**< Mode BEST_EMI for DCDC_EM23CTRL0            */
 #define _DCDC_EM23CTRL0_DRVSPEED_DEFAULT_SETTING      0x00000001UL                                    /**< Mode DEFAULT_SETTING for DCDC_EM23CTRL0     */
-#define _DCDC_EM23CTRL0_DRVSPEED_INTERMEDIATE         0x00000002UL                                    /**< Mode INTERMEDIATE for DCDC_EM23CTRL0        */
-#define _DCDC_EM23CTRL0_DRVSPEED_BEST_EFFICIENCY      0x00000003UL                                    /**< Mode BEST_EFFICIENCY for DCDC_EM23CTRL0     */
 #define DCDC_EM23CTRL0_DRVSPEED_DEFAULT               (_DCDC_EM23CTRL0_DRVSPEED_DEFAULT << 8)         /**< Shifted mode DEFAULT for DCDC_EM23CTRL0     */
-#define DCDC_EM23CTRL0_DRVSPEED_BEST_EMI              (_DCDC_EM23CTRL0_DRVSPEED_BEST_EMI << 8)        /**< Shifted mode BEST_EMI for DCDC_EM23CTRL0    */
 #define DCDC_EM23CTRL0_DRVSPEED_DEFAULT_SETTING       (_DCDC_EM23CTRL0_DRVSPEED_DEFAULT_SETTING << 8) /**< Shifted mode DEFAULT_SETTING for DCDC_EM23CTRL0*/
-#define DCDC_EM23CTRL0_DRVSPEED_INTERMEDIATE          (_DCDC_EM23CTRL0_DRVSPEED_INTERMEDIATE << 8)    /**< Shifted mode INTERMEDIATE for DCDC_EM23CTRL0*/
-#define DCDC_EM23CTRL0_DRVSPEED_BEST_EFFICIENCY       (_DCDC_EM23CTRL0_DRVSPEED_BEST_EFFICIENCY << 8) /**< Shifted mode BEST_EFFICIENCY for DCDC_EM23CTRL0*/
 
 /* Bit fields for DCDC BSTCTRL */
 #define _DCDC_BSTCTRL_RESETVALUE                      0x00000047UL                                 /**< Default value for DCDC_BSTCTRL              */
@@ -328,21 +316,22 @@ typedef struct {
 #define DCDC_BSTCTRL_IPKTMAXCTRL_TMAX_2P03us          (_DCDC_BSTCTRL_IPKTMAXCTRL_TMAX_2P03us << 4) /**< Shifted mode TMAX_2P03us for DCDC_BSTCTRL   */
 
 /* Bit fields for DCDC BSTEM01CTRL */
-#define _DCDC_BSTEM01CTRL_RESETVALUE                  0x0000010CUL                                      /**< Default value for DCDC_BSTEM01CTRL          */
+#define _DCDC_BSTEM01CTRL_RESETVALUE                  0x0000010DUL                                      /**< Default value for DCDC_BSTEM01CTRL          */
 #define _DCDC_BSTEM01CTRL_MASK                        0x0000030FUL                                      /**< Mask for DCDC_BSTEM01CTRL                   */
 #define _DCDC_BSTEM01CTRL_IPKVAL_SHIFT                0                                                 /**< Shift value for DCDC_IPKVAL                 */
 #define _DCDC_BSTEM01CTRL_IPKVAL_MASK                 0xFUL                                             /**< Bit mask for DCDC_IPKVAL                    */
-#define _DCDC_BSTEM01CTRL_IPKVAL_DEFAULT              0x0000000CUL                                      /**< Mode DEFAULT for DCDC_BSTEM01CTRL           */
-#define _DCDC_BSTEM01CTRL_IPKVAL_Load10mA             0x00000003UL                                      /**< Mode Load10mA for DCDC_BSTEM01CTRL          */
-#define _DCDC_BSTEM01CTRL_IPKVAL_Load11mA             0x00000004UL                                      /**< Mode Load11mA for DCDC_BSTEM01CTRL          */
-#define _DCDC_BSTEM01CTRL_IPKVAL_Load13mA             0x00000005UL                                      /**< Mode Load13mA for DCDC_BSTEM01CTRL          */
-#define _DCDC_BSTEM01CTRL_IPKVAL_Load15mA             0x00000006UL                                      /**< Mode Load15mA for DCDC_BSTEM01CTRL          */
-#define _DCDC_BSTEM01CTRL_IPKVAL_Load16mA             0x00000007UL                                      /**< Mode Load16mA for DCDC_BSTEM01CTRL          */
-#define _DCDC_BSTEM01CTRL_IPKVAL_Load18mA             0x00000008UL                                      /**< Mode Load18mA for DCDC_BSTEM01CTRL          */
-#define _DCDC_BSTEM01CTRL_IPKVAL_Load20mA             0x00000009UL                                      /**< Mode Load20mA for DCDC_BSTEM01CTRL          */
-#define _DCDC_BSTEM01CTRL_IPKVAL_Load21mA             0x0000000AUL                                      /**< Mode Load21mA for DCDC_BSTEM01CTRL          */
-#define _DCDC_BSTEM01CTRL_IPKVAL_Load23mA             0x0000000BUL                                      /**< Mode Load23mA for DCDC_BSTEM01CTRL          */
-#define _DCDC_BSTEM01CTRL_IPKVAL_Load25mA             0x0000000CUL                                      /**< Mode Load25mA for DCDC_BSTEM01CTRL          */
+#define _DCDC_BSTEM01CTRL_IPKVAL_DEFAULT              0x0000000DUL                                      /**< Mode DEFAULT for DCDC_BSTEM01CTRL           */
+#define _DCDC_BSTEM01CTRL_IPKVAL_Load10mA             0x00000004UL                                      /**< Mode Load10mA for DCDC_BSTEM01CTRL          */
+#define _DCDC_BSTEM01CTRL_IPKVAL_Load11mA             0x00000005UL                                      /**< Mode Load11mA for DCDC_BSTEM01CTRL          */
+#define _DCDC_BSTEM01CTRL_IPKVAL_Load13mA             0x00000006UL                                      /**< Mode Load13mA for DCDC_BSTEM01CTRL          */
+#define _DCDC_BSTEM01CTRL_IPKVAL_Load15mA             0x00000007UL                                      /**< Mode Load15mA for DCDC_BSTEM01CTRL          */
+#define _DCDC_BSTEM01CTRL_IPKVAL_Load16mA             0x00000008UL                                      /**< Mode Load16mA for DCDC_BSTEM01CTRL          */
+#define _DCDC_BSTEM01CTRL_IPKVAL_Load18mA             0x00000009UL                                      /**< Mode Load18mA for DCDC_BSTEM01CTRL          */
+#define _DCDC_BSTEM01CTRL_IPKVAL_Load20mA             0x0000000AUL                                      /**< Mode Load20mA for DCDC_BSTEM01CTRL          */
+#define _DCDC_BSTEM01CTRL_IPKVAL_Load21mA             0x0000000BUL                                      /**< Mode Load21mA for DCDC_BSTEM01CTRL          */
+#define _DCDC_BSTEM01CTRL_IPKVAL_Load23mA             0x0000000CUL                                      /**< Mode Load23mA for DCDC_BSTEM01CTRL          */
+#define _DCDC_BSTEM01CTRL_IPKVAL_Load25mA             0x0000000DUL                                      /**< Mode Load25mA for DCDC_BSTEM01CTRL          */
+#define _DCDC_BSTEM01CTRL_IPKVAL_Load26mA             0x0000000EUL                                      /**< Mode Load26mA for DCDC_BSTEM01CTRL          */
 #define DCDC_BSTEM01CTRL_IPKVAL_DEFAULT               (_DCDC_BSTEM01CTRL_IPKVAL_DEFAULT << 0)           /**< Shifted mode DEFAULT for DCDC_BSTEM01CTRL   */
 #define DCDC_BSTEM01CTRL_IPKVAL_Load10mA              (_DCDC_BSTEM01CTRL_IPKVAL_Load10mA << 0)          /**< Shifted mode Load10mA for DCDC_BSTEM01CTRL  */
 #define DCDC_BSTEM01CTRL_IPKVAL_Load11mA              (_DCDC_BSTEM01CTRL_IPKVAL_Load11mA << 0)          /**< Shifted mode Load11mA for DCDC_BSTEM01CTRL  */
@@ -354,40 +343,31 @@ typedef struct {
 #define DCDC_BSTEM01CTRL_IPKVAL_Load21mA              (_DCDC_BSTEM01CTRL_IPKVAL_Load21mA << 0)          /**< Shifted mode Load21mA for DCDC_BSTEM01CTRL  */
 #define DCDC_BSTEM01CTRL_IPKVAL_Load23mA              (_DCDC_BSTEM01CTRL_IPKVAL_Load23mA << 0)          /**< Shifted mode Load23mA for DCDC_BSTEM01CTRL  */
 #define DCDC_BSTEM01CTRL_IPKVAL_Load25mA              (_DCDC_BSTEM01CTRL_IPKVAL_Load25mA << 0)          /**< Shifted mode Load25mA for DCDC_BSTEM01CTRL  */
+#define DCDC_BSTEM01CTRL_IPKVAL_Load26mA              (_DCDC_BSTEM01CTRL_IPKVAL_Load26mA << 0)          /**< Shifted mode Load26mA for DCDC_BSTEM01CTRL  */
 #define _DCDC_BSTEM01CTRL_DRVSPEED_SHIFT              8                                                 /**< Shift value for DCDC_DRVSPEED               */
 #define _DCDC_BSTEM01CTRL_DRVSPEED_MASK               0x300UL                                           /**< Bit mask for DCDC_DRVSPEED                  */
 #define _DCDC_BSTEM01CTRL_DRVSPEED_DEFAULT            0x00000001UL                                      /**< Mode DEFAULT for DCDC_BSTEM01CTRL           */
-#define _DCDC_BSTEM01CTRL_DRVSPEED_BEST_EMI           0x00000000UL                                      /**< Mode BEST_EMI for DCDC_BSTEM01CTRL          */
 #define _DCDC_BSTEM01CTRL_DRVSPEED_DEFAULT_SETTING    0x00000001UL                                      /**< Mode DEFAULT_SETTING for DCDC_BSTEM01CTRL   */
-#define _DCDC_BSTEM01CTRL_DRVSPEED_INTERMEDIATE       0x00000002UL                                      /**< Mode INTERMEDIATE for DCDC_BSTEM01CTRL      */
-#define _DCDC_BSTEM01CTRL_DRVSPEED_BEST_EFFICIENCY    0x00000003UL                                      /**< Mode BEST_EFFICIENCY for DCDC_BSTEM01CTRL   */
 #define DCDC_BSTEM01CTRL_DRVSPEED_DEFAULT             (_DCDC_BSTEM01CTRL_DRVSPEED_DEFAULT << 8)         /**< Shifted mode DEFAULT for DCDC_BSTEM01CTRL   */
-#define DCDC_BSTEM01CTRL_DRVSPEED_BEST_EMI            (_DCDC_BSTEM01CTRL_DRVSPEED_BEST_EMI << 8)        /**< Shifted mode BEST_EMI for DCDC_BSTEM01CTRL  */
 #define DCDC_BSTEM01CTRL_DRVSPEED_DEFAULT_SETTING     (_DCDC_BSTEM01CTRL_DRVSPEED_DEFAULT_SETTING << 8) /**< Shifted mode DEFAULT_SETTING for DCDC_BSTEM01CTRL*/
-#define DCDC_BSTEM01CTRL_DRVSPEED_INTERMEDIATE        (_DCDC_BSTEM01CTRL_DRVSPEED_INTERMEDIATE << 8)    /**< Shifted mode INTERMEDIATE for DCDC_BSTEM01CTRL*/
-#define DCDC_BSTEM01CTRL_DRVSPEED_BEST_EFFICIENCY     (_DCDC_BSTEM01CTRL_DRVSPEED_BEST_EFFICIENCY << 8) /**< Shifted mode BEST_EFFICIENCY for DCDC_BSTEM01CTRL*/
 
 /* Bit fields for DCDC BSTEM23CTRL */
-#define _DCDC_BSTEM23CTRL_RESETVALUE                  0x00000109UL                                      /**< Default value for DCDC_BSTEM23CTRL          */
+#define _DCDC_BSTEM23CTRL_RESETVALUE                  0x0000010AUL                                      /**< Default value for DCDC_BSTEM23CTRL          */
 #define _DCDC_BSTEM23CTRL_MASK                        0x0000030FUL                                      /**< Mask for DCDC_BSTEM23CTRL                   */
 #define _DCDC_BSTEM23CTRL_IPKVAL_SHIFT                0                                                 /**< Shift value for DCDC_IPKVAL                 */
 #define _DCDC_BSTEM23CTRL_IPKVAL_MASK                 0xFUL                                             /**< Bit mask for DCDC_IPKVAL                    */
-#define _DCDC_BSTEM23CTRL_IPKVAL_DEFAULT              0x00000009UL                                      /**< Mode DEFAULT for DCDC_BSTEM23CTRL           */
-#define _DCDC_BSTEM23CTRL_IPKVAL_Load10mA             0x00000009UL                                      /**< Mode Load10mA for DCDC_BSTEM23CTRL          */
+#define _DCDC_BSTEM23CTRL_IPKVAL_DEFAULT              0x0000000AUL                                      /**< Mode DEFAULT for DCDC_BSTEM23CTRL           */
+#define _DCDC_BSTEM23CTRL_IPKVAL_Load5mA              0x00000004UL                                      /**< Mode Load5mA for DCDC_BSTEM23CTRL           */
+#define _DCDC_BSTEM23CTRL_IPKVAL_Load10mA             0x0000000AUL                                      /**< Mode Load10mA for DCDC_BSTEM23CTRL          */
 #define DCDC_BSTEM23CTRL_IPKVAL_DEFAULT               (_DCDC_BSTEM23CTRL_IPKVAL_DEFAULT << 0)           /**< Shifted mode DEFAULT for DCDC_BSTEM23CTRL   */
+#define DCDC_BSTEM23CTRL_IPKVAL_Load5mA               (_DCDC_BSTEM23CTRL_IPKVAL_Load5mA << 0)           /**< Shifted mode Load5mA for DCDC_BSTEM23CTRL   */
 #define DCDC_BSTEM23CTRL_IPKVAL_Load10mA              (_DCDC_BSTEM23CTRL_IPKVAL_Load10mA << 0)          /**< Shifted mode Load10mA for DCDC_BSTEM23CTRL  */
 #define _DCDC_BSTEM23CTRL_DRVSPEED_SHIFT              8                                                 /**< Shift value for DCDC_DRVSPEED               */
 #define _DCDC_BSTEM23CTRL_DRVSPEED_MASK               0x300UL                                           /**< Bit mask for DCDC_DRVSPEED                  */
 #define _DCDC_BSTEM23CTRL_DRVSPEED_DEFAULT            0x00000001UL                                      /**< Mode DEFAULT for DCDC_BSTEM23CTRL           */
-#define _DCDC_BSTEM23CTRL_DRVSPEED_BEST_EMI           0x00000000UL                                      /**< Mode BEST_EMI for DCDC_BSTEM23CTRL          */
 #define _DCDC_BSTEM23CTRL_DRVSPEED_DEFAULT_SETTING    0x00000001UL                                      /**< Mode DEFAULT_SETTING for DCDC_BSTEM23CTRL   */
-#define _DCDC_BSTEM23CTRL_DRVSPEED_INTERMEDIATE       0x00000002UL                                      /**< Mode INTERMEDIATE for DCDC_BSTEM23CTRL      */
-#define _DCDC_BSTEM23CTRL_DRVSPEED_BEST_EFFICIENCY    0x00000003UL                                      /**< Mode BEST_EFFICIENCY for DCDC_BSTEM23CTRL   */
 #define DCDC_BSTEM23CTRL_DRVSPEED_DEFAULT             (_DCDC_BSTEM23CTRL_DRVSPEED_DEFAULT << 8)         /**< Shifted mode DEFAULT for DCDC_BSTEM23CTRL   */
-#define DCDC_BSTEM23CTRL_DRVSPEED_BEST_EMI            (_DCDC_BSTEM23CTRL_DRVSPEED_BEST_EMI << 8)        /**< Shifted mode BEST_EMI for DCDC_BSTEM23CTRL  */
 #define DCDC_BSTEM23CTRL_DRVSPEED_DEFAULT_SETTING     (_DCDC_BSTEM23CTRL_DRVSPEED_DEFAULT_SETTING << 8) /**< Shifted mode DEFAULT_SETTING for DCDC_BSTEM23CTRL*/
-#define DCDC_BSTEM23CTRL_DRVSPEED_INTERMEDIATE        (_DCDC_BSTEM23CTRL_DRVSPEED_INTERMEDIATE << 8)    /**< Shifted mode INTERMEDIATE for DCDC_BSTEM23CTRL*/
-#define DCDC_BSTEM23CTRL_DRVSPEED_BEST_EFFICIENCY     (_DCDC_BSTEM23CTRL_DRVSPEED_BEST_EFFICIENCY << 8) /**< Shifted mode BEST_EFFICIENCY for DCDC_BSTEM23CTRL*/
 
 /* Bit fields for DCDC IF */
 #define _DCDC_IF_RESETVALUE                           0x00000000UL                       /**< Default value for DCDC_IF                   */

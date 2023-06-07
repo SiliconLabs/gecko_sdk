@@ -28,20 +28,21 @@ import os
 import struct
 from typing import Callable, ClassVar, Iterable, List, Optional, Tuple
 
-from bgapix.bglibx import BGLibExt, BGLibExtRetryParams
+from bgapix.bglibx import BGLibExtRetryParams
 from bgapix.slstatus import SlStatus
 
 from . import util
 from .conf import Configurator
-from .db import BtmeshDatabase, ModelID
+from .core import BtmeshComponent, BtmeshCore
+from .db import ModelID
 from .dfu import (FWID, FwReceiver, FwReceiverInfo, FwReceiverPhase,
                   FwUpdateAdditionalInfo, FwUpdateClient, FwUpdateStatus)
 from .errors import BtmeshError, BtmeshErrorCode
-from .event import LocalEvent, LocalEventBus
+from .event import LocalEvent
 from .mbt import (Blob, BlobTransferClient, BlobTransferMode, MBTProgressEvent,
                   MBTStatus)
 from .mdl import NamedModelID
-from .util import BtmeshRetryParams
+from .util import BtmeshMulticastRetryParams, BtmeshRetryParams
 
 logger = logging.getLogger(__name__)
 
@@ -158,7 +159,7 @@ class FwDistDistributionProgressEvent(LocalEvent):
     receivers_info: Iterable[FwReceiverInfo]
 
 
-class FwDistributionClient:
+class FwDistributionClient(BtmeshComponent):
     # The invalid state error code means unrecoverable error most of the time.
     # There is an important exception for segmented transfer.
     # The transport layer rejects to send two segmented message to the same
@@ -183,28 +184,27 @@ class FwDistributionClient:
 
     def __init__(
         self,
-        lib: BGLibExt,
-        db: BtmeshDatabase,
-        evtbus: LocalEventBus,
+        core: BtmeshCore,
         conf: Configurator,
         mbt_clt: BlobTransferClient,
         dfu_clt: FwUpdateClient,
-        retry_params_default: BtmeshRetryParams,
+        retry_params_default: BtmeshMulticastRetryParams,
     ):
-        self.lib = lib
-        self.db = db
-        self.evtbus = evtbus
+        super().__init__(core)
         self.conf = conf
         self.mbt_clt = mbt_clt
         self.dfu_clt = dfu_clt
         self.retry_params_default = retry_params_default
 
-    def init(self, elem_index: int, retry_params_default: BtmeshRetryParams = None):
+    def init(
+        self, elem_index: int, retry_params_default: BtmeshMulticastRetryParams = None
+    ):
         self.lib.btmesh.fw_dist_client.init(elem_index)
         self.set_retry_params_default(retry_params_default)
 
-    def set_retry_params_default(self, retry_params: BtmeshRetryParams):
+    def set_retry_params_default(self, retry_params: BtmeshMulticastRetryParams):
         if retry_params:
+            assert isinstance(retry_params, BtmeshMulticastRetryParams)
             self.retry_params_default = copy.copy(retry_params)
 
     def validate_dist_addr(self, dist_addr: int) -> None:
@@ -241,13 +241,13 @@ class FwDistributionClient:
         util.validate_ttl(ttl)
         self.lib.btmesh.fw_dist_client.setup(elem_index, appkey_index, ttl)
         if retry_params is None:
-            retry_params = self.retry_params_default.to_base()
+            retry_params = self.retry_params_default
         # Query the FW Distribution server capabilities
         capabilities_evts = self.lib.retry_until(
             self.lib.btmesh.fw_dist_client.get_capabilities,
             elem_index,
             dist_addr,
-            **retry_params.to_dict(),
+            retry_params=retry_params,
             retry_cmd_err_code=self.RETRY_CMD_ERR_CODES,
             event_selector="btmesh_evt_fw_dist_client_capabilities_status",
             elem_index=elem_index,
@@ -280,13 +280,13 @@ class FwDistributionClient:
         util.validate_ttl(ttl)
         self.lib.btmesh.fw_dist_client.setup(elem_index, appkey_index, ttl)
         if retry_params is None:
-            retry_params = self.retry_params_default.to_base()
+            retry_params = self.retry_params_default
         fw_status_evts = self.lib.retry_until(
             self.lib.btmesh.fw_dist_client.get_fw,
             elem_index,
             dist_addr,
             fwid.to_bytes(),
-            **retry_params.to_dict(),
+            retry_params=retry_params,
             retry_cmd_err_code=self.RETRY_CMD_ERR_CODES,
             event_selector="btmesh_evt_fw_dist_client_fw_status",
             elem_index=elem_index,
@@ -327,13 +327,13 @@ class FwDistributionClient:
         util.validate_ttl(ttl)
         self.lib.btmesh.fw_dist_client.setup(elem_index, appkey_index, ttl)
         if retry_params is None:
-            retry_params = self.retry_params_default.to_base()
+            retry_params = self.retry_params_default
         fw_status_evts = self.lib.retry_until(
             self.lib.btmesh.fw_dist_client.get_fw_by_index,
             elem_index,
             dist_addr,
             index,
-            **retry_params.to_dict(),
+            retry_params=retry_params,
             retry_cmd_err_code=self.RETRY_CMD_ERR_CODES,
             event_selector="btmesh_evt_fw_dist_client_fw_status",
             elem_index=elem_index,
@@ -408,39 +408,52 @@ class FwDistributionClient:
         # field when there is no space to upload the firmware to the Distributor
         # because the Distribution Server remains in Idle Upload Phase.
         # (e.g. FW size is greater than remaining upload space)
-        upload_status_evt = self.lib.retry_until(
+        upload_evt = self.lib.retry_until(
             self.lib.btmesh.fw_dist_client.start_upload,
             elem_index,
-            **retry_params.to_dict(),
+            retry_params=retry_params,
             retry_cmd_err_code=self.RETRY_CMD_ERR_CODES,
-            event_selector="btmesh_evt_fw_dist_client_upload_status",
+            event_selector=[
+                "btmesh_evt_fw_dist_client_upload_status",
+                "btmesh_evt_fw_dist_client_upload_failed",
+            ],
             elem_index=elem_index,
             server_address=dist_addr,
         )[0]
-        # There are three possibilities here:
-        #   - If the firmware with specified FWID is already uploaded to the
-        #     Distributor because the FWID is present in the FW Image List
-        #     then the BT Mesh stack generates an additional
-        #     btmesh_evt_fw_dist_client_upload_complete event.
-        #   - If the FW upload start is rejected by the Distributor then the
-        #     BT Mesh stack generates a btmesh_evt_fw_dist_client_upload_failed
-        #     event. This can happen when the Distributor is busy with another
-        #     (non-idempotent) firmware upload or there isn't enough space
-        #     on the Distributor to upload the new firmware.
-        #     See Max Firmware Images List Size, Max Firmware Image Size and
-        #     Max Upload Space capabilities which results in these errors.
-        #   - If the FW upload is started then no additional dist client events
-        #     are expected and the MBT transfer can be started.
-        upload_phase = FwDistUploadPhase.from_int(upload_status_evt.phase)
-        final_events = list(
-            self.lib.gen_events(
-                timeout=0.5,
-                event_selector=[
-                    "btmesh_evt_fw_dist_client_upload_failed",
-                    "btmesh_evt_fw_dist_client_upload_complete",
-                ],
+        if upload_evt == "btmesh_evt_fw_dist_client_upload_status":
+            upload_status_evt = upload_evt
+            # There are three possibilities here:
+            #   - If the firmware with specified FWID is already uploaded to the
+            #     Distributor because the FWID is present in the FW Image List
+            #     then the BT Mesh stack generates an additional
+            #     btmesh_evt_fw_dist_client_upload_complete event.
+            #   - If the FW upload start is rejected by the Distributor then the
+            #     BT Mesh stack generates a btmesh_evt_fw_dist_client_upload_failed
+            #     event. This can happen when the Distributor is busy with another
+            #     (non-idempotent) firmware upload or there isn't enough space
+            #     on the Distributor to upload the new firmware.
+            #     See Max Firmware Images List Size, Max Firmware Image Size and
+            #     Max Upload Space capabilities which results in these errors.
+            #   - If the FW upload is started then no additional dist client
+            #     events are expected and the MBT transfer can be started.
+            upload_phase = FwDistUploadPhase.from_int(upload_status_evt.phase)
+            final_events = list(
+                self.lib.gen_events(
+                    timeout=0.5,
+                    event_selector=[
+                        "btmesh_evt_fw_dist_client_upload_failed",
+                        "btmesh_evt_fw_dist_client_upload_complete",
+                    ],
+                )
             )
-        )
+        elif upload_evt == "btmesh_evt_fw_dist_client_upload_failed":
+            # If btmesh_evt_fw_dist_client_upload_status event is not received
+            # but the btmesh_evt_fw_dist_client_upload_failed event is received
+            # then it means that upload timeout occurred because the Firmware
+            # Distribution Upload Status message is not received from the
+            # Distributor node.
+            final_events=[upload_evt]
+
         if len(final_events) != 0:
             upload_evt = final_events[0]
             # The upload_evt.status_code contains the BLOB Transfer status code
@@ -524,7 +537,7 @@ class FwDistributionClient:
                 self.lib.btmesh.fw_dist_client.get_upload,
                 elem_index,
                 dist_addr,
-                **retry_params.to_dict(),
+                retry_params=retry_params,
                 retry_cmd_err_code=self.RETRY_CMD_ERR_CODES,
                 event_selector="btmesh_evt_fw_dist_client_upload_status",
                 elem_index=elem_index,
@@ -586,12 +599,12 @@ class FwDistributionClient:
         util.validate_ttl(ttl)
         self.lib.btmesh.fw_dist_client.setup(elem_index, appkey_index, ttl)
         if retry_params is None:
-            retry_params = self.retry_params_default.to_base()
+            retry_params = self.retry_params_default
         upload_status_evt = self.lib.retry_until(
             self.lib.btmesh.fw_dist_client.cancel_upload,
             elem_index,
             dist_addr,
-            **retry_params.to_dict(),
+            retry_params=retry_params,
             retry_cmd_err_code=self.RETRY_CMD_ERR_CODES,
             event_selector="btmesh_evt_fw_dist_client_upload_status",
             elem_index=elem_index,
@@ -650,7 +663,7 @@ class FwDistributionClient:
         util.validate_ttl(ttl)
         self.lib.btmesh.fw_dist_client.setup(elem_index, appkey_index, ttl)
         if retry_params is None:
-            retry_params = self.retry_params_default.to_base()
+            retry_params = self.retry_params_default
         self._delete_fw_reset_dist_phase(
             elem_index=elem_index,
             dist_addr=dist_addr,
@@ -663,7 +676,7 @@ class FwDistributionClient:
             elem_index,
             dist_addr,
             fwid.to_bytes(),
-            **retry_params.to_dict(),
+            retry_params=retry_params,
             retry_cmd_err_code=self.RETRY_CMD_ERR_CODES,
             event_selector="btmesh_evt_fw_dist_client_fw_status",
             elem_index=elem_index,
@@ -700,7 +713,7 @@ class FwDistributionClient:
         util.validate_ttl(ttl)
         self.lib.btmesh.fw_dist_client.setup(elem_index, appkey_index, ttl)
         if retry_params is None:
-            retry_params = self.retry_params_default.to_base()
+            retry_params = self.retry_params_default
         self._delete_fw_reset_dist_phase(
             elem_index=elem_index,
             dist_addr=dist_addr,
@@ -712,7 +725,7 @@ class FwDistributionClient:
             self.lib.btmesh.fw_dist_client.delete_all_fw,
             elem_index,
             dist_addr,
-            **retry_params.to_dict(),
+            retry_params=retry_params,
             retry_cmd_err_code=self.RETRY_CMD_ERR_CODES,
             event_selector="btmesh_evt_fw_dist_client_fw_status",
             elem_index=elem_index,
@@ -749,12 +762,12 @@ class FwDistributionClient:
         util.validate_ttl(ttl)
         self.lib.btmesh.fw_dist_client.setup(elem_index, appkey_index, ttl)
         if retry_params is None:
-            retry_params = self.retry_params_default.to_base()
+            retry_params = self.retry_params_default
         receiver_status_evts = self.lib.retry_until(
             self.lib.btmesh.fw_dist_client.delete_all_receivers,
             elem_index,
             dist_addr,
-            **retry_params.to_dict(),
+            retry_params=retry_params,
             retry_cmd_err_code=self.RETRY_CMD_ERR_CODES,
             event_selector="btmesh_evt_fw_dist_client_receivers_status",
             elem_index=elem_index,
@@ -789,7 +802,7 @@ class FwDistributionClient:
             )
         self.lib.btmesh.fw_dist_client.setup(elem_index, appkey_index, ttl)
         if retry_params is None:
-            retry_params = self.retry_params_default.to_base()
+            retry_params = self.retry_params_default
         n = receivers_per_msg
         receiver_chunks: Iterable[Iterable[FwReceiver]] = (
             receivers[i : i + n] for i in range(0, len(receivers), n)
@@ -806,7 +819,7 @@ class FwDistributionClient:
                 elem_index,
                 dist_addr,
                 receivers_bytes,
-                **retry_params.to_dict(),
+                retry_params=retry_params,
                 retry_cmd_err_code=self.RETRY_CMD_ERR_CODES,
                 event_selector="btmesh_evt_fw_dist_client_receivers_status",
                 elem_index=elem_index,
@@ -838,7 +851,7 @@ class FwDistributionClient:
         util.validate_ttl(ttl)
         self.lib.btmesh.fw_dist_client.setup(elem_index, appkey_index, ttl)
         if retry_params is None:
-            retry_params = self.retry_params_default.to_base()
+            retry_params = self.retry_params_default
         start_idx = start_index
         end_idx = start_idx + max_entries
         chunk_size = receivers_per_msg
@@ -868,7 +881,7 @@ class FwDistributionClient:
                 dist_addr,
                 start_idx,
                 max_entries,
-                **retry_params.to_dict(),
+                retry_params=retry_params,
                 retry_cmd_err_code=self.RETRY_CMD_ERR_CODES,
                 event_selector=event_selector,
             )
@@ -899,12 +912,12 @@ class FwDistributionClient:
         util.validate_ttl(ttl)
         self.lib.btmesh.fw_dist_client.setup(elem_index, appkey_index, ttl)
         if retry_params is None:
-            retry_params = self.retry_params_default.to_base()
+            retry_params = self.retry_params_default
         dist_status_evt = self.lib.retry_until(
             self.lib.btmesh.fw_dist_client.get,
             elem_index,
             dist_addr,
-            **retry_params.to_dict(),
+            retry_params=retry_params,
             retry_cmd_err_code=self.RETRY_CMD_ERR_CODES,
             event_selector="btmesh_evt_fw_dist_client_distribution_status",
             elem_index=elem_index,
@@ -951,7 +964,7 @@ class FwDistributionClient:
         util.validate_ttl(ttl)
         self.lib.btmesh.fw_dist_client.setup(elem_index, appkey_index, ttl)
         if retry_params is None:
-            retry_params = self.retry_params_default.to_base()
+            retry_params = self.retry_params_default
         if (transfer_mode == BlobTransferMode.PULL) and (
             group_addr != util.UNASSIGNED_ADDR
         ):
@@ -981,7 +994,7 @@ class FwDistributionClient:
             fw_list_index,
             group_addr,
             self.UNUSED_VIRTUAL_ADDRESS,
-            **retry_params.to_dict(),
+            retry_params=retry_params,
             retry_cmd_err_code=self.RETRY_CMD_ERR_CODES,
             event_selector="btmesh_evt_fw_dist_client_distribution_status",
             elem_index=elem_index,
@@ -1059,7 +1072,7 @@ class FwDistributionClient:
         appkey_index: int = 0,
         ttl: int = 5,
         dist_poll_int: float = 5,
-        retry_params: Optional[BtmeshRetryParams] = None,
+        retry_params: Optional[BtmeshMulticastRetryParams] = None,
     ) -> Tuple[FwDistDistributionStatus, Iterable[FwReceiverInfo]]:
         for receiver in receivers:
             util.validate_unicast_address(
@@ -1123,7 +1136,7 @@ class FwDistributionClient:
             dist_addr=dist_addr,
             appkey_index=appkey_index,
             ttl=ttl,
-            retry_params=retry_params.to_base(),
+            retry_params=retry_params,
         )
         self.add_receivers(
             elem_index=elem_index,
@@ -1131,7 +1144,7 @@ class FwDistributionClient:
             receivers=active_receivers,
             appkey_index=appkey_index,
             ttl=ttl,
-            retry_params=retry_params.to_base(),
+            retry_params=retry_params,
         )
         self.start_distribution(
             elem_index=elem_index,
@@ -1144,7 +1157,7 @@ class FwDistributionClient:
             transfer_mode=transfer_mode,
             appkey_index=appkey_index,
             ttl=ttl,
-            retry_params=retry_params.to_base(),
+            retry_params=retry_params,
         )
         dist_status, receivers_info = self.poll_distribution(
             elem_index=elem_index,
@@ -1154,7 +1167,7 @@ class FwDistributionClient:
             appkey_index=appkey_index,
             ttl=ttl,
             dist_poll_int=dist_poll_int,
-            retry_params=retry_params.to_base(),
+            retry_params=retry_params,
         )
         for rec_info in receivers_info:
             addr = rec_info.server_addr
@@ -1180,13 +1193,13 @@ class FwDistributionClient:
         util.validate_ttl(ttl)
         self.lib.btmesh.fw_dist_client.setup(elem_index, appkey_index, ttl)
         if retry_params is None:
-            retry_params = self.retry_params_default.to_base()
+            retry_params = self.retry_params_default
         # Cancel the FW Distribution
         dist_status_evt = self.lib.retry_until(
             self.lib.btmesh.fw_dist_client.cancel_distribution,
             elem_index,
             dist_addr,
-            **retry_params.to_dict(),
+            retry_params=retry_params,
             retry_cmd_err_code=self.RETRY_CMD_ERR_CODES,
             event_selector="btmesh_evt_fw_dist_client_distribution_status",
             elem_index=elem_index,

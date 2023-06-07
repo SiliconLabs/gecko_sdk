@@ -41,3 +41,4 @@ ui_hints:
   highlight: readme.md
 tag:
   - hardware:component:exp_header:spi
+  - hardware:device:ram:20

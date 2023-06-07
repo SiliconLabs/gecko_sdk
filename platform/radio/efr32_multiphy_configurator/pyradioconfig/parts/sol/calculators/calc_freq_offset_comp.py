@@ -75,15 +75,9 @@ class Calc_Freq_Offset_Comp_Sol(CALC_Freq_Offset_Comp_ocelot):
 
         afcscale = afcscale * scale
 
-        #Special case to set afc_scale_tx to 0 to disable TX AFC adjust when using oneshot
-        #See https://jira.silabs.com/browse/MCUW_RADIO_CFG-1510
-        if (afc_tx_adjust_enable == False) and afc_oneshot:
-            afcscale_tx = 0.0
-
-        # based on experimentation with DUT-to-DUT, we found that it needs to be disabled for fast_detect_mode
-        # noise in RX causes a garbage values accumulate for AFC, causing TX to transmit with large offset, and packets
-        # being missed
-        if fast_detect_enable:
+        # We have to set TX AFCSCALE to 0 to disable the TX adjustment
+        # See https://jira.silabs.com/browse/MCUW_RADIO_CFG-1510
+        if (afc_tx_adjust_enable == False):
             afcscale_tx = 0.0
 
         model.vars.afc_scale.value = afcscale

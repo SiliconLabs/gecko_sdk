@@ -47,8 +47,14 @@
 #elif defined(EFR32FG25A121F1152IM56)
 #include "efr32fg25a121f1152im56.h"
 
+#elif defined(EFR32FG25A211F1152IM56)
+#include "efr32fg25a211f1152im56.h"
+
 #elif defined(EFR32FG25A211F1920IM56)
 #include "efr32fg25a211f1920im56.h"
+
+#elif defined(EFR32FG25A221F1152IM56)
+#include "efr32fg25a221f1152im56.h"
 
 #elif defined(EFR32FG25A221F1920IM56)
 #include "efr32fg25a221f1920im56.h"

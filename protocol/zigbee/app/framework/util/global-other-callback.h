@@ -10,7 +10,7 @@
 // com.ember.workbench.app_framework.ui.ApplicationPreferencePage.accept()
 //
 
-#include "af.h"
+#include "app/framework/include/af.h"
 /** @brief Groups Cluster Clear Group Table
  *
  * This function is called by the framework when the application should clear

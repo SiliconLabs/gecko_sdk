@@ -9,24 +9,26 @@
  * @verbatim
  * Example: Add "-DEFM32G890F128" to your build options, to define part
  *          Add "#include "em_device.h" to your source files
+
+ *
  * @endverbatim
  ******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
- * 
+ *
  * The licensor of this software is Silicon Laboratories Inc.
- * 
+ *
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
  * arising from the use of this software.
- * 
+ *
  * Permission is granted to anyone to use this software for any purpose,
  * including commercial applications, and to alter it and redistribute it
  * freely, subject to the following restrictions:
- * 
+ *
  * 1. The origin of this software must not be misrepresented; you must not
  *    claim that you wrote the original software. If you use this software
  *    in a product, an acknowledgment in the product documentation would be
@@ -41,10 +43,13 @@
 #define EM_DEVICE_H
 #if defined(EFM32PG28B200F512IM68)
 #include "efm32pg28b200f512im68.h"
+
 #elif defined(EFM32PG28B210F1024IM68)
 #include "efm32pg28b210f1024im68.h"
+
 #elif defined(EFM32PG28B300F512IM68)
 #include "efm32pg28b300f512im68.h"
+
 #elif defined(EFM32PG28B310F1024IM68)
 #include "efm32pg28b310f1024im68.h"
 

@@ -29,13 +29,6 @@ static bool enablePollCompletedCallback;
 // *****************************************************************************
 // Functions
 
-#ifndef UC_BUILD
-// Stub no longer needed for UC
-void emAfPluginEndDeviceSupportPollingInit(void)
-{
-}
-#endif // UC_BUILD
-
 // This is called to scheduling polling events for the network(s).  We only
 // care about end device networks.  For each of those, the NCP will be told to
 // poll for joined networks or not to poll otherwise.
@@ -44,9 +37,9 @@ void emberAfPluginEndDeviceSupportTickCallback(void)
   uint8_t i;
   for (i = 0; i < EMBER_SUPPORTED_NETWORKS; i++) {
     (void) emberAfPushNetworkIndex(i);
-    if (emAfProIsCurrentNetwork()
-        && EMBER_END_DEVICE <= emAfCurrentZigbeeProNetwork->nodeType) {
-      EmAfPollingState *state = &emAfPollingStates[i];
+    if (sli_zigbee_af_pro_is_current_network()
+        && EMBER_END_DEVICE <= sli_zigbee_af_current_zigbee_pro_network->nodeType) {
+      sli_zigbee_af_polling_state *state = &sli_zigbee_af_polling_states[i];
       uint32_t lastPollIntervalMs = state->pollIntervalMs;
       if (emberAfNetworkState() == EMBER_JOINED_NETWORK) {
         state->pollIntervalMs = emberAfGetCurrentPollIntervalMsCallback();
@@ -58,14 +51,14 @@ void emberAfPluginEndDeviceSupportTickCallback(void)
       // 1) poll interval
       // 2) enablePollCompletedCallback
       if (state->pollIntervalMs != lastPollIntervalMs
-          || emAfEnablePollCompletedCallback != enablePollCompletedCallback) {
+          || sli_zigbee_af_enable_poll_completed_callback != enablePollCompletedCallback) {
         EmberStatus status;
         uint16_t duration;
         EmberEventUnits units;
         uint8_t ncpFailureLimit;
 
-        enablePollCompletedCallback = emAfEnablePollCompletedCallback;
-        if (emAfEnablePollCompletedCallback) {
+        enablePollCompletedCallback = sli_zigbee_af_enable_poll_completed_callback;
+        if (sli_zigbee_af_enable_poll_completed_callback) {
           ncpFailureLimit = 0;
           numPollsFailingLimit = EMBER_AF_PLUGIN_END_DEVICE_SUPPORT_MAX_MISSED_POLLS;
         } else {
@@ -73,9 +66,9 @@ void emberAfPluginEndDeviceSupportTickCallback(void)
           numPollsFailingLimit = 0;
         }
 
-        emAfGetTimerDurationAndUnitFromMS(state->pollIntervalMs,
-                                          &duration,
-                                          &units);
+        sli_zigbee_af_get_timer_duration_and_unit_from_ms(state->pollIntervalMs,
+                                                          &duration,
+                                                          &units);
         status = ezspPollForData(duration, units, ncpFailureLimit);
         if (status != EMBER_SUCCESS) {
           emberAfCorePrintln("poll nwk %d: 0x%x", i, status);
@@ -99,13 +92,9 @@ void emberAfPluginEndDeviceSupportPollingNetworkEventHandler(void)
 // This function is called when a poll completes and explains what happend with
 // the poll.  If no ACKs are received from the parent, we will try to find a
 // new parent.
-#ifdef UC_BUILD
-void emAfPluginEndDeviceSupportPollCompleteCallback(EmberStatus status)
-#else
-void ezspPollCompleteHandler(EmberStatus status)
-#endif
+void sli_zigbee_af_end_device_support_poll_complete_callback(EmberStatus status)
 {
-  emAfPollCompleteHandler(status, numPollsFailingLimit);
+  sli_zigbee_af_poll_complete_handler(status, numPollsFailingLimit);
 }
 
 void emberAfPreNcpResetCallback(void)
@@ -114,8 +103,8 @@ void emberAfPreNcpResetCallback(void)
   // necessary.
   uint8_t i;
   for (i = 0; i < EMBER_SUPPORTED_NETWORKS; i++) {
-    emAfPollingStates[i].pollIntervalMs = 0;
-    emAfPollingStates[i].numPollsFailing = 0;
+    sli_zigbee_af_polling_states[i].pollIntervalMs = 0;
+    sli_zigbee_af_polling_states[i].numPollsFailing = 0;
   }
   numPollsFailingLimit = EMBER_AF_PLUGIN_END_DEVICE_SUPPORT_MAX_MISSED_POLLS;
   enablePollCompletedCallback = false;

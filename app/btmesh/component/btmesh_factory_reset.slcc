@@ -10,6 +10,8 @@ description: >
  execution the node reboots itself. After reboot in both reset cases the node
  enters to unprovisioned state. These interface functions are available also
  for CLI calls.
+
+ This is a No-Code component.
 category: "Bluetooth Mesh|Utility"
 quality: "production"
 root_path: "app/btmesh/common/btmesh_factory_reset"
@@ -27,9 +29,9 @@ requires:
   - name: "bluetooth_feature_system"
   - name: "btmesh_stack_node"
   - name: "btmesh_stack"
-  - name: "simple_timer"
+  - name: "app_timer"
 recommends:
-  - id: "simple_timer"
+  - id: "app_timer"
 
 template_contribution: 
   - name: "btmesh_on_event"
@@ -67,3 +69,6 @@ template_contribution:
         - name: f
     condition:
       - "cli"
+
+  - name: component_catalog
+    value: "btmesh_factory_reset"

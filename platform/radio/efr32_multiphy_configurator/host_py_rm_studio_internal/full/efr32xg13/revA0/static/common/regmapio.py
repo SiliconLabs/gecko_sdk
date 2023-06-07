@@ -26,6 +26,7 @@ except NameError:
     unicode = str
     bytes = bytes
     basestring = (str,bytes)
+    long = int
 else:
     # 'unicode' exists, must be Python 2
     str = str

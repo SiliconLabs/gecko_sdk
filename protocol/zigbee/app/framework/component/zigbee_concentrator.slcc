@@ -29,10 +29,6 @@ template_contribution:
     value:
       callback_type: stack_status
       function_name: emberAfPluginConcentratorStackStatusCallback
-  - name: zigbee_stack_callback
-    value:
-      callback_type: incoming_route_error
-      function_name: emAfPluginConcentratorIncomingRouteErrorCallback   
   - name: zigbee_af_callback
     value:
       callback_type: local_data_init

@@ -1,0 +1,18 @@
+id: "bluetooth_feature_accept_list"
+label: "Device filtering with Bluetooth controller's Filter Accept List"
+package: "Bluetooth"
+description: >
+  The Filter Accept List provides the capability to filter tansmissions from
+  other Bluetooth devices so that the local device only receives/accepts
+  transmissions from the devices that it's interested in or wants to communicate
+  with.
+category: Bluetooth|Bluetooth Host (Stack)|Features with Commands and Events
+quality: "production"
+root_path: "protocol/bluetooth"
+config_file:
+  - path: "config/sl_bt_accept_list_config.h"
+provides:
+  - name: "bluetooth_feature_accept_list"
+template_contribution:
+  - name: component_catalog
+    value: bluetooth_feature_accept_list

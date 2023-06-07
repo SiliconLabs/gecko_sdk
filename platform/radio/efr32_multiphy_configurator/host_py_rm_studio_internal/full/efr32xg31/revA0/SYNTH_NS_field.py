@@ -1644,3 +1644,13 @@ class RM_Field_SYNTH_NS_SEQIEN_LOCNTDONE(Base_RM_Field):
         self.__dict__['zz_frozen'] = True
 
 
+class RM_Field_SYNTH_NS_FREQ1_FREQ(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_SYNTH_NS_FREQ1_FREQ, self).__init__(register,
+            'FREQ', 'SYNTH_NS.FREQ1.FREQ', 'read-write',
+            u"",
+            0, 28)
+        self.__dict__['zz_frozen'] = True
+
+

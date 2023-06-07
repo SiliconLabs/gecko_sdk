@@ -1,0 +1,16 @@
+label: ZWave_NCP_SerialAPI_EndDevice_Solution
+description: >
+  Demonstrates Serial Applications Programming Interface (Serial API) combined with OTW bootloader. 
+  The Serial API End Device allows the user to create a product with a host application with 
+  different capabilites than the Z-Wave device, such as drive a high performance display, 
+  but does not require the Z-Wave Controller role.
+quality: production
+project:
+  - path: ../Apps/zwave_ncp_serial_api/zwave_ncp_serial_api_end_device.slcp
+    id: application
+    output: app
+  - path: ../UCBootLoader/bootloader-uart-xmodem_otw.slcp
+    id: bootloader
+    output: boot
+post_build:
+  profile: zwave_ncp_serial_api_end_device_ws_postbuild

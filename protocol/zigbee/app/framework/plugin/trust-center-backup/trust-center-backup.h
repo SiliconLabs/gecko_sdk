@@ -14,17 +14,18 @@
  * sections of the MSLA applicable to Source Code.
  *
  ******************************************************************************/
+#ifdef SL_COMPONENT_CATALOG_PRESENT
+#include "sl_component_catalog.h"
+#endif
 
-#ifdef UC_BUILD
+#ifdef SL_CATALOG_ZIGBEE_TRUST_CENTER_BACKUP_PRESENT
 #include "trust-center-backup-config.h"
+#else
+#include "config/trust-center-backup-config.h"
+#endif
 #if (EMBER_AF_PLUGIN_TRUST_CENTER_BACKUP_POSIX_FILE_BACKUP_SUPPORT == 1)
 #define POSIX_FILE_BACKUP_SUPPORT
 #endif
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_TRUST_CENTER_BACKUP_POSIX_FILE_BACKUP_SUPPORT
-#define POSIX_FILE_BACKUP_SUPPORT
-#endif
-#endif // UC_BUILD
 
 /**
  * @defgroup trust-center-backup Trust Center Backup
@@ -123,12 +124,16 @@ EmberStatus emberAfTrustCenterBackupWriteNcpTokenToZigbeedTokens(const char* fil
 
 /** @} */ // end of name API
 /** @} */ // end of trust-center-backup
-#ifdef UC_BUILD
-void emAfTcExportCommand(sl_cli_command_arg_t *arguments);
-void emAfTcImportCommand(sl_cli_command_arg_t *arguments);
-void emAfTrustCenterBackupSaveTokensToFileCli(sl_cli_command_arg_t *arguments);
-void emAfTrustCenterBackupRestoreTokensFromFileCli(sl_cli_command_arg_t *arguments);
-#else
-void emAfTcExportCommand(void);
-void emAfTcImportCommand(void);
-#endif
+
+#ifdef SL_CLI_TYPES_H
+//requires CLI support; avoid having scripted unit test try to compile
+
+EmberStatus sli_zigbee_af_trust_center_backup_save_keys_to_data(EmberTokenData* data_s, uint32_t nvm3Key, uint8_t index);
+EmberStatus sli_zigbee_af_trust_center_backup_restore_keys_from_data(EmberTokenData* data_s, uint32_t nvm3Key, uint8_t index);
+
+void sli_zigbee_af_tc_export_command(sl_cli_command_arg_t *arguments);
+void sli_zigbee_af_tc_import_command(sl_cli_command_arg_t *arguments);
+void sli_zigbee_af_trust_center_backup_save_tokens_to_file_cli(sl_cli_command_arg_t *arguments);
+void sli_zigbee_af_trust_center_backup_restore_tokens_from_file_cli(sl_cli_command_arg_t *arguments);
+
+#endif //SL_CLI_TYPES_H

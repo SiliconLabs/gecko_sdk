@@ -17,15 +17,11 @@
  *
  ******************************************************************************/
 
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #ifdef SL_CATALOG_ZIGBEE_PRICE_SERVER_PRESENT
 #endif
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_PRICE_SERVER
-#define SL_CATALOG_ZIGBEE_PRICE_SERVER_PRESENT
-#endif
-#endif // UC_BUILD
 
 /**
  * @defgroup mn-price-passthrough  MN Price Passthrough Client/Server
@@ -46,9 +42,9 @@
  * @{
  */
 
-void emAfPluginMnPricePassthroughStartPollAndForward(void);
-void emAfPluginMnPricePassthroughStopPollAndForward(void);
-void emAfPluginMnPricePassthroughRoutingSetup(EmberNodeId fwdId,
-                                              uint8_t fwdEndpoint,
-                                              uint8_t esiEndpoint);
-void emAfPluginMnPricePassthroughPrintCurrentPrice(void);
+void sli_zigbee_af_mn_price_passthrough_start_poll_and_forward(void);
+void sli_zigbee_af_mn_price_passthrough_stop_poll_and_forward(void);
+void sli_zigbee_af_mn_price_passthrough_routing_setup(EmberNodeId fwdId,
+                                                      uint8_t fwdEndpoint,
+                                                      uint8_t esiEndpoint);
+void sli_zigbee_af_mn_price_passthrough_print_current_price(void);

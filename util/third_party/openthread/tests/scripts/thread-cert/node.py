@@ -27,11 +27,13 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 #
 
+import json
 import binascii
 import ipaddress
 import logging
 import os
 import re
+import shlex
 import socket
 import subprocess
 import sys
@@ -60,6 +62,7 @@ class OtbrDocker:
     _socat_proc = None
     _ot_rcp_proc = None
     _docker_proc = None
+    _border_routing_counters = None
 
     def __init__(self, nodeid: int, **kwargs):
         self.verbose = int(float(os.getenv('VERBOSE', 0)))
@@ -109,7 +112,7 @@ class OtbrDocker:
         logging.info(f'Docker image: {config.OTBR_DOCKER_IMAGE}')
         subprocess.check_call(f"docker rm -f {self._docker_name} || true", shell=True)
         CI_ENV = os.getenv('CI_ENV', '').split()
-        dns = ['--dns=127.0.0.1'] if INFRA_DNS64 == 1 else []
+        dns = ['--dns=127.0.0.1'] if INFRA_DNS64 == 1 else ['--dns=8.8.8.8']
         nat64_prefix = ['--nat64-prefix', '2001:db8:1:ffff::/96'] if INFRA_DNS64 == 1 else []
         os.makedirs('/tmp/coverage/', exist_ok=True)
 
@@ -168,12 +171,10 @@ class OtbrDocker:
         self.bash('service otbr-agent stop')
 
     def stop_mdns_service(self):
-        self.bash('service avahi-daemon stop')
-        self.bash('service mdns stop')
+        self.bash('service avahi-daemon stop; service mdns stop; !(cat /proc/net/udp | grep -i :14E9)')
 
     def start_mdns_service(self):
-        self.bash('service avahi-daemon start')
-        self.bash('service mdns start')
+        self.bash('service avahi-daemon start; service mdns start; cat /proc/net/udp | grep -i :14E9')
 
     def start_ot_ctl(self):
         cmd = f'docker exec -i {self._docker_name} ot-ctl'
@@ -362,6 +363,135 @@ class OtbrDocker:
                 dig_result[section].append(tuple(record))
 
         return dig_result
+
+    def call_dbus_method(self, *args):
+        args = shlex.join([args[0], args[1], json.dumps(args[2:])])
+        return json.loads(
+            self.bash(f'python3 /app/third_party/openthread/repo/tests/scripts/thread-cert/call_dbus_method.py {args}')
+            [0])
+
+    def get_dbus_property(self, property_name):
+        return self.call_dbus_method('org.freedesktop.DBus.Properties', 'Get', 'io.openthread.BorderRouter',
+                                     property_name)
+
+    def set_dbus_property(self, property_name, property_value):
+        return self.call_dbus_method('org.freedesktop.DBus.Properties', 'Set', 'io.openthread.BorderRouter',
+                                     property_name, property_value)
+
+    def get_border_routing_counters(self):
+        counters = self.get_dbus_property('BorderRoutingCounters')
+        counters = {
+            'inbound_unicast': counters[0],
+            'inbound_multicast': counters[1],
+            'outbound_unicast': counters[2],
+            'outbound_multicast': counters[3],
+            'ra_rx': counters[4],
+            'ra_tx_success': counters[5],
+            'ra_tx_failure': counters[6],
+            'rs_rx': counters[7],
+            'rs_tx_success': counters[8],
+            'rs_tx_failure': counters[9],
+        }
+        logging.info(f'border routing counters: {counters}')
+        return counters
+
+    def _process_traffic_counters(self, counter):
+        return {
+            '4to6': {
+                'packets': counter[0],
+                'bytes': counter[1],
+            },
+            '6to4': {
+                'packets': counter[2],
+                'bytes': counter[3],
+            }
+        }
+
+    def _process_packet_counters(self, counter):
+        return {'4to6': {'packets': counter[0]}, '6to4': {'packets': counter[1]}}
+
+    def nat64_set_enabled(self, enable):
+        return self.call_dbus_method('io.openthread.BorderRouter', 'SetNat64Enabled', enable)
+
+    @property
+    def nat64_state(self):
+        state = self.get_dbus_property('Nat64State')
+        return {'PrefixManager': state[0], 'Translator': state[1]}
+
+    @property
+    def nat64_mappings(self):
+        return [{
+            'id': row[0],
+            'ip4': row[1],
+            'ip6': row[2],
+            'expiry': row[3],
+            'counters': {
+                'total': self._process_traffic_counters(row[4][0]),
+                'ICMP': self._process_traffic_counters(row[4][1]),
+                'UDP': self._process_traffic_counters(row[4][2]),
+                'TCP': self._process_traffic_counters(row[4][3]),
+            }
+        } for row in self.get_dbus_property('Nat64Mappings')]
+
+    @property
+    def nat64_counters(self):
+        res_error = self.get_dbus_property('Nat64ErrorCounters')
+        res_proto = self.get_dbus_property('Nat64ProtocolCounters')
+        return {
+            'protocol': {
+                'Total': self._process_traffic_counters(res_proto[0]),
+                'ICMP': self._process_traffic_counters(res_proto[1]),
+                'UDP': self._process_traffic_counters(res_proto[2]),
+                'TCP': self._process_traffic_counters(res_proto[3]),
+            },
+            'errors': {
+                'Unknown': self._process_packet_counters(res_error[0]),
+                'Illegal Pkt': self._process_packet_counters(res_error[1]),
+                'Unsup Proto': self._process_packet_counters(res_error[2]),
+                'No Mapping': self._process_packet_counters(res_error[3]),
+            }
+        }
+
+    @property
+    def nat64_traffic_counters(self):
+        res = self.get_dbus_property('Nat64TrafficCounters')
+        return {
+            'Total': self._process_traffic_counters(res[0]),
+            'ICMP': self._process_traffic_counters(res[1]),
+            'UDP': self._process_traffic_counters(res[2]),
+            'TCP': self._process_traffic_counters(res[3]),
+        }
+
+    @property
+    def dns_upstream_query_state(self):
+        return bool(self.get_dbus_property('DnsUpstreamQueryState'))
+
+    @dns_upstream_query_state.setter
+    def dns_upstream_query_state(self, value):
+        if type(value) is not bool:
+            raise ValueError("dns_upstream_query_state must be a bool")
+        return self.set_dbus_property('DnsUpstreamQueryState', value)
+
+    def read_border_routing_counters_delta(self):
+        old_counters = self._border_routing_counters
+        new_counters = self.get_border_routing_counters()
+        self._border_routing_counters = new_counters
+        delta_counters = {}
+        if old_counters is None:
+            delta_counters = new_counters
+        else:
+            for i in ('inbound', 'outbound'):
+                for j in ('unicast', 'multicast'):
+                    key = f'{i}_{j}'
+                    assert (key in old_counters)
+                    assert (key in new_counters)
+                    value = [new_counters[key][0] - old_counters[key][0], new_counters[key][1] - old_counters[key][1]]
+                    delta_counters[key] = value
+        delta_counters = {
+            key: value for key, value in delta_counters.items() if not isinstance(value, int) and value[0] and value[1]
+        }
+
+        return delta_counters
 
     @staticmethod
     def __unescape_dns_instance_name(name: str) -> str:
@@ -1232,7 +1362,12 @@ class NodeImpl:
     # TREL utilities
     #
 
-    def get_trel_state(self) -> Union[None, bool]:
+    def enable_trel(self):
+        cmd = 'trel enable'
+        self.send_command(cmd)
+        self._expect_done()
+
+    def is_trel_enabled(self) -> Union[None, bool]:
         states = [r'Disabled', r'Enabled']
         self.send_command('trel')
         try:
@@ -1598,6 +1733,30 @@ class NodeImpl:
         self.send_command('pollperiod %d' % pollperiod)
         self._expect_done()
 
+    def get_child_supervision_interval(self):
+        self.send_command('childsupervision interval')
+        return self._expect_result(r'\d+')
+
+    def set_child_supervision_interval(self, interval):
+        self.send_command('childsupervision interval %d' % interval)
+        self._expect_done()
+
+    def get_child_supervision_check_timeout(self):
+        self.send_command('childsupervision checktimeout')
+        return self._expect_result(r'\d+')
+
+    def set_child_supervision_check_timeout(self, timeout):
+        self.send_command('childsupervision checktimeout %d' % timeout)
+        self._expect_done()
+
+    def get_child_supervision_check_failure_counter(self):
+        self.send_command('childsupervision failcounter')
+        return self._expect_result(r'\d+')
+
+    def reset_child_supervision_check_failure_counter(self):
+        self.send_command('childsupervision failcounter reset')
+        self._expect_done()
+
     def get_csl_info(self):
         self.send_command('csl')
         self._expect_done()
@@ -1805,10 +1964,10 @@ class NodeImpl:
 
         #
         # Example output:
-        # | ID  | RLOC16 | Timeout    | Age        | LQ In | C_VN |R|D|N|Ver|CSL|QMsgCnt| Extended MAC     |
-        # +-----+--------+------------+------------+-------+------+-+-+-+---+---+-------+------------------+
-        # |   1 | 0xc801 |        240 |         24 |     3 |  131 |1|0|0|  3| 0 |     0 | 4ecede68435358ac |
-        # |   2 | 0xc802 |        240 |          2 |     3 |  131 |0|0|0|  3| 1 |     0 | a672a601d2ce37d8 |
+        # | ID  | RLOC16 | Timeout    | Age        | LQ In | C_VN |R|D|N|Ver|CSL|QMsgCnt|Suprvsn| Extended MAC     |
+        # +-----+--------+------------+------------+-------+------+-+-+-+---+---+-------+-------+------------------+
+        # |   1 | 0xc801 |        240 |         24 |     3 |  131 |1|0|0|  3| 0 |     0 |   129 | 4ecede68435358ac |
+        # |   2 | 0xc802 |        240 |          2 |     3 |  131 |0|0|0|  3| 1 |     0 |     0 | a672a601d2ce37d8 |
         # Done
         #
 
@@ -1839,6 +1998,7 @@ class NodeImpl:
                 'ver': int(col('Ver')),
                 'csl': bool(int(col('CSL'))),
                 'qmsgcnt': int(col('QMsgCnt')),
+                'suprvsn': int(col('Suprvsn'))
             }
 
         return table
@@ -1987,7 +2147,7 @@ class NodeImpl:
         self._expect_done()
 
     def get_br_omr_prefix(self):
-        cmd = 'br omrprefix'
+        cmd = 'br omrprefix local'
         self.send_command(cmd)
         return self._expect_command_output()[0]
 
@@ -2001,7 +2161,7 @@ class NodeImpl:
         return omr_prefixes
 
     def get_br_on_link_prefix(self):
-        cmd = 'br onlinkprefix'
+        cmd = 'br onlinkprefix local'
         self.send_command(cmd)
         return self._expect_command_output()[0]
 
@@ -2014,12 +2174,12 @@ class NodeImpl:
         return prefixes
 
     def get_br_nat64_prefix(self):
-        cmd = 'br nat64prefix'
+        cmd = 'br nat64prefix local'
         self.send_command(cmd)
         return self._expect_command_output()[0]
 
     def get_br_favored_nat64_prefix(self):
-        cmd = 'br favorednat64prefix'
+        cmd = 'br nat64prefix favored'
         self.send_command(cmd)
         return self._expect_command_output()[0].split(' ')[0]
 
@@ -2152,6 +2312,8 @@ class NodeImpl:
         for line in netdata:
             if line.startswith('Services:'):
                 services_section = True
+            elif line.startswith('Contexts'):
+                services_section = False
             elif services_section:
                 services.append(line.strip().split(' '))
         return services
@@ -2162,8 +2324,8 @@ class NodeImpl:
 
     def get_netdata(self):
         raw_netdata = self.netdata_show()
-        netdata = {'Prefixes': [], 'Routes': [], 'Services': []}
-        key_list = ['Prefixes', 'Routes', 'Services']
+        netdata = {'Prefixes': [], 'Routes': [], 'Services': [], 'Contexts': []}
+        key_list = ['Prefixes', 'Routes', 'Services', 'Contexts']
         key = None
 
         for i in range(0, len(raw_netdata)):
@@ -2216,6 +2378,10 @@ class NodeImpl:
 
     def netdata_publish_route(self, prefix, flags='s', prf='med'):
         self.send_command(f'netdata publish route {prefix} {flags} {prf}')
+        self._expect_done()
+
+    def netdata_publish_replace(self, old_prefix, prefix, flags='s', prf='med'):
+        self.send_command(f'netdata publish replace {old_prefix} {prefix} {flags} {prf}')
         self._expect_done()
 
     def netdata_unpublish_prefix(self, prefix):
@@ -2758,7 +2924,7 @@ class NodeImpl:
         else:
             timeout = 5
 
-        self._expect(r'Received ACK in reply to notification ' r'from ([\da-f:]+)\b', timeout=timeout)
+        self._expect(r'Received ACK in reply to notification from ([\da-f:]+)\b', timeout=timeout)
         (source,) = self.pexpect.match.groups()
         source = source.decode('UTF-8')
 

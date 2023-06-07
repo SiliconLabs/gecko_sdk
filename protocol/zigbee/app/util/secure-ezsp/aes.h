@@ -19,31 +19,31 @@
 #define SILABS_APP_UTIL_SECURE_EZSP_AES_H
 
 // This function loads the 16 byte key into the AES hardware accelerator.
-void emLoadKeyIntoCore(const uint8_t* key);
+void sli_util_load_key_into_core(const uint8_t* key);
 
 // This function retrieves the 16 byte key from the AES hardware accelerator.
-void emGetKeyFromCore(uint8_t* key);
+void sli_zigbee_get_key_from_core(uint8_t* key);
 
 // This function encrypts the 16 byte plaintext block with the previously-loaded
 // 16 byte key using the AES hardware accelerator.
 // The resulting 16 byte ciphertext is written to the block parameter,
 // overwriting the plaintext.
-void emStandAloneEncryptBlock(uint8_t* block);
+void sli_util_stand_alone_encrypt_block(uint8_t* block);
 
-// emAesEncrypt performs AES encryption in ECB mode on the plaintext pointed to
+// sli_zigbee_aes_encrypt performs AES encryption in ECB mode on the plaintext pointed to
 // by the block parameter, using the key pointed to by the key parameter, and
 // places the resulting ciphertext into the 16 bytes of memory pointed to by the
 // block parameter (overwriting the supplied plaintext).  Any existing key is
 // destroyed.
-void emAesEncrypt(uint8_t* block, const uint8_t* key);
+void sli_zigbee_aes_encrypt(uint8_t* block, const uint8_t* key);
 
-// emAesDecrypt performs AES decryption in ECB mode on the ciphertext pointed to
+// sli_zigbee_aes_decrypt performs AES decryption in ECB mode on the ciphertext pointed to
 // by the block parameter, using the key pointed to by the key parameter, and
 // places the resulting plaintext into the 16 bytes of memory pointed to by the
 // block parameter (overwriting the supplied cyphertext).  Any existing key is
 // destroyed.
 #if CORTEXM3_EFR32
-void emAesDecrypt(uint8_t* block, const uint8_t* key);
+void sli_zigbee_aes_decrypt(uint8_t* block, const uint8_t* key);
 #endif
 
 #endif // SILABS_APP_UTIL_SECURE_EZSP_AES_H

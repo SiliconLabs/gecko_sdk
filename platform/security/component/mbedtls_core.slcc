@@ -20,8 +20,13 @@ provides:
   - name: mbedtls_core
 
 requires:
+  - name: device
+
   - name: mbedtls_source
   - name: mbedtls_config
+
+  - name: mbedtls_slcrypto
+    condition: [device_cortexm]
 
   # Inclusion of source and config components depends on which TZ state we are
   # targeting. For apps that do not make active use of TZ, a dummy state

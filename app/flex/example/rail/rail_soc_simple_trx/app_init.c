@@ -37,7 +37,10 @@
 #include "sl_rail_util_init.h"
 #include "app_process.h"
 #include "sl_simple_led_instances.h"
+#if defined(SL_CATALOG_APP_LOG_PRESENT)
 #include "app_log.h"
+#endif
+#include "sl_flex_rail_channel_selector.h"
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)
 #include "app_task_init.h"
@@ -67,7 +70,9 @@
  *****************************************************************************/
 SL_WEAK void print_sample_app_name(const char* app_name)
 {
+#if defined(SL_CATALOG_APP_LOG_PRESENT)
   app_log_info("%s\n", app_name);
+#endif
 }
 
 /******************************************************************************
@@ -86,9 +91,11 @@ RAIL_Handle_t app_init(void)
   sl_led_turn_off(&sl_led_led1);
 #endif
   // Start reception
-  RAIL_Status_t status = RAIL_StartRx(rail_handle, CHANNEL, NULL);
+  RAIL_Status_t status = RAIL_StartRx(rail_handle, get_selected_channel(), NULL);
   if (status != RAIL_STATUS_NO_ERROR) {
+#if defined(SL_CATALOG_APP_LOG_PRESENT)
     app_log_warning("After initialization RAIL_StartRx() result:%d ", status);
+#endif
   }
 
   // CLI info message

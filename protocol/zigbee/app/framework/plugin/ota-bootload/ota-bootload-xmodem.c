@@ -18,14 +18,6 @@
 #include "app/framework/include/af.h"
 #include "ota-bootload-ncp.h"
 
-#ifndef UC_BUILD
-#ifdef HAL_HOST
-  #include "hal/host/crc.h"
-#else //HAL_HOST
-  #include "hal/micro/crc.h"
-#endif //HAL_HOST
-#endif // UC_BUILD
-
 //------------------------------------------------------------------------------
 
 //#define DEBUG_PRINT_ON
@@ -86,18 +78,18 @@ static bool sendBlock(uint8_t blockNum, const uint8_t *data)
     //print "block %d (" % num,
     //for i in range(0,len(data)):
     //  print "%02x" % ord(data[i]),
-    if (!emAfBootloadSendData(fullBlock, FULL_BLOCK_SIZE)) {
+    if (!sli_zigbee_af_bootload_send_data(fullBlock, FULL_BLOCK_SIZE)) {
       DBGPRINT("sendBlock() fail 1");
       return false;
     }
     retry--;
-    if (!emAfBootloadWaitChar(&status, false, 0)) {
+    if (!sli_zigbee_af_bootload_wait_char(&status, false, 0)) {
       DBGPRINT("sendBlock() fail 2");
       return false;
     }
     while ( status == 'C' ) {
       // may have leftover C characters from start of transmission
-      if (!emAfBootloadWaitChar(&status, false, 0)) {
+      if (!sli_zigbee_af_bootload_wait_char(&status, false, 0)) {
         DBGPRINT("sendBlock() fail 3");
         return false;
       }
@@ -107,7 +99,7 @@ static bool sendBlock(uint8_t blockNum, const uint8_t *data)
   return (status == ACK);
 }
 
-void emAfInitXmodemState(bool startImmediately)
+void sli_zigbee_af_init_xmodsli_zigbee_state(bool startImmediately)
 {
   if (startImmediately) {
     // skip checking for 'C' characters
@@ -120,13 +112,13 @@ void emAfInitXmodemState(bool startImmediately)
   blockNum = 1;
 }
 
-bool emAfSendXmodemData(const uint8_t *data, uint16_t length, bool finished)
+bool sli_zigbee_af_send_xmodem_data(const uint8_t *data, uint16_t length, bool finished)
 {
   uint8_t rxData;
   uint16_t i;
 
   if (state == START_TRANSMISSION) {
-    if (emAfBootloadWaitChar(&rxData, true, 'C')) {
+    if (sli_zigbee_af_bootload_wait_char(&rxData, true, 'C')) {
       DBGPRINT("sending\n");
       state = SENDING;
     } else {
@@ -164,8 +156,8 @@ bool emAfSendXmodemData(const uint8_t *data, uint16_t length, bool finished)
         }
       }
       DBGPRINT("EOT\n", blockNum);
-      emAfBootloadSendByte(EOT);
-      if (!emAfBootloadWaitChar(&rxData, true, ACK)) {
+      sli_zigbee_af_bootload_send_byte(EOT);
+      if (!sli_zigbee_af_bootload_wait_char(&rxData, true, ACK)) {
         DBGPRINT("NoEOTAck\n");
         return false;
       }

@@ -19,9 +19,10 @@
 #include "af.h"
 #include "on-off.h"
 
-#ifdef UC_BUILD
 #include "zap-cluster-command-parser.h"
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #ifdef SL_CATALOG_ZIGBEE_REPORTING_PRESENT
 #include "reporting.h"
 #endif
@@ -34,21 +35,6 @@
 #ifdef SL_CATALOG_ZIGBEE_ZLL_LEVEL_CONTROL_SERVER_PRESENT
   #include "zll-level-control-server.h"
 #endif
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_REPORTING
-  #include "app/framework/plugin/reporting/reporting.h"
-#endif
-#ifdef EMBER_AF_PLUGIN_SCENES
-  #include "../scenes/scenes.h"
-#endif //EMBER_AF_PLUGIN_SCENES
-#ifdef EMBER_AF_PLUGIN_ZLL_ON_OFF_SERVER
-  #include "../zll-on-off-server/zll-on-off-server.h"
-  #define SL_CATALOG_ZIGBEE_ZLL_ON_OFF_SERVER_PRESENT
-#endif
-#ifdef EMBER_AF_PLUGIN_ZLL_LEVEL_CONTROL_SERVER
-  #include "../zll-level-control-server/zll-level-control-server.h"
-#endif
-#endif // UC_BUILD
 
 #ifdef ZCL_USING_ON_OFF_CLUSTER_START_UP_ON_OFF_ATTRIBUTE
 static bool areStartUpOnOffServerAttributesTokenized(uint8_t endpoint);
@@ -294,8 +280,6 @@ static bool areStartUpOnOffServerAttributesTokenized(uint8_t endpoint)
 }
 #endif
 
-#ifdef UC_BUILD
-
 uint32_t emberAfOnOffClusterServerCommandParse(sl_service_opcode_t opcode,
                                                sl_service_function_context_t *context)
 {
@@ -328,5 +312,3 @@ uint32_t emberAfOnOffClusterServerCommandParse(sl_service_opcode_t opcode,
           ? EMBER_ZCL_STATUS_SUCCESS
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
-
-#endif // UC_BUILD

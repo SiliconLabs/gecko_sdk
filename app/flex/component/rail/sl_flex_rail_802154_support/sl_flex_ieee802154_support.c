@@ -651,24 +651,24 @@ static int16_t sl_flex_ieee802154_reinit(RAIL_Handle_t r_handle,
   switch (std) {
     case SL_FLEX_IEEE802154_STD_IEEE802154_2P4GHZ:
       // configures the IEEE 802.15.4 on 2.4GHz
-      sl_flex_util_802154_protocol_config(r_handle,
-                                          SL_FLEX_UTIL_PROTOCOL_IEEE802154_2P4GHZ);
+      status = sl_flex_util_802154_protocol_config(r_handle,
+                                                   SL_FLEX_UTIL_PROTOCOL_IEEE802154_2P4GHZ);
       if (status != RAIL_STATUS_NO_ERROR) {
         app_log_error("sl_rail_util_protocol_config status: %d failed", status);
         return SL_FLEX_IEEE802154_ERROR;
       }
       break;
     case SL_FLEX_IEEE802154_STD_IEEE802154G_863MHZ:
-      sl_flex_util_802154_protocol_config(r_handle,
-                                          SL_FLEX_UTIL_PROTOCOL_IEEE802154_GB868_863MHZ);
+      status = sl_flex_util_802154_protocol_config(r_handle,
+                                                   SL_FLEX_UTIL_PROTOCOL_IEEE802154_GB868_863MHZ);
       if (status != RAIL_STATUS_NO_ERROR) {
         app_log_error("sl_rail_util_protocol_config status: %d failed", status);
         return SL_FLEX_IEEE802154_ERROR;
       }
       break;
     case SL_FLEX_IEEE802154_STD_IEEE802154G_915MHZ:
-      sl_flex_util_802154_protocol_config(r_handle,
-                                          SL_FLEX_UTIL_PROTOCOL_IEEE802154_GB868_915MHZ);
+      status = sl_flex_util_802154_protocol_config(r_handle,
+                                                   SL_FLEX_UTIL_PROTOCOL_IEEE802154_GB868_915MHZ);
       if (status != RAIL_STATUS_NO_ERROR) {
         app_log_error("sl_rail_util_protocol_config status: %d failed", status);
         return SL_FLEX_IEEE802154_ERROR;

@@ -3,11 +3,16 @@ label: "Proxy"
 package: "Btmesh"
 description: >
   Proxy component enables Bluetooth Mesh Proxy Server Feature for the node.
-  Proxy nodes send their messages over GATT and ADV bearers (GATT and Advertisement packeges),
+  Proxy nodes send their messages over GATT and ADV bearers (GATT and Advertisement packages),
   which is mandatory if the provisioner is a mobile phone. Proxy functionality can be enabled
   or disabled during runtime via node configuration.
+
+  This is a No-Code component.
 category: "Bluetooth Mesh|Features"
 quality: "production"
+tag:
+  - No-Code
+
 provides:
   - name: "btmesh_proxy"
 requires:

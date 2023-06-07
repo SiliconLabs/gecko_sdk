@@ -28,35 +28,51 @@
  *
  ******************************************************************************/
 
-// <<< Use Configuration Wizard in Context Menu >>>
-
 #ifndef SL_CPC_DRV_SPI_USART_EXP_SECONDARY_CONFIG_H
 #define SL_CPC_DRV_SPI_USART_EXP_SECONDARY_CONFIG_H
-#include "spidrv.h"
+
+// <<< Use Configuration Wizard in Context Menu >>>
 
 // <h> CPC-Secondary SPI Driver Configuration
 
+// <h> Queues size configuration
+
 // <o SL_CPC_DRV_SPI_EXP_RX_QUEUE_SIZE> Number of frame that can be queued in the driver receive queue
-// <i> Default: 10
-#define SL_CPC_DRV_SPI_EXP_RX_QUEUE_SIZE            10
+// <i> A greater number decreases the chances of retransmission due to dropped frames at the cost of memory footprint.
+// <i> Default : 10
+// <d> 10
+#define SL_CPC_DRV_SPI_EXP_RX_QUEUE_SIZE               10
 
 // <o SL_CPC_DRV_SPI_EXP_TX_QUEUE_SIZE> Number of frame that can be queued in the driver transmit queue
-// <i> Default: 10
-#define SL_CPC_DRV_SPI_EXP_TX_QUEUE_SIZE            10
-
-// <o SL_CPC_DRV_SPI_EXP_BITRATE> SPI bit rate
-// <i> Default: 1000000
-#define SL_CPC_DRV_SPI_EXP_BITRATE               1000000
-
-// <o SL_CPC_DRV_SPI_EXP_CS_FALLING_EDGE_INT_NO> Chip Select Interrupt Number on Falling Edge
-// <i> Default: 10
-#define SL_CPC_DRV_SPI_EXP_CS_FALLING_EDGE_INT_NO  4
-
-// <o SL_CPC_DRV_SPI_EXP_CS_RISING_EDGE_INT_NO> Chip Select Interrupt Number on Rising Edge
-// <i> Default: 11
-#define SL_CPC_DRV_SPI_EXP_CS_RISING_EDGE_INT_NO   5
+// <i> A greater number increases the transmission responsiveness at the cost of memory footprint.
+// <i> Default : 10
+// <d> 10
+#define SL_CPC_DRV_SPI_EXP_TX_QUEUE_SIZE               10
 // </h>
 
+// <h> LDMA SYNCTRIG bit configuration
+// <o SL_CPC_DRV_SPI_EXP_TX_AVAILABILITY_SYNCTRIG_CH> The LDMA SYNCTRIG bit number for the TX availability [bit] <0-7>
+// <i> Specify which SYNCTRIG bit is used. Modify this value to avoid collisions if specific LDMA SYNCTRIG bits need to be used elsewhere in the project.
+// <i> Default : 7
+// <d> 7
+#define SL_CPC_DRV_SPI_EXP_TX_AVAILABILITY_SYNCTRIG_CH 6
+
+// <o SL_CPC_DRV_SPI_EXP_CS_SYNCTRIG_PRS_CH> The LDMA SYNCTRIG bit number for the CS PRS channel [bit] <0-7>
+// <i> Specify which SYNCTRIG bit is used. Modify this value to avoid collisions if specific LDMA SYNCTRIG bits need to be used elsewhere in the project.
+// <i> This bit number is tied to the equivalent PRS channel number. Keep that in mind if using PRS channels elsewhere in the project.
+// <i> Default : 5
+// <d> 5
+#define SL_CPC_DRV_SPI_EXP_CS_SYNCTRIG_PRS_CH          5
+
+// <o SL_CPC_DRV_SPI_EXP_TXC_SYNCTRIG_PRS_CH> The LDMA SYNCTRIG bit number for the TXC PRS channel [bit] <0-7>
+// <i> Specify which SYNCTRIG bit is used. Modify this value to avoid collisions if specific LDMA SYNCTRIG bits need to be used elsewhere in the project.
+// <i> This bit number is tied to the equivalent PRS channel number. Keep that in mind if using PRS channels elsewhere in the project.
+// <i> Default : 6
+// <d> 6
+#define SL_CPC_DRV_SPI_EXP_TXC_SYNCTRIG_PRS_CH         4
+
+// </h>
+// </h>
 // <<< end of configuration section >>>
 
 // <<< sl:start pin_tool >>>

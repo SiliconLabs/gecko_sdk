@@ -33,7 +33,7 @@ template_contribution:
     value:
       group: slot-manager
       name: boot-slot
-      handler: emAfPluginSlotManagerCliBootloadSlot
+      handler: sli_slot_manager_cli_bootload_slot
       help: Boots the image in the specified slot ID.
       argument:
       - type: uint32
@@ -42,7 +42,7 @@ template_contribution:
     value:
       group: slot-manager
       name: erase-slot
-      handler: emAfPluginSlotManagerCliEraseSlot
+      handler: sli_slot_manager_cli_erase_slot
       help: Erases the specified slot ID.
       argument:
       - type: uint32
@@ -51,13 +51,13 @@ template_contribution:
     value:
       group: slot-manager
       name: ext-flash-info
-      handler: emAfPluginSlotManagerCliPrintExternalFlashInfo
+      handler: sli_slot_manager_cli_print_external_flash_info
       help: Prints flash storage information.
   - name: cli_command
     value:
       group: slot-manager
       name: read
-      handler: emAfPluginSlotManagerCliReadExtFlash
+      handler: sli_slot_manager_cli_read_ext_flash
       help: Reads raw data from flash storage.
       argument:
       - type: uint32
@@ -68,5 +68,5 @@ template_contribution:
     value:
       group: slot-manager
       name: slots-info
-      handler: emAfPluginSlotManagerCliPrintSlotsInfo
+      handler: sli_slot_manager_cli_print_slots_info
       help: Prints information for all available slots.

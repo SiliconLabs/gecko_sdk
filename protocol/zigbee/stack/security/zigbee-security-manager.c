@@ -25,26 +25,29 @@
 #include "stack/include/ember-types-internal.h"
 #include "hal.h" // for TOKEN_resolution
 
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
-#endif // UC_BUILD
+#endif
 
 // Externs
-extern bool emGetTrustCenterEui64(EmberEUI64 address);
-extern EmberStatus emGetTransientKeyTableEntry(uint8_t index, EmberTransientKeyData *transientKeyData);
-extern EmberStatus emGetKeyTableEntry(uint8_t index, EmberKeyStruct *result);
+
+extern bool sli_zigbee_get_trust_center_eui64(EmberEUI64 address);
+extern EmberStatus sli_zigbee_get_transient_key_table_entry(uint8_t index, EmberTransientKeyData *transientKeyData);
+extern EmberStatus sli_zigbee_get_key_table_entry(uint8_t index, EmberKeyStruct *result);
 extern bool findTransientLinkKey(const EmberEUI64 eui64ToFind,
                                  EmberTransientKeyData *keyDataReturn,
                                  EmberKeyStructBitmask* bitmask);
-extern void emStackTokenPrimitive(bool tokenRead,
-                                  void* tokenStruct,
-                                  uint16_t tokenAddress,
-                                  uint8_t length);
-
-void sl_zb_sec_man_init_context(sl_zb_sec_man_context_t* context)
-{
-  MEMSET(context, 0, sizeof(*context));
-}
+extern void sli_zigbee_stack_token_primitive(bool tokenRead,
+                                             void* tokenStruct,
+                                             uint16_t tokenAddress,
+                                             uint8_t length);
+extern bool sli_zigbee_is_token_data_initialized(uint8_t* data, uint8_t length);
+extern uint8_t sli_zigbee_find_key_table_entry(EmberEUI64 address, bool linkKey, uint8_t bitmask);
+extern EmberStatus sli_zigbee_get_link_key(EmberEUI64 partner,
+                                           EmberKeyData* key,
+                                           uint32_t **frameCounterLocLoc,
+                                           uint8_t getKeyBitmask);
+#define sli_zigbee_get_security_state(item) ((sli_zigbee_security_state_bitmask & (item)) == (item))
 
 sl_status_t sl_zb_sec_man_import_key(sl_zb_sec_man_context_t* context,
                                      sl_zb_sec_man_key_t* plaintext_key)
@@ -206,10 +209,22 @@ sl_status_t sl_zb_sec_man_export_link_key_by_eui(EmberEUI64 eui,
   }
   context->flags |= ZB_SEC_MAN_FLAG_EUI_IS_VALID;
 
-  status = sl_zb_sec_man_export_key(context, plaintext_key);
+  if (plaintext_key == NULL) {
+    //For callers who want this to return a key's index but not its actual value
+    sl_zb_sec_man_key_t unused_key;
+    status = sl_zb_sec_man_export_key(context, &unused_key);
+  } else {
+    status = sl_zb_sec_man_export_key(context, plaintext_key);
+  }
 
   if (status != SL_STATUS_OK) {
     return SL_STATUS_NOT_FOUND;
+  }
+
+  if (eui != NULL && key_data != NULL) {
+    context->flags |= ZB_SEC_MAN_FLAG_KEY_INDEX_IS_VALID;
+    //populate key_data if we did find a link key for this EUI
+    (void) sl_zb_sec_man_get_aps_key_info(context, key_data);
   }
 
   return status;
@@ -317,16 +332,16 @@ void zb_sec_man_set_network_key_info(sl_zb_sec_man_network_key_info_t* network_k
 {
   tokTypeStackKeys tok;
 
-  emStackTokenPrimitive(true, &tok, TOKEN_STACK_KEYS, TOKEN_STACK_KEYS_SIZE);
+  sli_zigbee_stack_token_primitive(true, &tok, TOKEN_STACK_KEYS, TOKEN_STACK_KEYS_SIZE);
   if (tok.activeKeySeqNum != network_key_info->network_key_sequence_number) {
     tok.activeKeySeqNum = network_key_info->network_key_sequence_number;
-    emStackTokenPrimitive(false, &tok, TOKEN_STACK_KEYS, TOKEN_STACK_KEYS_SIZE);
+    sli_zigbee_stack_token_primitive(false, &tok, TOKEN_STACK_KEYS, TOKEN_STACK_KEYS_SIZE);
   }
 
-  emStackTokenPrimitive(true, &tok, TOKEN_STACK_ALTERNATE_KEY, TOKEN_STACK_ALTERNATE_KEY_SIZE);
+  sli_zigbee_stack_token_primitive(true, &tok, TOKEN_STACK_ALTERNATE_KEY, TOKEN_STACK_ALTERNATE_KEY_SIZE);
   if (tok.activeKeySeqNum != network_key_info->alt_network_key_sequence_number) {
     tok.activeKeySeqNum = network_key_info->alt_network_key_sequence_number;
-    emStackTokenPrimitive(false, &tok, TOKEN_STACK_ALTERNATE_KEY, TOKEN_STACK_ALTERNATE_KEY_SIZE);
+    sli_zigbee_stack_token_primitive(false, &tok, TOKEN_STACK_ALTERNATE_KEY, TOKEN_STACK_ALTERNATE_KEY_SIZE);
   }
 }
 
@@ -341,24 +356,33 @@ sl_status_t zb_sec_man_fetch_tc_link_key_info(sl_zb_sec_man_context_t* context,
     return SL_STATUS_INVALID_MODE;
   }
 
+  MEMSET(key_data, 0, sizeof(*key_data));
+
   EmberEUI64 tcAddress;
-  if (emGetTrustCenterEui64(tcAddress)) {
+  if (sli_zigbee_get_trust_center_eui64(tcAddress)) {
     if ((context->flags & ZB_SEC_MAN_FLAG_EUI_IS_VALID)
         && (0 != MEMCOMPARE(context->eui64, tcAddress, EUI64_SIZE))) {
       return SL_STATUS_NOT_FOUND;
     }
     MEMMOVE(context->eui64, tcAddress, EUI64_SIZE);
     context->flags |= ZB_SEC_MAN_FLAG_EUI_IS_VALID;
+    key_data->bitmask |= EMBER_KEY_HAS_PARTNER_EUI64;
   }
-
-  MEMSET(key_data, 0, sizeof(*key_data));
 
   key_data->bitmask |= EMBER_KEY_HAS_OUTGOING_FRAME_COUNTER;
   key_data->outgoing_frame_counter = emberGetApsFrameCounter();
 
   if (emberGetNodeId() != 0x0000) {
-    key_data->incoming_frame_counter = emIncomingTcLinkKeyFrameCounter;
+    key_data->incoming_frame_counter = sli_zigbee_incoming_tc_link_key_frame_counter;
     key_data->bitmask |= EMBER_KEY_HAS_INCOMING_FRAME_COUNTER;
+  }
+
+  if (!sli_zigbee_get_security_state(KEY_IS_NOT_AUTHORIZED) ) {
+    key_data->bitmask |= EMBER_KEY_IS_AUTHORIZED;
+  }
+
+  if (sli_zigbee_get_security_state(EMBER_TC_SUPPORTS_FC_SYNC)) {
+    key_data->bitmask |= EMBER_KEY_FC_SYNC_SUPPORTED;
   }
 
   return SL_STATUS_OK;
@@ -371,9 +395,9 @@ sl_status_t zb_sec_man_fetch_transient_key_info(sl_zb_sec_man_context_t* context
   EmberTransientKeyData transientKeyData;
 
   if (context->flags & ZB_SEC_MAN_FLAG_KEY_INDEX_IS_VALID) {
-    status = emGetTransientKeyTableEntry(context->key_index, &transientKeyData);
+    status = sli_zigbee_get_transient_key_table_entry(context->key_index, &transientKeyData);
   } else if (context->flags & ZB_SEC_MAN_FLAG_EUI_IS_VALID) {
-    // emberGetTransientLinkKey is called when using the original transient and not the
+    // sl_zb_sec_man_export_transient_key_by_eui is called when using the original transient and not the
     // unconfirmed transient key. Hence initializing the bitmask to 0.
     EmberKeyStructBitmask bitmask = 0;
     bool found = findTransientLinkKey(context->eui64, &transientKeyData, &bitmask);
@@ -390,6 +414,9 @@ sl_status_t zb_sec_man_fetch_transient_key_info(sl_zb_sec_man_context_t* context
   key_data->incoming_frame_counter = transientKeyData.incomingFrameCounter;
   key_data->ttl_in_seconds = transientKeyData.remainingTimeSeconds;
 
+  context->multi_network_index = transientKeyData.networkIndex;
+  MEMMOVE(context->eui64, transientKeyData.eui64, sizeof(EmberEUI64));
+
   return SL_STATUS_OK;
 }
 
@@ -399,14 +426,17 @@ sl_status_t zb_sec_man_fetch_link_key_table_key_info(sl_zb_sec_man_context_t* co
   EmberStatus status = EMBER_ERR_FATAL;
   EmberKeyStruct result;
   if (context->flags & ZB_SEC_MAN_FLAG_KEY_INDEX_IS_VALID) {
-    status = emGetKeyTableEntry(context->key_index, &result);
+    status = sli_zigbee_get_key_table_entry(context->key_index, &result);
   }
   if (status != EMBER_SUCCESS) {
     return SL_STATUS_NOT_FOUND;
   }
+  MEMMOVE(context->eui64, result.partnerEUI64, EUI64_SIZE);
+  context->flags |= ZB_SEC_MAN_FLAG_EUI_IS_VALID;
   MEMSET(key_data, 0, sizeof(*key_data));
   key_data->bitmask = result.bitmask;
   key_data->incoming_frame_counter = result.incomingFrameCounter;
+  key_data->bitmask |= EMBER_KEY_HAS_INCOMING_FRAME_COUNTER;
   key_data->outgoing_frame_counter = result.outgoingFrameCounter;
 
   return SL_STATUS_OK;
@@ -425,4 +455,89 @@ void emberHmacAesHash(const uint8_t *key,
   (void) sl_zb_sec_man_import_key(&context, (sl_zb_sec_man_key_t *)key);
   (void) sl_zb_sec_man_load_key_context(&context);
   sl_zb_sec_man_hmac_aes_mmo(data, dataLength, result);
+}
+
+uint8_t zb_sec_man_version(void)
+{
+  return ZB_SEC_MAN_VERSION;
+}
+
+/// NOTE authentication token is only required for ZigBee Revision 23 and greater
+
+// Symmetric Passphrase Functions
+
+// NOTE auth token is in key table entry
+// NOTE copied from aps-keys-full.h
+// This bit indicates if entry in the key table is a Symmetric Passphrase
+#define KEY_TABLE_SYMMETRIC_PASSPHRASE      (BIT(7))
+
+uint8_t sl_zb_sec_man_find_symmetric_passphrase_key_table_index(EmberEUI64 address)
+{
+  // Look for the entry in the key table for the non-null address
+  if (address != NULL) {
+    return sli_zigbee_find_key_table_entry(address, true, KEY_TABLE_SYMMETRIC_PASSPHRASE);
+  }
+  return 0xFF;
+}
+
+sl_status_t sl_zb_sec_man_import_symmetric_passphrase(uint8_t index,
+                                                      EmberEUI64 address,
+                                                      EmberKeyData* key_data)
+{
+  sl_status_t status;
+
+  sl_zb_sec_man_context_t context;
+  sl_zb_sec_man_init_context(&context);
+
+  MEMCOPY(&context.eui64, address, sizeof(EmberEUI64));
+  // NOTE APP_LINK key type is a little misleading, as the symmetric
+  // passphrase is technically not a link key, however this key type
+  // corresponds to the correct storage type for the symmetric passphrase
+  context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_APP_LINK;
+  context.key_index = index;
+
+  context.flags |= ZB_SEC_MAN_FLAG_SYMMETRIC_PASSPHRASE;
+  status = sl_zb_sec_man_import_key(&context, (sl_zb_sec_man_key_t *) key_data);
+
+  return status;
+}
+
+sl_status_t sl_zb_sec_man_update_symmetric_passphrase_eui(EmberEUI64 old_eui64, EmberEUI64 new_eui64)
+{
+  uint8_t index = sl_zb_sec_man_find_symmetric_passphrase_key_table_index(old_eui64);
+  if (index == 0xFF) {
+    return SL_STATUS_NOT_FOUND;
+  }
+  tokTypeStackKeyTable tok;
+  halCommonGetIndexedToken(&tok, TOKEN_STACK_KEY_TABLE, index);
+  MEMMOVE(&(tok[KEY_ENTRY_IEEE_OFFSET]),
+          new_eui64,
+          EUI64_SIZE);
+  halCommonSetIndexedToken(TOKEN_STACK_KEY_TABLE, index, (void*)&tok);
+  return SL_STATUS_OK;
+}
+
+sl_status_t sl_zb_sec_man_export_symmetric_passphrase(EmberEUI64 address,
+                                                      EmberKeyData* key_data)
+{
+  uint8_t index = sl_zb_sec_man_find_symmetric_passphrase_key_table_index(address);
+  if (index == 0xFF) {
+    return SL_STATUS_FAIL;
+  }
+
+  sl_zb_sec_man_context_t context;
+  sl_zb_sec_man_aps_key_metadata_t metadata;
+
+  return sl_zb_sec_man_export_link_key_by_index(index, &context, (sl_zb_sec_man_key_t *) key_data, &metadata);
+}
+
+bool sl_zb_sec_man_have_link_key(EmberEUI64 eui)
+{
+  // Since we are simply checking for the existence of a key,
+  // we don't care if it is authorized or not.
+  return (EMBER_SUCCESS
+          == sli_zigbee_get_link_key(eui,
+                                     NULL, // key return data
+                                     NULL, // frame counter location
+                                     false)); // authorized keys only?
 }

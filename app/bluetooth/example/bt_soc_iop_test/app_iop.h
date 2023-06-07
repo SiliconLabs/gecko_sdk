@@ -3,7 +3,7 @@
  * @brief Helper functions for BLE interoperability test.
  *******************************************************************************
  * # License
- * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -30,13 +30,32 @@
 #ifndef APP_IOP_H
 #define APP_IOP_H
 
+#include "sl_bt_api.h"
+
+#define BONDING_DISABLED          0x00
+#define BONDING_ENABLED           0x01
+#define BONDING_WITHOUT_MITM      0x00
+#define BONDING_WITH_MITM         0x01
+
 //--------------------------------
 // Connection parameters
-extern uint16_t mtu_size;
-extern uint16_t pdu_size;
+
+// Default values
+#define DEFAULT_ADVERTISING_INTERVAL  32      // 20 ms
+#define DEFAULT_CONNECTION_INTERVAL   10      // 12.5 ms
+#define DEFAULT_RESPONDER_LATENCY     0
+#define DEFAULT_SUPV_TIMEOUT          200     // 2000 ms
+#define DEFAULT_CE_LENGTH_MIN         0x0000  // Unlimited connection event length
+#define DEFAULT_CE_LENGTH_MAX         0xFFFF  // Unlimited connection event length
+#define DEFAULT_PHY                   sl_bt_gap_phy_2m
+#define DEFAULT_PDU                   251
+
 extern uint16_t connection_interval;
 extern uint16_t responder_latency;
 extern uint16_t supv_timeout;
+extern uint16_t mtu_size;
+extern uint16_t pdu_size;
+extern uint8_t phy;
 
 //--------------------------------
 // Security
@@ -53,6 +72,11 @@ extern bool ota_dfu_request;
  * Initialize test data values.
  ******************************************************************************/
 void app_test_data_init(void);
+
+/***************************************************************************//**
+ * Throughput test process step. Sends out a single notification.
+ ******************************************************************************/
+void app_throughput_step(void);
 
 /***************************************************************************//**
  * Handle read operation for user-type characteristics.

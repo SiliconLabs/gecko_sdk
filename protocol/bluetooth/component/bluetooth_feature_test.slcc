@@ -3,7 +3,7 @@ label: "Direct Test Mode"
 package: "Bluetooth"
 description: >
   Bluetooth DTM test feature
-category: "Bluetooth|Stack|DTM"
+category: Bluetooth|Bluetooth Host (Stack)|Features with Commands and Events
 quality: "production"
 root_path: "protocol/bluetooth"
 requires:

@@ -15,6 +15,7 @@
 #include "secure-ezsp-types.h"
 #include "app/em260/command-context.h"
 #include "stack/include/cbke-crypto-engine.h"
+#include "stack/include/zigbee-security-manager.h"
 #include "stack/include/mfglib.h"
 #include "stack/include/binding-table.h"
 #include "stack/include/message.h"
@@ -35,7 +36,7 @@
 #include "ember-duty-cycle.h"
 #include "multi-phy.h"
 
-bool emAfProcessEzspCommandTrustCenter(uint16_t commandId)
+bool sli_zigbee_af_process_ezsp_command_trust_center(uint16_t commandId)
 {
   switch (commandId) {
 //------------------------------------------------------------------------------
@@ -52,15 +53,6 @@ bool emAfProcessEzspCommandTrustCenter(uint16_t commandId)
     case EZSP_BROADCAST_NETWORK_KEY_SWITCH: {
       EmberStatus status;
       status = emberBroadcastNetworkKeySwitch();
-      appendInt8u(status);
-      break;
-    }
-
-    case EZSP_BECOME_TRUST_CENTER: {
-      EmberStatus status;
-      EmberKeyData newNetworkKey;
-      fetchEmberKeyData(&newNetworkKey);
-      status = emberBecomeTrustCenter(&newNetworkKey);
       appendInt8u(status);
       break;
     }

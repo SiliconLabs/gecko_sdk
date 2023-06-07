@@ -5,9 +5,12 @@ description: >
   The L2CAP data channel component is used to transfer data through the
   link layer. The component serves as an API to access the L2CAP data
   transfer functionalites.
-category: Bluetooth|Middleware|L2CAP
-quality: experimental
+category: Bluetooth|Application|Miscellaneous
+quality: evaluation
 root_path: app/bluetooth/common/l2cap_transfer
+tag:
+  - Low-Code
+
 source:
   - path: src/sl_bt_l2cap_transfer.c
   - path: src/sl_bt_l2cap_transfer_freertos.c
@@ -18,7 +21,7 @@ source:
       - "micriumos_kernel"
 include:
   - path: inc
-    file_list: 
+    file_list:
       - path: sl_bt_l2cap_transfer.h
       - path: sli_bt_l2cap_transfer_adaptation.h
 config_file:
@@ -34,11 +37,11 @@ provides:
 requires:
   - name: bluetooth_stack
   - name: bluetooth_feature_l2cap
-  - name: component_catalog 
-  - name: power_manager  
+  - name: component_catalog
+  - name: power_manager
   - name: slist
   - name: app_assert
- 
+
 template_contribution:
   - name: bluetooth_on_event
     value:
@@ -48,7 +51,7 @@ template_contribution:
     value:
       event: service_process_action
       include: sl_bt_l2cap_transfer.h
-      handler: sli_bt_l2cap_transfer_process_action 
+      handler: sli_bt_l2cap_transfer_process_action
   - name: event_handler
     value:
       event: internal_app_init

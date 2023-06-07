@@ -12,7 +12,7 @@ class RM_Register_AGC_S_IPVERSION(Base_RM_Register):
             0xa800c000, 0x000,
             'IPVERSION', 'AGC_S.IPVERSION', 'read-only',
             u"",
-            0x00000003, 0xFFFFFFFF,
+            0x00000004, 0xFFFFFFFF,
             0x00001000, 0x00002000,
             0x00003000)
 
@@ -180,8 +180,8 @@ class RM_Register_AGC_S_CTRL0(Base_RM_Register):
         self.zz_fdict['DISRESETCHPWR'] = self.DISRESETCHPWR
         self.ADCATTENMODE = RM_Field_AGC_S_CTRL0_ADCATTENMODE(self)
         self.zz_fdict['ADCATTENMODE'] = self.ADCATTENMODE
-        self.FENOTCHMODESEL = RM_Field_AGC_S_CTRL0_FENOTCHMODESEL(self)
-        self.zz_fdict['FENOTCHMODESEL'] = self.FENOTCHMODESEL
+        self.INRXRSTEN = RM_Field_AGC_S_CTRL0_INRXRSTEN(self)
+        self.zz_fdict['INRXRSTEN'] = self.INRXRSTEN
         self.ADCATTENCODE = RM_Field_AGC_S_CTRL0_ADCATTENCODE(self)
         self.zz_fdict['ADCATTENCODE'] = self.ADCATTENCODE
         self.ENRSSIRESET = RM_Field_AGC_S_CTRL0_ENRSSIRESET(self)
@@ -204,7 +204,7 @@ class RM_Register_AGC_S_CTRL1(Base_RM_Register):
             0xa800c000, 0x024,
             'CTRL1', 'AGC_S.CTRL1', 'read-write',
             u"",
-            0x00001300, 0x0007FFFF,
+            0x00001300, 0x001FFFFF,
             0x00001000, 0x00002000,
             0x00003000)
 
@@ -220,6 +220,10 @@ class RM_Register_AGC_S_CTRL1(Base_RM_Register):
         self.zz_fdict['CCAMODE3LOGIC'] = self.CCAMODE3LOGIC
         self.CCASWCTRL = RM_Field_AGC_S_CTRL1_CCASWCTRL(self)
         self.zz_fdict['CCASWCTRL'] = self.CCASWCTRL
+        self.DISRSTONPREDET = RM_Field_AGC_S_CTRL1_DISRSTONPREDET(self)
+        self.zz_fdict['DISRSTONPREDET'] = self.DISRSTONPREDET
+        self.CFLOOPINCREQMODE = RM_Field_AGC_S_CTRL1_CFLOOPINCREQMODE(self)
+        self.zz_fdict['CFLOOPINCREQMODE'] = self.CFLOOPINCREQMODE
         self.__dict__['zz_frozen'] = True
 
 
@@ -296,7 +300,7 @@ class RM_Register_AGC_S_CTRL4(Base_RM_Register):
             0xa800c000, 0x030,
             'CTRL4', 'AGC_S.CTRL4', 'read-write',
             u"",
-            0x0000000E, 0xFF80FFFF,
+            0x0000000E, 0xBF80FFFF,
             0x00001000, 0x00002000,
             0x00003000)
 
@@ -312,8 +316,6 @@ class RM_Register_AGC_S_CTRL4(Base_RM_Register):
         self.zz_fdict['RFPKDSYNCSEL'] = self.RFPKDSYNCSEL
         self.RFPKDSEL = RM_Field_AGC_S_CTRL4_RFPKDSEL(self)
         self.zz_fdict['RFPKDSEL'] = self.RFPKDSEL
-        self.FRZPKDEN = RM_Field_AGC_S_CTRL4_FRZPKDEN(self)
-        self.zz_fdict['FRZPKDEN'] = self.FRZPKDEN
         self.RFPKDCNTEN = RM_Field_AGC_S_CTRL4_RFPKDCNTEN(self)
         self.zz_fdict['RFPKDCNTEN'] = self.RFPKDCNTEN
         self.__dict__['zz_frozen'] = True
@@ -444,7 +446,7 @@ class RM_Register_AGC_S_IF(Base_RM_Register):
             0xa800c000, 0x048,
             'IF', 'AGC_S.IF', 'read-write',
             u"",
-            0x00000000, 0x00007F7D,
+            0x00000000, 0x0003FF7D,
             0x00001000, 0x00002000,
             0x00003000)
 
@@ -474,6 +476,12 @@ class RM_Register_AGC_S_IF(Base_RM_Register):
         self.zz_fdict['GAINBELOWGAINTHD'] = self.GAINBELOWGAINTHD
         self.GAINUPDATEFRZ = RM_Field_AGC_S_IF_GAINUPDATEFRZ(self)
         self.zz_fdict['GAINUPDATEFRZ'] = self.GAINUPDATEFRZ
+        self.PNATTEN = RM_Field_AGC_S_IF_PNATTEN(self)
+        self.zz_fdict['PNATTEN'] = self.PNATTEN
+        self.COLLDETRSSIMAPRE = RM_Field_AGC_S_IF_COLLDETRSSIMAPRE(self)
+        self.zz_fdict['COLLDETRSSIMAPRE'] = self.COLLDETRSSIMAPRE
+        self.COLLDETRSSIMASYNC = RM_Field_AGC_S_IF_COLLDETRSSIMASYNC(self)
+        self.zz_fdict['COLLDETRSSIMASYNC'] = self.COLLDETRSSIMASYNC
         self.__dict__['zz_frozen'] = True
 
 
@@ -484,7 +492,7 @@ class RM_Register_AGC_S_IEN(Base_RM_Register):
             0xa800c000, 0x04C,
             'IEN', 'AGC_S.IEN', 'read-write',
             u"",
-            0x00000000, 0x00007F7D,
+            0x00000000, 0x0003FF7D,
             0x00001000, 0x00002000,
             0x00003000)
 
@@ -514,6 +522,12 @@ class RM_Register_AGC_S_IEN(Base_RM_Register):
         self.zz_fdict['GAINBELOWGAINTHD'] = self.GAINBELOWGAINTHD
         self.GAINUPDATEFRZ = RM_Field_AGC_S_IEN_GAINUPDATEFRZ(self)
         self.zz_fdict['GAINUPDATEFRZ'] = self.GAINUPDATEFRZ
+        self.PNATTEN = RM_Field_AGC_S_IEN_PNATTEN(self)
+        self.zz_fdict['PNATTEN'] = self.PNATTEN
+        self.COLLDETRSSIMAPRE = RM_Field_AGC_S_IEN_COLLDETRSSIMAPRE(self)
+        self.zz_fdict['COLLDETRSSIMAPRE'] = self.COLLDETRSSIMAPRE
+        self.COLLDETRSSIMASYNC = RM_Field_AGC_S_IEN_COLLDETRSSIMASYNC(self)
+        self.zz_fdict['COLLDETRSSIMASYNC'] = self.COLLDETRSSIMASYNC
         self.__dict__['zz_frozen'] = True
 
 
@@ -540,7 +554,7 @@ class RM_Register_AGC_S_GAINRANGE(Base_RM_Register):
             0xa800c000, 0x054,
             'GAINRANGE', 'AGC_S.GAINRANGE', 'read-write',
             u"",
-            0x00813187, 0x03FFFFFF,
+            0x00813187, 0x7FFFFFFF,
             0x00001000, 0x00002000,
             0x00003000)
 
@@ -556,6 +570,8 @@ class RM_Register_AGC_S_GAINRANGE(Base_RM_Register):
         self.zz_fdict['LATCHEDHISTEP'] = self.LATCHEDHISTEP
         self.HIPWRTHD = RM_Field_AGC_S_GAINRANGE_HIPWRTHD(self)
         self.zz_fdict['HIPWRTHD'] = self.HIPWRTHD
+        self.PNINDEXBORDER = RM_Field_AGC_S_GAINRANGE_PNINDEXBORDER(self)
+        self.zz_fdict['PNINDEXBORDER'] = self.PNINDEXBORDER
         self.__dict__['zz_frozen'] = True
 
 
@@ -566,12 +582,14 @@ class RM_Register_AGC_S_AGCPERIOD0(Base_RM_Register):
             0xa800c000, 0x058,
             'AGCPERIOD0', 'AGC_S.AGCPERIOD0', 'read-write',
             u"",
-            0xD607000E, 0xFFFF01FF,
+            0xD607020E, 0xFFFF03FF,
             0x00001000, 0x00002000,
             0x00003000)
 
         self.PERIODHI = RM_Field_AGC_S_AGCPERIOD0_PERIODHI(self)
         self.zz_fdict['PERIODHI'] = self.PERIODHI
+        self.PERIODHISTL = RM_Field_AGC_S_AGCPERIOD0_PERIODHISTL(self)
+        self.zz_fdict['PERIODHISTL'] = self.PERIODHISTL
         self.MAXHICNTTHD = RM_Field_AGC_S_AGCPERIOD0_MAXHICNTTHD(self)
         self.zz_fdict['MAXHICNTTHD'] = self.MAXHICNTTHD
         self.SETTLETIMEIF = RM_Field_AGC_S_AGCPERIOD0_SETTLETIMEIF(self)
@@ -642,7 +660,7 @@ class RM_Register_AGC_S_STEPDWN(Base_RM_Register):
             0xa800c000, 0x068,
             'STEPDWN', 'AGC_S.STEPDWN', 'read-write',
             u"",
-            0x00036D11, 0x0003FFFF,
+            0x00036D10, 0x0003FFFF,
             0x00001000, 0x00002000,
             0x00003000)
 
@@ -692,7 +710,7 @@ class RM_Register_AGC_S_GAINSTEPLIM1(Base_RM_Register):
             0xa800c000, 0x070,
             'GAINSTEPLIM1', 'AGC_S.GAINSTEPLIM1', 'read-write',
             u"",
-            0x000011BA, 0x00001FFF,
+            0x0000F1BA, 0x0003FFFF,
             0x00001000, 0x00002000,
             0x00003000)
 
@@ -702,6 +720,8 @@ class RM_Register_AGC_S_GAINSTEPLIM1(Base_RM_Register):
         self.zz_fdict['PGAINDEXMAX'] = self.PGAINDEXMAX
         self.PNINDEXMAX = RM_Field_AGC_S_GAINSTEPLIM1_PNINDEXMAX(self)
         self.zz_fdict['PNINDEXMAX'] = self.PNINDEXMAX
+        self.PNINDEXADC0 = RM_Field_AGC_S_GAINSTEPLIM1_PNINDEXADC0(self)
+        self.zz_fdict['PNINDEXADC0'] = self.PNINDEXADC0
         self.__dict__['zz_frozen'] = True
 
 
@@ -1030,7 +1050,7 @@ class RM_Register_AGC_S_SEQIF(Base_RM_Register):
             0xa800c000, 0x0C0,
             'SEQIF', 'AGC_S.SEQIF', 'read-write',
             u"",
-            0x00000000, 0x00007F7D,
+            0x00000000, 0x0003FF7D,
             0x00001000, 0x00002000,
             0x00003000)
 
@@ -1060,6 +1080,12 @@ class RM_Register_AGC_S_SEQIF(Base_RM_Register):
         self.zz_fdict['GAINBELOWGAINTHD'] = self.GAINBELOWGAINTHD
         self.GAINUPDATEFRZ = RM_Field_AGC_S_SEQIF_GAINUPDATEFRZ(self)
         self.zz_fdict['GAINUPDATEFRZ'] = self.GAINUPDATEFRZ
+        self.PNATTEN = RM_Field_AGC_S_SEQIF_PNATTEN(self)
+        self.zz_fdict['PNATTEN'] = self.PNATTEN
+        self.COLLDETRSSIMAPRE = RM_Field_AGC_S_SEQIF_COLLDETRSSIMAPRE(self)
+        self.zz_fdict['COLLDETRSSIMAPRE'] = self.COLLDETRSSIMAPRE
+        self.COLLDETRSSIMASYNC = RM_Field_AGC_S_SEQIF_COLLDETRSSIMASYNC(self)
+        self.zz_fdict['COLLDETRSSIMASYNC'] = self.COLLDETRSSIMASYNC
         self.__dict__['zz_frozen'] = True
 
 
@@ -1070,7 +1096,7 @@ class RM_Register_AGC_S_SEQIEN(Base_RM_Register):
             0xa800c000, 0x0C4,
             'SEQIEN', 'AGC_S.SEQIEN', 'read-write',
             u"",
-            0x00000000, 0x00007F7D,
+            0x00000000, 0x0003FF7D,
             0x00001000, 0x00002000,
             0x00003000)
 
@@ -1100,6 +1126,12 @@ class RM_Register_AGC_S_SEQIEN(Base_RM_Register):
         self.zz_fdict['GAINBELOWGAINTHD'] = self.GAINBELOWGAINTHD
         self.GAINUPDATEFRZ = RM_Field_AGC_S_SEQIEN_GAINUPDATEFRZ(self)
         self.zz_fdict['GAINUPDATEFRZ'] = self.GAINUPDATEFRZ
+        self.PNATTEN = RM_Field_AGC_S_SEQIEN_PNATTEN(self)
+        self.zz_fdict['PNATTEN'] = self.PNATTEN
+        self.COLLDETRSSIMAPRE = RM_Field_AGC_S_SEQIEN_COLLDETRSSIMAPRE(self)
+        self.zz_fdict['COLLDETRSSIMAPRE'] = self.COLLDETRSSIMAPRE
+        self.COLLDETRSSIMASYNC = RM_Field_AGC_S_SEQIEN_COLLDETRSSIMASYNC(self)
+        self.zz_fdict['COLLDETRSSIMASYNC'] = self.COLLDETRSSIMASYNC
         self.__dict__['zz_frozen'] = True
 
 
@@ -1122,26 +1154,6 @@ class RM_Register_AGC_S_RSSIABSTHR(Base_RM_Register):
         self.zz_fdict['SIRSSIHIGHTHR'] = self.SIRSSIHIGHTHR
         self.SIRSSINEGSTEPTHR = RM_Field_AGC_S_RSSIABSTHR_SIRSSINEGSTEPTHR(self)
         self.zz_fdict['SIRSSINEGSTEPTHR'] = self.SIRSSINEGSTEPTHR
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_AGC_S_LNABOOST(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_AGC_S_LNABOOST, self).__init__(rmio, label,
-            0xa800c000, 0x0CC,
-            'LNABOOST', 'AGC_S.LNABOOST', 'read-write',
-            u"",
-            0x000001FE, 0x000001FF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.BOOSTLNA = RM_Field_AGC_S_LNABOOST_BOOSTLNA(self)
-        self.zz_fdict['BOOSTLNA'] = self.BOOSTLNA
-        self.LNABWADJ = RM_Field_AGC_S_LNABOOST_LNABWADJ(self)
-        self.zz_fdict['LNABWADJ'] = self.LNABWADJ
-        self.LNABWADJBOOST = RM_Field_AGC_S_LNABOOST_LNABWADJBOOST(self)
-        self.zz_fdict['LNABWADJBOOST'] = self.LNABWADJBOOST
         self.__dict__['zz_frozen'] = True
 
 
@@ -1217,979 +1229,47 @@ class RM_Register_AGC_S_SPARE(Base_RM_Register):
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Register_AGC_S_PNRFFILT0(Base_RM_Register):
+class RM_Register_AGC_S_FLARE(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
-        super(RM_Register_AGC_S_PNRFFILT0, self).__init__(rmio, label,
+        super(RM_Register_AGC_S_FLARE, self).__init__(rmio, label,
             0xa800c000, 0x0E0,
-            'PNRFFILT0', 'AGC_S.PNRFFILT0', 'read-write',
+            'FLARE', 'AGC_S.FLARE', 'read-write',
             u"",
-            0x00200400, 0x3FFFFFFF,
+            0x00000004, 0x0000001F,
             0x00001000, 0x00002000,
             0x00003000)
 
-        self.LNAMIXRFATT1 = RM_Field_AGC_S_PNRFFILT0_LNAMIXRFATT1(self)
-        self.zz_fdict['LNAMIXRFATT1'] = self.LNAMIXRFATT1
-        self.LNAMIXRFATT2 = RM_Field_AGC_S_PNRFFILT0_LNAMIXRFATT2(self)
-        self.zz_fdict['LNAMIXRFATT2'] = self.LNAMIXRFATT2
-        self.LNAMIXRFATT3 = RM_Field_AGC_S_PNRFFILT0_LNAMIXRFATT3(self)
-        self.zz_fdict['LNAMIXRFATT3'] = self.LNAMIXRFATT3
+        self.PNATTENTHD = RM_Field_AGC_S_FLARE_PNATTENTHD(self)
+        self.zz_fdict['PNATTENTHD'] = self.PNATTENTHD
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Register_AGC_S_PNRFFILT1(Base_RM_Register):
+class RM_Register_AGC_S_STEPDWNSAFE(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
-        super(RM_Register_AGC_S_PNRFFILT1, self).__init__(rmio, label,
+        super(RM_Register_AGC_S_STEPDWNSAFE, self).__init__(rmio, label,
             0xa800c000, 0x0E4,
-            'PNRFFILT1', 'AGC_S.PNRFFILT1', 'read-write',
+            'STEPDWNSAFE', 'AGC_S.STEPDWNSAFE', 'read-write',
             u"",
-            0x00801804, 0x3FFFFFFF,
+            0x00036D11, 0x0007FFFF,
             0x00001000, 0x00002000,
             0x00003000)
 
-        self.LNAMIXRFATT4 = RM_Field_AGC_S_PNRFFILT1_LNAMIXRFATT4(self)
-        self.zz_fdict['LNAMIXRFATT4'] = self.LNAMIXRFATT4
-        self.LNAMIXRFATT5 = RM_Field_AGC_S_PNRFFILT1_LNAMIXRFATT5(self)
-        self.zz_fdict['LNAMIXRFATT5'] = self.LNAMIXRFATT5
-        self.LNAMIXRFATT6 = RM_Field_AGC_S_PNRFFILT1_LNAMIXRFATT6(self)
-        self.zz_fdict['LNAMIXRFATT6'] = self.LNAMIXRFATT6
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_AGC_S_PNRFFILT2(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_AGC_S_PNRFFILT2, self).__init__(rmio, label,
-            0xa800c000, 0x0E8,
-            'PNRFFILT2', 'AGC_S.PNRFFILT2', 'read-write',
-            u"",
-            0x01203C0B, 0x3FFFFFFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.LNAMIXRFATT7 = RM_Field_AGC_S_PNRFFILT2_LNAMIXRFATT7(self)
-        self.zz_fdict['LNAMIXRFATT7'] = self.LNAMIXRFATT7
-        self.LNAMIXRFATT8 = RM_Field_AGC_S_PNRFFILT2_LNAMIXRFATT8(self)
-        self.zz_fdict['LNAMIXRFATT8'] = self.LNAMIXRFATT8
-        self.LNAMIXRFATT9 = RM_Field_AGC_S_PNRFFILT2_LNAMIXRFATT9(self)
-        self.zz_fdict['LNAMIXRFATT9'] = self.LNAMIXRFATT9
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_AGC_S_PNRFFILT3(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_AGC_S_PNRFFILT3, self).__init__(rmio, label,
-            0xa800c000, 0x0EC,
-            'PNRFFILT3', 'AGC_S.PNRFFILT3', 'read-write',
-            u"",
-            0x02107C18, 0x3FFFFFFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.LNAMIXRFATT10 = RM_Field_AGC_S_PNRFFILT3_LNAMIXRFATT10(self)
-        self.zz_fdict['LNAMIXRFATT10'] = self.LNAMIXRFATT10
-        self.LNAMIXRFATT11 = RM_Field_AGC_S_PNRFFILT3_LNAMIXRFATT11(self)
-        self.zz_fdict['LNAMIXRFATT11'] = self.LNAMIXRFATT11
-        self.LNAMIXRFATT12 = RM_Field_AGC_S_PNRFFILT3_LNAMIXRFATT12(self)
-        self.zz_fdict['LNAMIXRFATT12'] = self.LNAMIXRFATT12
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_AGC_S_PNRFFILT4(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_AGC_S_PNRFFILT4, self).__init__(rmio, label,
-            0xa800c000, 0x0F0,
-            'PNRFFILT4', 'AGC_S.PNRFFILT4', 'read-write',
-            u"",
-            0x06E0FC2F, 0x3FFFFFFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.LNAMIXRFATT13 = RM_Field_AGC_S_PNRFFILT4_LNAMIXRFATT13(self)
-        self.zz_fdict['LNAMIXRFATT13'] = self.LNAMIXRFATT13
-        self.LNAMIXRFATT14 = RM_Field_AGC_S_PNRFFILT4_LNAMIXRFATT14(self)
-        self.zz_fdict['LNAMIXRFATT14'] = self.LNAMIXRFATT14
-        self.LNAMIXRFATT15 = RM_Field_AGC_S_PNRFFILT4_LNAMIXRFATT15(self)
-        self.zz_fdict['LNAMIXRFATT15'] = self.LNAMIXRFATT15
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_AGC_S_PNRFFILT5(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_AGC_S_PNRFFILT5, self).__init__(rmio, label,
-            0xa800c000, 0x0F4,
-            'PNRFFILT5', 'AGC_S.PNRFFILT5', 'read-write',
-            u"",
-            0x0180480F, 0x3FFFFFFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.LNAMIXRFATT16 = RM_Field_AGC_S_PNRFFILT5_LNAMIXRFATT16(self)
-        self.zz_fdict['LNAMIXRFATT16'] = self.LNAMIXRFATT16
-        self.LNAMIXRFATT17 = RM_Field_AGC_S_PNRFFILT5_LNAMIXRFATT17(self)
-        self.zz_fdict['LNAMIXRFATT17'] = self.LNAMIXRFATT17
-        self.LNAMIXRFATT18 = RM_Field_AGC_S_PNRFFILT5_LNAMIXRFATT18(self)
-        self.zz_fdict['LNAMIXRFATT18'] = self.LNAMIXRFATT18
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_AGC_S_PNRFFILT6(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_AGC_S_PNRFFILT6, self).__init__(rmio, label,
-            0xa800c000, 0x0F8,
-            'PNRFFILT6', 'AGC_S.PNRFFILT6', 'read-write',
-            u"",
-            0x02F0841F, 0x3FFFFFFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.LNAMIXRFATT19 = RM_Field_AGC_S_PNRFFILT6_LNAMIXRFATT19(self)
-        self.zz_fdict['LNAMIXRFATT19'] = self.LNAMIXRFATT19
-        self.LNAMIXRFATT20 = RM_Field_AGC_S_PNRFFILT6_LNAMIXRFATT20(self)
-        self.zz_fdict['LNAMIXRFATT20'] = self.LNAMIXRFATT20
-        self.LNAMIXRFATT21 = RM_Field_AGC_S_PNRFFILT6_LNAMIXRFATT21(self)
-        self.zz_fdict['LNAMIXRFATT21'] = self.LNAMIXRFATT21
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_AGC_S_PNRFFILT7(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_AGC_S_PNRFFILT7, self).__init__(rmio, label,
-            0xa800c000, 0x0FC,
-            'PNRFFILT7', 'AGC_S.PNRFFILT7', 'read-write',
-            u"",
-            0x07F1B83F, 0x3FFFFFFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.LNAMIXRFATT22 = RM_Field_AGC_S_PNRFFILT7_LNAMIXRFATT22(self)
-        self.zz_fdict['LNAMIXRFATT22'] = self.LNAMIXRFATT22
-        self.LNAMIXRFATT23 = RM_Field_AGC_S_PNRFFILT7_LNAMIXRFATT23(self)
-        self.zz_fdict['LNAMIXRFATT23'] = self.LNAMIXRFATT23
-        self.LNAMIXRFATT24 = RM_Field_AGC_S_PNRFFILT7_LNAMIXRFATT24(self)
-        self.zz_fdict['LNAMIXRFATT24'] = self.LNAMIXRFATT24
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_AGC_S_FENOTCHATT0(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_AGC_S_FENOTCHATT0, self).__init__(rmio, label,
-            0xa800c000, 0x100,
-            'FENOTCHATT0', 'AGC_S.FENOTCHATT0', 'read-write',
-            u"",
-            0x00000000, 0x3FFF3FFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.FENOTCHATTNSEL1 = RM_Field_AGC_S_FENOTCHATT0_FENOTCHATTNSEL1(self)
-        self.zz_fdict['FENOTCHATTNSEL1'] = self.FENOTCHATTNSEL1
-        self.FENOTCHCAPCRSE1 = RM_Field_AGC_S_FENOTCHATT0_FENOTCHCAPCRSE1(self)
-        self.zz_fdict['FENOTCHCAPCRSE1'] = self.FENOTCHCAPCRSE1
-        self.FENOTCHCAPFINE1 = RM_Field_AGC_S_FENOTCHATT0_FENOTCHCAPFINE1(self)
-        self.zz_fdict['FENOTCHCAPFINE1'] = self.FENOTCHCAPFINE1
-        self.FENOTCHRATTNEN1 = RM_Field_AGC_S_FENOTCHATT0_FENOTCHRATTNEN1(self)
-        self.zz_fdict['FENOTCHRATTNEN1'] = self.FENOTCHRATTNEN1
-        self.FENOTCHEN1 = RM_Field_AGC_S_FENOTCHATT0_FENOTCHEN1(self)
-        self.zz_fdict['FENOTCHEN1'] = self.FENOTCHEN1
-        self.FENOTCHATTNSEL2 = RM_Field_AGC_S_FENOTCHATT0_FENOTCHATTNSEL2(self)
-        self.zz_fdict['FENOTCHATTNSEL2'] = self.FENOTCHATTNSEL2
-        self.FENOTCHCAPCRSE2 = RM_Field_AGC_S_FENOTCHATT0_FENOTCHCAPCRSE2(self)
-        self.zz_fdict['FENOTCHCAPCRSE2'] = self.FENOTCHCAPCRSE2
-        self.FENOTCHCAPFINE2 = RM_Field_AGC_S_FENOTCHATT0_FENOTCHCAPFINE2(self)
-        self.zz_fdict['FENOTCHCAPFINE2'] = self.FENOTCHCAPFINE2
-        self.FENOTCHRATTNEN2 = RM_Field_AGC_S_FENOTCHATT0_FENOTCHRATTNEN2(self)
-        self.zz_fdict['FENOTCHRATTNEN2'] = self.FENOTCHRATTNEN2
-        self.FENOTCHEN2 = RM_Field_AGC_S_FENOTCHATT0_FENOTCHEN2(self)
-        self.zz_fdict['FENOTCHEN2'] = self.FENOTCHEN2
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_AGC_S_FENOTCHATT1(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_AGC_S_FENOTCHATT1, self).__init__(rmio, label,
-            0xa800c000, 0x104,
-            'FENOTCHATT1', 'AGC_S.FENOTCHATT1', 'read-write',
-            u"",
-            0x00000000, 0x3FFF3FFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.FENOTCHATTNSEL3 = RM_Field_AGC_S_FENOTCHATT1_FENOTCHATTNSEL3(self)
-        self.zz_fdict['FENOTCHATTNSEL3'] = self.FENOTCHATTNSEL3
-        self.FENOTCHCAPCRSE3 = RM_Field_AGC_S_FENOTCHATT1_FENOTCHCAPCRSE3(self)
-        self.zz_fdict['FENOTCHCAPCRSE3'] = self.FENOTCHCAPCRSE3
-        self.FENOTCHCAPFINE3 = RM_Field_AGC_S_FENOTCHATT1_FENOTCHCAPFINE3(self)
-        self.zz_fdict['FENOTCHCAPFINE3'] = self.FENOTCHCAPFINE3
-        self.FENOTCHRATTNEN3 = RM_Field_AGC_S_FENOTCHATT1_FENOTCHRATTNEN3(self)
-        self.zz_fdict['FENOTCHRATTNEN3'] = self.FENOTCHRATTNEN3
-        self.FENOTCHEN3 = RM_Field_AGC_S_FENOTCHATT1_FENOTCHEN3(self)
-        self.zz_fdict['FENOTCHEN3'] = self.FENOTCHEN3
-        self.FENOTCHATTNSEL4 = RM_Field_AGC_S_FENOTCHATT1_FENOTCHATTNSEL4(self)
-        self.zz_fdict['FENOTCHATTNSEL4'] = self.FENOTCHATTNSEL4
-        self.FENOTCHCAPCRSE4 = RM_Field_AGC_S_FENOTCHATT1_FENOTCHCAPCRSE4(self)
-        self.zz_fdict['FENOTCHCAPCRSE4'] = self.FENOTCHCAPCRSE4
-        self.FENOTCHCAPFINE4 = RM_Field_AGC_S_FENOTCHATT1_FENOTCHCAPFINE4(self)
-        self.zz_fdict['FENOTCHCAPFINE4'] = self.FENOTCHCAPFINE4
-        self.FENOTCHRATTNEN4 = RM_Field_AGC_S_FENOTCHATT1_FENOTCHRATTNEN4(self)
-        self.zz_fdict['FENOTCHRATTNEN4'] = self.FENOTCHRATTNEN4
-        self.FENOTCHEN4 = RM_Field_AGC_S_FENOTCHATT1_FENOTCHEN4(self)
-        self.zz_fdict['FENOTCHEN4'] = self.FENOTCHEN4
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_AGC_S_FENOTCHATT2(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_AGC_S_FENOTCHATT2, self).__init__(rmio, label,
-            0xa800c000, 0x108,
-            'FENOTCHATT2', 'AGC_S.FENOTCHATT2', 'read-write',
-            u"",
-            0x00000000, 0x3FFF3FFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.FENOTCHATTNSEL5 = RM_Field_AGC_S_FENOTCHATT2_FENOTCHATTNSEL5(self)
-        self.zz_fdict['FENOTCHATTNSEL5'] = self.FENOTCHATTNSEL5
-        self.FENOTCHCAPCRSE5 = RM_Field_AGC_S_FENOTCHATT2_FENOTCHCAPCRSE5(self)
-        self.zz_fdict['FENOTCHCAPCRSE5'] = self.FENOTCHCAPCRSE5
-        self.FENOTCHCAPFINE5 = RM_Field_AGC_S_FENOTCHATT2_FENOTCHCAPFINE5(self)
-        self.zz_fdict['FENOTCHCAPFINE5'] = self.FENOTCHCAPFINE5
-        self.FENOTCHRATTNEN5 = RM_Field_AGC_S_FENOTCHATT2_FENOTCHRATTNEN5(self)
-        self.zz_fdict['FENOTCHRATTNEN5'] = self.FENOTCHRATTNEN5
-        self.FENOTCHEN5 = RM_Field_AGC_S_FENOTCHATT2_FENOTCHEN5(self)
-        self.zz_fdict['FENOTCHEN5'] = self.FENOTCHEN5
-        self.FENOTCHATTNSEL6 = RM_Field_AGC_S_FENOTCHATT2_FENOTCHATTNSEL6(self)
-        self.zz_fdict['FENOTCHATTNSEL6'] = self.FENOTCHATTNSEL6
-        self.FENOTCHCAPCRSE6 = RM_Field_AGC_S_FENOTCHATT2_FENOTCHCAPCRSE6(self)
-        self.zz_fdict['FENOTCHCAPCRSE6'] = self.FENOTCHCAPCRSE6
-        self.FENOTCHCAPFINE6 = RM_Field_AGC_S_FENOTCHATT2_FENOTCHCAPFINE6(self)
-        self.zz_fdict['FENOTCHCAPFINE6'] = self.FENOTCHCAPFINE6
-        self.FENOTCHRATTNEN6 = RM_Field_AGC_S_FENOTCHATT2_FENOTCHRATTNEN6(self)
-        self.zz_fdict['FENOTCHRATTNEN6'] = self.FENOTCHRATTNEN6
-        self.FENOTCHEN6 = RM_Field_AGC_S_FENOTCHATT2_FENOTCHEN6(self)
-        self.zz_fdict['FENOTCHEN6'] = self.FENOTCHEN6
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_AGC_S_FENOTCHATT3(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_AGC_S_FENOTCHATT3, self).__init__(rmio, label,
-            0xa800c000, 0x10C,
-            'FENOTCHATT3', 'AGC_S.FENOTCHATT3', 'read-write',
-            u"",
-            0x00000000, 0x3FFF3FFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.FENOTCHATTNSEL7 = RM_Field_AGC_S_FENOTCHATT3_FENOTCHATTNSEL7(self)
-        self.zz_fdict['FENOTCHATTNSEL7'] = self.FENOTCHATTNSEL7
-        self.FENOTCHCAPCRSE7 = RM_Field_AGC_S_FENOTCHATT3_FENOTCHCAPCRSE7(self)
-        self.zz_fdict['FENOTCHCAPCRSE7'] = self.FENOTCHCAPCRSE7
-        self.FENOTCHCAPFINE7 = RM_Field_AGC_S_FENOTCHATT3_FENOTCHCAPFINE7(self)
-        self.zz_fdict['FENOTCHCAPFINE7'] = self.FENOTCHCAPFINE7
-        self.FENOTCHRATTNEN7 = RM_Field_AGC_S_FENOTCHATT3_FENOTCHRATTNEN7(self)
-        self.zz_fdict['FENOTCHRATTNEN7'] = self.FENOTCHRATTNEN7
-        self.FENOTCHEN7 = RM_Field_AGC_S_FENOTCHATT3_FENOTCHEN7(self)
-        self.zz_fdict['FENOTCHEN7'] = self.FENOTCHEN7
-        self.FENOTCHATTNSEL8 = RM_Field_AGC_S_FENOTCHATT3_FENOTCHATTNSEL8(self)
-        self.zz_fdict['FENOTCHATTNSEL8'] = self.FENOTCHATTNSEL8
-        self.FENOTCHCAPCRSE8 = RM_Field_AGC_S_FENOTCHATT3_FENOTCHCAPCRSE8(self)
-        self.zz_fdict['FENOTCHCAPCRSE8'] = self.FENOTCHCAPCRSE8
-        self.FENOTCHCAPFINE8 = RM_Field_AGC_S_FENOTCHATT3_FENOTCHCAPFINE8(self)
-        self.zz_fdict['FENOTCHCAPFINE8'] = self.FENOTCHCAPFINE8
-        self.FENOTCHRATTNEN8 = RM_Field_AGC_S_FENOTCHATT3_FENOTCHRATTNEN8(self)
-        self.zz_fdict['FENOTCHRATTNEN8'] = self.FENOTCHRATTNEN8
-        self.FENOTCHEN8 = RM_Field_AGC_S_FENOTCHATT3_FENOTCHEN8(self)
-        self.zz_fdict['FENOTCHEN8'] = self.FENOTCHEN8
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_AGC_S_FENOTCHATT4(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_AGC_S_FENOTCHATT4, self).__init__(rmio, label,
-            0xa800c000, 0x110,
-            'FENOTCHATT4', 'AGC_S.FENOTCHATT4', 'read-write',
-            u"",
-            0x00000000, 0x3FFF3FFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.FENOTCHATTNSEL9 = RM_Field_AGC_S_FENOTCHATT4_FENOTCHATTNSEL9(self)
-        self.zz_fdict['FENOTCHATTNSEL9'] = self.FENOTCHATTNSEL9
-        self.FENOTCHCAPCRSE9 = RM_Field_AGC_S_FENOTCHATT4_FENOTCHCAPCRSE9(self)
-        self.zz_fdict['FENOTCHCAPCRSE9'] = self.FENOTCHCAPCRSE9
-        self.FENOTCHCAPFINE9 = RM_Field_AGC_S_FENOTCHATT4_FENOTCHCAPFINE9(self)
-        self.zz_fdict['FENOTCHCAPFINE9'] = self.FENOTCHCAPFINE9
-        self.FENOTCHRATTNEN9 = RM_Field_AGC_S_FENOTCHATT4_FENOTCHRATTNEN9(self)
-        self.zz_fdict['FENOTCHRATTNEN9'] = self.FENOTCHRATTNEN9
-        self.FENOTCHEN9 = RM_Field_AGC_S_FENOTCHATT4_FENOTCHEN9(self)
-        self.zz_fdict['FENOTCHEN9'] = self.FENOTCHEN9
-        self.FENOTCHATTNSEL10 = RM_Field_AGC_S_FENOTCHATT4_FENOTCHATTNSEL10(self)
-        self.zz_fdict['FENOTCHATTNSEL10'] = self.FENOTCHATTNSEL10
-        self.FENOTCHCAPCRSE10 = RM_Field_AGC_S_FENOTCHATT4_FENOTCHCAPCRSE10(self)
-        self.zz_fdict['FENOTCHCAPCRSE10'] = self.FENOTCHCAPCRSE10
-        self.FENOTCHCAPFINE10 = RM_Field_AGC_S_FENOTCHATT4_FENOTCHCAPFINE10(self)
-        self.zz_fdict['FENOTCHCAPFINE10'] = self.FENOTCHCAPFINE10
-        self.FENOTCHRATTNEN10 = RM_Field_AGC_S_FENOTCHATT4_FENOTCHRATTNEN10(self)
-        self.zz_fdict['FENOTCHRATTNEN10'] = self.FENOTCHRATTNEN10
-        self.FENOTCHEN10 = RM_Field_AGC_S_FENOTCHATT4_FENOTCHEN10(self)
-        self.zz_fdict['FENOTCHEN10'] = self.FENOTCHEN10
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_AGC_S_FENOTCHATT5(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_AGC_S_FENOTCHATT5, self).__init__(rmio, label,
-            0xa800c000, 0x114,
-            'FENOTCHATT5', 'AGC_S.FENOTCHATT5', 'read-write',
-            u"",
-            0x00000000, 0x3FFF3FFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.FENOTCHATTNSEL11 = RM_Field_AGC_S_FENOTCHATT5_FENOTCHATTNSEL11(self)
-        self.zz_fdict['FENOTCHATTNSEL11'] = self.FENOTCHATTNSEL11
-        self.FENOTCHCAPCRSE11 = RM_Field_AGC_S_FENOTCHATT5_FENOTCHCAPCRSE11(self)
-        self.zz_fdict['FENOTCHCAPCRSE11'] = self.FENOTCHCAPCRSE11
-        self.FENOTCHCAPFINE11 = RM_Field_AGC_S_FENOTCHATT5_FENOTCHCAPFINE11(self)
-        self.zz_fdict['FENOTCHCAPFINE11'] = self.FENOTCHCAPFINE11
-        self.FENOTCHRATTNEN11 = RM_Field_AGC_S_FENOTCHATT5_FENOTCHRATTNEN11(self)
-        self.zz_fdict['FENOTCHRATTNEN11'] = self.FENOTCHRATTNEN11
-        self.FENOTCHEN11 = RM_Field_AGC_S_FENOTCHATT5_FENOTCHEN11(self)
-        self.zz_fdict['FENOTCHEN11'] = self.FENOTCHEN11
-        self.FENOTCHATTNSEL12 = RM_Field_AGC_S_FENOTCHATT5_FENOTCHATTNSEL12(self)
-        self.zz_fdict['FENOTCHATTNSEL12'] = self.FENOTCHATTNSEL12
-        self.FENOTCHCAPCRSE12 = RM_Field_AGC_S_FENOTCHATT5_FENOTCHCAPCRSE12(self)
-        self.zz_fdict['FENOTCHCAPCRSE12'] = self.FENOTCHCAPCRSE12
-        self.FENOTCHCAPFINE12 = RM_Field_AGC_S_FENOTCHATT5_FENOTCHCAPFINE12(self)
-        self.zz_fdict['FENOTCHCAPFINE12'] = self.FENOTCHCAPFINE12
-        self.FENOTCHRATTNEN12 = RM_Field_AGC_S_FENOTCHATT5_FENOTCHRATTNEN12(self)
-        self.zz_fdict['FENOTCHRATTNEN12'] = self.FENOTCHRATTNEN12
-        self.FENOTCHEN12 = RM_Field_AGC_S_FENOTCHATT5_FENOTCHEN12(self)
-        self.zz_fdict['FENOTCHEN12'] = self.FENOTCHEN12
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_AGC_S_FENOTCHATT6(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_AGC_S_FENOTCHATT6, self).__init__(rmio, label,
-            0xa800c000, 0x118,
-            'FENOTCHATT6', 'AGC_S.FENOTCHATT6', 'read-write',
-            u"",
-            0x00000000, 0x3FFF3FFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.FENOTCHATTNSEL13 = RM_Field_AGC_S_FENOTCHATT6_FENOTCHATTNSEL13(self)
-        self.zz_fdict['FENOTCHATTNSEL13'] = self.FENOTCHATTNSEL13
-        self.FENOTCHCAPCRSE13 = RM_Field_AGC_S_FENOTCHATT6_FENOTCHCAPCRSE13(self)
-        self.zz_fdict['FENOTCHCAPCRSE13'] = self.FENOTCHCAPCRSE13
-        self.FENOTCHCAPFINE13 = RM_Field_AGC_S_FENOTCHATT6_FENOTCHCAPFINE13(self)
-        self.zz_fdict['FENOTCHCAPFINE13'] = self.FENOTCHCAPFINE13
-        self.FENOTCHRATTNEN13 = RM_Field_AGC_S_FENOTCHATT6_FENOTCHRATTNEN13(self)
-        self.zz_fdict['FENOTCHRATTNEN13'] = self.FENOTCHRATTNEN13
-        self.FENOTCHEN13 = RM_Field_AGC_S_FENOTCHATT6_FENOTCHEN13(self)
-        self.zz_fdict['FENOTCHEN13'] = self.FENOTCHEN13
-        self.FENOTCHATTNSEL14 = RM_Field_AGC_S_FENOTCHATT6_FENOTCHATTNSEL14(self)
-        self.zz_fdict['FENOTCHATTNSEL14'] = self.FENOTCHATTNSEL14
-        self.FENOTCHCAPCRSE14 = RM_Field_AGC_S_FENOTCHATT6_FENOTCHCAPCRSE14(self)
-        self.zz_fdict['FENOTCHCAPCRSE14'] = self.FENOTCHCAPCRSE14
-        self.FENOTCHCAPFINE14 = RM_Field_AGC_S_FENOTCHATT6_FENOTCHCAPFINE14(self)
-        self.zz_fdict['FENOTCHCAPFINE14'] = self.FENOTCHCAPFINE14
-        self.FENOTCHRATTNEN14 = RM_Field_AGC_S_FENOTCHATT6_FENOTCHRATTNEN14(self)
-        self.zz_fdict['FENOTCHRATTNEN14'] = self.FENOTCHRATTNEN14
-        self.FENOTCHEN14 = RM_Field_AGC_S_FENOTCHATT6_FENOTCHEN14(self)
-        self.zz_fdict['FENOTCHEN14'] = self.FENOTCHEN14
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_AGC_S_FENOTCHATT7(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_AGC_S_FENOTCHATT7, self).__init__(rmio, label,
-            0xa800c000, 0x11C,
-            'FENOTCHATT7', 'AGC_S.FENOTCHATT7', 'read-write',
-            u"",
-            0x20080000, 0x3FFF3FFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.FENOTCHATTNSEL15 = RM_Field_AGC_S_FENOTCHATT7_FENOTCHATTNSEL15(self)
-        self.zz_fdict['FENOTCHATTNSEL15'] = self.FENOTCHATTNSEL15
-        self.FENOTCHCAPCRSE15 = RM_Field_AGC_S_FENOTCHATT7_FENOTCHCAPCRSE15(self)
-        self.zz_fdict['FENOTCHCAPCRSE15'] = self.FENOTCHCAPCRSE15
-        self.FENOTCHCAPFINE15 = RM_Field_AGC_S_FENOTCHATT7_FENOTCHCAPFINE15(self)
-        self.zz_fdict['FENOTCHCAPFINE15'] = self.FENOTCHCAPFINE15
-        self.FENOTCHRATTNEN15 = RM_Field_AGC_S_FENOTCHATT7_FENOTCHRATTNEN15(self)
-        self.zz_fdict['FENOTCHRATTNEN15'] = self.FENOTCHRATTNEN15
-        self.FENOTCHEN15 = RM_Field_AGC_S_FENOTCHATT7_FENOTCHEN15(self)
-        self.zz_fdict['FENOTCHEN15'] = self.FENOTCHEN15
-        self.FENOTCHATTNSEL16 = RM_Field_AGC_S_FENOTCHATT7_FENOTCHATTNSEL16(self)
-        self.zz_fdict['FENOTCHATTNSEL16'] = self.FENOTCHATTNSEL16
-        self.FENOTCHCAPCRSE16 = RM_Field_AGC_S_FENOTCHATT7_FENOTCHCAPCRSE16(self)
-        self.zz_fdict['FENOTCHCAPCRSE16'] = self.FENOTCHCAPCRSE16
-        self.FENOTCHCAPFINE16 = RM_Field_AGC_S_FENOTCHATT7_FENOTCHCAPFINE16(self)
-        self.zz_fdict['FENOTCHCAPFINE16'] = self.FENOTCHCAPFINE16
-        self.FENOTCHRATTNEN16 = RM_Field_AGC_S_FENOTCHATT7_FENOTCHRATTNEN16(self)
-        self.zz_fdict['FENOTCHRATTNEN16'] = self.FENOTCHRATTNEN16
-        self.FENOTCHEN16 = RM_Field_AGC_S_FENOTCHATT7_FENOTCHEN16(self)
-        self.zz_fdict['FENOTCHEN16'] = self.FENOTCHEN16
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_AGC_S_FENOTCHATT8(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_AGC_S_FENOTCHATT8, self).__init__(rmio, label,
-            0xa800c000, 0x120,
-            'FENOTCHATT8', 'AGC_S.FENOTCHATT8', 'read-write',
-            u"",
-            0x200B200A, 0x3FFF3FFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.FENOTCHATTNSEL17 = RM_Field_AGC_S_FENOTCHATT8_FENOTCHATTNSEL17(self)
-        self.zz_fdict['FENOTCHATTNSEL17'] = self.FENOTCHATTNSEL17
-        self.FENOTCHCAPCRSE17 = RM_Field_AGC_S_FENOTCHATT8_FENOTCHCAPCRSE17(self)
-        self.zz_fdict['FENOTCHCAPCRSE17'] = self.FENOTCHCAPCRSE17
-        self.FENOTCHCAPFINE17 = RM_Field_AGC_S_FENOTCHATT8_FENOTCHCAPFINE17(self)
-        self.zz_fdict['FENOTCHCAPFINE17'] = self.FENOTCHCAPFINE17
-        self.FENOTCHRATTNEN17 = RM_Field_AGC_S_FENOTCHATT8_FENOTCHRATTNEN17(self)
-        self.zz_fdict['FENOTCHRATTNEN17'] = self.FENOTCHRATTNEN17
-        self.FENOTCHEN17 = RM_Field_AGC_S_FENOTCHATT8_FENOTCHEN17(self)
-        self.zz_fdict['FENOTCHEN17'] = self.FENOTCHEN17
-        self.FENOTCHATTNSEL18 = RM_Field_AGC_S_FENOTCHATT8_FENOTCHATTNSEL18(self)
-        self.zz_fdict['FENOTCHATTNSEL18'] = self.FENOTCHATTNSEL18
-        self.FENOTCHCAPCRSE18 = RM_Field_AGC_S_FENOTCHATT8_FENOTCHCAPCRSE18(self)
-        self.zz_fdict['FENOTCHCAPCRSE18'] = self.FENOTCHCAPCRSE18
-        self.FENOTCHCAPFINE18 = RM_Field_AGC_S_FENOTCHATT8_FENOTCHCAPFINE18(self)
-        self.zz_fdict['FENOTCHCAPFINE18'] = self.FENOTCHCAPFINE18
-        self.FENOTCHRATTNEN18 = RM_Field_AGC_S_FENOTCHATT8_FENOTCHRATTNEN18(self)
-        self.zz_fdict['FENOTCHRATTNEN18'] = self.FENOTCHRATTNEN18
-        self.FENOTCHEN18 = RM_Field_AGC_S_FENOTCHATT8_FENOTCHEN18(self)
-        self.zz_fdict['FENOTCHEN18'] = self.FENOTCHEN18
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_AGC_S_FENOTCHATT9(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_AGC_S_FENOTCHATT9, self).__init__(rmio, label,
-            0xa800c000, 0x124,
-            'FENOTCHATT9', 'AGC_S.FENOTCHATT9', 'read-write',
-            u"",
-            0x200B200B, 0x3FFF3FFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.FENOTCHATTNSEL19 = RM_Field_AGC_S_FENOTCHATT9_FENOTCHATTNSEL19(self)
-        self.zz_fdict['FENOTCHATTNSEL19'] = self.FENOTCHATTNSEL19
-        self.FENOTCHCAPCRSE19 = RM_Field_AGC_S_FENOTCHATT9_FENOTCHCAPCRSE19(self)
-        self.zz_fdict['FENOTCHCAPCRSE19'] = self.FENOTCHCAPCRSE19
-        self.FENOTCHCAPFINE19 = RM_Field_AGC_S_FENOTCHATT9_FENOTCHCAPFINE19(self)
-        self.zz_fdict['FENOTCHCAPFINE19'] = self.FENOTCHCAPFINE19
-        self.FENOTCHRATTNEN19 = RM_Field_AGC_S_FENOTCHATT9_FENOTCHRATTNEN19(self)
-        self.zz_fdict['FENOTCHRATTNEN19'] = self.FENOTCHRATTNEN19
-        self.FENOTCHEN19 = RM_Field_AGC_S_FENOTCHATT9_FENOTCHEN19(self)
-        self.zz_fdict['FENOTCHEN19'] = self.FENOTCHEN19
-        self.FENOTCHATTNSEL20 = RM_Field_AGC_S_FENOTCHATT9_FENOTCHATTNSEL20(self)
-        self.zz_fdict['FENOTCHATTNSEL20'] = self.FENOTCHATTNSEL20
-        self.FENOTCHCAPCRSE20 = RM_Field_AGC_S_FENOTCHATT9_FENOTCHCAPCRSE20(self)
-        self.zz_fdict['FENOTCHCAPCRSE20'] = self.FENOTCHCAPCRSE20
-        self.FENOTCHCAPFINE20 = RM_Field_AGC_S_FENOTCHATT9_FENOTCHCAPFINE20(self)
-        self.zz_fdict['FENOTCHCAPFINE20'] = self.FENOTCHCAPFINE20
-        self.FENOTCHRATTNEN20 = RM_Field_AGC_S_FENOTCHATT9_FENOTCHRATTNEN20(self)
-        self.zz_fdict['FENOTCHRATTNEN20'] = self.FENOTCHRATTNEN20
-        self.FENOTCHEN20 = RM_Field_AGC_S_FENOTCHATT9_FENOTCHEN20(self)
-        self.zz_fdict['FENOTCHEN20'] = self.FENOTCHEN20
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_AGC_S_FENOTCHATT10(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_AGC_S_FENOTCHATT10, self).__init__(rmio, label,
-            0xa800c000, 0x128,
-            'FENOTCHATT10', 'AGC_S.FENOTCHATT10', 'read-write',
-            u"",
-            0x200B200B, 0x3FFF3FFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.FENOTCHATTNSEL21 = RM_Field_AGC_S_FENOTCHATT10_FENOTCHATTNSEL21(self)
-        self.zz_fdict['FENOTCHATTNSEL21'] = self.FENOTCHATTNSEL21
-        self.FENOTCHCAPCRSE21 = RM_Field_AGC_S_FENOTCHATT10_FENOTCHCAPCRSE21(self)
-        self.zz_fdict['FENOTCHCAPCRSE21'] = self.FENOTCHCAPCRSE21
-        self.FENOTCHCAPFINE21 = RM_Field_AGC_S_FENOTCHATT10_FENOTCHCAPFINE21(self)
-        self.zz_fdict['FENOTCHCAPFINE21'] = self.FENOTCHCAPFINE21
-        self.FENOTCHRATTNEN21 = RM_Field_AGC_S_FENOTCHATT10_FENOTCHRATTNEN21(self)
-        self.zz_fdict['FENOTCHRATTNEN21'] = self.FENOTCHRATTNEN21
-        self.FENOTCHEN21 = RM_Field_AGC_S_FENOTCHATT10_FENOTCHEN21(self)
-        self.zz_fdict['FENOTCHEN21'] = self.FENOTCHEN21
-        self.FENOTCHATTNSEL22 = RM_Field_AGC_S_FENOTCHATT10_FENOTCHATTNSEL22(self)
-        self.zz_fdict['FENOTCHATTNSEL22'] = self.FENOTCHATTNSEL22
-        self.FENOTCHCAPCRSE22 = RM_Field_AGC_S_FENOTCHATT10_FENOTCHCAPCRSE22(self)
-        self.zz_fdict['FENOTCHCAPCRSE22'] = self.FENOTCHCAPCRSE22
-        self.FENOTCHCAPFINE22 = RM_Field_AGC_S_FENOTCHATT10_FENOTCHCAPFINE22(self)
-        self.zz_fdict['FENOTCHCAPFINE22'] = self.FENOTCHCAPFINE22
-        self.FENOTCHRATTNEN22 = RM_Field_AGC_S_FENOTCHATT10_FENOTCHRATTNEN22(self)
-        self.zz_fdict['FENOTCHRATTNEN22'] = self.FENOTCHRATTNEN22
-        self.FENOTCHEN22 = RM_Field_AGC_S_FENOTCHATT10_FENOTCHEN22(self)
-        self.zz_fdict['FENOTCHEN22'] = self.FENOTCHEN22
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_AGC_S_FENOTCHATT11(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_AGC_S_FENOTCHATT11, self).__init__(rmio, label,
-            0xa800c000, 0x12C,
-            'FENOTCHATT11', 'AGC_S.FENOTCHATT11', 'read-write',
-            u"",
-            0x200B200B, 0x3FFF3FFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.FENOTCHATTNSEL23 = RM_Field_AGC_S_FENOTCHATT11_FENOTCHATTNSEL23(self)
-        self.zz_fdict['FENOTCHATTNSEL23'] = self.FENOTCHATTNSEL23
-        self.FENOTCHCAPCRSE23 = RM_Field_AGC_S_FENOTCHATT11_FENOTCHCAPCRSE23(self)
-        self.zz_fdict['FENOTCHCAPCRSE23'] = self.FENOTCHCAPCRSE23
-        self.FENOTCHCAPFINE23 = RM_Field_AGC_S_FENOTCHATT11_FENOTCHCAPFINE23(self)
-        self.zz_fdict['FENOTCHCAPFINE23'] = self.FENOTCHCAPFINE23
-        self.FENOTCHRATTNEN23 = RM_Field_AGC_S_FENOTCHATT11_FENOTCHRATTNEN23(self)
-        self.zz_fdict['FENOTCHRATTNEN23'] = self.FENOTCHRATTNEN23
-        self.FENOTCHEN23 = RM_Field_AGC_S_FENOTCHATT11_FENOTCHEN23(self)
-        self.zz_fdict['FENOTCHEN23'] = self.FENOTCHEN23
-        self.FENOTCHATTNSEL24 = RM_Field_AGC_S_FENOTCHATT11_FENOTCHATTNSEL24(self)
-        self.zz_fdict['FENOTCHATTNSEL24'] = self.FENOTCHATTNSEL24
-        self.FENOTCHCAPCRSE24 = RM_Field_AGC_S_FENOTCHATT11_FENOTCHCAPCRSE24(self)
-        self.zz_fdict['FENOTCHCAPCRSE24'] = self.FENOTCHCAPCRSE24
-        self.FENOTCHCAPFINE24 = RM_Field_AGC_S_FENOTCHATT11_FENOTCHCAPFINE24(self)
-        self.zz_fdict['FENOTCHCAPFINE24'] = self.FENOTCHCAPFINE24
-        self.FENOTCHRATTNEN24 = RM_Field_AGC_S_FENOTCHATT11_FENOTCHRATTNEN24(self)
-        self.zz_fdict['FENOTCHRATTNEN24'] = self.FENOTCHRATTNEN24
-        self.FENOTCHEN24 = RM_Field_AGC_S_FENOTCHATT11_FENOTCHEN24(self)
-        self.zz_fdict['FENOTCHEN24'] = self.FENOTCHEN24
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_AGC_S_FENOTCHFILT0(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_AGC_S_FENOTCHFILT0, self).__init__(rmio, label,
-            0xa800c000, 0x130,
-            'FENOTCHFILT0', 'AGC_S.FENOTCHFILT0', 'read-write',
-            u"",
-            0x00000000, 0x3FFF3FFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.FENOTCHATTNSEL1 = RM_Field_AGC_S_FENOTCHFILT0_FENOTCHATTNSEL1(self)
-        self.zz_fdict['FENOTCHATTNSEL1'] = self.FENOTCHATTNSEL1
-        self.FENOTCHCAPCRSE1 = RM_Field_AGC_S_FENOTCHFILT0_FENOTCHCAPCRSE1(self)
-        self.zz_fdict['FENOTCHCAPCRSE1'] = self.FENOTCHCAPCRSE1
-        self.FENOTCHCAPFINE1 = RM_Field_AGC_S_FENOTCHFILT0_FENOTCHCAPFINE1(self)
-        self.zz_fdict['FENOTCHCAPFINE1'] = self.FENOTCHCAPFINE1
-        self.FENOTCHRATTNEN1 = RM_Field_AGC_S_FENOTCHFILT0_FENOTCHRATTNEN1(self)
-        self.zz_fdict['FENOTCHRATTNEN1'] = self.FENOTCHRATTNEN1
-        self.FENOTCHEN1 = RM_Field_AGC_S_FENOTCHFILT0_FENOTCHEN1(self)
-        self.zz_fdict['FENOTCHEN1'] = self.FENOTCHEN1
-        self.FENOTCHATTNSEL2 = RM_Field_AGC_S_FENOTCHFILT0_FENOTCHATTNSEL2(self)
-        self.zz_fdict['FENOTCHATTNSEL2'] = self.FENOTCHATTNSEL2
-        self.FENOTCHCAPCRSE2 = RM_Field_AGC_S_FENOTCHFILT0_FENOTCHCAPCRSE2(self)
-        self.zz_fdict['FENOTCHCAPCRSE2'] = self.FENOTCHCAPCRSE2
-        self.FENOTCHCAPFINE2 = RM_Field_AGC_S_FENOTCHFILT0_FENOTCHCAPFINE2(self)
-        self.zz_fdict['FENOTCHCAPFINE2'] = self.FENOTCHCAPFINE2
-        self.FENOTCHRATTNEN2 = RM_Field_AGC_S_FENOTCHFILT0_FENOTCHRATTNEN2(self)
-        self.zz_fdict['FENOTCHRATTNEN2'] = self.FENOTCHRATTNEN2
-        self.FENOTCHEN2 = RM_Field_AGC_S_FENOTCHFILT0_FENOTCHEN2(self)
-        self.zz_fdict['FENOTCHEN2'] = self.FENOTCHEN2
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_AGC_S_FENOTCHFILT1(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_AGC_S_FENOTCHFILT1, self).__init__(rmio, label,
-            0xa800c000, 0x134,
-            'FENOTCHFILT1', 'AGC_S.FENOTCHFILT1', 'read-write',
-            u"",
-            0x00000000, 0x3FFF3FFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.FENOTCHATTNSEL3 = RM_Field_AGC_S_FENOTCHFILT1_FENOTCHATTNSEL3(self)
-        self.zz_fdict['FENOTCHATTNSEL3'] = self.FENOTCHATTNSEL3
-        self.FENOTCHCAPCRSE3 = RM_Field_AGC_S_FENOTCHFILT1_FENOTCHCAPCRSE3(self)
-        self.zz_fdict['FENOTCHCAPCRSE3'] = self.FENOTCHCAPCRSE3
-        self.FENOTCHCAPFINE3 = RM_Field_AGC_S_FENOTCHFILT1_FENOTCHCAPFINE3(self)
-        self.zz_fdict['FENOTCHCAPFINE3'] = self.FENOTCHCAPFINE3
-        self.FENOTCHRATTNEN3 = RM_Field_AGC_S_FENOTCHFILT1_FENOTCHRATTNEN3(self)
-        self.zz_fdict['FENOTCHRATTNEN3'] = self.FENOTCHRATTNEN3
-        self.FENOTCHEN3 = RM_Field_AGC_S_FENOTCHFILT1_FENOTCHEN3(self)
-        self.zz_fdict['FENOTCHEN3'] = self.FENOTCHEN3
-        self.FENOTCHATTNSEL4 = RM_Field_AGC_S_FENOTCHFILT1_FENOTCHATTNSEL4(self)
-        self.zz_fdict['FENOTCHATTNSEL4'] = self.FENOTCHATTNSEL4
-        self.FENOTCHCAPCRSE4 = RM_Field_AGC_S_FENOTCHFILT1_FENOTCHCAPCRSE4(self)
-        self.zz_fdict['FENOTCHCAPCRSE4'] = self.FENOTCHCAPCRSE4
-        self.FENOTCHCAPFINE4 = RM_Field_AGC_S_FENOTCHFILT1_FENOTCHCAPFINE4(self)
-        self.zz_fdict['FENOTCHCAPFINE4'] = self.FENOTCHCAPFINE4
-        self.FENOTCHRATTNEN4 = RM_Field_AGC_S_FENOTCHFILT1_FENOTCHRATTNEN4(self)
-        self.zz_fdict['FENOTCHRATTNEN4'] = self.FENOTCHRATTNEN4
-        self.FENOTCHEN4 = RM_Field_AGC_S_FENOTCHFILT1_FENOTCHEN4(self)
-        self.zz_fdict['FENOTCHEN4'] = self.FENOTCHEN4
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_AGC_S_FENOTCHFILT2(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_AGC_S_FENOTCHFILT2, self).__init__(rmio, label,
-            0xa800c000, 0x138,
-            'FENOTCHFILT2', 'AGC_S.FENOTCHFILT2', 'read-write',
-            u"",
-            0x00000000, 0x3FFF3FFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.FENOTCHATTNSEL5 = RM_Field_AGC_S_FENOTCHFILT2_FENOTCHATTNSEL5(self)
-        self.zz_fdict['FENOTCHATTNSEL5'] = self.FENOTCHATTNSEL5
-        self.FENOTCHCAPCRSE5 = RM_Field_AGC_S_FENOTCHFILT2_FENOTCHCAPCRSE5(self)
-        self.zz_fdict['FENOTCHCAPCRSE5'] = self.FENOTCHCAPCRSE5
-        self.FENOTCHCAPFINE5 = RM_Field_AGC_S_FENOTCHFILT2_FENOTCHCAPFINE5(self)
-        self.zz_fdict['FENOTCHCAPFINE5'] = self.FENOTCHCAPFINE5
-        self.FENOTCHRATTNEN5 = RM_Field_AGC_S_FENOTCHFILT2_FENOTCHRATTNEN5(self)
-        self.zz_fdict['FENOTCHRATTNEN5'] = self.FENOTCHRATTNEN5
-        self.FENOTCHEN5 = RM_Field_AGC_S_FENOTCHFILT2_FENOTCHEN5(self)
-        self.zz_fdict['FENOTCHEN5'] = self.FENOTCHEN5
-        self.FENOTCHATTNSEL6 = RM_Field_AGC_S_FENOTCHFILT2_FENOTCHATTNSEL6(self)
-        self.zz_fdict['FENOTCHATTNSEL6'] = self.FENOTCHATTNSEL6
-        self.FENOTCHCAPCRSE6 = RM_Field_AGC_S_FENOTCHFILT2_FENOTCHCAPCRSE6(self)
-        self.zz_fdict['FENOTCHCAPCRSE6'] = self.FENOTCHCAPCRSE6
-        self.FENOTCHCAPFINE6 = RM_Field_AGC_S_FENOTCHFILT2_FENOTCHCAPFINE6(self)
-        self.zz_fdict['FENOTCHCAPFINE6'] = self.FENOTCHCAPFINE6
-        self.FENOTCHRATTNEN6 = RM_Field_AGC_S_FENOTCHFILT2_FENOTCHRATTNEN6(self)
-        self.zz_fdict['FENOTCHRATTNEN6'] = self.FENOTCHRATTNEN6
-        self.FENOTCHEN6 = RM_Field_AGC_S_FENOTCHFILT2_FENOTCHEN6(self)
-        self.zz_fdict['FENOTCHEN6'] = self.FENOTCHEN6
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_AGC_S_FENOTCHFILT3(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_AGC_S_FENOTCHFILT3, self).__init__(rmio, label,
-            0xa800c000, 0x13C,
-            'FENOTCHFILT3', 'AGC_S.FENOTCHFILT3', 'read-write',
-            u"",
-            0x00000000, 0x3FFF3FFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.FENOTCHATTNSEL7 = RM_Field_AGC_S_FENOTCHFILT3_FENOTCHATTNSEL7(self)
-        self.zz_fdict['FENOTCHATTNSEL7'] = self.FENOTCHATTNSEL7
-        self.FENOTCHCAPCRSE7 = RM_Field_AGC_S_FENOTCHFILT3_FENOTCHCAPCRSE7(self)
-        self.zz_fdict['FENOTCHCAPCRSE7'] = self.FENOTCHCAPCRSE7
-        self.FENOTCHCAPFINE7 = RM_Field_AGC_S_FENOTCHFILT3_FENOTCHCAPFINE7(self)
-        self.zz_fdict['FENOTCHCAPFINE7'] = self.FENOTCHCAPFINE7
-        self.FENOTCHRATTNEN7 = RM_Field_AGC_S_FENOTCHFILT3_FENOTCHRATTNEN7(self)
-        self.zz_fdict['FENOTCHRATTNEN7'] = self.FENOTCHRATTNEN7
-        self.FENOTCHEN7 = RM_Field_AGC_S_FENOTCHFILT3_FENOTCHEN7(self)
-        self.zz_fdict['FENOTCHEN7'] = self.FENOTCHEN7
-        self.FENOTCHATTNSEL8 = RM_Field_AGC_S_FENOTCHFILT3_FENOTCHATTNSEL8(self)
-        self.zz_fdict['FENOTCHATTNSEL8'] = self.FENOTCHATTNSEL8
-        self.FENOTCHCAPCRSE8 = RM_Field_AGC_S_FENOTCHFILT3_FENOTCHCAPCRSE8(self)
-        self.zz_fdict['FENOTCHCAPCRSE8'] = self.FENOTCHCAPCRSE8
-        self.FENOTCHCAPFINE8 = RM_Field_AGC_S_FENOTCHFILT3_FENOTCHCAPFINE8(self)
-        self.zz_fdict['FENOTCHCAPFINE8'] = self.FENOTCHCAPFINE8
-        self.FENOTCHRATTNEN8 = RM_Field_AGC_S_FENOTCHFILT3_FENOTCHRATTNEN8(self)
-        self.zz_fdict['FENOTCHRATTNEN8'] = self.FENOTCHRATTNEN8
-        self.FENOTCHEN8 = RM_Field_AGC_S_FENOTCHFILT3_FENOTCHEN8(self)
-        self.zz_fdict['FENOTCHEN8'] = self.FENOTCHEN8
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_AGC_S_FENOTCHFILT4(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_AGC_S_FENOTCHFILT4, self).__init__(rmio, label,
-            0xa800c000, 0x140,
-            'FENOTCHFILT4', 'AGC_S.FENOTCHFILT4', 'read-write',
-            u"",
-            0x00000000, 0x3FFF3FFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.FENOTCHATTNSEL9 = RM_Field_AGC_S_FENOTCHFILT4_FENOTCHATTNSEL9(self)
-        self.zz_fdict['FENOTCHATTNSEL9'] = self.FENOTCHATTNSEL9
-        self.FENOTCHCAPCRSE9 = RM_Field_AGC_S_FENOTCHFILT4_FENOTCHCAPCRSE9(self)
-        self.zz_fdict['FENOTCHCAPCRSE9'] = self.FENOTCHCAPCRSE9
-        self.FENOTCHCAPFINE9 = RM_Field_AGC_S_FENOTCHFILT4_FENOTCHCAPFINE9(self)
-        self.zz_fdict['FENOTCHCAPFINE9'] = self.FENOTCHCAPFINE9
-        self.FENOTCHRATTNEN9 = RM_Field_AGC_S_FENOTCHFILT4_FENOTCHRATTNEN9(self)
-        self.zz_fdict['FENOTCHRATTNEN9'] = self.FENOTCHRATTNEN9
-        self.FENOTCHEN9 = RM_Field_AGC_S_FENOTCHFILT4_FENOTCHEN9(self)
-        self.zz_fdict['FENOTCHEN9'] = self.FENOTCHEN9
-        self.FENOTCHATTNSEL10 = RM_Field_AGC_S_FENOTCHFILT4_FENOTCHATTNSEL10(self)
-        self.zz_fdict['FENOTCHATTNSEL10'] = self.FENOTCHATTNSEL10
-        self.FENOTCHCAPCRSE10 = RM_Field_AGC_S_FENOTCHFILT4_FENOTCHCAPCRSE10(self)
-        self.zz_fdict['FENOTCHCAPCRSE10'] = self.FENOTCHCAPCRSE10
-        self.FENOTCHCAPFINE10 = RM_Field_AGC_S_FENOTCHFILT4_FENOTCHCAPFINE10(self)
-        self.zz_fdict['FENOTCHCAPFINE10'] = self.FENOTCHCAPFINE10
-        self.FENOTCHRATTNEN10 = RM_Field_AGC_S_FENOTCHFILT4_FENOTCHRATTNEN10(self)
-        self.zz_fdict['FENOTCHRATTNEN10'] = self.FENOTCHRATTNEN10
-        self.FENOTCHEN10 = RM_Field_AGC_S_FENOTCHFILT4_FENOTCHEN10(self)
-        self.zz_fdict['FENOTCHEN10'] = self.FENOTCHEN10
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_AGC_S_FENOTCHFILT5(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_AGC_S_FENOTCHFILT5, self).__init__(rmio, label,
-            0xa800c000, 0x144,
-            'FENOTCHFILT5', 'AGC_S.FENOTCHFILT5', 'read-write',
-            u"",
-            0x00000000, 0x3FFF3FFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.FENOTCHATTNSEL11 = RM_Field_AGC_S_FENOTCHFILT5_FENOTCHATTNSEL11(self)
-        self.zz_fdict['FENOTCHATTNSEL11'] = self.FENOTCHATTNSEL11
-        self.FENOTCHCAPCRSE11 = RM_Field_AGC_S_FENOTCHFILT5_FENOTCHCAPCRSE11(self)
-        self.zz_fdict['FENOTCHCAPCRSE11'] = self.FENOTCHCAPCRSE11
-        self.FENOTCHCAPFINE11 = RM_Field_AGC_S_FENOTCHFILT5_FENOTCHCAPFINE11(self)
-        self.zz_fdict['FENOTCHCAPFINE11'] = self.FENOTCHCAPFINE11
-        self.FENOTCHRATTNEN11 = RM_Field_AGC_S_FENOTCHFILT5_FENOTCHRATTNEN11(self)
-        self.zz_fdict['FENOTCHRATTNEN11'] = self.FENOTCHRATTNEN11
-        self.FENOTCHEN11 = RM_Field_AGC_S_FENOTCHFILT5_FENOTCHEN11(self)
-        self.zz_fdict['FENOTCHEN11'] = self.FENOTCHEN11
-        self.FENOTCHATTNSEL12 = RM_Field_AGC_S_FENOTCHFILT5_FENOTCHATTNSEL12(self)
-        self.zz_fdict['FENOTCHATTNSEL12'] = self.FENOTCHATTNSEL12
-        self.FENOTCHCAPCRSE12 = RM_Field_AGC_S_FENOTCHFILT5_FENOTCHCAPCRSE12(self)
-        self.zz_fdict['FENOTCHCAPCRSE12'] = self.FENOTCHCAPCRSE12
-        self.FENOTCHCAPFINE12 = RM_Field_AGC_S_FENOTCHFILT5_FENOTCHCAPFINE12(self)
-        self.zz_fdict['FENOTCHCAPFINE12'] = self.FENOTCHCAPFINE12
-        self.FENOTCHRATTNEN12 = RM_Field_AGC_S_FENOTCHFILT5_FENOTCHRATTNEN12(self)
-        self.zz_fdict['FENOTCHRATTNEN12'] = self.FENOTCHRATTNEN12
-        self.FENOTCHEN12 = RM_Field_AGC_S_FENOTCHFILT5_FENOTCHEN12(self)
-        self.zz_fdict['FENOTCHEN12'] = self.FENOTCHEN12
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_AGC_S_FENOTCHFILT6(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_AGC_S_FENOTCHFILT6, self).__init__(rmio, label,
-            0xa800c000, 0x148,
-            'FENOTCHFILT6', 'AGC_S.FENOTCHFILT6', 'read-write',
-            u"",
-            0x00000000, 0x3FFF3FFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.FENOTCHATTNSEL13 = RM_Field_AGC_S_FENOTCHFILT6_FENOTCHATTNSEL13(self)
-        self.zz_fdict['FENOTCHATTNSEL13'] = self.FENOTCHATTNSEL13
-        self.FENOTCHCAPCRSE13 = RM_Field_AGC_S_FENOTCHFILT6_FENOTCHCAPCRSE13(self)
-        self.zz_fdict['FENOTCHCAPCRSE13'] = self.FENOTCHCAPCRSE13
-        self.FENOTCHCAPFINE13 = RM_Field_AGC_S_FENOTCHFILT6_FENOTCHCAPFINE13(self)
-        self.zz_fdict['FENOTCHCAPFINE13'] = self.FENOTCHCAPFINE13
-        self.FENOTCHRATTNEN13 = RM_Field_AGC_S_FENOTCHFILT6_FENOTCHRATTNEN13(self)
-        self.zz_fdict['FENOTCHRATTNEN13'] = self.FENOTCHRATTNEN13
-        self.FENOTCHEN13 = RM_Field_AGC_S_FENOTCHFILT6_FENOTCHEN13(self)
-        self.zz_fdict['FENOTCHEN13'] = self.FENOTCHEN13
-        self.FENOTCHATTNSEL14 = RM_Field_AGC_S_FENOTCHFILT6_FENOTCHATTNSEL14(self)
-        self.zz_fdict['FENOTCHATTNSEL14'] = self.FENOTCHATTNSEL14
-        self.FENOTCHCAPCRSE14 = RM_Field_AGC_S_FENOTCHFILT6_FENOTCHCAPCRSE14(self)
-        self.zz_fdict['FENOTCHCAPCRSE14'] = self.FENOTCHCAPCRSE14
-        self.FENOTCHCAPFINE14 = RM_Field_AGC_S_FENOTCHFILT6_FENOTCHCAPFINE14(self)
-        self.zz_fdict['FENOTCHCAPFINE14'] = self.FENOTCHCAPFINE14
-        self.FENOTCHRATTNEN14 = RM_Field_AGC_S_FENOTCHFILT6_FENOTCHRATTNEN14(self)
-        self.zz_fdict['FENOTCHRATTNEN14'] = self.FENOTCHRATTNEN14
-        self.FENOTCHEN14 = RM_Field_AGC_S_FENOTCHFILT6_FENOTCHEN14(self)
-        self.zz_fdict['FENOTCHEN14'] = self.FENOTCHEN14
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_AGC_S_FENOTCHFILT7(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_AGC_S_FENOTCHFILT7, self).__init__(rmio, label,
-            0xa800c000, 0x14C,
-            'FENOTCHFILT7', 'AGC_S.FENOTCHFILT7', 'read-write',
-            u"",
-            0x20080000, 0x3FFF3FFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.FENOTCHATTNSEL15 = RM_Field_AGC_S_FENOTCHFILT7_FENOTCHATTNSEL15(self)
-        self.zz_fdict['FENOTCHATTNSEL15'] = self.FENOTCHATTNSEL15
-        self.FENOTCHCAPCRSE15 = RM_Field_AGC_S_FENOTCHFILT7_FENOTCHCAPCRSE15(self)
-        self.zz_fdict['FENOTCHCAPCRSE15'] = self.FENOTCHCAPCRSE15
-        self.FENOTCHCAPFINE15 = RM_Field_AGC_S_FENOTCHFILT7_FENOTCHCAPFINE15(self)
-        self.zz_fdict['FENOTCHCAPFINE15'] = self.FENOTCHCAPFINE15
-        self.FENOTCHRATTNEN15 = RM_Field_AGC_S_FENOTCHFILT7_FENOTCHRATTNEN15(self)
-        self.zz_fdict['FENOTCHRATTNEN15'] = self.FENOTCHRATTNEN15
-        self.FENOTCHEN15 = RM_Field_AGC_S_FENOTCHFILT7_FENOTCHEN15(self)
-        self.zz_fdict['FENOTCHEN15'] = self.FENOTCHEN15
-        self.FENOTCHATTNSEL16 = RM_Field_AGC_S_FENOTCHFILT7_FENOTCHATTNSEL16(self)
-        self.zz_fdict['FENOTCHATTNSEL16'] = self.FENOTCHATTNSEL16
-        self.FENOTCHCAPCRSE16 = RM_Field_AGC_S_FENOTCHFILT7_FENOTCHCAPCRSE16(self)
-        self.zz_fdict['FENOTCHCAPCRSE16'] = self.FENOTCHCAPCRSE16
-        self.FENOTCHCAPFINE16 = RM_Field_AGC_S_FENOTCHFILT7_FENOTCHCAPFINE16(self)
-        self.zz_fdict['FENOTCHCAPFINE16'] = self.FENOTCHCAPFINE16
-        self.FENOTCHRATTNEN16 = RM_Field_AGC_S_FENOTCHFILT7_FENOTCHRATTNEN16(self)
-        self.zz_fdict['FENOTCHRATTNEN16'] = self.FENOTCHRATTNEN16
-        self.FENOTCHEN16 = RM_Field_AGC_S_FENOTCHFILT7_FENOTCHEN16(self)
-        self.zz_fdict['FENOTCHEN16'] = self.FENOTCHEN16
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_AGC_S_FENOTCHFILT8(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_AGC_S_FENOTCHFILT8, self).__init__(rmio, label,
-            0xa800c000, 0x150,
-            'FENOTCHFILT8', 'AGC_S.FENOTCHFILT8', 'read-write',
-            u"",
-            0x200B200A, 0x3FFF3FFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.FENOTCHATTNSEL17 = RM_Field_AGC_S_FENOTCHFILT8_FENOTCHATTNSEL17(self)
-        self.zz_fdict['FENOTCHATTNSEL17'] = self.FENOTCHATTNSEL17
-        self.FENOTCHCAPCRSE17 = RM_Field_AGC_S_FENOTCHFILT8_FENOTCHCAPCRSE17(self)
-        self.zz_fdict['FENOTCHCAPCRSE17'] = self.FENOTCHCAPCRSE17
-        self.FENOTCHCAPFINE17 = RM_Field_AGC_S_FENOTCHFILT8_FENOTCHCAPFINE17(self)
-        self.zz_fdict['FENOTCHCAPFINE17'] = self.FENOTCHCAPFINE17
-        self.FENOTCHRATTNEN17 = RM_Field_AGC_S_FENOTCHFILT8_FENOTCHRATTNEN17(self)
-        self.zz_fdict['FENOTCHRATTNEN17'] = self.FENOTCHRATTNEN17
-        self.FENOTCHEN17 = RM_Field_AGC_S_FENOTCHFILT8_FENOTCHEN17(self)
-        self.zz_fdict['FENOTCHEN17'] = self.FENOTCHEN17
-        self.FENOTCHATTNSEL18 = RM_Field_AGC_S_FENOTCHFILT8_FENOTCHATTNSEL18(self)
-        self.zz_fdict['FENOTCHATTNSEL18'] = self.FENOTCHATTNSEL18
-        self.FENOTCHCAPCRSE18 = RM_Field_AGC_S_FENOTCHFILT8_FENOTCHCAPCRSE18(self)
-        self.zz_fdict['FENOTCHCAPCRSE18'] = self.FENOTCHCAPCRSE18
-        self.FENOTCHCAPFINE18 = RM_Field_AGC_S_FENOTCHFILT8_FENOTCHCAPFINE18(self)
-        self.zz_fdict['FENOTCHCAPFINE18'] = self.FENOTCHCAPFINE18
-        self.FENOTCHRATTNEN18 = RM_Field_AGC_S_FENOTCHFILT8_FENOTCHRATTNEN18(self)
-        self.zz_fdict['FENOTCHRATTNEN18'] = self.FENOTCHRATTNEN18
-        self.FENOTCHEN18 = RM_Field_AGC_S_FENOTCHFILT8_FENOTCHEN18(self)
-        self.zz_fdict['FENOTCHEN18'] = self.FENOTCHEN18
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_AGC_S_FENOTCHFILT9(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_AGC_S_FENOTCHFILT9, self).__init__(rmio, label,
-            0xa800c000, 0x154,
-            'FENOTCHFILT9', 'AGC_S.FENOTCHFILT9', 'read-write',
-            u"",
-            0x200B200B, 0x3FFF3FFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.FENOTCHATTNSEL19 = RM_Field_AGC_S_FENOTCHFILT9_FENOTCHATTNSEL19(self)
-        self.zz_fdict['FENOTCHATTNSEL19'] = self.FENOTCHATTNSEL19
-        self.FENOTCHCAPCRSE19 = RM_Field_AGC_S_FENOTCHFILT9_FENOTCHCAPCRSE19(self)
-        self.zz_fdict['FENOTCHCAPCRSE19'] = self.FENOTCHCAPCRSE19
-        self.FENOTCHCAPFINE19 = RM_Field_AGC_S_FENOTCHFILT9_FENOTCHCAPFINE19(self)
-        self.zz_fdict['FENOTCHCAPFINE19'] = self.FENOTCHCAPFINE19
-        self.FENOTCHRATTNEN19 = RM_Field_AGC_S_FENOTCHFILT9_FENOTCHRATTNEN19(self)
-        self.zz_fdict['FENOTCHRATTNEN19'] = self.FENOTCHRATTNEN19
-        self.FENOTCHEN19 = RM_Field_AGC_S_FENOTCHFILT9_FENOTCHEN19(self)
-        self.zz_fdict['FENOTCHEN19'] = self.FENOTCHEN19
-        self.FENOTCHATTNSEL20 = RM_Field_AGC_S_FENOTCHFILT9_FENOTCHATTNSEL20(self)
-        self.zz_fdict['FENOTCHATTNSEL20'] = self.FENOTCHATTNSEL20
-        self.FENOTCHCAPCRSE20 = RM_Field_AGC_S_FENOTCHFILT9_FENOTCHCAPCRSE20(self)
-        self.zz_fdict['FENOTCHCAPCRSE20'] = self.FENOTCHCAPCRSE20
-        self.FENOTCHCAPFINE20 = RM_Field_AGC_S_FENOTCHFILT9_FENOTCHCAPFINE20(self)
-        self.zz_fdict['FENOTCHCAPFINE20'] = self.FENOTCHCAPFINE20
-        self.FENOTCHRATTNEN20 = RM_Field_AGC_S_FENOTCHFILT9_FENOTCHRATTNEN20(self)
-        self.zz_fdict['FENOTCHRATTNEN20'] = self.FENOTCHRATTNEN20
-        self.FENOTCHEN20 = RM_Field_AGC_S_FENOTCHFILT9_FENOTCHEN20(self)
-        self.zz_fdict['FENOTCHEN20'] = self.FENOTCHEN20
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_AGC_S_FENOTCHFILT10(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_AGC_S_FENOTCHFILT10, self).__init__(rmio, label,
-            0xa800c000, 0x158,
-            'FENOTCHFILT10', 'AGC_S.FENOTCHFILT10', 'read-write',
-            u"",
-            0x200B200B, 0x3FFF3FFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.FENOTCHATTNSEL21 = RM_Field_AGC_S_FENOTCHFILT10_FENOTCHATTNSEL21(self)
-        self.zz_fdict['FENOTCHATTNSEL21'] = self.FENOTCHATTNSEL21
-        self.FENOTCHCAPCRSE21 = RM_Field_AGC_S_FENOTCHFILT10_FENOTCHCAPCRSE21(self)
-        self.zz_fdict['FENOTCHCAPCRSE21'] = self.FENOTCHCAPCRSE21
-        self.FENOTCHCAPFINE21 = RM_Field_AGC_S_FENOTCHFILT10_FENOTCHCAPFINE21(self)
-        self.zz_fdict['FENOTCHCAPFINE21'] = self.FENOTCHCAPFINE21
-        self.FENOTCHRATTNEN21 = RM_Field_AGC_S_FENOTCHFILT10_FENOTCHRATTNEN21(self)
-        self.zz_fdict['FENOTCHRATTNEN21'] = self.FENOTCHRATTNEN21
-        self.FENOTCHEN21 = RM_Field_AGC_S_FENOTCHFILT10_FENOTCHEN21(self)
-        self.zz_fdict['FENOTCHEN21'] = self.FENOTCHEN21
-        self.FENOTCHATTNSEL22 = RM_Field_AGC_S_FENOTCHFILT10_FENOTCHATTNSEL22(self)
-        self.zz_fdict['FENOTCHATTNSEL22'] = self.FENOTCHATTNSEL22
-        self.FENOTCHCAPCRSE22 = RM_Field_AGC_S_FENOTCHFILT10_FENOTCHCAPCRSE22(self)
-        self.zz_fdict['FENOTCHCAPCRSE22'] = self.FENOTCHCAPCRSE22
-        self.FENOTCHCAPFINE22 = RM_Field_AGC_S_FENOTCHFILT10_FENOTCHCAPFINE22(self)
-        self.zz_fdict['FENOTCHCAPFINE22'] = self.FENOTCHCAPFINE22
-        self.FENOTCHRATTNEN22 = RM_Field_AGC_S_FENOTCHFILT10_FENOTCHRATTNEN22(self)
-        self.zz_fdict['FENOTCHRATTNEN22'] = self.FENOTCHRATTNEN22
-        self.FENOTCHEN22 = RM_Field_AGC_S_FENOTCHFILT10_FENOTCHEN22(self)
-        self.zz_fdict['FENOTCHEN22'] = self.FENOTCHEN22
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_AGC_S_FENOTCHFILT11(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_AGC_S_FENOTCHFILT11, self).__init__(rmio, label,
-            0xa800c000, 0x15C,
-            'FENOTCHFILT11', 'AGC_S.FENOTCHFILT11', 'read-write',
-            u"",
-            0x200B200B, 0x3FFF3FFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.FENOTCHATTNSEL23 = RM_Field_AGC_S_FENOTCHFILT11_FENOTCHATTNSEL23(self)
-        self.zz_fdict['FENOTCHATTNSEL23'] = self.FENOTCHATTNSEL23
-        self.FENOTCHCAPCRSE23 = RM_Field_AGC_S_FENOTCHFILT11_FENOTCHCAPCRSE23(self)
-        self.zz_fdict['FENOTCHCAPCRSE23'] = self.FENOTCHCAPCRSE23
-        self.FENOTCHCAPFINE23 = RM_Field_AGC_S_FENOTCHFILT11_FENOTCHCAPFINE23(self)
-        self.zz_fdict['FENOTCHCAPFINE23'] = self.FENOTCHCAPFINE23
-        self.FENOTCHRATTNEN23 = RM_Field_AGC_S_FENOTCHFILT11_FENOTCHRATTNEN23(self)
-        self.zz_fdict['FENOTCHRATTNEN23'] = self.FENOTCHRATTNEN23
-        self.FENOTCHEN23 = RM_Field_AGC_S_FENOTCHFILT11_FENOTCHEN23(self)
-        self.zz_fdict['FENOTCHEN23'] = self.FENOTCHEN23
-        self.FENOTCHATTNSEL24 = RM_Field_AGC_S_FENOTCHFILT11_FENOTCHATTNSEL24(self)
-        self.zz_fdict['FENOTCHATTNSEL24'] = self.FENOTCHATTNSEL24
-        self.FENOTCHCAPCRSE24 = RM_Field_AGC_S_FENOTCHFILT11_FENOTCHCAPCRSE24(self)
-        self.zz_fdict['FENOTCHCAPCRSE24'] = self.FENOTCHCAPCRSE24
-        self.FENOTCHCAPFINE24 = RM_Field_AGC_S_FENOTCHFILT11_FENOTCHCAPFINE24(self)
-        self.zz_fdict['FENOTCHCAPFINE24'] = self.FENOTCHCAPFINE24
-        self.FENOTCHRATTNEN24 = RM_Field_AGC_S_FENOTCHFILT11_FENOTCHRATTNEN24(self)
-        self.zz_fdict['FENOTCHRATTNEN24'] = self.FENOTCHRATTNEN24
-        self.FENOTCHEN24 = RM_Field_AGC_S_FENOTCHFILT11_FENOTCHEN24(self)
-        self.zz_fdict['FENOTCHEN24'] = self.FENOTCHEN24
+        self.STEPDWNSAFE0 = RM_Field_AGC_S_STEPDWNSAFE_STEPDWNSAFE0(self)
+        self.zz_fdict['STEPDWNSAFE0'] = self.STEPDWNSAFE0
+        self.STEPDWNSAFE1 = RM_Field_AGC_S_STEPDWNSAFE_STEPDWNSAFE1(self)
+        self.zz_fdict['STEPDWNSAFE1'] = self.STEPDWNSAFE1
+        self.STEPDWNSAFE2 = RM_Field_AGC_S_STEPDWNSAFE_STEPDWNSAFE2(self)
+        self.zz_fdict['STEPDWNSAFE2'] = self.STEPDWNSAFE2
+        self.STEPDWNSAFE3 = RM_Field_AGC_S_STEPDWNSAFE_STEPDWNSAFE3(self)
+        self.zz_fdict['STEPDWNSAFE3'] = self.STEPDWNSAFE3
+        self.STEPDWNSAFE4 = RM_Field_AGC_S_STEPDWNSAFE_STEPDWNSAFE4(self)
+        self.zz_fdict['STEPDWNSAFE4'] = self.STEPDWNSAFE4
+        self.STEPDWNSAFE5 = RM_Field_AGC_S_STEPDWNSAFE_STEPDWNSAFE5(self)
+        self.zz_fdict['STEPDWNSAFE5'] = self.STEPDWNSAFE5
+        self.STEPDWNSAFEEN = RM_Field_AGC_S_STEPDWNSAFE_STEPDWNSAFEEN(self)
+        self.zz_fdict['STEPDWNSAFEEN'] = self.STEPDWNSAFEEN
         self.__dict__['zz_frozen'] = True
 
 
@@ -2197,7 +1277,7 @@ class RM_Register_AGC_S_CCADEBUG(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_CCADEBUG, self).__init__(rmio, label,
-            0xa800c000, 0x160,
+            0xa800c000, 0x0E8,
             'CCADEBUG', 'AGC_S.CCADEBUG', 'read-only',
             u"",
             0x00000000, 0x000003FF,
@@ -2210,6 +1290,182 @@ class RM_Register_AGC_S_CCADEBUG(Base_RM_Register):
         self.zz_fdict['DEBUGCCAM1'] = self.DEBUGCCAM1
         self.DEBUGCCASIGDET = RM_Field_AGC_S_CCADEBUG_DEBUGCCASIGDET(self)
         self.zz_fdict['DEBUGCCASIGDET'] = self.DEBUGCCASIGDET
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Register_AGC_S_TIACODE0(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_AGC_S_TIACODE0, self).__init__(rmio, label,
+            0xa800c000, 0x0EC,
+            'TIACODE0', 'AGC_S.TIACODE0', 'read-write',
+            u"",
+            0x00000000, 0x00777777,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.TIACOMP1 = RM_Field_AGC_S_TIACODE0_TIACOMP1(self)
+        self.zz_fdict['TIACOMP1'] = self.TIACOMP1
+        self.TIACOMP2 = RM_Field_AGC_S_TIACODE0_TIACOMP2(self)
+        self.zz_fdict['TIACOMP2'] = self.TIACOMP2
+        self.TIACOMP3 = RM_Field_AGC_S_TIACODE0_TIACOMP3(self)
+        self.zz_fdict['TIACOMP3'] = self.TIACOMP3
+        self.TIACOMP4 = RM_Field_AGC_S_TIACODE0_TIACOMP4(self)
+        self.zz_fdict['TIACOMP4'] = self.TIACOMP4
+        self.TIACOMP5 = RM_Field_AGC_S_TIACODE0_TIACOMP5(self)
+        self.zz_fdict['TIACOMP5'] = self.TIACOMP5
+        self.TIACOMP6 = RM_Field_AGC_S_TIACODE0_TIACOMP6(self)
+        self.zz_fdict['TIACOMP6'] = self.TIACOMP6
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Register_AGC_S_TIACODE1(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_AGC_S_TIACODE1, self).__init__(rmio, label,
+            0xa800c000, 0x0F0,
+            'TIACODE1', 'AGC_S.TIACODE1', 'read-write',
+            u"",
+            0x00000000, 0x00077777,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.TIACOMP7 = RM_Field_AGC_S_TIACODE1_TIACOMP7(self)
+        self.zz_fdict['TIACOMP7'] = self.TIACOMP7
+        self.TIACOMP8 = RM_Field_AGC_S_TIACODE1_TIACOMP8(self)
+        self.zz_fdict['TIACOMP8'] = self.TIACOMP8
+        self.TIACOMP9 = RM_Field_AGC_S_TIACODE1_TIACOMP9(self)
+        self.zz_fdict['TIACOMP9'] = self.TIACOMP9
+        self.TIACOMP10 = RM_Field_AGC_S_TIACODE1_TIACOMP10(self)
+        self.zz_fdict['TIACOMP10'] = self.TIACOMP10
+        self.TIACOMP11 = RM_Field_AGC_S_TIACODE1_TIACOMP11(self)
+        self.zz_fdict['TIACOMP11'] = self.TIACOMP11
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Register_AGC_S_LNAMIXCODE2(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_AGC_S_LNAMIXCODE2, self).__init__(rmio, label,
+            0xa800c000, 0x0F4,
+            'LNAMIXCODE2', 'AGC_S.LNAMIXCODE2', 'read-write',
+            u"",
+            0x00000011, 0x0001FFFF,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.LNAMIXSLICE11 = RM_Field_AGC_S_LNAMIXCODE2_LNAMIXSLICE11(self)
+        self.zz_fdict['LNAMIXSLICE11'] = self.LNAMIXSLICE11
+        self.LNAMIXCUREN = RM_Field_AGC_S_LNAMIXCODE2_LNAMIXCUREN(self)
+        self.zz_fdict['LNAMIXCUREN'] = self.LNAMIXCUREN
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Register_AGC_S_COLLDETCTRL(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_AGC_S_COLLDETCTRL, self).__init__(rmio, label,
+            0xa800c000, 0x100,
+            'COLLDETCTRL', 'AGC_S.COLLDETCTRL', 'read-write',
+            u"",
+            0x00002800, 0x03007F8F,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.UPONMARSSI = RM_Field_AGC_S_COLLDETCTRL_UPONMARSSI(self)
+        self.zz_fdict['UPONMARSSI'] = self.UPONMARSSI
+        self.INPUTSEL = RM_Field_AGC_S_COLLDETCTRL_INPUTSEL(self)
+        self.zz_fdict['INPUTSEL'] = self.INPUTSEL
+        self.RSSIINSEL = RM_Field_AGC_S_COLLDETCTRL_RSSIINSEL(self)
+        self.zz_fdict['RSSIINSEL'] = self.RSSIINSEL
+        self.OVRTHDSEL = RM_Field_AGC_S_COLLDETCTRL_OVRTHDSEL(self)
+        self.zz_fdict['OVRTHDSEL'] = self.OVRTHDSEL
+        self.MALATCHSEL = RM_Field_AGC_S_COLLDETCTRL_MALATCHSEL(self)
+        self.zz_fdict['MALATCHSEL'] = self.MALATCHSEL
+        self.MACOMPENSEL = RM_Field_AGC_S_COLLDETCTRL_MACOMPENSEL(self)
+        self.zz_fdict['MACOMPENSEL'] = self.MACOMPENSEL
+        self.MATAP = RM_Field_AGC_S_COLLDETCTRL_MATAP(self)
+        self.zz_fdict['MATAP'] = self.MATAP
+        self.FLTBYP = RM_Field_AGC_S_COLLDETCTRL_FLTBYP(self)
+        self.zz_fdict['FLTBYP'] = self.FLTBYP
+        self.LATCHRSSIEN = RM_Field_AGC_S_COLLDETCTRL_LATCHRSSIEN(self)
+        self.zz_fdict['LATCHRSSIEN'] = self.LATCHRSSIEN
+        self.LATCHRSSI = RM_Field_AGC_S_COLLDETCTRL_LATCHRSSI(self)
+        self.zz_fdict['LATCHRSSI'] = self.LATCHRSSI
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Register_AGC_S_COLLDETTHD(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_AGC_S_COLLDETTHD, self).__init__(rmio, label,
+            0xa800c000, 0x104,
+            'COLLDETTHD', 'AGC_S.COLLDETTHD', 'read-write',
+            u"",
+            0x00281606, 0x07FDFF0F,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.MATHRESHOLD = RM_Field_AGC_S_COLLDETTHD_MATHRESHOLD(self)
+        self.zz_fdict['MATHRESHOLD'] = self.MATHRESHOLD
+        self.MINTHRESHOLD = RM_Field_AGC_S_COLLDETTHD_MINTHRESHOLD(self)
+        self.zz_fdict['MINTHRESHOLD'] = self.MINTHRESHOLD
+        self.OVRTHRESHOLD = RM_Field_AGC_S_COLLDETTHD_OVRTHRESHOLD(self)
+        self.zz_fdict['OVRTHRESHOLD'] = self.OVRTHRESHOLD
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Register_AGC_S_COLLDETSTATUS(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_AGC_S_COLLDETSTATUS, self).__init__(rmio, label,
+            0xa800c000, 0x108,
+            'COLLDETSTATUS', 'AGC_S.COLLDETSTATUS', 'read-only',
+            u"",
+            0x00000000, 0x000001FF,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.MAFLTDOUT = RM_Field_AGC_S_COLLDETSTATUS_MAFLTDOUT(self)
+        self.zz_fdict['MAFLTDOUT'] = self.MAFLTDOUT
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Register_AGC_S_SETTLINGINDCTRL(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_AGC_S_SETTLINGINDCTRL, self).__init__(rmio, label,
+            0xa800c000, 0x110,
+            'SETTLINGINDCTRL', 'AGC_S.SETTLINGINDCTRL', 'read-write',
+            u"",
+            0x00010100, 0x003F3F01,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.EN = RM_Field_AGC_S_SETTLINGINDCTRL_EN(self)
+        self.zz_fdict['EN'] = self.EN
+        self.POSTHD = RM_Field_AGC_S_SETTLINGINDCTRL_POSTHD(self)
+        self.zz_fdict['POSTHD'] = self.POSTHD
+        self.NEGTHD = RM_Field_AGC_S_SETTLINGINDCTRL_NEGTHD(self)
+        self.zz_fdict['NEGTHD'] = self.NEGTHD
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Register_AGC_S_SETTLINGINDPER(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_AGC_S_SETTLINGINDPER, self).__init__(rmio, label,
+            0xa800c000, 0x114,
+            'SETTLINGINDPER', 'AGC_S.SETTLINGINDPER', 'read-write',
+            u"",
+            0x02000100, 0xFFFFFFFF,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.SETTLEDPERIOD = RM_Field_AGC_S_SETTLINGINDPER_SETTLEDPERIOD(self)
+        self.zz_fdict['SETTLEDPERIOD'] = self.SETTLEDPERIOD
+        self.DELAYPERIOD = RM_Field_AGC_S_SETTLINGINDPER_DELAYPERIOD(self)
+        self.zz_fdict['DELAYPERIOD'] = self.DELAYPERIOD
         self.__dict__['zz_frozen'] = True
 
 

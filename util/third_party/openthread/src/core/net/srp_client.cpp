@@ -206,18 +206,9 @@ void Client::AutoStart::SetState(State aState)
     }
 }
 
-void Client::AutoStart::SetCallback(AutoStartCallback aCallback, void *aContext)
-{
-    mCallback = aCallback;
-    mContext  = aContext;
-}
-
 void Client::AutoStart::InvokeCallback(const Ip6::SockAddr *aServerSockAddr) const
 {
-    if (mCallback != nullptr)
-    {
-        mCallback(aServerSockAddr, mContext);
-    }
+    mCallback.InvokeIfSet(aServerSockAddr);
 }
 
 #if OT_SHOULD_LOG_AT(OT_LOG_LEVEL_INFO)
@@ -257,6 +248,7 @@ Client::Client(Instance &aInstance)
     , mSingleServiceMode(false)
 #if OPENTHREAD_CONFIG_REFERENCE_DEVICE_ENABLE
     , mServiceKeyRecordEnabled(false)
+    , mUseShortLeaseOption(false)
 #endif
     , mUpdateMessageId(0)
     , mRetryWaitInterval(kMinRetryWaitInterval)
@@ -266,8 +258,6 @@ Client::Client(Instance &aInstance)
     , mDefaultLease(kDefaultLease)
     , mDefaultKeyLease(kDefaultKeyLease)
     , mSocket(aInstance)
-    , mCallback(nullptr)
-    , mCallbackContext(nullptr)
     , mDomainName(kDefaultDomainName)
     , mTimer(aInstance)
 {
@@ -365,7 +355,7 @@ void Client::Stop(Requester aRequester, StopMode aMode)
 
 #if OPENTHREAD_CONFIG_SRP_CLIENT_AUTO_START_API_ENABLE
 #if OPENTHREAD_CONFIG_SRP_CLIENT_SWITCH_SERVER_ON_FAILURE
-    mAutoStart.ResetTimoutFailureCount();
+    mAutoStart.ResetTimeoutFailureCount();
 #endif
     if (aRequester == kRequesterAuto)
     {
@@ -380,12 +370,6 @@ exit:
         DisableAutoStartMode();
     }
 #endif
-}
-
-void Client::SetCallback(Callback aCallback, void *aContext)
-{
-    mCallback        = aCallback;
-    mCallbackContext = aContext;
 }
 
 void Client::Resume(void)
@@ -739,18 +723,11 @@ void Client::ChangeHostAndServiceStates(const ItemState *aNewStates, ServiceStat
 #endif // OPENTHREAD_CONFIG_SRP_CLIENT_AUTO_START_API_ENABLE && OPENTHREAD_CONFIG_SRP_CLIENT_SAVE_SELECTED_SERVER_ENABLE
 }
 
-void Client::InvokeCallback(Error aError) const
-{
-    InvokeCallback(aError, mHostInfo, nullptr);
-}
+void Client::InvokeCallback(Error aError) const { InvokeCallback(aError, mHostInfo, nullptr); }
 
 void Client::InvokeCallback(Error aError, const HostInfo &aHostInfo, const Service *aRemovedServices) const
 {
-    VerifyOrExit(mCallback != nullptr);
-    mCallback(aError, &aHostInfo, mServices.GetHead(), aRemovedServices, mCallbackContext);
-
-exit:
-    return;
+    mCallback.InvokeIfSet(aError, &aHostInfo, mServices.GetHead(), aRemovedServices);
 }
 
 void Client::SendUpdate(void)
@@ -767,7 +744,7 @@ void Client::SendUpdate(void)
     };
 
     Error    error   = kErrorNone;
-    Message *message = mSocket.NewMessage(0);
+    Message *message = mSocket.NewMessage();
     uint32_t length;
 
     VerifyOrExit(message != nullptr, error = kErrorNoBufs);
@@ -858,7 +835,12 @@ Error Client::PrepareUpdateMessage(Message &aMessage)
 
     info.Clear();
 
+#if OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE
+    info.mKeyRef.SetKeyRef(kSrpEcdsaKeyRef);
+    SuccessOrExit(error = ReadOrGenerateKey(info.mKeyRef));
+#else
     SuccessOrExit(error = ReadOrGenerateKey(info.mKeyPair));
+#endif
 
     // Generate random Message ID and ensure it is different from last one
     do
@@ -908,6 +890,34 @@ exit:
     return error;
 }
 
+#if OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE
+Error Client::ReadOrGenerateKey(Crypto::Ecdsa::P256::KeyPairAsRef &aKeyRef)
+{
+    Error                        error = kErrorNone;
+    Crypto::Ecdsa::P256::KeyPair keyPair;
+
+    VerifyOrExit(!Crypto::Storage::HasKey(aKeyRef.GetKeyRef()));
+    error = Get<Settings>().Read<Settings::SrpEcdsaKey>(keyPair);
+
+    if (error == kErrorNone)
+    {
+        Crypto::Ecdsa::P256::PublicKey publicKey;
+
+        if (keyPair.GetPublicKey(publicKey) == kErrorNone)
+        {
+            SuccessOrExit(error = aKeyRef.ImportKeyPair(keyPair));
+            IgnoreError(Get<Settings>().Delete<Settings::SrpEcdsaKey>());
+            ExitNow();
+        }
+        IgnoreError(Get<Settings>().Delete<Settings::SrpEcdsaKey>());
+    }
+
+    error = aKeyRef.Generate();
+
+exit:
+    return error;
+}
+#else
 Error Client::ReadOrGenerateKey(Crypto::Ecdsa::P256::KeyPair &aKeyPair)
 {
     Error error;
@@ -930,6 +940,7 @@ Error Client::ReadOrGenerateKey(Crypto::Ecdsa::P256::KeyPair &aKeyPair)
 exit:
     return error;
 }
+#endif //  OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE
 
 Error Client::AppendServiceInstructions(Message &aMessage, Info &aInfo)
 {
@@ -1302,10 +1313,14 @@ Error Client::AppendKeyRecord(Message &aMessage, Info &aInfo) const
                  Dns::KeyRecord::kSignatoryFlagGeneral);
     key.SetProtocol(Dns::KeyRecord::kProtocolDnsSec);
     key.SetAlgorithm(Dns::KeyRecord::kAlgorithmEcdsaP256Sha256);
-    key.SetLength(sizeof(Dns::KeyRecord) - sizeof(Dns::ResourceRecord) + Crypto::Ecdsa::P256::PublicKey::kSize);
+    key.SetLength(sizeof(Dns::KeyRecord) - sizeof(Dns::ResourceRecord) + sizeof(Crypto::Ecdsa::P256::PublicKey));
     SuccessOrExit(error = aMessage.Append(key));
+#if OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE
+    SuccessOrExit(error = aInfo.mKeyRef.GetPublicKey(publicKey));
+#else
     SuccessOrExit(error = aInfo.mKeyPair.GetPublicKey(publicKey));
-    SuccessOrExit(error = aMessage.Append(publicKey.m8));
+#endif
+    SuccessOrExit(error = aMessage.Append(publicKey));
     aInfo.mRecordCount++;
 
 exit:
@@ -1361,6 +1376,7 @@ Error Client::AppendUpdateLeaseOptRecord(Message &aMessage)
     Error            error;
     Dns::OptRecord   optRecord;
     Dns::LeaseOption leaseOption;
+    uint16_t         optionSize;
 
     // Append empty (root domain) as OPT RR name.
     SuccessOrExit(error = Dns::Name::AppendTerminator(aMessage));
@@ -1370,15 +1386,26 @@ Error Client::AppendUpdateLeaseOptRecord(Message &aMessage)
     optRecord.Init();
     optRecord.SetUdpPayloadSize(kUdpPayloadSize);
     optRecord.SetDnsSecurityFlag();
-    optRecord.SetLength(sizeof(Dns::LeaseOption));
+
+#if OPENTHREAD_CONFIG_REFERENCE_DEVICE_ENABLE
+    if (mUseShortLeaseOption)
+    {
+        LogInfo("Test mode - appending short variant of Lease Option");
+        mKeyLease = mLease;
+        leaseOption.InitAsShortVariant(mLease);
+    }
+    else
+#endif
+    {
+        leaseOption.InitAsLongVariant(mLease, mKeyLease);
+    }
+
+    optionSize = static_cast<uint16_t>(leaseOption.GetSize());
+
+    optRecord.SetLength(optionSize);
 
     SuccessOrExit(error = aMessage.Append(optRecord));
-
-    leaseOption.Init();
-    leaseOption.SetLeaseInterval(mLease);
-    leaseOption.SetKeyLeaseInterval(mKeyLease);
-
-    error = aMessage.Append(leaseOption);
+    error = aMessage.AppendBytes(&leaseOption, optionSize);
 
 exit:
     return error;
@@ -1429,7 +1456,11 @@ Error Client::AppendSignature(Message &aMessage, Info &aInfo)
     sha256.Update(aMessage, 0, offset);
 
     sha256.Finish(hash);
+#if OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE
+    SuccessOrExit(error = aInfo.mKeyRef.Sign(hash, signature));
+#else
     SuccessOrExit(error = aInfo.mKeyPair.Sign(hash, signature));
+#endif
 
     // Move back in message and append SIG RR now with compressed host
     // name (as signer's name) along with the calculated signature.
@@ -1505,7 +1536,7 @@ void Client::ProcessResponse(Message &aMessage)
     LogInfo("Received response");
 
 #if OPENTHREAD_CONFIG_SRP_CLIENT_AUTO_START_API_ENABLE && OPENTHREAD_CONFIG_SRP_CLIENT_SWITCH_SERVER_ON_FAILURE
-    mAutoStart.ResetTimoutFailureCount();
+    mAutoStart.ResetTimeoutFailureCount();
 #endif
 
     error = Dns::Header::ResponseCodeToError(header.GetResponseCode());
@@ -1675,36 +1706,27 @@ Error Client::ProcessOptRecord(const Message &aMessage, uint16_t aOffset, const 
     // Read and process all options (in an OPT RR) from a message.
     // The `aOffset` points to beginning of record in `aMessage`.
 
-    Error    error = kErrorNone;
-    uint16_t len;
+    Error            error = kErrorNone;
+    Dns::LeaseOption leaseOption;
 
     IgnoreError(Dns::Name::ParseName(aMessage, aOffset));
     aOffset += sizeof(Dns::OptRecord);
 
-    len = aOptRecord.GetLength();
-
-    while (len > 0)
+    switch (error = leaseOption.ReadFrom(aMessage, aOffset, aOptRecord.GetLength()))
     {
-        Dns::LeaseOption leaseOption;
-        Dns::Option &    option = leaseOption;
-        uint16_t         size;
+    case kErrorNone:
+        mLease    = Min(leaseOption.GetLeaseInterval(), kMaxLease);
+        mKeyLease = Min(leaseOption.GetKeyLeaseInterval(), kMaxLease);
+        break;
 
-        SuccessOrExit(error = aMessage.Read(aOffset, option));
+    case kErrorNotFound:
+        // If server does not include a lease option in its response, it
+        // indicates that it accepted what we requested.
+        error = kErrorNone;
+        break;
 
-        VerifyOrExit(aOffset + option.GetSize() <= aMessage.GetLength(), error = kErrorParse);
-
-        if ((option.GetOptionCode() == Dns::Option::kUpdateLease) &&
-            (option.GetOptionLength() >= Dns::LeaseOption::kOptionLength))
-        {
-            SuccessOrExit(error = aMessage.Read(aOffset, leaseOption));
-
-            mLease    = Min(leaseOption.GetLeaseInterval(), kMaxLease);
-            mKeyLease = Min(leaseOption.GetKeyLeaseInterval(), kMaxLease);
-        }
-
-        size = static_cast<uint16_t>(option.GetSize());
-        aOffset += size;
-        len -= size;
+    default:
+        ExitNow();
     }
 
 exit:
@@ -1787,9 +1809,9 @@ void Client::UpdateState(void)
                     service.SetState(kToRefresh);
                     shouldUpdate = true;
                 }
-                else if (service.GetLeaseRenewTime() < earliestRenewTime)
+                else
                 {
-                    earliestRenewTime = service.GetLeaseRenewTime();
+                    earliestRenewTime = Min(earliestRenewTime, service.GetLeaseRenewTime());
                 }
 
                 break;
@@ -1908,9 +1930,9 @@ void Client::HandleTimer(void)
         // callback. It works correctly due to the guard check at the
         // top of `SelectNextServer()`.
 
-        mAutoStart.IncrementTimoutFailureCount();
+        mAutoStart.IncrementTimeoutFailureCount();
 
-        if (mAutoStart.GetTimoutFailureCount() >= kMaxTimeoutFailuresToSwitchServer)
+        if (mAutoStart.GetTimeoutFailureCount() >= kMaxTimeoutFailuresToSwitchServer)
         {
             SelectNextServer(kDisallowSwitchOnRegisteredHost);
         }

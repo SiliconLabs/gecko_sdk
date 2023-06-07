@@ -1,6 +1,6 @@
 # Wi-SUN - SoC CoAP Collector
 
-The Wi-SUN CoAP Collector sample application demonstrates the use of the Constrained Application Protocol (CoAP) to emulate a metering-like application. The CoAP Collector's purpose is to retrieve measurements from the devices running the Wi-SUN CoAP Meter application in the same Wi-SUN network. It also shows an implementation example of an application layer library on top of the Wi-SUN stack (i.e., CoAP).
+The Wi-SUN CoAP Collector sample application demonstrates the use of the Constrained Application Protocol (CoAP) to emulate a metering-like application. The CoAP Collector retrieves measurements from the devices running the Wi-SUN CoAP Meter application in the same Wi-SUN network. It also shows an implementation example of an application layer library on top of the Wi-SUN stack (i.e., CoAP).
 
 ## Getting Started
 
@@ -20,7 +20,7 @@ To get started with the example, follow the steps below:
 * Using Simplicity Studio, open consoles on both the Meter and Collector devices.
 * Wait for the CoAP Collector and Meter to join the Wi-SUN Border Router network.
 
-Refer to the associated sections in [QSG181: Wi-SUN SDK Quick Start Guide](https://www.silabs.com/documents/public/quick-start-guides/qsg181-wi-sun-sdk-quick-start-guide.pdf) for step-by-step guidelines for each operation.
+See the associated sections in [QSG181: Wi-SUN SDK Quick Start Guide](https://www.silabs.com/documents/public/quick-start-guides/qsg181-wi-sun-sdk-quick-start-guide.pdf) for step-by-step guidelines for each operation.
 
 ## Monitor a CoAP Meter
 
@@ -32,7 +32,10 @@ The CoAP Collector application has three specific commands: `wisun register_mete
 
     wisun register_meter [CoAP Meter Global IPv6 address]
 
-The CoAP Collector starts monitoring and retrieving sensor data from the CoAP Meter. The sensor data consists of actual temperature and relative humidity sensor measurements from the SI7021 I²C sensor and dummy lux values. Each udpate is output in the console as shown below.
+The CoAP Collector starts monitoring and retrieving sensor data from the CoAP Meter. The sensor data consists of actual temperature and relative humidity sensor measurements from the SI7021 I²C sensor and dummy lux values. 
+The IP address of the CoAP meter and its schedule time to send are included in the packet payload also. 
+The CoAP Collector uses schedule parameter of the LFN CoAP meter to optimize the period time of request sending.
+Each update is output in the console as shown below.
 
     [fd00:7283:7e00:0:b6e3:f9ff:fec5:8486]
     {
@@ -47,11 +50,13 @@ The CoAP Collector starts monitoring and retrieving sensor data from the CoAP Me
     "token": "n/a",
     "uri_path": "n/a",
     "payload": 
-    {
+    { 
+      "fd12:3456::62a4:23ff:fe37:a757 - 5000" : {
         "id": 145,
         "temp": 32.50,
         "hum": 40.50,
         "lx": 512
+      }
     }
 
     }

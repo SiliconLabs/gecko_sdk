@@ -6,7 +6,7 @@
  *****************************************************************************/
 
 #include <cmds_rf.h>
-#include <serialappl.h>
+#include <app.h>
 #include <ZW_application_transport_interface.h>
 #include <utils.h>
 

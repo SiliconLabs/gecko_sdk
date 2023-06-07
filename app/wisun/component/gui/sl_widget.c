@@ -61,7 +61,7 @@ __STATIC_INLINE void _reset_region(sl_display_rectangle_t * region);
  * @return uint8_t Line count
  *****************************************************************************/
 __STATIC_INLINE uint8_t _get_max_lines_on_widget(const sl_display_rectangle_t
-                                               *const frame);
+                                                 *const frame);
 
 /**************************************************************************//**
  * @brief Summarize sl_status
@@ -85,7 +85,7 @@ static void _optionlist_scroll(sl_widget_option_list_t * const optionlist);
  * @return uint8_t X size (width)
  *****************************************************************************/
 __STATIC_INLINE uint8_t _get_widget_x_size(const sl_display_rectangle_t
-                                         *const frame);
+                                           *const frame);
 
 /**************************************************************************//**
  * @brief Get widget y size (width)
@@ -94,7 +94,7 @@ __STATIC_INLINE uint8_t _get_widget_x_size(const sl_display_rectangle_t
  * @return uint8_t Y size (width)
  *****************************************************************************/
 __STATIC_INLINE uint8_t _get_widget_y_size(const sl_display_rectangle_t
-                                         *const frame);
+                                           *const frame);
 
 /**************************************************************************//**
  * @brief Get string offset to align center
@@ -104,7 +104,7 @@ __STATIC_INLINE uint8_t _get_widget_y_size(const sl_display_rectangle_t
  * @return uint8_t Offset value
  *****************************************************************************/
 __STATIC_INLINE uint8_t _get_str_offset_to_align_center(const sl_display_rectangle_t
-                                                      *const frame, const char *str);
+                                                        *const frame, const char *str);
 
 // -----------------------------------------------------------------------------
 //                                Static Variables
@@ -559,7 +559,7 @@ __STATIC_INLINE uint8_t _get_widget_y_size(const sl_display_rectangle_t *const f
 }
 
 __STATIC_INLINE uint8_t _get_str_offset_to_align_center(const sl_display_rectangle_t *const frame,
-                                                      const char *str)
+                                                        const char *str)
 {
   return ((_get_widget_x_size(frame) - (SL_WIDGET_FRAME_WIDTH * 2))
           - (sl_strnlen((char *)str, SL_WIDGET_MAX_LABEL_STR_LEN) * sl_widget_default_font.fontWidth)) / 2 + SL_WIDGET_FRAME_WIDTH;

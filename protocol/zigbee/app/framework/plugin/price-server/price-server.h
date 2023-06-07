@@ -19,16 +19,12 @@
 #define SILABS_PRICE_SERVER_H
 
 #include "app/framework/plugin/price-common/price-common.h"
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
+#include "sl_component_catalog.h"
+#endif // SL_COMPONENT_CATALOG_PRESEN
+#ifdef SL_CATALOG_ZIGBEE_PRICE_SERVER_PRESENT
 #include "price-server-config.h"
-#ifdef SL_CATALOG_ZIGBEE_PRICE_SERVER_TARIFF_MATRIX_PRESENT
-#define TARIFF_MATRIX_SUPPORT
-#endif // SL_CATALOG_ZIGBEE_PRICE_SERVER_TARIFF_MATRIX_PRESENT
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_PRICE_SERVER_TARIFF_MATRIX_SUPPORT
-#define TARIFF_MATRIX_SUPPORT
-#endif // EMBER_AF_PLUGIN_PRICE_SERVER_TARIFF_MATRIX_SUPPORT
-#endif // UC_BUILD
+#endif
 
 /**
  * @defgroup price-server Price Server
@@ -294,11 +290,11 @@ typedef struct {
   EmberAfPriceCancelTariff cancelTariff[EMBER_AF_PRICE_CLUSTER_SERVER_ENDPOINT_COUNT];
 } EmberAfPriceCancelTariffTable;
 
-typedef uint8_t emAfPriceBlockThreshold[ZCL_PRICE_CLUSTER_BLOCK_THRESHOLDS_PAYLOAD_SIZE];
+typedef uint8_t sli_zigbee_af_price_block_threshold[ZCL_PRICE_CLUSTER_BLOCK_THRESHOLDS_PAYLOAD_SIZE];
 typedef struct {
   union {
-    emAfPriceBlockThreshold blockAndTier[ZCL_PRICE_CLUSTER_MAX_TOU_BLOCK_TIERS][ZCL_PRICE_CLUSTER_MAX_TOU_BLOCKS - 1u];
-    emAfPriceBlockThreshold block[ZCL_PRICE_CLUSTER_MAX_TOU_BLOCKS - 1];
+    sli_zigbee_af_price_block_threshold blockAndTier[ZCL_PRICE_CLUSTER_MAX_TOU_BLOCK_TIERS][ZCL_PRICE_CLUSTER_MAX_TOU_BLOCKS - 1u];
+    sli_zigbee_af_price_block_threshold block[ZCL_PRICE_CLUSTER_MAX_TOU_BLOCKS - 1];
   } thresholds;
   uint32_t providerId;
   uint32_t issuerTariffId;
@@ -1487,6 +1483,6 @@ void emberAfPluginPriceServerNewActiveBlockPeriodInformationCallback(const Ember
 /** @} */ // end of Callbacks
 /** @} */ // end of price-server
 
-extern bool emAfPluginPriceServerBillingPeriodRepeat;
+extern bool sli_zigbee_af_price_server_billing_period_repeat;
 
 #endif  // #ifndef _PRICE_SERVER_H_

@@ -1,3 +1,11 @@
+zw_cc_multi_channel:
+  endpoints:
+    - endpoint: 1
+      generic_type: GENERIC_TYPE_SWITCH_BINARY
+      specific_type: SPECIFIC_TYPE_NOT_USED
+    - endpoint: 2
+      generic_type: GENERIC_TYPE_SWITCH_MULTILEVEL
+      specific_type: SPECIFIC_TYPE_NOT_USED
 zw_cc_binaryswitch:
   binary_switches:
     - endpoint: 1
@@ -12,14 +20,14 @@ zw_cc_notification:
         - profile_MS: ASSOCIATION_GROUP_INFO_REPORT_PROFILE_NOTIFICATION
         - profile_LS: NOTIFICATION_REPORT_POWER_MANAGEMENT_V4
       state_events:
-        - state_event: NOTIFICATION_EVENT_POWER_MANAGEMENT_OVERLOADED_DETECTED # Goes to idle when no longer active
+        - NOTIFICATION_EVENT_POWER_MANAGEMENT_OVERLOADED_DETECTED # Goes to idle when no longer active
     - type: NOTIFICATION_TYPE_POWER_MANAGEMENT
       endpoint: 2
       agi_profile:
         - profile_MS: ASSOCIATION_GROUP_INFO_REPORT_PROFILE_NOTIFICATION
         - profile_LS: NOTIFICATION_REPORT_POWER_MANAGEMENT_V4
       state_events:
-        - state_event: NOTIFICATION_EVENT_POWER_MANAGEMENT_OVERLOADED_DETECTED # Goes to idle when no longer active
+        - NOTIFICATION_EVENT_POWER_MANAGEMENT_OVERLOADED_DETECTED # Goes to idle when no longer active
 zw_cc_zwaveplusinfo:
   endpoints:
     - endpoint: 1

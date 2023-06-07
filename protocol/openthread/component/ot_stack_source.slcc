@@ -25,7 +25,6 @@ source:
       - path: api/coap_api.cpp
       - path: api/coap_secure_api.cpp
       - path: api/commissioner_api.cpp
-      - path: api/coprocessor_rpc_api.cpp
       - path: api/crypto_api.cpp
       - path: api/dataset_api.cpp
       - path: api/dataset_ftd_api.cpp
@@ -45,6 +44,7 @@ source:
       - path: api/link_metrics_api.cpp
       - path: api/link_raw_api.cpp
       - path: api/logging_api.cpp
+      - path: api/mesh_diag_api.cpp
       - path: api/message_api.cpp
       - path: api/multi_radio_api.cpp
       - path: api/nat64_api.cpp
@@ -92,6 +92,7 @@ source:
       - path: common/log.cpp
       - path: common/message.cpp
       - path: common/notifier.cpp
+      - path: common/preference.cpp
       - path: common/random.cpp
       - path: common/settings.cpp
       - path: common/string.cpp
@@ -101,15 +102,12 @@ source:
       - path: common/tlvs.cpp
       - path: common/trickle_timer.cpp
       - path: common/uptime.cpp
-      - path: coprocessor/rpc.cpp
       - path: crypto/aes_ccm.cpp
       - path: crypto/aes_ecb.cpp
       - path: crypto/crypto_platform.cpp
-      - path: crypto/ecdsa.cpp
       - path: crypto/hkdf_sha256.cpp
       - path: crypto/hmac_sha256.cpp
       - path: crypto/mbedtls.cpp
-      - path: crypto/pbkdf2_cmac.cpp
       - path: crypto/sha256.cpp
       - path: crypto/storage.cpp
       - path: diags/factory_diags.cpp
@@ -148,6 +146,7 @@ source:
       - path: net/dhcp6_server.cpp
       - path: net/dns_client.cpp
       - path: net/dns_dso.cpp
+      - path: net/dns_platform.cpp
       - path: net/dns_types.cpp
       - path: net/dnssd_server.cpp
       - path: net/icmp6.cpp
@@ -178,6 +177,7 @@ source:
       - path: thread/announce_begin_server.cpp
       - path: thread/announce_sender.cpp
       - path: thread/anycast_locator.cpp
+      - path: thread/child_supervision.cpp
       - path: thread/child_table.cpp
       - path: thread/csl_tx_scheduler.cpp
       - path: thread/discover_scanner.cpp
@@ -194,6 +194,7 @@ source:
       - path: thread/mesh_forwarder_mtd.cpp
       - path: thread/mle.cpp
       - path: thread/mle_router.cpp
+      - path: thread/mle_tlvs.cpp
       - path: thread/mle_types.cpp
       - path: thread/mlr_manager.cpp
       - path: thread/neighbor_table.cpp
@@ -218,14 +219,15 @@ source:
       - path: thread/uri_paths.cpp
       - path: utils/channel_manager.cpp
       - path: utils/channel_monitor.cpp
-      - path: utils/child_supervision.cpp
       - path: utils/flash.cpp
       - path: utils/heap.cpp
       - path: utils/history_tracker.cpp
       - path: utils/jam_detector.cpp
+      - path: utils/mesh_diag.cpp
       - path: utils/otns.cpp
       - path: utils/parse_cmdline.cpp
       - path: utils/ping_sender.cpp
+      - path: utils/power_calibration.cpp
       - path: utils/slaac_address.cpp
       - path: utils/srp_client_buffers.cpp
 template_contribution:

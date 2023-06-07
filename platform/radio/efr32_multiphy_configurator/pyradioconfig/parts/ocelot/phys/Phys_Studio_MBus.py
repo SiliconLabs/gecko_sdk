@@ -382,15 +382,16 @@ class PHYS_Mbus_Studio_Ocelot(IPhy):
 
         return phy
 
-    # Owner: Efrain Gaxiola
-    # JIRA Link: https://jira.silabs.com/browse/MCUW_RADIO_CFG-1414
-    # same as T mode, but with disabled block coder, dfl and crc. Needs software decoder, dfl, crc, decision can be made by first 6 bits of payload
-    def PHY_wMbus_ModeTC_M2O_100k_noFrame(self, model, phy_name=None):
-        phy = self._makePhy(model, model.profiles.Mbus, readable_name='WMbus T M2O (100k, no framing)',
+
+    # This T+C PHY can only receive ModeT FrameA packets (3OF6 encoding). Requires RAIL API to do concurrent detection.
+    # Use PHY_wMbus_ModeTC_M2O_100k_frameA_NRZ to receive ModeC FrameA packets without RAIL intervention.
+    # JIRA Link: https://jira.silabs.com/browse/MCUW_RADIO_CFG-2150
+    def PHY_wMbus_ModeTC_M2O_100k_frameA(self, model, phy_name=None):
+        phy = self._makePhy(model, model.profiles.Mbus, readable_name='WMbus TC M2O (100k, frameA)',
                             phy_name=phy_name)
 
         # Define the Mbus Mode
-        phy.profile_inputs.mbus_mode.value = model.vars.mbus_mode.var_enum.ModeT_M2O_100k
+        phy.profile_inputs.mbus_mode.value = model.vars.mbus_mode.var_enum.ModeTC_M2O_100k
 
         # Set the TX preamble length
         phy.profile_inputs.preamble_length.value = 38
@@ -400,11 +401,14 @@ class PHYS_Mbus_Studio_Ocelot(IPhy):
         phy.profile_inputs.channel_spacing_hz.value = 1000000
 
         # Frame formatting and encoding
-        phy.profile_inputs.mbus_frame_format.value = model.vars.mbus_frame_format.var_enum.NoFormat
-        phy.profile_inputs.mbus_symbol_encoding.value = model.vars.mbus_symbol_encoding.var_enum.NRZ
+        phy.profile_inputs.mbus_frame_format.value = model.vars.mbus_frame_format.var_enum.FrameA
+        phy.profile_inputs.mbus_symbol_encoding.value = model.vars.mbus_symbol_encoding.var_enum.MBUS_3OF6
         phy.profile_inputs.syncword_dualsync.value = False
 
         # Xtal frequency
         phy.profile_inputs.xtal_frequency_hz.value = 39000000
+
+        # Postamble length: Set for mode T
+        phy.profile_inputs.mbus_postamble_length.value = 1
 
         return phy

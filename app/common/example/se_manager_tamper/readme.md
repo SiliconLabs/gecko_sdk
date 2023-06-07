@@ -2,6 +2,8 @@
 
 This example uses the SE Manager API to demonstrate the tamper feature on the supported Series 2 Secure Vault High device.
 
+The tamper settings used in this example are only for demonstration purposes and should not be considered a recommendation.
+
 For demonstration purposes, a private command key is stored in the device's memory to sign the access certificate for tamper disable. The device's public command key in the SE OTP must match with the public key of this private command key to disable tamper responses.
 
 The default private command key (`cmd-unsafe-privkey.pem`) in PEM format can be found in the Windows folder below.
@@ -16,11 +18,11 @@ The public key of `cmd-unsafe-privkey.pem` in text format is:
 
 If the device does not have public command key in the SE OTP, the program will prompt the user to program the public key above to the device.
 
-The user can change the private command key (`private_command_key[]`) in `app_se_manager_tamper_disable.c` to match with the device's public command key in the SE OTP for tamper disable.
+If the device already has a public command ky provisioned in the SE OTP, the user can change the private command key (`private_command_key[]`) in `app_se_manager_tamper_disable.c` to match with the device's public command key.
 
 The example redirects standard I/O to the virtual serial port (VCOM) of the kit. By default, the serial port setting is 115200 bps and 8-N-1 configuration.
 
-The example has been instrumented with code to count the number of clock cycles spent in different operations. The results are printed on the VCOM serial port console. This feature can be disabled by defining `SE_MANAGER_PRINT=0` (default is 1) in the IDE setting (`Preprocessor->Defined symbols`).
+The example has been instrumented with code to count the number of clock cycles spent in different operations. The results are printed on the VCOM serial port console. This feature can be disabled by defining `SE_MANAGER_PRINT=0` (default is 1) in the IDE setting (`Properties->Settings->Preprocessor->Defined symbols`).
 
 ## Tamper Responses
 
@@ -98,17 +100,22 @@ The example has been instrumented with code to count the number of clock cycles 
 | 22 | TempSensor | 0 | 2 |
 | 23 | DPLL Fall | 0 | 2 |
 | 24 | DPLL Rise | 0 | 2 |
-| 25 | PRS0 | 0 | 1 (PRS source: None) |
-| 26 | PRS1 | 0 | 1 (PRS source: Push button PB0) |
-| 27 | PRS2 | 0 | 2 (PRS source: Push button PB0) |
-| 28 | PRS3 | 0 | 2 (PRS source: None) |
-| 29 | PRS4 | 0 | 4 (PRS source: Push button PB1) |
-| 30 | PRS5 | 0 | 4 (PRS source: Software) |
-| 31 | PRS6 | 0 | 7 (PRS source: None) |
+| -/25 | ETAMPDET | 0 | 2 |
+| 25/26 | PRS0 | 0 | 1 (PRS source: None) |
+| 26/27 | PRS1 | 0 | 1 (PRS source: Push button PB0) |
+| 27/28 | PRS2 | 0 | 2 (PRS source: Push button PB0) |
+| 28/29 | PRS3 | 0 | 2 (PRS source: None) |
+| 29/30 | PRS4 | 0 | 4 (PRS source: Push button PB1) |
+| 30/31 | PRS5 | 0 | 4 (PRS source: Software) |
+| 31/- | PRS6 | 0 | 7 (PRS source: None) |
+
+HSE-SVH devices with ETAMPDET (e.g. EFR32xG25B) only have PRS0 to PRS5.
 
 The disable tamper command reverts all masked tamper sources (`TAMPER_DISABLE_MASK` in `app_se_manager_tamper_disable.h`) to the hardcoded configuration (default levels in tables above).
 
 For EFR32xG21B devices, the default value of `TAMPER_DISABLE_MASK` is `0x00fa0000`. It restores PRS7, PRS6, PRS5, PRS4, PRS3, and PRS1 to the default level 0 (Ignore) after running the disable tamper command.
+
+For EFR32xG25B devices, the default value of `TAMPER_DISABLE_MASK` is `0xE4000000`. It restores PRS5, PRS4, PRS3, and PRS0 to the default level 0 (Ignore) after running the disable tamper command.
 
 For other Series 2 Secure Vault High devices, the default value of `TAMPER_DISABLE_MASK` is `0xf2000000`. It restores PRS6, PRS5, PRS4, PRS3, and PRS0 to the default level 0 (Ignore) after running the disable tamper command.
 
@@ -158,7 +165,7 @@ The following SE Manager APIs are used in this example:
 ## Additional Information
 
 1. The hard-coded private command key is an insecure method so the user should find a way to import the signed access certificate for tamper disable.
-2. This example does not enable the secure boot when provisioning the tamper configuration in `app_se_manager_tamper.c`.
+2. This example does not enable secure boot when provisioning the tamper configuration in `app_se_manager_tamper.c`.
 3. The device should disconnect from the debugger when running this example.
 4. **Warning:** Loading the tamper configuration and a public command key into the SE are a **ONE-TIME-ONLY** process. Both of these assignment operations are irrevocable and persist for the life of the device.
 5. The default optimization level is `Optimize for debugging (-Og)` on Simplicity IDE and `None` on IAR Embedded Workbench.

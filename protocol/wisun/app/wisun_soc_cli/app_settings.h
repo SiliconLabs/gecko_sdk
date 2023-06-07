@@ -57,8 +57,10 @@ typedef struct {
   uint8_t fec;
   uint8_t rx_phy_mode_ids[SL_WISUN_MAX_PHY_MODE_ID_COUNT];
   uint8_t rx_phy_mode_ids_count;
+  uint8_t rx_mdr_capable;
   uint16_t protocol_id;
   uint16_t channel_id;
+  uint8_t lfn_profile;
 } app_settings_wisun_t;
 
 typedef struct {
@@ -74,13 +76,15 @@ typedef struct {
   uint8_t printable_data_as_hex;
   uint8_t printable_data_length;
   uint8_t autoconnect;
+  uint8_t pti_state;
 } app_settings_app_t;
 
 extern app_settings_wisun_t app_settings_wisun;
 extern app_settings_ping_t app_settings_ping;
 extern app_settings_app_t app_settings_app;
 
-extern const app_enum_t app_settings_wisun_join_state_enum[];
+extern const app_enum_t app_settings_wisun_join_state_enum_ffn[];
+extern const app_enum_t app_settings_wisun_join_state_enum_lfn[];
 
 sl_status_t app_settings_get_channel_mask(const char *str, sl_wisun_channel_mask_t *channel_mask);
 

@@ -30,7 +30,7 @@ EmberStatus zaNodeSecurityInit(bool centralizedNetwork)
   EmberExtendedSecurityBitmask newExtended;
   EmberExtendedSecurityBitmask oldExtended;
   EmberStatus status;
-  const EmberAfSecurityProfileData *data = emAfGetCurrentSecurityProfileData();
+  const EmberAfSecurityProfileData *data = sli_zigbee_af_get_current_security_profile_data();
 
   if (data == NULL) {
     return EMBER_ERR_FATAL;
@@ -72,7 +72,7 @@ EmberStatus zaNodeSecurityInit(bool centralizedNetwork)
   emberAfSecurityPrintln("set extended security to: 0x%2x", newExtended);
   emberSetExtendedSecurityBitmask(newExtended);
 
-  emAfClearLinkKeyTable();
+  sli_zigbee_af_clear_link_key_table();
 
   return EMBER_SUCCESS;
 }

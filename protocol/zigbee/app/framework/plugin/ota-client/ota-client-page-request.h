@@ -25,20 +25,20 @@ enum {
   EM_AF_BLOCK_ALREADY_RECEIVED       = 4,
   EM_AF_PAGE_REQUEST_ERROR           = 0xFF
 };
-typedef uint8_t EmAfPageRequestClientStatus;
+typedef uint8_t sli_zigbee_af_page_request_client_status;
 
 #define EM_AF_PAGE_REQUEST_BLOCK_SIZE 32
 
 // This routine returns a timer indicating how long we should wait for
 // the page request responses to come in.  0 if there was an error.
-uint32_t emAfInitPageRequestClient(uint32_t offsetForPageRequest,
-                                   uint32_t totalImageSize);
-void emAfPageRequestTimerExpired(void);
-bool emAfHandlingPageRequestClient(void);
-EmAfPageRequestClientStatus emAfGetCurrentPageRequestStatus(void);
-EmAfPageRequestClientStatus emAfNoteReceivedBlockForPageRequestClient(uint32_t offset);
-EmAfPageRequestClientStatus emAfNextMissedBlockRequestOffset(uint32_t* nextOffset);
+uint32_t sli_zigbee_af_init_page_request_client(uint32_t offsetForPageRequest,
+                                                uint32_t totalImageSize);
+void sli_zigbee_af_page_request_timer_expired(void);
+bool sli_zigbee_af_handling_page_request_client(void);
+sli_zigbee_af_page_request_client_status sli_zigbee_af_get_current_page_request_status(void);
+sli_zigbee_af_page_request_client_status sli_zigbee_af_note_received_block_for_page_request_client(uint32_t offset);
+sli_zigbee_af_page_request_client_status sli_zigbee_af_next_missed_block_request_offset(uint32_t* nextOffset);
 
-uint32_t emAfGetPageRequestMissedPacketDelayMs(void);
-uint32_t emAfGetFinishedPageRequestOffset(void);
-void emAfAbortPageRequest(void);
+uint32_t sli_zigbee_af_get_page_request_missed_packet_delay_ms(void);
+uint32_t sli_zigbee_af_get_finished_page_request_offset(void);
+void sli_zigbee_af_abort_page_request(void);

@@ -40,13 +40,13 @@ template_contribution:
     value:
       group: device-management-server
       name: print
-      handler: emAfDeviceManagementServerCliPrint
+      handler: sli_zigbee_af_device_management_server_cli_print
       help: Prints the info relevant to device management.
   - name: cli_command
     value:
       group: device-management-server
       name: provider-id
-      handler: emAfDeviceManagementServerCliProviderId
+      handler: sli_zigbee_af_device_management_server_cli_provider_id
       help: Sets the provider ID.
       argument:
       - type: uint32
@@ -54,7 +54,7 @@ template_contribution:
     value:
       group: device-management-server
       name: issuer-event-id
-      handler: emAfDeviceManagementServerCliIssuerEventId
+      handler: sli_zigbee_af_device_management_server_cli_issuer_event_id
       help: Sets the issuer event ID.
       argument:
       - type: uint32
@@ -62,7 +62,7 @@ template_contribution:
     value:
       group: device-management-server
       name: tariff-type
-      handler: emAfDeviceManagementServerCliTariffType
+      handler: sli_zigbee_af_device_management_server_cli_tariff_type
       help: Sets the tariff type.
       argument:
       - type: uint8
@@ -70,7 +70,7 @@ template_contribution:
     value:
       group: device-management-server
       name: tenancy
-      handler: emAfDeviceManagementServerCliTenancy
+      handler: sli_zigbee_af_device_management_server_cli_tenancy
       help: Sets the tenancy information.
       argument:
       - type: uint32
@@ -79,7 +79,7 @@ template_contribution:
     value:
       group: device-management-server
       name: supplier
-      handler: emAfDeviceManagementServerCliSupplier
+      handler: sli_zigbee_af_device_management_server_cli_supplier
       help: Sets the supplier information.
       argument:
       - type: uint8
@@ -92,7 +92,7 @@ template_contribution:
     value:
       group: device-management-server
       name: site-id
-      handler: emAfDeviceManagementServerCliSiteId
+      handler: sli_zigbee_af_device_management_server_cli_site_id
       help: Sets the site ID information.
       argument:
       - type: string
@@ -101,7 +101,7 @@ template_contribution:
     value:
       group: device-management-server
       name: cin
-      handler: emAfDeviceManagementServerCliCIN
+      handler: sli_zigbee_af_device_management_server_cli_cin
       help: Sets the customer ID number information.
       argument:
       - type: string
@@ -110,7 +110,7 @@ template_contribution:
     value:
       group: device-management-server
       name: password
-      handler: emAfDeviceManagementServerCliPassword
+      handler: sli_zigbee_af_device_management_server_cli_password
       help: Sets the specified password.
       argument:
       - type: string
@@ -121,7 +121,7 @@ template_contribution:
     value:
       group: device-management-server
       name: pub-chg-of-tenancy
-      handler: emAfDeviceManagementServerCliPublishChangeOfTenancy
+      handler: sli_zigbee_af_device_management_server_cli_publish_change_of_tenancy
       help: Sends the PublishChangeOfTenancy command
       argument:
       - type: uint16
@@ -134,7 +134,7 @@ template_contribution:
     value:
       group: device-management-server
       name: pub-chg-of-supplier
-      handler: emAfDeviceManagementServerCliPublishChangeOfSupplier
+      handler: sli_zigbee_af_device_management_server_cli_publish_change_of_supplier
       help: Sends the PublishChangeOfSupplier command.
       argument:
       - type: uint16
@@ -147,7 +147,7 @@ template_contribution:
     value:
       group: device-management-server
       name: update-site-id
-      handler: emAfDeviceManagementServerCliUpdateSiteId
+      handler: sli_zigbee_af_device_management_server_cli_update_site_id
       help: Sends the UpdateSiteId command.
       argument:
       - type: uint16
@@ -160,7 +160,7 @@ template_contribution:
     value:
       group: device-management-server
       name: update-cin
-      handler: emAfDeviceManagementServerCliUpdateCIN
+      handler: sli_zigbee_af_device_management_server_cli_update_cin
       help: Sends the UpdateCIN command.
       argument:
       - type: uint16
@@ -173,7 +173,7 @@ template_contribution:
     value:
       group: device-management-server
       name: pending-updates
-      handler: emAfDeviceManagementServerCliPendingUpdates
+      handler: sli_zigbee_af_device_management_server_cli_pending_updates
       help: Sets the appropriate flag for pending updates. Details for each pending flag can be found via the definition of EmberAfDeviceManagementChangePendingFlags.
       argument:
       - type: uint8
@@ -182,7 +182,7 @@ template_contribution:
     value:
       group: device-management-server
       name: send-req-new-pass-resp
-      handler: emAfDeviceManagementServerCliSendRequestNewPasswordResponse
+      handler: sli_zigbee_af_device_management_server_cli_send_request_new_password_response
       help: Sends unsolicited request new password response.
       argument:
       - type: uint8

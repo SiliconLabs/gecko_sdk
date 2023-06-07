@@ -35,8 +35,81 @@
 #include <string.h>
 #include "em_cmu.h"
 #include "sl_assert.h"
+#include "sl_status.h"
+
+#if defined(MBEDTLS_THREADING_C)
+#include "cmsis_os2.h"
+#include "mbedtls/threading.h"
+
+// Mutex for protecting access to the TRNG instance
+static mbedtls_threading_mutex_t trng_mutex;
+static volatile bool trng_mutex_inited = false;
+
+/**
+ * \brief          Lock all task switches
+ *
+ * \return         Previous lock state
+ *
+ */
+static inline int32_t lock_task_switches(void)
+{
+  int32_t kernel_lock_state = 0;
+  osKernelState_t kernel_state = osKernelGetState();
+  if (kernel_state != osKernelInactive && kernel_state != osKernelReady) {
+    kernel_lock_state = osKernelLock();
+  }
+  return kernel_lock_state;
+}
+
+/**
+ * \brief          Restores the previous lock state
+ */
+static inline void restore_lock_state(int32_t kernel_lock_state)
+{
+  osKernelState_t kernel_state = osKernelGetState();
+  if (kernel_state != osKernelInactive && kernel_state != osKernelReady) {
+    if (osKernelRestoreLock(kernel_lock_state) < 0) {
+      EFM_ASSERT(false);
+    }
+  }
+}
+
+#endif
 
 #define SLI_TRNG_MAX_RETRIES 10
+
+/**
+ * \brief Pend on the TRNG mutex
+ */
+static psa_status_t trng_acquire(void)
+{
+#if defined(MBEDTLS_THREADING_C)
+  if (!trng_mutex_inited) {
+    int32_t kernel_lock_state = lock_task_switches();
+    if (!trng_mutex_inited) {
+      mbedtls_mutex_init(&trng_mutex);
+      trng_mutex_inited = true;
+    }
+    restore_lock_state(kernel_lock_state);
+  }
+  if (mbedtls_mutex_lock(&trng_mutex) != 0) {
+    return SL_STATUS_FAIL;
+  }
+#endif
+  return SL_STATUS_OK;
+}
+
+/**
+ * \brief Free the TRNG mutex.
+ */
+static void trng_release(void)
+{
+#if defined(MBEDTLS_THREADING_C)
+  if (trng_mutex_inited) {
+    mbedtls_mutex_unlock(&trng_mutex);
+  }
+#endif
+}
 
 /**
  * \brief TRNG soft reset function
@@ -279,10 +352,16 @@ psa_status_t sli_crypto_trng_get_random(unsigned char *output,
   size_t available_entropy;
   psa_status_t ret = PSA_SUCCESS;
 
+  ret = trng_acquire();
+  if (ret != SL_STATUS_OK) {
+    return ret;
+  }
+
   CMU->HFPERCLKEN0 |= CMU_HFPERCLKEN0_TRNG0;
   if ((TRNG0->CONTROL & TRNG_CONTROL_ENABLE) == 0u) {
     ret = sli_crypto_trng_init();
     if (ret != PSA_SUCCESS) {
+      trng_release();
       return ret;
     }
   }
@@ -337,6 +416,8 @@ psa_status_t sli_crypto_trng_get_random(unsigned char *output,
     output_len += count;
     len -= count;
   }
+
+  trng_release();
 
   // Discard all of the data in case of an error
   if (ret != PSA_SUCCESS && ret != PSA_ERROR_INSUFFICIENT_ENTROPY) {

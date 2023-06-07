@@ -25,11 +25,10 @@
 
 //------------------------------------------------------------------------------
 // Forward declarations
-#ifdef UC_BUILD
 void sendLaunchRequestToTarget(sl_cli_command_arg_t *arguments)
 {
   uint8_t index = sl_cli_get_argument_uint8(arguments, 0);
-  EmberAfOtaImageId id = emAfOtaFindImageIdByIndex(index);
+  EmberAfOtaImageId id = sli_zigbee_af_ota_find_image_id_by_index(index);
   uint8_t tag =  sl_cli_get_argument_uint8(arguments, 1);
 
   emberAfPluginStandaloneBootloaderServerStartClientBootloadWithCurrentTarget(&id, tag);
@@ -39,63 +38,9 @@ void sendLaunchRequestToEui(sl_cli_command_arg_t *arguments)
 {
   EmberEUI64 longId;
   uint8_t index = sl_cli_get_argument_uint8(arguments, 1);
-  EmberAfOtaImageId id = emAfOtaFindImageIdByIndex(index);
+  EmberAfOtaImageId id = sli_zigbee_af_ota_find_image_id_by_index(index);
   uint8_t tag =  sl_cli_get_argument_uint8(arguments, 2);
   sl_zigbee_copy_eui64_arg(arguments, 0, longId, false);
 
   emberAfPluginStandaloneBootloaderServerStartClientBootload(longId, &id, tag);
 }
-
-#else //UC_BUILD
-void sendLaunchRequestToEui(void);
-void sendLaunchRequestToTarget(void);
-
-//------------------------------------------------------------------------------
-// Globals
-
-#ifndef EMBER_AF_GENERATE_CLI
-static EmberCommandEntry bootloadCommands[] = {
-  emberCommandEntryAction("target", sendLaunchRequestToTarget, "uu",
-                          "Sends a launch bootloader request to the currently cached target"),
-  emberCommandEntryAction("eui", sendLaunchRequestToEui, "buu",
-                          "Send a launch bootloader request to the specified EUI64"),
-  emberCommandEntryTerminator(),
-};
-
-EmberCommandEntry emberAfPluginStandaloneBootloaderServerCommands[] = {
-  emberCommandEntryAction("status", emAfStandaloneBootloaderServerPrintStatus, "",
-                          "Prints the current status of the server"),
-  emberCommandEntryAction("query", (CommandAction)emberAfPluginStandaloneBootloaderServerBroadcastQuery, "",
-                          "Sends a broadcast standalone bootloader query."),
-  emberCommandEntrySubMenu("bootload", bootloadCommands,
-                           "Sends a request to launch the standalone bootloader"),
-  emberCommandEntryAction("print-target", emAfStandaloneBootloaderServerPrintTargetClientInfoCommand, "",
-                          "Print the cached info about the current bootload target"),
-  emberCommandEntryTerminator(),
-};
-#endif // EMBER_AF_GENERATE_CLI
-
-//------------------------------------------------------------------------------
-// Functions
-
-void sendLaunchRequestToTarget(void)
-{
-  uint8_t index = (uint8_t)emberUnsignedCommandArgument(0);
-  EmberAfOtaImageId id = emAfOtaFindImageIdByIndex(index);
-  uint8_t tag =  (uint8_t)emberUnsignedCommandArgument(1);
-
-  emberAfPluginStandaloneBootloaderServerStartClientBootloadWithCurrentTarget(&id, tag);
-}
-
-void sendLaunchRequestToEui(void)
-{
-  EmberEUI64 longId;
-  uint8_t index = (uint8_t)emberUnsignedCommandArgument(1);
-  EmberAfOtaImageId id = emAfOtaFindImageIdByIndex(index);
-  uint8_t tag =  (uint8_t)emberUnsignedCommandArgument(2);
-  emberCopyEui64Argument(0, longId);
-
-  emberAfPluginStandaloneBootloaderServerStartClientBootload(longId, &id, tag);
-}
-// *****************************************************************************
-#endif

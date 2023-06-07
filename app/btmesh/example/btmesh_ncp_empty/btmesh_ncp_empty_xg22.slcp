@@ -75,6 +75,8 @@ other_file:
 configuration:
   - name: NVM3_DEFAULT_CACHE_SIZE
     value: 80
+  - name: NVM3_DEFAULT_NVM_SIZE
+    value: "0x6000"
   - name: SL_BOARD_ENABLE_VCOM
     value: 1
   - name: SL_BTMESH_CONFIG_FRIEND_MAX_SUBS_LIST

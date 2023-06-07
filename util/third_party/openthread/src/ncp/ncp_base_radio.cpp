@@ -53,6 +53,11 @@ template <> otError NcpBase::HandlePropertyGet<SPINEL_PROP_RCP_API_VERSION>(void
 {
     return mEncoder.WriteUintPacked(SPINEL_RCP_API_VERSION);
 }
+
+template <> otError NcpBase::HandlePropertyGet<SPINEL_PROP_RCP_MIN_HOST_API_VERSION>(void)
+{
+    return mEncoder.WriteUintPacked(SPINEL_MIN_HOST_SUPPORTED_RCP_API_VERSION);
+}
 #endif
 
 // ----------------------------------------------------------------------------
@@ -127,8 +132,7 @@ void NcpBase::LinkRawReceiveDone(otRadioFrame *aFrame, otError aError)
 {
     uint8_t header = SPINEL_HEADER_FLAG;
 
-    header |=
-        ((aFrame->mIid <= SPINEL_HEADER_IID_MAX) ? (aFrame->mIid << SPINEL_HEADER_IID_SHIFT) : SPINEL_HEADER_IID_0);
+    header |= ((aFrame->mIid <= SPINEL_HEADER_IID_MAX) ? SPINEL_HEADER_IID(aFrame->mIid) : SPINEL_HEADER_IID_0);
 
     // Append frame header
     SuccessOrExit(mEncoder.BeginFrame(header, SPINEL_CMD_PROP_VALUE_IS, SPINEL_PROP_STREAM_RAW));
@@ -152,7 +156,7 @@ void NcpBase::LinkRawTransmitDone(otRadioFrame *aFrame, otRadioFrame *aAckFrame,
     if (mCurTransmitTID)
     {
         uint8_t header = SPINEL_HEADER_FLAG | mCurTransmitTID;
-        header |= static_cast<uint8_t>(mCurTransmitIID << SPINEL_HEADER_IID_SHIFT);
+        header |= SPINEL_HEADER_IID(mCurTransmitIID);
 
         bool framePending  = (aAckFrame != nullptr && static_cast<Mac::RxFrame *>(aAckFrame)->GetFramePending());
         bool headerUpdated = static_cast<Mac::TxFrame *>(aFrame)->IsHeaderUpdated();
@@ -210,9 +214,8 @@ void NcpBase::LinkRawEnergyScanDone(int8_t aEnergyScanMaxRssi)
     // since the energy scan could have been on a different channel.
     IgnoreError(otLinkRawReceive(mInstance));
 
-    SuccessOrExit(
-        mEncoder.BeginFrame(SPINEL_HEADER_FLAG | static_cast<uint8_t>(mCurTransmitIID << SPINEL_HEADER_IID_SHIFT),
-                            SPINEL_CMD_PROP_VALUE_IS, SPINEL_PROP_MAC_ENERGY_SCAN_RESULT));
+    SuccessOrExit(mEncoder.BeginFrame(SPINEL_HEADER_FLAG | SPINEL_HEADER_IID(mCurTransmitIID), SPINEL_CMD_PROP_VALUE_IS,
+                                      SPINEL_PROP_MAC_ENERGY_SCAN_RESULT));
 
     SuccessOrExit(mEncoder.WriteUint8(static_cast<uint8_t>(scanChannel)));
     SuccessOrExit(mEncoder.WriteInt8(aEnergyScanMaxRssi));
@@ -220,15 +223,14 @@ void NcpBase::LinkRawEnergyScanDone(int8_t aEnergyScanMaxRssi)
 
     // We are finished with the scan, so send out
     // a property update indicating such.
-    SuccessOrExit(
-        mEncoder.BeginFrame(SPINEL_HEADER_FLAG | static_cast<uint8_t>(mCurTransmitIID << SPINEL_HEADER_IID_SHIFT),
-                            SPINEL_CMD_PROP_VALUE_IS, SPINEL_PROP_MAC_SCAN_STATE));
+    SuccessOrExit(mEncoder.BeginFrame(SPINEL_HEADER_FLAG | SPINEL_HEADER_IID(mCurTransmitIID), SPINEL_CMD_PROP_VALUE_IS,
+                                      SPINEL_PROP_MAC_SCAN_STATE));
 
     SuccessOrExit(mEncoder.WriteUint8(SPINEL_SCAN_STATE_IDLE));
     SuccessOrExit(mEncoder.EndFrame());
 
 #if OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE
-    HandlePendingCommands();
+    mHandlePendingCommandsTask.Post();
 #endif
 
 exit:
@@ -418,14 +420,15 @@ otError NcpBase::DecodeStreamRawTxRequest(otRadioFrame &aFrame)
     SuccessOrExit(error = mDecoder.ReadUint8(aFrame.mChannel));
 
     // Set the default value for all optional parameters.
-    aFrame.mInfo.mTxInfo.mMaxCsmaBackoffs     = OPENTHREAD_CONFIG_MAC_MAX_CSMA_BACKOFFS_DIRECT;
-    aFrame.mInfo.mTxInfo.mMaxFrameRetries     = OPENTHREAD_CONFIG_MAC_DEFAULT_MAX_FRAME_RETRIES_DIRECT;
-    aFrame.mInfo.mTxInfo.mCsmaCaEnabled       = true;
-    aFrame.mInfo.mTxInfo.mIsHeaderUpdated     = false;
-    aFrame.mInfo.mTxInfo.mIsARetx             = false;
-    aFrame.mInfo.mTxInfo.mIsSecurityProcessed = false;
-    aFrame.mInfo.mTxInfo.mTxDelay             = 0;
-    aFrame.mInfo.mTxInfo.mTxDelayBaseTime     = 0;
+    aFrame.mInfo.mTxInfo.mRxChannelAfterTxDone = aFrame.mChannel;
+    aFrame.mInfo.mTxInfo.mMaxCsmaBackoffs      = OPENTHREAD_CONFIG_MAC_MAX_CSMA_BACKOFFS_DIRECT;
+    aFrame.mInfo.mTxInfo.mMaxFrameRetries      = OPENTHREAD_CONFIG_MAC_DEFAULT_MAX_FRAME_RETRIES_DIRECT;
+    aFrame.mInfo.mTxInfo.mCsmaCaEnabled        = true;
+    aFrame.mInfo.mTxInfo.mIsHeaderUpdated      = false;
+    aFrame.mInfo.mTxInfo.mIsARetx              = false;
+    aFrame.mInfo.mTxInfo.mIsSecurityProcessed  = false;
+    aFrame.mInfo.mTxInfo.mTxDelay              = 0;
+    aFrame.mInfo.mTxInfo.mTxDelayBaseTime      = 0;
 
     // All the next parameters are optional. Note that even if the
     // decoder fails to parse any of optional parameters we still want to
@@ -434,16 +437,22 @@ otError NcpBase::DecodeStreamRawTxRequest(otRadioFrame &aFrame)
 
     SuccessOrExit(mDecoder.ReadUint8(aFrame.mInfo.mTxInfo.mMaxCsmaBackoffs));
     SuccessOrExit(mDecoder.ReadUint8(aFrame.mInfo.mTxInfo.mMaxFrameRetries));
+
     SuccessOrExit(mDecoder.ReadBool(csmaEnable));
+    aFrame.mInfo.mTxInfo.mCsmaCaEnabled = csmaEnable;
+
     SuccessOrExit(mDecoder.ReadBool(isHeaderUpdated));
+    aFrame.mInfo.mTxInfo.mIsHeaderUpdated = isHeaderUpdated;
+
     SuccessOrExit(mDecoder.ReadBool(isARetx));
+    aFrame.mInfo.mTxInfo.mIsARetx = isARetx;
+
     SuccessOrExit(mDecoder.ReadBool(isSecurityProcessed));
+    aFrame.mInfo.mTxInfo.mIsSecurityProcessed = isSecurityProcessed;
+
     SuccessOrExit(mDecoder.ReadUint32(aFrame.mInfo.mTxInfo.mTxDelay));
     SuccessOrExit(mDecoder.ReadUint32(aFrame.mInfo.mTxInfo.mTxDelayBaseTime));
-    aFrame.mInfo.mTxInfo.mCsmaCaEnabled       = csmaEnable;
-    aFrame.mInfo.mTxInfo.mIsHeaderUpdated     = isHeaderUpdated;
-    aFrame.mInfo.mTxInfo.mIsARetx             = isARetx;
-    aFrame.mInfo.mTxInfo.mIsSecurityProcessed = isSecurityProcessed;
+    SuccessOrExit(mDecoder.ReadUint8(aFrame.mInfo.mTxInfo.mRxChannelAfterTxDone));
 
 exit:
     return error;
@@ -482,13 +491,13 @@ otError NcpBase::HandlePropertySet_SPINEL_PROP_STREAM_RAW(uint8_t aHeader)
     }
 
 exit:
-    if (error != OT_ERROR_NONE)
+    if (error == OT_ERROR_NONE)
     {
-        // If we fail to report the error now, it will be reported later in HandleReceive() of ncp_base.cpp.
-        if (WriteLastStatusFrame(aHeader, ThreadErrorToSpinelStatus(error)) == OT_ERROR_NONE)
-        {
-            error = OT_ERROR_NONE;
-        }
+        // Don't do anything here yet. We will complete the transaction when we get a transmit done callback
+    }
+    else
+    {
+        error = WriteLastStatusFrame(aHeader, ThreadErrorToSpinelStatus(error));
     }
 
     return error;
@@ -530,10 +539,23 @@ template <> otError NcpBase::HandlePropertySet<SPINEL_PROP_RCP_MAC_FRAME_COUNTER
 {
     otError  error = OT_ERROR_NONE;
     uint32_t frameCounter;
+    bool     setIfLarger = false;
 
     SuccessOrExit(error = mDecoder.ReadUint32(frameCounter));
 
-    error = otLinkRawSetMacFrameCounter(mInstance, frameCounter);
+    if (!mDecoder.IsAllReadInStruct())
+    {
+        SuccessOrExit(error = mDecoder.ReadBool(setIfLarger));
+    }
+
+    if (setIfLarger)
+    {
+        error = otLinkRawSetMacFrameCounterIfLarger(mInstance, frameCounter);
+    }
+    else
+    {
+        error = otLinkRawSetMacFrameCounter(mInstance, frameCounter);
+    }
 
 exit:
     return error;

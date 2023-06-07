@@ -6,12 +6,25 @@
  * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
- * The licensor of this software is Silicon Laboratories Inc. Your use of this
- * software is governed by the terms of Silicon Labs Master Software License
- * Agreement (MSLA) available at
- * www.silabs.com/about-us/legal/master-software-license-agreement. This
- * software is distributed to you in Source Code format and is governed by the
- * sections of the MSLA applicable to Source Code.
+ * SPDX-License-Identifier: Zlib
+ *
+ * The licensor of this software is Silicon Laboratories Inc.
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty. In no event will the authors be held liable for any damages
+ * arising from the use of this software.
+ *
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
+ *
+ * 1. The origin of this software must not be misrepresented; you must not
+ *    claim that you wrote the original software. If you use this software
+ *    in a product, an acknowledgment in the product documentation would be
+ *    appreciated but is not required.
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.
+ * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
 
@@ -20,6 +33,10 @@
 #include "sli_sleeptimer_hal.h"
 #include "em_core.h"
 #include "em_cmu.h"
+
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+#include "sl_power_manager.h"
+#endif
 
 #if (SL_SLEEPTIMER_PERIPHERAL == SL_SLEEPTIMER_PERIPHERAL_TIMER) \
   || (SL_SLEEPTIMER_PERIPHERAL == SL_SLEEPTIMER_PERIPHERAL_WTIMER)
@@ -303,8 +320,22 @@ __STATIC_INLINE uint32_t get_time_diff(uint32_t a,
  ******************************************************************************/
 uint16_t sleeptimer_hal_get_clock_accuracy(void)
 {
-  // Temporarily not supported when sleeptimer is using HF clocks
-  return 0xFFFF;
+#if defined(WTIMER_PRESENT)
+  return CMU_HF_ClockPrecisionGet(cmuClock_HF);
+#else
+  return CMU_HF_ClockPrecisionGet(SLEEPTIMER_TIMER_CLK);
+#endif
 }
 
+/***************************************************************************//**
+ * Set lowest energy mode based on a project's configurations and clock source
+ *
+ * @note Lowest possible energy mode for WTIMER and TIMER peripheral is EM1.
+ ******************************************************************************/
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+void sli_power_manager_set_em_requirement(void)
+{
+  sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM1);
+}
+#endif
 #endif

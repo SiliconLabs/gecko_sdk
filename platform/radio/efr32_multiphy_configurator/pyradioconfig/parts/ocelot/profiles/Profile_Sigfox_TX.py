@@ -56,7 +56,7 @@ class Profile_Sigfox_TX_Ocelot(Profile_Sigfox_TX):
         buildFecInputs(model, profile)
 
     def _add_reg_profile_outputs(self, model, profile):
-        build_modem_regs_ocelot(model, profile, self._family)
+        build_modem_regs_ocelot(model, profile)
 
 
 

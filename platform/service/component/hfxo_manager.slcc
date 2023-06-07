@@ -28,13 +28,15 @@ template_contribution:
       event: platform_init
       include: sl_hfxo_manager.h
       handler: sl_hfxo_manager_init_hardware
-    priority: -9725
+    priority: -9675
   - name: event_handler
     value:
       event: service_init
       include: sl_hfxo_manager.h
       handler: sl_hfxo_manager_init
     priority: -5
+validation_helper:
+  - path: platform/service/hfxo_manager/hfxo_manager_validation.lua    
 documentation:
   docset: gecko-platform
   document: service/api/group-hfxo-manager

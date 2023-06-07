@@ -150,9 +150,9 @@ public:
      * @retval kErrorNoBufs  Could not grow @p aMessage to write the parsed IPv6 header.
      *
      */
-    Error Decompress(Message &             aMessage,
+    Error Decompress(Message              &aMessage,
                      const Mac::Addresses &aMacAddrs,
-                     FrameData &           aFrameData,
+                     FrameData            &aFrameData,
                      uint16_t              aDatagramLength);
 
     /**
@@ -165,14 +165,14 @@ public:
      * @param[in]     aMacAddrs              The MAC source and destination addresses
      * @param[in,out] aFrameData             A frame data containing the LOWPAN_IPHC header.
      *
-     * @retval kErrorNone    The header was decompressed successfully. @p aIp6Headre and @p aFrameData are updated.
+     * @retval kErrorNone    The header was decompressed successfully. @p aIp6Header and @p aFrameData are updated.
      * @retval kErrorParse   Failed to parse the lowpan header.
      *
      */
-    Error DecompressBaseHeader(Ip6::Header &         aIp6Header,
-                               bool &                aCompressedNextHeader,
+    Error DecompressBaseHeader(Ip6::Header          &aIp6Header,
+                               bool                 &aCompressedNextHeader,
                                const Mac::Addresses &aMacAddrs,
-                               FrameData &           aFrameData);
+                               FrameData            &aFrameData);
 
     /**
      * This method decompresses a LOWPAN_NHC UDP header.
@@ -264,22 +264,22 @@ private:
 
     void  FindContextForId(uint8_t aContextId, Context &aContext) const;
     void  FindContextToCompressAddress(const Ip6::Address &aIp6Address, Context &aContext) const;
-    Error Compress(Message &             aMessage,
+    Error Compress(Message              &aMessage,
                    const Mac::Addresses &aMacAddrs,
-                   FrameBuilder &        aFrameBuilder,
-                   uint8_t &             aHeaderDepth);
+                   FrameBuilder         &aFrameBuilder,
+                   uint8_t              &aHeaderDepth);
 
     Error CompressExtensionHeader(Message &aMessage, FrameBuilder &aFrameBuilder, uint8_t &aNextHeader);
     Error CompressSourceIid(const Mac::Address &aMacAddr,
                             const Ip6::Address &aIpAddr,
-                            const Context &     aContext,
-                            uint16_t &          aHcCtl,
-                            FrameBuilder &      aFrameBuilder);
+                            const Context      &aContext,
+                            uint16_t           &aHcCtl,
+                            FrameBuilder       &aFrameBuilder);
     Error CompressDestinationIid(const Mac::Address &aMacAddr,
                                  const Ip6::Address &aIpAddr,
-                                 const Context &     aContext,
-                                 uint16_t &          aHcCtl,
-                                 FrameBuilder &      aFrameBuilder);
+                                 const Context      &aContext,
+                                 uint16_t           &aHcCtl,
+                                 FrameBuilder       &aFrameBuilder);
     Error CompressMulticast(const Ip6::Address &aIpAddr, uint16_t &aHcCtl, FrameBuilder &aFrameBuilder);
     Error CompressUdp(Message &aMessage, FrameBuilder &aFrameBuilder);
 
@@ -297,12 +297,6 @@ private:
 class MeshHeader
 {
 public:
-    /**
-     * The additional value that is added to predicted value of the route cost.
-     *
-     */
-    static constexpr uint8_t kAdditionalHopsLeft = 1;
-
     /**
      * This method initializes the Mesh Header with a given Mesh Source, Mesh Destination and Hops Left value.
      *
@@ -424,9 +418,9 @@ public:
     /**
      * This method appends the Mesh Header into a given frame.
      *
-     * @param[out]  aFrameBuilder  The `FrameBuidler` to append to.
+     * @param[out]  aFrameBuilder  The `FrameBuilder` to append to.
      *
-     * @retval kErrorNone    Successfully appended the MeshHeader to @p aFrameBuildr.
+     * @retval kErrorNone    Successfully appended the MeshHeader to @p aFrameBuilder.
      * @retval kErrorNoBufs  Insufficient available buffers.
      *
      */

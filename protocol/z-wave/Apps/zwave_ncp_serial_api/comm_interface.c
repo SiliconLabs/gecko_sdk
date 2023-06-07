@@ -1,5 +1,5 @@
 /**
- * @file comm_interface.c
+ * @file
  * @copyright 2022 Silicon Laboratories Inc.
  */
 

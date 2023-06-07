@@ -21,123 +21,123 @@
 #include "event_queue/event-queue.h"
 #include "multi-pan.h"
 
-extern EmberEventQueue emStackEventQueue;
+extern EmberEventQueue sli_zigbee_stack_event_queue;
 #ifdef EMBER_TEST
   #define testAssert assert
 #else // EMBER_TEST
   #define testAssert(x) do {} while (0)
 #endif // EMBER_TEST
 
-extern EmberEvent emBeaconEvents[];
-extern void emZigbeeBeaconEventHandler(EmberEvent *event);
+extern EmberEvent sli_zigbee_beacon_events[];
+extern void sli_zigbee_beacon_event_handler(EmberEvent *event);
 
-extern EmberEvent emPermitJoiningEvents[];
-extern void emZigbeePermitJoiningEventHandler(EmberEvent *event);
+extern EmberEvent sli_zigbee_permit_joiningEvents[];
+extern void sli_zigbee_permit_joining_event_handler(EmberEvent *event);
 
-extern EmberEvent emNetworkManagementEvents[];
-extern void emNetworkManagementEventHandler(EmberEvent *event);
-
-#if !defined(SL_ZIGBEE_LEAF_STACK) || defined(CSL_SUPPORT)
-extern EmberEvent emNeighborExchangeEvents[];
-extern void emNeighborExchangeEventHandler(EmberEvent *event);
-#endif
-
-extern EmberEvent emRequestKeyEvents[];
-extern void emRequestKeyEventHandler(EmberEvent *event);
+extern EmberEvent sli_zigbee_network_management_events[];
+extern void sli_zigbee_network_management_event_handler(EmberEvent *event);
 
 #if !defined(SL_ZIGBEE_LEAF_STACK) || defined(CSL_SUPPORT)
+extern EmberEvent sli_zigbee_neighbor_exchange_events[];
+extern void sli_zigbee_neighbor_exchange_event_handler(EmberEvent *event);
+#endif
 
-extern EmberEvent emSendParentAnnounceEvents[];
-extern void emSendParentAnnounceEventHandler(EmberEvent *event);
+extern EmberEvent sli_zigbee_request_key_events[];
+extern void sli_zigbee_request_key_event_handler(EmberEvent *event);
+
+#if !defined(SL_ZIGBEE_LEAF_STACK) || defined(CSL_SUPPORT)
+
+extern EmberEvent sli_zigbee_send_parent_announce_events[];
+extern void sli_zigbee_send_parent_announce_event_handler(EmberEvent *event);
 
 #endif
 
-extern EmberEvent emTransientLinkKeyEvents[];
-extern void emTransientLinkKeyEventHandler(EmberEvent *event);
+extern EmberEvent sli_zigbee_transient_link_key_events[];
+extern void sli_zigbee_transient_link_key_event_handler(EmberEvent *event);
 
-extern EmberEvent emGpTxEvents[];
-extern void emGpTxEventHandler(EmberEvent *event);
+extern EmberEvent sli_zigbee_gp_tx_events[];
+extern void sli_zigbee_gp_tx_event_handler(EmberEvent *event);
 
-extern EmberEvent emSourceRouteUpdateEvents[];
-extern void emSourceRouteUpdateEventHandler(EmberEvent *event);
+extern EmberEvent sli_zigbee_source_route_update_events[];
+extern void sli_zigbee_source_route_update_event_handler(EmberEvent *event);
 
 #if !(defined(SL_ZIGBEE_ROUTER_STACK))
-extern EmberEvent emAllowTcRejoinsUsingWellKnownKeyEvents[];
-extern void emAllowTcRejoinsUsingWellKnownKeyEventHandler(EmberEvent *event);
+extern EmberEvent sli_zigbee_allow_tc_rejoins_using_well_known_key_events[];
+extern void sli_zigbee_allow_tc_rejoins_using_well_known_key_event_handler(EmberEvent *event);
 #endif
 
 static void initializeForkedEvents(void)
 {
-  for (uint8_t j = 0; j < emNumMultiPanForks; j++) {
-    emBeaconEvents[j].actions.queue = &emStackEventQueue;
-    emBeaconEvents[j].actions.handler = emZigbeeBeaconEventHandler;
-    emBeaconEvents[j].actions.marker = NULL;
-    emBeaconEvents[j].actions.name = EVENT_NAME("Beacon");
-    emBeaconEvents[j].next = NULL;
+  for (uint8_t j = 0; j < sli_zigbee_num_multi_pan_forks; j++) {
+    sli_zigbee_beacon_events[j].actions.queue = &sli_zigbee_stack_event_queue;
+    sli_zigbee_beacon_events[j].actions.handler = sli_zigbee_beacon_event_handler;
+    sli_zigbee_beacon_events[j].actions.marker = NULL;
+    sli_zigbee_beacon_events[j].actions.name = EVENT_NAME("Beacon");
+    sli_zigbee_beacon_events[j].next = NULL;
 
-    emPermitJoiningEvents[j].actions.queue = &emStackEventQueue;
-    emPermitJoiningEvents[j].actions.handler = emZigbeePermitJoiningEventHandler;
-    emPermitJoiningEvents[j].actions.marker = NULL;
-    emPermitJoiningEvents[j].actions.name =  EVENT_NAME("Permit Joining");
-    emPermitJoiningEvents[j].next = NULL;
+    sli_zigbee_permit_joiningEvents[j].actions.queue = &sli_zigbee_stack_event_queue;
+    sli_zigbee_permit_joiningEvents[j].actions.handler = sli_zigbee_permit_joining_event_handler;
+    sli_zigbee_permit_joiningEvents[j].actions.marker = NULL;
+    sli_zigbee_permit_joiningEvents[j].actions.name =  EVENT_NAME("Permit Joining");
+    sli_zigbee_permit_joiningEvents[j].next = NULL;
 
-    emNetworkManagementEvents[j].actions.queue = &emStackEventQueue;
-    emNetworkManagementEvents[j].actions.handler = emNetworkManagementEventHandler;
-    emNetworkManagementEvents[j].actions.marker = NULL;
-    emNetworkManagementEvents[j].actions.name =  EVENT_NAME("NWK mgm");
-    emNetworkManagementEvents[j].next = NULL;
-
-#if !defined(SL_ZIGBEE_LEAF_STACK) || defined(CSL_SUPPORT)
-    emNeighborExchangeEvents[j].actions.queue = &emStackEventQueue;
-    emNeighborExchangeEvents[j].actions.handler = emNeighborExchangeEventHandler;
-    emNeighborExchangeEvents[j].actions.marker = NULL;
-    emNeighborExchangeEvents[j].actions.name =  EVENT_NAME("Neighbor exg");
-    emNeighborExchangeEvents[j].next = NULL;
-#endif
-
-    emRequestKeyEvents[j].actions.queue = &emStackEventQueue;
-    emRequestKeyEvents[j].actions.handler = emRequestKeyEventHandler;
-    emRequestKeyEvents[j].actions.marker = NULL;
-    emRequestKeyEvents[j].actions.name =  EVENT_NAME("Req key");
-    emRequestKeyEvents[j].next = NULL;
+    sli_zigbee_network_management_events[j].actions.queue = &sli_zigbee_stack_event_queue;
+    sli_zigbee_network_management_events[j].actions.handler = sli_zigbee_network_management_event_handler;
+    sli_zigbee_network_management_events[j].actions.marker = NULL;
+    sli_zigbee_network_management_events[j].actions.name =  EVENT_NAME("NWK mgm");
+    sli_zigbee_network_management_events[j].next = NULL;
 
 #if !defined(SL_ZIGBEE_LEAF_STACK) || defined(CSL_SUPPORT)
-    emSendParentAnnounceEvents[j].actions.queue = &emStackEventQueue;
-    emSendParentAnnounceEvents[j].actions.handler = emSendParentAnnounceEventHandler;
-    emSendParentAnnounceEvents[j].actions.marker = NULL;
-    emSendParentAnnounceEvents[j].actions.name =  EVENT_NAME("Parent announce");
-    emSendParentAnnounceEvents[j].next = NULL;
+    sli_zigbee_neighbor_exchange_events[j].actions.queue = &sli_zigbee_stack_event_queue;
+    sli_zigbee_neighbor_exchange_events[j].actions.handler = sli_zigbee_neighbor_exchange_event_handler;
+    sli_zigbee_neighbor_exchange_events[j].actions.marker = NULL;
+    sli_zigbee_neighbor_exchange_events[j].actions.name =  EVENT_NAME("Neighbor exg");
+    sli_zigbee_neighbor_exchange_events[j].next = NULL;
 #endif
 
-    emTransientLinkKeyEvents[j].actions.queue = &emStackEventQueue;
-    emTransientLinkKeyEvents[j].actions.handler = emTransientLinkKeyEventHandler;
-    emTransientLinkKeyEvents[j].actions.marker = NULL;
-    emTransientLinkKeyEvents[j].actions.name =  EVENT_NAME("Transient link key");
-    emTransientLinkKeyEvents[j].next = NULL;
+    sli_zigbee_request_key_events[j].actions.queue = &sli_zigbee_stack_event_queue;
+    sli_zigbee_request_key_events[j].actions.handler = sli_zigbee_request_key_event_handler;
+    sli_zigbee_request_key_events[j].actions.marker = NULL;
+    sli_zigbee_request_key_events[j].actions.name =  EVENT_NAME("Req key");
+    sli_zigbee_request_key_events[j].next = NULL;
 
-    emGpTxEvents[j].actions.queue = &emStackEventQueue;
-    emGpTxEvents[j].actions.handler = emGpTxEventHandler;
-    emGpTxEvents[j].actions.marker = NULL;
-    emGpTxEvents[j].actions.name =  EVENT_NAME("GP TX");
-    emGpTxEvents[j].next = NULL;
+#if !defined(SL_ZIGBEE_LEAF_STACK) || defined(CSL_SUPPORT)
+    sli_zigbee_send_parent_announce_events[j].actions.queue = &sli_zigbee_stack_event_queue;
+    sli_zigbee_send_parent_announce_events[j].actions.handler = sli_zigbee_send_parent_announce_event_handler;
+    sli_zigbee_send_parent_announce_events[j].actions.marker = NULL;
+    sli_zigbee_send_parent_announce_events[j].actions.name =  EVENT_NAME("Parent announce");
+    sli_zigbee_send_parent_announce_events[j].next = NULL;
+#endif
 
-    emSourceRouteUpdateEvents[j].actions.queue = &emStackEventQueue;
-    emSourceRouteUpdateEvents[j].actions.handler = emSourceRouteUpdateEventHandler;
-    emSourceRouteUpdateEvents[j].actions.marker = NULL;
-    emSourceRouteUpdateEvents[j].actions.name =  EVENT_NAME("Source route update");
-    emSourceRouteUpdateEvents[j].next = NULL;
+    sli_zigbee_transient_link_key_events[j].actions.queue = &sli_zigbee_stack_event_queue;
+    sli_zigbee_transient_link_key_events[j].actions.handler = sli_zigbee_transient_link_key_event_handler;
+    sli_zigbee_transient_link_key_events[j].actions.marker = NULL;
+    sli_zigbee_transient_link_key_events[j].actions.name =  EVENT_NAME("Transient link key");
+    sli_zigbee_transient_link_key_events[j].next = NULL;
+
+    sli_zigbee_gp_tx_events[j].actions.queue = &sli_zigbee_stack_event_queue;
+    sli_zigbee_gp_tx_events[j].actions.handler = sli_zigbee_gp_tx_event_handler;
+    sli_zigbee_gp_tx_events[j].actions.marker = NULL;
+    sli_zigbee_gp_tx_events[j].actions.name =  EVENT_NAME("GP TX");
+    sli_zigbee_gp_tx_events[j].next = NULL;
+
+    sli_zigbee_source_route_update_events[j].actions.queue = &sli_zigbee_stack_event_queue;
+    sli_zigbee_source_route_update_events[j].actions.handler = sli_zigbee_source_route_update_event_handler;
+    sli_zigbee_source_route_update_events[j].actions.marker = NULL;
+    sli_zigbee_source_route_update_events[j].actions.name =  EVENT_NAME("Source route update");
+    sli_zigbee_source_route_update_events[j].next = NULL;
 
 #if !(defined(SL_ZIGBEE_ROUTER_STACK))
-    emAllowTcRejoinsUsingWellKnownKeyEvents[j].actions.queue = &emStackEventQueue;
-    emAllowTcRejoinsUsingWellKnownKeyEvents[j].actions.handler = emAllowTcRejoinsUsingWellKnownKeyEventHandler;
-    emAllowTcRejoinsUsingWellKnownKeyEvents[j].actions.marker = NULL;
-    emAllowTcRejoinsUsingWellKnownKeyEvents[j].actions.name =  EVENT_NAME("Allow TC rejoin");
-    emAllowTcRejoinsUsingWellKnownKeyEvents[j].next = NULL;
+    sli_zigbee_allow_tc_rejoins_using_well_known_key_events[j].actions.queue = &sli_zigbee_stack_event_queue;
+    sli_zigbee_allow_tc_rejoins_using_well_known_key_events[j].actions.handler = sli_zigbee_allow_tc_rejoins_using_well_known_key_event_handler;
+    sli_zigbee_allow_tc_rejoins_using_well_known_key_events[j].actions.marker = NULL;
+    sli_zigbee_allow_tc_rejoins_using_well_known_key_events[j].actions.name =  EVENT_NAME("Allow TC rejoin");
+    sli_zigbee_allow_tc_rejoins_using_well_known_key_events[j].next = NULL;
 #endif
   }
 }
 
-void emMultiPanInit(void)
+void sli_zigbee_multi_pan_init(void)
 {
   initializeForkedEvents();
 }

@@ -21,10 +21,12 @@
 #include PLATFORM_HEADER
 #include "sl_rail_mux.h"
 #include "coexistence/protocol/ieee802154_uc/coexistence-802154.h"
-
+#define RAIL_SetStateTiming  sl_rail_mux_SetStateTiming
+#define RAIL_IEEE802154_SetRxToEnhAckTx   sl_rail_mux_IEEE802154_SetRxToEnhAckTx
 #define RAIL_ConfigRxOptions   sl_rail_mux_ConfigRxOptions
 #define RAIL_SetTaskPriority   sl_rail_mux_SetTaskPriority
 #define RAIL_IEEE802154_Config2p4GHzRadio   sl_rail_mux_IEEE802154_Config2p4GHzRadio
+#define RAIL_IEEE802154_Config2p4GHzRadioAntDiv   sl_rail_mux_IEEE802154_Config2p4GHzRadioAntDiv
 #define RAIL_ConfigEvents   sl_rail_mux_ConfigEvents
 #define RAIL_Init   sl_rail_mux_Init
 #define RAIL_SetPtiProtocol   sl_rail_mux_SetPtiProtocol

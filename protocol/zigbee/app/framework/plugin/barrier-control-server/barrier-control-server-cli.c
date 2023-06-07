@@ -25,7 +25,7 @@ static bool getBarrierPositionDescription(uint8_t endpoint,
                                           const char **descriptionLocation)
 {
   bool descriptionWasSet = true;
-  switch (emAfPluginBarrierControlServerGetBarrierPosition(endpoint)) {
+  switch (sli_zigbee_af_barrier_control_server_get_barrier_position(endpoint)) {
     case EMBER_ZCL_BARRIER_CONTROL_BARRIER_POSITION_OPEN:
       *descriptionLocation = "open";
       break;
@@ -33,7 +33,7 @@ static bool getBarrierPositionDescription(uint8_t endpoint,
       *descriptionLocation = "closed";
       break;
     default:
-      if (emAfPluginBarrierControlServerIsPartialBarrierSupported(endpoint)) {
+      if (sli_zigbee_af_barrier_control_server_is_partial_barrier_supported(endpoint)) {
         descriptionWasSet = false;
       } else {
         *descriptionLocation = "unknown";
@@ -67,25 +67,24 @@ static void printSafetyStatus(uint16_t safetyStatus)
   }
   emberAfAppPrintln(")");
 }
-#ifdef UC_BUILD
 // plugin barrier-control-server status <endpoint:1>
-void emAfPluginBarrierControlServerStatusCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_barrier_control_server_status_command(sl_cli_command_arg_t *arguments)
 {
   uint8_t endpoint = sl_cli_get_argument_uint8(arguments, 0);
   uint8_t barrierPosition
-    = emAfPluginBarrierControlServerGetBarrierPosition(endpoint);
+    = sli_zigbee_af_barrier_control_server_get_barrier_position(endpoint);
   const char *description;
   emberAfAppPrint("BarrierPosition: %d%%", barrierPosition);
   if (getBarrierPositionDescription(endpoint, &description)) {
     emberAfAppPrint(" (%s)", description);
   }
   emberAfAppPrintln("");
-  printSafetyStatus(emAfPluginBarrierControlServerGetSafetyStatus(endpoint));
+  printSafetyStatus(sli_zigbee_af_barrier_control_server_get_safety_status(endpoint));
 }
 
 // plugin barrier-control-server open <endpoint:1>
 // plugin barrier-control-server close <endpoint:1>
-void emAfPluginBarrierControlServerOpenOrCloseCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_barrier_control_server_open_or_close_command(sl_cli_command_arg_t *arguments)
 {
   uint8_t endpoint = sl_cli_get_argument_uint8(arguments, 0);
   bool open = memcmp(arguments->argv[arguments->arg_ofs - 1], "open", strlen("open")) == 0;
@@ -93,8 +92,8 @@ void emAfPluginBarrierControlServerOpenOrCloseCommand(sl_cli_command_arg_t *argu
     = (open
        ? EMBER_ZCL_BARRIER_CONTROL_BARRIER_POSITION_OPEN
        : EMBER_ZCL_BARRIER_CONTROL_BARRIER_POSITION_CLOSED);
-  emAfPluginBarrierControlServerSetBarrierPosition(endpoint, barrierPosition);
-  emAfPluginBarrierControlServerIncrementEvents(endpoint, open, false);
+  sli_zigbee_af_barrier_control_server_set_barrier_position(endpoint, barrierPosition);
+  sli_zigbee_af_barrier_control_server_increment_events(endpoint, open, false);
 
   const char *description;
   assert(getBarrierPositionDescription(endpoint, &description));
@@ -105,7 +104,7 @@ void emAfPluginBarrierControlServerOpenOrCloseCommand(sl_cli_command_arg_t *argu
 // plugin barrier-control-server tamper-detected <endpoint:1> <setOrClear:1>
 // plugin barrier-control-server failed-communication <endpoint:1> <setOrClear:1>
 // plugin barrier-control-server position-failure <endpoint:1> <setOrClear:1>
-void emAfPluginBarrierControlServerSafetyStatusCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_barrier_control_server_safety_status_command(sl_cli_command_arg_t *arguments)
 {
   uint8_t endpoint = sl_cli_get_argument_uint8(arguments, 0);
   bool doSet = sl_cli_get_argument_uint8(arguments, 1) == 1;
@@ -119,7 +118,7 @@ void emAfPluginBarrierControlServerSafetyStatusCommand(sl_cli_command_arg_t *arg
              : EMBER_AF_BARRIER_CONTROL_SAFETY_STATUS_POSITION_FAILURE)));
 
   uint16_t safetyStatus
-    = emAfPluginBarrierControlServerGetSafetyStatus(endpoint);
+    = sli_zigbee_af_barrier_control_server_get_safety_status(endpoint);
   if (doSet) {
     SETBITS(safetyStatus, bit);
   } else {
@@ -136,73 +135,3 @@ void emAfPluginBarrierControlServerSafetyStatusCommand(sl_cli_command_arg_t *arg
 
   printSafetyStatus(safetyStatus);
 }
-#else
-// plugin barrier-control-server status <endpoint:1>
-void emAfPluginBarrierControlServerStatusCommand(void)
-{
-  uint8_t endpoint = (uint8_t)emberUnsignedCommandArgument(0);
-  uint8_t barrierPosition
-    = emAfPluginBarrierControlServerGetBarrierPosition(endpoint);
-  const char *description;
-  emberAfAppPrint("BarrierPosition: %d%%", barrierPosition);
-  if (getBarrierPositionDescription(endpoint, &description)) {
-    emberAfAppPrint(" (%s)", description);
-  }
-  emberAfAppPrintln("");
-  printSafetyStatus(emAfPluginBarrierControlServerGetSafetyStatus(endpoint));
-}
-
-// plugin barrier-control-server open <endpoint:1>
-// plugin barrier-control-server close <endpoint:1>
-void emAfPluginBarrierControlServerOpenOrCloseCommand(void)
-{
-  uint8_t endpoint = (uint8_t)emberUnsignedCommandArgument(0);
-  bool open = emberStringCommandArgument(-1, NULL)[0] == 'o';
-  uint8_t barrierPosition
-    = (open
-       ? EMBER_ZCL_BARRIER_CONTROL_BARRIER_POSITION_OPEN
-       : EMBER_ZCL_BARRIER_CONTROL_BARRIER_POSITION_CLOSED);
-  emAfPluginBarrierControlServerSetBarrierPosition(endpoint, barrierPosition);
-  emAfPluginBarrierControlServerIncrementEvents(endpoint, open, false);
-
-  const char *description;
-  assert(getBarrierPositionDescription(endpoint, &description));
-  emberAfAppPrintln("Barrier is now %s", description);
-}
-
-// plugin barrier-control-server remote-lockout <endpoint:1> <setOrClear:1>
-// plugin barrier-control-server tamper-detected <endpoint:1> <setOrClear:1>
-// plugin barrier-control-server failed-communication <endpoint:1> <setOrClear:1>
-// plugin barrier-control-server position-failure <endpoint:1> <setOrClear:1>
-void emAfPluginBarrierControlServerSafetyStatusCommand(void)
-{
-  uint8_t endpoint = (uint8_t)emberUnsignedCommandArgument(0);
-  bool doSet = ((uint8_t)emberUnsignedCommandArgument(1)) == 1;
-  uint8_t bit
-    = (emberStringCommandArgument(-1, NULL)[0] == 'r'
-       ? EMBER_AF_BARRIER_CONTROL_SAFETY_STATUS_REMOTE_LOCKOUT
-       : (emberStringCommandArgument(-1, NULL)[0] == 't'
-          ? EMBER_AF_BARRIER_CONTROL_SAFETY_STATUS_TEMPER_DETECTED
-          : (emberStringCommandArgument(-1, NULL)[0] == 'f'
-             ? EMBER_AF_BARRIER_CONTROL_SAFETY_STATUS_FAILED_COMMUNICATION
-             : EMBER_AF_BARRIER_CONTROL_SAFETY_STATUS_POSITION_FAILURE)));
-
-  uint16_t safetyStatus
-    = emAfPluginBarrierControlServerGetSafetyStatus(endpoint);
-  if (doSet) {
-    SETBITS(safetyStatus, bit);
-  } else {
-    CLEARBITS(safetyStatus, bit);
-  }
-
-  EmberAfStatus status
-    = emberAfWriteServerAttribute(endpoint,
-                                  ZCL_BARRIER_CONTROL_CLUSTER_ID,
-                                  ZCL_BARRIER_SAFETY_STATUS_ATTRIBUTE_ID,
-                                  (uint8_t *)&safetyStatus,
-                                  ZCL_BITMAP16_ATTRIBUTE_TYPE);
-  assert(status == EMBER_ZCL_STATUS_SUCCESS);
-
-  printSafetyStatus(safetyStatus);
-}
-#endif

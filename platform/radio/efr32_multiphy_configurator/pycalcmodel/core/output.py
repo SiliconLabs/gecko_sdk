@@ -42,7 +42,7 @@ class ModelOutput(object):
     def __init__(self, var, category, output_type, readable_name=None,
                  value_limit_min=None, value_limit_max=None, override=None,
                  fractional_digits=None):
-        assert isinstance(var, ModelVariable), "FATAL ERROR: var is not ModelVariable"
+        # assert isinstance(var, ModelVariable), "FATAL ERROR: var is not ModelVariable"
         self._var = var
         if readable_name is None:
             self.readable_name = self._var.name
@@ -203,8 +203,8 @@ class ModelOutputContainer(object):
         return self.ZZ_OUTPUT_KEYS[var_name]
 
     def append(self, output):
-        assert isinstance(output, ModelOutput), \
-            "FATAL ERROR: output must be ModelOutput"
+        # assert isinstance(output, ModelOutput), \
+        #     "FATAL ERROR: output must be ModelOutput"
         if output.var_name in self:
             raise NameError("'{}' is already defined!".format(output.var_name))
         self.ZZ_OUTPUT_KEYS[output.var_name] = output

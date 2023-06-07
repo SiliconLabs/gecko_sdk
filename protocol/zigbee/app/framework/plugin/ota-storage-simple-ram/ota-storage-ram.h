@@ -34,5 +34,5 @@
 
 /** @} */ // end of ota-stoarge-simple-ram
 
-void emAfOtaStorageDriverCorruptImage(uint16_t index);
-uint16_t emAfOtaStorageDriveGetImageSize(void);
+void sli_zigbee_af_ota_storage_driver_corrupt_image(uint16_t index);
+uint16_t sli_zigbee_af_ota_storage_drive_get_image_size(void);

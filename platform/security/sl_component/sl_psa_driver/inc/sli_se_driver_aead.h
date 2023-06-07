@@ -27,6 +27,7 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
+
 #ifndef SLI_SE_DRIVER_AEAD_H
 #define SLI_SE_DRIVER_AEAD_H
 
@@ -42,13 +43,9 @@
  * \{
  ******************************************************************************/
 
-#include "em_device.h"
+#include "sli_psa_driver_features.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
 
 // Replace inclusion of crypto_driver_common.h with the new psa driver interface
 // header file when it becomes available.
@@ -79,6 +76,10 @@ typedef struct {
 
 // -----------------------------------------------------------------------------
 // Functions
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 psa_status_t sli_se_driver_aead_encrypt(const psa_key_attributes_t *attributes,
                                         const uint8_t *key_buffer,
@@ -189,11 +190,11 @@ psa_status_t sli_se_driver_aead_verify(sli_se_driver_aead_operation_t *operation
                                        const uint8_t *tag,
                                        size_t tag_length);
 
-#endif // SEMAILBOX_PRESENT
-
 #ifdef __cplusplus
 }
 #endif
+
+#endif // SLI_MBEDTLS_DEVICE_HSE
 
 /** \} (end addtogroup sl_psa_drivers_se) */
 /** \} (end addtogroup sl_psa_drivers) */

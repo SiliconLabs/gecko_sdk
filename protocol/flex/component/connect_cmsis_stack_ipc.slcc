@@ -15,10 +15,9 @@ requires:
   - name: "cmsis_rtos2"
   - name: "connect_stack_common"
   - name: "nvm3"
+  - name: "connect_csp"
 source:
   - path: "protocol/flex/cmsis-stack-ipc/cmsis-rtos-af-task.c"
-  - path: "protocol/flex/cmsis-stack-ipc/cmsis-rtos-ipc-api-gen.c"
-  - path: "protocol/flex/cmsis-stack-ipc/cmsis-rtos-ipc-cb-gen.c"
   - path: "protocol/flex/cmsis-stack-ipc/cmsis-rtos-ipc-common.c"
   - path: "protocol/flex/cmsis-stack-ipc/cmsis-rtos-support.c"
   - path: "protocol/flex/cmsis-stack-ipc/cmsis-rtos-vncp-task.c"
@@ -29,7 +28,6 @@ source:
 include:
   - path: "protocol/flex/cmsis-stack-ipc"
     file_list:
-      - path: "cmsis-rtos-ipc-api-gen.h"
       - path: "cmsis-rtos-support-gen.h"
       - path: "cmsis-rtos-support.h"
 config_file:
@@ -37,6 +35,7 @@ config_file:
 define:
   - name: "CMSISRTOS"
   - name: "SKIP_API_RENAME"
+  - name: "SL_CONNECT_RTOS_PRESENT"
 template_contribution:
   - name: stack_callback
     value:

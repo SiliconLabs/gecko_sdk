@@ -271,7 +271,7 @@ class CALC_Misc_jumbo(CALC_Misc):
         is_2fsk = modulation_type == model.vars.modulation_type.var_enum.FSK2
         viterbi_en = viterbi_en_reg == 1
         antdiv_off = antdivmode == model.vars.antdivmode.var_enum.DISABLE
-        in_base_profile = profile.lower() == 'base'
+        in_supported_profile = profile.lower() in ['base','sidewalk']
         not_spread = dsss_len == 0
         is_etsi = (etsi_cat1_compatible == model.vars.etsi_cat1_compatible.var_enum.Band_169) or \
                   (etsi_cat1_compatible == model.vars.etsi_cat1_compatible.var_enum.Band_868)
@@ -279,7 +279,7 @@ class CALC_Misc_jumbo(CALC_Misc):
         part_list = ['dumbo', 'jumbo', 'nerio', 'nixi']
         in_part_list = part_family.lower() in part_list
 
-        in_scope = is_2fsk and in_part_list and in_base_profile and not viterbi_en and antdiv_off and not_spread and not is_etsi
+        in_scope = is_2fsk and in_part_list and in_supported_profile and not viterbi_en and antdiv_off and not_spread and not is_etsi
 
         model.vars.in_2fsk_opt_scope.value = in_scope
 

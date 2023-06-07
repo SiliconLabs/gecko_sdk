@@ -3,7 +3,7 @@
  * @copyright 2022 Silicon Laboratories Inc.
  */
 
-#include <serialappl.h>
+#include <app.h>
 #include <cmds_management.h>
 #include <ZW_application_transport_interface.h>
 #include <utils.h>

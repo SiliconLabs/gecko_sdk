@@ -25,9 +25,6 @@
  ******************************************************************************/
 
 #include "app/framework/include/af.h"
-#ifndef UC_BUILD
-#include "callback.h"
-#endif
 #include "app/framework/plugin/ota-common/ota.h"
 #include "app/framework/plugin/ota-storage-common/ota-storage.h"
 
@@ -87,14 +84,14 @@ void emberAfOtaStorageDriverDownloadFinishCallback(uint32_t finalOffset)
   lastDownloadOffset = finalOffset;
 }
 
-void emAfOtaStorageDriverCorruptImage(uint16_t index)
+void sli_zigbee_af_ota_storage_driver_corrupt_image(uint16_t index)
 {
   if (index < STATIC_IMAGE_DATA_SIZE) {
     storage[index]++;
   }
 }
 
-uint16_t emAfOtaStorageDriveGetImageSize(void)
+uint16_t sli_zigbee_af_ota_storage_drive_get_image_size(void)
 {
   return STATIC_IMAGE_DATA_SIZE;
 }
@@ -122,7 +119,7 @@ uint32_t emberAfOtaStorageDriverMaxDownloadSizeCallback(void)
   return STATIC_IMAGE_DATA_SIZE;
 }
 
-void emAfOtaStorageDriverInfoPrint(void)
+void sli_zigbee_af_ota_storage_driver_info_print(void)
 {
   otaPrintln("Storage Driver:       OTA Simple Storage RAM");
   otaPrintln("Data Size (bytes):    %d", STATIC_IMAGE_DATA_SIZE);
@@ -133,7 +130,7 @@ EmberAfOtaStorageStatus emberAfOtaStorageDriverPrepareToResumeDownloadCallback(v
   return EMBER_AF_OTA_STORAGE_SUCCESS;
 }
 
-uint32_t emAfOtaStorageGetSlot(void)
+uint32_t sli_zigbee_af_ota_storage_get_slot(void)
 {
   return INVALID_SLOT;
 }

@@ -83,7 +83,7 @@ extern "C" {
  * @brief The EFR32XG21 series size needed for
  *   \ref RAIL_StateBufferEntry_t::bufferBytes.
  */
-#define RAIL_EFR32XG21_STATE_BUFFER_BYTES 528
+#define RAIL_EFR32XG21_STATE_BUFFER_BYTES 560
 
 /**
  * @def RAIL_EFR32XG22_STATE_BUFFER_BYTES
@@ -97,21 +97,21 @@ extern "C" {
  * @brief The EFR32XG23 series size needed for
  *   \ref RAIL_StateBufferEntry_t::bufferBytes.
  */
-#define RAIL_EFR32XG23_STATE_BUFFER_BYTES 568
+#define RAIL_EFR32XG23_STATE_BUFFER_BYTES 584
 
 /**
  * @def RAIL_EFR32XG24_STATE_BUFFER_BYTES
  * @brief The EFR32XG24 series size needed for
  *   \ref RAIL_StateBufferEntry_t::bufferBytes.
  */
-#define RAIL_EFR32XG24_STATE_BUFFER_BYTES 584
+#define RAIL_EFR32XG24_STATE_BUFFER_BYTES 592
 
 /**
  * @def RAIL_EFR32XG25_STATE_BUFFER_BYTES
  * @brief The EFR32XG25 series size needed for
  *   \ref RAIL_StateBufferEntry_t::bufferBytes.
  */
-#define RAIL_EFR32XG25_STATE_BUFFER_BYTES 608
+#define RAIL_EFR32XG25_STATE_BUFFER_BYTES 616
 
 /**
  * @def RAIL_EFR32XG27_STATE_BUFFER_BYTES
@@ -125,7 +125,7 @@ extern "C" {
  * @brief The EFR32XG28 series size needed for
  *   \ref RAIL_StateBufferEntry_t::bufferBytes.
  */
-#define RAIL_EFR32XG28_STATE_BUFFER_BYTES 568
+#define RAIL_EFR32XG28_STATE_BUFFER_BYTES 584
 
 #ifndef RAIL_STATE_BUFFER_BYTES
 /**
@@ -198,6 +198,57 @@ typedef struct RAIL_Config {
 } RAIL_Config_t;
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
+/**
+ * @def RAIL_SEQ_IMAGE_1
+ * @brief A macro for the first sequencer image.
+ */
+#define RAIL_SEQ_IMAGE_1                  1
+
+/**
+ * @def RAIL_SEQ_IMAGE_2
+ * @brief A macro for the second sequencer image.
+ */
+#define RAIL_SEQ_IMAGE_2                  2
+
+#if _SILICON_LABS_32B_SERIES_2_CONFIG == 4
+/**
+ * @def RAIL_SEQ_IMAGE_PA_10_DBM
+ * @brief A chip-specific macro for the sequencer image used on EFR32XG24 OPNs
+ *   with a 10 dBm PA.
+ */
+#define RAIL_SEQ_IMAGE_PA_10_DBM          RAIL_SEQ_IMAGE_1
+
+/**
+ * @def RAIL_SEQ_IMAGE_PA_20_DBM
+ * @brief A chip-specific macro for the sequencer image used on EFR32XG24 OPNs
+ *   with a 20 dBm PA.
+ */
+#define RAIL_SEQ_IMAGE_PA_20_DBM          RAIL_SEQ_IMAGE_2
+
+/**
+ * @def RAIL_SEQ_IMAGE_COUNT
+ * @brief A macro for the total number of sequencer images supported on the
+ *   platform.
+ */
+#define RAIL_SEQ_IMAGE_COUNT              2
+
+#else //_SILICON_LABS_32B_SERIES_2_CONFIG != 4
+
+/**
+ * @def RAIL_SEQ_IMAGE_DEFAULT
+ * @brief A chip-specific macro for the default sequencer image on platforms
+ *   that support only one sequencer image.
+ */
+#define RAIL_SEQ_IMAGE_DEFAULT            RAIL_SEQ_IMAGE_1
+
+/**
+ * @def RAIL_SEQ_IMAGE_COUNT
+ * @brief A macro for the total number of sequencer images supported on the
+ *   platform.
+ */
+#define RAIL_SEQ_IMAGE_COUNT              1
+#endif //_SILICON_LABS_32B_SERIES_2_CONFIG == 4
+
 /**
  * @enum RAIL_RadioStateEfr32_t
  * @brief Radio state machine statuses.
@@ -951,7 +1002,7 @@ typedef uint8_t RAIL_TxPowerLevel_t;
 typedef uint32_t RAIL_PaPowerSetting_t;
 
 /**
- * Returned by \ref RAIL_SetPaPowerSetting when the current PA does
+ * Returned by \ref RAIL_GetPaPowerSetting when the device does
  * not support the dBm to power setting mapping table.
  */
 #define RAIL_TX_PA_POWER_SETTING_UNSUPPORTED     (0U)
@@ -1036,6 +1087,17 @@ typedef uint32_t RAIL_PaPowerSetting_t;
  * RAIL_TX_POWER_MODE_2P4_LP mode.
  */
 #define RAIL_TX_POWER_LEVEL_2P4_LP_MIN     (0U)
+#elif _SILICON_LABS_32B_SERIES_2_CONFIG == 8
+/**
+ * The maximum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
+ * RAIL_TX_POWER_MODE_2P4_HP mode.
+ */
+#define RAIL_TX_POWER_LEVEL_2P4_HP_MAX     (240)
+/**
+ * The minimum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
+ * RAIL_TX_POWER_MODE_2P4_HP mode.
+ */
+#define RAIL_TX_POWER_LEVEL_2P4_HP_MIN     (1U)
 #else //efr32xg23
 /**
  * The maximum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
@@ -1129,38 +1191,6 @@ typedef uint32_t RAIL_PaPowerSetting_t;
  * RAIL_TX_POWER_MODE_SUBGIG_LLP mode.
  */
 #define RAIL_TX_POWER_LEVEL_SUBGIG_LLP_MIN (RAIL_SUBGIG_MIN)
-#if RAIL_SUPPORTS_EFF
-/**
- * The maximum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
- * RAIL_TX_POWER_MODE_SUBGIG_EFF_30DBM mode.
- */
-#define RAIL_TX_POWER_LEVEL_SUBGIG_EFF_30DBM_MAX (RAIL_SUBGIG_MAX)
-/**
- * The minimum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
- * RAIL_TX_POWER_MODE_SUBGIG_EFF_30DBM mode.
- */
-#define RAIL_TX_POWER_LEVEL_SUBGIG_EFF_30DBM_MIN (RAIL_SUBGIG_MIN)
-/**
- * The maximum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
- * RAIL_TX_POWER_MODE_SUBGIG_EFF_25DBM mode.
- */
-#define RAIL_TX_POWER_LEVEL_SUBGIG_EFF_25DBM_MAX (RAIL_SUBGIG_MAX)
-/**
- * The minimum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
- * RAIL_TX_POWER_MODE_SUBGIG_EFF_25DBM mode.
- */
-#define RAIL_TX_POWER_LEVEL_SUBGIG_EFF_25DBM_MIN (RAIL_SUBGIG_MIN)
-/**
- * The maximum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
- * RAIL_TX_POWER_MODE_SUBGIG_EFF_20DBM mode.
- */
-#define RAIL_TX_POWER_LEVEL_SUBGIG_EFF_20DBM_MAX (RAIL_SUBGIG_MAX)
-/**
- * The minimum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
- * RAIL_TX_POWER_MODE_SUBGIG_EFF_20DBM mode.
- */
-#define RAIL_TX_POWER_LEVEL_SUBGIG_EFF_20DBM_MIN (RAIL_SUBGIG_MIN)
-#endif
 #endif //RAIL_FEAT_SUBGIG_RADIO
 
 #if RAIL_SUPPORTS_OFDM_PA
@@ -1182,36 +1212,6 @@ typedef uint32_t RAIL_PaPowerSetting_t;
  */
 #define RAIL_TX_POWER_LEVEL_OFDM_PA_MIN (RAIL_OFDM_PA_MIN)
 #if RAIL_SUPPORTS_EFF
-/**
- * The maximum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
- * RAIL_TX_POWER_MODE_OFDM_PA_EFF_30DBM mode.
- */
-#define RAIL_TX_POWER_LEVEL_OFDM_PA_EFF_30DBM_MAX (RAIL_OFDM_PA_EFF_MAX)
-/**
- * The minimum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
- * RAIL_TX_POWER_MODE_OFDM_PA_EFF_30DBM mode.
- */
-#define RAIL_TX_POWER_LEVEL_OFDM_PA_EFF_30DBM_MIN (RAIL_OFDM_PA_EFF_MIN)
-/**
- * The maximum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
- * RAIL_TX_POWER_MODE_OFDM_PA_EFF_25DBM mode.
- */
-#define RAIL_TX_POWER_LEVEL_OFDM_PA_EFF_25DBM_MAX (RAIL_OFDM_PA_EFF_MAX)
-/**
- * The minimum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
- * RAIL_TX_POWER_MODE_OFDM_PA_EFF_250DBM mode.
- */
-#define RAIL_TX_POWER_LEVEL_OFDM_PA_EFF_25DBM_MIN (RAIL_OFDM_PA_EFF_MIN)
-/**
- * The maximum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
- * RAIL_TX_POWER_MODE_OFDM_PA_EFF_20DBM mode.
- */
-#define RAIL_TX_POWER_LEVEL_OFDM_PA_EFF_20DBM_MAX (RAIL_OFDM_PA_EFF_MAX)
-/**
- * The minimum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
- * RAIL_TX_POWER_MODE_OFDM_PA_EFF_20DBM mode.
- */
-#define RAIL_TX_POWER_LEVEL_OFDM_PA_EFF_20DBM_MIN (RAIL_OFDM_PA_EFF_MIN)
 /**
  * The maximum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * RAIL_TX_POWER_MODE_OFDM_PA_EFF_MAXDBM mode.
@@ -1274,8 +1274,7 @@ RAIL_ENUM(RAIL_TxPowerMode_t) {
    *  EFR32XG28: capable of 10dBm max output power supports powerlevel: 0-240
    */
   RAIL_TX_POWER_MODE_2P4GIG_HP,
-#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 1) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8))
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 1)
   /**
    *  Mid-power 2.4 GHz amplifier
    *  EFR32XG21: up to 10 dBm, raw values: 1-90
@@ -1283,7 +1282,7 @@ RAIL_ENUM(RAIL_TxPowerMode_t) {
    */
   RAIL_TX_POWER_MODE_2P4GIG_MP,
 #endif
-#if _SILICON_LABS_32B_SERIES_2_CONFIG != 3
+#if !((_SILICON_LABS_32B_SERIES_2_CONFIG == 3) || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8))
   /**
    *  Low-power 2.4 GHz amplifier
    *  EFR32XG21: up to 0 dBm, raw values: 1-64
@@ -1291,10 +1290,6 @@ RAIL_ENUM(RAIL_TxPowerMode_t) {
    *  EFR32XG24: up to 0 dBm, raw values: 1-16
    */
   RAIL_TX_POWER_MODE_2P4GIG_LP,
-#endif
-#if _SILICON_LABS_32B_SERIES_2_CONFIG == 8
-  /** Low-Low-power 2.4GHz amplifier */
-  RAIL_TX_POWER_MODE_2P4GIG_LLP,
 #endif
   /** Select the highest power PA available on the current chip. */
   RAIL_TX_POWER_MODE_2P4GIG_HIGHEST,
@@ -1331,32 +1326,12 @@ RAIL_ENUM(RAIL_TxPowerMode_t) {
 #if RAIL_SUPPORTS_EFF
 //Added after the normal PAs so old code doesn't accidentally use the wrong PA
 #if RAIL_FEAT_SUBGIG_RADIO
-  // EFF requires custom PAs. Normal PAs all use passthrough mode.
-  /** Danger, may overtemp EFF. Use power protection! */
-  RAIL_TX_POWER_MODE_SUBGIG_EFF_30DBM,
-  /** Danger, may overtemp EFF. Use power protection! */
-  RAIL_TX_POWER_MODE_SUBGIG_EFF_25DBM,
-  /** Below 15 dBm use passthrough PAs */
-  RAIL_TX_POWER_MODE_SUBGIG_EFF_20DBM,
-#if RAIL_SUPPORTS_DBM_POWERSETTING_MAPPING_TABLE
   /** PA for all dBm values in range, for Front-End-Module, using RAIL_PaPowerSetting_t table */
   RAIL_TX_POWER_MODE_SUBGIG_EFF_POWERSETTING_TABLE,
-#endif //RAIL_SUPPORTS_DBM_POWERSETTING_MAPPING_TABLE
 #endif//RAIL_FEAT_SUBGIG_RADIO
 #if RAIL_SUPPORTS_OFDM_PA
-  // EFF requires custom PAs. Normal PAs all use passthrough mode.
-  /** Danger, may overtemp EFF. Use power protection! */
-  RAIL_TX_POWER_MODE_OFDM_PA_EFF_30DBM,
-  /** Danger, may overtemp EFF. Use power protection! */
-  RAIL_TX_POWER_MODE_OFDM_PA_EFF_25DBM,
-  /** Below 15 dBm use passthrough PAs */
-  RAIL_TX_POWER_MODE_OFDM_PA_EFF_20DBM,
-  /** Special PA sending full Sol output. Use carefully */
-  RAIL_TX_POWER_MODE_OFDM_PA_EFF_MAXDBM,
-#if RAIL_SUPPORTS_DBM_POWERSETTING_MAPPING_TABLE
   /** PA for all dBm values in range, for Front-End-Module, using RAIL_PaPowerSetting_t table */
   RAIL_TX_POWER_MODE_OFDM_PA_EFF_POWERSETTING_TABLE,
-#endif //RAIL_SUPPORTS_DBM_POWERSETTING_MAPPING_TABLE
 #endif//RAIL_SUPPORTS_OFDM_PA
 #endif//RAIL_SUPPORTS_EFF
   /** Invalid amplifier Selection */
@@ -1367,17 +1342,13 @@ RAIL_ENUM(RAIL_TxPowerMode_t) {
 #if RAIL_FEAT_2G4_RADIO
 /** @deprecated Please use \ref RAIL_TX_POWER_MODE_2P4GIG_HP instead. */
 #define RAIL_TX_POWER_MODE_2P4_HP       RAIL_TX_POWER_MODE_2P4GIG_HP
-#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 1) || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8))
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 1)
 /** @deprecated Please use \ref RAIL_TX_POWER_MODE_2P4GIG_MP instead. */
 #define RAIL_TX_POWER_MODE_2P4_MP       RAIL_TX_POWER_MODE_2P4GIG_MP
 #endif
-#if _SILICON_LABS_32B_SERIES_2_CONFIG != 3
+#if !((_SILICON_LABS_32B_SERIES_2_CONFIG == 3) || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8))
 /** @deprecated Please use \ref RAIL_TX_POWER_MODE_2P4GIG_LP instead. */
 #define RAIL_TX_POWER_MODE_2P4_LP       RAIL_TX_POWER_MODE_2P4GIG_LP
-#endif
-#if _SILICON_LABS_32B_SERIES_2_CONFIG == 8
-/** @deprecated Please use \ref RAIL_TX_POWER_MODE_2P4GIG_LLP instead. */
-#define RAIL_TX_POWER_MODE_2P4_LLP       RAIL_TX_POWER_MODE_2P4GIG_LLP
 #endif
 /** @deprecated Please use \ref RAIL_TX_POWER_MODE_2P4GIG_HIGHEST instead. */
 #define RAIL_TX_POWER_MODE_2P4_HIGHEST  RAIL_TX_POWER_MODE_2P4GIG_HIGHEST
@@ -1395,8 +1366,9 @@ RAIL_ENUM(RAIL_TxPowerMode_t) {
 #define RAIL_NUM_PA (4U)
 #elif (_SILICON_LABS_32B_SERIES_2_CONFIG == 8)
 // There is a "dummy" PA for RAIL_TX_POWER_MODE_2P4GIG_HIGHEST which maps back to
-// RAIL_TX_POWER_MODE_2P4GIG_HP power curves. This explains why this value is 9 instead of 8.
-#define RAIL_NUM_PA (9U)
+// RAIL_TX_POWER_MODE_2P4GIG_HP power curves. This explains why this value is 6 instead of 5.
+// 4 subgig modes + 2.4G HP
+#define RAIL_NUM_PA (6U)
 #elif (_SILICON_LABS_32B_SERIES_2_CONFIG == 5)
 #if RAIL_SUPPORTS_EFF
 #define RAIL_NUM_PA (13U)
@@ -1413,15 +1385,12 @@ RAIL_ENUM(RAIL_TxPowerMode_t) {
 #if RAIL_FEAT_2G4_RADIO
 #ifndef RAIL_TX_POWER_MODE_2P4GIG_HP
 #define RAIL_TX_POWER_MODE_2P4GIG_HP ((RAIL_TxPowerMode_t) RAIL_TX_POWER_MODE_2P4GIG_HP)
-#if _SILICON_LABS_32B_SERIES_2_CONFIG == 1 || _SILICON_LABS_32B_SERIES_2_CONFIG == 8
+#if _SILICON_LABS_32B_SERIES_2_CONFIG == 1
 #define RAIL_TX_POWER_MODE_2P4GIG_MP ((RAIL_TxPowerMode_t) RAIL_TX_POWER_MODE_2P4GIG_MP)
-#endif //_SILICON_LABS_32B_SERIES_2_CONFIG == 1 || _SILICON_LABS_32B_SERIES_2_CONFIG == 8
-#if _SILICON_LABS_32B_SERIES_2_CONFIG != 3
+#endif //_SILICON_LABS_32B_SERIES_2_CONFIG == 1
+#if !((_SILICON_LABS_32B_SERIES_2_CONFIG == 3) || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8))
 #define RAIL_TX_POWER_MODE_2P4GIG_LP ((RAIL_TxPowerMode_t) RAIL_TX_POWER_MODE_2P4GIG_LP)
-#endif //_SILICON_LABS_32B_SERIES_2_CONFIG != 3
-#if _SILICON_LABS_32B_SERIES_2_CONFIG == 8
-#define RAIL_TX_POWER_MODE_2P4GIG_LLP ((RAIL_TxPowerMode_t) RAIL_TX_POWER_MODE_2P4GIG_LLP)
-#endif // _SILICON_LABS_32B_SERIES_2_CONFIG == 8
+#endif //!((_SILICON_LABS_32B_SERIES_2_CONFIG == 3) || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8))
 #define RAIL_TX_POWER_MODE_2P4GIG_HIGHEST ((RAIL_TxPowerMode_t) RAIL_TX_POWER_MODE_2P4GIG_HIGHEST)
 #endif //#ifndef RAIL_TX_POWER_MODE_2P4GIG_HP
 #endif //RAIL_FEAT_2G4_RADIO
@@ -1438,9 +1407,6 @@ RAIL_ENUM(RAIL_TxPowerMode_t) {
 #endif //RAIL_SUPPORTS_DBM_POWERSETTING_MAPPING_TABLE
 #define RAIL_TX_POWER_MODE_SUBGIG_HIGHEST                 ((RAIL_TxPowerMode_t) RAIL_TX_POWER_MODE_SUBGIG_HIGHEST)
 #if RAIL_SUPPORTS_EFF
-#define RAIL_TX_POWER_MODE_SUBGIG_EFF_30DBM               ((RAIL_TxPowerMode_t) RAIL_TX_POWER_MODE_SUBGIG_EFF_30DBM)
-#define RAIL_TX_POWER_MODE_SUBGIG_EFF_25DBM               ((RAIL_TxPowerMode_t) RAIL_TX_POWER_MODE_SUBGIG_EFF_25DBM)
-#define RAIL_TX_POWER_MODE_SUBGIG_EFF_20DBM               ((RAIL_TxPowerMode_t) RAIL_TX_POWER_MODE_SUBGIG_EFF_20DBM)
 #define RAIL_TX_POWER_MODE_SUBGIG_EFF_POWERSETTING_TABLE  ((RAIL_TxPowerMode_t) RAIL_TX_POWER_MODE_SUBGIG_EFF_POWERSETTING_TABLE)
 #endif//RAIL_SUPPORTS_EFF
 #endif //RAIL_FEAT_SUBGIG_RADIO
@@ -1450,10 +1416,6 @@ RAIL_ENUM(RAIL_TxPowerMode_t) {
 #define RAIL_TX_POWER_MODE_OFDM_PA                         ((RAIL_TxPowerMode_t) RAIL_TX_POWER_MODE_OFDM_PA)
 #endif //RAIL_SUPPORTS_DBM_POWERSETTING_MAPPING_TABLE
 #if RAIL_SUPPORTS_EFF
-#define RAIL_TX_POWER_MODE_OFDM_PA_EFF_30DBM               ((RAIL_TxPowerMode_t) RAIL_TX_POWER_MODE_OFDM_PA_EFF_30DBM)
-#define RAIL_TX_POWER_MODE_OFDM_PA_EFF_25DBM               ((RAIL_TxPowerMode_t) RAIL_TX_POWER_MODE_OFDM_PA_EFF_25DBM)
-#define RAIL_TX_POWER_MODE_OFDM_PA_EFF_20DBM               ((RAIL_TxPowerMode_t) RAIL_TX_POWER_MODE_OFDM_PA_EFF_20DBM)
-#define RAIL_TX_POWER_MODE_OFDM_PA_EFF_MAXDBM              ((RAIL_TxPowerMode_t) RAIL_TX_POWER_MODE_OFDM_PA_EFF_MAXDBM)
 #define RAIL_TX_POWER_MODE_OFDM_PA_EFF_POWERSETTING_TABLE  ((RAIL_TxPowerMode_t) RAIL_TX_POWER_MODE_OFDM_PA_EFF_POWERSETTING_TABLE)
 #endif//RAIL_SUPPORTS_EFF
 #endif //RAIL_SUPPORTS_OFDM_PA
@@ -1464,13 +1426,6 @@ RAIL_ENUM(RAIL_TxPowerMode_t) {
 #if RAIL_SUPPORTS_EFF
 #define RAIL_POWER_MODE_IS_ANY_EFF(x) ( ((x) == RAIL_TX_POWER_MODE_OFDM_PA_EFF_POWERSETTING_TABLE)   \
                                         || ((x) == RAIL_TX_POWER_MODE_SUBGIG_EFF_POWERSETTING_TABLE) \
-                                        || ((x) == RAIL_TX_POWER_MODE_SUBGIG_EFF_30DBM)              \
-                                        || ((x) == RAIL_TX_POWER_MODE_SUBGIG_EFF_25DBM)              \
-                                        || ((x) == RAIL_TX_POWER_MODE_SUBGIG_EFF_20DBM)              \
-                                        || ((x) == RAIL_TX_POWER_MODE_OFDM_PA_EFF_30DBM)             \
-                                        || ((x) == RAIL_TX_POWER_MODE_OFDM_PA_EFF_25DBM)             \
-                                        || ((x) == RAIL_TX_POWER_MODE_OFDM_PA_EFF_20DBM)             \
-                                        || ((x) == RAIL_TX_POWER_MODE_OFDM_PA_EFF_MAXDBM)            \
                                         )
 #define RAIL_POWER_MODE_IS_DBM_POWERSETTING_MAPPING_TABLE_OFDM(x)   ( ((x) == RAIL_TX_POWER_MODE_OFDM_PA_POWERSETTING_TABLE) \
                                                                       || ((x) == RAIL_TX_POWER_MODE_OFDM_PA_EFF_POWERSETTING_TABLE) )
@@ -1484,10 +1439,6 @@ RAIL_ENUM(RAIL_TxPowerMode_t) {
 // This macro is a boolean that checks for any OFDM modes
 #define RAIL_POWER_MODE_IS_ANY_OFDM(x) (   ((x) == RAIL_TX_POWER_MODE_OFDM_PA_POWERSETTING_TABLE)        \
                                            || ((x) == RAIL_TX_POWER_MODE_OFDM_PA_EFF_POWERSETTING_TABLE) \
-                                           || ((x) == RAIL_TX_POWER_MODE_OFDM_PA_EFF_30DBM)              \
-                                           || ((x) == RAIL_TX_POWER_MODE_OFDM_PA_EFF_25DBM)              \
-                                           || ((x) == RAIL_TX_POWER_MODE_OFDM_PA_EFF_20DBM)              \
-                                           || ((x) == RAIL_TX_POWER_MODE_OFDM_PA_EFF_MAXDBM)             \
                                            )
 #endif
 #else
@@ -1519,9 +1470,6 @@ RAIL_ENUM(RAIL_TxPowerMode_t) {
 #elif _SILICON_LABS_32B_SERIES_2_CONFIG == 8
 #define RAIL_TX_POWER_MODE_NAMES_2P4GIG \
   "RAIL_TX_POWER_MODE_2P4GIG_HP",       \
-  "RAIL_TX_POWER_MODE_2P4GIG_MP",       \
-  "RAIL_TX_POWER_MODE_2P4GIG_LP",       \
-  "RAIL_TX_POWER_MODE_2P4GIG_LLP",      \
   "RAIL_TX_POWER_MODE_2P4GIG_HIGHEST",
 #else // (_SILICON_LABS_32B_SERIES_2_CONFIG == 2|4|7)
 #define RAIL_TX_POWER_MODE_NAMES_2P4GIG \
@@ -1546,9 +1494,6 @@ RAIL_ENUM(RAIL_TxPowerMode_t) {
 #if RAIL_SUPPORTS_EFF
 #define RAIL_TX_POWER_MODE_NAMES_SUBGIG           \
   "RAIL_TX_POWER_MODE_SUBGIG_POWERSETTING_TABLE", \
-  "RAIL_TX_POWER_MODE_SUBGIG_EFF_30DBM",          \
-  "RAIL_TX_POWER_MODE_SUBGIG_EFF_25DBM",          \
-  "RAIL_TX_POWER_MODE_SUBGIG_EFF_20DBM",          \
   "RAIL_TX_POWER_MODE_SUBGIG_EFF_POWERSETTING_TABLE",
 #else
 #if RAIL_SUPPORTS_DBM_POWERSETTING_MAPPING_TABLE
@@ -1593,9 +1538,6 @@ RAIL_ENUM(RAIL_TxPowerMode_t) {
 #if RAIL_SUPPORTS_EFF
 #if RAIL_FEAT_SUBGIG_RADIO
 #define RAIL_TX_POWER_MODE_NAMES_SUBGIG_EFF       \
-  "RAIL_TX_POWER_MODE_SUBGIG_EFF_30DBM",          \
-  "RAIL_TX_POWER_MODE_SUBGIG_EFF_25DBM",          \
-  "RAIL_TX_POWER_MODE_SUBGIG_EFF_20DBM",          \
   "RAIL_TX_POWER_MODE_SUBGIG_POWERSETTING_TABLE", \
   "RAIL_TX_POWER_MODE_SUBGIG_EFF_POWERSETTING_TABLE",
 #else
@@ -1616,10 +1558,6 @@ RAIL_ENUM(RAIL_TxPowerMode_t) {
 #if RAIL_SUPPORTS_EFF
 #if RAIL_SUPPORTS_OFDM_PA
 #define RAIL_TX_POWER_MODE_NAMES_OFDM_PA_EFF       \
-  "RAIL_TX_POWER_MODE_OFDM_PA_EFF_30DBM",          \
-  "RAIL_TX_POWER_MODE_OFDM_PA_EFF_25DBM",          \
-  "RAIL_TX_POWER_MODE_OFDM_PA_EFF_20DBM",          \
-  "RAIL_TX_POWER_MODE_OFDM_PA_EFF_MAXDBM",         \
   "RAIL_TX_POWER_MODE_OFDM_PA_POWERSETTING_TABLE", \
   "RAIL_TX_POWER_MODE_OFDM_PA",                    \
   "RAIL_TX_POWER_MODE_OFDM_PA_EFF_POWERSETTING_TABLE",
@@ -1636,14 +1574,7 @@ RAIL_ENUM(RAIL_TxPowerMode_t) {
     "RAIL_TX_POWER_MODE_SUBGIG_HIGHEST",                 \
     "RAIL_TX_POWER_MODE_OFDM_PA_POWERSETTING_TABLE",     \
     "RAIL_TX_POWER_MODE_OFDM_PA",                        \
-    "RAIL_TX_POWER_MODE_SUBGIG_EFF_30DBM",               \
-    "RAIL_TX_POWER_MODE_SUBGIG_EFF_25DBM",               \
-    "RAIL_TX_POWER_MODE_SUBGIG_EFF_20DBM",               \
     "RAIL_TX_POWER_MODE_SUBGIG_EFF_POWERSETTING_TABLE",  \
-    "RAIL_TX_POWER_MODE_OFDM_PA_EFF_30DBM",              \
-    "RAIL_TX_POWER_MODE_OFDM_PA_EFF_25DBM",              \
-    "RAIL_TX_POWER_MODE_OFDM_PA_EFF_20DBM",              \
-    "RAIL_TX_POWER_MODE_OFDM_PA_EFF_MAXDBM",             \
     "RAIL_TX_POWER_MODE_OFDM_PA_EFF_POWERSETTING_TABLE", \
     "RAIL_TX_POWER_MODE_NONE",                           \
 }
@@ -1875,11 +1806,11 @@ RAIL_Status_t RAIL_ChangedDcdc(void);
 #if _SILICON_LABS_32B_SERIES_2_CONFIG == 8
 /// The static amount of memory needed per channel for channel hopping, measured
 /// in 32 bit words, regardless of the size of radio configuration structures.
-#define RAIL_CHANNEL_HOPPING_BUFFER_SIZE_PER_CHANNEL (61U)
+#define RAIL_CHANNEL_HOPPING_BUFFER_SIZE_PER_CHANNEL (63U)
 #else
 /// The static amount of memory needed per channel for channel hopping, measured
 /// in 32 bit words, regardless of the size of radio configuration structures.
-#define RAIL_CHANNEL_HOPPING_BUFFER_SIZE_PER_CHANNEL (54U)
+#define RAIL_CHANNEL_HOPPING_BUFFER_SIZE_PER_CHANNEL (56U)
 
 #endif
 

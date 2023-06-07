@@ -519,7 +519,7 @@ sl_status_t sli_usbd_driver_init(void)
   uint32_t hclk_freq = SystemHCLKGet();
   EFM_ASSERT(hclk_freq >= 30000000);
 
-  CMU_ClockSelectSet(cmuClock_USB, cmuSelect_USBPLL0);   // Select PLL0 as clock input of USB IP.
+  CMU_CLOCK_SELECT_SET(USB, USBPLL0);   // Select PLL0 as clock input of USB IP.
   CMU_ClockEnable(cmuClock_USB, true);                   // Enable USB clock. It will also enable PLL0.
 
   // IO settings.

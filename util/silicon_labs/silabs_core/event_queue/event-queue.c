@@ -38,14 +38,14 @@
 #define LIST_END EVENT_QUEUE_LIST_END
 
 // Marker function for ISR event types.  This should never be called.
-void emIsrEventMarker(struct Event_s *event)
+void sli_zigbee_isr_event_marker(struct Event_s *event)
 {
   (void)event;
 
   assert(false);
 }
 
-void emInitializeEventQueue(EmberEventQueue *queue)
+void sli_zigbee_initialize_event_queue(EmberEventQueue *queue)
 {
   queue->isrEvents = NULL;
   queue->events = LIST_END;
@@ -127,7 +127,7 @@ uint32_t emberEventGetRemainingMs(EmberEvent *event)
 {
   if (event->next == NULL) {
     return -1;
-  } else if (event->actions.marker == emIsrEventMarker) {
+  } else if (event->actions.marker == sli_zigbee_isr_event_marker) {
     return 0;
   } else {
     uint32_t remaining =
@@ -260,7 +260,7 @@ void emberMarkEventQueue(EmberEventQueue *queue)
 void emberEventSetDelayMs(EmberEvent *event, uint32_t delay)
 {
   EmberEventQueue *queue = event->actions.queue;
-  if (event->actions.marker == emIsrEventMarker) {
+  if (event->actions.marker == sli_zigbee_isr_event_marker) {
     assert(delay == 0);
     ATOMIC(
       if (event->next != NULL) {
@@ -312,7 +312,7 @@ void emberEventSetDelayMs(EmberEvent *event, uint32_t delay)
 void emberEventSetInactive(EmberEvent *event)
 {
   EmberEventQueue *queue = event->actions.queue;
-  if (event->actions.marker == emIsrEventMarker) {
+  if (event->actions.marker == sli_zigbee_isr_event_marker) {
     ATOMIC(
       if (event->next == NULL) {
       // do nothing

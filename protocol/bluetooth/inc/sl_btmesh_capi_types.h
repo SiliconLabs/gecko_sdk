@@ -34,8 +34,6 @@ struct bgbuf_t;
 /** Dummy vendor ID for Mesh specification models */
 #define MESH_SPEC_VENDOR_ID 0xffff
 
-#if FEATURE_MESH_GATT
-
 /** Mesh GATT provisioning service UUID */
 #define MESH_GATT_SERVICE_PROVISIONING_UUID "\x27\x18"
 /** Mesh GATT provisioning service data in characteristic UUID */
@@ -62,8 +60,6 @@ struct bgbuf_t;
 
 /** Advertise Mesh GATT proxy service with node identity */
 #define MESH_GATT_SERVICE_PROXY_NODE_IDENTITY_ADV 0x01
-
-#endif /* FEATURE_MESH_GATT */
 
 /* Provisioning algortihm bits */
 /** Use FIPS-P256 for provisioning */
@@ -165,15 +161,10 @@ struct bgbuf_t;
 
 /** Advertisement provisioning bearer (PB-ADV) */
 #define MESH_PROV_BEARER_ID_ADV   0x00
-#if FEATURE_MESH_GATT
 /** GATT provisioning bearer (PB-GATT) */
 #define MESH_PROV_BEARER_ID_GATT  0x01
 /** All available provisioning bearers */
 #define MESH_PROV_BEARERS_MASK      ((1 << MESH_PROV_BEARER_ID_ADV) | (1 << MESH_PROV_BEARER_ID_GATT))
-#else
-/** All available provisioning bearers */
-#define MESH_PROV_BEARERS_MASK      (1 << MESH_PROV_BEARER_ID_ADV)
-#endif /* FEATURE_MESH_GATT */
 
 /** Node is blacklisted and thus does not participate in key refresh */
 #define MESH_KR_NODE_IS_BLACKLISTED 1
@@ -211,9 +202,7 @@ typedef enum {
 /** Mesh bearer types */
 typedef enum {
   mesh_bearer_adv = 0, /**< Advertisement bearer */
-#if FEATURE_MESH_GATT
   mesh_bearer_gatt = 1 /**< GATT bearer */
-#endif /* FEATURE_MESH_GATT */
 } mesh_bearer_t;
 
 /** Network layer configuration structure */
@@ -389,8 +378,6 @@ typedef uint8_t mesh_uuid_t[16]; /**< UUID */
 typedef void (*mesh_trans_tx_event_cb)(mesh_trans_tx_event_t *event,
                                        void *cb_param);
 
-#if FEATURE_MESH_GATT
-
 /**
  * GATT service
  */
@@ -447,8 +434,6 @@ typedef struct {
 typedef void (*mesh_gatt_cb)(mesh_gatt_handle_t handle,
                              mesh_gatt_event_t *event,
                              void *cb_param);
-
-#endif /* FEATURE_MESH_GATT */
 
 /** Mesh AES cryptographic key type */
 typedef enum {

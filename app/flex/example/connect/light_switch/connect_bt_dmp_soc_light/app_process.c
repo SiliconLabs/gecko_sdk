@@ -315,7 +315,6 @@ static void handle_network_form(void)
   EmberStatus status;
   EmberNetworkParameters parameters;
 
-  MEMSET(&parameters, 0, sizeof(EmberNetworkParameters));
   parameters.radioTxPower = LIGHT_SWITCH_TX_POWER;
   parameters.radioChannel = sl_get_channel();
   parameters.panId = sl_get_pan_id();

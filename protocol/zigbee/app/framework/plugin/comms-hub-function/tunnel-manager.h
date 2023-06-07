@@ -7,7 +7,7 @@
  * function is called whenever data is to be sent to the device, and the
  * destroy function is called whenever the tunnel to the device should
  * be torn down. There are also 1 callback that the tunnel manager will call.
- * It is emAfPluginCommsHubFunctionTunnelDataReceivedCallback which is
+ * It is sli_zigbee_af_comms_hub_function_tunnel_data_received_callback which is
  * called when data is received from a tunnel.
  *******************************************************************************
  * # License
@@ -34,7 +34,7 @@
  * @brief Initializes internal data structures.
  *
  */
-void emAfPluginCommsHubFunctionTunnelInit(SLXU_INIT_ARG);
+void sli_zigbee_af_comms_hub_function_tunnel_init(uint8_t init_level);
 
 /**
  * @brief Creates a tunnel to a device of type ESME, HCALCS or PPMID.
@@ -70,8 +70,8 @@ void emAfPluginCommsHubFunctionTunnelInit(SLXU_INIT_ARG);
  * @param remoteEndpoint The remote endpoint to which the tunnel is to be created
  * @return true if successful or false if an error occurred
  */
-bool emAfPluginCommsHubFunctionTunnelCreate(EmberEUI64 remoteDeviceId,
-                                            uint8_t remoteEndpoint);
+bool sli_zigbee_af_comms_hub_function_tunnel_create(EmberEUI64 remoteDeviceId,
+                                                    uint8_t remoteEndpoint);
 
 /**
  * @brief Transfers data to a server through a tunnel.
@@ -85,11 +85,11 @@ bool emAfPluginCommsHubFunctionTunnelCreate(EmberEUI64 remoteDeviceId,
  * @param data The buffer containing the raw octets of data.
  * @return True if successful or false if an error occurred.
  */
-bool emAfPluginCommsHubFunctionTunnelSendData(EmberEUI64 remoteDeviceId,
-                                              uint16_t headerLen,
-                                              uint8_t *header,
-                                              uint16_t dataLen,
-                                              uint8_t *data);
+bool sli_zigbee_af_comms_hub_function_tunnel_send_data(EmberEUI64 remoteDeviceId,
+                                                       uint16_t headerLen,
+                                                       uint8_t *header,
+                                                       uint16_t dataLen,
+                                                       uint8_t *data);
 
 /**
  * @brief Closes a tunnel.
@@ -99,7 +99,7 @@ bool emAfPluginCommsHubFunctionTunnelSendData(EmberEUI64 remoteDeviceId,
  * @param remoteDeviceId The EUI64 of the device to which the tunnel will be closed
  * @return True if successful or false if an error occurred.
  */
-bool emAfPluginCommsHubFunctionTunnelDestroy(EmberEUI64 remoteDeviceId);
+bool sli_zigbee_af_comms_hub_function_tunnel_destroy(EmberEUI64 remoteDeviceId);
 
 /**
  * @brief Cleans up a tunnel.
@@ -109,7 +109,7 @@ bool emAfPluginCommsHubFunctionTunnelDestroy(EmberEUI64 remoteDeviceId);
  * @param remoteDeviceId The EUI64 of the device to which the tunnel state
  * is to be cleaned up.
  */
-void emAfPluginCommsHubFunctionTunnelCleanup(EmberEUI64 remoteDeviceId);
+void sli_zigbee_af_comms_hub_function_tunnel_cleanup(EmberEUI64 remoteDeviceId);
 
 /**
  * @brief Closes a tunnel.
@@ -118,7 +118,7 @@ void emAfPluginCommsHubFunctionTunnelCleanup(EmberEUI64 remoteDeviceId);
  *
  * @param remoteDeviceId The EUI64 of the device whose tunnel is to be closed.
  */
-void emAfPluginCommsHubFunctionTunnelClose(EmberEUI64 remoteDeviceId);
+void sli_zigbee_af_comms_hub_function_tunnel_close(EmberEUI64 remoteDeviceId);
 
 /**
  * @brief Prints the tunnel table.
@@ -126,8 +126,8 @@ void emAfPluginCommsHubFunctionTunnelClose(EmberEUI64 remoteDeviceId);
  * This function is used to print the tunneling table of the commshub.
  *
  */
-void emAfPluginCommsHubFunctionPrint(void);
+void sli_zigbee_af_comms_hub_function_print(void);
 
-bool emAfPluginCommsHubFunctionTunnelExists(EmberEUI64 deviceEui64);
+bool sli_zigbee_af_comms_hub_function_tunnel_exists(EmberEUI64 deviceEui64);
 
 #endif /* TUNNEL_MANAGER_H_ */

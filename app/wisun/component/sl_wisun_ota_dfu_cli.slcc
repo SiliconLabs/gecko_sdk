@@ -1,0 +1,58 @@
+id: "sl_wisun_ota_dfu_cli"
+label: "Wi-SUN Over-The-Air Device Firmware Upgrade (OTA DFU) CLI module"
+package: "wisun"
+description: "CLI implementation for Wi-SUN Over the Air Device Firmware Upgrade (OTA DFU) component."
+category: "Wi-SUN|Application"
+quality: "production"
+root_path: "app/wisun/component/ota_dfu_cli"
+provides:
+  - name: sl_wisun_ota_dfu_cli
+
+source:
+  - path: "sl_wisun_ota_dfu_cli.c"
+
+requires:
+  - name: "sl_wisun_ota_dfu"
+
+ui_hints:
+  visibility: never
+
+#-------------- Template Contribution ----------------
+template_contribution:
+  - name: "cli_group"
+    value:
+      name: "wisun"
+      help: "Wi-SUN commands"
+      shortcuts:
+        - name: "w"
+
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "start_firmware_update"
+      handler: "app_fw_update_start"
+      help: "Start firmware update"
+      shortcuts:
+        - name: "fb"
+  
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "stop_firmware_update"
+      handler: "app_fw_update_stop"
+      help: "Stop firmware update"
+      shortcuts:
+        - name: "fq"
+
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "firmware_update_status"
+      handler: "app_fw_update_status"
+      help: "Get firmware update status"
+      shortcuts:
+        - name: "fs"
+
+#---------------- Component Catalog ------------------
+  - name: component_catalog
+    value: wisun_ota_dfu_cli

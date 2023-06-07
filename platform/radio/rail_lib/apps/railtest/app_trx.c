@@ -43,6 +43,9 @@
 #include "rail_ble.h"
 #include "rail_ieee802154.h"
 #include "response_print.h"
+#ifdef SL_CATALOG_HADM_CLI_PRESENT
+#include "railapp_hadm.h"
+#endif
 /******************************************************************************
  * Variables
  *****************************************************************************/
@@ -53,7 +56,7 @@ static uint16_t dataLeft = 0;
 static uint8_t *dataLeftPtr = NULL;
 
 // Variables to keep track of the receive packet
-static uint16_t rxLengthTarget;
+static uint16_t rxLengthTarget = RAIL_SETFIXEDLENGTH_INVALID;
 static uint16_t rxLengthCount;
 static void *rxFifoPacketHandle = 0;
 static RailAppEvent_t *rxFifoPacketData;
@@ -91,16 +94,25 @@ static void packetMode_RxPacketAborted(RAIL_Handle_t railHandle)
   RAIL_RxPacketHandle_t packetHandle
     = RAIL_GetRxPacketInfo(railHandle, RAIL_RX_PACKET_HANDLE_NEWEST,
                            &packetInfo);
-  // assert(packetHandle != NULL);
-  // assert(packetInfo.packetBytes == 0);
+  if (packetHandle == RAIL_RX_PACKET_HANDLE_INVALID) {
+    return;
+  }
   // Get a memory buffer for the received packet details
-  void *rxPacketMemoryHandle = memoryAllocate(sizeof(RailAppEvent_t));
+  uint16_t length = packetInfo.packetBytes;
+  void *rxPacketMemoryHandle = memoryAllocate(sizeof(RailAppEvent_t) + length);
   RailAppEvent_t *rxPacket = (RailAppEvent_t *)memoryPtrFromHandle(rxPacketMemoryHandle);
   if (rxPacket != NULL) {
     rxPacket->type = RX_PACKET;
-    rxPacket->rxPacket.dataPtr = NULL;
+    if (length > 0U) {
+      // Read any non-rolled-back packet data into our packet structure
+      uint8_t *rxPacketData = (uint8_t *)&rxPacket[1];
+      RAIL_CopyRxPacket(rxPacketData, &packetInfo);
+      rxPacket->rxPacket.dataPtr =  rxPacketData;
+    } else {
+      rxPacket->rxPacket.dataPtr = NULL;
+    }
     rxPacket->rxPacket.packetStatus = packetInfo.packetStatus;
-    rxPacket->rxPacket.dataLength = 0U;
+    rxPacket->rxPacket.dataLength = length;
     rxPacket->rxPacket.freqOffset = getRxFreqOffset();
     rxPacket->rxPacket.filterMask = packetInfo.filterMask;
     // Read what packet details are available into our packet structure
@@ -351,6 +363,7 @@ void rxFifoPrep(void)
   if ((railDataConfig.rxMethod == FIFO_MODE)
       && (railDataConfig.rxSource == RX_PACKET_DATA)
       && (currentAppMode() != BER)
+      && (rxLengthTarget != RAIL_SETFIXEDLENGTH_INVALID)
       && !rxFifoManual) {
     rxLengthCount = rxLengthTarget;
     rxFifoPacketHandle = memoryAllocate(sizeof(RailAppEvent_t) + rxLengthTarget);
@@ -376,8 +389,22 @@ void loadTxData(uint8_t *data, uint16_t dataLen)
 {
   setTxRandomHelper();
   uint16_t dataWritten;
+  uint16_t dataLenToCopy = dataLen;
+  uint8_t* alignedBuf = getTxFifoBaseAddress();
+
   if (railDataConfig.txMethod == PACKET_MODE) {
-    RAIL_WriteTxFifo(railHandle, data, dataLen, true);
+    if (offsetInTxFifo == 0U) {
+      RAIL_WriteTxFifo(railHandle, data, dataLen, true);
+    } else {
+      if ((dataLen + offsetInTxFifo) > SL_RAIL_TEST_TX_BUFFER_SIZE) {
+        dataLenToCopy = SL_RAIL_TEST_TX_BUFFER_SIZE - offsetInTxFifo;
+      }
+      // Copy prepared data buffer directly in TxFifo regardless of alignment
+      (void)memcpy(&alignedBuf[offsetInTxFifo], data, dataLenToCopy);
+      // Insert dummy 'x' char before Tx Data for testing purpose
+      (void)memset(alignedBuf, 'x', offsetInTxFifo);
+      RAIL_SetTxFifoAlt(railHandle, alignedBuf, offsetInTxFifo, dataLenToCopy, SL_RAIL_TEST_TX_BUFFER_SIZE);
+    }
   } else {
     dataWritten = RAIL_WriteTxFifo(railHandle, data, dataLen, false);
     dataLeft = dataLen - dataWritten;
@@ -397,6 +424,9 @@ void configRxLengthSetting(uint16_t rxLength)
  *****************************************************************************/
 void RAILCb_TxPacketSent(RAIL_Handle_t railHandle, bool isAck)
 {
+#ifdef SL_CATALOG_HADM_CLI_PRESENT
+  RAILCb_TxPacketSentHadm(railHandle);
+#endif
 #if RAIL_IEEE802154_SUPPORTS_G_MODESWITCH && defined(WISUN_MODESWITCHPHRS_ARRAY_SIZE)
   if (modeSwitchState == TX_MS_PACKET || modeSwitchState == TX_ON_NEW_PHY) { // Packet has been sent in a MS context
     if (txCountAfterModeSwitchId == 0) { // Sent packet was MS packet
@@ -485,12 +515,29 @@ void RAILCb_RxPacketAborted(RAIL_Handle_t railHandle)
   if (railDataConfig.rxMethod == PACKET_MODE) {
     packetMode_RxPacketAborted(railHandle);
   } else if (!rxFifoManual) {
-    fifoMode_RxPacketReceived();
+    if (rxLengthTarget == RAIL_SETFIXEDLENGTH_INVALID) {
+      packetMode_RxPacketAborted(railHandle);
+    } else {
+      fifoMode_RxPacketReceived();
+    }
   }
+}
+
+void RAILCb_RxTimeout(RAIL_Handle_t railHandle)
+{
+#ifdef SL_CATALOG_HADM_CLI_PRESENT
+  RAILCb_RxTimeoutHadm(railHandle);
+#else
+  (void)railHandle;
+#endif
 }
 
 void RAILCb_RxPacketReceived(RAIL_Handle_t railHandle)
 {
+#ifdef SL_CATALOG_HADM_CLI_PRESENT
+  RAILCb_RxPacketReceivedHadm(railHandle);
+#endif
+
   counters.receive++;
   LedToggle(0);
   rxPacketEvent = true;
@@ -498,7 +545,11 @@ void RAILCb_RxPacketReceived(RAIL_Handle_t railHandle)
   if (railDataConfig.rxMethod == PACKET_MODE) {
     packetMode_RxPacketReceived(railHandle);
   } else if (!rxFifoManual) {
-    fifoMode_RxPacketReceived();
+    if (rxLengthTarget == RAIL_SETFIXEDLENGTH_INVALID) {
+      packetMode_RxPacketAborted(railHandle);
+    } else {
+      fifoMode_RxPacketReceived();
+    }
   }
 }
 

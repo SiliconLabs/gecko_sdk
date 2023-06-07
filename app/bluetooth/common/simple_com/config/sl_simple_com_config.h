@@ -31,6 +31,11 @@
 #ifndef SL_SIMPLE_COM_CONFIG_H
 #define SL_SIMPLE_COM_CONFIG_H
 
+/***********************************************************************************************//**
+ * @addtogroup simple_com
+ * @{
+ **************************************************************************************************/
+
 // <<< Use Configuration Wizard in Context Menu >>>
 
 // <o SL_SIMPLE_COM_RX_BUF_SIZE> Receive buffer size (bytes) <260-1024>
@@ -45,4 +50,5 @@
 
 // <<< end of configuration section >>>
 
+/** @} (end addtogroup simple_com) */
 #endif // SL_SIMPLE_COM_CONFIG_H

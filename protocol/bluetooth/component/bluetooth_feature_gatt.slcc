@@ -5,7 +5,7 @@ description: >
   GATT Client feature
 
   Enables the ability to browse and manage attributes in a remote GATT server.
-category: "Bluetooth|Stack"
+category: Bluetooth|Bluetooth Host (Stack)|Features with Commands and Events
 quality: "production"
 root_path: "protocol/bluetooth"
 requires:

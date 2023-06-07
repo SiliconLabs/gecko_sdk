@@ -18,7 +18,6 @@ include:
       - path: link_metrics.h
       - path: logging_rtt.h
       - path: mac_frame.h
-      - path: soft_source_match_table.h
       - path: settings.h
   - path: protocol/openthread/platform-abstraction/efr32
     file_list:
@@ -28,13 +27,18 @@ include:
       - path: rail_config.h
       - path: sl_packet_utils.h
       - path: sl_openthread.h
+      - path: diag.h
+      - path: soft_source_match_table.h
+  - path: protocol/openthread/platform-abstraction/include
+    file_list:
+      - path: radio_vendor.h
 source:
       - path: util/third_party/openthread/examples/platforms/utils/debug_uart.c
       - path: util/third_party/openthread/examples/platforms/utils/link_metrics.cpp
       - path: util/third_party/openthread/examples/platforms/utils/logging_rtt.c
       - path: util/third_party/openthread/examples/platforms/utils/mac_frame.cpp
       - path: util/third_party/openthread/examples/platforms/utils/settings_ram.c
-      - path: util/third_party/openthread/examples/platforms/utils/soft_source_match_table.c
+      - path: protocol/openthread/platform-abstraction/efr32/soft_source_match_table.c
       - path: protocol/openthread/platform-abstraction/efr32/alarm.c
       - path: protocol/openthread/platform-abstraction/efr32/diag.c
       - path: protocol/openthread/platform-abstraction/efr32/entropy.c
@@ -47,5 +51,6 @@ source:
       - path: protocol/openthread/platform-abstraction/efr32/crypto.c
       - path: protocol/openthread/platform-abstraction/efr32/ieee802154-packet-utils.cpp
       - path: protocol/openthread/platform-abstraction/efr32/radio.c
+      - path: protocol/openthread/platform-abstraction/efr32/radio_vendor.c
       - path: protocol/openthread/platform-abstraction/efr32/startup-gcc.c
       - path: protocol/openthread/platform-abstraction/efr32/system.c

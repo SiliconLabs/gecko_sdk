@@ -28,7 +28,7 @@ include:
 requires:
   - name: "wisun_config"
   - name: "sl_wisun_full_config"
-  - name: "sl_wisun_event_mgr"      # for handling core events
+  - name: "sl_wisun_event_mgr"
   - name: "sleeptimer"
   - name: "app_project_info"
 

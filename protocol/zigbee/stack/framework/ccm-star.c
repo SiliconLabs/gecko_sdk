@@ -19,14 +19,14 @@
 #else
   #include "hal/micro/unix/compiler/gcc.h"
 #endif
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
 #endif
 
 // TODO: EMZIGBEE-3712
-void emStandAloneEncryptBlock(uint8_t* block);
+void sli_util_stand_alone_encrypt_block(uint8_t* block);
 
-extern void emGetKeyFromCore(uint8_t* key);
+extern void sli_zigbee_get_key_from_core(uint8_t* key);
 
 #include "stack/include/ember-types.h"
 #include "stack/include/ccm-star.h"
@@ -73,11 +73,9 @@ extern void emGetKeyFromCore(uint8_t* key);
 // that different operations on the same message, such as MIC generation and
 // encryption, do not use the same nonce.
 
-#ifdef UC_BUILD
-#if !(defined SL_CATALOG_ZIGBEE_CCM_SOFTWARE_PRESENT)
+#if !(defined SL_CATALOG_ZIGBEE_CCM_SOFTWARE_PRESENT) && !defined(EMBER_TEST)
 #error "Only the Zigbee CCM (Software) component should bring in this file. Hardware should bring in the ZB Security Manager component"
 #endif // SL_CATALOG_ZIGBEE_
-#endif // UC_BUILD
 
 // -----------------------------------------------------------------
 // Software Implementation of CCM on top of the single-block AES API
@@ -137,7 +135,7 @@ static void encryptNonce(uint8_t *nonce,
   block[STANDALONE_VARIABLE_FIELD_INDEX_HIGH] = HIGH_BYTE(variableField);
   block[STANDALONE_VARIABLE_FIELD_INDEX_LOW] = LOW_BYTE(variableField);
 
-  emStandAloneEncryptBlock(block);
+  sli_util_stand_alone_encrypt_block(block);
 }
 
 //----------------------------------------------------------------
@@ -166,7 +164,7 @@ static uint8_t xorBytesIntoBlock(uint8_t *block,
     i += copied;
 
     if (blockIndex == ENCRYPTION_BLOCK_SIZE) {
-      emStandAloneEncryptBlock(block);
+      sli_util_stand_alone_encrypt_block(block);
       blockIndex = 0;
     }
   }
@@ -235,7 +233,7 @@ void emberCcmCalculateAndEncryptMic(uint8_t *nonce,
 
     // finish off authData if not on an encryption block boundary
     if (blockIndex > 0) {
-      emStandAloneEncryptBlock(encryptionBlock);
+      sli_util_stand_alone_encrypt_block(encryptionBlock);
       blockIndex = 0;
     }
   }

@@ -9,10 +9,10 @@
     unless:
     - device_content_override
 - source:
-  - path: platform/Device/SiliconLabs/MGM21/Source/system_mgm21.c
+  - path: platform/Device/SiliconLabs/MGM21/Source/startup_mgm21.c
     unless:
     - device_content_override
-  - path: platform/Device/SiliconLabs/MGM21/Source/startup_mgm21.c
+  - path: platform/Device/SiliconLabs/MGM21/Source/system_mgm21.c
     unless:
     - device_content_override
 - include:

@@ -26,7 +26,6 @@
 #  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 #  POSSIBILITY OF SUCH DAMAGE.
 #
-from typing import Mapping
 import unittest
 
 import config
@@ -34,11 +33,8 @@ import thread_cert
 import enum
 
 # Test description:
-#   This test verifies that a single NAT64 prefix is advertised when there are
+#   This test verifies that a single NAT64 prefix is published when there are
 #   multiple Border Routers in the same Thread and infrastructure network.
-#
-#   TODO: add checks for outbound connectivity from Thread device to IPv4 host
-#         after OTBR change is ready.
 #
 # Topology:
 #    ----------------(eth)--------------------------
@@ -53,12 +49,14 @@ ROUTER = 2
 BR2 = 3
 HOST = 4
 
+OMR_PREFIX = "2000:0:1111:4444::/64"
+
 NAT64_PREFIX_REFRESH_DELAY = 305
 
-NAT64_STATE_DISABLED = 'Disabled'
-NAT64_STATE_NOT_RUNNING = 'NotRunning'
-NAT64_STATE_IDLE = 'Idle'
-NAT64_STATE_ACTIVE = 'Active'
+NAT64_STATE_DISABLED = 'disabled'
+NAT64_STATE_NOT_RUNNING = 'not_running'
+NAT64_STATE_IDLE = 'idle'
+NAT64_STATE_ACTIVE = 'active'
 
 
 class Nat64MultiBorderRouter(thread_cert.TestCase):
@@ -88,19 +86,6 @@ class Nat64MultiBorderRouter(thread_cert.TestCase):
         },
     }
 
-    def assertDictIncludes(self, actual: Mapping[str, str], expected: Mapping[str, str]):
-        """ Asserts the `actual` dict includes the `expected` dict.
-
-        Args:
-            actual: A dict for checking.
-            expected: The expected items that the actual dict should contains.
-        """
-        for k, v in expected.items():
-            if k not in actual:
-                raise AssertionError(f"key {k} is not found in first dict")
-            if v != actual[k]:
-                raise AssertionError(f"{repr(actual[k])} != {repr(v)} for key {k}")
-
     def test(self):
         br1 = self.nodes[BR1]
         router = self.nodes[ROUTER]
@@ -111,7 +96,9 @@ class Nat64MultiBorderRouter(thread_cert.TestCase):
         self.simulator.go(5)
 
         br1.start()
-        br1.enable_nat64()
+        # When feature flag is enabled, NAT64 might be disabled by default. So
+        # ensure NAT64 is enabled here.
+        br1.nat64_set_enabled(True)
         self.simulator.go(config.LEADER_STARTUP_DELAY)
         br1.bash("service bind9 stop")
         self.simulator.go(NAT64_PREFIX_REFRESH_DELAY)
@@ -124,45 +111,54 @@ class Nat64MultiBorderRouter(thread_cert.TestCase):
         #
         # Case 1. BR2 with an infrastructure prefix joins the network later and
         #         it will add the infrastructure nat64 prefix to Network Data.
+        #         Note: NAT64 translator will be bypassed.
         #
         br2.start()
-        br2.enable_nat64()
+        # When feature flag is enabled, NAT64 might be disabled by default. So
+        # ensure NAT64 is enabled here.
+        br2.nat64_set_enabled(True)
         self.simulator.go(config.BORDER_ROUTER_STARTUP_DELAY)
         self.assertEqual('router', br2.get_state())
+
+        br2.add_prefix(OMR_PREFIX)
+        br2.register_netdata()
+        self.simulator.go(10)
 
         self.simulator.go(10)
         self.assertNotEqual(br1.get_br_favored_nat64_prefix(), br2.get_br_favored_nat64_prefix())
         br1_local_nat64_prefix = br1.get_br_nat64_prefix()
+        br2_local_nat64_prefix = br2.get_br_nat64_prefix()
+        self.assertNotEqual(br2_local_nat64_prefix, br2.get_br_favored_nat64_prefix())
         br2_infra_nat64_prefix = br2.get_br_favored_nat64_prefix()
 
         self.assertEqual(len(br1.get_netdata_nat64_prefix()), 1)
         nat64_prefix = br1.get_netdata_nat64_prefix()[0]
         self.assertEqual(nat64_prefix, br2_infra_nat64_prefix)
         self.assertNotEqual(nat64_prefix, br1_local_nat64_prefix)
-        self.assertDictIncludes(br1.get_nat64_state(), {
+        self.assertDictIncludes(br1.nat64_state, {
             'PrefixManager': NAT64_STATE_IDLE,
             'Translator': NAT64_STATE_NOT_RUNNING
         })
-        self.assertDictIncludes(br2.get_nat64_state(), {
+        self.assertDictIncludes(br2.nat64_state, {
             'PrefixManager': NAT64_STATE_ACTIVE,
-            'Translator': NAT64_STATE_ACTIVE
+            'Translator': NAT64_STATE_NOT_RUNNING
         })
 
         #
         # Case 2. Disable NAT64 on BR2.
         #         BR1 will add its local nat64 prefix.
         #
-        br2.disable_nat64()
+        br2.nat64_set_enabled(False)
         self.simulator.go(10)
 
         self.assertEqual(len(br1.get_netdata_nat64_prefix()), 1)
         nat64_prefix = br1.get_netdata_nat64_prefix()[0]
         self.assertEqual(nat64_prefix, br1_local_nat64_prefix)
-        self.assertDictIncludes(br1.get_nat64_state(), {
+        self.assertDictIncludes(br1.nat64_state, {
             'PrefixManager': NAT64_STATE_ACTIVE,
             'Translator': NAT64_STATE_ACTIVE
         })
-        self.assertDictIncludes(br2.get_nat64_state(), {
+        self.assertDictIncludes(br2.nat64_state, {
             'PrefixManager': NAT64_STATE_DISABLED,
             'Translator': NAT64_STATE_DISABLED
         })
@@ -173,21 +169,20 @@ class Nat64MultiBorderRouter(thread_cert.TestCase):
         #
         br2.bash("service bind9 stop")
         self.simulator.go(5)
-        br2.enable_nat64()
+        br2.nat64_set_enabled(True)
 
         self.simulator.go(10)
-        self.assertNotEqual(br2_infra_nat64_prefix, br2.get_br_favored_nat64_prefix())
-        br2_local_nat64_prefix = br2.get_br_nat64_prefix()
+        self.assertEqual(br2_local_nat64_prefix, br2.get_br_favored_nat64_prefix())
 
         self.assertEqual(len(br1.get_netdata_nat64_prefix()), 1)
         nat64_prefix = br1.get_netdata_nat64_prefix()[0]
         self.assertEqual(nat64_prefix, br1_local_nat64_prefix)
         self.assertNotEqual(nat64_prefix, br2_local_nat64_prefix)
-        self.assertDictIncludes(br1.get_nat64_state(), {
+        self.assertDictIncludes(br1.nat64_state, {
             'PrefixManager': NAT64_STATE_ACTIVE,
             'Translator': NAT64_STATE_ACTIVE
         })
-        self.assertDictIncludes(br2.get_nat64_state(), {
+        self.assertDictIncludes(br2.nat64_state, {
             'PrefixManager': NAT64_STATE_IDLE,
             'Translator': NAT64_STATE_NOT_RUNNING
         })
@@ -196,18 +191,18 @@ class Nat64MultiBorderRouter(thread_cert.TestCase):
         # Case 4. Disable NAT64 on BR1.
         #         BR1 withdraws its local prefix and BR2 advertises its local prefix.
         #
-        br1.disable_nat64()
+        br1.nat64_set_enabled(False)
 
         self.simulator.go(10)
         self.assertEqual(len(br1.get_netdata_nat64_prefix()), 1)
         nat64_prefix = br1.get_netdata_nat64_prefix()[0]
         self.assertEqual(br2_local_nat64_prefix, nat64_prefix)
         self.assertNotEqual(br1_local_nat64_prefix, nat64_prefix)
-        self.assertDictIncludes(br1.get_nat64_state(), {
+        self.assertDictIncludes(br1.nat64_state, {
             'PrefixManager': NAT64_STATE_DISABLED,
             'Translator': NAT64_STATE_DISABLED
         })
-        self.assertDictIncludes(br2.get_nat64_state(), {
+        self.assertDictIncludes(br2.nat64_state, {
             'PrefixManager': NAT64_STATE_ACTIVE,
             'Translator': NAT64_STATE_ACTIVE
         })
@@ -216,18 +211,18 @@ class Nat64MultiBorderRouter(thread_cert.TestCase):
         # Case 5. Re-enable NAT64 on BR1.
         #         NAT64 prefix in Network Data is still BR2's local prefix.
         #
-        br1.enable_nat64()
+        br1.nat64_set_enabled(True)
 
         self.simulator.go(10)
         self.assertEqual(len(br1.get_netdata_nat64_prefix()), 1)
         nat64_prefix = br1.get_netdata_nat64_prefix()[0]
         self.assertEqual(br2_local_nat64_prefix, nat64_prefix)
         self.assertNotEqual(br1_local_nat64_prefix, nat64_prefix)
-        self.assertDictIncludes(br1.get_nat64_state(), {
+        self.assertDictIncludes(br1.nat64_state, {
             'PrefixManager': NAT64_STATE_IDLE,
             'Translator': NAT64_STATE_NOT_RUNNING
         })
-        self.assertDictIncludes(br2.get_nat64_state(), {
+        self.assertDictIncludes(br2.nat64_state, {
             'PrefixManager': NAT64_STATE_ACTIVE,
             'Translator': NAT64_STATE_ACTIVE
         })
@@ -242,11 +237,11 @@ class Nat64MultiBorderRouter(thread_cert.TestCase):
         nat64_prefix = br1.get_netdata_nat64_prefix()[0]
         self.assertEqual(br1_local_nat64_prefix, nat64_prefix)
         self.assertNotEqual(br2_local_nat64_prefix, nat64_prefix)
-        self.assertDictIncludes(br1.get_nat64_state(), {
+        self.assertDictIncludes(br1.nat64_state, {
             'PrefixManager': NAT64_STATE_ACTIVE,
             'Translator': NAT64_STATE_ACTIVE
         })
-        self.assertDictIncludes(br2.get_nat64_state(), {
+        self.assertDictIncludes(br2.nat64_state, {
             'PrefixManager': NAT64_STATE_NOT_RUNNING,
             'Translator': NAT64_STATE_NOT_RUNNING
         })
@@ -261,11 +256,11 @@ class Nat64MultiBorderRouter(thread_cert.TestCase):
         nat64_prefix = br1.get_netdata_nat64_prefix()[0]
         self.assertEqual(br1_local_nat64_prefix, nat64_prefix)
         self.assertNotEqual(br2_local_nat64_prefix, nat64_prefix)
-        self.assertDictIncludes(br1.get_nat64_state(), {
+        self.assertDictIncludes(br1.nat64_state, {
             'PrefixManager': NAT64_STATE_ACTIVE,
             'Translator': NAT64_STATE_ACTIVE
         })
-        self.assertDictIncludes(br2.get_nat64_state(), {
+        self.assertDictIncludes(br2.nat64_state, {
             'PrefixManager': NAT64_STATE_IDLE,
             'Translator': NAT64_STATE_NOT_RUNNING
         })

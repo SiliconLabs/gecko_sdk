@@ -25,7 +25,8 @@ from typing import Optional, Tuple
 import btmesh.util
 from bgapix.bglibx import CommandFailedError
 from bgapix.slstatus import SlStatus
-from btmesh.conf import SilabsConfStatus, SilabsConfTxOpt, SilabsConfTxPhy
+from btmesh.conf import (GattProxyState, NodeIdentityState, SilabsConfStatus,
+                         SilabsConfTxOpt, SilabsConfTxPhy)
 from btmesh.db import ModelID
 from btmesh.errors import BtmeshError
 
@@ -38,6 +39,8 @@ from .cmd import BtmeshCmd
 
 
 class BtmeshConfCmd(BtmeshCmd):
+    NETKEY_IDX = 0
+
     @property
     def parser(self) -> ArgumentParserExt:
         return self.conf_parser
@@ -62,6 +65,7 @@ class BtmeshConfCmd(BtmeshCmd):
         self.subparser_dict = dict(
             (
                 self.create_conf_reset_parser(self.conf_subparser),
+                self.create_conf_set_parser(self.conf_subparser),
                 self.create_conf_ae_parser(self.conf_subparser),
             )
         )
@@ -101,13 +105,13 @@ class BtmeshConfCmd(BtmeshCmd):
             exit_on_error_ext=False,
         )
         self.conf_reset_parser.set_defaults(conf_subcmd=self.conf_reset_cmd)
-        self.conf_reset_parser.add_argument(
-            "nodespec",
-            nargs="+",
-            metavar="<nodespec>",
-            help=f"Target nodes of node reset procedure. The provisioner (NCP) "
-            f"shall be reset by factory reset explicitly so it can't be the "
-            f"target of this command. {app_ui.NODESPEC_HELP}",
+        self.add_nodes_pos_arg(
+            self.conf_reset_parser,
+            help=(
+                "Target nodes of node reset procedure. The provisioner (NCP) "
+                "shall be reset by factory reset explicitly so it can't be the "
+                "target of this command."
+            ),
         )
         self.conf_reset_parser.add_argument(
             "--local",
@@ -120,30 +124,24 @@ class BtmeshConfCmd(BtmeshCmd):
             "provisioner for example node factory reset was initiated by the "
             "push buttons on the board.",
         )
-        self.add_retry_max_arg(
+        self.add_btmesh_basic_retry_args(
             self.conf_reset_parser,
-            app_cfg.conf.reset_node_retry_max_default,
-            help=(
+            retry_max_default=app_cfg.conf.reset_node_retry_max_default,
+            retry_interval_default=app_cfg.conf.reset_node_retry_interval_default,
+            retry_interval_lpn_default=app_cfg.conf.reset_node_retry_interval_lpn_default,
+            retry_max_help=(
                 "Maximum number of additional Config Node Reset messages are "
                 "sent until the Config Node Reset Status message is received "
                 "from the remote node. "
                 "(default: %(default)s)"
             ),
-        )
-        self.add_retry_interval_arg(
-            self.conf_reset_parser,
-            app_cfg.conf.reset_node_retry_interval_default,
-            help=(
+            retry_interval_help=(
                 "Interval in seconds between Config Node Reset messages when "
                 "the Config Node Reset Status message is not received from the "
                 "remote node. "
                 "(default: %(default)s)"
             ),
-        )
-        self.add_retry_interval_lpn_arg(
-            self.conf_reset_parser,
-            app_cfg.conf.reset_node_retry_interval_lpn_default,
-            help=(
+            retry_interval_lpn_help=(
                 "Interval in seconds between Config Node Reset messages when "
                 "the Config Node Reset Status message is not received from the "
                 "remote Low Power Node. "
@@ -151,6 +149,55 @@ class BtmeshConfCmd(BtmeshCmd):
             ),
         )
         return SUBPARSER_NAME, self.conf_reset_parser
+
+    def create_conf_set_parser(self, subparsers) -> Tuple[str, ArgumentParserExt]:
+        SUBPARSER_NAME = "set"
+        self.conf_set_parser: ArgumentParserExt = subparsers.add_parser(
+            SUBPARSER_NAME,
+            help="Set configuration states on specified nodes.",
+            description="Set configuration states on specified nodes.",
+            exit_on_error_ext=False,
+        )
+        self.conf_set_parser.set_defaults(conf_subcmd=self.conf_set_cmd)
+        self.conf_set_parser.add_argument(
+            "--proxy",
+            choices=["on", "off"],
+            help="Set proxy feature.",
+        )
+        self.conf_set_parser.add_argument(
+            "--identity",
+            choices=["on", "off"],
+            help="Set node identity advertising.",
+        )
+        self.add_btmesh_basic_retry_args(
+            self.conf_set_parser,
+            retry_max_default=app_cfg.conf.conf_retry_max_default,
+            retry_interval_default=app_cfg.conf.conf_retry_interval_default,
+            retry_interval_lpn_default=app_cfg.conf.conf_retry_interval_lpn_default,
+            retry_max_help=(
+                "Maximum number of additional Config messages are sent until "
+                "the corresponding Config Status message is received from the "
+                "remote node. "
+                "(default: %(default)s)"
+            ),
+            retry_interval_help=(
+                "Interval in seconds between Config messages when the "
+                "corresponding Config Status message is not received "
+                "from the remote node. "
+                "(default: %(default)s)"
+            ),
+            retry_interval_lpn_help=(
+                "Interval in seconds between Config messages when the "
+                "corresponding Config Status message is not received "
+                "from the remote Low Power Node. "
+                "(default: %(default)s)"
+            ),
+        )
+        self.add_nodes_pos_arg(
+            self.conf_set_parser,
+            help=("Target nodes of configuration."),
+        )
+        return SUBPARSER_NAME, self.conf_set_parser
 
     def create_conf_ae_parser(self, subparsers) -> Tuple[str, ArgumentParserExt]:
         SUBPARSER_NAME = "ae"
@@ -246,11 +293,14 @@ class BtmeshConfCmd(BtmeshCmd):
                 "enabled or disabled for all models of the model profile."
             ),
         )
-        self.add_btmesh_basic_retry_args(
+        self.add_btmesh_multicast_basic_retry_args(
             self.conf_ae_parser,
             retry_max_default=app_cfg.conf.silabs_retry_max_default,
             retry_interval_default=app_cfg.conf.silabs_retry_interval_default,
             retry_interval_lpn_default=app_cfg.conf.silabs_retry_interval_lpn_default,
+            retry_multicast_threshold_default=(
+                app_cfg.conf.silabs_retry_multicast_threshold_default
+            ),
             retry_max_help=(
                 "Maximum number of additional Silabs Config Get or Set messages "
                 "are sent until the Silabs Config Status message is not received "
@@ -267,6 +317,16 @@ class BtmeshConfCmd(BtmeshCmd):
                 "Interval in seconds between Silabs Config Get or Set messages "
                 "when the Silabs Config Status message is not received from "
                 "the Silabs Config Server model of a Low Power Node. "
+                "(default: %(default)s)"
+            ),
+            retry_multicast_threshold_help=(
+                "Multicast threshold used during Silabs Configuration procedures. "
+                "If the number of uncompleted Silabs Config Servers with missing "
+                "Silabs Config Status messages during the aforementioned Silabs "
+                "Configuration procedures exceeds or is equal to this number "
+                "then the group address is used. "
+                "Otherwise, servers are looped through one by one. "
+                "Zero value means unicast addressing. "
                 "(default: %(default)s)"
             ),
         )
@@ -345,6 +405,41 @@ class BtmeshConfCmd(BtmeshCmd):
             except BtmeshError as e:
                 app_ui.error(str(e))
 
+    def conf_set_cmd(self, pargs):
+        nodes = app_db.btmesh_db.get_node_list(order_property="name")
+        nodes = self.parse_nodespecs(pargs.nodespec, nodes)
+        # The retry_cmd_max and retry_cmd_interval are used only because the
+        # other parameters are overwritten by the arguments of conf set command
+        retry_params_default = app_cfg.common.btmesh_retry_params_default
+        retry_params = self.process_btmesh_retry_params(pargs, retry_params_default)
+        for node in nodes:
+            node_str = app_ui.node_str(node)
+            if pargs.proxy:
+                if pargs.proxy == "on":
+                    proxy_state = GattProxyState.ENABLED
+                else:
+                    proxy_state = GattProxyState.DISABLED
+                app_btmesh.conf.set_gatt_proxy(
+                    node, state=proxy_state, retry_params=retry_params
+                )
+                proxy_state_str = proxy_state.pretty_name
+                app_ui.info(f"Proxy feature is {proxy_state_str} on {node_str} node.")
+            if pargs.identity:
+                if pargs.identity == "on":
+                    node_identity_state = NodeIdentityState.ENABLED
+                else:
+                    node_identity_state = NodeIdentityState.DISABLED
+                app_btmesh.conf.set_node_identity(
+                    node,
+                    netkey_index=self.NETKEY_IDX,
+                    state=node_identity_state,
+                    retry_params=retry_params,
+                )
+                identity_state_str = node_identity_state.pretty_name
+                app_ui.info(
+                    f"Node identity advertising is {identity_state_str} on {node_str} node."
+                )
+
     def conf_ae_cmd(self, pargs):
         appkey_idx = pargs.appkey_idx
         mdls: set[ModelID] = set()
@@ -353,10 +448,13 @@ class BtmeshConfCmd(BtmeshCmd):
             nodes_order_property="name",
             group_order_property="name",
         )
-        # The retry_cmd_max and retry_cmd_interval are used only because the
-        # other parameters are overwritten by the arguments of conf ae command
-        retry_params_default = app_cfg.common.btmesh_retry_params_default
-        retry_params = self.process_btmesh_retry_params(pargs, retry_params_default)
+        # The retry_cmd_max, retry_cmd_interval and auto_unicast common retry
+        # parameter configuration values are used only because the other retry
+        # parameters are overwritten by the arguments of conf ae command.
+        retry_params_default = app_cfg.common.btmesh_multicast_retry_params_default
+        retry_params = self.process_btmesh_multicast_retry_params(
+            pargs, retry_params_default
+        )
         if (pargs.mdls or pargs.elems or pargs.en or pargs.dis) and not (
             (pargs.mdls and pargs.elems) and (pargs.en or pargs.dis)
         ):

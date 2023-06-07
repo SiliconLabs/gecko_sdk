@@ -27,7 +27,7 @@ limitations under the License.
 #include "tensorflow/lite/kernels/kernel_util.h"
 #include "tensorflow/lite/kernels/op_macros.h"
 #include "tensorflow/lite/micro/kernels/kernel_util.h"
-#include "tensorflow/lite/micro/micro_error_reporter.h"
+#include "tensorflow/lite/micro/micro_log.h"
 
 namespace tflite {
 
@@ -162,14 +162,7 @@ TfLiteStatus SubEval(TfLiteContext* context, TfLiteNode* node) {
 }
 
 TfLiteRegistration Register_SUB() {
-  return {/*init=*/SubInit,
-          /*free=*/nullptr,
-          /*prepare=*/SubPrepare,
-          /*invoke=*/SubEval,
-          /*profiling_string=*/nullptr,
-          /*builtin_code=*/0,
-          /*custom_name=*/nullptr,
-          /*version=*/0};
+  return tflite::micro::RegisterOp(SubInit, SubPrepare, SubEval);
 }
 
 }  // namespace tflite

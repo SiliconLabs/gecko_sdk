@@ -50,11 +50,11 @@ char defaultStorageDirectory[OTA_FILE_STORAGE_DIR_LENGTH] = "ota-files";
 
 //------------------------------------------------------------------------------
 
-void emAfOtaStorageClose(void)
+void sli_zigbee_af_ota_storage_close(void)
 {
 }
 
-void emAfOtaStorageInfoPrint(void)
+void sli_zigbee_af_ota_storage_info_print(void)
 {
 }
 
@@ -70,7 +70,7 @@ EmberAfOtaStorageStatus emberAfOtaStorageClearTempDataCallback(void)
   return EMBER_AF_OTA_STORAGE_SUCCESS;
 }
 
-void emAfOtaLoadFileCommand(void)
+void sli_zigbee_af_ota_load_file_command(void)
 {
 }
 
@@ -126,7 +126,7 @@ EmberAfOtaImageId emberAfOtaStorageSearchCallback(uint16_t manufacturerId,
   return emberInvalidImageId;
 }
 
-uint32_t emAfOtaStorageGetSlot(void)
+uint32_t sli_zigbee_af_ota_storage_get_slot(void)
 {
   return INVALID_SLOT;
 }

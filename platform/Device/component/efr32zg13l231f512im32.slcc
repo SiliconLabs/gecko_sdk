@@ -9,10 +9,10 @@
     unless:
     - device_content_override
 - source:
-  - path: platform/Device/SiliconLabs/EFR32ZG13L/Source/system_efr32zg13l.c
+  - path: platform/Device/SiliconLabs/EFR32ZG13L/Source/startup_efr32zg13l.c
     unless:
     - device_content_override
-  - path: platform/Device/SiliconLabs/EFR32ZG13L/Source/startup_efr32zg13l.c
+  - path: platform/Device/SiliconLabs/EFR32ZG13L/Source/system_efr32zg13l.c
     unless:
     - device_content_override
 - include:

@@ -30,9 +30,9 @@
 #ifndef SL_SE_MANAGER_SIGNATURE_H
 #define SL_SE_MANAGER_SIGNATURE_H
 
-#include "em_device.h"
+#include "sli_se_manager_features.h"
 
-#if defined(SEMAILBOX_PRESENT) || defined(DOXYGEN)
+#if defined(SLI_MAILBOX_COMMAND_SUPPORTED)
 
 /// @addtogroup sl_se_manager
 /// @{
@@ -180,6 +180,6 @@ sl_status_t sl_se_ecc_verify(sl_se_command_context_t *cmd_ctx,
 /// @} (end addtogroup sl_se_manager_signature)
 /// @} (end addtogroup sl_se_manager)
 
-#endif // defined(SEMAILBOX_PRESENT)
+#endif // defined(SLI_MAILBOX_COMMAND_SUPPORTED)
 
 #endif // SL_SE_MANAGER_SIGNATURE_H

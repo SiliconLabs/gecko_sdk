@@ -16,7 +16,9 @@
  ******************************************************************************/
 
 #include "app/framework/include/af.h"
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #include "network-creator.h"
 #include "network-creator-security.h"
 #include "network-steering.h"
@@ -86,10 +88,10 @@ void finding_and_binding_event_handler(sl_zigbee_event_t *event)
   }
 }
 
-extern bool emAfPluginGreenPowerServerGpSinkCommissioningModeCommandHandler(uint8_t options,
-                                                                            uint16_t gpmAddrForSecurity,
-                                                                            uint16_t gpmAddrForPairing,
-                                                                            uint8_t sinkEndpoint);
+extern bool sli_zigbee_af_green_power_server_gp_sink_commissioning_mode_command_handler(uint8_t options,
+                                                                                        uint16_t gpmAddrForSecurity,
+                                                                                        uint16_t gpmAddrForPairing,
+                                                                                        uint8_t sinkEndpoint);
 
 // Enter or exit sink commissioning mode
 void sink_commissioning_mode_event_handler(sl_zigbee_event_t *event)
@@ -97,10 +99,10 @@ void sink_commissioning_mode_event_handler(sl_zigbee_event_t *event)
   uint8_t options = EMBER_AF_GP_SINK_COMMISSIONING_MODE_OPTIONS_INVOLVE_PROXIES \
                     | ((enterComm) ? EMBER_AF_GP_SINK_COMMISSIONING_MODE_OPTIONS_ACTION : 0);
 
-  emAfPluginGreenPowerServerGpSinkCommissioningModeCommandHandler(options,    //options - (Involve Proxy | Enter)
-                                                                  0xFFFF, //addr
-                                                                  0xFFFF, //addr
-                                                                  LIGHT_ENDPOINT); //light Endpoint
+  sli_zigbee_af_green_power_server_gp_sink_commissioning_mode_command_handler(options,    //options - (Involve Proxy | Enter)
+                                                                              0xFFFF,        //addr
+                                                                              0xFFFF,        //addr
+                                                                              LIGHT_ENDPOINT);        //light Endpoint
   if (enterComm) {
     led_turn_on(COMMISSIONING_STATUS_LED);
     enterComm = false;
@@ -519,7 +521,7 @@ void gpAppGpPrintTxQueue(sl_cli_command_arg_t *arguments)
   sl_zigbee_app_debug_println("Number of Gp Tx Queue entries : %d", listCount);
   int i = 0;
   if (listCount != 0) {
-    Buffer finger = emBufferQueueHead(emberGpGetTxQueueHead());
+    Buffer finger = sli_legacy_buffer_manager_buffer_queue_head(emberGpGetTxQueueHead());
     while (finger != NULL_BUFFER) {
       sl_zigbee_app_debug_println("Entry [%d] :", i++);
       EmberGpTxQueueEntry *entry = (EmberGpTxQueueEntry *)emberMessageBufferContents(finger);
@@ -531,7 +533,7 @@ void gpAppGpPrintTxQueue(sl_cli_command_arg_t *arguments)
       sl_zigbee_app_debug_print("  Data = [");
       sl_zigbee_app_debug_print_buffer(data, dataLength, true);
       sl_zigbee_app_debug_println("]");
-      finger = emBufferQueueNext(emberGpGetTxQueueHead(), finger);
+      finger = sli_legacy_buffer_manager_buffer_queue_next(emberGpGetTxQueueHead(), finger);
     }
   }
 }
@@ -544,9 +546,9 @@ void gpAppGpPrintTxQueue(sl_cli_command_arg_t *arguments)
 
 extern uint8_t sl_mac_lower_mac_get_radio_channel(uint8_t mac_index);
 
-extern EmberMessageBuffer emGpdfMakeHeader(bool useCca,
-                                           EmberGpAddress *src,
-                                           EmberGpAddress *dst);
+extern EmberMessageBuffer sli_zigbee_gpdf_make_header(bool useCca,
+                                                      EmberGpAddress *src,
+                                                      EmberGpAddress *dst);
 
 static void free_gp_tx_queue_entry(EmberGpTxQueueEntry* entry)
 {
@@ -568,7 +570,7 @@ static EmberGpTxQueueEntry* get_gp_stub_tx_queue(EmberGpAddress* addr)
                                          &dataLength,
                                          128) != EMBER_NULL_MESSAGE_BUFFER) {
     // Allocate a buffer and prepare a outgoing MAC header using gpd address in the emGpTxQueue
-    EmberMessageBuffer header = emGpdfMakeHeader(true, NULL, &(emGpTxQueue.addr));
+    EmberMessageBuffer header = sli_zigbee_gpdf_make_header(true, NULL, &(emGpTxQueue.addr));
     // Add the command Id from the queue to the buffer
     uint8_t len = emberMessageBufferLength(header) + 1;
     emberAppendToLinkedBuffers(header, &(emGpTxQueue.gpdCommandId), 1);

@@ -44,6 +44,10 @@
 // <i> Default: 38400000
 #define SL_DEVICE_INIT_HFXO_FREQ           38400000
 
+// <o SL_DEVICE_INIT_HFXO_PRECISION> HFXO precision in PPM <0-65535>
+// <i> Default: 500
+#define SL_DEVICE_INIT_HFXO_PRECISION      500
+
 // <o SL_DEVICE_INIT_HFXO_CTUNE> CTUNE <0-255>
 // <i> Default: 140
 #define SL_DEVICE_INIT_HFXO_CTUNE          140

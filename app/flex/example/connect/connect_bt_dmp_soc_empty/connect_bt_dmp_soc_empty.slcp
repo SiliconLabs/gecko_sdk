@@ -17,6 +17,7 @@ component:
   - id: connect_ble_cli
   - id: token_manager
   - id: micriumos_kernel
+  - id: rail_util_pti
 #------------Memory Protection Unit-------------------
   - id: mpu
 #---------------Workaround for DMP issue -------------
@@ -70,6 +71,24 @@ configuration:
     value: "4096"
   - name: SL_HEAP_SIZE
     value: "16000"
+    unless:
+      - "device_sdid_230"
+      - "device_sdid_235"
+  - name: SL_HEAP_SIZE
+    value: "20000"
+    condition:
+      - "device_sdid_230"
+  - name: SL_HEAP_SIZE
+    value: "20000"
+    condition:
+      - "device_sdid_235"
+  - name: "configTOTAL_HEAP_SIZE"
+    value: "12288"
+    condition: [device_sdid_230]
+  - name: "configTOTAL_HEAP_SIZE"
+    value: "12288"
+    condition: [device_sdid_235]
+
 #----------------- USART configs ---------------------
   - name: SL_BOARD_ENABLE_VCOM
     value: "1"

@@ -27,6 +27,7 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
+
 #ifndef SLI_SE_DRIVER_MAC_H
 #define SLI_SE_DRIVER_MAC_H
 
@@ -42,13 +43,9 @@
  * \{
  ******************************************************************************/
 
-#include "em_device.h"
+#include "sli_psa_driver_features.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
 
 // Replace inclusion of crypto_driver_common.h with the new psa driver interface
 // header file when it becomes available.
@@ -70,26 +67,28 @@ typedef struct {
       uint8_t streaming_block[16];
       size_t processed_length;
     } cbcmac;
-    #if defined(PSA_WANT_ALG_HMAC)
+    #if defined(SLI_PSA_DRIVER_FEATURE_HMAC)
     struct {
-      #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+        #if defined(SLI_PSA_DRIVER_FEATURE_HASH_STATE_64)
       uint8_t hmac_result[64];
-      #else
+        #else
       uint8_t hmac_result[32];
-      #endif
+        #endif // SLI_PSA_DRIVER_FEATURE_HASH_STATE_64
       size_t hmac_len;
     } hmac;
-    #endif
+    #endif // SLI_PSA_DRIVER_FEATURE_HMAC
   } ctx;
 } sli_se_driver_mac_operation_t;
 
 // -----------------------------------------------------------------------------
 // Functions
 
-#if defined(PSA_WANT_ALG_HMAC)
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 sl_se_hash_type_t sli_se_hash_type_from_psa_hmac_alg(psa_algorithm_t alg,
                                                      size_t *length);
-#endif
 
 psa_status_t sli_se_driver_mac_compute(sl_se_key_descriptor_t *key_desc,
                                        psa_algorithm_t alg,
@@ -114,11 +113,11 @@ psa_status_t sli_se_driver_mac_sign_finish(sli_se_driver_mac_operation_t *operat
                                            size_t mac_size,
                                            size_t *mac_length);
 
-#endif // SEMAILBOX_PRESENT
-
 #ifdef __cplusplus
 }
 #endif
+
+#endif // SLI_MBEDTLS_DEVICE_HSE
 
 /** \} (end addtogroup sl_psa_drivers_se) */
 /** \} (end addtogroup sl_psa_drivers) */

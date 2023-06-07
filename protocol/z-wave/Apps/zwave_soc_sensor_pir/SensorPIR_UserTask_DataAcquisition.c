@@ -6,7 +6,7 @@
  */
 
 #include <SensorPIR_UserTask_DataAcquisition.h>
-#include <zaf_event_helper.h>
+#include <zaf_event_distributor_soc.h>
 #include "events.h"
 #include <SizeOf.h>
 #include <zpal_power_manager.h>
@@ -61,7 +61,7 @@ NO_RETURN static void executeThread(void)
     //Do something user specific
     ////////////////////////////////////
 
-    ZAF_EventHelperEventEnqueue(EVENT_APP_USERTASK_DATA_ACQUISITION_FINISHED);  // An event to be send to the main app.
+    zaf_event_distributor_enqueue_app_event(EVENT_APP_USERTASK_DATA_ACQUISITION_FINISHED);  // An event to be send to the main app.
     zpal_pm_cancel(task_power_lock);
 
     vTaskDelay(pdMS_TO_TICKS(USER_TASK_WAKEUP_PERIOD));
@@ -92,16 +92,10 @@ SensorPIR_DataAcquisitionTask(void* pUserTaskParam)
 
   DPRINT("\r\nSensorPIR Data Acquisition UserTask started!");
 
-  // Wait for the Main App to initialize all needed modules
-  while (ZAF_EventHelperIsInitialized() != true)
-  {
-    vTaskDelay(pdMS_TO_TICKS(15));  // Value tuned to to the needed wait time!
-  }
-
   task_power_lock = zpal_pm_register(ZPAL_PM_TYPE_DEEP_SLEEP);
 
   // Generate event that says the Data acquisition UserTask has started!
-  if (ZAF_EventHelperEventEnqueue(EVENT_APP_USERTASK_DATA_ACQUISITION_READY))
+  if (zaf_event_distributor_enqueue_app_event(EVENT_APP_USERTASK_DATA_ACQUISITION_READY))
   {
     DPRINT("\r\nDataAcquisitionTask: Ready event is send to main app!\r\n");
   }

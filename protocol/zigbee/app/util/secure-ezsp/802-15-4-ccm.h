@@ -31,29 +31,29 @@
 #define STANDALONE_VARIABLE_FIELD_INDEX_LOW     15
 
 // The core encryption function.
-void emCcmEncrypt(const uint8_t *nonce,
-                  uint8_t *authenticate,
-                  uint16_t authenticateLength,
-                  uint8_t *encrypt,
-                  uint16_t encryptLength,
-                  uint8_t *mic,
-                  uint8_t packetMicLength);
+void sli_zigbee_ccm_encrypt(const uint8_t *nonce,
+                            uint8_t *authenticate,
+                            uint16_t authenticateLength,
+                            uint8_t *encrypt,
+                            uint16_t encryptLength,
+                            uint8_t *mic,
+                            uint8_t packetMicLength);
 
 // // Wrapper used when the authenticated, encrypted, and mic sections are
 // // adjacent.
-void emCcmEncryptPacket(const uint8_t *nonce,
-                        uint8_t *packet,
-                        uint16_t authenticateLength,
-                        uint16_t encryptLength,
-                        uint8_t micLength);
+void sli_zigbee_ccm_encrypt_packet(const uint8_t *nonce,
+                                   uint8_t *packet,
+                                   uint16_t authenticateLength,
+                                   uint16_t encryptLength,
+                                   uint8_t micLength);
 
 // // Decrypts the packet in place.  The security subframe is removed.
 // //
 // // Returns true if successful and false otherwise.
 
-bool emCcmDecryptPacket(const uint8_t *nonce,
-                        uint8_t *packet,
-                        uint16_t authenticateLength,
-                        uint8_t *encrypt,
-                        uint16_t encryptLength,
-                        uint8_t packetMicLength);
+bool sli_zigbee_ccm_decrypt_packet(const uint8_t *nonce,
+                                   uint8_t *packet,
+                                   uint16_t authenticateLength,
+                                   uint8_t *encrypt,
+                                   uint16_t encryptLength,
+                                   uint8_t packetMicLength);

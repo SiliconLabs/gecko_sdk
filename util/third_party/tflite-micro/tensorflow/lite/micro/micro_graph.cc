@@ -20,7 +20,7 @@ limitations under the License.
 #include "tensorflow/lite/kernels/internal/compatibility.h"
 #include "tensorflow/lite/micro/flatbuffer_utils.h"
 #include "tensorflow/lite/micro/memory_helpers.h"
-#include "tensorflow/lite/micro/micro_error_reporter.h"
+#include "tensorflow/lite/micro/micro_log.h"
 #include "tensorflow/lite/micro/micro_profiler.h"
 #include "tensorflow/lite/schema/schema_generated.h"
 
@@ -165,7 +165,7 @@ TfLiteStatus MicroGraph::InvokeSubgraph(int subgraph_idx) {
 #if !defined(TF_LITE_STRIP_ERROR_STRINGS)
     ScopedMicroProfiler scoped_profiler(
         OpNameFromRegistration(registration),
-        reinterpret_cast<MicroProfiler*>(context_->profiler));
+        reinterpret_cast<MicroProfilerInterface*>(context_->profiler));
 #endif
 
     TFLITE_DCHECK(registration->invoke);

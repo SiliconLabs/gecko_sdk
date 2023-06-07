@@ -31,6 +31,11 @@
 #ifndef SL_NCP_EVT_FILTER_H
 #define SL_NCP_EVT_FILTER_H
 
+/***********************************************************************************************//**
+ * @addtogroup ncp_evt_filter
+ * @{
+ **************************************************************************************************/
+
 #include <stdint.h>
 #include <stdbool.h>
 #include "sl_bt_api.h"
@@ -65,4 +70,5 @@ void sl_ncp_evt_filter_handler(user_cmd_manage_event_filter_t *cmd);
  ******************************************************************************/
 bool sl_ncp_evt_filter_is_filtered(uint32_t header);
 
+/** @} (end addtogroup ncp_evt_filter) */
 #endif // SL_NCP_EVT_FILTER_H

@@ -47,14 +47,14 @@ void getNetworkKeyFromCli(EmberKeyData* returnData);
 // true.
 extern bool emberAfClearLinkKeyTableUponFormingOrJoining;
 
-extern const EmberAfSecurityProfileData emAfSecurityProfileData[];
-const EmberAfSecurityProfileData *emAfGetCurrentSecurityProfileData(void);
+extern const EmberAfSecurityProfileData sli_zigbee_af_security_profile_data[];
+const EmberAfSecurityProfileData *sli_zigbee_af_get_current_security_profile_data(void);
 
-void emAfClearLinkKeyTable(void);
+void sli_zigbee_af_clear_link_key_table(void);
 
-EmberStatus emAfInstallCodeToKey(uint8_t* installCode, // includes CRC
-                                 uint8_t length,       // includes CRC length
-                                 EmberKeyData *key);
+EmberStatus sli_zigbee_af_install_code_to_key(uint8_t* installCode, // includes CRC
+                                              uint8_t length, // includes CRC length
+                                              EmberKeyData *key);
 
 EmberStatus zaTrustCenterSetJoinPolicy(EmberJoinDecision decision);
 

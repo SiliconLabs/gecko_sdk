@@ -21,7 +21,7 @@
 #include <cstdint>
 
 #include "tensorflow/lite/c/common.h"
-#include "tensorflow/lite/micro/micro_error_reporter.h"
+#include "tensorflow/lite/micro/tflite_bridge/micro_error_reporter.h"
 #include "config/audio_classifier_config.h"
 #include "audio_classifier.h"
 

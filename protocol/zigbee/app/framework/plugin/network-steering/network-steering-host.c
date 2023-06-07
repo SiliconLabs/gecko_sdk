@@ -32,17 +32,17 @@ static bool memoryCleared = false;
 
 //============================================================================
 
-uint8_t emAfPluginNetworkSteeringGetMaxPossiblePanIds(void)
+uint8_t sli_zigbee_af_network_steering_get_max_possible_pan_ids(void)
 {
   return MAX_NETWORKS;
 }
 
-void emAfPluginNetworkSteeringClearStoredPanIds(void)
+void sli_zigbee_af_network_steering_clear_stored_pan_ids(void)
 {
   memoryCleared = false;
 }
 
-uint16_t* emAfPluginNetworkSteeringGetStoredPanIdPointer(uint8_t index)
+uint16_t* sli_zigbee_af_network_steering_get_stored_pan_id_pointer(uint8_t index)
 {
   if (index >= MAX_NETWORKS) {
     return NULL;

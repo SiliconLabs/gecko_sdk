@@ -14,9 +14,12 @@ description: >
   - The Advertising Constant Tone Extension Transmit Duration characteristic is not implemented.
 
   - The AoD mode parameters are configured globally in the Constant Tone Extension GATT Service (Connection) component.
-category: Bluetooth|GATT
+category: Bluetooth|Application|GATT Services
 quality: production
 root_path: app/bluetooth/common/gatt_service_cte_adv
+tag:
+  - No-Code
+
 source:
   - path: sl_gatt_service_cte_silabs.c
 config_file:

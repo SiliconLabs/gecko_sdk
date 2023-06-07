@@ -1,6 +1,6 @@
 project_name: btmesh_soc_csr_generator
 package: Btmesh
-label: Bluetooth Mesh - SoC CSR Generator
+label: Bluetooth Mesh - SoC CSR Generator (Secure Vault)
 description: >
   Certificate generating firmware example. Software is generating the device
   EC key pair, the signing request for the device certificate, and other related
@@ -34,7 +34,6 @@ component:
   - id: psa_crypto_cmac
   - id: psa_crypto_ccm
   - id: psa_crypto_cipher_ecb
-  - id: psa_crypto_common
   - id: psa_crypto_ecdh
   - id: psa_crypto_ecdsa
   - id: psa_crypto_ecc_secp256r1
@@ -46,7 +45,7 @@ component:
   - id: sleeptimer
 
 requires:
-  - name: device_security_vault
+  - name: armv8m.main
   - name: device_has_radio_2g4hz
 
 source:
@@ -82,10 +81,10 @@ configuration:
       - "device_security_vault"
   - name: CSR_GENERATOR_PROTOCOL
     value: "CSR_PROTOCOL_BTMESH"
+  - name: NVM3_DEFAULT_NVM_SIZE
+    value: "0x6000"
   - name: SL_BOARD_ENABLE_VCOM
     value: "1"
-    condition:
-      - iostream_usart
   - name: SL_HEAP_SIZE
     value: "0x4000"
   - name: SL_IOSTREAM_USART_VCOM_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION

@@ -34,14 +34,17 @@
 
 #include <stdio.h>
 #include "socket.h"
-#include "socket_hnd.h"
-#include "external_socket.h"
+#include "sli_socket_hnd.h"
+#include "sli_socket_external.h"
 #include "sl_wisun_ip6string.h"
 #include "sl_wisun_trace_util.h"
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
+
+/// Data event handling timeout ms
+#define SOCKET_DATA_EVT_HND_TIMEOUT_MS                 3000UL
 
 // -----------------------------------------------------------------------------
 //                          Static Function Declarations
@@ -89,7 +92,7 @@ __STATIC_INLINE sl_wisun_socket_protocol_t _socktype2wisun(sock_type_t type, pro
  * @param[in] optlen Option length
  * @return int32_t Return with -1 on error, 0 on success.
  *****************************************************************************/
-static int32_t _set_socket_handler_opt(_socket_handler_t *hnd,
+static int32_t _set_socket_handler_opt(sli_socket_hnd_t *hnd,
                                        const int32_t optname,
                                        const void * const optval,
                                        const socklen_t optlen);
@@ -103,7 +106,7 @@ static int32_t _set_socket_handler_opt(_socket_handler_t *hnd,
  * @param[in] optlen Option length
  * @return int32_t Return with -1 on error, 0 on success.
  *****************************************************************************/
-static int32_t _get_socket_handler_opt(const _socket_handler_t * const hnd,
+static int32_t _get_socket_handler_opt(const sli_socket_hnd_t * const hnd,
                                        const int32_t optname,
                                        void * const optval,
                                        socklen_t * const optlen);
@@ -112,12 +115,10 @@ static int32_t _get_socket_handler_opt(const _socket_handler_t * const hnd,
 //                                Global Variables
 // -----------------------------------------------------------------------------
 
-/**
- * @brief Any address for IPv6
- */
+/// Any address for IPv6
 const in6_addr_t in6addr_any = {
   .s6_addr = {
-    .address = { 0 }
+    .address = { 0U }
   }
 };
 
@@ -140,18 +141,18 @@ int32_t socket(sock_domain_t domain, sock_type_t type, proto_type_t protocol)
     case AF_WISUN:
       stat = sl_wisun_open_socket(_socktype2wisun(type, protocol), &sock_id);
       if (stat == SL_STATUS_OK
-          && socket_handler_add_sockid((uint16_t) domain, sock_id) != RETVAL_ERROR) {
+          && sli_socket_hnd_add_sockid((uint16_t) domain, sock_id) != SOCKET_RETVAL_ERROR) {
         return sock_id;
       } else {
         __CHECK_FOR_STATUS(stat);
-        _set_errno_ret_error(EINVAL);
+        sli_socket_hnd_set_errno_ret_error(EINVAL);
       }
 
     // External socket
     case AF_INET:
-    case AF_INET6: return _external_socket(domain, type, protocol);
+    case AF_INET6: return sli_socket_external_socket(domain, type, protocol);
     default:
-      _set_errno_ret_error(EINVAL);
+      sli_socket_hnd_set_errno_ret_error(EINVAL);
   }
 }
 
@@ -159,29 +160,29 @@ int32_t socket(sock_domain_t domain, sock_type_t type, proto_type_t protocol)
 int32_t close(int32_t sockid)
 {
   sl_status_t stat = SL_STATUS_FAIL;
-  const _socket_handler_t *sockhnd = NULL;
-  sockhnd = socket_handler_get(sockid);
+  const sli_socket_hnd_t *sockhnd = NULL;
+  sockhnd = sli_socket_hnd_get(sockid);
 
   if (sockhnd == NULL) {
-    _set_errno_ret_error(EINVAL);
+    sli_socket_hnd_set_errno_ret_error(EINVAL);
   }
-  switch (sockhnd->_domain) {
+  switch (sockhnd->domain) {
     // Wi-SUN socket
     case AF_WISUN:
       // remove socket from the socket storage
-      if (socket_handler_remove(sockid) == RETVAL_ERROR) {
-        _set_errno_ret_error(EINVAL);
+      if (sli_socket_hnd_remove(sockid) == SOCKET_RETVAL_ERROR) {
+        sli_socket_hnd_set_errno_ret_error(EINVAL);
       }
       // close socket
       stat = sl_wisun_close_socket((sl_wisun_socket_id_t) sockid);
       __CHECK_FOR_STATUS(stat);
-      return _check_status(stat, RETVAL_OK, EINVAL);
+      return _check_status(stat, SOCKET_RETVAL_OK, EINVAL);
 
     // External socket
     case AF_INET:
-    case AF_INET6: return _external_close(sockid);
+    case AF_INET6: return sli_socket_external_close(sockid);
     default:
-      _set_errno_ret_error(EINVAL);
+      sli_socket_hnd_set_errno_ret_error(EINVAL);
   }
 }
 
@@ -190,19 +191,19 @@ int32_t bind(int32_t sockid, const struct sockaddr *addr, socklen_t addrlen)
 {
   sl_status_t stat = SL_STATUS_FAIL;
   const wisun_addr_t *wisun_addr = NULL;
-  _socket_handler_t *sockhnd = NULL;
+  sli_socket_hnd_t *sockhnd = NULL;
 
   // Get socket handler
-  sockhnd = socket_handler_get(sockid);
+  sockhnd = sli_socket_hnd_get(sockid);
   if (sockhnd == NULL) { // tried to bind addresss to non existing socket id
-    _set_errno_ret_error(EINVAL);
+    sli_socket_hnd_set_errno_ret_error(EINVAL);
   }
 
-  switch (sockhnd->_domain) {
+  switch (sockhnd->domain) {
     case AF_WISUN:
       if (addr == NULL || addrlen != sizeof(wisun_addr_t)
           || addr->sa_family != AF_WISUN) {
-        _set_errno_ret_error(EINVAL);
+        sli_socket_hnd_set_errno_ret_error(EINVAL);
       }
       // cast address to wisun address
       wisun_addr = (const wisun_addr_t *)addr;
@@ -211,78 +212,74 @@ int32_t bind(int32_t sockid, const struct sockaddr *addr, socklen_t addrlen)
                                   &wisun_addr->sin6_addr.s6_addr, // IPv6 address structure pointer
                                   wisun_addr->sin6_port);         // port number
       if (stat == SL_STATUS_OK) { // if the stack call return OK, add address struct
-        socket_handler_set_sockaddr(sockhnd, addr, (uint8_t)addrlen);
+        sli_socket_hnd_set_sockaddr(sockhnd, addr, (uint8_t)addrlen);
       }
       __CHECK_FOR_STATUS(stat);
-      return _check_status(stat, RETVAL_OK, EINVAL);
+      return _check_status(stat, SOCKET_RETVAL_OK, EINVAL);
 
     // External socket
     case AF_INET:
     case AF_INET6:
-      return _external_bind(sockid, addr, addrlen);
+      return sli_socket_external_bind(sockid, addr, addrlen);
     default:
-      _set_errno_ret_error(EINVAL);
+      sli_socket_hnd_set_errno_ret_error(EINVAL);
   }
 }
 
 /* Listen on socket */
 int32_t listen(int32_t sockid, int32_t backlog)
 {
-  const _socket_handler_t *sockhnd = NULL;
+  const sli_socket_hnd_t *sockhnd = NULL;
   sl_status_t stat = SL_STATUS_FAIL;
 
   // Getting socket handler
-  sockhnd = socket_handler_get(sockid);
+  sockhnd = sli_socket_hnd_get(sockid);
 
   if (sockhnd == NULL) {
-    return RETVAL_ERROR;
+    return SOCKET_RETVAL_ERROR;
   }
 
-  switch (sockhnd->_domain) {
+  switch (sockhnd->domain) {
     case AF_WISUN:
       (void) backlog; // ignore backlog because wi-sun stack defined 1 backlog capability
-      stat = sl_wisun_listen_on_socket((sl_wisun_socket_id_t) sockhnd->_socket_id);
+      stat = sl_wisun_listen_on_socket((sl_wisun_socket_id_t) sockhnd->socket_id);
       __CHECK_FOR_STATUS(stat);
-      return _check_status(stat, RETVAL_OK, EINVAL);
+      return _check_status(stat, SOCKET_RETVAL_OK, EINVAL);
 
     // External socket
     case AF_INET:
-    case AF_INET6:  return _external_listen(sockid, backlog);
+    case AF_INET6:  return sli_socket_external_listen(sockid, backlog);
 
     default:
-      _set_errno_ret_error(EINVAL);
+      sli_socket_hnd_set_errno_ret_error(EINVAL);
   }
 }
 
 /* accept on socket */
 int32_t accept(int32_t sockid, struct sockaddr *addr, socklen_t *addrlen)
 {
-  _socket_handler_t *sockhnd = NULL;
+  sli_socket_hnd_t *sockhnd = NULL;
   wisun_addr_t *remote_wisunaddr = NULL;
   sl_status_t stat = SL_STATUS_FAIL;
   sl_wisun_socket_id_t remote_sock_id;
-  bool conn_available = false;
-  sockhnd = socket_handler_get(sockid);
+  sockhnd = sli_socket_hnd_get(sockid);
 
   // No socket in the socket socket storage with this id
   if (sockhnd == NULL) {
-    return RETVAL_ERROR;
+    return SOCKET_RETVAL_ERROR;
   }
 
-  switch (sockhnd->_domain) {
+  switch (sockhnd->domain) {
     // Wi-SUN socket
     case AF_WISUN:
       if (addr == NULL || addrlen == NULL || *addrlen != sizeof(wisun_addr_t)) { // size is not correct
-        _set_errno_ret_error(EINVAL);
+        sli_socket_hnd_set_errno_ret_error(EINVAL);
       }
       remote_wisunaddr = (wisun_addr_t *) addr;
       remote_wisunaddr->sin6_family = AF_WISUN;
 
-      while (!conn_available) { // waiting for connection available flag set in event handler
-        socket_handler_get_state(sockhnd, SOCKET_STATE_CONNECTION_AVAILABLE, &conn_available);
-        osDelay(1); // dispatch
-      }
-      socket_handler_set_state(sockhnd, SOCKET_STATE_CONNECTION_AVAILABLE, false);
+      // waiting for connection
+      sli_socket_hnd_wait_for_conn_available_evt(sockhnd);
 
       stat = sl_wisun_accept_on_socket((sl_wisun_socket_id_t) sockid,                           // socket listener id
                                        &remote_sock_id,                                         // client id to set
@@ -290,39 +287,39 @@ int32_t accept(int32_t sockid, struct sockaddr *addr, socklen_t *addrlen)
                                        &remote_wisunaddr->sin6_port);                           // Port number
 
       if (stat == SL_STATUS_OK
-          && socket_handler_add(AF_WISUN, remote_sock_id, (void *) addr, (uint8_t)*addrlen) != RETVAL_ERROR) {
+          && sli_socket_hnd_add(AF_WISUN, remote_sock_id, (void *) addr, (uint8_t)*addrlen) != SOCKET_RETVAL_ERROR) {
         return remote_sock_id;
       } else {
         __CHECK_FOR_STATUS(stat);
-        _set_errno_ret_error(EINVAL);
+        sli_socket_hnd_set_errno_ret_error(EINVAL);
       }
 
     // External socket
     case AF_INET:
-    case AF_INET6:  return _external_accept(sockid, addr, addrlen);
+    case AF_INET6:  return sli_socket_external_accept(sockid, addr, addrlen);
     default:
-      _set_errno_ret_error(EINVAL);
+      sli_socket_hnd_set_errno_ret_error(EINVAL);
   }
 }
 
 /* connect */
 int32_t connect(int32_t sockid, const struct sockaddr *addr, socklen_t addrlen)
 {
-  _socket_handler_t *sockhnd = NULL;
+  sli_socket_hnd_t *sockhnd = NULL;
   const wisun_addr_t *wisun_remoteaddr = NULL;
   sl_status_t stat = SL_STATUS_FAIL;
-  sockhnd = socket_handler_get(sockid);
+  sockhnd = sli_socket_hnd_get(sockid);
 
   // No socket in the socket socket storage with this id
   if (sockhnd == NULL) {
-    return RETVAL_ERROR;
+    return SOCKET_RETVAL_ERROR;
   }
 
-  switch (sockhnd->_domain) {
+  switch (sockhnd->domain) {
     // Wi-SUN socket
     case AF_WISUN:
       if (addr == NULL || addrlen != sizeof(wisun_addr_t)) { // size is not correct
-        _set_errno_ret_error(EINVAL);
+        sli_socket_hnd_set_errno_ret_error(EINVAL);
       }
       wisun_remoteaddr = (const wisun_addr_t *)addr;
       stat = sl_wisun_connect_socket((sl_wisun_socket_id_t) sockid,
@@ -331,41 +328,33 @@ int32_t connect(int32_t sockid, const struct sockaddr *addr, socklen_t addrlen)
 
       if (stat == SL_STATUS_OK) {
         // storing the remote server address
-        socket_handler_write_remote_addr(sockhnd, &wisun_remoteaddr->sin6_family,
-                                         sizeof(wisun_remoteaddr->sin6_family),
-                                         SOCKADDR_WISUN_FAMILY_OFFSET);
-        socket_handler_write_remote_addr(sockhnd, &wisun_remoteaddr->sin6_addr,
-                                         sizeof(wisun_remoteaddr->sin6_addr),
-                                         SOCKADDR_WISUN_ADDRESS_OFFSET);
-        socket_handler_write_remote_addr(sockhnd, &wisun_remoteaddr->sin6_port,
-                                         sizeof(uint16_t),
-                                         SOCKADDR_WISUN_PORT_OFFSET);
-        return RETVAL_OK;
+        (void) sli_socket_hnd_write_remote_addr(sockhnd, wisun_remoteaddr, sizeof(wisun_addr_t), 0UL);
+        return SOCKET_RETVAL_OK;
       } else {
         __CHECK_FOR_STATUS(stat);
-        _set_errno_ret_error(EINVAL);
+        sli_socket_hnd_set_errno_ret_error(EINVAL);
       }
 
     // External socket
     case AF_INET:
-    case AF_INET6:  return _external_connect(sockid, addr, addrlen);
+    case AF_INET6:  return sli_socket_external_connect(sockid, addr, addrlen);
     default:
-      _set_errno_ret_error(EINVAL);
+      sli_socket_hnd_set_errno_ret_error(EINVAL);
   }
 }
 
 /* send */
 int32_t send(int32_t sockid, const void *buf, uint32_t len, int32_t flags)
 {
-  const _socket_handler_t *sockhnd = NULL;
+  const sli_socket_hnd_t *sockhnd = NULL;
   sl_status_t stat = SL_STATUS_FAIL;
 
-  sockhnd = socket_handler_get(sockid);
+  sockhnd = sli_socket_hnd_get(sockid);
   if (sockhnd == NULL) {
-    return RETVAL_ERROR;
+    return SOCKET_RETVAL_ERROR;
   }
 
-  switch (sockhnd->_domain) {
+  switch (sockhnd->domain) {
     case AF_WISUN:
       (void) flags;
       stat = sl_wisun_send_on_socket((sl_wisun_socket_id_t) sockid,
@@ -375,16 +364,16 @@ int32_t send(int32_t sockid, const void *buf, uint32_t len, int32_t flags)
         return (int32_t) len;
       } else {
         __CHECK_FOR_STATUS(stat);
-        _set_errno(EINVAL);
-        return RETVAL_ERROR;
+        sli_socket_hnd_set_errno(EINVAL);
+        return SOCKET_RETVAL_ERROR;
       }
 
     // External socket
     case AF_INET:
-    case AF_INET6: return _external_send(sockid, buf, len, flags);
+    case AF_INET6: return sli_socket_external_send(sockid, buf, len, flags);
 
     default:
-      _set_errno_ret_error(EINVAL);
+      sli_socket_hnd_set_errno_ret_error(EINVAL);
   }
 }
 
@@ -392,24 +381,24 @@ int32_t send(int32_t sockid, const void *buf, uint32_t len, int32_t flags)
 int32_t sendto(int32_t sockid, const void *buf, uint32_t len,
                int32_t flags, const struct sockaddr *dest_addr, socklen_t addrlen)
 {
-  const _socket_handler_t *sockhnd = NULL;
+  const sli_socket_hnd_t *sockhnd = NULL;
   const wisun_addr_t *wisun_remoteaddr = NULL;
   sl_status_t stat = SL_STATUS_FAIL;
 
   // No socket in the socket socket storage with this id
-  sockhnd = socket_handler_get(sockid);
+  sockhnd = sli_socket_hnd_get(sockid);
   if (sockhnd == NULL) {
-    return RETVAL_ERROR;
+    return SOCKET_RETVAL_ERROR;
   }
 
-  switch (sockhnd->_domain) {
+  switch (sockhnd->domain) {
     case AF_WISUN:
       (void) flags;
       // checking length and dest addr
 
       if (addrlen != sizeof(wisun_addr_t)
           || dest_addr == NULL) {
-        _set_errno_ret_error(EINVAL);
+        sli_socket_hnd_set_errno_ret_error(EINVAL);
       }
       wisun_remoteaddr = (const wisun_addr_t *)dest_addr;
       stat = sl_wisun_sendto_on_socket((sl_wisun_socket_id_t) sockid,                          // socket descriptor
@@ -421,49 +410,53 @@ int32_t sendto(int32_t sockid, const void *buf, uint32_t len,
         return (int32_t) len;
       } else {
         __CHECK_FOR_STATUS(stat);
-        _set_errno(EINVAL);
-        return RETVAL_ERROR;
+        sli_socket_hnd_set_errno(EINVAL);
+        return SOCKET_RETVAL_ERROR;
       }
 
     // External socket
     case AF_INET:
-    case AF_INET6: return _external_sendto(sockid, buf, len, flags, dest_addr, addrlen);
+    case AF_INET6: return sli_socket_external_sendto(sockid, buf, len, flags, dest_addr, addrlen);
 
     default:
-      _set_errno_ret_error(EINVAL);
+      sli_socket_hnd_set_errno_ret_error(EINVAL);
   }
 }
 
 /* recv */
 int32_t recv(int32_t sockid, void *buf, uint32_t len, int32_t flags)
 {
-  _socket_handler_t *sockhnd = NULL;
+  sli_socket_hnd_t *sockhnd = NULL;
   uint32_t real_length = len;
   // No socket in the socket socket storage with this id
-  sockhnd = socket_handler_get(sockid);
+  sockhnd = sli_socket_hnd_get(sockid);
   if (sockhnd == NULL) {
     return SOCKET_EOF; // if socket is not available anymore, indicate that to the application
   }
 
-  switch (sockhnd->_domain) {
+  switch (sockhnd->domain) {
     case AF_WISUN:
       (void) flags;
+      if (!sli_socket_hnd_is_remote_addr_stored(sockhnd)) {
+        sli_socket_hnd_set_errno_ret_error(EINVAL);
+      }
+      sli_socket_hnd_wait_for_data_evt_finish(sockhnd, SOCKET_DATA_EVT_HND_TIMEOUT_MS);
 
-      socket_handler_fifo_read(sockhnd, buf, &real_length);
+      sli_socket_hnd_fifo_read(sockhnd, buf, &real_length);
 
       // if zero, should bre return with ERROR -1, 0 is reserved for closed connection
       if (!real_length) {
-        _set_errno_ret_error(EINVAL);
+        sli_socket_hnd_set_errno_ret_error(EINVAL);
       } else {
         return real_length;
       }
 
     /*External socket*/
     case AF_INET:
-    case AF_INET6: return _external_recv(sockid, buf, len, flags);
+    case AF_INET6: return sli_socket_external_recv(sockid, buf, len, flags);
 
     default:
-      _set_errno_ret_error(EINVAL);
+      sli_socket_hnd_set_errno_ret_error(EINVAL);
   }
 }
 
@@ -471,36 +464,39 @@ int32_t recv(int32_t sockid, void *buf, uint32_t len, int32_t flags)
 int32_t recvfrom(int32_t sockid, void *buf, uint32_t len, int32_t flags,
                  struct sockaddr *src_addr, socklen_t *addrlen)
 {
-  _socket_handler_t *sockhnd = NULL;
+  sli_socket_hnd_t *sockhnd = NULL;
   uint32_t real_length = len;
 
   // No socket in the socket socket storage with this id
-  sockhnd = socket_handler_get(sockid);
+  sockhnd = sli_socket_hnd_get(sockid);
   if (sockhnd == NULL) {
     return SOCKET_EOF; // if socket is not available anymore, indicate that to the application
   }
 
-  switch (sockhnd->_domain) {
+  switch (sockhnd->domain) {
     case AF_WISUN:
       (void) flags;
+
       // checking length and source addr
       if (addrlen == NULL || *addrlen != sizeof(wisun_addr_t) || src_addr == NULL) {
-        _set_errno_ret_error(EINVAL);
+        sli_socket_hnd_set_errno_ret_error(EINVAL);
       }
 
-      if (socket_handler_read_remote_addr(sockhnd, src_addr, sizeof(wisun_addr_t), 0) == RETVAL_ERROR) {
-        _set_errno_ret_error(EINVAL);
+      if (!sli_socket_hnd_is_remote_addr_stored(sockhnd)
+          || sli_socket_hnd_read_remote_addr(sockhnd, src_addr, sizeof(wisun_addr_t), 0) == SOCKET_RETVAL_ERROR) {
+        sli_socket_hnd_set_errno_ret_error(EINVAL);
       } else {
-        socket_handler_fifo_read(sockhnd, buf, &real_length); // underflow not handled, real_lenght contains the read data
+        sli_socket_hnd_wait_for_data_evt_finish(sockhnd, SOCKET_DATA_EVT_HND_TIMEOUT_MS);
+        sli_socket_hnd_fifo_read(sockhnd, buf, &real_length); // underflow not handled, real_lenght contains the read data
       }
       return real_length;
 
     /*External socket*/
     case AF_INET:
-    case AF_INET6: return _external_recvfrom(sockid, buf, len, flags, src_addr, addrlen);
+    case AF_INET6: return sli_socket_external_recvfrom(sockid, buf, len, flags, src_addr, addrlen);
 
     default:
-      _set_errno_ret_error(EINVAL);
+      sli_socket_hnd_set_errno_ret_error(EINVAL);
   }
 }
 
@@ -508,15 +504,15 @@ int32_t recvfrom(int32_t sockid, void *buf, uint32_t len, int32_t flags,
 int32_t setsockopt(int32_t sockid, int32_t level, int32_t optname,
                    const void *optval, socklen_t optlen)
 {
-  _socket_handler_t *sockhnd = NULL;
+  sli_socket_hnd_t *sockhnd = NULL;
   sl_status_t stat = SL_STATUS_FAIL;
 
-  sockhnd = socket_handler_get(sockid);
+  sockhnd = sli_socket_hnd_get(sockid);
   if (sockhnd == NULL) {
-    return RETVAL_ERROR;
+    return SOCKET_RETVAL_ERROR;
   }
 
-  switch (sockhnd->_domain) {
+  switch (sockhnd->domain) {
     case AF_WISUN:
       if (level == SOL_SOCKET_HANDLER) {
         return _set_socket_handler_opt(sockhnd, optname, optval, optlen);
@@ -524,20 +520,20 @@ int32_t setsockopt(int32_t sockid, int32_t level, int32_t optname,
         // if the opt lent is not set to the sizeof sl_wisun_socket_option_data_t
         // return with erro in Wi-SUN mode
         if (optlen != sizeof(sl_wisun_socket_option_data_t)) {
-          _set_errno_ret_error(EINVAL);
+          sli_socket_hnd_set_errno_ret_error(EINVAL);
         }
-        stat = sl_wisun_set_socket_option((sl_wisun_socket_id_t) sockhnd->_socket_id,
+        stat = sl_wisun_set_socket_option((sl_wisun_socket_id_t) sockhnd->socket_id,
                                           (sl_wisun_socket_option_t) optname,
                                           (const sl_wisun_socket_option_data_t *)optval);
         __CHECK_FOR_STATUS(stat);
-        return _check_status(stat, RETVAL_OK, EINVAL);
+        return _check_status(stat, SOCKET_RETVAL_OK, EINVAL);
       } else {
-        _set_errno_ret_error(EINVAL);
+        sli_socket_hnd_set_errno_ret_error(EINVAL);
       }
     case AF_INET:
-    case AF_INET6: return _external_setsockopt(sockid, level, optname, optval, optlen);
+    case AF_INET6: return sli_socket_external_setsockopt(sockid, level, optname, optval, optlen);
     default:
-      _set_errno_ret_error(EINVAL);
+      sli_socket_hnd_set_errno_ret_error(EINVAL);
   }
 }
 
@@ -545,15 +541,15 @@ int32_t setsockopt(int32_t sockid, int32_t level, int32_t optname,
 int32_t getsockopt(int32_t sockid, int32_t level, int32_t optname,
                    void *optval, socklen_t *optlen)
 {
-  const _socket_handler_t *sockhnd = NULL;
+  const sli_socket_hnd_t *sockhnd = NULL;
   sl_status_t stat = SL_STATUS_FAIL;
 
-  sockhnd = socket_handler_get(sockid);
+  sockhnd = sli_socket_hnd_get(sockid);
   if (sockhnd == NULL) {
-    return RETVAL_ERROR;
+    return SOCKET_RETVAL_ERROR;
   }
 
-  switch (sockhnd->_domain) {
+  switch (sockhnd->domain) {
     case AF_WISUN:
       if (level == SOL_SOCKET_HANDLER) {
         return _get_socket_handler_opt(sockhnd, optname, optval, optlen);
@@ -561,20 +557,20 @@ int32_t getsockopt(int32_t sockid, int32_t level, int32_t optname,
         // if the opt lent is not set to the sizeof sl_wisun_socket_option_data_t
         // return with erro in Wi-SUN mode
         if (*optlen != sizeof(sl_wisun_socket_option_data_t)) {
-          _set_errno_ret_error(EINVAL);
+          sli_socket_hnd_set_errno_ret_error(EINVAL);
         }
-        stat = sl_wisun_get_socket_option((sl_wisun_socket_id_t) sockhnd->_socket_id,
+        stat = sl_wisun_get_socket_option((sl_wisun_socket_id_t) sockhnd->socket_id,
                                           (sl_wisun_socket_option_t) optname,
                                           (sl_wisun_socket_option_data_t *) optval);
         __CHECK_FOR_STATUS(stat);
-        return _check_status(stat, RETVAL_OK, EINVAL);
+        return _check_status(stat, SOCKET_RETVAL_OK, EINVAL);
       } else {
-        _set_errno_ret_error(EINVAL);
+        sli_socket_hnd_set_errno_ret_error(EINVAL);
       }
     case AF_INET:
-    case AF_INET6: return _external_getsockopt(sockid, level, optname, optval, optlen);
+    case AF_INET6: return sli_socket_external_getsockopt(sockid, level, optname, optval, optlen);
     default:
-      _set_errno_ret_error(EINVAL);
+      sli_socket_hnd_set_errno_ret_error(EINVAL);
   }
 }
 
@@ -595,7 +591,7 @@ int32_t inet_pton(sock_domain_t af, const char *src, void *dst)
     case AF_INET:
       (void) 0;
     default:
-      _set_errno_ret_error(EINVAL);
+      sli_socket_hnd_set_errno_ret_error(EINVAL);
   }
 }
 
@@ -612,7 +608,7 @@ const char *inet_ntop(sock_domain_t af, const void *src, char *dst, socklen_t si
     case AF_INET:
       (void) 0;
     default:
-      _set_errno(EINVAL);
+      sli_socket_hnd_set_errno(EINVAL);
       return NULL;
   }
 }
@@ -621,7 +617,7 @@ const char *inet_ntop(sock_domain_t af, const void *src, char *dst, socklen_t si
 //                          Static Function Definitions
 // -----------------------------------------------------------------------------
 
-static int32_t _set_socket_handler_opt(_socket_handler_t *hnd,
+static int32_t _set_socket_handler_opt(sli_socket_hnd_t *hnd,
                                        const int32_t optname,
                                        const void * const optval,
                                        socklen_t optlen)
@@ -629,14 +625,14 @@ static int32_t _set_socket_handler_opt(_socket_handler_t *hnd,
   switch (optname) {
     case SO_HANDLER_OVERWRITE_PREV_RCV_BUFF:
       if (optlen < sizeof(bool)) {
-        return RETVAL_ERROR;
+        return SOCKET_RETVAL_ERROR;
       }
-      return socket_handler_fifo_set_overwrite(hnd, (bool *)optval);
-    default: return RETVAL_ERROR;
+      return sli_socket_hnd_fifo_set_overwrite(hnd, (bool *)optval);
+    default: return SOCKET_RETVAL_ERROR;
   }
 }
 
-static int32_t _get_socket_handler_opt(const _socket_handler_t * const hnd,
+static int32_t _get_socket_handler_opt(const sli_socket_hnd_t * const hnd,
                                        const int32_t optname,
                                        void * const optval,
                                        socklen_t * const optlen)
@@ -644,12 +640,12 @@ static int32_t _get_socket_handler_opt(const _socket_handler_t * const hnd,
   switch (optname) {
     case SO_HANDLER_OVERWRITE_PREV_RCV_BUFF:
       if (*optlen < sizeof(bool)) {
-        return RETVAL_ERROR;
+        return SOCKET_RETVAL_ERROR;
       }
       *optlen = sizeof(bool);
-      return socket_handler_fifo_get_overwrite(hnd, (bool *)optval);
+      return sli_socket_hnd_fifo_get_overwrite(hnd, (bool *)optval);
 
-    default: return RETVAL_ERROR;
+    default: return SOCKET_RETVAL_ERROR;
   }
 }
 
@@ -658,8 +654,8 @@ __STATIC_INLINE int32_t _check_status(sl_status_t status, int32_t retval, int32_
   if (status == SL_STATUS_OK) {
     return retval;
   }
-  _set_errno(errno_val);
-  return RETVAL_ERROR;
+  sli_socket_hnd_set_errno(errno_val);
+  return SOCKET_RETVAL_ERROR;
 }
 
 __STATIC_INLINE sl_wisun_socket_protocol_t _proto2wisun(proto_type_t protocol)

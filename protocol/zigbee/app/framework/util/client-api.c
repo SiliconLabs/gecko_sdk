@@ -20,14 +20,14 @@
 #include "util.h"
 #include "client-api.h"
 
-uint8_t *emAfZclBuffer = NULL;
-uint16_t emAfZclBufferLen = 0;
+uint8_t *sli_zigbee_af_zcl_buffer = NULL;
+uint16_t sli_zigbee_af_zcl_bufferLen = 0;
 
 // Pointer to where this API should put the length
-uint16_t *emAfResponseLengthPtr = NULL;
+uint16_t *sli_zigbee_af_response_length_ptr = NULL;
 
 // Pointer to where the API should put the cluster ID
-EmberApsFrame *emAfCommandApsFrame = NULL;
+EmberApsFrame *sli_zigbee_af_command_aps_frame = NULL;
 
 /////////////////
 
@@ -184,10 +184,10 @@ void emberAfSetExternalBuffer(uint8_t *buffer,
                               uint16_t *lenPtr,
                               EmberApsFrame *apsFrame)
 {
-  emAfZclBuffer = buffer;
-  emAfZclBufferLen = bufferLen;
-  emAfResponseLengthPtr = lenPtr;
-  emAfCommandApsFrame = apsFrame;
+  sli_zigbee_af_zcl_buffer = buffer;
+  sli_zigbee_af_zcl_bufferLen = bufferLen;
+  sli_zigbee_af_response_length_ptr = lenPtr;
+  sli_zigbee_af_command_aps_frame = apsFrame;
 }
 
 uint16_t emberAfFillExternalManufacturerSpecificBuffer(uint8_t frameControl,
@@ -201,17 +201,17 @@ uint16_t emberAfFillExternalManufacturerSpecificBuffer(uint8_t frameControl,
   va_list argPointer = { 0 };
 
   va_start(argPointer, format);
-  returnValue = vFillBuffer(emAfZclBuffer,
-                            emAfZclBufferLen,
+  returnValue = vFillBuffer(sli_zigbee_af_zcl_buffer,
+                            sli_zigbee_af_zcl_bufferLen,
                             frameControl,
                             manufacturerCode,
                             commandId,
                             format,
                             argPointer);
   va_end(argPointer);
-  *emAfResponseLengthPtr = returnValue;
-  emAfCommandApsFrame->clusterId = clusterId;
-  emAfCommandApsFrame->options = EMBER_AF_DEFAULT_APS_OPTIONS;
+  *sli_zigbee_af_response_length_ptr = returnValue;
+  sli_zigbee_af_command_aps_frame->clusterId = clusterId;
+  sli_zigbee_af_command_aps_frame->options = EMBER_AF_DEFAULT_APS_OPTIONS;
   return returnValue;
 }
 
@@ -225,17 +225,17 @@ uint16_t emberAfFillExternalBuffer(uint8_t frameControl,
   va_list argPointer = { 0 };
 
   va_start(argPointer, format);
-  returnValue = vFillBuffer(emAfZclBuffer,
-                            emAfZclBufferLen,
+  returnValue = vFillBuffer(sli_zigbee_af_zcl_buffer,
+                            sli_zigbee_af_zcl_bufferLen,
                             frameControl,
                             EMBER_AF_NULL_MANUFACTURER_CODE,
                             commandId,
                             format,
                             argPointer);
   va_end(argPointer);
-  *emAfResponseLengthPtr = returnValue;
-  emAfCommandApsFrame->clusterId = clusterId;
-  emAfCommandApsFrame->options = EMBER_AF_DEFAULT_APS_OPTIONS;
+  *sli_zigbee_af_response_length_ptr = returnValue;
+  sli_zigbee_af_command_aps_frame->clusterId = clusterId;
+  sli_zigbee_af_command_aps_frame->options = EMBER_AF_DEFAULT_APS_OPTIONS;
   return returnValue;
 }
 
@@ -262,9 +262,9 @@ uint16_t emberAfFillBuffer(uint8_t *buffer,
 
 EmberStatus emberAfSendCommandUnicastToBindingsWithCallback(EmberAfMessageSentFunction callback)
 {
-  return emberAfSendUnicastToBindingsWithCallback(emAfCommandApsFrame,
-                                                  *emAfResponseLengthPtr,
-                                                  emAfZclBuffer,
+  return emberAfSendUnicastToBindingsWithCallback(sli_zigbee_af_command_aps_frame,
+                                                  *sli_zigbee_af_response_length_ptr,
+                                                  sli_zigbee_af_zcl_buffer,
                                                   callback);
 }
 
@@ -277,18 +277,18 @@ EmberStatus emberAfSendCommandMulticastWithCallback(EmberMulticastId multicastId
                                                     EmberAfMessageSentFunction callback)
 {
   return emberAfSendMulticastWithCallback(multicastId,
-                                          emAfCommandApsFrame,
-                                          *emAfResponseLengthPtr,
-                                          emAfZclBuffer,
+                                          sli_zigbee_af_command_aps_frame,
+                                          *sli_zigbee_af_response_length_ptr,
+                                          sli_zigbee_af_zcl_buffer,
                                           callback);
 }
 
 EmberStatus emberAfSendCommandMulticastWithAliasWithCallback(EmberMulticastId multicastId, EmberNodeId alias, uint8_t sequence, EmberAfMessageSentFunction callback)
 {
   return emberAfSendMulticastWithAliasWithCallback(multicastId,
-                                                   emAfCommandApsFrame,
-                                                   *emAfResponseLengthPtr,
-                                                   emAfZclBuffer,
+                                                   sli_zigbee_af_command_aps_frame,
+                                                   *sli_zigbee_af_response_length_ptr,
+                                                   sli_zigbee_af_zcl_buffer,
                                                    alias,
                                                    sequence,
                                                    callback);
@@ -306,9 +306,9 @@ EmberStatus emberAfSendCommandMulticastWithAlias(EmberMulticastId multicastId, E
 
 EmberStatus emberAfSendCommandMulticastToBindings(void)
 {
-  return emberAfSendMulticastToBindings(emAfCommandApsFrame,
-                                        *emAfResponseLengthPtr,
-                                        emAfZclBuffer);
+  return emberAfSendMulticastToBindings(sli_zigbee_af_command_aps_frame,
+                                        *sli_zigbee_af_response_length_ptr,
+                                        sli_zigbee_af_zcl_buffer);
 }
 
 EmberStatus emberAfSendCommandUnicastWithCallback(EmberOutgoingMessageType type,
@@ -317,9 +317,9 @@ EmberStatus emberAfSendCommandUnicastWithCallback(EmberOutgoingMessageType type,
 {
   return emberAfSendUnicastWithCallback(type,
                                         indexOrDestination,
-                                        emAfCommandApsFrame,
-                                        *emAfResponseLengthPtr,
-                                        emAfZclBuffer,
+                                        sli_zigbee_af_command_aps_frame,
+                                        *sli_zigbee_af_response_length_ptr,
+                                        sli_zigbee_af_zcl_buffer,
                                         callback);
 }
 
@@ -333,9 +333,9 @@ EmberStatus emberAfSendCommandBroadcastWithCallback(EmberNodeId destination,
                                                     EmberAfMessageSentFunction callback)
 {
   return emberAfSendBroadcastWithCallback(destination,
-                                          emAfCommandApsFrame,
-                                          *emAfResponseLengthPtr,
-                                          emAfZclBuffer,
+                                          sli_zigbee_af_command_aps_frame,
+                                          *sli_zigbee_af_response_length_ptr,
+                                          sli_zigbee_af_zcl_buffer,
                                           callback);
 }
 
@@ -345,9 +345,9 @@ EmberStatus emberAfSendCommandBroadcastWithAliasWithCallback(EmberNodeId destina
                                                              EmberAfMessageSentFunction callback)
 {
   return emberAfSendBroadcastWithAliasWithCallback(destination,
-                                                   emAfCommandApsFrame,
-                                                   *emAfResponseLengthPtr,
-                                                   emAfZclBuffer,
+                                                   sli_zigbee_af_command_aps_frame,
+                                                   *sli_zigbee_af_response_length_ptr,
+                                                   sli_zigbee_af_zcl_buffer,
                                                    alias,
                                                    sequence,
                                                    callback);
@@ -378,19 +378,19 @@ EmberStatus emberAfSendCommandInterPan(EmberPanId panId,
                              destinationLongId,
                              destinationShortId,
                              multicastId,
-                             emAfCommandApsFrame->clusterId,
+                             sli_zigbee_af_command_aps_frame->clusterId,
                              profileId,
-                             *emAfResponseLengthPtr,
-                             emAfZclBuffer);
+                             *sli_zigbee_af_response_length_ptr,
+                             sli_zigbee_af_zcl_buffer);
 }
 
 EmberApsFrame *emberAfGetCommandApsFrame(void)
 {
-  return emAfCommandApsFrame;
+  return sli_zigbee_af_command_aps_frame;
 }
 
 void emberAfSetCommandEndpoints(uint8_t sourceEndpoint, uint8_t destinationEndpoint)
 {
-  emAfCommandApsFrame->sourceEndpoint = sourceEndpoint;
-  emAfCommandApsFrame->destinationEndpoint = destinationEndpoint;
+  sli_zigbee_af_command_aps_frame->sourceEndpoint = sourceEndpoint;
+  sli_zigbee_af_command_aps_frame->destinationEndpoint = destinationEndpoint;
 }

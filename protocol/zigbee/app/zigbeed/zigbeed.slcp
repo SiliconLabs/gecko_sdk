@@ -28,6 +28,8 @@ component:
   - id: "zigbee_mfglib"
   # not required by zigbeed, but could be enabled
   - id: "zigbee_r22_support"
+  - id: "zigbee_r23_support"
+  - id: "zigbee_dynamic_commissioning"
   - id: "zigbee_token_interface"
 
 configuration:

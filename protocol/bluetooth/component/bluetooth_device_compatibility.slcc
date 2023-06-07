@@ -6,7 +6,7 @@ description: >
   A feature is supported by all device families if no compatibility is defined
   for the feature.
 
-category: "Bluetooth|Stack"
+category: Bluetooth|Bluetooth Host (Stack)
 quality: "production"
 root_path: "protocol/bluetooth"
 provides:
@@ -43,12 +43,17 @@ provides:
     condition: ["device_sdid_230"]
   - name: device_supports_bluetooth_connection_phy_update
     condition: ["device_sdid_235"]
+  - name: device_supports_bluetooth_cs
+    condition: ["device_generic_family_efr32xg24"]
 
 template_contribution:
   - name: component_catalog
     value: bluetooth_cte_support
     condition:
       - "device_supports_bluetooth_cte"
-
+  - name: component_catalog
+    value: bluetooth_cs_support
+    condition:
+      - "device_supports_bluetooth_cs"
 ui_hints:
   visibility: never

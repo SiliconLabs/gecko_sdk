@@ -44,11 +44,12 @@
  * \{
  ******************************************************************************/
 
-#include "em_device.h"
+#include "sli_psa_driver_features.h"
 
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
 
 #include "sli_se_transparent_types.h"
+
 // Replace inclusion of crypto_driver_common.h with the new psa driver interface
 // header file when it becomes available.
 #include "psa/crypto_driver_common.h"
@@ -389,7 +390,7 @@ psa_status_t sli_se_transparent_key_agreement(
 }
 #endif
 
-#endif // SEMAILBOX_PRESENT
+#endif // SLI_MBEDTLS_DEVICE_HSE
 
 /** \} (end addtogroup sl_psa_drivers_se) */
 /** \} (end addtogroup sl_psa_drivers) */

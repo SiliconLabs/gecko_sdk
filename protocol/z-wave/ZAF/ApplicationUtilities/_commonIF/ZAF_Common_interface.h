@@ -14,6 +14,7 @@
 
 #include <ZAF_CmdPublisher.h>
 #include <zpal_power_manager.h>
+#include <zpal_radio.h>
 
 #include <ZW_application_transport_interface.h>
 
@@ -56,12 +57,6 @@ void ZAF_setAppHandle(SApplicationHandles* pAppHandle);
 void ZAF_setPowerLock(zpal_pm_handle_t powerLock);
 
 /**
- * Pass an application protocol configuration handle to the ZAF framework. Can be later used by CC-s.
- * @param pProtocolConfig pointer to Protocol Configuration in application
- */
-void ZAF_setAppProtocolConfig(SProtocolConfig_t const * const pProtocolConfig);
-
-/**
  * Set the CP context. The application should use this an initialization,
  * so the ZAF_Common interface can redistribute the pContext address subsequently
  *
@@ -79,22 +74,28 @@ void ZAF_SetCPHandle(CP_Handle_t handle);
 SApplicationHandles* ZAF_getAppHandle();
 
 /**
+ * Get Protocol Info object
+ * @return pProtocolInfo member of m_pAppHandles
+ */
+const SProtocolInfo* ZAF_getProtocolInfo();
+
+/**
  * Get Notifying queue object. It is stored in m_pAppHandles
  * @return pZwTxQueue member of m_pAppHandles
  */
 SQueueNotifying* ZAF_getZwTxQueue();
 
 /**
- * Get Application Node Info object from m_pAppProtocolConfig
- * @return pNodeInfo member of m_pAppProtocolConfig
+ * Get Notifying queue object used for ZW Command Queue.
+ * @return pZwCommandQueue member of m_pAppHandles
  */
-const SAppNodeInfo_t* ZAF_getAppNodeInfo();
+SQueueNotifying* ZAF_getZwCommandQueue();
 
 /**
- * Get m_pAppProtocolConfig object
- * @return m_pAppProtocolConfig
+ * Get Network Statistics object.
+ * @return pNetworkStatistics member of m_pAppHandles
  */
-const SProtocolConfig_t* ZAF_getAppProtocolConfig();
+const zpal_radio_network_stats_t* ZAF_getNetworkStatistics();
 
 /**
  * Get m_PowerLock object
@@ -140,6 +141,20 @@ EInclusionState_t ZAF_GetInclusionState(void);
  * @return Node ID
  */
 node_id_t ZAF_GetNodeID(void);
+
+/**
+ * Returns the current home ID
+ *
+ * @return Home ID
+ */
+uint32_t ZAF_GetHomeID(void);
+
+/**
+ * Returns the current Suc node ID
+ *
+ * @return Suc Node ID
+ */
+node_id_t ZAF_GetSucNodeId(void);
 
 /**
  * Returns the current inclusion mode of the node, which indicates

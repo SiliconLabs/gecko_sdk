@@ -60,15 +60,20 @@ extern "C" {
  */
 #define SL_BT_INVALID_ADVERTISING_SET_HANDLE ((uint8_t) 0xFF)
 
+/**
+ * @brief Value used to indicate an invalid sync handle
+ */
+#define SL_BT_INVALID_SYNC_HANDLE ((uint16_t) 0xFFFF)
+
 /** @} */ // end addtogroup sl_bt_common_types
 
 
 /**
- * @brief Random bit sequence used in CS packets
+ * @brief ABR subevent length
  */
 typedef struct {
-  uint8_t data[16]; /**< Random bit sequence used in CS packets */
-} sl_bt_cs_sync_random_t;
+  uint8_t data[3]; /**< ABR subevent length */
+} sl_bt_cs_subevent_length_t;
 
 /**
  * @brief DRBG key
@@ -78,10 +83,10 @@ typedef struct {
 } sl_bt_drbg_key_t;
 
 /**
- * @brief 79 1-bit fields contain the value for the channel sounding channel index
+ * @brief 79 1-bit fields contain the value for the ABR channel index
  */
 typedef struct {
-  uint8_t data[10]; /**< 79 1-bit fields contain the value for the channel sounding channel index */
+  uint8_t data[10]; /**< 79 1-bit fields contain the value for the ABR channel index */
 } sl_bt_cs_channel_map_t;
 
 
@@ -535,20 +540,38 @@ typedef enum
                                                                                     bytes. */
   sl_bt_system_linklayer_config_key_power_control_golden_range         = 0x10, /**<
                                                                                     (0x10)
+                                                                                    Set
                                                                                     Power
-                                                                                    control
+                                                                                    Control
                                                                                     golden
                                                                                     range
-                                                                                    configuration.
+                                                                                    parameters.
                                                                                     The
+                                                                                    value
+                                                                                    is
+                                                                                    a
+                                                                                    8-bytes
+                                                                                    long
+                                                                                    array
+                                                                                    that
+                                                                                    consists
+                                                                                    of
+                                                                                    4
+                                                                                    pairs
+                                                                                    of
+                                                                                    golden
+                                                                                    range
+                                                                                    configurations.
+                                                                                    In
+                                                                                    each
+                                                                                    pair,
+                                                                                    the
                                                                                     first
                                                                                     byte
-                                                                                    of
-                                                                                    the
-                                                                                    value
                                                                                     is
                                                                                     the
                                                                                     lower
+                                                                                    RSSI
                                                                                     boundary
                                                                                     and
                                                                                     the
@@ -557,18 +580,24 @@ typedef enum
                                                                                     is
                                                                                     the
                                                                                     upper
+                                                                                    RSSI
                                                                                     boundary.
-                                                                                    Values
+                                                                                    RSSI
+                                                                                    values
                                                                                     are
                                                                                     in
                                                                                     dBm.
-                                                                                    Set
-                                                                                    golden
-                                                                                    range
-                                                                                    parameters.
-                                                                                    Value:
-                                                                                    8
-                                                                                    bytes.
+                                                                                    This
+                                                                                    configuration
+                                                                                    is
+                                                                                    not
+                                                                                    allowed
+                                                                                    if
+                                                                                    there
+                                                                                    are
+                                                                                    active
+                                                                                    Bluetooth
+                                                                                    connections.
                                                                                       - Byte
                                                                                         1
                                                                                         \-
@@ -1117,10 +1146,12 @@ sl_status_t sl_bt_system_halt(uint8_t halt);
  *     - <b>sl_bt_system_linklayer_config_key_set_channelmap_flags (0xc):</b>
  *       Configure channelmap adaptivity flags. Value: 4 bytes.
  *     - <b>sl_bt_system_linklayer_config_key_power_control_golden_range
- *       (0x10):</b> Power control golden range configuration. The first byte of
- *       the value is the lower boundary and the second byte is the upper
- *       boundary. Values are in dBm. Set golden range parameters. Value: 8
- *       bytes.
+ *       (0x10):</b> Set Power Control golden range parameters. The value is a
+ *       8-bytes long array that consists of 4 pairs of golden range
+ *       configurations. In each pair, the first byte is the lower RSSI boundary
+ *       and the second byte is the upper RSSI boundary. RSSI values are in dBm.
+ *       This configuration is not allowed if there are active Bluetooth
+ *       connections.
  *         - Byte 1 - Minimal RSSI on 1M PHY
  *         - Byte 2 - Maximal RSSI on 1M PHY
  *         - Byte 3 - Minimal RSSI on 2M PHY
@@ -1241,9 +1272,10 @@ sl_status_t sl_bt_system_get_tx_power_setting(int16_t *support_min,
  * occur, avoid calling this command regularly.
  *
  * @param[in] address Bluetooth identity address in little endian format
- * @param[in] type Address type
- *     - <b>0:</b> Public device address
- *     - <b>1:</b> Static device address
+ * @param[in] type Enum @ref sl_bt_gap_address_type_t. Identity address type.
+ *   Values:
+ *     - <b>sl_bt_gap_public_address (0x0):</b> Public device address
+ *     - <b>sl_bt_gap_static_address (0x1):</b> Static device address
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
@@ -1255,10 +1287,11 @@ sl_status_t sl_bt_system_set_identity_address(bd_addr address, uint8_t type);
  * Read the Bluetooth identity address used by the device, which can be a public
  * or random static device address.
  *
- * @param[out] address Bluetooth public address in little endian format
- * @param[out] type Address type
- *     - <b>0:</b> Public device address
- *     - <b>1:</b> Static random address
+ * @param[out] address Bluetooth identity address in little endian format
+ * @param[out] type Enum @ref sl_bt_gap_address_type_t. Identity address type.
+ *   Values:
+ *     - <b>sl_bt_gap_public_address (0x0):</b> Public device address
+ *     - <b>sl_bt_gap_static_address (0x1):</b> Static device address
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
@@ -1330,9 +1363,9 @@ sl_status_t sl_bt_system_get_counters(uint8_t reset,
 /***************************************************************************//**
  *
  * <b>Deprecated</b> . Use the sleeptimer component (in platform services
- * category) for timers. As the sleeptimer does not support a timer with slack
- * yet, the Bluetooth stack will continue to support this command until another
- * component provides the functionality.
+ * category) for timers. Because the sleeptimer does not support a timer with
+ * slack yet, the Bluetooth stack will continue to support this command until
+ * another component provides the functionality.
  *
  * Start a software timer with slack. The slack parameter allows the stack to
  * optimize wakeups and save power. The timer event is triggered between time
@@ -1375,6 +1408,182 @@ sl_status_t sl_bt_system_set_lazy_soft_timer(uint32_t time,
 /** @} */ // end addtogroup sl_bt_system
 
 /**
+ * @addtogroup sl_bt_resource Resource Report
+ * @{
+ *
+ * @brief Resource Report
+ *
+ * Commands and events in this class can be used to query and receive the memory
+ * buffer usage status. The memory buffer is used by the Bluetooth stack for
+ * storing application data (e.g., API commands and events), user data over
+ * Bluetooth connections, advertising, scanning, etc. Total buffer size is
+ * defined by the application using the SL_BT_CONFIG_BUFFER_SIZE configuration.
+ * The Bluetooth stack does not partition the buffer, instead, the buffer is a
+ * shared resource for all features. Therefore, the available memory for one
+ * feature could be affected by another feature in simultaneous use cases. This
+ * API class provides a utility for application to get some insight of the
+ * buffer usage. As allocations in the memory buffer have overhead, the actual
+ * amount of memory that can be used for user data is less than a reported free
+ * memory amount.
+ */
+
+/* Command and Response IDs */
+#define sl_bt_cmd_resource_get_status_id                             0x005f0020
+#define sl_bt_cmd_resource_set_report_threshold_id                   0x015f0020
+#define sl_bt_cmd_resource_enable_connection_tx_report_id            0x025f0020
+#define sl_bt_cmd_resource_get_connection_tx_status_id               0x035f0020
+#define sl_bt_cmd_resource_disable_connection_tx_report_id           0x045f0020
+#define sl_bt_rsp_resource_get_status_id                             0x005f0020
+#define sl_bt_rsp_resource_set_report_threshold_id                   0x015f0020
+#define sl_bt_rsp_resource_enable_connection_tx_report_id            0x025f0020
+#define sl_bt_rsp_resource_get_connection_tx_status_id               0x035f0020
+#define sl_bt_rsp_resource_disable_connection_tx_report_id           0x045f0020
+
+/**
+ * @addtogroup sl_bt_resource_connection_tx_flags Connection TX status flags
+ * @{
+ *
+ * Defines the connection TX status flags reported by @ref
+ * sl_bt_resource_get_connection_tx_status.
+ */
+
+/**
+ *
+ * The number of TX packets queued on a connection has overflowed the @p
+ * packet_count that was effective at the time the connection opened. The packet
+ * count is configured with command @ref
+ * sl_bt_resource_enable_connection_tx_report and is valid for subsequent
+ * connections.
+ *
+ * When this bit is set, the @p packet_count returned by @ref
+ * sl_bt_resource_get_connection_tx_status is correct, but @p data_len excludes
+ * the data bytes in the packets that overflowed the configured packet count.
+ *
+ * */
+#define SL_BT_RESOURCE_CONNECTION_TX_FLAGS_ERROR_PACKET_OVERFLOW 0x1       
+
+/**
+ *
+ * Internal inconsistency has been detected in the connection TX bookkeeping.
+ * When this bit is set, the application should consider both @p packet_count
+ * and @p data_len returned by @ref sl_bt_resource_get_connection_tx_status to
+ * be unreliable.
+ *
+ * */
+#define SL_BT_RESOURCE_CONNECTION_TX_FLAGS_ERROR_CORRUPT         0x2       
+
+/** @} */ // end Connection TX status flags
+
+/**
+ * @addtogroup sl_bt_evt_resource_status sl_bt_evt_resource_status
+ * @{
+ * @brief Indicates that the memory buffer usage has crossed a threshold
+ */
+
+/** @brief Identifier of the status event */
+#define sl_bt_evt_resource_status_id                                 0x005f00a0
+
+/***************************************************************************//**
+ * @brief Data structure of the status event
+ ******************************************************************************/
+PACKSTRUCT( struct sl_bt_evt_resource_status_s
+{
+  uint32_t free_bytes; /**< The number of free bytes in the memory buffer */
+});
+
+typedef struct sl_bt_evt_resource_status_s sl_bt_evt_resource_status_t;
+
+/** @} */ // end addtogroup sl_bt_evt_resource_status
+
+/***************************************************************************//**
+ *
+ * Get the present memory buffer usage status.
+ *
+ * @param[out] total_bytes The number of total bytes in the memory buffer
+ * @param[out] free_bytes The number of free bytes in the memory buffer
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_resource_get_status(uint32_t *total_bytes,
+                                      uint32_t *free_bytes);
+
+/***************************************************************************//**
+ *
+ * Set low and high thresholds of memory buffer usage reports. Value 0 in
+ * parameter @p low for the low threshold disables the reporting, and a non-zero
+ * value in @p low enables the reporting.
+ *
+ * When the reporting is enabled, event @ref sl_bt_evt_resource_status will be
+ * generated to report the status when the free buffer amount decreases and
+ * crosses the low threshold, and later another event will be generated if the
+ * free buffer amount increases and crosses the high threshold. If only the high
+ * threshold is crossed but the low threshold isn't, no event will be generated.
+ *
+ * By default, low and high threshold values are 0, i.e., no report event is
+ * generated.
+ *
+ * @param[in] low The low threshold of free bytes in the memory buffer, or 0 to
+ *   disable the reporting
+ * @param[in] high A non-zero value as the high threshold that must be greater
+ *   than parameter @p low, or 0 for not reporting the status for high threshold
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_resource_set_report_threshold(uint32_t low, uint32_t high);
+
+/***************************************************************************//**
+ *
+ * Enable tracking and reporting data packet TX status of future new
+ * connections. Existing connections are not affected by this command.
+ *
+ * @param[in] packet_count The maximum number of data packets to track on a
+ *   connection
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ * @b Events
+ *   - @ref sl_bt_evt_gatt_server_notification_tx_completed - Sent when GATT
+ *     notifications from the GATT server were transmitted.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_resource_enable_connection_tx_report(uint16_t packet_count);
+
+/***************************************************************************//**
+ *
+ * Get the data packet TX status of a connection.
+ *
+ * @param[in] connection Connection handle
+ * @param[out] flags Flags that indicate the status of connection TX packet
+ *   reporting. This value is a bitmask of @ref
+ *   sl_bt_resource_connection_tx_flags.
+ * @param[out] packet_count Number of data packets in the TX queue waiting to be
+ *   transmitted
+ * @param[out] data_len Total number of bytes of data packets in the TX queue
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_resource_get_connection_tx_status(uint8_t connection,
+                                                    uint16_t *flags,
+                                                    uint16_t *packet_count,
+                                                    uint32_t *data_len);
+
+/***************************************************************************//**
+ *
+ * Disable tracking and reporting data packet TX status of future new
+ * connections.
+ *
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_resource_disable_connection_tx_report();
+
+/** @} */ // end addtogroup sl_bt_resource
+
+/**
  * @addtogroup sl_bt_gap GAP
  * @{
  *
@@ -1395,16 +1604,48 @@ sl_status_t sl_bt_system_set_lazy_soft_timer(uint32_t time,
 #define sl_bt_rsp_gap_set_identity_address_id                        0x04020020
 
 /**
- * @brief These values define Bluetooth device address types.
+ * @brief These values define Bluetooth device address types. Commands and
+ * events that have Bluetooth device address parameters will specify which
+ * values are valid for that particular command or event.
+ *
+ * If the application does not include the
+ * bluetooth_feature_use_accurate_api_address_types component, most Bluetooth
+ * commands and events use a coarse address type that only differentiates
+ * between a public address and any random address. When the application
+ * includes the bluetooth_feature_use_accurate_api_address_types component,
+ * Bluetooth commands and events that include an address type will
+ * systematically use values of this @ref sl_bt_gap_address_type_t enumeration
+ * to indicate the accurate address type.
+ *
+ * The values @ref sl_bt_gap_public_address_resolved_from_rpa and @ref
+ * sl_bt_gap_static_address_resolved_from_rpa are reported by the Bluetooth
+ * stack only when the application includes the bluetooth_feature_resolving_list
+ * component and the address was resolved in the Bluetooth controller. If the
+ * application uses these two types in input parameters, they are treated as
+ * synonyms of @ref sl_bt_gap_public_address and @ref sl_bt_gap_static_address,
+ * respectively.
  */
 typedef enum
 {
-  sl_bt_gap_public_address               = 0x0, /**< (0x0) Public device address */
-  sl_bt_gap_static_address               = 0x1, /**< (0x1) Static device address */
-  sl_bt_gap_random_resolvable_address    = 0x2, /**< (0x2) Resolvable private
-                                                     random address */
-  sl_bt_gap_random_nonresolvable_address = 0x3  /**< (0x3) Non-resolvable
-                                                     private random address */
+  sl_bt_gap_public_address                   = 0x0,  /**< (0x0) Public device
+                                                          address */
+  sl_bt_gap_static_address                   = 0x1,  /**< (0x1) Static device
+                                                          address */
+  sl_bt_gap_random_resolvable_address        = 0x2,  /**< (0x2) Resolvable
+                                                          private random address */
+  sl_bt_gap_random_nonresolvable_address     = 0x3,  /**< (0x3) Non-resolvable
+                                                          private random address */
+  sl_bt_gap_public_address_resolved_from_rpa = 0x4,  /**< (0x4) Public identity
+                                                          address resolved from
+                                                          a resolvable private
+                                                          address (RPA) */
+  sl_bt_gap_static_address_resolved_from_rpa = 0x5,  /**< (0x5) Static identity
+                                                          address resolved from
+                                                          a resolvable private
+                                                          address (RPA) */
+  sl_bt_gap_anonymous_address                = 0xff  /**< (0xff) No address
+                                                          provided (anonymous
+                                                          advertising) */
 } sl_bt_gap_address_type_t;
 
 /**
@@ -1476,8 +1717,8 @@ sl_status_t sl_bt_gap_set_privacy_mode(uint8_t privacy, uint8_t interval);
  * @param[in] channel_map_len Length of data in @p channel_map
  * @param[in] channel_map @parblock
  *   5 byte bit field in little endian format. Only the first 37 bits are used.
- *   Bit 0 of the first byte is channel 0, bit 0 of the second byte is channel 8
- *   etc. Bits 37-39 are reserved for future use and must be set to 0.
+ *   Bit 0 of the first byte is channel 0, bit 0 of the second byte is channel
+ *   8, etc. Bits 37-39 are reserved for future use and must be set to 0.
  *
  *   A channel is bad when its bit is 0. A channel is unknown when its bit is 1.
  *   At least two channels shall be marked as unknown.
@@ -1490,6 +1731,15 @@ sl_status_t sl_bt_gap_set_data_channel_classification(size_t channel_map_len,
                                                       const uint8_t* channel_map);
 
 /***************************************************************************//**
+ *
+ * <b>Deprecated</b> and replaced by functionality-specific settings provided by
+ * the bluetooth_feature_accept_list component. For advertising, use the command
+ * @ref sl_bt_advertiser_configure and @p flags bits @ref
+ * SL_BT_ADVERTISER_USE_FILTER_FOR_SCAN_REQUESTS and @ref
+ * SL_BT_ADVERTISER_USE_FILTER_FOR_CONNECTION_REQUESTS to configure the
+ * advertising filter policy. For scanning, use the command @ref
+ * sl_bt_scanner_set_parameters_and_filter to control the scanning filter
+ * policy.
  *
  * Enable or disable accept list filtering. The setting will be effective the
  * next time that scanning is enabled. Use command @ref
@@ -1510,7 +1760,7 @@ sl_status_t sl_bt_gap_set_data_channel_classification(size_t channel_map_len,
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
  ******************************************************************************/
-sl_status_t sl_bt_gap_enable_whitelisting(uint8_t enable);
+SL_BGAPI_DEPRECATED sl_status_t sl_bt_gap_enable_whitelisting(uint8_t enable);
 
 /***************************************************************************//**
  *
@@ -1715,7 +1965,7 @@ typedef enum
  * set, i.e., the advertising address uses the device identity address. This
  * configuration has no effect if the advertising address has been set with the
  * @ref sl_bt_advertiser_set_random_address command. */
-#define SL_BT_ADVERTISER_USE_NONRESOLVABLE_ADDRESS      0x4       
+#define SL_BT_ADVERTISER_USE_NONRESOLVABLE_ADDRESS          0x4       
 
 /** Use the device identity address when privacy mode is enabled. By default,
  * this flag is not set, i.e., the advertising address uses a resolvable private
@@ -1723,7 +1973,35 @@ typedef enum
  * effect if the @ref SL_BT_ADVERTISER_USE_NONRESOLVABLE_ADDRESS flag is set or
  * the advertising address has been set with the @ref
  * sl_bt_advertiser_set_random_address command. */
-#define SL_BT_ADVERTISER_USE_DEVICE_IDENTITY_IN_PRIVACY 0x10      
+#define SL_BT_ADVERTISER_USE_DEVICE_IDENTITY_IN_PRIVACY     0x10      
+
+/**
+ *
+ * Use the Filter Accept List to filter scan requests received while performing
+ * scannable advertising with this advertising set. By default, this flag is not
+ * set and scan requests from all devices are processed. If the application sets
+ * this flag, scan requests are processed only from those devices that the
+ * application has added to the Filter Accept List.
+ *
+ * This configuration is supported only when the application has included the
+ * Bluetooth component bluetooth_feature_accept_list.
+ *
+ * */
+#define SL_BT_ADVERTISER_USE_FILTER_FOR_SCAN_REQUESTS       0x20      
+
+/**
+ *
+ * Use the Filter Accept List to filter connection requests received while
+ * performing connectable advertising with this advertising set. By default,
+ * this flag is not set and connection requests from all devices are processed.
+ * If the application sets this flag, connection requests are processed only
+ * from those devices that the application has added to the Filter Accept List.
+ *
+ * This configuration is supported only when the application has included the
+ * Bluetooth component bluetooth_feature_accept_list.
+ *
+ * */
+#define SL_BT_ADVERTISER_USE_FILTER_FOR_CONNECTION_REQUESTS 0x40      
 
 /** @} */ // end Generic Advertising Configuration Flags
 
@@ -1774,9 +2052,36 @@ PACKSTRUCT( struct sl_bt_evt_advertiser_scan_request_s
   uint8_t handle;       /**< Advertising set handle where the scan request was
                              received */
   bd_addr address;      /**< Bluetooth address of the scanner */
-  uint8_t address_type; /**< Scanner address type. Values:
+  uint8_t address_type; /**< Enum @ref sl_bt_gap_address_type_t.
+
+                             Scanner address type.
+
+                             If the application does not include the
+                             bluetooth_feature_use_accurate_api_address_types
+                             component, @p address_type uses the following
+                             values:
                                - <b>0:</b> Public address
-                               - <b>1:</b> Random address */
+                               - <b>1:</b> Random address
+
+                             If the application includes the
+                             bluetooth_feature_use_accurate_api_address_types
+                             component, @p address_type uses enum @ref
+                             sl_bt_gap_address_type_t values:
+                               - <b>sl_bt_gap_public_address (0x0):</b> Public
+                                 device address
+                               - <b>sl_bt_gap_static_address (0x1):</b> Static
+                                 device address
+                               - <b>sl_bt_gap_random_resolvable_address
+                                 (0x2):</b> Resolvable private random address
+                               - <b>sl_bt_gap_random_nonresolvable_address
+                                 (0x3):</b> Non-resolvable private random
+                                 address
+                               - <b>sl_bt_gap_public_address_resolved_from_rpa
+                                 (0x4):</b> Public identity address resolved
+                                 from a resolvable private address (RPA)
+                               - <b>sl_bt_gap_static_address_resolved_from_rpa
+                                 (0x5):</b> Static identity address resolved
+                                 from a resolvable private address (RPA) */
   uint8_t bonding;      /**< Bonding handle if the remote scanning device has
                              previously bonded with the local device. Values:
                                - <b>SL_BT_INVALID_BONDING_HANDLE (0xff):</b> No
@@ -1879,7 +2184,7 @@ sl_status_t sl_bt_advertiser_set_timing(uint8_t advertising_set,
  *
  * @param[in] advertising_set Advertising set handle
  * @param[in] channel_map @parblock
- *   Advertising channel map which determines which of the three channels will
+ *   Advertising channel map which determines, which of the three channels will
  *   be used for advertising. This value is given as a bitmask. Values:
  *     - <b>1:</b> Advertise on CH37
  *     - <b>2:</b> Advertise on CH38
@@ -1955,7 +2260,7 @@ sl_status_t sl_bt_advertiser_set_report_scan_request(uint8_t advertising_set,
 /***************************************************************************//**
  *
  * Set the advertiser on an advertising set to use a random address. This
- * overrides the default advertiser address which is either the public device
+ * overrides the default advertiser address, which is either the public device
  * address programmed at production or the address written into persistent
  * storage using @ref sl_bt_system_set_identity_address command. This setting is
  * stored in RAM only and does not change the identity address in persistent
@@ -1979,11 +2284,14 @@ sl_status_t sl_bt_advertiser_set_report_scan_request(uint8_t advertising_set,
  * specification.
  *
  * @param[in] advertising_set Advertising set handle
- * @param[in] addr_type Address type:
- *     - <b>1:</b> Static device address
- *     - <b>2:</b> Resolvable private random address
- *     - <b>3:</b> Non-resolvable private random address. This type can only be
- *       used for non-connectable advertising.
+ * @param[in] addr_type Enum @ref sl_bt_gap_address_type_t. Address type.
+ *   Values:
+ *     - <b>sl_bt_gap_static_address (0x1):</b> Static device address
+ *     - <b>sl_bt_gap_random_resolvable_address (0x2):</b> Resolvable private
+ *       random address
+ *     - <b>sl_bt_gap_random_nonresolvable_address (0x3):</b> Non-resolvable
+ *       private random address. This type can only be used for non-connectable
+ *       advertising.
  * @param[in] address The random address to set. Ignore this field when setting
  *   a resolvable random address.
  * @param[out] address_out The resolvable random address set for the advertiser.
@@ -2045,12 +2353,12 @@ sl_status_t sl_bt_advertiser_delete_set(uint8_t advertising_set);
 
 /***************************************************************************//**
  *
- * <b>Deprecated</b> and replaced by @ref sl_bt_extended_advertiser_set_phy
- * command.
+ * <b>Deprecated</b> and replaced by @ref sl_bt_extended_advertiser_set_phy.
  *
- * Set extended advertising PHYs on an advertising set. This setting will take
- * effect next time the extended advertising is enabled. When advertising on the
- * LE Coded PHY, coding scheme S=8 is used. The invalid parameter error is
+ * Set the primary and secondary advertising PHYs used for extended and periodic
+ * advertising on an advertising set. This setting will take effect next time
+ * extended or periodic advertising is enabled. When advertising on the LE Coded
+ * PHY, coding scheme S=8 is used. The SL_STATUS_INVALID_PARAMETER error is
  * returned if a PHY value is invalid or the device does not support a given
  * PHY.
  *
@@ -2249,7 +2557,7 @@ SL_BGAPI_DEPRECATED sl_status_t sl_bt_advertiser_set_long_data(uint8_t advertisi
  *   1. The connection mode is set to @ref
  *      sl_bt_advertiser_connectable_non_scannable.
  *   2. The primary advertising PHY is set to Coded PHY by @ref
- *      sl_bt_advertiser_set_phy.
+ *      sl_bt_extended_advertiser_set_phy.
  *   3. The user advertising data length is more than 31 bytes.
  *   4. Periodic advertising is enabled.
  *
@@ -2639,9 +2947,31 @@ sl_status_t sl_bt_legacy_advertiser_start(uint8_t advertising_set,
  *       duty cycle directed connectable legacy advertising
  * @param[in] peer_addr Address of the peer target device the advertising is
  *   directed to
- * @param[in] peer_addr_type Peer target device address type. Values:
+ * @param[in] peer_addr_type @parblock
+ *   Enum @ref sl_bt_gap_address_type_t.
+ *
+ *   Peer target device address type.
+ *
+ *   If the application does not include the
+ *   bluetooth_feature_use_accurate_api_address_types component, @p
+ *   peer_addr_type uses the following values:
  *     - <b>0:</b> Public address
  *     - <b>1:</b> Random address
+ *
+ *   If the application includes the
+ *   bluetooth_feature_use_accurate_api_address_types component, @p
+ *   peer_addr_type uses enum @ref sl_bt_gap_address_type_t values:
+ *     - <b>sl_bt_gap_public_address (0x0):</b> Public device address
+ *     - <b>sl_bt_gap_static_address (0x1):</b> Static device address
+ *     - <b>sl_bt_gap_random_resolvable_address (0x2):</b> Resolvable private
+ *       random address
+ *     - <b>sl_bt_gap_random_nonresolvable_address (0x3):</b> Non-resolvable
+ *       private random address
+ *     - <b>sl_bt_gap_public_address_resolved_from_rpa (0x4):</b> Public
+ *       identity address resolved from a resolvable private address (RPA)
+ *     - <b>sl_bt_gap_static_address_resolved_from_rpa (0x5):</b> Static
+ *       identity address resolved from a resolvable private address (RPA)
+ *   @endparblock
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
@@ -2717,11 +3047,12 @@ typedef enum
 
 /***************************************************************************//**
  *
- * Set advertising PHYs of the extended advertising on an advertising set. This
- * setting will take effect next time the advertising is enabled. When
- * advertising on the LE Coded PHY, coding scheme S=8 is used. The invalid
- * parameter error is returned if a PHY value is invalid or the device does not
- * support a given PHY.
+ * Set the primary and secondary advertising PHYs used for extended and periodic
+ * advertising on an advertising set. This setting will take effect next time
+ * extended or periodic advertising is enabled. When advertising on the LE Coded
+ * PHY, coding scheme S=8 is used. The SL_STATUS_INVALID_PARAMETER error is
+ * returned if a PHY value is invalid or the device does not support a given
+ * PHY.
  *
  * @param[in] advertising_set Advertising set handle
  * @param[in] primary_phy @parblock
@@ -2923,9 +3254,31 @@ sl_status_t sl_bt_extended_advertiser_start(uint8_t advertising_set,
  *   of @ref sl_bt_extended_advertiser_flags
  * @param[in] peer_addr Address of the peer target device the advertising is
  *   directed to
- * @param[in] peer_addr_type Peer target device address type. Values:
+ * @param[in] peer_addr_type @parblock
+ *   Enum @ref sl_bt_gap_address_type_t.
+ *
+ *   Peer target device address type.
+ *
+ *   If the application does not include the
+ *   bluetooth_feature_use_accurate_api_address_types component, @p
+ *   peer_addr_type uses the following values:
  *     - <b>0:</b> Public address
  *     - <b>1:</b> Random address
+ *
+ *   If the application includes the
+ *   bluetooth_feature_use_accurate_api_address_types component, @p
+ *   peer_addr_type uses enum @ref sl_bt_gap_address_type_t values:
+ *     - <b>sl_bt_gap_public_address (0x0):</b> Public device address
+ *     - <b>sl_bt_gap_static_address (0x1):</b> Static device address
+ *     - <b>sl_bt_gap_random_resolvable_address (0x2):</b> Resolvable private
+ *       random address
+ *     - <b>sl_bt_gap_random_nonresolvable_address (0x3):</b> Non-resolvable
+ *       private random address
+ *     - <b>sl_bt_gap_public_address_resolved_from_rpa (0x4):</b> Public
+ *       identity address resolved from a resolvable private address (RPA)
+ *     - <b>sl_bt_gap_static_address_resolved_from_rpa (0x5):</b> Static
+ *       identity address resolved from a resolvable private address (RPA)
+ *   @endparblock
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
@@ -2951,7 +3304,8 @@ sl_status_t sl_bt_extended_advertiser_start_directed(uint8_t advertising_set,
  *
  * @brief Periodic Advertiser
  *
- * Provides the periodic advertising feature.
+ * Provides support for advertising with periodic advertising trains that do not
+ * have subevents or response slots.
  */
 
 /* Command and Response IDs */
@@ -3058,10 +3412,34 @@ sl_status_t sl_bt_periodic_advertiser_set_long_data(uint8_t advertising_set);
  *
  * Start periodic advertising on an advertising set.
  *
- * When the flag @ref SL_BT_PERIODIC_ADVERTISER_AUTO_START_EXTENDED_ADVERTISING
- * is set, the stack will start the extended advertising and will return the
- * invalid parameter error if the extended advertising cannot be started for
- * some reason.
+ * According to the Bluetooth Core specification, periodic advertising PDUs
+ * cannot be transmitted until at least one extended advertising event has been
+ * completed. If the application needs exact control over the extended
+ * advertising data and parameters, use the @ref sl_bt_advertiser class to
+ * configure the parameters of the advertising set and the @ref
+ * sl_bt_extended_advertiser class to set or generate the desired extended
+ * advertising data payload. If the application does not configure the
+ * parameters or set the data, the default parameters and empty advertising data
+ * are used for the extended advertising.
+ *
+ * If the application has not already started extended advertising and the flag
+ * @ref SL_BT_PERIODIC_ADVERTISER_AUTO_START_EXTENDED_ADVERTISING is set in @p
+ * flags, the stack will automatically start extended advertising with the
+ * parameters and extended advertising data currently configured to the
+ * advertising set. The application may stop the automatically started extended
+ * advertising using the @ref sl_bt_advertiser_stop command.
+ *
+ * If the application has not already started extended advertising and the flag
+ * @ref SL_BT_PERIODIC_ADVERTISER_AUTO_START_EXTENDED_ADVERTISING is not set in
+ * @p flags, the stack will momentarily start extended advertising with the
+ * parameters and extended advertising data currently configured to the
+ * advertising set. Unless the application starts extended advertising before
+ * the first extended advertising event has completed, the stack will
+ * automatically stop the momentary extended advertising after the first
+ * extended advertising event.
+ *
+ * Periodic advertising PDUs are transmitted on the secondary PHY configured for
+ * the advertising set with the @ref sl_bt_extended_advertiser_set_phy command.
  *
  * Use @ref sl_bt_periodic_advertiser_stop command to stop the periodic
  * advertising.
@@ -3155,11 +3533,13 @@ sl_status_t sl_bt_periodic_advertiser_stop(uint8_t advertising_set);
 
 /* Command and Response IDs */
 #define sl_bt_cmd_scanner_set_parameters_id                          0x06050020
+#define sl_bt_cmd_scanner_set_parameters_and_filter_id               0x07050020
 #define sl_bt_cmd_scanner_stop_id                                    0x05050020
 #define sl_bt_cmd_scanner_set_timing_id                              0x01050020
 #define sl_bt_cmd_scanner_set_mode_id                                0x02050020
 #define sl_bt_cmd_scanner_start_id                                   0x03050020
 #define sl_bt_rsp_scanner_set_parameters_id                          0x06050020
+#define sl_bt_rsp_scanner_set_parameters_and_filter_id               0x07050020
 #define sl_bt_rsp_scanner_stop_id                                    0x05050020
 #define sl_bt_rsp_scanner_set_timing_id                              0x01050020
 #define sl_bt_rsp_scanner_set_mode_id                                0x02050020
@@ -3238,6 +3618,93 @@ typedef enum
 } sl_bt_scanner_data_status_t;
 
 /**
+ * @brief The scanning filter policy setting determines which advertisements and
+ * scan responses are delivered to the application when scanning. See the
+ * Bluetooth Core specification Volume 6, Part B, Section 4.3.3 "Scanning filter
+ * policy" for a detailed description of this setting.
+ *
+ * Note that some filter policies require the application to include additional
+ * Bluetooth feature components. Filter policies that use the Filter Accept List
+ * require that the application has included the bluetooth_feature_accept_list
+ * component. Filter policies that require the Bluetooth controller to resolve a
+ * Resolvable Private Address require that the application has included the
+ * bluetooth_feature_resolving_list component.
+ */
+typedef enum
+{
+  sl_bt_scanner_filter_policy_basic_unfiltered    = 0x0, /**< (0x0) Advertising
+                                                              and scan response
+                                                              PDUs are processed
+                                                              from all devices.
+                                                              For directed
+                                                              advertising, the
+                                                              target address
+                                                              must additionally
+                                                              match the identity
+                                                              address of the
+                                                              local device or be
+                                                              a Resolvable
+                                                              Private Address
+                                                              that is resolved
+                                                              to the local
+                                                              device by the
+                                                              Bluetooth
+                                                              controller. */
+  sl_bt_scanner_filter_policy_basic_filtered      = 0x1, /**< (0x1) Advertising
+                                                              and scan response
+                                                              PDUs are processed
+                                                              only from devices
+                                                              that the
+                                                              application has
+                                                              added to the
+                                                              Filter Accept
+                                                              List. For directed
+                                                              advertising, the
+                                                              target address
+                                                              must additionally
+                                                              match the identity
+                                                              address of the
+                                                              local device or be
+                                                              a Resolvable
+                                                              Private Address
+                                                              that is resolved
+                                                              to the local
+                                                              device by the
+                                                              Bluetooth
+                                                              controller. */
+  sl_bt_scanner_filter_policy_extended_unfiltered = 0x2, /**< (0x2) Advertising
+                                                              and scan response
+                                                              PDUs are processed
+                                                              from all devices.
+                                                              For directed
+                                                              advertising, the
+                                                              target address
+                                                              must additionally
+                                                              match the identity
+                                                              address of the
+                                                              local device or be
+                                                              any Resolvable
+                                                              Private Address. */
+  sl_bt_scanner_filter_policy_extended_filtered   = 0x3  /**< (0x3) Advertising
+                                                              and scan response
+                                                              PDUs are processed
+                                                              only from devices
+                                                              that the
+                                                              application has
+                                                              added to the
+                                                              Filter Accept
+                                                              List. For directed
+                                                              advertising, the
+                                                              target address
+                                                              must additionally
+                                                              match the identity
+                                                              address of the
+                                                              local device or be
+                                                              any Resolvable
+                                                              Private Address. */
+} sl_bt_scanner_filter_policy_t;
+
+/**
  * @addtogroup sl_bt_scanner_event_flag Event Type Flags of Advertisement Reports
  * @{
  *
@@ -3286,9 +3753,39 @@ PACKSTRUCT( struct sl_bt_evt_scanner_legacy_advertisement_report_s
                                        flags defined in @ref
                                        sl_bt_scanner_event_flag */
   bd_addr    address;             /**< Advertiser address */
-  uint8_t    address_type;        /**< Advertiser address type. Values:
+  uint8_t    address_type;        /**< Enum @ref sl_bt_gap_address_type_t.
+
+                                       Advertiser address type.
+
+                                       If the application does not include the
+                                       bluetooth_feature_use_accurate_api_address_types
+                                       component, @p address_type uses the
+                                       following values:
                                          - <b>0:</b> Public address
-                                         - <b>1:</b> Random address */
+                                         - <b>1:</b> Random address
+
+                                       If the application includes the
+                                       bluetooth_feature_use_accurate_api_address_types
+                                       component, @p address_type uses enum @ref
+                                       sl_bt_gap_address_type_t values:
+                                         - <b>sl_bt_gap_public_address
+                                           (0x0):</b> Public device address
+                                         - <b>sl_bt_gap_static_address
+                                           (0x1):</b> Static device address
+                                         - <b>sl_bt_gap_random_resolvable_address
+                                           (0x2):</b> Resolvable private random
+                                           address
+                                         - <b>sl_bt_gap_random_nonresolvable_address
+                                           (0x3):</b> Non-resolvable private
+                                           random address
+                                         - <b>sl_bt_gap_public_address_resolved_from_rpa
+                                           (0x4):</b> Public identity address
+                                           resolved from a resolvable private
+                                           address (RPA)
+                                         - <b>sl_bt_gap_static_address_resolved_from_rpa
+                                           (0x5):</b> Static identity address
+                                           resolved from a resolvable private
+                                           address (RPA) */
   uint8_t    bonding;             /**< Bonding handle if the remote advertising
                                        device has previously bonded with the
                                        local device. Values:
@@ -3303,11 +3800,42 @@ PACKSTRUCT( struct sl_bt_evt_scanner_legacy_advertisement_report_s
   bd_addr    target_address;      /**< The target address if the advertisement
                                        is from directed advertising, otherwise
                                        ignored */
-  uint8_t    target_address_type; /**< The target address type if the
+  uint8_t    target_address_type; /**< Enum @ref sl_bt_gap_address_type_t.
+
+                                       The target address type if the
                                        advertisement is from directed
-                                       advertising, otherwise ignored. Values:
+                                       advertising, otherwise ignored.
+
+                                       If the application does not include the
+                                       bluetooth_feature_use_accurate_api_address_types
+                                       component, @p target_address_type uses
+                                       the following values:
                                          - <b>0:</b> Public address
-                                         - <b>1:</b> Random address */
+                                         - <b>1:</b> Random address
+
+                                       If the application includes the
+                                       bluetooth_feature_use_accurate_api_address_types
+                                       component, @p target_address_type uses
+                                       enum @ref sl_bt_gap_address_type_t
+                                       values:
+                                         - <b>sl_bt_gap_public_address
+                                           (0x0):</b> Public device address
+                                         - <b>sl_bt_gap_static_address
+                                           (0x1):</b> Static device address
+                                         - <b>sl_bt_gap_random_resolvable_address
+                                           (0x2):</b> Resolvable private random
+                                           address
+                                         - <b>sl_bt_gap_random_nonresolvable_address
+                                           (0x3):</b> Non-resolvable private
+                                           random address
+                                         - <b>sl_bt_gap_public_address_resolved_from_rpa
+                                           (0x4):</b> Public identity address
+                                           resolved from a resolvable private
+                                           address (RPA)
+                                         - <b>sl_bt_gap_static_address_resolved_from_rpa
+                                           (0x5):</b> Static identity address
+                                           resolved from a resolvable private
+                                           address (RPA) */
   uint8array data;                /**< Advertising or scan response data. Ignore
                                        if this is directed advertising. */
 });
@@ -3343,11 +3871,44 @@ PACKSTRUCT( struct sl_bt_evt_scanner_extended_advertisement_report_s
                                        flags defined in @ref
                                        sl_bt_scanner_event_flag */
   bd_addr    address;             /**< Advertiser address */
-  uint8_t    address_type;        /**< Advertiser address type. Values:
+  uint8_t    address_type;        /**< Enum @ref sl_bt_gap_address_type_t.
+
+                                       Advertiser address type.
+
+                                       If the application does not include the
+                                       bluetooth_feature_use_accurate_api_address_types
+                                       component, @p address_type uses the
+                                       following values:
                                          - <b>0:</b> Public address
                                          - <b>1:</b> Random address
                                          - <b>255:</b> No address provided
-                                           (anonymous advertising) */
+                                           (anonymous advertising)
+
+                                       If the application includes the
+                                       bluetooth_feature_use_accurate_api_address_types
+                                       component, @p address_type uses enum @ref
+                                       sl_bt_gap_address_type_t values:
+                                         - <b>sl_bt_gap_public_address
+                                           (0x0):</b> Public device address
+                                         - <b>sl_bt_gap_static_address
+                                           (0x1):</b> Static device address
+                                         - <b>sl_bt_gap_random_resolvable_address
+                                           (0x2):</b> Resolvable private random
+                                           address
+                                         - <b>sl_bt_gap_random_nonresolvable_address
+                                           (0x3):</b> Non-resolvable private
+                                           random address
+                                         - <b>sl_bt_gap_anonymous_address
+                                           (0xff):</b> No address provided
+                                           (anonymous advertising)
+                                         - <b>sl_bt_gap_public_address_resolved_from_rpa
+                                           (0x4):</b> Public identity address
+                                           resolved from a resolvable private
+                                           address (RPA)
+                                         - <b>sl_bt_gap_static_address_resolved_from_rpa
+                                           (0x5):</b> Static identity address
+                                           resolved from a resolvable private
+                                           address (RPA) */
   uint8_t    bonding;             /**< Bonding handle if the remote advertising
                                        device has previously bonded with the
                                        local device. Values:
@@ -3361,11 +3922,42 @@ PACKSTRUCT( struct sl_bt_evt_scanner_extended_advertisement_report_s
                                        packet was received */
   bd_addr    target_address;      /**< The target address if this is directed
                                        advertising, otherwise ignored */
-  uint8_t    target_address_type; /**< The target address type if this is
-                                       directed advertising, otherwise ignored.
-                                       Values:
+  uint8_t    target_address_type; /**< Enum @ref sl_bt_gap_address_type_t.
+
+                                       The target address type if the
+                                       advertisement is from directed
+                                       advertising, otherwise ignored.
+
+                                       If the application does not include the
+                                       bluetooth_feature_use_accurate_api_address_types
+                                       component, @p target_address_type uses
+                                       the following values:
                                          - <b>0:</b> Public address
-                                         - <b>1:</b> Random address */
+                                         - <b>1:</b> Random address
+
+                                       If the application includes the
+                                       bluetooth_feature_use_accurate_api_address_types
+                                       component, @p target_address_type uses
+                                       enum @ref sl_bt_gap_address_type_t
+                                       values:
+                                         - <b>sl_bt_gap_public_address
+                                           (0x0):</b> Public device address
+                                         - <b>sl_bt_gap_static_address
+                                           (0x1):</b> Static device address
+                                         - <b>sl_bt_gap_random_resolvable_address
+                                           (0x2):</b> Resolvable private random
+                                           address
+                                         - <b>sl_bt_gap_random_nonresolvable_address
+                                           (0x3):</b> Non-resolvable private
+                                           random address
+                                         - <b>sl_bt_gap_public_address_resolved_from_rpa
+                                           (0x4):</b> Public identity address
+                                           resolved from a resolvable private
+                                           address (RPA)
+                                         - <b>sl_bt_gap_static_address_resolved_from_rpa
+                                           (0x5):</b> Static identity address
+                                           resolved from a resolvable private
+                                           address (RPA) */
   uint8_t    adv_sid;             /**< Advertising set identifier */
   uint8_t    primary_phy;         /**< Enum @ref sl_bt_gap_phy_t. The PHY on
                                        which advertising packets are transmitted
@@ -3474,11 +4066,44 @@ PACKSTRUCT( struct sl_bt_evt_scanner_scan_report_s
                                        - <b>1:</b> Extended advertising PDUs
                                          used */
   bd_addr    address;           /**< Bluetooth address of the remote device */
-  uint8_t    address_type;      /**< Advertiser address type. Values:
+  uint8_t    address_type;      /**< Enum @ref sl_bt_gap_address_type_t.
+
+                                     Advertiser address type.
+
+                                     If the application does not include the
+                                     bluetooth_feature_use_accurate_api_address_types
+                                     component, @p address_type uses the
+                                     following values:
                                        - <b>0:</b> Public address
                                        - <b>1:</b> Random address
                                        - <b>255:</b> No address provided
-                                         (anonymous advertising) */
+                                         (anonymous advertising)
+
+                                     If the application includes the
+                                     bluetooth_feature_use_accurate_api_address_types
+                                     component, @p address_type uses enum @ref
+                                     sl_bt_gap_address_type_t values:
+                                       - <b>sl_bt_gap_public_address (0x0):</b>
+                                         Public device address
+                                       - <b>sl_bt_gap_static_address (0x1):</b>
+                                         Static device address
+                                       - <b>sl_bt_gap_random_resolvable_address
+                                         (0x2):</b> Resolvable private random
+                                         address
+                                       - <b>sl_bt_gap_random_nonresolvable_address
+                                         (0x3):</b> Non-resolvable private
+                                         random address
+                                       - <b>sl_bt_gap_anonymous_address
+                                         (0xff):</b> No address provided
+                                         (anonymous advertising)
+                                       - <b>sl_bt_gap_public_address_resolved_from_rpa
+                                         (0x4):</b> Public identity address
+                                         resolved from a resolvable private
+                                         address (RPA)
+                                       - <b>sl_bt_gap_static_address_resolved_from_rpa
+                                         (0x5):</b> Static identity address
+                                         resolved from a resolvable private
+                                         address (RPA) */
   uint8_t    bonding;           /**< Bonding handle if the remote advertising
                                      device has previously bonded with the local
                                      device. Values:
@@ -3530,6 +4155,11 @@ typedef struct sl_bt_evt_scanner_scan_report_s sl_bt_evt_scanner_scan_report_t;
  * Set scan parameters for subsequent scanning operations. If the device is
  * currently scanning, new parameters will take effect when scanning is
  * restarted.
+ *
+ * This command sets the scanning filter policy to the default value @ref
+ * sl_bt_scanner_filter_policy_basic_unfiltered. Use the command @ref
+ * sl_bt_scanner_set_parameters_and_filter to set a specific scanning filter
+ * policy.
  *
  * @param[in] mode @parblock
  *   Enum @ref sl_bt_scanner_scan_mode_t.
@@ -3587,6 +4217,102 @@ typedef struct sl_bt_evt_scanner_scan_report_s sl_bt_evt_scanner_scan_report_t;
 sl_status_t sl_bt_scanner_set_parameters(uint8_t mode,
                                          uint16_t interval,
                                          uint16_t window);
+
+/***************************************************************************//**
+ *
+ * Set scan parameters and the scanning filter policy for subsequent scanning
+ * operations. If the device is currently scanning, new parameters will take
+ * effect when scanning is restarted.
+ *
+ * @param[in] mode @parblock
+ *   Enum @ref sl_bt_scanner_scan_mode_t.
+ *
+ *   Passive or active scan. Values:
+ *     - <b>sl_bt_scanner_scan_mode_passive (0x0):</b> Passive scanning mode
+ *       where the device only listens to advertising packets and does not
+ *       transmit packets
+ *     - <b>sl_bt_scanner_scan_mode_active (0x1):</b> Active scanning mode where
+ *       the device sends out a scan request packet upon receiving a scannable
+ *       advertising packet from a remote device and listens to the scan
+ *       response packet from the remote device
+ *
+ *   Default value: @ref sl_bt_scanner_scan_mode_passive.
+ *   @endparblock
+ * @param[in] interval @parblock
+ *   The time interval when the device starts its last scan until it begins the
+ *   subsequent scan. In other words, how often to scan
+ *     - Time = Value x 0.625 ms
+ *     - Range: 0x0004 to 0xFFFF
+ *     - Time Range: 2.5 ms to 40.96 s
+ *
+ *   Default value: 10 ms
+ *
+ *   A variable delay occurs when switching channels at the end of each scanning
+ *   interval, which is included in the scanning interval time. During the
+ *   switch time, advertising packets are not received by the device. The switch
+ *   time variation is use case dependent. For example, if scanning while
+ *   keeping active connections, the channel switch time might be longer than
+ *   when scanning without any active connections. Increasing the scanning
+ *   interval reduces the amount of time in which the device can't receive
+ *   advertising packets because it switches channels less often.
+ *
+ *   After every scan interval, the scanner changes the frequency at which it
+ *   operates. It cycles through all three advertising channels in a round robin
+ *   fashion. According to the specification, all three channels must be used by
+ *   a scanner.
+ *   @endparblock
+ * @param[in] window @parblock
+ *   The scan window, i.e., the duration of the scan, which must be less than or
+ *   equal to the @p interval
+ *     - Time = Value x 0.625 ms
+ *     - Range: 0x0004 to 0xFFFF
+ *     - Time Range: 2.5 ms to 40.96 s
+ *
+ *   Default value: 10 ms
+ *
+ *   Note that the packet reception is aborted if it's started just before the
+ *   scan window ends.
+ *   @endparblock
+ * @param[in] flags No flags are currently defined. Set this parameter to 0.
+ * @param[in] filter_policy @parblock
+ *   Enum @ref sl_bt_scanner_filter_policy_t.
+ *
+ *   The scanning filter policy to use when scanning is started. The filter
+ *   policy determines which advertisements and scan responses are delivered to
+ *   the application. Values:
+ *     - <b>sl_bt_scanner_filter_policy_basic_unfiltered (0x0):</b> Advertising
+ *       and scan response PDUs are processed from all devices. For directed
+ *       advertising, the target address must additionally match the identity
+ *       address of the local device or be a Resolvable Private Address that is
+ *       resolved to the local device by the Bluetooth controller.
+ *     - <b>sl_bt_scanner_filter_policy_basic_filtered (0x1):</b> Advertising
+ *       and scan response PDUs are processed only from devices that the
+ *       application has added to the Filter Accept List. For directed
+ *       advertising, the target address must additionally match the identity
+ *       address of the local device or be a Resolvable Private Address that is
+ *       resolved to the local device by the Bluetooth controller.
+ *     - <b>sl_bt_scanner_filter_policy_extended_unfiltered (0x2):</b>
+ *       Advertising and scan response PDUs are processed from all devices. For
+ *       directed advertising, the target address must additionally match the
+ *       identity address of the local device or be any Resolvable Private
+ *       Address.
+ *     - <b>sl_bt_scanner_filter_policy_extended_filtered (0x3):</b> Advertising
+ *       and scan response PDUs are processed only from devices that the
+ *       application has added to the Filter Accept List. For directed
+ *       advertising, the target address must additionally match the identity
+ *       address of the local device or be any Resolvable Private Address.
+ *
+ *   Default value: @ref sl_bt_scanner_filter_policy_basic_unfiltered
+ *   @endparblock
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_scanner_set_parameters_and_filter(uint8_t mode,
+                                                    uint16_t interval,
+                                                    uint16_t window,
+                                                    uint32_t flags,
+                                                    uint8_t filter_policy);
 
 /***************************************************************************//**
  *
@@ -3756,17 +4482,41 @@ sl_status_t sl_bt_scanner_start(uint8_t scanning_phy, uint8_t discover_mode);
  *
  * @brief Synchronization
  *
- * Provides periodic advertising synchronization feature.
+ * Provides the base functionality of periodic advertising synchronization. Use
+ * bluetooth_feature_sync_scanner and/or bluetooth_feature_past_receiver
+ * components to include the synchronization mechanisms that the application
+ * requires. Use bluetooth_feature_periodic_sync to include support for trains
+ * that do not have subevents or response slots, and/or
+ * bluetooth_feature_pawr_sync to include support for Periodic Advertising with
+ * Responses (PAwR) trains.
+ *
+ * Some functionality in this class is considered <b>deprecated</b> and has been
+ * superseded by new classes. When one or more of
+ * bluetooth_feature_sync_scanner, bluetooth_feature_periodic_sync, or
+ * bluetooth_feature_pawr_sync components is included by the application,
+ * commands that have been superseded by the new classes are no longer available
+ * for use in the @ref sl_bt_sync class. Calling them will receive
+ * SL_STATUS_NOT_SUPPORTED error code. These commands are as follows:
+ *   - @ref sl_bt_sync_set_parameters
+ *   - @ref sl_bt_sync_open
+ *
+ * See the command descriptions for the replacements.
+ *
+ * Events that are deprecated and superseded by the new classes are no longer
+ * triggered by the @ref sl_bt_sync class if any of the new classes are included
+ * in the application. See event descriptions for the replacements.
  */
 
 /* Command and Response IDs */
 #define sl_bt_cmd_sync_set_parameters_id                             0x02420020
 #define sl_bt_cmd_sync_open_id                                       0x00420020
 #define sl_bt_cmd_sync_set_reporting_mode_id                         0x03420020
+#define sl_bt_cmd_sync_update_sync_parameters_id                     0x04420020
 #define sl_bt_cmd_sync_close_id                                      0x01420020
 #define sl_bt_rsp_sync_set_parameters_id                             0x02420020
 #define sl_bt_rsp_sync_open_id                                       0x00420020
 #define sl_bt_rsp_sync_set_reporting_mode_id                         0x03420020
+#define sl_bt_rsp_sync_update_sync_parameters_id                     0x04420020
 #define sl_bt_rsp_sync_close_id                                      0x01420020
 
 /**
@@ -3799,7 +4549,12 @@ typedef enum
 /**
  * @addtogroup sl_bt_evt_sync_opened sl_bt_evt_sync_opened
  * @{
- * @brief Indicates that a periodic advertising synchronization has been opened.
+ * @brief <b>Deprecated</b> and replaced by @ref sl_bt_evt_periodic_sync_opened
+ * for periodic advertising trains that do not have subevents or response slots,
+ * and with @ref sl_bt_evt_pawr_sync_opened for Periodic Advertising with
+ * Responses (PAwR) trains.
+ *
+ * Indicates that a periodic advertising synchronization has been opened.
  */
 
 /** @brief Identifier of the opened event */
@@ -3813,9 +4568,36 @@ PACKSTRUCT( struct sl_bt_evt_sync_opened_s
   uint16_t sync;           /**< Periodic advertising synchronization handle */
   uint8_t  adv_sid;        /**< Advertising set identifier */
   bd_addr  address;        /**< Address of the advertiser */
-  uint8_t  address_type;   /**< Advertiser address type. Values:
+  uint8_t  address_type;   /**< Enum @ref sl_bt_gap_address_type_t.
+
+                                Advertiser address type.
+
+                                If the application does not include the
+                                bluetooth_feature_use_accurate_api_address_types
+                                component, @p address_type uses the following
+                                values:
                                   - <b>0:</b> Public address
-                                  - <b>1:</b> Random address */
+                                  - <b>1:</b> Random address
+
+                                If the application includes the
+                                bluetooth_feature_use_accurate_api_address_types
+                                component, @p address_type uses enum @ref
+                                sl_bt_gap_address_type_t values:
+                                  - <b>sl_bt_gap_public_address (0x0):</b>
+                                    Public device address
+                                  - <b>sl_bt_gap_static_address (0x1):</b>
+                                    Static device address
+                                  - <b>sl_bt_gap_random_resolvable_address
+                                    (0x2):</b> Resolvable private random address
+                                  - <b>sl_bt_gap_random_nonresolvable_address
+                                    (0x3):</b> Non-resolvable private random
+                                    address
+                                  - <b>sl_bt_gap_public_address_resolved_from_rpa
+                                    (0x4):</b> Public identity address resolved
+                                    from a resolvable private address (RPA)
+                                  - <b>sl_bt_gap_static_address_resolved_from_rpa
+                                    (0x5):</b> Static identity address resolved
+                                    from a resolvable private address (RPA) */
   uint8_t  adv_phy;        /**< Enum @ref sl_bt_gap_phy_t. The advertiser PHY.
                                 Values:
                                   - <b>sl_bt_gap_phy_1m (0x1):</b> 1M PHY
@@ -3842,8 +4624,14 @@ typedef struct sl_bt_evt_sync_opened_s sl_bt_evt_sync_opened_t;
 /**
  * @addtogroup sl_bt_evt_sync_transfer_received sl_bt_evt_sync_transfer_received
  * @{
- * @brief Indicates that synchronization information for a periodic advertising
- * train has been received
+ * @brief <b>Deprecated</b> and replaced by @ref
+ * sl_bt_evt_periodic_sync_transfer_received for periodic advertising trains
+ * that do not have subevents or response slots responses, and with @ref
+ * sl_bt_evt_pawr_sync_transfer_received for Periodic Advertising with Responses
+ * (PAwR) trains.
+ *
+ * Indicates that synchronization information for a periodic advertising train
+ * has been received
  *
  * See @ref sl_bt_past_receiver.
  */
@@ -3865,9 +4653,36 @@ PACKSTRUCT( struct sl_bt_evt_sync_transfer_received_s
                                 transferred the sync info */
   uint8_t  adv_sid;        /**< Advertising set identifier */
   bd_addr  address;        /**< Address of the advertiser */
-  uint8_t  address_type;   /**< Advertiser address type. Values:
+  uint8_t  address_type;   /**< Enum @ref sl_bt_gap_address_type_t.
+
+                                Advertiser address type.
+
+                                If the application does not include the
+                                bluetooth_feature_use_accurate_api_address_types
+                                component, @p address_type uses the following
+                                values:
                                   - <b>0:</b> Public address
-                                  - <b>1:</b> Random address */
+                                  - <b>1:</b> Random address
+
+                                If the application includes the
+                                bluetooth_feature_use_accurate_api_address_types
+                                component, @p address_type uses enum @ref
+                                sl_bt_gap_address_type_t values:
+                                  - <b>sl_bt_gap_public_address (0x0):</b>
+                                    Public device address
+                                  - <b>sl_bt_gap_static_address (0x1):</b>
+                                    Static device address
+                                  - <b>sl_bt_gap_random_resolvable_address
+                                    (0x2):</b> Resolvable private random address
+                                  - <b>sl_bt_gap_random_nonresolvable_address
+                                    (0x3):</b> Non-resolvable private random
+                                    address
+                                  - <b>sl_bt_gap_public_address_resolved_from_rpa
+                                    (0x4):</b> Public identity address resolved
+                                    from a resolvable private address (RPA)
+                                  - <b>sl_bt_gap_static_address_resolved_from_rpa
+                                    (0x5):</b> Static identity address resolved
+                                    from a resolvable private address (RPA) */
   uint8_t  adv_phy;        /**< Enum @ref sl_bt_gap_phy_t. The advertiser PHY.
                                 Values:
                                   - <b>sl_bt_gap_phy_1m (0x1):</b> 1M PHY
@@ -3894,7 +4709,9 @@ typedef struct sl_bt_evt_sync_transfer_received_s sl_bt_evt_sync_transfer_receiv
 /**
  * @addtogroup sl_bt_evt_sync_data sl_bt_evt_sync_data
  * @{
- * @brief Reports a received periodic advertisement packet.
+ * @brief <b>Deprecated</b> and replaced by @ref sl_bt_evt_periodic_sync_report.
+ *
+ * Reports a received periodic advertisement packet.
  */
 
 /** @brief Identifier of the data event */
@@ -3956,6 +4773,9 @@ typedef struct sl_bt_evt_sync_closed_s sl_bt_evt_sync_closed_t;
 
 /***************************************************************************//**
  *
+ * <b>Deprecated</b> and replaced by @ref
+ * sl_bt_sync_scanner_set_sync_parameters.
+ *
  * Configure periodic advertiser synchronization parameters. The specified
  * parameters take effect immediately for all advertisers that have not already
  * established synchronization.
@@ -3982,11 +4802,13 @@ typedef struct sl_bt_evt_sync_closed_s sl_bt_evt_sync_closed_t;
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
  ******************************************************************************/
-sl_status_t sl_bt_sync_set_parameters(uint16_t skip,
+SL_BGAPI_DEPRECATED sl_status_t sl_bt_sync_set_parameters(uint16_t skip,
                                       uint16_t timeout,
                                       uint32_t flags);
 
 /***************************************************************************//**
+ *
+ * <b>Deprecated</b> and replaced by @ref sl_bt_sync_scanner_open.
  *
  * Start establishing synchronization with the specified periodic advertiser in
  * parallel with other advertisers given in previous invocations of this
@@ -4000,9 +4822,31 @@ sl_status_t sl_bt_sync_set_parameters(uint16_t skip,
  * the most recent invocation of command @ref sl_bt_evt_scanner_scan_report.
  *
  * @param[in] address Address of the advertiser
- * @param[in] address_type Advertiser address type. Values:
+ * @param[in] address_type @parblock
+ *   Enum @ref sl_bt_gap_address_type_t.
+ *
+ *   Advertiser address type.
+ *
+ *   If the application does not include the
+ *   bluetooth_feature_use_accurate_api_address_types component, @p address_type
+ *   uses the following values:
  *     - <b>0:</b> Public address
  *     - <b>1:</b> Random address
+ *
+ *   If the application includes the
+ *   bluetooth_feature_use_accurate_api_address_types component, @p address_type
+ *   uses enum @ref sl_bt_gap_address_type_t values:
+ *     - <b>sl_bt_gap_public_address (0x0):</b> Public device address
+ *     - <b>sl_bt_gap_static_address (0x1):</b> Static device address
+ *     - <b>sl_bt_gap_random_resolvable_address (0x2):</b> Resolvable private
+ *       random address
+ *     - <b>sl_bt_gap_random_nonresolvable_address (0x3):</b> Non-resolvable
+ *       private random address
+ *     - <b>sl_bt_gap_public_address_resolved_from_rpa (0x4):</b> Public
+ *       identity address resolved from a resolvable private address (RPA)
+ *     - <b>sl_bt_gap_static_address_resolved_from_rpa (0x5):</b> Static
+ *       identity address resolved from a resolvable private address (RPA)
+ *   @endparblock
  * @param[in] adv_sid Advertising set identifier
  * @param[out] sync A handle that will be assigned to the periodic advertising
  *   synchronization after the synchronization is established. This handle is
@@ -4020,7 +4864,7 @@ sl_status_t sl_bt_sync_set_parameters(uint16_t skip,
  *     establishment procedure was canceled.
  *
  ******************************************************************************/
-sl_status_t sl_bt_sync_open(bd_addr address,
+SL_BGAPI_DEPRECATED sl_status_t sl_bt_sync_open(bd_addr address,
                             uint8_t address_type,
                             uint8_t adv_sid,
                             uint16_t *sync);
@@ -4046,6 +4890,40 @@ sl_status_t sl_bt_sync_set_reporting_mode(uint16_t sync,
 
 /***************************************************************************//**
  *
+ * Update synchronization parameters for a periodic sync that was already
+ * established.
+ *
+ * When a sync is established by scanning (see @ref sl_bt_sync_scanner) or by
+ * receiving Periodic Advertising Synchronization Transfer (see @ref
+ * sl_bt_past_receiver), the sync gets the @p skip and @p timeout parameters
+ * that were configured in the corresponding class. The application can use this
+ * command @ref sl_bt_sync_update_sync_parameters to update the values of a sync
+ * that has been established. The application can for example update the values
+ * to better match the actual interval of the periodic advertising train, or to
+ * increase the @p skip value to minimize wakeups when power saving is
+ * prioritized over receiving every periodic advertisement.
+ *
+ * @param[in] sync Periodic advertising synchronization handle
+ * @param[in] skip The maximum number of periodic advertising packets that can
+ *   be skipped after a successful receive.
+ *     - Range: 0x0000 to 0x01F3
+ *     - Default value: 0
+ * @param[in] timeout The maximum permitted time between successful receives. If
+ *   this time is exceeded, synchronization is lost. Unit: 10 ms.
+ *     - Range: 0x0A to 0x4000
+ *     - Unit: 10 ms
+ *     - Time range: 100 ms to 163.84 s
+ *     - Default value: 1000 ms
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_sync_update_sync_parameters(uint16_t sync,
+                                              uint16_t skip,
+                                              uint16_t timeout);
+
+/***************************************************************************//**
+ *
  * Close a periodic advertising synchronization or cancel an ongoing attempt of
  * establishing a synchronization.
  *
@@ -4061,6 +4939,150 @@ sl_status_t sl_bt_sync_set_reporting_mode(uint16_t sync,
 sl_status_t sl_bt_sync_close(uint16_t sync);
 
 /** @} */ // end addtogroup sl_bt_sync
+
+/**
+ * @addtogroup sl_bt_sync_scanner Periodic Advertising Sync Scanner
+ * @{
+ *
+ * @brief Periodic Advertising Sync Scanner
+ *
+ * Synchronize to periodic advertising trains by scanning for extended
+ * advertisements that provide the synchronization information.
+ */
+
+/* Command and Response IDs */
+#define sl_bt_cmd_sync_scanner_set_sync_parameters_id                0x00500020
+#define sl_bt_cmd_sync_scanner_open_id                               0x01500020
+#define sl_bt_rsp_sync_scanner_set_sync_parameters_id                0x00500020
+#define sl_bt_rsp_sync_scanner_open_id                               0x01500020
+
+/***************************************************************************//**
+ *
+ * Configure synchronization parameters for synchronizing to periodic
+ * advertising trains. The specified parameters take effect immediately for all
+ * periodic advertising trains that have not already established
+ * synchronization.
+ *
+ * The application should determine skip and timeout values based on the
+ * periodic advertising interval provided by the advertiser. Ensure that you use
+ * a long enough timeout to allow multiple receives. If @p skip and @p timeout
+ * are used, select appropriate values so that they allow a few receiving
+ * attempts. Periodic advertising intervals are reported in @ref
+ * sl_bt_evt_scanner_scan_report or @ref
+ * sl_bt_evt_scanner_extended_advertisement_report event.
+ *
+ * @param[in] skip The maximum number of periodic advertising packets that can
+ *   be skipped after a successful receive.
+ *     - Range: 0x0000 to 0x01F3
+ *     - Default value: 0
+ * @param[in] timeout The maximum permitted time between successful receives. If
+ *   this time is exceeded, synchronization is lost. Unit: 10 ms.
+ *     - Range: 0x0A to 0x4000
+ *     - Unit: 10 ms
+ *     - Time range: 100 ms to 163.84 s
+ *     - Default value: 1000 ms
+ * @param[in] reporting_mode @parblock
+ *   Enum @ref sl_bt_sync_reporting_mode_t. Specifies the initial mode for
+ *   reporting data received in the periodic advertising train after it has
+ *   achieved synchronization. Values:
+ *     - <b>sl_bt_sync_report_none (0x0):</b> Data received in periodic
+ *       advertising trains is not reported to the application.
+ *     - <b>sl_bt_sync_report_all (0x1):</b> Data received in periodic
+ *       advertising trains is reported to the application.
+ *
+ *   Default: @ref sl_bt_sync_report_all (Data received in periodic advertising
+ *   trains is reported to the application)
+ *   @endparblock
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_sync_scanner_set_sync_parameters(uint16_t skip,
+                                                   uint16_t timeout,
+                                                   uint8_t reporting_mode);
+
+/***************************************************************************//**
+ *
+ * Start establishing synchronization with the specified periodic advertiser in
+ * parallel with other advertisers given in previous invocations of this
+ * command.
+ *
+ * If the application has not already started scanning with the @ref
+ * sl_bt_scanner_start command, the stack will internally enable scanning so
+ * that synchronizations can occur. The internal scanning uses the PHY that was
+ * most recently used with @ref sl_bt_scanner_start and the parameters that have
+ * been configured with @ref sl_bt_scanner_set_timing. The internal scanning is
+ * automatically stopped when all requested synchronizations have occurred.
+ *
+ * The scanning responses from the internal scanning are not passed to the
+ * application unless the application starts scanning with the @ref
+ * sl_bt_scanner_start command. If the application starts scanning while
+ * synchronizations are being established, the scanning PHY and settings set by
+ * the application take effect immediately and scanning for synchronizations
+ * continues with the new settings. When the application has started scanning
+ * with the @ref sl_bt_scanner_start command, scanning continues until the
+ * application stops scanning with the @ref sl_bt_scanner_stop command.
+ *
+ * Advertisers that have not already synced before the invocation of this
+ * command will be synced using the @p skip and @p timeout values configured in
+ * the most recent invocation of command @ref sl_bt_evt_scanner_scan_report.
+ *
+ * @param[in] address Address of the advertiser
+ * @param[in] address_type @parblock
+ *   Enum @ref sl_bt_gap_address_type_t.
+ *
+ *   Advertiser address type.
+ *
+ *   If the application does not include the
+ *   bluetooth_feature_use_accurate_api_address_types component, @p address_type
+ *   uses the following values:
+ *     - <b>0:</b> Public address
+ *     - <b>1:</b> Random address
+ *
+ *   If the application includes the
+ *   bluetooth_feature_use_accurate_api_address_types component, @p address_type
+ *   uses enum @ref sl_bt_gap_address_type_t values:
+ *     - <b>sl_bt_gap_public_address (0x0):</b> Public device address
+ *     - <b>sl_bt_gap_static_address (0x1):</b> Static device address
+ *     - <b>sl_bt_gap_random_resolvable_address (0x2):</b> Resolvable private
+ *       random address
+ *     - <b>sl_bt_gap_random_nonresolvable_address (0x3):</b> Non-resolvable
+ *       private random address
+ *     - <b>sl_bt_gap_public_address_resolved_from_rpa (0x4):</b> Public
+ *       identity address resolved from a resolvable private address (RPA)
+ *     - <b>sl_bt_gap_static_address_resolved_from_rpa (0x5):</b> Static
+ *       identity address resolved from a resolvable private address (RPA)
+ *   @endparblock
+ * @param[in] adv_sid Advertising set identifier
+ * @param[out] sync A handle that will be assigned to the periodic advertising
+ *   synchronization after the synchronization is established. This handle is
+ *   valid only if the result code of this response is SL_STATUS_OK.
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ * @b Events
+ *   - @ref sl_bt_evt_periodic_sync_opened - Triggered after synchronization is
+ *     established to a periodic advertising train that does not have subevents
+ *     or response slots.
+ *   - @ref sl_bt_evt_pawr_sync_opened - Triggered after synchronization is
+ *     established to a Periodic Advertising with Responses (PAwR) train.
+ *   - @ref sl_bt_evt_periodic_sync_report - Triggered when data for periodic
+ *     advertising train that does not have subevents or response slots is
+ *     received and accepted by the reporting mode currently set to the train.
+ *   - @ref sl_bt_evt_pawr_sync_subevent_report - Triggered when subevent data
+ *     for Periodic Advertising with Responses (PAwR) train is received and
+ *     accepted by the reporting mode currently set to the train.
+ *   - @ref sl_bt_evt_sync_closed - Triggered after periodic advertising
+ *     synchronization was lost or explicitly closed, or a synchronization
+ *     establishment procedure was canceled.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_sync_scanner_open(bd_addr address,
+                                    uint8_t address_type,
+                                    uint8_t adv_sid,
+                                    uint16_t *sync);
+
+/** @} */ // end addtogroup sl_bt_sync_scanner
 
 /**
  * @addtogroup sl_bt_past_receiver PAST Receiver
@@ -4163,7 +5185,19 @@ typedef enum
  *
  * @b Events
  *   - @ref sl_bt_evt_sync_transfer_received - Triggered after synchronization
- *     transfer is received for a periodic advertising train.
+ *     transfer is received for a periodic advertising train that does not have
+ *     subevents or response slots. This event is used only when the application
+ *     does not include bluetooth_feature_periodic_sync or
+ *     bluetooth_feature_pawr_sync components.
+ *   - @ref sl_bt_evt_periodic_sync_transfer_received - If the application
+ *     includes the bluetooth_feature_periodic_sync or
+ *     bluetooth_feature_pawr_sync component, triggered after synchronization
+ *     transfer is received for a periodic advertising train that does not have
+ *     subevents or response slots.
+ *   - @ref sl_bt_evt_pawr_sync_transfer_received - If the application includes
+ *     the bluetooth_feature_pawr_sync component, triggered after
+ *     synchronization transfer is received for a Periodic Advertising with
+ *     Responses (PAwR) train.
  *
  ******************************************************************************/
 sl_status_t sl_bt_past_receiver_set_default_sync_receive_parameters(uint8_t mode,
@@ -4229,7 +5263,19 @@ sl_status_t sl_bt_past_receiver_set_default_sync_receive_parameters(uint8_t mode
  *
  * @b Events
  *   - @ref sl_bt_evt_sync_transfer_received - Triggered after synchronization
- *     transfer is received for a periodic advertising train.
+ *     transfer is received for a periodic advertising train that does not have
+ *     subevents or response slots. This event is used only when the application
+ *     does not include bluetooth_feature_periodic_sync or
+ *     bluetooth_feature_pawr_sync components.
+ *   - @ref sl_bt_evt_periodic_sync_transfer_received - If the application
+ *     includes the bluetooth_feature_periodic_sync or
+ *     bluetooth_feature_pawr_sync component, triggered after synchronization
+ *     transfer is received for a periodic advertising train that does not have
+ *     subevents or response slots.
+ *   - @ref sl_bt_evt_pawr_sync_transfer_received - If the application includes
+ *     the bluetooth_feature_pawr_sync component, triggered after
+ *     synchronization transfer is received for a Periodic Advertising with
+ *     Responses (PAwR) train.
  *
  ******************************************************************************/
 sl_status_t sl_bt_past_receiver_set_sync_receive_parameters(uint8_t connection,
@@ -4312,6 +5358,907 @@ sl_status_t sl_bt_sync_past_transfer(uint8_t connection,
 /** @} */ // end addtogroup sl_bt_sync_past
 
 /**
+ * @addtogroup sl_bt_periodic_sync Periodic Advertising without responses Synchronization
+ * @{
+ *
+ * @brief Periodic Advertising without responses Synchronization
+ *
+ * Provides events and control for synchronized periodic advertising trains that
+ * do not have subevents or response slots. Synchronization is achieved by
+ * scanning (see @ref sl_bt_sync_scanner) or by receiving Periodic Advertising
+ * Synchronization Transfer (see @ref sl_bt_past_receiver).
+ */
+
+/* Command and Response IDs */
+
+/**
+ * @addtogroup sl_bt_evt_periodic_sync_opened sl_bt_evt_periodic_sync_opened
+ * @{
+ * @brief Indicates that synchronization to a periodic advertising train that
+ * does not have subevents or response slots has been opened by scanning
+ *
+ * See command @ref sl_bt_sync_scanner_open.
+ */
+
+/** @brief Identifier of the opened event */
+#define sl_bt_evt_periodic_sync_opened_id                            0x005300a0
+
+/***************************************************************************//**
+ * @brief Data structure of the opened event
+ ******************************************************************************/
+PACKSTRUCT( struct sl_bt_evt_periodic_sync_opened_s
+{
+  uint16_t sync;           /**< Periodic Advertising synchronization handle */
+  uint8_t  adv_sid;        /**< Advertising set identifier */
+  bd_addr  address;        /**< Address of the advertiser */
+  uint8_t  address_type;   /**< Enum @ref sl_bt_gap_address_type_t.
+
+                                Advertiser address type.
+
+                                If the application does not include the
+                                bluetooth_feature_use_accurate_api_address_types
+                                component, @p address_type uses the following
+                                values:
+                                  - <b>0:</b> Public address
+                                  - <b>1:</b> Random address
+
+                                If the application includes the
+                                bluetooth_feature_use_accurate_api_address_types
+                                component, @p address_type uses enum @ref
+                                sl_bt_gap_address_type_t values:
+                                  - <b>sl_bt_gap_public_address (0x0):</b>
+                                    Public device address
+                                  - <b>sl_bt_gap_static_address (0x1):</b>
+                                    Static device address
+                                  - <b>sl_bt_gap_random_resolvable_address
+                                    (0x2):</b> Resolvable private random address
+                                  - <b>sl_bt_gap_random_nonresolvable_address
+                                    (0x3):</b> Non-resolvable private random
+                                    address
+                                  - <b>sl_bt_gap_public_address_resolved_from_rpa
+                                    (0x4):</b> Public identity address resolved
+                                    from a resolvable private address (RPA)
+                                  - <b>sl_bt_gap_static_address_resolved_from_rpa
+                                    (0x5):</b> Static identity address resolved
+                                    from a resolvable private address (RPA) */
+  uint8_t  adv_phy;        /**< Enum @ref sl_bt_gap_phy_t. The advertiser PHY.
+                                Values:
+                                  - <b>sl_bt_gap_phy_1m (0x1):</b> 1M PHY
+                                  - <b>sl_bt_gap_phy_2m (0x2):</b> 2M PHY
+                                  - <b>sl_bt_gap_phy_coded (0x4):</b> Coded PHY,
+                                    125k (S=8) or 500k (S=2) */
+  uint16_t adv_interval;   /**< The Periodic Advertising interval. Value in
+                                units of 1.25 ms
+                                  - Range: 0x06 to 0xFFFF
+                                  - Time range: 7.5 ms to 81.92 s */
+  uint16_t clock_accuracy; /**< Enum @ref
+                                sl_bt_sync_advertiser_clock_accuracy_t. The
+                                advertiser clock accuracy. */
+  uint8_t  bonding;        /**< Bonding handle. Values:
+                                  - <b>SL_BT_INVALID_BONDING_HANDLE (0xff):</b>
+                                    No bonding
+                                  - <b>Other:</b> Bonding handle */
+});
+
+typedef struct sl_bt_evt_periodic_sync_opened_s sl_bt_evt_periodic_sync_opened_t;
+
+/** @} */ // end addtogroup sl_bt_evt_periodic_sync_opened
+
+/**
+ * @addtogroup sl_bt_evt_periodic_sync_transfer_received sl_bt_evt_periodic_sync_transfer_received
+ * @{
+ * @brief Indicates that synchronization information for a periodic advertising
+ * train that does not have subevents or response slots has been received
+ *
+ * See @ref sl_bt_past_receiver.
+ */
+
+/** @brief Identifier of the transfer_received event */
+#define sl_bt_evt_periodic_sync_transfer_received_id                 0x015300a0
+
+/***************************************************************************//**
+ * @brief Data structure of the transfer_received event
+ ******************************************************************************/
+PACKSTRUCT( struct sl_bt_evt_periodic_sync_transfer_received_s
+{
+  uint16_t status;         /**< SL_STATUS_OK if synchronization was established.
+                                Other values indicate that the sync failed to
+                                get established. */
+  uint16_t sync;           /**< Periodic advertising synchronization handle */
+  uint16_t service_data;   /**< A value provided by the peer device */
+  uint8_t  connection;     /**< Connection handle of the connection that
+                                transferred the sync info */
+  uint8_t  adv_sid;        /**< Advertising set identifier */
+  bd_addr  address;        /**< Address of the advertiser */
+  uint8_t  address_type;   /**< Enum @ref sl_bt_gap_address_type_t.
+
+                                Advertiser address type.
+
+                                If the application does not include the
+                                bluetooth_feature_use_accurate_api_address_types
+                                component, @p address_type uses the following
+                                values:
+                                  - <b>0:</b> Public address
+                                  - <b>1:</b> Random address
+
+                                If the application includes the
+                                bluetooth_feature_use_accurate_api_address_types
+                                component, @p address_type uses enum @ref
+                                sl_bt_gap_address_type_t values:
+                                  - <b>sl_bt_gap_public_address (0x0):</b>
+                                    Public device address
+                                  - <b>sl_bt_gap_static_address (0x1):</b>
+                                    Static device address
+                                  - <b>sl_bt_gap_random_resolvable_address
+                                    (0x2):</b> Resolvable private random address
+                                  - <b>sl_bt_gap_random_nonresolvable_address
+                                    (0x3):</b> Non-resolvable private random
+                                    address
+                                  - <b>sl_bt_gap_public_address_resolved_from_rpa
+                                    (0x4):</b> Public identity address resolved
+                                    from a resolvable private address (RPA)
+                                  - <b>sl_bt_gap_static_address_resolved_from_rpa
+                                    (0x5):</b> Static identity address resolved
+                                    from a resolvable private address (RPA) */
+  uint8_t  adv_phy;        /**< Enum @ref sl_bt_gap_phy_t. The advertiser PHY.
+                                Values:
+                                  - <b>sl_bt_gap_phy_1m (0x1):</b> 1M PHY
+                                  - <b>sl_bt_gap_phy_2m (0x2):</b> 2M PHY
+                                  - <b>sl_bt_gap_phy_coded (0x4):</b> Coded PHY,
+                                    125k (S=8) or 500k (S=2) */
+  uint16_t adv_interval;   /**< The periodic advertising interval. Value in
+                                units of 1.25 ms
+                                  - Range: 0x06 to 0xFFFF
+                                  - Time range: 7.5 ms to 81.92 s */
+  uint16_t clock_accuracy; /**< Enum @ref
+                                sl_bt_sync_advertiser_clock_accuracy_t. The
+                                advertiser clock accuracy. */
+  uint8_t  bonding;        /**< Bonding handle. Values:
+                                  - <b>SL_BT_INVALID_BONDING_HANDLE (0xff):</b>
+                                    No bonding
+                                  - <b>Other:</b> Bonding handle */
+});
+
+typedef struct sl_bt_evt_periodic_sync_transfer_received_s sl_bt_evt_periodic_sync_transfer_received_t;
+
+/** @} */ // end addtogroup sl_bt_evt_periodic_sync_transfer_received
+
+/**
+ * @addtogroup sl_bt_evt_periodic_sync_report sl_bt_evt_periodic_sync_report
+ * @{
+ * @brief Reports a periodic advertising packet for periodic advertising train
+ * that does not have subevents or response slots
+ */
+
+/** @brief Identifier of the report event */
+#define sl_bt_evt_periodic_sync_report_id                            0x025300a0
+
+/***************************************************************************//**
+ * @brief Data structure of the report event
+ ******************************************************************************/
+PACKSTRUCT( struct sl_bt_evt_periodic_sync_report_s
+{
+  uint16_t   sync;        /**< Periodic advertising synchronization handle */
+  int8_t     tx_power;    /**< TX power value in the received packet header.
+                               Units: dBm
+                                 - Valid value range: -127 to 126
+                                 - Value 127: information unavailable */
+  int8_t     rssi;        /**< Signal strength indicator (RSSI) in the latest
+                               received packet. Units: dBm
+                                 - Range: -127 to +20 */
+  uint8_t    cte_type;    /**< The CTE type
+                                 - <b>0x00:</b> AoA CTE
+                                 - <b>0x01:</b> AoD CTE with 1us slots
+                                 - <b>0x02:</b> AoD CTE with 2us slots
+                                 - <b>0xFF:</b> No CTE */
+  uint8_t    data_status; /**< Data completeness:
+                                 - <b>0:</b> Complete
+                                 - <b>1:</b> Incomplete, more data to come in
+                                   new events
+                                 - <b>2:</b> Incomplete, data truncated, no more
+                                   to come */
+  uint8_t    counter;     /**< The sequence number of this @ref
+                               sl_bt_evt_periodic_sync_report event as a
+                               monotonically increasing counter that wraps from
+                               255 to 0. There is a single counter for this
+                               event type that starts from value 0 when the
+                               Bluetooth stack is started and is never reset
+                               while the stack is running. This counter can be
+                               used to detect if one or more @ref
+                               sl_bt_evt_periodic_sync_report events have been
+                               created by the stack but dropped due to problems
+                               such as temporarily running out of resources
+                               before the event reached the application. */
+  uint8array data;        /**< Periodic advertising data */
+});
+
+typedef struct sl_bt_evt_periodic_sync_report_s sl_bt_evt_periodic_sync_report_t;
+
+/** @} */ // end addtogroup sl_bt_evt_periodic_sync_report
+
+/** @} */ // end addtogroup sl_bt_periodic_sync
+
+/**
+ * @addtogroup sl_bt_pawr_sync Periodic Advertising with responses Synchronization
+ * @{
+ *
+ * @brief Periodic Advertising with responses Synchronization
+ *
+ * Provides events and control for synchronized Periodic Advertising with
+ * Responses (PAwR) trains. Synchronization is achieved by scanning (see @ref
+ * sl_bt_sync_scanner) or by receiving Periodic Advertising Synchronization
+ * Transfer (see @ref sl_bt_past_receiver).
+ */
+
+/* Command and Response IDs */
+#define sl_bt_cmd_pawr_sync_set_sync_subevents_id                    0x02540020
+#define sl_bt_cmd_pawr_sync_set_response_data_id                     0x03540020
+#define sl_bt_rsp_pawr_sync_set_sync_subevents_id                    0x02540020
+#define sl_bt_rsp_pawr_sync_set_response_data_id                     0x03540020
+
+/**
+ * @addtogroup sl_bt_evt_pawr_sync_opened sl_bt_evt_pawr_sync_opened
+ * @{
+ * @brief Indicates that synchronization to a Periodic Advertising with
+ * Responses (PAwR) train has been opened by scanning
+ *
+ * See command @ref sl_bt_sync_scanner_open.
+ */
+
+/** @brief Identifier of the opened event */
+#define sl_bt_evt_pawr_sync_opened_id                                0x005400a0
+
+/***************************************************************************//**
+ * @brief Data structure of the opened event
+ ******************************************************************************/
+PACKSTRUCT( struct sl_bt_evt_pawr_sync_opened_s
+{
+  uint16_t sync;                  /**< PAwR synchronization handle */
+  uint8_t  adv_sid;               /**< Advertising set identifier */
+  bd_addr  address;               /**< Address of the advertiser */
+  uint8_t  address_type;          /**< Enum @ref sl_bt_gap_address_type_t.
+
+                                       Advertiser address type.
+
+                                       If the application does not include the
+                                       bluetooth_feature_use_accurate_api_address_types
+                                       component, @p address_type uses the
+                                       following values:
+                                         - <b>0:</b> Public address
+                                         - <b>1:</b> Random address
+
+                                       If the application includes the
+                                       bluetooth_feature_use_accurate_api_address_types
+                                       component, @p address_type uses enum @ref
+                                       sl_bt_gap_address_type_t values:
+                                         - <b>sl_bt_gap_public_address
+                                           (0x0):</b> Public device address
+                                         - <b>sl_bt_gap_static_address
+                                           (0x1):</b> Static device address
+                                         - <b>sl_bt_gap_random_resolvable_address
+                                           (0x2):</b> Resolvable private random
+                                           address
+                                         - <b>sl_bt_gap_random_nonresolvable_address
+                                           (0x3):</b> Non-resolvable private
+                                           random address
+                                         - <b>sl_bt_gap_public_address_resolved_from_rpa
+                                           (0x4):</b> Public identity address
+                                           resolved from a resolvable private
+                                           address (RPA)
+                                         - <b>sl_bt_gap_static_address_resolved_from_rpa
+                                           (0x5):</b> Static identity address
+                                           resolved from a resolvable private
+                                           address (RPA) */
+  uint8_t  adv_phy;               /**< Enum @ref sl_bt_gap_phy_t. The advertiser
+                                       PHY. Values:
+                                         - <b>sl_bt_gap_phy_1m (0x1):</b> 1M PHY
+                                         - <b>sl_bt_gap_phy_2m (0x2):</b> 2M PHY
+                                         - <b>sl_bt_gap_phy_coded (0x4):</b>
+                                           Coded PHY, 125k (S=8) or 500k (S=2) */
+  uint16_t adv_interval;          /**< The periodic advertising interval. Value
+                                       in units of 1.25 ms
+                                         - Range: 0x06 to 0xFFFF
+                                         - Time range: 7.5 ms to 81.92 s */
+  uint16_t clock_accuracy;        /**< Enum @ref
+                                       sl_bt_sync_advertiser_clock_accuracy_t.
+                                       The advertiser clock accuracy. */
+  uint8_t  num_subevents;         /**< The number of subevents.
+                                         - Range: 0x01 to 0x80 */
+  uint8_t  subevent_interval;     /**< Subevent interval. Value in units of 1.25
+                                       ms.
+                                         - Range: 0x06 to 0xFF
+                                         - Time range: 7.5 ms to 318.75 ms */
+  uint8_t  response_slot_delay;   /**< Time between the advertising packet in a
+                                       subevent and the first response slot.
+                                       Value in units of 1.25 ms.
+                                         - Range: 0x01 to 0xFE
+                                         - Time range: 1.25 ms to 317.5 ms */
+  uint8_t  response_slot_spacing; /**< Time between response slots. Value in
+                                       units of 0.125 ms.
+                                         - Range: 0x02 to 0xFF
+                                         - Time range: 0.25 ms to 31.875 ms */
+  uint8_t  bonding;               /**< Bonding handle. Values:
+                                         - <b>SL_BT_INVALID_BONDING_HANDLE
+                                           (0xff):</b> No bonding
+                                         - <b>Other:</b> Bonding handle */
+});
+
+typedef struct sl_bt_evt_pawr_sync_opened_s sl_bt_evt_pawr_sync_opened_t;
+
+/** @} */ // end addtogroup sl_bt_evt_pawr_sync_opened
+
+/**
+ * @addtogroup sl_bt_evt_pawr_sync_transfer_received sl_bt_evt_pawr_sync_transfer_received
+ * @{
+ * @brief Indicates that synchronization information for Periodic Advertising
+ * with Responses (PAwR) train has been received
+ *
+ * See @ref sl_bt_past_receiver.
+ */
+
+/** @brief Identifier of the transfer_received event */
+#define sl_bt_evt_pawr_sync_transfer_received_id                     0x015400a0
+
+/***************************************************************************//**
+ * @brief Data structure of the transfer_received event
+ ******************************************************************************/
+PACKSTRUCT( struct sl_bt_evt_pawr_sync_transfer_received_s
+{
+  uint16_t status;                /**< SL_STATUS_OK if synchronization was
+                                       established. Other values indicate that
+                                       the sync failed to get established. */
+  uint16_t sync;                  /**< PAwR synchronization handle */
+  uint16_t service_data;          /**< A value provided by the peer device. */
+  uint8_t  connection;            /**< Connection handle of the connection that
+                                       transferred the sync info */
+  uint8_t  adv_sid;               /**< Advertising set identifier */
+  bd_addr  address;               /**< Address of the advertiser */
+  uint8_t  address_type;          /**< Enum @ref sl_bt_gap_address_type_t.
+
+                                       Advertiser address type.
+
+                                       If the application does not include the
+                                       bluetooth_feature_use_accurate_api_address_types
+                                       component, @p address_type uses the
+                                       following values:
+                                         - <b>0:</b> Public address
+                                         - <b>1:</b> Random address
+
+                                       If the application includes the
+                                       bluetooth_feature_use_accurate_api_address_types
+                                       component, @p address_type uses enum @ref
+                                       sl_bt_gap_address_type_t values:
+                                         - <b>sl_bt_gap_public_address
+                                           (0x0):</b> Public device address
+                                         - <b>sl_bt_gap_static_address
+                                           (0x1):</b> Static device address
+                                         - <b>sl_bt_gap_random_resolvable_address
+                                           (0x2):</b> Resolvable private random
+                                           address
+                                         - <b>sl_bt_gap_random_nonresolvable_address
+                                           (0x3):</b> Non-resolvable private
+                                           random address
+                                         - <b>sl_bt_gap_public_address_resolved_from_rpa
+                                           (0x4):</b> Public identity address
+                                           resolved from a resolvable private
+                                           address (RPA)
+                                         - <b>sl_bt_gap_static_address_resolved_from_rpa
+                                           (0x5):</b> Static identity address
+                                           resolved from a resolvable private
+                                           address (RPA) */
+  uint8_t  adv_phy;               /**< Enum @ref sl_bt_gap_phy_t. The advertiser
+                                       PHY. Values:
+                                         - <b>sl_bt_gap_phy_1m (0x1):</b> 1M PHY
+                                         - <b>sl_bt_gap_phy_2m (0x2):</b> 2M PHY
+                                         - <b>sl_bt_gap_phy_coded (0x4):</b>
+                                           Coded PHY, 125k (S=8) or 500k (S=2) */
+  uint16_t adv_interval;          /**< The periodic advertising interval. Value
+                                       in units of 1.25 ms
+                                         - Range: 0x06 to 0xFFFF
+                                         - Time range: 7.5 ms to 81.92 s */
+  uint16_t clock_accuracy;        /**< Enum @ref
+                                       sl_bt_sync_advertiser_clock_accuracy_t.
+                                       The advertiser clock accuracy. */
+  uint8_t  num_subevents;         /**< The number of subevents.
+                                         - Range: 0x01 to 0x80 */
+  uint8_t  subevent_interval;     /**< Subevent interval. Value in units of 1.25
+                                       ms.
+                                         - Range: 0x06 to 0xFF
+                                         - Time range: 7.5 ms to 318.75 ms */
+  uint8_t  response_slot_delay;   /**< Time between the advertising packet in a
+                                       subevent and the first response slot.
+                                       Value in units of 1.25 ms.
+                                         - Range: 0x01 to 0xFE
+                                         - Time range: 1.25 ms to 317.5 ms */
+  uint8_t  response_slot_spacing; /**< Time between response slots. Value in
+                                       units of 0.125 ms.
+                                         - Range: 0x02 to 0xFF
+                                         - Time range: 0.25 ms to 31.875 ms */
+  uint8_t  bonding;               /**< Bonding handle. Values:
+                                         - <b>SL_BT_INVALID_BONDING_HANDLE
+                                           (0xff):</b> No bonding
+                                         - <b>Other:</b> Bonding handle */
+});
+
+typedef struct sl_bt_evt_pawr_sync_transfer_received_s sl_bt_evt_pawr_sync_transfer_received_t;
+
+/** @} */ // end addtogroup sl_bt_evt_pawr_sync_transfer_received
+
+/**
+ * @addtogroup sl_bt_evt_pawr_sync_subevent_report sl_bt_evt_pawr_sync_subevent_report
+ * @{
+ * @brief Reports that the device's radio has received a periodic advertisement
+ * in a subevent of an active PAwR train
+ *
+ * This event reports also empty advertisements, i.e., advertisements that
+ * contained no payload data. In this case the @p data parameter has zero
+ * length.
+ */
+
+/** @brief Identifier of the subevent_report event */
+#define sl_bt_evt_pawr_sync_subevent_report_id                       0x025400a0
+
+/***************************************************************************//**
+ * @brief Data structure of the subevent_report event
+ ******************************************************************************/
+PACKSTRUCT( struct sl_bt_evt_pawr_sync_subevent_report_s
+{
+  uint16_t   sync;          /**< PAwR synchronization handle */
+  int8_t     tx_power;      /**< TX power value in the received packet header.
+                                 Units: dBm
+                                   - Valid value range: -127 to 126
+                                   - Value 127: information unavailable */
+  int8_t     rssi;          /**< Signal strength indicator (RSSI) of the
+                                 received packet. Units: dBm
+                                   - Range: -127 to +20 */
+  uint8_t    cte_type;      /**< The CTE type
+                                   - <b>0x00:</b> AoA CTE
+                                   - <b>0x01:</b> AoD CTE with 1us slots
+                                   - <b>0x02:</b> AoD CTE with 2us slots
+                                   - <b>0xFF:</b> No CTE */
+  uint16_t   event_counter; /**< The value of the periodic advertising event
+                                 counter (paEventCounter) of the event in which
+                                 the advertisement was received. If the
+                                 application responds to this advertisement, use
+                                 this field as the value of @p request_event
+                                 parameter for the @ref
+                                 sl_bt_pawr_sync_set_response_data command. */
+  uint8_t    subevent;      /**< The subevent in which the advertisement was
+                                 received. If the application responds to this
+                                 advertisement, use this field as the value of
+                                 @p request_subevent parameter for the @ref
+                                 sl_bt_pawr_sync_set_response_data command. */
+  uint8_t    data_status;   /**< Data completeness:
+                                   - <b>0:</b> Complete
+                                   - <b>1:</b> Incomplete, more data to come in
+                                     new events
+                                   - <b>2:</b> Incomplete, data truncated, no
+                                     more to come
+                                   - <b>255:</b> Failed to receive subevent data
+                                     in this subevent */
+  uint8_t    counter;       /**< The sequence number of this @ref
+                                 sl_bt_evt_pawr_sync_subevent_report event as a
+                                 monotonically increasing counter that wraps
+                                 from 255 to 0. There is a single counter for
+                                 this event type that starts from value 0 when
+                                 the Bluetooth stack is started and is never
+                                 reset while the stack is running. This counter
+                                 can be used to detect if one or more @ref
+                                 sl_bt_evt_pawr_sync_subevent_report events have
+                                 been created by the stack but dropped due to
+                                 problems such as temporarily running out of
+                                 resources before the event reached the
+                                 application. */
+  uint8array data;          /**< The advertisement data that was received */
+});
+
+typedef struct sl_bt_evt_pawr_sync_subevent_report_s sl_bt_evt_pawr_sync_subevent_report_t;
+
+/** @} */ // end addtogroup sl_bt_evt_pawr_sync_subevent_report
+
+/***************************************************************************//**
+ *
+ * Specify the subevents that this device will synchronize to on the specified
+ * PAwR train.
+ *
+ * @param[in] sync PAwR synchronization handle
+ * @param[in] subevents_len Length of data in @p subevents
+ * @param[in] subevents Array of subevent indexes to synchronize to
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_pawr_sync_set_sync_subevents(uint16_t sync,
+                                               size_t subevents_len,
+                                               const uint8_t* subevents);
+
+/***************************************************************************//**
+ *
+ * Set the data to be sent in the specified response slot of a subevent of an
+ * active PAwR train.
+ *
+ * Use this command when the application receives the @ref
+ * sl_bt_evt_pawr_sync_subevent_report event and the application needs to send a
+ * response. The application needs to set the response data within the timing
+ * requirements implied by the parameters of the PAwR train that the device is
+ * synchronized to. If the response data is set too late, this command will fail
+ * with result SL_STATUS_BT_CTRL_ADVERTISING_TIMEOUT.
+ *
+ * @param[in] sync PAwR synchronization handle
+ * @param[in] request_event The periodic advertising event counter
+ *   (paEventCounter) of the request. Set this parameter to the value of the @p
+ *   event_counter field of the @ref sl_bt_evt_pawr_sync_subevent_report_id
+ *   event that the application is responding to.
+ * @param[in] request_subevent The subevent of the request. Set this parameter
+ *   to the value of the @p subevent field of the @ref
+ *   sl_bt_evt_pawr_sync_subevent_report_id event that the application is
+ *   responding to.
+ * @param[in] response_subevent The subevent in which the response is to be sent
+ * @param[in] response_slot The response slot in which the response is to be
+ *   sent
+ * @param[in] response_data_len Length of data in @p response_data
+ * @param[in] response_data Data to be sent in the specified response slot.
+ *   Maximum of 248 bytes of data can be set with this command.
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_pawr_sync_set_response_data(uint16_t sync,
+                                              uint16_t request_event,
+                                              uint8_t request_subevent,
+                                              uint8_t response_subevent,
+                                              uint8_t response_slot,
+                                              size_t response_data_len,
+                                              const uint8_t* response_data);
+
+/** @} */ // end addtogroup sl_bt_pawr_sync
+
+/**
+ * @addtogroup sl_bt_pawr_advertiser PAwR Advertiser
+ * @{
+ *
+ * @brief PAwR Advertiser
+ *
+ * Provides support for advertising with Periodic Advertising with Responses
+ * (PAwR) trains.
+ */
+
+/* Command and Response IDs */
+#define sl_bt_cmd_pawr_advertiser_start_id                           0x00550020
+#define sl_bt_cmd_pawr_advertiser_set_subevent_data_id               0x01550020
+#define sl_bt_cmd_pawr_advertiser_create_connection_id               0x02550020
+#define sl_bt_cmd_pawr_advertiser_stop_id                            0x03550020
+#define sl_bt_rsp_pawr_advertiser_start_id                           0x00550020
+#define sl_bt_rsp_pawr_advertiser_set_subevent_data_id               0x01550020
+#define sl_bt_rsp_pawr_advertiser_create_connection_id               0x02550020
+#define sl_bt_rsp_pawr_advertiser_stop_id                            0x03550020
+
+/**
+ * @addtogroup sl_bt_evt_pawr_advertiser_subevent_data_request sl_bt_evt_pawr_advertiser_subevent_data_request
+ * @{
+ * @brief This event is triggered to indicate that the Bluetooth stack is ready
+ * to accept data for the specified subevents of the PAwR train.
+ *
+ * To ensure effective use of the available memory, applications are encouraged
+ * to observe these events and set data using @ref
+ * sl_bt_pawr_advertiser_set_subevent_data for the subevents that are being
+ * requested and for which the application has data to send
+ *
+ * If the application has no data to send, it does not need to call @ref
+ * sl_bt_pawr_advertiser_set_subevent_data for that subevent. The application
+ * can attempt to set data for that subevent later when the application has new
+ * data to send.
+ */
+
+/** @brief Identifier of the subevent_data_request event */
+#define sl_bt_evt_pawr_advertiser_subevent_data_request_id           0x005500a0
+
+/***************************************************************************//**
+ * @brief Data structure of the subevent_data_request event
+ ******************************************************************************/
+PACKSTRUCT( struct sl_bt_evt_pawr_advertiser_subevent_data_request_s
+{
+  uint8_t advertising_set;     /**< The PAwR advertising set handle */
+  uint8_t subevent_start;      /**< The first subevent that data is requested
+                                    for */
+  uint8_t subevent_data_count; /**< The number of subevents that data is
+                                    requested for */
+});
+
+typedef struct sl_bt_evt_pawr_advertiser_subevent_data_request_s sl_bt_evt_pawr_advertiser_subevent_data_request_t;
+
+/** @} */ // end addtogroup sl_bt_evt_pawr_advertiser_subevent_data_request
+
+/**
+ * @addtogroup sl_bt_evt_pawr_advertiser_subevent_tx_failed sl_bt_evt_pawr_advertiser_subevent_tx_failed
+ * @{
+ * @brief This event is triggered if subevent data was successfully set using
+ * @ref sl_bt_pawr_advertiser_set_subevent_data command but the attempt to
+ * transmit the subevent data has failed
+ *
+ * This error is not fatal. The event is provided to the application so that it
+ * knows not to expect response reports for this subevent and can set subevent
+ * data again for retransmission without needing to timeout waiting for response
+ * reports that will not be received because the transmission failed.
+ */
+
+/** @brief Identifier of the subevent_tx_failed event */
+#define sl_bt_evt_pawr_advertiser_subevent_tx_failed_id              0x025500a0
+
+/***************************************************************************//**
+ * @brief Data structure of the subevent_tx_failed event
+ ******************************************************************************/
+PACKSTRUCT( struct sl_bt_evt_pawr_advertiser_subevent_tx_failed_s
+{
+  uint8_t advertising_set; /**< The PAwR advertising set handle for the PAwR
+                                train that failed to transmit subevent data */
+  uint8_t subevent;        /**< The subevent that failed to transmit subevent
+                                data */
+});
+
+typedef struct sl_bt_evt_pawr_advertiser_subevent_tx_failed_s sl_bt_evt_pawr_advertiser_subevent_tx_failed_t;
+
+/** @} */ // end addtogroup sl_bt_evt_pawr_advertiser_subevent_tx_failed
+
+/**
+ * @addtogroup sl_bt_evt_pawr_advertiser_response_report sl_bt_evt_pawr_advertiser_response_report
+ * @{
+ * @brief Reports the status and data of a used response slot of an active PAwR
+ * train
+ *
+ * The report is given for every response slot that was marked as used in the
+ * @ref sl_bt_pawr_advertiser_set_subevent_data command.
+ */
+
+/** @brief Identifier of the response_report event */
+#define sl_bt_evt_pawr_advertiser_response_report_id                 0x015500a0
+
+/***************************************************************************//**
+ * @brief Data structure of the response_report event
+ ******************************************************************************/
+PACKSTRUCT( struct sl_bt_evt_pawr_advertiser_response_report_s
+{
+  uint8_t    advertising_set; /**< The PAwR advertising set handle */
+  uint8_t    subevent;        /**< The subevent that this report corresponds to */
+  int8_t     tx_power;        /**< TX power value in the received packet header.
+                                   Units: dBm
+                                     - Valid value range: -127 to 126
+                                     - Value 127: information unavailable */
+  int8_t     rssi;            /**< Signal strength indicator (RSSI) of the
+                                   received packet. Units: dBm
+                                     - Valid value range: -127 to +20
+                                     - Value 127: information unavailable */
+  uint8_t    cte_type;        /**< The CTE type
+                                     - <b>0x00:</b> AoA CTE
+                                     - <b>0x01:</b> AoD CTE with 1us slots
+                                     - <b>0x02:</b> AoD CTE with 2us slots
+                                     - <b>0xFF:</b> No CTE */
+  uint8_t    response_slot;   /**< The response slot that this report
+                                   corresponds to */
+  uint8_t    data_status;     /**< Data completeness:
+                                     - <b>0:</b> Complete
+                                     - <b>1:</b> Incomplete, more data to come
+                                       in new events
+                                     - <b>2:</b> Incomplete, data truncated, no
+                                       more to come
+                                     - <b>255:</b> Failed to receive subevent
+                                       response in this response slot */
+  uint8_t    counter;         /**< The sequence number of this @ref
+                                   sl_bt_evt_pawr_advertiser_response_report
+                                   event as a monotonically increasing counter
+                                   that wraps from 255 to 0. There is a single
+                                   counter for this event type that starts from
+                                   value 0 when the Bluetooth stack is started
+                                   and is never reset while the stack is
+                                   running. This counter can be used to detect
+                                   if one or more @ref
+                                   sl_bt_evt_pawr_advertiser_response_report
+                                   events have been created by the stack but
+                                   dropped due to problems such as temporarily
+                                   running out of resources before the event
+                                   reached the application. */
+  uint8array data;            /**< The response data that was received, if any */
+});
+
+typedef struct sl_bt_evt_pawr_advertiser_response_report_s sl_bt_evt_pawr_advertiser_response_report_t;
+
+/** @} */ // end addtogroup sl_bt_evt_pawr_advertiser_response_report
+
+/***************************************************************************//**
+ *
+ * Start PAwR advertising on the specified advertising set.
+ *
+ * According to the Bluetooth Core specification, PAwR advertising PDUs cannot
+ * be transmitted until at least one extended advertising event has been
+ * completed. If the application needs exact control over the extended
+ * advertising data and parameters, use the @ref sl_bt_advertiser class to
+ * configure the parameters of the advertising set and the @ref
+ * sl_bt_extended_advertiser class to set or generate the desired extended
+ * advertising data payload. If the application does not configure the
+ * parameters or set the data, the default parameters and empty advertising data
+ * are used for the extended advertising.
+ *
+ * If the application has not already started extended advertising and the flag
+ * @ref SL_BT_PERIODIC_ADVERTISER_AUTO_START_EXTENDED_ADVERTISING is set in @p
+ * flags, the stack will automatically start extended advertising with the
+ * parameters and extended advertising data currently configured to the
+ * advertising set. The application may stop the automatically started extended
+ * advertising using the @ref sl_bt_advertiser_stop command.
+ *
+ * If the application has not already started extended advertising and the flag
+ * @ref SL_BT_PERIODIC_ADVERTISER_AUTO_START_EXTENDED_ADVERTISING is not set in
+ * @p flags, the stack will momentarily start extended advertising with the
+ * parameters and extended advertising data currently configured to the
+ * advertising set. Unless the application starts extended advertising before
+ * the first extended advertising event has completed, the stack will
+ * automatically stop the momentary extended advertising after the first
+ * extended advertising event.
+ *
+ * PAwR advertising PDUs are transmitted on the secondary PHY configured for the
+ * advertising set with the @ref sl_bt_extended_advertiser_set_phy command.
+ *
+ * To stop PAwR advertising, use @ref sl_bt_pawr_advertiser_stop command.
+ *
+ * @param[in] advertising_set The PAwR advertising set handle
+ * @param[in] interval_min @parblock
+ *   Minimum periodic advertising interval. Value in units of 1.25 ms.
+ *     - Range: 0x06 to 0xFFFF
+ *     - Time range: 7.5 ms to 81.92 s
+ *
+ *   Default value: 100 ms
+ *   @endparblock
+ * @param[in] interval_max @parblock
+ *   Maximum periodic advertising interval. Value in units of 1.25 ms.
+ *     - Range: 0x06 to 0xFFFF
+ *     - Time range: 7.5 ms to 81.92 s
+ *     - Note: interval_max should be bigger than interval_min
+ *
+ *   Default value: 200 ms
+ *   @endparblock
+ * @param[in] flags Additional periodic advertising options. Value: 0 or bitmask
+ *   of @ref sl_bt_periodic_advertiser_flags
+ * @param[in] num_subevents The number of subevents.
+ *     - Range: 0x01 to 0x80
+ * @param[in] subevent_interval Subevent interval. Value in units of 1.25 ms.
+ *     - Range: 0x06 to 0xFF
+ *     - Time range: 7.5 ms to 318.75 ms
+ * @param[in] response_slot_delay Time between the advertising packet in a
+ *   subevent and the first response slot. Value in units of 1.25 ms.
+ *     - Range: 0x01 to 0xFE
+ *     - Time range: 1.25 ms to 317.5 ms
+ * @param[in] response_slot_spacing Time between response slots. Value in units
+ *   of 0.125 ms.
+ *     - Range: 0x02 to 0xFF
+ *     - Time range: 0.25 ms to 31.875 ms
+ * @param[in] response_slots Number of subevent response slots.
+ *     - Range: 0x01 to 0xFF
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_pawr_advertiser_start(uint8_t advertising_set,
+                                        uint16_t interval_min,
+                                        uint16_t interval_max,
+                                        uint32_t flags,
+                                        uint8_t num_subevents,
+                                        uint8_t subevent_interval,
+                                        uint8_t response_slot_delay,
+                                        uint8_t response_slot_spacing,
+                                        uint8_t response_slots);
+
+/***************************************************************************//**
+ *
+ * Set data to be sent in the specified subevent of an active PAwR train. Data
+ * is transmitted only once and is discarded after it has been transmitted.
+ *
+ * Data given to this command is passed to the Bluetooth controller, which will
+ * queue data and transmit it at the correct time. The application may always
+ * opportunistically try to queue more data with this command, but the
+ * controller may reject data and return an error if the queuing capacity is
+ * exceeded. In this case, the Bluetooth stack will trigger the @ref
+ * sl_bt_evt_pawr_advertiser_subevent_data_request event later when the
+ * controller is ready to accept more data.
+ *
+ * To ensure effective use of the available memory, applications are encouraged
+ * to observe the @ref sl_bt_evt_pawr_advertiser_subevent_data_request events
+ * and set data for the subevents that are being requested and for which the
+ * application has data to send. Applications should also note that PAwR is an
+ * unreliable transport and cannot guarantee delivery. If reliability is
+ * required, the application must implement an acknowledgment mechanism using
+ * response slots of the PAwR train and set subevent data again for a
+ * re-transmission if it was not successfully delivered.
+ *
+ * @param[in] advertising_set The PAwR advertising set handle
+ * @param[in] subevent The subevent in which the data is to be sent
+ * @param[in] response_slot_start The first response slot to be used in this
+ *   subevent
+ * @param[in] response_slot_count The number of response slots to be used
+ * @param[in] adv_data_len Length of data in @p adv_data
+ * @param[in] adv_data Data to be sent in the specified subevent
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ * @b Events
+ *   - @ref sl_bt_evt_pawr_advertiser_subevent_data_request - This event is
+ *     triggered when the Bluetooth stack is ready to accept more subevent data.
+ *   - @ref sl_bt_evt_pawr_advertiser_subevent_tx_failed - This event is
+ *     triggered if transmitting the subevent data has failed.
+ *   - @ref sl_bt_evt_pawr_advertiser_response_report - If the subevent data was
+ *     successfully transmitted, this event is triggered for each response slot
+ *     that was marked as used in this subevent.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_pawr_advertiser_set_subevent_data(uint8_t advertising_set,
+                                                    uint8_t subevent,
+                                                    uint8_t response_slot_start,
+                                                    uint8_t response_slot_count,
+                                                    size_t adv_data_len,
+                                                    const uint8_t* adv_data);
+
+/***************************************************************************//**
+ *
+ * Initiate a connection request to a device that is synchronized to the
+ * specified active PAwR train. The connection is established on the secondary
+ * PHY configured for the advertising set with the @ref
+ * sl_bt_extended_advertiser_set_phy command. The connection uses the parameters
+ * configured with command @ref sl_bt_connection_set_default_parameters.
+ *
+ * @param[in] advertising_set The PAwR advertising set handle
+ * @param[in] subevent The subevent in which the connection request is to be
+ *   sent
+ * @param[in] address Address of the device to connect to
+ * @param[in] address_type Enum @ref sl_bt_gap_address_type_t. Address type of
+ *   the device to connect to. Values:
+ *     - <b>sl_bt_gap_public_address (0x0):</b> Public device address
+ *     - <b>sl_bt_gap_static_address (0x1):</b> Static device address
+ *     - <b>sl_bt_gap_random_resolvable_address (0x2):</b> Resolvable private
+ *       random address
+ *     - <b>sl_bt_gap_random_nonresolvable_address (0x3):</b> Non-resolvable
+ *       private random address
+ *     - <b>sl_bt_gap_public_address_resolved_from_rpa (0x4):</b> Public
+ *       identity address resolved from a resolvable private address (RPA)
+ *     - <b>sl_bt_gap_static_address_resolved_from_rpa (0x5):</b> Static
+ *       identity address resolved from a resolvable private address (RPA)
+ * @param[out] connection Handle that will be assigned to the connection after
+ *   the connection is established. This handle is valid only if the result code
+ *   of this command is SL_STATUS_OK.
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ * @b Events
+ *   - @ref sl_bt_evt_connection_closed - This event is triggered if the
+ *     connection failed to be created.
+ *   - @ref sl_bt_evt_connection_opened - This event is triggered after the
+ *     connection is opened and indicates whether the devices are already bonded
+ *     and the role of the device in this connection.
+ *   - @ref sl_bt_evt_connection_parameters - This event indicates the
+ *     connection parameters and security mode of the connection.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_pawr_advertiser_create_connection(uint8_t advertising_set,
+                                                    uint8_t subevent,
+                                                    bd_addr address,
+                                                    uint8_t address_type,
+                                                    uint8_t *connection);
+
+/***************************************************************************//**
+ *
+ * Stop PAwR advertising on an advertising set. Counterpart to @ref
+ * sl_bt_pawr_advertiser_start.
+ *
+ * This command does not affect the enable state of the advertising set, i.e.,
+ * legacy or extended advertising is not stopped.
+ *
+ * @param[in] advertising_set The PAwR advertising set handle
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_pawr_advertiser_stop(uint8_t advertising_set);
+
+/** @} */ // end addtogroup sl_bt_pawr_advertiser
+
+/**
  * @addtogroup sl_bt_connection Connection
  * @{
  *
@@ -4324,6 +6271,7 @@ sl_status_t sl_bt_sync_past_transfer(uint8_t connection,
 /* Command and Response IDs */
 #define sl_bt_cmd_connection_set_default_parameters_id               0x00060020
 #define sl_bt_cmd_connection_set_default_preferred_phy_id            0x01060020
+#define sl_bt_cmd_connection_set_default_data_length_id              0x10060020
 #define sl_bt_cmd_connection_open_id                                 0x04060020
 #define sl_bt_cmd_connection_set_parameters_id                       0x06060020
 #define sl_bt_cmd_connection_set_preferred_phy_id                    0x08060020
@@ -4334,11 +6282,14 @@ sl_status_t sl_bt_sync_past_transfer(uint8_t connection,
 #define sl_bt_cmd_connection_set_remote_power_reporting_id           0x0a060020
 #define sl_bt_cmd_connection_get_tx_power_id                         0x0b060020
 #define sl_bt_cmd_connection_get_remote_tx_power_id                  0x0c060020
-#define sl_bt_cmd_connection_close_id                                0x05060020
 #define sl_bt_cmd_connection_read_remote_used_features_id            0x0d060020
 #define sl_bt_cmd_connection_get_security_status_id                  0x0e060020
+#define sl_bt_cmd_connection_set_data_length_id                      0x11060020
+#define sl_bt_cmd_connection_close_id                                0x05060020
+#define sl_bt_cmd_connection_forcefully_close_id                     0x0f060020
 #define sl_bt_rsp_connection_set_default_parameters_id               0x00060020
 #define sl_bt_rsp_connection_set_default_preferred_phy_id            0x01060020
+#define sl_bt_rsp_connection_set_default_data_length_id              0x10060020
 #define sl_bt_rsp_connection_open_id                                 0x04060020
 #define sl_bt_rsp_connection_set_parameters_id                       0x06060020
 #define sl_bt_rsp_connection_set_preferred_phy_id                    0x08060020
@@ -4349,9 +6300,11 @@ sl_status_t sl_bt_sync_past_transfer(uint8_t connection,
 #define sl_bt_rsp_connection_set_remote_power_reporting_id           0x0a060020
 #define sl_bt_rsp_connection_get_tx_power_id                         0x0b060020
 #define sl_bt_rsp_connection_get_remote_tx_power_id                  0x0c060020
-#define sl_bt_rsp_connection_close_id                                0x05060020
 #define sl_bt_rsp_connection_read_remote_used_features_id            0x0d060020
 #define sl_bt_rsp_connection_get_security_status_id                  0x0e060020
+#define sl_bt_rsp_connection_set_data_length_id                      0x11060020
+#define sl_bt_rsp_connection_close_id                                0x05060020
+#define sl_bt_rsp_connection_forcefully_close_id                     0x0f060020
 
 /**
  * @brief Indicate the Bluetooth Security Mode.
@@ -4435,32 +6388,47 @@ typedef enum
  ******************************************************************************/
 PACKSTRUCT( struct sl_bt_evt_connection_opened_s
 {
-  bd_addr address;      /**< Remote device address */
-  uint8_t address_type; /**< Enum @ref sl_bt_gap_address_type_t. Remote device
-                             address type. Values:
-                               - <b>sl_bt_gap_public_address (0x0):</b> Public
-                                 device address
-                               - <b>sl_bt_gap_static_address (0x1):</b> Static
-                                 device address
-                               - <b>sl_bt_gap_random_resolvable_address
-                                 (0x2):</b> Resolvable private random address
-                               - <b>sl_bt_gap_random_nonresolvable_address
-                                 (0x3):</b> Non-resolvable private random
-                                 address */
-  uint8_t master;       /**< Device role in connection. Values:
-                               - <b>0:</b> Peripheral
-                               - <b>1:</b> Central */
-  uint8_t connection;   /**< Handle for new connection */
-  uint8_t bonding;      /**< Bonding handle. Values:
-                               - <b>SL_BT_INVALID_BONDING_HANDLE (0xff):</b> No
-                                 bonding
-                               - <b>Other:</b> Bonding handle */
-  uint8_t advertiser;   /**< The local advertising set that this connection was
-                             opened to. Values:
-                               - <b>SL_BT_INVALID_ADVERTISING_SET_HANDLE
-                                 (0xff):</b> Invalid value or not applicable.
-                                 Ignore this field
-                               - <b>Other:</b> The advertising set handle */
+  bd_addr  address;      /**< Remote device address */
+  uint8_t  address_type; /**< Enum @ref sl_bt_gap_address_type_t. Remote device
+                              address type. Values:
+                                - <b>sl_bt_gap_public_address (0x0):</b> Public
+                                  device address
+                                - <b>sl_bt_gap_static_address (0x1):</b> Static
+                                  device address
+                                - <b>sl_bt_gap_random_resolvable_address
+                                  (0x2):</b> Resolvable private random address
+                                - <b>sl_bt_gap_random_nonresolvable_address
+                                  (0x3):</b> Non-resolvable private random
+                                  address
+                                - <b>sl_bt_gap_public_address_resolved_from_rpa
+                                  (0x4):</b> Public identity address resolved
+                                  from a resolvable private address (RPA)
+                                - <b>sl_bt_gap_static_address_resolved_from_rpa
+                                  (0x5):</b> Static identity address resolved
+                                  from a resolvable private address (RPA) */
+  uint8_t  master;       /**< Device role in connection. Values:
+                                - <b>0:</b> Peripheral
+                                - <b>1:</b> Central */
+  uint8_t  connection;   /**< Handle for new connection */
+  uint8_t  bonding;      /**< Bonding handle. Values:
+                                - <b>SL_BT_INVALID_BONDING_HANDLE (0xff):</b> No
+                                  bonding
+                                - <b>Other:</b> Bonding handle */
+  uint8_t  advertiser;   /**< The local advertising set that this connection was
+                              opened to. Values:
+                                - <b>SL_BT_INVALID_ADVERTISING_SET_HANDLE
+                                  (0xff):</b> Invalid value or not applicable.
+                                  Ignore this field
+                                - <b>Other:</b> The advertising set handle */
+  uint16_t sync;         /**< The sync handle if the local device is in the
+                              peripheral-role and the connection was opened via
+                              a Periodic Advertising with Responses (PAwR) train
+                              that the local device has synchronized to. Values:
+                                - <b>SL_BT_INVALID_SYNC_HANDLE (0xffff):</b> The
+                                  connection was not opened over a PAwR train
+                                  that the local device is synchronized to
+                                - <b>Other:</b> The sync handle for the PAwR
+                                  train that was used to open the connection */
 });
 
 typedef struct sl_bt_evt_connection_opened_s sl_bt_evt_connection_opened_t;
@@ -4499,8 +6467,10 @@ PACKSTRUCT( struct sl_bt_evt_connection_parameters_s
                                    Authenticated Secure Connections pairing with
                                    encryption using a 128-bit strength
                                    encryption key */
-  uint16_t txsize;        /**< Maximum Data Channel PDU Payload size that the
-                               controller can send in an air packet */
+  uint16_t txsize;        /**< <b>Deprecated</b> and no longer used for
+                               reporting the connection data length update. Use
+                               the event @ref sl_bt_evt_connection_data_length
+                               instead. */
 });
 
 typedef struct sl_bt_evt_connection_parameters_s sl_bt_evt_connection_parameters_t;
@@ -4629,7 +6599,20 @@ typedef struct sl_bt_evt_connection_get_remote_tx_power_completed_s sl_bt_evt_co
  * transmit power reporting has been enabled
  *
  * Enable or disable transmit power reporting using @ref
- * sl_bt_connection_set_power_reporting command.
+ * sl_bt_connection_set_power_reporting command. Local transmit power reporting
+ * is enabled by default for new connections.
+ *
+ * When enabled, local transmit power change events may get triggered in the
+ * following situations:
+ *   - When the connection has just opened and the initial transmit power is set
+ *   - When the application explicitly changes the system TX power using the
+ *     @ref sl_bt_system_set_tx_power command
+ *   - When the bluetooth_feature_power_control component is included and
+ *     enabled in the application and the local transmit power is adjusted by
+ *     the power control feature
+ *   - When the bluetooth_feature_afh component for Adaptive Frequency Hopping
+ *     is included and enabled in the application and the local transmit power
+ *     is adjusted due to changes in the availability of good channels.
  */
 
 /** @brief Identifier of the tx_power event */
@@ -4748,6 +6731,64 @@ typedef struct sl_bt_evt_connection_remote_tx_power_s sl_bt_evt_connection_remot
 /** @} */ // end addtogroup sl_bt_evt_connection_remote_tx_power
 
 /**
+ * @addtogroup sl_bt_evt_connection_remote_used_features sl_bt_evt_connection_remote_used_features
+ * @{
+ * @brief List of link layer features supported by the remote device.
+ */
+
+/** @brief Identifier of the remote_used_features event */
+#define sl_bt_evt_connection_remote_used_features_id                 0x080600a0
+
+/***************************************************************************//**
+ * @brief Data structure of the remote_used_features event
+ ******************************************************************************/
+PACKSTRUCT( struct sl_bt_evt_connection_remote_used_features_s
+{
+  uint8_t    connection; /**< Connection handle */
+  uint8array features;   /**< This parameter is 8 bytes in little endian format
+                              and contains bit fields describing the supported
+                              link layer features of the remote device. Bit
+                              value 1 means that the feature is supported.
+
+                              The bits are explained in Bluetooth specification
+                              Vol 6, Part B, 4.6. */
+});
+
+typedef struct sl_bt_evt_connection_remote_used_features_s sl_bt_evt_connection_remote_used_features_t;
+
+/** @} */ // end addtogroup sl_bt_evt_connection_remote_used_features
+
+/**
+ * @addtogroup sl_bt_evt_connection_data_length sl_bt_evt_connection_data_length
+ * @{
+ * @brief Reports a change to the maximum payload length or maximum TX time in
+ * either direction of a connection.
+ */
+
+/** @brief Identifier of the data_length event */
+#define sl_bt_evt_connection_data_length_id                          0x090600a0
+
+/***************************************************************************//**
+ * @brief Data structure of the data_length event
+ ******************************************************************************/
+PACKSTRUCT( struct sl_bt_evt_connection_data_length_s
+{
+  uint8_t  connection;  /**< Connection handle */
+  uint16_t tx_data_len; /**< The maximum payload octets of a packet that the
+                             local Controller will send */
+  uint16_t tx_time_us;  /**< The maximum time in microseconds that the local
+                             Controller will take to send a data packet */
+  uint16_t rx_data_len; /**< The maximum payload octets of a packet that the
+                             local Controller expects to receive */
+  uint16_t rx_time_us;  /**< The maximum time in microseconds that the local
+                             Controller expects to take to receive a data packet */
+});
+
+typedef struct sl_bt_evt_connection_data_length_s sl_bt_evt_connection_data_length_t;
+
+/** @} */ // end addtogroup sl_bt_evt_connection_data_length
+
+/**
  * @addtogroup sl_bt_evt_connection_closed sl_bt_evt_connection_closed
  * @{
  * @brief Indicates that a connection was either closed or that no connection
@@ -4775,34 +6816,6 @@ PACKSTRUCT( struct sl_bt_evt_connection_closed_s
 typedef struct sl_bt_evt_connection_closed_s sl_bt_evt_connection_closed_t;
 
 /** @} */ // end addtogroup sl_bt_evt_connection_closed
-
-/**
- * @addtogroup sl_bt_evt_connection_remote_used_features sl_bt_evt_connection_remote_used_features
- * @{
- * @brief List of link layer features supported by the remote device.
- */
-
-/** @brief Identifier of the remote_used_features event */
-#define sl_bt_evt_connection_remote_used_features_id                 0x080600a0
-
-/***************************************************************************//**
- * @brief Data structure of the remote_used_features event
- ******************************************************************************/
-PACKSTRUCT( struct sl_bt_evt_connection_remote_used_features_s
-{
-  uint8_t    connection; /**< Connection handle */
-  uint8array features;   /**< This parameter is 8 bytes in little endian format
-                              and contains bit fields describing the supported
-                              link layer features of the remote device. Bit
-                              value 1 means that the feature is supported.
-
-                              The bits are explained in Bluetooth specification
-                              Vol 6, Part B, 4.6. */
-});
-
-typedef struct sl_bt_evt_connection_remote_used_features_s sl_bt_evt_connection_remote_used_features_t;
-
-/** @} */ // end addtogroup sl_bt_evt_connection_remote_used_features
 
 /***************************************************************************//**
  *
@@ -4951,6 +6964,30 @@ sl_status_t sl_bt_connection_set_default_preferred_phy(uint8_t preferred_phy,
 
 /***************************************************************************//**
  *
+ * Set the default preferred maximum TX payload length to be used for new
+ * connections.
+ *
+ * When a connection is open, the maximum TX payload length is 27. Either device
+ * could initiate a data length update procedure and event @ref
+ * sl_bt_evt_connection_data_length is generated when the data length has been
+ * changed on the connection.
+ *
+ * @param[in] tx_data_len @parblock
+ *   Preferred maximum payload octets of a packet that the local Controller will
+ *   send
+ *
+ *   Range: Range: 27 (0x1B) to 251 (0xFB)
+ *
+ *   Default: 251
+ *   @endparblock
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_connection_set_default_data_length(uint16_t tx_data_len);
+
+/***************************************************************************//**
+ *
  * Connect to an advertising device with the specified initiating PHY on which
  * connectable advertisements on primary advertising channels are received. The
  * Bluetooth stack will enter a state where it continuously scans for the
@@ -4994,6 +7031,10 @@ sl_status_t sl_bt_connection_set_default_preferred_phy(uint8_t preferred_phy,
  *       random address
  *     - <b>sl_bt_gap_random_nonresolvable_address (0x3):</b> Non-resolvable
  *       private random address
+ *     - <b>sl_bt_gap_public_address_resolved_from_rpa (0x4):</b> Public
+ *       identity address resolved from a resolvable private address (RPA)
+ *     - <b>sl_bt_gap_static_address_resolved_from_rpa (0x5):</b> Static
+ *       identity address resolved from a resolvable private address (RPA)
  * @param[in] initiating_phy Enum @ref sl_bt_gap_phy_t. The initiating PHY.
  *   Values:
  *     - <b>sl_bt_gap_phy_1m (0x1):</b> 1M PHY
@@ -5320,23 +7361,6 @@ sl_status_t sl_bt_connection_get_remote_tx_power(uint8_t connection,
 
 /***************************************************************************//**
  *
- * Close a Bluetooth connection or cancel an ongoing connection establishment
- * process. The parameter is a connection handle which is reported in @ref
- * sl_bt_evt_connection_opened event or @ref sl_bt_connection_open command
- * response.
- *
- * @param[in] connection Handle of the connection to be closed
- *
- * @return SL_STATUS_OK if successful. Error code otherwise.
- *
- * @b Events
- *   - @ref sl_bt_evt_connection_closed
- *
- ******************************************************************************/
-sl_status_t sl_bt_connection_close(uint8_t connection);
-
-/***************************************************************************//**
- *
  * Read link layer features supported by the remote device.
  *
  * @param[in] connection Connection Handle
@@ -5377,6 +7401,84 @@ sl_status_t sl_bt_connection_get_security_status(uint8_t connection,
                                                  uint8_t *key_size,
                                                  uint8_t *bonding_handle);
 
+/***************************************************************************//**
+ *
+ * Request to update the maximum TX payload length and maximum packet TX time of
+ * a Bluetooth connection.
+ *
+ * Event @ref sl_bt_evt_connection_data_length is generated when the data length
+ * has been changed on the connection.
+ *
+ * @param[in] connection Connection handle
+ * @param[in] tx_data_len @parblock
+ *   Preferred maximum payload octets of a packet that the local Controller will
+ *   send
+ *
+ *   Range: 27 (0x1B) to 251 (0xFB)
+ *   @endparblock
+ * @param[in] tx_time_us @parblock
+ *   Preferred maximum TX time in microseconds that the local Controller will
+ *   take to send a packet
+ *
+ *   Range: 328 (0x0148) to 17040 (0x4290)
+ *   @endparblock
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ * @b Events
+ *   - @ref sl_bt_evt_connection_data_length
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_connection_set_data_length(uint8_t connection,
+                                             uint16_t tx_data_len,
+                                             uint16_t tx_time_us);
+
+/***************************************************************************//**
+ *
+ * Close a Bluetooth connection gracefully by performing the ACL Termination
+ * procedure or cancel an ongoing connection establishment process. The
+ * parameter is a connection handle which is reported in @ref
+ * sl_bt_evt_connection_opened event or @ref sl_bt_connection_open command
+ * response.
+ *
+ * Disconnecting a connection is an asynchronous operation. The disconnection is
+ * completed when a @ref sl_bt_evt_connection_closed event for the given
+ * connection handle is received. To open a new connection to the same remote
+ * device, wait for the @ref sl_bt_evt_connection_closed event and then initiate
+ * the connection.
+ *
+ * @param[in] connection Handle of the connection to be closed
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ * @b Events
+ *   - @ref sl_bt_evt_connection_closed
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_connection_close(uint8_t connection);
+
+/***************************************************************************//**
+ *
+ * Forcefully close a Bluetooth connection without performing the ACL
+ * Termination procedure. The parameter is a connection handle which is reported
+ * in @ref sl_bt_evt_connection_opened event or @ref sl_bt_connection_open
+ * command response.
+ *
+ * Closing a connection using this command could result in the observation of
+ * connection loss or supervision timeout on the remote device. Only use this
+ * command for special cases, for example, when disconnecting a connection with
+ * @ref sl_bt_connection_close did not complete in expected time period.
+ *
+ * @param[in] connection Handle of the connection to be closed
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ * @b Events
+ *   - @ref sl_bt_evt_connection_closed
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_connection_forcefully_close(uint8_t connection);
+
 /** @} */ // end addtogroup sl_bt_connection
 
 /**
@@ -5397,6 +7499,7 @@ sl_status_t sl_bt_connection_get_security_status(uint8_t connection,
 #define sl_bt_cmd_gatt_discover_characteristics_id                   0x03090020
 #define sl_bt_cmd_gatt_discover_characteristics_by_uuid_id           0x04090020
 #define sl_bt_cmd_gatt_discover_descriptors_id                       0x06090020
+#define sl_bt_cmd_gatt_discover_characteristic_descriptors_id        0x14090020
 #define sl_bt_cmd_gatt_set_characteristic_notification_id            0x05090020
 #define sl_bt_cmd_gatt_send_characteristic_confirmation_id           0x0d090020
 #define sl_bt_cmd_gatt_read_characteristic_value_id                  0x07090020
@@ -5417,6 +7520,7 @@ sl_status_t sl_bt_connection_get_security_status(uint8_t connection,
 #define sl_bt_rsp_gatt_discover_characteristics_id                   0x03090020
 #define sl_bt_rsp_gatt_discover_characteristics_by_uuid_id           0x04090020
 #define sl_bt_rsp_gatt_discover_descriptors_id                       0x06090020
+#define sl_bt_rsp_gatt_discover_characteristic_descriptors_id        0x14090020
 #define sl_bt_rsp_gatt_set_characteristic_notification_id            0x05090020
 #define sl_bt_rsp_gatt_send_characteristic_confirmation_id           0x0d090020
 #define sl_bt_rsp_gatt_read_characteristic_value_id                  0x07090020
@@ -5568,8 +7672,8 @@ typedef struct sl_bt_evt_gatt_characteristic_s sl_bt_evt_gatt_characteristic_t;
  * @brief Indicates that a GATT characteristic descriptor in the remote GATT
  * database was discovered
  *
- * It is generated after issuing the @ref sl_bt_gatt_discover_descriptors
- * command.
+ * It is generated after issuing the @ref sl_bt_gatt_discover_descriptors or
+ * @ref sl_bt_gatt_discover_characteristic_descriptors command.
  */
 
 /** @brief Identifier of the descriptor event */
@@ -5836,8 +7940,8 @@ sl_status_t sl_bt_gatt_discover_characteristics_by_uuid(uint8_t connection,
 
 /***************************************************************************//**
  *
- * Discover all descriptors of a GATT characteristic in a remote GATT database.
- * It generates a unique gatt_descriptor event for every discovered descriptor.
+ * Discover all descriptors in a remote GATT database starting from handle. It
+ * generates a unique gatt_descriptor event for every discovered descriptor.
  * Received @ref sl_bt_evt_gatt_procedure_completed event indicates that this
  * GATT procedure has successfully completed or failed with an error.
  *
@@ -5856,6 +7960,32 @@ sl_status_t sl_bt_gatt_discover_characteristics_by_uuid(uint8_t connection,
  ******************************************************************************/
 sl_status_t sl_bt_gatt_discover_descriptors(uint8_t connection,
                                             uint16_t characteristic);
+
+/***************************************************************************//**
+ *
+ * Discover all descriptors of a GATT characteristic in a remote GATT database.
+ * It generates a unique gatt_descriptor event for every discovered descriptor.
+ * Received @ref sl_bt_evt_gatt_procedure_completed event indicates that this
+ * GATT procedure has successfully completed or failed with an error.
+ *
+ * @param[in] connection Connection handle
+ * @param[in] start GATT characteristic handle. This value is normally received
+ *   from the gatt_characteristic event.
+ * @param[in] end GATT characteristic handle. This value is normally received
+ *   from the gatt_characteristic event.
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ * @b Events
+ *   - @ref sl_bt_evt_gatt_descriptor - Discovered descriptor from remote GATT
+ *     database.
+ *   - @ref sl_bt_evt_gatt_procedure_completed - Procedure was successfully
+ *     completed or failed with an error.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_gatt_discover_characteristic_descriptors(uint8_t connection,
+                                                           uint16_t start,
+                                                           uint16_t end);
 
 /***************************************************************************//**
  *
@@ -6805,7 +8935,7 @@ sl_status_t sl_bt_gattdb_add_uuid16_descriptor(uint16_t session,
  *   Characteristic Configuration descriptor.
  * @param[in] value_len Length of data in @p value
  * @param[in] value The initial descriptor value. Length of this value must be
- *   less than or equal to @p maxlen. Ingored if value type is @ref
+ *   less than or equal to @p maxlen. Ignored if value type is @ref
  *   sl_bt_gattdb_user_managed_value, or if this is a Client Characteristic
  *   Configuration descriptor.
  * @param[out] descriptor The descriptor attribute handle. This handle is
@@ -7235,6 +9365,39 @@ PACKSTRUCT( struct sl_bt_evt_gatt_server_indication_timeout_s
 typedef struct sl_bt_evt_gatt_server_indication_timeout_s sl_bt_evt_gatt_server_indication_timeout_t;
 
 /** @} */ // end addtogroup sl_bt_evt_gatt_server_indication_timeout
+
+/**
+ * @addtogroup sl_bt_evt_gatt_server_notification_tx_completed sl_bt_evt_gatt_server_notification_tx_completed
+ * @{
+ * @brief Indicates that one or more GATT notifications have been transmitted.
+ *
+ * By default, this event is not enabled on Bluetooth connections due to
+ * additional resource usages
+ *
+ * Following enablers are required to enable the Bluetooth stack's functionality
+ * for supporting this event,
+ *   - Include feature bluetooth_feature_resource_report in the application
+ *     project.
+ *   - Use command @ref sl_bt_resource_enable_connection_tx_report to enable
+ *     data packet TX status reports before this Bluetooth connection is
+ *     established.
+ */
+
+/** @brief Identifier of the notification_tx_completed event */
+#define sl_bt_evt_gatt_server_notification_tx_completed_id           0x060a00a0
+
+/***************************************************************************//**
+ * @brief Data structure of the notification_tx_completed event
+ ******************************************************************************/
+PACKSTRUCT( struct sl_bt_evt_gatt_server_notification_tx_completed_s
+{
+  uint8_t connection; /**< Connection handle */
+  uint8_t count;      /**< Number of notifications that have been transmitted */
+});
+
+typedef struct sl_bt_evt_gatt_server_notification_tx_completed_s sl_bt_evt_gatt_server_notification_tx_completed_t;
+
+/** @} */ // end addtogroup sl_bt_evt_gatt_server_notification_tx_completed
 
 /***************************************************************************//**
  *
@@ -7888,7 +10051,9 @@ typedef struct sl_bt_evt_test_dtm_completed_s sl_bt_evt_test_dtm_completed_t;
  *     - <b>-127 to +20:</b> Use specified or the nearest TX power level. The
  *       minimum -127 dBm is specified in the Bluetooth specification. However,
  *       a device may not support this low TX power. In addition, only some
- *       devices support 20 dBm TX power.
+ *       devices support 20 dBm TX power. Effective TX power will be limited by
+ *       the global system TX power that can be set with the @ref
+ *       sl_bt_system_set_tx_power command.
  *     - <b>0x7E:</b> Use minimum TX power level the device supports.
  *     - <b>0x7F:</b> Use the smallest of the maximum TX power level the device
  *       supports and the global maximum TX power setting in stack.
@@ -8202,6 +10367,9 @@ typedef enum
 /** Require secure connections OOB data from both devices. */
 #define SL_BT_SM_CONFIGURATION_OOB_FROM_BOTH_DEVICES_REQUIRED       0x40      
 
+/** Reject pairing if remote device uses debug keys. */
+#define SL_BT_SM_CONFIGURATION_REJECT_DEBUG_KEYS                    0x80      
+
 /** @} */ // end Security Manager configuration flags
 
 /**
@@ -8421,7 +10589,9 @@ typedef struct sl_bt_evt_sm_confirm_bonding_s sl_bt_evt_sm_confirm_bonding_t;
  *       one device.
  *     - <b>1:</b> Require secure connections OOB data from both devices.
  *
- *   Bit 7: Reserved
+ *   Bit 7:
+ *     - <b>0:</b> Allow debug keys from remote device.
+ *     - <b>1:</b> Reject pairing if remote device uses debug keys.
  *
  *   Default value: 0x00
  *   @endparblock
@@ -8471,6 +10641,11 @@ sl_status_t sl_bt_sm_set_debug_mode();
 
 /***************************************************************************//**
  *
+ * <b>Deprecated</b> and replaced by @ref
+ * sl_bt_accept_list_add_device_by_bonding and @ref
+ * sl_bt_accept_list_add_device_by_address provided by the
+ * bluetooth_feature_accept_list component.
+ *
  * Add device to accept list, which can be enabled with @ref
  * sl_bt_gap_enable_whitelisting.
  *
@@ -8479,19 +10654,14 @@ sl_status_t sl_bt_sm_set_debug_mode();
  *
  * @param[in] address Address of the device added to accept list
  * @param[in] address_type Enum @ref sl_bt_gap_address_type_t. Address type of
- *   the device added to accept list. Only public or static device addresses can
- *   be added to the accept list. Values:
+ *   the device added to accept list. Values:
  *     - <b>sl_bt_gap_public_address (0x0):</b> Public device address
  *     - <b>sl_bt_gap_static_address (0x1):</b> Static device address
- *     - <b>sl_bt_gap_random_resolvable_address (0x2):</b> Resolvable private
- *       random address
- *     - <b>sl_bt_gap_random_nonresolvable_address (0x3):</b> Non-resolvable
- *       private random address
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
  ******************************************************************************/
-sl_status_t sl_bt_sm_add_to_whitelist(bd_addr address, uint8_t address_type);
+SL_BGAPI_DEPRECATED sl_status_t sl_bt_sm_add_to_whitelist(bd_addr address, uint8_t address_type);
 
 /***************************************************************************//**
  *
@@ -9272,6 +11442,281 @@ sl_status_t sl_bt_external_bondingdb_set_data(uint8_t connection,
 /** @} */ // end addtogroup sl_bt_external_bondingdb
 
 /**
+ * @addtogroup sl_bt_resolving_list Address Resolving List
+ * @{
+ *
+ * @brief Address Resolving List
+ *
+ * Provides support for adding and removing devices from the Resolving List in
+ * controller-based privacy.
+ *
+ * Adding a peer device to the Resolving List allows the Bluetooth controller to
+ * resolve the address when the peer device is using privacy and is transmitting
+ * with a Resolvable Private Address (RPA). When the controller has resolved an
+ * address in a received Bluetooth packet such as an advertisement, the
+ * corresponding event will report the peer device's identity address even if a
+ * Resolvable Private Address was used over the air.
+ *
+ * When the application has added a peer device to the Resolving List, the
+ * application may use the peer device's identity address in commands such as
+ * @ref sl_bt_connection_open or @ref sl_bt_sync_scanner_open even if the peer
+ * device is using privacy and is using a Resolvable Private Address over the
+ * air.
+ */
+
+/* Command and Response IDs */
+#define sl_bt_cmd_resolving_list_add_device_by_bonding_id            0x005d0020
+#define sl_bt_cmd_resolving_list_add_device_by_address_id            0x015d0020
+#define sl_bt_cmd_resolving_list_remove_device_by_bonding_id         0x025d0020
+#define sl_bt_cmd_resolving_list_remove_device_by_address_id         0x035d0020
+#define sl_bt_cmd_resolving_list_remove_all_devices_id               0x045d0020
+#define sl_bt_rsp_resolving_list_add_device_by_bonding_id            0x005d0020
+#define sl_bt_rsp_resolving_list_add_device_by_address_id            0x015d0020
+#define sl_bt_rsp_resolving_list_remove_device_by_bonding_id         0x025d0020
+#define sl_bt_rsp_resolving_list_remove_device_by_address_id         0x035d0020
+#define sl_bt_rsp_resolving_list_remove_all_devices_id               0x045d0020
+
+/**
+ * @brief Specifies the Privacy Mode used for a peer device in the Resolving
+ * List
+ */
+typedef enum
+{
+  sl_bt_resolving_list_privacy_mode_network = 0x0, /**< (0x0) Use Network
+                                                        Privacy Mode for the
+                                                        peer device */
+  sl_bt_resolving_list_privacy_mode_device  = 0x1  /**< (0x1) Use Device Privacy
+                                                        Mode for the peer device */
+} sl_bt_resolving_list_privacy_mode_t;
+
+/***************************************************************************//**
+ *
+ * Add a device to the Resolving List based on its bonding handle.
+ *
+ * This command is not available if the application uses the external bonding
+ * database provided by the component
+ * bluetooth_feature_external_bonding_database. In that configuration the
+ * application can use the command @ref
+ * sl_bt_resolving_list_add_device_by_address and provide the peer's identity
+ * address and its Identity Resolving Key (IRK).
+ *
+ * @param[in] bonding The bonding handle
+ * @param[in] privacy_mode @parblock
+ *   Enum @ref sl_bt_resolving_list_privacy_mode_t. The Privacy Mode to use for
+ *   the peer device. Values:
+ *     - <b>sl_bt_resolving_list_privacy_mode_network (0x0):</b> Use Network
+ *       Privacy Mode for the peer device
+ *     - <b>sl_bt_resolving_list_privacy_mode_device (0x1):</b> Use Device
+ *       Privacy Mode for the peer device
+ *
+ *   Default: @ref sl_bt_resolving_list_privacy_mode_network (Use Network
+ *   Privacy Mode for the peer device)
+ *   @endparblock
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_resolving_list_add_device_by_bonding(uint32_t bonding,
+                                                       uint8_t privacy_mode);
+
+/***************************************************************************//**
+ *
+ * Add a device to the Resolving List based on its identity address and its
+ * Identity Resolving Key (IRK).
+ *
+ * This command is typically only needed when the application uses the external
+ * bonding database provided by the component
+ * bluetooth_feature_external_bonding_database. When the application uses the
+ * built-in bonding database, the command @ref
+ * sl_bt_resolving_list_add_device_by_bonding is more convenient.
+ *
+ * @param[in] address Bluetooth address of the peer device
+ * @param[in] address_type Enum @ref sl_bt_gap_address_type_t. The peer device
+ *   address type. Values:
+ *     - <b>sl_bt_gap_public_address (0x0):</b> Public device address
+ *     - <b>sl_bt_gap_static_address (0x1):</b> Static device address
+ * @param[in] key Identity Resolving Key (IRK) of the peer device in little
+ *   endian format.
+ * @param[in] privacy_mode @parblock
+ *   Enum @ref sl_bt_resolving_list_privacy_mode_t. The Privacy Mode to use for
+ *   the peer device. Values:
+ *     - <b>sl_bt_resolving_list_privacy_mode_network (0x0):</b> Use Network
+ *       Privacy Mode for the peer device
+ *     - <b>sl_bt_resolving_list_privacy_mode_device (0x1):</b> Use Device
+ *       Privacy Mode for the peer device
+ *
+ *   Default: @ref sl_bt_resolving_list_privacy_mode_network (Use Network
+ *   Privacy Mode for the peer device)
+ *   @endparblock
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_resolving_list_add_device_by_address(bd_addr address,
+                                                       uint8_t address_type,
+                                                       aes_key_128 key,
+                                                       uint8_t privacy_mode);
+
+/***************************************************************************//**
+ *
+ * Remove a device from the Resolving List based on its bonding handle.
+ *
+ * This command is not available if the application uses the external bonding
+ * database provided by the component
+ * bluetooth_feature_external_bonding_database. In that configuration the
+ * application can use the command @ref
+ * sl_bt_resolving_list_remove_device_by_address and provide the peer's identity
+ * address.
+ *
+ * @param[in] bonding The bonding handle
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_resolving_list_remove_device_by_bonding(uint32_t bonding);
+
+/***************************************************************************//**
+ *
+ * Remove a device from the Resolving List based on its identity address.
+ *
+ * @param[in] address Bluetooth address of the peer device
+ * @param[in] address_type Enum @ref sl_bt_gap_address_type_t. The peer device
+ *   address type. Values:
+ *     - <b>sl_bt_gap_public_address (0x0):</b> Public device address
+ *     - <b>sl_bt_gap_static_address (0x1):</b> Static device address
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_resolving_list_remove_device_by_address(bd_addr address,
+                                                          uint8_t address_type);
+
+/***************************************************************************//**
+ *
+ * Remove all devices from the Resolving List.
+ *
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_resolving_list_remove_all_devices();
+
+/** @} */ // end addtogroup sl_bt_resolving_list
+
+/**
+ * @addtogroup sl_bt_accept_list Filter Accept List
+ * @{
+ *
+ * @brief Filter Accept List
+ *
+ * Provides support for adding and removing devices from the Filter Accept List
+ * in the Bluetooth controller.
+ *
+ * The Filter Accept List allows filtering transmissions from other Bluetooth
+ * devices so that the local device only receives/accepts transmissions from the
+ * devices that it's interested in or wants to communicate with. Operations that
+ * support filtering provide a means to control how the Filter Accept List is
+ * used:
+ *   - For advertising, use the command @ref sl_bt_advertiser_configure and @p
+ *     flags bits @ref SL_BT_ADVERTISER_USE_FILTER_FOR_SCAN_REQUESTS and @ref
+ *     SL_BT_ADVERTISER_USE_FILTER_FOR_CONNECTION_REQUESTS to control the
+ *     advertising filter policy
+ *   - For scanning, use the command @ref
+ *     sl_bt_scanner_set_parameters_and_filter to control the scanning filter
+ *     policy
+ */
+
+/* Command and Response IDs */
+#define sl_bt_cmd_accept_list_add_device_by_bonding_id               0x005e0020
+#define sl_bt_cmd_accept_list_add_device_by_address_id               0x015e0020
+#define sl_bt_cmd_accept_list_remove_device_by_bonding_id            0x025e0020
+#define sl_bt_cmd_accept_list_remove_device_by_address_id            0x035e0020
+#define sl_bt_cmd_accept_list_remove_all_devices_id                  0x045e0020
+#define sl_bt_rsp_accept_list_add_device_by_bonding_id               0x005e0020
+#define sl_bt_rsp_accept_list_add_device_by_address_id               0x015e0020
+#define sl_bt_rsp_accept_list_remove_device_by_bonding_id            0x025e0020
+#define sl_bt_rsp_accept_list_remove_device_by_address_id            0x035e0020
+#define sl_bt_rsp_accept_list_remove_all_devices_id                  0x045e0020
+
+/***************************************************************************//**
+ *
+ * Add a device to the Filter Accept List based on its bonding handle.
+ *
+ * @param[in] bonding The bonding handle
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_accept_list_add_device_by_bonding(uint32_t bonding);
+
+/***************************************************************************//**
+ *
+ * Add a device to the Filter Accept List based on its identity address.
+ *
+ * Use the special address type @ref sl_bt_gap_anonymous_address to add an entry
+ * that matches all advertisements sent with no address.
+ *
+ * @param[in] address Bluetooth address of the peer device
+ * @param[in] address_type Enum @ref sl_bt_gap_address_type_t. The peer device
+ *   address type. Values:
+ *     - <b>sl_bt_gap_public_address (0x0):</b> Public device address
+ *     - <b>sl_bt_gap_static_address (0x1):</b> Static device address
+ *     - <b>sl_bt_gap_anonymous_address (0xff):</b> Anonymous address. A Filter
+ *       Accept List entry with this type matches all advertisements sent with
+ *       no address.
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_accept_list_add_device_by_address(bd_addr address,
+                                                    uint8_t address_type);
+
+/***************************************************************************//**
+ *
+ * Remove a device from the Filter Accept List based on its bonding handle.
+ *
+ * @param[in] bonding The bonding handle
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_accept_list_remove_device_by_bonding(uint32_t bonding);
+
+/***************************************************************************//**
+ *
+ * Remove a device from the Filter Accept List based on its identity address.
+ *
+ * Use the special address type @ref sl_bt_gap_anonymous_address to remove an
+ * entry that matches all advertisements sent with no address.
+ *
+ * @param[in] address Bluetooth address of the peer device
+ * @param[in] address_type Enum @ref sl_bt_gap_address_type_t. The peer device
+ *   address type. Values:
+ *     - <b>sl_bt_gap_public_address (0x0):</b> Public device address
+ *     - <b>sl_bt_gap_static_address (0x1):</b> Static device address
+ *     - <b>sl_bt_gap_anonymous_address (0xff):</b> Anonymous address. A Filter
+ *       Accept List entry with this type matches all advertisements sent with
+ *       no address.
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_accept_list_remove_device_by_address(bd_addr address,
+                                                       uint8_t address_type);
+
+/***************************************************************************//**
+ *
+ * Remove all devices from the Filter Accept List.
+ *
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_accept_list_remove_all_devices();
+
+/** @} */ // end addtogroup sl_bt_accept_list
+
+/**
  * @addtogroup sl_bt_ota OTA
  * @{
  *
@@ -9349,9 +11794,9 @@ sl_status_t sl_bt_ota_set_advertising_data(uint8_t packet_type,
  *
  *   Bit 1: Application update version check. Check the version number and
  *   product ID of the application upgrade before applying. If the version
- *   number of the current application can not be determined, this
- *   implementation will assume that it is OK to apply the new image. Note that
- *   this is not a security feature.
+ *   number of the current application can't be determined, this implementation
+ *   will assume that it is OK to apply the new image. Note that this is not a
+ *   security feature.
  *
  *     - <b>0:</b> Disable version check
  *     - <b>1:</b> Enable version check
@@ -9518,6 +11963,1150 @@ sl_status_t sl_bt_coex_get_counters(uint8_t reset,
 /** @} */ // end addtogroup sl_bt_coex
 
 /**
+ * @addtogroup sl_bt_cs Accurate Bluetooth Ranging
+ * @{
+ *
+ * @brief Accurate Bluetooth Ranging
+ *
+ * This class provides commands and events for Accurate Bluetooth Ranging (ABR)
+ * between Bluetooth devices.
+ */
+
+/* Command and Response IDs */
+#define sl_bt_cmd_cs_security_enable_id                              0x00590020
+#define sl_bt_cmd_cs_set_default_settings_id                         0x01590020
+#define sl_bt_cmd_cs_create_config_id                                0x02590020
+#define sl_bt_cmd_cs_remove_config_id                                0x03590020
+#define sl_bt_cmd_cs_set_channel_classification_id                   0x04590020
+#define sl_bt_cmd_cs_set_procedure_parameters_id                     0x05590020
+#define sl_bt_cmd_cs_procedure_enable_id                             0x06590020
+#define sl_bt_cmd_cs_set_antenna_configuration_id                    0x07590020
+#define sl_bt_rsp_cs_security_enable_id                              0x00590020
+#define sl_bt_rsp_cs_set_default_settings_id                         0x01590020
+#define sl_bt_rsp_cs_create_config_id                                0x02590020
+#define sl_bt_rsp_cs_remove_config_id                                0x03590020
+#define sl_bt_rsp_cs_set_channel_classification_id                   0x04590020
+#define sl_bt_rsp_cs_set_procedure_parameters_id                     0x05590020
+#define sl_bt_rsp_cs_procedure_enable_id                             0x06590020
+#define sl_bt_rsp_cs_set_antenna_configuration_id                    0x07590020
+
+/**
+ * @brief Specifies the role for the device during ABR procedure.
+ */
+typedef enum
+{
+  sl_bt_cs_role_initiator = 0x0, /**< (0x0) The device will initiate the
+                                      procedure */
+  sl_bt_cs_role_reflector = 0x1  /**< (0x1) The device will reciprocate
+                                      transmission */
+} sl_bt_cs_role_t;
+
+/**
+ * @brief Defines the status of a given role for an ABR capable device.
+ */
+typedef enum
+{
+  sl_bt_cs_role_status_disable = 0x0, /**< (0x0) The given role is disabled */
+  sl_bt_cs_role_status_enable  = 0x1  /**< (0x1) The given role is enabled */
+} sl_bt_cs_role_status_t;
+
+/**
+ * @brief Defines the status of a companion signal.
+ */
+typedef enum
+{
+  sl_bt_cs_companion_signal_status_disable = 0x0, /**< (0x0) The companion
+                                                       signal is disabled */
+  sl_bt_cs_companion_signal_status_enable  = 0x1  /**< (0x1) The companion
+                                                       signal is enabled */
+} sl_bt_cs_companion_signal_status_t;
+
+/**
+ * @brief Defines the ABR procedure state for the device.
+ */
+typedef enum
+{
+  sl_bt_cs_procedure_state_disabled = 0x0, /**< (0x0) ABR procedures are
+                                                disabled */
+  sl_bt_cs_procedure_state_enabled  = 0x1  /**< (0x1) ABR procedures are enabled */
+} sl_bt_cs_procedure_state_t;
+
+/**
+ * @brief Defines the different modes for ABR steps.
+ */
+typedef enum
+{
+  sl_bt_cs_mode_calibration = 0x0, /**< (0x0) Frequency offset and timing
+                                        calibration measurement */
+  sl_bt_cs_mode_rtt         = 0x1, /**< (0x1) Round Trip Time (RTT) measurement */
+  sl_bt_cs_mode_pbr         = 0x2, /**< (0x2) Phase-Based Ranging (PBR)
+                                        measurement */
+  sl_bt_cs_mode_pbr_and_rtt = 0x3  /**< (0x3) PBR and RTT measurement */
+} sl_bt_cs_mode_t;
+
+/**
+ * @brief Defines the Round Trip Time (RTT) payload types used during the ABR
+ * sequence.
+ */
+typedef enum
+{
+  sl_bt_cs_rtt_type_coarse                     = 0x0, /**< (0x0) RTT Coarse */
+  sl_bt_cs_rtt_type_fractional_96_bit_sounding = 0x2  /**< (0x2) RTT Fractional
+                                                           with 96-bit Sounding
+                                                           Sequence */
+} sl_bt_cs_rtt_type_t;
+
+/**
+ * @brief Specifies the ABR channel selection algorithms.
+ */
+typedef enum
+{
+  sl_bt_cs_channel_selection_algorithm_3b                     = 0x0, /**< (0x0)
+                                                                          Use
+                                                                          Channel
+                                                                          Selection
+                                                                          Algorithm
+                                                                          #3b
+                                                                          for
+                                                                          non-mode
+                                                                          0 ABR
+                                                                          steps */
+  sl_bt_cs_channel_selection_algorithm_3c                     = 0x1, /**< (0x1)
+                                                                          Use
+                                                                          Channel
+                                                                          Selection
+                                                                          Algorithm
+                                                                          #3c
+                                                                          for
+                                                                          non-mode
+                                                                          0 ABR
+                                                                          steps */
+  sl_bt_cs_channel_selection_algorithm_user_shape_interleaved = 0x2  /**< (0x2)
+                                                                          Use
+                                                                          Interleaved
+                                                                          shape
+                                                                          for
+                                                                          user
+                                                                          specified
+                                                                          channel
+                                                                          sequence */
+} sl_bt_cs_channel_selection_algorithm_t;
+
+/**
+ * @brief Specifies the ch3c shapes.
+ */
+typedef enum
+{
+  sl_bt_cs_ch3c_shape_hat         = 0x0, /**< (0x0) Use Hat shape for user
+                                              specified channel sequence */
+  sl_bt_cs_chc3_shape_interleaved = 0x1  /**< (0x1) Use Interleaved shape for
+                                              user specified channel sequence */
+} sl_bt_cs_ch3c_shape_t;
+
+/**
+ * @brief Describes the current status of the procedure or subevents.
+ */
+typedef enum
+{
+  sl_bt_cs_done_status_complete                 = 0x0,  /**< (0x0) All results
+                                                             complete for the
+                                                             ABR procedure or
+                                                             subevent */
+  sl_bt_cs_done_status_partial_results_continue = 0x1,  /**< (0x1) Partial
+                                                             results with more
+                                                             to follow */
+  sl_bt_cs_done_status_current_aborted          = 0xfe, /**< (0xfe) Current ABR
+                                                             procedure or
+                                                             subevent aborted */
+  sl_bt_cs_done_status_all_aborted              = 0xff  /**< (0xff) Current and
+                                                             all subsequent
+                                                             subevents in the
+                                                             procedure aborted */
+} sl_bt_cs_done_status_t;
+
+/**
+ * @brief Describes the abort reasons for ABR procedures and subevents and is
+ * represented by 4 bits in a byte
+ */
+typedef enum
+{
+  sl_bt_cs_abort_reason_no_abort              = 0x0, /**< (0x0) Not aborted */
+  sl_bt_cs_abort_reason_host_request          = 0x1, /**< (0x1) Local or remote
+                                                          host request */
+  sl_bt_cs_abort_reason_insufficient_channels = 0x2, /**< (0x2) Filtered channel
+                                                          has less than 15
+                                                          channels */
+  sl_bt_cs_abort_reason_no_map_update         = 0x3, /**< (0x3) Channel map
+                                                          update instant has
+                                                          passed */
+  sl_bt_cs_abort_reason_unspecified           = 0xf  /**< (0xf) Unspecified
+                                                          reasons for abortion */
+} sl_bt_cs_abort_reason_t;
+
+/**
+ * @brief Specifies the role for the device during ABR procedure.
+ */
+typedef enum
+{
+  sl_bt_cs_config_state_removed = 0x0, /**< (0x0) The ABR device configuration
+                                            is removed */
+  sl_bt_cs_config_state_created = 0x1  /**< (0x1) The ABR device configuration
+                                            is created */
+} sl_bt_cs_config_state_t;
+
+/**
+ * @addtogroup sl_bt_evt_cs_security_enable_complete sl_bt_evt_cs_security_enable_complete
+ * @{
+ * @brief Indicates that a locally initiated ABR security start procedure has
+ * completed or the local controller has responded to a channel security request
+ * from the remote controller
+ */
+
+/** @brief Identifier of the security_enable_complete event */
+#define sl_bt_evt_cs_security_enable_complete_id                     0x005900a0
+
+/***************************************************************************//**
+ * @brief Data structure of the security_enable_complete event
+ ******************************************************************************/
+PACKSTRUCT( struct sl_bt_evt_cs_security_enable_complete_s
+{
+  uint8_t connection; /**< Connection handle */
+});
+
+typedef struct sl_bt_evt_cs_security_enable_complete_s sl_bt_evt_cs_security_enable_complete_t;
+
+/** @} */ // end addtogroup sl_bt_evt_cs_security_enable_complete
+
+/**
+ * @addtogroup sl_bt_evt_cs_config_complete sl_bt_evt_cs_config_complete
+ * @{
+ * @brief Indicates that a locally initiated ABR configuration procedure has
+ * completed or the local controller has responded to an ABR configuration
+ * request from the remote controller
+ */
+
+/** @brief Identifier of the config_complete event */
+#define sl_bt_evt_cs_config_complete_id                              0x015900a0
+
+/***************************************************************************//**
+ * @brief Data structure of the config_complete event
+ ******************************************************************************/
+PACKSTRUCT( struct sl_bt_evt_cs_config_complete_s
+{
+  uint8_t                connection;              /**< Connection handle */
+  uint8_t                config_id;               /**< ABR configuration
+                                                       identifier.
+                                                         - Range: 0 to 3 */
+  uint16_t               status;                  /**< SL_STATUS_OK if
+                                                       successful. Error code
+                                                       otherwise. */
+  uint8_t                config_state;            /**< Enum @ref
+                                                       sl_bt_cs_config_state_t.
+                                                       ABR configuration state
+                                                       Values:
+                                                         - <b>sl_bt_cs_config_state_removed
+                                                           (0x0):</b> The ABR
+                                                           device configuration
+                                                           is removed
+                                                         - <b>sl_bt_cs_config_state_created
+                                                           (0x1):</b> The ABR
+                                                           device configuration
+                                                           is created */
+  uint8_t                main_mode_type;          /**< Enum @ref
+                                                       sl_bt_cs_mode_t. Main
+                                                       mode type. Values:
+                                                         - <b>sl_bt_cs_mode_calibration
+                                                           (0x0):</b> Frequency
+                                                           offset and timing
+                                                           calibration
+                                                           measurement
+                                                         - <b>sl_bt_cs_mode_rtt
+                                                           (0x1):</b> Round Trip
+                                                           Time (RTT)
+                                                           measurement
+                                                         - <b>sl_bt_cs_mode_pbr
+                                                           (0x2):</b>
+                                                           Phase-Based Ranging
+                                                           (PBR) measurement
+                                                         - <b>sl_bt_cs_mode_pbr_and_rtt
+                                                           (0x3):</b> PBR and
+                                                           RTT measurement */
+  uint8_t                sub_mode_type;           /**< Enum @ref
+                                                       sl_bt_cs_mode_t. Sub mode
+                                                       type. Values:
+                                                         - <b>sl_bt_cs_mode_calibration
+                                                           (0x0):</b> Frequency
+                                                           offset and timing
+                                                           calibration
+                                                           measurement
+                                                         - <b>sl_bt_cs_mode_rtt
+                                                           (0x1):</b> Round Trip
+                                                           Time (RTT)
+                                                           measurement
+                                                         - <b>sl_bt_cs_mode_pbr
+                                                           (0x2):</b>
+                                                           Phase-Based Ranging
+                                                           (PBR) measurement
+                                                         - <b>sl_bt_cs_mode_pbr_and_rtt
+                                                           (0x3):</b> PBR and
+                                                           RTT measurement */
+  uint8_t                min_main_mode_steps;     /**< Minimum number of ABR
+                                                       main mode steps to be
+                                                       executed prior to a sub
+                                                       mode step.
+                                                         - Range: 1 to 160 */
+  uint8_t                max_main_mode_steps;     /**< Maximum number of ABR
+                                                       main mode steps to be
+                                                       executed prior to a sub
+                                                       mode step.
+                                                         - Range: 1 to 160 */
+  uint8_t                main_mode_repetition;    /**< Number of main mode steps
+                                                       taken from the end of the
+                                                       last ABR subevent to be
+                                                       repeated at the beginning
+                                                       of the current ABR
+                                                       subevent directly after
+                                                       the last Mode 0 step of
+                                                       that event.
+                                                         - Range: 0 to 3 */
+  uint8_t                mode_calibration_steps;  /**< Number of calibration
+                                                       mode steps to be included
+                                                       at the beginning of the
+                                                       test ABR subevent.
+                                                         - Range: 1 to 3 */
+  uint8_t                role;                    /**< Enum @ref
+                                                       sl_bt_cs_role_t. Device
+                                                       role during the ABR
+                                                       procedure Values:
+                                                         - <b>sl_bt_cs_role_initiator
+                                                           (0x0):</b> The device
+                                                           will initiate the
+                                                           procedure
+                                                         - <b>sl_bt_cs_role_reflector
+                                                           (0x1):</b> The device
+                                                           will reciprocate
+                                                           transmission */
+  uint8_t                rtt_type;                /**< Enum @ref
+                                                       sl_bt_cs_rtt_type_t. RTT
+                                                       payload type used in the
+                                                       ABR procedure Values:
+                                                         - <b>sl_bt_cs_rtt_type_coarse
+                                                           (0x0):</b> RTT Coarse
+                                                         - <b>sl_bt_cs_rtt_type_fractional_96_bit_sounding
+                                                           (0x2):</b> RTT
+                                                           Fractional with
+                                                           96-bit Sounding
+                                                           Sequence */
+  uint8_t                cs_sync_phy;             /**< Enum @ref
+                                                       sl_bt_gap_phy_t. Used PHY
+                                                       for ABR SYNC exchanges
+                                                       during a procedure
+                                                       Values:
+                                                         - <b>sl_bt_gap_phy_1m
+                                                           (0x1):</b> 1M PHY */
+  sl_bt_cs_channel_map_t channel_map;             /**< A fixed length byte array
+                                                       of 10 bytes consisting of
+                                                       79 1-bit fields.
+
+                                                       The nth field (in the
+                                                       range 0 to 78) contains
+                                                       the value for the ABR
+                                                       channel index n.
+
+                                                         - Bit value 0: Channel
+                                                           n is disabled
+                                                         - Bit value 1: Channel
+                                                           n is enabled
+
+                                                       The rest of most
+                                                       significant bits are
+                                                       reserved for future use
+                                                       and must be set to 0.
+                                                       Channels n = 0, 1, 23,
+                                                       24, 25, 77 and 78 shall
+                                                       be ignored and not used
+                                                       for ABR. At least 15
+                                                       channels shall be marked
+                                                       as used. */
+  uint8_t                channel_map_repetition;  /**< Number of times the
+                                                       channel_map field will be
+                                                       cycled through for
+                                                       non-Mode 0 steps within a
+                                                       ABR procedure.
+                                                         - Range: 0x01 to 0xFF */
+  uint8_t                channel_selection_type;  /**< Enum @ref
+                                                       sl_bt_cs_channel_selection_algorithm_t.
+                                                       ABR algorithm to be used
+                                                       during the procedure for
+                                                       non-mode 0 steps Value:
+                                                         - <b>sl_bt_cs_channel_selection_algorithm_3b
+                                                           (0x0):</b> Use
+                                                           Channel Selection
+                                                           Algorithm #3b for
+                                                           non-mode 0 ABR steps
+                                                         - <b>sl_bt_cs_channel_selection_algorithm_3c
+                                                           (0x1):</b> Use
+                                                           Channel Selection
+                                                           Algorithm #3c for
+                                                           non-mode 0 ABR steps
+                                                         - <b>sl_bt_cs_channel_selection_algorithm_user_shape_interleaved
+                                                           (0x2):</b> Use
+                                                           Interleaved shape for
+                                                           user specified
+                                                           channel sequence */
+  uint8_t                ch3c_shape;              /**< Enum @ref
+                                                       sl_bt_cs_ch3c_shape_t.
+                                                       Shape for user-specified
+                                                       channel sequence Values:
+                                                         - <b>sl_bt_cs_ch3c_shape_hat
+                                                           (0x0):</b> Use Hat
+                                                           shape for user
+                                                           specified channel
+                                                           sequence
+                                                         - <b>sl_bt_cs_chc3_shape_interleaved
+                                                           (0x1):</b> Use
+                                                           Interleaved shape for
+                                                           user specified
+                                                           channel sequence */
+  uint8_t                ch3c_jump;               /**< Number of channels
+                                                       skipped in each rising
+                                                       and falling sequence
+                                                         - Range: 0x03 to 0x08 */
+  uint8_t                companion_signal_enable; /**< Enum @ref
+                                                       sl_bt_cs_companion_signal_status_t.
+                                                       Enabled or disabled
+                                                       companion signal status
+                                                       Values:
+                                                         - <b>sl_bt_cs_companion_signal_status_disable
+                                                           (0x0):</b> The
+                                                           companion signal is
+                                                           disabled
+                                                         - <b>sl_bt_cs_companion_signal_status_enable
+                                                           (0x1):</b> The
+                                                           companion signal is
+                                                           enabled */
+});
+
+typedef struct sl_bt_evt_cs_config_complete_s sl_bt_evt_cs_config_complete_t;
+
+/** @} */ // end addtogroup sl_bt_evt_cs_config_complete
+
+/**
+ * @addtogroup sl_bt_evt_cs_procedure_enable_complete sl_bt_evt_cs_procedure_enable_complete
+ * @{
+ * @brief Indicates the controller has scheduled a new ABR procedure
+ * measurement, as a result of @ref sl_bt_cs_procedure_enable command or
+ * disabled an ongoing, as a result of @ref sl_bt_cs_procedure_enable command.
+ */
+
+/** @brief Identifier of the procedure_enable_complete event */
+#define sl_bt_evt_cs_procedure_enable_complete_id                    0x025900a0
+
+/***************************************************************************//**
+ * @brief Data structure of the procedure_enable_complete event
+ ******************************************************************************/
+PACKSTRUCT( struct sl_bt_evt_cs_procedure_enable_complete_s
+{
+  uint8_t  connection;             /**< Connection handle */
+  uint8_t  config_id;              /**< ABR configuration identifier.
+                                          - Range: 0 to 3 */
+  uint16_t status;                 /**< SL_STATUS_OK if successful. Error code
+                                        otherwise. */
+  uint8_t  state;                  /**< Enum @ref sl_bt_cs_procedure_state_t.
+                                        ABR procedure enabled or disabled
+                                        Values:
+                                          - <b>sl_bt_cs_procedure_state_disabled
+                                            (0x0):</b> ABR procedures are
+                                            disabled
+                                          - <b>sl_bt_cs_procedure_state_enabled
+                                            (0x1):</b> ABR procedures are
+                                            enabled */
+  uint8_t  antenna_config;         /**< Antenna configuration index
+                                          - Range: 0 to 7 */
+  int8_t   tx_power;               /**< Transmit power level used in the
+                                        transmission. Units: dBm.
+                                          - Range: -127 to +20
+                                          - Value: 0x07F. Transmit power level
+                                            is unavailable */
+  uint32_t subevent_len;           /**< Duration for each subevent in
+                                        microseconds
+                                          - Range: 1250 μs to 4 s */
+  uint8_t  subevents_per_interval; /**< Number of subevents anchored off the
+                                        same ACL connection event
+                                          - Range: 1 to 16 */
+  uint16_t subevent_interval;      /**< Duration in microseconds between
+                                        consecutive ABR subevents anchored off
+                                        the same ACL connection event. Units:
+                                        0.625 ms. */
+  uint16_t event_interval;         /**< Number of ACL connection events between
+                                        consecutive ABR event anchor points */
+  uint16_t procedure_interval;     /**< Number of ACL connection events between
+                                        consecutive ABR procedure anchor points */
+  uint16_t procedure_count;        /**< Number of procedures to continue until
+                                        disabled. Maximum number of procedures
+                                        to be scheduled.
+                                          - Range: 0x01 to 0xFFFF. */
+});
+
+typedef struct sl_bt_evt_cs_procedure_enable_complete_s sl_bt_evt_cs_procedure_enable_complete_t;
+
+/** @} */ // end addtogroup sl_bt_evt_cs_procedure_enable_complete
+
+/**
+ * @addtogroup sl_bt_evt_cs_result sl_bt_evt_cs_result
+ * @{
+ * @brief Reports results of every ABR subevent within the ABR procedure
+ */
+
+/** @brief Identifier of the result event */
+#define sl_bt_evt_cs_result_id                                       0x035900a0
+
+/***************************************************************************//**
+ * @brief Data structure of the result event
+ ******************************************************************************/
+PACKSTRUCT( struct sl_bt_evt_cs_result_s
+{
+  uint8_t    connection;             /**< Connection handle. Returns a
+                                          SL_BT_INVALID_CONNECTION_HANDLE (0xFF)
+                                          when triggered as a result of @ref
+                                          sl_bt_cs_test_start command */
+  uint8_t    config_id;              /**< ABR configuration identifier
+                                            - Range: 0 to 3 */
+  uint16_t   start_acl_conn_event;   /**< Starting an ACL connection event count
+                                          for the results reported in the event.
+                                          This is reported only in the first
+                                          subevent in the procedure. For
+                                          subsequent subevents, this value is
+                                          set to 0. */
+  uint16_t   procedure_counter;      /**< Indicates the associated ABR procedure
+                                          count for the results reported in this
+                                          event */
+  int16_t    frequency_compensation; /**< Frequency compensation value. Units:
+                                          0.01 ppm (15-bit signed integer).
+                                            - Range: -10000 to 10000
+                                            - Value: 0xC000. Frequency
+                                              compensation value is not
+                                              available or the role is not
+                                              initiator. This is reported only
+                                              in the first subevent in the
+                                              procedure. For subsequent
+                                              subevents, this value is set to 0. */
+  uint8_t    procedure_done_status;  /**< Enum @ref sl_bt_cs_done_status_t.
+                                          Current status of the ABR procedure
+                                          Values:
+                                            - <b>sl_bt_cs_done_status_complete
+                                              (0x0):</b> All results complete
+                                              for the ABR procedure or subevent
+                                            - <b>sl_bt_cs_done_status_partial_results_continue
+                                              (0x1):</b> Partial results with
+                                              more to follow
+                                            - <b>sl_bt_cs_done_status_current_aborted
+                                              (0xfe):</b> Current ABR procedure
+                                              or subevent aborted
+                                            - <b>sl_bt_cs_done_status_all_aborted
+                                              (0xff):</b> Current and all
+                                              subsequent subevents in the
+                                              procedure aborted */
+  uint8_t    subevent_done_status;   /**< Enum @ref sl_bt_cs_done_status_t.
+                                          Current status of the ABR subevent
+                                          Values:
+                                            - <b>sl_bt_cs_done_status_complete
+                                              (0x0):</b> All results complete
+                                              for the ABR procedure or subevent
+                                            - <b>sl_bt_cs_done_status_partial_results_continue
+                                              (0x1):</b> Partial results with
+                                              more to follow
+                                            - <b>sl_bt_cs_done_status_current_aborted
+                                              (0xfe):</b> Current ABR procedure
+                                              or subevent aborted
+                                            - <b>sl_bt_cs_done_status_all_aborted
+                                              (0xff):</b> Current and all
+                                              subsequent subevents in the
+                                              procedure aborted */
+  uint8_t    abort_reason;           /**< Enum @ref sl_bt_cs_abort_reason_t.
+                                          Indicates the abort reason when the
+                                          procedure_done_status or
+                                          subevent_done_status is set to 0xF,
+                                          otherwise the default value is set to
+                                          zero. The first 4 bits are related to
+                                          the procedure abort reasons and the
+                                          last 4 bits are related to the
+                                          subevent done. Values:
+                                            - <b>sl_bt_cs_abort_reason_no_abort
+                                              (0x0):</b> Not aborted
+                                            - <b>sl_bt_cs_abort_reason_host_request
+                                              (0x1):</b> Local or remote host
+                                              request
+                                            - <b>sl_bt_cs_abort_reason_insufficient_channels
+                                              (0x2):</b> Filtered channel has
+                                              less than 15 channels
+                                            - <b>sl_bt_cs_abort_reason_no_map_update
+                                              (0x3):</b> Channel map update
+                                              instant has passed
+                                            - <b>sl_bt_cs_abort_reason_unspecified
+                                              (0xf):</b> Unspecified reasons for
+                                              abortion */
+  int8_t     reference_power_level;  /**< Reference power level used by the
+                                          transmission. Units: dBm.
+                                            - Range: -127 to 20
+                                            - Value: 0x07F. The reference power
+                                              level is not applicable */
+  uint8_t    num_antenna_paths;      /**< Number of antenna paths supported by
+                                          the local controller for the ABR tone
+                                          exchanges.
+                                            - Range: 1 to 4. The number of
+                                              antenna paths used during the
+                                              phase measurement stage of the ABR
+                                              step
+                                            - Value: 0. Phase measurement does
+                                              not occur during the ABR step,
+                                              therefore ignored */
+  uint8_t    num_steps;              /**< Number of steps in the ABR subevent
+                                          for which results are reported.
+                                            - Range: 1 to 160 */
+  uint8array data;                   /**< The result data is structured as
+                                          follows:
+                                            - step_status: 1 octet for each
+                                              num_steps. 0x00 for step scheduled
+                                              and reported. 0xFE for step
+                                              aborted.
+                                            - step_mode: 1 octet for each
+                                              num_steps. Mode type. Range 0 to
+                                              3.
+                                            - step_channel: 1 octet for each
+                                              num_steps. Channel index. Range 1
+                                              to 78.
+                                            - step_data_length: 1 octet for each
+                                              num_steps. Length of mode and role
+                                              specific information being
+                                              reported. Range 0x00 to 0xFF.
+                                            - step_data: step_data_length octet
+                                              for each corresponding steps in
+                                              num_steps. */
+});
+
+typedef struct sl_bt_evt_cs_result_s sl_bt_evt_cs_result_t;
+
+/** @} */ // end addtogroup sl_bt_evt_cs_result
+
+/***************************************************************************//**
+ *
+ * Start or restart ABR security start procedure for the specified connection.
+ *
+ * @param[in] connection Connection handle
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ * @b Events
+ *   - @ref sl_bt_evt_cs_security_enable_complete - Triggered when ABR security
+ *     start procedure has completed.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_cs_security_enable(uint8_t connection);
+
+/***************************************************************************//**
+ *
+ * Set the default ABR settings for the specified connection. By default, all
+ * roles are disabled and the antenna is set to 1.
+ *
+ * @param[in] connection Connection handle
+ * @param[in] initiator_status Enum @ref sl_bt_cs_role_status_t. Enable or
+ *   disable status of the Initiator role. Values:
+ *     - <b>sl_bt_cs_role_status_disable (0x0):</b> The given role is disabled
+ *     - <b>sl_bt_cs_role_status_enable (0x1):</b> The given role is enabled
+ * @param[in] reflector_status Enum @ref sl_bt_cs_role_status_t. Enable or
+ *   disable status of the Reflector role. Values:
+ *     - <b>sl_bt_cs_role_status_disable (0x0):</b> The given role is disabled
+ *     - <b>sl_bt_cs_role_status_enable (0x1):</b> The given role is enabled
+ * @param[in] antenna_identifier Antenna identifier to be used for ABR sync
+ *   packets.
+ *     - Range: 1 to 4
+ * @param[in] max_tx_power Maximum transmit power level to be used in all ABR
+ *   transmissions. Units: dBm.
+ *     - Range: -127 to +20
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_cs_set_default_settings(uint8_t connection,
+                                          uint8_t initiator_status,
+                                          uint8_t reflector_status,
+                                          uint8_t antenna_identifier,
+                                          int8_t max_tx_power);
+
+/***************************************************************************//**
+ *
+ * Create a new ABR configuration in the local and remote controller. The role
+ * used in this command must be enabled prior to issuing this command using @ref
+ * sl_bt_cs_set_default_settings command.
+ *
+ * @param[in] connection The connection handle
+ * @param[in] config_id ABR configuration identifier.
+ *     - Range: 0 to 3
+ * @param[in] create_context Defines in which device the created configuration
+ *   will be written
+ *     - Value: 0x00. Write ABR configuration in the local controller only
+ *     - Value: 0x01. Write ABR configuration in both the local and remote
+ *       controller using a configuration procedure
+ * @param[in] main_mode_type Enum @ref sl_bt_cs_mode_t. Main mode type. Values:
+ *     - <b>sl_bt_cs_mode_calibration (0x0):</b> Frequency offset and timing
+ *       calibration measurement
+ *     - <b>sl_bt_cs_mode_rtt (0x1):</b> Round Trip Time (RTT) measurement
+ *     - <b>sl_bt_cs_mode_pbr (0x2):</b> Phase-Based Ranging (PBR) measurement
+ *     - <b>sl_bt_cs_mode_pbr_and_rtt (0x3):</b> PBR and RTT measurement
+ * @param[in] sub_mode_type Enum @ref sl_bt_cs_mode_t. Sub mode type. Values:
+ *     - <b>sl_bt_cs_mode_calibration (0x0):</b> Frequency offset and timing
+ *       calibration measurement
+ *     - <b>sl_bt_cs_mode_rtt (0x1):</b> Round Trip Time (RTT) measurement
+ *     - <b>sl_bt_cs_mode_pbr (0x2):</b> Phase-Based Ranging (PBR) measurement
+ *     - <b>sl_bt_cs_mode_pbr_and_rtt (0x3):</b> PBR and RTT measurement
+ * @param[in] min_main_mode_steps Minimum number of ABR main mode steps to be
+ *   executed prior to a sub mode step.
+ *     - Range: 1 to 160
+ * @param[in] max_main_mode_steps Maximum number of ABR main mode steps to be
+ *   executed prior to a sub mode step.
+ *     - Range: 1 to 160
+ * @param[in] main_mode_repetition Number of main mode steps taken from the end
+ *   of the last ABR subevent to be repeated at the beginning of the current ABR
+ *   subevent directly after the value r last Mode 0 step of that event.
+ *     - Range: 0 to 3
+ * @param[in] mode_calibration_steps Number of Mode 0 steps to be included at
+ *   the beginning of the test ABR subevent
+ *     - Range: 1 to 3
+ * @param[in] role Enum @ref sl_bt_cs_role_t. Device's role during the ABR
+ *   procedure Values:
+ *     - <b>sl_bt_cs_role_initiator (0x0):</b> The device will initiate the
+ *       procedure
+ *     - <b>sl_bt_cs_role_reflector (0x1):</b> The device will reciprocate
+ *       transmission
+ * @param[in] rtt_type Enum @ref sl_bt_cs_rtt_type_t. RTT payload type used in
+ *   the ABR procedure Values:
+ *     - <b>sl_bt_cs_rtt_type_coarse (0x0):</b> RTT Coarse
+ *     - <b>sl_bt_cs_rtt_type_fractional_96_bit_sounding (0x2):</b> RTT
+ *       Fractional with 96-bit Sounding Sequence
+ * @param[in] cs_sync_phy Enum @ref sl_bt_gap_phy_t. Used PHY for ABR SYNC
+ *   exchanges during a procedure Values:
+ *     - <b>sl_bt_gap_phy_1m (0x1):</b> 1M PHY
+ * @param[in] channel_map @parblock
+ *   A fixed length byte array of 10 bytes consisting of 79 1-bit fields.
+ *
+ *   The nth such field (in the range 0 to 78) contains the value for the ABR
+ *   channel index n.
+ *
+ *     - Bit value 0: Channel n is disabled
+ *     - Bit value 1: Channel n is enabled
+ *
+ *   The rest of most significant bits are reserved for future use and must be
+ *   set to 0. Channels n = 0, 1, 23, 24, 25, 77 and 78 shall be ignored and not
+ *   used for ABR. At least 15 channels shall be marked as used.
+ *   @endparblock
+ * @param[in] channel_map_repetition Number of times the channel_map field will
+ *   be cycled through for non-Mode 0 steps within an ABR procedure.
+ *     - Range: 0x01 to 0xFF
+ * @param[in] channel_selection_type Enum @ref
+ *   sl_bt_cs_channel_selection_algorithm_t. Channel selection algorithm Values:
+ *     - <b>sl_bt_cs_channel_selection_algorithm_3b (0x0):</b> Use Channel
+ *       Selection Algorithm #3b for non-mode 0 ABR steps
+ *     - <b>sl_bt_cs_channel_selection_algorithm_3c (0x1):</b> Use Channel
+ *       Selection Algorithm #3c for non-mode 0 ABR steps
+ *     - <b>sl_bt_cs_channel_selection_algorithm_user_shape_interleaved
+ *       (0x2):</b> Use Interleaved shape for user specified channel sequence
+ * @param[in] ch3c_shape Enum @ref sl_bt_cs_ch3c_shape_t. Ch3c shape Values:
+ *     - <b>sl_bt_cs_ch3c_shape_hat (0x0):</b> Use Hat shape for user specified
+ *       channel sequence
+ *     - <b>sl_bt_cs_chc3_shape_interleaved (0x1):</b> Use Interleaved shape for
+ *       user specified channel sequence
+ * @param[in] ch3c_jump Number of channels skipped in each rising and falling
+ *   sequence.
+ *     - Range: 2 to 8
+ * @param[in] companion_signal_state Enum @ref
+ *   sl_bt_cs_companion_signal_status_t. Companion device's signal status
+ *   Values:
+ *     - <b>sl_bt_cs_companion_signal_status_disable (0x0):</b> The companion
+ *       signal is disabled
+ *     - <b>sl_bt_cs_companion_signal_status_enable (0x1):</b> The companion
+ *       signal is enabled
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ * @b Events
+ *   - @ref sl_bt_evt_cs_config_complete - Triggered when an ABR configuration
+ *     procedure completed
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_cs_create_config(uint8_t connection,
+                                   uint8_t config_id,
+                                   uint8_t create_context,
+                                   uint8_t main_mode_type,
+                                   uint8_t sub_mode_type,
+                                   uint8_t min_main_mode_steps,
+                                   uint8_t max_main_mode_steps,
+                                   uint8_t main_mode_repetition,
+                                   uint8_t mode_calibration_steps,
+                                   uint8_t role,
+                                   uint8_t rtt_type,
+                                   uint8_t cs_sync_phy,
+                                   const sl_bt_cs_channel_map_t *channel_map,
+                                   uint8_t channel_map_repetition,
+                                   uint8_t channel_selection_type,
+                                   uint8_t ch3c_shape,
+                                   uint8_t ch3c_jump,
+                                   uint8_t companion_signal_state);
+
+/***************************************************************************//**
+ *
+ * Remove an ABR configuration from the local controller.
+ *
+ * @param[in] connection Connection handle
+ * @param[in] config_id ABR configuration identifier
+ *     - Range: 0 to 3
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ * @b Events
+ *   - @ref sl_bt_evt_cs_config_complete - Triggered when an ABR configuration
+ *     procedure is completed
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_cs_remove_config(uint8_t connection, uint8_t config_id);
+
+/***************************************************************************//**
+ *
+ * Update the channel classification for ABR. This classification persists until
+ * overwritten with a subsequent command or until the system is reset.
+ *
+ * @param[in] channel_map @parblock
+ *   A fixed length byte array of 10 bytes consisting of 79 1-bit fields.
+ *
+ *   The nth field (in the range 0 to 78) contains the value for the link layer
+ *   channel index n.
+ *
+ *     - Bit value 0: Channel n is disabled.
+ *     - Bit value 1: Channel n is enabled.
+ *
+ *   The rest of most significant bits are reserved for future use and must be
+ *   set to 0. Channels n = 0, 1, 23, 24, 25, 77 and 78 shall be ignored and not
+ *   used for ABR.
+ *   @endparblock
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_cs_set_channel_classification(const sl_bt_cs_channel_map_t *channel_map);
+
+/***************************************************************************//**
+ *
+ * Set the parameters for scheduling ABR procedures with the remote device.
+ *
+ * @param[in] connection The connection handle
+ * @param[in] config_id ABR configuration identifier.
+ *     - Range: 0 to 3.
+ * @param[in] max_procedure_len Maximum duration for each measurement procedure.
+ *   Value in units of 0.625 ms.
+ *     - Range: 0x0001 to 0xFFFF.
+ *     - Time: N x 0.625ms. <b>N</b> being the input.
+ *     - Time range: 0.625 ms to 40.959375 s.
+ * @param[in] min_procedure_interval Minimum duration in number of connection
+ *   events between consecutive measurement procedure.
+ *     - Range: 0x01 to 0xFFFF.
+ * @param[in] max_procedure_interval Maximum duration in number of connection
+ *   events between consecutive measurement procedure.
+ *     - Range: 0x01 to 0xFFFF.
+ * @param[in] max_procedure_count Maximum number of ABR procedures to be
+ *   scheduled
+ *     - Range: 0x01 to 0xFFFF: Maximum number of procedures to be scheduled.
+ *     - Value: 0x00. Procedures to continue until disabled.
+ * @param[in] min_subevent_len Minimum suggested duration for each ABR subevent.
+ *   Units: microseconds.
+ *     - Range: 0x01 to 0xFFFFFF
+ *     - Time range: 1250 us to 4s
+ * @param[in] max_subevent_len Maximum suggested duration for each ABR subevent.
+ *   Units: microseconds.
+ *     - Range: 0x01 to 0xFFFFFF
+ *     - Time range: 1250 us to 4s
+ * @param[in] tone_antenna_config_selection Antenna configuration index
+ *     - Range: 0 to 7
+ * @param[in] phy Enum @ref sl_bt_gap_phy_t. PHY on which the ABR transmission
+ *   will take place Values:
+ *     - <b>sl_bt_gap_phy_1m (0x1):</b> 1M PHY
+ *     - <b>sl_bt_gap_phy_2m (0x2):</b> 2M PHY
+ *     - <b>sl_bt_gap_phy_coded (0x4):</b> Coded PHY, 125k (S=8) or 500k (S=2)
+ *     - <b>sl_bt_gap_phy_any (0xff):</b> Any PHYs the device supports
+ * @param[in] tx_pwr_delta Transmit power delta. Units: dB.
+ *     - Value: 0x80. Host does not have a recommendation for transmit power
+ *       delta
+ * @param[in] preferred_peer_antenna Preferred peer-ordered antenna elements to
+ *   be used by the remote device for the antenna configuration denoted by the
+ *   tone antenna config selection.
+ *     - Bit 0: Use first ordered antenna element
+ *     - Bit 1: Use second ordered antenna element
+ *     - Bit 2: Use third ordered antenna element
+ *     - Bit 3: Use fourth ordered antenna element
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_cs_set_procedure_parameters(uint8_t connection,
+                                              uint8_t config_id,
+                                              uint16_t max_procedure_len,
+                                              uint16_t min_procedure_interval,
+                                              uint16_t max_procedure_interval,
+                                              uint16_t max_procedure_count,
+                                              uint32_t min_subevent_len,
+                                              uint32_t max_subevent_len,
+                                              uint8_t tone_antenna_config_selection,
+                                              uint8_t phy,
+                                              int8_t tx_pwr_delta,
+                                              uint8_t preferred_peer_antenna);
+
+/***************************************************************************//**
+ *
+ * Enable or disable scheduling ABR procedures with the remote device.
+ *
+ * @param[in] connection The connection handle
+ * @param[in] enable Enum @ref sl_bt_cs_procedure_state_t. Enabled or disabled
+ *   ABR procedure state. Values:
+ *     - <b>sl_bt_cs_procedure_state_disabled (0x0):</b> ABR procedures are
+ *       disabled
+ *     - <b>sl_bt_cs_procedure_state_enabled (0x1):</b> ABR procedures are
+ *       enabled
+ * @param[in] config_id ABR configuration identifier
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ * @b Events
+ *   - @ref sl_bt_evt_cs_procedure_enable_complete - Triggered when local
+ *     controller has scheduled or disabled an ABR procedure measurement
+ *   - @ref sl_bt_evt_cs_result - Triggered when local controller has results to
+ *     report for every ABR event within the ABR procedure
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_cs_procedure_enable(uint8_t connection,
+                                      uint8_t enable,
+                                      uint8_t config_id);
+
+/***************************************************************************//**
+ *
+ * Set the antenna configuration for the ABR feature.
+ *
+ * @param[in] antenna_element_offset_len Length of data in @p
+ *   antenna_element_offset
+ * @param[in] antenna_element_offset Offset of each antenna, each element is a
+ *   signed 16-bit integer stored in two consecutive bytes in little-endian
+ *   order. Units: 1 cm.
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_cs_set_antenna_configuration(size_t antenna_element_offset_len,
+                                               const uint8_t* antenna_element_offset);
+
+/** @} */ // end addtogroup sl_bt_cs
+
+/**
+ * @addtogroup sl_bt_cs_test Accurate Bluetooth Ranging Test
+ * @{
+ *
+ * @brief Accurate Bluetooth Ranging Test
+ *
+ * This class provides optional test commands and events for ABR between
+ * Bluetooth devices.
+ */
+
+/* Command and Response IDs */
+#define sl_bt_cmd_cs_test_start_id                                   0x005a0020
+#define sl_bt_rsp_cs_test_start_id                                   0x005a0020
+
+/**
+ * @brief Defines tone extension for ABR test
+ */
+typedef enum
+{
+  sl_bt_cs_test_tone_extension_both_without      = 0x0, /**< (0x0) Initiator and
+                                                             Reflector tones
+                                                             sent without tone
+                                                             extension */
+  sl_bt_cs_test_tone_extension_reflector_without = 0x1, /**< (0x1) Initiator
+                                                             tone sent with
+                                                             extension;
+                                                             Reflector tone sent
+                                                             without extension */
+  sl_bt_cs_test_tone_extension_initiator_without = 0x2, /**< (0x2) Initiator
+                                                             tone sent without
+                                                             extension;
+                                                             Reflector tone sent
+                                                             with extension */
+  sl_bt_cs_test_tone_extension_both_with         = 0x3, /**< (0x3) Initiator and
+                                                             Reflector tones
+                                                             sent with extension */
+  sl_bt_cs_test_tone_extension_round_robin       = 0x4  /**< (0x4) Loop through
+                                                             values 0x00 to 0x03 */
+} sl_bt_cs_test_tone_extension_t;
+
+/**
+ * @brief This defines sounding sequence marker for ABR test
+ */
+typedef enum
+{
+  sl_bt_cs_test_sounding_sequence_marker_1           = 0x0, /**< (0x0) Use
+                                                                 0b0011 as the
+                                                                 Sounding
+                                                                 Sequence marker */
+  sl_bt_cs_test_sounding_sequence_marker_2           = 0x1, /**< (0x1) Use
+                                                                 0b1100 as the
+                                                                 Sounding
+                                                                 Sequence marker */
+  sl_bt_cs_test_sounding_sequence_marker_round_robin = 0x2  /**< (0x2) Loop
+                                                                 through 0b0011
+                                                                 and 0b1100 */
+} sl_bt_cs_test_sounding_sequence_marker_t;
+
+/***************************************************************************//**
+ *
+ * Start a single ABR procedure using the given configuration. The reflector
+ * must be initialized before starting the initiator. To stop an ongoing test,
+ * use the @ref sl_bt_test_dtm_end command.
+ *
+ * @param[in] main_mode_type Enum @ref sl_bt_cs_mode_t. Main mode type. Values :
+ *     - <b>sl_bt_cs_mode_calibration (0x0):</b> Frequency offset and timing
+ *       calibration measurement
+ *     - <b>sl_bt_cs_mode_rtt (0x1):</b> Round Trip Time (RTT) measurement
+ *     - <b>sl_bt_cs_mode_pbr (0x2):</b> Phase-Based Ranging (PBR) measurement
+ *     - <b>sl_bt_cs_mode_pbr_and_rtt (0x3):</b> PBR and RTT measurement
+ * @param[in] sub_mode_type Enum @ref sl_bt_cs_mode_t. Sub mode type. Values:
+ *     - <b>sl_bt_cs_mode_calibration (0x0):</b> Frequency offset and timing
+ *       calibration measurement
+ *     - <b>sl_bt_cs_mode_rtt (0x1):</b> Round Trip Time (RTT) measurement
+ *     - <b>sl_bt_cs_mode_pbr (0x2):</b> Phase-Based Ranging (PBR) measurement
+ *     - <b>sl_bt_cs_mode_pbr_and_rtt (0x3):</b> PBR and RTT measurement
+ * @param[in] main_mode_repetition Number of main mode steps taken from the end
+ *   of the last ABR subevent to be repeated at the beginning of the current ABR
+ *   subevent directly after the last Mode 0 step of that event.
+ *     - Range: 0 to 3
+ * @param[in] mode_calibration_steps Number of calibration mode steps to be
+ *   included at the beginning of the test ABR subevent
+ *     - Range: 1 to 3
+ * @param[in] role Enum @ref sl_bt_cs_role_t. Role during ABR procedure Values:
+ *     - <b>sl_bt_cs_role_initiator (0x0):</b> The device will initiate the
+ *       procedure
+ *     - <b>sl_bt_cs_role_reflector (0x1):</b> The device will reciprocate
+ *       transmission
+ * @param[in] rtt_type Enum @ref sl_bt_cs_rtt_type_t. RTT payload type used in
+ *   the ABR procedure Values:
+ *     - <b>sl_bt_cs_rtt_type_coarse (0x0):</b> RTT Coarse
+ *     - <b>sl_bt_cs_rtt_type_fractional_96_bit_sounding (0x2):</b> RTT
+ *       Fractional with 96-bit Sounding Sequence
+ * @param[in] cs_sync_phy Enum @ref sl_bt_gap_phy_t. Used PHY for ABR SYNC
+ *   exchanges during a procedure Values:
+ *     - <b>sl_bt_gap_phy_1m (0x1):</b> 1M PHY
+ *     - <b>sl_bt_gap_phy_2m (0x2):</b> 2M PHY
+ *     - <b>sl_bt_gap_phy_coded (0x4):</b> Coded PHY, 125k (S=8) or 500k (S=2)
+ *     - <b>sl_bt_gap_phy_any (0xff):</b> Any PHYs the device supports
+ * @param[in] antenna_selection Antenna Identifier to be used for RTT packets
+ *     - Range: 1 to 4
+ * @param[in] subevent_len ABR subevent length in units of microseconds.
+ * @param[in] subevent_interval Interval between the start of two consecutive
+ *   ABR events. Units: 0.625 ms.
+ *     - Value: 0x0000. Single ABR subevent
+ * @param[in] tx_power Transmit power level for the transmission. Units: dBm.
+ *     - Range: -127 to +20
+ *     - Value: 0x7E. Set transmitter to minimum transmit power level
+ *     - Value: 0x7F. Set transmitter to maximum transmit power level
+ * @param[in] t_ip1_time Idle time in microseconds between the RTT packets
+ *     - Values: 10, 20, 30, 40, 50, 60, 80 or 145
+ * @param[in] t_ip2_time Interlude time in microseconds between the ABR tones
+ *     - Values: 10, 20, 30, 40, 50, 60, 80 or 145
+ * @param[in] t_fcs_time Time in microseconds for frequency changes
+ *     - Values: 15, 20, 30, 40, 50, 60, 80, 100, 120 or 150
+ * @param[in] t_pm_time Time in microseconds for the phase measurement period of
+ *   the ABR tones
+ *     - Values: 10, 20 or 40
+ * @param[in] t_sw_time Time in microseconds for the antenna switch period of
+ *   the ABR tones
+ *     - Values: 0, 1, 2, 4 or 10
+ * @param[in] tone_antenna_config Antenna Configuration Index used during
+ *   antenna switching
+ *     - Range: 0 to 7
+ * @param[in] companion_signal_state Enum @ref
+ *   sl_bt_cs_companion_signal_status_t. Enable or disable status of the
+ *   companion signal. Values:
+ *     - <b>sl_bt_cs_companion_signal_status_disable (0x0):</b> The companion
+ *       signal is disabled
+ *     - <b>sl_bt_cs_companion_signal_status_enable (0x1):</b> The companion
+ *       signal is enabled
+ * @param[in] drbg_nonce Antenna Configuration Index used during antenna
+ *   switching
+ *     - Range: 0 to 7
+ * @param[in] override_config Configuration of the parameters in
+ *   override_parameters
+ *     - Bit 0: The channel sequence for the subevent is determined by the
+ *       values of channel map repetition, channel length, and channel
+ *       parameters.
+ *     - Bit 2: The number of main mode ABR steps to be executed before a sub
+ *       mode ABR step during the ABR procedure is determined by the value of
+ *       main mode steps parameter.
+ *     - Bit 3: The transmission of tone extensions within each Mode 2 or Mode 3
+ *       step is determined by the value of T_PM_Tone_Ext parameter.
+ *     - Bit 4: The Tone antenna permutation index for each Mode 2 or Mode 3
+ *       step is determined by the value of Tone_Antenna_Permutation parameter.
+ *     - Bit 5: The ABR Access Address of all packets sent by the initiator is
+ *       determined by ABR_SYNC_AA_Initiator parameter. The ABR Access Address
+ *       of all packets sent by the reflector is determined by
+ *       ABR_SYNC_AA_Reflector parameter.
+ *   B
+ *     - Bit 6: The Marker positions for each ABR SYNC packet with a marker is
+ *       determined by the value of SS_Marker1_Position and SS_Marker2_Position
+ *       parameters.
+ *     - Bit 7: The Marker value for each marker within a ABR SYNC packet is
+ *       determined by SS_Marker_Value parameter.
+ *     - Bit 8: The payload of the ABR SYNC packet is determined by the value of
+ *       ABR_SYNC_Payload_Pattern parameter.
+ *     - Bit 10: Stable Phase test
+ * @param[in] override_parameters_len Length of data in @p override_parameters
+ * @param[in] override_parameters Variable set of parameters which are present
+ *   dependent on the bits set in the override config parameter.
+ *     - Bit 0: channel_map_repetition, channel_length and channel
+ *     - Bit 2: main_mode_steps
+ *     - Bit 3: t_pm_tone_ext
+ *     - Bit 4: tone_antenna_permutation
+ *     - Bit 5: aa_initiator and aa_reflector
+ *     - Bit 6: ss_marker1_position and ss_marker2_position
+ *     - Bit 7: ss_marker_value
+ *     - Bit 8: ABR_SYNC_Payload_Pattern and ABR_SYNC_User_Payload
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ * @b Events
+ *   - @ref sl_bt_evt_cs_result - Triggered when local controller has results to
+ *     report for every ABR subevent within the ABR procedure
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_cs_test_start(uint8_t main_mode_type,
+                                uint8_t sub_mode_type,
+                                uint8_t main_mode_repetition,
+                                uint8_t mode_calibration_steps,
+                                uint8_t role,
+                                uint8_t rtt_type,
+                                uint8_t cs_sync_phy,
+                                uint8_t antenna_selection,
+                                const sl_bt_cs_subevent_length_t *subevent_len,
+                                uint16_t subevent_interval,
+                                int8_t tx_power,
+                                uint8_t t_ip1_time,
+                                uint8_t t_ip2_time,
+                                uint8_t t_fcs_time,
+                                uint8_t t_pm_time,
+                                uint8_t t_sw_time,
+                                uint8_t tone_antenna_config,
+                                uint8_t companion_signal_state,
+                                uint16_t drbg_nonce,
+                                uint16_t override_config,
+                                size_t override_parameters_len,
+                                const uint8_t* override_parameters);
+
+/** @} */ // end addtogroup sl_bt_cs_test
+
+/**
  * @addtogroup sl_bt_l2cap L2CAP Connection Oriented Channels
  * @{
  *
@@ -9534,8 +13123,8 @@ sl_status_t sl_bt_coex_get_counters(uint8_t reset,
  *
  * The Simplified Protocol/Service Multiplexer (SPSM) of a channel specifies the
  * protocol or services the channel implements. It can be a value for a fixed
- * service assigned by the Bluetooth SIG or a dynamically allocated value and
- * used with services defined in the GATT Server. The dynamically assigned value
+ * service assigned by the Bluetooth SIG or a dynamically-allocated value and
+ * used with services defined in the GATT Server. The dynamically-assigned value
  * may be used to support multiple implementations of a particular protocol. See
  * the Bluetooth core specification for more details. The application specifies
  * the SPSM value in a channel open request in the @p spsm parameter of the @ref
@@ -9686,7 +13275,7 @@ PACKSTRUCT( struct sl_bt_evt_l2cap_le_channel_open_request_s
   uint8_t  connection; /**< The connection handle */
   uint16_t spsm;       /**< The protocol/services implemented by the peer
                             channel endpoint */
-  uint16_t cid;        /**< The channel identifier */
+  uint16_t cid;        /**< The channel identifier on the local device */
   uint16_t max_sdu;    /**< The Maximum Service Data Unit size of the peer
                             channel endpoint */
   uint16_t max_pdu;    /**< The maximum PDU payload size of the peer channel
@@ -9694,6 +13283,7 @@ PACKSTRUCT( struct sl_bt_evt_l2cap_le_channel_open_request_s
   uint16_t credit;     /**< The initial credit value of the peer channel
                             endpoint, i.e., number of PDUs that the local
                             channel endpoint can send */
+  uint16_t remote_cid; /**< The channel identifier on the peer device */
 });
 
 typedef struct sl_bt_evt_l2cap_le_channel_open_request_s sl_bt_evt_l2cap_le_channel_open_request_t;
@@ -9721,7 +13311,7 @@ PACKSTRUCT( struct sl_bt_evt_l2cap_le_channel_open_response_s
 {
   uint8_t  connection; /**< The Bluetooth connection handle on which the
                             response is received */
-  uint16_t cid;        /**< The channel identifier */
+  uint16_t cid;        /**< The channel identifier on the local device */
   uint16_t max_sdu;    /**< The Maximum Service Data Unit size of the peer
                             channel endpoint */
   uint16_t max_pdu;    /**< The maximum PDU payload size of the peer channel
@@ -9740,6 +13330,7 @@ PACKSTRUCT( struct sl_bt_evt_l2cap_le_channel_open_response_s
                             value indicates the connection request was refused
                             by the peer device and other parameters of this
                             event must be ignored. */
+  uint16_t remote_cid; /**< The channel identifier on the peer device */
 });
 
 typedef struct sl_bt_evt_l2cap_le_channel_open_response_s sl_bt_evt_l2cap_le_channel_open_response_t;
@@ -9883,9 +13474,9 @@ typedef struct sl_bt_evt_l2cap_command_rejected_s sl_bt_evt_l2cap_command_reject
  *
  * @b Events
  *   - @ref sl_bt_evt_l2cap_le_channel_open_response - Triggered when an LE
- *     credit based connection response has been received in response to this
+ *     credit-based connection response has been received in response to this
  *     command.
- *   - @ref sl_bt_evt_l2cap_channel_closed - Triggered when a LE credit based
+ *   - @ref sl_bt_evt_l2cap_channel_closed - Triggered when an LE credit-based
  *     connection response has not been received within 30 seconds after this
  *     command has been issued.
  *
@@ -10169,7 +13760,7 @@ sl_status_t sl_bt_cte_transmitter_disable_connectionless_cte(uint8_t handle);
  *     - <b>1:</b> AoD CTE with 1 us slots
  *     - <b>2:</b> AoD CTE with 2 us slots
  * @param[in] cte_count The number of CTEs to be transmitted in each extended
- *   advertising interval. Currently only cte_count = 1 is supported.
+ *   advertising interval. Currently, only cte_count = 1 is supported.
  * @param[in] switching_pattern_len Length of data in @p switching_pattern
  * @param[in] switching_pattern Antenna switching pattern. Antennas will be
  *   switched in this order with the antenna switch pins during CTE. If the CTE
@@ -10403,11 +13994,44 @@ PACKSTRUCT( struct sl_bt_evt_cte_receiver_silabs_iq_report_s
 {
   uint16_t   status;          /**< Status of CTE IQ sampling */
   bd_addr    address;         /**< Bluetooth address of the remote device */
-  uint8_t    address_type;    /**< Advertiser address type. Values:
+  uint8_t    address_type;    /**< Enum @ref sl_bt_gap_address_type_t.
+
+                                   Advertiser address type.
+
+                                   If the application does not include the
+                                   bluetooth_feature_use_accurate_api_address_types
+                                   component, @p address_type uses the following
+                                   values:
                                      - <b>0:</b> Public address
                                      - <b>1:</b> Random address
                                      - <b>255:</b> No address provided
-                                       (anonymous advertising) */
+                                       (anonymous advertising)
+
+                                   If the application includes the
+                                   bluetooth_feature_use_accurate_api_address_types
+                                   component, @p address_type uses enum @ref
+                                   sl_bt_gap_address_type_t values:
+                                     - <b>sl_bt_gap_public_address (0x0):</b>
+                                       Public device address
+                                     - <b>sl_bt_gap_static_address (0x1):</b>
+                                       Static device address
+                                     - <b>sl_bt_gap_random_resolvable_address
+                                       (0x2):</b> Resolvable private random
+                                       address
+                                     - <b>sl_bt_gap_random_nonresolvable_address
+                                       (0x3):</b> Non-resolvable private random
+                                       address
+                                     - <b>sl_bt_gap_anonymous_address
+                                       (0xff):</b> No address provided
+                                       (anonymous advertising)
+                                     - <b>sl_bt_gap_public_address_resolved_from_rpa
+                                       (0x4):</b> Public identity address
+                                       resolved from a resolvable private
+                                       address (RPA)
+                                     - <b>sl_bt_gap_static_address_resolved_from_rpa
+                                       (0x5):</b> Static identity address
+                                       resolved from a resolvable private
+                                       address (RPA) */
   uint8_t    phy;             /**< The PHY on which the packet is received.
                                      - <b>1:</b> 1M PHY
                                      - <b>2:</b> 2M PHY */
@@ -10593,7 +14217,19 @@ sl_status_t sl_bt_cte_receiver_set_sync_cte_type(uint8_t sync_cte_type);
  *
  * @b Events
  *   - @ref sl_bt_evt_sync_transfer_received - Triggered after synchronization
- *     transfer is received for a periodic advertising train.
+ *     transfer is received for a periodic advertising train that does not have
+ *     subevents or response slots. This event is used only when the application
+ *     does not include bluetooth_feature_periodic_sync or
+ *     bluetooth_feature_pawr_sync components.
+ *   - @ref sl_bt_evt_periodic_sync_transfer_received - If the application
+ *     includes the bluetooth_feature_periodic_sync or
+ *     bluetooth_feature_pawr_sync component, triggered after synchronization
+ *     transfer is received for a periodic advertising train that does not have
+ *     subevents or response slots.
+ *   - @ref sl_bt_evt_pawr_sync_transfer_received - If the application includes
+ *     the bluetooth_feature_pawr_sync component, triggered after
+ *     synchronization transfer is received for a Periodic Advertising with
+ *     Responses (PAwR) train.
  *
  ******************************************************************************/
 sl_status_t sl_bt_cte_receiver_set_default_sync_receive_parameters(uint8_t mode,
@@ -10674,7 +14310,19 @@ sl_status_t sl_bt_cte_receiver_set_default_sync_receive_parameters(uint8_t mode,
  *
  * @b Events
  *   - @ref sl_bt_evt_sync_transfer_received - Triggered after synchronization
- *     transfer is received for a periodic advertising train.
+ *     transfer is received for a periodic advertising train that does not have
+ *     subevents or response slots. This event is used only when the application
+ *     does not include bluetooth_feature_periodic_sync or
+ *     bluetooth_feature_pawr_sync components.
+ *   - @ref sl_bt_evt_periodic_sync_transfer_received - If the application
+ *     includes the bluetooth_feature_periodic_sync or
+ *     bluetooth_feature_pawr_sync component, triggered after synchronization
+ *     transfer is received for a periodic advertising train that does not have
+ *     subevents or response slots.
+ *   - @ref sl_bt_evt_pawr_sync_transfer_received - If the application includes
+ *     the bluetooth_feature_pawr_sync component, triggered after
+ *     synchronization transfer is received for a Periodic Advertising with
+ *     Responses (PAwR) train.
  *
  ******************************************************************************/
 sl_status_t sl_bt_cte_receiver_set_sync_receive_parameters(uint8_t connection,
@@ -10964,6 +14612,7 @@ PACKSTRUCT( struct sl_bt_msg {
     sl_bt_evt_system_resource_exhausted_t                        evt_system_resource_exhausted; /**< Data field for system resource_exhausted event*/
     sl_bt_evt_system_external_signal_t                           evt_system_external_signal; /**< Data field for system external_signal event*/
     sl_bt_evt_system_soft_timer_t                                evt_system_soft_timer; /**< Data field for system soft_timer event*/
+    sl_bt_evt_resource_status_t                                  evt_resource_status; /**< Data field for resource status event*/
     sl_bt_evt_advertiser_timeout_t                               evt_advertiser_timeout; /**< Data field for advertiser timeout event*/
     sl_bt_evt_advertiser_scan_request_t                          evt_advertiser_scan_request; /**< Data field for advertiser scan_request event*/
     sl_bt_evt_periodic_advertiser_status_t                       evt_periodic_advertiser_status; /**< Data field for periodic_advertiser status event*/
@@ -10974,6 +14623,15 @@ PACKSTRUCT( struct sl_bt_msg {
     sl_bt_evt_sync_transfer_received_t                           evt_sync_transfer_received; /**< Data field for sync transfer_received event*/
     sl_bt_evt_sync_data_t                                        evt_sync_data; /**< Data field for sync data event*/
     sl_bt_evt_sync_closed_t                                      evt_sync_closed; /**< Data field for sync closed event*/
+    sl_bt_evt_periodic_sync_opened_t                             evt_periodic_sync_opened; /**< Data field for periodic_sync opened event*/
+    sl_bt_evt_periodic_sync_transfer_received_t                  evt_periodic_sync_transfer_received; /**< Data field for periodic_sync transfer_received event*/
+    sl_bt_evt_periodic_sync_report_t                             evt_periodic_sync_report; /**< Data field for periodic_sync report event*/
+    sl_bt_evt_pawr_sync_opened_t                                 evt_pawr_sync_opened; /**< Data field for pawr_sync opened event*/
+    sl_bt_evt_pawr_sync_transfer_received_t                      evt_pawr_sync_transfer_received; /**< Data field for pawr_sync transfer_received event*/
+    sl_bt_evt_pawr_sync_subevent_report_t                        evt_pawr_sync_subevent_report; /**< Data field for pawr_sync subevent_report event*/
+    sl_bt_evt_pawr_advertiser_subevent_data_request_t            evt_pawr_advertiser_subevent_data_request; /**< Data field for pawr_advertiser subevent_data_request event*/
+    sl_bt_evt_pawr_advertiser_subevent_tx_failed_t               evt_pawr_advertiser_subevent_tx_failed; /**< Data field for pawr_advertiser subevent_tx_failed event*/
+    sl_bt_evt_pawr_advertiser_response_report_t                  evt_pawr_advertiser_response_report; /**< Data field for pawr_advertiser response_report event*/
     sl_bt_evt_connection_opened_t                                evt_connection_opened; /**< Data field for connection opened event*/
     sl_bt_evt_connection_parameters_t                            evt_connection_parameters; /**< Data field for connection parameters event*/
     sl_bt_evt_connection_phy_status_t                            evt_connection_phy_status; /**< Data field for connection phy_status event*/
@@ -10981,8 +14639,9 @@ PACKSTRUCT( struct sl_bt_msg {
     sl_bt_evt_connection_get_remote_tx_power_completed_t         evt_connection_get_remote_tx_power_completed; /**< Data field for connection get_remote_tx_power_completed event*/
     sl_bt_evt_connection_tx_power_t                              evt_connection_tx_power; /**< Data field for connection tx_power event*/
     sl_bt_evt_connection_remote_tx_power_t                       evt_connection_remote_tx_power; /**< Data field for connection remote_tx_power event*/
-    sl_bt_evt_connection_closed_t                                evt_connection_closed; /**< Data field for connection closed event*/
     sl_bt_evt_connection_remote_used_features_t                  evt_connection_remote_used_features; /**< Data field for connection remote_used_features event*/
+    sl_bt_evt_connection_data_length_t                           evt_connection_data_length; /**< Data field for connection data_length event*/
+    sl_bt_evt_connection_closed_t                                evt_connection_closed; /**< Data field for connection closed event*/
     sl_bt_evt_gatt_mtu_exchanged_t                               evt_gatt_mtu_exchanged; /**< Data field for gatt mtu_exchanged event*/
     sl_bt_evt_gatt_service_t                                     evt_gatt_service; /**< Data field for gatt service event*/
     sl_bt_evt_gatt_characteristic_t                              evt_gatt_characteristic; /**< Data field for gatt characteristic event*/
@@ -10996,6 +14655,7 @@ PACKSTRUCT( struct sl_bt_msg {
     sl_bt_evt_gatt_server_characteristic_status_t                evt_gatt_server_characteristic_status; /**< Data field for gatt_server characteristic_status event*/
     sl_bt_evt_gatt_server_execute_write_completed_t              evt_gatt_server_execute_write_completed; /**< Data field for gatt_server execute_write_completed event*/
     sl_bt_evt_gatt_server_indication_timeout_t                   evt_gatt_server_indication_timeout; /**< Data field for gatt_server indication_timeout event*/
+    sl_bt_evt_gatt_server_notification_tx_completed_t            evt_gatt_server_notification_tx_completed; /**< Data field for gatt_server notification_tx_completed event*/
     sl_bt_evt_test_dtm_completed_t                               evt_test_dtm_completed; /**< Data field for test dtm_completed event*/
     sl_bt_evt_sm_passkey_display_t                               evt_sm_passkey_display; /**< Data field for sm passkey_display event*/
     sl_bt_evt_sm_passkey_request_t                               evt_sm_passkey_request; /**< Data field for sm passkey_request event*/
@@ -11006,6 +14666,10 @@ PACKSTRUCT( struct sl_bt_msg {
     sl_bt_evt_external_bondingdb_data_request_t                  evt_external_bondingdb_data_request; /**< Data field for external_bondingdb data_request event*/
     sl_bt_evt_external_bondingdb_data_t                          evt_external_bondingdb_data; /**< Data field for external_bondingdb data event*/
     sl_bt_evt_external_bondingdb_data_ready_t                    evt_external_bondingdb_data_ready; /**< Data field for external_bondingdb data_ready event*/
+    sl_bt_evt_cs_security_enable_complete_t                      evt_cs_security_enable_complete; /**< Data field for cs security_enable_complete event*/
+    sl_bt_evt_cs_config_complete_t                               evt_cs_config_complete; /**< Data field for cs config_complete event*/
+    sl_bt_evt_cs_procedure_enable_complete_t                     evt_cs_procedure_enable_complete; /**< Data field for cs procedure_enable_complete event*/
+    sl_bt_evt_cs_result_t                                        evt_cs_result; /**< Data field for cs result event*/
     sl_bt_evt_l2cap_le_channel_open_request_t                    evt_l2cap_le_channel_open_request; /**< Data field for l2cap le_channel_open_request event*/
     sl_bt_evt_l2cap_le_channel_open_response_t                   evt_l2cap_le_channel_open_response; /**< Data field for l2cap le_channel_open_response event*/
     sl_bt_evt_l2cap_channel_data_t                               evt_l2cap_channel_data; /**< Data field for l2cap channel_data event*/
@@ -11117,10 +14781,16 @@ static inline sl_bt_msg_t* sl_bt_get_command_response()
 void sl_bt_priority_handle(void);
 
 /**
- * Signals stack that external event has happened. Signals can be used to report
- * status change from interrupt context or from other threads to application.
- * Signals are bits that are automatically cleared after application has been
- * notified.
+ * @brief Signal the Bluetooth stack that an external event has happened.
+ *
+ * Signals can be used to report status changes from interrupt context or from
+ * other threads to application. Signals are bits that are automatically cleared
+ * after application has been notified.
+ *
+ * If the Platform Core Interrupt API has been configured to use the
+ * CORE_ATOMIC_METHOD_BASEPRI as the implementation method of atomic sections,
+ * this function must not be called from an interrupt handler with a priority
+ * higher than CORE_ATOMIC_BASE_PRIORITY_LEVEL.
  *
  * @param signals is a bitmask defining active signals that are reported back to
  *   the application by system_external_signal-event.

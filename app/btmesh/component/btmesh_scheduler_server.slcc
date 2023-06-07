@@ -5,9 +5,14 @@ description: >
   Used to support the control and reporting functionality of a node that can store
   a schedule. It has a corresponding Scheduler Setup Server model which is present
   in the same element.
+
+  This is a No-Code component.
 category: "Bluetooth Mesh|Models|Time and Scenes"
 quality: "production"
 root_path: "app/btmesh/common/btmesh_scheduler_server"
+tag:
+  - No-Code
+
 config_file:
   - path: "config/sl_btmesh_scheduler_server_config.h"
   - path: btmesh_scheduler_server.dcd

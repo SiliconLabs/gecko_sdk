@@ -85,6 +85,10 @@ include:
       - path: iot_test_ble_hal_kpi.h
       - path: iot_test_ble_hal_stress_test.h
     condition: ["aws_tests_defs"]
+  - path: util/third_party/aws_iot_libs/libraries/c_sdk/standard/ble/include
+    file_list:
+      - path: iot_ble_config_defaults.h
+    condition: ["aws_tests_defs"]
 
   # Demo related includes
   - path: util/third_party/aws_iot_libs/libraries/abstractions/ble_hal/include
@@ -104,6 +108,8 @@ include:
       - path: iot_ble_device_information.h
       - path: iot_ble_mqtt_serialize.h
       - path: iot_ble_mqtt_transport.h
+      - path: iot_ble_mqtt_transport_config.h
+      - path: iot_ble_config_defaults.h
     condition: ["aws_demos_defs"]
   - path: util/third_party/aws_iot_libs/libraries/c_sdk/standard/ble/src
     file_list:
@@ -114,22 +120,15 @@ include:
       - path: iot_serializer.h
       - path: iot_json_utils.h
     condition: ["aws_demos_defs"]
-    
 
 config_file:
   - path: util/third_party/aws_iot_libs/vendors/siliconlabs/boards/all/ports/ble/config/sl_bt_hal_config.h
     file_id: sl_bt_hal_config
-    # Test related configs
+  # Test related configs
   - path: util/third_party/aws_iot_libs/vendors/siliconlabs/boards/all/aws_tests/config_files/iot_ble_config.h
-    condition: ["aws_tests_defs"]
-  - path: util/third_party/aws_iot_libs/libraries/c_sdk/standard/ble/include/iot_ble_config_defaults.h 
     condition: ["aws_tests_defs"]
   # Demo related configs
   - path: util/third_party/aws_iot_libs/vendors/siliconlabs/boards/all/aws_demos/config_files/iot_ble_config.h
-    condition: ["aws_demos_defs"]
-  - path: util/third_party/aws_iot_libs/libraries/c_sdk/standard/ble/include/iot_ble_mqtt_transport_config.h 
-    condition: ["aws_demos_defs"]
-  - path: util/third_party/aws_iot_libs/libraries/c_sdk/standard/ble/include/iot_ble_config_defaults.h 
     condition: ["aws_demos_defs"]
 
 provides:

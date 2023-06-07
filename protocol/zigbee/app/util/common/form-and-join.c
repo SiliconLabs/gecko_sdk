@@ -37,8 +37,9 @@
 #include "stack/include/error.h"
 #include "hal/hal.h"
 
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #include "zigbee_stack_callback_dispatcher.h"
 #include "zigbee_app_framework_callback.h"
 #ifdef SL_CATALOG_ZIGBEE_NETWORK_FIND_PRESENT
@@ -47,19 +48,6 @@
 #define RADIO_TX_CALLBACK
 #endif
 #endif
-#else // !UC_BUILD
-#include "plugin/serial/serial.h"
-#ifdef EMBER_AF_PLUGIN_NETWORK_FIND_SUB_GHZ
-#define SL_CATALOG_ZIGBEE_NETWORK_FIND_SUB_GHZ_PRESENT
-#endif
-#ifdef EMBER_AF_PLUGIN_NETWORK_FIND
-#define SL_CATALOG_ZIGBEE_NETWORK_FIND_PRESENT
-#include "app/framework/plugin/network-find/network-find.h"
-#ifdef EMBER_AF_PLUGIN_NETWORK_FIND_RADIO_TX_CALLBACK
-#define RADIO_TX_CALLBACK
-#endif
-#endif
-#endif // UC_BUILD
 
 #include "form-and-join.h"
 #include "form-and-join-adapter.h"
@@ -69,9 +57,7 @@
 #if defined RADIO_TX_CALLBACK
   #define GET_PRO2PLUS_RADIO_TX_POWER(chanPg)   emberAfPluginNetworkFindGetRadioPowerForChannelCallback(chanPg)
 #elif defined SL_CATALOG_ZIGBEE_NETWORK_FIND_SUB_GHZ_PRESENT
-#if UC_BUILD
 #include "network-find-sub-ghz-config.h"
-#endif // UC_BUILD
   #define GET_PRO2PLUS_RADIO_TX_POWER(chanPg)   EMBER_AF_PLUGIN_NETWORK_FIND_SUB_GHZ_RADIO_TX_POWER
 #else
 // The radio power options are defined in the Network Find plugin, which may
@@ -144,15 +130,15 @@ static uint8_t networkCount;    // The number of NetworkInfo records.
 
 #ifdef SCAN_DEBUG_PRINT_ENABLE
 // define this if printing messages -- note serial port used is 1
-   #define SCAN_DEBUG_MSG(x, y) emberSerialPrintf(1, x, y); emberSerialWaitSend(1)
-   #define SCAN_DEBUG(x) emberSerialPrintf(1, x); emberSerialWaitSend(1)
+   #define SCAN_DEBUG_MSG(x, y) sl_zigbee_core_debug_print(x, y); emberSerialWaitSend(1)
+   #define SCAN_DEBUG(x) sl_zigbee_core_debug_print(x); emberSerialWaitSend(1)
 
-   #define SCAN_DEBUG_XPAN_PRINT(xpan)                            \
-  do {                                                            \
-    (void) emberSerialPrintf(1, "%x%x%x%x%x%x%x%x",               \
-                             xpan[0], xpan[1], xpan[2], xpan[3],  \
-                             xpan[4], xpan[5], xpan[6], xpan[7]); \
-    (void) emberSerialWaitSend(1);                                \
+   #define SCAN_DEBUG_XPAN_PRINT(xpan)                              \
+  do {                                                              \
+    sl_zigbee_core_debug_print("%x%x%x%x%x%x%x%x",                  \
+                               xpan[0], xpan[1], xpan[2], xpan[3],  \
+                               xpan[4], xpan[5], xpan[6], xpan[7]); \
+    (void) emberSerialWaitSend(1);                                  \
   } while (false)
 
 #elif defined(EMBER_SCRIPTED_TEST)
@@ -298,7 +284,7 @@ static void energyScanComplete(void)
         currentPage++;
         SCAN_DEBUG_MSG("%p on page ", "Continue energy scan");
         SCAN_DEBUG_MSG("%d\n", currentPage);
-        if (startScanForUnusedPanId((((uint32_t)currentPage) << EMBER_MAX_CHANNELS_PER_PAGE) | emAfGetSearchForUnusedNetworkChannelMask(currentPage),
+        if (startScanForUnusedPanId((((uint32_t)currentPage) << EMBER_MAX_CHANNELS_PER_PAGE) | sli_zigbee_af_get_unused_network_channel_mask(currentPage),
                                     scanDurationCache) == EMBER_SUCCESS) {
           return;
         }
@@ -419,7 +405,6 @@ static void startPanIdScan(void)
 
 // Form a network using one of the unused PAN IDs.  If we got unlucky we
 // pick some more and try again.
-#ifdef UC_BUILD
 static void panIdScanComplete(void)
 {
   uint8_t i;
@@ -444,30 +429,6 @@ static void panIdScanComplete(void)
 
   startPanIdScan();     // Start over with new candidates.
 }
-#else
-static void panIdScanComplete(void)
-{
-  uint8_t i;
-
-  for (i = 0; i < NUM_PAN_ID_CANDIDATES; i++) {
-    if (panIdCandidates[i] != 0xFFFF) {
-      const EmberPanId panId = panIdCandidates[i];
-      emberFormAndJoinCleanup(EMBER_SUCCESS);
-      emberAfUnusedPanIdFoundCallback(panId, channelCache);
-      return;
-    }
-  }
-
-  // XXX: Do we care this could keep happening forever?
-  // In practice there couldn't be as many PAN IDs heard that
-  // conflict with ALL our randomly selected set of candidate PANs.
-  // But in theory we could get the same random set of numbers
-  // (more likely due to a bug) and we could hear the same set of
-  // PAN IDs that conflict with our random set.
-
-  startPanIdScan();     // Start over with new candidates.
-}
-#endif // UC_BUILD
 
 #ifdef SL_CATALOG_ZIGBEE_NETWORK_FIND_SUB_GHZ_PRESENT
 static EmberStatus startSecondInterface(void)
@@ -497,7 +458,7 @@ static EmberStatus startSecondInterface(void)
     emberAfAppPrintln("Error 0x%x", status);
   }
 
-  emAfSecondaryInterfaceFormedCallback(status);
+  sli_zigbee_af_secondary_interface_formed_callback(status);
   return status;
 }
 #endif
@@ -575,8 +536,7 @@ EmberStatus emberScanForNextJoinableNetwork(void)
 //------------------------------------------------------------------------------
 // Callbacks
 
-#ifdef UC_BUILD
-void emAfPluginFormAndJoinScanCompleteCallback(uint8_t channel, EmberStatus status)
+void sli_zigbee_af_form_and_join_scan_complete_callback(uint8_t channel, EmberStatus status)
 {
   if (!emberFormAndJoinIsScanning()) {
     return;
@@ -614,54 +574,12 @@ void emAfPluginFormAndJoinScanCompleteCallback(uint8_t channel, EmberStatus stat
       break;
   }
 }
-#else
-bool emberFormAndJoinScanCompleteHandler(uint8_t channel, EmberStatus status)
-{
-  if (!emberFormAndJoinIsScanning()) {
-    return false;
-  }
-
-  if (FORM_AND_JOIN_ENERGY_SCAN != formAndJoinScanType) {
-    // This scan is an Active Scan.
-    // Active Scans potentially report transmit failures through this callback.
-    if (EMBER_SUCCESS != status) {
-      // The Active Scan is still in progress.  This callback is informing us
-      // about a failure to transmit the beacon request on this channel.
-      // If necessary we could save this failing channel number and start
-      // another Active Scan on this channel later (after this current scan is
-      // complete).
-      return false;
-    }
-  }
-
-  switch (formAndJoinScanType) {
-    case FORM_AND_JOIN_ENERGY_SCAN:
-      energyScanComplete();
-      break;
-
-    case FORM_AND_JOIN_PAN_ID_SCAN:
-      panIdScanComplete();
-      break;
-
-    case FORM_AND_JOIN_JOINABLE_SCAN:
-      formAndJoinScanType = FORM_AND_JOIN_NEXT_NETWORK;
-      emberScanForNextJoinableNetwork();
-      break;
-
-    default:
-      // MISRA requires default case.
-      break;
-  }
-  return true;
-}
-#endif // UC_BUILD
 
 // We are either looking for PAN IDs or for joinable networks.  In the first
 // case we just check the found PAN ID against our list of candidates.
-#ifdef UC_BUILD
-void emAfPluginFormAndJoinNetworkFoundCallback(EmberZigbeeNetwork *networkFound,
-                                               uint8_t lqi,
-                                               int8_t rssi)
+void sli_zigbee_af_form_and_join_network_found_callback(EmberZigbeeNetwork *networkFound,
+                                                        uint8_t lqi,
+                                                        int8_t rssi)
 {
   uint8_t i;
 
@@ -703,59 +621,9 @@ void emAfPluginFormAndJoinNetworkFoundCallback(EmberZigbeeNetwork *networkFound,
       break;
   }
 }
-#else
-bool emberFormAndJoinNetworkFoundHandler(EmberZigbeeNetwork *networkFound,
-                                         uint8_t lqi,
-                                         int8_t rssi)
-{
-  uint8_t i;
-
-  SCAN_DEBUG_MSG("SCAN: nwk found ch %d, ", networkFound->channel);
-  SCAN_DEBUG_MSG("panID 0x%2x, xpan: ", networkFound->panId);
-  SCAN_DEBUG_XPAN_PRINT(networkFound->extendedPanId);
-  SCAN_DEBUG_MSG(", lqi %d", lqi);
-  SCAN_DEBUG_MSG(", profile: %d", networkFound->stackProfile);
-  SCAN_DEBUG_MSG(", pjoin: %d", networkFound->allowingJoin);
-  SCAN_DEBUG("\n");
-
-  switch (formAndJoinScanType) {
-    case FORM_AND_JOIN_PAN_ID_SCAN:
-      for (i = 0; i < NUM_PAN_ID_CANDIDATES; i++) {
-        if (panIdCandidates[i] == networkFound->panId) {
-          panIdCandidates[i] = 0xFFFF;
-        }
-      }
-      break;
-
-    case FORM_AND_JOIN_JOINABLE_SCAN:
-      // check for a beacon with permit join on...
-      if (networkFound->allowingJoin
-          // ...the same stack profile as this application...
-          && networkFound->stackProfile == formAndJoinStackProfile()
-          && (// ...and ignore the Extended PAN ID, or...
-            ignoreExtendedPanId
-            // ...a matching Extended PAN ID
-            || (MEMCOMPARE(extendedPanIdCache,
-                           networkFound->extendedPanId,
-                           EXTENDED_PAN_ID_SIZE) == 0))) {
-        saveNetwork(networkFound, lqi, rssi);
-        SCAN_DEBUG(": MATCH\r\n");
-      } else {
-        SCAN_DEBUG(": NO match\r\n");
-      }
-      break;
-
-    default:
-      // MISRA requires default case.
-      break;
-  }
-  return emberFormAndJoinIsScanning();
-}
-#endif // UC_BUILD
 
 // Just remember the result.
-#ifdef UC_BUILD
-void emAfPluginFormAndJoinEnergyScanResultCallback(uint8_t channel, int8_t maxRssiValue)
+void sli_zigbee_af_form_and_join_energy_scan_result_callback(uint8_t channel, int8_t maxRssiValue)
 {
   if (!emberFormAndJoinIsScanning()) {
     return;
@@ -766,7 +634,7 @@ void emAfPluginFormAndJoinEnergyScanResultCallback(uint8_t channel, int8_t maxRs
 
 #ifdef SL_CATALOG_ZIGBEE_NETWORK_FIND_PRESENT
   if (emberAfPluginNetworkFindGetEnableScanningAllChannelsCallback()
-      && !emAfIsCurrentSearchForUnusedNetworkScanningAllChannels()
+      && !sli_zigbee_af_is_current_search_for_unused_network_scanning_all_channels()
       && maxRssiValue > emberAfPluginNetworkFindGetEnergyThresholdForChannelCallback(channel)) {
     SCAN_DEBUG(", not suitable (above cut-off value)");
     SCAN_DEBUG("\r\n");
@@ -777,49 +645,13 @@ void emAfPluginFormAndJoinEnergyScanResultCallback(uint8_t channel, int8_t maxRs
   addCandidate(channel, maxRssiValue);
   SCAN_DEBUG("\r\n");
 }
-#else
-bool emberFormAndJoinEnergyScanResultHandler(uint8_t channel, int8_t maxRssiValue)
-{
-  if (emberFormAndJoinIsScanning()) {
-    SCAN_DEBUG_MSG("SCAN: found energy %d dBm on ", maxRssiValue);
-    SCAN_DEBUG_MSG("channel 0x%x", channel);
 
-#ifdef SL_CATALOG_ZIGBEE_NETWORK_FIND_PRESENT
-    if (emberAfPluginNetworkFindGetEnableScanningAllChannelsCallback()
-        && !emAfIsCurrentSearchForUnusedNetworkScanningAllChannels()
-        && maxRssiValue > emberAfPluginNetworkFindGetEnergyThresholdForChannelCallback(channel)) {
-      SCAN_DEBUG(", not suitable (above cut-off value)");
-    } else
-#endif
-    {
-      addCandidate(channel, maxRssiValue);
-    }
-
-    SCAN_DEBUG("\r\n");
-    return true;
-  }
-  return false;
-}
-#endif // UC_BUILD
-
-#ifdef UC_BUILD
-void emAfPluginFormAndJoinUnusedPanIdFoundCallback(EmberPanId panId, uint8_t channel)
+void sli_zigbee_af_form_and_join_unused_pan_id_found_callback(EmberPanId panId, uint8_t channel)
 {
   if (emberFormAndJoinIsScanning()) {
     emberFormAndJoinCleanup(EMBER_SUCCESS);
   }
 }
-#else
-bool emberFormAndJoinUnusedPanIdFoundHandler(EmberPanId panId, uint8_t channel)
-{
-  if (emberFormAndJoinIsScanning()) {
-    emberFormAndJoinCleanup(EMBER_SUCCESS);
-    emberAfUnusedPanIdFoundCallback(panId, channel);
-    return(true);
-  }
-  return(false);
-}
-#endif // UC_BUILD
 
 //------------------------------------------------------------------------------
 // Helper functions

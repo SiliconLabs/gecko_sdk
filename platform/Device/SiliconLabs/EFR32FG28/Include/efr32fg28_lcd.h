@@ -676,6 +676,10 @@ typedef struct {
 #define _LCD_UPDATECTRL_LOADADDR_SEGD1WR     0x00000004UL                               /**< Mode SEGD1WR for LCD_UPDATECTRL             */
 #define _LCD_UPDATECTRL_LOADADDR_SEGD2WR     0x00000005UL                               /**< Mode SEGD2WR for LCD_UPDATECTRL             */
 #define _LCD_UPDATECTRL_LOADADDR_SEGD3WR     0x00000006UL                               /**< Mode SEGD3WR for LCD_UPDATECTRL             */
+#define _LCD_UPDATECTRL_LOADADDR_SEGD4WR     0x00000007UL                               /**< Mode SEGD4WR for LCD_UPDATECTRL             */
+#define _LCD_UPDATECTRL_LOADADDR_SEGD5WR     0x00000008UL                               /**< Mode SEGD5WR for LCD_UPDATECTRL             */
+#define _LCD_UPDATECTRL_LOADADDR_SEGD6WR     0x00000009UL                               /**< Mode SEGD6WR for LCD_UPDATECTRL             */
+#define _LCD_UPDATECTRL_LOADADDR_SEGD7WR     0x0000000AUL                               /**< Mode SEGD7WR for LCD_UPDATECTRL             */
 #define LCD_UPDATECTRL_LOADADDR_DEFAULT      (_LCD_UPDATECTRL_LOADADDR_DEFAULT << 13)   /**< Shifted mode DEFAULT for LCD_UPDATECTRL     */
 #define LCD_UPDATECTRL_LOADADDR_BACTRLWR     (_LCD_UPDATECTRL_LOADADDR_BACTRLWR << 13)  /**< Shifted mode BACTRLWR for LCD_UPDATECTRL    */
 #define LCD_UPDATECTRL_LOADADDR_AREGAWR      (_LCD_UPDATECTRL_LOADADDR_AREGAWR << 13)   /**< Shifted mode AREGAWR for LCD_UPDATECTRL     */
@@ -684,6 +688,10 @@ typedef struct {
 #define LCD_UPDATECTRL_LOADADDR_SEGD1WR      (_LCD_UPDATECTRL_LOADADDR_SEGD1WR << 13)   /**< Shifted mode SEGD1WR for LCD_UPDATECTRL     */
 #define LCD_UPDATECTRL_LOADADDR_SEGD2WR      (_LCD_UPDATECTRL_LOADADDR_SEGD2WR << 13)   /**< Shifted mode SEGD2WR for LCD_UPDATECTRL     */
 #define LCD_UPDATECTRL_LOADADDR_SEGD3WR      (_LCD_UPDATECTRL_LOADADDR_SEGD3WR << 13)   /**< Shifted mode SEGD3WR for LCD_UPDATECTRL     */
+#define LCD_UPDATECTRL_LOADADDR_SEGD4WR      (_LCD_UPDATECTRL_LOADADDR_SEGD4WR << 13)   /**< Shifted mode SEGD4WR for LCD_UPDATECTRL     */
+#define LCD_UPDATECTRL_LOADADDR_SEGD5WR      (_LCD_UPDATECTRL_LOADADDR_SEGD5WR << 13)   /**< Shifted mode SEGD5WR for LCD_UPDATECTRL     */
+#define LCD_UPDATECTRL_LOADADDR_SEGD6WR      (_LCD_UPDATECTRL_LOADADDR_SEGD6WR << 13)   /**< Shifted mode SEGD6WR for LCD_UPDATECTRL     */
+#define LCD_UPDATECTRL_LOADADDR_SEGD7WR      (_LCD_UPDATECTRL_LOADADDR_SEGD7WR << 13)   /**< Shifted mode SEGD7WR for LCD_UPDATECTRL     */
 
 /* Bit fields for LCD FRAMERATE */
 #define _LCD_FRAMERATE_RESETVALUE            0x00000000UL                               /**< Default value for LCD_FRAMERATE             */

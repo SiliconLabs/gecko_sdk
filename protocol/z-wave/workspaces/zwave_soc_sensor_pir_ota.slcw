@@ -1,0 +1,16 @@
+label: ZWave_SoC_SensorPIR_Solution
+description: >
+  Demonstrates passive infrared (PIR) sensor application combined with OTA bootloader. 
+  The Z-Wave certified passive infrared (PIR) sensor application shows 
+  a presence/movement detector implementation for controlling other devices 
+  and for sending notifications.
+quality: production
+project:
+  - path: ../Apps/zwave_soc_sensor_pir/zwave_soc_sensor_pir.slcp
+    id: application
+    output: app
+  - path: ../UCBootLoader/bootloader-storage-internal-single-512k_ota.slcp
+    id: bootloader
+    output: boot
+post_build:
+  profile: zwave_soc_sensor_pir_ws_postbuild

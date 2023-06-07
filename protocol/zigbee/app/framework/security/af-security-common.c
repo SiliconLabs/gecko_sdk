@@ -26,11 +26,11 @@
 //------------------------------------------------------------------------------
 bool emberAfClearLinkKeyTableUponFormingOrJoining = true;
 
-const EmberAfSecurityProfileData emAfSecurityProfileData[] = {
+const EmberAfSecurityProfileData sli_zigbee_af_security_profile_data[] = {
   #include "security-profile-data.h"
 };
 
-#if (!defined(UC_BUILD) || defined(SL_CATALOG_CLI_PRESENT))
+#if (defined(SL_CATALOG_CLI_PRESENT))
 static const EmberKeyData unSetKey = DUMMY_KEY;
 
 // This routine sets the keys from values previously set on the CLI.
@@ -60,7 +60,7 @@ void getNetworkKeyFromCli(EmberKeyData* returnData)
 
 #endif
 
-void emAfClearLinkKeyTable(void)
+void sli_zigbee_af_clear_link_key_table(void)
 {
 #if EMBER_KEY_TABLE_SIZE
   if (emberAfClearLinkKeyTableUponFormingOrJoining) {
@@ -70,14 +70,14 @@ void emAfClearLinkKeyTable(void)
 #endif
 }
 
-const EmberAfSecurityProfileData *emAfGetCurrentSecurityProfileData(void)
+const EmberAfSecurityProfileData *sli_zigbee_af_get_current_security_profile_data(void)
 {
   uint8_t i;
-  for (i = 0; i < COUNTOF(emAfSecurityProfileData); i++) {
-    if (emAfProIsCurrentNetwork()
-        && (emAfCurrentZigbeeProNetwork->securityProfile
-            == emAfSecurityProfileData[i].securityProfile)) {
-      return &emAfSecurityProfileData[i];
+  for (i = 0; i < COUNTOF(sli_zigbee_af_security_profile_data); i++) {
+    if (sli_zigbee_af_pro_is_current_network()
+        && (sli_zigbee_af_current_zigbee_pro_network->securityProfile
+            == sli_zigbee_af_security_profile_data[i].securityProfile)) {
+      return &sli_zigbee_af_security_profile_data[i];
     }
   }
   return NULL;
@@ -86,10 +86,10 @@ const EmberAfSecurityProfileData *emAfGetCurrentSecurityProfileData(void)
 bool emberAfIsCurrentSecurityProfileSmartEnergy(void)
 {
 #ifdef EMBER_AF_HAS_SECURITY_PROFILE_SE
-  return (emAfProIsCurrentNetwork()
-          && ((emAfCurrentZigbeeProNetwork->securityProfile
+  return (sli_zigbee_af_pro_is_current_network()
+          && ((sli_zigbee_af_current_zigbee_pro_network->securityProfile
                == EMBER_AF_SECURITY_PROFILE_SE_TEST)
-              || (emAfCurrentZigbeeProNetwork->securityProfile
+              || (sli_zigbee_af_current_zigbee_pro_network->securityProfile
                   == EMBER_AF_SECURITY_PROFILE_SE_FULL)));
 #else
   return false;

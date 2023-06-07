@@ -25,8 +25,6 @@ source:
     unless: [device_has_eusart]
   - path: sl_wsrcp_eusart.c
     condition: [device_has_eusart]
-  - path: sl_wsrcp_crc.h
-  - path: sl_wsrcp_crc.c
 
 template_contribution:
   - name: component_catalog

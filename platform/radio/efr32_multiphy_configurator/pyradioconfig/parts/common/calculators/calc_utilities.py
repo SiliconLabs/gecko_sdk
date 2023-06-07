@@ -44,7 +44,7 @@ class CALC_Utilities(ICalculator):
         
         
 
-    def frac2exp(self, max_m, frac):
+    def frac2exp(self, max_m, frac, up=False):
         """
         convert fraction into mantissa and exponent format
 
@@ -57,8 +57,13 @@ class CALC_Utilities(ICalculator):
             return 0, 0
 
         best_diff = 99e9
+        if up:
+            m_values = xrange(1, max_m, 1)
+        else:
+            m_values = xrange(max_m, 0, -1)
+
         # start with the highest allowed mantissa and find best m, e pair
-        for m in xrange(max_m, 0, -1):
+        for m in m_values:
             e = py2round(math.log(frac / m, 2))
             diff = abs(frac - m * 2**e)
 

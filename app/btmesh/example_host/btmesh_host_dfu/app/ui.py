@@ -41,6 +41,7 @@ logger = logging.getLogger(__name__)
 
 
 class BtmeshDfuAppSpecName(enum.Enum):
+    BDADDRSPEC = enum.auto()
     NODESPEC = enum.auto()
     ELEMSPEC = enum.auto()
     MDLSPEC = enum.auto()
@@ -95,6 +96,12 @@ class BtmeshDfuAppUI:
         "pub_retx_count": AppUIColumnInfo(header="Pub ReTxCnt", default=False),
         "pub_retx_int_ms": AppUIColumnInfo(header="Pub ReTxInt", default=False),
     }
+
+    BDADDRSPEC_HELP = (
+        f"The <bdaddrspec> identifies BLE address and it can be 6 hex character "
+        f"pairs separated by colons. "
+        f"For example: C0:01:CA:FE:BA:BE."
+    )
 
     NODESPEC_HELP = (
         f"The <nodespec> identifies nodes and it can be UUID, primary address, "
@@ -312,9 +319,9 @@ class BtmeshDfuAppUI:
             node_dict["prim_addr"] = f"0x{node.prim_addr:04X}"
             node_dict["elem_count"] = node.elem_count
             node_dict["name"] = node.name
-            node_dict["cid"] = node.dcd.cid if node.dcd else None
-            node_dict["pid"] = node.dcd.pid if node.dcd else None
-            node_dict["vid"] = node.dcd.vid if node.dcd else None
+            node_dict["cid"] = f"0x{node.dcd.cid:04X}" if node.dcd else None
+            node_dict["pid"] = f"0x{node.dcd.pid:04X}" if node.dcd else None
+            node_dict["vid"] = f"0x{node.dcd.vid:04X}" if node.dcd else None
             node_dict["crpl"] = node.dcd.crpl if node.dcd else None
             node_dict["relay"] = node.dcd.relay if node.dcd else None
             node_dict["proxy"] = node.dcd.proxy if node.dcd else None
@@ -436,6 +443,14 @@ class BtmeshDfuAppUI:
                         for mdl_name in bind_mdl_names:
                             self.info(f"        - {mdl_name}")
 
+    def node_str(self, node: Node) -> str:
+        node_format = app_cfg.ui.node_format
+        return node_format.format(
+            name=node.name,
+            uuid=node.uuid.hex(),
+            prim_addr=node.prim_addr,
+        )
+
     def elem_str(self, elem_addr: int) -> str:
         elem_format = app_cfg.ui.elem_format
         node = app_db.btmesh_db.get_node_by_elem_addr(elem_addr)
@@ -475,6 +490,43 @@ class BtmeshDfuAppUI:
     def nodes_input(self, prompt, node_list, level=logging.INFO):
         nodespecs = app_ui.input(prompt, level=level)
         return self.parse_nodespecs(nodespecs, node_list)
+
+    def parse_bdaddrspecs(
+        self, bdaddrspecs, filter_duplicates: bool = True
+    ) -> List[str]:
+        sel_bd_addr_list = []
+        if isinstance(bdaddrspecs, str):
+            bdaddrspec_list = self.split_text(bdaddrspecs)
+        else:
+            bdaddrspec_list = bdaddrspecs
+        for bdaddrspec in bdaddrspec_list:
+            bdaddrspec = bdaddrspec.strip()
+            hex_match = re.fullmatch(btmesh.util.BDADDR_PATTERN, bdaddrspec)
+            if not hex_match:
+                raise BtmeshDfuAppParseSpecError(
+                    f"Invalid bdaddrspec ({bdaddrspec}).",
+                    spec_name=BtmeshDfuAppSpecName.BDADDRSPEC,
+                    spec_value=bdaddrspec,
+                )
+            sel_bd_addr_list.append(bdaddrspec)
+        if filter_duplicates:
+            # Remove duplicate entries from the list
+            # Note: Dictionaries are ordered from Python 3.7 and the required
+            # python version is 3.7 as well so the dict can be considered ordered
+            sel_bd_addr_list = list(dict.fromkeys(sel_bd_addr_list))
+        return sel_bd_addr_list
+
+    def parse_bdaddrspec(self, bdaddrspec) -> str:
+        sel_bd_addr_list = self.parse_bdaddrspecs(bdaddrspec)
+        if 1 < len(sel_bd_addr_list):
+            raise BtmeshDfuAppParseSpecError(
+                f"The bdaddrspec is ambiguous. It is resolved to multiple "
+                f"BLE addresses but it is expected to be a single "
+                f"one. ({sel_bd_addr_list})",
+                spec_name=BtmeshDfuAppSpecName.BDADDRSPEC,
+                spec_value=bdaddrspec,
+            )
+        return sel_bd_addr_list[0]
 
     def parse_nodespecs(
         self, nodespecs, node_list: Sequence[Node], filter_duplicates: bool = True

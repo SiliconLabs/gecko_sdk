@@ -111,6 +111,10 @@ extern void sl_rail_util_ieee801254_on_rail_event(RAIL_Handle_t railHandle, RAIL
 extern void sl_bt_ll_coex_handle_events(RAIL_Events_t events);
 #endif //SL_CATALOG_RAIL_UTIL_COEX_PRESENT
 
+#ifndef SL_BOARD_NAME
+#define SL_BOARD_NAME "?"
+#endif//SL_BOARD_NAME
+
 // External control and status variables
 Counters_t counters = { 0 };
 bool receiveModeEnabled = false;
@@ -149,7 +153,6 @@ volatile uint32_t ccaSuccesses = 0;
 volatile uint32_t sentAckPackets = 0;
 
 // Globals accessed in an interrupt context declared volatile.
-static volatile bool receivingPacket = false;
 volatile RAIL_Events_t lastTxStatus = 0;
 volatile RAIL_Events_t lastTxAckStatus = 0;
 volatile uint32_t failPackets = 0;
@@ -229,6 +232,7 @@ static union {
   RAIL_FIFO_ALIGNMENT_TYPE align[SL_RAIL_TEST_TX_BUFFER_SIZE / RAIL_FIFO_ALIGNMENT];
   uint8_t fifo[SL_RAIL_TEST_TX_BUFFER_SIZE];
 } txFifo;
+uint16_t offsetInTxFifo = 0;
 
 uint8_t ackData[RAIL_AUTOACK_MAX_LENGTH] = {
   0x0F, 0x0E, 0xF1, 0xE2, 0xD3, 0xC4, 0xB5, 0x0F,
@@ -353,8 +357,8 @@ void sl_rail_test_internal_app_init(void)
   responsePrintEnable(printingEnabled);
   // Print app initialization information.
   RAILTEST_PRINTF("\n");
-  responsePrint("reset", "App:%s,Built:%s,Cause:0x%x",
-                SL_RAIL_TEST_APP_NAME, buildDateTime, resetCause);
+  responsePrint("reset", "App:%s,Built:%s,Cause:0x%x,Brd:%s",
+                SL_RAIL_TEST_APP_NAME, buildDateTime, resetCause, SL_BOARD_NAME);
   printChipInfo();
   getPti(NULL);
 
@@ -681,7 +685,6 @@ void sl_rail_util_on_event(RAIL_Handle_t railHandle, RAIL_Events_t events)
     counters.preambleDetect++;
   }
   if (events & (RAIL_EVENT_RX_SYNC1_DETECT | RAIL_EVENT_RX_SYNC2_DETECT)) {
-    receivingPacket = true;
     counters.syncDetect++;
     rxFifoPrep();
     if (printRxFreqOffsetData) {
@@ -729,7 +732,6 @@ void sl_rail_util_on_event(RAIL_Handle_t railHandle, RAIL_Events_t events)
                 | RAIL_EVENT_RX_FRAME_ERROR
                 | RAIL_EVENT_RX_PACKET_RECEIVED)) {
     // All of the above events cause a packet to not be received
-    receivingPacket = false;
     if (events & RAIL_EVENT_RX_PACKET_RECEIVED) {
       RAILCb_RxPacketReceived(railHandle);
 #if RAIL_IEEE802154_SUPPORTS_G_MODESWITCH && defined(WISUN_MODESWITCHPHRS_ARRAY_SIZE)
@@ -771,6 +773,9 @@ void sl_rail_util_on_event(RAIL_Handle_t railHandle, RAIL_Events_t events)
       counters.frameError++;
       RAILCb_RxPacketAborted(railHandle);
     }
+  }
+  if (events & RAIL_EVENT_RX_TIMEOUT) {
+    RAILCb_RxTimeout(railHandle);
   }
   if (events & RAIL_EVENT_RX_ACK_TIMEOUT) {
     counters.ackTimeout++;
@@ -972,6 +977,7 @@ void processPendingCalibrations(void)
   bool calsInTxMode = inAppMode(TX_N_PACKETS, NULL)
                       | inAppMode(TX_CONTINUOUS, NULL)
                       | inAppMode(TX_STREAM, NULL);
+  bool receivingPacket = RAIL_GetRadioState(railHandle) == RAIL_RF_STATE_RX_ACTIVE;
 
   if (calibrateRadio && (calsInMode | calsInTxMode) && !skipCalibrations && !receivingPacket) {
     RAIL_CalMask_t pendingCals = RAIL_GetPendingCal(railHandle);
@@ -1147,7 +1153,18 @@ void changeChannel(uint32_t i)
       responsePrintError("changeChannel",
                          0xF0,
                          "FATAL, call to RAIL_StartRx() failed (%u)", status);
-      while (1) ;
+      while (1) ; // as desired channel has been validated by RAIL_IsValidChannel(), this is a FATAL error
+    }
+  } else {
+    // If we are not in receive mode, Radio configuration related to selected channel needs to be done
+    // in case of following 802.15.4g option configuration. In that case, FRC dynamic frame length mode is checked
+    // to see if we have loaded a valid PHY supporting dynamic FEC.
+    RAIL_Status_t status = RAIL_PrepareChannel(railHandle, channel);
+    if (status != RAIL_STATUS_NO_ERROR) {
+      responsePrintError("changeChannel",
+                         0xF0,
+                         "FATAL, call to RAIL_PrepareChannel() failed (%u)", status);
+      while (1) ; // as desired channel has been validated by RAIL_IsValidChannel(), this is a FATAL error
     }
   }
 #if RAIL_IEEE802154_SUPPORTS_G_MODESWITCH && defined(WISUN_MODESWITCHPHRS_ARRAY_SIZE)
@@ -1166,6 +1183,11 @@ void changeChannel(uint32_t i)
     modeSwitchState = IDLE;
   }
 #endif
+}
+
+uint8_t *getTxFifoBaseAddress(void)
+{
+  return txFifo.fifo;
 }
 
 void pendPacketTx(void)
@@ -1266,6 +1288,7 @@ void finishTxSequenceIfPending(void)
                     "transmitted:%u,"
                     "lastTxTime:%u,"
                     "timePos:%u,"
+                    "durationUs:%u,"
                     "lastTxStart:%u,"
                     "ccaSuccess:%u,"
                     "failed:%u,"
@@ -1278,6 +1301,7 @@ void finishTxSequenceIfPending(void)
                     sentPackets,
                     previousTxAppendedInfo.timeSent.packetTime,
                     previousTxAppendedInfo.timeSent.timePosition,
+                    previousTxAppendedInfo.timeSent.packetDurationUs,
                     txStartTime,
                     ccaSuccesses,
                     paramFailPackets,
@@ -1337,7 +1361,7 @@ void printPacket(char *cmdName,
   responsePrintStart(cmdName);
   if (packetData != NULL) {
     responsePrintContinue(
-      "len:%d,timeUs:%u,timePos:%u,DurationUs:%u,crc:%s,filterMask:0x%x,rssi:%d,lqi:%d,phy:%d",
+      "len:%d,timeUs:%u,timePos:%u,durationUs:%u,crc:%s,filterMask:0x%x,rssi:%d,lqi:%d,phy:%d",
       packetData->dataLength,
       packetData->appendedInfo.timeReceived.packetTime,
       packetData->appendedInfo.timeReceived.timePosition,
@@ -1372,7 +1396,7 @@ void printPacket(char *cmdName,
   } else {
     responsePrintContinue("len:%d", dataLength);
   }
-  if (data != NULL) {
+  if ((data != NULL) && (dataLength > 0U)) {
     // Manually print out payload bytes iteratively, so that we don't need to
     // reserve a RAM buffer. Finish the response here.
     RAILTEST_PRINTF("{payload:");

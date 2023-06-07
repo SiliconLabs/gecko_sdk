@@ -22,7 +22,7 @@
  * @brief Initializes the prepayment mode table.
  *
  **/
-void emInitPrepaymentModesTable(void);
+void sli_zigbee_af_init_prepayment_modes_table(void);
 
 /**
  * @brief Schedules a prepayment mode at some current or future time.

@@ -92,6 +92,10 @@ static bool add_to_lists(uint8_t endpoint, uint8_t cc)
     case COMMAND_CLASS_SECURITY:
     case COMMAND_CLASS_SECURITY_2:
     case COMMAND_CLASS_SUPERVISION:
+    case COMMAND_CLASS_APPLICATION_STATUS:
+    case COMMAND_CLASS_INCLUSION_CONTROLLER:
+    case COMMAND_CLASS_MULTI_CMD:
+    case COMMAND_CLASS_TIME:
       unsecure_included_cc->cc_list[unsecure_included_cc->list_size++] = cc;
       secure_included_unsecure_cc->cc_list[secure_included_unsecure_cc->list_size++] = cc;
       break;

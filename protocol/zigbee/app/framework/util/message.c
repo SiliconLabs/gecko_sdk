@@ -20,9 +20,7 @@
 #include "app/framework/util/util.h"
 #include "app/framework/util/config.h"
 
-#ifdef UC_BUILD
-#include "sl_signature_decode.h"
-#endif
+#include "app/framework/signature-decode/sl_signature_decode.h"
 
 //------------------------------------------------------------------------------
 
@@ -152,7 +150,6 @@ uint32_t emberAfGetInt(const uint8_t* message,
                        uint16_t msgLen,
                        uint8_t bytes)
 {
-#ifdef UC_BUILD
   // This printout needs to stay here, otherwise `./z run linkkey` test fails.
   // We should rework the test so we can remove this....
   if ((currentIndex + bytes) > msgLen) {
@@ -161,20 +158,6 @@ uint32_t emberAfGetInt(const uint8_t* message,
     return 0;
   }
   return sl_signature_decode_int(message, currentIndex, msgLen, bytes);
-#else
-  uint32_t result = 0;
-  uint8_t i = bytes;
-  if ((currentIndex + bytes) > msgLen) {
-    emberAfDebugPrintln("GetInt, %x bytes short", bytes);
-    emberAfDebugFlush();
-    return 0;
-  }
-  while (i > 0) {
-    result = (result << 8) + message[(currentIndex + i) - 1];
-    i--;
-  }
-  return result;
-#endif
 }
 
 uint32_t emberAfGetInt32u(const uint8_t* message, uint16_t currentIndex, uint16_t msgLen)

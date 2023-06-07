@@ -76,7 +76,7 @@ static uint16_t BITMASK_COUNT;
 #endif
 
 static uint16_t blocksReceivedBitmask[BITMASK_COUNT_CONST];
-static EmAfPageRequestClientStatus pageRequestStatus = EM_AF_NO_PAGE_REQUEST;
+static sli_zigbee_af_page_request_client_status pageRequestStatus = EM_AF_NO_PAGE_REQUEST;
 static uint32_t pageRequestOffset = 0;
 
 // For the last page, the number of blocks may be less than MAX_BLOCKS_IN_PAGE
@@ -104,8 +104,8 @@ static uint16_t blocksInThisPage;
 //------------------------------------------------------------------------------
 // Functions
 
-uint32_t emAfInitPageRequestClient(uint32_t offsetForPageRequest,
-                                   uint32_t totalImageSize)
+uint32_t sli_zigbee_af_init_page_request_client(uint32_t offsetForPageRequest,
+                                                uint32_t totalImageSize)
 {
   uint8_t i;
   for (i = 0; i < BITMASK_COUNT; i++) {
@@ -126,12 +126,12 @@ uint32_t emAfInitPageRequestClient(uint32_t offsetForPageRequest,
   return EMBER_AF_PLUGIN_OTA_CLIENT_PAGE_REQUEST_TIMEOUT_MS;
 }
 
-EmAfPageRequestClientStatus emAfGetCurrentPageRequestStatus(void)
+sli_zigbee_af_page_request_client_status sli_zigbee_af_get_current_page_request_status(void)
 {
   return pageRequestStatus;
 }
 
-void emAfPageRequestTimerExpired(void)
+void sli_zigbee_af_page_request_timer_expired(void)
 {
   if (pageRequestStatus == EM_AF_WAITING_PAGE_REQUEST_REPLIES) {
     otaPrintln("Page request timer expired.  Checking for missed blocks.");
@@ -139,12 +139,12 @@ void emAfPageRequestTimerExpired(void)
   }
 }
 
-uint32_t emAfGetPageSize(void)
+uint32_t sli_zigbee_af_get_page_size(void)
 {
   return PAGE_SIZE;
 }
 
-uint32_t emAfGetPageRequestMissedPacketDelayMs(void)
+uint32_t sli_zigbee_af_get_page_request_missed_packet_delay_ms(void)
 {
   return PAGE_REQUEST_MISSED_PACKET_DELAY_MS;
 }
@@ -199,18 +199,18 @@ static bool allBlocksReceived(uint16_t numReceived)
   return (numReceived == blocksInThisPage);
 }
 
-void emAfAbortPageRequest(void)
+void sli_zigbee_af_abort_page_request(void)
 {
   // Note:  Don't zero out the pageRequestOffset so it can be retrieved later.
   pageRequestStatus = EM_AF_NO_PAGE_REQUEST;
 }
 
-uint32_t emAfGetFinishedPageRequestOffset(void)
+uint32_t sli_zigbee_af_get_finished_page_request_offset(void)
 {
   return pageRequestOffset + EMBER_AF_PLUGIN_OTA_CLIENT_PAGE_REQUEST_SIZE;
 }
 
-EmAfPageRequestClientStatus emAfNoteReceivedBlockForPageRequestClient(uint32_t offset)
+sli_zigbee_af_page_request_client_status sli_zigbee_af_note_received_block_for_page_request_client(uint32_t offset)
 {
   uint16_t mask;
   uint16_t smallOffset;
@@ -254,14 +254,14 @@ EmAfPageRequestClientStatus emAfNoteReceivedBlockForPageRequestClient(uint32_t o
 
   if (allBlocksReceived(numBlocksReceived(NULL))) {
     EXTRA_DEBUG(otaPrintln("All blocks received.  Page request complete."));
-    emAfAbortPageRequest();
+    sli_zigbee_af_abort_page_request();
     return EM_AF_PAGE_REQUEST_COMPLETE;
   }
 
   return pageRequestStatus;
 }
 
-EmAfPageRequestClientStatus emAfNextMissedBlockRequestOffset(uint32_t* nextOffset)
+sli_zigbee_af_page_request_client_status sli_zigbee_af_next_missed_block_request_offset(uint32_t* nextOffset)
 {
   uint16_t blocksReceived;
   if (pageRequestStatus != EM_AF_RETRY_MISSED_PACKETS) {
@@ -275,13 +275,13 @@ EmAfPageRequestClientStatus emAfNextMissedBlockRequestOffset(uint32_t* nextOffse
     // If we didn't get ANY blocks after a page request, odds are the
     // OTA server is unreachable.  No point in retrying.
     otaPrintln("All blocks missed.  Server seems unreachable.  Giving up.");
-    emAfAbortPageRequest();
+    sli_zigbee_af_abort_page_request();
     return EM_AF_PAGE_REQUEST_ERROR;
   }
   return pageRequestStatus;
 }
 
-bool emAfHandlingPageRequestClient(void)
+bool sli_zigbee_af_handling_page_request_client(void)
 {
   return handlingPageRequest();
 }
@@ -290,47 +290,47 @@ bool emAfHandlingPageRequestClient(void)
 
 #else  // !defined(EMBER_AF_PLUGIN_OTA_CLIENT_PAGE_REQUEST_SUPPORT)
 
-uint32_t emAfInitPageRequestClient(uint32_t offsetForPageRequest,
-                                   uint32_t totalImageSize)
+uint32_t sli_zigbee_af_init_page_request_client(uint32_t offsetForPageRequest,
+                                                uint32_t totalImageSize)
 {
   return 0;
 }
 
-bool emAfHandlingPageRequestClient(void)
+bool sli_zigbee_af_handling_page_request_client(void)
 {
   return false;
 }
 
-void emAfPageRequestTimerExpired(void)
+void sli_zigbee_af_page_request_timer_expired(void)
 {
 }
 
-EmAfPageRequestClientStatus emAfNoteReceivedBlockForPageRequestClient(uint32_t offset)
-{
-  return EM_AF_PAGE_REQUEST_ERROR;
-}
-
-EmAfPageRequestClientStatus emAfNextMissedBlockRequestOffset(uint32_t* nextOffset)
+sli_zigbee_af_page_request_client_status sli_zigbee_af_note_received_block_for_page_request_client(uint32_t offset)
 {
   return EM_AF_PAGE_REQUEST_ERROR;
 }
 
-EmAfPageRequestClientStatus emAfGetCurrentPageRequestStatus(void)
+sli_zigbee_af_page_request_client_status sli_zigbee_af_next_missed_block_request_offset(uint32_t* nextOffset)
+{
+  return EM_AF_PAGE_REQUEST_ERROR;
+}
+
+sli_zigbee_af_page_request_client_status sli_zigbee_af_get_current_page_request_status(void)
 {
   return EM_AF_NO_PAGE_REQUEST;
 }
 
-uint32_t emAfGetPageRequestMissedPacketDelayMs(void)
+uint32_t sli_zigbee_af_get_page_request_missed_packet_delay_ms(void)
 {
   return 0;
 }
 
-uint32_t emAfGetFinishedPageRequestOffset(void)
+uint32_t sli_zigbee_af_get_finished_page_request_offset(void)
 {
   return 0;
 }
 
-void emAfAbortPageRequest(void)
+void sli_zigbee_af_abort_page_request(void)
 {
 }
 

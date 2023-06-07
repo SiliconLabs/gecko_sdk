@@ -20,9 +20,12 @@
 #include <em_device.h>
 #include <em_ldma.h>
 #include <dmadrv.h>
+#include "sl_component_catalog.h"
 
-#ifdef WISUN_RCP_USE_CPC
+#if defined SL_CATALOG_CPC_SECONDARY_PRESENT
 #include <sl_cpc.h>
+#elif defined SL_CATALOG_IOSTREAM_UART_COMMON_PRESENT
+#include "sl_wsrcp_uart_plt.h"
 #else
 #include "sl_wsrcp_uart.h"
 #endif
@@ -37,8 +40,10 @@ struct sl_wsrcp_app {
     osEventFlagsId_t main_events;
     osThreadId_t main_task;
 
-#ifdef WISUN_RCP_USE_CPC
+#if defined SL_CATALOG_CPC_SECONDARY_PRESENT
     sl_cpc_endpoint_handle_t cpc_ep;
+#elif defined SL_CATALOG_IOSTREAM_UART_COMMON_PRESENT
+    struct sl_wsrcp_uart_plt uart_plt;
 #else
     struct sl_wsrcp_uart uart;
 #endif

@@ -1,7 +1,7 @@
 project_name: rail_soc_simple_trx_auto_ack
 label: "RAIL - SoC Simple TRX with Auto-ACK"
 package: Flex
-description: "This application demonstrates the simplest exchange of TX and ACK (software based) operation between two nodes. Both nodes are capable of sending messages and receiving ACKs. On the WSTK, any button press (PB0/PB1) will send a message. LED0 will toggle on message send and LED1 will toggle on ACK receive. With one click this baremetal sample app can be run on an OS, currently MicriumOS and FreeRTOS is supported."
+description: "This application demonstrates the simplest exchange of TX and ACK (software based) operation between two nodes. Both nodes are capable of sending messages and receiving ACKs. On the WSTK, any button press (PB0/PB1) will send a message. LED0 will toggle on message received and LED1 will toggle on ACK receive. With one click this baremetal sample app can be run on an OS, currently MicriumOS and FreeRTOS is supported."
 category: RAIL Examples
 quality: production
 
@@ -43,6 +43,8 @@ component:
 #----------------- Require list ----------------------
 requires:
   - name: a_radio_config
+  - name: sl_flex_rail_config
+  - name: sl_flex_rail_channel_selector
   - name: sl_simple_rail_os
     condition:
       - "kernel"

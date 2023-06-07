@@ -19,7 +19,7 @@ limitations under the License.
 #include <cstddef>
 #include <cstdint>
 
-#include "tensorflow/lite/micro/micro_error_reporter.h"
+#include "tensorflow/lite/micro/micro_log.h"
 
 namespace tflite {
 MicroContext::MicroContext(MicroAllocator* allocator, const Model* model,
@@ -122,7 +122,7 @@ void MicroContextReportOpError(struct TfLiteContext* context,
                                const char* format, ...) {
   va_list args;
   va_start(args, format);
-  GetMicroErrorReporter()->Report(format, args);
+  Log(format, args);
   va_end(args);
 }
 

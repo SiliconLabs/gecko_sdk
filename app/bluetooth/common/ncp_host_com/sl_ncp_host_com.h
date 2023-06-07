@@ -30,6 +30,11 @@
 #ifndef SL_NCP_HOST_COM_H
 #define SL_NCP_HOST_COM_H
 
+/***********************************************************************************************//**
+ * @addtogroup ncp_host_com
+ * @{
+ **************************************************************************************************/
+
 #include "sl_ncp_host_com_config.h"
 
 /**************************************************************************//**
@@ -53,4 +58,5 @@ int32_t sl_ncp_host_com_read(uint32_t len, uint8_t *data);
 int32_t sl_ncp_host_com_peek(void);
 
 bool sl_ncp_host_is_ok_to_sleep(void);
+/** @} (end addtogroup ncp_host_com) */
 #endif // SL_NCP_HOST_COM_H

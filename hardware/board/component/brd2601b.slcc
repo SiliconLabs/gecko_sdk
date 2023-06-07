@@ -43,7 +43,7 @@
     instance:
     - btn0
     - btn1
-  - id: mx25_flash_shutdown_eusart
+  - id: mx25_flash_shutdown_usart
   - id: bootloader_spi_controller_usart_driver
   - id: bootloader_spi_peripheral_usart_driver
   - id: imu_driver_icm20689
@@ -75,4 +75,4 @@
   - hardware:has:exp_header:spi
   - hardware:has:exp_header:uart
   - hardware:has:exp_header:i2c
-  - hardware:has:imu
+  - hardware:has:imu:icm-20689

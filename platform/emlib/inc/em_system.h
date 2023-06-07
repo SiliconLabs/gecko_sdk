@@ -31,8 +31,8 @@
 #ifndef EM_SYSTEM_H
 #define EM_SYSTEM_H
 
-#include <stdbool.h>
 #include "em_device.h"
+#include "em_system_generic.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -250,7 +250,7 @@ typedef enum {
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)
   systemPartFamilyFlex28 = DEVINFO_PART_FAMILY_FG | (28 << _DEVINFO_PART_FAMILYNUM_SHIFT),  /**< EFR32 Flex Gecko Series 2 Config 8 Value Device Family */
   systemPartFamilyZen28 = DEVINFO_PART_FAMILY_ZG | (28 << _DEVINFO_PART_FAMILYNUM_SHIFT),   /**< EFR32 Zen Gecko Series 2 Config 8 Value Device Family */
-  systemPartFamilyPerl28 = DEVINFO_PART_FAMILY_PG | (28 << _DEVINFO_PART_FAMILYNUM_SHIFT),  /**< EFR32 Perl Gecko Series 2 Config 8 Value Device Family */
+  systemPartFamilyEfm32Pearl28 = DEVINFO_PART_FAMILY_PG | (28 << _DEVINFO_PART_FAMILYNUM_SHIFT),  /**< EFM32 Pearl Gecko Series 2 Config 8 Value Device Family */
 #endif
 /* Deprecated family #defines */
 #if defined(_DEVINFO_PART_DEVICE_FAMILY_G)
@@ -279,16 +279,6 @@ typedef enum {
                                                                   on unprogrammed parts. */
 } SYSTEM_PartFamily_TypeDef;
 
-/** Family security capability. */
-typedef enum {
-  securityCapabilityUnknown, /**< Unknown security capability. */
-  securityCapabilityNA,      /**< Security capability not applicable. */
-  securityCapabilityBasic,   /**< Basic security capability. */
-  securityCapabilityRoT,     /**< Root of Trust security capability. */
-  securityCapabilitySE,      /**< Secure Element security capability. */
-  securityCapabilityVault    /**< Secure Vault security capability. */
-} SYSTEM_SecurityCapability_TypeDef;
-
 /*******************************************************************************
  *******************************   STRUCTS   ***********************************
  ******************************************************************************/
@@ -314,20 +304,12 @@ typedef enum {
 } SYSTEM_FpuAccess_TypeDef;
 #endif
 
-/** DEVINFO calibration address/value pair. */
-typedef struct {
-  uint32_t address;                       /**< Peripheral calibration register address. */
-  uint32_t calValue;                      /**< Calibration value for register at address. */
-}
-SYSTEM_CalAddrVal_TypeDef;
-
 /*******************************************************************************
  *****************************   PROTOTYPES   **********************************
  ******************************************************************************/
 
-void SYSTEM_ChipRevisionGet(SYSTEM_ChipRevision_TypeDef *rev);
-bool SYSTEM_GetCalibrationValue(volatile uint32_t *regAddress);
-SYSTEM_SecurityCapability_TypeDef SYSTEM_GetSecurityCapability(void);
+void                      SYSTEM_ChipRevisionGet(SYSTEM_ChipRevision_TypeDef *rev);
+SYSTEM_PartFamily_TypeDef SYSTEM_GetFamily(void);
 
 #if defined(_DEVINFO_DEVINFOREV_DEVINFOREV_MASK) || defined(_DEVINFO_INFO_DEVINFOREV_MASK)
 /***************************************************************************//**
@@ -363,218 +345,6 @@ __STATIC_INLINE void SYSTEM_FpuAccessModeSet(SYSTEM_FpuAccess_TypeDef accessMode
   SCB->CPACR = (SCB->CPACR & ~(0xFUL << 20)) | (uint32_t)accessMode;
 }
 #endif
-
-/***************************************************************************//**
- * @brief
- *   Get the unique number for this device.
- *
- * @return
- *   Unique number for this device.
- ******************************************************************************/
-__STATIC_INLINE uint64_t SYSTEM_GetUnique(void)
-{
-#if defined (_DEVINFO_EUI64H_MASK)
-  uint32_t tmp = DEVINFO->EUI64L;
-  return (uint64_t)((uint64_t)DEVINFO->EUI64H << 32) | tmp;
-#elif defined(_DEVINFO_UNIQUEH_MASK)
-  uint32_t tmp = DEVINFO->UNIQUEL;
-  return (uint64_t)((uint64_t)DEVINFO->UNIQUEH << 32) | tmp;
-#else
-#error Location of device unique number is not defined.
-#endif
-}
-
-/***************************************************************************//**
- * @brief
- *   Get the production revision for this part.
- *
- * @return
- *   Production revision for this part.
- ******************************************************************************/
-__STATIC_INLINE uint8_t SYSTEM_GetProdRev(void)
-{
-#if defined (_DEVINFO_PART_PROD_REV_MASK)
-  return (uint8_t)((DEVINFO->PART & _DEVINFO_PART_PROD_REV_MASK)
-                   >> _DEVINFO_PART_PROD_REV_SHIFT);
-#elif defined (_DEVINFO_INFO_PRODREV_MASK)
-  return (uint8_t)((DEVINFO->INFO & _DEVINFO_INFO_PRODREV_MASK)
-                   >> _DEVINFO_INFO_PRODREV_SHIFT);
-#else
-#error Location of production revision is not defined.
-#endif
-}
-
-/***************************************************************************//**
- * @brief
- *   Get the SRAM size (in KB).
- *
- * @note
- *   This function retrieves SRAM size by reading the chip device
- *   info structure. If your binary is made for one specific device only,
- *   use SRAM_SIZE instead.
- *
- * @return
- *   Size of internal SRAM (in KB).
- ******************************************************************************/
-__STATIC_INLINE uint16_t SYSTEM_GetSRAMSize(void)
-{
-  uint16_t sizekb;
-
-#if defined(_EFM32_GECKO_FAMILY)
-  /* Early Gecko devices had a bug where SRAM and Flash size were swapped. */
-  if (SYSTEM_GetProdRev() < 5) {
-    sizekb = (DEVINFO->MSIZE & _DEVINFO_MSIZE_FLASH_MASK)
-             >> _DEVINFO_MSIZE_FLASH_SHIFT;
-  }
-#endif
-  sizekb = (uint16_t)((DEVINFO->MSIZE & _DEVINFO_MSIZE_SRAM_MASK)
-                      >> _DEVINFO_MSIZE_SRAM_SHIFT);
-
-#if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_80) && defined(_EFR_DEVICE)
-  /* Do not include EFR32xG1 RAMH. */
-  sizekb--;
-#endif
-
-  return sizekb;
-}
-
-/***************************************************************************//**
- * @brief
- *   Get the flash size (in KB).
- *
- * @note
- *   This function retrieves flash size by reading the chip device
- *   info structure. If your binary is made for one specific device only,
- *   use FLASH_SIZE instead.
- *
- * @return
- *   Size of internal flash (in KB).
- ******************************************************************************/
-__STATIC_INLINE uint16_t SYSTEM_GetFlashSize(void)
-{
-#if defined(_EFM32_GECKO_FAMILY)
-  /* Early Gecko devices had a bug where SRAM and Flash size were swapped. */
-  if (SYSTEM_GetProdRev() < 5) {
-    return (DEVINFO->MSIZE & _DEVINFO_MSIZE_SRAM_MASK)
-           >> _DEVINFO_MSIZE_SRAM_SHIFT;
-  }
-#endif
-  return (uint16_t)((DEVINFO->MSIZE & _DEVINFO_MSIZE_FLASH_MASK)
-                    >> _DEVINFO_MSIZE_FLASH_SHIFT);
-}
-
-/***************************************************************************//**
- * @brief
- *   Get the flash page size in bytes.
- *
- * @note
- *   This function retrieves flash page size by reading the chip device
- *   info structure. If your binary is made for one specific device only,
- *   use FLASH_PAGE_SIZE instead.
- *
- * @return
- *   Page size of internal flash in bytes.
- ******************************************************************************/
-__STATIC_INLINE uint32_t SYSTEM_GetFlashPageSize(void)
-{
-  uint32_t tmp;
-
-#if defined(_SILICON_LABS_32B_SERIES_0)
-
-#if defined(_EFM32_GIANT_FAMILY)
-  if (SYSTEM_GetProdRev() < 18) {
-    /* Early Giant/Leopard devices did not have MEMINFO in DEVINFO. */
-    return FLASH_PAGE_SIZE;
-  }
-#elif defined(_EFM32_ZERO_FAMILY)
-  if (SYSTEM_GetProdRev() < 24) {
-    /* Early Zero devices have an incorrect DEVINFO flash page size */
-    return FLASH_PAGE_SIZE;
-  }
-#endif
-#endif
-
-#if defined(_DEVINFO_MEMINFO_FLASHPAGESIZE_MASK)
-  tmp = (DEVINFO->MEMINFO & _DEVINFO_MEMINFO_FLASHPAGESIZE_MASK)
-        >> _DEVINFO_MEMINFO_FLASHPAGESIZE_SHIFT;
-#elif defined(_DEVINFO_MEMINFO_FLASH_PAGE_SIZE_MASK)
-  tmp = (DEVINFO->MEMINFO & _DEVINFO_MEMINFO_FLASH_PAGE_SIZE_MASK)
-        >> _DEVINFO_MEMINFO_FLASH_PAGE_SIZE_SHIFT;
-#else
-#error Location of flash page size is not defined.
-#endif
-
-  return 1UL << ((tmp + 10UL) & 0x1FUL);
-}
-
-/***************************************************************************//**
- * @brief
- *   Get the MCU part number.
- *
- * @return
- *   The part number of MCU.
- ******************************************************************************/
-__STATIC_INLINE uint16_t SYSTEM_GetPartNumber(void)
-{
-#if defined(_DEVINFO_PART_DEVICENUM_MASK)
-  return (uint16_t)((DEVINFO->PART & _DEVINFO_PART_DEVICENUM_MASK)
-                    >> _DEVINFO_PART_DEVICENUM_SHIFT);
-#elif defined(_DEVINFO_PART_DEVICE_NUMBER_MASK)
-  return (uint16_t)((DEVINFO->PART & _DEVINFO_PART_DEVICE_NUMBER_MASK)
-                    >> _DEVINFO_PART_DEVICE_NUMBER_SHIFT);
-#else
-#error Location of device part number is not defined.
-#endif
-}
-
-/***************************************************************************//**
- * @brief
- *   Get the MCU family identifier.
- *
- * @note
- *   This function retrieves family ID by reading the chip's device info
- *   structure in flash memory. Users can retrieve family ID directly
- *   by reading DEVINFO->PART item and decode with mask and shift
- *   \#defines defined in \<part_family\>_devinfo.h (refer to code
- *   below for details).
- *
- * @return
- *   Family identifier of MCU.
- ******************************************************************************/
-__STATIC_INLINE SYSTEM_PartFamily_TypeDef SYSTEM_GetFamily(void)
-{
-#if defined(_DEVINFO_PART_FAMILY_MASK)
-  return (SYSTEM_PartFamily_TypeDef)
-         ((uint32_t)((DEVINFO->PART & (_DEVINFO_PART_FAMILY_MASK
-                                       | _DEVINFO_PART_FAMILYNUM_MASK))));
-#elif defined(_DEVINFO_PART_DEVICE_FAMILY_MASK)
-  return (SYSTEM_PartFamily_TypeDef)
-         ((uint32_t)((DEVINFO->PART & _DEVINFO_PART_DEVICE_FAMILY_MASK)
-                     >> _DEVINFO_PART_DEVICE_FAMILY_SHIFT));
-#else
-  #error Location of device family name is not defined.
-#endif
-}
-
-/***************************************************************************//**
- * @brief
- *   Get the calibration temperature (in degrees Celsius).
- *
- * @return
- *   Calibration temperature in Celsius.
- ******************************************************************************/
-__STATIC_INLINE uint8_t SYSTEM_GetCalibrationTemperature(void)
-{
-#if defined(_DEVINFO_CAL_TEMP_MASK)
-  return (uint8_t)((DEVINFO->CAL & _DEVINFO_CAL_TEMP_MASK)
-                   >> _DEVINFO_CAL_TEMP_SHIFT);
-#elif defined(_DEVINFO_CALTEMP_TEMP_MASK)
-  return (uint8_t)((DEVINFO->CALTEMP & _DEVINFO_CALTEMP_TEMP_MASK)
-                   >> _DEVINFO_CALTEMP_TEMP_SHIFT);
-#else
-#error Location of calibration temperature is not defined.
-#endif
-}
 
 /** @} (end addtogroup system) */
 

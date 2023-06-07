@@ -60,7 +60,9 @@ typedef enum {
   /// FFN Router
   SL_WISUN_ROUTER = 0,
   /// LFN Router (experimental, for evaluation purposes only)
-  SL_WISUN_LFN = 1
+  SL_WISUN_LFN = 1,
+  /// Border Router
+  SL_WISUN_BORDER_ROUTER = 2
 } sl_wisun_device_type_t;
 
 /// Enumerations for network size
@@ -285,14 +287,14 @@ typedef enum {
   SL_WISUN_JOIN_STATE_CONFIGURE_ROUTING  = 4,
   /// Join state 5: Operational
   SL_WISUN_JOIN_STATE_OPERATIONAL        = 5,
-  /// Join state 4.1: Preferred parent selection
-  SL_WISUN_JOIN_STATE_4_1_PARENT_SELECT  = 41,
-  /// Join state 4.2: DHCP address acquisition
-  SL_WISUN_JOIN_STATE_4_2_DHCP           = 42,
-  /// Join state 4.3: Address registration
-  SL_WISUN_JOIN_STATE_4_3_EARO            = 43,
-  /// Join state 4.4: DAO registration
-  SL_WISUN_JOIN_STATE_4_4_DAO            = 44
+  /// Join state 4: Preferred parent selection
+  SL_WISUN_JOIN_STATE_PARENT_SELECT      = 41,
+  /// Join state 4: DHCP address acquisition
+  SL_WISUN_JOIN_STATE_DHCP               = 42,
+  /// Join state 4: Address registration
+  SL_WISUN_JOIN_STATE_EARO               = 43,
+  /// Join state 4: DAO registration
+  SL_WISUN_JOIN_STATE_DAO                = 44
 } sl_wisun_join_state_t;
 
 /// Enumerations for network update flags
@@ -312,6 +314,16 @@ typedef enum {
   SL_WISUN_PHY_CONFIG_EXPLICIT = 2,
   SL_WISUN_PHY_CONFIG_IDS      = 3
 } sl_wisun_phy_config_type_t;
+
+/// Enumeration for LFN configuration profile
+typedef enum {
+  /// Profile for test usage, best performance but highest power consumption
+  SL_WISUN_LFN_PROFILE_TEST     = 0,
+  /// Profile providing balance between power consumption and performance
+  SL_WISUN_LFN_PROFILE_BALANCED = 1,
+  /// Profile optimized for low power consumption
+  SL_WISUN_LFN_PROFILE_ECO      = 2
+} sl_wisun_lfn_profile_t;
 
 /// Wi-SUN Message API common header
 SL_PACK_START(1)
@@ -387,8 +399,6 @@ typedef struct {
   uint32_t synch_lost;
   /// Number of times a transmission attempt has failed due to lack of timing information.
   uint32_t unknown_neighbor;
-  /// Number of channel transmission retries.
-  uint32_t channel_retry;
 } sl_wisun_statistics_fhss_t;
 
 /// Wi-SUN statistics
@@ -530,6 +540,10 @@ typedef struct {
       uint16_t protocol_id;
       /// Channel ID
       uint16_t channel_id;
+      /// PHY mode ID
+      uint8_t phy_mode_id;
+      /// Reserved, set to zero
+      uint8_t reserved[3];
     } ids;
   } config;
 } sl_wisun_phy_config_t;
@@ -645,6 +659,8 @@ typedef struct {
   /// Parent RSSI In measured RSSI value (0xff if unknown)
   /// Calculated using EWMA specified by Wi-SUN from range of -174 (0) to +80 (254) dBm.
   uint8_t rsl_in;
+  /// Indicate if the device is an LFN. 1 = LFN, 0 = FFN
+  uint8_t is_lfn;
 } SL_ATTRIBUTE_PACKED sl_wisun_neighbor_info_t;
 SL_PACK_END()
 
@@ -663,8 +679,6 @@ typedef enum {
   SL_WISUN_TRACE_GROUP_DNS     = 10,    /// DNS
   SL_WISUN_TRACE_GROUP_RPL     = 11,    /// RPL
   SL_WISUN_TRACE_GROUP_TRIC    = 12,    /// Trickle
-  SL_WISUN_TRACE_GROUP_ND      = 13,    /// Network Discovery
-  SL_WISUN_TRACE_GROUP_RA      = 14,    /// Router Advertisement
   SL_WISUN_TRACE_GROUP_WS      = 15,    /// Wi-SUN Stack
   SL_WISUN_TRACE_GROUP_BOOT    = 16,    /// Wi-SUN Bootstrap
   SL_WISUN_TRACE_GROUP_WSR     = 17,    /// Wi-SUN Router

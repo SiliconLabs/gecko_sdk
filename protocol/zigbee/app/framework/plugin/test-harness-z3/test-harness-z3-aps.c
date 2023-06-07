@@ -18,6 +18,7 @@
 #include "app/framework/include/af.h"
 
 #include "test-harness-z3-core.h"
+#include "stack/include/zigbee-security-manager.h"
 
 // -----------------------------------------------------------------------------
 // Constants
@@ -69,14 +70,9 @@ static EmberKeyData *keys[] = {
   &installCodeKey,
 };
 
-#ifdef UC_BUILD
 sl_zigbee_event_t emberAfPluginTestHarnessZ3ResetKeyEvent;
 #define z3ResetKeyEventControl (&emberAfPluginTestHarnessZ3ResetKeyEvent)
-void emberAfPluginTestHarnessZ3ResetKeyEventHandler(SLXU_UC_EVENT);
-#else
-EmberEventControl emberAfPluginTestHarnessZ3ResetKeyEventControl;
-#define z3ResetKeyEventControl emberAfPluginTestHarnessZ3ResetKeyEventControl
-#endif
+void emberAfPluginTestHarnessZ3ResetKeyEventHandler(sl_zigbee_event_t * event);
 
 static uint8_t mostRecentKeyIndex = 0xFF;
 
@@ -97,11 +93,11 @@ uint32_t emberGetTestHarnessConfigurationOptions(uint8_t commandType,
   return 0;
 }
 
-void emberAfPluginTestHarnessZ3ResetKeyEventHandler(SLXU_UC_EVENT)
+void emberAfPluginTestHarnessZ3ResetKeyEventHandler(sl_zigbee_event_t * event)
 {
   EmberStatus status;
 
-  slxu_zigbee_event_set_inactive(z3ResetKeyEventControl);
+  sl_zigbee_event_set_inactive(z3ResetKeyEventControl);
 
   // Remove the most recently added key.
   if (mostRecentKeyIndex != 0xFF) {
@@ -116,20 +112,27 @@ void emberAfPluginTestHarnessZ3ResetKeyEventHandler(SLXU_UC_EVENT)
 
 static EmberStatus setNextKey(EmberEUI64 partner, bool linkKey, uint8_t keyType)
 {
-  EmberStatus status;
+  sl_status_t status;
+  sl_zb_sec_man_context_t context;
+  sl_zb_sec_man_init_context(&context);
+  context.key_index = 0xFF;
+  MEMMOVE(context.eui64, partner, sizeof(EmberEUI64));
+  context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_APP_LINK;
+  status = sl_zb_sec_man_import_key(&context,
+                                    (keyType > KEY_TYPE_MAX
+                                     ? (sl_zb_sec_man_key_t*) &(keys[KEY_TYPE_MAX])
+                                     : (sl_zb_sec_man_key_t*) &(keys[keyType])));
 
-  status = emberAddOrUpdateKeyTableEntry(partner,
-                                         linkKey,
-                                         (keyType > KEY_TYPE_MAX
-                                          ? keys[KEY_TYPE_MAX]
-                                          : keys[keyType]));
+  // temporary conversion until everything is ported to sl_status_t
+  EmberStatus status_ember = ((status == SL_STATUS_OK) ? EMBER_SUCCESS
+                              : ((status == SL_STATUS_FULL) ? EMBER_TABLE_FULL : EMBER_KEY_TABLE_INVALID_ADDRESS));
 
-  emberAfCorePrintln("setNextKey: status = %X", status);
+  emberAfCorePrintln("setNextKey: status = %X", status_ember);
 
-  mostRecentKeyIndex = emberFindKeyTableEntry(partner, true);
-  slxu_zigbee_event_set_active(z3ResetKeyEventControl);
+  mostRecentKeyIndex = context.key_index;
+  sl_zigbee_event_set_active(z3ResetKeyEventControl);
 
-  return status;
+  return status_ember;
 }
 
 // -----------------------------------------------------------------------------
@@ -137,31 +140,27 @@ static EmberStatus setNextKey(EmberEUI64 partner, bool linkKey, uint8_t keyType)
 
 #ifdef EZSP_HOST
   #define emberSendRemoveDevice(...) EMBER_INVALID_CALL
-  #define emSendApsCommand(...)      EMBER_INVALID_CALL
+  #define sli_zigbee_send_aps_command(...)      EMBER_INVALID_CALL
 #else
 
 // Internal stack API.
-extern bool emSendApsCommand(EmberNodeId destination,
-                             EmberEUI64 longDestination,
-                             EmberMessageBuffer payload,
-                             uint8_t options);
+extern bool sli_zigbee_send_aps_command(EmberNodeId destination,
+                                        EmberEUI64 longDestination,
+                                        EmberMessageBuffer payload,
+                                        uint8_t options);
 
 #endif /* EZSP_HOST */
 
 // plugin test-harness z3 aps aps-remove-device <parentLong:8> <dstLong:8> <options:4>
-void emAfPluginTestHarnessZ3ApsApsRemoveDevice(SL_CLI_COMMAND_ARG)
+void sli_zigbee_af_test_harness_z3_aps_aps_remove_device(SL_CLI_COMMAND_ARG)
 {
   EmberEUI64 parentLong, targetLong;
   EmberNodeId parentShort;
   EmberStatus status = EMBER_SUCCESS;
-#ifdef UC_BUILD
-  uint32_t options = emAfPluginTestHarnessZ3GetSignificantBit(arguments, 2);
-#else
-  uint32_t options = emAfPluginTestHarnessZ3GetSignificantBit(2);
-#endif //UC_BUILD
+  uint32_t options = sli_zigbee_af_test_harness_z3_get_significant_bit(arguments, 2);
 
-  emberCopyBigEndianEui64Argument(0, parentLong);
-  emberCopyBigEndianEui64Argument(1, targetLong);
+  sl_zigbee_copy_eui64_arg(arguments, 0, parentLong, true);
+  sl_zigbee_copy_eui64_arg(arguments, 1, targetLong, true);
 
   switch (options) {
     case BIT32(0):
@@ -192,13 +191,9 @@ void emAfPluginTestHarnessZ3ApsApsRemoveDevice(SL_CLI_COMMAND_ARG)
                      status);
 }
 
-void emAfPluginTestHarnessZ3ApsApsRemoveDeviceConfig(SL_CLI_COMMAND_ARG)
+void sli_zigbee_af_test_harness_z3_aps_aps_remove_device_config(SL_CLI_COMMAND_ARG)
 {
-#ifdef UC_BUILD
-  configApsRemoveDeviceConfigOptions = emAfPluginTestHarnessZ3GetSignificantBit(arguments, 0);
-#else
-  configApsRemoveDeviceConfigOptions = emAfPluginTestHarnessZ3GetSignificantBit(0);
-#endif //UC_BUILD
+  configApsRemoveDeviceConfigOptions = sli_zigbee_af_test_harness_z3_get_significant_bit(arguments, 0);
   emberAfCorePrintln("%p: %p: 0x%X",
                      TEST_HARNESS_Z3_PRINT_NAME,
                      "Remove device configuration",
@@ -207,24 +202,22 @@ void emAfPluginTestHarnessZ3ApsApsRemoveDeviceConfig(SL_CLI_COMMAND_ARG)
 
 // plugin test-harness z3 aps aps-request-key <dstShort:2> <keyType:1>
 // <parentLong:8> <options:4>
-void emAfPluginTestHarnessZ3ApsApsRequestKeyCommand(SL_CLI_COMMAND_ARG)
+void sli_zigbee_af_test_harness_z3_aps_aps_request_key_command(SL_CLI_COMMAND_ARG)
 {
   EmberStatus status = EMBER_INVALID_CALL;
 #ifndef EZSP_HOST
-  EmberNodeId destShort = (EmberNodeId)emberUnsignedCommandArgument(0);
-  uint8_t keyType       = (uint8_t)emberUnsignedCommandArgument(1);
-#ifdef UC_BUILD
-  uint32_t options      = emAfPluginTestHarnessZ3GetSignificantBit(arguments, 3);
-#else
-  uint32_t options      = emAfPluginTestHarnessZ3GetSignificantBit(3);
-#endif //UC_BUILD
+
+  EmberNodeId destShort = sl_cli_get_argument_uint16(arguments, 0);
+  uint8_t keyType       = sl_cli_get_argument_uint8(arguments, 1);
+  uint32_t options      = sli_zigbee_af_test_harness_z3_get_significant_bit(arguments, 3);
+
   EmberEUI64 partnerLong, trustCenterEui64;
   uint8_t frame[10];
   uint8_t *finger = &frame[0];
   EmberMessageBuffer commandBuffer;
   uint8_t apsCommandOptions;
 
-  emberCopyBigEndianEui64Argument(2, partnerLong);
+  sl_zigbee_copy_eui64_arg(arguments, 2, partnerLong, true);
 
   status = emberLookupEui64ByNodeId(EMBER_TRUST_CENTER_NODE_ID, trustCenterEui64);
   if (status != EMBER_SUCCESS) {
@@ -310,10 +303,10 @@ void emAfPluginTestHarnessZ3ApsApsRequestKeyCommand(SL_CLI_COMMAND_ARG)
     goto done;
   }
 
-  status = (emSendApsCommand(destShort,
-                             trustCenterEui64,
-                             commandBuffer,
-                             apsCommandOptions)
+  status = (sli_zigbee_send_aps_command(destShort,
+                                        trustCenterEui64,
+                                        commandBuffer,
+                                        apsCommandOptions)
             ? EMBER_SUCCESS
             : EMBER_ERR_FATAL);
   emberReleaseMessageBuffer(commandBuffer);

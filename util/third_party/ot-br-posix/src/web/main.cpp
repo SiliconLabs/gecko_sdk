@@ -48,7 +48,7 @@
 
 static const char kSyslogIdent[]          = "otbr-web";
 static const char kDefaultInterfaceName[] = "wpan0";
-static const char kDefaultListenAddr[]    = "0.0.0.0";
+static const char kDefaultListenAddr[]    = "::";
 
 std::unique_ptr<otbr::Web::WebServer> sServer(nullptr);
 
@@ -71,9 +71,9 @@ static void PrintVersion(void)
 
 int main(int argc, char **argv)
 {
-    const char * interfaceName  = nullptr;
-    const char * httpListenAddr = nullptr;
-    const char * httpPort       = nullptr;
+    const char  *interfaceName  = nullptr;
+    const char  *httpListenAddr = nullptr;
+    const char  *httpPort       = nullptr;
     otbrLogLevel logLevel       = OTBR_LOG_INFO;
     int          ret            = 0;
     int          opt;

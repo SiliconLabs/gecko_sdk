@@ -38,7 +38,6 @@ EmberStatus emberAfEzspSavePreinstalledCbkeData283k1CommandCallback(void);
 #define CBKE_283K1_DATA_LENGTH \
   (EMBER_CERTIFICATE_283K1_SIZE + EMBER_PUBLIC_KEY_283K1_SIZE + EMBER_PRIVATE_KEY_283K1_SIZE)
 
-#ifndef UC_BUILD
 void emberAfPluginEzspCbkeSetValueCommandCallback(EmberAfPluginEzspValueCommandContext* context);
 void emberAfPluginEzspCbkeConfigurationValueCommandCallback(EmberAfPluginEzspConfigurationValueCommandContext* context);
 
@@ -46,4 +45,3 @@ void emberAfPluginEzspCbkeConfigurationValueCommandCallback(EmberAfPluginEzspCon
 // Framework callbacks
 
 void emberAfPluginEzspCbkePermitHostToNcpFrameCallback(bool *permit);
-#endif  // UC_BUILD

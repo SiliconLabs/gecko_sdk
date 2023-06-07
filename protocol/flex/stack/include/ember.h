@@ -32,10 +32,6 @@
 #ifndef __EMBER_H__
 #define __EMBER_H__
 
-#if !defined(SKIP_API_RENAME)
-#include "api-rename.h"
-#endif
-
 #include "ember-types.h"
 #include "error.h"
 #include "memory-buffer.h"

@@ -31,6 +31,11 @@
 #ifndef SL_SENSOR_GAS_H
 #define SL_SENSOR_GAS_H
 
+/***********************************************************************************************//**
+ * @addtogroup sensor_gas
+ * @{
+ **************************************************************************************************/
+
 #include <stdint.h>
 #include "sl_status.h"
 
@@ -58,4 +63,5 @@ void sl_sensor_gas_deinit(void);
  *****************************************************************************/
 sl_status_t sl_sensor_gas_get(uint16_t *eco2, uint16_t *tvoc);
 
+/** @} (end addtogroup sensor_gas) */
 #endif // SL_SENSOR_GAS_H

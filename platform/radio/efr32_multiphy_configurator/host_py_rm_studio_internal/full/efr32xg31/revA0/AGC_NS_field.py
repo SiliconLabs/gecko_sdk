@@ -334,11 +334,11 @@ class RM_Field_AGC_NS_CTRL0_ADCATTENMODE(Base_RM_Field):
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_AGC_NS_CTRL0_FENOTCHMODESEL(Base_RM_Field):
+class RM_Field_AGC_NS_CTRL0_INRXRSTEN(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_CTRL0_FENOTCHMODESEL, self).__init__(register,
-            'FENOTCHMODESEL', 'AGC_NS.CTRL0.FENOTCHMODESEL', 'read-write',
+        super(RM_Field_AGC_NS_CTRL0_INRXRSTEN, self).__init__(register,
+            'INRXRSTEN', 'AGC_NS.CTRL0.INRXRSTEN', 'read-write',
             u"",
             24, 1)
         self.__dict__['zz_frozen'] = True
@@ -461,6 +461,26 @@ class RM_Field_AGC_NS_CTRL1_CCASWCTRL(Base_RM_Field):
             'CCASWCTRL', 'AGC_NS.CTRL1.CCASWCTRL', 'read-write',
             u"",
             18, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_CTRL1_DISRSTONPREDET(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_CTRL1_DISRSTONPREDET, self).__init__(register,
+            'DISRSTONPREDET', 'AGC_NS.CTRL1.DISRSTONPREDET', 'read-write',
+            u"",
+            19, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_CTRL1_CFLOOPINCREQMODE(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_CTRL1_CFLOOPINCREQMODE, self).__init__(register,
+            'CFLOOPINCREQMODE', 'AGC_NS.CTRL1.CFLOOPINCREQMODE', 'read-write',
+            u"",
+            20, 1)
         self.__dict__['zz_frozen'] = True
 
 
@@ -711,16 +731,6 @@ class RM_Field_AGC_NS_CTRL4_RFPKDSEL(Base_RM_Field):
             'RFPKDSEL', 'AGC_NS.CTRL4.RFPKDSEL', 'read-write',
             u"",
             29, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_CTRL4_FRZPKDEN(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_CTRL4_FRZPKDEN, self).__init__(register,
-            'FRZPKDEN', 'AGC_NS.CTRL4.FRZPKDEN', 'read-write',
-            u"",
-            30, 1)
         self.__dict__['zz_frozen'] = True
 
 
@@ -1104,6 +1114,36 @@ class RM_Field_AGC_NS_IF_GAINUPDATEFRZ(Base_RM_Field):
         self.__dict__['zz_frozen'] = True
 
 
+class RM_Field_AGC_NS_IF_PNATTEN(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_IF_PNATTEN, self).__init__(register,
+            'PNATTEN', 'AGC_NS.IF.PNATTEN', 'read-write',
+            u"",
+            15, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_IF_COLLDETRSSIMAPRE(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_IF_COLLDETRSSIMAPRE, self).__init__(register,
+            'COLLDETRSSIMAPRE', 'AGC_NS.IF.COLLDETRSSIMAPRE', 'read-write',
+            u"",
+            16, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_IF_COLLDETRSSIMASYNC(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_IF_COLLDETRSSIMASYNC, self).__init__(register,
+            'COLLDETRSSIMASYNC', 'AGC_NS.IF.COLLDETRSSIMASYNC', 'read-write',
+            u"",
+            17, 1)
+        self.__dict__['zz_frozen'] = True
+
+
 class RM_Field_AGC_NS_IEN_RSSIVALID(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
@@ -1234,6 +1274,36 @@ class RM_Field_AGC_NS_IEN_GAINUPDATEFRZ(Base_RM_Field):
         self.__dict__['zz_frozen'] = True
 
 
+class RM_Field_AGC_NS_IEN_PNATTEN(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_IEN_PNATTEN, self).__init__(register,
+            'PNATTEN', 'AGC_NS.IEN.PNATTEN', 'read-write',
+            u"",
+            15, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_IEN_COLLDETRSSIMAPRE(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_IEN_COLLDETRSSIMAPRE, self).__init__(register,
+            'COLLDETRSSIMAPRE', 'AGC_NS.IEN.COLLDETRSSIMAPRE', 'read-write',
+            u"",
+            16, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_IEN_COLLDETRSSIMASYNC(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_IEN_COLLDETRSSIMASYNC, self).__init__(register,
+            'COLLDETRSSIMASYNC', 'AGC_NS.IEN.COLLDETRSSIMASYNC', 'read-write',
+            u"",
+            17, 1)
+        self.__dict__['zz_frozen'] = True
+
+
 class RM_Field_AGC_NS_CMD_RSSISTART(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
@@ -1304,6 +1374,16 @@ class RM_Field_AGC_NS_GAINRANGE_HIPWRTHD(Base_RM_Field):
         self.__dict__['zz_frozen'] = True
 
 
+class RM_Field_AGC_NS_GAINRANGE_PNINDEXBORDER(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_GAINRANGE_PNINDEXBORDER, self).__init__(register,
+            'PNINDEXBORDER', 'AGC_NS.GAINRANGE.PNINDEXBORDER', 'read-write',
+            u"",
+            26, 5)
+        self.__dict__['zz_frozen'] = True
+
+
 class RM_Field_AGC_NS_AGCPERIOD0_PERIODHI(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
@@ -1311,6 +1391,16 @@ class RM_Field_AGC_NS_AGCPERIOD0_PERIODHI(Base_RM_Field):
             'PERIODHI', 'AGC_NS.AGCPERIOD0.PERIODHI', 'read-write',
             u"",
             0, 9)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_AGCPERIOD0_PERIODHISTL(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_AGCPERIOD0_PERIODHISTL, self).__init__(register,
+            'PERIODHISTL', 'AGC_NS.AGCPERIOD0.PERIODHISTL', 'read-write',
+            u"",
+            9, 1)
         self.__dict__['zz_frozen'] = True
 
 
@@ -1541,6 +1631,16 @@ class RM_Field_AGC_NS_GAINSTEPLIM1_PNINDEXMAX(Base_RM_Field):
             'PNINDEXMAX', 'AGC_NS.GAINSTEPLIM1.PNINDEXMAX', 'read-write',
             u"",
             8, 5)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_GAINSTEPLIM1_PNINDEXADC0(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_GAINSTEPLIM1_PNINDEXADC0, self).__init__(register,
+            'PNINDEXADC0', 'AGC_NS.GAINSTEPLIM1.PNINDEXADC0', 'read-write',
+            u"",
+            13, 5)
         self.__dict__['zz_frozen'] = True
 
 
@@ -2214,6 +2314,36 @@ class RM_Field_AGC_NS_SEQIF_GAINUPDATEFRZ(Base_RM_Field):
         self.__dict__['zz_frozen'] = True
 
 
+class RM_Field_AGC_NS_SEQIF_PNATTEN(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_SEQIF_PNATTEN, self).__init__(register,
+            'PNATTEN', 'AGC_NS.SEQIF.PNATTEN', 'read-write',
+            u"",
+            15, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_SEQIF_COLLDETRSSIMAPRE(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_SEQIF_COLLDETRSSIMAPRE, self).__init__(register,
+            'COLLDETRSSIMAPRE', 'AGC_NS.SEQIF.COLLDETRSSIMAPRE', 'read-write',
+            u"",
+            16, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_SEQIF_COLLDETRSSIMASYNC(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_SEQIF_COLLDETRSSIMASYNC, self).__init__(register,
+            'COLLDETRSSIMASYNC', 'AGC_NS.SEQIF.COLLDETRSSIMASYNC', 'read-write',
+            u"",
+            17, 1)
+        self.__dict__['zz_frozen'] = True
+
+
 class RM_Field_AGC_NS_SEQIEN_RSSIVALID(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
@@ -2344,6 +2474,36 @@ class RM_Field_AGC_NS_SEQIEN_GAINUPDATEFRZ(Base_RM_Field):
         self.__dict__['zz_frozen'] = True
 
 
+class RM_Field_AGC_NS_SEQIEN_PNATTEN(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_SEQIEN_PNATTEN, self).__init__(register,
+            'PNATTEN', 'AGC_NS.SEQIEN.PNATTEN', 'read-write',
+            u"",
+            15, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_SEQIEN_COLLDETRSSIMAPRE(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_SEQIEN_COLLDETRSSIMAPRE, self).__init__(register,
+            'COLLDETRSSIMAPRE', 'AGC_NS.SEQIEN.COLLDETRSSIMAPRE', 'read-write',
+            u"",
+            16, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_SEQIEN_COLLDETRSSIMASYNC(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_SEQIEN_COLLDETRSSIMASYNC, self).__init__(register,
+            'COLLDETRSSIMASYNC', 'AGC_NS.SEQIEN.COLLDETRSSIMASYNC', 'read-write',
+            u"",
+            17, 1)
+        self.__dict__['zz_frozen'] = True
+
+
 class RM_Field_AGC_NS_RSSIABSTHR_RSSIHIGHTHRSH(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
@@ -2381,36 +2541,6 @@ class RM_Field_AGC_NS_RSSIABSTHR_SIRSSINEGSTEPTHR(Base_RM_Field):
             'SIRSSINEGSTEPTHR', 'AGC_NS.RSSIABSTHR.SIRSSINEGSTEPTHR', 'read-write',
             u"",
             24, 8)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_LNABOOST_BOOSTLNA(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_LNABOOST_BOOSTLNA, self).__init__(register,
-            'BOOSTLNA', 'AGC_NS.LNABOOST.BOOSTLNA', 'read-write',
-            u"",
-            0, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_LNABOOST_LNABWADJ(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_LNABOOST_LNABWADJ, self).__init__(register,
-            'LNABWADJ', 'AGC_NS.LNABOOST.LNABWADJ', 'read-write',
-            u"",
-            1, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_LNABOOST_LNABWADJBOOST(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_LNABOOST_LNABWADJBOOST, self).__init__(register,
-            'LNABWADJBOOST', 'AGC_NS.LNABOOST.LNABWADJBOOST', 'read-write',
-            u"",
-            5, 4)
         self.__dict__['zz_frozen'] = True
 
 
@@ -2494,2643 +2624,83 @@ class RM_Field_AGC_NS_SPARE_SPAREREG(Base_RM_Field):
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_AGC_NS_PNRFFILT0_LNAMIXRFATT1(Base_RM_Field):
+class RM_Field_AGC_NS_FLARE_PNATTENTHD(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_PNRFFILT0_LNAMIXRFATT1, self).__init__(register,
-            'LNAMIXRFATT1', 'AGC_NS.PNRFFILT0.LNAMIXRFATT1', 'read-write',
+        super(RM_Field_AGC_NS_FLARE_PNATTENTHD, self).__init__(register,
+            'PNATTENTHD', 'AGC_NS.FLARE.PNATTENTHD', 'read-write',
             u"",
-            0, 10)
+            0, 5)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_AGC_NS_PNRFFILT0_LNAMIXRFATT2(Base_RM_Field):
+class RM_Field_AGC_NS_STEPDWNSAFE_STEPDWNSAFE0(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_PNRFFILT0_LNAMIXRFATT2, self).__init__(register,
-            'LNAMIXRFATT2', 'AGC_NS.PNRFFILT0.LNAMIXRFATT2', 'read-write',
+        super(RM_Field_AGC_NS_STEPDWNSAFE_STEPDWNSAFE0, self).__init__(register,
+            'STEPDWNSAFE0', 'AGC_NS.STEPDWNSAFE.STEPDWNSAFE0', 'read-write',
             u"",
-            10, 10)
+            0, 3)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_AGC_NS_PNRFFILT0_LNAMIXRFATT3(Base_RM_Field):
+class RM_Field_AGC_NS_STEPDWNSAFE_STEPDWNSAFE1(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_PNRFFILT0_LNAMIXRFATT3, self).__init__(register,
-            'LNAMIXRFATT3', 'AGC_NS.PNRFFILT0.LNAMIXRFATT3', 'read-write',
+        super(RM_Field_AGC_NS_STEPDWNSAFE_STEPDWNSAFE1, self).__init__(register,
+            'STEPDWNSAFE1', 'AGC_NS.STEPDWNSAFE.STEPDWNSAFE1', 'read-write',
             u"",
-            20, 10)
+            3, 3)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_AGC_NS_PNRFFILT1_LNAMIXRFATT4(Base_RM_Field):
+class RM_Field_AGC_NS_STEPDWNSAFE_STEPDWNSAFE2(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_PNRFFILT1_LNAMIXRFATT4, self).__init__(register,
-            'LNAMIXRFATT4', 'AGC_NS.PNRFFILT1.LNAMIXRFATT4', 'read-write',
+        super(RM_Field_AGC_NS_STEPDWNSAFE_STEPDWNSAFE2, self).__init__(register,
+            'STEPDWNSAFE2', 'AGC_NS.STEPDWNSAFE.STEPDWNSAFE2', 'read-write',
             u"",
-            0, 10)
+            6, 3)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_AGC_NS_PNRFFILT1_LNAMIXRFATT5(Base_RM_Field):
+class RM_Field_AGC_NS_STEPDWNSAFE_STEPDWNSAFE3(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_PNRFFILT1_LNAMIXRFATT5, self).__init__(register,
-            'LNAMIXRFATT5', 'AGC_NS.PNRFFILT1.LNAMIXRFATT5', 'read-write',
+        super(RM_Field_AGC_NS_STEPDWNSAFE_STEPDWNSAFE3, self).__init__(register,
+            'STEPDWNSAFE3', 'AGC_NS.STEPDWNSAFE.STEPDWNSAFE3', 'read-write',
             u"",
-            10, 10)
+            9, 3)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_AGC_NS_PNRFFILT1_LNAMIXRFATT6(Base_RM_Field):
+class RM_Field_AGC_NS_STEPDWNSAFE_STEPDWNSAFE4(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_PNRFFILT1_LNAMIXRFATT6, self).__init__(register,
-            'LNAMIXRFATT6', 'AGC_NS.PNRFFILT1.LNAMIXRFATT6', 'read-write',
+        super(RM_Field_AGC_NS_STEPDWNSAFE_STEPDWNSAFE4, self).__init__(register,
+            'STEPDWNSAFE4', 'AGC_NS.STEPDWNSAFE.STEPDWNSAFE4', 'read-write',
             u"",
-            20, 10)
+            12, 3)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_AGC_NS_PNRFFILT2_LNAMIXRFATT7(Base_RM_Field):
+class RM_Field_AGC_NS_STEPDWNSAFE_STEPDWNSAFE5(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_PNRFFILT2_LNAMIXRFATT7, self).__init__(register,
-            'LNAMIXRFATT7', 'AGC_NS.PNRFFILT2.LNAMIXRFATT7', 'read-write',
+        super(RM_Field_AGC_NS_STEPDWNSAFE_STEPDWNSAFE5, self).__init__(register,
+            'STEPDWNSAFE5', 'AGC_NS.STEPDWNSAFE.STEPDWNSAFE5', 'read-write',
             u"",
-            0, 10)
+            15, 3)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_AGC_NS_PNRFFILT2_LNAMIXRFATT8(Base_RM_Field):
+class RM_Field_AGC_NS_STEPDWNSAFE_STEPDWNSAFEEN(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_PNRFFILT2_LNAMIXRFATT8, self).__init__(register,
-            'LNAMIXRFATT8', 'AGC_NS.PNRFFILT2.LNAMIXRFATT8', 'read-write',
+        super(RM_Field_AGC_NS_STEPDWNSAFE_STEPDWNSAFEEN, self).__init__(register,
+            'STEPDWNSAFEEN', 'AGC_NS.STEPDWNSAFE.STEPDWNSAFEEN', 'read-write',
             u"",
-            10, 10)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_PNRFFILT2_LNAMIXRFATT9(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_PNRFFILT2_LNAMIXRFATT9, self).__init__(register,
-            'LNAMIXRFATT9', 'AGC_NS.PNRFFILT2.LNAMIXRFATT9', 'read-write',
-            u"",
-            20, 10)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_PNRFFILT3_LNAMIXRFATT10(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_PNRFFILT3_LNAMIXRFATT10, self).__init__(register,
-            'LNAMIXRFATT10', 'AGC_NS.PNRFFILT3.LNAMIXRFATT10', 'read-write',
-            u"",
-            0, 10)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_PNRFFILT3_LNAMIXRFATT11(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_PNRFFILT3_LNAMIXRFATT11, self).__init__(register,
-            'LNAMIXRFATT11', 'AGC_NS.PNRFFILT3.LNAMIXRFATT11', 'read-write',
-            u"",
-            10, 10)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_PNRFFILT3_LNAMIXRFATT12(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_PNRFFILT3_LNAMIXRFATT12, self).__init__(register,
-            'LNAMIXRFATT12', 'AGC_NS.PNRFFILT3.LNAMIXRFATT12', 'read-write',
-            u"",
-            20, 10)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_PNRFFILT4_LNAMIXRFATT13(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_PNRFFILT4_LNAMIXRFATT13, self).__init__(register,
-            'LNAMIXRFATT13', 'AGC_NS.PNRFFILT4.LNAMIXRFATT13', 'read-write',
-            u"",
-            0, 10)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_PNRFFILT4_LNAMIXRFATT14(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_PNRFFILT4_LNAMIXRFATT14, self).__init__(register,
-            'LNAMIXRFATT14', 'AGC_NS.PNRFFILT4.LNAMIXRFATT14', 'read-write',
-            u"",
-            10, 10)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_PNRFFILT4_LNAMIXRFATT15(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_PNRFFILT4_LNAMIXRFATT15, self).__init__(register,
-            'LNAMIXRFATT15', 'AGC_NS.PNRFFILT4.LNAMIXRFATT15', 'read-write',
-            u"",
-            20, 10)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_PNRFFILT5_LNAMIXRFATT16(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_PNRFFILT5_LNAMIXRFATT16, self).__init__(register,
-            'LNAMIXRFATT16', 'AGC_NS.PNRFFILT5.LNAMIXRFATT16', 'read-write',
-            u"",
-            0, 10)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_PNRFFILT5_LNAMIXRFATT17(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_PNRFFILT5_LNAMIXRFATT17, self).__init__(register,
-            'LNAMIXRFATT17', 'AGC_NS.PNRFFILT5.LNAMIXRFATT17', 'read-write',
-            u"",
-            10, 10)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_PNRFFILT5_LNAMIXRFATT18(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_PNRFFILT5_LNAMIXRFATT18, self).__init__(register,
-            'LNAMIXRFATT18', 'AGC_NS.PNRFFILT5.LNAMIXRFATT18', 'read-write',
-            u"",
-            20, 10)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_PNRFFILT6_LNAMIXRFATT19(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_PNRFFILT6_LNAMIXRFATT19, self).__init__(register,
-            'LNAMIXRFATT19', 'AGC_NS.PNRFFILT6.LNAMIXRFATT19', 'read-write',
-            u"",
-            0, 10)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_PNRFFILT6_LNAMIXRFATT20(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_PNRFFILT6_LNAMIXRFATT20, self).__init__(register,
-            'LNAMIXRFATT20', 'AGC_NS.PNRFFILT6.LNAMIXRFATT20', 'read-write',
-            u"",
-            10, 10)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_PNRFFILT6_LNAMIXRFATT21(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_PNRFFILT6_LNAMIXRFATT21, self).__init__(register,
-            'LNAMIXRFATT21', 'AGC_NS.PNRFFILT6.LNAMIXRFATT21', 'read-write',
-            u"",
-            20, 10)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_PNRFFILT7_LNAMIXRFATT22(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_PNRFFILT7_LNAMIXRFATT22, self).__init__(register,
-            'LNAMIXRFATT22', 'AGC_NS.PNRFFILT7.LNAMIXRFATT22', 'read-write',
-            u"",
-            0, 10)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_PNRFFILT7_LNAMIXRFATT23(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_PNRFFILT7_LNAMIXRFATT23, self).__init__(register,
-            'LNAMIXRFATT23', 'AGC_NS.PNRFFILT7.LNAMIXRFATT23', 'read-write',
-            u"",
-            10, 10)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_PNRFFILT7_LNAMIXRFATT24(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_PNRFFILT7_LNAMIXRFATT24, self).__init__(register,
-            'LNAMIXRFATT24', 'AGC_NS.PNRFFILT7.LNAMIXRFATT24', 'read-write',
-            u"",
-            20, 10)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT0_FENOTCHATTNSEL1(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT0_FENOTCHATTNSEL1, self).__init__(register,
-            'FENOTCHATTNSEL1', 'AGC_NS.FENOTCHATT0.FENOTCHATTNSEL1', 'read-write',
-            u"",
-            0, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT0_FENOTCHCAPCRSE1(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT0_FENOTCHCAPCRSE1, self).__init__(register,
-            'FENOTCHCAPCRSE1', 'AGC_NS.FENOTCHATT0.FENOTCHCAPCRSE1', 'read-write',
-            u"",
-            4, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT0_FENOTCHCAPFINE1(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT0_FENOTCHCAPFINE1, self).__init__(register,
-            'FENOTCHCAPFINE1', 'AGC_NS.FENOTCHATT0.FENOTCHCAPFINE1', 'read-write',
-            u"",
-            8, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT0_FENOTCHRATTNEN1(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT0_FENOTCHRATTNEN1, self).__init__(register,
-            'FENOTCHRATTNEN1', 'AGC_NS.FENOTCHATT0.FENOTCHRATTNEN1', 'read-write',
-            u"",
-            12, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT0_FENOTCHEN1(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT0_FENOTCHEN1, self).__init__(register,
-            'FENOTCHEN1', 'AGC_NS.FENOTCHATT0.FENOTCHEN1', 'read-write',
-            u"",
-            13, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT0_FENOTCHATTNSEL2(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT0_FENOTCHATTNSEL2, self).__init__(register,
-            'FENOTCHATTNSEL2', 'AGC_NS.FENOTCHATT0.FENOTCHATTNSEL2', 'read-write',
-            u"",
-            16, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT0_FENOTCHCAPCRSE2(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT0_FENOTCHCAPCRSE2, self).__init__(register,
-            'FENOTCHCAPCRSE2', 'AGC_NS.FENOTCHATT0.FENOTCHCAPCRSE2', 'read-write',
-            u"",
-            20, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT0_FENOTCHCAPFINE2(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT0_FENOTCHCAPFINE2, self).__init__(register,
-            'FENOTCHCAPFINE2', 'AGC_NS.FENOTCHATT0.FENOTCHCAPFINE2', 'read-write',
-            u"",
-            24, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT0_FENOTCHRATTNEN2(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT0_FENOTCHRATTNEN2, self).__init__(register,
-            'FENOTCHRATTNEN2', 'AGC_NS.FENOTCHATT0.FENOTCHRATTNEN2', 'read-write',
-            u"",
-            28, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT0_FENOTCHEN2(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT0_FENOTCHEN2, self).__init__(register,
-            'FENOTCHEN2', 'AGC_NS.FENOTCHATT0.FENOTCHEN2', 'read-write',
-            u"",
-            29, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT1_FENOTCHATTNSEL3(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT1_FENOTCHATTNSEL3, self).__init__(register,
-            'FENOTCHATTNSEL3', 'AGC_NS.FENOTCHATT1.FENOTCHATTNSEL3', 'read-write',
-            u"",
-            0, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT1_FENOTCHCAPCRSE3(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT1_FENOTCHCAPCRSE3, self).__init__(register,
-            'FENOTCHCAPCRSE3', 'AGC_NS.FENOTCHATT1.FENOTCHCAPCRSE3', 'read-write',
-            u"",
-            4, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT1_FENOTCHCAPFINE3(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT1_FENOTCHCAPFINE3, self).__init__(register,
-            'FENOTCHCAPFINE3', 'AGC_NS.FENOTCHATT1.FENOTCHCAPFINE3', 'read-write',
-            u"",
-            8, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT1_FENOTCHRATTNEN3(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT1_FENOTCHRATTNEN3, self).__init__(register,
-            'FENOTCHRATTNEN3', 'AGC_NS.FENOTCHATT1.FENOTCHRATTNEN3', 'read-write',
-            u"",
-            12, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT1_FENOTCHEN3(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT1_FENOTCHEN3, self).__init__(register,
-            'FENOTCHEN3', 'AGC_NS.FENOTCHATT1.FENOTCHEN3', 'read-write',
-            u"",
-            13, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT1_FENOTCHATTNSEL4(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT1_FENOTCHATTNSEL4, self).__init__(register,
-            'FENOTCHATTNSEL4', 'AGC_NS.FENOTCHATT1.FENOTCHATTNSEL4', 'read-write',
-            u"",
-            16, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT1_FENOTCHCAPCRSE4(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT1_FENOTCHCAPCRSE4, self).__init__(register,
-            'FENOTCHCAPCRSE4', 'AGC_NS.FENOTCHATT1.FENOTCHCAPCRSE4', 'read-write',
-            u"",
-            20, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT1_FENOTCHCAPFINE4(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT1_FENOTCHCAPFINE4, self).__init__(register,
-            'FENOTCHCAPFINE4', 'AGC_NS.FENOTCHATT1.FENOTCHCAPFINE4', 'read-write',
-            u"",
-            24, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT1_FENOTCHRATTNEN4(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT1_FENOTCHRATTNEN4, self).__init__(register,
-            'FENOTCHRATTNEN4', 'AGC_NS.FENOTCHATT1.FENOTCHRATTNEN4', 'read-write',
-            u"",
-            28, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT1_FENOTCHEN4(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT1_FENOTCHEN4, self).__init__(register,
-            'FENOTCHEN4', 'AGC_NS.FENOTCHATT1.FENOTCHEN4', 'read-write',
-            u"",
-            29, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT2_FENOTCHATTNSEL5(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT2_FENOTCHATTNSEL5, self).__init__(register,
-            'FENOTCHATTNSEL5', 'AGC_NS.FENOTCHATT2.FENOTCHATTNSEL5', 'read-write',
-            u"",
-            0, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT2_FENOTCHCAPCRSE5(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT2_FENOTCHCAPCRSE5, self).__init__(register,
-            'FENOTCHCAPCRSE5', 'AGC_NS.FENOTCHATT2.FENOTCHCAPCRSE5', 'read-write',
-            u"",
-            4, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT2_FENOTCHCAPFINE5(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT2_FENOTCHCAPFINE5, self).__init__(register,
-            'FENOTCHCAPFINE5', 'AGC_NS.FENOTCHATT2.FENOTCHCAPFINE5', 'read-write',
-            u"",
-            8, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT2_FENOTCHRATTNEN5(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT2_FENOTCHRATTNEN5, self).__init__(register,
-            'FENOTCHRATTNEN5', 'AGC_NS.FENOTCHATT2.FENOTCHRATTNEN5', 'read-write',
-            u"",
-            12, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT2_FENOTCHEN5(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT2_FENOTCHEN5, self).__init__(register,
-            'FENOTCHEN5', 'AGC_NS.FENOTCHATT2.FENOTCHEN5', 'read-write',
-            u"",
-            13, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT2_FENOTCHATTNSEL6(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT2_FENOTCHATTNSEL6, self).__init__(register,
-            'FENOTCHATTNSEL6', 'AGC_NS.FENOTCHATT2.FENOTCHATTNSEL6', 'read-write',
-            u"",
-            16, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT2_FENOTCHCAPCRSE6(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT2_FENOTCHCAPCRSE6, self).__init__(register,
-            'FENOTCHCAPCRSE6', 'AGC_NS.FENOTCHATT2.FENOTCHCAPCRSE6', 'read-write',
-            u"",
-            20, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT2_FENOTCHCAPFINE6(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT2_FENOTCHCAPFINE6, self).__init__(register,
-            'FENOTCHCAPFINE6', 'AGC_NS.FENOTCHATT2.FENOTCHCAPFINE6', 'read-write',
-            u"",
-            24, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT2_FENOTCHRATTNEN6(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT2_FENOTCHRATTNEN6, self).__init__(register,
-            'FENOTCHRATTNEN6', 'AGC_NS.FENOTCHATT2.FENOTCHRATTNEN6', 'read-write',
-            u"",
-            28, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT2_FENOTCHEN6(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT2_FENOTCHEN6, self).__init__(register,
-            'FENOTCHEN6', 'AGC_NS.FENOTCHATT2.FENOTCHEN6', 'read-write',
-            u"",
-            29, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT3_FENOTCHATTNSEL7(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT3_FENOTCHATTNSEL7, self).__init__(register,
-            'FENOTCHATTNSEL7', 'AGC_NS.FENOTCHATT3.FENOTCHATTNSEL7', 'read-write',
-            u"",
-            0, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT3_FENOTCHCAPCRSE7(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT3_FENOTCHCAPCRSE7, self).__init__(register,
-            'FENOTCHCAPCRSE7', 'AGC_NS.FENOTCHATT3.FENOTCHCAPCRSE7', 'read-write',
-            u"",
-            4, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT3_FENOTCHCAPFINE7(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT3_FENOTCHCAPFINE7, self).__init__(register,
-            'FENOTCHCAPFINE7', 'AGC_NS.FENOTCHATT3.FENOTCHCAPFINE7', 'read-write',
-            u"",
-            8, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT3_FENOTCHRATTNEN7(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT3_FENOTCHRATTNEN7, self).__init__(register,
-            'FENOTCHRATTNEN7', 'AGC_NS.FENOTCHATT3.FENOTCHRATTNEN7', 'read-write',
-            u"",
-            12, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT3_FENOTCHEN7(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT3_FENOTCHEN7, self).__init__(register,
-            'FENOTCHEN7', 'AGC_NS.FENOTCHATT3.FENOTCHEN7', 'read-write',
-            u"",
-            13, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT3_FENOTCHATTNSEL8(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT3_FENOTCHATTNSEL8, self).__init__(register,
-            'FENOTCHATTNSEL8', 'AGC_NS.FENOTCHATT3.FENOTCHATTNSEL8', 'read-write',
-            u"",
-            16, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT3_FENOTCHCAPCRSE8(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT3_FENOTCHCAPCRSE8, self).__init__(register,
-            'FENOTCHCAPCRSE8', 'AGC_NS.FENOTCHATT3.FENOTCHCAPCRSE8', 'read-write',
-            u"",
-            20, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT3_FENOTCHCAPFINE8(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT3_FENOTCHCAPFINE8, self).__init__(register,
-            'FENOTCHCAPFINE8', 'AGC_NS.FENOTCHATT3.FENOTCHCAPFINE8', 'read-write',
-            u"",
-            24, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT3_FENOTCHRATTNEN8(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT3_FENOTCHRATTNEN8, self).__init__(register,
-            'FENOTCHRATTNEN8', 'AGC_NS.FENOTCHATT3.FENOTCHRATTNEN8', 'read-write',
-            u"",
-            28, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT3_FENOTCHEN8(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT3_FENOTCHEN8, self).__init__(register,
-            'FENOTCHEN8', 'AGC_NS.FENOTCHATT3.FENOTCHEN8', 'read-write',
-            u"",
-            29, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT4_FENOTCHATTNSEL9(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT4_FENOTCHATTNSEL9, self).__init__(register,
-            'FENOTCHATTNSEL9', 'AGC_NS.FENOTCHATT4.FENOTCHATTNSEL9', 'read-write',
-            u"",
-            0, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT4_FENOTCHCAPCRSE9(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT4_FENOTCHCAPCRSE9, self).__init__(register,
-            'FENOTCHCAPCRSE9', 'AGC_NS.FENOTCHATT4.FENOTCHCAPCRSE9', 'read-write',
-            u"",
-            4, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT4_FENOTCHCAPFINE9(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT4_FENOTCHCAPFINE9, self).__init__(register,
-            'FENOTCHCAPFINE9', 'AGC_NS.FENOTCHATT4.FENOTCHCAPFINE9', 'read-write',
-            u"",
-            8, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT4_FENOTCHRATTNEN9(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT4_FENOTCHRATTNEN9, self).__init__(register,
-            'FENOTCHRATTNEN9', 'AGC_NS.FENOTCHATT4.FENOTCHRATTNEN9', 'read-write',
-            u"",
-            12, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT4_FENOTCHEN9(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT4_FENOTCHEN9, self).__init__(register,
-            'FENOTCHEN9', 'AGC_NS.FENOTCHATT4.FENOTCHEN9', 'read-write',
-            u"",
-            13, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT4_FENOTCHATTNSEL10(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT4_FENOTCHATTNSEL10, self).__init__(register,
-            'FENOTCHATTNSEL10', 'AGC_NS.FENOTCHATT4.FENOTCHATTNSEL10', 'read-write',
-            u"",
-            16, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT4_FENOTCHCAPCRSE10(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT4_FENOTCHCAPCRSE10, self).__init__(register,
-            'FENOTCHCAPCRSE10', 'AGC_NS.FENOTCHATT4.FENOTCHCAPCRSE10', 'read-write',
-            u"",
-            20, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT4_FENOTCHCAPFINE10(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT4_FENOTCHCAPFINE10, self).__init__(register,
-            'FENOTCHCAPFINE10', 'AGC_NS.FENOTCHATT4.FENOTCHCAPFINE10', 'read-write',
-            u"",
-            24, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT4_FENOTCHRATTNEN10(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT4_FENOTCHRATTNEN10, self).__init__(register,
-            'FENOTCHRATTNEN10', 'AGC_NS.FENOTCHATT4.FENOTCHRATTNEN10', 'read-write',
-            u"",
-            28, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT4_FENOTCHEN10(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT4_FENOTCHEN10, self).__init__(register,
-            'FENOTCHEN10', 'AGC_NS.FENOTCHATT4.FENOTCHEN10', 'read-write',
-            u"",
-            29, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT5_FENOTCHATTNSEL11(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT5_FENOTCHATTNSEL11, self).__init__(register,
-            'FENOTCHATTNSEL11', 'AGC_NS.FENOTCHATT5.FENOTCHATTNSEL11', 'read-write',
-            u"",
-            0, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT5_FENOTCHCAPCRSE11(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT5_FENOTCHCAPCRSE11, self).__init__(register,
-            'FENOTCHCAPCRSE11', 'AGC_NS.FENOTCHATT5.FENOTCHCAPCRSE11', 'read-write',
-            u"",
-            4, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT5_FENOTCHCAPFINE11(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT5_FENOTCHCAPFINE11, self).__init__(register,
-            'FENOTCHCAPFINE11', 'AGC_NS.FENOTCHATT5.FENOTCHCAPFINE11', 'read-write',
-            u"",
-            8, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT5_FENOTCHRATTNEN11(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT5_FENOTCHRATTNEN11, self).__init__(register,
-            'FENOTCHRATTNEN11', 'AGC_NS.FENOTCHATT5.FENOTCHRATTNEN11', 'read-write',
-            u"",
-            12, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT5_FENOTCHEN11(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT5_FENOTCHEN11, self).__init__(register,
-            'FENOTCHEN11', 'AGC_NS.FENOTCHATT5.FENOTCHEN11', 'read-write',
-            u"",
-            13, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT5_FENOTCHATTNSEL12(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT5_FENOTCHATTNSEL12, self).__init__(register,
-            'FENOTCHATTNSEL12', 'AGC_NS.FENOTCHATT5.FENOTCHATTNSEL12', 'read-write',
-            u"",
-            16, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT5_FENOTCHCAPCRSE12(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT5_FENOTCHCAPCRSE12, self).__init__(register,
-            'FENOTCHCAPCRSE12', 'AGC_NS.FENOTCHATT5.FENOTCHCAPCRSE12', 'read-write',
-            u"",
-            20, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT5_FENOTCHCAPFINE12(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT5_FENOTCHCAPFINE12, self).__init__(register,
-            'FENOTCHCAPFINE12', 'AGC_NS.FENOTCHATT5.FENOTCHCAPFINE12', 'read-write',
-            u"",
-            24, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT5_FENOTCHRATTNEN12(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT5_FENOTCHRATTNEN12, self).__init__(register,
-            'FENOTCHRATTNEN12', 'AGC_NS.FENOTCHATT5.FENOTCHRATTNEN12', 'read-write',
-            u"",
-            28, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT5_FENOTCHEN12(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT5_FENOTCHEN12, self).__init__(register,
-            'FENOTCHEN12', 'AGC_NS.FENOTCHATT5.FENOTCHEN12', 'read-write',
-            u"",
-            29, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT6_FENOTCHATTNSEL13(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT6_FENOTCHATTNSEL13, self).__init__(register,
-            'FENOTCHATTNSEL13', 'AGC_NS.FENOTCHATT6.FENOTCHATTNSEL13', 'read-write',
-            u"",
-            0, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT6_FENOTCHCAPCRSE13(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT6_FENOTCHCAPCRSE13, self).__init__(register,
-            'FENOTCHCAPCRSE13', 'AGC_NS.FENOTCHATT6.FENOTCHCAPCRSE13', 'read-write',
-            u"",
-            4, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT6_FENOTCHCAPFINE13(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT6_FENOTCHCAPFINE13, self).__init__(register,
-            'FENOTCHCAPFINE13', 'AGC_NS.FENOTCHATT6.FENOTCHCAPFINE13', 'read-write',
-            u"",
-            8, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT6_FENOTCHRATTNEN13(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT6_FENOTCHRATTNEN13, self).__init__(register,
-            'FENOTCHRATTNEN13', 'AGC_NS.FENOTCHATT6.FENOTCHRATTNEN13', 'read-write',
-            u"",
-            12, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT6_FENOTCHEN13(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT6_FENOTCHEN13, self).__init__(register,
-            'FENOTCHEN13', 'AGC_NS.FENOTCHATT6.FENOTCHEN13', 'read-write',
-            u"",
-            13, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT6_FENOTCHATTNSEL14(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT6_FENOTCHATTNSEL14, self).__init__(register,
-            'FENOTCHATTNSEL14', 'AGC_NS.FENOTCHATT6.FENOTCHATTNSEL14', 'read-write',
-            u"",
-            16, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT6_FENOTCHCAPCRSE14(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT6_FENOTCHCAPCRSE14, self).__init__(register,
-            'FENOTCHCAPCRSE14', 'AGC_NS.FENOTCHATT6.FENOTCHCAPCRSE14', 'read-write',
-            u"",
-            20, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT6_FENOTCHCAPFINE14(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT6_FENOTCHCAPFINE14, self).__init__(register,
-            'FENOTCHCAPFINE14', 'AGC_NS.FENOTCHATT6.FENOTCHCAPFINE14', 'read-write',
-            u"",
-            24, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT6_FENOTCHRATTNEN14(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT6_FENOTCHRATTNEN14, self).__init__(register,
-            'FENOTCHRATTNEN14', 'AGC_NS.FENOTCHATT6.FENOTCHRATTNEN14', 'read-write',
-            u"",
-            28, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT6_FENOTCHEN14(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT6_FENOTCHEN14, self).__init__(register,
-            'FENOTCHEN14', 'AGC_NS.FENOTCHATT6.FENOTCHEN14', 'read-write',
-            u"",
-            29, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT7_FENOTCHATTNSEL15(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT7_FENOTCHATTNSEL15, self).__init__(register,
-            'FENOTCHATTNSEL15', 'AGC_NS.FENOTCHATT7.FENOTCHATTNSEL15', 'read-write',
-            u"",
-            0, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT7_FENOTCHCAPCRSE15(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT7_FENOTCHCAPCRSE15, self).__init__(register,
-            'FENOTCHCAPCRSE15', 'AGC_NS.FENOTCHATT7.FENOTCHCAPCRSE15', 'read-write',
-            u"",
-            4, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT7_FENOTCHCAPFINE15(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT7_FENOTCHCAPFINE15, self).__init__(register,
-            'FENOTCHCAPFINE15', 'AGC_NS.FENOTCHATT7.FENOTCHCAPFINE15', 'read-write',
-            u"",
-            8, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT7_FENOTCHRATTNEN15(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT7_FENOTCHRATTNEN15, self).__init__(register,
-            'FENOTCHRATTNEN15', 'AGC_NS.FENOTCHATT7.FENOTCHRATTNEN15', 'read-write',
-            u"",
-            12, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT7_FENOTCHEN15(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT7_FENOTCHEN15, self).__init__(register,
-            'FENOTCHEN15', 'AGC_NS.FENOTCHATT7.FENOTCHEN15', 'read-write',
-            u"",
-            13, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT7_FENOTCHATTNSEL16(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT7_FENOTCHATTNSEL16, self).__init__(register,
-            'FENOTCHATTNSEL16', 'AGC_NS.FENOTCHATT7.FENOTCHATTNSEL16', 'read-write',
-            u"",
-            16, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT7_FENOTCHCAPCRSE16(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT7_FENOTCHCAPCRSE16, self).__init__(register,
-            'FENOTCHCAPCRSE16', 'AGC_NS.FENOTCHATT7.FENOTCHCAPCRSE16', 'read-write',
-            u"",
-            20, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT7_FENOTCHCAPFINE16(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT7_FENOTCHCAPFINE16, self).__init__(register,
-            'FENOTCHCAPFINE16', 'AGC_NS.FENOTCHATT7.FENOTCHCAPFINE16', 'read-write',
-            u"",
-            24, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT7_FENOTCHRATTNEN16(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT7_FENOTCHRATTNEN16, self).__init__(register,
-            'FENOTCHRATTNEN16', 'AGC_NS.FENOTCHATT7.FENOTCHRATTNEN16', 'read-write',
-            u"",
-            28, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT7_FENOTCHEN16(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT7_FENOTCHEN16, self).__init__(register,
-            'FENOTCHEN16', 'AGC_NS.FENOTCHATT7.FENOTCHEN16', 'read-write',
-            u"",
-            29, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT8_FENOTCHATTNSEL17(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT8_FENOTCHATTNSEL17, self).__init__(register,
-            'FENOTCHATTNSEL17', 'AGC_NS.FENOTCHATT8.FENOTCHATTNSEL17', 'read-write',
-            u"",
-            0, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT8_FENOTCHCAPCRSE17(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT8_FENOTCHCAPCRSE17, self).__init__(register,
-            'FENOTCHCAPCRSE17', 'AGC_NS.FENOTCHATT8.FENOTCHCAPCRSE17', 'read-write',
-            u"",
-            4, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT8_FENOTCHCAPFINE17(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT8_FENOTCHCAPFINE17, self).__init__(register,
-            'FENOTCHCAPFINE17', 'AGC_NS.FENOTCHATT8.FENOTCHCAPFINE17', 'read-write',
-            u"",
-            8, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT8_FENOTCHRATTNEN17(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT8_FENOTCHRATTNEN17, self).__init__(register,
-            'FENOTCHRATTNEN17', 'AGC_NS.FENOTCHATT8.FENOTCHRATTNEN17', 'read-write',
-            u"",
-            12, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT8_FENOTCHEN17(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT8_FENOTCHEN17, self).__init__(register,
-            'FENOTCHEN17', 'AGC_NS.FENOTCHATT8.FENOTCHEN17', 'read-write',
-            u"",
-            13, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT8_FENOTCHATTNSEL18(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT8_FENOTCHATTNSEL18, self).__init__(register,
-            'FENOTCHATTNSEL18', 'AGC_NS.FENOTCHATT8.FENOTCHATTNSEL18', 'read-write',
-            u"",
-            16, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT8_FENOTCHCAPCRSE18(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT8_FENOTCHCAPCRSE18, self).__init__(register,
-            'FENOTCHCAPCRSE18', 'AGC_NS.FENOTCHATT8.FENOTCHCAPCRSE18', 'read-write',
-            u"",
-            20, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT8_FENOTCHCAPFINE18(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT8_FENOTCHCAPFINE18, self).__init__(register,
-            'FENOTCHCAPFINE18', 'AGC_NS.FENOTCHATT8.FENOTCHCAPFINE18', 'read-write',
-            u"",
-            24, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT8_FENOTCHRATTNEN18(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT8_FENOTCHRATTNEN18, self).__init__(register,
-            'FENOTCHRATTNEN18', 'AGC_NS.FENOTCHATT8.FENOTCHRATTNEN18', 'read-write',
-            u"",
-            28, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT8_FENOTCHEN18(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT8_FENOTCHEN18, self).__init__(register,
-            'FENOTCHEN18', 'AGC_NS.FENOTCHATT8.FENOTCHEN18', 'read-write',
-            u"",
-            29, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT9_FENOTCHATTNSEL19(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT9_FENOTCHATTNSEL19, self).__init__(register,
-            'FENOTCHATTNSEL19', 'AGC_NS.FENOTCHATT9.FENOTCHATTNSEL19', 'read-write',
-            u"",
-            0, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT9_FENOTCHCAPCRSE19(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT9_FENOTCHCAPCRSE19, self).__init__(register,
-            'FENOTCHCAPCRSE19', 'AGC_NS.FENOTCHATT9.FENOTCHCAPCRSE19', 'read-write',
-            u"",
-            4, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT9_FENOTCHCAPFINE19(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT9_FENOTCHCAPFINE19, self).__init__(register,
-            'FENOTCHCAPFINE19', 'AGC_NS.FENOTCHATT9.FENOTCHCAPFINE19', 'read-write',
-            u"",
-            8, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT9_FENOTCHRATTNEN19(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT9_FENOTCHRATTNEN19, self).__init__(register,
-            'FENOTCHRATTNEN19', 'AGC_NS.FENOTCHATT9.FENOTCHRATTNEN19', 'read-write',
-            u"",
-            12, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT9_FENOTCHEN19(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT9_FENOTCHEN19, self).__init__(register,
-            'FENOTCHEN19', 'AGC_NS.FENOTCHATT9.FENOTCHEN19', 'read-write',
-            u"",
-            13, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT9_FENOTCHATTNSEL20(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT9_FENOTCHATTNSEL20, self).__init__(register,
-            'FENOTCHATTNSEL20', 'AGC_NS.FENOTCHATT9.FENOTCHATTNSEL20', 'read-write',
-            u"",
-            16, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT9_FENOTCHCAPCRSE20(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT9_FENOTCHCAPCRSE20, self).__init__(register,
-            'FENOTCHCAPCRSE20', 'AGC_NS.FENOTCHATT9.FENOTCHCAPCRSE20', 'read-write',
-            u"",
-            20, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT9_FENOTCHCAPFINE20(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT9_FENOTCHCAPFINE20, self).__init__(register,
-            'FENOTCHCAPFINE20', 'AGC_NS.FENOTCHATT9.FENOTCHCAPFINE20', 'read-write',
-            u"",
-            24, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT9_FENOTCHRATTNEN20(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT9_FENOTCHRATTNEN20, self).__init__(register,
-            'FENOTCHRATTNEN20', 'AGC_NS.FENOTCHATT9.FENOTCHRATTNEN20', 'read-write',
-            u"",
-            28, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT9_FENOTCHEN20(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT9_FENOTCHEN20, self).__init__(register,
-            'FENOTCHEN20', 'AGC_NS.FENOTCHATT9.FENOTCHEN20', 'read-write',
-            u"",
-            29, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT10_FENOTCHATTNSEL21(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT10_FENOTCHATTNSEL21, self).__init__(register,
-            'FENOTCHATTNSEL21', 'AGC_NS.FENOTCHATT10.FENOTCHATTNSEL21', 'read-write',
-            u"",
-            0, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT10_FENOTCHCAPCRSE21(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT10_FENOTCHCAPCRSE21, self).__init__(register,
-            'FENOTCHCAPCRSE21', 'AGC_NS.FENOTCHATT10.FENOTCHCAPCRSE21', 'read-write',
-            u"",
-            4, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT10_FENOTCHCAPFINE21(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT10_FENOTCHCAPFINE21, self).__init__(register,
-            'FENOTCHCAPFINE21', 'AGC_NS.FENOTCHATT10.FENOTCHCAPFINE21', 'read-write',
-            u"",
-            8, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT10_FENOTCHRATTNEN21(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT10_FENOTCHRATTNEN21, self).__init__(register,
-            'FENOTCHRATTNEN21', 'AGC_NS.FENOTCHATT10.FENOTCHRATTNEN21', 'read-write',
-            u"",
-            12, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT10_FENOTCHEN21(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT10_FENOTCHEN21, self).__init__(register,
-            'FENOTCHEN21', 'AGC_NS.FENOTCHATT10.FENOTCHEN21', 'read-write',
-            u"",
-            13, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT10_FENOTCHATTNSEL22(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT10_FENOTCHATTNSEL22, self).__init__(register,
-            'FENOTCHATTNSEL22', 'AGC_NS.FENOTCHATT10.FENOTCHATTNSEL22', 'read-write',
-            u"",
-            16, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT10_FENOTCHCAPCRSE22(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT10_FENOTCHCAPCRSE22, self).__init__(register,
-            'FENOTCHCAPCRSE22', 'AGC_NS.FENOTCHATT10.FENOTCHCAPCRSE22', 'read-write',
-            u"",
-            20, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT10_FENOTCHCAPFINE22(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT10_FENOTCHCAPFINE22, self).__init__(register,
-            'FENOTCHCAPFINE22', 'AGC_NS.FENOTCHATT10.FENOTCHCAPFINE22', 'read-write',
-            u"",
-            24, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT10_FENOTCHRATTNEN22(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT10_FENOTCHRATTNEN22, self).__init__(register,
-            'FENOTCHRATTNEN22', 'AGC_NS.FENOTCHATT10.FENOTCHRATTNEN22', 'read-write',
-            u"",
-            28, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT10_FENOTCHEN22(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT10_FENOTCHEN22, self).__init__(register,
-            'FENOTCHEN22', 'AGC_NS.FENOTCHATT10.FENOTCHEN22', 'read-write',
-            u"",
-            29, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT11_FENOTCHATTNSEL23(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT11_FENOTCHATTNSEL23, self).__init__(register,
-            'FENOTCHATTNSEL23', 'AGC_NS.FENOTCHATT11.FENOTCHATTNSEL23', 'read-write',
-            u"",
-            0, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT11_FENOTCHCAPCRSE23(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT11_FENOTCHCAPCRSE23, self).__init__(register,
-            'FENOTCHCAPCRSE23', 'AGC_NS.FENOTCHATT11.FENOTCHCAPCRSE23', 'read-write',
-            u"",
-            4, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT11_FENOTCHCAPFINE23(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT11_FENOTCHCAPFINE23, self).__init__(register,
-            'FENOTCHCAPFINE23', 'AGC_NS.FENOTCHATT11.FENOTCHCAPFINE23', 'read-write',
-            u"",
-            8, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT11_FENOTCHRATTNEN23(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT11_FENOTCHRATTNEN23, self).__init__(register,
-            'FENOTCHRATTNEN23', 'AGC_NS.FENOTCHATT11.FENOTCHRATTNEN23', 'read-write',
-            u"",
-            12, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT11_FENOTCHEN23(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT11_FENOTCHEN23, self).__init__(register,
-            'FENOTCHEN23', 'AGC_NS.FENOTCHATT11.FENOTCHEN23', 'read-write',
-            u"",
-            13, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT11_FENOTCHATTNSEL24(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT11_FENOTCHATTNSEL24, self).__init__(register,
-            'FENOTCHATTNSEL24', 'AGC_NS.FENOTCHATT11.FENOTCHATTNSEL24', 'read-write',
-            u"",
-            16, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT11_FENOTCHCAPCRSE24(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT11_FENOTCHCAPCRSE24, self).__init__(register,
-            'FENOTCHCAPCRSE24', 'AGC_NS.FENOTCHATT11.FENOTCHCAPCRSE24', 'read-write',
-            u"",
-            20, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT11_FENOTCHCAPFINE24(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT11_FENOTCHCAPFINE24, self).__init__(register,
-            'FENOTCHCAPFINE24', 'AGC_NS.FENOTCHATT11.FENOTCHCAPFINE24', 'read-write',
-            u"",
-            24, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT11_FENOTCHRATTNEN24(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT11_FENOTCHRATTNEN24, self).__init__(register,
-            'FENOTCHRATTNEN24', 'AGC_NS.FENOTCHATT11.FENOTCHRATTNEN24', 'read-write',
-            u"",
-            28, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHATT11_FENOTCHEN24(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHATT11_FENOTCHEN24, self).__init__(register,
-            'FENOTCHEN24', 'AGC_NS.FENOTCHATT11.FENOTCHEN24', 'read-write',
-            u"",
-            29, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT0_FENOTCHATTNSEL1(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT0_FENOTCHATTNSEL1, self).__init__(register,
-            'FENOTCHATTNSEL1', 'AGC_NS.FENOTCHFILT0.FENOTCHATTNSEL1', 'read-write',
-            u"",
-            0, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT0_FENOTCHCAPCRSE1(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT0_FENOTCHCAPCRSE1, self).__init__(register,
-            'FENOTCHCAPCRSE1', 'AGC_NS.FENOTCHFILT0.FENOTCHCAPCRSE1', 'read-write',
-            u"",
-            4, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT0_FENOTCHCAPFINE1(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT0_FENOTCHCAPFINE1, self).__init__(register,
-            'FENOTCHCAPFINE1', 'AGC_NS.FENOTCHFILT0.FENOTCHCAPFINE1', 'read-write',
-            u"",
-            8, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT0_FENOTCHRATTNEN1(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT0_FENOTCHRATTNEN1, self).__init__(register,
-            'FENOTCHRATTNEN1', 'AGC_NS.FENOTCHFILT0.FENOTCHRATTNEN1', 'read-write',
-            u"",
-            12, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT0_FENOTCHEN1(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT0_FENOTCHEN1, self).__init__(register,
-            'FENOTCHEN1', 'AGC_NS.FENOTCHFILT0.FENOTCHEN1', 'read-write',
-            u"",
-            13, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT0_FENOTCHATTNSEL2(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT0_FENOTCHATTNSEL2, self).__init__(register,
-            'FENOTCHATTNSEL2', 'AGC_NS.FENOTCHFILT0.FENOTCHATTNSEL2', 'read-write',
-            u"",
-            16, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT0_FENOTCHCAPCRSE2(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT0_FENOTCHCAPCRSE2, self).__init__(register,
-            'FENOTCHCAPCRSE2', 'AGC_NS.FENOTCHFILT0.FENOTCHCAPCRSE2', 'read-write',
-            u"",
-            20, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT0_FENOTCHCAPFINE2(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT0_FENOTCHCAPFINE2, self).__init__(register,
-            'FENOTCHCAPFINE2', 'AGC_NS.FENOTCHFILT0.FENOTCHCAPFINE2', 'read-write',
-            u"",
-            24, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT0_FENOTCHRATTNEN2(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT0_FENOTCHRATTNEN2, self).__init__(register,
-            'FENOTCHRATTNEN2', 'AGC_NS.FENOTCHFILT0.FENOTCHRATTNEN2', 'read-write',
-            u"",
-            28, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT0_FENOTCHEN2(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT0_FENOTCHEN2, self).__init__(register,
-            'FENOTCHEN2', 'AGC_NS.FENOTCHFILT0.FENOTCHEN2', 'read-write',
-            u"",
-            29, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT1_FENOTCHATTNSEL3(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT1_FENOTCHATTNSEL3, self).__init__(register,
-            'FENOTCHATTNSEL3', 'AGC_NS.FENOTCHFILT1.FENOTCHATTNSEL3', 'read-write',
-            u"",
-            0, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT1_FENOTCHCAPCRSE3(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT1_FENOTCHCAPCRSE3, self).__init__(register,
-            'FENOTCHCAPCRSE3', 'AGC_NS.FENOTCHFILT1.FENOTCHCAPCRSE3', 'read-write',
-            u"",
-            4, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT1_FENOTCHCAPFINE3(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT1_FENOTCHCAPFINE3, self).__init__(register,
-            'FENOTCHCAPFINE3', 'AGC_NS.FENOTCHFILT1.FENOTCHCAPFINE3', 'read-write',
-            u"",
-            8, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT1_FENOTCHRATTNEN3(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT1_FENOTCHRATTNEN3, self).__init__(register,
-            'FENOTCHRATTNEN3', 'AGC_NS.FENOTCHFILT1.FENOTCHRATTNEN3', 'read-write',
-            u"",
-            12, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT1_FENOTCHEN3(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT1_FENOTCHEN3, self).__init__(register,
-            'FENOTCHEN3', 'AGC_NS.FENOTCHFILT1.FENOTCHEN3', 'read-write',
-            u"",
-            13, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT1_FENOTCHATTNSEL4(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT1_FENOTCHATTNSEL4, self).__init__(register,
-            'FENOTCHATTNSEL4', 'AGC_NS.FENOTCHFILT1.FENOTCHATTNSEL4', 'read-write',
-            u"",
-            16, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT1_FENOTCHCAPCRSE4(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT1_FENOTCHCAPCRSE4, self).__init__(register,
-            'FENOTCHCAPCRSE4', 'AGC_NS.FENOTCHFILT1.FENOTCHCAPCRSE4', 'read-write',
-            u"",
-            20, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT1_FENOTCHCAPFINE4(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT1_FENOTCHCAPFINE4, self).__init__(register,
-            'FENOTCHCAPFINE4', 'AGC_NS.FENOTCHFILT1.FENOTCHCAPFINE4', 'read-write',
-            u"",
-            24, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT1_FENOTCHRATTNEN4(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT1_FENOTCHRATTNEN4, self).__init__(register,
-            'FENOTCHRATTNEN4', 'AGC_NS.FENOTCHFILT1.FENOTCHRATTNEN4', 'read-write',
-            u"",
-            28, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT1_FENOTCHEN4(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT1_FENOTCHEN4, self).__init__(register,
-            'FENOTCHEN4', 'AGC_NS.FENOTCHFILT1.FENOTCHEN4', 'read-write',
-            u"",
-            29, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT2_FENOTCHATTNSEL5(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT2_FENOTCHATTNSEL5, self).__init__(register,
-            'FENOTCHATTNSEL5', 'AGC_NS.FENOTCHFILT2.FENOTCHATTNSEL5', 'read-write',
-            u"",
-            0, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT2_FENOTCHCAPCRSE5(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT2_FENOTCHCAPCRSE5, self).__init__(register,
-            'FENOTCHCAPCRSE5', 'AGC_NS.FENOTCHFILT2.FENOTCHCAPCRSE5', 'read-write',
-            u"",
-            4, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT2_FENOTCHCAPFINE5(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT2_FENOTCHCAPFINE5, self).__init__(register,
-            'FENOTCHCAPFINE5', 'AGC_NS.FENOTCHFILT2.FENOTCHCAPFINE5', 'read-write',
-            u"",
-            8, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT2_FENOTCHRATTNEN5(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT2_FENOTCHRATTNEN5, self).__init__(register,
-            'FENOTCHRATTNEN5', 'AGC_NS.FENOTCHFILT2.FENOTCHRATTNEN5', 'read-write',
-            u"",
-            12, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT2_FENOTCHEN5(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT2_FENOTCHEN5, self).__init__(register,
-            'FENOTCHEN5', 'AGC_NS.FENOTCHFILT2.FENOTCHEN5', 'read-write',
-            u"",
-            13, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT2_FENOTCHATTNSEL6(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT2_FENOTCHATTNSEL6, self).__init__(register,
-            'FENOTCHATTNSEL6', 'AGC_NS.FENOTCHFILT2.FENOTCHATTNSEL6', 'read-write',
-            u"",
-            16, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT2_FENOTCHCAPCRSE6(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT2_FENOTCHCAPCRSE6, self).__init__(register,
-            'FENOTCHCAPCRSE6', 'AGC_NS.FENOTCHFILT2.FENOTCHCAPCRSE6', 'read-write',
-            u"",
-            20, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT2_FENOTCHCAPFINE6(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT2_FENOTCHCAPFINE6, self).__init__(register,
-            'FENOTCHCAPFINE6', 'AGC_NS.FENOTCHFILT2.FENOTCHCAPFINE6', 'read-write',
-            u"",
-            24, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT2_FENOTCHRATTNEN6(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT2_FENOTCHRATTNEN6, self).__init__(register,
-            'FENOTCHRATTNEN6', 'AGC_NS.FENOTCHFILT2.FENOTCHRATTNEN6', 'read-write',
-            u"",
-            28, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT2_FENOTCHEN6(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT2_FENOTCHEN6, self).__init__(register,
-            'FENOTCHEN6', 'AGC_NS.FENOTCHFILT2.FENOTCHEN6', 'read-write',
-            u"",
-            29, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT3_FENOTCHATTNSEL7(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT3_FENOTCHATTNSEL7, self).__init__(register,
-            'FENOTCHATTNSEL7', 'AGC_NS.FENOTCHFILT3.FENOTCHATTNSEL7', 'read-write',
-            u"",
-            0, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT3_FENOTCHCAPCRSE7(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT3_FENOTCHCAPCRSE7, self).__init__(register,
-            'FENOTCHCAPCRSE7', 'AGC_NS.FENOTCHFILT3.FENOTCHCAPCRSE7', 'read-write',
-            u"",
-            4, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT3_FENOTCHCAPFINE7(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT3_FENOTCHCAPFINE7, self).__init__(register,
-            'FENOTCHCAPFINE7', 'AGC_NS.FENOTCHFILT3.FENOTCHCAPFINE7', 'read-write',
-            u"",
-            8, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT3_FENOTCHRATTNEN7(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT3_FENOTCHRATTNEN7, self).__init__(register,
-            'FENOTCHRATTNEN7', 'AGC_NS.FENOTCHFILT3.FENOTCHRATTNEN7', 'read-write',
-            u"",
-            12, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT3_FENOTCHEN7(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT3_FENOTCHEN7, self).__init__(register,
-            'FENOTCHEN7', 'AGC_NS.FENOTCHFILT3.FENOTCHEN7', 'read-write',
-            u"",
-            13, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT3_FENOTCHATTNSEL8(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT3_FENOTCHATTNSEL8, self).__init__(register,
-            'FENOTCHATTNSEL8', 'AGC_NS.FENOTCHFILT3.FENOTCHATTNSEL8', 'read-write',
-            u"",
-            16, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT3_FENOTCHCAPCRSE8(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT3_FENOTCHCAPCRSE8, self).__init__(register,
-            'FENOTCHCAPCRSE8', 'AGC_NS.FENOTCHFILT3.FENOTCHCAPCRSE8', 'read-write',
-            u"",
-            20, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT3_FENOTCHCAPFINE8(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT3_FENOTCHCAPFINE8, self).__init__(register,
-            'FENOTCHCAPFINE8', 'AGC_NS.FENOTCHFILT3.FENOTCHCAPFINE8', 'read-write',
-            u"",
-            24, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT3_FENOTCHRATTNEN8(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT3_FENOTCHRATTNEN8, self).__init__(register,
-            'FENOTCHRATTNEN8', 'AGC_NS.FENOTCHFILT3.FENOTCHRATTNEN8', 'read-write',
-            u"",
-            28, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT3_FENOTCHEN8(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT3_FENOTCHEN8, self).__init__(register,
-            'FENOTCHEN8', 'AGC_NS.FENOTCHFILT3.FENOTCHEN8', 'read-write',
-            u"",
-            29, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT4_FENOTCHATTNSEL9(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT4_FENOTCHATTNSEL9, self).__init__(register,
-            'FENOTCHATTNSEL9', 'AGC_NS.FENOTCHFILT4.FENOTCHATTNSEL9', 'read-write',
-            u"",
-            0, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT4_FENOTCHCAPCRSE9(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT4_FENOTCHCAPCRSE9, self).__init__(register,
-            'FENOTCHCAPCRSE9', 'AGC_NS.FENOTCHFILT4.FENOTCHCAPCRSE9', 'read-write',
-            u"",
-            4, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT4_FENOTCHCAPFINE9(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT4_FENOTCHCAPFINE9, self).__init__(register,
-            'FENOTCHCAPFINE9', 'AGC_NS.FENOTCHFILT4.FENOTCHCAPFINE9', 'read-write',
-            u"",
-            8, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT4_FENOTCHRATTNEN9(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT4_FENOTCHRATTNEN9, self).__init__(register,
-            'FENOTCHRATTNEN9', 'AGC_NS.FENOTCHFILT4.FENOTCHRATTNEN9', 'read-write',
-            u"",
-            12, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT4_FENOTCHEN9(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT4_FENOTCHEN9, self).__init__(register,
-            'FENOTCHEN9', 'AGC_NS.FENOTCHFILT4.FENOTCHEN9', 'read-write',
-            u"",
-            13, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT4_FENOTCHATTNSEL10(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT4_FENOTCHATTNSEL10, self).__init__(register,
-            'FENOTCHATTNSEL10', 'AGC_NS.FENOTCHFILT4.FENOTCHATTNSEL10', 'read-write',
-            u"",
-            16, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT4_FENOTCHCAPCRSE10(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT4_FENOTCHCAPCRSE10, self).__init__(register,
-            'FENOTCHCAPCRSE10', 'AGC_NS.FENOTCHFILT4.FENOTCHCAPCRSE10', 'read-write',
-            u"",
-            20, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT4_FENOTCHCAPFINE10(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT4_FENOTCHCAPFINE10, self).__init__(register,
-            'FENOTCHCAPFINE10', 'AGC_NS.FENOTCHFILT4.FENOTCHCAPFINE10', 'read-write',
-            u"",
-            24, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT4_FENOTCHRATTNEN10(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT4_FENOTCHRATTNEN10, self).__init__(register,
-            'FENOTCHRATTNEN10', 'AGC_NS.FENOTCHFILT4.FENOTCHRATTNEN10', 'read-write',
-            u"",
-            28, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT4_FENOTCHEN10(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT4_FENOTCHEN10, self).__init__(register,
-            'FENOTCHEN10', 'AGC_NS.FENOTCHFILT4.FENOTCHEN10', 'read-write',
-            u"",
-            29, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT5_FENOTCHATTNSEL11(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT5_FENOTCHATTNSEL11, self).__init__(register,
-            'FENOTCHATTNSEL11', 'AGC_NS.FENOTCHFILT5.FENOTCHATTNSEL11', 'read-write',
-            u"",
-            0, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT5_FENOTCHCAPCRSE11(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT5_FENOTCHCAPCRSE11, self).__init__(register,
-            'FENOTCHCAPCRSE11', 'AGC_NS.FENOTCHFILT5.FENOTCHCAPCRSE11', 'read-write',
-            u"",
-            4, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT5_FENOTCHCAPFINE11(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT5_FENOTCHCAPFINE11, self).__init__(register,
-            'FENOTCHCAPFINE11', 'AGC_NS.FENOTCHFILT5.FENOTCHCAPFINE11', 'read-write',
-            u"",
-            8, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT5_FENOTCHRATTNEN11(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT5_FENOTCHRATTNEN11, self).__init__(register,
-            'FENOTCHRATTNEN11', 'AGC_NS.FENOTCHFILT5.FENOTCHRATTNEN11', 'read-write',
-            u"",
-            12, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT5_FENOTCHEN11(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT5_FENOTCHEN11, self).__init__(register,
-            'FENOTCHEN11', 'AGC_NS.FENOTCHFILT5.FENOTCHEN11', 'read-write',
-            u"",
-            13, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT5_FENOTCHATTNSEL12(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT5_FENOTCHATTNSEL12, self).__init__(register,
-            'FENOTCHATTNSEL12', 'AGC_NS.FENOTCHFILT5.FENOTCHATTNSEL12', 'read-write',
-            u"",
-            16, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT5_FENOTCHCAPCRSE12(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT5_FENOTCHCAPCRSE12, self).__init__(register,
-            'FENOTCHCAPCRSE12', 'AGC_NS.FENOTCHFILT5.FENOTCHCAPCRSE12', 'read-write',
-            u"",
-            20, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT5_FENOTCHCAPFINE12(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT5_FENOTCHCAPFINE12, self).__init__(register,
-            'FENOTCHCAPFINE12', 'AGC_NS.FENOTCHFILT5.FENOTCHCAPFINE12', 'read-write',
-            u"",
-            24, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT5_FENOTCHRATTNEN12(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT5_FENOTCHRATTNEN12, self).__init__(register,
-            'FENOTCHRATTNEN12', 'AGC_NS.FENOTCHFILT5.FENOTCHRATTNEN12', 'read-write',
-            u"",
-            28, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT5_FENOTCHEN12(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT5_FENOTCHEN12, self).__init__(register,
-            'FENOTCHEN12', 'AGC_NS.FENOTCHFILT5.FENOTCHEN12', 'read-write',
-            u"",
-            29, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT6_FENOTCHATTNSEL13(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT6_FENOTCHATTNSEL13, self).__init__(register,
-            'FENOTCHATTNSEL13', 'AGC_NS.FENOTCHFILT6.FENOTCHATTNSEL13', 'read-write',
-            u"",
-            0, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT6_FENOTCHCAPCRSE13(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT6_FENOTCHCAPCRSE13, self).__init__(register,
-            'FENOTCHCAPCRSE13', 'AGC_NS.FENOTCHFILT6.FENOTCHCAPCRSE13', 'read-write',
-            u"",
-            4, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT6_FENOTCHCAPFINE13(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT6_FENOTCHCAPFINE13, self).__init__(register,
-            'FENOTCHCAPFINE13', 'AGC_NS.FENOTCHFILT6.FENOTCHCAPFINE13', 'read-write',
-            u"",
-            8, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT6_FENOTCHRATTNEN13(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT6_FENOTCHRATTNEN13, self).__init__(register,
-            'FENOTCHRATTNEN13', 'AGC_NS.FENOTCHFILT6.FENOTCHRATTNEN13', 'read-write',
-            u"",
-            12, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT6_FENOTCHEN13(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT6_FENOTCHEN13, self).__init__(register,
-            'FENOTCHEN13', 'AGC_NS.FENOTCHFILT6.FENOTCHEN13', 'read-write',
-            u"",
-            13, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT6_FENOTCHATTNSEL14(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT6_FENOTCHATTNSEL14, self).__init__(register,
-            'FENOTCHATTNSEL14', 'AGC_NS.FENOTCHFILT6.FENOTCHATTNSEL14', 'read-write',
-            u"",
-            16, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT6_FENOTCHCAPCRSE14(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT6_FENOTCHCAPCRSE14, self).__init__(register,
-            'FENOTCHCAPCRSE14', 'AGC_NS.FENOTCHFILT6.FENOTCHCAPCRSE14', 'read-write',
-            u"",
-            20, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT6_FENOTCHCAPFINE14(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT6_FENOTCHCAPFINE14, self).__init__(register,
-            'FENOTCHCAPFINE14', 'AGC_NS.FENOTCHFILT6.FENOTCHCAPFINE14', 'read-write',
-            u"",
-            24, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT6_FENOTCHRATTNEN14(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT6_FENOTCHRATTNEN14, self).__init__(register,
-            'FENOTCHRATTNEN14', 'AGC_NS.FENOTCHFILT6.FENOTCHRATTNEN14', 'read-write',
-            u"",
-            28, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT6_FENOTCHEN14(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT6_FENOTCHEN14, self).__init__(register,
-            'FENOTCHEN14', 'AGC_NS.FENOTCHFILT6.FENOTCHEN14', 'read-write',
-            u"",
-            29, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT7_FENOTCHATTNSEL15(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT7_FENOTCHATTNSEL15, self).__init__(register,
-            'FENOTCHATTNSEL15', 'AGC_NS.FENOTCHFILT7.FENOTCHATTNSEL15', 'read-write',
-            u"",
-            0, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT7_FENOTCHCAPCRSE15(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT7_FENOTCHCAPCRSE15, self).__init__(register,
-            'FENOTCHCAPCRSE15', 'AGC_NS.FENOTCHFILT7.FENOTCHCAPCRSE15', 'read-write',
-            u"",
-            4, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT7_FENOTCHCAPFINE15(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT7_FENOTCHCAPFINE15, self).__init__(register,
-            'FENOTCHCAPFINE15', 'AGC_NS.FENOTCHFILT7.FENOTCHCAPFINE15', 'read-write',
-            u"",
-            8, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT7_FENOTCHRATTNEN15(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT7_FENOTCHRATTNEN15, self).__init__(register,
-            'FENOTCHRATTNEN15', 'AGC_NS.FENOTCHFILT7.FENOTCHRATTNEN15', 'read-write',
-            u"",
-            12, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT7_FENOTCHEN15(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT7_FENOTCHEN15, self).__init__(register,
-            'FENOTCHEN15', 'AGC_NS.FENOTCHFILT7.FENOTCHEN15', 'read-write',
-            u"",
-            13, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT7_FENOTCHATTNSEL16(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT7_FENOTCHATTNSEL16, self).__init__(register,
-            'FENOTCHATTNSEL16', 'AGC_NS.FENOTCHFILT7.FENOTCHATTNSEL16', 'read-write',
-            u"",
-            16, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT7_FENOTCHCAPCRSE16(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT7_FENOTCHCAPCRSE16, self).__init__(register,
-            'FENOTCHCAPCRSE16', 'AGC_NS.FENOTCHFILT7.FENOTCHCAPCRSE16', 'read-write',
-            u"",
-            20, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT7_FENOTCHCAPFINE16(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT7_FENOTCHCAPFINE16, self).__init__(register,
-            'FENOTCHCAPFINE16', 'AGC_NS.FENOTCHFILT7.FENOTCHCAPFINE16', 'read-write',
-            u"",
-            24, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT7_FENOTCHRATTNEN16(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT7_FENOTCHRATTNEN16, self).__init__(register,
-            'FENOTCHRATTNEN16', 'AGC_NS.FENOTCHFILT7.FENOTCHRATTNEN16', 'read-write',
-            u"",
-            28, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT7_FENOTCHEN16(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT7_FENOTCHEN16, self).__init__(register,
-            'FENOTCHEN16', 'AGC_NS.FENOTCHFILT7.FENOTCHEN16', 'read-write',
-            u"",
-            29, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT8_FENOTCHATTNSEL17(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT8_FENOTCHATTNSEL17, self).__init__(register,
-            'FENOTCHATTNSEL17', 'AGC_NS.FENOTCHFILT8.FENOTCHATTNSEL17', 'read-write',
-            u"",
-            0, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT8_FENOTCHCAPCRSE17(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT8_FENOTCHCAPCRSE17, self).__init__(register,
-            'FENOTCHCAPCRSE17', 'AGC_NS.FENOTCHFILT8.FENOTCHCAPCRSE17', 'read-write',
-            u"",
-            4, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT8_FENOTCHCAPFINE17(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT8_FENOTCHCAPFINE17, self).__init__(register,
-            'FENOTCHCAPFINE17', 'AGC_NS.FENOTCHFILT8.FENOTCHCAPFINE17', 'read-write',
-            u"",
-            8, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT8_FENOTCHRATTNEN17(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT8_FENOTCHRATTNEN17, self).__init__(register,
-            'FENOTCHRATTNEN17', 'AGC_NS.FENOTCHFILT8.FENOTCHRATTNEN17', 'read-write',
-            u"",
-            12, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT8_FENOTCHEN17(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT8_FENOTCHEN17, self).__init__(register,
-            'FENOTCHEN17', 'AGC_NS.FENOTCHFILT8.FENOTCHEN17', 'read-write',
-            u"",
-            13, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT8_FENOTCHATTNSEL18(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT8_FENOTCHATTNSEL18, self).__init__(register,
-            'FENOTCHATTNSEL18', 'AGC_NS.FENOTCHFILT8.FENOTCHATTNSEL18', 'read-write',
-            u"",
-            16, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT8_FENOTCHCAPCRSE18(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT8_FENOTCHCAPCRSE18, self).__init__(register,
-            'FENOTCHCAPCRSE18', 'AGC_NS.FENOTCHFILT8.FENOTCHCAPCRSE18', 'read-write',
-            u"",
-            20, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT8_FENOTCHCAPFINE18(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT8_FENOTCHCAPFINE18, self).__init__(register,
-            'FENOTCHCAPFINE18', 'AGC_NS.FENOTCHFILT8.FENOTCHCAPFINE18', 'read-write',
-            u"",
-            24, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT8_FENOTCHRATTNEN18(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT8_FENOTCHRATTNEN18, self).__init__(register,
-            'FENOTCHRATTNEN18', 'AGC_NS.FENOTCHFILT8.FENOTCHRATTNEN18', 'read-write',
-            u"",
-            28, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT8_FENOTCHEN18(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT8_FENOTCHEN18, self).__init__(register,
-            'FENOTCHEN18', 'AGC_NS.FENOTCHFILT8.FENOTCHEN18', 'read-write',
-            u"",
-            29, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT9_FENOTCHATTNSEL19(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT9_FENOTCHATTNSEL19, self).__init__(register,
-            'FENOTCHATTNSEL19', 'AGC_NS.FENOTCHFILT9.FENOTCHATTNSEL19', 'read-write',
-            u"",
-            0, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT9_FENOTCHCAPCRSE19(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT9_FENOTCHCAPCRSE19, self).__init__(register,
-            'FENOTCHCAPCRSE19', 'AGC_NS.FENOTCHFILT9.FENOTCHCAPCRSE19', 'read-write',
-            u"",
-            4, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT9_FENOTCHCAPFINE19(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT9_FENOTCHCAPFINE19, self).__init__(register,
-            'FENOTCHCAPFINE19', 'AGC_NS.FENOTCHFILT9.FENOTCHCAPFINE19', 'read-write',
-            u"",
-            8, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT9_FENOTCHRATTNEN19(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT9_FENOTCHRATTNEN19, self).__init__(register,
-            'FENOTCHRATTNEN19', 'AGC_NS.FENOTCHFILT9.FENOTCHRATTNEN19', 'read-write',
-            u"",
-            12, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT9_FENOTCHEN19(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT9_FENOTCHEN19, self).__init__(register,
-            'FENOTCHEN19', 'AGC_NS.FENOTCHFILT9.FENOTCHEN19', 'read-write',
-            u"",
-            13, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT9_FENOTCHATTNSEL20(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT9_FENOTCHATTNSEL20, self).__init__(register,
-            'FENOTCHATTNSEL20', 'AGC_NS.FENOTCHFILT9.FENOTCHATTNSEL20', 'read-write',
-            u"",
-            16, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT9_FENOTCHCAPCRSE20(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT9_FENOTCHCAPCRSE20, self).__init__(register,
-            'FENOTCHCAPCRSE20', 'AGC_NS.FENOTCHFILT9.FENOTCHCAPCRSE20', 'read-write',
-            u"",
-            20, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT9_FENOTCHCAPFINE20(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT9_FENOTCHCAPFINE20, self).__init__(register,
-            'FENOTCHCAPFINE20', 'AGC_NS.FENOTCHFILT9.FENOTCHCAPFINE20', 'read-write',
-            u"",
-            24, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT9_FENOTCHRATTNEN20(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT9_FENOTCHRATTNEN20, self).__init__(register,
-            'FENOTCHRATTNEN20', 'AGC_NS.FENOTCHFILT9.FENOTCHRATTNEN20', 'read-write',
-            u"",
-            28, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT9_FENOTCHEN20(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT9_FENOTCHEN20, self).__init__(register,
-            'FENOTCHEN20', 'AGC_NS.FENOTCHFILT9.FENOTCHEN20', 'read-write',
-            u"",
-            29, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT10_FENOTCHATTNSEL21(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT10_FENOTCHATTNSEL21, self).__init__(register,
-            'FENOTCHATTNSEL21', 'AGC_NS.FENOTCHFILT10.FENOTCHATTNSEL21', 'read-write',
-            u"",
-            0, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT10_FENOTCHCAPCRSE21(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT10_FENOTCHCAPCRSE21, self).__init__(register,
-            'FENOTCHCAPCRSE21', 'AGC_NS.FENOTCHFILT10.FENOTCHCAPCRSE21', 'read-write',
-            u"",
-            4, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT10_FENOTCHCAPFINE21(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT10_FENOTCHCAPFINE21, self).__init__(register,
-            'FENOTCHCAPFINE21', 'AGC_NS.FENOTCHFILT10.FENOTCHCAPFINE21', 'read-write',
-            u"",
-            8, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT10_FENOTCHRATTNEN21(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT10_FENOTCHRATTNEN21, self).__init__(register,
-            'FENOTCHRATTNEN21', 'AGC_NS.FENOTCHFILT10.FENOTCHRATTNEN21', 'read-write',
-            u"",
-            12, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT10_FENOTCHEN21(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT10_FENOTCHEN21, self).__init__(register,
-            'FENOTCHEN21', 'AGC_NS.FENOTCHFILT10.FENOTCHEN21', 'read-write',
-            u"",
-            13, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT10_FENOTCHATTNSEL22(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT10_FENOTCHATTNSEL22, self).__init__(register,
-            'FENOTCHATTNSEL22', 'AGC_NS.FENOTCHFILT10.FENOTCHATTNSEL22', 'read-write',
-            u"",
-            16, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT10_FENOTCHCAPCRSE22(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT10_FENOTCHCAPCRSE22, self).__init__(register,
-            'FENOTCHCAPCRSE22', 'AGC_NS.FENOTCHFILT10.FENOTCHCAPCRSE22', 'read-write',
-            u"",
-            20, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT10_FENOTCHCAPFINE22(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT10_FENOTCHCAPFINE22, self).__init__(register,
-            'FENOTCHCAPFINE22', 'AGC_NS.FENOTCHFILT10.FENOTCHCAPFINE22', 'read-write',
-            u"",
-            24, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT10_FENOTCHRATTNEN22(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT10_FENOTCHRATTNEN22, self).__init__(register,
-            'FENOTCHRATTNEN22', 'AGC_NS.FENOTCHFILT10.FENOTCHRATTNEN22', 'read-write',
-            u"",
-            28, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT10_FENOTCHEN22(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT10_FENOTCHEN22, self).__init__(register,
-            'FENOTCHEN22', 'AGC_NS.FENOTCHFILT10.FENOTCHEN22', 'read-write',
-            u"",
-            29, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT11_FENOTCHATTNSEL23(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT11_FENOTCHATTNSEL23, self).__init__(register,
-            'FENOTCHATTNSEL23', 'AGC_NS.FENOTCHFILT11.FENOTCHATTNSEL23', 'read-write',
-            u"",
-            0, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT11_FENOTCHCAPCRSE23(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT11_FENOTCHCAPCRSE23, self).__init__(register,
-            'FENOTCHCAPCRSE23', 'AGC_NS.FENOTCHFILT11.FENOTCHCAPCRSE23', 'read-write',
-            u"",
-            4, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT11_FENOTCHCAPFINE23(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT11_FENOTCHCAPFINE23, self).__init__(register,
-            'FENOTCHCAPFINE23', 'AGC_NS.FENOTCHFILT11.FENOTCHCAPFINE23', 'read-write',
-            u"",
-            8, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT11_FENOTCHRATTNEN23(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT11_FENOTCHRATTNEN23, self).__init__(register,
-            'FENOTCHRATTNEN23', 'AGC_NS.FENOTCHFILT11.FENOTCHRATTNEN23', 'read-write',
-            u"",
-            12, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT11_FENOTCHEN23(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT11_FENOTCHEN23, self).__init__(register,
-            'FENOTCHEN23', 'AGC_NS.FENOTCHFILT11.FENOTCHEN23', 'read-write',
-            u"",
-            13, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT11_FENOTCHATTNSEL24(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT11_FENOTCHATTNSEL24, self).__init__(register,
-            'FENOTCHATTNSEL24', 'AGC_NS.FENOTCHFILT11.FENOTCHATTNSEL24', 'read-write',
-            u"",
-            16, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT11_FENOTCHCAPCRSE24(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT11_FENOTCHCAPCRSE24, self).__init__(register,
-            'FENOTCHCAPCRSE24', 'AGC_NS.FENOTCHFILT11.FENOTCHCAPCRSE24', 'read-write',
-            u"",
-            20, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT11_FENOTCHCAPFINE24(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT11_FENOTCHCAPFINE24, self).__init__(register,
-            'FENOTCHCAPFINE24', 'AGC_NS.FENOTCHFILT11.FENOTCHCAPFINE24', 'read-write',
-            u"",
-            24, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT11_FENOTCHRATTNEN24(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT11_FENOTCHRATTNEN24, self).__init__(register,
-            'FENOTCHRATTNEN24', 'AGC_NS.FENOTCHFILT11.FENOTCHRATTNEN24', 'read-write',
-            u"",
-            28, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_FENOTCHFILT11_FENOTCHEN24(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_FENOTCHFILT11_FENOTCHEN24, self).__init__(register,
-            'FENOTCHEN24', 'AGC_NS.FENOTCHFILT11.FENOTCHEN24', 'read-write',
-            u"",
-            29, 1)
+            18, 1)
         self.__dict__['zz_frozen'] = True
 
 
@@ -5161,6 +2731,326 @@ class RM_Field_AGC_NS_CCADEBUG_DEBUGCCASIGDET(Base_RM_Field):
             'DEBUGCCASIGDET', 'AGC_NS.CCADEBUG.DEBUGCCASIGDET', 'read-only',
             u"",
             9, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_TIACODE0_TIACOMP1(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_TIACODE0_TIACOMP1, self).__init__(register,
+            'TIACOMP1', 'AGC_NS.TIACODE0.TIACOMP1', 'read-write',
+            u"",
+            0, 3)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_TIACODE0_TIACOMP2(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_TIACODE0_TIACOMP2, self).__init__(register,
+            'TIACOMP2', 'AGC_NS.TIACODE0.TIACOMP2', 'read-write',
+            u"",
+            4, 3)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_TIACODE0_TIACOMP3(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_TIACODE0_TIACOMP3, self).__init__(register,
+            'TIACOMP3', 'AGC_NS.TIACODE0.TIACOMP3', 'read-write',
+            u"",
+            8, 3)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_TIACODE0_TIACOMP4(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_TIACODE0_TIACOMP4, self).__init__(register,
+            'TIACOMP4', 'AGC_NS.TIACODE0.TIACOMP4', 'read-write',
+            u"",
+            12, 3)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_TIACODE0_TIACOMP5(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_TIACODE0_TIACOMP5, self).__init__(register,
+            'TIACOMP5', 'AGC_NS.TIACODE0.TIACOMP5', 'read-write',
+            u"",
+            16, 3)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_TIACODE0_TIACOMP6(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_TIACODE0_TIACOMP6, self).__init__(register,
+            'TIACOMP6', 'AGC_NS.TIACODE0.TIACOMP6', 'read-write',
+            u"",
+            20, 3)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_TIACODE1_TIACOMP7(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_TIACODE1_TIACOMP7, self).__init__(register,
+            'TIACOMP7', 'AGC_NS.TIACODE1.TIACOMP7', 'read-write',
+            u"",
+            0, 3)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_TIACODE1_TIACOMP8(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_TIACODE1_TIACOMP8, self).__init__(register,
+            'TIACOMP8', 'AGC_NS.TIACODE1.TIACOMP8', 'read-write',
+            u"",
+            4, 3)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_TIACODE1_TIACOMP9(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_TIACODE1_TIACOMP9, self).__init__(register,
+            'TIACOMP9', 'AGC_NS.TIACODE1.TIACOMP9', 'read-write',
+            u"",
+            8, 3)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_TIACODE1_TIACOMP10(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_TIACODE1_TIACOMP10, self).__init__(register,
+            'TIACOMP10', 'AGC_NS.TIACODE1.TIACOMP10', 'read-write',
+            u"",
+            12, 3)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_TIACODE1_TIACOMP11(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_TIACODE1_TIACOMP11, self).__init__(register,
+            'TIACOMP11', 'AGC_NS.TIACODE1.TIACOMP11', 'read-write',
+            u"",
+            16, 3)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_LNAMIXCODE2_LNAMIXSLICE11(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_LNAMIXCODE2_LNAMIXSLICE11, self).__init__(register,
+            'LNAMIXSLICE11', 'AGC_NS.LNAMIXCODE2.LNAMIXSLICE11', 'read-write',
+            u"",
+            0, 6)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_LNAMIXCODE2_LNAMIXCUREN(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_LNAMIXCODE2_LNAMIXCUREN, self).__init__(register,
+            'LNAMIXCUREN', 'AGC_NS.LNAMIXCODE2.LNAMIXCUREN', 'read-write',
+            u"",
+            6, 11)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_COLLDETCTRL_UPONMARSSI(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_COLLDETCTRL_UPONMARSSI, self).__init__(register,
+            'UPONMARSSI', 'AGC_NS.COLLDETCTRL.UPONMARSSI', 'read-write',
+            u"",
+            0, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_COLLDETCTRL_INPUTSEL(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_COLLDETCTRL_INPUTSEL, self).__init__(register,
+            'INPUTSEL', 'AGC_NS.COLLDETCTRL.INPUTSEL', 'read-write',
+            u"",
+            1, 2)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_COLLDETCTRL_RSSIINSEL(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_COLLDETCTRL_RSSIINSEL, self).__init__(register,
+            'RSSIINSEL', 'AGC_NS.COLLDETCTRL.RSSIINSEL', 'read-write',
+            u"",
+            3, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_COLLDETCTRL_OVRTHDSEL(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_COLLDETCTRL_OVRTHDSEL, self).__init__(register,
+            'OVRTHDSEL', 'AGC_NS.COLLDETCTRL.OVRTHDSEL', 'read-write',
+            u"",
+            7, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_COLLDETCTRL_MALATCHSEL(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_COLLDETCTRL_MALATCHSEL, self).__init__(register,
+            'MALATCHSEL', 'AGC_NS.COLLDETCTRL.MALATCHSEL', 'read-write',
+            u"",
+            8, 2)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_COLLDETCTRL_MACOMPENSEL(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_COLLDETCTRL_MACOMPENSEL, self).__init__(register,
+            'MACOMPENSEL', 'AGC_NS.COLLDETCTRL.MACOMPENSEL', 'read-write',
+            u"",
+            10, 2)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_COLLDETCTRL_MATAP(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_COLLDETCTRL_MATAP, self).__init__(register,
+            'MATAP', 'AGC_NS.COLLDETCTRL.MATAP', 'read-write',
+            u"",
+            12, 2)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_COLLDETCTRL_FLTBYP(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_COLLDETCTRL_FLTBYP, self).__init__(register,
+            'FLTBYP', 'AGC_NS.COLLDETCTRL.FLTBYP', 'read-write',
+            u"",
+            14, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_COLLDETCTRL_LATCHRSSIEN(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_COLLDETCTRL_LATCHRSSIEN, self).__init__(register,
+            'LATCHRSSIEN', 'AGC_NS.COLLDETCTRL.LATCHRSSIEN', 'read-write',
+            u"",
+            24, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_COLLDETCTRL_LATCHRSSI(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_COLLDETCTRL_LATCHRSSI, self).__init__(register,
+            'LATCHRSSI', 'AGC_NS.COLLDETCTRL.LATCHRSSI', 'read-write',
+            u"",
+            25, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_COLLDETTHD_MATHRESHOLD(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_COLLDETTHD_MATHRESHOLD, self).__init__(register,
+            'MATHRESHOLD', 'AGC_NS.COLLDETTHD.MATHRESHOLD', 'read-write',
+            u"",
+            0, 4)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_COLLDETTHD_MINTHRESHOLD(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_COLLDETTHD_MINTHRESHOLD, self).__init__(register,
+            'MINTHRESHOLD', 'AGC_NS.COLLDETTHD.MINTHRESHOLD', 'read-write',
+            u"",
+            8, 9)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_COLLDETTHD_OVRTHRESHOLD(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_COLLDETTHD_OVRTHRESHOLD, self).__init__(register,
+            'OVRTHRESHOLD', 'AGC_NS.COLLDETTHD.OVRTHRESHOLD', 'read-write',
+            u"",
+            18, 9)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_COLLDETSTATUS_MAFLTDOUT(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_COLLDETSTATUS_MAFLTDOUT, self).__init__(register,
+            'MAFLTDOUT', 'AGC_NS.COLLDETSTATUS.MAFLTDOUT', 'read-only',
+            u"",
+            0, 9)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_SETTLINGINDCTRL_EN(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_SETTLINGINDCTRL_EN, self).__init__(register,
+            'EN', 'AGC_NS.SETTLINGINDCTRL.EN', 'read-write',
+            u"",
+            0, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_SETTLINGINDCTRL_POSTHD(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_SETTLINGINDCTRL_POSTHD, self).__init__(register,
+            'POSTHD', 'AGC_NS.SETTLINGINDCTRL.POSTHD', 'read-write',
+            u"",
+            8, 6)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_SETTLINGINDCTRL_NEGTHD(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_SETTLINGINDCTRL_NEGTHD, self).__init__(register,
+            'NEGTHD', 'AGC_NS.SETTLINGINDCTRL.NEGTHD', 'read-write',
+            u"",
+            16, 6)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_SETTLINGINDPER_SETTLEDPERIOD(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_SETTLINGINDPER_SETTLEDPERIOD, self).__init__(register,
+            'SETTLEDPERIOD', 'AGC_NS.SETTLINGINDPER.SETTLEDPERIOD', 'read-write',
+            u"",
+            0, 16)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_SETTLINGINDPER_DELAYPERIOD(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_SETTLINGINDPER_DELAYPERIOD, self).__init__(register,
+            'DELAYPERIOD', 'AGC_NS.SETTLINGINDPER.DELAYPERIOD', 'read-write',
+            u"",
+            16, 16)
         self.__dict__['zz_frozen'] = True
 
 

@@ -125,6 +125,8 @@ class PHYS_Studio_Base_Ocelot(IPhy):
         # Add band-specific parameters
         phy.profile_inputs.base_frequency_hz.value = 868000000
 
+        return phy
+
     # Owner: Casey Weltzin
     # JIRA Link: https://jira.silabs.com/browse/PGOCELOTVALTEST-146
     def PHY_Studio_868M_2GFSK_38p4Kbps_20K(self, model, phy_name=None):

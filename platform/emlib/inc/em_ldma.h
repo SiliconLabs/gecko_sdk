@@ -81,7 +81,7 @@ extern "C" {
  * DMA transfers are initiated by a call to @ref LDMA_StartTransfer(),
  * transfer properties are controlled by the contents of @ref LDMA_TransferCfg_t
  * and @ref LDMA_Descriptor_t structure parameters.
- * The @htmlonly LDMA_Descriptor_t @endhtmlonly structure parameter may be a
+ * The LDMA_Descriptor_t structure parameter may be a
  * pointer to an array of descriptors, descriptors in array should
  * be linked together as needed.
  *
@@ -1034,8 +1034,8 @@ typedef struct {
   uint32_t  reserved1  : 4;     /**< Reserved                                        */
   uint32_t  dstIlEn    : 1;     /**< Destination interleave.                         */
   uint32_t  IlMode     : 2;     /**< Interleave mode.                                */
-  uint32_t  bufferable : 1;    /**< Reserved                                        */
-  uint32_t  reserved2  : 24;    /**< Allow AHB buffering.                            */
+  uint32_t  bufferable : 1;     /**< Allow AHB buffering.                            */
+  uint32_t  reserved2  : 24;    /**< Reserved                                        */
 
   uint32_t  reserved3;          /**< Reserved                                        */
   uint32_t  IlSrc;              /**< DMA rules table base address in memory.         */

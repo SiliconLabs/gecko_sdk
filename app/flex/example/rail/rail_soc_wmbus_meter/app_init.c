@@ -38,6 +38,7 @@
 #include "app_process.h"
 #include "sl_simple_led_instances.h"
 #include "sl_wmbus_support.h"
+#include "sl_flex_rail_channel_selector.h"
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -94,9 +95,9 @@ RAIL_Handle_t app_init(void)
   }
 
   if ( mode == WMBUS_MODE_T_METER || mode == WMBUS_MODE_T_COLLECTOR || mode == WMBUS_MODE_C ) {
-    rx_channel = TX_CHANNEL + 1; //asymmetric config, rx will be on a different channel
+    rx_channel = get_selected_channel() + 1; //asymmetric config, rx will be on a different channel
   } else {
-    rx_channel = TX_CHANNEL;
+    rx_channel = get_selected_channel();
   }
 
   //calibrate IR on rx channel before starting the main loop, since it takes longer than most rx operation

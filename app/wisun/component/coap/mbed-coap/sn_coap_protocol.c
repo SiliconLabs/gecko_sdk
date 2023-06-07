@@ -618,7 +618,6 @@ sn_coap_hdr_s *sn_coap_protocol_parse(struct coap_s * restrict handle, sn_nsdl_a
     /* Set returned status to User */
     returned_dst_coap_msg_ptr->coap_status = COAP_STATUS_PARSER_BLOCKWISE_MSG_REJECTED;
     tr_error("sn_coap_protocol_parse - COAP_STATUS_PARSER_BLOCKWISE_MSG_REJECTED!");
-    //todo: send response -> not implemented
     return returned_dst_coap_msg_ptr;
   }
 #endif /* !SN_COAP_BLOCKWISE_ENABLED && !SN_COAP_MAX_BLOCKWISE_PAYLOAD_SIZE */

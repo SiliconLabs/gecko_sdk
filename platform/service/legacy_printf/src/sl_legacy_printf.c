@@ -63,7 +63,7 @@
 //   - add a single byte to the local buffer
 //   - convert a nibble to its ascii hex character
 //   - convert an uint16_t to a decimal string
-// Most of these only work within the emPrintfInternal() function.
+// Most of these only work within the sli_util_printf_internal() function.
 
 // Current champion is %4x which writes 8 bytes.  (%s and %p can write
 // more, but they do their own overflow checks).
@@ -169,10 +169,10 @@ uint8_t emDecimalStringWrite(uint32_t value,
 }
 
 // Returns number of characters written
-uint8_t emPrintfInternal(emPrintfFlushHandler flushHandler,
-                         COM_Port_t port,
-                         PGM_P string,
-                         va_list args)
+uint8_t sli_util_printf_internal(emPrintfFlushHandler flushHandler,
+                                 COM_Port_t port,
+                                 PGM_P string,
+                                 va_list args)
 {
   (void) port;
   uint8_t localBuffer[LOCAL_BUFFER_SIZE + MAX_SINGLE_COMMAND_BYTES] = { 0, };
@@ -403,7 +403,7 @@ EmberStatus emberSerialPrintfVarArg(uint8_t port, PGM_P formatString, va_list ap
   (void) port;
   EmberStatus stat = EMBER_SUCCESS;
 
-  if (!emPrintfInternal(emberSerialWriteData, 0, formatString, ap)) {
+  if (!sli_util_printf_internal(emberSerialWriteData, 0, formatString, ap)) {
     stat = EMBER_ERR_FATAL;
   }
 

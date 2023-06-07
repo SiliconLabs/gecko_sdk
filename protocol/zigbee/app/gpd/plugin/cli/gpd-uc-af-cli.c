@@ -20,7 +20,9 @@
 // -----------------------------------------------------------------------------
 #include <stdint.h>
 #include "em_chip.h"
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #include "sl_cli.h"
 #ifdef SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT
 #include "sl_zigbee_debug_print.h"

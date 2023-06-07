@@ -128,7 +128,7 @@ public:
      * @returns true if busy transmitting or scanning, false otherwise.
      *
      */
-    bool IsTransmittingOrScanning(void) { return mSubMac.IsTransmittingOrScanning(); }
+    bool IsTransmittingOrScanning(void) const { return mSubMac.IsTransmittingOrScanning(); }
 
     /**
      * This method gets the radio transmit frame.
@@ -279,13 +279,15 @@ public:
     /**
      * This method sets the current MAC frame counter value.
      *
-     * @param[in] aMacFrameCounter  The MAC frame counter value.
+     * @param[in] aFrameCounter  The MAC frame counter value.
+     * @param[in] aSetIfLarger   If `true`, set only if the new value @p aFrameCounter is larger than current value.
+     *                           If `false`, set the new value independent of the current value.
      *
      * @retval kErrorNone            If successful.
      * @retval kErrorInvalidState    If the raw link-layer isn't enabled.
      *
      */
-    Error SetMacFrameCounter(uint32_t aMacFrameCounter);
+    Error SetMacFrameCounter(uint32_t aFrameCounter, bool aSetIfLarger);
 
 #if OT_SHOULD_LOG_AT(OT_LOG_LEVEL_INFO)
     /**
@@ -306,12 +308,12 @@ public:
      *
      */
     void RecordFrameTransmitStatus(const TxFrame &aFrame,
-                                   const RxFrame *aAckFrame,
+                                   RxFrame       *aAckFrame,
                                    Error          aError,
                                    uint8_t        aRetryCount,
                                    bool           aWillRetx);
 #else
-    void    RecordFrameTransmitStatus(const TxFrame &, const RxFrame *, Error, uint8_t, bool) {}
+    void    RecordFrameTransmitStatus(const TxFrame &, RxFrame *, Error, uint8_t, bool) {}
 #endif
 
 private:

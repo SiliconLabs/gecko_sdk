@@ -27,8 +27,9 @@
 
 #include "app/framework/plugin/reporting/reporting.h"
 
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
-#include "app/util/common/uc-temp-macros.h"
+#endif
 #ifdef SL_CATALOG_ZIGBEE_BLE_EVENT_HANDLER_PRESENT
 #include "sl_ble_event_handler.h"
 #endif

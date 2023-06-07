@@ -101,11 +101,6 @@
 #define OPENTHREAD_CONFIG_CHANNEL_MONITOR_ENABLE    0
 #endif
 // </e>
-// <e>  Child Supervision
-#ifndef OPENTHREAD_CONFIG_CHILD_SUPERVISION_ENABLE
-#define OPENTHREAD_CONFIG_CHILD_SUPERVISION_ENABLE  0
-#endif
-// </e>
 // <e>  Maximum size of the CLI line (in bytes), including null terminator
 #ifndef OPENTHREAD_CONFIG_CLI_MAX_LINE_LENGTH
 #define OPENTHREAD_CONFIG_CLI_MAX_LINE_LENGTH       640
@@ -186,11 +181,6 @@
 #define OPENTHREAD_CONFIG_JOINER_ENABLE             1
 #endif
 // </e>
-// <e>  Legacy Network
-#ifndef OPENTHREAD_CONFIG_LEGACY_ENABLE
-#define OPENTHREAD_CONFIG_LEGACY_ENABLE             0
-#endif
-// </e>
 // <e>  Link Raw Service
 #ifndef OPENTHREAD_CONFIG_LINK_RAW_ENABLE
 #define OPENTHREAD_CONFIG_LINK_RAW_ENABLE           0
@@ -256,9 +246,9 @@
 #define OPENTHREAD_CONFIG_SNTP_CLIENT_ENABLE        0
 #endif
 // </e>
-// <e>  TMF Network Diagnostics for MTD
-#ifndef OPENTHREAD_CONFIG_TMF_NETWORK_DIAG_MTD_ENABLE
-#define OPENTHREAD_CONFIG_TMF_NETWORK_DIAG_MTD_ENABLE   0
+// <e>  TMF Network Diagnostic client API
+#ifndef OPENTHREAD_CONFIG_TMF_NETDIAG_CLIENT_ENABLE
+#define OPENTHREAD_CONFIG_TMF_NETDIAG_CLIENT_ENABLE   1
 #endif
 // </e>
 // <e>  Time Synchronization Service

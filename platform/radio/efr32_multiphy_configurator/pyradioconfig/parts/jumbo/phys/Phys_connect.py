@@ -260,7 +260,7 @@ class PHYS_connect(IPhy):
         phy.profile_inputs.fsk_symbol_map.value = model.vars.fsk_symbol_map.var_enum.MAP0
         phy.profile_inputs.manchester_mapping.value = model.vars.manchester_mapping.var_enum.Default
         phy.profile_inputs.modulation_type.value = model.vars.modulation_type.var_enum.OQPSK
-        if model.part_family.lower() in ['dumbo', 'jumbo', 'nerio', 'nixi']:
+        if model.part_family.lower() in ['dumbo', 'jumbo', 'nerio', 'nixi', 'unit_test_part']:
             # Series 1
             phy.profile_inputs.pll_bandwidth_tx.value = model.vars.pll_bandwidth_tx.var_enum.BW_2520KHz
         else:
@@ -436,7 +436,7 @@ class PHYS_connect(IPhy):
         phy.profile_inputs.white_poly.value = model.vars.white_poly.var_enum.NONE
         phy.profile_inputs.timing_detection_threshold.value = 65
         phy.profile_inputs.timing_sample_threshold.value = 0
-        if model.part_family.lower() in ['dumbo', 'jumbo', 'nerio', 'nixi']:
+        if model.part_family.lower() in ['dumbo', 'jumbo', 'nerio', 'nixi', 'unit_test_part']:
             # Series 1
             phy.profile_inputs.pll_bandwidth_tx.value = model.vars.pll_bandwidth_tx.var_enum.BW_2520KHz
         else:
@@ -471,7 +471,7 @@ class PHYS_connect(IPhy):
         phy.profile_inputs.fsk_symbol_map.value = model.vars.fsk_symbol_map.var_enum.MAP0
         phy.profile_inputs.manchester_mapping.value = model.vars.manchester_mapping.var_enum.Default
         phy.profile_inputs.modulation_type.value = model.vars.modulation_type.var_enum.OQPSK
-        if model.part_family.lower() in ['dumbo', 'jumbo', 'nerio', 'nixi']:
+        if model.part_family.lower() in ['dumbo', 'jumbo', 'nerio', 'nixi', 'unit_test_part']:
             # Series 1
             phy.profile_inputs.pll_bandwidth_tx.value = model.vars.pll_bandwidth_tx.var_enum.BW_2520KHz
         else:

@@ -60,6 +60,7 @@
 #define APP_SETTINGS_WISUN_DEFAULT_CHANNEL_SPACING  SL_WISUN_CHANNEL_SPACING_100HZ
 #define APP_SETTINGS_WISUN_DEFAULT_REGULATION  SL_WISUN_REGULATION_NONE
 #define APP_SETTINGS_WISUN_DEFAULT_DEVICE_TYPE  SL_WISUN_ROUTER
+#define APP_SETTINGS_WISUN_DEFAULT_LFN_PROFILE SL_WISUN_LFN_PROFILE_TEST
 
 #define APP_SETTINGS_WISUN_CHANNEL_MASK_ALL  0xFFFFFFFF
 #define APP_SETTINGS_WISUN_CHANNEL_MASK_NONE  0
@@ -124,7 +125,8 @@ static const app_settings_wisun_t app_settings_wisun_default = {
   .device_type = APP_SETTINGS_WISUN_DEFAULT_DEVICE_TYPE,
   .chan_plan_id = APP_SETTINGS_WISUN_DEFAULT_CHAN_PLAN_ID,
   .phy_mode_id = APP_SETTINGS_WISUN_DEFAULT_PHY_MODE_ID,
-  .phy_config_type = APP_SETTINGS_WISUN_DEFAULT_PHY_CONFIG_TYPE
+  .phy_config_type = APP_SETTINGS_WISUN_DEFAULT_PHY_CONFIG_TYPE,
+  .lfn_profile = APP_SETTINGS_WISUN_DEFAULT_LFN_PROFILE
 };
 
 static const app_settings_ping_t app_settings_ping_default = {
@@ -139,7 +141,8 @@ static const app_settings_ping_t app_settings_ping_default = {
 static const app_settings_app_t app_settings_app_default = {
   .printable_data_as_hex = false,
   .printable_data_length = APP_UTIL_PRINTABLE_DATA_MAX_LENGTH,
-  .autoconnect = APP_SETTINGS_APP_DEFAULT_AUTOCONNECT
+  .autoconnect = APP_SETTINGS_APP_DEFAULT_AUTOCONNECT,
+  .pti_state = true
 };
 
 app_settings_wisun_t app_settings_wisun;
@@ -233,18 +236,29 @@ static const app_enum_t app_settings_phy_channel_spacing_enum[] =
   { NULL, 0 }
 };
 
-const app_enum_t app_settings_wisun_join_state_enum[] =
+const app_enum_t app_settings_wisun_join_state_enum_ffn[] =
 {
   { "Disconnected", SL_WISUN_JOIN_STATE_DISCONNECTED },
-  { "Select PAN", SL_WISUN_JOIN_STATE_SELECT_PAN },
-  { "Authenticate", SL_WISUN_JOIN_STATE_AUTHENTICATE },
-  { "Acquire PAN Config", SL_WISUN_JOIN_STATE_ACQUIRE_PAN_CONFIG },
-  { "Configure Routing", SL_WISUN_JOIN_STATE_CONFIGURE_ROUTING },
-  { "Operational", SL_WISUN_JOIN_STATE_OPERATIONAL },
-  { "Configure Routing - parent selection", SL_WISUN_JOIN_STATE_4_1_PARENT_SELECT },
-  { "Configure Routing - DHCP", SL_WISUN_JOIN_STATE_4_2_DHCP },
-  { "Configure Routing - address registration", SL_WISUN_JOIN_STATE_4_3_EARO },
-  { "Configure Routing - DAO registration", SL_WISUN_JOIN_STATE_4_4_DAO },
+  { "Join state 1: Select PAN", SL_WISUN_JOIN_STATE_SELECT_PAN },
+  { "Join state 2: Authenticate", SL_WISUN_JOIN_STATE_AUTHENTICATE },
+  { "Join state 3: Acquire PAN Config", SL_WISUN_JOIN_STATE_ACQUIRE_PAN_CONFIG },
+  { "Join state 4: Configure Routing - parent selection", SL_WISUN_JOIN_STATE_CONFIGURE_ROUTING },
+  { "Join state 4: Configure Routing - DHCP", SL_WISUN_JOIN_STATE_DHCP },
+  { "Join state 4: Configure Routing - address registration", SL_WISUN_JOIN_STATE_EARO },
+  { "Join state 4: Configure Routing - DAO registration", SL_WISUN_JOIN_STATE_DAO },
+  { "Join state 5: Operational", SL_WISUN_JOIN_STATE_OPERATIONAL },
+  { NULL, 0 }
+};
+
+const app_enum_t app_settings_wisun_join_state_enum_lfn[] =
+{
+  { "Disconnected", SL_WISUN_JOIN_STATE_DISCONNECTED },
+  { "Join state 1: Select PAN", SL_WISUN_JOIN_STATE_SELECT_PAN },
+  { "Join state 2: Authenticate", SL_WISUN_JOIN_STATE_AUTHENTICATE },
+  { "Join state 3: Acquire PAN Config", SL_WISUN_JOIN_STATE_ACQUIRE_PAN_CONFIG },
+  { "Join state 4: Configure IP Layer - DHCP", SL_WISUN_JOIN_STATE_CONFIGURE_ROUTING },
+  { "Join state 4: Configure IP Layer - address registration", SL_WISUN_JOIN_STATE_EARO },
+  { "Join state 5: Operational", SL_WISUN_JOIN_STATE_OPERATIONAL },
   { NULL, 0 }
 };
 
@@ -255,6 +269,14 @@ const app_enum_t app_settings_wisun_neighbor_type_enum[] =
   { "Child", SL_WISUN_NEIGHBOR_TYPE_CHILD },
   { NULL, 0 }
 };
+
+const app_enum_t app_settings_wisun_is_lfn_enum[] =
+{
+  { "FFN", 0 },
+  { "LFN", 1 },
+  { NULL, 0 }
+};
+
 
 static const app_enum_t app_settings_wisun_regulation_enum[] =
 {
@@ -279,6 +301,14 @@ static const app_enum_t app_settings_wisun_device_type_enum[] =
   { NULL, 0 }
 };
 
+static const app_enum_t app_settings_wisun_lfn_profile_enum[] =
+{
+  { "test", SL_WISUN_LFN_PROFILE_TEST },
+  { "balanced", SL_WISUN_LFN_PROFILE_BALANCED },
+  { "eco", SL_WISUN_LFN_PROFILE_ECO },
+  { NULL, 0 }
+};
+
 static sl_status_t app_settings_get_fan10_phy_config(char *value_str,
                                                      const char *key_str,
                                                      const app_settings_entry_t *entry);
@@ -294,9 +324,9 @@ static sl_status_t app_settings_get_ids_phy_config(char *value_str,
 static sl_status_t app_settings_get_fan10_and_fan11_phy_config(char *value_str,
                                                                const char *key_str,
                                                                const app_settings_entry_t *entry);
-static sl_status_t app_settings_get_fan11_and_explicit_phy_config(char *value_str,
-                                                                  const char *key_str,
-                                                                  const app_settings_entry_t *entry);
+static sl_status_t app_settings_get_fan11_and_explicit_and_ids_phy_config(char *value_str,
+                                                                          const char *key_str,
+                                                                          const app_settings_entry_t *entry);
 static sl_status_t app_settings_get_ip_addresses(char *value_str,
                                                  const char *key_str,
                                                  const app_settings_entry_t *entry);
@@ -345,7 +375,11 @@ static sl_status_t app_settings_set_regulation_warning_threshold(const char *val
 static sl_status_t app_settings_set_regulation_alert_threshold(const char *value_str,
                                                                const char *key_str,
                                                                const app_settings_entry_t *entry);
+
 #if RAIL_IEEE802154_SUPPORTS_G_MODESWITCH
+static sl_status_t app_settings_set_rx_mdr_capable(const char *value_str,
+                                                   const char *key_str,
+                                                   const app_settings_entry_t *entry);
 static sl_status_t app_settings_set_rx_phy_mode_ids(const char *value_str,
                                                     const char *key_str,
                                                     const app_settings_entry_t *entry);
@@ -457,7 +491,7 @@ const app_settings_entry_t app_settings_entries[] =
     .input_enum_list = NULL,
     .output_enum_list = NULL,
     .set_handler = app_settings_set_integer,
-    .get_handler = app_settings_get_fan11_and_explicit_phy_config,
+    .get_handler = app_settings_get_fan11_and_explicit_and_ids_phy_config,
     .description = "Wi-SUN PHY mode ID [uint8]"
   },
   {
@@ -767,7 +801,7 @@ const app_settings_entry_t app_settings_entries[] =
     .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
     .value = NULL,
     .input_enum_list = NULL,
-    .output_enum_list = app_settings_wisun_join_state_enum,
+    .output_enum_list = app_settings_wisun_join_state_enum_ffn,
     .set_handler = NULL,
     .get_handler = app_settings_get_join_state,
     .description = "Wi-SUN join state"
@@ -867,6 +901,19 @@ const app_settings_entry_t app_settings_entries[] =
   },
 #if RAIL_IEEE802154_SUPPORTS_G_MODESWITCH
   {
+    .key = "rx_mdr_capable",
+    .domain = app_settings_domain_wisun,
+    .value_size = APP_SETTINGS_VALUE_SIZE_UINT8,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = &app_settings_wisun.rx_mdr_capable,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = app_settings_set_rx_mdr_capable,
+    .get_handler = app_settings_get_integer,
+    .description = "Indicate if MDR Command is supported"
+  },
+  {
     .key = "rx_phy_mode_ids_count",
     .domain = app_settings_domain_wisun,
     .value_size = APP_SETTINGS_VALUE_SIZE_UINT8,
@@ -893,6 +940,32 @@ const app_settings_entry_t app_settings_entries[] =
     .description = "List of PhyModeId to advertise in POM-IE"
   },
 #endif
+  {
+    .key = "lfn_profile",
+    .domain = app_settings_domain_wisun,
+    .value_size = APP_SETTINGS_VALUE_SIZE_UINT8,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = &app_settings_wisun.lfn_profile,
+    .input_enum_list = app_settings_wisun_lfn_profile_enum,
+    .output_enum_list = app_settings_wisun_lfn_profile_enum,
+    .set_handler = app_settings_set_integer,
+    .get_handler = app_settings_get_integer,
+    .description = "Wi-SUN LFN profile [uint8]"
+  },
+  {
+    .key = "pti_state",
+    .domain = app_settings_domain_app,
+    .value_size = APP_SETTINGS_VALUE_SIZE_UINT8,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = &app_settings_app.pti_state,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = app_settings_set_integer,
+    .get_handler = app_settings_get_integer,
+    .description = "Disable or enable PTI [bool] (0|1)"
+  },
   {
     .key = NULL,
     .domain = 0,
@@ -1017,7 +1090,6 @@ static const app_settings_entry_t app_statistics_entries[] =
     .get_handler = app_settings_get_integer,
     .description = "Tx queue peak"
   },
-#if defined(SL_CATALOG_WISUN_MODE_SWITCH_PRESENT)
   {
     .key = "rx_ms_count",
     .domain = app_statistics_domain_mac,
@@ -1070,7 +1142,6 @@ static const app_settings_entry_t app_statistics_entries[] =
     .get_handler = app_settings_get_integer,
     .description = "Tx failed count using mode switch"
   },
-#endif
   {
     .key = "rx_count",
     .domain = app_statistics_domain_mac,
@@ -1291,19 +1362,6 @@ static const app_settings_entry_t app_statistics_entries[] =
     .set_handler = NULL,
     .get_handler = app_settings_get_integer,
     .description = "Unknown neighbor"
-  },
-  {
-    .key = "synch_lost",
-    .domain = app_statistics_domain_fhss,
-    .value_size = APP_SETTINGS_VALUE_SIZE_UINT32,
-    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
-    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
-    .value = &app_statistics.fhss.channel_retry,
-    .input_enum_list = NULL,
-    .output_enum_list = NULL,
-    .set_handler = NULL,
-    .get_handler = app_settings_get_integer,
-    .description = "Synch lost"
   },
   {
     .key = "pan_control_rx_count",
@@ -1779,12 +1837,13 @@ static sl_status_t app_settings_get_fan10_and_fan11_phy_config(char *value_str,
   return app_settings_get_phy_config(value_str, key_str, entry, !used);
 }
 
-static sl_status_t app_settings_get_fan11_and_explicit_phy_config(char *value_str,
-                                                                  const char *key_str,
-                                                                  const app_settings_entry_t *entry)
+static sl_status_t app_settings_get_fan11_and_explicit_and_ids_phy_config(char *value_str,
+                                                                          const char *key_str,
+                                                                          const app_settings_entry_t *entry)
 {
   bool used = app_settings_wisun.phy_config_type == SL_WISUN_PHY_CONFIG_FAN11
-           || app_settings_wisun.phy_config_type == SL_WISUN_PHY_CONFIG_EXPLICIT;
+           || app_settings_wisun.phy_config_type == SL_WISUN_PHY_CONFIG_EXPLICIT
+           || app_settings_wisun.phy_config_type == SL_WISUN_PHY_CONFIG_IDS;
   return app_settings_get_phy_config(value_str, key_str, entry, !used);
 }
 
@@ -1935,6 +1994,8 @@ static sl_status_t app_settings_get_neighbors(char *value_str,
             if (neighbor_info.rsl_in != 0xFF) {
               printf("    rsl_in = %d dBm\r\n", (int16_t)neighbor_info.rsl_in - 174);
             }
+            app_util_get_string(value_str, neighbor_info.is_lfn, app_settings_wisun_is_lfn_enum, false, false, 0);
+            printf("    device_type = %s\r\n", value_str);
           }
         }
         printf("]\r\n");
@@ -2005,7 +2066,7 @@ static sl_status_t app_settings_get_statistics_regulation(char *value_str,
   while (iter->key) {
     if (!strcmp(entry->key, app_statistics_domain_str[iter->domain])) {
       // Associated regional regulation is coded in input_enum_list.
-      if (app_settings_wisun.regulation == (sl_wisun_regulation_t)iter->input_enum_list) {
+      if ((uintptr_t)app_settings_wisun.regulation == (uintptr_t)iter->input_enum_list) {
         if (!key_str || !strcmp(iter->key, key_str)) {
           if (iter->get_handler) {
             ret = iter->get_handler(value_str, NULL, iter);
@@ -2182,6 +2243,9 @@ static sl_status_t app_settings_get_join_state(char *value_str,
 
   ret = sl_wisun_get_join_state(&join_state);
   if (ret == SL_STATUS_OK) {
+    if (app_settings_wisun.device_type == SL_WISUN_LFN) {
+      ent.output_enum_list = app_settings_wisun_join_state_enum_lfn;
+    }
     value = join_state;
     ent.value = &value;
     ret = app_settings_get_integer(value_str, key_str, (const app_settings_entry_t *)&ent);
@@ -2277,6 +2341,41 @@ static sl_status_t app_settings_set_regulation_alert_threshold(const char *value
 }
 
 #if RAIL_IEEE802154_SUPPORTS_G_MODESWITCH
+static sl_status_t app_settings_set_rx_mdr_capable(const char *value_str,
+                                                   const char *key_str,
+                                                   const app_settings_entry_t *entry)
+{
+  sl_status_t ret;
+  uint8_t phy_mode_id_count, is_mdr_command_capable;
+  uint8_t phy_mode_id[SL_WISUN_MAX_PHY_MODE_ID_COUNT];
+  uint8_t *phy_mode_id_p, *phy_mode_id_count_p;
+
+  ret = app_settings_set_integer(value_str, key_str, entry);
+
+  if (ret == SL_STATUS_OK) {
+
+    if (app_settings_wisun.rx_phy_mode_ids_count == 0) {
+      // Check if default PhyList can be retrieved from device
+      if (sl_wisun_get_pom_ie(&phy_mode_id_count, phy_mode_id, &is_mdr_command_capable) == SL_STATUS_OK) {
+        phy_mode_id_p = phy_mode_id;
+        phy_mode_id_count_p = &phy_mode_id_count;
+      } else {
+        // POM-IE not available yet
+        return ret;
+      }
+    } else {
+      phy_mode_id_p = app_settings_wisun.rx_phy_mode_ids;
+      phy_mode_id_count_p = &app_settings_wisun.rx_phy_mode_ids_count;
+    }
+
+    ret = sl_wisun_set_pom_ie(*phy_mode_id_count_p,
+                              phy_mode_id_p,
+                              app_settings_wisun.rx_mdr_capable);
+  }
+
+  return ret;
+}
+
 static sl_status_t app_settings_set_rx_phy_mode_ids(const char *value_str,
                                                     const char *key_str,
                                                     const app_settings_entry_t *entry)
@@ -2318,7 +2417,7 @@ static sl_status_t app_settings_set_rx_phy_mode_ids(const char *value_str,
 
     ret = sl_wisun_set_pom_ie(app_settings_wisun.rx_phy_mode_ids_count,
                               app_settings_wisun.rx_phy_mode_ids,
-                              0);
+                              app_settings_wisun.rx_mdr_capable);
   }
 
   return ret;

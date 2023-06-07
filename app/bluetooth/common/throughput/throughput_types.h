@@ -30,6 +30,11 @@
 #ifndef THROUGHPUT_TYPES_H
 #define THROUGHPUT_TYPES_H
 
+/***********************************************************************************************//**
+ * @addtogroup throughput
+ * @{
+ **************************************************************************************************/
+
 #include "sl_bt_api.h"
 
 /*******************************************************************************
@@ -44,11 +49,13 @@ typedef enum {
 
 /// State enum type
 typedef enum {
+  THROUGHPUT_STATE_UNINITALIZED,
   THROUGHPUT_STATE_DISCONNECTED,
   THROUGHPUT_STATE_CONNECTED,
   THROUGHPUT_STATE_SUBSCRIBED,
   THROUGHPUT_STATE_TEST,
-  THROUGHPUT_STATE_TEST_FINISH
+  THROUGHPUT_STATE_TEST_FINISH,
+  THROUGHPUT_STATE_UNINITALIZING
 } throughput_state_t;
 
 /// Mode enum type
@@ -142,4 +149,5 @@ typedef struct {
 #define CLI_OK                                      "OK" APP_LOG_NEW_LINE
 #define CLI_ERROR                                   "ERROR" APP_LOG_NEW_LINE
 
+/** @} (end addtogroup throughput) */
 #endif // THROUGHPUT_TYPES_H

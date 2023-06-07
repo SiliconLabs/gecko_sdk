@@ -448,27 +448,3 @@ class Calc_Synth_Bobcat(CALC_Synth_ocelot):
 
             self._reg_write_default(model.vars.RAC_CLKMULTCTRL_CLKMULTENRESYNC)
             self._reg_write_default(model.vars.RAC_CLKMULTCTRL_CLKMULTVALID)
-
-    def calc_lo_side_regs(self, model):
-        """
-        Exact copy of panther implementation
-        This is needed to shield Ocelot SubG low-side injection fix from Bobcat 2.4G fix (happening separately)
-        """
-
-        model.vars.lo_injection_side.value = model.vars.lo_injection_side.var_enum.HIGH_SIDE # default to high-side
-
-        lo_injection_side = model.vars.lo_injection_side.value
-
-        if lo_injection_side == model.vars.lo_injection_side.var_enum.HIGH_SIDE:
-            loside = 1
-            digiqswapen = 1
-            mixerconj = 0
-        else:
-            loside = 0
-            digiqswapen = 0
-            mixerconj = 1
-
-        #Write the registers
-        self._reg_write(model.vars.SYNTH_IFFREQ_LOSIDE, loside)
-        self._reg_write(model.vars.MODEM_MIXCTRL_DIGIQSWAPEN, digiqswapen)
-        self._reg_write(model.vars.MODEM_DIGMIXCTRL_MIXERCONJ, mixerconj)

@@ -19,7 +19,9 @@
 #include <stdint.h>
 #include <stdarg.h>
 #include <string.h>
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #include "sl_zigbee_debug_print.h"
 #include "sl_zigbee_debug_print_config.h"
 

@@ -20,10 +20,10 @@
 #include <string.h>
 #include <CC_Supervision.h>
 #include <ZAF_Common_interface.h>
-#include "ZAF_tx_mutex.h"
 //#define DEBUGPRINT
 #include "DebugPrint.h"
 #include <zpal_radio.h>
+#include "zaf_transport_tx.h"
 
 /****************************************************************************/
 /*                      PRIVATE TYPES and DEFINITIONS                       */
@@ -68,41 +68,29 @@ static void SetRadioAttenuation(uint8_t adjustTxPower);
 static void
 SendTestReport(void)
 {
-  ZAF_TRANSPORT_TX_BUFFER  TxBuf;
-  ZW_APPLICATION_TX_BUFFER *pTxBuf = &(TxBuf.appTxBuf);
-  memset((uint8_t*)pTxBuf, 0, sizeof(ZW_APPLICATION_TX_BUFFER) );
-  CommandClassSupervisionGetAdd(&(TxBuf.supervisionGet));
+  ZW_APPLICATION_TX_BUFFER txBuf;
+  zaf_tx_options_t tx_options;
+  memset((uint8_t*)&txBuf, 0, sizeof(ZW_APPLICATION_TX_BUFFER) );
 
-  MULTICHAN_NODE_ID masterNode;
-  TRANSMIT_OPTIONS_TYPE_SINGLE_EX txOptionsEx;
+  tx_options.dest_node_id = testSourceNodeID;
+  tx_options.source_endpoint = 0;
+  tx_options.dest_endpoint = 0;
+  tx_options.tx_options = ZWAVE_PLUS_TX_OPTIONS;
+  tx_options.security_key = GetHighestSecureLevel(ZAF_GetSecurityKeys());
+  tx_options.bit_addressing = false;
+  tx_options.use_supervision = false;
 
-  masterNode.node.nodeId = testSourceNodeID;
-  masterNode.node.endpoint = 0;
-  masterNode.node.BitAddress = 0;
-  masterNode.nodeInfo.BitMultiChannelEncap = 0;
-  masterNode.nodeInfo.security = GetHighestSecureLevel(ZAF_GetSecurityKeys());
-  txOptionsEx.txOptions = ZWAVE_PLUS_TX_OPTIONS;
-  txOptionsEx.sourceEndpoint = 0;
-  txOptionsEx.pDestNode = &masterNode;
-
-  pTxBuf->ZW_PowerlevelTestNodeReportFrame.cmdClass = COMMAND_CLASS_POWERLEVEL;
-  pTxBuf->ZW_PowerlevelTestNodeReportFrame.cmd = POWERLEVEL_TEST_NODE_REPORT;
-  pTxBuf->ZW_PowerlevelTestNodeReportFrame.testNodeid = (uint8_t)testNodeID;   // Z-Wave only (not for Z-Wave LR)
-  pTxBuf->ZW_PowerlevelTestNodeReportFrame.statusOfOperation = testState;
-  pTxBuf->ZW_PowerlevelTestNodeReportFrame.testFrameCount1 =
+  txBuf.ZW_PowerlevelTestNodeReportFrame.cmdClass = COMMAND_CLASS_POWERLEVEL;
+  txBuf.ZW_PowerlevelTestNodeReportFrame.cmd = POWERLEVEL_TEST_NODE_REPORT;
+  txBuf.ZW_PowerlevelTestNodeReportFrame.testNodeid = (uint8_t)testNodeID;   // Z-Wave only (not for Z-Wave LR)
+  txBuf.ZW_PowerlevelTestNodeReportFrame.statusOfOperation = testState;
+  txBuf.ZW_PowerlevelTestNodeReportFrame.testFrameCount1 =
       (uint8_t)(testFrameSuccessCount >> 8);
-  pTxBuf->ZW_PowerlevelTestNodeReportFrame.testFrameCount2 = (uint8_t)testFrameSuccessCount;
+  txBuf.ZW_PowerlevelTestNodeReportFrame.testFrameCount2 = (uint8_t)testFrameSuccessCount;
 
-  if (ZAF_ENQUEUE_STATUS_SUCCESS != Transport_SendRequestEP(
-          (uint8_t*)pTxBuf,
-          sizeof(pTxBuf->ZW_PowerlevelTestNodeReportFrame),
-          &txOptionsEx,
-          NULL))
-  {
-    //sending request failed
-    DPRINTF("%s(): Transport_SendRequestEP() failed. \n", __func__);
-  }
-  return;
+  (void) zaf_transport_tx((uint8_t*)&txBuf,
+                          sizeof(txBuf.ZW_PowerlevelTestNodeReportFrame),
+                          NULL, &tx_options);
 }
 
 /**
@@ -227,8 +215,6 @@ CC_Powerlevel_handler(
   uint8_t * pLengthOut)
 {
   UNUSED(cmdLength);
-  UNUSED(pFrameOut);
-  UNUSED(pLengthOut);
 
   switch (pCmd->ZW_Common.cmd)
   {
@@ -275,25 +261,13 @@ CC_Powerlevel_handler(
         return RECEIVED_FRAME_STATUS_FAIL;
       }
 
-      ZAF_TRANSPORT_TX_BUFFER  TxBuf;
-      ZW_APPLICATION_TX_BUFFER *pTxBuf = &(TxBuf.appTxBuf);
-      memset((uint8_t*)pTxBuf, 0, sizeof(ZW_APPLICATION_TX_BUFFER) );
+      pFrameOut->ZW_PowerlevelReportFrame.cmdClass = COMMAND_CLASS_POWERLEVEL;
+      pFrameOut->ZW_PowerlevelReportFrame.cmd = POWERLEVEL_REPORT;
+      pFrameOut->ZW_PowerlevelReportFrame.powerLevel = currentPower;
+      pFrameOut->ZW_PowerlevelReportFrame.timeout = timerPowerLevelSec;
 
-      TRANSMIT_OPTIONS_TYPE_SINGLE_EX *pTxOptionsEx;
-      RxToTxOptions(rxOpt, &pTxOptionsEx);
-      pTxBuf->ZW_PowerlevelReportFrame.cmdClass = COMMAND_CLASS_POWERLEVEL;
-      pTxBuf->ZW_PowerlevelReportFrame.cmd = POWERLEVEL_REPORT;
-      pTxBuf->ZW_PowerlevelReportFrame.powerLevel = currentPower;
-      pTxBuf->ZW_PowerlevelReportFrame.timeout = timerPowerLevelSec;
-      if (ZAF_ENQUEUE_STATUS_SUCCESS != Transport_SendResponseEP(
-                                                        (uint8_t *)pTxBuf,
-                                                        sizeof(pTxBuf->ZW_PowerlevelReportFrame),
-                                                        pTxOptionsEx,
-                                                        NULL))
-      {
-        /*Job failed */
-        return RECEIVED_FRAME_STATUS_FAIL;
-      }
+      *pLengthOut = sizeof(ZW_POWERLEVEL_REPORT_FRAME);
+
       return RECEIVED_FRAME_STATUS_SUCCESS;
     break;
 
@@ -322,36 +296,20 @@ CC_Powerlevel_handler(
 
     case POWERLEVEL_TEST_NODE_GET:
       {
-        TRANSMIT_OPTIONS_TYPE_SINGLE_EX *pTxOptionsEx;
-
         if (true == Check_not_legal_response_job(rxOpt))
         {
           /*Do not support endpoint bit-addressing */
           return RECEIVED_FRAME_STATUS_FAIL;
         }
 
-        ZAF_TRANSPORT_TX_BUFFER  TxBuf;
-        ZW_APPLICATION_TX_BUFFER *pTxBuf = &(TxBuf.appTxBuf);
-        memset((uint8_t*)pTxBuf, 0, sizeof(ZW_APPLICATION_TX_BUFFER) );
-        /*Check pTxBuf is free*/
+        pFrameOut->ZW_PowerlevelTestNodeReportFrame.cmdClass = COMMAND_CLASS_POWERLEVEL;
+        pFrameOut->ZW_PowerlevelTestNodeReportFrame.cmd = POWERLEVEL_TEST_NODE_REPORT;
+        pFrameOut->ZW_PowerlevelTestNodeReportFrame.testNodeid = (uint8_t)testNodeID;
+        pFrameOut->ZW_PowerlevelTestNodeReportFrame.statusOfOperation = testState;
+        pFrameOut->ZW_PowerlevelTestNodeReportFrame.testFrameCount1 = (uint8_t)(testFrameSuccessCount >> 8);
+        pFrameOut->ZW_PowerlevelTestNodeReportFrame.testFrameCount2 = (uint8_t)(testFrameSuccessCount);
 
-        RxToTxOptions(rxOpt, &pTxOptionsEx);
-        pTxBuf->ZW_PowerlevelTestNodeReportFrame.cmdClass = COMMAND_CLASS_POWERLEVEL;
-        pTxBuf->ZW_PowerlevelTestNodeReportFrame.cmd = POWERLEVEL_TEST_NODE_REPORT;
-        pTxBuf->ZW_PowerlevelTestNodeReportFrame.testNodeid = (uint8_t)testNodeID;
-        pTxBuf->ZW_PowerlevelTestNodeReportFrame.statusOfOperation = testState;
-        pTxBuf->ZW_PowerlevelTestNodeReportFrame.testFrameCount1 = (uint8_t)(testFrameSuccessCount >> 8);
-        pTxBuf->ZW_PowerlevelTestNodeReportFrame.testFrameCount2 = (uint8_t)(testFrameSuccessCount);
-
-        if (ZAF_ENQUEUE_STATUS_SUCCESS != Transport_SendResponseEP(
-                (uint8_t *)pTxBuf,
-                sizeof(pTxBuf->ZW_PowerlevelTestNodeReportFrame),
-                pTxOptionsEx,
-                NULL))
-        {
-          /*Job failed, free transmit-buffer pTxBuf by clearing mutex */
-          return RECEIVED_FRAME_STATUS_FAIL;
-        }
+        *pLengthOut = sizeof(ZW_POWERLEVEL_TEST_NODE_REPORT_FRAME);
       }
       return RECEIVED_FRAME_STATUS_SUCCESS;
     break;

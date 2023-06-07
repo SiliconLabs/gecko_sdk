@@ -24,6 +24,7 @@ requires:
   # - name: rail_util_coex
   # - name: rail_util_aox
   # - name: rail_util_rf_path
+  - name: rail_util_rf_path_switch
 
   # Other utilities
   # - name: fem_util

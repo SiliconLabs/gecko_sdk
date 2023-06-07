@@ -2,7 +2,7 @@
 //
 #include PLATFORM_HEADER
 #include "stack/include/ember-types.h"
-#include "event_control/event.h"
+#include "event_queue/event-queue.h"
 #if defined(CORTEXM3_EFR32)
 #include "spidrv.h"
 #else
@@ -39,8 +39,8 @@
 
 // ------------------------------------------------------------------------------
 // Plugin events
-EmberEventControl emberAfPluginPowerMeterCs5463InitEventControl;
-EmberEventControl emberAfPluginPowerMeterCs5463ReadEventControl;
+EmberEvent emberAfPluginPowerMeterCs5463InitEvent;
+EmberEvent emberAfPluginPowerMeterCs5463ReadEvent;
 
 // ------------------------------------------------------------------------------
 // Plugin private funcitons declaration
@@ -71,7 +71,7 @@ static void cs563InternalSpiMasterDeselectSlave(void);
 
 #if defined(EMBER_AF_PLUGIN_EEPROM)
 // extern eeprom functions to be used
-extern bool emAfIsEepromInitialized(void);
+extern bool sli_eeprom_is_eeprom_initialized(void);
 extern void emberAfPluginEepromNoteInitializedState(bool state);
 extern void emberAfPluginEepromShutdown();
 #endif //defined(EMBER_AF_PLUGIN_EEPROM)
@@ -95,15 +95,15 @@ static SPIDRV_HandleData_t spiHandler;
 #endif
 // ------------------------------------------------------------------------------
 // Plugin private event handlers
-void emberAfPluginPowerMeterCs5463InitEventHandler(void)
+void emberAfPluginPowerMeterCs5463InitEventHandler(EmberEvent* event)
 {
   halPowerMeterInit();
-  emberEventControlSetInactive(emberAfPluginPowerMeterCs5463InitEventControl);
-  emberEventControlSetDelayMS(emberAfPluginPowerMeterCs5463ReadEventControl,
-                              CS5463_MEASUREMENT_DELAY_MS);
+  emberEventSetInactive(emberAfPluginPowerMeterCs5463InitEvent);
+  emberEventSetDelayMs(emberAfPluginPowerMeterCs5463ReadEvent,
+                       CS5463_MEASUREMENT_DELAY_MS);
 }
 
-void emberAfPluginPowerMeterCs5463ReadEventHandler(void)
+void emberAfPluginPowerMeterCs5463ReadEventHandler(EmberEvent* event)
 {
   uint16_t gainFactor;
 #if defined(CORTEXM3_EFR32) && defined(EMBER_AF_PLUGIN_EEPROM)
@@ -115,8 +115,8 @@ void emberAfPluginPowerMeterCs5463ReadEventHandler(void)
   apparentPower = cs5463GetApparentPowerMilliW();
   powerFactor = cs5463GetPowerFactor();
   onChipTemperature = cs5463GetTemperature(false);
-  emberEventControlSetDelayMS(emberAfPluginPowerMeterCs5463ReadEventControl,
-                              CS5463_READ_INTERVAL_MS);
+  emberEventSetDelayMs(emberAfPluginPowerMeterCs5463ReadEvent,
+                       CS5463_READ_INTERVAL_MS);
   if (isCalibrating) {
     if ((rmsCurrent > CURRENT_CALIBRATION_MAX_MA)
         || (rmsCurrent < CURRENT_CALIBRATION_MIN_MA)) {
@@ -137,8 +137,8 @@ void emberAfPluginPowerMeterCs5463ReadEventHandler(void)
 // The init callback, which will be called by the framework on init.
 void emberAfPluginPowerMeterCs5463InitCallback(void)
 {
-  emberEventControlSetDelayMS(emberAfPluginPowerMeterCs5463InitEventControl,
-                              CS5463_INIT_DELAY_MS);
+  emberEventSetDelayMs(emberAfPluginPowerMeterCs5463InitEvent,
+                       CS5463_INIT_DELAY_MS);
 }
 
 void halPowerMeterInit(void)
@@ -552,13 +552,13 @@ bool halPowerMeterCalibrateCurrentGain(uint16_t referenceCurrentMa)
       || (referenceCurrentMa < CURRENT_CALIBRATION_MIN_MA)) {
     return false;
   }
-  emberEventControlSetInactive(emberAfPluginPowerMeterCs5463ReadEventControl);
+  emberEventSetInactive(emberAfPluginPowerMeterCs5463ReadEvent);
   halSetCurrentGain(CURRENT_UNIT_FACTOR);
   halPowerMeterInit();
   calibrationCurrentReference = referenceCurrentMa;
   isCalibrating = true;
-  emberEventControlSetDelayMS(emberAfPluginPowerMeterCs5463ReadEventControl,
-                              CS5463_CALIBRATE_INTERVAL_MS);
+  emberEventSetDelayMs(emberAfPluginPowerMeterCs5463ReadEvent,
+                       CS5463_CALIBRATE_INTERVAL_MS);
   return true;
 }
 

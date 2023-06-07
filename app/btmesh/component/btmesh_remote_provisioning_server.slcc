@@ -5,9 +5,14 @@ description: >
   Used to support remote provisioning server functionality of provisioning 
   a remote device over the mesh network and to perform the Node Provisioning 
   Protocol Interface procedures.
+
+  This is a No-Code component.
 category: "Bluetooth Mesh|Models|Remote Provisioning"
 quality: "production"
 root_path: "app/btmesh/common/btmesh_remote_provisioning_server"
+tag:
+  - No-Code
+
 config_file:
   - path: "config/sl_btmesh_remote_provisioning_server_config.h"
   - path: btmesh_remote_provisioning_server.dcd
@@ -23,6 +28,7 @@ provides:
 requires:
   - name: "app_assert"
   - name: "app_btmesh_util"
+  - name: "btmesh_provisionee"
   - name: "btmesh_stack_node"
   - name: "btmesh_stack_remote_provisioning_server"
   - name: "btmesh_stack"

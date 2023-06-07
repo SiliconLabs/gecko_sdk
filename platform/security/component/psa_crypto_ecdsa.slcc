@@ -34,10 +34,10 @@ requires:
 template_contribution:
   - name: psa_crypto_config
     value: PSA_WANT_ALG_ECDSA
-  - name: psa_crypto_config
+  - name: psa_crypto_builtin_config
     value: "MBEDTLS_PSA_BUILTIN_ALG_ECDSA 1"
     condition: [mbedtls_ecdsa]
-  - name: psa_crypto_config
+  - name: psa_crypto_builtin_config
     value: "MBEDTLS_PSA_BUILTIN_ALG_DETERMINISTIC_ECDSA 1"
     condition: [mbedtls_ecdsa_deterministic]
   - name: mbedtls_config

@@ -21,8 +21,9 @@
 
 #include "app/framework/plugin/ota-storage-common/ota-storage.h"
 
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #include "ota-bootload-config.h"
 #include "bootloader-interface-standalone.h"
 #if (EMBER_AF_PLUGIN_OTA_BOOTLOAD_UART_HOST_REBOOT == 1)
@@ -31,16 +32,6 @@
 #ifdef SL_CATALOG_ZIGBEE_EZSP_UART_PRESENT
 #define EZSP_UART_PRESENT
 #endif
-#else // !UC_BUILD
-#include "enums.h"
-#include "hal/micro/bootloader-interface-standalone.h"
-#ifdef EMBER_AF_PLUGIN_OTA_BOOTLOAD_UART_HOST_REBOOT
-#define UART_HOST_REBOOT
-#endif
-#ifdef EMBER_AF_PLUGIN_EZSP_UART
-#define EZSP_UART_PRESENT
-#endif
-#endif // UC_BUILD
 
 #include "ota-bootload-ncp.h"
 
@@ -103,7 +94,7 @@ static int serialFd = NULL_FILE_DESCRIPTOR;
 
 //------------------------------------------------------------------------------
 
-bool emAfStartNcpBootloaderCommunications(void)
+bool sli_zigbee_af_start_ncp_bootloader_communications(void)
 {
   serialFd = NULL_FILE_DESCRIPTOR;
   char errorString[MAX_ERROR_LENGTH];
@@ -123,7 +114,7 @@ bool emAfStartNcpBootloaderCommunications(void)
     return false;
   }
 
-  if (!emAfBootloadSendByte(beginDownload)) {
+  if (!sli_zigbee_af_bootload_send_byte(beginDownload)) {
     errorPrint("Failed to set bootloader in download mode.\n");
     return false;
   }
@@ -161,7 +152,7 @@ static bool checkForXmodemStart(void)
   return false;
 }
 
-bool emAfBootloadSendData(const uint8_t *data, uint16_t length)
+bool sli_zigbee_af_bootload_send_data(const uint8_t *data, uint16_t length)
 {
   if (length != write(serialFd,
                       data,
@@ -174,9 +165,9 @@ bool emAfBootloadSendData(const uint8_t *data, uint16_t length)
   return true;
 }
 
-bool emAfBootloadSendByte(uint8_t byte)
+bool sli_zigbee_af_bootload_send_byte(uint8_t byte)
 {
-  return emAfBootloadSendData(&byte, 1);
+  return sli_zigbee_af_bootload_send_data(&byte, 1);
 }
 
 static bool checkForBootloaderMenu(void)
@@ -187,7 +178,7 @@ static bool checkForBootloaderMenu(void)
   MEMSET(receivedBytesCache, 0, MAX_RECEIVED_BYTES);
 
   // Send a CR to the bootloader menu to trigger the prompt to echo back.
-  if (!emAfBootloadSendByte(returnChar)) {
+  if (!sli_zigbee_af_bootload_send_byte(returnChar)) {
     return false;
   }
 
@@ -229,7 +220,7 @@ static bool checkForBootloaderMenu(void)
   return true;
 }
 
-bool emAfRebootNcpAfterBootload(void)
+bool sli_zigbee_af_reboot_ncp_after_bootload(void)
 {
   delay();
   messagePrint("Rebooting NCP\n");
@@ -239,7 +230,7 @@ bool emAfRebootNcpAfterBootload(void)
     return false;
   }
 
-  if (!emAfBootloadSendByte(runChar)) {
+  if (!sli_zigbee_af_bootload_send_byte(runChar)) {
     return false;
   }
 
@@ -313,7 +304,7 @@ static int checkFdForData(void)
 //  being allowed to be received until the timeout is reached.  Current
 //  behavior only looks at one character and waits up to the timeout for it to
 //  arrive
-bool emAfBootloadWaitChar(uint8_t *data, bool expect, uint8_t expected)
+bool sli_zigbee_af_bootload_wait_char(uint8_t *data, bool expect, uint8_t expected)
 {
   int status = checkFdForData();
   if (status <= 0) {
@@ -337,7 +328,7 @@ bool emAfBootloadWaitChar(uint8_t *data, bool expect, uint8_t expected)
   }
 }
 
-void emAfPostNcpBootload(bool success)
+void sli_zigbee_af_post_ncp_bootload(bool success)
 {
   // If bootload fails, we could try to bootload again.
   // For now, we will require external intervention.
@@ -351,8 +342,8 @@ void emAfPostNcpBootload(bool success)
 #if defined(UART_HOST_REBOOT)
     halReboot();
 #else
-    emAfResetAndInitNCP();
-    emAfNetworkInit(SL_ZIGBEE_INIT_LEVEL_DONE);
+    sli_zigbee_af_reset_and_init_ncp();
+    sli_zigbee_af_network_init(SL_ZIGBEE_INIT_LEVEL_DONE);
 #endif
   }
 }

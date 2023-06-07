@@ -12,17 +12,6 @@ component_root_path: util/third_party/mbedtls
 provides:
   - name: mbedtls_source
 
-requires:
-  - name: device
-
-  - name: mbedtls_slcrypto_version
-    condition: [device_cortexm]
-
-recommends:
-  # The require + recommend approach is used for testing with older drivers.
-  - id: mbedtls_slcrypto
-    condition: [device_cortexm]
-
 source:
   - path: library/constant_time.c
   - path: library/threading.c

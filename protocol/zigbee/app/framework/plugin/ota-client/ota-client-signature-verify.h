@@ -24,13 +24,13 @@
 // returns another status code.
 // When EMBER_AF_IMAGE_VERIFY_WAIT is returned then no further calls
 // are necessary.  The verify code will fire the callback
-// emAfOtaVerifyStoredDataFinish() when it is has a result.
-EmberAfImageVerifyStatus emAfOtaImageSignatureVerify(uint16_t maxHashCalculations,
-                                                     const EmberAfOtaImageId* id,
-                                                     bool newVerification);
+// sli_zigbee_af_ota_verify_stored_data_finish() when it is has a result.
+EmberAfImageVerifyStatus sli_zigbee_af_ota_image_signature_verify(uint16_t maxHashCalculations,
+                                                                  const EmberAfOtaImageId* id,
+                                                                  bool newVerification);
 
 // This is the maximum number of digest calculations we perform per call to
-// emAfOtaImageSignatureVerify().  Arbitrary chosen value to limit
+// sli_zigbee_af_ota_image_signature_verify().  Arbitrary chosen value to limit
 // time spent in this routine.  A value of 0 means we will NOT return
 // until we are completely done with our digest calculations.
 // Empirically waiting until digest calculations are complete can
@@ -41,6 +41,6 @@ EmberAfImageVerifyStatus emAfOtaImageSignatureVerify(uint16_t maxHashCalculation
 // serviced.
 #define MAX_DIGEST_CALCULATIONS_PER_CALL 5
 
-void emAfOtaVerifyStoredDataFinish(EmberAfImageVerifyStatus status);
+void sli_zigbee_af_ota_verify_stored_data_finish(EmberAfImageVerifyStatus status);
 
-void emAfOtaClientSignatureVerifyPrintSigners(void);
+void sli_zigbee_af_ota_client_signature_verify_print_signers(void);

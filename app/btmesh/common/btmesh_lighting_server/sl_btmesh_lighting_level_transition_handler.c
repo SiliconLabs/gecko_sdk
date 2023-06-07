@@ -32,7 +32,7 @@
 #include "sl_status.h"
 
 #include "app_assert.h"
-#include "sl_simple_timer.h"
+#include "app_timer.h"
 
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
@@ -69,10 +69,10 @@ static uint32_t level_transtime_elapsed;
 /// non-zero if lightness transition is active
 static uint8_t level_transitioning;
 
-static sl_simple_timer_t transition_timer;
+static app_timer_t transition_timer;
 
 // Timer callbacks
-static void transition_timer_cb(sl_simple_timer_t *handle,
+static void transition_timer_cb(app_timer_t *handle,
                                 void *data);
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -92,7 +92,7 @@ SL_WEAK void sl_btmesh_lighting_server_on_ui_update(uint16_t lightness_level)
 /***************************************************************************//**
  * Timer Callback for LEDs transitions.
  ******************************************************************************/
-static void transition_timer_cb(sl_simple_timer_t *handle,
+static void transition_timer_cb(app_timer_t *handle,
                                 void *data)
 {
   (void)data;
@@ -104,7 +104,7 @@ static void transition_timer_cb(sl_simple_timer_t *handle,
     SL_BTMESH_LIGHTING_SERVER_UI_UPDATE_PERIOD_CFG_VAL;
 
   if (!level_transitioning) {
-    sl_status_t sc = sl_simple_timer_stop(&transition_timer);
+    sl_status_t sc = app_timer_stop(&transition_timer);
     app_assert_status_f(sc, "Failed to stop Periodic Level Transition Timer");
     return;
   } else {
@@ -167,7 +167,7 @@ void sl_btmesh_lighting_set_level(uint16_t level, uint32_t transition_ms)
     /* if a transition was in progress, cancel it */
     if (level_transitioning) {
       level_transitioning = 0;
-      sl_status_t sc = sl_simple_timer_stop(&transition_timer);
+      sl_status_t sc = app_timer_stop(&transition_timer);
       app_assert_status_f(sc, "Failed to stop Periodic Level Transition Timer");
     }
     sl_btmesh_lighting_server_on_ui_update(current_level);
@@ -184,11 +184,11 @@ void sl_btmesh_lighting_set_level(uint16_t level, uint32_t transition_ms)
 
   // enabling timer IRQ -> the PWM level is adjusted in timer interrupt
   // gradually until target level is reached.
-  sl_status_t sc = sl_simple_timer_start(&transition_timer,
-                                         SL_BTMESH_LIGHTING_SERVER_PWM_UPDATE_PERIOD_CFG_VAL,
-                                         transition_timer_cb,
-                                         NO_CALLBACK_DATA,
-                                         true);
+  sl_status_t sc = app_timer_start(&transition_timer,
+                                   SL_BTMESH_LIGHTING_SERVER_PWM_UPDATE_PERIOD_CFG_VAL,
+                                   transition_timer_cb,
+                                   NO_CALLBACK_DATA,
+                                   true);
   app_assert_status_f(sc, "Failed to start periodic Transition Timer");
 
   return;

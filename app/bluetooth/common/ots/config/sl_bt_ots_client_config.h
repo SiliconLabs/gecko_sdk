@@ -31,6 +31,11 @@
 #ifndef SL_BT_OTS_CLIENT_CONFIG_H
 #define SL_BT_OTS_CLIENT_CONFIG_H
 
+/***********************************************************************************************//**
+ * @addtogroup ots_client
+ * @{
+ **************************************************************************************************/
+
 #include "sl_bluetooth_connection_config.h"
 
 // <<< Use Configuration Wizard in Context Menu >>>
@@ -49,4 +54,5 @@
 
 // <<< end of configuration section >>>
 
+/** @} (end addtogroup ots_client) */
 #endif // SL_BT_OTS_CLIENT_CONFIG_H

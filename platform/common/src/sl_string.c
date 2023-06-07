@@ -101,7 +101,7 @@ size_t sl_strnlen(char *str, size_t max_len)
   if (str == NULL) {
     return len;
   }
-  while ((*str != '\0') && (len < max_len)) {
+  while ((len < max_len) && (*str != '\0')) {
     str++;
     len++;
   }

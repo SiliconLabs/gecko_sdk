@@ -21,7 +21,7 @@
     <properties key="solutionReferenceId" value="app.mcu_example.factory_demo.brd2204a.factory_demo.slcp"/>
     <properties key="projectFilePaths" value="factory_demo/brd2204a/factory_demo.slcp"/>
     <properties key="readmeFiles" value="factory_demo/brd2204a/readme.md"/>
-    <properties key="boardCompatibility" value="brd2204a com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2204a brd2204c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efm32gg11b.*"/>
     <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
@@ -36,7 +36,7 @@
     <properties key="solutionReferenceId" value="app.mcu_example.micriumos_canopen.micriumos_canopen.slcp"/>
     <properties key="projectFilePaths" value="micriumos_canopen/micriumos_canopen.slcp"/>
     <properties key="readmeFiles" value="micriumos_canopen/readme.md"/>
-    <properties key="boardCompatibility" value="brd2204a com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2204a brd2204c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efm32gg11b.*"/>
     <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
@@ -51,7 +51,7 @@
     <properties key="solutionReferenceId" value="app.mcu_example.micriumos_net.micriumos_net.slcp"/>
     <properties key="projectFilePaths" value="micriumos_net/micriumos_net.slcp"/>
     <properties key="readmeFiles" value="micriumos_net/readme.md"/>
-    <properties key="boardCompatibility" value="brd2204a com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2204a brd2204c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efm32gg11b.*"/>
     <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
@@ -66,7 +66,7 @@
     <properties key="solutionReferenceId" value="app.mcu_example.micriumos_webmic.micriumos_webmic.slcp"/>
     <properties key="projectFilePaths" value="micriumos_webmic/micriumos_webmic.slcp"/>
     <properties key="readmeFiles" value="micriumos_webmic/readme.md"/>
-    <properties key="boardCompatibility" value="brd2204a com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2204a brd2204c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efm32gg11b.*"/>
     <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>

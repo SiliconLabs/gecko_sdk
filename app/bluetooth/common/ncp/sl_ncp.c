@@ -40,7 +40,7 @@
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
 #endif // SL_COMPONENT_CATALOG_PRESENT
-#include "sl_simple_timer.h"
+#include "app_timer.h"
 #if defined(SL_CATALOG_WAKE_LOCK_PRESENT)
 #include "sl_wake_lock.h"
 #endif // SL_CATALOG_WAKE_LOCK_PRESENT
@@ -104,8 +104,8 @@ static inline void evt_set_available(void);
 static inline void evt_clr_available(void);
 
 // Timer handle and callback for command timeout.
-static sl_simple_timer_t cmd_timer;
-static void cmd_timer_cb(sl_simple_timer_t *timer, void *data);
+static app_timer_t cmd_timer;
+static void cmd_timer_cb(app_timer_t *timer, void *data);
 
 #if defined(SL_CATALOG_WAKE_LOCK_PRESENT)
 static inline bool sleep_signal_mask_is_set(void);
@@ -371,6 +371,7 @@ void sl_btmesh_on_event(sl_btmesh_msg_t *evt)
       // Enqueue event
       evt_enqueue(MSG_GET_LEN(evt),
                   (uint8_t *)evt);
+      sl_ncp_os_task_proceed();
     }
   }
 }
@@ -449,6 +450,7 @@ void sl_simple_com_transmit_cb(sl_status_t status)
   }
   #endif // SL_CATALOG_WAKE_LOCK_PRESENT
   busy = false;
+  sl_ncp_os_task_proceed();
 }
 
 /**************************************************************************//**
@@ -571,17 +573,17 @@ static void cmd_enqueue(uint16_t len, uint8_t *data)
 
   if (state == CMD_RECEIVED) {
     // Stop timer as the whole command was received. No problem if timer was
-    // not started before, simple_timer is prepared for that.
-    sc = sl_simple_timer_stop(&cmd_timer);
+    // not started before, app_timer is prepared for that.
+    sc = app_timer_stop(&cmd_timer);
 
     app_assert_status(sc);
   } else if (state == CMD_WAITING) {
     // Start timer used for max waiting time of fragmented packets.
-    sc = sl_simple_timer_start(&cmd_timer,
-                               SL_NCP_CMD_TIMEOUT_MS,
-                               cmd_timer_cb,
-                               NULL,
-                               false);
+    sc = app_timer_start(&cmd_timer,
+                         SL_NCP_CMD_TIMEOUT_MS,
+                         cmd_timer_cb,
+                         NULL,
+                         false);
     app_assert_status(sc);
   }
 }
@@ -634,7 +636,7 @@ static void evt_dequeue(void)
 // -----------------------------------------------------------------------------
 // Timer callback function
 
-static void cmd_timer_cb(sl_simple_timer_t *timer, void *data)
+static void cmd_timer_cb(app_timer_t *timer, void *data)
 {
   (void)data;
   (void)timer;

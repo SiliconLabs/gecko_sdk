@@ -1,0 +1,74 @@
+id: zigbee_direct_zdd
+label: Zigbee Direct Device Functionality
+package: Zigbee
+description: Zigbee Direct Device Functionality
+category: "Zigbee|Zigbee Direct ZDD"
+quality: production
+
+config_file:
+  - path: protocol/zigbee/app/framework/plugin-soc/zigbee_direct_zdd/config/zigbee_direct_zdd_config.h
+  - path: protocol/zigbee/app/framework/plugin-soc/zigbee_direct_zdd/zigbee_direct_zdd.xml
+    directory: btconf
+
+provides:
+  - name: zigbee_direct_zdd
+
+requires:
+  - name: zigbee_app_framework_common
+  - name: zigbee_zcl_framework_core
+  - name: bluetooth_stack
+  - name: mbedtls_ccm
+  - name: mbedtls_md5
+  - name: psa_crypto_md5
+  - name: psa_crypto_sha256
+  - name: mbedtls_hash
+  - name: psa_crypto_hmac
+  - name: zigbee_network_steering
+  - name: zigbee_packet_handoff
+  - name: zigbee_dynamic_commissioning
+  - name: zigbee_network_creator
+  - name: zigbee_network_creator_security
+  - name: zigbee_find_and_bind_target
+  - name: zigbee_find_and_bind_initiator
+
+source:  
+  - path: protocol/zigbee/app/framework/plugin-soc/zigbee_direct_zdd/zigbee_direct_security.c
+  - path: protocol/zigbee/app/framework/plugin-soc/zigbee_direct_zdd/zigbee_direct_common.c
+  - path: protocol/zigbee/app/framework/plugin-soc/zigbee_direct_zdd/zigbee_direct_session_key_negotiation.c
+
+include:
+  - path: protocol/zigbee/app/framework/plugin-soc/zigbee_direct_zdd/
+    file_list:
+    - path: zigbee_direct_security.h
+    - path: zigbee_direct_tlv.h
+    - path: zigbee-direct-zdd-tokens.h
+    - path: zigbee_direct_session_key_negotiation.h
+    - path: zigbee_direct_common.h
+
+template_contribution:
+  - name: component_catalog
+    value: zigbee_direct_zdd
+  - name: zigbee_af_callback
+    value:
+      callback_type: event_init
+      function_name: sli_zdd_application_init
+  - name: zigbee_af_callback
+    value:
+      callback_type: local_data_init
+      function_name: sli_zdd_application_init
+  - name: zigbee_af_callback
+    value:
+      callback_type: init_done
+      function_name: sli_zdd_application_init
+  - name: zigbee_stack_callback
+    value:
+      callback_type: stack_status
+      function_name: sli_zigbee_af_plugin_zdd_stack_status_callback    
+  - name: cluster_service
+    value:
+      cluster_id: "0x003D"
+      mfg_id: "NOT_MFG_SPECIFIC"
+      side: "SERVER"
+      service_function: "emberAfZigbeeDirectClusterServerCommandParse"
+  - name: token_header
+    value: app/framework/plugin-soc/zigbee_direct_zdd/zigbee-direct-zdd-tokens.h

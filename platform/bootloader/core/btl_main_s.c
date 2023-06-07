@@ -763,6 +763,7 @@ void SystemInit2(void)
 int main(void)
 {
   fih_int fih_rc = FIH_FAILURE;
+  (void) fih_rc;
   CHIP_Init();
 #if defined(BOOTLOADER_APPLOADER)
   sl_device_init_clocks();

@@ -3,7 +3,7 @@ label: Bluetooth Feature Pack - NCP Default
 package: Bluetooth
 description: >
   Includes selection of Bluetooth stack default NCP features.
-category: Bluetooth|Application
+category: Bluetooth|Application|Miscellaneous
 quality: deprecated
 root_path: app/bluetooth
 requires:
@@ -12,7 +12,6 @@ requires:
   - name: bluetooth_feature_extended_advertiser
   - name: bluetooth_feature_periodic_advertiser
   - name: bluetooth_feature_connection
-  - name: bluetooth_feature_dfu
   - name: bluetooth_feature_gap
   - name: bluetooth_feature_gatt
   - name: bluetooth_feature_gatt_server

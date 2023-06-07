@@ -201,5 +201,5 @@ EmberStatus emberAfPluginDeviceDatabaseFindDeviceSupportingCluster(EmberAfDevice
 /** @} */ // end of name API
 /** @} */ // end of device-database
 
-void emAfPluginDeviceDatabaseUpdateNodeStackRevision(EmberEUI64 eui64,
-                                                     uint8_t stackRevision);
+void sli_zigbee_af_device_database_update_node_stack_revision(EmberEUI64 eui64,
+                                                              uint8_t stackRevision);

@@ -13,7 +13,7 @@
 #include PLATFORM_HEADER
 #include CONFIGURATION_HEADER
 #include "stack/include/ember-types.h"
-#include "event_control/event.h"
+#include "event_queue/event-queue.h"
 #include "hal/hal.h"
 
 #include EMBER_AF_API_BATTERY_MONITOR
@@ -79,7 +79,7 @@ static uint32_t AdcToMilliV(uint32_t adcVal);
 // ------------------------------------------------------------------------------
 // Globals
 
-EmberEventControl emberAfPluginBatteryMonitorReadADCEventControl;
+EmberEvent emberAfPluginBatteryMonitorReadADCEvent;
 
 // structure used to store irq configuration from GIC plugin
 static HalGenericInterruptControlIrqCfg *irqConfig;
@@ -179,7 +179,7 @@ void emberAfPluginBatteryMonitorReadADCEventHandler(void)
   uint32_t timeSinceLastMeasureMS = currentMsTick - lastBatteryMeasureTick;
   ADC_InitSingle_TypeDef initAdc = ADC_INITSINGLE_BATTERY_VOLTAGE;
 
-  emberEventControlSetInactive(emberAfPluginBatteryMonitorReadADCEventControl);
+  emberEventSetInactive(emberAfPluginBatteryMonitorReadADCEvent);
 
   // In case something else in the system was using the ADC, reconfigure it to
   // properly sample the battery voltage

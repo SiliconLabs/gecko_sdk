@@ -45,6 +45,8 @@
 #include "em_core.h"
 #include "sl_light_switch_support.h"
 #include "sl_flex_rail_package_assistant.h"
+#include "sl_flex_rail_config.h"
+#include "sl_flex_rail_channel_selector.h"
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)
 #include "app_task_init.h"
@@ -249,8 +251,8 @@ static volatile uint64_t current_rail_err = 0;
 static RAIL_RxPacketDetails_t rxPacketDetails;
 
 /// Receive and Send FIFO
-static __ALIGNED(RAIL_FIFO_ALIGNMENT) uint8_t rx_fifo[RAIL_FIFO_SIZE];
-static __ALIGNED(RAIL_FIFO_ALIGNMENT) uint8_t tx_fifo[RAIL_FIFO_SIZE];
+static __ALIGNED(RAIL_FIFO_ALIGNMENT) uint8_t rx_fifo[SL_FLEX_RAIL_RX_FIFO_SIZE];
+static __ALIGNED(RAIL_FIFO_ALIGNMENT) uint8_t tx_fifo[SL_FLEX_RAIL_TX_FIFO_SIZE];
 
 /// Transmit packet
 static uint8_t out_packet[TX_PAYLOAD_LENGTH] = {
@@ -287,11 +289,11 @@ static RAIL_Status_t rail_status;
 void set_up_tx_fifo(RAIL_Handle_t rail_handle)
 {
   uint16_t allocated_tx_fifo_size = 0;
-  allocated_tx_fifo_size = RAIL_SetTxFifo(rail_handle, tx_fifo, 0, RAIL_FIFO_SIZE);
-  app_assert(allocated_tx_fifo_size == RAIL_FIFO_SIZE,
+  allocated_tx_fifo_size = RAIL_SetTxFifo(rail_handle, tx_fifo, 0, SL_FLEX_RAIL_TX_FIFO_SIZE);
+  app_assert(allocated_tx_fifo_size == SL_FLEX_RAIL_TX_FIFO_SIZE,
              "RAIL_SetTxFifo() failed to allocate a large enough fifo (%d bytes instead of %d bytes)\n",
              allocated_tx_fifo_size,
-             RAIL_FIFO_SIZE);
+             SL_FLEX_RAIL_TX_FIFO_SIZE);
 }
 
 /******************************************************************************
@@ -569,7 +571,7 @@ static void transmit_packet(RAIL_Handle_t rail_handle)
   set_command_type(&out_packet[DEMO_CONTROL_PAYLOAD_BYTE], LIGHT_TOGGLE);
   set_switch_state_in_payload();
   prepare_package(rail_handle, out_packet, sizeof(out_packet));
-  rail_status = RAIL_StartTx(rail_handle, CHANNEL, RAIL_TX_OPTIONS_DEFAULT, NULL);
+  rail_status = RAIL_StartTx(rail_handle, get_selected_channel(), RAIL_TX_OPTIONS_DEFAULT, NULL);
   if (rail_status != RAIL_STATUS_NO_ERROR) {
     app_log_warning("RAIL_StartTx() result:%d ", rail_status);
   }

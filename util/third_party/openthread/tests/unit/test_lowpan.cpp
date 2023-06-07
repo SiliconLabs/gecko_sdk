@@ -35,8 +35,8 @@ using namespace ot;
 
 namespace ot {
 
-ot::Instance *  sInstance;
-Ip6::Ip6 *      sIp6;
+ot::Instance   *sInstance;
+Ip6::Ip6       *sIp6;
 Lowpan::Lowpan *sLowpan;
 
 void TestIphcVector::GetCompressedStream(uint8_t *aIphc, uint16_t &aIphcLength)
@@ -129,7 +129,8 @@ static void Init(void)
 
     SuccessOrQuit(message->AppendBytes(mockNetworkData, sizeof(mockNetworkData)));
 
-    IgnoreError(sInstance->Get<NetworkData::Leader>().SetNetworkData(0, 0, NetworkData::kStableSubset, *message, 0));
+    IgnoreError(
+        sInstance->Get<NetworkData::Leader>().SetNetworkData(0, 0, NetworkData::kStableSubset, *message, 2, 0x20));
 }
 
 /**
@@ -145,7 +146,7 @@ static void Init(void)
  */
 static void Test(TestIphcVector &aVector, bool aCompress, bool aDecompress)
 {
-    Message * message = nullptr;
+    Message  *message = nullptr;
     uint8_t   result[512];
     uint8_t   iphc[512];
     uint8_t   ip6[512];
@@ -172,7 +173,7 @@ static void Test(TestIphcVector &aVector, bool aCompress, bool aDecompress)
     if (aCompress)
     {
         FrameBuilder frameBuilder;
-        Message *    compressedMsg;
+        Message     *compressedMsg;
         Ip6::Ecn     ecn;
 
         frameBuilder.Init(result, 127);

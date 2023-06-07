@@ -3,7 +3,7 @@ label:  "LE Power Control"
 package: "Bluetooth"
 description: >
   Bluetooth LE Power Control feature
-category: "Bluetooth|Feature"
+category: Bluetooth|Bluetooth LE Controller (Link Layer)|Additional Features
 quality: "production"
 root_path: "protocol/bluetooth"
 config_file:

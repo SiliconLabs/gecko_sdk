@@ -33,7 +33,7 @@
 #ifndef SL_HFXO_MANAGER_CONFIG_H
 #define SL_HFXO_MANAGER_CONFIG_H
 
-// <h>Power Manager Configuration
+// <h>HFXO Manager Configuration
 
 // <q SL_HFXO_MANAGER_CUSTOM_HFXO_IRQ_HANDLER> Enable custom IRQ handler for crystal HF oscillator.
 // <i> Enable if HFXO0_IRQHandler is needed from your application.

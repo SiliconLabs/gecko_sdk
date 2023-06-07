@@ -119,7 +119,6 @@ void otPlatAlarmMilliStartAt(otInstance *aInstance, uint32_t aT0, uint32_t aDt)
     OT_UNUSED_VARIABLE(aInstance);
     sl_status_t status;
     int32_t     remaining;
-    uint32_t    ticks;
 
     sl_sleeptimer_stop_timer(&sl_handle);
 
@@ -133,10 +132,11 @@ void otPlatAlarmMilliStartAt(otInstance *aInstance, uint32_t aT0, uint32_t aDt)
     }
     else
     {
-        status = sl_sleeptimer_ms32_to_tick(remaining, &ticks);
-        assert(status == SL_STATUS_OK);
-
-        status = sl_sleeptimer_start_timer(&sl_handle, ticks, AlarmCallback, NULL, 0,
+        status = sl_sleeptimer_start_timer(&sl_handle,
+                                           sl_sleeptimer_ms_to_tick(remaining),
+                                           AlarmCallback,
+                                           NULL,
+                                           0,
                                            SL_SLEEPTIMER_NO_HIGH_PRECISION_HF_CLOCKS_REQUIRED_FLAG);
         assert(status == SL_STATUS_OK);
     }

@@ -18,20 +18,8 @@
 #include "app/framework/include/af.h"
 #include "gbcs-gas-meter.h"
 
-#ifdef UC_BUILD
-
 // plugin gbcs-gas-meter report-attributes
-void emAfPluginGbcsGasMeterCliReportAttributes(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_gbcs_gas_meter_cli_report_attributes(sl_cli_command_arg_t *arguments)
 {
   emberAfPluginGbcsGasMeterReportAttributes();
 }
-
-#else
-
-// plugin gbcs-gas-meter report-attributes
-void emAfPluginGbcsGasMeterCliReportAttributes(void)
-{
-  emberAfPluginGbcsGasMeterReportAttributes();
-}
-
-#endif

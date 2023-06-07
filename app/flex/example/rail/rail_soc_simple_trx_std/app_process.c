@@ -58,6 +58,7 @@
 
 #include "rail_types.h"
 #include "cmsis_compiler.h"
+#include "sl_flex_rail_config.h"
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -66,7 +67,7 @@
 #ifdef SL_CATALOG_FLEX_IEEE802154_SUPPORT_PRESENT
   #define RAIL_FIFO_SIZE                    (SL_FLEX_RAIL_FRAME_MAX_SIZE)
 #else
-  #define RAIL_FIFO_SIZE                    (128)
+  #define RAIL_FIFO_SIZE                    (SL_FLEX_RAIL_RX_FIFO_SIZE)
 #endif
 /// Size of sending data
 #define RAIL_PAYLOAD_DATA_SIZE            (17U)

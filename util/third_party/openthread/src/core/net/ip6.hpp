@@ -42,6 +42,7 @@
 #include <openthread/nat64.h>
 #include <openthread/udp.h>
 
+#include "common/callback.hpp"
 #include "common/encoding.hpp"
 #include "common/frame_data.hpp"
 #include "common/locator.hpp"
@@ -135,6 +136,26 @@ public:
     explicit Ip6(Instance &aInstance);
 
     /**
+     * This method allocates a new message buffer from the buffer pool with default settings (link security
+     * enabled and `kPriorityMedium`).
+     *
+     * @returns A pointer to the message or `nullptr` if insufficient message buffers are available.
+     *
+     */
+    Message *NewMessage(void);
+
+    /**
+     * This method allocates a new message buffer from the buffer pool with default settings (link security
+     * enabled and `kPriorityMedium`).
+     *
+     * @param[in]  aReserved  The number of header bytes to reserve following the IPv6 header.
+     *
+     * @returns A pointer to the message or `nullptr` if insufficient message buffers are available.
+     *
+     */
+    Message *NewMessage(uint16_t aReserved);
+
+    /**
      * This method allocates a new message buffer from the buffer pool.
      *
      * @param[in]  aReserved  The number of header bytes to reserve following the IPv6 header.
@@ -143,34 +164,23 @@ public:
      * @returns A pointer to the message or `nullptr` if insufficient message buffers are available.
      *
      */
-    Message *NewMessage(uint16_t aReserved, const Message::Settings &aSettings = Message::Settings::GetDefault());
+    Message *NewMessage(uint16_t aReserved, const Message::Settings &aSettings);
 
     /**
      * This method allocates a new message buffer from the buffer pool and writes the IPv6 datagram to the message.
+     *
+     * The message priority is always determined from IPv6 message itself (@p aData) and the priority included in
+     * @p aSetting is ignored.
      *
      * @param[in]  aData        A pointer to the IPv6 datagram buffer.
      * @param[in]  aDataLength  The size of the IPV6 datagram buffer pointed by @p aData.
      * @param[in]  aSettings    The message settings.
      *
      * @returns A pointer to the message or `nullptr` if malformed IPv6 header or insufficient message buffers are
-     * available.
+     *          available.
      *
      */
-    Message *NewMessage(const uint8_t *aData, uint16_t aDataLength, const Message::Settings &aSettings);
-
-    /**
-     * This method allocates a new message buffer from the buffer pool and writes the IPv6 datagram to the message.
-     *
-     * @note The link layer security is enabled and the message priority is obtained from IPv6 message itself.
-     *
-     * @param[in]  aData        A pointer to the IPv6 datagram buffer.
-     * @param[in]  aDataLength  The size of the IPV6 datagram buffer pointed by @p aData.
-     *
-     * @returns A pointer to the message or `nullptr` if malformed IPv6 header or insufficient message buffers are
-     * available.
-     *
-     */
-    Message *NewMessage(const uint8_t *aData, uint16_t aDataLength);
+    Message *NewMessageFromData(const uint8_t *aData, uint16_t aDataLength, const Message::Settings &aSettings);
 
     /**
      * This method converts the IPv6 DSCP value to message priority level.
@@ -227,9 +237,9 @@ public:
      * @retval kErrorParse    Encountered a malformed header when processing the message.
      *
      */
-    Error HandleDatagram(Message &     aMessage,
+    Error HandleDatagram(Message      &aMessage,
                          MessageOrigin aOrigin,
-                         const void *  aLinkMessageInfo = nullptr,
+                         const void   *aLinkMessageInfo = nullptr,
                          bool          aIsReassembled   = false);
 
     /**
@@ -246,7 +256,10 @@ public:
      * @sa SetReceiveIp6FilterEnabled
      *
      */
-    void SetReceiveDatagramCallback(otIp6ReceiveCallback aCallback, void *aCallbackContext);
+    void SetReceiveDatagramCallback(otIp6ReceiveCallback aCallback, void *aCallbackContext)
+    {
+        mReceiveIp6DatagramCallback.Set(aCallback, aCallbackContext);
+    }
 
 #if OPENTHREAD_CONFIG_NAT64_TRANSLATOR_ENABLE
     /**
@@ -259,7 +272,10 @@ public:
      * @sa SetReceiveDatagramCallback
      *
      */
-    void SetNat64ReceiveIp4DatagramCallback(otNat64ReceiveIp4Callback aCallback, void *aCallbackContext);
+    void SetNat64ReceiveIp4DatagramCallback(otNat64ReceiveIp4Callback aCallback, void *aCallbackContext)
+    {
+        mReceiveIp4DatagramCallback.Set(aCallback, aCallbackContext);
+    }
 #endif
 
     /**
@@ -287,30 +303,25 @@ public:
     void SetReceiveIp6FilterEnabled(bool aEnabled) { mIsReceiveIp6FilterEnabled = aEnabled; }
 
     /**
-     * This method indicates whether or not IPv6 forwarding is enabled.
+     * This method performs default source address selection.
      *
-     * @returns TRUE if IPv6 forwarding is enabled, FALSE otherwise.
+     * @param[in,out]  aMessageInfo  A reference to the message information.
      *
-     */
-    bool IsForwardingEnabled(void) const { return mForwardingEnabled; }
-
-    /**
-     * This method enables/disables IPv6 forwarding.
-     *
-     * @param[in]  aEnable  TRUE to enable IPv6 forwarding, FALSE otherwise.
+     * @retval  kErrorNone      Found a source address and updated SockAddr of @p aMessageInfo.
+     * @retval  kErrorNotFound  No source address was found and @p aMessageInfo is unchanged.
      *
      */
-    void SetForwardingEnabled(bool aEnable) { mForwardingEnabled = aEnable; }
+    Error SelectSourceAddress(MessageInfo &aMessageInfo) const;
 
     /**
-     * This method perform default source address selection.
+     * This method performs default source address selection.
      *
-     * @param[in]  aMessageInfo  A reference to the message information.
+     * @param[in]  aDestination  The destination address.
      *
      * @returns A pointer to the selected IPv6 source address or `nullptr` if no source address was found.
      *
      */
-    const Netif::UnicastAddress *SelectSourceAddress(MessageInfo &aMessageInfo);
+    const Address *SelectSourceAddress(const Address &aDestination) const;
 
     /**
      * This method returns a reference to the send queue.
@@ -348,6 +359,20 @@ public:
      *
      */
     const otBorderRoutingCounters &GetBorderRoutingCounters(void) const { return mBorderRoutingCounters; }
+
+    /**
+     * This method returns a reference to the Border Routing counters.
+     *
+     * @returns A reference to the Border Routing counters.
+     *
+     */
+    otBorderRoutingCounters &GetBorderRoutingCounters(void) { return mBorderRoutingCounters; }
+
+    /**
+     * This method resets the Border Routing counters.
+     *
+     */
+    void ResetBorderRoutingCounters(void) { memset(&mBorderRoutingCounters, 0, sizeof(mBorderRoutingCounters)); }
 #endif
 
 private:
@@ -359,21 +384,20 @@ private:
     void HandleSendQueue(void);
 
     static uint8_t PriorityToDscp(Message::Priority aPriority);
-    static Error   GetDatagramPriority(const uint8_t *aData, uint16_t aDataLen, Message::Priority &aPriority);
 
     void  EnqueueDatagram(Message &aMessage);
-    Error ProcessReceiveCallback(Message &          aMessage,
-                                 MessageOrigin      aOrigin,
-                                 const MessageInfo &aMessageInfo,
-                                 uint8_t            aIpProto,
-                                 bool               aAllowReceiveFilter,
-                                 Message::Ownership aMessageOwnership);
-    Error HandleExtensionHeaders(Message &     aMessage,
+    Error PassToHost(Message           &aMessage,
+                     MessageOrigin      aOrigin,
+                     const MessageInfo &aMessageInfo,
+                     uint8_t            aIpProto,
+                     bool               aApplyFilter,
+                     Message::Ownership aMessageOwnership);
+    Error HandleExtensionHeaders(Message      &aMessage,
                                  MessageOrigin aOrigin,
-                                 MessageInfo & aMessageInfo,
-                                 Header &      aHeader,
-                                 uint8_t &     aNextHeader,
-                                 bool &        aReceive);
+                                 MessageInfo  &aMessageInfo,
+                                 Header       &aHeader,
+                                 uint8_t      &aNextHeader,
+                                 bool         &aReceive);
     Error FragmentDatagram(Message &aMessage, uint8_t aIpProto);
     Error HandleFragment(Message &aMessage, MessageOrigin aOrigin, MessageInfo &aMessageInfo);
 #if OPENTHREAD_CONFIG_IP6_FRAGMENTATION_ENABLE
@@ -383,31 +407,29 @@ private:
     void SendIcmpError(Message &aMessage, Icmp::Header::Type aIcmpType, Icmp::Header::Code aIcmpCode);
 #endif
     Error AddMplOption(Message &aMessage, Header &aHeader);
-    Error AddTunneledMplOption(Message &aMessage, Header &aHeader, MessageInfo &aMessageInfo);
-    Error InsertMplOption(Message &aMessage, Header &aHeader, MessageInfo &aMessageInfo);
+    Error AddTunneledMplOption(Message &aMessage, Header &aHeader);
+    Error InsertMplOption(Message &aMessage, Header &aHeader);
     Error RemoveMplOption(Message &aMessage);
     Error HandleOptions(Message &aMessage, Header &aHeader, bool aIsOutbound, bool &aReceive);
-    Error HandlePayload(Header &           aIp6Header,
-                        Message &          aMessage,
-                        MessageInfo &      aMessageInfo,
+    Error HandlePayload(Header            &aIp6Header,
+                        Message           &aMessage,
+                        MessageInfo       &aMessageInfo,
                         uint8_t            aIpProto,
                         Message::Ownership aMessageOwnership);
-    bool  ShouldForwardToThread(const MessageInfo &aMessageInfo, MessageOrigin aOrigin) const;
     bool  IsOnLink(const Address &aAddress) const;
+    Error RouteLookup(const Address &aSource, const Address &aDestination) const;
 #if OPENTHREAD_CONFIG_IP6_BR_COUNTERS_ENABLE
     void UpdateBorderRoutingCounters(const Header &aHeader, uint16_t aMessageLength, bool aIsInbound);
 #endif
 
     using SendQueueTask = TaskletIn<Ip6, &Ip6::HandleSendQueue>;
 
-    bool                 mForwardingEnabled;
-    bool                 mIsReceiveIp6FilterEnabled;
-    otIp6ReceiveCallback mReceiveIp6DatagramCallback;
-    void *               mReceiveIp6DatagramCallbackContext;
+    bool mIsReceiveIp6FilterEnabled;
+
+    Callback<otIp6ReceiveCallback> mReceiveIp6DatagramCallback;
 
 #if OPENTHREAD_CONFIG_NAT64_TRANSLATOR_ENABLE
-    otNat64ReceiveIp4Callback mReceiveIp4DatagramCallback;
-    void *                    mReceiveIp4DatagramCallbackContext;
+    Callback<otNat64ReceiveIp4Callback> mReceiveIp4DatagramCallback;
 #endif
 
     PriorityQueue mSendQueue;

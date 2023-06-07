@@ -31,7 +31,7 @@
 #include <stdio.h>
 #include "sl_bluetooth.h"
 #include "gatt_db.h"
-#include "sl_simple_timer.h"
+#include "app_timer.h"
 #include "app_assert.h"
 #include "board.h"
 #include "advertise.h"
@@ -173,7 +173,7 @@ static advertise_ibeacon_t  adv_ibeacon = ADVERTISE_IBEACON_DATA_DEFAULT;
 static advertise_scan_response_t adv_scan_response = ADVERTISE_SCAN_RESPONSE_DEFAULT;
 
 // Advertising timer
-static sl_simple_timer_t adv_timer;
+static app_timer_t adv_timer;
 
 // Advertising set handle allocated by Bluetooth stack
 static uint8_t adv_set_handle = 0xff;
@@ -182,7 +182,7 @@ static uint8_t adv_set_handle = 0xff;
 // Private function declarations
 
 static void adv_set_data(adv_type_t type);
-static void adv_timer_cb(sl_simple_timer_t *timer, void *data);
+static void adv_timer_cb(app_timer_t *timer, void *data);
 
 // -----------------------------------------------------------------------------
 // Private function definitions
@@ -201,7 +201,7 @@ static void adv_set_data(adv_type_t type)
   app_assert_status(sc);
 }
 
-static void adv_timer_cb(sl_simple_timer_t *timer, void *data)
+static void adv_timer_cb(app_timer_t *timer, void *data)
 {
   (void)timer;
   (void)data;
@@ -243,7 +243,7 @@ void advertise_init(uint32_t unique_id)
   char *suffix;
   suffix = strstr((char *)local_name, ADVERTISE_DEVICE_NAME_DEFAULT_SUFFIX);
   app_assert(suffix != NULL,
-             "Device name substring cannot be found: %s\n",
+             "Device name substring cannot be found: %s" APP_LOG_NL,
              (char *)local_name);
 
   // Update Scan Response data
@@ -270,6 +270,7 @@ void advertise_init(uint32_t unique_id)
   app_assert_status(sc);
   // Start advertising
   advertise_start();
+  app_log_info("Started advertising as '%s'" APP_LOG_NL, (char *)local_name);
 }
 
 void advertise_start(void)
@@ -288,11 +289,11 @@ void advertise_start(void)
   app_assert_status(sc);
 
   // Start timer to alternate advertising data
-  sc = sl_simple_timer_start(&adv_timer,
-                             ADV_ALTERNATE_TIME_MS,
-                             adv_timer_cb,
-                             NULL,
-                             true);
+  sc = app_timer_start(&adv_timer,
+                       ADV_ALTERNATE_TIME_MS,
+                       adv_timer_cb,
+                       NULL,
+                       true);
   app_assert_status(sc);
 }
 
@@ -300,7 +301,7 @@ void advertise_stop(void)
 {
   sl_status_t sc;
   // Stop advertising timer
-  sc = sl_simple_timer_stop(&adv_timer);
+  sc = app_timer_stop(&adv_timer);
   app_assert_status(sc);
   // Stop advertising
   sc = sl_bt_advertiser_stop(adv_set_handle);

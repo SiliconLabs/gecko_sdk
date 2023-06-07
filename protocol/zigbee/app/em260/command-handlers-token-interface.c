@@ -4,15 +4,13 @@
  *
  *****************************************************************************/
 //
-// *** Generated file. Do not edit! ***
+// Originally generated using Studio and AFv6 apps, now hand mantained
 //
 // Description: Handlers for the EZSP frames that directly correspond to Ember
 // API calls.
 
 #include PLATFORM_HEADER
 #include "stack/include/ember-types.h"
-#include "ezsp-enum.h"
-#include "secure-ezsp-types.h"
 #include "app/em260/command-context.h"
 #include "stack/include/cbke-crypto-engine.h"
 #include "stack/include/mfglib.h"
@@ -33,10 +31,14 @@
 #include "zigbee-device-stack.h"
 #include "ember-duty-cycle.h"
 #include "multi-phy.h"
-#include "micro-common.h"
+
+extern void halReboot(void);
+#ifdef EMBER_TEST
+#define halReboot()
+#endif // EMBER_TEST
+
 // Extern for the auto generated handler as specified in the ezsp.yaml
-extern bool emAfProcessEzspCommandTokenManagement(uint16_t commandId);
-extern bool emAfProcessEzspCommandTokenInterface(uint16_t commandId);
+extern bool sli_zigbee_af_process_ezsp_command_token_interface(uint16_t commandId);
 
 // The handler that is not generated as specified in the ezsp.yaml
 static void emberAfTokenInterfaceSetOrGetEzspHandler(bool set)
@@ -64,7 +66,7 @@ static void emberAfTokenInterfaceSetOrGetEzspHandler(bool set)
 }
 
 // Hook from command handler for the Token interface commands
-bool emAfProcessEzspTokenInterfaceCommands(uint16_t commandId)
+bool sli_zigbee_af_process_ezsp_token_interface_commands(uint16_t commandId)
 {
   switch (commandId) {
     case EZSP_RESET_NODE:
@@ -76,7 +78,7 @@ bool emAfProcessEzspTokenInterfaceCommands(uint16_t commandId)
                                                == EZSP_SET_TOKEN_DATA);
       break;
     default:
-      return emAfProcessEzspCommandTokenInterface(commandId);
+      return sli_zigbee_af_process_ezsp_command_token_interface(commandId);
       break;
   }
   return true;

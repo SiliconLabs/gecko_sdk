@@ -9,9 +9,14 @@ description: >
   speed up data transfer between nodes. All nodes must have the Silabs Configuration Server vendor model enabled, and a
   Silabs Configuration Client (enabled by e.g. the Advertisement Extension Client component) must configure the clients
   to use Advertisement Extension.
+
+  This is a No-Code component.
 category: "Bluetooth Mesh|Models|Proprietary"
 quality: "production"
 root_path: "app/btmesh/common/btmesh_ae_server"
+tag:
+  - No-Code
+
 config_file:
   - path: btmesh_ae_server.dcd
     directory: btmeshconf
@@ -25,6 +30,7 @@ provides:
   - name: "btmesh_ae_server"
 requires:
   - name: "app_assert"
+  - name: "btmesh_provisionee"
   - name: "btmesh_stack_advertiser_extended"
   - name: "btmesh_stack_silabs_config_server"
 

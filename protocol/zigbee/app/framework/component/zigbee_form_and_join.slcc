@@ -31,7 +31,7 @@ template_contribution:
   - name: zigbee_af_callback
     value:
       callback_type: event_init
-      function_name: emAfPluginFormAndJoinInitCallback  
+      function_name: sli_zigbee_af_form_and_join_init_callback  
   - name: zigbee_stack_callback
     value:
       callback_type: mark_buffers
@@ -39,20 +39,20 @@ template_contribution:
   - name: zigbee_stack_callback
     value:
       callback_type: scan_complete
-      function_name: emAfPluginFormAndJoinScanCompleteCallback
+      function_name: sli_zigbee_af_form_and_join_scan_complete_callback
     priority: -10
   - name: zigbee_stack_callback
     value:
       callback_type: energy_scan_result
-      function_name: emAfPluginFormAndJoinEnergyScanResultCallback
+      function_name: sli_zigbee_af_form_and_join_energy_scan_result_callback
     priority: -10
   - name: zigbee_stack_callback
     value:
       callback_type: unused_pan_id_found
-      function_name: emAfPluginFormAndJoinUnusedPanIdFoundCallback
+      function_name: sli_zigbee_af_form_and_join_unused_pan_id_found_callback
     priority: -10
   - name: zigbee_stack_callback
     value:
       callback_type: network_found
-      function_name: emAfPluginFormAndJoinNetworkFoundCallback
+      function_name: sli_zigbee_af_form_and_join_network_found_callback
     priority: -10

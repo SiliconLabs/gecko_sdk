@@ -38,15 +38,6 @@
 /*******************************************************************************
  * This function change the lightness and send it to the server.
  *
- * @param[in] change  Defines lightness percentage change, possible values are
- *                    -100% - + 100%.
- *
- ******************************************************************************/
-void sl_btmesh_change_lightness(int8_t change_percentage);
-
-/*******************************************************************************
- * This function change the lightness and send it to the server.
- *
  * @param[in] new_lightness_percentage  Defines new lightness value as percentage
  *    Valid values 0-100 %
  *

@@ -63,7 +63,7 @@ void app_task(void *args)
 
   while (1) {
     sl_wisun_collector_measurement_request_loop();
-    msleep(SL_WISUN_COLLECTOR_PERIOD_MS);
+    msleep(1);
   }
 }
 

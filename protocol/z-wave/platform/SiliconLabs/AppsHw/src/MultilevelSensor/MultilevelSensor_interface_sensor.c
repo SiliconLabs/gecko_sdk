@@ -27,8 +27,9 @@
 #include "sl_i2cspm.h"
 #include "sl_i2cspm_instances.h"
 #include "sl_si70xx.h"
+#include "sl_veml6035.h"
 #include <cc_multilevel_sensor_config.h>
-
+#include "ZW_typedefs.h"
 // -----------------------------------------------------------------------------
 //                Macros and Typedefs
 // -----------------------------------------------------------------------------
@@ -40,47 +41,89 @@
 // -----------------------------------------------------------------------------
 //                Static Variables
 // -----------------------------------------------------------------------------
-static bool initialized = false;
+static bool temperature_humidity_sensor_initialized = false;
+static bool ambient_light_sensor_initialized = false;
 
 // -----------------------------------------------------------------------------
 //              Static Function
 // -----------------------------------------------------------------------------
 static bool 
-MultilevelSensor_sensor_init(void)
+MultilevelSensor_temperature_humidity_sensor_init(void)
 {
   sl_status_t sc;
 
-  if(initialized) {
+  if(temperature_humidity_sensor_initialized) {
     return true;
   }
 
   sc = sl_si70xx_init(sl_i2cspm_sensor, SI7021_ADDR);
   
-  initialized = (sc == SL_STATUS_OK);
+  temperature_humidity_sensor_initialized = (sc == SL_STATUS_OK);
 
-  return initialized;
+  return temperature_humidity_sensor_initialized;
 }
 
 static bool 
-MultilevelSensor_sensor_deinit(void)
+MultilevelSensor_temperature_humidity_sensor_deinit(void)
 {
-  if(!initialized) {
+  if(!temperature_humidity_sensor_initialized) {
     return true;
   }
 
-  initialized = false;
+  temperature_humidity_sensor_initialized = false;
+
+  return true;
+}
+
+static bool
+MultilevelSensor_ambient_light_sensor_init(void)
+{
+  sl_status_t sc;
+
+  if (ambient_light_sensor_initialized)
+  {
+      return true;
+  }
+
+  sc = sl_veml6035_init(sl_i2cspm_sensor, false);
+
+  ambient_light_sensor_initialized = (sc == SL_STATUS_OK);
+
+  return ambient_light_sensor_initialized;
+
+}
+
+static bool
+MultilevelSensor_ambient_light_sensor_deinit(void)
+{
+  if(!ambient_light_sensor_initialized)
+  {
+      return true;
+  }
+
+  ambient_light_sensor_initialized = false;
 
   return true;
 }
 
 static bool 
-MultilevelSensor_sensor_read(uint32_t *rh_data, int32_t *temp_data)
+MultilevelSensor_temperature_humidity_sensor_read(uint32_t *rh_data, int32_t *temp_data)
 {
-  if(!initialized) {
+  if(!temperature_humidity_sensor_initialized) {
     return false;
   }
 
   return (sl_si70xx_measure_rh_and_temp(sl_i2cspm_sensor, SI7021_ADDR, rh_data, temp_data) == SL_STATUS_OK);
+}
+
+static bool
+MultilevelSensor_ambient_light_sensor_read(float *al_data)
+{
+  if(!ambient_light_sensor_initialized) {
+      return false;
+  }
+
+  return (sl_veml6035_get_als_lux(sl_i2cspm_sensor, al_data));
 }
 
 // -----------------------------------------------------------------------------
@@ -90,31 +133,43 @@ MultilevelSensor_sensor_read(uint32_t *rh_data, int32_t *temp_data)
 bool 
 cc_multilevel_sensor_humidity_interface_init(void)
 {
-  return MultilevelSensor_sensor_init();
+  return MultilevelSensor_temperature_humidity_sensor_init();
 }
 
 bool 
 cc_multilevel_sensor_air_temperature_interface_init(void)
 {
-  return MultilevelSensor_sensor_init();
+  return MultilevelSensor_temperature_humidity_sensor_init();
+}
+
+bool
+cc_multilevel_sensor_ambient_light_interface_init(void)
+{
+  return MultilevelSensor_ambient_light_sensor_init();
 }
 
 bool 
 cc_multilevel_sensor_humidity_interface_deinit(void)
 {
-  return MultilevelSensor_sensor_deinit();
+  return MultilevelSensor_temperature_humidity_sensor_deinit();
 }
 
 bool 
 cc_multilevel_sensor_air_temperature_interface_deinit(void)
 {
-  return MultilevelSensor_sensor_deinit();
+  return MultilevelSensor_temperature_humidity_sensor_deinit();
+}
+
+bool
+cc_multilevel_sensor_ambient_light_interface_deinit()
+{
+  return MultilevelSensor_ambient_light_sensor_deinit();
 }
 
 bool 
 cc_multilevel_sensor_humidity_interface_read_value(sensor_read_result_t* o_result, uint8_t i_scale)
 {
-  (void)i_scale;
+  UNUSED(i_scale);
 
   uint32_t rh_data;
   int32_t temp_data;
@@ -125,7 +180,7 @@ cc_multilevel_sensor_humidity_interface_read_value(sensor_read_result_t* o_resul
     o_result->precision  = SENSOR_READ_RESULT_PRECISION_3;
     o_result->size_bytes = SENSOR_READ_RESULT_SIZE_4;
     
-    MultilevelSensor_sensor_read(&rh_data, &temp_data);
+    MultilevelSensor_temperature_humidity_sensor_read(&rh_data, &temp_data);
 
     DPRINTF("Humidity: %d\n", rh_data);
 
@@ -151,7 +206,7 @@ cc_multilevel_sensor_air_temperature_interface_read_value(sensor_read_result_t* 
     o_result->precision  = SENSOR_READ_RESULT_PRECISION_3;
     o_result->size_bytes = SENSOR_READ_RESULT_SIZE_4;
     
-    MultilevelSensor_sensor_read(&rh_data, &temp_data);
+    MultilevelSensor_temperature_humidity_sensor_read(&rh_data, &temp_data);
 
     DPRINTF("Temperature: %d\n", rh_data);
 
@@ -172,6 +227,34 @@ cc_multilevel_sensor_air_temperature_interface_read_value(sensor_read_result_t* 
       o_result->raw_result[1] = (uint8_t)((temp_data >> 16) & 0xFF);
       o_result->raw_result[0] = (uint8_t)((temp_data >> 24) & 0xFF);
     }
+  }
+
+  return true;
+}
+
+bool
+cc_multilevel_sensor_ambient_light_interface_read_value(sensor_read_result_t* o_result, uint8_t i_scale)
+{
+  UNUSED(i_scale);
+  float al_data;
+  uint32_t al_data_int;
+
+  if (o_result != NULL)
+  {
+    memset(o_result, 0, sizeof(sensor_read_result_t));
+    o_result->precision  = SENSOR_READ_RESULT_PRECISION_3;
+    o_result->size_bytes = SENSOR_READ_RESULT_SIZE_4;
+
+    MultilevelSensor_ambient_light_sensor_read(&al_data);
+
+    al_data_int = (uint32_t) (al_data * 1000);
+
+    DPRINTF("Ambient light: %d\n", al_data_int);
+
+    o_result->raw_result[3] = (uint8_t)(al_data_int & 0xFF);
+    o_result->raw_result[2] = (uint8_t)((al_data_int >> 8 ) & 0xFF);
+    o_result->raw_result[1] = (uint8_t)((al_data_int >> 16) & 0xFF);
+    o_result->raw_result[0] = (uint8_t)((al_data_int >> 24) & 0xFF);
   }
 
   return true;

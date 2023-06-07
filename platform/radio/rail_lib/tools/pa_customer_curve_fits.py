@@ -305,7 +305,7 @@ def main():
       f.write(output)
   if (minPowerLevel == 255) or (maxPowerLevel == 255):
     print("WARNING :: Curve doesn't have correct min/max powerlevels.")
-  print("\nMax Powerlevel: %d, Min Powerlevel: %d" %(minPowerLevel, maxPowerLevel))
+  print("\nMin Powerlevel: %d, Max Powerlevel: %d" %(minPowerLevel, maxPowerLevel))
   # Show the plot of the curve fit if requested
   if enablePlotting:
     plt.show()

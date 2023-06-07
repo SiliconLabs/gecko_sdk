@@ -3,9 +3,12 @@ label: "HCI Coex Vendor Specific Commands"
 package: "Bluetooth"
 description: >
   Provides vendor specific commands to HCI to control coexistence RAIL plugin
-category: "Bluetooth|Controller"
+category: Bluetooth|Host Controller Interface (HCI)
 quality: "production"
 root_path: "app/bluetooth/common/hci_coex"
+tag:
+  - No-Code
+
 config_file:
   - path: "config/sl_bt_hci_coex_config.h"
 include:

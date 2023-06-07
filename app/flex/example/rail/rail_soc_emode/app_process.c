@@ -38,6 +38,7 @@
 #include "app_process.h"
 #include "app_assert.h"
 #include "app_log.h"
+#include "sl_flex_rail_channel_selector.h"
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)
 #include "app_task_init.h"
@@ -47,12 +48,11 @@
 #include "cmsis_compiler.h"
 
 #include "sl_flex_rail_package_assistant.h"
+#include "sl_flex_rail_config.h"
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
-/// Size of RAIL RX/TX FIFO
-#define RAIL_FIFO_SIZE (256U)
 /// Transmit data length
 #define TX_PAYLOAD_LENGTH (16U)
 
@@ -143,9 +143,9 @@ volatile bool rx_ended = true;
 //                                Static Variables
 // -----------------------------------------------------------------------------
 /// Receive and Send FIFO
-static __ALIGNED(RAIL_FIFO_ALIGNMENT) uint8_t rx_fifo[RAIL_FIFO_SIZE];
+static __ALIGNED(RAIL_FIFO_ALIGNMENT) uint8_t rx_fifo[SL_FLEX_RAIL_RX_FIFO_SIZE];
 
-static __ALIGNED(RAIL_FIFO_ALIGNMENT) uint8_t tx_fifo[RAIL_FIFO_SIZE];
+static __ALIGNED(RAIL_FIFO_ALIGNMENT) uint8_t tx_fifo[SL_FLEX_RAIL_TX_FIFO_SIZE];
 
 /// Transmit packet
 static uint8_t out_packet[TX_PAYLOAD_LENGTH] = {
@@ -204,7 +204,7 @@ void app_process_action(RAIL_Handle_t rail_handle)
     case S_CW:
       app_log_info("Tx CW mode; EM%d\n", sleep_mode);
       set_radio_to_idle_state(rail_handle);
-      rail_status = RAIL_StartTxStream(rail_handle, CHANNEL, RAIL_STREAM_CARRIER_WAVE);
+      rail_status = RAIL_StartTxStream(rail_handle, get_selected_channel(), RAIL_STREAM_CARRIER_WAVE);
       if (rail_status != RAIL_STATUS_NO_ERROR) {
         app_log_warning("RAIL_StartRx() result:%d", rail_status);
       }
@@ -213,7 +213,7 @@ void app_process_action(RAIL_Handle_t rail_handle)
     case S_RX:
       app_log_info("Rx mode; EM%d\n", sleep_mode);
       set_radio_to_idle_state(rail_handle);
-      rail_status = RAIL_StartRx(rail_handle, 0, NULL);
+      rail_status = RAIL_StartRx(rail_handle, get_selected_channel(), NULL);
       if (rail_status != RAIL_STATUS_NO_ERROR) {
         app_log_warning("RAIL_StartRx() result:%d", rail_status);
       }
@@ -328,11 +328,11 @@ void sl_rail_util_on_event(RAIL_Handle_t rail_handle, RAIL_Events_t events)
 void set_up_tx_fifo(RAIL_Handle_t rail_handle)
 {
   uint16_t allocated_tx_fifo_size = 0;
-  allocated_tx_fifo_size = RAIL_SetTxFifo(rail_handle, tx_fifo, 0, RAIL_FIFO_SIZE);
-  app_assert(allocated_tx_fifo_size == RAIL_FIFO_SIZE,
+  allocated_tx_fifo_size = RAIL_SetTxFifo(rail_handle, tx_fifo, 0, SL_FLEX_RAIL_TX_FIFO_SIZE);
+  app_assert(allocated_tx_fifo_size == SL_FLEX_RAIL_TX_FIFO_SIZE,
              "RAIL_SetTxFifo() failed to allocate a large enough fifo (%d bytes instead of %d bytes)\n",
              allocated_tx_fifo_size,
-             RAIL_FIFO_SIZE);
+             SL_FLEX_RAIL_TX_FIFO_SIZE);
 }
 // -----------------------------------------------------------------------------
 //                          Static Function Definitions
@@ -382,7 +382,7 @@ static void handle_periodic_rx(RAIL_Handle_t rail_handle)
   }
   if (rx_ended) {
     rx_ended = false;
-    rail_status = RAIL_ScheduleRx(rail_handle, CHANNEL, &shedule_rx_config, NULL);
+    rail_status = RAIL_ScheduleRx(rail_handle, get_selected_channel(), &shedule_rx_config, NULL);
     if (rail_status != RAIL_STATUS_NO_ERROR) {
       app_log_warning("RAIL_ScheduleRx() result:%d", rail_status);
     }
@@ -408,7 +408,7 @@ static void handle_periodic_tx(RAIL_Handle_t rail_handle)
 
   if (!packet_sending) {
     prepare_package(rail_handle, out_packet, sizeof(out_packet));
-    rail_status = RAIL_StartScheduledTx(rail_handle, 0, RAIL_TX_OPTIONS_DEFAULT, &shedule_tx_config, NULL);
+    rail_status = RAIL_StartScheduledTx(rail_handle, get_selected_channel(), RAIL_TX_OPTIONS_DEFAULT, &shedule_tx_config, NULL);
     if (rail_status != RAIL_STATUS_NO_ERROR) {
       app_log_warning("RAIL_StartScheduledTx() result:%d", rail_status);
     }
@@ -445,13 +445,13 @@ static void handle_received_packet(RAIL_Handle_t rail_handle)
   printf_rx_packet(start_of_packet, packet_size);
   if (periodic_receive) {
     rx_ended = false;
-    rail_status = RAIL_ScheduleRx(rail_handle, CHANNEL, &shedule_rx_config, NULL);
+    rail_status = RAIL_ScheduleRx(rail_handle, get_selected_channel(), &shedule_rx_config, NULL);
     if (rail_status != RAIL_STATUS_NO_ERROR) {
       app_log_warning("RAIL_ScheduleRx() result:%d", rail_status);
     }
     app_state = S_PERIODIC_RX;
   } else {
-    rail_status = RAIL_StartRx(rail_handle, CHANNEL, NULL);
+    rail_status = RAIL_StartRx(rail_handle, get_selected_channel(), NULL);
     if (rail_status != RAIL_STATUS_NO_ERROR) {
       app_log_warning("RAIL_StartRx() result:%d", rail_status);
     }

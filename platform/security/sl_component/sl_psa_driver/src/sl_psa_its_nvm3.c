@@ -32,13 +32,11 @@
 // Includes
 
 #if defined(MBEDTLS_CONFIG_FILE)
-#include MBEDTLS_CONFIG_FILE
-#else
-#include "mbedtls/config.h"
+  #include MBEDTLS_CONFIG_FILE
 #endif
 
 #if defined(MBEDTLS_PSA_CRYPTO_STORAGE_C) && !defined(MBEDTLS_PSA_ITS_FILE_C)
-#include "psa_crypto_config.h"
+
 #include "psa/internal_trusted_storage.h"
 #include "psa/sli_internal_trusted_storage.h"
 #include "nvm3_default.h"
@@ -56,14 +54,89 @@
   #include "psa_crypto_driver_wrappers.h"
   #if defined(SEMAILBOX_PRESENT)
     #include "psa/crypto_extra.h"
+    #include "sl_psa_values.h"
     #include "sli_se_opaque_functions.h"
   #endif // defined(SEMAILBOX_PRESENT)
 #endif // defined(SLI_PSA_ITS_ENCRYPTED)
 
-#if (!SL_PSA_ITS_SUPPORT_V3_DRIVER)
+// -------------------------------------
+// Threading support
+
+#if defined(MBEDTLS_THREADING_C)
+#include "cmsis_os2.h"
+#include "mbedtls/threading.h"
+
+// Mutex for protecting access to the ITS instance
+static mbedtls_threading_mutex_t its_mutex;
+static volatile bool its_mutex_inited = false;
+
+/**
+ * \brief          Lock all task switches
+ *
+ * \return         Previous lock state
+ *
+ */
+static inline int32_t lock_task_switches(void)
+{
+  int32_t kernel_lock_state = 0;
+  osKernelState_t kernel_state = osKernelGetState();
+  if (kernel_state != osKernelInactive && kernel_state != osKernelReady) {
+    kernel_lock_state = osKernelLock();
+  }
+  return kernel_lock_state;
+}
+
+/**
+ * \brief          Restores the previous lock state
+ */
+static inline void restore_lock_state(int32_t kernel_lock_state)
+{
+  osKernelState_t kernel_state = osKernelGetState();
+  if (kernel_state != osKernelInactive && kernel_state != osKernelReady) {
+    if (osKernelRestoreLock(kernel_lock_state) < 0) {
+      EFM_ASSERT(false);
+    }
+  }
+}
+
+#endif // defined(MBEDTLS_THREADING_C)
+
+/**
+ * \brief Pend on the ITS mutex
+ */
+void sli_its_acquire_mutex(void)
+{
+#if defined(MBEDTLS_THREADING_C)
+  if (!its_mutex_inited) {
+    int32_t kernel_lock_state = lock_task_switches();
+    if (!its_mutex_inited) {
+      mbedtls_mutex_init(&its_mutex);
+      its_mutex_inited = true;
+    }
+    restore_lock_state(kernel_lock_state);
+  }
+  if (mbedtls_mutex_lock(&its_mutex) != 0) {
+    EFM_ASSERT(false);
+  }
+#endif
+}
+
+/**
+ * \brief Free the ITS mutex.
+ */
+void sli_its_release_mutex(void)
+{
+#if defined(MBEDTLS_THREADING_C)
+  if (its_mutex_inited) {
+    mbedtls_mutex_unlock(&its_mutex);
+  }
+#endif
+}
 
 // -------------------------------------
 // Defines
+
+#if (!SL_PSA_ITS_SUPPORT_V3_DRIVER)
 
 #define SLI_PSA_ITS_META_MAGIC_V1             (0x05E175D1UL)
 #define SLI_PSA_ITS_META_MAGIC_V2             (0x5E175D10UL)
@@ -161,7 +234,7 @@ static session_key_t g_cached_session_key = {
   .uid = 0,
   .data = { 0 },
 };
-#endif
+#endif // defined(SLI_PSA_ITS_ENCRYPTED)
 
 // -------------------------------------
 // Structs
@@ -172,7 +245,7 @@ typedef struct {
   psa_storage_uid_t uid;
   psa_storage_create_flags_t flags;
 } sl_its_file_meta_v1_t;
-#endif /* SLI_ITS_SUPPORT_V1_FORMAT */
+#endif // defined(SLI_PSA_ITS_SUPPORT_V1_FORMAT)
 
 // Due to alignment constraints on the 64-bit UID, the v2 header struct is
 // serialized to 16 bytes instead of the 24 bytes the v1 header compiles to.
@@ -188,7 +261,7 @@ typedef struct {
   // When encrypted & authenticated, MAC is stored at the end of the data array
   uint8_t data[];
 } sli_its_encrypted_blob_t;
-#endif
+#endif // defined(SLI_PSA_ITS_ENCRYPTED)
 
 // -------------------------------------
 // Local function prototypes
@@ -198,7 +271,7 @@ static nvm3_ObjectKey_t prepare_its_get_nvm3_id(psa_storage_uid_t uid);
 
 #if defined(TFM_CONFIG_SL_SECURE_LIBRARY)
 static inline bool object_lives_in_s(const void *object, size_t object_size);
-#endif
+#endif // defined(TFM_CONFIG_SL_SECURE_LIBRARY)
 
 #if defined(SLI_PSA_ITS_ENCRYPTED)
 static psa_status_t derive_session_key(uint8_t *iv,
@@ -222,7 +295,7 @@ static psa_status_t decrypt_its_file(sli_its_file_meta_v2_t *metadata,
 
 static psa_status_t authenticate_its_file(nvm3_ObjectKey_t nvm3_object_id,
                                           psa_storage_uid_t *authenticated_uid);
-#endif
+#endif // defined(SLI_PSA_ITS_ENCRYPTED)
 
 // -------------------------------------
 // Local function definitions
@@ -243,7 +316,7 @@ static inline bool object_lives_in_s(const void *object, size_t object_size)
 
   return true;
 }
-#endif
+#endif // defined(TFM_CONFIG_SL_SECURE_LIBRARY)
 
 static inline void cache_set(nvm3_ObjectKey_t key)
 {
@@ -859,7 +932,7 @@ psa_status_t psa_its_set(psa_storage_uid_t uid,
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 #endif
-
+  sli_its_acquire_mutex();
   nvm3_ObjectKey_t nvm3_object_id = prepare_its_get_nvm3_id(uid);
   Ecode_t status;
   psa_status_t ret = PSA_SUCCESS;
@@ -868,6 +941,7 @@ psa_status_t psa_its_set(psa_storage_uid_t uid,
 #if defined(SLI_PSA_ITS_ENCRYPTED)
   psa_storage_uid_t authenticated_uid;
   sli_its_encrypted_blob_t *blob = NULL;
+  size_t blob_length = 0u;
   psa_status_t psa_status;
 
   size_t its_file_size = data_length + SLI_ITS_ENCRYPTED_BLOB_SIZE_OVERHEAD;
@@ -877,7 +951,8 @@ psa_status_t psa_its_set(psa_storage_uid_t uid,
 
   uint8_t *its_file_buffer = mbedtls_calloc(1, its_file_size + sizeof(sli_its_file_meta_v2_t));
   if (its_file_buffer == NULL) {
-    return PSA_ERROR_INSUFFICIENT_MEMORY;
+    ret = PSA_ERROR_INSUFFICIENT_MEMORY;
+    goto exit;
   }
   memset(its_file_buffer, 0, its_file_size + sizeof(sli_its_file_meta_v2_t));
 
@@ -885,7 +960,6 @@ psa_status_t psa_its_set(psa_storage_uid_t uid,
   if (nvm3_object_id > SLI_PSA_ITS_NVM3_RANGE_END) {
     // ITS UID was not found. Request a new.
     nvm3_object_id = get_nvm3_id(0ULL, true);
-
     if (nvm3_object_id > SLI_PSA_ITS_NVM3_RANGE_END) {
       // The storage is full, or an error was returned during cleanup.
       ret = PSA_ERROR_INSUFFICIENT_STORAGE;
@@ -929,11 +1003,10 @@ psa_status_t psa_its_set(psa_storage_uid_t uid,
   its_file_meta->flags = create_flags;
 
 #if defined(SLI_PSA_ITS_ENCRYPTED)
-  // Everything after the the file metadata will make up the encrypted & authenticated blob
+  // Everything after the file metadata will make up the encrypted & authenticated blob
   blob = (sli_its_encrypted_blob_t*)(its_file_buffer + sizeof(sli_its_file_meta_v2_t));
 
   // Encrypt and authenticate the provided data
-  size_t blob_length;
   psa_status = encrypt_its_file(its_file_meta,
                                 (uint8_t*)p_data,
                                 data_length,
@@ -970,9 +1043,12 @@ psa_status_t psa_its_set(psa_storage_uid_t uid,
   }
 
   exit:
-  // Clear and free key buffer before return.
-  memset(its_file_buffer, 0, its_file_size + sizeof(sli_its_file_meta_v2_t));
-  mbedtls_free(its_file_buffer);
+  if (its_file_buffer != NULL) {
+    // Clear and free key buffer before return.
+    memset(its_file_buffer, 0, its_file_size + sizeof(sli_its_file_meta_v2_t));
+    mbedtls_free(its_file_buffer);
+  }
+  sli_its_release_mutex();
   return ret;
 }
 
@@ -1002,6 +1078,8 @@ psa_status_t psa_its_get(psa_storage_uid_t uid,
                          void *p_data,
                          size_t *p_data_length)
 {
+  psa_status_t ret = PSA_ERROR_CORRUPTION_DETECTED;
+
   if ((data_length != 0U) && (p_data_length == NULL)) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
@@ -1015,52 +1093,66 @@ psa_status_t psa_its_get(psa_storage_uid_t uid,
     }
   }
 
-  nvm3_ObjectKey_t nvm3_object_id = prepare_its_get_nvm3_id(uid);
-  if (nvm3_object_id > SLI_PSA_ITS_NVM3_RANGE_END) {
-    return PSA_ERROR_DOES_NOT_EXIST;
-  }
-
+#if defined(SLI_PSA_ITS_ENCRYPTED)
+  sli_its_encrypted_blob_t *blob = NULL;
+  size_t plaintext_length;
+  psa_status_t psa_status;
+#endif
+  size_t its_file_data_size = 0u;
   Ecode_t status;
   sli_its_file_meta_v2_t its_file_meta = { 0 };
   size_t its_file_size = 0;
   size_t its_file_offset = 0;
 
+  sli_its_acquire_mutex();
+  nvm3_ObjectKey_t nvm3_object_id = prepare_its_get_nvm3_id(uid);
+  if (nvm3_object_id > SLI_PSA_ITS_NVM3_RANGE_END) {
+    ret = PSA_ERROR_DOES_NOT_EXIST;
+    goto exit;
+  }
+
   status = get_file_metadata(nvm3_object_id, &its_file_meta, &its_file_offset, &its_file_size);
   if (status == SLI_PSA_ITS_ECODE_NO_VALID_HEADER) {
-    return PSA_ERROR_DOES_NOT_EXIST;
+    ret = PSA_ERROR_DOES_NOT_EXIST;
+    goto exit;
   }
   if (status != ECODE_NVM3_OK
       && status != SLI_PSA_ITS_ECODE_NEEDS_UPGRADE) {
-    return PSA_ERROR_STORAGE_FAILURE;
+    ret = PSA_ERROR_STORAGE_FAILURE;
+    goto exit;
   }
 
 #if defined(TFM_CONFIG_SL_SECURE_LIBRARY)
   if (its_file_meta.flags == PSA_STORAGE_FLAG_WRITE_ONCE_SECURE_ACCESSIBLE
       && !object_lives_in_s(p_data, data_length)) {
     // The flag indicates that this data should not be read back to the non-secure domain
-    return PSA_ERROR_INVALID_ARGUMENT;
+    ret = PSA_ERROR_INVALID_ARGUMENT;
+    goto exit;
   }
 #endif
 
 #if defined(SLI_PSA_ITS_ENCRYPTED)
   // Subtract IV and MAC from ITS file as the below checks concern the actual data size
-  size_t its_file_data_size = its_file_size - SLI_ITS_ENCRYPTED_BLOB_SIZE_OVERHEAD;
+  its_file_data_size = its_file_size - SLI_ITS_ENCRYPTED_BLOB_SIZE_OVERHEAD;
 #else
-  size_t its_file_data_size = its_file_size;
+  its_file_data_size = its_file_size;
 #endif
 
   if (data_length != 0U) {
     if ((data_offset >= its_file_data_size) && (its_file_data_size != 0U)) {
-      return PSA_ERROR_INVALID_ARGUMENT;
+      ret = PSA_ERROR_INVALID_ARGUMENT;
+      goto exit;
     }
 
     if ((its_file_data_size == 0U) && (data_offset != 0U)) {
-      return PSA_ERROR_INVALID_ARGUMENT;
+      ret = PSA_ERROR_INVALID_ARGUMENT;
+      goto exit;
     }
   } else {
     // Allow the offset at the data size boundary if the requested amount of data is zero.
     if (data_offset > its_file_data_size) {
-      return PSA_ERROR_INVALID_ARGUMENT;
+      ret = PSA_ERROR_INVALID_ARGUMENT;
+      goto exit;
     }
   }
 
@@ -1070,16 +1162,12 @@ psa_status_t psa_its_get(psa_storage_uid_t uid,
     *p_data_length = data_length;
   }
 
-  psa_status_t ret = PSA_ERROR_CORRUPTION_DETECTED;
-
 #if defined(SLI_PSA_ITS_ENCRYPTED)
-  size_t plaintext_length;
-  psa_status_t psa_status;
-
   // its_file_size includes size of sli_its_encrypted_blob_t struct
-  sli_its_encrypted_blob_t *blob = (sli_its_encrypted_blob_t*)mbedtls_calloc(1, its_file_size);
+  blob = (sli_its_encrypted_blob_t*)mbedtls_calloc(1, its_file_size);
   if (blob == NULL) {
-    return PSA_ERROR_INSUFFICIENT_MEMORY;
+    ret = PSA_ERROR_INSUFFICIENT_MEMORY;
+    goto exit;
   }
   memset(blob, 0, its_file_size);
 
@@ -1090,7 +1178,7 @@ psa_status_t psa_its_get(psa_storage_uid_t uid,
                                 its_file_size);
   if (status != ECODE_NVM3_OK) {
     ret = PSA_ERROR_STORAGE_FAILURE;
-    goto cleanup;
+    goto exit;
   }
 
   // Decrypt and authenticate blob
@@ -1103,18 +1191,18 @@ psa_status_t psa_its_get(psa_storage_uid_t uid,
 
   if (psa_status != PSA_SUCCESS) {
     ret = psa_status;
-    goto cleanup;
+    goto exit;
   }
 
   if (plaintext_length != (its_file_size - SLI_ITS_ENCRYPTED_BLOB_SIZE_OVERHEAD)) {
     ret = PSA_ERROR_INVALID_SIGNATURE;
-    goto cleanup;
+    goto exit;
   }
 
   // Verify that the requested UID is equal to the retrieved and authenticated UID
   if (uid != its_file_meta.uid) {
     ret = PSA_ERROR_INVALID_ARGUMENT;
-    goto cleanup;
+    goto exit;
   }
 
   if (*p_data_length > 0) {
@@ -1122,9 +1210,12 @@ psa_status_t psa_its_get(psa_storage_uid_t uid,
   }
   ret = PSA_SUCCESS;
 
-  cleanup:
-  memset(blob, 0, its_file_size);
-  mbedtls_free(blob);
+  exit:
+  if (blob != NULL) {
+    memset(blob, 0, its_file_size);
+    mbedtls_free(blob);
+  }
+  sli_its_release_mutex();
 #else
   // If no encryption is used, just read out the data and write it directly to the output buffer
   status = nvm3_readPartialData(nvm3_defaultHandle, nvm3_object_id, p_data, its_file_offset + data_offset, *p_data_length);
@@ -1134,6 +1225,9 @@ psa_status_t psa_its_get(psa_storage_uid_t uid,
   } else {
     ret = PSA_SUCCESS;
   }
+
+  exit:
+  sli_its_release_mutex();
 #endif
 
   return ret;
@@ -1157,52 +1251,61 @@ psa_status_t psa_its_get(psa_storage_uid_t uid,
 psa_status_t psa_its_get_info(psa_storage_uid_t uid,
                               struct psa_storage_info_t *p_info)
 {
+  psa_status_t psa_status = PSA_ERROR_CORRUPTION_DETECTED;
+
   if (p_info == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
-
-  nvm3_ObjectKey_t nvm3_object_id = prepare_its_get_nvm3_id(uid);
-  if (nvm3_object_id > SLI_PSA_ITS_NVM3_RANGE_END) {
-    return PSA_ERROR_DOES_NOT_EXIST;
-  }
-
   Ecode_t status;
   sli_its_file_meta_v2_t its_file_meta = { 0 };
   size_t its_file_size = 0;
   size_t its_file_offset = 0;
 
+  sli_its_acquire_mutex();
+  nvm3_ObjectKey_t nvm3_object_id = prepare_its_get_nvm3_id(uid);
+  if (nvm3_object_id > SLI_PSA_ITS_NVM3_RANGE_END) {
+    psa_status = PSA_ERROR_DOES_NOT_EXIST;
+    goto exit;
+  }
+
   status = get_file_metadata(nvm3_object_id, &its_file_meta, &its_file_offset, &its_file_size);
   if (status == SLI_PSA_ITS_ECODE_NO_VALID_HEADER) {
-    return PSA_ERROR_DOES_NOT_EXIST;
+    psa_status = PSA_ERROR_DOES_NOT_EXIST;
+    goto exit;
   }
   if (status != ECODE_NVM3_OK
       && status != SLI_PSA_ITS_ECODE_NEEDS_UPGRADE) {
-    return PSA_ERROR_STORAGE_FAILURE;
+    psa_status = PSA_ERROR_STORAGE_FAILURE;
+    goto exit;
   }
 
 #if defined(SLI_PSA_ITS_ENCRYPTED)
   // Authenticate the ITS file (both metadata and ciphertext) before returning the metadata.
   // Note that this can potentially induce a significant performance hit.
   psa_storage_uid_t authenticated_uid;
-  psa_status_t psa_status = authenticate_its_file(nvm3_object_id, &authenticated_uid);
+  psa_status = authenticate_its_file(nvm3_object_id, &authenticated_uid);
   if (psa_status != PSA_SUCCESS) {
-    return psa_status;
+    goto exit;
   }
 
   if (authenticated_uid != uid) {
-    return PSA_ERROR_INVALID_SIGNATURE;
+    psa_status = PSA_ERROR_INVALID_SIGNATURE;
+    goto exit;
   }
 #endif
 
   p_info->flags = its_file_meta.flags;
   p_info->size = its_file_size;
 
+  psa_status = PSA_SUCCESS;
+
 #if defined(SLI_PSA_ITS_ENCRYPTED)
   // Remove IV and MAC size from file size
   p_info->size = its_file_size - SLI_ITS_ENCRYPTED_BLOB_SIZE_OVERHEAD;
 #endif
-
-  return PSA_SUCCESS;
+  exit:
+  sli_its_release_mutex();
+  return psa_status;
 }
 
 /**
@@ -1219,23 +1322,28 @@ psa_status_t psa_its_get_info(psa_storage_uid_t uid,
  */
 psa_status_t psa_its_remove(psa_storage_uid_t uid)
 {
-  nvm3_ObjectKey_t nvm3_object_id = prepare_its_get_nvm3_id(uid);
-  if (nvm3_object_id > SLI_PSA_ITS_NVM3_RANGE_END) {
-    return PSA_ERROR_DOES_NOT_EXIST;
-  }
-
+  psa_status_t psa_status = PSA_ERROR_CORRUPTION_DETECTED;
   Ecode_t status;
   sli_its_file_meta_v2_t its_file_meta = { 0 };
   size_t its_file_size = 0;
   size_t its_file_offset = 0;
 
+  sli_its_acquire_mutex();
+  nvm3_ObjectKey_t nvm3_object_id = prepare_its_get_nvm3_id(uid);
+  if (nvm3_object_id > SLI_PSA_ITS_NVM3_RANGE_END) {
+    psa_status = PSA_ERROR_DOES_NOT_EXIST;
+    goto exit;
+  }
+
   status = get_file_metadata(nvm3_object_id, &its_file_meta, &its_file_offset, &its_file_size);
   if (status == SLI_PSA_ITS_ECODE_NO_VALID_HEADER) {
-    return PSA_ERROR_DOES_NOT_EXIST;
+    psa_status = PSA_ERROR_DOES_NOT_EXIST;
+    goto exit;
   }
   if (status != ECODE_NVM3_OK
       && status != SLI_PSA_ITS_ECODE_NEEDS_UPGRADE) {
-    return PSA_ERROR_STORAGE_FAILURE;
+    psa_status = PSA_ERROR_STORAGE_FAILURE;
+    goto exit;
   }
 
   if (its_file_meta.flags == PSA_STORAGE_FLAG_WRITE_ONCE
@@ -1243,19 +1351,21 @@ psa_status_t psa_its_remove(psa_storage_uid_t uid)
       || its_file_meta.flags == PSA_STORAGE_FLAG_WRITE_ONCE_SECURE_ACCESSIBLE
 #endif
       ) {
-    return PSA_ERROR_NOT_PERMITTED;
+    psa_status = PSA_ERROR_NOT_PERMITTED;
+    goto exit;
   }
 
 #if defined(SLI_PSA_ITS_ENCRYPTED)
   // If the UID already exists, authenticate the existing value and make sure the stored UID is the same.
   psa_storage_uid_t authenticated_uid;
-  psa_status_t psa_status = authenticate_its_file(nvm3_object_id, &authenticated_uid);
+  psa_status = authenticate_its_file(nvm3_object_id, &authenticated_uid);
   if (psa_status != PSA_SUCCESS) {
-    return psa_status;
+    goto exit;
   }
 
   if (authenticated_uid != uid) {
-    return PSA_ERROR_NOT_PERMITTED;
+    psa_status = PSA_ERROR_NOT_PERMITTED;
+    goto exit;
   }
 #endif
 
@@ -1269,10 +1379,14 @@ psa_status_t psa_its_remove(psa_storage_uid_t uid)
     }
     cache_clear(nvm3_object_id);
 
-    return PSA_SUCCESS;
+    psa_status = PSA_SUCCESS;
   } else {
-    return PSA_ERROR_STORAGE_FAILURE;
+    psa_status = PSA_ERROR_STORAGE_FAILURE;
   }
+
+  exit:
+  sli_its_release_mutex();
+  return psa_status;
 }
 
 // -------------------------------------
@@ -1280,19 +1394,18 @@ psa_status_t psa_its_remove(psa_storage_uid_t uid)
 static psa_storage_uid_t psa_its_identifier_of_slot(mbedtls_svc_key_id_t key)
 {
 #if defined(MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER)
-  /* Encode the owner in the upper 32 bits. This means that if
-   * owner values are nonzero (as they are on a PSA platform),
-   * no key file will ever have a value less than 0x100000000, so
-   * the whole range 0..0xffffffff is available for non-key files. */
+  // Encode the owner in the upper 32 bits. This means that if
+  // owner values are nonzero (as they are on a PSA platform),
+  // no key file will ever have a value less than 0x100000000, so
+  // the whole range 0..0xffffffff is available for non-key files.
   uint32_t unsigned_owner_id = MBEDTLS_SVC_KEY_ID_GET_OWNER_ID(key);
-  return(  ( (uint64_t) unsigned_owner_id << 32)
-           | MBEDTLS_SVC_KEY_ID_GET_KEY_ID(key) );
+  return ((uint64_t)unsigned_owner_id << 32) | MBEDTLS_SVC_KEY_ID_GET_KEY_ID(key);
 #else
-  /* Use the key id directly as a file name.
-   * psa_is_key_id_valid() in psa_crypto_slot_management.c
-   * is responsible for ensuring that key identifiers do not have a
-   * value that is reserved for non-key files. */
-  return(key);
+  // Use the key id directly as a file name.
+  // psa_is_key_id_valid() in psa_crypto_slot_management.c
+  // is responsible for ensuring that key identifiers do not have a
+  // value that is reserved for non-key files.
+  return key;
 #endif
 }
 
@@ -1305,6 +1418,8 @@ psa_status_t sli_psa_its_change_key_id(mbedtls_svc_key_id_t old_id,
   uint32_t obj_type;
   size_t its_file_size = 0;
   psa_status_t psa_status = PSA_ERROR_CORRUPTION_DETECTED;
+  int8_t *its_file_buffer = NULL;
+  sli_its_file_meta_v2_t* metadata = NULL;
 
 #if defined(SLI_PSA_ITS_ENCRYPTED)
   sli_its_encrypted_blob_t *blob = NULL;
@@ -1313,11 +1428,13 @@ psa_status_t sli_psa_its_change_key_id(mbedtls_svc_key_id_t old_id,
   psa_status_t encrypt_status;
   psa_status_t decrypt_status;
 #endif
+  sli_its_acquire_mutex();
 
   // Check whether the key to migrate exists on disk
   nvm3_ObjectKey_t nvm3_object_id = prepare_its_get_nvm3_id(old_uid);
   if (nvm3_object_id > SLI_PSA_ITS_NVM3_RANGE_END) {
-    return PSA_ERROR_DOES_NOT_EXIST;
+    psa_status = PSA_ERROR_DOES_NOT_EXIST;
+    goto exit;
   }
 
   // Get total length to allocate
@@ -1326,16 +1443,17 @@ psa_status_t sli_psa_its_change_key_id(mbedtls_svc_key_id_t old_id,
                               &obj_type,
                               &its_file_size);
   if (status != ECODE_NVM3_OK) {
-    return PSA_ERROR_STORAGE_FAILURE;
+    psa_status = PSA_ERROR_STORAGE_FAILURE;
+    goto exit;
   }
 
   // Allocate temporary buffer and cast it to the metadata format
-  uint8_t *its_file_buffer = mbedtls_calloc(1, its_file_size);
-  sli_its_file_meta_v2_t* metadata = (sli_its_file_meta_v2_t*) its_file_buffer;
-
+  its_file_buffer = mbedtls_calloc(1, its_file_size);
   if (its_file_buffer == NULL) {
-    return PSA_ERROR_INSUFFICIENT_MEMORY;
+    psa_status = PSA_ERROR_INSUFFICIENT_MEMORY;
+    goto exit;
   }
+  metadata = (sli_its_file_meta_v2_t*) its_file_buffer;
 
   // Read contents of pre-existing key into the temporary buffer
   status = nvm3_readData(nvm3_defaultHandle,
@@ -1429,9 +1547,12 @@ psa_status_t sli_psa_its_change_key_id(mbedtls_svc_key_id_t old_id,
   }
 
   exit:
-  // Clear and free key buffer before return.
-  memset(its_file_buffer, 0, its_file_size);
-  mbedtls_free(its_file_buffer);
+  if (its_file_buffer != NULL) {
+    // Clear and free key buffer before return.
+    memset(its_file_buffer, 0, its_file_size);
+    mbedtls_free(its_file_buffer);
+  }
+  sli_its_release_mutex();
   return psa_status;
 }
 
@@ -1516,7 +1637,7 @@ SLI_STATIC_TESTABLE uint32_t nvm3_uid_set_cache[(SL_PSA_ITS_MAX_FILES + 31) / 32
 SLI_STATIC_TESTABLE uint32_t nvm3_uid_tomb_cache[(SL_PSA_ITS_MAX_FILES + 31) / 32] = { 0 };
 #if SL_PSA_ITS_SUPPORT_V2_DRIVER
 SLI_STATIC_TESTABLE uint32_t its_driver_version = SLI_PSA_ITS_NOT_CHECKED;
-#endif
+#endif // SL_PSA_ITS_SUPPORT_V2_DRIVER
 
 #if defined(SLI_PSA_ITS_ENCRYPTED)
 // The root key is an AES-256 key, and is therefore 32 bytes.
@@ -1547,18 +1668,18 @@ static session_key_t g_cached_session_key = {
   .uid = 0,
   .data = { 0 },
 };
-#endif
+#endif // defined(SLI_PSA_ITS_ENCRYPTED)
 
 // -------------------------------------
 // Structs
 
-#if defined (SLI_PSA_ITS_SUPPORT_V1_FORMAT_INTERNAL)
+#if defined(SLI_PSA_ITS_SUPPORT_V1_FORMAT_INTERNAL)
 typedef struct {
   uint32_t magic;
   psa_storage_uid_t uid;
   psa_storage_create_flags_t flags;
 } sl_its_file_meta_v1_t;
-#endif /* SLI_ITS_SUPPORT_V1_FORMAT_INTERNAL */
+#endif // defined(SLI_PSA_ITS_SUPPORT_V1_FORMAT_INTERNAL)
 
 // -------------------------------------
 // Local function prototypes
@@ -1843,10 +1964,11 @@ static psa_status_t psa_its_get_legacy(nvm3_ObjectKey_t nvm3_object_id,
 
 #if defined(SLI_PSA_ITS_ENCRYPTED)
   psa_status_t psa_status = PSA_ERROR_CORRUPTION_DETECTED;
+  sli_its_encrypted_blob_t *blob = NULL;
   size_t plaintext_length;
 
   // its_file_size includes size of sli_its_encrypted_blob_t struct
-  sli_its_encrypted_blob_t *blob = (sli_its_encrypted_blob_t*)mbedtls_calloc(1, its_file_size);
+  blob = (sli_its_encrypted_blob_t*)mbedtls_calloc(1, its_file_size);
   if (blob == NULL) {
     return PSA_ERROR_INSUFFICIENT_MEMORY;
   }
@@ -1885,8 +2007,10 @@ static psa_status_t psa_its_get_legacy(nvm3_ObjectKey_t nvm3_object_id,
   psa_status = PSA_SUCCESS;
 
   cleanup:
-  memset(blob, 0, its_file_size);
-  mbedtls_free(blob);
+  if (blob != NULL) {
+    memset(blob, 0, its_file_size);
+    mbedtls_free(blob);
+  }
   return psa_status;
 #else
   // If no encryption is used, just read out the data and write it directly to the output buffer
@@ -2122,6 +2246,8 @@ psa_status_t psa_its_set_v1(psa_storage_uid_t uid,
 
   its_file_meta = (sl_its_file_meta_v1_t *)its_file_buffer;
   sli_its_file_meta_v2_t its_file_meta_v2;
+
+  sli_its_acquire_mutex();
   psa_status = find_nvm3_id(uid, true, &its_file_meta_v2, NULL, NULL,
                             &nvm3_object_id);
   if (psa_status != PSA_SUCCESS) {
@@ -2157,6 +2283,7 @@ psa_status_t psa_its_set_v1(psa_storage_uid_t uid,
   // Clear and free key buffer before return.
   memset(its_file_buffer, 0, its_file_size + sizeof(sl_its_file_meta_v1_t));
   mbedtls_free(its_file_buffer);
+  sli_its_release_mutex();
   return psa_status;
 }
 #endif //SLI_PSA_ITS_SUPPORT_V1_FORMAT_INTERNAL
@@ -2728,6 +2855,7 @@ psa_status_t psa_its_set(psa_storage_uid_t uid,
 #if defined(SLI_PSA_ITS_ENCRYPTED)
   sli_its_encrypted_blob_t *blob = NULL;
   size_t its_file_size = data_length + SLI_ITS_ENCRYPTED_BLOB_SIZE_OVERHEAD;
+  size_t blob_length = 0u;
 #else
   size_t its_file_size = data_length;
 #endif
@@ -2740,6 +2868,7 @@ psa_status_t psa_its_set(psa_storage_uid_t uid,
 
   its_file_meta = (sli_its_file_meta_v2_t *)its_file_buffer;
 
+  sli_its_acquire_mutex();
   psa_status = find_nvm3_id(uid, true, its_file_meta, NULL, NULL, &nvm3_object_id);
   if (psa_status != PSA_SUCCESS) {
     if (psa_status == PSA_ERROR_DOES_NOT_EXIST) {
@@ -2757,7 +2886,6 @@ psa_status_t psa_its_set(psa_storage_uid_t uid,
   blob = (sli_its_encrypted_blob_t*)(its_file_buffer + sizeof(sli_its_file_meta_v2_t));
 
   // Encrypt and authenticate the provided data
-  size_t blob_length;
   psa_status = sli_encrypt_its_file(its_file_meta,
                                     (uint8_t*)p_data,
                                     data_length,
@@ -2796,6 +2924,7 @@ psa_status_t psa_its_set(psa_storage_uid_t uid,
   // Clear and free key buffer before return.
   memset(its_file_buffer, 0, its_file_size + sizeof(sli_its_file_meta_v2_t));
   mbedtls_free(its_file_buffer);
+  sli_its_release_mutex();
   return psa_status;
 }
 
@@ -2838,44 +2967,54 @@ psa_status_t psa_its_get(psa_storage_uid_t uid,
     }
   }
 
+#if defined(SLI_PSA_ITS_ENCRYPTED)
+  size_t plaintext_length;
+  sli_its_encrypted_blob_t *blob = NULL;
+#endif
   psa_status_t psa_status = PSA_ERROR_CORRUPTION_DETECTED;
   Ecode_t status;
   sli_its_file_meta_v2_t its_file_meta = { 0 };
-  size_t its_file_size = 0;
-  size_t its_file_offset = 0;
+  size_t its_file_size = 0u;
+  size_t its_file_data_size = 0u;
+  size_t its_file_offset = 0u;
   nvm3_ObjectKey_t nvm3_object_id;
 
+  sli_its_acquire_mutex();
   psa_status = find_nvm3_id(uid, false, &its_file_meta, &its_file_offset, &its_file_size, &nvm3_object_id);
   if (psa_status != PSA_SUCCESS) {
-    return psa_status;
+    goto exit;
   }
 #if defined(TFM_CONFIG_SL_SECURE_LIBRARY)
   if (its_file_meta.flags == PSA_STORAGE_FLAG_WRITE_ONCE_SECURE_ACCESSIBLE
       && !object_lives_in_s(p_data, data_length)) {
     // The flag indicates that this data should not be read back to the non-secure domain
-    return PSA_ERROR_INVALID_ARGUMENT;
+    psa_status = PSA_ERROR_INVALID_ARGUMENT;
+    goto exit;
   }
 #endif
 
 #if defined(SLI_PSA_ITS_ENCRYPTED)
   // Subtract IV and MAC from ITS file as the below checks concern the actual data size
-  size_t its_file_data_size = its_file_size - SLI_ITS_ENCRYPTED_BLOB_SIZE_OVERHEAD;
+  its_file_data_size = its_file_size - SLI_ITS_ENCRYPTED_BLOB_SIZE_OVERHEAD;
 #else
-  size_t its_file_data_size = its_file_size;
+  its_file_data_size = its_file_size;
 #endif
 
   if (data_length != 0U) {
     if ((data_offset >= its_file_data_size) && (its_file_data_size != 0U)) {
-      return PSA_ERROR_INVALID_ARGUMENT;
+      psa_status = PSA_ERROR_INVALID_ARGUMENT;
+      goto exit;
     }
 
     if ((its_file_data_size == 0U) && (data_offset != 0U)) {
-      return PSA_ERROR_INVALID_ARGUMENT;
+      psa_status = PSA_ERROR_INVALID_ARGUMENT;
+      goto exit;
     }
   } else {
     // Allow the offset at the data size boundary if the requested amount of data is zero.
     if (data_offset > its_file_data_size) {
-      return PSA_ERROR_INVALID_ARGUMENT;
+      psa_status = PSA_ERROR_INVALID_ARGUMENT;
+      goto exit;
     }
   }
 
@@ -2886,12 +3025,11 @@ psa_status_t psa_its_get(psa_storage_uid_t uid,
   }
 
 #if defined(SLI_PSA_ITS_ENCRYPTED)
-  size_t plaintext_length;
-
   // its_file_size includes size of sli_its_encrypted_blob_t struct
-  sli_its_encrypted_blob_t *blob = (sli_its_encrypted_blob_t*)mbedtls_calloc(1, its_file_size);
+  blob = (sli_its_encrypted_blob_t*)mbedtls_calloc(1, its_file_size);
   if (blob == NULL) {
-    return PSA_ERROR_INSUFFICIENT_MEMORY;
+    psa_status = PSA_ERROR_INSUFFICIENT_MEMORY;
+    goto exit;
   }
   memset(blob, 0, its_file_size);
 
@@ -2902,7 +3040,7 @@ psa_status_t psa_its_get(psa_storage_uid_t uid,
                                 its_file_size);
   if (status != ECODE_NVM3_OK) {
     psa_status = PSA_ERROR_STORAGE_FAILURE;
-    goto cleanup;
+    goto exit;
   }
 
   // Decrypt and authenticate blob
@@ -2914,18 +3052,18 @@ psa_status_t psa_its_get(psa_storage_uid_t uid,
                                     &plaintext_length);
 
   if (psa_status != PSA_SUCCESS) {
-    goto cleanup;
+    goto exit;
   }
 
   if (plaintext_length != (its_file_size - SLI_ITS_ENCRYPTED_BLOB_SIZE_OVERHEAD)) {
     psa_status = PSA_ERROR_INVALID_SIGNATURE;
-    goto cleanup;
+    goto exit;
   }
 
   // Verify that the requested UID is equal to the retrieved and authenticated UID
   if (uid != its_file_meta.uid) {
     psa_status = PSA_ERROR_INVALID_ARGUMENT;
-    goto cleanup;
+    goto exit;
   }
 
   if (*p_data_length > 0) {
@@ -2933,9 +3071,12 @@ psa_status_t psa_its_get(psa_storage_uid_t uid,
   }
   psa_status = PSA_SUCCESS;
 
-  cleanup:
-  memset(blob, 0, its_file_size);
-  mbedtls_free(blob);
+  exit:
+  if (blob != NULL) {
+    memset(blob, 0, its_file_size);
+    mbedtls_free(blob);
+  }
+  sli_its_release_mutex();
 #else
   // If no encryption is used, just read out the data and write it directly to the output buffer
   status = nvm3_readPartialData(nvm3_defaultHandle, nvm3_object_id, p_data, its_file_offset + data_offset, *p_data_length);
@@ -2945,6 +3086,9 @@ psa_status_t psa_its_get(psa_storage_uid_t uid,
   } else {
     psa_status = PSA_SUCCESS;
   }
+
+  exit:
+  sli_its_release_mutex();
 #endif
 
   return psa_status;
@@ -2978,8 +3122,10 @@ psa_status_t psa_its_get_info(psa_storage_uid_t uid,
   size_t its_file_offset = 0;
   nvm3_ObjectKey_t nvm3_object_id;
 
+  sli_its_acquire_mutex();
   psa_status = find_nvm3_id(uid, false, &its_file_meta, &its_file_offset, &its_file_size, &nvm3_object_id);
   if (psa_status != PSA_SUCCESS) {
+    sli_its_release_mutex();
     return psa_status;
   }
 
@@ -2990,7 +3136,7 @@ psa_status_t psa_its_get_info(psa_storage_uid_t uid,
   // Remove IV and MAC size from file size
   p_info->size = its_file_size - SLI_ITS_ENCRYPTED_BLOB_SIZE_OVERHEAD;
 #endif
-
+  sli_its_release_mutex();
   return PSA_SUCCESS;
 }
 
@@ -3015,28 +3161,33 @@ psa_status_t psa_its_remove(psa_storage_uid_t uid)
   size_t its_file_offset = 0;
   nvm3_ObjectKey_t nvm3_object_id;
 
+  sli_its_acquire_mutex();
   psa_status = find_nvm3_id(uid, false, &its_file_meta, &its_file_offset, &its_file_size, &nvm3_object_id);
   if (psa_status != PSA_SUCCESS) {
-    return psa_status;
+    goto exit;
   }
   if (its_file_meta.flags == PSA_STORAGE_FLAG_WRITE_ONCE
 #if defined(TFM_CONFIG_SL_SECURE_LIBRARY)
       || (its_file_meta.flags == PSA_STORAGE_FLAG_WRITE_ONCE_SECURE_ACCESSIBLE)
 #endif
       ) {
-    return PSA_ERROR_NOT_PERMITTED;
+    psa_status = PSA_ERROR_NOT_PERMITTED;
+    goto exit;
   }
   status = nvm3_deleteObject(nvm3_defaultHandle, nvm3_object_id);
-
   if (status == ECODE_NVM3_OK) {
     // Power-loss might occur, however upon boot, the look-up table will be
     // re-filled as long as the data has been successfully written to NVM3.
     clear_cache(nvm3_object_id);
     set_tomb(nvm3_object_id);
-    return PSA_SUCCESS;
+    psa_status = PSA_SUCCESS;
   } else {
-    return PSA_ERROR_STORAGE_FAILURE;
+    psa_status = PSA_ERROR_STORAGE_FAILURE;
   }
+
+  exit:
+  sli_its_release_mutex();
+  return psa_status;
 }
 
 // -------------------------------------
@@ -3050,14 +3201,13 @@ static psa_storage_uid_t psa_its_identifier_of_slot(mbedtls_svc_key_id_t key)
    * no key file will ever have a value less than 0x100000000, so
    * the whole range 0..0xffffffff is available for non-key files. */
   uint32_t unsigned_owner_id = MBEDTLS_SVC_KEY_ID_GET_OWNER_ID(key);
-  return(  ( (uint64_t) unsigned_owner_id << 32)
-           | MBEDTLS_SVC_KEY_ID_GET_KEY_ID(key) );
+  return ((uint64_t) unsigned_owner_id << 32) | MBEDTLS_SVC_KEY_ID_GET_KEY_ID(key);
 #else
   /* Use the key id directly as a file name.
    * psa_is_key_id_valid() in psa_crypto_slot_management.c
    * is responsible for ensuring that key identifiers do not have a
    * value that is reserved for non-key files. */
-  return(key);
+  return key;
 #endif
 }
 
@@ -3068,15 +3218,12 @@ psa_status_t sli_psa_its_change_key_id(mbedtls_svc_key_id_t old_id,
   psa_storage_uid_t new_uid = psa_its_identifier_of_slot(new_id);
   size_t its_file_size = 0;
   psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
-
   if (old_id == new_id) {
     return PSA_SUCCESS;
   }
-
   // Check whether the key to migrate exists on disk
   struct psa_storage_info_t p_info;
   status = psa_its_get_info(old_uid, &p_info);
-
   if (status != PSA_SUCCESS) {
     return status;
   }

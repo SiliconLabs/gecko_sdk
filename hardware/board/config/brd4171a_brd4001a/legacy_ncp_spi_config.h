@@ -21,22 +21,22 @@
 // <<< sl:start pin_tool >>>
 // <usart signal=TX,RX,CLK,(CS)> LEGACY_NCP_SPI
 // $[USART_LEGACY_NCP_SPI]
-#define LEGACY_NCP_SPI_PERIPHERAL                USART0
-#define LEGACY_NCP_SPI_PERIPHERAL_NO             0
+#define LEGACY_NCP_SPI_PERIPHERAL                USART2
+#define LEGACY_NCP_SPI_PERIPHERAL_NO             2
 
-// USART0 TX on PD00
+// USART2 TX on PD00
 #define LEGACY_NCP_SPI_TX_PORT                   gpioPortD
 #define LEGACY_NCP_SPI_TX_PIN                    0
 
-// USART0 RX on PD01
+// USART2 RX on PD01
 #define LEGACY_NCP_SPI_RX_PORT                   gpioPortD
 #define LEGACY_NCP_SPI_RX_PIN                    1
 
-// USART0 CLK on PD02
+// USART2 CLK on PD02
 #define LEGACY_NCP_SPI_CLK_PORT                  gpioPortD
 #define LEGACY_NCP_SPI_CLK_PIN                   2
 
-// USART0 CS on PD04
+// USART2 CS on PD04
 #define LEGACY_NCP_SPI_CS_PORT                   gpioPortD
 #define LEGACY_NCP_SPI_CS_PIN                    4
 

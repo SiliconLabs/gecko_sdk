@@ -106,4 +106,4 @@ void emberAfPluginIasZoneClientReadAttributesResponseCallback(EmberAfClusterId c
 /** @} */ // end of name Callbacks
 /** @} */ // end of ias-zone-client
 
-void emAfClearServers(void);
+void sli_zigbee_af_clear_servers(void);

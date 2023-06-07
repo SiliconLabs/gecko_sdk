@@ -1,0 +1,34 @@
+id: app_timer_freertos
+label: Timer for FreeRTOS
+package: platform
+description: >
+  Timer service based on FreeRTOS
+  for applications with less strict timing requirements.
+  This module is based on the sleeptimer, but runs the timer callbacks in
+  non-interrupt context. This behavior gives more flexibility for the callback
+  implementation but causes a less precise timing.
+  If your application requires precise timing, please use the sleeptimer
+  directly.
+category: Application|Utility
+quality: production
+root_path: app/common/util/app_timer_freertos
+source:
+  - path: app_timer_freertos.c
+include:
+  - path: .
+    file_list:
+      - path: app_timer.h
+      - path: sl_simple_timer.h
+provides:
+  - name: app_timer
+requires:
+  - name: freertos
+  - name: freertos_heap
+template_contribution:
+  - name: component_catalog
+    value: app_timer_freertos
+validation_library:
+  - path: ../../../common/validation/autonumber_common.lua
+    name: autonumber_common
+validation_helper:
+  - path: app_timer_freertos_validation.lua

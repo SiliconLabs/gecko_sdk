@@ -18,28 +18,17 @@
 
 #include "app/framework/include/af.h"
 #include "app/framework/util/util.h"
+
 #include "fragmentation.h"
 #ifdef SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT
-#include "sl_zigbee_debug_print.h"
-#else // ! SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT
-#define sl_zigbee_legacy_af_debug_print(...)
+#include "app/framework/plugin/debug-print/sl_zigbee_debug_print.h"
 #endif //SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT
-#ifdef UC_BUILD
 #if (EMBER_AF_PLUGIN_FRAGMENTATION_FREE_OUTGOING_MESSAGE_PRIOR_TO_FINAL_ACK == 1)
 #define FREE_OUTGOING_MESSAGE_PRIOR_TO_FINAL_ACK
 #endif
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_FRAGMENTATION_FREE_OUTGOING_MESSAGE_PRIOR_TO_FINAL_ACK
-#define FREE_OUTGOING_MESSAGE_PRIOR_TO_FINAL_ACK
-#endif
-#endif // UC_BUILD
 
 //------------------------------------------------------------------------------
 // Globals
-
-#ifndef UC_BUILD
-EmberEventControl emAfFragmentationEvents[10];
-#endif // UC_BUILD
 
 #if defined(FREE_OUTGOING_MESSAGE_PRIOR_TO_FINAL_ACK)
 #define FREE_OUTGOING_MESSAGE_PRIOR_TO_FINAL_ACK_BOOLEAN true
@@ -75,9 +64,9 @@ static txFragmentedPacket txPacketAwaitingFinalAck = {
 
 #if defined(EMBER_TEST)
   #define NO_BLOCK_TO_DROP 0xFF
-uint8_t emAfPluginFragmentationArtificiallyDropBlockNumber = NO_BLOCK_TO_DROP;
-  #define artificiallyDropBlock(block) (block == emAfPluginFragmentationArtificiallyDropBlockNumber)
-  #define clearArtificiallyDropBlock() emAfPluginFragmentationArtificiallyDropBlockNumber = NO_BLOCK_TO_DROP;
+uint8_t sli_zigbee_af_fragmentation_artificially_drop_block_number = NO_BLOCK_TO_DROP;
+  #define artificiallyDropBlock(block) (block == sli_zigbee_af_fragmentation_artificially_drop_block_number)
+  #define clearArtificiallyDropBlock() sli_zigbee_af_fragmentation_artificially_drop_block_number = NO_BLOCK_TO_DROP;
   #define artificiallyDropBlockPrintln(format, arg) sl_zigbee_legacy_af_debug_print((format), (arg))
 
 #else
@@ -88,15 +77,17 @@ uint8_t emAfPluginFragmentationArtificiallyDropBlockNumber = NO_BLOCK_TO_DROP;
 #endif
 
 #define messageTag(txPacket) ((txPacket)->apsFrame.sequence)
+
+extern uint16_t sl_zigbee_get_aps_ack_timeout_ms(void);
 //------------------------------------------------------------------------------
 // Functions
 
-EmberStatus emAfFragmentationSendUnicast(EmberOutgoingMessageType type,
-                                         uint16_t indexOrDestination,
-                                         EmberApsFrame *apsFrame,
-                                         uint8_t *buffer,
-                                         uint16_t bufLen,
-                                         uint16_t *messageTag)
+EmberStatus sli_zigbee_af_fragmentation_send_unicast(EmberOutgoingMessageType type,
+                                                     uint16_t indexOrDestination,
+                                                     EmberApsFrame *apsFrame,
+                                                     uint8_t *buffer,
+                                                     uint16_t bufLen,
+                                                     uint16_t *messageTag)
 {
   EmberStatus status;
   uint16_t fragments;
@@ -121,8 +112,8 @@ EmberStatus emAfFragmentationSendUnicast(EmberOutgoingMessageType type,
   txPacket->apsFrame.options |=
     (EMBER_APS_OPTION_FRAGMENT | EMBER_APS_OPTION_RETRY);
 
-  emAfPluginFragmentationHandleSourceRoute(txPacket,
-                                           indexOrDestination);
+  sli_zigbee_af_fragmentation_handle_source_route(txPacket,
+                                                  indexOrDestination);
 
   MEMMOVE(txPacket->bufferPtr, buffer, bufLen);
   txPacket->bufLen = bufLen;
@@ -153,8 +144,8 @@ EmberStatus emAfFragmentationSendUnicast(EmberOutgoingMessageType type,
   return status;
 }
 
-bool emAfFragmentationMessageSent(EmberApsFrame *apsFrame,
-                                  EmberStatus status)
+bool sli_zigbee_af_fragmentation_message_sent(EmberApsFrame *apsFrame,
+                                              EmberStatus status)
 {
   if (apsFrame->options & EMBER_APS_OPTION_FRAGMENT) {
     // If the outgoing APS frame is fragmented, we should always have a
@@ -207,10 +198,10 @@ static EmberStatus sendNextFragments(txFragmentedPacket* txPacket)
 
     txPacket->apsFrame.groupId = HIGH_LOW_TO_INT(txPacket->fragmentCount, i);
 
-    status = emAfPluginFragmentationSend(txPacket,
-                                         i,
-                                         fragmentLen,
-                                         offset);
+    status = sli_zigbee_af_fragmentation_send(txPacket,
+                                              i,
+                                              fragmentLen,
+                                              offset);
     if (status != EMBER_SUCCESS) {
       return status;
     }
@@ -220,13 +211,13 @@ static EmberStatus sendNextFragments(txFragmentedPacket* txPacket)
   } // close inner for
 
   if (txPacket->fragmentsInTransit == 0) {
-    emAfFragmentationMessageSentHandler(txPacket->messageType,
-                                        txPacket->indexOrDestination,
-                                        &txPacket->apsFrame,
-                                        txPacket->bufferPtr,
-                                        txPacket->bufLen,
-                                        EMBER_SUCCESS,
-                                        messageTag(txPacket));
+    sli_zigbee_af_fragmentation_message_sent_handler(txPacket->messageType,
+                                                     txPacket->indexOrDestination,
+                                                     &txPacket->apsFrame,
+                                                     txPacket->bufferPtr,
+                                                     txPacket->bufLen,
+                                                     EMBER_SUCCESS,
+                                                     messageTag(txPacket));
     txPacket->messageType = UNUSED_TX_PACKET_ENTRY;
   } else if (freeOutgoingMessagePriorToFinalAck
              && txPacket->bufferPtr != NULL
@@ -247,13 +238,13 @@ static void abortTransmission(txFragmentedPacket *txPacket,
                               EmberStatus status)
 {
   if (status != EMBER_SUCCESS && txPacket->messageType != UNUSED_TX_PACKET_ENTRY) {
-    emAfFragmentationMessageSentHandler(txPacket->messageType,
-                                        txPacket->indexOrDestination,
-                                        &txPacket->apsFrame,
-                                        txPacket->bufferPtr,
-                                        txPacket->bufLen,
-                                        status,
-                                        messageTag(txPacket));
+    sli_zigbee_af_fragmentation_message_sent_handler(txPacket->messageType,
+                                                     txPacket->indexOrDestination,
+                                                     &txPacket->apsFrame,
+                                                     txPacket->bufferPtr,
+                                                     txPacket->bufLen,
+                                                     status,
+                                                     messageTag(txPacket));
     txPacket->messageType = UNUSED_TX_PACKET_ENTRY;
   }
 }
@@ -322,8 +313,9 @@ static void ageAllAckedRxPackets(void)
 static uint16_t retryTimeoutMs(EmberNodeId nodeId)
 {
   EmberEUI64 eui64;
-  uint16_t retryTimeoutMs = emberApsAckTimeoutMs;
-  if (EMBER_SLEEPY_END_DEVICE <= emAfCurrentZigbeeProNetwork->nodeType) {
+  uint16_t retryTimeoutMs = sl_zigbee_get_aps_ack_timeout_ms();
+
+  if (EMBER_SLEEPY_END_DEVICE <= sli_zigbee_af_current_zigbee_pro_network->nodeType) {
     retryTimeoutMs += emberMacIndirectTimeout;
   }
   if (emberLookupEui64ByNodeId(nodeId, eui64) == EMBER_SUCCESS
@@ -333,11 +325,11 @@ static uint16_t retryTimeoutMs(EmberNodeId nodeId)
   return retryTimeoutMs;
 }
 
-bool emAfFragmentationIncomingMessage(EmberIncomingMessageType type,
-                                      EmberApsFrame *apsFrame,
-                                      EmberNodeId sender,
-                                      uint8_t **buffer,
-                                      uint16_t *bufLen)
+bool sli_zigbee_af_fragmentation_incoming_message(EmberIncomingMessageType type,
+                                                  EmberApsFrame *apsFrame,
+                                                  EmberNodeId sender,
+                                                  uint8_t **buffer,
+                                                  uint16_t *bufLen)
 {
   static bool rxWindowMoved = false;
   bool newFragment;
@@ -378,15 +370,9 @@ bool emAfFragmentationIncomingMessage(EmberIncomingMessageType type,
     rxPacket->fragmentLen = (uint8_t)(*bufLen);
     setFragmentMask(rxPacket);
 
-#ifdef UC_BUILD
-    slxu_zigbee_event_set_delay_ms(&(rxPacket->fragmentEventControl),
-                                   (retryTimeoutMs(sender)
-                                    * ZIGBEE_APSC_MAX_TRANSMIT_RETRIES));
-#else // !UC_BUILD
-    emberEventControlSetDelayMS(*(rxPacket->fragmentEventControl),
-                                (retryTimeoutMs(sender)
-                                 * ZIGBEE_APSC_MAX_TRANSMIT_RETRIES));
-#endif // UC_BUILD
+    sl_zigbee_event_set_delay_ms(&(rxPacket->fragmentEventControl),
+                                 (retryTimeoutMs(sender)
+                                  * ZIGBEE_APSC_MAX_TRANSMIT_RETRIES));
     emberAfAddToCurrentAppTasks(EMBER_AF_FRAGMENTATION_IN_PROGRESS);
   }
 
@@ -398,15 +384,9 @@ bool emAfFragmentationIncomingMessage(EmberIncomingMessageType type,
     setFragmentMask(rxPacket);
     rxWindowMoved = true;
 
-#ifdef UC_BUILD
-    slxu_zigbee_event_set_delay_ms(&(rxPacket->fragmentEventControl),
-                                   (retryTimeoutMs(sender)
-                                    * ZIGBEE_APSC_MAX_TRANSMIT_RETRIES));
-#else // !UC_BUILD
-    emberEventControlSetDelayMS(*(rxPacket->fragmentEventControl),
-                                (retryTimeoutMs(sender)
-                                 * ZIGBEE_APSC_MAX_TRANSMIT_RETRIES));
-#endif // UC_BUILD
+    sl_zigbee_event_set_delay_ms(&(rxPacket->fragmentEventControl),
+                                 (retryTimeoutMs(sender)
+                                  * ZIGBEE_APSC_MAX_TRANSMIT_RETRIES));
   }
 
   // Fragment outside the rx window.
@@ -461,9 +441,9 @@ bool emAfFragmentationIncomingMessage(EmberIncomingMessageType type,
   if (fragment == rxPacket->fragmentsExpected - 1
       || (rxPacket->fragmentMask
           | lowBitMask(fragment % emberFragmentWindowSize)) == 0xFF) {
-    emAfPluginFragmentationSendReply(sender,
-                                     apsFrame,
-                                     rxPacket);
+    sli_zigbee_af_fragmentation_send_reply(sender,
+                                           apsFrame,
+                                           rxPacket);
   }
 
   // Received all the expected fragments.
@@ -511,45 +491,25 @@ bool emAfFragmentationIncomingMessage(EmberIncomingMessageType type,
       emberAfSendDefaultResponse(&cmd, EMBER_ZCL_STATUS_INSUFFICIENT_SPACE);
 
       // Finally, free the buffer
-#ifdef UC_BUILD
-      emAfFragmentationAbortReception(&(rxPacket->fragmentEventControl));
-#else // !UC_BUILD
-      emAfFragmentationAbortReception(rxPacket->fragmentEventControl);
-#endif // UC_BUILD
+      sli_zigbee_af_fragmentation_abort_reception(&(rxPacket->fragmentEventControl));
     }
   }
   return true;
 
   kickout:
-#ifdef UC_BUILD
-  emAfFragmentationAbortReception(&(rxPacket->fragmentEventControl));
-#else // !UC_BUILD
-  emAfFragmentationAbortReception(rxPacket->fragmentEventControl);
-#endif // UC_BUILD
+  sli_zigbee_af_fragmentation_abort_reception(&(rxPacket->fragmentEventControl));
 
   return true;
 }
 
-#ifdef UC_BUILD
-void emAfFragmentationAbortReception(sl_zigbee_event_t* control)
-#else // !UC_BUILD
-void emAfFragmentationAbortReception(EmberEventControl* control)
-#endif // UC_BUILD
+void sli_zigbee_af_fragmentation_abort_reception(sl_zigbee_event_t* control)
 {
   uint8_t i;
-#ifdef UC_BUILD
-  slxu_zigbee_event_set_inactive(control);
-#else // !UC_BUILD
-  emberEventControlSetInactive(*control);
-#endif // UC_BUILD
+  sl_zigbee_event_set_inactive(control);
 
   for (i = 0; i < EMBER_AF_PLUGIN_FRAGMENTATION_MAX_INCOMING_PACKETS; i++) {
     rxFragmentedPacket *rxPacket = &(rxPackets[i]);
-#ifdef UC_BUILD
     if (&(rxPacket->fragmentEventControl) == control) {
-#else // !UC_BUILD
-    if (rxPacket->fragmentEventControl == control) {
-#endif // UC_BUILD
       rxPacket->status = EMBER_AF_PLUGIN_FRAGMENTATION_RX_PACKET_AVAILABLE;
     }
   }
@@ -645,8 +605,6 @@ static rxFragmentedPacket* rxPacketLookUp(EmberApsFrame *apsFrame,
 //------------------------------------------------------------------------------
 // Initialization
 
-#ifdef UC_BUILD
-
 void emberAfPluginFragmentationInitCallback(uint8_t init_level)
 {
   switch (init_level) {
@@ -654,8 +612,8 @@ void emberAfPluginFragmentationInitCallback(uint8_t init_level)
     {
       uint8_t i;
       for (i = 0; i < EMBER_AF_PLUGIN_FRAGMENTATION_MAX_INCOMING_PACKETS; i++) {
-        slxu_zigbee_event_init(&(rxPackets[i].fragmentEventControl),
-                               emAfFragmentationAbortReception);
+        sl_zigbee_event_init(&(rxPackets[i].fragmentEventControl),
+                             sli_zigbee_af_fragmentation_abort_reception);
         rxPackets[i].status = EMBER_AF_PLUGIN_FRAGMENTATION_RX_PACKET_AVAILABLE;
       }
       break;
@@ -664,7 +622,7 @@ void emberAfPluginFragmentationInitCallback(uint8_t init_level)
     case SL_ZIGBEE_INIT_LEVEL_LOCAL_DATA:
     {
       uint8_t i;
-      emAfPluginFragmentationPlatformInitCallback();
+      sli_zigbee_af_fragmentation_platform_init_callback();
       for (i = 0; i < EMBER_AF_PLUGIN_FRAGMENTATION_MAX_OUTGOING_PACKETS; i++) {
         txPackets[i].messageType = 0xFF;
       }
@@ -672,27 +630,6 @@ void emberAfPluginFragmentationInitCallback(uint8_t init_level)
     }
   }
 }
-
-#else // !UC_BUILD
-
-void emberAfPluginFragmentationInitCallback(void)
-{
-  uint8_t i;
-  emAfPluginFragmentationPlatformInitCallback();
-
-  for (i = 0; i < EMBER_AF_PLUGIN_FRAGMENTATION_MAX_INCOMING_PACKETS; i++) {
-    slxu_zigbee_event_init(&(rxPackets[i].fragmentEventControl),
-                           emAfFragmentationAbortReception);
-    rxPackets[i].status = EMBER_AF_PLUGIN_FRAGMENTATION_RX_PACKET_AVAILABLE;
-    rxPackets[i].fragmentEventControl = &(emAfFragmentationEvents[i]);
-  }
-
-  for (i = 0; i < EMBER_AF_PLUGIN_FRAGMENTATION_MAX_OUTGOING_PACKETS; i++) {
-    txPackets[i].messageType = 0xFF;
-  }
-}
-
-#endif // UC_BUILD
 
 //------------------------------------------------------------------------------
 // Utility

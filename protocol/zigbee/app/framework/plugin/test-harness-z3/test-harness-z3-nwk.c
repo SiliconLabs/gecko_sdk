@@ -23,25 +23,25 @@
 // -----------------------------------------------------------------------------
 // Globals
 
-bool emAfPluginTestHarnessZ3IgnoreLeaveCommands = false;
+bool sli_zigbee_af_test_harness_z3_ignore_leave_commands = false;
 
 // private stack API
-extern void emChangePanIdNow(EmberPanId panId);
+extern void sli_zigbee_change_pan_id_now(EmberPanId panId);
 
 // -----------------------------------------------------------------------------
 // NWK CLI Commands
 
 #ifdef EZSP_HOST
-  #define emNetworkSendCommand(...) false
+  #define sli_zigbee_network_sendCommand(...) false
 #else
 
 // Internal stack API's.
-extern bool emNetworkSendCommand(EmberNodeId destination,
-                                 uint8_t *commandFrame,
-                                 uint8_t length,
-                                 bool tryToInsertLongDest,
-                                 EmberEUI64 destinationEui);
-extern uint8_t emSetNwkUpdateId(uint8_t id);
+extern bool sli_zigbee_network_sendCommand(EmberNodeId destination,
+                                           uint8_t *commandFrame,
+                                           uint8_t length,
+                                           bool tryToInsertLongDest,
+                                           EmberEUI64 destinationEui);
+extern uint8_t sli_zigbee_set_nwk_update_id(uint8_t id);
 
 #endif /* EZSP_HOST */
 
@@ -56,20 +56,20 @@ static EmberStatus sendNetworkCommand(EmberNodeId destinationShort,
     = (emberLookupEui64ByNodeId(destinationShort, destinationLong)
        == EMBER_SUCCESS);
 
-  return (emNetworkSendCommand(destinationShort,
-                               commandFrame,
-                               length,
-                               haveDestinationLong,
-                               destinationLong)
+  return (sli_zigbee_network_sendCommand(destinationShort,
+                                         commandFrame,
+                                         length,
+                                         haveDestinationLong,
+                                         destinationLong)
           ? EMBER_SUCCESS
           : EMBER_DELIVERY_FAILED);
 }
 
 // plugin test-harness z3 nwk nwk-rejoin-request <dstShort:2>
-void emAfPluginTestHarnessZ3NwkNwkRejoinRequestCommand(SL_CLI_COMMAND_ARG)
+void sli_zigbee_af_test_harness_z3_nwk_nwk_rejoin_request_command(SL_CLI_COMMAND_ARG)
 {
   EmberStatus status;
-  EmberNodeId destinationShort = (EmberNodeId)emberUnsignedCommandArgument(0);
+  EmberNodeId destinationShort = sl_cli_get_argument_uint16(arguments, 0);
   EmberNodeType nodeType;
   uint8_t commandFrame[2];
 
@@ -110,14 +110,14 @@ void emAfPluginTestHarnessZ3NwkNwkRejoinRequestCommand(SL_CLI_COMMAND_ARG)
 }
 
 // plugin test-harness z3 nwk nwk-rejoin-response <addr:2> <status:1> <dstShort:2>
-void emAfPluginTestHarnessZ3NwkNwkRejoinResponseCommand(SL_CLI_COMMAND_ARG)
+void sli_zigbee_af_test_harness_z3_nwk_nwk_rejoin_response_command(SL_CLI_COMMAND_ARG)
 {
   uint8_t     frame[4];
   EmberStatus status;
 
-  EmberNodeId networkAddress   = (EmberNodeId)emberUnsignedCommandArgument(0);
-  uint8_t     rejoinStatus     = (uint8_t)emberUnsignedCommandArgument(1);
-  EmberNodeId destinationShort = (EmberNodeId)emberUnsignedCommandArgument(2);
+  EmberNodeId networkAddress   = sl_cli_get_argument_uint16(arguments, 0);
+  uint8_t     rejoinStatus     = sl_cli_get_argument_uint8(arguments, 1);
+  EmberNodeId destinationShort = sl_cli_get_argument_uint16(arguments, 2);
 
   frame[0] = NWK_REJOIN_RESPONSE_COMMAND;
   frame[1] = LOW_BYTE(networkAddress);
@@ -134,23 +134,21 @@ void emAfPluginTestHarnessZ3NwkNwkRejoinResponseCommand(SL_CLI_COMMAND_ARG)
 
 // plugin test-harness z3 nwk nwk-leave <rejoin:1> <request:1>
 // <removeChildren:1> <dstShort:2> <options:4>
-void emAfPluginTestHarnessZ3NwkNwkLeaveCommand(SL_CLI_COMMAND_ARG)
+void sli_zigbee_af_test_harness_z3_nwk_nwk_leave_command(SL_CLI_COMMAND_ARG)
 {
   EmberStatus status;
   uint8_t frame[2] = { NWK_LEAVE_COMMAND, 0, };
 
-  bool rejoin                  = (bool)emberUnsignedCommandArgument(0);
-  bool request                 = (bool)emberUnsignedCommandArgument(1);
+  bool rejoin                  = (bool)sl_cli_get_argument_uint32(arguments, 0);
+  bool request                 = (bool)sl_cli_get_argument_uint32(arguments, 1);
   // CCB 2047
   // - CCB makes the first step to depracate the 'leave and remove children' functionality.
   // - We were proactive here and deprecated it right away.
   // bool removeChildren          = (bool)emberUnsignedCommandArgument(2);
-  EmberNodeId destinationShort = (EmberNodeId)emberUnsignedCommandArgument(3);
-#ifdef UC_BUILD
-  uint32_t options      = emAfPluginTestHarnessZ3GetSignificantBit(arguments, 4);
-#else
-  uint32_t options      = emAfPluginTestHarnessZ3GetSignificantBit(4);
-#endif //UC_BUILD
+
+  EmberNodeId destinationShort = sl_cli_get_argument_uint16(arguments, 3);
+  uint32_t options      = sli_zigbee_af_test_harness_z3_get_significant_bit(arguments, 4);
+
   if (rejoin) {
     frame[1] |= BIT(5);
   }
@@ -160,11 +158,11 @@ void emAfPluginTestHarnessZ3NwkNwkLeaveCommand(SL_CLI_COMMAND_ARG)
 
   switch (options) {
     case BIT(0): // no ieee addr field
-      status = (emNetworkSendCommand(destinationShort,
-                                     frame,
-                                     sizeof(frame),
-                                     false,
-                                     NULL)
+      status = (sli_zigbee_network_sendCommand(destinationShort,
+                                               frame,
+                                               sizeof(frame),
+                                               false,
+                                               NULL)
                 ? EMBER_SUCCESS
                 : EMBER_DELIVERY_FAILED);
       break;
@@ -182,27 +180,28 @@ void emAfPluginTestHarnessZ3NwkNwkLeaveCommand(SL_CLI_COMMAND_ARG)
 
 // plugin test-harness z3 nwk nwk-leave-supression on
 // plugin test-harness z3 nwk nwk-leave-supression off
-void emAfPluginTestHarnessZ3NwkNwkLeaveSupression(SL_CLI_COMMAND_ARG)
+void sli_zigbee_af_test_harness_z3_nwk_nwk_leave_supression(SL_CLI_COMMAND_ARG)
 {
-  emAfPluginTestHarnessZ3IgnoreLeaveCommands
-    = (emberStringCommandArgument(-1, NULL)[1] == 'n');
+  sli_zigbee_af_test_harness_z3_ignore_leave_commands
+    = (sl_zigbee_cli_get_argument_string_and_length(arguments, -1, NULL)[1] == 'n');
+
   emberAfCorePrintln("%s: %s: %s",
                      TEST_HARNESS_Z3_PRINT_NAME,
                      "Supress network leave",
-                     (emAfPluginTestHarnessZ3IgnoreLeaveCommands
+                     (sli_zigbee_af_test_harness_z3_ignore_leave_commands
                       ? "YES"
                       : "NO"));
 }
 
 // plugin test-harness z3 nwk nwk-key-supression on
 // plugin test-harness z3 nwk nwk-key-supression off
-void emAfPluginTestHarnessZ3NwkNwkKeySupression(SL_CLI_COMMAND_ARG)
+void sli_zigbee_af_test_harness_z3_nwk_nwk_key_supression(SL_CLI_COMMAND_ARG)
 {
   // TODO:
 }
 
 // plugin test-harness z3 nwk get-network-update-id
-void emAfPluginTestHarnessZ3NwkGetNetworkUpdateId(SL_CLI_COMMAND_ARG)
+void sli_zigbee_af_test_harness_z3_nwk_get_network_update_id(SL_CLI_COMMAND_ARG)
 {
   EmberNetworkParameters networkParameters;
   EmberNodeType nodeType;
@@ -214,12 +213,12 @@ void emAfPluginTestHarnessZ3NwkGetNetworkUpdateId(SL_CLI_COMMAND_ARG)
 }
 
 // plugin test-harness z3 nwk set-network-update-id
-void emAfPluginTestHarnessZ3NwkSetNetworkUpdateId(SL_CLI_COMMAND_ARG)
+void sli_zigbee_af_test_harness_z3_nwk_set_network_update_id(SL_CLI_COMMAND_ARG)
 {
-  uint8_t updateId = (uint8_t)emberUnsignedCommandArgument(0);
+  uint8_t updateId = sl_cli_get_argument_uint8(arguments, 0);
   // Note, we can't use emberSetNwkUpdateId here, since that only sets
   // the update ID in a variable that is used when forming a network
-  emSetNwkUpdateId(updateId);
+  sli_zigbee_set_nwk_update_id(updateId);
   emberAfCorePrintln("%s: %s: 0x%X",
                      TEST_HARNESS_Z3_PRINT_NAME,
                      "Set network update id",

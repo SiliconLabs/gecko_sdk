@@ -293,28 +293,34 @@ class CALC_WiSUN_Jumbo(ICalculator):
 
     def calc_wisun_phy_mode_id(self, model):
         # This function calculates the PhyModeID for Wi-SUN OFDM and Wi-SUN FSK PHYs
-        # For OFDM, the variable contains an array of MCS0-6 values
-        # For FSK, the variable contains an array of FEC off/on values
+        # For OFDM, the variable contains an array of MCS0-7 values
+        # For FSK, a PHY with FEC on can also be FEC off but the inverse is false
+        # Then the variable contains an array of either FEC off/on or FEC off values
 
         profile_name = model.profile.name.lower()
+        fec_enabled = model.vars.fec_enabled.value
+
         wisun_phy_mode_id = None
         if profile_name in ["wisun_fan_1_0", "wisun_han"]:
             wisun_mode = model.vars.wisun_mode.value
-            wisun_phy_mode_id = [0] * 2
-            phy_mode =  int(wisun_mode) + 1
+            wisun_phy_mode_id = [0]
+            phy_mode = int(wisun_mode) + 1
+
+            # FEC off
             wisun_phy_mode_id[0] = (0 << 4) | phy_mode
-            wisun_phy_mode_id[1] = (1 << 4) | phy_mode
+            if fec_enabled:
+                # FEC on
+                wisun_phy_mode_id.append((1 << 4) | phy_mode)
         elif profile_name in ["wisun_fan_1_1"]:
             wisun_phy_mode_id_select = model.vars.wisun_phy_mode_id_select.value
-            wisun_phy_mode_id = [0] * 2
+            wisun_phy_mode_id = [0]
             if wisun_phy_mode_id_select >= 16:
                 #FEC is enabled
                 wisun_phy_mode_id[0] = wisun_phy_mode_id_select - 16
-                wisun_phy_mode_id[1] = wisun_phy_mode_id_select
+                wisun_phy_mode_id.append(wisun_phy_mode_id_select)
             else:
                 #No FEC
                 wisun_phy_mode_id[0] = wisun_phy_mode_id_select
-                wisun_phy_mode_id[1] = wisun_phy_mode_id_select + 16
 
         if wisun_phy_mode_id is not None:
             # Write the variable

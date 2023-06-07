@@ -1,0 +1,20 @@
+parameters: []
+constants:
+  - name: workspace_name
+    value: btmesh_soc_trustzone_workspace
+steps:
+  - task: convert
+    input:
+      - "{{tz_secure_binary}}"
+      - "{{tz_nonsecure_binary}}"
+    output: artifact/{{workspace_name}}-app-only.s37
+  - task: convert
+    input:
+      - "{{bootloader_secure_app}}"
+      - "{{bootloader_nonsecure_app}}"
+      - "{{tz_secure_binary}}"
+      - "{{tz_nonsecure_binary}}"
+    output: artifact/{{workspace_name}}-full.s37
+  - task: create_gbl
+    app: "artifact/{{workspace_name}}-app-only.s37"
+    output: artifact/{{workspace_name}}-app-only.gbl

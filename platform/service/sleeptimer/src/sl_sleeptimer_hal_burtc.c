@@ -34,6 +34,10 @@
 #include "em_core.h"
 #include "em_cmu.h"
 
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+#include "sl_power_manager.h"
+#endif
+
 #if SL_SLEEPTIMER_PERIPHERAL == SL_SLEEPTIMER_PERIPHERAL_BURTC
 
 #if defined(_SILICON_LABS_32B_SERIES_0)
@@ -273,4 +277,24 @@ uint16_t sleeptimer_hal_get_clock_accuracy(void)
   return CMU_LF_ClockPrecisionGet(cmuClock_BURTC);
 }
 
+/***************************************************************************//**
+ * Set lowest energy mode based on a project's configurations and clock source
+ *
+ * @note If power_manager_no_deepsleep component is included in a project, the
+ *       lowest possible energy mode is EM1, else lowest energy mode is
+ *       determined by clock source.
+ ******************************************************************************/
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+void sli_sleeptimer_set_pm_em_requirement(void)
+{
+  switch (CMU->EM4GRPACLKCTRL & _CMU_EM4GRPACLKCTRL_CLKSEL_MASK) {
+    case CMU_EM4GRPACLKCTRL_CLKSEL_LFRCO:
+    case CMU_EM4GRPACLKCTRL_CLKSEL_LFXO:
+      sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM2);
+      break;
+    default:
+      break;
+  }
+}
+#endif
 #endif

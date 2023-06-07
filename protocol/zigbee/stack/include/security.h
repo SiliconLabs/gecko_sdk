@@ -162,7 +162,7 @@ bool emberHaveLinkKey(EmberEUI64 remoteDevice);
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 extern uint8_t emberKeyTableSize;
-extern uint32_t emIncomingApsFrameCounters[];
+extern uint32_t sli_zigbee_incoming_aps_frame_counters[];
 #endif
 
 /** @brief Generate a Random Key (link, network, or master) and returns
@@ -494,7 +494,7 @@ EmberStatus emberSetMfgSecurityConfig(uint32_t magicNumber,
 EmberStatus emberSetOutgoingNwkFrameCounter(uint32_t desiredValue);
 #else
   #define emberSetOutgoingNwkFrameCounter(desiredValue) \
-  emSetFrameCounter(EMBER_CURRENT_NETWORK_KEY, desiredValue)
+  sli_zigbee_set_frame_counter(EMBER_CURRENT_NETWORK_KEY, desiredValue)
 #endif
 
 /** @brief Set the APS layer outgoing frame counter for Trust Center
@@ -519,10 +519,10 @@ EmberStatus emberSetOutgoingNwkFrameCounter(uint32_t desiredValue);
 EmberStatus emberSetOutgoingApsFrameCounter(uint32_t desiredValue);
 #else
   #define emberSetOutgoingApsFrameCounter(desiredValue) \
-  emSetFrameCounter(EMBER_TRUST_CENTER_LINK_KEY, desiredValue)
+  sli_zigbee_set_frame_counter(EMBER_TRUST_CENTER_LINK_KEY, desiredValue)
 
-EmberStatus emSetFrameCounter(EmberKeyType keyType,
-                              uint32_t desiredValue);
+EmberStatus sli_zigbee_set_frame_counter(EmberKeyType keyType,
+                                         uint32_t desiredValue);
 #endif
 
 /** @brief Add a temporary link key for a joining device. The link key will

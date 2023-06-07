@@ -1,0 +1,77 @@
+/**
+ * @file
+ * Command Class Central Scene Configuration
+ * @remarks This file is auto generated
+ * @copyright 2023 Silicon Laboratories Inc.
+ */
+
+#include <stdint.h>
+#include <stdbool.h>
+#include <CC_CentralScene.h>
+#include <SizeOf.h>
+#include <Assert.h>
+
+{# Validation check of configuration #}
+{% if (('identical' in central_scene) and (central_scene.identical == 1)) %}
+  {% if central_scene.scenes|length > 1 %}
+// If identical is true, then list of scenes must have only one element
+STATIC_ASSERT(0, STATIC_ASSERT_FAILED_identical_scenes_invalid_list_size);
+  {% endif %}
+  {% if 'number_of_scenes' not in central_scene %}
+// If identical is true, then number_of_scenes must be defined
+STATIC_ASSERT(0, STATIC_ASSERT_FAILED_identical_scenes_number_of_scenes_missing);
+  {% endif %}
+{% else %}
+  {% if 'number_of_scenes' in central_scene %}
+// If identical is not defined or false, then number_of_scenes must not be defined
+// and all scenes must be explicitly listed
+STATIC_ASSERT(0, STATIC_ASSERT_FAILED_number_of_scenes_mist_not_be_defined);
+  {% endif %}
+{% endif%}
+
+/*
+ * This array must be sorted by scene numbers. The Z-Wave Command Class Configurator (Z3C) will sort
+ * the array, but if modified manually after generation, make sure to keep it sorted by scene numbers.
+ */
+static cc_central_scene_t scenes_attributes [] = {
+{% set scenes_sorted = central_scene.scenes|sort(attribute='scene') %}
+{% for s in scenes_sorted %}
+  {
+     .scene_number = {{s.scene}},
+     {# create a bitmask of supported attributes #}
+     {% set attribute_bitmask = [] %}
+     {% for attribute in s.attributes %}
+        {% set attribute_bitmask = attribute_bitmask.append(attribute) %}
+     {% endfor %}
+     .scene_attributes = (1 {{'<<'}} {{ attribute_bitmask|join(' ) | (1 << ') }})
+  },
+{% endfor %}
+};
+
+STATIC_ASSERT((sizeof_array(scenes_attributes) > 0), STATIC_ASSERT_FAILED_size_mismatch);
+
+cc_central_scene_t * cc_central_scene_config_get_scenes_attributes(void) {
+  return scenes_attributes;
+}
+
+uint8_t cc_central_scene_config_get_number_of_scenes() {
+{% if 'number_of_scenes' in central_scene %}
+  return {{central_scene.number_of_scenes}};
+{% else %}
+  return sizeof_array(scenes_attributes);
+{% endif %}
+}
+
+uint8_t cc_central_scene_config_get_attribute_bitmask(uint8_t scene_number) {
+  ASSERT(scene_number <= sizeof_array(scenes_attributes));
+  return scenes_attributes[scene_number - 1].scene_attributes;
+}
+
+uint8_t cc_central_scene_config_get_identical() {
+{% if 'identical' in central_scene %}
+  return {{central_scene.identical}};
+{% else %}
+  return 0;
+{% endif %}
+}
+

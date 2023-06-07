@@ -52,9 +52,9 @@ extern "C" {
 typedef struct otCliCommand
 {
     const char *mName; ///< A pointer to the command string.
-    otError (*mCommand)(void *  aContext,
+    otError (*mCommand)(void   *aContext,
                         uint8_t aArgsLength,
-                        char *  aArgs[]); ///< A function pointer to process the command.
+                        char   *aArgs[]); ///< A function pointer to process the command.
 } otCliCommand;
 
 /**
@@ -104,8 +104,10 @@ void otCliInputLine(char *aBuf);
  * @param[in]  aLength        @p aUserCommands length.
  * @param[in]  aContext       @p The context passed to the handler.
  *
+ * @retval OT_ERROR_NONE    Successfully updated command table with commands from @p aUserCommands.
+ * @retval OT_ERROR_FAILED  Maximum number of command entries have already been set.
  */
-void otCliSetUserCommands(const otCliCommand *aUserCommands, uint8_t aLength, void *aContext);
+otError otCliSetUserCommands(const otCliCommand *aUserCommands, uint8_t aLength, void *aContext);
 
 /**
  * Write a number of bytes to the CLI console as a hex string.
@@ -145,6 +147,15 @@ void otCliAppendResult(otError aError);
  *
  */
 void otCliPlatLogv(otLogLevel aLogLevel, otLogRegion aLogRegion, const char *aFormat, va_list aArgs);
+
+/**
+ * Callback to allow vendor specific commands to be added to the user command table.
+ *
+ * Available when `OPENTHREAD_CONFIG_CLI_VENDOR_COMMANDS_ENABLE` is enabled and
+ * `OPENTHREAD_CONFIG_CLI_MAX_USER_CMD_ENTRIES` is greater than 1.
+ *
+ */
+extern void otCliVendorSetUserCommands(void);
 
 /**
  * @}

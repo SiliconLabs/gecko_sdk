@@ -1,5 +1,5 @@
 /**
- * @file zaf_cc_list_generator.h
+ * @file
  *
  * Generates CC lists used for the Node Information Frame and for validation of incoming frames.
  *

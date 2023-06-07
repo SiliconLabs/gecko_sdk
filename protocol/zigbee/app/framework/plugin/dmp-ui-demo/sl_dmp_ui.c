@@ -29,8 +29,8 @@
 #include <stdio.h>
 #include "sl_dmp_bitmaps.h"
 #include "sl_dmp_ui.h"
-#include "app/util/common/uc-temp-macros.h"
 #include "zigbee_device_config.h"
+extern uint8_t ascii_lut[];
 
 #define helpmenu_line1     "      **HELP**       "
 #define helpmenu_line2     "PB0 - Toggle Light   "
@@ -48,13 +48,8 @@
 #define APP_NAME_LEN       20
 #define DEV_NAME_LEN       20
 
-#ifdef UC_BUILD
 sl_zigbee_event_t lcdPermitJoinEvent;
 #define permitJoinEvent (&lcdPermitJoinEvent)
-#else // !UC_BUILD
-extern EmberEventControl lcdPermitJoinEventControl;
-#define permitJoinEvent (lcdPermitJoinEventControl)
-#endif // UC_BUILD
 
 GLIB_Context_t glibContext;          /* Global glib context */
 
@@ -74,7 +69,7 @@ static uint8_t eventTimeLeft;
 static bool panIdDisplayToggle = false;
 static bool blockPanIdDisplay = false;
 DmpUiZigBeeNetworkState_t last_nwState = DMP_UI_STATE_UNKNOWN;
-void lcdPermitJoinEventHandler(SLXU_UC_EVENT);
+void lcdPermitJoinEventHandler(sl_zigbee_event_t * event);
 /*******************************************************************************
  **************************   LOCAL FUNCTIONS   ********************************
  ******************************************************************************/
@@ -274,7 +269,7 @@ void sl_dmp_ui_init(uint8_t init_level)
   switch (init_level) {
     case SL_ZIGBEE_INIT_LEVEL_EVENT:
     {
-      slxu_zigbee_event_init(permitJoinEvent, lcdPermitJoinEventHandler);
+      sl_zigbee_event_init(permitJoinEvent, lcdPermitJoinEventHandler);
       break;
     }
 
@@ -441,7 +436,7 @@ void sl_dmp_ui_zigbee_permit_join(bool enable)
   blockPanIdDisplay = true;
 
   if ( enable ) {
-    slxu_zigbee_event_set_delay_ms(permitJoinEvent, DMP_UI_PJOIN_EVENT_DURATION);
+    sl_zigbee_event_set_delay_ms(permitJoinEvent, DMP_UI_PJOIN_EVENT_DURATION);
   }
 }
 
@@ -451,7 +446,7 @@ void sl_dmp_ui_update_direction(DmpUiLightDirection_t direction)
 
   dmpUiDirectDisplayStartTime = halCommonGetInt16uMillisecondTick();
 
-  slxu_zigbee_event_set_delay_ms(permitJoinEvent, DMP_UI_PJOIN_EVENT_DURATION);
+  sl_zigbee_event_set_delay_ms(permitJoinEvent, DMP_UI_PJOIN_EVENT_DURATION);
 }
 
 void sl_dmp_ui_bluetooth_connected(bool connectionState)
@@ -463,7 +458,7 @@ void sl_dmp_ui_bluetooth_connected(bool connectionState)
   }
 }
 
-void lcdPermitJoinEventHandler(SLXU_UC_EVENT)
+void lcdPermitJoinEventHandler(sl_zigbee_event_t * event)
 {
   if (!helpMenuDisplayed) {
     if (SLI_ZIGBEE_PRIMARY_NETWORK_DEVICE_TYPE <= SLI_ZIGBEE_NETWORK_DEVICE_TYPE_ROUTER) {
@@ -488,15 +483,15 @@ void lcdPermitJoinEventHandler(SLXU_UC_EVENT)
     }
 
     if (eventTimeLeft || (dmpUiDirectDisplayStartTime != 0)) {
-      slxu_zigbee_event_set_delay_ms(permitJoinEvent, DMP_UI_PJOIN_EVENT_DURATION);
+      sl_zigbee_event_set_delay_ms(permitJoinEvent, DMP_UI_PJOIN_EVENT_DURATION);
     } else {
       blockPanIdDisplay = false;
       panIdDisplayToggle = false;
       dmpUiUpdateZigbeeStatus(DMP_UI_STATE_UNKNOWN, true);
-      slxu_zigbee_event_set_inactive(permitJoinEvent);
+      sl_zigbee_event_set_inactive(permitJoinEvent);
     }
   } else {
-    slxu_zigbee_event_set_delay_ms(permitJoinEvent, DMP_UI_PJOIN_EVENT_DURATION);
+    sl_zigbee_event_set_delay_ms(permitJoinEvent, DMP_UI_PJOIN_EVENT_DURATION);
   }
 }
 

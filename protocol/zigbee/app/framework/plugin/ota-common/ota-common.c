@@ -29,7 +29,7 @@
 
 // This relates all OTA command IDs in app/framework/gen/command-id.h
 // to minimum message lengths (does not include EMBER_AF_ZCL_OVERHEAD)
-const uint8_t emAfOtaMinMessageLengths[] = {
+const uint8_t sli_zigbee_af_ota_min_message_lengths[] = {
   2,      // Image Notify
   8,      // Query Next Image Request
   1,      // Query Next Image Response
@@ -42,9 +42,9 @@ const uint8_t emAfOtaMinMessageLengths[] = {
   1,     // Query Specific File Response
 };
 
-EmberAfOtaImageId emAfOtaCreateEmberAfOtaImageIdStruct(uint16_t manufacturerId,
-                                                       uint16_t imageType,
-                                                       uint32_t fileVersion)
+EmberAfOtaImageId sli_zigbee_af_ota_create_ember_af_ota_image_id_struct(uint16_t manufacturerId,
+                                                                        uint16_t imageType,
+                                                                        uint32_t fileVersion)
 {
   EmberAfOtaImageId id;
   id.manufacturerId = manufacturerId;
@@ -55,9 +55,9 @@ EmberAfOtaImageId emAfOtaCreateEmberAfOtaImageIdStruct(uint16_t manufacturerId,
 }
 
 // This assumes the message has already been validated for its length
-uint8_t emAfOtaParseImageIdFromMessage(EmberAfOtaImageId* returnId,
-                                       const uint8_t* buffer,
-                                       uint8_t length)
+uint8_t sli_zigbee_af_ota_parse_image_id_from_message(EmberAfOtaImageId* returnId,
+                                                      const uint8_t* buffer,
+                                                      uint8_t length)
 {
   returnId->manufacturerId  = emberAfGetInt16u(buffer, 0, length);
   returnId->imageTypeId     = emberAfGetInt16u(buffer, 2, length);
@@ -96,7 +96,7 @@ static uint8_t printPercentage(const char * prefixString,
 
   currentOffset -= startingOffset;
 
-  percentageComplete = emAfCalculatePercentage(currentOffset, imageSize);
+  percentageComplete = sli_zigbee_af_calculate_percentage(currentOffset, imageSize);
 
   if (oldPercentageComplete == 255
       || (percentageComplete >= updateFrequency
@@ -108,7 +108,7 @@ static uint8_t printPercentage(const char * prefixString,
   return percentageComplete;
 }
 
-void emAfPrintPercentageSetStartAndEnd(uint32_t startingOffset, uint32_t endOffset)
+void sli_zigbee_af_print_percentage_set_start_and_end(uint32_t startingOffset, uint32_t endOffset)
 {
   printPercentage(NULL,           // prefix string (ignored)
                   0,              // update frequency (ignored)
@@ -117,9 +117,9 @@ void emAfPrintPercentageSetStartAndEnd(uint32_t startingOffset, uint32_t endOffs
                   endOffset);
 }
 
-uint8_t emAfPrintPercentageUpdate(const char * prefixString,
-                                  uint8_t updateFrequency,
-                                  uint32_t currentOffset)
+uint8_t sli_zigbee_af_print_percentage_update(const char * prefixString,
+                                              uint8_t updateFrequency,
+                                              uint32_t currentOffset)
 {
   return printPercentage(prefixString,
                          updateFrequency,
@@ -128,7 +128,7 @@ uint8_t emAfPrintPercentageUpdate(const char * prefixString,
                          0);              // offset end (ignored)
 }
 
-uint8_t emAfCalculatePercentage(uint32_t currentOffset, uint32_t imageSize)
+uint8_t sli_zigbee_af_calculate_percentage(uint32_t currentOffset, uint32_t imageSize)
 {
   uint8_t percentage = 0;
   if (imageSize == 0) {

@@ -28,31 +28,27 @@
  *
  ******************************************************************************/
 
-#include "em_device.h"
+#include "sli_psa_driver_features.h"
 
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
 
 #include "psa/crypto.h"
 #include "psa/crypto_extra.h"
+
+#include "sli_psa_driver_common.h"
+
 #include "sli_se_driver_cipher.h"
+#include "sli_se_driver_key_management.h"
+
 #include "sl_se_manager.h"
 #include "sl_se_manager_cipher.h"
 
-#include "sli_psa_driver_common.h"
-#include "sli_se_driver_key_management.h"
-
 #include <string.h>
 
-#if (defined(PSA_WANT_KEY_TYPE_AES)        \
-  && (defined(PSA_WANT_ALG_ECB_NO_PADDING) \
-  || defined(PSA_WANT_ALG_CTR)             \
-  || defined(PSA_WANT_ALG_CFB)             \
-  || defined(PSA_WANT_ALG_OFB)             \
-  || defined(PSA_WANT_ALG_CCM)             \
-  || defined(PSA_WANT_ALG_CBC_NO_PADDING)  \
-  || defined(PSA_WANT_ALG_CBC_PKCS7)))     \
-  || (defined(PSA_WANT_KEY_TYPE_CHACHA20)  \
-  && defined(PSA_WANT_ALG_STREAM_CIPHER))
+// -----------------------------------------------------------------------------
+// Static functions
+
+#if defined(SLI_PSA_DRIVER_FEATURE_CIPHER)
 
 /**
  * @brief
@@ -72,9 +68,9 @@ static psa_status_t validate_key_type(const sl_se_key_descriptor_t *key_desc)
   if (sl_key_type == SL_SE_KEY_TYPE_AES_128
       || sl_key_type == SL_SE_KEY_TYPE_AES_192
       || sl_key_type == SL_SE_KEY_TYPE_AES_256
-      #if _SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT
+      #if defined(SLI_PSA_DRIVER_FEATURE_CHACHA20)
       || sl_key_type == SL_SE_KEY_TYPE_CHACHA20
-      #endif // VAULT
+      #endif
       ) {
     return PSA_SUCCESS;
   }
@@ -83,9 +79,8 @@ static psa_status_t validate_key_type(const sl_se_key_descriptor_t *key_desc)
 }
 
 // Validate combination of key and algorithm
-static psa_status_t
-validate_key_algorithm_match(psa_algorithm_t alg,
-                             const psa_key_attributes_t *attributes)
+static psa_status_t validate_key_algorithm_match(psa_algorithm_t alg,
+                                                 const psa_key_attributes_t *attributes)
 {
   switch (alg) {
     case PSA_ALG_ECB_NO_PADDING:
@@ -99,61 +94,24 @@ validate_key_algorithm_match(psa_algorithm_t alg,
         return PSA_ERROR_NOT_SUPPORTED;
       }
       break;
-    #if _SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT
+      #if defined(SLI_PSA_DRIVER_FEATURE_CHACHA20)
     case PSA_ALG_STREAM_CIPHER:
       if (psa_get_key_type(attributes) != PSA_KEY_TYPE_CHACHA20) {
         return PSA_ERROR_NOT_SUPPORTED;
       }
       break;
-    #endif // VAULT
+      #endif
     default:
       return PSA_ERROR_NOT_SUPPORTED;
   }
   return PSA_SUCCESS;
 }
 
-#endif // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_*
+#endif // SLI_PSA_DRIVER_FEATURE_CIPHER
 
-/** Encrypt a message using a symmetric cipher.
- *
- * This function encrypts a message with a random IV (initialization
- * vector). Use the multipart operation interface with a
- * #psa_cipher_operation_t object to provide other forms of IV.
- *
- * \param handle                Handle to the key to use for the operation.
- *                              It must remain valid until the operation
- *                              terminates.
- * \param alg                   The cipher algorithm to compute
- *                              (\c PSA_ALG_XXX value such that
- *                              #PSA_ALG_IS_CIPHER(\p alg) is true).
- * \param[in] input             Buffer containing the message to encrypt.
- * \param input_length          Size of the \p input buffer in bytes.
- * \param[out] output           Buffer where the output is to be written.
- *                              The output contains the IV followed by
- *                              the ciphertext proper.
- * \param output_size           Size of the \p output buffer in bytes.
- * \param[out] output_length    On success, the number of bytes
- *                              that make up the output.
- *
- * \retval #PSA_SUCCESS
- *         Success.
- * \retval #PSA_ERROR_INVALID_HANDLE
- * \retval #PSA_ERROR_NOT_PERMITTED
- * \retval #PSA_ERROR_INVALID_ARGUMENT
- *         \p handle is not compatible with \p alg.
- * \retval #PSA_ERROR_NOT_SUPPORTED
- *         \p alg is not supported or is not a cipher algorithm.
- * \retval #PSA_ERROR_BUFFER_TOO_SMALL
- * \retval #PSA_ERROR_INSUFFICIENT_MEMORY
- * \retval #PSA_ERROR_COMMUNICATION_FAILURE
- * \retval #PSA_ERROR_HARDWARE_FAILURE
- * \retval #PSA_ERROR_CORRUPTION_DETECTED
- * \retval #PSA_ERROR_STORAGE_FAILURE
- * \retval #PSA_ERROR_BAD_STATE
- *         The library has not been previously initialized by psa_crypto_init().
- *         It is implementation-dependent whether a failure to initialize
- *         results in this error code.
- */
+// -----------------------------------------------------------------------------
+// Single-shot driver entry points
+
 psa_status_t sli_se_driver_cipher_encrypt(const psa_key_attributes_t *attributes,
                                           const uint8_t *key_buffer,
                                           size_t key_buffer_size,
@@ -166,41 +124,30 @@ psa_status_t sli_se_driver_cipher_encrypt(const psa_key_attributes_t *attributes
                                           size_t output_size,
                                           size_t *output_length)
 {
-#if (defined(PSA_WANT_KEY_TYPE_AES)                                            \
-  && (defined(PSA_WANT_ALG_ECB_NO_PADDING)                                     \
-  || defined(PSA_WANT_ALG_CTR)                                                 \
-  || defined(PSA_WANT_ALG_CFB)                                                 \
-  || defined(PSA_WANT_ALG_OFB)                                                 \
-  || defined(PSA_WANT_ALG_CCM)                                                 \
-  || defined(PSA_WANT_ALG_CBC_NO_PADDING)                                      \
-  || defined(PSA_WANT_ALG_CBC_PKCS7)))                                         \
-  || ((defined(PSA_WANT_KEY_TYPE_CHACHA20)                                     \
-  && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)) \
-  && defined(PSA_WANT_ALG_STREAM_CIPHER))
+  #if defined(SLI_PSA_DRIVER_FEATURE_CIPHER)
 
-#if defined(MBEDTLS_PSA_CRYPTO_C)
-#if (defined(PSA_WANT_KEY_TYPE_AES)                                            \
-  && (defined(PSA_WANT_ALG_CTR)                                                \
-  || defined(PSA_WANT_ALG_CFB)                                                 \
-  || defined(PSA_WANT_ALG_OFB)                                                 \
-  || defined(PSA_WANT_ALG_CCM)                                                 \
-  || defined(PSA_WANT_ALG_CBC_NO_PADDING)                                      \
-  || defined(PSA_WANT_ALG_CBC_PKCS7)))                                         \
-  || ((defined(PSA_WANT_KEY_TYPE_CHACHA20)                                     \
-  && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)) \
-  && defined(PSA_WANT_ALG_STREAM_CIPHER))
+  #if defined(MBEDTLS_PSA_CRYPTO_C)
+
+  #if defined(SLI_PSA_DRIVER_FEATURE_AES_CTR)            \
+  || defined(SLI_PSA_DRIVER_FEATURE_AES_CFB)             \
+  || defined(SLI_PSA_DRIVER_FEATURE_AES_OFB)             \
+  || defined(SLI_PSA_DRIVER_FEATURE_AES_CCM_STAR_NO_TAG) \
+  || defined(SLI_PSA_DRIVER_FEATURE_AES_CBC_NO_PADDING)  \
+  || defined(SLI_PSA_DRIVER_FEATURE_AES_CBC_PKCS7)       \
+  || defined(SLI_PSA_DRIVER_FEATURE_CHACHA20)
   uint8_t tmp_buf[16] = { 0 };
-#endif
-#if (defined(PSA_WANT_KEY_TYPE_AES)       \
-  && (defined(PSA_WANT_ALG_CTR)           \
-  || defined(PSA_WANT_ALG_CFB)            \
-  || defined(PSA_WANT_ALG_OFB)            \
-  || defined(PSA_WANT_ALG_CCM)            \
-  || defined(PSA_WANT_ALG_CBC_NO_PADDING) \
-  || defined(PSA_WANT_ALG_CBC_PKCS7)))
+  #endif
+
+  #if defined(SLI_PSA_DRIVER_FEATURE_AES_CTR)            \
+  || defined(SLI_PSA_DRIVER_FEATURE_AES_CFB)             \
+  || defined(SLI_PSA_DRIVER_FEATURE_AES_OFB)             \
+  || defined(SLI_PSA_DRIVER_FEATURE_AES_CCM_STAR_NO_TAG) \
+  || defined(SLI_PSA_DRIVER_FEATURE_AES_CBC_NO_PADDING)  \
+  || defined(SLI_PSA_DRIVER_FEATURE_AES_CBC_PKCS7)
   uint8_t final_block[16] = { 0 };
-#endif
-#endif // MBEDTLS_PSA_CRYPTO_C
+  #endif
+
+  #endif   // MBEDTLS_PSA_CRYPTO_C
 
   // Argument check
   if (key_buffer == NULL
@@ -260,7 +207,7 @@ psa_status_t sli_se_driver_cipher_encrypt(const psa_key_attributes_t *attributes
   }
 
   switch (alg) {
-#if defined(PSA_WANT_KEY_TYPE_AES) && defined(PSA_WANT_ALG_ECB_NO_PADDING)
+    #if defined(SLI_PSA_DRIVER_FEATURE_AES_ECB)
     case PSA_ALG_ECB_NO_PADDING:
       // Check buffer sizes
       if (output_size < input_length) {
@@ -284,20 +231,22 @@ psa_status_t sli_se_driver_cipher_encrypt(const psa_key_attributes_t *attributes
       }
       *output_length = input_length;
       break;
-#endif // PSA_WANT_KEY_TYPE_AES && PSA_WANT_ALG_ECB_NO_PADDING
-#if defined(MBEDTLS_PSA_CRYPTO_C)
-#if defined(PSA_WANT_KEY_TYPE_AES) && defined(PSA_WANT_ALG_CCM)
-    case PSA_ALG_CCM_STAR_NO_TAG:
-      // Explicit fallthrough
-#endif
-#if defined(PSA_WANT_KEY_TYPE_AES) && (defined(PSA_WANT_ALG_CTR) || defined(PSA_WANT_ALG_CCM))
+    #endif   // SLI_PSA_DRIVER_FEATURE_AES_ECB
+
+    #if defined(MBEDTLS_PSA_CRYPTO_C)
+
+    #if defined(SLI_PSA_DRIVER_FEATURE_AES_CCM_STAR_NO_TAG)
+    case PSA_ALG_CCM_STAR_NO_TAG:     // Explicit fallthrough
+    #endif
+
+    #if defined(SLI_PSA_DRIVER_FEATURE_AES_CTR_VARIANT)
     case PSA_ALG_CTR: {
       uint8_t iv_buf[16] = { 0 };
       // Check buffer sizes
       if (output_size < input_length) {
         return PSA_ERROR_INVALID_ARGUMENT;
       }
-#if defined(PSA_WANT_ALG_CCM)
+      #if defined(SLI_PSA_DRIVER_FEATURE_AES_CCM_STAR_NO_TAG)
       if (alg == PSA_ALG_CCM_STAR_NO_TAG) {
         if (iv_length != 13) {
           return PSA_ERROR_INVALID_ARGUMENT;
@@ -309,18 +258,20 @@ psa_status_t sli_se_driver_cipher_encrypt(const psa_key_attributes_t *attributes
         iv_buf[14] = 0;
         iv_buf[15] = 1;
       } else
-#endif
+      #endif     // SLI_PSA_DRIVER_FEATURE_AES_CCM_STAR_NO_TAG
       {
         if (iv_length != 16) {
           return PSA_ERROR_INVALID_ARGUMENT;
         }
 
-        // Write nonce to temporary buf to be used internally by sl_se_aes_crypt_ctr.
+        // Write nonce to temporary buf to be used internally by
+        // sl_se_aes_crypt_ctr.
         memcpy(iv_buf, iv, 16);
       }
 
-      // Store final block in a temporary buffer in order to avoid in being overwritten
-      // inside of sl_se_aes_crypt_ctr() (hence the separation into two calls).
+      // Store final block in a temporary buffer in order to avoid in being
+      // overwritten inside of sl_se_aes_crypt_ctr() (hence the separation
+      // into two calls).
       if ((input_length & 0x0F) > 0) {
         memcpy(final_block, &input[input_length & ~0x0F], 16);
       }
@@ -358,8 +309,9 @@ psa_status_t sli_se_driver_cipher_encrypt(const psa_key_attributes_t *attributes
       *output_length = input_length;
       break;
     }
-#endif // PSA_WANT_KEY_TYPE_AES && (PSA_WANT_ALG_CTR || PSA_WANT_ALG_CCM)
-#if defined(PSA_WANT_KEY_TYPE_AES) && defined(PSA_WANT_ALG_CFB)
+    #endif   // SLI_PSA_DRIVER_FEATURE_AES_CTR_VARIANT
+
+    #if defined(SLI_PSA_DRIVER_FEATURE_AES_CFB)
     case PSA_ALG_CFB:
       // Check buffer sizes
       if (output_size < input_length) {
@@ -370,11 +322,13 @@ psa_status_t sli_se_driver_cipher_encrypt(const psa_key_attributes_t *attributes
         return PSA_ERROR_INVALID_ARGUMENT;
       }
 
-      // Write IV to temporary buf to be used internally by sl_se_aes_crypt_cbf128.
+      // Write IV to temporary buf to be used internally by
+      // sl_se_aes_crypt_cbf128.
       memcpy(tmp_buf, iv, 16);
 
-      // Store final block in a temporary buffer in order to avoid in being overwritten
-      // inside of sl_se_aes_crypt_ctr() (hence the separation into two calls).
+      // Store final block in a temporary buffer in order to avoid in being
+      // overwritten inside of sl_se_aes_crypt_ctr() (hence the separation
+      // into two calls).
       if ((input_length & 0x0F) > 0) {
         memcpy(final_block, &input[input_length & ~0x0F], 16);
       }
@@ -411,8 +365,9 @@ psa_status_t sli_se_driver_cipher_encrypt(const psa_key_attributes_t *attributes
 
       *output_length = input_length;
       break;
-#endif // PSA_WANT_KEY_TYPE_AES && PSA_WANT_ALG_CFB
-#if defined(PSA_WANT_KEY_TYPE_AES) && defined(PSA_WANT_ALG_OFB)
+    #endif   // SLI_PSA_DRIVER_FEATURE_AES_CFB
+
+    #if defined(SLI_PSA_DRIVER_FEATURE_AES_OFB)
     case PSA_ALG_OFB:
     {
       // Check buffer sizes
@@ -424,7 +379,8 @@ psa_status_t sli_se_driver_cipher_encrypt(const psa_key_attributes_t *attributes
         return PSA_ERROR_INVALID_ARGUMENT;
       }
 
-      // Write IV to temporary buf to be used internally by sl_se_aes_crypt_ecb.
+      // Write IV to temporary buf to be used internally by
+      // sl_se_aes_crypt_ecb.
       memcpy(tmp_buf, iv, 16);
 
       size_t data_length = input_length;
@@ -456,10 +412,9 @@ psa_status_t sli_se_driver_cipher_encrypt(const psa_key_attributes_t *attributes
       *output_length = input_length;
     }
     break;
-#endif // PSA_WANT_KEY_TYPE_AES && PSA_WANT_ALG_OFB
-#if defined(PSA_WANT_KEY_TYPE_AES)           \
-    && (defined(PSA_WANT_ALG_CBC_NO_PADDING) \
-    || defined(PSA_WANT_ALG_CBC_PKCS7))
+    #endif   // SLI_PSA_DRIVER_FEATURE_AES_OFB
+
+    #if defined(SLI_PSA_DRIVER_FEATURE_AES_CBC_VARIANT)
     case PSA_ALG_CBC_NO_PADDING:
       // We cannot do CBC without padding on non-block sizes.
       if (input_length % 16 != 0) {
@@ -482,10 +437,12 @@ psa_status_t sli_se_driver_cipher_encrypt(const psa_key_attributes_t *attributes
         return PSA_ERROR_INVALID_ARGUMENT;
       }
 
-      // Write IV to temporary buf to be used internally by sl_se_aes_crypt_cbf128.
+      // Write IV to temporary buf to be used internally by
+      // sl_se_aes_crypt_cbf128.
       memcpy(tmp_buf, iv, 16);
 
-      // Store last block (if non-blocksize input-length) to temporary buffer to be used in padding.
+      // Store last block (if non-blocksize input-length) to temporary
+      // buffer to be used in padding.
       if (alg == PSA_ALG_CBC_PKCS7) {
         memcpy(final_block, &input[input_length & ~0xF], input_length & 0xF);
       }
@@ -507,9 +464,12 @@ psa_status_t sli_se_driver_cipher_encrypt(const psa_key_attributes_t *attributes
       // Process final block.
       if (alg == PSA_ALG_CBC_PKCS7) {
         // Add PKCS7 padding.
-        memset(&final_block[input_length & 0xF], 16 - (input_length & 0xF), 16 - (input_length & 0xF));
+        memset(&final_block[input_length & 0xF],
+               16 - (input_length & 0xF),
+               16 - (input_length & 0xF));
 
-        // Store IV (last ciphertext block) in temp buffer to avoid messing up output.
+        // Store IV (last ciphertext block) in temp buffer to avoid messing
+        // up output.
         if (input_length >= 16) {
           memcpy(tmp_buf, &output[(input_length & ~0xF) - 16], 16);
         }
@@ -534,9 +494,9 @@ psa_status_t sli_se_driver_cipher_encrypt(const psa_key_attributes_t *attributes
         *output_length = input_length;
       }
       break;
-#endif // PSA_WANT_KEY_TYPE_AES && (PSA_WANT_ALG_CBC_PKCS7 || PSA_WANT_ALG_CBC_NO_PADDING)
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
-#if defined(PSA_WANT_KEY_TYPE_CHACHA20) && defined(PSA_WANT_ALG_STREAM_CIPHER)
+    #endif   // SLI_PSA_DRIVER_FEATURE_AES_CBC_VARIANT
+
+    #if defined(SLI_PSA_DRIVER_FEATURE_CHACHA20)
     case PSA_ALG_STREAM_CIPHER:
       if (psa_get_key_type(attributes) != PSA_KEY_TYPE_CHACHA20) {
         return PSA_ERROR_INVALID_ARGUMENT;
@@ -570,9 +530,10 @@ psa_status_t sli_se_driver_cipher_encrypt(const psa_key_attributes_t *attributes
 
       *output_length = input_length;
       break;
-#endif // PSA_WANT_KEY_TYPE_CHACHA20 && PSA_WANT_ALG_STREAM_CIPHER
-#endif // VAULT
-#endif // MBEDTLS_PSA_CRYPTO_C
+    #endif   // SLI_PSA_DRIVER_FEATURE_CHACHA20
+
+    #endif   // MBEDTLS_PSA_CRYPTO_C
+
     default:
       (void)attributes;
       (void)key_buffer;
@@ -602,7 +563,7 @@ psa_status_t sli_se_driver_cipher_encrypt(const psa_key_attributes_t *attributes
     return PSA_SUCCESS;
   }
 
-#else // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_*
+  #else // SLI_PSA_DRIVER_FEATURE_CIPHER
 
   (void)attributes;
   (void)key_buffer;
@@ -618,47 +579,9 @@ psa_status_t sli_se_driver_cipher_encrypt(const psa_key_attributes_t *attributes
 
   return PSA_ERROR_NOT_SUPPORTED;
 
-#endif // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_*
+  #endif // SLI_PSA_DRIVER_FEATURE_CIPHER
 }
 
-/** Decrypt a message using a symmetric cipher.
- *
- * This function decrypts a message encrypted with a symmetric cipher.
- *
- * \param handle                Handle to the key to use for the operation.
- *                              It must remain valid until the operation
- *                              terminates.
- * \param alg                   The cipher algorithm to compute
- *                              (\c PSA_ALG_XXX value such that
- *                              #PSA_ALG_IS_CIPHER(\p alg) is true).
- * \param[in] input             Buffer containing the message to decrypt.
- *                              This consists of the IV followed by the
- *                              ciphertext proper.
- * \param input_length          Size of the \p input buffer in bytes.
- * \param[out] output           Buffer where the plaintext is to be written.
- * \param output_size           Size of the \p output buffer in bytes.
- * \param[out] output_length    On success, the number of bytes
- *                              that make up the output.
- *
- * \retval #PSA_SUCCESS
- *         Success.
- * \retval #PSA_ERROR_INVALID_HANDLE
- * \retval #PSA_ERROR_NOT_PERMITTED
- * \retval #PSA_ERROR_INVALID_ARGUMENT
- *         \p handle is not compatible with \p alg.
- * \retval #PSA_ERROR_NOT_SUPPORTED
- *         \p alg is not supported or is not a cipher algorithm.
- * \retval #PSA_ERROR_BUFFER_TOO_SMALL
- * \retval #PSA_ERROR_INSUFFICIENT_MEMORY
- * \retval #PSA_ERROR_COMMUNICATION_FAILURE
- * \retval #PSA_ERROR_HARDWARE_FAILURE
- * \retval #PSA_ERROR_STORAGE_FAILURE
- * \retval #PSA_ERROR_CORRUPTION_DETECTED
- * \retval #PSA_ERROR_BAD_STATE
- *         The library has not been previously initialized by psa_crypto_init().
- *         It is implementation-dependent whether a failure to initialize
- *         results in this error code.
- */
 psa_status_t sli_se_driver_cipher_decrypt(const psa_key_attributes_t *attributes,
                                           const uint8_t *key_buffer,
                                           size_t key_buffer_size,
@@ -669,37 +592,22 @@ psa_status_t sli_se_driver_cipher_decrypt(const psa_key_attributes_t *attributes
                                           size_t output_size,
                                           size_t *output_length)
 {
-#if (defined(PSA_WANT_KEY_TYPE_AES)                                           \
-  && (defined(PSA_WANT_ALG_ECB_NO_PADDING)                                    \
-  || defined(PSA_WANT_ALG_CTR)                                                \
-  || defined(PSA_WANT_ALG_CFB)                                                \
-  || defined(PSA_WANT_ALG_OFB)                                                \
-  || defined(PSA_WANT_ALG_CCM)                                                \
-  || defined(PSA_WANT_ALG_CBC_NO_PADDING)                                     \
-  || defined(PSA_WANT_ALG_CBC_PKCS7)))                                        \
-  || (defined(PSA_WANT_KEY_TYPE_CHACHA20)                                     \
-  && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) \
-  && defined(PSA_WANT_ALG_STREAM_CIPHER))
+  #if defined(SLI_PSA_DRIVER_FEATURE_CIPHER)
 
-#if defined(PSA_WANT_KEY_TYPE_AES)   \
-  && (defined(PSA_WANT_ALG_CTR)      \
-  || defined(PSA_WANT_ALG_CCM)       \
-  || defined(PSA_WANT_ALG_CBC_PKCS7) \
-  || defined(PSA_WANT_ALG_CBC_NO_PADDING))
+  #if defined(SLI_PSA_DRIVER_FEATURE_AES_CTR_VARIANT) \
+  || defined(SLI_PSA_DRIVER_FEATURE_AES_CBC_VARIANT)
   uint8_t tmp_buf[16] = { 0 };
-#endif
-#if (defined(PSA_WANT_KEY_TYPE_AES)                                            \
-  && (defined(PSA_WANT_ALG_CTR)                                                \
-  || defined(PSA_WANT_ALG_OFB)                                                 \
-  || defined(PSA_WANT_ALG_CFB)                                                 \
-  || defined(PSA_WANT_ALG_CCM)                                                 \
-  || defined(PSA_WANT_ALG_CBC_PKCS7)                                           \
-  || defined(PSA_WANT_ALG_CBC_NO_PADDING)))                                    \
-  || ((defined(PSA_WANT_KEY_TYPE_CHACHA20)                                     \
-  && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)) \
-  && defined(PSA_WANT_ALG_STREAM_CIPHER))
+  #endif
+
+  #if defined(SLI_PSA_DRIVER_FEATURE_AES_CTR)            \
+  || defined(SLI_PSA_DRIVER_FEATURE_AES_CFB)             \
+  || defined(SLI_PSA_DRIVER_FEATURE_AES_OFB)             \
+  || defined(SLI_PSA_DRIVER_FEATURE_AES_CCM_STAR_NO_TAG) \
+  || defined(SLI_PSA_DRIVER_FEATURE_AES_CBC_NO_PADDING)  \
+  || defined(SLI_PSA_DRIVER_FEATURE_AES_CBC_PKCS7)       \
+  || defined(SLI_PSA_DRIVER_FEATURE_CHACHA20)
   uint8_t iv_buf[16] = { 0 };
-#endif
+  #endif
 
   // Argument check.
   if (key_buffer == NULL
@@ -758,7 +666,7 @@ psa_status_t sli_se_driver_cipher_decrypt(const psa_key_attributes_t *attributes
   }
 
   switch (alg) {
-#if defined(PSA_WANT_KEY_TYPE_AES) && defined(PSA_WANT_ALG_ECB_NO_PADDING)
+    #if defined(SLI_PSA_DRIVER_FEATURE_AES_ECB)
     case PSA_ALG_ECB_NO_PADDING:
       // Check buffer sizes.
       if (output_size < input_length) {
@@ -780,15 +688,16 @@ psa_status_t sli_se_driver_cipher_decrypt(const psa_key_attributes_t *attributes
 
       *output_length = input_length;
       break;
-#endif // PSA_WANT_KEY_TYPE_AES && PSA_WANT_ALG_ECB_NO_PADDING
-#if defined(PSA_WANT_KEY_TYPE_AES) && defined(PSA_WANT_ALG_CCM)
-    case PSA_ALG_CCM_STAR_NO_TAG:
-      // Explicit fallthrough
-#endif
-#if defined(PSA_WANT_KEY_TYPE_AES) && (defined(PSA_WANT_ALG_CTR) || defined(PSA_WANT_ALG_CCM))
+    #endif   // SLI_PSA_DRIVER_FEATURE_AES_ECB
+
+    #if defined(SLI_PSA_DRIVER_FEATURE_AES_CCM_STAR_NO_TAG)
+    case PSA_ALG_CCM_STAR_NO_TAG:     // Explicit fallthrough
+    #endif   // SLI_PSA_DRIVER_FEATURE_AES_CCM_STAR_NO_TAG
+
+    #if defined(SLI_PSA_DRIVER_FEATURE_AES_CTR_VARIANT)
     case PSA_ALG_CTR:
       // Check buffer sizes.
-#if defined(PSA_WANT_ALG_CCM)
+      #if defined(SLI_PSA_DRIVER_FEATURE_AES_CCM_STAR_NO_TAG)
       if (alg == PSA_ALG_CCM_STAR_NO_TAG) {
         if (output_size < input_length - 13) {
           return PSA_ERROR_BUFFER_TOO_SMALL;
@@ -802,13 +711,14 @@ psa_status_t sli_se_driver_cipher_decrypt(const psa_key_attributes_t *attributes
         input += 13;
         input_length -= 13;
       } else
-#endif
+      #endif     // SLI_PSA_DRIVER_FEATURE_AES_CCM_STAR_NO_TAG
       {
         if (output_size < input_length - 16) {
           return PSA_ERROR_BUFFER_TOO_SMALL;
         }
 
-        // Write IV to temporary buf to be used internally by sl_se_aes_crypt_ctr.
+        // Write IV to temporary buf to be used internally by
+        // sl_se_aes_crypt_ctr.
         memcpy(iv_buf, input, 16);
         input += 16;
         input_length -= 16;
@@ -825,15 +735,17 @@ psa_status_t sli_se_driver_cipher_decrypt(const psa_key_attributes_t *attributes
 
       *output_length = input_length;
       break;
-#endif // PSA_WANT_KEY_TYPE_AES && (PSA_WANT_ALG_CTR || PSA_WANT_ALG_CCM)
-#if defined(PSA_WANT_KEY_TYPE_AES) && defined(PSA_WANT_ALG_CFB)
+    #endif   // SLI_PSA_DRIVER_FEATURE_AES_CTR_VARIANT
+
+    #if defined(SLI_PSA_DRIVER_FEATURE_AES_CFB)
     case PSA_ALG_CFB:
       // Check buffer sizes.
       if (output_size < input_length - 16) {
         return PSA_ERROR_INVALID_ARGUMENT;
       }
 
-      // Write IV to temporary buf to be used internally by sl_se_aes_crypt_cfb128.
+      // Write IV to temporary buf to be used internally by
+      // sl_se_aes_crypt_cfb128.
       memcpy(iv_buf, input, 16);
 
       status = sl_se_aes_crypt_cfb128(&cmd_ctx,
@@ -847,8 +759,9 @@ psa_status_t sli_se_driver_cipher_decrypt(const psa_key_attributes_t *attributes
 
       *output_length = input_length - 16;
       break;
-#endif // PSA_WANT_KEY_TYPE_AES && PSA_WANT_ALG_CFB
-#if defined(PSA_WANT_KEY_TYPE_AES) && defined(PSA_WANT_ALG_OFB)
+    #endif   // SLI_PSA_DRIVER_FEATURE_AES_CFB
+
+    #if defined(SLI_PSA_DRIVER_FEATURE_AES_OFB)
     case PSA_ALG_OFB:
     {
       // Check buffer sizes.
@@ -856,7 +769,8 @@ psa_status_t sli_se_driver_cipher_decrypt(const psa_key_attributes_t *attributes
         return PSA_ERROR_BUFFER_TOO_SMALL;
       }
 
-      // Write IV to temporary buf to be used internally by sl_se_aes_crypt_ecb.
+      // Write IV to temporary buf to be used internally by
+      // sl_se_aes_crypt_ecb.
       memcpy(iv_buf, input, 16);
 
       input += 16;
@@ -884,16 +798,16 @@ psa_status_t sli_se_driver_cipher_decrypt(const psa_key_attributes_t *attributes
       *output_length = input_length - 16;
     }
     break;
-#endif // PSA_WANT_KEY_TYPE_AES && PSA_WANT_ALG_OFB
-#if defined(PSA_WANT_KEY_TYPE_AES)           \
-    && (defined(PSA_WANT_ALG_CBC_NO_PADDING) \
-    || defined(PSA_WANT_ALG_CBC_PKCS7))
+    #endif   // SLI_PSA_DRIVER_FEATURE_AES_OFB
+
+    #if defined(SLI_PSA_DRIVER_FEATURE_AES_CBC_VARIANT)
     case PSA_ALG_CBC_NO_PADDING:
       // We cannot do CBC without padding on non-block sizes.
       if (input_length % 16 != 0) {
         return PSA_ERROR_INVALID_ARGUMENT;
       }
     // fall through
+
     case PSA_ALG_CBC_PKCS7: {
       size_t full_blocks;
       if (alg == PSA_ALG_CBC_NO_PADDING) {
@@ -914,7 +828,8 @@ psa_status_t sli_se_driver_cipher_decrypt(const psa_key_attributes_t *attributes
         full_blocks = (input_length - 32) / 16;
       }
 
-      // Write IV to temporary buf to be used internally by sl_se_aes_crypt_cbc.
+      // Write IV to temporary buf to be used internally by
+      // sl_se_aes_crypt_cbc.
       memcpy(iv_buf, input, 16);
 
       // CBC-decrypt all but the last block.
@@ -933,7 +848,8 @@ psa_status_t sli_se_driver_cipher_decrypt(const psa_key_attributes_t *attributes
 
       // Process final block.
       if (alg == PSA_ALG_CBC_PKCS7) {
-        // Store last block to temporary buffer to be used in removing the padding.
+        // Store last block to temporary buffer to be used in removing the
+        // padding.
         memcpy(tmp_buf, &input[input_length - 16], 16);
 
         // CBC-decrypt the last block.
@@ -971,9 +887,9 @@ psa_status_t sli_se_driver_cipher_decrypt(const psa_key_attributes_t *attributes
       }
       break;
     }
-#endif // PSA_WANT_KEY_TYPE_AES && (PSA_WANT_ALG_CBC_PKCS7 || PSA_WANT_ALG_CBC_NO_PADDING)
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
-#if defined(PSA_WANT_KEY_TYPE_CHACHA20) && defined(PSA_WANT_ALG_STREAM_CIPHER)
+    #endif   // SLI_PSA_DRIVER_FEATURE_AES_CBC_VARIANT
+
+    #if defined(SLI_PSA_DRIVER_FEATURE_CHACHA20)
     case PSA_ALG_STREAM_CIPHER:
       if (psa_get_key_type(attributes) != PSA_KEY_TYPE_CHACHA20) {
         return PSA_ERROR_INVALID_ARGUMENT;
@@ -991,7 +907,7 @@ psa_status_t sli_se_driver_cipher_decrypt(const psa_key_attributes_t *attributes
       status = sl_se_chacha20_crypt(&cmd_ctx,
                                     SL_SE_DECRYPT,
                                     &key_desc,
-                                    input_length - 12, // - 12 due to the nonce.
+                                    input_length - 12,     // - 12 due to the nonce.
                                     iv_buf,
                                     input,
                                     &input[12],
@@ -999,18 +915,16 @@ psa_status_t sli_se_driver_cipher_decrypt(const psa_key_attributes_t *attributes
 
       *output_length = input_length - 12;
       break;
-#endif // PSA_WANT_KEY_TYPE_CHACHA20 && PSA_WANT_ALG_STREAM_CIPHER
-#endif
+    #endif   // SLI_PSA_DRIVER_FEATURE_CHACHA20
+
     default:
       return PSA_ERROR_NOT_SUPPORTED;
   }
 
-#if defined(PSA_WANT_KEY_TYPE_AES)   \
-  && (defined(PSA_WANT_ALG_OFB)      \
-  || defined(PSA_WANT_ALG_CBC_PKCS7) \
-  || defined(PSA_WANT_ALG_CBC_NO_PADDING))
+  #if defined(SLI_PSA_DRIVER_FEATURE_AES_CBC_VARIANT) \
+  || defined(SLI_PSA_DRIVER_FEATURE_AES_OFB)
   exit:
-#endif
+  #endif
 
   if (status != SL_STATUS_OK) {
     memset(output, 0, output_size);
@@ -1025,7 +939,7 @@ psa_status_t sli_se_driver_cipher_decrypt(const psa_key_attributes_t *attributes
     return PSA_SUCCESS;
   }
 
-#else // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_*
+  #else // SLI_PSA_DRIVER_FEATURE_CIPHER
 
   (void)attributes;
   (void)key_buffer;
@@ -1039,23 +953,18 @@ psa_status_t sli_se_driver_cipher_decrypt(const psa_key_attributes_t *attributes
 
   return PSA_ERROR_NOT_SUPPORTED;
 
-#endif // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_*
+  #endif // SLI_PSA_DRIVER_FEATURE_CIPHER
 }
 
-psa_status_t sli_se_driver_cipher_encrypt_setup(sli_se_driver_cipher_operation_t *operation,
-                                                const psa_key_attributes_t *attributes,
-                                                psa_algorithm_t alg)
+// -----------------------------------------------------------------------------
+// Multi-part driver entry points
+
+psa_status_t sli_se_driver_cipher_encrypt_setup(
+  sli_se_driver_cipher_operation_t *operation,
+  const psa_key_attributes_t *attributes,
+  psa_algorithm_t alg)
 {
-#if (defined(PSA_WANT_KEY_TYPE_AES)        \
-  && (defined(PSA_WANT_ALG_ECB_NO_PADDING) \
-  || defined(PSA_WANT_ALG_CTR)             \
-  || defined(PSA_WANT_ALG_CFB)             \
-  || defined(PSA_WANT_ALG_OFB)             \
-  || defined(PSA_WANT_ALG_CCM)             \
-  || defined(PSA_WANT_ALG_CBC_NO_PADDING)  \
-  || defined(PSA_WANT_ALG_CBC_PKCS7)))     \
-  || (defined(PSA_WANT_KEY_TYPE_CHACHA20)  \
-  && defined(PSA_WANT_ALG_STREAM_CIPHER))
+  #if defined(SLI_PSA_DRIVER_FEATURE_CIPHER_MULTIPART)
 
   if (operation == NULL || attributes == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
@@ -1071,7 +980,7 @@ psa_status_t sli_se_driver_cipher_encrypt_setup(sli_se_driver_cipher_operation_t
   // Validate combination of key and algorithm
   return validate_key_algorithm_match(alg, attributes);
 
-#else // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_*
+  #else // SLI_PSA_DRIVER_FEATURE_CIPHER_MULTIPART
 
   (void)operation;
   (void)attributes;
@@ -1079,23 +988,15 @@ psa_status_t sli_se_driver_cipher_encrypt_setup(sli_se_driver_cipher_operation_t
 
   return PSA_ERROR_NOT_SUPPORTED;
 
-#endif // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_*
+  #endif // SLI_PSA_DRIVER_FEATURE_CIPHER_MULTIPART
 }
 
-psa_status_t sli_se_driver_cipher_decrypt_setup(sli_se_driver_cipher_operation_t *operation,
-                                                const psa_key_attributes_t *attributes,
-                                                psa_algorithm_t alg)
+psa_status_t sli_se_driver_cipher_decrypt_setup(
+  sli_se_driver_cipher_operation_t *operation,
+  const psa_key_attributes_t *attributes,
+  psa_algorithm_t alg)
 {
-#if (defined(PSA_WANT_KEY_TYPE_AES)        \
-  && (defined(PSA_WANT_ALG_ECB_NO_PADDING) \
-  || defined(PSA_WANT_ALG_CTR)             \
-  || defined(PSA_WANT_ALG_CFB)             \
-  || defined(PSA_WANT_ALG_OFB)             \
-  || defined(PSA_WANT_ALG_CCM)             \
-  || defined(PSA_WANT_ALG_CBC_NO_PADDING)  \
-  || defined(PSA_WANT_ALG_CBC_PKCS7)))     \
-  || (defined(PSA_WANT_KEY_TYPE_CHACHA20)  \
-  && defined(PSA_WANT_ALG_STREAM_CIPHER))
+  #if defined(SLI_PSA_DRIVER_FEATURE_CIPHER_MULTIPART)
 
   if (operation == NULL || attributes == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
@@ -1111,7 +1012,7 @@ psa_status_t sli_se_driver_cipher_decrypt_setup(sli_se_driver_cipher_operation_t
   // Validate combination of key and algorithm
   return validate_key_algorithm_match(alg, attributes);
 
-  #else // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_*
+  #else // SLI_PSA_DRIVER_FEATURE_CIPHER_MULTIPART
 
   (void)operation;
   (void)attributes;
@@ -1119,22 +1020,15 @@ psa_status_t sli_se_driver_cipher_decrypt_setup(sli_se_driver_cipher_operation_t
 
   return PSA_ERROR_NOT_SUPPORTED;
 
-#endif // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_*
+  #endif // SLI_PSA_DRIVER_FEATURE_CIPHER_MULTIPART
 }
 
-psa_status_t sli_se_driver_cipher_set_iv(sli_se_driver_cipher_operation_t *operation,
-                                         const uint8_t *iv,
-                                         size_t iv_length)
+psa_status_t sli_se_driver_cipher_set_iv(
+  sli_se_driver_cipher_operation_t *operation,
+  const uint8_t *iv,
+  size_t iv_length)
 {
-#if (defined(PSA_WANT_KEY_TYPE_AES)       \
-  && (defined(PSA_WANT_ALG_CTR)           \
-  || defined(PSA_WANT_ALG_CFB)            \
-  || defined(PSA_WANT_ALG_OFB)            \
-  || defined(PSA_WANT_ALG_CCM)            \
-  || defined(PSA_WANT_ALG_CBC_NO_PADDING) \
-  || defined(PSA_WANT_ALG_CBC_PKCS7)))    \
-  || (defined(PSA_WANT_KEY_TYPE_CHACHA20) \
-  && defined(PSA_WANT_ALG_STREAM_CIPHER))
+  #if defined(SLI_PSA_DRIVER_FEATURE_CIPHER_MULTIPART)
 
   if (operation == NULL || iv == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
@@ -1157,16 +1051,19 @@ psa_status_t sli_se_driver_cipher_set_iv(sli_se_driver_cipher_operation_t *opera
       } else {
         return PSA_SUCCESS;
       }
-    case PSA_ALG_CTR:
-    case PSA_ALG_CFB:
-    case PSA_ALG_OFB:
-    case PSA_ALG_CBC_NO_PADDING:
-    case PSA_ALG_CBC_PKCS7:
+      break;
+
+    case PSA_ALG_CTR:   // Explicit fallthrough
+    case PSA_ALG_CFB:   // Explicit fallthrough
+    case PSA_ALG_OFB:   // Explicit fallthrough
+    case PSA_ALG_CBC_NO_PADDING:   // Explicit fallthrough
+    case PSA_ALG_CBC_PKCS7:   // Explicit fallthrough
       if (iv_length != 16) {
         return PSA_ERROR_INVALID_ARGUMENT;
       }
       memcpy(operation->iv, iv, iv_length);
       break;
+
     case PSA_ALG_CCM_STAR_NO_TAG:
       // Preformat the IV for CCM*-no-tag here, such that the remainder
       // of the processing for this algorithm boils down to AES-CTR
@@ -1179,7 +1076,8 @@ psa_status_t sli_se_driver_cipher_set_iv(sli_se_driver_cipher_operation_t *opera
       operation->iv[15] = 1;
       iv_length = 16;
       break;
-    #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+
+      #if defined(SLI_PSA_DRIVER_FEATURE_CHACHA20)
     case PSA_ALG_STREAM_CIPHER:
       // PSA Crypto supports multiple IV input lengths for ChaCha20
       // refer to the doc for PSA_ALG_STREAM_CIPHER
@@ -1188,19 +1086,20 @@ psa_status_t sli_se_driver_cipher_set_iv(sli_se_driver_cipher_operation_t *opera
         memset(operation->iv, 0, 4);
         memcpy(&operation->iv[4], iv, iv_length);
       } else if (iv_length == 16) {
-        // Initial counter value is stored little-endian in the first four bytes
-        // This makes our lives easier: since this driver will only run on
-        // little-endian machines, we can just cast it to a uint32.
+        // Initial counter value is stored little-endian in the first four
+        // bytes. This makes our lives easier: since this driver will only
+        // run on little-endian machines, we can just cast it to a uint32.
         memcpy(operation->iv, iv, iv_length);
       } else if (iv_length == 8) {
-        // "original" ChaCha20: 8-byte IV and 8-byte counter (which is initialised to 0)
-        // We currently don't support this format
+        // "Original" ChaCha20: 8-byte IV and 8-byte counter (0-initialised).
+        // We currently don't support this format.
         return PSA_ERROR_NOT_SUPPORTED;
       } else {
         return PSA_ERROR_INVALID_ARGUMENT;
       }
       break;
-    #endif
+      #endif // SLI_PSA_DRIVER_FEATURE_CHACHA20
+
     default:
       return PSA_ERROR_BAD_STATE;
   }
@@ -1209,7 +1108,7 @@ psa_status_t sli_se_driver_cipher_set_iv(sli_se_driver_cipher_operation_t *opera
 
   return PSA_SUCCESS;
 
-#else // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_*
+  #else // SLI_PSA_DRIVER_FEATURE_CIPHER_MULTIPART
 
   (void)operation;
   (void)iv;
@@ -1217,27 +1116,18 @@ psa_status_t sli_se_driver_cipher_set_iv(sli_se_driver_cipher_operation_t *opera
 
   return PSA_ERROR_NOT_SUPPORTED;
 
-#endif // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_*
+  #endif // SLI_PSA_DRIVER_FEATURE_CIPHER_MULTIPART
 }
 
-psa_status_t sli_se_driver_cipher_update(sli_se_driver_cipher_operation_t *operation,
-                                         const uint8_t *input,
-                                         size_t input_length,
-                                         uint8_t *output,
-                                         size_t output_size,
-                                         size_t *output_length)
+psa_status_t sli_se_driver_cipher_update(
+  sli_se_driver_cipher_operation_t *operation,
+  const uint8_t *input,
+  size_t input_length,
+  uint8_t *output,
+  size_t output_size,
+  size_t *output_length)
 {
-#if (defined(PSA_WANT_KEY_TYPE_AES)                                            \
-  && (defined(PSA_WANT_ALG_ECB_NO_PADDING)                                     \
-  || defined(PSA_WANT_ALG_CTR)                                                 \
-  || defined(PSA_WANT_ALG_CFB)                                                 \
-  || defined(PSA_WANT_ALG_OFB)                                                 \
-  || defined(PSA_WANT_ALG_CCM)                                                 \
-  || defined(PSA_WANT_ALG_CBC_NO_PADDING)                                      \
-  || defined(PSA_WANT_ALG_CBC_PKCS7)))                                         \
-  || ((defined(PSA_WANT_KEY_TYPE_CHACHA20)                                     \
-  && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)) \
-  && defined(PSA_WANT_ALG_STREAM_CIPHER))
+  #if defined(SLI_PSA_DRIVER_FEATURE_CIPHER_MULTIPART)
 
   // Argument check
   if (operation == NULL
@@ -1259,8 +1149,8 @@ psa_status_t sli_se_driver_cipher_update(sli_se_driver_cipher_operation_t *opera
   size_t actual_output_length = 0;
 
   // We need to cache (not return) the whole last block for decryption with
-  // padding, otherwise it won't be possible to remove a potential padding block
-  // during finish.
+  // padding, otherwise it won't be possible to remove a potential padding
+  // block during finish.
   bool cache_full_block = (operation->alg == PSA_ALG_CBC_PKCS7
                            && operation->direction == SL_SE_DECRYPT);
 
@@ -1273,17 +1163,20 @@ psa_status_t sli_se_driver_cipher_update(sli_se_driver_cipher_operation_t *opera
     case PSA_ALG_CBC_PKCS7:
       lagging = true;
       break;
+
     case PSA_ALG_CTR:
     case PSA_ALG_CCM_STAR_NO_TAG:
     case PSA_ALG_CFB:
     case PSA_ALG_OFB:
       lagging = false;
       break;
-    #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+
+      #if defined(SLI_PSA_DRIVER_FEATURE_CHACHA20)
     case PSA_ALG_STREAM_CIPHER:
       lagging = false;
       break;
-    #endif
+      #endif
+
     default:
       return PSA_ERROR_BAD_STATE;
   }
@@ -1311,7 +1204,8 @@ psa_status_t sli_se_driver_cipher_update(sli_se_driver_cipher_operation_t *opera
       }
     }
 
-    // We know we'll be computing and outputing at least the completed streaming block
+    // We know we'll be computing and outputing at least the completed
+    // streaming block.
     size_t output_blocks = 1;
 
     if (input_length > bytes_to_boundary) {
@@ -1359,7 +1253,7 @@ psa_status_t sli_se_driver_cipher_update(sli_se_driver_cipher_operation_t *opera
   }
 
   switch (operation->alg) {
-#if defined(PSA_WANT_KEY_TYPE_AES) && defined(PSA_WANT_ALG_ECB_NO_PADDING)
+    #if defined(SLI_PSA_DRIVER_FEATURE_AES_ECB)
     case PSA_ALG_ECB_NO_PADDING:
       // Read in up to full streaming input block
       if (bytes_to_boundary != 16) {
@@ -1406,12 +1300,10 @@ psa_status_t sli_se_driver_cipher_update(sli_se_driver_cipher_operation_t *opera
 
       // What's left over in the input buffer will be cleaned up after switch-case
       break;
-#endif // PSA_WANT_KEY_TYPE_AES && PSA_WANT_ALG_ECB_NO_PADDING
-#if defined(PSA_WANT_KEY_TYPE_AES)           \
-    && (defined(PSA_WANT_ALG_CBC_NO_PADDING) \
-    || defined(PSA_WANT_ALG_CBC_PKCS7))
-    case PSA_ALG_CBC_NO_PADDING:
-    // fall through
+    #endif   // SLI_PSA_DRIVER_FEATURE_AES_ECB
+
+    #if defined(SLI_PSA_DRIVER_FEATURE_AES_CBC_VARIANT)
+    case PSA_ALG_CBC_NO_PADDING:     // fall through
     case PSA_ALG_CBC_PKCS7:
       if (bytes_to_boundary != 16) {
         memcpy(&operation->streaming_block[operation->processed_length % 16],
@@ -1488,12 +1380,13 @@ psa_status_t sli_se_driver_cipher_update(sli_se_driver_cipher_operation_t *opera
 
       // What's left over in the input buffer will be cleaned up after switch-case
       break;
-#endif // PSA_WANT_KEY_TYPE_AES && (PSA_WANT_ALG_CBC_PKCS7 || PSA_WANT_ALG_CBC_NO_PADDING)
-#if defined(PSA_WANT_KEY_TYPE_AES) && defined(PSA_WANT_ALG_CCM)
-    case PSA_ALG_CCM_STAR_NO_TAG:
-      // Explicit fallthrough
-#endif // PSA_WANT_KEY_TYPE_AES && PSA_WANT_ALG_CCM
-#if defined(PSA_WANT_KEY_TYPE_AES) && (defined(PSA_WANT_ALG_CTR) || defined(PSA_WANT_ALG_CCM))
+    #endif   // SLI_PSA_DRIVER_FEATURE_AES_CBC_VARIANT
+
+    #if defined(SLI_PSA_DRIVER_FEATURE_AES_CCM_STAR_NO_TAG)
+    case PSA_ALG_CCM_STAR_NO_TAG:     // Explicit fallthrough
+    #endif   // SLI_PSA_DRIVER_FEATURE_AES_CCM_STAR_NO_TAG
+
+    #if defined(SLI_PSA_DRIVER_FEATURE_AES_CTR_VARIANT)
     case PSA_ALG_CTR:
     {
       uint32_t offset = operation->processed_length % 16;
@@ -1517,8 +1410,9 @@ psa_status_t sli_se_driver_cipher_update(sli_se_driver_cipher_operation_t *opera
       input_length -= input_length;
       break;
     }
-#endif // PSA_WANT_KEY_TYPE_AES && (PSA_WANT_ALG_CTR || PSA_WANT_ALG_CCM)
-#if defined(PSA_WANT_KEY_TYPE_AES) && defined(PSA_WANT_ALG_CFB)
+    #endif   // SLI_PSA_DRIVER_FEATURE_AES_CTR_VARIANT
+
+    #if defined(SLI_PSA_DRIVER_FEATURE_AES_CFB)
     case PSA_ALG_CFB:
     {
       uint32_t offset = operation->processed_length % 16;
@@ -1541,8 +1435,9 @@ psa_status_t sli_se_driver_cipher_update(sli_se_driver_cipher_operation_t *opera
       input_length -= input_length;
       break;
     }
-#endif // PSA_WANT_KEY_TYPE_AES && PSA_WANT_ALG_CFB
-#if defined(PSA_WANT_KEY_TYPE_AES) && defined(PSA_WANT_ALG_OFB)
+    #endif   // SLI_PSA_DRIVER_FEATURE_AES_CFB
+
+    #if defined(SLI_PSA_DRIVER_FEATURE_AES_OFB)
     case PSA_ALG_OFB:
     {
       size_t data_length = input_length;
@@ -1572,9 +1467,9 @@ psa_status_t sli_se_driver_cipher_update(sli_se_driver_cipher_operation_t *opera
       input_length -= input_length;
       break;
     }
-#endif // PSA_WANT_KEY_TYPE_AES && PSA_WANT_ALG_OFB
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
-#if defined(PSA_WANT_KEY_TYPE_CHACHA20) && defined(PSA_WANT_ALG_STREAM_CIPHER)
+    #endif   // SLI_PSA_DRIVER_FEATURE_AES_OFB
+
+    #if defined(SLI_PSA_DRIVER_FEATURE_CHACHA20)
     case PSA_ALG_STREAM_CIPHER:
     {
       // counter value is at the start of the IV buffer
@@ -1588,8 +1483,12 @@ psa_status_t sli_se_driver_cipher_update(sli_se_driver_cipher_operation_t *opera
       if (operation->processed_length % 64 != 0) {
         // Perform partial block operation until block boundary or end of input
         uint8_t chacha20_block[64] = { 0 };
-        size_t offset_in_block = operation->processed_length % sizeof(chacha20_block);
-        size_t length_in_block = input_length < (sizeof(chacha20_block) - offset_in_block) ? input_length : (sizeof(chacha20_block) - offset_in_block);
+        size_t offset_in_block = operation->processed_length
+                                 % sizeof(chacha20_block);
+        size_t length_in_block =
+          input_length < (sizeof(chacha20_block) - offset_in_block)
+          ? input_length
+          : (sizeof(chacha20_block) - offset_in_block);
         uint32_t counter_bytes = __REV(ctr_value);
 
         // Retrieve streaming block
@@ -1652,8 +1551,8 @@ psa_status_t sli_se_driver_cipher_update(sli_se_driver_cipher_operation_t *opera
       *((uint32_t*)operation->iv) = ctr_value;
       break;
     }
-#endif // PSA_WANT_KEY_TYPE_CHACHA20 && PSA_WANT_ALG_STREAM_CIPHER
-#endif // VAULT
+    #endif   // SLI_PSA_DRIVER_FEATURE_CHACHA20
+
     default:
       return PSA_ERROR_BAD_STATE;
   }
@@ -1688,7 +1587,7 @@ psa_status_t sli_se_driver_cipher_update(sli_se_driver_cipher_operation_t *opera
     return PSA_SUCCESS;
   }
 
-#else // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_*
+  #else // SLI_PSA_DRIVER_FEATURE_CIPHER_MULTIPART
 
   (void)operation;
   (void)input;
@@ -1699,30 +1598,24 @@ psa_status_t sli_se_driver_cipher_update(sli_se_driver_cipher_operation_t *opera
 
   return PSA_ERROR_NOT_SUPPORTED;
 
-#endif // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_*
+  #endif // SLI_PSA_DRIVER_FEATURE_CIPHER_MULTIPART
 }
 
-psa_status_t sli_se_driver_cipher_finish(sli_se_driver_cipher_operation_t *operation,
-                                         uint8_t *output,
-                                         size_t output_size,
-                                         size_t *output_length)
+psa_status_t sli_se_driver_cipher_finish(
+  sli_se_driver_cipher_operation_t *operation,
+  uint8_t *output,
+  size_t output_size,
+  size_t *output_length)
 {
-#if (defined(PSA_WANT_KEY_TYPE_AES)        \
-  && (defined(PSA_WANT_ALG_ECB_NO_PADDING) \
-  || defined(PSA_WANT_ALG_CTR)             \
-  || defined(PSA_WANT_ALG_CFB)             \
-  || defined(PSA_WANT_ALG_OFB)             \
-  || defined(PSA_WANT_ALG_CCM)             \
-  || defined(PSA_WANT_ALG_CBC_NO_PADDING)  \
-  || defined(PSA_WANT_ALG_CBC_PKCS7)))     \
-  || (defined(PSA_WANT_KEY_TYPE_CHACHA20)  \
-  && defined(PSA_WANT_ALG_STREAM_CIPHER))
+  #if defined(SLI_PSA_DRIVER_FEATURE_CIPHER_MULTIPART)
 
-  // Finalize cipher operation. This will only output data for algorithms which include padding.
-  // This is currently only AES-CBC with PKCS#7.
+  // Finalize cipher operation. This will only output data for algorithms
+  // which include padding. This is currently only AES-CBC with PKCS#7.
 
   // Argument check
-  if (operation == NULL || (output == NULL && output_size > 0) || output_length == NULL) {
+  if (operation == NULL
+      || (output == NULL && output_size > 0)
+      || output_length == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
@@ -1734,10 +1627,8 @@ psa_status_t sli_se_driver_cipher_finish(sli_se_driver_cipher_operation_t *opera
   }
 
   switch (operation->alg) {
-#if defined(PSA_WANT_KEY_TYPE_AES)           \
-    && (defined(PSA_WANT_ALG_ECB_NO_PADDING) \
-    || defined(PSA_WANT_ALG_CBC_NO_PADDING))
-    case PSA_ALG_ECB_NO_PADDING:
+    #if defined(SLI_PSA_DRIVER_FEATURE_AES_ECB) || defined(SLI_PSA_DRIVER_FEATURE_AES_CBC_VARIANT)
+    case PSA_ALG_ECB_NO_PADDING:     // Explicit fallthrough
     case PSA_ALG_CBC_NO_PADDING:
       // No-padding operations can't finish if they haven't processed block-size input
       *output_length = 0;
@@ -1747,8 +1638,9 @@ psa_status_t sli_se_driver_cipher_finish(sli_se_driver_cipher_operation_t *opera
         psa_status = PSA_SUCCESS;
       }
       break;
-#endif // PSA_WANT_KEY_TYPE_AES && (PSA_WANT_ALG_ECB_NO_PADDING || PSA_WANT_ALG_CBC_NO_PADDING)
-#if defined(PSA_WANT_KEY_TYPE_AES) && defined(PSA_WANT_ALG_CBC_PKCS7)
+    #endif // SLI_PSA_DRIVER_FEATURE_AES_ECB || SLI_PSA_DRIVER_FEATURE_AES_CBC_VARIANT
+
+    #if defined(SLI_PSA_DRIVER_FEATURE_AES_CBC_PKCS7)
     case PSA_ALG_CBC_PKCS7:
     {
       // Ephemeral contexts
@@ -1767,7 +1659,9 @@ psa_status_t sli_se_driver_cipher_finish(sli_se_driver_cipher_operation_t *opera
           break;
         }
         size_t padding_bytes = 16 - (operation->processed_length % 16);
-        memset(&operation->streaming_block[16 - padding_bytes], padding_bytes, padding_bytes);
+        memset(&operation->streaming_block[16 - padding_bytes],
+               padding_bytes,
+               padding_bytes);
 
         status = sl_se_aes_crypt_cbc(&cmd_ctx,
                                      key_desc,
@@ -1785,7 +1679,8 @@ psa_status_t sli_se_driver_cipher_finish(sli_se_driver_cipher_operation_t *opera
         }
       } else {
         // Expect full-block input
-        if (operation->processed_length % 16 != 0 || operation->processed_length < 16) {
+        if (operation->processed_length % 16 != 0
+            || operation->processed_length < 16) {
           psa_status = PSA_ERROR_INVALID_ARGUMENT;
           break;
         }
@@ -1810,7 +1705,9 @@ psa_status_t sli_se_driver_cipher_finish(sli_se_driver_cipher_operation_t *opera
         }
 
         size_t padding_bytes = out_buf[15];
-        psa_status = sli_psa_validate_pkcs7_padding(out_buf, 16, padding_bytes);
+        psa_status = sli_psa_validate_pkcs7_padding(out_buf,
+                                                    16,
+                                                    padding_bytes);
 
         if (psa_status == PSA_SUCCESS) {
           // The padding was valid
@@ -1824,26 +1721,18 @@ psa_status_t sli_se_driver_cipher_finish(sli_se_driver_cipher_operation_t *opera
       }
     }
     break;
-#endif // PSA_WANT_KEY_TYPE_AES && PSA_WANT_ALG_CBC_PKCS7
-#if (defined(PSA_WANT_KEY_TYPE_AES)         \
-    && (defined(PSA_WANT_ALG_CFB)           \
-    || defined(PSA_WANT_ALG_OFB)            \
-    || defined(PSA_WANT_ALG_CCM)            \
-    || defined(PSA_WANT_ALG_CTR)))          \
-    || (defined(PSA_WANT_KEY_TYPE_CHACHA20) \
-    && defined(PSA_WANT_ALG_STREAM_CIPHER))
+    #endif // SLI_PSA_DRIVER_FEATURE_AES_CBC_PKCS7
+
     case PSA_ALG_CTR:
     case PSA_ALG_CCM_STAR_NO_TAG:
     case PSA_ALG_CFB:
     case PSA_ALG_OFB:
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
     case PSA_ALG_STREAM_CIPHER:
-#endif // VAULT
       // Actual stream ciphers: nothing to do here.
       *output_length = 0;
       psa_status = PSA_SUCCESS;
       break;
-#endif
+
     default:
       psa_status = PSA_ERROR_BAD_STATE;
   }
@@ -1852,7 +1741,7 @@ psa_status_t sli_se_driver_cipher_finish(sli_se_driver_cipher_operation_t *opera
   }
   return psa_status;
 
-#else // PSA_WANT_ALG_AES && PSA_WANT_KEY_TYPE_*
+  #else // SLI_PSA_DRIVER_FEATURE_CIPHER_MULTIPART
 
   (void)operation;
   (void)output;
@@ -1861,7 +1750,7 @@ psa_status_t sli_se_driver_cipher_finish(sli_se_driver_cipher_operation_t *opera
 
   return PSA_ERROR_NOT_SUPPORTED;
 
-#endif // PSA_WANT_ALG_AES && PSA_WANT_KEY_TYPE_*
+  #endif // SLI_PSA_DRIVER_FEATURE_CIPHER_MULTIPART
 }
 
-#endif // defined(SEMAILBOX_PRESENT)
+#endif // SLI_MBEDTLS_DEVICE_HSE

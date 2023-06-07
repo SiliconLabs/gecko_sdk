@@ -32,11 +32,18 @@ class Calc_Viterbi_Sol(Calc_Viterbi_Bobcat):
     def calc_freqtrackmode_reg(self, model):
         vtdemoden = model.vars.MODEM_VITERBIDEMOD_VTDEMODEN.value
         phscale_derate_factor = model.vars.phscale_derate_factor.value
+        rtschmode = (model.vars.MODEM_REALTIMCFE_RTSCHMODE.value == 1)
+        pmacquingwin = model.vars.MODEM_TRECPMDET_PMACQUINGWIN.value
+        afc_oneshot_enabled = (model.vars.MODEM_AFC_AFCONESHOT.value == 1)
 
         if vtdemoden:
             if phscale_derate_factor <= 1:
-                #For most TRECS PHYs, use averaging window of 16 bits to allow for frequent adjustments
-                freqtrackmode = 1
+                if rtschmode and (pmacquingwin < 7) and afc_oneshot_enabled:
+                    #Covers Sidewalk short CFE case
+                    freqtrackmode = 3
+                else:
+                    #For most TRECS PHYs, use averaging window of 16 bits to allow for frequent adjustments
+                    freqtrackmode = 1
             else:
                 #For high tol PHYs, use longer averaging window to avoid bad offset estimates
                 freqtrackmode = 3
@@ -85,12 +92,17 @@ class Calc_Viterbi_Sol(Calc_Viterbi_Bobcat):
         pmdetthd = model.vars.MODEM_PHDMODCTRL_PMDETTHD.value
         freq_offset_hz = model.vars.freq_offset_hz.value
         deviation = model.vars.deviation.value
+        pmacquingwin = model.vars.MODEM_TRECPMDET_PMACQUINGWIN.value
+        afc_oneshot_enabled = (model.vars.MODEM_AFC_AFCONESHOT.value == 1)
 
         if rtschmode == 1:
             #Special case for dual syncword detection case where hard slicing on syncword is required
             #because frequency tolerance is more difficult when RTSCHMODE is 1
             if deviation !=0 and freq_offset_hz/deviation > 2:
                 #For very high offset cases we need to use a minimal PMOFFSET value to ensure no noisy samples in offset est
+                pmoffset = 2
+            elif (pmacquingwin < 7) and afc_oneshot_enabled:
+                #Covers Sidewalk short CFE case
                 pmoffset = 2
             else:
                 pmoffset = osr * 2 + 2

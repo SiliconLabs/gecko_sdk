@@ -34,7 +34,7 @@
 #include "sl_btmesh_api.h"
 
 #include "app_assert.h"
-#include "sl_simple_timer.h"
+#include "app_timer.h"
 
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
@@ -58,8 +58,8 @@
 // IV Update age in seconds
 static uint32_t age = 0;
 
-static sl_simple_timer_t iv_update_age_backup_timer;
-static void on_iv_update_age_backup_timer(sl_simple_timer_t *handle, void *data);
+static app_timer_t iv_update_age_backup_timer;
+static void on_iv_update_age_backup_timer(app_timer_t *handle, void *data);
 
 static void age_backup_timer_start(void);
 static void backup_age(void);
@@ -119,7 +119,7 @@ static void backup_age(void)
 /***************************************************************************//**
  *  Increment and backup IV Update age
  ******************************************************************************/
-static void on_iv_update_age_backup_timer(sl_simple_timer_t *handle, void *data)
+static void on_iv_update_age_backup_timer(app_timer_t *handle, void *data)
 {
   (void)data;
   (void)handle;
@@ -132,11 +132,11 @@ static void on_iv_update_age_backup_timer(sl_simple_timer_t *handle, void *data)
  ******************************************************************************/
 static void age_backup_timer_start(void)
 {
-  sl_status_t sc = sl_simple_timer_start(&iv_update_age_backup_timer,
-                                         SL_BTMESH_IV_UPDATE_AGE_BACKUP_PERIOD_S * 1000,
-                                         on_iv_update_age_backup_timer,
-                                         NULL,
-                                         true);
+  sl_status_t sc = app_timer_start(&iv_update_age_backup_timer,
+                                   SL_BTMESH_IV_UPDATE_AGE_BACKUP_PERIOD_S * 1000,
+                                   on_iv_update_age_backup_timer,
+                                   NULL,
+                                   true);
   app_assert_status_f(sc, "Failed to start timer");
 }
 

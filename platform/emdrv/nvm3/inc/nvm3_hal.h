@@ -39,7 +39,6 @@
 #ifdef NVM3_HOST_BUILD
 #include "nvm3_hal_host.h"
 #else
-#include "em_device.h"
 #include "sl_assert.h"
 #include "sl_common.h"
 #endif

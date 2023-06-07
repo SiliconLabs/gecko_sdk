@@ -3,7 +3,7 @@
  * @brief
  *******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -31,8 +31,27 @@
 #define __SL_WISUN_CONFIG_H__
 
 #include <stddef.h>
+{% if only_radio is sameas false %}
 #include "sl_wisun_types.h"
+{% else -%}
+#include <stdint.h>
+{%- endif -%}
+{% if config.deviceType is not none %}
+
+//! Wi-SUN device type
+#if !defined(WISUN_CONFIG_DEVICE_TYPE)
+#define WISUN_CONFIG_DEVICE_TYPE                {{config.deviceType}}
+#endif
+{%- endif -%}
+{% if config.deviceProfile is not none %}
+
+//! Wi-SUN device profile (LFN)
+#if !defined(WISUN_CONFIG_DEVICE_PROFILE)
+#define WISUN_CONFIG_DEVICE_PROFILE             {{config.deviceProfile}}
+#endif
+{%- endif -%}
 {% if config.networkName is not none %}
+
 //! Wi-SUN network name
 #define WISUN_CONFIG_NETWORK_NAME               "{{config.networkName}}"
 {%- endif -%}
@@ -51,11 +70,17 @@
 //! Wi-SUN DWELL Interval (15-255) default 255
 #define WISUN_CONFIG_DWELL_INTERVAL             {{config.dwellInterval}}U
 {%- endif -%}
+{% if config.allowedChannels is not none and only_radio is sameas false %}
+
+//! Wi-SUN allowed channels
+#define WISUN_CONFIG_ALLOWED_CHANNELS 
+extern const sl_wisun_channel_mask_t wisun_config_allowed_channels_mask;
+{%- endif -%}
 {% if config.defaultPhy is not none %}
 
 {% if config.defaultPhy['profile'] == 'wisun_fan_1_0' -%}
 //! Wi-SUN default PHY - FAN1.0 profile
-#define WISUN_CONFIG_DEFAULT_PHY_FAN10          SL_WISUN_PHY_CONFIG_FAN10
+#define WISUN_CONFIG_DEFAULT_PHY_FAN10          0
 
 //! Wi-SUN default PHY - Regulatory Domain
 #define WISUN_CONFIG_REGULATORY_DOMAIN          {{config.defaultPhy['regulatoryDomain']}}
@@ -67,7 +92,7 @@
 #define WISUN_CONFIG_OPERATING_MODE             {{config.defaultPhy['operatingMode']}}
 {%- else -%}
 //! Wi-SUN default PHY - FAN1.1 profile
-#define WISUN_CONFIG_DEFAULT_PHY_FAN11          SL_WISUN_PHY_CONFIG_FAN11
+#define WISUN_CONFIG_DEFAULT_PHY_FAN11          1
 
 //! Wi-SUN default PHY - Regulatory domain
 #define WISUN_CONFIG_REGULATORY_DOMAIN          {{config.defaultPhy['regulatoryDomain']}}
@@ -80,6 +105,21 @@
 {%- endif %}
 
 {%- endif %}
+{% if config.broadcastRetries is not none %}
+//! Wi-SUN Broadcast retries
+#define WISUN_CONFIG_BROADCAST_RETRIES          {{config.broadcastRetries}}
+{%- endif -%}
+{% if config.modeSwitchPhys is not none %}
+{% if (config.modeSwitchPhys|length > 0) and (config.modeSwitchPhys is not none) %}
+
+//! Wi-SUN Mode Switch PHYs number
+#define WISUN_CONFIG_MODE_SWITCH_PHYS_NUMBER    {{config.modeSwitchPhys|length}}
+
+//! Wi-SUN Mode Switch PHYs
+extern const uint8_t wisun_config_ms_phys[];
+{%- endif -%}
+{%- endif -%}
+{% if config.macList is not none %}
 {% if config.macList|length > 0 %}
 
 //! Wi-SUN MAC list struct for allowed and denied mac addresses
@@ -88,12 +128,14 @@ typedef struct {
   const sl_wisun_mac_address_t mac_list[];
 } wisun_config_mac_list_t;
 {%- endif -%}
+{%- endif -%}
 {% if config.macAddress is not none %}
 
 #define WISUN_CONFIG_MAC_ADDRESS_PRESENT
 //! Wi-SUN MAC address
 extern const sl_wisun_mac_address_t wisun_config_mac_address;
 {%- endif -%}
+{% if config.macList is not none %}
 {% if (config.macList|length > 0) and (config.isDenyList is sameas false) %}
 
 #define WISUN_CONFIG_MAC_ALLOW_LIST_PRESENT 
@@ -106,20 +148,24 @@ extern const wisun_config_mac_list_t wisun_config_mac_allow_list;
 //! Wi-SUN MAC deny list
 extern const wisun_config_mac_list_t wisun_config_mac_deny_list;
 {%- endif -%}
-
+{%- endif -%}
 {% if config.devicePrivateKey is not none %}
 
+#define WISUN_CONFIG_DEVICE_PRIVATE_KEY_PRESENT
 //! Wi-SUN Device private key
 extern const uint8_t wisun_config_device_private_key[];
 {%- endif -%}
 {% if config.deviceCertificate is not none %}
 
+#define WISUN_CONFIG_DEVICE_CERTIFICATE_PRESENT
 //! Wi-SUN Device certificate
 extern const uint8_t wisun_config_device_certificate[];
 {%- endif -%}
 {% if config.caCertificate is not none %}
 
 //! Wi-SUN CA certificate
+
+#define WISUN_CONFIG_CA_CERTIFICATE_PRESENT
 extern const uint8_t wisun_config_ca_certificate[];
 {%- endif %}
 

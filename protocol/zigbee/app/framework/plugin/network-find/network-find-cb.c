@@ -17,7 +17,9 @@
 
 #include "af.h"
 #include "network-find.h"
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #ifdef SL_CATALOG_ZIGBEE_NETWORK_FIND_SUB_GHZ_PRESENT
 #include "network-find-sub-ghz-config.h"
 #endif  // SL_CATALOG_ZIGBEE_NETWORK_FIND_SUB_GHZ_PRESENT

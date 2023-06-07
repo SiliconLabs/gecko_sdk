@@ -6,7 +6,7 @@ description: >
 
   This component includes the crypto configration needed by the Bluetooth stack
   and should not be included directly by the application.
-category: "Bluetooth|Stack"
+category: Bluetooth|Bluetooth Host (Stack)
 quality: "production"
 template_contribution:
   - name: psa_key_slots

@@ -44,11 +44,14 @@ WEAK(bool emberAfPluginZclFrameworkCoreEzspErrorCallback(EzspStatus status))
   }
 
   // Do not reset if this is a decryption failure, as we ignored the packet
-  // Do not reset for a callback overflow, as we don't want the device to reboot
-  // under stress
+  // Do not reset for a callback overflow or error queue, as we don't want the device to reboot
+  // under stress;
+  // Resetting under these conditions does not solve the problem as the
+  // problem is external to the NCP. Throttling the additional traffic and staggering things
+  // might make it better instead.
   // For all other errors, we reset the NCP
   if ((status != EZSP_ERROR_SECURITY_PARAMETERS_INVALID)
-      && (status != EZSP_ERROR_OVERFLOW)) {
+      && (status != EZSP_ERROR_OVERFLOW) && (status != EZSP_ERROR_QUEUE_FULL)) {
     return true;
   }
 #endif // EZSP_HOST

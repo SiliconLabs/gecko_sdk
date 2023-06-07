@@ -14,11 +14,12 @@
  * sections of the MSLA applicable to Source Code.
  *
  ******************************************************************************/
-#if defined(UC_BUILD)
 
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #include "app/framework/util/print.h"
-#ifdef SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT
+#if defined(SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT) && !defined(EMBER_SCRIPTED_TEST)
 #include "sl_zigbee_debug_print_config.h"
 #endif // SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT
 // Generic print area.
@@ -1721,5 +1722,3 @@
 #define emberAfSlWwahClusterPrintString(buffer)
 
 #endif // (defined(SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT) && (SL_ZIGBEE_DEBUG_ZCL_GROUP_ENABLED == 1))
-
-#endif // UC_BUILD

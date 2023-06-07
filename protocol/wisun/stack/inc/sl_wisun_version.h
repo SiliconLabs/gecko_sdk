@@ -36,11 +36,11 @@
 #endif
 
 #ifndef SL_WISUN_VERSION_MINOR
-#define SL_WISUN_VERSION_MINOR 5
+#define SL_WISUN_VERSION_MINOR 6
 #endif
 
 #ifndef SL_WISUN_VERSION_PATCH
-#define SL_WISUN_VERSION_PATCH 2
+#define SL_WISUN_VERSION_PATCH 0
 #endif
 
 #define FORMAT_WISUN_STACK_VERSION(a,b,c) (((a) << 16) + ((b) << 8) +  (c))

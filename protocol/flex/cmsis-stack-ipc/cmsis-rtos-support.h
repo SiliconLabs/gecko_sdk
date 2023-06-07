@@ -58,8 +58,6 @@ void emAfPluginCmsisRtosStackTask(void *p_arg);
 
 void emAfPluginCmsisRtosAppFrameworkTask(void *p_arg);
 
-bool emAfPluginCmsisRtosIsCurrentTaskStackTask(void);
-
 osThreadId_t emAfPluginCmsisRtosGetStackTcb(void);
 
 void emAfPluginCmsisRtosWakeUpConnectStackTask(void);
@@ -71,35 +69,8 @@ void emAfPluginCmsisRtosWakeUpAppFrameworkTask(void);
 
 void emAfPluginCmsisRtosIpcInit(void);
 
-void emAfPluginCmsisRtosSendBlockingCommand(uint16_t identifier,
-                                            const char *format,
-                                            ...);
-
-void emAfPluginCmsisRtosSendResponse(uint16_t identifier,
-                                     const char *format,
-                                     ...);
-
-void emAfPluginCmsisRtosSendCallbackCommand(uint16_t identifier,
-                                            const char *format,
-                                            ...);
-
 void emAfPluginCmsisRtosProcessIncomingApiCommand(void);
 
-void emAfPluginCmsisRtosHandleIncomingApiCommand(uint16_t commandId);
-
 bool emAfPluginCmsisRtosProcessIncomingCallbackCommand(void);
-
-void emAfPluginCmsisRtosHandleIncomingCallbackCommand(uint16_t commandId,
-                                                      uint8_t *callbackParams);
-
-void emAfPluginCmsisRtosAcquireCommandMutex(void);
-
-void emAfPluginCmsisRtosReleaseCommandMutex(void);
-
-void emAfPluginCmsisRtosFetchApiParams(PGM_P format, ...);
-
-void emAfPluginCmsisRtosFetchCallbackParams(uint8_t *callbackParams,
-                                            PGM_P format,
-                                            ...);
 
 #endif // _CMSIS_RTOS_SUPPORT_H_

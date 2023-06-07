@@ -262,9 +262,7 @@ sl_status_t app_util_get_mac_address(sl_wisun_mac_address_t *const value,
 sl_status_t app_util_get_mac_address_string(char *value_str,
                                             const sl_wisun_mac_address_t *value)
 {
-  int i;
-
-  for (i = 0; i < SL_WISUN_MAC_ADDRESS_SIZE; ++i) {
+  for (uint8_t i = 0; i < SL_WISUN_MAC_ADDRESS_SIZE; ++i) {
     sprintf(value_str, "%02x:", value->address[i]);
     value_str += 3;
   }

@@ -393,7 +393,35 @@ static sl_status_t _app_get_regulation_warning_threshold(char *value_str,
 static sl_status_t _app_get_regulation_alert_threshold(char *value_str,
                                                        const char *key_str,
                                                        const app_cli_entry_t *entry);
+
 #endif
+
+#if defined(SL_CATALOG_WISUN_LFN_DEVICE_SUPPORT_PRESENT)
+/**************************************************************************//**
+ * @brief Helper to get device type
+ * @param[out] *value_str is the desired value string
+ * @param[in] *key_str is the key string of the set command
+ * @param[in] *entry is the settings entry
+ * @return SL_STATUS_OK if the setting is success.
+ * @return SL_STATUS_FAIL if setting failed.
+ *****************************************************************************/
+static sl_status_t _app_get_device_type(char *value_str,
+                                        const char *key_str,
+                                        const app_cli_entry_t *entry);
+
+/**************************************************************************//**
+ * @brief Helper to get LFN profile
+ * @param[out] *value_str is the desired value string
+ * @param[in] *key_str is the key string of the set command
+ * @param[in] *entry is the settings entry
+ * @return SL_STATUS_OK if the setting is success.
+ * @return SL_STATUS_FAIL if setting failed.
+ *****************************************************************************/
+static sl_status_t _app_get_lfn_profile(char *value_str,
+                                        const char *key_str,
+                                        const app_cli_entry_t *entry);
+#endif
+
 /**************************************************************************//**
  * @brief Connect to Wi-SUN network by PHY configuration type
  * @details CLI callback helper function
@@ -771,6 +799,34 @@ const app_cli_entry_t app_settings_entries[] =
     .set_handler = _app_set_regulation_alert_threshold,
     .get_handler = _app_get_regulation_alert_threshold,
     .description = "Transmission alert threshold in percent (-1 to disable) [int8]"
+  },
+#endif
+#if defined(SL_CATALOG_WISUN_LFN_DEVICE_SUPPORT_PRESENT)
+  {
+    .key = "device_type",
+    .domain = APP_CLI_WISUN_DOMAIN_ID,
+    .value_size = APP_CLI_VALUE_SIZE_UINT8,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = NULL,
+    .input_enum_list = app_wisun_device_type_enum,
+    .output_enum_list = app_wisun_device_type_enum,
+    .set_handler = NULL,
+    .get_handler = _app_get_device_type,
+    .description = "Device type"
+  },
+  {
+    .key = "lfn_profile",
+    .domain = APP_CLI_WISUN_DOMAIN_ID,
+    .value_size = APP_CLI_VALUE_SIZE_UINT8,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = NULL,
+    .input_enum_list = app_wisun_lfn_profile_enum,
+    .output_enum_list = app_wisun_lfn_profile_enum,
+    .set_handler = NULL,
+    .get_handler = _app_get_lfn_profile,
+    .description = "Wi-SUN LFN profile"
   },
 #endif
   {
@@ -1551,7 +1607,7 @@ static sl_status_t _app_get_regulation(char *value_str,
   if (!strstr(entry->key, "regulation")) {
     return SL_STATUS_FAIL;
   }
-  
+
   // finds the proper string for the value for regulation
   value_enum = entry->output_enum_list;
   if (value_enum->value_str == NULL) {
@@ -1567,7 +1623,7 @@ static sl_status_t _app_get_regulation(char *value_str,
   }
 
   snprintf(value_str, APP_CLI_STR_VALUE_LENGTH, "%s (%d)",
-             value_enum->value_str, (uint8_t)value_enum->value);
+           value_enum->value_str, (uint8_t)value_enum->value);
 
   return SL_STATUS_OK;
 }
@@ -1611,6 +1667,55 @@ static sl_status_t _app_get_regulation_alert_threshold(char *value_str,
              thresholds.alert_threshold);
   }
 
+  return SL_STATUS_OK;
+}
+#endif
+
+#if defined(SL_CATALOG_WISUN_LFN_DEVICE_SUPPORT_PRESENT)
+static sl_status_t _app_get_device_type(char *value_str,
+                                        const char *key_str,
+                                        const app_cli_entry_t *entry)
+{
+  const char *dev_type_str = NULL;
+  sl_wisun_device_type_t dev_type = SL_WISUN_ROUTER;
+  (void) key_str;
+
+  if (value_str == NULL || entry == NULL || entry->key == NULL) {
+    return SL_STATUS_FAIL;
+  }
+
+  dev_type =  app_wisun_get_device_type();
+  dev_type_str = app_wisun_trace_util_device_type_to_str((uint32_t) dev_type);
+
+  if (dev_type_str == NULL) {
+    return SL_STATUS_FAIL;
+  }
+
+  (void) snprintf(value_str, APP_CLI_STR_VALUE_LENGTH, "%s (%lu)", dev_type_str, (uint32_t) dev_type);
+  return SL_STATUS_OK;
+}
+
+static sl_status_t _app_get_lfn_profile(char *value_str,
+                                        const char *key_str,
+                                        const app_cli_entry_t *entry)
+{
+  const char *lfn_profile_str = NULL;
+  sl_wisun_lfn_profile_t lfn_profile = SL_WISUN_LFN_PROFILE_TEST;
+
+  (void) key_str;
+
+  if (value_str == NULL || entry == NULL || entry->key == NULL) {
+    return SL_STATUS_FAIL;
+  }
+
+  lfn_profile =  app_wisun_get_lfn_profile();
+  lfn_profile_str = app_wisun_trace_util_lfn_profile_to_str((uint32_t) lfn_profile);
+
+  if (lfn_profile_str == NULL) {
+    return SL_STATUS_FAIL;
+  }
+
+  (void) snprintf(value_str, APP_CLI_STR_VALUE_LENGTH, "%s (%lu)", lfn_profile_str, (uint32_t) lfn_profile);
   return SL_STATUS_OK;
 }
 #endif

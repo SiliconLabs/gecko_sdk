@@ -10,6 +10,8 @@ description: >
   
 package: Z-Wave
 quality: production
+source:
+  - path: protocol/z-wave/platform/SiliconLabs/AppsHw/src/common/app_deep_sleep.c
 define:
   - name: ZAF_CONFIG_DEVICE_OPTION_MASK
     value: APPLICATION_NODEINFO_NOT_LISTENING

@@ -60,6 +60,12 @@ ZW_TransportMulticast_SendRequest(const uint8_t * const p_data,
 void ZW_TransportMulticast_clearTimeout(void);
 
 /**
+ * @brief Initializes the Tx Buffer
+ * 
+ */
+void ZW_TransportMulticast_init(void);
+
+/**
  * @} // ZAF_Transport_Multicast
  * @} // ZAF_Transport
  * @} // ZAF

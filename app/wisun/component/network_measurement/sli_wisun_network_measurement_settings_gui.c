@@ -237,7 +237,7 @@ static void _phy_domain_form(void *args)
   filter_params.domain = domain->domain;
 
   // get phy list
-  _phy_list = app_wisun_get_phy_list(filter_profile);;
+  _phy_list = app_wisun_get_phy_list(filter_profile);
 
   // destroy domain list
   _destroy_domain_list();
@@ -275,7 +275,7 @@ static void _set_phy(void *args)
   if (app_wisun_setting_set_phy(&phy->phy_cfg) == SL_STATUS_OK) {
     printf("[New PHY set: %s]\n", phy->name);
   } else {
-    printf("[Failure: Selected PHY cannot be set]");
+    printf("[Failure: Selected PHY cannot be set]\n");
     return;
   }
 

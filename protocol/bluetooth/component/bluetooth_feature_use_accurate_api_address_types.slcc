@@ -1,0 +1,22 @@
+id: "bluetooth_feature_use_accurate_api_address_types"
+label: "Select API semantics that use accurate Bluetooth address types"
+package: "Bluetooth"
+description: >
+  In the default Bluetooth stack configuration most Bluetooth commands and
+  events use coarse address typing that only differentiates between public
+  (value 0) and any random (value 1) address types.
+
+  This component changes how the Bluetooth stack interprets and reports
+  Bluetooth address types. When this component is included, Bluetooth commands
+  and events that include an address type will systematically use the
+  sl_bt_gap_address_type_t enumeration to indicate the accurate type.
+category: Bluetooth|Bluetooth Host (Stack)|Additional Features
+quality: "production"
+root_path: "protocol/bluetooth"
+requires:
+  - name: "bluetooth_stack"
+provides:
+  - name: "bluetooth_feature_use_accurate_api_address_types"
+template_contribution:
+  - name: component_catalog
+    value: bluetooth_feature_use_accurate_api_address_types

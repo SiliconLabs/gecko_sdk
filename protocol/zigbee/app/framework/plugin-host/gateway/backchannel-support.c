@@ -41,9 +41,7 @@
 #include <strings.h>
 
 #include "app/framework/plugin-host/gateway/gateway-support.h"
-#ifdef UC_BUILD
 #include "gateway-config.h"
-#endif // UC_BUILD
 
 //------------------------------------------------------------------------------
 // GLOBALS

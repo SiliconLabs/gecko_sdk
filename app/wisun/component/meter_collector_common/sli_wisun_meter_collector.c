@@ -53,6 +53,7 @@
       return;                                        \
     }                                                \
     dest->id          = src->id;                     \
+    dest->schedule    = src->schedule;               \
     dest->temperature = src->temperature;            \
     dest->humidity    = src->humidity;               \
     dest->light       = src->light;                  \
@@ -116,12 +117,12 @@ static void _def_collector_timeout_hnd(sl_wisun_meter_entry_t *meter);
  * @param[in] sockid The socket to use for transmission
  * @param[in,out] meter Meter entry
  * @param[in,out] req Request
- * @return true Never
- * @return false Always
+ * @return SL_STATUS_OK Never
+ * @return SL_STATUS_FAIL Always
  *****************************************************************************/
-static bool _def_collector_send(const int32_t sockid,
-                                sl_wisun_meter_entry_t *meter,
-                                sl_wisun_meter_request_t *req);
+static sl_status_t _def_collector_send(const int32_t sockid,
+                                       sl_wisun_meter_entry_t *meter,
+                                       sl_wisun_meter_request_t *req);
 
 /**************************************************************************//**
  * @brief Default collector receive
@@ -327,21 +328,21 @@ static void _def_collector_timeout_hnd(sl_wisun_meter_entry_t *meter)
 
   ip_str = app_wisun_trace_util_get_ip_str(&meter->addr.sin6_addr);
 
-  printf("[Measurement response timed out: %ldms %s]",
+  printf("[Measurement response timed out: %ldms %s]\n",
          sl_sleeptimer_tick_to_ms(meter->resp_recv_timestamp - meter->req_sent_timestamp),
          ip_str);
   app_wisun_trace_util_destroy_ip_str(ip_str);
 }
 
-static bool _def_collector_send(const int32_t sockid,
-                                sl_wisun_meter_entry_t *meter,
-                                sl_wisun_meter_request_t *req)
+static sl_status_t _def_collector_send(const int32_t sockid,
+                                       sl_wisun_meter_entry_t *meter,
+                                       sl_wisun_meter_request_t *req)
 {
   (void) sockid;
   (void) meter;
   (void) req;
   assert("[Collector Send not implemented!]" == NULL);
-  return false;
+  return SL_STATUS_FAIL;
 }
 
 static sl_wisun_meter_entry_t * _def_collector_recv(int32_t sockid)

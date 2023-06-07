@@ -415,7 +415,8 @@ void setRxOptions(sl_cli_command_arg_t *args)
   responsePrint(sl_cli_get_command_string(args, 0),
                 "storeCrc:%s,ignoreCrcErrors:%s,enableDualSync:%s,"
                 "trackAborted:%s,removeAppendedInfo:%s,rxAntenna:%s,"
-                "frameDet:%s,skipDCCal:%s,skipSynthCa:%s,rxChannelSwitching:%s",
+                "frameDet:%s,skipDCCal:%s,skipSynthCal:%s,rxChannelSwitching:%s,"
+                "fastRx2Rx:%s",
                 (rxOptions & RAIL_RX_OPTION_STORE_CRC) ? "True" : "False",
                 (rxOptions & RAIL_RX_OPTION_IGNORE_CRC_ERRORS) ? "True" : "False",
                 (rxOptions & RAIL_RX_OPTION_ENABLE_DUALSYNC) ? "True" : "False",
@@ -425,7 +426,8 @@ void setRxOptions(sl_cli_command_arg_t *args)
                 (rxOptions & RAIL_RX_OPTION_DISABLE_FRAME_DETECTION) ? "Off" : "On",
                 (rxOptions & RAIL_RX_OPTION_SKIP_DC_CAL) ? "True" : "False",
                 (rxOptions & RAIL_RX_OPTION_SKIP_SYNTH_CAL) ? "True" : "False",
-                (rxOptions & RAIL_RX_OPTION_CHANNEL_SWITCHING) ? "True" : "False");
+                (rxOptions & RAIL_RX_OPTION_CHANNEL_SWITCHING) ? "True" : "False",
+                (rxOptions & RAIL_RX_OPTION_FAST_RX2RX) ? "True" : "False");
 }
 
 void setTxTone(sl_cli_command_arg_t *args)
@@ -1051,4 +1053,13 @@ void holdRx(sl_cli_command_arg_t *args)
   rxProcessHeld = !rxHeld;
   responsePrint(sl_cli_get_command_string(args, 0), "HoldRx:%s",
                 rxHeld ? "Enabled" : "Disabled");
+}
+
+void enableCacheSynthCal(sl_cli_command_arg_t *args)
+{
+  uint8_t enable = sl_cli_get_argument_uint8(args, 0);
+  RAIL_Status_t status = RAIL_EnableCacheSynthCal(railHandle, (bool)enable);
+
+  responsePrint(sl_cli_get_command_string(args, 0), "Result:%s",
+                ((status == RAIL_STATUS_NO_ERROR) ? "Success" : "Failure"));
 }

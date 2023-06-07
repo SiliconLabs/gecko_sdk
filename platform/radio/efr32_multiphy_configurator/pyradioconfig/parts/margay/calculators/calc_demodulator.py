@@ -79,6 +79,8 @@ class CALC_Demodulator_Margay(CALC_Demodulator_ocelot):
             rssi_rf_adjust_db = -11.02
         elif rf_band == model.vars.rf_band.var_enum.BAND_915:
             rssi_rf_adjust_db = -10.10
+        elif rf_band == model.vars.rf_band.var_enum.BAND_2400:
+            rssi_rf_adjust_db = -2.65
         else:
             LogMgr.Warning("Warning: No RSSI adjustment available for this band")
             rssi_rf_adjust_db = -11.0 #This was the default in early RAIL for Margay and so won't impact customers for now

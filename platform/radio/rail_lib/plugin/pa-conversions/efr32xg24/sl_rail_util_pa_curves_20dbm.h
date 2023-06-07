@@ -42,16 +42,28 @@ extern "C" {
 #define RAIL_PA_CURVES_LP_VALUES (16U)
 
 #define RAIL_PA_CURVES_2P4_HP_VBAT_MAX_POWER      200
-#define RAIL_PA_CURVES_2P4_HP_VBAT_MIN_POWER      -260
+#define RAIL_PA_CURVES_2P4_HP_VBAT_MIN_POWER      -338
 #define RAIL_PA_CURVES_2P4_HP_VBAT_CURVES \
-  { { 180, 2377, -314962 },               \
-    { 72, 710, -43395 },                  \
-    { 40, 397, -6404 },                   \
-    { 24, 227, 6629 },                    \
-    { 15, 153, 9469 },                    \
-    { 9, 92, 9349 },                      \
-    { 6, 55, 7867 },                      \
-    { 3, 26, 5495 } }
+  { { 180, 2280, -291457 },               \
+    { 78, 770, -46749 },                  \
+    { 44, 431, -6673 },                   \
+    { 27, 255, 6886 },                    \
+    { 17, 167, 10458 },                   \
+    { 10, 98, 10261 },                    \
+    { 6, 59, 8616 },                      \
+    { 3, 11, 3745 } }
+
+#define RAIL_PA_CURVES_2P4_HP_DCDC_MAX_POWER      200
+#define RAIL_PA_CURVES_2P4_HP_DCDC_MIN_POWER      -338
+#define RAIL_PA_CURVES_2P4_HP_DCDC_CURVES \
+  { { 180, 2263, -287605 },               \
+    { 78, 783, -47869 },                  \
+    { 45, 432, -6351 },                   \
+    { 26, 255, 7104 },                    \
+    { 17, 167, 10595 },                   \
+    { 10, 98, 10336 },                    \
+    { 6, 59, 8671 },                      \
+    { 3, 11, 3757 } }
 
 #define RAIL_PA_CURVES_2P4_LP_VBAT_MAX_POWER      0
 #define RAIL_PA_CURVES_2P4_LP_VBAT_MIN_POWER      -260
@@ -79,10 +91,22 @@ extern "C" {
 // Macro to declare the variables needed to initialize RAIL_TxPowerCurvesConfig_t for use in
 // RAIL_InitTxPowerCurves, assuming battery powered operation
 #define RAIL_DECLARE_TX_POWER_VBAT_CURVES_ALT                                  \
-  static const RAIL_TxPowerCurveAlt_t RAIL_piecewiseDataHp = {                 \
+  static const RAIL_TxPowerCurveAlt_t RAIL_piecewiseDataHpVbat = {             \
     RAIL_PA_CURVES_2P4_HP_VBAT_MAX_POWER,                                      \
     RAIL_PA_CURVES_2P4_HP_VBAT_MIN_POWER,                                      \
     RAIL_PA_CURVES_2P4_HP_VBAT_CURVES,                                         \
+  };                                                                           \
+  static const int16_t RAIL_curves24Lp[RAIL_PA_CURVES_LP_VALUES] =             \
+    RAIL_PA_CURVES_2P4_LP_VBAT_CURVES;
+// *INDENT-OFF*
+
+// Macro to declare the variables needed to initialize RAIL_TxPowerCurvesConfig_t for use in
+// RAIL_InitTxPowerCurves, assuming battery powered operation
+#define RAIL_DECLARE_TX_POWER_DCDC_CURVES_ALT                                  \
+  static const RAIL_TxPowerCurveAlt_t RAIL_piecewiseDataHpDcdc = {             \
+    RAIL_PA_CURVES_2P4_HP_DCDC_MAX_POWER,                                      \
+    RAIL_PA_CURVES_2P4_HP_DCDC_MIN_POWER,                                      \
+    RAIL_PA_CURVES_2P4_HP_DCDC_CURVES,                                         \
   };                                                                           \
   static const int16_t RAIL_curves24Lp[RAIL_PA_CURVES_LP_VALUES] =             \
     RAIL_PA_CURVES_2P4_LP_VBAT_CURVES;
@@ -96,7 +120,7 @@ extern "C" {
         .segments = RAIL_PA_CURVES_PIECEWISE_SEGMENTS,                         \
         .min = RAIL_TX_POWER_LEVEL_2P4_HP_MIN,                                 \
         .max = RAIL_TX_POWER_LEVEL_2P4_HP_MAX,                                 \
-        .conversion = { .powerCurve = &RAIL_piecewiseDataHp },                 \
+        .conversion = { .powerCurve = &RAIL_piecewiseDataHpVbat},              \
       },                                                                       \
       {                                                                        \
         .algorithm = RAIL_PA_ALGORITHM_MAPPING_TABLE,                          \
@@ -104,7 +128,7 @@ extern "C" {
         .min = RAIL_TX_POWER_LEVEL_2P4_LP_MIN,                                 \
         .max = RAIL_TX_POWER_LEVEL_2P4_LP_MAX,                                 \
         .conversion = { .mappingTable = &RAIL_curves24Lp[0] },                 \
-      },                                                                        \
+      },                                                                       \
     }                                                                          \
   }
 // *INDENT-OFF*

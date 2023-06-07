@@ -6,9 +6,14 @@ description: >
   network and trigger a state transition to a scene on another node.
   
   This component provides a function to recall a scene identified by its number.
+
+  This is a No-Code component.
 category: "Bluetooth Mesh|Models|Time and Scenes"
 quality: "production"
 root_path: "app/btmesh/common/btmesh_scene_client"
+tag:
+  - No-Code
+
 config_file:
   - path: btmesh_scene_client.dcd
     directory: btmeshconf
@@ -24,11 +29,12 @@ provides:
 requires:
   - name: "app_assert"
   - name: "app_btmesh_util"
+  - name: "btmesh_provisionee"
   - name: "btmesh_stack_scene_client"
   - name: "btmesh_stack"
-  - name: "simple_timer"
+  - name: "app_timer"
 recommends:
-  - id: "simple_timer"
+  - id: "app_timer"
 
 template_contribution:
   - name: "btmesh_on_event"

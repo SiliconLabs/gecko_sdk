@@ -122,7 +122,7 @@ static Ecode_t StartTransfer(DmaMode_t             mode,
  ******************************************************************************/
 Ecode_t DMADRV_AllocateChannel(unsigned int *channelId, void *capabilities)
 {
-  int i;
+  unsigned int i;
   (void)capabilities;
   CORE_DECLARE_IRQ_STATE;
 
@@ -135,7 +135,7 @@ Ecode_t DMADRV_AllocateChannel(unsigned int *channelId, void *capabilities)
   }
 
   CORE_ENTER_ATOMIC();
-  for ( i = 0; i < (int)EMDRV_DMADRV_DMA_CH_COUNT; i++ ) {
+  for ( i = 0U; i < (unsigned int)EMDRV_DMADRV_DMA_CH_COUNT; i++ ) {
     if ( !chTable[i].allocated ) {
       *channelId           = i;
       chTable[i].allocated = true;
@@ -1241,10 +1241,6 @@ static Ecode_t StartTransfer(DmaMode_t             mode,
 ///
 ///   @details
 ///
-///   @li @ref dmadrv_intro
-///   @li @ref dmadrv_conf
-///   @li @ref dmadrv_api
-///   @li @ref dmadrv_example
 ///
 ///   @n @section dmadrv_intro Introduction
 ///
@@ -1306,12 +1302,12 @@ static Ecode_t StartTransfer(DmaMode_t             mode,
 ///
 ///   @ref DMADRV_Init(), @ref DMADRV_DeInit() @n
 ///    These functions initialize or deinitialize the DMADRV driver. Typically,
-///    @htmlonly DMADRV_Init() @endhtmlonly is called once in the startup code.
+///    DMADRV_Init() is called once in the startup code.
 ///
 ///   @ref DMADRV_AllocateChannel(), @ref DMADRV_FreeChannel() @n
 ///    DMA channel reserve and release functions. It is recommended that
-///    application code check that @htmlonly DMADRV_AllocateChannel() @endhtmlonly
-///    returns @htmlonly ECODE_EMDRV_DMADRV_OK @endhtmlonly before starting a DMA
+///    application code check that DMADRV_AllocateChannel()
+///    returns ECODE_EMDRV_DMADRV_OK before starting a DMA
 ///    transfer.
 ///
 ///   @ref DMADRV_MemoryPeripheral() @n

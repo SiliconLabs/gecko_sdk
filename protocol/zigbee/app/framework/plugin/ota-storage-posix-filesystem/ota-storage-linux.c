@@ -105,7 +105,7 @@ typedef struct {
 
 // This global is used to define what is in the OTA header and help map that
 // to the 'EmberAfOtaHeader' data structure. Must use
-// emGetOtaHeaderFieldDefinition() to get the field definitions. Do not use this
+// sli_zigbee_af_get_ota_header_field_definition() to get the field definitions. Do not use this
 // array directly.
 static const EmberAfOtaHeaderFieldDefinition otaHeaderFieldDefinitions[] = {
   { "Magic Number", INTEGER_FIELD, 4, ALWAYS_PRESENT_MASK },
@@ -171,7 +171,7 @@ static OtaImage* iterator = NULL;
   mkdir((x), S_IRUSR | S_IWUSR | S_IXUSR)   /* permissions (o=rwx) */
 #endif
 
-static EmAfOtaStorageLinuxConfig config = {
+static sli_zigbee_af_ota_storage_linux_config config = {
   false,  // memoryDebug
   false,  // fileDebug
   false,  // fieldDebug
@@ -207,8 +207,8 @@ static uint16_t calculateOtaFileHeaderLength(EmberAfOtaHeader* header);
 static uint8_t* writeHeaderDataToBuffer(EmberAfOtaBootloadFileHeaderFieldIndex_t fieldIndex,
                                         uint16_t headerVersion,
                                         uint8_t* bufferPtr);
-const EmberAfOtaHeaderFieldDefinition *emGetOtaHeaderFieldDefinition(uint16_t headerVersion,
-                                                                     EmberAfOtaBootloadFileHeaderFieldIndex_t headerIndex);
+const EmberAfOtaHeaderFieldDefinition *sli_zigbee_af_get_ota_header_field_definition(uint16_t headerVersion,
+                                                                                     EmberAfOtaBootloadFileHeaderFieldIndex_t headerIndex);
 static EmberAfOtaHeader* readImageHeader(const char* filename);
 static OtaImage* imageSearchInternal(const EmberAfOtaImageId* id);
 static EmberAfOtaImageId getIteratorImageId(void);
@@ -235,7 +235,7 @@ static bool createStorageDirectory = true;
 
 // Our storage device examines all files in the passed directory, or simply
 // loads a single file into its header cache.
-EmberAfOtaStorageStatus emAfOtaSetStorageDevice(const void* device)
+EmberAfOtaStorageStatus sli_zigbee_af_ota_set_storage_device(const void* device)
 {
   if (initDone) {
     return EMBER_AF_OTA_STORAGE_ERROR;
@@ -295,14 +295,14 @@ EmberAfOtaStorageStatus emAfOtaSetStorageDevice(const void* device)
   return EMBER_AF_OTA_STORAGE_SUCCESS;
 }
 
-void emAfOtaStorageGetConfig(EmAfOtaStorageLinuxConfig* currentConfig)
+void sli_zigbee_af_ota_storage_get_config(sli_zigbee_af_ota_storage_linux_config* currentConfig)
 {
-  (void) memcpy(currentConfig, &config, sizeof(EmAfOtaStorageLinuxConfig));
+  (void) memcpy(currentConfig, &config, sizeof(sli_zigbee_af_ota_storage_linux_config));
 }
 
-void emAfOtaStorageSetConfig(const EmAfOtaStorageLinuxConfig* newConfig)
+void sli_zigbee_af_ota_storage_set_config(const sli_zigbee_af_ota_storage_linux_config* newConfig)
 {
-  (void) memcpy(&config, newConfig, sizeof(EmAfOtaStorageLinuxConfig));
+  (void) memcpy(&config, newConfig, sizeof(sli_zigbee_af_ota_storage_linux_config));
 }
 
 EmberAfOtaStorageStatus emberAfOtaStorageInitCallback(void)
@@ -355,14 +355,14 @@ EmberAfOtaStorageStatus emberAfOtaStorageInitCallback(void)
   return status;
 }
 
-void emAfPluginOtaStoragePosixFilesystemInitCallback(uint8_t init_level)
+void sli_zigbee_af_ota_storage_posix_filesystsli_zigbee_init_callback(uint8_t init_level)
 {
-  SLXU_INIT_UNUSED_ARG;
+  (void)init_level;
 
   emberAfOtaStorageInitCallback();
 }
 
-void emAfOtaStorageClose(void)
+void sli_zigbee_af_ota_storage_close(void)
 {
   OtaImage* ptr = imageListLast;
   while (ptr != NULL) {
@@ -417,7 +417,7 @@ EmberAfOtaImageId emberAfOtaStorageSearchCallback(uint16_t manufacturerId,
   return id;
 }
 
-const char* emAfOtaStorageGetFilepath(const EmberAfOtaImageId* id)
+const char* sli_zigbee_af_ota_storage_get_filepath(const EmberAfOtaImageId* id)
 {
   OtaImage* image = findImageById(id);
   if (image == NULL) {
@@ -476,8 +476,8 @@ EmberAfOtaStorageStatus emberAfOtaStorageReadImageDataCallback(const EmberAfOtaI
   return EMBER_AF_OTA_STORAGE_SUCCESS;
 }
 
-EmberAfOtaStorageStatus emAfOtaStorageCreateImage(EmberAfOtaHeader* header,
-                                                  const char* filename)
+EmberAfOtaStorageStatus sli_zigbee_af_ota_storage_create_image(EmberAfOtaHeader* header,
+                                                               const char* filename)
 {
   // Windows requires the 'b' (binary) as part of the mode so that line endings
   // are not truncated.  POSIX ignores this.
@@ -504,7 +504,7 @@ EmberAfOtaStorageStatus emAfOtaStorageCreateImage(EmberAfOtaHeader* header,
 
   EmberAfOtaBootloadFileHeaderFieldIndex_t fieldIndex = HEADER_LENGTH_INDEX;
   while (fieldIndex < FIELD_INDEX_MAX) {
-    const EmberAfOtaHeaderFieldDefinition *definition = emGetOtaHeaderFieldDefinition(header->headerVersion, fieldIndex);
+    const EmberAfOtaHeaderFieldDefinition *definition = sli_zigbee_af_get_ota_header_field_definition(header->headerVersion, fieldIndex);
     debug(config.memoryDebug,
           "Writing Header Field: %s, bufferPtr: %p\n",
           definition->name, bufferPtr);
@@ -535,7 +535,7 @@ EmberAfOtaStorageStatus emAfOtaStorageCreateImage(EmberAfOtaHeader* header,
   return EMBER_AF_OTA_STORAGE_SUCCESS;
 }
 
-EmberAfOtaStorageStatus emAfOtaStorageAddImageFile(const char* filename)
+EmberAfOtaStorageStatus sli_zigbee_af_ota_storage_add_image_file(const char* filename)
 {
   return (NULL == addImageFileToList(filename,
                                      false)    // print image info?
@@ -624,7 +624,7 @@ EmberAfOtaStorageStatus emberAfOtaStorageClearTempDataCallback(void)
   // tempStorageFilepath is used throughout the life of the storage
   // device, so we only need to free it if there was an error,
   // or when the storage device changed.  We expect we can
-  // only change the storage device if we first call emAfOtaStorageClose()
+  // only change the storage device if we first call sli_zigbee_af_ota_storage_close()
   // which frees the tempStorageFilepath data as well.
   if ((status != EMBER_AF_OTA_STORAGE_SUCCESS)
       && tempStorageFilepath) {
@@ -665,13 +665,13 @@ EmberAfOtaStorageStatus emberAfOtaStorageCheckTempDataCallback(uint32_t* returnO
   *returnTotalSize = image->header->imageSize;
   *returnOffset = image->fileSize;
   MEMSET(returnOtaImageId, 0, sizeof(EmberAfOtaImageId));
-  *returnOtaImageId = emAfOtaStorageGetImageIdFromHeader(image->header);
+  *returnOtaImageId = sli_zigbee_af_ota_storage_get_image_id_from_header(image->header);
   return EMBER_AF_OTA_STORAGE_SUCCESS;
 }
 
-EmberAfOtaStorageStatus emAfOtaStorageAppendImageData(const char* filename,
-                                                      uint32_t length,
-                                                      const uint8_t* data)
+EmberAfOtaStorageStatus sli_zigbee_af_ota_storage_append_image_data(const char* filename,
+                                                                    uint32_t length,
+                                                                    const uint8_t* data)
 {
   OtaImage* image = findImageByFilename(filename);
   if (image != NULL) {
@@ -714,7 +714,7 @@ EmberAfOtaStorageStatus emberAfOtaStorageFinishDownloadCallback(uint32_t offset)
   return EMBER_AF_OTA_STORAGE_SUCCESS;
 }
 
-void emAfOtaStorageInfoPrint(void)
+void sli_zigbee_af_ota_storage_info_print(void)
 {
   note("Storage Module:     OTA POSIX Filesystem Storage Module\n");
   note("Storage Directory:  %s\n", defaultStorageDirectory);
@@ -765,7 +765,7 @@ static EmberAfOtaStorageStatus createDefaultStorageDirectory(void)
       return EMBER_AF_OTA_STORAGE_ERROR;
     }
   }
-  return emAfOtaSetStorageDevice(defaultStorageDirectory);
+  return sli_zigbee_af_ota_set_storage_device(defaultStorageDirectory);
 }
 
 static bool doEui64sMatch(const uint8_t* firstEui64,
@@ -954,7 +954,7 @@ static OtaImage* addImageFileToList(const char* filename,
                newImage->filenameStart,
                newImage->header->firmwareVersion);
           uint8_t *finger = (uint8_t *)&newImage->header->upgradeFileDestination;
-          for (int i = emGetOtaHeaderFieldDefinition(newImage->header->headerVersion, UPGRADE_FILE_DESTINATION_INDEX)->length; i; i--) {
+          for (int i = sli_zigbee_af_get_ota_header_field_definition(newImage->header->headerVersion, UPGRADE_FILE_DESTINATION_INDEX)->length; i; i--) {
             note("%02X", finger[i - 1]);
           }
           note(") as an existing one\n");
@@ -1137,7 +1137,7 @@ static void freeOtaImage(OtaImage* image)
   myFree(image);
 }
 
-const EmberAfOtaHeaderFieldDefinition *emGetOtaHeaderFieldDefinition(uint16_t headerVersion, EmberAfOtaBootloadFileHeaderFieldIndex_t headerIndex)
+const EmberAfOtaHeaderFieldDefinition *sli_zigbee_af_get_ota_header_field_definition(uint16_t headerVersion, EmberAfOtaBootloadFileHeaderFieldIndex_t headerIndex)
 {
   if ((!isValidHeaderVersion(headerVersion)) && (headerIndex != MAGIC_NUMBER_INDEX) && (headerIndex != HEADER_VERSION_INDEX)) {
     return &otaHeaderFieldDefinitions[INVALID_FIELD_INDEX];
@@ -1189,7 +1189,7 @@ static EmberAfOtaHeader* readImageHeader(const char* filename)
   // Read the Version and length first so we can use those to validate the rest
   // of the image.
   EmberAfOtaStorageStatus status;
-  uint16_t headerVersionLength = emGetOtaHeaderFieldDefinition(0, HEADER_VERSION_INDEX)->length;
+  uint16_t headerVersionLength = sli_zigbee_af_get_ota_header_field_definition(0, HEADER_VERSION_INDEX)->length;
   status = readHeaderDataFromBuffer(HEADER_VERSION_INDEX,
                                     0, // we don't know the version yet
                                     bufferPtr,
@@ -1203,7 +1203,7 @@ static EmberAfOtaHeader* readImageHeader(const char* filename)
     goto imageReadError;
   }
   bufferPtr += 2;  // header version field length
-  uint16_t headerLengthLength = emGetOtaHeaderFieldDefinition(header->headerVersion, HEADER_LENGTH_INDEX)->length;
+  uint16_t headerLengthLength = sli_zigbee_af_get_ota_header_field_definition(header->headerVersion, HEADER_LENGTH_INDEX)->length;
   status = readHeaderDataFromBuffer(HEADER_LENGTH_INDEX,
                                     header->headerVersion,
                                     bufferPtr,
@@ -1229,7 +1229,7 @@ static EmberAfOtaHeader* readImageHeader(const char* filename)
       goto imageReadError;
     }
     if (otaHeaderFieldLocations[fieldIndex].found == true) {
-      uint16_t fieldLength = emGetOtaHeaderFieldDefinition(header->headerVersion, fieldIndex)->length;
+      uint16_t fieldLength = sli_zigbee_af_get_ota_header_field_definition(header->headerVersion, fieldIndex)->length;
       lengthRemaining -= fieldLength;
       bufferPtr += fieldLength;
       dataRead -= fieldLength;
@@ -1242,7 +1242,7 @@ static EmberAfOtaHeader* readImageHeader(const char* filename)
 
   fieldIndex = HEADER_VERSION_INDEX;
   while (fieldIndex < FIELD_INDEX_MAX) {
-    const EmberAfOtaHeaderFieldDefinition *fieldPtr = emGetOtaHeaderFieldDefinition(header->headerVersion, fieldIndex);
+    const EmberAfOtaHeaderFieldDefinition *fieldPtr = sli_zigbee_af_get_ota_header_field_definition(header->headerVersion, fieldIndex);
     if (fieldPtr->maskForOptionalField == ALWAYS_PRESENT_MASK
         && !otaHeaderFieldLocations[fieldIndex].found) {
       error("Missing field '%s' from OTA header.\n", fieldPtr->name);
@@ -1271,7 +1271,7 @@ static EmberAfOtaStorageStatus readHeaderDataFromBuffer(EmberAfOtaBootloadFileHe
                                                         int32_t headerLengthRemaining,
                                                         int32_t actualBufferDataRemaining)
 {
-  const EmberAfOtaHeaderFieldDefinition *definition = emGetOtaHeaderFieldDefinition(headerVersion, fieldIndex);
+  const EmberAfOtaHeaderFieldDefinition *definition = sli_zigbee_af_get_ota_header_field_definition(headerVersion, fieldIndex);
   if (definition->maskForOptionalField != ALWAYS_PRESENT_MASK) {
     uint16_t fieldControl = *(uint16_t*)(otaHeaderFieldLocations[FIELD_CONTROL_INDEX].location);
     if (!(fieldControl & definition->maskForOptionalField)) {
@@ -1373,7 +1373,7 @@ static uint8_t* writeHeaderDataToBuffer(EmberAfOtaBootloadFileHeaderFieldIndex_t
                                         uint16_t headerVersion,
                                         uint8_t* bufferPtr)
 {
-  const EmberAfOtaHeaderFieldDefinition *definition = emGetOtaHeaderFieldDefinition(headerVersion, fieldIndex);
+  const EmberAfOtaHeaderFieldDefinition *definition = sli_zigbee_af_get_ota_header_field_definition(headerVersion, fieldIndex);
   if (definition->maskForOptionalField != ALWAYS_PRESENT_MASK) {
     uint16_t fieldControl = *(uint16_t*)(otaHeaderFieldLocations[FIELD_CONTROL_INDEX].location);
     if (!(fieldControl & definition->maskForOptionalField)) {
@@ -1419,7 +1419,7 @@ static uint16_t calculateOtaFileHeaderLength(EmberAfOtaHeader* header)
   uint16_t length = 4; // the size of the magic number
   int fieldIndex = HEADER_VERSION_INDEX;
   while (fieldIndex < FIELD_INDEX_MAX) {
-    const EmberAfOtaHeaderFieldDefinition *definition = emGetOtaHeaderFieldDefinition(header->headerVersion, fieldIndex);
+    const EmberAfOtaHeaderFieldDefinition *definition = sli_zigbee_af_get_ota_header_field_definition(header->headerVersion, fieldIndex);
     if (definition->maskForOptionalField == ALWAYS_PRESENT_MASK
         || (header->fieldControl & definition->maskForOptionalField)) {
       length += definition->length;
@@ -1476,10 +1476,10 @@ static EmberAfOtaImageId getIteratorImageId(void)
   if (iterator == NULL) {
     return emberAfInvalidImageId;
   }
-  return emAfOtaStorageGetImageIdFromHeader(iterator->header);
+  return sli_zigbee_af_ota_storage_get_image_id_from_header(iterator->header);
 }
 
-uint32_t emAfOtaStorageGetSlot(void)
+uint32_t sli_zigbee_af_ota_storage_get_slot(void)
 {
   return INVALID_SLOT;
 }

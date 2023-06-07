@@ -15,9 +15,7 @@
  *
  ******************************************************************************/
 
-#ifdef UC_BUILD
 #include "green-power-client-config.h"
-#endif
 
 // TODO: properly doxygenate this file
 
@@ -68,11 +66,7 @@ typedef struct {
 } EmberAfGreenPowerDuplicateFilter;
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-bool emGpMessageChecking(EmberGpAddress *gpAddr, uint8_t sequenceNumber);
-#ifndef UC_BUILD
-void emberAfPluginGreenPowerClientChannelEventHandler(void);
-void emberAfPluginGreenPowerClientExitCommissioningEventHandler(void);
-#endif
+bool sli_zigbee_af_gp_message_checking(EmberGpAddress *gpAddr, uint8_t sequenceNumber);
 #endif //DOXYGEN_SHOULD_SKIP_THIS
 
 /**
@@ -88,4 +82,40 @@ void emberAfPluginGreenPowerClientExitCommissioningEventHandler(void);
 void emberAfPluginGreenPowerClientClearProxyTable(void);
 
 /** @} */ // end of name API
+
+/**
+ * @name Callbacks
+ * @{
+ */
+
+/**
+ * @defgroup gp_client_cb Green Power Client
+ * @ingroup af_callback
+ * @brief Callbacks for Green Power Client Component
+ *
+ */
+
+/**
+ * @addtogroup gp_client_cb
+ * @{
+ */
+
+/** @brief Green power client Sink table based forward callback.
+ *
+ * This function is called by the Green Power client before forwarding the gp notification.
+ * This callback provides the pointer to the group list for the paired gpd.
+ * In case of a combo application, where the green power server is also present, this callback
+ * is consumed by the green power server to update the sinklist from the sink table.
+ *
+ * @param addr gpd address Ver.: always
+ * @param sinkList sink list pointer , that can be used to update the sink list  Ver.: always
+ * @param maxNumberEntries maximum number of sink list entires Ver.: always
+ */
+void emberAfGreenPowerClientGpdfSinkTableBasedForwardCallback(EmberGpAddress *addr,
+                                                              EmberGpSinkListEntry *sinkList,
+                                                              uint8_t maxNumberEntries);
+
+/** @} */ // end of gp_client_cb
+/** @} */ // end of name Callbacks
+
 /** @} */ // end of green-power-client

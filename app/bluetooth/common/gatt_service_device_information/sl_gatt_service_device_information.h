@@ -31,6 +31,11 @@
 #ifndef SL_GATT_SERVICE_DEVICE_INFORMATION_H
 #define SL_GATT_SERVICE_DEVICE_INFORMATION_H
 
+/***********************************************************************************************//**
+ * @addtogroup gatt_service_device_information
+ * @{
+ **************************************************************************************************/
+
 #include "sl_bt_api.h"
 
 /**************************************************************************//**
@@ -39,4 +44,5 @@
  *****************************************************************************/
 void sl_gatt_service_device_information_on_event(sl_bt_msg_t *evt);
 
+/** @} (end addtogroup gatt_service_device_information) */
 #endif // SL_GATT_SERVICE_DEVICE_INFORMATION_H

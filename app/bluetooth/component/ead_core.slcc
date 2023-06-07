@@ -1,0 +1,41 @@
+id: ead_core
+package: Bluetooth
+label: Encrypted Advertising Data core API
+description: >
+  Provides simple to use API for Advertising, Periodic Advertising and Scan
+  Response data encryption and decryption that is compatible with the Bluetooth
+  Core Encrypted Advertisement Data (EAD) enhancement.
+
+  For the usage of the APIs defined in sl_bt_ead_core.h please see
+
+  esl_core_encrypt_message(void *msg, uint8_t *len) and
+
+  esl_core_decrypt_message(void *msg, uint8_t *len)
+
+  functions in esl_tag_crypto.c within ESL Tag core component.
+category: Bluetooth|Application|Miscellaneous
+quality: production
+root_path: app/bluetooth/common/ead_core
+tag:
+  - Custom-Code
+
+config_file:
+  - path: config/sl_bt_ead_core_config.h
+    file_id: sl_bt_ead_core_config
+
+include:
+  - path: .
+    file_list:
+      - path: sl_bt_ead_core.h
+
+source:
+  - path: sl_bt_ead_core.c
+
+provides:
+  - name: ead_core
+
+requires:
+  - name: device_has_radioaes
+  - name: psa_crypto
+  - name: psa_crypto_ccm
+  - name: sli_protocol_crypto

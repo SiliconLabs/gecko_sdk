@@ -163,7 +163,7 @@ void printRailAppEvents(void)
     if (railtestEvent != NULL) {
       if (railtestEvent->type == RX_PACKET) {
         char *cmdName;
-        uint8_t *dataPtr = NULL;
+        uint8_t *dataPtr = railtestEvent->rxPacket.dataPtr;
         switch (railtestEvent->rxPacket.packetStatus) {
           case RAIL_RX_PACKET_ABORT_FORMAT:
             cmdName = "rxErrFmt";
@@ -183,7 +183,6 @@ void printRailAppEvents(void)
           case RAIL_RX_PACKET_READY_CRC_ERROR:
           case RAIL_RX_PACKET_READY_SUCCESS:
             cmdName = "rxPacket";
-            dataPtr = railtestEvent->rxPacket.dataPtr;
             break;
           default:
             cmdName = "rxErr???";

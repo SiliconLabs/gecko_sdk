@@ -6,7 +6,7 @@
  */
 #include <stdint.h>
 #include "cmd_handlers.h"
-#include "serialappl.h"
+#include "app.h"
 #include "sl_dcdc.h"
 #include "ZW_typedefs.h"
 #include "ZW_SerialAPI.h"

@@ -31,6 +31,11 @@
 #ifndef SL_NCP_CONFIG_H
 #define SL_NCP_CONFIG_H
 
+/***********************************************************************************************//**
+ * @addtogroup ncp
+ * @{
+ **************************************************************************************************/
+
 // <<< Use Configuration Wizard in Context Menu >>>
 
 // <o SL_NCP_CMD_BUF_SIZE> Command buffer size (bytes) <260-1024>
@@ -49,4 +54,5 @@
 #define SL_NCP_CMD_TIMEOUT_MS   (500)
 // <<< end of configuration section >>>
 
+/** @} (end addtogroup ncp) */
 #endif // SL_NCP_CONFIG_H

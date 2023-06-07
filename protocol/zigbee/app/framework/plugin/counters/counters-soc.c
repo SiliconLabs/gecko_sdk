@@ -37,9 +37,9 @@ static uint8_t getMultiNetworkCounterIndex(EmberCounterType type);
 static void multiNetworkCounterHandler(EmberCounterType type, uint8_t data);
 #endif
 
-void emberAfPluginCountersInitCallback(SLXU_INIT_ARG)
+void emberAfPluginCountersInitCallback(uint8_t init_level)
 {
-  SLXU_INIT_UNUSED_ARG;
+  (void)init_level;
 
   emberAfPluginCountersClear();
   emberAfPluginCountersResetThresholds();
@@ -47,11 +47,7 @@ void emberAfPluginCountersInitCallback(SLXU_INIT_ARG)
 
 //Implement the stack callback by simply tallying up the counts.
 
-#ifdef UC_BUILD
-void emAfPluginCountersCounterCallback(EmberCounterType type, EmberCounterInfo info)
-#else
-void emberCounterHandler(EmberCounterType type, EmberCounterInfo info)
-#endif
+void sli_zigbee_af_counters_counter_callback(EmberCounterType type, EmberCounterInfo info)
 {
   bool phyIndexRequiredCounter = emberCounterRequiresPhyIndex(type);
 
@@ -178,7 +174,7 @@ void emberAfPluginCountersSetThreshold(EmberCounterType type, uint16_t threshold
  * usual single-network counters array.
  ******************************************************************************/
 #ifndef EMBER_MULTI_NETWORK_STRIPPED
-extern uint8_t emSupportedNetworks;
+extern uint8_t sli_zigbee_supported_networks;
 
 static const EmberCounterType multiNetworkCounterTable[] = {
   EMBER_COUNTER_MAC_RX_BROADCAST,
@@ -222,7 +218,7 @@ static void multiNetworkCounterHandler(EmberCounterType type, uint8_t data)
   }
 
   uint8_t nwkIndex = emberGetCallbackNetwork();
-  assert(nwkIndex < emSupportedNetworks);
+  assert(nwkIndex < sli_zigbee_supported_networks);
 
   if (emberMultiNetworkCounters[nwkIndex][counterIndex] < 0xFFFF) {
     emberMultiNetworkCounters[nwkIndex][counterIndex] += 1;

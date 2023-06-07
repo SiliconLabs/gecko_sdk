@@ -8,7 +8,7 @@ description: >
   API calls will not work.
   
   Fixes among others: BG-9961, BG-9489
-category: Bluetooth|Application
+category: Bluetooth|Application|Miscellaneous
 quality: production
 conflicts:
   - name: device_no_rail_api

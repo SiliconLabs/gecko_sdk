@@ -32,24 +32,17 @@ EmberAfPluginSimpleClockTimeSyncStatus syncStatus = EMBER_AF_SIMPLE_CLOCK_NEVER_
 // This event is used to periodically force an update to the internal time in
 // order to avoid potential rollover problems with the system ticks.  A call to
 // GetCurrentTime or SetTime will reschedule the event.
-#ifdef UC_BUILD
 sl_zigbee_event_t emberAfPluginSimpleClockUpdateEvent;
 #define updateEvent (&emberAfPluginSimpleClockUpdateEvent)
-void emberAfPluginSimpleClockUpdateEventHandler(SLXU_UC_EVENT);
-#else
-EmberEventControl emberAfPluginSimpleClockUpdateEventControl;
-#define updateEvent emberAfPluginSimpleClockUpdateEventControl
-#endif
-
-#ifdef UC_BUILD
+void emberAfPluginSimpleClockUpdateEventHandler(sl_zigbee_event_t * event);
 
 void emberAfPluginSimpleClockInitCallback(uint8_t init_level)
 {
   switch (init_level) {
     case SL_ZIGBEE_INIT_LEVEL_EVENT:
     {
-      slxu_zigbee_event_init(updateEvent,
-                             emberAfPluginSimpleClockUpdateEventHandler);
+      sl_zigbee_event_init(updateEvent,
+                           emberAfPluginSimpleClockUpdateEventHandler);
       break;
     }
 
@@ -60,15 +53,6 @@ void emberAfPluginSimpleClockInitCallback(uint8_t init_level)
     }
   }
 }
-
-#else // !UC_BUILD
-
-void emberAfPluginSimpleClockInitCallback(void)
-{
-  emberAfSetTimeCallback(0);
-}
-
-#endif // UC_BUILD
 
 uint32_t emberAfGetCurrentTimeCallback(void)
 {
@@ -89,8 +73,8 @@ uint32_t emberAfGetCurrentTimeCallback(void)
   }
 
   // Schedule an event to recalculate time to help avoid rollover problems.
-  slxu_zigbee_event_set_delay_ms(updateEvent,
-                                 MILLISECOND_TICKS_PER_DAY);
+  sl_zigbee_event_set_delay_ms(updateEvent,
+                               MILLISECOND_TICKS_PER_DAY);
   return timeS;
 }
 
@@ -122,7 +106,7 @@ EmberAfPluginSimpleClockTimeSyncStatus emberAfPluginSimpleClockGetTimeSyncStatus
   return syncStatus;
 }
 
-void emberAfPluginSimpleClockUpdateEventHandler(SLXU_UC_EVENT)
+void emberAfPluginSimpleClockUpdateEventHandler(sl_zigbee_event_t * event)
 {
   // Get the time, which will reschedule the event.
 

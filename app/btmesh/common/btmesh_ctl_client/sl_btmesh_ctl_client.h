@@ -32,15 +32,6 @@
 #define SL_BTMESH_CTL_CLIENT_H
 
 /*******************************************************************************
- * This function change the color temperature and sends it to the server.
- *
- * @param[in] change_percentage  Defines the color temperature percentage change,
- * possible values are  -100% - + 100%.
- *
- ******************************************************************************/
-void sl_btmesh_change_temperature(int8_t change_percentage);
-
-/*******************************************************************************
  * This function change the temperature and send it to the server.
  *
  * @param[in] new_color_temperature_percentage  Defines new color temperature

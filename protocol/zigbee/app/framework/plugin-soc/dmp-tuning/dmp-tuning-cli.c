@@ -24,9 +24,9 @@
 #include "dmp-tuning-profiles.h"
 #include "sl_bluetooth.h"
 
-void emRadioEnableConfigScheduledCallback(bool enable);
-bool emRadioConfigScheduledCallbackEnabled(void);
-void emRadioConfigScheduledCallback(bool scheduled);
+void sli_802154mac_radio_enable_config_scheduled_callback(bool enable);
+bool sli_802154mac_radio_config_scheduled_callback_enabled(void);
+void sli_802154mac_radio_config_scheduled_callback(bool scheduled);
 void emberAfPluginDmpStopRadio(void);
 
 // Zigbee related CLI commands
@@ -215,18 +215,18 @@ void emberAfPluginDmpTuningGetRailScheduledEventCounters(sl_cli_command_arg_t *a
 
 void emberAfPluginDmpTuningEnableRailConfigSchedulerEvents(sl_cli_command_arg_t *arguments)
 {
-  emRadioEnableConfigScheduledCallback(true);
+  sli_802154mac_radio_enable_config_scheduled_callback(true);
   emberAfCorePrintln("DmpTuning - EnableRailConfigSchedulerEvents: success");
 }
 
 void emberAfPluginDmpTuningDisableRailConfigSchedulerEvents(sl_cli_command_arg_t *arguments)
 {
-  emRadioEnableConfigScheduledCallback(false);
+  sli_802154mac_radio_enable_config_scheduled_callback(false);
   emberAfCorePrintln("DmpTuning - DisableRailConfigSchedulerEvents: success");
 }
 
 void emberAfPluginDmpTuningGetRailConfigSchedulerEventsEnabled(sl_cli_command_arg_t *arguments)
 {
   emberAfCorePrintln("RAIL config scheduler event enabled: %d",
-                     emRadioConfigScheduledCallbackEnabled());
+                     sli_802154mac_radio_config_scheduled_callback_enabled());
 }

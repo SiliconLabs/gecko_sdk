@@ -49,7 +49,7 @@ uint8_t emberMaximumApsPayloadLength(void);
  */
 #define EMBER_APSC_MAX_ACK_WAIT_TERMINAL_SECURITY_MS  100
 
-/** @brief The APS ACK timeout value.
+/** @brief Return the APS ACK timeout value.
  * The stack waits this amount of time between resends of APS retried messages.
  * The default value is:
  * <pre>
@@ -58,7 +58,12 @@ uint8_t emberMaximumApsPayloadLength(void);
  *    + EMBER_APSC_MAX_ACK_WAIT_TERMINAL_SECURITY_MS)
  * </pre>
  */
-extern uint16_t emberApsAckTimeoutMs;
+uint16_t sl_zigbee_get_aps_ack_timeout_ms(void);
+
+/** @brief Set the APS ACK timeout value.
+ *
+ */
+void sl_zigbee_set_aps_ack_timeout_ms(uint16_t timeout);
 
 /** @brief Send a multicast message for an alias source to all endpoints that
  * share a specific multicast ID and are within a specified number of hops of
@@ -597,7 +602,7 @@ void emberIncomingMessageHandler(EmberIncomingMessageType type,
  * @note This function may only be called from within
  * - ::emberIncomingMessageHandler()
  * - ::emberNetworkFoundHandler()
- * - ::emIncomingRouteRecord()
+ * - ::sli_zigbee_incoming_route_record()
  * - ::emberMacPassthroughMessageHandler()
  * - ::emberIncomingBootloadMessageHandler()
  * .
@@ -632,7 +637,7 @@ EmberStatus emberGetLastHopLqi(uint8_t *lastHopLqi);
  * @note This function may only be called from within:
  * - ::emberIncomingMessageHandler()
  * - ::emberNetworkFoundHandler()
- * - ::emIncomingRouteRecord()
+ * - ::sli_zigbee_incoming_route_record()
  * - ::emberMacPassthroughMessageHandler()
  * - ::emberIncomingBootloadMessageHandler()
  * .
@@ -681,7 +686,7 @@ EmberStatus emberGetLastHopRssi(int8_t *lastHopRssi);
  * @note This function may only be called from within:
  * - ::emberIncomingMessageHandler()
  * - ::emberNetworkFoundHandler()
- * - ::emIncomingRouteRecord()
+ * - ::sli_zigbee_incoming_route_record()
  * - ::emberMacPassthroughMessageHandler()
  * - ::emberIncomingBootloadMessageHandler()
  *
@@ -910,7 +915,7 @@ void emberIdConflictHandler(EmberNodeId conflictingId);
  */
 bool emberPendingAckedMessages(void);
 
-/** @brief The multicast table.
+/** @brief Returns the multicast table.
  *
  * Each entry contains a multicast ID
  * and an endpoint, indicating that the endpoint is a member of the multicast
@@ -920,11 +925,20 @@ bool emberPendingAckedMessages(void);
  * Entries with with an endpoint of 0 are ignored (the ZDO does not a member
  * of any multicast groups).  All endpoints are initialized to 0 on startup.
  */
-extern EmberMulticastTableEntry emberMulticastTable[];
+EmberMulticastTableEntry* sl_zigbee_get_multicast_table(void);
 
-/** @brief The number of entries in the multicast table.
+/** @brief Sets the multicast table pointer.
+ *
  */
-extern uint8_t emberMulticastTableSize;
+sl_status_t sl_zigbee_set_multicast_table(EmberMulticastTableEntry* entry);
+
+/** @brief Return the number of entries in the multicast table.
+ */
+uint8_t sl_zigbee_get_multicast_table_size(void);
+
+/** @brief Set the number of entries in the multicast table.
+ */
+sl_status_t sl_zigbee_set_multicast_table_size(uint8_t size);
 
 /** @brief Allows the higher layers to control the broadcast behavior of
  * a routing device. The originating device will rebroadcast the maximum number of times and
@@ -1006,6 +1020,21 @@ EmberPacketAction emberPacketHandoffOutgoingHandler(EmberZigbeePacketType packet
                                                     EmberMessageBuffer packetBuffer,
                                                     uint8_t index,
                                                     void *data);
+
+/** @brief Intercept an outgoing packet from the Zigbee stack and hands it off
+ * to the relevant plugins for possible further processing and forwarding to
+ * non 15.4 interfaces
+ *
+ * @param mac_index  The interface id from which this packet would need to be
+ * sent out
+ * @param Header  The ::EmberMessageBuffer containing the packet.
+ * @param priority  Possible priority of this packet vs other packets that need to
+ * be sent out on the same interface
+ */
+
+void emberRedirectOutgoingMessageHandler(uint8_t mac_index,
+                                         EmberMessageBuffer header,
+                                         uint8_t priority);
 
 /** @brief Call when the stack receives a packet that is meant
  * for one of the protocol layers specified in ::EmberZigbeePacketType.
@@ -1124,7 +1153,7 @@ EmberStatus slx_zigbee_add_to_incoming_network_queue(int8_t rssi,
  * <li> emberIdConflictHandler()
  * <li> emberIncomingManyToOneRouteRequestHandler()
  * <li> emberGetSenderEui64()
- * <li> emIncomingRouteRecord()
+ * <li> sli_zigbee_incoming_route_record()
  * <li> emberSetExtendedTimeout()
  * <li> ::emberMulticastTable
  * <li> ::emberMulticastTableSize

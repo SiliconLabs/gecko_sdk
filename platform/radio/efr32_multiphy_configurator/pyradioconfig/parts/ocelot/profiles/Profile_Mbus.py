@@ -120,8 +120,8 @@ class Profile_Mbus_Ocelot(IProfile):
         self._sw_profile_outputs_common.build_ircal_outputs(model, profile)
 
         # Output fields
-        buildFrameOutputs(model, profile, family=family)
-        buildCrcOutputs(model, profile, family)
+        buildFrameOutputs(model, profile)
+        buildCrcOutputs(model, profile)
         buildWhiteOutputs(model, profile)
         buildFecOutputs(model, profile)
         self._add_reg_profile_outputs(model, profile)
@@ -129,7 +129,7 @@ class Profile_Mbus_Ocelot(IProfile):
         return profile
 
     def _add_reg_profile_outputs(self, model, profile):
-        build_modem_regs_ocelot(model, profile, family=self._family)
+        build_modem_regs_ocelot(model, profile)
 
     def mbus_profile_frame_format_common(self, model):
 
@@ -297,6 +297,8 @@ class Profile_Mbus_Ocelot(IProfile):
             profile_MBus_modes.profile_wMbus_ModeS_32p768k(model, self._family)
         elif mode == model.vars.mbus_mode.var_enum.ModeN_6p4k:
             profile_MBus_modes.profile_wMbus_ModeN_6p4k(model, self._family)
+        elif mode == model.vars.mbus_mode.var_enum.ModeTC_M2O_100k:
+            profile_MBus_modes.profile_wMbus_ModeTC_M2O_100k(model, self._family)
 
     def mbus_profile_symbol_encoding_calc(self, model):
         mbus_symbol_encoding = model.profile.inputs.mbus_symbol_encoding.var_value

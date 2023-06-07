@@ -35,7 +35,9 @@
 #include "app_log.h"
 #include "sl_rail_util_init.h"
 #include "simple_rail_tx.h"
+#include "cmsis_compiler.h"
 #include "sl_status.h"
+#include "sl_flex_rail_config.h"
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -56,7 +58,7 @@ __STATIC_INLINE sl_status_t simple_rail_tx_set_state(simple_rail_tx_state_t requ
 //                                Global Variables
 // -----------------------------------------------------------------------------
 /// RAIL Transmit FIFO, can be updated from app
-uint8_t sl_tx_fifo[RAIL_TX_FIFO_SIZE] = UNIVERSAL_PAYLOAD;
+uint8_t sl_tx_fifo[SL_FLEX_RAIL_TX_FIFO_SIZE] = UNIVERSAL_PAYLOAD;
 
 // -----------------------------------------------------------------------------
 //                                Static Variables
@@ -125,11 +127,11 @@ void sl_simple_rail_tx_tick(void)
   switch (sl_simple_rail_tx_get_state()) {
     case S_TX_PACKET_SEND_REQUEST:
       // Set RAIL FIFO
-      allocated_fifo_size = RAIL_SetTxFifo(sl_rail_handle, sl_tx_fifo, TX_PAYLOAD_LENGTH, RAIL_TX_FIFO_SIZE);
-      app_assert(allocated_fifo_size == RAIL_TX_FIFO_SIZE,
+      allocated_fifo_size = RAIL_SetTxFifo(sl_rail_handle, sl_tx_fifo, TX_PAYLOAD_LENGTH, SL_FLEX_RAIL_TX_FIFO_SIZE);
+      app_assert(allocated_fifo_size == SL_FLEX_RAIL_TX_FIFO_SIZE,
                  "RAIL_SetTxFifo() failed to allocate a large enough buffer (%d bytes instead of %d bytes)\n",
                  allocated_fifo_size,
-                 RAIL_TX_FIFO_SIZE);
+                 SL_FLEX_RAIL_TX_FIFO_SIZE);
 
       // Send RAIL messages
       start_tx_status = RAIL_StartTx(sl_rail_handle, TX_CHANNEL, RAIL_TX_OPTIONS_DEFAULT, NULL);

@@ -229,7 +229,7 @@ typedef struct otTimestamp
 /**
  * This structure represents an Active or Pending Operational Dataset.
  *
- * Components in Dataset are optional. `mComponets` structure specifies which components are present in the Dataset.
+ * Components in Dataset are optional. `mComponents` structure specifies which components are present in the Dataset.
  *
  */
 typedef struct otOperationalDataset
@@ -479,11 +479,11 @@ otError otDatasetSetPendingTlvs(otInstance *aInstance, const otOperationalDatase
  * @retval OT_ERROR_NO_BUFS       Insufficient buffer space to send.
  *
  */
-otError otDatasetSendMgmtActiveGet(otInstance *                          aInstance,
+otError otDatasetSendMgmtActiveGet(otInstance                           *aInstance,
                                    const otOperationalDatasetComponents *aDatasetComponents,
-                                   const uint8_t *                       aTlvTypes,
+                                   const uint8_t                        *aTlvTypes,
                                    uint8_t                               aLength,
-                                   const otIp6Address *                  aAddress);
+                                   const otIp6Address                   *aAddress);
 
 /**
  * Sends MGMT_ACTIVE_SET.
@@ -500,12 +500,12 @@ otError otDatasetSendMgmtActiveGet(otInstance *                          aInstan
  * @retval OT_ERROR_BUSY          A previous request is ongoing.
  *
  */
-otError otDatasetSendMgmtActiveSet(otInstance *                aInstance,
+otError otDatasetSendMgmtActiveSet(otInstance                 *aInstance,
                                    const otOperationalDataset *aDataset,
-                                   const uint8_t *             aTlvs,
+                                   const uint8_t              *aTlvs,
                                    uint8_t                     aLength,
                                    otDatasetMgmtSetCallback    aCallback,
-                                   void *                      aContext);
+                                   void                       *aContext);
 
 /**
  * Sends MGMT_PENDING_GET.
@@ -520,11 +520,11 @@ otError otDatasetSendMgmtActiveSet(otInstance *                aInstance,
  * @retval OT_ERROR_NO_BUFS       Insufficient buffer space to send.
  *
  */
-otError otDatasetSendMgmtPendingGet(otInstance *                          aInstance,
+otError otDatasetSendMgmtPendingGet(otInstance                           *aInstance,
                                     const otOperationalDatasetComponents *aDatasetComponents,
-                                    const uint8_t *                       aTlvTypes,
+                                    const uint8_t                        *aTlvTypes,
                                     uint8_t                               aLength,
-                                    const otIp6Address *                  aAddress);
+                                    const otIp6Address                   *aAddress);
 
 /**
  * Sends MGMT_PENDING_SET.
@@ -541,12 +541,12 @@ otError otDatasetSendMgmtPendingGet(otInstance *                          aInsta
  * @retval OT_ERROR_BUSY          A previous request is ongoing.
  *
  */
-otError otDatasetSendMgmtPendingSet(otInstance *                aInstance,
+otError otDatasetSendMgmtPendingSet(otInstance                 *aInstance,
                                     const otOperationalDataset *aDataset,
-                                    const uint8_t *             aTlvs,
+                                    const uint8_t              *aTlvs,
                                     uint8_t                     aLength,
                                     otDatasetMgmtSetCallback    aCallback,
-                                    void *                      aContext);
+                                    void                       *aContext);
 
 /**
  * This function generates PSKc from a given pass-phrase, network name, and extended PAN ID.
@@ -562,10 +562,10 @@ otError otDatasetSendMgmtPendingSet(otInstance *                aInstance,
  * @retval OT_ERROR_INVALID_ARGS  If any of the input arguments is invalid.
  *
  */
-otError otDatasetGeneratePskc(const char *           aPassPhrase,
-                              const otNetworkName *  aNetworkName,
+otError otDatasetGeneratePskc(const char            *aPassPhrase,
+                              const otNetworkName   *aNetworkName,
                               const otExtendedPanId *aExtPanId,
-                              otPskc *               aPskc);
+                              otPskc                *aPskc);
 
 /**
  * Sets an `otNetworkName` instance from a given null terminated C string.
@@ -583,7 +583,7 @@ otError otDatasetGeneratePskc(const char *           aPassPhrase,
 otError otNetworkNameFromString(otNetworkName *aNetworkName, const char *aNameString);
 
 /**
- * This function parses an Operational Dataset from a `otOperationalDatasetTlvs`.
+ * Parses an Operational Dataset from a given `otOperationalDatasetTlvs`.
  *
  * @param[in]  aDatasetTlvs  A pointer to dataset TLVs.
  * @param[out] aDataset      A pointer to where the dataset will be placed.
@@ -593,6 +593,33 @@ otError otNetworkNameFromString(otNetworkName *aNetworkName, const char *aNameSt
  *
  */
 otError otDatasetParseTlvs(const otOperationalDatasetTlvs *aDatasetTlvs, otOperationalDataset *aDataset);
+
+/**
+ * Converts a given Operational Dataset to `otOperationalDatasetTlvs`.
+ *
+ * @param[in]  aDataset      An Operational dataset to convert to TLVs.
+ * @param[out] aDatasetTlvs  A pointer to dataset TLVs to return the result.
+ *
+ * @retval OT_ERROR_NONE          Successfully converted @p aDataset and updated @p aDatasetTlvs.
+ * @retval OT_ERROR_INVALID_ARGS  @p aDataset is invalid, does not contain active or pending timestamps.
+ *
+ */
+otError otDatasetConvertToTlvs(const otOperationalDataset *aDataset, otOperationalDatasetTlvs *aDatasetTlvs);
+
+/**
+ * Updates a given Operational Dataset.
+ *
+ * @p aDataset contains the fields to be updated and their new value.
+ *
+ * @param[in]     aDataset      Specifies the set of types and values to update.
+ * @param[in,out] aDatasetTlvs  A pointer to dataset TLVs to update.
+ *
+ * @retval OT_ERROR_NONE          Successfully updated @p aDatasetTlvs.
+ * @retval OT_ERROR_INVALID_ARGS  @p aDataset contains invalid values.
+ * @retval OT_ERROR_NO_BUFS       Not enough space space in @p aDatasetTlvs to apply the update.
+ *
+ */
+otError otDatasetUpdateTlvs(const otOperationalDataset *aDataset, otOperationalDatasetTlvs *aDatasetTlvs);
 
 /**
  * @}

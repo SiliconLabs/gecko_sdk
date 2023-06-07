@@ -81,8 +81,6 @@ void halSimEepromCallback(EmberStatus status)
             //[BugzId:14392]
             break;
           case EMBER_ERR_FLASH_VERIFY_FAILED:
-            //[[WBB350FIXME -It would be nice to have a unified, ]]
-            //[[             platform independant reboot machanism]]
         #if defined (CORTEXM3)
             halInternalSysReset(RESET_FLASH_VERIFY);
         #else

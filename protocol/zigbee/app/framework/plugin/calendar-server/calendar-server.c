@@ -20,9 +20,7 @@
 #include "app/framework/plugin/calendar-common/calendar-common.h"
 #include "calendar-server.h"
 
-#ifdef UC_BUILD
 #include "zap-cluster-command-parser.h"
-#endif
 
 //-----------------------------------------------------------------------------
 // Globals
@@ -117,15 +115,13 @@ void emberAfCalendarClusterServerTickCallback(uint8_t endpoint)
   }
 
   if (commandSent && ++publishInfo.commandIndex < publishInfo.totalCommands) {
-    slxu_zigbee_zcl_schedule_server_tick(endpoint,
-                                         ZCL_CALENDAR_CLUSTER_ID,
-                                         MILLISECOND_TICKS_PER_QUARTERSECOND);
+    sl_zigbee_zcl_schedule_server_tick(endpoint,
+                                       ZCL_CALENDAR_CLUSTER_ID,
+                                       MILLISECOND_TICKS_PER_QUARTERSECOND);
   } else {
     publishInfo.commandIndex = EMBER_AF_PLUGIN_CALENDAR_COMMON_INVALID_INDEX;
   }
 }
-
-#ifdef UC_BUILD
 
 bool emberAfCalendarClusterGetCalendarCallback(EmberAfClusterCommand *cmd)
 {
@@ -208,9 +204,9 @@ bool emberAfCalendarClusterGetCalendarCallback(EmberAfClusterCommand *cmd)
     publishInfo.clientEndpoint = cmd->apsFrame->sourceEndpoint;
     publishInfo.serverEndpoint = cmd->apsFrame->destinationEndpoint;
     publishInfo.sequence = cmd->seqNum;
-    slxu_zigbee_zcl_schedule_server_tick(emberAfCurrentEndpoint(),
-                                         ZCL_CALENDAR_CLUSTER_ID,
-                                         MILLISECOND_TICKS_PER_QUARTERSECOND);
+    sl_zigbee_zcl_schedule_server_tick(emberAfCurrentEndpoint(),
+                                       ZCL_CALENDAR_CLUSTER_ID,
+                                       MILLISECOND_TICKS_PER_QUARTERSECOND);
   }
 
   return true;
@@ -274,9 +270,9 @@ bool emberAfCalendarClusterGetDayProfilesCallback(EmberAfClusterCommand *cmd)
   publishInfo.clientEndpoint = cmd->apsFrame->sourceEndpoint;
   publishInfo.serverEndpoint = cmd->apsFrame->destinationEndpoint;
   publishInfo.sequence = cmd->seqNum;
-  slxu_zigbee_zcl_schedule_server_tick(emberAfCurrentEndpoint(),
-                                       ZCL_CALENDAR_CLUSTER_ID,
-                                       MILLISECOND_TICKS_PER_QUARTERSECOND);
+  sl_zigbee_zcl_schedule_server_tick(emberAfCurrentEndpoint(),
+                                     ZCL_CALENDAR_CLUSTER_ID,
+                                     MILLISECOND_TICKS_PER_QUARTERSECOND);
 
   return true;
 }
@@ -339,9 +335,9 @@ bool emberAfCalendarClusterGetWeekProfilesCallback(EmberAfClusterCommand *cmd)
   publishInfo.clientEndpoint = cmd->apsFrame->sourceEndpoint;
   publishInfo.serverEndpoint = cmd->apsFrame->destinationEndpoint;
   publishInfo.sequence = cmd->seqNum;
-  slxu_zigbee_zcl_schedule_server_tick(emberAfCurrentEndpoint(),
-                                       ZCL_CALENDAR_CLUSTER_ID,
-                                       MILLISECOND_TICKS_PER_QUARTERSECOND);
+  sl_zigbee_zcl_schedule_server_tick(emberAfCurrentEndpoint(),
+                                     ZCL_CALENDAR_CLUSTER_ID,
+                                     MILLISECOND_TICKS_PER_QUARTERSECOND);
 
   return true;
 }
@@ -389,9 +385,9 @@ bool emberAfCalendarClusterGetSeasonsCallback(EmberAfClusterCommand *cmd)
   publishInfo.clientEndpoint = cmd->apsFrame->sourceEndpoint;
   publishInfo.serverEndpoint = cmd->apsFrame->destinationEndpoint;
   publishInfo.sequence = cmd->seqNum;
-  slxu_zigbee_zcl_schedule_server_tick(emberAfCurrentEndpoint(),
-                                       ZCL_CALENDAR_CLUSTER_ID,
-                                       MILLISECOND_TICKS_PER_QUARTERSECOND);
+  sl_zigbee_zcl_schedule_server_tick(emberAfCurrentEndpoint(),
+                                     ZCL_CALENDAR_CLUSTER_ID,
+                                     MILLISECOND_TICKS_PER_QUARTERSECOND);
 
   return true;
 }
@@ -502,387 +498,13 @@ bool emberAfCalendarClusterGetSpecialDaysCallback(EmberAfClusterCommand *cmd)
     publishInfo.clientEndpoint = cmd->apsFrame->sourceEndpoint;
     publishInfo.serverEndpoint = cmd->apsFrame->destinationEndpoint;
     publishInfo.sequence = cmd->seqNum;
-    slxu_zigbee_zcl_schedule_server_tick(emberAfCurrentEndpoint(),
-                                         ZCL_CALENDAR_CLUSTER_ID,
-                                         MILLISECOND_TICKS_PER_QUARTERSECOND);
-  }
-
-  return true;
-}
-
-#else // UC_BUILD
-
-bool emberAfCalendarClusterGetCalendarCallback(uint32_t earliestStartTime,
-                                               uint32_t minIssuerEventId,
-                                               uint8_t numberOfCalendars,
-                                               uint8_t calendarType,
-                                               uint32_t providerId)
-{
-  EmberAfClusterCommand *cmd = emberAfCurrentCommand();
-  uint8_t i;
-
-  emberAfCalendarClusterPrintln("RX: GetCalendar 0x%4x, 0x%4x, 0x%x, 0x%x, 0x%4x",
-                                earliestStartTime,
-                                minIssuerEventId,
-                                numberOfCalendars,
-                                calendarType,
-                                providerId);
-
-  // Only one Get can be processed at a time.
-  if (publishInfo.commandIndex != EMBER_AF_PLUGIN_CALENDAR_COMMON_INVALID_INDEX) {
-    emberAfCalendarClusterPrintln("%p%p%p",
-                                  "Error: ",
-                                  "Cannot get calendar: ",
-                                  "only one Get command can be processed at a time");
-    emberAfSendDefaultResponse(cmd, EMBER_ZCL_STATUS_FAILURE);
-    return true;
-  }
-
-  publishInfo.totalCommands = 0;
-
-  while (numberOfCalendars == 0 || publishInfo.totalCommands < numberOfCalendars) {
-    uint32_t referenceUtc = MAX_INT32U_VALUE;
-    uint8_t indexToSend = 0xFF;
-
-    // Find active or scheduled calendars matching the filter fields in the
-    // request that have not been sent out yet.  Of those, find the one that
-    // starts the earliest.
-    for (i = 0; i < EMBER_AF_PLUGIN_CALENDAR_COMMON_TOTAL_CALENDARS; i++) {
-      if (calendars[i].calendarId != EMBER_AF_PLUGIN_CALENDAR_COMMON_INVALID_CALENDAR_ID
-          && !READBITS(calendars[i].flags, EMBER_AF_PLUGIN_CALENDAR_COMMON_FLAGS_SENT)
-          && (minIssuerEventId == EMBER_AF_PLUGIN_CALENDAR_COMMON_WILDCARD_ISSUER_ID
-              || minIssuerEventId <= calendars[i].issuerEventId)
-          && (calendarType == EMBER_AF_PLUGIN_CALENDAR_COMMON_WILDCARD_CALENDAR_TYPE
-              || calendarType == calendars[i].calendarType)
-          && (providerId == EMBER_AF_PLUGIN_CALENDAR_COMMON_WILDCARD_PROVIDER_ID
-              || providerId == calendars[i].providerId)
-          && earliestStartTime < emberAfPluginCalendarCommonEndTimeUtc(&(calendars[i]))
-          && calendars[i].startTimeUtc < referenceUtc) {
-        referenceUtc = calendars[i].startTimeUtc;
-        indexToSend = i;
-      }
-    }
-
-    // If no active or scheduled calendar were found, it either means there are
-    // no active or scheduled calendars at the specified time or we've already
-    // found all of them in previous iterations.  If we did find one, we send
-    // it, mark it as sent, and move on.
-    if (indexToSend == 0xFF) {
-      break;
-    } else {
-      publishInfo.calendarsToPublish[publishInfo.totalCommands++] = indexToSend;
-      SETBITS(calendars[indexToSend].flags, EMBER_AF_PLUGIN_CALENDAR_COMMON_FLAGS_SENT);
-    }
-  }
-
-  // If we sent nothing, we return an error.  Otherwise, we need to roll
-  // through all the calendars and clear the sent bit.
-  if (publishInfo.totalCommands == 0) {
-    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_NOT_FOUND);
-  } else {
-    for (i = 0; i < EMBER_AF_PLUGIN_CALENDAR_COMMON_TOTAL_CALENDARS; i++) {
-      if (READBITS(calendars[i].flags, EMBER_AF_PLUGIN_CALENDAR_COMMON_FLAGS_SENT)) {
-        CLEARBITS(calendars[i].flags, EMBER_AF_PLUGIN_CALENDAR_COMMON_FLAGS_SENT);
-      }
-    }
-
-    publishInfo.publishCommandId = ZCL_PUBLISH_CALENDAR_COMMAND_ID;
-    publishInfo.commandIndex = 0;
-    publishInfo.nodeId = cmd->source;
-    publishInfo.clientEndpoint = cmd->apsFrame->sourceEndpoint;
-    publishInfo.serverEndpoint = cmd->apsFrame->destinationEndpoint;
-    publishInfo.sequence = cmd->seqNum;
-    slxu_zigbee_zcl_schedule_server_tick(emberAfCurrentEndpoint(),
-                                         ZCL_CALENDAR_CLUSTER_ID,
-                                         MILLISECOND_TICKS_PER_QUARTERSECOND);
-  }
-
-  return true;
-}
-
-bool emberAfCalendarClusterGetDayProfilesCallback(uint32_t providerId,
-                                                  uint32_t issuerCalendarId,
-                                                  uint8_t startDayId,
-                                                  uint8_t numberOfDays)
-{
-  EmberAfClusterCommand *cmd = emberAfCurrentCommand();
-
-  uint8_t calendarIndex = emberAfPluginCalendarCommonGetCalendarById(issuerCalendarId,
-                                                                     providerId);
-
-  emberAfCalendarClusterPrintln("RX: GetDayProfiles 0x%4x, 0x%4x, 0x%x, 0x%x",
-                                providerId,
-                                issuerCalendarId,
-                                startDayId,
-                                numberOfDays);
-
-  if (calendarIndex == EMBER_AF_PLUGIN_CALENDAR_COMMON_INVALID_INDEX) {
-    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_NOT_FOUND);
-    return true;
-  }
-
-  if (startDayId == 0) {
-    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_INVALID_FIELD);
-    return true;
-  }
-
-  if (calendars[calendarIndex].numberOfDayProfiles < startDayId) {
-    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_NOT_FOUND);
-    return true;
-  }
-
-  // Only one Get can be processed at a time.
-  if (publishInfo.commandIndex != EMBER_AF_PLUGIN_CALENDAR_COMMON_INVALID_INDEX) {
-    emberAfCalendarClusterPrintln("%p%p%p",
-                                  "Error: ",
-                                  "Cannot get day profiles: ",
-                                  "only one Get command can be processed at a time");
-    emberAfSendDefaultResponse(cmd, EMBER_ZCL_STATUS_FAILURE);
-    return true;
-  }
-
-  publishInfo.totalCommands = calendars[calendarIndex].numberOfDayProfiles - startDayId + 1;
-  if (numberOfDays != 0 && numberOfDays < publishInfo.totalCommands) {
-    publishInfo.totalCommands = numberOfDays;
-  }
-
-  publishInfo.calendarIndex = calendarIndex;
-  publishInfo.startIndex = startDayId - 1;
-
-  publishInfo.publishCommandId = ZCL_PUBLISH_DAY_PROFILE_COMMAND_ID;
-  publishInfo.commandIndex = 0;
-  publishInfo.nodeId = cmd->source;
-  publishInfo.clientEndpoint = cmd->apsFrame->sourceEndpoint;
-  publishInfo.serverEndpoint = cmd->apsFrame->destinationEndpoint;
-  publishInfo.sequence = cmd->seqNum;
-  slxu_zigbee_zcl_schedule_server_tick(emberAfCurrentEndpoint(),
+    sl_zigbee_zcl_schedule_server_tick(emberAfCurrentEndpoint(),
                                        ZCL_CALENDAR_CLUSTER_ID,
                                        MILLISECOND_TICKS_PER_QUARTERSECOND);
-
-  return true;
-}
-
-bool emberAfCalendarClusterGetWeekProfilesCallback(uint32_t providerId,
-                                                   uint32_t issuerCalendarId,
-                                                   uint8_t startWeekId,
-                                                   uint8_t numberOfWeeks)
-{
-  EmberAfClusterCommand *cmd = emberAfCurrentCommand();
-
-  uint8_t calendarIndex = emberAfPluginCalendarCommonGetCalendarById(issuerCalendarId,
-                                                                     providerId);
-
-  emberAfCalendarClusterPrintln("RX: GetWeekProfiles 0x%4x, 0x%4x, 0x%x, 0x%x",
-                                providerId,
-                                issuerCalendarId,
-                                startWeekId,
-                                numberOfWeeks);
-
-  if (calendarIndex == EMBER_AF_PLUGIN_CALENDAR_COMMON_INVALID_INDEX) {
-    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_NOT_FOUND);
-    return true;
-  }
-
-  if (startWeekId == 0) {
-    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_INVALID_FIELD);
-    return true;
-  }
-
-  if (calendars[calendarIndex].numberOfWeekProfiles < startWeekId) {
-    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_NOT_FOUND);
-    return true;
-  }
-
-  // Only one Get can be processed at a time.
-  if (publishInfo.commandIndex != EMBER_AF_PLUGIN_CALENDAR_COMMON_INVALID_INDEX) {
-    emberAfCalendarClusterPrintln("%p%p%p",
-                                  "Error: ",
-                                  "Cannot get week profile: ",
-                                  "only one Get command can be processed at a time");
-    emberAfSendDefaultResponse(cmd, EMBER_ZCL_STATUS_FAILURE);
-    return true;
-  }
-
-  publishInfo.totalCommands = calendars[calendarIndex].numberOfWeekProfiles - startWeekId + 1;
-  if (numberOfWeeks != 0 && numberOfWeeks < publishInfo.totalCommands) {
-    publishInfo.totalCommands = numberOfWeeks;
-  }
-
-  publishInfo.calendarIndex = calendarIndex;
-  publishInfo.startIndex = startWeekId - 1;
-
-  publishInfo.publishCommandId = ZCL_PUBLISH_WEEK_PROFILE_COMMAND_ID;
-  publishInfo.commandIndex = 0;
-  publishInfo.nodeId = cmd->source;
-  publishInfo.clientEndpoint = cmd->apsFrame->sourceEndpoint;
-  publishInfo.serverEndpoint = cmd->apsFrame->destinationEndpoint;
-  publishInfo.sequence = cmd->seqNum;
-  slxu_zigbee_zcl_schedule_server_tick(emberAfCurrentEndpoint(),
-                                       ZCL_CALENDAR_CLUSTER_ID,
-                                       MILLISECOND_TICKS_PER_QUARTERSECOND);
-
-  return true;
-}
-
-bool emberAfCalendarClusterGetSeasonsCallback(uint32_t providerId,
-                                              uint32_t issuerCalendarId)
-{
-  EmberAfClusterCommand *cmd = emberAfCurrentCommand();
-
-  uint8_t calendarIndex = emberAfPluginCalendarCommonGetCalendarById(issuerCalendarId,
-                                                                     providerId);
-  emberAfCalendarClusterPrintln("RX: GetSeasons 0x%4x, 0x%4x",
-                                providerId,
-                                issuerCalendarId);
-
-  if (calendarIndex == EMBER_AF_PLUGIN_CALENDAR_COMMON_INVALID_INDEX
-      || calendars[calendarIndex].numberOfSeasons == 0) {
-    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_NOT_FOUND);
-    return true;
-  }
-
-  // Only one Get can be processed at a time.
-  if (publishInfo.commandIndex != EMBER_AF_PLUGIN_CALENDAR_COMMON_INVALID_INDEX) {
-    emberAfCalendarClusterPrintln("%p%p%p",
-                                  "Error: ",
-                                  "Cannot get seasons: ",
-                                  "only one Get command can be processed at a time");
-    emberAfSendDefaultResponse(cmd, EMBER_ZCL_STATUS_FAILURE);
-    return true;
-  }
-
-  publishInfo.totalCommands = 1;
-
-  publishInfo.calendarIndex = calendarIndex;
-  publishInfo.startIndex = 0;
-
-  publishInfo.publishCommandId = ZCL_PUBLISH_SEASONS_COMMAND_ID;
-  publishInfo.commandIndex = 0;
-  publishInfo.nodeId = cmd->source;
-  publishInfo.clientEndpoint = cmd->apsFrame->sourceEndpoint;
-  publishInfo.serverEndpoint = cmd->apsFrame->destinationEndpoint;
-  publishInfo.sequence = cmd->seqNum;
-  slxu_zigbee_zcl_schedule_server_tick(emberAfCurrentEndpoint(),
-                                       ZCL_CALENDAR_CLUSTER_ID,
-                                       MILLISECOND_TICKS_PER_QUARTERSECOND);
-
-  return true;
-}
-
-bool emberAfCalendarClusterGetSpecialDaysCallback(uint32_t startTime,
-                                                  uint8_t numberOfEvents,
-                                                  uint8_t calendarType,
-                                                  uint32_t providerId,
-                                                  uint32_t issuerCalendarId)
-{
-  EmberAfClusterCommand *cmd = emberAfCurrentCommand();
-  uint8_t numberOfSpecialDaysSent = 0;
-  uint8_t i;
-
-  emberAfCalendarClusterPrintln("RX: GetSpecialDays 0x%4x, 0x%x, 0x%x, 0x%4x, 0x%4x",
-                                startTime,
-                                numberOfEvents,
-                                calendarType,
-                                providerId,
-                                issuerCalendarId);
-
-  // TODO-SPEC: 12-0517-11 says that a start time of zero means now, but this
-  // is apparently going away.  See comment TE6-7 in 13-0546-06 and Ian
-  // Winterburn's email to zigbee_pro_energy@mail.zigbee.org on March 25, 2014.
-  //if (startTime == 0) {
-  //  startTime = emberAfGetCurrentTime();
-  //}
-
-  // Only one Get can be processed at a time.
-  if (publishInfo.commandIndex != EMBER_AF_PLUGIN_CALENDAR_COMMON_INVALID_INDEX) {
-    emberAfCalendarClusterPrintln("%p%p%p",
-                                  "Error: ",
-                                  "Cannot get special days: ",
-                                  "only one Get command can be processed at a time");
-    emberAfSendDefaultResponse(cmd, EMBER_ZCL_STATUS_FAILURE);
-    return true;
-  }
-
-#ifdef SL_CATALOG_ZIGBEE_GAS_PROXY_FUNCTION_PRESENT
-  if (issuerCalendarId == GBCS_TARIFF_SWITCHING_CALENDAR_ID) {
-    issuerCalendarId = tariffSwitchingCalendarId;
-  } else if (issuerCalendarId == GBCS_NON_DISABLEMENT_CALENDAR_ID) {
-    issuerCalendarId = nonDisablementCalendarId;
-  }
-#endif // SL_CATALOG_ZIGBEE_GAS_PROXY_FUNCTION_PRESENT
-
-  publishInfo.totalCommands = 0;
-
-  while (numberOfEvents == 0 || numberOfSpecialDaysSent < numberOfEvents) {
-    uint32_t referenceUtc = MAX_INT32U_VALUE;
-    uint8_t indexToSend = 0xFF;
-
-    // Find active or scheduled calendars matching the filter fields in the
-    // request that have not been sent out yet.  Of those, find the one that
-    // starts the earliest.
-    for (i = 0; i < EMBER_AF_PLUGIN_CALENDAR_COMMON_TOTAL_CALENDARS; i++) {
-      if (calendars[i].calendarId != EMBER_AF_PLUGIN_CALENDAR_COMMON_INVALID_CALENDAR_ID
-          && !READBITS(calendars[i].flags, EMBER_AF_PLUGIN_CALENDAR_COMMON_FLAGS_SENT)
-          && (calendarType == EMBER_AF_PLUGIN_CALENDAR_COMMON_WILDCARD_CALENDAR_TYPE
-              || calendarType == calendars[i].calendarType)
-          && (providerId == EMBER_AF_PLUGIN_CALENDAR_COMMON_WILDCARD_PROVIDER_ID
-              || providerId == calendars[i].providerId)
-          && (issuerCalendarId == EMBER_AF_PLUGIN_CALENDAR_COMMON_WILDCARD_CALENDAR_ID
-              || issuerCalendarId == calendars[i].calendarId)
-          && startTime < emberAfPluginCalendarCommonEndTimeUtc(&(calendars[i]))
-          && calendars[i].startTimeUtc < referenceUtc) {
-        referenceUtc = calendars[i].startTimeUtc;
-        indexToSend = i;
-      }
-    }
-
-    // If no active or scheduled calendar were found, it either means there are
-    // no active or scheduled calendars at the specified time or we've already
-    // found all of them in previous iterations.  If we did find one, we need
-    // to look at, and maybe send, its special days before we move on.
-    if (indexToSend == 0xFF) {
-      break;
-    } else {
-      if (calendars[indexToSend].numberOfSpecialDayProfiles != 0) {
-        publishInfo.calendarsToPublish[publishInfo.totalCommands++] = indexToSend;
-        numberOfSpecialDaysSent += calendars[indexToSend].numberOfSpecialDayProfiles;
-      }
-
-      SETBITS(calendars[indexToSend].flags, EMBER_AF_PLUGIN_CALENDAR_COMMON_FLAGS_SENT);
-    }
-  }
-
-  // Roll through all the calendars and clear the sent bit.
-  for (i = 0; i < EMBER_AF_PLUGIN_CALENDAR_COMMON_TOTAL_CALENDARS; i++) {
-    if (READBITS(calendars[i].flags, EMBER_AF_PLUGIN_CALENDAR_COMMON_FLAGS_SENT)) {
-      CLEARBITS(calendars[i].flags, EMBER_AF_PLUGIN_CALENDAR_COMMON_FLAGS_SENT);
-    }
-  }
-
-  // If there is nothing to send, we return an error.
-  if (publishInfo.totalCommands == 0) {
-    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_NOT_FOUND);
-  } else {
-    publishInfo.publishCommandId = ZCL_PUBLISH_SPECIAL_DAYS_COMMAND_ID;
-    publishInfo.commandIndex = 0;
-    if (numberOfEvents == 0 || numberOfSpecialDaysSent < numberOfEvents) {
-      publishInfo.numberOfEvents = numberOfSpecialDaysSent;
-    } else {
-      publishInfo.numberOfEvents = numberOfEvents;
-    }
-    publishInfo.nodeId = cmd->source;
-    publishInfo.clientEndpoint = cmd->apsFrame->sourceEndpoint;
-    publishInfo.serverEndpoint = cmd->apsFrame->destinationEndpoint;
-    publishInfo.sequence = cmd->seqNum;
-    slxu_zigbee_zcl_schedule_server_tick(emberAfCurrentEndpoint(),
-                                         ZCL_CALENDAR_CLUSTER_ID,
-                                         MILLISECOND_TICKS_PER_QUARTERSECOND);
   }
 
   return true;
 }
-
-#endif // UC_BUILD
 
 bool emberAfCalendarClusterGetCalendarCancellationCallback(void)
 {
@@ -1261,8 +883,6 @@ void emberAfCalendarServerCancelCalendarMessage(EmberNodeId nodeId,
   }
 }
 
-#ifdef UC_BUILD
-
 uint32_t emberAfCalendarClusterServerCommandParse(sl_service_opcode_t opcode,
                                                   sl_service_function_context_t *context)
 {
@@ -1310,5 +930,3 @@ uint32_t emberAfCalendarClusterServerCommandParse(sl_service_opcode_t opcode,
           ? EMBER_ZCL_STATUS_SUCCESS
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
-
-#endif // UC_BUILD

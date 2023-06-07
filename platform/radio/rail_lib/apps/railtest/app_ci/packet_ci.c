@@ -102,23 +102,35 @@ void setTxRandom(sl_cli_command_arg_t *args)
                 end);
 }
 
+/*
+ * The sl_cli_get_argument_count() can include the start index then
+ * payload. Remove 1 from the count when checking "> sizeof(txData)" to
+ * compensate for the index and leave just the size of the payload.
+ * The test test_payloadMultipleFifoSize checks for
+ * exactly MAX_PAYLOAD = 1024 and if the offset count is included the
+ * check is throws the check off by 1.
+ * Specifically, the test being run is:
+ *  "setTxPayloadQuiet 1008 240 241 242 243 244 245 246 247 248 249 250 251 252 253 254 255"
+ * which results in offset = 1008 and count = 17 so 1 must be removed
+ * from the count to accommodate the precise MAX_PAYLOAD = 1024.
+ * Reducing the count during the check in this way does not affect
+ * any other tests.
+ */
 static bool setTxPayloadHelper(sl_cli_command_arg_t *args)
 {
   uint16_t offset = sl_cli_get_argument_uint16(args, 0);
-
+  // Make sure this fits in the buffer
+  uint8_t count = (uint8_t)sl_cli_get_argument_count(args);
+  if ((offset + count - 1U) > sizeof(txData)) {
+    responsePrintError(sl_cli_get_command_string(args, 0), 5, "Data overflows txData buffer");
+    return false;
+  }
   // Read as many bytes as have been supplied and set them
-  for (int i = 2; i < sl_cli_get_argument_count(args) + 1; i++) {
-    uint32_t index = offset + i - 2;
-    uint8_t value = sl_cli_get_argument_uint8(args, i - 1);
-
-    // Make sure this fits in the txData buffer
-    if (index >= sizeof(txData)) {
-      responsePrintError(sl_cli_get_command_string(args, 0), 5, "Data overflows txData buffer");
-      return false;
-    }
+  for (int i = 1; i < count; i++) {
+    uint32_t index = offset + i - 1;
+    uint8_t value = sl_cli_get_argument_uint8(args, i);
     txData[index] = value;
   }
-
   if (railDataConfig.txMethod == PACKET_MODE) {
     RAIL_WriteTxFifo(railHandle, txData, txDataLen, true);
   }

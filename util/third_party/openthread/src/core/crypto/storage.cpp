@@ -56,7 +56,7 @@ exit:
     return error;
 }
 
-void Storage::DeletePersistentKeys(void)
+void Storage::DestroyPersistentKeys(void)
 {
     DestroyKey(kNetworkKeyRef);
     DestroyKey(kPskcRef);
@@ -64,6 +64,7 @@ void Storage::DeletePersistentKeys(void)
     DestroyKey(kActiveDatasetPskcRef);
     DestroyKey(kPendingDatasetNetworkKeyRef);
     DestroyKey(kPendingDatasetPskcRef);
+    DestroyKey(kEcdsaRef);
 }
 #endif
 

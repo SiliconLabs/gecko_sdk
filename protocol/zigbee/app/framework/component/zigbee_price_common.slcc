@@ -30,7 +30,7 @@ template_contribution:
     value:
       group: price-common
       name: adj-st-t
-      handler: emAfPluginPriceCommonClusterGetAdjustedStartTimeCli
+      handler: sli_zigbee_af_price_common_cluster_get_adjusted_start_time_cli
       help: Calculates a new UTC start time value based on the duration type parameter.
       argument:
       - type: uint32
@@ -39,7 +39,7 @@ template_contribution:
     value:
       group: price-common
       name: cnvrt-durn-to-sec
-      handler: emAfPluginPriceCommonClusterConvertDurationToSecondsCli
+      handler: sli_zigbee_af_price_common_cluster_convert_duration_to_seconds_cli
       help: Converts the duration to a number of seconds based on the duration type parameter.
       argument:
       - type: uint32

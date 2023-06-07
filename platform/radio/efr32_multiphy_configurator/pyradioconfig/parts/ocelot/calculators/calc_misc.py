@@ -83,7 +83,6 @@ class CALC_Misc_ocelot(CALC_Misc_lynx):
         self._reg_write(model.vars.MODEM_CTRL2_DEVMULA, 0)
         self._reg_write(model.vars.MODEM_CTRL2_DEVMULB, 0)
         self._reg_write(model.vars.MODEM_CTRL2_RATESELMODE, 0)
-        self._reg_write(model.vars.MODEM_CTRL2_RXFRCDIS, 0)
         self._reg_write(model.vars.MODEM_CTRL2_SQITHRESH, 0)
         self._reg_write(model.vars.MODEM_CTRL2_TXPINMODE, 0)
         self._reg_write(model.vars.MODEM_CTRL4_ADCSATDENS, 0)

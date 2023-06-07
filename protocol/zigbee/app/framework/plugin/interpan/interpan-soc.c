@@ -27,17 +27,13 @@ static const EmberMacFilterMatchData filters[] = {
 
 //------------------------------------------------------------------------------
 
-#ifdef UC_BUILD
-void emAfPluginInterpanMacFilterMatchMessageCallback(const EmberMacFilterMatchStruct *macFilterMatchStruct)
-#else
-void emberMacFilterMatchMessageHandler(const EmberMacFilterMatchStruct *macFilterMatchStruct)
-#endif
+void sli_zigbee_af_interpan_mac_filter_match_message_callback(const EmberMacFilterMatchStruct *macFilterMatchStruct)
 {
-  emAfPluginInterpanProcessMessage(emGetBufferLength(macFilterMatchStruct->message),
-                                   emGetBufferPointer(macFilterMatchStruct->message));
+  sli_zigbee_af_interpan_process_message(sli_legacy_buffer_manager_get_buffer_length(macFilterMatchStruct->message),
+                                         sli_legacy_buffer_manager_get_buffer_pointer(macFilterMatchStruct->message));
 }
 
-EmberStatus emAfPluginInterpanSendRawMessage(uint8_t length, uint8_t* message)
+EmberStatus sli_zigbee_af_interpan_send_raw_message(uint8_t length, uint8_t* message)
 {
   EmberStatus status;
   EmberMessageBuffer buffer = emberFillLinkedBuffers(message, length);
@@ -50,23 +46,11 @@ EmberStatus emAfPluginInterpanSendRawMessage(uint8_t length, uint8_t* message)
   return status;
 }
 
-#ifdef UC_BUILD
-
 void emberAfPluginInterpanInitCallback(uint8_t init_level)
 {
   interpanPluginInit(init_level);
   interpanPluginSetMacMatchFilterEnable(true);
 }
-
-#else // !UC_BUILD
-
-void emberAfPluginInterpanInitCallback(void)
-{
-  interpanPluginInit();
-  interpanPluginSetMacMatchFilterEnable(true);
-}
-
-#endif // UC_BUILD
 
 void interpanPluginSetMacMatchFilterEnable(bool enable)
 {
@@ -88,11 +72,11 @@ void interpanPluginSetMacMatchFilterEnable(bool enable)
 // pointed to by *apsFrame is big enough to hold additional
 // space for the Auxiliary security header and the MIC.
 
-EmberStatus emAfInterpanApsCryptMessage(bool encrypt,
-                                        uint8_t* apsFrame,
-                                        uint8_t* messageLength,
-                                        uint8_t apsHeaderLength,
-                                        EmberEUI64 remoteEui64)
+EmberStatus sli_zigbee_af_interpan_aps_crypt_message(bool encrypt,
+                                                     uint8_t* apsFrame,
+                                                     uint8_t* messageLength,
+                                                     uint8_t apsHeaderLength,
+                                                     EmberEUI64 remoteEui64)
 {
   EmberStatus status = EMBER_LIBRARY_NOT_PRESENT;
 

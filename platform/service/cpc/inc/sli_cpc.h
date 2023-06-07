@@ -69,7 +69,7 @@
 #define MCU_ATOMIC_STORE        sl_atomic_store
 #endif
 
-#define SLI_CPC_PROTOCOL_VERSION            (3)
+#define SLI_CPC_PROTOCOL_VERSION            (4)
 
 #define SLI_CPC_ENDPOINT_SYSTEM             (1)
 
@@ -167,6 +167,18 @@
 #define SL_CPC_ENDPOINT_ACP_ENABLED  (0)
 #endif
 
+#if defined(SL_CATALOG_SE_CPC_PRESENT)
+#define SL_CPC_ENDPOINT_SE_ENABLED  (1)
+#else
+#define SL_CPC_ENDPOINT_SE_ENABLED  (0)
+#endif
+
+#if defined(SL_CATALOG_CPC_NVM3_PRESENT)
+#define SL_CPC_ENDPOINT_NVM3_ENABLED  (1)
+#else
+#define SL_CPC_ENDPOINT_NVM3_ENABLED  (0)
+#endif
+
 // Frame Flags
 #define SL_CPC_OPEN_ENDPOINT_FLAG_IFRAME_DISABLE    (0x01 << 0)   // I-frame is enabled by default; This flag MUST be set to disable the i-frame support by the endpoint
 #define SL_CPC_OPEN_ENDPOINT_FLAG_UFRAME_ENABLE     (0x01 << 1)   // U-frame is disabled by default; This flag MUST be set to enable u-frame support by the endpoint
@@ -224,6 +236,12 @@ SL_ENUM(sl_cpc_service_endpoint_id_t){
 #if (SL_CPC_ENDPOINT_ACP_ENABLED >= 1)
   SL_CPC_ENDPOINT_ACP = 15,            ///< ACP endpoint
 #endif
+#if (SL_CPC_ENDPOINT_SE_ENABLED >= 1)
+  SL_CPC_ENDPOINT_SE = 16,             ///< Secure Engine endpoint
+#endif
+#if (SL_CPC_ENDPOINT_NVM3_ENABLED >= 1)
+  SL_CPC_ENDPOINT_NVM3 = 17,           ///< NVM3 endpoint
+#endif
   SL_CPC_ENDPOINT_LAST_ID_MARKER,      // DO NOT USE THIS ENDPOINT ID
 };
 
@@ -264,10 +282,11 @@ SL_ENUM(sl_cpc_service_endpoint_id_t){
 #define SLI_CPC_RX_DATA_MAX_LENGTH             (SL_CPC_RX_PAYLOAD_MAX_LENGTH + 2)
 #endif
 #define SLI_CPC_HDLC_REJECT_MAX_COUNT          ((SL_CPC_RX_BUFFER_MAX_COUNT / 2) + 1)
-#define SLI_CPC_RX_QUEUE_ITEM_MAX_COUNT        (1 + ((SL_CPC_RX_BUFFER_MAX_COUNT / 4) * 3))
+#define SLI_CPC_RX_QUEUE_ITEM_MAX_COUNT        (SL_CPC_RX_BUFFER_MAX_COUNT - 1)
 #define SLI_CPC_TX_QUEUE_ITEM_SFRAME_MAX_COUNT (SLI_CPC_RX_QUEUE_ITEM_MAX_COUNT)
 #define SLI_CPC_BUFFER_HANDLE_MAX_COUNT        (SL_CPC_TX_QUEUE_ITEM_MAX_COUNT + SL_CPC_RX_BUFFER_MAX_COUNT + SLI_CPC_TX_QUEUE_ITEM_SFRAME_MAX_COUNT)
 #define SLI_CPC_RE_TRANSMIT                    (10)
+#define SLI_CPC_INIT_RE_TRANSMIT_TIMEOUT_MS    (100)
 #define SLI_CPC_MAX_RE_TRANSMIT_TIMEOUT_MS     (5000)
 #define SLI_CPC_MIN_RE_TRANSMIT_TIMEOUT_MS     (5)
 #define SLI_CPC_DISCONNECTION_NOTIFICATION_TIMEOUT_MS  (1000)
@@ -303,7 +322,8 @@ SL_ENUM(sl_cpc_service_endpoint_id_t){
                                                          + SLI_CPC_ENDPOINT_RAIL_ENABLED + SLI_CPC_ENDPOINT_ZIGBEE_ENABLED + SLI_CPC_ENDPOINT_ZWAVE_ENABLED       \
                                                          + SLI_CPC_ENDPOINT_CONNECT_ENABLED + SLI_CPC_ENDPOINT_GPIO_ENABLED + SLI_CPC_ENDPOINT_OPENTHREAD_ENABLED \
                                                          + SLI_CPC_ENDPOINT_WISUN_ENABLED + SLI_CPC_ENDPOINT_WIFI_ENABLED + SLI_CPC_ENDPOINT_CLI_ENABLED          \
-                                                         + SL_CPC_ENDPOINT_BLUETOOTH_RCP_ENABLED + SL_CPC_ENDPOINT_ACP_ENABLED)
+                                                         + SL_CPC_ENDPOINT_BLUETOOTH_RCP_ENABLED + SL_CPC_ENDPOINT_ACP_ENABLED + SL_CPC_ENDPOINT_SE_ENABLED       \
+                                                         + SL_CPC_ENDPOINT_NVM3_ENABLED)
 
 #if !defined(SLI_CPC_ENDPOINT_COUNT)
 #define SLI_CPC_ENDPOINT_COUNT          (SLI_CPC_ENDPOINT_INTERNAL_COUNT + SL_CPC_USER_ENDPOINT_MAX_COUNT + SLI_CPC_ENDPOINT_TEMPORARY_MAX_COUNT)
@@ -593,7 +613,7 @@ sl_status_t sli_cpc_get_system_command_buffer(sli_cpc_system_cmd_t **item);
 sl_status_t sli_cpc_get_receive_queue_item(sl_cpc_receive_queue_item_t **item);
 
 /***************************************************************************//**
- * Free receive queue item.
+ * Push receive queue item queued to the postponed free list
  *
  * @param[in] item  Pointer to item to free.
  *
@@ -603,9 +623,9 @@ sl_status_t sli_cpc_get_receive_queue_item(sl_cpc_receive_queue_item_t **item);
  *
  * @return Status code.
  ******************************************************************************/
-sl_status_t sli_cpc_free_receive_queue_item(sl_cpc_receive_queue_item_t *item,
-                                            void **data,
-                                            uint16_t *data_length);
+sl_status_t sli_cpc_push_receive_queue_item_to_postponed_list(sl_cpc_receive_queue_item_t *rx_queue_item,
+                                                              void **data,
+                                                              uint16_t * data_length);
 
 /***************************************************************************//**
  * Free receive queue item and data buffer.
@@ -665,6 +685,15 @@ sl_status_t sli_cpc_get_endpoint(sl_cpc_endpoint_t **endpoint);
  * @param[in] endpoint  Pointer to endpoint to free.
  ******************************************************************************/
 void sli_cpc_free_endpoint(sl_cpc_endpoint_t *endpoint);
+
+/***************************************************************************//**
+ * Free internal rx buffer; Not pushed in RX Queue .
+ *
+ * @param[in] data  Pointer to data buffer to free.
+ *
+ * @return Status code .
+ ******************************************************************************/
+sl_status_t sli_cpc_free_rx_buffer(void *data);
 
 /***************************************************************************//**
  * Get endpoint closed argument item.

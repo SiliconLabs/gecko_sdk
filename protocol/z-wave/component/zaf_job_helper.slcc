@@ -1,0 +1,24 @@
+id: zaf_job_helper
+label: Z-Wave Job Helper Component
+category: Z-Wave
+description: >
+  This component contains the legacy job helper. It allows applications to
+  enqueue events in a sequential way. For example, upon event A, two new events
+  are enqueued B and C as jobs. Event C will only be handled once event B is
+  done.
+
+  This component should be replaced by using the zaf transport queue which
+  removed the need for jobs in the applications because now it is possible to
+  "send and forget" a frame.
+package: Z-Wave
+quality: production
+include:
+  - path: "protocol/z-wave/ZAF/ApplicationUtilities/EventHandling/"
+    file_list:
+      - path: "zaf_job_helper.h"
+source:
+  - path: "protocol/z-wave/ZAF/ApplicationUtilities/EventHandling/zaf_job_helper.c"
+define:
+  - name: ZAF_USE_LEGACY_JOB_HELPER
+provides:
+  - name: zaf_job_helper

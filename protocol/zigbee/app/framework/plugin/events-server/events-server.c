@@ -20,9 +20,7 @@
 #include "app/framework/util/common.h"
 #include "events-server.h"
 
-#ifdef UC_BUILD
 #include "zap-cluster-command-parser.h"
-#endif
 
 #if (EMBER_AF_PLUGIN_EVENTS_SERVER_TAMPER_LOG_SIZE != 0)
 #define EMBER_AF_PLUGIN_EVENTS_SERVER_TAMPER_LOG_ENABLE
@@ -202,9 +200,7 @@ static PublishEventLogPartner partner;
 
 static EmberAfEventLog *getEventLog(uint8_t endpoint, EmberAfEventLogId logId);
 static void clearEventLog(EmberAfEventLog *eventLog);
-#if ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_EVENTS_CLUSTER)) || defined(UC_BUILD))
 static void printEventLog(uint8_t endpoint, EmberAfEventLogId logId);
-#endif // ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_EVENTS_CLUSTER)) || defined(UC_BUILD))
 
 static uint16_t findMatchingEvents(uint8_t endpoint,
                                    uint8_t logId,
@@ -355,15 +351,13 @@ void emberAfEventsClusterServerTickCallback(uint8_t endpoint)
 
   if (numberOfEvents != 0
       && partner.commandIndex < partner.totalCommands) {
-    slxu_zigbee_zcl_schedule_server_tick(endpoint,
-                                         ZCL_EVENTS_CLUSTER_ID,
-                                         MILLISECOND_TICKS_PER_QUARTERSECOND);
+    sl_zigbee_zcl_schedule_server_tick(endpoint,
+                                       ZCL_EVENTS_CLUSTER_ID,
+                                       MILLISECOND_TICKS_PER_QUARTERSECOND);
   } else {
     partner.commandIndex = ZCL_EVENTS_INVALID_INDEX;
   }
 }
-
-#ifdef UC_BUILD
 
 // The GetEventLog command allows a client to request events from a server's
 // event logs. One or more PublishEventLog commands are returned on receipt
@@ -435,9 +429,9 @@ bool emberAfEventsClusterGetEventLogCallback(EmberAfClusterCommand *cmd)
     partner.state.eventsToPublishIndex = 0;
     partner.state.remainingEventData = NULL;
     partner.state.remainingEventDataLen = 0;
-    slxu_zigbee_zcl_schedule_server_tick(endpoint,
-                                         ZCL_EVENTS_CLUSTER_ID,
-                                         MILLISECOND_TICKS_PER_QUARTERSECOND);
+    sl_zigbee_zcl_schedule_server_tick(endpoint,
+                                       ZCL_EVENTS_CLUSTER_ID,
+                                       MILLISECOND_TICKS_PER_QUARTERSECOND);
   }
   return true;
 }
@@ -511,149 +505,6 @@ bool emberAfEventsClusterClearEventLogRequestCallback(EmberAfClusterCommand *cmd
   return true;
 }
 
-#else // !UC_BUILD
-
-// The GetEventLog command allows a client to request events from a server's
-// event logs. One or more PublishEventLog commands are returned on receipt
-// of this command. A ZCL Default Response with status NOT_FOUND shall be
-// returned if no events match the given search criteria.
-bool emberAfEventsClusterGetEventLogCallback(uint8_t eventControlLogId,
-                                             uint16_t eventId,
-                                             uint32_t startTime,
-                                             uint32_t endTime,
-                                             uint8_t numberOfEvents,
-                                             uint16_t eventOffset)
-{
-  EmberAfClusterCommand *cmd = emberAfCurrentCommand();
-  uint8_t endpoint = emberAfCurrentEndpoint();
-
-  emberAfEventsClusterPrintln("RX: GetEventLog 0x%x, 0x%2x, 0x%4x, 0x%4x, 0x%x, 0x%2x",
-                              eventControlLogId,
-                              eventId,
-                              startTime,
-                              endTime,
-                              numberOfEvents,
-                              eventOffset);
-
-  mangleCommandForGBCSNonTOMCmd(&endpoint,
-                                &eventControlLogId);
-
-  // Only one GetEventLog can be processed at a time.
-  if (partner.commandIndex != ZCL_EVENTS_INVALID_INDEX) {
-    emberAfEventsClusterPrintln("%p%p%p",
-                                "Error: ",
-                                "Cannot get event log: ",
-                                "only one GetEventLog command can be processed at a time");
-    emberAfSendDefaultResponse(cmd, EMBER_ZCL_STATUS_FAILURE);
-    return true;
-  }
-
-  partner.totalMatchingEvents = findMatchingEvents(endpoint,
-                                                   requestedLogId(eventControlLogId),
-                                                   eventId,
-                                                   startTime,
-                                                   endTime,
-                                                   numberOfEvents,
-                                                   eventOffset,
-                                                   &partner.eventsToPublishCount,
-                                                   partner.eventsToPublish);
-  if (partner.totalMatchingEvents == 0 || partner.totalMatchingEvents <= eventOffset) {
-    emberAfEventsClusterPrintln("No matching events to return!");
-    emberAfSendDefaultResponse(cmd, EMBER_ZCL_STATUS_NOT_FOUND);
-  } else {
-    partner.isIntraPan = (cmd->interPanHeader == NULL);
-    if (partner.isIntraPan) {
-      partner.pan.intra.nodeId = cmd->source;
-      partner.pan.intra.clientEndpoint = cmd->apsFrame->sourceEndpoint;
-      partner.pan.intra.serverEndpoint = cmd->apsFrame->destinationEndpoint;
-    } else {
-      partner.pan.inter.panId = cmd->interPanHeader->panId;
-      MEMCOPY(partner.pan.inter.eui64, cmd->interPanHeader->longAddress, EUI64_SIZE);
-    }
-    partner.sequence = cmd->seqNum;
-    partner.maxPayloadLength = EMBER_AF_MAXIMUM_SEND_PAYLOAD_LENGTH;
-    partner.publishFullInformation = retrieveFullInformation(eventControlLogId);
-    partner.totalCommands = getPublishEventLogTotalCommands(endpoint,
-                                                            partner.maxPayloadLength,
-                                                            partner.publishFullInformation,
-                                                            partner.eventsToPublishCount,
-                                                            partner.eventsToPublish);
-    partner.commandIndex = 0;
-    partner.state.eventsToPublishIndex = 0;
-    partner.state.remainingEventData = NULL;
-    partner.state.remainingEventDataLen = 0;
-    slxu_zigbee_zcl_schedule_server_tick(endpoint,
-                                         ZCL_EVENTS_CLUSTER_ID,
-                                         MILLISECOND_TICKS_PER_QUARTERSECOND);
-  }
-  return true;
-}
-
-// The ClearEventLog command requests that an Events server device clear the
-// specified event log(s). The Events server device SHOULD clear the requested
-// events logs, however it is understood that market specific restrictions may
-// be applied to prevent this.
-//
-// To determine whether or not we should clear the requested log we will
-// callback to the application with the requested logId and let the application
-// tell us which logs are OK to be cleared.
-//
-// Note: that when setting the clearedEventLogs bitmap included within the
-// ClearEventLogResponse we take advantage of the fact that the logId value
-// currently indicates the the bit number in the bitmap to be set.  If this ever
-// changes we'll need to modify the way we set the clearedEventLogs.
-bool emberAfEventsClusterClearEventLogRequestCallback(uint8_t logId)
-{
-  uint8_t i, clearedEventLogs = 0;
-  uint8_t endpoint = emberAfCurrentEndpoint();
-
-  emberAfEventsClusterPrintln("RX: ClearEventLogRequest 0x%X", logId);
-
-  mangleCommandForGBCSNonTOMCmd(&endpoint,
-                                &logId);
-
-#if defined(SL_CATALOG_ZIGBEE_GAS_PROXY_FUNCTION_PRESENT)
-  if ((endpoint == EMBER_AF_PLUGIN_GAS_PROXY_FUNCTION_ESI_ENDPOINT)
-      && (logId == EMBER_ZCL_EVENT_LOG_ID_SECURITY_EVENT_LOG)) {
-    emberAfEventsClusterPrintln("ERR: Modifying or deleting entries from the GPF Security Log is not allowed.");
-    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_FAILURE);
-    return true;
-  }
-#endif
-
-  if (emberAfPluginEventsServerOkToClearLogCallback((EmberAfEventLogId)logId)) {
-    if (!emberAfEventsServerClearEventLog(endpoint, (EmberAfEventLogId)logId)) {
-      emberAfEventsClusterPrintln("%p%p%p",
-                                  "Error: ",
-                                  "Cannot clear event log: ",
-                                  "invalid endpoint and/or logId");
-      emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_FAILURE);
-      return true;
-    }
-    clearedEventLogs |= BIT(logId);
-  } else if (EMBER_ZCL_EVENT_LOG_ID_ALL_LOGS == logId) {
-    for (i = 0; i < NUM_EVENT_LOGS; i++) {
-      if (emberAfPluginEventsServerOkToClearLogCallback(allLogIds[i])) {
-        if (!emberAfEventsServerClearEventLog(endpoint, allLogIds[i])) {
-          emberAfEventsClusterPrintln("%p%p%p",
-                                      "Error: ",
-                                      "Cannot clear event log: ",
-                                      "invalid endpoint");
-          emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_FAILURE);
-          return true;
-        }
-        clearedEventLogs |= BIT(allLogIds[i]);
-      }
-    }
-  }
-
-  emberAfFillCommandEventsClusterClearEventLogResponse(clearedEventLogs);
-  emberAfSendResponse();
-  return true;
-}
-
-#endif // UC_BUILD
-
 //------------------------------------------------------------------------------
 // Other Miscellaneous functions
 
@@ -726,7 +577,6 @@ bool emberAfEventsServerClearEventLog(uint8_t endpoint, EmberAfEventLogId logId)
 // Print the specified event log.
 void emberAfEventsServerPrintEventLog(uint8_t endpoint, EmberAfEventLogId logId)
 {
-#if ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_EVENTS_CLUSTER)) || defined(UC_BUILD))
   uint8_t i;
 
   if (EMBER_ZCL_EVENT_LOG_ID_ALL_LOGS == logId) {
@@ -736,20 +586,17 @@ void emberAfEventsServerPrintEventLog(uint8_t endpoint, EmberAfEventLogId logId)
   } else {
     printEventLog(endpoint, logId);
   }
-#endif // ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_EVENTS_CLUSTER)) || defined(UC_BUILD))
 }
 
 // Print an event
 void emberAfEventsServerPrintEvent(const EmberAfEvent *event)
 {
-#if ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_EVENTS_CLUSTER)) || defined(UC_BUILD))
   emberAfEventsClusterPrintln("       eventId: 0x%2x", event->eventId);
   emberAfEventsClusterPrintln("     eventTime: 0x%4x", event->eventTime);
   emberAfEventsClusterPrintln("  eventDataLen: 0x%x", emberAfStringLength(event->eventData));
   emberAfEventsClusterPrint("     eventData: ");
   emberAfEventsClusterPrintString(event->eventData);
   emberAfEventsClusterPrintln("");
-#endif // ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_EVENTS_CLUSTER)) || defined(UC_BUILD))
 }
 
 // Retrieves the event at the index.  Returns false if logId or index is invalid.
@@ -957,7 +804,6 @@ static void clearEventLog(EmberAfEventLog *eventLog)
   emberAfPluginEventsServerLogDataUpdatedCallback(emberAfCurrentCommand());
 }
 
-#if ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_EVENTS_CLUSTER)) || defined(UC_BUILD))
 // Print all valid entries within the given event log
 static void printEventLog(uint8_t endpoint, EmberAfEventLogId logId)
 {
@@ -991,7 +837,6 @@ static void printEventLog(uint8_t endpoint, EmberAfEventLogId logId)
     }
   }
 }
-#endif // ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_EVENTS_CLUSTER)) || defined(UC_BUILD))
 
 // find events needing to be published that match the given criteria
 static uint16_t findMatchingEvents(uint8_t endpoint,
@@ -1353,8 +1198,6 @@ static void mangleCommandForGBCSNonTOMCmd(uint8_t * endpoint,
 #endif
 }
 
-#ifdef UC_BUILD
-
 uint32_t emberAfEventsClusterServerCommandParse(sl_service_opcode_t opcode,
                                                 sl_service_function_context_t *context)
 {
@@ -1382,4 +1225,3 @@ uint32_t emberAfEventsClusterServerCommandParse(sl_service_opcode_t opcode,
           ? EMBER_ZCL_STATUS_SUCCESS
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
-#endif // UC_BUILD

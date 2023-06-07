@@ -20,10 +20,8 @@
 #include "tunneling-client.h"
 #include "app/framework/plugin/address-table/address-table.h"
 
-#ifdef UC_BUILD
 #include "zap-cluster-command-parser.h"
 #include "tunneling-client-config.h"
-#endif // UC_BUILD
 
 #define UNUSED_ENDPOINT_ID 0xFF
 
@@ -43,26 +41,26 @@ typedef struct {
   uint8_t   protocolId;
   uint16_t  manufacturerCode;
   bool flowControlSupport;
-} EmAfTunnelingClientTunnel;
+} sli_zigbee_af_tunneling_client_tunnel;
 
-static EmAfTunnelingClientTunnel tunnels[EMBER_AF_PLUGIN_TUNNELING_CLIENT_TUNNEL_LIMIT];
+static sli_zigbee_af_tunneling_client_tunnel tunnels[EMBER_AF_PLUGIN_TUNNELING_CLIENT_TUNNEL_LIMIT];
 
 static uint8_t pendingIndex = EMBER_AF_PLUGIN_TUNNELING_CLIENT_NULL_INDEX;
 
 static bool findIeeeAddress(EmberNodeId server);
 static void ieeeAddressCallback(const EmberAfServiceDiscoveryResult *result);
-static bool createAddressTableEntry(EmAfTunnelingClientTunnel *tunnel,
+static bool createAddressTableEntry(sli_zigbee_af_tunneling_client_tunnel *tunnel,
                                     EmberEUI64 eui64);
-bool haveLinkKey(const EmAfTunnelingClientTunnel *tunnel);
-static bool partnerLinkKeyExchange(const EmAfTunnelingClientTunnel *tunnel);
+bool haveLinkKey(const sli_zigbee_af_tunneling_client_tunnel *tunnel);
+static bool partnerLinkKeyExchange(const sli_zigbee_af_tunneling_client_tunnel *tunnel);
 static void partnerLinkKeyExchangeCallback(bool success);
-static bool sendRequestTunnel(const EmAfTunnelingClientTunnel *tunnel);
+static bool sendRequestTunnel(const sli_zigbee_af_tunneling_client_tunnel *tunnel);
 static void cleanUp(EmberAfPluginTunnelingClientStatus status);
 static EmberAfStatus clientFindTunnel(uint16_t tunnelId,
                                       uint8_t addressIndex,
                                       uint8_t clientEndpoint,
                                       uint8_t serverEndpoint,
-                                      EmAfTunnelingClientTunnel **tunnel,
+                                      sli_zigbee_af_tunneling_client_tunnel **tunnel,
                                       uint8_t *tunnelIndex);
 
 void emberAfTunnelingClusterClientInitCallback(uint8_t endpoint)
@@ -135,7 +133,7 @@ EmberAfPluginTunnelingClientStatus emberAfPluginTunnelingClientRequestTunnel(Emb
     if (tunnels[i].addressIndex == EMBER_NULL_ADDRESS_TABLE_INDEX
         && tunnels[i].serverEndpoint == UNUSED_ENDPOINT_ID) {
       EmberEUI64 eui64;
-      EmAfTunnelingClientTunnel tunnel;
+      sli_zigbee_af_tunneling_client_tunnel tunnel;
       tunnel.clientEndpoint = clientEndpoint;
       tunnel.serverEndpoint = serverEndpoint;
       // The node id of the server is tucked away in the tunnel id field so we
@@ -171,7 +169,7 @@ EmberAfPluginTunnelingClientStatus emberAfPluginTunnelingClientRequestTunnel(Emb
       // waiting for a long address lookup or link key exchange to finish.
       // Either way, we can save the tunnel to the table and return.
       pendingIndex = i;
-      MEMMOVE(&tunnels[i], &tunnel, sizeof(EmAfTunnelingClientTunnel));
+      MEMMOVE(&tunnels[i], &tunnel, sizeof(sli_zigbee_af_tunneling_client_tunnel));
       return EMBER_AF_PLUGIN_TUNNELING_CLIENT_SUCCESS;
     }
   }
@@ -210,7 +208,7 @@ static void ieeeAddressCallback(const EmberAfServiceDiscoveryResult *result)
   }
 }
 
-static bool createAddressTableEntry(EmAfTunnelingClientTunnel *tunnel,
+static bool createAddressTableEntry(sli_zigbee_af_tunneling_client_tunnel *tunnel,
                                     EmberEUI64 eui64)
 {
   tunnel->addressIndex = emberAfPluginAddressTableAddEntry(eui64);
@@ -238,7 +236,7 @@ static void transferDataMessageSentCallback(EmberOutgoingMessageType type,
   }
 }
 
-bool haveLinkKey(const EmAfTunnelingClientTunnel *tunnel)
+bool haveLinkKey(const sli_zigbee_af_tunneling_client_tunnel *tunnel)
 {
   // We assume we always have a link with the server if one of us is the trust
   // center.  We may already have a link key with other nodes, but we don't
@@ -249,7 +247,7 @@ bool haveLinkKey(const EmAfTunnelingClientTunnel *tunnel)
               == EMBER_TRUST_CENTER_NODE_ID));
 }
 
-static bool partnerLinkKeyExchange(const EmAfTunnelingClientTunnel *tunnel)
+static bool partnerLinkKeyExchange(const sli_zigbee_af_tunneling_client_tunnel *tunnel)
 {
   EmberStatus status = emberAfInitiatePartnerLinkKeyExchangeCallback(tunnel->tunnelId,
                                                                      tunnel->serverEndpoint,
@@ -275,7 +273,7 @@ static void partnerLinkKeyExchangeCallback(bool success)
   }
 }
 
-static bool sendRequestTunnel(const EmAfTunnelingClientTunnel *tunnel)
+static bool sendRequestTunnel(const sli_zigbee_af_tunneling_client_tunnel *tunnel)
 {
   EmberStatus status;
   emberAfFillCommandTunnelingClusterRequestTunnel(tunnel->protocolId,
@@ -287,12 +285,12 @@ static bool sendRequestTunnel(const EmAfTunnelingClientTunnel *tunnel)
   status = emberAfSendCommandUnicast(EMBER_OUTGOING_VIA_ADDRESS_TABLE,
                                      tunnel->addressIndex);
   if (status == EMBER_SUCCESS) {
-    slxu_zigbee_zcl_schedule_client_tick_extended(tunnel->clientEndpoint,
-                                                  ZCL_TUNNELING_CLUSTER_ID,
-                                                  (EMBER_AF_PLUGIN_TUNNELING_CLIENT_TIMEOUT_SECONDS
-                                                   * MILLISECOND_TICKS_PER_SECOND),
-                                                  EMBER_AF_SHORT_POLL,
-                                                  EMBER_AF_OK_TO_SLEEP);
+    sl_zigbee_zcl_schedule_client_tick_extended(tunnel->clientEndpoint,
+                                                ZCL_TUNNELING_CLUSTER_ID,
+                                                (EMBER_AF_PLUGIN_TUNNELING_CLIENT_TIMEOUT_SECONDS
+                                                 * MILLISECOND_TICKS_PER_SECOND),
+                                                EMBER_AF_SHORT_POLL,
+                                                EMBER_AF_OK_TO_SLEEP);
   } else {
     emberAfTunnelingClusterPrintln("ERR: Could not send RequestTunnel: 0x%x",
                                    status);
@@ -315,8 +313,6 @@ static void cleanUp(EmberAfPluginTunnelingClientStatus status)
 
 //-----------------------
 // ZCL commands callbacks
-
-#ifdef UC_BUILD
 
 bool emberAfTunnelingClusterRequestTunnelResponseCallback(EmberAfClusterCommand *cmd)
 {
@@ -357,9 +353,9 @@ bool emberAfTunnelingClusterRequestTunnelResponseCallback(EmberAfClusterCommand 
 
     // Reschedule the tick to clean up any unused entries that may have been
     // closed while we were waiting for this request to finish.
-    slxu_zigbee_zcl_schedule_client_tick(cmd->apsFrame->destinationEndpoint,
-                                         ZCL_TUNNELING_CLUSTER_ID,
-                                         MILLISECOND_TICKS_PER_SECOND);
+    sl_zigbee_zcl_schedule_client_tick(cmd->apsFrame->destinationEndpoint,
+                                       ZCL_TUNNELING_CLUSTER_ID,
+                                       MILLISECOND_TICKS_PER_SECOND);
 
     pendingIndex = EMBER_AF_PLUGIN_TUNNELING_CLIENT_NULL_INDEX;
     status = EMBER_ZCL_STATUS_SUCCESS;
@@ -375,7 +371,7 @@ bool emberAfTunnelingClusterRequestTunnelResponseCallback(EmberAfClusterCommand 
 bool emberAfTunnelingClusterTransferDataServerToClientCallback(EmberAfClusterCommand *cmd)
 {
   sl_zcl_tunneling_cluster_transfer_data_server_to_client_command_t cmd_data;
-  EmAfTunnelingClientTunnel *tunnel;
+  sli_zigbee_af_tunneling_client_tunnel *tunnel;
   EmberAfStatus status;
   EmberAfTunnelingTransferDataStatus tunnelError = EMBER_ZCL_TUNNELING_TRANSFER_DATA_STATUS_DATA_OVERFLOW;
   uint16_t dataLen;
@@ -426,7 +422,7 @@ bool emberAfTunnelingClusterTransferDataServerToClientCallback(EmberAfClusterCom
 bool emberAfTunnelingClusterTransferDataErrorServerToClientCallback(EmberAfClusterCommand *cmd)
 {
   sl_zcl_tunneling_cluster_transfer_data_error_server_to_client_command_t cmd_data;
-  EmAfTunnelingClientTunnel *tunnel;
+  sli_zigbee_af_tunneling_client_tunnel *tunnel;
   EmberAfStatus status;
   uint8_t tunnelIndex;
 
@@ -457,7 +453,7 @@ bool emberAfTunnelingClusterTransferDataErrorServerToClientCallback(EmberAfClust
 bool emberAfTunnelingClusterTunnelClosureNotificationCallback(EmberAfClusterCommand *cmd)
 {
   sl_zcl_tunneling_cluster_tunnel_closure_notification_command_t cmd_data;
-  EmAfTunnelingClientTunnel *tunnel;
+  sli_zigbee_af_tunneling_client_tunnel *tunnel;
   EmberAfStatus status;
   uint8_t tunnelIndex;
 
@@ -485,169 +481,9 @@ bool emberAfTunnelingClusterTunnelClosureNotificationCallback(EmberAfClusterComm
     tunnel->serverEndpoint = UNUSED_ENDPOINT_ID;
     if (pendingIndex == EMBER_AF_PLUGIN_TUNNELING_CLIENT_NULL_INDEX
         || tunnels[pendingIndex].clientEndpoint != tunnel->clientEndpoint) {
-      slxu_zigbee_zcl_schedule_client_tick(tunnel->clientEndpoint,
-                                           ZCL_TUNNELING_CLUSTER_ID,
-                                           MILLISECOND_TICKS_PER_SECOND);
-    }
-    emberAfPluginTunnelingClientTunnelClosedCallback(tunnelIndex);
-  }
-
-  emberAfSendImmediateDefaultResponse(status);
-  return true;
-}
-
-#else // !UC_BUILD
-
-bool emberAfTunnelingClusterRequestTunnelResponseCallback(uint16_t tunnelId,
-                                                          uint8_t tunnelStatus,
-                                                          uint16_t maximumIncomingTransferSize)
-{
-  EmberAfStatus status = EMBER_ZCL_STATUS_FAILURE;
-
-  emberAfTunnelingClusterPrintln("RX: RequestTunnelResponse 0x%2x, 0x%x, 0x%2x",
-                                 tunnelId,
-                                 tunnelStatus,
-                                 maximumIncomingTransferSize);
-
-  if (pendingIndex != EMBER_AF_PLUGIN_TUNNELING_CLIENT_NULL_INDEX
-      && (tunnels[pendingIndex].addressIndex
-          == emberAfGetAddressIndex())
-      && (tunnels[pendingIndex].clientEndpoint
-          == emberAfCurrentCommand()->apsFrame->destinationEndpoint)
-      && (tunnels[pendingIndex].serverEndpoint
-          == emberAfCurrentCommand()->apsFrame->sourceEndpoint)) {
-    // If the server accepted the request and created the tunnel, we need to
-    // save the assigned tunnel id for future communication.  However, we do
-    // not inform the application of the real tunnel id and instead give them
-    // an index into our table.  This makes it possible for the application to
-    // uniquely identify a tunnel even if multiple servers give us duplicate
-    // tunnel ids.
-    uint8_t tunnelIndex;
-    if (tunnelStatus == EMBER_ZCL_TUNNELING_TUNNEL_STATUS_SUCCESS) {
-      tunnels[pendingIndex].tunnelId = tunnelId;
-      tunnelIndex = pendingIndex;
-    } else {
-      tunnels[pendingIndex].serverEndpoint = UNUSED_ENDPOINT_ID;
-      tunnelIndex = EMBER_AF_PLUGIN_TUNNELING_CLIENT_NULL_INDEX;
-    }
-
-    // Reschedule the tick to clean up any unused entries that may have been
-    // closed while we were waiting for this request to finish.
-    slxu_zigbee_zcl_schedule_client_tick(emberAfCurrentCommand()->apsFrame->destinationEndpoint,
+      sl_zigbee_zcl_schedule_client_tick(tunnel->clientEndpoint,
                                          ZCL_TUNNELING_CLUSTER_ID,
                                          MILLISECOND_TICKS_PER_SECOND);
-
-    pendingIndex = EMBER_AF_PLUGIN_TUNNELING_CLIENT_NULL_INDEX;
-    status = EMBER_ZCL_STATUS_SUCCESS;
-    emberAfPluginTunnelingClientTunnelOpenedCallback(tunnelIndex,
-                                                     (EmberAfPluginTunnelingClientStatus)tunnelStatus,
-                                                     maximumIncomingTransferSize);
-  }
-
-  emberAfSendImmediateDefaultResponse(status);
-  return true;
-}
-
-bool emberAfTunnelingClusterTransferDataServerToClientCallback(uint16_t tunnelId,
-                                                               uint8_t* data)
-{
-  EmAfTunnelingClientTunnel *tunnel;
-  EmberAfStatus status;
-  EmberAfTunnelingTransferDataStatus tunnelError = EMBER_ZCL_TUNNELING_TRANSFER_DATA_STATUS_DATA_OVERFLOW;
-  uint16_t dataLen = (emberAfCurrentCommand()->bufLen
-                      - (emberAfCurrentCommand()->payloadStartIndex
-                         + sizeof(tunnelId)));
-  uint8_t tunnelIndex;
-
-  emberAfTunnelingClusterPrint("RX: TransferData 0x%2x, [", tunnelId);
-  emberAfTunnelingClusterPrintBuffer(data, dataLen, false);
-  emberAfTunnelingClusterPrintln("]");
-
-  status = clientFindTunnel(tunnelId,
-                            emberAfGetAddressIndex(),
-                            emberAfCurrentCommand()->apsFrame->destinationEndpoint,
-                            emberAfCurrentCommand()->apsFrame->sourceEndpoint,
-                            &tunnel,
-                            &tunnelIndex);
-  if (status == EMBER_ZCL_STATUS_SUCCESS) {
-    if (dataLen <= EMBER_AF_PLUGIN_TUNNELING_CLIENT_MAXIMUM_INCOMING_TRANSFER_SIZE) {
-      emberAfPluginTunnelingClientDataReceivedCallback(tunnelIndex,
-                                                       data,
-                                                       dataLen);
-      emberAfSendImmediateDefaultResponse(status);
-      return true;
-    }
-    // else
-    //   tunnelError code already set (overflow)
-  } else {
-    tunnelError = (status == EMBER_ZCL_STATUS_NOT_AUTHORIZED
-                   ? EMBER_ZCL_TUNNELING_TRANSFER_DATA_STATUS_WRONG_DEVICE
-                   : EMBER_ZCL_TUNNELING_TRANSFER_DATA_STATUS_NO_SUCH_TUNNEL);
-  }
-
-  // Error
-  emberAfFillCommandTunnelingClusterTransferDataErrorClientToServer(tunnelId,
-                                                                    tunnelError);
-  emberAfGetCommandApsFrame()->options |= EMBER_APS_OPTION_SOURCE_EUI64;
-  emberAfSendResponse();
-
-  return true;
-}
-
-bool emberAfTunnelingClusterTransferDataErrorServerToClientCallback(uint16_t tunnelId,
-                                                                    uint8_t transferDataStatus)
-{
-  EmAfTunnelingClientTunnel *tunnel;
-  EmberAfStatus status;
-  uint8_t tunnelIndex;
-
-  emberAfTunnelingClusterPrintln("RX: TransferDataError 0x%2x, 0x%x",
-                                 tunnelId,
-                                 transferDataStatus);
-
-  status = clientFindTunnel(tunnelId,
-                            emberAfGetAddressIndex(),
-                            emberAfCurrentCommand()->apsFrame->destinationEndpoint,
-                            emberAfCurrentCommand()->apsFrame->sourceEndpoint,
-                            &tunnel,
-                            &tunnelIndex);
-  if (status == EMBER_ZCL_STATUS_SUCCESS) {
-    emberAfPluginTunnelingClientDataErrorCallback(tunnelIndex,
-                                                  (EmberAfTunnelingTransferDataStatus)transferDataStatus);
-  }
-
-  emberAfSendImmediateDefaultResponse(status);
-  return true;
-}
-
-bool emberAfTunnelingClusterTunnelClosureNotificationCallback(uint16_t tunnelId)
-{
-  EmAfTunnelingClientTunnel *tunnel;
-  EmberAfStatus status;
-  uint8_t tunnelIndex;
-
-  emberAfTunnelingClusterPrintln("RX: TunnelClosureNotification 0x%2x",
-                                 tunnelId);
-
-  status = clientFindTunnel(tunnelId,
-                            emberAfGetAddressIndex(),
-                            emberAfCurrentCommand()->apsFrame->destinationEndpoint,
-                            emberAfCurrentCommand()->apsFrame->sourceEndpoint,
-                            &tunnel,
-                            &tunnelIndex);
-  if (status == EMBER_ZCL_STATUS_SUCCESS) {
-    // Mark the entry as unused and, unless we have a pending tunnel request on
-    // the same endpoint, schedule a tick to clean up the address table entry.
-    // The delay before cleaning up the address table is to give the stack some
-    // time to continue using it for sending the response to the server.
-    // However, if we have a pending request, the tick is already being used as
-    // a timeout for the request and we don't want to interfere with that.
-    tunnel->serverEndpoint = UNUSED_ENDPOINT_ID;
-    if (pendingIndex == EMBER_AF_PLUGIN_TUNNELING_CLIENT_NULL_INDEX
-        || tunnels[pendingIndex].clientEndpoint != tunnel->clientEndpoint) {
-      slxu_zigbee_zcl_schedule_client_tick(tunnel->clientEndpoint,
-                                           ZCL_TUNNELING_CLUSTER_ID,
-                                           MILLISECOND_TICKS_PER_SECOND);
     }
     emberAfPluginTunnelingClientTunnelClosedCallback(tunnelIndex);
   }
@@ -655,8 +491,6 @@ bool emberAfTunnelingClusterTunnelClosureNotificationCallback(uint16_t tunnelId)
   emberAfSendImmediateDefaultResponse(status);
   return true;
 }
-
-#endif // UC_BUILD
 
 EmberAfStatus emberAfPluginTunnelingClientTransferData(uint8_t tunnelIndex,
                                                        uint8_t *data,
@@ -704,9 +538,9 @@ EmberAfStatus emberAfPluginTunnelingClientCloseTunnel(uint8_t tunnelIndex)
       if (pendingIndex == EMBER_AF_PLUGIN_TUNNELING_CLIENT_NULL_INDEX
           || (tunnels[pendingIndex].clientEndpoint
               != tunnels[tunnelIndex].clientEndpoint)) {
-        slxu_zigbee_zcl_schedule_client_tick(tunnels[tunnelIndex].clientEndpoint,
-                                             ZCL_TUNNELING_CLUSTER_ID,
-                                             MILLISECOND_TICKS_PER_SECOND);
+        sl_zigbee_zcl_schedule_client_tick(tunnels[tunnelIndex].clientEndpoint,
+                                           ZCL_TUNNELING_CLUSTER_ID,
+                                           MILLISECOND_TICKS_PER_SECOND);
       }
       return EMBER_ZCL_STATUS_SUCCESS;
     } else {
@@ -732,7 +566,7 @@ static EmberAfStatus clientFindTunnel(uint16_t tunnelId,
                                       uint8_t addressIndex,
                                       uint8_t clientEndpoint,
                                       uint8_t serverEndpoint,
-                                      EmAfTunnelingClientTunnel **tunnel,
+                                      sli_zigbee_af_tunneling_client_tunnel **tunnel,
                                       uint8_t *tunnelIndex)
 {
   uint8_t i;
@@ -758,7 +592,7 @@ static EmberAfStatus clientFindTunnel(uint16_t tunnelId,
   return EMBER_ZCL_STATUS_NOT_FOUND;
 }
 
-void emAfPluginTunnelingClientCliPrint(void)
+void sli_zigbee_af_tunneling_client_cli_print(void)
 {
   uint8_t i;
   uint8_t count = 0;
@@ -795,8 +629,6 @@ void emAfPluginTunnelingClientCliPrint(void)
                                  count,
                                  EMBER_AF_PLUGIN_TUNNELING_CLIENT_TUNNEL_LIMIT);
 }
-
-#ifdef UC_BUILD
 
 uint32_t emberAfTunnelingClusterClientCommandParse(sl_service_opcode_t opcode,
                                                    sl_service_function_context_t *context)
@@ -835,5 +667,3 @@ uint32_t emberAfTunnelingClusterClientCommandParse(sl_service_opcode_t opcode,
           ? EMBER_ZCL_STATUS_SUCCESS
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
-
-#endif // UC_BUILD

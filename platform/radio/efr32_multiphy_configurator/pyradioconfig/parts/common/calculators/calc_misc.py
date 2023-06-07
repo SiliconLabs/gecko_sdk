@@ -32,6 +32,8 @@ class CALC_Misc(ICalculator):
 
 
         self._addModelRegister(model, 'MODEM.CTRL1.SYNC1INV'           , int, ModelVariableFormat.HEX )
+
+        # FIXME: amtudave: Restore the conditional after tri sync detection added to sync det
         self._addModelRegister(model, 'MODEM.CTRL1.SYNCERRORS'         , int, ModelVariableFormat.HEX )
 
         self._addModelRegister(model, 'MODEM.CTRL2.BRDIVA'             , int, ModelVariableFormat.HEX )
@@ -102,7 +104,6 @@ class CALC_Misc(ICalculator):
         self._reg_write(model.vars.MODEM_AFC_AFCTXMODE,       0)
 
         self._reg_write(model.vars.SEQ_MISC_SQBMODETX, 0)
-
 
     #Disable dynamic slicer on Dumbo by default
     def calc_dynamic_slicer_sw_en(self, model):

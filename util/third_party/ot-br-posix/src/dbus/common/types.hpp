@@ -38,6 +38,7 @@
 
 #include <stdint.h>
 
+#include <array>
 #include <string>
 #include <vector>
 
@@ -88,6 +89,9 @@ struct Ip6Prefix
 
     uint8_t mLength; ///< The IPv6 prefix length.
 };
+
+using Ip4Address = std::array<uint8_t, 4>;
+using Ip6Address = std::array<uint8_t, 16>;
 
 struct OnMeshPrefix
 {
@@ -496,6 +500,7 @@ struct NeighborInfo
     int8_t   mLastRssi;         ///< Last observed RSSI
     uint16_t mFrameErrorRate;   ///< Frame error rate (0xffff->100%). Requires error tracking feature.
     uint16_t mMessageErrorRate; ///< (IPv6) msg error rate (0xffff->100%). Requires error tracking feature.
+    uint16_t mVersion;          ///< Thread version of the neighbor
     bool     mRxOnWhenIdle;     ///< rx-on-when-idle
     bool     mFullThreadDevice; ///< Full Thread Device
     bool     mFullNetworkData;  ///< Full Network Data
@@ -617,6 +622,83 @@ struct RadioCoexMetrics
     uint32_t mAvgRxRequestToGrantTime;            ///< Average time in usec from rx request to grant.
     uint32_t mNumRxGrantNone;                     ///< Number of rx requests that completed without receiving grant.
     bool     mStopped;                            ///< Stats collection stopped due to saturation.
+};
+
+struct BorderRoutingCounters
+{
+    struct PacketsAndBytes
+    {
+        uint64_t mPackets; ///< The number of packets.
+        uint64_t mBytes;   ///< The number of bytes.
+    };
+
+    PacketsAndBytes mInboundUnicast;    ///< The counters for inbound unicast.
+    PacketsAndBytes mInboundMulticast;  ///< The counters for inbound multicast.
+    PacketsAndBytes mOutboundUnicast;   ///< The counters for outbound unicast.
+    PacketsAndBytes mOutboundMulticast; ///< The counters for outbound multicast.
+    uint32_t        mRaRx;              ///< The number of received RA packets.
+    uint32_t        mRaTxSuccess;       ///< The number of RA packets successfully transmitted.
+    uint32_t        mRaTxFailure;       ///< The number of RA packets failed to transmit.
+    uint32_t        mRsRx;              ///< The number of received RS packets.
+    uint32_t        mRsTxSuccess;       ///< The number of RS packets successfully transmitted.
+    uint32_t        mRsTxFailure;       ///< The number of RS packets failed to transmit.
+};
+
+struct Nat64ComponentState
+{
+    std::string mPrefixManagerState;
+    std::string mTranslatorState;
+};
+
+struct Nat64TrafficCounters
+{
+    uint64_t m4To6Packets; ///< Number of packets translated from IPv4 to IPv6.
+    uint64_t m4To6Bytes;   ///< Sum of size of packets translated from IPv4 to IPv6.
+    uint64_t m6To4Packets; ///< Number of packets translated from IPv6 to IPv4.
+    uint64_t m6To4Bytes;   ///< Sum of size of packets translated from IPv6 to IPv4.
+};
+
+struct Nat64PacketCounters
+{
+    uint64_t m4To6Packets; ///< Number of packets translated from IPv4 to IPv6.
+    uint64_t m6To4Packets; ///< Number of packets translated from IPv6 to IPv4.
+};
+
+struct Nat64ProtocolCounters
+{
+    Nat64TrafficCounters mTotal; ///< Counters for sum of all protocols.
+    Nat64TrafficCounters mIcmp;  ///< Counters for ICMP and ICMPv6.
+    Nat64TrafficCounters mUdp;   ///< Counters for UDP.
+    Nat64TrafficCounters mTcp;   ///< Counters for TCP.
+};
+
+struct Nat64AddressMapping
+{
+    uint64_t   mId;              ///< The unique id for a mapping session.
+    Ip4Address mIp4;             ///< The IPv4 address of the mapping.
+    Ip6Address mIp6;             ///< The IPv6 address of the mapping.
+    uint32_t   mRemainingTimeMs; ///< Remaining time before expiry in milliseconds.
+
+    Nat64ProtocolCounters mCounters;
+};
+
+struct Nat64ErrorCounters
+{
+    Nat64PacketCounters mUnknown;          ///< Packet drop for unknown reasons.
+    Nat64PacketCounters mIllegalPacket;    ///< Packet drop due to failed to parse the datagram.
+    Nat64PacketCounters mUnsupportedProto; ///< Packet drop due to unsupported IP protocol.
+    Nat64PacketCounters mNoMapping;        ///< Packet drop due to no mappings found or mapping pool exhausted.
+};
+
+struct InfraLinkInfo
+{
+    std::string mName;                   ///< The name of the infrastructure network interface.
+    bool        mIsUp;                   ///< Whether the infrastructure network interface is up.
+    bool        mIsRunning;              ///< Whether the infrastructure network interface is running.
+    bool        mIsMulticast;            ///< Whether the infrastructure network interface is multicast.
+    uint32_t    mLinkLocalAddresses;     ///< The number of link-local addresses on the infra network interface.
+    uint32_t    mUniqueLocalAddresses;   ///< The number of unique local addresses on the infra network interface.
+    uint32_t    mGlobalUnicastAddresses; ///< The number of global unicast addresses on the infra network interface.
 };
 
 } // namespace DBus

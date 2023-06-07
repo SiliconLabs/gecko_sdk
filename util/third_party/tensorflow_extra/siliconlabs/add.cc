@@ -24,6 +24,7 @@ limitations under the License.
 #include "tensorflow/lite/kernels/kernel_util.h"
 #include "tensorflow/lite/kernels/op_macros.h"
 #include "tensorflow/lite/micro/kernels/kernel_util.h"
+
 #include "sl_mvp_ml_add.h"
 
 namespace tflite {
@@ -177,13 +178,13 @@ TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node) {
   TFLITE_DCHECK(node->builtin_data != nullptr);
 
   MicroContext* micro_context = GetMicroContext(context);
-  TfLiteTensor* input1 = 
+  TfLiteTensor* input1 =
       micro_context->AllocateTempInputTensor(node, kInputTensor1);
   TF_LITE_ENSURE(context, input1 != nullptr);
-  TfLiteTensor* input2 = 
+  TfLiteTensor* input2 =
       micro_context->AllocateTempInputTensor(node, kInputTensor2);
   TF_LITE_ENSURE(context, input2 != nullptr);
-  TfLiteTensor* output = 
+  TfLiteTensor* output =
       micro_context->AllocateTempOutputTensor(node, kOutputTensor);
   TF_LITE_ENSURE(context, output != nullptr);
 
@@ -235,7 +236,9 @@ TfLiteRegistration Register_ADD() {
           /*profiling_string=*/nullptr,
           /*builtin_code=*/0,
           /*custom_name=*/nullptr,
-          /*version=*/0};
+          /*version=*/0,
+          /*registration_external=*/nullptr
+  };
 }
 
 }  // namespace tflite

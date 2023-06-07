@@ -89,11 +89,11 @@ uint16_t emberAfPluginSubGhzServerSuspendZclMessagesStatus(EmberNodeId nodeId);
  * @return True if the message has been processed by the Sub-GHz plugin and
  *         should be suppressed, false to allow the message through.
  */
-bool emAfSubGhzServerIncomingMessage(EmberIncomingMessageType type,
-                                     EmberApsFrame *apsFrame,
-                                     EmberNodeId sender,
-                                     uint16_t messageLength,
-                                     uint8_t *messageContents);
+bool sli_zigbee_af_sub_ghz_server_incoming_message(EmberIncomingMessageType type,
+                                                   EmberApsFrame *apsFrame,
+                                                   EmberNodeId sender,
+                                                   uint16_t messageLength,
+                                                   uint8_t *messageContents);
 
 /** @} */ // end of name API
 
@@ -119,9 +119,9 @@ bool emAfSubGhzServerIncomingMessage(EmberIncomingMessageType type,
  * Used to handle the incoming Mgmt_NWK_Unsolicited_Enhanced_Update_notify command.
  * Calls the user's emberAfPluginSubGhzUnsolicitedEnhancedUpdateNotifyCallback in response.
  */
-void emAfSubGhzServerZDOMessageReceivedCallback(EmberNodeId sender,
-                                                const uint8_t* message,
-                                                uint16_t length);
+void sli_zigbee_af_sub_ghz_server_zdo_message_received_callback(EmberNodeId sender,
+                                                                const uint8_t* message,
+                                                                uint16_t length);
 
 /** @brief Callback to let the application handle the incoming
  * Mgmt_NWK_Unsolicited_Enhanced_Update_notify command.

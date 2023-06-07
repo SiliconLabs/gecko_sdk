@@ -39,8 +39,6 @@
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
-/// Size of RAIL TX FIFO
-#define RAIL_TX_FIFO_SIZE (256U)
 /// RAIL transmit data length
 #define TX_PAYLOAD_LENGTH (16U)
 /// RAIL transmit channel

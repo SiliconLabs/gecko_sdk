@@ -3,7 +3,7 @@ label:  "Connection"
 package: "Bluetooth"
 description: >
   Bluetooth connection feature
-category: "Bluetooth|Feature"
+category: Bluetooth|Bluetooth LE Controller (Link Layer)|Features with Commands and Events
 quality: "production"
 root_path: "protocol/bluetooth"
 config_file:

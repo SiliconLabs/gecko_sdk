@@ -373,10 +373,6 @@ static void DelayTicksEM1(uint16_t ticks)
 ///  The source files for the USTIMER driver library resides in the
 ///  emdrv/ustimer folder, and are named ustimer.c and ustimer.h.
 ///
-///  @li @ref ustimer_intro
-///  @li @ref ustimer_conf
-///  @li @ref ustimer_api
-///  @li @ref ustimer_example
 ///
 ///@n @section ustimer_intro Introduction
 ///
@@ -420,7 +416,7 @@ static void DelayTicksEM1(uint16_t ticks)
 ///
 ///  @ref USTIMER_Init(), @ref USTIMER_DeInit() @n
 ///    These functions initialize and deinitialize the USTIMER driver. Typically
-///    @htmlonly USTIMER_Init() @endhtmlonly is called once in your startup code.
+///    USTIMER_Init() is called once in your startup code.
 ///
 ///  @ref USTIMER_Delay()
 ///    Delay a given number of microseconds. The MCU enters EM1 during the delay.

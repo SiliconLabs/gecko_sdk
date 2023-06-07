@@ -30,6 +30,11 @@
 #ifndef SL_SENSOR_LUX_CONFIG_H
 #define SL_SENSOR_LUX_CONFIG_H
 
+/***********************************************************************************************//**
+ * @addtogroup sensor_lux
+ * @{
+ **************************************************************************************************/
+
 // <<< Use Configuration Wizard in Context Menu >>>
 
 // <h> Bluetooth Mesh - Lux Sensor
@@ -76,4 +81,5 @@
 
 // <<< end of configuration section >>>
 
+/** @} (end addtogroup sensor_lux) */
 #endif // SL_SENSOR_LUX_CONFIG_H

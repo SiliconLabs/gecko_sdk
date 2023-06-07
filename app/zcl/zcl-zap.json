@@ -28,6 +28,7 @@
     "wwah-silabs-devices.xml",
     "wwah-silabs.xml",
     "z3-nfr.xml",
+    "zigbee-direct.xml",
     "zll-devices.xml",
     "zll.xml"
   ],

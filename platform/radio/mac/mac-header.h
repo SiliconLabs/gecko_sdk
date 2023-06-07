@@ -25,13 +25,13 @@
 uint16_t emberFetchLowHighInt16u(const uint8_t *contents);
 void emberStoreLowHighInt16u(uint8_t *contents, uint16_t value);
 
-uint32_t emFetchInt32u(bool lowHigh, const uint8_t* contents);
-void emStoreInt32u(bool lowHigh, uint8_t* contents, uint32_t value);
+uint32_t sli_util_fetch_int32u(bool lowHigh, const uint8_t* contents);
+void sli_util_store_int32u(bool lowHigh, uint8_t* contents, uint32_t value);
 
 #define emberFetchLowHighInt32u(contents) \
-  (emFetchInt32u(true, contents))
+  (sli_util_fetch_int32u(true, contents))
 #define emberStoreLowHighInt32u(contents, value) \
-  (emStoreInt32u(true, contents, value))
+  (sli_util_store_int32u(true, contents, value))
 
 // -----------------------------------------------------------------------------
 // Connect types stuff

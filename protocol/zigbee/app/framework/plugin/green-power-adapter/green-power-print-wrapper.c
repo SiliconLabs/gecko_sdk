@@ -21,6 +21,7 @@
 * Customer should define these in their own application code
 ***************************************************************************/
 
+#ifndef EMBER_TEST
 WEAK(void emberAfCorePrintWrapper(const char * formatString, ...))
 {
 }
@@ -68,3 +69,4 @@ WEAK(void emberAfGreenPowerClusterPrintBufferWrapper(const uint8_t *buffer, uint
 WEAK(void emberAfGreenPowerClusterPrintStringWrapper(const uint8_t *buffer))
 {
 }
+#endif // !EMBER_TEST

@@ -18,6 +18,7 @@ requires:
   - name: "radio_config_simple_rail_singlephy"
   - name: "status"
   - name: "device_has_radio"
+  - name: "sl_flex_rail_config"
 source:
   - path: "simple_rail_rx.c"
 include:

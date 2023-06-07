@@ -48,29 +48,21 @@
 #define LED1_LABEL           "LED0"
 // <gpio> LED1_GPIO
 // $[GPIO_LED1_GPIO]
-#define LED1_GPIO_PORT       gpioPortB
-#define LED1_GPIO_PIN        4
 // [GPIO_LED1_GPIO]$
 
 #define LED2_LABEL           "LED1"
 // <gpio> LED2_GPIO
 // $[GPIO_LED2_GPIO]
-#define LED2_GPIO_PORT       gpioPortB
-#define LED2_GPIO_PIN        5
 // [GPIO_LED2_GPIO]$
 
 #define LED3_LABEL           "LED2"
 // <gpio> LED3_GPIO
 // $[GPIO_LED3_GPIO]
-#define LED3_GPIO_PORT       gpioPortA
-#define LED3_GPIO_PIN        11
 // [GPIO_LED3_GPIO]$
 
 #define LED4_LABEL           "LED3"
 // <gpio> LED4_GPIO
 // $[GPIO_LED4_GPIO]
-#define LED4_GPIO_PORT       gpioPortA
-#define LED4_GPIO_PIN        12
 // [GPIO_LED4_GPIO]$
 
 // <<< sl:end pin_tool >>>

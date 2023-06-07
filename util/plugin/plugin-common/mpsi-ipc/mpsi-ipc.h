@@ -40,6 +40,6 @@
 /***************************************************************************//**
  * Send a MPSI message over the IPC mechanism.
  ******************************************************************************/
-uint8_t emAfPluginMpsiIpcSendMessage(MpsiMessage_t* mpsiMessage);
+uint8_t sli_mpsi_ipc_send_message(MpsiMessage_t* mpsiMessage);
 
 #endif // __MPSI_IPC_H__

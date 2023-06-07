@@ -21,7 +21,7 @@
 #include "zigbee_common_callback_dispatcher.h"
 
 {# EVENT INIT -#}
-void emAfEventInit(void)
+void sli_zigbee_af_event_init(void)
 {
 {%- for cb in zigbee_af_callback %}
 {%- if cb['callback_type'] == "event_init" or cb['callback_type'] == "init" %}
@@ -31,7 +31,7 @@ void emAfEventInit(void)
 }
 
 {# LOCAL DATA INIT -#}
-void emAfLocalDataInit(void)
+void sli_zigbee_af_local_data_init(void)
 {
 {%- for cb in zigbee_af_callback %}
 {%- if cb['callback_type'] == "local_data_init" %}
@@ -41,7 +41,7 @@ void emAfLocalDataInit(void)
 }
 
 {# INIT DONE -#}
-void emAfInitDone(void)
+void sli_zigbee_af_initDone(void)
 {
 {%- for cb in zigbee_af_callback %}
 {%- if cb['callback_type'] == "init_done" %}
@@ -51,7 +51,7 @@ void emAfInitDone(void)
 }
 
 {# TICK #}
-void emAfTick(void)
+void sli_zigbee_af_tick(void)
 {
 {%- for cb in zigbee_af_callback %}
 {%- if cb['callback_type'] == "tick" %}

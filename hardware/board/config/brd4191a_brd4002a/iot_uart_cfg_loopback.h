@@ -101,24 +101,24 @@
 // <<< sl:start pin_tool >>>
 // <usart signal=TX,RX,(CLK),(CS),(RTS),(CTS)> IOT_UART_CFG_LOOPBACK
 // $[USART_IOT_UART_CFG_LOOPBACK]
-#define IOT_UART_CFG_LOOPBACK_PERIPHERAL         USART0
-#define IOT_UART_CFG_LOOPBACK_PERIPHERAL_NO      0
+#define IOT_UART_CFG_LOOPBACK_PERIPHERAL         USART1
+#define IOT_UART_CFG_LOOPBACK_PERIPHERAL_NO      1
 
-// USART0 TX on PA05
+// USART1 TX on PA05
 #define IOT_UART_CFG_LOOPBACK_TX_PORT            gpioPortA
 #define IOT_UART_CFG_LOOPBACK_TX_PIN             5
 
-// USART0 RX on PA06
+// USART1 RX on PA06
 #define IOT_UART_CFG_LOOPBACK_RX_PORT            gpioPortA
 #define IOT_UART_CFG_LOOPBACK_RX_PIN             6
 
 
 
-// USART0 RTS on PA07
+// USART1 RTS on PA07
 #define IOT_UART_CFG_LOOPBACK_RTS_PORT           gpioPortA
 #define IOT_UART_CFG_LOOPBACK_RTS_PIN            7
 
-// USART0 CTS on PA08
+// USART1 CTS on PA08
 #define IOT_UART_CFG_LOOPBACK_CTS_PORT           gpioPortA
 #define IOT_UART_CFG_LOOPBACK_CTS_PIN            8
 

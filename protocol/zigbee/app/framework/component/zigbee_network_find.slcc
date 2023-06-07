@@ -46,11 +46,11 @@ template_contribution:
   - name: zigbee_stack_callback
     value:
       callback_type: unused_pan_id_found
-      function_name: emAfPluginNetworkFindUnusedPanIdFoundCallback
+      function_name: sli_zigbee_af_network_find_unused_pan_id_found_callback
   - name: zigbee_stack_callback
     value:
       callback_type: scan_error
-      function_name: emAfPluginNetworkFindScanErrorCallback
+      function_name: sli_zigbee_af_network_find_scan_error_callback
   - name: cli_group
     value:
       name: network

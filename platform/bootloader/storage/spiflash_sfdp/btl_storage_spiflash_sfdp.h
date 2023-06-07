@@ -25,17 +25,7 @@
  * @{
  * @page SPI Flash Using JEDEC SFDP Standard
  *   The SPI Flash storage implementation using JEDEC supports all SPI Flash parts
- *   that are JEDEC supported, including the following:
- *   - Spansion S25FL208K (8Mbit)
- *   - Winbond W25X20BV (2Mbit), W25Q80BV (8Mbit)
- *   - Macronix MX25L2006E (2Mbit), MX25L4006E (4Mbit), MX25L8006E (8Mbit),
- *     MX25R8035F (8Mbit low power), MX25L1606E (16Mbit),
- *     MX25U1635E (16Mbit 2Volt), MX25R6435F (64Mbit low power)
- *   - Atmel/Adesto AT25DF041A (4Mbit), AT25DF081A (8Mbit)
- *   - Numonyx/Micron M25P20 (2Mbit), M25P40 (4Mbit), M25P80 (8Mbit),
- *     M25P16 (16Mbit)
- *   - ISSI IS25LQ025B (256Kbit), IS25LQ512B (512Kbit), IS25LQ010B (1Mbit),
- *     IS25LQ020B (2Mbit), IS25LQ040B (4Mbit)
+ *   that support JEDEC SFDP.
  *
  *   The supported devices will be detected and configured at runtime using the
  *   SFDP standard. The driver queries the parameter table present within a

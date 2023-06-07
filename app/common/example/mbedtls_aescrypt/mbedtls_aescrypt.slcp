@@ -26,6 +26,8 @@ readme:
    - path: readme.md
 ui_hints:
    highlight: readme.md
+tag:
+  - hardware:device:ram:8
 component:
    - id: emlib_cmu
    - id: emlib_chip

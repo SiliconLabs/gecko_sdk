@@ -45,11 +45,6 @@ lifeline_reporting(ccc_pair_t * p_ccc_pair)
 void 
 CC_DeviceResetLocally_notification_tx(void)
 {
-  const AGI_PROFILE lifelineProfile = {
-      ASSOCIATION_GROUP_INFO_REPORT_PROFILE_GENERAL,
-      ASSOCIATION_GROUP_INFO_REPORT_PROFILE_GENERAL_LIFELINE
-  };
-    
   transmission_result_t transmissionResult = {
     .nodeId = 0,
     .status = false,
@@ -68,7 +63,7 @@ CC_DeviceResetLocally_notification_tx(void)
     };
 
     if(JOB_STATUS_SUCCESS != cc_engine_multicast_request(
-        &lifelineProfile,
+        NULL,
         ENDPOINT_ROOT,
         &cmdGrp,
         NULL,

@@ -118,14 +118,9 @@ typedef struct {
 } DeviceTableQueueEntry;
 
 static uint8_t permitJoinBroadcastCounter = (PJOIN_BROADCAST_PERIOD - 1);
-#ifdef UC_BUILD
 sl_zigbee_event_t emberAfPluginDeviceTableNewDeviceEvent;
 #define newDeviceEventControl (&emberAfPluginDeviceTableNewDeviceEvent)
-void emberAfPluginDeviceTableNewDeviceEventHandler(SLXU_UC_EVENT);
-#else // !UC_BUILD
-EmberEventControl emberAfPluginDeviceTableNewDeviceEventControl;
-#define newDeviceEventControl emberAfPluginDeviceTableNewDeviceEventControl
-#endif // UC_BUILD
+void emberAfPluginDeviceTableNewDeviceEventHandler(sl_zigbee_event_t * event);
 
 enum {
   DEVICE_DISCOVERY_STATE_ENDPOINTS_SEND = 0x00,
@@ -149,7 +144,7 @@ static uint8_t queueSize;
 void emberAfPluginDeviceTableIndexAddedCallback(uint16_t index);
 
 // Bookkeeping callbacks
-void emAfPluginDeviceTableDeviceLeftCallback(EmberEUI64 newNodeEui64);
+void sli_zigbee_af_device_table_device_left_callback(EmberEUI64 newNodeEui64);
 
 static uint8_t getQueueIndexFromNodeAndEndpoint(DeviceTableQueueEntry * queue,
                                                 uint16_t nodeId,
@@ -247,7 +242,7 @@ static bool addQueueEntry(DeviceTableQueueEntry * queue,
 
   if (queueSize == 1) { // this is the first entry and the state machine is inactive
                         // we have to activated it.
-    slxu_zigbee_event_set_active(newDeviceEventControl);
+    sl_zigbee_event_set_active(newDeviceEventControl);
   }
   return true;
 }
@@ -281,19 +276,20 @@ static void newEndpointDiscovered(EmberAfPluginDeviceTableEntry *p_entry)
   // Figure out if we need to do anything, like write the CIE address to it.
   if (p_entry->deviceId == DEVICE_ID_IAS_ZONE) {
     // write IEEE address to CIE address location
-    emAfDeviceTableSendCieAddressWrite(p_entry->nodeId, p_entry->endpoint);
+    sli_zigbee_af_device_table_send_cie_address_write(p_entry->nodeId, p_entry->endpoint);
   }
   p_entry->state = EMBER_AF_PLUGIN_DEVICE_TABLE_STATE_JOINED;
   // New device is set, time to make the callback to indicate a new device
   // has joined.
   emberAfPluginDeviceTableNewDeviceCallback(p_entry->eui64);
-  emAfDeviceTableSave();
+  sli_zigbee_af_device_table_save();
 }
 
-void emberAfPluginDeviceTableNewDeviceEventHandler(SLXU_UC_EVENT)
+void emberAfPluginDeviceTableNewDeviceEventHandler(sl_zigbee_event_t * event)
 {
   DeviceTableQueueEntry * currentEntryPtr = &taskQueue[0];
-  uint8_t taskQueueIndex, nextState, delay;
+  uint8_t taskQueueIndex, delay = 0;
+  uint8_t nextState = 0;
 
   if ((currentEntryPtr->delay == 0) && (queueSize > 0)) {
     emberAfPrintBigEndianEui64(currentEntryPtr->eui64);
@@ -331,10 +327,10 @@ void emberAfPluginDeviceTableNewDeviceEventHandler(SLXU_UC_EVENT)
     updateQueueEntry(taskQueue, taskQueueIndex, nextState, delay);
   }
   if (queueSize > 0) {
-    slxu_zigbee_event_set_delay_ms(newDeviceEventControl, EVENT_TICK_MS);
+    sl_zigbee_event_set_delay_ms(newDeviceEventControl, EVENT_TICK_MS);
     updateTaskQueueByTick();
   } else {
-    slxu_zigbee_event_set_inactive(newDeviceEventControl);
+    sl_zigbee_event_set_inactive(newDeviceEventControl);
   }
 }
 
@@ -386,7 +382,7 @@ static void newDeviceParseSimpleDescriptorResponse(EmberNodeId nodeId,
   endpointIndex = emberAfDeviceTableGetEndpointFromNodeIdAndEndpoint(nodeId,
                                                                      endpoint);
   if (endpointIndex == EMBER_AF_PLUGIN_DEVICE_TABLE_NULL_INDEX) {
-    endpointIndex = emAfDeviceTableFindFreeDeviceTableIndex();
+    endpointIndex = sli_zigbee_af_device_table_find_free_device_table_index();
     if (endpointIndex == EMBER_AF_PLUGIN_DEVICE_TABLE_NULL_INDEX) {
       // Error case... no more room in the index table
       emberAfCorePrintln("Error: Device Table Full");
@@ -462,8 +458,8 @@ void emberAfDeviceTableNewDeviceJoinHandler(EmberNodeId newNodeId,
                          deviceTable[deviceTableIndex].nodeId,
                          newNodeId);
 
-      emAfDeviceTableUpdateNodeId(deviceTable[deviceTableIndex].nodeId,
-                                  newNodeId);
+      sli_zigbee_af_device_table_update_node_id(deviceTable[deviceTableIndex].nodeId,
+                                                newNodeId);
 
       // Test code for failure to see leave request.
       uint16_t endpointIndex =
@@ -479,7 +475,7 @@ void emberAfDeviceTableNewDeviceJoinHandler(EmberNodeId newNodeId,
       // has joined.
       emberAfPluginDeviceTableRejoinDeviceCallback(deviceTable[deviceTableIndex].eui64);
       // Need to save when the node ID changes.
-      emAfDeviceTableSave();
+      sli_zigbee_af_device_table_save();
     }
   }
 }
@@ -489,10 +485,10 @@ static void newDeviceLeftHandler(EmberEUI64 newNodeEui64)
   uint16_t index = emberAfDeviceTableGetFirstIndexFromEui64(newNodeEui64);
 
   if (index != EMBER_AF_PLUGIN_DEVICE_TABLE_NULL_INDEX) {
-    emAfPluginDeviceTableDeviceLeftCallback(newNodeEui64);
-    emAfPluginDeviceTableDeleteEntry(index);
+    sli_zigbee_af_device_table_device_left_callback(newNodeEui64);
+    sli_zigbee_af_device_table_delete_entry(index);
     // Save on Node Left
-    emAfDeviceTableSave();
+    sli_zigbee_af_device_table_save();
   }
 
   //search and delete any pending task in the taskQueue that matches the eui64
@@ -527,31 +523,16 @@ static EmberStatus broadcastPermitJoin(uint8_t duration)
   return status;
 }
 
-#ifdef UC_BUILD
-void emAfPluginDeviceTableTrustCenterJoinCallback(EmberNodeId newNodeId,
-                                                  EmberEUI64 newNodeEui64,
-                                                  EmberDeviceUpdate status,
-                                                  EmberNodeId parentOfNewNode)
-#else // !UC_BUILD
-void emberAfTrustCenterJoinCallback(EmberNodeId newNodeId,
-                                    EmberEUI64 newNodeEui64,
-                                    EmberNodeId parentOfNewNode,
-                                    EmberDeviceUpdate status,
-                                    EmberJoinDecision decision)
-#endif // UC_BUILD
+void sli_zigbee_af_device_table_trust_center_join_callback(EmberNodeId newNodeId,
+                                                           EmberEUI64 newNodeEui64,
+                                                           EmberDeviceUpdate status,
+                                                           EmberNodeId parentOfNewNode)
 {
   uint8_t i;
 
-#ifdef UC_BUILD
   emberAfCorePrintln("TC Join Callback %2x , status: %d",
                      newNodeId,
                      status);
-#else // !UC_BUILD
-  emberAfCorePrintln("TC Join Callback %2x , decision: %d, status: %d",
-                     newNodeId,
-                     decision,
-                     status);
-#endif // UC_BUILD
 
   for (i = 0; i < 8; i++) {
     emberAfCorePrint("%x",
@@ -576,7 +557,7 @@ void emberAfTrustCenterJoinCallback(EmberNodeId newNodeId,
     default:
       // If the device is in the left sent state, we want to send another
       // left message.
-      if (emAfDeviceTableShouldDeviceLeave(newNodeId)) {
+      if (sli_zigbee_af_device_table_should_device_leave(newNodeId)) {
         return;
       } else {
         emberAfCorePrintln("new device line %d", __LINE__);
@@ -605,10 +586,10 @@ void emberAfTrustCenterJoinCallback(EmberNodeId newNodeId,
  * @param message   Ver.: always
  * @param length   Ver.: always
  */
-bool emAfPluginDeviceTablePreZDOMessageReceived(EmberNodeId emberNodeId,
-                                                EmberApsFrame* apsFrame,
-                                                uint8_t* message,
-                                                uint16_t length)
+bool sli_zigbee_af_device_table_pre_zdo_message_received(EmberNodeId emberNodeId,
+                                                         EmberApsFrame* apsFrame,
+                                                         uint8_t* message,
+                                                         uint16_t length)
 {
   EmberNodeId ieeeSourceNode, remoteDeviceNwkId;
 
@@ -664,7 +645,7 @@ bool emAfPluginDeviceTablePreZDOMessageReceived(EmberNodeId emberNodeId,
   }
 
   emberAfCorePrint("%2x ", emberNodeId);
-  emAfDeviceTablePrintBuffer(message, length);
+  sli_zigbee_af_device_table_print_buffer(message, length);
 
   return false;
 }

@@ -4,12 +4,11 @@ package: Bluetooth
 description: |-
   BLE controller to be used by external Bluetooth stack
 
-category: Bluetooth|Controller
+category: Bluetooth|Bluetooth LE Controller (Link Layer)
 quality: production
 root_path: protocol/bluetooth/bgstack/ll
 config_file:
   - path: config/sl_btctrl_config.h
-  - path: config/sl_btctrl_acceptance_list_config.h
 provides:
   - name: bluetooth_controller
   - name: wireless_stack

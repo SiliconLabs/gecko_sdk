@@ -18,10 +18,6 @@
 #if !defined(OPTION_CLI_H)
 #define OPTION_CLI_H
 
-#ifndef UC_BUILD
-extern EmberCommandEntry emAfOptionCommands[];
-#endif // UC_BUILD
-
-void emAfCliServiceDiscoveryCallback(const EmberAfServiceDiscoveryResult* result);
+void sli_zigbee_af_cli_service_discovery_callback(const EmberAfServiceDiscoveryResult* result);
 
 #endif

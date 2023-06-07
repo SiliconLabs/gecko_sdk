@@ -71,8 +71,9 @@ class Neighbor;
 
 namespace Mac {
 
-constexpr uint32_t kDataPollTimeout = 100; ///< Timeout for receiving Data Frame (in msec).
-constexpr uint32_t kSleepDelay      = 300; ///< Max sleep delay when frame is pending (in msec).
+constexpr uint32_t kDataPollTimeout =
+    OPENTHREAD_CONFIG_MAC_DATA_POLL_TIMEOUT; ///< Timeout for receiving Data Frame (in msec).
+constexpr uint32_t kSleepDelay = 300;        ///< Max sleep delay when frame is pending (in msec)
 
 constexpr uint16_t kScanDurationDefault = OPENTHREAD_CONFIG_MAC_SCAN_DURATION; ///< Duration per channel (in msec).
 
@@ -412,7 +413,7 @@ public:
      *
      */
     void RecordFrameTransmitStatus(const TxFrame &aFrame,
-                                   const RxFrame *aAckFrame,
+                                   RxFrame       *aAckFrame,
                                    Error          aError,
                                    uint8_t        aRetryCount,
                                    bool           aWillRetx);
@@ -586,7 +587,11 @@ public:
      */
     bool IsEnabled(void) const { return mEnabled; }
 
-    void DeleteMacKeys(void) { mMode2KeyMaterial.Clear(); }
+    /**
+     * This method clears the Mode2Key stored in PSA ITS.
+     *
+     */
+    void ClearMode2Key(void) { mMode2KeyMaterial.Clear(); }
 
 #if OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
     /**
@@ -618,6 +623,14 @@ public:
      *
      */
     uint16_t GetCslPeriod(void) const { return mCslPeriod; }
+
+    /**
+     * This method gets the CSL period.
+     *
+     * @returns CSL period in milliseconds.
+     *
+     */
+    uint32_t GetCslPeriodMs(void) const { return mCslPeriod * kUsPerTenSymbols / 1000; }
 
     /**
      * This method sets the CSL period.
@@ -782,7 +795,7 @@ private:
 #if OPENTHREAD_FTD && OPENTHREAD_CONFIG_MAC_CSL_TRANSMITTER_ENABLE
     void ProcessCsl(const RxFrame &aFrame, const Address &aSrcAddr);
 #endif
-#if OPENTHREAD_CONFIG_MLE_LINK_METRICS_SUBJECT_ENABLE
+#if OPENTHREAD_CONFIG_MLE_LINK_METRICS_INITIATOR_ENABLE
     void ProcessEnhAckProbing(const RxFrame &aFrame, const Neighbor &aNeighbor);
 #endif
     static const char *OperationToString(Operation aOperation);

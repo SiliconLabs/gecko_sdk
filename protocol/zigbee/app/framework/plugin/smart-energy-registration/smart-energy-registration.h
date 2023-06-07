@@ -15,8 +15,9 @@
  *
  ******************************************************************************/
 
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #include "smart-energy-registration-config.h"
 #if (EMBER_AF_PLUGIN_SMART_ENERGY_REGISTRATION_ESI_REDISCOVERY == 1)
 #define ESI_REDISCOVERY
@@ -24,17 +25,6 @@
 #if (EMBER_AF_PLUGIN_SMART_ENERGY_REGISTRATION_ALLOW_NON_ESI_TIME_SERVERS == 1)
 #define ALLOW_NON_ESI_TIME_SERVERS
 #endif
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_SMART_ENERGY_REGISTRATION
-#define SL_CATALOG_ZIGBEE_SMART_ENERGY_REGISTRATION_PRESENT
-#endif
-#ifdef EMBER_AF_PLUGIN_SMART_ENERGY_REGISTRATION_ESI_REDISCOVERY
-#define ESI_REDISCOVERY
-#endif
-#ifdef EMBER_AF_PLUGIN_SMART_ENERGY_REGISTRATION_ALLOW_NON_ESI_TIME_SERVERS
-#define ALLOW_NON_ESI_TIME_SERVERS
-#endif
-#endif // UC_BUILD
 
 /**
  * @defgroup smart-energy-registration  Smart Energy Registration
@@ -90,7 +80,7 @@
     #ifdef ESI_REDISCOVERY
       #define EMBER_AF_PLUGIN_SMART_ENERGY_REGISTRATION_DELAY_PERIOD \
   (EMBER_AF_PLUGIN_SMART_ENERGY_REGISTRATION_ESI_DISCOVERY_PERIOD * MILLISECOND_TICKS_PER_HOUR)
-extern uint32_t emAfPluginSmartEnergyRegistrationDiscoveryPeriod;
+extern uint32_t sli_zigbee_af_smart_energy_registration_discovery_period;
     #endif
   #endif
 
@@ -100,12 +90,12 @@ extern uint32_t emAfPluginSmartEnergyRegistrationDiscoveryPeriod;
   #if defined(EMBER_AF_PLUGIN_SMART_ENERGY_REGISTRATION_ESI_DISCOVERY_REQUIRED) \
   || defined(ALLOW_NON_ESI_TIME_SERVERS)
     #define EMBER_AF_PLUGIN_SMART_ENERGY_REGISTRATION_TIME_SOURCE_REQUIRED
-void emAfPluginSmartEnergyRegistrationReadAttributesResponseCallback(uint8_t *buffer,
-                                                                     uint16_t bufLen);
+void sli_zigbee_af_smart_energy_registration_read_attributes_response_callback(uint8_t *buffer,
+                                                                               uint16_t bufLen);
   #endif
 
 #endif // SL_CATALOG_ZIGBEE_SMART_ENERGY_REGISTRATION_PRESENT
 
 /** @} */ // end of smart-energy-registration
 
-uint8_t emAfPluginSmartEnergyRegistrationTrustCenterKeyEstablishmentEndpoint(void);
+uint8_t sli_zigbee_af_smart_energy_registration_trust_center_key_establishment_endpoint(void);

@@ -112,7 +112,7 @@ template_contribution:
       event: platform_init
       include: sl_device_init_hfxo.h
       handler: sl_device_init_hfxo
-    priority: -9700
+    priority: -9650
   - name: device_init_clocks_present
     value: hfxo
 documentation:

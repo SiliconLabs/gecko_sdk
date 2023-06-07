@@ -20,22 +20,12 @@
 #include "../../util/common.h"
 #include "simple-metering-client.h"
 
-#ifdef UC_BUILD
 #include "simple-metering-client-config.h"
 #include "zap-cluster-command-parser.h"
-#endif // UC_BUILD
 
 static uint32_t profileIntervals[EMBER_AF_PLUGIN_SIMPLE_METERING_CLIENT_NUMBER_OF_INTERVALS_SUPPORTED];
 
 uint16_t removeEndpointId = 0xFFFF;
-
-#ifndef UC_BUILD
-void emberAfSimpleMeteringClusterClientDefaultResponseCallback(uint8_t endpoint,
-                                                               uint8_t commandId,
-                                                               EmberAfStatus status)
-{
-}
-#endif //!UC_BUILD
 
 static void clusterRequestCommon(uint8_t responseCommandId)
 {
@@ -73,7 +63,7 @@ static void clusterRequestCommon(uint8_t responseCommandId)
   }
 }
 
-uint32_t emAfSimpleMeteringClusterGetLatestPeriod(void)
+uint32_t sli_zigbee_af_simple_metering_cluster_get_latest_period(void)
 {
   emberAfSimpleMeteringClusterPrintln("Returning [0x%4x]", profileIntervals[0]);
   return profileIntervals[0];
@@ -95,8 +85,6 @@ bool emberAfSimpleMeteringClusterRemoveMirrorCallback(void)
   clusterRequestCommon(ZCL_MIRROR_REMOVED_COMMAND_ID);
   return true;
 }
-
-#ifdef UC_BUILD
 
 bool emberAfSimpleMeteringClusterGetProfileResponseCallback(EmberAfClusterCommand *cmd)
 {
@@ -155,58 +143,6 @@ bool emberAfSimpleMeteringClusterSupplyStatusResponseCallback(EmberAfClusterComm
   return true;
 }
 
-#else // !UC_BUILD
-
-bool emberAfSimpleMeteringClusterGetProfileResponseCallback(uint32_t endTime,
-                                                            uint8_t status,
-                                                            uint8_t profileIntervalPeriod,
-                                                            uint8_t numberOfPeriodsDelivered,
-                                                            uint8_t* intervals)
-{
-  uint8_t i;
-  emberAfSimpleMeteringClusterPrint("RX: GetProfileResponse 0x%4x, 0x%x, 0x%x, 0x%x",
-                                    endTime,
-                                    status,
-                                    profileIntervalPeriod,
-                                    numberOfPeriodsDelivered);
-  if (numberOfPeriodsDelivered > EMBER_AF_PLUGIN_SIMPLE_METERING_CLIENT_NUMBER_OF_INTERVALS_SUPPORTED) {
-    numberOfPeriodsDelivered = EMBER_AF_PLUGIN_SIMPLE_METERING_CLIENT_NUMBER_OF_INTERVALS_SUPPORTED;
-  }
-  for (i = 0; i < numberOfPeriodsDelivered; i++) {
-    emberAfSimpleMeteringClusterPrint(" [0x%4x]",
-                                      emberAfGetInt24u(intervals + i * 3, 0, 3));
-    profileIntervals[i] = emberAfGetInt24u(intervals + i * 3, 0, 3);
-  }
-  emberAfSimpleMeteringClusterPrintln("");
-  emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
-  return true;
-}
-
-bool emberAfSimpleMeteringClusterRequestFastPollModeResponseCallback(uint8_t appliedUpdatePeriod,
-                                                                     uint32_t fastPollModeEndtime)
-{
-  emberAfSimpleMeteringClusterPrintln("RX: RequestFastPollModeResponse 0x%x, 0x%4x 0x%4x 0x%4x",
-                                      appliedUpdatePeriod,
-                                      fastPollModeEndtime,
-                                      emberAfGetCurrentTime(),
-                                      (fastPollModeEndtime - emberAfGetCurrentTime()));
-  emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
-  return true;
-}
-
-bool emberAfSimpleMeteringClusterSupplyStatusResponseCallback(uint32_t providerId,
-                                                              uint32_t issuerEventId,
-                                                              uint32_t implementationDateTime,
-                                                              uint8_t supplyStatus)
-{
-  emberAfSimpleMeteringClusterPrintln("Supply Status Callback");
-  return true;
-}
-
-#endif // UC_BUILD
-
-#ifdef UC_BUILD
-
 uint32_t emberAfSimpleMeteringClusterClientCommandParse(sl_service_opcode_t opcode,
                                                         sl_service_function_context_t *context)
 {
@@ -249,5 +185,3 @@ uint32_t emberAfSimpleMeteringClusterClientCommandParse(sl_service_opcode_t opco
           ? EMBER_ZCL_STATUS_SUCCESS
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
-
-#endif // UC_BUILD

@@ -22,10 +22,10 @@ template_contribution:
     value: PSA_WANT_KEY_TYPE_CHACHA20
   - name: psa_crypto_config
     value: PSA_WANT_ALG_STREAM_CIPHER
-  - name: psa_crypto_config
+  - name: psa_crypto_builtin_config
     value: "MBEDTLS_PSA_BUILTIN_KEY_TYPE_CHACHA20 1"
     condition: [mbedtls_chachapoly]
-  - name: psa_crypto_config
+  - name: psa_crypto_builtin_config
     value: "MBEDTLS_PSA_BUILTIN_ALG_STREAM_CIPHER 1"
     condition: [mbedtls_chachapoly]
 documentation:

@@ -34,8 +34,11 @@
 #include "em_device.h"
 #include "sl_common.h"
 #include "em_system.h"
-#include "em_gpio.h"
 #include "em_bus.h"
+
+#if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_80)
+#include "em_gpio.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -301,7 +304,7 @@ __STATIC_INLINE void CHIP_Init(void)
   *(volatile uint32_t *)(EMU_BASE + 0x1A4) |= 0x1f << 10;
 #endif
 
-#if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_200)
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
   SYSTEM_ChipRevision_TypeDef chipRev;
   SYSTEM_ChipRevisionGet(&chipRev);
 

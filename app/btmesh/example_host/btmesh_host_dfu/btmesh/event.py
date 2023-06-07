@@ -21,7 +21,10 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 import dataclasses
+import logging
 from typing import ClassVar
+
+logger = logging.getLogger(__name__)
 
 
 @dataclasses.dataclass
@@ -77,5 +80,14 @@ class LocalEventBus:
     def emit(self, event: LocalEvent) -> None:
         if not isinstance(event, LocalEvent):
             raise TypeError("Local event bus can handle local events only.")
+        logger.info(repr(event))
         for event_handler in self._local_event_handlers.get(event.name, []):
             event_handler(event)
+
+@dataclasses.dataclass
+class NCPComOpenEvent(LocalEvent):
+    name: ClassVar[str] = "btmesh_levt_ncp_com_open"
+
+@dataclasses.dataclass
+class FactoryResetEvent(LocalEvent):
+    name: ClassVar[str] = "btmesh_levt_factory_reset"

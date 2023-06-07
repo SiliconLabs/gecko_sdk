@@ -14,16 +14,14 @@
  * sections of the MSLA applicable to Source Code.
  *
  ******************************************************************************/
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #ifdef SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
 #include "app/framework/include/af.h"
 #else // !SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
 #include "green-power-adapter.h"
 #endif //SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
-#else //!UC_BUILD
-#include "app/framework/include/af.h"
-#endif //UC_BUILD
 #include "green-power-server.h"
 
 /** @brief Green power commissioning notification callback
@@ -238,5 +236,39 @@ WEAK(void emberAfGreenPowerClusterCommissioningMessageStatusNotificationCallback
                                                                                  EmberOutgoingMessageType messageType,
                                                                                  uint16_t destination,
                                                                                  EmberStatus status))
+{
+}
+
+/** @brief Update alias information callback.
+ *
+ * This function is called by the green power server plugin during
+ * commissioning to update alias information from user.
+ *
+ * @param gpdAddr GPD address Ver.: always
+ * @param alias        Ver.: always
+ *
+ * @returns true if the alias is updated by the caller.
+ */
+WEAK(bool emberAfPluginGreenPowerServerUpdateAliasCallback(EmberGpAddress *gpdAddr,
+                                                           uint16_t *alias))
+{
+  return false;
+}
+
+/** @brief Green power server pairing status callback
+ *
+ * This function is called by the Green Power Server plugin during the pairing
+ * process to indicate the status. This may be called multiple times for a single
+ * pairing session. This provides the status as well as the current GPD context.
+ * This callback can be monitored to get information in case a GPD commissioning
+ * that has started ended up in success or failure. This callback does not give
+ * any information about a commissioning GPDF that gets filtered out ealier in the
+ * commissioning processing.
+ *
+ * @param status status of the pairing Ver.: always
+ * @param commissioningGpd context of the GPD that is currently commissioning Ver.: always
+ */
+WEAK(void emberAfGreenPowerServerPairingStatusCallback(EmberSinkPairingStatus status,
+                                                       EmberCommissioningGpd *commissioningGpd))
 {
 }

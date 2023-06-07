@@ -79,7 +79,7 @@
   - name: cortexm33
   - name: armv8m.main
   - name: device_security_vault
-  - name: device_dcdc_buck/**
+  - name: device_dcdc_buck
   - name: device_pa_10dbm
   - name: device_pa_0dbm
   - name: device_has_acmp

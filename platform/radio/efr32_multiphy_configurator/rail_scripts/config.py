@@ -183,6 +183,9 @@ PROTECTED_FIELDS_SOL = {
     ],
 }
 
+# TODO_S3: Fix protected fields on Viper
+PROTECTED_FIELDS_VIPER = PROTECTED_FIELDS_BOBCAT.copy()
+PROTECTED_FIELDS_RAINIER = PROTECTED_FIELDS_VIPER.copy()
 PROTECTED_FIELDS_CARACAL = PROTECTED_FIELDS_BOBCAT.copy()
 
 def mergeDictionaries(dict1, dict2):
@@ -210,7 +213,9 @@ PROTECTED_FIELDS = {
     'sol': mergeDictionaries(PROTECTED_FIELDS_BASE, PROTECTED_FIELDS_SOL),
     'leopard': mergeDictionaries(PROTECTED_FIELDS_BASE, None),
     'margay': mergeDictionaries(PROTECTED_FIELDS_BASE, PROTECTED_FIELDS_OCELOT),
+    'viper': mergeDictionaries(PROTECTED_FIELDS_BASE, PROTECTED_FIELDS_VIPER),
     'caracal': mergeDictionaries(PROTECTED_FIELDS_BASE, PROTECTED_FIELDS_CARACAL),
+    'rainier': mergeDictionaries(PROTECTED_FIELDS_BASE, PROTECTED_FIELDS_RAINIER),
 }
 
 # Radio config action "enum"

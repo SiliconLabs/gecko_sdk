@@ -44,7 +44,6 @@ component:
   - id: btmesh_stack_lc_server
   - id: btmesh_stack_lc_client
   - id: btmesh_stack_lc_setup_server
-  - id: btmesh_stack_lpn
   - id: btmesh_stack_mbt_client
   - id: btmesh_stack_mbt_server
   - id: btmesh_stack_migration

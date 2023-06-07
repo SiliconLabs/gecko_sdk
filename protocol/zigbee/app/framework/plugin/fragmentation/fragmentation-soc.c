@@ -25,15 +25,15 @@
 //-----------------------------------------------------------------------------
 // Functions
 
-void emAfPluginFragmentationPlatformInitCallback(void)
+void sli_zigbee_af_fragmentation_platform_init_callback(void)
 {
   emberFragmentWindowSize = EMBER_AF_PLUGIN_FRAGMENTATION_RX_WINDOW_SIZE;
 }
 
-EmberStatus emAfPluginFragmentationSend(txFragmentedPacket* txPacket,
-                                        uint8_t fragmentNumber,
-                                        uint16_t fragmentLen,
-                                        uint16_t offset)
+EmberStatus sli_zigbee_af_fragmentation_send(txFragmentedPacket* txPacket,
+                                             uint8_t fragmentNumber,
+                                             uint16_t fragmentLen,
+                                             uint16_t offset)
 {
   EmberStatus status;
   EmberMessageBuffer message;
@@ -51,16 +51,16 @@ EmberStatus emAfPluginFragmentationSend(txFragmentedPacket* txPacket,
   return status;
 }
 
-void emAfPluginFragmentationHandleSourceRoute(txFragmentedPacket* txPacket,
-                                              uint16_t indexOrDestination)
+void sli_zigbee_af_fragmentation_handle_source_route(txFragmentedPacket* txPacket,
+                                                     uint16_t indexOrDestination)
 {
   // Nothing to do on SOC.  This will be handled later by the NWK code
   // calling into the application to ask for a source route.
 }
 
-void emAfPluginFragmentationSendReply(EmberNodeId sender,
-                                      EmberApsFrame* apsFrame,
-                                      rxFragmentedPacket* rxPacket)
+void sli_zigbee_af_fragmentation_send_reply(EmberNodeId sender,
+                                            EmberApsFrame* apsFrame,
+                                            rxFragmentedPacket* rxPacket)
 {
   emberSetReplyFragmentData(HIGH_LOW_TO_INT(rxPacket->fragmentMask,
                                             rxPacket->fragmentBase));

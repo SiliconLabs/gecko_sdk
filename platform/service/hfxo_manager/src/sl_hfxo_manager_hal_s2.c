@@ -33,13 +33,26 @@
 #include "sli_hfxo_manager.h"
 #include "sl_hfxo_manager.h"
 #include "sl_hfxo_manager_config.h"
+#include "sli_sleeptimer.h"
 #include "sl_status.h"
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include "sl_component_catalog.h"
+#endif
+#if defined(SYSRTC_PRESENT)
+#include "peripheral_sysrtc.h"
+#endif
 
 #include <stdbool.h>
 
 /*******************************************************************************
  *********************************   DEFINES   *********************************
  ******************************************************************************/
+
+#if (defined(SL_HFXO_MANAGER_SLEEPY_CRYSTAL_SUPPORT) \
+  && (SL_HFXO_MANAGER_SLEEPY_CRYSTAL_SUPPORT == 1)   \
+  && defined(SL_CATALOG_POWER_MANAGER_DEEPSLEEP_BLOCKING_HFXO_RESTORE_PRESENT))
+#error Component power_manager_deepsleep_blocking_hfxo_restore is not compatible with SL_HFXO_MANAGER_SLEEPY_CRYSTAL_SUPPORT configuration
+#endif
 
 // Defines for hidden field FORCERAWCLK in HFXO_CTRL register
 #define _HFXO_MANAGER_CTRL_FORCERAWCLK_SHIFT                  31
@@ -88,6 +101,7 @@
 
 // Error flag to indicate if we failed the startup process
 static bool error_flag = false;
+
 #if (SL_HFXO_MANAGER_SLEEPY_CRYSTAL_SUPPORT == 1)
 // Error retry counter
 static uint8_t error_try_cnt = 0;
@@ -115,6 +129,11 @@ static uint32_t sleepy_xtal_settings_corebias = SLEEPY_XTAL_SETTING_DEFAULT_CORE
 __WEAK void sli_hfxo_manager_notify_ready_for_power_manager(void);
 
 /***************************************************************************//**
+ * HFXO PRS ready notification callback for internal use with power manager
+ ******************************************************************************/
+__WEAK void sli_hfxo_notify_ready_for_power_manager_from_prs(void);
+
+/***************************************************************************//**
  * Hardware specific initialization.
  ******************************************************************************/
 void sli_hfxo_manager_init_hardware(void)
@@ -129,12 +148,25 @@ void sli_hfxo_manager_init_hardware(void)
 #endif
 
   HFXO0->IEN_CLR = HFXO_IEN_RDY | HFXO_IEN_DNSERR | HFXO_IEN_COREBIASOPTERR;
+#if defined(SYSRTC_PRESENT)
+  HFXO0->IEN_CLR = HFXO_IEN_PRSRDY;
+#endif
+
   HFXO0->IF_CLR = HFXO_IF_RDY | HFXO_IF_DNSERR | HFXO_IEN_COREBIASOPTERR;
+#if defined(SYSRTC_PRESENT)
+  HFXO0->IF_CLR = HFXO_IF_PRSRDY;
+#endif
 
   NVIC_ClearPendingIRQ(HFXO_IRQ_NUMBER);
   NVIC_EnableIRQ(HFXO_IRQ_NUMBER);
 
   HFXO0->IEN_SET = HFXO_IEN_RDY | HFXO_IEN_DNSERR | HFXO_IEN_COREBIASOPTERR;
+
+#if defined(SYSRTC_PRESENT)
+  HFXO0->IEN_SET = HFXO_IEN_PRSRDY;
+  HFXO0->CTRL &= ~(_HFXO_CTRL_DISONDEMANDPRS_MASK & HFXO_CTRL_DISONDEMANDPRS_DEFAULT);
+  HFXO0->CTRL |= HFXO_CTRL_PRSSTATUSSEL0_PRSHWREQ;
+#endif
 }
 
 /***************************************************************************//**
@@ -168,7 +200,11 @@ bool sli_hfxo_manager_is_hfxo_ready(bool wait)
   bool ready = false;
 
   do {
+#if defined(SYSRTC_PRESENT)
+    ready = (((HFXO0->STATUS & (HFXO_STATUS_RDY | HFXO_STATUS_PRSRDY)) != 0) && !error_flag) ? true : false;
+#else
     ready = (((HFXO0->STATUS & HFXO_STATUS_RDY) != 0) && !error_flag) ? true : false;
+#endif
   } while (!ready && wait);
 
   return ready;
@@ -197,6 +233,26 @@ void sl_hfxo_manager_irq_handler(void)
 #if (SL_HFXO_MANAGER_SLEEPY_CRYSTAL_SUPPORT == 1)
   bool disondemand =  (HFXO0->CTRL & _HFXO_CTRL_DISONDEMAND_MASK) ? true : false;
   bool forceen = (HFXO0->CTRL & _HFXO_CTRL_FORCEEN_MASK) ? true : false;
+#endif
+
+#if defined(SYSRTC_PRESENT)
+  if (irq_flag & HFXO_IF_PRSRDY) {
+    // Clear PRS RDY flag and EM23ONDEMAND
+    HFXO0->IF_CLR = irq_flag & HFXO_IF_PRSRDY;
+    HFXO0->CTRL_CLR = HFXO_CTRL_EM23ONDEMAND;
+
+    sli_hfxo_manager_end_startup_measurement();
+
+    // Notify power manager HFXO is ready
+    sli_hfxo_notify_ready_for_power_manager_from_prs();
+    sli_hfxo_manager_notify_ready_for_power_manager();
+
+    // Update sleep on isr exit flag
+    sli_sleeptimer_update_sleep_on_isr_exit(true);
+
+    // Clear interrupt to reset PRS signal
+    sl_sysrtc_clear_group_interrupts(0u, SYSRTC_GRP0_IF_CMP1);
+  }
 #endif
 
   // RDY Interrupt Flag Handling

@@ -4,8 +4,7 @@ from pycalcmodel.core.output import ModelOutput, ModelOutputType
 def build_modem_regs_margay(model,profile):
 
     #Start with Ocelot regs
-    family = model.part_family.lower()
-    build_modem_regs_ocelot(model, profile, family)
+    build_modem_regs_ocelot(model, profile)
 
     #Additional Margay regs
     profile.outputs.append(ModelOutput(model.vars.RAC_LNAMIXTRIM1_LNAMIXMXRBIAS1, '', ModelOutputType.SVD_REG_FIELD,

@@ -422,6 +422,16 @@ struct Addresses
 };
 
 /**
+ * This structure represents two PAN IDs corresponding to source and destination.
+ *
+ */
+struct PanIds
+{
+    PanId mSource;      ///< Source PAN ID.
+    PanId mDestination; ///< Destination PAN ID.
+};
+
+/**
  * This class represents a MAC key.
  *
  */
@@ -530,7 +540,7 @@ public:
      * @param[out] aKey  A reference to the output the key.
      *
      */
-    void ExtractKey(Key &aKey);
+    void ExtractKey(Key &aKey) const;
 
     /**
      * This method converts `KeyMaterial` to a `Crypto::Key`.

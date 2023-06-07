@@ -119,7 +119,7 @@ EmberStatus emberAfPluginNetworkCreatorSecurityOpenNetworkWithKeyPair(EmberEUI64
  * known key is a security risk and the default policy of the stack is to deny
  * such rejoins. Calling this function to allow rejoins with the well-known key
  * will allow the rejoins for a period of
- * emAllowTcRejoinsUsingWellKnownKeyTimeoutSec seconds.
+ * sli_zigbee_allow_tc_rejoins_using_well_known_key_timeout_sec seconds.
  *
  * @return An ::EmberStatus value describing the success or failure of the
  * policy change. If this node is not currently on a network,

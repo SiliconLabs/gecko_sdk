@@ -22,6 +22,7 @@ class CALC_Mbus_Ocelot(CALC_Mbus):
             ['ModeT_O2M_32p768k', 8, 'Mode T, Other to Meter, 100kbps'],
             ['ModeS_32p768k', 9, 'Mode S, 32.768kbps'],
             ['ModeN_6p4k', 10, 'Mode N, 6.4kbps'],
+            ['ModeTC_M2O_100k', 11, 'Mode T + C, Meter to Other, 100kbps'],
         ]
         var.var_enum = CreateModelVariableEnum(
             'MbusModeEnum',
@@ -32,11 +33,17 @@ class CALC_Mbus_Ocelot(CALC_Mbus):
 
         if model.profile.name.lower() == 'mbus':
             mode = model.vars.mbus_mode.value
-            if mode == model.vars.mbus_mode.var_enum.ModeN_6p4k:
-                #New logic for ModeN 6.4kbps
-                len = 16
-                sync_a = long(0xf68d)
-                sync_b = long(0xf672)
+            if mode in [model.vars.mbus_mode.var_enum.ModeTC_M2O_100k,
+                        model.vars.mbus_mode.var_enum.ModeN_6p4k]:
+                if mode == model.vars.mbus_mode.var_enum.ModeTC_M2O_100k:
+                    len = 10
+                    sync_a = long(0x3d)
+                    sync_b = long(0)
+                elif mode == model.vars.mbus_mode.var_enum.ModeN_6p4k:
+                    #New logic for ModeN 6.4kbps
+                    len = 16
+                    sync_a = long(0xf68d)
+                    sync_b = long(0xf672)
 
                 # Set syncword 0/1 based on whether frame format A or B is selected
                 # If only one syncword exists, don't flip them for frame B format

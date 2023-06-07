@@ -14,8 +14,8 @@
   - id: cpc_secondary_driver_uart_usart
     instance: 
     - vcom
-  - id: cpc_config_vcom_usart
+  - id: cpc_config_vcom
     instance:
     - vcom
 - requires:
-  - name: cpc_config_vcom_usart
+  - name: cpc_config_vcom

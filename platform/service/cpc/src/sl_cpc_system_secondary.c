@@ -51,8 +51,9 @@
 #if (defined(SL_CATALOG_EMLIB_CORE_PRESENT))
 #include "em_core.h"
 #include "em_chip.h"
-#if defined(RMU_PRESENT)
 #include "em_rmu.h"
+#if defined(EMU_PRESENT)
+#include "em_emu.h"
 #endif
 #endif
 
@@ -118,7 +119,7 @@ static void on_poll(uint8_t endpoint_id,
                     void *poll_data,
                     uint32_t poll_data_length,
                     void **reply_data,
-                    uint32_t * reply_data_lenght,
+                    uint32_t * reply_data_length,
                     void **on_write_complete_arg);
 
 static void enter_irq_timer_callback(sli_cpc_timer_handle_t *handle,
@@ -350,11 +351,11 @@ sl_status_t sli_cpc_send_disconnection_notification(uint8_t endpoint_id)
 SL_WEAK sl_cpc_system_status_t cpc_get_reset_reason(void)
 {
   sl_cpc_system_status_t last_status = STATUS_RESET_UNKNOWN;
+  uint32_t reset_cause = RMU_ResetCauseGet();
+
+  RMU_ResetCauseClear();
+
 #if defined(RMU_PRESENT)
-
-  uint32_t reset_cause;
-
-  reset_cause = RMU_ResetCauseGet();
 
  #if defined(_RMU_RSTCAUSE_MASK)
   if (reset_cause & RMU_RSTCAUSE_PORST) {
@@ -376,7 +377,10 @@ SL_WEAK sl_cpc_system_status_t cpc_get_reset_reason(void)
   } else if (reset_cause & RMU_RSTCAUSE_EM4RST) {
     last_status = STATUS_RESET_OTHER;
   }
- #else
+  #endif
+
+#elif defined(EMU_PRESENT)
+
  #if defined(_EMU_RSTCTRL_AVDDBODRMODE_MASK)
   if (reset_cause & rmuResetAVDD) {
     last_status = STATUS_RESET_FAULT;
@@ -422,9 +426,6 @@ SL_WEAK sl_cpc_system_status_t cpc_get_reset_reason(void)
     last_status = STATUS_RESET_SOFTWARE;
   }
  #endif
- #endif
-
-  RMU_ResetCauseClear();
 #endif
 
   return last_status;
@@ -607,18 +608,36 @@ static void on_property_get_fc_validation_value(sli_cpc_system_cmd_t *tx_command
 
 /***************************************************************************//**
  * Command ID:  CMD_PROPERTY_GET
- * Property ID: PROP_BUS_SPEED_VALUE
- *   Send the bus speed value of the secondary to the primary.
+ * Property ID: PROP_BUS_BITRATE_VALUE
+ *   Send the bus bitrate value of the secondary to the primary.
  ******************************************************************************/
-static void on_property_get_bus_speed_value(sli_cpc_system_cmd_t *tx_command)
+static void on_property_get_bus_bitrate_value(sli_cpc_system_cmd_t *tx_command)
 {
   sli_cpc_system_property_cmd_t *prop_cmd_buff;
-  uint32_t *bus_speed_value;
+  uint32_t *bus_bitrate_value;
 
   prop_cmd_buff = (sli_cpc_system_property_cmd_t*) tx_command->payload;
-  prop_cmd_buff->property_id = PROP_BUS_SPEED_VALUE;
-  bus_speed_value = (uint32_t *)(prop_cmd_buff->payload);
-  *bus_speed_value = sli_cpc_drv_get_bus_speed();
+  prop_cmd_buff->property_id = PROP_BUS_BITRATE_VALUE;
+  bus_bitrate_value = (uint32_t *)(prop_cmd_buff->payload);
+  *bus_bitrate_value = sli_cpc_drv_get_bus_bitrate();
+
+  tx_command->header.length = sizeof(sli_cpc_property_id_t) + sizeof(uint32_t);
+}
+
+/***************************************************************************//**
+ * Command ID:  CMD_PROPERTY_GET
+ * Property ID: PROP_BUS_MAX_BITRATE_VALUE
+ *   Send the bus max bitrate value of the secondary to the primary.
+ ******************************************************************************/
+static void on_property_get_bus_max_bitrate_value(sli_cpc_system_cmd_t *tx_command)
+{
+  sli_cpc_system_property_cmd_t *prop_cmd_buff;
+  uint32_t *bus_max_bitrate_value;
+
+  prop_cmd_buff = (sli_cpc_system_property_cmd_t*) tx_command->payload;
+  prop_cmd_buff->property_id = PROP_BUS_MAX_BITRATE_VALUE;
+  bus_max_bitrate_value = (uint32_t *)(prop_cmd_buff->payload);
+  *bus_max_bitrate_value = sli_cpc_drv_get_bus_max_bitrate();
 
   tx_command->header.length = sizeof(sli_cpc_property_id_t) + sizeof(uint32_t);
 }
@@ -849,15 +868,20 @@ static void on_property_set_state(uint8_t endpoint_id,
                                   sli_cpc_system_cmd_t *tx_command,
                                   sli_cpc_system_cmd_t *rx_command)
 {
-  (void)rx_command;
+  sli_cpc_system_property_cmd_t *rx_prop_command = (sli_cpc_system_property_cmd_t*)(rx_command->payload);
+
+  sl_cpc_endpoint_state_t *ep_state = (sl_cpc_endpoint_state_t *)rx_prop_command->payload;
+
+  tx_command->header.length = sizeof(sli_cpc_system_property_cmd_t) + sizeof(sl_cpc_endpoint_state_t);
 
   sli_cpc_system_property_cmd_t *tx_property_command;
   tx_property_command = (sli_cpc_system_property_cmd_t*) tx_command->payload;
-
-  sli_cpc_remote_disconnected(endpoint_id);
-
   tx_command->header.length = sizeof(sli_cpc_property_id_t);
   tx_property_command->property_id = EP_ID_TO_PROPERTY_STATE(endpoint_id);
+
+  if (*ep_state == SL_CPC_STATE_CLOSING || *ep_state == SL_CPC_STATE_CLOSED) {
+    sli_cpc_remote_disconnected(endpoint_id);
+  }
 }
 
 /***************************************************************************//**
@@ -982,11 +1006,11 @@ static void on_property_set_read_only(sli_cpc_system_cmd_t *tx_command)
  *   of the operation.
  ******************************************************************************/
 static void on_noop(sli_cpc_system_cmd_t *noop,
-                    uint32_t *reply_data_lenght)
+                    uint32_t *reply_data_length)
 {
   noop->header.command_id = CMD_SYSTEM_NOOP;
   noop->header.length = 0;
-  *reply_data_lenght = sizeof(sli_cpc_system_cmd_header_t) + noop->header.length;
+  *reply_data_length = sizeof(sli_cpc_system_cmd_header_t) + noop->header.length;
 }
 
 /***************************************************************************//**
@@ -1027,7 +1051,7 @@ SL_WEAK sl_cpc_system_status_t cpc_secondary_on_reset_request(sli_cpc_system_reb
  *   _reboot_mode'
  ******************************************************************************/
 static void on_reset(sli_cpc_system_cmd_t *reset,
-                     uint32_t *reply_data_lenght,
+                     uint32_t *reply_data_length,
                      void **on_write_complete_arg)
 {
   sl_cpc_system_status_t *reset_status;
@@ -1036,7 +1060,7 @@ static void on_reset(sli_cpc_system_cmd_t *reset,
   reset->header.command_id = CMD_SYSTEM_RESET;
 
   reset->header.length = sizeof(sl_cpc_system_status_t);
-  *reply_data_lenght = sizeof(sli_cpc_system_cmd_header_t) + reset->header.length;
+  *reply_data_length = sizeof(sli_cpc_system_cmd_header_t) + reset->header.length;
 
   *reset_status = cpc_secondary_on_reset_request(prop_bootloader_reboot_mode);
 
@@ -1062,7 +1086,7 @@ static void on_reset(sli_cpc_system_cmd_t *reset,
  ******************************************************************************/
 static void on_property_get(sli_cpc_system_cmd_t *rx_command,
                             sli_cpc_system_cmd_t *reply,
-                            uint32_t *reply_data_lenght)
+                            uint32_t *reply_data_length)
 {
   sli_cpc_system_property_cmd_t *rx_property_cmd = (sli_cpc_system_property_cmd_t *)rx_command->payload;
 
@@ -1099,8 +1123,12 @@ static void on_property_get(sli_cpc_system_cmd_t *rx_command,
       on_property_get_fc_validation_value(reply);
       break;
 
-    case PROP_BUS_SPEED_VALUE:
-      on_property_get_bus_speed_value(reply);
+    case PROP_BUS_BITRATE_VALUE:
+      on_property_get_bus_bitrate_value(reply);
+      break;
+
+    case PROP_BUS_MAX_BITRATE_VALUE:
+      on_property_get_bus_max_bitrate_value(reply);
       break;
 
     case PROP_BOOTLOADER_INFO:
@@ -1145,7 +1173,7 @@ static void on_property_get(sli_cpc_system_cmd_t *rx_command,
       break;
   }
 
-  *reply_data_lenght = sizeof(sli_cpc_system_cmd_header_t) + reply->header.length;
+  *reply_data_length = sizeof(sli_cpc_system_cmd_header_t) + reply->header.length;
 }
 
 /***************************************************************************//**
@@ -1156,7 +1184,7 @@ static void on_property_get(sli_cpc_system_cmd_t *rx_command,
  ******************************************************************************/
 static void on_property_set(sli_cpc_system_cmd_t* rx_command,
                             sli_cpc_system_cmd_t *reply,
-                            uint32_t * reply_data_lenght)
+                            uint32_t * reply_data_length)
 {
   sli_cpc_system_property_cmd_t *rx_property_cmd;
 
@@ -1201,7 +1229,7 @@ static void on_property_set(sli_cpc_system_cmd_t* rx_command,
     }
   }
 
-  *reply_data_lenght = sizeof(sli_cpc_system_cmd_header_t) + reply->header.length;
+  *reply_data_length = sizeof(sli_cpc_system_cmd_header_t) + reply->header.length;
 }
 
 /***************************************************************************//**
@@ -1212,17 +1240,17 @@ static void on_poll(uint8_t endpoint_id,
                     void *poll_data,
                     uint32_t poll_data_length,
                     void **reply_data,
-                    uint32_t *reply_data_lenght,
+                    uint32_t *reply_data_length,
                     void **on_write_complete_arg)
 {
   uint32_t frame_type = (uint32_t)arg;
   sli_cpc_system_cmd_t *rx_command = (sli_cpc_system_cmd_t *)poll_data;
   sli_cpc_system_cmd_t *tx_command;
   *reply_data = NULL;
-  *reply_data_lenght = 0;
+  *reply_data_length = 0;
   (void)endpoint_id;
 
-  if (frame_type != SLI_CPC_HDLC_FRAME_TYPE_UNNUMBERED && frame_type != SLI_CPC_HDLC_FRAME_TYPE_DATA) {
+  if (frame_type != SLI_CPC_HDLC_FRAME_TYPE_UNNUMBERED && frame_type != SLI_CPC_HDLC_FRAME_TYPE_INFORMATION) {
     EFM_ASSERT(false);
     return; // Drop packet
   }
@@ -1258,24 +1286,25 @@ static void on_poll(uint8_t endpoint_id,
     sli_cpc_system_property_cmd_t *rx_property_cmd = (sli_cpc_system_property_cmd_t *)rx_command->payload;
     switch (rx_command->header.command_id) {
       case CMD_SYSTEM_RESET:
-        on_reset((sli_cpc_system_cmd_t *)*reply_data, reply_data_lenght, on_write_complete_arg);
+        on_reset((sli_cpc_system_cmd_t *)*reply_data, reply_data_length, on_write_complete_arg);
         break;
 
       case CMD_SYSTEM_PROP_VALUE_GET:
         if (rx_property_cmd->property_id == PROP_RX_CAPABILITY
             || rx_property_cmd->property_id == PROP_CAPABILITIES
-            || rx_property_cmd->property_id == PROP_BUS_SPEED_VALUE
+            || rx_property_cmd->property_id == PROP_BUS_BITRATE_VALUE
+            || rx_property_cmd->property_id == PROP_BUS_MAX_BITRATE_VALUE
             || rx_property_cmd->property_id == PROP_PROTOCOL_VERSION
             || rx_property_cmd->property_id == PROP_BOOTLOADER_INFO
             || rx_property_cmd->property_id == PROP_SECONDARY_CPC_VERSION
             || rx_property_cmd->property_id == PROP_SECONDARY_APP_VERSION) {
-          on_property_get(rx_command, (sli_cpc_system_cmd_t *)*reply_data, reply_data_lenght);
+          on_property_get(rx_command, (sli_cpc_system_cmd_t *)*reply_data, reply_data_length);
         }
         break;
 
       case CMD_SYSTEM_PROP_VALUE_SET:
         if (rx_property_cmd->property_id == PROP_BOOTLOADER_REBOOT_MODE) {
-          on_property_set(rx_command, (sli_cpc_system_cmd_t *)*reply_data, reply_data_lenght);
+          on_property_set(rx_command, (sli_cpc_system_cmd_t *)*reply_data, reply_data_length);
         }
         break;
 
@@ -1283,18 +1312,18 @@ static void on_poll(uint8_t endpoint_id,
         EFM_ASSERT(false);
         return; // Drop packet
     }
-  } else if (frame_type == SLI_CPC_HDLC_FRAME_TYPE_DATA) {
+  } else if (frame_type == SLI_CPC_HDLC_FRAME_TYPE_INFORMATION) {
     switch (rx_command->header.command_id) {
       case CMD_SYSTEM_NOOP:
-        on_noop((sli_cpc_system_cmd_t *)*reply_data, reply_data_lenght);
+        on_noop((sli_cpc_system_cmd_t *)*reply_data, reply_data_length);
         break;
 
       case CMD_SYSTEM_PROP_VALUE_GET:
-        on_property_get(rx_command, (sli_cpc_system_cmd_t *)*reply_data, reply_data_lenght);
+        on_property_get(rx_command, (sli_cpc_system_cmd_t *)*reply_data, reply_data_length);
         break;
 
       case CMD_SYSTEM_PROP_VALUE_SET:
-        on_property_set(rx_command, (sli_cpc_system_cmd_t *)*reply_data, reply_data_lenght);
+        on_property_set(rx_command, (sli_cpc_system_cmd_t *)*reply_data, reply_data_length);
         break;
 
       default:

@@ -186,7 +186,7 @@ sl_status_t sl_widget_title_init(sl_widget_title_t * const title);
  * @return sl_status_t SL_STATUS_OK on success, SL_STATUS_FAIL on error
  *****************************************************************************/
 __STATIC_INLINE sl_status_t sl_widget_title_reset(sl_widget_title_t
-                                                *const title)
+                                                  *const title)
 {
   return sl_widget_title_init(title);
 }
@@ -214,7 +214,7 @@ sl_status_t sl_widget_button_init(sl_widget_button_t * const button);
  * @return sl_status_t SL_STATUS_OK on success, SL_STATUS_FAIL on error
  *****************************************************************************/
 __STATIC_INLINE sl_status_t sl_widget_button_reset(sl_widget_button_t
-                                                 *const button)
+                                                   *const button)
 {
   return sl_widget_button_init(button);
 }
@@ -251,7 +251,7 @@ sl_status_t sl_widget_optionlist_init(sl_widget_option_list_t * const optionlist
  * @return sl_status_t SL_STATUS_OK on success, SL_STATUS_FAIL on error
  *****************************************************************************/
 __STATIC_INLINE sl_status_t sl_widget_optionlist_reset(sl_widget_option_list_t *
-                                                     const optionlist)
+                                                       const optionlist)
 {
   return sl_widget_optionlist_init(optionlist);
 }
@@ -323,7 +323,7 @@ sl_status_t sl_widget_progressbar_init(sl_widget_progressbar_t
  * @return sl_status_t SL_STATUS_OK on success, SL_STATUS_FAIL on error
  *****************************************************************************/
 __STATIC_INLINE sl_status_t sl_widget_progressbar_reset(sl_widget_progressbar_t
-                                                      *const progressbar)
+                                                        *const progressbar)
 {
   return sl_widget_progressbar_init(progressbar);
 }
@@ -386,7 +386,7 @@ sl_status_t sl_widget_textbox_init(sl_widget_textbox_t * const textbox);
  * @return sl_status_t SL_STATUS_OK on success, SL_STATUS_FAIL on error
  *****************************************************************************/
 __STATIC_INLINE sl_status_t sl_widget_textbox_reset(sl_widget_textbox_t
-                                                  *const textbox)
+                                                    *const textbox)
 {
   return sl_widget_textbox_init(textbox);
 }

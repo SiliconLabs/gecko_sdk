@@ -6,7 +6,7 @@ description: >
   structures based on the included components and their configuration. This
   component is automatically included when required and should not be included
   directly by the application.
-category: "Bluetooth|Stack"
+category: Bluetooth|Bluetooth Host (Stack)
 quality: "production"
 provides:
   - name: "bluetooth_configuration"
@@ -25,7 +25,7 @@ include:
       - path: "sli_bt_periodic_adv_config.h"
       - path: "sli_bt_periodic_advertiser_config.h"
       - path: "sli_bt_sync_config.h"
-      - path: "sli_bt_channel_sounding_config.h"
+      - path: "sli_bt_accept_list_config.h"
 source:
   - path: "src/sli_bt_advertiser_config.c"
   - path: "src/sli_bt_connection_config.c"
@@ -35,7 +35,7 @@ source:
   - path: "src/sli_bt_periodic_adv_config.c"
   - path: "src/sli_bt_periodic_advertiser_config.c"
   - path: "src/sli_bt_sync_config.c"
-  - path: "src/sli_bt_channel_sounding_config.c"
+  - path: "src/sli_bt_accept_list_config.c"
 template_contribution:
   - name: component_catalog
     value: bluetooth_configuration

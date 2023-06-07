@@ -137,7 +137,7 @@ public:
      * @param[in] aHandler      The attach result handler.
      *
      */
-    void Attach(const std::string &         aNetworkName,
+    void Attach(const std::string          &aNetworkName,
                 uint16_t                    aPanId,
                 uint64_t                    aExtPanId,
                 const std::vector<uint8_t> &aNetworkKey,
@@ -294,6 +294,8 @@ private:
 
     std::map<uint16_t, size_t> mUnsecurePortRefCounter;
 
+    bool mWaitingMgmtSetResponse =
+        false; // During waiting for mgmt set response, calls to AttachHandler by StateChangedCallback will be ignored
     int64_t       mAttachDelayMs = 0;
     AttachHandler mAttachHandler;
     ResultHandler mJoinerHandler;

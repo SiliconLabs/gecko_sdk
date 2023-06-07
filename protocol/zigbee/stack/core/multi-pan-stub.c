@@ -18,33 +18,33 @@
 #include PLATFORM_HEADER
 #include "hal/hal.h"
 #include "core/multi-pan.h"
-#include "core/ember-multi-network.h" // for emNetworkDescriptor and emPanInfoData
+#include "core/ember-multi-network.h" // for sli_zigbee_network_descriptor and sli_zigbee_pan_info_data
 #include "mac-child.h" // for sl_mac_child_entry_t
 #include "stack/include/ember-types-internal.h" // for PAN_ID_OKAY
 
-const EmberLibraryStatus emMultiPanLibraryStatus = EMBER_LIBRARY_IS_STUB;
+const EmberLibraryStatus sli_zigbee_multi_pan_library_status = EMBER_LIBRARY_IS_STUB;
 
 #ifndef EMBER_MULTI_NETWORK_STRIPPED
 
-extern sl_mac_child_entry_t emChildTableData[];
-extern uint16_t emChildStatusData[];
-extern uint32_t emChildTimersData[];
-extern uint16_t emChildLqiData[];
-extern uint8_t emEndDeviceTimeoutData[];
-extern uint8_t emRouteRecordTableData[];
-extern EmBroadcastTableEntry emBroadcastTableData[];
+extern sl_mac_child_entry_t sli_zigbee_child_table_data[];
+extern uint16_t sli_zigbee_child_status_data[];
+extern uint32_t sli_zigbee_child_timers_data[];
+extern uint16_t sli_zigbee_child_lqi_data[];
+extern uint8_t sli_zigbee_end_device_timeout_data[];
+extern uint8_t sli_zigbee_route_record_table_data[];
+extern sli_zigbee_broadcast_table_entry_t sli_zigbee_broadcast_table_data[];
 
-void emNetworkPanInfoDataInit(uint8_t nwkIndex, EmberNetworkInfo *curNetwork)
+void sli_zigbee_network_pan_info_data_init(uint8_t nwkIndex, EmberNetworkInfo *curNetwork)
 {
   (void)nwkIndex;
-  curNetwork->panInfoData->childTable = &(emChildTableData[0]);
-  curNetwork->panInfoData->childStatus = &(emChildStatusData[0]);
-  curNetwork->panInfoData->childTimers = &(emChildTimersData[0]);
-  curNetwork->panInfoData->childLqi = &(emChildLqiData[0]);
-  curNetwork->panInfoData->endDeviceTimeout = &(emEndDeviceTimeoutData[0]);
+  curNetwork->panInfoData->childTable = &(sli_zigbee_child_table_data[0]);
+  curNetwork->panInfoData->childStatus = &(sli_zigbee_child_status_data[0]);
+  curNetwork->panInfoData->childTimers = &(sli_zigbee_child_timers_data[0]);
+  curNetwork->panInfoData->childLqi = &(sli_zigbee_child_lqi_data[0]);
+  curNetwork->panInfoData->endDeviceTimeout = &(sli_zigbee_end_device_timeout_data[0]);
   curNetwork->panInfoData->endDeviceChildCount = 0;
-  curNetwork->panInfoData->routeRecordTable = &(emRouteRecordTableData[0]);
-  curNetwork->panInfoData->broadcastTable = &(emBroadcastTableData[0]);
+  curNetwork->panInfoData->routeRecordTable = &(sli_zigbee_route_record_table_data[0]);
+  curNetwork->panInfoData->broadcastTable = &(sli_zigbee_broadcast_table_data[0]);
   curNetwork->panInfoData->broadcastHead = 0;
   curNetwork->panInfoData->fastLinkStatusCount = 0;
   curNetwork->panInfoData->permitJoining = false;
@@ -55,13 +55,13 @@ void emNetworkPanInfoDataInit(uint8_t nwkIndex, EmberNetworkInfo *curNetwork)
   curNetwork->panInfoData->newPanId = PAN_ID_OKAY;
 }
 
-void emSetChildTableForCurrentNetwork(void)
+void sli_zigbee_set_child_table_for_current_network(void)
 {
 }
 
-void emGetChildTokenForCurrentNetwork(void *data,
-                                      uint16_t tokenAddress,
-                                      uint8_t childIndex)
+void sli_zigbee_get_child_token_for_current_network(void *data,
+                                                    uint16_t tokenAddress,
+                                                    uint8_t childIndex)
 {
   switch (tokenAddress) {
     case TOKEN_STACK_CHILD_TABLE: {
@@ -79,9 +79,9 @@ void emGetChildTokenForCurrentNetwork(void *data,
   }
 }
 
-void emSetChildTokenForCurrentNetwork(uint16_t tokenAddress,
-                                      uint8_t childIndex,
-                                      void *data)
+void sli_zigbee_set_child_token_for_current_network(uint16_t tokenAddress,
+                                                    uint8_t childIndex,
+                                                    void *data)
 {
   switch (tokenAddress) {
     case TOKEN_STACK_CHILD_TABLE: {
@@ -99,22 +99,22 @@ void emSetChildTokenForCurrentNetwork(uint16_t tokenAddress,
   }
 }
 
-EmberEvent* emGetForkedEvent(EmberEvent *list)
+EmberEvent* sli_zigbee_get_forked_event(EmberEvent *list)
 {
   return list;
 }
-uint8_t emGetNetworkIndexFromEvent(EmberEvent *event,
-                                   EmberEvent *list)
+uint8_t sli_zigbee_get_network_index_from_event(EmberEvent *event,
+                                                EmberEvent *list)
 {
   return EMBER_NULL_NETWORK_INDEX;
 }
 
-uint8_t emGetNetworkIndexForForkedGlobal(void)
+uint8_t sli_zigbee_get_network_index_for_forked_global(void)
 {
   return 0;
 }
 
-bool emIsPanIdInUse(EmberPanId panId)
+bool sli_zigbee_is_pan_id_in_use(EmberPanId panId)
 {
   return false;
 }
@@ -122,7 +122,7 @@ bool emIsPanIdInUse(EmberPanId panId)
 // for libaries build on Raspi
 void fakeCallToMultiPanInit(void)
 {
-  emMultiPanInit();
+  sli_zigbee_multi_pan_init();
 }
 
 #endif // EMBER_MULTI_NETWORK_STRIPPED

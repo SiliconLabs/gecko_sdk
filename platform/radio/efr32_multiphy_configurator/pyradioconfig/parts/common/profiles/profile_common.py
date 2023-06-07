@@ -21,9 +21,9 @@ def buildCrcInputs(model, profile):
     IProfile.make_optional_input(profile, model.vars.crc_input_order, 'crc', readable_name="CRC Input Bit Endian",  default=model.vars.crc_input_order.var_enum.LSB_FIRST)
     IProfile.make_optional_input(profile, model.vars.crc_invert,      'crc', readable_name="CRC Invert",            default=False)
 
-def buildCrcOutputs(model, profile, family):
+def buildCrcOutputs(model, profile):
     # These are named differently in 90nm parts vs Panther
-    if family in ["dumbo", "jumbo", "nerio", "nixi"]:
+    if model.part_family.lower() in ["dumbo", "jumbo", "nerio", "nixi", "unit_test_part"]:
         profile.outputs.append(eval(_buildModelOutputStringFromRegisterField('CRC_CTRL_PADCRCINPUT', 'crc')))
         profile.outputs.append(eval(_buildModelOutputStringFromRegisterField('CRC_CTRL_BITSPERWORD', 'crc')))
         profile.outputs.append(eval(_buildModelOutputStringFromRegisterField('CRC_CTRL_BITREVERSE', 'crc')))
@@ -99,7 +99,7 @@ def buildFecOutputs(model, profile):
 """
 Builds the inputs and outputs of the general frame settings
 """
-def buildFrameInputs(model, profile, family):
+def buildFrameInputs(model, profile):
     MIN_FRAME_LENGTH = 1
     MAX_FRAME_LENGTH = 0x7fffffff
     MIN_HEADER_LENGTH = 1
@@ -115,9 +115,9 @@ def buildFrameInputs(model, profile, family):
     # -- Payload --
     IProfile.make_optional_input(profile, model.vars.payload_white_en, 'frame_payload', default=False, readable_name="Payload Whitening Enable")
     IProfile.make_optional_input(profile, model.vars.payload_crc_en, 'frame_payload', default=True, readable_name="Insert/Check CRC after payload")
-    if family != 'dumbo':
+    if model.part_family.lower() not in ['dumbo','unit_test_part']:
         IProfile.make_hidden_input(profile, model.vars.payload_addtrailtxdata_en, 'frame_payload', readable_name="Add Trail TX Data to subframe")
-    if family == 'nerio' or family == 'nixi':           # TODO Is this correct?  Do we include this in Nixi?
+    if model.part_family.lower() in ['nerio','nixi']:           # TODO Is this correct?  Do we include this in Nixi?
         IProfile.make_hidden_input(profile, model.vars.payload_excludesubframewcnt_en, 'frame_payload', readable_name="Exclude words in subframe from Word Couunter")
 
     # -- Header --
@@ -125,9 +125,9 @@ def buildFrameInputs(model, profile, family):
     IProfile.make_optional_input(profile, model.vars.header_calc_crc, 'frame_header', default=False, readable_name="CRC Header")
     # IProfile.make_required_input(profile, model.vars.header_include_crc, 'frame_header', readable_name="Insert/Check CRC after header", default=False, default_visibility=ModelInputDefaultVisibilityType.HIDDEN))
     IProfile.make_optional_input(profile, model.vars.header_white_en, 'frame_header', default=False, readable_name="Whiten Header")
-    if family != 'dumbo':
+    if model.part_family.lower() not in ['dumbo','unit_test_part']:
         IProfile.make_hidden_input(profile, model.vars.header_addtrailtxdata_en, 'frame_header',       readable_name="Add Trail TX Data to subframe")
-    if family not in ["dumbo", "jumbo"]:
+    if model.part_family.lower() not in ["dumbo", "jumbo", "unit_test_part"]:
         # TODO Is this correct?  Do we include this in Nixi?
         IProfile.make_hidden_input(profile, model.vars.header_excludesubframewcnt_en, 'frame_payload', readable_name="Exclude words in subframe from Word Couunter")
 
@@ -175,7 +175,7 @@ def buildFrameInputs(model, profile, family):
     IProfile.make_optional_input(profile, model.vars.frame_type_6_filter, 'frame_type_length', default=False, readable_name="Apply Address Filter for Frame Type 6")
     IProfile.make_optional_input(profile, model.vars.frame_type_7_filter, 'frame_type_length', default=False, readable_name="Apply Address Filter for Frame Type 7")
 
-def buildFrameOutputs(model, profile, family):
+def buildFrameOutputs(model, profile):
     profile.outputs.append(eval(_buildModelOutputStringFromRegisterField('FRC_FECCTRL_BLOCKWHITEMODE', 'frame')))
 
     profile.outputs.append(eval(_buildModelOutputStringFromRegisterField('FRC_CTRL_BITSPERWORD', 'frame')))
@@ -198,9 +198,9 @@ def buildFrameOutputs(model, profile, family):
     profile.outputs.append(eval(_buildModelOutputStringFromRegisterField('FRC_MAXLENGTH_MAXLENGTH', 'frame')))
 
     #These are named differently in 90nm parts vs Panther
-    if family in ["dumbo", "jumbo", "nerio", "nixi"]:
+    if model.part_family.lower() in ["dumbo", "jumbo", "nerio", "nixi", "unit_test_part"]:
 
-        if family != 'dumbo':
+        if model.part_family.lower() not in ['dumbo','unit_test_part']:
             profile.outputs.append(eval(_buildModelOutputStringFromRegisterField('FRC_FCD0_ADDTRAILTXDATA', 'frame')))
         profile.outputs.append(eval(_buildModelOutputStringFromRegisterField('FRC_FCD0_SKIPWHITE', 'frame')))
         profile.outputs.append(eval(_buildModelOutputStringFromRegisterField('FRC_FCD0_SKIPCRC', 'frame')))
@@ -209,7 +209,7 @@ def buildFrameOutputs(model, profile, family):
         profile.outputs.append(eval(_buildModelOutputStringFromRegisterField('FRC_FCD0_BUFFER', 'frame')))
         profile.outputs.append(eval(_buildModelOutputStringFromRegisterField('FRC_FCD0_WORDS', 'frame')))
 
-        if family != 'dumbo':
+        if model.part_family.lower() not in ['dumbo','unit_test_part']:
             profile.outputs.append(eval(_buildModelOutputStringFromRegisterField('FRC_FCD1_ADDTRAILTXDATA', 'frame')))
         profile.outputs.append(eval(_buildModelOutputStringFromRegisterField('FRC_FCD1_SKIPWHITE', 'frame')))
         profile.outputs.append(eval(_buildModelOutputStringFromRegisterField('FRC_FCD1_SKIPCRC', 'frame')))
@@ -218,7 +218,7 @@ def buildFrameOutputs(model, profile, family):
         profile.outputs.append(eval(_buildModelOutputStringFromRegisterField('FRC_FCD1_BUFFER', 'frame')))
         profile.outputs.append(eval(_buildModelOutputStringFromRegisterField('FRC_FCD1_WORDS', 'frame')))
 
-        if family != 'dumbo':
+        if model.part_family.lower() not in ['dumbo','unit_test_part']:
             profile.outputs.append(eval(_buildModelOutputStringFromRegisterField('FRC_FCD2_ADDTRAILTXDATA', 'frame')))
         profile.outputs.append(eval(_buildModelOutputStringFromRegisterField('FRC_FCD2_SKIPWHITE', 'frame')))
         profile.outputs.append(eval(_buildModelOutputStringFromRegisterField('FRC_FCD2_SKIPCRC', 'frame')))
@@ -227,7 +227,7 @@ def buildFrameOutputs(model, profile, family):
         profile.outputs.append(eval(_buildModelOutputStringFromRegisterField('FRC_FCD2_BUFFER', 'frame')))
         profile.outputs.append(eval(_buildModelOutputStringFromRegisterField('FRC_FCD2_WORDS', 'frame')))
 
-        if family != 'dumbo':
+        if model.part_family.lower() not in ['dumbo','unit_test_part']:
             profile.outputs.append(eval(_buildModelOutputStringFromRegisterField('FRC_FCD3_ADDTRAILTXDATA', 'frame')))
         profile.outputs.append(eval(_buildModelOutputStringFromRegisterField('FRC_FCD3_SKIPWHITE', 'frame')))
         profile.outputs.append(eval(_buildModelOutputStringFromRegisterField('FRC_FCD3_SKIPCRC', 'frame')))
@@ -236,7 +236,7 @@ def buildFrameOutputs(model, profile, family):
         profile.outputs.append(eval(_buildModelOutputStringFromRegisterField('FRC_FCD3_BUFFER', 'frame')))
         profile.outputs.append(eval(_buildModelOutputStringFromRegisterField('FRC_FCD3_WORDS', 'frame')))
 
-        if family in ["nerio"]:
+        if model.part_family.lower() in ["nerio"]:
             profile.outputs.append(ModelOutput(model.vars.FRC_FCD0_EXCLUDESUBFRAMEWCNT, '', ModelOutputType.SVD_REG_FIELD, readable_name='FRC.FCD0.EXCLUDESUBFRAMEWCNT'))
             profile.outputs.append(ModelOutput(model.vars.FRC_FCD1_EXCLUDESUBFRAMEWCNT, '', ModelOutputType.SVD_REG_FIELD, readable_name='FRC.FCD1.EXCLUDESUBFRAMEWCNT'))
             profile.outputs.append(ModelOutput(model.vars.FRC_FCD2_EXCLUDESUBFRAMEWCNT, '', ModelOutputType.SVD_REG_FIELD, readable_name='FRC.FCD2.EXCLUDESUBFRAMEWCNT'))
@@ -244,7 +244,7 @@ def buildFrameOutputs(model, profile, family):
             profile.outputs.append(ModelOutput(model.vars.FRC_CTRL_RATESELECT,         '', ModelOutputType.SVD_REG_FIELD, readable_name='FRC.CTRL.RATESELECT'))
 
     # These are named differently in 90nm parts vs Panther
-    if family not in ["dumbo", "jumbo", "nerio", "nixi"]:
+    if model.part_family.lower() not in ["dumbo", "jumbo", "nerio", "nixi", "unit_test_part"]:
         profile.outputs.append(eval(_buildModelOutputStringFromRegisterField('FRC_FCD0_ADDTRAILTXDATA', 'frame')))
         profile.outputs.append(eval(_buildModelOutputStringFromRegisterField('FRC_FCD0_SKIPWHITE', 'frame')))
         profile.outputs.append(eval(_buildModelOutputStringFromRegisterField('FRC_FCD0_SKIPCRC', 'frame')))

@@ -49,6 +49,11 @@ class BtmeshErrorCode(enum.IntEnum):
     DIST_CLT_CANCEL_DIST_FAILED = enum.auto()
     DFU_CLT_ADD_RECEIVER_FAILED = enum.auto()
     DFU_CLT_CANCEL_DIST_FAILED = enum.auto()
+    PROXY_CONNECT_SCAN_FAILED = enum.auto()
+    PROXY_CONNECT_TIMEOUT = enum.auto()
+    PROXY_NODE_CONN_DOES_NOT_EXIST = enum.auto()
+    PROXY_NODE_CONN_ALREADY_EXISTS = enum.auto()
+    BT_CONN_DOES_NOT_EXIST = enum.auto()
 
 
 class BtmeshException(Exception):

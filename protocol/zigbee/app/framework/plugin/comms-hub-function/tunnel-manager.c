@@ -7,7 +7,7 @@
  * function is called whenever data is to be sent to the device, and the
  * destroy function is called whenever the tunnel to the device should
  * be torn down. There are also 1 callback that the tunnel manager will call.
- * It is emAfPluginCommsHubFunctionTunnelDataReceivedCallback which is
+ * It is sli_zigbee_af_comms_hub_function_tunnel_data_received_callback which is
  * called when data is received from a tunnel.
  *******************************************************************************
  * # License
@@ -33,7 +33,7 @@
 typedef enum {
   CLIENT_TUNNEL,
   SERVER_TUNNEL,
-} EmAfCommsHubFunctionTunnelType;
+} sli_zigbee_af_comms_hub_function_tunnel_type;
 
 typedef enum {
   UNUSED_TUNNEL,
@@ -41,19 +41,19 @@ typedef enum {
   RESPONSE_PENDING_TUNNEL,
   ACTIVE_TUNNEL,
   CLOSED_TUNNEL
-} EmAfCommsHubFunctionTunnelState;
+} sli_zigbee_af_comms_hub_function_tunnel_state;
 
 typedef struct {
   EmberEUI64 remoteDeviceId;
   uint8_t remoteEndpoint;
   EmberNodeId remoteNodeId;
-  EmAfCommsHubFunctionTunnelType type;
-  EmAfCommsHubFunctionTunnelState state;
+  sli_zigbee_af_comms_hub_function_tunnel_type type;
+  sli_zigbee_af_comms_hub_function_tunnel_state state;
   uint8_t tunnelId;
   uint32_t timeoutMSec;
-} EmAfCommsHubFunctionTunnel;
+} sli_zigbee_af_comms_hub_function_tunnel;
 
-static EmAfCommsHubFunctionTunnel tunnels[EMBER_AF_PLUGIN_COMMS_HUB_FUNCTION_TUNNEL_LIMIT];
+static sli_zigbee_af_comms_hub_function_tunnel tunnels[EMBER_AF_PLUGIN_COMMS_HUB_FUNCTION_TUNNEL_LIMIT];
 
 /*
  * The Tunneling-client plugin only allows one tunnel to be created at a time.
@@ -87,19 +87,9 @@ static uint8_t message[1500];
 #define GBCS_TUNNELING_PROTOCOL_ID            0x06
 #define GBCS_TUNNELING_FLOW_CONTROL_SUPPORT   false
 
-#ifdef UC_BUILD
-#else // UC_BUILD
-
-#endif
-
-#ifdef UC_BUILD
 sl_zigbee_event_t emberAfPluginCommsHubFunctionTunnelEvent;
 #define tunnelEventControl (&emberAfPluginCommsHubFunctionTunnelEvent)
-void emberAfPluginCommsHubFunctionTunnelEventHandler(SLXU_UC_EVENT);
-#else
-EmberEventControl emberAfPluginCommsHubFunctionTunnelEventControl;
-#define tunnelEventControl emberAfPluginCommsHubFunctionTunnelEventControl
-#endif
+void emberAfPluginCommsHubFunctionTunnelEventHandler(sl_zigbee_event_t * event);
 
 //------------------------------------------------------------------------------
 // Forward Declarations
@@ -108,20 +98,18 @@ static bool requestTunnel(uint8_t tunnelIndex);
 static bool handleRequestTunnelFailure(uint8_t tunnelIndex,
                                        EmberAfPluginTunnelingClientStatus status);
 static uint8_t findTunnelByDeviceId(EmberEUI64 remoteDeviceId);
-static uint8_t findTunnelByTunnelId(uint8_t tunnelId, EmAfCommsHubFunctionTunnelType type);
+static uint8_t findTunnelByTunnelId(uint8_t tunnelId, sli_zigbee_af_comms_hub_function_tunnel_type type);
 
 //------------------------------------------------------------------------------
 // API Functions
 
-#ifdef UC_BUILD
-
-void emAfPluginCommsHubFunctionTunnelInit(uint8_t init_level)
+void sli_zigbee_af_comms_hub_function_tunnel_init(uint8_t init_level)
 {
   switch (init_level) {
     case SL_ZIGBEE_INIT_LEVEL_EVENT:
     {
-      slxu_zigbee_event_init(&emberAfPluginCommsHubFunctionTunnelEvent,
-                             emberAfPluginCommsHubFunctionTunnelEventHandler);
+      sl_zigbee_event_init(&emberAfPluginCommsHubFunctionTunnelEvent,
+                           emberAfPluginCommsHubFunctionTunnelEventHandler);
       emberAfDebugPrintln("CHF: TunnelInit");
       break;
     }
@@ -152,47 +140,14 @@ void emAfPluginCommsHubFunctionTunnelInit(uint8_t init_level)
   }
 }
 
-#else // !UC_BUILD
-
-void emAfPluginCommsHubFunctionTunnelInit(void)
-{
-  uint8_t i;
-
-  slxu_zigbee_event_init(&emberAfPluginCommsHubFunctionTunnelEvent,
-                         emberAfPluginCommsHubFunctionTunnelEventHandler);
-
-  emberAfDebugPrintln("CHF: TunnelInit");
-
-  for (i = 0; i < EMBER_AF_PLUGIN_COMMS_HUB_FUNCTION_TUNNEL_LIMIT; i++) {
-    tunnels[i].state = UNUSED_TUNNEL;
-  }
-
-  // Per GBCS v0.8 section 10.2.2, Devices supporting the Tunneling Cluster
-  // as a Server shall have a MaximumIncomingTransferSize set to 1500 octets,
-  // in line with the ZSE default.  All Devices supporting the Tunneling
-  // Cluster shall use this value in any RequestTunnelResponse command and
-  // any RequestTunnel command.
-  //
-  // If the tunneling client's configured maximumIncomingTransferSize
-  // is less than 1500 we'll log a warning.
-  //
-  // See equivalent check in emberAfPluginTunnelingClientTunnelOpenedCallback()
-  if (EMBER_AF_PLUGIN_TUNNELING_CLIENT_MAXIMUM_INCOMING_TRANSFER_SIZE < 1500) {
-    emberAfPluginCommsHubFunctionPrintln("WARN: Tunneling Client MaximumIncomingTransferSize is %d but should be 1500",
-                                         EMBER_AF_PLUGIN_TUNNELING_CLIENT_MAXIMUM_INCOMING_TRANSFER_SIZE);
-  }
-}
-
-#endif // UC_BUILD
-
-bool emAfPluginCommsHubFunctionTunnelExists(EmberEUI64 deviceEui64)
+bool sli_zigbee_af_comms_hub_function_tunnel_exists(EmberEUI64 deviceEui64)
 {
   return (EM_AF_PLUGIN_COMMS_HUB_FUNCTION_NULL_TUNNEL_INDEX != findTunnelByDeviceId(deviceEui64));
 }
 
 // This should be called after CBKE.
-bool emAfPluginCommsHubFunctionTunnelCreate(EmberEUI64 remoteDeviceId,
-                                            uint8_t remoteEndpoint)
+bool sli_zigbee_af_comms_hub_function_tunnel_create(EmberEUI64 remoteDeviceId,
+                                                    uint8_t remoteEndpoint)
 {
   uint8_t tunnelIndex;
   emberAfDebugPrint("CHF: TunnelCreate ");
@@ -234,11 +189,11 @@ bool emAfPluginCommsHubFunctionTunnelCreate(EmberEUI64 remoteDeviceId,
   return false;
 }
 
-bool emAfPluginCommsHubFunctionTunnelSendData(EmberEUI64 remoteDeviceId,
-                                              uint16_t headerLen,
-                                              uint8_t *header,
-                                              uint16_t dataLen,
-                                              uint8_t *data)
+bool sli_zigbee_af_comms_hub_function_tunnel_send_data(EmberEUI64 remoteDeviceId,
+                                                       uint16_t headerLen,
+                                                       uint8_t *header,
+                                                       uint16_t dataLen,
+                                                       uint8_t *data)
 {
   EmberAfStatus status = EMBER_ZCL_STATUS_FAILURE;
   bool success;
@@ -284,7 +239,7 @@ bool emAfPluginCommsHubFunctionTunnelSendData(EmberEUI64 remoteDeviceId,
   return success;
 }
 
-bool emAfPluginCommsHubFunctionTunnelDestroy(EmberEUI64 remoteDeviceId)
+bool sli_zigbee_af_comms_hub_function_tunnel_destroy(EmberEUI64 remoteDeviceId)
 {
   EmberAfStatus status = EMBER_ZCL_STATUS_NOT_FOUND;
   uint8_t tunnelIndex;
@@ -303,14 +258,14 @@ bool emAfPluginCommsHubFunctionTunnelDestroy(EmberEUI64 remoteDeviceId)
       if (tunnelIndex == responsePendingIndex) {
         responsePendingIndex = EM_AF_PLUGIN_COMMS_HUB_FUNCTION_NULL_TUNNEL_INDEX;
         // let the tunnel event handler retry any pending create requests
-        slxu_zigbee_event_set_active(tunnelEventControl);
+        sl_zigbee_event_set_active(tunnelEventControl);
       }
     }
   }
   return (status == EMBER_ZCL_STATUS_SUCCESS);
 }
 
-void emAfPluginCommsHubFunctionTunnelCleanup(EmberEUI64 remoteDeviceId)
+void sli_zigbee_af_comms_hub_function_tunnel_cleanup(EmberEUI64 remoteDeviceId)
 {
   uint8_t tunnelIndex;
 
@@ -329,7 +284,7 @@ void emAfPluginCommsHubFunctionTunnelCleanup(EmberEUI64 remoteDeviceId)
   }
 }
 
-void emAfPluginCommsHubFunctionTunnelClose(EmberEUI64 remoteDeviceId)
+void sli_zigbee_af_comms_hub_function_tunnel_close(EmberEUI64 remoteDeviceId)
 {
   uint8_t tunnelId;
   tunnelId = findTunnelByDeviceId(remoteDeviceId);
@@ -340,7 +295,7 @@ void emAfPluginCommsHubFunctionTunnelClose(EmberEUI64 remoteDeviceId)
   }
 }
 
-void emAfPluginCommsHubFunctionPrint(void)
+void sli_zigbee_af_comms_hub_function_print(void)
 {
   uint8_t i;
   emberAfPluginCommsHubFunctionPrintln("");
@@ -381,14 +336,14 @@ void emAfPluginCommsHubFunctionPrint(void)
 // Callbacks
 
 // Tunnel event handler used to retry previously attempted tunnel creations
-void emberAfPluginCommsHubFunctionTunnelEventHandler(SLXU_UC_EVENT)
+void emberAfPluginCommsHubFunctionTunnelEventHandler(sl_zigbee_event_t * event)
 {
   uint8_t tunnelIndex;
   uint32_t timeNowMs;
   uint32_t nearestEventTimeoutDelayMs = UINT32_MAX;
   uint32_t currentTunnelTimeoutMs = 0;
 
-  slxu_zigbee_event_set_inactive(tunnelEventControl);
+  sl_zigbee_event_set_inactive(tunnelEventControl);
   timeNowMs = halCommonGetInt32uMillisecondTick();
 
   emberAfPluginCommsHubFunctionPrintln("CHF: emberAfPluginCommsHubFunctionTunnelEventHandler");
@@ -405,8 +360,8 @@ void emberAfPluginCommsHubFunctionTunnelEventHandler(SLXU_UC_EVENT)
           emberAfPluginCommsHubFunctionPrintln("Retrying tunnel creation to node ID 0x%2x",
                                                tunnels[tunnelIndex].remoteNodeId);
           if (requestTunnel(tunnelIndex)) {
-            slxu_zigbee_event_set_delay_ms(tunnelEventControl,
-                                           MILLISECOND_TICKS_PER_SECOND);
+            sl_zigbee_event_set_delay_ms(tunnelEventControl,
+                                         MILLISECOND_TICKS_PER_SECOND);
             return;
           }
         } else {
@@ -420,7 +375,7 @@ void emberAfPluginCommsHubFunctionTunnelEventHandler(SLXU_UC_EVENT)
   }
 
   if (nearestEventTimeoutDelayMs != MAX_INT32U_VALUE) {
-    slxu_zigbee_event_set_delay_ms(tunnelEventControl, nearestEventTimeoutDelayMs);
+    sl_zigbee_event_set_delay_ms(tunnelEventControl, nearestEventTimeoutDelayMs);
   }
 }
 
@@ -444,7 +399,7 @@ void emberAfPluginTunnelingClientTunnelOpenedCallback(uint8_t tunnelId,
   if (responsePendingIndex != EM_AF_PLUGIN_COMMS_HUB_FUNCTION_NULL_TUNNEL_INDEX) {
     uint8_t tunnelIndex = responsePendingIndex;
     responsePendingIndex = EM_AF_PLUGIN_COMMS_HUB_FUNCTION_NULL_TUNNEL_INDEX;
-    slxu_zigbee_event_set_active(tunnelEventControl);
+    sl_zigbee_event_set_active(tunnelEventControl);
     if (tunnelStatus == EMBER_AF_PLUGIN_TUNNELING_CLIENT_SUCCESS) {
       tunnels[tunnelIndex].tunnelId = tunnelId;
       tunnels[tunnelIndex].state = ACTIVE_TUNNEL;
@@ -503,9 +458,9 @@ void emberAfPluginTunnelingClientDataReceivedCallback(uint8_t tunnelId,
 
   tunnelIndex = findTunnelByTunnelId(tunnelId, CLIENT_TUNNEL);
   if (tunnelIndex != EM_AF_PLUGIN_COMMS_HUB_FUNCTION_NULL_TUNNEL_INDEX) {
-    emAfPluginCommsHubFunctionTunnelDataReceivedCallback(tunnels[tunnelIndex].remoteDeviceId,
-                                                         dataLen,
-                                                         data);
+    sli_zigbee_af_comms_hub_function_tunnel_data_received_callback(tunnels[tunnelIndex].remoteDeviceId,
+                                                                   dataLen,
+                                                                   data);
   }
 }
 
@@ -529,7 +484,7 @@ void emberAfPluginTunnelingClientTunnelClosedCallback(uint8_t tunnelId)
     tunnels[tunnelIndex].state = CLOSED_TUNNEL;
     if (tunnelIndex == responsePendingIndex) {
       responsePendingIndex = EM_AF_PLUGIN_COMMS_HUB_FUNCTION_NULL_TUNNEL_INDEX;
-      slxu_zigbee_event_set_active(tunnelEventControl);
+      sl_zigbee_event_set_active(tunnelEventControl);
     }
   }
 }
@@ -560,7 +515,7 @@ bool emberAfPluginTunnelingServerIsProtocolSupportedCallback(uint8_t protocolId,
 
   return (GBCS_TUNNELING_PROTOCOL_ID == protocolId
           && GBCS_TUNNELING_MANUFACTURER_CODE == manufacturerCode
-          && emAfPluginCommsHubFunctionTunnelAcceptCallback(remoteDeviceId));
+          && sli_zigbee_af_comms_hub_function_tunnel_accept_callback(remoteDeviceId));
 }
 
 /** @brief Tunnel Opened
@@ -662,9 +617,9 @@ void emberAfPluginTunnelingServerDataReceivedCallback(uint16_t tunnelId,
 
   tunnelIndex = findTunnelByTunnelId(tunnelId, SERVER_TUNNEL);
   if (tunnelIndex != EM_AF_PLUGIN_COMMS_HUB_FUNCTION_NULL_TUNNEL_INDEX) {
-    emAfPluginCommsHubFunctionTunnelDataReceivedCallback(tunnels[tunnelIndex].remoteDeviceId,
-                                                         dataLen,
-                                                         data);
+    sli_zigbee_af_comms_hub_function_tunnel_data_received_callback(tunnels[tunnelIndex].remoteDeviceId,
+                                                                   dataLen,
+                                                                   data);
   }
 }
 
@@ -725,7 +680,7 @@ void emberAfPluginTunnelingClientDataErrorCallback(uint8_t tunnelIndex,
   emberAfPluginCommsHubFunctionPrintln("CHF: ClientDataError: 0x%x, 0x%x", tunnelIndex, transferDataStatus);
   if (transferDataStatus == EMBER_ZCL_TUNNELING_TRANSFER_DATA_STATUS_NO_SUCH_TUNNEL) {
     emberAfPluginCommsHubFunctionPrintln("No Tunnel Found: New tunnel is requested for the device.");
-    emAfPluginCommsHubFunctionTunnelCleanup(tunnels[tunnelId].remoteDeviceId);
+    sli_zigbee_af_comms_hub_function_tunnel_cleanup(tunnels[tunnelId].remoteDeviceId);
     requestTunnel(tunnelId);
   }
 }
@@ -754,7 +709,7 @@ static bool requestTunnel(uint8_t tunnelIndex)
   if (responsePendingIndex != EM_AF_PLUGIN_COMMS_HUB_FUNCTION_NULL_TUNNEL_INDEX) {
     tunnels[tunnelIndex].state = REQUEST_PENDING_TUNNEL;
     tunnels[tunnelIndex].timeoutMSec = halCommonGetInt32uMillisecondTick();
-    slxu_zigbee_event_set_active(tunnelEventControl);
+    sl_zigbee_event_set_active(tunnelEventControl);
     return true;
   }
 
@@ -787,7 +742,7 @@ static bool handleRequestTunnelFailure(uint8_t tunnelIndex, EmberAfPluginTunneli
     tunnels[tunnelIndex].state = REQUEST_PENDING_TUNNEL;
     tunnels[tunnelIndex].timeoutMSec = halCommonGetInt32uMillisecondTick()
                                        + (MILLISECOND_TICKS_PER_SECOND * 180);
-    slxu_zigbee_event_set_active(tunnelEventControl);
+    sl_zigbee_event_set_active(tunnelEventControl);
     emberAfPluginCommsHubFunctionPrintln("CHF: Busy status received from node ID 0x%2x", tunnels[tunnelIndex].remoteNodeId);
     return true;
   } else if (status == EMBER_AF_PLUGIN_TUNNELING_CLIENT_NO_MORE_TUNNEL_IDS) {
@@ -797,7 +752,7 @@ static bool handleRequestTunnelFailure(uint8_t tunnelIndex, EmberAfPluginTunneli
     for (i = 0; i < EMBER_AF_PLUGIN_COMMS_HUB_FUNCTION_TUNNEL_LIMIT; i++) {
       if (i != tunnelIndex && tunnels[i].remoteNodeId == tunnels[tunnelIndex].remoteNodeId) {
         retryRequest = true;
-        emAfPluginCommsHubFunctionTunnelDestroy(tunnels[i].remoteDeviceId);
+        sli_zigbee_af_comms_hub_function_tunnel_destroy(tunnels[i].remoteDeviceId);
       }
     }
     if (retryRequest) {
@@ -806,7 +761,7 @@ static bool handleRequestTunnelFailure(uint8_t tunnelIndex, EmberAfPluginTunneli
       tunnels[tunnelIndex].state = REQUEST_PENDING_TUNNEL;
       tunnels[tunnelIndex].timeoutMSec = halCommonGetInt32uMillisecondTick()
                                          + (MILLISECOND_TICKS_PER_SECOND * 5);
-      slxu_zigbee_event_set_active(tunnelEventControl);
+      sl_zigbee_event_set_active(tunnelEventControl);
       return true;
     }
     // no tunnels were closed so nothing more we can do
@@ -852,7 +807,7 @@ static uint8_t findTunnelByDeviceId(EmberEUI64 remoteDeviceId)
 }
 
 // Find an active tunnel from the given client tunneling plugin identifer,
-static uint8_t findTunnelByTunnelId(uint8_t tunnelId, EmAfCommsHubFunctionTunnelType type)
+static uint8_t findTunnelByTunnelId(uint8_t tunnelId, sli_zigbee_af_comms_hub_function_tunnel_type type)
 {
   uint8_t tunnelIndex;
 

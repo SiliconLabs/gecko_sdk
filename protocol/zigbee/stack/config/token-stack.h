@@ -581,31 +581,26 @@ DEFINE_INDEXED_TOKEN(STACK_ADDITIONAL_CHILD_DATA,
   #include "stack/zll/zll-token-config.h"
   #define ZLL_TOKENS_PRESENT
 //#endif
-#ifdef UC_BUILD
-  #if defined(SL_CATALOG_ZIGBEE_GREEN_POWER_PRESENT) || defined(EMBER_TEST)
+  #if defined(SL_CATALOG_ZIGBEE_GREEN_POWER_PRESENT) || defined(JAM_BUILT_GP_LIB) || defined(EMBER_TEST)
     #include "stack/gp/gp-token-config.h"
     #define GP_TOKENS_PRESENT
   #endif // (SL_CATALOG_ZIGBEE_GREEN_POWER_PRESENT) || (EMBER_TEST)
-#else // !UC_BUILD
-//#if defined(EMBER_AF_PLUGIN_GP_LIBRARY) || defined(EMBER_TEST)
-  #include "stack/gp/gp-token-config.h"
-//#endif
-#endif // UC_BUILD
   #include "stack/core/multi-pan-token-config.h"
 #endif  // SMART_ENERGY_STACK_TOKENS
 
-#ifdef UC_BUILD
+#ifndef EMBER_SCRIPTED_TEST
  #ifdef SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
    #include "app/framework/util/af-token.h"
  #endif
  #ifdef SL_CATALOG_ZIGBEE_NCP_FRAMEWORK_PRESENT
    #include "app/framework/util/af-ncp-token.h"
  #endif
-#else
+#else // EMBER_SCRIPTED_TEST
+// Unit tests may define their own token header, like em260's unit test
  #ifdef APPLICATION_TOKEN_HEADER
   #include APPLICATION_TOKEN_HEADER
  #endif
-#endif // UC_BUILD
+#endif // EMBER_SCRIPTED_TEST
 
 //The tokens defined below are test tokens. They are normally not used
 //but are left here as a convenience so test tokens do not have to
@@ -644,18 +639,18 @@ DEFINE_INDEXED_TOKEN(STACK_ADDITIONAL_CHILD_DATA,
 
 //The Simulated EEPROM and NVM3 unit tests define their tokens via the
 //APPLICATION_TOKEN_HEADER macro.
-#ifdef UC_BUILD
+#ifndef EMBER_SCRIPTED_TEST
  #ifdef SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
    #include "app/framework/util/af-token.h"
  #endif
  #ifdef SL_CATALOG_ZIGBEE_NCP_FRAMEWORK_PRESENT
    #include "app/framework/util/af-ncp-token.h"
  #endif
-#else
+#else // EMBER_SCRIPTED_TEST
  #ifdef APPLICATION_TOKEN_HEADER
   #include APPLICATION_TOKEN_HEADER
  #endif
-#endif // UC_BUILD
+#endif // EMBER_SCRIPTED_TEST
 
 #endif // !defined(SIM_EEPROM_TEST) && !defined(NVM3_TEST)
 

@@ -33,7 +33,6 @@
 // -----------------------------------------------------------------------------
 //                                   Includes
 // -----------------------------------------------------------------------------
-#include "socket_hnd.h"
 #include "socket.h"
 #include "sl_wisun_app_core_util.h"
 #include "sl_wisun_tcp_server_config.h"

@@ -41,6 +41,7 @@ class profile_MBus_modes(object):
         model.vars.rx_xtal_error_ppm.value_forced = 25
         model.vars.tx_xtal_error_ppm.value_forced = 60
         model.vars.shaping_filter.value_forced = model.vars.shaping_filter.var_enum.NONE
+        model.vars.shaping_filter_param.value_forced = 0.0
 
         # Value optimized to meet frequency offset spec with deviation tolerance of 40kHz and 112 kcps baidrate
         # Details https://jira.silabs.com/browse/MCUW_RADIO_CFG-1505
@@ -59,6 +60,36 @@ class profile_MBus_modes(object):
         # Details available in https://jira.silabs.com/browse/MCUW_RADIO_CFG-1752
         model.vars.MODEM_FRMSCHTIME_PMENDSCHEN.value_forced = 1
         model.vars.MODEM_FRMSCHTIME_FRMSCHTIME.value_forced = 65535
+
+    @staticmethod
+    def profile_wMbus_ModeTC_M2O_100k(model, family):
+
+        #Settings that are not profile inputs for Mbus
+
+        # These values are the same as ModeT_M2O_100k
+        model.vars.modulation_type.value_forced = model.vars.modulation_type.var_enum.FSK2
+        model.vars.bitrate.value_forced = 66666
+        model.vars.baudrate_tol_ppm.value_forced = 120000
+        model.vars.deviation.value_forced = 50000
+        model.vars.preamble_detection_length.value_forced = 38
+        model.vars.rx_xtal_error_ppm.value_forced = 25
+        model.vars.tx_xtal_error_ppm.value_forced = 60
+        model.vars.shaping_filter.value_forced = model.vars.shaping_filter.var_enum.NONE
+        model.vars.shaping_filter_param.value_forced = 0.0
+        model.vars.bandwidth_hz.value_forced = 330000
+        model.vars.freq_dev_max.value_forced = 80000
+        model.vars.MODEM_BCRDEMODCTRL_BBPMDETEN.value_forced = 1
+        model.vars.MODEM_FRMSCHTIME_PMENDSCHEN.value_forced = 1
+        model.vars.MODEM_FRMSCHTIME_FRMSCHTIME.value_forced = 65535
+
+        # These values are different from ModeT_M2O_100k, see https://jira.silabs.com/browse/MCUW_RADIO_CFG-2150
+        model.vars.freq_dev_min.value_forced = 33750                        # To accomodate C Mode M2O Specs
+        model.vars.MODEM_BCRDEMODPMEXP_BCRCFECOSTTHD.value_forced = 168     # To resolve sensitivity issue at corner case (868.95MHz / 88kcps / 80kHz freqdev)
+        # model.vars.MODEM_BCRDEMODKSI_BCRKSI3.value_forced = 30            # Commented out as packet loss not observed any more
+
+
+
+
 
     # Owner: Efrain Gaxiola
     # JIRA Link: https://jira.silabs.com/browse/PGOCELOTVALTEST-31
@@ -101,6 +132,7 @@ class profile_MBus_modes(object):
 
         #Shaping filter
         model.vars.shaping_filter.value_forced = model.vars.shaping_filter.var_enum.NONE
+        model.vars.shaping_filter_param.value_forced = 0.0
 
         #Tolerance requirements
         model.vars.rx_xtal_error_ppm.value_forced = 25
@@ -139,6 +171,7 @@ class profile_MBus_modes(object):
         model.vars.rx_xtal_error_ppm.value_forced = 60
         model.vars.tx_xtal_error_ppm.value_forced = 25
         model.vars.shaping_filter.value_forced = model.vars.shaping_filter.var_enum.NONE
+        model.vars.shaping_filter_param.value_forced = 0.0
 
         # : TODO update calculation. This is required to achieve the required sensitivity at 80000 deviation
         model.vars.MODEM_BCRDEMODPMEXP_BCRCFECOSTTHD.value_forced = 200
@@ -166,6 +199,7 @@ class profile_MBus_modes(object):
         model.vars.rx_xtal_error_ppm.value_forced = 60
         model.vars.tx_xtal_error_ppm.value_forced = 25
         model.vars.shaping_filter.value_forced = model.vars.shaping_filter.var_enum.NONE
+        model.vars.shaping_filter_param.value_forced = 0.0
 
         # : TODO update calculation. This is required to achieve the required sensitivity at 80000 deviation
         model.vars.MODEM_BCRDEMODPMEXP_BCRCFECOSTTHD.value_forced = 200
@@ -219,6 +253,7 @@ class profile_MBus_modes(object):
         model.vars.rx_xtal_error_ppm.value_forced = 10
         model.vars.tx_xtal_error_ppm.value_forced = 10
         model.vars.shaping_filter.value_forced = model.vars.shaping_filter.var_enum.NONE
+        model.vars.shaping_filter_param.value_forced = 0.0
 
     # Owner: Efrain Gaxiola
     # JIRA Link: https://jira.silabs.com/browse/PGOCELOTVALTEST-64
@@ -232,6 +267,7 @@ class profile_MBus_modes(object):
         model.vars.rx_xtal_error_ppm.value_forced = 16
         model.vars.tx_xtal_error_ppm.value_forced = 16
         model.vars.shaping_filter.value_forced = model.vars.shaping_filter.var_enum.NONE
+        model.vars.shaping_filter_param.value_forced = 0.0
 
     # Owner: Efrain Gaxiola
     # JIRA Link: https://jira.silabs.com/browse/PGOCELOTVALTEST-1131

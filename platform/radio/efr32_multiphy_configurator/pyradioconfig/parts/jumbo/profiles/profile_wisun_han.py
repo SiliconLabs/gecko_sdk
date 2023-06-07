@@ -119,9 +119,9 @@ class ProfileWisunHanJumbo(IProfile):
 
     def build_register_profile_outputs(self, model, profile):
         family = self._family
-        build_modem_regs_jumbo(model, profile, family)
-        buildFrameOutputs(model, profile, family)
-        buildCrcOutputs(model, profile, family)
+        build_modem_regs_jumbo(model, profile)
+        buildFrameOutputs(model, profile)
+        buildCrcOutputs(model, profile)
         buildWhiteOutputs(model, profile)
         buildFecOutputs(model, profile)
 

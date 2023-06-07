@@ -7,11 +7,12 @@
 *
 */
 
+#include <string.h>
 #include <ZAF_command_class_utils.h>
 #include <ZW_classcmd.h>
 #include <ZW_TransportSecProtocol.h>
 #include <ZAF_Common_interface.h>
-#include <string.h>
+#include "zaf_protocol_config.h"
 //#define DEBUGPRINT
 #include "DebugPrint.h"
 
@@ -26,7 +27,7 @@ CmdClassSupported(security_key_t eKey,
                   uint8_t nonSecurelistLen)
 {
   security_key_t device_higest_secure_level = GetHighestSecureLevel(ZAF_GetSecurityKeys());
-  const SProtocolConfig_t* app_protocol_config = ZAF_getAppProtocolConfig();
+  const SProtocolConfig_t* app_protocol_config = zaf_get_protocol_config();
   uint8_t app_secure_keys_requested = *(app_protocol_config->pSecureKeysRequested);
   /*Check commandClass is in non-secure list*/
   if(NON_NULL( pNonSecurelist ))

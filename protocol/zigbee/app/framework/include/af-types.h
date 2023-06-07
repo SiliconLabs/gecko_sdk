@@ -24,16 +24,14 @@
 #ifndef SILABS_AF_API_TYPES
 #define SILABS_AF_API_TYPES
 
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #include "zap-type.h"
-#include "zigbee_app_framework_common.h"
+#include "app/framework/common/zigbee_app_framework_common.h"
 #ifdef SL_CATALOG_ZIGBEE_MESSAGING_CLIENT_PRESENT
 #include "messaging-client-config.h"
 #endif  // SL_CATALOG_ZIGBEE_MESSAGING_CLIENT_PRESENT
-#else
-#include "enums.h"
-#endif
 
 #ifdef EZSP_HOST
 #include "app/util/ezsp/ezsp-enum.h"
@@ -511,7 +509,7 @@ typedef struct {
 typedef struct {
   EmberNodeType nodeType;
   EmberAfSecurityProfile securityProfile;
-} EmAfZigbeeProNetwork;
+} sli_zigbee_af_zigbee_pro_network;
 
 #endif
 
@@ -847,7 +845,6 @@ typedef struct {
   EmberEventControl *eventControl;
 } EmberAfEventContext;
 
-#ifdef UC_BUILD
 // TODO: update doxygen
 /**
  * @brief Keep track of cluster-related events and
@@ -886,7 +883,6 @@ typedef struct {
    */
   sl_zigbee_event_t *event;
 } sl_zigbee_event_context_t;
-#endif
 
 /**
  * @brief Refer to the handler for network events.
@@ -948,19 +944,12 @@ typedef struct {
 #define ZCL_SCENES_GLOBAL_SCENE_SCENE_ID 0x00u
 
 // EMZIGBEE-6833: EmberAfSceneTableEntry declaration should be moved to the scenes component.
-#ifdef UC_BUILD
-#include "sl_component_catalog.h"
 #ifdef SL_CATALOG_ZIGBEE_SCENES_PRESENT
 #include "scenes-config.h"
 #if (EMBER_AF_PLUGIN_SCENES_NAME_SUPPORT == 1)
 #define SCENES_NAME_SUPPORT
 #endif
 #endif // SL_CATALOG_ZIGBEE_SCENES_PRESENT
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_SCENES_NAME_SUPPORT
-#define SCENES_NAME_SUPPORT
-#endif
-#endif // UC_BUILD
 
 /**
  * @brief Store scene table entries in RAM or in tokens,
@@ -1904,20 +1893,12 @@ typedef struct {
   bool server;
 } EmberAfClusterInfo;
 
-#ifdef UC_BUILD
-#include "sl_component_catalog.h"
 #ifdef SL_CATALOG_ZIGBEE_DEVICE_DATABASE_PRESENT
 #include "device-database-config.h"
 #else
 #define EMBER_AF_MAX_CLUSTERS_PER_ENDPOINT 3u
 #define EMBER_AF_MAX_ENDPOINTS_PER_DEVICE  1u
 #endif
-#else // UC_BUILD
-#if !defined(EMBER_AF_MAX_CLUSTERS_PER_ENDPOINT)
-#define EMBER_AF_MAX_CLUSTERS_PER_ENDPOINT 3u
-#define EMBER_AF_MAX_ENDPOINTS_PER_DEVICE  1u
-#endif
-#endif // UC_BUILD
 /**
  * @brief Contain basic information about an endpoint.
  */

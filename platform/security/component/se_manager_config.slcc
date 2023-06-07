@@ -15,6 +15,9 @@ include:
       - path: sl_se_manager_check_config.h
       - path: sl_se_manager_config.h
 
+conflicts:
+  - name: native
+
 requires:
   - name: device
 

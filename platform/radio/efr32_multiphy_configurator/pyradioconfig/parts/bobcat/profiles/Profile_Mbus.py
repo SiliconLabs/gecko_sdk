@@ -29,8 +29,6 @@ class Profile_Mbus_Bobcat(Profile_Mbus_Ocelot):
     """
     def buildProfileModel(self, model):
 
-        family = self._family
-
         # Build profile
         profile = self._makeProfile(model)
 
@@ -86,12 +84,12 @@ class Profile_Mbus_Bobcat(Profile_Mbus_Ocelot):
         self._sw_profile_outputs_common.build_rail_outputs(model, profile)
 
         # Output fields
-        buildFrameOutputs(model, profile, family=family)
-        buildCrcOutputs(model, profile, family)
+        buildFrameOutputs(model, profile)
+        buildCrcOutputs(model, profile)
         buildWhiteOutputs(model, profile)
         buildFecOutputs(model, profile)
 
-        build_modem_regs_bobcat(model, profile, family = family)
+        build_modem_regs_bobcat(model, profile)
 
         build_ircal_sw_vars(model, profile)
 

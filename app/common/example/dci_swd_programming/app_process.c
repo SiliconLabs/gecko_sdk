@@ -44,6 +44,11 @@ static void print_se_status(void);
 static void print_otp_conf(void);
 
 /***************************************************************************//**
+ * Print debug port lock state
+ ******************************************************************************/
+static void print_lock_status(void);
+
+/***************************************************************************//**
  * Print core clock cycle and time.
  ******************************************************************************/
 static void print_cycle_time(void);
@@ -122,6 +127,8 @@ static const char *dci_task_string[] = {
   "READ SERIAL NUMBER",
   "READ PUBLIC SIGN KEY",
   "READ PUBLIC COMMAND KEY",
+  "READ LOCK STATUS",
+  "SET DEBUG RESTRICTIONS",
   "ENABLE SECURE DEBUG",
   "DISABLE SECURE DEBUG",
   "LOCK DEVICE",
@@ -132,7 +139,7 @@ static const char *dci_task_string[] = {
   "INITIALIZE PUBLIC SIGN KEY",
   "INITIALIZE PUBLIC COMMAND KEY",
   "INITIALIZE SE OTP",
-  "DISABLE DEVICE ERASE"
+  "DISABLE DEVICE ERASE",
 };
 
 /// Task selection for SWD interface
@@ -145,7 +152,15 @@ static const char *swd_task_string[] = {
   "PROGRAM USER DATA",
   "UPGRADE SE FIRMWARE THROUGH APPLICATION FIRMWARE"
 };
-
+static uint8_t dbg_restrict_select = 0, dbg_restrict_bits = 0;
+bool first = true;
+static const char *debug_restrict_string[] = {
+  "Non-secure, Invasive Debug",
+  "Non-secure, Non-invasive Debug",
+  "Secure, Invasive Debug"
+  "",
+  "Secure, Non-Invasive Debug"
+};
 #if defined(DEVICE_XG21)
 /// Strings for tamper sources of xG21B
 static const char *tamper_source_xg21b[TAMPER_SIGNAL_NUM] = {
@@ -242,6 +257,7 @@ void app_process_action(void)
 {
   // Retrieve input character from VCOM port
   app_iostream_usart_process_action();
+  static const size_t n_dci_tasks = sizeof(dci_task_string) / sizeof(char *);
 
   switch (app_state) {
     case APP_ENTRY:
@@ -287,7 +303,7 @@ void app_process_action(void)
       if (space_press) {
         space_press = false;
         dci_task_select++;
-        if (dci_task_select == DCI_TASK_NUM) {
+        if (dci_task_select == n_dci_tasks) {
           dci_task_select = 0;
           printf("\n");
         }
@@ -304,7 +320,6 @@ void app_process_action(void)
           printf("  + Press ENTER to confirm or press SPACE to abort.\n");
           app_state = CONFIRM_SELECTION;
         } else {
-          // Set up DCI command buffer
           app_state += (dci_task_select + 1);
           cmd_resp_buf[0] = app_state;
           set_dci_command(cmd_resp_buf);
@@ -312,6 +327,40 @@ void app_process_action(void)
       }
       break;
 
+    case SELECT_DBG_RESTRICT_MODE:
+      /* DebugRestrict is set based on individual bit masks, not modes.
+       * probably need ask user about each bit */
+
+      if (first) {
+        first = false;
+        printf("  + Set the lockbit for %s? ENTER to confirm, SPACE to skip\n",
+               debug_restrict_string[dbg_restrict_select]);
+      }
+      if (space_press) {
+        space_press = false;
+        dbg_restrict_select++;
+        printf("  + Set the lockbit for %s? ENTER to confirm, SPACE to skip\n",
+               debug_restrict_string[dbg_restrict_select]);
+      }
+      if (enter_press) {
+        enter_press = false;
+        dbg_restrict_bits |= 1 << dbg_restrict_select;
+        printf("  + Setting the lockbit for %s\n", debug_restrict_string[dbg_restrict_select]);
+        dbg_restrict_select++;
+        if (dbg_restrict_select < DBG_RESTRICT_NUM) {
+          printf("  + Set the lockbit for %s? ENTER to confirm, SPACE to skip\n",
+                 debug_restrict_string[dbg_restrict_select]);
+        }
+      }
+      if (dbg_restrict_select == DBG_RESTRICT_NUM) {
+        app_state = SET_DBG_RESTRICTIONS;
+        cmd_resp_buf[0] = app_state;
+        cmd_resp_buf[1] = UPGRADE_SE_FIRMWARE_LENGTH;       /*this name should be generalized to single mailbox parameter*/
+        cmd_resp_buf[2] = dbg_restrict_bits;
+        set_dci_command(cmd_resp_buf);
+      }
+
+      break;
     case GET_SE_STATUS:
       printf("\n  . Read target device SE status... ");
       TRY
@@ -319,6 +368,18 @@ void app_process_action(void)
       write_dci_command(cmd_resp_buf);
       read_dci_response(cmd_resp_buf);
       print_se_status();
+      app_state = APP_ENTRY;
+      CATCH
+        app_state = APP_ERROR;
+      ENDTRY
+      break;
+
+    case READ_LOCK_STATUS:
+      TRY
+      connect_to_dci();
+      write_dci_command(cmd_resp_buf);
+      read_dci_response(cmd_resp_buf);
+      print_lock_status();
       app_state = APP_ENTRY;
       CATCH
         app_state = APP_ERROR;
@@ -794,6 +855,21 @@ void app_process_action(void)
         app_state = APP_ERROR;
       ENDTRY
       break;
+    case SET_DBG_RESTRICTIONS:
+      /**/
+      printf("\n  . Set the debug restriction bits of the target device... ");
+      TRY
+      connect_to_dci();
+      write_dci_command(cmd_resp_buf);
+      read_dci_response(cmd_resp_buf);
+      printf("OK\n");
+      app_state = GET_SE_STATUS;
+      cmd_resp_buf[0] = app_state;
+      set_dci_command(cmd_resp_buf);
+      CATCH
+        app_state = APP_ERROR;
+      ENDTRY
+      break;
 
     case APP_ERROR:
       printf("Failed - %s\n", get_error_string(error_code));
@@ -937,6 +1013,39 @@ static void print_se_status(void)
   }
 }
 
+/**
+ * Print Debug Port lock state
+ * @return
+ */
+static void print_lock_status(void)
+{
+  static const char *lockbit_strings[] =
+  {
+    "Debug Locked, config status    :",
+    "Device erase                   :",
+    "Secure debug unlock            :",
+    "",         //reserved
+    "",         //reserved
+    "Debug port                     :",
+    "Invasive Debug Lock            :",
+    "Non-invasive Debug Lock        :",
+    "Secure Invasive Debug Lock     :",
+    "Secure Non-invasive Debug Lock :"
+  };
+
+  printf("  . Debug port lock state\n");
+  for (int index = 0; index <= NUM_DEBUG_LOCK_BITS; index++) {
+    if (index <= 2) {// || index >=5){
+      printf("  + %s %s.\n",
+             lockbit_strings[index],
+             (cmd_resp_buf[1] & (uint32_t)1 << index) ? "Enabled" : "Disabled");
+    } else if (index >= 5) {
+      printf("  + %s %s.\n",
+             lockbit_strings[index],
+             (cmd_resp_buf[1] & (uint32_t)1 << index) ? "Locked" : "Unlocked");
+    }
+  }
+}
 /***************************************************************************//**
  * Print OTP configuration.
  ******************************************************************************/

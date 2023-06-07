@@ -34,9 +34,7 @@
 #ifndef SILABS_PRICE_CLIENT_H
 #define SILABS_PRICE_CLIENT_H
 
-#ifdef UC_BUILD
 #include "price-client-config.h"
-#endif // UC_BUILD
 
 #ifndef EMBER_AF_PLUGIN_PRICE_CLIENT_TABLE_SIZE
 #define EMBER_AF_PLUGIN_PRICE_CLIENT_TABLE_SIZE 2
@@ -274,9 +272,9 @@ uint8_t emberAfPriceClusterGetActiveCurrencyIndex(uint8_t endpoint);
 
 //void emberAfPriceClusterClientInitCallback(uint8_t endpoint);
 
-void emAfPluginPriceClientPrintInfo(uint8_t endpoint);
-void emAfPluginPriceClientPrintByEventId(uint8_t endpoint, uint32_t issuerEventId);
-void emAfPriceClearPriceTable(uint8_t endpoint);
+void sli_zigbee_af_price_client_print_info(uint8_t endpoint);
+void sli_zigbee_af_price_client_print_by_event_id(uint8_t endpoint, uint32_t issuerEventId);
+void sli_zigbee_af_price_clear_price_table(uint8_t endpoint);
 
 /**
  * @brief Return the block period table index with a matching eventId.
@@ -286,7 +284,7 @@ void emAfPriceClearPriceTable(uint8_t endpoint);
  * @return The index with a valid matching event ID.
  *
  **/
-uint8_t emAfPriceGetBlockPeriodTableIndexByEventId(uint8_t endpoint, uint32_t issuerEventId);
+uint8_t sli_zigbee_af_price_get_block_period_table_index_by_event_id(uint8_t endpoint, uint32_t issuerEventId);
 
 /**
  * @brief Print the information at the specified index of the block period table.
@@ -296,7 +294,7 @@ uint8_t emAfPriceGetBlockPeriodTableIndexByEventId(uint8_t endpoint, uint32_t is
  * @param index The index whose data should be printed.
  *
  **/
-void emAfPricePrintBlockPeriodTableIndex(uint8_t endpoint, uint8_t index);
+void sli_zigbee_af_price_print_block_period_table_index(uint8_t endpoint, uint8_t index);
 
 /**
  * @brief Return the conversion factor table index with a matching eventId.
@@ -306,7 +304,7 @@ void emAfPricePrintBlockPeriodTableIndex(uint8_t endpoint, uint8_t index);
  * @return The index with a valid matching event ID.
  *
  **/
-uint8_t emAfPriceGetConversionFactorIndexByEventId(uint8_t endpoint, uint32_t issuerEventId);
+uint8_t sli_zigbee_af_price_get_conversion_factor_index_by_event_id(uint8_t endpoint, uint32_t issuerEventId);
 
 /**
  * @brief Print the information at the specified index of the conversion factor table.
@@ -315,7 +313,7 @@ uint8_t emAfPriceGetConversionFactorIndexByEventId(uint8_t endpoint, uint32_t is
  * @param index The index whose data should be printed.
  *
  **/
-void emAfPricePrintConversionFactorEntryIndex(uint8_t endpoint, uint8_t index);
+void sli_zigbee_af_price_print_conversion_factor_entry_index(uint8_t endpoint, uint8_t index);
 
 /**
  * @brief Return the calorific value table index with a matching eventId.
@@ -325,7 +323,7 @@ void emAfPricePrintConversionFactorEntryIndex(uint8_t endpoint, uint8_t index);
  * @return The index with a valid matching event ID.
  *
  **/
-uint8_t emAfPriceGetCalorificValueIndexByEventId(uint8_t endpoint, uint32_t issuerEventId);
+uint8_t sli_zigbee_af_price_get_calorific_value_index_by_event_id(uint8_t endpoint, uint32_t issuerEventId);
 
 /**
  * @brief Print the information at the specified index of the calorific value table.
@@ -334,7 +332,7 @@ uint8_t emAfPriceGetCalorificValueIndexByEventId(uint8_t endpoint, uint32_t issu
  * @param index The index whose data should be printed.
  *
  **/
-void emAfPricePrintCalorificValueEntryIndex(uint8_t endpoint, uint8_t index);
+void sli_zigbee_af_price_print_calorific_value_entry_index(uint8_t endpoint, uint8_t index);
 
 /**
  * @brief Return the index of the currently active tier label table entry,
@@ -344,7 +342,7 @@ void emAfPricePrintCalorificValueEntryIndex(uint8_t endpoint, uint8_t index);
  * @return The index of the active tier label table entry.
  *
  **/
-uint8_t emAfPriceGetActiveTierLabelTableIndexByTariffId(uint8_t endpoint, uint32_t tariffId);
+uint8_t sli_zigbee_af_price_get_active_tier_label_table_index_by_tariff_id(uint8_t endpoint, uint32_t tariffId);
 
 /**
  * @brief Print the information at the specified index of the tier label table.
@@ -353,7 +351,7 @@ uint8_t emAfPriceGetActiveTierLabelTableIndexByTariffId(uint8_t endpoint, uint32
  * @param index The index whose data should be printed.
  *
  **/
-void emAfPricePrintTierLabelTableEntryIndex(uint8_t endpoint, uint8_t index);
+void sli_zigbee_af_price_print_tier_label_table_entry_index(uint8_t endpoint, uint8_t index);
 
 /**
  * @brief Print the information at the specified index of the CO2 value table.
@@ -362,13 +360,7 @@ void emAfPricePrintTierLabelTableEntryIndex(uint8_t endpoint, uint8_t index);
  * @param index The index whose data should be printed.
  *
  **/
-void emAfPricePrintCo2ValueTablePrintIndex(uint8_t endpoint, uint8_t index);
-
-/**
- * @brief Print the tier label table.
- *
- **/
-//void emAfPriceClientPrintTierLabelTable( void );
+void sli_zigbee_af_price_print_co2_value_table_print_index(uint8_t endpoint, uint8_t index);
 
 /**
  * @brief Return the consolidated bill table index with a matching eventId.
@@ -378,7 +370,7 @@ void emAfPricePrintCo2ValueTablePrintIndex(uint8_t endpoint, uint8_t index);
  * @return The index with a valid matching event ID.
  *
  **/
-uint8_t emAfPriceConsolidatedBillTableGetIndexWithEventId(uint8_t endpoint, uint32_t issuerEventId);
+uint8_t sli_zigbee_af_price_consolidated_bill_table_get_index_with_event_id(uint8_t endpoint, uint32_t issuerEventId);
 
 /**
  * @brief Return the index of the active consolidated bill table.
@@ -388,7 +380,7 @@ uint8_t emAfPriceConsolidatedBillTableGetIndexWithEventId(uint8_t endpoint, uint
  * or 0xFF if no valid match is found.
  *
  **/
-uint8_t emAfPriceConsolidatedBillTableGetCurrentIndex(uint8_t endpoint);
+uint8_t sli_zigbee_af_price_consolidated_bill_table_get_current_index(uint8_t endpoint);
 
 /**
  * @brief Print the information at the specified index of the consolidated bill table.
@@ -397,7 +389,7 @@ uint8_t emAfPriceConsolidatedBillTableGetCurrentIndex(uint8_t endpoint);
  * @param index The index whose data should be printed.
  *
  **/
-void emAfPricePrintConsolidatedBillTableIndex(uint8_t endpoint, uint8_t index);
+void sli_zigbee_af_price_print_consolidated_bill_table_index(uint8_t endpoint, uint8_t index);
 
 /**
  * @brief Return the credit payment table index with a matching eventId.
@@ -406,7 +398,7 @@ void emAfPricePrintConsolidatedBillTableIndex(uint8_t endpoint, uint8_t index);
  * @return The index with a valid matching event ID.
  *
  **/
-uint8_t emAfPriceCreditPaymentTableGetIndexWithEventId(uint8_t endpoint, uint32_t issuerEventId);
+uint8_t sli_zigbee_af_price_credit_payment_table_get_index_with_event_id(uint8_t endpoint, uint32_t issuerEventId);
 
 /**
  * @brief Print the credit payment table entry data of the index with a valid matching eventId.
@@ -415,7 +407,7 @@ uint8_t emAfPriceCreditPaymentTableGetIndexWithEventId(uint8_t endpoint, uint32_
  * @param issuerEventId The eventId that should be found in the credit payment table.
  *
  **/
-void emAfPricePrintCreditPaymentTableEventId(uint32_t issuerEventId);
+void sli_zigbee_af_price_print_credit_payment_table_event_id(uint32_t issuerEventId);
 
 /**
  * @brief Print the information at the specified index of the credit payment table.
@@ -424,7 +416,7 @@ void emAfPricePrintCreditPaymentTableEventId(uint32_t issuerEventId);
  * @param index The index whose data should be printed.
  *
  **/
-void emAfPricePrintCreditPaymentTableIndex(uint8_t endpoint, uint8_t index);
+void sli_zigbee_af_price_print_credit_payment_table_index(uint8_t endpoint, uint8_t index);
 
 /**
  * @brief Print the information at the specified index of the currency conversion table.
@@ -433,7 +425,7 @@ void emAfPricePrintCreditPaymentTableIndex(uint8_t endpoint, uint8_t index);
  * @param index The index whose data should be printed.
  *
  **/
-void emAfPricePrintCurrencyConversionTableIndex(uint8_t endpoint, uint8_t index);
+void sli_zigbee_af_price_print_currency_conversion_table_index(uint8_t endpoint, uint8_t index);
 
 /**
  * @brief Return the index of the currently active billing period entry,
@@ -443,7 +435,7 @@ void emAfPricePrintCurrencyConversionTableIndex(uint8_t endpoint, uint8_t index)
  * @return The index of the active billing period entry.
  *
  **/
-uint8_t emAfPriceGetActiveBillingPeriodIndex(uint8_t endpoint);
+uint8_t sli_zigbee_af_price_get_active_billing_period_index(uint8_t endpoint);
 
 /**
  * @brief Print the information at the specified index of the billing period table.
@@ -452,7 +444,7 @@ uint8_t emAfPriceGetActiveBillingPeriodIndex(uint8_t endpoint);
  * @param index The index whose data should be printed.
  *
  **/
-void emAfPricePrintBillingPeriodTableEntryIndex(uint8_t endpoint, uint8_t index);
+void sli_zigbee_af_price_print_billing_period_table_entry_index(uint8_t endpoint, uint8_t index);
 
 /**
  *  @name Callbacks

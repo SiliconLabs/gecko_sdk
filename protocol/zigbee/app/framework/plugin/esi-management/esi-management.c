@@ -246,9 +246,9 @@ uint8_t emberAfPluginEsiManagementUpdateEsiAndGetIndex(const EmberAfClusterComma
   return index;
 }
 
-void emberAfPluginEsiManagementInitCallback(SLXU_INIT_ARG)
+void emberAfPluginEsiManagementInitCallback(uint8_t init_level)
 {
-  SLXU_INIT_UNUSED_ARG;
+  (void)init_level;
 
   emberAfPluginEsiManagementClearTable();
 }

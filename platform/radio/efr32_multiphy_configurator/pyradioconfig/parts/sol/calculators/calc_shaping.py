@@ -6,10 +6,10 @@ class Calc_Shaping_Sol(CALC_Shaping_ocelot):
     def calc_txfront_coeffs(self, model):
 
         #Read in model vars
-        softmodem_modulator_select = model.vars.softmodem_modulator_select.value
+        modulator_select = model.vars.modulator_select.value
 
         #Lookup the coeffs
-        if softmodem_modulator_select == model.vars.softmodem_modulator_select.var_enum.IQ_MOD:
+        if modulator_select == model.vars.modulator_select.var_enum.IQ_MOD:
             coeffs = [-28,-67,-101,-133,-162,-175,-151,-35,155,397,688,1023,1385,1713,1929,2033]
         else:
             coeffs = [0]*16
@@ -37,9 +37,9 @@ class Calc_Shaping_Sol(CALC_Shaping_ocelot):
         # This method sets the shaping related registers to do not care depending on whether IQ or legacy mod is used
 
         dual_fefilt = model.vars.dual_fefilt.value # Using this for now to indicate a concurrent PHY
-        softmodem_modulator_select = model.vars.softmodem_modulator_select.value
+        modulator_select = model.vars.modulator_select.value
 
-        if (not dual_fefilt) and softmodem_modulator_select == model.vars.softmodem_modulator_select.var_enum.IQ_MOD:
+        if (not dual_fefilt) and modulator_select == model.vars.modulator_select.var_enum.IQ_MOD:
             #Using the IQ modulator
             do_not_care_fields = ['MODEM_SHAPING.*','MODEM_CTRL0_SHAPING']
 

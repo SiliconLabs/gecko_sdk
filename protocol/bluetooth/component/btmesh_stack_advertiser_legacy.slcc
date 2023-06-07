@@ -25,192 +25,58 @@ template_contribution:
       name: provisioning_advertisers
       count: 2
 library:
-#EFR32BG12P
-  - path: "lib/EFR32BG12P/GCC/libbtmesh_advertiser_legacy.a"
+#EFR32XG12
+  - path: "lib/EFR32XG12/GCC/libbtmesh_advertiser_legacy.a"
     condition:
       - "toolchain_gcc"
-      - "device_family_efr32bg12p"
-  - path: "lib/EFR32BG12P/IAR/libbtmesh_advertiser_legacy.a"
+      - "device_generic_family_efr32xg12"
+  - path: "lib/EFR32XG12/IAR/libbtmesh_advertiser_legacy.a"
     condition:
       - "toolchain_iar"
-      - "device_family_efr32bg12p"
-#EFR32MG12P
-  - path: "lib/EFR32MG12P/GCC/libbtmesh_advertiser_legacy.a"
+      - "device_generic_family_efr32xg12"
+#EFR32XG13
+  - path: "lib/EFR32XG13/GCC/libbtmesh_advertiser_legacy.a"
     condition:
       - "toolchain_gcc"
-      - "device_family_efr32mg12p"
-  - path: "lib/EFR32MG12P/IAR/libbtmesh_advertiser_legacy.a"
+      - "device_generic_family_efr32xg13"
+  - path: "lib/EFR32XG13/IAR/libbtmesh_advertiser_legacy.a"
     condition:
       - "toolchain_iar"
-      - "device_family_efr32mg12p"
-#MGM12
-  - path: "lib/EFR32MG12P/GCC/libbtmesh_advertiser_legacy.a"
+      - "device_generic_family_efr32xg13"
+#EFR32XG21
+  - path: "lib/EFR32XG21/GCC/libbtmesh_advertiser_legacy.a"
     condition:
       - "toolchain_gcc"
-      - "device_family_mgm12"
-  - path: "lib/EFR32MG12P/IAR/libbtmesh_advertiser_legacy.a"
+      - "device_generic_family_efr32xg21"
+  - path: "lib/EFR32XG21/IAR/libbtmesh_advertiser_legacy.a"
     condition:
       - "toolchain_iar"
-      - "device_family_mgm12"
-#EFR32BG13P
-  - path: "lib/EFR32BG13P/GCC/libbtmesh_advertiser_legacy.a"
+      - "device_generic_family_efr32xg21"
+#EFR32XG22
+  - path: "lib/EFR32XG22/GCC/libbtmesh_advertiser_legacy.a"
     condition:
       - "toolchain_gcc"
-      - "device_family_efr32bg13p"
-  - path: "lib/EFR32BG13P/IAR/libbtmesh_advertiser_legacy.a"
+      - "device_generic_family_efr32xg22"
+  - path: "lib/EFR32XG22/IAR/libbtmesh_advertiser_legacy.a"
     condition:
       - "toolchain_iar"
-      - "device_family_efr32bg13p"
-#BGM13
-  - path: "lib/EFR32BG13P/GCC/libbtmesh_advertiser_legacy.a"
+      - "device_generic_family_efr32xg22"
+#EFR32XG24
+  - path: "lib/EFR32XG24/GCC/libbtmesh_advertiser_legacy.a"
     condition:
       - "toolchain_gcc"
-      - "device_family_bgm13"
-  - path: "lib/EFR32BG13P/IAR/libbtmesh_advertiser_legacy.a"
+      - "device_generic_family_efr32xg24"
+  - path: "lib/EFR32XG24/IAR/libbtmesh_advertiser_legacy.a"
     condition:
       - "toolchain_iar"
-      - "device_family_bgm13"
-#EFR32MG13P
-  - path: "lib/EFR32MG13P/GCC/libbtmesh_advertiser_legacy.a"
+      - "device_generic_family_efr32xg24"
+#EFR32XG27
+  - path: "lib/EFR32XG27/GCC/libbtmesh_advertiser_legacy.a"
     condition:
       - "toolchain_gcc"
-      - "device_family_efr32mg13p"
-  - path: "lib/EFR32MG13P/IAR/libbtmesh_advertiser_legacy.a"
+      - "device_generic_family_efr32xg27"
+  - path: "lib/EFR32XG27/IAR/libbtmesh_advertiser_legacy.a"
     condition:
       - "toolchain_iar"
-      - "device_family_efr32mg13p"
-#MGM13
-  - path: "lib/EFR32MG13P/GCC/libbtmesh_advertiser_legacy.a"
-    condition:
-      - "toolchain_gcc"
-      - "device_family_mgm13"
-  - path: "lib/EFR32MG13P/IAR/libbtmesh_advertiser_legacy.a"
-    condition:
-      - "toolchain_iar"
-      - "device_family_mgm13"
-#EFR32BG21
-  - path: "lib/EFR32BG21/GCC/libbtmesh_advertiser_legacy.a"
-    condition:
-      - "toolchain_gcc"
-      - "device_family_efr32bg21"
-  - path: "lib/EFR32BG21/IAR/libbtmesh_advertiser_legacy.a"
-    condition:
-      - "toolchain_iar"
-      - "device_family_efr32bg21"
-#BGM21
-  - path: "lib/EFR32BG21/GCC/libbtmesh_advertiser_legacy.a"
-    condition:
-      - "toolchain_gcc"
-      - "device_family_bgm21"
-  - path: "lib/EFR32BG21/IAR/libbtmesh_advertiser_legacy.a"
-    condition:
-      - "toolchain_iar"
-      - "device_family_bgm21"
-#EFR32MG21
-  - path: "lib/EFR32MG21/GCC/libbtmesh_advertiser_legacy.a"
-    condition:
-      - "toolchain_gcc"
-      - "device_family_efr32mg21"
-  - path: "lib/EFR32MG21/IAR/libbtmesh_advertiser_legacy.a"
-    condition:
-      - "toolchain_iar"
-      - "device_family_efr32mg21"
-#MGM21
-  - path: "lib/EFR32MG21/GCC/libbtmesh_advertiser_legacy.a"
-    condition:
-      - "toolchain_gcc"
-      - "device_family_mgm21"
-  - path: "lib/EFR32MG21/IAR/libbtmesh_advertiser_legacy.a"
-    condition:
-      - "toolchain_iar"
-      - "device_family_mgm21"
-#EFR32BG22
-  - path: "lib/EFR32BG22/GCC/libbtmesh_advertiser_legacy.a"
-    condition:
-      - "toolchain_gcc"
-      - "device_family_efr32bg22"
-  - path: "lib/EFR32BG22/IAR/libbtmesh_advertiser_legacy.a"
-    condition:
-      - "toolchain_iar"
-      - "device_family_efr32bg22"
-#BGM22
-  - path: "lib/EFR32BG22/GCC/libbtmesh_advertiser_legacy.a"
-    condition:
-      - "toolchain_gcc"
-      - "device_family_bgm22"
-  - path: "lib/EFR32BG22/IAR/libbtmesh_advertiser_legacy.a"
-    condition:
-      - "toolchain_iar"
-      - "device_family_bgm22"
-#EFR32MG22
-  - path: "lib/EFR32MG22/GCC/libbtmesh_advertiser_legacy.a"
-    condition:
-      - "toolchain_gcc"
-      - "device_family_efr32mg22"
-  - path: "lib/EFR32MG22/IAR/libbtmesh_advertiser_legacy.a"
-    condition:
-      - "toolchain_iar"
-      - "device_family_efr32mg22"
-#MGM22
-  - path: "lib/EFR32MG22/GCC/libbtmesh_advertiser_legacy.a"
-    condition:
-      - "toolchain_gcc"
-      - "device_family_mgm22"
-  - path: "lib/EFR32MG22/IAR/libbtmesh_advertiser_legacy.a"
-    condition:
-      - "toolchain_iar"
-      - "device_family_mgm22"
-#EFR32MG24
-  - path: "lib/EFR32MG24/GCC/libbtmesh_advertiser_legacy.a"
-    condition:
-      - "toolchain_gcc"
-      - "device_family_efr32mg24"
-  - path: "lib/EFR32MG24/IAR/libbtmesh_advertiser_legacy.a"
-    condition:
-      - "toolchain_iar"
-      - "device_family_efr32mg24"
-#EFR32BG24
-  - path: "lib/EFR32BG24/GCC/libbtmesh_advertiser_legacy.a"
-    condition:
-      - "toolchain_gcc"
-      - "device_family_efr32bg24"
-  - path: "lib/EFR32BG24/IAR/libbtmesh_advertiser_legacy.a"
-    condition:
-      - "toolchain_iar"
-      - "device_family_efr32bg24"
-#MGM24
-  - path: "lib/EFR32MG24/GCC/libbtmesh_advertiser_legacy.a"
-    condition:
-      - "toolchain_gcc"
-      - "device_family_mgm24"
-  - path: "lib/EFR32MG24/IAR/libbtmesh_advertiser_legacy.a"
-    condition:
-      - "toolchain_iar"
-      - "device_family_mgm24"
-#BGM24
-  - path: "lib/EFR32BG24/GCC/libbtmesh_advertiser_legacy.a"
-    condition:
-      - "toolchain_gcc"
-      - "device_family_bgm24"
-  - path: "lib/EFR32BG24/IAR/libbtmesh_advertiser_legacy.a"
-    condition:
-      - "toolchain_iar"
-      - "device_family_bgm24"
-#EFR32MG27
-  - path: "lib/EFR32MG27/GCC/libbtmesh_advertiser_legacy.a"
-    condition:
-      - "toolchain_gcc"
-      - "device_family_efr32mg27"
-  - path: "lib/EFR32MG27/IAR/libbtmesh_advertiser_legacy.a"
-    condition:
-      - "toolchain_iar"
-      - "device_family_efr32mg27"
-#EFR32BG27
-  - path: "lib/EFR32BG27/GCC/libbtmesh_advertiser_legacy.a"
-    condition:
-      - "toolchain_gcc"
-      - "device_family_efr32bg27"
-  - path: "lib/EFR32BG27/IAR/libbtmesh_advertiser_legacy.a"
-    condition:
-      - "toolchain_iar"
-      - "device_family_efr32bg27"
+      - "device_generic_family_efr32xg27"
+

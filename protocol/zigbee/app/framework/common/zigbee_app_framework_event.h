@@ -262,12 +262,12 @@ void sli_zigbee_event_init(sl_zigbee_event_t *event,
 sl_zigbee_event_t* sli_zigbee_get_event_ptr(sl_zigbee_event_t *event,
                                             uint8_t endpoint);
 
-extern EmberEventQueue emAppEventQueue;
+extern EmberEventQueue sli_zigbee_af_app_event_queue;
 #define sli_zigbee_ms_to_next_app_framework_event() \
-  emberMsToNextQueueEvent(&emAppEventQueue)
+  emberMsToNextQueueEvent(&sli_zigbee_af_app_event_queue)
 
 #define sli_zigbee_run_events() \
-  emberRunEventQueue(&emAppEventQueue)
+  emberRunEventQueue(&sli_zigbee_af_app_event_queue)
 
 #if (SL_ZIGBEE_EVENT_DEBUG_ENABLED)
   #define sl_zigbee_endpoint_event_init(event, handler, endpoint)        \

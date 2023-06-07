@@ -15,9 +15,7 @@
  *
  ******************************************************************************/
 
-#ifdef UC_BUILD
 #include "messaging-server-config.h"
-#endif  // UC_BUILD
 
 /**
  * @defgroup messaging-server  Messaging Server
@@ -124,4 +122,4 @@ void emberAfPluginMessagingServerCancelMessage(EmberNodeId nodeId,
 /** @} */ // end of name API
 /** @} */ // end of messaging-server
 
-void emAfPluginMessagingServerPrintInfo(uint8_t endpoint);
+void sli_zigbee_af_messaging_server_print_info(uint8_t endpoint);

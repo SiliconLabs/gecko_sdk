@@ -22,6 +22,8 @@ requires:
   - name: mbedtls_sha256
   - name: mbedtls_core
   - name: mbedtls_entropy_default
+    condition: [device_cortexm]
+
 template_contribution:
   - name: mbedtls_config
     value: MBEDTLS_ENTROPY_C

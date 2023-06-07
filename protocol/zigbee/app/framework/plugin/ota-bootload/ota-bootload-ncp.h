@@ -15,12 +15,12 @@
  *
  ******************************************************************************/
 
-bool emAfStartNcpBootloaderCommunications(void);
-void emAfPostNcpBootload(bool success);
-bool emAfRebootNcpAfterBootload(void);
+bool sli_zigbee_af_start_ncp_bootloader_communications(void);
+void sli_zigbee_af_post_ncp_bootload(bool success);
+bool sli_zigbee_af_reboot_ncp_after_bootload(void);
 
 // These primitives are called by the Xmodem code to pass data via
 // the specific mechanism (UART or SPI).
-bool emAfBootloadSendData(const uint8_t *data, uint16_t length);
-bool emAfBootloadSendByte(uint8_t byte);
-bool emAfBootloadWaitChar(uint8_t *data, bool expect, uint8_t expected);
+bool sli_zigbee_af_bootload_send_data(const uint8_t *data, uint16_t length);
+bool sli_zigbee_af_bootload_send_byte(uint8_t byte);
+bool sli_zigbee_af_bootload_wait_char(uint8_t *data, bool expect, uint8_t expected);

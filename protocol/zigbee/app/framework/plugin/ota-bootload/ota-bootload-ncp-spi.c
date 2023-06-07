@@ -22,15 +22,10 @@
 
 #include "ota-bootload-ncp.h"
 
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
-#include "bootloader-interface-standalone.h"
-#else // !UC_BUILD
-#include "hal/micro/bootloader-interface-standalone.h"
-#ifdef EMBER_AF_PLUGIN_EZSP_SPI
-#define SL_CATALOG_ZIGBEE_EZSP_SPI_PRESENT
 #endif
-#endif // UC_BUILD
+#include "bootloader-interface-standalone.h"
 
 #if defined(SL_CATALOG_ZIGBEE_EZSP_SPI_PRESENT)
 
@@ -39,11 +34,7 @@
 #elif defined(UNIX_HOST)
   #include "hal/micro/unix/host/spi-protocol-common.h"
 #else
-  #ifndef UC_BUILD
-    #include "hal/host/spi-protocol-common.h"
-  #else
     #include "spi-protocol-common.h"
-  #endif // UC_BUILD
 #endif
 
 //#define SPI_DEBUG
@@ -173,7 +164,7 @@ static uint8_t *bootloaderQuery(void)
   return getResult();
 }
 
-bool emAfStartNcpBootloaderCommunications(void)
+bool sli_zigbee_af_start_ncp_bootloader_communications(void)
 {
   uint8_t *queryResp;
   uint16_t j;
@@ -219,7 +210,7 @@ bool emAfStartNcpBootloaderCommunications(void)
   return (queryResp != NULL);
 }
 
-void emAfPostNcpBootload(bool success)
+void sli_zigbee_af_post_ncp_bootload(bool success)
 {
   // TODO:  Call an application callback.
 
@@ -227,13 +218,13 @@ void emAfPostNcpBootload(bool success)
   halReboot();
 }
 
-bool emAfRebootNcpAfterBootload(void)
+bool sli_zigbee_af_reboot_ncp_after_bootload(void)
 {
   // ezsp-spi bootloader automatically reboots after upload finishes
   return true;
 }
 
-bool emAfBootloadSendData(const uint8_t *data, uint16_t length)
+bool sli_zigbee_af_bootload_send_data(const uint8_t *data, uint16_t length)
 {
   uint8_t *response;
 
@@ -247,12 +238,12 @@ bool emAfBootloadSendData(const uint8_t *data, uint16_t length)
             || ( (data[0] == XMODEM_EOT) && (response[1] == XMODEM_FILEDONE) ) );
 }
 
-bool emAfBootloadSendByte(uint8_t byte)
+bool sli_zigbee_af_bootload_send_byte(uint8_t byte)
 {
-  return emAfBootloadSendData(&byte, 1);
+  return sli_zigbee_af_bootload_send_data(&byte, 1);
 }
 
-bool emAfBootloadWaitChar(uint8_t *data, bool expect, uint8_t expected)
+bool sli_zigbee_af_bootload_wait_char(uint8_t *data, bool expect, uint8_t expected)
 {
   uint8_t *response;
 

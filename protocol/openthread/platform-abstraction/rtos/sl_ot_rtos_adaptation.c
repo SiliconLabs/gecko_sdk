@@ -30,38 +30,34 @@
 #include "cmsis_os2.h"
 #include "sl_ot_rtos_adaptation.h"
 #include "sl_ot_init.h"
-
+#include "sl_cmsis_os2_common.h"
 #include "sl_component_catalog.h"
 
-#ifdef SL_CATALOG_BLUETOOTH_PRESENT
-#include "sl_bt_rtos_config.h"
-
-// Configure OpenThread initialization task to use the highest priority to ensure
-// OpenThread instantiation and CLI initialization is complete, before other tasks
-// have started
-#define SL_OPENTHREAD_RTOS_TASK_PRIORITY_STARTUP   (SL_BT_RTOS_LINK_LAYER_TASK_PRIORITY + 1)
-#else
-#define SL_OPENTHREAD_RTOS_TASK_PRIORITY_STARTUP   (SL_OPENTHREAD_RTOS_TASK_PRIORITY + 1)
-#endif // SL_CATALOG_BLUETOOTH_PRESENT
-
-static osThreadId_t      sInitThread   = NULL;
 static osThreadId_t      sMainThread   = NULL;
+__ALIGNED(8) static uint8_t openthread_task_stack[SL_OPENTHREAD_OS_STACK_TASK_SIZE];
+__ALIGNED(4) static uint8_t openthread_task_cb[osThreadCbSize];
 
+static void mainloop(void *aContext);
 otInstance *otGetInstance(void);
-
-const osThreadAttr_t otInitThreadAttr = {
-  .name  = "otInitThread",
-  .attr_bits = 0u,
-  .stack_size = 2048,
-  .priority = (osPriority_t) SL_OPENTHREAD_RTOS_TASK_PRIORITY_STARTUP
-};
 
 const osThreadAttr_t otMainThreadAttr = {
   .name  = "otMainThread",
   .attr_bits = 0u,
-  .stack_size = 4096,
-  .priority = (osPriority_t) SL_OPENTHREAD_RTOS_TASK_PRIORITY
+  .stack_size = SL_OPENTHREAD_OS_STACK_TASK_SIZE,
+  .stack_mem = openthread_task_stack,
+  .cb_mem = openthread_task_cb,
+  .cb_size = osThreadCbSize,
+  .priority = (osPriority_t) SL_OPENTHREAD_RTOS_TASK_PRIORITY,
 };
+
+void sl_ot_rtos_init(void)
+{
+    sMainThread =  osThreadNew(mainloop, NULL, &otMainThreadAttr);
+    // Handling OpenThread initialization here
+    // ensures that, any functions calling mbedTLS API
+    // (and subsequently OSMutexPend), are called after the kernel has started.
+    sl_ot_init();
+}
 
 static void mainloop(void *aContext)
 {
@@ -83,22 +79,7 @@ static void mainloop(void *aContext)
     osThreadTerminate(sMainThread);
 }
 
-static void otInit(void *aContext)
-{
-    (void)aContext;
 
-    // Handling OpenThread initialization within a thread instead of
-    // sl_event_handler ensures that, any functions calling mbedTLS API
-    // (and subsequently OSMutexPend), are called after the kernel has started.
-    sl_ot_init();
-    sMainThread =  osThreadNew(mainloop, NULL, &otMainThreadAttr);
-    osThreadExit();
-}
-
-void sl_ot_rtos_init(void)
-{
-    sInitThread =  osThreadNew(otInit, NULL, &otInitThreadAttr);
-}
 
 static void resumeThread()
 {

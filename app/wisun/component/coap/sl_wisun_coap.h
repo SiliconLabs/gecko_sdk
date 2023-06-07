@@ -138,31 +138,19 @@ typedef struct sl_wisun_coap {
  * @param[in] tx_callback TX callback, if it's NULL, the default callback is applied
  * @param[in] rx_callback RX callback, if it's NULL, the default callback is applied
  * @param[in] version CoAP version
- * @return true Proper initialization
- * @return false Error
  *****************************************************************************/
-bool sl_wisun_coap_init(const sl_wisun_coap_tx_callback tx_callback,
+void sl_wisun_coap_init(const sl_wisun_coap_tx_callback tx_callback,
                         const sl_wisun_coap_rx_callback rx_callback,
                         const sl_wisun_coap_version_t   version);
 
 /**************************************************************************//**
  * @brief Initialize Wi-SUN CoAP default.
  * @details Initializes the internal descriptor with default values.
- * @return true Proper initialization
- * @return false Error
  *****************************************************************************/
-__STATIC_INLINE bool sl_wisun_coap_init_default(void)
+__STATIC_INLINE void sl_wisun_coap_init_default(void)
 {
-  return sl_wisun_coap_init(NULL, NULL, COAP_VERSION_1);
+  sl_wisun_coap_init(NULL, NULL, COAP_VERSION_1);
 }
-
-/**************************************************************************//**
- * @brief Get lib state.
- * @details Gets the initialized state of the CoAP library to decide whether the init is needed.
- * @return true Initialized
- * @return false Not initialized
- *****************************************************************************/
-bool sl_wisun_coap_is_initialized(void);
 
 /**************************************************************************//**
  * @brief Implement malloc.

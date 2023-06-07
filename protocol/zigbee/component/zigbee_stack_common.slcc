@@ -71,7 +71,6 @@ include:
       - path: child.h
       - path: ember-alternate-mac.h
       - path: ember-duty-cycle.h
-      - path: ember-static-struct.h
       - path: message.h
       - path: multi-network.h
       - path: multi-phy.h
@@ -92,6 +91,7 @@ include:
       - path: gp-types.h
       - path: zll-api.h
       - path: binding-table.h
+      - path: sl_zigbee_address_info.h
   - path: protocol/zigbee/stack/gp/
     file_list:
       - path: gp-token-config.h
@@ -156,7 +156,7 @@ source:
     # use librail simulation (uses ember PHY) and this source file need 'rail.h'.
   - path: platform/radio/rail_lib/plugin/rail_util_ant_div/sl_rail_util_ant_div.c
     condition:
-      - zigbee_librail_simulation
+      - rail_lib_simulation
     unless:
       - rail_util_ant_div
   - path: platform/radio/rail_lib/plugin/coexistence/protocol/ieee802154_uc/coexistence-802154.c
@@ -168,10 +168,11 @@ source:
   # use librail simulation (uses ember PHY) and this source file need 'rail.h'.
   - path: platform/radio/rail_lib/plugin/coexistence/protocol/ieee802154_uc/coexistence-802154.c
     condition:
-      - zigbee_librail_simulation
+      - rail_lib_simulation
     unless:
       - rail_util_coex
   - path: protocol/zigbee/stack/config/ember-configuration.c
+  - path: protocol/zigbee/stack/config/ember-configuration-access.c
   - path: protocol/zigbee/app/em260/command-handlers-messaging-generated.c
     condition:
       - zigbee_ncp
@@ -252,6 +253,14 @@ source:
   - path: protocol/zigbee/stack/framework/zigbee-event-logger-stub-gen.c
     unless:
       - zigbee_event_logger
+  - path: protocol/zigbee/stack/zigbee/sl_zigbee_zdo_dlk_negotiation_stubs.c
+    unless:
+      # NOTE use both just in case
+      - zigbee_zdo_dlk_negotiation
+      - zigbee_dynamic_commissioning
+  - path: protocol/zigbee/stack/stubs/sl_zigbee_r23_misc_support_stubs.c
+    unless:
+      - zigbee_r23_support
 
 validation_helper:
   # NCP doesn't have DEVICE_TYPE before it connects to Host
@@ -344,103 +353,103 @@ template_contribution:
   - name: zigbee_stack_callback
     value:
       callback_type: mac_filter_match_message
-      function_name: emAfMacFilterMatchMessageCallback
+      function_name: sli_zigbee_af_mac_filter_match_message_callback
     condition:
        - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: bootload_transmit_complete
-      function_name: emAfBootloadTransmitCompleteCallback
+      function_name: sli_zigbee_af_bootload_transmit_complete_callback
     condition:
        - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: incoming_bootload_message
-      function_name: emAfIncomingBootloadMessageCallback
+      function_name: sli_zigbee_af_incoming_bootload_message_callback
     condition:
        - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: raw_transmit_complete
-      function_name: emAfRawTransmitCompleteCallback
+      function_name: sli_zigbee_af_raw_transmit_complete_callback
     condition:
        - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: mac_passthrough_message
-      function_name: emAfMacPassthroughMessageCallback
+      function_name: sli_zigbee_af_mac_passthrough_message_callback
     condition:
        - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: id_conflict
-      function_name: emAfIdConflictCallback
+      function_name: sli_zigbee_af_id_conflict_callback
     condition:
        - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: incoming_network_status
-      function_name: emAfIncomingNetworkStatusCallback
+      function_name: sli_zigbee_af_incoming_network_status_callback
     condition:
        - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: incoming_route_error
-      function_name: emAfIncomingRouteErrorCallback
+      function_name: sli_zigbee_af_incoming_route_error_callback
     condition:
        - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: incoming_many_to_one_route_request
-      function_name: emAfIncomingManyToOneRouteRequestCallback
+      function_name: sli_zigbee_af_incoming_many_to_one_route_requestCallback
     condition:
        - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: duty_cycle
-      function_name: emAfDutyCycleCallback
+      function_name: sli_zigbee_af_duty_cycle_callback
     condition:
        - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: child_join
-      function_name: emAfChildJoinCallback
+      function_name: sli_zigbee_af_child_joinCallback
     condition:
        - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: network_found
-      function_name: emAfNetworkFoundCallback
+      function_name: sli_zigbee_af_network_found_callback
     condition:
        - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: scan_complete
-      function_name: emAfScanCompleteCallback
+      function_name: sli_zigbee_af_scan_complete_callback
     condition:
        - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: incoming_message
-      function_name: emAfIncomingMessageCallback
+      function_name: sli_zigbee_af_incoming_message_callback
     condition:
        - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: message_sent
-      function_name:  emAfMessageSentCallback
+      function_name:  sli_zigbee_af_message_sent_callback
     condition:
        - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: switch_network_key
-      function_name: emAfSwitchNetworkKeyCallback
+      function_name: sli_zigbee_af_switch_network_key_callback
     condition:
       - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: zigbee_key_establishment
-      function_name: emAfZigbeeKeyEstablishmentCallback
+      function_name: sli_zigbee_af_zigbee_key_establishment_callback
     condition:
       - zigbee_ncp
 

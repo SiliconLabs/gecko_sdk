@@ -9,9 +9,14 @@ description: >
   or in sl_btmesh_lpn_config.h. Several callback functions, which can be implemented in the application,
   are available for initialization and friendship related events. More details about the functions can be found in sl_btmesh_lpn.h.
   LPN functionality can be enabled or disabled during runtime via node configuration.
+
+  This is a No-Code component.
 category: "Bluetooth Mesh|Features"
 quality: "production"
 root_path: "app/btmesh/common/btmesh_lpn"
+tag:
+  - No-Code
+
 config_file:
   - path: "config/sl_btmesh_lpn_config.h"
 source:
@@ -28,12 +33,14 @@ requires:
   - name: "btmesh_stack_lpn"
   - name: "btmesh_stack_node"
   - name: "btmesh_stack"
-  - name: "simple_timer"
+  - name: "app_timer"
 recommends:
-  - id: "simple_timer"
-  
+  - id: "app_timer"
+
 template_contribution:
   - name: "btmesh_on_event"
     value:
       include: "sl_btmesh_lpn.h"
       function: "sl_btmesh_lpn_on_event"
+  - name: component_catalog
+    value: "btmesh_lpn"

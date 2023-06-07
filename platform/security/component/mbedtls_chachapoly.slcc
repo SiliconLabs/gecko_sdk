@@ -1,6 +1,6 @@
 id: mbedtls_chachapoly
 package: platform
-label: ChaChaPoly Algorithm
+label: ChaChaPoly
 description: >-
   This component provides support for authenticated encryption and decryption with
   ChaChaPoly using Mbed TLS. This component also provides support for the ChaCha20

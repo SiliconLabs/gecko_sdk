@@ -51,6 +51,7 @@
 #endif
 #endif
 
+#include "common/callback.hpp"
 #include "common/locator.hpp"
 #include "common/message.hpp"
 #include "common/random.hpp"
@@ -394,16 +395,16 @@ private:
 #ifdef MBEDTLS_SSL_EXPORT_KEYS
 #if (MBEDTLS_VERSION_NUMBER >= 0x03000000)
 
-    static void HandleMbedtlsExportKeys(void *                      aContext,
+    static void HandleMbedtlsExportKeys(void                       *aContext,
                                         mbedtls_ssl_key_export_type aType,
-                                        const unsigned char *       aMasterSecret,
+                                        const unsigned char        *aMasterSecret,
                                         size_t                      aMasterSecretLen,
                                         const unsigned char         aClientRandom[32],
                                         const unsigned char         aServerRandom[32],
                                         mbedtls_tls_prf_types       aTlsPrfType);
 
     void HandleMbedtlsExportKeys(mbedtls_ssl_key_export_type aType,
-                                 const unsigned char *       aMasterSecret,
+                                 const unsigned char        *aMasterSecret,
                                  size_t                      aMasterSecretLen,
                                  const unsigned char         aClientRandom[32],
                                  const unsigned char         aServerRandom[32],
@@ -411,7 +412,7 @@ private:
 
 #else
 
-    static int       HandleMbedtlsExportKeys(void *               aContext,
+    static int       HandleMbedtlsExportKeys(void                *aContext,
                                              const unsigned char *aMasterSecret,
                                              const unsigned char *aKeyBlock,
                                              size_t               aMacLength,
@@ -458,11 +459,11 @@ private:
 
 #if OPENTHREAD_CONFIG_COAP_SECURE_API_ENABLE
 #ifdef MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED
-    const uint8_t *    mCaChainSrc;
+    const uint8_t     *mCaChainSrc;
     uint32_t           mCaChainLength;
-    const uint8_t *    mOwnCertSrc;
+    const uint8_t     *mOwnCertSrc;
     uint32_t           mOwnCertLength;
-    const uint8_t *    mPrivateKeySrc;
+    const uint8_t     *mPrivateKeySrc;
     uint32_t           mPrivateKeyLength;
     mbedtls_x509_crt   mCaChain;
     mbedtls_x509_crt   mOwnCert;
@@ -494,15 +495,13 @@ private:
 
     Message *mReceiveMessage;
 
-    ConnectedHandler mConnectedHandler;
-    ReceiveHandler   mReceiveHandler;
-    void *           mContext;
+    Callback<ConnectedHandler> mConnectedCallback;
+    Callback<ReceiveHandler>   mReceiveCallback;
 
     Ip6::MessageInfo mMessageInfo;
     Ip6::Udp::Socket mSocket;
 
-    TransportCallback mTransportCallback;
-    void *            mTransportContext;
+    Callback<TransportCallback> mTransportCallback;
 
     Message::SubType mMessageSubType;
     Message::SubType mMessageDefaultSubType;

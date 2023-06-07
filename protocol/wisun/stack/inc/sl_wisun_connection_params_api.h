@@ -32,6 +32,7 @@
 #define SL_WISUN_CONNECTION_PARAMS_API_H
 
 #include <stdint.h>
+#include "sl_wisun_common.h"
 #include "sl_common.h"
 #include "sl_status.h"
 
@@ -39,15 +40,6 @@
 
 /// API version used to check compatibility (do not edit when using this header)
 #define SL_WISUN_PARAMS_API_VERSION 0x0001
-
-/// Convert months to minutes (month of 30 days)
-#define MONTH_TO_MIN(x) ((x) * 30 * 24 * 60)
-
-/// Convert hours to seconds
-#define HOUR_TO_SEC(x) ((x) * 3600)
-
-/// Convert days to seconds
-#define DAY_TO_SEC(x) ((x) * 24 * 3600)
 
 /**************************************************************************//**
  * @addtogroup SL_WISUN_TYPES
@@ -69,10 +61,17 @@ SL_PACK_END()
 /// PAN discovery parameter set
 SL_PACK_START(1)
 typedef struct {
-  /// PAN advertisement trickle timer
+  /// PAN Advertisement trickle timer
   sl_wisun_trickle_params_t trickle_pa;
-  /// PAN advertisement solicit trickle timer
+  /// PAN Advertisement Solicit trickle timer
   sl_wisun_trickle_params_t trickle_pas;
+  /// Minimum signal level for a node to be selected as the EAPOL target for
+  /// authentication immediately after a PAN Advertisement reception.
+  /// Range from -174 (0) to +80 (254) dBm, 255 to disable feature.
+  uint8_t eapol_target_min_sens;
+  /// If true, allow join state 1 to be skipped using cached information
+  /// from the previous connection.
+  bool allow_skip:1;
 } sl_wisun_params_discovery;
 SL_PACK_END()
 
@@ -114,15 +113,18 @@ typedef struct {
   uint16_t gtk_max_mismatch_m;
   /// LGTK_MAX_MISMATCH (minutes)
   uint16_t lgtk_max_mismatch_m;
+  /// If true, allow join state 2 to be skipped using cached credentials
+  /// from the previous connection.
+  bool allow_skip:1;
 } sl_wisun_params_eapol;
 SL_PACK_END()
 
 /// PAN configuration parameter set
 SL_PACK_START(1)
 typedef struct {
-  /// PAN configuration trickle timer
+  /// PAN Configuration trickle timer
   sl_wisun_trickle_params_t trickle_pc;
-  /// PAN configuration solicit trickle timer
+  /// PAN Configuration Solicit trickle timer
   sl_wisun_trickle_params_t trickle_pcs;
 } sl_wisun_params_configuration;
 SL_PACK_END()
@@ -171,7 +173,7 @@ typedef struct {
 } sl_wisun_params_misc;
 SL_PACK_END()
 
-/// Connection parameter set
+/// FFN parameter set
 SL_PACK_START(1)
 typedef struct {
   /**
@@ -197,13 +199,13 @@ typedef struct {
 SL_PACK_END()
 
 /***************************************************************************//**
- * @addtogroup SL_WISUN_PARAMS_PREDEFINED_PROFILES Predefined connection profiles
+ * @addtogroup SL_WISUN_FFN_PARAMETER_SETS Predefined FFN parameter sets
  *
- * Predefined connection profiles for sl_wisun_set_connection_parameters().
+ * Predefined FFN parameter sets for sl_wisun_set_connection_parameters().
  *
- * These profiles can be used either as-is to replicate the behavior of
+ * These parameter sets can be used either as-is to replicate the behavior of
  * sl_wisun_set_network_size(), or used as an initialization value for an
- * application-specific connection profile.
+ * application-specific parameter set.
  *
  * @{
  ******************************************************************************/
@@ -214,19 +216,21 @@ static const sl_wisun_connection_params_t SL_WISUN_PARAMS_PROFILE_TEST = {
   .discovery = {
     .trickle_pa = {
       .imin_s = 5,
-      .imax_s = 15,
+      .imax_s = 60,
       .k = 1
     },
     .trickle_pas = {
       .imin_s = 5,
       .imax_s = 15,
       .k = 1
-    }
+    },
+    .eapol_target_min_sens = DBM_TO_RSL_RANGE(-60),
+    .allow_skip = true
   },
   .configuration = {
     .trickle_pc = {
       .imin_s = 5,
-      .imax_s = 15,
+      .imax_s = 60,
       .k = 1
     },
     .trickle_pcs = {
@@ -256,6 +260,7 @@ static const sl_wisun_connection_params_t SL_WISUN_PARAMS_PROFILE_TEST = {
     .gtk_request_imax_m = 4,
     .gtk_max_mismatch_m = 64,
     .lgtk_max_mismatch_m = 60,
+    .allow_skip = true
   },
   .rpl = {
     .dis_max_delay_first_s = 1,
@@ -295,7 +300,9 @@ static const sl_wisun_connection_params_t SL_WISUN_PARAMS_PROFILE_CERTIF = {
       .imin_s = 15,
       .imax_s = 60,
       .k = 1
-    }
+    },
+    .eapol_target_min_sens = 255,
+    .allow_skip = false
   },
   .configuration = {
     .trickle_pc = {
@@ -330,6 +337,7 @@ static const sl_wisun_connection_params_t SL_WISUN_PARAMS_PROFILE_CERTIF = {
     .gtk_request_imax_m = 64,
     .gtk_max_mismatch_m = 1,
     .lgtk_max_mismatch_m = 60,
+    .allow_skip = false
   },
   .rpl = {
     .dis_max_delay_first_s = 1,
@@ -369,7 +377,9 @@ static const sl_wisun_connection_params_t SL_WISUN_PARAMS_PROFILE_SMALL = {
       .imin_s = 15,
       .imax_s = 60,
       .k = 1
-    }
+    },
+    .eapol_target_min_sens = DBM_TO_RSL_RANGE(-60),
+    .allow_skip = true
   },
   .configuration = {
     .trickle_pc = {
@@ -404,6 +414,7 @@ static const sl_wisun_connection_params_t SL_WISUN_PARAMS_PROFILE_SMALL = {
     .gtk_request_imax_m = 4,
     .gtk_max_mismatch_m = 64,
     .lgtk_max_mismatch_m = 60,
+    .allow_skip = true
   },
   .rpl = {
     .dis_max_delay_first_s = 1,
@@ -443,7 +454,9 @@ static const sl_wisun_connection_params_t SL_WISUN_PARAMS_PROFILE_MEDIUM = {
       .imin_s = 60,
       .imax_s = 960,
       .k = 1
-    }
+    },
+    .eapol_target_min_sens = DBM_TO_RSL_RANGE(-60),
+    .allow_skip = true
   },
   .configuration = {
     .trickle_pc = {
@@ -478,6 +491,7 @@ static const sl_wisun_connection_params_t SL_WISUN_PARAMS_PROFILE_MEDIUM = {
     .gtk_request_imax_m = 64,
     .gtk_max_mismatch_m = 64,
     .lgtk_max_mismatch_m = 60,
+    .allow_skip = true
   },
   .rpl = {
     .dis_max_delay_first_s = 60,
@@ -517,7 +531,9 @@ static const sl_wisun_connection_params_t SL_WISUN_PARAMS_PROFILE_LARGE = {
       .imin_s = 120,
       .imax_s = 1536,
       .k = 1
-    }
+    },
+    .eapol_target_min_sens = DBM_TO_RSL_RANGE(-60),
+    .allow_skip = true
   },
   .configuration = {
     .trickle_pc = {
@@ -552,6 +568,7 @@ static const sl_wisun_connection_params_t SL_WISUN_PARAMS_PROFILE_LARGE = {
     .gtk_request_imax_m = 64,
     .gtk_max_mismatch_m = 64,
     .lgtk_max_mismatch_m = 60,
+    .allow_skip = true
   },
   .rpl = {
     .dis_max_delay_first_s = 60,

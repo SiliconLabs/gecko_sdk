@@ -86,5 +86,5 @@ bool emberAfCustomStorageWriteCallback(const uint8_t* dataToWrite,
 // TODO: put this gating back in once we have that mechanism in place for
 // the generated CLI
 //#if defined(EMBER_TEST)
-void emAfOtaLoadFileCommand(void);
+void sli_zigbee_af_ota_load_file_command(void);
 //#endif

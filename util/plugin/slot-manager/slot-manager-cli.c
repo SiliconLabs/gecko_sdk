@@ -10,16 +10,16 @@
 #include "printf.h"
 #include "sl_status.h"
 
-void emAfPluginSlotManagerCliBootloadSlot(sl_cli_command_arg_t *arguments)
+void sli_slot_manager_cli_bootload_slot(sl_cli_command_arg_t *arguments)
 {
   uint32_t slotId = sl_cli_get_argument_uint32(arguments, 0);
 
   if (emberAfPluginSlotManagerVerifyAndBootloadSlot(slotId) != SL_STATUS_OK) {
-    printf("Unable to boot image at slot %d\n", slotId);
+    printf("Unable to boot image at slot %ld\n", slotId);
   }
 }
 
-void emAfPluginSlotManagerCliEraseSlot(sl_cli_command_arg_t *arguments)
+void sli_slot_manager_cli_erase_slot(sl_cli_command_arg_t *arguments)
 {
   uint32_t slotId = sl_cli_get_argument_uint32(arguments, 0);
   if (emberAfPluginSlotManagerEraseSlot(slotId) != SL_STATUS_OK) {
@@ -27,12 +27,12 @@ void emAfPluginSlotManagerCliEraseSlot(sl_cli_command_arg_t *arguments)
   }
 }
 
-void emAfPluginSlotManagerCliPrintExternalFlashInfo(sl_cli_command_arg_t *arguments)
+void sli_slot_manager_cli_print_external_flash_info(sl_cli_command_arg_t *arguments)
 {
   emberAfPluginSlotManagerPrintExternalFlashInfo();
 }
 
-void emAfPluginSlotManagerCliReadExtFlash(sl_cli_command_arg_t *arguments)
+void sli_slot_manager_cli_read_ext_flash(sl_cli_command_arg_t *arguments)
 {
   uint8_t offset, data[MAX_FLASH_READ_BYTES];
   uint32_t address = sl_cli_get_argument_uint32(arguments, 0);
@@ -47,14 +47,14 @@ void emAfPluginSlotManagerCliReadExtFlash(sl_cli_command_arg_t *arguments)
                                            len) == SL_STATUS_OK) {
     printf("Address          Data\n");
     for (offset = 0; offset < (len - 1); offset++) {
-      printf("0x%4x       0x%x\n", address + offset, data[offset]);
+      printf("0x%4lx       0x%x\n", address + offset, data[offset]);
     }
   } else {
     printf("Failed to read from flash\n");
   }
 }
 
-void emAfPluginSlotManagerCliPrintSlotsInfo(sl_cli_command_arg_t *arguments)
+void sli_slot_manager_cli_print_slots_info(sl_cli_command_arg_t *arguments)
 {
   uint32_t slotId = 0;
   SlotManagerSlotInfo_t slotInfo;
@@ -63,9 +63,9 @@ void emAfPluginSlotManagerCliPrintSlotsInfo(sl_cli_command_arg_t *arguments)
 
   while (SL_STATUS_OK == emberAfPluginSlotManagerGetSlotInfo(slotId, &slotInfo)) {
     imagePresentInSlot = true;
-    printf("Slot %d\n"
-           "  Address     : 0x%4X\n"
-           "  Length      : 0x%4X (%d bytes)\n",
+    printf("Slot %ld\n"
+           "  Address     : 0x%4lX\n"
+           "  Length      : 0x%4lX (%ld bytes)\n",
            slotId,
            slotInfo.slotStorageInfo.address,
            slotInfo.slotStorageInfo.length,
@@ -96,13 +96,13 @@ void emAfPluginSlotManagerCliPrintSlotsInfo(sl_cli_command_arg_t *arguments)
         printf("MCU\n");
         break;
       default:
-        printf("Other (0x%X)\n", slotInfo.slotAppInfo.type);
+        printf("Other (0x%lX)\n", slotInfo.slotAppInfo.type);
         break;
     }
 
     if (imagePresentInSlot) {
-      printf("  Version     : 0x%4X\n", slotInfo.slotAppInfo.version);
-      printf("  Capabilities: 0x%4X\n", slotInfo.slotAppInfo.capabilities);
+      printf("  Version     : 0x%lX\n", slotInfo.slotAppInfo.version);
+      printf("  Capabilities: 0x%4lX\n", slotInfo.slotAppInfo.capabilities);
       printf("  Product ID  : ");
       uint8_t numProductIdDigits = COUNTOF(slotInfo.slotAppInfo.productId);
       for (index = 0; index < numProductIdDigits; index++) {

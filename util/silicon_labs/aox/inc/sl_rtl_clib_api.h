@@ -73,6 +73,7 @@ enum sl_rtl_error_code{
 };
 /** @} */ // end addtogroup sl_rtl_error
 
+
 /**
  * @addtogroup sl_rtl_aox Angle of Arrival / Departure
  * @{
@@ -415,15 +416,15 @@ enum sl_rtl_error_code sl_rtl_aox_create_estimator(sl_rtl_aox_libitem* item);
  *             Indexing: i_samples_out[snapshot][antenna]
  * @param[out] q_samples_out Buffer for the processed Q-samples. Must be allocated by the user.
  *             Indexing: q_samples_out[snapshot][antenna]
- * @param[in] num_snapshots_out Number of snaphots allocated in the output buffers. This function
- *            checks if the given number of snaphots and calculated snapshots based on the length of RAW-data match
+ * @param[in] num_snapshots_out Number of snapshots allocated in the output buffers. This function
+ *            checks if the given number of snapshots and calculated snapshots based on the length of RAW-data match
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_aox_convert_raw_samples(sl_rtl_aox_libitem* item, uint32_t start_offset, float iq_data_downsampling_factor, float* raw_i_samples_in, float* raw_q_samples_in, uint32_t num_raw_samples_in, float** i_samples_out, float** q_samples_out, uint32_t num_snapshots_out);
 
 /**************************************************************************//**
- * Calculate the number of downsampled snaphots in a RAW IQ-data buffer. Use this function to get the number
- * of snaphots to allocate the i_samples and q_samples buffers for the process-function.
+ * Calculate the number of downsampled snapshots in a RAW IQ-data buffer. Use this function to get the number
+ * of snapshots to allocate the i_samples and q_samples buffers for the process-function.
  *
  * @param[in] item Pointer to the initialized and configured AoX libitem.
  * @param[in] num_raw_samples_in Total number of RAW IQ-sample pairs.
@@ -431,7 +432,7 @@ enum sl_rtl_error_code sl_rtl_aox_convert_raw_samples(sl_rtl_aox_libitem* item, 
  * @param[in] iq_data_downsampling_factor Ratio between chip IQ-data sampling rate and downsampled rate.
  *            For example, 4.8e6 / 500e3 = 9.6.
  * @param[in] num_channels Number of channels in the RAW data
- * @param[out] num_snapshots_out Calculated number of snaphots based on the input.
+ * @param[out] num_snapshots_out Calculated number of snapshots based on the input.
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_aox_calculate_number_of_snapshots(sl_rtl_aox_libitem* item, uint32_t num_raw_samples_in, uint32_t start_offset, float iq_data_downsampling_factor, uint32_t num_channels, uint32_t* num_snapshots_out);
@@ -702,6 +703,176 @@ enum sl_rtl_error_code sl_rtl_aox_antenna_pattern_deinit(sl_rtl_aox_antenna_patt
 /** @} */ // end addtogroup sl_rtl_aox
 
 /**
+ * @addtogroup sl_rtl_abr Accurate Bluetooth Ranging (ABR)
+ * @{
+ *
+ * @brief Accurate Bluetooth Ranging
+ *
+ * These functions are related to the phase-based estimation of distance from
+ * I/Q-samples.
+ * The distances can be calculated following these steps:
+ *   1. Initialize a sl_rtl_abr_libitem instance
+ *   2. Set up the calculation parameters
+ *   3. Create the estimator
+ *   4. Process the I/Q data into a distance
+ *   5. Get distance estimate
+ */
+
+/// ABR estimator mode
+enum sl_rtl_abr_algo_mode{
+  SL_RTL_ABR_ALGO_MODE_REAL_TIME_BASIC = 1, ///< Medium filtering, medium response, medium CPU cost. Suitable for real-time tracking.
+
+  SL_RTL_ABR_ALGO_MODE_LAST ///< Placeholder
+};
+
+// ABR
+enum sl_rtl_abr_cs_mode{
+  SL_RTL_ABR_CS_MODE_RTP = 0, ///< Round-trip phase based estimation (RTP)
+  SL_RTL_ABR_CS_MODE_RTT = 1, ///< Round-trip time based estimation (RTT)
+  // SL_RTL_ABR_CS_MODE_RTP_RTT = 2, ///< Combination of RTP and RTT
+  SL_RTL_ABR_CS_MODE_LAST ///< Placeholder
+};
+
+// ABR tone quality. Currently only entered for RTP
+enum sl_rtl_abr_tone_quality{
+  SL_RTL_ABR_TONE_QUALITY_GOOD = 0,
+  SL_RTL_ABR_TONE_QUALITY_MEDIUM = 1,
+  SL_RTL_ABR_TONE_QUALITY_LOW = 2,
+  SL_RTL_ABR_TONE_QUALITY_UNAVAILABLE = 3
+};
+
+// RTT
+// Note: rssi_d1, rssi_d2, time_d1 and time_d2 are required to be from the same channels and in the same channel order.
+typedef struct {
+  uint32_t num_time_stamps; ///< Number of frequencies, 0xFFFFFFFF or 0 if invalid. In case of invalid input, the previously estimated distance shall be returned.
+  int32_t* rssi_d1; ///< Array of RSSI values from device 1, enter INVALID_RSSI_VALUE for any unavailable RSSI measurement
+  int32_t* rssi_d2; ///< Array of RSSI values from device 2, enter INVALID_RSSI_VALUE for any unavailable RSSI measurement
+  int32_t* time_d1; ///< Array of time measurements from device 1, enter INVALID_TIME_VALUE for any unavailable time measurement
+  int32_t* time_d2; ///< Array of time measurements from device 2, enter INVALID_TIME_VALUE for any unavailable time measurement
+} sl_rtl_abr_rtt_data;
+
+// RTP
+typedef struct {
+  uint32_t num_tones; ///< Number of tones (frequencies)
+  float tones_frequency_delta_hz; ///< Frequency delta, Hz
+  uint32_t* blank_tone_indices;  ///< Tones that shall be ignored when making a distance estimation
+  uint32_t num_blank_tone_indices;
+  enum sl_rtl_abr_tone_quality* tone_qualities_d1; ///< num_tones elements, null ptr means not used
+  enum sl_rtl_abr_tone_quality* tone_qualities_d2; ///< num_tones elements, null ptr means not used
+  float* i_samples_d1;  ///< Array of device 1 I components, enter INVALID_PCT_VALUE for any unavailable PCT measurement
+  float* q_samples_d1;  ///< Array of device 1 Q components, enter INVALID_PCT_VALUE for any unavailable PCT measurement
+  float* i_samples_d2;  ///< Array of device 2 I components, enter INVALID_PCT_VALUE for any unavailable PCT measurement
+  float* q_samples_d2;  ///< Array of device 2 Q components, enter INVALID_PCT_VALUE for any unavailable PCT measurement
+  // sl_rtl_abr_doppler_params* doppler_params; ///< Support for the Doppler parameters to be added in future
+} sl_rtl_abr_rtp_data;
+
+/// ABR library item
+typedef void* sl_rtl_abr_libitem;
+
+/**************************************************************************//**
+ * Initialize the ABR libitem instance.
+ *
+ * @param[in] item Pointer to the libitem to be initialized
+ * @return ::SL_RTL_ERROR_SUCCESS if successful
+ *****************************************************************************/
+enum sl_rtl_error_code sl_rtl_abr_init(sl_rtl_abr_libitem* item);
+
+/**************************************************************************//**
+ * Deinitialize a libitem instance of the ABR estimator.
+ *
+ * @param[in] item Pointer to the libitem to be deinitialized
+ * @return ::SL_RTL_ERROR_SUCCESS if successful
+ *****************************************************************************/
+enum sl_rtl_error_code sl_rtl_abr_deinit(sl_rtl_abr_libitem* item);
+
+/**************************************************************************//**
+ * Set the estimation mode.
+ *
+ * @param[in] item Pointer to the initialized ABR libitem
+ * @param[in] mode Estimator mode as ::sl_rtl_abr_algo_mode
+ * @return ::SL_RTL_ERROR_SUCCESS if successful
+ *
+ * Set the estimation mode. For example, ::SL_RTL_ABR_ALGO_MODE_BASIC sets medium
+ * filtering. For further description of the modes, see the documentation
+ * of ::sl_rtl_abr_algo_mode.
+ *****************************************************************************/
+enum sl_rtl_error_code sl_rtl_abr_set_algo_mode(sl_rtl_abr_libitem* item, enum sl_rtl_abr_algo_mode mode);
+
+/**************************************************************************//**
+ * Set the estimation cs_mode.
+ *
+ * @param[in] item Pointer to the initialized ABR libitem
+ * @param[in] mode cs_mode as ::sl_rtl_abr_cs_mode
+ * @return ::SL_RTL_ERROR_SUCCESS if successful
+ *
+ * Set the desired cs_mode. For example, ::SL_RTL_ABR_CS_MODE_RTP uses round-trip
+ * phase based cs_mode.
+ *****************************************************************************/
+enum sl_rtl_error_code sl_rtl_abr_set_cs_mode(sl_rtl_abr_libitem* item, enum sl_rtl_abr_cs_mode cs_mode);
+
+/**************************************************************************//**
+ * Create the estimator after initializing the libitem and setting parameters.
+ *
+ * @param[in] item Pointer to the initialized and configured ABR libitem
+ * @return ::SL_RTL_ERROR_SUCCESS if successful
+ *****************************************************************************/
+enum sl_rtl_error_code sl_rtl_abr_create_estimator(sl_rtl_abr_libitem* item);
+
+/* NARROWBAND PHASE BASED DISTANCE ESTIMATION */
+
+/**************************************************************************//**
+ * Calculate distance estimate based on RTP.
+ *
+ * @param[in] item Pointer to the initialized and configured ABR libitem
+ * @param[in] rtp_data Data structure with the RTP measurement data
+ * @return ::SL_RTL_ERROR_SUCCESS if successful and
+ *   ::SL_RTL_ERROR_ESTIMATION_IN_PROGRESS if estimate is not yet final
+ *   and more input data needs to be processed.
+ *
+ * Calculate the distance estimate from the given I/Q samples captured at the
+ * given frequencies. Use sl_rtl_abr_get_distance to fetch the latest distance
+ * estimate.
+ *****************************************************************************/
+enum sl_rtl_error_code sl_rtl_abr_process_rtp(sl_rtl_abr_libitem* item, sl_rtl_abr_rtp_data* rtp_data);
+
+/**************************************************************************//**
+ * Calculate distance estimate based on RTT.
+ *
+ * @param[in] item Pointer to the initialized and configured ABR libitem
+ * @param[in] rtt_data Data structure with the RTT measurement data
+ * @return ::SL_RTL_ERROR_SUCCESS if successful and
+ *   ::SL_RTL_ERROR_ESTIMATION_IN_PROGRESS if estimate is not yet final
+ *   and more input data needs to be processed.
+ *
+ * Calculate the distance estimate from the given device time samples.
+ * Use sl_rtl_abr_get_distance to fetch the latest distance
+ * estimate.
+ *****************************************************************************/
+enum sl_rtl_error_code sl_rtl_abr_process_rtt(sl_rtl_abr_libitem* item, sl_rtl_abr_rtt_data* rtt_data);
+
+/* DISTANCE ESTIMATION COMMON*/
+
+/**************************************************************************//**
+ * Get likeliness of the distance estimate.
+ *
+ * @param[in] item Pointer to the initialized ABR libitem
+ * @param[out] distance Distance out in meters.
+ * @return ::SL_RTL_ERROR_SUCCESS if successful
+ *****************************************************************************/
+enum sl_rtl_error_code sl_rtl_abr_get_distance(sl_rtl_abr_libitem* item, float* distance);
+
+/**************************************************************************//**
+ * Get distance estimate.
+ *
+ * @param[in] item Pointer to the initialized ABR libitem
+ * @param[out] distance_likeliness Likeliness between 0.0 - 1.0 (unlikely - likely) of the estimated distance
+ * @return ::SL_RTL_ERROR_SUCCESS if successful
+ *****************************************************************************/
+enum sl_rtl_error_code sl_rtl_abr_get_distance_likeliness(sl_rtl_abr_libitem* item, float* distance_likeliness);
+
+/** @} */ // end addtogroup sl_rtl_abr
+
+/**
  * @addtogroup sl_rtl_loc Location Finding
  * @{
  *
@@ -762,6 +933,13 @@ enum sl_rtl_loc_locator_parameter {
   SL_RTL_LOC_LOCATOR_PARAMETER_LAST
 };
 
+enum sl_rtl_loc_default_accuracy_parameter {
+  SL_RTL_LOC_DEFAULT_AZIMUTH_STDEV,          ///< Set the default azimuth stdev
+  SL_RTL_LOC_DEFAULT_ELEVATION_STDEV,        ///< Set the default elevation stdev
+  SL_RTL_LOC_DEFAULT_MINIMUM_DISTANCE_STDEV, ///< Set the default minimum distance stdev, will be added to the effective stdev value
+  SL_RTL_LOC_DEFAULT_DISTANCE_STDEV_COEFF,   ///< Set the default distance stdev coeff, will be added after multiplied with the distance measurement to the effective stdev value
+};
+
 /// Target-specific parameters related to locationing
 enum sl_rtl_loc_target_parameter{
   SL_RTL_LOC_TARGET_PARAMETER_TARGET_HEIGHT, // Z-position when the target is statically on some x-y-plane
@@ -809,7 +987,7 @@ typedef void* sl_rtl_loc_libitem;
 /**************************************************************************//**
  * Initialize the locationing libitem instance.
  *
- * @param[in] item Pointer to the libitem to be initialized.
+ * @param[in] item Pointer to the libitem to be initialized
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_loc_init(sl_rtl_loc_libitem* item);
@@ -817,7 +995,7 @@ enum sl_rtl_error_code sl_rtl_loc_init(sl_rtl_loc_libitem* item);
 /**************************************************************************//**
  * Deinitialize the locationing libitem instance.
  *
- * @param[in] item Pointer to the libitem to be initialized.
+ * @param[in] item Pointer to the libitem to be initialized
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_loc_deinit(sl_rtl_loc_libitem* item);
@@ -829,7 +1007,7 @@ enum sl_rtl_error_code sl_rtl_loc_deinit(sl_rtl_loc_libitem* item);
  * start all over from the beginning. This can be used, for example, in testing
  * instead of deleting and re-creating the libitem object.
  *
- * @param[in] item Pointer to the libitem to be initialized.
+ * @param[in] item Pointer to the libitem to be initialized
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_loc_reinit(sl_rtl_loc_libitem* item);
@@ -837,13 +1015,13 @@ enum sl_rtl_error_code sl_rtl_loc_reinit(sl_rtl_loc_libitem* item);
 /**************************************************************************//**
  * Set the locationing dimensionality mode. Possible choices are 2D or 3D
  * modes. Two-dimensional mode does not vary the z-position of the target and
- * assumes it is 0 at all times. When updating, for example, the distance
- * measurement from the locator to the target in 2D mode, note that
+ * assumes it is 0 at all times. When updating, for example, the distance measure-
+ * ment from the locator to the target in 2D mode, it should be noted that
  * even if the locator and tag are on different z-planes, the distance should
- * be as if they were on the same z-plane.
+ * be given as the distance as if they were on the same z-plane.
  *
- * @param[in] item Pointer to the libitem.
- * @param[in] mode Estimation mode as enum.
+ * @param[in] item Pointer to the libitem
+ * @param[in] mode Estimation mode as enum
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_loc_set_mode(sl_rtl_loc_libitem* item, enum sl_rtl_loc_estimation_mode mode);
@@ -857,8 +1035,8 @@ enum sl_rtl_error_code sl_rtl_loc_set_mode(sl_rtl_loc_libitem* item, enum sl_rtl
  * inaccurate measurements from the calculation. However, they will always leave
  * enough of them to calculate the estimate.
  *
- * @param[in] item Pointer to the libitem.
- * @param[in] method Validation method as enum.
+ * @param[in] item Pointer to the libitem
+ * @param[in] method Validation method as enum
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_loc_set_measurement_validation(sl_rtl_loc_libitem* item, enum sl_rtl_loc_measurement_validation_method method);
@@ -879,8 +1057,8 @@ enum sl_rtl_error_code sl_rtl_loc_add_locator(sl_rtl_loc_libitem* item, struct s
 /**************************************************************************//**
  * Add an asset tag item into the locationing estimator.
  *
- * @param[in] item Pointer to the libitem.
- * @param[out] tag_id_out ID of the tag assigned by the library.
+ * @param[in] item Pointer to the libitem
+ * @param[out] tag_id_out ID of the tag assigned by the library
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_loc_add_tag(sl_rtl_loc_libitem* item, int32_t *tag_id_out);
@@ -888,8 +1066,8 @@ enum sl_rtl_error_code sl_rtl_loc_add_tag(sl_rtl_loc_libitem* item, int32_t *tag
 /**************************************************************************//**
  * Remove an asset tag item previously added with sl_rtl_loc_add_tag.
  *
- * @param[in] item Pointer to the libitem.
- * @param[out]  ID of the tag to be removed.
+ * @param[in] item Pointer to the libitem
+ * @param[out]  ID of the tag to be removed
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_loc_remove_tag(sl_rtl_loc_libitem* item, int32_t tag_id);
@@ -897,7 +1075,7 @@ enum sl_rtl_error_code sl_rtl_loc_remove_tag(sl_rtl_loc_libitem* item, int32_t t
 /**************************************************************************//**
  * Create the position estimator instance after all locators have been added.
  *
- * @param[in] item Pointer to the libitem.
+ * @param[in] item Pointer to the libitem
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_loc_create_position_estimator(sl_rtl_loc_libitem* item);
@@ -908,10 +1086,10 @@ enum sl_rtl_error_code sl_rtl_loc_create_position_estimator(sl_rtl_loc_libitem* 
  * Set locator-specific parameters, such as the azimuth and elevation
  * measurement covariances.
  *
- * @param[in] item Pointer to the libitem.
- * @param[in] locator_id ID of the locator for which the parameter will be set.
- * @param[in] parameter Parameter to be set (as enum).
- * @param[in] value New value for the parameter.
+ * @param[in] item Pointer to the libitem
+ * @param[in] locator_id ID of the locator for which the parameter will be set
+ * @param[in] parameter Parameter to be set (as enum)
+ * @param[in] value New value for the parameter
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_loc_set_locator_parameter(sl_rtl_loc_libitem* item, uint32_t locator_id, enum sl_rtl_loc_locator_parameter parameter, float value);
@@ -920,9 +1098,9 @@ enum sl_rtl_error_code sl_rtl_loc_set_locator_parameter(sl_rtl_loc_libitem* item
  * Set target-specific parameters, such as the known target height.
 
  *
- * @param[in] item Pointer to the libitem.
- * @param[in] parameter Parameter to be set (as enum).
- * @param[in] value New value for the parameter.
+ * @param[in] item Pointer to the libitem
+ * @param[in] parameter Parameter to be set (as enum)
+ * @param[in] value New value for the parameter
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_loc_set_target_parameter(sl_rtl_loc_libitem* item, enum sl_rtl_loc_target_parameter parameter, float value);
@@ -930,10 +1108,10 @@ enum sl_rtl_error_code sl_rtl_loc_set_target_parameter(sl_rtl_loc_libitem* item,
 /**************************************************************************//**
  * Set target-specific parameters, such as the known target height for a specified tag.
  *
- * @param[in] item Pointer to the libitem.
- * @param[in] parameter Parameter to be set (as enum).
- * @param[in] value New value for the parameter.
- * @param[in] tag_id TagID of the asset to be changed or ::SL_RTL_LOC_ALL_TAGS.
+ * @param[in] item Pointer to the libitem
+ * @param[in] parameter Parameter to be set (as enum)
+ * @param[in] value New value for the parameter
+ * @param[in] tag_id TagID of the asset to be changed or ::SL_RTL_LOC_ALL_TAGS
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_loc_set_target_parameter_tag(sl_rtl_loc_libitem* item, enum sl_rtl_loc_target_parameter parameter, float value, int32_t tag_id);
@@ -943,7 +1121,7 @@ enum sl_rtl_error_code sl_rtl_loc_set_target_parameter_tag(sl_rtl_loc_libitem* i
  * new measurements if the previous measurements are not valid for the next
  * iteration step.
  *
- * @param[in] item Pointer to the libitem.
+ * @param[in] item Pointer to the libitem
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_loc_clear_measurements(sl_rtl_loc_libitem* item);
@@ -953,8 +1131,8 @@ enum sl_rtl_error_code sl_rtl_loc_clear_measurements(sl_rtl_loc_libitem* item);
  * new measurements if the previous measurements are not valid for the next
  * iteration step.
  *
- * @param[in] item Pointer to the libitem.
- * @param[in] tag_id TagID of the asset to be changed or ::SL_RTL_LOC_ALL_TAGS.
+ * @param[in] item Pointer to the libitem
+ * @param[in] tag_id TagID of the asset to be changed or ::SL_RTL_LOC_ALL_TAGS
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_loc_clear_measurements_tag(sl_rtl_loc_libitem* item, int32_t tag_id);
@@ -962,10 +1140,10 @@ enum sl_rtl_error_code sl_rtl_loc_clear_measurements_tag(sl_rtl_loc_libitem* ite
 /**************************************************************************//**
  * Set a new measurement for a locator specified by the locator ID.
  *
- * @param[in] item Pointer to the libitem.
- * @param[in] locator_id ID of the locator for which the measurement will be set.
- * @param[in] field Measurement to be updated (as enum).
- * @param[in] value New value for the measurement.
+ * @param[in] item Pointer to the libitem
+ * @param[in] locator_id ID of the locator for which the measurement will be set
+ * @param[in] field Measurement to be updated (as enum)
+ * @param[in] value New value for the measurement
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_loc_set_locator_measurement(sl_rtl_loc_libitem* item, uint32_t locator_id, enum sl_rtl_loc_locator_measurement_field field, float value);
@@ -986,12 +1164,24 @@ enum sl_rtl_error_code sl_rtl_loc_set_locator_measurement_tag(sl_rtl_loc_libitem
  * Set a new measurement for the target. Because the current version does not support this
  * function, calling it has no effect.
  *
- * @param[in] item Pointer to the libitem.
- * @param[in] field Measurement to be updated (as enum).
- * @param[in] value New value for the measurement.
+ * @param[in] item Pointer to the libitem
+ * @param[in] field Measurement to be updated (as enum)
+ * @param[in] value New value for the measurement
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_loc_set_target_measurement(sl_rtl_loc_libitem* item, enum sl_rtl_loc_target_measurement_field field, float value);
+
+/**************************************************************************//**
+ * Set the default accuracy value for direction / distance.
+ * This value will be used if not given explicitly by measurement.
+ *
+ * @param[in] item Pointer to the libitem
+ * @param[in] locator_id ID of the locator whose parameter will be set
+ * @param[in] parm Parameter to be set (as enum)
+ * @param[in] value New value for the default accuracy
+ * @return ::SL_RTL_ERROR_SUCCESS if successful
+ *****************************************************************************/
+enum sl_rtl_error_code sl_rtl_loc_set_default_accuracy(sl_rtl_loc_libitem* item, uint32_t locator_id, enum sl_rtl_loc_default_accuracy_parameter param, float value);
 
 /**************************************************************************//**
  * Process the current time step of the locationing filter. Call this function
@@ -1000,7 +1190,7 @@ enum sl_rtl_error_code sl_rtl_loc_set_target_measurement(sl_rtl_loc_libitem* ite
  * the filter forward and provide new state results and state covariance
  * values, which can be retrieved with separate function calls.
  *
- * @param[in] item Pointer to the libitem.
+ * @param[in] item Pointer to the libitem
  * @param[in] time_step Process time interval in seconds. This is the time
  * separation between the previous step and this current step.
  * @return ::SL_RTL_ERROR_SUCCESS if successful
@@ -1014,10 +1204,10 @@ enum sl_rtl_error_code sl_rtl_loc_process(sl_rtl_loc_libitem* item, float time_s
  * the filter forward and provide new state results and state covariance
  * values, which can be retrieved with separate function calls.
  *
- * @param[in] item Pointer to the libitem.
+ * @param[in] item Pointer to the libitem
  * @param[in] time_step Process time interval in seconds. This is the time
  * separation between the previous step and this current step.
- * @param[in] tag_id TagID of the asset to be processed or ::SL_RTL_LOC_ALL_TAGS.
+ * @param[in] tag_id TagID of the asset to be processed or ::SL_RTL_LOC_ALL_TAGS
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_loc_process_tag(sl_rtl_loc_libitem* item, float time_step, int32_t tag_id);
@@ -1025,9 +1215,9 @@ enum sl_rtl_error_code sl_rtl_loc_process_tag(sl_rtl_loc_libitem* item, float ti
 /**************************************************************************//**
  * Get result of the current state variables or state covariances.
  *
- * @param[in] item Pointer to the libitem.
- * @param[in] result The desired state variable result as enum.
- * @param[out] value The value output of the state variable.
+ * @param[in] item Pointer to the libitem
+ * @param[in] result The desired state variable result as enum
+ * @param[out] value The value output of the state variable
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_loc_get_result(sl_rtl_loc_libitem* item, enum sl_rtl_loc_result result, float* value);
@@ -1035,10 +1225,10 @@ enum sl_rtl_error_code sl_rtl_loc_get_result(sl_rtl_loc_libitem* item, enum sl_r
 /**************************************************************************//**
  * Get result of the current state variables or state covariances for a specified tag.
  *
- * @param[in] item Pointer to the libitem.
- * @param[in] result The desired state variable result as enum.
- * @param[out] value The value output of the state variable.
- * @param[in] tag_id TagID of the asset to fetch the results for.
+ * @param[in] item Pointer to the libitem
+ * @param[in] result The desired state variable result as enum
+ * @param[out] value The value output of the state variable
+ * @param[in] tag_id TagID of the asset to fetch the results for
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_loc_get_result_tag(sl_rtl_loc_libitem* item, enum sl_rtl_loc_result result, float* value, int32_t tag_id);
@@ -1047,23 +1237,23 @@ enum sl_rtl_error_code sl_rtl_loc_get_result_tag(sl_rtl_loc_libitem* item, enum 
  * Get the latest measurement converted into the coordinate system of the
  * multi-locator system.
  *
- * @param[in] item Pointer to the libitem.
- * @param[in] locator_id ID of the locator whose measurement will be retrieved.
- * @param[in] field Measurement to be retrieved (as enum).
- * @param[out] value_out The value output of the state variable.
+ * @param[in] item Pointer to the libitem
+ * @param[in] locator_id ID of the locator whose measurement will be retrieved
+ * @param[in] field Measurement to be retrieved (as enum)
+ * @param[out] value_out The value output of the state variable
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_loc_get_measurement_in_system_coordinates(sl_rtl_loc_libitem* item, uint32_t locator_id, enum sl_rtl_loc_locator_measurement_field field, float* value_out);
 
 /**************************************************************************//**
- * Get latest measurement converted into the coordinate system of the
+ * Get the latest measurement converted into the coordinate system of the
  * multi-locator system for a specified tag.
  *
- * @param[in] item Pointer to the libitem.
- * @param[in] locator_id ID of the locator whose measurement will be retrieved.
- * @param[in] field Measurement to be retrieved (as enum).
- * @param[out] value_out The value output of the state variable.
- * @param[in] tag_id TagID of the asset.
+ * @param[in] item Pointer to the libitem
+ * @param[in] locator_id ID of the locator whose measurement will be retrieved
+ * @param[in] field Measurement to be retrieved (as enum)
+ * @param[out] value_out The value output of the state variable
+ * @param[in] tag_id TagID of the asset
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_loc_get_measurement_in_system_coordinates_tag(sl_rtl_loc_libitem* item, uint32_t locator_id, enum sl_rtl_loc_locator_measurement_field field, float* value_out, int32_t tag_id);
@@ -1071,34 +1261,13 @@ enum sl_rtl_error_code sl_rtl_loc_get_measurement_in_system_coordinates_tag(sl_r
 /**************************************************************************//**
  * Get the expected direction of the asset for the locator.
  *
- * @param[in] item Pointer to the libitem.
- * @param[in] locator_id ID of the locator whose measurement will be retrieved.
- * @param[out] azimuth The expected azimuth value.
- * @param[out] elevation The expected elevation value.
- * @param[out] distance The expected distance value.
- * @return ::SL_RTL_ERROR_SUCCESS if the locator does not require correction.
- * @return ::SL_RTL_ERROR_INCORRECT_MEASUREMENT if the locator's previous measurement was ignored because the error is too large.
- * @returns Another error code in case of error
- *
- * Position calculation has a better overall view to the asset's location than
- * any individual locator. If the direction angles differ too much from
- * the expected direction, the locator can be instructed to correct its
- * internal state so that in can recover from this incorrectness faster.
- * See also sl_rtl_aox_set_expected_direction().
- *****************************************************************************/
-enum sl_rtl_error_code sl_rtl_loc_get_expected_direction(sl_rtl_loc_libitem* item, uint32_t locator_id, float *azimuth, float *elevation, float *distance);
-
-/**************************************************************************//**
- * Get the expected direction of the asset for the locator for a specified tag.
- *
- * @param[in] item Pointer to the libitem.
- * @param[in] locator_id ID of the locator whose measurement will be retrieved.
- * @param[out] azimuth The expected azimuth value.
- * @param[out] elevation The expected elevation value.
- * @param[out] distance The expected distance value.
- * @param[in] tag_id TagID of the asset.
- * @return ::SL_RTL_ERROR_SUCCESS if the locator does not require correction.
- * @return ::SL_RTL_ERROR_INCORRECT_MEASUREMENT if the locator's previous measurement was ignored because of too large error
+ * @param[in] item Pointer to the libitem
+ * @param[in] locator_id ID of the locator whose measurement will be retrieved
+ * @param[out] azimuth The expected azimuth value
+ * @param[out] elevation The expected elevation value
+ * @param[out] distance The expected distance value
+ * @return ::SL_RTL_ERROR_SUCCESS if the locator does not require correction
+ * @return ::SL_RTL_ERROR_INCORRECT_MEASUREMENT if the locator's previous measurement was ignored because the error is too large
  * @returns Another error code in case of error
  *
  * Position calculation has a better overall view to the asset's location than
@@ -1107,16 +1276,37 @@ enum sl_rtl_error_code sl_rtl_loc_get_expected_direction(sl_rtl_loc_libitem* ite
  * internal state so that in can recover from this incorrectness faster.
  * See also sl_rtl_aox_set_expected_direction()
  *****************************************************************************/
+enum sl_rtl_error_code sl_rtl_loc_get_expected_direction(sl_rtl_loc_libitem* item, uint32_t locator_id, float *azimuth, float *elevation, float *distance);
+
+/**************************************************************************//**
+ * Get the expected direction of the asset for the locator for a specified tag.
+ *
+ * @param[in] item Pointer to the libitem
+ * @param[in] locator_id ID of the locator whose measurement will be retrieved
+ * @param[out] azimuth The expected azimuth value
+ * @param[out] elevation The expected elevation value
+ * @param[out] distance The expected distance value
+ * @param[in] tag_id TagID of the asset
+ * @return ::SL_RTL_ERROR_SUCCESS if the locator does not require correction
+ * @return ::SL_RTL_ERROR_INCORRECT_MEASUREMENT if the locator's previous measurement was ignored because of too large error
+ * @returns Another error code in case of error
+ *
+ * Position calculation has a better overall view to the asset's location than
+ * any individual locator. If the direction angles differ too much from
+ * the expected direction, the locator can be instructed to correct its
+ * internal state so that in can recover from this incorrectness faster.
+ * See also sl_rtl_aox_set_expected_direction().
+ *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_loc_get_expected_direction_tag(sl_rtl_loc_libitem* item, uint32_t locator_id, float *azimuth, float *elevation, float *distance, int32_t tag_id);
 
 /**************************************************************************//**
  * Get the deviation values for expected direction of the asset for the locator.
  *
- * @param[in] locator_id ID of the locator whose measurement will be retrieved.
- * @param[out] azimuth The expected azimuth value's standard deviation.
- * @param[out] elevation The expected elevation value's standard deviation.
- * @param[in] item Pointer to the libitem.
- * @param[out] distance The expected distance value's standard deviation.
+ * @param[in] locator_id ID of the locator whose measurement will be retrieved
+ * @param[out] azimuth The expected azimuth value's standard deviation
+ * @param[out] elevation The expected elevation value's standard deviation
+ * @param[in] item Pointer to the libitem
+ * @param[out] distance The expected distance value's standard deviation
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_loc_get_expected_deviation(sl_rtl_loc_libitem* item, uint32_t locator_id, float *azimuth, float *elevation, float *distance);
@@ -1125,12 +1315,12 @@ enum sl_rtl_error_code sl_rtl_loc_get_expected_deviation(sl_rtl_loc_libitem* ite
  * Get the deviation values for expected direction of the asset for the locator
  * for a specified tag.
  *
- * @param[in] item Pointer to the libitem.
- * @param[in] locator_id ID of the locator whose measurement will be retrieved.
- * @param[out] azimuth The expected azimuth value's standard deviation.
- * @param[out] elevation The expected elevation value's standard deviation.
- * @param[out] distance The expected distance value's standard deviation.
- * @param[in] tag_id TagID of the asset.
+ * @param[in] item Pointer to the libitem
+ * @param[in] locator_id ID of the locator whose measurement will be retrieved
+ * @param[out] azimuth The expected azimuth value's standard deviation
+ * @param[out] elevation The expected elevation value's standard deviation
+ * @param[out] distance The expected distance value's standard deviation
+ * @param[in] tag_id TagID of the asset
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_loc_get_expected_deviation_tag(sl_rtl_loc_libitem* item, uint32_t locator_id, float *azimuth, float *elevation, float *distance, int32_t tag_id);
@@ -1139,7 +1329,7 @@ enum sl_rtl_error_code sl_rtl_loc_get_expected_deviation_tag(sl_rtl_loc_libitem*
  * Get the number of locators, which are disabled from position calculation because
  * the direction error is too large.
  *
- * @param[in] item Pointer to the libitem.
+ * @param[in] item Pointer to the libitem
  * @returns Number of locators needing correction, or -1 in case of any other error
  *****************************************************************************/
 int sl_rtl_loc_get_number_disabled(sl_rtl_loc_libitem* item);
@@ -1148,8 +1338,8 @@ int sl_rtl_loc_get_number_disabled(sl_rtl_loc_libitem* item);
  * Get the number of locators, which are disabled from position calculation because
  * the direction error is too large, for a specified tag.
  *
- * @param[in] item Pointer to the libitem.
- * @param[in] tag_id TagID of the asset.
+ * @param[in] item Pointer to the libitem
+ * @param[in] tag_id TagID of the asset
  * @returns Number of locators needing correction, or -1 in case of any other error
  *****************************************************************************/
 int sl_rtl_loc_get_number_disabled_tag(sl_rtl_loc_libitem* item, int32_t tag_id);
@@ -1158,8 +1348,8 @@ int sl_rtl_loc_get_number_disabled_tag(sl_rtl_loc_libitem* item, int32_t tag_id)
  * Check if the asset is in reach of a given locator according to the
  * position-based filtering.
  *
- * @param[in] item Pointer to the libitem.
- * @param[in] locator_id ID of the locator to run the test.
+ * @param[in] item Pointer to the libitem
+ * @param[in] locator_id ID of the locator to run the test
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 bool sl_rtl_loc_filter_in_reach(sl_rtl_loc_libitem* item, uint32_t locator_id);
@@ -1168,21 +1358,21 @@ bool sl_rtl_loc_filter_in_reach(sl_rtl_loc_libitem* item, uint32_t locator_id);
  * Clear all the position-based filters from a locator or from all
  * locators.
  *
- * @param[in] item Pointer to the libitem.
- * @param[in] locator_id ID of a single locator or ::SL_RTL_LOC_ALL_LOCATORS.
+ * @param[in] item Pointer to the libitem
+ * @param[in] locator_id ID of a single locator or ::SL_RTL_LOC_ALL_LOCATORS
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_loc_filter_clear(sl_rtl_loc_libitem* item, uint32_t locator_id);
 
 /**************************************************************************//**
  * Add a position-based filter. This filter is based on the distance from a locator.
- * The filter can be added to one locator or all locators. A locator may also
- * have several combined filters.
+ * The filter can be added to one locator or all locators. A locator may
+ * have several filters which are combined.
  *
- * @param[in] item Pointer to the libitem.
- * @param[in] locator_id ID of a single locator or ::SL_RTL_LOC_ALL_LOCATORS.
- * @param[in] radius Distance from the locator.
- * @param[in] exclude_region If true, define an excluded region instead.
+ * @param[in] item Pointer to the libitem
+ * @param[in] locator_id ID of a single locator or ::SL_RTL_LOC_ALL_LOCATORS
+ * @param[in] radius Distance from the locator
+ * @param[in] exclude_region If true, define an excluded region instead
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_loc_filter_sphere(sl_rtl_loc_libitem* item, uint32_t locator_id, float radius, bool exclude_region);
@@ -1190,13 +1380,13 @@ enum sl_rtl_error_code sl_rtl_loc_filter_sphere(sl_rtl_loc_libitem* item, uint32
 /**************************************************************************//**
  * Add a position-based filter. The two dimensional filter is based on
  * the distance from a locator.
- * The filter can be added to one locator or all locators. A locator may  also
- * have several combined filters.
+ * The filter can be added to one locator or all locators. A locator may
+ * have several filters which are combined.
  *
- * @param[in] item Pointer to the libitem.
- * @param[in] locator_id ID of a single locator or ::SL_RTL_LOC_ALL_LOCATORS.
- * @param[in] radius Distance from the locator.
- * @param[in] exclude_region If true, define an excluded region instead.
+ * @param[in] item Pointer to the libitem
+ * @param[in] locator_id ID of a single locator or ::SL_RTL_LOC_ALL_LOCATORS
+ * @param[in] radius Distance from the locator
+ * @param[in] exclude_region If true, define an excluded region instead
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_loc_filter_circle(sl_rtl_loc_libitem* item, uint32_t locator_id, float radius, bool exclude_region);
@@ -1204,15 +1394,15 @@ enum sl_rtl_error_code sl_rtl_loc_filter_circle(sl_rtl_loc_libitem* item, uint32
 /**************************************************************************//**
  * Add a position-based filter. This filter defines relative distances in
  * coordinate axes' directions.
- * The filter can be added to one locator or all locators. A locator may also
- * have several combined filters.
+ * The filter can be added to one locator or all locators. A locator may
+ * have several filters which are combined.
  *
- * @param[in] item Pointer to the libitem.
- * @param[in] locator_id ID of a single locator or ::SL_RTL_LOC_ALL_LOCATORS.
- * @param[in] xDelta Maximum distance in X-coordinate direction.
- * @param[in] yDelta Maximum distance in Y-coordinate direction.
- * @param[in] zDelta Maximum distance in Z-coordinate direction.
- * @param[in] exclude_region If true, define an excluded region instead.
+ * @param[in] item Pointer to the libitem
+ * @param[in] locator_id ID of a single locator or ::SL_RTL_LOC_ALL_LOCATORS
+ * @param[in] xDelta Maximum distance in X-coordinate direction
+ * @param[in] yDelta Maximum distance in Y-coordinate direction
+ * @param[in] zDelta Maximum distance in Z-coordinate direction
+ * @param[in] exclude_region If true, define an excluded region instead
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_loc_filter_box(sl_rtl_loc_libitem* item, uint32_t locator_id, float xDelta, float yDelta, float zDelta, bool exclude_region);
@@ -1220,14 +1410,14 @@ enum sl_rtl_error_code sl_rtl_loc_filter_box(sl_rtl_loc_libitem* item, uint32_t 
 /**************************************************************************//**
  * Add a position-based filter. This two dimensional filter defines relative
  * distances in coordinate axes' directions.
- * The filter can be added to one locator or all locators. A locator may also
- * have several combined filters.
+ * The filter can be added to one locator or all locators. A locator may
+ * have several filters which are combined.
  *
- * @param[in] item Pointer to the libitem.
- * @param[in] locator_id ID of a single locator or ::SL_RTL_LOC_ALL_LOCATORS.
- * @param[in] xDelta Maximum distance in X-coordinate direction.
- * @param[in] yDelta Maximum distance in Y-coordinate direction.
- * @param[in] exclude_region If true, define an excluded region instead.
+ * @param[in] item Pointer to the libitem
+ * @param[in] locator_id ID of a single locator or ::SL_RTL_LOC_ALL_LOCATORS
+ * @param[in] xDelta Maximum distance in X-coordinate direction
+ * @param[in] yDelta Maximum distance in Y-coordinate direction
+ * @param[in] exclude_region If true, define an excluded region instead
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_loc_filter_rect(sl_rtl_loc_libitem* item, uint32_t locator_id, float xDelta, float yDelta, bool exclude_region);
@@ -1235,18 +1425,18 @@ enum sl_rtl_error_code sl_rtl_loc_filter_rect(sl_rtl_loc_libitem* item, uint32_t
 /**************************************************************************//**
  * Add a position-based filter. This filter defines an area in global
  * coordinates.
- * The filter can be added to one locator or all locators. A locator may also
- * have several combined filters.
+ * The filter can be added to one locator or all locators. A locator may
+ * have several filters which are combined.
  *
- * @param[in] item Pointer to the libitem.
- * @param[in] locator_id ID of a single locator or ::SL_RTL_LOC_ALL_LOCATORS.
- * @param[in] minX Minimum X-coordinate value.
- * @param[in] maxX Maximum X-coordinate value.
- * @param[in] minY Minimum Y-coordinate value.
- * @param[in] maxY Maximum Y-coordinate value.
- * @param[in] minZ Minimum Z-coordinate value.
- * @param[in] maxZ Maximum Z-coordinate value.
- * @param[in] exclude_region If true, define an excluded region instead.
+ * @param[in] item Pointer to the libitem
+ * @param[in] locator_id ID of a single locator or ::SL_RTL_LOC_ALL_LOCATORS
+ * @param[in] minX Minimum X-coordinate value
+ * @param[in] maxX Maximum X-coordinate value
+ * @param[in] minY Minimum Y-coordinate value
+ * @param[in] maxY Maximum Y-coordinate value
+ * @param[in] minZ Minimum Z-coordinate value
+ * @param[in] maxZ Maximum Z-coordinate value
+ * @param[in] exclude_region If true, define an excluded region instead
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_loc_filter_room(sl_rtl_loc_libitem* item, uint32_t locator_id, float minX, float maxX, float minY, float maxY, float minZ, float maxZ, bool exclude_region);
@@ -1254,16 +1444,16 @@ enum sl_rtl_error_code sl_rtl_loc_filter_room(sl_rtl_loc_libitem* item, uint32_t
 /**************************************************************************//**
  * Add a position-based filter. The two dimensional filter defines an area in
  * global coordinates.
- * The filter can be added to one locator or all locators. A locator may also
- * have several combined filters.
+ * The filter can be added to one locator or all locators. A locator may
+ * have several filters which are combined.
  *
- * @param[in] item Pointer to the libitem.
- * @param[in] locator_id ID of a single locator or ::SL_RTL_LOC_ALL_LOCATORS.
- * @param[in] minX Minimum X-coordinate value.
- * @param[in] maxX Maximum X-coordinate value.
- * @param[in] minY Minimum Y-coordinate value.
- * @param[in] maxY Maximum Y-coordinate value.
- * @param[in] exclude_region If true, define an excluded region instead.
+ * @param[in] item Pointer to the libitem
+ * @param[in] locator_id ID of a single locator or ::SL_RTL_LOC_ALL_LOCATORS
+ * @param[in] minX Minimum X-coordinate value
+ * @param[in] maxX Maximum X-coordinate value
+ * @param[in] minY Minimum Y-coordinate value
+ * @param[in] maxY Maximum Y-coordinate value
+ * @param[in] exclude_region If true, define an excluded region instead
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_loc_filter_floor(sl_rtl_loc_libitem* item, uint32_t locator_id, float minX, float maxX, float minY, float maxY, bool exclude_region);
@@ -1273,16 +1463,31 @@ enum sl_rtl_error_code sl_rtl_loc_filter_floor(sl_rtl_loc_libitem* item, uint32_
  *
  * The trilateration method calculates the position based on the distances
  * from the locators rather than the direction angles. This function enables
- * the method, but the location calculation may still use the
- * direction if available to further increase the accuracy.
+ * the method, but the location calculation may still utilize also the
+ * directon if available to further increase the accuracy.
  *
  * Trilateration method is not turned on by default.
  *
- * @param[in] item Pointer to the libitem.
- * @param[in] value Turn the trilateration on or off.
+ * @param[in] item Pointer to the libitem
+ * @param[in] value Turn the trilateration on or off
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_loc_enable_trilateration(sl_rtl_loc_libitem* item, bool value);
+
+/**************************************************************************//**
+ * Prefer the asset location below or above the locator plane.
+ *
+ * If the locators are all in the same plane (or close to it), the height of
+ * the asset may become ambiguous. Set the preference to be below or above
+ * plane so that is more likely to end up in the correct position.
+ *
+ * The default options is below the plane.
+ *
+ * @param[in] item Pointer to the libitem
+ * @param[in] value Turn the trilateration on or off
+ * @return ::SL_RTL_ERROR_SUCCESS if successful
+ *****************************************************************************/
+enum sl_rtl_error_code sl_rtl_loc_trilateration_prefer_below_plane(sl_rtl_loc_libitem* item, bool value);
 
 /** @} */ // end addtogroup sl_rtl_loc
 
@@ -1293,7 +1498,7 @@ enum sl_rtl_error_code sl_rtl_loc_enable_trilateration(sl_rtl_loc_libitem* item,
  * @brief Utility Functionality
  *
  * These functions provide supporting functionality such as conversions,
- * additional filtering, diagnostics, and setup.
+ * additional filtering, diagnostics, and setup functions.
  */
 
 /// Utility library item
@@ -1307,7 +1512,7 @@ enum sl_rtl_util_parameter{
 /**************************************************************************//**
  * Initialize the Util libitem instance.
  *
- * @param[in] item Pointer to the libitem to be initialized.
+ * @param[in] item Pointer to the libitem to be initialized
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_util_init(sl_rtl_util_libitem* item);
@@ -1315,7 +1520,7 @@ enum sl_rtl_error_code sl_rtl_util_init(sl_rtl_util_libitem* item);
 /**************************************************************************//**
  * Deinitialize a Util libitem instance.
  *
- * @param[in] item Pointer to the libitem to be deinitialized.
+ * @param[in] item Pointer to the libitem to be deinitialized
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_util_deinit(sl_rtl_util_libitem* item);
@@ -1323,9 +1528,9 @@ enum sl_rtl_error_code sl_rtl_util_deinit(sl_rtl_util_libitem* item);
 /**************************************************************************//**
  * Set util parameters.
  *
- * @param[in] item Pointer to the initialized Util libitem.
- * @param[in] parameter Parameter to change.
- * @param[in] value Value of the parameter.
+ * @param[in] item Pointer to the initialized Util libitem
+ * @param[in] parameter Parameter to change
+ * @param[in] value Value of the parameter
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_util_set_parameter(sl_rtl_util_libitem* item, enum sl_rtl_util_parameter parameter, float value);
@@ -1333,9 +1538,9 @@ enum sl_rtl_error_code sl_rtl_util_set_parameter(sl_rtl_util_libitem* item, enum
 /**************************************************************************//**
  * Filter a value using the moving average.
  *
- * @param[in] item Pointer to the initialized Util libitem.
- * @param[in] value_in Value to be fed to the filter.
- * @param[out] value_out Pointer to the filtered value.
+ * @param[in] item Pointer to the initialized Util libitem
+ * @param[in] value_in Value to be fed to the filter
+ * @param[out] value_out Pointer to the filtered value
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_util_filter(sl_rtl_util_libitem* item, float value_in, float* value_out);
@@ -1343,10 +1548,10 @@ enum sl_rtl_error_code sl_rtl_util_filter(sl_rtl_util_libitem* item, float value
 /**************************************************************************//**
  * Convert an RSSI-value to distance in meters.
  *
- * @param[in] item Pointer to the initialized Util libitem.
- * @param[in] tx_power Reference RSSI value of the TX-device at 1.0 m distance in dBm, for example -45.0f.
- * @param[in] rssi Measured RSSI from the receiver.
- * @param[out] distance_out Distance in meters.
+ * @param[in] item Pointer to the initialized Util libitem
+ * @param[in] tx_power Reference RSSI value of the TX-device at 1.0 m distance in dBm, for example -45.0f
+ * @param[in] rssi Measured RSSI from the receiver
+ * @param[out] distance_out Distance in meters
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_util_rssi2distance(float tx_power, float rssi, float* distance_out);
@@ -1354,10 +1559,10 @@ enum sl_rtl_error_code sl_rtl_util_rssi2distance(float tx_power, float rssi, flo
 /**************************************************************************//**
  * Set up the IQ sample quality analysis.
  *
- * @param[in] item Pointer to the initialized Util libitem.
- * @param[in] level Analysis level.
- * @param[in] num_antennas The number of antennas in the array.
- * @param[in] raw_samples Data contains raw samples instead of picked ones.
+ * @param[in] item Pointer to the initialized Util libitem
+ * @param[in] level Analysis level
+ * @param[in] num_antennas The number of antennas in the array
+ * @param[in] raw_samples Data contains raw samples instead of picked ones
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_util_iq_sample_qa_setup(sl_rtl_util_libitem *item, uint32_t level, uint32_t num_antennas, bool raw_samples);
@@ -1365,11 +1570,11 @@ enum sl_rtl_error_code sl_rtl_util_iq_sample_qa_setup(sl_rtl_util_libitem *item,
 /**************************************************************************//**
  * Set up parameters for the IQ sample quality analysis.
  *
- * @param[in] item Pointer to the initialized Util libitem.
- * @param[in] sample_rate The sampling rate.
- * @param[in] sample_offset The offset for the picked sample in the sampling slot.
- * @param[in] samples_in_slot Number of samples in the sampling slot.
- * @param[in] number_of_channels Number of radio channels.
+ * @param[in] item Pointer to the initialized Util libitem
+ * @param[in] sample_rate The sampling rate
+ * @param[in] sample_offset The offset for the picked sample in the sampling slot
+ * @param[in] samples_in_slot Number of samples in the sampling slot
+ * @param[in] number_of_channels Number of radio channels
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_util_iq_sample_qa_set_parameters(sl_rtl_util_libitem* item, uint32_t sample_rate, uint8_t sample_offset, uint8_t samples_in_slot, uint8_t number_of_channels);
@@ -1378,10 +1583,10 @@ enum sl_rtl_error_code sl_rtl_util_iq_sample_qa_set_parameters(sl_rtl_util_libit
  * Set up IQ sample QA downsampling ratio.
  *
  * Set the downsampling factor used during the antenna samples (related to the
- * sampling rate of the reference period).
+ * sampling rate of the reference period)
  *
- * @param[in] item Pointer to the initialized Util libitem.
- * @param[in] dsf The downsampling factor.
+ * @param[in] item Pointer to the initialized Util libitem
+ * @param[in] dsf The downsampling factor
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_util_iq_sample_qa_set_downsampling_factor(sl_rtl_util_libitem* item, float dsf);
@@ -1393,8 +1598,8 @@ enum sl_rtl_error_code sl_rtl_util_iq_sample_qa_set_downsampling_factor(sl_rtl_u
  * period. The use of this function is optional and, if not given,
  * the default values are used.
  *
- * @param[in] item Pointer to the initialized Util libitem.
- * @param[in] offset The data samples' offset.
+ * @param[in] item Pointer to the initialized Util libitem
+ * @param[in] offset The data samples' offset
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_util_iq_sample_qa_set_data_offset(sl_rtl_util_libitem* item, uint32_t offset);
@@ -1402,9 +1607,9 @@ enum sl_rtl_error_code sl_rtl_util_iq_sample_qa_set_data_offset(sl_rtl_util_libi
 /**************************************************************************//**
  * Set the switch pattern for the IQ sample quality.
  *
- * @param[in] item Pointer to the initialized Util libitem.
- * @param[in] size The size of the switch pattern.
- * @param[in] pattern Array of integers representing the switch pattern.
+ * @param[in] item Pointer to the initialized Util libitem
+ * @param[in] size The size of the switch pattern
+ * @param[in] pattern Array of integers representing the switch pattern
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_util_iq_sample_qa_set_switch_pattern(sl_rtl_util_libitem* item, uint32_t size, uint32_t *pattern);
@@ -1412,20 +1617,20 @@ enum sl_rtl_error_code sl_rtl_util_iq_sample_qa_set_switch_pattern(sl_rtl_util_l
 /**************************************************************************//**
  * Feed the IQ sample quality analysis the reference period data.
  *
- * @param[in] item Pointer to the initialized Util libitem.
- * @param[in] num_samples The size of data.
- * @param[in] i_samples I-part of the sample data.
- * @param[in] q_samples Q-part of the sample data.
+ * @param[in] item Pointer to the initialized Util libitem
+ * @param[in] num_samples The size of data
+ * @param[in] i_samples I-part of the sample data
+ * @param[in] q_samples Q-part of the sample data
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_util_iq_sample_qa_add_reference(sl_rtl_util_libitem *item, uint32_t num_samples, float *i_samples, float *q_samples);
 /**************************************************************************//**
  * Feed the IQ sample quality analysis the antenna data.
  *
- * @param[in] item Pointer to the initialized Util libitem.
- * @param[in] num_snapshots The size of the data.
- * @param[in] i_samples I-part of the sample data.
- * @param[in] q_samples Q-part of the sample data.
+ * @param[in] item Pointer to the initialized Util libitem
+ * @param[in] num_snapshots The size of the data
+ * @param[in] i_samples I-part of the sample data
+ * @param[in] q_samples Q-part of the sample data
  * @param[in] channel Radio channel the packet is using.
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
@@ -1434,7 +1639,7 @@ enum sl_rtl_error_code sl_rtl_util_iq_sample_qa_add_data(sl_rtl_util_libitem *it
 /**************************************************************************//**
  * Get the overall results of the IQ sample quality analysis.
  *
- * @param[in] item Pointer to the initialized Util libitem.
+ * @param[in] item Pointer to the initialized Util libitem
 
  * @return Bitmask of the failing tests, zero if everything passed
  *****************************************************************************/
@@ -1443,9 +1648,9 @@ uint32_t sl_rtl_util_iq_sample_qa_get_results(sl_rtl_util_libitem *item);
 /**************************************************************************//**
  * Get the detailed results of the IQ sample quality analysis.
  *
- * @param[in] item Pointer to the initialized Util libitem.
- * @param[out] iq_sample_qa_results The data structure with data related to the previous data packet.
- * @param[out] antenna_data The array of antenna-specific results.
+ * @param[in] item Pointer to the initialized Util libitem
+ * @param[out] iq_sample_qa_results The data structure with data related to the previous data packet
+ * @param[out] antenna_data The array of antenna-specific results
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_util_iq_sample_qa_get_details(sl_rtl_util_libitem *item, sl_rtl_clib_iq_sample_qa_dataset_t *iq_sample_qa_results, sl_rtl_clib_iq_sample_qa_antenna_data_t *antenna_data);
@@ -1453,10 +1658,10 @@ enum sl_rtl_error_code sl_rtl_util_iq_sample_qa_get_details(sl_rtl_util_libitem 
 /**************************************************************************//**
  * Get the detailed results of the IQ sample quality analysis for the specified radio channel.
  *
- * @param[in] item Pointer to the initialized Util libitem.
+ * @param[in] item Pointer to the initialized Util libitem
  * @param[in] channel Radio channel to show results for.
- * @param[out] iq_sample_qa_results The data structure with data related to the last data packet using the requested channel.
- * @param[out] antenna_data The array of antenna specific results.
+ * @param[out] iq_sample_qa_results The data structure with data related to the last data packet using the requested channel
+ * @param[out] antenna_data The array of antenna specific results
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_util_iq_sample_qa_get_channel_details(sl_rtl_util_libitem* item, uint8_t channel, sl_rtl_clib_iq_sample_qa_dataset_t *iq_sample_qa_results, sl_rtl_clib_iq_sample_qa_antenna_data_t *antenna_data);
@@ -1464,9 +1669,9 @@ enum sl_rtl_error_code sl_rtl_util_iq_sample_qa_get_channel_details(sl_rtl_util_
 /**************************************************************************//**
  * Write the IQ sample quality analysis code as human readable strings in the provided buffer.
  *
- * @param[in] buf Buffer for the results to be written.
- * @param[in] size Size of the buffer.
- * @param[in] code The results previously received from the sl_rtl_util_iq_sample_qa_get_results().
+ * @param[in] buf Buffer for the results to be written
+ * @param[in] size Size of the buffer
+ * @param[in] code The results previously received from the sl_rtl_util_iq_sample_qa_get_results()
  * @returns pointer to the buffer containing data, or to a constant string
  *****************************************************************************/
 char *sl_rtl_util_iq_sample_qa_code2string(char *buf, int size, uint32_t code);

@@ -26,5 +26,5 @@
 // The size of a 802.15.4 MAC beacon payload in bytes.
 #define MAC_BEACON_SIZE (4)
 
-EmberPacketAction emAfPluginTestHarnessZ3ModifyBeaconPayload(uint8_t *beaconPayload,
-                                                             uint8_t *payloadLength);
+EmberPacketAction sli_zigbee_af_test_harness_z3_modify_beacon_payload(uint8_t *beaconPayload,
+                                                                      uint8_t *payloadLength);

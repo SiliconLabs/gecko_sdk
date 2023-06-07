@@ -18,19 +18,19 @@
 #include "green-power-event-wrapper.h"
 
 #if (EMBER_AF_PLUGIN_GREEN_POWER_ADAPTER_USE_CUSTOM_EVENT_SYSTEM == 1)
-WEAK(void slxu_zigbee_event_init_wrapper(sl_zigbee_event_wrapper_t *event, pluginGPAdatperEventHandler_t handler))
+WEAK(void sl_zigbee_event_init_wrapper(sl_zigbee_event_wrapper_t *event, pluginGPAdatperEventHandler_t handler))
 {
 }
 
-WEAK(void slxu_zigbee_event_set_delay_ms_wrapper(sl_zigbee_event_wrapper_t *event, uint32_t delayMs))
+WEAK(void sl_zigbee_event_set_delay_ms_wrapper(sl_zigbee_event_wrapper_t *event, uint32_t delayMs))
 {
 }
 
-WEAK(void slxu_zigbee_event_set_inactive_wrapper(sl_zigbee_event_wrapper_t *event))
+WEAK(void sl_zigbee_event_set_inactive_wrapper(sl_zigbee_event_wrapper_t *event))
 {
 }
 
-WEAK(bool slxu_zigbee_event_is_active_wrapper(sl_zigbee_event_wrapper_t *event))
+WEAK(bool sl_zigbee_event_is_active_wrapper(sl_zigbee_event_wrapper_t *event))
 {
   return false;
 }

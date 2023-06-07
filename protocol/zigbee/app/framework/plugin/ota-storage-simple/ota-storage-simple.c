@@ -19,9 +19,6 @@
  ******************************************************************************/
 
 #include "app/framework/include/af.h"
-#ifndef UC_BUILD
-#include "callback.h"
-#endif
 #include "app/framework/plugin/ota-common/ota.h"
 #include "app/framework/plugin/ota-storage-common/ota-storage.h"
 
@@ -80,9 +77,9 @@ EmberAfOtaStorageStatus emberAfOtaStorageInitCallback(void)
   return EMBER_AF_OTA_STORAGE_SUCCESS;
 }
 
-void emAfPluginOtaStorageSimpleInitCallback(uint8_t init_level)
+void sli_zigbee_af_ota_storage_simple_init_callback(uint8_t init_level)
 {
-  SLXU_INIT_UNUSED_ARG;
+  (void)init_level;
 
   emberAfOtaStorageInitCallback();
 }
@@ -242,7 +239,7 @@ static EmberAfOtaStorageStatus readAndValidateStoredImage(EmberAfOtaHeader* retu
       indexOrReadLength++;
     }
     if (headerHasUpgradeFileDest(returnData)) {
-      uint16_t upgradeFileDestinationLength = emGetUpgradeFileDestinationLength(returnData->headerVersion);
+      uint16_t upgradeFileDestinationLength = sli_zigbee_af_get_upgrade_file_destination_length(returnData->headerVersion);
       if (parseData) {
         MEMMOVE(&returnData->upgradeFileDestination,
                 data + indexOrReadLength,
@@ -346,7 +343,7 @@ EmberAfOtaStorageStatus emberAfOtaStorageCheckTempDataCallback(uint32_t* returnO
           == readAndValidateStoredImage(&header,
                                         true))) {  // print magic number error?
     *returnTotalSize = header.imageSize;
-    *returnOtaImageId = emAfOtaStorageGetImageIdFromHeader(&header);
+    *returnOtaImageId = sli_zigbee_af_ota_storage_get_image_id_from_header(&header);
     if (lastOffset >= header.imageSize) {
       storageHasFullImage = true;
       *returnOffset = header.imageSize;
@@ -379,12 +376,12 @@ EmberAfOtaStorageStatus emberAfOtaStorageDeleteImageCallback(const EmberAfOtaIma
   return status;
 }
 
-void emAfOtaStorageInfoPrint(void)
+void sli_zigbee_af_ota_storage_info_print(void)
 {
   otaPrintln("Storage Module: OTA Simple Storage Plugin");
   otaPrintln("Images Stored:  %d of 1\n",
              (storageHasFullImage ? 1 : 0));
-  emAfOtaStorageDriverInfoPrint();
+  sli_zigbee_af_ota_storage_driver_info_print();
 }
 
 static EmberAfOtaImageId getCurrentImageId(void)

@@ -37,11 +37,10 @@ define:
 configuration:
   - name: SL_POWER_MANAGER_DEBUG
     value: 1
-  - name: SL_POWER_MANAGER_LOWEST_EM_ALLOWED
-    value: 3
 readme:
   - path: readme.md
 ui_hints:
   highlight: readme.md
 tag:
   - hardware:component:button:2+
+  - hardware:device:ram:20

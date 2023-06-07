@@ -4,7 +4,9 @@ category: Z-Wave
 description: >
   This component provides the Protocol-specific, Application Framework-specific, and SDK-related
   version numbers (in the form of MINOR - MAJOR - PATH). The application developer can freely alter
-  the ZAF_VERSION_* version numbers according to their needs. This can be done in the config_app.h
+  the ZAF_VERSION_* version numbers according to their needs. This can be done in this component.
+  Application version, which is generated during release of SDK,
+  the application developer can freely alter the version numbers according to his needs.
 package: Z-Wave
 quality: production
 provides:
@@ -14,20 +16,23 @@ define:
 - name: ZW_VERSION_MAJOR
   value: 7
 - name: ZW_VERSION_MINOR
-  value: 19
+  value: 20
 - name: ZW_VERSION_PATCH
-  value: 3
+  value: 0
 # Z-Wave Plus Framework and Apps
 - name: ZAF_VERSION_MAJOR
   value: 10
 - name: ZAF_VERSION_MINOR
-  value: 19
+  value: 20
 - name: ZAF_VERSION_PATCH
-  value: 3
+  value: 0
 # SDK
 - name: SDK_VERSION_MAJOR
   value: 7
 - name: SDK_VERSION_MINOR
-  value: 19
+  value: 20
 - name: SDK_VERSION_PATCH
-  value: 3
+  value: 0
+config_file:
+  - path: protocol/z-wave/platform/SiliconLabs/PAL/config/version/zw_version_config.h
+    file_id: version_config

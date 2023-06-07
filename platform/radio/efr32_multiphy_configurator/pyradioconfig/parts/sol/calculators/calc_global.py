@@ -204,6 +204,7 @@ class Calc_Global_Sol(CALC_Global_ocelot):
         self._addModelRegister(model, 'RAC.RX.FEFILTOUTPUTSEL', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'RAC.PATRIM6.TXTRIMBBREGFB', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'RAC.PATRIM6.TXTRIMFILGAIN', int, ModelVariableFormat.HEX)
+        self._addModelRegister(model, 'RAC.PATRIM6.TXTRIMFILRES', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'AGC.SETTLINGINDCTRL.EN', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'AGC.SETTLINGINDCTRL.POSTHD', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'AGC.SETTLINGINDCTRL.NEGTHD', int, ModelVariableFormat.HEX)
@@ -264,6 +265,7 @@ class Calc_Global_Sol(CALC_Global_ocelot):
         self._addModelRegister(model, 'SUNOFDM.TXCFG1.TXROTATERAMP', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'SUNOFDM.TXCFG1.TXHCSERRORS', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'SUNOFDM.TXCFG1.TXFCSERRORS', int, ModelVariableFormat.HEX)
+        self._addModelRegister(model, 'SUNOFDM.TXCFG1.TXFCSBYP', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'SUNOFDM.ANT.ANTDIV', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'SUNOFDM.ANT.ANTSEL', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'SUNOFDM.PDET.PDETCORRELWIDTH', int, ModelVariableFormat.HEX)
@@ -342,6 +344,10 @@ class Calc_Global_Sol(CALC_Global_ocelot):
         self._addModelRegister(model, 'SUNOFDM.PAPR.ENPAPR', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'SUNOFDM.PAPR.GAINSAT', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'SUNOFDM.PAPR.GAINATT', int, ModelVariableFormat.HEX)
+        self._addModelRegister(model, 'SUNOFDM.ANTDIVDLY.AGCRELDLY', int, ModelVariableFormat.HEX)
+        self._addModelRegister(model, 'SUNOFDM.ANTDIVDLY.AGCCONVDLY', int, ModelVariableFormat.HEX)
+        self._addModelRegister(model, 'SUNOFDM.ANTDIVDLY.SETTLINGTIME', int, ModelVariableFormat.HEX)
+        self._addModelRegister(model, 'SUNOFDM.ANTDIVDLY.ANTICPSWITCH', int, ModelVariableFormat.HEX)
 
         # SUNOQPSK Peripheral
         self._addModelRegister(model, 'SUNOQPSK.VREGS.MAJORVERSION', int, ModelVariableFormat.HEX)

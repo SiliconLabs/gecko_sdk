@@ -32,10 +32,13 @@ include:
 
 requires:
   - name: device
-  - name: emlib_common
-  - name: emlib_core
   - name: emlib_se
+  - name: emlib_common
+    condition: [device_cortexm]
+  - name: emlib_core
+    condition: [device_cortexm]
   - name: emlib_system
+    condition: [device_cortexm]
   - name: status
 
 provides:

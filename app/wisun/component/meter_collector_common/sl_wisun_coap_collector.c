@@ -34,6 +34,7 @@
 #include "sl_wisun_coap_collector.h"
 #include <string.h>
 #include "sl_string.h"
+#include "sl_status.h"
 #include "sl_wisun_meter_collector_config.h"
 #include "sl_wisun_collector.h"
 
@@ -57,12 +58,12 @@
  * @details Handler function
  * @param[in] meter Meter entry
  * @param[in] req Meter request
- * @return true On success
- * @return false On failure
+ * @return SL_STATUS_OK On success
+ * @return SL_STATUS_FAIL On failure
  *****************************************************************************/
-static bool _coap_collector_send_request(const int32_t sockid,
-                                         sl_wisun_meter_entry_t * meter,
-                                         sl_wisun_meter_request_t * req);
+static sl_status_t _coap_collector_send_request(const int32_t sockid,
+                                                sl_wisun_meter_entry_t * meter,
+                                                sl_wisun_meter_request_t * req);
 
 /**************************************************************************//**
  * @brief CoAP Collector receive response
@@ -71,6 +72,22 @@ static bool _coap_collector_send_request(const int32_t sockid,
  * @return sl_wisun_meter_entry_t* Meter entry or NULL on failure
  *****************************************************************************/
 static sl_wisun_meter_entry_t * _coap_collector_recv_response(int32_t sockid);
+
+/**************************************************************************//**
+ * @brief CoAP Collector update meter status
+ * @details Update meter fields from received packet
+ * @param[in,out] meter meter
+ * @param[in] parsed received parsed packet
+ *****************************************************************************/
+static void _update_meter_status(sl_wisun_meter_entry_t *meter, sl_wisun_coap_packet_t* parsed);
+
+/**************************************************************************//**
+ * @brief CoAP Collector get schedule from payload
+ * @details Get schedule value from json payload.
+ * @param[in] payload_ptr payload_ptr
+ * @return Schedule value.
+ *****************************************************************************/
+static uint32_t _get_schedule_from_payload(uint8_t *payload_ptr);
 
 // -----------------------------------------------------------------------------
 //                                Global Variables
@@ -112,7 +129,7 @@ void sl_wisun_coap_collector_init(void)
 }
 
 /* CoAP collector prepare request */
-bool sl_wisun_coap_collector_prepare_meas_request(void)
+sl_status_t sl_wisun_coap_collector_prepare_meas_request(void)
 {
   int16_t builder_res = -1;                // builder result
   sl_wisun_coap_packet_t *packet = NULL;
@@ -127,7 +144,7 @@ bool sl_wisun_coap_collector_prepare_meas_request(void)
 
   if (packet == NULL) {
     printf("[Coap packet buffer cannot be allocated]\n");
-    __cleanup_and_return_val(packet, _meas_req.buff, false);
+    __cleanup_and_return_val(packet, _meas_req.buff, SL_STATUS_FAIL);
   }
 
   // Init request for meters
@@ -148,13 +165,13 @@ bool sl_wisun_coap_collector_prepare_meas_request(void)
 
   if (_meas_req.buff == NULL) {
     printf("[Coap message buffer cannot be allocated]\n");
-    __cleanup_and_return_val(packet, _meas_req.buff, false);
+    __cleanup_and_return_val(packet, _meas_req.buff, SL_STATUS_FAIL);
   }
 
   builder_res = sl_wisun_coap_builder(_meas_req.buff, packet);
   if (builder_res < 0) {
     printf("[Coap builder error: %s]\n", builder_res == -1 ? "Message Header structure" : "NULL ptr arg");
-    __cleanup_and_return_val(packet, _meas_req.buff, false);
+    __cleanup_and_return_val(packet, _meas_req.buff, SL_STATUS_FAIL);
   }
   // Set measurement request which is sent periodically
   sl_wisun_collector_set_measurement_request(&_meas_req);
@@ -164,10 +181,10 @@ bool sl_wisun_coap_collector_prepare_meas_request(void)
 
   sl_wisun_mc_mutex_release(_coap_collector_hnd);
 
-  return true;
+  return SL_STATUS_OK;
 }
 
-bool sl_wisun_coap_collector_prepare_led_toggle_request(const uint8_t led_id)
+sl_status_t sl_wisun_coap_collector_prepare_led_toggle_request(const uint8_t led_id)
 {
   int16_t builder_res  = -1;                // builder result
   const char *payload  = NULL;
@@ -184,7 +201,7 @@ bool sl_wisun_coap_collector_prepare_led_toggle_request(const uint8_t led_id)
 
   if (packet == NULL) {
     printf("[Coap packet buffer cannot be allocated]\n");
-    __cleanup_and_return_val(packet, _led_req.buff, false);
+    __cleanup_and_return_val(packet, _led_req.buff, SL_STATUS_FAIL);
   }
 
   payload = sl_wisun_mc_get_led_payload_by_id(led_id);
@@ -208,13 +225,13 @@ bool sl_wisun_coap_collector_prepare_led_toggle_request(const uint8_t led_id)
 
   if (_led_req.buff == NULL) {
     printf("[Coap message buffer cannot be allocated]\n");
-    __cleanup_and_return_val(packet, _led_req.buff, false);
+    __cleanup_and_return_val(packet, _led_req.buff, SL_STATUS_FAIL);
   }
 
   builder_res = sl_wisun_coap_builder(_led_req.buff, packet);
   if (builder_res < 0) {
     printf("[Coap builder error: %s]\n", builder_res == -1 ? "Message Header structure" : "NULL ptr arg");
-    __cleanup_and_return_val(packet, _led_req.buff, false);
+    __cleanup_and_return_val(packet, _led_req.buff, SL_STATUS_FAIL);
   }
 
   // only packet should be freed
@@ -222,16 +239,17 @@ bool sl_wisun_coap_collector_prepare_led_toggle_request(const uint8_t led_id)
 
   sl_wisun_mc_mutex_release(_coap_collector_hnd);
 
-  return true;
+  return SL_STATUS_OK;
 }
 
-bool sl_wisun_coap_collector_send_led_toggle_request(const wisun_addr_t * const meter_addr)
+sl_status_t sl_wisun_coap_collector_send_led_toggle_request(const wisun_addr_t * const meter_addr)
 {
   sl_wisun_meter_entry_t meter = { 0 };
-  bool retval = false;
+  sl_status_t retval = SL_STATUS_FAIL;
+
   retval = sl_wisun_collector_get_meter(meter_addr, &meter);
-  if (!retval) {
-    return false;
+  if (retval != SL_STATUS_OK) {
+    return SL_STATUS_FAIL;
   }
   retval = _coap_collector_send_request(sl_wisun_collector_get_shared_socket(),
                                         &meter,
@@ -243,13 +261,13 @@ bool sl_wisun_coap_collector_send_led_toggle_request(const wisun_addr_t * const 
 //                          Static Function Definitions
 // -----------------------------------------------------------------------------
 
-static bool _coap_collector_send_request(const int32_t sockid,
-                                         sl_wisun_meter_entry_t * meter,
-                                         sl_wisun_meter_request_t * req)
+static sl_status_t _coap_collector_send_request(const int32_t sockid,
+                                                sl_wisun_meter_entry_t * meter,
+                                                sl_wisun_meter_request_t * req)
 {
-  int32_t res         = SOCKET_INVALID_ID;
-  socklen_t len       = 0;
-  bool retval         = true;
+  int32_t res = SOCKET_INVALID_ID;
+  socklen_t len = 0;
+  sl_status_t retval = SL_STATUS_OK;
 
   if (sockid == SOCKET_INVALID_ID) {
     return false;
@@ -259,8 +277,8 @@ static bool _coap_collector_send_request(const int32_t sockid,
 
   res = sendto(sockid, req->buff, req->length, 0,
                (const struct sockaddr *)&meter->addr, len);
-  if (res == RETVAL_ERROR) {
-    retval = false;
+  if (res == SOCKET_RETVAL_ERROR) {
+    retval = SL_STATUS_FAIL;
   }
 
   return retval;
@@ -278,26 +296,67 @@ static sl_wisun_meter_entry_t * _coap_collector_recv_response(int32_t sockid)
   len = sizeof(remote_addr);
   res = recvfrom(sockid, _recv_buff, SL_WISUN_COAP_METER_COLLECTOR_RECV_BUFF_SIZE, 0,
                  (struct sockaddr *)&remote_addr, &len);
-  if (res > 0) {
-    meter = _coap_collector_hnd.get_meter(&remote_addr);
-    if (meter != NULL) {
-      ip_addr = app_wisun_trace_util_get_ip_str(&remote_addr.sin6_addr);
-      parsed = sl_wisun_coap_parser(res, _recv_buff);
-      if (parsed != NULL) {
-        printf("[%s]\n", ip_addr);
-        sl_wisun_coap_print_packet(parsed, false);
-      } else {
-        printf("[CoAP Parser failure]\n");
-      }
-      sl_wisun_coap_destroy_packet(parsed);
-      app_wisun_trace_util_destroy_ip_str(ip_addr);
-      return meter;
-    } else {
-      printf("[Unknown remote message received!]\n");
-    }
+  if (res <= 0) {
+    return NULL;
   }
 
-  return NULL;
+  meter = _coap_collector_hnd.get_meter(&remote_addr);
+
+  if (meter == NULL) {
+    printf("[Unknown remote message received!]\n");
+    return NULL;
+  }
+
+  ip_addr = app_wisun_trace_util_get_ip_str(&remote_addr.sin6_addr);
+  parsed = sl_wisun_coap_parser(res, _recv_buff);
+
+  if (parsed == NULL) {
+    printf("[CoAP Parser failure]\n");
+    return NULL;
+  }
+
+  _update_meter_status(meter, parsed);
+
+  printf("[%s]\n", ip_addr);
+  sl_wisun_coap_print_packet(parsed, false);
+  sl_wisun_coap_destroy_packet(parsed);
+  app_wisun_trace_util_destroy_ip_str(ip_addr);
+
+  return meter;
+}
+
+static void _update_meter_status(sl_wisun_meter_entry_t *meter, sl_wisun_coap_packet_t* parsed)
+{
+  if (parsed->payload_ptr != NULL) {
+    meter->schedule = _get_schedule_from_payload(parsed->payload_ptr);
+  }
+}
+
+static uint32_t _get_schedule_from_payload(uint8_t *payload_ptr)
+{
+  char *scedule_value;
+  uint32_t scedule_value_uint32   = SL_WISUN_METER_DEFAULT_PERIOD_MS;
+  char *scedule_value_start_ptr   = strchr((const char*)payload_ptr, '-') + 1;
+  char *scedule_value_end_ptr     = strchr((const char*)scedule_value_start_ptr, '"');
+  size_t schedule_value_length    = scedule_value_end_ptr - scedule_value_start_ptr;
+
+  scedule_value = (char*)app_wisun_malloc(schedule_value_length);
+  if (scedule_value == NULL) {
+    printf("[Payload parse failure: could not allocate buffer]\n");
+    return scedule_value_uint32;
+  }
+
+  strncpy(scedule_value, scedule_value_start_ptr, schedule_value_length);
+  scedule_value_uint32 = atoi(scedule_value);
+
+  if (scedule_value_uint32 == 0) {
+    printf("[Payload parse failure: schedule value could not represen as int]\n");
+    scedule_value_uint32 = SL_WISUN_METER_DEFAULT_PERIOD_MS;
+  }
+
+  app_wisun_free(scedule_value);
+
+  return scedule_value_uint32;
 }
 
 #undef __cleanup_and_return_val

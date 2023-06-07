@@ -33,22 +33,17 @@
 #include "app/framework/util/util.h"
 
 #include "trust-center-nwk-key-update-broadcast.h"
+#include "stack/include/zigbee-security-manager.h"
 
 // *****************************************************************************
 // Globals
 
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 sl_zigbee_event_t emberAfPluginTrustCenterNwkKeyUpdateBroadcastMyEvent;
 #define myEvent (&emberAfPluginTrustCenterNwkKeyUpdateBroadcastMyEvent)
-void emberAfPluginTrustCenterNwkKeyUpdateBroadcastMyEventHandler(SLXU_UC_EVENT);
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_TEST_HARNESS
-#define SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
-#endif
-EmberEventControl emberAfPluginTrustCenterNwkKeyUpdateBroadcastMyEventControl;
-#define myEvent emberAfPluginTrustCenterNwkKeyUpdateBroadcastMyEventControl
-#endif // UC_BUILD
+void emberAfPluginTrustCenterNwkKeyUpdateBroadcastMyEventHandler(sl_zigbee_event_t * event);
 
 #if defined(SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT)
 extern EmberStatus emberAfTrustCenterStartBroadcastNetworkKeyUpdate(void);
@@ -60,10 +55,10 @@ extern EmberStatus emberAfTrustCenterStartBroadcastNetworkKeyUpdate(void);
 
 // *****************************************************************************
 
-void emberAfPluginTrustCenterNwkKeyUpdateBroadcastMyEventHandler(SLXU_UC_EVENT)
+void emberAfPluginTrustCenterNwkKeyUpdateBroadcastMyEventHandler(sl_zigbee_event_t * event)
 {
   EmberStatus status;
-  slxu_zigbee_event_set_inactive(myEvent);
+  sl_zigbee_event_set_inactive(myEvent);
 
   status = emberBroadcastNetworkKeySwitch();
   if (status != EMBER_SUCCESS) {
@@ -75,18 +70,25 @@ void emberAfPluginTrustCenterNwkKeyUpdateBroadcastMyEventHandler(SLXU_UC_EVENT)
 
 static bool nextNetworkKeyIsNewer(EmberKeyStruct* nextNwkKey)
 {
-  EmberKeyStruct currentNwkKey;
-  EmberStatus status;
+  sl_status_t status;
+  sl_zb_sec_man_context_t context;
+  sl_zb_sec_man_key_t plaintext_key;
+  sl_zb_sec_man_network_key_info_t key_info;
+
+  sl_zb_sec_man_init_context(&context);
+  context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_NETWORK;
+  context.key_index = 1;
+
+  status = sl_zb_sec_man_export_key(&context, &plaintext_key);
+  MEMMOVE(&(nextNwkKey->key),
+          &plaintext_key.key,
+          EMBER_ENCRYPTION_KEY_SIZE);
 
   // It is assumed that the current nwk key has valid data.
-  emberGetKey(EMBER_CURRENT_NETWORK_KEY,
-              &currentNwkKey);
-
-  status = emberGetKey(EMBER_NEXT_NETWORK_KEY,
-                       nextNwkKey);
-  if (status != EMBER_SUCCESS
-      || (timeGTorEqualInt8u(currentNwkKey.sequenceNumber,
-                             nextNwkKey->sequenceNumber))) {
+  (void)sl_zb_sec_man_get_network_key_info(&key_info);
+  if (status != SL_STATUS_OK
+      || (timeGTorEqualInt8u(key_info.network_key_sequence_number,
+                             key_info.alt_network_key_sequence_number))) {
     return false;
   }
 
@@ -100,11 +102,7 @@ EmberStatus emberAfTrustCenterStartNetworkKeyUpdate(void)
 
   if (emberAfGetNodeId() != EMBER_TRUST_CENTER_NODE_ID
       || emberAfNetworkState() != EMBER_JOINED_NETWORK
-      #ifdef UC_BUILD
       || sl_zigbee_event_is_scheduled(myEvent)
-      #else
-      || myEvent.status != EMBER_EVENT_INACTIVE
-      #endif
       ) {
     return EMBER_INVALID_CALL;
   }
@@ -123,16 +121,16 @@ EmberStatus emberAfTrustCenterStartNetworkKeyUpdate(void)
   } else {
     emberAfSecurityPrintln("Broadcasting next NWK key");
     // The +2 is a fuzz factor
-    slxu_zigbee_event_set_delay_qs(myEvent,
-                                   EMBER_BROADCAST_TABLE_TIMEOUT_QS + 2);
+    sl_zigbee_event_set_delay_qs(myEvent,
+                                 EMBER_BROADCAST_TABLE_TIMEOUT_QS + 2);
   }
   return status;
 }
 
-void emAfPluginTrustCenterNwkKeyUpdateBroadcastInitCallback(SLXU_INIT_ARG)
+void sli_zigbee_af_trust_center_nwk_key_update_broadcast_init_callback(uint8_t init_level)
 {
-  SLXU_INIT_UNUSED_ARG;
+  (void)init_level;
 
-  slxu_zigbee_event_init(myEvent,
-                         emberAfPluginTrustCenterNwkKeyUpdateBroadcastMyEventHandler);
+  sl_zigbee_event_init(myEvent,
+                       emberAfPluginTrustCenterNwkKeyUpdateBroadcastMyEventHandler);
 }

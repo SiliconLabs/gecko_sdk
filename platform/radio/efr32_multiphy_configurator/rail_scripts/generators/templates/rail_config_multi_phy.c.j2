@@ -89,7 +89,7 @@ const RAIL_RffpllConfig_t *radioConfigRffpllConfig = (RAIL_RffpllConfig_t *) {{(
 {%- if multiPhyConfig.commonStructures.modemTxCompensationEntries.items() %}
 #if RAIL_SUPPORTS_HFXO_COMPENSATION
 {%- for modemTxCompensationName, modemTxCompensationEntry in multiPhyConfig.commonStructures.modemTxCompensationEntries.items() %}
-static const int16_t {{modemTxCompensationName}}[{{modemTxCompensationEntry|length}}] = {
+static const uint16_t {{modemTxCompensationName}}[{{modemTxCompensationEntry|length}}] = {
   {% for value in modemTxCompensationEntry[:-1] -%}
     {{value}}{{", "}}
   {%- endfor %}
@@ -324,6 +324,16 @@ const uint32_t {{modemConfigName}}[] = {
   0xFFFFFFFFUL,
 };
 {% endfor %}
+{%- for entryName, entry in multiPhyConfig.commonStructures.railAlternatePhyEntries.items() %}
+static const RAIL_AlternatePhy_t {{entryName}} = {
+  .baseFrequency = {{entry.baseFrequency|int}}UL,
+  .channelSpacing = {{entry.channelSpacing|int}}UL,
+  .numberOfChannels = {{entry.numberOfChannels|int}}U,
+  .minIf_kHz = {{entry.minIf_kHz}}U,
+  .minBaseIf_kHz = {{entry.minBaseIf_kHz}}U,
+  .isOfdmModem = {{"true" if entry.isOfdmModem else "false"}},
+};
+{% endfor %}
 {%- for multiPhyConfigEntryName, multiPhyConfigEntry in multiPhyConfig.multiPhyConfigEntries.items() %}
 const RAIL_ChannelConfigEntry_t {{multiPhyConfigEntryName}}_channels[] = {
   {%- for entryName, entry in multiPhyConfigEntry.channelConfigEntries.items() %}
@@ -346,6 +356,11 @@ const RAIL_ChannelConfigEntry_t {{multiPhyConfigEntryName}}_channels[] = {
 #ifdef RADIO_CONFIG_ENABLE_STACK_INFO
     .stackInfo = {{entry.stackInfo.name if entry.stackInfo else "NULL"}},
 #endif
+    {% if entry.alternatePhy -%}
+    .alternatePhy = (RAIL_AlternatePhy_t *) &{{entry.alternatePhy.name}},
+    {%- else -%}
+    .alternatePhy = NULL,
+    {%- endif %}
   },
   {%- endfor %}
 };
@@ -357,6 +372,7 @@ const RAIL_ChannelConfig_t {{multiPhyConfigEntryName}}_channelConfig = {
   .configs = {{multiPhyConfigEntryName}}_channels,
   .length = {{multiPhyConfigEntry.channelConfig.length}}U,
   .signature = {{multiPhyConfigEntry.channelConfig.signature}}UL,
+  .xtalFrequencyHz = {{multiPhyConfigEntry.channelConfig.xtalFrequency}}UL,
 };
 {% endfor %}
 {%- if not rail_internal %}

@@ -28,6 +28,7 @@ component:
   - id: "zigbee_ezsp_cpc"
   - id: "zigbee_file_descriptor_dispatch"
   - id: "zigbee_green_power_client"
+  - id: "zigbee_green_power_client_cli"
   - id: "zigbee_green_power_common"
   - id: "zigbee_ias_zone_client"
   - id: "zigbee_identify"

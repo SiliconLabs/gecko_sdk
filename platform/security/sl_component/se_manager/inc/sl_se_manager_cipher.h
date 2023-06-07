@@ -30,9 +30,9 @@
 #ifndef SL_SE_MANAGER_CIPHER_H
 #define SL_SE_MANAGER_CIPHER_H
 
-#include "em_device.h"
+#include "sli_se_manager_features.h"
 
-#if defined(SEMAILBOX_PRESENT) || defined(DOXYGEN)
+#if defined(SLI_MAILBOX_COMMAND_SUPPORTED)
 
 /// @addtogroup sl_se_manager
 /// @{
@@ -917,7 +917,7 @@ sl_status_t sl_se_hmac(sl_se_command_context_t *cmd_ctx,
                        uint8_t *output,
                        size_t output_len);
 
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || defined(DOXYGEN)
+#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
 /***************************************************************************//**
  * @brief
  *   ChaCha20 buffer encryption/decryption, as defined by RFC8439 section 2.4.
@@ -1108,6 +1108,6 @@ sl_status_t sl_se_poly1305_genkey_tag(sl_se_command_context_t *cmd_ctx,
 /// @} (end addtogroup sl_se_manager_cipher)
 /// @} (end addtogroup sl_se_manager)
 
-#endif // defined(SEMAILBOX_PRESENT)
+#endif // defined(SLI_MAILBOX_COMMAND_SUPPORTED)
 
 #endif // SL_SE_MANAGER_CIPHER_H

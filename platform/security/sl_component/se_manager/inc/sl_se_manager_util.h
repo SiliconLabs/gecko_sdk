@@ -30,9 +30,9 @@
 #ifndef SL_SE_MANAGER_UTIL_H
 #define SL_SE_MANAGER_UTIL_H
 
-#include "em_device.h"
+#include "sli_se_manager_features.h"
 
-#if defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT) || defined(DOXYGEN)
+#if defined(SLI_MAILBOX_COMMAND_SUPPORTED) || defined(SLI_VSE_MAILBOX_COMMAND_SUPPORTED)
 
 /// @addtogroup sl_se_manager
 /// @{
@@ -391,7 +391,7 @@ sl_status_t sl_se_get_debug_lock_status(sl_se_command_context_t *cmd_ctx,
  ******************************************************************************/
 sl_status_t sl_se_apply_debug_lock(sl_se_command_context_t *cmd_ctx);
 
-#if defined(SEMAILBOX_PRESENT) || defined(DOXYGEN)
+#if defined(SLI_MAILBOX_COMMAND_SUPPORTED)
 /***************************************************************************//**
  * @brief
  *   Writes data to User Data section in MTP. Write data must be aligned to
@@ -476,7 +476,7 @@ sl_status_t sl_se_get_status(sl_se_command_context_t *cmd_ctx,
 sl_status_t sl_se_get_serialnumber(sl_se_command_context_t *cmd_ctx,
                                    void *serial);
 
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1) || defined(DOXYGEN)
+#if defined(SLI_SE_COMMAND_STATUS_READ_RSTCAUSE_AVAILABLE)
 /***************************************************************************//**
  * @brief
  *   Read the EMU->RSTCAUSE after a tamper reset. This function should be called
@@ -497,9 +497,7 @@ sl_status_t sl_se_get_reset_cause(sl_se_command_context_t *cmd_ctx,
                                   uint32_t *reset_cause);
 #endif
 
-#if (defined(_SILICON_LABS_SECURITY_FEATURE)                                  \
-  && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) \
-  && (_SILICON_LABS_32B_SERIES_2_CONFIG >= 3))
+#if defined(SLI_SE_COMMAND_READ_TAMPER_RESET_CAUSE_AVAILABLE)
 /***************************************************************************//**
  * @brief
  *   Read the latest cached tamper reset cause. The returned value is the index
@@ -526,9 +524,7 @@ sl_status_t sl_se_get_reset_cause(sl_se_command_context_t *cmd_ctx,
 sl_status_t sl_se_get_tamper_reset_cause(sl_se_command_context_t *cmd_ctx,
                                          bool *was_tamper_reset,
                                          uint32_t *reset_cause);
-#endif /* #if (defined(_SILICON_LABS_SECURITY_FEATURE) \
-          && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) \
-          && (_SILICON_LABS_32B_SERIES_2_CONFIG >= 3))*/
+#endif // SLI_SE_COMMAND_READ_TAMPER_RESET_CAUSE_AVAILABLE
 
 /***************************************************************************//**
  * @brief
@@ -702,7 +698,7 @@ sl_status_t sl_se_open_debug(sl_se_command_context_t *cmd_ctx,
                              uint32_t len,
                              const sl_se_debug_options_t *debug_options);
 
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || defined(DOXYGEN)
+#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
 /***************************************************************************//**
  * @brief
  *   Temporarily disable tamper configuration using certificate and signed
@@ -774,7 +770,7 @@ sl_status_t sl_se_read_cert(sl_se_command_context_t *cmd_ctx,
                             void *cert,
                             uint32_t num_bytes);
 
-#endif // defined(SEMAILBOX_PRESENT)
+#endif // defined(SLI_MAILBOX_COMMAND_SUPPORTED)
 
 #ifdef __cplusplus
 }
@@ -783,6 +779,6 @@ sl_status_t sl_se_read_cert(sl_se_command_context_t *cmd_ctx,
 /// @} (end addtogroup sl_se_manager_util)
 /// @} (end addtogroup sl_se_manager)
 
-#endif // defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT)
+#endif // defined(SLI_MAILBOX_COMMAND_SUPPORTED) || defined(SLI_VSE_MAILBOX_COMMAND_SUPPORTED)
 
 #endif // SL_SE_MANAGER_UTIL_H

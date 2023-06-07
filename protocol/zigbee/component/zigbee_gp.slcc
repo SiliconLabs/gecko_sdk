@@ -43,13 +43,13 @@ template_contribution:
   - name: zigbee_stack_callback
     value:
       callback_type: d_gp_sent
-      function_name: emAfDGpSentCallback
+      function_name: sli_zigbee_af_d_gp_sent_callback
     condition:  
        - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: gpep_incoming_message
-      function_name: emAfGpepIncomingMessageCallback
+      function_name: sli_zigbee_af_gpep_incoming_message_callback
     condition:  
        - zigbee_ncp
   

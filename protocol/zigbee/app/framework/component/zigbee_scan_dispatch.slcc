@@ -21,19 +21,19 @@ template_contribution:
   - name: zigbee_af_callback
     value:
       callback_type: event_init
-      function_name: emAfPluginScanDispatchInitCallback
+      function_name: sli_zigbee_af_scan_dispatch_init_callback
   - name: zigbee_stack_callback
     value:
       callback_type: energy_scan_result
-      function_name: emAfPluginScanDispatchEnergyScanResultCallback
+      function_name: sli_zigbee_af_scan_dispatch_energy_scan_result_callback
   - name: zigbee_stack_callback
     value:
       callback_type: scan_complete
-      function_name: emAfPluginScanDispatchScanCompleteCallback
+      function_name: sli_zigbee_af_scan_dispatch_scan_complete_callback
   - name: zigbee_stack_callback
     value:
       callback_type: network_found
-      function_name: emAfPluginScanDispatchNetworkFoundCallback
+      function_name: sli_zigbee_af_scan_dispatch_network_found_callback
 documentation:
   docset: zigbee
   document: zigbee-af-api/scan-dispatch

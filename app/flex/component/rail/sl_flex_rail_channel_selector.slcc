@@ -1,0 +1,59 @@
+id: "sl_flex_rail_channel_selector"
+label: "Flex - RAIL Channel Selector"
+package: "Flex"
+description: "Provides config and CLI help for setting the channel for the application."
+category: "Flex|RAIL|Utility"
+quality: "production"
+root_path: "app/flex/component/rail/sl_flex_rail_channel_selector"
+provides:
+  - name: sl_flex_rail_channel_selector
+
+requires:
+  - name: "rail_lib_singleprotocol"
+
+# according to standards the packet assembler is chosen.
+source:
+  - path: "sl_flex_rail_channel_selector.c"
+  - path: "sl_flex_rail_channel_selector_cli.c"
+    condition:
+      - "cli"
+include:
+  - path: "."
+    file_list:
+    - "path": "sl_flex_rail_channel_selector.h"
+
+config_file:
+  - path: config/sl_flex_rail_channel_selector_config.h
+
+
+#-------------- Template Contribution ----------------
+template_contribution:
+#---------------- Component Catalog ------------------
+  - name: component_catalog
+    value: rail_package_assistant
+
+  - name: cli_command
+    value:
+      name: set_channel
+      handler: cli_set_channel
+      help: "Set which channel the communication will happen"
+      argument:
+      - type: uint16
+        help: The channel number to apply
+    condition:
+      - "cli"
+  - name: cli_command
+    value:
+      name: get_channel
+      handler: cli_get_channel
+      help: "Get which channel the communication is happening"
+    condition:
+      - "cli"
+  - name: event_handler
+    value:
+      event: internal_app_init
+      include: "sl_flex_rail_channel_selector.h"
+      handler: "set_configured_channel"
+    priority: 2000
+
+

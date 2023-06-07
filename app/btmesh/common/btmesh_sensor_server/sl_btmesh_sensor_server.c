@@ -37,7 +37,7 @@
 #include "sl_btmesh_api.h"
 #include "sl_btmesh_sensor.h"
 #include "sl_btmesh_dcd.h"
-#include "sl_simple_timer.h"
+#include "app_timer.h"
 
 #include "app_assert.h"
 #include "em_common.h"
@@ -131,13 +131,13 @@ static sl_btmesh_evt_sensor_server_publish_t publish_period;
 
 // -------------------------------
 // Periodic timer handles
-static sl_simple_timer_t sensor_server_data_timer;
-static sl_simple_timer_t sensor_server_publish_timer;
+static app_timer_t sensor_server_data_timer;
+static app_timer_t sensor_server_publish_timer;
 
 // -------------------------------
 // Periodic timer callbacks
-static void sensor_server_data_timer_cb(sl_simple_timer_t *handle, void *data);
-static void sensor_server_publish_timer_cb(sl_simple_timer_t *handle, void *data);
+static void sensor_server_data_timer_cb(app_timer_t *handle, void *data);
+static void sensor_server_publish_timer_cb(app_timer_t *handle, void *data);
 #endif
 
 void sl_btmesh_sensor_server_node_init(void)
@@ -263,11 +263,11 @@ void sl_btmesh_sensor_server_node_init(void)
 
 #if SENSOR_PEOPLE_COUNT_CADENCE || SENSOR_THERMOMETER_CADENCE
   if (update_interval != 0) {
-    sl_status_t sc = sl_simple_timer_start(&sensor_server_data_timer,
-                                           ((uint32_t)(pow((double)1.1, ((double)update_interval - 64)) * 1000)),
-                                           sensor_server_data_timer_cb,
-                                           NO_CALLBACK_DATA,
-                                           true);
+    sl_status_t sc = app_timer_start(&sensor_server_data_timer,
+                                     ((uint32_t)(pow((double)1.1, ((double)update_interval - 64)) * 1000)),
+                                     sensor_server_data_timer_cb,
+                                     NO_CALLBACK_DATA,
+                                     true);
     app_assert_status_f(sc, "Failed to start periodic sensor_server_data_timer");
   }
 #endif
@@ -781,7 +781,7 @@ illuminance_t get_light(void)
  *
  * @return none
  ******************************************************************************/
-static void sensor_server_data_timer_cb(sl_simple_timer_t *handle, void *data)
+static void sensor_server_data_timer_cb(app_timer_t *handle, void *data)
 {
   (void)data;
   (void)handle;
@@ -809,16 +809,16 @@ static void sensor_server_data_timer_cb(sl_simple_timer_t *handle, void *data)
   if (prev_publish_timeout != publ_timeout) {
     log_info("Publishing period: %d ms" NL, publ_timeout);
     //Stop publish timer
-    sc = sl_simple_timer_stop(&sensor_server_publish_timer);
+    sc = app_timer_stop(&sensor_server_publish_timer);
 
     app_assert_status_f(sc, "Failed to stop periodic sensor_server_publish_timer");
 
     //Restart publishing timer with the new timer value
-    sc = sl_simple_timer_start(&sensor_server_publish_timer,
-                               publ_timeout,
-                               sensor_server_publish_timer_cb,
-                               NO_CALLBACK_DATA,
-                               true);
+    sc = app_timer_start(&sensor_server_publish_timer,
+                         publ_timeout,
+                         sensor_server_publish_timer_cb,
+                         NO_CALLBACK_DATA,
+                         true);
     app_assert_status_f(sc, "Failed to start periodic sensor_server_publish_timer");
   }
   prev_publish_timeout = publ_timeout;
@@ -832,7 +832,7 @@ static void sensor_server_data_timer_cb(sl_simple_timer_t *handle, void *data)
  *
  * @return none
  ******************************************************************************/
-static void sensor_server_publish_timer_cb(sl_simple_timer_t *handle, void *data)
+static void sensor_server_publish_timer_cb(app_timer_t *handle, void *data)
 {
   (void)data;
   (void)handle;

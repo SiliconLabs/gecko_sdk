@@ -19,9 +19,7 @@
 #include "app/framework/util/af-main.h"
 #include "app/framework/plugin/device-database/device-database.h"
 
-#ifdef UC_BUILD
 #include "device-database-config.h"
-#endif
 
 //============================================================================
 // Globals
@@ -39,9 +37,9 @@ void emberAfPluginDeviceDatabaseDiscoveryCompleteCallback(const EmberAfDeviceInf
 
 //============================================================================
 
-void emberAfPluginDeviceDatabaseInitCallback(SLXU_INIT_ARG)
+void emberAfPluginDeviceDatabaseInitCallback(uint8_t init_level)
 {
-  SLXU_INIT_UNUSED_ARG;
+  (void)init_level;
 
   MEMSET(deviceDatabase, 0xFF, sizeof(EmberAfDeviceInfo) * EMBER_AF_PLUGIN_DEVICE_DATABASE_MAX_DEVICES);
 }
@@ -318,8 +316,8 @@ EmberStatus emberAfPluginDeviceDatabaseFindDeviceSupportingCluster(EmberAfDevice
   return EMBER_SUCCESS;
 }
 
-void emAfPluginDeviceDatabaseUpdateNodeStackRevision(EmberEUI64 eui64,
-                                                     uint8_t stackRevision)
+void sli_zigbee_af_device_database_update_node_stack_revision(EmberEUI64 eui64,
+                                                              uint8_t stackRevision)
 {
   EmberAfDeviceInfo *device = findDeviceByEui64(eui64);
   if (device != NULL) {

@@ -1,5 +1,5 @@
 /**
- * @file FreeRTOSConfig.h
+ * @file
  * @copyright 2022 Silicon Laboratories Inc.
  */
 #ifndef FREERTOS_CONFIG_H

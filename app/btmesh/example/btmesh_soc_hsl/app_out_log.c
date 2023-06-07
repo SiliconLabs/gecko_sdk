@@ -36,11 +36,21 @@
 #include "app_log.h"
 
 #include "sl_btmesh_api.h"
+
+#ifdef SL_CATALOG_BTMESH_FRIEND_PRESENT
 #include "sl_btmesh_friend.h"
+#endif // SL_CATALOG_BTMESH_FRIEND_PRESENT
+
 #include "sl_btmesh_hsl_server.h"
 #include "sl_btmesh_lighting_server.h"
+
+#ifdef SL_CATALOG_BTMESH_PROVISIONING_DECORATOR_PRESENT
 #include "sl_btmesh_provisioning_decorator.h"
+#endif // SL_CATALOG_BTMESH_PROVISIONING_DECORATOR_PRESENT
+
+#ifdef SL_CATALOG_BTMESH_FACTORY_RESET_PRESENT
 #include "sl_btmesh_factory_reset.h"
+#endif // SL_CATALOG_BTMESH_FACTORY_RESET_PRESENT
 
 #define UINT16_TO_PERCENTAGE(level) ((((uint32_t)(level) * 100) + 32767) / 65535)
 #define UINT16_TO_DEGREE(level) ((((uint32_t)(level) * 360) + 32767) / 65535)
@@ -101,7 +111,7 @@ void sl_btmesh_friend_on_friendship_terminated(uint16_t netkey_index,
  ******************************************************************************/
 void sl_btmesh_hsl_hue_on_ui_update(uint16_t hue)
 {
-  app_log("BT mesh HSL Hue:      %4udeg" APP_LOG_NL, UINT16_TO_DEGREE(hue));
+  app_log("BT mesh HSL Hue:      %4ludeg" APP_LOG_NL, UINT16_TO_DEGREE(hue));
   (void)hue;
 }
 
@@ -114,7 +124,7 @@ void sl_btmesh_hsl_hue_on_ui_update(uint16_t hue)
  ******************************************************************************/
 void sl_btmesh_hsl_saturation_on_ui_update(uint16_t saturation)
 {
-  app_log("BT mesh HSL Saturation: %4u%%" APP_LOG_NL,
+  app_log("BT mesh HSL Saturation: %4lu%%" APP_LOG_NL,
           UINT16_TO_PERCENTAGE(saturation));
   (void)saturation;
 }
@@ -132,7 +142,7 @@ void sl_btmesh_hsl_saturation_on_ui_update(uint16_t saturation)
  ******************************************************************************/
 void sl_btmesh_lighting_server_on_ui_update(uint16_t lightness_level)
 {
-  app_log("BT mesh Lightness:     %5u%%" APP_LOG_NL,
+  app_log("BT mesh Lightness:     %5lu%%" APP_LOG_NL,
           UINT16_TO_PERCENTAGE(lightness_level));
   (void)lightness_level;
 }

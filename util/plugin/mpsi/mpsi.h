@@ -51,12 +51,12 @@
 #endif
 
 #if defined(EMBER_AF_PLUGIN_MPSI_STORAGE)
- #define mpsiSendMessageToStack(...) emAfPluginMpsiStorageStoreMessage( \
+ #define mpsiSendMessageToStack(...) sli_mpsi_storage_store_message( \
     __VA_ARGS__)
 #elif defined(EMBER_AF_PLUGIN_MPSI_IPC)
- #define mpsiSendMessageToStack(...) emAfPluginMpsiIpcSendMessage(__VA_ARGS__)
+ #define mpsiSendMessageToStack(...) sli_mpsi_ipc_send_message(__VA_ARGS__)
 #elif defined(BLE_NCP_MOBILE_APP)
- #define mpsiSendMessageToStack(...) emAfPluginSendMpsiMessageToStack( \
+ #define mpsiSendMessageToStack(...) sli_zigbee_af__send_mpsi_message_to_stack( \
     __VA_ARGS__)
 #endif // EMBER_AF_PLUGIN_MPSI_STORAGE || EMBER_AF_PLUGIN_MPSI_IPC
 
@@ -112,20 +112,20 @@ uint8_t emberAfPluginMpsiSendMessage(MpsiMessage_t* mpsiMessage);
 // Internal APIs
 
 void    emberAfPluginMpsiInitCallback(void);
-uint8_t emAfPluginMpsiMessageIdSupportedByLocalStack(uint16_t messageId);
-uint8_t emAfPluginSendMpsiMessageToStack(MpsiMessage_t* mpsiMessage);
-void    emAfPluginMpsiProcessStatus(MpsiMessage_t* mpsiMessage, uint8_t status);
+uint8_t sli_mpsi_message_id_supported_by_local_stack(uint16_t messageId);
+uint8_t sli_zigbee_af__send_mpsi_message_to_stack(MpsiMessage_t* mpsiMessage);
+void    sli_mpsi_process_status(MpsiMessage_t* mpsiMessage, uint8_t status);
 
 //------------------------------------------------------------------------------
 // Private functions
 
-bool    emIsCustomMpsiMessage(uint16_t messageId);
-uint8_t emProcessMpsiMessage(MpsiMessage_t* mpsiMessage);
+bool    sli_mpsi_is_custom_mpsi_message(uint16_t messageId);
+uint8_t sli_util_process_mpsi_message(MpsiMessage_t* mpsiMessage);
 
 #if defined(EMBER_STACK_BLE)
-uint8_t emBleSendMpsiMessageToMobileApp(MpsiMessage_t* mpsiMessage);
+uint8_t sli_mpsi_ble_send_mpsi_message_to_mobile_app(MpsiMessage_t* mpsiMessage);
 #else
-#define emBleSendMpsiMessageToMobileApp(...) mpsiSendMessageToStack(__VA_ARGS__)
+#define sli_mpsi_ble_send_mpsi_message_to_mobile_app(...) mpsiSendMessageToStack(__VA_ARGS__)
 #endif // EMBER_STACK_BLE
 
 #endif  // MPSI_H

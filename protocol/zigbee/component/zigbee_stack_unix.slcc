@@ -88,7 +88,6 @@ include:
     file_list:
       - path: platform/common/inc/sl_enum.h
       - path: platform/radio/rail_lib/plugin/coexistence/protocol/ieee802154_uc/coexistence-802154.h
-      - path: platform/radio/rail_lib/plugin/coexistence/protocol/ieee802154/coexistence-802154.h
       - path: platform/service/iostream/inc/sl_iostream_swo_itm_8.h
       - path: platform/service/iostream/inc/sl_iostream.h
       - path: platform/service/legacy_hal/inc/button.h
@@ -109,7 +108,6 @@ include:
       - path: protocol/zigbee/app/zigbeed/zigbeed_configuration.h
       - path: protocol/zigbee/app/zigbeed/serial_adapter.h
       - path: protocol/zigbee/stack/framework/zigbee_debug_channel.h
-      - path: util/silicon_labs/silabs_core/event_control/event.h
       - path: util/third_party/libcoap/include/coap/coap.h
   - file_list:
       - path: em_device.h
@@ -139,7 +137,7 @@ include:
     - path: random.h
 
 # used by zigbeed/simulator_stubs.c
-  - path: "platform/radio/rail_lib/plugin/coexistence/protocol/ieee802154"
+  - path: "platform/radio/rail_lib/plugin/coexistence/protocol/ieee802154_uc"
 
   - path: "platform/common/inc"
 
@@ -151,6 +149,26 @@ include:
 # and I just copied it over as a temporary workaround.  We should
 # move it in with lower-mac-spinel at the minimum.
   - path: "protocol/zigbee/app/zigbeed"
+
+# for openthread/src/posix/platform
+  - path: "util/third_party/openthread/src"
+    file_list:
+    - path: posix/platform/radio.hpp
+    - path: posix/platform/radio_url.hpp
+    - path: posix/platform/resolver.hpp
+    - path: posix/platform/system.hpp
+    - path: posix/platform/mainloop.hpp
+    - path: posix/platform/daemon.hpp
+    - path: posix/platform/firewall.hpp
+    - path: posix/platform/infra_if.hpp
+    - path: posix/platform/udp.hpp
+    - path: lib/spinel/radio_spinel.hpp
+    - path: lib/spinel/radio_spinel.hpp
+    - path: lib/spinel/openthread-spinel-config.h
+    - path: lib/spinel/radio_spinel_impl.hpp
+    - path: lib/spinel/spinel_decoder.hpp
+    - path: core/radio/max_power_table.hpp
+    - path: ncp/ncp_config.h
 
 source:
 
@@ -170,6 +188,18 @@ source:
   - path: "platform/service/legacy_hal/src/crc.c"
   # not brought in by default, since this component provides zigbee_debug_basic
   - path: "protocol/zigbee/stack/framework/debug-stub.c"
+
+# OT source 
+  - path: "util/third_party/openthread/src/posix/platform/radio.cpp"
+  - path: "util/third_party/openthread/src/posix/platform/radio_url.cpp"
+  - path: "util/third_party/openthread/src/posix/platform/resolver.cpp"
+  - path: "util/third_party/openthread/src/posix/platform/alarm.cpp"
+  - path: "util/third_party/openthread/src/posix/platform/backtrace.cpp"
+  - path: "util/third_party/openthread/src/posix/platform/entropy.cpp"
+  - path: "util/third_party/openthread/src/posix/platform/system.cpp"
+  - path: "util/third_party/openthread/src/posix/platform/memory.cpp"
+  - path: "util/third_party/openthread/src/posix/platform/mainloop.cpp"
+  - path: "util/third_party/openthread/src/posix/platform/logging.cpp"
 
 define:
   - name: UNIX_HOST

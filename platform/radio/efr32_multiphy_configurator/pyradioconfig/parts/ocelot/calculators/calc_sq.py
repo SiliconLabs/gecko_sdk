@@ -34,9 +34,10 @@ class Calc_SQ_Ocelot(ICalculator):
         sq_enabled = (model.vars.MODEM_SQ_SQEN.value == 1)
         bits_per_symbol = model.vars.bits_per_symbol_actual.value
         delay_adc_to_demod_symbols = model.vars.delay_adc_to_demod_symbols.value
-        delay_adc_to_demod_bits = delay_adc_to_demod_symbols / bits_per_symbol
+        delay_adc_to_demod_bits = delay_adc_to_demod_symbols * bits_per_symbol
         pmcostvalthd = model.vars.MODEM_TRECPMDET_PMCOSTVALTHD.value
         baudrate = model.vars.baudrate.value
+
 
         #Only calculate timeouts if fast detect is enabled
         if sq_enabled:
@@ -110,7 +111,9 @@ class Calc_SQ_Ocelot(ICalculator):
                     sqtimout = 0
                     sqstg2timout = 0
 
-            #Not yet calculating for other demods
+            # For Coherent Demod, only specific Longrange PHYs were tested as per MCUW_RADIO_CFG-1858
+            # So doing sqtimout and sqstg2timout overrides in Longrange_mode profile (_lookup_from_longrange_mode)
+            # Not yet calculating for other demods
             else:
                 sqtimout = 0
                 sqstg2timout = 0
@@ -120,8 +123,8 @@ class Calc_SQ_Ocelot(ICalculator):
             sqstg2timout = 0
 
         #Write the registers
-        self._reg_write(model.vars.MODEM_SQ_SQTIMOUT, sqtimout)
-        self._reg_write(model.vars.MODEM_SQEXT_SQSTG2TIMOUT, sqstg2timout)
+        self._reg_write(model.vars.MODEM_SQ_SQTIMOUT, sqtimout, check_saturation=True)
+        self._reg_write(model.vars.MODEM_SQEXT_SQSTG2TIMOUT, sqstg2timout, check_saturation=True)
 
 
     def calc_sq_timeout3(self, model):
@@ -132,16 +135,25 @@ class Calc_SQ_Ocelot(ICalculator):
         preamble_length = model.vars.preamble_length.value #This is the TX preamble length
         syncword_length = model.vars.syncword_length.value
         sq_enabled = (model.vars.MODEM_SQ_SQEN.value == 1)
+        demod_select = model.vars.demod_select.value
+        symbol_encoding = model.vars.symbol_encoding.value
+        dsss_spreading_factor = model.vars.dsss_spreading_factor.value
 
         # Only calculate timeouts if fast detect is enabled
         if sq_enabled:
-            # If we detect preamble quickly then we need to wait for preamble and syncword (plus some margin)
-            sqstg3timout = int(preamble_length + syncword_length * 1.5)
+
+            if (demod_select == model.vars.demod_select.var_enum.COHERENT and
+                  symbol_encoding == model.vars.symbol_encoding.var_enum.DSSS):
+                # MODEM.SQ takes values according to the chiprate
+                sqstg3timout = int((preamble_length + syncword_length * 1.5) * dsss_spreading_factor)
+            else:
+                # If we detect preamble quickly then we need to wait for preamble and syncword (plus some margin)
+                sqstg3timout = int(preamble_length + syncword_length * 1.5)
         else:
             sqstg3timout = 0
 
         #Write the register
-        self._reg_write(model.vars.MODEM_SQEXT_SQSTG3TIMOUT, sqstg3timout)
+        self._reg_write(model.vars.MODEM_SQEXT_SQSTG3TIMOUT, sqstg3timout, check_saturation=True)
 
     def calc_psm_max_sleep_time(self, model):
 
@@ -150,12 +162,26 @@ class Calc_SQ_Ocelot(ICalculator):
         sqtimout = model.vars.MODEM_SQ_SQTIMOUT.value
         sqstg2timout = model.vars.MODEM_SQEXT_SQSTG2TIMOUT.value
         baudrate = model.vars.baudrate.value
+        bitrate = model.vars.bitrate.value
         sq_enabled = (model.vars.MODEM_SQ_SQEN.value == 1)
+        symbol_encoding = model.vars.symbol_encoding.value
+        demod_select = model.vars.demod_select.value
+        dsss_spreading_factor = model.vars.dsss_spreading_factor.value
 
         # Only calculate timeouts if signal qualifier is enabled
         if sq_enabled:
             #Calculate the max timeout
-            psm_max_sleep_us = int((preamble_length - 2*sqtimout - sqstg2timout)/baudrate*1000000) #sleep time is in us
+            if (demod_select == model.vars.demod_select.var_enum.COHERENT and
+                  symbol_encoding == model.vars.symbol_encoding.var_enum.DSSS):
+                if sqtimout == 0 or sqstg2timout == 0:
+                    LogMgr.Warning(
+                        "Support for Fast detect available only for PHYs in LongRange Profile")
+                    psm_max_sleep_us = 0
+                else:
+                    preamble_length_chips = preamble_length * dsss_spreading_factor
+                    psm_max_sleep_us = int((preamble_length_chips - (2 * sqtimout) - sqstg2timout) * 1e6 / baudrate)
+            else:
+                psm_max_sleep_us = int((preamble_length - 2*sqtimout - sqstg2timout) * 1e6 / baudrate) #sleep time is in us
         else:
             psm_max_sleep_us = 0
 
@@ -166,17 +192,20 @@ class Calc_SQ_Ocelot(ICalculator):
 
         #Read in model variables
         fast_detect_enable = (model.vars.fast_detect_enable.value == model.vars.fast_detect_enable.var_enum.ENABLED)
+        symbol_encoding = model.vars.symbol_encoding.value
         demod_select = model.vars.demod_select.value
 
         supported_demod = (demod_select == model.vars.demod_select.var_enum.TRECS_VITERBI) or \
-                          (demod_select == model.vars.demod_select.var_enum.TRECS_SLICER)
+                          (demod_select == model.vars.demod_select.var_enum.TRECS_SLICER) or \
+                          (demod_select == model.vars.demod_select.var_enum.COHERENT and
+                           symbol_encoding == model.vars.symbol_encoding.var_enum.DSSS)
 
         #Enable the signal qualifier when fast timing detection is enabled and we are using a supported demod
         if fast_detect_enable:
             if supported_demod:
                 sqen_reg = 1
             else:
-                LogMgr.Warning("Fast detect is currently only supported with 2FSK PHYs in the Base Profile")
+                LogMgr.Warning("Fast detect is currently only supported with 2FSK PHYs in the Base Profile and DSSS PHYs in LongRange Profile")
                 sqen_reg = 0
         else:
             sqen_reg = 0

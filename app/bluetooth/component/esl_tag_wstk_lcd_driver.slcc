@@ -1,0 +1,36 @@
+id: esl_tag_wstk_lcd_driver
+package: Bluetooth
+label: ESL Tag WSTK LCD driver
+description: >
+  This component is an example of a low level driver implementation for the LCD
+  memory display mounted on the WSTK Developer Board, to be used with an ESL Tag
+  Display component. PLEASE NOTE that this driver automatically registers the
+  WSTK LCD screen as the first display on the ESL Tag!
+category: Bluetooth|Application|Miscellaneous
+quality: production
+root_path: app/bluetooth/common/esl_tag_wstk_lcd_driver
+tag:
+  - No-Code
+
+include:
+  - path: ./inc
+    file_list:
+      - path: esl_tag_wstk_lcd_driver.h
+
+source:
+  - path: src/esl_tag_wstk_lcd_driver.c
+
+provides:
+  - name: esl_tag_wstk_lcd_driver
+
+requires:
+  - name: dmd_memlcd
+  - name: memlcd_screen
+  - name: esl_tag_display
+
+template_contribution:
+  - name: bluetooth_on_event
+    value:
+      include: esl_tag_wstk_lcd_driver.h
+      function: esl_wstk_lcd_bt_on_event
+    priority: -8999  # must be put before esl_core_bt_on_event!

@@ -217,7 +217,7 @@ static void si7021_cmd_write(uint8_t *cmd, uint16_t cmd_len, uint8_t *data, uint
   ret = I2CSPM_Transfer(rht_sensor, &seq);
 
   app_assert(ret == i2cTransferDone,
-             "[E: 0x%04x] Failed to write to SI7021\n",
+             "[E: 0x%04x] Failed to write to SI7021" APP_LOG_NL,
              (int)ret);
 }
 
@@ -254,7 +254,7 @@ static float measure_supply_ir(uint8_t loadSetting)
   i = 0.006074 * loadSetting + 0.00309;
   r = (supplyVoltage - supplyVoltageLoad) / i;
 
-  app_log_info(" sv = %.3f  svl = %.3f   i = %.3f   r = %.3f\n",
+  app_log_info("Power supply - sv = %.3f   svl = %.3f   i = %.3f   r = %.3f" APP_LOG_NL,
                supplyVoltage, supplyVoltageLoad, i, r);
 
   return r;
@@ -303,7 +303,7 @@ void sl_power_supply_probe(void)
   rht_sensor = sl_sensor_select(SL_BOARD_SENSOR_RHT);
   sc = sl_board_enable_sensor(SL_BOARD_SENSOR_RHT);
   app_assert((SL_STATUS_OK == sc) && (NULL != rht_sensor),
-             "[E: %#04x] Si7021 sensor not available\n",
+             "[E: %#04lx] Si7021 sensor not available" APP_LOG_NL,
              sc);
   sc = sl_si70xx_init(rht_sensor, SI7021_ADDR);
 

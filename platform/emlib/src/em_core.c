@@ -33,15 +33,6 @@
 /* *INDENT-OFF* */
 // *****************************************************************************
 ///  @addtogroup core CORE - Core Interrupt
-///  @brief Core interrupt handling API
-///
-///  @li @ref core_intro
-///  @li @ref core_conf
-///  @li @ref core_macro_api
-///  @li @ref core_reimplementation
-///  @li @ref core_vector_tables
-///  @li @ref core_examples
-///  @li @ref core_porting
 ///
 ///@n @section core_intro Introduction
 ///
@@ -67,7 +58,7 @@
 ///
 ///@n @section core_conf Compile-time Configuration
 ///
-///  The following @htmlonly #defines @endhtmlonly are used to configure em_core:
+///  The following #defines are used to configure em_core:
 ///  @code{.c}
 ///  // The interrupt priority level used inside ATOMIC sections.
 ///  #define CORE_ATOMIC_BASE_PRIORITY_LEVEL    3
@@ -947,6 +938,28 @@ uint32_t CORE_get_max_time_critical_section(void)
 uint32_t CORE_get_max_time_atomic_section(void)
 {
   return atomic_cycle_counter.max;
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Clears the max time spent in atomic section.
+ *
+ * @note SL_EMLIB_CORE_ENABLE_INTERRUPT_DISABLED_TIMING must be enabled.
+ ******************************************************************************/
+void CORE_clear_max_time_critical_section(void)
+{
+  critical_cycle_counter.max = 0;
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Clears the max time spent in atomic section.
+ *
+ * @note SL_EMLIB_CORE_ENABLE_INTERRUPT_DISABLED_TIMING must be enabled.
+ ******************************************************************************/
+void CORE_clear_max_time_atomic_section(void)
+{
+  atomic_cycle_counter.max = 0;
 }
 #endif //(SL_EMLIB_CORE_ENABLE_INTERRUPT_DISABLED_TIMING == 1)
 

@@ -35,7 +35,7 @@ template_contribution:
     value:
       group: sub-ghz
       name: get-suspend-status
-      handler: emAfSubGhzClientCliGetSuspendStatus
+      handler: sli_zigbee_af_sub_ghz_client_cli_get_suspend_status
       help: Send the GetSuspendZCLMessagesStatus command to the Sub-GHz server.
       argument:
       - type: uint16
@@ -46,7 +46,7 @@ template_contribution:
     value:
       group: sub-ghz
       name: ignore-suspend-status
-      handler: emAfSubGhzClientCliIgnoreSuspendStatus
+      handler: sli_zigbee_af_sub_ghz_client_cli_ignore_suspend_status
       help: Ignore the suspend status when sending ZCL messages (for testing purposes only).
       argument:
       - type: int8
@@ -55,7 +55,7 @@ template_contribution:
     value:
       group: sub-ghz
       name: request-channel-change
-      handler: emAfSubGhzClientCliRequestChannelChange
+      handler: sli_zigbee_af_sub_ghz_client_cli_request_channel_change
       help: Send the Mgmt_NWK_Unsolicited_Enhanced_Update_notify command to the Sub-GHz server.
       argument:
       - type: uint16

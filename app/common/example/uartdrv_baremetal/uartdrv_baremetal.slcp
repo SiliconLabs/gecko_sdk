@@ -33,8 +33,6 @@ define:
   - name: DEBUG_EFM
   - name: "LEUART_USE_LFXO"
 configuration:
-  - name: SL_UARTDRV_LEUART_VCOM_BAUDRATE
-    value: 9600
   - name: SL_BOARD_ENABLE_VCOM
     value: 1
   - name: UARTDRV_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION

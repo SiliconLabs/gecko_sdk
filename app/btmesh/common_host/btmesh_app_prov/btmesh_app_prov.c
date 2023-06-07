@@ -39,7 +39,7 @@
 #include "btmesh_app_prov.h"
 #include "app_log.h"
 #include "app_assert.h"
-#include "sl_simple_timer.h"
+#include "app_timer.h"
 
 #include "sl_common.h"
 #include "btmesh_prov.h"
@@ -121,7 +121,7 @@ static void app_on_remove_node_job_status(const btmesh_conf_job_t *job);
  * @param[in] timer Pointer to the timer used
  * @param[in] data Data from the timer
  ****************************************************************************/
-static void app_on_scan_timer(sl_simple_timer_t *timer, void *data);
+static void app_on_scan_timer(app_timer_t *timer, void *data);
 
 /**************************************************************************//**
  * Callback for the timer used during provisioner reset
@@ -129,7 +129,7 @@ static void app_on_scan_timer(sl_simple_timer_t *timer, void *data);
  * @param[in] timer Pointer to the timer used
  * @param[in] data Data from the timer
  ****************************************************************************/
-static void app_on_reset_timer(sl_simple_timer_t *timer, void *data);
+static void app_on_reset_timer(app_timer_t *timer, void *data);
 
 // ----------------------------------------------------------------------------
 // Static Variables
@@ -153,9 +153,9 @@ static uint16_t ddb_count = 0;
 static bool db_ready = false;
 static uint32_t phase_timeout_s = DEFAULT_PHASE_TIMEOUT_S;
 /// Timer for scanning for unprovisioned devices
-static sl_simple_timer_t scan_timer;
+static app_timer_t scan_timer;
 /// Timer for provisioner node reset
-static sl_simple_timer_t reset_timer;
+static app_timer_t reset_timer;
 /// Command line options
 static struct option prov_long_options[PROV_OPTLENGTH] = {
   { "nodeinfo", required_argument, 0, 'i' },
@@ -384,11 +384,11 @@ void handle_scan(void)
       }
       command_state = IN_PROGRESS;
       // Let the provisioner scan unprovisioned nodes
-      sl_simple_timer_start(&scan_timer,       // Timer pointer
-                            SCAN_TIMER_MS,     // Timer duration
-                            app_on_scan_timer, // Timer callback
-                            NULL,              // Timer data, not needed
-                            false);            // Not periodic
+      app_timer_start(&scan_timer,       // Timer pointer
+                      SCAN_TIMER_MS,           // Timer duration
+                      app_on_scan_timer,       // Timer callback
+                      NULL,                    // Timer data, not needed
+                      false);                  // Not periodic
       break;
     }
     case IN_PROGRESS:
@@ -644,11 +644,11 @@ void handle_reset(void)
       app_log_info("Initiating node reset" APP_LOG_NEW_LINE);
       sl_btmesh_node_reset();
       // Timer to let the NVM clear properly
-      sl_simple_timer_start(&reset_timer,       // Timer pointer
-                            RESET_TIMER_MS,     // Timer duration
-                            app_on_reset_timer, // Timer callback
-                            NULL,               // Timer data, not needed
-                            false);             // Not periodic
+      app_timer_start(&reset_timer,       // Timer pointer
+                      RESET_TIMER_MS,           // Timer duration
+                      app_on_reset_timer,       // Timer callback
+                      NULL,                     // Timer data, not needed
+                      false);                   // Not periodic
       command_state = IN_PROGRESS;
       break;
     case IN_PROGRESS:
@@ -871,12 +871,12 @@ SL_WEAK void btmesh_app_prov_set_cbp_capability(bool capability)
 // ----------------------------------------------------------------------------
 // Private function definitions
 
-static void app_on_scan_timer(sl_simple_timer_t *timer, void *data)
+static void app_on_scan_timer(app_timer_t *timer, void *data)
 {
   command_state = FINISHED;
 }
 
-static void app_on_reset_timer(sl_simple_timer_t *timer, void *data)
+static void app_on_reset_timer(app_timer_t *timer, void *data)
 {
   command_state = FINISHED;
 }

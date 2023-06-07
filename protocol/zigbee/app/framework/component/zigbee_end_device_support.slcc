@@ -35,11 +35,11 @@ template_contribution:
   - name: zigbee_af_callback
     value:
       callback_type: event_init
-      function_name: emAfPluginEndDeviceSupportMoveInit
+      function_name: sli_zigbee_af_end_device_support_move_init
   - name: zigbee_af_callback
     value:
       callback_type: event_init
-      function_name: emAfPluginEndDeviceSupportPollingInit
+      function_name: sli_zigbee_af_end_device_support_polling_init
     unless:
       - zigbee_ezsp
   - name: zigbee_af_callback
@@ -57,7 +57,7 @@ template_contribution:
   - name: zigbee_stack_callback
     value:
       callback_type: poll_complete
-      function_name: emAfPluginEndDeviceSupportPollCompleteCallback
+      function_name: sli_zigbee_af_end_device_support_poll_complete_callback
   - name: cli_group
     value:
       group: plugin

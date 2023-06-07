@@ -31,6 +31,11 @@
 #ifndef SL_SENSOR_IMU_H
 #define SL_SENSOR_IMU_H
 
+/***********************************************************************************************//**
+ * @addtogroup sensor_imu
+ * @{
+ **************************************************************************************************/
+
 #include <stdbool.h>
 #include "sl_status.h"
 
@@ -65,4 +70,5 @@ sl_status_t sl_sensor_imu_get(int16_t ovec[3], int16_t avec[3]);
  *****************************************************************************/
 sl_status_t sl_sensor_imu_calibrate(void);
 
+/** @} (end addtogroup sensor_imu) */
 #endif // SL_SENSOR_IMU_H

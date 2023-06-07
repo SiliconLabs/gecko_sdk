@@ -16,15 +16,9 @@
  *
  ******************************************************************************/
 
-#ifdef UC_BUILD
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
 #endif // SL_COMPONENT_CATALOG_PRESENT
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_TEST_HARNESS
-#define SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
-#endif // EMBER_AF_PLUGIN_TEST_HARNESS
-#endif // UC_BUILD
 
 #include "app/framework/include/af.h"
 #include "app/framework/util/af-main.h"                     //emberAfIsFullSmartEnergySecurityPresent
@@ -41,19 +35,15 @@
 #endif // SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
 
 #include "app/framework/plugin/esi-management/esi-management.h"
+#include "stack/include/zigbee-security-manager.h"
 
 // A helper macro for a human readable TimeStatus flags check.
 // Usage e.g.: if (IS_TIME_STATUS(bla, MASTER_CLOCK) { ... }
 // Permitted values for 'mask' are defined in enums.h, under EMBER_AF_TIME_STATUS_MASK_...
 #define IS_TIME_STATUS(reg, mask) ((reg) & EMBER_AF_TIME_STATUS_MASK_##mask)
 
-#ifdef UC_BUILD
 sl_zigbee_event_t emberAfPluginSmartEnergyRegistrationTickNetworkEvents[EMBER_SUPPORTED_NETWORKS];
-void emberAfPluginSmartEnergyRegistrationTickNetworkEventHandler(SLXU_UC_EVENT);
-#else
-extern EmberEventControl emberAfPluginSmartEnergyRegistrationTickNetworkEventControls[1];
-void emberAfPluginSmartEnergyRegistrationTickNetworkEventHandler(void);
-#endif
+void emberAfPluginSmartEnergyRegistrationTickNetworkEventHandler(sl_zigbee_event_t * event);
 
 #if defined(EMBER_AF_PLUGIN_SMART_ENERGY_REGISTRATION_ESI_DISCOVERY_REQUIRED)
   #define PARTNER_KE_REQUIRED
@@ -91,7 +81,7 @@ typedef enum {
 #endif
   STATE_REGISTRATION_COMPLETE,
   STATE_REGISTRATION_FAILED,
-} EmAfPluginSmartEnergyRegistrationState;
+} sli_zigbee_af_smart_energy_registration_state;
 
 #define UNDEFINED_ENDPOINT 0xFF
 
@@ -103,13 +93,13 @@ typedef struct {
   uint8_t   timeStatus;
   uint32_t  lastSetTime;
   uint32_t  validUntilTime;
-} EmAfPluginSmartEnergyRegistrationTimeSource;
+} sli_zigbee_af_smart_energy_registration_time_source;
 #endif //EMBER_AF_PLUGIN_SMART_ENERGY_REGISTRATION_TIME_SOURCE_REQUIRED
 
 #ifdef EMBER_AF_PLUGIN_SMART_ENERGY_REGISTRATION_ESI_DISCOVERY_REQUIRED
 
 #ifdef EMBER_AF_PLUGIN_SMART_ENERGY_REGISTRATION_DELAY_PERIOD
-uint32_t emAfPluginSmartEnergyRegistrationDiscoveryPeriod =
+uint32_t sli_zigbee_af_smart_energy_registration_discovery_period =
   EMBER_AF_PLUGIN_SMART_ENERGY_REGISTRATION_DELAY_PERIOD;
 #endif //EMBER_AF_PLUGIN_SMART_ENERGY_REGISTRATION_DELAY_PERIOD
 
@@ -172,7 +162,7 @@ static bool resumeAfterDelay(EmberStatus status, uint32_t delayMs);
 #define transition(next) transitionAfterDelay((next),                                                     \
                                               EMBER_AF_PLUGIN_SMART_ENERGY_REGISTRATION_DELAY_TRANSITION, \
                                               true)     // reset error count
-static bool transitionAfterDelay(EmAfPluginSmartEnergyRegistrationState next,
+static bool transitionAfterDelay(sli_zigbee_af_smart_energy_registration_state next,
                                  uint32_t delay,
                                  bool resetErrorCount);
 
@@ -199,7 +189,7 @@ static void discoveryCallback(const EmberAfServiceDiscoveryResult *result);
 #endif
 
 typedef struct {
-  EmAfPluginSmartEnergyRegistrationState state;
+  sli_zigbee_af_smart_energy_registration_state state;
   uint8_t errors;
   uint8_t trustCenterKeyEstablishmentEndpoint;
 #ifdef EMBER_AF_PLUGIN_SMART_ENERGY_REGISTRATION_ESI_DISCOVERY_REQUIRED
@@ -217,7 +207,7 @@ typedef struct {
 #endif
 #ifdef EMBER_AF_PLUGIN_SMART_ENERGY_REGISTRATION_TIME_SOURCE_REQUIRED
   bool resuming;    // determineAuthoritativeTimeSource
-  EmAfPluginSmartEnergyRegistrationTimeSource source;
+  sli_zigbee_af_smart_energy_registration_time_source source;
 #endif
 } State;
 static State states[EMBER_SUPPORTED_NETWORKS];
@@ -230,15 +220,13 @@ static State states[EMBER_SUPPORTED_NETWORKS];
 
 //------------------------------------------------------------------------------
 //---internal callback
-#ifdef UC_BUILD
-void emAfPluginSmartEnergyRegistrationInitCallback(SLXU_INIT_ARG)
+void sli_zigbee_af_smart_energy_registration_init_callback(uint8_t init_level)
 {
-  SLXU_INIT_UNUSED_ARG;
+  (void)init_level;
 
-  slxu_zigbee_network_event_init(emberAfPluginSmartEnergyRegistrationTickNetworkEvents,
-                                 emberAfPluginSmartEnergyRegistrationTickNetworkEventHandler);
+  sl_zigbee_network_event_init(emberAfPluginSmartEnergyRegistrationTickNetworkEvents,
+                               emberAfPluginSmartEnergyRegistrationTickNetworkEventHandler);
 }
-#endif
 //------------------------------------------------------------------------------
 
 EmberStatus emberAfRegistrationStartCallback(void)
@@ -262,7 +250,7 @@ EmberStatus emberAfRegistrationStartCallback(void)
   }
 
 #ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
-  if (!emAfTestHarnessAllowRegistration) {
+  if (!sli_zigbee_af_test_harness_allow_registration) {
     return EMBER_SECURITY_CONFIGURATION_INVALID;
   }
 #endif // SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
@@ -288,15 +276,11 @@ void emberAfRegistrationAbortCallback(void)
     // again in the same call chain.
     State *state = &states[emberGetCurrentNetwork()];
     state->state = STATE_REGISTRATION_FAILED;
-    #ifdef UC_BUILD
     emberAfPluginSmartEnergyRegistrationTickNetworkEventHandler(emberAfPluginSmartEnergyRegistrationTickNetworkEvents);
-    #else
-    emberAfPluginSmartEnergyRegistrationTickNetworkEventHandler();
-    #endif
   }
 }
 
-void emberAfPluginSmartEnergyRegistrationTickNetworkEventHandler(SLXU_UC_EVENT)
+void emberAfPluginSmartEnergyRegistrationTickNetworkEventHandler(sl_zigbee_event_t * event)
 {
   State *state = &states[emberGetCurrentNetwork()];
   switch (state->state) {
@@ -349,7 +333,7 @@ void emberAfPluginSmartEnergyRegistrationTickNetworkEventHandler(SLXU_UC_EVENT)
   }
 }
 
-uint8_t emAfPluginSmartEnergyRegistrationTrustCenterKeyEstablishmentEndpoint(void)
+uint8_t sli_zigbee_af_smart_energy_registration_trust_center_key_establishment_endpoint(void)
 {
   // When we start, the key establishment endpoint will be zero.  This is okay
   // internally in this plugin, but we really want to use a better "undefined"
@@ -390,13 +374,8 @@ static bool checkErrorCountAndSetEventControl(uint32_t delayMs,
     return false;
   }
 
-#ifdef UC_BUILD
   sl_zigbee_event_set_delay_ms(emberAfPluginSmartEnergyRegistrationTickNetworkEvents,
                                delayMs);
-#else
-  emberAfNetworkEventControlSetDelayMS(emberAfPluginSmartEnergyRegistrationTickNetworkEventControls,
-                                       delayMs);
-  #endif
 
   return true;
 }
@@ -411,7 +390,7 @@ static bool resumeAfterDelay(EmberStatus status, uint32_t delayMs)
                                            false);
 }
 
-static bool transitionAfterDelay(EmAfPluginSmartEnergyRegistrationState next,
+static bool transitionAfterDelay(sli_zigbee_af_smart_energy_registration_state next,
                                  uint32_t delay,
                                  bool resetErrorCount)
 {
@@ -758,8 +737,8 @@ static void determineAuthoritativeTimeSource(void)
   }
 }
 
-void emAfPluginSmartEnergyRegistrationReadAttributesResponseCallback(uint8_t *buffer,
-                                                                     uint16_t bufLen)
+void sli_zigbee_af_smart_energy_registration_read_attributes_response_callback(uint8_t *buffer,
+                                                                               uint16_t bufLen)
 {
   State *state = &states[emberGetCurrentNetwork()];
   uint32_t time           = 0x00000000UL;
@@ -896,7 +875,7 @@ static void stopRegistration(bool success)
 #ifdef EMBER_AF_PLUGIN_SMART_ENERGY_REGISTRATION_DELAY_PERIOD
   if (success) {
     transitionAfterDelay(STATE_DISCOVER_ENERGY_SERVICE_INTERFACES,
-                         emAfPluginSmartEnergyRegistrationDiscoveryPeriod,
+                         sli_zigbee_af_smart_energy_registration_discovery_period,
                          true);
     return;
   }
@@ -1069,9 +1048,15 @@ static void discoveryCallback(const EmberAfServiceDiscoveryResult *result)
                                  "Key Establishment cluster");
       resumeAfterFixedDelay(EMBER_ERR_FATAL);
     } else {
-      EmberKeyStruct keyStruct;
-      if (emberGetKey(EMBER_TRUST_CENTER_LINK_KEY, &keyStruct)
-          != EMBER_SUCCESS) {
+      sl_zb_sec_man_context_t context;
+      sl_zb_sec_man_key_t plaintext_key;
+      sl_zb_sec_man_aps_key_metadata_t key_data;
+      sl_zb_sec_man_init_context(&context);
+
+      context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_TC_LINK;
+      (void)sl_zb_sec_man_get_aps_key_info(&context, &key_data);
+
+      if (sl_zb_sec_man_export_key(&context, &plaintext_key) != SL_STATUS_OK) {
         emberAfRegistrationPrintln("ERR: Failed to get trust center link key");
         emberAfRegistrationAbortCallback();
         return;
@@ -1087,7 +1072,7 @@ static void discoveryCallback(const EmberAfServiceDiscoveryResult *result)
                                    " - see 'info' command for more detail");
         emberAfRegistrationFlush();
         transition(NEXT_STATE_AFTER_KE);
-      } else if ((keyStruct.bitmask & EMBER_KEY_IS_AUTHORIZED) != 0U) {
+      } else if ((key_data.bitmask & EMBER_KEY_IS_AUTHORIZED) != 0U) {
         emberAfRegistrationPrintln("%pSkipping key establishment%p",
                                    "",
                                    " because key is already authorized");

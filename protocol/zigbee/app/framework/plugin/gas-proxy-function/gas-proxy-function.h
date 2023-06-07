@@ -18,9 +18,7 @@
 #ifndef SILABS_GAS_PROXY_FUNCTION_H
 #define SILABS_GAS_PROXY_FUNCTION_H
 
-#ifdef UC_BUILD
 #include "gas-proxy-function-config.h"
-#endif // UC_BUILD
 
 #define fieldLength(field) \
   (emberAfCurrentCommand()->bufLen - (field - emberAfCurrentCommand()->buffer));
@@ -40,14 +38,6 @@
  * @addtogroup gas-proxy-function
  * @{
  */
-
-#ifndef UC_BUILD
-#define emberAfPluginGasProxyFunctionPrint(...)                          emberAfAppPrint(__VA_ARGS__)
-#define emberAfPluginGasProxyFunctionPrintln(...)                        emberAfAppPrintln(__VA_ARGS__)
-#define emberAfPluginGasProxyFunctionDebugExec(x)                        emberAfAppDebugExec(x)
-#define emberAfPluginGasProxyFunctionPrintBuffer(buffer, len, withSpace) emberAfAppPrintBuffer(buffer, len, withSpace)
-#define emberAfPluginGasProxyFunctionPrintString(buffer)                 emberAfPrintString(EMBER_AF_PRINT_APP, (buffer))
-#endif  // UC_BUILD
 
 /**
  * @name Handlers
@@ -78,10 +68,10 @@ typedef enum {
   EMBER_AF_GPF_MESSAGE_TYPE_NON_TOM,
 } EmberAfGPFMessageType;
 
-uint32_t emAfGasProxyFunctionGetGbzStartTime(void);
-void emAfGasProxyFunctionAlert(uint16_t alertCode,
-                               EmberAfClusterCommand *cmd,
-                               uint16_t messageCode);
+uint32_t sli_zigbee_af_gas_proxy_function_get_gbz_start_time(void);
+void sli_zigbee_af_gas_proxy_function_alert(uint16_t alertCode,
+                                            EmberAfClusterCommand *cmd,
+                                            uint16_t messageCode);
 #endif //DOXYGEN_SHOULD_SKIP_THIS
 
 /**

@@ -2,7 +2,7 @@
 
 #include PLATFORM_HEADER
 #include "stack/include/ember-types.h"
-#include "event_control/event.h"
+#include "event_queue/event-queue.h"
 #include "hal/hal.h"
 #include "app/framework/include/af.h"
 #include <pthread.h>
@@ -53,7 +53,7 @@ static MQTTAsync_onFailure mqttTopicPublishFailureCallack;
 static MQTTAsync_messageArrived mqttMessageArrivedCallback;
 
 // Event controls
-EmberEventControl emberAfPluginTransportMqttBrokerReconnectEventControl;
+EmberEvent emberAfPluginTransportMqttBrokerReconnectEvent;
 
 void emberAfPluginTransportMqttInitCallback(void)
 {
@@ -122,18 +122,18 @@ void emberAfPluginTransportMqttInitCallback(void)
 // start and never fire our connection event
 #ifndef EMBER_TEST
   // Start our connection event timer to attempt to connect to the broker
-  emberEventControlSetActive(
-    emberAfPluginTransportMqttBrokerReconnectEventControl);
+  emberEventSetActive(
+    emberAfPluginTransportMqttBrokerReconnectEvent);
 #endif
 }
 
-void emberAfPluginTransportMqttBrokerReconnectEventHandler(void)
+void emberAfPluginTransportMqttBrokerReconnectEventHandler(EmberEvent* event)
 {
   bool currentMqttConnected = false;
   static bool lastMqttConnected = false;
 
-  emberEventControlSetInactive(
-    emberAfPluginTransportMqttBrokerReconnectEventControl);
+  emberEventSetInactive(
+    emberAfPluginTransportMqttBrokerReconnectEvent);
 
   // Get the current connection state
   currentMqttConnected = isMqttConnectedProtected();
@@ -161,8 +161,8 @@ void emberAfPluginTransportMqttBrokerReconnectEventHandler(void)
   // Reset our last state for the next execution of this event
   lastMqttConnected = currentMqttConnected;
 
-  emberEventControlSetDelayMS(
-    emberAfPluginTransportMqttBrokerReconnectEventControl,
+  emberEventSetDelayMs(
+    emberAfPluginTransportMqttBrokerReconnectEvent,
     MQTT_RECONNECT_RATE_MS);
 }
 

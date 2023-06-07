@@ -1,17 +1,24 @@
-#include "em_gpio.h"
-#include "em_cmu.h"
-
 #include "sl_debug_swo.h"
 
+#include "em_device.h"
+
 #if defined(__CORTEX_M) && (__CORTEX_M >= 3)
+
+#if _SILICON_LABS_32B_SERIES <= 2
+#include "em_gpio.h"
+#include "em_cmu.h"
+#endif
 
 #include "sl_debug_swo_config.h"
 
 sl_status_t sl_debug_swo_init(void)
 {
-  uint32_t freq;
+  uint32_t freq = 0.0f;
+  uint16_t cyctap = 0U;
+  uint16_t postpreset = 0U;
+
+#if _SILICON_LABS_32B_SERIES <= 2
   unsigned int location = 0U;
-  uint16_t cyctap, postpreset;
   CMU_ClockEnable(cmuClock_GPIO, true);
 
 #if defined(_GPIO_ROUTE_SWOPEN_MASK)
@@ -33,6 +40,7 @@ sl_status_t sl_debug_swo_init(void)
 
   // Enable SWO pin
   GPIO_DbgSWOEnable(true);
+#endif
 
 #if _SILICON_LABS_32B_SERIES < 2
   // Enable debug clock
@@ -40,7 +48,7 @@ sl_status_t sl_debug_swo_init(void)
 
   // Get debug clock frequency
   freq = CMU_ClockFreqGet(cmuClock_DBG);
-#else //_SILICON_LABS_32B_SERIES >= 2
+#elif _SILICON_LABS_32B_SERIES == 2
 
 #if defined(_CMU_TRACECLKCTRL_CLKSEL_MASK)
 #if defined(_CMU_TRACECLKCTRL_CLKSEL_HFRCOEM23)

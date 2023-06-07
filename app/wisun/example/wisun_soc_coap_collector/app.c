@@ -35,6 +35,7 @@
 #include <assert.h>
 #include "app.h"
 #include "sl_wisun_coap_collector.h"
+#include "sl_status.h"
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -61,18 +62,15 @@ void app_task(void *args)
 {
   (void) args;
 
-  // Init coap lib
-  assert(sl_wisun_coap_init_default());
-
   // connect to the wisun network
   app_wisun_connect_and_wait();
 
   // prepare request
-  assert(sl_wisun_coap_collector_prepare_meas_request());
+  assert(sl_wisun_coap_collector_prepare_meas_request() == SL_STATUS_OK);
 
   while (1) {
     sl_wisun_collector_measurement_request_loop();
-    msleep(SL_WISUN_COLLECTOR_PERIOD_MS);
+    msleep(1);
   }
 }
 

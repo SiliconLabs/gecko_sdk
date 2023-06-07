@@ -31,6 +31,11 @@
 #ifndef SL_BT_OTS_SERVER_H
 #define SL_BT_OTS_SERVER_H
 
+/***********************************************************************************************//**
+ * @addtogroup ots_server
+ * @{
+ **************************************************************************************************/
+
 #include <stdbool.h>
 #include <stdint.h>
 #include "sl_bt_ots_datatypes.h"
@@ -403,4 +408,5 @@ bool sli_bt_ots_server_is_ok_to_sleep(void);
 };
 #endif
 
+/** @} (end addtogroup ots_server) */
 #endif // SL_BT_OTS_SERVER_H

@@ -22,18 +22,18 @@
 // Functions
 
 // plugin gbz-message-controller clear
-void emAfPluginGbzMessageControllerCliClear(void)
+void sli_zigbee_af_gbz_message_controller_cli_clear(void)
 {
 }
 
 // plugin gbz-message-controller append
 // This function will "look" into the ZCL buffer and copy over the current
 // filled command into the GBZ command payload buffer.
-void emAfPluginGbzMessageControllerCliAppend(void)
+void sli_zigbee_af_gbz_message_controller_cli_append(void)
 {
 }
 
 // plugin gbz-message-controller encryption <encryptionEnabled:1>
-void emAfPluginGbzMessageControllerCliEncryption(void)
+void sli_zigbee_af_gbz_message_controller_cli_encryption(void)
 {
 }

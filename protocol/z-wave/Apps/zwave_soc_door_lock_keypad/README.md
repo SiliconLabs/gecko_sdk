@@ -132,7 +132,8 @@ The following buttons and LEDs are used.
     <td>
         Simulates entering a user code on a keypad.<br>
         The entered user code is hard-coded with the value of the default user code of the application. The default user code is 1234.<br>
-        A valid user code entry (i.e., button press) toggles the Door Lock Mode between Secured and Unsecured.<br>
+        A valid user code entry (i.e., button press) toggles the Door Lock Mode between Secured and Unsecured,<br>
+        with a delay of 2 seconds, to simulate timed hardware operation.<br>
         If the user code for user ID 1 is changed to something else than the default user code, the Door Lock Mode can no longer be toggled by pressing this button.<br>
     </td>
 </tr>

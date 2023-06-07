@@ -31,6 +31,11 @@
 #ifndef SL_POWER_SUPPLY_H
 #define SL_POWER_SUPPLY_H
 
+/***********************************************************************************************//**
+ * @addtogroup power_supply
+ * @{
+ **************************************************************************************************/
+
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -85,4 +90,5 @@ float sl_power_supply_measure_voltage(unsigned int avg);
  ******************************************************************************/
 uint8_t sl_power_supply_get_battery_level(void);
 
+/** @} (end addtogroup power_supply) */
 #endif // SL_POWER_SUPPLY_H

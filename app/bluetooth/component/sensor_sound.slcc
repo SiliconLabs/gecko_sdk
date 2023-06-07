@@ -2,9 +2,12 @@ id: sensor_sound
 label: Sound level sensor (microphone)
 package: Bluetooth
 description: Sound level sensor (microphone) driver abstraction designed for Thunderboard.
-category: Application|Sensor
+category: Bluetooth|Application|Miscellaneous
 quality: production
 root_path: app/bluetooth/common/sensor_sound
+tag:
+  - No-Code
+
 source:
   - path: sl_sensor_sound.c
 include:

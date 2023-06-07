@@ -5,14 +5,23 @@ description: >
   Color Tunable Lighting (CTL) Server model. Used to support the control and
   reporting functionality of a node with a light source that is dimmable and whose
   color temperature can be selected.
-  
+
   This component implements this control and reporting functionality, extending
   on lighting server, and also provides callbacks on lighting related events.
-  
+
   For more details about lighting, please see Lighting Server.
+
+  This is a Low-Code component. The following weak callbacks are available to
+  implement the relevant light source handling:
+
+  void sl_btmesh_lighting_level_pwm_cb(uint16_t level);
+  void sl_btmesh_lighting_color_pwm_cb(uint16_t color);
 category: "Bluetooth Mesh|Models|Lighting"
 quality: "production"
 root_path: "app/btmesh/common/btmesh_ctl_server"
+tag:
+  - Low-Code
+
 config_file:
   - path: btmesh_ctl_server.dcd
     directory: btmeshconf
@@ -36,9 +45,9 @@ requires:
   - name: "btmesh_generic_server"
   - name: "btmesh_lighting_server"
   - name: "btmesh_stack"
-  - name: "simple_timer"
+  - name: "app_timer"
 recommends:
-  - id: "simple_timer"
+  - id: "app_timer"
 
 template_contribution:
   - name: "btmesh_on_event"

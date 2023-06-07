@@ -97,7 +97,7 @@ template_contribution:
     value:
       group: policy
       name: print
-      handler: emAfOtaServerPolicyPrint
+      handler: sli_zigbee_af_ota_server_policy_print
       help: Prints the polices used by the OTA Server Policy component.
   - name: cli_command
     value:
@@ -168,7 +168,7 @@ template_contribution:
     value:
       group: ota-server
       name: load-file
-      handler: emAfOtaLoadFileCommand
+      handler: sli_zigbee_af_ota_load_file_command
       help: Loads a file.
       argument:
       - type: string

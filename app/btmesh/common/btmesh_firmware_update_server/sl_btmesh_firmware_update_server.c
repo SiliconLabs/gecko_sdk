@@ -27,6 +27,8 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
+#include "sl_component_catalog.h"
+
 #include "sl_btmesh.h"
 #include "sl_btmesh_dcd.h"
 
@@ -41,7 +43,7 @@
 #include "app_assert.h"
 #endif // SL_CATALOG_APP_ASSERT_PRESENT
 
-#include "sl_simple_timer.h"
+#include "app_timer.h"
 
 #ifdef SL_CATALOG_BTMESH_STACK_FW_DISTRIBUTION_SERVER_PRESENT
 #include "sli_btmesh_fw_distribution_server.h"
@@ -105,7 +107,7 @@ static struct {
   /// Current progress of verification
   uint32_t verification_progress;
   /// Verification log timer
-  sl_simple_timer_t verify_timer;
+  app_timer_t verify_timer;
   /// BLOB identifier being transferred
   sl_bt_uuid_64_t blob_id;
 
@@ -177,7 +179,7 @@ static void btmesh_firmware_udpate_server_change_state(btmesh_firmware_udpate_st
  * @param[in] timer Timer structure
  * @param[in] data Callback data
  ******************************************************************************/
-static void btmesh_firmware_update_server_verify_progress_ui_update(sl_simple_timer_t *timer,
+static void btmesh_firmware_update_server_verify_progress_ui_update(app_timer_t *timer,
                                                                     void *data);
 
 void sl_btmesh_firmware_update_server_init(void)
@@ -344,7 +346,7 @@ void sl_btmesh_firmware_update_server_verify_step_handle(void)
         // In case of success, accept firmware
         sl_btmesh_fw_update_server_verify_fw_rsp(BTMESH_FIRMWARE_UPDATE_SERVER_MAIN,
                                                  !0);
-        sl_simple_timer_stop(&firmware_update_server.verify_timer);
+        app_timer_stop(&firmware_update_server.verify_timer);
 #if FW_UPDATE_SERVER_VERIFY_PROGRESS_UI_UPDATE_PERIOD > 0
         btmesh_firmware_update_server_verify_progress_ui_update(NULL, NULL);
 #endif // FW_UPDATE_SERVER_VERIFY_PROGRESS_UI_UPDATE_PERIOD > 0
@@ -354,7 +356,7 @@ void sl_btmesh_firmware_update_server_verify_step_handle(void)
         // In case of error, reject firmware
         sl_btmesh_fw_update_server_verify_fw_rsp(BTMESH_FIRMWARE_UPDATE_SERVER_MAIN,
                                                  0);
-        sl_simple_timer_stop(&firmware_update_server.verify_timer);
+        app_timer_stop(&firmware_update_server.verify_timer);
 #if FW_UPDATE_SERVER_VERIFY_PROGRESS_UI_UPDATE_PERIOD > 0
         btmesh_firmware_update_server_verify_progress_ui_update(NULL, NULL);
 #endif // FW_UPDATE_SERVER_VERIFY_PROGRESS_UI_UPDATE_PERIOD > 0
@@ -542,11 +544,11 @@ static void btmesh_firmware_udpate_server_change_state(btmesh_firmware_udpate_st
                                                 &firmware_update_server.verification_chunk_size,
                                                 firmware_update_server.verification_size);
 #if SL_BTMESH_FW_UPDATE_SERVER_VERIFY_PROGRESS_UI_UPDATE_PERIOD_CFG_VAL > 0
-      sl_simple_timer_start(&firmware_update_server.verify_timer,
-                            SL_BTMESH_FW_UPDATE_SERVER_VERIFY_PROGRESS_UI_UPDATE_PERIOD_CFG_VAL,
-                            btmesh_firmware_update_server_verify_progress_ui_update,
-                            NULL,
-                            true);
+      app_timer_start(&firmware_update_server.verify_timer,
+                      SL_BTMESH_FW_UPDATE_SERVER_VERIFY_PROGRESS_UI_UPDATE_PERIOD_CFG_VAL,
+                      btmesh_firmware_update_server_verify_progress_ui_update,
+                      NULL,
+                      true);
 #else // SL_BTMESH_FW_UPDATE_SERVER_VERIFY_PROGRESS_UI_UPDATE_PERIOD_CFG_VAL > 0
       btmesh_firmware_update_server_verify_progress_ui_update(NULL, NULL);
 #endif // FW_UPDATE_SERVER_LOGGING_VERIFY_PROGRESS_PERIOD > 0
@@ -585,7 +587,7 @@ static void btmesh_firmware_udpate_server_change_state(btmesh_firmware_udpate_st
   }
 }
 
-static void btmesh_firmware_update_server_verify_progress_ui_update(sl_simple_timer_t *timer,
+static void btmesh_firmware_update_server_verify_progress_ui_update(app_timer_t *timer,
                                                                     void *data)
 {
   (void)timer;

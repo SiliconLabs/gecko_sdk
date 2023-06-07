@@ -37,9 +37,13 @@ configuration:
     value: 1
   - name: SL_IOSTREAM_USART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
     value: 1
+  - name: SL_IOSTREAM_USART_VCOM_RX_BUFFER_SIZE
+    value: 80
 define:
   - name: DEBUG_EFM
 readme:
   - path: readme.md
 ui_hints:
   highlight: readme.md
+tag:
+  - hardware:device:ram:10

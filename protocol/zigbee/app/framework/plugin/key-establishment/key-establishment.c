@@ -22,29 +22,26 @@
 #include "app/framework/util/af-main.h"
 #include "app/framework/util/common.h"
 #include "hal/hal.h"
+#include "stack/include/zigbee-security-manager.h"
 
-#ifdef UC_BUILD
+#include "stack/include/zigbee-security-manager.h"
+
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
 #include "test-harness.h"
 #endif // SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_TEST_HARNESS
-#define SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
-#include "app/framework/plugin/test-harness/test-harness.h"
-#endif // EMBER_AF_PLUGIN_TEST_HARNESS
-#endif // UC_BUILD
 
 #if !defined(EZSP_HOST)
   #include "stack/include/cbke-crypto-engine.h"
 #endif
 #include "key-establishment.h"
 #include "key-establishment-storage.h"
-
-#ifdef UC_BUILD
 #include "zap-cluster-command-parser.h"
+#ifndef EMBER_SCRIPTED_TEST
 #include "zigbee_af_cluster_functions.h"
-
+#endif
 #if defined(ZCL_TERMINATE_KEY_ESTABLISHMENT_FROM_SERVER_COMMAND_ID)
 #define ZCL_TERMINATE_KEY_ESTABLISHMENT_COMMAND_ID ZCL_TERMINATE_KEY_ESTABLISHMENT_FROM_SERVER_COMMAND_ID
 #elif defined(ZCL_TERMINATE_KEY_ESTABLISHMENT_FROM_CLIENT_COMMAND_ID)
@@ -69,7 +66,6 @@ WEAK(bool emberAfPluginKeyEstablishmentEventCallback(EmberAfKeyEstablishmentNoti
 {
   return true;
 }
-#endif // UC_BUILD
 
 //------------------------------------------------------------------------------
 // Globals
@@ -108,14 +104,9 @@ static KeyEstablishmentPartner keyEstPartner;
 static EmberNodeId lastNodeSuccessfulCbke = EMBER_NULL_NODE_ID;
 static uint8_t lastConfirmKeyDataResponseApsSequence;
 
-#ifdef UC_BUILD
 sl_zigbee_event_t emberAfPluginKeyEstablishmentApsDuplicateDetectionEvent;
 #define apsDuplicateDetectionEvent (&emberAfPluginKeyEstablishmentApsDuplicateDetectionEvent)
 void emberAfPluginKeyEstablishmentApsDuplicateDetectionEventHandler(sl_zigbee_event_t *event);
-#else
-EmberEventControl emberAfPluginKeyEstablishmentApsDuplicateDetectionEventControl;
-#define apsDuplicateDetectionEvent emberAfPluginKeyEstablishmentApsDuplicateDetectionEventControl
-#endif
 
 #define KEY_ESTABLISHMENT_TIMEOUT_BASE_SECONDS 10
 
@@ -160,10 +151,10 @@ EmberEventControl emberAfPluginKeyEstablishmentApsDuplicateDetectionEventControl
 #define EPHEMERAL_DATA_TIME_OFFSET 2
 #define CONFIRM_KEY_TIME_OFFSET    3
 
-EmberAfCbkeKeyEstablishmentSuite emAfAvailableCbkeSuite = EMBER_AF_CBKE_KEY_ESTABLISHMENT_SUITE_163K1;
-EmberAfCbkeKeyEstablishmentSuite emAfCurrentCbkeSuite   = EMBER_AF_CBKE_KEY_ESTABLISHMENT_SUITE_163K1;
+EmberAfCbkeKeyEstablishmentSuite sli_zigbee_af_available_cbke_suite = EMBER_AF_CBKE_KEY_ESTABLISHMENT_SUITE_163K1;
+EmberAfCbkeKeyEstablishmentSuite sli_zigbee_af_current_cbke_suite   = EMBER_AF_CBKE_KEY_ESTABLISHMENT_SUITE_163K1;
 #ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
-static EmberAfCbkeKeyEstablishmentSuite emUseTestHarnessSuite  = EMBER_AF_INVALID_KEY_ESTABLISHMENT_SUITE;
+static EmberAfCbkeKeyEstablishmentSuite sli_zigbee_af_use_test_harness_suite  = EMBER_AF_INVALID_KEY_ESTABLISHMENT_SUITE;
 #endif // SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
 
 #if defined EMBER_TEST
@@ -177,7 +168,7 @@ static uint8_t cbkeSuiteOffset = CBKE_163K1_SUITE_OFFSET;
 //The SMAC and Terminate sizes are duplicated to be able to easily select
 //suite based sizes for the 163k and the 283k curve.
 // This KeyEstablishMessage enum to message size.
-const uint8_t emAfKeyEstablishMessageToDataSize[] = {
+const uint8_t sli_zigbee_af_key_establish_message_to_data_size[] = {
   EM_AF_KE_INITIATE_SIZE,
   EM_AF_KE_EPHEMERAL_SIZE,
   EM_AF_KE_SMAC_SIZE,
@@ -247,9 +238,7 @@ static uint8_t apsSequenceNumbers[NUM_SEQ_NUMBER];
 static uint8_t certSubjectOffset = CERT_SUBJECT_OFFSET;
 static uint8_t certIssuerOffset  = CERT_ISSUER_OFFSET;
 
-#if ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_KEY_ESTABLISHMENT_CLUSTER)) || defined(UC_BUILD))
 static const char * terminateStatus[] = TERMINATE_STATUS_STRINGS;
-#endif
 
 // Over the air message lengths for Initiate Key Establishment Request and Response
 // certificate + keyEstablishmentSuite + ephemeralDataGenerateTime + confirmKeyGenerateTime
@@ -293,24 +282,17 @@ static void messageSentHandler(EmberOutgoingMessageType type,
 static bool commandIsFromOurPartner(const EmberAfClusterCommand *cmd);
 static bool setPartnerFromCommand(const EmberAfClusterCommand *cmd);
 static void writeKeyEstablishmentClusterAttribute(uint8_t endpoint);
-#if ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_KEY_ESTABLISHMENT_CLUSTER)) || defined(UC_BUILD))
 static void debugPrintSmac(bool initiatorSmac, uint8_t *smac);
 static void debugPrintOtherSmac(bool received, uint8_t *smac);
 static void debugPrintCert(bool initiatorCert, uint8_t *cert);
-void emPrintData283k1(uint8_t *buffer, uint8_t size, unsigned char *type);
+void sli_zigbee_af_print_data283k1(uint8_t *buffer, uint8_t size, unsigned char *type);
 static void debugPrintKey(bool initiatorKey, uint8_t *key);
-#else
-  #define debugPrintSmac(initiatorSmac, smac)
-  #define debugPrintOtherSmac(received, smac)
-  #define debugPrintCert(initiatorCert, cert)
-  #define debugPrintKey(initiatorKey, key)
-#endif
 
 #if defined(EMBER_AF_HAS_SECURITY_PROFILE_SE_TEST)
 
   #if defined(SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT)
 // Test code only
-    #define NEW_KEY_TABLE_ENTRY_ALLOWED (emKeyEstablishmentPolicyAllowNewKeyEntries)
+    #define NEW_KEY_TABLE_ENTRY_ALLOWED (sli_zigbee_af_key_establishment_policy_allow_new_key_entries)
 
   #else
     #define NEW_KEY_TABLE_ENTRY_ALLOWED true
@@ -353,7 +335,12 @@ static bool checkValidByteValue283k1(uint8_t byte, uint8_t requiredValue, uint8_
 static bool checkKeyTable(uint8_t *bigEndianEui64)
 {
   EmberEUI64 eui64;
-  EmberKeyStruct keyStruct;
+  sl_zb_sec_man_context_t context;
+  sl_zb_sec_man_aps_key_metadata_t key_data;
+  sl_zb_sec_man_init_context(&context);
+
+  context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_TC_LINK;
+  sl_zb_sec_man_get_aps_key_info(&context, &key_data);
 
   emberReverseMemCopy(eui64, bigEndianEui64, EUI64_SIZE);
 
@@ -361,15 +348,17 @@ static bool checkKeyTable(uint8_t *bigEndianEui64)
   emberAfKeyEstablishmentClusterDebugExec(emberAfPrintBigEndianEui64(eui64));
   emberAfKeyEstablishmentClusterPrintln("");
 
+  int test = (key_data.bitmask & EMBER_KEY_HAS_PARTNER_EUI64);
+
   if (keyEstPartner.isIntraPan
       && keyEstPartner.pan.intraPan.nodeId == EMBER_TRUST_CENTER_NODE_ID) {
-    if (emberGetKey(EMBER_TRUST_CENTER_LINK_KEY, &keyStruct) == EMBER_SUCCESS
-        && (keyStruct.bitmask & EMBER_KEY_HAS_PARTNER_EUI64)
-        && MEMCOMPARE(eui64, keyStruct.partnerEUI64, EUI64_SIZE) == 0) {
+    if ((key_data.bitmask & EMBER_KEY_HAS_PARTNER_EUI64)
+        && MEMCOMPARE(eui64, context.eui64, EUI64_SIZE) == 0) {
       // The key to be updated is our existing TC Link Key, therefore
       // we have room.
       return true;
     }
+    emberAfKeyEstablishmentClusterPrintln("Error: EUI64 of TC does not match its cert. %d", test);
     emberAfKeyEstablishmentClusterPrintln("Error: EUI64 of TC does not match its cert.");
     cleanupAndStop(INVALID_PARTNER_MESSAGE);
     return false;
@@ -379,14 +368,17 @@ static bool checkKeyTable(uint8_t *bigEndianEui64)
 
     // We either have an existing link key entry that we can update,
     // or there is an empty entry.
-    if (emberFindKeyTableEntry(eui64, true) != 0xFF) {
+    sl_zb_sec_man_context_t context_existing;
+    sl_zb_sec_man_context_t context_open;
+    sl_zb_sec_man_export_link_key_by_eui(eui64, &context_existing, NULL, NULL);
+    sl_zb_sec_man_export_link_key_by_eui(NULL, &context_open, NULL, NULL);
+    if (context_existing.key_index != 0xFF) {
       return true;
     } else if (NEW_KEY_TABLE_ENTRY_ALLOWED != true) {
       emberAfKeyEstablishmentClusterPrintln("Error: Unknown EUI64 trying to perform CBKE.");
       cleanupAndStop(INVALID_PARTNER_MESSAGE);
       return false;
-    } else if (0xFF != emberFindKeyTableEntry((uint8_t*)emberAfNullEui64,
-                                              true)) {
+    } else if (0xFF != context_open.key_index) {
       return true;
     } else {
       // MISRA requires ..else if.. to have terminating else.
@@ -518,7 +510,7 @@ static void keyEstablishStateMachine(KeyEstablishEvent newEvent,
     case BEGIN_KEY_ESTABLISHMENT:
     {
       EmberAfKeyEstablishmentNotifyMessage result = NO_APP_MESSAGE;
-      emberAfKeyEstablishmentClusterPrintln("Current Suite %u", emAfCurrentCbkeSuite);
+      emberAfKeyEstablishmentClusterPrintln("Current Suite %u", sli_zigbee_af_current_cbke_suite);
       if (keyEstPartner.isInitiator) {
         if (!checkRequestedSuite(data1)
             || !checkIssuer(data2 + certIssuerOffset)
@@ -594,12 +586,12 @@ static void keyEstablishStateMachine(KeyEstablishEvent newEvent,
                                      (!keyEstPartner.isInitiator
                                       ? data2            // partner cert
                                       : data1))          // partner key
-          || emGenerateCbkeKeysForCurve() != EMBER_OPERATION_IN_PROGRESS) {
+          || sli_zigbee_af_generate_cbke_keys_for_curve() != EMBER_OPERATION_IN_PROGRESS) {
         cleanupAndStop(NO_LOCAL_RESOURCES);
         return;
       }
       scriptTestCheckpoint("CBKE: beginning crypto operation");
-      emAfSetCryptoOperationInProgress();
+      sli_zigbee_af_set_crypto_operation_in_progress();
       break;
 
     // For both roles, we are done generating keys.  Send the message.
@@ -619,13 +611,11 @@ static void keyEstablishStateMachine(KeyEstablishEvent newEvent,
       EmberCertificate283k1Data partnerCert;
       EmberPublicKey283k1Data partnerEphemeralPublicKey;
 
-#if ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_KEY_ESTABLISHMENT_CLUSTER)) || defined(UC_BUILD))
       if (!keyEstPartner.isInitiator) {
         debugPrintKey(false, data1);
       } else {
         debugPrintOtherSmac(true, data1);
       }
-#endif
       // For the initiator this is slightly ineffecient because we store
       // the public key but then immediately retrieve it.  However it
       // saves on flash to treat responder and initiator the same.
@@ -636,14 +626,14 @@ static void keyEstablishStateMachine(KeyEstablishEvent newEvent,
           || !retrieveAndClearPublicPartnerData(&partnerCert,
                                                 &partnerEphemeralPublicKey)
           || (EMBER_OPERATION_IN_PROGRESS
-              != emCalculateSmacsForCurve(!keyEstPartner.isInitiator,
-                                          &partnerCert,
-                                          &partnerEphemeralPublicKey))) {
+              != sli_zigbee_af_calculate_smacs_for_curve(!keyEstPartner.isInitiator,
+                                                         &partnerCert,
+                                                         &partnerEphemeralPublicKey))) {
         cleanupAndStop(NO_LOCAL_RESOURCES);
         return;
       }
       scriptTestCheckpoint("CBKE: begin crypto operation from ephemeral data");
-      emAfSetCryptoOperationInProgress();
+      sli_zigbee_af_set_crypto_operation_in_progress();
       break;
     }
 
@@ -696,7 +686,7 @@ static void keyEstablishStateMachine(KeyEstablishEvent newEvent,
         if (cmd != NULL) {
           lastConfirmKeyDataResponseApsSequence = cmd->apsFrame->sequence;
         }
-        slxu_zigbee_event_set_delay_ms(
+        sl_zigbee_event_set_delay_ms(
           apsDuplicateDetectionEvent,
           KEY_ESTABLISHMENT_APS_DUPLICATE_DETECTION_TIMEOUT_SEC << 10);
       }
@@ -716,9 +706,9 @@ static void keyEstablishStateMachine(KeyEstablishEvent newEvent,
 
   {
     uint32_t timeMs = (uint32_t)(eventTimeoutsSec[newEvent]) * MILLISECOND_TICKS_PER_SECOND;
-    slxu_zigbee_zcl_schedule_server_tick(keyEstablishmentEndpoint,
-                                         ZCL_KEY_ESTABLISHMENT_CLUSTER_ID,
-                                         timeMs);
+    sl_zigbee_zcl_schedule_server_tick(keyEstablishmentEndpoint,
+                                       ZCL_KEY_ESTABLISHMENT_CLUSTER_ID,
+                                       timeMs);
   }
   lastEvent = newEvent;
   return;
@@ -731,8 +721,8 @@ static void clearKeyEstablishmentState(void)
   lastEvent = NO_KEY_ESTABLISHMENT_EVENT;
   clearAllTemporaryPublicData();
   emberClearTemporaryDataMaybeStoreLinkKeyForCurve(false);
-  slxu_zigbee_zcl_deactivate_server_tick(keyEstablishmentEndpoint,
-                                         ZCL_KEY_ESTABLISHMENT_CLUSTER_ID);
+  sl_zigbee_zcl_deactivate_server_tick(keyEstablishmentEndpoint,
+                                       ZCL_KEY_ESTABLISHMENT_CLUSTER_ID);
 
   // NOTE: When clearing the state, we intentionally retain information about
   // the partner (e.g., node id, APS sequence numbers, etc.).  That information
@@ -803,7 +793,7 @@ static void sendKeyEstablishMessage(KeyEstablishMessage message)
   *ptr   = message;
 
 #ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
-  if (!emAfKeyEstablishmentTestHarnessMessageSendCallback(message)) {
+  if (!sli_zigbee_af_key_establishment_test_harness_message_send_callback(message)) {
     return;
   }
 #endif // SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
@@ -840,8 +830,8 @@ static void sendTerminateMessage(EmberAfAmiKeyEstablishmentStatus status,
 
   // Since we only support the single key establishment suite, we can
   // get away with casting this into an uint8_t and simply zeroing the high bits.
-  *ptr++ = LOW_BYTE(emAfCurrentCbkeSuite);
-  *ptr++ = HIGH_BYTE(emAfCurrentCbkeSuite);
+  *ptr++ = LOW_BYTE(sli_zigbee_af_current_cbke_suite);
+  *ptr++ = HIGH_BYTE(sli_zigbee_af_current_cbke_suite);
 
   appResponseLength = (ptr - appResponseData);
 
@@ -995,7 +985,7 @@ static bool commandIsFromOurPartner(const EmberAfClusterCommand *cmd)
 static void writeKeyEstablishmentClusterAttribute(uint8_t endpoint)
 {
   if (isCbkeKeyEstablishmentSuiteValid()) {
-    uint16_t keSuiteId = emAfAvailableCbkeSuite;
+    uint16_t keSuiteId = sli_zigbee_af_available_cbke_suite;
     EmberAfStatus attrWriteStatus;
 
     // Make the 'mask' 16-bit so that we can bit shift the client mask (0x80)
@@ -1025,7 +1015,6 @@ static void writeKeyEstablishmentClusterAttribute(uint8_t endpoint)
 //------------------------------------------------------------------------------
 // DEBUG
 
-#if ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_KEY_ESTABLISHMENT_CLUSTER)) || defined(UC_BUILD))
 static void debugPrintSmac(bool initiatorSmac, uint8_t *smac)
 {
   emberAfKeyEstablishmentClusterPrintln("%p SMAC",
@@ -1073,7 +1062,6 @@ static void debugPrintKey(bool initiatorKey, uint8_t *key)
     // MISRA requires ..else if.. to have terminating else.
   }
 }
-#endif
 
 static EmberStatus initiateKeyEstablishment(const EmberEUI64 eui64,
                                             uint16_t nodeIdOrPanId,
@@ -1105,9 +1093,9 @@ static EmberStatus initiateKeyEstablishment(const EmberEUI64 eui64,
       validLastEvent = CHECK_SUPPORTED_CURVES;
 
       EmberAfCbkeKeyEstablishmentSuite suite;
-      if ((emAfAvailableCbkeSuite & EMBER_AF_CBKE_KEY_ESTABLISHMENT_SUITE_283K1) != 0U) {
+      if ((sli_zigbee_af_available_cbke_suite & EMBER_AF_CBKE_KEY_ESTABLISHMENT_SUITE_283K1) != 0U) {
         suite = EMBER_AF_CBKE_KEY_ESTABLISHMENT_SUITE_283K1;
-      } else if ((emAfAvailableCbkeSuite & EMBER_AF_CBKE_KEY_ESTABLISHMENT_SUITE_163K1) != 0U) {
+      } else if ((sli_zigbee_af_available_cbke_suite & EMBER_AF_CBKE_KEY_ESTABLISHMENT_SUITE_163K1) != 0U) {
         suite = EMBER_AF_CBKE_KEY_ESTABLISHMENT_SUITE_163K1;
       } else {
         return EMBER_ERR_FATAL;
@@ -1118,7 +1106,7 @@ static EmberStatus initiateKeyEstablishment(const EmberEUI64 eui64,
         " (using %sk1)",
         (EMBER_AF_CBKE_KEY_ESTABLISHMENT_SUITE_283K1 == suite) ? "283" : "163");
 
-      emAfKeyEstablishmentSelectCurve(suite);
+      sli_zigbee_af_key_establishment_select_curve(suite);
       keyEstablishStateMachine(BEGIN_KEY_ESTABLISHMENT, NULL, NULL);
       return ((lastEvent == validLastEvent)
               ? EMBER_ERR_FATAL
@@ -1129,10 +1117,10 @@ static EmberStatus initiateKeyEstablishment(const EmberEUI64 eui64,
     // in running curve specific key establishment tests, irrespective of
     // which binaries are supported.
 #ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
-    if (emUseTestHarnessSuite != EMBER_AF_INVALID_KEY_ESTABLISHMENT_SUITE) {
+    if (sli_zigbee_af_use_test_harness_suite != EMBER_AF_INVALID_KEY_ESTABLISHMENT_SUITE) {
       lastEvent = CHECK_SUPPORTED_CURVES;
       validLastEvent = CHECK_SUPPORTED_CURVES;
-      emAfKeyEstablishmentSelectCurve(emUseTestHarnessSuite);
+      sli_zigbee_af_key_establishment_select_curve(sli_zigbee_af_use_test_harness_suite);
       keyEstablishStateMachine(BEGIN_KEY_ESTABLISHMENT, NULL, NULL);
     } else
 #endif // SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
@@ -1159,7 +1147,7 @@ static bool checkMalformed283k1Command(bool isCertificate)
       emberAfKeyEstablishmentClusterPrintln(
         "Invalid length for KE command: %d (expected: %d, actual: %d)",
         cmd->commandId,
-        emAfKeyEstablishMessageToDataSize[cmd->commandId + cbkeSuiteOffset],
+        sli_zigbee_af_key_establish_message_to_data_size[cmd->commandId + cbkeSuiteOffset],
         (cmd->bufLen - cmd->payloadStartIndex));
 
       cleanupAndStop(INVALID_PARTNER_MESSAGE);
@@ -1173,7 +1161,7 @@ static EmberAfStatus validateNewCbkeSuite(uint8_t endpoint,
                                           uint16_t newCbkeSuite)
 {
   if (newCbkeSuite <= emberAfIsFullSmartEnergySecurityPresent()) {
-    //emAfAvailableCbkeSuite = newCbkeSuite;
+    //sli_zigbee_af_available_cbke_suite = newCbkeSuite;
     return EMBER_ZCL_STATUS_SUCCESS;
   } else {
     return EMBER_ZCL_STATUS_INVALID_VALUE;
@@ -1231,11 +1219,11 @@ void sendNextKeyEstablishMessage(KeyEstablishMessage message,
                                  uint8_t *data)
 {
   uint8_t *ptr = appResponseData + EMBER_AF_ZCL_OVERHEAD;
-  uint8_t size = emAfKeyEstablishMessageToDataSize[message + cbkeSuiteOffset];
+  uint8_t size = sli_zigbee_af_key_establish_message_to_data_size[message + cbkeSuiteOffset];
   bool certMessage = (message == ZCL_INITIATE_KEY_ESTABLISHMENT_REQUEST_COMMAND_ID);
   if (certMessage) {
-    *ptr++ = LOW_BYTE(emAfCurrentCbkeSuite);
-    *ptr++ = HIGH_BYTE(emAfCurrentCbkeSuite);
+    *ptr++ = LOW_BYTE(sli_zigbee_af_current_cbke_suite);
+    *ptr++ = HIGH_BYTE(sli_zigbee_af_current_cbke_suite);
     *ptr++ = EM_AF_ADVERTISED_EPHEMERAL_DATA_GEN_TIME_SECONDS;
     *ptr++ = GENERATE_SHARED_SECRET_TIME_SECONDS;
     size -= 4;  // reduce the size for the 4 bytes we already added
@@ -1250,27 +1238,27 @@ void sendNextKeyEstablishMessage(KeyEstablishMessage message,
 //-----------------------------------------------------------------------------
 //Helper functions for the test-harness.
 
-void emAfSkipCheckSupportedCurves(EmberAfCbkeKeyEstablishmentSuite suite)
+void sli_zigbee_af_skip_check_supported_curves(EmberAfCbkeKeyEstablishmentSuite suite)
 {
 #ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
-  emUseTestHarnessSuite = suite;
+  sli_zigbee_af_use_test_harness_suite = suite;
 #endif // SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
 }
 
-void emAfSetAvailableCurves(EmberAfCbkeKeyEstablishmentSuite suite)
+void sli_zigbee_af_set_available_curves(EmberAfCbkeKeyEstablishmentSuite suite)
 {
-  emAfAvailableCbkeSuite = suite;
+  sli_zigbee_af_available_cbke_suite = suite;
   writeKeyEstablishmentClusterAttribute(keyEstablishmentEndpoint);
 }
 
-void emAfKeyEstablishmentSelectCurve(EmberAfCbkeKeyEstablishmentSuite suite)
+void sli_zigbee_af_key_establishment_select_curve(EmberAfCbkeKeyEstablishmentSuite suite)
 {
-  if ((suite & emAfAvailableCbkeSuite) == 0) {
-    emAfCurrentCbkeSuite = EMBER_AF_INVALID_KEY_ESTABLISHMENT_SUITE;
+  if ((suite & sli_zigbee_af_available_cbke_suite) == 0) {
+    sli_zigbee_af_current_cbke_suite = EMBER_AF_INVALID_KEY_ESTABLISHMENT_SUITE;
     return;
   }
 
-  emAfCurrentCbkeSuite   = suite;
+  sli_zigbee_af_current_cbke_suite   = suite;
   if (suite == EMBER_AF_CBKE_KEY_ESTABLISHMENT_SUITE_163K1) {
     cbkeSuiteOffset   = CBKE_163K1_SUITE_OFFSET;
     certSubjectOffset = CERT_SUBJECT_OFFSET;
@@ -1285,18 +1273,6 @@ void emAfKeyEstablishmentSelectCurve(EmberAfCbkeKeyEstablishmentSuite suite)
 }
 
 //-----------------------------------------------------------------------------
-EmberAfStatus emberAfKeyEstablishmentClusterClientPreAttributeChangedCallback(uint8_t endpoint,
-                                                                              EmberAfAttributeId attributeId,
-                                                                              EmberAfAttributeType attributeType,
-                                                                              uint8_t size,
-                                                                              uint8_t *value)
-{
-  return emberAfKeyEstablishmentClusterServerPreAttributeChangedCallback(endpoint,
-                                                                         attributeId,
-                                                                         attributeType,
-                                                                         size,
-                                                                         value);
-}
 
 EmberAfStatus emberAfKeyEstablishmentClusterServerPreAttributeChangedCallback(uint8_t endpoint,
                                                                               EmberAfAttributeId attributeId,
@@ -1316,6 +1292,19 @@ EmberAfStatus emberAfKeyEstablishmentClusterServerPreAttributeChangedCallback(ui
   }
 }
 
+EmberAfStatus emberAfKeyEstablishmentClusterClientPreAttributeChangedCallback(uint8_t endpoint,
+                                                                              EmberAfAttributeId attributeId,
+                                                                              EmberAfAttributeType attributeType,
+                                                                              uint8_t size,
+                                                                              uint8_t *value)
+{
+  return emberAfKeyEstablishmentClusterServerPreAttributeChangedCallback(endpoint,
+                                                                         attributeId,
+                                                                         attributeType,
+                                                                         size,
+                                                                         value);
+}
+
 void emberAfKeyEstablishmentClusterClientAttributeChangedCallback(uint8_t endpoint,
                                                                   EmberAfAttributeId attributeId)
 {
@@ -1332,7 +1321,7 @@ void emberAfKeyEstablishmentClusterClientAttributeChangedCallback(uint8_t endpoi
     return;
   }
 
-  emAfAvailableCbkeSuite = availableSuites;
+  sli_zigbee_af_available_cbke_suite = availableSuites;
 
   status = emberAfReadServerAttribute(endpoint,
                                       ZCL_KEY_ESTABLISHMENT_CLUSTER_ID,
@@ -1371,7 +1360,7 @@ void emberAfKeyEstablishmentClusterServerAttributeChangedCallback(uint8_t endpoi
     return;
   }
 
-  emAfAvailableCbkeSuite = availableSuites;
+  sli_zigbee_af_available_cbke_suite = availableSuites;
 
   status = emberAfReadClientAttribute(endpoint,
                                       ZCL_KEY_ESTABLISHMENT_CLUSTER_ID,
@@ -1403,16 +1392,16 @@ void emberAfPluginKeyEstablishmentReadAttributesCallback(EmberAfCbkeKeyEstablish
   emberAfKeyEstablishmentClusterPrintln("keyEstPartner.isInitiator emberAfPluginKeyEstablishmentReadAttributesCallback %u", keyEstPartner.isInitiator);
   if (!keyEstPartner.isInitiator) {
     //We identify the highest available suite to use.
-    if ((suite & emAfAvailableCbkeSuite)
+    if ((suite & sli_zigbee_af_available_cbke_suite)
         >= EMBER_AF_CBKE_KEY_ESTABLISHMENT_SUITE_283K1) {
       emberAfKeyEstablishmentClusterPrintln("Using cbke-283k1");
-      emAfKeyEstablishmentSelectCurve(EMBER_AF_CBKE_KEY_ESTABLISHMENT_SUITE_283K1);
-    } else if ((suite & emAfAvailableCbkeSuite)
+      sli_zigbee_af_key_establishment_select_curve(EMBER_AF_CBKE_KEY_ESTABLISHMENT_SUITE_283K1);
+    } else if ((suite & sli_zigbee_af_available_cbke_suite)
                <= EMBER_AF_CBKE_KEY_ESTABLISHMENT_SUITE_163K1) {
       //We accept 0x00(EMBER_AF_INVALID_KEY_ESTABLISHMENT_SUITE) as an acceptable value for
       //163k1 KE because our stacks 4.6 and older don't initialize the KE attribute to 1.
       emberAfKeyEstablishmentClusterPrintln("Using cbke-163k1");
-      emAfKeyEstablishmentSelectCurve(EMBER_AF_CBKE_KEY_ESTABLISHMENT_SUITE_163K1);
+      sli_zigbee_af_key_establishment_select_curve(EMBER_AF_CBKE_KEY_ESTABLISHMENT_SUITE_163K1);
     } else {
       emberAfKeyEstablishmentClusterPrintln("Error: No valid Cluster");
       cleanupAndStop(BAD_KEY_ESTABLISHMENT_SUITE);
@@ -1443,12 +1432,12 @@ bool emberAfPerformingKeyEstablishmentCallback(void)
   return (lastEvent != NO_KEY_ESTABLISHMENT_EVENT);
 }
 
-void emAfPluginKeyEstablishmentInitCallback(SLXU_INIT_ARG)
+void sli_zigbee_af_key_establishment_init_callback(uint8_t init_level)
 {
-  SLXU_INIT_UNUSED_ARG;
+  (void)init_level;
 
-  slxu_zigbee_event_init(apsDuplicateDetectionEvent,
-                         emberAfPluginKeyEstablishmentApsDuplicateDetectionEventHandler);
+  sl_zigbee_event_init(apsDuplicateDetectionEvent,
+                       emberAfPluginKeyEstablishmentApsDuplicateDetectionEventHandler);
 }
 
 void emberAfKeyEstablishmentClusterServerInitCallback(uint8_t endpoint)
@@ -1459,9 +1448,9 @@ void emberAfKeyEstablishmentClusterServerInitCallback(uint8_t endpoint)
 
 //If the test harness is selected, it is expected to force the selection of the ECC 283k1 curve.
 //By default, all variables use the ECC 163k1 curve.
-  emAfAvailableCbkeSuite = emberAfIsFullSmartEnergySecurityPresent();
+  sli_zigbee_af_available_cbke_suite = emberAfIsFullSmartEnergySecurityPresent();
 
-  if (emAfCurrentCbkeSuite == EMBER_AF_CBKE_KEY_ESTABLISHMENT_SUITE_283K1) {
+  if (sli_zigbee_af_current_cbke_suite == EMBER_AF_CBKE_KEY_ESTABLISHMENT_SUITE_283K1) {
     cbkeSuiteOffset   = CBKE_283K1_SUITE_OFFSET;
     certSubjectOffset = CERT_SUBJECT_OFFSET_283K1;
     certIssuerOffset  = CERT_ISSUER_OFFSET_283K1;
@@ -1469,7 +1458,7 @@ void emberAfKeyEstablishmentClusterServerInitCallback(uint8_t endpoint)
 
   // We use a "core" print in hopes that this message will be seen.
   // Key establishment will not work and mysteriously fail when started.
-  emberAfCorePrintln("Key Est. Init %p 0x%x", (isCbkeKeyEstablishmentSuiteValid() ? "Success" : "FAILED!"), LOW_BYTE(emAfAvailableCbkeSuite));
+  emberAfCorePrintln("Key Est. Init %p 0x%x", (isCbkeKeyEstablishmentSuiteValid() ? "Success" : "FAILED!"), LOW_BYTE(sli_zigbee_af_available_cbke_suite));
   emberAfKeyEstablishmentClusterPrintln("Key Est. Init %p",
                                         (isCbkeKeyEstablishmentSuiteValid()
                                          ? "Success"
@@ -1498,7 +1487,7 @@ bool emberAfKeyEstablishmentClusterInitiateKeyEstablishmentRequestCallback(uint1
 {
   EmberAfClusterCommand *cmd = emberAfCurrentCommand();
   emberAfKeyEstablishmentClusterPrintln("Suite %u\r\n", keyEstablishmentSuite);
-  emAfKeyEstablishmentSelectCurve(keyEstablishmentSuite);
+  sli_zigbee_af_key_establishment_select_curve(keyEstablishmentSuite);
   if (cmd != NULL && setPartnerFromCommand(cmd)) {
     keyEstPartner.sequenceNumber = cmd->seqNum;
     if (checkMalformed283k1Command(true)) {
@@ -1656,12 +1645,12 @@ void emberAfKeyEstablishmentClusterClientMessageSentCallback(EmberOutgoingMessag
 //------------------------------------------------------------------------------
 // CBKE Library Callbacks
 
-void emAfPluginKeyEstablishmentGenerateCbkeKeysHandler(EmberStatus status,
-                                                       EmberPublicKeyData *ephemeralPublicKey)
+void sli_zigbee_af_key_establishment_generate_cbke_keys_handler(EmberStatus status,
+                                                                EmberPublicKeyData *ephemeralPublicKey)
 {
   emberAfKeyEstablishmentClusterPrintln("GenerateCbkeKeysHandler() returned: 0x%x",
                                         status);
-  emAfCryptoOperationComplete();
+  sli_zigbee_af_crypto_operation_complete();
 
   if (status != EMBER_SUCCESS) {
     cleanupAndStop(NO_LOCAL_RESOURCES);
@@ -1669,9 +1658,9 @@ void emAfPluginKeyEstablishmentGenerateCbkeKeysHandler(EmberStatus status,
   }
 
 #ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
-  if (emAfKeyEstablishmentTestHarnessCbkeCallback(CBKE_OPERATION_GENERATE_KEYS,
-                                                  ephemeralPublicKey->contents,
-                                                  NULL)) {
+  if (sli_zigbee_af_key_establishment_test_harness_cbke_callback(CBKE_OPERATION_GENERATE_KEYS,
+                                                                 ephemeralPublicKey->contents,
+                                                                 NULL)) {
     return;
   }
 #endif //SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
@@ -1683,13 +1672,13 @@ void emAfPluginKeyEstablishmentGenerateCbkeKeysHandler(EmberStatus status,
   (void) emberAfPopNetworkIndex();
 }
 
-void emAfPluginKeyEstablishmentCalculateSmacsHandler(EmberStatus status,
-                                                     EmberSmacData *initiatorSmac,
-                                                     EmberSmacData *responderSmac)
+void sli_zigbee_af_key_establishment_calculate_smacs_handler(EmberStatus status,
+                                                             EmberSmacData *initiatorSmac,
+                                                             EmberSmacData *responderSmac)
 {
   emberAfKeyEstablishmentClusterPrintln("CalculateSmacsHandler() returned: 0x%x",
                                         status);
-  emAfCryptoOperationComplete();
+  sli_zigbee_af_crypto_operation_complete();
   debugPrintSmac(true, emberSmacContents(initiatorSmac));
   debugPrintSmac(false, emberSmacContents(responderSmac));
 
@@ -1699,9 +1688,9 @@ void emAfPluginKeyEstablishmentCalculateSmacsHandler(EmberStatus status,
   }
 
 #ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
-  if (emAfKeyEstablishmentTestHarnessCbkeCallback(CBKE_OPERATION_GENERATE_SECRET,
-                                                  initiatorSmac->contents,
-                                                  responderSmac->contents)) {
+  if (sli_zigbee_af_key_establishment_test_harness_cbke_callback(CBKE_OPERATION_GENERATE_SECRET,
+                                                                 initiatorSmac->contents,
+                                                                 responderSmac->contents)) {
     return;
   }
 #endif // SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
@@ -1713,12 +1702,12 @@ void emAfPluginKeyEstablishmentCalculateSmacsHandler(EmberStatus status,
   (void) emberAfPopNetworkIndex();
 }
 
-void emAfPluginKeyEstablishmentGenerateCbkeKeysHandler283k1(EmberStatus status,
-                                                            EmberPublicKey283k1Data *ephemeralPublicKey)
+void sli_zigbee_af_key_establishment_generate_cbke_keys_handler283k1(EmberStatus status,
+                                                                     EmberPublicKey283k1Data *ephemeralPublicKey)
 {
   emberAfKeyEstablishmentClusterPrintln("GenerateCbkeKeysHandler283k1() returned: 0x%x",
                                         status);
-  emAfCryptoOperationComplete();
+  sli_zigbee_af_crypto_operation_complete();
 
   if (status != EMBER_SUCCESS) {
     cleanupAndStop(NO_LOCAL_RESOURCES);
@@ -1726,9 +1715,9 @@ void emAfPluginKeyEstablishmentGenerateCbkeKeysHandler283k1(EmberStatus status,
   }
 
 #ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
-  if (emAfKeyEstablishmentTestHarnessCbkeCallback(CBKE_OPERATION_GENERATE_KEYS_283K1,
-                                                  ephemeralPublicKey->contents,
-                                                  NULL)) {
+  if (sli_zigbee_af_key_establishment_test_harness_cbke_callback(CBKE_OPERATION_GENERATE_KEYS_283K1,
+                                                                 ephemeralPublicKey->contents,
+                                                                 NULL)) {
     return;
   }
 #endif // SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
@@ -1740,13 +1729,13 @@ void emAfPluginKeyEstablishmentGenerateCbkeKeysHandler283k1(EmberStatus status,
   (void) emberAfPopNetworkIndex();
 }
 
-void emAfPluginKeyEstablishmentCalculateSmacsHandler283k1(EmberStatus status,
-                                                          EmberSmacData* initiatorSmac,
-                                                          EmberSmacData* responderSmac)
+void sli_zigbee_af_key_establishment_calculate_smacs_handler283k1(EmberStatus status,
+                                                                  EmberSmacData* initiatorSmac,
+                                                                  EmberSmacData* responderSmac)
 {
   emberAfKeyEstablishmentClusterPrintln("CalculateSmacsHandler() returned: 0x%x",
                                         status);
-  emAfCryptoOperationComplete();
+  sli_zigbee_af_crypto_operation_complete();
 
   if (status != EMBER_SUCCESS) {
     cleanupAndStop(NO_LOCAL_RESOURCES);
@@ -1754,9 +1743,9 @@ void emAfPluginKeyEstablishmentCalculateSmacsHandler283k1(EmberStatus status,
   }
 
 #ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
-  if (emAfKeyEstablishmentTestHarnessCbkeCallback(CBKE_OPERATION_GENERATE_SECRET_283K1,
-                                                  initiatorSmac->contents,
-                                                  responderSmac->contents)) {
+  if (sli_zigbee_af_key_establishment_test_harness_cbke_callback(CBKE_OPERATION_GENERATE_SECRET_283K1,
+                                                                 initiatorSmac->contents,
+                                                                 responderSmac->contents)) {
     return;
   }
 #endif // SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
@@ -1771,17 +1760,15 @@ void emAfPluginKeyEstablishmentCalculateSmacsHandler283k1(EmberStatus status,
 //------------------------------------------------------------------------------
 // Event Handlers
 
-void emberAfPluginKeyEstablishmentApsDuplicateDetectionEventHandler(SLXU_UC_EVENT)
+void emberAfPluginKeyEstablishmentApsDuplicateDetectionEventHandler(sl_zigbee_event_t * event)
 {
-  slxu_zigbee_event_set_inactive(apsDuplicateDetectionEvent);
+  sl_zigbee_event_set_inactive(apsDuplicateDetectionEvent);
 
   lastNodeSuccessfulCbke = EMBER_NULL_NODE_ID;
 }
 
 //----------------------
 // ZCL commands handling
-
-#ifdef UC_BUILD
 
 static void postZclCommandProcedure(EmberAfClusterCommand *cmd,
                                     EmberAfStatus status)
@@ -1790,7 +1777,7 @@ static void postZclCommandProcedure(EmberAfClusterCommand *cmd,
     emberAfKeyEstablishmentClusterPrintln(
       "Invalid length for KE command: %d (expected: %d, actual: %d)",
       cmd->commandId,
-      emAfKeyEstablishMessageToDataSize[cmd->commandId + cbkeSuiteOffset],
+      sli_zigbee_af_key_establish_message_to_data_size[cmd->commandId + cbkeSuiteOffset],
       (cmd->bufLen - cmd->payloadStartIndex));
 
     cleanupAndStop(INVALID_PARTNER_MESSAGE);
@@ -1812,7 +1799,7 @@ uint32_t emberAfKeyEstablishmentClusterServerCommandParse(sl_service_opcode_t op
   if (((!commandIsFromOurPartner(cmd)) && (lastEvent != NO_KEY_ESTABLISHMENT_EVENT)) \
       || (!isCbkeKeyEstablishmentSuiteValid())) {
     KeyEstablishmentPartner tmpPartner;
-    emberAfKeyEstablishmentClusterPrintln("emAfAvailableCbkeSuite %u last event %u", emAfAvailableCbkeSuite, lastEvent);
+    emberAfKeyEstablishmentClusterPrintln("sli_zigbee_af_available_cbke_suite %u last event %u", sli_zigbee_af_available_cbke_suite, lastEvent);
     // If we have not successfully initialized or we are already in doing
     // key establishment with another partner, tell this new partner to go
     // away and maybe try again later.  The sendTerminateMessage function
@@ -1993,62 +1980,3 @@ uint32_t emberAfKeyEstablishmentClusterClientCommandParse(sl_service_opcode_t op
 
   return EMBER_ZCL_STATUS_SUCCESS;
 }
-
-#else // !UC_BUILD
-
-static bool commandReceivedHandler(EmberAfClusterCommand *cmd)
-{
-//  EmberAfStatus status = keyEstablishmentClusterCommandParse(cmd);
-  if ((cmd->direction == ZCL_DIRECTION_CLIENT_TO_SERVER)                                 \
-      && (((!commandIsFromOurPartner(cmd)) && (lastEvent != NO_KEY_ESTABLISHMENT_EVENT)) \
-          || (!isCbkeKeyEstablishmentSuiteValid()))) {
-    KeyEstablishmentPartner tmpPartner;
-    emberAfKeyEstablishmentClusterPrintln("emAfAvailableCbkeSuite %u last event %u", emAfAvailableCbkeSuite, lastEvent);
-    // If we have not successfully initialized or we are already in doing
-    // key establishment with another partner, tell this new partner to go
-    // away and maybe try again later.  The sendTerminateMessage function
-    // assumes it is sending to the current partner, so we have to temporarily
-    // switch to the new partner, send the terminate, and then switch back to
-    // our real partner.
-    MEMCOPY(&tmpPartner, &keyEstPartner, sizeof(KeyEstablishmentPartner));
-    emberAfKeyEstablishmentClusterPrintln(isCbkeKeyEstablishmentSuiteValid()
-                                          ? "Second Key estabishment not supported, terminating it."
-                                          : "Key Est. FAILED INITIALIZATION, terminating");
-    if (setPartnerFromCommand(cmd)) {
-      keyEstPartner.sequenceNumber = cmd->seqNum;
-      sendTerminateMessage(EMBER_ZCL_AMI_KEY_ESTABLISHMENT_STATUS_NO_RESOURCES,
-                           BACK_OFF_TIME_REPORTED_TO_PARTNER);
-    }
-    MEMMOVE(&keyEstPartner, &tmpPartner, sizeof(KeyEstablishmentPartner));
-    return true;
-  }
-  EmberAfStatus status = (cmd->direction == ZCL_DIRECTION_CLIENT_TO_SERVER
-                          ? emberAfKeyEstablishmentClusterServerCommandParse(cmd)
-                          : emberAfKeyEstablishmentClusterClientCommandParse(cmd));
-  if (status == EMBER_ZCL_STATUS_MALFORMED_COMMAND) {
-    emberAfKeyEstablishmentClusterPrintln(
-      "Invalid length for KE command: %d (expected: %d, actual: %d)",
-      cmd->commandId,
-      emAfKeyEstablishMessageToDataSize[cmd->commandId + cbkeSuiteOffset],
-      (cmd->bufLen - cmd->payloadStartIndex));
-
-    cleanupAndStop(INVALID_PARTNER_MESSAGE);
-  } else if (status != EMBER_ZCL_STATUS_SUCCESS) {
-    emberAfSendDefaultResponse(cmd, status);
-  } else {
-    // MISRA requires ..else if.. to have terminating else.
-  }
-  return true;
-}
-
-bool emberAfKeyEstablishmentClusterClientCommandReceivedCallback(EmberAfClusterCommand *cmd)
-{
-  return commandReceivedHandler(cmd);
-}
-
-bool emberAfKeyEstablishmentClusterServerCommandReceivedCallback(EmberAfClusterCommand *cmd)
-{
-  return commandReceivedHandler(cmd);
-}
-
-#endif // UC_BUILD

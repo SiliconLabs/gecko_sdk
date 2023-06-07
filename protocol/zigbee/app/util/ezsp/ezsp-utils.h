@@ -100,15 +100,14 @@ EmberStatus ezspUtilInit(uint8_t serialPort);
 
 void emberTick(void);
 
-extern EmberEUI64 emLocalEui64;
+extern EmberEUI64 sli_802154mac_local_eui64;
 // The ezsp util library keeps track of the local node's EUI64 and
 // short id so that there isn't the need for communication with the
 // Ember radio node every time these values are queried.
-#define emberGetEui64() (emLocalEui64)
+#define emberGetEui64() (sli_802154mac_local_eui64)
 #define emberIsLocalEui64(eui64) \
-  (MEMCOMPARE(eui64, emLocalEui64, EUI64_SIZE) == 0)
+  (MEMCOMPARE(eui64, sli_802154mac_local_eui64, EUI64_SIZE) == 0)
 
-extern uint8_t emberBindingTableSize;
 extern uint8_t emberTemporaryBindingEntries;
 
  #define emberFetchLowHighInt16u(contents) \

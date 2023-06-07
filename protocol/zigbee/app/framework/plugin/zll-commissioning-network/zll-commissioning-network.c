@@ -20,10 +20,8 @@
 #include "app/util/common/form-and-join.h"
 #include "app/framework/plugin/zll-commissioning-common/zll-commissioning.h"
 
-#ifdef UC_BUILD
 #include "zigbee_stack_callback_dispatcher.h"
 #include "zll-commissioning-network-config.h"
-#endif
 
 #define WAITING_BIT 0x80
 
@@ -36,14 +34,9 @@ enum {
   WAITING_SECONDARY  = WAITING_BIT | JOINABLE_SECONDARY,
 };
 static uint8_t state = ZLL_NETWORK_INITIAL;
-#ifdef UC_BUILD
 sl_zigbee_event_t emberAfPluginZllCommissioningNetworkNetworkEvent;
 #define zllCommissioningNetworkEventControl (&emberAfPluginZllCommissioningNetworkNetworkEvent)
-void emberAfPluginZllCommissioningNetworkNetworkEventHandler(SLXU_UC_EVENT);
-#else
-EmberEventControl emberAfPluginZllCommissioningNetworkNetworkEventControl;
-#define zllCommissioningNetworkEventControl emberAfPluginZllCommissioningNetworkNetworkEventControl
-#endif
+void emberAfPluginZllCommissioningNetworkNetworkEventHandler(sl_zigbee_event_t * event);
 uint8_t extendedPanId[EXTENDED_PAN_ID_SIZE] = EMBER_AF_PLUGIN_ZLL_COMMISSIONING_NETWORK_EXTENDED_PAN_ID;
 
 // The exponent of the number of scan periods, where a scan period is 960
@@ -53,15 +46,15 @@ uint8_t extendedPanId[EXTENDED_PAN_ID_SIZE] = EMBER_AF_PLUGIN_ZLL_COMMISSIONING_
 #define SCAN_DURATION 4
 
 // Private ZLL commissioning functions
-EmberNodeType emAfZllGetLogicalNodeType(void);
-EmberStatus emAfZllFormNetwork(uint8_t channel, int8_t power, EmberPanId panId);
+EmberNodeType sli_zigbee_af_zll_get_logical_node_type(void);
+EmberStatus sli_zigbee_af_zll_form_network(uint8_t channel, int8_t power, EmberPanId panId);
 
-void emAfPluginZllCommissioningNetworkInitCallback(SLXU_INIT_ARG)
+void sli_zigbee_af_zll_commissioning_network_init_callback(uint8_t init_level)
 {
-  SLXU_INIT_UNUSED_ARG;
+  (void)init_level;
 
-  slxu_zigbee_event_init(&emberAfPluginZllCommissioningNetworkNetworkEvent,
-                         emberAfPluginZllCommissioningNetworkNetworkEventHandler);
+  sl_zigbee_event_init(&emberAfPluginZllCommissioningNetworkNetworkEvent,
+                       emberAfPluginZllCommissioningNetworkNetworkEventHandler);
 }
 //------------------------------------------------------------------------------
 
@@ -126,7 +119,7 @@ void emberAfJoinableNetworkFoundCallback(EmberZigbeeNetwork *networkFound,
   // next tick and restart from there.
   if (status != EMBER_SUCCESS) {
     emberAfAppPrintln("Error: %s: 0x%X", "could not join network", status);
-    slxu_zigbee_event_set_active(zllCommissioningNetworkEventControl);
+    sl_zigbee_event_set_active(zllCommissioningNetworkEventControl);
   }
 }
 
@@ -137,46 +130,30 @@ void emberAfPluginFormAndJoinNetworkFoundCallback(EmberZigbeeNetwork *networkFou
   emberAfJoinableNetworkFoundCallback(networkFound, lqi, rssi);
 }
 
-#ifdef UC_BUILD
-void emAfPluginZllCommissioningNetworkUnusedPanIdFoundCallback(EmberPanId panId, uint8_t channel)
-#else
-void emberAfUnusedPanIdFoundCallback(EmberPanId panId, uint8_t channel)
-#endif // UC_BUILD
+void sli_zigbee_af_zll_commissioning_network_unused_pan_id_found_callback(EmberPanId panId, uint8_t channel)
 {
-  EmberStatus status = emAfZllFormNetwork(channel,
-                                          EMBER_AF_PLUGIN_ZLL_COMMISSIONING_COMMON_RADIO_TX_POWER,
-                                          panId);
+  EmberStatus status = sli_zigbee_af_zll_form_network(channel,
+                                                      EMBER_AF_PLUGIN_ZLL_COMMISSIONING_COMMON_RADIO_TX_POWER,
+                                                      panId);
   if (status != EMBER_SUCCESS) {
     emberAfAppPrintln("Error: %s: 0x%X", "could not form network", status);
-#ifdef UC_BUILD
-    emAfPluginZllCommissioningNetworkScanErrorCallback(status);
-#else
-    emberAfScanErrorCallback(status);
-#endif // UC_BUILD
+    sli_zigbee_af_zll_commissioning_network_scan_error_callback(status);
   }
 }
 
 void emberAfPluginFormAndJoinUnusedPanIdFoundCallback(EmberPanId panId, uint8_t channel)
 {
-#ifdef UC_BUILD
-  emAfPluginZllCommissioningNetworkUnusedPanIdFoundCallback(panId, channel);
-#else
-  emberAfUnusedPanIdFoundCallback(panId, channel);
-#endif // UC_BUILD
+  sli_zigbee_af_zll_commissioning_network_unused_pan_id_found_callback(panId, channel);
 }
 
-#ifdef UC_BUILD
-void emAfPluginZllCommissioningNetworkScanErrorCallback(EmberStatus status)
-#else
-void emberAfScanErrorCallback(EmberStatus status)
-#endif // UC_BUILD
+void sli_zigbee_af_zll_commissioning_network_scan_error_callback(EmberStatus status)
 {
 #ifdef SCAN_SECONDARY_CHANNELS
   if (status == EMBER_NO_BEACONS
       && state == JOINABLE_PRIMARY
       && emberGetZllSecondaryChannelMask() != 0) {
     state = JOINABLE_SECONDARY;
-    slxu_zigbee_event_set_active(zllCommissioningNetworkEventControl);
+    sl_zigbee_event_set_active(zllCommissioningNetworkEventControl);
     return;
   }
 #endif
@@ -199,10 +176,10 @@ void emberAfSetFormAndJoinExtendedPanIdCallback(const uint8_t *extPanId)
   MEMMOVE(extendedPanId, extPanId, EXTENDED_PAN_ID_SIZE);
 }
 
-void emberAfPluginZllCommissioningNetworkNetworkEventHandler(SLXU_UC_EVENT)
+void emberAfPluginZllCommissioningNetworkNetworkEventHandler(sl_zigbee_event_t * event)
 {
   EmberStatus status = EMBER_ERR_FATAL;
-  slxu_zigbee_event_set_inactive(zllCommissioningNetworkEventControl);
+  sl_zigbee_event_set_inactive(zllCommissioningNetworkEventControl);
   if ((state == JOINABLE_PRIMARY || state == JOINABLE_SECONDARY)
       && emberFormAndJoinCanContinueJoinableNetworkScan()) {
     status = emberScanForNextJoinableNetwork();
@@ -231,11 +208,7 @@ void emberAfPluginZllCommissioningNetworkNetworkEventHandler(SLXU_UC_EVENT)
   }
 }
 
-#ifdef UC_BUILD
-void emAfPluginZllCommissioningNetworkStackStatusCallback(EmberStatus status)
-#else
-void emberAfPluginZllCommissioningNetworkStackStatusCallback(EmberStatus status)
-#endif
+void sli_zigbee_af_zll_commissioning_network_stack_status_callback(EmberStatus status)
 {
   uint8_t delayMinutes = MAX_INT8U_VALUE;
 
@@ -254,13 +227,9 @@ void emberAfPluginZllCommissioningNetworkStackStatusCallback(EmberStatus status)
   }
 
   if (delayMinutes == 0) {
-    #ifdef UC_BUILD
     emberAfPluginZllCommissioningNetworkNetworkEventHandler(zllCommissioningNetworkEventControl);
-    #else
-    emberAfPluginZllCommissioningNetworkNetworkEventHandler();
-    #endif
   } else if (delayMinutes != MAX_INT8U_VALUE) {
-    slxu_zigbee_event_set_delay_minutes(zllCommissioningNetworkEventControl,
-                                        delayMinutes);
+    sl_zigbee_event_set_delay_minutes(zllCommissioningNetworkEventControl,
+                                      delayMinutes);
   }
 }

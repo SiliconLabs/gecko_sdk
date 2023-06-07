@@ -88,6 +88,10 @@ static otbrError DNSErrorToOtbrError(DNSServiceErrorType aError)
         error = OTBR_ERROR_NOT_IMPLEMENTED;
         break;
 
+    case kDNSServiceErr_ServiceNotRunning:
+        error = OTBR_ERROR_INVALID_STATE;
+        break;
+
     default:
         error = OTBR_ERROR_MDNS;
         break;
@@ -373,7 +377,7 @@ PublisherMDnsSd::DnssdHostRegistration::~DnssdHostRegistration(void)
     for (const auto &recordRefAndAddress : GetRecordRefMap())
     {
         const DNSRecordRef &recordRef = recordRefAndAddress.first;
-        const Ip6Address &  address   = recordRefAndAddress.second;
+        const Ip6Address   &address   = recordRefAndAddress.second;
         if (IsCompleted())
         {
             // The Bonjour mDNSResponder somehow doesn't send goodbye message for the AAAA record when it is
@@ -418,7 +422,7 @@ Publisher::ServiceRegistration *PublisherMDnsSd::FindServiceRegistration(const D
 }
 
 Publisher::HostRegistration *PublisherMDnsSd::FindHostRegistration(const DNSServiceRef &aServiceRef,
-                                                                   const DNSRecordRef & aRecordRef)
+                                                                   const DNSRecordRef  &aRecordRef)
 {
     HostRegistration *result = nullptr;
 
@@ -440,10 +444,10 @@ Publisher::HostRegistration *PublisherMDnsSd::FindHostRegistration(const DNSServ
 void PublisherMDnsSd::HandleServiceRegisterResult(DNSServiceRef         aService,
                                                   const DNSServiceFlags aFlags,
                                                   DNSServiceErrorType   aError,
-                                                  const char *          aName,
-                                                  const char *          aType,
-                                                  const char *          aDomain,
-                                                  void *                aContext)
+                                                  const char           *aName,
+                                                  const char           *aType,
+                                                  const char           *aDomain,
+                                                  void                 *aContext)
 {
     static_cast<PublisherMDnsSd *>(aContext)->HandleServiceRegisterResult(aService, aFlags, aError, aName, aType,
                                                                           aDomain);
@@ -452,15 +456,15 @@ void PublisherMDnsSd::HandleServiceRegisterResult(DNSServiceRef         aService
 void PublisherMDnsSd::HandleServiceRegisterResult(DNSServiceRef         aServiceRef,
                                                   const DNSServiceFlags aFlags,
                                                   DNSServiceErrorType   aError,
-                                                  const char *          aName,
-                                                  const char *          aType,
-                                                  const char *          aDomain)
+                                                  const char           *aName,
+                                                  const char           *aType,
+                                                  const char           *aDomain)
 {
     OTBR_UNUSED_VARIABLE(aDomain);
 
-    otbrError            error = DNSErrorToOtbrError(aError);
-    std::string          originalInstanceName;
+    otbrError            error      = DNSErrorToOtbrError(aError);
     ServiceRegistration *serviceReg = FindServiceRegistration(aServiceRef);
+    serviceReg->mName               = aName;
 
     otbrLogInfo("Received reply for service %s.%s, serviceRef = %p", aName, aType, aServiceRef);
 
@@ -481,13 +485,13 @@ exit:
     return;
 }
 
-void PublisherMDnsSd::PublishServiceImpl(const std::string &aHostName,
-                                         const std::string &aName,
-                                         const std::string &aType,
-                                         const SubTypeList &aSubTypeList,
-                                         uint16_t           aPort,
-                                         const TxtList &    aTxtList,
-                                         ResultCallback &&  aCallback)
+otbrError PublisherMDnsSd::PublishServiceImpl(const std::string &aHostName,
+                                              const std::string &aName,
+                                              const std::string &aType,
+                                              const SubTypeList &aSubTypeList,
+                                              uint16_t           aPort,
+                                              const TxtList     &aTxtList,
+                                              ResultCallback   &&aCallback)
 {
     otbrError            ret   = OTBR_ERROR_NONE;
     int                  error = 0;
@@ -497,12 +501,19 @@ void PublisherMDnsSd::PublishServiceImpl(const std::string &aHostName,
     std::string          regType           = MakeRegType(aType, sortedSubTypeList);
     DNSServiceRef        serviceRef        = nullptr;
     std::string          fullHostName;
+    const char          *hostNameCString    = nullptr;
+    const char          *serviceNameCString = nullptr;
 
     VerifyOrExit(mState == State::kReady, ret = OTBR_ERROR_INVALID_STATE);
 
     if (!aHostName.empty())
     {
-        fullHostName = MakeFullHostName(aHostName);
+        fullHostName    = MakeFullHostName(aHostName);
+        hostNameCString = fullHostName.c_str();
+    }
+    if (!aName.empty())
+    {
+        serviceNameCString = aName.c_str();
     }
 
     aCallback = HandleDuplicateServiceRegistration(aHostName, aName, aType, sortedSubTypeList, aPort, sortedTxtList,
@@ -512,9 +523,9 @@ void PublisherMDnsSd::PublishServiceImpl(const std::string &aHostName,
     SuccessOrExit(ret = EncodeTxtData(aTxtList, txt));
     otbrLogInfo("Registering new service %s.%s.local, serviceRef = %p", aName.c_str(), regType.c_str(), serviceRef);
     SuccessOrExit(error = DNSServiceRegister(&serviceRef, kDNSServiceFlagsNoAutoRename, kDNSServiceInterfaceIndexAny,
-                                             aName.c_str(), regType.c_str(), /* domain */ nullptr,
-                                             !aHostName.empty() ? fullHostName.c_str() : nullptr, htons(aPort),
-                                             txt.size(), txt.data(), HandleServiceRegisterResult, this));
+                                             serviceNameCString, regType.c_str(),
+                                             /* domain */ nullptr, hostNameCString, htons(aPort), txt.size(),
+                                             txt.data(), HandleServiceRegisterResult, this));
     AddServiceRegistration(std::unique_ptr<DnssdServiceRegistration>(new DnssdServiceRegistration(
         aHostName, aName, aType, sortedSubTypeList, aPort, sortedTxtList, std::move(aCallback), serviceRef, this)));
 
@@ -534,6 +545,7 @@ exit:
         }
         std::move(aCallback)(ret);
     }
+    return ret;
 }
 
 void PublisherMDnsSd::UnpublishService(const std::string &aName, const std::string &aType, ResultCallback &&aCallback)
@@ -547,9 +559,9 @@ exit:
     std::move(aCallback)(error);
 }
 
-void PublisherMDnsSd::PublishHostImpl(const std::string &            aName,
-                                      const std::vector<Ip6Address> &aAddresses,
-                                      ResultCallback &&              aCallback)
+otbrError PublisherMDnsSd::PublishHostImpl(const std::string             &aName,
+                                           const std::vector<Ip6Address> &aAddresses,
+                                           ResultCallback               &&aCallback)
 {
     otbrError              ret   = OTBR_ERROR_NONE;
     int                    error = 0;
@@ -598,6 +610,7 @@ exit:
 
         std::move(aCallback)(ret);
     }
+    return ret;
 }
 
 void PublisherMDnsSd::UnpublishHost(const std::string &aName, ResultCallback &&aCallback)
@@ -618,7 +631,7 @@ void PublisherMDnsSd::HandleRegisterHostResult(DNSServiceRef       aServiceRef,
                                                DNSRecordRef        aRecordRef,
                                                DNSServiceFlags     aFlags,
                                                DNSServiceErrorType aError,
-                                               void *              aContext)
+                                               void               *aContext)
 {
     static_cast<PublisherMDnsSd *>(aContext)->HandleRegisterHostResult(aServiceRef, aRecordRef, aFlags, aError);
 }
@@ -631,7 +644,7 @@ void PublisherMDnsSd::HandleRegisterHostResult(DNSServiceRef       aServiceRef,
     OTBR_UNUSED_VARIABLE(aFlags);
 
     otbrError error   = DNSErrorToOtbrError(aError);
-    auto *    hostReg = static_cast<DnssdHostRegistration *>(FindHostRegistration(aServiceRef, aRecordRef));
+    auto     *hostReg = static_cast<DnssdHostRegistration *>(FindHostRegistration(aServiceRef, aRecordRef));
 
     std::string hostName;
 
@@ -803,7 +816,7 @@ exit:
     return;
 }
 
-void PublisherMDnsSd::ServiceRef::Process(const MainloopContext &     aMainloop,
+void PublisherMDnsSd::ServiceRef::Process(const MainloopContext      &aMainloop,
                                           std::vector<DNSServiceRef> &aReadyServices) const
 {
     int fd;
@@ -833,10 +846,10 @@ void PublisherMDnsSd::ServiceSubscription::HandleBrowseResult(DNSServiceRef     
                                                               DNSServiceFlags     aFlags,
                                                               uint32_t            aInterfaceIndex,
                                                               DNSServiceErrorType aErrorCode,
-                                                              const char *        aInstanceName,
-                                                              const char *        aType,
-                                                              const char *        aDomain,
-                                                              void *              aContext)
+                                                              const char         *aInstanceName,
+                                                              const char         *aType,
+                                                              const char         *aDomain,
+                                                              void               *aContext)
 {
     static_cast<ServiceSubscription *>(aContext)->HandleBrowseResult(aServiceRef, aFlags, aInterfaceIndex, aErrorCode,
                                                                      aInstanceName, aType, aDomain);
@@ -846,9 +859,9 @@ void PublisherMDnsSd::ServiceSubscription::HandleBrowseResult(DNSServiceRef     
                                                               DNSServiceFlags     aFlags,
                                                               uint32_t            aInterfaceIndex,
                                                               DNSServiceErrorType aErrorCode,
-                                                              const char *        aInstanceName,
-                                                              const char *        aType,
-                                                              const char *        aDomain)
+                                                              const char         *aInstanceName,
+                                                              const char         *aType,
+                                                              const char         *aDomain)
 {
     OTBR_UNUSED_VARIABLE(aServiceRef);
     OTBR_UNUSED_VARIABLE(aDomain);
@@ -909,7 +922,7 @@ void PublisherMDnsSd::ServiceSubscription::UpdateAll(MainloopContext &aMainloop)
     }
 }
 
-void PublisherMDnsSd::ServiceSubscription::ProcessAll(const MainloopContext &     aMainloop,
+void PublisherMDnsSd::ServiceSubscription::ProcessAll(const MainloopContext      &aMainloop,
                                                       std::vector<DNSServiceRef> &aReadyServices) const
 {
     Process(aMainloop, aReadyServices);
@@ -936,12 +949,12 @@ void PublisherMDnsSd::ServiceInstanceResolution::HandleResolveResult(DNSServiceR
                                                                      DNSServiceFlags      aFlags,
                                                                      uint32_t             aInterfaceIndex,
                                                                      DNSServiceErrorType  aErrorCode,
-                                                                     const char *         aFullName,
-                                                                     const char *         aHostTarget,
+                                                                     const char          *aFullName,
+                                                                     const char          *aHostTarget,
                                                                      uint16_t             aPort,
                                                                      uint16_t             aTxtLen,
                                                                      const unsigned char *aTxtRecord,
-                                                                     void *               aContext)
+                                                                     void                *aContext)
 {
     static_cast<ServiceInstanceResolution *>(aContext)->HandleResolveResult(
         aServiceRef, aFlags, aInterfaceIndex, aErrorCode, aFullName, aHostTarget, aPort, aTxtLen, aTxtRecord);
@@ -951,8 +964,8 @@ void PublisherMDnsSd::ServiceInstanceResolution::HandleResolveResult(DNSServiceR
                                                                      DNSServiceFlags      aFlags,
                                                                      uint32_t             aInterfaceIndex,
                                                                      DNSServiceErrorType  aErrorCode,
-                                                                     const char *         aFullName,
-                                                                     const char *         aHostTarget,
+                                                                     const char          *aFullName,
+                                                                     const char          *aHostTarget,
                                                                      uint16_t             aPort,
                                                                      uint16_t             aTxtLen,
                                                                      const unsigned char *aTxtRecord)
@@ -1018,10 +1031,10 @@ void PublisherMDnsSd::ServiceInstanceResolution::HandleGetAddrInfoResult(DNSServ
                                                                          DNSServiceFlags        aFlags,
                                                                          uint32_t               aInterfaceIndex,
                                                                          DNSServiceErrorType    aErrorCode,
-                                                                         const char *           aHostName,
+                                                                         const char            *aHostName,
                                                                          const struct sockaddr *aAddress,
                                                                          uint32_t               aTtl,
-                                                                         void *                 aContext)
+                                                                         void                  *aContext)
 {
     static_cast<ServiceInstanceResolution *>(aContext)->HandleGetAddrInfoResult(aServiceRef, aFlags, aInterfaceIndex,
                                                                                 aErrorCode, aHostName, aAddress, aTtl);
@@ -1031,7 +1044,7 @@ void PublisherMDnsSd::ServiceInstanceResolution::HandleGetAddrInfoResult(DNSServ
                                                                          DNSServiceFlags        aFlags,
                                                                          uint32_t               aInterfaceIndex,
                                                                          DNSServiceErrorType    aErrorCode,
-                                                                         const char *           aHostName,
+                                                                         const char            *aHostName,
                                                                          const struct sockaddr *aAddress,
                                                                          uint32_t               aTtl)
 {
@@ -1065,7 +1078,7 @@ exit:
 
 void PublisherMDnsSd::ServiceInstanceResolution::FinishResolution(void)
 {
-    ServiceSubscription *  subscription = mSubscription;
+    ServiceSubscription   *subscription = mSubscription;
     std::string            serviceName  = mSubscription->mType;
     DiscoveredInstanceInfo instanceInfo = mInstanceInfo;
 
@@ -1096,10 +1109,10 @@ void PublisherMDnsSd::HostSubscription::HandleResolveResult(DNSServiceRef       
                                                             DNSServiceFlags        aFlags,
                                                             uint32_t               aInterfaceIndex,
                                                             DNSServiceErrorType    aErrorCode,
-                                                            const char *           aHostName,
+                                                            const char            *aHostName,
                                                             const struct sockaddr *aAddress,
                                                             uint32_t               aTtl,
-                                                            void *                 aContext)
+                                                            void                  *aContext)
 {
     static_cast<HostSubscription *>(aContext)->HandleResolveResult(aServiceRef, aFlags, aInterfaceIndex, aErrorCode,
                                                                    aHostName, aAddress, aTtl);
@@ -1109,7 +1122,7 @@ void PublisherMDnsSd::HostSubscription::HandleResolveResult(DNSServiceRef       
                                                             DNSServiceFlags        aFlags,
                                                             uint32_t               aInterfaceIndex,
                                                             DNSServiceErrorType    aErrorCode,
-                                                            const char *           aHostName,
+                                                            const char            *aHostName,
                                                             const struct sockaddr *aAddress,
                                                             uint32_t               aTtl)
 {

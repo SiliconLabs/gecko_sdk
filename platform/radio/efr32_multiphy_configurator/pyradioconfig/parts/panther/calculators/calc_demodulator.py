@@ -184,3 +184,43 @@ class CALC_Demodulator_panther(CALC_Demodulator_nixi):
 
         #Write the model var
         model.vars.rssi_adjust_db.value = rssi_adjust_db
+
+    def calc_digmixfreq_reg(self, model):
+
+        if_analog_hz = model.vars.if_frequency_hz_actual.value
+        fxo = model.vars.fxo_or_fdec8.value
+        dec0 = model.vars.dec0_actual.value
+
+        digmixfreq = int(if_analog_hz * dec0 * pow(2, 20) / fxo)
+
+        if digmixfreq > pow(2, 20) - 1:
+            digmixfreq = pow(2, 20) - 1
+
+        """From series 2 onwards, using negative DIGMIXFREQ for low-side injection (See https://jira.silabs.com/browse/MCUW_RADIO_CFG-1906)"""
+        if model.vars.lo_injection_side.value == model.vars.lo_injection_side.var_enum.LOW_SIDE:
+            digmixfreq *= -1
+
+        self._reg_write(model.vars.MODEM_DIGMIXCTRL_DIGMIXFREQ, digmixfreq, allow_neg=True,
+                        neg_twos_comp=True)
+
+    def calc_if_center_digital_hz_actual(self, model):
+        """Need to accomodate negative DIGMIXFREQ value for low-side injection"""
+        fxo = model.vars.fxo_or_fdec8.value
+        dec0 = model.vars.dec0_actual.value
+        cfosr = model.vars.cfosr_actual.value
+        
+        if model.vars.lo_injection_side.value == model.vars.lo_injection_side.var_enum.HIGH_SIDE:
+            digmixfreq = model.vars.MODEM_DIGMIXCTRL_DIGMIXFREQ.value
+        else:
+            model_var = model.vars.MODEM_DIGMIXCTRL_DIGMIXFREQ
+            digmixfreq_regsize = model_var.rm.bitWidth
+            digmixfreq = (2 ** digmixfreq_regsize) - model.vars.MODEM_DIGMIXCTRL_DIGMIXFREQ.value
+
+        digmixmode = model.vars.MODEM_DIGMIXCTRL_DIGMIXMODE.value
+
+        if digmixmode:
+            if_frequency = fxo * digmixfreq / (dec0 * pow(2, 20))
+        else:
+            if_frequency = fxo / (dec0 * cfosr)
+
+        model.vars.if_center_digital_hz_actual.value = int(if_frequency)

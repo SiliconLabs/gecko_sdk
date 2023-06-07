@@ -22,6 +22,7 @@
 
 #include "sl_status.h"
 #include "stack/include/ember-types.h"
+#include "stack/include/zigbee-security-manager-types.h"
 
 /**
  * @addtogroup zigbee_security_manager
@@ -34,141 +35,11 @@
  * @{
  */
 
-/** @brief The list of supported key types used by Zigbee Security Manager. */
-enum {
-  SL_ZB_SEC_MAN_KEY_TYPE_NONE,
-  /** @brief This is the network key, used for encrypting and decrypting network
-   * payloads.
-   * There is only one of these keys in storage. */
-  SL_ZB_SEC_MAN_KEY_TYPE_NETWORK,
-  /** @brief This is the Trust Center Link Key. On the joining device, this is the APS
-   * key used to communicate with the trust center. On the trust center, this
-   * key can be used as a root key for APS encryption and decryption when
-   * communicating with joining devices (if the security policy has the
-   * EMBER_TRUST_CENTER_USES_HASHED_LINK_KEY bit set).
-   * There is only one of these keys in storage. */
-  SL_ZB_SEC_MAN_KEY_TYPE_TC_LINK,
-  /** @brief This is a Trust Center Link Key, but it times out after either
-   * ::EMBER_TRANSIENT_KEY_TIMEOUT_S or
-   * ::EMBER_AF_PLUGIN_NETWORK_CREATOR_SECURITY_NETWORK_OPEN_TIME_S (if
-   * defined), whichever is longer. This type of key is set on trust centers
-   * who wish to open joining with a temporary, or transient, APS key for
-   * devices to join with. Joiners who wish to try several keys when joining a
-   * network may set several of these types of keys before attempting to join.
-   * This is an indexed key, and local storage can fit as many keys as
-   * available RAM allows. */
-  SL_ZB_SEC_MAN_KEY_TYPE_TC_LINK_WITH_TIMEOUT,
-  /** @brief This is an Application link key. On both joining devices and the trust
-   * center, this key is used in APS encryption and decryption when
-   * communicating to a joining device.
-   * This is an indexed key table of size EMBER_KEY_TABLE_SIZE, so long as there
-   * is sufficient nonvolatile memory to store keys. */
-  SL_ZB_SEC_MAN_KEY_TYPE_APP_LINK,
-  /** @brief Key type used to store Secure EZSP keys */
-  SL_ZB_SEC_MAN_KEY_TYPE_SECURE_EZSP_KEY,
-  /** @brief This is the ZLL encryption key for use by algorithms that require it. */
-  SL_ZB_SEC_MAN_KEY_TYPE_ZLL_ENCRYPTION_KEY,
-  /** @brief For ZLL, this is the pre-configured link key used during classical ZigBee commissioning. */
-  SL_ZB_SEC_MAN_KEY_TYPE_ZLL_PRECONFIGURED_KEY,
-  /** @brief This is a Green Power Device (GPD) key used on a Proxy device. */
-  SL_ZB_SEC_MAN_KEY_TYPE_GREEN_POWER_PROXY_TABLE_KEY,
-  /** @brief This is a Green Power Device (GPD) key used on a Sink device. */
-  SL_ZB_SEC_MAN_KEY_TYPE_GREEN_POWER_SINK_TABLE_KEY,
-  /** @brief This is a generic key type intended to be loaded for one-time hashing or
-   * crypto operations. This key is not persisted. */
-  SL_ZB_SEC_MAN_KEY_TYPE_INTERNAL
-};
-typedef uint8_t sl_zb_sec_man_key_type_t;
-
-/** @brief Derived keys are calculated when performing Zigbee crypto operations. The stack
- * makes use of these derivations. */
-enum {
-  /** @brief Perform no derivation; use the key as is. */
-  SL_ZB_SEC_MAN_DERIVED_KEY_TYPE_NONE = 0,
-  /** @brief Perform the Key-Transport-Key hash. */
-  SL_ZB_SEC_MAN_DERIVED_KEY_TYPE_KEY_TRANSPORT_KEY = 1,
-  /** @brief Perform the Key-Load-Key hash. */
-  SL_ZB_SEC_MAN_DERIVED_KEY_TYPE_KEY_LOAD_KEY = 2,
-  /** @brief Perform the Verify Key hash. */
-  SL_ZB_SEC_MAN_DERIVED_KEY_TYPE_VERIFY_KEY = 3,
-  /** @brief Perform a simple AES hash of the key for TC backup. */
-  SL_ZB_SEC_MAN_DERIVED_KEY_TYPE_TC_SWAP_OUT_KEY = 4,
-  /** @brief For a TC using hashed link keys, hashed the root key against the supplied EUI in context. */
-  SL_ZB_SEC_MAN_DERIVED_KEY_TYPE_TC_HASHED_LINK_KEY = 5
-};
-typedef uint8_t sl_zb_sec_man_derived_key_type_t;
-
-/**
- * @brief Security Manager context flags.
- */
-#ifdef DOXYGEN_SHOULD_SKIP_THIS
-enum sl_zigbee_sec_man_flags_t
-#else
-typedef uint8_t sl_zigbee_sec_man_flags_t;
-enum
-#endif
-{
-  ZB_SEC_MAN_FLAG_NONE                      = 0x00,
-  /** @brief For export APIs, this flag indicates the key_index parameter is valid in
-   *  the ::sl_zb_sec_man_context_t structure. This bit is set by the caller
-   *  when intending to search for a key by key_index. This flag has no
-   *  significance for import APIs. */
-  ZB_SEC_MAN_FLAG_KEY_INDEX_IS_VALID        = 0x01,
-  /** @brief For export APIs, this flag indicates the eui64 parameter is valid in the
-   *  ::sl_zb_sec_man_context_t structure. This bit is set by the caller when
-   *  intending to search for a key by eui64. It is also set when searching by
-   *  key_index and an entry is found. This flag has no significance for import
-   *  APIs. */
-  ZB_SEC_MAN_FLAG_EUI_IS_VALID              = 0x02,
-  /** @brief Internal use only. This indicates that the transient key being added is an
-   * unconfirmed, updated key. This bit is set when we add a transient key and
-   * the ::EmberTcLinkKeyRequestPolicy policy
-   * is ::EMBER_ALLOW_TC_LINK_KEY_REQUEST_AND_GENERATE_NEW_KEY, whose behavior
-   * dictates that we generate a new, unconfirmed key, send it to the requester,
-   * and await for a Verify Key Confirm message. */
-  ZB_SEC_MAN_FLAG_UNCONFIRMED_TRANSIENT_KEY = 0x04,
-};
-
-/** @brief This data structure houses the context when interacting with the Zigbee
- * Security Manager APIs. For example, when importing a key into storage, the various
- * fields of this structure are used to determine which type of key is being stored. */
-typedef struct {
-  sl_zb_sec_man_key_type_t core_key_type;
-  uint8_t key_index;
-  sl_zb_sec_man_derived_key_type_t derived_type;
-  EmberEUI64 eui64;
-  uint8_t multi_network_index;
-  sl_zigbee_sec_man_flags_t flags;
-} sl_zb_sec_man_context_t;
-
-/** @brief This data structure contains the metadata pertaining to an network key */
-typedef struct {
-  bool network_key_set;
-  bool alternate_network_key_set;
-  uint8_t network_key_sequence_number;
-  uint8_t alt_network_key_sequence_number;
-} sl_zb_sec_man_network_key_info_t;
-
-/** @brief This data structure contains the metadata pertaining to an APS key */
-typedef struct {
-  EmberKeyStructBitmask bitmask;
-  uint32_t outgoing_frame_counter;  // valid only if bitmask & EMBER_KEY_HAS_OUTGOING_FRAME_COUNTER
-  uint32_t incoming_frame_counter;  // valid only if bitmask & EMBER_KEY_HAS_INCOMING_FRAME_COUNTER
-  uint16_t ttl_in_seconds;          // valid only if core_key_type == SL_ZB_SEC_MAN_KEY_TYPE_TC_LINK_WITH_TIMEOUT
-} sl_zb_sec_man_aps_key_metadata_t;
-
-/** @brief This data structure contains the key data that is passed
- *   into various other functions. */
-typedef struct {
-  uint8_t key[EMBER_ENCRYPTION_KEY_SIZE];
-} sl_zb_sec_man_key_t;
-
 // CCM* operation defines
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
  #ifndef NONCE_LENGTH
   #define MESSAGE_LENGTH_FIELD_SIZE (2)
   #define NONCE_LENGTH (15 - MESSAGE_LENGTH_FIELD_SIZE)
-  #define MIC_LENGTH (4)
   #define ENCRYPTION_BLOCK_SIZE (16)
  #endif // NONCE_LENGTH
 #endif // DOXYGEN_SHOULD_SKIP_THIS
@@ -188,8 +59,11 @@ void sl_zb_sec_man_init_context(sl_zb_sec_man_context_t* context);
  * set. context->key_index is unused.<br>
  * ..SL_ZB_SEC_MAN_KEY_TYPE_APP_LINK, then context->key_index determines which
  * index in the persisted key table that the entry should be stored to.
- * context->eui64 must also be set.<br>
- * * ..SL_ZB_SEC_MAN_KEY_TYPE_GREEN_POWER_PROXY_TABLE_KEY or
+ * context->eui64 must also be set.
+ * If context->key_index is 0xFF, a suitable key index will be found (either one
+ * storing an existing key with address of context->eui64, or an open entry),
+ * and context->key_index will be updated with where the entry was stored. <br>
+ * ..SL_ZB_SEC_MAN_KEY_TYPE_GREEN_POWER_PROXY_TABLE_KEY or
  * SL_ZB_SEC_MAN_KEY_TYPE_GREEN_POWER_SINK_TABLE_KEY, then context->key_index
  * dictates which key entry to import. These Green Power keys are indexed keys,
  * and there are EMBER_GP_PROXY_TABLE_SIZE/EMBER_GP_SINK_TABLE_SIZE many of them.<br>
@@ -215,7 +89,10 @@ sl_status_t sl_zb_sec_man_import_key(sl_zb_sec_man_context_t* context,
  * key, into storage.
  *
  * @param index [IN] The index to set or overwrite in the key table for keys of
- * type SL_ZB_SEC_MAN_KEY_TYPE_APP_LINK.
+ * type SL_ZB_SEC_MAN_KEY_TYPE_APP_LINK.  If index is set to 0xFF (255), then
+ * the key will either overwrite whichever key table entry has an EUI of address
+ * (if one exists) or write to the first available key table entry.  The index
+ * that the key was placed into will not be returned by this API.
  * @param address [IN] The EUI belonging to the key.
  * @param plaintext_key [IN] A pointer to the key to import.
  *
@@ -238,6 +115,9 @@ sl_status_t sl_zb_sec_man_export_link_key_by_index(uint8_t index,
  * that has the same EUI address as the passed value.
  * If NULL is passed in for the address then it finds the first
  * unused entry and sets the index in the context.
+ * It is valid to pass in NULL to plaintext_key or key_data in case
+ * the index of the referenced key is desired but not its value or
+ * other metadata.
  */
 sl_status_t sl_zb_sec_man_export_link_key_by_eui(EmberEUI64 eui,
                                                  sl_zb_sec_man_context_t* context,
@@ -250,7 +130,7 @@ sl_status_t sl_zb_sec_man_export_link_key_by_eui(EmberEUI64 eui,
  * @param remoteDevice The long address of a some other device in the network.
  * @return bool Returns true if a link key is available.
  */
-sl_status_t sl_zb_sec_man_have_link_key(EmberEUI64 eui);
+bool sl_zb_sec_man_have_link_key(EmberEUI64 eui);
 
 /**
  * @brief Add a transient or temporary key entry to key storage.
@@ -495,7 +375,22 @@ void sl_zb_sec_man_hmac_aes_mmo(const uint8_t* input,
                                 uint8_t* output);
 
 /**
- * @brief Encrypt the specified data using AES-CCM with AES-128 and a 32-bit MIC.
+ * @brief Encrypt the specified data using AES-CCM with AES-128 and a MIC of the requested length (in  * bytes).  See documentation for sl_zb_sec_ * man_aes_ccm for information on parameters besides mic_length.
+ *
+ * @param mic_length [IN] Length of the MIC to output.  Currently supported MIC lengths are 4 bytes
+ * and 8 bytes.
+ *
+ */
+sl_status_t sl_zb_sec_man_aes_ccm_extended(uint8_t* nonce,
+                                           bool encrypt,
+                                           const uint8_t* input,
+                                           uint8_t encryption_start_index,
+                                           uint8_t length,
+                                           uint8_t mic_length,
+                                           uint8_t* output);
+
+/**
+ * @brief Encrypt the specified data using AES-CCM with AES-128 and a 4-byte MIC.
  *
  * @param nonce [IN] Nonce value used as part of CCM* encryption.
  *
@@ -518,12 +413,94 @@ void sl_zb_sec_man_hmac_aes_mmo(const uint8_t* input,
  * large as the input length.
  *
  */
-sl_status_t sl_zb_sec_man_aes_ccm(uint8_t* nonce,
-                                  bool encrypt,
-                                  const uint8_t* input,
-                                  uint8_t encryption_start_index,
-                                  uint8_t length,
-                                  uint8_t* output);
+#define sl_zb_sec_man_aes_ccm(nonce, encrypt, input, encryption_start_index, length, output) \
+  sl_zb_sec_man_aes_ccm_extended(nonce, encrypt, input, encryption_start_index, length, 4, output)
+
+/**
+ * @brief Perform AES-128 crypto on the specified 16-byte block using a previously loaded context.
+ *
+ * @param encrypt [IN] true if encrypting, else decrypt
+ *
+ * @param input [IN] Input, expected to be 16 bytes long.
+ *
+ * @param output [OUT] Output of the AES-128 encryption operation.
+ *
+ */
+sl_status_t sl_zb_sec_man_aes_128_crypt_block(bool encrypt,
+                                              const uint8_t* input,
+                                              uint8_t* output);
+
+// Symmetric Passphrase functions
+
+/** @brief Finds the Link Key Table index of the symmetric passphase of the given device EUI64.
+ *
+ * This function will return the Link Key Table index of the symmetric passphase of the given
+ * device EUI64, and will return 0xFF if no matching symmetric passphrase is found.
+ *
+ * @param address EUI64 of device
+ *
+ * @return An uint8_t value that indicates the index of the stored symmetric passphrase
+ * in the link key table.
+ */
+uint8_t sl_zb_sec_man_find_symmetric_passphrase_key_table_index(EmberEUI64 address);
+
+/** @brief Imports the symmetric passphrase to the Link Key Table.
+ *
+ * This function will use Security Manager methods to store the given symmetric
+ * passphrase in the Link Key Table at the given index with matching EUI64.
+ *
+ * @param erase whether to erase the key at the given index with matching address
+ * @param index Link Key Table index to store symmetric passphrase
+ * @param address device EUI64
+ * @param key_data pointer to symmetric passphrase memory
+ *
+ * @return An ::EmberStatus value that indicates the success or failure of
+ * importing the symmetric passphrase into the Link Key Table.
+ */
+sl_status_t sl_zb_sec_man_import_symmetric_passphrase(uint8_t index,
+                                                      EmberEUI64 address,
+                                                      EmberKeyData* key_data);
+
+/** @brief Exports the symmetric passphrase from the Link Key Table.
+ *
+ * This function will use Security Manager methods to export the given symmetric
+ * passphrase from the Link Key Table matching EUI64.
+ *
+ * @param address device EUI64
+ * @param key_data pointer to symmetric passphrase memory
+ *
+ * @return An ::EmberStatus value that indicates the success or failure of
+ * exporting the symmetric passphrase into the Link Key Table.
+ */
+sl_status_t sl_zb_sec_man_export_symmetric_passphrase(EmberEUI64 address,
+                                                      EmberKeyData* key_data);
+
+/** @brief Updates the device address of a symmetric passphrase entry.
+ *
+ * This function will update the device address of a symmetric passphrase entry
+ * in the Link Key Table that matches the given old device address with the new
+ * device address.
+ *
+ * @param old_eui64 Old device address
+ * @param new_eui64 New device address
+ *
+ * @return An ::EmberStatus value that indicates the success or failure of
+ * updating the Link Key Table entry's device EUI64
+ */
+sl_status_t sl_zb_sec_man_update_symmetric_passphrase_eui(EmberEUI64 old_eui64,
+                                                          EmberEUI64 new_eui64);
+
+/**
+ * @brief Returns whether a Symmetric Passphrase can be stored
+ *
+ * The determination of whether a new Symmetric Passphrase can be stored is made
+ * by checking if one already exists inside the key table with the same EUI64
+ *
+ * @param address device address
+ * @return a boolean representing whether a Symmetric Passphrase can be stored
+ */
+#define sl_zb_sec_man_symmetric_passphrase_update_allowed(address) \
+  (sl_zb_sec_man_find_symmetric_passphrase_key_table_index(address) == 0xFF)
 
 // Internal APIs
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -532,6 +509,65 @@ sl_status_t zb_sec_man_import_transient_key(EmberEUI64 eui64,
                                             sl_zigbee_sec_man_flags_t flags);
 
 void zb_sec_man_set_network_key_info(sl_zb_sec_man_network_key_info_t* network_key_info);
+
+void sl_zb_sec_man_set_context_aes_ecb_alg(sl_zb_sec_man_context_t* context);
+void sl_zb_sec_man_set_context_extended_ccm_alg(sl_zb_sec_man_context_t* context);
+
+//Used by EZSP so hosts can retrieve information about the NCP's key storage.
+//Implemented as its own NCP function because the EZSP command handler calling
+//it can be built in libraries, which won't have the SL catalog defines present
+//to make a correct decision on what the value of ZB_SEC_MAN_VERSION should be.
+uint8_t zb_sec_man_version(void);
+//VERSION 0:  No PSA storage
+//VERSION 1:  PSA storage present
+#if defined (SL_CATALOG_ZIGBEE_SECURE_KEY_STORAGE_PRESENT)
+#define ZB_SEC_MAN_VERSION 1
+#else
+#define ZB_SEC_MAN_VERSION 0
+#endif
+
+//wrapper macros for EZSP frame usage (map calls from autogenerated code to the actual handler).
+//Any other code should be calling the sl_zb_sec_man APIs directly.
+
+#define emberImportKey sl_zb_sec_man_import_key
+
+#define emberInitSecurityManagerContext sl_zb_sec_man_init_context
+
+#define emberExportKey(context, key, status) \
+  status = sl_zb_sec_man_export_key(context, key);
+
+#define emberGetNetworkKeyInfo sl_zb_sec_man_get_network_key_info
+
+#define emberGetApsKeyInfo(context, eui, key_metadata, status)      \
+  do {                                                              \
+    status = sl_zb_sec_man_get_aps_key_info(context, key_metadata); \
+    MEMMOVE(eui, context.eui64, EUI64_SIZE);                        \
+  } while (0)
+
+#define emberImportLinkKey sl_zb_sec_man_import_link_key
+#define emberCheckKeyContext sl_zb_sec_man_check_key_context
+#define emberImportTransientKey zb_sec_man_import_transient_key
+
+#define emberExportLinkKeyByIndex(index, eui, plaintext_key, key_data, status)                 \
+  do {                                                                                         \
+    sl_zb_sec_man_context_t context;                                                           \
+    status = sl_zb_sec_man_export_link_key_by_index(index, &context, plaintext_key, key_data); \
+    MEMMOVE(eui, context.eui64, EUI64_SIZE);                                                   \
+  } while (0)
+
+#define emberExportLinkKeyByEui(eui, plaintext_key, index, key_data, status)               \
+  do {                                                                                     \
+    sl_zb_sec_man_context_t context;                                                       \
+    status = sl_zb_sec_man_export_link_key_by_eui(eui, &context, plaintext_key, key_data); \
+    index = context.key_index;                                                             \
+  } while (0)
+
+#define emberExportTransientKeyByIndex(index, context, plaintext_key, key_data, status) \
+  status = sl_zb_sec_man_export_transient_key_by_index(index, context, plaintext_key, key_data);
+
+#define emberExportTransientKeyByEui(eui, context, plaintext_key, key_data, status) \
+  status = sl_zb_sec_man_export_transient_key_by_eui(eui, context, plaintext_key, key_data);
+
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 /** @} END addtogroup */

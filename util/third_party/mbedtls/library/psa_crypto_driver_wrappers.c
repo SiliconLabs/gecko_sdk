@@ -47,9 +47,11 @@
 
 /* Repeat above block for each JSON-declared driver during autogeneration */
 
-#include "em_device.h"
+#include "sli_psa_driver_features.h"
+
 #include <string.h>
-#if defined(SEMAILBOX_PRESENT)
+
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
 #ifndef PSA_CRYPTO_DRIVER_PRESENT
 #define PSA_CRYPTO_DRIVER_PRESENT
 #endif
@@ -58,10 +60,9 @@
 #endif
 #include "sli_se_transparent_types.h"
 #include "sli_se_transparent_functions.h"
-#endif /* SEMAILBOX_PRESENT */
-#if defined(SEMAILBOX_PRESENT) && \
-  ( (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || \
-    defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS) )
+#endif
+
+#if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
 #ifndef PSA_CRYPTO_DRIVER_PRESENT
 #define PSA_CRYPTO_DRIVER_PRESENT
 #endif
@@ -70,8 +71,9 @@
 #endif
 #include "sli_se_opaque_types.h"
 #include "sli_se_opaque_functions.h"
-#endif /* SEMAILBOX_PRESENT  && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) */
-#if defined(CRYPTOACC_PRESENT)
+#endif /* SLI_MBEDTLS_DEVICE_HSE  && SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS */
+
+#if defined(SLI_MBEDTLS_DEVICE_VSE)
 #ifndef PSA_CRYPTO_DRIVER_PRESENT
 #define PSA_CRYPTO_DRIVER_PRESENT
 #endif
@@ -80,12 +82,13 @@
 #endif
 #include "sli_cryptoacc_transparent_types.h"
 #include "sli_cryptoacc_transparent_functions.h"
-#if defined(SEPUF_PRESENT) && defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS)
+#if defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
 #include "sli_cryptoacc_opaque_types.h"
 #include "sli_cryptoacc_opaque_functions.h"
-#endif // SEPUF_PRESENT && MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS
-#endif /* CRYPTOACC_PRESENT */
-#if defined(CRYPTO_PRESENT)
+#endif /* SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS */
+#endif
+
+#if defined(SLI_MBEDTLS_DEVICE_S1)
 #ifndef PSA_CRYPTO_DRIVER_PRESENT
 #define PSA_CRYPTO_DRIVER_PRESENT
 #endif
@@ -94,7 +97,7 @@
 #endif
 #include "sli_crypto_transparent_types.h"
 #include "sli_crypto_transparent_functions.h"
-#endif /* CRYPTO_PRESENT */
+#endif
 
 #endif /* MBEDTLS_PSA_CRYPTO_DRIVERS */
 
@@ -153,26 +156,26 @@ psa_status_t psa_driver_wrapper_init( void )
         return( status );
 #endif
 
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
     status = sli_se_transparent_driver_init();
     if( status != PSA_SUCCESS )
         return( status );
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS)
+#if defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
     status = sli_se_opaque_driver_init();
     if( status != PSA_SUCCESS )
         return( status );
-#endif /* Vault */
-#endif /* SEMAILBOX_PRESENT */
-#if defined(CRYPTOACC_PRESENT)
+#endif /* SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS */
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_VSE)
     status = sli_cryptoacc_transparent_driver_init();
     if( status != PSA_SUCCESS )
         return( status );
-#endif /* CRYPTOACC_PRESENT */
-#if defined(CRYPTO_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_S1)
     status = sli_crypto_transparent_driver_init();
     if( status != PSA_SUCCESS )
         return( status );
-#endif /* CRYPTO_PRESENT */
+#endif
 
     (void) status;
     return( PSA_SUCCESS );
@@ -233,7 +236,7 @@ psa_status_t psa_driver_wrapper_sign_message(
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
 #else /* PSA_CRYPTO_DRIVER_TEST */
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
             status = sli_se_transparent_sign_message( attributes,
                                                       key_buffer,
                                                       key_buffer_size,
@@ -246,7 +249,7 @@ psa_status_t psa_driver_wrapper_sign_message(
             /* Declared with fallback == true */
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
-#endif /* SEMAILBOX_PRESENT */
+#endif
 #endif /* PSA_CRYPTO_DRIVER_TEST */
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
             break;
@@ -269,9 +272,7 @@ psa_status_t psa_driver_wrapper_sign_message(
                 return( status );
             break;
 #endif /* PSA_CRYPTO_DRIVER_TEST */
-#if defined(SEMAILBOX_PRESENT) && \
-  ( (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || \
-    defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS) )
+#if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
         case PSA_KEY_LOCATION_SLI_SE_OPAQUE:
             status = sli_se_opaque_sign_message( attributes,
                                                  key_buffer,
@@ -284,7 +285,7 @@ psa_status_t psa_driver_wrapper_sign_message(
                                                  signature_length );
             /* No fallback for opaque */
             return( status );
-#endif /* VAULT */
+#endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
         default:
             /* Key is declared with a lifetime not known to us */
@@ -337,7 +338,7 @@ psa_status_t psa_driver_wrapper_verify_message(
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
 #else /* PSA_CRYPTO_DRIVER_TEST */
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
             status = sli_se_transparent_verify_message( attributes,
                                                         key_buffer,
                                                         key_buffer_size,
@@ -349,7 +350,7 @@ psa_status_t psa_driver_wrapper_verify_message(
             /* Declared with fallback == true */
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
-#endif /* SEMAILBOX_PRESENT */
+#endif
 #endif /* PSA_CRYPTO_DRIVER_TEST */
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
             break;
@@ -368,9 +369,7 @@ psa_status_t psa_driver_wrapper_verify_message(
                         signature,
                         signature_length ) );
 #endif /* PSA_CRYPTO_DRIVER_TEST */
-#if defined(SEMAILBOX_PRESENT) && \
-  ( (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || \
-    defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS) )
+#if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
         case PSA_KEY_LOCATION_SLI_SE_OPAQUE:
             status = sli_se_opaque_verify_message( attributes,
                                                    key_buffer,
@@ -382,7 +381,7 @@ psa_status_t psa_driver_wrapper_verify_message(
                                                    signature_length );
             /* No fallback for opaque */
             return( status );
-#endif /* VAULT */
+#endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
         default:
             /* Key is declared with a lifetime not known to us */
@@ -450,7 +449,7 @@ psa_status_t psa_driver_wrapper_sign_hash(
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
 #endif /* PSA_CRYPTO_DRIVER_TEST */
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
             status = sli_se_transparent_sign_hash( attributes,
                                                    key_buffer,
                                                    key_buffer_size,
@@ -463,7 +462,7 @@ psa_status_t psa_driver_wrapper_sign_hash(
             /* Declared with fallback == true */
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
-#elif defined(CRYPTOACC_PRESENT)
+#elif defined(SLI_MBEDTLS_DEVICE_VSE)
             status = sli_cryptoacc_transparent_sign_hash( attributes,
                                                           key_buffer,
                                                           key_buffer_size,
@@ -476,7 +475,7 @@ psa_status_t psa_driver_wrapper_sign_hash(
             /* Declared with fallback == true */
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
-#endif /* SEMAILBOX_PRESENT CRYPTOACC_PRESENT */
+#endif /* SLI_MBEDTLS_DEVICE_HSE SLI_MBEDTLS_DEVICE_VSE */
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
             /* Fell through, meaning no accelerator supports this operation */
             return( psa_sign_hash_builtin( attributes,
@@ -503,9 +502,7 @@ psa_status_t psa_driver_wrapper_sign_hash(
                                                              signature_size,
                                                              signature_length ) );
 #endif /* PSA_CRYPTO_DRIVER_TEST */
-#if defined(SEMAILBOX_PRESENT) && \
-  ( (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || \
-    defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS) )
+#if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
         case PSA_KEY_LOCATION_SLI_SE_OPAQUE:
             status = sli_se_opaque_sign_hash( attributes,
                                               key_buffer,
@@ -518,7 +515,7 @@ psa_status_t psa_driver_wrapper_sign_hash(
                                               signature_length );
             /* No fallback for opaque */
             return( status );
-#endif /* VAULT */
+#endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
         default:
             /* Key is declared with a lifetime not known to us */
@@ -577,7 +574,7 @@ psa_status_t psa_driver_wrapper_verify_hash(
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
 #endif /* PSA_CRYPTO_DRIVER_TEST */
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
             status = sli_se_transparent_verify_hash( attributes,
                                                      key_buffer,
                                                      key_buffer_size,
@@ -589,7 +586,7 @@ psa_status_t psa_driver_wrapper_verify_hash(
             /* Declared with fallback == true */
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
-#elif defined(CRYPTOACC_PRESENT)
+#elif defined(SLI_MBEDTLS_DEVICE_VSE)
             status = sli_cryptoacc_transparent_verify_hash( attributes,
                                                             key_buffer,
                                                             key_buffer_size,
@@ -601,7 +598,7 @@ psa_status_t psa_driver_wrapper_verify_hash(
             /* Declared with fallback == true */
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
-#endif /* SEMAILBOX_PRESENT CRYPTOACC_PRESENT*/
+#endif /* SLI_MBEDTLS_DEVICE_HSE SLI_MBEDTLS_DEVICE_VSE*/
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
 
             return( psa_verify_hash_builtin( attributes,
@@ -626,9 +623,7 @@ psa_status_t psa_driver_wrapper_verify_hash(
                                                                signature,
                                                                signature_length ) );
 #endif /* PSA_CRYPTO_DRIVER_TEST */
-#if defined(SEMAILBOX_PRESENT) && \
-  ( (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || \
-    defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS) )
+#if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
         case PSA_KEY_LOCATION_SLI_SE_OPAQUE:
             status = sli_se_opaque_verify_hash( attributes,
                                                 key_buffer,
@@ -640,7 +635,7 @@ psa_status_t psa_driver_wrapper_verify_hash(
                                                 signature_length );
             /* No fallback for opaque */
             return( status );
-#endif /* VAULT */
+#endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
         default:
             /* Key is declared with a lifetime not known to us */
@@ -681,13 +676,11 @@ psa_status_t psa_driver_wrapper_get_key_buffer_size_from_key_data(
             return( ( *key_buffer_size != 0 ) ?
                     PSA_SUCCESS : PSA_ERROR_NOT_SUPPORTED );
 #endif /* PSA_CRYPTO_DRIVER_TEST */
-#if defined(SEMAILBOX_PRESENT) \
-     && ((_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) \
-         || defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS))
+#if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
         case PSA_KEY_LOCATION_SLI_SE_OPAQUE:
             *key_buffer_size = data_length;
             return( psa_driver_wrapper_get_key_buffer_size( attributes, key_buffer_size ) );
-#endif /* VAULT || MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS */
+#endif
         default:
             (void)key_type;
             (void)data;
@@ -729,9 +722,7 @@ psa_status_t psa_driver_wrapper_get_key_buffer_size(
                 return( PSA_ERROR_NOT_SUPPORTED );
             *key_buffer_size = buffer_size;
             return( PSA_SUCCESS );
-#if defined(SEMAILBOX_PRESENT) \
-     && ((_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) \
-         || defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS))
+#if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
         case PSA_KEY_LOCATION_SLI_SE_OPAQUE:
             buffer_size = PSA_EXPORT_KEY_OUTPUT_SIZE( key_type, key_bits );
             if( buffer_size == 0 ||
@@ -754,7 +745,13 @@ psa_status_t psa_driver_wrapper_get_key_buffer_size(
             buffer_size += sizeof(sli_se_opaque_wrapped_key_context_t);
             *key_buffer_size = buffer_size;
             return ( PSA_SUCCESS );
-#endif // VAULT || MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_VSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
+        case PSA_KEY_LOCATION_SL_CRYPTOACC_OPAQUE:
+            buffer_size = sizeof(sli_cryptoacc_opaque_key_context_t);
+            *key_buffer_size = buffer_size;
+            return ( PSA_SUCCESS );
+#endif
 #if defined(PSA_CRYPTO_DRIVER_TEST)
         case PSA_CRYPTO_TEST_DRIVER_LOCATION:
 #if defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS)
@@ -826,7 +823,7 @@ psa_status_t psa_driver_wrapper_generate_key(
                 if( status != PSA_ERROR_NOT_SUPPORTED )
                     break;
 #endif /* PSA_CRYPTO_DRIVER_TEST */
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
                 status = sli_se_transparent_generate_key( attributes,
                                                           key_buffer,
                                                           key_buffer_size,
@@ -834,8 +831,8 @@ psa_status_t psa_driver_wrapper_generate_key(
                 /* Declared with fallback == true */
                 if( status != PSA_ERROR_NOT_SUPPORTED )
                     break;
-#endif /* SEMAILBOX_PRESENT */
-#if defined(CRYPTOACC_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_VSE)
                 status = sli_cryptoacc_transparent_generate_key( attributes,
                                                                  key_buffer,
                                                                  key_buffer_size,
@@ -843,7 +840,7 @@ psa_status_t psa_driver_wrapper_generate_key(
                 /* Declared with fallback == true */
                 if( status != PSA_ERROR_NOT_SUPPORTED )
                     break;
-#endif /* CRYPTOACC_PRESENT */
+#endif
             }
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
 
@@ -860,7 +857,7 @@ psa_status_t psa_driver_wrapper_generate_key(
                 attributes, key_buffer, key_buffer_size, key_buffer_length );
             break;
 #endif /* PSA_CRYPTO_DRIVER_TEST */
-#if defined(SEMAILBOX_PRESENT) && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
         case PSA_KEY_LOCATION_SLI_SE_OPAQUE:
             // Call opaque driver API
             status = sli_se_opaque_generate_key( attributes,
@@ -869,7 +866,7 @@ psa_status_t psa_driver_wrapper_generate_key(
                                                  key_buffer_length );
             /* No fallback for opaque drivers */
             return status;
-#endif /* SEMAILBOX_PRESENT && VAULT*/
+#endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
 
         default:
@@ -939,7 +936,7 @@ psa_status_t psa_driver_wrapper_import_key(
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
 #endif /* PSA_CRYPTO_DRIVER_TEST */
-#if defined(CRYPTOACC_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_VSE)
             status = sli_cryptoacc_transparent_import_key( attributes,
                                                            data, data_length,
                                                            key_buffer,
@@ -949,8 +946,8 @@ psa_status_t psa_driver_wrapper_import_key(
             /* Declared with fallback == true */
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
-#endif /* CRYPTOACC_PRESENT */
-#if defined(SEMAILBOX_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
             status = sli_se_transparent_import_key( attributes,
                                                     data, data_length,
                                                     key_buffer,
@@ -960,7 +957,7 @@ psa_status_t psa_driver_wrapper_import_key(
             /* Declared with fallback == true */
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
-#endif /* SEMAILBOX_PRESENT */
+#endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
             /* Fell through, meaning no accelerator supports this operation */
             return( psa_import_key_into_slot( attributes,
@@ -977,14 +974,14 @@ psa_status_t psa_driver_wrapper_import_key(
                          key_buffer, key_buffer_size,
                          key_buffer_length, bits ) );
 #endif /* PSA_CRYPTO_DRIVER_TEST */
-#if defined(SEMAILBOX_PRESENT) && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_WRAPPED_KEYS)
         case PSA_KEY_LOCATION_SLI_SE_OPAQUE:
             return( sli_se_opaque_import_key(
                          attributes,
                          data, data_length,
                          key_buffer, key_buffer_size,
                          key_buffer_length, bits ) );
-#endif // VAULT && PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT
+#endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
 
         default:
@@ -1045,7 +1042,7 @@ psa_status_t psa_driver_wrapper_export_key(
                                                     data_size,
                                                     data_length ) );
 #endif /* PSA_CRYPTO_DRIVER_TEST */
-#if defined(SEMAILBOX_PRESENT) && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_WRAPPED_KEYS)
         case PSA_KEY_LOCATION_SLI_SE_OPAQUE:
             // We are on a vault device, call opaque driver
             return( sli_se_opaque_export_key( attributes,
@@ -1054,7 +1051,7 @@ psa_status_t psa_driver_wrapper_export_key(
                                               data,
                                               data_size,
                                               data_length ) );
-#endif // VAULT
+#endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
         default:
             /* Key is declared with a lifetime not known to us */
@@ -1110,7 +1107,7 @@ psa_status_t psa_driver_wrapper_export_public_key(
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
 #endif /* PSA_CRYPTO_DRIVER_TEST */
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
             status = sli_se_transparent_export_public_key( attributes,
                                                            key_buffer,
                                                            key_buffer_size,
@@ -1120,8 +1117,8 @@ psa_status_t psa_driver_wrapper_export_public_key(
             /* Declared with fallback == true */
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
-#endif // SEMAILBOX_PRESENT
-#if defined(CRYPTOACC_PRESENT)
+#endif // SLI_MBEDTLS_DEVICE_HSE
+#if defined(SLI_MBEDTLS_DEVICE_VSE)
             status = sli_cryptoacc_transparent_export_public_key( attributes,
                                                                   key_buffer,
                                                                   key_buffer_size,
@@ -1131,7 +1128,7 @@ psa_status_t psa_driver_wrapper_export_public_key(
             /* Declared with fallback == true */
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
-#endif // CRYPTOACC_PRESENT
+#endif // SLI_MBEDTLS_DEVICE_VSE
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
             /* Fell through, meaning no accelerator supports this operation */
             return( psa_export_public_key_internal( attributes,
@@ -1152,9 +1149,7 @@ psa_status_t psa_driver_wrapper_export_public_key(
                                                            data_size,
                                                            data_length ) );
 #endif /* PSA_CRYPTO_DRIVER_TEST */
-#if defined(SEMAILBOX_PRESENT) && \
-  ( (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || \
-    defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS) )
+#if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
         case PSA_KEY_LOCATION_SLI_SE_OPAQUE:
             return( sli_se_opaque_export_public_key( attributes,
                                                      key_buffer,
@@ -1162,7 +1157,7 @@ psa_status_t psa_driver_wrapper_export_public_key(
                                                      data,
                                                      data_size,
                                                      data_length ) );
-#endif // SEMAILBOX_PRESENT & VAULT
+#endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
         default:
             /* Key is declared with a lifetime not known to us */
@@ -1185,23 +1180,20 @@ psa_status_t psa_driver_wrapper_get_builtin_key(
                         attributes,
                         key_buffer, key_buffer_size, key_buffer_length ) );
 #endif /* PSA_CRYPTO_DRIVER_TEST */
-#if defined(SEMAILBOX_PRESENT) && \
-  ( (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || \
-    defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS) )
+#if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
         case PSA_KEY_LOCATION_SLI_SE_OPAQUE:
             return( sli_se_opaque_get_builtin_key(
                         slot_number,
                         attributes,
                         key_buffer, key_buffer_size, key_buffer_length ) );
-#endif // SEMAILBOX_PRESENT & VAULT
-#if defined(CRYPTOACC) && defined(SEPUF_PRESENT) && \
-    defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS)
-        case PSA_KEY_LOCATION_SLI_CRYPTOACC_OPAQUE:
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_VSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
+        case PSA_KEY_LOCATION_SL_CRYPTOACC_OPAQUE:
             return( sli_cryptoacc_opaque_get_builtin_key(
                         slot_number,
                         attributes,
                         key_buffer, key_buffer_size, key_buffer_length ) );
-#endif // SEMAILBOX_PRESENT & VAULT
+#endif
         default:
             (void) slot_number;
             (void) key_buffer;
@@ -1298,7 +1290,7 @@ psa_status_t psa_driver_wrapper_cipher_encrypt(
                 return( status );
 #endif /* PSA_CRYPTO_DRIVER_TEST */
 #if defined(MBEDTLS_PSA_CRYPTO_DRIVERS)
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
             status = sli_se_transparent_cipher_encrypt(
                         attributes,
                         key_buffer,
@@ -1313,8 +1305,8 @@ psa_status_t psa_driver_wrapper_cipher_encrypt(
                         output_length );
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
-#endif /* SEMAILBOX_PRESENT */
-#if defined(CRYPTOACC_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_VSE)
             status = sli_cryptoacc_transparent_cipher_encrypt(
                         attributes,
                         key_buffer,
@@ -1329,8 +1321,8 @@ psa_status_t psa_driver_wrapper_cipher_encrypt(
                         output_length );
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
-#endif /* CRYPTOACC_PRESENT */
-#if defined(CRYPTO_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_S1)
             status = sli_crypto_transparent_cipher_encrypt(
                         attributes,
                         key_buffer,
@@ -1345,7 +1337,7 @@ psa_status_t psa_driver_wrapper_cipher_encrypt(
                         output_length );
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
-#endif /* CRYPTO_PRESENT */
+#endif
 #endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
 
@@ -1381,8 +1373,7 @@ psa_status_t psa_driver_wrapper_cipher_encrypt(
                                                         output_size,
                                                         output_length ) );
 #endif /* PSA_CRYPTO_DRIVER_TEST */
-#if defined(SEMAILBOX_PRESENT) && ((_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || \
-    defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS))
+#if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
         case PSA_KEY_LOCATION_SLI_SE_OPAQUE:
             return ( sli_se_opaque_cipher_encrypt(
                         attributes,
@@ -1396,7 +1387,7 @@ psa_status_t psa_driver_wrapper_cipher_encrypt(
                         output,
                         output_size,
                         output_length ) );
-#endif // VAULT
+#endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
 
         default:
@@ -1452,7 +1443,7 @@ psa_status_t psa_driver_wrapper_cipher_decrypt(
                 return( status );
 #endif /* PSA_CRYPTO_DRIVER_TEST */
 #if defined(MBEDTLS_PSA_CRYPTO_DRIVERS)
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
             status = sli_se_transparent_cipher_decrypt(
                         attributes,
                         key_buffer,
@@ -1465,8 +1456,8 @@ psa_status_t psa_driver_wrapper_cipher_decrypt(
                         output_length );
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
-#endif /* SEMAILBOX_PRESENT */
-#if defined(CRYPTOACC_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_VSE)
             status = sli_cryptoacc_transparent_cipher_decrypt(
                         attributes,
                         key_buffer,
@@ -1479,8 +1470,8 @@ psa_status_t psa_driver_wrapper_cipher_decrypt(
                         output_length );
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
-#endif /* CRYPTOACC_PRESENT */
-#if defined(CRYPTO_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_S1)
             status = sli_crypto_transparent_cipher_decrypt(
                         attributes,
                         key_buffer,
@@ -1493,7 +1484,7 @@ psa_status_t psa_driver_wrapper_cipher_decrypt(
                         output_length );
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
-#endif /* CRYPTO_PRESENT */
+#endif
 #endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
 
@@ -1525,8 +1516,7 @@ psa_status_t psa_driver_wrapper_cipher_decrypt(
                                                         output_size,
                                                         output_length ) );
 #endif /* PSA_CRYPTO_DRIVER_TEST */
-#if defined(SEMAILBOX_PRESENT) && ((_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || \
-    defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS))
+#if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
         case PSA_KEY_LOCATION_SLI_SE_OPAQUE:
             return ( sli_se_opaque_cipher_decrypt(
                         attributes,
@@ -1538,7 +1528,7 @@ psa_status_t psa_driver_wrapper_cipher_decrypt(
                         output,
                         output_size,
                         output_length ) );
-#endif // VAULT
+#endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
 
         default:
@@ -1586,7 +1576,7 @@ psa_status_t psa_driver_wrapper_cipher_encrypt_setup(
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
 #endif /* PSA_CRYPTO_DRIVER_TEST */
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
             status = sli_se_transparent_cipher_encrypt_setup(
                         &operation->ctx.sli_se_transparent_ctx,
                         attributes,
@@ -1597,8 +1587,8 @@ psa_status_t psa_driver_wrapper_cipher_encrypt_setup(
                 operation->id = SLI_SE_TRANSPARENT_DRIVER_ID;
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
-#endif /* SEMAILBOX_PRESENT */
-#if defined(CRYPTOACC_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_VSE)
             status = sli_cryptoacc_transparent_cipher_encrypt_setup(
                         &operation->ctx.sli_cryptoacc_transparent_ctx,
                         attributes,
@@ -1609,8 +1599,8 @@ psa_status_t psa_driver_wrapper_cipher_encrypt_setup(
                 operation->id = SLI_CRYPTOACC_TRANSPARENT_DRIVER_ID;
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
-#endif /* CRYPTOACC_PRESENT */
-#if defined(CRYPTO_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_S1)
             status = sli_crypto_transparent_cipher_encrypt_setup(
                         &operation->ctx.sli_crypto_transparent_ctx,
                         attributes,
@@ -1621,7 +1611,7 @@ psa_status_t psa_driver_wrapper_cipher_encrypt_setup(
                 operation->id = SLI_CRYPTO_TRANSPARENT_DRIVER_ID;
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
-#endif /* CRYPTO_PRESENT */
+#endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
 #if defined(MBEDTLS_PSA_BUILTIN_CIPHER)
             /* Fell through, meaning no accelerator supports this operation */
@@ -1653,8 +1643,7 @@ psa_status_t psa_driver_wrapper_cipher_encrypt_setup(
 
             return( status );
 #endif /* PSA_CRYPTO_DRIVER_TEST */
-#if defined(SEMAILBOX_PRESENT) && ((_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || \
-    defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS))
+#if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
         case PSA_KEY_LOCATION_SLI_SE_OPAQUE:
             status = sli_se_opaque_cipher_encrypt_setup(
                         &operation->ctx.sli_se_opaque_ctx,
@@ -1665,7 +1654,7 @@ psa_status_t psa_driver_wrapper_cipher_encrypt_setup(
             if( status == PSA_SUCCESS )
                 operation->id = SLI_SE_OPAQUE_DRIVER_ID;
             return( status );
-#endif // VAULT
+#endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
         default:
             /* Key is declared with a lifetime not known to us */
@@ -1708,7 +1697,7 @@ psa_status_t psa_driver_wrapper_cipher_decrypt_setup(
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
 #endif /* PSA_CRYPTO_DRIVER_TEST */
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
             status = sli_se_transparent_cipher_decrypt_setup(
                         &operation->ctx.sli_se_transparent_ctx,
                         attributes,
@@ -1719,8 +1708,8 @@ psa_status_t psa_driver_wrapper_cipher_decrypt_setup(
                 operation->id = SLI_SE_TRANSPARENT_DRIVER_ID;
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
-#endif /* SEMAILBOX_PRESENT */
-#if defined(CRYPTOACC_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_VSE)
             status = sli_cryptoacc_transparent_cipher_decrypt_setup(
                         &operation->ctx.sli_cryptoacc_transparent_ctx,
                         attributes,
@@ -1731,8 +1720,8 @@ psa_status_t psa_driver_wrapper_cipher_decrypt_setup(
                 operation->id = SLI_CRYPTOACC_TRANSPARENT_DRIVER_ID;
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
-#endif /* CRYPTOACC_PRESENT */
-#if defined(CRYPTO_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_S1)
             status = sli_crypto_transparent_cipher_decrypt_setup(
                         &operation->ctx.sli_crypto_transparent_ctx,
                         attributes,
@@ -1743,7 +1732,7 @@ psa_status_t psa_driver_wrapper_cipher_decrypt_setup(
                 operation->id = SLI_CRYPTO_TRANSPARENT_DRIVER_ID;
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
-#endif /* CRYPTO_PRESENT */
+#endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
 #if defined(MBEDTLS_PSA_BUILTIN_CIPHER)
             /* Fell through, meaning no accelerator supports this operation */
@@ -1775,8 +1764,7 @@ psa_status_t psa_driver_wrapper_cipher_decrypt_setup(
 
             return( status );
 #endif /* PSA_CRYPTO_DRIVER_TEST */
-#if defined(SEMAILBOX_PRESENT) && ((_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || \
-    defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS))
+#if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
         case PSA_KEY_LOCATION_SLI_SE_OPAQUE:
             status = sli_se_opaque_cipher_decrypt_setup(
                         &operation->ctx.sli_se_opaque_ctx,
@@ -1787,7 +1775,7 @@ psa_status_t psa_driver_wrapper_cipher_decrypt_setup(
             if( status == PSA_SUCCESS )
                 operation->id = SLI_SE_OPAQUE_DRIVER_ID;
             return( status );
-#endif // VAULT
+#endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
         default:
             /* Key is declared with a lifetime not known to us */
@@ -1826,31 +1814,30 @@ psa_status_t psa_driver_wrapper_cipher_set_iv(
                         &operation->ctx.opaque_test_driver_ctx,
                         iv, iv_length ) );
 #endif /* PSA_CRYPTO_DRIVER_TEST */
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
         case SLI_SE_TRANSPARENT_DRIVER_ID:
             return( sli_se_transparent_cipher_set_iv(
                         &operation->ctx.sli_se_transparent_ctx,
                         iv, iv_length ) );
-#endif /* SEMAILBOX_PRESENT */
-#if defined(CRYPTOACC_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_VSE)
         case SLI_CRYPTOACC_TRANSPARENT_DRIVER_ID:
             return( sli_cryptoacc_transparent_cipher_set_iv(
                         &operation->ctx.sli_cryptoacc_transparent_ctx,
                         iv, iv_length ) );
-#endif /* CRYPTOACC_PRESENT */
-#if defined(CRYPTO_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_S1)
         case SLI_CRYPTO_TRANSPARENT_DRIVER_ID:
             return( sli_crypto_transparent_cipher_set_iv(
                         &operation->ctx.sli_crypto_transparent_ctx,
                         iv, iv_length ) );
-#endif /* CRYPTO_PRESENT */
-#if defined(SEMAILBOX_PRESENT) && ((_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || \
-    defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS))
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
         case SLI_SE_OPAQUE_DRIVER_ID:
             return( sli_se_opaque_cipher_set_iv(
                         &operation->ctx.sli_se_opaque_ctx,
                         iv, iv_length ) );
-#endif // VAULT
+#endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
     }
 
@@ -1894,35 +1881,34 @@ psa_status_t psa_driver_wrapper_cipher_update(
                         input, input_length,
                         output, output_size, output_length ) );
 #endif /* PSA_CRYPTO_DRIVER_TEST */
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
         case SLI_SE_TRANSPARENT_DRIVER_ID:
             return( sli_se_transparent_cipher_update(
                         &operation->ctx.sli_se_transparent_ctx,
                         input, input_length,
                         output, output_size, output_length ) );
-#endif /* SEMAILBOX_PRESENT */
-#if defined(CRYPTOACC_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_VSE)
         case SLI_CRYPTOACC_TRANSPARENT_DRIVER_ID:
             return( sli_cryptoacc_transparent_cipher_update(
                         &operation->ctx.sli_cryptoacc_transparent_ctx,
                         input, input_length,
                         output, output_size, output_length ) );
-#endif /* CRYPTOACC_PRESENT */
-#if defined(CRYPTO_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_S1)
         case SLI_CRYPTO_TRANSPARENT_DRIVER_ID:
             return( sli_crypto_transparent_cipher_update(
                         &operation->ctx.sli_crypto_transparent_ctx,
                         input, input_length,
                         output, output_size, output_length ) );
-#endif /* CRYPTO_PRESENT */
-#if defined(SEMAILBOX_PRESENT) && ((_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || \
-    defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS))
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
         case SLI_SE_OPAQUE_DRIVER_ID:
             return( sli_se_opaque_cipher_update(
                         &operation->ctx.sli_se_opaque_ctx,
                         input, input_length,
                         output, output_size, output_length ) );
-#endif // VAULT
+#endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
     }
 
@@ -1963,31 +1949,30 @@ psa_status_t psa_driver_wrapper_cipher_finish(
                         &operation->ctx.opaque_test_driver_ctx,
                         output, output_size, output_length ) );
 #endif /* PSA_CRYPTO_DRIVER_TEST */
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
         case SLI_SE_TRANSPARENT_DRIVER_ID:
             return( sli_se_transparent_cipher_finish(
                         &operation->ctx.sli_se_transparent_ctx,
                         output, output_size, output_length ) );
-#endif /* SEMAILBOX_PRESENT */
-#if defined(CRYPTOACC_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_VSE)
         case SLI_CRYPTOACC_TRANSPARENT_DRIVER_ID:
             return( sli_cryptoacc_transparent_cipher_finish(
                         &operation->ctx.sli_cryptoacc_transparent_ctx,
                         output, output_size, output_length ) );
-#endif /* CRYPTOACC_PRESENT */
-#if defined(CRYPTO_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_S1)
         case SLI_CRYPTO_TRANSPARENT_DRIVER_ID:
             return( sli_crypto_transparent_cipher_finish(
                         &operation->ctx.sli_crypto_transparent_ctx,
                         output, output_size, output_length ) );
-#endif /* CRYPTO_PRESENT */
-#if defined(SEMAILBOX_PRESENT) && ((_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || \
-    defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS))
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
         case SLI_SE_OPAQUE_DRIVER_ID:
             return( sli_se_opaque_cipher_finish(
                         &operation->ctx.sli_se_opaque_ctx,
                         output, output_size, output_length ) );
-#endif // VAULT
+#endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
     }
 
@@ -2028,26 +2013,26 @@ psa_status_t psa_driver_wrapper_cipher_abort(
                 sizeof( operation->ctx.opaque_test_driver_ctx ) );
             return( status );
 #endif /* PSA_CRYPTO_DRIVER_TEST */
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
         case SLI_SE_TRANSPARENT_DRIVER_ID:
             return( sli_se_transparent_cipher_abort(
                         &operation->ctx.sli_se_transparent_ctx ) );
-#endif /* SEMAILBOX_PRESENT */
-#if defined(CRYPTOACC_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_VSE)
         case SLI_CRYPTOACC_TRANSPARENT_DRIVER_ID:
             return( sli_cryptoacc_transparent_cipher_abort(
                         &operation->ctx.sli_cryptoacc_transparent_ctx ) );
-#endif /* CRYPTOACC_PRESENT */
-#if defined(CRYPTO_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_S1)
         case SLI_CRYPTO_TRANSPARENT_DRIVER_ID:
             return( sli_crypto_transparent_cipher_abort(
                         &operation->ctx.sli_crypto_transparent_ctx  ) );
-#endif /* CRYPTO_PRESENT */
-#if defined(SEMAILBOX_PRESENT) && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
         case SLI_SE_OPAQUE_DRIVER_ID:
             return( sli_se_opaque_cipher_abort(
                         &operation->ctx.sli_se_opaque_ctx ) );
-#endif // VAULT
+#endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
     }
 
@@ -2077,24 +2062,24 @@ psa_status_t psa_driver_wrapper_hash_compute(
 #endif
 
 #if defined(MBEDTLS_PSA_CRYPTO_DRIVERS)
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
     status = sli_se_transparent_hash_compute(
                 alg, input, input_length, hash, hash_size, hash_length );
     if( status != PSA_ERROR_NOT_SUPPORTED )
         return( status );
-#endif /* SEMAILBOX_PRESENT */
-#if defined(CRYPTOACC_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_VSE)
     status = sli_cryptoacc_transparent_hash_compute(
                 alg, input, input_length, hash, hash_size, hash_length );
     if( status != PSA_ERROR_NOT_SUPPORTED )
         return( status );
-#endif /* CRYPTOACC_PRESENT */
-#if defined(CRYPTO_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_S1)
     status = sli_crypto_transparent_hash_compute(
                 alg, input, input_length, hash, hash_size, hash_length );
     if( status != PSA_ERROR_NOT_SUPPORTED )
         return( status );
-#endif /* CRYPTO_PRESENT */
+#endif
 #endif /* MBEDTLS_PSA_CRYPTO_DRIVERS */
 
     /* If software fallback is compiled in, try fallback */
@@ -2133,7 +2118,7 @@ psa_status_t psa_driver_wrapper_hash_setup(
 #endif
 
 #if defined(MBEDTLS_PSA_CRYPTO_DRIVERS)
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
     status = sli_se_transparent_hash_setup(
                 &operation->ctx.sli_se_transparent_ctx, alg );
     if( status == PSA_SUCCESS )
@@ -2141,8 +2126,8 @@ psa_status_t psa_driver_wrapper_hash_setup(
 
     if( status != PSA_ERROR_NOT_SUPPORTED )
         return( status );
-#endif /* SEMAILBOX_PRESENT */
-#if defined(CRYPTOACC_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_VSE)
     status = sli_cryptoacc_transparent_hash_setup(
                 &operation->ctx.sli_cryptoacc_transparent_ctx, alg );
     if( status == PSA_SUCCESS )
@@ -2150,8 +2135,8 @@ psa_status_t psa_driver_wrapper_hash_setup(
 
     if( status != PSA_ERROR_NOT_SUPPORTED )
         return( status );
-#endif /* CRYPTOACC_PRESENT */
-#if defined(CRYPTO_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_S1)
     status = sli_crypto_transparent_hash_setup(
                 &operation->ctx.sli_crypto_transparent_ctx, alg );
     if( status == PSA_SUCCESS )
@@ -2159,7 +2144,7 @@ psa_status_t psa_driver_wrapper_hash_setup(
 
     if( status != PSA_ERROR_NOT_SUPPORTED )
         return( status );
-#endif /* CRYPTO_PRESENT */
+#endif
 #endif
 
     /* If software fallback is compiled in, try fallback */
@@ -2198,27 +2183,27 @@ psa_status_t psa_driver_wrapper_hash_clone(
                         &target_operation->ctx.test_driver_ctx ) );
 #endif
 #if defined(MBEDTLS_PSA_CRYPTO_DRIVERS)
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
         case SLI_SE_TRANSPARENT_DRIVER_ID:
             target_operation->id = SLI_SE_TRANSPARENT_DRIVER_ID;
             return( sli_se_transparent_hash_clone(
                         &source_operation->ctx.sli_se_transparent_ctx,
                         &target_operation->ctx.sli_se_transparent_ctx ) );
-#endif /* SEMAILBOX_PRESENT */
-#if defined(CRYPTOACC_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_VSE)
         case SLI_CRYPTOACC_TRANSPARENT_DRIVER_ID:
             target_operation->id = SLI_CRYPTOACC_TRANSPARENT_DRIVER_ID;
             return( sli_cryptoacc_transparent_hash_clone(
                         &source_operation->ctx.sli_cryptoacc_transparent_ctx,
                         &target_operation->ctx.sli_cryptoacc_transparent_ctx ) );
-#endif /* CRYPTOACC_PRESENT */
-#if defined(CRYPTO_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_S1)
         case SLI_CRYPTO_TRANSPARENT_DRIVER_ID:
             target_operation->id = SLI_CRYPTO_TRANSPARENT_DRIVER_ID;
             return( sli_crypto_transparent_hash_clone(
                         &source_operation->ctx.sli_crypto_transparent_ctx,
                         &target_operation->ctx.sli_crypto_transparent_ctx ) );
-#endif /* CRYPTO_PRESENT */
+#endif
 #endif /* MBEDTLS_PSA_CRYPTO_DRIVERS */
         default:
             (void) target_operation;
@@ -2245,24 +2230,24 @@ psa_status_t psa_driver_wrapper_hash_update(
                         input, input_length ) );
 #endif
 #if defined(MBEDTLS_PSA_CRYPTO_DRIVERS)
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
         case SLI_SE_TRANSPARENT_DRIVER_ID:
             return( sli_se_transparent_hash_update(
                         &operation->ctx.sli_se_transparent_ctx,
                         input, input_length ) );
-#endif /* SEMAILBOX_PRESENT */
-#if defined(CRYPTOACC_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_VSE)
         case SLI_CRYPTOACC_TRANSPARENT_DRIVER_ID:
             return( sli_cryptoacc_transparent_hash_update(
                         &operation->ctx.sli_cryptoacc_transparent_ctx,
                         input, input_length ) );
-#endif /* CRYPTOACC_PRESENT */
-#if defined(CRYPTO_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_S1)
         case SLI_CRYPTO_TRANSPARENT_DRIVER_ID:
             return( sli_crypto_transparent_hash_update(
                         &operation->ctx.sli_crypto_transparent_ctx,
                         input, input_length ) );
-#endif /* CRYPTO_PRESENT */
+#endif
 #endif /* MBEDTLS_PSA_CRYPTO_DRIVERS */
         default:
             (void) input;
@@ -2291,24 +2276,24 @@ psa_status_t psa_driver_wrapper_hash_finish(
                         hash, hash_size, hash_length ) );
 #endif
 #if defined(MBEDTLS_PSA_CRYPTO_DRIVERS)
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
         case SLI_SE_TRANSPARENT_DRIVER_ID:
             return( sli_se_transparent_hash_finish(
                         &operation->ctx.sli_se_transparent_ctx,
                         hash, hash_size, hash_length ) );
-#endif /* SEMAILBOX_PRESENT */
-#if defined(CRYPTOACC_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_VSE)
         case SLI_CRYPTOACC_TRANSPARENT_DRIVER_ID:
             return( sli_cryptoacc_transparent_hash_finish(
                         &operation->ctx.sli_cryptoacc_transparent_ctx,
                         hash, hash_size, hash_length ) );
-#endif /* CRYPTOACC_PRESENT */
-#if defined(CRYPTO_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_S1)
         case SLI_CRYPTO_TRANSPARENT_DRIVER_ID:
             return( sli_crypto_transparent_hash_finish(
                         &operation->ctx.sli_crypto_transparent_ctx,
                         hash, hash_size, hash_length ) );
-#endif /* CRYPTO_PRESENT */
+#endif
 #endif /* MBEDTLS_PSA_CRYPTO_DRIVERS */
         default:
             (void) hash;
@@ -2333,21 +2318,21 @@ psa_status_t psa_driver_wrapper_hash_abort(
                         &operation->ctx.test_driver_ctx ) );
 #endif
 #if defined(MBEDTLS_PSA_CRYPTO_DRIVERS)
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
         case SLI_SE_TRANSPARENT_DRIVER_ID:
             return( sli_se_transparent_hash_abort(
                         &operation->ctx.sli_se_transparent_ctx ) );
-#endif /* SEMAILBOX_PRESENT */
-#if defined(CRYPTOACC_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_VSE)
         case SLI_CRYPTOACC_TRANSPARENT_DRIVER_ID:
             return( sli_cryptoacc_transparent_hash_abort(
                         &operation->ctx.sli_cryptoacc_transparent_ctx ) );
-#endif /* CRYPTOACC_PRESENT */
-#if defined(CRYPTO_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_S1)
         case SLI_CRYPTO_TRANSPARENT_DRIVER_ID:
             return( sli_crypto_transparent_hash_abort(
                         &operation->ctx.sli_crypto_transparent_ctx ) );
-#endif /* CRYPTO_PRESENT */
+#endif
 #endif /* MBEDTLS_PSA_CRYPTO_DRIVERS */
         default:
             return( PSA_ERROR_BAD_STATE );
@@ -2387,7 +2372,7 @@ psa_status_t psa_driver_wrapper_aead_encrypt(
                 return( status );
 #endif /* PSA_CRYPTO_DRIVER_TEST */
 #if defined(MBEDTLS_PSA_CRYPTO_DRIVERS)
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
             status = sli_se_transparent_aead_encrypt(
                         attributes, key_buffer, key_buffer_size,
                         alg,
@@ -2397,8 +2382,8 @@ psa_status_t psa_driver_wrapper_aead_encrypt(
                         ciphertext, ciphertext_size, ciphertext_length );
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
-#endif /* SEMAILBOX_PRESENT */
-#if defined(CRYPTOACC_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_VSE)
             status = sli_cryptoacc_transparent_aead_encrypt(
                         attributes, key_buffer, key_buffer_size,
                         alg,
@@ -2408,8 +2393,8 @@ psa_status_t psa_driver_wrapper_aead_encrypt(
                         ciphertext, ciphertext_size, ciphertext_length );
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
-#endif /* CRYPTOACC_PRESENT */
-#if defined(CRYPTO_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_S1)
             status = sli_crypto_transparent_aead_encrypt(
                         attributes, key_buffer, key_buffer_size,
                         alg,
@@ -2419,7 +2404,7 @@ psa_status_t psa_driver_wrapper_aead_encrypt(
                         ciphertext, ciphertext_size, ciphertext_length );
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
-#endif /* CRYPTO_PRESENT */
+#endif
 #endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
 
@@ -2433,8 +2418,7 @@ psa_status_t psa_driver_wrapper_aead_encrypt(
                         ciphertext, ciphertext_size, ciphertext_length ) );
 
         /* Add cases for opaque driver here */
-#if defined(SEMAILBOX_PRESENT) && ((_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || \
-    defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS))
+#if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
         case PSA_KEY_LOCATION_SLI_SE_OPAQUE:
             return ( sli_se_opaque_aead_encrypt(
                         attributes, key_buffer, key_buffer_size,
@@ -2443,7 +2427,7 @@ psa_status_t psa_driver_wrapper_aead_encrypt(
                         additional_data, additional_data_length,
                         plaintext, plaintext_length,
                         ciphertext, ciphertext_size, ciphertext_length ) );
-#endif // VAULT
+#endif
         default:
             /* Key is declared with a lifetime not known to us */
             (void)status;
@@ -2484,7 +2468,7 @@ psa_status_t psa_driver_wrapper_aead_decrypt(
                 return( status );
 #endif /* PSA_CRYPTO_DRIVER_TEST */
 #if defined(MBEDTLS_PSA_CRYPTO_DRIVERS)
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
             status = sli_se_transparent_aead_decrypt(
                         attributes, key_buffer, key_buffer_size,
                         alg,
@@ -2494,8 +2478,8 @@ psa_status_t psa_driver_wrapper_aead_decrypt(
                         plaintext, plaintext_size, plaintext_length );
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
-#endif /* SEMAILBOX_PRESENT */
-#if defined(CRYPTOACC_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_VSE)
             status = sli_cryptoacc_transparent_aead_decrypt(
                         attributes, key_buffer, key_buffer_size,
                         alg,
@@ -2505,8 +2489,8 @@ psa_status_t psa_driver_wrapper_aead_decrypt(
                         plaintext, plaintext_size, plaintext_length );
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
-#endif /* CRYPTOACC_PRESENT */
-#if defined(CRYPTO_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_S1)
             status = sli_crypto_transparent_aead_decrypt(
                         attributes, key_buffer, key_buffer_size,
                         alg,
@@ -2516,7 +2500,7 @@ psa_status_t psa_driver_wrapper_aead_decrypt(
                         plaintext, plaintext_size, plaintext_length );
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
-#endif /* CRYPTO_PRESENT */
+#endif
 #endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
 
@@ -2530,8 +2514,7 @@ psa_status_t psa_driver_wrapper_aead_decrypt(
                         plaintext, plaintext_size, plaintext_length ) );
 
         /* Add cases for opaque driver here */
-#if defined(SEMAILBOX_PRESENT) && ((_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || \
-    defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS))
+#if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
         case PSA_KEY_LOCATION_SLI_SE_OPAQUE:
             return ( sli_se_opaque_aead_decrypt(
                         attributes, key_buffer, key_buffer_size,
@@ -2540,7 +2523,7 @@ psa_status_t psa_driver_wrapper_aead_decrypt(
                         additional_data, additional_data_length,
                         ciphertext, ciphertext_length,
                         plaintext, plaintext_size, plaintext_length ) );
-#endif // VAULT
+#endif
         default:
             /* Key is declared with a lifetime not known to us */
             (void)status;
@@ -2577,7 +2560,7 @@ psa_status_t psa_driver_wrapper_aead_encrypt_setup(
                 return( status );
 #endif /* PSA_CRYPTO_DRIVER_TEST */
 #if defined(MBEDTLS_PSA_CRYPTO_DRIVERS)
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
             operation->id = SLI_SE_TRANSPARENT_DRIVER_ID;
             status = sli_se_transparent_aead_encrypt_setup(
                         &operation->ctx.sli_se_transparent_ctx,
@@ -2585,8 +2568,8 @@ psa_status_t psa_driver_wrapper_aead_encrypt_setup(
                         alg );
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
-#endif /* SEMAILBOX_PRESENT */
-#if defined(CRYPTOACC_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_VSE)
             operation->id = SLI_CRYPTOACC_TRANSPARENT_DRIVER_ID;
             status = sli_cryptoacc_transparent_aead_encrypt_setup(
                         &operation->ctx.sli_cryptoacc_transparent_ctx,
@@ -2594,8 +2577,8 @@ psa_status_t psa_driver_wrapper_aead_encrypt_setup(
                         alg );
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
-#endif /* CRYPTOACC_PRESENT */
-#if defined(CRYPTO_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_S1)
             operation->id = SLI_CRYPTO_TRANSPARENT_DRIVER_ID;
             status = sli_crypto_transparent_aead_encrypt_setup(
                         &operation->ctx.sli_crypto_transparent_ctx,
@@ -2603,7 +2586,7 @@ psa_status_t psa_driver_wrapper_aead_encrypt_setup(
                         alg );
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
-#endif /* CRYPTO_PRESENT */
+#endif
 #endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
 
@@ -2617,8 +2600,7 @@ psa_status_t psa_driver_wrapper_aead_encrypt_setup(
             return( status );
 
         /* Add cases for opaque driver here */
-#if defined(SEMAILBOX_PRESENT) && ((_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || \
-    defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS))
+#if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
         case PSA_KEY_LOCATION_SLI_SE_OPAQUE:
             status = sli_se_opaque_aead_encrypt_setup(
                         &operation->ctx.sli_se_opaque_ctx,
@@ -2627,7 +2609,7 @@ psa_status_t psa_driver_wrapper_aead_encrypt_setup(
             if( status == PSA_SUCCESS )
                 operation->id = SLI_SE_OPAQUE_DRIVER_ID;
             return( status );
-#endif // VAULT
+#endif
         default:
             /* Key is declared with a lifetime not known to us */
             (void)status;
@@ -2665,7 +2647,7 @@ psa_status_t psa_driver_wrapper_aead_decrypt_setup(
                 return( status );
 #endif /* PSA_CRYPTO_DRIVER_TEST */
 #if defined(MBEDTLS_PSA_CRYPTO_DRIVERS)
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
             operation->id = SLI_SE_TRANSPARENT_DRIVER_ID;
             status = sli_se_transparent_aead_decrypt_setup(
                         &operation->ctx.sli_se_transparent_ctx,
@@ -2673,8 +2655,8 @@ psa_status_t psa_driver_wrapper_aead_decrypt_setup(
                         alg );
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
-#endif /* SEMAILBOX_PRESENT */
-#if defined(CRYPTOACC_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_VSE)
             operation->id = SLI_CRYPTOACC_TRANSPARENT_DRIVER_ID;
             status = sli_cryptoacc_transparent_aead_decrypt_setup(
                         &operation->ctx.sli_cryptoacc_transparent_ctx,
@@ -2682,8 +2664,8 @@ psa_status_t psa_driver_wrapper_aead_decrypt_setup(
                         alg );
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
-#endif /* CRYPTOACC_PRESENT */
-#if defined(CRYPTO_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_S1)
             operation->id = SLI_CRYPTO_TRANSPARENT_DRIVER_ID;
             status = sli_crypto_transparent_aead_decrypt_setup(
                         &operation->ctx.sli_crypto_transparent_ctx,
@@ -2691,7 +2673,7 @@ psa_status_t psa_driver_wrapper_aead_decrypt_setup(
                         alg );
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
-#endif /* CRYPTO_PRESENT */
+#endif
 #endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
 
@@ -2706,8 +2688,7 @@ psa_status_t psa_driver_wrapper_aead_decrypt_setup(
             return( status );
 
         /* Add cases for opaque driver here */
-#if defined(SEMAILBOX_PRESENT) && ((_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || \
-    defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS))
+#if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
         case PSA_KEY_LOCATION_SLI_SE_OPAQUE:
             status = sli_se_opaque_aead_decrypt_setup(
                         &operation->ctx.sli_se_opaque_ctx,
@@ -2716,7 +2697,7 @@ psa_status_t psa_driver_wrapper_aead_decrypt_setup(
             if( status == PSA_SUCCESS )
                 operation->id = SLI_SE_OPAQUE_DRIVER_ID;
             return( status );
-#endif // VAULT
+#endif
         default:
             /* Key is declared with a lifetime not known to us */
             (void)status;
@@ -2749,31 +2730,30 @@ psa_status_t psa_driver_wrapper_aead_set_nonce(
         /* Add cases for opaque driver here */
 
 #endif /* PSA_CRYPTO_DRIVER_TEST */
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
         case SLI_SE_TRANSPARENT_DRIVER_ID:
             return( sli_se_transparent_aead_set_nonce(
                         &operation->ctx.sli_se_transparent_ctx,
                         nonce, nonce_length ) );
-#endif /* SEMAILBOX_PRESENT */
-#if defined(CRYPTOACC_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_VSE)
         case SLI_CRYPTOACC_TRANSPARENT_DRIVER_ID:
             return( sli_cryptoacc_transparent_aead_set_nonce(
                         &operation->ctx.sli_cryptoacc_transparent_ctx,
                         nonce, nonce_length ) );
-#endif /* CRYPTOACC_PRESENT */
-#if defined(CRYPTO_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_S1)
         case SLI_CRYPTO_TRANSPARENT_DRIVER_ID:
             return( sli_crypto_transparent_aead_set_nonce(
                         &operation->ctx.sli_crypto_transparent_ctx,
                         nonce, nonce_length ) );
-#endif /* CRYPTO_PRESENT */
-#if defined(SEMAILBOX_PRESENT) && ((_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || \
-    defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS))
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
         case SLI_SE_OPAQUE_DRIVER_ID:
             return( sli_se_opaque_aead_set_nonce(
                         &operation->ctx.sli_se_opaque_ctx,
                         nonce, nonce_length ) );
-#endif // VAULT
+#endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
     }
 
@@ -2808,31 +2788,30 @@ psa_status_t psa_driver_wrapper_aead_set_lengths(
         /* Add cases for opaque driver here */
 
 #endif /* PSA_CRYPTO_DRIVER_TEST */
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
         case SLI_SE_TRANSPARENT_DRIVER_ID:
             return( sli_se_transparent_aead_set_lengths(
                         &operation->ctx.sli_se_transparent_ctx,
                         ad_length, plaintext_length ) );
-#endif /* SEMAILBOX_PRESENT */
-#if defined(CRYPTOACC_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_VSE)
         case SLI_CRYPTOACC_TRANSPARENT_DRIVER_ID:
             return( sli_cryptoacc_transparent_aead_set_lengths(
                         &operation->ctx.sli_cryptoacc_transparent_ctx,
                         ad_length, plaintext_length ) );
-#endif /* CRYPTOACC_PRESENT */
-#if defined(CRYPTO_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_S1)
         case SLI_CRYPTO_TRANSPARENT_DRIVER_ID:
             return( sli_crypto_transparent_aead_set_lengths(
                         &operation->ctx.sli_crypto_transparent_ctx,
                         ad_length, plaintext_length ) );
-#endif /* CRYPTO_PRESENT */
-#if defined(SEMAILBOX_PRESENT) && ((_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || \
-    defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS))
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
         case SLI_SE_OPAQUE_DRIVER_ID:
             return( sli_se_opaque_aead_set_lengths(
                         &operation->ctx.sli_se_opaque_ctx,
                         ad_length, plaintext_length ) );
-#endif // VAULT
+#endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
     }
 
@@ -2867,31 +2846,30 @@ psa_status_t psa_driver_wrapper_aead_update_ad(
         /* Add cases for opaque driver here */
 
 #endif /* PSA_CRYPTO_DRIVER_TEST */
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
         case SLI_SE_TRANSPARENT_DRIVER_ID:
             return( sli_se_transparent_aead_update_ad(
                         &operation->ctx.sli_se_transparent_ctx,
                         input, input_length ) );
-#endif /* SEMAILBOX_PRESENT */
-#if defined(CRYPTOACC_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_VSE)
         case SLI_CRYPTOACC_TRANSPARENT_DRIVER_ID:
             return( sli_cryptoacc_transparent_aead_update_ad(
                         &operation->ctx.sli_cryptoacc_transparent_ctx,
                         input, input_length ) );
-#endif /* CRYPTOACC_PRESENT */
-#if defined(CRYPTO_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_S1)
         case SLI_CRYPTO_TRANSPARENT_DRIVER_ID:
             return( sli_crypto_transparent_aead_update_ad(
                         &operation->ctx.sli_crypto_transparent_ctx,
                         input, input_length ) );
-#endif /* CRYPTO_PRESENT */
-#if defined(SEMAILBOX_PRESENT) && ((_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || \
-    defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS))
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
         case SLI_SE_OPAQUE_DRIVER_ID:
             return( sli_se_opaque_aead_update_ad(
                         &operation->ctx.sli_se_opaque_ctx,
                         input, input_length ) );
-#endif // VAULT
+#endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
     }
 
@@ -2931,35 +2909,34 @@ psa_status_t psa_driver_wrapper_aead_update(
         /* Add cases for opaque driver here */
 
 #endif /* PSA_CRYPTO_DRIVER_TEST */
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
         case SLI_SE_TRANSPARENT_DRIVER_ID:
             return( sli_se_transparent_aead_update(
                         &operation->ctx.sli_se_transparent_ctx,
                         input, input_length, output, output_size,
                         output_length ) );
-#endif /* SEMAILBOX_PRESENT */
-#if defined(CRYPTOACC_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_VSE)
         case SLI_CRYPTOACC_TRANSPARENT_DRIVER_ID:
             return( sli_cryptoacc_transparent_aead_update(
                         &operation->ctx.sli_cryptoacc_transparent_ctx,
                         input, input_length, output, output_size,
                         output_length ) );
-#endif /* CRYPTOACC_PRESENT */
-#if defined(CRYPTO_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_S1)
         case SLI_CRYPTO_TRANSPARENT_DRIVER_ID:
             return( sli_crypto_transparent_aead_update(
                         &operation->ctx.sli_crypto_transparent_ctx,
                         input, input_length, output, output_size,
                         output_length ) );
-#endif /* CRYPTO_PRESENT */
-#if defined(SEMAILBOX_PRESENT) && ((_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || \
-    defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS))
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
         case SLI_SE_OPAQUE_DRIVER_ID:
             return( sli_se_opaque_aead_update(
                         &operation->ctx.sli_se_opaque_ctx,
                         input, input_length, output, output_size,
                         output_length ) );
-#endif // VAULT
+#endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
     }
 
@@ -3004,35 +2981,34 @@ psa_status_t psa_driver_wrapper_aead_finish(
         /* Add cases for opaque driver here */
 
 #endif /* PSA_CRYPTO_DRIVER_TEST */
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
         case SLI_SE_TRANSPARENT_DRIVER_ID:
             return( sli_se_transparent_aead_finish(
                         &operation->ctx.sli_se_transparent_ctx,
                         ciphertext, ciphertext_size,
                         ciphertext_length, tag, tag_size, tag_length ) );
-#endif /* SEMAILBOX_PRESENT */
-#if defined(CRYPTOACC_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_VSE)
         case SLI_CRYPTOACC_TRANSPARENT_DRIVER_ID:
             return( sli_cryptoacc_transparent_aead_finish(
                         &operation->ctx.sli_cryptoacc_transparent_ctx,
                         ciphertext, ciphertext_size,
                         ciphertext_length, tag, tag_size, tag_length ) );
-#endif /* CRYPTOACC_PRESENT */
-#if defined(CRYPTO_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_S1)
         case SLI_CRYPTO_TRANSPARENT_DRIVER_ID:
             return( sli_crypto_transparent_aead_finish(
                         &operation->ctx.sli_crypto_transparent_ctx,
                         ciphertext, ciphertext_size,
                         ciphertext_length, tag, tag_size, tag_length ) );
-#endif /* CRYPTO_PRESENT */
-#if defined(SEMAILBOX_PRESENT) && ((_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || \
-    defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS))
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
         case SLI_SE_OPAQUE_DRIVER_ID:
             return( sli_se_opaque_aead_finish(
                         &operation->ctx.sli_se_opaque_ctx,
                         ciphertext, ciphertext_size,
                         ciphertext_length, tag, tag_size, tag_length ) );
-#endif // VAULT
+#endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
     }
 
@@ -3097,35 +3073,34 @@ psa_status_t psa_driver_wrapper_aead_verify(
         /* Add cases for opaque driver here */
 
 #endif /* PSA_CRYPTO_DRIVER_TEST */
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
         case SLI_SE_TRANSPARENT_DRIVER_ID:
             return( sli_se_transparent_aead_verify(
                         &operation->ctx.sli_se_transparent_ctx,
                         plaintext, plaintext_size,
                         plaintext_length, tag, tag_length ) );
-#endif /* SEMAILBOX_PRESENT */
-#if defined(CRYPTOACC_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_VSE)
         case SLI_CRYPTOACC_TRANSPARENT_DRIVER_ID:
             return( sli_cryptoacc_transparent_aead_verify(
                         &operation->ctx.sli_cryptoacc_transparent_ctx,
                         plaintext, plaintext_size,
                         plaintext_length, tag, tag_length ) );
-#endif /* CRYPTOACC_PRESENT */
-#if defined(CRYPTO_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_S1)
         case SLI_CRYPTO_TRANSPARENT_DRIVER_ID:
             return( sli_crypto_transparent_aead_verify(
                         &operation->ctx.sli_crypto_transparent_ctx,
                         plaintext, plaintext_size,
                         plaintext_length, tag, tag_length ) );
-#endif /* CRYPTO_PRESENT */
-#if defined(SEMAILBOX_PRESENT) && ((_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || \
-    defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS))
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
         case SLI_SE_OPAQUE_DRIVER_ID:
             return( sli_se_opaque_aead_verify(
                         &operation->ctx.sli_se_opaque_ctx,
                         plaintext, plaintext_size,
                         plaintext_length, tag, tag_length ) );
-#endif // VAULT
+#endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
     }
 
@@ -3158,27 +3133,26 @@ psa_status_t psa_driver_wrapper_aead_abort(
         /* Add cases for opaque driver here */
 
 #endif /* PSA_CRYPTO_DRIVER_TEST */
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
         case SLI_SE_TRANSPARENT_DRIVER_ID:
             return( sli_se_transparent_aead_abort(
                         &operation->ctx.sli_se_transparent_ctx ) );
-#endif /* SEMAILBOX_PRESENT */
-#if defined(CRYPTOACC_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_VSE)
         case SLI_CRYPTOACC_TRANSPARENT_DRIVER_ID:
             return( sli_cryptoacc_transparent_aead_abort(
                         &operation->ctx.sli_cryptoacc_transparent_ctx ) );
-#endif /* CRYPTOACC_PRESENT */
-#if defined(CRYPTO_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_S1)
         case SLI_CRYPTO_TRANSPARENT_DRIVER_ID:
             return( sli_crypto_transparent_aead_abort(
                         &operation->ctx.sli_crypto_transparent_ctx ) );
-#endif /* CRYPTO_PRESENT */
-#if defined(SEMAILBOX_PRESENT) && ((_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || \
-    defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS))
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
         case SLI_SE_OPAQUE_DRIVER_ID:
             return( sli_se_opaque_aead_abort(
                         &operation->ctx.sli_se_opaque_ctx ) );
-#endif // VAULT
+#endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
     }
 
@@ -3219,30 +3193,30 @@ psa_status_t psa_driver_wrapper_mac_compute(
                 return( status );
 #endif /* PSA_CRYPTO_DRIVER_TEST */
 #if defined(MBEDTLS_PSA_CRYPTO_DRIVERS)
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
             status = sli_se_transparent_mac_compute(
                         attributes, key_buffer, key_buffer_size, alg,
                         input, input_length,
                         mac, mac_size, mac_length );
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
-#endif /* SEMAILBOX_PRESENT */
-#if defined(CRYPTOACC_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_VSE)
             status = sli_cryptoacc_transparent_mac_compute(
                         attributes, key_buffer, key_buffer_size, alg,
                         input, input_length,
                         mac, mac_size, mac_length );
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
-#endif /* CRYPTOACC_PRESENT */
-#if defined(CRYPTO_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_S1)
             status = sli_crypto_transparent_mac_compute(
                         attributes, key_buffer, key_buffer_size, alg,
                         input, input_length,
                         mac, mac_size, mac_length );
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
-#endif /* CRYPTO_PRESENT */
+#endif
 #endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
 #if defined(MBEDTLS_PSA_BUILTIN_MAC)
@@ -3267,22 +3241,20 @@ psa_status_t psa_driver_wrapper_mac_compute(
             return( status );
 #endif /* PSA_CRYPTO_DRIVER_TEST */
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
-#if defined(SEMAILBOX_PRESENT) && ((_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || \
-    defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS))
+#if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
         case PSA_KEY_LOCATION_SLI_SE_OPAQUE:
             return ( sli_se_opaque_mac_compute(
                         attributes, key_buffer, key_buffer_size, alg,
                         input, input_length,
                         mac, mac_size, mac_length ) );
-#endif // VAULT
-#if defined(CRYPTOACC_PRESENT) && defined(SEPUF_PRESENT) && \
-    defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS)
-        case PSA_KEY_LOCATION_SLI_CRYPTOACC_OPAQUE:
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_VSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
+        case PSA_KEY_LOCATION_SL_CRYPTOACC_OPAQUE:
             return ( sli_cryptoacc_opaque_mac_compute(
                         attributes, key_buffer, key_buffer_size, alg,
                         input, input_length,
                         mac, mac_size, mac_length ) );
-#endif // CRYPTOACC && SEPUF && BUILTIN_KEYS
+#endif
         default:
             /* Key is declared with a lifetime not known to us */
             (void) key_buffer;
@@ -3329,7 +3301,7 @@ psa_status_t psa_driver_wrapper_mac_sign_setup(
                 return( status );
 #endif /* PSA_CRYPTO_DRIVER_TEST */
 #if defined(MBEDTLS_PSA_CRYPTO_DRIVERS)
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
             status = sli_se_transparent_mac_sign_setup(
                 &operation->ctx.sli_se_transparent_ctx,
                 attributes,
@@ -3341,8 +3313,8 @@ psa_status_t psa_driver_wrapper_mac_sign_setup(
 
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
-#endif /* SEMAILBOX_PRESENT */
-#if defined(CRYPTOACC_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_VSE)
             status = sli_cryptoacc_transparent_mac_sign_setup(
                 &operation->ctx.sli_cryptoacc_transparent_ctx,
                 attributes,
@@ -3354,8 +3326,8 @@ psa_status_t psa_driver_wrapper_mac_sign_setup(
 
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
-#endif /* CRYPTOACC_PRESENT */
-#if defined(CRYPTO_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_S1)
             status = sli_crypto_transparent_mac_sign_setup(
                 &operation->ctx.sli_crypto_transparent_ctx,
                 attributes,
@@ -3367,7 +3339,7 @@ psa_status_t psa_driver_wrapper_mac_sign_setup(
 
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
-#endif /* CRYPTO_PRESENT */
+#endif
 #endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
 #if defined(MBEDTLS_PSA_BUILTIN_MAC)
@@ -3399,8 +3371,7 @@ psa_status_t psa_driver_wrapper_mac_sign_setup(
 
             return( status );
 #endif /* PSA_CRYPTO_DRIVER_TEST */
-#if defined(SEMAILBOX_PRESENT) && ((_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || \
-    defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS))
+#if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
         case PSA_KEY_LOCATION_SLI_SE_OPAQUE:
             status = sli_se_opaque_mac_sign_setup(
                         &operation->ctx.sli_se_opaque_ctx,
@@ -3410,7 +3381,7 @@ psa_status_t psa_driver_wrapper_mac_sign_setup(
             if( status == PSA_SUCCESS )
                 operation->id = SLI_SE_OPAQUE_DRIVER_ID;
             return( status );
-#endif // VAULT
+#endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
         default:
             /* Key is declared with a lifetime not known to us */
@@ -3455,7 +3426,7 @@ psa_status_t psa_driver_wrapper_mac_verify_setup(
                 return( status );
 #endif /* PSA_CRYPTO_DRIVER_TEST */
 #if defined(MBEDTLS_PSA_CRYPTO_DRIVERS)
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
             status = sli_se_transparent_mac_verify_setup(
                 &operation->ctx.sli_se_transparent_ctx,
                 attributes,
@@ -3467,8 +3438,8 @@ psa_status_t psa_driver_wrapper_mac_verify_setup(
 
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
-#endif /* SEMAILBOX_PRESENT */
-#if defined(CRYPTOACC_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_VSE)
             status = sli_cryptoacc_transparent_mac_verify_setup(
                 &operation->ctx.sli_cryptoacc_transparent_ctx,
                 attributes,
@@ -3480,8 +3451,8 @@ psa_status_t psa_driver_wrapper_mac_verify_setup(
 
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
-#endif /* CRYPTOACC_PRESENT */
-#if defined(CRYPTO_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_S1)
             status = sli_crypto_transparent_mac_verify_setup(
                 &operation->ctx.sli_crypto_transparent_ctx,
                 attributes,
@@ -3493,7 +3464,7 @@ psa_status_t psa_driver_wrapper_mac_verify_setup(
 
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
-#endif /* CRYPTO_PRESENT */
+#endif
 #endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
 #if defined(MBEDTLS_PSA_BUILTIN_MAC)
@@ -3525,8 +3496,7 @@ psa_status_t psa_driver_wrapper_mac_verify_setup(
 
             return( status );
 #endif /* PSA_CRYPTO_DRIVER_TEST */
-#if defined(SEMAILBOX_PRESENT) && ((_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || \
-    defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS))
+#if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
         case PSA_KEY_LOCATION_SLI_SE_OPAQUE:
             status = sli_se_opaque_mac_verify_setup(
                         &operation->ctx.sli_se_opaque_ctx,
@@ -3536,7 +3506,7 @@ psa_status_t psa_driver_wrapper_mac_verify_setup(
             if( status == PSA_SUCCESS )
                 operation->id = SLI_SE_OPAQUE_DRIVER_ID;
             return( status );
-#endif // VAULT
+#endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
         default:
             /* Key is declared with a lifetime not known to us */
@@ -3575,31 +3545,30 @@ psa_status_t psa_driver_wrapper_mac_update(
                         &operation->ctx.opaque_test_driver_ctx,
                         input, input_length ) );
 #endif /* PSA_CRYPTO_DRIVER_TEST */
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
         case SLI_SE_TRANSPARENT_DRIVER_ID:
             return( sli_se_transparent_mac_update(
                         &operation->ctx.sli_se_transparent_ctx,
                         input, input_length ) );
-#endif /* SEMAILBOX_PRESENT */
-#if defined(CRYPTOACC_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_VSE)
         case SLI_CRYPTOACC_TRANSPARENT_DRIVER_ID:
             return( sli_cryptoacc_transparent_mac_update(
                         &operation->ctx.sli_cryptoacc_transparent_ctx,
                         input, input_length ) );
-#endif /* CRYPTOACC_PRESENT */
-#if defined(CRYPTO_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_S1)
         case SLI_CRYPTO_TRANSPARENT_DRIVER_ID:
             return( sli_crypto_transparent_mac_update(
                         &operation->ctx.sli_crypto_transparent_ctx,
                         input, input_length ) );
-#endif /* CRYPTO_PRESENT */
-#if defined(SEMAILBOX_PRESENT) && ((_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || \
-    defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS))
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
         case SLI_SE_OPAQUE_DRIVER_ID:
             return( sli_se_opaque_mac_update(
                         &operation->ctx.sli_se_opaque_ctx,
                         input, input_length ) );
-#endif // VAULT
+#endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
         default:
             (void) input;
@@ -3634,31 +3603,30 @@ psa_status_t psa_driver_wrapper_mac_sign_finish(
                         &operation->ctx.opaque_test_driver_ctx,
                         mac, mac_size, mac_length ) );
 #endif /* PSA_CRYPTO_DRIVER_TEST */
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
         case SLI_SE_TRANSPARENT_DRIVER_ID:
             return( sli_se_transparent_mac_sign_finish(
                         &operation->ctx.sli_se_transparent_ctx,
                         mac, mac_size, mac_length ) );
-#endif /* SEMAILBOX_PRESENT */
-#if defined(CRYPTOACC_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_VSE)
         case SLI_CRYPTOACC_TRANSPARENT_DRIVER_ID:
             return( sli_cryptoacc_transparent_mac_sign_finish(
                         &operation->ctx.sli_cryptoacc_transparent_ctx,
                         mac, mac_size, mac_length ) );
-#endif /* CRYPTOACC_PRESENT */
-#if defined(CRYPTO_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_S1)
         case SLI_CRYPTO_TRANSPARENT_DRIVER_ID:
             return( sli_crypto_transparent_mac_sign_finish(
                         &operation->ctx.sli_crypto_transparent_ctx,
                         mac, mac_size, mac_length ) );
-#endif /* CRYPTO_PRESENT */
-#if defined(SEMAILBOX_PRESENT) && ((_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || \
-    defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS))
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
         case SLI_SE_OPAQUE_DRIVER_ID:
             return( sli_se_opaque_mac_sign_finish(
                         &operation->ctx.sli_se_opaque_ctx,
                         mac, mac_size, mac_length ) );
-#endif // VAULT
+#endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
         default:
             (void) mac;
@@ -3693,31 +3661,30 @@ psa_status_t psa_driver_wrapper_mac_verify_finish(
                         &operation->ctx.opaque_test_driver_ctx,
                         mac, mac_length ) );
 #endif /* PSA_CRYPTO_DRIVER_TEST */
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
         case SLI_SE_TRANSPARENT_DRIVER_ID:
             return( sli_se_transparent_mac_verify_finish(
                         &operation->ctx.sli_se_transparent_ctx,
                         mac, mac_length ) );
-#endif /* SEMAILBOX_PRESENT */
-#if defined(CRYPTOACC_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_VSE)
         case SLI_CRYPTOACC_TRANSPARENT_DRIVER_ID:
             return( sli_cryptoacc_transparent_mac_verify_finish(
                         &operation->ctx.sli_cryptoacc_transparent_ctx,
                         mac, mac_length ) );
-#endif /* CRYPTOACC_PRESENT */
-#if defined(CRYPTO_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_S1)
         case SLI_CRYPTO_TRANSPARENT_DRIVER_ID:
             return( sli_crypto_transparent_mac_verify_finish(
                         &operation->ctx.sli_crypto_transparent_ctx,
                         mac, mac_length ) );
-#endif /* CRYPTO_PRESENT */
-#if defined(SEMAILBOX_PRESENT) && ((_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || \
-    defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS))
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
         case SLI_SE_OPAQUE_DRIVER_ID:
             return( sli_se_opaque_mac_verify_finish(
                         &operation->ctx.sli_se_opaque_ctx,
                         mac, mac_length ) );
-#endif // VAULT
+#endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
         default:
             (void) mac;
@@ -3745,27 +3712,26 @@ psa_status_t psa_driver_wrapper_mac_abort(
             return( mbedtls_test_opaque_mac_abort(
                         &operation->ctx.opaque_test_driver_ctx ) );
 #endif /* PSA_CRYPTO_DRIVER_TEST */
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
         case SLI_SE_TRANSPARENT_DRIVER_ID:
             return( sli_se_transparent_mac_abort(
                         &operation->ctx.sli_se_transparent_ctx ) );
-#endif /* SEMAILBOX_PRESENT */
-#if defined(CRYPTOACC_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_VSE)
         case SLI_CRYPTOACC_TRANSPARENT_DRIVER_ID:
             return( sli_cryptoacc_transparent_mac_abort(
                         &operation->ctx.sli_cryptoacc_transparent_ctx ) );
-#endif /* CRYPTOACC_PRESENT */
-#if defined(CRYPTO_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_S1)
         case SLI_CRYPTO_TRANSPARENT_DRIVER_ID:
             return( sli_crypto_transparent_mac_abort(
                         &operation->ctx.sli_crypto_transparent_ctx ) );
-#endif /* CRYPTO_PRESENT */
-#if defined(SEMAILBOX_PRESENT) && ((_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || \
-    defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS))
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
         case SLI_SE_OPAQUE_DRIVER_ID:
             return( sli_se_opaque_mac_abort(
                         &operation->ctx.sli_se_opaque_ctx ) );
-#endif // VAULT
+#endif
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
         default:
             return( PSA_ERROR_INVALID_ARGUMENT );
@@ -3922,7 +3888,7 @@ psa_status_t psa_driver_wrapper_key_agreement(
         case PSA_KEY_LOCATION_LOCAL_STORAGE:
             /* Key is stored in the slot in export representation, so
              * cycle through all known transparent accelerators */
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
             status = sli_se_transparent_key_agreement( alg,
                                                        &attributes,
                                                        private_key->key.data,
@@ -3935,8 +3901,8 @@ psa_status_t psa_driver_wrapper_key_agreement(
             /* Declared with fallback == true */
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
-#endif /* SEMAILBOX_PRESENT */
-#if defined(CRYPTOACC_PRESENT)
+#endif
+#if defined(SLI_MBEDTLS_DEVICE_VSE)
             status = sli_cryptoacc_transparent_key_agreement( alg,
                                                               &attributes,
                                                               private_key->key.data,
@@ -3949,12 +3915,10 @@ psa_status_t psa_driver_wrapper_key_agreement(
             /* Declared with fallback == true */
             if( status != PSA_ERROR_NOT_SUPPORTED )
                 return( status );
-#endif /* CRYPTOACC_PRESENT */
+#endif
             /* Fell through, meaning no accelerator supports this operation */
             return( PSA_ERROR_NOT_SUPPORTED );
-#if defined(SEMAILBOX_PRESENT) && \
-  ( (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || \
-    defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS) )
+#if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
         case PSA_KEY_LOCATION_SLI_SE_OPAQUE:
             status = sli_se_opaque_key_agreement( alg,
                                                   &attributes,
@@ -3967,7 +3931,7 @@ psa_status_t psa_driver_wrapper_key_agreement(
                                                   shared_secret_length );
             // Cannot have fallback for opaque drivers:
             return ( status );
-#endif /* SEMAILBOX_PRESENT && VAULT */
+#endif
         default:
             /* Key is declared with a lifetime not known to us */
             return( status );

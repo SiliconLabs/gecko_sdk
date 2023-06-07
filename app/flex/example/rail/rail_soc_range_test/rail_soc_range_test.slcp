@@ -83,6 +83,8 @@ requires:
   - name: radio_config_simple_rail_singlephy
     condition: [device_sdid_220]
   - name: radio_config_simple_rail_singlephy
+    condition: [device_sdid_230]
+  - name: radio_config_simple_rail_singlephy
     condition: [device_sdid_235]
   - name: radio_config_simple_rail_singlephy
     condition: 
@@ -157,6 +159,11 @@ configuration:
     value: "0"
   - name: SL_CLI_EXAMPLE_TASK_PRIORITY
     value: "48"
+#------------- RAIL init, Configuration --------------
+  - name: SL_FLEX_RAIL_TX_FIFO_SIZE
+    value: "128"
+  - name: SL_FLEX_RAIL_RX_FIFO_SIZE
+    value: "256"
 #------------- RAIL init, Project --------------------
   - name: SL_RAIL_UTIL_INIT_INIT_COMPLETE_CALLBACK_INST0_ENABLE
     value: "1"

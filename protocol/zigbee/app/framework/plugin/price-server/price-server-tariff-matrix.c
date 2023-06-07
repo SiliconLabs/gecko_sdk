@@ -20,16 +20,10 @@
 #include "price-server.h"
 #include "price-server-tick.h"
 
-#ifdef UC_BUILD
 #include "zap-cluster-command-parser.h"
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_GBCS_COMPATIBILITY
-#define SL_CATALOG_ZIGBEE_GBCS_COMPATIBILITY_PRESENT
 #endif
-#endif // UC_BUILD
-
-#if defined(TARIFF_MATRIX_SUPPORT)
 
 //=============================================================================
 // Functions
@@ -919,7 +913,6 @@ void emberAfPricePrintBlockThresholds(uint8_t endpoint,
 
 void emberAfPricePrintTariffTable(uint8_t endpoint)
 {
-#if ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_PRICE_CLUSTER)) || defined(UC_BUILD))
   uint8_t i;
   uint8_t ep = emberAfFindClusterServerEndpointIndex(endpoint, ZCL_PRICE_CLUSTER_ID);
 
@@ -938,12 +931,10 @@ void emberAfPricePrintTariffTable(uint8_t endpoint)
     emberAfPricePrintTariff(&priceServerInfo.scheduledTariffTable.commonInfos[ep][i],
                             &priceServerInfo.scheduledTariffTable.scheduledTariffs[ep][i]);
   }
-#endif // ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_PRICE_CLUSTER)) || defined(UC_BUILD))
 }
 
 void emberAfPricePrintPriceMatrixTable(uint8_t endpoint)
 {
-#if ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_PRICE_CLUSTER)) || defined(UC_BUILD))
   uint8_t i;
   uint8_t ep = emberAfFindClusterServerEndpointIndex(endpoint, ZCL_PRICE_CLUSTER_ID);
 
@@ -963,13 +954,10 @@ void emberAfPricePrintPriceMatrixTable(uint8_t endpoint)
                                  &priceServerInfo.scheduledPriceMatrixTable.commonInfos[ep][i],
                                  &priceServerInfo.scheduledPriceMatrixTable.scheduledPriceMatrix[ep][i]);
   }
-
-#endif // ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_PRICE_CLUSTER)) || defined(UC_BUILD))
 }
 
 void emberAfPricePrintBlockThresholdsTable(uint8_t endpoint)
 {
-#if ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_PRICE_CLUSTER)) || defined(UC_BUILD))
   uint8_t i;
   uint8_t ep = emberAfFindClusterServerEndpointIndex(endpoint, ZCL_PRICE_CLUSTER_ID);
 
@@ -989,13 +977,11 @@ void emberAfPricePrintBlockThresholdsTable(uint8_t endpoint)
                                      &priceServerInfo.scheduledBlockThresholdsTable.commonInfos[ep][i],
                                      &priceServerInfo.scheduledBlockThresholdsTable.scheduledBlockThresholds[ep][i]);
   }
-
-#endif // ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_PRICE_CLUSTER)) || defined(UC_BUILD))
 }
 
-static void emberAfPutPriceBlockThresholdInResp(emAfPriceBlockThreshold *threshold)
+static void emberAfPutPriceBlockThresholdInResp(sli_zigbee_af_price_block_threshold *threshold)
 {
-  uint16_t length = sizeof(emAfPriceBlockThreshold);
+  uint16_t length = sizeof(sli_zigbee_af_price_block_threshold);
 
 #if BIGENDIAN_CPU
   int8_t loc  = length - 1;
@@ -1015,8 +1001,6 @@ static void emberAfPutPriceBlockThresholdInResp(emAfPriceBlockThreshold *thresho
 
 //-----------------------
 // ZCL Commands Callbacks
-
-#ifdef UC_BUILD
 
 bool emberAfPriceClusterGetTariffInformationCallback(EmberAfClusterCommand *cmd)
 {
@@ -1300,436 +1284,3 @@ bool emberAfPriceClusterGetBlockThresholdsCallback(EmberAfClusterCommand *cmd)
 
   return true;
 }
-
-#else // !UC_BUILD
-
-bool emberAfPriceClusterGetTariffInformationCallback(uint32_t earliestStartTime,
-                                                     uint32_t minIssuerEventId,
-                                                     uint8_t numberOfCommands,
-                                                     uint8_t tariffType)
-{
-  uint8_t validCmds[EMBER_AF_PLUGIN_PRICE_SERVER_TARIFF_TABLE_SIZE];
-  uint8_t ep = emberAfFindClusterServerEndpointIndex(emberAfCurrentEndpoint(), ZCL_PRICE_CLUSTER_ID);
-  uint8_t entriesCount;
-  uint8_t validEntriesCount;
-
-  emberAfDebugPrintln("RX: GetTariffInformation, 0x%4X, 0x%4X, 0x%X, 0x%X",
-                      earliestStartTime,
-                      minIssuerEventId,
-                      numberOfCommands,
-                      tariffType);
-
-  if (ep == 0xFF) {
-    emberAfPriceClusterPrintln("ERR: Unable to find endpoint (%d)!", ep);
-    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_INVALID_VALUE);
-    return true;
-  }
-
-  entriesCount = emberAfPluginPriceCommonFindValidEntries(validCmds,
-                                                          EMBER_AF_PLUGIN_PRICE_SERVER_TARIFF_TABLE_SIZE,
-                                                          (EmberAfPriceCommonInfo *)priceServerInfo.scheduledTariffTable.commonInfos[ep],
-                                                          earliestStartTime,
-                                                          minIssuerEventId,
-                                                          numberOfCommands);
-  validEntriesCount = entriesCount;
-
-  // eliminate commands with mismatching tariffType
-  // upper nibble is reserved. we'll ignore them.
-  {
-    uint8_t i;
-    for (i = 0; i < entriesCount; i++) {
-      uint8_t index = validCmds[i];
-      if ((priceServerInfo.scheduledTariffTable.scheduledTariffs[ep][index].tariffTypeChargingScheme & TARIFF_TYPE_MASK) != (tariffType & TARIFF_TYPE_MASK)) {
-        validCmds[i] = ZCL_PRICE_INVALID_INDEX;
-        validEntriesCount--;
-      }
-    }
-  }
-
-  emberAfDebugPrintln("Tariffs found: %d", validEntriesCount);
-  sendValidCmdEntries(ZCL_PUBLISH_TARIFF_INFORMATION_COMMAND_ID,
-                      ep,
-                      validCmds,
-                      entriesCount);
-
-  return true;
-}
-
-bool emberAfPriceClusterGetPriceMatrixCallback(uint32_t issuerTariffId)
-{
-  EmberAfScheduledTariff tariff;
-  EmberAfPriceCommonInfo tariffInfo;
-  EmberAfScheduledPriceMatrix pm;
-  EmberAfPriceCommonInfo pmInfo;
-  bool found;
-  uint8_t endpoint = emberAfCurrentEndpoint(), i, j, payloadControl;
-  uint16_t size = 0;
-  // Allocate for the largest possible size, unfortunately
-  uint8_t subPayload[ZCL_PRICE_CLUSTER_MAX_TOU_BLOCKS
-                     * ZCL_PRICE_CLUSTER_MAX_TOU_BLOCK_TIERS
-                     * ZCL_PRICE_CLUSTER_PRICE_MATRIX_SUB_PAYLOAD_ENTRY_SIZE];
-
-  // A price matrix must have an associated tariff, otherwise it is meaningless
-  found = emberAfPriceGetTariffByIssuerTariffId(endpoint,
-                                                issuerTariffId,
-                                                &tariffInfo,
-                                                &tariff);
-
-  if (!found) {
-    emberAfDebugPrintln("GetPriceMatrix: no corresponding tariff for id 0x%4x found",
-                        issuerTariffId);
-    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_NOT_FOUND);
-    return true;
-  }
-
-  // Grab the actual price matrix
-  found = emberAfPriceGetPriceMatrixByIssuerTariffId(endpoint,
-                                                     issuerTariffId,
-                                                     &pmInfo,
-                                                     &pm);
-
-  if (!found) {
-    emberAfDebugPrintln("GetPriceMatrix: no corresponding price matrix for id 0x%4x found",
-                        issuerTariffId);
-    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_NOT_FOUND);
-    return true;
-  }
-
-  // The structure of the price matrix will vary depending on the type of the tariff
-  switch (tariff.tariffTypeChargingScheme >> 4) {
-    case 0: // TOU only
-      payloadControl = 1;
-      for (i = 0; i < tariff.numberOfPriceTiersInUse; i++) {
-        subPayload[i * ZCL_PRICE_CLUSTER_PRICE_MATRIX_SUB_PAYLOAD_ENTRY_SIZE] = i + 1;
-        emberAfCopyInt32u(subPayload,
-                          i * ZCL_PRICE_CLUSTER_PRICE_MATRIX_SUB_PAYLOAD_ENTRY_SIZE + 1,
-                          pm.matrix.tier[i]);
-        size += ZCL_PRICE_CLUSTER_PRICE_MATRIX_SUB_PAYLOAD_ENTRY_SIZE;
-      }
-      break;
-    case 1: // Block only
-      payloadControl = 0;
-      for (i = 0; i < tariff.numberOfPriceTiersInUse; i++) {
-        subPayload[i * ZCL_PRICE_CLUSTER_PRICE_MATRIX_SUB_PAYLOAD_ENTRY_SIZE] = i << 4;
-        emberAfCopyInt32u(subPayload,
-                          i * ZCL_PRICE_CLUSTER_PRICE_MATRIX_SUB_PAYLOAD_ENTRY_SIZE + 1,
-                          pm.matrix.blockAndTier[i][0]);
-        size += ZCL_PRICE_CLUSTER_PRICE_MATRIX_SUB_PAYLOAD_ENTRY_SIZE;
-      }
-      break;
-    case 2:
-    case 3: // TOU / Block combined
-      payloadControl = 0;
-      for (i = 0; i < tariff.numberOfPriceTiersInUse; i++) {
-        for (j = 0; j < tariff.numberOfBlockThresholdsInUse + 1; j++) {
-          subPayload[size] = (i << 4) | j;
-          emberAfCopyInt32u(subPayload,
-                            size + 1,
-                            pm.matrix.blockAndTier[i][j]);
-          size += ZCL_PRICE_CLUSTER_PRICE_MATRIX_SUB_PAYLOAD_ENTRY_SIZE;
-        }
-      }
-      break;
-    default:
-      emberAfDebugPrintln("GetPriceMatrix: invalid tariff type / charging scheme");
-      emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_INVALID_VALUE);
-      return true;
-  }
-
-  // Populate and send the PublishPriceMatrix command
-  emberAfDebugPrintln("GetPriceMatrix: subpayload size 0x%2x", size);
-
-#ifdef SL_CATALOG_ZIGBEE_GBCS_COMPATIBILITY_PRESENT
-  // GBCS explicitly lists some commands that need to be sent with "disable
-  // default response" flag set. This is one of them.
-  // We make it conditional on GBCS so it does not affect standard SE apps.
-  emberAfSetDisableDefaultResponse(EMBER_AF_DISABLE_DEFAULT_RESPONSE_ONE_SHOT);
-#endif
-
-  emberAfFillCommandPriceClusterPublishPriceMatrix(pm.providerId,
-                                                   pmInfo.issuerEventId,
-                                                   pmInfo.startTime,
-                                                   pm.issuerTariffId,
-                                                   0,
-                                                   1,
-                                                   payloadControl,
-                                                   subPayload,
-                                                   size);
-  emberAfSendResponse();
-
-  return true;
-}
-
-bool emberAfPriceClusterGetBlockThresholdsCallback(uint32_t issuerTariffId)
-{
-  EmberAfPriceCommonInfo tariffInfo;
-  EmberAfScheduledTariff tariff;
-  EmberAfPriceCommonInfo btInfo;
-  EmberAfScheduledBlockThresholds bt;
-  bool found;
-  uint8_t endpoint = emberAfCurrentEndpoint(), i, j;
-  uint16_t size = 0;
-
-  // Block thresholds must have an associated tariff, otherwise it is meaningless
-  found = emberAfPriceGetTariffByIssuerTariffId(endpoint,
-                                                issuerTariffId,
-                                                &tariffInfo,
-                                                &tariff);
-
-  if (!found) {
-    emberAfDebugPrintln("GetBlockThresholds: no corresponding tariff for id 0x%4x found",
-                        issuerTariffId);
-    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_NOT_FOUND);
-    return true;
-  }
-
-  // Grab the actual block thresholds
-  found = emberAfPriceGetBlockThresholdsByIssuerTariffId(endpoint,
-                                                         issuerTariffId,
-                                                         &btInfo,
-                                                         &bt);
-
-  if (!found) {
-    emberAfDebugPrintln("GetBlockThresholds: no corresponding block thresholds for id 0x%4x found",
-                        issuerTariffId);
-    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_NOT_FOUND);
-    return true;
-  }
-
-  // Populate and send the PublishBlockThresholds command
-  (void) emberAfFillExternalBuffer((ZCL_CLUSTER_SPECIFIC_COMMAND
-                                    | ZCL_FRAME_CONTROL_SERVER_TO_CLIENT),
-                                   ZCL_PRICE_CLUSTER_ID,
-                                   ZCL_PUBLISH_BLOCK_THRESHOLDS_COMMAND_ID,
-                                   "wwwwuu",
-                                   bt.providerId,
-                                   btInfo.issuerEventId,
-                                   btInfo.startTime,
-                                   bt.issuerTariffId,
-                                   0,
-                                   1);
-
-  // The structure of the block thresholds subpayload will vary depending on the tier block mode
-  switch (tariff.tierBlockMode) {
-    case 0: // ActiveBlock
-    case 1: // ActiveBlockPriceTier
-      (void) emberAfPutInt8uInResp(1); // payload control
-      (void) emberAfPutInt8uInResp(tariff.numberOfBlockThresholdsInUse);
-      size += 1;
-      for (j = 0; j < tariff.numberOfBlockThresholdsInUse; j++) {
-        emberAfPutPriceBlockThresholdInResp(&bt.thresholds.block[j]);
-        size += 6;
-      }
-      break;
-    case 2: // ActiveBlockPriceTierThreshold
-      (void) emberAfPutInt8uInResp(0); // payload control
-      for (i = 0; i < tariff.numberOfPriceTiersInUse; i++) {
-        (void) emberAfPutInt8uInResp((i << 4) | tariff.numberOfBlockThresholdsInUse);
-        size += 1;
-        for (j = 0; j < tariff.numberOfBlockThresholdsInUse; j++) {
-          emberAfPutPriceBlockThresholdInResp(&bt.thresholds.blockAndTier[i][j]);
-          size += 6;
-        }
-      }
-      break;
-    case 0xFF://Not used: in case of TOU tariff or Block tariff charging scheme only
-      if ((tariff.tariffTypeChargingScheme & CHARGING_SCHEME_MASK) == 0x10) {//block tariff only
-        (void) emberAfPutInt8uInResp(1); // payload control
-        (void) emberAfPutInt8uInResp(tariff.numberOfBlockThresholdsInUse);
-        size += 1;
-        for (j = 0; j < tariff.numberOfBlockThresholdsInUse; j++) {
-          emberAfPutPriceBlockThresholdInResp(&bt.thresholds.block[j]);
-          size += 6;
-        }
-      } else if ((tariff.tariffTypeChargingScheme & CHARGING_SCHEME_MASK) == 0x00) {//TOU tariff only
-        (void) emberAfPutInt8uInResp(0); // payload control
-        for (i = 0; i < tariff.numberOfPriceTiersInUse; i++) {
-          (void) emberAfPutInt8uInResp((i << 4) | tariff.numberOfBlockThresholdsInUse);
-          size += 1;
-          for (j = 0; j < tariff.numberOfBlockThresholdsInUse; j++) {
-            emberAfPutPriceBlockThresholdInResp(&bt.thresholds.blockAndTier[i][j]);
-            size += 6;
-          }
-        }
-      } else {
-        emberAfDebugPrintln("GetBlockThresholds: invalid tariff charging scheme 0x%x for tierblockmode 0xFF",
-                            tariff.tariffTypeChargingScheme);
-        emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_INVALID_VALUE);
-        return true;
-      }
-      break;
-    default:
-      emberAfDebugPrintln("GetBlockThresholds: invalid tier block mode");
-      emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_INVALID_VALUE);
-      return true;
-  }
-
-  emberAfDebugPrintln("GetBlockThresholds: subpayload size 0x%2x", size);
-  emberAfSendResponse();
-
-  return true;
-}
-
-#endif // UC_BUILD
-
-#else // !defined(TARIFF_MATRIX_SUPPORT)
-//TODO: Clean this else block while removing "#ifndef UC_BUILD"
-
-void emberAfPriceClearTariffTable(uint8_t endpoint)
-{
-}
-
-void emberAfPriceClearPriceMatrixTable(uint8_t endpoint)
-{
-}
-
-void emberAfPriceClearBlockThresholdsTable(uint8_t endpoint)
-{
-}
-
-bool emberAfPriceSetTariffTableEntry(uint8_t endpoint,
-                                     uint8_t index,
-                                     EmberAfPriceCommonInfo *info,
-                                     const EmberAfScheduledTariff *tariff)
-{
-  return false;
-}
-
-bool emberAfPriceClusterGetTariffInformationCallback(uint32_t earliestStartTime,
-                                                     uint32_t minIssuerEventId,
-                                                     uint8_t numberOfCommands,
-                                                     uint8_t tariffType)
-{
-  return false;
-}
-
-bool emberAfPriceClusterGetPriceMatrixCallback(uint32_t issuerTariffId)
-{
-  return false;
-}
-
-bool emberAfPriceClusterGetBlockThresholdsCallback(uint32_t issuerTariffId)
-{
-  return false;
-}
-
-bool emberAfPriceGetTariffTableEntry(uint8_t endpoint,
-                                     uint8_t index,
-                                     EmberAfPriceCommonInfo *info,
-                                     EmberAfScheduledTariff *tariff)
-{
-  return false;
-}
-
-bool emberAfPriceAddTariffTableEntry(uint8_t endpoint,
-                                     EmberAfPriceCommonInfo *info,
-                                     const EmberAfScheduledTariff *curTariff)
-{
-  return false;
-}
-
-bool emberAfPriceGetPriceMatrix(uint8_t endpoint,
-                                uint8_t index,
-                                EmberAfPriceCommonInfo *info,
-                                EmberAfScheduledPriceMatrix *pm)
-{
-  return false;
-}
-
-bool emberAfPriceGetBlockThresholdsTableEntry(uint8_t endpoint,
-                                              uint8_t index,
-                                              EmberAfScheduledBlockThresholds *bt)
-{
-  return false;
-}
-
-bool emberAfPriceGetTariffByIssuerTariffId(uint8_t endpoint,
-                                           uint32_t issuerTariffId,
-                                           EmberAfPriceCommonInfo *info,
-                                           EmberAfScheduledTariff *tariff)
-{
-  return false;
-}
-
-bool emberAfPriceGetPriceMatrixByIssuerTariffId(uint8_t endpoint,
-                                                uint32_t issuerTariffId,
-                                                EmberAfPriceCommonInfo *info,
-                                                EmberAfScheduledPriceMatrix *pm)
-{
-  return false;
-}
-
-bool emberAfPriceGetBlockThresholdsByIssuerTariffId(uint8_t endpoint,
-                                                    uint32_t issuerTariffId,
-                                                    EmberAfPriceCommonInfo *info,
-                                                    EmberAfScheduledBlockThresholds *bt)
-{
-  return false;
-}
-
-bool emberAfPriceSetPriceMatrix(uint8_t endpoint,
-                                uint8_t index,
-                                EmberAfPriceCommonInfo *info,
-                                const EmberAfScheduledPriceMatrix *pm)
-{
-  return false;
-}
-
-bool emberAfPriceSetBlockThresholdsTableEntry(uint8_t endpoint,
-                                              uint8_t index,
-                                              const EmberAfPriceCommonInfo *info,
-                                              const EmberAfScheduledBlockThresholds *bt)
-{
-  return false;
-}
-
-void emberAfPricePrintTariff(const EmberAfPriceCommonInfo *info,
-                             const EmberAfScheduledTariff *tariff)
-{
-}
-void emberAfPricePrintPriceMatrix(uint8_t endpoint,
-                                  const EmberAfPriceCommonInfo *info,
-                                  const EmberAfScheduledPriceMatrix *pm)
-{
-}
-void emberAfPricePrintBlockThresholds(uint8_t endpoint,
-                                      const EmberAfPriceCommonInfo *info,
-                                      const EmberAfScheduledBlockThresholds *bt)
-{
-}
-void emberAfPricePrintTariffTable(uint8_t endpoint)
-{
-}
-void emberAfPricePrintPriceMatrixTable(uint8_t endpoint)
-{
-}
-void emberAfPricePrintBlockThresholdsTable(uint8_t endpoint)
-{
-}
-bool emberAfPriceAddBlockThresholdsTableEntry(uint8_t endpoint,
-                                              uint32_t providerId,
-                                              uint32_t issuerEventId,
-                                              uint32_t startTime,
-                                              uint32_t issuerTariffId,
-                                              uint8_t commandIndex,
-                                              uint8_t numberOfCommands,
-                                              uint8_t subpayloadControl,
-                                              uint8_t* payload)
-{
-  return false;
-}
-
-bool emberAfPriceAddPriceMatrixRaw(uint8_t endpoint,
-                                   uint32_t providerId,
-                                   uint32_t issuerEventId,
-                                   uint32_t startTime,
-                                   uint32_t issuerTariffId,
-                                   uint8_t commandIndex,
-                                   uint8_t numberOfCommands,
-                                   uint8_t subPayloadControl,
-                                   uint8_t* payload)
-{
-  return false;
-}
-
-#endif // TARIFF_MATRIX_SUPPORT

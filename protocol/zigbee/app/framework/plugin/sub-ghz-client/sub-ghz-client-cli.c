@@ -43,16 +43,12 @@ static void printSuccessOrError(EmberStatus status)
  * @param nodeId .... server's node ID
  * @param endpoint .. server's endpoint
  */
-#ifndef UC_BUILD
-void emAfSubGhzClientCliGetSuspendStatus(void)
-#else
-void emAfSubGhzClientCliGetSuspendStatus(sl_cli_command_arg_t *arguments)
-#endif
+void sli_zigbee_af_sub_ghz_client_cli_get_suspend_status(sl_cli_command_arg_t *arguments)
 {
   EmberStatus status;
 
-  EmberNodeId nodeId = (EmberNodeId)emberUnsignedCommandArgument(0);
-  uint8_t endpoint = (uint8_t)emberUnsignedCommandArgument(1);
+  EmberNodeId nodeId = sl_cli_get_argument_uint16(arguments, 0);
+  uint8_t endpoint = sl_cli_get_argument_uint8(arguments, 1);
 
   status = emberAfPluginSubGhzClientSendGetSuspendZclMessagesStatusCommand(nodeId, endpoint);
   printSuccessOrError(status);
@@ -66,13 +62,9 @@ void emAfSubGhzClientCliGetSuspendStatus(sl_cli_command_arg_t *arguments)
  *
  * @param ignore  true to ignore, false to switch back to normal behaviour
  */
-#ifndef UC_BUILD
-void emAfSubGhzClientCliIgnoreSuspendStatus(void)
-#else
-void emAfSubGhzClientCliIgnoreSuspendStatus(sl_cli_command_arg_t *arguments)
-#endif
+void sli_zigbee_af_sub_ghz_client_cli_ignore_suspend_status(sl_cli_command_arg_t *arguments)
 {
-  bool ignore = (bool)emberUnsignedCommandArgument(0);
+  bool ignore = (bool)sl_cli_get_argument_uint32(arguments, 0);
   emberAfPluginSubGhzClientIgnoreSuspendZclMessagesCommand(ignore);
 }
 
@@ -87,21 +79,17 @@ void emAfSubGhzClientCliIgnoreSuspendStatus(sl_cli_command_arg_t *arguments)
  * @param macTxUcastRetries .. total number of Mac Tx transaction retries
  * @param period ............. time in minutes over which macTxUcastXxx were measured
  */
-#ifndef UC_BUILD
-void emAfSubGhzClientCliRequestChannelChange(void)
-#else
-void emAfSubGhzClientCliRequestChannelChange(sl_cli_command_arg_t *arguments)
-#endif
+void sli_zigbee_af_sub_ghz_client_cli_request_channel_change(sl_cli_command_arg_t *arguments)
 {
   EmberStatus status;
 
-  EmberNodeId nodeId = (EmberNodeId)emberUnsignedCommandArgument(0);
-  uint8_t page = (uint8_t)emberUnsignedCommandArgument(1);
-  uint8_t channel = (uint8_t)emberUnsignedCommandArgument(2);
-  uint16_t macTxUcastTotal = (uint16_t)emberUnsignedCommandArgument(3);
-  uint16_t macTxUcastFailures = (uint16_t)emberUnsignedCommandArgument(4);
-  uint16_t macTxUcastRetries = (uint16_t)emberUnsignedCommandArgument(5);
-  uint8_t period = (uint8_t)emberUnsignedCommandArgument(6);
+  EmberNodeId nodeId = sl_cli_get_argument_uint16(arguments, 0);
+  uint8_t page = sl_cli_get_argument_uint8(arguments, 1);
+  uint8_t channel = sl_cli_get_argument_uint8(arguments, 2);
+  uint16_t macTxUcastTotal = sl_cli_get_argument_uint16(arguments, 3);
+  uint16_t macTxUcastFailures = sl_cli_get_argument_uint16(arguments, 4);
+  uint16_t macTxUcastRetries = sl_cli_get_argument_uint16(arguments, 5);
+  uint8_t period = sl_cli_get_argument_uint8(arguments, 6);
 
   status = emberAfPluginSubGhzClientSendUnsolicitedEnhancedUpdateNotify(nodeId,
                                                                         page,

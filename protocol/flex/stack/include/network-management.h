@@ -296,7 +296,6 @@ EmberStatus emberJoinNetworkExtended(EmberNodeType nodeType,
                                      EmberNodeId nodeId,
                                      EmberNetworkParameters *parameters);
 
-#if defined(DOXYGEN_SHOULD_SKIP_THIS) || defined(UNIX_HOST)
 /** @brief Cause the stack to associate with the network using the
  * specified network parameters. The network ID is assigned by the network
  * coordinator.
@@ -321,10 +320,6 @@ EmberStatus emberJoinNetworkExtended(EmberNodeType nodeType,
  */
 EmberStatus emberJoinNetwork(EmberNodeType nodeType,
                              EmberNetworkParameters *parameters);
-#else
-#define emberJoinNetwork(nodeType, parameters) \
-  (emberJoinNetworkExtended((nodeType), EMBER_NULL_NODE_ID, (parameters)))
-#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 /** @brief Tell the stack to allow other nodes to join the network
  * with this node as their parent.  Joining is initially disabled by default.
@@ -451,7 +446,6 @@ EmberNodeId emberGetAuxiliaryAddressFilteringEntry(uint8_t entryIndex);
  */
 void emberResetNetworkState(void);
 
-#if defined(DOXYGEN_SHOULD_SKIP_THIS) || defined(UNIX_HOST)
 /** @brief Form a new network as an ::EMBER_MAC_MODE_DEVICE by becoming the
  *  coordinator. This API should be used to form a compliant 802.15.4 PAN and
  *  to inter-operate with other 802.15.4 devices.
@@ -465,12 +459,6 @@ void emberResetNetworkState(void);
  *   of the new network or the reason that the network formation failed.
  */
 EmberStatus emberMacFormNetwork(EmberNetworkParameters *parameters);
-#else
-#define emberMacFormNetwork(parameters)             \
-  (emberJoinCommissioned(EMBER_MAC_MODE_DEVICE,     \
-                         EMBER_COORDINATOR_ADDRESS, \
-                         (parameters)))
-#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 /** @brief Configure a ::EMBER_MAC_MODE_DEVICE node to be a PAN coordinator.
  * Note, this only applies to nodes that have been commissioned as

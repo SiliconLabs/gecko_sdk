@@ -28,33 +28,27 @@
  *
  ******************************************************************************/
 
-#include "em_device.h"
+#include "sli_psa_driver_features.h"
 
-#if defined(SEMAILBOX_PRESENT)
-#include "psa/crypto_platform.h"
-
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) \
-  || defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS)
+#if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
 
 #include "psa/crypto.h"
+
 #include "sli_se_opaque_types.h"
 #include "sli_se_opaque_functions.h"
-
-#include "sl_se_manager.h"
-#include "sl_se_manager_cipher.h"
 
 #include "sli_se_driver_cipher.h"
 #include "sli_se_driver_key_management.h"
 
+#include "sl_se_manager.h"
+#include "sl_se_manager_cipher.h"
+
 #include <string.h>
 
-#if (defined(PSA_WANT_KEY_TYPE_AES)        \
-  && (defined(PSA_WANT_ALG_ECB_NO_PADDING) \
-  || defined(PSA_WANT_ALG_CTR)             \
-  || defined(PSA_WANT_ALG_CFB)             \
-  || defined(PSA_WANT_ALG_OFB)             \
-  || defined(PSA_WANT_ALG_CBC_NO_PADDING)  \
-  || defined(PSA_WANT_ALG_CBC_PKCS7)))
+// -----------------------------------------------------------------------------
+// Static functions
+
+#if defined(SLI_PSA_DRIVER_FEATURE_CIPHER_MULTIPART)
 
 static void update_key_from_context(sli_se_opaque_cipher_operation_t* ctx)
 {
@@ -62,10 +56,11 @@ static void update_key_from_context(sli_se_opaque_cipher_operation_t* ctx)
   ctx->operation.key_desc.storage.location.buffer.pointer = ctx->key;
 }
 
-static psa_status_t initialize_key_in_context(const psa_key_attributes_t *attributes,
-                                              sli_se_opaque_cipher_operation_t *operation,
-                                              const uint8_t *key_buffer,
-                                              size_t key_buffer_size)
+static psa_status_t initialize_key_in_context(
+  const psa_key_attributes_t *attributes,
+  sli_se_opaque_cipher_operation_t *operation,
+  const uint8_t *key_buffer,
+  size_t key_buffer_size)
 {
   // Double check that the location of the key actually is
   // as expected for this driver.
@@ -109,29 +104,25 @@ static psa_status_t initialize_key_in_context(const psa_key_attributes_t *attrib
   return PSA_SUCCESS;
 }
 
-#endif // PSA_WANT_KEY_TYPE_AES && PSA_WANT_ALG_*
+#endif // SLI_PSA_DRIVER_FEATURE_CIPHER_MULTIPART
 
-psa_status_t sli_se_opaque_cipher_encrypt(const psa_key_attributes_t *attributes,
-                                          const uint8_t *key_buffer,
-                                          size_t key_buffer_size,
-                                          psa_algorithm_t alg,
-                                          const uint8_t *iv,
-                                          size_t iv_length,
-                                          const uint8_t *input,
-                                          size_t input_length,
-                                          uint8_t *output,
-                                          size_t output_size,
-                                          size_t *output_length)
+// -----------------------------------------------------------------------------
+// Single-shot driver entry points
+
+psa_status_t sli_se_opaque_cipher_encrypt(
+  const psa_key_attributes_t *attributes,
+  const uint8_t *key_buffer,
+  size_t key_buffer_size,
+  psa_algorithm_t alg,
+  const uint8_t *iv,
+  size_t iv_length,
+  const uint8_t *input,
+  size_t input_length,
+  uint8_t *output,
+  size_t output_size,
+  size_t *output_length)
 {
-#if (defined(PSA_WANT_KEY_TYPE_AES)        \
-  && (defined(PSA_WANT_ALG_ECB_NO_PADDING) \
-  || defined(PSA_WANT_ALG_CTR)             \
-  || defined(PSA_WANT_ALG_CFB)             \
-  || defined(PSA_WANT_ALG_OFB)             \
-  || defined(PSA_WANT_ALG_CBC_NO_PADDING)  \
-  || defined(PSA_WANT_ALG_CBC_PKCS7)))     \
-  || (defined(PSA_WANT_KEY_TYPE_CHACHA20)  \
-  && defined(PSA_WANT_ALG_STREAM_CIPHER))
+  #if defined (SLI_PSA_DRIVER_FEATURE_CIPHER)
 
   return sli_se_driver_cipher_encrypt(attributes,
                                       key_buffer,
@@ -145,7 +136,7 @@ psa_status_t sli_se_opaque_cipher_encrypt(const psa_key_attributes_t *attributes
                                       output_size,
                                       output_length);
 
-#else // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_*
+  #else // SLI_PSA_DRIVER_FEATURE_CIPHER
 
   (void)attributes;
   (void)key_buffer;
@@ -161,28 +152,21 @@ psa_status_t sli_se_opaque_cipher_encrypt(const psa_key_attributes_t *attributes
 
   return PSA_ERROR_NOT_SUPPORTED;
 
-#endif // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_*
+  #endif // SLI_PSA_DRIVER_FEATURE_CIPHER
 }
 
-psa_status_t sli_se_opaque_cipher_decrypt(const psa_key_attributes_t *attributes,
-                                          const uint8_t *key_buffer,
-                                          size_t key_buffer_size,
-                                          psa_algorithm_t alg,
-                                          const uint8_t *input,
-                                          size_t input_length,
-                                          uint8_t *output,
-                                          size_t output_size,
-                                          size_t *output_length)
+psa_status_t sli_se_opaque_cipher_decrypt(
+  const psa_key_attributes_t *attributes,
+  const uint8_t *key_buffer,
+  size_t key_buffer_size,
+  psa_algorithm_t alg,
+  const uint8_t *input,
+  size_t input_length,
+  uint8_t *output,
+  size_t output_size,
+  size_t *output_length)
 {
-#if (defined(PSA_WANT_KEY_TYPE_AES)        \
-  && (defined(PSA_WANT_ALG_ECB_NO_PADDING) \
-  || defined(PSA_WANT_ALG_CTR)             \
-  || defined(PSA_WANT_ALG_CFB)             \
-  || defined(PSA_WANT_ALG_OFB)             \
-  || defined(PSA_WANT_ALG_CBC_NO_PADDING)  \
-  || defined(PSA_WANT_ALG_CBC_PKCS7)))     \
-  || (defined(PSA_WANT_KEY_TYPE_CHACHA20)  \
-  && defined(PSA_WANT_ALG_STREAM_CIPHER))
+  #if defined (SLI_PSA_DRIVER_FEATURE_CIPHER)
 
   return sli_se_driver_cipher_decrypt(attributes,
                                       key_buffer,
@@ -194,7 +178,7 @@ psa_status_t sli_se_opaque_cipher_decrypt(const psa_key_attributes_t *attributes
                                       output_size,
                                       output_length);
 
-#else // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_*
+  #else // SLI_PSA_DRIVER_FEATURE_CIPHER
 
   (void)attributes;
   (void)key_buffer;
@@ -208,22 +192,20 @@ psa_status_t sli_se_opaque_cipher_decrypt(const psa_key_attributes_t *attributes
 
   return PSA_ERROR_NOT_SUPPORTED;
 
-#endif // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_*
+  #endif // SLI_PSA_DRIVER_FEATURE_CIPHER
 }
 
-psa_status_t sli_se_opaque_cipher_encrypt_setup(sli_se_opaque_cipher_operation_t *operation,
-                                                const psa_key_attributes_t *attributes,
-                                                const uint8_t *key_buffer,
-                                                size_t key_buffer_size,
-                                                psa_algorithm_t alg)
+// -----------------------------------------------------------------------------
+// Multi-part driver entry points
+
+psa_status_t sli_se_opaque_cipher_encrypt_setup(
+  sli_se_opaque_cipher_operation_t *operation,
+  const psa_key_attributes_t *attributes,
+  const uint8_t *key_buffer,
+  size_t key_buffer_size,
+  psa_algorithm_t alg)
 {
-#if (defined(PSA_WANT_KEY_TYPE_AES)        \
-  && (defined(PSA_WANT_ALG_ECB_NO_PADDING) \
-  || defined(PSA_WANT_ALG_CTR)             \
-  || defined(PSA_WANT_ALG_CFB)             \
-  || defined(PSA_WANT_ALG_OFB)             \
-  || defined(PSA_WANT_ALG_CBC_NO_PADDING)  \
-  || defined(PSA_WANT_ALG_CBC_PKCS7)))
+  #if defined(SLI_PSA_DRIVER_FEATURE_CIPHER_MULTIPART)
 
   if (operation == NULL || attributes == NULL || key_buffer == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
@@ -245,7 +227,7 @@ psa_status_t sli_se_opaque_cipher_encrypt_setup(sli_se_opaque_cipher_operation_t
                                          key_buffer_size);
   return psa_status;
 
-#else // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_AES
+  #else // SLI_PSA_DRIVER_FEATURE_CIPHER_MULTIPART
 
   (void)operation;
   (void)attributes;
@@ -255,22 +237,17 @@ psa_status_t sli_se_opaque_cipher_encrypt_setup(sli_se_opaque_cipher_operation_t
 
   return PSA_ERROR_NOT_SUPPORTED;
 
-#endif // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_AES
+  #endif // SLI_PSA_DRIVER_FEATURE_CIPHER_MULTIPART
 }
 
-psa_status_t sli_se_opaque_cipher_decrypt_setup(sli_se_opaque_cipher_operation_t *operation,
-                                                const psa_key_attributes_t *attributes,
-                                                const uint8_t *key_buffer,
-                                                size_t key_buffer_size,
-                                                psa_algorithm_t alg)
+psa_status_t sli_se_opaque_cipher_decrypt_setup(
+  sli_se_opaque_cipher_operation_t *operation,
+  const psa_key_attributes_t *attributes,
+  const uint8_t *key_buffer,
+  size_t key_buffer_size,
+  psa_algorithm_t alg)
 {
-#if (defined(PSA_WANT_KEY_TYPE_AES)        \
-  && (defined(PSA_WANT_ALG_ECB_NO_PADDING) \
-  || defined(PSA_WANT_ALG_CTR)             \
-  || defined(PSA_WANT_ALG_CFB)             \
-  || defined(PSA_WANT_ALG_OFB)             \
-  || defined(PSA_WANT_ALG_CBC_NO_PADDING)  \
-  || defined(PSA_WANT_ALG_CBC_PKCS7)))
+  #if defined(SLI_PSA_DRIVER_FEATURE_CIPHER_MULTIPART)
 
   if (operation == NULL || attributes == NULL || key_buffer == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
@@ -293,7 +270,7 @@ psa_status_t sli_se_opaque_cipher_decrypt_setup(sli_se_opaque_cipher_operation_t
                                          key_buffer_size);
   return psa_status;
 
-#else // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_AES
+  #else // SLI_PSA_DRIVER_FEATURE_CIPHER_MULTIPART
 
   (void)operation;
   (void)attributes;
@@ -303,20 +280,15 @@ psa_status_t sli_se_opaque_cipher_decrypt_setup(sli_se_opaque_cipher_operation_t
 
   return PSA_ERROR_NOT_SUPPORTED;
 
-#endif // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_AES
+  #endif // SLI_PSA_DRIVER_FEATURE_CIPHER_MULTIPART
 }
 
-psa_status_t sli_se_opaque_cipher_set_iv(sli_se_opaque_cipher_operation_t *operation,
-                                         const uint8_t *iv,
-                                         size_t iv_length)
+psa_status_t sli_se_opaque_cipher_set_iv(
+  sli_se_opaque_cipher_operation_t *operation,
+  const uint8_t *iv,
+  size_t iv_length)
 {
-#if (defined(PSA_WANT_KEY_TYPE_AES)        \
-  && (defined(PSA_WANT_ALG_ECB_NO_PADDING) \
-  || defined(PSA_WANT_ALG_CTR)             \
-  || defined(PSA_WANT_ALG_CFB)             \
-  || defined(PSA_WANT_ALG_OFB)             \
-  || defined(PSA_WANT_ALG_CBC_NO_PADDING)  \
-  || defined(PSA_WANT_ALG_CBC_PKCS7)))
+  #if defined(SLI_PSA_DRIVER_FEATURE_CIPHER_MULTIPART)
 
   if (operation == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
@@ -329,7 +301,7 @@ psa_status_t sli_se_opaque_cipher_set_iv(sli_se_opaque_cipher_operation_t *opera
 
   return sli_se_driver_cipher_set_iv(&operation->operation, iv, iv_length);
 
-#else // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_AES
+  #else // SLI_PSA_DRIVER_FEATURE_CIPHER_MULTIPART
 
   (void)operation;
   (void)iv;
@@ -337,23 +309,18 @@ psa_status_t sli_se_opaque_cipher_set_iv(sli_se_opaque_cipher_operation_t *opera
 
   return PSA_ERROR_NOT_SUPPORTED;
 
-#endif // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_AES
+  #endif // SLI_PSA_DRIVER_FEATURE_CIPHER_MULTIPART
 }
 
-psa_status_t sli_se_opaque_cipher_update(sli_se_opaque_cipher_operation_t *operation,
-                                         const uint8_t *input,
-                                         size_t input_length,
-                                         uint8_t *output,
-                                         size_t output_size,
-                                         size_t *output_length)
+psa_status_t sli_se_opaque_cipher_update(
+  sli_se_opaque_cipher_operation_t *operation,
+  const uint8_t *input,
+  size_t input_length,
+  uint8_t *output,
+  size_t output_size,
+  size_t *output_length)
 {
-#if (defined(PSA_WANT_KEY_TYPE_AES)        \
-  && (defined(PSA_WANT_ALG_ECB_NO_PADDING) \
-  || defined(PSA_WANT_ALG_CTR)             \
-  || defined(PSA_WANT_ALG_CFB)             \
-  || defined(PSA_WANT_ALG_OFB)             \
-  || defined(PSA_WANT_ALG_CBC_NO_PADDING)  \
-  || defined(PSA_WANT_ALG_CBC_PKCS7)))
+  #if defined(SLI_PSA_DRIVER_FEATURE_CIPHER_MULTIPART)
 
   // Argument check
   if (operation == NULL) {
@@ -375,7 +342,7 @@ psa_status_t sli_se_opaque_cipher_update(sli_se_opaque_cipher_operation_t *opera
                                      output_size,
                                      output_length);
 
-#else // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_AES
+  #else // SLI_PSA_DRIVER_FEATURE_CIPHER_MULTIPART
 
   (void)operation;
   (void)input;
@@ -386,21 +353,16 @@ psa_status_t sli_se_opaque_cipher_update(sli_se_opaque_cipher_operation_t *opera
 
   return PSA_ERROR_NOT_SUPPORTED;
 
-#endif // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_AES
+  #endif // SLI_PSA_DRIVER_FEATURE_CIPHER_MULTIPART
 }
 
-psa_status_t sli_se_opaque_cipher_finish(sli_se_opaque_cipher_operation_t *operation,
-                                         uint8_t *output,
-                                         size_t output_size,
-                                         size_t *output_length)
+psa_status_t sli_se_opaque_cipher_finish(
+  sli_se_opaque_cipher_operation_t *operation,
+  uint8_t *output,
+  size_t output_size,
+  size_t *output_length)
 {
-#if (defined(PSA_WANT_KEY_TYPE_AES)        \
-  && (defined(PSA_WANT_ALG_ECB_NO_PADDING) \
-  || defined(PSA_WANT_ALG_CTR)             \
-  || defined(PSA_WANT_ALG_CFB)             \
-  || defined(PSA_WANT_ALG_OFB)             \
-  || defined(PSA_WANT_ALG_CBC_NO_PADDING)  \
-  || defined(PSA_WANT_ALG_CBC_PKCS7)))
+  #if defined(SLI_PSA_DRIVER_FEATURE_CIPHER_MULTIPART)
 
   if (operation == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
@@ -419,7 +381,7 @@ psa_status_t sli_se_opaque_cipher_finish(sli_se_opaque_cipher_operation_t *opera
                                      output_size,
                                      output_length);
 
-#else // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_AES
+  #else // SLI_PSA_DRIVER_FEATURE_CIPHER_MULTIPART
 
   (void)operation;
   (void)output;
@@ -428,18 +390,13 @@ psa_status_t sli_se_opaque_cipher_finish(sli_se_opaque_cipher_operation_t *opera
 
   return PSA_ERROR_NOT_SUPPORTED;
 
-#endif // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_AES
+  #endif // SLI_PSA_DRIVER_FEATURE_CIPHER_MULTIPART
 }
 
-psa_status_t sli_se_opaque_cipher_abort(sli_se_opaque_cipher_operation_t *operation)
+psa_status_t sli_se_opaque_cipher_abort(
+  sli_se_opaque_cipher_operation_t *operation)
 {
-#if (defined(PSA_WANT_KEY_TYPE_AES)        \
-  && (defined(PSA_WANT_ALG_ECB_NO_PADDING) \
-  || defined(PSA_WANT_ALG_CTR)             \
-  || defined(PSA_WANT_ALG_CFB)             \
-  || defined(PSA_WANT_ALG_OFB)             \
-  || defined(PSA_WANT_ALG_CBC_NO_PADDING)  \
-  || defined(PSA_WANT_ALG_CBC_PKCS7)))
+  #if defined(SLI_PSA_DRIVER_FEATURE_CIPHER_MULTIPART)
 
   if (operation != NULL) {
     // Wipe context
@@ -448,14 +405,13 @@ psa_status_t sli_se_opaque_cipher_abort(sli_se_opaque_cipher_operation_t *operat
 
   return PSA_SUCCESS;
 
-#else // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_AES
+  #else // SLI_PSA_DRIVER_FEATURE_CIPHER_MULTIPART
 
   (void)operation;
 
   return PSA_ERROR_NOT_SUPPORTED;
 
-#endif // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_AES
+  #endif // SLI_PSA_DRIVER_FEATURE_CIPHER_MULTIPART
 }
 
-#endif // VAULT || MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS
-#endif // defined(SEMAILBOX_PRESENT)
+#endif // SLI_MBEDTLS_DEVICE_HSE && SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS

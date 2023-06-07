@@ -19,8 +19,15 @@
 #include "app/framework/include/af.h"
 #include "app/framework/util/common.h"
 #include "trust-center-keepalive.h"
-#ifdef UC_BUILD
+
+#ifdef SL_COMPONENT_CATALOG_PRESENT
+#include "sl_component_catalog.h"
+#endif
+
+#ifdef SL_CATALOG_ZIGBEE_TRUST_CENTER_KEEPALIVE_PRESENT
 #include "trust-center-keepalive-config.h"
+#else
+#include "config/trust-center-keepalive-config.h"
 #endif
 
 //------------------------------------------------------------------------------
@@ -28,7 +35,6 @@
 
 #if defined(EMBER_SCRIPTED_TEST)
   #define EMBER_AF_PLUGIN_TRUST_CENTER_KEEPALIVE_DEFAULT_JITTER_PERIOD_SECONDS  60
-  #define EMBER_AF_PLUGIN_TRUST_CENTER_KEEPALIVE_DEFAULT_BASE_PERIOD_MINUTES    3
 #endif
 
 typedef enum {
@@ -39,12 +45,8 @@ typedef enum {
   STATE_INITIATE_NETWORK_SEARCH,
 } TrustCenterKeepaliveState;
 
-#ifdef UC_BUILD
 sl_zigbee_event_t emberAfPluginTrustCenterKeepaliveTickNetworkEvents[EMBER_SUPPORTED_NETWORKS];
-void emberAfPluginTrustCenterKeepaliveTickNetworkEventHandler(SLXU_UC_EVENT);
-#else
-extern EmberEventControl emberAfPluginTrustCenterKeepaliveTickNetworkEventControls[];
-#endif
+void emberAfPluginTrustCenterKeepaliveTickNetworkEventHandler(sl_zigbee_event_t * event);
 
 typedef struct {
   uint32_t timeOfLastResponse;
@@ -90,15 +92,13 @@ static KeepaliveStatusStruct* getCurrentStatusStruct(void)
   return &(keepaliveStatusArray[emberGetCurrentNetwork()]);
 }
 
-#ifdef UC_BUILD
-
 void emberAfPluginTrustCenterKeepaliveInitCallback(uint8_t init_level)
 {
   switch (init_level) {
     case SL_ZIGBEE_INIT_LEVEL_EVENT:
     {
-      slxu_zigbee_network_event_init(emberAfPluginTrustCenterKeepaliveTickNetworkEvents,
-                                     emberAfPluginTrustCenterKeepaliveTickNetworkEventHandler);
+      sl_zigbee_network_event_init(emberAfPluginTrustCenterKeepaliveTickNetworkEvents,
+                                   emberAfPluginTrustCenterKeepaliveTickNetworkEventHandler);
       break;
     }
 
@@ -113,18 +113,6 @@ void emberAfPluginTrustCenterKeepaliveInitCallback(uint8_t init_level)
   }
 }
 
-#else // !UC_BUILD
-
-void emberAfPluginTrustCenterKeepaliveInitCallback(void)
-{
-  uint8_t i;
-  for (i = 0; i < EMBER_SUPPORTED_NETWORKS; i++) {
-    MEMCOPY(&(keepaliveStatusArray[i]), &defaultStruct, sizeof(KeepaliveStatusStruct));
-  }
-}
-
-#endif // UC_BUILD
-
 void emberAfTrustCenterKeepaliveAbortCallback(void)
 {
   KeepaliveStatusStruct* currentStatusStruct = getCurrentStatusStruct();
@@ -133,11 +121,7 @@ void emberAfTrustCenterKeepaliveAbortCallback(void)
     currentStatusStruct->state = STATE_NONE;
   }
   emberAfCorePrintln("Setting trust center keepalive inactive.");
-  #ifdef UC_BUILD
   sl_zigbee_event_set_inactive(emberAfPluginTrustCenterKeepaliveTickNetworkEvents);
-  #else
-  emberAfNetworkEventControlSetInactive(emberAfPluginTrustCenterKeepaliveTickNetworkEventControls);
-  #endif
 }
 
 void emberAfPluginTrustCenterKeepaliveStackStatusCallback(EmberStatus status)
@@ -297,15 +281,9 @@ static void delayUntilNextKeepalive(void)
     delayTimeSeconds,
     currentStatusStruct->baseTimeSeconds,
     randomJitter, currentStatusStruct->jitterTimeSeconds);
-  #ifdef UC_BUILD
   sl_zigbee_event_set_delay_ms(emberAfPluginTrustCenterKeepaliveTickNetworkEvents,
                                (delayTimeSeconds
                                 * MILLISECOND_TICKS_PER_SECOND));
-    #else
-  emberAfNetworkEventControlSetDelayMS(emberAfPluginTrustCenterKeepaliveTickNetworkEventControls,
-                                       (delayTimeSeconds
-                                        * MILLISECOND_TICKS_PER_SECOND));
-  #endif
 }
 
 static void messageTimeout(void)
@@ -365,7 +343,7 @@ static void serviceDiscoveryCallback(const EmberAfServiceDiscoveryResult* result
     // the Keep-Alive signals.
     currentStatusStruct->destinationEndpoint = list->list[0];
     emberAfPluginTrustCenterKeepaliveConnectivityEstablishedCallback();
-    emAfSendKeepaliveSignal();
+    sli_zigbee_af_send_keepalive_signal();
   } else if (result->status == EMBER_AF_UNICAST_SERVICE_DISCOVERY_COMPLETE_WITH_EMPTY_RESPONSE) {
     if (emberAfPluginTrustCenterKeepaliveServerlessIsSupportedCallback()) {
       // Some third-party users of this mechanism (eg. WWAH) might not care about
@@ -430,14 +408,10 @@ static void discoveryKeepaliveEndpoint(void)
     //   out the process.
 }
 
-void emberAfPluginTrustCenterKeepaliveTickNetworkEventHandler(SLXU_UC_EVENT)
+void emberAfPluginTrustCenterKeepaliveTickNetworkEventHandler(sl_zigbee_event_t * event)
 {
   KeepaliveStatusStruct* currentStatusStruct = getCurrentStatusStruct();
-  #ifdef UC_BUILD
   sl_zigbee_event_set_inactive(emberAfPluginTrustCenterKeepaliveTickNetworkEvents);
-  #else
-  emberAfNetworkEventControlSetInactive(emberAfPluginTrustCenterKeepaliveTickNetworkEventControls);
-  #endif
 
   if (currentStatusStruct->waitingForResponse) {
     messageTimeout();
@@ -449,7 +423,7 @@ void emberAfPluginTrustCenterKeepaliveTickNetworkEventHandler(SLXU_UC_EVENT)
       discoveryKeepaliveEndpoint();
       break;
     case STATE_SEND_KEEPALIVE_SIGNAL:
-      emAfSendKeepaliveSignal();
+      sli_zigbee_af_send_keepalive_signal();
       break;
     default:
       break;
@@ -467,7 +441,7 @@ void emberAfKeepaliveClusterClientDefaultResponseCallback(uint8_t endpoint,
   }
 }
 
-void emAfSendKeepaliveSignal(void)
+void sli_zigbee_af_send_keepalive_signal(void)
 {
   KeepaliveStatusStruct* currentStatusStruct = getCurrentStatusStruct();
   EmberStatus status;
@@ -506,20 +480,15 @@ void emAfSendKeepaliveSignal(void)
   currentStatusStruct->state = STATE_SEND_KEEPALIVE_SIGNAL;
   currentStatusStruct->waitingForResponse = (status == EMBER_SUCCESS);
   if (status == EMBER_SUCCESS) {
-    #ifdef UC_BUILD
     sl_zigbee_event_set_delay_ms(emberAfPluginTrustCenterKeepaliveTickNetworkEvents,
                                  KEEPALIVE_WAIT_TIME_MS);
-    #else
-    emberAfNetworkEventControlSetDelayMS(emberAfPluginTrustCenterKeepaliveTickNetworkEventControls,
-                                         KEEPALIVE_WAIT_TIME_MS);
-    #endif
   } else {
     delayUntilNextKeepalive();
   }
 }
 
-void emAfPluginTrustCenterKeepaliveReadAttributesResponseCallback(uint8_t *buffer,
-                                                                  uint16_t bufLen)
+void sli_zigbee_af_trust_center_keepalive_read_attributes_response_callback(uint8_t *buffer,
+                                                                            uint16_t bufLen)
 {
   KeepaliveStatusStruct* currentStatusStruct = getCurrentStatusStruct();
   if (emberAfCurrentCommand()->source == EMBER_TRUST_CENTER_NODE_ID
@@ -623,25 +592,25 @@ static void initiateSearchForNewNetworkWithTrustCenter(void)
   }
 }
 
-uint8_t emAfPluginTrustCenterKeepaliveGetBaseTimeMinutes(void)
+uint8_t sli_zigbee_af_trust_center_keepalive_get_base_time_minutes(void)
 {
   KeepaliveStatusStruct* currentStatusStruct = getCurrentStatusStruct();
   return (uint8_t)(currentStatusStruct->baseTimeSeconds / 60);
 }
 
-uint16_t emAfPluginTrustCenterKeepaliveGetBaseTimeSeconds(void)
+uint16_t sli_zigbee_af_trust_center_keepalive_get_base_time_seconds(void)
 {
   KeepaliveStatusStruct* currentStatusStruct = getCurrentStatusStruct();
   return currentStatusStruct->baseTimeSeconds;
 }
 
-uint16_t emAfPluginTrustCenterKeepaliveGetJitterTimeSeconds(void)
+uint16_t sli_zigbee_af_trust_center_keepalive_get_jitter_time_seconds(void)
 {
   KeepaliveStatusStruct* currentStatusStruct = getCurrentStatusStruct();
   return currentStatusStruct->jitterTimeSeconds;
 }
 
-bool emAfPluginTrustCenterKeepaliveTcHasServerCluster(void)
+bool sli_zigbee_af_trust_center_keepalive_tc_has_server_cluster(void)
 {
   KeepaliveStatusStruct* currentStatusStruct = getCurrentStatusStruct();
   return currentStatusStruct->tcHasKeepAliveServerCluster;

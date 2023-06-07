@@ -15,21 +15,11 @@
  *
  ******************************************************************************/
 
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
-#include "calendar-common-config.h"
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_GBCS_COMPATIBILITY
-#define SL_CATALOG_ZIGBEE_GBCS_COMPATIBILITY_PRESENT
 #endif
-#ifdef EMBER_AF_PLUGIN_GAS_PROXY_FUNCTION
-#define SL_CATALOG_ZIGBEE_GAS_PROXY_FUNCTION_PRESENT
-#endif
-#endif // UC_BUILD
 
-#ifdef UC_BUILD
 #include "calendar-common-config.h"
-#endif // UC_BUILD
 
 /**
  * @defgroup calendar-common Calendar Common

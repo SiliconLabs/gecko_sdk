@@ -140,11 +140,14 @@ typedef void (*SPIDRV_Callback_t)(struct SPIDRV_HandleData *handle,
                                   Ecode_t transferStatus,
                                   int itemsTransferred);
 
-/// An SPI driver instance initialization structure.
-/// Contains a number of SPIDRV configuration options.
-/// This structure is passed to @ref SPIDRV_Init() when initializing a SPIDRV
-/// instance. Some common initialization data sets are predefined in
-/// @ref spidrv_init_structs
+/**
+ * @struct SPIDRV_Init
+ * @struct SPIDRV_Init_t
+ * @brief An SPI driver instance initialization structure.
+ *   Contains a number of SPIDRV configuration options.
+ *   This structure is passed to @ref SPIDRV_Init() when initializing a SPIDRV instance.
+ *   Some common initialization data sets are predefined in @ref spidrv_init_structs.
+ */
 typedef struct SPIDRV_Init {
   void               *port;             ///< The USART used for SPI.
 #if defined(_USART_ROUTELOC0_MASK)

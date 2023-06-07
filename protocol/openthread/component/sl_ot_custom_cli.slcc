@@ -15,9 +15,14 @@ include:
   - path: protocol/openthread/include
     file_list:
       - path: sl_ot_custom_cli.h
+source:
+  - path: protocol/openthread/src/cli/cli_utils.c
 template_file:
   - path: protocol/openthread/src/template/sl_ot_custom_cli.c.jinja
 template_contribution:
   - name: ot_init
     value: sl_ot_custom_cli_init
     priority: 21
+define:
+  - name: SL_OPENTHREAD_CUSTOM_CLI_ENABLE
+    value: 1

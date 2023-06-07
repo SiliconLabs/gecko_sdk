@@ -39,11 +39,10 @@ import socket
 import select
 
 # Test description:
-#   This test verifies the advertisement of local NAT64 prefix in Thread network
+#   This test verifies publishing the local NAT64 prefix in Thread network
 #   when no NAT64 prefix found on infrastructure interface.
-#
-#   TODO: add checks for outbound connectivity from Thread device to IPv4 host
-#         after OTBR change is ready.
+#   It also verifies the outbound connectivity from a Thread device to
+#   an IPv4 host address.
 #
 # Topology:
 #    ----------------(eth)--------------------
@@ -117,7 +116,9 @@ class Nat64SingleBorderRouter(thread_cert.TestCase):
         self.simulator.go(5)
 
         br.start()
-        br.enable_nat64()
+        # When feature flag is enabled, NAT64 might be disabled by default. So
+        # ensure NAT64 is enabled here.
+        br.nat64_set_enabled(True)
         self.simulator.go(config.LEADER_STARTUP_DELAY)
         br.bash("service bind9 stop")
         self.simulator.go(330)
@@ -193,13 +194,13 @@ class Nat64SingleBorderRouter(thread_cert.TestCase):
         host_ip = self.get_host_ip()
         self.assertTrue(router.ping(ipaddr=host_ip))
 
-        mappings = br.get_nat64_mappings()
+        mappings = br.nat64_mappings
         self.assertEqual(mappings[0]['counters']['ICMP']['4to6']['packets'], 1)
         self.assertEqual(mappings[0]['counters']['ICMP']['6to4']['packets'], 1)
         self.assertEqual(mappings[0]['counters']['total']['4to6']['packets'], 1)
         self.assertEqual(mappings[0]['counters']['total']['6to4']['packets'], 1)
 
-        counters = br.get_nat64_counters()
+        counters = br.nat64_counters
         self.assertEqual(counters['protocol']['ICMP']['4to6']['packets'], 1)
         self.assertEqual(counters['protocol']['ICMP']['6to4']['packets'], 1)
 
@@ -212,9 +213,9 @@ class Nat64SingleBorderRouter(thread_cert.TestCase):
 
         sock.close()
 
-        counters = br.get_nat64_counters()
+        counters = br.nat64_counters
         self.assertEqual(counters['protocol']['UDP']['6to4']['packets'], 1)
-        mappings = br.get_nat64_mappings()
+        mappings = br.nat64_mappings
         self.assertEqual(mappings[0]['counters']['UDP']['6to4']['packets'], 1)
 
         # We should be able to get a IPv4 mapped IPv6 address.
@@ -223,13 +224,13 @@ class Nat64SingleBorderRouter(thread_cert.TestCase):
             ipv6.synthesize_ip6_address(ipaddress.IPv6Network(nat64_prefix), ipaddress.IPv4Address('203.0.113.1')))
         self.assertFalse(router.ping(ipaddr=mapped_ip6_address))
 
-        mappings = br.get_nat64_mappings()
+        mappings = br.nat64_mappings
         self.assertEqual(mappings[0]['counters']['ICMP']['4to6']['packets'], 1)
         self.assertEqual(mappings[0]['counters']['ICMP']['6to4']['packets'], 2)
         self.assertEqual(mappings[0]['counters']['total']['4to6']['packets'], 1)
         self.assertEqual(mappings[0]['counters']['total']['6to4']['packets'], 3)
 
-        counters = br.get_nat64_counters()
+        counters = br.nat64_counters
         self.assertEqual(counters['protocol']['ICMP']['4to6']['packets'], 1)
         self.assertEqual(counters['protocol']['ICMP']['6to4']['packets'], 2)
 

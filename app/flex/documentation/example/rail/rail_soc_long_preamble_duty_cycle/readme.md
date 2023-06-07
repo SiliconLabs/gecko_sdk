@@ -24,26 +24,39 @@ families that support proprietary software and the Duty Cycle/RX Channel Hopping
 RAIL APIs.
 
 Use the compile time symbol
-[`RAIL_SUPPORTS_CHANNEL_HOPPING`](https://docs.silabs.com/rail/latest/group-features#gadcf2cddcac5cd29251a41acb7a2cb0ad)
+[`RAIL_SUPPORTS_CHANNEL_HOPPING`](https://docs.silabs.com/rail/2.14/rail-api/features#rail-supports-channel-hopping-1)
 or the runtime call
-[`RAIL_SupportsChannelHopping()`](https://docs.silabs.com/rail/latest/group-features#ga4406c5dad879b047d6170e233ac23ee7)
+[`RAIL_SupportsChannelHopping()`](https://docs.silabs.com/rail/2.14/rail-api/features#rail-supports-channel-hopping)
 to check whether the platform supports this feature.
+
+The application works differently depending on the device generation. Signal
+Qualifier (SQ, also known as Preamble Sense Mode) will be used where available.
+Typically, EFR32xG23 and newer sub-GHz capable parts support Signal Qualifier.
+
+When the application is using signal qualifier, the boot printout will mention
+it.
 
 ## Getting Started
 
-Compile the project and download the application to two radio boards.
+After compiling the project, download it to two radio boards. Connect to their
+UART console.
 
-On startup the transmitted preamble length, the bitrate and the off time will be
-displayed:
+On startup the bitrate and the off time will be displayed, and on generations
+without signal qualifier, the transmitted preamble length:
 
 ```
 Long Preamble Duty Cycle
 Preamble length 50000 for bitrate 500000 b/s with 98000 us off time
 ```
-
+With signal qualifier, the preamble length is not printed, but the signal
+qualifier mode is:
+```
+Bitrate 500000 b/s with 5763 us off time. Duty cycling with signal qualifier.
+```
 ----
 
-You may encounter two kind of misconfiguration on startup:
+If the application is not running in signal qualifier mode, you may encounter
+two kind of misconfiguration on startup:
 
 1. Detection time is lower than the configured on time;
 2. Transmitted preamble length cannot be configured on radio configuration
@@ -69,7 +82,6 @@ running:
 ```
 Duty Cycle Off time was changed to ensure stable working
 ```
-
 ----
 
 Transmitting a packet can be done by pressing a button or issuing `send` CLI
@@ -110,6 +122,21 @@ You can monitor the current consumption on the Energy Profiler extension though
 it is not reliable for doing accurate measurements (mainboard leakage).
 
 ## Application Configuration
+
+### Configuring devices with Signal Qualifier
+
+If signal qualifier is used, the timing parameters are automatically calculated
+from the radio configuration. Increase the preamble length for longer sleep
+period. The Configurator will set the detection time to the shortest possible.
+E.g., if detection can be achieved on 16 symbols on the given configuration and
+the preamble length is set to 1000, the sleep period will be 1000 - 2*16 = 968
+symbols.
+
+Note that the *Fast Preamble Detect* option in the Radio Configurator is enabled
+on the default radio config of this example. It must be kept on for the feature
+to work, and only 2FSK and MSK modulations are supported.
+
+### Configuring devices without Signal Qualifier
 
 Though the duty cycle component cannot be added in the component editor, this
 component is automatically installed in LDC example applications and generates a

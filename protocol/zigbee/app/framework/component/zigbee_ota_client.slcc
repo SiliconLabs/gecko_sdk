@@ -45,7 +45,7 @@ template_contribution:
   - name: zigbee_stack_callback
     value:
       callback_type: dsa_verify
-      function_name: emAfDsaVerifyCallback
+      function_name: sli_zigbee_af_dsa_verify_callback
   - name: cluster_functions
     value:
        cluster_name: OtaBootload
@@ -103,13 +103,13 @@ template_contribution:
     value:
       group: ota-client
       name: status
-      handler: emAfOtaClientPrintState
+      handler: sli_zigbee_af_ota_client_print_state
       help: Prints information on the current state of the OTA client download.
   - name: cli_command
     value:
       group: ota-client
       name: block-test
-      handler: emAfSendImageBlockRequestTest
+      handler: sli_zigbee_af_send_image_block_request_test
       help: Sends an image block request for a file the server should not have.  Test harness only (test case 9.5.6 - Missing File)
   - name: cli_command
     value:
@@ -140,13 +140,13 @@ template_contribution:
     value:
       group: ota-client
       name: disable-downgrades
-      handler: emAfOtaClientDisableDowngrades
+      handler: sli_zigbee_af_ota_client_disable_downgrades
       help: Disables OTA downgrades.
   - name: cli_command
     value:
       group: ota-client
       name: enable-downgrades
-      handler: emAfOtaClientEnableDowngrades
+      handler: sli_zigbee_af_ota_client_enable_downgrades
       help: Enables OTA downgrades.
 
 documentation:

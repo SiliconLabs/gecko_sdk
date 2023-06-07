@@ -1,0 +1,45 @@
+id: abr_reflector
+package: Bluetooth
+label: ABR reflector
+description: >
+  ABR reflector (Peripheral) Role API acts as a server and accepts connection from
+  ABR initiator (Central) Role clients.
+  It sends ABR reflector side measurement data via indications to a registered initiator node.
+category: Bluetooth|Application|Miscellaneous
+quality: experimental
+root_path: app/bluetooth/common/abr_reflector
+include:
+  - path: .
+    file_list:
+      - path: abr_reflector.h
+config_file:
+  - path: abr_reflector.xml
+    directory: btconf
+source:
+  - path: abr_reflector.c
+requires:
+  - name: app_log
+  - name: app_assert
+  - name: gatt_configuration
+  - name: bluetooth_stack
+  - name: bluetooth_feature_power_control
+  - name: bluetooth_feature_connection
+  - name: bluetooth_feature_legacy_advertiser
+  - name: bluetooth_feature_extended_advertiser
+    condition:
+      - device_supports_bluetooth_advertising_extensions
+  - name: bluetooth_feature_gatt_server
+  - name: bluetooth_feature_gatt
+  - name: power_manager
+  - name: bluetooth_feature_cs
+  - name: bluetooth_feature_cs_test
+
+
+provides:
+  - name: abr_reflector
+template_contribution:
+  - name: bluetooth_on_event
+    value:
+      include: abr_reflector.h
+      function: abr_reflector_on_bt_event
+    priority: 0

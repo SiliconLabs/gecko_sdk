@@ -15,11 +15,12 @@ component:
   - id: iostream_stdlib_config
   - id: cpc_security_secondary_none
   - id: wisun_full_radioconf
+  - id: wisun_stack_lfn
   - id: wisun_rcp_app
 
 requires:
-  - name: rail_util_eff
-    condition: [hardware_board_has_eff]
+  - name: freertos_heap_3
+    condition: [freertos]
 
 configuration:
   - name: SL_CPC_DRV_UART_VCOM_BAUDRATE
@@ -43,15 +44,6 @@ configuration:
   - name: OS_CFG_DBG_EN
     value: 1
     condition: [micriumos_kernel]
-  - name: SL_RAIL_UTIL_PA_SELECTION_SUBGHZ
-    value: "RAIL_TX_POWER_MODE_SUBGIG_EFF_20DBM"
-    condition: [hardware_board_has_eff]
-  - name: RAIL_UTIL_EFF_MAX_TX_CONTINUOUS_POWER_DBM
-    value: 20
-    condition: [hardware_board_has_eff]
-  - name: RAIL_UTIL_EFF_MAX_TX_DUTY_CYCLE
-    value: 100
-    condition: [hardware_board_has_eff]
   - name: SL_RAIL_UTIL_PTI_BAUD_RATE_HZ
     value: "3200000"
   - name: SL_DEVICE_INIT_RFFPLL_BAND

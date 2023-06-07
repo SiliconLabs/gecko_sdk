@@ -1,32 +1,28 @@
 #!/usr/bin/env python3
 
 import sys
-import os
 import argparse
 from string import Template
 import re
+from pathlib import Path
 
 # Patch site-packages to find numpy
 import jinja2
 if sys.platform.startswith("win"):
-  site_packages_path = os.path.abspath(os.path.join(os.path.dirname(jinja2.__file__), "../../../ext-site-packages"))
+  site_packages_path = (Path(jinja2.__file__).parent / "../../../ext-site-packages").resolve()
 else:
-  site_packages_path = os.path.abspath(os.path.join(os.path.dirname(jinja2.__file__), "../../../../ext-site-packages"))
-if os.path.exists(site_packages_path):
-  if site_packages_path not in sys.path:
-    sys.path.insert(0, site_packages_path)
+  site_packages_path = (Path(jinja2.__file__).parent / "../../../../ext-site-packages").resolve()
+if site_packages_path.exists() and str(site_packages_path) not in sys.path:
+    sys.path.insert(0, str(site_packages_path))
 
-"""
-Generation of parameter files requires the tflite_model, tflite_model_parameters
-and tensorflow_lite_support packages. Because these packages are not installed
-in the uc-generation environment where this python script will be run, these
-packages are supplied as source. tflite_model and tflite_model_parameters were
-fetched from internal repos, while the tensorflow_lite_support was fetched from
-https://github.com/tensorflow/tflite-support.
-"""
+# Generation of parameter files requires the tflite_model, tflite_model_parameters
+# and tensorflow_lite_support packages. Because these packages are not installed
+# in the uc-generation environment where this python script will be run, these
+# packages are supplied as source. tflite_model and tflite_model_parameters were
+# fetched from internal repos, while the tensorflow_lite_support was fetched from
+# https://github.com/tensorflow/tflite-support.
 from tflite.Model import Model
 from tflite.BuiltinOperator import BuiltinOperator
-from tflite_model import TfliteModel
 from tflite_model_parameters import TfliteModelParameters
 
 model_data_h = """// Auto-generated serialization of TFLite flatbuffers in config directory
@@ -66,8 +62,8 @@ template_opcode_resolver_h = """// Auto-generated macro to instanciate and initi
 #ifndef SL_TFLITE_MICRO_OPCODE_RESOLVER_H
 #define SL_TFLITE_MICRO_OPCODE_RESOLVER_H
 
-#define SL_TFLITE_MICRO_OPCODE_RESOLVER(opcode_resolver, error_reporter) \\
-static tflite::MicroMutableOpResolver<${data_len}> opcode_resolver(error_reporter); \\
+#define SL_TFLITE_MICRO_OPCODE_RESOLVER(opcode_resolver) \\
+static tflite::MicroMutableOpResolver<${data_len}> opcode_resolver; \\
 ${data}
 
 #endif // SL_TFLITE_MICRO_OPCODE_RESOLVER_H
@@ -190,16 +186,25 @@ def sanitize_filename(name):
   return name
 
 
-def find_first_tflite_file(input_dir):
+def find_first_tflite_file(input_dir: Path):
   '''
   Return the alphabetically sorted first tflite filename and content
   '''
-  for f in sorted(os.listdir(input_dir)):
-    if os.path.splitext(f)[-1] == '.tflite':
-      with open(os.path.join(input_dir, f), 'rb') as fd:
-        data = fd.read()
-      filename = sanitize_filename(os.path.splitext(f)[0])
-      return filename, data
+  candidates = sorted(input_dir.glob("**/*.tflite"))
+  if not candidates:
+    print("tflite.py INFO: No tflite file found - exiting.")
+    sys.exit(0)
+
+  tflite_file = candidates[0]
+  if 1 < len(candidates):
+    listing = "\n- ".join(str(cand) for cand in candidates)
+    print(f"tflite.py WARNING: Multiple tflite files found:\n- {listing}")
+    print(f"Defaulting to converting {tflite_file}")
+
+  with open(tflite_file, "rb") as fd:
+    data = fd.read()
+
+  return tflite_file.stem, data
 
 def generate_c_array(buf):
   arr = ''
@@ -211,7 +216,7 @@ def generate_c_array(buf):
   return arr.lstrip().rstrip(', ')
 
 def opcode_parse_opcode(opcode):
-  if opcode.CustomCode() != None:
+  if opcode.CustomCode() is not None:
     opcode_val = opcode.CustomCode()
   else:
     opcode_val = opcode.DeprecatedBuiltinCode()
@@ -247,7 +252,7 @@ def generate_c_type(value):
     value = str(value) + "f"
   return value
 
-def generate_files(input_dir, output_dir):
+def generate_files(input_dir: Path, output_dir: Path):
   model_name, buf = find_first_tflite_file(input_dir)
 
   # Generate model data
@@ -289,26 +294,27 @@ def generate_files(input_dir, output_dir):
       parameter_defines += param_define_t.substitute(**props)
     parameter_defines += '\n'
 
-  with open(os.path.join(output_dir, 'sl_tflite_micro_model.h'), 'w') as fd:
+  with open(Path(output_dir, 'sl_tflite_micro_model.h'), 'w') as fd:
     fd.write(model_data_h)
-  with open(os.path.join(output_dir, 'sl_tflite_micro_model.c'), 'w') as fd:
+  with open(Path(output_dir, 'sl_tflite_micro_model.c'), 'w') as fd:
     fd.write(model_data_c)
-  with open(os.path.join(output_dir, 'sl_tflite_micro_opcode_resolver.h'), 'w') as fd:
+  with open(Path(output_dir, 'sl_tflite_micro_opcode_resolver.h'), 'w') as fd:
     fd.write(opcode_data)
   # Only emit this file if model parameters are available
   if parameter_defines:
     tp = Template(template_model_parameters_h)
-    with open(os.path.join(output_dir, 'sl_tflite_micro_model_parameters.h'), 'w') as fd:
+    with open(Path(output_dir, 'sl_tflite_micro_model_parameters.h'), 'w') as fd:
       fd.write(tp.substitute(data=(parameter_defines), model_name=model_name))
 
 
 
 def entry():
   parser = argparse.ArgumentParser(description='TensorFlow Lite flatbuffer to C converter.')
-  parser.add_argument('-i', required=True, help='Input directory containing .tflite files')
-  parser.add_argument('-o', required=True, help='Output directory to populate with serialized content.')
+  parser.add_argument('-i', required=True, type=Path, help='Input directory containing .tflite files')
+  parser.add_argument('-o', required=True, type=Path, help='Output directory to populate with serialized content.')
   args = parser.parse_args()
 
   generate_files(args.i, args.o)
 
-entry()
+if __name__ == "__main__":
+  entry()

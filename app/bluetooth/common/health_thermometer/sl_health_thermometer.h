@@ -31,6 +31,11 @@
 #ifndef SL_HEALTH_THERMOMETER_H
 #define SL_HEALTH_THERMOMETER_H
 
+/***********************************************************************************************//**
+ * @addtogroup health_thermometer
+ * @{
+ **************************************************************************************************/
+
 #include <stddef.h>
 #include <stdint.h>
 #include "sl_health_thermometer_config.h"
@@ -88,4 +93,5 @@ void sl_bt_ht_temperature_measurement_indication_confirmed_cb(uint8_t connection
  *****************************************************************************/
 void sl_bt_ht_on_event(sl_bt_msg_t *evt);
 
+/** @} (end addtogroup health_thermometer) */
 #endif // SL_HEALTH_THERMOMETER_H

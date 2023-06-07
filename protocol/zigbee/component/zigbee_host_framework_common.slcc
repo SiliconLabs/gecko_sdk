@@ -38,7 +38,6 @@ include:
       - path: ember-debug.h
       - path: ember-duty-cycle.h
       - path: ember-random-api.h
-      - path: ember-static-struct.h
       - path: gp-types.h
       - path: library.h
       - path: mac-layer.h
@@ -74,7 +73,6 @@ include:
       - path: event_queue/event-queue.h
 
 define:
-  - name: "UC_BUILD"
   - name: "USE_ZAP_CONFIG"
     value: "1"
 
@@ -85,9 +83,6 @@ toolchain_settings:
     value: "-Wno-missing-field-initializers"
   - option: gcc_compiler_option
     value: "-Wno-missing-braces"
-  # EMZIGBEE-6659
-  - option: gcc_compiler_option
-    value: "-Wno-format"
 
 template_file:
   - path: protocol/zigbee/app/framework/common/template/zigbee_stack_callback_dispatcher.h.jinja
@@ -113,7 +108,7 @@ template_contribution:
   - name: zigbee_af_callback
     value:
       callback_type: tick
-      function_name: emAfHostFrameworkTick
+      function_name: sli_zigbee_af_host_framework_tick
 
 
 documentation:

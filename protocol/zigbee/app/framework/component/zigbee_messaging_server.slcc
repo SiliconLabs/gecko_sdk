@@ -37,7 +37,7 @@ template_contribution:
     value:
       group: messaging-server
       name: message
-      handler: emAfMessagingServerCliMsg
+      handler: sli_zigbee_af_messaging_server_cli_msg
       help: Set the message used by the message plugin.
       argument:
       - type: string
@@ -46,7 +46,7 @@ template_contribution:
     value:
       group: messaging-server
       name: append
-      handler: emAfMessagingServerCliAppend
+      handler: sli_zigbee_af_messaging_server_cli_append
       help: Appends an additional string to the message contained in the message component.
       argument:
       - type: string
@@ -55,7 +55,7 @@ template_contribution:
     value:
       group: messaging-server
       name: id
-      handler: emAfMessagingServerCliId
+      handler: sli_zigbee_af_messaging_server_cli_id
       help: Sets the message ID for the message contained in the messaging component.
       argument:
       - type: uint32
@@ -64,7 +64,7 @@ template_contribution:
     value:
       group: messaging-server
       name: time
-      handler: emAfMessagingServerCliTime
+      handler: sli_zigbee_af_messaging_server_cli_time
       help: Sets the start time and duration for the message used by the message component.
       argument:
       - type: uint32
@@ -75,7 +75,7 @@ template_contribution:
     value:
       group: messaging-server
       name: relative-time
-      handler: emAfMessagingServerCliRelativeTime
+      handler: sli_zigbee_af_messaging_server_cli_relative_time
       help: Sets the relative time on the message.
       argument:
       - type: uint32
@@ -91,19 +91,19 @@ template_contribution:
     value:
       group: transmission
       name: normal
-      handler: emAfMessagingServerCliTransmission
+      handler: sli_zigbee_af_messaging_server_cli_transmission
       help: Sets the message control bit mask to normal transmission.
   - name: cli_command
     value:
       group: transmission
       name: ipan
-      handler: emAfMessagingServerCliTransmission
+      handler: sli_zigbee_af_messaging_server_cli_transmission
       help: Sets the message control bit mask in the message to anonymous.
   - name: cli_command
     value:
       group: transmission
       name: both
-      handler: emAfMessagingServerCliTransmission
+      handler: sli_zigbee_af_messaging_server_cli_transmission
       help: Sets the message control bit mask in the message to normal and anonymous.
   - name: cli_group
     value:
@@ -114,25 +114,25 @@ template_contribution:
     value:
       group: importance
       name: low
-      handler: emAfMessagingServerCliImportance
+      handler: sli_zigbee_af_messaging_server_cli_importance
       help: Sets the message importance to low.
   - name: cli_command
     value:
       group: importance
       name: medium
-      handler: emAfMessagingServerCliImportance
+      handler: sli_zigbee_af_messaging_server_cli_importance
       help: Sets the message importance to medium.
   - name: cli_command
     value:
       group: importance
       name: high
-      handler: emAfMessagingServerCliImportance
+      handler: sli_zigbee_af_messaging_server_cli_importance
       help: Sets the message importance to high.
   - name: cli_command
     value:
       group: importance
       name: critical
-      handler: emAfMessagingServerCliImportance
+      handler: sli_zigbee_af_messaging_server_cli_importance
       help: Sets the message importance to critical.
   - name: cli_group
     value:
@@ -143,19 +143,19 @@ template_contribution:
     value:
       group: confirm
       name: not
-      handler: emAfMessagingServerCliConfirm
+      handler: sli_zigbee_af_messaging_server_cli_confirm
       help: Sets the message confirmation to not used.
   - name: cli_command
     value:
       group: confirm
       name: req
-      handler: emAfMessagingServerCliConfirm
+      handler: sli_zigbee_af_messaging_server_cli_confirm
       help: Sets message confirmation to required.
   - name: cli_command
     value:
       group: messaging-server
       name: valid
-      handler: emAfMessagingServerCliValid
+      handler: sli_zigbee_af_messaging_server_cli_valid
       help: Sets the message validity to valid.
       argument:
       - type: uint8
@@ -164,7 +164,7 @@ template_contribution:
     value:
       group: messaging-server
       name: invalid
-      handler: emAfMessagingServerCliValid
+      handler: sli_zigbee_af_messaging_server_cli_valid
       help: Sets the message validity to invalid.
       argument:
       - type: uint8
@@ -173,7 +173,7 @@ template_contribution:
     value:
       group: messaging-server
       name: display
-      handler: emAfMessagingServerCliDisplay
+      handler: sli_zigbee_af_messaging_server_cli_display
       help: Displays the message.
       argument:
       - type: uint16
@@ -186,7 +186,7 @@ template_contribution:
     value:
       group: messaging-server
       name: cancel
-      handler: emAfMessagingServerCliCancel
+      handler: sli_zigbee_af_messaging_server_cli_cancel
       help: Cancels the message.
       argument:
       - type: uint16
@@ -199,7 +199,7 @@ template_contribution:
     value:
       group: messaging-server
       name: print
-      handler: emAfMessagingServerCliPrint
+      handler: sli_zigbee_af_messaging_server_cli_print
       help: Prints the message info.
       argument:
       - type: uint8

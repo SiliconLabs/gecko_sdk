@@ -39,8 +39,16 @@ include:
     file_list:
       - path: openthread-core-posix-config.h
       - path: openthread-posix-config.h
-      - path: cpc_interface.hpp
       - path: platform-posix.h
+      - path: vendor_interface.hpp
+  - path: "protocol/openthread/platform-abstraction/include"
+    file_list:
+      - path: radio_vendor.h
+      - path: vendor_spinel.hpp
+  - path: "protocol/openthread/platform-abstraction/posix"
+    file_list:
+      - path: cpc_interface.hpp
+      - path: posix_vendor_spinel_interface.hpp
 
 # used by util/third_party/openthread/src/core/common/random.cpp
   - path: "util/third_party/mbedtls/include"

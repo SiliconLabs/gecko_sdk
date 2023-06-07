@@ -25,12 +25,15 @@
 
 #include <errno.h>
 
-#ifdef UC_BUILD
-#include "trust-center-backup-config.h"
+#ifndef EMBER_SCRIPTED_TEST
+  #include "trust-center-backup-config.h"
+#else
+  #include "config/trust-center-backup-config.h"
+#endif
+
 #if (EMBER_AF_PLUGIN_TRUST_CENTER_BACKUP_POSIX_FILE_BACKUP_SUPPORT == 1)
   #define POSIX_FILE_BACKUP_SUPPORT
 #endif // EMBER_AF_PLUGIN_TRUST_CENTER_BACKUP_POSIX_FILE_BACKUP_SUPPORT
-#endif // UC_BUILD
 
 #if defined(EMBER_TEST)
   #define POSIX_FILE_BACKUP_SUPPORT
@@ -45,7 +48,7 @@
 // supports 8-bit values.
 #define MAX_FILEPATH_LENGTH 255
 
-#ifdef UC_BUILD
+#ifdef SL_CATALOG_ZIGBEE_CORE_CLI_PRESENT
 // Forward Declarations
 
 static void getFilePathFromCommandLine(sl_cli_command_arg_t *arguments, uint8_t* result);
@@ -53,7 +56,7 @@ static void getFilePathFromCommandLine(sl_cli_command_arg_t *arguments, uint8_t*
 // *****************************************************************************
 // Functions
 
-void emAfTcExportCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_tc_export_command(sl_cli_command_arg_t *arguments)
 {
   uint8_t file[MAX_FILEPATH_LENGTH];
   getFilePathFromCommandLine(arguments, file);
@@ -61,7 +64,7 @@ void emAfTcExportCommand(sl_cli_command_arg_t *arguments)
   emberAfTrustCenterExportBackupToFile((const char*)file);
 }
 
-void emAfTrustCenterBackupSaveTokensToFileCli(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_trust_center_backup_save_tokens_to_file_cli(sl_cli_command_arg_t *arguments)
 {
   uint8_t file[MAX_FILEPATH_LENGTH];
   getFilePathFromCommandLine(arguments, file);
@@ -69,7 +72,7 @@ void emAfTrustCenterBackupSaveTokensToFileCli(sl_cli_command_arg_t *arguments)
   printf("%s Status = %d\n", (status == EMBER_SUCCESS) ? "SUCCESS" : "ERROR", status);
 }
 
-void emAfTcImportCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_tc_import_command(sl_cli_command_arg_t *arguments)
 {
   uint8_t file[MAX_FILEPATH_LENGTH];
   getFilePathFromCommandLine(arguments, file);
@@ -77,7 +80,7 @@ void emAfTcImportCommand(sl_cli_command_arg_t *arguments)
   emberAfTrustCenterImportBackupFromFile((const char*)file);
 }
 
-void emAfTrustCenterBackupRestoreTokensFromFileCli(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_trust_center_backup_restore_tokens_from_file_cli(sl_cli_command_arg_t *arguments)
 {
   uint8_t file[MAX_FILEPATH_LENGTH];
   getFilePathFromCommandLine(arguments, file);
@@ -94,7 +97,7 @@ static void getFilePathFromCommandLine(sl_cli_command_arg_t *arguments, uint8_t*
   result[length] = '\0';
 }
 
-void emAfTrustCenterBackupRestoreResetNodeCli(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_trust_center_backup_restore_reset_node_cli(sl_cli_command_arg_t *arguments)
 {
   (void)arguments;
 #if defined EZSP_HOST
@@ -102,7 +105,7 @@ void emAfTrustCenterBackupRestoreResetNodeCli(sl_cli_command_arg_t *arguments)
 #endif
 }
 
-void emAfTrustCenterBackupWriteNcpTokenToZigbeedTokensCli(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_trust_center_backup_write_ncp_token_to_zigbeed_tokens_cli(sl_cli_command_arg_t *arguments)
 {
   uint8_t file[MAX_FILEPATH_LENGTH];
   getFilePathFromCommandLine(arguments, file);
@@ -110,38 +113,5 @@ void emAfTrustCenterBackupWriteNcpTokenToZigbeedTokensCli(sl_cli_command_arg_t *
   printf("%s Status = %d\n", (status == EMBER_SUCCESS) ? "SUCCESS" : "ERROR", status);
 }
 
-#else
-// *****************************************************************************
-// Forward Declarations
-
-static void getFilePathFromCommandLine(uint8_t* result);
-
-// *****************************************************************************
-// Functions
-
-void emAfTcExportCommand(void)
-{
-  uint8_t file[MAX_FILEPATH_LENGTH];
-  getFilePathFromCommandLine(file);
-
-  emberAfTrustCenterExportBackupToFile(file);
-}
-
-void emAfTcImportCommand(void)
-{
-  uint8_t file[MAX_FILEPATH_LENGTH];
-  getFilePathFromCommandLine(file);
-
-  emberAfTrustCenterImportBackupFromFile(file);
-}
-
-static void getFilePathFromCommandLine(uint8_t* result)
-{
-  uint8_t length = emberCopyStringArgument(0,
-                                           result,
-                                           MAX_FILEPATH_LENGTH,
-                                           false); // leftpad?
-  result[length] = '\0';
-}
-#endif // UC_BUILD
+#endif // SL_CLI_TYPES_H
 #endif // defined(POSIX_FILE_BACKUP_SUPPORT)

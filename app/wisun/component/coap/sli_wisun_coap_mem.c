@@ -119,7 +119,7 @@ static _coap_mem_t _mem[WISUN_COAP_MEMORY_OPTION_COUNT] = {
 void _wisun_coap_mem_init(void)
 {
   for (uint8_t i = 0; i < WISUN_COAP_MEMORY_OPTION_COUNT; ++i) {
-    // create memory poo
+    // create memory pool
     assert(sl_mempool_create(&_mem[i].mempool,
                              _mem[i].block_count,
                              _mem[i].block_size,

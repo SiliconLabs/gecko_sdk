@@ -16,7 +16,7 @@ class profile_MBus_modes(object):
     #
     @staticmethod
     def set_agc_to_some_mysterious_values(model, family):
-        if family != "dumbo":
+        if family not in ["dumbo","unit_test_part"]:
             model.vars.AGC_MININDEX_INDEXMINPGA.value_forced = 9
             model.vars.AGC_MININDEX_INDEXMINDEGEN.value_forced = 6
             model.vars.AGC_MININDEX_INDEXMINSLICES.value_forced = 0
@@ -68,7 +68,7 @@ class profile_MBus_modes(object):
         model.vars.AGC_LOOPDEL_LNASLICESDEL.value_forced = 4
         model.vars.AGC_LOOPDEL_IFPGADEL.value_forced = 4
 
-        if family == "dumbo":
+        if family in ["dumbo","unit_test_part"]:
             # We think this is here because it's compensating for the lack of an RF peak detector in Dumbo
             model.vars.AGC_GAINSTEPLIM_CFLOOPSTEPMAX.value_forced = 4
         else:
@@ -101,7 +101,7 @@ class profile_MBus_modes(object):
         model.vars.bandwidth_hz.value_forced = 25000
         model.vars.if_frequency_hz.value_forced = 150000
         model.vars.symbols_in_timing_window.value_forced = 6
-        if model.part_family.lower() in ['dumbo', 'jumbo', 'nerio', 'nixi']:
+        if model.part_family.lower() in ['dumbo', 'jumbo', 'nerio', 'nixi', "unit_test_part"]:
             # Series 1
             model.vars.pll_bandwidth_tx.value_forced = model.vars.pll_bandwidth_tx.var_enum.BW_2120KHz
         else:
@@ -143,7 +143,7 @@ class profile_MBus_modes(object):
         # keying off the new mbus_mode variable.
         #
 
-        if family == "dumbo":
+        if family in ["dumbo","unit_test_part"]:
             #
             # We don't know why this is being done, but we think it exists because Dumbo
             # doesn't have the src block.  These register writes aren't needed in Jumbo
@@ -195,7 +195,7 @@ class profile_MBus_modes(object):
 
         model.vars.agc_period.value_forced = 0
 
-        if family == "dumbo":
+        if family in ["dumbo","unit_test_part"]:
             # We don't know why this is being done, but we think it exists because it's
             # compensating for the lack of RF peak in Dumbo.  These register writes aren't
             # needed in Jumbo because Jumbo has the RF peak detector enabled.  At least
@@ -234,7 +234,7 @@ class profile_MBus_modes(object):
         model.vars.frequency_comp_mode.value_forced = model.vars.frequency_comp_mode.var_enum.INTERNAL_ALWAYS_ON
         model.vars.bandwidth_hz.value_forced = 150000
 
-        if family != "dumbo":
+        if family not in ["dumbo","unit_test_part"]:
             profile_MBus_modes.set_agc_to_some_mysterious_values(model, family)
 
 
@@ -278,10 +278,10 @@ class profile_MBus_modes(object):
         model.vars.AGC_CTRL2_FASTLOOPDEL.value_forced = 0  # 4
         model.vars.AGC_GAINSTEPLIM_CFLOOPSTEPMAX.value_forced = 0
 
-        if family != "dumbo":
+        if family not in ["dumbo","unit_test_part"]:
             profile_MBus_modes.set_agc_to_some_mysterious_values(model, family)
 
-        if family != "dumbo" and family != "jumbo" and family != "nerio" and family != "nixi":
+        if family not in ["dumbo","jumbo","nerio","nixi","unit_test_part"]:
             model.vars.bitrate.value_forced = 16384
 
     #
@@ -331,10 +331,10 @@ class profile_MBus_modes(object):
         model.vars.AGC_CTRL2_FASTLOOPDEL.value_forced = 8  #origianl 0, set to 8 to improve PER floor at power lever > -50dBm
         model.vars.AGC_GAINSTEPLIM_CFLOOPSTEPMAX.value_forced = 0
 
-        if family != "dumbo":
+        if family not in ["dumbo","unit_test_part"]:
             profile_MBus_modes.set_agc_to_some_mysterious_values(model, family)
 
-        if family != "dumbo" and family != "jumbo" and family != "nerio" and family != "nixi":
+        if family not in ["dumbo","jumbo","nerio","nixi","unit_test_part"]:
             model.vars.bitrate.value_forced = 16384
 
 
@@ -372,7 +372,7 @@ class profile_MBus_modes(object):
         model.vars.AGC_GAINSTEPLIM_CFLOOPSTEPMAX.value_forced = 0
         model.vars.AGC_CTRL1_AGCPERIOD.value_forced = 5
 
-        if family != "dumbo":
+        if family not in ["dumbo","unit_test_part"]:
             profile_MBus_modes.set_agc_to_some_mysterious_values(model, family)
 
 
@@ -412,7 +412,7 @@ class profile_MBus_modes(object):
         model.vars.AGC_GAINSTEPLIM_CFLOOPSTEPMAX.value_forced = 0
         model.vars.AGC_CTRL1_AGCPERIOD.value_forced = 5
 
-        if family != "dumbo":
+        if family not in ["dumbo","unit_test_part"]:
             profile_MBus_modes.set_agc_to_some_mysterious_values(model, family)
 
 
@@ -448,10 +448,10 @@ class profile_MBus_modes(object):
         model.vars.errors_in_timing_window.value_forced = 1
         model.vars.timing_sample_threshold.value_forced = 6
 
-        if family != "dumbo":
+        if family not in ["dumbo","unit_test_part"]:
             profile_MBus_modes.set_agc_to_some_mysterious_values(model, family)
 
-        if family != "dumbo" and family != "jumbo" and family != "nerio" and family != "nixi":
+        if family not in ["dumbo","jumbo","nerio","nixi","unit_test_part"]:
             model.vars.bitrate.value_forced = 2400
 
 
@@ -494,6 +494,6 @@ class profile_MBus_modes(object):
         model.vars.MODEM_AFC_AFCRXCLR.value_forced = 0
         model.vars.MODEM_AFCADJLIM_AFCADJLIM.value_forced = 1800
 
-        if family != "dumbo":
+        if family not in ["dumbo","unit_test_part"]:
             profile_MBus_modes.set_agc_to_some_mysterious_values(model, family)
 

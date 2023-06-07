@@ -1,4 +1,4 @@
-id: test_framwork_unity_memory
+id: test_framework_unity_memory
 label: Unity test framework memory component
 package: platform
 description: Unity test framework - memory component
@@ -12,7 +12,6 @@ include:
     file_list:
       - path: "unity_memory.h"
 provides:
-  - name: test_framwork_unity_memory
   - name: test_framework_unity_memory
 requires:
   - name: test_framework_unity

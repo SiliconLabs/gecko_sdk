@@ -22,10 +22,8 @@
 #include "app/framework/plugin/gbz-message-controller/gbz-message-controller.h"
 #include "gbcs-gas-meter.h"
 
-#ifdef UC_BUILD
 #include "gbcs-gas-meter-config.h"
 #include "zap-cluster-command-parser.h"
-#endif // UC_BUILD
 
 // Plugin configuration options
 
@@ -57,14 +55,9 @@ static uint8_t state;
 // This event replaces the use of the emberAfMainTickCallback which should
 // not be used by sleepy devices as it does not properly allow for power
 // management.
-#ifdef UC_BUILD
 sl_zigbee_event_t emberAfPluginGbcsGasMeterSleepyMeterEvent;
 #define sleepyMeterEventControl (&emberAfPluginGbcsGasMeterSleepyMeterEvent)
-void emberAfPluginGbcsGasMeterSleepyMeterEventHandler(SLXU_UC_EVENT);
-#else
-EmberEventControl emberAfPluginGbcsGasMeterSleepyMeterEventControl;
-#define sleepyMeterEventControl emberAfPluginGbcsGasMeterSleepyMeterEventControl
-#endif
+void emberAfPluginGbcsGasMeterSleepyMeterEventHandler(sl_zigbee_event_t * event);
 
 /*
  * Per section 10.2.2 of the GBCS version 0.8
@@ -91,16 +84,16 @@ typedef enum {
   RESPONSE_PENDING_TUNNEL,
   ACTIVE_TUNNEL,
   CLOSED_TUNNEL
-} EmAfGSMETunnelState;
+} sli_zigbee_af_gsme_tunnel_state;
 
 typedef struct {
   uint8_t remoteEndpoint;
   EmberNodeId remoteNodeId;
-  EmAfGSMETunnelState state;
+  sli_zigbee_af_gsme_tunnel_state state;
   uint8_t tunnelId;
-} EmAfGSMETunnel;
+} sli_zigbee_af_gsme_tunnel;
 
-static EmAfGSMETunnel tunnel;
+static sli_zigbee_af_gsme_tunnel tunnel;
 
 // Tunnel Manager Header values per GNBCS spec
 #define TUNNEL_MANAGER_HEADER_GET          0x01
@@ -132,7 +125,7 @@ typedef struct {
   EmberAfClusterId clusterId;
   uint16_t attributeCount;
   EmberAfAttributeId *attributeIds;
-} EmAfSGSMEAttributeData;
+} sli_zigbee_af_sgsme_attribute_data;
 
 static EmberAfAttributeId basicClusterAttributes[] = {
   ZCL_VERSION_ATTRIBUTE_ID,
@@ -260,7 +253,7 @@ static EmberAfAttributeId prepaymentClusterAttributes[] = {
 };
 #define GAS_METER_PREPAYMENT_CLUSTER_ATTRIBUTE_COUNT ((sizeof(prepaymentClusterAttributes) / sizeof(prepaymentClusterAttributes[0])))
 
-static EmAfSGSMEAttributeData reportList[] = {
+static sli_zigbee_af_sgsme_attribute_data reportList[] = {
   { false, ZCL_BASIC_CLUSTER_ID, GAS_METER_BASIC_CLUSTER_ATTRIBUTE_COUNT, basicClusterAttributes },
   { false, ZCL_PREPAYMENT_CLUSTER_ID, GAS_METER_PREPAYMENT_CLUSTER_ATTRIBUTE_COUNT, prepaymentClusterAttributes },
   { false, ZCL_SIMPLE_METERING_CLUSTER_ID, GAS_METER_METERING_CLUSTER_ATTRIBUTE_COUNT, meteringClusterAttributes },
@@ -341,16 +334,13 @@ void emberAfPluginGbcsGasMeterReportAttributes(void)
  * the resource cleanup of the Application Framework itself.
  *
  */
-
-#ifdef UC_BUILD
-
 void emberAfPluginGbcsGasMeterInitCallback(uint8_t init_level)
 {
   switch (init_level) {
     case SL_ZIGBEE_INIT_LEVEL_EVENT:
     {
-      slxu_zigbee_event_init(sleepyMeterEventControl,
-                             emberAfPluginGbcsGasMeterSleepyMeterEventHandler);
+      sl_zigbee_event_init(sleepyMeterEventControl,
+                           emberAfPluginGbcsGasMeterSleepyMeterEventHandler);
       break;
     }
 
@@ -362,16 +352,6 @@ void emberAfPluginGbcsGasMeterInitCallback(uint8_t init_level)
     }
   }
 }
-
-#else // !UC_BUILD
-
-void emberAfPluginGbcsGasMeterInitCallback(void)
-{
-  tunnel.state = UNUSED_TUNNEL;
-  setSleepyMeterState(INITIAL_STATE);
-}
-
-#endif // UC_BUILD
 
 // *******************************************************************
 // * clusterInitCallback
@@ -402,7 +382,7 @@ void emberAfClusterInitCallback(uint8_t endpointId,
 // *
 // *******************************************************************
 
-void emberAfPluginGbcsGasMeterSleepyMeterEventHandler(SLXU_UC_EVENT)
+void emberAfPluginGbcsGasMeterSleepyMeterEventHandler(sl_zigbee_event_t * event)
 {
   EmberStatus status;
   EmberNodeId partnerShortId = 0x0000; // Node ID of trust center which is the Comms Hub
@@ -410,8 +390,8 @@ void emberAfPluginGbcsGasMeterSleepyMeterEventHandler(SLXU_UC_EVENT)
 
   // Polling the network state every tick is ineffecient and does not allow the device
   // to sleep.  So let's create a little delay.
-  slxu_zigbee_event_set_delay_ms(sleepyMeterEventControl,
-                                 2 * MILLISECOND_TICKS_PER_SECOND);
+  sl_zigbee_event_set_delay_ms(sleepyMeterEventControl,
+                               2 * MILLISECOND_TICKS_PER_SECOND);
 
   // don't do anything unless we're on the network
   if (emberNetworkState() != EMBER_JOINED_NETWORK) {
@@ -692,59 +672,6 @@ void emberAfPluginSimpleMeteringServerProcessNotificationFlagsCallback(EmberAfAt
   }
 }
 
-#ifndef UC_BUILD
-/** @brief Request Mirror Response
- *
- * @param endpointId   Ver.: always
- */
-bool emberAfSimpleMeteringClusterRequestMirrorResponseCallback(uint16_t endpointId)
-{
-  if (endpointId == 0xffff) {
-    emberAfAppPrintln("Mirror add FAILED");
-  } else {
-    if (state != MIRROR_READY) {
-      mirrorEndpoint = endpointId;
-      mirrorAddress = emberAfCurrentCommand()->source;
-      emberAfAppPrintln("Mirror ADDED on 0x%2x, 0x%x", mirrorAddress, endpointId);
-
-      uint32_t issuerEventId = emberAfGetCurrentTime();
-      emberAfFillCommandSimpleMeteringClusterConfigureMirror(issuerEventId,
-                                                             MIRROR_UPDATE_INTERVAL_SECONDS,
-                                                             true,
-                                                             EMBER_ZCL_NOTIFICATION_SCHEME_PREDEFINED_NOTIFICATION_SCHEME_B);
-      emberAfSetCommandEndpoints(GSME_ENDPOINT, mirrorEndpoint);
-      emberAfSendCommandUnicast(EMBER_OUTGOING_DIRECT, mirrorAddress);
-
-      setSleepyMeterState(MIRROR_READY);
-    } else {
-      emberAfAppPrintln("Mirror add for 0x%2x, 0x%x ignored, already mirrored on 0x%2x 0x%x.",
-                        emberAfCurrentCommand()->source, endpointId,
-                        mirrorAddress, mirrorEndpoint);
-    }
-  }
-  emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
-  return true;
-}
-
-/** @brief Mirror Removed
- *
- * @param endpointId   Ver.: always
- */
-bool emberAfSimpleMeteringClusterMirrorRemovedCallback(uint16_t endpointId)
-{
-  // * This callback simply prints out the endpoint from which
-  // * the mirror was removed, and sets our state back to looking for
-  // * a new mirror
-  if (endpointId == 0xffff) {
-    emberAfAppPrintln("Mirror remove FAILED");
-  } else {
-    emberAfAppPrintln("Mirror REMOVED from %x", endpointId);
-    setSleepyMeterState(INITIAL_STATE);
-  }
-  emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
-  return true;
-}
-#endif  // UC_BUILD
 /** @brief Registration
  *
  * This callback is called when the device joins a network and the process of
@@ -890,16 +817,16 @@ static void setSleepyMeterState(uint8_t newState)
   switch (state) {
     case INITIAL_STATE:
     case REGISTRATION_COMPLETE:
-      slxu_zigbee_event_set_delay_qs(sleepyMeterEventControl, (INITIAL_STATE_EVENT_INTERVAL_SECONDS << 2));
+      sl_zigbee_event_set_delay_qs(sleepyMeterEventControl, (INITIAL_STATE_EVENT_INTERVAL_SECONDS << 2));
       break;
     case MIRROR_READY:
-      slxu_zigbee_event_set_delay_qs(sleepyMeterEventControl, (MIRROR_UPDATE_INTERVAL_SECONDS << 2));
+      sl_zigbee_event_set_delay_qs(sleepyMeterEventControl, (MIRROR_UPDATE_INTERVAL_SECONDS << 2));
       break;
     case SERVICE_DISCOVERY_STARTED:
     case MIRROR_CONFIGURATION_STARTED:
     case MIRROR_UPDATE_IN_PROGRESS:
     default:
-      slxu_zigbee_event_set_delay_qs(sleepyMeterEventControl, MIRROR_UPDATE_IN_PROGRESS_INTERVAL_QUARTER_SECONDS);
+      sl_zigbee_event_set_delay_qs(sleepyMeterEventControl, MIRROR_UPDATE_IN_PROGRESS_INTERVAL_QUARTER_SECONDS);
       break;
   }
 }
@@ -1151,8 +1078,6 @@ static void serviceDiscoveryCallback(const EmberAfServiceDiscoveryResult* result
   }
 }
 
-#ifdef UC_BUILD
-
 bool emberAfSimpleMeteringClusterRequestMirrorResponseCallback(EmberAfClusterCommand *cmd)
 {
   sl_zcl_simple_metering_cluster_request_mirror_response_command_t cmd_data;
@@ -1215,8 +1140,8 @@ bool emberAfSimpleMeteringClusterMirrorRemovedCallback(EmberAfClusterCommand *cm
   return true;
 }
 
-uint32_t emAfGbcsGasMeterSimpleMeteringClusterServerCommandParse(sl_service_opcode_t opcode,
-                                                                 sl_service_function_context_t *context)
+uint32_t sli_zigbee_af_gbcs_gas_meter_simple_metering_cluster_server_command_parse(sl_service_opcode_t opcode,
+                                                                                   sl_service_function_context_t *context)
 {
   (void)opcode;
 
@@ -1242,4 +1167,3 @@ uint32_t emAfGbcsGasMeterSimpleMeteringClusterServerCommandParse(sl_service_opco
           ? EMBER_ZCL_STATUS_SUCCESS
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
-#endif  //UC_BUILD

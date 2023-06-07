@@ -6,12 +6,25 @@
  * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
- * The licensor of this software is Silicon Laboratories Inc.  Your use of this
- * software is governed by the terms of Silicon Labs Master Software License
- * Agreement (MSLA) available at
- * www.silabs.com/about-us/legal/master-software-license-agreement.  This
- * software is distributed to you in Source Code format and is governed by the
- * sections of the MSLA applicable to Source Code.
+ * SPDX-License-Identifier: Zlib
+ *
+ * The licensor of this software is Silicon Laboratories Inc.
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty. In no event will the authors be held liable for any damages
+ * arising from the use of this software.
+ *
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
+ *
+ * 1. The origin of this software must not be misrepresented; you must not
+ *    claim that you wrote the original software. If you use this software
+ *    in a product, an acknowledgment in the product documentation would be
+ *    appreciated but is not required.
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.
+ * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
 #ifndef EFP_H
@@ -28,7 +41,6 @@
 extern "C" {
 #endif
 
-
 /* *INDENT-OFF* */
 /***************************************************************************//**
  * @addtogroup sl_efp EFP - Energy Friendly PMIC
@@ -38,19 +50,12 @@ extern "C" {
 
 @section EFP_DOC EFP (Energy Friendly PMIC) Driver Documentation
 
-
-  @li @ref sl_efp_intro
-  @li @ref sl_efp_configuration
-  @li @ref sl_efp_example
-  @li @ref sl_efp_builtin_support
-
 @n @section sl_efp_intro Introduction
 
 The EFP is a flexible, highly efficient, multi-output power
 management IC. This driver provides an API to configure and control EFP ICs.
 The EFP is controlled by the host SoC using an I2C bus. The driver support
 systems with multiple EFP ICs.
-
 
 @n @section sl_efp_configuration Configuring the EFP driver
 
@@ -68,7 +73,6 @@ this will be reflected in the configuration file.
 
 Here is an example of an initialization structure for instance efp0 using the
 configuration file.
-
 
 @verbatim
 sl_efp_init_data_t sl_efp_efp0_init = {
@@ -96,7 +100,6 @@ sl_efp_init_data_t sl_efp_efp0_init = {
 #endif
 };
 @endverbatim
-
 
 Some configurations options must be added manually in the application. From the
 above initialization structure, `handoff_size` and `handoff_parameters` are
@@ -455,7 +458,6 @@ int main( void )
 }
 @endverbatim
 
-
 @n @section sl_efp_builtin_support EFP Built-in support in xG22 and later devices
 
 @n
@@ -572,7 +574,6 @@ int main( void )
 
 ******************************************************************************/
 /* *INDENT-ON* */
-
 
 /// Method for controlling EFP Energy Mode (EM) transitions.
 typedef enum {
@@ -1182,7 +1183,6 @@ sl_status_t sl_efp_write_register_field(sl_efp_handle_t handle,
                                         uint8_t addr, uint8_t data,
                                         uint8_t mask, uint8_t pos);
 /** @} (end addtogroup sl_efp) */
-
 
 #ifdef __cplusplus
 }

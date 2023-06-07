@@ -50,7 +50,7 @@ typedef uint8_t EmberMacInterfaceId;
 /**
  * @brief Received packet max buffer size.
  */
-#define EMBER_ALT_MAC_RECEIVE_BUFFER_SIZE 125
+#define EMBER_ALT_MAC_RECEIVE_BUFFER_SIZE 128
 
 // Transmit and Receive Zigbee MAC data frame format:
 // ------------------------------------------------------------------------------------

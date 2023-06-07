@@ -48,7 +48,7 @@ template_contribution:
     value:
       group: sleepy-message-queue
       name: store
-      handler: emAfSleepyMessageQueueCliStore
+      handler: sli_zigbee_af_sleepy_message_queue_cli_store
       help: Stores a message into the sleepy message queue.
       argument:
       - type: uint32
@@ -65,7 +65,7 @@ template_contribution:
     value:
       group: sleepy-message-queue
       name: getPendingMsgId
-      handler: emAfSleepyMessageQueueCliGetPendingMsgId
+      handler: sli_zigbee_af_sleepy_message_queue_cli_get_pending_msgId
       help: Gets the first pending message ID for a given destination EUI64.
       argument:
       - type: hex
@@ -74,7 +74,7 @@ template_contribution:
     value:
       group: sleepy-message-queue
       name: getPendingMsg
-      handler: emAfSleepyMessageQueueCliGetPendingMsg
+      handler: sli_zigbee_af_sleepy_message_queue_cli_get_pending_msg
       help: Gets the first pending message ID for a given destination EUI64.
       argument:
       - type: uint8
@@ -83,7 +83,7 @@ template_contribution:
     value:
       group: sleepy-message-queue
       name: getNumMsg
-      handler: emAfSleepyMessageQueueCliGetNumPendingMsg
+      handler: sli_zigbee_af_sleepy_message_queue_cli_get_num_pending_msg
       help: Gets the number of pending messages for a given destination EUI64.
       argument:
       - type: hex
@@ -92,7 +92,7 @@ template_contribution:
     value:
       group: sleepy-message-queue
       name: remove
-      handler: emAfSleepyMessageQueueCliRemoveMsgId
+      handler: sli_zigbee_af_sleepy_message_queue_cli_remove_msg_id
       help: Removes the message from the queue with the given messageID.
       argument:
       - type: uint8
@@ -101,7 +101,7 @@ template_contribution:
     value:
       group: sleepy-message-queue
       name: removeAll
-      handler: emAfSleepyMessageQueueCliRemoveAllMsg
+      handler: sli_zigbee_af_sleepy_message_queue_cli_remove_all_msg
       help: Removes all messages from the queue with the given EUI64.
       argument:
       - type: hex
@@ -110,13 +110,13 @@ template_contribution:
     value:
       group: sleepy-message-queue
       name: unusedCnt
-      handler: emAfSleepyMessageQueueCliGetNumUnusedEntries
+      handler: sli_zigbee_af_sleepy_message_queue_cli_get_num_unused_entries
       help: Reads the number of unused queue entries.
   - name: cli_command
     value:
       group: sleepy-message-queue
       name: remainTime
-      handler: emAfSleepyMessageQueueCliGetNextMessageEventTimeoutMs
+      handler: sli_zigbee_af_sleepy_message_queue_cli_get_next_message_event_timeout_ms
       help: Reports the remaining timeout on the message specified by the message ID.
       argument:
       - type: uint8
@@ -125,7 +125,7 @@ template_contribution:
     value:
       group: sleepy-message-queue
       name: timestamp
-      handler: emAfSleepyMessageQueueCliGetCurrentInt32uMillisecondTick
+      handler: sli_zigbee_af_sleepy_message_queue_cli_get_current_int32u_millisecond_tick
       help: Retrieves the current value of halCommonGetInt32uMillisecondTick().
 
 documentation:

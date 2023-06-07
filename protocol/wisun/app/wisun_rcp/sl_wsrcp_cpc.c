@@ -17,6 +17,14 @@
 #include <sl_cpc.h>
 #include <sli_cpc.h>
 
+#if __has_include("sl_cpc_drv_secondary_spi_config.h")
+#include "sl_cpc_drv_secondary_spi_config.h"
+#endif
+
+#if defined(SL_CPC_DRV_SPI_EXP_BITRATE) && SL_CPC_DRV_SPI_EXP_BITRATE != 1000000
+#error SPI can only be used with a 1MHz clock
+#endif
+
 #include "sl_wsrcp_log.h"
 
 // Used for debug to display the data sent/received on the bus

@@ -41,13 +41,6 @@
 // <i> Default: 0
 #define SL_POWER_MANAGER_CUSTOM_HF_OSCILLATOR_IRQ_HANDLER  0
 
-// <o SL_POWER_MANAGER_LOWEST_EM_ALLOWED> Lowest Energy mode allowed
-// <1=> EM1
-// <2=> EM2
-// <3=> EM3
-// <i> Default: 2
-#define SL_POWER_MANAGER_LOWEST_EM_ALLOWED   2
-
 // <q SL_POWER_MANAGER_CONFIG_VOLTAGE_SCALING_FAST_WAKEUP> Enable fast wakeup (disable voltage scaling in EM2/3 mode)
 // <i> Enable or disable voltage scaling in EM2/3 modes (when available). This decreases wakeup time by about 30 us.
 // <i> Deprecated. It is replaced by the function sl_power_manager_em23_voltage_scaling_enable_fast_wakeup()

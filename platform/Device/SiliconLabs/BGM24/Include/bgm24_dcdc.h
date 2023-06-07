@@ -205,21 +205,11 @@ typedef struct {
 #define _DCDC_EM23CTRL0_IPKVAL_SHIFT                0                                               /**< Shift value for DCDC_IPKVAL                 */
 #define _DCDC_EM23CTRL0_IPKVAL_MASK                 0xFUL                                           /**< Bit mask for DCDC_IPKVAL                    */
 #define _DCDC_EM23CTRL0_IPKVAL_DEFAULT              0x00000003UL                                    /**< Mode DEFAULT for DCDC_EM23CTRL0             */
-#define _DCDC_EM23CTRL0_IPKVAL_Load36mA             0x00000003UL                                    /**< Mode Load36mA for DCDC_EM23CTRL0            */
-#define _DCDC_EM23CTRL0_IPKVAL_Load40mA             0x00000004UL                                    /**< Mode Load40mA for DCDC_EM23CTRL0            */
-#define _DCDC_EM23CTRL0_IPKVAL_Load44mA             0x00000005UL                                    /**< Mode Load44mA for DCDC_EM23CTRL0            */
-#define _DCDC_EM23CTRL0_IPKVAL_Load48mA             0x00000006UL                                    /**< Mode Load48mA for DCDC_EM23CTRL0            */
-#define _DCDC_EM23CTRL0_IPKVAL_Load52mA             0x00000007UL                                    /**< Mode Load52mA for DCDC_EM23CTRL0            */
-#define _DCDC_EM23CTRL0_IPKVAL_Load56mA             0x00000008UL                                    /**< Mode Load56mA for DCDC_EM23CTRL0            */
-#define _DCDC_EM23CTRL0_IPKVAL_Load60mA             0x00000009UL                                    /**< Mode Load60mA for DCDC_EM23CTRL0            */
+#define _DCDC_EM23CTRL0_IPKVAL_Load5mA              0x00000003UL                                    /**< Mode Load5mA for DCDC_EM23CTRL0             */
+#define _DCDC_EM23CTRL0_IPKVAL_Load10mA             0x00000009UL                                    /**< Mode Load10mA for DCDC_EM23CTRL0            */
 #define DCDC_EM23CTRL0_IPKVAL_DEFAULT               (_DCDC_EM23CTRL0_IPKVAL_DEFAULT << 0)           /**< Shifted mode DEFAULT for DCDC_EM23CTRL0     */
-#define DCDC_EM23CTRL0_IPKVAL_Load36mA              (_DCDC_EM23CTRL0_IPKVAL_Load36mA << 0)          /**< Shifted mode Load36mA for DCDC_EM23CTRL0    */
-#define DCDC_EM23CTRL0_IPKVAL_Load40mA              (_DCDC_EM23CTRL0_IPKVAL_Load40mA << 0)          /**< Shifted mode Load40mA for DCDC_EM23CTRL0    */
-#define DCDC_EM23CTRL0_IPKVAL_Load44mA              (_DCDC_EM23CTRL0_IPKVAL_Load44mA << 0)          /**< Shifted mode Load44mA for DCDC_EM23CTRL0    */
-#define DCDC_EM23CTRL0_IPKVAL_Load48mA              (_DCDC_EM23CTRL0_IPKVAL_Load48mA << 0)          /**< Shifted mode Load48mA for DCDC_EM23CTRL0    */
-#define DCDC_EM23CTRL0_IPKVAL_Load52mA              (_DCDC_EM23CTRL0_IPKVAL_Load52mA << 0)          /**< Shifted mode Load52mA for DCDC_EM23CTRL0    */
-#define DCDC_EM23CTRL0_IPKVAL_Load56mA              (_DCDC_EM23CTRL0_IPKVAL_Load56mA << 0)          /**< Shifted mode Load56mA for DCDC_EM23CTRL0    */
-#define DCDC_EM23CTRL0_IPKVAL_Load60mA              (_DCDC_EM23CTRL0_IPKVAL_Load60mA << 0)          /**< Shifted mode Load60mA for DCDC_EM23CTRL0    */
+#define DCDC_EM23CTRL0_IPKVAL_Load5mA               (_DCDC_EM23CTRL0_IPKVAL_Load5mA << 0)           /**< Shifted mode Load5mA for DCDC_EM23CTRL0     */
+#define DCDC_EM23CTRL0_IPKVAL_Load10mA              (_DCDC_EM23CTRL0_IPKVAL_Load10mA << 0)          /**< Shifted mode Load10mA for DCDC_EM23CTRL0    */
 #define _DCDC_EM23CTRL0_DRVSPEED_SHIFT              8                                               /**< Shift value for DCDC_DRVSPEED               */
 #define _DCDC_EM23CTRL0_DRVSPEED_MASK               0x300UL                                         /**< Bit mask for DCDC_DRVSPEED                  */
 #define _DCDC_EM23CTRL0_DRVSPEED_DEFAULT            0x00000001UL                                    /**< Mode DEFAULT for DCDC_EM23CTRL0             */
@@ -234,15 +224,35 @@ typedef struct {
 #define DCDC_EM23CTRL0_DRVSPEED_BEST_EFFICIENCY     (_DCDC_EM23CTRL0_DRVSPEED_BEST_EFFICIENCY << 8) /**< Shifted mode BEST_EFFICIENCY for DCDC_EM23CTRL0*/
 
 /* Bit fields for DCDC PFMXCTRL */
-#define _DCDC_PFMXCTRL_RESETVALUE                   0x00000B0CUL                              /**< Default value for DCDC_PFMXCTRL             */
+#define _DCDC_PFMXCTRL_RESETVALUE                   0x00000C0CUL                              /**< Default value for DCDC_PFMXCTRL             */
 #define _DCDC_PFMXCTRL_MASK                         0x00001F0FUL                              /**< Mask for DCDC_PFMXCTRL                      */
 #define _DCDC_PFMXCTRL_IPKVAL_SHIFT                 0                                         /**< Shift value for DCDC_IPKVAL                 */
 #define _DCDC_PFMXCTRL_IPKVAL_MASK                  0xFUL                                     /**< Bit mask for DCDC_IPKVAL                    */
 #define _DCDC_PFMXCTRL_IPKVAL_DEFAULT               0x0000000CUL                              /**< Mode DEFAULT for DCDC_PFMXCTRL              */
+#define _DCDC_PFMXCTRL_IPKVAL_LOAD50MA              0x00000003UL                              /**< Mode LOAD50MA for DCDC_PFMXCTRL             */
+#define _DCDC_PFMXCTRL_IPKVAL_LOAD65MA              0x00000004UL                              /**< Mode LOAD65MA for DCDC_PFMXCTRL             */
+#define _DCDC_PFMXCTRL_IPKVAL_LOAD73MA              0x00000005UL                              /**< Mode LOAD73MA for DCDC_PFMXCTRL             */
+#define _DCDC_PFMXCTRL_IPKVAL_LOAD80MA              0x00000006UL                              /**< Mode LOAD80MA for DCDC_PFMXCTRL             */
+#define _DCDC_PFMXCTRL_IPKVAL_LOAD86MA              0x00000007UL                              /**< Mode LOAD86MA for DCDC_PFMXCTRL             */
+#define _DCDC_PFMXCTRL_IPKVAL_LOAD93MA              0x00000008UL                              /**< Mode LOAD93MA for DCDC_PFMXCTRL             */
+#define _DCDC_PFMXCTRL_IPKVAL_LOAD100MA             0x00000009UL                              /**< Mode LOAD100MA for DCDC_PFMXCTRL            */
+#define _DCDC_PFMXCTRL_IPKVAL_LOAD106MA             0x0000000AUL                              /**< Mode LOAD106MA for DCDC_PFMXCTRL            */
+#define _DCDC_PFMXCTRL_IPKVAL_LOAD113MA             0x0000000BUL                              /**< Mode LOAD113MA for DCDC_PFMXCTRL            */
+#define _DCDC_PFMXCTRL_IPKVAL_LOAD120MA             0x0000000CUL                              /**< Mode LOAD120MA for DCDC_PFMXCTRL            */
 #define DCDC_PFMXCTRL_IPKVAL_DEFAULT                (_DCDC_PFMXCTRL_IPKVAL_DEFAULT << 0)      /**< Shifted mode DEFAULT for DCDC_PFMXCTRL      */
+#define DCDC_PFMXCTRL_IPKVAL_LOAD50MA               (_DCDC_PFMXCTRL_IPKVAL_LOAD50MA << 0)     /**< Shifted mode LOAD50MA for DCDC_PFMXCTRL     */
+#define DCDC_PFMXCTRL_IPKVAL_LOAD65MA               (_DCDC_PFMXCTRL_IPKVAL_LOAD65MA << 0)     /**< Shifted mode LOAD65MA for DCDC_PFMXCTRL     */
+#define DCDC_PFMXCTRL_IPKVAL_LOAD73MA               (_DCDC_PFMXCTRL_IPKVAL_LOAD73MA << 0)     /**< Shifted mode LOAD73MA for DCDC_PFMXCTRL     */
+#define DCDC_PFMXCTRL_IPKVAL_LOAD80MA               (_DCDC_PFMXCTRL_IPKVAL_LOAD80MA << 0)     /**< Shifted mode LOAD80MA for DCDC_PFMXCTRL     */
+#define DCDC_PFMXCTRL_IPKVAL_LOAD86MA               (_DCDC_PFMXCTRL_IPKVAL_LOAD86MA << 0)     /**< Shifted mode LOAD86MA for DCDC_PFMXCTRL     */
+#define DCDC_PFMXCTRL_IPKVAL_LOAD93MA               (_DCDC_PFMXCTRL_IPKVAL_LOAD93MA << 0)     /**< Shifted mode LOAD93MA for DCDC_PFMXCTRL     */
+#define DCDC_PFMXCTRL_IPKVAL_LOAD100MA              (_DCDC_PFMXCTRL_IPKVAL_LOAD100MA << 0)    /**< Shifted mode LOAD100MA for DCDC_PFMXCTRL    */
+#define DCDC_PFMXCTRL_IPKVAL_LOAD106MA              (_DCDC_PFMXCTRL_IPKVAL_LOAD106MA << 0)    /**< Shifted mode LOAD106MA for DCDC_PFMXCTRL    */
+#define DCDC_PFMXCTRL_IPKVAL_LOAD113MA              (_DCDC_PFMXCTRL_IPKVAL_LOAD113MA << 0)    /**< Shifted mode LOAD113MA for DCDC_PFMXCTRL    */
+#define DCDC_PFMXCTRL_IPKVAL_LOAD120MA              (_DCDC_PFMXCTRL_IPKVAL_LOAD120MA << 0)    /**< Shifted mode LOAD120MA for DCDC_PFMXCTRL    */
 #define _DCDC_PFMXCTRL_IPKTMAXCTRL_SHIFT            8                                         /**< Shift value for DCDC_IPKTMAXCTRL            */
 #define _DCDC_PFMXCTRL_IPKTMAXCTRL_MASK             0x1F00UL                                  /**< Bit mask for DCDC_IPKTMAXCTRL               */
-#define _DCDC_PFMXCTRL_IPKTMAXCTRL_DEFAULT          0x0000000BUL                              /**< Mode DEFAULT for DCDC_PFMXCTRL              */
+#define _DCDC_PFMXCTRL_IPKTMAXCTRL_DEFAULT          0x0000000CUL                              /**< Mode DEFAULT for DCDC_PFMXCTRL              */
 #define DCDC_PFMXCTRL_IPKTMAXCTRL_DEFAULT           (_DCDC_PFMXCTRL_IPKTMAXCTRL_DEFAULT << 8) /**< Shifted mode DEFAULT for DCDC_PFMXCTRL      */
 
 /* Bit fields for DCDC IF */
@@ -361,7 +371,7 @@ typedef struct {
 #define _DCDC_STATUS_RUNNING_MASK                   0x4UL                                 /**< Bit mask for DCDC_RUNNING                   */
 #define _DCDC_STATUS_RUNNING_DEFAULT                0x00000000UL                          /**< Mode DEFAULT for DCDC_STATUS                */
 #define DCDC_STATUS_RUNNING_DEFAULT                 (_DCDC_STATUS_RUNNING_DEFAULT << 2)   /**< Shifted mode DEFAULT for DCDC_STATUS        */
-#define DCDC_STATUS_VREGIN                          (0x1UL << 3)                          /**< VREGIN comparator status                    */
+#define DCDC_STATUS_VREGIN                          (0x1UL << 3)                          /**< VREGVDD comparator status                   */
 #define _DCDC_STATUS_VREGIN_SHIFT                   3                                     /**< Shift value for DCDC_VREGIN                 */
 #define _DCDC_STATUS_VREGIN_MASK                    0x8UL                                 /**< Bit mask for DCDC_VREGIN                    */
 #define _DCDC_STATUS_VREGIN_DEFAULT                 0x00000000UL                          /**< Mode DEFAULT for DCDC_STATUS                */

@@ -18,14 +18,14 @@
 #ifndef SILABS_COMMAND_RELAY_LOCAL_H
 #define SILABS_COMMAND_RELAY_LOCAL_H
 
-void emAfPluginCommandRelayAddBind(EmberEUI64 inEui,
-                                   uint8_t inEndpoint,
-                                   EmberEUI64 outEui,
-                                   uint8_t outEndpoint);
+void sli_zigbee_af_command_relay_add_bind(EmberEUI64 inEui,
+                                          uint8_t inEndpoint,
+                                          EmberEUI64 outEui,
+                                          uint8_t outEndpoint);
 
-void emAfPluginCommandRelayPrint(void);
-void emAfPluginCommandRelayRemove(EmberAfPluginCommandRelayDeviceEndpoint* inDeviceEndpoint,
-                                  EmberAfPluginCommandRelayDeviceEndpoint* outDeviceEndpoint);
-void emAfPluginCommandRelayRemoveDeviceByEui64(EmberEUI64 eui64);
+void sli_zigbee_af_command_relay_print(void);
+void sli_zigbee_af_command_relay_remove(EmberAfPluginCommandRelayDeviceEndpoint* inDeviceEndpoint,
+                                        EmberAfPluginCommandRelayDeviceEndpoint* outDeviceEndpoint);
+void sli_zigbee_af_command_relay_remove_device_by_eui64(EmberEUI64 eui64);
 
 #endif //__COMMAND_RELAY_LOCAL_H

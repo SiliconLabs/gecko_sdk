@@ -48,8 +48,8 @@
 #define SL_IPERF_MESSAGE_QUEUE_SIZE                16U
 
 // <o SL_IPERF_STACK_SIZE_WORD> Set test thread stack size in word depth
-// <i> Default value: 294
-#define SL_IPERF_STACK_SIZE_WORD                   294U
+// <i> Default value: 512
+#define SL_IPERF_STACK_SIZE_WORD                   512U
 
 // <o SL_IPERF_BUFFER_SIZE> Server receiver buffer size
 // <i> Default value 1234 (UDPv6 size without fragmentation)

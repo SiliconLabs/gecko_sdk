@@ -86,7 +86,7 @@ WEAK(bool emberAfPluginNetworkSteeringGetDistributedKeyCallback(EmberKeyData * k
  */
 WEAK(EmberNodeType emberAfPluginNetworkSteeringGetNodeTypeCallback(EmberAfPluginNetworkSteeringJoiningState state))
 {
-  return ((emAfCurrentZigbeeProNetwork->nodeType == EMBER_COORDINATOR)
+  return ((sli_zigbee_af_current_zigbee_pro_network->nodeType == EMBER_COORDINATOR)
           ? EMBER_ROUTER
-          : emAfCurrentZigbeeProNetwork->nodeType);
+          : sli_zigbee_af_current_zigbee_pro_network->nodeType);
 }

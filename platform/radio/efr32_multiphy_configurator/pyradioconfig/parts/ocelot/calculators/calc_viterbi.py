@@ -5,6 +5,8 @@ from pycalcmodel.core.variable import ModelVariableFormat
 
 class CALC_Viterbi_ocelot(CALC_Viterbi_lynx):
 
+    acqwin_unit = 4
+
     def buildVariables(self, model):
 
         #Call the inherited buildVariables
@@ -190,7 +192,7 @@ class CALC_Viterbi_ocelot(CALC_Viterbi_lynx):
         trecs_effective_syncword_len = model.vars.trecs_effective_syncword_len.value
 
         if vtdemoden:
-            syncacqwin = trecs_effective_syncword_len // 4 - 1
+            syncacqwin = trecs_effective_syncword_len // self.acqwin_unit - 1
         else:
             syncacqwin = 0
 
@@ -231,9 +233,9 @@ class CALC_Viterbi_ocelot(CALC_Viterbi_lynx):
 
         if preamsch_len >= 4 and vtdemoden:
             if antdivmode == 5 or antdivmode == 1:
-                pmacqwin = 2
+                pmacqwin = 12 // self.acqwin_unit - 1 #12 bits
             else:
-                pmacqwin = preamsch_len // 4 - 1
+                pmacqwin = preamsch_len // self.acqwin_unit - 1
         else:
             pmacqwin = 0
 
@@ -243,7 +245,7 @@ class CALC_Viterbi_ocelot(CALC_Viterbi_lynx):
 
         pmacquingwin = model.vars.MODEM_TRECPMDET_PMACQUINGWIN.value
 
-        model.vars.pmacquingwin_actual.value = 4 * (pmacquingwin + 1)
+        model.vars.pmacquingwin_actual.value = self.acqwin_unit * (pmacquingwin + 1)
 
     def calc_pmdetthd_reg(self, model):
 
@@ -255,16 +257,24 @@ class CALC_Viterbi_ocelot(CALC_Viterbi_lynx):
         osr = model.vars.MODEM_TRECSCFG_TRECSOSR.value
         pmwinsize = model.vars.pmacquingwin_actual.value
         baudrate = model.vars.baudrate.value
-        dual_sync_en = model.vars.MODEM_CTRL1_DUALSYNC.value == 1
+        rtschmode = model.vars.MODEM_REALTIMCFE_RTSCHMODE.value == 1
         modulation_index = model.vars.modulation_index.value
         freq_offset_hz = model.vars.freq_offset_hz.value
+        pmacquingwin = model.vars.MODEM_TRECPMDET_PMACQUINGWIN.value
+        afc_oneshot_enabled = (model.vars.MODEM_AFC_AFCONESHOT.value == 1)
 
         relative_freq_offs = freq_offset_hz / baudrate
 
-        if dual_sync_en and ((modulation_index <= 0.5 and relative_freq_offs  > 0.57) or baudrate > 90000):
-            #Special case for dual syncword detection case where hard slicing on syncword is required
+        if rtschmode:
+            #Special case where hard slicing on syncword is required
             #because frequency tolerance is more difficult when RTSCHMODE is 1
-            pmoffset = osr*2 + 2
+            if (pmacquingwin < 7) and afc_oneshot_enabled:
+                # This is consistent with latest Margay calculation and avoids floor in PER Waterfall
+                pmoffset = 2
+            elif (modulation_index <= 0.5 and relative_freq_offs  > 0.57) or baudrate > 90000:
+                pmoffset = osr * 2 + 2
+            else:
+                pmoffset = osr * pmwinsize + 2
         else:
             # + 2 for processing delay. See expsynclen register description. These are used in the same way.
             pmoffset =  osr * pmwinsize + 2
@@ -284,25 +294,25 @@ class CALC_Viterbi_ocelot(CALC_Viterbi_lynx):
         modulation_index = model.vars.modulation_index.value
         phscale_derate_factor = model.vars.phscale_derate_factor.value
 
+        large_freq_dev = (freq_dev_min < 0.8*deviation) or (freq_dev_max > 1.2*deviation)
+
         #Calculate the cost threshold based on preamble detect window and deviation tolerance requirement
         if preamsch_len > 0 and vtdemoden:
-            if ((freq_dev_min < 0.8*deviation) or (freq_dev_max > 1.2*deviation)):
-                if antdivmode == model.vars.antdivmode.var_enum.PHDEMODANTDIV or antdivmode == model.vars.antdivmode.var_enum.ANTENNA1:
-                    reg = 200
-                else:
-                    #High tolerance case
-                    reg = 750 - (7 - pmacquingwin) * 60
+            if antdivmode == model.vars.antdivmode.var_enum.PHDEMODANTDIV or antdivmode == model.vars.antdivmode.var_enum.ANTENNA1:
+                # Special values for antenna diversity
+                reg = 200 if large_freq_dev else 150
+            elif large_freq_dev and pmacquingwin >= (28 // self.acqwin_unit - 1):
+                # Experimental results show that with PMACQUINGWIN less than  28 bits, increasing cost threshold will introduce floor
+                reg = 750 - (32 // self.acqwin_unit - 1 - pmacquingwin) * (15 * self.acqwin_unit)
             else:
-                if antdivmode == model.vars.antdivmode.var_enum.PHDEMODANTDIV or antdivmode == model.vars.antdivmode.var_enum.ANTENNA1:
-                    reg = 150 # : If antdiv enabled, pmagcquingwin is always set to 2.
-                elif fast_detect_enable:
+                if fast_detect_enable:
                     # Optimized value because our calculation isn't yet good for small windows (window size is 8)
                     if modulation_index <= 0.7:
                         reg = 100
                     else:
                         reg = 80
                 else:
-                    reg = 500 - (7 - pmacquingwin) * 60
+                    reg = 500 - (32 // self.acqwin_unit - 1 - pmacquingwin) * (15 * self.acqwin_unit)
         else:
             reg = 0
 
@@ -318,7 +328,7 @@ class CALC_Viterbi_ocelot(CALC_Viterbi_lynx):
         phscale_derate_factor = model.vars.phscale_derate_factor.value
 
         if vtdemoden:
-            reg = self.MIN_COST_THD_FULL - (7 - syncacqwin_reg) * 60
+            reg = self.MIN_COST_THD_FULL - (32 // self.acqwin_unit - 1 - syncacqwin_reg) * (15 * self.acqwin_unit)
             reg = int(reg / phscale_derate_factor)  #Derate for PHSCALE if not set to nominal 64
         else:
             reg = 0
@@ -400,7 +410,6 @@ class CALC_Viterbi_ocelot(CALC_Viterbi_lynx):
         self._reg_write(model.vars.MODEM_PHDMODCTRL_BCRLEGACYCONC, 0)
         #self._reg_write(model.vars.MODEM_VTCORRCFG1_VITERBIKSI3WB, 0)
 
-        self._reg_write(model.vars.MODEM_REALTIMCFE_EXTENSCHBYP, 1) # Enable the extended search bypass as workaround for PGOCELOT-5342
 
         if vtdemoden:
             # these register fields have a fixed value for now
@@ -420,10 +429,17 @@ class CALC_Viterbi_ocelot(CALC_Viterbi_lynx):
 
     def calc_freqtrackmode_reg(self, model):
         vtdemoden = model.vars.MODEM_VITERBIDEMOD_VTDEMODEN.value
+        rtschmode = model.vars.MODEM_REALTIMCFE_RTSCHMODE.value == 1
+        pmacquingwin = model.vars.MODEM_TRECPMDET_PMACQUINGWIN.value
+        afc_oneshot_enabled = (model.vars.MODEM_AFC_AFCONESHOT.value == 1)
 
-        #On Ocelot, always use FREQTRACKMODE=1
         if vtdemoden:
-            freqtrackmode = 1
+            if rtschmode and (pmacquingwin < 7) and afc_oneshot_enabled:
+                # Sidewalk testing showed that for small CFEs, higher FREQTRACKMODE is needed to avoid tol issues
+                # This is consistent with findings on other parts and we should probably use FREQTRACKMODE=3 generally eventually
+                freqtrackmode = 3
+            else:
+                freqtrackmode = 1
         else:
             freqtrackmode = 0
 
@@ -712,3 +728,6 @@ class CALC_Viterbi_ocelot(CALC_Viterbi_lynx):
 
         #Write the register
         self._reg_write(model.vars.MODEM_REALTIMCFE_RTSCHMODE, rtschmode)
+
+    def calc_realtimcfe_extenschbyp_reg(self, model):
+        self._reg_write(model.vars.MODEM_REALTIMCFE_EXTENSCHBYP, 1) # Enable the extended search bypass as workaround for PGOCELOT-5342

@@ -95,9 +95,6 @@ void app_init(void)
   // Init meter collector
   sl_wisun_coap_meter_init();
 
-  // Init resource handler
-  sl_wisun_coap_rhnd_init();
-
   // Init sensor all
   coap_resource.data.uri_path          = SL_WISUN_COAP_METER_COLLECTOR_MEASUREMENT_URI_PATH;
   coap_resource.data.resource_type     = SL_WISUN_COAP_METER_RESOURCE_RT_ALL;

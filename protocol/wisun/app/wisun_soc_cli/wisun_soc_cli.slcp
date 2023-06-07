@@ -26,22 +26,16 @@ component:
   - id: "nvm3_default"
   - id: "slist"
   - id: "silabs_core_sl_malloc"
-  - id: "sl_wisun_cli_util"
-  - id: "iostream_retarget_stdio"
-  - id: "iostream_stdlib_config"
-  - id: "iostream_recommended_stream"
+  - id: "sl_wisun_app_cli"
   - id: "cli"
-    instance:
+    instance: 
       - vcom
+  - id: "sl_wisun_cli_util"
   - id: "rail_util_pa"
 
 requires:
   - name: freertos_heap_3
     condition: [freertos]
-  - name: "sl_wisun_mode_switch"
-    condition: [device_sdid_220]
-  - name: "rail_util_eff"
-    condition: [hardware_board_has_eff]
 
 source:
   - path: "app.c"
@@ -104,20 +98,13 @@ configuration:
     value: "0xE000"
   - name: "WISUN_CLI_AUTO_SAVE"
     value: "0"
-  - name: SL_RAIL_UTIL_PA_SELECTION_SUBGHZ
-    value: "RAIL_TX_POWER_MODE_SUBGIG_EFF_20DBM"
-    condition: [hardware_board_has_eff]
-  - name: RAIL_UTIL_EFF_MAX_TX_CONTINUOUS_POWER_DBM
-    value: 20
-    condition: [hardware_board_has_eff]
-  - name: RAIL_UTIL_EFF_MAX_TX_DUTY_CYCLE
-    value: 100
-    condition: [hardware_board_has_eff]
   - name: SL_RAIL_UTIL_PTI_BAUD_RATE_HZ
     value: "3200000"
   - name: SL_DEVICE_INIT_RFFPLL_BAND
     value: "1"
     condition: [device_sdid_220, hardware_board_default_rf_band_470]
+  - name: SL_MBEDTLS_SSL_IN_CONTENT_LEN
+    value: 1024
 
 template_contribution:
   - name: "event_handler"
@@ -388,6 +375,33 @@ template_contribution:
       argument:
         - type: uint8
           help: "mode: 0=default, 1=slot"
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "set_lfn_support"
+      handler: "app_set_lfn_support"
+      help: "configure LFN support"
+      argument:
+        - type: uint8
+          help: "lfn_limit: Number of locally supported LFN"
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "mode_switch"
+      handler: "app_mode_switch"
+      help: "configure mode witch: w ms"
+      shortcuts:
+        - name: "ms"
+      argument:
+        - type: uint8
+          help: "mode: 0=disabled, 1=enabled, 2=default"
+        - type: uint8
+          help: "PhyModeId"
+        - type: stringopt
+          help: "neighbor MAC address (optional)"
+    condition:
+      - "cli"
+
 # -------------------------------
   - name: "cli_group"
     value:

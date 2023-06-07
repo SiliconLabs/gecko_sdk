@@ -68,7 +68,7 @@ errorcode_t mpsiStorageWrite(uint16_t  tag,
 //------------------------------------------------------------------------------
 // Internal APIs
 void    emberAfPluginMpsiStorageInitCallback(void);
-uint8_t emAfPluginMpsiStorageStoreMessage(MpsiMessage_t* mpsiMessage);
+uint8_t sli_mpsi_storage_store_message(MpsiMessage_t* mpsiMessage);
 
 //------------------------------------------------------------------------------
 // Private APIs

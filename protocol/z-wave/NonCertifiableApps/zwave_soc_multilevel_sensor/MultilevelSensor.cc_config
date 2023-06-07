@@ -9,6 +9,22 @@ zw_cc_multilevel_sensor:
       name: SENSOR_NAME_HUMIDITY
       scales:
         - SENSOR_SCALE_PERCENTAGE
+    ambient_light:
+      name: SENSOR_NAME_ILLUMINANCE
+      scales:
+        - SENSOR_SCALE_LUX
+    motion_axis_x:
+      name: SENSOR_NAME_ACCELERATION_X
+      scales:
+        - SENSOR_SCALE_METER_SQUARE_SECOND
+    motion_axis_y:
+      name: SENSOR_NAME_ACCELERATION_Y
+      scales:
+        - SENSOR_SCALE_METER_SQUARE_SECOND
+    motion_axis_z:
+      name: SENSOR_NAME_ACCELERATION_Z
+      scales:
+        - SENSOR_SCALE_METER_SQUARE_SECOND
 zw_cc_configuration:
   configurations:
     - name: "Minimum temperature limit"
@@ -35,13 +51,3 @@ zw_cc_configuration:
       altering_capabilities: 0
       read_only: 0
       advanced: 0
-zw_cc_agi:
-  endpoints:
-    - endpoint: 0
-      groups:
-        - name: Basic Set
-          profile_msb: ASSOCIATION_GROUP_INFO_REPORT_PROFILE_NOTIFICATION
-          profile_lsb: NOTIFICATION_REPORT_HOME_SECURITY_V4
-          commands:
-            - command_class: COMMAND_CLASS_BASIC
-              command: BASIC_SET

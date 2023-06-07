@@ -208,10 +208,10 @@ bool emberAfPluginStandaloneBootloaderCommonIncomingMessageCallback(EmberEUI64 l
 /** @} */ // end of name Callbacks
 /** @} */ // end of standalone-bootloader-common
 
-void emAfStandaloneBootloaderCommonPrintHardwareTag(uint8_t* text);
-void emAfStandaloneBootloaderClientEncrypt(uint8_t* block, uint8_t* key);
+void sli_zigbee_af_standalone_bootloader_common_print_hardware_tag(uint8_t* text);
+void sli_zigbee_af_standalone_bootloader_client_encrypt(uint8_t* block, uint8_t* key);
 
-EmberStatus emAfSendBootloadMessage(bool isBroadcast,
-                                    EmberEUI64 destEui64,
-                                    uint8_t length,
-                                    uint8_t* message);
+EmberStatus sli_zigbee_af_send_bootload_message(bool isBroadcast,
+                                                EmberEUI64 destEui64,
+                                                uint8_t length,
+                                                uint8_t* message);

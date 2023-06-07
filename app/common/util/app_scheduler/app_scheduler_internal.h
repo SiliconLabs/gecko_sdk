@@ -35,7 +35,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "sl_slist.h"
-#include "sl_simple_timer.h"
+#include "app_timer.h"
 #include "app_scheduler.h"
 // -----------------------------------------------------------------------------
 // Definitions
@@ -44,7 +44,7 @@
 typedef struct {
   sl_slist_node_t node;                                     ///< List node.
   app_scheduler_task_t task;                                ///< Task function.
-  sl_simple_timer_t timer_handle;                           ///< Simple Timer handle.
+  app_timer_t timer_handle;                                 ///< Timer handle.
   bool triggered;                                           ///< Timer is triggered.
   bool periodic;                                            ///< Timer is periodic.
   size_t data_size;                                         ///< Size of the data

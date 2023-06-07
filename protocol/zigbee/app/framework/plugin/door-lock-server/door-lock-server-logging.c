@@ -18,9 +18,7 @@
 #include "af.h"
 #include "door-lock-server.h"
 
-#ifdef UC_BUILD
 #include "zap-cluster-command-parser.h"
-#endif
 
 static EmberAfPluginDoorLockServerLogEntry entries[EMBER_AF_PLUGIN_DOOR_LOCK_SERVER_MAX_LOG_ENTRIES];
 static uint8_t nextEntryId = 1;
@@ -97,8 +95,6 @@ bool emberAfPluginDoorLockServerGetLogEntry(uint16_t *entryId,
   return true;
 }
 
-#ifdef UC_BUILD
-
 bool emberAfDoorLockClusterGetLogRecordCallback(EmberAfClusterCommand *cmd)
 {
   sl_zcl_door_lock_cluster_get_log_record_command_t cmd_data;
@@ -132,34 +128,3 @@ bool emberAfDoorLockClusterGetLogRecordCallback(EmberAfClusterCommand *cmd)
   }
   return true;
 }
-
-#else // !UC_BUILD
-
-bool emberAfDoorLockClusterGetLogRecordCallback(uint16_t entryId)
-{
-  EmberStatus status;
-  EmberAfPluginDoorLockServerLogEntry entry;
-  if (LOG_IS_EMPTY() || !emberAfPluginDoorLockServerGetLogEntry(&entryId, &entry)) {
-    status = emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_INVALID_VALUE);
-    if (status != EMBER_ZCL_STATUS_SUCCESS) {
-      emberAfDoorLockClusterPrintln("Failed to send default response: 0x%X",
-                                    status);
-    }
-  } else {
-    emberAfFillCommandDoorLockClusterGetLogRecordResponse(entry.logEntryId,
-                                                          entry.timestamp,
-                                                          entry.eventType,
-                                                          entry.source,
-                                                          entry.eventId,
-                                                          entry.userId,
-                                                          entry.pin);
-    status = emberAfSendResponse();
-    if (status != EMBER_SUCCESS) {
-      emberAfDoorLockClusterPrintln("Failed to send GetLogRecordResponse: 0x%X",
-                                    status);
-    }
-  }
-  return true;
-}
-
-#endif // UC_BUILD

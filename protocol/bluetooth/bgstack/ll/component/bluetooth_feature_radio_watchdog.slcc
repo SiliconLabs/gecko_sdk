@@ -3,7 +3,7 @@ label: Bluetooth Radio Watchdog
 package: Bluetooth
 description: Radio watchdog feature
 
-category: Bluetooth|Controller
+category: Bluetooth|Bluetooth LE Controller (Link Layer)|Additional Features
 quality: production
 provides:
   - name: bluetooth_radio_watchdog

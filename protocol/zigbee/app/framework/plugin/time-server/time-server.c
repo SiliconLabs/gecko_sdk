@@ -22,7 +22,6 @@
 #include "../../util/common.h"
 #include "time-server.h"
 
-#ifdef UC_BUILD
 #include "time-server-config.h"
 #if (EMBER_AF_PLUGIN_TIME_SERVER_SUPERSEDING == 1)
 #define SUPERSEDING
@@ -36,20 +35,6 @@
 #if (EMBER_AF_PLUGIN_TIME_SERVER_MASTER_ZONE_DST == 1)
 #define MASTER_ZONE_DST
 #endif
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_TIME_SERVER_SUPERSEDING
-#define SUPERSEDING
-#endif
-#ifdef EMBER_AF_PLUGIN_TIME_SERVER_MASTER
-#define MASTER
-#endif
-#ifdef EMBER_AF_PLUGIN_TIME_SERVER_SYNCHRONIZED
-#define SYNCHRONIZED
-#endif
-#ifdef EMBER_AF_PLUGIN_TIME_SERVER_MASTER_ZONE_DST
-#define MASTER_ZONE_DST
-#endif
-#endif // UC_BUILD
 
 #define INVALID_ENDPOINT 0xFF
 
@@ -58,7 +43,7 @@ static EmberAfStatus writeTime(uint8_t endpoint, uint32_t time);
 
 static uint8_t singleton = INVALID_ENDPOINT;
 
-#define emAfContainsTimeServerAttribute(endpoint, attribute) \
+#define sli_zigbee_af_contains_time_server_attribute(endpoint, attribute) \
   emberAfContainsAttribute((endpoint), ZCL_TIME_CLUSTER_ID, (attribute), CLUSTER_MASK_SERVER, EMBER_AF_NULL_MANUFACTURER_CODE)
 
 void emberAfTimeClusterServerInitCallback(uint8_t endpoint)
@@ -104,10 +89,10 @@ void emberAfTimeClusterServerInitCallback(uint8_t endpoint)
   // The third bit of TimeStatus indicates whether the TimeZone, DstStart,
   // DstEnd, and DstShift attributes are set internally to correct values for
   // the location of the clock.
-  if (emAfContainsTimeServerAttribute(endpoint, ZCL_TIME_ZONE_ATTRIBUTE_ID)
-      && emAfContainsTimeServerAttribute(endpoint, ZCL_DST_START_ATTRIBUTE_ID)
-      && emAfContainsTimeServerAttribute(endpoint, ZCL_DST_END_ATTRIBUTE_ID)
-      && emAfContainsTimeServerAttribute(endpoint, ZCL_DST_SHIFT_ATTRIBUTE_ID)) {
+  if (sli_zigbee_af_contains_time_server_attribute(endpoint, ZCL_TIME_ZONE_ATTRIBUTE_ID)
+      && sli_zigbee_af_contains_time_server_attribute(endpoint, ZCL_DST_START_ATTRIBUTE_ID)
+      && sli_zigbee_af_contains_time_server_attribute(endpoint, ZCL_DST_END_ATTRIBUTE_ID)
+      && sli_zigbee_af_contains_time_server_attribute(endpoint, ZCL_DST_SHIFT_ATTRIBUTE_ID)) {
     timeStatus |= BIT(2);
   }
 #endif // MASTER_ZONE_DST
@@ -130,9 +115,9 @@ void emberAfTimeClusterServerInitCallback(uint8_t endpoint)
 
   // Ticks are scheduled for all endpoints that do not have a singleton time
   // attribute and for one of the endpoints with a singleton attribute.
-  slxu_zigbee_zcl_schedule_server_tick(endpoint,
-                                       ZCL_TIME_CLUSTER_ID,
-                                       MILLISECOND_TICKS_PER_SECOND);
+  sl_zigbee_zcl_schedule_server_tick(endpoint,
+                                     ZCL_TIME_CLUSTER_ID,
+                                     MILLISECOND_TICKS_PER_SECOND);
 }
 
 void emberAfTimeClusterServerTickCallback(uint8_t endpoint)
@@ -147,9 +132,9 @@ void emberAfTimeClusterServerTickCallback(uint8_t endpoint)
   writeTime(endpoint, currentTime);
 
   // Reschedule the tick callback.
-  slxu_zigbee_zcl_schedule_server_tick(endpoint,
-                                       ZCL_TIME_CLUSTER_ID,
-                                       MILLISECOND_TICKS_PER_SECOND);
+  sl_zigbee_zcl_schedule_server_tick(endpoint,
+                                     ZCL_TIME_CLUSTER_ID,
+                                     MILLISECOND_TICKS_PER_SECOND);
 }
 
 EmberAfStatus emberAfTimeClusterServerPreAttributeChangedCallback(
@@ -194,7 +179,7 @@ EmberAfStatus emberAfTimeClusterServerPreAttributeChangedCallback(
   return status;
 }
 
-uint32_t emAfTimeClusterServerGetCurrentTime(void)
+uint32_t sli_zigbee_af_time_cluster_server_get_current_time(void)
 {
   EmberAfStatus status = EMBER_ZCL_STATUS_SUCCESS;
   uint32_t currentTime = emberAfGetCurrentTimeCallback();
@@ -205,7 +190,7 @@ uint32_t emAfTimeClusterServerGetCurrentTime(void)
     uint8_t i;
     for (i = 0; i < emberAfEndpointCount(); i++) {
       uint8_t endpoint = emberAfEndpointFromIndex(i);
-      if (emAfContainsTimeServerAttribute(endpoint, ZCL_TIME_ATTRIBUTE_ID)) {
+      if (sli_zigbee_af_contains_time_server_attribute(endpoint, ZCL_TIME_ATTRIBUTE_ID)) {
         status = readTime(endpoint, &currentTime);
         if (status == EMBER_ZCL_STATUS_SUCCESS) {
           break;
@@ -217,14 +202,14 @@ uint32_t emAfTimeClusterServerGetCurrentTime(void)
   return (status == EMBER_ZCL_STATUS_SUCCESS ? currentTime : 0);
 }
 
-void emAfTimeClusterServerSetCurrentTime(uint32_t utcTime)
+void sli_zigbee_af_time_cluster_server_set_current_time(uint32_t utcTime)
 {
   // Set the time on all endpoints that do not have a singleton time attribute
   // as well as on one of the endpoints with a singleton attribute.
   uint8_t i;
   for (i = 0; i < emberAfEndpointCount(); i++) {
     uint8_t endpoint = emberAfEndpointFromIndex(i);
-    if (emAfContainsTimeServerAttribute(endpoint, ZCL_TIME_ATTRIBUTE_ID)) {
+    if (sli_zigbee_af_contains_time_server_attribute(endpoint, ZCL_TIME_ATTRIBUTE_ID)) {
       EmberAfAttributeMetadata *metadata = emberAfLocateAttributeMetadata(endpoint,
                                                                           ZCL_TIME_CLUSTER_ID,
                                                                           ZCL_TIME_ATTRIBUTE_ID,

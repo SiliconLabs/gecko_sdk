@@ -123,6 +123,9 @@ source:
   - path: platform/radio/rail_lib/apps/railtest/app_ci/timer_ci.c
   - path: platform/radio/rail_lib/apps/railtest/app_ci/address_filter_ci.c
   - path: platform/radio/rail_lib/apps/railtest/app_ci/trx_ci.c
+  - path: platform/radio/rail_lib/apps/railtest/app_ci/wmbus_ci.c
+    condition:
+      - device_series_2
   - path: platform/radio/rail_lib/apps/railtest/app_ci/zwave_ci.c
   - path: platform/radio/rail_lib/apps/railtest/app_ci/mfm_ci.c
   - path: platform/radio/rail_lib/apps/railtest/app_ci/info_ci.c
@@ -1134,7 +1137,7 @@ template_contribution:
       help: "Configure the radio for 2.4 GHz 802.15.4.\\n                    Use with enable802154."
       argument:
         - type: uint8opt
-          help: "antDiv: [0=Disable] 1=Enable\\n                    [uint8opt] coex: [0=Disable] 1=Enable\\n                    [uint8opt] fem: [0=Disable] 1=Enable\\n                    [uint8opt] custom: [0=None] 1=Custom1"
+          help: "antDiv: [0=Disable] 1=Enable\\n                    [uint8opt] coex: [0=Disable] 1=Enable\\n                    [uint8opt] fem: [0=Disable] 1=Enable\\n                    [uint8opt] custom: [0=None] 1=Custom1\\n                    [uint8opt] 2mbps: [0=Disable] 1=Enable"
 
   - name: cli_command
     value:
@@ -1202,6 +1205,15 @@ template_contribution:
       argument:
         - type: uint8
           help: "0=Disable 1=Enable"
+
+  - name: cli_command
+    value:
+      name: setRxToEnhAckTx
+      handler: setRxToEnhAckTx
+      help: "Set an RxToTx turnaround time used just for Enh-ACKs."
+      argument:
+        - type: int32
+          help: "rxToTxUs (0=same as Imm-ACKs, -1=don't change)"
 
   - name: cli_command
     value:
@@ -1418,6 +1430,31 @@ template_contribution:
     value:
       name: ___________________
       handler: cliSeparatorHack
+
+  - name: cli_command
+    value:
+      name: ____WMBUS_Mode____
+      handler: cliSeparatorHack
+    condition:
+      - device_series_2
+
+  - name: cli_command
+    value:
+      name: configWmbus
+      handler: configWmbus
+      help: "Configure WMBUS simultaneous M2O RX of T and C modes"
+      argument:
+        - type: uint8
+          help: "0=Disable 1=Enable"
+    condition:
+      - device_series_2
+
+  - name: cli_command
+    value:
+      name: _______________
+      handler: cliSeparatorHack
+    condition:
+      - device_series_2
 
   - name: cli_command
     value:
@@ -1736,6 +1773,23 @@ template_contribution:
 
   - name: cli_command
     value:
+      name: setAntDivPin
+      handler: setAntDivPin
+      help: "Set output pin for antenna diversity."
+      argument:
+        - type: uint8
+          help: "Antenna0 gpioPort (0=A, 1=B, etc.)"
+        - type: uint8
+          help: "Antenna0 gpioPin"
+        - type: uint8
+          help: "Antenna1 gpioPort (0=A, 1=B, etc.)"
+        - type: uint8
+          help: "Antenna1 gpioPin"
+        - type: uint8opt
+          help: "Antenna0 gpioPin State: 0=Disable [1=Enable]\\n                    [uint8opt] Antenna1 gpioPin State: 0=Disable [1=Enable]"
+
+  - name: cli_command
+    value:
       name: ___________________________
       handler: cliSeparatorHack
 
@@ -1977,9 +2031,11 @@ template_contribution:
 
   - name: cli_command
     value:
-      name: getSetEffControl
-      handler: getSetEffControl
-      help: "No parameters, returns the EFF Control structure"
+      name: getSetEffClpcControl
+      handler: getSetEffClpcControl
+      help: " No parameters, returns the EFF CLPC Control structure"
+      shortcuts:
+        - name: getSetEffControl
       argument:
         - type: uint8opt
           help: "non-zero=reset EFF Control structure to 0"
@@ -1989,9 +2045,11 @@ template_contribution:
 
   - name: cli_command
     value:
-      name: getSetEffMode
-      handler: getSetEffMode
-      help: "No parameters, returns the EFF Mode on FEMDATA"
+      name: getSetEffClpcFemdata
+      handler: getSetEffClpcFemdata
+      help: " No parameters, returns the EFF Mode on FEMDATA"
+      shortcuts:
+        - name: getSetEffMode
       argument:
         - type: uint8opt
           help: "EffMode: Sets the EFF Mode on FEMDATA"
@@ -2001,9 +2059,11 @@ template_contribution:
 
   - name: cli_command
     value:
-      name: getSetEffRuralUrban
-      handler: getSetEffRuralUrban
-      help: "Returns the trip voltage from rural to urban in mV"
+      name: getSetEffLnaRuralUrban
+      handler: getSetEffLnaRuralUrban
+      help: " Returns the trip voltage from rural to urban in mV"
+      shortcuts:
+        - name: getSetEffRuralUrban
       argument:
         - type: uint16opt
           help: "TripVoltage: Sets the trip voltage, in mV"
@@ -2013,9 +2073,11 @@ template_contribution:
 
   - name: cli_command
     value:
-      name: getSetEffUrbanBypass
-      handler: getSetEffUrbanBypass
-      help: "Returns the trip voltage from urban to bypass in mV"
+      name: getSetEffLnaUrbanBypass
+      handler: getSetEffLnaUrbanBypass
+      help: " Returns the trip voltage from urban to bypass in mV"
+      shortcuts:
+        - name: getSetEffUrbanBypass
       argument:
         - type: uint16opt
           help: "TripVoltage: Sets the trip voltage, in mV"
@@ -2025,9 +2087,11 @@ template_contribution:
 
   - name: cli_command
     value:
-      name: getSetEffUrbanDwellTime
-      handler: getSetEffUrbanDwellTime
-      help: "Returns the length of time the EFF LNA stays in urban mode before transitioning to rural mode in ms"
+      name: getSetEffLnaUrbanDwellTime
+      handler: getSetEffLnaUrbanDwellTime
+      help: " Returns the length of time the EFF LNA stays in urban mode before transitioning to rural mode in ms"
+      shortcuts:
+        - name: getSetEffUrbanDwellTime
       argument:
         - type: uint32opt
           help: "TransitionTime: Sets the transition time, in ms"
@@ -2037,9 +2101,11 @@ template_contribution:
 
   - name: cli_command
     value:
-      name: getSetEffBypassDwellTime
-      handler: getSetEffBypassDwellTime
-      help: "Returns the length of time the EFF LNA stays in bypass mode before transitioning to urban or rural mode in ms"
+      name: getSetEffLnaBypassDwellTime
+      handler: getSetEffLnaBypassDwellTime
+      help: " Returns the length of time the EFF LNA stays in bypass mode before transitioning to urban or rural mode in ms"
+      shortcuts:
+        - name: getSetEffBypassDwellTime
       argument:
         - type: uint32opt
           help: "TransitionTime: Sets the transition time, in ms"
@@ -2049,11 +2115,13 @@ template_contribution:
 
   - name: cli_command
     value:
-      name: getSetClpcFastLoop
-      handler: getSetClpcFastLoop
-      help: "Returns the target and slope for a specific mode and sensor"
+      name: getSetEffClpcFastLoop
+      handler: getSetEffClpcFastLoop
+      help: " Returns the target and slope for a specific mode and sensor"
+      shortcuts:
+        - name: getSetClpcFastLoop
       argument:
-        - type: uint16opt
+        - type: stringopt
           help: "ModeSensorIndex: Choose a mode&sensor\\n                    [uint16opt] TargetMv: Sets the target, in millivolts\\n                    [uint16opt] Slope: Sets the delta millivolts/PA power level\\n"
     condition:
       - device_sdid_220
@@ -2061,11 +2129,13 @@ template_contribution:
 
   - name: cli_command
     value:
-      name: getSetClpcFastLoopCal
-      handler: getSetClpcFastLoopCal
+      name: getSetEffClpcFastLoopCal
+      handler: getSetEffClpcFastLoopCal
       help: " Returns the CAL1 and CAL2 points for a specific mode\\n                    and sensor"
+      shortcuts:
+        - name: getSetClpcFastLoopCal
       argument:
-        - type: int16opt
+        - type: stringopt
           help: "ModeSensorIndex: Choose a mode&sensor\\n                    [int16opt] Cal1Ddbm: Cal 1 Output Power\\n                    [int16opt] Cal1Mv: Cal 1 millivolts\\n                    [int16opt] Cal2Ddbm: Cal 2 Output Power\\n                    [int16opt] Cal2Mv: Cal 2 millivolts\\n"
     condition:
       - device_sdid_220
@@ -2073,11 +2143,13 @@ template_contribution:
 
   - name: cli_command
     value:
-      name: getSetClpcFastLoopCalSlp
-      handler: getSetClpcFastLoopCalSlp
+      name: getSetEffClpcFastLoopCalSlp
+      handler: getSetEffClpcFastLoopCalSlp
       help: " Returns Calibration slope equation for a specific mode\\n                    and sensor"
+      shortcuts:
+        - name: getSetClpcFastLoopCalSlp
       argument:
-        - type: int16opt
+        - type: stringopt
           help: "ModeSensorIndex: Choose a mode&sensor\\n                    [int16opt] Slope1e1: Cal slope * 10 in mV/ddBm\\n                    [int16opt] Offset290Ddbm: Offset at 29 dBm"
     condition:
       - device_sdid_220
@@ -2085,11 +2157,13 @@ template_contribution:
 
   - name: cli_command
     value:
-      name: getSetClpcEnable
-      handler: getSetClpcEnable
+      name: getSetEffClpcEnable
+      handler: getSetEffClpcEnable
       help: "No parameters, returns EFF CLPC Enable"
+      shortcuts:
+        - name: getSetClpcEnable
       argument:
-        - type: uint8opt
+        - type: stringopt
           help: "ClpcEnable: Sets the EFF CLPC Enable"
     condition:
       - device_sdid_220
@@ -2099,7 +2173,7 @@ template_contribution:
     value:
       name: getSetEffClpcFlags
       handler: getSetEffClpcFlags
-      help: "No parameters, returns the current EFF CLPC Flags\\n                    Bit 0: (1) = ANTV sensor first, 0 = SAW2 sensor first"
+      help: "No parameters, returns the current EFF CLPC Flags\\n                    Bit 0 Fast Loop: [0 = SAW2 sensor], 1 = ANTV sensor"
       argument:
         - type: uint8opt
           help: "Arg1: Flags"
@@ -2111,7 +2185,7 @@ template_contribution:
     value:
       name: getSetEffTempThreshold
       handler: getSetEffTempThreshold
-      help: "Returns the EFF temperature threshold"
+      help: " Returns the EFF temperature threshold"
       argument:
         - type: uint16opt
           help: "TempThreshold: Sets the EFF temperature threshold, in degrees Kelvin"
@@ -2298,6 +2372,15 @@ template_contribution:
       argument:
         - type: uint16
           help: "channel"
+
+  - name: cli_command
+    value:
+      name: setPktOffsetInTxFifo
+      handler: setPktOffsetInTxFifo
+      help: " Set the offset in number of bytes of the Tx Data in Tx Fifo."
+      argument:
+        - type: uint16opt
+          help: "Offset in number of  bytes. If no parameter specified, command returns current active Offset"
 
   - name: cli_command
     value:
@@ -2549,3 +2632,12 @@ template_contribution:
       name: deinitProtocol
       handler: deinitProtocol
       help: "Deinit the current protocol (BLE, 802.15.4, Z-Wave)"
+
+  - name: cli_command
+    value:
+      name: enableCacheSynthCal
+      handler: enableCacheSynthCal
+      help: "Sequencer will start caching the calibration values on next\\n                    state transition and use them instead of calibrating again\\n                    for future state transitions. Recalibration will occur when\\n                    needed (eg. protocol change, temperature change)"
+      argument:
+        - type: uint8
+          help: 0=Disable 1=Enable

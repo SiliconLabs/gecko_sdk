@@ -2,23 +2,24 @@
 # -*- coding: utf-8 -*-
 
 #
-# Generated Tue May 19 10:38:15 2020 by generateDS.py version 2.12d.
+# Generated Thu Feb 23 14:49:58 2023 by generateDS.py version 2.12d.
 #
 # Command line options:
-#   ('-o', '..\\Bindings.py')
+#   ('-o', '../Bindings.py')
 #   ('--super', 'Bindings')
-#   ('-s', '..\\Template.py')
+#   ('-s', '../Template.py')
 #   ('--subclass-suffix', '')
 #   ('--member-specs', 'list')
+#   ('--external-encoding', 'ascii')
 #   ('-m', '')
 #   ('-f', '')
 #   ('--silence', '')
 #
 # Command line arguments:
-#   .\multi_phy_configuration_model.xsd
+#   ./multi_phy_configuration_model.xsd
 #
 # Command line:
-#   generateDS_custom.py -o "..\Bindings.py" --super="Bindings" -s "..\Template.py" --subclass-suffix --member-specs="list" -m -f --silence .\multi_phy_configuration_model.xsd
+#   C:\validation\host_py_radio_config\Package\pylib_multi_phy_model\multi_phy_configuration_model\xsd\generateDS_custom.py -o "../Bindings.py" --super="Bindings" -s "../Template.py" --subclass-suffix --member-specs="list" --external-encoding="ascii" -m -f --silence ./multi_phy_configuration_model.xsd
 #
 # Current working directory (os.getcwd()):
 #   xsd
@@ -640,33 +641,33 @@ class multi_phy_configuration(GeneratedsSuper):
     name or label of this configurationpart number(e.g. IC,
     Simulation, FPGA, etc...) Defaults to 'IC", if not provided."""
     member_data_items_ = [
-        MemberSpec_('part_family', 'xs:string', 0),
-        MemberSpec_('status_code', 'xs:string', 0),
-        MemberSpec_('readable_name', 'xs:string', 0),
-        MemberSpec_('rail_adapter_version', 'xs:string', 0),
-        MemberSpec_('part_revision', 'xs:string', 0),
-        MemberSpec_('target', 'xs:string', 0),
-        MemberSpec_('part_opn', 'xs:string', 0),
         MemberSpec_('xsd_version', 'xs:string', 0),
-        MemberSpec_('status_message', 'xs:string', 0),
+        MemberSpec_('part_family', 'xs:string', 0),
+        MemberSpec_('part_revision', 'xs:string', 0),
+        MemberSpec_('rail_adapter_version', 'xs:string', 0),
         MemberSpec_('desc', 'xs:string', 0),
+        MemberSpec_('status_code', 'xs:string', 0),
+        MemberSpec_('status_message', 'xs:string', 0),
+        MemberSpec_('readable_name', 'xs:string', 0),
+        MemberSpec_('part_opn', 'xs:string', 0),
+        MemberSpec_('target', 'xs:string', 0),
         MemberSpec_('base_channel_configurations', 'base_channel_configurationsType', 0),
         MemberSpec_('output_files', 'output_filesType', 0),
     ]
     subclass = None
     superclass = None
-    def __init__(self, part_family=None, status_code=None, readable_name=None, rail_adapter_version=None, part_revision=None, target='IC', part_opn=None, xsd_version=None, status_message=None, desc=None, base_channel_configurations=None, output_files=None):
+    def __init__(self, xsd_version=None, part_family=None, part_revision=None, rail_adapter_version=None, desc=None, status_code=None, status_message=None, readable_name=None, part_opn=None, target='IC', base_channel_configurations=None, output_files=None):
         self.original_tagname_ = None
-        self.part_family = _cast(None, part_family)
-        self.status_code = _cast(None, status_code)
-        self.readable_name = _cast(None, readable_name)
-        self.rail_adapter_version = _cast(None, rail_adapter_version)
-        self.part_revision = _cast(None, part_revision)
-        self.target = _cast(None, target)
-        self.part_opn = _cast(None, part_opn)
         self.xsd_version = _cast(None, xsd_version)
-        self.status_message = _cast(None, status_message)
+        self.part_family = _cast(None, part_family)
+        self.part_revision = _cast(None, part_revision)
+        self.rail_adapter_version = _cast(None, rail_adapter_version)
         self.desc = _cast(None, desc)
+        self.status_code = _cast(None, status_code)
+        self.status_message = _cast(None, status_message)
+        self.readable_name = _cast(None, readable_name)
+        self.part_opn = _cast(None, part_opn)
+        self.target = _cast(None, target)
         if base_channel_configurations is None:
             self.base_channel_configurations = base_channel_configurationsType()
         else:
@@ -687,36 +688,36 @@ class multi_phy_configuration(GeneratedsSuper):
     def get_output_files(self): return self.output_files
     def set_output_files(self, output_files): self.output_files = output_files
     output_filesProp = property(get_output_files, set_output_files)
-    def get_part_family(self): return self.part_family
-    def set_part_family(self, part_family): self.part_family = part_family
-    part_familyProp = property(get_part_family, set_part_family)
-    def get_status_code(self): return self.status_code
-    def set_status_code(self, status_code): self.status_code = status_code
-    status_codeProp = property(get_status_code, set_status_code)
-    def get_readable_name(self): return self.readable_name
-    def set_readable_name(self, readable_name): self.readable_name = readable_name
-    readable_nameProp = property(get_readable_name, set_readable_name)
-    def get_rail_adapter_version(self): return self.rail_adapter_version
-    def set_rail_adapter_version(self, rail_adapter_version): self.rail_adapter_version = rail_adapter_version
-    rail_adapter_versionProp = property(get_rail_adapter_version, set_rail_adapter_version)
-    def get_part_revision(self): return self.part_revision
-    def set_part_revision(self, part_revision): self.part_revision = part_revision
-    part_revisionProp = property(get_part_revision, set_part_revision)
-    def get_target(self): return self.target
-    def set_target(self, target): self.target = target
-    targetProp = property(get_target, set_target)
-    def get_part_opn(self): return self.part_opn
-    def set_part_opn(self, part_opn): self.part_opn = part_opn
-    part_opnProp = property(get_part_opn, set_part_opn)
     def get_xsd_version(self): return self.xsd_version
     def set_xsd_version(self, xsd_version): self.xsd_version = xsd_version
     xsd_versionProp = property(get_xsd_version, set_xsd_version)
-    def get_status_message(self): return self.status_message
-    def set_status_message(self, status_message): self.status_message = status_message
-    status_messageProp = property(get_status_message, set_status_message)
+    def get_part_family(self): return self.part_family
+    def set_part_family(self, part_family): self.part_family = part_family
+    part_familyProp = property(get_part_family, set_part_family)
+    def get_part_revision(self): return self.part_revision
+    def set_part_revision(self, part_revision): self.part_revision = part_revision
+    part_revisionProp = property(get_part_revision, set_part_revision)
+    def get_rail_adapter_version(self): return self.rail_adapter_version
+    def set_rail_adapter_version(self, rail_adapter_version): self.rail_adapter_version = rail_adapter_version
+    rail_adapter_versionProp = property(get_rail_adapter_version, set_rail_adapter_version)
     def get_desc(self): return self.desc
     def set_desc(self, desc): self.desc = desc
     descProp = property(get_desc, set_desc)
+    def get_status_code(self): return self.status_code
+    def set_status_code(self, status_code): self.status_code = status_code
+    status_codeProp = property(get_status_code, set_status_code)
+    def get_status_message(self): return self.status_message
+    def set_status_message(self, status_message): self.status_message = status_message
+    status_messageProp = property(get_status_message, set_status_message)
+    def get_readable_name(self): return self.readable_name
+    def set_readable_name(self, readable_name): self.readable_name = readable_name
+    readable_nameProp = property(get_readable_name, set_readable_name)
+    def get_part_opn(self): return self.part_opn
+    def set_part_opn(self, part_opn): self.part_opn = part_opn
+    part_opnProp = property(get_part_opn, set_part_opn)
+    def get_target(self): return self.target
+    def set_target(self, target): self.target = target
+    targetProp = property(get_target, set_target)
     def hasContent_(self):
         if (
             self.base_channel_configurations is not None or
@@ -744,36 +745,36 @@ class multi_phy_configuration(GeneratedsSuper):
         else:
             outfile.write('/>%s' % (eol_, ))
     def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='multi_phy_configuration'):
-        if self.part_family is not None and 'part_family' not in already_processed:
-            already_processed.add('part_family')
-            outfile.write(' part_family=%s' % (self.gds_format_string(quote_attrib(self.part_family), input_name='part_family'), ))
-        if self.status_code is not None and 'status_code' not in already_processed:
-            already_processed.add('status_code')
-            outfile.write(' status_code=%s' % (self.gds_format_string(quote_attrib(self.status_code), input_name='status_code'), ))
-        if self.readable_name is not None and 'readable_name' not in already_processed:
-            already_processed.add('readable_name')
-            outfile.write(' readable_name=%s' % (self.gds_format_string(quote_attrib(self.readable_name), input_name='readable_name'), ))
-        if self.rail_adapter_version is not None and 'rail_adapter_version' not in already_processed:
-            already_processed.add('rail_adapter_version')
-            outfile.write(' rail_adapter_version=%s' % (self.gds_format_string(quote_attrib(self.rail_adapter_version), input_name='rail_adapter_version'), ))
-        if self.part_revision is not None and 'part_revision' not in already_processed:
-            already_processed.add('part_revision')
-            outfile.write(' part_revision=%s' % (self.gds_format_string(quote_attrib(self.part_revision), input_name='part_revision'), ))
-        if self.target is not None and 'target' not in already_processed:
-            already_processed.add('target')
-            outfile.write(' target=%s' % (self.gds_format_string(quote_attrib(self.target), input_name='target'), ))
-        if self.part_opn is not None and 'part_opn' not in already_processed:
-            already_processed.add('part_opn')
-            outfile.write(' part_opn=%s' % (self.gds_format_string(quote_attrib(self.part_opn), input_name='part_opn'), ))
         if self.xsd_version is not None and 'xsd_version' not in already_processed:
             already_processed.add('xsd_version')
             outfile.write(' xsd_version=%s' % (self.gds_format_string(quote_attrib(self.xsd_version), input_name='xsd_version'), ))
-        if self.status_message is not None and 'status_message' not in already_processed:
-            already_processed.add('status_message')
-            outfile.write(' status_message=%s' % (self.gds_format_string(quote_attrib(self.status_message), input_name='status_message'), ))
+        if self.part_family is not None and 'part_family' not in already_processed:
+            already_processed.add('part_family')
+            outfile.write(' part_family=%s' % (self.gds_format_string(quote_attrib(self.part_family), input_name='part_family'), ))
+        if self.part_revision is not None and 'part_revision' not in already_processed:
+            already_processed.add('part_revision')
+            outfile.write(' part_revision=%s' % (self.gds_format_string(quote_attrib(self.part_revision), input_name='part_revision'), ))
+        if self.rail_adapter_version is not None and 'rail_adapter_version' not in already_processed:
+            already_processed.add('rail_adapter_version')
+            outfile.write(' rail_adapter_version=%s' % (self.gds_format_string(quote_attrib(self.rail_adapter_version), input_name='rail_adapter_version'), ))
         if self.desc is not None and 'desc' not in already_processed:
             already_processed.add('desc')
             outfile.write(' desc=%s' % (self.gds_format_string(quote_attrib(self.desc), input_name='desc'), ))
+        if self.status_code is not None and 'status_code' not in already_processed:
+            already_processed.add('status_code')
+            outfile.write(' status_code=%s' % (self.gds_format_string(quote_attrib(self.status_code), input_name='status_code'), ))
+        if self.status_message is not None and 'status_message' not in already_processed:
+            already_processed.add('status_message')
+            outfile.write(' status_message=%s' % (self.gds_format_string(quote_attrib(self.status_message), input_name='status_message'), ))
+        if self.readable_name is not None and 'readable_name' not in already_processed:
+            already_processed.add('readable_name')
+            outfile.write(' readable_name=%s' % (self.gds_format_string(quote_attrib(self.readable_name), input_name='readable_name'), ))
+        if self.part_opn is not None and 'part_opn' not in already_processed:
+            already_processed.add('part_opn')
+            outfile.write(' part_opn=%s' % (self.gds_format_string(quote_attrib(self.part_opn), input_name='part_opn'), ))
+        if self.target is not None and 'target' not in already_processed:
+            already_processed.add('target')
+            outfile.write(' target=%s' % (self.gds_format_string(quote_attrib(self.target), input_name='target'), ))
     def exportChildren(self, outfile, level, namespace_='', name_='multi_phy_configuration', fromsubclass_=False, pretty_print=True):
         if pretty_print:
             eol_ = '\n'
@@ -790,46 +791,46 @@ class multi_phy_configuration(GeneratedsSuper):
         if self.hasContent_():
             self.exportLiteralChildren(outfile, level, name_)
     def exportLiteralAttributes(self, outfile, level, already_processed, name_):
-        if self.part_family is not None and 'part_family' not in already_processed:
-            already_processed.add('part_family')
-            showIndent(outfile, level)
-            outfile.write('part_family="%s",\n' % (self.part_family,))
-        if self.status_code is not None and 'status_code' not in already_processed:
-            already_processed.add('status_code')
-            showIndent(outfile, level)
-            outfile.write('status_code="%s",\n' % (self.status_code,))
-        if self.readable_name is not None and 'readable_name' not in already_processed:
-            already_processed.add('readable_name')
-            showIndent(outfile, level)
-            outfile.write('readable_name="%s",\n' % (self.readable_name,))
-        if self.rail_adapter_version is not None and 'rail_adapter_version' not in already_processed:
-            already_processed.add('rail_adapter_version')
-            showIndent(outfile, level)
-            outfile.write('rail_adapter_version="%s",\n' % (self.rail_adapter_version,))
-        if self.part_revision is not None and 'part_revision' not in already_processed:
-            already_processed.add('part_revision')
-            showIndent(outfile, level)
-            outfile.write('part_revision="%s",\n' % (self.part_revision,))
-        if self.target is not None and 'target' not in already_processed:
-            already_processed.add('target')
-            showIndent(outfile, level)
-            outfile.write('target="%s",\n' % (self.target,))
-        if self.part_opn is not None and 'part_opn' not in already_processed:
-            already_processed.add('part_opn')
-            showIndent(outfile, level)
-            outfile.write('part_opn="%s",\n' % (self.part_opn,))
         if self.xsd_version is not None and 'xsd_version' not in already_processed:
             already_processed.add('xsd_version')
             showIndent(outfile, level)
             outfile.write('xsd_version="%s",\n' % (self.xsd_version,))
-        if self.status_message is not None and 'status_message' not in already_processed:
-            already_processed.add('status_message')
+        if self.part_family is not None and 'part_family' not in already_processed:
+            already_processed.add('part_family')
             showIndent(outfile, level)
-            outfile.write('status_message="%s",\n' % (self.status_message,))
+            outfile.write('part_family="%s",\n' % (self.part_family,))
+        if self.part_revision is not None and 'part_revision' not in already_processed:
+            already_processed.add('part_revision')
+            showIndent(outfile, level)
+            outfile.write('part_revision="%s",\n' % (self.part_revision,))
+        if self.rail_adapter_version is not None and 'rail_adapter_version' not in already_processed:
+            already_processed.add('rail_adapter_version')
+            showIndent(outfile, level)
+            outfile.write('rail_adapter_version="%s",\n' % (self.rail_adapter_version,))
         if self.desc is not None and 'desc' not in already_processed:
             already_processed.add('desc')
             showIndent(outfile, level)
             outfile.write('desc="%s",\n' % (self.desc,))
+        if self.status_code is not None and 'status_code' not in already_processed:
+            already_processed.add('status_code')
+            showIndent(outfile, level)
+            outfile.write('status_code="%s",\n' % (self.status_code,))
+        if self.status_message is not None and 'status_message' not in already_processed:
+            already_processed.add('status_message')
+            showIndent(outfile, level)
+            outfile.write('status_message="%s",\n' % (self.status_message,))
+        if self.readable_name is not None and 'readable_name' not in already_processed:
+            already_processed.add('readable_name')
+            showIndent(outfile, level)
+            outfile.write('readable_name="%s",\n' % (self.readable_name,))
+        if self.part_opn is not None and 'part_opn' not in already_processed:
+            already_processed.add('part_opn')
+            showIndent(outfile, level)
+            outfile.write('part_opn="%s",\n' % (self.part_opn,))
+        if self.target is not None and 'target' not in already_processed:
+            already_processed.add('target')
+            showIndent(outfile, level)
+            outfile.write('target="%s",\n' % (self.target,))
     def exportLiteralChildren(self, outfile, level, name_):
         if self.base_channel_configurations is not None:
             showIndent(outfile, level)
@@ -852,46 +853,46 @@ class multi_phy_configuration(GeneratedsSuper):
                 self.buildChildren(child, node, nodeName_)
         return self
     def buildAttributes(self, node, attrs, already_processed):
-        value = find_attr_value_('part_family', node)
-        if value is not None and 'part_family' not in already_processed:
-            already_processed.add('part_family')
-            self.part_family = value
-        value = find_attr_value_('status_code', node)
-        if value is not None and 'status_code' not in already_processed:
-            already_processed.add('status_code')
-            self.status_code = value
-        value = find_attr_value_('readable_name', node)
-        if value is not None and 'readable_name' not in already_processed:
-            already_processed.add('readable_name')
-            self.readable_name = value
-        value = find_attr_value_('rail_adapter_version', node)
-        if value is not None and 'rail_adapter_version' not in already_processed:
-            already_processed.add('rail_adapter_version')
-            self.rail_adapter_version = value
-        value = find_attr_value_('part_revision', node)
-        if value is not None and 'part_revision' not in already_processed:
-            already_processed.add('part_revision')
-            self.part_revision = value
-        value = find_attr_value_('target', node)
-        if value is not None and 'target' not in already_processed:
-            already_processed.add('target')
-            self.target = value
-        value = find_attr_value_('part_opn', node)
-        if value is not None and 'part_opn' not in already_processed:
-            already_processed.add('part_opn')
-            self.part_opn = value
         value = find_attr_value_('xsd_version', node)
         if value is not None and 'xsd_version' not in already_processed:
             already_processed.add('xsd_version')
             self.xsd_version = value
-        value = find_attr_value_('status_message', node)
-        if value is not None and 'status_message' not in already_processed:
-            already_processed.add('status_message')
-            self.status_message = value
+        value = find_attr_value_('part_family', node)
+        if value is not None and 'part_family' not in already_processed:
+            already_processed.add('part_family')
+            self.part_family = value
+        value = find_attr_value_('part_revision', node)
+        if value is not None and 'part_revision' not in already_processed:
+            already_processed.add('part_revision')
+            self.part_revision = value
+        value = find_attr_value_('rail_adapter_version', node)
+        if value is not None and 'rail_adapter_version' not in already_processed:
+            already_processed.add('rail_adapter_version')
+            self.rail_adapter_version = value
         value = find_attr_value_('desc', node)
         if value is not None and 'desc' not in already_processed:
             already_processed.add('desc')
             self.desc = value
+        value = find_attr_value_('status_code', node)
+        if value is not None and 'status_code' not in already_processed:
+            already_processed.add('status_code')
+            self.status_code = value
+        value = find_attr_value_('status_message', node)
+        if value is not None and 'status_message' not in already_processed:
+            already_processed.add('status_message')
+            self.status_message = value
+        value = find_attr_value_('readable_name', node)
+        if value is not None and 'readable_name' not in already_processed:
+            already_processed.add('readable_name')
+            self.readable_name = value
+        value = find_attr_value_('part_opn', node)
+        if value is not None and 'part_opn' not in already_processed:
+            already_processed.add('part_opn')
+            self.part_opn = value
+        value = find_attr_value_('target', node)
+        if value is not None and 'target' not in already_processed:
+            already_processed.add('target')
+            self.target = value
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
         if nodeName_ == 'base_channel_configurations':
             obj_ = base_channel_configurationsType.factory()
@@ -1015,10 +1016,10 @@ class base_channel_configurationType(GeneratedsSuper):
     is the reference regsiter set used to optimize space across
     multiple base_channel_configs"""
     member_data_items_ = [
-        MemberSpec_('profile', 'xs:string', 0),
-        MemberSpec_('base_channel_reference', 'xs:string', 0),
         MemberSpec_('name', 'xs:string', 0),
+        MemberSpec_('profile', 'xs:string', 0),
         MemberSpec_('force_empty_phy_config_delta_subtract', 'xs:boolean', 0),
+        MemberSpec_('base_channel_reference', 'xs:string', 0),
         MemberSpec_('profile_inputs', 'profile_inputsType', 0),
         MemberSpec_('phy', 'phyType', 0),
         MemberSpec_('profile_output_overrides', 'profile_output_overridesType', 0),
@@ -1031,12 +1032,12 @@ class base_channel_configurationType(GeneratedsSuper):
     ]
     subclass = None
     superclass = None
-    def __init__(self, profile=None, base_channel_reference=None, name=None, force_empty_phy_config_delta_subtract=True, profile_inputs=None, phy=None, profile_output_overrides=None, metadata=None, channel_config_entries=None, phy_config_base=None, phy_config_delta_subtract=None, link_layer_config=None, optional_arguments=None):
+    def __init__(self, name=None, profile=None, force_empty_phy_config_delta_subtract=True, base_channel_reference=None, profile_inputs=None, phy=None, profile_output_overrides=None, metadata=None, channel_config_entries=None, phy_config_base=None, phy_config_delta_subtract=None, link_layer_config=None, optional_arguments=None):
         self.original_tagname_ = None
-        self.profile = _cast(None, profile)
-        self.base_channel_reference = _cast(None, base_channel_reference)
         self.name = _cast(None, name)
+        self.profile = _cast(None, profile)
         self.force_empty_phy_config_delta_subtract = _cast(bool, force_empty_phy_config_delta_subtract)
+        self.base_channel_reference = _cast(None, base_channel_reference)
         if profile_inputs is None:
             self.profile_inputs = profile_inputsType()
         else:
@@ -1103,18 +1104,18 @@ class base_channel_configurationType(GeneratedsSuper):
     def get_optional_arguments(self): return self.optional_arguments
     def set_optional_arguments(self, optional_arguments): self.optional_arguments = optional_arguments
     optional_argumentsProp = property(get_optional_arguments, set_optional_arguments)
-    def get_profile(self): return self.profile
-    def set_profile(self, profile): self.profile = profile
-    profileProp = property(get_profile, set_profile)
-    def get_base_channel_reference(self): return self.base_channel_reference
-    def set_base_channel_reference(self, base_channel_reference): self.base_channel_reference = base_channel_reference
-    base_channel_referenceProp = property(get_base_channel_reference, set_base_channel_reference)
     def get_name(self): return self.name
     def set_name(self, name): self.name = name
     nameProp = property(get_name, set_name)
+    def get_profile(self): return self.profile
+    def set_profile(self, profile): self.profile = profile
+    profileProp = property(get_profile, set_profile)
     def get_force_empty_phy_config_delta_subtract(self): return self.force_empty_phy_config_delta_subtract
     def set_force_empty_phy_config_delta_subtract(self, force_empty_phy_config_delta_subtract): self.force_empty_phy_config_delta_subtract = force_empty_phy_config_delta_subtract
     force_empty_phy_config_delta_subtractProp = property(get_force_empty_phy_config_delta_subtract, set_force_empty_phy_config_delta_subtract)
+    def get_base_channel_reference(self): return self.base_channel_reference
+    def set_base_channel_reference(self, base_channel_reference): self.base_channel_reference = base_channel_reference
+    base_channel_referenceProp = property(get_base_channel_reference, set_base_channel_reference)
     def hasContent_(self):
         if (
             self.profile_inputs is not None or
@@ -1149,18 +1150,18 @@ class base_channel_configurationType(GeneratedsSuper):
         else:
             outfile.write('/>%s' % (eol_, ))
     def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='base_channel_configurationType'):
-        if self.profile is not None and 'profile' not in already_processed:
-            already_processed.add('profile')
-            outfile.write(' profile=%s' % (self.gds_format_string(quote_attrib(self.profile), input_name='profile'), ))
-        if self.base_channel_reference is not None and 'base_channel_reference' not in already_processed:
-            already_processed.add('base_channel_reference')
-            outfile.write(' base_channel_reference=%s' % (self.gds_format_string(quote_attrib(self.base_channel_reference), input_name='base_channel_reference'), ))
         if self.name is not None and 'name' not in already_processed:
             already_processed.add('name')
             outfile.write(' name=%s' % (self.gds_format_string(quote_attrib(self.name), input_name='name'), ))
+        if self.profile is not None and 'profile' not in already_processed:
+            already_processed.add('profile')
+            outfile.write(' profile=%s' % (self.gds_format_string(quote_attrib(self.profile), input_name='profile'), ))
         if self.force_empty_phy_config_delta_subtract is not None and 'force_empty_phy_config_delta_subtract' not in already_processed:
             already_processed.add('force_empty_phy_config_delta_subtract')
             outfile.write(' force_empty_phy_config_delta_subtract="%s"' % self.gds_format_boolean(self.force_empty_phy_config_delta_subtract, input_name='force_empty_phy_config_delta_subtract'))
+        if self.base_channel_reference is not None and 'base_channel_reference' not in already_processed:
+            already_processed.add('base_channel_reference')
+            outfile.write(' base_channel_reference=%s' % (self.gds_format_string(quote_attrib(self.base_channel_reference), input_name='base_channel_reference'), ))
     def exportChildren(self, outfile, level, namespace_='', name_='base_channel_configurationType', fromsubclass_=False, pretty_print=True):
         if pretty_print:
             eol_ = '\n'
@@ -1192,22 +1193,22 @@ class base_channel_configurationType(GeneratedsSuper):
         if self.hasContent_():
             self.exportLiteralChildren(outfile, level, name_)
     def exportLiteralAttributes(self, outfile, level, already_processed, name_):
-        if self.profile is not None and 'profile' not in already_processed:
-            already_processed.add('profile')
-            showIndent(outfile, level)
-            outfile.write('profile="%s",\n' % (self.profile,))
-        if self.base_channel_reference is not None and 'base_channel_reference' not in already_processed:
-            already_processed.add('base_channel_reference')
-            showIndent(outfile, level)
-            outfile.write('base_channel_reference="%s",\n' % (self.base_channel_reference,))
         if self.name is not None and 'name' not in already_processed:
             already_processed.add('name')
             showIndent(outfile, level)
             outfile.write('name="%s",\n' % (self.name,))
+        if self.profile is not None and 'profile' not in already_processed:
+            already_processed.add('profile')
+            showIndent(outfile, level)
+            outfile.write('profile="%s",\n' % (self.profile,))
         if self.force_empty_phy_config_delta_subtract is not None and 'force_empty_phy_config_delta_subtract' not in already_processed:
             already_processed.add('force_empty_phy_config_delta_subtract')
             showIndent(outfile, level)
             outfile.write('force_empty_phy_config_delta_subtract=%s,\n' % (self.force_empty_phy_config_delta_subtract,))
+        if self.base_channel_reference is not None and 'base_channel_reference' not in already_processed:
+            already_processed.add('base_channel_reference')
+            showIndent(outfile, level)
+            outfile.write('base_channel_reference="%s",\n' % (self.base_channel_reference,))
     def exportLiteralChildren(self, outfile, level, name_):
         if self.profile_inputs is not None:
             showIndent(outfile, level)
@@ -1269,18 +1270,14 @@ class base_channel_configurationType(GeneratedsSuper):
                 self.buildChildren(child, node, nodeName_)
         return self
     def buildAttributes(self, node, attrs, already_processed):
-        value = find_attr_value_('profile', node)
-        if value is not None and 'profile' not in already_processed:
-            already_processed.add('profile')
-            self.profile = value
-        value = find_attr_value_('base_channel_reference', node)
-        if value is not None and 'base_channel_reference' not in already_processed:
-            already_processed.add('base_channel_reference')
-            self.base_channel_reference = value
         value = find_attr_value_('name', node)
         if value is not None and 'name' not in already_processed:
             already_processed.add('name')
             self.name = value
+        value = find_attr_value_('profile', node)
+        if value is not None and 'profile' not in already_processed:
+            already_processed.add('profile')
+            self.profile = value
         value = find_attr_value_('force_empty_phy_config_delta_subtract', node)
         if value is not None and 'force_empty_phy_config_delta_subtract' not in already_processed:
             already_processed.add('force_empty_phy_config_delta_subtract')
@@ -1290,6 +1287,10 @@ class base_channel_configurationType(GeneratedsSuper):
                 self.force_empty_phy_config_delta_subtract = False
             else:
                 raise_parse_error(node, 'Bad boolean attribute')
+        value = find_attr_value_('base_channel_reference', node)
+        if value is not None and 'base_channel_reference' not in already_processed:
+            already_processed.add('base_channel_reference')
+            self.base_channel_reference = value
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
         if nodeName_ == 'profile_inputs':
             obj_ = profile_inputsType.factory()
@@ -2144,10 +2145,11 @@ class channel_config_entryType(GeneratedsSuper):
         MemberSpec_('full_register_model', 'xs:string', 0),
         MemberSpec_('optional_arguments', 'optional_argumentsType', 0),
         MemberSpec_('metadata', 'xs:string', 0),
+        MemberSpec_('alternate_phy', 'alternate_phyType', 0),
     ]
     subclass = None
     superclass = None
-    def __init__(self, name=None, base_frequency=None, channel_spacing=None, physical_channel_offset=None, channel_number_start=None, channel_number_end=None, max_power=None, profile_input_overrides=None, profile_output_overrides=None, phy_name_override=None, phy_config_delta_add=None, radio_configurator_output_model=None, full_register_model=None, optional_arguments=None, metadata=None):
+    def __init__(self, name=None, base_frequency=None, channel_spacing=None, physical_channel_offset=None, channel_number_start=None, channel_number_end=None, max_power=None, profile_input_overrides=None, profile_output_overrides=None, phy_name_override=None, phy_config_delta_add=None, radio_configurator_output_model=None, full_register_model=None, optional_arguments=None, metadata=None, alternate_phy=None):
         self.original_tagname_ = None
         self.name = _cast(None, name)
         self.base_frequency = base_frequency
@@ -2176,6 +2178,10 @@ class channel_config_entryType(GeneratedsSuper):
         else:
             self.optional_arguments = optional_arguments
         self.metadata = metadata
+        if alternate_phy is None:
+            self.alternate_phy = alternate_phyType()
+        else:
+            self.alternate_phy = alternate_phy
     def factory(*args_, **kwargs_):
         if channel_config_entryType.subclass:
             return channel_config_entryType.subclass(*args_, **kwargs_)
@@ -2224,6 +2230,9 @@ class channel_config_entryType(GeneratedsSuper):
     def get_metadata(self): return self.metadata
     def set_metadata(self, metadata): self.metadata = metadata
     metadataProp = property(get_metadata, set_metadata)
+    def get_alternate_phy(self): return self.alternate_phy
+    def set_alternate_phy(self, alternate_phy): self.alternate_phy = alternate_phy
+    alternate_phyProp = property(get_alternate_phy, set_alternate_phy)
     def get_name(self): return self.name
     def set_name(self, name): self.name = name
     nameProp = property(get_name, set_name)
@@ -2242,7 +2251,8 @@ class channel_config_entryType(GeneratedsSuper):
             self.radio_configurator_output_model is not None or
             self.full_register_model is not None or
             self.optional_arguments is not None or
-            self.metadata is not None
+            self.metadata is not None or
+            self.alternate_phy is not None
         ):
             return True
         else:
@@ -2312,6 +2322,8 @@ class channel_config_entryType(GeneratedsSuper):
         if self.metadata is not None:
             showIndent(outfile, level, pretty_print)
             outfile.write('<%smetadata>%s</%smetadata>%s' % (namespace_, self.gds_format_string(quote_xml(self.metadata), input_name='metadata'), namespace_, eol_))
+        if self.alternate_phy is not None:
+            self.alternate_phy.export(outfile, level, namespace_, name_='alternate_phy', pretty_print=pretty_print)
     def exportLiteral(self, outfile, level, name_='channel_config_entryType'):
         level += 1
         already_processed = set()
@@ -2378,6 +2390,12 @@ class channel_config_entryType(GeneratedsSuper):
         if self.metadata is not None:
             showIndent(outfile, level)
             outfile.write('metadata=%s,\n' % quote_python(self.metadata))
+        if self.alternate_phy is not None:
+            showIndent(outfile, level)
+            outfile.write('alternate_phy=model_.alternate_phyType(\n')
+            self.alternate_phy.exportLiteral(outfile, level, name_='alternate_phy')
+            showIndent(outfile, level)
+            outfile.write('),\n')
     def build(self, node):
         already_processed = set()
         self.buildAttributes(node, node.attrib, already_processed)
@@ -2468,6 +2486,11 @@ class channel_config_entryType(GeneratedsSuper):
             metadata_ = child_.text
             metadata_ = self.gds_validate_string(metadata_, node, 'metadata')
             self.metadata = metadata_
+        elif nodeName_ == 'alternate_phy':
+            obj_ = alternate_phyType.factory()
+            obj_.build(child_)
+            self.alternate_phy = obj_
+            obj_.original_tagname_ = 'alternate_phy'
 # end class channel_config_entryType
 
 
@@ -4094,6 +4117,133 @@ class argumentType(GeneratedsSuper):
             value_ = self.gds_validate_string(value_, node, 'value')
             self.value = value_
 # end class argumentType
+
+
+class alternate_phyType(GeneratedsSuper):
+    member_data_items_ = [
+        MemberSpec_('base_frequency', 'xs:decimal', 0),
+        MemberSpec_('channel_spacing', 'xs:decimal', 0),
+        MemberSpec_('number_of_channels', 'xs:decimal', 0),
+    ]
+    subclass = None
+    superclass = None
+    def __init__(self, base_frequency=None, channel_spacing=None, number_of_channels=None):
+        self.original_tagname_ = None
+        self.base_frequency = base_frequency
+        self.channel_spacing = channel_spacing
+        self.number_of_channels = number_of_channels
+    def factory(*args_, **kwargs_):
+        if alternate_phyType.subclass:
+            return alternate_phyType.subclass(*args_, **kwargs_)
+        else:
+            return alternate_phyType(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_base_frequency(self): return self.base_frequency
+    def set_base_frequency(self, base_frequency): self.base_frequency = base_frequency
+    base_frequencyProp = property(get_base_frequency, set_base_frequency)
+    def get_channel_spacing(self): return self.channel_spacing
+    def set_channel_spacing(self, channel_spacing): self.channel_spacing = channel_spacing
+    channel_spacingProp = property(get_channel_spacing, set_channel_spacing)
+    def get_number_of_channels(self): return self.number_of_channels
+    def set_number_of_channels(self, number_of_channels): self.number_of_channels = number_of_channels
+    number_of_channelsProp = property(get_number_of_channels, set_number_of_channels)
+    def hasContent_(self):
+        if (
+            self.base_frequency is not None or
+            self.channel_spacing is not None or
+            self.number_of_channels is not None
+        ):
+            return True
+        else:
+            return False
+    def export(self, outfile, level, namespace_='', name_='alternate_phyType', namespacedef_='', pretty_print=True):
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.original_tagname_ is not None:
+            name_ = self.original_tagname_
+        showIndent(outfile, level, pretty_print)
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        already_processed = set()
+        self.exportAttributes(outfile, level, already_processed, namespace_, name_='alternate_phyType')
+        if self.hasContent_():
+            outfile.write('>%s' % (eol_, ))
+            self.exportChildren(outfile, level + 1, namespace_='', name_='alternate_phyType', pretty_print=pretty_print)
+            showIndent(outfile, level, pretty_print)
+            outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
+        else:
+            outfile.write('/>%s' % (eol_, ))
+    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='alternate_phyType'):
+        pass
+    def exportChildren(self, outfile, level, namespace_='', name_='alternate_phyType', fromsubclass_=False, pretty_print=True):
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.base_frequency is not None:
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sbase_frequency>%s</%sbase_frequency>%s' % (namespace_, self.gds_format_float(self.base_frequency, input_name='base_frequency'), namespace_, eol_))
+        if self.channel_spacing is not None:
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%schannel_spacing>%s</%schannel_spacing>%s' % (namespace_, self.gds_format_float(self.channel_spacing, input_name='channel_spacing'), namespace_, eol_))
+        if self.number_of_channels is not None:
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%snumber_of_channels>%s</%snumber_of_channels>%s' % (namespace_, self.gds_format_float(self.number_of_channels, input_name='number_of_channels'), namespace_, eol_))
+    def exportLiteral(self, outfile, level, name_='alternate_phyType'):
+        level += 1
+        already_processed = set()
+        self.exportLiteralAttributes(outfile, level, already_processed, name_)
+        if self.hasContent_():
+            self.exportLiteralChildren(outfile, level, name_)
+    def exportLiteralAttributes(self, outfile, level, already_processed, name_):
+        pass
+    def exportLiteralChildren(self, outfile, level, name_):
+        if self.base_frequency is not None:
+            showIndent(outfile, level)
+            outfile.write('base_frequency=%f,\n' % self.base_frequency)
+        if self.channel_spacing is not None:
+            showIndent(outfile, level)
+            outfile.write('channel_spacing=%f,\n' % self.channel_spacing)
+        if self.number_of_channels is not None:
+            showIndent(outfile, level)
+            outfile.write('number_of_channels=%f,\n' % self.number_of_channels)
+    def build(self, node):
+        already_processed = set()
+        self.buildAttributes(node, node.attrib, already_processed)
+        for child in node:
+            if isinstance(child.tag, str):
+                nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+                self.buildChildren(child, node, nodeName_)
+        return self
+    def buildAttributes(self, node, attrs, already_processed):
+        pass
+    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
+        if nodeName_ == 'base_frequency':
+            sval_ = child_.text
+            try:
+                fval_ = float(sval_)
+            except (TypeError, ValueError) as exp:
+                raise_parse_error(child_, 'requires float or double: %s' % exp)
+            fval_ = self.gds_validate_float(fval_, node, 'base_frequency')
+            self.base_frequency = fval_
+        elif nodeName_ == 'channel_spacing':
+            sval_ = child_.text
+            try:
+                fval_ = float(sval_)
+            except (TypeError, ValueError) as exp:
+                raise_parse_error(child_, 'requires float or double: %s' % exp)
+            fval_ = self.gds_validate_float(fval_, node, 'channel_spacing')
+            self.channel_spacing = fval_
+        elif nodeName_ == 'number_of_channels':
+            sval_ = child_.text
+            try:
+                fval_ = float(sval_)
+            except (TypeError, ValueError) as exp:
+                raise_parse_error(child_, 'requires float or double: %s' % exp)
+            fval_ = self.gds_validate_float(fval_, node, 'number_of_channels')
+            self.number_of_channels = fval_
+# end class alternate_phyType
 
 
 class phy_config_baseType(GeneratedsSuper):
@@ -5873,27 +6023,28 @@ class source_code(GeneratedsSuper):
 
 
 GDSClassesMapping = {
-    'channel_config_entries': channel_config_entriesType,
-    'argument': argumentType12,
-    'phy_config_delta_add': phy_config_delta_addType,
-    'channel_config_entry': channel_config_entryType,
     'base_channel_configurations': base_channel_configurationsType,
-    'link_layer_config': link_layer_configType,
-    'register': registerType7,
-    'phy_config_delta_subtract': phy_config_delta_subtractType,
+    'output_files': output_filesType,
+    'base_channel_configuration': base_channel_configurationType,
     'profile_inputs': profile_inputsType,
-    'phy_config_base': phy_config_baseType,
     'phy': phyType9,
     'profile_output_overrides': profile_output_overridesType4,
-    'inputs': inputsType,
-    'file': fileType,
-    'override': overrideType10,
-    'input': inputType8,
-    'base_channel_configuration': base_channel_configurationType,
+    'channel_config_entries': channel_config_entriesType,
+    'phy_config_base': phy_config_baseType,
+    'phy_config_delta_subtract': phy_config_delta_subtractType,
+    'link_layer_config': link_layer_configType,
     'optional_arguments': optional_argumentsType,
+    'input': inputType8,
     'profile_input_overrides': profile_input_overridesType2,
+    'override': overrideType10,
+    'channel_config_entry': channel_config_entryType,
+    'phy_config_delta_add': phy_config_delta_addType,
+    'alternate_phy': alternate_phyType,
+    'register': registerType7,
+    'argument': argumentType12,
+    'inputs': inputsType,
     'overrides': overridesType,
-    'output_files': output_filesType,
+    'file': fileType,
 }
 
 
@@ -6023,6 +6174,7 @@ if __name__ == '__main__':
 __all__ = [
     "access",
     "addressOffset",
+    "alternate_phyType",
     "argumentType",
     "argumentType12",
     "baseAddress",

@@ -26,25 +26,34 @@ include:
 
   # Internals.
   - path: inc
-    unless: [trustzone_nonsecure]
     file_list:
+      - path: sli_se_manager_features.h
       - path: sl_se_manager_internal_keys.h
+        unless: [trustzone_nonsecure]
       - path: sli_se_manager_internal.h
+        unless: [trustzone_nonsecure]
 
 requires:
   - name: device
-  - name: emlib_common
-  - name: emlib_core
-  - name: emlib_se
-  - name: emlib_system
+  - name: sl_common
+    condition: [native]
   - name: status
-  
+
+  - name: emlib_se
+  - name: emlib_common
+    condition: [device_cortexm]
+  - name: emlib_core
+    condition: [device_cortexm]
+  - name: emlib_system
+    condition: [device_cortexm]
+
   - name: se_manager_osal
+    condition: [device_cortexm]
   
   - name: se_manager_config
-    condition: [trustzone_unaware]
+    condition: [trustzone_unaware, device_cortexm]
   - name: se_manager_config
-    condition: [trustzone_secure]
+    condition: [trustzone_secure, device_cortexm]
 
   # Not implemented for the TZ SE Manager Service (but used by the PSA drivers).
   - name: se_manager_crypto
@@ -54,7 +63,7 @@ requires:
 
   # Inclusion of source and config components depends on which TZ state we are
   # targeting. For apps that do not make active use of TZ, a dummy state
-  # (trustzone_unaware) should be used. 
+  # (trustzone_unaware) should be used.
   - name: trustzone_security_state
 
 provides:

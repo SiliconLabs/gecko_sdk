@@ -547,6 +547,17 @@ bool COEX_ConfigRadioHoldOff(COEX_GpioHandle_t gpioHandle);
 bool COEX_ConfigPhySelect(COEX_GpioHandle_t gpioHandle);
 
 /**
+ * Configure the COEX WiFi TX GPIO.
+ *
+ * @param[in] gpioHandle A GPIO instance handle.
+ * @return This function returns true if the WiFi TX GPIO
+ *  was successfully configured, false otherwise.
+ *
+ * @note Pass NULL to disable the COEX PHY select GPIO.
+ */
+bool COEX_ConfigWifiTx(COEX_GpioHandle_t gpioHandle);
+
+/**
  * Set the COEX configuration options
  *
  * @param[in] options New COEX configuration options.
@@ -690,4 +701,4 @@ void COEX_on_event(COEX_Events_t events);
 }
 #endif
 
-#endif  // __COEXISTENCE_H__
+#endif // __COEXISTENCE_H__

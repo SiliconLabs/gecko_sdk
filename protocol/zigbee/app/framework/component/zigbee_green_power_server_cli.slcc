@@ -1,0 +1,86 @@
+package: Zigbee
+description: A component implementing the server-side CLI functionality of the Green Power cluster.
+label: Green Power Server CLI
+quality: production
+id: zigbee_green_power_server_cli
+category: Zigbee|Green Power
+provides:
+   - name: "zigbee_green_power_server_cli"
+source:
+  - path: protocol/zigbee/app/framework/plugin/green-power-server/green-power-server-cli.c
+    condition:
+      - "cli"
+      - "zigbee_green_power_server"
+  - path: protocol/zigbee/app/framework/plugin/green-power-common/green-power-cli.c
+    condition:
+      - "cli"
+    unless:
+      - "zigbee_green_power_server"
+include:
+  - path: protocol/zigbee/app/framework/plugin/green-power-server
+    file_list:
+      - path: green-power-server.h
+        condition:
+          - "zigbee_green_power_server"
+      - path: green-power-server-tokens.h
+        condition:
+          - "zigbee_green_power_server"
+  - path: protocol/zigbee/stack/gp
+    file_list:
+      - path: gp-sink-table.h
+        condition:
+          - "zigbee_gp"
+  # The green power server is capable of a pre-defined default translation and
+  # forwarding of GPDF commands without the support of the translation table
+  # component. This path is needed to ensure the structure definitions are
+  # available in absence of the translation table component.
+  - path: protocol/zigbee/app/framework/plugin/green-power-translation-table
+    file_list:
+      - path: green-power-translation-table.h
+        condition:
+          - "zigbee_green_power_server"
+template_contribution:
+  - name: component_catalog
+    value: zigbee_green_power_server_cli
+  - name: cli_group
+    value:
+      group: plugin
+      name: green-power-server
+      help: green-power-server related commands.
+  - name: cli_command
+    value:
+      group: green-power-server
+      name: commission
+      handler: emberAfPluginGreenPowerServerCommissioningMode
+      help: Puts the GPS in commissioning mode.
+      argument:
+      - type: uint8
+        help: 1 to enter, 0 to leave
+      - type: uint16
+        help: Green Power Manager (GPM) address for security
+      - type: uint16
+        help: Green Power Manager (GPM) address for pairing
+      - type: uint8
+        help: Sink endpoint
+  - name: cli_command
+    value:
+      group: green-power-server
+      name: extend-comm
+      handler: emberAfGreenPowerClusterGpSinkCliCommissioningWindowExtend
+      help: Extends commissioning window.
+      argument:
+      - type: uint16
+        help: Time in milliseconds
+  - name: cli_command
+    value:
+      group: green-power-server
+      name: sink-table-print
+      handler: emberAfPluginGreenPowerServerCliSinkTablePrint
+      help: Prints all entries of the sink table.
+  - name: cli_command
+    value:
+      group: green-power-server
+      name: sink-table-clear
+      handler: emberAfPluginGreenPowerServerCliClearSinkTable
+      help: Clears sink table.
+

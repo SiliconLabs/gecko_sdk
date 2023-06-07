@@ -29,6 +29,7 @@ include:
   - path: libraries/3rdparty/mbedtls_config
     file_list:
       - path: threading_alt.h
+      - path: aws_mbedtls_user_config.h
 
 template_contribution:
   # Mbed TLS Dynamic memory allocation support
@@ -47,13 +48,15 @@ template_contribution:
   - name: mbedtls_config
     value: MBEDTLS_THREADING_ALT
   - name: mbedtls_config
-    value: THREADING_InitMutex mbedtls_mutex_init
+    value: THREADING_InitMutex aws_mbedtls_mutex_init
   - name: mbedtls_config
-    value: THREADING_FreeMutex mbedtls_mutex_free
+    value: THREADING_FreeMutex aws_mbedtls_mutex_free
   - name: mbedtls_config
-    value: THREADING_TakeMutexBlocking mbedtls_mutex_lock
+    value: THREADING_TakeMutexBlocking aws_mbedtls_mutex_lock
   - name: mbedtls_config
-    value: THREADING_GiveMutex mbedtls_mutex_unlock
+    value: THREADING_GiveMutex aws_mbedtls_mutex_unlock
 
 define:
   - name: CONFIG_MBEDTLS_USE_FREERTOS_PVCALLOC
+  - name: MBEDTLS_USER_CONFIG_FILE
+    value: "<aws_mbedtls_user_config.h>"

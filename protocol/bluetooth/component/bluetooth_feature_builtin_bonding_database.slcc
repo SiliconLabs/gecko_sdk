@@ -5,7 +5,7 @@ description: >
   Configures the Bluetooth stack to include a built-in bonding database. In this
   configuration the Bluetooth stack stores the bonding data in the local
   non-volatile memory.
-category: "Bluetooth|Feature"
+category: Bluetooth|Bluetooth Host (Stack)|Additional Features
 quality: "production"
 root_path: "protocol/bluetooth"
 provides:

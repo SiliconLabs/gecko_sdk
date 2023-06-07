@@ -40,5 +40,6 @@ tag:
   - hardware:component:led:1+
   - hardware:component:button:1+
   - hardware:!shared:button:led
+  - hardware:device:ram:20
 define:
   - name: DEBUG_EFM

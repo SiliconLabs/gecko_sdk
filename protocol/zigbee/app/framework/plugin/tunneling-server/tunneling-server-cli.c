@@ -18,14 +18,13 @@
 #include "app/framework/include/af.h"
 #include "tunneling-server.h"
 #include "app/util/serial/sl_zigbee_command_interpreter.h"
-#ifdef UC_BUILD
-void emAfPluginTunnelingServerCliPrint(void);
-void emAfPluginTunnelingServerPrintCliCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_tunneling_server_cli_print(void);
+void sli_zigbee_af_tunneling_server_printCliCommand(sl_cli_command_arg_t *arguments)
 {
-  emAfPluginTunnelingServerCliPrint();
+  sli_zigbee_af_tunneling_server_cli_print();
 }
 
-void emAfPluginTunnelingServerCliTransfer(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_tunneling_server_cli_transfer(sl_cli_command_arg_t *arguments)
 {
   uint16_t tunnelIndex =  sl_cli_get_argument_uint16(arguments, 0);
   uint8_t data[255];
@@ -40,40 +39,3 @@ void emberAfPluginTunnelingServerToggleBusyCliCommand(sl_cli_command_arg_t *argu
 {
   emberAfPluginTunnelingServerToggleBusyCommand();
 }
-
-#else
-void emAfPluginTunnelingServerCliTransfer(void);
-
-#if !defined(EMBER_AF_GENERATE_CLI)
-
-void emAfPluginTunnelingServerCliPrint(void);
-
-EmberCommandEntry emberAfPluginTunnelingServerCommands[] = {
-  emberCommandEntryAction("transfer", emAfPluginTunnelingServerCliTransfer, "vb",
-                          "Transfer data through the tunnel"),
-  emberCommandEntryAction("busy", emberAfPluginTunnelingServerToggleBusyCommand, "",
-                          "Toggly the busy status of the tunnel"),
-  emberCommandEntryAction("print", emAfPluginTunnelingServerCliPrint, "",
-                          "Print the list of tunnels"),
-  emberCommandEntryTerminator(),
-};
-
-#endif // EMBER_AF_GENERATE_CLI
-
-// plugin tunneling-server transfer <tunnel index:2> <data>
-void emAfPluginTunnelingServerCliTransfer(void)
-{
-  uint16_t tunnelIndex = (uint16_t)emberUnsignedCommandArgument(0);
-  uint8_t data[255];
-  uint16_t dataLen = emberCopyStringArgument(1, data, sizeof(data), false);
-  EmberAfStatus status = emberAfPluginTunnelingServerTransferData(tunnelIndex,
-                                                                  data,
-                                                                  dataLen);
-  emberAfTunnelingClusterPrintln("%p 0x%x", "transfer", status);
-}
-
-void emberAfPluginTunnelingServerToggleBusyCliCommand(void)
-{
-  emberAfPluginTunnelingServerToggleBusyCommand();
-}
-#endif //UC_BUILD

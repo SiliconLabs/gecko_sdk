@@ -38,7 +38,7 @@
 
 /** @} */ // end of ota-storage-linux
 
-typedef void (EmAfOtaStorageFileAddedHandler)(const EmberAfOtaHeader*);
+typedef void (sli_zigbee_af_ota_storage_file_added_handler)(const EmberAfOtaHeader*);
 
 typedef struct {
   bool memoryDebug;
@@ -46,8 +46,8 @@ typedef struct {
   bool fieldDebug;
   bool ignoreFilesWithUnderscorePrefix;
   bool printFileDiscoveryOrRemoval;
-  EmAfOtaStorageFileAddedHandler* fileAddedHandler;
-} EmAfOtaStorageLinuxConfig;
+  sli_zigbee_af_ota_storage_file_added_handler* fileAddedHandler;
+} sli_zigbee_af_ota_storage_linux_config;
 
-void emAfOtaStorageGetConfig(EmAfOtaStorageLinuxConfig* currentConfig);
-void emAfOtaStorageSetConfig(const EmAfOtaStorageLinuxConfig* newConfig);
+void sli_zigbee_af_ota_storage_get_config(sli_zigbee_af_ota_storage_linux_config* currentConfig);
+void sli_zigbee_af_ota_storage_set_config(const sli_zigbee_af_ota_storage_linux_config* newConfig);

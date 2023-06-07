@@ -4,9 +4,12 @@ package: Bluetooth
 description: >
   The Object Transfer Service (OTS) Object Client provides an API for
   managing objects on the remote Object Server.
-category: Bluetooth|Middleware|OTS
-quality: experimental
+category: Bluetooth|Application|GATT Profiles
+quality: evaluation
 root_path:  app/bluetooth/common/ots
+tag:
+  - Low-Code
+
 source:
   - path: src/sl_bt_ots_client.c
   - path: src/sl_bt_ots_common.c

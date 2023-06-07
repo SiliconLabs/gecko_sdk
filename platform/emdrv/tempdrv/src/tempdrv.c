@@ -606,7 +606,7 @@ Ecode_t TEMPDRV_Enable(bool enable)
  *   Get the number of active callbacks for a limit.
  *
  * @param[in] limit
- *   Limit type, refer to @ref TEMPDRV_LimitType.
+ *   Limit type, refer to @ref TEMPDRV_LimitType_t.
  *
  * @return
  *   Number of active callbacks
@@ -697,7 +697,7 @@ int8_t TEMPDRV_GetTemp(void)
  *   Temperature to trigger on given in number of &deg;C.
  *
  * @param[in] limit
- *   Limit type, refer to @ref TEMPDRV_LimitType. Using @ref TEMPDRV_LIMIT_LOW
+ *   Limit type, refer to @ref TEMPDRV_LimitType_t. Using @ref TEMPDRV_LIMIT_LOW
  *   will register a callback when the EMU temperature reaches \p temp &deg;C
  *   or lower, and using @ref TEMPDRV_LIMIT_HIGH will register a callback when
  *   the EMU temperature reaches \p temp &deg;C or higher.
@@ -799,11 +799,8 @@ Ecode_t TEMPDRV_UnregisterCallback(TEMPDRV_Callback_t callback)
 ///   The source files for the TEMP driver library resides in the
 ///   emdrv/tempdrv folder, and consists of tempdrv.c and tempdrv.h.
 ///
-///   @li @ref tempdrv_intro
-///   @li @ref tempdrv_conf
-///   @li @ref tempdrv_api
 ///
-///   @n @section tempdrv_intro Introduction
+///   @n @section tempdrv_intro_1 Introduction
 ///
 ///   TEMPDRV gives the user a nice interface to the EMU internal temperature sensor
 ///   which is present on the EFR32 and some EFM32 devices. The TEMPDRV supports
@@ -862,7 +859,7 @@ Ecode_t TEMPDRV_UnregisterCallback(TEMPDRV_Callback_t callback)
 ///   @ref TEMPDRV_Init(), @ref TEMPDRV_DeInit() @n
 ///    These functions initializes or deinitializes the TEMPDRV driver. This will
 ///    erase any registered callbacks and disabled all interrupts. Typically
-///    @htmlonly TEMPDRV_Init() @endhtmlonly is called once in your startup code.
+///    TEMPDRV_Init() is called once in your startup code.
 ///
 ///   @ref TEMPDRV_Enable() @n
 ///    Enable or disable the temperature driver without losing any registered

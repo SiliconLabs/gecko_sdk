@@ -315,10 +315,7 @@ static otInstance *InitInstance(PosixConfig *aConfig)
     return instance;
 }
 
-void otTaskletsSignalPending(otInstance *aInstance)
-{
-    OT_UNUSED_VARIABLE(aInstance);
-}
+void otTaskletsSignalPending(otInstance *aInstance) { OT_UNUSED_VARIABLE(aInstance); }
 
 void otPlatReset(otInstance *aInstance)
 {
@@ -383,7 +380,7 @@ int main(int argc, char *argv[])
 #if !OPENTHREAD_POSIX_CONFIG_DAEMON_ENABLE
     otAppCliInit(instance);
 #endif
-    otCliSetUserCommands(kCommands, OT_ARRAY_LENGTH(kCommands), instance);
+    IgnoreError(otCliSetUserCommands(kCommands, OT_ARRAY_LENGTH(kCommands), instance));
 
     while (true)
     {

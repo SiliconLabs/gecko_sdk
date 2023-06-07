@@ -96,11 +96,6 @@ EmberStatus emberSetExtendedSecurityBitmask(EmberExtendedSecurityBitmask mask);
 EmberStatus emberGetExtendedSecurityBitmask(EmberExtendedSecurityBitmask* mask);
 EmberStatus emberSetNodeId(EmberNodeId nodeId);
 uint8_t emberGetLastStackZigDevRequestSequence(void);
-#ifndef UC_BUILD
-void emberSetMaximumIncomingTransferSize(uint16_t size);
-void emberSetMaximumOutgoingTransferSize(uint16_t size);
-void emberSetDescriptorCapability(uint8_t capability);
-#endif
 EmberStatus emberSendUnicastNetworkKeyUpdate(EmberNodeId targetShort,
                                              EmberEUI64  targetLong,
                                              EmberKeyData* newKey);

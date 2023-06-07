@@ -35,7 +35,7 @@ template_contribution:
     value:
       group: device-database
       name: print-all
-      handler: emAfPluginDeviceDatabasePrintAll
+      handler: sli_zigbee_af_device_database_print_all
       help: Prints all devices in the database.
   - name: cli_group
     value:
@@ -46,7 +46,7 @@ template_contribution:
     value:
       group: device
       name: print
-      handler: emAfPluginDeviceDatabasePrintDevice
+      handler: sli_zigbee_af_device_database_print_device
       help: Prints all the clusters and endpoints known about the specified device in the database.
       argument:
       - type: hex
@@ -55,7 +55,7 @@ template_contribution:
     value:
       group: device
       name: erase
-      handler: emAfPluginDeviceDatabaseErase
+      handler: sli_zigbee_af_device_database_erase
       help: Erases the device with specified EUI64 from the database.
       argument:
       - type: hex
@@ -64,7 +64,7 @@ template_contribution:
     value:
       group: device
       name: add-dummy
-      handler: emAfPluginDeviceDatabaseAddDummyDevice
+      handler: sli_zigbee_af_device_database_add_dummy_device
       help: Adds a device with specified EUI64 and a sequential number of clusters and endpoints.
       argument:
       - type: hex

@@ -1,4 +1,4 @@
-/* Copyright 2021 The TensorFlow Authors. All Rights Reserved.
+/* Copyright 2022 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -26,15 +26,69 @@ namespace tflite {
 
 namespace {
 // Softmax parameter data that persists in user_data
-const int kInt16LUTArraySize = 513;
+const int kInt16LUTArraySize = LUTSize<int16_t>();
+
+TfLiteStatus InitializeLutForInt16(TfLiteContext* context,
+                                   const TfLiteTensor* input,
+                                   TfLiteTensor* output,
+                                   SoftmaxParams* op_data) {
+  // Only allocate LUTs for KTfLiteInt16 data type
+  if (input->type == kTfLiteInt16) {
+    void* raw_exp_lut = context->AllocatePersistentBuffer(
+        context, sizeof(int16_t) * kInt16LUTArraySize);
+    TF_LITE_ENSURE(context, raw_exp_lut != nullptr);
+    op_data->exp_lut = reinterpret_cast<int16_t*>(raw_exp_lut);
+    void* one_over_one_plus_x_lut = context->AllocatePersistentBuffer(
+        context, sizeof(int16_t) * kInt16LUTArraySize);
+    TF_LITE_ENSURE(context, one_over_one_plus_x_lut != nullptr);
+    op_data->one_over_one_plus_x_lut =
+        reinterpret_cast<int16_t*>(one_over_one_plus_x_lut);
+  }
+
+  if (output->type == kTfLiteInt16) {
+    TF_LITE_ENSURE(context,
+                   input->type == kTfLiteInt8 || input->type == kTfLiteInt16);
+  } else {
+    TF_LITE_ENSURE_EQ(context, input->type, output->type);
+  }
+
+  // Populate LUT if required
+  if (input->type == kTfLiteInt16) {
+    TF_LITE_ENSURE_EQ(context, output->params.zero_point, 0);
+    // exp LUT only used on negative values
+    // we consider exp(-10.0) is insignificant to accumulation
+    const int32_t range = std::numeric_limits<int16_t>::max() -
+                          std::numeric_limits<int16_t>::min();
+    LUTPopulate<int16_t>(
+        10.0f / range, std::numeric_limits<int16_t>::max(), 2.0f / range, 0,
+        [](float value) { return std::exp(value); }, op_data->exp_lut);
+
+    LUTPopulate<int16_t>(
+        1.0f / range, std::numeric_limits<int16_t>::min(), 2.0f / range, 0,
+        [](float value) { return 1.0f / (1.0f + value); },
+        op_data->one_over_one_plus_x_lut);
+
+    op_data->zero_point = output->params.zero_point;
+    op_data->scale = output->params.scale;
+  }
+
+  return kTfLiteOk;
+}
+
+}  // namespace
 
 TfLiteStatus CalculateSoftmaxParams(TfLiteContext* context,
                                     const TfLiteTensor* input,
                                     TfLiteTensor* output,
                                     const TfLiteSoftmaxParams* params,
                                     SoftmaxParams* op_data) {
+  if (InitializeLutForInt16(context, input, output, op_data) != kTfLiteOk) {
+    return kTfLiteError;
+  }
+
   if (input->type == kTfLiteInt8 || input->type == kTfLiteInt16) {
     if (input->type == kTfLiteInt16) {
+      TF_LITE_ENSURE_EQ(context, input->params.zero_point, 0);
       TF_LITE_ENSURE_EQ(context, output->params.zero_point, 0);
       TF_LITE_ENSURE_NEAR(context, output->params.scale, 1.f / 32768,
                           (0.001f * 1.f / 32768));
@@ -83,8 +137,6 @@ TfLiteStatus CalculateSoftmaxParams(TfLiteContext* context,
   return kTfLiteOk;
 }
 
-}  // namespace
-
 void* SoftmaxInit(TfLiteContext* context, const char* buffer, size_t length) {
   TFLITE_DCHECK(context->AllocatePersistentBuffer != nullptr);
   return context->AllocatePersistentBuffer(context, sizeof(SoftmaxParams));
@@ -103,40 +155,6 @@ TfLiteStatus SoftmaxPrepare(TfLiteContext* context, TfLiteNode* node) {
 
   TF_LITE_ENSURE(context, node->user_data != nullptr);
   SoftmaxParams* op_data = static_cast<SoftmaxParams*>(node->user_data);
-  // Only allocate LUTs for KTfLiteInt16 data type
-  if (input->type == kTfLiteInt16) {
-    void* raw_exp_lut = context->AllocatePersistentBuffer(
-        context, sizeof(int16_t) * kInt16LUTArraySize);
-    TF_LITE_ENSURE(context, raw_exp_lut != nullptr);
-    op_data->exp_lut = reinterpret_cast<int16_t*>(raw_exp_lut);
-    void* one_over_one_plus_x_lut = context->AllocatePersistentBuffer(
-        context, sizeof(int16_t) * kInt16LUTArraySize);
-    TF_LITE_ENSURE(context, one_over_one_plus_x_lut != nullptr);
-    op_data->one_over_one_plus_x_lut =
-        reinterpret_cast<int16_t*>(one_over_one_plus_x_lut);
-  }
-
-  if (output->type == kTfLiteInt16) {
-    TF_LITE_ENSURE(context,
-                   input->type == kTfLiteInt8 || input->type == kTfLiteInt16);
-  } else {
-    TF_LITE_ENSURE_EQ(context, input->type, output->type);
-  }
-
-  // Populate LUT if required
-  if (input->type == kTfLiteInt16) {
-    TF_LITE_ENSURE_EQ(context, output->params.zero_point, 0);
-    // exp LUT only used on negative values
-    // we consider exp(-10.0) is insignificant to accumulation
-    gen_lut<float, int16_t, int16_t>(
-        [](float value) { return std::exp(value); }, -10.0f, 0.0f, -1.0f, 1.0f,
-        op_data->exp_lut);
-    gen_lut<float, int16_t, int16_t>(
-        [](float value) { return 1.0f / (1.0f + value); }, 0.0f, 1.0f, -1.0f,
-        1.0f, op_data->one_over_one_plus_x_lut);
-    op_data->zero_point = output->params.zero_point;
-    op_data->scale = output->params.scale;
-  }
 
   auto* params = static_cast<TfLiteSoftmaxParams*>(node->builtin_data);
   auto ret_val =

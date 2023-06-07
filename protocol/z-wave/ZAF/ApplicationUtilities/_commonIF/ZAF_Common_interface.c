@@ -4,20 +4,14 @@
  */
 
 #include "ZAF_Common_interface.h"
+#include "zaf_protocol_config.h"
 //#define DEBUGPRINT
 #include "DebugPrint.h"
 
 static SApplicationHandles * m_pAppHandles;
-static const SProtocolConfig_t * m_pAppProtocolConfig;
 static zpal_pm_handle_t m_PowerLock;
 static CP_Handle_t m_CmdPublisherHandle;
 static zaf_wake_up_callback_t wake_up_callback;
-
-// setters
-void ZAF_setAppProtocolConfig(SProtocolConfig_t const * const pProtocolConfig)
-{
-  m_pAppProtocolConfig = pProtocolConfig;
-}
 
 void ZAF_setAppHandle(SApplicationHandles* pAppHandle)
 {
@@ -42,11 +36,10 @@ SApplicationHandles* ZAF_getAppHandle()
   return m_pAppHandles;
 }
 
-
-const SAppNodeInfo_t* ZAF_getAppNodeInfo()
+const SProtocolInfo* ZAF_getProtocolInfo()
 {
-  ASSERT(m_pAppProtocolConfig);
-  return m_pAppProtocolConfig->pNodeInfo;
+  ASSERT(m_pAppHandles);
+  return m_pAppHandles->pProtocolInfo;
 }
 
 SQueueNotifying* ZAF_getZwTxQueue()
@@ -55,10 +48,16 @@ SQueueNotifying* ZAF_getZwTxQueue()
   return m_pAppHandles->pZwTxQueue;
 }
 
-const SProtocolConfig_t* ZAF_getAppProtocolConfig()
+SQueueNotifying* ZAF_getZwCommandQueue()
 {
-  ASSERT(m_pAppProtocolConfig);
-  return m_pAppProtocolConfig;
+  ASSERT(m_pAppHandles);
+  return m_pAppHandles->pZwCommandQueue;
+}
+
+const zpal_radio_network_stats_t* ZAF_getNetworkStatistics()
+{
+  ASSERT(m_pAppHandles);
+  return m_pAppHandles->pNetworkStatistics;
 }
 
 zpal_pm_handle_t ZAF_getPowerLock()
@@ -82,7 +81,7 @@ CP_Handle_t ZAF_getCPHandle()
 bool isFLiRS(const SAppNodeInfo_t * pAppNodeInfo)
 {
   UNUSED(pAppNodeInfo);
-  return ZAF_getAppNodeInfo()->DeviceOptionsMask & (APPLICATION_FREQ_LISTENING_MODE_1000ms ^ APPLICATION_FREQ_LISTENING_MODE_250ms);
+  return zaf_get_app_node_info()->DeviceOptionsMask & (APPLICATION_FREQ_LISTENING_MODE_1000ms ^ APPLICATION_FREQ_LISTENING_MODE_250ms);
 }
 
 EInclusionState_t ZAF_GetInclusionState(void)
@@ -95,6 +94,18 @@ node_id_t ZAF_GetNodeID(void)
 {
   ASSERT(m_pAppHandles);
   return m_pAppHandles->pNetworkInfo->NodeId;
+}
+
+uint32_t ZAF_GetHomeID(void)
+{
+  ASSERT(m_pAppHandles);
+  return m_pAppHandles->pNetworkInfo->HomeId;
+}
+
+node_id_t ZAF_GetSucNodeId(void)
+{
+  ASSERT(m_pAppHandles);
+  return m_pAppHandles->pNetworkInfo->SucNodeId;
 }
 
 EInclusionMode_t ZAF_GetInclusionMode(void)

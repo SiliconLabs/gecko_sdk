@@ -264,7 +264,9 @@
 #define  SLI_USBD_CFG_DBG_STATS_EN                             0u
 #endif
 
-// FIXME: decide what to do with LOG macros
+// These LOG macros are used in different layers of the stack to track some USB events.
+// They are internal to the stack and cannot be configured from a public configuration file.
+// They expand to nothing at the moment.
 #define   SLI_USBD_LOG_DBG(...)
 #define   SLI_USBD_LOG_VRB(...)
 #define   SLI_USBD_LOG_ERR(...)
@@ -727,7 +729,7 @@ typedef struct sli_usbd_interface {
  *                       ------       +----------+    +------+    +------+    +------+          +------+
  *******************************************************************************************************/
 
-// Configuration Structue
+// Configuration Structure
 typedef struct sli_usbd_configuration {
   uint8_t                       attrib;                                                         ///< Configuration attributes.
   uint16_t                      max_power;                                                      ///< Maximum bus power drawn.
@@ -830,7 +832,7 @@ typedef struct {
   uint16_t                    desc_buf_req_len;                                             ///< Configuration & string descriptor requested length.
   uint16_t                    desc_buf_max_len;                                             ///< Configuration & string descriptor maximum length.
   sl_status_t                 *desc_buf_status_ptr;                                         ///< Configuration & string descriptor error pointer.
-  // Endpoint InformatION
+  // Endpoint Information
   uint16_t                    endpoint_max_ctrl_pkt_size;                                   ///< Ctrl EP maximum packet size.
   uint8_t                     endpoint_interface_table[SL_USBD_ENDPOINT_MAX_NBR];           ///< EP to IF number reference table.
   uint8_t                     endpoint_max_phy_nbr;                                         ///< EP Maximum physical number.

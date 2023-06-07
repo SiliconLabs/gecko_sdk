@@ -50,11 +50,11 @@ static void serviceReturn(const EmberAfServiceDiscoveryResult* result)
                      result->status);
 }
 
-bool emAfPluginDeviceTablePreCommandReceivedCallback(EmberAfClusterCommand* cmd)
+bool sli_zigbee_af_device_table_pre_command_received_callback(EmberAfClusterCommand* cmd)
 {
   uint16_t nodeId = cmd->source;
   uint32_t currentTimestamp = halCommonGetInt32uMillisecondTick();
-  uint32_t index = emAfDeviceTableFindFirstEndpointNodeId(nodeId);
+  uint32_t index = sli_zigbee_af_device_table_find_first_endpoint_node_id(nodeId);
   EmberAfPluginDeviceTableEntry *deviceTable = emberAfDeviceTablePointer();
 
   if (getCurrentState(nodeId)
@@ -70,7 +70,7 @@ bool emAfPluginDeviceTablePreCommandReceivedCallback(EmberAfClusterCommand* cmd)
 
   while (index != EMBER_AF_PLUGIN_DEVICE_TABLE_NULL_INDEX) {
     deviceTable[index].lastMsgTimestamp = currentTimestamp;
-    index = emAfDeviceTableFindNextEndpoint(index);
+    index = sli_zigbee_af_device_table_find_next_endpoint(index);
   }
 
   return false;
@@ -166,7 +166,7 @@ static void optionallyChangeState(EmberNodeId nodeId,
 
   if (originalState != state) {
     // Need to change state on all endpoints
-    emAfDeviceTableUpdateDeviceState(index, state);
+    sli_zigbee_af_device_table_update_device_state(index, state);
     emberAfPluginDeviceTableStateChangeCallback(deviceTable[index].nodeId,
                                                 state);
   }
@@ -224,7 +224,7 @@ static bool shouldDeviceLeave(EmberNodeId nodeId)
   return false;
 }
 
-bool emAfDeviceTableShouldDeviceLeave(EmberNodeId nodeId)
+bool sli_zigbee_af_device_table_should_device_leave(EmberNodeId nodeId)
 {
   return shouldDeviceLeave(nodeId);
 }

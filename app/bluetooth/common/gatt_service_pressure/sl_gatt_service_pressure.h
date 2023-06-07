@@ -31,6 +31,11 @@
 #ifndef SL_GATT_SERVICE_PRESSURE_H
 #define SL_GATT_SERVICE_PRESSURE_H
 
+/***********************************************************************************************//**
+ * @addtogroup gatt_service_pressure
+ * @{
+ **************************************************************************************************/
+
 #include "sl_bt_api.h"
 
 /**************************************************************************//**
@@ -47,4 +52,5 @@ void sl_gatt_service_pressure_on_event(sl_bt_msg_t *evt);
  *****************************************************************************/
 sl_status_t sl_gatt_service_pressure_get(float *pressure);
 
+/** @} (end addtogroup gatt_service_pressure) */
 #endif // SL_GATT_SERVICE_PRESSURE_H

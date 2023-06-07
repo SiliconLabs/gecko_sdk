@@ -4,9 +4,12 @@ package: Bluetooth
 description: >
   Provides the LEDs and buttons in GATT characteristics.
   Designed for the Thunderboard smartphone app.
-category: Bluetooth|GATT
+category: Bluetooth|Application|GATT Services
 quality: production
 root_path: app/bluetooth/common/gatt_service_aio
+tag:
+  - No-Code
+
 config_file:
   - path: gatt_service_aio.xml
     directory: btconf

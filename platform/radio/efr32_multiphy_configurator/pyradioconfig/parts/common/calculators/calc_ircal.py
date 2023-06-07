@@ -189,7 +189,7 @@ class CALC_IrCal(ICalculator):
         subgig_band = model.vars.subgig_band.value
         part_family = model.part_family.lower()
 
-        if part_family == "dumbo":
+        if part_family in ["dumbo","unit_test_part"]:
             # Dumbo has a sub-gig PTE value on the Device Information page.
             if lodiv <= 3:
                 model.vars.ircal_manufconfigvalid.value = True

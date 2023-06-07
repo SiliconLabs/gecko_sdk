@@ -31,7 +31,7 @@
 #ifndef SE_MANAGER_OSAL_BAREMETAL_H
 #define SE_MANAGER_OSAL_BAREMETAL_H
 
-#include "em_device.h"
+#include "sli_se_manager_features.h"
 
 #ifdef __cplusplus
 extern "C" {

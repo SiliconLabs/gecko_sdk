@@ -30,6 +30,11 @@
 #ifndef SL_SENSOR_LIGHT_CONFIG_H
 #define SL_SENSOR_LIGHT_CONFIG_H
 
+/***********************************************************************************************//**
+ * @addtogroup sensor_light
+ * @{
+ **************************************************************************************************/
+
 // <<< Use Configuration Wizard in Context Menu >>>
 
 // <h> Bluetooth Mesh - Light Sensor
@@ -76,4 +81,5 @@
 
 // <<< end of configuration section >>>
 
+/** @} (end addtogroup sensor_light) */
 #endif // SL_SENSOR_LIGHT_CONFIG_H

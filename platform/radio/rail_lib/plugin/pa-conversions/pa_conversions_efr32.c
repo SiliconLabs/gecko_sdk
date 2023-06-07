@@ -348,8 +348,9 @@ RAIL_TxPowerLevel_t RAIL_ConvertDbmToRaw(RAIL_Handle_t railHandle,
     } else {
       powerLevel = (uint32_t) powerLevelInt;
     }
-    // Add 500 to do rounding correctly, as opposed to just rounding towards 0
-    powerLevel = ((powerLevel + 500U) / 1000U);
+    // RAIL_LIB-8330: Modified from adding 500 to adding 92, this was tested on xg21 as being the highest
+    // number we can use without exceeding the requested power in dBm
+    powerLevel = ((powerLevel + 92U) / 1000U);
 
     // In case it turns out the resultant power level was too low and we have
     // to recalculate with the next curve...

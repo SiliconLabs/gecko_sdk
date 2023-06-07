@@ -20,7 +20,7 @@ To get started with the example, follow the steps below:
 * Using Simplicity Studio, open consoles on both the Meter and Collector devices.
 * Wait for the Collector and Meter to join the Wi-SUN Border Router network.
 
-Refer to the associated sections in [QSG181: Wi-SUN SDK Quick Start Guide](https://www.silabs.com/documents/public/quick-start-guides/qsg181-wi-sun-sdk-quick-start-guide.pdf) if you want step-by-step guidelines for each operation.
+See the associated sections in [QSG181: Wi-SUN SDK Quick Start Guide](https://www.silabs.com/documents/public/quick-start-guides/qsg181-wi-sun-sdk-quick-start-guide.pdf) for step-by-step guidelines for each operation.
 
 ## Monitor a Meter
 
@@ -32,7 +32,7 @@ The Collector application has two specific commands: `wisun register_meter [IPv6
 
     wisun register_meter [Meter Global IPv6 address]
 
-The Collector starts monitoring and retrieving sensor data from the Meter. Each udpate is output in the console as shown.
+The Collector starts monitoring and retrieving sensor data from the Meter. The collector parses schedule time of the Meter and optimize the period time of request sending to LFN Meters. Each update is output in the console as shown below.
 
     [fd2a:6e01:9bfc:990c:20d:6fff:fe20:b6f9: {id: 1}{temp: 28.52}{hum: 36.01}{lx: 480}]
 

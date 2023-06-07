@@ -42,11 +42,11 @@ template_contribution:
   - name: zigbee_af_callback
     value:
       callback_type: pre_command_received
-      function_name: emAfPluginDeviceTablePreCommandReceivedCallback
+      function_name: sli_zigbee_af_device_table_pre_command_received_callback
   - name: zigbee_af_callback
     value:
       callback_type: pre_zdo_message_received
-      function_name: emAfPluginDeviceTablePreZDOMessageReceived    
+      function_name: sli_zigbee_af_device_table_pre_zdo_message_received    
   - name: zigbee_stack_callback
     value:
       callback_type: stack_status
@@ -60,7 +60,7 @@ template_contribution:
     value:
       group: device-table
       name: disc
-      handler: emAfDeviceTableDiscoverPresentNodeCommand
+      handler: sli_zigbee_af_device_table_discover_present_node_command
       help: Forces a (re)discovery of the device based on the node ID.
       argument:
       - type: uint16
@@ -69,7 +69,7 @@ template_contribution:
     value:
       group: device-table
       name: isend
-      handler: emAfDeviceTableIndexSendCommand
+      handler: sli_zigbee_af_device_table_index_send_command
       help: Sends to a device in the device table.
       argument:
       - type: uint16
@@ -78,7 +78,7 @@ template_contribution:
     value:
       group: device-table
       name: send
-      handler: emAfDeviceTableSendCommand
+      handler: sli_zigbee_af_device_table_send_command
       help: Sends to a device in the device table.
       argument:
       - type: hex
@@ -89,7 +89,7 @@ template_contribution:
     value:
       group: device-table
       name: irepair
-      handler: emAfDeviceTableIndexRouteRepairCommand
+      handler: sli_zigbee_af_device_table_index_route_repair_command
       help: Kicks off device route repair.
       argument:
       - type: uint16
@@ -98,7 +98,7 @@ template_contribution:
     value:
       group: device-table
       name: repair
-      handler: emAfDeviceTableRouteRepairCommand
+      handler: sli_zigbee_af_device_table_route_repair_command
       help: Kicks off device route repair.
       argument:
       - type: hex
@@ -107,7 +107,7 @@ template_contribution:
     value:
       group: device-table
       name: iremove
-      handler: emAfDeviceTableIndexRemoveCommand
+      handler: sli_zigbee_af_device_table_index_remove_command
       help: Removes device from the device table.
       argument:
       - type: uint16
@@ -116,7 +116,7 @@ template_contribution:
     value:
       group: device-table
       name: remove
-      handler: emAfDeviceTableRemoveCommand
+      handler: sli_zigbee_af_device_table_remove_command
       help: Removes device from the device table.
       argument:
       - type: hex
@@ -125,19 +125,19 @@ template_contribution:
     value:
       group: device-table
       name: save
-      handler: emAfDeviceTableSaveCommand
+      handler: sli_zigbee_af_device_table_saveCommand
       help: Saves the file.
   - name: cli_command
     value:
       group: device-table
       name: load
-      handler: emAfDeviceTableLoadCommand
+      handler: sli_zigbee_af_device_table_loadCommand
       help: Loads the file.
   - name: cli_command
     value:
       group: device-table
       name: leave
-      handler: emAfPluginDeviceTableSendLeaveCommand
+      handler: sli_zigbee_af_device_table_send_leave_command
       help: Removes a device from the device table.
       argument:
       - type: hex
@@ -156,7 +156,7 @@ template_contribution:
   - name: zigbee_stack_callback
     value:
       callback_type: trust_center_join
-      function_name: emAfPluginDeviceTableTrustCenterJoinCallback
+      function_name: sli_zigbee_af_device_table_trust_center_join_callback
 
 documentation:
   docset: zigbee

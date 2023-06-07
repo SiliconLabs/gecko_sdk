@@ -30,6 +30,11 @@
 #ifndef SL_NCP_HOST_COM_CONFIG_H
 #define SL_NCP_HOST_COM_CONFIG_H
 
+/***********************************************************************************************//**
+ * @addtogroup ncp_host_com
+ * @{
+ **************************************************************************************************/
+
 // <<< Use Configuration Wizard in Context Menu >>>
 
 // <o SL_NCP_HOST_COM_BUF_SIZE> Buffer size (bytes) <260-4096>
@@ -39,4 +44,5 @@
 
 // <<< end of configuration section >>>
 
+/** @} (end addtogroup ncp_host_com) */
 #endif // SL_NCP_HOST_COM_CONFIG_H

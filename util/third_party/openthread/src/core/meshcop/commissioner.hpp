@@ -42,6 +42,7 @@
 
 #include "coap/coap_secure.hpp"
 #include "common/as_core_type.hpp"
+#include "common/callback.hpp"
 #include "common/clearable.hpp"
 #include "common/locator.hpp"
 #include "common/log.hpp"
@@ -498,6 +499,9 @@ private:
     static constexpr uint32_t kKeepAliveTimeout     = 50; // TIMEOUT_COMM_PET (seconds)
     static constexpr uint32_t kRemoveJoinerDelay    = 20; // Delay to remove successfully joined joiner
 
+    static constexpr uint32_t kJoinerSessionTimeoutMillis =
+        1000 * OPENTHREAD_CONFIG_COMMISSIONER_JOINER_SESSION_TIMEOUT; // Expiration time for active Joiner session
+
     enum ResignMode : uint8_t
     {
         kSendKeepAliveToResign,
@@ -537,7 +541,7 @@ private:
 
     Error AddJoiner(const Mac::ExtAddress *aEui64,
                     const JoinerDiscerner *aDiscerner,
-                    const char *           aPskd,
+                    const char            *aPskd,
                     uint32_t               aTimeout);
     Error RemoveJoiner(const Mac::ExtAddress *aEui64, const JoinerDiscerner *aDiscerner, uint32_t aDelay);
     void  RemoveJoiner(Joiner &aJoiner, uint32_t aDelay);
@@ -547,27 +551,27 @@ private:
 
     void UpdateJoinerExpirationTimer(void);
 
-    static void HandleMgmtCommissionerSetResponse(void *               aContext,
-                                                  otMessage *          aMessage,
+    static void HandleMgmtCommissionerSetResponse(void                *aContext,
+                                                  otMessage           *aMessage,
                                                   const otMessageInfo *aMessageInfo,
                                                   Error                aResult);
-    void        HandleMgmtCommissionerSetResponse(Coap::Message *         aMessage,
+    void        HandleMgmtCommissionerSetResponse(Coap::Message          *aMessage,
                                                   const Ip6::MessageInfo *aMessageInfo,
                                                   Error                   aResult);
-    static void HandleMgmtCommissionerGetResponse(void *               aContext,
-                                                  otMessage *          aMessage,
+    static void HandleMgmtCommissionerGetResponse(void                *aContext,
+                                                  otMessage           *aMessage,
                                                   const otMessageInfo *aMessageInfo,
                                                   Error                aResult);
-    void        HandleMgmtCommissionerGetResponse(Coap::Message *         aMessage,
+    void        HandleMgmtCommissionerGetResponse(Coap::Message          *aMessage,
                                                   const Ip6::MessageInfo *aMessageInfo,
                                                   Error                   aResult);
-    static void HandleLeaderPetitionResponse(void *               aContext,
-                                             otMessage *          aMessage,
+    static void HandleLeaderPetitionResponse(void                *aContext,
+                                             otMessage           *aMessage,
                                              const otMessageInfo *aMessageInfo,
                                              Error                aResult);
     void HandleLeaderPetitionResponse(Coap::Message *aMessage, const Ip6::MessageInfo *aMessageInfo, Error aResult);
-    static void HandleLeaderKeepAliveResponse(void *               aContext,
-                                              otMessage *          aMessage,
+    static void HandleLeaderKeepAliveResponse(void                *aContext,
+                                              otMessage           *aMessage,
                                               const otMessageInfo *aMessageInfo,
                                               Error                aResult);
     void HandleLeaderKeepAliveResponse(Coap::Message *aMessage, const Ip6::MessageInfo *aMessageInfo, Error aResult);
@@ -578,6 +582,8 @@ private:
     template <Uri kUri> void HandleTmf(Coap::Message &aMessage, const Ip6::MessageInfo &aMessageInfo);
 
     void HandleRelayReceive(Coap::Message &aMessage, const Ip6::MessageInfo &aMessageInfo);
+
+    void HandleJoinerSessionTimer(void);
 
     void SendJoinFinalizeResponse(const Coap::Message &aRequest, StateTlv::State aState);
 
@@ -598,10 +604,11 @@ private:
 
     using JoinerExpirationTimer = TimerMilliIn<Commissioner, &Commissioner::HandleJoinerExpirationTimer>;
     using CommissionerTimer     = TimerMilliIn<Commissioner, &Commissioner::HandleTimer>;
+    using JoinerSessionTimer    = TimerMilliIn<Commissioner, &Commissioner::HandleJoinerSessionTimer>;
 
     Joiner mJoiners[OPENTHREAD_CONFIG_COMMISSIONER_MAX_JOINER_ENTRIES];
 
-    Joiner *                 mActiveJoiner;
+    Joiner                  *mActiveJoiner;
     Ip6::InterfaceIdentifier mJoinerIid;
     uint16_t                 mJoinerPort;
     uint16_t                 mJoinerRloc;
@@ -609,6 +616,7 @@ private:
     uint8_t                  mTransmitAttempts;
     JoinerExpirationTimer    mJoinerExpirationTimer;
     CommissionerTimer        mTimer;
+    JoinerSessionTimer       mJoinerSessionTimer;
 
     AnnounceBeginClient mAnnounceBegin;
     EnergyScanClient    mEnergyScan;
@@ -621,9 +629,8 @@ private:
 
     State mState;
 
-    StateCallback  mStateCallback;
-    JoinerCallback mJoinerCallback;
-    void *         mCallbackContext;
+    Callback<StateCallback>  mStateCallback;
+    Callback<JoinerCallback> mJoinerCallback;
 };
 
 DeclareTmfHandler(Commissioner, kUriDatasetChanged);

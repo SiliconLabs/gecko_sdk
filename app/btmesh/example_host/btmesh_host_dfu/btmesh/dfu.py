@@ -31,18 +31,20 @@ from typing import (Callable, ClassVar, Dict, Iterable, List, Optional, Tuple,
 
 from bgapi.bglib import BGEvent, CommandFailedError
 
-from bgapix.bglibx import (BGLibExt, BGLibExtRetryParams,
-                           BGLibExtWaitEventError, EventParamValues)
+from bgapix.bglibx import (BGLibExtRetryParams, BGLibExtWaitEventError,
+                           EventParamValues)
 from bgapix.slstatus import SlStatus
 
 from . import util
 from .conf import Configurator
+from .core import (BtmeshAddressList, BtmeshBaseStatus, BtmeshComponent,
+                   BtmeshCore, BtmeshStatusErrorClass)
 from .db import FWID, BtmeshDatabase
 from .errors import BtmeshError, BtmeshErrorCode
-from .event import LocalEvent, LocalEventBus
+from .event import LocalEvent
 from .mbt import (Blob, BlobTransferClient, BlobTransferMode, MBTProgressEvent,
                   MBTStatus)
-from .util import BtmeshRetryParams
+from .util import BtmeshMulticastRetryParams, BtmeshRetryParams
 
 logger = logging.getLogger(__name__)
 
@@ -85,6 +87,7 @@ class FwUpdateStatus(util.BtmeshIntEnum):
     METADATA_CHECK_FAILED = 0x05
     TEMPORARILY_UNABLE = 0x06
     BLOB_TRANSFER_BUSY = 0x07
+    COMMAND_ERROR = 0xFE
     TIMEOUT = 0xFF
     UNKNOWN_VALUE = util.ENUM_UNKNOWN_VALUE
 
@@ -144,25 +147,48 @@ class FwReceiverInfo:
 
 
 @dataclasses.dataclass
-class FwUpdateBaseStatus:
+class FwUpdateBaseStatus(BtmeshBaseStatus):
     server_addr: int
     status: FwUpdateStatus
 
     @classmethod
-    def from_event(cls, events: Iterable[BGEvent]):
-        raise NotImplementedError(f"The {cls.__name__} can't be instantiated.")
+    def create_command_error(
+        cls, db: BtmeshDatabase, addr: int, command_result: SlStatus
+    ) -> "FwUpdateBaseStatus":
+        return cls(
+            command_result=command_result,
+            server_addr=addr,
+            status=FwUpdateStatus.COMMAND_ERROR,
+        )
 
     @classmethod
-    def create_status_timeout(cls, addr: int):
-        raise NotImplementedError(f"The {cls.__name__} can't be instantiated.")
+    def create_timeout(cls, db: BtmeshDatabase, addr: int) -> "FwUpdateBaseStatus":
+        return cls(
+            command_result=SlStatus.OK,
+            server_addr=addr,
+            status=FwUpdateStatus.TIMEOUT,
+        )
+
+    def get_error_class(self) -> BtmeshStatusErrorClass:
+        if self.command_result != SlStatus.OK:
+            return BtmeshStatusErrorClass.COMMAND_ERROR
+        elif self.status == FwUpdateStatus.TIMEOUT:
+            return BtmeshStatusErrorClass.TIMEOUT
+        elif self.status == FwUpdateStatus.SUCCESS:
+            return BtmeshStatusErrorClass.SUCCESS
+        else:
+            return BtmeshStatusErrorClass.FAILURE
+
+    def get_addr(self) -> int:
+        return self.server_addr
 
 
 @dataclasses.dataclass
 class FwUpdateInfoStatus(FwUpdateBaseStatus):
-    fw_index: Optional[int]
-    fw_count: Optional[int]
-    fwid: Optional[FWID]
-    uri: Optional[str]
+    fw_index: Optional[int] = None
+    fw_count: Optional[int] = None
+    fwid: Optional[FWID] = None
+    uri: Optional[str] = None
 
     @classmethod
     def raise_construction_error(cls):
@@ -173,7 +199,9 @@ class FwUpdateInfoStatus(FwUpdateBaseStatus):
         )
 
     @classmethod
-    def from_event(cls, events: Iterable[BGEvent]):
+    def create_from_events(
+        cls, db: BtmeshDatabase, events: Iterable[BGEvent]
+    ) -> "FwUpdateInfoStatus":
         events = list(events)
         if len(events) != 2:
             cls.raise_construction_error()
@@ -199,6 +227,7 @@ class FwUpdateInfoStatus(FwUpdateBaseStatus):
             )
             uri = ""
         return FwUpdateInfoStatus(
+            command_result=SlStatus.OK,
             status=FwUpdateStatus.SUCCESS,
             server_addr=info_status_fwid_evt.server_address,
             fw_index=info_status_fwid_evt.index,
@@ -207,42 +236,25 @@ class FwUpdateInfoStatus(FwUpdateBaseStatus):
             uri=uri,
         )
 
-    @classmethod
-    def create_status_timeout(cls, addr: int):
-        return FwUpdateInfoStatus(
-            status=FwUpdateStatus.TIMEOUT,
-            server_addr=addr,
-            fw_index=None,
-            fw_count=None,
-            fwid=None,
-            uri=None,
-        )
-
 
 @dataclasses.dataclass
 class FwUpdateMetadataStatus(FwUpdateBaseStatus):
-    additional_info: Optional[FwUpdateAdditionalInfo]
-    fw_index: Optional[int]
+    additional_info: Optional[FwUpdateAdditionalInfo] = None
+    fw_index: Optional[int] = None
 
     @classmethod
-    def from_event(cls, events: Iterable[BGEvent]):
-        event = events[0]
+    def create_from_events(
+        cls, db: BtmeshDatabase, events: Iterable[BGEvent]
+    ) -> "FwUpdateMetadataStatus":
+        event = next(iter(events))
         return FwUpdateMetadataStatus(
+            command_result=SlStatus.OK,
             server_addr=event.server_address,
             status=FwUpdateStatus.from_int(event.status),
             additional_info=FwUpdateAdditionalInfo.from_int(
                 event.additional_information
             ),
             fw_index=event.fw_index,
-        )
-
-    @classmethod
-    def create_status_timeout(cls, addr: int):
-        return FwUpdateMetadataStatus(
-            server_addr=addr,
-            status=FwUpdateStatus.TIMEOUT,
-            additional_info=None,
-            fw_index=None,
         )
 
 
@@ -254,7 +266,7 @@ class FwUpdateProgressEvent(LocalEvent):
     receivers_info: Iterable[FwReceiverInfo]
 
 
-class FwUpdateClient:
+class FwUpdateClient(BtmeshComponent):
     RETRY_CMD_ERR_CODES = (SlStatus.NO_MORE_RESOURCE,)
     UNUSED_VIRTUAL_ADDR = b"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
     DFU_STATE_CHANGED_EVENT = "btmesh_evt_fw_standalone_updater_dist_state_changed"
@@ -275,16 +287,12 @@ class FwUpdateClient:
 
     def __init__(
         self,
-        lib: BGLibExt,
-        db: BtmeshDatabase,
-        evtbus: LocalEventBus,
+        core: BtmeshCore,
         conf: Configurator,
         mbt_clt: BlobTransferClient,
-        retry_params_default: BtmeshRetryParams,
+        retry_params_default: BtmeshMulticastRetryParams,
     ):
-        self.lib = lib
-        self.db = db
-        self.evtbus = evtbus
+        super().__init__(core)
         self.conf = conf
         self.mbt_clt = mbt_clt
         self.retry_params_default = retry_params_default
@@ -293,14 +301,15 @@ class FwUpdateClient:
         self,
         elem_index: int = 0,
         max_updating_nodes: int = 8,
-        retry_params_default: BtmeshRetryParams = None,
+        retry_params_default: BtmeshMulticastRetryParams = None,
     ):
         self.lib.btmesh.fw_update_client.init(elem_index)
         self.lib.btmesh.fw_standalone_updater.init(elem_index, max_updating_nodes)
         self.set_retry_params_default(retry_params_default)
 
-    def set_retry_params_default(self, retry_params: BtmeshRetryParams):
+    def set_retry_params_default(self, retry_params: BtmeshMulticastRetryParams):
         if retry_params:
+            assert isinstance(retry_params, BtmeshMulticastRetryParams)
             self.retry_params_default = copy.copy(retry_params)
 
     def dfu_procedure(
@@ -313,15 +322,13 @@ class FwUpdateClient:
         appkey_index: int,
         ttl: int,
         *args,
-        final_event_names: Union[str, Iterable[str]],
+        event_selector,
         fw_update_status_class: FwUpdateBaseStatus,
-        retry_params: BtmeshRetryParams = None,
+        retry_params: BtmeshMulticastRetryParams = None,
         **final_event_params,
-    ):
+    ) -> Dict[int, FwUpdateBaseStatus]:
         if not util.is_iterable(server_addrs):
             server_addrs = [server_addrs]
-        if isinstance(final_event_names, str):
-            final_event_names = [final_event_names]
         util.validate_ttl(ttl)
         for addr in server_addrs:
             util.validate_unicast_address(addr, "Invalid server address.")
@@ -333,70 +340,21 @@ class FwUpdateClient:
             virtual_addr = self.UNUSED_VIRTUAL_ADDR
         if retry_params is None:
             retry_params = self.retry_params_default
-        # If there is at least one LPN in the nodes then the LPN specific retry
-        # interval is used instead of the regular one.
-        if retry_params.retry_interval != retry_params.retry_interval_lpn:
-            any_lpn = self.conf.any_lpn_in_elem_addrs(server_addrs, skip_local=True)
-            retry_params = retry_params.to_base(use_interval_lpn=any_lpn)
-        else:
-            retry_params = retry_params.to_base(use_interval_lpn=False)
-        status_evt_list = []
-        if group_addr is util.UNASSIGNED_ADDR:
-            for addr in server_addrs:
-                try:
-                    status_evts = self.lib.retry_until(
-                        cmd,
-                        elem_index,
-                        addr,
-                        virtual_addr,
-                        appkey_index,
-                        ttl,
-                        *args,
-                        **retry_params.to_dict(),
-                        retry_cmd_err_code=[SlStatus.NO_MORE_RESOURCE],
-                        event_selector=final_event_names,
-                        final_event_count=len(final_event_names),
-                        server_address=addr,
-                        **final_event_params,
-                    )
-                except BGLibExtWaitEventError as e:
-                    continue
-                status_evt_list.extend(status_evts)
-        else:
-            util.validate_group_address(group_addr)
-            event_selector: Dict[str, Dict[str, object]] = {}
-            for evt_name in final_event_names:
-                event_selector[evt_name] = {
-                    "#unique": "server_address",
-                    "server_address": EventParamValues(addr for addr in server_addrs),
-                }
-                event_selector[evt_name].update(final_event_params)
-            try:
-                status_evt_list = self.lib.retry_until(
-                    cmd,
-                    elem_index,
-                    group_addr,
-                    virtual_addr,
-                    appkey_index,
-                    ttl,
-                    *args,
-                    retry_int_rst_on_evt=True,
-                    **retry_params.to_dict(),
-                    retry_cmd_err_code=[SlStatus.NO_MORE_RESOURCE],
-                    event_selector=event_selector,
-                    final_event_count=len(server_addrs) * len(final_event_names),
-                )
-            except BGLibExtWaitEventError as e:
-                status_evt_list = e.events
-        status_list = []
-        for addr in server_addrs:
-            evts = [evt for evt in status_evt_list if addr == evt.server_address]
-            if evts:
-                status = fw_update_status_class.from_event(evts)
-            else:
-                status = fw_update_status_class.create_status_timeout(addr)
-            status_list.append(status)
-        return status_list
+        return self.core.send_until(
+            cmd,
+            elem_index,
+            BtmeshAddressList(list(server_addrs), group_addr=group_addr),
+            virtual_addr,
+            appkey_index,
+            ttl,
+            *args,
+            event_selector=event_selector,
+            status_class=fw_update_status_class,
+            retry_int_rst_on_evt=True,
+            retry_params=retry_params,
+            retry_cmd_err_code=[SlStatus.NO_MORE_RESOURCE],
+            **final_event_params,
+        )
 
     def get_info(
         self,
@@ -408,8 +366,12 @@ class FwUpdateClient:
         virtual_addr: bytes = bytes(),
         appkey_index: int = 0,
         ttl: int = 5,
-        retry_params: BtmeshRetryParams = None,
-    ) -> List[FwUpdateInfoStatus]:
+        retry_params: BtmeshMulticastRetryParams = None,
+    ) -> Dict[int, FwUpdateInfoStatus]:
+        raw_event_selector = {
+            "btmesh_evt_fw_update_client_info_status_current_fwid": {"#final": False},
+            "btmesh_evt_fw_update_client_info_status_update_uri": {"#final": True},
+        }
         return self.dfu_procedure(
             self.lib.btmesh.fw_update_client.get_info,
             elem_index,
@@ -420,10 +382,7 @@ class FwUpdateClient:
             ttl,
             first_index,
             max_entries,
-            final_event_names=(
-                "btmesh_evt_fw_update_client_info_status_current_fwid",
-                "btmesh_evt_fw_update_client_info_status_update_uri",
-            ),
+            event_selector=raw_event_selector,
             fw_update_status_class=FwUpdateInfoStatus,
             retry_params=retry_params,
         )
@@ -438,8 +397,8 @@ class FwUpdateClient:
         virtual_addr: bytes = bytes(),
         appkey_index: int = 0,
         ttl: int = 5,
-        retry_params: BtmeshRetryParams = None,
-    ) -> List[FwUpdateMetadataStatus]:
+        retry_params: BtmeshMulticastRetryParams = None,
+    ) ->  Dict[int, FwUpdateMetadataStatus]:
         return self.dfu_procedure(
             self.lib.btmesh.fw_update_client.check_metadata,
             elem_index,
@@ -450,7 +409,7 @@ class FwUpdateClient:
             ttl,
             fw_index,
             metadata,
-            final_event_names="btmesh_evt_fw_update_client_metadata_status",
+            event_selector="btmesh_evt_fw_update_client_metadata_status",
             fw_update_status_class=FwUpdateMetadataStatus,
             retry_params=retry_params,
         )
@@ -464,14 +423,14 @@ class FwUpdateClient:
         virtual_addr: bytes = bytes(),
         appkey_index: int = 0,
         ttl: int = 5,
-        retry_params: Optional[BtmeshRetryParams] = None,
+        retry_params: Optional[BtmeshMulticastRetryParams] = None,
     ) -> Dict[int, FwUpdateMetadataStatus]:
         util.validate_ttl(ttl)
         if retry_params is None:
             retry_params = self.retry_params_default
         fw_idx_set = set((receiver.fw_index for receiver in receivers))
         if len(fw_idx_set) == 1:
-            metadata_statuses = self.check_metadata(
+            addr_metadata_status_dict = self.check_metadata(
                 elem_index=elem_index,
                 server_addrs=[receiver.server_addr for receiver in receivers],
                 fw_index=fw_idx_set.pop(),
@@ -483,9 +442,9 @@ class FwUpdateClient:
                 retry_params=retry_params,
             )
         else:
-            metadata_statuses = []
+            addr_metadata_status_dict = {}
             for receiver in receivers:
-                metadata_status = self.check_metadata(
+                addr_metadata_status_pair_dict = self.check_metadata(
                     elem_index=elem_index,
                     server_addrs=receiver.server_addr,
                     fw_index=receiver.fw_index,
@@ -496,9 +455,8 @@ class FwUpdateClient:
                     ttl=ttl,
                     retry_params=retry_params,
                 )
-                metadata_statuses.append(metadata_status)
-        metadata_status_dict = {mds.server_addr: mds for mds in metadata_statuses}
-        return metadata_status_dict
+                addr_metadata_status_dict.update(addr_metadata_status_pair_dict)
+        return addr_metadata_status_dict
 
     def _add_receivers(self, elem_index: int, receivers: Iterable[FwReceiver]) -> None:
         for idx, receiver in enumerate(receivers):
@@ -546,7 +504,7 @@ class FwUpdateClient:
             self.lib.retry_until(
                 self.lib.btmesh.fw_standalone_updater.execute_distribution_step,
                 elem_index,
-                **retry_params.to_dict(),
+                retry_params=retry_params,
                 event_selector=self.DFU_STATE_CHANGED_EVENT,
             )
         except CommandFailedError as e:
@@ -657,7 +615,7 @@ class FwUpdateClient:
         # interval is used instead of the regular one.
         if retry_params.retry_interval != retry_params.retry_interval_lpn:
             server_addrs = [receiver.server_addr for receiver in receivers]
-            any_lpn = self.conf.any_lpn_in_elem_addrs(server_addrs, skip_local=True)
+            any_lpn = self.core.any_lpn_in_elem_addrs(server_addrs, skip_local=True)
             retry_params_base = retry_params.to_base(use_interval_lpn=any_lpn)
         else:
             retry_params_base = retry_params.to_base(use_interval_lpn=False)
@@ -727,10 +685,9 @@ class FwUpdateClient:
         transfer_mode: BlobTransferMode = BlobTransferMode.PUSH,
         chunk_size_pref: int = 53,
         virtual_addr: bytes = bytes(),
-        multicast_threshold: int = 2,
         appkey_index: int = 0,
         ttl: int = 5,
-        retry_params: Optional[BtmeshRetryParams] = None,
+        retry_params: Optional[BtmeshMulticastRetryParams] = None,
         on_bg_event: Optional[Callable] = None,
     ) -> Tuple[FwUpdateStep, List[FwReceiverInfo]]:
         if not util.is_iterable(receivers):
@@ -748,6 +705,7 @@ class FwUpdateClient:
         metadata_status_dict = self.check_receivers_metadata(
             elem_index=elem_index,
             receivers=receivers,
+            metadata=metadata,
             group_addr=group_addr,
             virtual_addr=virtual_addr,
             appkey_index=appkey_index,
@@ -787,8 +745,7 @@ class FwUpdateClient:
             receivers_info = failed_receivers_info
             return state, receivers_info
         self.lib.subscribe(
-            self.DFU_STATE_CHANGED_EVENT,
-            self.on_fw_update_state_changed
+            self.DFU_STATE_CHANGED_EVENT, self.on_fw_update_state_changed
         )
         try:
             self._start_fw_update(
@@ -801,7 +758,7 @@ class FwUpdateClient:
                 timeout_base=timeout_base,
                 transfer_mode=transfer_mode,
                 virtual_addr=virtual_addr,
-                multicast_threshold=multicast_threshold,
+                multicast_threshold=retry_params.multicast_threshold,
                 appkey_index=appkey_index,
                 ttl=ttl,
             )
@@ -818,8 +775,7 @@ class FwUpdateClient:
             )
         finally:
             self.lib.unsubscribe(
-                self.DFU_STATE_CHANGED_EVENT,
-                self.on_fw_update_state_changed
+                self.DFU_STATE_CHANGED_EVENT, self.on_fw_update_state_changed
             )
 
         for rec_info in receivers_info:
@@ -917,7 +873,7 @@ class FwUpdateClient:
             server_addrs = [
                 receiver_info.server_addr for receiver_info in receivers_info_list
             ]
-            any_lpn = self.conf.any_lpn_in_elem_addrs(server_addrs, skip_local=True)
+            any_lpn = self.core.any_lpn_in_elem_addrs(server_addrs, skip_local=True)
             retry_params_base = retry_params.to_base(use_interval_lpn=any_lpn)
         else:
             retry_params_base = retry_params.to_base(use_interval_lpn=False)

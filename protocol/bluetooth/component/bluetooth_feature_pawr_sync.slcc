@@ -1,0 +1,34 @@
+id: "bluetooth_feature_pawr_sync"
+label: "Synchronization to Periodic Advertising with Responses trains"
+package: "Bluetooth"
+description: >
+  Provides events and control for synchronized Periodic Advertising with
+  Responses (PAwR) trains. Synchronization is achieved by scanning (see
+  <bluetooth_feature_sync_scanner>) or by receiving Periodic Advertising
+  Synchronization Transfer (PAST) from a remote device (see
+  <bluetooth_feature_past_receiver>).
+
+  Use this component if the application syncs to periodic advertising using the
+  components mentioned above and needs support for Periodic Advertising with
+  Responses (PAwR) trains.
+category: Bluetooth|Bluetooth LE Controller (Link Layer)|Features with Commands and Events
+quality: "production"
+root_path: "protocol/bluetooth"
+config_file:
+  - path: "config/sl_bt_pawr_sync_config.h"
+requires:
+  - name: "bluetooth_controller"
+  - name: "bluetooth_feature_periodic_sync"
+  - name: "device_supports_bluetooth_advertising_extensions"
+provides:
+  - name: "bluetooth_feature_pawr_sync"
+template_contribution:
+  - name: component_catalog
+    value: bluetooth_feature_pawr_sync
+  - name: bluetooth_controller_init
+    value:
+      include: "sl_bt_pawr_sync_config.h"
+      extern_declare: "sl_status_t sl_btctrl_pawr_synchronizer_configure(struct sl_btctrl_pawr_synchronizer_config *pawr_config)"
+      function: "{ struct sl_btctrl_pawr_synchronizer_config _pawr_config = {.max_pawr_sets = SL_BT_CONFIG_MAX_PAWR_SYNCHRONIZERS}; sl_btctrl_pawr_synchronizer_configure(&_pawr_config); }"
+      deinit: "{ struct sl_btctrl_pawr_synchronizer_config _pawr_config = {.max_pawr_sets = 0, }; sl_btctrl_pawr_synchronizer_configure(&_pawr_config); }"
+    priority: 3

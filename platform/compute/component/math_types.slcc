@@ -1,0 +1,17 @@
+id: math_types
+label: Math Types
+package: platform
+description: >
+  This component provides some math type features.
+category: Platform|Compute
+quality: production
+root_path: platform/compute/math
+include:
+  - path: inc
+    file_list:
+      - path: sl_math_types.h
+provides:
+  - name: math_types
+toolchain_settings:
+  - option: fp16
+    value: enabled

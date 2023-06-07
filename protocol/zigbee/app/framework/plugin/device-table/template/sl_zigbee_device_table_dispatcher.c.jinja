@@ -25,7 +25,7 @@
 {%- endif %}
 {%- endfor %}
 
-void emAfPluginDeviceTableDeviceLeftCallback(EmberEUI64 newNodeEui64)
+void sli_zigbee_af_device_table_device_left_callback(EmberEUI64 newNodeEui64)
 {
 {%- for cb in zigbee_af_device_table_callback %}
 {%- if cb['callback_type'] == "device_left" %}

@@ -18,7 +18,6 @@
 #ifndef ZIGBEE_OTA_SERVER_H
 #define ZIGBEE_OTA_SERVER_H
 
-#ifdef UC_BUILD
 #include "ota-server-config.h"
 #if (EMBER_AF_PLUGIN_OTA_SERVER_PAGE_REQUEST_SUPPORT == 1)
 #define PAGE_REQUEST_SUPPORT
@@ -29,17 +28,6 @@
 #if (EMBER_AF_PLUGIN_OTA_SERVER_DYNAMIC_MIN_BLOCK_PERIOD_SUPPORT == 1)
 #define DYNAMIC_MIN_BLOCK_PERIOD_SUPPORT
 #endif
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_OTA_SERVER_PAGE_REQUEST_SUPPORT
-#define PAGE_REQUEST_SUPPORT
-#endif
-#ifdef EMBER_AF_PLUGIN_OTA_SERVER_MIN_BLOCK_REQUEST_SUPPORT
-#define MIN_BLOCK_REQUEST_SUPPORT
-#endif
-#ifdef EMBER_AF_PLUGIN_OTA_SERVER_DYNAMIC_MIN_BLOCK_PERIOD_SUPPORT
-#define DYNAMIC_MIN_BLOCK_PERIOD_SUPPORT
-#endif
-#endif // UC_BUILD
 
 /**
  * @defgroup ota-server OTA Server
@@ -138,28 +126,28 @@ void emberAfPluginOtaServerUpdateCompleteCallback(uint16_t manufacturerId,
   #define EM_AF_TEST_HARNESS_CODE
 #endif
 
-uint8_t emAfOtaServerGetBlockSize(void);
-uint8_t emAfOtaImageBlockRequestHandler(EmberAfImageBlockRequestCallbackStruct* callbackData);
+uint8_t sli_zigbee_af_ota_server_get_block_size(void);
+uint8_t sli_zigbee_af_ota_image_block_request_handler(EmberAfImageBlockRequestCallbackStruct* callbackData);
 
-bool emAfOtaPageRequestErrorHandler(void);
+bool sli_zigbee_af_ota_page_request_error_handler(void);
 
-void emAfOtaPageRequestTick(uint8_t endpoint);
+void sli_zigbee_af_ota_page_request_tick(uint8_t endpoint);
 
 // Returns the status code to the request.
-uint8_t emAfOtaPageRequestHandler(uint8_t clientEndpoint,
-                                  uint8_t serverEndpoint,
-                                  const EmberAfOtaImageId* id,
-                                  uint32_t offset,
-                                  uint8_t maxDataSize,
-                                  uint16_t pageSize,
-                                  uint16_t responseSpacing);
+uint8_t sli_zigbee_af_ota_page_request_handler(uint8_t clientEndpoint,
+                                               uint8_t serverEndpoint,
+                                               const EmberAfOtaImageId* id,
+                                               uint32_t offset,
+                                               uint8_t maxDataSize,
+                                               uint16_t pageSize,
+                                               uint16_t responseSpacing);
 
-bool emAfOtaServerHandlingPageRequest(void);
+bool sli_zigbee_af_ota_server_handling_page_request(void);
 
 // This used to be static in ota-server.c as prepareResponse,
 // made global because SE 1.4 requires a special treatment for OTA requests.
-void emAfOtaServerPrepareResponse(bool useDefaultResponse,
-                                  uint8_t commandId,
-                                  uint8_t status,
-                                  uint8_t defaultResponsePayloadCommandId);
+void sli_zigbee_af_ota_server_prepare_response(bool useDefaultResponse,
+                                               uint8_t commandId,
+                                               uint8_t status,
+                                               uint8_t defaultResponsePayloadCommandId);
 #endif // ZIGBEE_OTA_SERVER_H

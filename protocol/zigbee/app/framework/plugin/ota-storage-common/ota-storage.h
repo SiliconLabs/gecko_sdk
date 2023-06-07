@@ -143,12 +143,12 @@ uint32_t emberAfOtaStorageDriverMaxDownloadSizeCallback(void);
 
 // Initialization
 // (For the POSIX implementation the device will be a file or directory)
-EmberAfOtaStorageStatus emAfOtaStorageSetDevice(const void* device);
-void emAfOtaStorageClose(void);
+EmberAfOtaStorageStatus sli_zigbee_af_ota_storage_set_device(const void* device);
+void sli_zigbee_af_ota_storage_close(void);
 
-const char* emAfOtaStorageGetFilepath(const EmberAfOtaImageId* id);
+const char* sli_zigbee_af_ota_storage_get_filepath(const EmberAfOtaImageId* id);
 
-EmberAfOtaStorageStatus emAfOtaStorageAddImageFile(const char* filename);
+EmberAfOtaStorageStatus sli_zigbee_af_ota_storage_add_image_file(const char* filename);
 
 // Creating (two options)
 //  - Create a file based on a passed "EmberAfOtaHeader" structure, stored
@@ -156,65 +156,69 @@ EmberAfOtaStorageStatus emAfOtaStorageAddImageFile(const char* filename);
 //      PC tool.
 //  - Create a file based on raw data (presumably received over the air)
 //      This will be stored in a single static temp file.
-EmberAfOtaStorageStatus emAfOtaStorageCreateImage(EmberAfOtaHeader* header,
-                                                  const char* filename);
-EmberAfOtaStorageStatus emAfOtaStorageAppendImageData(const char* filename,
-                                                      uint32_t length,
-                                                      const uint8_t* data);
+EmberAfOtaStorageStatus sli_zigbee_af_ota_storage_create_image(EmberAfOtaHeader* header,
+                                                               const char* filename);
+EmberAfOtaStorageStatus sli_zigbee_af_ota_storage_append_image_data(const char* filename,
+                                                                    uint32_t length,
+                                                                    const uint8_t* data);
 
 //------------------------------------------------------------------------------
 // Generic routines that are independent of the actual storage mechanism.
 
 // Will return 0 on invalid headerVersion
-uint16_t emGetUpgradeFileDestinationLength(uint16_t headerVersion);
+uint16_t sli_zigbee_af_get_upgrade_file_destination_length(uint16_t headerVersion);
 
-EmberAfOtaStorageStatus emAfOtaStorageGetHeaderLengthAndImageSize(const EmberAfOtaImageId* id,
-                                                                  uint32_t *returnHeaderLength,
-                                                                  uint32_t *returnImageSize);
+EmberAfOtaStorageStatus sli_zigbee_af_ota_storage_get_header_length_and_image_size(const EmberAfOtaImageId* id,
+                                                                                   uint32_t *returnHeaderLength,
+                                                                                   uint32_t *returnImageSize);
 
-EmberAfOtaStorageStatus emAfOtaStorageGetZigbeeStackVersion(const EmberAfOtaImageId* id,
-                                                            uint16_t *returnZigbeeStackVersion);
+EmberAfOtaStorageStatus sli_zigbee_af_ota_storage_get_zigbee_stack_version(const EmberAfOtaImageId* id,
+                                                                           uint16_t *returnZigbeeStackVersion);
 
-EmberAfOtaImageId emAfOtaStorageGetImageIdFromHeader(const EmberAfOtaHeader* header);
+EmberAfOtaImageId sli_zigbee_af_ota_storage_get_image_id_from_header(const EmberAfOtaHeader* header);
 
 // Returns the offset and size of the actual data (does not include
 // tag meta-data) in the specified tag.
-EmberAfOtaStorageStatus emAfOtaStorageGetTagOffsetAndSize(const EmberAfOtaImageId* id,
-                                                          uint16_t tag,
-                                                          uint32_t* returnTagOffset,
-                                                          uint32_t* returnTagSize);
+EmberAfOtaStorageStatus sli_zigbee_af_ota_storage_get_tag_offset_and_size(const EmberAfOtaImageId* id,
+                                                                          uint16_t tag,
+                                                                          uint32_t* returnTagOffset,
+                                                                          uint32_t* returnTagSize);
 
-EmberAfOtaStorageStatus emAfOtaStorageGetTagOffsetsAndSizes(const EmberAfOtaImageId* id,
-                                                            uint16_t tag,
-                                                            uint32_t** returnTagOffset,
-                                                            uint32_t** returnTagSize);
+EmberAfOtaStorageStatus sli_zigbee_af_ota_storage_get_tag_offsets_and_sizes(const EmberAfOtaImageId* id,
+                                                                            uint16_t tag,
+                                                                            uint32_t** returnTagOffset,
+                                                                            uint32_t** returnTagSize);
 
-EmberAfOtaStorageStatus emAfOtaStorageGetTagDataFromImage(const EmberAfOtaImageId* id,
-                                                          uint16_t tag,
-                                                          uint8_t* returnData,
-                                                          uint32_t* returnDataLength,
-                                                          uint32_t maxReturnDataLength);
+EmberAfOtaStorageStatus sli_zigbee_af_ota_storage_get_tag_data_from_image(const EmberAfOtaImageId* id,
+                                                                          uint16_t tag,
+                                                                          uint8_t* returnData,
+                                                                          uint32_t* returnDataLength,
+                                                                          uint32_t maxReturnDataLength);
 
 // This gets the OTA header as it is formatted in the file, including
 // the magic number.
-EmberAfOtaStorageStatus emAfOtaStorageGetRawHeaderData(const EmberAfOtaImageId* id,
-                                                       uint8_t* returnData,
-                                                       uint32_t* returnDataLength,
-                                                       uint32_t maxReturnDataLength);
+EmberAfOtaStorageStatus sli_zigbee_af_ota_storage_get_raw_header_data(const EmberAfOtaImageId* id,
+                                                                      uint8_t* returnData,
+                                                                      uint32_t* returnDataLength,
+                                                                      uint32_t maxReturnDataLength);
 
 // This retrieves a list of all tags in the file and their lengths.
 // It will read at most 'maxTags' and return that array data in tagInfo.
-EmberAfOtaStorageStatus emAfOtaStorageReadAllTagInfo(const EmberAfOtaImageId* id,
-                                                     EmberAfTagData* tagInfo,
-                                                     uint16_t maxTags,
-                                                     uint16_t* totalTags);
+EmberAfOtaStorageStatus sli_zigbee_af_ota_storage_read_all_tag_info(const EmberAfOtaImageId* id,
+                                                                    EmberAfTagData* tagInfo,
+                                                                    uint16_t maxTags,
+                                                                    uint16_t* totalTags);
 
-void emAfOtaStorageInfoPrint(void);
-void emAfOtaStorageDriverInfoPrint(void);
+void sli_zigbee_af_ota_storage_info_print(void);
+void sli_zigbee_af_ota_storage_driver_info_print(void);
 
 // This retrieves the slot being used to store OTA images if the OTA Simple
 // Storage EEPROM Driver plugin has been configured to use slots
-uint32_t emAfOtaStorageGetSlot(void);
+uint32_t sli_zigbee_af_ota_storage_get_slot(void);
+
+// Our storage device examines all files in the passed directory, or simply
+// loads a single file into its header cache.
+EmberAfOtaStorageStatus sli_zigbee_af_ota_set_storage_device(const void* device);
 
 //------------------------------------------------------------------------------
 // Internal (for debugging malloc() and free())

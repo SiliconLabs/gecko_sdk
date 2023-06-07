@@ -151,6 +151,7 @@ typedef enum
 #define FUNC_ID_ZW_ASSIGN_RETURN_ROUTE                  0x46
 #define FUNC_ID_ZW_DELETE_RETURN_ROUTE                  0x47
 #define FUNC_ID_ZW_REQUEST_NODE_NEIGHBOR_UPDATE         0x48
+#define FUNC_ID_ZW_REQUEST_NODETYPE_NEIGHBOR_UPDATE     0x68
 #define FUNC_ID_ZW_APPLICATION_UPDATE                   0x49
 
 /** @deprecated Use ZW_APPLICATION_UPDATE */

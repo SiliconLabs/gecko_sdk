@@ -15,11 +15,7 @@
  *
  ******************************************************************************/
 #include "gpd-components-common.h"
-#ifndef UC_BUILD
-#include "gpd-callbacks.h"
-#else
 #include "gpd-cb.h"
-#endif
 
 // The NVM array is arranged as follows
 //-----------------------------------------------------------------------------

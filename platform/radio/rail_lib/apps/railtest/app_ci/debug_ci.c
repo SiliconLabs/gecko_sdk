@@ -69,7 +69,84 @@ static uint8_t debugDataBuffer[MAX_DEBUG_BYTES];
 
 #ifdef SL_RAIL_UTIL_EFF_DEVICE
 static const char *effModeSensorNames[] = RAIL_EFF_MODE_SENSOR_ENUM_NAMES;
-#endif
+static const char *effClpcEnableEnumNames[] = RAIL_EFF_CLPC_ENABLE_ENUM_NAMES;
+
+// This function gets the EFF Mode Sensor Index from a string.
+// Returns 0xFF if the string is not found.
+static uint8_t getEffModeSensorNameFromString(char *modeString)
+{
+  uint8_t i;
+
+  // If modeString has the 'RAIL_EFF_MODE_SENSOR_' prefix, strip it
+#define RAIL_EFF_MODE_SENSOR_PREFIX (sizeof("RAIL_EFF_MODE_SENSOR_") - 1)
+  if (strncasecmp(modeString, "RAIL_EFF_MODE_SENSOR_", RAIL_EFF_MODE_SENSOR_PREFIX) == 0) {
+    modeString += RAIL_EFF_MODE_SENSOR_PREFIX;
+  }
+  for (i = 0; i < sizeof(effModeSensorNames) / sizeof(effModeSensorNames[0]); i++) {
+    if (strcasecmp(modeString, effModeSensorNames[i] + RAIL_EFF_MODE_SENSOR_PREFIX) == 0) {
+      return i;
+    }
+  }
+  return 0xFF;
+}
+
+// This function reads the first entry in the command line and tries to convert it into a sensor mode.
+// If unsuccessful, it returns 0xff
+static uint8_t getEffModeSensorFromCommmandLine(char *commandString, char *modeString)
+{
+  // Attempt to convert the sensor mode string to a RAIL_EffModeSensor_t enum index.
+  RAIL_EffModeSensor_t mode = getEffModeSensorNameFromString(modeString);
+  if (mode == 0xFF) {
+    // If the string doesn't match a n EFF mode sensor, attempt to convert it to a RAIL_EffModeSensor_t.
+    char *strtoulEnd;
+    mode = (RAIL_EffModeSensor_t)strtoul(modeString, &strtoulEnd, 0);
+    //check that strtoul didn't fail and that mode is valid RAIL_EffModeSensor_t
+    if (strtoulEnd == modeString || mode >= RAIL_EFF_MODE_SENSOR_COUNT) {
+      responsePrintError(commandString, 0x13, "Invalid EFF Mode Sensor enum value selected: %s", modeString);
+      mode = 0xFF;
+    }
+  }
+  return mode;
+}
+
+// This function gets the EFF Enable Mode from a string.
+// Returns 0xFF if the string is not found.
+static uint8_t getEffEnableModeFromString(char *modeString)
+{
+  uint8_t i;
+
+  // If modeString has the 'RAIL_EFF_CLPC_' prefix, strip it
+#define RAIL_EFF_CLPC_PREFIX (sizeof("RAIL_EFF_CLPC_") - 1)
+  if (strncasecmp(modeString, "RAIL_EFF_CLPC_", RAIL_EFF_CLPC_PREFIX) == 0) {
+    modeString += RAIL_EFF_CLPC_PREFIX;
+  }
+  for (i = 0; i < sizeof(effClpcEnableEnumNames) / sizeof(effClpcEnableEnumNames[0]); i++) {
+    if (strcasecmp(modeString, effClpcEnableEnumNames[i] + RAIL_EFF_CLPC_PREFIX) == 0) {
+      return i;
+    }
+  }
+  return 0xFF;
+}
+
+// This function reads the first entry in the command line and tries to convert it into a EFF Enable mode.
+// If unsuccessful, it returns 0xff
+static uint8_t getEffEnableModeFromCommmandLine(char *commandString, char *modeString)
+{
+  // Attempt to convert the enable mode string to a RAIL_ClpcEnable_t enum index.
+  RAIL_ClpcEnable_t mode = getEffEnableModeFromString(modeString);
+  if (mode == 0xFF) {
+    // If the string doesn't match an enable mode, attempt to convert it to a RAIL_ClpcEnable_t.
+    char *strtoulEnd;
+    mode = (RAIL_ClpcEnable_t)strtoul(modeString, &strtoulEnd, 0);
+    //check that strtoul didn't fail and that mode is valid RAIL_ClpcEnable_t
+    if (strtoulEnd == modeString || mode >= RAIL_EFF_CLPC_COUNT) {
+      responsePrintError(commandString, 0x13, "Invalid EFF CLPC Enable enum value selected: %s", modeString);
+      mode = 0xFF;
+    }
+  }
+  return mode;
+}
+#endif // SL_RAIL_UTIL_EFF_DEVICE
 
 /*
  * setFrequency
@@ -514,7 +591,7 @@ void getTemperature(sl_cli_command_arg_t *args)
 #endif
 }
 
-void getSetEffControl(sl_cli_command_arg_t *args)
+void getSetEffClpcControl(sl_cli_command_arg_t *args)
 {
 #ifdef SL_RAIL_UTIL_EFF_DEVICE
   if (SL_RAIL_UTIL_EFF_DEVICE != RAIL_EFF_DEVICE_NONE) {
@@ -529,53 +606,97 @@ void getSetEffControl(sl_cli_command_arg_t *args)
     }
 
     CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
-    RAIL_Status_t status = RAIL_GetSetEffControl(railHandle, tempBuffer, reset);
+    RAIL_Status_t status = RAIL_GetSetEffClpcControl(railHandle, tempBuffer, reset);
 
     if (status == RAIL_STATUS_NO_ERROR) {
+      // Copy debug results into proper structure
+      uint32_t effClpcResults_uint32[6];
+      RAIL_EffClpcResults_t effClpcResults[6];
+
+      for ( uint32_t i = 0; i < 6; i++) {
+        effClpcResults_uint32[i] = (((uint32_t)tempBuffer[2 * (i + 7) + 1] << 16) | tempBuffer[2 * (i + 7)]);
+      }
+      memcpy(effClpcResults, effClpcResults_uint32, sizeof(RAIL_EffClpcResults_t) * 6);
+
       responsePrintStart(sl_cli_get_command_string(args, 0));
       responsePrintContinue("EFF_CLPC_STATUS:%d,"
-                            "RX_BYPASS_SENSE_VDDB:%d,"
-                            "RX_BYPASS_SENSE_TEMPB:%d,"
-                            "PA_SAWA:%d,"
-                            "PA_SAWB:%d,"
-                            "PA_SAWC:%d,"
-                            "PA_SAWD:%d,"
-                            "PA_SAWE:%d,"
-                            "PA_SAWF:%d,"
-                            "PA_SAWG:%d,"
-                            "PA_SAWH:%d",
-                            ((uint32_t)tempBuffer[1] << 16) | tempBuffer[0],
-                            tempBuffer[2],
-                            tempBuffer[3],
-                            tempBuffer[4],
-                            tempBuffer[5],
-                            tempBuffer[6],
-                            tempBuffer[7],
-                            tempBuffer[8],
-                            tempBuffer[9],
-                            tempBuffer[10],
-                            tempBuffer[11]
+                            "\n" "RX_BYPASS_SENSE_VDDB:%d,"
+                                 "RX_BYPASS_SENSE_TEMPB:%d,"
+                                 "\n" "PA_SAWA:%d,"
+                                      "PA_SAWB:%d,"
+                                      "PA_SAWC:%d,"
+                                      "PA_SAWD:%d,"
+                                      "PA_SAWE:%d",
+                            ((uint32_t)tempBuffer[1] << 16) | tempBuffer[0], // EFF_CLPC_STATUS
+                            tempBuffer[2], // RX_BYPASS_SENSE_VDDB
+                            tempBuffer[3], // RX_BYPASS_SENSE_TEMPB
+                            tempBuffer[4], // PA_SAWA
+                            tempBuffer[5], // PA_SAWB
+                            tempBuffer[6], // PA_SAWC
+                            tempBuffer[7], // PA_SAWD
+                            tempBuffer[8] // PA_SAWE
                             );
-      responsePrintEnd("PA_SENSE_ANT_VOLTAGEA:%d,"
-                       "PA_SENSE_ANT_CURRENTA:%d,"
-                       "PA_SENSE_ANT_VOLTAGEB:%d,"
-                       "PA_SENSE_ANT_CURRENTB:%d,"
-                       "PA_SENSE_VDD_SENSE:%d,"
-                       "RX_BYPASS_SENSE_TEMPA:%d,"
-                       "TIMESTAMP0:%d,"
-                       "TIMESTAMP1:%d,"
-                       "TIMESTAMP2:%d,"
-                       "TIMESTAMP3:%d",
-                       tempBuffer[12],
-                       tempBuffer[13],
-                       tempBuffer[14],
-                       tempBuffer[15],
-                       tempBuffer[16],
-                       tempBuffer[17],
-                       ((uint32_t)tempBuffer[19] << 16) | tempBuffer[18],
-                       ((uint32_t)tempBuffer[21] << 16) | tempBuffer[20],
-                       ((uint32_t)tempBuffer[23] << 16) | tempBuffer[22],
-                       ((uint32_t)tempBuffer[25] << 16) | tempBuffer[24]
+      responsePrintContinue("\n" "PA_SENSE_ANT_VOLTAGEA:%d,"
+                                 "PA_SENSE_ANT_VOLTAGEB:%d,"
+                                 "PA_SENSE_ANT_VOLTAGEC:%d,"
+                                 "\n" "PA_SENSE_VDD_SENSE:%d,"
+                                      "RX_BYPASS_SENSE_TEMPA:%d",
+                            tempBuffer[9], // PA_SENSE_ANT_VOLTAGEA
+                            tempBuffer[10], // PA_SENSE_ANT_VOLTAGEB
+                            tempBuffer[11], // PA_SENSE_ANT_VOLTAGEC
+                            tempBuffer[12], // PA_SENSE_VDD_SENSE
+                            tempBuffer[13] // RX_BYPASS_SENSE_TEMPA
+                            );
+      responsePrintContinue("\n\n" "SAWA_DEBUG.rawShift:%2d,"
+                                   "SAWA_DEBUG.clampedShift:%2d,"
+                                   "SAWA_DEBUG.currIndex:%3d,"
+                                   "SAWA_DEBUG.newIndex:%3d,"
+                                   "\n" "SAWB_DEBUG.rawShift:%2d,"
+                                        "SAWB_DEBUG.clampedShift:%2d,"
+                                        "SAWB_DEBUG.currIndex:%3d,"
+                                        "SAWB_DEBUG.newIndex:%3d",
+                            effClpcResults[0].rawShift, // SAWA_DEBUG
+                            effClpcResults[0].clampedShift, // SAWA_DEBUG
+                            effClpcResults[0].currIndex, // SAWA_DEBUG
+                            effClpcResults[0].newIndex, // SAWA_DEBUG
+                            effClpcResults[1].rawShift, // SAWB_DEBUG
+                            effClpcResults[1].clampedShift, // SAWB_DEBUG
+                            effClpcResults[1].currIndex, // SAWB_DEBUG
+                            effClpcResults[1].newIndex // SAWB_DEBUG
+                            );
+      responsePrintContinue("\n" "SAWC_DEBUG.rawShift:%2d,"
+                                 "SAWC_DEBUG.clampedShift:%2d,"
+                                 "SAWC_DEBUG.currIndex:%3d,"
+                                 "SAWC_DEBUG.newIndex:%3d,"
+                                 "\n" "SAWD_DEBUG.rawShift:%2d,"
+                                      "SAWD_DEBUG.clampedShift:%2d,"
+                                      "SAWD_DEBUG.currIndex:%3d,"
+                                      "SAWD_DEBUG.newIndex:%3d",
+                            effClpcResults[2].rawShift, // SAWC_DEBUG
+                            effClpcResults[2].clampedShift, // SAWC_DEBUG
+                            effClpcResults[2].currIndex, // SAWC_DEBUG
+                            effClpcResults[2].newIndex, // SAWC_DEBUG
+                            effClpcResults[3].rawShift, // SAWD_DEBUG
+                            effClpcResults[3].clampedShift, // SAWD_DEBUG
+                            effClpcResults[3].currIndex, // SAWD_DEBUG
+                            effClpcResults[3].newIndex // SAWD_DEBUG
+                            );
+      responsePrintEnd("\n\n" "ANTVA_DEBUG.rawShift:%2d,"
+                              "ANTVA_DEBUG.clampedShift:%2d,"
+                              "ANTVA_DEBUG.currIndex:%3d,"
+                              "ANTVA_DEBUG.newIndex:%3d,"
+                              "\n" "ANTVB_DEBUG.rawShift:%2d,"
+                                   "ANTVB_DEBUG.clampedShift:%2d,"
+                                   "ANTVB_DEBUG.currIndex:%3d,"
+                                   "ANTVB_DEBUG.newIndex:%3d",
+                       effClpcResults[4].rawShift, // ANTVA_DEBUG
+                       effClpcResults[4].clampedShift, // ANTVA_DEBUG
+                       effClpcResults[4].currIndex, // ANTVA_DEBUG
+                       effClpcResults[4].newIndex, // ANTVA_DEBUG
+                       effClpcResults[5].rawShift, // ANTVB_DEBUG
+                       effClpcResults[5].clampedShift, // ANTVB_DEBUG
+                       effClpcResults[5].currIndex, // ANTVB_DEBUG
+                       effClpcResults[5].newIndex // ANTVB_DEBUG
                        );
     } else {
       responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Could not get EFF Control values.");
@@ -586,7 +707,7 @@ void getSetEffControl(sl_cli_command_arg_t *args)
 #endif // SL_RAIL_UTIL_EFF_DEVICE
 }
 
-void getSetEffMode(sl_cli_command_arg_t *args)
+void getSetEffClpcFemdata(sl_cli_command_arg_t *args)
 {
 #ifdef SL_RAIL_UTIL_EFF_DEVICE
   if (SL_RAIL_UTIL_EFF_DEVICE != RAIL_EFF_DEVICE_NONE) {
@@ -599,7 +720,7 @@ void getSetEffMode(sl_cli_command_arg_t *args)
     }
 
     CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
-    RAIL_Status_t status = RAIL_GetSetEffMode(railHandle, &newMode, changeMode);
+    RAIL_Status_t status = RAIL_GetSetEffClpcFemdata(railHandle, &newMode, changeMode);
 
     if (status == RAIL_STATUS_NO_ERROR) {
       responsePrintStart(sl_cli_get_command_string(args, 0));
@@ -615,7 +736,7 @@ void getSetEffMode(sl_cli_command_arg_t *args)
 #endif // SL_RAIL_UTIL_EFF_DEVICE
 }
 
-void getSetEffRuralUrban(sl_cli_command_arg_t *args)
+void getSetEffLnaRuralUrban(sl_cli_command_arg_t *args)
 {
 #ifdef SL_RAIL_UTIL_EFF_DEVICE
   if (SL_RAIL_UTIL_EFF_DEVICE != RAIL_EFF_DEVICE_NONE) {
@@ -628,7 +749,7 @@ void getSetEffRuralUrban(sl_cli_command_arg_t *args)
     }
 
     CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
-    RAIL_Status_t status = RAIL_GetSetEffRuralUrbanMv(railHandle, &newTrip, changeTrip);
+    RAIL_Status_t status = RAIL_GetSetEffLnaRuralUrbanMv(railHandle, &newTrip, changeTrip);
 
     if (status == RAIL_STATUS_NO_ERROR) {
       responsePrintStart(sl_cli_get_command_string(args, 0));
@@ -644,7 +765,7 @@ void getSetEffRuralUrban(sl_cli_command_arg_t *args)
 #endif // SL_RAIL_UTIL_EFF_DEVICE
 }
 
-void getSetEffUrbanBypass(sl_cli_command_arg_t *args)
+void getSetEffLnaUrbanBypass(sl_cli_command_arg_t *args)
 {
 #ifdef SL_RAIL_UTIL_EFF_DEVICE
   if (SL_RAIL_UTIL_EFF_DEVICE != RAIL_EFF_DEVICE_NONE) {
@@ -657,7 +778,7 @@ void getSetEffUrbanBypass(sl_cli_command_arg_t *args)
     }
 
     CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
-    RAIL_Status_t status = RAIL_GetSetEffUrbanBypassMv(railHandle, &newTrip, changeTrip);
+    RAIL_Status_t status = RAIL_GetSetEffLnaUrbanBypassMv(railHandle, &newTrip, changeTrip);
 
     if (status == RAIL_STATUS_NO_ERROR) {
       responsePrintStart(sl_cli_get_command_string(args, 0));
@@ -673,7 +794,7 @@ void getSetEffUrbanBypass(sl_cli_command_arg_t *args)
 #endif // SL_RAIL_UTIL_EFF_DEVICE
 }
 
-void getSetEffUrbanDwellTime(sl_cli_command_arg_t *args)
+void getSetEffLnaUrbanDwellTime(sl_cli_command_arg_t *args)
 {
 #ifdef SL_RAIL_UTIL_EFF_DEVICE
   if (SL_RAIL_UTIL_EFF_DEVICE != RAIL_EFF_DEVICE_NONE) {
@@ -686,7 +807,7 @@ void getSetEffUrbanDwellTime(sl_cli_command_arg_t *args)
     }
 
     CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
-    RAIL_Status_t status = RAIL_GetSetEffUrbanDwellTimeMs(railHandle, &newDwellTime, changeDwellTime);
+    RAIL_Status_t status = RAIL_GetSetEffLnaUrbanDwellTimeMs(railHandle, &newDwellTime, changeDwellTime);
 
     if (status == RAIL_STATUS_NO_ERROR) {
       responsePrintStart(sl_cli_get_command_string(args, 0));
@@ -702,7 +823,7 @@ void getSetEffUrbanDwellTime(sl_cli_command_arg_t *args)
 #endif // SL_RAIL_UTIL_EFF_DEVICE
 }
 
-void getSetEffBypassDwellTime(sl_cli_command_arg_t *args)
+void getSetEffLnaBypassDwellTime(sl_cli_command_arg_t *args)
 {
 #ifdef SL_RAIL_UTIL_EFF_DEVICE
   if (SL_RAIL_UTIL_EFF_DEVICE != RAIL_EFF_DEVICE_NONE) {
@@ -715,7 +836,7 @@ void getSetEffBypassDwellTime(sl_cli_command_arg_t *args)
     }
 
     CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
-    RAIL_Status_t status = RAIL_GetSetEffBypassDwellTimeMs(railHandle, &newDwellTime, changeDwellTime);
+    RAIL_Status_t status = RAIL_GetSetEffLnaBypassDwellTimeMs(railHandle, &newDwellTime, changeDwellTime);
 
     if (status == RAIL_STATUS_NO_ERROR) {
       responsePrintStart(sl_cli_get_command_string(args, 0));
@@ -731,7 +852,7 @@ void getSetEffBypassDwellTime(sl_cli_command_arg_t *args)
 #endif // SL_RAIL_UTIL_EFF_DEVICE
 }
 
-void getSetClpcFastLoop(sl_cli_command_arg_t *args)
+void getSetEffClpcFastLoop(sl_cli_command_arg_t *args)
 {
 #ifdef SL_RAIL_UTIL_EFF_DEVICE
   if (SL_RAIL_UTIL_EFF_DEVICE != RAIL_EFF_DEVICE_NONE) {
@@ -740,26 +861,29 @@ void getSetClpcFastLoop(sl_cli_command_arg_t *args)
     uint16_t newTargetMv = 0;
     uint16_t newSlopeMvPerPaLevel = 0;
 
+    if (sl_cli_get_argument_count(args) > 0) {
+      modeSensorIndex = getEffModeSensorFromCommmandLine(sl_cli_get_command_string(args, 0), sl_cli_get_argument_string(args, 0));
+      if (modeSensorIndex == 0xff) {
+        return; //error message printed by getEffModeSensorFromCommmandLine
+      }
+    }
     if (sl_cli_get_argument_count(args) > 2) {
-      modeSensorIndex = sl_cli_get_argument_int16(args, 0);
       changeValues = true;
-      newTargetMv = sl_cli_get_argument_uint16(args, 1);
-      newSlopeMvPerPaLevel = sl_cli_get_argument_uint16(args, 2);
-    } else if (sl_cli_get_argument_count(args) > 0) {
-      modeSensorIndex = sl_cli_get_argument_int16(args, 0);
-    } else {
-      // MISRA compliance
+      newTargetMv = strtoul(sl_cli_get_argument_string(args, 1), NULL, 0);
+      newSlopeMvPerPaLevel = strtoul(sl_cli_get_argument_string(args, 2), NULL, 0);
     }
 
     CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
-    RAIL_Status_t status = RAIL_GetSetClpcFastLoop(railHandle, modeSensorIndex, &newTargetMv, &newSlopeMvPerPaLevel, changeValues);
+    RAIL_Status_t status = RAIL_GetSetEffClpcFastLoop(railHandle, modeSensorIndex, &newTargetMv, &newSlopeMvPerPaLevel, changeValues);
 
     if (status == RAIL_STATUS_NO_ERROR) {
       responsePrintStart(sl_cli_get_command_string(args, 0));
       responsePrintEnd("Mode Sensor Index:%s,"
+                       "Mode Sensor:%d,"
                        "EFF CLPC target (millivolts):%d,"
                        "EFF CLPC slope (millivolts/raw level):%d",
                        effModeSensorNames[modeSensorIndex],
+                       modeSensorIndex,
                        newTargetMv,
                        newSlopeMvPerPaLevel
                        );
@@ -772,7 +896,7 @@ void getSetClpcFastLoop(sl_cli_command_arg_t *args)
 #endif // SL_RAIL_UTIL_EFF_DEVICE
 }
 
-void getSetClpcFastLoopCal(sl_cli_command_arg_t *args)
+void getSetEffClpcFastLoopCal(sl_cli_command_arg_t *args)
 {
 #ifdef SL_RAIL_UTIL_EFF_DEVICE
   if (SL_RAIL_UTIL_EFF_DEVICE != RAIL_EFF_DEVICE_NONE) {
@@ -780,33 +904,36 @@ void getSetClpcFastLoopCal(sl_cli_command_arg_t *args)
     RAIL_EffModeSensor_t modeSensorIndex = RAIL_EFF_MODE_SENSOR_FSK_ANTV;
     RAIL_EffCalConfig_t calibrationEntry;
 
+    if (sl_cli_get_argument_count(args) > 0) {
+      modeSensorIndex = getEffModeSensorFromCommmandLine(sl_cli_get_command_string(args, 0), sl_cli_get_argument_string(args, 0));
+      if (modeSensorIndex == 0xff) {
+        return; //error message printed by getEffModeSensorFromCommmandLine
+      }
+    }
     if (sl_cli_get_argument_count(args) > 4) {
       changeValues = true;
-      modeSensorIndex = sl_cli_get_argument_int16(args, 0);
-      calibrationEntry.cal1Ddbm = sl_cli_get_argument_int16(args, 1);
-      calibrationEntry.cal1Mv = sl_cli_get_argument_int16(args, 2);
-      calibrationEntry.cal2Ddbm = sl_cli_get_argument_int16(args, 3);
-      calibrationEntry.cal2Mv = sl_cli_get_argument_int16(args, 4);
-    } else if (sl_cli_get_argument_count(args) > 0) {
-      modeSensorIndex = sl_cli_get_argument_int16(args, 0);
-    } else {
-      // MISRA compliance
+      calibrationEntry.cal1Ddbm = strtoul(sl_cli_get_argument_string(args, 1), NULL, 0);
+      calibrationEntry.cal1Mv = strtoul(sl_cli_get_argument_string(args, 2), NULL, 0);
+      calibrationEntry.cal2Ddbm = strtoul(sl_cli_get_argument_string(args, 3), NULL, 0);
+      calibrationEntry.cal2Mv = strtoul(sl_cli_get_argument_string(args, 4), NULL, 0);
     }
 
     CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
-    RAIL_Status_t status = RAIL_GetSetClpcFastLoopCal(railHandle,
-                                                      modeSensorIndex,
-                                                      &calibrationEntry,
-                                                      changeValues);
+    RAIL_Status_t status = RAIL_GetSetEffClpcFastLoopCal(railHandle,
+                                                         modeSensorIndex,
+                                                         &calibrationEntry,
+                                                         changeValues);
 
     if (status == RAIL_STATUS_NO_ERROR) {
       responsePrintStart(sl_cli_get_command_string(args, 0));
       responsePrintEnd("Mode Sensor Index:%s,"
+                       "Mode Sensor:%d,"
                        "Cal 1 ddBm:%d,"
                        "Cal 1 millivolts:%d,"
                        "Cal 2 ddBm:%d,"
                        "Cal 2 millivolts:%d",
                        effModeSensorNames[modeSensorIndex],
+                       modeSensorIndex,
                        calibrationEntry.cal1Ddbm,
                        calibrationEntry.cal1Mv,
                        calibrationEntry.cal2Ddbm,
@@ -821,7 +948,7 @@ void getSetClpcFastLoopCal(sl_cli_command_arg_t *args)
 #endif // SL_RAIL_UTIL_EFF_DEVICE
 }
 
-void getSetClpcFastLoopCalSlp(sl_cli_command_arg_t *args)
+void getSetEffClpcFastLoopCalSlp(sl_cli_command_arg_t *args)
 {
 #ifdef SL_RAIL_UTIL_EFF_DEVICE
   if (SL_RAIL_UTIL_EFF_DEVICE != RAIL_EFF_DEVICE_NONE) {
@@ -830,30 +957,33 @@ void getSetClpcFastLoopCalSlp(sl_cli_command_arg_t *args)
     int16_t newSlope1e1MvPerDdbm;
     int16_t newoffset290Ddbm;
 
+    if (sl_cli_get_argument_count(args) > 0) {
+      modeSensorIndex = getEffModeSensorFromCommmandLine(sl_cli_get_command_string(args, 0), sl_cli_get_argument_string(args, 0));
+      if (modeSensorIndex == 0xff) {
+        return; //error message printed by getEffModeSensorFromCommmandLine
+      }
+    }
     if (sl_cli_get_argument_count(args) > 2) {
       changeValues = true;
-      modeSensorIndex = sl_cli_get_argument_int16(args, 0);
-      newSlope1e1MvPerDdbm = sl_cli_get_argument_int16(args, 1);
-      newoffset290Ddbm = sl_cli_get_argument_int16(args, 2);
-    } else if (sl_cli_get_argument_count(args) > 0) {
-      modeSensorIndex = sl_cli_get_argument_int16(args, 0);
-    } else {
-      // MISRA compliance
+      newSlope1e1MvPerDdbm = strtol(sl_cli_get_argument_string(args, 1), NULL, 0);
+      newoffset290Ddbm = strtol(sl_cli_get_argument_string(args, 2), NULL, 0);
     }
 
     CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
-    RAIL_Status_t status = RAIL_GetSetClpcFastLoopCalSlp(railHandle,
-                                                         modeSensorIndex,
-                                                         &newSlope1e1MvPerDdbm,
-                                                         &newoffset290Ddbm,
-                                                         changeValues);
+    RAIL_Status_t status = RAIL_GetSetEffClpcFastLoopCalSlp(railHandle,
+                                                            modeSensorIndex,
+                                                            &newSlope1e1MvPerDdbm,
+                                                            &newoffset290Ddbm,
+                                                            changeValues);
 
     if (status == RAIL_STATUS_NO_ERROR) {
       responsePrintStart(sl_cli_get_command_string(args, 0));
       responsePrintEnd("Mode Sensor Index:%s,"
+                       "Mode Sensor:%d,"
                        "Cal Slope * 10:%d,"
                        "Cal Offset at 290 ddBm:%d",
                        effModeSensorNames[modeSensorIndex],
+                       modeSensorIndex,
                        newSlope1e1MvPerDdbm,
                        newoffset290Ddbm
                        );
@@ -866,7 +996,7 @@ void getSetClpcFastLoopCalSlp(sl_cli_command_arg_t *args)
 #endif // SL_RAIL_UTIL_EFF_DEVICE
 }
 
-void getSetClpcEnable(sl_cli_command_arg_t *args)
+void getSetEffClpcEnable(sl_cli_command_arg_t *args)
 {
 #ifdef SL_RAIL_UTIL_EFF_DEVICE
   if (SL_RAIL_UTIL_EFF_DEVICE != RAIL_EFF_DEVICE_NONE) {
@@ -875,15 +1005,20 @@ void getSetClpcEnable(sl_cli_command_arg_t *args)
 
     if (sl_cli_get_argument_count(args) > 0) {
       changeClpcEnable = true;
-      newClpcEnable = sl_cli_get_argument_uint8(args, 0);
+      newClpcEnable = getEffEnableModeFromCommmandLine(sl_cli_get_command_string(args, 0), sl_cli_get_argument_string(args, 0));
+      if (newClpcEnable == 0xff) {
+        return; //error message printed by getEffEnableModeFromCommmandLine
+      }
     }
 
     CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
-    RAIL_Status_t status = RAIL_GetSetClpcEnable(railHandle, &newClpcEnable, changeClpcEnable);
+    RAIL_Status_t status = RAIL_GetSetEffClpcEnable(railHandle, &newClpcEnable, changeClpcEnable);
 
     if (status == RAIL_STATUS_NO_ERROR) {
       responsePrintStart(sl_cli_get_command_string(args, 0));
-      responsePrintEnd("EFF CLPC Enable:%d",
+      responsePrintEnd("EFF CLPC Enable Index:%s,"
+                       "EFF CLPC Enable:%d",
+                       effClpcEnableEnumNames[newClpcEnable],
                        newClpcEnable
                        );
     } else {
@@ -1087,6 +1222,57 @@ static uint32_t *prsmuxlsbSetAddress = (uint32_t*)0xB60411B0UL,
 static char pinForOFDMPRSSignal[OFDM_PRS_SIGNAL_COUNT][5];
 #endif//RAIL_SUPPORTS_OFDM_PA
 
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG >= 3)
+#define RAIL_NEEDS_DOUT_DCLK_WORKAROUND 1
+#else
+#define RAIL_NEEDS_DOUT_DCLK_WORKAROUND 0
+#endif
+
+#if RAIL_NEEDS_DOUT_DCLK_WORKAROUND
+// RAIL_LIB-8179: for SERIES_2_CONFIG >= 3, the MODEM DOUT and DCLK PRS signals
+// only work in Tx. The same information can be recovered in Rx using MODEM
+// PRESENT and SYNCSENT PRS signals with a MODEM PRS ctrl register
+// reconfiguration. The workaround consist in routing the DOUT/DCLK and
+// PRESENT/SYNCSENT signals to the same pin and reconfiguring MODEM psr ctrl
+// register when the user request DOUT/DCLK.
+// Note that it is not possible to use PRESENT/SYNCSENT to show preamble sent
+// or syncword sent while they are used for DOUT/DCLK, and vice versa.
+
+#define PRESENT_SYNCSENT_PRS_SIGNAL_AVAILABLE         '\0'
+
+#ifndef MODEM_PRSCTRL_PRESENTSEL_SHIFT
+#define MODEM_PRSCTRL_PRESENTSEL_SHIFT (0xA)
+#endif
+
+#ifndef MODEM_PRSCTRL_PRESENTSEL_LR_or_RXD
+#define MODEM_PRSCTRL_PRESENTSEL_LR_or_RXD (0x1)
+#endif
+
+#ifndef MODEM_PRSCTRL_SYNCSENTSEL_SHIFT
+#define MODEM_PRSCTRL_SYNCSENTSEL_SHIFT (0x8)
+#endif
+
+#ifndef MODEM_PRSCTRL_SYNCSENTSEL_LR_or_RXD_VALID
+#define MODEM_PRSCTRL_SYNCSENTSEL_LR_or_RXD_VALID (0x1)
+#endif
+
+// Set and clear addresses for MODEM_PRSCTRL register
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 7)
+static uint32_t *prsctrlAddress = (uint32_t*)0xB8014240UL,
+                *prsctrlSetAddress = (uint32_t*)0xB8015240UL,
+                *prsctrlClrAddress = (uint32_t*)0xB8016240UL;
+#else // For xG23, xG24, xG25 and xG28.
+static uint32_t *prsctrlAddress = (uint32_t*)0xB80141ACUL,
+                *prsctrlSetAddress = (uint32_t*)0xB80151ACUL,
+                *prsctrlClrAddress = (uint32_t*)0xB80161ACUL;
+#endif
+
+// Tables saving the pin name used for PRESENT/SYNCSENT signals and telling if
+// these signals are already used.
+static char pinForPRESENTPRSSignal[5],
+            pinForSYNCSENTPRSSignal[5];
+#endif //RAIL_NEEDS_DOUT_DCLK_WORKAROUND
+
 char pinForPRSChannel[PRS_ASYNC_CHAN_COUNT][5];
 
 static void printDebugSignalHelp(char *cmdName,
@@ -1251,11 +1437,20 @@ static RAIL_Status_t getPinAndChannelFromInput(debugPin_t *pin, char *pinArg, bo
       return RAIL_STATUS_INVALID_PARAMETER;
     }
   } else if (signal->isPrs) {
-    // Check if pin is already in use (RAIL_LIB-8181)
-    for (i = 0; i < PRS_ASYNC_CHAN_COUNT; i++) {
-      if (strcasecmp(pinForPRSChannel[i], pinArg) == 0) {
-        responsePrint(pin->name, "\nPin already in use");
-        return RAIL_STATUS_INVALID_PARAMETER;
+#if RAIL_NEEDS_DOUT_DCLK_WORKAROUND
+    // 2 PRS signals are routed to the same pin for DOUT/DCLK workaround. Skip
+    // the following check for DOUT/DCLK PRS signals.
+    if ((signal->loc.prs.source != _PRS_ASYNC_CH_CTRL_SOURCESEL_MODEML)
+        || ((signal->loc.prs.signal != _PRS_ASYNC_CH_CTRL_SIGSEL_MODEMLDOUT)
+            && (signal->loc.prs.signal != _PRS_ASYNC_CH_CTRL_SIGSEL_MODEMLDCLK)))
+#endif
+    {
+      // Check if pin is already in use (RAIL_LIB-8181)
+      for (i = 0; i < PRS_ASYNC_CHAN_COUNT; i++) {
+        if (strcasecmp(pinForPRSChannel[i], pinArg) == 0) {
+          responsePrint(pin->name, "\nPin already in use");
+          return RAIL_STATUS_INVALID_PARAMETER;
+        }
       }
     }
     // If the signal is a PRS signal, search for an available PRS channel
@@ -1300,6 +1495,95 @@ static RAIL_Status_t getPinAndChannelFromInput(debugPin_t *pin, char *pinArg, bo
 
   return RAIL_STATUS_NO_ERROR;
 }
+
+#if RAIL_NEEDS_DOUT_DCLK_WORKAROUND
+static RAIL_Status_t checkPresentIsFree(void)
+{
+  if (pinForPRESENTPRSSignal[0] != PRESENT_SYNCSENT_PRS_SIGNAL_AVAILABLE) {
+    return RAIL_STATUS_INVALID_STATE;
+  }
+  return RAIL_STATUS_NO_ERROR;
+}
+
+static RAIL_Status_t checkSyncsentIsFree(void)
+{
+  if (pinForSYNCSENTPRSSignal[0] != PRESENT_SYNCSENT_PRS_SIGNAL_AVAILABLE) {
+    return RAIL_STATUS_INVALID_STATE;
+  }
+  return RAIL_STATUS_NO_ERROR;
+}
+
+static void setPresentPrsSignal(debugPin_t *pin, const debugSignal_t *signal)
+{
+  // Get PRS channel. No need to check the pin arg because this is the second
+  // time this function is called on the same pin. disablePin arg is false
+  // because here we always want to enable the PRS signal.
+  (void) getPinAndChannelFromInput(pin, pin->name, false, signal);
+
+  // Enable SOURCESEL_MODEMH + SIGSEL_MODEMHPRESENT PRS towards the same port/pin use for DOUT
+  halEnablePrs(pin->prsChannel,
+               pin->prsLocation,
+               pin->gpioPort,
+               pin->gpioPin,
+               _PRS_ASYNC_CH_CTRL_SOURCESEL_MODEMH,
+               _PRS_ASYNC_CH_CTRL_SIGSEL_MODEMHPRESENT
+               );
+
+  // Reconfigure modem PRS register according to directions given in RAIL_LIB-8179
+  *prsctrlSetAddress = (MODEM_PRSCTRL_PRESENTSEL_LR_or_RXD << MODEM_PRSCTRL_PRESENTSEL_SHIFT);
+}
+
+static void setSyncsentPrsSignal(debugPin_t *pin, const debugSignal_t *signal)
+{
+  // Get PRS channel. No need to check the pin arg because this is the second
+  // time this function is called on the same pin. disablePin arg is false
+  // because here we always want to enable the PRS signal.
+  (void) getPinAndChannelFromInput(pin, pin->name, false, signal);
+
+  // Enable SOURCESEL_MODEMH + SIGSEL_MODEMHSYNCSENT PRS towards the same port/pin use for DCLK
+  halEnablePrs(pin->prsChannel,
+               pin->prsLocation,
+               pin->gpioPort,
+               pin->gpioPin,
+               _PRS_ASYNC_CH_CTRL_SOURCESEL_MODEMH,
+               _PRS_ASYNC_CH_CTRL_SIGSEL_MODEMHSYNCSENT
+               );
+
+  // Reconfigure modem PRS register according to directions given in RAIL_LIB-8179.
+  *prsctrlSetAddress = (MODEM_PRSCTRL_SYNCSENTSEL_LR_or_RXD_VALID << MODEM_PRSCTRL_SYNCSENTSEL_SHIFT);
+}
+
+static void clearPresentPrsSignal(debugPin_t *pin, const debugSignal_t *signal)
+{
+  // If we are disabling the pin used for present PRS signal.
+  if (strcasecmp(pinForPRESENTPRSSignal, pin->name) == 0) {
+    // Clear the second PRS if it has been activated, so when MODEM_PRSCTRL_PRESENTSEL_LR_or_RXD is set.
+    if ((*prsctrlAddress & (MODEM_PRSCTRL_PRESENTSEL_LR_or_RXD << MODEM_PRSCTRL_PRESENTSEL_SHIFT)) != 0U) {
+      (void) getPinAndChannelFromInput(pin, pin->name, true, signal);
+      halDisablePrs(pin->prsChannel);
+    }
+    // Always clear table and modem prsctrl register
+    pinForPRESENTPRSSignal[0] = PRESENT_SYNCSENT_PRS_SIGNAL_AVAILABLE;
+    *prsctrlClrAddress = (MODEM_PRSCTRL_PRESENTSEL_LR_or_RXD << MODEM_PRSCTRL_PRESENTSEL_SHIFT);
+  }
+}
+
+static void clearSyncsentPrsSignal(debugPin_t *pin, const debugSignal_t *signal)
+{
+  // If we are disabling the pin used for syncsent PRS signal.
+  if (strcasecmp(pinForSYNCSENTPRSSignal, pin->name) == 0) {
+    // Clear the second PRS if it has been activated, so when MODEM_PRSCTRL_SYNCSENTSEL_LR_or_RXD_VALID is set.
+    if ((*prsctrlAddress & (MODEM_PRSCTRL_SYNCSENTSEL_LR_or_RXD_VALID << MODEM_PRSCTRL_SYNCSENTSEL_SHIFT)) != 0U) {
+      (void) getPinAndChannelFromInput(pin, pin->name, true, signal);
+      halDisablePrs(pin->prsChannel);
+    }
+    // Always clear table and modem prsctrl register
+    pinForSYNCSENTPRSSignal[0] = PRESENT_SYNCSENT_PRS_SIGNAL_AVAILABLE;
+    *prsctrlClrAddress = (MODEM_PRSCTRL_SYNCSENTSEL_LR_or_RXD_VALID << MODEM_PRSCTRL_SYNCSENTSEL_SHIFT);
+  }
+}
+
+#endif //RAIL_NEEDS_DOUT_DCLK_WORKAROUND
 
 #else // !_SILICON_LABS_32B_SERIES_2
 static void printDebugSignalHelp(char *cmdName,
@@ -1375,7 +1659,7 @@ void setDebugSignal(sl_cli_command_arg_t * args)
     0
   };
   debugPin_t *pin = &defaultPin;
-  RAIL_Status_t status;
+  RAIL_Status_t status = RAIL_STATUS_NO_ERROR;
   #if RAIL_SUPPORTS_OFDM_PA
   uint8_t prsSignal = 0;
   uint32_t ofdmPrsSignalIndex = 0;
@@ -1441,9 +1725,9 @@ void setDebugSignal(sl_cli_command_arg_t * args)
       return;
     }
   }
-
-#if RAIL_SUPPORTS_OFDM_PA
+#if RAIL_SUPPORTS_OFDM_PA || RAIL_NEEDS_DOUT_DCLK_WORKAROUND
   if (signal != NULL) {
+#if RAIL_SUPPORTS_OFDM_PA
     prsSignal = signal->loc.prs.signal;
     if ((signal->loc.prs.source == _PRS_ASYNC_CH_CTRL_SOURCESEL_SMCTRLL)
         && (((debugSignal_t*)signal) != &customSignal)) {
@@ -1453,8 +1737,28 @@ void setDebugSignal(sl_cli_command_arg_t * args)
         return;
       }
     }
+#endif //RAIL_SUPPORTS_OFDM_PA
+#if RAIL_NEEDS_DOUT_DCLK_WORKAROUND
+    if (((signal->loc.prs.source == _PRS_ASYNC_CH_CTRL_SOURCESEL_MODEMH)
+         && (signal->loc.prs.signal == _PRS_ASYNC_CH_CTRL_SIGSEL_MODEMHPRESENT))
+        || ((signal->loc.prs.source == _PRS_ASYNC_CH_CTRL_SOURCESEL_MODEML)
+            && (signal->loc.prs.signal == _PRS_ASYNC_CH_CTRL_SIGSEL_MODEMLDOUT))) {
+      status = checkPresentIsFree();
+    }
+    if (((signal->loc.prs.source == _PRS_ASYNC_CH_CTRL_SOURCESEL_MODEMH)
+         && (signal->loc.prs.signal == _PRS_ASYNC_CH_CTRL_SIGSEL_MODEMHSYNCSENT))
+        || ((signal->loc.prs.source == _PRS_ASYNC_CH_CTRL_SOURCESEL_MODEML)
+            && (signal->loc.prs.signal == _PRS_ASYNC_CH_CTRL_SIGSEL_MODEMLDCLK))) {
+      status = checkSyncsentIsFree();
+    }
+    if (status != RAIL_STATUS_NO_ERROR) {
+      responsePrintError(signal->name, 0x50, "No more MODEM PRS channels available, please turn off DOUT, DCLK, SYNCSENT or PRESENT before setting this one");
+      return;
+    }
+#endif //RAIL_NEEDS_DOUT_DCLK_WORKAROUND
   }
-#endif//RAIL_SUPPORTS_OFDM_PA
+#endif  //RAIL_SUPPORTS_OFDM_PA || RAIL_NEEDS_DOUT_DCLK_WORKAROUND
+
   // Determine the pin, port, and prsChannel from the input arguments
   #if defined(_SILICON_LABS_32B_SERIES_2)
   status = getPinAndChannelFromInput(pin, pinArg, disablePin, signal);
@@ -1481,6 +1785,10 @@ void setDebugSignal(sl_cli_command_arg_t * args)
 #endif//RAIL_SUPPORTS_OFDM_PA
     // Turn off the PRS output on this pin's channel
     halDisablePrs(pin->prsChannel);
+#if RAIL_NEEDS_DOUT_DCLK_WORKAROUND
+    clearPresentPrsSignal(pin, signal);
+    clearSyncsentPrsSignal(pin, signal);
+#endif //RAIL_NEEDS_DOUT_DCLK_WORKAROUND
     // @TODO: Turn off the RAIL debug event for this pin
     responsePrint(sl_cli_get_command_string(args, 0), "Pin:%s,Signal:OFF", pin->name);
 
@@ -1510,6 +1818,30 @@ void setDebugSignal(sl_cli_command_arg_t * args)
                  signal->loc.prs.signal
 #endif//RAIL_SUPPORTS_OFDM_PA
                  );
+
+#if RAIL_NEEDS_DOUT_DCLK_WORKAROUND
+// Fill the pin tables when requested PRS is DOUT, DCLK, PRESENT or SYNCSENT.
+// Set PRESENT/SYNCSENT as the second PRS only when the requested one is
+// DOUT/DCLK.
+    if (((signal->loc.prs.source == _PRS_ASYNC_CH_CTRL_SOURCESEL_MODEMH)
+         && (signal->loc.prs.signal == _PRS_ASYNC_CH_CTRL_SIGSEL_MODEMHPRESENT))) {
+      strcpy(pinForPRESENTPRSSignal, pin->name);
+    }
+    if (((signal->loc.prs.source == _PRS_ASYNC_CH_CTRL_SOURCESEL_MODEML)
+         && (signal->loc.prs.signal == _PRS_ASYNC_CH_CTRL_SIGSEL_MODEMLDOUT))) {
+      strcpy(pinForPRESENTPRSSignal, pin->name);
+      setPresentPrsSignal(pin, signal);
+    }
+    if (((signal->loc.prs.source == _PRS_ASYNC_CH_CTRL_SOURCESEL_MODEMH)
+         && (signal->loc.prs.signal == _PRS_ASYNC_CH_CTRL_SIGSEL_MODEMHSYNCSENT))) {
+      strcpy(pinForSYNCSENTPRSSignal, pin->name);
+    }
+    if (((signal->loc.prs.source == _PRS_ASYNC_CH_CTRL_SOURCESEL_MODEML)
+         && (signal->loc.prs.signal == _PRS_ASYNC_CH_CTRL_SIGSEL_MODEMLDCLK))) {
+      strcpy(pinForSYNCSENTPRSSignal, pin->name);
+      setSyncsentPrsSignal(pin, signal);
+    }
+#endif //RAIL_NEEDS_DOUT_DCLK_WORKAROUND
   } else {
     // Turn on the RAIL debug event for this signal
   }

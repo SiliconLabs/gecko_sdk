@@ -37,7 +37,9 @@ component:
   - id: rail_util_pa
   - id: rail_util_pti
   - id: rail_util_rf_path
+  - id: rail_util_rf_path_switch
   - id: rail_util_rssi
+  - id: rail_util_built_in_phys
 
 #----------------- Require list ----------------------
 requires:
@@ -114,6 +116,8 @@ configuration:
     value: "1"
     condition:
       - device_series_1 # Enable wake from rfsense when in EM2 and EM3.
+  - name: SL_RAIL_UTIL_RAIL_POWER_MANAGER_INIT
+    value: "0"
   # cli
   #   for all
   - name: SL_CLI_LOCAL_ECHO

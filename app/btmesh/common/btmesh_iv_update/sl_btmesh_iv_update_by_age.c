@@ -37,7 +37,7 @@
 
 #include <stdbool.h>
 #include "app_assert.h"
-#include "sl_simple_timer.h"
+#include "app_timer.h"
 
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
@@ -62,8 +62,8 @@
 #define NORMAL_OPERATION 0
 #define IV_UPDATE_IN_PROGRESS 1
 
-static sl_simple_timer_t age_timer;
-static void on_age_timer(sl_simple_timer_t *handle, void *data);
+static app_timer_t age_timer;
+static void on_age_timer(app_timer_t *handle, void *data);
 
 static void age_timer_start(uint32_t timeout_s);
 static void age_timer_stop(void);
@@ -112,7 +112,7 @@ void sl_btmesh_iv_update_by_age_on_event(sl_btmesh_msg_t* evt)
 /***************************************************************************//**
  *  Request IV Update on timer callback
  ******************************************************************************/
-static void on_age_timer(sl_simple_timer_t *handle, void *data)
+static void on_age_timer(app_timer_t *handle, void *data)
 {
   (void)data;
   (void)handle;
@@ -125,11 +125,11 @@ static void on_age_timer(sl_simple_timer_t *handle, void *data)
  ******************************************************************************/
 static void age_timer_start(uint32_t timeout_s)
 {
-  sl_status_t sc = sl_simple_timer_start(&age_timer,
-                                         timeout_s * 1000,
-                                         on_age_timer,
-                                         NULL,
-                                         false);
+  sl_status_t sc = app_timer_start(&age_timer,
+                                   timeout_s * 1000,
+                                   on_age_timer,
+                                   NULL,
+                                   false);
   app_assert_status_f(sc, "Failed to start timer");
 }
 
@@ -138,7 +138,7 @@ static void age_timer_start(uint32_t timeout_s)
  ******************************************************************************/
 static void age_timer_stop(void)
 {
-  sl_status_t sc = sl_simple_timer_stop(&age_timer);
+  sl_status_t sc = app_timer_stop(&age_timer);
   app_assert_status_f(sc, "Failed to stop timer");
 }
 

@@ -43,6 +43,7 @@
 #include "coap/coap_message.hpp"
 #include "coap/coap_secure.hpp"
 #include "common/as_core_type.hpp"
+#include "common/callback.hpp"
 #include "common/locator.hpp"
 #include "common/log.hpp"
 #include "common/message.hpp"
@@ -102,14 +103,14 @@ public:
      * @retval kErrorInvalidState  The IPv6 stack is not enabled or Thread stack is fully enabled.
      *
      */
-    Error Start(const char *     aPskd,
-                const char *     aProvisioningUrl,
-                const char *     aVendorName,
-                const char *     aVendorModel,
-                const char *     aVendorSwVersion,
-                const char *     aVendorData,
+    Error Start(const char      *aPskd,
+                const char      *aProvisioningUrl,
+                const char      *aVendorName,
+                const char      *aVendorModel,
+                const char      *aVendorSwVersion,
+                const char      *aVendorData,
                 otJoinerCallback aCallback,
-                void *           aContext);
+                void            *aContext);
 
     /**
      * This method stops the Joiner service.
@@ -184,7 +185,7 @@ private:
     static constexpr uint16_t kJoinerUdpPort = OPENTHREAD_CONFIG_JOINER_UDP_PORT;
 
     static constexpr uint32_t kConfigExtAddressDelay = 100;  // in msec.
-    static constexpr uint32_t kReponseTimeout        = 4000; ///< Max wait time to receive response (in msec).
+    static constexpr uint32_t kResponseTimeout       = 4000; ///< Max wait time to receive response (in msec).
 
     struct JoinerRouter
     {
@@ -201,8 +202,8 @@ private:
     static void HandleSecureCoapClientConnect(bool aConnected, void *aContext);
     void        HandleSecureCoapClientConnect(bool aConnected);
 
-    static void HandleJoinerFinalizeResponse(void *               aContext,
-                                             otMessage *          aMessage,
+    static void HandleJoinerFinalizeResponse(void                *aContext,
+                                             otMessage           *aMessage,
                                              const otMessageInfo *aMessageInfo,
                                              Error                aResult);
     void HandleJoinerFinalizeResponse(Coap::Message *aMessage, const Ip6::MessageInfo *aMessageInfo, Error aResult);
@@ -239,8 +240,7 @@ private:
 
     State mState;
 
-    otJoinerCallback mCallback;
-    void *           mContext;
+    Callback<otJoinerCallback> mCallback;
 
     JoinerRouter mJoinerRouters[OPENTHREAD_CONFIG_JOINER_MAX_CANDIDATES];
     uint16_t     mJoinerRouterIndex;

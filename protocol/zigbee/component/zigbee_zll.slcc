@@ -61,25 +61,25 @@ template_contribution:
   - name: zigbee_stack_callback
     value:
       callback_type: zll_touch_link_target
-      function_name: emAfZllTouchLinkTargetCallback
+      function_name: sli_zigbee_af_zll_touch_link_target_callback
     condition:  
        - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: zll_address_assignment
-      function_name: emAfZllAddressAssignmentCallback
+      function_name: sli_zigbee_af_zll_address_assignment_callback
     condition:  
        - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: zll_scan_complete
-      function_name: emAfZllScanCompleteCallback
+      function_name: sli_zigbee_af_zll_scan_complete_callback
     condition:  
        - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: zll_network_found
-      function_name: emAfZllNetworkFoundCallback
+      function_name: sli_zigbee_af_zll_network_found_callback
     condition:  
        - zigbee_ncp
 

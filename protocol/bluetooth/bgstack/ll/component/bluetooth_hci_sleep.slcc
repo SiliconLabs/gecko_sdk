@@ -3,7 +3,7 @@ label: HCI Sleep Component
 package: Bluetooth
 description: Vendor-specific sleep command puts device into EM2, otherwise device will enter EM1 when possible
 
-category: Bluetooth|Controller
+category: Bluetooth|Host Controller Interface (HCI)
 quality: production
 root_path: protocol/bluetooth/bgstack/ll/utils/sleep
 source:
@@ -31,3 +31,8 @@ template_contribution:
       include: sl_btctrl_hci_sleep.h
       handler: sl_btctrl_hci_sleep_sleep
     priority: 1
+  - name: power_manager_handler
+    value:
+      event: is_ok_to_sleep
+      include: sl_btctrl_hci_sleep.h
+      handler: sl_btctrl_hci_sleep_is_ok_to_sleep

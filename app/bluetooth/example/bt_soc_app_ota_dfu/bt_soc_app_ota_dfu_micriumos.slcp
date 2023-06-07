@@ -40,7 +40,7 @@ component:
     instance:
       - vcom
   - id: mpu
-  - id: simple_timer_micriumos
+  - id: app_timer_micriumos
   - id: bt_post_build
 
 source:

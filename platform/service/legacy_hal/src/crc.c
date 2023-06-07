@@ -25,11 +25,6 @@
  *     initial remainder should be 0xFFFF
  */
 
-//[[
-// This CRC seems to take about the same amount of time as the table driven CRC
-// which was timed at 34 cycles on the mega128 (8.5us @4MHz) and it utilizes
-// much less flash.
-//]]
 uint16_t halCommonCrc16(uint8_t newByte, uint16_t prevResult)
 {
   prevResult = ((uint16_t) (prevResult >> 8)) | ((uint16_t) (prevResult << 8));
@@ -37,11 +32,6 @@ uint16_t halCommonCrc16(uint8_t newByte, uint16_t prevResult)
   prevResult ^= (prevResult & 0xff) >> 4;
   prevResult ^= (uint16_t) (((uint16_t) (prevResult << 8)) << 4);
 
-  //[[ What I wanted is the following function:
-  // prevResult ^= ((prevResult & 0xff) << 4) << 1;
-  // Unfortunately the compiler does this in 46 cycles.  The next line of code
-  // does the same thing, but the compiler uses only 10 cycles to implement it.
-  //]]
   prevResult ^= ((uint8_t) (((uint8_t) (prevResult & 0xff)) << 5))
                 | ((uint16_t) ((uint16_t) ((uint8_t) (((uint8_t) (prevResult & 0xff)) >> 3)) << 8));
 

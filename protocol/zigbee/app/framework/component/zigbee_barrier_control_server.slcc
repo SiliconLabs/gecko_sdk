@@ -35,7 +35,7 @@ template_contribution:
     value:
       group: barrier-control-server
       name: status
-      handler: emAfPluginBarrierControlServerStatusCommand
+      handler: sli_zigbee_af_barrier_control_server_status_command
       help: Prints out the status of the Barrier Control server cluster implementation.
       argument:
       - type: uint8
@@ -44,7 +44,7 @@ template_contribution:
     value:
       group: barrier-control-server
       name: open
-      handler: emAfPluginBarrierControlServerOpenOrCloseCommand
+      handler: sli_zigbee_af_barrier_control_server_open_or_close_command
       help: Notifies the component that the barrier has been opened manually.
       argument:
       - type: uint8
@@ -53,7 +53,7 @@ template_contribution:
     value:
       group: barrier-control-server
       name: close
-      handler: emAfPluginBarrierControlServerOpenOrCloseCommand
+      handler: sli_zigbee_af_barrier_control_server_open_or_close_command
       help: Notifies the component that the barrier has been closed manually.
       argument:
       - type: uint8
@@ -62,7 +62,7 @@ template_contribution:
     value:
       group: barrier-control-server
       name: remote-lockout
-      handler: emAfPluginBarrierControlServerSafetyStatusCommand
+      handler: sli_zigbee_af_barrier_control_server_safety_status_command
       help: Simulates or clears a remote lockout event on the barrier (i.e., sets or clears the RemoteLockout bit in the SafetyStatus attribute).
       argument:
       - type: uint8
@@ -73,7 +73,7 @@ template_contribution:
     value:
       group: barrier-control-server
       name: tamper-detected
-      handler: emAfPluginBarrierControlServerSafetyStatusCommand
+      handler: sli_zigbee_af_barrier_control_server_safety_status_command
       help: Simulates or clears a tamper-detected event on the barrier (i.e., sets or clears the TamperDetected bit in the SafetyStatus attribute).
       argument:
       - type: uint8
@@ -84,7 +84,7 @@ template_contribution:
     value:
       group: barrier-control-server
       name: failed-communication
-      handler: emAfPluginBarrierControlServerSafetyStatusCommand
+      handler: sli_zigbee_af_barrier_control_server_safety_status_command
       help: Simulates or clears a failed communication event on the barrier (i.e., sets or clears the FailedCommunication bit in the SafetyStatus attribute).
       argument:
       - type: uint8
@@ -95,7 +95,7 @@ template_contribution:
     value:
       group: barrier-control-server
       name: position-failure
-      handler: emAfPluginBarrierControlServerSafetyStatusCommand
+      handler: sli_zigbee_af_barrier_control_server_safety_status_command
       help: Simulates or clears a position failure event on the barrier (i.e., sets or clears the PositionFailure bit in the SafetyStatus attribute).
       argument:
       - type: uint8

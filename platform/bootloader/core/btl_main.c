@@ -566,7 +566,8 @@ static void btl_getPeripheralList(uint32_t *ppusatd0, uint32_t *ppusatd1)
   *ppusatd0 |= SMU_PPUSATD0_MSC;
   *ppusatd0 |= SMU_PPUSATD0_CMU;
   *ppusatd0 |= SMU_PPUSATD0_HFRCO0;
-#if !defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5) || !defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)
   *ppusatd0 |= SMU_PPUSATD0_GPIO;
 #endif
   *ppusatd0 |= SMU_PPUSATD0_GPCRC;

@@ -1,0 +1,42 @@
+id: nn_mvp
+label: MVP NN
+package: platform
+description: >
+  This component provides MVP accelerated NN (neural network) kernels.
+  The API of this component is marked as internal, and is used to implement
+  acceleration for TensorFlow Lite Micro. See the TensorFlow Lite Micro component
+  for Machine Learning APIs.
+category: Platform|Compute
+quality: production
+root_path: platform/compute/nn/mvp
+config_file:
+  - path: config/sl_nn_mvp_config.h
+source:
+  - path: src/sl_mvp_ml_add.c
+  - path: src/sl_mvp_ml_conv2d.c
+  - path: src/sl_mvp_ml_depthwise_conv2d.c
+  - path: src/sl_mvp_ml_fully_connected.c
+  - path: src/sl_mvp_ml_mul.c
+  - path: src/sl_mvp_ml_pooling.c
+  - path: src/sl_mvp_ml_transpose_conv2d.c
+  - path: src/sli_mvp_ml_depthwise_conv2d.cc
+  - path: src/sli_mvp_ml_depthwise_conv2d_opt.c
+include:
+  - path: inc
+    file_list:
+      - path: sl_mvp_ml.h
+      - path: sl_mvp_ml_add.h
+      - path: sl_mvp_ml_conv2d.h
+      - path: sl_mvp_ml_depthwise_conv2d.h
+      - path: sl_mvp_ml_fully_connected.h
+      - path: sl_mvp_ml_mul.h
+      - path: sl_mvp_ml_pooling.h
+      - path: sl_mvp_ml_transpose_conv2d.h
+provides:
+  - name: nn_mvp
+requires:
+  - name: driver_mvp
+  - name: math_mvp
+  - name: emlib_common
+  - name: status
+  - name: device_has_mvp

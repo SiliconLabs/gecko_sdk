@@ -35,6 +35,10 @@
 #include <stdbool.h>
 #include "sl_assert.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #if !defined(__STATIC_INLINE)
 #if !defined(__unix__) && defined(__arm__)
 /* Compiler agnostic definitions */
@@ -45,10 +49,6 @@
 #warning Please provide a macro for your compiler and architecture
 #define __STATIC_INLINE static
 #endif
-#endif
-
-#ifdef __cplusplus
-extern "C" {
 #endif
 
 /***************************************************************************//**
@@ -65,7 +65,7 @@ extern "C" {
  * Therefore, macros such as @ref SL_ALIGN are provided to enable compiler independent
  * code.
  *
- * @note RAM code macros are implemented in [RAMFUNC](../../emlib/api).
+ * @note RAM code macros are implemented in [RAMFUNC](/gecko-platform/<docspace-docleaf-version>/emlib-efm32g/).
  * Cross-compiler RAM code support needs extended documentation and it is therefore
  * implemented as a separate module.
  *
@@ -209,7 +209,7 @@ extern "C" {
   _Pragma("GCC diagnostic pop")
 #else
   #define SL_IGNORE_TYPE_LIMIT_BEGIN
-  #define SL_IGNORE_TYPE_LIMIT_END
+  #define SL_IGNORE_TYPE_LIMIT_END         ///< A MACRO to notify the compiler, limit END.
 #endif
 
 #endif // !defined(__GNUC__)

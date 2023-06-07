@@ -20,12 +20,12 @@
 #    misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-from typing import Optional
+from typing import Callable, Dict, Iterable, List, Optional, Tuple
 
 import btmesh.util
+from btmesh.prov import UnprovDeviceBeacon
 
 from ..btmesh import app_btmesh
-from ..cfg import app_cfg
 from ..ui import app_ui
 from ..util.argparsex import ArgumentParserExt
 from .cmd import BtmeshCmd
@@ -49,8 +49,9 @@ class BtmeshScanCmd(BtmeshCmd):
         )
         self.scan_parser.add_argument(
             "--time",
+            "-t",
             type=float,
-            default=2.0,
+            default=1.0,
             help="Scan duration in seconds (type: %(type)s, default: %(default)s).",
         )
         return self.scan_parser
@@ -61,47 +62,52 @@ class BtmeshScanCmd(BtmeshCmd):
         self.scan_show_stats(beacon_stats)
         return False
 
-    def scan(self, show_beacons=False, max_time=2.0):
+    def scan(self, show_beacons=False, max_time=2.0) -> List[UnprovDeviceBeacon]:
         # Parse the string arguments into pargs variable (parsed args)
         app_ui.info("Scanning for unprovisioned nodes...")
-        beacon_stats = set()
+        beacon_stats: Dict[Tuple, UnprovDeviceBeacon] = {}
         for beacon in app_btmesh.prov.scan_unprov_beacons_gen(max_time):
             beacon_static_data = (
                 beacon.uuid,
                 beacon.bearer,
-                beacon.address,
-                beacon.address_type,
+                beacon.bd_addr,
+                beacon.bd_addr_type,
             )
-            beacon_stats.add(beacon_static_data)
+            if beacon_static_data in beacon_stats:
+                if beacon_stats[beacon_static_data].rssi < beacon.rssi:
+                    beacon_stats[beacon_static_data] = beacon
+            else:
+                beacon_stats[beacon_static_data] = beacon
+            bearer_str = f"{beacon.bearer.pretty_name},"
+            bd_addr_type_str = beacon.bd_addr_type.to_pretty_name(
+                prettifier=str.capitalize
+            )
             if show_beacons:
                 ui_beacon_list = [
-                    "uuid=" + beacon.uuid.hex(),
-                    "bearer=" + btmesh.util.unprov_beacon_bearer_str(beacon.bearer),
-                    "address=" + beacon.address,
-                    "address_type=" + btmesh.util.bd_addr_type_str(beacon.address_type),
-                    "rssi=" + str(beacon.rssi),
+                    f"uuid={beacon.uuid.hex()},",
+                    f"bearer={bearer_str:<8}",
+                    f"address={beacon.bd_addr},",
+                    f"address_type={bd_addr_type_str},",
+                    f"rssi={beacon.rssi}",
                 ]
                 app_ui.info("Unprovisioned beacon: " + " ".join(ui_beacon_list))
-        stats = [
-            {
-                "uuid": b[0],
-                "bearer": b[1],
-                "address": b[2],
-                "address_type": b[3],
-            }
-            for b in beacon_stats
-        ]
-        stats = sorted(stats, key=lambda bs_elem: bs_elem["uuid"])
+        stats = list(beacon_stats.values())
+        stats = sorted(stats, key=lambda beacon: beacon.uuid)
         return stats
 
-    def scan_show_stats(self, beacon_stats):
+    def scan_show_stats(
+        self,
+        beacon_stats: Iterable[UnprovDeviceBeacon],
+    ) -> None:
         beacon_stat_list = [
             {
                 "idx": str(idx),
-                "uuid": bs["uuid"].hex(),
-                "bearer": btmesh.util.unprov_beacon_bearer_str(bs["bearer"]),
-                "address": bs["address"],
-                "address_type": btmesh.util.bd_addr_type_str(bs["address_type"]),
+                "uuid": bs.uuid.hex(),
+                "bearer": bs.bearer.pretty_name,
+                "address": bs.bd_addr,
+                "address_type": bs.bd_addr_type.to_pretty_name(
+                    prettifier=str.capitalize
+                ),
             }
             for idx, bs in enumerate(beacon_stats)
         ]
@@ -118,5 +124,6 @@ class BtmeshScanCmd(BtmeshCmd):
                     "address_type": "Address Type",
                 },
             )
+
 
 scan_cmd = BtmeshScanCmd()

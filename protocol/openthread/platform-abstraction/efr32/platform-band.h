@@ -76,6 +76,8 @@ typedef struct efr32RadioCounters
     uint32_t mRailEventsSchedulerStatusTransmitBusy;
     uint32_t mRailEventsSchedulerStatusLastStatus;
     uint32_t mRailEventsEnhAckTxFailed;
+    uint32_t mRailEventsScheduledTxTriggeredCount;
+    uint32_t mRailEventsScheduledTxStartedCount;
 } efr32RadioCounters;
 
 

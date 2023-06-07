@@ -20,21 +20,14 @@
 #include "app/framework/include/af.h"
 #include "update-tc-link-key.h"
 
-#ifdef UC_BUILD
 #include "update-tc-link-key-config.h"
-#endif // UC_BUILD
 
 #include "app/framework/plugin/network-steering/network-steering-internal.h"
 
 static bool inRequest = false;
 
-#ifdef UC_BUILD
 sl_zigbee_event_t emberAfPluginUpdateTcLinkKeyBeginTcLinkKeyUpdateEvent;
 #define beginTcLinkKeyUpdateEvent (&emberAfPluginUpdateTcLinkKeyBeginTcLinkKeyUpdateEvent)
-#else
-EmberEventControl emberAfPluginUpdateTcLinkKeyBeginTcLinkKeyUpdateEventControl;
-#define beginTcLinkKeyUpdateEvent (emberAfPluginUpdateTcLinkKeyBeginTcLinkKeyUpdateEventControl)
-#endif // UC_BUILD
 
 // Setting the default timer to a day.
 static uint32_t LinkKeyUpdateTimerMilliseconds = MILLISECOND_TICKS_PER_DAY;
@@ -63,12 +56,12 @@ bool emberAfPluginUpdateTcLinkKeyStop(void)
 
 void emberAfPluginUpdateTcLinkKeySetDelay(uint32_t delayMs)
 {
-  slxu_zigbee_event_set_delay_ms(beginTcLinkKeyUpdateEvent, delayMs);
+  sl_zigbee_event_set_delay_ms(beginTcLinkKeyUpdateEvent, delayMs);
 }
 
 void emberAfPluginUpdateTcLinkKeySetInactive(void)
 {
-  slxu_zigbee_event_set_inactive(beginTcLinkKeyUpdateEvent);
+  sl_zigbee_event_set_inactive(beginTcLinkKeyUpdateEvent);
 }
 
 void emberAfPluginUpdateTcLinkKeyZigbeeKeyEstablishmentCallback(EmberEUI64 partner,
@@ -109,10 +102,10 @@ void emberAfPluginUpdateTcLinkKeyZigbeeKeyEstablishmentCallback(EmberEUI64 partn
 // Other applications may choose to regularly update their TC link key for
 // security reasons.
 
-void emberAfPluginUpdateTcLinkKeyBeginTcLinkKeyUpdateEventHandler(SLXU_UC_EVENT)
+void emberAfPluginUpdateTcLinkKeyBeginTcLinkKeyUpdateEventHandler(sl_zigbee_event_t * event)
 {
   if (!inRequest) {
-    slxu_zigbee_event_set_inactive(beginTcLinkKeyUpdateEvent);
+    sl_zigbee_event_set_inactive(beginTcLinkKeyUpdateEvent);
 
     EmberStatus status = emberAfPluginUpdateTcLinkKeyStart();
     emberAfCorePrintln("%p: %p: 0x%X",
@@ -124,9 +117,9 @@ void emberAfPluginUpdateTcLinkKeyBeginTcLinkKeyUpdateEventHandler(SLXU_UC_EVENT)
       // Else, this might be one of the periodic link key updates that does not
       // require that the node leave the network. This will be retried in the
       // next attempt to update TCLK
-      if ( emAfPluginNetworkSteeringStateUpdateTclk() ) {
+      if ( sli_zigbee_af_network_steering_state_update_tclk() ) {
         emberLeaveNetwork();
-        emAfPluginNetworkSteeringCleanup(status);
+        sli_zigbee_af_network_steering_cleanup(status);
       }
     }
   }
@@ -138,10 +131,10 @@ void emberAfPluginSetTCLinkKeyUpdateTimerMilliSeconds(uint32_t timeInMillisecond
   LinkKeyUpdateTimerMilliseconds = timeInMilliseconds;
 }
 
-void emAfPluginUpdateTcLinkKeyBeginTcLinkKeyUpdateInit(SLXU_INIT_ARG)
+void sli_zigbee_af_update_tc_link_key_begin_tc_link_key_update_init(uint8_t init_level)
 {
-  SLXU_INIT_UNUSED_ARG;
+  (void)init_level;
 
-  slxu_zigbee_event_init(beginTcLinkKeyUpdateEvent,
-                         emberAfPluginUpdateTcLinkKeyBeginTcLinkKeyUpdateEventHandler);
+  sl_zigbee_event_init(beginTcLinkKeyUpdateEvent,
+                       emberAfPluginUpdateTcLinkKeyBeginTcLinkKeyUpdateEventHandler);
 }

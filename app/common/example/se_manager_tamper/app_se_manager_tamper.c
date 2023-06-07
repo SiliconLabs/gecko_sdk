@@ -24,6 +24,8 @@
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
 
+#define SE_VERSION_MASK (0x00FFFFFF)
+
 // -----------------------------------------------------------------------------
 //                          Static Function Declarations
 // -----------------------------------------------------------------------------
@@ -38,11 +40,20 @@
 /// Command context
 static sl_se_command_context_t cmd_ctx;
 
+/// Host or SE firmware version
+static uint32_t version;
+
 /// Tamper interrupt status
 static bool tamper_int_status;
 
 /// Reset cause buffer
 static uint32_t rst_cause_buf;
+
+/// Reset cause flag
+static bool was_tamper_rst;
+
+/// Tamper reset cause buffer
+static uint32_t tmp_rst_cause_buf;
 
 /// SE status buffer
 static sl_se_status_t se_status_buf;
@@ -93,6 +104,14 @@ uint32_t * get_rst_cause_buf_ptr(void)
 }
 
 /***************************************************************************//**
+ * Get tamper reset cause buffer pointer.
+ ******************************************************************************/
+uint32_t * get_tmp_rst_cause_buf_ptr(void)
+{
+  return(&tmp_rst_cause_buf);
+}
+
+/***************************************************************************//**
  * Get SE status buffer pointer.
  ******************************************************************************/
 sl_se_status_t * get_se_status_buf_ptr(void)
@@ -106,6 +125,22 @@ sl_se_status_t * get_se_status_buf_ptr(void)
 sl_se_otp_init_t * get_se_otp_conf_buf_ptr(void)
 {
   return(&se_otp_conf_buf);
+}
+
+/***************************************************************************//**
+ * Get version data.
+ ******************************************************************************/
+uint32_t get_version(void)
+{
+  return(version & SE_VERSION_MASK);
+}
+
+/***************************************************************************//**
+ * Get flag for if reset cause was tamper.
+ ******************************************************************************/
+bool get_was_tamper_reset(void)
+{
+  return(was_tamper_rst);
 }
 
 /***************************************************************************//**
@@ -150,6 +185,15 @@ void init_tamper_prs(void)
                       offsetof(PRS_TypeDef, CONSUMER_SE_TAMPERSRC4));
   PRS_ConnectConsumer(SW_RST_TAMPER_PRS_CH, prsTypeAsync,
                       offsetof(PRS_TypeDef, CONSUMER_SE_TAMPERSRC5));
+#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)
+  PRS_ConnectConsumer(TAMPER_INT_PRS_CH, prsTypeAsync,
+                      offsetof(PRS_TypeDef, CONSUMER_SETAMPER_TAMPERSRC27));
+  PRS_ConnectConsumer(TAMPER_CNT_PRS_CH, prsTypeAsync,
+                      offsetof(PRS_TypeDef, CONSUMER_SETAMPER_TAMPERSRC28));
+  PRS_ConnectConsumer(HW_RST_TAMPER_PRS_CH, prsTypeAsync,
+                      offsetof(PRS_TypeDef, CONSUMER_SETAMPER_TAMPERSRC30));
+  PRS_ConnectConsumer(SW_RST_TAMPER_PRS_CH, prsTypeAsync,
+                      offsetof(PRS_TypeDef, CONSUMER_SETAMPER_TAMPERSRC31));
 #else
   PRS_ConnectConsumer(TAMPER_INT_PRS_CH, prsTypeAsync,
                       offsetof(PRS_TypeDef, CONSUMER_SETAMPER_TAMPERSRC26));
@@ -179,7 +223,7 @@ sl_status_t deinit_se_manager(void)
 }
 
 /***************************************************************************//**
- * Get EMU->RSTCAUSE after a tamper reset.
+ * Get EMU->RSTCAUSE after a reset.
  ******************************************************************************/
 sl_status_t get_reset_cause(void)
 {
@@ -193,11 +237,31 @@ sl_status_t get_reset_cause(void)
 }
 
 /***************************************************************************//**
+ * Get Tamper reset cause after a tamper reset.
+ ******************************************************************************/
+sl_status_t get_tamper_reset_cause(void)
+{
+#if defined (SLI_SE_COMMAND_READ_TAMPER_RESET_CAUSE_AVAILABLE)
+  print_error_cycle(sl_se_get_tamper_reset_cause(&cmd_ctx, &was_tamper_rst, &tmp_rst_cause_buf), &cmd_ctx);
+#else
+  return SL_STATUS_NOT_SUPPORTED;
+#endif
+}
+
+/***************************************************************************//**
  * Get SE status.
  ******************************************************************************/
 sl_status_t get_se_status(void)
 {
   print_error_cycle(sl_se_get_status(&cmd_ctx, &se_status_buf), &cmd_ctx);
+}
+
+/***************************************************************************//**
+ * Get the SE firmware version.
+ ******************************************************************************/
+sl_status_t get_se_version(void)
+{
+  print_error_cycle(sl_se_get_se_version(&cmd_ctx, &version), &cmd_ctx);
 }
 
 /***************************************************************************//**

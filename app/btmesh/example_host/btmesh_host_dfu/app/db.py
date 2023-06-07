@@ -353,14 +353,13 @@ class BtmeshDfuAppDatabase(StateDictObject):
             fwid_bytes = StateDictObject.to_bytes(raw_fwid)
             metadata = StateDictObject.to_bytes(raw_metadata)
             self.fwid_metadata_cache[fwid_bytes] = metadata
-        self.btmesh_db.set_event_emitter(app_btmesh.emit_local_event)
 
     def clear(self):
         self.btmesh_db.clear()
         self.app_groups.clear()
         self.fwid_metadata_cache.clear()
         db_clr_event = BtmeshDfuAppDbClearedEvent()
-        app_btmesh.emit_local_event(db_clr_event)
+        app_btmesh.core.emit_local_event(db_clr_event)
 
     def save(self, path=None):
         if path is None:

@@ -42,13 +42,6 @@ extern "C"
 {
 #endif
 
-/***************************************************************************/ /**
- * @addtogroup cpc_system_common
- * @brief CPC System Endpoint Common
- * @details
- * @{
- ******************************************************************************/
-
 /***************************************************************************//**
  * System endpoint property id enum
  *
@@ -69,7 +62,8 @@ SL_ENUM_GENERIC(sli_cpc_property_id_t, uint32_t)
   PROP_SECONDARY_APP_VERSION  = 0x04,
   PROP_RX_CAPABILITY          = 0x20,
   PROP_FC_VALIDATION_VALUE    = 0x30,
-  PROP_BUS_SPEED_VALUE        = 0x40,
+  PROP_BUS_BITRATE_VALUE      = 0x40,
+  PROP_BUS_MAX_BITRATE_VALUE  = 0x50,
   PROP_BOOTLOADER_INFO        = 0x200,
   PROP_BOOTLOADER_REBOOT_MODE = 0x202,
   PROP_SECURITY_STATE         = 0x301,
@@ -468,8 +462,6 @@ typedef struct {
   sli_cpc_property_id_t property_id;        ///< Identifier of the property.
   uint8_t payload[];                        ///< Property value.
 } sli_cpc_system_property_cmd_t;
-
-/** @} (end addtogroup cpc_system_common) */
 
 #ifdef __cplusplus
 }

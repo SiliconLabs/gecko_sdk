@@ -2,31 +2,31 @@
 
 #include PLATFORM_HEADER
 #include "stack/include/ember-types.h"
-#include "event_control/event.h"
+#include "event_queue/event-queue.h"
 
-EmberEventControl emberAfPluginButtonInterfaceButton0PressedEventControl;
-EmberEventControl emberAfPluginButtonInterfaceButton0ReleasedEventControl;
-EmberEventControl emberAfPluginButtonInterfaceButton1PressedEventControl;
-EmberEventControl emberAfPluginButtonInterfaceButton1ReleasedEventControl;
-EmberEventControl emberAfPluginButtonInterfaceButtonTimeoutEventControl;
+EmberEvent emberAfPluginButtonInterfaceButton0PressedEvent;
+EmberEvent emberAfPluginButtonInterfaceButton0ReleasedEvent;
+EmberEvent emberAfPluginButtonInterfaceButton1PressedEvent;
+EmberEvent emberAfPluginButtonInterfaceButton1ReleasedEvent;
+EmberEvent emberAfPluginButtonInterfaceButtonTimeoutEvent;
 
-void emberAfPluginButtonInterfaceButtonTimeoutEventHandler(void)
+void emberAfPluginButtonInterfaceButtonTimeoutEventHandler(EmberEvent* event)
 {
 }
 
-void emberAfPluginButtonInterfaceButton0PressedEventHandler(void)
+void emberAfPluginButtonInterfaceButton0PressedEventHandler(EmberEvent* event)
 {
 }
 
-void emberAfPluginButtonInterfaceButton0ReleasedEventHandler(void)
+void emberAfPluginButtonInterfaceButton0ReleasedEventHandler(EmberEvent* event)
 {
 }
 
-void emberAfPluginButtonInterfaceButton1PressedEventHandler(void)
+void emberAfPluginButtonInterfaceButton1PressedEventHandler(EmberEvent* event)
 {
 }
 
-void emberAfPluginButtonInterfaceButton1ReleasedEventHandler(void)
+void emberAfPluginButtonInterfaceButton1ReleasedEventHandler(EmberEvent* event)
 {
 }
 

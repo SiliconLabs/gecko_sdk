@@ -22,17 +22,13 @@
 #include "app/framework/plugin/events-server/events-server.h"
 #include "gpf-structured-data.h"
 
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #include "gas-proxy-function-config.h"
 // Needed because we reference EMBER_AF_PLUGIN_METER_MIRROR_MAX_MIRRORS
 #include "meter-mirror-config.h"
 #include "zap-cluster-command-parser.h"
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_GBCS_COMPATIBILITY
-#define SL_CATALOG_ZIGBEE_GBCS_COMPATIBILITY_PRESENT
-#endif
-#endif // UC_BUILD
 
 /**
  * This file adds support for the GPF Structured Data Items as defined in the
@@ -272,33 +268,17 @@ static GpfStructuredData structuredData[EMBER_AF_PLUGIN_METER_MIRROR_MAX_MIRRORS
 // aid and can be removed if desired.
 static uint8_t logCatchupsInProgress = 0;
 
-#ifdef UC_BUILD
-
 // Event used to handle work when GetNotifiedMessage is received in response
 // to notification flags being set when catchup is started on any of the logs.
 extern sl_zigbee_event_t emberAfPluginGasProxyFunctionCatchupEvent;
 #define gasProxyFunctionCatchupEventControl (&emberAfPluginGasProxyFunctionCatchupEvent)
-void emberAfPluginGasProxyFunctionCatchupEventHandler(SLXU_UC_EVENT);
+void emberAfPluginGasProxyFunctionCatchupEventHandler(sl_zigbee_event_t * event);
 // The GPF uses this event to check on its logs that need to updated every
 // so often. These logs are the Profile Data Log, the Daily Gas Consumption Log,
 // the Daily Read Log, and the Prepayment Daily Read Log.
 // See EMAPPFWKV2-1333 and section 10.4.2.8 in v0.8.1.
 extern sl_zigbee_event_t emberAfPluginGasProxyFunctionGsmeSyncEndpointEvents[];
 #define endpointEvent emberAfPluginGasProxyFunctionGsmeSyncEndpointEvents
-#else // !UC_BUILD
-
-// Event used to handle work when GetNotifiedMessage is received in response
-// to notification flags being set when catchup is started on any of the logs.
-EmberEventControl emberAfPluginGasProxyFunctionCatchupEventControl;
-#define gasProxyFunctionCatchupEventControl (emberAfPluginGasProxyFunctionCatchupEventControl)
-// The GPF uses this event to check on its logs that need to updated every
-// so often. These logs are the Profile Data Log, the Daily Gas Consumption Log,
-// the Daily Read Log, and the Prepayment Daily Read Log.
-// See EMAPPFWKV2-1333 and section 10.4.2.8 in v0.8.1.
-extern EmberEventControl emberAfPluginGasProxyFunctionGsmeSyncEndpointEventControls[];
-#define endpointEvent emberAfPluginGasProxyFunctionGsmeSyncEndpointEventControls
-
-#endif // UC_BUILD
 
 //------------------------------------------------------------------------------
 // Storage for the various logs making up the structured data.
@@ -1275,7 +1255,7 @@ static void decrementLogCatchupsInProgress(void)
   }
 }
 
-void emAfPrintLogCatchupsInProgress(void)
+void sli_zigbee_af_print_log_catchups_in_progress(void)
 {
   emberAfPluginGasProxyFunctionPrintln("GPF: Log catch-ups %d", logCatchupsInProgress);
 }
@@ -2191,9 +2171,9 @@ void emberAfPluginMeterMirrorMirrorAddedCallback(const EmberEUI64 requestingDevi
 
   // Set an event to make sure we keep our logs up to date with
   // our new GSME buddy at least every half hour (see 10.4.2.8 in v0.8.1).
-  slxu_zigbee_endpoint_event_set_delay_ms(endpointEvent,
-                                          endpoint,
-                                          SECONDS_IN_HALF_HOUR * MILLISECOND_TICKS_PER_SECOND);
+  sl_zigbee_endpoint_event_set_delay_ms(endpointEvent,
+                                        endpoint,
+                                        SECONDS_IN_HALF_HOUR * MILLISECOND_TICKS_PER_SECOND);
 }
 
 /** @brief Mirror Removed
@@ -2222,8 +2202,8 @@ void emberAfPluginMeterMirrorMirrorRemovedCallback(const EmberEUI64 requestingDe
   emberAfPluginGasProxyFunctionPrintln("GPF: Structured Data removed on endpoint 0x%x", endpoint);
 
   // We don't care about this GSME checking in anymore.
-  slxu_zigbee_endpoint_event_set_inactive(endpointEvent,
-                                          endpoint);
+  sl_zigbee_endpoint_event_set_inactive(endpointEvent,
+                                        endpoint);
 }
 
 /** @brief Reporting Complete
@@ -2358,7 +2338,6 @@ void emberAfPluginMeterMirrorReportingCompleteCallback(uint8_t endpoint)
  * @param numberOfSamples   Ver.: always
  * @param samples   Ver.: always
  */
-#ifdef UC_BUILD
 bool emberAfSimpleMeteringClusterGetSampledDataResponseCallback(EmberAfClusterCommand *cmd)
 {
   sl_zcl_simple_metering_cluster_get_sampled_data_response_command_t cmd_data;
@@ -2485,126 +2464,6 @@ bool emberAfSimpleMeteringClusterGetSampledDataResponseCallback(EmberAfClusterCo
   emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
   return true;
 }
-#else   // !UC_BUILD
-bool emberAfSimpleMeteringClusterGetSampledDataResponseCallback(uint16_t sampleId,
-                                                                uint32_t sampleStartTime,
-                                                                uint8_t sampleType,
-                                                                uint16_t sampleRequestInterval,
-                                                                uint16_t numberOfSamples,
-                                                                uint8_t* samples)
-{
-  uint8_t endpoint = emberAfCurrentEndpoint();
-  uint8_t i = findStructuredData(endpoint);
-  GpfSampleLog *sampleLog;
-  GpfSampleLog *otherSampleLog;
-  uint16_t samplesLength = fieldLength(samples);
-  uint16_t samplesIndex = 0;
-  uint32_t sample;
-  uint32_t sampleTime = sampleStartTime;
-  EmberAfStatus status;
-  uint8_t currentSummationDelivered[] = { 0, 0, 0, 0, 0, 0 };
-  uint32_t currentSummation;
-
-  emberAfPluginGasProxyFunctionPrintln("GPF: GetSampledDataResponse 0x%2x 0x%4x 0x%x 0x%2x 0x%2x 0x%2x",
-                                       sampleId,
-                                       sampleStartTime,
-                                       sampleType,
-                                       sampleRequestInterval,
-                                       numberOfSamples,
-                                       samplesLength);
-
-  if (i == GPF_INVALID_LOG_INDEX) {
-    return false;
-  }
-
-  if (sampleType != EMBER_ZCL_SAMPLE_TYPE_CONSUMPTION_DELIVERED) {
-    emberAfPluginGasProxyFunctionPrintln("GPF: WARN: GetSampledDataResponse command received with invalid sampleType: 0x%x", sampleType);
-    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_INVALID_FIELD);
-    return true;
-  }
-
-  if (sampleId == GPF_DAILY_CONSUMPTION_LOG_SAMPLE_ID) {
-    emberAfPluginGasProxyFunctionPrintln("GPF: Receive Daily Consumption Log");
-    sampleLog = &structuredData[i].dailyConsumptionLog;
-    otherSampleLog = &structuredData[i].profileDataLog;
-  } else if (sampleId == GPF_PROFILE_DATA_LOG_SAMPLE_ID) {
-    emberAfPluginGasProxyFunctionPrintln("GPF: Receive Profile Data Log");
-    sampleLog = &structuredData[i].profileDataLog;
-    otherSampleLog = &structuredData[i].dailyConsumptionLog;
-  } else {
-    emberAfPluginGasProxyFunctionPrintln("GPF: WARN: GetSampledDataResponse command received with invalid sampleId: 0x%2x", sampleId);
-    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_INVALID_FIELD);
-    return true;
-  }
-
-  // The only times we should receive a GetSampledDataResponse are
-  // the following:
-  //   1) After a node restart where we send a GetSampledData request to obtain
-  //      any data that may have been missed while this node was out of service.
-  //   2) After we know that we are missing GSME Profile Data Log entries, and
-  //      we send a GetSampledData to retrieve those entries.
-  // These are both examples of a "catchup."
-  // As such we will ignore any commands that we were not expecting.
-  if (!sampleLog->catchup || emberAfCurrentCommand()->seqNum != sampleLog->catchupSequenceNumber) {
-    emberAfPluginGasProxyFunctionPrintln("GPF: WARN: ignoring unexpected GetSampledDataResponse command");
-    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
-    return true;
-  }
-
-  // Don't overwrite our start time if we have already been receiving samples
-  // from the GSME.
-  if (sampleLog->numberOfEntries == 0) {
-    sampleLog->startTime = sampleTime;
-  }
-
-  sampleLog->sampleInterval = sampleRequestInterval;
-  while (samplesIndex < samplesLength) {
-    sample = emberAfGetInt24u(samples, samplesIndex, samplesLength);
-    samplesIndex += 3;
-    sampleTime = ((sampleId == GPF_PROFILE_DATA_LOG_SAMPLE_ID)
-                  ? NEXT_HALF_HOUR(sampleTime) : NEXT_MIDNIGHT(sampleTime));
-    receiveSampleData(sampleTime, sample, sampleLog);
-  }
-
-  // now that we are caught up we need to set the prev summation value so that
-  // the next time the device reports consumption we can calculate the sample
-  // correctly.  For the profile log it is easy, we just use the current
-  // summation attribute which represents the last time it was reported. For
-  // the daily consumption log it is a little more difficult. To set the prev
-  // summation we need to start with the current summation then using the profile
-  // log subtract the incremental values back to the beginning of the day.
-  status = emberAfReadServerAttribute(endpoint,
-                                      ZCL_SIMPLE_METERING_CLUSTER_ID,
-                                      ZCL_CURRENT_SUMMATION_DELIVERED_ATTRIBUTE_ID,
-                                      currentSummationDelivered,
-                                      6);
-  if (status != EMBER_ZCL_STATUS_SUCCESS) {
-    emberAfPluginGasProxyFunctionPrintln("GPF: ERR: can't read CurrentSummationDelivered attribute: status 0x%x", status);
-  }
-  // We only care about the least significant 32 bits as the the summation delivered
-  // should not change by more than a 32 bit value between attribute reports.
-#if (BIGENDIAN_CPU)
-  MEMCOPY((uint8_t *)&currentSummation, &currentSummationDelivered[2], 4);
-#else
-  MEMCOPY((uint8_t *)&currentSummation, &currentSummationDelivered[0], 4);
-#endif
-  if (sampleId == GPF_PROFILE_DATA_LOG_SAMPLE_ID) {
-    sampleLog->prevSummation = currentSummation;
-    // in this case sampleLog is the profile data log and otherSamleLog is
-    // the daily consumption log
-    setDailyConsumptionLogPrevSummation(sampleLog, otherSampleLog);
-  } else if (!otherSampleLog->catchup) {
-    // in this case sampleLog is the daily consumption log and otherSampleLog is
-    // the profile data log.
-    setDailyConsumptionLogPrevSummation(otherSampleLog, sampleLog);
-  }
-
-  stopSampleLogCatchup(endpoint, sampleLog, otherSampleLog);
-
-  emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
-  return true;
-}
-#endif  // UC_BUILD
 
 /** @brief Simple Metering Cluster Get Sampled Data
  *
@@ -2613,7 +2472,6 @@ bool emberAfSimpleMeteringClusterGetSampledDataResponseCallback(uint16_t sampleI
  * @param sampleType   Ver.: always
  * @param numberOfSamples   Ver.: always
  */
-#ifdef UC_BUILD
 bool emberAfSimpleMeteringClusterGetSampledDataCallback(EmberAfClusterCommand *cmd)
 {
   sl_zcl_simple_metering_cluster_get_sampled_data_command_t cmd_data;
@@ -2665,55 +2523,6 @@ bool emberAfSimpleMeteringClusterGetSampledDataCallback(EmberAfClusterCommand *c
   return true;
 }
 
-#else // !UC_BUILD
-bool emberAfSimpleMeteringClusterGetSampledDataCallback(uint16_t sampleId,
-                                                        uint32_t earliestSampleTime,
-                                                        uint8_t sampleType,
-                                                        uint16_t numberOfSamples)
-{
-  uint8_t endpoint = emberAfCurrentEndpoint();
-  uint8_t i = findStructuredData(endpoint);
-  GpfSampleLog *sampleLog;
-
-  emberAfPluginGasProxyFunctionPrintln("GPF: GetSampledData 0x%2x 0x%4x 0x%x 0x%2x",
-                                       sampleId,
-                                       earliestSampleTime,
-                                       sampleType,
-                                       numberOfSamples);
-
-  if (i == GPF_INVALID_LOG_INDEX) {
-    return false;
-  }
-
-  if (sampleType != EMBER_ZCL_SAMPLE_TYPE_CONSUMPTION_DELIVERED) {
-    emberAfPluginGasProxyFunctionPrintln("GPF: WARN: GetSampledData command received with invalid sampleType: 0x%x", sampleType);
-    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_NOT_FOUND);
-    return true;
-  }
-
-  if (!emberAfPluginGasProxyFunctionDataLogAccessRequestCallback(emberAfPluginGasProxyFunctionGetCurrentMessage(),
-                                                                 emberAfCurrentCommand())) {
-    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_NOT_AUTHORIZED);
-    return true;
-  }
-
-  if (sampleId == GPF_DAILY_CONSUMPTION_LOG_SAMPLE_ID) {
-    emberAfPluginGasProxyFunctionPrintln("GPF: Publish Daily Consumption Log");
-    sampleLog = &structuredData[i].dailyConsumptionLog;
-  } else if (sampleId == GPF_PROFILE_DATA_LOG_SAMPLE_ID) {
-    emberAfPluginGasProxyFunctionPrintln("GPF: Publish Profile Data Log");
-    sampleLog = &structuredData[i].profileDataLog;
-  } else {
-    emberAfPluginGasProxyFunctionPrintln("GPF: WARN: GetSampledData command received with invalid sampleId: 0x%2x", sampleId);
-    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_NOT_FOUND);
-    return true;
-  }
-
-  sendSampleData(earliestSampleTime, numberOfSamples, sampleLog);
-  return true;
-}
-#endif  // UC_BUILD
-
 /** @brief Simple Metering Cluster Publish Snapshot
  *
  * @param snapshotId   Ver.: always
@@ -2725,7 +2534,6 @@ bool emberAfSimpleMeteringClusterGetSampledDataCallback(uint16_t sampleId,
  * @param snapshotPayloadType   Ver.: always
  * @param snapshotPayload   Ver.: always
  */
-#ifdef UC_BUILD
 bool emberAfSimpleMeteringClusterPublishSnapshotCallback(EmberAfClusterCommand *cmd)
 {
   sl_zcl_simple_metering_cluster_publish_snapshot_command_t cmd_data;
@@ -2831,131 +2639,15 @@ bool emberAfSimpleMeteringClusterPublishSnapshotCallback(EmberAfClusterCommand *
        * Counter Matrix and the GSME Consumption Register in the GSME Billing Data
        * Log.
        */
-      emAfGasProxyFunctionAlert(GBCS_ALERT_BILLING_DATA_LOG_UPDATED,
-                                emberAfCurrentCommand(),
-                                GCS53_MESSAGE_CODE);
+      sli_zigbee_af_gas_proxy_function_alert(GBCS_ALERT_BILLING_DATA_LOG_UPDATED,
+                                             emberAfCurrentCommand(),
+                                             GCS53_MESSAGE_CODE);
     }
   }
 
   emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
   return true;
 }
-#else   // !UC_BUILD
-bool emberAfSimpleMeteringClusterPublishSnapshotCallback(uint32_t snapshotId,
-                                                         uint32_t snapshotTime,
-                                                         uint8_t totalSnapshotsFound,
-                                                         uint8_t commandIndex,
-                                                         uint8_t totalNumberOfCommands,
-                                                         uint32_t snapshotCause,
-                                                         uint8_t snapshotPayloadType,
-                                                         uint8_t* snapshotPayload)
-{
-  uint8_t endpoint = emberAfCurrentEndpoint();
-  uint8_t i = findStructuredData(endpoint);
-  GpfSnapshotLog *snapshotLog;
-  GpfSnapshotLog *otherSnapshotLog;
-  uint32_t now = emberAfGetCurrentTime();
-
-  emberAfPluginGasProxyFunctionPrintln("GPF: PublishSnapshot 0x%4x 0x%4x 0x%x 0x%x 0x%x 0x%4x 0x%x",
-                                       snapshotId,
-                                       snapshotTime,
-                                       totalSnapshotsFound,
-                                       commandIndex,
-                                       totalNumberOfCommands,
-                                       snapshotCause,
-                                       snapshotPayloadType);
-
-  if (i == GPF_INVALID_LOG_INDEX) {
-    return false;
-  }
-
-  // Both the Daily Read Log and Billing Data Log PublishSnapshot commands use
-  // the same snapshotPayloadTypes (referenced below). The types were obtained
-  // by looking at the response in the use case description for GCS16a then
-  // also looking at the description of the billing data log in GBCS v0.8.1
-  // section 10.4.2.4 and comparing it to the description of the daily read log
-  // in the SMETS v1.58 section 4.4.94.
-  // GBCS IRP328 wants to add support for SnapshotPayloadType 4 and 6 i.e
-  // EMBER_ZCL_SNAPSHOT_PAYLOAD_TYPE_TOU_INFORMATION_SET_DELIVERED_REGISTERS_NO_BILLING
-  // and EMBER_ZCL_SNAPSHOT_PAYLOAD_TYPE_BLOCK_TIER_INFORMATION_SET_DELIVERED_NO_BILLING respectively.
-  if (snapshotPayloadType != EMBER_ZCL_SNAPSHOT_PAYLOAD_TYPE_TOU_INFORMATION_SET_DELIVERED_REGISTERS
-      && snapshotPayloadType != EMBER_ZCL_SNAPSHOT_PAYLOAD_TYPE_BLOCK_TIER_INFORMATION_SET_DELIVERED
-      && snapshotPayloadType != EMBER_ZCL_SNAPSHOT_PAYLOAD_TYPE_TOU_INFORMATION_SET_DELIVERED_REGISTERS_NO_BILLING
-      && snapshotPayloadType != EMBER_ZCL_SNAPSHOT_PAYLOAD_TYPE_BLOCK_TIER_INFORMATION_SET_DELIVERED_NO_BILLING) {
-    emberAfPluginGasProxyFunctionPrintln("GPF: WARN: PublishSnapshot command received with unsupported payloadType: 0x%x", snapshotPayloadType);
-    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_INVALID_FIELD);
-    return true;
-  }
-
-  if (snapshotCause == GPF_SNAPSHOT_CAUSE_GENERAL) {
-    emberAfPluginGasProxyFunctionPrintln("GPF: Receive Daily Read Log");
-    snapshotLog = &structuredData[i].dailyReadLog;
-    otherSnapshotLog = &structuredData[i].billingDataLog.snapshot;
-  } else if (snapshotCause
-             & (GPF_SNAPSHOT_CAUSE_END_OF_BILLING_PERIOD
-                | GPF_SNAPSHOT_CAUSE_CHANGE_OF_TARIFF
-                | GPF_SNAPSHOT_CAUSE_CHANGE_OF_SUPPLIER
-                | GPF_SNAPSHOT_CAUSE_CHANGE_OF_PAYMENT_MODE)) {
-    emberAfPluginGasProxyFunctionPrintln("GPF: Receive Billing Data Log - Tariff TOU Register Matrix, the Consumption Register and Tariff Block Counter Matrix");
-    snapshotLog = &structuredData[i].billingDataLog.snapshot;
-    otherSnapshotLog = &structuredData[i].dailyReadLog;
-  } else {
-    emberAfPluginGasProxyFunctionPrintln("GPF: WARN: PublishSnapshot command received with unsupported cause: 0x%4x", snapshotCause);
-    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_INVALID_FIELD);
-    return true;
-  }
-
-  // Ignore any commands that we were not expecting.
-  if (snapshotLog->catchup && emberAfCurrentCommand()->seqNum != snapshotLog->catchupSequenceNumber) {
-    emberAfPluginGasProxyFunctionPrintln("GPF: WARN: ignoring unexpected PublishSnapshot command");
-    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
-    return true;
-  }
-
-  receiveSnapshot(snapshotId, snapshotTime, snapshotCause, snapshotPayloadType, snapshotPayload, snapshotLog);
-
-  if (snapshotLog->catchup) {
-    snapshotLog->catchupSnapshotOffset++;
-    if (snapshotLog->catchupSnapshotOffset >= totalSnapshotsFound) {
-      stopSnapshotLogCatchup(endpoint, snapshotLog, otherSnapshotLog);
-    } else {
-      EmberAfClusterCommand *cmd = emberAfCurrentCommand();
-      getSnapshot(endpoint, cmd->apsFrame->sourceEndpoint, cmd->source, snapshotLog);
-    }
-  } else {
-    if (snapshotCause == GPF_SNAPSHOT_CAUSE_GENERAL) {
-      /*
-       * GBCS v0.8.1 Section 10.4.2.1
-       *
-       * The GPF shall populate the relevant attributes upon receipt of the
-       * PublishSnapshot command, providing the command is received between
-       * midnight (UTC) and the next scheduled wake of the GSME.
-       */
-      if (snapshotTime >= PREV_MIDNIGHT(now)
-          && structuredData[i].lastAttributeReportTime < PREV_MIDNIGHT(now)) {
-        updateSnapshotAttributes(endpoint, snapshotPayloadType, snapshotPayload);
-      }
-    } else {
-      /*
-       * CHTS v1.46 Section 4.5.2
-       *
-       * Where changes have been made to the GSME Billing Data Log in accordance
-       * with the timetable set-out in the GSME Billing Calendar, the GPF shall be
-       * capable of generating and sending an Alert containing the most recent
-       * entries of the GSME Tariff TOU Register Matrix, the GSME Tariff Block
-       * Counter Matrix and the GSME Consumption Register in the GSME Billing Data
-       * Log.
-       */
-      emAfGasProxyFunctionAlert(GBCS_ALERT_BILLING_DATA_LOG_UPDATED,
-                                emberAfCurrentCommand(),
-                                GCS53_MESSAGE_CODE);
-    }
-  }
-
-  emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
-  return true;
-}
-#endif  // UC_BUILD
 
 /** @brief Simple Metering Cluster Get Snapshot
  *
@@ -2964,7 +2656,6 @@ bool emberAfSimpleMeteringClusterPublishSnapshotCallback(uint32_t snapshotId,
  * @param snapshotOffset   Ver.: always
  * @param snapshotCause   Ver.: always
  */
-#ifdef UC_BUILD
 bool emberAfSimpleMeteringClusterGetSnapshotCallback(EmberAfClusterCommand *cmd)
 {
   sl_zcl_simple_metering_cluster_get_snapshot_command_t cmd_data;
@@ -3019,58 +2710,6 @@ bool emberAfSimpleMeteringClusterGetSnapshotCallback(EmberAfClusterCommand *cmd)
   kickout:
   return true;
 }
-#else // !UC_BUILD
-bool emberAfSimpleMeteringClusterGetSnapshotCallback(uint32_t earliestStartTime,
-                                                     uint32_t latestEndTime,
-                                                     uint8_t snapshotOffset,
-                                                     uint32_t snapshotCause)
-{
-  uint8_t endpoint = emberAfCurrentEndpoint();
-  uint8_t i = findStructuredData(endpoint);
-  GpfSnapshotLog *snapshotLog;
-
-  emberAfPluginGasProxyFunctionPrintln("GPF: GetSnapshot 0x%4x 0x%4x 0x%x 0x%4x",
-                                       earliestStartTime,
-                                       latestEndTime,
-                                       snapshotOffset,
-                                       snapshotCause);
-
-  if (i == GPF_INVALID_LOG_INDEX) {
-    return false;
-  }
-
-  if (snapshotCause == GPF_SNAPSHOT_CAUSE_GENERAL) {
-    emberAfPluginGasProxyFunctionPrintln("GPF: Publish Daily Read Log");
-    snapshotLog = &structuredData[i].dailyReadLog;
-    if (!emberAfPluginGasProxyFunctionDataLogAccessRequestCallback(emberAfPluginGasProxyFunctionGetCurrentMessage(),
-                                                                   emberAfCurrentCommand())) {
-      emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_NOT_AUTHORIZED);
-      goto kickout;
-    }
-  } else if (snapshotCause
-             & (GPF_SNAPSHOT_CAUSE_END_OF_BILLING_PERIOD
-                | GPF_SNAPSHOT_CAUSE_CHANGE_OF_TARIFF
-                | GPF_SNAPSHOT_CAUSE_CHANGE_OF_SUPPLIER
-                | GPF_SNAPSHOT_CAUSE_CHANGE_OF_PAYMENT_MODE)) {
-    if (!emberAfPluginGasProxyFunctionDataLogAccessRequestCallback(emberAfPluginGasProxyFunctionGetCurrentMessage(),
-                                                                   emberAfCurrentCommand())) {
-      emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_NOT_AUTHORIZED);
-      goto kickout;
-    }
-
-    emberAfPluginGasProxyFunctionPrintln("GPF: Publish Billing Data Log - Tariff TOU Register Matrix, the Consumption Register and Tariff Block Counter Matrix");
-    snapshotLog = &structuredData[i].billingDataLog.snapshot;
-  } else {
-    emberAfPluginGasProxyFunctionPrintln("GPF: WARN: GetSnapshot command received with unsupported cause: 0x%4x", snapshotCause);
-    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_NOT_FOUND);
-    return true;
-  }
-
-  sendSnapshot(earliestStartTime, latestEndTime, snapshotOffset, snapshotCause, snapshotLog);
-  kickout:
-  return true;
-}
-#endif // UC_BUILD
 
 /** @brief Prepayment Cluster Publish Prepay Snapshot
  *
@@ -3083,7 +2722,6 @@ bool emberAfSimpleMeteringClusterGetSnapshotCallback(uint32_t earliestStartTime,
  * @param snapshotPayloadType   Ver.: always
  * @param snapshotPayload   Ver.: always
  */
-#ifdef UC_BUILD
 bool emberAfPrepaymentClusterPublishPrepaySnapshotCallback(EmberAfClusterCommand *cmd)
 {
   sl_zcl_prepayment_cluster_publish_prepay_snapshot_command_t cmd_data;
@@ -3187,9 +2825,9 @@ bool emberAfPrepaymentClusterPublishPrepaySnapshotCallback(EmberAfClusterCommand
        * containing the most entries of GSME Meter Balance, Emergency Credit Balance,
        * Accumulated Debt Register, Payment Debt Register and Time Debt Registers [1 ... 2]
        */
-      emAfGasProxyFunctionAlert(GBCS_ALERT_BILLING_DATA_LOG_UPDATED,
-                                emberAfCurrentCommand(),
-                                GCS53_MESSAGE_CODE);
+      sli_zigbee_af_gas_proxy_function_alert(GBCS_ALERT_BILLING_DATA_LOG_UPDATED,
+                                             emberAfCurrentCommand(),
+                                             GCS53_MESSAGE_CODE);
     }
   }
 
@@ -3197,113 +2835,6 @@ bool emberAfPrepaymentClusterPublishPrepaySnapshotCallback(EmberAfClusterCommand
   kickout:
   return true;
 }
-#else // !UC_BUILD
-bool emberAfPrepaymentClusterPublishPrepaySnapshotCallback(uint32_t snapshotId,
-                                                           uint32_t snapshotTime,
-                                                           uint8_t totalSnapshotsFound,
-                                                           uint8_t commandIndex,
-                                                           uint8_t totalNumberOfCommands,
-                                                           uint32_t snapshotCause,
-                                                           uint8_t snapshotPayloadType,
-                                                           uint8_t* snapshotPayload)
-{
-  uint8_t endpoint = emberAfCurrentEndpoint();
-  uint8_t i = findStructuredData(endpoint);
-  GpfPrepaySnapshotLog *prepaySnapshotLog;
-  GpfPrepaySnapshotLog *otherPrepaySnapshotLog;
-  uint32_t now = emberAfGetCurrentTime();
-
-  emberAfPluginGasProxyFunctionPrintln("GPF: RX: PublishPrepaySnapshot, 0x%4x, 0x%4x, 0x%x, 0x%x, 0x%x, 0x%4x, 0x%x",
-                                       snapshotId,
-                                       snapshotTime,
-                                       totalSnapshotsFound,
-                                       commandIndex,
-                                       totalNumberOfCommands,
-                                       snapshotCause,
-                                       snapshotPayloadType);
-
-  if (i == GPF_INVALID_LOG_INDEX) {
-    return false;
-  }
-
-  if (snapshotPayloadType != EMBER_ZCL_PREPAY_SNAPSHOT_PAYLOAD_TYPE_DEBT_CREDIT_STATUS) {
-    emberAfPluginGasProxyFunctionPrintln("GPF: WARN: PublishPrepaySnapshot command received with unsupported payloadType: 0x%x", snapshotPayloadType);
-    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_INVALID_FIELD);
-    return true;
-  }
-
-  if (snapshotCause == GPF_SNAPSHOT_CAUSE_GENERAL) {
-    emberAfPluginGasProxyFunctionPrintln("GPF: Receive Prepay Daily Read Log");
-    if (!emberAfPluginGasProxyFunctionDataLogAccessRequestCallback(emberAfPluginGasProxyFunctionGetCurrentMessage(),
-                                                                   emberAfCurrentCommand())) {
-      emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_NOT_AUTHORIZED);
-      goto kickout;
-    }
-
-    prepaySnapshotLog = &structuredData[i].prepayDailyReadLog;
-    otherPrepaySnapshotLog = &structuredData[i].billingDataLog.prepaySnapshot;
-  } else if (snapshotCause
-             & (GPF_SNAPSHOT_CAUSE_END_OF_BILLING_PERIOD
-                | GPF_SNAPSHOT_CAUSE_CHANGE_OF_TARIFF
-                | GPF_SNAPSHOT_CAUSE_CHANGE_OF_SUPPLIER
-                | GPF_SNAPSHOT_CAUSE_CHANGE_OF_PAYMENT_MODE)) {
-    emberAfPluginGasProxyFunctionPrintln("GPF: Receive Billing Data Log - Meter Balance, Emergency Credit Balance, Accumulated Debt Register, Payment Debt Register and Time Debt Registers");
-    prepaySnapshotLog = &structuredData[i].billingDataLog.prepaySnapshot;
-    otherPrepaySnapshotLog = &structuredData[i].prepayDailyReadLog;
-  } else {
-    emberAfPluginGasProxyFunctionPrintln("GPF: WARN: PublishPrepaySnapshot command received with unsupported cause: 0x%4x", snapshotCause);
-    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_INVALID_FIELD);
-    return true;
-  }
-
-  // Ignore any commands that we were not expecting.
-  if (prepaySnapshotLog->catchup && emberAfCurrentCommand()->seqNum != prepaySnapshotLog->catchupSequenceNumber) {
-    emberAfPluginGasProxyFunctionPrintln("GPF: WARN: ignoring unexpected PublishPrepaySnapshot command");
-    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
-    return true;
-  }
-
-  receivePrepaySnapshot(snapshotId, snapshotTime, snapshotCause, snapshotPayloadType, snapshotPayload, prepaySnapshotLog);
-
-  if (prepaySnapshotLog->catchup) {
-    prepaySnapshotLog->catchupSnapshotOffset++;
-    if (prepaySnapshotLog->catchupSnapshotOffset >= totalSnapshotsFound) {
-      stopPrepaySnapshotLogCatchup(endpoint, prepaySnapshotLog, otherPrepaySnapshotLog);
-    } else {
-      EmberAfClusterCommand *cmd = emberAfCurrentCommand();
-      getPrepaySnapshot(endpoint, cmd->apsFrame->sourceEndpoint, cmd->source, prepaySnapshotLog);
-    }
-  } else {
-    if (snapshotCause == GPF_SNAPSHOT_CAUSE_GENERAL) {
-      /*
-       * GBCS v0.8.1 Section 10.4.2.2
-       *
-       * The GPF shall populate the relevant attributes upon receipt of the
-       * Publish Prepay Snapshot command, providing the command is received
-       * between midnight (UTC) and the next scheduled wake of the GSME.
-       */
-      if (snapshotTime >= PREV_MIDNIGHT(now)
-          && structuredData[i].lastAttributeReportTime < PREV_MIDNIGHT(now)) {
-        updatePrepaySnapshotAttributes(endpoint, snapshotPayloadType, snapshotPayload);
-      }
-    } else {
-      /*
-       * GBCS IRP328: added missing element in the usecase GCS53.
-       * With this change, the GPF shall be capable of generating and sending an alert
-       * containing the most entries of GSME Meter Balance, Emergency Credit Balance,
-       * Accumulated Debt Register, Payment Debt Register and Time Debt Registers [1 ... 2]
-       */
-      emAfGasProxyFunctionAlert(GBCS_ALERT_BILLING_DATA_LOG_UPDATED,
-                                emberAfCurrentCommand(),
-                                GCS53_MESSAGE_CODE);
-    }
-  }
-
-  emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
-  kickout:
-  return true;
-}
-#endif  // UC_BUILD
 
 /** @brief Prepayment Cluster Get Prepay Snapshot
  *
@@ -3312,7 +2843,6 @@ bool emberAfPrepaymentClusterPublishPrepaySnapshotCallback(uint32_t snapshotId,
  * @param snapshotOffset   Ver.: always
  * @param snapshotCause   Ver.: always
  */
-#ifdef UC_BUILD
 bool emberAfPrepaymentClusterGetPrepaySnapshotCallback(EmberAfClusterCommand *cmd)
 {
   sl_zcl_prepayment_cluster_get_prepay_snapshot_command_t cmd_data;
@@ -3355,46 +2885,6 @@ bool emberAfPrepaymentClusterGetPrepaySnapshotCallback(EmberAfClusterCommand *cm
   sendPrepaySnapshot(cmd_data.earliestStartTime, cmd_data.latestEndTime, cmd_data.snapshotOffset, cmd_data.snapshotCause, prepaySnapshotLog);
   return true;
 }
-#else // !UC_BUILD
-bool emberAfPrepaymentClusterGetPrepaySnapshotCallback(uint32_t earliestStartTime,
-                                                       uint32_t latestEndTime,
-                                                       uint8_t snapshotOffset,
-                                                       uint32_t snapshotCause)
-{
-  uint8_t endpoint = emberAfCurrentEndpoint();
-  uint8_t i = findStructuredData(endpoint);
-  GpfPrepaySnapshotLog *prepaySnapshotLog;
-
-  emberAfPluginGasProxyFunctionPrintln("GPF: RX: GetPrepaySnapshot 0x%4x 0x%4x 0x%x 0x%4x",
-                                       earliestStartTime,
-                                       latestEndTime,
-                                       snapshotOffset,
-                                       snapshotCause);
-
-  if (i == GPF_INVALID_LOG_INDEX) {
-    return false;
-  }
-
-  if (snapshotCause == GPF_SNAPSHOT_CAUSE_GENERAL) {
-    emberAfPluginGasProxyFunctionPrintln("GPF: Publish Prepay Daily Read Log");
-    prepaySnapshotLog = &structuredData[i].prepayDailyReadLog;
-  } else if (snapshotCause
-             & (GPF_SNAPSHOT_CAUSE_END_OF_BILLING_PERIOD
-                | GPF_SNAPSHOT_CAUSE_CHANGE_OF_TARIFF
-                | GPF_SNAPSHOT_CAUSE_CHANGE_OF_SUPPLIER
-                | GPF_SNAPSHOT_CAUSE_CHANGE_OF_PAYMENT_MODE)) {
-    emberAfPluginGasProxyFunctionPrintln("GPF: Publish Billing Data Log - Meter Balance, Emergency Credit Balance, Accumulated Debt Register, Payment Debt Register and Time Debt Registers");
-    prepaySnapshotLog = &structuredData[i].billingDataLog.prepaySnapshot;
-  } else {
-    emberAfPluginGasProxyFunctionPrintln("GPF: WARN: GetPrepaySnapshot command received with unsupported cause: 0x%4x", snapshotCause);
-    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_NOT_FOUND);
-    return true;
-  }
-
-  sendPrepaySnapshot(earliestStartTime, latestEndTime, snapshotOffset, snapshotCause, prepaySnapshotLog);
-  return true;
-}
-#endif  // UC_BUILD
 
 /** @brief Prepayment Cluster Publish Top Up Log
  *
@@ -3402,7 +2892,6 @@ bool emberAfPrepaymentClusterGetPrepaySnapshotCallback(uint32_t earliestStartTim
  * @param totalNumberOfCommands   Ver.: always
  * @param topUpPayload   Ver.: always
  */
-#ifdef  UC_BUILD
 bool emberAfPrepaymentClusterPublishTopUpLogCallback(EmberAfClusterCommand *cmd)
 {
   sl_zcl_prepayment_cluster_publish_top_up_log_command_t cmd_data;
@@ -3457,64 +2946,12 @@ bool emberAfPrepaymentClusterPublishTopUpLogCallback(EmberAfClusterCommand *cmd)
   emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
   return true;
 }
-#else // !UC_BUILD
-bool emberAfPrepaymentClusterPublishTopUpLogCallback(uint8_t commandIndex,
-                                                     uint8_t totalNumberOfCommands,
-                                                     uint8_t* topUpPayload)
-{
-  uint8_t endpoint = emberAfCurrentEndpoint();
-  uint8_t i = findStructuredData(endpoint);
-  GpfTopUpLog *topUpLog;
-  uint16_t topUpPayloadLength = fieldLength(topUpPayload);
-  uint16_t topUpPayloadIndex = 0;
-  uint8_t *topUpPayloadCode;
-  uint32_t topUpPayloadAmount;
-  uint32_t topUpPayloadTime;
-
-  emberAfPluginGasProxyFunctionPrintln("GPF: PublishTopUpLog 0x%x 0x%x 0x%2x",
-                                       commandIndex,
-                                       totalNumberOfCommands,
-                                       topUpPayloadLength);
-
-  if (i == GPF_INVALID_LOG_INDEX) {
-    return false;
-  }
-
-  emberAfPluginGasProxyFunctionPrintln("GPF: Receive Billing Data Log - value of prepayment credits");
-  topUpLog = &structuredData[i].billingDataLog.topUp;
-
-  // Ignore any commands that we were not expecting.
-  if (topUpLog->catchup && emberAfCurrentCommand()->seqNum != topUpLog->catchupSequenceNumber) {
-    emberAfPluginGasProxyFunctionPrintln("GPF: WARN: ignoring unexpected PublishTopUpLog command");
-    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
-    return true;
-  }
-
-  while (topUpPayloadIndex < topUpPayloadLength) {
-    topUpPayloadCode = emberAfGetString(topUpPayload, topUpPayloadIndex, topUpPayloadLength);
-    topUpPayloadIndex += emberAfStringLength(topUpPayloadCode) + 1;
-    topUpPayloadAmount = emberAfGetInt32u(topUpPayload, topUpPayloadIndex, topUpPayloadLength);
-    topUpPayloadIndex += 4;
-    topUpPayloadTime = emberAfGetInt32u(topUpPayload, topUpPayloadIndex, topUpPayloadLength);
-    topUpPayloadIndex += 4;
-    receiveTopUp(topUpPayloadCode, topUpPayloadAmount, topUpPayloadTime, topUpLog);
-  }
-
-  if (topUpLog->catchup) {
-    stopTopUpLogCatchup(endpoint, topUpLog);
-  }
-
-  emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
-  return true;
-}
-#endif  // UC_BUILD
 
 /** @brief Prepayment Cluster Get Top Up Log
  *
  * @param latestEndTime   Ver.: always
  * @param numberOfRecords   Ver.: always
  */
-#ifdef UC_BUILD
 bool emberAfPrepaymentClusterGetTopUpLogCallback(EmberAfClusterCommand *cmd)
 {
   sl_zcl_prepayment_cluster_get_top_up_log_command_t cmd_data;
@@ -3544,39 +2981,10 @@ bool emberAfPrepaymentClusterGetTopUpLogCallback(EmberAfClusterCommand *cmd)
   // indicated by this being a loopback command, then grab the start time
   // from the GBZ parser.
   earliestStartTime = (emberAfCurrentCommand()->source == emberAfGetNodeId())
-                      ? emAfGasProxyFunctionGetGbzStartTime() : 0;
+                      ? sli_zigbee_af_gas_proxy_function_get_gbz_start_time() : 0;
   sendTopUp(earliestStartTime, cmd_data.latestEndTime, cmd_data.numberOfRecords, topUpLog);
   return true;
 }
-#else // !UC_BUILD
-bool emberAfPrepaymentClusterGetTopUpLogCallback(uint32_t latestEndTime,
-                                                 uint8_t numberOfRecords)
-{
-  uint8_t endpoint = emberAfCurrentEndpoint();
-  uint8_t i = findStructuredData(endpoint);
-  GpfTopUpLog *topUpLog;
-  uint32_t earliestStartTime;
-
-  emberAfPluginGasProxyFunctionPrintln("GPF: GetTopUpLog 0x%4x 0x%x",
-                                       latestEndTime,
-                                       numberOfRecords);
-
-  if (i == GPF_INVALID_LOG_INDEX) {
-    return false;
-  }
-
-  emberAfPluginGasProxyFunctionPrintln("GPF: Publish Billing Data Log - value of prepayment credits");
-  topUpLog = &structuredData[i].billingDataLog.topUp;
-
-  // GBCS adds an additional filter criteria so if this is use case GCS15e,
-  // indicated by this being a loopback command, then grab the start time
-  // from the GBZ parser.
-  earliestStartTime = (emberAfCurrentCommand()->source == emberAfGetNodeId())
-                      ? emAfGasProxyFunctionGetGbzStartTime() : 0;
-  sendTopUp(earliestStartTime, latestEndTime, numberOfRecords, topUpLog);
-  return true;
-}
-#endif  // UC_BUILD
 
 /** @brief Prepayment Cluster Publish Debt Log
  *
@@ -3584,7 +2992,6 @@ bool emberAfPrepaymentClusterGetTopUpLogCallback(uint32_t latestEndTime,
  * @param totalNumberOfCommands   Ver.: always
  * @param debtPayload   Ver.: always
  */
-#ifdef UC_BUILD
 bool emberAfPrepaymentClusterPublishDebtLogCallback(EmberAfClusterCommand *cmd)
 {
   sl_zcl_prepayment_cluster_publish_debt_log_command_t cmd_data;
@@ -3642,60 +3049,6 @@ bool emberAfPrepaymentClusterPublishDebtLogCallback(EmberAfClusterCommand *cmd)
   emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
   return true;
 }
-#else // !UC_BUILD
-bool emberAfPrepaymentClusterPublishDebtLogCallback(uint8_t commandIndex,
-                                                    uint8_t totalNumberOfCommands,
-                                                    uint8_t* debtPayload)
-{
-  uint8_t endpoint = emberAfCurrentEndpoint();
-  uint8_t i = findStructuredData(endpoint);
-  GpfDebtLog *debtLog;
-  uint16_t debtPayloadLength = fieldLength(debtPayload);
-  uint16_t debtPayloadIndex = 0;
-  uint32_t collectionTime;
-  uint32_t amountCollected;
-  uint32_t outstandingDebt;
-  uint8_t  debtType;
-
-  emberAfPluginGasProxyFunctionPrintln("GPF: PublishDebtLog 0x%x 0x%x 0x%2x",
-                                       commandIndex,
-                                       totalNumberOfCommands,
-                                       debtPayloadLength);
-
-  if (i == GPF_INVALID_LOG_INDEX) {
-    return false;
-  }
-
-  emberAfPluginGasProxyFunctionPrintln("GPF: Receive Billing Data Log - payment-based debt payments");
-  debtLog = &structuredData[i].billingDataLog.debt;
-
-  // Ignore any commands that we were not expecting.
-  if (debtLog->catchup && emberAfCurrentCommand()->seqNum != debtLog->catchupSequenceNumber) {
-    emberAfPluginGasProxyFunctionPrintln("GPF: WARN: ignoring unexpected PublishDebtLog command");
-    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
-    return true;
-  }
-
-  while (debtPayloadIndex < debtPayloadLength) {
-    collectionTime = emberAfGetInt32u(debtPayload, debtPayloadIndex, debtPayloadLength);
-    debtPayloadIndex += 4;
-    amountCollected = emberAfGetInt32u(debtPayload, debtPayloadIndex, debtPayloadLength);
-    debtPayloadIndex += 4;
-    debtType = emberAfGetInt8u(debtPayload, debtPayloadIndex, debtPayloadLength);
-    debtPayloadIndex += 1;
-    outstandingDebt = emberAfGetInt32u(debtPayload, debtPayloadIndex, debtPayloadLength);
-    debtPayloadIndex += 4;
-    receiveDebt(collectionTime, amountCollected, outstandingDebt, debtType, debtLog);
-  }
-
-  if (debtLog->catchup) {
-    stopDebtLogCatchup(endpoint, debtLog);
-  }
-
-  emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
-  return true;
-}
-#endif  //  UC_BUILD
 
 /** @brief Prepayment Cluster Get Debt Repayment Log
  *
@@ -3703,7 +3056,6 @@ bool emberAfPrepaymentClusterPublishDebtLogCallback(uint8_t commandIndex,
  * @param numberOfDebts   Ver.: always
  * @param debtType   Ver.: always
  */
-#ifdef UC_BUILD
 bool emberAfPrepaymentClusterGetDebtRepaymentLogCallback(EmberAfClusterCommand *cmd)
 {
   sl_zcl_prepayment_cluster_get_debt_repayment_log_command_t cmd_data;
@@ -3734,51 +3086,20 @@ bool emberAfPrepaymentClusterGetDebtRepaymentLogCallback(EmberAfClusterCommand *
   // indicated by this being a loopback command, then grab the start time
   // from the GBZ parser.
   earliestStartTime = (emberAfCurrentCommand()->source == emberAfGetNodeId())
-                      ? emAfGasProxyFunctionGetGbzStartTime() : 0;
+                      ? sli_zigbee_af_gas_proxy_function_get_gbz_start_time() : 0;
   sendDebt(earliestStartTime, cmd_data.latestEndTime, cmd_data.numberOfDebts, cmd_data.debtType, debtLog);
   return true;
 }
-#else //  !UC_BUILD
-bool emberAfPrepaymentClusterGetDebtRepaymentLogCallback(uint32_t latestEndTime,
-                                                         uint8_t numberOfDebts,
-                                                         uint8_t debtType)
-{
-  uint8_t endpoint = emberAfCurrentEndpoint();
-  uint8_t i = findStructuredData(endpoint);
-  GpfDebtLog *debtLog;
-  uint32_t earliestStartTime;
-
-  emberAfPluginGasProxyFunctionPrintln("GPF: GetDebtRepaymentLog 0x%4x 0x%x 0x%x",
-                                       latestEndTime,
-                                       numberOfDebts,
-                                       debtType);
-
-  if (i == GPF_INVALID_LOG_INDEX) {
-    return false;
-  }
-
-  emberAfPluginGasProxyFunctionPrintln("GPF: Publish Billing Data Log - payment-based debt payments");
-  debtLog = &structuredData[i].billingDataLog.debt;
-
-  // GBCS adds an additional filter criteria so if this is use case GCS15d,
-  // indicated by this being a loopback command, then grab the start time
-  // from the GBZ parser.
-  earliestStartTime = (emberAfCurrentCommand()->source == emberAfGetNodeId())
-                      ? emAfGasProxyFunctionGetGbzStartTime() : 0;
-  sendDebt(earliestStartTime, latestEndTime, numberOfDebts, debtType, debtLog);
-  return true;
-}
-#endif  // UC_BUILD
 
 // Catchup event handler used to retry previously attempted Get requests on
 // the various logs.
-void emberAfPluginGasProxyFunctionCatchupEventHandler(SLXU_UC_EVENT)
+void emberAfPluginGasProxyFunctionCatchupEventHandler(sl_zigbee_event_t * event)
 {
   uint8_t i;
   uint8_t localEndpoint, remoteEndpoint;
   EmberNodeId remoteNodeId;
 
-  slxu_zigbee_event_set_inactive(gasProxyFunctionCatchupEventControl);
+  sl_zigbee_event_set_inactive(gasProxyFunctionCatchupEventControl);
 
   for (i = 0; i < EMBER_AF_PLUGIN_METER_MIRROR_MAX_MIRRORS; i++) {
     if (structuredData[i].endpoint == GPF_UNUSED_ENDPOINT_ID) {
@@ -3801,8 +3122,8 @@ void emberAfPluginGasProxyFunctionCatchupEventHandler(SLXU_UC_EVENT)
         getSnapshot(localEndpoint, remoteEndpoint, remoteNodeId, snapshotLog);
       }
       structuredData[i].functionalNotificationFlags &= ~EMBER_AF_METERING_FNF_GET_SNAPSHOT;
-      slxu_zigbee_event_set_delay_ms(gasProxyFunctionCatchupEventControl,
-                                     MILLISECOND_TICKS_PER_SECOND);
+      sl_zigbee_event_set_delay_ms(gasProxyFunctionCatchupEventControl,
+                                   MILLISECOND_TICKS_PER_SECOND);
       continue;
     }
 
@@ -3816,8 +3137,8 @@ void emberAfPluginGasProxyFunctionCatchupEventHandler(SLXU_UC_EVENT)
         getSampleData(localEndpoint, remoteEndpoint, remoteNodeId, sampleLog);
       }
       structuredData[i].functionalNotificationFlags &= ~EMBER_AF_METERING_FNF_GET_SAMPLED_DATA;
-      slxu_zigbee_event_set_delay_ms(gasProxyFunctionCatchupEventControl,
-                                     MILLISECOND_TICKS_PER_SECOND);
+      sl_zigbee_event_set_delay_ms(gasProxyFunctionCatchupEventControl,
+                                   MILLISECOND_TICKS_PER_SECOND);
       continue;
     }
 
@@ -3833,8 +3154,8 @@ void emberAfPluginGasProxyFunctionCatchupEventHandler(SLXU_UC_EVENT)
         getPrepaySnapshot(localEndpoint, remoteEndpoint, remoteNodeId, prepaySnapshotLog);
       }
       structuredData[i].notificationFlags4 &= ~EMBER_AF_METERING_NF4_GET_PREPAY_SNAPSHOT;
-      slxu_zigbee_event_set_delay_ms(gasProxyFunctionCatchupEventControl,
-                                     MILLISECOND_TICKS_PER_SECOND);
+      sl_zigbee_event_set_delay_ms(gasProxyFunctionCatchupEventControl,
+                                   MILLISECOND_TICKS_PER_SECOND);
       continue;
     }
 
@@ -3844,8 +3165,8 @@ void emberAfPluginGasProxyFunctionCatchupEventHandler(SLXU_UC_EVENT)
         getTopUp(localEndpoint, remoteEndpoint, remoteNodeId, topUpLog);
       }
       structuredData[i].notificationFlags4 &= ~EMBER_AF_METERING_NF4_GET_TOP_UP_LOG;
-      slxu_zigbee_event_set_delay_ms(gasProxyFunctionCatchupEventControl,
-                                     MILLISECOND_TICKS_PER_SECOND);
+      sl_zigbee_event_set_delay_ms(gasProxyFunctionCatchupEventControl,
+                                   MILLISECOND_TICKS_PER_SECOND);
       continue;
     }
 
@@ -3855,8 +3176,8 @@ void emberAfPluginGasProxyFunctionCatchupEventHandler(SLXU_UC_EVENT)
         getDebt(localEndpoint, remoteEndpoint, remoteNodeId, debtLog);
       }
       structuredData[i].notificationFlags4 &= ~EMBER_AF_METERING_NF4_GET_DEBT_REPAYMENT_LOG;
-      slxu_zigbee_event_set_delay_ms(gasProxyFunctionCatchupEventControl,
-                                     MILLISECOND_TICKS_PER_SECOND);
+      sl_zigbee_event_set_delay_ms(gasProxyFunctionCatchupEventControl,
+                                   MILLISECOND_TICKS_PER_SECOND);
       continue;
     }
   }
@@ -3867,8 +3188,8 @@ void emberAfPluginGasProxyFunctionGsmeSyncEndpointEventHandler(uint8_t endpoint)
   uint8_t i = findStructuredData(endpoint);
   uint32_t nowUTC, lastEntryTime, aDayAgo, halfAnHourAgo;
 
-  slxu_zigbee_endpoint_event_set_inactive(endpointEvent,
-                                          endpoint);
+  sl_zigbee_endpoint_event_set_inactive(endpointEvent,
+                                        endpoint);
 
   nowUTC        = emberAfGetCurrentTime();
   aDayAgo       = nowUTC - SECONDS_IN_DAY;
@@ -3925,9 +3246,9 @@ void emberAfPluginGasProxyFunctionGsmeSyncEndpointEventHandler(uint8_t endpoint)
     // Fire this event next time we expect the GSME to have checked in.
     // By the v0.8.1 GBCS spec, in section 10.4.2.8, this should be
     // 30 minutes from now.
-    slxu_zigbee_endpoint_event_set_delay_ms(endpointEvent,
-                                            endpoint,
-                                            SECONDS_IN_HALF_HOUR * MILLISECOND_TICKS_PER_SECOND);
+    sl_zigbee_endpoint_event_set_delay_ms(endpointEvent,
+                                          endpoint,
+                                          SECONDS_IN_HALF_HOUR * MILLISECOND_TICKS_PER_SECOND);
   }
 }
 
@@ -3937,7 +3258,6 @@ void emberAfPluginGasProxyFunctionGsmeSyncEndpointEventHandler(uint8_t endpoint)
  * @param notificationFlagAttributeId   Ver.: always
  * @param notificationFlagsN   Ver.: always
  */
-#ifdef UC_BUILD
 bool emberAfSimpleMeteringClusterGetNotifiedMessageCallback(EmberAfClusterCommand *cmd)
 {
   sl_zcl_simple_metering_cluster_get_notified_message_command_t cmd_data;
@@ -4005,77 +3325,11 @@ bool emberAfSimpleMeteringClusterGetNotifiedMessageCallback(EmberAfClusterComman
     (notificationFlagAttributeId == ZCL_FUNCTIONAL_NOTIFICATION_FLAGS_ATTRIBUTE_ID) ? notificationFlagsN : 0;
   structuredData[i].notificationFlags4 |=
     (notificationFlagAttributeId == ZCL_NOTIFICATION_FLAGS_4_ATTRIBUTE_ID) ? notificationFlagsN : 0;
-  slxu_zigbee_event_set_active(gasProxyFunctionCatchupEventControl);
+  sl_zigbee_event_set_active(gasProxyFunctionCatchupEventControl);
 
   emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
   return true;
 }
-#else //! UC_BUILD
-bool emberAfSimpleMeteringClusterGetNotifiedMessageCallback(uint8_t notificationScheme,
-                                                            uint16_t notificationFlagAttributeId,
-                                                            uint32_t notificationFlagsN)
-{
-  EmberAfClusterCommand *cmd = emberAfCurrentCommand();
-  uint8_t endpoint = emberAfCurrentEndpoint();
-  uint8_t i = findStructuredData(endpoint);
-
-  /*
-   * From GBCS
-   *
-   * For clarity, the GSME:
-   *
-   *  - shall not action ZSE / ZCL commands received from the GPF in relation
-   *    to any of the flags within NotificationFlags2, NotificationFlags3 and
-   *    NotificationFlags5;
-   *
-   *  - for NotificationFlags4, shall only action ZSE / ZCL commands received
-   *    from the GPF in relation to the flags specified below.
-   *
-   *      Bit Number    Waiting Command
-   *      6             Get Prepay Snapshot
-   *      7             Get Top Up Log
-   *      9             Get Debt Repayment Log
-   *
-   *  - for FunctionalNotificationFlags, shall only action ZSE / ZCL commands
-   *    received from the GPF in relation to the flags specified below
-   *
-   *      Bit Number   Waiting Command
-   *      0            New OTA Firmware
-   *      1            CBKE Update Request
-   *      4            Stay Awake Request HAN
-   *      5            Stay Awake Request WAN
-   *      6-8          Push Historical Metering Data Attribute Set
-   *      9-11         Push Historical Prepayment Data Attribute Set
-   *      12           Push All Static Data - Basic Cluster
-   *      13           Push All Static Data - Metering Cluster
-   *      14           Push All Static Data - Prepayment Cluster
-   *      15           NetworkKeyActive
-   *      21           Tunnel Message Pending
-   *      22           GetSnapshot
-   *      23           GetSampledData
-   */
-
-  if (i == GPF_INVALID_LOG_INDEX || notificationScheme != 0x02
-      || (notificationFlagAttributeId != ZCL_FUNCTIONAL_NOTIFICATION_FLAGS_ATTRIBUTE_ID
-          && notificationFlagAttributeId != ZCL_NOTIFICATION_FLAGS_4_ATTRIBUTE_ID)) {
-    return false;
-  }
-
-  // Since this request could result in many commands being sent back to the
-  // sleepy device we schedule the work for the catchup event handler which can
-  // deal with spacing out the commands.
-  structuredData[i].remoteEndpoint = cmd->apsFrame->sourceEndpoint;
-  structuredData[i].remoteNodeId = cmd->source;
-  structuredData[i].functionalNotificationFlags |=
-    (notificationFlagAttributeId == ZCL_FUNCTIONAL_NOTIFICATION_FLAGS_ATTRIBUTE_ID) ? notificationFlagsN : 0;
-  structuredData[i].notificationFlags4 |=
-    (notificationFlagAttributeId == ZCL_NOTIFICATION_FLAGS_4_ATTRIBUTE_ID) ? notificationFlagsN : 0;
-  slxu_zigbee_event_set_active(gasProxyFunctionCatchupEventControl);
-
-  emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
-  return true;
-}
-#endif  // UC_BUILD
 
 /** @brief Simple Metering Cluster Client Default Response
  *

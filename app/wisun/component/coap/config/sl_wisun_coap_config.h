@@ -61,8 +61,8 @@
 #define SL_WISUN_COAP_RESOURCE_HND_SERVICE_PORT         5683U
 
 // <o SL_WISUN_COAP_RESOURCE_HND_STACK_SIZE_WORD> Resource handler service stack size in CPU word
-// <i> Default: 200
-#define SL_WISUN_COAP_RESOURCE_HND_STACK_SIZE_WORD      200UL
+// <i> Default: 256
+#define SL_WISUN_COAP_RESOURCE_HND_STACK_SIZE_WORD      256UL
 
 // <o SL_WISUN_COAP_RESOURCE_HND_SOCK_BUFF_SIZE> Resource handler service socket communication buffer size
 // <i> Default: 1024

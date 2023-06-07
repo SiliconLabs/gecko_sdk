@@ -2,7 +2,7 @@ id: "gecko_sdk"
 label: "Gecko SDK Suite"
 description: |-
   Gecko SDK Suite for EM3xx, EFM32, EZR32 and EFR32 microcontrollers and radios.
-sdk_version: "4.2.3"
+sdk_version: "4.3.0"
 specification_version: 10
 component_path:
   - path: "app/amazon/component"
@@ -22,6 +22,7 @@ component_path:
   - path: "platform/bootloader/component"
   - path: "platform/CMSIS/component"
   - path: "platform/common/component"
+  - path: "platform/compute/component"
   - path: "platform/driver/component"
   - path: "platform/service/component"
   - path: "platform/Device/component"
@@ -63,6 +64,7 @@ component_path:
   - path: "protocol/usb/component"
   - path: "util/plugin/component"
   - path: "util/silicon_labs/silabs_core/component"
+  - path: "util/silicon_labs/aox/component"
   - path: "util/third_party/aws_iot_libs/component"
   - path: "util/third_party/aws_iot_libs/component/aws_demos"
   - path: "util/third_party/aws_iot_libs/component/aws_services"
@@ -75,6 +77,7 @@ component_path:
   - path: "util/third_party/aws_iot_libs/component/iot_logging"
   - path: "util/third_party/aws_iot_libs/component/iot_platform"
   - path: "util/third_party/aws_iot_libs/component/runtest"
+  - path: "util/third_party/cmsis_dsp/component"
   - path: "util/third_party/coremark/component"
   - path: "util/third_party/freertos/component"
   - path: "util/third_party/printf/component"
@@ -89,30 +92,35 @@ component_path:
 toolchain_mapping: "platform/common/toolchain/toolchains.slct"
 documentation:
   - docset: gecko-platform
-    version: "4.2"
+    version: "4.3"
   - docset: mbed-tls
     version: "3.2"
   - docset: connect-stack
-    version: "3.5"
+    version: "3.6"
   - docset: mcu-bootloader
     version: "2.1"
   - docset: openthread
-    version: "2.2"
+    version: "2.3"
   - docset: rail
-    version: "2.14"
+    version: "2.15"
   - docset: wifi/wf200/rtos
     version: "3.6"
   - docset: wisun
-    version: "1.5"
+    version: "1.6"
   - docset: zigbee
-    version: "7.2"
+    version: "7.3"
+  - docset: rtl-lib
+    version: "6.0"
 upgrade_manifest:
+  - path: "app/common/upgrade.slcu"
   - path: "hardware/upgrade.slcu"
   - path: "platform/upgrade.slcu"
   - path: "platform/service/component/upgrade.slcu"
   - path: "protocol/zigbee/component/upgrade.slcu"
   - path: "platform/security/component/upgrade.slcu"
+  - path: "util/third_party/unity_test_framework/component/upgrade.slcu"
 post_build_profile:
   - path: "platform/common/postbuild_profile/"
   - path: "app/bluetooth/postbuild_profile"
-  - path: "extension/homekit/app/postbuild_profile/"
+  - path: "app/btmesh/postbuild_profile"
+  - path: "protocol/z-wave/postbuild_profile/"

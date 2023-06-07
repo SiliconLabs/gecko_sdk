@@ -108,6 +108,8 @@ static sl_status_t start_rtos_adaptation()
   // This function is called internally in this file. Callers guarantee the
   // necessary locking, so we can manipulate the flags safely.
 
+  osThreadId_t bluetooth_tid = NULL;
+
   // If the Bluetooth stack is stopping, we cannot accept a new request to start
   // the stack until the previous stopping has finished
   if (bluetooth_state_flags & SL_BT_RTOS_STATE_FLAG_STOPPING) {
@@ -148,7 +150,7 @@ static sl_status_t start_rtos_adaptation()
   // `tid_thread_bluetooth` when it starts running. This way setting the thread
   // ID is always synchronous to starting the stack inside the thread.
   EFM_ASSERT(tid_thread_bluetooth == NULL);
-  osThreadId_t bluetooth_tid = osThreadNew(bluetooth_thread, NULL, &thread_bluetooth_attr);
+  bluetooth_tid = osThreadNew(bluetooth_thread, NULL, &thread_bluetooth_attr);
   if (bluetooth_tid == NULL) {
     // We failed to create the thread, so the start won't be able to proceed.
     // Clear the starting flag to keep the state consistent.

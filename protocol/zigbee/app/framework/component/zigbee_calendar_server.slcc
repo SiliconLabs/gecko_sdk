@@ -37,7 +37,7 @@ template_contribution:
     value:
       group: calendar-server
       name: publish-calendar
-      handler: emAfCalendarServerCliPublishCalendar
+      handler: sli_zigbee_af_calendar_server_cli_publish_calendar
       help: Publishes a calendar.
       argument:
       - type: uint16
@@ -52,7 +52,7 @@ template_contribution:
     value:
       group: calendar-server
       name: publish-day-profiles
-      handler: emAfCalendarServerCliPublishDayProfiles
+      handler: sli_zigbee_af_calendar_server_cli_publish_day_profiles
       help: Publishes the day profiles of the specified day in the specified calendar.
       argument:
       - type: uint16
@@ -69,7 +69,7 @@ template_contribution:
     value:
       group: calendar-server
       name: publish-week-profile
-      handler: emAfCalendarServerCliPublishWeekProfile
+      handler: sli_zigbee_af_calendar_server_cli_publish_week_profile
       help: Publishes the week profile of the specified week in the specified calendar.
       argument:
       - type: uint16
@@ -86,7 +86,7 @@ template_contribution:
     value:
       group: calendar-server
       name: publish-seasons
-      handler: emAfCalendarServerCliPublishSeasons
+      handler: sli_zigbee_af_calendar_server_cli_publish_seasons
       help: Publishes the seasons in the specified calendar.
       argument:
       - type: uint16
@@ -101,7 +101,7 @@ template_contribution:
     value:
       group: calendar-server
       name: publish-special-days
-      handler: emAfCalendarServerCliPublishSpecialDays
+      handler: sli_zigbee_af_calendar_server_cli_publish_special_days
       help: Publishes the special days for the specified calendar.
       argument:
       - type: uint16

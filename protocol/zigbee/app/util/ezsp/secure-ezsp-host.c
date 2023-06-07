@@ -33,9 +33,9 @@ EzspStatus emberSecureEzspSetSecurityKey(EmberKeyData *securityKey,
   status = ezspSetSecurityKey(securityKey, securityType);
 
   if (status == EZSP_SUCCESS) {
-    emSecureEzspSetSecurityKey(securityKey);
-    emSecureEzspSetSecurityType(securityType);
-    emSecureEzspSetState(SECURE_EZSP_STATE_PARAMETERS_PENDING);
+    sli_zigbee_secure_ezsp_set_security_key(securityKey);
+    sli_zigbee_secure_ezsp_set_security_type(securityType);
+    sli_zigbee_secure_ezsp_set_state(SECURE_EZSP_STATE_PARAMETERS_PENDING);
 
     // Save new key to host token
     tokTypeSecureEzspSecurityKey tok;
@@ -57,9 +57,9 @@ EzspStatus emberSecureEzspSetSecurityParameters(SecureEzspSecurityLevel security
   status = ezspSetSecurityParameters(securityLevel, hostRandomNumber, &ncpRandomNumber);
 
   if (status == EZSP_SUCCESS) {
-    emSecureEzspSetSecurityLevel(securityLevel);
-    emSecureEzspGenerateSessionIds(hostRandomNumber, &ncpRandomNumber);
-    emSecureEzspSetState(SECURE_EZSP_STATE_SYNCED);
+    sli_zigbee_secure_ezsp_set_security_level(securityLevel);
+    sli_zigbee_secure_ezsp_generate_session_ids(hostRandomNumber, &ncpRandomNumber);
+    sli_zigbee_secure_ezsp_set_state(SECURE_EZSP_STATE_SYNCED);
   }
 
   return status;
@@ -72,7 +72,7 @@ EzspStatus emberSecureEzspResetToFactoryDefaults(void)
   status = ezspResetToFactoryDefaults();
 
   if (status == EZSP_SUCCESS) {
-    emSecureEzspReset();
+    sli_zigbee_secure_ezsp_reset();
   }
 
   return status;
@@ -81,18 +81,18 @@ EzspStatus emberSecureEzspResetToFactoryDefaults(void)
 //------------------------------------------------------------------------------
 // Internal functions and handlers.
 
-EzspStatus emSecureEzspInit(void)
+EzspStatus sli_zigbee_secure_ezsp_init(void)
 {
   SecureEzspSecurityType ncpSecurityType;
   EzspStatus hostSecurityKeyStatus;
   EzspStatus ncpSecurityKeyStatus = ezspGetSecurityKeyStatus(&ncpSecurityType);
 
-  if (emSecureEzspIsSecurityKeySet()) {
+  if (sli_zigbee_secure_ezsp_is_security_key_set()) {
     hostSecurityKeyStatus = EZSP_ERROR_SECURITY_KEY_ALREADY_SET;
 
     tokTypeSecureEzspSecurityKey tok;
     halCommonGetToken(&tok, TOKEN_SECURE_EZSP_SECURITY_KEY);
-    MEMMOVE(emberKeyContents(emSecureEzspGetSecurityKey()),
+    MEMMOVE(emberKeyContents(sli_zigbee_secure_ezsp_get_security_key()),
             tok.contents,
             EMBER_ENCRYPTION_KEY_SIZE);
   } else {
@@ -104,7 +104,7 @@ EzspStatus emSecureEzspInit(void)
                         hostSecurityKeyStatus);
 
   if (ncpSecurityKeyStatus == EZSP_ERROR_SECURITY_KEY_ALREADY_SET) {
-    emSecureEzspSetState(SECURE_EZSP_STATE_PARAMETERS_PENDING);
+    sli_zigbee_secure_ezsp_set_state(SECURE_EZSP_STATE_PARAMETERS_PENDING);
   }
 
   emberSecureEzspInitCallback(ncpSecurityKeyStatus,
@@ -113,22 +113,22 @@ EzspStatus emSecureEzspInit(void)
   return EZSP_SUCCESS;
 }
 
-EzspStatus emSecureEzspSetSecurityKey(EmberKeyData *securityKey)
+EzspStatus sli_zigbee_secure_ezsp_set_security_key(EmberKeyData *securityKey)
 {
   //TODO: Remove when we fully move Secure EZSP key out of RAM
-  MEMMOVE(emberKeyContents(emSecureEzspGetSecurityKey()),
+  MEMMOVE(emberKeyContents(sli_zigbee_secure_ezsp_get_security_key()),
           emberKeyContents(securityKey),
           EMBER_ENCRYPTION_KEY_SIZE);
   return EZSP_SUCCESS;
 }
 
-EzspStatus emSecureEzspReset(void)
+EzspStatus sli_zigbee_secure_ezsp_reset(void)
 {
   // Reset token
   tokTypeSecureEzspSecurityKey tok;
   MEMSET(&tok, 0x00, sizeof(tokTypeSecureEzspSecurityKey));
   halCommonSetToken(TOKEN_SECURE_EZSP_SECURITY_KEY, &tok);
 
-  emSecureEzspDeInit();
+  sli_zigbee_secure_ezsp_de_init();
   return EZSP_SUCCESS;
 }

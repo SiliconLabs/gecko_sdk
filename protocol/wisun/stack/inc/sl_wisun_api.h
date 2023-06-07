@@ -35,6 +35,7 @@
 #include "sl_wisun_events.h"
 #include "sl_status.h"
 #include "sl_wisun_connection_params_api.h"
+#include "sl_wisun_lfn_params_api.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -694,7 +695,7 @@ sl_status_t sl_wisun_set_regulation_tx_thresholds(int8_t warning_threshold,
  * latencies. Setting the duration to #SL_WISUN_ADVERT_FRAGMENT_DISABLE disables
  * async transmission fragmentation.
  *
- * By default, the maximum fragment duration is set to 500ms.
+ * By default, the maximum fragment duration is set to 500 ms.
  *****************************************************************************/
 sl_status_t sl_wisun_set_advert_fragment_duration(uint32_t fragment_duration_ms);
 
@@ -724,33 +725,53 @@ sl_status_t sl_wisun_set_unicast_tx_mode(uint8_t mode);
 sl_status_t sl_wisun_set_device_type(sl_wisun_device_type_t device_type);
 
 /**************************************************************************//**
- * Set the mode switch configuration
+ * Set the mode switch configuration.
  *
  * @param[in] mode Mode switch configuration of the neighbor. If set to
  *                 #SL_WISUN_MODE_SWITCH_DEFAULT, the configuration of
  *                 the neighbor is reset back to the default mode switch
- *                 behaviour.
+ *                 behavior.
  * @param[in] phy_mode_id PhyModeId to use when mode is set to
  *                        #SL_WISUN_MODE_SWITCH_ENABLED, ignored otherwise.
  * @param[in] neighbor_address MAC address of the neighbor to configure.
  *                             If set to #sl_wisun_broadcast_mac, configures
- *                             the default mode switch behaviour for all
+ *                             the default mode switch behavior for all
+ *                             non-configured neighbors.
+ * @param[in] reserved Reserved for future use, set to false.
+ * @return SL_STATUS_OK if successful, an error code otherwise
+ *****************************************************************************/
+sl_status_t sl_wisun_config_mode_switch(uint8_t mode,
+                                        uint8_t phy_mode_id,
+                                        const sl_wisun_mac_address_t *neighbor_address,
+                                        bool reserved);
+
+/**************************************************************************//**
+ * Set the PHY mode switch configuration.
+ *
+ * @param[in] mode Mode switch configuration of the neighbor. If set to
+ *                 #SL_WISUN_MODE_SWITCH_DEFAULT, the configuration of
+ *                 the neighbor is reset back to the default mode switch
+ *                 behavior.
+ * @param[in] phy_mode_id PhyModeId to use when mode is set to
+ *                        #SL_WISUN_MODE_SWITCH_ENABLED, ignored otherwise.
+ * @param[in] neighbor_address MAC address of the neighbor to configure.
+ *                             If set to #sl_wisun_broadcast_mac, configures
+ *                             the default mode switch behavior for all
  *                             non-configured neighbors.
  * @return SL_STATUS_OK if successful, an error code otherwise
  *****************************************************************************/
-sl_status_t sl_wisun_set_mode_switch(uint8_t mode,
-                                     uint8_t phy_mode_id,
-                                     const sl_wisun_mac_address_t *neighbor_address);
+#define sl_wisun_set_mode_switch(mode, phy_mode_id, neighbor_address) \
+                   sl_wisun_config_mode_switch(mode, phy_mode_id, neighbor_address, false)
 
 /**************************************************************************//**
- * Configure connection parameter set.
+ * Configure the FFN parameter set.
  *
- * @param[in] params Parameters set to use
+ * @param[in] params Parameter set to use
  * @return SL_STATUS_OK if successful, an error code otherwise
  *
- * This function sets the connection parameter set. These parameters impact
- * connection time, bandwidth usage, and latency. The use of a predefined
- * parameter set is recommended (@ref SL_WISUN_PARAMS_PREDEFINED_PROFILES).
+ * This function sets the FFN parameter set. These parameters impact
+ * connection time, bandwidth usage, and latency. Use of a predefined
+ * parameter set is recommended (@ref SL_WISUN_FFN_PARAMETER_SETS).
  * The function must be called before initiating a connection.
  *****************************************************************************/
 sl_status_t sl_wisun_set_connection_parameters(const sl_wisun_connection_params_t *params);
@@ -777,9 +798,10 @@ sl_status_t sl_wisun_set_pom_ie(uint8_t phy_mode_id_count,
  * Get the POM-IE configuration.
  *
  * @param[out] phy_mode_id_count Number of PhyModeId retrieved
- * @param[out] phy_mode_ids List of phy_mode_id_count PhyModeId.
- *                          Caller must provide at least #SL_WISUN_MAX_PHY_MODE_ID_COUNT bytes.
- * @param[out] is_mdr_command_capable Set to 1 if the device supports MAC mode switch, 0 if not
+ * @param[out] phy_mode_ids List of phy_mode_id_count PhyModeId. Caller must allocate
+ *                          space for at least #SL_WISUN_MAX_PHY_MODE_ID_COUNT entries.
+ * @param[out] is_mdr_command_capable Set to 1 if the device supports MAC mode switch,
+ *                                    0 otherwise
  * @return SL_STATUS_OK if successful, an error code otherwise
  *
  * This function retrieves the PHY operating mode information advertised
@@ -788,6 +810,44 @@ sl_status_t sl_wisun_set_pom_ie(uint8_t phy_mode_id_count,
 sl_status_t sl_wisun_get_pom_ie(uint8_t *phy_mode_id_count,
                                 uint8_t *phy_mode_ids,
                                 uint8_t *is_mdr_command_capable);
+
+/**************************************************************************//**
+ * Configure the LFN parameter set.
+ *
+ * @param[in] params Parameter set to use
+ * @return SL_STATUS_OK if successful, an error code otherwise
+ *
+ * This function sets the LFN parameter set. These parameters impact
+ * connection time, bandwidth usage, power consumption, and latency.
+ * Use of a predefined parameter set is recommended
+ * (@ref SL_WISUN_LFN_PARAMETER_SETS).
+ * The function must be called before initiating a connection.
+ ******************************************************************************/
+sl_status_t sl_wisun_set_lfn_parameters(const sl_wisun_lfn_params_t *params);
+
+/**************************************************************************//**
+ * Set the maximum number of LFN children.
+ *
+ * @param[in] lfn_limit Maximum number of LFN children [0, 10]
+ * @return SL_STATUS_OK if successful, an error code otherwise
+ *
+ * This function sets the maximum number of LFN children this node can
+ * parent.
+ ******************************************************************************/
+sl_status_t sl_wisun_set_lfn_support(uint8_t lfn_limit);
+
+/**************************************************************************//**
+ * Set the PTI state.
+ *
+ * @param[in] pti_state PTI state
+ *   - **true**: PTI is enabled
+ *   - **false**: PTI is disabled
+ * @return SL_STATUS_OK if successful, an error code otherwise
+ *
+ * This functions sets Packet Trace Interface (PTI) state. PTI is enabled
+ * by default.
+ *****************************************************************************/
+sl_status_t sl_wisun_set_pti_state(bool pti_state);
 
 /** @} (end SL_WISUN_API) */
 

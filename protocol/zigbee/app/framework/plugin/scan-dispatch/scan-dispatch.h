@@ -17,10 +17,14 @@
 
 #ifndef SILABS_SCAN_DISPATCH_H
 #define SILABS_SCAN_DISPATCH_H
-
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
+#include "sl_component_catalog.h"
+#endif
+#ifdef SL_CATALOG_ZIGBEE_SCAN_DISPATCH_PRESENT
 #include "scan-dispatch-config.h"
-#endif // UC_BUILD
+#else
+#include "app/framework/plugin/scan-dispatch/config/scan-dispatch-config.h"
+#endif
 
 /**
  * @defgroup scan-dispatch  Scan Dispatch

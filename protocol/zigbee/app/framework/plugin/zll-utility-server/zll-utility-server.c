@@ -20,9 +20,7 @@
 #include "app/framework/plugin/zll-commissioning-common/zll-commissioning.h"
 #include "app/framework/plugin/zll-commissioning-server/zll-commissioning-server.h"
 
-#ifdef UC_BUILD
 #include "zap-cluster-command-parser.h"
-#endif // UC_BUILD
 
 static uint16_t getMaxLength(void)
 {
@@ -38,8 +36,6 @@ static uint16_t getMaxLength(void)
   }
   return maxLength;
 }
-
-#ifdef UC_BUILD
 
 bool emberAfZllCommissioningClusterGetGroupIdentifiersRequestCallback(EmberAfClusterCommand *cmd)
 {
@@ -150,107 +146,6 @@ bool emberAfZllCommissioningClusterGetEndpointListRequestCallback(EmberAfCluster
   return true;
 }
 
-#else // !UC_BUILD
-
-bool emberAfZllCommissioningClusterGetGroupIdentifiersRequestCallback(uint8_t startIndex)
-{
-  EmberStatus sendStatus;
-  uint8_t endpoint = emberAfCurrentEndpoint();
-  uint8_t total = emberAfPluginZllCommissioningServerGroupIdentifierCountCallback(endpoint);
-  uint8_t i;
-  uint8_t *count;
-  uint16_t maxLength;
-
-  emberAfZllCommissioningClusterPrintln("RX: GetGroupIdentifiersRequest 0x%x",
-                                        startIndex);
-
-  (void) emberAfFillExternalBuffer((ZCL_CLUSTER_SPECIFIC_COMMAND
-                                    | ZCL_FRAME_CONTROL_SERVER_TO_CLIENT
-                                    | EMBER_AF_DEFAULT_RESPONSE_POLICY_RESPONSES),
-                                   ZCL_ZLL_COMMISSIONING_CLUSTER_ID,
-                                   ZCL_GET_GROUP_IDENTIFIERS_RESPONSE_COMMAND_ID,
-                                   "uu",
-                                   total,
-                                   startIndex);
-
-  count = &appResponseData[appResponseLength];
-  (void) emberAfPutInt8uInResp(0); // temporary count
-
-  maxLength = getMaxLength();
-  for (i = startIndex; i < total && appResponseLength + 3 <= maxLength; i++) {
-    EmberAfPluginZllCommissioningGroupInformationRecord record;
-    if (emberAfPluginZllCommissioningServerGroupIdentifierCallback(endpoint,
-                                                                   i,
-                                                                   &record)) {
-      (void) emberAfPutInt16uInResp(record.groupId);
-      (void) emberAfPutInt8uInResp(record.groupType);
-      (*count)++;
-    }
-  }
-
-  sendStatus = emberAfSendResponse();
-  if (EMBER_SUCCESS != sendStatus) {
-    emberAfZllCommissioningClusterPrintln("ZLL: failed to send %s response: "
-                                          "0x%x",
-                                          "group_identifiers",
-                                          sendStatus);
-  }
-  return true;
-}
-
-bool emberAfZllCommissioningClusterGetEndpointListRequestCallback(uint8_t startIndex)
-{
-  EmberStatus sendStatus;
-  uint8_t endpoint = emberAfCurrentEndpoint();
-  uint8_t total = emberAfPluginZllCommissioningServerEndpointInformationCountCallback(endpoint);
-  uint8_t i;
-  uint8_t *count;
-  uint16_t maxLength;
-
-  emberAfZllCommissioningClusterPrintln("RX: GetEndpointListRequest 0x%x",
-                                        startIndex);
-
-  (void) emberAfFillExternalBuffer((ZCL_CLUSTER_SPECIFIC_COMMAND
-                                    | ZCL_FRAME_CONTROL_SERVER_TO_CLIENT
-                                    | EMBER_AF_DEFAULT_RESPONSE_POLICY_RESPONSES),
-                                   ZCL_ZLL_COMMISSIONING_CLUSTER_ID,
-                                   ZCL_GET_ENDPOINT_LIST_RESPONSE_COMMAND_ID,
-                                   "uu",
-                                   total,
-                                   startIndex);
-
-  count = &appResponseData[appResponseLength];
-  (void) emberAfPutInt8uInResp(0); // temporary count
-
-  maxLength = getMaxLength();
-  for (i = startIndex; i < total && appResponseLength + 8 <= maxLength; i++) {
-    EmberAfPluginZllCommissioningEndpointInformationRecord record;
-    if (emberAfPluginZllCommissioningServerEndpointInformationCallback(endpoint,
-                                                                       i,
-                                                                       &record)) {
-      (void) emberAfPutInt16uInResp(record.networkAddress);
-      (void) emberAfPutInt8uInResp(record.endpointId);
-      (void) emberAfPutInt16uInResp(record.profileId);
-      (void) emberAfPutInt16uInResp(record.deviceId);
-      (void) emberAfPutInt8uInResp(record.version);
-      (*count)++;
-    }
-  }
-
-  sendStatus = emberAfSendResponse();
-  if (EMBER_SUCCESS != sendStatus) {
-    emberAfZllCommissioningClusterPrintln("ZLL: failed to send %s response: "
-                                          "0x%x",
-                                          "endpoint_list",
-                                          sendStatus);
-  }
-  return true;
-}
-
-#endif // UC_BUILD
-
-#ifdef UC_BUILD
-
 uint32_t emberAfZllCommissioningClusterServerCommandParse(sl_service_opcode_t opcode,
                                                           sl_service_function_context_t *context)
 {
@@ -278,5 +173,3 @@ uint32_t emberAfZllCommissioningClusterServerCommandParse(sl_service_opcode_t op
           ? EMBER_ZCL_STATUS_SUCCESS
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
-
-#endif // UC_BUILD

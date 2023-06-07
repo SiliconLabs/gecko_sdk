@@ -29,9 +29,9 @@ uint8_t  emberFragmentWindowSize = EMBER_AF_PLUGIN_FRAGMENTATION_RX_WINDOW_SIZE;
 //-----------------------------------------------------------------------------
 // Functions
 
-void emberAfPluginFragmentationNcpInitCallback(SLXU_INIT_ARG)
+void emberAfPluginFragmentationNcpInitCallback(uint8_t init_level)
 {
-  SLXU_INIT_UNUSED_ARG;
+  (void)init_level;
 
   ezspGetConfigurationValue(EZSP_CONFIG_INDIRECT_TRANSMISSION_TIMEOUT,
                             &emberMacIndirectTimeout);
@@ -41,14 +41,14 @@ void emberAfPluginFragmentationNcpInitCallback(SLXU_INIT_ARG)
                             "Fragmentation RX window size");
 }
 
-void emAfPluginFragmentationPlatformInitCallback(void)
+void sli_zigbee_af_fragmentation_platform_init_callback(void)
 {
 }
 
-EmberStatus emAfPluginFragmentationSend(txFragmentedPacket* txPacket,
-                                        uint8_t fragmentNumber,
-                                        uint16_t fragmentLen,
-                                        uint16_t offset)
+EmberStatus sli_zigbee_af_fragmentation_send(txFragmentedPacket* txPacket,
+                                             uint8_t fragmentNumber,
+                                             uint16_t fragmentLen,
+                                             uint16_t offset)
 {
   EmberStatus status;
 
@@ -62,15 +62,15 @@ EmberStatus emAfPluginFragmentationSend(txFragmentedPacket* txPacket,
   return status;
 }
 
-void emAfPluginFragmentationHandleSourceRoute(txFragmentedPacket* txPacket,
-                                              uint16_t indexOrDestination)
+void sli_zigbee_af_fragmentation_handle_source_route(txFragmentedPacket* txPacket,
+                                                     uint16_t indexOrDestination)
 {
 //now this is unnneccessary and similar to SoC
 }
 
-void emAfPluginFragmentationSendReply(EmberNodeId sender,
-                                      EmberApsFrame* apsFrame,
-                                      rxFragmentedPacket* rxPacket)
+void sli_zigbee_af_fragmentation_send_reply(EmberNodeId sender,
+                                            EmberApsFrame* apsFrame,
+                                            rxFragmentedPacket* rxPacket)
 {
   apsFrame->groupId = HIGH_LOW_TO_INT(rxPacket->fragmentMask, rxPacket->fragmentBase);
   ezspSendReply(sender, apsFrame, 0, NULL);

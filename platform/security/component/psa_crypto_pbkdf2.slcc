@@ -12,10 +12,18 @@ provides:
   - name: psa_crypto_pbkdf2
 requires:
   - name: psa_crypto
+  - name: device_series_2
   - name: device_security_vault
+    condition: [device_has_semailbox]
+  - name: device_security_rot
+    condition: [device_has_cryptoacc]
+    
 template_contribution:
   - name: psa_crypto_config
     value: PSA_WANT_ALG_PBKDF2_HMAC
+  - name: psa_crypto_config
+    value: PSA_WANT_ALG_PBKDF2_AES_CMAC_PRF_128
+    condition: [device_sdid_205]
   - name: psa_crypto_config
     value: PSA_WANT_ALG_PBKDF2_AES_CMAC_PRF_128
     condition: [device_sdid_210]
@@ -25,6 +33,9 @@ template_contribution:
   - name: psa_crypto_config
     value: PSA_WANT_ALG_PBKDF2_AES_CMAC_PRF_128
     condition: [device_sdid_220]
+  - name: psa_crypto_config
+    value: PSA_WANT_ALG_PBKDF2_AES_CMAC_PRF_128
+    condition: [device_sdid_230]
   - name: psa_crypto_config
     value: PSA_WANT_ALG_PBKDF2_AES_CMAC_PRF_128
     condition: [device_sdid_235]

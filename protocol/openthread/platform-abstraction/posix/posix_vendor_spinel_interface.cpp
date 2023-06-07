@@ -1,0 +1,308 @@
+/*
+ *  Copyright (c) 2023, The OpenThread Authors.
+ *  All rights reserved.
+ *
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions are met:
+ *  1. Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ *  2. Redistributions in binary form must reproduce the above copyright
+ *     notice, this list of conditions and the following disclaimer in the
+ *     documentation and/or other materials provided with the distribution.
+ *  3. Neither the name of the copyright holder nor the
+ *     names of its contributors may be used to endorse or promote products
+ *     derived from this software without specific prior written permission.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ *  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ *  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ *  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ *  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ *  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ *  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ *  POSSIBILITY OF SUCH DAMAGE.
+ */
+
+/*
+ * @file
+ * @brief This file contains implementations for functions to interact with the
+ *        posix spinel interface to build vendor specific spinel frames.
+ */
+
+#include "posix_vendor_spinel_interface.hpp"
+#include "vendor_spinel.hpp"
+#include "openthread-posix-config.h"
+#include "posix/platform/radio.hpp"
+#include "lib/spinel/radio_spinel.hpp"
+
+#if OPENTHREAD_POSIX_CONFIG_RCP_BUS == OT_POSIX_RCP_BUS_UART
+#include "hdlc_interface.hpp"
+using InterfaceType = ot::Posix::HdlcInterface;
+
+#if OPENTHREAD_POSIX_VIRTUAL_TIME
+using ProcessContextType = VirtualTimeEvent;
+#else
+using ProcessContextType = RadioProcessContext;
+#endif // OPENTHREAD_POSIX_VIRTUAL_TIME
+#elif OPENTHREAD_POSIX_CONFIG_RCP_BUS == OT_POSIX_RCP_BUS_SPI
+#include "spi_interface.hpp"
+using InterfaceType = ot::Posix::SpiInterface;
+using ProcessContextType = RadioProcessContext;
+#elif OPENTHREAD_POSIX_CONFIG_RCP_BUS == OT_POSIX_RCP_BUS_VENDOR
+#include "vendor_interface.hpp"
+using InterfaceType = ot::Posix::VendorInterface;
+using ProcessContextType = RadioProcessContext;
+#else
+#error "OPENTHREAD_POSIX_CONFIG_RCP_BUS only allows OT_POSIX_RCP_BUS_UART, OT_POSIX_RCP_BUS_SPI and " \
+    "OT_POSIX_RCP_BUS_VENDOR!"
+#endif
+
+namespace VendorCmd     = ot::Vendor;
+namespace AntennaCmd    = VendorCmd::Antenna;
+namespace CoexCmd       = VendorCmd::Coex;
+namespace TestCmd       = VendorCmd::Test;
+
+namespace ot {
+namespace Spinel {
+namespace Vendor {
+
+RadioSpinel<InterfaceType, ProcessContextType> *GetSpinelInterface()
+{
+    return ((RadioSpinel<InterfaceType,ProcessContextType>*)Posix::Radio::GetSpinelInstance());
+}
+
+namespace Antenna {
+otError getTxAntennaMode(uint8_t &aMode)
+{
+    static const uint8_t command = AntennaCmd::ANT_TX_MODE_COMMAND;
+    otError error = GetSpinelInterface()->GetWithParam(SPINEL_PROP_VENDOR_ANTENNA, 
+    &command, sizeof(command), SPINEL_DATATYPE_UINT8_S, &aMode);
+    LogIfFail("Get TX Antenna Mode failed", error);
+    return error;
+}
+
+otError setTxAntennaMode(uint8_t aMode)
+{
+    static const uint8_t command = AntennaCmd::ANT_TX_MODE_COMMAND;
+    otError error = GetSpinelInterface()->Set(SPINEL_PROP_VENDOR_ANTENNA, 
+    SPINEL_DATATYPE_UINT8_S SPINEL_DATATYPE_UINT8_S, command, aMode);
+    LogIfFail("Set TX Antenna Mode failed", error);
+    return error;
+}
+
+otError getRxAntennaMode(uint8_t &aMode)
+{
+    static const uint8_t command = AntennaCmd::ANT_RX_MODE_COMMAND;
+    otError error = GetSpinelInterface()->GetWithParam(SPINEL_PROP_VENDOR_ANTENNA, 
+    &command, sizeof(command), SPINEL_DATATYPE_UINT8_S, &aMode);
+    LogIfFail("Get RX Antenna Mode failed", error);
+    return error;
+}
+
+otError setRxAntennaMode(uint8_t aMode)
+{
+    static const uint8_t command = AntennaCmd::ANT_RX_MODE_COMMAND;
+    otError error = GetSpinelInterface()->Set(SPINEL_PROP_VENDOR_ANTENNA, 
+    SPINEL_DATATYPE_UINT8_S SPINEL_DATATYPE_UINT8_S, command, aMode);
+    LogIfFail("Set RX Antenna Mode failed", error);
+    return error;
+}
+
+otError getActivePhy(uint8_t &aActivePhy)
+{
+    static const uint8_t command = AntennaCmd::ANT_ACTIVE_PHY_COMMAND;
+    otError error = GetSpinelInterface()->GetWithParam(SPINEL_PROP_VENDOR_ANTENNA, 
+    &command, sizeof(command), SPINEL_DATATYPE_UINT8_S, &aActivePhy);
+    LogIfFail("Get Active Phy failed", error);
+    return error;
+}
+} // namespace Antenna
+
+namespace Coex {
+otError getDpState(uint8_t &dpPulse)
+{
+    static const uint8_t command = CoexCmd::COEX_DP_STATE_COMMAND;
+    otError error = GetSpinelInterface()->GetWithParam(SPINEL_PROP_VENDOR_COEX,
+    &command, sizeof(command), SPINEL_DATATYPE_UINT8_S, &dpPulse);
+    LogIfFail("Get DP State failed", error);
+    return error;
+}
+
+otError setDpState(uint8_t dpPulse)
+{
+    static const uint8_t command = CoexCmd::COEX_DP_STATE_COMMAND;
+    otError error = GetSpinelInterface()->Set(SPINEL_PROP_VENDOR_COEX,
+    SPINEL_DATATYPE_UINT8_S SPINEL_DATATYPE_UINT8_S, command, dpPulse);
+    LogIfFail("Set DP State failed", error);
+    return error;
+}
+
+otError getGpioInputOverride(uint8_t &enabled)
+{
+    static const uint8_t command = CoexCmd::COEX_GPIO_INPUT_OVERRIDE_COMMAND;
+    otError error = GetSpinelInterface()->GetWithParam(SPINEL_PROP_VENDOR_COEX, 
+    &command, sizeof(command), SPINEL_DATATYPE_UINT8_S, &enabled);
+    LogIfFail("Get GPIO Input Override failed", error);
+    return error;
+}
+
+otError setGpioInputOverride(uint8_t gpioIndex, bool enabled)
+{
+    static const uint8_t command = CoexCmd::COEX_GPIO_INPUT_OVERRIDE_COMMAND;
+    otError error = GetSpinelInterface()->Set(SPINEL_PROP_VENDOR_COEX,
+    SPINEL_DATATYPE_UINT8_S SPINEL_DATATYPE_UINT8_S SPINEL_DATATYPE_BOOL_S,
+    command, gpioIndex, enabled);
+    LogIfFail("Set GPIO Input Override failed", error);
+    return error;
+}
+
+otError getActiveRadio(uint8_t &activePhy)
+{
+    static const uint8_t command = CoexCmd::COEX_ACTIVE_RADIO_COMMAND;
+    otError error = GetSpinelInterface()->GetWithParam(SPINEL_PROP_VENDOR_COEX,
+    &command, sizeof(command), SPINEL_DATATYPE_UINT8_S, &activePhy);
+    LogIfFail("Get Active Radio failed", error);
+    return error;
+}
+
+otError getPhySelectTimeout(uint8_t &timeout)
+{
+    static const uint8_t command = CoexCmd::COEX_PHY_SELECT_TIMEOUT_COMMAND;
+    otError error = GetSpinelInterface()->GetWithParam(SPINEL_PROP_VENDOR_COEX,
+    &command, sizeof(command), SPINEL_DATATYPE_UINT8_S, &timeout);
+    LogIfFail("Get Phy Select Timeout failed", error);
+    return error;
+}
+
+otError setPhySelectTimeout(uint8_t timeout)
+{
+    static const uint8_t command = CoexCmd::COEX_PHY_SELECT_TIMEOUT_COMMAND;
+    otError error = GetSpinelInterface()->Set(SPINEL_PROP_VENDOR_COEX,
+    SPINEL_DATATYPE_UINT8_S SPINEL_DATATYPE_UINT8_S, command, timeout);
+    LogIfFail("Set Phy Select Timeout failed", error);
+    return error;
+}
+
+otError getOptions(uint32_t &ptaOptions)
+{
+    static const uint8_t command = CoexCmd::COEX_PTA_OPTIONS_COMMAND;
+    otError error = GetSpinelInterface()->GetWithParam(SPINEL_PROP_VENDOR_COEX,
+    &command, sizeof(command), SPINEL_DATATYPE_UINT32_S, &ptaOptions);
+    LogIfFail("Get PTA Options failed", error);
+    return error;
+}
+
+otError setOptions(uint32_t ptaOptions)
+{
+    static const uint8_t command = CoexCmd::COEX_PTA_OPTIONS_COMMAND;
+    otError error = GetSpinelInterface()->Set(SPINEL_PROP_VENDOR_COEX,
+    SPINEL_DATATYPE_UINT8_S SPINEL_DATATYPE_UINT32_S, command, ptaOptions);
+    LogIfFail("Set PTA Options failed", error);
+    return error;
+}
+
+otError getConstantOptions(uint32_t &ptaOptions)
+{
+    static const uint8_t command = CoexCmd::COEX_CONSTANT_OPTIONS_COMMAND;
+    otError error = GetSpinelInterface()->GetWithParam(SPINEL_PROP_VENDOR_COEX,
+    &command, sizeof(command), SPINEL_DATATYPE_UINT32_S, &ptaOptions);
+    LogIfFail("Get Constant Options failed", error);
+    return error;
+}
+
+otError isEnabled(bool &ptaState)
+{
+    static const uint8_t command = CoexCmd::COEX_PTA_STATE_COMMAND;
+    otError error = GetSpinelInterface()->GetWithParam(SPINEL_PROP_VENDOR_COEX,
+    &command, sizeof(command), SPINEL_DATATYPE_BOOL_S, &ptaState);
+    LogIfFail("Is Enabled failed", error);
+    return error;
+}
+
+otError setEnable(bool ptaState)
+{
+    static const uint8_t command = CoexCmd::COEX_PTA_STATE_COMMAND;
+    otError error = GetSpinelInterface()->Set(SPINEL_PROP_VENDOR_COEX,
+    SPINEL_DATATYPE_UINT8_S SPINEL_DATATYPE_BOOL_S, command, ptaState);
+    LogIfFail("Set Enable failed", error);
+    return error;
+}
+
+otError getRequestPwmArgs(uint8_t &pwmComposite, uint8_t &pwmPulseDc, uint8_t &pwmPeriodHalfMs)
+{
+    static const uint8_t command = CoexCmd::COEX_PWM_STATE_COMMAND;
+    otError error = GetSpinelInterface()->GetWithParam(SPINEL_PROP_VENDOR_COEX,
+    &command, sizeof(command), SPINEL_DATATYPE_UINT8_S SPINEL_DATATYPE_UINT8_S SPINEL_DATATYPE_UINT8_S,
+    &pwmComposite, &pwmPulseDc, &pwmPeriodHalfMs);
+    LogIfFail("Get Request PWM Args failed", error);
+    return error;
+}
+
+otError setRequestPwmArgs(uint8_t pwmComposite, uint8_t pwmPulseDc, uint8_t pwmPeriodHalfMs)
+{
+    static const uint8_t command = CoexCmd::COEX_PWM_STATE_COMMAND;
+    otError error = GetSpinelInterface()->Set(SPINEL_PROP_VENDOR_COEX,
+    SPINEL_DATATYPE_UINT8_S SPINEL_DATATYPE_UINT8_S SPINEL_DATATYPE_UINT8_S SPINEL_DATATYPE_UINT8_S,
+    command, pwmComposite, pwmPulseDc, pwmPeriodHalfMs);
+    LogIfFail("Set Request PWM Args failed", error);
+    return error;
+}
+
+otError clearCoexCounters()
+{
+    static const uint8_t command = CoexCmd::COEX_COUNTERS_COMMAND;
+    otError error = GetSpinelInterface()->Set(SPINEL_PROP_VENDOR_COEX,
+    SPINEL_DATATYPE_UINT8_S, command);
+    LogIfFail("Clear Coex Counters failed", error);
+    return error;
+}
+
+otError getCoexCounters(uint32_t coexCounters[])
+{
+    static const uint8_t command = CoexCmd::COEX_COUNTERS_COMMAND;
+    otError error = GetSpinelInterface()->GetWithParam(SPINEL_PROP_VENDOR_COEX,
+    &command, sizeof(command), SPINEL_DATATYPE_UINT32_S SPINEL_DATATYPE_UINT32_S
+    SPINEL_DATATYPE_UINT32_S SPINEL_DATATYPE_UINT32_S SPINEL_DATATYPE_UINT32_S
+    SPINEL_DATATYPE_UINT32_S, &coexCounters[0], &coexCounters[1], &coexCounters[2],
+    &coexCounters[3], &coexCounters[4], &coexCounters[5]);
+    LogIfFail("Get Coex Counters failed", error);
+    return error;
+}
+
+otError setRadioHoldoff(bool enabled)
+{
+    static const uint8_t command = CoexCmd::COEX_RADIO_HOLDOFF_COMMAND;
+    otError error = GetSpinelInterface()->Set(SPINEL_PROP_VENDOR_COEX,
+    SPINEL_DATATYPE_UINT8_S SPINEL_DATATYPE_BOOL_S, command, enabled);
+    LogIfFail("Set Radio Holdoff failed", error);
+    return error;
+}
+
+} // namespace Coex
+
+namespace Test {
+otError getPtiRadioConfig(uint16_t &aRadioConfig)
+{
+    static const uint8_t command = TestCmd::GEN_PTI_RADIO_CONFIG_COMMAND;
+    otError error = GetSpinelInterface()->GetWithParam(SPINEL_PROP_VENDOR_TEST, 
+    &command, sizeof(command), SPINEL_DATATYPE_UINT16_S, &aRadioConfig);
+    LogIfFail("Get PTI Radio Config failed", error);
+    return error;
+}
+
+otError setCcaMode(uint8_t aMode)
+{
+    static const uint8_t command = TestCmd::GEN_CCA_MODE_COMMAND;
+    otError error = GetSpinelInterface()->Set(SPINEL_PROP_VENDOR_TEST, 
+    SPINEL_DATATYPE_UINT8_S SPINEL_DATATYPE_UINT8_S, command, aMode);
+    LogIfFail("Set CCA Mode failed", error);
+    return error;
+}
+} // namespace Test
+
+} // namespace Vendor
+} // namespace Spinel
+} // namespace ot

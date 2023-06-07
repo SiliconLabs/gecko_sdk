@@ -124,10 +124,9 @@ static bool loadFileIntoOtaStorage(char* file)
 
 #define MAX_FILENAME_SIZE   255
 
-#ifdef UC_BUILD
 #include "sl_cli.h"
 
-void emAfOtaLoadFileCommand(sl_cli_command_arg_t *args)
+void sli_zigbee_af_ota_load_file_command(sl_cli_command_arg_t *args)
 {
   char filename[MAX_FILENAME_SIZE];
   uint8_t *buffer = (uint8_t*)sl_cli_get_argument_string(args, 0);
@@ -144,28 +143,3 @@ void emAfOtaLoadFileCommand(sl_cli_command_arg_t *args)
 
   loadFileIntoOtaStorage(filename);
 }
-
-#else // !UC_BUILD
-
-// TODO: this should be gated once we set up a gating mechanism for the
-// generated CLI
-void emAfOtaLoadFileCommand(void)
-{
-  char filename[MAX_FILENAME_SIZE];
-  uint8_t length = emberCopyStringArgument(0,
-                                           filename,
-                                           MAX_FILENAME_SIZE,
-                                           false);
-  if (length >= MAX_FILENAME_SIZE) {
-    otaPrintln("OTA ERR: filename '%s' is too long (max %d chars)",
-               filename,
-               MAX_FILENAME_SIZE - 1);
-    return;
-  }
-  filename[length] = '\0';
-  otaPrintln("Loading from file: '%s'", filename);
-
-  loadFileIntoOtaStorage(filename);
-}
-
-#endif // UC_BUILD

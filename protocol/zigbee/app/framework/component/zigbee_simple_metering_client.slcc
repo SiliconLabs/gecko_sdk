@@ -38,7 +38,7 @@ template_contribution:
     value:
       group: simple-metering-client
       name: sch-snapshot
-      handler: emAfPluginSimpleMeteringClientCliSchSnapshot
+      handler: sli_zigbee_af_simple_metering_client_cli_sch_snapshot
       help: Schedules a snapshot.
       argument:
       - type: uint16
@@ -67,7 +67,7 @@ template_contribution:
     value:
       group: simple-metering-client
       name: start-sampling
-      handler: emAfPluginSimpleMeteringClientCliStartSampling
+      handler: sli_zigbee_af_simple_metering_client_cli_start_sampling
       help: Sends a start sampling command to a metering server.
       argument:
       - type: uint16
@@ -90,7 +90,7 @@ template_contribution:
     value:
       group: simple-metering-client
       name: get-sampled-data
-      handler: emAfPluginSimpleMeteringClientCliGetSampledData
+      handler: sli_zigbee_af_simple_metering_client_cli_get_sampled_data
       help: Sends a start sampling command to a metering server.
       argument:
       - type: uint16
@@ -111,7 +111,7 @@ template_contribution:
     value:
       group: simple-metering-client
       name: local-change-supply
-      handler: emAfPluginSimpleMeteringClientCliLocalChangeSupply
+      handler: sli_zigbee_af_simple_metering_client_cli_local_change_supply
       help: Sends a start sampling command to a metering server.
       argument:
       - type: uint16

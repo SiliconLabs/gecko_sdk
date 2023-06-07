@@ -15,19 +15,7 @@
  *
  ******************************************************************************/
 
-#ifdef UC_BUILD
 #include "green-power-translation-table-config.h"
-#else // !UC_BUILD
-// In Appbuilder, the EMBER_AF_PLUGIN_GREEN_POWER_TRANSLATION_TABLE_USE_TOKENS is defined
-// (in auto generated AF header) if-and-only-if the token is enabled by user,
-// so just redefine it to 1 else to 0.
-#ifdef EMBER_AF_PLUGIN_GREEN_POWER_TRANSLATION_TABLE_USE_TOKENS
-#undef EMBER_AF_PLUGIN_GREEN_POWER_TRANSLATION_TABLE_USE_TOKENS
-#define EMBER_AF_PLUGIN_GREEN_POWER_TRANSLATION_TABLE_USE_TOKENS 1
-#else
-#define EMBER_AF_PLUGIN_GREEN_POWER_TRANSLATION_TABLE_USE_TOKENS 0
-#endif // EMBER_AF_PLUGIN_GREEN_POWER_TRANSLATION_TABLE_USE_TOKENS
-#endif // UC_BUILD
 
 // Green Power Translation Table Tokens
 #if (EMBER_AF_PLUGIN_GREEN_POWER_TRANSLATION_TABLE_USE_TOKENS == 1)
@@ -65,22 +53,10 @@
 #ifdef DEFINETOKENS
 // Define the actual token storage information here
 
-#ifndef UC_BUILD
-// Not needed for the UC and will be cleaned up.
-#ifndef EMBER_AF_PLUGIN_GREEN_POWER_TRANSLATION_TABLE_CUSTOMIZED_GPD_TRANSLATION_TABLE_SIZE
-#define EMBER_AF_PLUGIN_GREEN_POWER_TRANSLATION_TABLE_CUSTOMIZED_GPD_TRANSLATION_TABLE_SIZE (20)
-#endif
-
-#ifndef EMBER_AF_PLUGIN_GREEN_POWER_TRANSLATION_TABLE_TRANSLATION_TABLE_SIZE
-#define EMBER_AF_PLUGIN_GREEN_POWER_TRANSLATION_TABLE_TRANSLATION_TABLE_SIZE 30
-#endif
-
-#endif // !UC_BUILD
-
 #define EMBER_AF_PLUGIN_GREEN_POWER_SERVER_ADDITIONALINFO_TABLE_SIZE EMBER_AF_PLUGIN_GREEN_POWER_TRANSLATION_TABLE_TRANSLATION_TABLE_SIZE
 
 DEFINE_INDEXED_TOKEN(TRANSLATION_TABLE,
-                     EmGpCommandTranslationTableEntry,
+                     sli_zigbee_af_gp_command_translation_table_entry,
                      EMBER_AF_PLUGIN_GREEN_POWER_TRANSLATION_TABLE_TRANSLATION_TABLE_SIZE,
                      { 0x00, 0x00, 0x00, 0x00, 0x00, { 0x00000000 }, 0x00, 0x00 })
 DEFINE_INDEXED_TOKEN(CUSTOMIZED_TABLE,

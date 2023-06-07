@@ -69,22 +69,22 @@
 
 // <usart signal=TX,RX,CLK,CS> SL_NCP_SPIDRV_USART
 // $[USART_SL_NCP_SPIDRV_USART]
-#define SL_NCP_SPIDRV_USART_PERIPHERAL           USART0
-#define SL_NCP_SPIDRV_USART_PERIPHERAL_NO        0
+#define SL_NCP_SPIDRV_USART_PERIPHERAL           USART2
+#define SL_NCP_SPIDRV_USART_PERIPHERAL_NO        2
 
-// USART0 TX on PC00
+// USART2 TX on PC00
 #define SL_NCP_SPIDRV_USART_TX_PORT              gpioPortC
 #define SL_NCP_SPIDRV_USART_TX_PIN               0
 
-// USART0 RX on PC01
+// USART2 RX on PC01
 #define SL_NCP_SPIDRV_USART_RX_PORT              gpioPortC
 #define SL_NCP_SPIDRV_USART_RX_PIN               1
 
-// USART0 CLK on PC02
+// USART2 CLK on PC02
 #define SL_NCP_SPIDRV_USART_CLK_PORT             gpioPortC
 #define SL_NCP_SPIDRV_USART_CLK_PIN              2
 
-// USART0 CS on PC03
+// USART2 CS on PC03
 #define SL_NCP_SPIDRV_USART_CS_PORT              gpioPortC
 #define SL_NCP_SPIDRV_USART_CS_PIN               3
 

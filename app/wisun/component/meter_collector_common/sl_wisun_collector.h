@@ -35,10 +35,10 @@
 //                                   Includes
 // -----------------------------------------------------------------------------
 
-#include "socket_hnd.h"
 #include "socket.h"
 #include "sli_wisun_meter_collector.h"
 #include "sl_wisun_collector_config.h"
+#include "sl_status.h"
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -80,30 +80,31 @@ void sl_wisun_collector_init_common_resources(void);
  * @brief Register Meter.
  * @details Add meter to the meter storage to handle in measurement loop
  * @param[in] meter_addr meter address structure
- * @return true meter has been successfully added
- * @return false on error
+ * @return SL_STATUS_OK meter has been successfully added
+ * @return SL_STATUS_ALREADY_EXISTS meter had already been added
+ * @return SL_STATUS_FAIL on error
  *****************************************************************************/
-bool sl_wisun_collector_register_meter(const wisun_addr_t *meter_addr);
+sl_status_t sl_wisun_collector_register_meter(const wisun_addr_t *meter_addr);
 
 /**************************************************************************//**
  * @brief Register Meter.
  * @details Add meter to the meter storage to handle in measurement loop
  * @param[in] meter_addr meter address structure
- * @return true meter has been successfully added
- * @return false on error
+ * @return SL_STATUS_OK meter has been successfully added
+ * @return SL_STATUS_FAIL on error
  *****************************************************************************/
-bool sl_wisun_collector_remove_meter(const wisun_addr_t *meter_addr);
+sl_status_t sl_wisun_collector_remove_meter(const wisun_addr_t *meter_addr);
 
 /**************************************************************************//**
  * @brief Get Meter by address.
  * @details Create a meter entry copy to the destination by address
  * @param[in] meter_addr meter address structure
  * @param[in,out] dest_meter destination meter entry
- * @return true meter has been successfully copied
- * @return false on error
+ * @return SL_STATUS_OK meter has been successfully copied
+ * @return SL_STATUS_FAIL on error
  *****************************************************************************/
-bool sl_wisun_collector_get_meter(const wisun_addr_t *meter_addr,
-                                  sl_wisun_meter_entry_t * const dest_meter);
+sl_status_t sl_wisun_collector_get_meter(const wisun_addr_t *meter_addr,
+                                         sl_wisun_meter_entry_t * const dest_meter);
 
 /**************************************************************************//**
  * @brief Compare byte address.

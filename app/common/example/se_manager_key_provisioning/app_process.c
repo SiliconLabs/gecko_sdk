@@ -174,7 +174,16 @@ static const char *tamper_source[SL_SE_TAMPER_SIGNAL_NUM_SIGNALS] = {
   "BOD                   : ",
   "Temperature sensor    : ",
   "DPLL lock fail low    : ",
-  "DPLL lock fial high   : ",
+  "DPLL lock fail high   : ",
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)
+  "ETAMPDET              : ",
+  "PRS0                  : ",
+  "PRS1                  : ",
+  "PRS2                  : ",
+  "PRS3                  : ",
+  "PRS4                  : ",
+  "PRS5                  : ",
+  #else
   "PRS0                  : ",
   "PRS1                  : ",
   "PRS2                  : ",
@@ -182,6 +191,7 @@ static const char *tamper_source[SL_SE_TAMPER_SIGNAL_NUM_SIGNALS] = {
   "PRS4                  : ",
   "PRS5                  : ",
   "PRS6                  : "
+#endif
 #endif
 };
 #endif

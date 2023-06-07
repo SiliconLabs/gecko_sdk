@@ -115,11 +115,11 @@ EmberStatus emberSendUnicastNetworkKeyUpdate(EmberNodeId targetShort,
                                              EmberEUI64  targetLong,
                                              EmberKeyData* newKey);
 #else
-EmberStatus emSendAlternateNetworkKeyToAddress(EmberNodeId targetShort,
-                                               EmberEUI64 targetLong,
-                                               EmberKeyData* newKey);
+EmberStatus sli_zigbee_send_alternate_network_key_to_address(EmberNodeId targetShort,
+                                                             EmberEUI64 targetLong,
+                                                             EmberKeyData* newKey);
 #define emberSendUnicastNetworkKeyUpdate(shortAddr, longAddr, key) \
-  emSendAlternateNetworkKeyToAddress((shortAddr), (longAddr), (key))
+  sli_zigbee_send_alternate_network_key_to_address((shortAddr), (longAddr), (key))
 #endif
 
 /** @brief Send the network key
@@ -213,20 +213,6 @@ EmberJoinDecision emberTrustCenterJoinHandler(EmberNodeId newNodeId,
                                               EmberDeviceUpdate status,
                                               EmberNodeId parentOfNewNode);
 
-/** @brief Cause a coordinator to become the Trust Center
- *    when it is operating in a network that is not using one. It will
- *    send out an updated Network Key to all devices that will indicate a
- *    transition of the network to now use a Trust Center. The Trust Center
- *    should also switch all devices to using the new network key with a call
- *    to emberBroadcastNetworkKeySwitch().
- *
- * @param newNetworkKey  The key data for the Updated Network Key.
- *
- * @return An ::EmberStatus value that indicates the success or failure
- * of the command.
- */
-EmberStatus emberBecomeTrustCenter(EmberKeyData* newNetworkKey);
-
 /** @brief Control the policy that the Trust Center uses
  *  for determining whether to allow or deny requests for Trust Center
  *  link keys.
@@ -241,13 +227,13 @@ EmberStatus emberBecomeTrustCenter(EmberKeyData* newNetworkKey);
  *      on). Afterwards, requests for the TC link key should be denied.
  */
 #ifdef EMBER_MULTI_NETWORK_STRIPPED
-#define emGetNetworkIndexForForkedGlobal()  0
+#define sli_zigbee_get_network_index_for_forked_global()  0
 #else // EMBER_MULTI_NETWORK_STRIPPED
-extern uint8_t emGetNetworkIndexForForkedGlobal(void);
+extern uint8_t sli_zigbee_get_network_index_for_forked_global(void);
 #endif // EMBER_MULTI_NETWORK_STRIPPED
 
 extern EmberTcLinkKeyRequestPolicy emberTrustCenterLinkKeyRequestPolicies[];
-#define emberTrustCenterLinkKeyRequestPolicy emberTrustCenterLinkKeyRequestPolicies[emGetNetworkIndexForForkedGlobal()]
+#define emberTrustCenterLinkKeyRequestPolicy emberTrustCenterLinkKeyRequestPolicies[sli_zigbee_get_network_index_for_forked_global()]
 
 /** @brief Control the policy that the Trust Center uses
  *  for determining whether to allow or deny requests for application
@@ -259,7 +245,7 @@ extern EmberTcLinkKeyRequestPolicy emberTrustCenterLinkKeyRequestPolicies[];
  *  Generally, application link key requests may always be allowed.
  */
 extern EmberAppLinkKeyRequestPolicy emberAppLinkKeyRequestPolicies[];
-#define emberAppLinkKeyRequestPolicy emberAppLinkKeyRequestPolicies[emGetNetworkIndexForForkedGlobal()]
+#define emberAppLinkKeyRequestPolicy emberAppLinkKeyRequestPolicies[sli_zigbee_get_network_index_for_forked_global()]
 
 /** @brief Send an APS remove device command to the destination.
  *    If the destination is an end device, this must be sent to

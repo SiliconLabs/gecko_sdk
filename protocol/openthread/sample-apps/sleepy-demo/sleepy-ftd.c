@@ -36,8 +36,9 @@
 #define MULTICAST_ADDR "ff03::1"
 #define MULTICAST_PORT 123
 #define RECV_PORT 234
-#define MTD_MESSAGE "mtd button"
 #define FTD_MESSAGE "ftd button"
+#define MTD_MESSAGE "mtd button"
+#define SSED_MESSAGE "ssed button"
 
 // Forward declarations
 otInstance *otGetInstance(void);
@@ -199,8 +200,9 @@ void sFtdReceiveCallback(void *aContext, otMessage *aMessage, const otMessageInf
     length      = otMessageRead(aMessage, otMessageGetOffset(aMessage), buf, sizeof(buf) - 1);
     buf[length] = '\0';
 
-    // Check that the payload matches MTD_MESSAGE
-    VerifyOrExit(strncmp((char *)buf, MTD_MESSAGE, sizeof(MTD_MESSAGE)) == 0);
+    // Check that the payload matches MTD_MESSAGE or SSED_MESSAGE
+    VerifyOrExit(strncmp((char *)buf, MTD_MESSAGE, sizeof(MTD_MESSAGE)) == 0
+                 || strncmp((char *)buf, SSED_MESSAGE, sizeof(SSED_MESSAGE)) == 0);
 
     // Store the MTD's address
     sHaveSwitchAddress = true;

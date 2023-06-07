@@ -95,5 +95,5 @@ void emberAfPluginStandaloneBootloaderServerFinishedCallback(bool success);
 /** @} */ // end of name Callbacks
 /** @} */ // end of standalone-bootloader-server
 
-void emAfStandaloneBootloaderServerPrintTargetClientInfoCommand(void);
-void emAfStandaloneBootloaderServerPrintStatus(void);
+void sli_zigbee_af_standalone_bootloader_server_print_target_client_info_command(void);
+void sli_zigbee_af_standalone_bootloader_server_print_status(void);

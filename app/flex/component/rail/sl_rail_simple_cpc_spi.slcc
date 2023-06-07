@@ -1,0 +1,64 @@
+id: sl_rail_simple_cpc_spi
+label: Simple RAIL CPC for NCP projects (SPI)
+package: Flex
+description: >
+  Component that provides simple communication interface for CPC using recommended CPC communication.
+  This component is mainly used in NCP communication cases.
+category: "Flex|RAIL|Extension"
+quality: production
+root_path: app/flex/component/rail/sl_rail_simple_cpc
+config_file:
+  - path: config/sl_rail_simple_cpc_config.h
+source:
+  - path: sl_rail_simple_cpc.c
+    condition:
+      - cpc_core
+include:
+  - path: .
+    file_list:
+      - path: sl_rail_simple_cpc.h
+provides:
+  - name: rail_simple_cpc
+requires:
+  - name: cpc_secondary
+  - name: status
+  - name: emlib_common
+  - name: emlib_core
+  - name: emlib_cmu
+
+recommends:
+  - id: cpc_secondary_driver_spi_usart
+    instance:
+    - exp
+    condition: [device_series_1]
+  - id: cpc_secondary_driver_spi_eusart
+    instance:
+    - exp
+    condition: [device_series_2]
+    unless: [device_sdid_205]
+  - id: cpc_secondary_driver_spi_usart
+    instance:
+    - exp
+    condition: [device_sdid_205]
+    
+
+template_contribution:
+  - name: component_catalog
+    value: rail_simple_cpc
+  - name: component_catalog
+    value: rail_ncp
+    condition:
+    - cpc_core
+  - name: event_handler
+    value:
+      event: internal_app_init
+      include: sl_rail_simple_cpc.h
+      handler: sl_rail_simple_cpc_init
+    priority: 2
+  - name: event_handler
+    value:
+      event: service_process_action
+      include: sl_rail_simple_cpc.h
+      handler: sl_rail_simple_cpc_step
+    unless:
+      - kernel

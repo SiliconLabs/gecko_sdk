@@ -43,7 +43,7 @@ template_contribution:
   - name: zigbee_stack_callback
     value:
       callback_type: stack_status
-      function_name: emAfPluginZllCommissioningCommonStackStatusCallback
+      function_name: sli_zigbee_af_zll_commissioning_common_stack_status_callback
   - name: cli_group
     value:
       group: plugin

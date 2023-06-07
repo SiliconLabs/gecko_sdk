@@ -21,9 +21,11 @@
 
 #include "app/framework/plugin/ota-client/ota-client.h"
 
-#ifdef UC_BUILD
+#ifdef EMBER_SCRIPTED_TEST
+#include "config/ota-client-policy-config.h"
+#else
 #include "ota-client-policy-config.h"
-#endif // UC_BUILD
+#endif
 
 // Note: EMBER_AF_MANUFACTURER_CODE defined in client's config
 

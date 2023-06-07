@@ -20,7 +20,7 @@
 #include "stack/include/ember-types.h"
 #include "stack/include/library.h"
 
-const EmberLibraryStatus emCbke283k1DsaVerifyLibraryStatus = EMBER_LIBRARY_IS_STUB;
+const EmberLibraryStatus sli_zigbee_cbke283k1_dsa_verify_library_status = EMBER_LIBRARY_IS_STUB;
 
 EmberStatus emberDsaVerify283k1(EmberMessageDigest* digest,
                                 EmberCertificate283k1Data* signerCertificate,
@@ -32,6 +32,6 @@ EmberStatus emberDsaVerify283k1(EmberMessageDigest* digest,
   return EMBER_LIBRARY_NOT_PRESENT;
 }
 
-void emDsaVerify283k1(void)
+void sli_zigbee_dsa_verify283k1(void)
 {
 }

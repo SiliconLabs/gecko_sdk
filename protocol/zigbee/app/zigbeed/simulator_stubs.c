@@ -64,7 +64,7 @@ void scriptTestCheckpoint(char* string, ...)
 {
 }
 
-// Referenced from emLinkReportCosts in neighbor.c
+// Referenced from sli_zigbee_report_link_costs in neighbor.c
 void sendLogEvent(char *types, char *data)
 {
 }
@@ -82,7 +82,7 @@ void simulatedTimePasses(void)
 #include "sl_status.h"
 #include "sl_iostream.h"
 
-// Referenced from emSourceRouteUpdateEventHandler in source-route-update.c
+// Referenced from sli_zigbee_source_route_update_event_handler in source-route-update.c
 EmberStatus emberSerialPrintfLine(uint8_t port, PGM_P formatString, ...)
 {
   return 0;

@@ -14,7 +14,7 @@ class ProfileWisunFanMargay(ProfileWisunFanOcelot):
 
     def build_register_profile_outputs(self, model, profile):
         build_modem_regs_margay(model, profile)
-        buildFrameOutputs(model, profile, self._family)
-        buildCrcOutputs(model, profile, self._family)
+        buildFrameOutputs(model, profile)
+        buildCrcOutputs(model, profile)
         buildWhiteOutputs(model, profile)
         buildFecOutputs(model, profile)

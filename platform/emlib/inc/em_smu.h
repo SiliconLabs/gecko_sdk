@@ -438,7 +438,9 @@ typedef enum {
 #if defined(_SMU_PPUPATD0_I2C1_SHIFT)
   smuPeripheralI2C1         = _SMU_PPUPATD0_I2C1_SHIFT,           /**< SMU peripheral identifier for I2C1      */
 #endif
+#if defined(_SMU_PPUPATD0_CHIPTESTCTRL_SHIFT)
   smuPeripheralCHIPTESTCTRL = _SMU_PPUPATD0_CHIPTESTCTRL_SHIFT,   /**< SMU peripheral identifier for CHIPTESTCTRL */
+#endif
 #if defined(_SMU_PPUPATD0_SYSCFGCFGNS_SHIFT)
   smuPeripheralSYSCFGCFGNS  = _SMU_PPUPATD0_SYSCFGCFGNS_SHIFT,    /**< SMU peripheral identifier for SYSCFGCFGNS */
 #endif

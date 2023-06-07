@@ -19,7 +19,7 @@ component:
   - id: zw_cc_battery_nvm
   - id: zw_cc_common
   - id: zw_cc_manufacturerspecific
-  - id: zw_cc_multichannelcontrol
+  - id: zw_cc_multi_channel_control
   - id: zw_cc_supervision
   - id: zw_cc_zwaveplusinfo
   - id: zw_cc_deviceresetlocally
@@ -41,22 +41,27 @@ component:
   - id: iostream_recommended_stream
   - id: mpu # disable execution from RAM
   - id: freertos_heap_4
+  - id: ZW_MIGRATION_TO_7_19
 source:
-  - path: app.c
   - path: main.c
   - path: network_management.c
   - path: node_storage.c
-  - path: key_fob.c
+  - path: app.c
 include:
   - path: .
     file_list:
-    - path: app.h
-    - path: config_app.h
     - path: events.h
     - path: network_management.h
     - path: node_storage.h
 
 configuration:
+  # Version numbers are equal to ZAF_VERSION_MAJOR, ZAF_VERSION_MINOR, ZAF_VERSION_PATCH
+  - name: APP_VERSION
+    value: 10
+  - name: APP_REVISION
+    value: 20
+  - name: APP_PATCH
+    value: 0
   - name: ZAF_CONFIG_REQUEST_KEY_S0
     value: 1
   - name: ZAF_CONFIG_REQUEST_KEY_S2_UNAUTHENTICATED
@@ -111,8 +116,6 @@ configuration:
     value: 8
   - name: SL_DEVICE_INIT_DCDC_BYPASS
     value: 1
-  - name: SL_POWER_MANAGER_LOWEST_EM_ALLOWED 
-    value: 3    
   - name: SL_PSA_ITS_USER_MAX_FILES
     value: 32
     condition: ["device_series_2", "device_security_vault"]
@@ -136,14 +139,21 @@ configuration:
     value: 1
   - name: SL_PSA_ITS_SUPPORT_V3_DRIVER
     value: 1
+  - name: ZAF_APP_NAME
+    value: '"key_fob"'
 
 define:
   - name: APP_PROPERTIES_CONFIG_FILE
     value: <application_properties_config.h>
+  - name: FILE_ID_APPLICATIONDATA # File identifiers for application file system
+    value: "0x00000" # Range: 0x00000 - 0x0FFFF
 
 other_file:
   - path: ../../DevTools/postbuild.sh
 
+post_build:
+  profile: zwave_soc_key_fob
+  
 tag:
   - prebuilt_demo
 

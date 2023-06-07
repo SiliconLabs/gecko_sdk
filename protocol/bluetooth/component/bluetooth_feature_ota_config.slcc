@@ -12,7 +12,7 @@ description: >
   This configuration is not available to the Apploader on series 2 devices.
   On series 2, the Apploader runs in the Bootloader as a communication plugin,
   and the configuration can be implemented in the Apploader application directly.
-category: "Bluetooth|OTA"
+category: Bluetooth|Application|Firmware Update
 quality: "production"
 root_path: "protocol/bluetooth"
 requires:

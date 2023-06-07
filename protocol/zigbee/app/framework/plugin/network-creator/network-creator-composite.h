@@ -26,7 +26,7 @@
 typedef struct {
   uint8_t beaconsHeard;
   int8_t maxRssiHeard;
-} EmAfPluginNetworkCreatorChannelComposite;
+} sli_zigbee_af_network_creator_channel_composite;
 
 // The minimum for a signed 8 bit integer.
 #define EM_AF_PLUGIN_NETWORK_CREATOR_CHANNEL_COMPOSITE_INVALID_RSSI (-128)
@@ -35,7 +35,7 @@ enum {
   EM_AF_PLUGIN_NETWORK_CREATOR_CHANNEL_COMPOSITE_METRIC_BEACONS  = 0,
   EM_AF_PLUGIN_NETWORK_CREATOR_CHANNEL_COMPOSITE_METRIC_RSSI     = 1,
 };
-typedef uint8_t EmAfPluginNetworkCreatorChannelCompositeMetric;
+typedef uint8_t sli_zigbee_af_network_creator_channel_compositeMetric;
 
 // Here are the threshold values for the channel composite struct. These enable
 // the network creator to use discrete logic to find the best channel on which
@@ -46,8 +46,8 @@ typedef uint8_t EmAfPluginNetworkCreatorChannelCompositeMetric;
   #define EMBER_AF_PLUGIN_NETWORK_CREATOR_CHANNEL_BEACONS_THRESHOLD 20
 #endif
 
-#define emAfPluginNetworkCreatorChannelCompositeIsAboveThreshold(composite) \
-  (((composite).beaconsHeard                                                \
+#define sli_zigbee_af_network_creator_channel_composite_is_above_threshold(composite) \
+  (((composite).beaconsHeard                                                          \
     > EMBER_AF_PLUGIN_NETWORK_CREATOR_CHANNEL_BEACONS_THRESHOLD))
 
 // This is the number of 802.15.4 channels that the internal logic

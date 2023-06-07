@@ -245,6 +245,8 @@
   "DisableConfigurationMode": "zcl sl-wwah disable-config-mode",
   "UseTrustCenterForClusterServer": "zcl sl-wwah use-tc-for-cluster-server",
   "TrustCenterForClusterServerQuery": "zcl sl-wwah query-tc-for-cluster-server",
-  "EnableApsLinkKeyAuthorization": "zcl sl-wwah enable-aps-link-key-auth"
+  "EnableApsLinkKeyAuthorization": "zcl sl-wwah enable-aps-link-key-auth",
+  "ConfigureInterface": "zcl zigbee-direct config-interface",
+  "ConfigureAnonymousJoinTimeout": "zcl zigbee-direct config-anonymous-join-timeout"
 
 }

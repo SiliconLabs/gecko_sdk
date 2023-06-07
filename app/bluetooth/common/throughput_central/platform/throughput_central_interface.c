@@ -27,7 +27,7 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
-#include "sl_simple_timer.h"
+#include "app_timer.h"
 #include "throughput_central_interface.h"
 #include "throughput_types.h"
 #include "app_assert.h"
@@ -37,9 +37,9 @@
 static throughput_count_t time_storage = 0;
 
 /// RSSI refresh timer
-static sl_simple_timer_t refresh_timer;
+static app_timer_t refresh_timer;
 
-static void refresh_timer_callback(sl_simple_timer_t *timer,
+static void refresh_timer_callback(app_timer_t *timer,
                                    void *data)
 {
   (void)timer;
@@ -80,11 +80,11 @@ void timer_refresh_rssi_start(void)
 {
   // Start refresh timer
   sl_status_t sc;
-  sc = sl_simple_timer_start(&refresh_timer,
-                             THROUGHPUT_CENTRAL_REFRESH_TIMER_PERIOD,
-                             refresh_timer_callback,
-                             NULL,
-                             true);
+  sc = app_timer_start(&refresh_timer,
+                       THROUGHPUT_CENTRAL_REFRESH_TIMER_PERIOD,
+                       refresh_timer_callback,
+                       NULL,
+                       true);
   app_assert_status(sc);
 }
 
@@ -95,6 +95,6 @@ void timer_refresh_rssi_stop(void)
 {
   // Stop refresh timer
   sl_status_t sc;
-  sc = sl_simple_timer_stop(&refresh_timer);
+  sc = app_timer_stop(&refresh_timer);
   app_assert_status(sc);
 }

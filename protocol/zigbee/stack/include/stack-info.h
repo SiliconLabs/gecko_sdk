@@ -166,19 +166,19 @@ void emberSetMaximumOutgoingTransferSize(uint16_t size);
 void emberSetDescriptorCapability(uint8_t capability);
 
 #else   // Doxygen ignores the following
-extern EmberEUI64 emLocalEui64;
-#define emberGetEui64() (emLocalEui64)
+extern EmberEUI64 sli_802154mac_local_eui64;
+#define emberGetEui64() (sli_802154mac_local_eui64)
 #define emberIsLocalEui64(eui64) \
-  (MEMCOMPARE((eui64), emLocalEui64, EUI64_SIZE) == 0)
+  (MEMCOMPARE((eui64), sli_802154mac_local_eui64, EUI64_SIZE) == 0)
 
 EmberNodeId emberGetNodeId(void);
 EmberNodeId emberRadioGetNodeId(void);
 
-extern uint16_t emManufacturerCode;
-extern uint16_t emPowerDescriptor;
-extern uint16_t emMaximumIncomingTransferSize;
-extern uint16_t emMaximumOutgoingTransferSize;
-extern uint8_t emDescriptorCapability;
+extern uint16_t sli_zigbee_manufacturer_code;
+extern uint16_t sli_zigbee_power_descriptor;
+extern uint16_t sli_zigbee_maximum_incoming_transfer_size;
+extern uint16_t sli_zigbee_maximum_outgoing_transfer_size;
+extern uint8_t sli_zigbee_descriptor_capability;
 
 enum {
   EMBER_ROUTE_ERROR_NO_ROUTE_AVAILABLE    = 0x00,
@@ -218,13 +218,13 @@ enum {
 EmberStatus emberSetBrokenRouteErrorCode(uint8_t errorCode);
 
 #define emberSetManufacturerCode(code) \
-  (emManufacturerCode = (code))
+  (sli_zigbee_manufacturer_code = (code))
 #define emberSetMaximumIncomingTransferSize(size) \
-  (emMaximumIncomingTransferSize = (size))
+  (sli_zigbee_maximum_incoming_transfer_size = (size))
 #define emberSetMaximumOutgoingTransferSize(size) \
-  (emMaximumOutgoingTransferSize = (size))
+  (sli_zigbee_maximum_outgoing_transfer_size = (size))
 #define emberSetDescriptorCapability(capability) \
-  (emDescriptorCapability = (capability))
+  (sli_zigbee_descriptor_capability = (capability))
 #endif
 
 /** @brief Copy the current network parameters into the structure
@@ -430,6 +430,17 @@ extern EmberEndpoint emberEndpoints[];
  * @return The endpoint number for the index'th endpoint.
  */
 uint8_t emberGetEndpoint(uint8_t index);
+
+/** @brief Retrieve the number of configured endpoints.
+ *
+ * the value of emberEndpointCount.
+ *
+ * This function return the number of configured endpoints on SoC,
+ * or the number of configured endpoints on Host + on NCP.
+ *
+ * @return The number of configured endpoint.
+ */
+uint8_t emberGetEndpointCount(void);
 
 /** @brief Retrieve the endpoint description for the
  * given endpoint.
@@ -690,17 +701,17 @@ uint8_t emberRouteTableSize(void);
 
 #else   // Doxgyen ignores the following
 // The '+ 0' prevents anyone from accidentally assigning to these.
-#define emberTreeDepth()           (emTreeDepth         + 0)
-#define emberMaxDepth()            (emMaxDepth          + 0)
-#define emberRouteTableSize()      (emRouteTableSize    + 0)
+#define emberTreeDepth()           (sli_zigbee_tree_depth         + 0)
+#define emberMaxDepth()            (sli_zigbee_max_depth          + 0)
+#define emberRouteTableSize()      (sli_zigbee_route_table_size    + 0)
 
-extern uint8_t emDefaultSecurityLevel;
-extern uint8_t emMaxHops;
-extern uint8_t emRouteTableSize;
-extern uint8_t emSourceRouteTableSize;
-extern uint8_t emMaxDepth;                // The maximum tree depth.
-extern uint8_t emTreeDepth;               // The current depth.
-extern uint8_t emEndDeviceConfiguration;
+extern uint8_t sli_zigbee_default_security_level;
+extern uint8_t sli_zigbee_max_hops;
+extern uint8_t sli_zigbee_route_table_size;
+extern uint8_t sli_zigbee_source_route_table_size;
+extern uint8_t sli_zigbee_max_depth;                // The maximum tree depth.
+extern uint8_t sli_zigbee_tree_depth;               // The current depth.
+extern uint8_t sli_zigbee_end_device_configuration;
 
 /** @brief Set the stack profile of the network.
  * This API is for SoC Only, Host-NCP should use
@@ -953,6 +964,19 @@ EmberStatus emberGetTokenData(uint32_t token,
 EmberStatus emberSetTokenData(uint32_t token,
                               uint32_t index,
                               EmberTokenData *tokenData);
+
+/**
+ * @brief Update function to accept a rejoin channel mask for Multi-MAC end device types.
+ * The following function is called for a Multi-MAC end device to allow the user configuration of
+ * the device to update channel mask for the scenario where a rejoin is initiated due to end device
+ * timeout event. Based on the Multi-MAC end device configuration this call is expected to update
+ * the mask so that the rejoin interface will be selected. As per the SE 1.4 errata, the
+ * "Multi-MAC Selection" end device can change the rejoin interface where as the Multi-MAC Joining
+ * end devices shall not.
+ * @param rejoinChannelMask 32-bit channel mask.
+ *
+ */
+void emberUpdateMultiMacRejoinChannelMaskForSelectionOrJoiningDevice(uint32_t *rejoinChannelMask);
 
 /** @} END addtogroup */
 

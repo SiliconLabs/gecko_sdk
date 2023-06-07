@@ -37,7 +37,7 @@
 
 #include <stdio.h>
 #include "app_assert.h"
-#include "sl_simple_timer.h"
+#include "app_timer.h"
 
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
@@ -67,23 +67,23 @@
 #define NO_CALLBACK_DATA               (void *)NULL
 
 /// Friend finding timer handler
-static sl_simple_timer_t lpn_friend_find_timer;
+static app_timer_t lpn_friend_find_timer;
 /// Node configuration timer handler
-static sl_simple_timer_t lpn_node_configured_timer;
+static app_timer_t lpn_node_configured_timer;
 /// High throughput timer handler
-static sl_simple_timer_t lpn_high_throughput_timer;
+static app_timer_t lpn_high_throughput_timer;
 
 /// High throughput timing list head
 static sl_btmesh_lpn_high_throughput_timer_t *lpn_high_throughput_head;
 
 /// Friend finding timer callback
-static void lpn_friend_find_timer_cb(sl_simple_timer_t *handle,
+static void lpn_friend_find_timer_cb(app_timer_t *handle,
                                      void *data);
 /// Node configuration timer callback
-static void lpn_node_configured_timer_cb(sl_simple_timer_t *handle,
+static void lpn_node_configured_timer_cb(app_timer_t *handle,
                                          void *data);
 /// High throughput timer callback
-static void lpn_high_throughput_timer_cb(sl_simple_timer_t *handle,
+static void lpn_high_throughput_timer_cb(app_timer_t *handle,
                                          void *data);
 
 /// Flag for indicating that lpn feature is active
@@ -221,7 +221,7 @@ void sl_btmesh_lpn_feature_deinit(void)
   }
 
   // Cancel friend finding timer
-  sl_status_t sc = sl_simple_timer_stop(&lpn_friend_find_timer);
+  sl_status_t sc = app_timer_stop(&lpn_friend_find_timer);
   app_assert_status_f(sc, "Failed to stop timer");
 
   // Terminate friendship if exist
@@ -300,11 +300,11 @@ void sl_btmesh_lpn_on_event(sl_btmesh_msg_t* evt)
         evt->data.evt_lpn_friendship_failed.reason);
 
       // try again after timer expires
-      sl_status_t sc = sl_simple_timer_start(&lpn_friend_find_timer,
-                                             SL_BTMESH_LPN_FRIEND_FIND_TIMEOUT_CFG_VAL,
-                                             lpn_friend_find_timer_cb,
-                                             NO_CALLBACK_DATA,
-                                             false);
+      sl_status_t sc = app_timer_start(&lpn_friend_find_timer,
+                                       SL_BTMESH_LPN_FRIEND_FIND_TIMEOUT_CFG_VAL,
+                                       lpn_friend_find_timer_cb,
+                                       NO_CALLBACK_DATA,
+                                       false);
       app_assert_status_f(sc, "Failed to start timer");
 
       break;
@@ -316,11 +316,11 @@ void sl_btmesh_lpn_on_event(sl_btmesh_msg_t* evt)
       friend_address = 0;
       if (num_mesh_proxy_conn == 0) {
         // try again after timer expires
-        sl_status_t sc = sl_simple_timer_start(&lpn_friend_find_timer,
-                                               SL_BTMESH_LPN_FRIEND_FIND_TIMEOUT_CFG_VAL,
-                                               lpn_friend_find_timer_cb,
-                                               NO_CALLBACK_DATA,
-                                               false);
+        sl_status_t sc = app_timer_start(&lpn_friend_find_timer,
+                                         SL_BTMESH_LPN_FRIEND_FIND_TIMEOUT_CFG_VAL,
+                                         lpn_friend_find_timer_cb,
+                                         NO_CALLBACK_DATA,
+                                         false);
         app_assert_status_f(sc, "Failed to start timer");
       }
       break;
@@ -358,11 +358,11 @@ sl_status_t sl_btmesh_lpn_high_throughput_register(sl_btmesh_lpn_high_throughput
     // If head is not yet set, set this as the head
     lpn_high_throughput_head = handle;
     // Since head was not set, the timer is turned off as well
-    sl_status_t sc = sl_simple_timer_start(&lpn_high_throughput_timer,
-                                           handle->timeout,
-                                           lpn_high_throughput_timer_cb,
-                                           NULL,
-                                           false);
+    sl_status_t sc = app_timer_start(&lpn_high_throughput_timer,
+                                     handle->timeout,
+                                     lpn_high_throughput_timer_cb,
+                                     NULL,
+                                     false);
     log_status_error_f(sc, "Failed to start timer" NL);
   } else if (lpn_high_throughput_head == handle) {
     // If only one element is registered, the loop below would not detect it
@@ -394,11 +394,11 @@ sl_status_t sl_btmesh_lpn_high_throughput_register(sl_btmesh_lpn_high_throughput
   // restart timer with the faster.
   // This might also be the case for re-registering a slowing timer as well.
   if (lpn_high_throughput_timer.timeout_ms > handle->timeout) {
-    sl_status_t sc = sl_simple_timer_start(&lpn_high_throughput_timer,
-                                           handle->timeout,
-                                           lpn_high_throughput_timer_cb,
-                                           NULL,
-                                           false);
+    sl_status_t sc = app_timer_start(&lpn_high_throughput_timer,
+                                     handle->timeout,
+                                     lpn_high_throughput_timer_cb,
+                                     NULL,
+                                     false);
     log_status_error_f(sc, "Failed to start timer" NL);
   }
   return retval;
@@ -451,11 +451,11 @@ static void lpn_establish_friendship(void)
  ******************************************************************************/
 static void set_configuration_timer(uint32_t delay)
 {
-  sl_status_t sc = sl_simple_timer_start(&lpn_node_configured_timer,
-                                         delay,
-                                         lpn_node_configured_timer_cb,
-                                         NO_CALLBACK_DATA,
-                                         false);
+  sl_status_t sc = app_timer_start(&lpn_node_configured_timer,
+                                   delay,
+                                   lpn_node_configured_timer_cb,
+                                   NO_CALLBACK_DATA,
+                                   false);
   app_assert_status_f(sc, "Failed to start timer");
 }
 
@@ -463,7 +463,7 @@ static void set_configuration_timer(uint32_t delay)
  * @addtogroup btmesh_lpn_tmr_cb Timer Callbacks
  * @{
  *****************************************************************************/
-static void lpn_friend_find_timer_cb(sl_simple_timer_t *handle, void *data)
+static void lpn_friend_find_timer_cb(app_timer_t *handle, void *data)
 {
   (void)data;
   (void)handle;
@@ -471,7 +471,7 @@ static void lpn_friend_find_timer_cb(sl_simple_timer_t *handle, void *data)
   lpn_establish_friendship();
 }
 
-static void  lpn_node_configured_timer_cb(sl_simple_timer_t *handle, void *data)
+static void  lpn_node_configured_timer_cb(app_timer_t *handle, void *data)
 {
   (void)data;
   (void)handle;
@@ -482,7 +482,7 @@ static void  lpn_node_configured_timer_cb(sl_simple_timer_t *handle, void *data)
   }
 }
 
-static void lpn_high_throughput_timer_cb(sl_simple_timer_t *handle, void *data)
+static void lpn_high_throughput_timer_cb(app_timer_t *handle, void *data)
 {
   (void)data;
   (void)handle;
@@ -507,11 +507,11 @@ static void lpn_high_throughput_timer_cb(sl_simple_timer_t *handle, void *data)
 
   if (fastest->timeout < SL_BTMESH_LPN_POLL_TIMEOUT_CFG_VAL) {
     // Start a timer with the timeout value
-    sl_status_t sc = sl_simple_timer_start(&lpn_high_throughput_timer,
-                                           fastest->timeout,
-                                           lpn_high_throughput_timer_cb,
-                                           NULL,
-                                           false);
+    sl_status_t sc = app_timer_start(&lpn_high_throughput_timer,
+                                     fastest->timeout,
+                                     lpn_high_throughput_timer_cb,
+                                     NULL,
+                                     false);
     app_assert_status_f(sc, "Failed to start timer");
 
     switch (fastest->mode) {

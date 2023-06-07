@@ -34,6 +34,10 @@
 #define BUTTON_INSTANCE_1   sl_button_btn1
 #endif
 
+#ifndef LCD_MAX_LINES
+#define LCD_MAX_LINES      11
+#endif
+
 /*******************************************************************************
  ***************************  LOCAL VARIABLES   ********************************
  ******************************************************************************/
@@ -120,6 +124,10 @@ void sl_button_on_change(const sl_button_t *handle)
       currentLine = 0;
       GLIB_clear(&glibContext);
     } else if (&BUTTON_INSTANCE_1 == handle) {
+      if (currentLine > LCD_MAX_LINES) {
+        currentLine = 0;
+        GLIB_clear(&glibContext);
+      }
       GLIB_drawStringOnLine(&glibContext,
                             "Hello World!",
                             currentLine++,

@@ -56,6 +56,7 @@ source:
   - path: tensorflow/lite/micro/kernels/dequantize.cc
   - path: tensorflow/lite/micro/kernels/dequantize_common.cc
   - path: tensorflow/lite/micro/kernels/detection_postprocess.cc
+  - path: tensorflow/lite/micro/kernels/div.cc
   - path: tensorflow/lite/micro/kernels/elementwise.cc
   - path: tensorflow/lite/micro/kernels/elu.cc
   - path: tensorflow/lite/micro/kernels/ethosu.cc
@@ -108,10 +109,12 @@ source:
   - path: tensorflow/lite/micro/kernels/quantize_common.cc
   - path: tensorflow/lite/micro/kernels/read_variable.cc
   - path: tensorflow/lite/micro/kernels/reduce.cc
+  - path: tensorflow/lite/micro/kernels/reduce_common.cc
   - path: tensorflow/lite/micro/kernels/reshape.cc
   - path: tensorflow/lite/micro/kernels/resize_bilinear.cc
   - path: tensorflow/lite/micro/kernels/resize_nearest_neighbor.cc
   - path: tensorflow/lite/micro/kernels/round.cc
+  - path: tensorflow/lite/micro/kernels/select.cc
   - path: tensorflow/lite/micro/kernels/shape.cc
   - path: tensorflow/lite/micro/kernels/slice.cc
   - path: tensorflow/lite/micro/kernels/softmax.cc
@@ -122,6 +125,7 @@ source:
   - path: tensorflow/lite/micro/kernels/space_to_depth.cc
   - path: tensorflow/lite/micro/kernels/split.cc
   - path: tensorflow/lite/micro/kernels/split_v.cc
+  - path: tensorflow/lite/micro/kernels/squared_difference.cc
   - path: tensorflow/lite/micro/kernels/squeeze.cc
   - path: tensorflow/lite/micro/kernels/strided_slice.cc
   - path: tensorflow/lite/micro/kernels/sub.cc

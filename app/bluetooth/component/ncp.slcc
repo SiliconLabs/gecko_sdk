@@ -2,9 +2,14 @@ id: ncp
 label: NCP Interface
 package: Bluetooth
 description: Component that provides the Bluetooth Network Co-Processor (NCP) communication interface.
-category: Bluetooth|NCP|Target
+
+  This is a No-Code component.
+category: Bluetooth|NCP Interface
 quality: production
 root_path: app/bluetooth/common/ncp
+tag:
+  - No-Code
+
 config_file:
   - path: config/sl_ncp_config.h
   - path: config/sl_ncp_freertos_config.h
@@ -35,10 +40,10 @@ requires:
   - name: emlib_core
   - name: ncp_evt_filter
   - name: simple_com
-  - name: simple_timer
+  - name: app_timer
   - name: status
 recommends:
-  - id: simple_timer
+  - id: app_timer
 define:
   - name: "SL_BT_API_FULL"
 template_contribution:

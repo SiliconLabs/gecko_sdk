@@ -40,6 +40,8 @@ typedef enum {
   READ_SERIAL_NUMBER,
   READ_PUB_SIGN_KEY,
   READ_PUB_CMD_KEY,
+  READ_LOCK_STATUS,
+  SELECT_DBG_RESTRICT_MODE,
   ENABLE_SECURE_DEBUG,
   DISABLE_SECURE_DEBUG,
   LOCK_DEVICE,
@@ -66,6 +68,7 @@ typedef enum {
   GET_DEVICE_INFO,
   PROG_MAIN_FLASH_SE,
   PROG_MAIN_FLASH_SIGNED,
+  SET_DBG_RESTRICTIONS,
   APP_ERROR,
   APP_EXIT
 } state_t;
@@ -74,19 +77,21 @@ typedef enum {
 #define INTERFACE_NUM           (2)
 
 /// Number of DCI tasks
-#define DCI_TASK_NUM            (16)
+#define DCI_TASK_NUM            (18)
 
 /// Number of SWD tasks
 #define SWD_TASK_NUM            (5)
+
+#define DBG_RESTRICT_NUM        (4)
 
 /// DCI number
 #define DCI_SELECT              (0)
 
 /// Boundary for command requires confirmation
-#define CONFIRM_COMMAND         (4)
+#define CONFIRM_COMMAND         (5)
 
 /// Boundary for one-time command
-#define ONE_TIME_COMMAND        (10)
+#define ONE_TIME_COMMAND        (12)
 
 /// Recover device item number
 #define RECOVER_SELECT          (9)
@@ -195,6 +200,8 @@ typedef enum {
 
 /// Tamper reset threshold shift
 #define TAMPER_RESET_SHIFT      (24)
+
+#define NUM_DEBUG_LOCK_BITS      (9)
 
 // -----------------------------------------------------------------------------
 //                                Global Variables

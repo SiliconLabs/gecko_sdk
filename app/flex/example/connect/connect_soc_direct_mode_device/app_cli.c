@@ -42,6 +42,7 @@
 #include "sl_cli.h"
 #include "app_log.h"
 #include "stack-info.h"
+#include "sl_connect_config.h"
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -342,7 +343,7 @@ void cli_tx_test(sl_cli_command_arg_t *arguments)
 // -----------------------------------------------------------------------------
 static EmberStatus send_tx_test_packet(void)
 {
-  uint8_t tx_test_packet[127];
+  uint8_t tx_test_packet[SL_FLEX_CONNECT_BUFFER_SIZE];
 
   for (uint8_t i = 0; i < tx_test_packet_size; i++) {
     tx_test_packet[i] = i;

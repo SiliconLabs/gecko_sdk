@@ -49,3 +49,4 @@ ui_hints:
   highlight: readme.md
 tag:
   - hardware:device:ram:40
+  - hardware:component:button:1+

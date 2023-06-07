@@ -34,7 +34,6 @@
 #include <assert.h>
 #include <string.h>
 #include "sl_wisun_app_core_util.h"
-#include "socket_hnd.h"
 #include "socket.h"
 #include "app.h"
 #include "sl_wisun_meter.h"
@@ -62,71 +61,14 @@
 /*App task function*/
 void app_task(void *args)
 {
-  static uint8_t received_token[SL_WISUN_METER_COLLECTOR_TOKEN_MAX_SIZE] = { 0U };
-  static wisun_addr_t meter_addr                                         = { 0U };
-  static wisun_addr_t collector_addr                                     = { 0U };
-  const char *collector_ip                                               = NULL;
-  int32_t sockd_meter                                                    = SOCKET_INVALID_ID;
-  int32_t r                                                              = RETVAL_ERROR;
-  socklen_t len                                                          = 0UL;
-  uint16_t token_len                                                     = 0U;
-
   (void) args;
 
   // connect to the wisun network
   app_wisun_connect_and_wait();
   printf("[Port: %u]\n", SL_WISUN_METER_PORT);
 
-  // init reference token
-  sl_wisun_mc_init_token(SL_WISUN_METER_COLLECTOR_TOKEN);
-  token_len = sl_wisun_mc_get_token_size();
-
-  // creating socket
-  sockd_meter = socket(AF_WISUN, SOCK_DGRAM, IPPROTO_UDP);
-  assert_res(sockd_meter, "Wi-SUN Meter socket()");
-
-  // fill the server address structure
-  meter_addr.sin6_family = AF_WISUN;
-  meter_addr.sin6_addr = in6addr_any;
-  meter_addr.sin6_port = htons(SL_WISUN_METER_PORT);
-
-  // bind address to the socket
-  r = bind(sockd_meter, (const struct sockaddr *) &meter_addr, sizeof(struct sockaddr_in6));
-  assert_res(r, "Wi-SUN Meter bind()");
-
-  len = sizeof(collector_addr);
-  // receiver loop
   while (1) {
-    // receive token
-    r = recvfrom(sockd_meter, received_token, token_len, 0,
-                 (struct sockaddr *) &collector_addr, &len);
-
-    if (r > 0) {
-      // not valid address
-      if (!memcmp(&collector_addr.sin6_addr, &in6addr_any, sizeof(in6addr_any))) {
-        printf("[Not valid address received]\n");
-        msleep(1);
-        continue;
-      }
-
-      // compare token
-      if (!sl_wisun_mc_compare_token(received_token, r)) {
-        msleep(1);
-        continue;
-      }
-
-      // if token matched, send measurement packet
-      collector_ip = app_wisun_trace_util_get_ip_str(&collector_addr.sin6_addr);
-      if (!sl_wisun_meter_meas_params_and_send(sockd_meter, &collector_addr)) {
-        printf("[%s: Measurement has NOT been sent]\n", collector_ip);
-      } else {
-        printf("[%s: Measurement packet has been sent (%d bytes)]\n",
-               collector_ip, sizeof(sl_wisun_meter_packet_t));
-      }
-      app_wisun_trace_util_destroy_ip_str(collector_ip);
-    }
-
-    // dispatch thread
+    sl_wisun_meter_process();
     msleep(1);
   }
 }

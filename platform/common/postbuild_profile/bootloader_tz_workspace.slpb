@@ -1,0 +1,10 @@
+parameters: []
+constants:
+  - name: workspace_name
+    value: bootloader_tz
+steps:
+  - task: convert
+    input:
+      - "{{bootloader_secure_app}}"
+      - "{{bootloader_nonsecure_app}}"
+    output: "artifact/{{workspace_name}}-combined.s37"

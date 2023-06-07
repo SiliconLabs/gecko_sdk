@@ -1,0 +1,20 @@
+id: zw_role_type_sleeping_listening_1000ms
+label: Z-Wave Role Type Listening Sleeping 1000ms
+category: Z-Wave|Role Types
+description: >
+  The Listening Sleeping End Device Role Type (LSS) is intended for battery-operated devices
+  that can be reached even though they are sleeping thanks to Beaming (FLiRS devices).
+  Examples include Door Locks and Battery-Operated Thermostats. It listens every 
+  1000 ms
+  
+  Define ZAF_CONFIG_DEVICE_OPTION_MASK is automatically set by this component.
+package: Z-Wave
+quality: production
+define:
+  - name: ZAF_CONFIG_DEVICE_OPTION_MASK
+    value: APPLICATION_FREQ_LISTENING_MODE_1000ms
+requires:
+  - name: zw_role_type_sleeping_listening
+provides:
+  - name: zw_role_type_sleeping_listening_mode
+  - name: zw_role_type_sleeping_listening_1000ms

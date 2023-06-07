@@ -134,7 +134,7 @@ public:
         {
         public:
             bool                 IsRemoved(void) const { return mRemoved; }
-            const uint8_t *      GetTxtData(void) const { return mTxtData; }
+            const uint8_t       *GetTxtData(void) const { return mTxtData; }
             uint16_t             GetTxtLength(void) const { return mTxtLength; }
             const Ip6::SockAddr &GetSockAddr(void) const { return static_cast<const Ip6::SockAddr &>(mSockAddr); }
         };
@@ -150,6 +150,13 @@ public:
      *
      */
     typedef otTrelPeerIterator PeerIterator;
+
+    /**
+     * This method enables or disables the TREL interface.
+     *
+     * @param[in] aEnable A boolean to enable/disable the TREL interface.
+     */
+    void SetEnabled(bool aEnable);
 
     /**
      * This method enables the TREL interface.
@@ -243,18 +250,18 @@ private:
     void HandleDiscoveredPeerInfo(const Peer::Info &aInfo);
 
     void  RegisterService(void);
-    Error ParsePeerInfoTxtData(const Peer::Info &      aInfo,
-                               Mac::ExtAddress &       aExtAddress,
+    Error ParsePeerInfoTxtData(const Peer::Info       &aInfo,
+                               Mac::ExtAddress        &aExtAddress,
                                MeshCoP::ExtendedPanId &aExtPanId) const;
     Peer *GetNewPeerEntry(void);
     void  RemovePeerEntry(Peer &aEntry);
 
-    using RegsiterServiceTask = TaskletIn<Interface, &Interface::RegisterService>;
+    using RegisterServiceTask = TaskletIn<Interface, &Interface::RegisterService>;
 
     bool                mInitialized : 1;
     bool                mEnabled : 1;
     bool                mFiltered : 1;
-    RegsiterServiceTask mRegisterServiceTask;
+    RegisterServiceTask mRegisterServiceTask;
     uint16_t            mUdpPort;
     Packet              mRxPacket;
     PeerTable           mPeerTable;

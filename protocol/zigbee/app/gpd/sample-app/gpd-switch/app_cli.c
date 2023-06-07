@@ -16,7 +16,9 @@
  ******************************************************************************/
 
 #if SL_COMPONENT_CATALOG_PRESENT
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #endif // SL_COMPONENT_CATALOG_PRESENT
 
 #include "app_process.h"

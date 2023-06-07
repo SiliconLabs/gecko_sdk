@@ -18,9 +18,13 @@ class CALC_Frame_Detect_Ocelot(CALC_Frame_Detect):
         #Read in model variables
         demod_select = model.vars.demod_select.value
         rtschmode_actual = model.vars.MODEM_REALTIMCFE_RTSCHMODE.value
+        directmode_rx = model.vars.directmode_rx.value
+        mod_type = model.vars.modulation_type.value
 
+        if directmode_rx != model.vars.directmode_rx.var_enum.DISABLED and mod_type == model.vars.modulation_type.var_enum.FSK2:
+            syncerrors = 2
         #Allow 1 sync error if using TRECS and RTSCHMODE = 1 (hard slicing instead of CFE)
-        if demod_select == model.vars.demod_select.var_enum.TRECS_VITERBI or \
+        elif demod_select == model.vars.demod_select.var_enum.TRECS_VITERBI or \
                 demod_select == model.vars.demod_select.var_enum.TRECS_SLICER:
             if rtschmode_actual == 1:
                 syncerrors = 1
@@ -157,7 +161,7 @@ class CALC_Frame_Detect_Ocelot(CALC_Frame_Detect):
                     cfloopdel_symbols = int(round(agc_settling_delay/osr))
                     remaining_pre_symbols = preamble_detection_length - cfloopdel_symbols
 
-                    if remaining_pre_symbols >=4 or modformat == model.vars.modulation_type.var_enum.FSK4:
+                    if remaining_pre_symbols >= 4:
 
                         if baudrate_tol_ppm >= 1000:
                             #Maximum timing window size is 8 to allow for more frequent resynchronization
@@ -170,8 +174,14 @@ class CALC_Frame_Detect_Ocelot(CALC_Frame_Detect):
                         timingbases = min(remaining_pre_symbols//basebits,max_timingbases)
 
                     else:
-                        # Use sliding window (FDM0)
-                        timingbases = 0
+                        # Short preamble 4FSK seems to work better with older calculation (https://jira.silabs.com/browse/MCUW_RADIO_CFG-2065)
+                        if modformat == model.vars.modulation_type.var_enum.FSK4:
+                            super().calc_timbases_val(model)
+                            return
+
+                        else:
+                            # Use sliding window (FDM0)
+                            timingbases = 0
 
         # Calculate the final timing window size and write to model variable
         timing_window_size = int(timingbases * basebits)
@@ -527,3 +537,24 @@ class CALC_Frame_Detect_Ocelot(CALC_Frame_Detect):
             reg_value = 1
 
         self._reg_write(model.vars.MODEM_CTRL1_DUALSYNC, reg_value)
+
+    def calc_syncbits_reg(self, model):
+        """
+        write sync word length from input to register
+
+        Args:
+            model (ModelRoot) : Data model to read and write variables from
+        """
+
+        assert (model.vars.syncword_length.value > 0)
+        directmode_rx = model.vars.directmode_rx.value
+        mod_type = model.vars.modulation_type.value
+
+        if directmode_rx != model.vars.directmode_rx.var_enum.DISABLED and mod_type == model.vars.modulation_type.var_enum.FSK2:
+            syncword_length = 2     # Min valid length
+        elif model.vars.ber_force_sync.value == True:
+            syncword_length = 32
+        else:
+            syncword_length = model.vars.syncword_length.value
+
+        self._reg_write(model.vars.MODEM_CTRL1_SYNCBITS, syncword_length - 1)

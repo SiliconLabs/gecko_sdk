@@ -16,20 +16,13 @@
  *
  ******************************************************************************/
 
-#ifdef UC_BUILD
 #include "events-server-config.h"
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #ifdef SL_CATALOG_ZIGBEE_GAS_PROXY_FUNCTION_PRESENT
 #include "gas-proxy-function-config.h"
 #endif
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_GAS_PROXY_FUNCTION
-#define SL_CATALOG_ZIGBEE_GAS_PROXY_FUNCTION_PRESENT
-#endif
-#ifdef EMBER_AF_PLUGIN_GBCS_COMPATIBILITY
-#define SL_CATALOG_ZIGBEE_GBCS_COMPATIBILITY_PRESENT
-#endif
-#endif // UC_BUILD
 
 /**
  * @defgroup events-server  Events Server

@@ -36,7 +36,7 @@
 #include "em_common.h" // for SL_WEAK
 
 #include "sl_rail_mux.h"
-
+#include "mac-flat-header.h"
 #include "buffer_manager/buffer-management.h"
 #include "buffer_manager/buffer-queue.h"
 
@@ -579,6 +579,11 @@ RAIL_Status_t sl_rail_mux_IEEE802154_Config2p4GHzRadio(RAIL_Handle_t railHandle)
   (void)railHandle;
 
   return RAIL_IEEE802154_Config2p4GHzRadio(mux_rail_handle);
+}
+
+RAIL_Status_t sl_rail_mux_IEEE802154_Config2p4GHzRadioAntDiv(RAIL_Handle_t railHandle)
+{
+  return RAIL_IEEE802154_Config2p4GHzRadioAntDiv(mux_rail_handle);
 }
 
 uint16_t sl_rail_mux_ConfigChannels(RAIL_Handle_t railHandle,
@@ -1381,6 +1386,27 @@ RAIL_Status_t sl_rail_mux_RAIL_ScheduleRx(RAIL_Handle_t railHandle,
   return ret_status;
 }
 
+void sl_rail_mux_set_coex_counter_handler(RAIL_Handle_t railHandle,
+                                          COEX_CounterHandler_t counter_handler)
+{
+  uint8_t context_index = fn_get_context_index(railHandle);
+
+  assert(context_index < SUPPORTED_PROTOCOL_COUNT);
+
+  protocol_context[context_index].coex_counter_handler = counter_handler;
+}
+
+void sl_rail_util_coex_counter_on_event(sl_rail_util_coex_event_t event)
+{
+  uint8_t context_index = fn_get_active_tx_context_index();
+
+  assert(context_index < SUPPORTED_PROTOCOL_COUNT);
+
+  if (protocol_context[context_index].coex_counter_handler != NULL) {
+    (*protocol_context[context_index].coex_counter_handler)(event);
+  }
+}
+
 //------------------------------------------------------------------------------
 // Static functions
 
@@ -1585,6 +1611,20 @@ static uint8_t fn_get_active_tx_context_index(void)
   return active_tx_context_index;
 }
 
+RAIL_Status_t sl_rail_mux_SetStateTiming(RAIL_Handle_t railHandle,
+                                         RAIL_StateTiming_t *timings)
+{
+  (void) railHandle;
+  return RAIL_SetStateTiming(mux_rail_handle, timings);
+}
+
+RAIL_Status_t sl_rail_mux_IEEE802154_SetRxToEnhAckTx(RAIL_Handle_t railHandle,
+                                                     RAIL_TransitionTime_t *pRxToEnhAckTx)
+{
+  (void) railHandle;
+  return RAIL_IEEE802154_SetRxToEnhAckTx(mux_rail_handle, pRxToEnhAckTx);
+}
+
 HIDDEN void fn_mux_rail_events_callback(RAIL_Handle_t railHandle, RAIL_Events_t events)
 {
   (void)railHandle;
@@ -1592,6 +1632,7 @@ HIDDEN void fn_mux_rail_events_callback(RAIL_Handle_t railHandle, RAIL_Events_t 
   RAIL_RxPacketHandle_t rx_packet_handle;
   RAIL_RxPacketDetails_t packet_details;
   bool start_pending_tx = false;
+  bool is_beacon = false;
   uint8_t active_tx_protocol_index = fn_get_active_tx_context_index();
   uint8_t i;
 
@@ -1602,6 +1643,15 @@ HIDDEN void fn_mux_rail_events_callback(RAIL_Handle_t railHandle, RAIL_Events_t 
     assert(RAIL_GetRxPacketDetailsAlt(mux_rail_handle,
                                       rx_packet_handle,
                                       &packet_details) == RAIL_STATUS_NO_ERROR);
+    //need to read phy header (1 byte) + framecontrol (2 bytes)
+    uint8_t macHdr[EMBER_MAC_HEADER_SEQUENCE_NUMBER_OFFSET];
+    uint8_t *rxPacket = macHdr;
+    assert(RAIL_PeekRxPacket(mux_rail_handle,
+                             rx_packet_handle,
+                             macHdr,
+                             sizeof(macHdr),
+                             0) == sizeof(macHdr));
+    is_beacon = sl_mac_flat_frame_type(rxPacket, true) == EMBER_MAC_HEADER_FC_FRAME_TYPE_BEACON;
   }
 
   if (events & RAIL_EVENT_IEEE802154_DATA_REQUEST_COMMAND) {
@@ -1673,9 +1723,9 @@ HIDDEN void fn_mux_rail_events_callback(RAIL_Handle_t railHandle, RAIL_Events_t 
       // packet did not satisfy any of the protocol filtering: we mask out the
       // RAIL_EVENT_RX_PACKET_RECEIVED event.
       if (rx_channel != protocol_context[i].channel
-          // MAC Acks do not contain any addressing information
-          // Do not check for filterMask on Rx packets that are acks
-          || (!packet_details.isAck && (rx_info.filterMask & protocol_context[i].addr_filter_mask_802154) == 0)
+          // MAC acks and beacons do not contain any addressing information
+          // Do not check for filterMask on Rx packets that are acks or beacons
+          || (!packet_details.isAck && !is_beacon && (rx_info.filterMask & protocol_context[i].addr_filter_mask_802154) == 0)
           || (packet_details.isAck && (i != active_tx_protocol_index)) ) {
         enabled_events &= ~RAIL_EVENT_RX_PACKET_RECEIVED;
       } else {
@@ -1877,7 +1927,7 @@ static bool check_event_filter(uint8_t context_index,
 
   if (!enable) {
     for (uint8_t i = 0; i < SUPPORTED_PROTOCOL_COUNT; i++) {
-      if (fn_get_context_flag_by_index(context_index, flag)) {
+      if (fn_get_context_flag_by_index(i, flag)) {
         // filter stop event since the radio operation
         // is in progress on another stack
         return false;

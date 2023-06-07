@@ -24,7 +24,7 @@ template_contribution:
   - name: zigbee_af_callback
     value:
       callback_type: event_init
-      function_name: emAfPluginColorControlServerInitCallback
+      function_name: sli_zigbee_af_color_control_server_init_callback
   - name: cluster_service
     value:
        cluster_id: "0x0300"

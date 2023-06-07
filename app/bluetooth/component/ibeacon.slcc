@@ -2,9 +2,14 @@ id: ibeacon
 label: iBeacon
 package: Bluetooth
 description: iBeacon component for beacon advertising
-category: Bluetooth|Application
+
+  This is a No-Code component.
+category: Bluetooth|Application|Miscellaneous
 quality: production
 root_path: app/bluetooth/common/ibeacon
+tag:
+  - No-Code
+
 source:
   - path: sl_bt_ibeacon.c
 include:

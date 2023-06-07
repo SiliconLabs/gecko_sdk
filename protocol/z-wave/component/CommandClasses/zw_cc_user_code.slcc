@@ -13,11 +13,13 @@ config_file:
   - path: protocol/z-wave/platform/SiliconLabs/PAL/config/cc_user_code/cc_user_code_config.h
     file_id: cc_user_code_config
 source:
-  - path: protocol/z-wave/ZAF/CommandClasses/UserCode/CC_UserCode.c
+  - path: protocol/z-wave/ZAF/CommandClasses/UserCode/src/CC_UserCode.c
 include:
-  - path: protocol/z-wave/ZAF/CommandClasses/UserCode/
+  - path: protocol/z-wave/ZAF/CommandClasses/UserCode/inc/
     file_list:
      - path: CC_UserCode.h
+  - path: protocol/z-wave/ZAF/CommandClasses/UserCode/src/
+    file_list:
      - path: cc_user_code_io.h
 provides:
   - name: zw_cc_user_code

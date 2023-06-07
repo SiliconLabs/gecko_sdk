@@ -3,12 +3,15 @@ package: Bluetooth
 label: Throughput Test helper
 description: |-
   Helper for throughput tests
-category: Bluetooth|Application|Throughput
+category: Bluetooth|Application|Test
 quality: production
 root_path: app/bluetooth/common/throughput
+tag:
+  - No-Code
+
 include:
   - path: .
-    file_list: 
+    file_list:
       - path: throughput_types.h
       - path: throughput_common.h
 requires:

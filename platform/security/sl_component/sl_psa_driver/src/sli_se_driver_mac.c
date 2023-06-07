@@ -28,12 +28,13 @@
  *
  ******************************************************************************/
 
-#include "em_device.h"
+#include "sli_psa_driver_features.h"
 
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
 
 #include "sli_psa_driver_common.h"  // sli_psa_zeroize()
 #include "psa/crypto.h"
+
 #include "mbedtls/platform.h"
 
 #include "sli_se_driver_mac.h"
@@ -46,7 +47,8 @@
 //------------------------------------------------------------------------------
 // Static functions
 
-#if defined(PSA_WANT_ALG_HMAC)
+#if defined(SLI_PSA_DRIVER_FEATURE_HMAC)
+
 sl_se_hash_type_t sli_se_hash_type_from_psa_hmac_alg(psa_algorithm_t alg,
                                                      size_t *length)
 {
@@ -65,22 +67,25 @@ sl_se_hash_type_t sli_se_hash_type_from_psa_hmac_alg(psa_algorithm_t alg,
     case PSA_ALG_SHA_256:
       *length = 32;
       return SL_SE_HASH_SHA256;
-    #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+
+      #if defined(SLI_MBEDTLS_DEVICE_HSE_VAULT_HIGH)
     case PSA_ALG_SHA_384:
       *length = 48;
       return SL_SE_HASH_SHA384;
     case PSA_ALG_SHA_512:
       *length = 64;
       return SL_SE_HASH_SHA512;
-    #endif
+      #endif
+
     default:
       return SL_SE_HASH_NONE;
   }
 }
-#endif // PSA_WANT_ALG_HMAC
+
+#endif // SLI_PSA_DRIVER_FEATURE_HMAC
 
 //------------------------------------------------------------------------------
-// Second stage driver entry points
+// Single-shot driver entry points
 
 psa_status_t sli_se_driver_mac_compute(sl_se_key_descriptor_t *key_desc,
                                        psa_algorithm_t alg,
@@ -90,9 +95,7 @@ psa_status_t sli_se_driver_mac_compute(sl_se_key_descriptor_t *key_desc,
                                        size_t mac_size,
                                        size_t *mac_length)
 {
-#if defined(PSA_WANT_ALG_HMAC)  \
-  || defined(PSA_WANT_ALG_CMAC) \
-  || defined(PSA_WANT_ALG_CBC_MAC)
+  #if defined(SLI_PSA_DRIVER_FEATURE_MAC)
 
   if (mac == NULL
       || mac_length == NULL
@@ -109,13 +112,13 @@ psa_status_t sli_se_driver_mac_compute(sl_se_key_descriptor_t *key_desc,
     return PSA_ERROR_HARDWARE_FAILURE;
   }
 
-  #if defined(PSA_WANT_ALG_HMAC)
+  #if defined(SLI_PSA_DRIVER_FEATURE_HMAC)
   if (PSA_ALG_IS_HMAC(alg)) {
-    #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+    #if defined(SLI_PSA_DRIVER_FEATURE_HASH_STATE_64)
     uint8_t tmp_hmac[64];
-    #else // VAULT
+    #else
     uint8_t tmp_hmac[32];
-    #endif // VAULT
+    #endif
 
     size_t requested_length = 0;
     sl_se_hash_type_t hash_type =
@@ -161,7 +164,7 @@ psa_status_t sli_se_driver_mac_compute(sl_se_key_descriptor_t *key_desc,
         key_desc->storage.location.buffer.size = word_aligned_buffer_size;
       }
     }
-    #endif // SLI_SE_KEY_PADDING_REQUIRED
+    #endif     // SLI_SE_KEY_PADDING_REQUIRED
 
     status = sl_se_hmac(&cmd_ctx,
                         key_desc,
@@ -176,7 +179,7 @@ psa_status_t sli_se_driver_mac_compute(sl_se_key_descriptor_t *key_desc,
       sli_psa_zeroize(temp_key_buf, word_aligned_buffer_size);
       mbedtls_free(temp_key_buf);
     }
-    #endif // SLI_SE_KEY_PADDING_REQUIRED
+    #endif     // SLI_SE_KEY_PADDING_REQUIRED
 
     if (status == PSA_SUCCESS) {
       memcpy(mac, tmp_hmac, requested_length);
@@ -189,14 +192,15 @@ psa_status_t sli_se_driver_mac_compute(sl_se_key_descriptor_t *key_desc,
 
     goto exit;
   }
-  #endif // PSA_WANT_ALG_HMAC
+  #endif   // SLI_PSA_DRIVER_FEATURE_HMAC
 
-  #if defined(PSA_WANT_ALG_HMAC) \
-  && (defined(PSA_WANT_ALG_CMAC) || defined(PSA_WANT_ALG_CBC_MAC))
+  #if defined(SLI_PSA_DRIVER_FEATURE_HMAC) \
+  && (defined(SLI_PSA_DRIVER_FEATURE_CMAC) \
+  || defined(SLI_PSA_DRIVER_FEATURE_CBC_MAC))
   else
-  #endif // PSA_WANT_ALG_HMAC && (PSA_WANT_ALG_CMAC || PSA_WANT_ALG_CBC_MAC)
+  #endif
 
-  #if defined(PSA_WANT_ALG_CMAC) || defined(PSA_WANT_ALG_CBC_MAC)
+  #if defined(SLI_PSA_DRIVER_FEATURE_CMAC) || defined(SLI_PSA_DRIVER_FEATURE_CBC_MAC)
   {
     size_t output_length = PSA_MAC_TRUNCATED_LENGTH(alg);
     if (output_length == 0) {
@@ -209,7 +213,7 @@ psa_status_t sli_se_driver_mac_compute(sl_se_key_descriptor_t *key_desc,
     }
 
     switch (PSA_ALG_FULL_LENGTH_MAC(alg)) {
-      #if defined(PSA_WANT_ALG_CBC_MAC)
+      #if defined(SLI_PSA_DRIVER_FEATURE_CBC_MAC)
       case PSA_ALG_CBC_MAC: {
         uint8_t tmp_buf[16] = { 0 };
         uint8_t tmp_mac[16] = { 0 };
@@ -242,8 +246,9 @@ psa_status_t sli_se_driver_mac_compute(sl_se_key_descriptor_t *key_desc,
         goto exit;
         break;
       }
-      #endif // PSA_WANT_ALG_CBC_MAC
-      #if defined(PSA_WANT_ALG_CMAC)
+      #endif     // SLI_PSA_DRIVER_FEATURE_CBC_MAC
+
+      #if defined(SLI_PSA_DRIVER_FEATURE_CMAC)
       case PSA_ALG_CMAC: {
         uint8_t tmp_mac[16] = { 0 };
 
@@ -263,13 +268,14 @@ psa_status_t sli_se_driver_mac_compute(sl_se_key_descriptor_t *key_desc,
         goto exit;
         break;
       }
-      #endif // PSA_WANT_ALG_CMAC
+      #endif     // SLI_PSA_DRIVER_FEATURE_CMAC
+
       default:
         return PSA_ERROR_NOT_SUPPORTED;
         break;
     }
   }
-  #endif // PSA_WANT_ALG_CMAC || PSA_WANT_ALG_CBC_MAC
+  #endif   // SLI_PSA_DRIVER_FEATURE_CMAC || SLI_PSA_DRIVER_FEATURE_CBC_MAC
 
   exit:
 
@@ -291,7 +297,7 @@ psa_status_t sli_se_driver_mac_compute(sl_se_key_descriptor_t *key_desc,
 
   return psa_status;
 
-#else // PSA_WANT_ALG_HMAC || PSA_WANT_ALG_CMAC || PSA_WANT_ALG_CBC_MAC
+  #else // SLI_PSA_DRIVER_FEATURE_MAC
 
   (void)key_desc;
   (void)alg;
@@ -302,10 +308,14 @@ psa_status_t sli_se_driver_mac_compute(sl_se_key_descriptor_t *key_desc,
   (void)mac_length;
 
   return PSA_ERROR_NOT_SUPPORTED;
-#endif // PSA_WANT_ALG_HMAC || PSA_WANT_ALG_CMAC || PSA_WANT_ALG_CBC_MAC
+
+  #endif // SLI_PSA_DRIVER_FEATURE_MAC
 }
 
-#if defined(PSA_WANT_ALG_CMAC) || defined(PSA_WANT_ALG_CBC_MAC)
+//------------------------------------------------------------------------------
+// Multi-part driver entry points
+
+#if defined(SLI_PSA_DRIVER_FEATURE_CMAC) || defined(SLI_PSA_DRIVER_FEATURE_CBC_MAC)
 
 psa_status_t sli_se_driver_mac_sign_setup(
   sli_se_driver_mac_operation_t *operation,
@@ -321,7 +331,7 @@ psa_status_t sli_se_driver_mac_sign_setup(
   memset(operation, 0, sizeof(*operation));
 
   switch (PSA_ALG_FULL_LENGTH_MAC(alg)) {
-    #if defined(PSA_WANT_ALG_CBC_MAC)
+    #if defined(SLI_PSA_DRIVER_FEATURE_CBC_MAC)
     case PSA_ALG_CBC_MAC:
       if (psa_get_key_type(attributes) != PSA_KEY_TYPE_AES) {
         return PSA_ERROR_NOT_SUPPORTED;
@@ -330,8 +340,9 @@ psa_status_t sli_se_driver_mac_sign_setup(
         return PSA_ERROR_INVALID_ARGUMENT;
       }
       break;
-    #endif // PSA_WANT_ALG_CBC_MAC
-    #if defined(PSA_WANT_ALG_CMAC)
+    #endif // SLI_PSA_DRIVER_FEATURE_CBC_MAC
+
+    #if defined(SLI_PSA_DRIVER_FEATURE_CMAC)
     case PSA_ALG_CMAC:
       if (psa_get_key_type(attributes) != PSA_KEY_TYPE_AES) {
         return PSA_ERROR_NOT_SUPPORTED;
@@ -340,7 +351,8 @@ psa_status_t sli_se_driver_mac_sign_setup(
         return PSA_ERROR_INVALID_ARGUMENT;
       }
       break;
-    #endif // PSA_WANT_ALG_CMAC
+    #endif // SLI_PSA_DRIVER_FEATURE_CMAC
+
     default:
       return PSA_ERROR_NOT_SUPPORTED;
   }
@@ -369,7 +381,7 @@ psa_status_t sli_se_driver_mac_update(sli_se_driver_mac_operation_t *operation,
 
   psa_status_t psa_status = PSA_ERROR_NOT_SUPPORTED;
   switch (PSA_ALG_FULL_LENGTH_MAC(operation->alg)) {
-    #if defined(PSA_WANT_ALG_CBC_MAC)
+    #if defined(SLI_PSA_DRIVER_FEATURE_CBC_MAC)
     case PSA_ALG_CBC_MAC:
       if (input_length == 0) {
         psa_status = PSA_SUCCESS;
@@ -442,8 +454,9 @@ psa_status_t sli_se_driver_mac_update(sli_se_driver_mac_operation_t *operation,
 
       psa_status = PSA_SUCCESS;
       goto exit;
-    #endif // PSA_WANT_ALG_CBC_MAC
-    #if defined(PSA_WANT_ALG_CMAC)
+    #endif // SLI_PSA_DRIVER_FEATURE_CBC_MAC
+
+    #if defined(SLI_PSA_DRIVER_FEATURE_CMAC)
     case PSA_ALG_CMAC:
       if (input_length == 0) {
         psa_status = PSA_SUCCESS;
@@ -464,7 +477,8 @@ psa_status_t sli_se_driver_mac_update(sli_se_driver_mac_operation_t *operation,
       }
       psa_status = PSA_SUCCESS;
       goto exit;
-    #endif // PSA_WANT_ALG_CMAC
+    #endif // SLI_PSA_DRIVER_FEATURE_CMAC
+
     default:
       psa_status = PSA_ERROR_BAD_STATE;
       goto exit;
@@ -506,7 +520,7 @@ psa_status_t sli_se_driver_mac_sign_finish(
   }
 
   switch (PSA_ALG_FULL_LENGTH_MAC(operation->alg)) {
-    #if defined(PSA_WANT_ALG_CBC_MAC)
+    #if defined(SLI_PSA_DRIVER_FEATURE_CBC_MAC)
     case PSA_ALG_CBC_MAC: {
       (void)key_desc;
 
@@ -521,8 +535,9 @@ psa_status_t sli_se_driver_mac_sign_finish(
       return PSA_SUCCESS;
       break;
     }
-    #endif // PSA_WANT_ALG_CBC_MAC
-    #if defined(PSA_WANT_ALG_CMAC)
+    #endif // SLI_PSA_DRIVER_FEATURE_CBC_MAC
+
+    #if defined(SLI_PSA_DRIVER_FEATURE_CMAC)
     case PSA_ALG_CMAC: {
       // Ephemeral contexts
       sl_se_command_context_t cmd_ctx = { 0 };
@@ -555,12 +570,13 @@ psa_status_t sli_se_driver_mac_sign_finish(
       return PSA_SUCCESS;
       break;
     }
-    #endif // PSA_WANT_ALG_CMAC
+    #endif // SLI_PSA_DRIVER_FEATURE_CMAC
+
     default:
       return PSA_ERROR_BAD_STATE;
   }
 }
 
-#endif // PSA_WANT_ALG_CMAC || PSA_WANT_ALG_CBC_MAC
+#endif // SLI_PSA_DRIVER_FEATURE_CMAC || SLI_PSA_DRIVER_FEATURE_CBC_MAC
 
-#endif // defined(SEMAILBOX_PRESENT)
+#endif // SLI_MBEDTLS_DEVICE_HSE

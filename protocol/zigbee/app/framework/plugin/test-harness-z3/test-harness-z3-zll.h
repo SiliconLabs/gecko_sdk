@@ -38,11 +38,11 @@
 // -----------------------------------------------------------------------------
 // Framework-internal callbacks
 
-void emAfPluginTestHarnessZ3ZllStackStatusCallback(EmberStatus status);
+void sli_zigbee_af_test_harness_z3_zll_stack_status_callback(EmberStatus status);
 
-void emAfPluginTestHarnessZ3ZllNetworkFoundCallback(const EmberZllNetwork *networkInfo);
-void emAfPluginTestHarnessZ3ZllScanCompleteCallback(EmberStatus status);
-EmberPacketAction emAfPluginTestHarnessZ3ZllCommandCallback(uint8_t *command,
-                                                            EmberEUI64 sourceEui64);
-EmberPacketAction emAfPluginTestHarnessZ3ZllModifyInterpanCommand(uint8_t *commandData,
-                                                                  uint8_t macHeaderLength);
+void sli_zigbee_af_test_harness_z3_zll_network_found_callback(const EmberZllNetwork *networkInfo);
+void sli_zigbee_af_test_harness_z3_zll_scan_complete_callback(EmberStatus status);
+EmberPacketAction sli_zigbee_af_test_harness_z3_zll_command_callback(uint8_t *command,
+                                                                     EmberEUI64 sourceEui64);
+EmberPacketAction sli_zigbee_af_test_harness_z3_zll_modify_interpan_command(uint8_t *commandData,
+                                                                            uint8_t macHeaderLength);

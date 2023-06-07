@@ -78,6 +78,20 @@ void emberAfStackStatusCallback(
   EmberStatus status);
 
 /** @brief
+ * A callback that allows the app to redirect the packet
+ * @param mac_index The mac index used to redirect messages
+ * @param header Packet buffer header
+ * @param priority Transmit priority
+ */
+void emberAfRedirectOutgoingMessageCallback(
+  // The mac index used to redirect messages
+  uint8_t mac_index,
+  // Packet buffer header
+  EmberMessageBuffer header,
+  // Transmit priority
+  uint8_t priority);
+
+/** @brief
  * Reports the result of an energy scan for a single channel. The scan is not
  * complete until the scanCompleteHandler callback is called.
  * @param channel The 802.15.4 channel number that was scanned.
@@ -719,6 +733,18 @@ void emberAfRadioNeedsCalibratingCallback(void);
 void emberAfScanErrorCallback(
   // The error status of a scan
   EmberStatus status);
+
+/** @brief
+ * A callback invoked when receiving a message.
+ * Used when AF Support component is enabled on NCP.
+ * User can use apsFrame to filter for which ZCL messages they want to process on NCP.
+ * If this function returns true then the message is being processed on NCP, otherwise it
+ * will be forwarded to the Host.
+ * @param apsFrame The aps Frame
+ */
+bool emberAfSupportIncomingMessageCallback(
+  // The aps Frame
+  EmberApsFrame *apsFrame);
 
 /** @} */ // stack-callback group
 

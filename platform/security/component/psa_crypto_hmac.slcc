@@ -19,7 +19,7 @@ template_contribution:
     value: PSA_WANT_ALG_HMAC
   - name: psa_crypto_config
     value: PSA_WANT_KEY_TYPE_HMAC
-  - name: psa_crypto_config
+  - name: psa_crypto_builtin_config
     value: "MBEDTLS_PSA_BUILTIN_ALG_HMAC 1"
     condition: [mbedtls_hmac]
 documentation:

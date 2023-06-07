@@ -28,7 +28,7 @@ import logging
 import signal
 from collections import UserList
 from threading import Thread
-from typing import Callable, Mapping, NamedTuple
+from typing import Callable, List, Mapping, Optional, Union
 
 from bgapi.bglib import BGEvent, BGLib, CommandFailedError
 
@@ -138,6 +138,30 @@ class EventList(UserList):
         self._final_event_cnt = value
 
 
+@dataclasses.dataclass
+class BGLibExtRetryParams:
+    retry_max: int
+    retry_interval: float
+    retry_cmd_max: int
+    retry_cmd_interval: float
+
+    def to_dict(self):
+        return dataclasses.asdict(self)
+
+    def to_base(self, **kwargs) -> "BGLibExtRetryParams":
+        return BGLibExtRetryParams(**self.to_dict())
+
+    def __post_init__(self):
+        if self.retry_max < 0:
+            raise ValueError(f"The retry max is negative.")
+        if self.retry_interval < 0.0:
+            raise ValueError(f"The retry interval is negative.")
+        if self.retry_cmd_max < 0:
+            raise ValueError(f"The retry command max is negative.")
+        if self.retry_cmd_interval < 0.0:
+            raise ValueError(f"The retry command interval is negative.")
+
+
 class BGLibExt(BGLib):
     def is_iterable(obj):
         return hasattr(obj, "__iter__") or hasattr(obj, "__getitem__")
@@ -232,6 +256,24 @@ class BGLibExt(BGLib):
         # Bit 24 - 32: Event index
         return (evt_idx & 0xFF) << 24 | (cls_idx & 0xFF) << 16 | 0x80 | (dev_id << 3)
 
+    def add_event_filter(self, api_name, class_name, event_name):
+        EVT_FILTER_CMD_ADD_ID = b"\x00"
+        event_id = self.get_event_id(api_name, class_name, event_name)
+        event_id_bytes = event_id.to_bytes(4, byteorder="little")
+        evt_filter_cmd_bytes = EVT_FILTER_CMD_ADD_ID + event_id_bytes
+        self.bt.user.manage_event_filter(evt_filter_cmd_bytes)
+
+    def remove_event_filter(self, api_name, class_name, event_name):
+        EVT_FILTER_CMD_REMOVE_ID = b"\x01"
+        event_id = self.get_event_id(api_name, class_name, event_name)
+        event_id_bytes = event_id.to_bytes(4, byteorder="little")
+        evt_filter_cmd_bytes = EVT_FILTER_CMD_REMOVE_ID + event_id_bytes
+        self.bt.user.manage_event_filter(evt_filter_cmd_bytes)
+
+    def reset_event_filter(self):
+        EVT_FILTER_CMD_RESET_ID = b"\x02"
+        self.bt.user.manage_event_filter(EVT_FILTER_CMD_RESET_ID)
+
     def subscribe(self, event_name, handler):
         handler_list = self._event_name_handlers.setdefault(event_name, [])
         if handler not in handler_list:
@@ -269,6 +311,14 @@ class BGLibExt(BGLib):
         # base class or any object which event selector can be constructed from.
         if EventSelectorPassThrough.is_constructable_from(raw_event_selector):
             event_selector = EventSelectorPassThrough()
+        elif isinstance(raw_event_selector, EventSelectorComposite):
+            event_selector = raw_event_selector
+            child_evt_sel = self.build_event_selector(
+                event_selector.raw_child_event_selector,
+                param_subs=param_subs,
+                **event_selector.raw_child_event_selector_params,
+            )
+            event_selector.child_event_selector = child_evt_sel
         elif isinstance(raw_event_selector, EventSelector):
             event_selector = raw_event_selector
         elif EventSelectorNameParam.is_constructable_from(raw_event_selector):
@@ -276,7 +326,9 @@ class BGLibExt(BGLib):
                 raw_event_selector, param_subs=param_subs, **event_selector_params
             )
         elif EventSelectorCallable.is_constructable_from(raw_event_selector):
-            event_selector = EventSelectorCallable(raw_event_selector)
+            event_selector = EventSelectorCallable(
+                raw_event_selector, **event_selector_params
+            )
         else:
             raise TypeError(f"Invalid event selector type: {type(raw_event_selector)}")
         return event_selector
@@ -357,11 +409,27 @@ class BGLibExt(BGLib):
         max_time=10,
         max_time_rst_on_evt=False,
         final_event_count=1,
+        soft_final_event_count=None,
+        soft_final_event_proc_time=None,
         keep_all_events=False,
         param_subs={},
         selected_events=EventList(),
         **event_selector_params,
     ) -> EventList:
+        if (soft_final_event_count is not None) and (
+            final_event_count < soft_final_event_count
+        ):
+            raise ValueError(
+                f"The wait_events soft_final_event_count ({soft_final_event_count}) "
+                f"shall less than or equal to final_event_count ({final_event_count})."
+            )
+        if soft_final_event_count:
+            # The soft_final_event_count feature makes it possible to
+            # abandon the retry process when an acceptable amount of
+            # final events are selected from upper layer point of view.
+            final_event_count_threshold = soft_final_event_count
+        else:
+            final_event_count_threshold = final_event_count
         if not selected_events:
             # Avoid the modification of default mutable parameter
             selected_events = EventList()
@@ -388,13 +456,41 @@ class BGLibExt(BGLib):
                             break
                     elif category == EventSelector.SELECT_FINAL:
                         selected_events.final_event_cnt += 1
-                        if selected_events.final_event_cnt < final_event_count:
-                            if max_time_rst_on_evt:
-                                logger.debug("Restart wait events max time.")
-                                gen_events_max_time = True
+                        if (
+                            final_event_count_threshold
+                            <= selected_events.final_event_cnt
+                        ):
+                            break
+                        if max_time_rst_on_evt:
+                            logger.debug("Restart wait events max time.")
+                            gen_events_max_time = True
+                            break
+            if final_event_count_threshold <= selected_events.final_event_cnt:
+                if final_event_count_threshold < final_event_count:
+                    # This condition is true when the soft_final_event_count
+                    # feature is used.
+                    # If the soft_final_event_count is reached then there might
+                    # be some important events in the event queue which could be
+                    # selected as well. It could also make sense to wait for
+                    # additional events for for a while before to return more
+                    # selected events to the caller.
+                    # For example: Multicast request with multiple responses.
+                    # The upper layer might switch to unicast addressing if the
+                    # critical amount of responses are received.
+                    for event in super().gen_events(
+                        timeout=None,
+                        max_events=None,
+                        max_time=soft_final_event_proc_time,
+                    ):
+                        category = evt_sel.categorize(event, selected_events)
+                        if category == EventSelector.SELECT_CONTINUE:
+                            selected_events.append(event)
+                        elif category == EventSelector.SELECT_FINAL:
+                            selected_events.append(event)
+                            selected_events.final_event_cnt += 1
+                            if final_event_count <= selected_events.final_event_cnt:
                                 break
-                        else:
-                            return selected_events
+                return selected_events
         # The execution reaches this point if the desired number of final events
         # are not encountered before the timeout or max_time elapsed.
         # If the awaited final event is not encountered then it means something
@@ -420,6 +516,8 @@ class BGLibExt(BGLib):
             max_time=max_time,
             max_time_rst_on_evt=False,
             final_event_count=1,
+            soft_final_event_count=None,
+            soft_final_event_proc_time=None,
             keep_all_events=False,
             param_subs=param_subs,
             **event_selector_params,
@@ -429,18 +527,21 @@ class BGLibExt(BGLib):
         self,
         command,
         *args,
-        retry_max=5,
-        retry_interval=1.0,
-        retry_int_rst_on_evt=False,
-        retry_cmd_max=10,
-        retry_cmd_interval=1.0,
-        retry_cmd_err_code=[],
+        retry_params: BGLibExtRetryParams = BGLibExtRetryParams(5, 1.0, 10, 1.0),
+        retry_int_rst_on_evt: bool = False,
+        retry_cmd_err_code: Union[SlStatus, List[SlStatus]]=[],
         retry_event_selector=None,
         event_selector=None,
-        final_event_count=1,
-        keep_all_events=False,
+        final_event_count: int = 1,
+        soft_final_event_count: Optional[int] = None,
+        soft_final_event_proc_time: Optional[float] = None,
+        keep_all_events: bool = False,
         **event_selector_params,
     ):
+        retry_max = retry_params.retry_max
+        retry_interval = retry_params.retry_interval
+        retry_cmd_max = retry_params.retry_cmd_max
+        retry_cmd_interval = retry_params.retry_cmd_interval
         if isinstance(retry_cmd_err_code, SlStatus):
             retry_cmd_err_code = [retry_cmd_err_code]
         elif not BGLibExt.is_iterable(retry_cmd_err_code):
@@ -451,7 +552,7 @@ class BGLibExt(BGLib):
         prev_sel_evt_cnt = 0
         for retry_count in range(0, retry_max + 1):
             # The command itself might not be successful but it could mean
-            # recoverable error so it could make sense to retry is a bit later.
+            # recoverable error so it could make sense to retry it a bit later.
             # For example memory allocation could fail in the stack.
             for retry_cmd_count in range(0, retry_cmd_max + 1):
                 try:
@@ -531,6 +632,8 @@ class BGLibExt(BGLib):
                                 max_time=retry_cmd_interval,
                                 max_time_rst_on_evt=retry_int_rst_on_evt,
                                 final_event_count=final_event_count,
+                                soft_final_event_count=soft_final_event_count,
+                                soft_final_event_proc_time=soft_final_event_proc_time,
                                 keep_all_events=keep_all_events,
                                 param_subs=param_subs,
                                 selected_events=selected_events,
@@ -556,6 +659,8 @@ class BGLibExt(BGLib):
                         max_time=retry_interval,
                         max_time_rst_on_evt=retry_int_rst_on_evt,
                         final_event_count=final_event_count,
+                        soft_final_event_count=soft_final_event_count,
+                        soft_final_event_proc_time=soft_final_event_proc_time,
                         keep_all_events=keep_all_events,
                         param_subs=param_subs,
                         selected_events=selected_events,
@@ -585,10 +690,20 @@ class BGLibExt(BGLib):
             # caller to evaluate it.
             # The recoverable error (retry_event_selector) detection shall
             # be performed over the new events only otherwise it could lead
-            # to constants retry until the retry count is maxed because the
+            # to constant retry until the retry count is maxed because the
             # retry triggering event could be still in selected_events when
             # the event_selector is not stateless because events are
             # accumulated in each retry iteration.
+            # The retry_event_selector feature shall be used with care when the
+            # final_event_count is greater than one or when the #unique feature
+            # of EventSelectorNameParam is used.
+            # The event_selector shall return SELECT_CONTINUE for events which
+            # are selected by retry_event_selector otherwise the final_event_count
+            # is reached sooner than expected.
+            # The #unique feature stores certain events with specified fields
+            # once which could cause problems if the event triggering the retry
+            # is stored. And consequently, the new event with the same unique
+            # fields can't be stored so it leads to missed events.
             if (retry_event_selector is not None) and (retry_count < retry_max):
                 retry_evt_sel = self.build_event_selector(
                     retry_event_selector, param_subs=param_subs
@@ -601,28 +716,6 @@ class BGLibExt(BGLib):
                     continue
             # The required events are found which shall be returned
             return selected_events
-
-
-
-@dataclasses.dataclass
-class BGLibExtRetryParams:
-    retry_max: int
-    retry_interval: float
-    retry_cmd_max: int
-    retry_cmd_interval: float
-
-    def to_dict(self):
-        return dataclasses.asdict(self)
-
-    def __post_init__(self):
-        if self.retry_max < 0:
-            raise ValueError(f"The retry max is negative.")
-        if self.retry_interval < 0.0:
-            raise ValueError(f"The retry interval is negative.")
-        if self.retry_cmd_max < 0:
-            raise ValueError(f"The retry command max is negative.")
-        if self.retry_cmd_interval < 0.0:
-            raise ValueError(f"The retry command interval is negative.")
 
 
 class EventSelector(abc.ABC):
@@ -646,6 +739,23 @@ class EventParamValues(UserList):
 
     def __init__(self, initlist=None):
         super().__init__(initlist=initlist)
+
+
+class EventSelectorComposite(EventSelector):
+    def __init__(
+        self, raw_child_event_selector, raw_child_event_selector_params
+    ) -> None:
+        self.raw_child_event_selector = raw_child_event_selector
+        self.raw_child_event_selector_params = raw_child_event_selector_params
+        self._child_event_selector = None
+
+    @property
+    def child_event_selector(self) -> Optional[EventSelector]:
+        return self._child_event_selector
+
+    @child_event_selector.setter
+    def child_event_selector(self, value) -> None:
+        self._child_event_selector = value
 
 
 class EventSelectorNameParam(EventSelector):

@@ -35,7 +35,7 @@
 #include "app_assert.h"
 #include "gatt_db.h"
 #include "sl_bluetooth.h"
-#include "sl_simple_timer.h"
+#include "app_timer.h"
 #include "sl_bt_cbap_config.h"
 #include "sl_bt_cbap_root_cert.h"
 #include "sl_bt_cbap.h"
@@ -165,7 +165,7 @@ static characteristics_t char_state = (characteristics_t)0;
 static sl_bt_cbap_peripheral_state_t cbap_peripheral_state = SL_BT_CBAP_PERIPHERAL_IDLE;
 
 // Timer handle
-static sl_simple_timer_t state_timer;
+static app_timer_t state_timer;
 
 // Remote certificate which was sent over GATT in DER format
 static uint8_t remote_certificate_der[CHAIN_LINK_DATA_LEN * CHAIN_LINK_DATA_NUM] = { 0 };
@@ -201,7 +201,7 @@ static bool find_service_in_advertisement(const uint8_t *scan_data,
 // Start or stop timer for timeout check.
 static void set_timeout(bool activate);
 // Timer callback.
-static void state_timer_cb(sl_simple_timer_t *handle, void *data);
+static void state_timer_cb(app_timer_t *handle, void *data);
 
 // -----------------------------------------------------------------------------
 // Public function definitions
@@ -854,15 +854,15 @@ static void set_timeout(bool activate)
   sl_status_t sc;
   if (activate) {
     // Start or restart timer to timeout check
-    sc = sl_simple_timer_start(&state_timer,
-                               TIMEOUT,
-                               state_timer_cb,
-                               NO_CALLBACK_DATA,
-                               false);
+    sc = app_timer_start(&state_timer,
+                         TIMEOUT,
+                         state_timer_cb,
+                         NO_CALLBACK_DATA,
+                         false);
     app_assert_status(sc);
   } else {
     // Stop timer
-    sc = sl_simple_timer_stop(&state_timer);
+    sc = app_timer_stop(&state_timer);
     app_assert_status(sc);
   }
 }
@@ -872,7 +872,7 @@ static void set_timeout(bool activate)
  * @param[in] handle pointer to handle instance
  * @param[in] data pointer to input data
  ******************************************************************************/
-static void state_timer_cb(sl_simple_timer_t *handle, void *data)
+static void state_timer_cb(app_timer_t *handle, void *data)
 {
   (void)handle;
   (void)data;

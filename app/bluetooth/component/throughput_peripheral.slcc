@@ -3,17 +3,20 @@ package: Bluetooth
 label: Throughput Test Transmitter (Peripheral) Role API
 description: >
   Throughput Test Transmitter (Peripheral) Role API acts as a server and accepts connection from
-  Throughput Test Receivers (Central) Role clients. 
+  Throughput Test Receivers (Central) Role clients.
   It sends out data via notifications or indications to a registered Central node.
   Throughput parameters can be managed using the API calls or via CLI.
   The API provides interface for configuring, starting and stopping transmission.
   Status and result callbacks can be also registered using the API.
-category: Bluetooth|Application|Throughput
+category: Bluetooth|Application|Test
 quality: production
 root_path: app/bluetooth/common/throughput_peripheral
+tag:
+  - No-Code
+
 include:
   - path: .
-    file_list: 
+    file_list:
       - path: throughput_peripheral.h
 config_file:
   - path: "config/throughput_peripheral_config.h"
@@ -27,23 +30,22 @@ requires:
   - name: gatt_configuration
   - name: bluetooth_stack
   - name: bluetooth_feature_system
-  - name: bluetooth_feature_afh
   - name: bluetooth_feature_power_control
   - name: bluetooth_feature_connection
   - name: bluetooth_feature_legacy_advertiser
   - name: bluetooth_feature_extended_advertiser
-    condition: 
+    condition:
       - device_supports_bluetooth_advertising_extensions
   - name: bluetooth_feature_gatt_server
   - name: bluetooth_feature_gatt
   - name: power_manager
   - name: throughput
-  - name: simple_timer
+  - name: app_timer
   - name: sleeptimer
   - name: throughput_ui
 
 recommends:
-  - id: simple_timer
+  - id: app_timer
   - id: throughput_ui_log
 provides:
   - name: throughput_peripheral

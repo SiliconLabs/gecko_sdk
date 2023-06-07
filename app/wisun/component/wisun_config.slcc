@@ -26,409 +26,129 @@ include:
       - "sl_wisun_empty"
 
 config_file:
+#------------------------------------------------ restriction files with conditions
+# LFN not support
+- path: config/restrictions/lfn_not_supported.restriction
+  directory: wisun
+  unless:
+    - "sl_wisun_lfn_device_support"
+    - "wisun_cli"
+# tabs' restriction files
+- path: config/restrictions/only_radio.restriction  # other applications that are not empty
+  directory: wisun
+  unless:
+    - "sl_wisun_full_config"
+    - "sl_wisun_empty"
+    - "wisun_cli"
+- path: config/restrictions/only_radio.restriction  # for empty app
+  directory: wisun
+  condition:
+    - "sl_wisun_empty"
+- path: config/restrictions/only_radio.restriction  # for wisun_cli app
+  directory: wisun
+  condition:
+    - "wisun_cli"
+    
 #------------------------------------------------ default full configuration
 # EU_1_1a
 - path: config/EU_1_1a/wisun_settings.wisunconf
   directory: wisun
   condition:
     - brd4163a
-    - sl_wisun_full_config
-  unless:
-    - sl_wisun_empty
 - path: config/EU_1_1a/wisun_settings.wisunconf
   directory: wisun
   condition:
     - brd4254a
-    - sl_wisun_full_config
-  unless:
-    - sl_wisun_empty
 - path: config/EU_1_1a/wisun_settings.wisunconf
   directory: wisun
   condition:
     - brd4271a
-    - sl_wisun_full_config
-  unless:
-    - sl_wisun_empty
 - path: config/EU_1_1a/wisun_settings.wisunconf
   directory: wisun
   condition:
     - brd4274a
-    - sl_wisun_full_config
-  unless:
-    - sl_wisun_empty
 
 # NA_1_1b
 - path: config/NA_1_1b/wisun_settings.wisunconf
   directory: wisun
   condition:
     - brd4164a
-    - sl_wisun_full_config
-  unless:
-    - sl_wisun_empty
 - path: config/NA_1_1b/wisun_settings.wisunconf
   directory: wisun
   condition:
     - brd4170a
-    - sl_wisun_full_config
-  unless:
-    - sl_wisun_empty
 - path: config/NA_1_1b/wisun_settings.wisunconf
   directory: wisun
   condition:
     - brd4253a
-    - sl_wisun_full_config
-  unless:
-    - sl_wisun_empty
 - path: config/NA_1_1b/wisun_settings.wisunconf
   directory: wisun
   condition:
     - brd4270a
-    - sl_wisun_full_config
-  unless:
-    - sl_wisun_empty
 - path: config/NA_1_1b/wisun_settings.wisunconf
   directory: wisun
   condition:
     - brd4270b
-    - sl_wisun_full_config
-  unless:
-    - sl_wisun_empty
 - path: config/NA_1_1b/wisun_settings.wisunconf
   directory: wisun
   condition:
     - brd4273a
-    - sl_wisun_full_config
-  unless:
-    - sl_wisun_empty
 - path: config/NA_1_1b/wisun_settings.wisunconf
   directory: wisun
   condition:
     - brd4400a
-    - sl_wisun_full_config
-  unless:
-    - sl_wisun_empty
-- path: config/NA_1_1b/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-    - brd4401a
-    - sl_wisun_full_config
-  unless:
-    - sl_wisun_empty
 - path: config/NA_1_1b/wisun_settings.wisunconf
   directory: wisun
   condition:
     - brd4400b
-    - sl_wisun_full_config
-  unless:
-    - sl_wisun_empty
+- path: config/NA_1_1b/wisun_settings.wisunconf
+  directory: wisun
+  condition:
+    - brd4400c
+- path: config/NA_1_1b/wisun_settings.wisunconf
+  directory: wisun
+  condition:
+    - brd4401a
 - path: config/NA_1_1b/wisun_settings.wisunconf
   directory: wisun
   condition:
     - brd4401b
-    - sl_wisun_full_config
-  unless:
-    - sl_wisun_empty
+- path: config/NA_1_1b/wisun_settings.wisunconf
+  directory: wisun
+  condition:
+    - brd4401c
 
 # CN_1_1b
 - path: config/CN_1_1b/wisun_settings.wisunconf
   directory: wisun
   condition:
     - brd4172a
-    - sl_wisun_full_config
-  unless:
-    - sl_wisun_empty
 - path: config/CN_1_1b/wisun_settings.wisunconf
   directory: wisun
   condition:
     - brd4272a
-    - sl_wisun_full_config
-  unless:
-    - sl_wisun_empty
 
 # based on IC all NA_1_1b
 - path: config/NA_1_1b/wisun_settings.wisunconf
   directory: wisun
   condition:
     - device_sdid_84
-    - sl_wisun_full_config
   unless:
     - hardware_board
-    - sl_wisun_empty
 - path: config/NA_1_1b/wisun_settings.wisunconf
   directory: wisun
   condition:
     - device_sdid_220
-    - sl_wisun_full_config
   unless:
     - hardware_board
-    - sl_wisun_empty
 - path: config/NA_1_1b/wisun_settings.wisunconf
   directory: wisun
   condition:
     - device_sdid_235
-    - sl_wisun_full_config
   unless:
     - hardware_board
-    - sl_wisun_empty
 
 #------------------------------------------------ default configuration end
-#------------------------------------------------ default configuration only radio
-# EU_1_1a
-- path: config/EU_1_1a/only_radio/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-    - brd4163a
-  unless:
-    - sl_wisun_full_config
-- path: config/EU_1_1a/only_radio/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-    - brd4254a
-  unless:
-    - sl_wisun_full_config
-- path: config/EU_1_1a/only_radio/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-    - brd4271a
-  unless:
-    - sl_wisun_full_config
-- path: config/EU_1_1a/only_radio/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-    - brd4274a
-  unless:
-    - sl_wisun_full_config
-
-# NA_1_1b
-- path: config/NA_1_1b/only_radio/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-    - brd4164a
-  unless:
-    - sl_wisun_full_config
-- path: config/NA_1_1b/only_radio/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-    - brd4170a
-  unless:
-    - sl_wisun_full_config
-- path: config/NA_1_1b/only_radio/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-    - brd4253a
-  unless:
-    - sl_wisun_full_config
-- path: config/NA_1_1b/only_radio/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-    - brd4270a
-  unless:
-    - sl_wisun_full_config
-- path: config/NA_1_1b/only_radio/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-    - brd4270b
-  unless:
-    - sl_wisun_full_config
-- path: config/NA_1_1b/only_radio/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-    - brd4273a
-  unless:
-    - sl_wisun_full_config
-- path: config/NA_1_1b/only_radio/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-    - brd4400a
-  unless:
-    - sl_wisun_full_config
-- path: config/NA_1_1b/only_radio/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-    - brd4401a
-  unless:
-    - sl_wisun_full_config
-- path: config/NA_1_1b/only_radio/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-    - brd4400b
-  unless:
-    - sl_wisun_full_config
-- path: config/NA_1_1b/only_radio/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-    - brd4401b
-  unless:
-    - sl_wisun_full_config
-
-# CN_1_1b
-- path: config/CN_1_1b/only_radio/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-    - brd4172a
-  unless:
-    - sl_wisun_full_config
-- path: config/CN_1_1b/only_radio/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-    - brd4272a
-  unless:
-    - sl_wisun_full_config
-
-# based on IC all NA_1_1b
-- path: config/NA_1_1b/only_radio/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-    - device_sdid_84
-  unless:
-    - hardware_board
-    - sl_wisun_full_config
-- path: config/NA_1_1b/only_radio/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-    - device_sdid_220
-  unless:
-    - hardware_board
-    - sl_wisun_full_config
-- path: config/NA_1_1b/only_radio/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-    - device_sdid_235
-  unless:
-    - hardware_board
-    - sl_wisun_full_config
-
-#------------------------------------------------ default configuration only radio end
-#------------------------------------------------ default configuration only radio just for empty
-# EU_1_1a
-- path: config/EU_1_1a/only_radio/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-    - brd4163a
-    - sl_wisun_empty
-    - sl_wisun_full_config
-- path: config/EU_1_1a/only_radio/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-    - brd4254a
-    - sl_wisun_empty
-    - sl_wisun_full_config
-- path: config/EU_1_1a/only_radio/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-    - brd4271a
-    - sl_wisun_empty
-    - sl_wisun_full_config
-- path: config/EU_1_1a/only_radio/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-    - brd4274a
-    - sl_wisun_empty
-    - sl_wisun_full_config
-
-# NA_1_1b
-- path: config/NA_1_1b/only_radio/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-    - brd4164a
-    - sl_wisun_empty
-    - sl_wisun_full_config
-- path: config/NA_1_1b/only_radio/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-    - brd4170a
-    - sl_wisun_empty
-    - sl_wisun_full_config
-- path: config/NA_1_1b/only_radio/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-    - brd4253a
-    - sl_wisun_empty
-    - sl_wisun_full_config
-- path: config/NA_1_1b/only_radio/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-    - brd4270a
-    - sl_wisun_empty
-    - sl_wisun_full_config
-- path: config/NA_1_1b/only_radio/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-    - brd4270b
-    - sl_wisun_empty
-    - sl_wisun_full_config
-- path: config/NA_1_1b/only_radio/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-    - brd4273a
-    - sl_wisun_empty
-    - sl_wisun_full_config
-- path: config/NA_1_1b/only_radio/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-    - brd4400a
-    - sl_wisun_empty
-    - sl_wisun_full_config
-- path: config/NA_1_1b/only_radio/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-    - brd4401a
-    - sl_wisun_empty
-    - sl_wisun_full_config
-- path: config/NA_1_1b/only_radio/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-    - brd4400b
-    - sl_wisun_empty
-    - sl_wisun_full_config
-- path: config/NA_1_1b/only_radio/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-    - brd4401b
-    - sl_wisun_empty
-    - sl_wisun_full_config
-
-# CN_1_1b
-- path: config/CN_1_1b/only_radio/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-    - brd4172a
-    - sl_wisun_empty
-    - sl_wisun_full_config
-- path: config/CN_1_1b/only_radio/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-    - brd4272a
-    - sl_wisun_empty
-    - sl_wisun_full_config
-
-# based on IC all NA_1_1b
-- path: config/NA_1_1b/only_radio/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-    - device_sdid_84
-    - sl_wisun_empty
-    - sl_wisun_full_config
-  unless:
-    - hardware_board
-- path: config/NA_1_1b/only_radio/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-    - device_sdid_220
-    - sl_wisun_empty
-    - sl_wisun_full_config
-  unless:
-    - hardware_board
-- path: config/NA_1_1b/only_radio/wisun_settings.wisunconf
-  directory: wisun
-  condition:
-    - device_sdid_235
-    - sl_wisun_empty
-    - sl_wisun_full_config
-  unless:
-    - hardware_board
-
-#------------------------------------------------ default configuration only radio end
 
 template_contribution:
 #---------------- Component Catalog ------------------

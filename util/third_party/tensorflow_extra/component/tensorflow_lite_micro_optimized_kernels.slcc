@@ -41,6 +41,8 @@ source:
     unless:
       - tensorflow_kernel_accelerated_fully_connected
   - path: mul.cc
+    unless:
+      - tensorflow_kernel_accelerated_mul
   - path: pooling.cc
     unless:
       - tensorflow_kernel_accelerated_pooling

@@ -7,7 +7,7 @@ description: >
   deprecated functions of the BGAPI class "advertiser". See the component
   <bluetooth_feature_advertiser> and the Bluetooth API reference for more
   details on deprecated advertiser functions.
-category: "Bluetooth|Feature"
+category: Bluetooth|Bluetooth LE Controller (Link Layer)|Features with Commands and Events
 quality: "production"
 root_path: "protocol/bluetooth"
 requires:

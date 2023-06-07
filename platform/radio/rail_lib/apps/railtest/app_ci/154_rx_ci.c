@@ -43,6 +43,10 @@
   #include "sl_component_catalog.h"
 #endif
 
+#ifdef SL_CATALOG_RAIL_UTIL_COEX_PRESENT
+#include "coexistence-802154.h"
+#endif
+
 bool ieee802154EnhAckEnabled = false;
 uint8_t ieee802154PhrLen = 1U; // Default is 1-byte PHY Header (length byte)
 bool setFpByDefault = false;
@@ -60,6 +64,7 @@ static int8_t ccaThreshold = RAIL_RSSI_INVALID_DBM;
 
 void emRadioHoldOffIsr(bool active)
 {
+#ifdef SL_CATALOG_RAIL_UTIL_COEX_PRESENT
   if (active) {
     if (txType == TX_TYPE_CSMA) {
       ccaThreshold = csmaConfig->ccaThreshold;
@@ -68,11 +73,18 @@ void emRadioHoldOffIsr(bool active)
       ccaThreshold = lbtConfig->lbtThreshold;
       RAIL_SetCcaThreshold(railHandle, RAIL_RSSI_INVALID_DBM);
     }
-  } else if (ccaThreshold != RAIL_RSSI_INVALID_DBM) {
-    RAIL_SetCcaThreshold(railHandle, ccaThreshold);
+    if ((sl_rail_util_coex_get_options() & SL_RAIL_UTIL_COEX_OPT_ACK_HOLDOFF) != SL_RAIL_UTIL_COEX_OPT_DISABLED) {
+      RAIL_PauseRxAutoAck(railHandle, true);
+    }
   } else {
-    // MISRA compliance
+    if (ccaThreshold != RAIL_RSSI_INVALID_DBM) {
+      RAIL_SetCcaThreshold(railHandle, ccaThreshold);
+    }
+    RAIL_PauseRxAutoAck(railHandle, false);
   }
+#else
+  (void)active;
+#endif
 }
 
 void sl_railtest_update_154_radio_config(void)
@@ -202,6 +214,10 @@ void ieee802154Enable(sl_cli_command_arg_t *args)
 #define RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_CUSTOM1_PHY_SHIFT   (3U)
 #define RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_CUSTOM1_PHY         (1U << RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_CUSTOM1_PHY_SHIFT)
 #endif
+#if RAIL_IEEE802154_SUPPORTS_2MBPS_PHY
+#define RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_2MBPS_PHY_SHIFT   (4U)
+#define RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_2MBPS_PHY         (1U << RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_2MBPS_PHY_SHIFT)
+#endif
 
 typedef RAIL_Status_t (*RAIL_IEEE802154_2p4GHzRadioConfig_t)(RAIL_Handle_t railHandle);
 static RAIL_IEEE802154_2p4GHzRadioConfig_t ieee802154Configs[] = {
@@ -215,6 +231,9 @@ static RAIL_IEEE802154_2p4GHzRadioConfig_t ieee802154Configs[] = {
   &RAIL_IEEE802154_Config2p4GHzRadioAntDivCoexFem,
 #if RAIL_IEEE802154_SUPPORTS_CUSTOM1_PHY
   &RAIL_IEEE802154_Config2p4GHzRadioCustom1,
+#endif
+#if RAIL_IEEE802154_SUPPORTS_2MBPS_PHY
+  &RAIL_IEEE802154_Config2p4GHzRadio2Mbps,
 #endif
 };
 
@@ -248,12 +267,22 @@ void config2p4Ghz802154(sl_cli_command_arg_t *args)
   if ((sl_cli_get_argument_count(args) >= 4)
       && (sl_cli_get_argument_uint8(args, 3) != 0U)) {
     ieee802154Config |= RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_CUSTOM1_PHY;
-  }
-  if (ieee802154Config >= COUNTOF(ieee802154Configs)) {
-    responsePrintError(sl_cli_get_command_string(args, 0), 1,
-                       "Cannot set antdiv, coex or fem options when custom is set");
+    if (ieee802154Config > RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_CUSTOM1_PHY) {
+      responsePrintError(sl_cli_get_command_string(args, 0), 1,
+                         "Cannot set antdiv, coex or fem options when custom is set");
+    }
   }
 #endif //RAIL_IEEE802154_SUPPORTS_CUSTOM1_PHY
+#if RAIL_IEEE802154_SUPPORTS_2MBPS_PHY
+  if ((sl_cli_get_argument_count(args) >= 5)
+      && (sl_cli_get_argument_uint8(args, 4) != 0U)) {
+    ieee802154Config |= RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_2MBPS_PHY;
+    if (ieee802154Config > RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_2MBPS_PHY) {
+      responsePrintError(sl_cli_get_command_string(args, 0), 1,
+                         "Cannot set antdiv, coex, fem, or custom PHY options with 2Mbps PHY");
+    }
+  }
+#endif //RAIL_IEEE802154_SUPPORTS_2MBPS_PHY
   status = (*ieee802154Configs[ieee802154Config])(railHandle);
   if (status == RAIL_STATUS_NO_ERROR) {
     ieee802154PhrLen = 1U;
@@ -649,11 +678,6 @@ void ieee802154SetPHR(sl_cli_command_arg_t *args)
     for (uint8_t index = 0; index < phrSizeByte; index++) {
       txData[index] = ((phr & (0xFF << index * 8)) >> index * 8);
     }
-
-    if (railDataConfig.txMethod == PACKET_MODE) {
-      RAIL_WriteTxFifo(railHandle, txData, txDataLen, true);
-    }
-
     responsePrint(sl_cli_get_command_string(args, 0), "PhrSize:%d,PHR:0x%x", phrSizeByte, phr);
     printTxPacket(args);
   } else {
@@ -1182,4 +1206,17 @@ void ieee802154ConfigRxChannelSwitching(sl_cli_command_arg_t *args)
   responsePrint(sl_cli_get_command_string(args, 0),
                 "IEEE802154 RX channel switching unsupported");
 #endif
+}
+
+void setRxToEnhAckTx(sl_cli_command_arg_t *args)
+{
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
+  RAIL_TransitionTime_t rxToEnhAckTx = (RAIL_TransitionTime_t)sl_cli_get_argument_int32(args, 0);
+  RAIL_Status_t status = RAIL_IEEE802154_SetRxToEnhAckTx(railHandle, &rxToEnhAckTx);
+  if (RAIL_STATUS_NO_ERROR == status) {
+    responsePrint(sl_cli_get_command_string(args, 0), "RxToEnhAckTx:%u",
+                  rxToEnhAckTx);
+  } else {
+    responsePrintError(sl_cli_get_command_string(args, 0), status, "Setting RxToEnhAckTx failed");
+  }
 }

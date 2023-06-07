@@ -1,0 +1,156 @@
+project_name: btmesh_soc_csr_generator_tz
+package: Btmesh
+label: Bluetooth Mesh - SoC CSR Generator (TrustZone)
+description: >
+  Certificate generating firmware example. Software is generating the device
+  EC key pair, the signing request for the device certificate, and other related
+  data. The generated data can be read out by the Central Authority.
+  This example utilizes TrustZone for storing keys.
+  
+category: Bluetooth Mesh Examples
+quality: experimental
+
+filter:
+  - name: "Wireless Technology"
+    value: ["Bluetooth Mesh"]
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]
+
+component:
+  - id: app_assert
+  - id: app_log
+  - id: apploader
+  - id: bootloader_interface
+  - id: component_catalog
+  - id: device_init
+  - id: emlib_cmu
+  - id: iostream_usart
+    instance:
+      - vcom
+  - id: mpu
+  - id: nvm3_lib
+  - id: nvm3_default
+  - id: psa_crypto
+  - id: psa_crypto_cmac
+  - id: psa_crypto_ccm
+  - id: psa_crypto_cipher_ecb
+  - id: psa_crypto_ecdh
+  - id: psa_crypto_ecdsa
+  - id: psa_crypto_ecc_secp256r1
+  - id: psa_its
+  - id: psa_crypto_hmac
+  - id: psa_crypto_sha256
+  - id: psa_crypto_sha1
+  - id: sl_system
+  - id: sleeptimer
+  - id: trustzone_nonsecure
+  - id: tz_secure_key_library
+
+requires:
+  - name: armv8m.main
+  - name: device_has_radio_2g4hz 
+
+conflicts:
+  - name: device_security_vault
+
+source:
+  - path: app.c
+  - path: main.c
+  - path: csr_generator.c
+  - path: der.c
+
+include:
+  - path: .
+    file_list:
+    - path: app.h
+    - path: csr_generator.h
+    - path: der.h
+
+config_file:
+  - path: config/csr_generator_config.h
+
+other_file:
+  - path: ../../../bluetooth/script/create_bl_files.bat
+  - path: ../../../bluetooth/script/create_bl_files.sh
+
+import:
+  # Import the config files from the TZ Secure application
+  - id: btmesh_soc_tz_secure_application
+  
+configuration:
+  - name: APP_LOG_LEVEL
+    value: "APP_LOG_LEVEL_INFO"
+  - name: CSR_GENERATOR_EC_KEY_ALGO
+    value: "PSA_ALG_ECDH"
+  - name: CSR_GENERATOR_EC_KEY_USAGE
+    value: "KEY_USAGE_DERIVE"
+  - name: CSR_GENERATOR_KEY_LOCATION
+    value: "PSA_KEY_LOCATION_SLI_SE_OPAQUE"
+    condition:
+      - "device_security_vault"
+  - name: CSR_GENERATOR_PROTOCOL
+    value: "CSR_PROTOCOL_BTMESH"
+  - name: NVM3_DEFAULT_NVM_SIZE
+    value: "0x6000"
+  - name: SL_BOARD_ENABLE_VCOM
+    value: "1"
+  - name: SL_BTMESH_CONFIG_MAX_PROV_BEARERS
+    value: "3"
+  - name: SL_HEAP_SIZE
+    value: "0x4000"
+  - name: SL_IOSTREAM_USART_VCOM_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
+    value: "0"
+  - name: SL_PSA_ITS_USER_MAX_FILES
+    value: "0xC0"
+    condition:
+      - psa_crypto
+  - name: SL_PSA_KEY_USER_SLOT_COUNT
+    value: "1"
+    condition:
+      - psa_crypto
+  - name: SL_STACK_SIZE
+    value: "0x1400"
+
+template_contribution:
+  - name: memory_flash_start
+    value: 0x20000
+    condition: [device_sdid_200]
+    unless: [bootloader_interface]
+  - name: memory_flash_start
+    value: 0x20000
+    condition: [device_sdid_205]
+    unless: [bootloader_interface]
+  - name: memory_flash_start
+    value: 0x8020000
+    unless: [device_sdid_200, device_sdid_205, bootloader_interface]
+
+  # Offset due to secure-application if bootloader is used
+  - name: memory_flash_start
+    value: 0x2C000
+    condition: [device_sdid_200, bootloader_interface]
+  - name: memory_flash_start
+    value: 0x2C000
+    condition: [device_sdid_205, bootloader_interface]
+  - name: memory_flash_start
+    value: 0x802C000
+    condition: [bootloader_interface]
+    unless: [device_sdid_200, device_sdid_205]
+
+
+  - name: memory_flash_size
+    value: 0x64000
+  - name: memory_ram_start
+    value: 0x20003000
+  - name: memory_ram_size
+    value: 0x8000
+
+
+tag:
+  - hardware:device:flash:512
+  - hardware:device:ram:32
+  - hardware:rf:band:2400
+
+post_build:
+  profile: btmesh_tz_non_secure_application

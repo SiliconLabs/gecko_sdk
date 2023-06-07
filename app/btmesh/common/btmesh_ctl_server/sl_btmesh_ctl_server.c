@@ -43,7 +43,7 @@
 #include "sl_btmesh_lib.h"
 
 #include "app_assert.h"
-#include "sl_simple_timer.h"
+#include "app_timer.h"
 
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
@@ -117,31 +117,31 @@ static uint32_t move_sec_level_trans = 0;
 static int16_t move_sec_level_delta = 0;
 
 // Timer handles
-static sl_simple_timer_t ctl_sec_level_move_timer;
-static sl_simple_timer_t ctl_sec_level_transition_timer;
-static sl_simple_timer_t ctl_temp_transition_timer;
-static sl_simple_timer_t ctl_transition_complete_timer;
-static sl_simple_timer_t ctl_delayed_sec_level_timer;
-static sl_simple_timer_t ctl_delayed_ctl_temperature_timer;
-static sl_simple_timer_t ctl_delayed_ctl_request_timer;
-static sl_simple_timer_t ctl_state_store_timer;
+static app_timer_t ctl_sec_level_move_timer;
+static app_timer_t ctl_sec_level_transition_timer;
+static app_timer_t ctl_temp_transition_timer;
+static app_timer_t ctl_transition_complete_timer;
+static app_timer_t ctl_delayed_sec_level_timer;
+static app_timer_t ctl_delayed_ctl_temperature_timer;
+static app_timer_t ctl_delayed_ctl_request_timer;
+static app_timer_t ctl_state_store_timer;
 
 // Timer callbacks
-static void ctl_sec_level_move_timer_cb(sl_simple_timer_t *handle,
+static void ctl_sec_level_move_timer_cb(app_timer_t *handle,
                                         void *data);
-static void ctl_sec_level_transition_timer_cb(sl_simple_timer_t *handle,
+static void ctl_sec_level_transition_timer_cb(app_timer_t *handle,
                                               void *data);
-static void ctl_temp_transition_timer_cb(sl_simple_timer_t *handle,
+static void ctl_temp_transition_timer_cb(app_timer_t *handle,
                                          void *data);
-static void ctl_transition_complete_timer_cb(sl_simple_timer_t *handle,
+static void ctl_transition_complete_timer_cb(app_timer_t *handle,
                                              void *data);
-static void ctl_delayed_sec_level_timer_cb(sl_simple_timer_t *handle,
+static void ctl_delayed_sec_level_timer_cb(app_timer_t *handle,
                                            void *data);
-static void ctl_delayed_ctl_temperature_timer_cb(sl_simple_timer_t *handle,
+static void ctl_delayed_ctl_temperature_timer_cb(app_timer_t *handle,
                                                  void *data);
-static void ctl_delayed_ctl_request_timer_cb(sl_simple_timer_t *handle,
+static void ctl_delayed_ctl_request_timer_cb(app_timer_t *handle,
                                              void *data);
-static void ctl_state_store_timer_cb(sl_simple_timer_t *handle,
+static void ctl_state_store_timer_cb(app_timer_t *handle,
                                      void *data);
 
 /***************************************************************************//**
@@ -414,11 +414,11 @@ static void ctl_request(uint16_t model_id,
       sl_btmesh_set_lightness_target(request->ctl.lightness);
       lightbulb_state.temperature_target = request->ctl.temperature;
       lightbulb_state.deltauv_target = request->ctl.deltauv;
-      sl_status_t sc = sl_simple_timer_start(&ctl_delayed_ctl_request_timer,
-                                             delay_ms,
-                                             ctl_delayed_ctl_request_timer_cb,
-                                             NO_CALLBACK_DATA,
-                                             false);
+      sl_status_t sc = app_timer_start(&ctl_delayed_ctl_request_timer,
+                                       delay_ms,
+                                       ctl_delayed_ctl_request_timer_cb,
+                                       NO_CALLBACK_DATA,
+                                       false);
       app_assert_status_f(sc, "Failed to start Delayed CTL Request timer");
       // store transition parameter for later use
       delayed_ctl_trans = transition_ms;
@@ -435,11 +435,11 @@ static void ctl_request(uint16_t model_id,
                                                   transition_ms);
 
       // lightbulb current state will be updated when transition is complete
-      sl_status_t sc = sl_simple_timer_start(&ctl_transition_complete_timer,
-                                             transition_ms,
-                                             ctl_transition_complete_timer_cb,
-                                             NO_CALLBACK_DATA,
-                                             false);
+      sl_status_t sc = app_timer_start(&ctl_transition_complete_timer,
+                                       transition_ms,
+                                       ctl_transition_complete_timer_cb,
+                                       NO_CALLBACK_DATA,
+                                       false);
       app_assert_status_f(sc, "Failed to start CTL Transition Complete timer");
     }
     lightbulb_state_changed();
@@ -585,11 +585,11 @@ static void ctl_recall(uint16_t model_id,
       lightbulb_state.deltauv_current = current->ctl.deltauv;
     } else {
       // lightbulb current state will be updated when transition is complete
-      sl_status_t sc = sl_simple_timer_start(&ctl_transition_complete_timer,
-                                             transition_ms,
-                                             ctl_transition_complete_timer_cb,
-                                             NO_CALLBACK_DATA,
-                                             false);
+      sl_status_t sc = app_timer_start(&ctl_transition_complete_timer,
+                                       transition_ms,
+                                       ctl_transition_complete_timer_cb,
+                                       NO_CALLBACK_DATA,
+                                       false);
       app_assert_status_f(sc, "Failed to start CTL Transition Complete timer");
     }
     lightbulb_state_changed();
@@ -659,11 +659,11 @@ static void delayed_ctl_request(void)
     ctl_update_and_publish(BTMESH_CTL_SERVER_MAIN, delayed_ctl_trans);
   } else {
     // state is updated when transition is complete
-    sl_status_t sc = sl_simple_timer_start(&ctl_transition_complete_timer,
-                                           delayed_ctl_trans,
-                                           ctl_transition_complete_timer_cb,
-                                           NO_CALLBACK_DATA,
-                                           false);
+    sl_status_t sc = app_timer_start(&ctl_transition_complete_timer,
+                                     delayed_ctl_trans,
+                                     ctl_transition_complete_timer_cb,
+                                     NO_CALLBACK_DATA,
+                                     false);
     app_assert_status_f(sc, "Failed to start CTL Transition Complete timer");
   }
 }
@@ -1125,11 +1125,11 @@ static void ctl_temperature_request(uint16_t model_id,
       // Current state remains as is for now
       lightbulb_state.temperature_target = request->ctl_temperature.temperature;
       lightbulb_state.deltauv_target = request->ctl_temperature.deltauv;
-      sl_status_t sc = sl_simple_timer_start(&ctl_delayed_ctl_temperature_timer,
-                                             delay_ms,
-                                             ctl_delayed_ctl_temperature_timer_cb,
-                                             NO_CALLBACK_DATA,
-                                             false);
+      sl_status_t sc = app_timer_start(&ctl_delayed_ctl_temperature_timer,
+                                       delay_ms,
+                                       ctl_delayed_ctl_temperature_timer_cb,
+                                       NO_CALLBACK_DATA,
+                                       false);
       app_assert_status_f(sc, "Failed to start Delayed Temperature timer");
       // store transition parameter for later use
       delayed_ctl_temperature_trans = transition_ms;
@@ -1143,11 +1143,11 @@ static void ctl_temperature_request(uint16_t model_id,
                                                   transition_ms);
 
       // lightbulb current state will be updated when transition is complete
-      sl_status_t sc = sl_simple_timer_start(&ctl_temp_transition_timer,
-                                             transition_ms,
-                                             ctl_temp_transition_timer_cb,
-                                             NO_CALLBACK_DATA,
-                                             false);
+      sl_status_t sc = app_timer_start(&ctl_temp_transition_timer,
+                                       transition_ms,
+                                       ctl_temp_transition_timer_cb,
+                                       NO_CALLBACK_DATA,
+                                       false);
       app_assert_status_f(sc, "Failed to start Temp Transition timer");
     }
     lightbulb_state_changed();
@@ -1264,11 +1264,11 @@ static void ctl_temperature_recall(uint16_t model_id,
       lightbulb_state.deltauv_current = current->ctl_temperature.deltauv;
     } else {
       // lightbulb current state will be updated when transition is complete
-      sl_status_t sc = sl_simple_timer_start(&ctl_temp_transition_timer,
-                                             transition_ms,
-                                             ctl_temp_transition_timer_cb,
-                                             NO_CALLBACK_DATA,
-                                             false);
+      sl_status_t sc = app_timer_start(&ctl_temp_transition_timer,
+                                       transition_ms,
+                                       ctl_temp_transition_timer_cb,
+                                       NO_CALLBACK_DATA,
+                                       false);
       app_assert_status_f(sc, "Failed to start Temp Transition timer");
     }
     lightbulb_state_changed();
@@ -1324,11 +1324,11 @@ static void delayed_ctl_temperature_request(void)
                                        delayed_ctl_temperature_trans);
   } else {
     // state is updated when transition is complete
-    sl_status_t sc = sl_simple_timer_start(&ctl_temp_transition_timer,
-                                           delayed_ctl_temperature_trans,
-                                           ctl_temp_transition_timer_cb,
-                                           NO_CALLBACK_DATA,
-                                           false);
+    sl_status_t sc = app_timer_start(&ctl_temp_transition_timer,
+                                     delayed_ctl_temperature_trans,
+                                     ctl_temp_transition_timer_cb,
+                                     NO_CALLBACK_DATA,
+                                     false);
     app_assert_status_f(sc, "Failed to start Temp Transition timer");
   }
 }
@@ -1483,11 +1483,11 @@ static void sec_level_move_schedule_next_request(int32_t remaining_delta)
                                                 lightbulb_state.deltauv_current,
                                                 move_sec_level_trans);
   }
-  sl_status_t sc = sl_simple_timer_start(&ctl_sec_level_move_timer,
-                                         transition_ms,
-                                         ctl_sec_level_move_timer_cb,
-                                         NO_CALLBACK_DATA,
-                                         false);
+  sl_status_t sc = app_timer_start(&ctl_sec_level_move_timer,
+                                   transition_ms,
+                                   ctl_sec_level_move_timer_cb,
+                                   NO_CALLBACK_DATA,
+                                   false);
   app_assert_status_f(sc, "Failed to start Sec Level timer");
 }
 
@@ -1531,9 +1531,9 @@ static void sec_level_move_request(void)
 static void sec_level_move_stop(void)
 {
   // Cancel timers
-  sl_status_t sc = sl_simple_timer_stop(&ctl_delayed_sec_level_timer);
+  sl_status_t sc = app_timer_stop(&ctl_delayed_sec_level_timer);
   app_assert_status_f(sc, "Failed to stop Delayed Sec Level timer");
-  sc = sl_simple_timer_stop(&ctl_sec_level_move_timer);
+  sc = app_timer_stop(&ctl_sec_level_move_timer);
   app_assert_status_f(sc, "Failed to stop Sec Level Move timer");
   //Reset move parameters
   move_sec_level_delta = 0;
@@ -1605,11 +1605,11 @@ static void sec_level_request(uint16_t model_id,
           lightbulb_state.sec_level_target = request->level;
           lightbulb_state.temperature_target = temperature;
           sec_level_request_kind = mesh_generic_request_level;
-          sl_status_t sc = sl_simple_timer_start(&ctl_delayed_sec_level_timer,
-                                                 delay_ms,
-                                                 ctl_delayed_sec_level_timer_cb,
-                                                 NO_CALLBACK_DATA,
-                                                 false);
+          sl_status_t sc = app_timer_start(&ctl_delayed_sec_level_timer,
+                                           delay_ms,
+                                           ctl_delayed_sec_level_timer_cb,
+                                           NO_CALLBACK_DATA,
+                                           false);
           app_assert_status_f(sc, "Failed to start Delayed Sec Level timer");
           // store transition parameter for later use
           delayed_sec_level_trans = transition_ms;
@@ -1622,11 +1622,11 @@ static void sec_level_request(uint16_t model_id,
                                                       transition_ms);
 
           // lightbulb current state will be updated when transition is complete
-          sl_status_t sc = sl_simple_timer_start(&ctl_sec_level_transition_timer,
-                                                 delayed_sec_level_trans,
-                                                 ctl_sec_level_transition_timer_cb,
-                                                 NO_CALLBACK_DATA,
-                                                 false);
+          sl_status_t sc = app_timer_start(&ctl_sec_level_transition_timer,
+                                           delayed_sec_level_trans,
+                                           ctl_sec_level_transition_timer_cb,
+                                           NO_CALLBACK_DATA,
+                                           false);
           app_assert_status_f(sc, "Failed to start Sec Level Transition timer");
         }
 
@@ -1667,11 +1667,11 @@ static void sec_level_request(uint16_t model_id,
           lightbulb_state.sec_level_target = requested_level;
           lightbulb_state.temperature_target = temperature;
           sec_level_request_kind = mesh_generic_request_level_move;
-          sl_status_t sc = sl_simple_timer_start(&ctl_delayed_sec_level_timer,
-                                                 delay_ms,
-                                                 ctl_delayed_sec_level_timer_cb,
-                                                 NO_CALLBACK_DATA,
-                                                 false);
+          sl_status_t sc = app_timer_start(&ctl_delayed_sec_level_timer,
+                                           delay_ms,
+                                           ctl_delayed_sec_level_timer_cb,
+                                           NO_CALLBACK_DATA,
+                                           false);
           app_assert_status_f(sc, "Failed to start Delayed Sec Level timer");
         } else {
           // no delay so start move
@@ -1704,11 +1704,11 @@ static void sec_level_request(uint16_t model_id,
         // Current state remains as is for now
         remaining_ms = delay_ms;
         sec_level_request_kind = mesh_generic_request_level_halt;
-        sl_status_t sc = sl_simple_timer_start(&ctl_delayed_sec_level_timer,
-                                               delay_ms,
-                                               ctl_delayed_sec_level_timer_cb,
-                                               NO_CALLBACK_DATA,
-                                               false);
+        sl_status_t sc = app_timer_start(&ctl_delayed_sec_level_timer,
+                                         delay_ms,
+                                         ctl_delayed_sec_level_timer_cb,
+                                         NO_CALLBACK_DATA,
+                                         false);
         app_assert_status_f(sc, "Failed to start Delayed Sec Level timer");
       } else {
         sec_level_move_stop();
@@ -1806,11 +1806,11 @@ static void sec_level_recall(uint16_t model_id,
       lightbulb_state.sec_level_current = current->level.level;
     } else {
       // lightbulb current state will be updated when transition is complete
-      sl_status_t sc = sl_simple_timer_start(&ctl_sec_level_transition_timer,
-                                             transition_ms,
-                                             ctl_sec_level_transition_timer_cb,
-                                             NO_CALLBACK_DATA,
-                                             false);
+      sl_status_t sc = app_timer_start(&ctl_sec_level_transition_timer,
+                                       transition_ms,
+                                       ctl_sec_level_transition_timer_cb,
+                                       NO_CALLBACK_DATA,
+                                       false);
       app_assert_status_f(sc, "Failed to start Sec Level Transition timer");
     }
     lightbulb_state_changed();
@@ -1861,11 +1861,11 @@ static void delayed_sec_level_request(void)
                                      delayed_sec_level_trans);
       } else {
         // state is updated when transition is complete
-        sl_status_t sc = sl_simple_timer_start(&ctl_sec_level_transition_timer,
-                                               delayed_sec_level_trans,
-                                               ctl_sec_level_transition_timer_cb,
-                                               NO_CALLBACK_DATA,
-                                               false);
+        sl_status_t sc = app_timer_start(&ctl_sec_level_transition_timer,
+                                         delayed_sec_level_trans,
+                                         ctl_sec_level_transition_timer_cb,
+                                         NO_CALLBACK_DATA,
+                                         false);
         app_assert_status_f(sc, "Failed to start Sec Level Transition timer");
       }
       break;
@@ -2006,11 +2006,11 @@ static sl_status_t lightbulb_state_store(void)
  ******************************************************************************/
 static void lightbulb_state_changed(void)
 {
-  sl_status_t sc = sl_simple_timer_start(&ctl_state_store_timer,
-                                         SL_BTMESH_CTL_SERVER_NVM_SAVE_TIME_CFG_VAL,
-                                         ctl_state_store_timer_cb,
-                                         NO_CALLBACK_DATA,
-                                         false);
+  sl_status_t sc = app_timer_start(&ctl_state_store_timer,
+                                   SL_BTMESH_CTL_SERVER_NVM_SAVE_TIME_CFG_VAL,
+                                   ctl_state_store_timer_cb,
+                                   NO_CALLBACK_DATA,
+                                   false);
   app_assert_status_f(sc, "Failed to start State Store timer");
 }
 
@@ -2094,11 +2094,11 @@ void sl_btmesh_ctl_server_init(void)
         sl_btmesh_ctl_set_temperature_deltauv_level(lightbulb_state.temperature_current,
                                                     lightbulb_state.deltauv_current,
                                                     IMMEDIATE);
-        sl_status_t sc = sl_simple_timer_start(&ctl_temp_transition_timer,
-                                               transition_ms,
-                                               ctl_temp_transition_timer_cb,
-                                               NO_CALLBACK_DATA,
-                                               false);
+        sl_status_t sc = app_timer_start(&ctl_temp_transition_timer,
+                                         transition_ms,
+                                         ctl_temp_transition_timer_cb,
+                                         NO_CALLBACK_DATA,
+                                         false);
         app_assert_status_f(sc, "Failed to start Temp Transition timer");
         sl_btmesh_ctl_set_temperature_deltauv_level(lightbulb_state.temperature_target,
                                                     lightbulb_state.deltauv_target,
@@ -2286,7 +2286,7 @@ static void scene_server_reset_register_impl(uint16_t elem_index)
 /**************************************************************************//**
  * Timer Callbacks
  *****************************************************************************/
-static void ctl_sec_level_move_timer_cb(sl_simple_timer_t *handle,
+static void ctl_sec_level_move_timer_cb(app_timer_t *handle,
                                         void *data)
 {
   (void)data;
@@ -2295,7 +2295,7 @@ static void ctl_sec_level_move_timer_cb(sl_simple_timer_t *handle,
   sec_level_move_request();
 }
 
-static void ctl_sec_level_transition_timer_cb(sl_simple_timer_t *handle,
+static void ctl_sec_level_transition_timer_cb(app_timer_t *handle,
                                               void *data)
 {
   (void)data;
@@ -2305,7 +2305,7 @@ static void ctl_sec_level_transition_timer_cb(sl_simple_timer_t *handle,
   sec_level_transition_complete();
 }
 
-static void ctl_temp_transition_timer_cb(sl_simple_timer_t *handle,
+static void ctl_temp_transition_timer_cb(app_timer_t *handle,
                                          void *data)
 {
   (void)data;
@@ -2315,7 +2315,7 @@ static void ctl_temp_transition_timer_cb(sl_simple_timer_t *handle,
   ctl_temperature_transition_complete();
 }
 
-static void ctl_transition_complete_timer_cb(sl_simple_timer_t *handle,
+static void ctl_transition_complete_timer_cb(app_timer_t *handle,
                                              void *data)
 {
   (void)data;
@@ -2324,7 +2324,7 @@ static void ctl_transition_complete_timer_cb(sl_simple_timer_t *handle,
   ctl_transition_complete();
 }
 
-static void ctl_delayed_sec_level_timer_cb(sl_simple_timer_t *handle,
+static void ctl_delayed_sec_level_timer_cb(app_timer_t *handle,
                                            void *data)
 {
   (void)data;
@@ -2334,7 +2334,7 @@ static void ctl_delayed_sec_level_timer_cb(sl_simple_timer_t *handle,
   delayed_sec_level_request();
 }
 
-static void ctl_delayed_ctl_temperature_timer_cb(sl_simple_timer_t *handle,
+static void ctl_delayed_ctl_temperature_timer_cb(app_timer_t *handle,
                                                  void *data)
 {
   (void)data;
@@ -2343,7 +2343,7 @@ static void ctl_delayed_ctl_temperature_timer_cb(sl_simple_timer_t *handle,
   delayed_ctl_temperature_request();
 }
 
-static void ctl_delayed_ctl_request_timer_cb(sl_simple_timer_t *handle,
+static void ctl_delayed_ctl_request_timer_cb(app_timer_t *handle,
                                              void *data)
 {
   (void)data;
@@ -2352,7 +2352,7 @@ static void ctl_delayed_ctl_request_timer_cb(sl_simple_timer_t *handle,
   delayed_ctl_request();
 }
 
-static void ctl_state_store_timer_cb(sl_simple_timer_t *handle,
+static void ctl_state_store_timer_cb(app_timer_t *handle,
                                      void *data)
 {
   (void)data;

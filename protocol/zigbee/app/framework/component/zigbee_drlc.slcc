@@ -37,7 +37,7 @@ template_contribution:
   - name: zigbee_stack_callback
     value:
       callback_type: dsa_sign
-      function_name: emAfDemandResponseLoadControlClusterDsaSignCallback
+      function_name: sli_zigbee_af_demand_response_load_control_cluster_dsa_sign_callback
   - name: cluster_service
     value:
        cluster_id: "0x0701"

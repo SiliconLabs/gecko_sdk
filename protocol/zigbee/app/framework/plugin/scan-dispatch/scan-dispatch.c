@@ -22,12 +22,8 @@
 // -----------------------------------------------------------------------------
 // Global variables
 
-#ifdef UC_BUILD
 sl_zigbee_event_t emberAfPluginScanDispatchScanNetworkEvents[EMBER_SUPPORTED_NETWORKS];
-void emberAfPluginScanDispatchScanNetworkEventHandler(SLXU_UC_EVENT);
-#else
-extern EmberEventControl emberAfPluginScanDispatchScanNetworkEventControls[];
-#endif
+void emberAfPluginScanDispatchScanNetworkEventHandler(sl_zigbee_event_t * event);
 
 // -----------------------------------------------------------------------------
 // Internal implementation elements
@@ -83,11 +79,7 @@ EmberStatus emberAfPluginScanDispatchScheduleScan(EmberAfPluginScanDispatchScanD
     tail = handlerQueueNextIndex(tail);
     count++;
     status = EMBER_SUCCESS;
-#ifdef UC_BUILD
     sl_zigbee_event_set_active(emberAfPluginScanDispatchScanNetworkEvents);
-#else
-    emberAfNetworkEventControlSetActive(emberAfPluginScanDispatchScanNetworkEventControls);
-#endif
   }
 
   return status;
@@ -102,25 +94,19 @@ void emberAfPluginScanDispatchClear(void)
 // -----------------------------------------------------------------------------
 // Internal and public callbacks
 
-#ifdef UC_BUILD
-void emAfPluginScanDispatchInitCallback(uint8_t init_level)
+void sli_zigbee_af_scan_dispatch_init_callback(uint8_t init_level)
 {
-  SLXU_INIT_UNUSED_ARG;
+  (void)init_level;
 
-  slxu_zigbee_network_event_init(emberAfPluginScanDispatchScanNetworkEvents,
-                                 emberAfPluginScanDispatchScanNetworkEventHandler);
+  sl_zigbee_network_event_init(emberAfPluginScanDispatchScanNetworkEvents,
+                               emberAfPluginScanDispatchScanNetworkEventHandler);
 }
-#endif
 
-void emberAfPluginScanDispatchScanNetworkEventHandler(SLXU_UC_EVENT)
+void emberAfPluginScanDispatchScanNetworkEventHandler(sl_zigbee_event_t * event)
 {
   sl_status_t status;
 
-#ifdef UC_BUILD
   sl_zigbee_event_set_inactive(emberAfPluginScanDispatchScanNetworkEvents);
-#else
-  emberAfNetworkEventControlSetInactive(emberAfPluginScanDispatchScanNetworkEventControls);
-#endif
 
   // If there is a handler in the queue, start a scan for it.
   // If we are already scanning, we should try again.
@@ -140,21 +126,13 @@ void emberAfPluginScanDispatchScanNetworkEventHandler(SLXU_UC_EVENT)
                              NULL);     // network
         head = handlerQueueNextIndex(head);
         count--;
-#ifdef UC_BUILD
         sl_zigbee_event_set_active(emberAfPluginScanDispatchScanNetworkEvents);
-#else
-        emberAfNetworkEventControlSetActive(emberAfPluginScanDispatchScanNetworkEventControls);
-#endif
       }
     }
   }
 }
 
-#ifdef UC_BUILD
-void emAfPluginScanDispatchEnergyScanResultCallback(uint8_t channel, int8_t rssi)
-#else
-void emberAfEnergyScanResultCallback(uint8_t channel, int8_t rssi)
-#endif
+void sli_zigbee_af_scan_dispatch_energy_scan_result_callback(uint8_t channel, int8_t rssi)
 {
   maybeCallNextHandler((uint8_t)rssi,
                        channel,
@@ -164,15 +142,9 @@ void emberAfEnergyScanResultCallback(uint8_t channel, int8_t rssi)
                        NULL);     // network
 }
 
-#ifdef UC_BUILD
-void emAfPluginScanDispatchNetworkFoundCallback(EmberZigbeeNetwork *networkFound,
-                                                uint8_t lqi,
-                                                int8_t rssi)
-#else
-void emberAfNetworkFoundCallback(EmberZigbeeNetwork *networkFound,
-                                 uint8_t lqi,
-                                 int8_t rssi)
-#endif
+void sli_zigbee_af_scan_dispatch_network_found_callback(EmberZigbeeNetwork *networkFound,
+                                                        uint8_t lqi,
+                                                        int8_t rssi)
 {
   maybeCallNextHandler((uint8_t)rssi,
                        lqi,
@@ -182,11 +154,7 @@ void emberAfNetworkFoundCallback(EmberZigbeeNetwork *networkFound,
                        networkFound);
 }
 
-#ifdef UC_BUILD
-void emAfPluginScanDispatchScanCompleteCallback(uint8_t channel, EmberStatus status)
-#else
-void emberAfScanCompleteCallback(uint8_t channel, EmberStatus status)
-#endif
+void sli_zigbee_af_scan_dispatch_scan_complete_callback(uint8_t channel, EmberStatus status)
 {
   maybeCallNextHandler(status,
                        channel,
@@ -203,10 +171,6 @@ void emberAfScanCompleteCallback(uint8_t channel, EmberStatus status)
   if ((status == EMBER_SUCCESS) && !handlerQueueIsEmpty()) {
     head = handlerQueueNextIndex(head);
     count--;
-#ifdef UC_BUILD
     sl_zigbee_event_set_active(emberAfPluginScanDispatchScanNetworkEvents);
-#else
-    emberAfNetworkEventControlSetActive(emberAfPluginScanDispatchScanNetworkEventControls);
-#endif
   }
 }

@@ -1,23 +1,24 @@
 #!/usr/bin/env python
 
 #
-# Generated Tue May 19 10:38:15 2020 by generateDS.py version 2.12d.
+# Generated Thu Feb 23 14:49:58 2023 by generateDS.py version 2.12d.
 #
 # Command line options:
-#   ('-o', '..\\Bindings.py')
+#   ('-o', '../Bindings.py')
 #   ('--super', 'Bindings')
-#   ('-s', '..\\Template.py')
+#   ('-s', '../Template.py')
 #   ('--subclass-suffix', '')
 #   ('--member-specs', 'list')
+#   ('--external-encoding', 'ascii')
 #   ('-m', '')
 #   ('-f', '')
 #   ('--silence', '')
 #
 # Command line arguments:
-#   .\multi_phy_configuration_model.xsd
+#   ./multi_phy_configuration_model.xsd
 #
 # Command line:
-#   generateDS_custom.py -o "..\Bindings.py" --super="Bindings" -s "..\Template.py" --subclass-suffix --member-specs="list" -m -f --silence .\multi_phy_configuration_model.xsd
+#   C:\validation\host_py_radio_config\Package\pylib_multi_phy_model\multi_phy_configuration_model\xsd\generateDS_custom.py -o "../Bindings.py" --super="Bindings" -s "../Template.py" --subclass-suffix --member-specs="list" --external-encoding="ascii" -m -f --silence ./multi_phy_configuration_model.xsd
 #
 # Current working directory (os.getcwd()):
 #   xsd
@@ -94,8 +95,8 @@ ExternalEncoding = 'ascii'
 
 
 class multi_phy_configuration(supermod.multi_phy_configuration):
-    def __init__(self, part_family=None, status_code=None, readable_name=None, rail_adapter_version=None, part_revision=None, target='IC', part_opn=None, xsd_version=None, status_message=None, desc=None, base_channel_configurations=None, output_files=None):
-        super(multi_phy_configuration, self).__init__(part_family, status_code, readable_name, rail_adapter_version, part_revision, target, part_opn, xsd_version, status_message, desc, base_channel_configurations, output_files, )
+    def __init__(self, xsd_version=None, part_family=None, part_revision=None, rail_adapter_version=None, desc=None, status_code=None, status_message=None, readable_name=None, part_opn=None, target='IC', base_channel_configurations=None, output_files=None):
+        super(multi_phy_configuration, self).__init__(xsd_version, part_family, part_revision, rail_adapter_version, desc, status_code, status_message, readable_name, part_opn, target, base_channel_configurations, output_files, )
 supermod.multi_phy_configuration.subclass = multi_phy_configuration
 # end class multi_phy_configuration
 
@@ -108,8 +109,8 @@ supermod.base_channel_configurationsType.subclass = base_channel_configurationsT
 
 
 class base_channel_configurationType(supermod.base_channel_configurationType):
-    def __init__(self, profile=None, base_channel_reference=None, name=None, force_empty_phy_config_delta_subtract=True, profile_inputs=None, phy=None, profile_output_overrides=None, metadata=None, channel_config_entries=None, phy_config_base=None, phy_config_delta_subtract=None, link_layer_config=None, optional_arguments=None):
-        super(base_channel_configurationType, self).__init__(profile, base_channel_reference, name, force_empty_phy_config_delta_subtract, profile_inputs, phy, profile_output_overrides, metadata, channel_config_entries, phy_config_base, phy_config_delta_subtract, link_layer_config, optional_arguments, )
+    def __init__(self, name=None, profile=None, force_empty_phy_config_delta_subtract=True, base_channel_reference=None, profile_inputs=None, phy=None, profile_output_overrides=None, metadata=None, channel_config_entries=None, phy_config_base=None, phy_config_delta_subtract=None, link_layer_config=None, optional_arguments=None):
+        super(base_channel_configurationType, self).__init__(name, profile, force_empty_phy_config_delta_subtract, base_channel_reference, profile_inputs, phy, profile_output_overrides, metadata, channel_config_entries, phy_config_base, phy_config_delta_subtract, link_layer_config, optional_arguments, )
 supermod.base_channel_configurationType.subclass = base_channel_configurationType
 # end class base_channel_configurationType
 
@@ -171,8 +172,8 @@ supermod.channel_config_entriesType.subclass = channel_config_entriesType
 
 
 class channel_config_entryType(supermod.channel_config_entryType):
-    def __init__(self, name=None, base_frequency=None, channel_spacing=None, physical_channel_offset=None, channel_number_start=None, channel_number_end=None, max_power=None, profile_input_overrides=None, profile_output_overrides=None, phy_name_override=None, phy_config_delta_add=None, radio_configurator_output_model=None, full_register_model=None, optional_arguments=None, metadata=None):
-        super(channel_config_entryType, self).__init__(name, base_frequency, channel_spacing, physical_channel_offset, channel_number_start, channel_number_end, max_power, profile_input_overrides, profile_output_overrides, phy_name_override, phy_config_delta_add, radio_configurator_output_model, full_register_model, optional_arguments, metadata, )
+    def __init__(self, name=None, base_frequency=None, channel_spacing=None, physical_channel_offset=None, channel_number_start=None, channel_number_end=None, max_power=None, profile_input_overrides=None, profile_output_overrides=None, phy_name_override=None, phy_config_delta_add=None, radio_configurator_output_model=None, full_register_model=None, optional_arguments=None, metadata=None, alternate_phy=None):
+        super(channel_config_entryType, self).__init__(name, base_frequency, channel_spacing, physical_channel_offset, channel_number_start, channel_number_end, max_power, profile_input_overrides, profile_output_overrides, phy_name_override, phy_config_delta_add, radio_configurator_output_model, full_register_model, optional_arguments, metadata, alternate_phy, )
 supermod.channel_config_entryType.subclass = channel_config_entryType
 # end class channel_config_entryType
 
@@ -231,6 +232,13 @@ class argumentType(supermod.argumentType):
         super(argumentType, self).__init__(key, value, )
 supermod.argumentType.subclass = argumentType
 # end class argumentType
+
+
+class alternate_phyType(supermod.alternate_phyType):
+    def __init__(self, base_frequency=None, channel_spacing=None, number_of_channels=None):
+        super(alternate_phyType, self).__init__(base_frequency, channel_spacing, number_of_channels, )
+supermod.alternate_phyType.subclass = alternate_phyType
+# end class alternate_phyType
 
 
 class phy_config_baseType(supermod.phy_config_baseType):

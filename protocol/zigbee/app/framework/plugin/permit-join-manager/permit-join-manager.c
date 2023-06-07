@@ -29,10 +29,14 @@
 
 #include "app/framework/include/af.h"
 #include "app/util/zigbee-framework/zigbee-device-common.h"
-
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
+#include "sl_component_catalog.h"
+#endif
+#ifdef SL_CATALOG_ZIGBEE_PERMIT_JOIN_MANAGER_PRESENT
 #include "permit-join-manager-config.h"
-#endif // UC_BUILD
+#else
+#include "app/framework/plugin/permit-join-manager/config/permit-join-manager-config.h"
+#endif
 
 //=============================================================================
 // Globals
@@ -51,12 +55,8 @@
   #define EMBER_AF_PLUGIN_PERMIT_JOIN_MANAGER_DEVICE_ANNOUNCE_TIMEOUT 1000
 #endif
 
-#ifdef UC_BUILD
 sl_zigbee_event_t emberAfPluginPermitJoinManagerTimeoutNetworkEvents[EMBER_SUPPORTED_NETWORKS];
-void emberAfPluginPermitJoinManagerTimeoutNetworkEventHandler(SLXU_UC_EVENT);
-#else // !UC_BUILD
-extern EmberEventControl emberAfPluginPermitJoinManagerTimeoutNetworkEventControls[];
-#endif // UC_BUILD
+void emberAfPluginPermitJoinManagerTimeoutNetworkEventHandler(sl_zigbee_event_t * event);
 static EmberAfJoiningDevice joiningDeviceList[EMBER_AF_PLUGIN_PERMIT_JOIN_MANAGER_JOINING_DEVICES_QUEUE_LENGTH];
 
 // With device announce there is only the ZDO sequence number, there is no status code.
@@ -99,14 +99,9 @@ static void addDeviceToJoiningList(EmberNodeId emberNodeId)
       emberAfCorePrintln("Adding to queue at index %u", i);
       joiningDeviceList[i].emberNodeId = emberNodeId;
       joiningDeviceList[i].timeStamp = halCommonGetInt32uMillisecondTick();
-#ifdef UC_BUILD
-      slxu_zigbee_event_set_delay_ms(emberAfPluginPermitJoinManagerTimeoutNetworkEvents,
-                                     EMBER_AF_PLUGIN_PERMIT_JOIN_MANAGER_DEVICE_ANNOUNCE_TIMEOUT);
+      sl_zigbee_event_set_delay_ms(emberAfPluginPermitJoinManagerTimeoutNetworkEvents,
+                                   EMBER_AF_PLUGIN_PERMIT_JOIN_MANAGER_DEVICE_ANNOUNCE_TIMEOUT);
 
-#else // !UC_BUILD
-      emberAfNetworkEventControlSetDelayMS(emberAfPluginPermitJoinManagerTimeoutNetworkEventControls,
-                                           EMBER_AF_PLUGIN_PERMIT_JOIN_MANAGER_DEVICE_ANNOUNCE_TIMEOUT);
-#endif // UC_BUILD
       return;
     }
   }
@@ -137,15 +132,13 @@ static EmberNodeId findDeviceInJoiningList(EmberNodeId emberNodeId)
   return EMBER_NULL_NODE_ID;
 }
 
-#ifdef UC_BUILD
-
 void emberAfPluginPermitJoinManagerInitCallback(uint8_t init_level)
 {
   switch (init_level) {
     case SL_ZIGBEE_INIT_LEVEL_EVENT:
     {
-      slxu_zigbee_network_event_init(emberAfPluginPermitJoinManagerTimeoutNetworkEvents,
-                                     emberAfPluginPermitJoinManagerTimeoutNetworkEventHandler);
+      sl_zigbee_network_event_init(emberAfPluginPermitJoinManagerTimeoutNetworkEvents,
+                                   emberAfPluginPermitJoinManagerTimeoutNetworkEventHandler);
       break;
     }
 
@@ -160,19 +153,6 @@ void emberAfPluginPermitJoinManagerInitCallback(uint8_t init_level)
     }
   }
 }
-
-#else // !UC_BUILD
-
-void emberAfPluginPermitJoinManagerInitCallback(void)
-{
-  int i = 0;
-  for (i = 0; i < EMBER_AF_PLUGIN_PERMIT_JOIN_MANAGER_JOINING_DEVICES_QUEUE_LENGTH; i++) {
-    joiningDeviceList[i].emberNodeId = EMBER_NULL_NODE_ID;
-    joiningDeviceList[i].timeStamp = 0;
-  }
-}
-
-#endif // UC_BUILD
 
 bool emberAfPluginPermitJoinManagerZdoMessageReceivedCallback(EmberNodeId emberNodeId,
                                                               EmberApsFrame* apsFrame,
@@ -201,14 +181,9 @@ bool emberAfPluginPermitJoinManagerZdoMessageReceivedCallback(EmberNodeId emberN
   return false;
 }
 
-void emberAfPluginPermitJoinManagerTimeoutNetworkEventHandler(SLXU_UC_EVENT)
+void emberAfPluginPermitJoinManagerTimeoutNetworkEventHandler(sl_zigbee_event_t * event)
 {
-#ifdef UC_BUILD
   sl_zigbee_event_set_inactive(emberAfPluginPermitJoinManagerTimeoutNetworkEvents);
-#else // !UC_BUILD
-  uint8_t networkIndex = emberGetCurrentNetwork();
-  emberEventControlSetInactive(emberAfPluginPermitJoinManagerTimeoutNetworkEventControls[networkIndex]);
-#endif // UC_BUILD
   int i = 0;
   static int j = 0;
   for (i = 0; i < EMBER_AF_PLUGIN_PERMIT_JOIN_MANAGER_JOINING_DEVICES_QUEUE_LENGTH; i++) {

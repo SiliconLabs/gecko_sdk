@@ -10,7 +10,7 @@
 #include PLATFORM_HEADER
 #include CONFIGURATION_HEADER
 #include "stack/include/ember-types.h"
-#include "event_control/event.h"
+#include "event_queue/event-queue.h"
 #include "hal/hal.h"
 #include "hal/micro/led.h"
 #include "hal/micro/micro.h"
@@ -24,15 +24,15 @@
 
 // ------------------------------------------------------------------------------
 // Plugin events
-EmberEventControl emberAfPluginLedBlinkLed0EventFunctionEventControl;
-EmberEventControl emberAfPluginLedBlinkLed1EventFunctionEventControl;
+EmberEvent emberAfPluginLedBlinkLed0EventFunctionEvent;
+EmberEvent emberAfPluginLedBlinkLed1EventFunctionEvent;
 
-EmberEventControl * ledEventArray[BSP_LED_COUNT] = {
+EmberEvent * ledEventArray[BSP_LED_COUNT] = {
 #if BSP_LED_COUNT >= 1
-  &emberAfPluginLedBlinkLed0EventFunctionEventControl,
+  &emberAfPluginLedBlinkLed0EventFunctionEvent,
 #endif
 #if BSP_LED_COUNT >= 2
-  &emberAfPluginLedBlinkLed1EventFunctionEventControl
+  &emberAfPluginLedBlinkLed1EventFunctionEvent
 #endif
 };
 
@@ -75,13 +75,13 @@ static uint8_t ledSequence;
 
 // ------------------------------------------------------------------------------
 // Plugin led0 event handler
-void emberAfPluginLedBlinkLed0EventFunctionEventHandler(void)
+void emberAfPluginLedBlinkLed0EventFunctionEventHandler(EmberEvent* event)
 {
   handleLedEvent(0);
 }
 
 // Plugin led1 event handler
-void emberAfPluginLedBlinkLed1EventFunctionEventHandler(void)
+void emberAfPluginLedBlinkLed1EventFunctionEventHandler(EmberEvent* event)
 {
   handleLedEvent(1);
 }
@@ -106,13 +106,13 @@ static void handleLedEvent(uint8_t ledIndex)
       case LED_ON:
         // was on.  this must be time to turn it off.
         turnLedOff(activeLed[ledIndex]);
-        emberEventControlSetInactive(*(ledEventArray[ledIndex]));
+        emberEventSetInactive(*(ledEventArray[ledIndex]));
         break;
 
       case LED_OFF:
         // was on.  this must be time to turn it off.
         turnLedOn(activeLed[ledIndex]);
-        emberEventControlSetInactive(*(ledEventArray[ledIndex]));
+        emberEventSetInactive(*(ledEventArray[ledIndex]));
         break;
 
       case LED_BLINKING_ON:
@@ -123,30 +123,30 @@ static void handleLedEvent(uint8_t ledIndex)
           }
           if (ledBlinkCount[ledIndex] > 0) {
             ledEventState[ledIndex] = LED_BLINKING_OFF;
-            emberEventControlSetDelayMS(*(ledEventArray[ledIndex]),
-                                        ledBlinkTimeMs[ledIndex]);
+            emberEventSetDelayMs(*(ledEventArray[ledIndex]),
+                                 ledBlinkTimeMs[ledIndex]);
           } else {
             ledEventState[ledIndex] = LED_OFF;
-            emberEventControlSetInactive(*(ledEventArray[ledIndex]));
+            emberEventSetInactive(*(ledEventArray[ledIndex]));
           }
         } else {
           ledEventState[ledIndex] = LED_BLINKING_OFF;
-          emberEventControlSetDelayMS(*(ledEventArray[ledIndex]),
-                                      ledBlinkTimeMs[ledIndex]);
+          emberEventSetDelayMs(*(ledEventArray[ledIndex]),
+                               ledBlinkTimeMs[ledIndex]);
         }
         break;
       case LED_BLINKING_OFF:
         turnLedOn(activeLed[ledIndex]);
         ledEventState[ledIndex] = LED_BLINKING_ON;
-        emberEventControlSetDelayMS(*(ledEventArray[ledIndex]),
-                                    ledBlinkTimeMs[ledIndex]);
+        emberEventSetDelayMs(*(ledEventArray[ledIndex]),
+                             ledBlinkTimeMs[ledIndex]);
         break;
       case LED_BLINK_PATTERN:
         if (ledBlinkCount[ledIndex] == 0) {
           turnLedOff(activeLed[ledIndex]);
 
           ledEventState[ledIndex] = LED_OFF;
-          emberEventControlSetInactive(*(ledEventArray[ledIndex]));
+          emberEventSetInactive(*(ledEventArray[ledIndex]));
 
           break;
         }
@@ -157,9 +157,9 @@ static void handleLedEvent(uint8_t ledIndex)
           turnLedOn(activeLed[ledIndex]);
         }
 
-        emberEventControlSetDelayMS(*(ledEventArray[ledIndex]),
-                                    blinkPattern[ledIndex][blinkPatternIndex[
-                                                             ledIndex]]);
+        emberEventSetDelayMs(*(ledEventArray[ledIndex]),
+                             blinkPattern[ledIndex][blinkPatternIndex[
+                                                      ledIndex]]);
 
         blinkPatternIndex[ledIndex]++;
 
@@ -215,10 +215,10 @@ void halMultiLedBlinkLedOn(uint8_t timeMs, uint8_t led)
   ledEventState[ledIndex] = LED_ON;
 
   if (timeMs > 0) {
-    emberEventControlSetDelayQS(*(ledEventArray[ledIndex]),
-                                ((uint16_t) timeMs) * 4);
+    emberEventSetDelayMs(*(ledEventArray[ledIndex]),
+                         ((uint16_t) timeMs));
   } else {
-    emberEventControlSetInactive(*(ledEventArray[ledIndex]));
+    emberEventSetInactive(*(ledEventArray[ledIndex]));
   }
 }
 
@@ -231,10 +231,10 @@ void halMultiLedBlinkLedOff(uint8_t timeMs, uint8_t led)
   ledEventState[ledIndex] = LED_OFF;
 
   if (timeMs > 0) {
-    emberEventControlSetDelayQS(*(ledEventArray[ledIndex]),
-                                ((uint16_t) timeMs) * 4);
+    emberEventSetDelayMs(*(ledEventArray[ledIndex]),
+                         ((uint16_t) timeMs));
   } else {
-    emberEventControlSetInactive(*(ledEventArray[ledIndex]));
+    emberEventSetInactive(*(ledEventArray[ledIndex]));
   }
 }
 
@@ -248,8 +248,8 @@ void halMultiLedBlinkBlink(uint8_t  count,
   ledBlinkTimeMs[ledIndex] = blinkTimeMs;
   turnLedOff(activeLed[ledIndex]);
   ledEventState[ledIndex] = LED_BLINKING_OFF;
-  emberEventControlSetDelayMS(*(ledEventArray[ledIndex]),
-                              ledBlinkTimeMs[ledIndex]);
+  emberEventSetDelayMs(*(ledEventArray[ledIndex]),
+                       ledBlinkTimeMs[ledIndex]);
   ledBlinkCount[ledIndex] = count;
 }
 
@@ -281,8 +281,8 @@ void halMultiLedBlinkPattern(uint8_t  count,
     blinkPattern[ledIndex][i] = pattern[i];
   }
 
-  emberEventControlSetDelayMS(*(ledEventArray[ledIndex]),
-                              blinkPattern[ledIndex][0]);
+  emberEventSetDelayMs(*(ledEventArray[ledIndex]),
+                       blinkPattern[ledIndex][0]);
 
   blinkPatternIndex[ledIndex] = 1;
 }

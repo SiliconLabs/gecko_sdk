@@ -59,9 +59,13 @@ extern "C" {
 
 #if defined(_SILICON_LABS_32B_SERIES_2)
 /** Maximum common lines of LCD. */
-#define LCD_COM_LINES_MAX  4
+#if defined(LCD_OCTAPLEX) && (LCD_OCTAPLEX == 1)
+#define LCD_COM_LINES_MAX           (LCD_COM_NUM + LCD_SEGASCOM_NUM)
+#else
+#define LCD_COM_LINES_MAX           LCD_COM_NUM
+#endif
 /** Maximum segment lines of LCD. */
-#define LCD_SEGMENT_LINES_MAX  20
+#define LCD_SEGMENT_LINES_MAX       LCD_SEG_NUM
 #endif
 
 /*******************************************************************************
@@ -81,12 +85,12 @@ typedef enum {
 #if defined(LCD_DISPCTRL_MUXE_MUXE)
   /** Sextaplex / 1/6 Duty cycle (segments can be multiplexed with LCD_COM[0:5]). */
   lcdMuxSextaplex  = LCD_DISPCTRL_MUXE_MUXE | LCD_DISPCTRL_MUX_DUPLEX,
-  /** Octaplex / 1/6 Duty cycle (segments can be multiplexed with LCD_COM[0:5]). */
+  /** Octaplex / 1/8 Duty cycle (segments can be multiplexed with LCD_COM[0:7]). */
   lcdMuxOctaplex   = LCD_DISPCTRL_MUXE_MUXE | LCD_DISPCTRL_MUX_QUADRUPLEX
 #elif defined(LCD_DISPCTRL_MUX_SEXTAPLEX)
   /** Sextaplex / 1/6 Duty cycle (segments can be multiplexed with LCD_COM[0:5]). */
   lcdMuxSextaplex  = LCD_DISPCTRL_MUX_SEXTAPLEX,
-  /** Octaplex / 1/6 Duty cycle (segments can be multiplexed with LCD_COM[0:5]). */
+  /** Octaplex / 1/8 Duty cycle (segments can be multiplexed with LCD_COM[0:7]). */
   lcdMuxOctaplex   = LCD_DISPCTRL_MUX_OCTAPLEX,
 #endif
 } LCD_Mux_TypeDef;
@@ -256,7 +260,23 @@ typedef enum {
   /** Starts synchronizing registers after a write to SEGD2. */
   lcdLoadAddrSegd2  = LCD_UPDATECTRL_LOADADDR_SEGD2WR,
   /** Starts synchronizing registers after a write to SEGD3. */
-  lcdLoadAddrSegd3  = LCD_UPDATECTRL_LOADADDR_SEGD3WR
+  lcdLoadAddrSegd3  = LCD_UPDATECTRL_LOADADDR_SEGD3WR,
+#if defined(LCD_UPDATECTRL_LOADADDR_SEGD4WR)
+  /** Starts synchronizing registers after a write to SEGD4. */
+  lcdLoadAddrSegd4  = LCD_UPDATECTRL_LOADADDR_SEGD4WR,
+#endif
+#if defined(LCD_UPDATECTRL_LOADADDR_SEGD5WR)
+  /** Starts synchronizing registers after a write to SEGD5. */
+  lcdLoadAddrSegd5  = LCD_UPDATECTRL_LOADADDR_SEGD5WR,
+#endif
+#if defined(LCD_UPDATECTRL_LOADADDR_SEGD6WR)
+  /** Starts synchronizing registers after a write to SEGD6. */
+  lcdLoadAddrSegd6  = LCD_UPDATECTRL_LOADADDR_SEGD6WR,
+#endif
+#if defined(LCD_UPDATECTRL_LOADADDR_SEGD7WR)
+  /** Starts synchronizing registers after a write to SEGD7. */
+  lcdLoadAddrSegd7  = LCD_UPDATECTRL_LOADADDR_SEGD7WR,
+#endif
 } LCD_LoadAddr_TypeDef;
 #endif
 

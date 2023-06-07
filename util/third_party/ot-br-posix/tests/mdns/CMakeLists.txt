@@ -70,6 +70,11 @@ add_test(
     COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/test-service-subtypes
 )
 
+add_test(
+    NAME mdns-single-empty-service-name
+    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/test-single-empty-service-name
+)
+
 set_tests_properties(
     mdns-single
     mdns-multiple
@@ -78,6 +83,7 @@ set_tests_properties(
     mdns-single-custom-host
     mdns-multiple-custom-hosts
     mdns-service-subtypes
+    mdns-single-empty-service-name
     PROPERTIES
         ENVIRONMENT "OTBR_MDNS=${OTBR_MDNS};OTBR_TEST_MDNS=$<TARGET_FILE:otbr-test-mdns>"
 )

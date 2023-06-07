@@ -20,7 +20,7 @@
 #include "price-server-tick.h"
 #include "price-server.h"
 
-bool emAfPluginPriceServerBillingPeriodRepeat = true;
+bool sli_zigbee_af_price_server_billing_period_repeat = true;
 
 static EmberAfPriceServerPendingEvents PendingPriceEvents;
 
@@ -84,7 +84,7 @@ void emberAfPriceClusterServerTickCallback(uint8_t endpoint)
       // There is no next billing event, so we need to schedule one with the
       // same duration as the current event. See Billing Period Duration
       // description in D.4.2.4.10.2 of the SE spec.
-      if (emAfPluginPriceServerBillingPeriodRepeat) {
+      if (sli_zigbee_af_price_server_billing_period_repeat) {
         emberAfPriceServerRefreshBillingPeriod(endpoint, true); // force?
         // Recalculate next delay time
         eventDelaySec = emberAfPriceServerSecondsUntilBillingPeriodEvent(endpoint);
@@ -255,7 +255,7 @@ void emberAfPriceClusterServerTickCallback(uint8_t endpoint)
   } else {
     emberAfPriceClusterPrintln("Scheduling Tick Callback in %d msec", delayMSec);
   }
-  (void) slxu_zigbee_zcl_schedule_server_tick(endpoint, ZCL_PRICE_CLUSTER_ID, delayMSec);
+  (void) sl_zigbee_zcl_schedule_server_tick(endpoint, ZCL_PRICE_CLUSTER_ID, delayMSec);
 }
 
 void emberAfPriceClusterScheduleTickCallback(uint8_t endpoint, EmberAfPriceServerPendingEvents event)

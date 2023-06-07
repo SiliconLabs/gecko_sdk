@@ -33,13 +33,13 @@
 
 // <<< Use Configuration Wizard in Context Menu >>>
 
-// <q SL_BTMESH_LC_LINEAR_OUTPUT_LOG_ENABLE_CFG_VAL> Enable linear output events logging
-// <i> Enables logging of linear output events.
-#define SL_BTMESH_LC_LINEAR_OUTPUT_LOG_ENABLE_CFG_VAL      0
-
-// <q SL_BTMESH_UNKNOWN_EVENTS_LOG_ENABLE_CFG_VAL> Enable unknown events logging
+// <q SL_BTMESH_EVENT_LOG_ENABLE_UNKNOWN_CFG_VAL> Enable unknown events logging
 // <i> Enables logging of unknown events.
-#define SL_BTMESH_UNKNOWN_EVENTS_LOG_ENABLE_CFG_VAL      0
+#define SL_BTMESH_EVENT_LOG_ENABLE_UNKNOWN_CFG_VAL      0
+
+// <s SL_BTMESH_EVENT_LOG_PREFIX_CFG_VAL> Prefix
+// <i> Prefix of the logged events.
+#define SL_BTMESH_EVENT_LOG_PREFIX_CFG_VAL      "evt:"
 
 // <<< end of configuration section >>>
 

@@ -91,8 +91,8 @@ void halStackRadioPowerMainControl(bool powerUp);
 void halStackRadioPowerUpBoard(void);
 void halStackRadioPowerDownBoard(void);
 void halStackProcessBootCount(void);
-EmberStatus emDebugInit(void);
-void emRadioSeedRandom(void);
+EmberStatus sli_util_debug_init(void);
+void sli_802154phy_radio_seed_random(void);
 
 /** @} (end addtogroup legacyhal) */
 

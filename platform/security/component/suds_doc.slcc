@@ -1,0 +1,29 @@
+id: suds_doc
+label: SUDS Documentation Component
+package: platform
+quality: production
+
+component_root_path: platform/security
+
+category: Platform|Security|SUDS Doc
+
+description:
+  "This component provides additional source paths for offical psec api documentation. SUDS doxygen setup will by default parse each component in platform/security, and include referenced header files"
+include:
+  - path: sl_component/sl_psa_driver/doxygen
+    file_list:
+      - path: doc_sl_crypto.h
+  - path: ../../util/third_party/mbedtls/doxygen/input
+    file_list:
+      - path: doc_encdec.h
+      - path: doc_rng.h
+      - path: doc_hashing.h
+      - path: doc_ssltls.h
+      - path: doc_tcpip.h
+      - path: doc_x509.h
+      - path: doc_rng.h
+  - path: doc/security-api
+    file_list:
+      - path: psa-thread-safety.md
+
+

@@ -49,6 +49,8 @@ component:
 #----------------- Require list ----------------------
 requires:
   - name: a_radio_config
+  - name: sl_flex_rail_config
+  - name: sl_flex_rail_channel_selector
   - name: sl_simple_rail_os
     condition:
       - "kernel"

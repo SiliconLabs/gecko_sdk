@@ -72,6 +72,7 @@
 #include <fcntl.h>
 #include <ifaddrs.h>
 #ifdef __linux__
+#include <linux/if_link.h>
 #include <linux/if_tun.h>
 #include <linux/netlink.h>
 #include <linux/rtnetlink.h>
@@ -151,19 +152,15 @@ extern int
 #include "common/debug.hpp"
 #include "net/ip6_address.hpp"
 
+#include "resolver.hpp"
+
 unsigned int gNetifIndex = 0;
 char         gNetifName[IFNAMSIZ];
 otIp4Cidr    gNat64Cidr;
 
-const char *otSysGetThreadNetifName(void)
-{
-    return gNetifName;
-}
+const char *otSysGetThreadNetifName(void) { return gNetifName; }
 
-unsigned int otSysGetThreadNetifIndex(void)
-{
-    return gNetifIndex;
-}
+unsigned int otSysGetThreadNetifIndex(void) { return gNetifIndex; }
 
 #if OPENTHREAD_CONFIG_PLATFORM_NETIF_ENABLE
 #if OPENTHREAD_POSIX_CONFIG_FIREWALL_ENABLE
@@ -212,6 +209,10 @@ static otIp6Prefix        sAddedExternalRoutes[kMaxExternalRoutesNum];
 
 #if OPENTHREAD_CONFIG_BORDER_ROUTING_ENABLE && OPENTHREAD_CONFIG_NAT64_TRANSLATOR_ENABLE
 static constexpr uint32_t kNat64RoutePriority = 100; ///< Priority for route to NAT64 CIDR, 100 means a high priority.
+#endif
+
+#if OPENTHREAD_CONFIG_DNS_UPSTREAM_QUERY_ENABLE
+ot::Posix::Resolver gResolver;
 #endif
 
 #if defined(RTM_NEWMADDR) || defined(__NetBSD__)
@@ -336,7 +337,11 @@ static uint8_t NetmaskToPrefixLength(const struct sockaddr_in6 *netmask)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-align"
 
-void AddRtAttr(struct nlmsghdr *aHeader, uint32_t aMaxLen, uint8_t aType, const void *aData, uint8_t aLen)
+static struct rtattr *AddRtAttr(struct nlmsghdr *aHeader,
+                                uint32_t         aMaxLen,
+                                uint8_t          aType,
+                                const void      *aData,
+                                uint8_t          aLen)
 {
     uint8_t        len = RTA_LENGTH(aLen);
     struct rtattr *rta;
@@ -352,6 +357,8 @@ void AddRtAttr(struct nlmsghdr *aHeader, uint32_t aMaxLen, uint8_t aType, const 
         memcpy(RTA_DATA(rta), aData, aLen);
     }
     aHeader->nlmsg_len = NLMSG_ALIGN(aHeader->nlmsg_len) + RTA_ALIGN(len);
+
+    return rta;
 }
 
 void AddRtAttrUint32(struct nlmsghdr *aHeader, uint32_t aMaxLen, uint8_t aType, uint32_t aData)
@@ -624,8 +631,7 @@ exit:
     return error;
 }
 
-#if OPENTHREAD_POSIX_CONFIG_INSTALL_OMR_ROUTES_ENABLE || OPENTHREAD_POSIX_CONFIG_INSTALL_EXTERNAL_ROUTES_ENABLE
-static otError DeleteRoute(const otIp6Prefix &aPrefix)
+template <size_t N> otError DeleteRoute(const uint8_t (&aAddress)[N], uint8_t aPrefixLen)
 {
     constexpr unsigned int kBufSize = 512;
     struct
@@ -634,10 +640,10 @@ static otError DeleteRoute(const otIp6Prefix &aPrefix)
         struct rtmsg    msg;
         char            buf[kBufSize];
     } req{};
-    unsigned char data[sizeof(in6_addr)];
-    char          addrBuf[OT_IP6_ADDRESS_STRING_SIZE];
-    unsigned int  netifIdx = otSysGetThreadNetifIndex();
-    otError       error    = OT_ERROR_NONE;
+    unsigned int netifIdx = otSysGetThreadNetifIndex();
+    otError      error    = OT_ERROR_NONE;
+
+    static_assert(N == sizeof(in6_addr) || N == sizeof(in_addr), "aAddress should be 4 octets or 16 octets");
 
     VerifyOrExit(netifIdx > 0, error = OT_ERROR_INVALID_STATE);
     VerifyOrExit(sNetlinkFd >= 0, error = OT_ERROR_INVALID_STATE);
@@ -649,9 +655,9 @@ static otError DeleteRoute(const otIp6Prefix &aPrefix)
     req.header.nlmsg_pid  = 0;
     req.header.nlmsg_seq  = ++sNetlinkSequence;
 
-    req.msg.rtm_family   = AF_INET6;
+    req.msg.rtm_family   = (N == sizeof(in6_addr) ? AF_INET6 : AF_INET);
     req.msg.rtm_src_len  = 0;
-    req.msg.rtm_dst_len  = aPrefix.mLength;
+    req.msg.rtm_dst_len  = aPrefixLen;
     req.msg.rtm_tos      = 0;
     req.msg.rtm_scope    = RT_SCOPE_UNIVERSE;
     req.msg.rtm_type     = RTN_UNICAST;
@@ -659,9 +665,7 @@ static otError DeleteRoute(const otIp6Prefix &aPrefix)
     req.msg.rtm_protocol = RTPROT_BOOT;
     req.msg.rtm_flags    = 0;
 
-    otIp6AddressToString(&aPrefix.mPrefix, addrBuf, OT_IP6_ADDRESS_STRING_SIZE);
-    inet_pton(AF_INET6, addrBuf, data);
-    AddRtAttr(reinterpret_cast<nlmsghdr *>(&req), sizeof(req), RTA_DST, data, sizeof(data));
+    AddRtAttr(reinterpret_cast<nlmsghdr *>(&req), sizeof(req), RTA_DST, &aAddress, sizeof(aAddress));
     AddRtAttrUint32(&req.header, sizeof(req), RTA_OIF, netifIdx);
 
     if (send(sNetlinkFd, &req, sizeof(req), 0) < 0)
@@ -674,9 +678,15 @@ exit:
     return error;
 }
 
+#if OPENTHREAD_POSIX_CONFIG_INSTALL_OMR_ROUTES_ENABLE || OPENTHREAD_POSIX_CONFIG_INSTALL_EXTERNAL_ROUTES_ENABLE
 static otError AddRoute(const otIp6Prefix &aPrefix, uint32_t aPriority)
 {
     return AddRoute(aPrefix.mPrefix.mFields.m8, aPrefix.mLength, aPriority);
+}
+
+static otError DeleteRoute(const otIp6Prefix &aPrefix)
+{
+    return DeleteRoute(aPrefix.mPrefix.mFields.m8, aPrefix.mLength);
 }
 #endif // OPENTHREAD_POSIX_CONFIG_INSTALL_OMR_ROUTES_ENABLE || OPENTHREAD_POSIX_CONFIG_INSTALL_EXTERNAL_ROUTES_ENABLE
 
@@ -861,9 +871,14 @@ exit:
 #endif // OPENTHREAD_POSIX_CONFIG_INSTALL_EXTERNAL_ROUTES_ENABLE
 
 #if OPENTHREAD_CONFIG_BORDER_ROUTING_ENABLE && OPENTHREAD_CONFIG_NAT64_TRANSLATOR_ENABLE
-static otError AddIp4Route(const otIp4Cidr &aCidr, uint32_t aPriority)
+static otError AddIp4Route(const otIp4Cidr &aIp4Cidr, uint32_t aPriority)
 {
-    return AddRoute(aCidr.mAddress.mFields.m8, aCidr.mLength, aPriority);
+    return AddRoute(aIp4Cidr.mAddress.mFields.m8, aIp4Cidr.mLength, aPriority);
+}
+
+static otError DeleteIp4Route(const otIp4Cidr &aIp4Cidr)
+{
+    return DeleteRoute(aIp4Cidr.mAddress.mFields.m8, aIp4Cidr.mLength);
 }
 #endif
 #endif // defined(__linux__)
@@ -879,6 +894,28 @@ static void processAddressChange(const otIp6AddressInfo *aAddressInfo, bool aIsA
         UpdateUnicast(static_cast<otInstance *>(aContext), *aAddressInfo, aIsAdded);
     }
 }
+
+#if defined(__linux__) && OPENTHREAD_CONFIG_NAT64_TRANSLATOR_ENABLE
+void processNat64StateChange(otNat64State aNewState)
+{
+    // If the interface is not up and we are enabling NAT64, the route will be added when we bring up the route.
+    // Also, the route will be deleted by the kernel when we shutting down the interface.
+    // We should try to add route first, since otNat64SetEnabled never fails.
+    if (otIp6IsEnabled(gInstance))
+    {
+        if (aNewState == OT_NAT64_STATE_ACTIVE)
+        {
+            AddIp4Route(gNat64Cidr, kNat64RoutePriority);
+            otLogInfoPlat("[netif] Adding route for NAT64");
+        }
+        else
+        {
+            DeleteIp4Route(gNat64Cidr);
+            otLogInfoPlat("[netif] Deleting route for NAT64");
+        }
+    }
+}
+#endif // defined(__linux__) && OPENTHREAD_CONFIG_NAT64_TRANSLATOR_ENABLE
 
 void platformNetifStateChange(otInstance *aInstance, otChangedFlags aFlags)
 {
@@ -898,6 +935,12 @@ void platformNetifStateChange(otInstance *aInstance, otChangedFlags aFlags)
         ot::Posix::UpdateIpSets(aInstance);
 #endif
     }
+#if defined(__linux__) && OPENTHREAD_CONFIG_NAT64_TRANSLATOR_ENABLE
+    if (OT_CHANGED_NAT64_TRANSLATOR_STATE & aFlags)
+    {
+        processNat64StateChange(otNat64GetTranslatorState(aInstance));
+    }
+#endif
 }
 
 static void processReceive(otMessage *aMessage, void *aContext)
@@ -1026,10 +1069,10 @@ static void logAddrEvent(bool isAdd, const ot::Ip6::Address &aAddress, otError e
     {
         otLogInfoPlat("[netif] %s [%s] %s%s", isAdd ? "ADD" : "DEL", aAddress.IsMulticast() ? "M" : "U",
                       aAddress.ToString().AsCString(),
-                      error == OT_ERROR_ALREADY
-                          ? " (already subscribed, ignored)"
-                          : error == OT_ERROR_REJECTED ? " (rejected)"
-                                                       : error == OT_ERROR_NOT_FOUND ? " (not found, ignored)" : "");
+                      error == OT_ERROR_ALREADY     ? " (already subscribed, ignored)"
+                      : error == OT_ERROR_REJECTED  ? " (rejected)"
+                      : error == OT_ERROR_NOT_FOUND ? " (not found, ignored)"
+                                                    : "");
     }
     else
     {
@@ -1042,7 +1085,7 @@ static void logAddrEvent(bool isAdd, const ot::Ip6::Address &aAddress, otError e
 
 static void processNetifAddrEvent(otInstance *aInstance, struct nlmsghdr *aNetlinkMessage)
 {
-    struct ifaddrmsg *  ifaddr = reinterpret_cast<struct ifaddrmsg *>(NLMSG_DATA(aNetlinkMessage));
+    struct ifaddrmsg   *ifaddr = reinterpret_cast<struct ifaddrmsg *>(NLMSG_DATA(aNetlinkMessage));
     size_t              rtaLength;
     otError             error = OT_ERROR_NONE;
     struct sockaddr_in6 addr6;
@@ -1167,7 +1210,6 @@ static void processNetifLinkEvent(otInstance *aInstance, struct nlmsghdr *aNetli
     if (isUp && gNat64Cidr.mLength > 0)
     {
         SuccessOrExit(error = otNat64SetIp4Cidr(gInstance, &gNat64Cidr));
-        AddIp4Route(gNat64Cidr, kNat64RoutePriority);
         otLogInfoPlat("[netif] Succeeded to enable NAT64");
     }
 #endif
@@ -1207,10 +1249,10 @@ static void processNetifAddrEvent(otInstance *aInstance, struct rt_msghdr *rtm)
 #endif
     struct sockaddr_in6 addr6;
     struct sockaddr_in6 netmask;
-    uint8_t *           addrbuf;
+    uint8_t            *addrbuf;
     unsigned int        addrmask = 0;
     unsigned int        i;
-    struct sockaddr *   sa;
+    struct sockaddr    *sa;
     bool                is_link_local;
 
     addr6.sin6_family   = 0;
@@ -1531,10 +1573,10 @@ static void processMLDEvent(otInstance *aInstance)
     struct sockaddr_in6 srcAddr;
     socklen_t           addrLen  = sizeof(srcAddr);
     bool                fromSelf = false;
-    MLDv2Header *       hdr      = reinterpret_cast<MLDv2Header *>(buffer);
+    MLDv2Header        *hdr      = reinterpret_cast<MLDv2Header *>(buffer);
     size_t              offset;
     uint8_t             type;
-    struct ifaddrs *    ifAddrs = nullptr;
+    struct ifaddrs     *ifAddrs = nullptr;
     char                addressString[INET6_ADDRSTRLEN + 1];
 
     bufferLen = recvfrom(sMLDMonitorFd, buffer, sizeof(buffer), 0, reinterpret_cast<sockaddr *>(&srcAddr), &addrLen);
@@ -1602,11 +1644,54 @@ exit:
 #endif
 
 #if defined(__linux__)
+static void SetAddrGenModeToNone(void)
+{
+    struct
+    {
+        struct nlmsghdr  nh;
+        struct ifinfomsg ifi;
+        char             buf[512];
+    } req;
+
+    const enum in6_addr_gen_mode mode = IN6_ADDR_GEN_MODE_NONE;
+
+    memset(&req, 0, sizeof(req));
+
+    req.nh.nlmsg_len   = NLMSG_LENGTH(sizeof(struct ifinfomsg));
+    req.nh.nlmsg_flags = NLM_F_REQUEST | NLM_F_ACK;
+    req.nh.nlmsg_type  = RTM_NEWLINK;
+    req.nh.nlmsg_pid   = 0;
+    req.nh.nlmsg_seq   = ++sNetlinkSequence;
+
+    req.ifi.ifi_index  = static_cast<int>(gNetifIndex);
+    req.ifi.ifi_change = 0xffffffff;
+    req.ifi.ifi_flags  = IFF_MULTICAST | IFF_NOARP;
+
+    {
+        struct rtattr *afSpec  = AddRtAttr(&req.nh, sizeof(req), IFLA_AF_SPEC, 0, 0);
+        struct rtattr *afInet6 = AddRtAttr(&req.nh, sizeof(req), AF_INET6, 0, 0);
+        struct rtattr *inet6AddrGenMode =
+            AddRtAttr(&req.nh, sizeof(req), IFLA_INET6_ADDR_GEN_MODE, &mode, sizeof(mode));
+
+        afInet6->rta_len += inet6AddrGenMode->rta_len;
+        afSpec->rta_len += afInet6->rta_len;
+    }
+
+    if (send(sNetlinkFd, &req, req.nh.nlmsg_len, 0) != -1)
+    {
+        otLogInfoPlat("[netif] Sent request#%u to set addr_gen_mode to %d", sNetlinkSequence, mode);
+    }
+    else
+    {
+        otLogWarnPlat("[netif] Failed to send request#%u to set addr_gen_mode to %d", sNetlinkSequence, mode);
+    }
+}
+
 // set up the tun device
 static void platformConfigureTunDevice(otPlatformConfig *aPlatformConfig)
 {
     struct ifreq ifr;
-    const char * interfaceName;
+    const char  *interfaceName;
 
     sTunFd = open(OPENTHREAD_POSIX_TUN_DEVICE, O_RDWR | O_CLOEXEC | O_NONBLOCK);
     VerifyOrDie(sTunFd >= 0, OT_EXIT_ERROR_ERRNO);
@@ -1642,7 +1727,7 @@ static void platformConfigureTunDevice(otPlatformConfig *aPlatformConfig)
         SetLinkState(gInstance, false);
     }
 
-    VerifyOrDie(ioctl(sTunFd, TUNSETLINK, ARPHRD_VOID) == 0, OT_EXIT_ERROR_ERRNO);
+    VerifyOrDie(ioctl(sTunFd, TUNSETLINK, ARPHRD_NONE) == 0, OT_EXIT_ERROR_ERRNO);
 
     ifr.ifr_mtu = static_cast<int>(kMaxIp6Size);
     VerifyOrDie(ioctl(sIpFd, SIOCSIFMTU, static_cast<void *>(&ifr)) == 0, OT_EXIT_ERROR_ERRNO);
@@ -1795,6 +1880,10 @@ void platformNetifInit(otPlatformConfig *aPlatformConfig)
 #if OPENTHREAD_POSIX_USE_MLD_MONITOR
     mldListenerInit();
 #endif
+
+#if __linux__
+    SetAddrGenModeToNone();
+#endif
 }
 
 void platformNetifSetUp(void)
@@ -1816,11 +1905,12 @@ void platformNetifSetUp(void)
 #if OPENTHREAD_POSIX_MULTICAST_PROMISCUOUS_REQUIRED
     otIp6SetMulticastPromiscuousEnabled(aInstance, true);
 #endif
+#if OPENTHREAD_CONFIG_DNS_UPSTREAM_QUERY_ENABLE
+    gResolver.Init();
+#endif
 }
 
-void platformNetifTearDown(void)
-{
-}
+void platformNetifTearDown(void) {}
 
 void platformNetifDeinit(void)
 {
@@ -1874,6 +1964,10 @@ void platformNetifUpdateFdSet(fd_set *aReadFdSet, fd_set *aWriteFdSet, fd_set *a
 #if OPENTHREAD_POSIX_USE_MLD_MONITOR
     FD_SET(sMLDMonitorFd, aReadFdSet);
     FD_SET(sMLDMonitorFd, aErrorFdSet);
+#endif
+
+#if OPENTHREAD_CONFIG_DNS_UPSTREAM_QUERY_ENABLE
+    gResolver.UpdateFdSet(aReadFdSet, aErrorFdSet, aMaxFd);
 #endif
 
     if (sTunFd > *aMaxFd)
@@ -1936,6 +2030,10 @@ void platformNetifProcess(const fd_set *aReadFdSet, const fd_set *aWriteFdSet, c
     {
         processMLDEvent(gInstance);
     }
+#endif
+
+#if OPENTHREAD_CONFIG_DNS_UPSTREAM_QUERY_ENABLE
+    gResolver.Process(aReadFdSet, aErrorFdSet);
 #endif
 
 exit:

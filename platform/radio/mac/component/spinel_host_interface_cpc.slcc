@@ -16,10 +16,11 @@ library:
     
 include:
   - path: "platform/service/cpc/daemon/lib"
+  - path: "util/third_party/openthread/src/posix/platform"
 
 source:
-  - path: "util/third_party/openthread/src/posix/platform/cpc_interface.cpp"
+  - path: "protocol/openthread/platform-abstraction/posix/cpc_interface.cpp"
 
 define:
   - name: "OPENTHREAD_POSIX_CONFIG_RCP_BUS"
-    value: OT_POSIX_RCP_BUS_CPC
+    value: OT_POSIX_RCP_BUS_VENDOR

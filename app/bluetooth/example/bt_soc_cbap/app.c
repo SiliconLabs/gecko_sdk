@@ -35,7 +35,7 @@
 #include "app_assert.h"
 #include "app_log.h"
 #include "sl_simple_led_instances.h"
-#include "sl_simple_timer.h"
+#include "app_timer.h"
 #include "sl_bt_cbap.h"
 #include "cbap_config.h"
 #include "app.h"
@@ -71,7 +71,7 @@ static bool peripheral_target_defined = ADDR_ENABLE;
 static bd_addr peripheral_target_addr;
 
 // Timer handle
-static sl_simple_timer_t led_timer;
+static app_timer_t led_timer;
 
 // Clears candidate device.
 static void clear_connection_info(void);
@@ -87,7 +87,7 @@ static bool decode_address(char *addess_str, bd_addr *address);
 bool check_scan_report(sl_bt_evt_scanner_legacy_advertisement_report_t *scan_report);
 
 // Timer Callback.
-static void led_timer_cb(sl_simple_timer_t *handle, void *data);
+static void led_timer_cb(app_timer_t *handle, void *data);
 
 /**************************************************************************//**
  * Application Init.
@@ -293,11 +293,11 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
           // Blink LED.
           sl_led_turn_on(SL_SIMPLE_LED_INSTANCE(0));
           app_log_info("LED on." APP_LOG_NL);
-          sc = sl_simple_timer_start(&led_timer,
-                                     LED_TIMEOUT,
-                                     led_timer_cb,
-                                     NO_CALLBACK_DATA,
-                                     false);
+          sc = app_timer_start(&led_timer,
+                               LED_TIMEOUT,
+                               led_timer_cb,
+                               NO_CALLBACK_DATA,
+                               false);
           app_assert_status(sc);
         }
       }
@@ -571,7 +571,7 @@ bool check_scan_report(sl_bt_evt_scanner_legacy_advertisement_report_t *scan_rep
  * @param[in] handle pointer to handle instance
  * @param[in] data pointer to input data
  ******************************************************************************/
-static void led_timer_cb(sl_simple_timer_t *handle, void *data)
+static void led_timer_cb(app_timer_t *handle, void *data)
 {
   (void)handle;
   (void)data;

@@ -12,12 +12,12 @@
 #include <stdint.h>
 #include <string.h> // For memset and memcpy
 #include <NodeMask.h>
-#include <ZAF_tx_mutex.h>
 #include <ZW_transport_api.h>
 #include <ZW_TransportSecProtocol.h>
 #include <association_plus_base.h>
 #include <ZW_application_transport_interface.h>
 #include <ZAF_Common_interface.h>
+#include <CC_Supervision.h>
 
 //#define DEBUGPRINT
 #include "DebugPrint.h"
@@ -71,6 +71,10 @@ static bool moreMultiChannelNodes;
 
 static uint32_t remainingNodeCount;
 
+static ZAF_TRANSPORT_TX_BUFFER txBuf;
+
+static bool multiCastInProgress;
+
 /****************************************************************************/
 /*                              EXPORTED DATA                               */
 /****************************************************************************/
@@ -106,8 +110,49 @@ static void ZCB_multicast_callback(TRANSMISSION_RESULT * pTransmissionResult);
 static MultiChannelTXResult_t TransmitMultiChannel(transmission_result_t * pTxResult);
 static MulticastTXResult_t TransmitMultiCast(transmission_result_t * pTxResult);
 
+static void
+ZCB_RequestJobStatus(TRANSMISSION_RESULT * pTransmissionResult)
+{
+  DPRINT("\r\nZCB_RequestJobStatus");
+  /* Free the module before calling callback in case of recursive calls */
+  if(pTransmissionResult->isFinished == TRANSMISSION_RESULT_FINISHED) {
+    multiCastInProgress = false;
+  }
+
+  if(NON_NULL(p_callback_hold))
+  {
+    p_callback_hold(pTransmissionResult);
+  }
+}
+
+static bool
+RequestBufferSupervisionPayloadActivate(ZW_APPLICATION_TX_BUFFER** ppPayload, 
+                                        size_t* pPayLoadlen, bool supervision)
+{
+  /*Rewrite SV-cmd if CCmultichannel has written in payload*/
+  CommandClassSupervisionGetWrite(&(txBuf.supervisionGet));
+  *pPayLoadlen = CommandClassSupervisionGetGetPayloadLength(&(txBuf.supervisionGet));
+  if(true == supervision)
+  {
+    *ppPayload = (ZW_APPLICATION_TX_BUFFER*)&(txBuf.supervisionGet);
+    *pPayLoadlen += sizeof(ZW_SUPERVISION_GET_FRAME);
+  }
+  else
+  {
+    *ppPayload = &(txBuf.appTxBuf);
+  }
+  return true;
+}
+
+bool
+RequestBufferSetPayloadLength(uint8_t payLoadlen)
+{
+  CommandClassSupervisionGetSetPayloadLength(&txBuf.supervisionGet, payLoadlen);
+  return true;
+}
+
 // The application is calling this function!
-void multichannel_callback(transmission_result_t * pTxResult)
+static void multichannel_callback(transmission_result_t * pTxResult)
 {
   pTxResult->nodeId = singleCastTxDestNodeId;
   if (TRANSMIT_COMPLETE_OK != pTxResult->status) {
@@ -122,9 +167,7 @@ void multichannel_callback(transmission_result_t * pTxResult)
     EVALUATE_TRANSMISSION_RESULT(pTxResult->isFinished);
 
     // Report the transmission result to the application.
-    if (NULL != p_callback_hold) {
-      p_callback_hold(pTxResult);
-    }
+    ZCB_RequestJobStatus(pTxResult);
     // Continue with the next multi-channel transmission, if any.
   }
 
@@ -139,9 +182,7 @@ void multichannel_callback(transmission_result_t * pTxResult)
 
       EVALUATE_TRANSMISSION_RESULT(pTxResult->isFinished);
 
-      if (NULL != p_callback_hold) {
-        p_callback_hold(pTxResult);
-      }
+      ZCB_RequestJobStatus(pTxResult);
 
       // Return here so that simultaneous transmissions towards different destinations are avoided.
       return;
@@ -161,9 +202,7 @@ void multichannel_callback(transmission_result_t * pTxResult)
     // Report the transmission result to the application.
     pTxResult->isFinished = TRANSMISSION_RESULT_FINISHED;
 
-    if (NULL != p_callback_hold) {
-      p_callback_hold(pTxResult);
-    }
+    ZCB_RequestJobStatus(pTxResult);
   } else {
     // There are remaining associated destinations in the association group.
     MulticastTXResult_t MulticastResult = TransmitMultiCast(NULL);
@@ -174,9 +213,7 @@ void multichannel_callback(transmission_result_t * pTxResult)
 
       EVALUATE_TRANSMISSION_RESULT(pTxResult->isFinished);
 
-      if (NULL != p_callback_hold) {
-        p_callback_hold(pTxResult);
-      }
+      ZCB_RequestJobStatus(pTxResult);
       return;
     } else if (MULTICAST_TXRESULT_NOT_ENOUGH_DESTINATIONS == MulticastResult) {
       /*
@@ -217,13 +254,13 @@ static MultiChannelTXResult_t TransmitMultiChannel(transmission_result_t * pTxRe
     {
       TRANSMIT_OPTIONS_TYPE_SINGLE_EX txOptions = {
                                                    .txOptions = p_nodelist_hold->txOptions,
-                                                   .txSecOptions = 0,
+                                                   .txSecOptions = fSupervisionEnableHold ? S2_TXOPTION_VERIFY_DELIVERY : 0,
                                                    .sourceEndpoint = p_nodelist_hold->sourceEndpoint,
                                                    .pDestNode = &node
       };
       singleCastTxDestNodeId = node.node.nodeId;
       EZAF_EnqueueStatus_t txResult;
-      txResult = Transport_SendRequestEP(
+      txResult = ZAF_Transmit(
                     p_data_hold,
                     data_length_hold,
                     &txOptions,
@@ -244,7 +281,7 @@ static MulticastTXResult_t TransmitMultiCast(transmission_result_t * pTxResult)
   ZW_NodeMaskClear(node_mask, sizeof(NODE_MASK_TYPE));
 
   singlecast_node_count = 0;
-  txSecOptions = 0;
+  txSecOptions = fSupervisionEnableHold ? S2_TXOPTION_VERIFY_DELIVERY : 0;
   
   //Safeguard against buffer overflow
   if (TX_BUFFER_SIZE < data_length_hold)
@@ -273,7 +310,7 @@ static MulticastTXResult_t TransmitMultiCast(transmission_result_t * pTxResult)
     FramePackage.uTransmitParams.SendDataMultiEx.SourceNodeId = 0xFF;
     FramePackage.uTransmitParams.SendDataMultiEx.eKeyType = GetHighestSecureLevel(m_pAppHandle->pNetworkInfo->SecurityKeys);
 
-    txSecOptions = S2_TXOPTION_SINGLECAST_FOLLOWUP;
+    txSecOptions |= S2_TXOPTION_SINGLECAST_FOLLOWUP;
 
     FramePackage.eTransmitType = EZWAVETRANSMITTYPE_MULTI_EX;
 
@@ -313,17 +350,21 @@ ZW_TransportMulticast_SendRequest(const uint8_t * const p_data,
                                   TRANSMIT_OPTIONS_TYPE_EX * p_nodelist,
                                   ZAF_TX_Callback_t p_callback)
 {
-  if (IS_NULL(p_nodelist) || 0 == p_nodelist->list_length || IS_NULL(p_data) || 0 == data_length)
+  if (IS_NULL(p_nodelist) || 0 == p_nodelist->list_length
+      || IS_NULL(p_data) || 0 == data_length || multiCastInProgress)
   {
     return ETRANSPORTMULTICAST_FAILED;
   }
 
+  memcpy(&txBuf.appTxBuf, p_data, data_length);
+
   p_callback_hold = p_callback;
   p_nodelist_hold = p_nodelist;
-  p_data_hold = (uint8_t *)p_data;
+  p_data_hold = (uint8_t *)&(txBuf.appTxBuf);
   data_length_hold = data_length;
 
-  if (true != RequestBufferSetPayloadLength((ZW_APPLICATION_TX_BUFFER *)p_data, data_length))
+  CommandClassSupervisionGetAdd(&(txBuf.supervisionGet));
+  if (true != RequestBufferSetPayloadLength(data_length))
   {
     // Failure to set payload length
     return ETRANSPORTMULTICAST_FAILED;
@@ -356,6 +397,7 @@ ZW_TransportMulticast_SendRequest(const uint8_t * const p_data,
   MultiChannelTXResult_t MultiChannelResult = TransmitMultiChannel(NULL);  // Handles bit-addressing for multi-channel
 
   if (MCTXRESULT_SUCCESS == MultiChannelResult) {
+    multiCastInProgress = true;
     return ETRANSPORTMULTICAST_ADDED_TO_QUEUE;
   } else if (MCTXRESULT_FAILURE == MultiChannelResult) {
     return ETRANSPORTMULTICAST_FAILED;
@@ -364,6 +406,7 @@ ZW_TransportMulticast_SendRequest(const uint8_t * const p_data,
   MulticastTXResult_t MulticastResult = TransmitMultiCast(NULL);
 
   if (MULTICAST_TXRESULT_SUCCESS == MulticastResult) {
+    multiCastInProgress = true;
     return ETRANSPORTMULTICAST_ADDED_TO_QUEUE;
   } else if (MULTICAST_TXRESULT_FAILURE == MulticastResult) {
     return ETRANSPORTMULTICAST_FAILED;
@@ -379,6 +422,7 @@ ZW_TransportMulticast_SendRequest(const uint8_t * const p_data,
     ZCB_multicast_callback(NULL);  // The argument can be ignored.
   }
 
+  multiCastInProgress = true;
   return ETRANSPORTMULTICAST_ADDED_TO_QUEUE;
 }
 
@@ -447,10 +491,7 @@ ZCB_multicast_callback(TRANSMISSION_RESULT * pTransmissionResult)
     }
 
     // Report the transmission result to the application.
-    if (NON_NULL(p_callback_hold))
-    {
-      p_callback_hold(&transmissionResult);
-    }
+    ZCB_RequestJobStatus(&transmissionResult);
   }
 
   // Initiate new transmission.
@@ -482,14 +523,11 @@ ZCB_multicast_callback(TRANSMISSION_RESULT * pTransmissionResult)
       transmissionResult.isFinished = TRANSMISSION_RESULT_FINISHED;
 
       // Report the transmission result to the application.
-      if (NON_NULL(p_callback_hold))
-      {
-        p_callback_hold(&transmissionResult);
-      }
+      ZCB_RequestJobStatus(&transmissionResult);
       return;
     }
 
-    txResult = Transport_SendRequestEP(
+    txResult = ZAF_Transmit(
                   p_data_hold,
                   data_length_hold,
                   &txOptions,
@@ -502,10 +540,7 @@ ZCB_multicast_callback(TRANSMISSION_RESULT * pTransmissionResult)
       EVALUATE_TRANSMISSION_RESULT(transmissionResult.isFinished);
 
       // Report the transmission result to the application.
-      if (NON_NULL(p_callback_hold))
-      {
-        p_callback_hold(&transmissionResult);
-      }
+      ZCB_RequestJobStatus(&transmissionResult);
       return;
     }
     multicast_cb_called = true;
@@ -521,4 +556,11 @@ ZW_TransportMulticast_clearTimeout(void)
   }
   ZCB_multicast_callback(NULL);
   gotSupervision  = true;
+}
+
+void
+ZW_TransportMulticast_init(void)
+{
+  memset((uint8_t *)&txBuf, 0x00, sizeof(txBuf));
+  multiCastInProgress = false;
 }

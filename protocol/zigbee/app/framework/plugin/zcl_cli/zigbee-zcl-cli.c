@@ -24,9 +24,9 @@ extern const sl_cli_handle_t sl_cli_handles[];
 extern const uint32_t sl_cli_handles_count;
 
 // Api to add the zcl cli to the application.
-void sli_zigbee_zcl_cli_init(SLXU_INIT_ARG)
+void sli_zigbee_zcl_cli_init(uint8_t init_level)
 {
-  SLXU_INIT_UNUSED_ARG;
+  (void)init_level;
 
   // Add ZCL cli command handling for all cli instance handles
   for (uint8_t i = 0; i < sl_cli_handles_count; i++) {

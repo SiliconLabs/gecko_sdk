@@ -14,8 +14,9 @@
  * sections of the MSLA applicable to Source Code.
  *
  ******************************************************************************/
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #ifdef SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
 #include "app/framework/include/af.h"
 #include "util.h"
@@ -48,25 +49,6 @@
 #endif // SL_CATALOG_ZIGBEE_GREEN_POWER_TRANSLATION_TABLE_PRESENT
 
 // super/protocol/zigbee/app/framework/util/util.h for the emberAfAppendToExternalBuffer
-#else // !UC_BUILD
-#include "app/framework/include/af.h"
-#include "util.h"
-#include EMBER_AF_API_GREEN_POWER_COMMON
-#include EMBER_AF_API_GREEN_POWER_SERVER
-
-// If either green power server plugin or translation table plugin sets the user translation
-// table option, then define the local flag to be used.
-#if (defined(EMBER_AF_PLUGIN_GREEN_POWER_SERVER_USER_HAS_DEFAULT_TRANSLATION_TABLE) \
-  || defined(EMBER_AF_PLUGIN_GREEN_POWER_TRANSLATION_TABLE_USER_HAS_DEFAULT_TRANSLATION_TABLE))
-#define USER_HAS_DEFAULT_TRANSLATION_TABLE
-#endif //EMBER_AF_PLUGIN_GREEN_POWER_SERVER_USER_HAS_DEFAULT_TRANSLATION_TABLE
-
-#ifdef EMBER_AF_PLUGIN_GREEN_POWER_TRANSLATION_TABLE
-#include "app/framework/plugin/green-power-translation-table/green-power-translation-table.h"
-#define TRANSLATION_TABLE_PRESENT
-#endif
-
-#endif // UC_BUILD
 
 // This file has three map tables
 // 1. Default translation table, maps the gpd command with a zigbee cluster command. This is called as a default or
@@ -163,11 +145,11 @@ const EmberAfGreenPowerServerGpdSubTranslationTableEntry emberGpDefaultTranslati
 #endif
 };
 
-uint16_t emGpDefaultTableSize = (sizeof(emberGpDefaultTranslationTable) / sizeof(EmberAfGreenPowerServerGpdSubTranslationTableEntry));
+uint16_t sli_zigbee_af_gp_default_table_size = (sizeof(emberGpDefaultTranslationTable) / sizeof(EmberAfGreenPowerServerGpdSubTranslationTableEntry));
 
 static uint16_t defaultTableGpdCmdIndex(uint16_t startIndex, uint8_t gpdCommandId)
 {
-  for (int i = startIndex; i < emGpDefaultTableSize; i++) {
+  for (int i = startIndex; i < sli_zigbee_af_gp_default_table_size; i++) {
     if (gpdCommandId == emberGpDefaultTranslationTable[i].gpdCommand) {
       return i;
     }
@@ -176,8 +158,8 @@ static uint16_t defaultTableGpdCmdIndex(uint16_t startIndex, uint8_t gpdCommandI
 }
 // Simply builds a list of all the gpd cluster supported by the standard deviceId
 // consumed by formGpdClusterListFromIncommingCommReq
-bool emGetClusterListFromCmdIdLookup(uint8_t gpdCommandId,
-                                     ZigbeeCluster *gpdCluster)
+bool sli_zigbee_af_get_cluster_list_from_cmd_id_lookup(uint8_t gpdCommandId,
+                                                       ZigbeeCluster *gpdCluster)
 {
   if (gpdCluster != NULL) {
     uint16_t index = defaultTableGpdCmdIndex(0, gpdCommandId);
@@ -307,7 +289,7 @@ static void fillExternalBufferGpdCommandScenesPayload(EmberGpAddress *gpdAddr,
   //If the sink implements the Translation Table, it derives the groupId as alias
   uint16_t groupId = ((uint16_t)genericTranslationTable->zclPayloadDefault[2] << 8) + genericTranslationTable->zclPayloadDefault[1];
   if (groupId == 0xFFFF) {
-    groupId = emGpdAlias(gpdAddr);
+    groupId = sli_zigbee_af_gpd_alias(gpdAddr);
   }
   // General command filling.
   (void) emberAfFillExternalBuffer((ZCL_CLUSTER_SPECIFIC_COMMAND             \
@@ -321,18 +303,18 @@ static void fillExternalBufferGpdCommandScenesPayload(EmberGpAddress *gpdAddr,
   if (gpdCommandId & EMBER_ZCL_GP_GPDF_STORE_SCENE0) {
     // Store Scenes commands from 0x18 to 0x1F
     // Add the endpoint to the group in the store
-    EmberAfStatus status = emGpAddToApsGroup(endpoint, groupId);
+    EmberAfStatus status = sli_zigbee_af_gp_add_to_aps_group(endpoint, groupId);
     emberAfCorePrintln("Store Scene : Added endpoint %d to Group %d Status = %d", endpoint, groupId, status);
   } else {
     // Recall Scenes commands from 0x10 to 0x17 - the payload is already ready
   }
 }
 
-EmberStatus emGpForwardGpdToMappedEndpoint(EmberGpAddress *addr,
-                                           uint8_t gpdCommandId,
-                                           uint8_t *gpdCommandPayload,
-                                           const EmberAfGreenPowerServerGpdSubTranslationTableEntry *genericTranslationTable,
-                                           uint8_t endpoint)
+EmberStatus sli_zigbee_af_gp_forward_gpd_to_mapped_endpoint(EmberGpAddress *addr,
+                                                            uint8_t gpdCommandId,
+                                                            uint8_t *gpdCommandPayload,
+                                                            const EmberAfGreenPowerServerGpdSubTranslationTableEntry *genericTranslationTable,
+                                                            uint8_t endpoint)
 {
   // Start to fill and send the commands
   if (gpdCommandId == EMBER_ZCL_GP_GPDF_MULTI_CLUSTER_RPTG
@@ -381,20 +363,20 @@ EmberStatus emGpForwardGpdToMappedEndpoint(EmberGpAddress *addr,
   return emberAfSendCommandUnicast(EMBER_OUTGOING_DIRECT, emberAfGetNodeId());
 }
 
-void emGpForwardGpdCommandDefault(EmberGpAddress *addr,
-                                  uint8_t gpdCommandId,
-                                  uint8_t *gpdCommandPayload)
+void sli_zigbee_af_gp_forward_gpd_command_default(EmberGpAddress *addr,
+                                                  uint8_t gpdCommandId,
+                                                  uint8_t *gpdCommandPayload)
 {
   uint16_t tableIndex = defaultTableGpdCmdIndex(0, gpdCommandId);
   if (0xFFFF == tableIndex) {
     return; // Can not be forwarded without preconfigured map.
   }
   const EmberAfGreenPowerServerGpdSubTranslationTableEntry *genericTranslationTable = &emberGpDefaultTranslationTable[tableIndex];
-  emGpForwardGpdToMappedEndpoint(addr,
-                                 gpdCommandId,
-                                 gpdCommandPayload,
-                                 genericTranslationTable,
-                                 EMBER_AF_PLUGIN_GREEN_POWER_SERVER_ZCL_MESSAGE_DST_ENDPOINT); // Application Endpoint
+  sli_zigbee_af_gp_forward_gpd_to_mapped_endpoint(addr,
+                                                  gpdCommandId,
+                                                  gpdCommandPayload,
+                                                  genericTranslationTable,
+                                                  EMBER_AF_PLUGIN_GREEN_POWER_SERVER_ZCL_MESSAGE_DST_ENDPOINT); // Application Endpoint
 }
 
 const uint16_t deviceIdCluster_EMBER_GP_DEVICE_ID_GPD_SIMPLE_SENSOR_SWITCH[]          = { 0x000F };
@@ -419,8 +401,8 @@ const GpDeviceIdAndClusterMap gpdDeviceClusterMap[] = {
 
 // Simply builds a list of all the gpd cluster supported by the standard deviceId
 // consumed by formGpdClusterListFromIncommingCommReq
-uint8_t emGetClusterListFromDeviceIdLookup(uint8_t gpdDeviceId,
-                                           ZigbeeCluster *gpdClusterList)
+uint8_t sli_zigbee_af_get_cluster_list_from_device_id_lookup(uint8_t gpdDeviceId,
+                                                             ZigbeeCluster *gpdClusterList)
 {
   for (uint8_t mapTableIndex = 0; mapTableIndex < DEVICE_ID_MAP_CLUSTER_TABLE_SIZE; mapTableIndex++) {
     if (gpdDeviceClusterMap[mapTableIndex].deviceId == gpdDeviceId) {
@@ -484,8 +466,8 @@ const GpDeviceIdAndCommandMap gpdDeviceCmdMap[] = {
 
 // Simply builds a list of all the gpd commands supported by the standard deviceId
 // consumed by formGpdCommandListFromIncommingCommReq
-uint8_t emGetCommandListFromDeviceIdLookup(uint8_t gpdDeviceId,
-                                           uint8_t *gpdCommandList)
+uint8_t sli_zigbee_af_get_command_list_from_device_id_lookup(uint8_t gpdDeviceId,
+                                                             uint8_t *gpdCommandList)
 {
   for (uint8_t index = 0; index < DEVICE_ID_MAP_TABLE_SIZE; index++) {
     if (gpdDeviceCmdMap[index].deviceId == gpdDeviceId) {

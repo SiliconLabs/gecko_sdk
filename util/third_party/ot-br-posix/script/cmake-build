@@ -58,10 +58,13 @@
 # shellcheck source=script/_initrc
 . "$(dirname "$0")"/_initrc
 
-readonly OTBR_TOP_SRCDIR="$PWD"
-readonly OTBR_TOP_BUILD_DIR="${BUILD_DIR}/otbr"
+OTBR_TOP_SRCDIR="$PWD"
+readonly OTBR_TOP_SRCDIR
 
-OTBR_TARGET=${OTBR_TARGET:-}
+OTBR_TOP_BUILD_DIR="${BUILD_DIR}/otbr"
+readonly OTBR_TOP_BUILD_DIR
+
+OTBR_TARGET=${OTBR_TARGET-}
 
 main()
 {
@@ -72,7 +75,7 @@ main()
     (
         cd "${builddir}" || die "Failed to enter ${builddir}"
 
-        cmake -GNinja "${OTBR_TOP_SRCDIR}" "$@"
+        cmake -GNinja -DCMAKE_EXPORT_COMPILE_COMMANDS=ON "${OTBR_TOP_SRCDIR}" "$@"
 
         if [[ -n ${OTBR_TARGET[*]} ]]; then
             ninja "${OTBR_TARGET[@]}"

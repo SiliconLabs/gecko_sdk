@@ -2,16 +2,16 @@
 
 #include PLATFORM_HEADER
 #include "stack/include/ember-types.h"
-#include "event_control/event.h"
+#include "event_queue/event-queue.h"
 
-EmberEventControl emberAfPluginGpioSensorInterruptEventControl;
-EmberEventControl emberAfPluginGpioSensorDebounceEventControl;
+EmberEvent emberAfPluginGpioSensorInterruptEvent;
+EmberEvent emberAfPluginGpioSensorDebounceEvent;
 
-void emberAfPluginGpioSensorInterruptEventHandler(void)
+void emberAfPluginGpioSensorInterruptEventHandler(EmberEvent* event)
 {
 }
 
-void emberAfPluginGpioSensorDebounceEventHandler(void)
+void emberAfPluginGpioSensorDebounceEventHandler(EmberEvent* event)
 {
 }
 

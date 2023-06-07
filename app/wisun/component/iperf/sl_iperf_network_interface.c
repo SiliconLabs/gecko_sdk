@@ -118,7 +118,7 @@ SL_WEAK int32_t sl_iperf_socket_recv(int32_t sockid, void *buff, size_t len)
 }
 
 SL_WEAK int32_t sl_iperf_socket_recvfrom(int32_t sockid, void *buff, uint32_t len,
-                                                       sl_iperf_socket_addr_t *src_addr)
+                                         sl_iperf_socket_addr_t *src_addr)
 {
   (void) sockid;
   (void) buff;
@@ -128,7 +128,7 @@ SL_WEAK int32_t sl_iperf_socket_recvfrom(int32_t sockid, void *buff, uint32_t le
 }
 
 SL_WEAK int32_t sl_iperf_socket_setsockopt(int32_t sockid, int32_t level, int32_t optname,
-                                                         const void *optval, size_t optlen)
+                                           const void *optval, size_t optlen)
 {
   (void) sockid;
   (void) level;
@@ -139,7 +139,7 @@ SL_WEAK int32_t sl_iperf_socket_setsockopt(int32_t sockid, int32_t level, int32_
 }
 
 SL_WEAK int32_t sl_iperf_socket_getsockopt(int32_t sockid, int32_t level, int32_t optname,
-                                                         void *optval, size_t *optlen)
+                                           void *optval, size_t *optlen)
 {
   (void) sockid;
   (void) level;
@@ -204,7 +204,7 @@ SL_WEAK uint32_t sl_iperf_network_ntohl(uint32_t val)
 }
 
 SL_WEAK int32_t sl_iperf_inet_pton(const char *src_str,
-                                                 sl_iperf_socket_addr_t * const dst_addr)
+                                   sl_iperf_socket_addr_t * const dst_addr)
 {
   (void) src_str;
   (void) dst_addr;
@@ -212,8 +212,8 @@ SL_WEAK int32_t sl_iperf_inet_pton(const char *src_str,
 }
 
 SL_WEAK const char *sl_iperf_inet_ntop(const  sl_iperf_socket_addr_t * const src_addr,
-                                                     char * const dst_str,
-                                                     const size_t size)
+                                       char * const dst_str,
+                                       const size_t size)
 {
   (void) src_addr;
   (void) dst_str;
@@ -222,7 +222,7 @@ SL_WEAK const char *sl_iperf_inet_ntop(const  sl_iperf_socket_addr_t * const src
 }
 
 SL_WEAK int32_t sl_iperf_join_multicast_group(const int32_t sockid,
-                                                            const sl_iperf_socket_addr_t * const multicast_addr)
+                                              const sl_iperf_socket_addr_t * const multicast_addr)
 {
   (void) sockid;
   (void) multicast_addr;
@@ -230,7 +230,7 @@ SL_WEAK int32_t sl_iperf_join_multicast_group(const int32_t sockid,
 }
 
 SL_WEAK int32_t sl_iperf_leave_multicast_group(const int32_t sockid,
-                                                             const sl_iperf_socket_addr_t * const multicast_addr)
+                                               const sl_iperf_socket_addr_t * const multicast_addr)
 {
   (void) sockid;
   (void) multicast_addr;

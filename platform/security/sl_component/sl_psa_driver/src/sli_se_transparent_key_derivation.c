@@ -28,15 +28,16 @@
  *
  ******************************************************************************/
 
-#include "em_device.h"
+#include "sli_psa_driver_features.h"
 
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
+
+#include "psa/crypto.h"
 
 #include "sli_se_driver_key_derivation.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+//------------------------------------------------------------------------------
+// Driver entry points
 
 psa_status_t sli_se_transparent_key_agreement(
   psa_algorithm_t alg,
@@ -60,7 +61,4 @@ psa_status_t sli_se_transparent_key_agreement(
                                      output_length);
 }
 
-#ifdef __cplusplus
-}
-#endif
-#endif // SEMAILBOX_PRESENT
+#endif // SLI_MBEDTLS_DEVICE_HSE

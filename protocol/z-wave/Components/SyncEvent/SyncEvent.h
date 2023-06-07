@@ -30,6 +30,12 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+/**
+* @addtogroup Components
+* @{
+* @addtogroup SyncEvent
+* @{
+*/
 
 //===============================   void SyncEvent(void)   ===============================
 
@@ -296,6 +302,11 @@ void SyncEventArg2BindObject(SSyncEventArg2* pThis, void(*pFunction)(), void* pO
 * \param Arg2
 */
 void SyncEventArg2Invoke(const SSyncEventArg2* pThis, uint32_t Arg1, uint32_t Arg2);
+
+/**
+ * @} // addtogroup SyncEvent
+ * @} // addtogroup Components
+ */
 
 #endif	// _SYNCEVENT_H_
 

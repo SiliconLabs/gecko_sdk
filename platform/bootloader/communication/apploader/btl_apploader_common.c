@@ -265,9 +265,10 @@ int32_t bootloader_apploader_communication_start(void)
   memcpy(advData + advDataLen, ADV_DATA_DEVICE_ADDR, ADV_DATA_DEVICE_ADDR_LENGTH);
   advDataLen += ADV_DATA_DEVICE_ADDR_LENGTH;
   sl_apploader_address_type_t addrType = deviceAddr.type;
+  memcpy(advData + advDataLen, &deviceAddr.address, sizeof(deviceAddr.address));
+  advDataLen += sizeof(deviceAddr.address);
   memcpy(advData + advDataLen, &addrType, sizeof(sl_apploader_address_type_t));
-  memcpy(advData + advDataLen + sizeof(sl_apploader_address_type_t), &deviceAddr.address, sizeof(deviceAddr.address));
-  advDataLen += sizeof(sl_apploader_address_t);
+  advDataLen += sizeof(sl_apploader_address_type_t);
 
   //set scan response data
   uint8_t scanRspData[ADV_DATA_SIZE_MAX];

@@ -35,7 +35,6 @@
 #define ECDSA_HPP_
 
 #include "openthread-core-config.h"
-#include "crypto/storage.hpp"
 
 #if OPENTHREAD_CONFIG_ECDSA_ENABLE
 
@@ -47,6 +46,7 @@
 
 #include "common/error.hpp"
 #include "crypto/sha256.hpp"
+#include "crypto/storage.hpp"
 
 namespace ot {
 namespace Crypto {
@@ -78,6 +78,9 @@ public:
 
     class PublicKey;
     class KeyPair;
+#if OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE
+    class KeyPairAsRef;
+#endif
 
     /**
      * This class represents an ECDSA signature.
@@ -91,6 +94,9 @@ public:
     {
         friend class KeyPair;
         friend class PublicKey;
+#if OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE
+        friend class KeyPairAsRef;
+#endif
 
     public:
         static constexpr uint8_t kSize = OT_CRYPTO_ECDSA_SIGNATURE_SIZE; ///< Signature size in bytes.
@@ -134,17 +140,7 @@ public:
          * @retval kErrorFailed       Failed to generate key.
          *
          */
-        Error Generate(void)
-        {
-#if OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE
-            mKeyRef   = ot::Crypto::Storage::kEcdsaKeyRef;
-            mDerBytes = nullptr;
-#else
-            mKeyRef   = 0;
-            mDerBytes = reinterpret_cast<uint8_t *>(mContextStorage);
-#endif
-            return otPlatCryptoEcdsaGenerateKey(this);
-        }
+        Error Generate(void) { return otPlatCryptoEcdsaGenerateKey(this); }
 
         /**
          * This method gets the associated public key from the `KeyPair`.
@@ -213,10 +209,106 @@ public:
         {
             return otPlatCryptoEcdsaSign(this, &aHash, &aSignature);
         }
+    };
+
+#if OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE
+    /**
+     * This class represents a key pair (public and private keys) as a PSA KeyRef.
+     *
+     */
+    class KeyPairAsRef
+    {
+    public:
+        /**
+         * This constructor initializes a `KeyPairAsRef`.
+         *
+         * @param[in] aKeyRef         PSA key reference to use while using the keypair.
+         */
+        explicit KeyPairAsRef(otCryptoKeyRef aKeyRef = 0) { mKeyRef = aKeyRef; }
+
+        /**
+         * This method generates a new keypair and imports it into PSA ITS.
+         *
+         * @retval kErrorNone         A new key pair was generated successfully.
+         * @retval kErrorNoBufs       Failed to allocate buffer for key generation.
+         * @retval kErrorNotCapable   Feature not supported.
+         * @retval kErrorFailed       Failed to generate key.
+         *
+         */
+        Error Generate(void) const { return otPlatCryptoEcdsaGenerateAndImportKey(mKeyRef); }
+
+        /**
+         * This method imports a new keypair into PSA ITS.
+         *
+         * @param[in] aKeyPair        KeyPair to be imported in DER format.
+         *
+         * @retval kErrorNone         A key pair was imported successfully.
+         * @retval kErrorNotCapable   Feature not supported.
+         * @retval kErrorFailed       Failed to import the key.
+         *
+         */
+        Error ImportKeyPair(const KeyPair &aKeyPair)
+        {
+            return Crypto::Storage::ImportKey(mKeyRef, Storage::kKeyTypeEcdsa, Storage::kKeyAlgorithmEcdsa,
+                                              (Storage::kUsageSignHash | Storage::kUsageVerifyHash),
+                                              Storage::kTypePersistent, aKeyPair.GetDerBytes(),
+                                              aKeyPair.GetDerLength());
+        }
+
+        /**
+         * This method gets the associated public key from the keypair referenced by mKeyRef.
+         *
+         * @param[out] aPublicKey     A reference to a `PublicKey` to output the value.
+         *
+         * @retval kErrorNone      Public key was retrieved successfully, and @p aPublicKey is updated.
+         * @retval kErrorFailed    There was a error exporting the public key from PSA.
+         *
+         */
+        Error GetPublicKey(PublicKey &aPublicKey) const
+        {
+            return otPlatCryptoEcdsaExportPublicKey(mKeyRef, &aPublicKey);
+        }
+
+        /**
+         * This method calculates the ECDSA signature for a hashed message using the private key from keypair
+         * referenced by mKeyRef.
+         *
+         * This method uses the deterministic digital signature generation procedure from RFC 6979.
+         *
+         * @param[in]  aHash               The SHA-256 hash value of the message to use for signature calculation.
+         * @param[out] aSignature          A reference to a `Signature` to output the calculated signature value.
+         *
+         * @retval kErrorNone           The signature was calculated successfully and @p aSignature was updated.
+         * @retval kErrorParse          The key-pair DER format could not be parsed (invalid format).
+         * @retval kErrorInvalidArgs    The @p aHash is invalid.
+         * @retval kErrorNoBufs         Failed to allocate buffer for signature calculation.
+         *
+         */
+        Error Sign(const Sha256::Hash &aHash, Signature &aSignature) const
+        {
+            return otPlatCryptoEcdsaSignUsingKeyRef(mKeyRef, &aHash, &aSignature);
+        }
+
+        /**
+         * This method gets the Key reference for the keypair stored in the PSA.
+         *
+         * @returns The PSA key ref.
+         *
+         */
+        otCryptoKeyRef GetKeyRef(void) const { return mKeyRef; }
+
+        /**
+         * This method sets the Key reference.
+         *
+         * @param[in] aKeyRef         PSA key reference to use while using the keypair.
+         *
+         */
+        void SetKeyRef(otCryptoKeyRef aKeyRef) { mKeyRef = aKeyRef; }
 
     private:
-        OT_DEFINE_ALIGNED_VAR(mContextStorage, kMaxDerSize, uint64_t);
+        otCryptoKeyRef mKeyRef;
     };
+#endif
 
     /**
      * This class represents a public key.
@@ -228,6 +320,9 @@ public:
     class PublicKey : public otPlatCryptoEcdsaPublicKey, public Equatable<PublicKey>
     {
         friend class KeyPair;
+#if OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE
+        friend class KeyPairAsRef;
+#endif
 
     public:
         static constexpr uint8_t kSize = OT_CRYPTO_ECDSA_PUBLIC_KEY_SIZE; ///< Size of the public key in bytes.
@@ -256,31 +351,9 @@ public:
         {
             return otPlatCryptoEcdsaVerify(this, &aHash, &aSignature);
         }
+
     } OT_TOOL_PACKED_END;
 };
-
-/**
- * This function creates an ECDSA signature.
- *
- * @param[out]     aOutput            An output buffer where ECDSA sign should be stored.
- * @param[in,out]  aOutputLength      The length of the @p aOutput buffer.
- * @param[in]      aInputHash         An input hash.
- * @param[in]      aInputHashLength   The length of the @p aInputHash buffer.
- * @param[in]      aPrivateKey        A private key in PEM format.
- * @param[in]      aPrivateKeyLength  The length of the @p aPrivateKey buffer.
- *
- * @retval  kErrorNone         ECDSA sign has been created successfully.
- * @retval  kErrorNoBufs       Output buffer is too small.
- * @retval  kErrorInvalidArgs  Private key is not valid EC Private Key.
- * @retval  kErrorFailed       Error during signing.
- *
- */
-Error Sign(uint8_t *      aOutput,
-           uint16_t &     aOutputLength,
-           const uint8_t *aInputHash,
-           uint16_t       aInputHashLength,
-           const uint8_t *aPrivateKey,
-           uint16_t       aPrivateKeyLength);
 
 /**
  * @}

@@ -15,4 +15,4 @@ class PhyFilters(IPhyFilter):
 
     sim_tests_phy_groups = ['Phys_sim_tests']
 
-    simplicity_studio_phy_groups = ['Phys_Datasheet']
+    simplicity_studio_phy_groups = ['Phys_Datasheet','Phys_Connect']

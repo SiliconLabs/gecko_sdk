@@ -14,19 +14,11 @@
  * sections of the MSLA applicable to Source Code.
  *
  ******************************************************************************/
-#ifdef UC_BUILD
 #include "reporting-config.h"
-#endif
 
-#ifdef UC_BUILD
 #if (EMBER_AF_PLUGIN_REPORTING_ENABLE_EXPANDED_TABLE == 1)
 #define EXPANDED_TABLE
 #endif
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_REPORTING_ENABLE_EXPANDED_TABLE
-#define EXPANDED_TABLE
-#endif
-#endif // UC_BUILD
 
 #ifdef EXPANDED_TABLE
 #else

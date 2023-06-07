@@ -947,21 +947,21 @@ typedef enum IRQn{
 #define PER_REG_BLOCK_SET_OFFSET                0x1000UL  /**< Offset to SET register block */
 #define PER_REG_BLOCK_CLR_OFFSET                0x2000UL  /**< Offset to CLEAR register block */
 #define PER_REG_BLOCK_TGL_OFFSET                0x3000UL  /**< Offset to TOGGLE register block */
-#define MSC_CDA_PRESENT                         0x0UL     /**>  */
+#define MSC_CDA_PRESENT                         0x1UL     /**>  */
 #define MSC_FDIO_WIDTH                          0x40UL    /**> None */
 #define MSC_FLASHADDRBITS                       0x13UL    /**> None */
 #define MSC_FLASHBLOCKADDRBITS                  0x13UL    /**> None */
-#define MSC_FLASH_BLOCK_INFO_PCOUNT             0x6UL     /**> None */
+#define MSC_FLASH_BLOCK_INFO_PCOUNT             0xCUL     /**> None */
 #define MSC_INFOADDRBITS                        0x10UL    /**> None */
 #define MSC_INFOBLOCKADDRBITS                   0x10UL    /**> None */
-#define MSC_INFO_PSIZE_BITS                     0xDUL     /**> None */
-#define MSC_MAIN_PSIZE_BITS                     0xDUL     /**> None */
+#define MSC_INFO_PSIZE_BITS                     0xCUL     /**> None */
+#define MSC_MAIN_PSIZE_BITS                     0xCUL     /**> None */
 #define MSC_MTP_PRESENT                         0x1UL     /**>  */
 #define MSC_REDUNDANCY                          0x2UL     /**> None */
 #define MSC_UD_IN_MTP_PAGE                      0x0UL     /**>  */
 #define MSC_YADDRBITS                           0x6UL     /**>  */
-#define SYSROM_WORDS                            0x600UL   /**> Number of words in ROM */
-#define SYSROM_ROM_SIZE_BYTES                   0x1800UL  /**> Number of bytes in ROM */
+#define SYSROM_WORDS                            0x700UL   /**> Number of words in ROM */
+#define SYSROM_ROM_SIZE_BYTES                   0x1C00UL  /**> Number of bytes in ROM */
 #define DMEM_BANK0_SIZE                         0x6000UL  /**> Bank0 Size */
 #define DMEM_BANK1_SIZE                         0x2000UL  /**> Bank1 Size */
 #define DMEM_BANK2_SIZE                         0x0UL     /**> Bank2 Size */

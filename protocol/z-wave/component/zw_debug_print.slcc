@@ -7,6 +7,12 @@ quality: production
 provides:
 - name: zw_debug_print
 
+include:
+  - path: "protocol/z-wave/ZAF/ApplicationUtilities"
+    file_list:
+    - path: "ZAF_PrintAppInfo.h"
+source:
+  - path: "protocol/z-wave/ZAF/ApplicationUtilities/ZAF_PrintAppInfo.c"
 requires:
   - name: iostream_recommended_stream
   - name: zw_debug

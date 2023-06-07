@@ -1,11 +1,11 @@
 from pycalcmodel.core.output import ModelOutput, ModelOutputType
 
 
-def build_modem_regs_nixi(model,profile, family):
+def build_modem_regs_nixi(model,profile):
 
-    if family == 'nerio':       # this is probably a bug.  This probably should be included in all profiles
+    if model.part_family.lower()  == 'nerio':       # this is probably a bug.  This probably should be included in all profiles
         profile.outputs.append(ModelOutput(model.vars.MODEM_CTRL2_RATESELMODE, '',       ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.CTRL2.RATESELMODE'         ))
-    if family == 'nerio':           # this is probably a bug.  This probably should be included in all profiles
+    if model.part_family.lower() == 'nerio':           # this is probably a bug.  This probably should be included in all profiles
         profile.outputs.append(ModelOutput(model.vars.MODEM_CTRL6_CODINGB, '',           ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.CTRL6.CODINGB'             ))
 
     profile.outputs.append(ModelOutput(model.vars.AGC_CTRL0_ADCRESETDURATION, '',    ModelOutputType.SVD_REG_FIELD, readable_name='AGC.CTRL0.ADCRESETDURATION'      ))

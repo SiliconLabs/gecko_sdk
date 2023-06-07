@@ -353,6 +353,26 @@ static const debugSignal_t debugSignals[] =
       }
     }
   },
+  {
+    .name = "DOUT",
+    .isPrs = true,
+    .loc = {
+      .prs = {
+        .signal = _PRS_ASYNC_CH_CTRL_SIGSEL_MODEMLDOUT,
+        .source = _PRS_ASYNC_CH_CTRL_SOURCESEL_MODEML,
+      }
+    }
+  },
+  {
+    .name = "DCLK",
+    .isPrs = true,
+    .loc = {
+      .prs = {
+        .signal = _PRS_ASYNC_CH_CTRL_SIGSEL_MODEMLDCLK,
+        .source = _PRS_ASYNC_CH_CTRL_SOURCESEL_MODEML,
+      }
+    }
+  },
 #ifndef _PRS_ASYNC_CH_CTRL_SIGSEL_PROTIMERLCC0
 #define _PRS_ASYNC_CH_CTRL_SIGSEL_PROTIMERLCC0 (0x00000001UL)
 #endif

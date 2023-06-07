@@ -73,6 +73,8 @@
 
 #define SL_STATUS_WISUN_SPACE             ((sl_status_t)0x1400)
 
+#define SL_STATUS_COMPUTE_SPACE           ((sl_status_t)0x1500)
+
 // -----------------------------------------------------------------------------
 // Status Defines
 
@@ -368,6 +370,23 @@
 #define SL_STATUS_WIFI_CONNECTION_AUTH_FAILURE             ((sl_status_t)0x0B1E)  ///< The connection request failed because the WPA handshake did not complete successfully
 #define SL_STATUS_WIFI_RETRY_EXCEEDED                      ((sl_status_t)0x0B1F)  ///< The request failed because the retry limit was exceeded
 #define SL_STATUS_WIFI_TX_LIFETIME_EXCEEDED                ((sl_status_t)0x0B20)  ///< The request failed because the MSDU life time was exceeded
+
+// -----------------------------------------------------------------------------
+// MVP Driver and MVP Math status codes
+#define SL_STATUS_COMPUTE_DRIVER_FAULT                      ((sl_status_t)0x1501)   ///< Critical fault
+#define SL_STATUS_COMPUTE_DRIVER_ALU_NAN                    ((sl_status_t)0x1502)   ///< ALU operation output NaN
+#define SL_STATUS_COMPUTE_DRIVER_ALU_OVERFLOW               ((sl_status_t)0x1503)   ///< ALU numeric overflow
+#define SL_STATUS_COMPUTE_DRIVER_ALU_UNDERFLOW              ((sl_status_t)0x1504)   ///< ALU numeric underflow
+#define SL_STATUS_COMPUTE_DRIVER_STORE_CONVERSION_OVERFLOW  ((sl_status_t)0x1505)   ///< Overflow during array store
+#define SL_STATUS_COMPUTE_DRIVER_STORE_CONVERSION_UNDERFLOW ((sl_status_t)0x1506)   ///< Underflow during array store conversion
+#define SL_STATUS_COMPUTE_DRIVER_STORE_CONVERSION_INFINITY  ((sl_status_t)0x1507)   ///< Infinity encountered during array store conversion
+#define SL_STATUS_COMPUTE_DRIVER_STORE_CONVERSION_NAN       ((sl_status_t)0x1508)   ///< NaN encountered during array store conversion
+
+#define SL_STATUS_COMPUTE_MATH_FAULT                        ((sl_status_t)0x1511)   ///< MATH Critical fault
+#define SL_STATUS_COMPUTE_MATH_NAN                          ((sl_status_t)0x1512)   ///< MATH NaN encountered
+#define SL_STATUS_COMPUTE_MATH_INFINITY                     ((sl_status_t)0x1513)   ///< MATH Infinity encountered
+#define SL_STATUS_COMPUTE_MATH_OVERFLOW                     ((sl_status_t)0x1514)   ///< MATH numeric overflow
+#define SL_STATUS_COMPUTE_MATH_UNDERFLOW                    ((sl_status_t)0x1515)   ///< MATH numeric underflow
 
 // -----------------------------------------------------------------------------
 // Data Types

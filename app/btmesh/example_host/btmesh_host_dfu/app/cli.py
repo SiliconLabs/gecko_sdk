@@ -24,6 +24,7 @@ import configparser
 import logging
 import sys
 from pathlib import Path
+from typing import Iterator
 
 import bgapi
 
@@ -70,7 +71,8 @@ class BtmeshDfuCli:
             datefmt="%Y-%m-%d %H:%M:%S",
         )
         logger.info(f"{app_exec.APP_NAME} application is started.")
-        self.load_cfg(pargs.cfg)
+        self.cfg_path: Path = pargs.cfg
+        self.load_cfg(self.cfg_path)
         self.cmd_parser = app_exec.build_cmd_parser()
         self.cli_parser = self.build_cli_parser([self.startup_parser, self.cmd_parser])
 
@@ -83,7 +85,7 @@ class BtmeshDfuCli:
             type=str.upper,
             choices=logging._nameToLevel.keys(),
             help="Log level",
-            default=logging.INFO,
+            default=logging.DEBUG,
         )
         startup_parser.add_argument(
             "--cfg",
@@ -134,13 +136,26 @@ class BtmeshDfuCli:
             help="USB device file or COM port of the device to connect",
             default=None,
         )
+        api_xmls_default = list(self.abs_api_xmls_path())
+        api_xmls_default_help = ", ".join(api_xmls_default)
         cli_parser.add_argument(
             "--xapi",
             dest="api_xmls",
-            help="XML file paths for the API references, from the used SDKs",
             action="append",
+            help=(
+                f"XML file paths for the API references, from the used SDKs. "
+                f"(default: {api_xmls_default_help})"
+            ),
         )
         return cli_parser
+
+    def abs_api_xmls_path(self) -> Iterator[str]:
+        for api_xml_path in app_cfg.common.api_xmls_default:
+            if api_xml_path.is_absolute():
+                yield str(api_xml_path)
+            else:
+                abs_api_xml_path = (self.cfg_path.parent / api_xml_path).resolve()
+                yield str(abs_api_xml_path)
 
     def load_cfg(self, cfg_path: Path):
         try:
@@ -191,7 +206,12 @@ class BtmeshDfuCli:
             connector = bgapi.SocketConnector(self.ip, self.port)
         else:
             self.cli_parser.error("USB or IP connection data missing.", force_exit=True)
-        app_exec.lib = BGLibExt(connector, args.api_xmls, response_timeout=5)
+        if args.api_xmls:
+            api_xmls = args.api_xmls
+        else:
+            api_xmls_default = list(self.abs_api_xmls_path())
+            api_xmls = api_xmls_default
+        app_exec.lib = BGLibExt(connector, api_xmls, response_timeout=5)
         app_exec.interactive = args.interactive
         app_exec.open(args.system_reset, args.factory_reset)
         command = args.command

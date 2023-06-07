@@ -9,10 +9,10 @@
     unless:
     - device_content_override
 - source:
-  - path: platform/Device/SiliconLabs/BGM24/Source/system_bgm24.c
+  - path: platform/Device/SiliconLabs/BGM24/Source/startup_bgm24.c
     unless:
     - device_content_override
-  - path: platform/Device/SiliconLabs/BGM24/Source/startup_bgm24.c
+  - path: platform/Device/SiliconLabs/BGM24/Source/system_bgm24.c
     unless:
     - device_content_override
 - include:

@@ -9,10 +9,10 @@
     unless:
     - device_content_override
 - source:
-  - path: platform/Device/SiliconLabs/EFR32MG27/Source/system_efr32mg27.c
+  - path: platform/Device/SiliconLabs/EFR32MG27/Source/startup_efr32mg27.c
     unless:
     - device_content_override
-  - path: platform/Device/SiliconLabs/EFR32MG27/Source/startup_efr32mg27.c
+  - path: platform/Device/SiliconLabs/EFR32MG27/Source/system_efr32mg27.c
     unless:
     - device_content_override
 - include:
@@ -145,8 +145,6 @@
   - name: device_supports_rail_stack
   - name: device_supports_zigbee
   - name: device_supports_bluetooth
-  - name: device_supports_bluetooth_iq_sampling
-  - name: device_supports_bluetooth_antenna_switching
   - name: device_supports_bluetooth_coded_phy
   - name: device_supports_bluetooth_cte
   - name: device_supports_connect

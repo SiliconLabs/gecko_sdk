@@ -26,12 +26,13 @@ import logging
 import re
 from configparser import ConfigParser, ExtendedInterpolation, SectionProxy
 from pathlib import Path
-from typing import Dict, Iterable, Set
+from typing import Dict, Iterable, List, Set
 
 import btmesh.util
 from btmesh.db import ModelID
 from btmesh.mdl import NamedModelID
-from btmesh.util import BtmeshRetryParams
+from btmesh.util import (BtmeshMulticastRetryParams, BtmeshRetryParams,
+                         ConnectionParamsRange)
 
 DEFAULT_APP_CFG_INI = """# BT Mesh Host DFU configuration file
 
@@ -117,12 +118,21 @@ profile_lightness_help = Configuration of Light Lightness Client,
 
 
 [common]
+# Default path of Bluetooth and BT Mesh API xml files.
+# The PyBGAPI creates classes, commands and events from xapi files at runtime.
+# The app uses the PyBGAPI through the btmesh layer which implements complex
+# BT Mesh procedures and provides a simple interface.
+# If relative path is provided then the base path is the location of this
+# configuration file.
+api_xmls_default = ../../../../protocol/bluetooth/api/sl_bt.xapi,
+                   ../../../../protocol/bluetooth/api/sl_btmesh.xapi
+
 # Maximum command retry count when the expected event is not received or the
 # received event means a recoverable error.
 # If the maximum retry count is exceeded and the expected event is not found or
 # the received event means the same recoverable error then an error is raised.
 # Example: the response message of server is lost due to interference.
-# Note: this default value is used unless a more specific configuration parameter
+# Note: this default value is used unless a more specific configuration option
 # overrides it. See <prefix>_retry_max_default parameters in this file.
 retry_max_default = 5
 
@@ -130,7 +140,7 @@ retry_max_default = 5
 # expected event is not received or the received event means a recoverable error.
 # Example: keep some time between message transmissions to wait for the
 # response message of the remote node.
-# Note: this default value is used unless a more specific configuration parameter
+# Note: this default value is used unless a more specific configuration option
 # overrides it. See <prefix>_retry_interval_default parameters in this file.
 retry_interval_default = 1.0
 
@@ -140,7 +150,7 @@ retry_interval_default = 1.0
 # target element address belongs to a Low Power Node.
 # Example: keep some time between message transmissions to wait for the response
 # message of the remote Low Power Node.
-# Note: this default value is used unless a more specific configuration parameter
+# Note: this default value is used unless a more specific configuration option
 # overrides it. See <prefix>_retry_interval_lpn_default parameters in this file.
 retry_interval_lpn_default = 5.0
 
@@ -148,16 +158,29 @@ retry_interval_lpn_default = 5.0
 # If the max command retry count is exceeded and the command still fails with
 # the same recoverable error then an error is raised.
 # Example for recoverable error: lack of dynamic memory in BT Mesh stack. "
-# Note: this default value is used unless a more specific configuration parameter
+# Note: this default value is used unless a more specific configuration option
 # overrides it. See <prefix>_retry_cmd_max_default parameters in this file.
 retry_cmd_max_default = 10
 
 # The retry command interval is measured between commands in seconds during retry
 # when the command fails due to recoverable error.
 # Example: keep time between commands to wait to free dynamic memory.
-# Note: this default value is used unless a more specific configuration parameter
+# Note: this default value is used unless a more specific configuration option
 # overrides it. See <prefix>_retry_cmd_interval_default parameters in this file.
 retry_cmd_interval_default = 0.5
+
+# If the number of remaining node elements (element addresses) with missing
+# status messages exceeds or equals to the retry multicast threshold then the
+# group address is used to send BT Mesh messages, otherwise each element address
+# is looped through one by one. Zero value means unicast addressing.
+retry_multicast_threshold_default = 2
+
+# If auto unicast retry feature is turned on and the multicast retry procedure
+# fails before the number of remaining nodes elements (element addresses) with
+# missing status messages goes below the retry multicast threshold then an
+# additional unicast retry procedure is executed otherwise the remaining node
+# elements fail with timeout.
+retry_auto_unicast_default = False
 
 
 [conf]
@@ -196,7 +219,7 @@ reset_node_local_remove_on_retry_limit = true
 # For example: Config Appkey Add, Config Model Publication Set, Config Model
 # Subscription Add, Config Model App Bind, Config Composition Data Get, etc.
 # Note: this default value is used for BT Mesh Configuration messages unless
-# a more specific configuration parameter overrides it like the Config Reset
+# a more specific configuration option overrides it like the Config Reset
 # Node message is affected by reset_node_retry_max_default.
 conf_retry_max_default = 5
 
@@ -205,7 +228,7 @@ conf_retry_max_default = 5
 # For example: Config Appkey Add, Config Model Publication Set, Config Model
 # Subscription Add, Config Model App Bind, Config Composition Data Get, etc.
 # Note: this default value is used for BT Mesh Configuration messages unless
-# a more specific configuration parameter overrides it like the Config Reset
+# a more specific configuration option overrides it like the Config Reset
 # Node message is affected by reset_node_retry_interval_default.
 conf_retry_interval_default = 1.0
 
@@ -215,7 +238,7 @@ conf_retry_interval_default = 1.0
 # For example: Config Appkey Add, Config Model Publication Set, Config Model
 # Subscription Add, Config Model App Bind, Config Composition Data Get, etc.
 # Note: this default value is used for BT Mesh Configuration messages unless
-# a more specific configuration parameter overrides it like the Config Reset
+# a more specific configuration option overrides it like the Config Reset
 # Node message is affected by reset_node_retry_interval_lpn_default.
 conf_retry_interval_lpn_default = 30.0
 
@@ -238,6 +261,16 @@ silabs_retry_interval_default = 1.0
 # Note: The configuration of BT Mesh over Advertisement Extension proprietary
 # feature is performed through Silabs Config messages. (see conf ae command)
 silabs_retry_interval_lpn_default = 5.0
+
+# Default multicast threshold used during Silabs Configuration procedures.
+# If the number of uncompleted Silabs Config Servers with missing Silabs Config
+# Status messages during the aforementioned Silabs Configuration procedures
+# exceeds or is equal to this number then the group address is used.
+# Otherwise, servers are looped through one by one.
+# Zero value means unicast addressing.
+# Note: The configuration of BT Mesh over Advertisement Extension proprietary
+# feature is performed through Silabs Config messages. (see conf ae command)
+silabs_retry_multicast_threshold_default = 2
 
 
 [dist_clt]
@@ -293,7 +326,7 @@ dist_poll_int_default = 5.0
 # Distribution Server.
 # For example: FW Distribution Upload Start, FW Distribution Receivers Add,
 # FW Distribution Start message etc.
-# Note: this default value is used unless a more specific configuration parameter
+# Note: this default value is used unless a more specific configuration option
 # overrides it. See delete_retry_max_default parameter in this file.
 dist_retry_max_default = 5
 
@@ -309,7 +342,7 @@ dist_retry_max_default = 5
 # This default retry interval is used for Metadata Check Procedure at the
 # beginning of Firmware Distribution procedure between Firmware Update Metadata
 # Check messages sent to the updating nodes.
-# Note: this default value is used unless a more specific configuration parameter
+# Note: this default value is used unless a more specific configuration option
 # overrides it. See delete_retry_interval_default parameter in this file.
 dist_retry_interval_default = 1.0
 
@@ -319,6 +352,16 @@ dist_retry_interval_default = 1.0
 # Note: This parameters affects the Firmware Metadata Check at the beginning
 # of the Firmware Distribution procedure.
 dist_retry_interval_lpn_default = 5.0
+
+# Default multicast threshold used during the Firmware Compatibility Check
+# (Metadata Check) at the beginning of the Firmware Distribution procedure.
+# If the number of uncompleted servers (missing status messages) during the
+# aforementioned Firmware Compatibility Check procedure exceeds or is equal
+# to this number then the group address is used. Otherwise, servers are looped
+# through one by one. Zero value means unicast addressing.
+# WARNING! The multicast threshold of distribution process is determined by the
+# configuration of Firmware Distribution Server component on the Distributor node.
+dist_retry_multicast_threshold_default = 2
 
 # Default maximum number of additional Firmware Distribution Firmware Delete or
 # Delete All messages which are sent until the corresponding status message
@@ -372,26 +415,13 @@ max_updating_nodes = 8
 # The standard (non-AE) segmented chunks are able to transfer 12 bytes per
 # advertisement minus 1 byte opcode and 2 bytes chunk number and 4 bytes of MIC.
 # This means N advertisements are able to transfer 12 x N - 7 bytes of chunk data.
-# The standard unsegmented chunk is  able to transfer 8 bytes of chunk data.
+# The standard unsegmented chunk is able to transfer 8 bytes of chunk data.
 dfu_chunk_size_default = 53
-
-# Default multicast threshold used during the BLOB transfer phase of FW update.
-# If the number of uncompleted servers (missing status messages) during any BLOB
-# transfer procedure step exceeds or is equal to this number then the group
-# address is used. Otherwise, servers are looped through one by one.
-# Value of 0 disables the feature.
-# Note: Each BT Mesh message sent to a group address triggers the response of
-# several nodes which send the corresponding status messages with random delay.
-# As the number of nodes increases the probability of collisions increases as well.
-# If the number of nodes with missing status messages is low then it is better
-# to send multiple unicast messages instead of a single message to the group
-# address because the collisions could lead to the loss of the status messages.
-dfu_multicast_threshold_default = 1
 
 # Default maximum number of additional Firmware Update messages which are sent
 # until the corresponding Firmware Update messages are received from the Firmware
 # Update Server model of each selected updating nodes.
-# This configuration parameter is used during Firmware Information Query and
+# This configuration option is used during Firmware Information Query and
 # Firmware Metadata Check procedures and it is not used during Standalone
 # Firmware Update procedure.
 # The default maximum number of retransmissions in each Standalone Firmware
@@ -413,26 +443,44 @@ dfu_retry_interval_default = 1.0
 # Standalone Firmware Update procedure.
 dfu_retry_interval_lpn_default = 5.0
 
+# Default multicast threshold used during Check For Current Firmware procedure
+# and during the Firmware Compatibility Check (Metadata Check) and BLOB Transfer
+# phase of FW update.
+# If the number of uncompleted servers (missing status messages) during the
+# aforementioned FW Update procedures or during any BLOB Transfer procedure
+# step exceeds or is equal to this number then the group address is used.
+# Otherwise, servers are looped through one by one.
+# Zero value means unicast addressing.
+# WARNING! The FW Update Start, Get (Verification), Cancel and Apply steps of
+# FW Update uses unicast addressing only and loops through each server on by one.
+# Note: Each BT Mesh message sent to a group address triggers the response of
+# several nodes which send the corresponding status messages with random delay.
+# As the number of nodes increases the probability of collisions increases as well.
+# If the number of nodes with missing status messages is low then it is better
+# to send multiple unicast messages instead of a single message to the group
+# address because the collisions could lead to the loss of the status messages.
+dfu_retry_multicast_threshold_default = 2
+
 
 [mbt_clt]
 # Element index of the BLOB Transfer Client model on NCP node.
 elem_index = 0
 
 # Maximum number of BLOB Transfer Servers participating in a BLOB transfer.
-# Note: The BT Mesh stack allocates memory based on this configuration parameter
+# Note: The BT Mesh stack allocates memory based on this configuration option
 #       when MBT Client model is initialized.
 max_servers = 8
 
 # Maximum number of blocks during a BLOB transfer. The MBT Client breaks the
 # BLOB into suitably sized blocks during BLOB transfer.
-# Note: The BT Mesh stack allocates memory based on this configuration parameter
+# Note: The BT Mesh stack allocates memory based on this configuration option
 #       when MBT Client model is initialized.
 max_blocks = 1850
 
 # Max number of chunks in a block during a BLOB transfer.
 # Each block is composed of identically sized chunks of data, except for the
 # last chunk which may be smaller than the other chunks.
-# Note: The BT Mesh stack allocates memory based on this configuration parameter
+# Note: The BT Mesh stack allocates memory based on this configuration option
 #       when MBT Client model is initialized.
 max_chunks_per_block = 128
 
@@ -462,6 +510,109 @@ appkey0 = AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 # Name of the provisioner node in the BT Mesh database.
 prov_node_name = Provisioner
 
+# If SAR transmitter custom params enable is true then the local SAR transmitter
+# parameters are overridden by the specific sar_tx default configuration options.
+# The default values are set based on the BT Mesh stack default values.
+sar_tx_custom_local_params_enable = true
+
+# Default Segment Interval Step controls the interval between transmissions of
+# segments of a segmented message in milliseconds.
+# The value is the range of 10ms to 160ms in 10ms steps, intermediate values are
+# rounded down to the nearest multiple of 10.
+# Default value is 20ms in specification.
+sar_tx_segment_interval_step_default = 20
+
+# Default SAR Unicast Retransmission Count controls the maximum number of
+# transmissions of segments of segmented messages to a unicast destination.
+# Valid range is 0 - 15, where 0 represents a single transmission.
+# The default value is 2 in specification, resulting in 3 transmissions total.
+sar_tx_unicast_retrans_count_default = 7
+
+# Default SAR Unicast Retransmissions Without Progress Count controls the
+# maximum number of retransmissions of segments of segmented messages to a
+# unicast destination without progress (without marking newly marking any
+# segments acknowledged).
+# Valid range is 0 - 15, where 0 represents a single transmission.
+# The default value is 2 in specification, resulting in 3 transmissions.
+# The value of this state should be set to a value greater by two or more than
+# the value of the SAR Acknowledgement Retransmissions Count on a peer node.
+# This helps prevent the SAR transmitter from abandoning the SAR prematurely.
+sar_tx_unicast_retrans_wo_progress_count_default = 2
+
+# Default SAR Unicast Retransmissions Interval Step state controls the minimum
+#interval between retransmissions of segments of a segmented message for a
+# destination that is a unicast address in 25ms steps.
+# Valid range is 25 - 400ms, intermediate values are rounded down to the nearest
+# multiple of 25. Default value is 200ms in specification.
+sar_tx_unicast_retrans_interval_step_default = 200
+
+# Default SAR Unicast Retransmissions Interval Increment state controls the
+# incremental component of the interval between retransmissions of segments of
+# a segmented message for a destination that is a unicast address in 25ms steps.
+# Valid range is 25 - 400ms, intermediate values are rounded down to the nearest
+# multiple of 25. Default value is 50ms in specification.
+sar_tx_unicast_retrans_interval_increment_default = 50
+
+# Default SAR Multicast Retransmissions Count state controls the maximum number
+# of transmissions of segments of segmented messages to a group address or a
+# virtual address.
+# Valid range is 0 - 15, where 0 represents a single transmission.
+# The default value is 1 in specification, resulting in 2 transmissions.
+# WARNING! The BLOB Transfer procedure has a high-level retransmission logic
+# which detects missing chunks and retransmits the missing ones.
+# It is recommended to disable multicast retransmissions in Lower Transport layer
+# because it slows down the multicast BLOB Transfer significantly,
+# and consequently multicast retransmissions are disabled by default.
+sar_tx_multicast_retrans_count_default = 0
+
+# Default SAR Multicast Retransmissions Interval Step state controls the interval
+# between retransmissions of segments of a segmented message for a destination
+# that is a group address or a virtual address in 25ms steps.
+# Valid range is 25-400ms, intermediate values are rounded down to the nearest
+# multiple of 25. Default values is 100ms in specification.
+sar_tx_multicast_retrans_interval_step_default = 100
+
+# If SAR receiver custom params enable is true then the local SAR receiver
+# parameters are overridden by the specific sar_rx default configuration options.
+# The default values are set based on the BT Mesh stack default values.
+sar_rx_custom_local_params_enable = false
+
+# Default SAR Segments Threshold state represents the size of a segmented
+# message in number of segments above which the Segment Acknowledgment
+# messages are enabled.
+# Valid range is 0 - 31, the default value is 3 (segments) in specification.
+sar_rx_segments_threshold_default = 3
+
+# Default SAR Acknowledgment Delay Increment state control the interval between
+# the reception of a new segment of a segmented message for a destination that
+# is a unicast address and the transmission of the Segment Acknowledgment for
+# that message.
+# Formula: acknowledgment delay increment=SAR Acknowledgment Delay Increment+1.5
+# Valid range is 0 - 7, default is 2 in specification resulting in 3.5 segment
+# transmission interval steps.
+sar_rx_ack_delay_increment_default = 2
+
+# Default SAR Discard Timeout state controls the time that the lower transport
+# layer waits after receiving unique segments of a segmented message before
+# discarding that segmented message in 5s steps.
+# Valid range is 5000 - 80000ms, intermediate values are rounded down to the
+# nearest multiple of 5s. The default value is 10000ms in specification.
+sar_rx_discard_timeout_default = 10000
+
+# Default SAR Receiver Segment Interval Step state indicates the interval between
+# received segments of a segmented message in milliseconds.
+# This is used to control rate of transmission of Segment Acknowledgment messages.
+# Valid range is 10 - 160, intermediate values are rounded down to the nearest
+# multiple of 10. The default value is 20ms in specification.
+sar_rx_segment_interval_step_default = 20
+
+# Default SAR Acknowledgment Retransmissions Count state controls the maximum
+# number of retransmissions of Segment Acknowledgment messages sent by the lower
+# transport layer.
+# Valid range is 0 - 3. The default value is 1 in specification, representing
+# 1 retransmissions or 2 in total.
+sar_rx_ack_retrans_count_default = 2
+
 
 [persistence]
 # Path of json file which stores the persistent data of program.
@@ -474,6 +625,64 @@ default_on_failed_load = true
 # If true then a backup is created from the failed persistent data file before
 # it is overwritten with the default values.
 backup_on_failed_load = true
+
+
+[proxy]
+# Default scanning timeout for Proxy Service Advertisements with node identity
+# in seconds.
+scan_timeout_default = 2.0
+
+# Default bluetooth connection opening and proxy connection establishment timeout
+# in milliseconds.
+conn_open_timeout_ms_default = 5000.0
+
+# Default minimum value for the connection event interval in milliseconds.
+# Range: 7.5ms to 4s
+# Resolution: 1.25ms
+conn_min_interval_ms_default = 7.5
+
+# Default maximum value for the connection event interval in milliseconds.
+# Range: 7.5ms to 4s
+# Resolution: 1.25ms
+conn_max_interval_ms_default = 7.5
+
+# Default peripheral latency, which defines how many connection intervals the peripheral
+# can skip if it has no data to send.
+# Range: 0x0000 to 0x01f3
+conn_latency_default = 0
+
+# Default supervision timeout in milliseconds, which defines the time that
+# the connection is maintained although the devices can't communicate at the
+# currently configured connection intervals.
+# The supervision timeout value in milliseconds shall be larger than
+# (1 + latency) * max_interval * 2, where max_interval is given in ms.
+# Range: 100ms to 32s
+# Resolution: 10ms
+conn_timeout_ms_default = 5000.0
+
+# Default minimum length of the connection event.
+# This value defines the minimum time that should be given to the connection
+# event in a situation where other tasks need to run immediately after the
+# connection event. When the value is very small, the connection event still
+# has at least one TX/RX operation.
+# If this value is increased, more time is reserved for the connection event
+# so it can transmit and receive more packets in a connection interval.
+# Range: 0x0000 to 0xffff (multiplied by 0.625ms)
+# Resolution: 0.625 ms
+conn_min_ce_length_ms_default = 0
+
+# Default maximum length of the connection event.
+# This value is used for limiting the connection event length so that a
+# connection that has large amounts of data to transmit or receive doesn't
+# block other tasks.
+# Limiting the connection event is a hard stop. If there is no enough time
+# to send or receive a packet, the connection event will be closed.
+# If the value is set to 0, the connection event still has at least one TX/RX
+# operation. This is useful to limit power consumption or leave more time to
+# other tasks.
+# Range: 0x0000 to 0xffff (multiplied by 0.625ms)
+# Resolution: 0.625 ms
+conn_max_ce_length_ms_default = 40000.0
 
 
 [reset]
@@ -504,6 +713,18 @@ fwid_format = str
 # shown on the UI.
 # Valid values: str, hex
 metadata_format = str
+
+# The format determines how the node is shown on the UI.
+# The node format can be any valid python format string which may use the
+# following keyword parameters:
+#   - name: Node name as string
+#   - uuid: Node UUID as string (32 hex characters)
+#   - prim_addr: Node primary address as integer(element index 0)
+# Examples:
+#   - {name}                      =>  Node_Light
+#   - 0x{prim_addr:04X}           =>  0x200B
+#   - {name} (0x{prim_addr:04X})  =>  Node_Light (0x200B)
+node_format={name}
 
 # The format determines how the node element is shown on the UI.
 # The node element format can be any valid python format string which may use
@@ -720,6 +941,8 @@ class BtmeshDfuCommonCfg:
     def __init__(self, section: SectionProxy):
         self.section = section
         sect = section
+        # api_xmls_default
+        self._api_xmls_default = self.process_api_xmls_default()
         # retry_max_default
         self._retry_max_default = sect.getint("retry_max_default")
         # retry_interval_default
@@ -730,23 +953,44 @@ class BtmeshDfuCommonCfg:
         self._retry_cmd_max_default = sect.getint("retry_cmd_max_default")
         # retry_cmd_interval_default
         self._retry_cmd_interval_default = sect.getfloat("retry_cmd_interval_default")
+        # retry_multicast_threshold_default
+        self._retry_multicast_threshold_default = sect.getint(
+            "retry_multicast_threshold_default"
+        )
+        # retry_auto_unicast_default
+        self._retry_auto_unicast_default = sect.getboolean(
+            "retry_auto_unicast_default"
+        )
         # Log common configuration
         sectname = sect.name
-        logger.debug(f"{sectname}:retry_max_default: " f"{self.retry_max_default}")
+        api_xmls_default_str = ", ".join(str(path) for path in self.api_xmls_default)
+        logger.debug(f"{sectname}:api_xmls_default: {api_xmls_default_str}")
+        logger.debug(f"{sectname}:retry_max_default: {self.retry_max_default}")
         logger.debug(
-            f"{sectname}:retry_interval_default: " f"{self.retry_interval_default}"
+            f"{sectname}:retry_interval_default: {self.retry_interval_default}"
         )
         logger.debug(
             f"{sectname}:retry_interval_lpn_default: "
             f"{self.retry_interval_lpn_default}"
         )
-        logger.debug(
-            f"{sectname}:retry_cmd_max_default: " f"{self.retry_cmd_max_default}"
-        )
+        logger.debug(f"{sectname}:retry_cmd_max_default: {self.retry_cmd_max_default}")
         logger.debug(
             f"{sectname}:retry_cmd_interval_default: "
             f"{self.retry_cmd_interval_default}"
         )
+        logger.debug(
+            f"{sectname}:retry_multicast_threshold_default: "
+            f"{self.retry_multicast_threshold_default}"
+        )
+        logger.debug(
+            f"{sectname}:retry_auto_unicast_default: "
+            f"{self.retry_auto_unicast_default}"
+        )
+
+    @property
+    def api_xmls_default(self):
+        for path in self._api_xmls_default:
+            yield path
 
     @property
     def retry_max_default(self):
@@ -769,18 +1013,43 @@ class BtmeshDfuCommonCfg:
         return self._retry_cmd_interval_default
 
     @property
+    def retry_multicast_threshold_default(self):
+        return self._retry_multicast_threshold_default
+
+    @property
+    def retry_auto_unicast_default(self):
+        return self._retry_auto_unicast_default
+
+    @property
     def retry_params_default(self):
-        return self.btmesh_retry_params_default.to_base()
+        return self.btmesh_multicast_retry_params_default.to_base()
 
     @property
     def btmesh_retry_params_default(self):
-        return BtmeshRetryParams(
+        return self.btmesh_multicast_retry_params_default.to_btmesh()
+
+    @property
+    def btmesh_multicast_retry_params_default(self):
+        return BtmeshMulticastRetryParams(
             retry_max=self.retry_max_default,
             retry_interval=self.retry_interval_default,
             retry_interval_lpn=self.retry_interval_lpn_default,
             retry_cmd_max=self.retry_cmd_max_default,
             retry_cmd_interval=self.retry_cmd_interval_default,
+            multicast_threshold=self.retry_multicast_threshold_default,
+            auto_unicast=self.retry_auto_unicast_default,
         )
+
+    def process_api_xmls_default(self) -> List[Path]:
+        sect = self.section
+        api_xmls_text = sect.get("api_xmls_default")
+        api_xml_paths = []
+        for api_xml_text in api_xmls_text.split(CFG_OPT_INTERNAL_SEP):
+            api_xml_text = api_xml_text.strip()
+            if api_xml_text:
+                api_xml_path = Path(api_xml_text)
+                api_xml_paths.append(api_xml_path)
+        return api_xml_paths
 
 
 class BtmeshDfuAppConfCfg:
@@ -819,6 +1088,10 @@ class BtmeshDfuAppConfCfg:
         self._silabs_retry_interval_lpn_default = sect.getfloat(
             "silabs_retry_interval_lpn_default"
         )
+        # silabs_retry_multicast_threshold_default
+        self._silabs_retry_multicast_threshold_default = sect.getint(
+            "silabs_retry_multicast_threshold_default"
+        )
         # Log conf configuration
         sectname = sect.name
         logger.debug(
@@ -838,7 +1111,7 @@ class BtmeshDfuAppConfCfg:
             f"{self.reset_node_local_remove_on_retry_limit}"
         )
         logger.debug(
-            f"{sectname}:conf_retry_max_default: " f"{self.conf_retry_max_default}"
+            f"{sectname}:conf_retry_max_default: {self.conf_retry_max_default}"
         )
         logger.debug(
             f"{sectname}:conf_retry_interval_default: "
@@ -849,7 +1122,7 @@ class BtmeshDfuAppConfCfg:
             f"{self.conf_retry_interval_lpn_default}"
         )
         logger.debug(
-            f"{sectname}:silabs_retry_max_default: " f"{self.silabs_retry_max_default}"
+            f"{sectname}:silabs_retry_max_default: {self.silabs_retry_max_default}"
         )
         logger.debug(
             f"{sectname}:silabs_retry_interval_default: "
@@ -858,6 +1131,10 @@ class BtmeshDfuAppConfCfg:
         logger.debug(
             f"{sectname}:silabs_retry_interval_lpn_default: "
             f"{self.silabs_retry_interval_lpn_default}"
+        )
+        logger.debug(
+            f"{sectname}:silabs_retry_multicast_threshold_default: "
+            f"{self.silabs_retry_multicast_threshold_default}"
         )
 
     @property
@@ -900,6 +1177,10 @@ class BtmeshDfuAppConfCfg:
     def silabs_retry_interval_lpn_default(self):
         return self._silabs_retry_interval_lpn_default
 
+    @property
+    def silabs_retry_multicast_threshold_default(self):
+        return self._silabs_retry_multicast_threshold_default
+
 
 class BtmeshDfuAppFwDistClientCfg:
     def __init__(self, section: SectionProxy):
@@ -931,6 +1212,10 @@ class BtmeshDfuAppFwDistClientCfg:
         self._dist_retry_interval_lpn_default = sect.getfloat(
             "dist_retry_interval_lpn_default"
         )
+        # dist_retry_multicast_threshold_default
+        self._dist_retry_multicast_threshold_default = sect.getint(
+            "dist_retry_multicast_threshold_default"
+        )
         # delete_retry_max_default
         self._delete_retry_max_default = sect.getint("delete_retry_max_default")
         # delete_retry_interval_default
@@ -958,7 +1243,7 @@ class BtmeshDfuAppFwDistClientCfg:
         )
         logger.debug(f"{sectname}:dist_poll_int_default: {self.dist_poll_int_default}")
         logger.debug(
-            f"{sectname}:dist_retry_max_default: " f"{self.dist_retry_max_default}"
+            f"{sectname}:dist_retry_max_default: {self.dist_retry_max_default}"
         )
         logger.debug(
             f"{sectname}:dist_retry_interval_default: "
@@ -969,7 +1254,11 @@ class BtmeshDfuAppFwDistClientCfg:
             f"{self.dist_retry_interval_lpn_default}"
         )
         logger.debug(
-            f"{sectname}:delete_retry_max_default: " f"{self.delete_retry_max_default}"
+            f"{sectname}:dist_retry_multicast_threshold_default: "
+            f"{self.dist_retry_multicast_threshold_default}"
+        )
+        logger.debug(
+            f"{sectname}:delete_retry_max_default: {self.delete_retry_max_default}"
         )
         logger.debug(
             f"{sectname}:delete_retry_interval_default: "
@@ -1025,6 +1314,10 @@ class BtmeshDfuAppFwDistClientCfg:
         return self._dist_retry_interval_lpn_default
 
     @property
+    def dist_retry_multicast_threshold_default(self):
+        return self._dist_retry_multicast_threshold_default
+
+    @property
     def delete_retry_max_default(self):
         return self._delete_retry_max_default
 
@@ -1049,10 +1342,6 @@ class BtmeshDfuAppFwUpdateClientCfg:
         self._max_updating_nodes = sect.getint("max_updating_nodes")
         # dfu_chunk_size_default
         self._dfu_chunk_size_default = sect.getint("dfu_chunk_size_default")
-        # dfu_multicast_threshold_default
-        self._dfu_multicast_threshold_default = sect.getint(
-            "dfu_multicast_threshold_default"
-        )
         # dfu_retry_max_default
         self._dfu_retry_max_default = sect.getint("dfu_retry_max_default")
         # dfu_retry_interval_default
@@ -1060,6 +1349,10 @@ class BtmeshDfuAppFwUpdateClientCfg:
         # dfu_retry_interval_lpn_default
         self._dfu_retry_interval_lpn_default = sect.getfloat(
             "dfu_retry_interval_lpn_default"
+        )
+        # dfu_retry_multicast_threshold_default
+        self._dfu_retry_multicast_threshold_default = sect.getint(
+            "dfu_retry_multicast_threshold_default"
         )
 
         # Log dfu_clt configuration
@@ -1072,9 +1365,6 @@ class BtmeshDfuAppFwUpdateClientCfg:
         logger.debug(
             f"{sectname}:dfu_chunk_size_default: {self.dfu_chunk_size_default}"
         )
-        logger.debug(
-            f"{sectname}:dfu_multicast_threshold_default: {self.dfu_multicast_threshold_default}"
-        )
         logger.debug(f"{sectname}:dfu_retry_max_default: {self.dfu_retry_max_default}")
         logger.debug(
             f"{sectname}:dfu_retry_interval_default: "
@@ -1083,6 +1373,10 @@ class BtmeshDfuAppFwUpdateClientCfg:
         logger.debug(
             f"{sectname}:dfu_retry_interval_lpn_default: "
             f"{self.dfu_retry_interval_lpn_default}"
+        )
+        logger.debug(
+            f"{sectname}:dfu_retry_multicast_threshold_default: "
+            f"{self.dfu_retry_multicast_threshold_default}"
         )
 
     @property
@@ -1110,10 +1404,6 @@ class BtmeshDfuAppFwUpdateClientCfg:
         return self._dfu_chunk_size_default
 
     @property
-    def dfu_multicast_threshold_default(self):
-        return self._dfu_multicast_threshold_default
-
-    @property
     def dfu_retry_max_default(self):
         return self._dfu_retry_max_default
 
@@ -1124,6 +1414,10 @@ class BtmeshDfuAppFwUpdateClientCfg:
     @property
     def dfu_retry_interval_lpn_default(self):
         return self._dfu_retry_interval_lpn_default
+
+    @property
+    def dfu_retry_multicast_threshold_default(self):
+        return self._dfu_retry_multicast_threshold_default
 
 
 class BtmeshDfuAppBlobTransferClientCfg:
@@ -1209,6 +1503,62 @@ class BtmeshDfuAppNetworkCfg:
         # prov_node_name
         self._prov_node_name = sect.get("prov_node_name")
         btmesh.util.validate_name(self.prov_node_name)
+        # sar_tx_custom_local_params_enable
+        self._sar_tx_custom_local_params_enable = sect.getboolean(
+            "sar_tx_custom_local_params_enable"
+        )
+        # sar_tx_segment_interval_step_default
+        self._sar_tx_segment_interval_step_default = sect.getint(
+            "sar_tx_segment_interval_step_default"
+        )
+        # sar_tx_unicast_retrans_count_default
+        self._sar_tx_unicast_retrans_count_default = sect.getint(
+            "sar_tx_unicast_retrans_count_default"
+        )
+        # sar_tx_unicast_retrans_wo_progress_count_default
+        self._sar_tx_unicast_retrans_wo_progress_count_default = sect.getint(
+            "sar_tx_unicast_retrans_wo_progress_count_default"
+        )
+        # sar_tx_unicast_retrans_interval_step_default
+        self._sar_tx_unicast_retrans_interval_step_default = sect.getint(
+            "sar_tx_unicast_retrans_interval_step_default"
+        )
+        # sar_tx_unicast_retrans_interval_increment_default
+        self._sar_tx_unicast_retrans_interval_increment_default = sect.getint(
+            "sar_tx_unicast_retrans_interval_increment_default"
+        )
+        # sar_tx_multicast_retrans_count_default
+        self._sar_tx_multicast_retrans_count_default = sect.getint(
+            "sar_tx_multicast_retrans_count_default"
+        )
+        # sar_tx_multicast_retrans_interval_step_default
+        self._sar_tx_multicast_retrans_interval_step_default = sect.getint(
+            "sar_tx_multicast_retrans_interval_step_default"
+        )
+        # sar_rx_custom_local_params_enable
+        self._sar_rx_custom_local_params_enable = sect.getboolean(
+            "sar_rx_custom_local_params_enable"
+        )
+        # sar_rx_segments_threshold_default
+        self._sar_rx_segments_threshold_default = sect.getint(
+            "sar_rx_segments_threshold_default"
+        )
+        # sar_rx_ack_delay_increment_default
+        self._sar_rx_ack_delay_increment_default = sect.getint(
+            "sar_rx_ack_delay_increment_default"
+        )
+        # sar_rx_discard_timeout_default
+        self._sar_rx_discard_timeout_default = sect.getint(
+            "sar_rx_discard_timeout_default"
+        )
+        # sar_rx_segment_interval_step_default
+        self._sar_rx_segment_interval_step_default = sect.getint(
+            "sar_rx_segment_interval_step_default"
+        )
+        # sar_rx_ack_retrans_count_default
+        self._sar_rx_ack_retrans_count_default = sect.getint(
+            "sar_rx_ack_retrans_count_default"
+        )
         # Log network configuration
         sectname = sect.name
         logger.debug(f"{sectname}:random_netkey: {self.random_netkey}")
@@ -1218,30 +1568,142 @@ class BtmeshDfuAppNetworkCfg:
             logger.debug(f"{sectname}:appkey{idx}: {appkey.hex().upper()}")
         logger.debug(f"{sectname}:appkey_cnt: {self.appkey_cnt}")
         logger.debug(f"{sectname}:prov_node_name: {self.prov_node_name}")
+        logger.debug(
+            f"{sectname}:sar_tx_custom_local_params_enable: "
+            f"{self.sar_tx_custom_local_params_enable}"
+        )
+        logger.debug(
+            f"{sectname}:sar_tx_segment_interval_step_default: "
+            f"{self.sar_tx_segment_interval_step_default}"
+        )
+        logger.debug(
+            f"{sectname}:sar_tx_unicast_retrans_count_default: "
+            f"{self.sar_tx_unicast_retrans_count_default}"
+        )
+        logger.debug(
+            f"{sectname}:sar_tx_unicast_retrans_wo_progress_count_default: "
+            f"{self.sar_tx_unicast_retrans_wo_progress_count_default}"
+        )
+        logger.debug(
+            f"{sectname}:sar_tx_unicast_retrans_interval_step_default: "
+            f"{self.sar_tx_unicast_retrans_interval_step_default}"
+        )
+        logger.debug(
+            f"{sectname}:sar_tx_unicast_retrans_interval_increment_default: "
+            f"{self.sar_tx_unicast_retrans_interval_increment_default}"
+        )
+        logger.debug(
+            f"{sectname}:sar_tx_multicast_retrans_count_default: "
+            f"{self.sar_tx_multicast_retrans_count_default}"
+        )
+        logger.debug(
+            f"{sectname}:sar_tx_multicast_retrans_interval_step_default: "
+            f"{self.sar_tx_multicast_retrans_interval_step_default}"
+        )
+        logger.debug(
+            f"{sectname}:sar_rx_custom_local_params_enable: "
+            f"{self.sar_rx_custom_local_params_enable}"
+        )
+        logger.debug(
+            f"{sectname}:sar_rx_segments_threshold_default: "
+            f"{self.sar_rx_segments_threshold_default}"
+        )
+        logger.debug(
+            f"{sectname}:sar_rx_ack_delay_increment_default: "
+            f"{self.sar_rx_ack_delay_increment_default}"
+        )
+        logger.debug(
+            f"{sectname}:sar_rx_discard_timeout_default: "
+            f"{self.sar_rx_discard_timeout_default}"
+        )
+        logger.debug(
+            f"{sectname}:sar_rx_segment_interval_step_default: "
+            f"{self.sar_rx_segment_interval_step_default}"
+        )
+        logger.debug(
+            f"{sectname}:sar_rx_ack_retrans_count_default: "
+            f"{self.sar_rx_ack_retrans_count_default}"
+        )
 
     @property
-    def random_netkey(self):
+    def random_netkey(self) -> bool:
         return self._random_netkey
 
     @property
-    def netkey(self):
+    def netkey(self) -> bytes:
         return self._netkey
 
     @property
-    def random_appkey(self):
+    def random_appkey(self) -> bool:
         return self._random_appkey
 
     @property
-    def appkey_cnt(self):
+    def appkey_cnt(self) -> int:
         return self._appkey_cnt
 
     @property
-    def appkeys(self):
+    def appkeys(self) -> Iterable[bytes]:
         return self._appkeys
 
     @property
-    def prov_node_name(self):
+    def prov_node_name(self) -> str:
         return self._prov_node_name
+
+    @property
+    def sar_tx_custom_local_params_enable(self) -> bool:
+        return self._sar_tx_custom_local_params_enable
+
+    @property
+    def sar_tx_segment_interval_step_default(self) -> int:
+        return self._sar_tx_segment_interval_step_default
+
+    @property
+    def sar_tx_unicast_retrans_count_default(self) -> int:
+        return self._sar_tx_unicast_retrans_count_default
+
+    @property
+    def sar_tx_unicast_retrans_wo_progress_count_default(self) -> int:
+        return self._sar_tx_unicast_retrans_wo_progress_count_default
+
+    @property
+    def sar_tx_unicast_retrans_interval_step_default(self) -> int:
+        return self._sar_tx_unicast_retrans_interval_step_default
+
+    @property
+    def sar_tx_unicast_retrans_interval_increment_default(self) -> int:
+        return self._sar_tx_unicast_retrans_interval_increment_default
+
+    @property
+    def sar_tx_multicast_retrans_count_default(self) -> int:
+        return self._sar_tx_multicast_retrans_count_default
+
+    @property
+    def sar_tx_multicast_retrans_interval_step_default(self) -> int:
+        return self._sar_tx_multicast_retrans_interval_step_default
+
+    @property
+    def sar_rx_custom_local_params_enable(self) -> bool:
+        return self._sar_rx_custom_local_params_enable
+
+    @property
+    def sar_rx_segments_threshold_default(self) -> int:
+        return self._sar_rx_segments_threshold_default
+
+    @property
+    def sar_rx_ack_delay_increment_default(self) -> int:
+        return self._sar_rx_ack_delay_increment_default
+
+    @property
+    def sar_rx_discard_timeout_default(self) -> int:
+        return self._sar_rx_discard_timeout_default
+
+    @property
+    def sar_rx_segment_interval_step_default(self) -> int:
+        return self._sar_rx_segment_interval_step_default
+
+    @property
+    def sar_rx_ack_retrans_count_default(self) -> int:
+        return self._sar_rx_ack_retrans_count_default
 
 
 class BtmeshDfuAppPersistenceCfg:
@@ -1273,6 +1735,116 @@ class BtmeshDfuAppPersistenceCfg:
     @property
     def backup_on_failed_load(self):
         return self._backup_on_failed_load
+
+
+class BtmeshDfuAppProxyCfg:
+    def __init__(self, section: SectionProxy):
+        self.section = section
+        sect = section
+        # scan_timeout_default
+        self._scan_timeout_default = sect.getfloat("scan_timeout_default")
+        # conn_open_timeout_ms_default
+        self._conn_open_timeout_ms_default = sect.getfloat(
+            "conn_open_timeout_ms_default"
+        )
+        # conn_min_interval_ms_default
+        self._conn_min_interval_ms_default = sect.getfloat(
+            "conn_min_interval_ms_default"
+        )
+        # conn_max_interval_ms_default
+        self._conn_max_interval_ms_default = sect.getfloat(
+            "conn_max_interval_ms_default"
+        )
+        # conn_latency_default
+        self._conn_latency_default = sect.getint("conn_latency_default")
+        # conn_timeout_ms_default
+        self._conn_timeout_ms_default = sect.getfloat("conn_timeout_ms_default")
+        # conn_min_ce_length_ms_default
+        self._conn_min_ce_length_ms_default = sect.getfloat(
+            "conn_min_ce_length_ms_default"
+        )
+        # conn_max_ce_length_ms_default
+        self._conn_max_ce_length_ms_default = sect.getfloat(
+            "conn_max_ce_length_ms_default"
+        )
+        # Log persistence configuration
+        sectname = sect.name
+        logger.debug(f"{sectname}:scan_timeout_default: {self.scan_timeout_default}")
+        logger.debug(
+            f"{sectname}:conn_open_timeout_ms_default: "
+            f"{self.conn_open_timeout_ms_default}"
+        )
+        logger.debug(
+            f"{sectname}:conn_min_interval_ms_default: "
+            f"{self.conn_min_interval_ms_default}"
+        )
+        logger.debug(
+            f"{sectname}:conn_max_interval_ms_default: "
+            f"{self.conn_max_interval_ms_default}"
+        )
+        logger.debug(f"{sectname}:conn_latency_default: {self.conn_latency_default}")
+        logger.debug(
+            f"{sectname}:conn_timeout_ms_default: {self.conn_timeout_ms_default}"
+        )
+        logger.debug(
+            f"{sectname}:conn_min_ce_length_ms_default: "
+            f"{self.conn_min_ce_length_ms_default}"
+        )
+        logger.debug(
+            f"{sectname}:conn_max_ce_length_ms_default: "
+            f"{self.conn_max_ce_length_ms_default}"
+        )
+        btmesh.util.validate_conn_params_range(
+            min_interval_ms=self.conn_min_interval_ms_default,
+            max_interval_ms=self.conn_max_interval_ms_default,
+            latency=self.conn_latency_default,
+            timeout_ms=self.conn_timeout_ms_default,
+            min_ce_length_ms=self.conn_min_ce_length_ms_default,
+            max_ce_length_ms=self.conn_max_ce_length_ms_default,
+        )
+
+    @property
+    def scan_timeout_default(self) -> float:
+        return self._scan_timeout_default
+
+    @property
+    def conn_open_timeout_ms_default(self) -> float:
+        return self._conn_open_timeout_ms_default
+
+    @property
+    def conn_min_interval_ms_default(self) -> float:
+        return self._conn_min_interval_ms_default
+
+    @property
+    def conn_max_interval_ms_default(self) -> float:
+        return self._conn_max_interval_ms_default
+
+    @property
+    def conn_latency_default(self) -> int:
+        return self._conn_latency_default
+
+    @property
+    def conn_timeout_ms_default(self) -> float:
+        return self._conn_timeout_ms_default
+
+    @property
+    def conn_min_ce_length_ms_default(self) -> float:
+        return self._conn_min_ce_length_ms_default
+
+    @property
+    def conn_max_ce_length_ms_default(self) -> float:
+        return self._conn_max_ce_length_ms_default
+
+    @property
+    def conn_params_range(self) -> ConnectionParamsRange:
+        return ConnectionParamsRange(
+            min_interval_ms=self.conn_min_interval_ms_default,
+            max_interval_ms=self.conn_max_interval_ms_default,
+            latency=self.conn_latency_default,
+            timeout_ms=self.conn_timeout_ms_default,
+            min_ce_length_ms=self.conn_min_ce_length_ms_default,
+            max_ce_length_ms=self.conn_max_ce_length_ms_default,
+        )
 
 
 class BtmeshDfuAppResetCfg:
@@ -1316,6 +1888,11 @@ class BtmeshDfuAppUICfg:
                 f"Invalid {sect.name}:{opt_name} configuration option. "
                 f"Valid formats are: {valid_formats}."
             )
+        # node_format
+        opt_name = "node_format"
+        node_format = sect[opt_name]
+        self.validate_node_format(sect, opt_name, node_format)
+        self._node_format = node_format
         # elem_format
         opt_name = "elem_format"
         elem_format = sect[opt_name]
@@ -1327,7 +1904,23 @@ class BtmeshDfuAppUICfg:
         logger.debug(f"{sectname}:table_width_default: {self.table_width_default}")
         logger.debug(f"{sectname}:fwid_format: {self.fwid_format}")
         logger.debug(f"{sectname}:metadata_format: {self.metadata_format}")
+        logger.debug(f"{sectname}:node_format: {self.node_format}")
         logger.debug(f"{sectname}:elem_format: {self.elem_format}")
+
+    def validate_node_format(self, sect: SectionProxy, opt_name: str, node_format: str):
+        # Test the format string with dummy data to make sure that valid
+        # node_format string was provided.
+        try:
+            node_format.format(
+                name="NodeName",
+                uuid=bytes.fromhex("0123456789ABCDEFFEDCBA9876543210"),
+                prim_addr=0x2000,
+            )
+        except Exception as e:
+            raise ValueError(
+                f"Invalid {sect.name}:{opt_name} configuration option. "
+                f"The format string is invalid."
+            ) from e
 
     def validate_elem_format(self, sect: SectionProxy, opt_name: str, elem_format: str):
         # Test the format string with dummy data to make sure that valid
@@ -1359,6 +1952,10 @@ class BtmeshDfuAppUICfg:
         return self._metadata_format
 
     @property
+    def node_format(self) -> str:
+        return self._node_format
+
+    @property
     def elem_format(self) -> str:
         return self._elem_format
 
@@ -1381,6 +1978,7 @@ class BtmeshDfuAppCfg:
         self.mbt_clt = BtmeshDfuAppBlobTransferClientCfg(self.cp["mbt_clt"])
         self.network = BtmeshDfuAppNetworkCfg(self.cp["network"])
         self.persistence = BtmeshDfuAppPersistenceCfg(self.cp["persistence"])
+        self.proxy = BtmeshDfuAppProxyCfg(self.cp["proxy"])
         self.reset = BtmeshDfuAppResetCfg(self.cp["reset"])
         self.ui = BtmeshDfuAppUICfg(self.cp["ui"])
 

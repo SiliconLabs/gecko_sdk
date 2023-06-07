@@ -77,7 +77,7 @@ void CoapSecure::PrintPayload(otMessage *aMessage)
 
         while (length > 0)
         {
-            bytesToPrint = (length < sizeof(buf)) ? length : sizeof(buf);
+            bytesToPrint = Min(length, static_cast<uint16_t>(sizeof(buf)));
             otMessageRead(aMessage, otMessageGetOffset(aMessage) + bytesPrinted, buf, bytesToPrint);
 
             OutputBytes(buf, static_cast<uint8_t>(bytesToPrint));
@@ -200,20 +200,11 @@ template <> otError CoapSecure::Process<Cmd("stop")>(Arg aArgs[])
     return OT_ERROR_NONE;
 }
 
-template <> otError CoapSecure::Process<Cmd("get")>(Arg aArgs[])
-{
-    return ProcessRequest(aArgs, OT_COAP_CODE_GET);
-}
+template <> otError CoapSecure::Process<Cmd("get")>(Arg aArgs[]) { return ProcessRequest(aArgs, OT_COAP_CODE_GET); }
 
-template <> otError CoapSecure::Process<Cmd("post")>(Arg aArgs[])
-{
-    return ProcessRequest(aArgs, OT_COAP_CODE_POST);
-}
+template <> otError CoapSecure::Process<Cmd("post")>(Arg aArgs[]) { return ProcessRequest(aArgs, OT_COAP_CODE_POST); }
 
-template <> otError CoapSecure::Process<Cmd("put")>(Arg aArgs[])
-{
-    return ProcessRequest(aArgs, OT_COAP_CODE_PUT);
-}
+template <> otError CoapSecure::Process<Cmd("put")>(Arg aArgs[]) { return ProcessRequest(aArgs, OT_COAP_CODE_PUT); }
 
 template <> otError CoapSecure::Process<Cmd("delete")>(Arg aArgs[])
 {
@@ -694,7 +685,7 @@ exit:
 #endif // CLI_COAP_SECURE_USE_COAP_DEFAULT_HANDLER
 
 #if OPENTHREAD_CONFIG_COAP_BLOCKWISE_TRANSFER_ENABLE
-otError CoapSecure::BlockwiseReceiveHook(void *         aContext,
+otError CoapSecure::BlockwiseReceiveHook(void          *aContext,
                                          const uint8_t *aBlock,
                                          uint32_t       aPosition,
                                          uint16_t       aBlockLength,
@@ -724,11 +715,11 @@ otError CoapSecure::BlockwiseReceiveHook(const uint8_t *aBlock,
     return OT_ERROR_NONE;
 }
 
-otError CoapSecure::BlockwiseTransmitHook(void *    aContext,
-                                          uint8_t * aBlock,
+otError CoapSecure::BlockwiseTransmitHook(void     *aContext,
+                                          uint8_t  *aBlock,
                                           uint32_t  aPosition,
                                           uint16_t *aBlockLength,
-                                          bool *    aMore)
+                                          bool     *aMore)
 {
     return static_cast<CoapSecure *>(aContext)->BlockwiseTransmitHook(aBlock, aPosition, aBlockLength, aMore);
 }

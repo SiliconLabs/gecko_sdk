@@ -1,0 +1,42 @@
+id: se_cpc_primary
+package: platform
+label: Secure Engine Co-Processor Communcation Primary
+description: >-
+  Provides primary support for Secure Engine mailbox communication over CPC
+category: Platform|Security|Secure Engine CPC
+quality: evaluation
+root_path: platform/security/sl_component/sl_secure_engine_cpc
+
+include:
+  - path: inc/primary
+    file_list:
+      - path: sl_se_cpc_primary.h
+source:
+  - path: src/sl_se_cpc_primary.c
+
+provides:
+  - name: se_cpc_primary
+
+  # We don't want to unconditionally provide this, since that could lead to
+  # conflicts for non-cpc-se apps requiring this. We only provide this for the
+  # convenience of not having to repeat conditions (see psa_driver_source).
+  - name: device_has_semailbox
+    condition: [se_cpc_primary]
+
+  # We don't want to unconditionally provide this, since that could lead to
+  # conflicts for non-cpc-se apps requiring this. We provide this here since it
+  # is a requirement of the emlib_se component.
+  - name: device_series_2
+    condition: [se_cpc_primary]
+
+requires:
+  - name: native
+  - name: se_cpc_common
+
+define:
+  # We do not currently support Mbed TLS alt-plugin acceleration with SEd.
+  - name: NO_CRYPTO_ACCELERATION
+
+template_contribution:
+  - name: component_catalog
+    value: se_cpc_primary

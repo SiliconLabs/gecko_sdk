@@ -4,46 +4,6 @@ from pyradioconfig.calculator_model_framework.Utils.CustomExceptions import Calc
 from pycalcmodel.core.variable import ModelVariableFormat, CreateModelVariableEnum
 
 class calc_synth_viper(Calc_Synth_Bobcat):
-    def calc_lo_side_regs(self, model):
-        """
-        calculate LOSIDE register in synth and matching one in modem
-
-        Args:
-            model (ModelRoot) : Data model to read and write variables from
-        """
-
-        model.vars.lo_injection_side.value = model.vars.lo_injection_side.var_enum.HIGH_SIDE # default to high-side
-        lo_injection_side = model.vars.lo_injection_side.value
-
-        if lo_injection_side == model.vars.lo_injection_side.var_enum.HIGH_SIDE:
-            loside = 1
-        else:
-            loside = 0
-
-        #Write the registers
-        self._reg_write(model.vars.SYNTH_IFFREQ_LOSIDE, loside)
-
-    def calc_digmixctrl_regs(self, model):
-        """
-        calculate LOSIDE register in synth and matching one in modem
-
-        Args:
-            model (ModelRoot) : Data model to read and write variables from
-        """
-        fefilt_selected = model.vars.fefilt_selected.value
-        lo_injection_side = model.vars.lo_injection_side.value
-
-        if lo_injection_side == model.vars.lo_injection_side.var_enum.HIGH_SIDE:
-            digiqswapen = 1
-            mixerconj = 0
-        else:
-            digiqswapen = 0
-            mixerconj = 1
-
-        # Write the registers
-        self._reg_write_by_name_concat(model, fefilt_selected, 'DIGMIXCTRL_DIGIQSWAPEN', digiqswapen)
-        self._reg_write_by_name_concat(model, fefilt_selected, 'DIGMIXCTRL_MIXERCONJ', mixerconj)
-
     def calc_rx_mode_reg(self, model):
 
         rx_mode = model.vars.synth_rx_mode.value
@@ -115,3 +75,16 @@ class calc_synth_viper(Calc_Synth_Bobcat):
 
         # Override on Viper
         self._reg_write(model.vars.RAC_RX_SYPFDCHPLPENRX,             rx_mode_settings['RAC.RX.SYPFDCHPLPENRX'][ind])
+
+    def calc_pga_lna_bw_reg(self, model):
+
+        # Removed LNABWADJ and LNABWADJBOOST (IPMCUSRW-1189)
+        pgabwmode = 1
+        self._reg_write(model.vars.RAC_PGACTRL_PGABWMODE, pgabwmode)
+
+    def calc_fasthopping_regs(self, model):
+
+        #Disable by default, probably remove these for RAIL control at some point
+        self._reg_write(model.vars.MODEM_PHDMODCTRL_FASTHOPPINGEN, 0)
+        self._reg_write(model.vars.MODEM_CMD_HOPPINGSTART, 0)
+        self._reg_write(model.vars.MODEM_DIGMIXCTRL_FWHOPPING, 0)

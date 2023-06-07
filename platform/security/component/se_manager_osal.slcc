@@ -17,11 +17,17 @@ include:
         unless: [cmsis_rtos2]
       - path: sli_se_manager_osal_cmsis_rtos2.h
         condition: [cmsis_rtos2]
+  - path: inc
+    file_list:
+      - path: sli_se_manager_features.h
+    unless: [se_manager]
+
+conflicts:
+  - name: native
 
 requires:
-  - name: device
-  - name: status
   - name: se_manager_config
+  - name: emlib_core
 
 provides:
   - name: se_manager_osal

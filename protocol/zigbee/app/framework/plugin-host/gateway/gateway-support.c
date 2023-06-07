@@ -27,9 +27,7 @@
 #include "app/util/serial/sl_zigbee_command_interpreter.h"
 #include "app/util/serial/linux-serial.h"
 #include "app/framework/plugin-host/gateway/gateway-support.h"
-#ifdef UC_BUILD
 #include "gateway-config.h"
-#endif // UC_BUILD
 
 #include "app/framework/plugin-host/file-descriptor-dispatch/file-descriptor-dispatch.h"
 
@@ -117,27 +115,8 @@ bool emberAfMainStartCallback(int* returnCode,
 
   emberSerialSetPrompt(cliPrompt);
 
-#ifndef UC_BUILD
-  emberSerialCommandCompletionInit(emberCommandTable);
-#endif
   return false;
 }
-
-#ifndef UC_BUILD
-static void debugPrintYieldDuration(uint32_t msToNextEvent, uint8_t eventIndex)
-{
-// Temporarily stub to enable build
-  if (msToNextEvent == 0xFFFFFFFFUL) {
-    debugPrint("Yield forever (or until FD is ready)");
-  } else if (msToNextEvent > MAX_READ_TIMEOUT_MS) {
-    debugPrint("Yield %d ms until MAX_READ_TIMEOUT_MS", msToNextEvent);
-  } else {
-    debugPrint("Yield %d ms until %s event ",
-               msToNextEvent,
-               emberAfGetEventString(eventIndex));
-  }
-}
-#endif // UC_BUILD
 
 void emberAfPluginGatewayTickCallback(void)
 {
@@ -148,11 +127,7 @@ void emberAfPluginGatewayTickCallback(void)
   emberSerialSendReadyToRead(APP_SERIAL);
 #endif
 
-  uint8_t index;
-  uint32_t msToNextEvent = emberAfMsToNextEventExtended(0xFFFFFFFFUL, &index);
-#ifndef UC_BUILD
-  debugPrintYieldDuration(msToNextEvent, index);
-#endif
+  uint32_t msToNextEvent = emberAfMsToNextEvent(0xFFFFFFFFUL);
   msToNextEvent = (msToNextEvent > MAX_READ_TIMEOUT_MS
                    ? MAX_READ_TIMEOUT_MS
                    : msToNextEvent);
@@ -160,7 +135,7 @@ void emberAfPluginGatewayTickCallback(void)
   emberAfPluginFileDescriptorDispatchWaitForEvents(msToNextEvent);
 }
 
-void emberAfPluginGatewayInitCallback(SLXU_INIT_ARG)
+void emberAfPluginGatewayInitCallback(uint8_t init_level)
 {
   int fdList[MAX_FDS];
   int count = 0;

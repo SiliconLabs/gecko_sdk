@@ -1,0 +1,40 @@
+id: "sl_ftp"
+label: "File Transfer Protocol"
+package: "wisun"
+description: > 
+  FTP (File Transfer Protocol) and TFTP (Trivial File Transfer Protocol) implementation. 
+  FTP Client provides solution to file exchange between client and any remote host over TCP.
+  TFTP Client provides solution to file exchange between client and any remote host over UDP.
+category: "Wi-SUN|Wi-SUN Services"
+quality: "production"
+root_path: "app/wisun/component/ftp"
+provides:
+  - name: sl_ftp
+
+source:
+  - path: "sl_ftp.c"
+  - path: "sl_ftp_clnt.c"
+  - path: "sl_tftp_clnt.c"
+
+include:
+  - path: "."
+    file_list:
+    - "path": "sl_ftp.h"
+    - "path": "sl_ftp_clnt.h"
+    - "path": "sl_tftp_clnt.h"
+config_file:
+  - path: "config/sl_ftp_config.h"
+
+
+#-------------- Template Contribution ----------------
+template_contribution:
+  - name: "event_handler"
+    value:
+      event: "internal_app_init"
+      include: "sl_ftp.h"
+      handler: "sl_ftp_init"
+  
+
+#---------------- Component Catalog ------------------
+  - name: component_catalog
+    value: ftp

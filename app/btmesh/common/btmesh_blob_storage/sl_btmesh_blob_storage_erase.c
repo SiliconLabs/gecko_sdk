@@ -33,7 +33,7 @@
 #include "sl_bgapi.h"
 
 #include "app_assert.h"
-#include "sl_simple_timer.h"
+#include "app_timer.h"
 
 #include "sl_btmesh_blob_storage.h"
 #include "sl_btmesh_blob_storage_config.h"
@@ -44,7 +44,7 @@
 #include "app_btmesh_util.h"
 
 struct {
-  struct sl_simple_timer timer; ///< Timer to separate two erase steps (chunk)
+  struct app_timer timer; ///< Timer to separate two erase steps (chunk)
   BootloaderEraseStatus_t status; ///< Erase status for chunked erase
   uint32_t slot_id; ///< Currently erasing slot's identifier
   int32_t error_code; ///< Bootloader error code
@@ -66,7 +66,7 @@ static void blob_storage_start_delete_separation_timer(void);
 /***************************************************************************//**
  * Erase separation time elapsed callback
  ******************************************************************************/
-static void blob_storage_on_delete_separation_time_elapsed(sl_simple_timer_t *timer,
+static void blob_storage_on_delete_separation_time_elapsed(app_timer_t *timer,
                                                            void *data);
 
 /***************************************************************************//**
@@ -359,16 +359,16 @@ static void blob_storage_start_delete_separation_timer(void)
     blob_storage_on_delete_separation_time_elapsed(&blob_storage_erase.timer, NULL);
   } else {
     sl_status_t sc;
-    sc = sl_simple_timer_start(&blob_storage_erase.timer,
-                               blob_storage_erase.separation_time_ms,
-                               blob_storage_on_delete_separation_time_elapsed,
-                               NULL,
-                               false);
+    sc = app_timer_start(&blob_storage_erase.timer,
+                         blob_storage_erase.separation_time_ms,
+                         blob_storage_on_delete_separation_time_elapsed,
+                         NULL,
+                         false);
     app_assert_status(sc);
   }
 }
 
-static void blob_storage_on_delete_separation_time_elapsed(sl_simple_timer_t *timer,
+static void blob_storage_on_delete_separation_time_elapsed(app_timer_t *timer,
                                                            void *data)
 {
   (void) timer;

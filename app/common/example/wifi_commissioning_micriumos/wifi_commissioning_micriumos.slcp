@@ -82,9 +82,6 @@ configuration:
   - name: SL_POWER_MANAGER_CONFIG_VOLTAGE_SCALING_FAST_WAKEUP
     value: 1
     condition: [power_manager]
-  - name: SL_POWER_MANAGER_LOWEST_EM_ALLOWED
-    value: 2
-    condition: [power_manager] 
 define:
   - name: "DEBUG_EFM"
 tag:

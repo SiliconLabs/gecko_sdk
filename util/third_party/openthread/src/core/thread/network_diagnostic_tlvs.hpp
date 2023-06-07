@@ -36,6 +36,7 @@
 
 #include "openthread-core-config.h"
 
+#include <openthread/netdiag.h>
 #include <openthread/thread.h>
 
 #include "common/clearable.hpp"
@@ -44,6 +45,7 @@
 #include "common/tlvs.hpp"
 #include "net/ip6_address.hpp"
 #include "radio/radio.hpp"
+#include "thread/link_quality.hpp"
 #include "thread/mle_tlvs.hpp"
 #include "thread/mle_types.hpp"
 
@@ -58,7 +60,7 @@ using ot::Encoding::BigEndian::HostSwap32;
  *
  */
 OT_TOOL_PACKED_BEGIN
-class NetworkDiagnosticTlv : public ot::Tlv
+class Tlv : public ot::Tlv
 {
 public:
     /**
@@ -67,23 +69,52 @@ public:
      */
     enum Type : uint8_t
     {
-        kExtMacAddress   = OT_NETWORK_DIAGNOSTIC_TLV_EXT_ADDRESS,
-        kAddress16       = OT_NETWORK_DIAGNOSTIC_TLV_SHORT_ADDRESS,
-        kMode            = OT_NETWORK_DIAGNOSTIC_TLV_MODE,
-        kTimeout         = OT_NETWORK_DIAGNOSTIC_TLV_TIMEOUT,
-        kConnectivity    = OT_NETWORK_DIAGNOSTIC_TLV_CONNECTIVITY,
-        kRoute           = OT_NETWORK_DIAGNOSTIC_TLV_ROUTE,
-        kLeaderData      = OT_NETWORK_DIAGNOSTIC_TLV_LEADER_DATA,
-        kNetworkData     = OT_NETWORK_DIAGNOSTIC_TLV_NETWORK_DATA,
-        kIp6AddressList  = OT_NETWORK_DIAGNOSTIC_TLV_IP6_ADDR_LIST,
-        kMacCounters     = OT_NETWORK_DIAGNOSTIC_TLV_MAC_COUNTERS,
-        kBatteryLevel    = OT_NETWORK_DIAGNOSTIC_TLV_BATTERY_LEVEL,
-        kSupplyVoltage   = OT_NETWORK_DIAGNOSTIC_TLV_SUPPLY_VOLTAGE,
-        kChildTable      = OT_NETWORK_DIAGNOSTIC_TLV_CHILD_TABLE,
-        kChannelPages    = OT_NETWORK_DIAGNOSTIC_TLV_CHANNEL_PAGES,
-        kTypeList        = OT_NETWORK_DIAGNOSTIC_TLV_TYPE_LIST,
-        kMaxChildTimeout = OT_NETWORK_DIAGNOSTIC_TLV_MAX_CHILD_TIMEOUT,
+        kExtMacAddress      = OT_NETWORK_DIAGNOSTIC_TLV_EXT_ADDRESS,
+        kAddress16          = OT_NETWORK_DIAGNOSTIC_TLV_SHORT_ADDRESS,
+        kMode               = OT_NETWORK_DIAGNOSTIC_TLV_MODE,
+        kTimeout            = OT_NETWORK_DIAGNOSTIC_TLV_TIMEOUT,
+        kConnectivity       = OT_NETWORK_DIAGNOSTIC_TLV_CONNECTIVITY,
+        kRoute              = OT_NETWORK_DIAGNOSTIC_TLV_ROUTE,
+        kLeaderData         = OT_NETWORK_DIAGNOSTIC_TLV_LEADER_DATA,
+        kNetworkData        = OT_NETWORK_DIAGNOSTIC_TLV_NETWORK_DATA,
+        kIp6AddressList     = OT_NETWORK_DIAGNOSTIC_TLV_IP6_ADDR_LIST,
+        kMacCounters        = OT_NETWORK_DIAGNOSTIC_TLV_MAC_COUNTERS,
+        kBatteryLevel       = OT_NETWORK_DIAGNOSTIC_TLV_BATTERY_LEVEL,
+        kSupplyVoltage      = OT_NETWORK_DIAGNOSTIC_TLV_SUPPLY_VOLTAGE,
+        kChildTable         = OT_NETWORK_DIAGNOSTIC_TLV_CHILD_TABLE,
+        kChannelPages       = OT_NETWORK_DIAGNOSTIC_TLV_CHANNEL_PAGES,
+        kTypeList           = OT_NETWORK_DIAGNOSTIC_TLV_TYPE_LIST,
+        kMaxChildTimeout    = OT_NETWORK_DIAGNOSTIC_TLV_MAX_CHILD_TIMEOUT,
+        kVersion            = OT_NETWORK_DIAGNOSTIC_TLV_VERSION,
+        kVendorName         = OT_NETWORK_DIAGNOSTIC_TLV_VENDOR_NAME,
+        kVendorModel        = OT_NETWORK_DIAGNOSTIC_TLV_VENDOR_MODEL,
+        kVendorSwVersion    = OT_NETWORK_DIAGNOSTIC_TLV_VENDOR_SW_VERSION,
+        kThreadStackVersion = OT_NETWORK_DIAGNOSTIC_TLV_THREAD_STACK_VERSION,
     };
+
+    /**
+     * Maximum length of Vendor Name TLV.
+     *
+     */
+    static constexpr uint8_t kMaxVendorNameLength = OT_NETWORK_DIAGNOSTIC_MAX_VENDOR_NAME_TLV_LENGTH;
+
+    /**
+     * Maximum length of Vendor Model TLV.
+     *
+     */
+    static constexpr uint8_t kMaxVendorModelLength = OT_NETWORK_DIAGNOSTIC_MAX_VENDOR_MODEL_TLV_LENGTH;
+
+    /**
+     * Maximum length of Vendor SW Version TLV.
+     *
+     */
+    static constexpr uint8_t kMaxVendorSwVersionLength = OT_NETWORK_DIAGNOSTIC_MAX_VENDOR_SW_VERSION_TLV_LENGTH;
+
+    /**
+     * Maximum length of Vendor SW Version TLV.
+     *
+     */
+    static constexpr uint8_t kMaxThreadStackVersionLength = OT_NETWORK_DIAGNOSTIC_MAX_THREAD_STACK_VERSION_TLV_LENGTH;
 
     /**
      * This method returns the Type value.
@@ -107,61 +138,91 @@ public:
  * This class defines Extended MAC Address TLV constants and types.
  *
  */
-typedef SimpleTlvInfo<NetworkDiagnosticTlv::kExtMacAddress, Mac::ExtAddress> ExtMacAddressTlv;
+typedef SimpleTlvInfo<Tlv::kExtMacAddress, Mac::ExtAddress> ExtMacAddressTlv;
 
 /**
  * This class defines Address16 TLV constants and types.
  *
  */
-typedef UintTlvInfo<NetworkDiagnosticTlv::kAddress16, uint16_t> Address16Tlv;
+typedef UintTlvInfo<Tlv::kAddress16, uint16_t> Address16Tlv;
 
 /**
  * This class defines Mode TLV constants and types.
  *
  */
-typedef UintTlvInfo<NetworkDiagnosticTlv::kMode, uint8_t> ModeTlv;
+typedef UintTlvInfo<Tlv::kMode, uint8_t> ModeTlv;
 
 /**
  * This class defines Timeout TLV constants and types.
  *
  */
-typedef UintTlvInfo<NetworkDiagnosticTlv::kTimeout, uint32_t> TimeoutTlv;
+typedef UintTlvInfo<Tlv::kTimeout, uint32_t> TimeoutTlv;
 
 /**
  * This class defines Network Data TLV constants and types.
  *
  */
-typedef TlvInfo<NetworkDiagnosticTlv::kNetworkData> NetworkDataTlv;
+typedef TlvInfo<Tlv::kNetworkData> NetworkDataTlv;
 
 /**
  * This class defines IPv6 Address List TLV constants and types.
  *
  */
-typedef TlvInfo<NetworkDiagnosticTlv::kIp6AddressList> Ip6AddressListTlv;
+typedef TlvInfo<Tlv::kIp6AddressList> Ip6AddressListTlv;
 
 /**
  * This class defines Battery Level TLV constants and types.
  *
  */
-typedef UintTlvInfo<NetworkDiagnosticTlv::kBatteryLevel, uint8_t> BatteryLevelTlv;
+typedef UintTlvInfo<Tlv::kBatteryLevel, uint8_t> BatteryLevelTlv;
 
 /**
  * This class defines Supply Voltage TLV constants and types.
  *
  */
-typedef UintTlvInfo<NetworkDiagnosticTlv::kSupplyVoltage, uint16_t> SupplyVoltageTlv;
+typedef UintTlvInfo<Tlv::kSupplyVoltage, uint16_t> SupplyVoltageTlv;
 
 /**
  * This class defines Child Table TLV constants and types.
  *
  */
-typedef TlvInfo<NetworkDiagnosticTlv::kChildTable> ChildTableTlv;
+typedef TlvInfo<Tlv::kChildTable> ChildTableTlv;
 
 /**
  * This class defines Max Child Timeout TLV constants and types.
  *
  */
-typedef UintTlvInfo<NetworkDiagnosticTlv::kMaxChildTimeout, uint32_t> MaxChildTimeoutTlv;
+typedef UintTlvInfo<Tlv::kMaxChildTimeout, uint32_t> MaxChildTimeoutTlv;
+
+/**
+ * This class defines Version TLV constants and types.
+ *
+ */
+typedef UintTlvInfo<Tlv::kVersion, uint16_t> VersionTlv;
+
+/**
+ * This class defines Vendor Name TLV constants and types.
+ *
+ */
+typedef StringTlvInfo<Tlv::kVendorName, Tlv::kMaxVendorNameLength> VendorNameTlv;
+
+/**
+ * This class defines Vendor Model TLV constants and types.
+ *
+ */
+typedef StringTlvInfo<Tlv::kVendorModel, Tlv::kMaxVendorModelLength> VendorModelTlv;
+
+/**
+ * This class defines Vendor SW Version TLV constants and types.
+ *
+ */
+typedef StringTlvInfo<Tlv::kVendorSwVersion, Tlv::kMaxVendorSwVersionLength> VendorSwVersionTlv;
+
+/**
+ * This class defines Thread Stack Version TLV constants and types.
+ *
+ */
+typedef StringTlvInfo<Tlv::kThreadStackVersion, Tlv::kMaxThreadStackVersionLength> ThreadStackVersionTlv;
 
 typedef otNetworkDiagConnectivity Connectivity; ///< Network Diagnostic Connectivity value.
 
@@ -173,7 +234,7 @@ OT_TOOL_PACKED_BEGIN
 class ConnectivityTlv : public Mle::ConnectivityTlv
 {
 public:
-    static constexpr uint8_t kType = NetworkDiagnosticTlv::kConnectivity; ///< The TLV Type value.
+    static constexpr uint8_t kType = ot::NetworkDiagnostic::Tlv::kConnectivity; ///< The TLV Type value.
 
     /**
      * This method initializes the TLV.
@@ -214,7 +275,7 @@ OT_TOOL_PACKED_BEGIN
 class RouteTlv : public Mle::RouteTlv
 {
 public:
-    static constexpr uint8_t kType = NetworkDiagnosticTlv::kRoute; ///< The TLV Type value.
+    static constexpr uint8_t kType = ot::NetworkDiagnostic::Tlv::kRoute; ///< The TLV Type value.
 
     /**
      * This method initializes the TLV.
@@ -235,7 +296,7 @@ OT_TOOL_PACKED_BEGIN
 class LeaderDataTlv : public Mle::LeaderDataTlv
 {
 public:
-    static constexpr uint8_t kType = NetworkDiagnosticTlv::kLeaderData; ///< The TLV Type value.
+    static constexpr uint8_t kType = ot::NetworkDiagnostic::Tlv::kLeaderData; ///< The TLV Type value.
 
     /**
      * This method initializes the TLV.
@@ -253,7 +314,7 @@ public:
  *
  */
 OT_TOOL_PACKED_BEGIN
-class MacCountersTlv : public NetworkDiagnosticTlv, public TlvInfo<NetworkDiagnosticTlv::kMacCounters>
+class MacCountersTlv : public Tlv, public TlvInfo<Tlv::kMacCounters>
 {
 public:
     /**
@@ -263,7 +324,7 @@ public:
     void Init(void)
     {
         SetType(kMacCounters);
-        SetLength(sizeof(*this) - sizeof(NetworkDiagnosticTlv));
+        SetLength(sizeof(*this) - sizeof(Tlv));
     }
 
     /**
@@ -273,7 +334,7 @@ public:
      * @retval FALSE  If the TLV does not appear to be well-formed.
      *
      */
-    bool IsValid(void) const { return GetLength() >= sizeof(*this) - sizeof(NetworkDiagnosticTlv); }
+    bool IsValid(void) const { return GetLength() >= sizeof(*this) - sizeof(Tlv); }
 
     /**
      * This method returns the IfInUnknownProtos counter.
@@ -467,6 +528,28 @@ public:
     }
 
     /**
+     * This method the Link Quality value.
+     *
+     * @returns The Link Quality value.
+     *
+     */
+    LinkQuality GetLinkQuality(void) const
+    {
+        return static_cast<LinkQuality>((GetTimeoutChildId() & kLqiMask) >> kLqiOffset);
+    }
+
+    /**
+     * This method set the Link Quality value.
+     *
+     * @param[in] aLinkQuality  The Link Quality value.
+     *
+     */
+    void SetLinkQuality(LinkQuality aLinkQuality)
+    {
+        SetTimeoutChildId((GetTimeoutChildId() & ~kLqiMask) | ((aLinkQuality << kLqiOffset) & kLqiMask));
+    }
+
+    /**
      * This method returns the Child ID value.
      *
      * @returns The Child ID value.
@@ -505,12 +588,14 @@ private:
     //             1                   0
     //   5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0
     //  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    //  | Timeout |RSV|     Child ID    |
+    //  | Timeout |LQI|     Child ID    |
     //  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
     static constexpr uint8_t  kTimeoutOffset = 11;
+    static constexpr uint8_t  kLqiOffset     = 9;
     static constexpr uint8_t  kChildIdOffset = 0;
     static constexpr uint16_t kTimeoutMask   = 0x1f << kTimeoutOffset;
+    static constexpr uint16_t kLqiMask       = 0x3 << kLqiOffset;
     static constexpr uint16_t kChildIdMask   = 0x1ff << kChildIdOffset;
 
     uint16_t GetTimeoutChildId(void) const { return HostSwap16(mTimeoutChildId); }
@@ -525,7 +610,7 @@ private:
  *
  */
 OT_TOOL_PACKED_BEGIN
-class ChannelPagesTlv : public NetworkDiagnosticTlv, public TlvInfo<NetworkDiagnosticTlv::kChannelPages>
+class ChannelPagesTlv : public Tlv, public TlvInfo<Tlv::kChannelPages>
 {
 public:
     /**
@@ -535,7 +620,7 @@ public:
     void Init(void)
     {
         SetType(kChannelPages);
-        SetLength(sizeof(*this) - sizeof(NetworkDiagnosticTlv));
+        SetLength(sizeof(*this) - sizeof(Tlv));
     }
 
     /**
@@ -568,7 +653,7 @@ private:
  *
  */
 OT_TOOL_PACKED_BEGIN
-class TypeListTlv : public NetworkDiagnosticTlv, public TlvInfo<NetworkDiagnosticTlv::kTypeList>
+class TypeListTlv : public Tlv, public TlvInfo<Tlv::kTypeList>
 {
 public:
     /**
@@ -578,7 +663,7 @@ public:
     void Init(void)
     {
         SetType(kTypeList);
-        SetLength(sizeof(*this) - sizeof(NetworkDiagnosticTlv));
+        SetLength(sizeof(*this) - sizeof(Tlv));
     }
 } OT_TOOL_PACKED_END;
 

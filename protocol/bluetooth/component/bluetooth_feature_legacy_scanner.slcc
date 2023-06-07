@@ -15,7 +15,7 @@ description: >
   benefit of including this component only is reduced application size by
   eliminating the stack functionalities for scanning advertisements that use
   extended advertising PDUs.
-category: "Bluetooth|Feature"
+category: Bluetooth|Bluetooth LE Controller (Link Layer)|Features with Commands and Events
 quality: "production"
 root_path: "protocol/bluetooth"
 requires:

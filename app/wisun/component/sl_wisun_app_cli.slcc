@@ -8,33 +8,74 @@ root_path: "app/wisun/component/app_cli"
 provides:
   - name: sl_wisun_app_cli
 
-source:
-  - path: "sl_wisun_app_cli.c"
-
-requires:
-  - name: "sl_wisun_app_setting"
-  - name: "sl_wisun_trace_util"
-  - name: "iostream_recommended_stream"
-  - name: "iostream_retarget_stdio"
-  - name: "iostream_stdlib_config"
-  - name: "cli"
-  - name: "printf"
-
 ui_hints:
   visibility: never
-  
+
+source:
+  - path: "sl_wisun_app_cli.c"
+    condition:
+      - "cli"
+      - "sl_wisun_app_core"
+      - "sl_wisun_app_setting"
+
+requires:
+  - name: "iostream_recommended_stream"
+    condition:
+      - "cli"
+  - name: "iostream_retarget_stdio"
+    condition:
+      - "cli"
+  - name: "iostream_stdlib_config"
+    condition:
+      - "cli"
+  - name: "printf"
+    condition:
+      - "cli"
+
+# CLI modules of components
+  # CLI Util
+  - name: "sl_wisun_cli_util_cli"
+    condition:
+      - "cli"
+      - "sl_wisun_cli_util"
+  - name: "sl_wisun_ping_cli"
+    condition:
+      - "cli"
+      - "sl_wisun_ping"
+  - name: "sl_wisun_collector_cli"
+    condition:
+      - "cli"
+      - "sl_wisun_collector"
+  - name: "sl_wisun_network_measurement_cli"
+    condition:
+      - "cli"
+      - "sl_wisun_network_measurement"
+  - name: "sl_iperf_cli"
+    condition:
+      - "cli"
+      - "sl_iperf"
+  - name: "sl_wisun_tcp_client_cli"
+    condition:
+      - "cli"
+      - "sl_wisun_tcp_client"
+  - name: "sl_wisun_udp_client_cli"
+    condition:
+      - "cli"
+      - "sl_wisun_udp_client"
+
 #-------------- Template Contribution ----------------
 template_contribution:
 #---------------- Component Catalog ------------------
-  - name: component_catalog
-    value: wisun_app_cli
-
   - name: "cli_group"
     value:
       name: "wisun"
       help: "Wi-SUN commands"
       shortcuts:
         - name: "w"
+    condition:
+      - "cli"
+    unless:
+      - "wisun_cli"
 
   # SDK cli commands (core)
   - name: "cli_command"
@@ -46,7 +87,11 @@ template_contribution:
       shortcuts:
         - name: "j10"
     condition:
+      - "cli"
       - "sl_wisun_app_core"
+      - "sl_wisun_app_setting"
+    unless:
+      - "wisun_cli"
 
   - name: "cli_command"
     value:
@@ -57,7 +102,11 @@ template_contribution:
       shortcuts:
         - name: "j11"
     condition:
+      - "cli"
       - "sl_wisun_app_core"
+      - "sl_wisun_app_setting"
+    unless:
+      - "wisun_cli"
 
   - name: "cli_command"
     value:
@@ -67,9 +116,12 @@ template_contribution:
       help: "Connect to a Wi-SUN network using explicit PHY settings"
       shortcuts:
         - name: "je"
-    condition: 
-      - "wisun_full_radioconf"
+    condition:
+      - "cli"
       - "sl_wisun_app_core"
+      - "sl_wisun_app_setting"
+    unless:
+      - "wisun_cli"
 
   - name: "cli_command"
     value:
@@ -80,7 +132,11 @@ template_contribution:
       shortcuts:
         - name: "d"
     condition:
+      - "cli"
       - "sl_wisun_app_core"
+      - "sl_wisun_app_setting"
+    unless:
+      - "wisun_cli"
 
   - name: "cli_command"
     value:
@@ -90,6 +146,11 @@ template_contribution:
       shortcuts:
         - name: "a"
     condition:
+      - "cli"
       - "app_project_info"
+    unless:
+      - "wisun_cli"
 
+  - name: component_catalog
+    value: wisun_app_cli
 

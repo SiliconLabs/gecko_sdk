@@ -278,9 +278,6 @@ void GPIO_ODD_IRQHandler(void)
 ///   The source files for the GPIO interrupt dispatcher library resides in the
 ///   emdrv/gpiointerrupt folder, and are named gpiointerrupt.c and gpiointerrupt.h.
 ///
-///   @li @ref gpioint_intro
-///   @li @ref gpioint_api
-///   @li @ref gpioint_example
 ///
 ///   @n @section gpioint_intro Introduction
 ///   EFM32/EZR32/EFR32 has two GPIO interrupts lines, Odd and Even. If more
@@ -308,7 +305,7 @@ void GPIO_ODD_IRQHandler(void)
 ///
 ///   @ref GPIOINT_Init() @n
 ///    This functions initializes the dispatcher register. Typically
-///    @htmlonly GPIOINT_Init() @endhtmlonly is called once in your startup code.
+///    GPIOINT_Init() is called once in your startup code.
 ///
 ///   @ref GPIOINT_CallbackRegister() @n
 ///    Register a callback function on a pin interrupt number.

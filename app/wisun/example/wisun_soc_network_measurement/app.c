@@ -65,8 +65,6 @@ void app_task(void *args)
 {
   (void) args;
 
-  assert(sl_wisun_coap_init_default() != false);
-
   // connect to the wisun network
   app_wisun_connect_and_wait();
 

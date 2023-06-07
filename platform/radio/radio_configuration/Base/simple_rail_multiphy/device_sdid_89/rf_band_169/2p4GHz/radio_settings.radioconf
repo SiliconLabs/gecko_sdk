@@ -53,26 +53,6 @@
       <metadata>{"selectedPhy":"PHY_Datasheet_868M_2GFSK_500Kbps_125K"}</metadata>
       <profile_inputs>
         <input>
-          <key>agc_period</key>
-          <value>0</value>
-        </input>
-        <input>
-          <key>agc_power_target</key>
-          <value>-8</value>
-        </input>
-        <input>
-          <key>agc_settling_delay</key>
-          <value>39</value>
-        </input>
-        <input>
-          <key>agc_speed</key>
-          <value>1</value>
-        </input>
-        <input>
-          <key>asynchronous_rx_enable</key>
-          <value>false</value>
-        </input>
-        <input>
           <key>base_frequency_hz</key>
           <value>2450000000</value>
         </input>
@@ -99,14 +79,6 @@
         <input>
           <key>crc_input_order</key>
           <value>0</value>
-        </input>
-        <input>
-          <key>crc_invert</key>
-          <value>false</value>
-        </input>
-        <input>
-          <key>crc_pad_input</key>
-          <value>false</value>
         </input>
         <input>
           <key>crc_poly</key>
@@ -146,10 +118,6 @@
         </input>
         <input>
           <key>frame_bitendian</key>
-          <value>0</value>
-        </input>
-        <input>
-          <key>frame_coding</key>
           <value>0</value>
         </input>
         <input>
@@ -265,14 +233,6 @@
           <value>0</value>
         </input>
         <input>
-          <key>frequency_comp_mode</key>
-          <value>1</value>
-        </input>
-        <input>
-          <key>freq_offset_hz</key>
-          <value>4000</value>
-        </input>
-        <input>
           <key>fsk_symbol_map</key>
           <value>0</value>
         </input>
@@ -297,20 +257,8 @@
           <value>0</value>
         </input>
         <input>
-          <key>manchester_mapping</key>
-          <value>0</value>
-        </input>
-        <input>
           <key>modulation_type</key>
           <value>0</value>
-        </input>
-        <input>
-          <key>number_of_timing_windows</key>
-          <value>1</value>
-        </input>
-        <input>
-          <key>payload_crc_en</key>
-          <value>true</value>
         </input>
         <input>
           <key>payload_white_en</key>
@@ -341,10 +289,6 @@
           <value>0.5</value>
         </input>
         <input>
-          <key>symbols_in_timing_window</key>
-          <value>14</value>
-        </input>
-        <input>
           <key>symbol_encoding</key>
           <value>0</value>
         </input>
@@ -367,14 +311,6 @@
         <input>
           <key>test_ber</key>
           <value>false</value>
-        </input>
-        <input>
-          <key>timing_detection_threshold</key>
-          <value>20</value>
-        </input>
-        <input>
-          <key>timing_sample_threshold</key>
-          <value>12</value>
         </input>
         <input>
           <key>tx_xtal_error_ppm</key>

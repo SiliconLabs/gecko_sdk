@@ -39,9 +39,6 @@
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
-/// RAIL channel number
-#define CHANNEL ((uint8_t) 0)
-
 /// Emode state machine states
 typedef enum {
   S_IDLE,            //!< Idle state

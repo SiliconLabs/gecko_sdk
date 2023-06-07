@@ -21,10 +21,11 @@
 #include "sl_wisun_ip6string.h"
 #include "nvm3.h"
 #include "app_settings.h"
-#include "sl_wisun_br_api.h"
+#include "border_router/sl_wisun_br_api.h"
 #include "sl_default_phy.h"
 #include "sl_wisun_cli_util.h"
 #include "sl_wisun_types.h"
+#include "sl_wisun_trace_api.h"
 #include "rail_features.h"
 
 #define APP_SETTINGS_WISUN_DEFAULT_NETWORK_NAME  "Wi-SUN Network"
@@ -44,6 +45,8 @@
 #define APP_SETTINGS_WISUN_DEFAULT_PHY_CONFIG_TYPE  SL_WISUN_PHY_CONFIG_FAN10
 #define APP_SETTINGS_WISUN_DEFAULT_CHAN_PLAN_ID  1
 #define APP_SETTINGS_WISUN_DEFAULT_PHY_MODE_ID  2
+#define APP_SETTINGS_WISUN_DEFAULT_LFN_PROFILE SL_WISUN_LFN_PROFILE_TEST
+#define APP_SETTINGS_WISUN_DEFAULT_DEVICE_TYPE  SL_WISUN_BORDER_ROUTER
 
 #ifndef APP_SETTINGS_APP_DEFAULT_AUTOSTART
 # define APP_SETTINGS_APP_DEFAULT_AUTOSTART  false
@@ -74,6 +77,14 @@ typedef enum
   app_statistics_domain_regulation = 0x05
 } app_statistics_domain_t;
 
+static const app_enum_t app_settings_wisun_device_type_enum[] =
+{
+  { "FFN", SL_WISUN_ROUTER },
+  { "LFN", SL_WISUN_LFN },
+  { "BR" , SL_WISUN_BORDER_ROUTER},
+  { NULL , 0 }
+};
+
 const char *app_statistics_domain_str[] =
 {
   "phy",
@@ -95,16 +106,25 @@ static const app_settings_wisun_t app_settings_wisun_default = {
   .uc_dwell_interval_ms = APP_SETTINGS_WISUN_DEFAULT_UC_DWELL_INTERVAL,
   .bc_interval_ms = APP_SETTINGS_WISUN_DEFAULT_BC_INTERVAL,
   .bc_dwell_interval_ms = APP_SETTINGS_WISUN_DEFAULT_BC_DWELL_INTERVAL,
-  .state = SLI_WISUN_BR_TASK_STATE_UNINITIALIZED,
+  .gtk = {
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+  },
+  .gtk_set = 0,
+  .state = SL_WISUN_BR_STATE_INITIALIZED,
   .channel_spacing = APP_SETTINGS_WISUN_DEFAULT_CHANNEL_SPACING,
   .number_of_channels = APP_SETTINGS_WISUN_DEFAULT_NUMBER_OF_CHANNELS,
   .ch0_frequency = APP_SETTINGS_WISUN_DEFAULT_CH0_FREQUENCY,
   .allowed_channels = APP_SETTINGS_WISUN_DEFAULT_ALLOWED_CHANNELS,
   .trace_filter = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF},
   .regulation = APP_SETTINGS_WISUN_DEFAULT_REGULATION,
+  .device_type = APP_SETTINGS_WISUN_DEFAULT_DEVICE_TYPE,
   .chan_plan_id = APP_SETTINGS_WISUN_DEFAULT_CHAN_PLAN_ID,
   .phy_mode_id = APP_SETTINGS_WISUN_DEFAULT_PHY_MODE_ID,
-  .phy_config_type = APP_SETTINGS_WISUN_DEFAULT_PHY_CONFIG_TYPE
+  .phy_config_type = APP_SETTINGS_WISUN_DEFAULT_PHY_CONFIG_TYPE,
+  .lfn_profile = APP_SETTINGS_WISUN_DEFAULT_LFN_PROFILE
 };
 
 static const app_settings_app_t app_settings_app_default = {
@@ -188,11 +208,10 @@ static const app_enum_t app_settings_wisun_operating_class_enum[] =
   { NULL, 0 }
 };
 
-static const app_enum_t app_settings_wisun_br_state_enum[] =
+static const app_enum_t app_settings_wisun_state_enum[] =
 {
-  { "uninitialized", SLI_WISUN_BR_TASK_STATE_UNINITIALIZED },
-  { "initialized", SLI_WISUN_BR_TASK_STATE_INITIALIZED },
-  { "started", SLI_WISUN_BR_TASK_STATE_STARTED },
+  { "initialized", SL_WISUN_BR_STATE_INITIALIZED },
+  { "operational", SL_WISUN_BR_STATE_OPERATIONAL },
   { NULL, 0 }
 };
 
@@ -215,6 +234,14 @@ static const app_enum_t app_settings_wisun_regulation_enum[] =
   { NULL, 0 }
 };
 
+static const app_enum_t app_settings_wisun_lfn_profile_enum[] =
+{
+  { "test", SL_WISUN_LFN_PROFILE_TEST },
+  { "balanced", SL_WISUN_LFN_PROFILE_BALANCED },
+  { "eco", SL_WISUN_LFN_PROFILE_ECO },
+  { NULL, 0 }
+};
+
 static sl_status_t app_settings_get_fan10_phy_config(char *value_str,
                                                      const char *key_str,
                                                      const app_settings_entry_t *entry);
@@ -230,9 +257,15 @@ static sl_status_t app_settings_get_ids_phy_config(char *value_str,
 static sl_status_t app_settings_get_fan10_and_fan11_phy_config(char *value_str,
                                                                const char *key_str,
                                                                const app_settings_entry_t *entry);
-static sl_status_t app_settings_get_fan11_and_explicit_phy_config(char *value_str,
-                                                                  const char *key_str,
-                                                                  const app_settings_entry_t *entry);
+static sl_status_t app_settings_get_fan11_and_explicit_and_ids_phy_config(char *value_str,
+                                                                          const char *key_str,
+                                                                          const app_settings_entry_t *entry);
+static sl_status_t app_settings_set_gtk(const char *value_str,
+                                        const char *key_str,
+                                        const app_settings_entry_t *entry);
+static sl_status_t app_settings_get_gtk(char *value_str,
+                                        const char *key_str,
+                                        const app_settings_entry_t *entry);
 static sl_status_t app_settings_get_gak(char *value_str,
                                         const char *key_str,
                                         const app_settings_entry_t *entry);
@@ -266,13 +299,13 @@ static sl_status_t app_settings_set_trace_filter(const char *value_str,
 static sl_status_t app_settings_get_trace_filter(char *value_str,
                                                  const char *key_str,
                                                  const app_settings_entry_t *entry);
-static sl_status_t app_settings_set_pti_state(const char *value_str,
-                                              const char *key_str,
-                                              const app_settings_entry_t *entry);
 static sl_status_t app_settings_set_regulation(const char *value_str,
                                                const char *key_str,
                                                const app_settings_entry_t *entry);
 #if RAIL_IEEE802154_SUPPORTS_G_MODESWITCH
+static sl_status_t app_settings_set_rx_mdr_capable(const char *value_str,
+                                                   const char *key_str,
+                                                   const app_settings_entry_t *entry);
 static sl_status_t app_settings_set_rx_phy_mode_ids(const char *value_str,
                                                     const char *key_str,
                                                     const app_settings_entry_t *entry);
@@ -291,7 +324,7 @@ const app_settings_entry_t app_settings_entries[] =
     .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
     .value = &app_settings_wisun.state,
     .input_enum_list = NULL,
-    .output_enum_list = app_settings_wisun_br_state_enum,
+    .output_enum_list = app_settings_wisun_state_enum,
     .set_handler = NULL,
     .get_handler = app_settings_get_state,
     .description = "Border router state"
@@ -397,7 +430,7 @@ const app_settings_entry_t app_settings_entries[] =
     .input_enum_list = NULL,
     .output_enum_list = NULL,
     .set_handler = app_settings_set_integer,
-    .get_handler = app_settings_get_fan11_and_explicit_phy_config,
+    .get_handler = app_settings_get_fan11_and_explicit_and_ids_phy_config,
     .description = "Wi-SUN PHY mode ID [uint8]"
   },
   {
@@ -555,6 +588,59 @@ const app_settings_entry_t app_settings_entries[] =
     .set_handler = app_settings_set_allowed_channels,
     .get_handler = app_settings_get_string,
     .description = "Allowed channel ranges (e.g. 0-54,57-60,64,67-68)"
+  },
+
+  {
+    .key = "gtk1",
+    .domain = app_settings_domain_wisun,
+    .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = app_settings_wisun.gtk[0],
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = app_settings_set_gtk,
+    .get_handler = app_settings_get_gtk,
+    .description = "GTK to install, 'none' to uninstall [string]"
+  },
+  {
+    .key = "gtk2",
+    .domain = app_settings_domain_wisun,
+    .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = app_settings_wisun.gtk[1],
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = app_settings_set_gtk,
+    .get_handler = app_settings_get_gtk,
+    .description = "GTK to install, 'none' to uninstall [string]"
+  },
+  {
+    .key = "gtk3",
+    .domain = app_settings_domain_wisun,
+    .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = app_settings_wisun.gtk[2],
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = app_settings_set_gtk,
+    .get_handler = app_settings_get_gtk,
+    .description = "GTK to install, 'none' to uninstall [string]"
+  },
+  {
+    .key = "gtk4",
+    .domain = app_settings_domain_wisun,
+    .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = app_settings_wisun.gtk[3],
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = app_settings_set_gtk,
+    .get_handler = app_settings_get_gtk,
+    .description = "GTK to install, 'none' to uninstall [string]"
   },
   {
     .key = "gak1",
@@ -799,7 +885,7 @@ const app_settings_entry_t app_settings_entries[] =
     .value = &app_settings_app.pti_state,
     .input_enum_list = NULL,
     .output_enum_list = NULL,
-    .set_handler = app_settings_set_pti_state,
+    .set_handler = app_settings_set_integer,
     .get_handler = app_settings_get_integer,
     .description = "Disable or enable PTI [bool] (0|1)"
   },
@@ -829,7 +915,33 @@ const app_settings_entry_t app_settings_entries[] =
     .get_handler = app_settings_get_integer,
     .description = "Regional regulation [uint8]"
   },
+  {
+  .key = "device_type",
+  .domain = app_settings_domain_wisun,
+  .value_size = APP_SETTINGS_VALUE_SIZE_UINT8,
+  .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+  .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+  .value = &app_settings_wisun.device_type,
+  .input_enum_list = app_settings_wisun_device_type_enum,
+  .output_enum_list = app_settings_wisun_device_type_enum,
+  .set_handler = app_settings_set_integer,
+  .get_handler = app_settings_get_integer,
+  .description = "Device type [uint8]"
+  },
 #if RAIL_IEEE802154_SUPPORTS_G_MODESWITCH
+  {
+    .key = "rx_mdr_capable",
+    .domain = app_settings_domain_wisun,
+    .value_size = APP_SETTINGS_VALUE_SIZE_UINT8,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = &app_settings_wisun.rx_mdr_capable,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = app_settings_set_rx_mdr_capable,
+    .get_handler = app_settings_get_integer,
+    .description = "Indicate if MDR Command is supported"
+  },
   {
     .key = "rx_phy_mode_ids_count",
     .domain = app_settings_domain_wisun,
@@ -857,6 +969,19 @@ const app_settings_entry_t app_settings_entries[] =
     .description = "List of PhyModeId to advertise in POM-IE"
   },
 #endif
+  {
+    .key = "lfn_profile",
+    .domain = app_settings_domain_wisun,
+    .value_size = APP_SETTINGS_VALUE_SIZE_UINT8,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = &app_settings_wisun.lfn_profile,
+    .input_enum_list = app_settings_wisun_lfn_profile_enum,
+    .output_enum_list = app_settings_wisun_lfn_profile_enum,
+    .set_handler = app_settings_set_integer,
+    .get_handler = app_settings_get_integer,
+    .description = "Wi-SUN LFN profile [uint8]"
+  },
   {
     .key = NULL,
     .domain = 0,
@@ -980,7 +1105,6 @@ static const app_settings_entry_t app_statistics_entries[] =
     .get_handler = app_settings_get_integer,
     .description = "Tx queue peak"
   },
-#if defined(SL_CATALOG_WISUN_MODE_SWITCH_PRESENT)
   {
     .key = "rx_ms_count",
     .domain = app_statistics_domain_mac,
@@ -1033,7 +1157,6 @@ static const app_settings_entry_t app_statistics_entries[] =
     .get_handler = app_settings_get_integer,
     .description = "Tx failed count using mode switch"
   },
-#endif
   {
     .key = "rx_count",
     .domain = app_statistics_domain_mac,
@@ -1254,19 +1377,6 @@ static const app_settings_entry_t app_statistics_entries[] =
     .set_handler = NULL,
     .get_handler = app_settings_get_integer,
     .description = "Unknown neighbor"
-  },
-  {
-    .key = "synch_lost",
-    .domain = app_statistics_domain_fhss,
-    .value_size = APP_SETTINGS_VALUE_SIZE_UINT32,
-    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
-    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
-    .value = &app_statistics.fhss.channel_retry,
-    .input_enum_list = NULL,
-    .output_enum_list = NULL,
-    .set_handler = NULL,
-    .get_handler = app_settings_get_integer,
-    .description = "Synch lost"
   },
   {
     .key = "pan_control_rx_count",
@@ -1742,13 +1852,85 @@ static sl_status_t app_settings_get_fan10_and_fan11_phy_config(char *value_str,
   return app_settings_get_phy_config(value_str, key_str, entry, !used);
 }
 
-static sl_status_t app_settings_get_fan11_and_explicit_phy_config(char *value_str,
-                                                                  const char *key_str,
-                                                                  const app_settings_entry_t *entry)
+static sl_status_t app_settings_get_fan11_and_explicit_and_ids_phy_config(char *value_str,
+                                                                          const char *key_str,
+                                                                          const app_settings_entry_t *entry)
 {
   bool used = app_settings_wisun.phy_config_type == SL_WISUN_PHY_CONFIG_FAN11
-           || app_settings_wisun.phy_config_type == SL_WISUN_PHY_CONFIG_EXPLICIT;
+           || app_settings_wisun.phy_config_type == SL_WISUN_PHY_CONFIG_EXPLICIT
+           || app_settings_wisun.phy_config_type == SL_WISUN_PHY_CONFIG_IDS;
   return app_settings_get_phy_config(value_str, key_str, entry, !used);
+}
+
+static int parse_byte_array(uint8_t *out, int size, const char *str)
+{
+  unsigned int val;
+  for (int i = 0; i < size; i++) {
+    if (str[2] != '\0' && str[2] != ':')
+      return -1;
+    if (sscanf(str, "%x", &val) != 1)
+      return -2;
+    out[i] = val;
+    str += 3;
+  }
+  if (str[-1] != '\0')
+    return -3;
+  return 0;
+}
+
+static sl_status_t app_settings_set_gtk(const char *value_str,
+                                        const char *key_str,
+                                        const app_settings_entry_t *entry)
+{
+  (void)key_str;
+
+  uint16_t key_index;
+  int ret;
+
+  ret = sscanf(entry->key, "gtk%hu", &key_index);
+  if (ret != 1) {
+    return SL_STATUS_FAIL;
+  }
+
+  if (strcmp(value_str, "none") == 0){
+    app_settings_wisun.gtk_set &= ~(1 << (key_index - 1));
+    return SL_STATUS_OK;
+  } else {
+    ret = parse_byte_array(entry->value, 16, value_str);
+    if (ret == 0) {
+      app_settings_wisun.gtk_set |= 1 << (key_index - 1);
+      return SL_STATUS_OK;
+    } else {
+      return SL_STATUS_FAIL;
+    }
+  }
+}
+
+static sl_status_t app_settings_get_gtk(char *value_str,
+                                        const char *key_str,
+                                        const app_settings_entry_t *entry)
+{
+  (void)key_str;
+
+  const uint8_t *gtk = (uint8_t *) entry->value;
+  uint16_t key_index;
+  int ret;
+
+  ret = sscanf(entry->key, "gtk%hu", &key_index);
+  if (ret != 1) {
+    return SL_STATUS_FAIL;
+  }
+
+  if (app_settings_wisun.gtk_set & (1 << (key_index - 1))) {
+    sprintf(value_str, "%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x",
+            *gtk,        *(gtk + 1),  *(gtk + 2),  *(gtk + 3),
+            *(gtk + 4),  *(gtk + 5),  *(gtk + 6),  *(gtk + 7),
+            *(gtk + 8),  *(gtk + 9),  *(gtk + 10), *(gtk + 11),
+            *(gtk + 12), *(gtk + 13), *(gtk + 14), *(gtk + 15));
+    return SL_STATUS_OK;
+  } else {
+    return SL_STATUS_FAIL;
+  }
 }
 
 static sl_status_t app_settings_get_gak(char *value_str,
@@ -1757,12 +1939,12 @@ static sl_status_t app_settings_get_gak(char *value_str,
 {
   (void)key_str;
 
-  sli_wisun_br_task_state_t state;
+  sl_wisun_br_state_t state;
   uint8_t *gak = (uint8_t *) entry->value;
   uint16_t key_index;
   int ret;
 
-  if(!sl_wisun_br_get_state(&state) && state != SLI_WISUN_BR_TASK_STATE_STARTED) {
+  if(!sl_wisun_br_get_state(&state) && state != SL_WISUN_BR_STATE_OPERATIONAL) {
     return SL_STATUS_FAIL;
   }
 
@@ -1789,12 +1971,12 @@ static sl_status_t app_settings_get_lfn_gak(char *value_str,
 {
   (void)key_str;
 
-  sli_wisun_br_task_state_t state;
+  sl_wisun_br_state_t state;
   uint8_t *gak = (uint8_t *) entry->value;
   uint16_t key_index;
   int ret;
 
-  if(!sl_wisun_br_get_state(&state) && state != SLI_WISUN_BR_TASK_STATE_STARTED) {
+  if(!sl_wisun_br_get_state(&state) && state != SL_WISUN_BR_STATE_OPERATIONAL) {
     return SL_STATUS_FAIL;
   }
 
@@ -1824,7 +2006,7 @@ static sl_status_t app_settings_get_mac_address(char *value_str,
   (void)key_str;
   (void)entry;
 
-  ret = sl_wisun_br_get_mac_address(&address);
+  ret = sl_wisun_get_mac_address(&address);
   if (ret == SL_STATUS_OK) {
     ret = app_util_get_mac_address_string(value_str, &address);
   }
@@ -1866,17 +2048,19 @@ static sl_status_t app_settings_get_state(char *value_str,
 {
   (void)key_str;
 
-  sli_wisun_br_task_state_t state;
-  uint8_t value_length = sizeof(sli_wisun_br_task_state_t);
+  sl_wisun_br_state_t state;
+  uint8_t value_length = sizeof(sl_wisun_br_state_t);
 
-  sl_wisun_br_get_state(&state);
+  if (sl_wisun_br_get_state(&state) != SL_STATUS_OK) {
+    return SL_STATUS_FAIL;
+  }
 
   return app_util_get_string(value_str,
-                             state,
-                             entry->output_enum_list,
-                             false,
-                             false,
-                             value_length);
+                            state,
+                            entry->output_enum_list,
+                            false,
+                            false,
+                            value_length);
 }
 
 static sl_status_t app_settings_get_statistics(char *value_str,
@@ -1895,7 +2079,7 @@ static sl_status_t app_settings_get_statistics(char *value_str,
   #endif
 
   // Update statistics
-  ret = sl_wisun_br_get_statistics(statistics_type, &app_statistics);
+  ret = sl_wisun_get_statistics(statistics_type, &app_statistics);
   if (ret != SL_STATUS_OK) {
     printf("[Failed to retrieve statistics: %lu]\r\n", ret);
     return SL_STATUS_FAIL;
@@ -1928,7 +2112,7 @@ static sl_status_t app_settings_get_statistics_regulation(char *value_str,
   const app_settings_entry_t *iter;
 
   // Update statistics
-  ret = sl_wisun_br_get_statistics(SL_WISUN_STATISTICS_TYPE_REGULATION, &app_statistics);
+  ret = sl_wisun_get_statistics(SL_WISUN_STATISTICS_TYPE_REGULATION, &app_statistics);
   if (ret != SL_STATUS_OK) {
     return ret;
   }
@@ -1937,7 +2121,7 @@ static sl_status_t app_settings_get_statistics_regulation(char *value_str,
   while (iter->key) {
     if (!strcmp(entry->key, app_statistics_domain_str[iter->domain])) {
       // Associated regional regulation is coded in input_enum_list.
-      if (app_settings_wisun.regulation == (sl_wisun_regulation_t)iter->input_enum_list) {
+      if ((uintptr_t)app_settings_wisun.regulation == (uintptr_t)iter->input_enum_list) {
         if (!key_str || !strcmp(iter->key, key_str)) {
           if (iter->get_handler) {
             ret = iter->get_handler(value_str, NULL, iter);
@@ -2065,7 +2249,7 @@ static sl_status_t app_settings_set_trace_filter(const char *value_str,
         if (ret != SL_STATUS_OK) {
           return ret;
         } else {
-          return sl_wisun_br_set_trace_filter(app_settings_wisun.trace_filter);
+          return sl_wisun_set_trace_filter(app_settings_wisun.trace_filter);
         }
       } else {
         return SL_STATUS_PERMISSION;
@@ -2103,48 +2287,16 @@ static sl_status_t app_settings_get_trace_filter(char *value_str,
   return SL_STATUS_FAIL;
 }
 
-static sl_status_t app_settings_set_pti_state(const char *value_str,
-                                              const char *key_str,
-                                              const app_settings_entry_t *entry)
-{
-  sl_status_t ret;
-  uint32_t pti_state;
-  (void)key_str;
-  (void)entry;
-
-  ret = app_util_get_integer(&pti_state, value_str, NULL, false);
-  if (ret != SL_STATUS_OK) {
-    // Not a valid PTI state.
-    ret = SL_STATUS_INVALID_TYPE;
-  } else if (pti_state > 1) {
-    // Not a valid PTI state.
-    ret = SL_STATUS_INVALID_PARAMETER;
-  }
-
-  if (ret == SL_STATUS_OK) {
-    app_settings_app.pti_state = pti_state;
-    ret = sl_wisun_br_set_pti(pti_state);
-    if (ret == SL_STATUS_OK) {
-      printf("[PTI set correctly]\r\n");
-    } else {
-      printf("[Failed to set PTI]\r\n");
-      ret = SL_STATUS_OK;  // To prevent the caller to display an error message.
-    }
-  }
-
-  return ret;
-}
-
 static sl_status_t app_settings_set_regulation(const char *value_str,
                                                const char *key_str,
                                                const app_settings_entry_t *entry)
 {
   sl_status_t ret;
-  sli_wisun_br_task_state_t state;
+  sl_wisun_br_state_t state;
 
   sl_wisun_br_get_state(&state);
 
-  if (state == SLI_WISUN_BR_TASK_STATE_STARTED) {
+  if (state == SL_WISUN_BR_STATE_OPERATIONAL) {
     return SL_STATUS_INVALID_STATE;
   }
 
@@ -2154,6 +2306,42 @@ static sl_status_t app_settings_set_regulation(const char *value_str,
 }
 
 #if RAIL_IEEE802154_SUPPORTS_G_MODESWITCH
+
+static sl_status_t app_settings_set_rx_mdr_capable(const char *value_str,
+                                                   const char *key_str,
+                                                   const app_settings_entry_t *entry)
+{
+  sl_status_t ret;
+  uint8_t phy_mode_id_count, is_mdr_command_capable;
+  uint8_t phy_mode_id[SL_WISUN_MAX_PHY_MODE_ID_COUNT];
+  uint8_t *phy_mode_id_p, *phy_mode_id_count_p;
+
+  ret = app_settings_set_integer(value_str, key_str, entry);
+
+  if (ret == SL_STATUS_OK) {
+
+    if (app_settings_wisun.rx_phy_mode_ids_count == 0) {
+      // Check if default PhyList can be retrieved from device
+      if (sl_wisun_get_pom_ie(&phy_mode_id_count, phy_mode_id, &is_mdr_command_capable) == SL_STATUS_OK) {
+        phy_mode_id_p = phy_mode_id;
+        phy_mode_id_count_p = &phy_mode_id_count;
+      } else {
+        // POM-IE not available yet
+        return ret;
+      }
+    } else {
+      phy_mode_id_p = app_settings_wisun.rx_phy_mode_ids;
+      phy_mode_id_count_p = &app_settings_wisun.rx_phy_mode_ids_count;
+    }
+
+    ret = sl_wisun_set_pom_ie(*phy_mode_id_count_p,
+                              phy_mode_id_p,
+                              app_settings_wisun.rx_mdr_capable);
+  }
+
+  return ret;
+}
+
 static sl_status_t app_settings_set_rx_phy_mode_ids(const char *value_str,
                                                     const char *key_str,
                                                     const app_settings_entry_t *entry)
@@ -2193,9 +2381,9 @@ static sl_status_t app_settings_set_rx_phy_mode_ids(const char *value_str,
     memcpy(app_settings_wisun.rx_phy_mode_ids, phy_mode_ids, phy_mode_ids_count);
     app_settings_wisun.rx_phy_mode_ids_count = phy_mode_ids_count;
 
-    ret = sl_wisun_br_set_pom_ie(app_settings_wisun.rx_phy_mode_ids_count,
-                                 app_settings_wisun.rx_phy_mode_ids,
-                                 0);
+    ret = sl_wisun_set_pom_ie(app_settings_wisun.rx_phy_mode_ids_count,
+                              app_settings_wisun.rx_phy_mode_ids,
+                              app_settings_wisun.rx_mdr_capable);
   }
 
   return ret;
@@ -2217,7 +2405,7 @@ static sl_status_t app_settings_get_rx_phy_mode_ids(char *value_str,
 
   if (app_settings_wisun.rx_phy_mode_ids_count == 0) {
     // Check if default PhyList can be retrieved from device
-    if (sl_wisun_br_get_pom_ie(&phy_mode_id_count, phy_mode_id, &is_mdr_command_capable) == SL_STATUS_OK) {
+    if (sl_wisun_get_pom_ie(&phy_mode_id_count, phy_mode_id, &is_mdr_command_capable) == SL_STATUS_OK) {
       phy_mode_id_p = phy_mode_id;
       phy_mode_id_count_p = &phy_mode_id_count;
     } else {

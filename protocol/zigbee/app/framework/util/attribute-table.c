@@ -25,11 +25,10 @@
 // for pulling in defines dealing with EITHER server or client
 #include "af-main.h"
 
-#ifdef UC_BUILD
 #include "zap-type.h"
-#else
-#include "enums.h"
-#endif
+#if defined(EZSP_HOST) && defined(SL_CATALOG_ZIGBEE_AF_SUPPORT_PRESENT)
+#include "af-support-host.h"
+#endif //defined(EZSP_HOST) && defined(SL_CATALOG_ZIGBEE_AF_SUPPORT_PRESENT)
 
 //------------------------------------------------------------------------------
 
@@ -63,16 +62,16 @@ EmberAfStatus emberAfWriteAttributeExternal(uint8_t endpoint,
       return EMBER_ZCL_STATUS_FAILURE;
     case EMBER_ZCL_ATTRIBUTE_WRITE_PERMISSION_ALLOW_WRITE_NORMAL:
     case EMBER_ZCL_ATTRIBUTE_WRITE_PERMISSION_ALLOW_WRITE_OF_READ_ONLY:
-      return emAfWriteAttribute(endpoint,
-                                cluster,
-                                attributeID,
-                                mask,
-                                manufacturerCode,
-                                dataPtr,
-                                dataType,
-                                (extWritePermission
-                                 == EMBER_ZCL_ATTRIBUTE_WRITE_PERMISSION_ALLOW_WRITE_OF_READ_ONLY),
-                                false);
+      return sli_zigbee_af_write_attribute(endpoint,
+                                           cluster,
+                                           attributeID,
+                                           mask,
+                                           manufacturerCode,
+                                           dataPtr,
+                                           dataType,
+                                           (extWritePermission
+                                            == EMBER_ZCL_ATTRIBUTE_WRITE_PERMISSION_ALLOW_WRITE_OF_READ_ONLY),
+                                           false);
     default:
       return (EmberAfStatus)extWritePermission;
   }
@@ -86,15 +85,15 @@ EmberAfStatus emberAfWriteAttribute(uint8_t endpoint,
                                     uint8_t* dataPtr,
                                     EmberAfAttributeType dataType)
 {
-  return emAfWriteAttribute(endpoint,
-                            cluster,
-                            attributeID,
-                            mask,
-                            EMBER_AF_NULL_MANUFACTURER_CODE,
-                            dataPtr,
-                            dataType,
-                            true,   // override read-only?
-                            false); // just test?
+  return sli_zigbee_af_write_attribute(endpoint,
+                                       cluster,
+                                       attributeID,
+                                       mask,
+                                       EMBER_AF_NULL_MANUFACTURER_CODE,
+                                       dataPtr,
+                                       dataType,
+                                       true, // override read-only?
+                                       false); // just test?
 }
 
 EmberAfStatus emberAfWriteClientAttribute(uint8_t endpoint,
@@ -103,15 +102,15 @@ EmberAfStatus emberAfWriteClientAttribute(uint8_t endpoint,
                                           uint8_t* dataPtr,
                                           EmberAfAttributeType dataType)
 {
-  return emAfWriteAttribute(endpoint,
-                            cluster,
-                            attributeID,
-                            CLUSTER_MASK_CLIENT,
-                            EMBER_AF_NULL_MANUFACTURER_CODE,
-                            dataPtr,
-                            dataType,
-                            true,   // override read-only?
-                            false); // just test?
+  return sli_zigbee_af_write_attribute(endpoint,
+                                       cluster,
+                                       attributeID,
+                                       CLUSTER_MASK_CLIENT,
+                                       EMBER_AF_NULL_MANUFACTURER_CODE,
+                                       dataPtr,
+                                       dataType,
+                                       true, // override read-only?
+                                       false); // just test?
 }
 
 EmberAfStatus emberAfWriteServerAttribute(uint8_t endpoint,
@@ -120,15 +119,15 @@ EmberAfStatus emberAfWriteServerAttribute(uint8_t endpoint,
                                           uint8_t* dataPtr,
                                           EmberAfAttributeType dataType)
 {
-  return emAfWriteAttribute(endpoint,
-                            cluster,
-                            attributeID,
-                            CLUSTER_MASK_SERVER,
-                            EMBER_AF_NULL_MANUFACTURER_CODE,
-                            dataPtr,
-                            dataType,
-                            true,   // override read-only?
-                            false); // just test?
+  return sli_zigbee_af_write_attribute(endpoint,
+                                       cluster,
+                                       attributeID,
+                                       CLUSTER_MASK_SERVER,
+                                       EMBER_AF_NULL_MANUFACTURER_CODE,
+                                       dataPtr,
+                                       dataType,
+                                       true, // override read-only?
+                                       false); // just test?
 }
 
 EmberAfStatus emberAfWriteManufacturerSpecificClientAttribute(uint8_t endpoint,
@@ -138,15 +137,15 @@ EmberAfStatus emberAfWriteManufacturerSpecificClientAttribute(uint8_t endpoint,
                                                               uint8_t* dataPtr,
                                                               EmberAfAttributeType dataType)
 {
-  return emAfWriteAttribute(endpoint,
-                            cluster,
-                            attributeID,
-                            CLUSTER_MASK_CLIENT,
-                            manufacturerCode,
-                            dataPtr,
-                            dataType,
-                            true,   // override read-only?
-                            false); // just test?
+  return sli_zigbee_af_write_attribute(endpoint,
+                                       cluster,
+                                       attributeID,
+                                       CLUSTER_MASK_CLIENT,
+                                       manufacturerCode,
+                                       dataPtr,
+                                       dataType,
+                                       true, // override read-only?
+                                       false); // just test?
 }
 
 EmberAfStatus emberAfWriteManufacturerSpecificServerAttribute(uint8_t endpoint,
@@ -156,15 +155,15 @@ EmberAfStatus emberAfWriteManufacturerSpecificServerAttribute(uint8_t endpoint,
                                                               uint8_t* dataPtr,
                                                               EmberAfAttributeType dataType)
 {
-  return emAfWriteAttribute(endpoint,
-                            cluster,
-                            attributeID,
-                            CLUSTER_MASK_SERVER,
-                            manufacturerCode,
-                            dataPtr,
-                            dataType,
-                            true,   // override read-only?
-                            false); // just test?
+  return sli_zigbee_af_write_attribute(endpoint,
+                                       cluster,
+                                       attributeID,
+                                       CLUSTER_MASK_SERVER,
+                                       manufacturerCode,
+                                       dataPtr,
+                                       dataType,
+                                       true, // override read-only?
+                                       false); // just test?
 }
 
 EmberAfStatus emberAfVerifyAttributeWrite(uint8_t endpoint,
@@ -175,15 +174,15 @@ EmberAfStatus emberAfVerifyAttributeWrite(uint8_t endpoint,
                                           uint8_t* dataPtr,
                                           EmberAfAttributeType dataType)
 {
-  return emAfWriteAttribute(endpoint,
-                            cluster,
-                            attributeID,
-                            mask,
-                            manufacturerCode,
-                            dataPtr,
-                            dataType,
-                            false, // override read-only?
-                            true); // just test?
+  return sli_zigbee_af_write_attribute(endpoint,
+                                       cluster,
+                                       attributeID,
+                                       mask,
+                                       manufacturerCode,
+                                       dataPtr,
+                                       dataType,
+                                       false, // override read-only?
+                                       true); // just test?
 }
 
 EmberAfStatus emberAfReadAttribute(uint8_t endpoint,
@@ -194,14 +193,14 @@ EmberAfStatus emberAfReadAttribute(uint8_t endpoint,
                                    uint8_t readLength,
                                    EmberAfAttributeType *dataType)
 {
-  return emAfReadAttribute(endpoint,
-                           cluster,
-                           attributeID,
-                           mask,
-                           EMBER_AF_NULL_MANUFACTURER_CODE,
-                           dataPtr,
-                           readLength,
-                           dataType);
+  return sli_zigbee_af_read_attribute(endpoint,
+                                      cluster,
+                                      attributeID,
+                                      mask,
+                                      EMBER_AF_NULL_MANUFACTURER_CODE,
+                                      dataPtr,
+                                      readLength,
+                                      dataType);
 }
 
 EmberAfStatus emberAfReadServerAttribute(uint8_t endpoint,
@@ -210,14 +209,14 @@ EmberAfStatus emberAfReadServerAttribute(uint8_t endpoint,
                                          uint8_t* dataPtr,
                                          uint8_t readLength)
 {
-  return emAfReadAttribute(endpoint,
-                           cluster,
-                           attributeID,
-                           CLUSTER_MASK_SERVER,
-                           EMBER_AF_NULL_MANUFACTURER_CODE,
-                           dataPtr,
-                           readLength,
-                           NULL);
+  return sli_zigbee_af_read_attribute(endpoint,
+                                      cluster,
+                                      attributeID,
+                                      CLUSTER_MASK_SERVER,
+                                      EMBER_AF_NULL_MANUFACTURER_CODE,
+                                      dataPtr,
+                                      readLength,
+                                      NULL);
 }
 
 EmberAfStatus emberAfReadClientAttribute(uint8_t endpoint,
@@ -226,14 +225,14 @@ EmberAfStatus emberAfReadClientAttribute(uint8_t endpoint,
                                          uint8_t* dataPtr,
                                          uint8_t readLength)
 {
-  return emAfReadAttribute(endpoint,
-                           cluster,
-                           attributeID,
-                           CLUSTER_MASK_CLIENT,
-                           EMBER_AF_NULL_MANUFACTURER_CODE,
-                           dataPtr,
-                           readLength,
-                           NULL);
+  return sli_zigbee_af_read_attribute(endpoint,
+                                      cluster,
+                                      attributeID,
+                                      CLUSTER_MASK_CLIENT,
+                                      EMBER_AF_NULL_MANUFACTURER_CODE,
+                                      dataPtr,
+                                      readLength,
+                                      NULL);
 }
 
 EmberAfStatus emberAfReadManufacturerSpecificServerAttribute(uint8_t endpoint,
@@ -243,14 +242,14 @@ EmberAfStatus emberAfReadManufacturerSpecificServerAttribute(uint8_t endpoint,
                                                              uint8_t* dataPtr,
                                                              uint8_t readLength)
 {
-  return emAfReadAttribute(endpoint,
-                           cluster,
-                           attributeID,
-                           CLUSTER_MASK_SERVER,
-                           manufacturerCode,
-                           dataPtr,
-                           readLength,
-                           NULL);
+  return sli_zigbee_af_read_attribute(endpoint,
+                                      cluster,
+                                      attributeID,
+                                      CLUSTER_MASK_SERVER,
+                                      manufacturerCode,
+                                      dataPtr,
+                                      readLength,
+                                      NULL);
 }
 
 EmberAfStatus emberAfReadManufacturerSpecificClientAttribute(uint8_t endpoint,
@@ -260,14 +259,14 @@ EmberAfStatus emberAfReadManufacturerSpecificClientAttribute(uint8_t endpoint,
                                                              uint8_t* dataPtr,
                                                              uint8_t readLength)
 {
-  return emAfReadAttribute(endpoint,
-                           cluster,
-                           attributeID,
-                           CLUSTER_MASK_CLIENT,
-                           manufacturerCode,
-                           dataPtr,
-                           readLength,
-                           NULL);
+  return sli_zigbee_af_read_attribute(endpoint,
+                                      cluster,
+                                      attributeID,
+                                      CLUSTER_MASK_CLIENT,
+                                      manufacturerCode,
+                                      dataPtr,
+                                      readLength,
+                                      NULL);
 }
 
 // Resolve the manufacturing code for an attribute when the Discover Attribute
@@ -276,10 +275,10 @@ EmberAfStatus emberAfReadManufacturerSpecificClientAttribute(uint8_t endpoint,
 // lowest attrId equal to or greater than startAttributeId. If two or more
 // such mfg-specific attrs have the same attrId, select the lower numbered
 // mfg-code. If no valid mfg code is resolved, return 0xFFFF.
-uint16_t emAfResolveMfgCodeForDiscoverAttribute(uint8_t endpoint,
-                                                EmberAfClusterId clusterId,
-                                                EmberAfAttributeId startAttributeId,
-                                                uint8_t clientServerMask)
+uint16_t sli_zigbee_af_resolve_mfg_code_for_discover_attribute(uint8_t endpoint,
+                                                               EmberAfClusterId clusterId,
+                                                               EmberAfAttributeId startAttributeId,
+                                                               uint8_t clientServerMask)
 {
   uint16_t attrMfgCode = 0xFFFFu;
   uint16_t candidateMfgCode;
@@ -330,7 +329,7 @@ uint16_t emAfResolveMfgCodeForDiscoverAttribute(uint8_t endpoint,
         // this is the first qualifying attr found;
         // else, this qualifying attr has a lower attrId than prior attr found;
         // else, this attrId equals prior, prefer this attr's lower mfg-code.
-        candidateMfgCode = emAfGetManufacturerCodeForAttribute(cluster, metadata);
+        candidateMfgCode = sli_zigbee_af_get_manufacturer_code_for_attribute(cluster, metadata);
         if (candidateMfgCode != EMBER_AF_NULL_MANUFACTURER_CODE
             && (!foundFirst
                 || metadata->attributeId < foundAttrId
@@ -372,7 +371,7 @@ bool emberAfReadSequentialAttributesAddToResponse(uint8_t endpoint,
   record.manufacturerCode = manufacturerCode;
 
   // If we don't have the cluster or it doesn't match the search, we're done.
-  if (cluster == NULL || !emAfMatchCluster(cluster, &record)) {
+  if (cluster == NULL || !sli_zigbee_af_match_cluster(cluster, &record)) {
     return true;
   }
 
@@ -384,7 +383,7 @@ bool emberAfReadSequentialAttributesAddToResponse(uint8_t endpoint,
     // unset).
     if (!emberAfClusterIsManufacturerSpecific(cluster)) {
       record.attributeId = metadata->attributeId;
-      if (!emAfMatchAttribute(cluster, metadata, &record)) {
+      if (!sli_zigbee_af_match_attribute(cluster, metadata, &record)) {
         continue;
       }
     }
@@ -421,17 +420,11 @@ bool emberAfReadSequentialAttributesAddToResponse(uint8_t endpoint,
 
 static void emberAfAttributeDecodeAndPrintCluster(EmberAfClusterId cluster, uint16_t mfgCode)
 {
-#if defined(UC_BUILD) || (defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_ATTRIBUTES))
   uint16_t index = emberAfFindClusterNameIndexWithMfgCode(cluster, mfgCode);
   if (index != 0xFFFFu) {
     emberAfAttributesPrintln("(%p)", zclClusterNames[index].name);
   }
-  #if !defined(UC_BUILD)
-  emberAfAttributesFlush();
-  #else
   emberAfAttributesPrintln("");
-  #endif
-#endif //defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_ATTRIBUTES)
 }
 
 void emberAfPrintAttributeTable(void)
@@ -444,7 +437,7 @@ void emberAfPrintAttributeTable(void)
   for (endpointIndex = 0;
        endpointIndex < emberAfEndpointCount();
        endpointIndex++) {
-    EmberAfDefinedEndpoint *ep = &(emAfEndpoints[endpointIndex]);
+    EmberAfDefinedEndpoint *ep = &(sli_zigbee_af_endpoints[endpointIndex]);
     emberAfAttributesPrintln("ENDPOINT %x", ep->endpoint);
     emberAfAttributesPrintln("clus / side / attr / mfg  /type(len)/ rw / storage / data (raw)");
     emberAfAttributesFlush();
@@ -467,7 +460,7 @@ void emberAfPrintAttributeTable(void)
                                cluster->clusterId,
                                (emberAfAttributeIsClient(metaData) ? "clnt" : "srvr"),
                                metaData->attributeId);
-        mfgCode = emAfGetManufacturerCodeForAttribute(cluster, metaData);
+        mfgCode = sli_zigbee_af_get_manufacturer_code_for_attribute(cluster, metaData);
         if (mfgCode == EMBER_AF_NULL_MANUFACTURER_CODE) {
           emberAfAttributesPrint("----");
         } else {
@@ -483,16 +476,16 @@ void emberAfPrintAttributeTable(void)
                                    ? "extern "
                                    : "  RAM  ")));
         emberAfAttributesFlush();
-        status = emAfReadAttribute(ep->endpoint,
-                                   cluster->clusterId,
-                                   metaData->attributeId,
-                                   (emberAfAttributeIsClient(metaData)
-                                    ? CLUSTER_MASK_CLIENT
-                                    : CLUSTER_MASK_SERVER),
-                                   mfgCode,
-                                   data,
-                                   ATTRIBUTE_LARGEST,
-                                   NULL);
+        status = sli_zigbee_af_read_attribute(ep->endpoint,
+                                              cluster->clusterId,
+                                              metaData->attributeId,
+                                              (emberAfAttributeIsClient(metaData)
+                                               ? CLUSTER_MASK_CLIENT
+                                               : CLUSTER_MASK_SERVER),
+                                              mfgCode,
+                                              data,
+                                              ATTRIBUTE_LARGEST,
+                                              NULL);
         if (status == EMBER_ZCL_STATUS_UNSUPPORTED_ATTRIBUTE) {
           emberAfAttributesPrintln("Unsupported");
         } else {
@@ -542,14 +535,14 @@ EmberAfStatus emberAfRetrieveAttributeAndCraftResponse(uint8_t endpoint,
                            clusterId, attrId, mask, manufacturerCode);
 
   // lookup the attribute in our table
-  status = emAfReadAttribute(endpoint,
-                             clusterId,
-                             attrId,
-                             mask,
-                             manufacturerCode,
-                             data,
-                             ATTRIBUTE_LARGEST,
-                             &dataType);
+  status = sli_zigbee_af_read_attribute(endpoint,
+                                        clusterId,
+                                        attrId,
+                                        mask,
+                                        manufacturerCode,
+                                        data,
+                                        ATTRIBUTE_LARGEST,
+                                        &dataType);
   if (status == EMBER_ZCL_STATUS_SUCCESS) {
     dataLen = emberAfAttributeValueSize(dataType, data, (uint16_t) sizeof(data));
     if (dataLen == 0u || (readLength - 4u) < dataLen) {
@@ -689,15 +682,15 @@ EmberAfStatus emberAfAppendAttributeReportFields(uint8_t endpoint,
 // the table or the data is too large, returns true and writes to dataPtr
 // if the attribute is supported and the readLength specified is less than
 // the length of the data.
-EmberAfStatus emAfWriteAttribute(uint8_t endpoint,
-                                 EmberAfClusterId cluster,
-                                 EmberAfAttributeId attributeID,
-                                 uint8_t mask,
-                                 uint16_t manufacturerCode,
-                                 uint8_t *data,
-                                 EmberAfAttributeType dataType,
-                                 bool overrideReadOnlyAndDataType,
-                                 bool justTest)
+EmberAfStatus sli_zigbee_af_write_attribute(uint8_t endpoint,
+                                            EmberAfClusterId cluster,
+                                            EmberAfAttributeId attributeID,
+                                            uint8_t mask,
+                                            uint16_t manufacturerCode,
+                                            uint8_t *data,
+                                            EmberAfAttributeType dataType,
+                                            bool overrideReadOnlyAndDataType,
+                                            bool justTest)
 {
   EmberAfAttributeMetadata *metadata = NULL;
   EmberAfAttributeSearchRecord record;
@@ -706,21 +699,31 @@ EmberAfStatus emAfWriteAttribute(uint8_t endpoint,
   record.clusterMask = mask;
   record.attributeId = attributeID;
   record.manufacturerCode = manufacturerCode;
-  emAfReadOrWriteAttribute(&record,
-                           &metadata,
-                           NULL,   // buffer
-                           0,      // buffer size
-                           false); // write?
+
+  EmberAfStatus status = sli_zigbee_af_read_or_write_attribute(&record,
+                                                               &metadata,
+                                                               NULL, // buffer
+                                                               0, // buffer size
+                                                               false); // write?
+  (void)status;
 
   // if we dont support that attribute
   if (metadata == NULL) {
-    emberAfAttributesPrintln("%pep %x clus %2x attr %2x not supported",
-                             "WRITE ERR: ",
-                             endpoint,
-                             cluster,
-                             attributeID);
-    emberAfAttributesFlush();
-    return EMBER_ZCL_STATUS_UNSUPPORTED_ATTRIBUTE;
+#if defined(EZSP_HOST) && defined(SL_CATALOG_ZIGBEE_AF_SUPPORT_PRESENT)
+    // If no attribute was found then try searching on NCP.
+    if (status == EMBER_ZCL_STATUS_UNSUPPORTED_ATTRIBUTE) {
+      return sli_zigbee_af_support_write_attribute(&record, dataType, data, overrideReadOnlyAndDataType, justTest);
+    } else
+#endif
+    {
+      emberAfAttributesPrintln("%pep %x clus %2x attr %2x not supported",
+                               "WRITE ERR: ",
+                               endpoint,
+                               cluster,
+                               attributeID);
+      emberAfAttributesFlush();
+      return EMBER_ZCL_STATUS_UNSUPPORTED_ATTRIBUTE;
+    }
   }
 
   // if the data type specified by the caller is incorrect
@@ -795,24 +798,24 @@ EmberAfStatus emAfWriteAttribute(uint8_t endpoint,
 
     // Pre-write attribute callback specific
     // to the cluster that the attribute lives in.
-    status = emAfClusterPreAttributeChangedCallback(endpoint,
-                                                    cluster,
-                                                    attributeID,
-                                                    mask,
-                                                    manufacturerCode,
-                                                    dataType,
-                                                    dataSize,
-                                                    data);
+    status = sli_zigbee_af_cluster_pre_attribute_changed_callback(endpoint,
+                                                                  cluster,
+                                                                  attributeID,
+                                                                  mask,
+                                                                  manufacturerCode,
+                                                                  dataType,
+                                                                  dataSize,
+                                                                  data);
     if (status != EMBER_ZCL_STATUS_SUCCESS) {
       return status;
     }
 
     // write the attribute
-    status = emAfReadOrWriteAttribute(&record,
-                                      NULL,    // metadata
-                                      data,
-                                      0,       // buffer size - unused
-                                      true);   // write?
+    status = sli_zigbee_af_read_or_write_attribute(&record,
+                                                   NULL, // metadata
+                                                   data,
+                                                   0, // buffer size - unused
+                                                   true); // write?
 
     if (status != EMBER_ZCL_STATUS_SUCCESS) {
       return status;
@@ -820,7 +823,7 @@ EmberAfStatus emAfWriteAttribute(uint8_t endpoint,
 
     // Save the attribute to token if needed
     // Function itself will weed out tokens that are not tokenized.
-    emAfSaveAttributeToToken(data, endpoint, cluster, metadata);
+    sli_zigbee_af_save_attribute_to_token(data, endpoint, cluster, metadata);
 
     emberAfReportingAttributeChangeCallback(endpoint,
                                             cluster,
@@ -843,11 +846,11 @@ EmberAfStatus emAfWriteAttribute(uint8_t endpoint,
 
     // Post-write attribute callback specific
     // to the cluster that the attribute lives in.
-    emAfClusterAttributeChangedCallback(endpoint,
-                                        cluster,
-                                        attributeID,
-                                        mask,
-                                        manufacturerCode);
+    sli_zigbee_af_cluster_attribute_changed_callback(endpoint,
+                                                     cluster,
+                                                     attributeID,
+                                                     mask,
+                                                     manufacturerCode);
   } else {
     // bug: 11618, we are not handling properly external attributes
     // in this case... We need to do something. We don't really
@@ -862,14 +865,14 @@ EmberAfStatus emAfWriteAttribute(uint8_t endpoint,
 // If dataPtr is NULL, no data is copied to the caller.
 // readLength should be 0 in that case.
 
-EmberAfStatus emAfReadAttribute(uint8_t endpoint,
-                                EmberAfClusterId cluster,
-                                EmberAfAttributeId attributeID,
-                                uint8_t mask,
-                                uint16_t manufacturerCode,
-                                uint8_t *dataPtr,
-                                uint16_t readLength,
-                                EmberAfAttributeType *dataType)
+EmberAfStatus sli_zigbee_af_read_attribute(uint8_t endpoint,
+                                           EmberAfClusterId cluster,
+                                           EmberAfAttributeId attributeID,
+                                           uint8_t mask,
+                                           uint16_t manufacturerCode,
+                                           uint8_t *dataPtr,
+                                           uint16_t readLength,
+                                           EmberAfAttributeType *dataType)
 {
   EmberAfAttributeMetadata *metadata = NULL;
   EmberAfAttributeSearchRecord record;
@@ -879,11 +882,11 @@ EmberAfStatus emAfReadAttribute(uint8_t endpoint,
   record.clusterMask = mask;
   record.attributeId = attributeID;
   record.manufacturerCode = manufacturerCode;
-  status = emAfReadOrWriteAttribute(&record,
-                                    &metadata,
-                                    dataPtr,
-                                    readLength,
-                                    false); // write?
+  status = sli_zigbee_af_read_or_write_attribute(&record,
+                                                 &metadata,
+                                                 dataPtr,
+                                                 readLength,
+                                                 false); // write?
 
   if (status == EMBER_ZCL_STATUS_SUCCESS) {
     // It worked!  If the user asked for the type, set it before returning.
@@ -894,6 +897,20 @@ EmberAfStatus emAfReadAttribute(uint8_t endpoint,
     if (status == EMBER_ZCL_STATUS_INSUFFICIENT_SPACE) {
       emberAfAttributesPrintln("READ: attribute size too large for caller");
       emberAfAttributesFlush();
+    }
+#if defined(EZSP_HOST) && defined(SL_CATALOG_ZIGBEE_AF_SUPPORT_PRESENT)
+    else if (status == EMBER_ZCL_STATUS_UNSUPPORTED_ATTRIBUTE) {
+      // If no attribute was found then try searching on NCP.
+      // It's not possible to return metadata of attribute which reside on NCP, but we can retreive dataType.
+      EmberAfAttributeType attDataType;
+      status = sli_zigbee_af_support_read_attribute(&record, &attDataType, dataPtr, readLength);
+      if (status == EMBER_ZCL_STATUS_SUCCESS && dataType != NULL) {
+        *dataType = attDataType;
+      }
+    }
+#endif
+    else {
+      // to Prevent Misra warning
     }
   }
 

@@ -17,9 +17,7 @@
 
 #include "../../include/af.h"
 #include "zll-on-off-server.h"
-#ifdef UC_BUILD
 #include "zap-cluster-command-parser.h"
-#endif
 
 #define ZLL_ON_OFF_CLUSTER_ON_OFF_CONTROL_ACCEPT_ONLY_WHEN_ON_MASK BIT(0)
 
@@ -129,9 +127,9 @@ void emberAfOnOffClusterServerTickCallback(uint8_t endpoint)
     }
   }
 
-  slxu_zigbee_zcl_schedule_server_tick(endpoint,
-                                       ZCL_ON_OFF_CLUSTER_ID,
-                                       MILLISECOND_TICKS_PER_SECOND / 10);
+  sl_zigbee_zcl_schedule_server_tick(endpoint,
+                                     ZCL_ON_OFF_CLUSTER_ID,
+                                     MILLISECOND_TICKS_PER_SECOND / 10);
 }
 
 bool emberAfOnOffClusterOnWithRecallGlobalSceneCallback(void)
@@ -176,7 +174,6 @@ bool emberAfOnOffClusterOnWithRecallGlobalSceneCallback(void)
   return true;
 }
 
-#ifdef UC_BUILD
 bool emberAfOnOffClusterOffWithEffectCallback(EmberAfClusterCommand *cmd)
 {
   sl_zcl_on_off_cluster_off_with_effect_command_t cmd_data;
@@ -316,157 +313,17 @@ bool emberAfOnOffClusterOnWithTimedOffCallback(EmberAfClusterCommand *cmd)
   // 0xFFFF, the device shall then update the device every 1/10th second until
   // both the OnTime and OffWaitTime attributes are equal to 0x0000.
   if (onTimeAttribute < 0xFFFF && offWaitTimeAttribute < 0xFFFF) {
-    slxu_zigbee_zcl_schedule_server_tick(endpoint,
-                                         ZCL_ON_OFF_CLUSTER_ID,
-                                         MILLISECOND_TICKS_PER_SECOND / 10);
+    sl_zigbee_zcl_schedule_server_tick(endpoint,
+                                       ZCL_ON_OFF_CLUSTER_ID,
+                                       MILLISECOND_TICKS_PER_SECOND / 10);
   } else {
-    slxu_zigbee_zcl_deactivate_server_tick(endpoint, ZCL_ON_OFF_CLUSTER_ID);
+    sl_zigbee_zcl_deactivate_server_tick(endpoint, ZCL_ON_OFF_CLUSTER_ID);
   }
 
   kickout:
   emberAfSendImmediateDefaultResponse(status);
   return true;
 }
-#else
-bool emberAfOnOffClusterOffWithEffectCallback(uint8_t effectId, uint8_t effectVariant)
-{
-  EmberAfStatus status = EMBER_ZCL_STATUS_INVALID_VALUE;
-  bool globalSceneControl;
-  uint8_t endpoint = emberAfCurrentEndpoint();
-
-  // Ensure parameters have values withing proper range.
-  if (effectId > EMBER_ZCL_ON_OFF_EFFECT_IDENTIFIER_DYING_LIGHT
-      || effectVariant > EMBER_ZCL_ON_OFF_DELAYED_ALL_OFF_EFFECT_VARIANT_50_PERCENT_DIM_DOWN_IN_0P8_SECONDS_THEN_FADE_TO_OFF_IN_12_SECONDS
-      || (effectId == EMBER_ZCL_ON_OFF_EFFECT_IDENTIFIER_DYING_LIGHT
-          && effectVariant > EMBER_ZCL_ON_OFF_DYING_LIGHT_EFFECT_VARIANT_20_PERCENTER_DIM_UP_IN_0P5_SECONDS_THEN_FADE_TO_OFF_IN_1_SECOND)) {
-    goto kickout;
-  }
-
-  // If the GlobalSceneControl attribute is equal to true, the application on
-  // the associated endpoint shall store its settings in its global scene then
-  // set the GlobalSceneControl attribute to false.
-  status = readGlobalSceneControl(endpoint, &globalSceneControl);
-  if (status != EMBER_ZCL_STATUS_SUCCESS) {
-    goto kickout;
-  } else if (globalSceneControl) {
-    status = emberAfScenesClusterStoreCurrentSceneCallback(endpoint,
-                                                           ZCL_SCENES_GLOBAL_SCENE_GROUP_ID,
-                                                           ZCL_SCENES_GLOBAL_SCENE_SCENE_ID);
-    if (status != EMBER_ZCL_STATUS_SUCCESS) {
-      emberAfOnOffClusterPrintln("ERR: %ping %p %x", "stor", "global scene", status);
-      goto kickout;
-    }
-    globalSceneControl = false;
-    status = writeGlobalSceneControl(endpoint, globalSceneControl);
-    if (status != EMBER_ZCL_STATUS_SUCCESS) {
-      goto kickout;
-    }
-  }
-
-  // The application will handle the actual effect and variant.
-  status = emberAfPluginZllOnOffServerOffWithEffectCallback(endpoint,
-                                                            effectId,
-                                                            effectVariant);
-  if (status == EMBER_ZCL_STATUS_SUCCESS) {
-    // If the application handled the effect, the endpoint shall enter its
-    // "off" state, update the OnOff attribute accordingly, and set the OnTime
-    // attribute to 0x0000.
-    status = emberAfOnOffClusterSetValueCallback(endpoint, ZCL_OFF_COMMAND_ID, false);
-    if (status == EMBER_ZCL_STATUS_SUCCESS) {
-      status = writeOnTime(endpoint, 0x0000);
-    }
-  }
-
-  kickout:
-  emberAfSendImmediateDefaultResponse(status);
-  return true;
-}
-
-bool emberAfOnOffClusterOnWithTimedOffCallback(uint8_t onOffControl, uint16_t onTime, uint16_t offWaitTime)
-{
-  EmberAfStatus status;
-  uint16_t onTimeAttribute, offWaitTimeAttribute;
-  bool onOffAttribute;
-  uint8_t endpoint = emberAfCurrentEndpoint();
-
-  // The valid range of the OnTime and OffWaitTime fields is 0x0000 to 0xFFFF.
-  if (onTime == 0xFFFF || offWaitTime == 0xFFFF) {
-    status = EMBER_ZCL_STATUS_INVALID_FIELD;
-    goto kickout;
-  }
-
-  // On receipt of this command, if the accept only when on sub-field of the
-  // on/off control field is set to 1 and the value of the OnOff attribute is
-  // equal to 0x00 (off), the command shall be discarded.
-  status = readOnOff(endpoint, &onOffAttribute);
-  if (status != EMBER_ZCL_STATUS_SUCCESS) {
-    goto kickout;
-  } else if ((onOffControl & ZLL_ON_OFF_CLUSTER_ON_OFF_CONTROL_ACCEPT_ONLY_WHEN_ON_MASK)
-             && !onOffAttribute) {
-    goto kickout;
-  }
-
-  status = readOnTime(endpoint, &onTimeAttribute);
-  if (status != EMBER_ZCL_STATUS_SUCCESS) {
-    goto kickout;
-  }
-  status = readOffWaitTime(endpoint, &offWaitTimeAttribute);
-  if (status != EMBER_ZCL_STATUS_SUCCESS) {
-    goto kickout;
-  }
-
-  // If the value of the OffWaitTime attribute is greater than zero and the
-  // value of the OnOff attribute is equal to 0x00, then the device shall set
-  // the OffWaitTime attribute to the minimum of the OffWaitTime attribute and
-  // the value specified in the off wait time field.  In all other cases, the
-  // device shall set the OnTime attribute to the maximum of the OnTime
-  // attribute and the value specified in the on time field, set the
-  // OffWaitTime attribute to the value specified in the off wait time field
-  // and set the OnOff attribute to 0x01 (on).
-  if (0x0000 < offWaitTimeAttribute && !onOffAttribute) {
-    if (offWaitTime < offWaitTimeAttribute) {
-      offWaitTimeAttribute = offWaitTime;
-    }
-    status = writeOffWaitTime(endpoint, offWaitTimeAttribute);
-    if (status != EMBER_ZCL_STATUS_SUCCESS) {
-      goto kickout;
-    }
-  } else {
-    if (onTimeAttribute < onTime) {
-      onTimeAttribute = onTime;
-    }
-    status = writeOnTime(endpoint, onTimeAttribute);
-    if (status != EMBER_ZCL_STATUS_SUCCESS) {
-      goto kickout;
-    }
-    offWaitTimeAttribute = offWaitTime;
-    status = writeOffWaitTime(endpoint, offWaitTimeAttribute);
-    if (status != EMBER_ZCL_STATUS_SUCCESS) {
-      goto kickout;
-    }
-    onOffAttribute = true;
-    status = writeOnOff(endpoint, onOffAttribute);
-    if (status != EMBER_ZCL_STATUS_SUCCESS) {
-      goto kickout;
-    }
-  }
-
-  // If the values of the OnTime and OffWaitTime attributes are both less than
-  // 0xFFFF, the device shall then update the device every 1/10th second until
-  // both the OnTime and OffWaitTime attributes are equal to 0x0000.
-  if (onTimeAttribute < 0xFFFF && offWaitTimeAttribute < 0xFFFF) {
-    slxu_zigbee_zcl_schedule_server_tick(endpoint,
-                                         ZCL_ON_OFF_CLUSTER_ID,
-                                         MILLISECOND_TICKS_PER_SECOND / 10);
-  } else {
-    slxu_zigbee_zcl_deactivate_server_tick(endpoint, ZCL_ON_OFF_CLUSTER_ID);
-  }
-
-  kickout:
-  emberAfSendImmediateDefaultResponse(status);
-  return true;
-}
-#endif // UC_BUILD
 
 EmberAfStatus emberAfPluginZllOnOffServerOffZllExtensions(const EmberAfClusterCommand *cmd)
 {
@@ -553,8 +410,6 @@ EmberAfStatus emberAfPluginZllOnOffServerLevelControlZllExtensions(uint8_t endpo
   }
 }
 
-#ifdef UC_BUILD
-
 uint32_t emberAfZllOnOffClusterServerCommandParse(sl_service_opcode_t opcode,
                                                   sl_service_function_context_t *context)
 {
@@ -587,5 +442,3 @@ uint32_t emberAfZllOnOffClusterServerCommandParse(sl_service_opcode_t opcode,
           ? EMBER_ZCL_STATUS_SUCCESS
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
-
-#endif // UC_BUILD

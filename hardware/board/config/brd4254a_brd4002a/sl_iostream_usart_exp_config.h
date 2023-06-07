@@ -84,18 +84,18 @@
 // <<< sl:start pin_tool >>>
 // <usart signal=TX,RX,(CTS),(RTS)> SL_IOSTREAM_USART_EXP
 // $[USART_SL_IOSTREAM_USART_EXP]
-#define SL_IOSTREAM_USART_EXP_PERIPHERAL         USART3
-#define SL_IOSTREAM_USART_EXP_PERIPHERAL_NO      3
+#define SL_IOSTREAM_USART_EXP_PERIPHERAL         USART2
+#define SL_IOSTREAM_USART_EXP_PERIPHERAL_NO      2
 
-// USART3 TX on PB6
+// USART2 TX on PB6
 #define SL_IOSTREAM_USART_EXP_TX_PORT            gpioPortB
 #define SL_IOSTREAM_USART_EXP_TX_PIN             6
-#define SL_IOSTREAM_USART_EXP_TX_LOC             10
+#define SL_IOSTREAM_USART_EXP_TX_LOC             9
 
-// USART3 RX on PB7
+// USART2 RX on PB7
 #define SL_IOSTREAM_USART_EXP_RX_PORT            gpioPortB
 #define SL_IOSTREAM_USART_EXP_RX_PIN             7
-#define SL_IOSTREAM_USART_EXP_RX_LOC             10
+#define SL_IOSTREAM_USART_EXP_RX_LOC             9
 
 
 

@@ -39,7 +39,6 @@
                 .syntax  unified
                 .arch    armv8-m.main
 
-
                 .section    .stack
                 .align      9
                 #ifdef __STACK_SIZE
@@ -72,11 +71,11 @@
  __HeapLimit:
                 .size       __HeapLimit, . - __HeapLimit
 
-                #define __INITIAL_SP     __StackTop
+#define __INITIAL_SP     __StackTop
                 #if defined(SL_TRUSTZONE_SECURE)
-                #define __STACK_LIMIT    __StackLimit
+#define __STACK_LIMIT    __StackLimit
                 #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
-                #define __STACK_SEAL     __StackSeal
+#define __STACK_SEAL     __StackSeal
                 #endif
                 #endif // SL_TRUSTZONE_SECURE
 
@@ -102,7 +101,6 @@ __Vectors:
                 .long    sl_app_properties                  /*     Application properties */
                 .long    PendSV_Handler                     /*  -2 PendSV Handler */
                 .long    SysTick_Handler                    /*  -1 SysTick Handler */
-
 
     /* External interrupts */
                 .long    CRYPTOACC_IRQHandler    /* 0 - CRYPTOACC */
@@ -163,8 +161,8 @@ __Vectors:
                 .long    SW3_IRQHandler          /* 55 - SW3 */
                 .long    KERNEL0_IRQHandler      /* 56 - KERNEL0 */
                 .long    KERNEL1_IRQHandler      /* 57 - KERNEL1 */
-                .long    M33CTI0_IRQHandler      /* 58 - M33CTI0 */
-                .long    M33CTI1_IRQHandler      /* 59 - M33CTI1 */
+                .long    Default_Handler         /* Reserved */
+                .long    Default_Handler         /* Reserved */
                 .long    EMUEFP_IRQHandler       /* 60 - EMUEFP */
                 .long    DCDC_IRQHandler         /* 61 - DCDC */
                 .long    EUART0_RX_IRQHandler    /* 62 - EUART0_RX */
@@ -175,7 +173,6 @@ __Vectors:
 __Vectors_End:
                 .equ     __Vectors_Size, __Vectors_End - __Vectors
                 .size    __Vectors, . - __Vectors
-
 
                 .thumb
                 .section .text
@@ -245,7 +242,7 @@ Reset_Handler:
 .L_loop2_done:
 
                 #ifndef __START
-                #define __START _start
+#define __START _start
                 #endif
                 bl      __START
 
@@ -335,8 +332,6 @@ Default_Handler:
                 Set_Default_Handler  SW3_IRQHandler
                 Set_Default_Handler  KERNEL0_IRQHandler
                 Set_Default_Handler  KERNEL1_IRQHandler
-                Set_Default_Handler  M33CTI0_IRQHandler
-                Set_Default_Handler  M33CTI1_IRQHandler
                 Set_Default_Handler  EMUEFP_IRQHandler
                 Set_Default_Handler  DCDC_IRQHandler
                 Set_Default_Handler  EUART0_RX_IRQHandler

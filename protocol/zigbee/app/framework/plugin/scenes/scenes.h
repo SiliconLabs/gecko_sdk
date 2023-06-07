@@ -45,26 +45,13 @@
  * @{
  */
 
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #include "scenes-config.h"
 #if (EMBER_AF_PLUGIN_SCENES_NAME_SUPPORT == 1)
 #define NAME_SUPPORT
 #endif
-#else // !UC_BUILD
-// In Appbuilder, the EMBER_AF_PLUGIN_SCENES_USE_TOKENS is defined
-// (in auto generated AF header) if-and-only-if the token is enabled by user,
-// so just redefine it to 1 else to 0.
-#ifdef EMBER_AF_PLUGIN_SCENES_USE_TOKENS
-#undef EMBER_AF_PLUGIN_SCENES_USE_TOKENS
-#define EMBER_AF_PLUGIN_SCENES_USE_TOKENS 1
-#else
-#define EMBER_AF_PLUGIN_SCENES_USE_TOKENS 0
-#endif // EMBER_AF_PLUGIN_SCENES_USE_TOKENS
-#ifdef EMBER_AF_PLUGIN_SCENES_NAME_SUPPORT
-#define NAME_SUPPORT
-#endif
-#endif // UC_BUILD
 
 EmberAfStatus emberAfScenesSetSceneCountAttribute(uint8_t endpoint,
                                                   uint8_t newCount);
@@ -180,4 +167,4 @@ bool emberAfPluginScenesServerCustomRecallSceneCallback(
 /** @} */ // end of name API
 /** @} */ // end of scenes-server
 
-void emAfPluginScenesServerPrintInfo(void);
+void sli_zigbee_af_scenes_server_print_info(void);

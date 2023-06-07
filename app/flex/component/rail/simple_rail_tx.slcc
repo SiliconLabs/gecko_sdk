@@ -20,6 +20,7 @@ requires:
   - name: "a_radio_config"
   - name: "status"
   - name: "device_has_radio"
+  - name: "sl_flex_rail_config"
 recommends:
   - id: "radio_config_simple_rail_singlephy"
 source:

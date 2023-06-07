@@ -19,9 +19,7 @@
 #include "app/framework/include/af.h"
 #include "power-consumption-model.h"
 
-#ifdef UC_BUILD
 #include "power-consumption-model-config.h"
-#endif // UC_BUILD
 
 //-----------------------------------------------------------------------------
 // Plugin private macros
@@ -94,14 +92,9 @@ static void lightbulbInit(void);
 ///////////////////////////////////////////////////////////////////////////////
 // Plugin event handlers
 // Event variable to create an event
-#ifdef UC_BUILD
 sl_zigbee_event_t emberAfPluginPowerConsumptionModelReadEvent;
 #define powerConsumptionModelRead (&emberAfPluginPowerConsumptionModelReadEvent)
-void emberAfPluginPowerConsumptionModelReadEventHandler(SLXU_UC_EVENT);
-#else
-EmberEventControl emberAfPluginPowerConsumptionModelReadEventControl;
-#define powerConsumptionModelRead emberAfPluginPowerConsumptionModelReadEventControl
-#endif
+void emberAfPluginPowerConsumptionModelReadEventHandler(sl_zigbee_event_t * event);
 
 //-----------------------------------------------------------------------------
 // This function reads on_off and level control cluster and returns 0 when
@@ -287,13 +280,11 @@ static void lightbulbInit(void)
   totalEnergyConsumptionMilliWattSecond = 0;
 }
 
-#ifdef UC_BUILD
 #include "sl_cli.h"
 void emberAfPowerConsumptionModelPrintAttributesCommand(sl_cli_command_arg_t *arguments)
 {
   emberAfPowerConsumptionModelPrintAttributes();
 }
-#endif
 
 // This function read cumulative energy and instantaneous power and print it
 void emberAfPowerConsumptionModelPrintAttributes(void)
@@ -338,15 +329,13 @@ void emberAfPowerConsumptionModelPrintAttributes(void)
 /// Event triggering
 // Initiating call back server
 
-#ifdef UC_BUILD
-
 void emberAfPluginPowerConsumptionModelInitCallback(uint8_t init_level)
 {
   switch (init_level) {
     case SL_ZIGBEE_INIT_LEVEL_EVENT:
     {
-      slxu_zigbee_event_init(powerConsumptionModelRead,
-                             emberAfPluginPowerConsumptionModelReadEventHandler);
+      sl_zigbee_event_init(powerConsumptionModelRead,
+                           emberAfPluginPowerConsumptionModelReadEventHandler);
       break;
     }
 
@@ -359,28 +348,17 @@ void emberAfPluginPowerConsumptionModelInitCallback(uint8_t init_level)
     case SL_ZIGBEE_INIT_LEVEL_DONE:
     {
       simpleMeteringClusterSetup();
-      slxu_zigbee_event_set_active(powerConsumptionModelRead);
+      sl_zigbee_event_set_active(powerConsumptionModelRead);
       break;
     }
   }
 }
 
-#else // !UC_BUILD
-
-void emberAfPluginPowerConsumptionModelInitCallback(void)
-{
-  lightbulbInit();
-  simpleMeteringClusterSetup();
-  slxu_zigbee_event_set_active(powerConsumptionModelRead);
-}
-
-#endif // UC_BUILD
-
 // After event triggered, this function is called
-void emberAfPluginPowerConsumptionModelReadEventHandler(SLXU_UC_EVENT)
+void emberAfPluginPowerConsumptionModelReadEventHandler(sl_zigbee_event_t * event)
 {
-  slxu_zigbee_event_set_delay_ms(powerConsumptionModelRead,
-                                 SAMPLE_PERIOD_MILLI_SECOND);
+  sl_zigbee_event_set_delay_ms(powerConsumptionModelRead,
+                               SAMPLE_PERIOD_MILLI_SECOND);
   refreshingEnergyConsumptionData();
 }
 

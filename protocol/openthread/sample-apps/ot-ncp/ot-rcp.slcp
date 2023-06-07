@@ -12,6 +12,7 @@ component:
     instance:
       - vcom
   - id: rail_util_pti
+  - id: bootloader_interface
 
 include:
   - path: .

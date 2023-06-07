@@ -31,6 +31,11 @@
 #ifndef SL_NCP_FREERTOS_CONFIG_H
 #define SL_NCP_FREERTOS_CONFIG_H
 
+/***********************************************************************************************//**
+ * @addtogroup ncp
+ * @{
+ **************************************************************************************************/
+
 // <<< Use Configuration Wizard in Context Menu >>>
 
 // <o SL_NCP_TASK_PRIO> Priority of the NCP OS task
@@ -50,4 +55,5 @@
 
 // <<< end of configuration section >>>
 
+/** @} (end addtogroup ncp) */
 #endif // SL_NCP_FREERTOS_CONFIG_H

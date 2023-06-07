@@ -26,10 +26,10 @@ provides:
 requires:
   - name: bootloader_interface
   - name: silabs_core_sl_malloc
-  - name: simple_timer
+  - name: app_timer
   - name: status
 recommends:
-  - id: simple_timer
+  - id: app_timer
 template_contribution:
   - name: component_catalog
     value: btmesh_blob_storage

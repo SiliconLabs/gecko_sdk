@@ -38,6 +38,28 @@ WEAK(void emberAfIncomingMessageCallback(
   (void)message;
 }
 
+#if defined(EMBER_AF_NCP) && defined(SL_CATALOG_ZIGBEE_AF_SUPPORT_PRESENT)
+extern void sli_zigbee_af_incoming_message_handler(EmberIncomingMessageType type,
+                                                   EmberApsFrame *apsFrame,
+                                                   uint8_t lastHopLqi,
+                                                   int8_t lastHopRssi,
+                                                   uint16_t messageLength,
+                                                   uint8_t *messageContents);
+
+WEAK(bool emberAfSupportIncomingMessageCallback(EmberApsFrame *apsFrame))
+{
+  (void)apsFrame;
+  return false;
+}
+
+bool emberAfSupportIncomingMessageHandler(EmberApsFrame *apsFrame)
+{
+  return ((sli_zb_af_support_incoming_message(apsFrame)) \
+          || (emberAfSupportIncomingMessageCallback(apsFrame)));
+}
+
+#endif // defined(EMBER_AF_NCP) && defined(SL_CATALOG_ZIGBEE_AF_SUPPORT_PRESENT)
+
 // A callback invoked when receiving a message.
 void emberIncomingMessageHandler(
   // Incoming message type
@@ -48,21 +70,41 @@ void emberIncomingMessageHandler(
   EmberMessageBuffer message)
 {
   emberAfPushCallbackNetworkIndex();
-  emAfIncomingMessage(type, apsFrame, message);
-  emberAfIncomingMessageCallback(type, apsFrame, message);
+#if defined(EMBER_AF_NCP) && defined(SL_CATALOG_ZIGBEE_AF_SUPPORT_PRESENT)
+  // Attempt to handle incoming message on NCP. Messages for GP endpoint are handled here.
+  // All other messages are passed up to the host.
+  if (emberAfSupportIncomingMessageHandler(apsFrame)) {
+    uint8_t lastHopLqi;
+    int8_t lastHopRssi;
+
+    emberGetLastHopLqi(&lastHopLqi);
+    emberGetLastHopRssi(&lastHopRssi);
+
+    sli_zigbee_af_incoming_message_handler(type,
+                                           apsFrame,
+                                           lastHopLqi,
+                                           lastHopRssi,
+                                           sli_legacy_buffer_manager_get_buffer_length(message),
+                                           sli_legacy_buffer_manager_get_buffer_pointer(message));
+  } else
+#endif // defined(EMBER_AF_NCP) && defined(SL_CATALOG_ZIGBEE_AF_SUPPORT_PRESENT)
+  {
+    sli_zb_af_incoming_message(type, apsFrame, message);
+    emberAfIncomingMessageCallback(type, apsFrame, message);
+  }
   emberAfPopNetworkIndex();
 }
 
 // -----------------------------------------------------------------------------
 // A callback invoked when a messageSend has been tried by the stack.
 
-WEAK(void emAfMessageSentCallback(EmberOutgoingMessageType type,
-                                  uint16_t indexOrDestination,
-                                  EmberApsFrame *apsFrame,
-                                  EmberMessageBuffer message,
-                                  EmberStatus status))
+WEAK(void sli_zigbee_af_message_sent_callback(EmberOutgoingMessageType type,
+                                              uint16_t indexOrDestination,
+                                              EmberApsFrame *apsFrame,
+                                              EmberMessageBuffer message,
+                                              EmberStatus status))
 {
-  emAfMessageSent(type, indexOrDestination, apsFrame, message, status);
+  sli_zigbee_af_message_sent(type, indexOrDestination, apsFrame, message, status);
 }
 
 void emberMessageSentHandler(
@@ -78,13 +120,13 @@ void emberMessageSentHandler(
   EmberStatus status)
 {
   emberAfPushCallbackNetworkIndex();
-  emAfMessageSentCallback(type, indexOrDestination, apsFrame, message, status);
+  sli_zigbee_af_message_sent_callback(type, indexOrDestination, apsFrame, message, status);
   emberAfPopNetworkIndex();
 }
 
 // -----------------------------------------------------------------------------
-// Weak implementation of emAfTrustCenterJoinCallback
-WEAK(EmberJoinDecision emAfTrustCenterJoinCallback(
+// Weak implementation of sli_zigbee_af_trust_center_join_callback
+WEAK(EmberJoinDecision sli_zigbee_af_trust_center_join_callback(
        // Joining node's id
        EmberNodeId newNodeId,
        // Joining node's Eui64
@@ -114,8 +156,8 @@ EmberJoinDecision emberTrustCenterJoinHandler(
 {
   EmberJoinDecision ret;
   emberAfPushCallbackNetworkIndex();
-  ret = emAfTrustCenterJoinCallback(newNodeId, newNodeEui64, status, parentOfNewNode);
-  emAfTrustCenterJoin(newNodeId, newNodeEui64, status, parentOfNewNode);
+  ret = sli_zigbee_af_trust_center_join_callback(newNodeId, newNodeEui64, status, parentOfNewNode);
+  sli_zigbee_af_trust_center_join(newNodeId, newNodeEui64, status, parentOfNewNode);
   emberAfPopNetworkIndex();
   return ret;
 }
@@ -130,14 +172,14 @@ WEAK(void emberAfMarkBuffersCallback(void))
 void emberMarkBuffersHandler(void)
 {
   emberAfPushCallbackNetworkIndex();
-  emAfMarkBuffers();
+  sli_zigbee_af_mark_buffers();
   emberAfMarkBuffersCallback();
   emberAfPopNetworkIndex();
 }
 
 // -----------------------------------------------------------------------------
-// Weak implementation of emAfPacketHandoffIncomingCallback
-WEAK(EmberPacketAction emAfPacketHandoffIncomingCallback(
+// Weak implementation of sli_zigbee_af_packet_handoff_incoming_callback
+WEAK(EmberPacketAction sli_zigbee_af_packet_handoff_incoming_callback(
        EmberZigbeePacketType packetType,
        EmberMessageBuffer packetBuffer,
        uint8_t index,
@@ -162,15 +204,15 @@ EmberPacketAction emberPacketHandoffIncomingHandler(
 {
   EmberPacketAction ret;
   emberAfPushCallbackNetworkIndex();
-  ret = emAfPacketHandoffIncomingCallback(packetType, packetBuffer, index, data);
-  emAfPacketHandoffIncoming(packetType, packetBuffer, index, data);
+  ret = sli_zigbee_af_packet_handoff_incoming_callback(packetType, packetBuffer, index, data);
+  sli_zigbee_af_packet_handoff_incoming(packetType, packetBuffer, index, data);
   emberAfPopNetworkIndex();
   return ret;
 }
 
 // -----------------------------------------------------------------------------
-// Weak implementation of emAfPacketHandoffOutgoingCallback
-WEAK(EmberPacketAction emAfPacketHandoffOutgoingCallback(
+// Weak implementation of sli_zigbee_af_packet_handoff_outgoing_callback
+WEAK(EmberPacketAction sli_zigbee_af_packet_handoff_outgoing_callback(
        EmberZigbeePacketType packetType,
        EmberMessageBuffer packetBuffer,
        uint8_t index,
@@ -195,8 +237,8 @@ EmberPacketAction emberPacketHandoffOutgoingHandler(
 {
   EmberPacketAction ret;
   emberAfPushCallbackNetworkIndex();
-  ret = emAfPacketHandoffOutgoingCallback(packetType, packetBuffer, index, data);
-  emAfPacketHandoffOutgoing(packetType, packetBuffer, index, data);
+  ret = sli_zigbee_af_packet_handoff_outgoing_callback(packetType, packetBuffer, index, data);
+  sli_zigbee_af_packet_handoff_outgoing(packetType, packetBuffer, index, data);
   emberAfPopNetworkIndex();
   return ret;
 }
@@ -223,7 +265,7 @@ void emberIncomingMfgTestMessageHandler(
   uint8_t *data)
 {
   emberAfPushCallbackNetworkIndex();
-  emAfIncomingMfgTestMessage(messageType, dataLength, data);
+  sli_zigbee_af_incoming_mfg_test_message(messageType, dataLength, data);
   emberAfIncomingMfgTestMessageCallback(messageType, dataLength, data);
   emberAfPopNetworkIndex();
 }
@@ -240,7 +282,7 @@ void emberOverrideIncomingRouteRecordHandler(
   bool *consumed)
 {
   emberAfPushCallbackNetworkIndex();
-  emAfOverrideIncomingRouteRecord(source, sourceEui, relayCount, header, relayListIndex, consumed);
+  sli_zigbee_af_override_incoming_route_record(source, sourceEui, relayCount, header, relayListIndex, consumed);
   emberAfPopNetworkIndex();
 }
 
@@ -272,7 +314,7 @@ uint8_t emberOverrideAppendSourceRouteHandler(
   uint8_t ret;
   emberAfPushCallbackNetworkIndex();
   ret = emberAfOverrideAppendSourceRouteCallback(destination, header, consumed);
-  emAfOverrideAppendSourceRoute(destination, header, consumed);
+  sli_zigbee_af_override_append_source_route(destination, header, consumed);
   emberAfPopNetworkIndex();
   return ret;
 }
@@ -286,7 +328,7 @@ void emberOverrideFurthurIndexForSourceRouteAddEntryHandler(
   uint8_t *furtherIndex)
 {
   emberAfPushCallbackNetworkIndex();
-  emAfOverrideFurthurIndexForSourceRouteAddEntry(id, furtherIndex);
+  sli_zigbee_af_override_furthur_index_for_source_route_add_entry(id, furtherIndex);
   emberAfPopNetworkIndex();
 }
 
@@ -309,8 +351,38 @@ void emberStackStatusHandler(
   EmberStatus status)
 {
   emberAfPushCallbackNetworkIndex();
-  emAfStackStatus(status);
+  sli_zigbee_af_stack_status(status);
   emberAfStackStatusCallback(status);
+  emberAfPopNetworkIndex();
+}
+
+// -----------------------------------------------------------------------------
+// Weak implementation of public Callback emberAfRedirectOutgoingMessageCallback
+WEAK(void emberAfRedirectOutgoingMessageCallback(
+       // The mac index used to redirect messages
+       uint8_t mac_index,
+       // Packet buffer header
+       EmberMessageBuffer header,
+       // Transmit priority
+       uint8_t priority))
+{
+  (void)mac_index;
+  (void)header;
+  (void)priority;
+}
+
+// A callback that allows the app to redirect the packet
+void emberRedirectOutgoingMessageHandler(
+  // The mac index used to redirect messages
+  uint8_t mac_index,
+  // Packet buffer header
+  EmberMessageBuffer header,
+  // Transmit priority
+  uint8_t priority)
+{
+  emberAfPushCallbackNetworkIndex();
+  sli_zigbee_af_redirect_outgoing_message(mac_index, header, priority);
+  emberAfRedirectOutgoingMessageCallback(mac_index, header, priority);
   emberAfPopNetworkIndex();
 }
 
@@ -335,7 +407,7 @@ void emberEnergyScanResultHandler(
   int8_t maxRssiValue)
 {
   emberAfPushCallbackNetworkIndex();
-  emAfEnergyScanResult(channel, maxRssiValue);
+  sli_zigbee_af_energy_scan_result(channel, maxRssiValue);
   emberAfEnergyScanResultCallback(channel, maxRssiValue);
   emberAfPopNetworkIndex();
 }
@@ -366,7 +438,7 @@ void emberNetworkFoundHandler(
   int8_t rssi)
 {
   emberAfPushCallbackNetworkIndex();
-  emAfNetworkFound(networkFound, lqi, rssi);
+  sli_zigbee_af_network_found(networkFound, lqi, rssi);
   emberAfNetworkFoundCallback(networkFound, lqi, rssi);
   emberAfPopNetworkIndex();
 }
@@ -397,7 +469,7 @@ void emberScanCompleteHandler(
   EmberStatus status)
 {
   emberAfPushCallbackNetworkIndex();
-  emAfScanComplete(channel, status);
+  sli_zigbee_af_scan_complete(channel, status);
   emberAfScanCompleteCallback(channel, status);
   emberAfPopNetworkIndex();
 }
@@ -423,7 +495,7 @@ void emberUnusedPanIdFoundHandler(
   uint8_t channel)
 {
   emberAfPushCallbackNetworkIndex();
-  emAfUnusedPanIdFound(panId, channel);
+  sli_zigbee_af_unused_pan_id_found(panId, channel);
   emberAfUnusedPanIdFoundCallback(panId, channel);
   emberAfPopNetworkIndex();
 }
@@ -448,7 +520,7 @@ void emberChildJoinHandler(
   bool joining)
 {
   emberAfPushCallbackNetworkIndex();
-  emAfChildJoin(index, joining);
+  sli_zigbee_af_child_join(index, joining);
   emberAfChildJoinCallback(index, joining);
   emberAfPopNetworkIndex();
 }
@@ -478,7 +550,7 @@ void emberDutyCycleHandler(
   EmberDutyCycleState state)
 {
   emberAfPushCallbackNetworkIndex();
-  emAfDutyCycle(channelPage, channel, state);
+  sli_zigbee_af_duty_cycle(channelPage, channel, state);
   emberAfDutyCycleCallback(channelPage, channel, state);
   emberAfPopNetworkIndex();
 }
@@ -496,8 +568,8 @@ WEAK(void emberAfRemoteSetBindingCallback(
   return;
 }
 
-// Weak implementation of emAfRemoteSetBindingCallback
-WEAK(EmberZdoStatus emAfRemoteSetBindingCallback(
+// Weak implementation of sli_zigbee_af_remote_set_binding_callback
+WEAK(EmberZdoStatus sli_zigbee_af_remote_set_binding_callback(
        // Return: The contents of the binding entry.
        EmberBindingTableEntry *entry))
 {
@@ -516,8 +588,8 @@ EmberZdoStatus emberRemoteSetBindingHandler(
 {
   EmberZdoStatus ret;
   emberAfPushCallbackNetworkIndex();
-  ret = emAfRemoteSetBindingCallback(entry);
-  emAfRemoteSetBinding(entry);
+  ret = sli_zigbee_af_remote_set_binding_callback(entry);
+  sli_zigbee_af_remote_set_binding(entry);
   emberAfRemoteSetBindingCallback(entry, ret);
   emberAfPopNetworkIndex();
   return ret;
@@ -536,8 +608,8 @@ WEAK(void emberAfRemoteDeleteBindingCallback(
   return;
 }
 
-// Weak implementation of emAfRemoteDeleteBindingCallback
-WEAK(EmberZdoStatus emAfRemoteDeleteBindingCallback(
+// Weak implementation of sli_zigbee_af_remote_delete_binding_callback
+WEAK(EmberZdoStatus sli_zigbee_af_remote_delete_binding_callback(
        // The index of the binding whose deletion was requested.
        uint8_t index))
 {
@@ -556,8 +628,8 @@ EmberZdoStatus emberRemoteDeleteBindingHandler(
 {
   EmberZdoStatus ret;
   emberAfPushCallbackNetworkIndex();
-  ret = emAfRemoteDeleteBindingCallback(index);
-  emAfRemoteDeleteBinding(index);
+  ret = sli_zigbee_af_remote_delete_binding_callback(index);
+  sli_zigbee_af_remote_delete_binding(index);
   emberAfRemoteDeleteBindingCallback(index, ret);
   emberAfPopNetworkIndex();
   return ret;
@@ -586,7 +658,7 @@ void emberPollCompleteHandler(
   EmberStatus status)
 {
   emberAfPushCallbackNetworkIndex();
-  emAfPollComplete(status);
+  sli_zigbee_af_poll_complete(status);
   emberAfPollCompleteCallback(status);
   emberAfPopNetworkIndex();
 }
@@ -611,7 +683,7 @@ void emberPollHandler(
   bool transmitExpected)
 {
   emberAfPushCallbackNetworkIndex();
-  emAfPoll(childId, transmitExpected);
+  sli_zigbee_af_poll(childId, transmitExpected);
   emberAfPollCallback(childId, transmitExpected);
   emberAfPopNetworkIndex();
 }
@@ -634,9 +706,9 @@ void emberDebugHandler(
   EmberMessageBuffer message)
 {
   emberAfPushCallbackNetworkIndex();
-  emAfDebug(message);
-  uint8_t messageLength = emGetBufferLength(message);
-  uint8_t *messageContents = emGetBufferPointer(message);
+  sli_zigbee_af_debug(message);
+  uint8_t messageLength = sli_legacy_buffer_manager_get_buffer_length(message);
+  uint8_t *messageContents = sli_legacy_buffer_manager_get_buffer_pointer(message);
   emberAfDebugCallback(messageLength, messageContents);
   emberAfPopNetworkIndex();
 }
@@ -672,7 +744,7 @@ void emberIncomingManyToOneRouteRequestHandler(
   uint8_t cost)
 {
   emberAfPushCallbackNetworkIndex();
-  emAfIncomingManyToOneRouteRequest(source, longId, cost);
+  sli_zigbee_af_incoming_many_to_one_route_request(source, longId, cost);
   emberAfIncomingManyToOneRouteRequestCallback(source, longId, cost);
   emberAfPopNetworkIndex();
 }
@@ -698,7 +770,7 @@ void emberIncomingRouteErrorHandler(
   EmberNodeId target)
 {
   emberAfPushCallbackNetworkIndex();
-  emAfIncomingRouteError(status, target);
+  sli_zigbee_af_incoming_route_error(status, target);
   emberAfIncomingRouteErrorCallback(status, target);
   emberAfPopNetworkIndex();
 }
@@ -725,7 +797,7 @@ void emberIncomingNetworkStatusHandler(
   EmberNodeId target)
 {
   emberAfPushCallbackNetworkIndex();
-  emAfIncomingNetworkStatus(errorCode, target);
+  sli_zigbee_af_incoming_network_status(errorCode, target);
   emberAfIncomingNetworkStatusCallback(errorCode, target);
   emberAfPopNetworkIndex();
 }
@@ -765,7 +837,7 @@ void emberIncomingRouteRecordHandler(
   uint8_t relayListIndex)
 {
   emberAfPushCallbackNetworkIndex();
-  emAfIncomingRouteRecord(source, sourceEui, relayCount, header, relayListIndex);
+  sli_zigbee_af_incoming_route_record(source, sourceEui, relayCount, header, relayListIndex);
   emberAfIncomingRouteRecordCallback(source, sourceEui, relayCount, header, relayListIndex);
   emberAfPopNetworkIndex();
 }
@@ -789,7 +861,7 @@ void emberIdConflictHandler(
   EmberNodeId conflictingId)
 {
   emberAfPushCallbackNetworkIndex();
-  emAfIdConflict(conflictingId);
+  sli_zigbee_af_id_conflict(conflictingId);
   emberAfIdConflictCallback(conflictingId);
   emberAfPopNetworkIndex();
 }
@@ -826,11 +898,11 @@ void emberMacPassthroughMessageHandler(
   int8_t lastHopRssi = 0;
   uint8_t lastHopLqi = 0;
   emberAfPushCallbackNetworkIndex();
-  emAfMacPassthroughMessage(messageType, message);
+  sli_zigbee_af_mac_passthrough_message(messageType, message);
   emberGetLastHopRssi(&lastHopRssi);
   emberGetLastHopLqi(&lastHopLqi);
-  uint8_t messageLength = emGetBufferLength(message);
-  uint8_t *messageContents = emGetBufferPointer(message);
+  uint8_t messageLength = sli_legacy_buffer_manager_get_buffer_length(message);
+  uint8_t *messageContents = sli_legacy_buffer_manager_get_buffer_pointer(message);
   emberAfMacPassthroughMessageCallback(messageType, lastHopLqi, lastHopRssi, messageLength, messageContents);
   emberAfPopNetworkIndex();
 }
@@ -850,7 +922,7 @@ void emberStackTokenChangedHandler(
   uint16_t tokenAddress)
 {
   emberAfPushCallbackNetworkIndex();
-  emAfStackTokenChanged(tokenAddress);
+  sli_zigbee_af_stack_token_changed(tokenAddress);
   emberAfStackTokenChangedCallback(tokenAddress);
   emberAfPopNetworkIndex();
 }
@@ -870,7 +942,7 @@ void emberTimerHandler(
   uint8_t timerId)
 {
   emberAfPushCallbackNetworkIndex();
-  emAfTimer(timerId);
+  sli_zigbee_af_timer(timerId);
   emberAfTimerCallback(timerId);
   emberAfPopNetworkIndex();
 }
@@ -890,7 +962,7 @@ void emberCounterRolloverHandler(
   EmberCounterType type)
 {
   emberAfPushCallbackNetworkIndex();
-  emAfCounterRollover(type);
+  sli_zigbee_af_counterRollover(type);
   emberAfCounterRolloverCallback(type);
   emberAfPopNetworkIndex();
 }
@@ -918,7 +990,7 @@ void emberRawTransmitCompleteHandler(
   EmberStatus status)
 {
   emberAfPushCallbackNetworkIndex();
-  emAfRawTransmitComplete(message, status);
+  sli_zigbee_af_raw_transmit_complete(message, status);
   emberAfRawTransmitCompleteCallback(message, status);
   emberAfPopNetworkIndex();
 }
@@ -940,7 +1012,7 @@ void emberSwitchNetworkKeyHandler(
   uint8_t sequenceNumber)
 {
   emberAfPushCallbackNetworkIndex();
-  emAfSwitchNetworkKey(sequenceNumber);
+  sli_zigbee_af_switch_network_key(sequenceNumber);
   emberAfSwitchNetworkKeyCallback(sequenceNumber);
   emberAfPopNetworkIndex();
 }
@@ -970,7 +1042,7 @@ void emberZigbeeKeyEstablishmentHandler(
   EmberKeyStatus status)
 {
   emberAfPushCallbackNetworkIndex();
-  emAfZigbeeKeyEstablishment(partner, status);
+  sli_zigbee_af_zigbee_key_establishment(partner, status);
   emberAfZigbeeKeyEstablishmentCallback(partner, status);
   emberAfPopNetworkIndex();
 }
@@ -998,7 +1070,7 @@ void emberGenerateCbkeKeysHandler(
   EmberPublicKeyData *ephemeralPublicKey)
 {
   emberAfPushCallbackNetworkIndex();
-  emAfGenerateCbkeKeys(status, ephemeralPublicKey);
+  sli_zigbee_af_generate_cbke_keys(status, ephemeralPublicKey);
   emberAfGenerateCbkeKeysCallback(status, ephemeralPublicKey);
   emberAfPopNetworkIndex();
 }
@@ -1031,7 +1103,7 @@ void emberCalculateSmacsHandler(
   EmberSmacData *responderSmac)
 {
   emberAfPushCallbackNetworkIndex();
-  emAfCalculateSmacs(status, initiatorSmac, responderSmac);
+  sli_zigbee_af_calculate_smacs(status, initiatorSmac, responderSmac);
   emberAfCalculateSmacsCallback(status, initiatorSmac, responderSmac);
   emberAfPopNetworkIndex();
 }
@@ -1064,9 +1136,9 @@ void emberDsaSignHandler(
   EmberMessageBuffer signedMessage)
 {
   emberAfPushCallbackNetworkIndex();
-  emAfDsaSign(status, signedMessage);
-  uint8_t messageLength = emGetBufferLength(signedMessage);
-  uint8_t *messageContents = emGetBufferPointer(signedMessage);
+  sli_zigbee_af_dsa_sign(status, signedMessage);
+  uint8_t messageLength = sli_legacy_buffer_manager_get_buffer_length(signedMessage);
+  uint8_t *messageContents = sli_legacy_buffer_manager_get_buffer_pointer(signedMessage);
   emberAfDsaSignCallback(status, messageLength, messageContents);
   emberAfPopNetworkIndex();
 }
@@ -1090,7 +1162,7 @@ void emberDsaVerifyHandler(
   EmberStatus status)
 {
   emberAfPushCallbackNetworkIndex();
-  emAfDsaVerify(status);
+  sli_zigbee_af_dsa_verify(status);
   emberAfDsaVerifyCallback(status);
   emberAfPopNetworkIndex();
 }
@@ -1125,13 +1197,13 @@ void emberIncomingBootloadMessageHandler(
   EmberMessageBuffer message)
 {
   emberAfPushCallbackNetworkIndex();
-  emAfIncomingBootloadMessage(longId, message);
+  sli_zigbee_af_incoming_bootload_message(longId, message);
   uint8_t lastHopLqi = 0;
   int8_t lastHopRssi = 0;
   emberGetLastHopRssi(&lastHopRssi);
   emberGetLastHopLqi(&lastHopLqi);
-  uint8_t messageLength = emGetBufferLength(message);
-  uint8_t *messageContents = emGetBufferPointer(message);
+  uint8_t messageLength = sli_legacy_buffer_manager_get_buffer_length(message);
+  uint8_t *messageContents = sli_legacy_buffer_manager_get_buffer_pointer(message);
   emberAfIncomingBootloadMessageCallback(longId, lastHopLqi, lastHopRssi, messageLength, messageContents);
   emberAfPopNetworkIndex();
 }
@@ -1163,9 +1235,9 @@ void emberBootloadTransmitCompleteHandler(
   EmberStatus status)
 {
   emberAfPushCallbackNetworkIndex();
-  emAfBootloadTransmitComplete(message, status);
-  uint8_t messageLength = emGetBufferLength(message);
-  uint8_t *messageContents = emGetBufferPointer(message);
+  sli_zigbee_af_bootload_transmit_complete(message, status);
+  uint8_t messageLength = sli_legacy_buffer_manager_get_buffer_length(message);
+  uint8_t *messageContents = sli_legacy_buffer_manager_get_buffer_pointer(message);
   emberAfBootloadTransmitCompleteCallback(status, messageLength, messageContents);
   emberAfPopNetworkIndex();
 }
@@ -1201,7 +1273,7 @@ void emberZllNetworkFoundHandler(
   int8_t lastHopRssi = 0;
   uint8_t lastHopLqi = 0;
   emberAfPushCallbackNetworkIndex();
-  emAfZllNetworkFound(networkInfo, deviceInfo);
+  sli_zigbee_af_zll_networkFound(networkInfo, deviceInfo);
   emberGetLastHopRssi(&lastHopRssi);
   emberGetLastHopLqi(&lastHopLqi);
   emberAfZllNetworkFoundCallback(deviceInfo ? true : false, lastHopLqi, lastHopRssi, networkInfo, deviceInfo);
@@ -1223,7 +1295,7 @@ void emberZllScanCompleteHandler(
   EmberStatus status)
 {
   emberAfPushCallbackNetworkIndex();
-  emAfZllScanComplete(status);
+  sli_zigbee_af_zll_scan_complete(status);
   emberAfZllScanCompleteCallback(status);
   emberAfPopNetworkIndex();
 }
@@ -1252,7 +1324,7 @@ void emberZllAddressAssignmentHandler(
   int8_t lastHopRssi = 0;
   uint8_t lastHopLqi = 0;
   emberAfPushCallbackNetworkIndex();
-  emAfZllAddressAssignment(addressInfo);
+  sli_zb_af_zll_address_assignment(addressInfo);
   emberGetLastHopRssi(&lastHopRssi);
   emberGetLastHopLqi(&lastHopLqi);
   emberAfZllAddressAssignmentCallback(lastHopLqi, lastHopRssi, addressInfo);
@@ -1274,7 +1346,7 @@ void emberZllTouchLinkTargetHandler(
   const EmberZllNetwork *networkInfo)
 {
   emberAfPushCallbackNetworkIndex();
-  emAfZllTouchLinkTarget(networkInfo);
+  sli_zigbee_af_zll_touch_link_target(networkInfo);
   emberAfZllTouchLinkTargetCallback(networkInfo);
   emberAfPopNetworkIndex();
 }
@@ -1310,13 +1382,13 @@ void emberMacFilterMatchMessageHandler(
   const EmberMacFilterMatchStruct *macFilterMatchStruct)
 {
   emberAfPushCallbackNetworkIndex();
-  emAfMacFilterMatchMessage(macFilterMatchStruct);
+  sli_zigbee_af_mac_filter_match_message(macFilterMatchStruct);
   uint8_t lastHopLqi = 0;
   int8_t lastHopRssi = 0;
   emberGetLastHopRssi(&lastHopRssi);
   emberGetLastHopLqi(&lastHopLqi);
-  uint8_t messageLength = emGetBufferLength(macFilterMatchStruct->message);
-  uint8_t *messageContents = emGetBufferPointer(macFilterMatchStruct->message);
+  uint8_t messageLength = sli_legacy_buffer_manager_get_buffer_length(macFilterMatchStruct->message);
+  uint8_t *messageContents = sli_legacy_buffer_manager_get_buffer_pointer(macFilterMatchStruct->message);
   emberAfMacFilterMatchMessageCallback(macFilterMatchStruct->filterIndexMatch,
                                        macFilterMatchStruct->legacyPassthroughType,
                                        lastHopLqi, lastHopRssi,
@@ -1345,7 +1417,7 @@ void emberDGpSentHandler(
   uint8_t gpepHandle)
 {
   emberAfPushCallbackNetworkIndex();
-  emAfDGpSent(status, gpepHandle);
+  sli_zigbee_af_d_gp_sent(status, gpepHandle);
   emberAfDGpSentCallback(status, gpepHandle);
   emberAfPopNetworkIndex();
 }
@@ -1360,8 +1432,8 @@ WEAK(EmberStatus emberAfPanIdConflictCallback(
   return EMBER_LIBRARY_NOT_PRESENT;
 }
 
-// Weak implementation of emAfPanIdConflictCallback
-WEAK(EmberStatus emAfPanIdConflictCallback(
+// Weak implementation of sli_zigbee_af_pan_id_conflict_callback
+WEAK(EmberStatus sli_zigbee_af_pan_id_conflict_callback(
        // Number of conflict reports
        int8_t conflictCount))
 {
@@ -1378,8 +1450,8 @@ EmberStatus emberPanIdConflictHandler(
 {
   EmberStatus ret;
   emberAfPushCallbackNetworkIndex();
-  ret = emAfPanIdConflictCallback(conflictCount);
-  emAfPanIdConflict(conflictCount);
+  ret = sli_zigbee_af_pan_id_conflict_callback(conflictCount);
+  sli_zigbee_af_pan_id_conflict(conflictCount);
   emberAfPanIdConflictCallback(conflictCount);
   emberAfPopNetworkIndex();
   return ret;
@@ -1402,7 +1474,7 @@ void emberOrphanNotificationHandler(
   EmberEUI64 longId)
 {
   emberAfPushCallbackNetworkIndex();
-  emAfOrphanNotification(longId);
+  sli_zigbee_af_orphan_notification(longId);
   emberAfOrphanNotificationCallback(longId);
   emberAfPopNetworkIndex();
 }
@@ -1427,7 +1499,7 @@ void emberCounterHandler(
   EmberCounterInfo Info)
 {
   emberAfPushCallbackNetworkIndex();
-  emAfCounter(type, Info);
+  sli_zigbee_af_counter(type, Info);
   emberAfCounterCallback(type, Info);
   emberAfPopNetworkIndex();
 }
@@ -1442,8 +1514,8 @@ WEAK(bool emberAfMacPassthroughFilterCallback(
   return false;
 }
 
-// Weak implementation of emAfMacPassthroughFilterCallback
-WEAK(bool emAfMacPassthroughFilterCallback(
+// Weak implementation of sli_zigbee_af_mac_passthrough_filter_callback
+WEAK(bool sli_zigbee_af_mac_passthrough_filter_callback(
        // Return: Mac Header of the matched messgae
        uint8_t *macHeader))
 {
@@ -1460,8 +1532,8 @@ bool emberMacPassthroughFilterHandler(
 {
   bool ret;
   emberAfPushCallbackNetworkIndex();
-  ret = emAfMacPassthroughFilterCallback(macHeader);
-  emAfMacPassthroughFilter(macHeader);
+  ret = sli_zigbee_af_mac_passthrough_filter_callback(macHeader);
+  sli_zigbee_af_mac_passthrough_filter(macHeader);
   emberAfMacPassthroughFilterCallback(macHeader);
   emberAfPopNetworkIndex();
   return ret;
@@ -1491,7 +1563,7 @@ void emberGenerateCbkeKeysHandler283k1(
   EmberPublicKey283k1Data *ephemeralPublicKey)
 {
   emberAfPushCallbackNetworkIndex();
-  emAfGenerateCbkeKeysHandler283k1(status, ephemeralPublicKey);
+  sli_zigbee_af_generate_cbke_keys_handler283k1(status, ephemeralPublicKey);
   emberAfGenerateCbkeKeysHandler283k1Callback(status, ephemeralPublicKey);
   emberAfPopNetworkIndex();
 }
@@ -1525,7 +1597,7 @@ void emberCalculateSmacsHandler283k1(
   EmberSmacData *responderSmac)
 {
   emberAfPushCallbackNetworkIndex();
-  emAfCalculateSmacsHandler283k1(status, initiatorSmac, responderSmac);
+  sli_zigbee_af_calculate_smacsHandler283k1(status, initiatorSmac, responderSmac);
   emberAfCalculateSmacsHandler283k1Callback(status, initiatorSmac, responderSmac);
   emberAfPopNetworkIndex();
 }
@@ -1616,14 +1688,14 @@ void emberGpepIncomingMessageHandler(
   uint8_t *gpdCommandPayload)
 {
   emberAfPushCallbackNetworkIndex();
-  emAfGpepIncomingMessage(status, gpdLink, sequenceNumber, addr, gpdfSecurityLevel, gpdfSecurityKeyType, autoCommissioning, bidirectionalInfo, gpdSecurityFrameCounter, gpdCommandId, mic, proxyTableIndex, gpdCommandPayloadLength, gpdCommandPayload);
+  sli_zigbee_af_gpep_incoming_message(status, gpdLink, sequenceNumber, addr, gpdfSecurityLevel, gpdfSecurityKeyType, autoCommissioning, bidirectionalInfo, gpdSecurityFrameCounter, gpdCommandId, mic, proxyTableIndex, gpdCommandPayloadLength, gpdCommandPayload);
   emberAfGpepIncomingMessageCallback(status, gpdLink, sequenceNumber, addr, gpdfSecurityLevel, gpdfSecurityKeyType, autoCommissioning, bidirectionalInfo, gpdSecurityFrameCounter, gpdCommandId, mic, proxyTableIndex, gpdCommandPayloadLength, gpdCommandPayload);
   emberAfPopNetworkIndex();
 }
 
 // -----------------------------------------------------------------------------
-// Weak implementation of emAfRtosIdleCallback
-WEAK(bool emAfRtosIdleCallback(
+// Weak implementation of sli_zigbee_af_rtos_idle_callback
+WEAK(bool sli_zigbee_af_rtos_idle_callback(
        // Return: Idle time duration
        uint32_t *idleTimeMs))
 {
@@ -1639,8 +1711,8 @@ bool emberRtosIdleHandler(
 {
   bool ret;
   emberAfPushCallbackNetworkIndex();
-  ret = emAfRtosIdleCallback(idleTimeMs);
-  emAfRtosIdle(idleTimeMs);
+  ret = sli_zigbee_af_rtos_idle_callback(idleTimeMs);
+  sli_zigbee_af_rtos_idle(idleTimeMs);
   emberAfPopNetworkIndex();
   return ret;
 }
@@ -1655,7 +1727,7 @@ WEAK(void emberAfRtosStackWakeupIsrCallback(void))
 void emberRtosStackWakeupIsrHandler(void)
 {
   emberAfPushCallbackNetworkIndex();
-  emAfRtosStackWakeupIsr();
+  sli_zb_af_rtos_stack_wakeup_isr();
   emberAfRtosStackWakeupIsrCallback();
   emberAfPopNetworkIndex();
 }
@@ -1670,7 +1742,7 @@ WEAK(void emberAfRadioNeedsCalibratingCallback(void))
 void emberRadioNeedsCalibratingHandler(void)
 {
   emberAfPushCallbackNetworkIndex();
-  emAfRadioNeedsCalibrating();
+  sli_zigbee_af_radio_needs_calibrating();
   emberAfRadioNeedsCalibratingCallback();
   emberAfPopNetworkIndex();
 }
@@ -1690,7 +1762,7 @@ void emberScanErrorHandler(
   EmberStatus status)
 {
   emberAfPushCallbackNetworkIndex();
-  emAfScanError(status);
+  sli_zigbee_af_scan_error(status);
   emberAfScanErrorCallback(status);
   emberAfPopNetworkIndex();
 }

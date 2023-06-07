@@ -47,7 +47,7 @@ template_contribution:
   - name: zigbee_stack_callback
     value:
       callback_type: stack_status
-      function_name: emAfPluginReportingStackStatusCallback
+      function_name: sli_zigbee_af_reporting_stack_status_callback
   - name: cli_group
     value:
       group: plugin
@@ -57,19 +57,19 @@ template_contribution:
     value:
       group: reporting
       name: print
-      handler: emAfPluginReportingCliPrint
+      handler: sli_zigbee_af_reporting_cli_print
       help: Prints the report table.
   - name: cli_command
     value:
       group: reporting
       name: clear
-      handler: emAfPluginReportingCliClear
+      handler: sli_zigbee_af_reporting_cli_clear
       help: Clears all entries from the report table.
   - name: cli_command
     value:
       group: reporting
       name: remove
-      handler: emAfPluginReportingCliRemove
+      handler: sli_zigbee_af_reporting_cli_remove
       help: Removes an entry from the report table.
       argument:
       - type: uint8
@@ -78,7 +78,7 @@ template_contribution:
     value:
       group: reporting
       name: add
-      handler: emAfPluginReportingCliAdd
+      handler: sli_zigbee_af_reporting_cli_add
       help: Adds a new entry to the report table.
       argument:
       - type: uint8
@@ -99,13 +99,13 @@ template_contribution:
     value:
       group: reporting
       name: clear-last-report-time
-      handler: emAfPluginReportingCliClearLastReportTime
+      handler: sli_zigbee_af_reporting_cli_clear_last_report_time
       help: Clears the last report time of attributes.
   - name: cli_command
     value:
       group: reporting
       name: test-timing
-      handler: emAfPluginReportingCliTestTiming
+      handler: sli_zigbee_af_reporting_cli_test_timing
       help: FOR TESTING PURPOSES - gather timing metrics for reporting table operations.
   - name: token_header
     value: app/framework/plugin/reporting/reporting-tokens.h

@@ -5,9 +5,10 @@ class Calc_Radio_Sol(CALC_Radio_ocelot):
     def calc_txofdm_reg(self, model):
 
         #Read in model vars
-        softmodem_modulator_select = model.vars.softmodem_modulator_select.value
+        modulator_select = model.vars.modulator_select.value
+        conc_ofdm = (model.vars.conc_ofdm_option.value != model.vars.conc_ofdm_option.var_enum.NONE)
 
-        if softmodem_modulator_select == model.vars.softmodem_modulator_select.var_enum.IQ_MOD:
+        if modulator_select == model.vars.modulator_select.var_enum.IQ_MOD or conc_ofdm:
             #This method enables OFDM TX
             txenbbreg = 1
             txenmix = 1

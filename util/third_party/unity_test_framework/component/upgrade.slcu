@@ -1,0 +1,26 @@
+upgrade:
+  - sdk:
+      id: gecko_sdk
+      version: "4.3.0"
+    component:
+      - trigger: test_framwork_unity
+        description: >
+          Replace test_framwork_unity with correct component test_framework_unity.
+        add:
+          - test_framework_unity
+        remove:
+          - test_framwork_unity
+      - trigger: test_framwork_unity_fixture
+        description: >
+          Replace test_framwork_unity_fixture with correct component test_framework_unity_fixture.
+        add:
+          - test_framework_unity_fixture
+        remove:
+          - test_framwork_unity_fixture
+      - trigger: test_framwork_unity_memory
+        description: >
+          Replace test_framwork_unity_memory with correct component test_framework_unity_memory.
+        add:
+          - test_framework_unity_memory
+        remove:
+          - test_framwork_unity_memory

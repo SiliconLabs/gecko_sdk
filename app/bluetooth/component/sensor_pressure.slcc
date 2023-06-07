@@ -2,9 +2,12 @@ id: sensor_pressure
 label: Air pressure sensor
 package: Bluetooth
 description: Air pressure sensor driver abstraction designed for Thunderboard.
-category: Application|Sensor
+category: Bluetooth|Application|Miscellaneous
 quality: production
 root_path: app/bluetooth/common/sensor_pressure
+tag:
+  - No-Code
+
 source:
   - path: sl_sensor_pressure.c
 

@@ -17,9 +17,10 @@ source:
   - path: protocol/zigbee/app/framework/plugin/green-power-adapter/zigbee_zcl_callback_dispatcher.c
     unless:
     - zigbee_zcl_framework_core
-  - path: protocol/zigbee/app/framework/plugin/green-power-adapter/green-power-zap-cluster-command-parser.c
+  - path: protocol/zigbee/app/framework/plugin/green-power-adapter/generated/zap-cluster-command-parser.c
     unless:
     - zigbee_zcl_framework_core
+    - zigbee_af_support
   - path: protocol/zigbee/app/framework/plugin/green-power-adapter/green-power-af-wrapper.c
     unless:
     - zigbee_zcl_framework_core
@@ -48,6 +49,7 @@ source:
   - path: protocol/zigbee/app/framework/util/multi-network.c
   - path: protocol/zigbee/app/framework/util/time-util.c
   - path: protocol/zigbee/app/framework/util/util.c
+  - path: protocol/zigbee/app/framework/util/zcl-util.c
   - path: protocol/zigbee/app/framework/util/af-event.c
 
 include:
@@ -62,47 +64,59 @@ include:
       - path: zigbee_zcl_callback_dispatcher.h
         unless:
          - zigbee_zcl_framework_core
+         - zigbee_af_support
       - path: zigbee_af_cluster_functions.h
         unless:
          - zigbee_zcl_framework_core
+         - zigbee_af_support
   - path: protocol/zigbee/app/framework/plugin/green-power-adapter
     file_list:
       - path: generated/zap-cluster-command-parser.h
         unless:
          - zigbee_zcl_framework_core
+         - zigbee_af_support
       - path: generated/zap-command-structs.h
         unless:
          - zigbee_zcl_framework_core
+         - zigbee_af_support
       - path: generated/zap-command.h
         unless:
          - zigbee_zcl_framework_core
+         - zigbee_af_support
       - path: generated/zap-config.h
         unless:
          - zigbee_zcl_framework_core
+         - zigbee_af_support
       - path: generated/zap-enabled-incoming-commands.h
         unless:
          - zigbee_zcl_framework_core
+         - zigbee_af_support
       - path: generated/zap-event.h
         unless:
          - zigbee_zcl_framework_core
+         - zigbee_af_support
       - path: generated/zap-id.h
         unless:
          - zigbee_zcl_framework_core
+         - zigbee_af_support
       - path: generated/zap-print.h
         unless:
          - zigbee_zcl_framework_core
+         - zigbee_af_support
       - path: generated/zap-tokens.h
         unless:
          - zigbee_zcl_framework_core
       - path: generated/zap-type.h
         unless:
          - zigbee_zcl_framework_core
+         - zigbee_af_support
   - path: protocol/zigbee/app/framework/plugin/green-power-adapter
     unless:
       - zigbee_zcl_framework_core
   - path: protocol/zigbee/app/framework/plugin/green-power-adapter/generated
     unless:
       - zigbee_zcl_framework_core
+      - zigbee_af_support
   - path: protocol/zigbee/app/framework/include
     file_list:
       - path: af.h
@@ -124,7 +138,6 @@ include:
       - path: print.h
       - path: service-discovery.h
       - path: time-util.h
-      - path: tokens.h
       - path: util.h
       - path: zcl-debug-print.h
   - path: protocol/zigbee/app/framework/security

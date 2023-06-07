@@ -1,0 +1,49 @@
+id: "sl_wisun_ota_dfu"
+label: "Wi-SUN Over-The-Air Device Firmware Upgrade (OTA DFU)"
+package: "wisun"
+description: > 
+  Wi-SUN Over-The-Air Device Firmware Upgrade (OTA DFU) service is implemented for updating Wi-SUN device's firmware. 
+  The component uses the Gecko Bootloader API to perform firmware write, verify and set to boot-load operations.
+  A Trivial File Transfer Protocol (TFTP) client provides downloader solution to obtain a new Gecko Bootloader File (GBL) file from remote host Over-The-Air, using the Wi-SUN network. 
+  The connection to the TFTP remote host can be configured in component configuration file.
+  The entire firmware upgrade session can be managed over CoAP, the service includes notification and status request capabilities.
+category: "Wi-SUN|Wi-SUN Services"
+quality: "production"
+root_path: "app/wisun/component/ota_dfu"
+provides:
+  - name: sl_wisun_ota_dfu
+
+source:
+  - path: "sl_wisun_ota_dfu.c"
+
+include:
+  - path: "."
+    file_list:
+    - "path": "sl_wisun_ota_dfu.h"
+
+config_file:
+  - path: "config/sl_wisun_ota_dfu_config.h"
+
+requires:
+  - name: bootloader_interface
+  - name: sl_ftp
+  - name: sl_wisun_coap
+  - name: sl_wisun_ftp_posix_port
+  - name: sleeptimer
+
+#-------------- Template Contribution ----------------
+template_contribution:
+  - name: "event_handler"
+    value:
+      event: "internal_app_init"
+      include: "sl_wisun_ota_dfu.h"
+      handler: "sl_wisun_ota_dfu_init"
+  
+
+#---------------- Component Catalog ------------------
+  - name: component_catalog
+    value: wisun_ota_dfu
+
+documentation:
+  docset: wisun
+  document: wisun-stack-api/sl-wisun-ota-dfu-api

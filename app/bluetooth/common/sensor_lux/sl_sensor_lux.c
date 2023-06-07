@@ -49,7 +49,7 @@ sl_status_t sl_sensor_lux_init(void)
   sl_i2cspm_t *light_sensor = sl_sensor_select(SL_BOARD_SENSOR_LIGHT);
   sc = sl_board_enable_sensor(SL_BOARD_SENSOR_LIGHT);
   app_assert((SL_STATUS_OK == sc) && (NULL != light_sensor),
-             "[E: %#04x] VEML6035 sensor not available\n",
+             "[E: %#04lx] VEML6035 sensor not available" APP_LOG_NL,
              sc);
   sc = sl_veml6035_init(light_sensor, false);
   if (SL_STATUS_OK == sc) {

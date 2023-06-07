@@ -33,6 +33,10 @@
 
 #include "sl_enum.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /***************************************************************************//**
  * @addtogroup cos Configuration Over SWO
  * @brief Configuration Over SWO
@@ -49,8 +53,7 @@
  * @{
  ******************************************************************************/
 
-/** @} (end addtogroup cos) */
-
+/// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
 /*******************************************************************************
  *******************************   DEFINES   ***********************************
  ******************************************************************************/
@@ -58,9 +61,16 @@
 #define SLI_COS_UARTDRV_VCOM_PRESENT
 #endif // SL_CATALOG_UARTDRV_USART_PRESENT || SL_CATALOG_UARTDRV_EUSART_PRESENT
 
-/***************************************************************************//**
- * PTI mode enumerations.
- ******************************************************************************/
+#define COS_CONFIG_FLOWCONTROL_NONE      0
+#define COS_CONFIG_FLOWCONTROL_CTS       1
+#define COS_CONFIG_FLOWCONTROL_RTS       2
+#define COS_CONFIG_FLOWCONTROL_CTS_RTS   3
+/// @endcond
+
+// -----------------------------------------------------------------------------
+// Data Types
+
+/// @brief Enumeration representing the PTI Modes
 SL_ENUM(COS_PtiMode_t) {
   /** ONEWIRE mode. */
   COS_CONFIG_PTI_MODE_ONEWIRE,
@@ -74,9 +84,7 @@ SL_ENUM(COS_PtiMode_t) {
   COS_CONFIG_PTI_MODE_COUNT
 };
 
-/***************************************************************************//**
- * PTI interface enumerations.
- ******************************************************************************/
+/// @brief Enumeration representing the PTI Interfaces
 SL_ENUM(COS_PtiInterface_t) {
   /** PTI INTERFACE 0. */
   COS_CONFIG_PTI_INTERFACE_0,
@@ -94,19 +102,46 @@ SL_ENUM(COS_PtiInterface_t) {
  ******************************************************************************/
 void sl_cos_send_config(void);
 
+ /***************************************************************************//**
+ * Custom API, to be used by other software component to write the
+ * structured VCOM data on SWO ITM channel 8
+ * The following Custom API take Baud rate, Flow Control as an input that should be
+ * configured at the bit(0 to 23) and bit(30(CTS), 31(RTS)) of the structured VCOM
+ * data respectively so that WSTK identifies the baud rate and flow_control values
+ * and configure accordingly
+ *
+ * @param[in] BaudRate       Baud rate that has to be set over bit_0 to bit_23.
+ *
+ * @param[in] flow_control   Flow Control value that has to be set over bit_30 and bit_31.
+ ******************************************************************************/
+void sl_cos_config_vcom(uint32_t baudrate,
+                        uint8_t flow_control);
+
 /***************************************************************************//**
  * Custom API, to be used by other software component to write the
  * structured PTI data on SWO ITM channel 8
+ *
+ * @param[in] BaudRate       Baud rate that has to be set over bit_0 to bit_23.
+ * @param[in] mode           COS_PtiMode_t to be used.
+ *                           ONEWIRE mode.
+ *                           TWOWIRE mode.
+ *                           UART mode.
+ *                           SPI mode.
+ *                           PTI Modes that has to be set over bit_27 to bit_29.
+ * @param[in] interface      COS_PtiInterface_t to be used.
+ *                           PTI INTERFACE 0.
+ *                           PTI INTERFACE 1.
+ *                           Interface value that has to be set over bit_30 and bit_31.
+ * @return  config
  ******************************************************************************/
 void sl_cos_config_pti(uint32_t baudrate,
                        COS_PtiMode_t mode,
                        COS_PtiInterface_t interface);
 
-/***************************************************************************//**
- * Custom API, to be used by other software component to write the
- * structured VCOM data on SWO ITM channel 8
- ******************************************************************************/
-void sl_cos_config_vcom(uint32_t baudrate,
-                        uint8_t flow_control);
+/** @} (end addtogroup cos) */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* SL_COS_H */

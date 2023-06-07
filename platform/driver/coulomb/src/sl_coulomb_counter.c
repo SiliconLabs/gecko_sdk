@@ -284,12 +284,14 @@ sl_coulomb_counter_output_mask_t sl_coulomb_counter_outputs_need_calibration(voi
  ******************************************************************************/
 static sl_status_t sli_coulomb_counter_read_result(uint16_t *result)
 {
+#if SL_COULOMB_COUNTER_DRIVER_PERIPHERAL == SL_COULOMB_COUNTER_DRIVER_PERIPHERAL_EFP
   sl_status_t status;
 
   status = sli_coulomb_counter_hal_cal_stop();
   if (status != SL_STATUS_OK) {
     return status;
   }
+#endif
 
   return sli_coulomb_counter_hal_cal_read_result(result);
 }

@@ -157,8 +157,8 @@ __vector_table_0x1c
                 DCD      SW3_IRQHandler          ; 55: SW3 Interrupt
                 DCD      KERNEL0_IRQHandler      ; 56: KERNEL0 Interrupt
                 DCD      KERNEL1_IRQHandler      ; 57: KERNEL1 Interrupt
-                DCD      M33CTI0_IRQHandler      ; 58: M33CTI0 Interrupt
-                DCD      M33CTI1_IRQHandler      ; 59: M33CTI1 Interrupt
+                DCD      0                       ; Reserved
+                DCD      0                       ; Reserved
                 DCD      EMUEFP_IRQHandler       ; 60: EMUEFP Interrupt
                 DCD      DCDC_IRQHandler         ; 61: DCDC Interrupt
                 DCD      EUART0_RX_IRQHandler    ; 62: EUART0_RX Interrupt
@@ -296,10 +296,6 @@ Reset_Handler
 
                 PUBWEAK KERNEL1_IRQHandler
 
-                PUBWEAK M33CTI0_IRQHandler
-
-                PUBWEAK M33CTI1_IRQHandler
-
                 PUBWEAK EMUEFP_IRQHandler
 
                 PUBWEAK DCDC_IRQHandler
@@ -409,10 +405,6 @@ SW3_IRQHandler
 KERNEL0_IRQHandler
 
 KERNEL1_IRQHandler
-
-M33CTI0_IRQHandler
-
-M33CTI1_IRQHandler
 
 EMUEFP_IRQHandler
 

@@ -48,6 +48,12 @@ void sli_hfxo_manager_init_hardware(void);
 void sli_hfxo_manager_begin_startup_measurement(void);
 
 /***************************************************************************//**
+ * Function to call when a compare match event produces a PRS signal to
+   start HFXO. Save comapre value.
+ ******************************************************************************/
+void sli_hfxo_prs_manager_begin_startup_measurement(uint32_t compare_value);
+
+/***************************************************************************//**
  * Function to call just after HFXO becomes ready, to save current tick count
  * and calculate HFXO startup time.
  ******************************************************************************/

@@ -27,14 +27,13 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
-#include "em_device.h"
-
-#if defined(SEMAILBOX_PRESENT)
 
 #include "sl_se_manager.h"
+
+#if defined(SLI_MAILBOX_COMMAND_SUPPORTED)
+
 #include "sli_se_manager_internal.h"
 #include "em_se.h"
-#include "em_system.h"
 #include <string.h>
 
 /// @addtogroup sl_se_manager
@@ -101,4 +100,4 @@ sl_status_t sl_se_get_random(sl_se_command_context_t *cmd_ctx,
 
 /** @} (end addtogroup sl_se) */
 
-#endif // defined(SEMAILBOX_PRESENT)
+#endif // defined(SLI_MAILBOX_COMMAND_SUPPORTED)

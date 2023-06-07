@@ -1,0 +1,26 @@
+id: driver_mvp_hal_efr32
+label: MVP HAL Driver for EFR32 parts
+package: platform
+description: >
+  This component provides the HAL part of the MVP driver. It is customized for
+  EFR32 parts with MVP.
+
+  The API of this component is marked as internal.
+category: Platform|Compute
+quality: production
+root_path: platform/compute/driver/mvp
+source:
+  - path: src/sl_mvp_hal_efr32.c
+include:
+  - path: inc
+    file_list:
+      - path: sl_mvp_hal.h
+provides:
+  - name: driver_mvp_hal
+  - name: driver_mvp_hal_efr32
+requires:
+  - name: device_has_mvp
+  - name: component_catalog
+  - name: status
+  - name: emlib_common
+  - name: dmadrv

@@ -23,7 +23,7 @@
 import logging
 
 import btmesh.util
-from btmesh.db import BtmeshDbNodeRemoved, ModelID, Node
+from btmesh.db import BtmeshDbNodeRemovedEvent, ModelID, Node
 from btmesh.util import BtmeshRetryParams
 
 from .btmesh import app_btmesh
@@ -112,13 +112,13 @@ class BtmeshDfuAppGroupController:
 
     def setup(self):
         self.build_info()
-        app_btmesh.subscribe("btmesh_levt_app_db_cleared", self.on_app_db_cleared)
-        app_btmesh.subscribe("btmesh_levt_db_node_removed", self.on_db_node_removed)
+        app_btmesh.core.subscribe("btmesh_levt_app_db_cleared", self.on_app_db_cleared)
+        app_btmesh.core.subscribe("btmesh_levt_db_node_removed", self.on_db_node_removed)
 
     def on_app_db_cleared(self, event: BtmeshDfuAppDbClearedEvent):
         self.clear_info()
 
-    def on_db_node_removed(self, event: BtmeshDbNodeRemoved):
+    def on_db_node_removed(self, event: BtmeshDbNodeRemovedEvent):
         node = event.node
         self.remove_node(node, local=True)
 

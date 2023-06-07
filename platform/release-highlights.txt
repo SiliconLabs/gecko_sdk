@@ -1,4 +1,7 @@
-Gecko Platform 4.2.3.0
-- CMSIS Device: Added support for EFR32xG21 Rev. C and Rev. D devices
-- Boards and External Devices: Additional boards supported
-- RAIL library: Targeted quality improvements and bug fixes
+Gecko Platform 4.3.0.0
+
+-Support for EFR32xG27 devices
+-Power Manager update for optimized return from EM2
+-CPC support for multiple SPI clients
+-CPC remote peripheral (GPIO) access
+-License change (to open-source zlib) for various platform files

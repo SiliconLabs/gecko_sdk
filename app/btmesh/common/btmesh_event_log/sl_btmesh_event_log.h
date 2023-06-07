@@ -31,12 +31,16 @@
 #ifndef SL_BTMESH_EVENT_LOG
 #define SL_BTMESH_EVENT_LOG
 
-/***************************************************************************//**
- * Handling of sensor client stack events. Both BLuetooth LE and Bluetooth mesh
- * events are handled here.
- * @param[in] evt_id  Incoming event ID.
- * @param[in] evt     Pointer to incoming event.
+/*******************************************************************************
+ * Log Bluetooth mesh events
+ * @param[in] evt     Pointer to incoming event
  ******************************************************************************/
-void sl_btmesh_handle_btmesh_logging_events(sl_btmesh_msg_t *evt);
+void sl_btmesh_log_btmesh_events(sl_btmesh_msg_t *evt);
+
+/*******************************************************************************
+ * Log Bluetooth LE connection events
+ * @param[in] evt     Pointer to incoming event
+ ******************************************************************************/
+void sl_btmesh_log_bt_connection_events(sl_bt_msg_t *evt);
 
 #endif // SL_BTMESH_EVENT_LOG

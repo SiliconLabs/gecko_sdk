@@ -431,12 +431,12 @@ void IADC_init(IADC_TypeDef *iadc,
         osrValue = (iadc->CFG[config].CFG & _IADC_CFG_OSRHA_MASK) >> _IADC_CFG_OSRHA_SHIFT;
 
         // 1. Calculate gain correction
-        if (osrHiAcc[osrValue] == 92.0) {
+        if ((uint32_t)osrHiAcc[osrValue] == 92U) {
           // for OSR = 92, gainSysHiAcc = 0.957457
           gainSysHiAcc = 0.957457;
         } else {
           // for OSR != 92, gainSysHiAcc = OSR/(OSR + 1)
-          gainSysHiAcc = osrHiAcc[osrValue] / (osrHiAcc[osrValue] + 1);
+          gainSysHiAcc = osrHiAcc[osrValue] / (osrHiAcc[osrValue] + 1.0f);
         }
         anaGain = (float) uiGainCAna / 32768.0f * gainSysHiAcc;
         anaGainRound =  IADC_ROUND_D2I(32768.0f * anaGain);
@@ -466,8 +466,8 @@ void IADC_init(IADC_TypeDef *iadc,
         offsetAna = (offsetAna) * (1.25f / refVoltage);
 
         // 4. Calculate final offset
-        offset2 = 262144.0f / osrHiAcc[osrValue] / (osrHiAcc[osrValue] + 1) + offsetAna * 4.0f + 524288.0f;
-        offset2 = (uiGainCAna / 32768.0f * (-1.0)) * offset2 + 524288.0f;
+        offset2 = 262144.0f / osrHiAcc[osrValue] / (osrHiAcc[osrValue] + 1.0f) + offsetAna * 4.0f + 524288.0f;
+        offset2 = (uiGainCAna / 32768.0f * (-1.0f)) * offset2 + 524288.0f;
         offsetLong = IADC_ROUND_D2I(offset2);
 
         // 5. Write offset to scale register

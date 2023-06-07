@@ -81,7 +81,6 @@ void sl_iperf_nw_interface_init(void)
 int32_t sl_iperf_socket_create(sl_iperf_protocol_t protocol)
 {
   int32_t sockid = SL_IPERF_NW_API_ERROR;
-  bool overwrite_buff = true;
 
   switch (protocol) {
     case SL_IPERF_IPROTOV6_UDP:
@@ -91,11 +90,9 @@ int32_t sl_iperf_socket_create(sl_iperf_protocol_t protocol)
       sockid = socket(AF_WISUN, SOCK_STREAM, IPPROTO_TCP);
       break;
     // IPv4 is not supported on Wi-SUN
-    default:                    return SL_IPERF_NW_API_ERROR;
+    default: return SL_IPERF_NW_API_ERROR;
   }
-  (void) setsockopt(sockid, SOL_SOCKET_HANDLER,
-                    SO_HANDLER_OVERWRITE_PREV_RCV_BUFF,
-                    &overwrite_buff, sizeof(bool));
+
   return sockid;
 }
 

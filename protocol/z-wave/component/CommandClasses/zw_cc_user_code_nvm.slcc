@@ -13,9 +13,9 @@ description: >
 package: Z-Wave
 quality: production
 source:
-  - path: protocol/z-wave/ZAF/CommandClasses/UserCode/cc_user_code_nvm.c
+  - path: protocol/z-wave/ZAF/CommandClasses/UserCode/src/cc_user_code_nvm.c
 include:
-  - path: protocol/z-wave/ZAF/CommandClasses/UserCode/
+  - path: protocol/z-wave/ZAF/CommandClasses/UserCode/inc
     file_list:
      - path: CC_UserCode.h
 provides:

@@ -22,22 +22,27 @@
 #include "network-creator.h"
 #include "network-creator-composite.h"
 
-#ifdef UC_BUILD
-#include "network-creator-security.h"
+#ifdef SL_COMPONENT_CATALOG_PRESENT
+#include "sl_component_catalog.h"
+#endif
+
+#ifdef SL_CATALOG_ZIGBEE_NETWORK_CREATOR_PRESENT
 #include "network-creator-config.h"
+#else
+#include "app/framework/plugin/network-creator/config/network-creator-config.h"
+#endif
+
+#ifdef SL_CATALOG_ZIGBEE_SCAN_DISPATCH_PRESENT
 #include "scan-dispatch.h"
-#else // !UC_BUILD
-#if defined(EMBER_AF_API_SCAN_DISPATCH)
-  #include EMBER_AF_API_SCAN_DISPATCH
-#elif defined(EMBER_TEST)
-  #include "../scan-dispatch/scan-dispatch.h"
+#else
+#include "app/framework/plugin/scan-dispatch/scan-dispatch.h"
 #endif
-#if defined(EMBER_AF_API_NETWORK_CREATOR_SECURITY)
-  #include EMBER_AF_API_NETWORK_CREATOR_SECURITY
-#elif defined(EMBER_TEST)
-  #include "../network-creator-security/network-creator-security.h"
+
+#ifdef SL_CATALOG_ZIGBEE_NETWORK_CREATOR_SECURITY_PRESENT
+#include "network-creator-security.h"
+#else
+#include "app/framework/plugin/network-creator-security/network-creator-security.h"
 #endif
-#endif // UC_BUILD
 
 #ifdef EMBER_TEST
   #ifndef EMBER_AF_PLUGIN_NETWORK_CREATOR_SCAN_DURATION
@@ -64,17 +69,17 @@
 // -----------------------------------------------------------------------------
 // Globals
 
-uint32_t emAfPluginNetworkCreatorPrimaryChannelMask = EMBER_AF_PLUGIN_NETWORK_CREATOR_CHANNEL_MASK;
+uint32_t sli_zigbee_af_network_creator_primary_channel_mask = EMBER_AF_PLUGIN_NETWORK_CREATOR_CHANNEL_MASK;
 
 // The Base Device spec (13-0402) says, by default, define the secondary
 // channel mask to be all channels XOR the primary mask. See 6.2, table 2.
 #define SECONDARY_CHANNEL_MASK \
   (EMBER_ALL_802_15_4_CHANNELS_MASK ^ EMBER_AF_PLUGIN_NETWORK_CREATOR_CHANNEL_MASK)
-uint32_t emAfPluginNetworkCreatorSecondaryChannelMask = (uint32_t)SECONDARY_CHANNEL_MASK;
+uint32_t sli_zigbee_af_network_creator_secondary_channel_mask = (uint32_t)SECONDARY_CHANNEL_MASK;
 
 static uint32_t currentChannelMask;
 
-static EmAfPluginNetworkCreatorChannelComposite channelComposites[EMBER_NUM_802_15_4_CHANNELS];
+static sli_zigbee_af_network_creator_channel_composite channelComposites[EMBER_NUM_802_15_4_CHANNELS];
 
 static bool doFormCentralizedNetwork = true;
 
@@ -102,7 +107,7 @@ static EmberStatus scheduleScans(void);
 
 static void cleanChannelComposites(void);
 static void updateChannelComposites(int8_t rssi,
-                                    EmAfPluginNetworkCreatorChannelCompositeMetric metric,
+                                    sli_zigbee_af_network_creator_channel_compositeMetric metric,
                                     uint8_t channel);
 static void maybeClearChannelBitOfMaxRssiReading(uint8_t channel);
 
@@ -126,7 +131,7 @@ EmberStatus emberAfPluginNetworkCreatorStart(bool centralizedNetwork)
   doFormCentralizedNetwork = centralizedNetwork;
 
   // Reset channel masks and composites and state.
-  currentChannelMask = emAfPluginNetworkCreatorPrimaryChannelMask;
+  currentChannelMask = sli_zigbee_af_network_creator_primary_channel_mask;
   cleanChannelComposites();
   clearStateFlags();
 
@@ -184,7 +189,7 @@ static void fillExtendedPanId(uint8_t *extendedPanId)
   bool invalid = true;
 
   for (i = 0; i < EXTENDED_PAN_ID_SIZE && invalid; i++) {
-    invalid = (emAfExtendedPanId[i] == 0x00 || emAfExtendedPanId[i] == 0xFF);
+    invalid = (sli_zigbee_af_extended_pan_id[i] == 0x00 || sli_zigbee_af_extended_pan_id[i] == 0xFF);
   }
 
   if (invalid) {
@@ -192,7 +197,7 @@ static void fillExtendedPanId(uint8_t *extendedPanId)
       extendedPanId[i] = emberGetPseudoRandomNumber();
     }
   } else {
-    MEMMOVE(extendedPanId, emAfExtendedPanId, EXTENDED_PAN_ID_SIZE);
+    MEMMOVE(extendedPanId, sli_zigbee_af_extended_pan_id, EXTENDED_PAN_ID_SIZE);
   }
 }
 
@@ -272,7 +277,7 @@ static void handleScanComplete(EmberAfPluginScanDispatchScanResults *results)
         // ...then try the secondary mask if we were on the primary...
         // ...else fail because we tried both masks.
         if (!maskIsSecondary()) {
-          currentChannelMask = emAfPluginNetworkCreatorSecondaryChannelMask;
+          currentChannelMask = sli_zigbee_af_network_creator_secondary_channel_mask;
           SETBITS(stateFlags, STATE_FLAGS_MASK_IS_SECONDARY);
           scheduleScans();
         } else {
@@ -356,7 +361,7 @@ static EmberStatus scheduleScans()
 }
 
 static void updateChannelComposites(int8_t rssi,
-                                    EmAfPluginNetworkCreatorChannelCompositeMetric metric,
+                                    sli_zigbee_af_network_creator_channel_compositeMetric metric,
                                     uint8_t channel)
 {
   uint8_t channelIndex = channel - EMBER_MIN_802_15_4_CHANNEL_NUMBER;
@@ -383,7 +388,7 @@ static void updateChannelComposites(int8_t rssi,
   }
 
   // If the channel is over the composite threshold, disregard the channel.
-  if (emAfPluginNetworkCreatorChannelCompositeIsAboveThreshold(channelComposites[channelIndex])) {
+  if (sli_zigbee_af_network_creator_channel_composite_is_above_threshold(channelComposites[channelIndex])) {
     CLEARBIT(currentChannelMask, channel);
   }
 }

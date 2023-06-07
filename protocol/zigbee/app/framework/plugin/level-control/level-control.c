@@ -23,9 +23,10 @@
 // clusters specific header
 #include "level-control.h"
 
-#ifdef UC_BUILD
 #include "level-control-config.h"
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #include "zap-cluster-command-parser.h"
 #ifdef SL_CATALOG_ZIGBEE_REPORTING_PRESENT
 #include "reporting.h"
@@ -45,23 +46,6 @@
 #define COLOR_CONTROL_SERVER_TEMP
 #endif
 #endif
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_REPORTING
-#include "app/framework/plugin/reporting/reporting.h"
-#endif
-#ifdef EMBER_AF_PLUGIN_ZLL_LEVEL_CONTROL_SERVER
-#define SL_CATALOG_ZIGBEE_ZLL_LEVEL_CONTROL_SERVER_PRESENT
-#include "app/framework/plugin/zll-level-control-server/zll-level-control-server.h"
-#define MIN_LEVEL EMBER_AF_PLUGIN_ZLL_LEVEL_CONTROL_SERVER_MINIMUM_LEVEL
-#define MAX_LEVEL EMBER_AF_PLUGIN_ZLL_LEVEL_CONTROL_SERVER_MAXIMUM_LEVEL
-#else // !EMBER_AF_PLUGIN_ZLL_LEVEL_CONTROL_SERVER
-#define MIN_LEVEL EMBER_AF_PLUGIN_LEVEL_CONTROL_MINIMUM_LEVEL
-#define MAX_LEVEL EMBER_AF_PLUGIN_LEVEL_CONTROL_MAXIMUM_LEVEL
-#endif // EMBER_AF_PLUGIN_ZLL_LEVEL_CONTROL_SERVER
-#ifdef EMBER_AF_PLUGIN_COLOR_CONTROL_SERVER_TEMP
-#define COLOR_CONTROL_SERVER_TEMP
-#endif
-#endif // UC_BUILD
 
 #ifdef ZCL_USING_LEVEL_CONTROL_CLUSTER_START_UP_CURRENT_LEVEL_ATTRIBUTE
 static bool areStartUpLevelControlServerAttributesTokenized(uint8_t endpoint);
@@ -132,16 +116,16 @@ static void reallyUpdateCoupledColorTemp(uint8_t endpoint);
 
 static void schedule(uint8_t endpoint, uint32_t delayMs)
 {
-  slxu_zigbee_zcl_schedule_server_tick_extended(endpoint,
-                                                ZCL_LEVEL_CONTROL_CLUSTER_ID,
-                                                delayMs,
-                                                EMBER_AF_LONG_POLL,
-                                                EMBER_AF_OK_TO_SLEEP);
+  sl_zigbee_zcl_schedule_server_tick_extended(endpoint,
+                                              ZCL_LEVEL_CONTROL_CLUSTER_ID,
+                                              delayMs,
+                                              EMBER_AF_LONG_POLL,
+                                              EMBER_AF_OK_TO_SLEEP);
 }
 
 static void deactivate(uint8_t endpoint)
 {
-  slxu_zigbee_zcl_deactivate_server_tick(endpoint, ZCL_LEVEL_CONTROL_CLUSTER_ID);
+  sl_zigbee_zcl_deactivate_server_tick(endpoint, ZCL_LEVEL_CONTROL_CLUSTER_ID);
 }
 
 static EmberAfLevelControlState *getState(uint8_t endpoint)
@@ -417,7 +401,6 @@ static bool shouldExecuteIfOff(uint8_t endpoint,
 #endif
 }
 
-#ifdef UC_BUILD
 bool emberAfLevelControlClusterMoveToLevelCallback(EmberAfClusterCommand *cmd)
 {
   sl_zcl_level_control_cluster_move_to_level_command_t cmd_data;
@@ -559,117 +542,6 @@ bool emberAfLevelControlClusterStopWithOnOffCallback(void)
   stopHandler(ZCL_STOP_WITH_ON_OFF_COMMAND_ID, 0xFF, 0xFF);
   return true;
 }
-
-#else // !UC_BUILD
-
-bool emberAfLevelControlClusterMoveToLevelCallback(uint8_t level,
-                                                   uint16_t transitionTime,
-                                                   uint8_t optionMask,
-                                                   uint8_t optionOverride)
-{
-  emberAfLevelControlClusterPrintln("%pMOVE_TO_LEVEL %x %2x %x %x",
-                                    "RX level-control:",
-                                    level,
-                                    transitionTime,
-                                    optionMask,
-                                    optionOverride);
-  moveToLevelHandler(ZCL_MOVE_TO_LEVEL_COMMAND_ID,
-                     level,
-                     transitionTime,
-                     optionMask,
-                     optionOverride,
-                     INVALID_STORED_LEVEL); // Don't revert to the stored level
-  return true;
-}
-
-bool emberAfLevelControlClusterMoveToLevelWithOnOffCallback(uint8_t level,
-                                                            uint16_t transitionTime)
-{
-  emberAfLevelControlClusterPrintln("%pMOVE_TO_LEVEL_WITH_ON_OFF %x %2x",
-                                    "RX level-control:",
-                                    level,
-                                    transitionTime);
-  moveToLevelHandler(ZCL_MOVE_TO_LEVEL_WITH_ON_OFF_COMMAND_ID,
-                     level,
-                     transitionTime,
-                     0xFF,
-                     0xFF,
-                     INVALID_STORED_LEVEL); // Don't revert to the stored level
-  return true;
-}
-
-bool emberAfLevelControlClusterMoveCallback(uint8_t moveMode,
-                                            uint8_t rate,
-                                            uint8_t optionMask,
-                                            uint8_t optionOverride)
-{
-  emberAfLevelControlClusterPrintln("%pMOVE %x %x",
-                                    "RX level-control:",
-                                    moveMode,
-                                    rate);
-  moveHandler(ZCL_MOVE_COMMAND_ID, moveMode, rate, optionMask, optionOverride);
-  return true;
-}
-
-bool emberAfLevelControlClusterMoveWithOnOffCallback(uint8_t moveMode, uint8_t rate)
-{
-  emberAfLevelControlClusterPrintln("%pMOVE_WITH_ON_OFF %x %x",
-                                    "RX level-control:",
-                                    moveMode,
-                                    rate);
-  moveHandler(ZCL_MOVE_WITH_ON_OFF_COMMAND_ID, moveMode, rate, 0xFF, 0xFF);
-  return true;
-}
-
-bool emberAfLevelControlClusterStepCallback(uint8_t stepMode,
-                                            uint8_t stepSize,
-                                            uint16_t transitionTime,
-                                            uint8_t optionMask,
-                                            uint8_t optionOverride)
-{
-  emberAfLevelControlClusterPrintln("%pSTEP %x %x %2x",
-                                    "RX level-control:",
-                                    stepMode,
-                                    stepSize,
-                                    transitionTime);
-  stepHandler(ZCL_STEP_COMMAND_ID, stepMode, stepSize, transitionTime, optionMask, optionOverride);
-  return true;
-}
-
-bool emberAfLevelControlClusterStepWithOnOffCallback(uint8_t stepMode,
-                                                     uint8_t stepSize,
-                                                     uint16_t transitionTime)
-{
-  emberAfLevelControlClusterPrintln("%pSTEP_WITH_ON_OFF %x %x %2x",
-                                    "RX level-control:",
-                                    stepMode,
-                                    stepSize,
-                                    transitionTime);
-  stepHandler(ZCL_STEP_WITH_ON_OFF_COMMAND_ID,
-              stepMode,
-              stepSize,
-              transitionTime,
-              0xFF,
-              0xFF);
-  return true;
-}
-
-bool emberAfLevelControlClusterStopCallback(uint8_t optionMask,
-                                            uint8_t optionOverride)
-{
-  emberAfLevelControlClusterPrintln("%pSTOP", "RX level-control:");
-  stopHandler(ZCL_STOP_COMMAND_ID, optionMask, optionOverride);
-  return true;
-}
-
-bool emberAfLevelControlClusterStopWithOnOffCallback(void)
-{
-  emberAfLevelControlClusterPrintln("%pSTOP_WITH_ON_OFF", "RX level-control:");
-  stopHandler(ZCL_STOP_WITH_ON_OFF_COMMAND_ID, 0xFF, 0xFF);
-  return true;
-}
-
-#endif // !UC_BUILD
 
 static void moveToLevelHandler(uint8_t commandId,
                                uint8_t level,
@@ -869,11 +741,33 @@ static void moveHandler(uint8_t commandId, uint8_t moveMode, uint8_t rate, uint8
     }
   }
 
-  // If the Rate field is 0xFF, the device should move as fast as it is able.
-  // Otherwise, the rate is in units per second.
+  // If the Rate field is 0xFF, the DefaultMoveRate SHALL be used
   if (rate == 0xFF) {
+#ifdef ZCL_USING_LEVEL_CONTROL_CLUSTER_DEFAULT_MOVE_RATE_ATTRIBUTE
+    uint8_t defaultMoveRate = 0;
+    status = emberAfReadServerAttribute(endpoint,
+                                        ZCL_LEVEL_CONTROL_CLUSTER_ID,
+                                        ZCL_DEFAULT_MOVE_RATE_ATTRIBUTE_ID,
+                                        (uint8_t *)&defaultMoveRate,
+                                        sizeof(defaultMoveRate));
+    if (status != EMBER_ZCL_STATUS_SUCCESS) {
+      emberAfLevelControlClusterPrintln("ERR: reading default move rate %x",
+                                        status);
+      goto send_default_response;
+    }
+    if (defaultMoveRate != 0) {
+      state->eventDurationMs = (MILLISECOND_TICKS_PER_SECOND / defaultMoveRate);
+    } else {
+      goto send_default_response;
+    }
+
+#else //ZCL_USING_LEVEL_CONTROL_CLUSTER_DEFAULT_MOVE_RATE_ATTRIBUTE
+    // If the Rate field is 0xFF and the DefaultMoveRate attribute is not supported,
+    // then the device should move as fast as it is able.
     state->eventDurationMs = FASTEST_TRANSITION_TIME_MS;
+#endif //ZCL_USING_LEVEL_CONTROL_CLUSTER_DEFAULT_MOVE_RATE_ATTRIBUTE
   } else {
+    // Otherwise, the rate is in units per second.
     state->eventDurationMs = MILLISECOND_TICKS_PER_SECOND / rate;
   }
   state->transitionTimeMs = difference * state->eventDurationMs;
@@ -1225,8 +1119,6 @@ static bool areStartUpLevelControlServerAttributesTokenized(uint8_t endpoint)
 }
 #endif
 
-#ifdef UC_BUILD
-
 uint32_t emberAfLevelControlClusterServerCommandParse(sl_service_opcode_t opcode,
                                                       sl_service_function_context_t *context)
 {
@@ -1284,5 +1176,3 @@ uint32_t emberAfLevelControlClusterServerCommandParse(sl_service_opcode_t opcode
           ? EMBER_ZCL_STATUS_SUCCESS
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
-
-#endif // UC_BUILD

@@ -18,15 +18,7 @@
 #ifndef __AF_DEBUG_PRINT__
 #define __AF_DEBUG_PRINT__
 
-#ifdef UC_BUILD
 #include "zcl-debug-print.h"
-#else
-#if defined (EMBER_TEST) && !defined(EMBER_AF_PRINT_NAMES)
-#include "debug-printing-test.h"
-#else
-#include "debug-printing.h"
-#endif
-#endif// UC_BUILD
 
 #if !defined(EMBER_AF_PRINT_OUTPUT) && defined(APP_SERIAL)
   #define EMBER_AF_PRINT_OUTPUT APP_SERIAL

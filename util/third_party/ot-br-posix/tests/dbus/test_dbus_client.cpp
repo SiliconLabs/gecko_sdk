@@ -39,6 +39,9 @@
 #include "common/code_utils.hpp"
 #include "dbus/client/thread_api_dbus.hpp"
 #include "dbus/common/constants.hpp"
+#if OTBR_ENABLE_TELEMETRY_DATA_API
+#include "proto/thread_telemetry.pb.h"
+#endif
 
 using otbr::DBus::ActiveScanResult;
 using otbr::DBus::ClientError;
@@ -54,6 +57,13 @@ using otbr::DBus::TxtEntry;
 
 #if OTBR_ENABLE_DNSSD_DISCOVERY_PROXY
 using otbr::DBus::DnssdCounters;
+#endif
+
+#if OTBR_ENABLE_NAT64
+using otbr::DBus::Nat64AddressMapping;
+using otbr::DBus::Nat64ComponentState;
+using otbr::DBus::Nat64ErrorCounters;
+using otbr::DBus::Nat64ProtocolCounters;
 #endif
 
 #define TEST_ASSERT(x)                                              \
@@ -198,6 +208,67 @@ void CheckMdnsInfo(ThreadApiDBus *aApi)
     TEST_ASSERT(mdnsInfo.mServiceRegistrationEmaLatency > 0);
 }
 
+void CheckNat64(ThreadApiDBus *aApi)
+{
+    OTBR_UNUSED_VARIABLE(aApi);
+#if OTBR_ENABLE_NAT64
+    {
+        Nat64ComponentState aState;
+        TEST_ASSERT(aApi->SetNat64Enabled(false) == OTBR_ERROR_NONE);
+        TEST_ASSERT(aApi->GetNat64State(aState) == OTBR_ERROR_NONE);
+        TEST_ASSERT(aState.mPrefixManagerState == OTBR_NAT64_STATE_NAME_DISABLED);
+        TEST_ASSERT(aState.mTranslatorState == OTBR_NAT64_STATE_NAME_DISABLED);
+
+        TEST_ASSERT(aApi->SetNat64Enabled(true) == OTBR_ERROR_NONE);
+        TEST_ASSERT(aApi->GetNat64State(aState) == OTBR_ERROR_NONE);
+        TEST_ASSERT(aState.mPrefixManagerState != OTBR_NAT64_STATE_NAME_DISABLED);
+        TEST_ASSERT(aState.mTranslatorState != OTBR_NAT64_STATE_NAME_DISABLED);
+    }
+
+    {
+        std::vector<Nat64AddressMapping> aMappings;
+        TEST_ASSERT(aApi->GetNat64Mappings(aMappings) == OTBR_ERROR_NONE);
+    }
+
+    {
+        Nat64ProtocolCounters aCounters;
+        TEST_ASSERT(aApi->GetNat64ProtocolCounters(aCounters) == OTBR_ERROR_NONE);
+    }
+
+    {
+        Nat64ErrorCounters aCounters;
+        TEST_ASSERT(aApi->GetNat64ErrorCounters(aCounters) == OTBR_ERROR_NONE);
+    }
+#endif
+}
+
+#if OTBR_ENABLE_TELEMETRY_DATA_API
+void CheckTelemetryData(ThreadApiDBus *aApi)
+{
+    std::vector<uint8_t>         responseTelemetryDataBytes;
+    threadnetwork::TelemetryData telemetryData;
+
+    TEST_ASSERT(aApi->GetTelemetryData(responseTelemetryDataBytes) == OTBR_ERROR_NONE);
+    // Print TelemetryData proto in hex format.
+    printf("TelemetryData bytes in hex: ");
+    for (uint8_t byte : responseTelemetryDataBytes)
+    {
+        printf("%02x ", byte);
+    }
+    printf("\n");
+
+    TEST_ASSERT(telemetryData.ParseFromString(
+        std::string(responseTelemetryDataBytes.begin(), responseTelemetryDataBytes.end())));
+    TEST_ASSERT(telemetryData.wpan_stats().node_type() == threadnetwork::TelemetryData::NODE_TYPE_LEADER);
+    TEST_ASSERT(telemetryData.wpan_stats().channel() == 11);
+    TEST_ASSERT(telemetryData.wpan_stats().radio_tx_power() == 0);
+    TEST_ASSERT(telemetryData.wpan_stats().mac_cca_fail_rate() < 1e-6);
+    TEST_ASSERT(telemetryData.wpan_stats().phy_tx() > 0);
+    TEST_ASSERT(telemetryData.wpan_stats().phy_rx() > 0);
+    TEST_ASSERT(telemetryData.wpan_stats().ip_tx_success() > 0);
+}
+#endif
+
 int main()
 {
     DBusError                      error;
@@ -205,8 +276,9 @@ int main()
     std::unique_ptr<ThreadApiDBus> api;
     uint64_t                       extpanid = 0xdead00beaf00cafe;
     std::string                    region;
-    uint32_t                       scanDuration = 1000; // 1s for each channel
-    bool                           stepDone     = false;
+    uint32_t                       scanDuration         = 1000; // 1s for each channel
+    bool                           stepDone             = false;
+    uint32_t                       preferredChannelMask = 0;
 
     dbus_error_init(&error);
     connection = UniqueDBusConnection(dbus_bus_get(DBUS_BUS_SYSTEM, &error));
@@ -223,6 +295,9 @@ int main()
     TEST_ASSERT(api->SetRadioRegion("US") == ClientError::ERROR_NONE);
     TEST_ASSERT(api->GetRadioRegion(region) == ClientError::ERROR_NONE);
     TEST_ASSERT(region == "US");
+
+    TEST_ASSERT(api->GetPreferredChannelMask(preferredChannelMask) == ClientError::ERROR_NONE);
+    TEST_ASSERT(preferredChannelMask == 0x7fff800);
 
     api->EnergyScan(scanDuration, [&stepDone](const std::vector<EnergyScanResult> &aResult) {
         TEST_ASSERT(!aResult.empty());
@@ -304,6 +379,10 @@ int main()
                             CheckSrpServerInfo(api.get());
                             CheckMdnsInfo(api.get());
                             CheckDnssdCounters(api.get());
+                            CheckNat64(api.get());
+#if OTBR_ENABLE_TELEMETRY_DATA_API
+                            CheckTelemetryData(api.get());
+#endif
                             api->FactoryReset(nullptr);
                             TEST_ASSERT(api->GetNetworkName(name) == OTBR_ERROR_NONE);
                             TEST_ASSERT(rloc16 != 0xffff);

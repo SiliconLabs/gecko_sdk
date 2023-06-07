@@ -8,16 +8,15 @@
 #ifdef EMBER_STACK_ZIGBEE
  #ifdef EZSP_HOST
 // Host
-  #define addTransientLinkKey     ezspAddTransientLinkKey
   #define getNetworkParameters(nodeTypePtr, parametersPtr) \
   ezspGetNetworkParameters(nodeTypePtr, parametersPtr)
  #else
 // SoC
-  #define addTransientLinkKey     emberAddTransientLinkKey
   #define getNetworkParameters(nodeTypePtr, parametersPtr) \
   emberGetNetworkParameters(parametersPtr);                \
   (void)nodeTypePtr;
  #endif  // EZSP_HOST
+ #define addTransientLinkKey sl_zb_sec_man_import_transient_link_key
 #endif // EMBER_STACK_ZIGBEE
 
 // Message callbacks

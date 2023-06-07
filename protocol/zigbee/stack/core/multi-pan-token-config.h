@@ -34,19 +34,11 @@
 
 // We only reserve token space for multi PAN child table
 // when multiple ZC and ZR devices devices are present.
-#ifdef UC_BUILD
 #if (EMBER_ZC_AND_ZR_DEVICE_COUNT > 1)
   #define EMBER_MULTI_PAN_CHILD_TABLE_TOKEN_SIZE EMBER_CHILD_TABLE_SIZE
 #else
   #define EMBER_MULTI_PAN_CHILD_TABLE_TOKEN_SIZE 0
 #endif
-#else // !UC_BUILD
-#if (EMBER_AF_ZC_AND_ZR_DEVICE_COUNT > 1)
-  #define EMBER_MULTI_PAN_CHILD_TABLE_TOKEN_SIZE EMBER_CHILD_TABLE_SIZE
-#else
-  #define EMBER_MULTI_PAN_CHILD_TABLE_TOKEN_SIZE 0
-#endif
-#endif // UC_BUILD
 
 #ifdef DEFINETOKENS
 DEFINE_INDEXED_TOKEN(MULTI_PAN_STACK_CHILD_TABLE,

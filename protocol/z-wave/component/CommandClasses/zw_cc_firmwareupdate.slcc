@@ -10,16 +10,18 @@ description: >
   Version Command Class may be used to verify that the intended firmware version is installed.
 package: Z-Wave
 quality: production
+root_path: protocol/z-wave
 source:
-  - path: protocol/z-wave/ZAF/CommandClasses/FirmwareUpdate/CC_FirmwareUpdate.c
-  - path: protocol/z-wave/ZAF/CommandClasses/FirmwareUpdate/ota_util.c
+  - path: ZAF/CommandClasses/FirmwareUpdate/src/CC_FirmwareUpdate.c
+  - path: ZAF/CommandClasses/FirmwareUpdate/src/ota_util.c
+  # Private header
+  - path: ZAF/CommandClasses/FirmwareUpdate/src/ota_util.h
 include:
-  - path: protocol/z-wave/ZAF/CommandClasses/FirmwareUpdate/
+  - path: ZAF/CommandClasses/FirmwareUpdate/inc/
     file_list:
      - path: CC_FirmwareUpdate.h
-     - path: ota_util.h
 config_file:
-  - path: protocol/z-wave/platform/SiliconLabs/PAL/config/cc_firmware_update/cc_firmware_update_config.h
+  - path: platform/SiliconLabs/PAL/config/cc_firmware_update/cc_firmware_update_config.h
     file_id: cc_firmware_update_config
 provides:
   - name: zw_cc_firmwareupdate

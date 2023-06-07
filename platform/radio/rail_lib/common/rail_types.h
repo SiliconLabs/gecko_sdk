@@ -367,10 +367,18 @@ typedef struct RAIL_PacketTimeStamp {
    */
   RAIL_PacketTimePosition_t timePosition;
   /**
+   * In RX and OFDM for EFR32xG25 only  :
    * A value specifying the on-air duration of the data packet,
    * starting with the first bit of the PHR (i.e. end of sync word).
    * Preamble and sync word duration are hence excluded.
-   * Only valid for receive packets at the present time on EFR32xG25 only.
+   *
+   * In Tx for all EFR32 Series 2 except EFR32xG21 :
+   * A value specifying the on-air duration of the data packet,
+   * starting at the preamble (i.e. includes preamble, sync word, PHR, payload and FCS).
+   * This value can be use to compute duty cycles.
+   *
+   * At the present time, this field is set to zero for all EFR32 Series 1 and EFR32xG21,
+   * and also for transmission of auto-ack.
    */
   RAIL_Time_t packetDurationUs;
 } RAIL_PacketTimeStamp_t;
@@ -1537,7 +1545,8 @@ RAIL_ENUM_GENERIC(RAIL_Events_t, uint64_t) {
  * Occurs when a Tx has been blocked because of temperature exceeding
  * the safety threshold.
  *
- * Only occurs on platforms where \ref RAIL_SUPPORTS_EFF is true.
+ * Only occurs on platforms where \ref RAIL_SUPPORTS_EFF is true,
+ * and only when also reporting \ref RAIL_EVENT_TX_BLOCKED.
  */
 #define RAIL_EVENT_TX_BLOCKED_TOO_HOT (1ULL << RAIL_EVENT_TX_BLOCKED_TOO_HOT_SHIFT)
 
@@ -1963,6 +1972,7 @@ typedef struct RAIL_ChannelConfig {
                                                  entries. */
   uint32_t length; /**< Number of RAIL_ChannelConfigEntry_t entries. */
   uint32_t signature; /**< Signature for this structure. Only used on modules. */
+  uint32_t xtalFrequencyHz; /**< Crystal Frequency for the channel config. */
 } RAIL_ChannelConfig_t;
 
 /**
@@ -2079,9 +2089,20 @@ RAIL_ENUM(RAIL_RxDataSource_t) {
   RX_IQDATA_FILTMSB, /**< Gets highest 16 bits of I/Q data provided to the
                          demodulator. */
   RX_DIRECT_MODE_DATA, /**< Gets RX direct mode data output from the demodulator.
+                            BCRDEMOD captures bcr_dmod_rawd at the sample rate
+                            (faster than the bit rate by the OSR), specifically
+                            the demod_samp_rate trigger.
                             Only supported if
                             \ref RAIL_SUPPORTS_RX_DIRECT_MODE_DATA_TO_FIFO
                             is true. */
+  RX_DIRECT_SYNCHRONOUS_MODE_DATA,  /**< Gets synchronous RX direct mode data
+                                         output from the demodulator.
+                                         BCRDEMOD_SYNCHRONOUS captures
+                                         bcr_dmod_rxd_ext at the bit
+                                         rate (bcr_dmod_bitclk_ext trigger).
+                                         Only supported if
+                                         \ref RAIL_SUPPORTS_RX_DIRECT_MODE_DATA_TO_FIFO
+                                         is true. */
   /** A count of the choices in this enumeration. */
   RAIL_RX_DATA_SOURCE_COUNT // Must be last
 };
@@ -2093,6 +2114,7 @@ RAIL_ENUM(RAIL_RxDataSource_t) {
 #define RX_IQDATA_FILTLSB         ((RAIL_RxDataSource_t) RX_IQDATA_FILTLSB)
 #define RX_IQDATA_FILTMSB         ((RAIL_RxDataSource_t) RX_IQDATA_FILTMSB)
 #define RX_DIRECT_MODE_DATA       ((RAIL_RxDataSource_t) RX_DIRECT_MODE_DATA)
+#define RX_DIRECT_SYNCHRONOUS_MODE_DATA ((RAIL_RxDataSource_t) RX_DIRECT_SYNCHRONOUS_MODE_DATA)
 #define RAIL_RX_DATA_SOURCE_COUNT ((RAIL_RxDataSource_t) RAIL_RX_DATA_SOURCE_COUNT)
 #endif//DOXYGEN_SHOULD_SKIP_THIS
 
@@ -2920,6 +2942,25 @@ typedef struct RAIL_LbtConfig {
 }
 
 /**
+ * @def RAIL_LBT_CONFIG_ETSI_EN_300_220_1_V3_1_0
+ * @brief RAIL_LbtConfig_t initializer configuring LBT per ETSI 300 220-1
+ *   V3.1.0 for a typical Sub-GHz band. To be practical, users should override
+ *   lbtTries and/or lbtTimeout so channel access failure will be reported in a
+ *   reasonable time frame rather than the unbounded time frame ETSI defined.
+ */
+#define RAIL_LBT_CONFIG_ETSI_EN_300_220_1_V3_1_0 {                             \
+    /* LBT per ETSI 300 220-1 V3.1.0                                        */ \
+    /* LBT time = random backoff of 160-4960 us in 160 us increments        */ \
+    /* lbtMinBoRand */ 1,    /*                                             */ \
+    /* lbtMaxBoRand */ 31,   /* app-chosen; 31*lbtBackoff = 4960 us         */ \
+    /* lbtTries     */ RAIL_MAX_LBT_TRIES, /* the maximum supported         */ \
+    /* lbtThreshold */ -85,  /* 15 dB above Rx sensitivity per Table 45     */ \
+    /* lbtBackoff   */ 160,  /* 160 us per Table 48 Minimum CCA interval    */ \
+    /* lbtDuration  */ 160,  /* 160 us per Table 48 Minimum deferral period */ \
+    /* lbtTimeout   */ 0,    /* No timeout (recommend user override)        */ \
+}
+
+/**
  * @struct RAIL_SyncWordConfig_t
  * @brief RAIL sync words and length configuration.
  *
@@ -3070,6 +3111,8 @@ RAIL_ENUM_GENERIC(RAIL_RxOptions_t, uint32_t) {
   #endif //DOXYGEN_SHOULD_SKIP_THIS
   /** Shift position of \ref RAIL_RX_OPTION_CHANNEL_SWITCHING bit. */
   RAIL_RX_OPTION_CHANNEL_SWITCHING_SHIFT,
+  /** Shift position of \ref RAIL_RX_OPTION_FAST_RX2RX bit. */
+  RAIL_RX_OPTION_FAST_RX2RX_SHIFT,
 };
 
 /** A value representing no options enabled. */
@@ -3208,6 +3251,18 @@ RAIL_ENUM_GENERIC(RAIL_RxOptions_t, uint32_t) {
  *   selection options.
  */
 #define RAIL_RX_OPTION_CHANNEL_SWITCHING (1U << RAIL_RX_OPTION_CHANNEL_SWITCHING_SHIFT)
+
+/**
+ * An option to enable fast RX2RX state transition.
+ *
+ * Once enabled, the sequencer will send the radio to RXSEARCH and get ready to
+ * receive the next packet while still processing the previous one. This will
+ * reduce RX to RX state transition time but risks impacting receive capability.
+ *
+ * @note This option is only supported on specific chips where
+ * \ref RAIL_SUPPORTS_FAST_RX2RX is true.
+ */
+#define RAIL_RX_OPTION_FAST_RX2RX (1U << RAIL_RX_OPTION_FAST_RX2RX_SHIFT)
 
 /** A value representing all possible options. */
 #define RAIL_RX_OPTIONS_ALL 0xFFFFFFFFUL
@@ -3549,6 +3604,10 @@ typedef struct RAIL_RxPacketDetails {
    * chapter 20.3, table 20-10.
    * Ex: Packet bitrate for OFDM option 1 MCS0 is 100kb/s and 2400kb/s for MCS6.
    *
+   * In WMBUS cases, when using PHY_wMbus_ModeTC_M2O_100k_frameA with simultaneous
+   * RX of T and C modes enabled (\ref RAIL_WMBUS_Config()), the value corresponds
+   * to \ref RAIL_WMBUS_Phy_t.
+   *
    * It is always available.
    */
   uint8_t subPhyId;
@@ -3676,7 +3735,7 @@ typedef struct RAIL_HFXOThermistorConfig {
 
 /**
  * @struct RAIL_HFXOCompensationConfig_t
- * @brief Set compensation spepcific parameters
+ * @brief Set compensation specific parameters
  */
 typedef struct RAIL_HFXOCompensationConfig {
   /**
@@ -4566,7 +4625,7 @@ RAIL_ENUM(RAIL_EffModeSensor_t) {
 #define RAIL_EFF_MODE_SENSOR_FSK_SAW2 ((RAIL_EffModeSensor_t) RAIL_EFF_MODE_SENSOR_FSK_SAW2)
 #define RAIL_EFF_MODE_SENSOR_OFDM_ANTV ((RAIL_EffModeSensor_t) RAIL_EFF_MODE_SENSOR_OFDM_ANTV)
 #define RAIL_EFF_MODE_SENSOR_OFDM_SAW2 ((RAIL_EffModeSensor_t) RAIL_EFF_MODE_SENSOR_OFDM_SAW2)
-#define RAIL_EFF_MODE_SENSOR_COUNT ((RAIL_EffModeSensor_t) RAIL_EFF_CAL_COUNT)
+#define RAIL_EFF_MODE_SENSOR_COUNT ((RAIL_EffModeSensor_t) RAIL_EFF_MODE_SENSOR_COUNT)
 #endif//DOXYGEN_SHOULD_SKIP_THIS
 
 /**
@@ -4578,6 +4637,22 @@ RAIL_ENUM(RAIL_EffModeSensor_t) {
     "RAIL_EFF_MODE_SENSOR_FSK_SAW2",      \
     "RAIL_EFF_MODE_SENSOR_OFDM_ANTV",     \
     "RAIL_EFF_MODE_SENSOR_OFDM_SAW2",     \
+}
+
+/**
+ * @def RAIL_EFF_CLPC_ENABLE_ENUM_NAMES
+ * @brief A macro that is string versions of the calibration enums.
+ */
+#define RAIL_EFF_CLPC_ENABLE_ENUM_NAMES { \
+    "RAIL_EFF_CLPC_DISABLED",             \
+    "RAIL_EFF_CLPC_MODE_CHANGE",          \
+    "RAIL_EFF_CLPC_POWER_SLOW",           \
+    "RAIL_EFF_CLPC_POWER_FAST",           \
+    "RAIL_EFF_CLPC_POWER_BOTH",           \
+    "RAIL_EFF_CLPC_POWER_SLOW_STOPPED",   \
+    "RAIL_EFF_CLPC_POWER_FAST_STOPPED",   \
+    "RAIL_EFF_CLPC_POWER_BOTH_STOPPED",   \
+    "RAIL_EFF_CLPC_COUNT",                \
 }
 
 /** @struct RAIL_EffCalConfig_t
@@ -4617,6 +4692,20 @@ typedef struct RAIL_EffClpcConfig {
   RAIL_EffClpcSensorConfig_t antv; /**< ANTV sensor configuration */
   RAIL_EffClpcSensorConfig_t saw2; /**< SAW2 sensor configuration */
 } RAIL_EffClpcConfig_t;
+
+/** @struct RAIL_EffClpcResults_t
+ *
+ * @brief Structure for passing information from the CLPC.
+ *
+ * A structure of type \ref RAIL_EffClpcResults_t returns the measurements and decisions from the
+ * Closed Loop Power Control back to the application side.
+ */
+typedef struct RAIL_EffClpcResults {
+  int8_t rawShift;  /**< CLPC shift directly from formula */
+  int8_t clampedShift;  /**< Shift after clamping to maximum allowed for this pass */
+  uint8_t currIndex;  /**< Powersetting table index before shifting */
+  uint8_t newIndex;  /**< Power table index after shifting */
+} RAIL_EffClpcResults_t;
 
 /**
  * @struct RAIL_EffConfig_t
@@ -4782,7 +4871,7 @@ extern "C" {
 typedef struct RAIL_StateTiming {
   RAIL_TransitionTime_t idleToRx; /**< Transition time from IDLE to RX. */
   RAIL_TransitionTime_t txToRx; /**< Transition time from TX to RX. */
-  RAIL_TransitionTime_t idleToTx; /**< Transition time from IDLE to RX. */
+  RAIL_TransitionTime_t idleToTx; /**< Transition time from IDLE to TX. */
   RAIL_TransitionTime_t rxToTx; /**< Transition time from RX packet to TX. */
   RAIL_TransitionTime_t rxSearchTimeout; /**< Length of time the radio will search for a
                                             packet when coming from idle or RX. */

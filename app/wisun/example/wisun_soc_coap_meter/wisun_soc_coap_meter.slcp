@@ -24,14 +24,18 @@ component:
   - id: "restrictions_profile_wisun_fan_1_0"
   - id: "restrictions_profile_wisun_fan_1_1"
 # SDK components
+  - id: "sl_wisun_lfn_device_support"
   - id: "sl_wisun_trace_util"
+  - id: "sl_wisun_app_core"
+  - id: "sl_wisun_app_setting"
   - id: "sl_wisun_app_cli"
   - id: "sl_wisun_ping"
   - id: "sl_wisun_meter"
   - id: "sl_wisun_coap"
-  - id: cli
+  - id: "cli"
     instance:
-    - example
+      - vcom
+
 requires:
   - name: "cmsis_rtos2"
   - name: freertos_heap_3
@@ -86,7 +90,7 @@ configuration:
   - name: "APP_PROJECT_INFO_MBEDTLS_VERSION_ENABLED"
     value: "1"
   - name: SL_RAIL_UTIL_PA_SELECTION_SUBGHZ
-    value: "RAIL_TX_POWER_MODE_SUBGIG_EFF_20DBM"
+    value: "RAIL_TX_POWER_MODE_SUBGIG_EFF_POWERSETTING_TABLE"
     condition: [hardware_board_has_eff]
   - name: RAIL_UTIL_EFF_MAX_TX_CONTINUOUS_POWER_DBM
     value: 20
@@ -106,9 +110,7 @@ configuration:
 
 #--------------------- SDK memory configuration ------------------------
   - name: "SL_HEAP_SIZE"
-    value: "0x14000"
-  - name: "SL_WISUN_COAP_RESOURCE_HND_STACK_SIZE_WORD"
-    value: "200"
+    value: "0x15000"
     
 readme:
   - path: ../../documentation/example/wisun_soc_coap_meter/readme.md

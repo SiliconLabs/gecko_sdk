@@ -6,7 +6,7 @@ Both nodes can send and receive IEEE Std. 802.15.4 and IEEE Std. 802.15.4g or BL
 With IEEE Std. 802.15.4 the frame can be sent and received with CSMA/CA, auto-ACK, address filtering and setable Frame Control Frame (available settings: broadcast or unicast).
 With IEEE Std. 802.15.4g the frame can be sent and received with auto-ACK, address filtering and setable Frame Control Frame (available settings broadcast or unicast).
 On the WSTK, any button press (PB0/PB1) will send a message.
-LED0 will toggle on message send and LED1 will toggle on message receive.
+LED1 will toggle on message send and LED0 will toggle on message receive.
 CLI can also be used for sending and showing received messages.
 To send enter 'send'. By default the received packets will be printed out in terminal.
 To change standard to BLE, the Flex - RAIL BLE support software component shall be installed under Flex/RAIL/Utilility.
@@ -44,6 +44,7 @@ component:
 #----------------- Require list ----------------------
 requires:
   - name: sl_flex_rail_protocol
+  - name: sl_flex_rail_config
   - name: sl_simple_rail_os
     condition:
       - "kernel"

@@ -14,7 +14,9 @@ component:
   - id: app_assert
   - id: legacy_hal
   - id: token_manager
+  - id: rail_util_pti
   # Connect components
+  - id: sl_connect_config
   - id: sl_sensor_sink_core
   - id: connect_debug_print
   - id: connect_app_framework_common
@@ -47,6 +49,9 @@ component:
 #----------------- Require list ----------------------
 requires:
   - name: a_radio_config
+  - name: radio_config_simple_connect_singlephy_device_family_fgm23
+    condition:
+      - "device_family_fgm23"
 
 #----------------- Project files ---------------------
 include:

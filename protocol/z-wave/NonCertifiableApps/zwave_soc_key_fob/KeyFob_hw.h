@@ -7,11 +7,8 @@
 #ifndef KEYFOB_HW_H_
 #define KEYFOB_HW_H_
 
-#include <stdint.h>
-#include <ZW_basis_api.h>
+#include <stdbool.h>
 
-void KeyFob_hw_init(EResetReason_t reset_reason);
-void KeyFob_hw_deep_sleep_wakeup_handler(void);
 void KeyFob_basic_on_Led_handler(bool ledOn);
 void KeyFob_basic_off_Led_handler(bool ledOn);
 void KeyFob_group_add_Led_handler(bool ledOn);

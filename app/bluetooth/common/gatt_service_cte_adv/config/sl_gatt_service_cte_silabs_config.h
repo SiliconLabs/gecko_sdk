@@ -31,6 +31,11 @@
 #ifndef SL_GATT_SERVICE_CTE_SILABS_CONFIG_H
 #define SL_GATT_SERVICE_CTE_SILABS_CONFIG_H
 
+/***********************************************************************************************//**
+ * @addtogroup gatt_service_cte_silabs
+ * @{
+ **************************************************************************************************/
+
 // <<< Use Configuration Wizard in Context Menu >>>
 
 // <o SL_GATT_SERVICE_CTE_SILABS_ADV_INTERVAL> Silabs CTE advertising interval in units of 0.625 ms <32-65535>
@@ -56,4 +61,5 @@
 
 // <<< end of configuration section >>>
 
+/** @} (end addtogroup gatt_service_cte_silabs) */
 #endif // SL_GATT_SERVICE_CTE_SILABS_CONFIG_H

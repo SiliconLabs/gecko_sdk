@@ -53,9 +53,19 @@ static void print_key_storage(void);
 static void encrypt_aead_single(psa_algorithm_t algo);
 
 /***************************************************************************//**
+ * Multi part AEAD encryption.
+ ******************************************************************************/
+static void encrypt_aead_multi(psa_algorithm_t algo);
+
+/***************************************************************************//**
  * Single part AEAD decryption.
  ******************************************************************************/
 static void decrypt_aead_single(void);
+
+/***************************************************************************//**
+ * Multi part AEAD decryption.
+ ******************************************************************************/
+static void decrypt_aead_multi(void);
 
 // -----------------------------------------------------------------------------
 //                                Global Variables
@@ -216,6 +226,16 @@ void app_process_action(void)
       if (app_state == PSA_CRYPTO_EXIT) {
         break;
       }
+      printf("\n  . Multipart AES CCM encryption -");
+      encrypt_aead_multi(PSA_ALG_CCM);
+      if (app_state == PSA_CRYPTO_EXIT) {
+        break;
+      }
+      printf("\n  . Multipart AES CCM decryption -");
+      decrypt_aead_multi();
+      if (app_state == PSA_CRYPTO_EXIT) {
+        break;
+      }
       app_state = AES_GCM_TEST;
       break;
 
@@ -230,6 +250,18 @@ void app_process_action(void)
       if (app_state == PSA_CRYPTO_EXIT) {
         break;
       }
+      printf("\n  . Multipart AES GCM encryption -");
+      encrypt_aead_multi(PSA_ALG_GCM);
+      if (app_state == PSA_CRYPTO_EXIT) {
+        break;
+      }
+
+      printf("\n  . Multipart AES GCM decryption -");
+      decrypt_aead_multi();
+      if (app_state == PSA_CRYPTO_EXIT) {
+        break;
+      }
+
       app_state = CHACHA20_POLY1305_TEST;
       break;
 
@@ -358,11 +390,10 @@ static void print_key_storage(void)
 }
 
 /***************************************************************************//**
- * Single part AEAD encryption.
+ * Zero decrypt buffer and create an AEAD encryption key.
  ******************************************************************************/
-static void encrypt_aead_single(psa_algorithm_t algo)
+static psa_status_t encrypt_aead_init(psa_algorithm_t algo)
 {
-  app_state = PSA_CRYPTO_EXIT;
   memset(get_cipher_msg_buf_ptr(), 0, plain_msg_size[plain_msg_size_select]);
   printf(" %lu bytes random plaintext with %d bit key\n",
          plain_msg_size[plain_msg_size_select],
@@ -372,16 +403,32 @@ static void encrypt_aead_single(psa_algorithm_t algo)
   printf("  + Creating a %d-bit %s key... ",
          symmetric_key_size[symmetric_key_size_select],
          symmetric_key_storage_string[symmetric_key_storage_select]);
-  if (create_import_key(CREATE_KEY_OFFSET + symmetric_key_storage_select,
-                        PSA_KEY_TYPE_NONE,
-                        symmetric_key_size[symmetric_key_size_select],
-                        PERSISTENT_KEY_ID,
-                        DEFAULT_KEY_USAGE,
-                        algo) != PSA_SUCCESS) {
-    return;
+
+  psa_status_t ret = create_import_key(CREATE_KEY_OFFSET + symmetric_key_storage_select,
+                                       PSA_KEY_TYPE_NONE,
+                                       symmetric_key_size[symmetric_key_size_select],
+                                       PERSISTENT_KEY_ID,
+                                       DEFAULT_KEY_USAGE,
+                                       algo);
+
+  if (ret == PSA_SUCCESS) {
+    // Free resources
+    reset_key_attr();
+  } else {
+    printf("Failed to create key: %ld\n", ret);
   }
-  // Free resources
-  reset_key_attr();
+
+  return ret;
+}
+
+/***************************************************************************//**
+ * Single part AEAD encryption.
+ ******************************************************************************/
+static void encrypt_aead_single(psa_algorithm_t algo)
+{
+  app_state = PSA_CRYPTO_EXIT;
+
+  encrypt_aead_init(algo);
 
   // Use default AEAD tag length
   set_nonce_len(NONCE_LEN);
@@ -394,11 +441,27 @@ static void encrypt_aead_single(psa_algorithm_t algo)
 }
 
 /***************************************************************************//**
- * Single part AEAD decryption.
+ * Multi part AEAD encryption.
  ******************************************************************************/
-static void decrypt_aead_single(void)
+static void encrypt_aead_multi(psa_algorithm_t algo)
 {
   app_state = PSA_CRYPTO_EXIT;
+
+  if ( encrypt_aead_init(algo) != PSA_SUCCESS ) {
+    return;
+  }
+  printf("  . Multipart encryption...");
+  if ( multipart_aead(true) != PSA_SUCCESS ) {
+    return;
+  }
+  app_state = PSA_CRYPTO_INIT;
+}
+
+/***************************************************************************//**
+ * Zero plaintext buffer and set nonce/ad lengths.
+ ******************************************************************************/
+static void decrypt_aead_init(void)
+{
   // Use the key in encryption for decryption
   memset(get_plain_msg_buf_ptr(), 0, plain_msg_size[plain_msg_size_select]);
   printf(" %lu bytes ciphertext with %d bit key\n",
@@ -408,6 +471,17 @@ static void decrypt_aead_single(void)
   // Setup length is not necessary if decryption after encryption
   set_nonce_len(NONCE_LEN);
   set_ad_len(AD_LEN);
+}
+
+/***************************************************************************//**
+ * Single part AEAD decryption.
+ ******************************************************************************/
+static void decrypt_aead_single(void)
+{
+  app_state = PSA_CRYPTO_EXIT;
+
+  decrypt_aead_init();
+
   printf("  + Decrypting message... ");
   if (decrypt_aead() != PSA_SUCCESS) {
     return;
@@ -423,5 +497,32 @@ static void decrypt_aead_single(void)
   if (destroy_key() != PSA_SUCCESS) {
     return;
   }
+  app_state = PSA_CRYPTO_INIT;
+}
+
+/***************************************************************************//**
+ * Multi part AEAD decryption.
+ ******************************************************************************/
+static void decrypt_aead_multi(void)
+{
+  app_state = PSA_CRYPTO_EXIT;
+
+  decrypt_aead_init();
+
+  printf("  + Multipart decrypt...");
+  if (multipart_aead(false) != PSA_SUCCESS) {
+    return;
+  }
+
+  // In contrast to singlepart, decrypt won't return PSA_SUCCESS
+  // if the key does not match.  So no hash comparison necessary.
+
+  printf("  + Destroying a %d-bit %s key... ",
+         symmetric_key_size[symmetric_key_size_select],
+         symmetric_key_storage_string[symmetric_key_storage_select]);
+  if (destroy_key() != PSA_SUCCESS) {
+    return;
+  }
+
   app_state = PSA_CRYPTO_INIT;
 }

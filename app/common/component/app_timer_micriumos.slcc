@@ -1,0 +1,30 @@
+id: app_timer_micriumos
+label: Timer for Micrium RTOS
+package: platform
+description: >
+  Timer service based on Micrium RTOS
+  for applications with less strict timing requirements.
+  This module is based on the sleeptimer, but runs the timer callbacks in
+  non-interrupt context. This behavior gives more flexibility for the callback
+  implementation but causes a less precise timing.
+  If your application requires precise timing, please use the sleeptimer
+  directly.
+category: Application|Utility
+quality: production
+root_path: app/common/util/app_timer_micriumos
+source:
+  - path: app_timer_micriumos.c
+include:
+  - path: .
+    file_list:
+      - path: app_timer.h
+      - path: sl_simple_timer.h
+provides:
+  - name: app_timer
+requires:
+  - name: micriumos_kernel
+template_contribution:
+  - name: component_catalog
+    value: app_timer_micriumos
+validation_helper:
+  - path: app_timer_micriumos_validation.lua

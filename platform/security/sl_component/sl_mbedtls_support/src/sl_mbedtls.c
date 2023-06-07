@@ -39,6 +39,44 @@
 #endif
 #endif // #if !defined(SL_TRUSTZONE_NONSECURE)
 
+#if defined(MBEDTLS_THREADING_ALT) && defined(MBEDTLS_THREADING_C)
+#if defined(MBEDTLS_PSA_CRYPTO_C)
+#include "cmsis_os2.h"
+#include <stdbool.h>
+static volatile bool mbedtls_psa_slots_mutex_inited = false;
+
+/**
+ * \brief          Lock all task switches
+ *
+ * \return         Previous lock state
+ *
+ */
+static inline int32_t lock_task_switches(void)
+{
+  int32_t kernel_lock_state = 0;
+  osKernelState_t kernel_state = osKernelGetState();
+  if (kernel_state != osKernelInactive && kernel_state != osKernelReady) {
+    kernel_lock_state = osKernelLock();
+  }
+  return kernel_lock_state;
+}
+
+/**
+ * \brief          Restores the previous lock state
+ */
+static inline void restore_lock_state(int32_t kernel_lock_state)
+{
+  osKernelState_t kernel_state = osKernelGetState();
+  if (kernel_state != osKernelInactive && kernel_state != osKernelReady) {
+    if (osKernelRestoreLock(kernel_lock_state) < 0) {
+      EFM_ASSERT(false);
+    }
+  }
+}
+
+#endif // defined(MBEDTLS_PSA_CRYPTO_C)
+#endif // defined(MBEDTLS_THREADING_ALT) && defined(MBEDTLS_THREADING_C)
+
 void sl_mbedtls_init(void)
 {
 #if !defined(SL_TRUSTZONE_NONSECURE)
@@ -58,10 +96,21 @@ void sl_mbedtls_init(void)
 
 #endif // #if !defined(SL_TRUSTZONE_NONSECURE)
 
-#if defined(MBEDTLS_THREADING_C)
+#if defined(MBEDTLS_THREADING_ALT) && defined(MBEDTLS_THREADING_C)
   mbedtls_threading_set_alt(&THREADING_InitMutex,
                             &THREADING_FreeMutex,
                             &THREADING_TakeMutexBlocking,
                             &THREADING_GiveMutex);
-#endif // #if defined(MBEDTLS_THREADING_C)
+  #if defined(MBEDTLS_PSA_CRYPTO_C)
+  // Initialize mutex for PSA slot access in psa_crypto_slot_management.c
+  if (!mbedtls_psa_slots_mutex_inited) {
+    int32_t kernel_lock_state = lock_task_switches();
+    if (!mbedtls_psa_slots_mutex_inited) {
+      mbedtls_mutex_init(&mbedtls_psa_slots_mutex);
+      mbedtls_psa_slots_mutex_inited = true;
+    }
+    restore_lock_state(kernel_lock_state);
+  }
+  #endif // #if defined(MBEDTLS_PSA_CRYPTO_C)
+#endif // #if defined(MBEDTLS_THREADING_ALT) && defined(MBEDTLS_THREADING_C)
 }

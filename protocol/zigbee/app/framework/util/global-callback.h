@@ -15,7 +15,7 @@
  *
  ******************************************************************************/
 
-#include "af.h"
+#include "app/framework/include/af.h"
 
 /**
  * @addtogroup global_callback

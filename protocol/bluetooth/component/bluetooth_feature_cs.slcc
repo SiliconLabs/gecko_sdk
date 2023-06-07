@@ -1,0 +1,18 @@
+id: "bluetooth_feature_cs"
+label: "Accurate Bluetooth Ranging"
+package: "Bluetooth"
+description: >
+  This component, corresponding to the "cs" class in Bluetooth APIs,
+  provides the Accurate Bluetooth Ranging feature.
+category: Bluetooth|Bluetooth Host (Stack)|Features with Commands and Events
+quality: "experimental"
+root_path: "protocol/bluetooth"
+requires:
+  - name: "bluetooth_controller"
+  - name: "device_supports_bluetooth_cs"
+provides:
+  - name: "bluetooth_feature_cs"
+template_contribution:
+  - name: component_catalog
+    value: bluetooth_feature_cs
+    priority: 10

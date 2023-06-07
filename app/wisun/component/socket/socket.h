@@ -39,7 +39,7 @@ extern "C" {
 // -----------------------------------------------------------------------------
 
 #include <stddef.h>
-#include <inttypes.h>
+#include <stdint.h>
 #include "sl_status.h"
 #include "sl_wisun_api.h"
 #include "errno.h"
@@ -52,6 +52,17 @@ extern "C" {
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
+/// Socket API error return value
+#define SOCKET_RETVAL_ERROR                   (-1L)
+
+/// Socket API OK return value
+#define SOCKET_RETVAL_OK                      (0L)
+
+/// Invalid socket ID
+#define SOCKET_INVALID_ID                     (SOCKET_RETVAL_ERROR)
+
+/// Socket EOF
+#define SOCKET_EOF                            (0L)
 
 /**************************************************************************//**
  * @addtogroup SL_WISUN_SOCKET_API_TYPES Socket API type definitions
@@ -113,13 +124,13 @@ typedef struct in_addr {
 /// Internet address structure for functions
 typedef struct sockaddr_in {
   /// Address family, AF_INET
-  uint16_t       sin_family;
+  uint16_t sin_family;
   /// Port number
-  uint16_t       sin_port;
+  uint16_t sin_port;
   /// Internet address
   struct in_addr sin_addr;
   /// Same size as struct sockaddr
-  uint8_t        sin_zero[8];
+  uint8_t sin_zero[8];
 } sockaddr_in_t;
 
 /// IPv6 Internet address
@@ -131,44 +142,29 @@ typedef struct in6_addr {
 /// IPv6 structure
 typedef struct sockaddr_in6 {
   /// address family, AF_INET6
-  uint16_t        sin6_family;
+  uint16_t sin6_family;
   /// port number, Network Byte Order
-  uint16_t        sin6_port;
+  uint16_t sin6_port;
   /// IPv6 flow information
-  uint32_t        sin6_flowinfo;
+  uint32_t sin6_flowinfo;
   /// IPv6 address
   struct in6_addr sin6_addr;
   /// Scope ID
-  uint32_t        sin6_scope_id;
+  uint32_t sin6_scope_id;
 } sockaddr_in6_t;
 
 /// IPv6 Internet address storage with padding
 typedef struct sockaddr_storage {
   /// address family
-  uint16_t  ss_family;
+  uint16_t ss_family;
   /// padding implementation: size of the reminder of sockaddr_in6_t
   uint8_t _data[26];
 } sockaddr_storage_t;
 
-///  Wi-SUN address structure type definition
+/// Wi-SUN address structure type definition
 typedef struct sockaddr_in6 wisun_addr_t;
 
 /** @} (end SL_WISUN_SOCKET_API_TYPES) */
-
-/// Address structure family offset
-#define SOCKADDR_WISUN_FAMILY_OFFSET     (offsetof(wisun_addr_t, sin6_family))
-
-/// Address structure port offset
-#define SOCKADDR_WISUN_PORT_OFFSET       (offsetof(wisun_addr_t, sin6_port))
-
-/// Address structure flow info offset
-#define SOCKADDR_WISUN_FLOWINFO_OFFSET   (offsetof(wisun_addr_t, sin6_flowinfo))
-
-/// Address structure address offset
-#define SOCKADDR_WISUN_ADDRESS_OFFSET    (offsetof(wisun_addr_t, sin6_addr))
-
-/// Address structure scope ID offset
-#define SOCKADDR_WISUN_SCOPEID_OFFSET    (offsetof(wisun_addr_t, sin6_scope_id))
 
 /// Definition of any address for IPv4
 #define INADDR_ANY    (0UL) // IPv4
@@ -183,6 +179,7 @@ typedef enum socket_option_level {
 
 /// Socket option level enum type definition
 typedef enum socket_handler_opt {
+  /// Enable overwriting previous received buffer
   SO_HANDLER_OVERWRITE_PREV_RCV_BUFF = -1,
 } socket_handler_opt_t;
 

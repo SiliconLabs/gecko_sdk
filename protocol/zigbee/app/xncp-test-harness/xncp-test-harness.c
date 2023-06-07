@@ -31,8 +31,8 @@
 // External declarations
 
 EmberStatus emberAfPluginXncpSendCustomEzspMessage(uint8_t length, uint8_t *payload);
-void emResetApsFrameCounter(void);
-void emTestHarnessAdvanceApsFrameCounter(void);
+void sli_zigbee_reset_aps_frame_counter(void);
+void sli_zigbee_test_harness_advance_aps_frame_counter(void);
 
 // -----------------------------------------------------------------------------
 
@@ -52,28 +52,16 @@ void emberAfMainInitCallback(void)
 
 // -----------------------------------------------------------------------------
 // Handlers and callbacks
-#ifdef UC_BUILD
 bool emberAfPluginXncpPermitNcpToHostFrameCallback(uint16_t frameId,
                                                    uint8_t payloadLength,
                                                    uint8_t *payload)
-#else //!UC_BUILD
-bool emberAfPluginCommandHandlerPermitNcpToHostFrameCallback(uint16_t frameId,
-                                                             uint8_t payloadLength,
-                                                             uint8_t *payload)
-#endif  //UC_BUILD
 {
   return true;
 }
 
-#ifdef UC_BUILD
 bool emberAfPluginXncpPermitHostToNcpFrameCallback(uint16_t frameId,
                                                    uint8_t payloadLength,
                                                    uint8_t *payload)
-#else // !UC_BUILD
-bool emberAfPluginCommandHandlerPermitHostToNcpFrameCallback(uint16_t frameId,
-                                                             uint8_t payloadLength,
-                                                             uint8_t *payload)
-#endif  // UC_BUILD
 {
   return true;
 }
@@ -90,11 +78,11 @@ EmberStatus emberAfPluginXncpIncomingCustomFrameCallback(uint8_t messageLength,
 
   switch (commandId) {
     case EMBER_XNCP_TEST_HARNESS_COMMAND_RESET_APS_FRAME_COUNTER: {
-      emResetApsFrameCounter();
+      sli_zigbee_reset_aps_frame_counter();
       return EMBER_SUCCESS;
     }
     case EMBER_XNCP_TEST_HARNESS_COMMAND_ADVANCE_APS_FRAME_COUNTER: {
-      emTestHarnessAdvanceApsFrameCounter();
+      sli_zigbee_test_harness_advance_aps_frame_counter();
       return EMBER_SUCCESS;
     }
     default:
@@ -104,16 +92,9 @@ EmberStatus emberAfPluginXncpIncomingCustomFrameCallback(uint8_t messageLength,
   return EMBER_INVALID_CALL;
 }
 
-#ifdef UC_BUILD
 bool emberAfPluginXncpIncomingMessageCallback(EmberIncomingMessageType type,
                                               EmberApsFrame *apsFrame,
                                               EmberMessageBuffer message)
-#else // !UC_BUILD
-// If this function returns true, the packet is not passed to the HOST.
-bool emberAfIncomingMessageCallback(EmberIncomingMessageType type,
-                                    EmberApsFrame *apsFrame,
-                                    EmberMessageBuffer message)
-#endif  // UC_BUILD
 {
   return false;
 }

@@ -32,7 +32,7 @@ library:
   ## Controllers
   ### Series 1
   - path: protocol/z-wave/ZWave/lib/libZWaveController_700s.a
-    condition: [device_series_1, zw_controller]
+    condition: [device_series_1, zw_role_type_central_static_controller]
   ### Series 2
   - path: protocol/z-wave/ZWave/lib/libZWaveController_800s.a
-    condition: [device_series_2, zw_controller]
+    condition: [device_series_2, zw_role_type_central_static_controller]

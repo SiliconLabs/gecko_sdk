@@ -33,10 +33,10 @@
 //------------------------------------------------------------------------------
 // Functions
 
-EmberStatus emAfSendBootloadMessage(bool isBroadcast,
-                                    EmberEUI64 destEui64,
-                                    uint8_t length,
-                                    uint8_t* message)
+EmberStatus sli_zigbee_af_send_bootload_message(bool isBroadcast,
+                                                EmberEUI64 destEui64,
+                                                uint8_t length,
+                                                uint8_t* message)
 {
   return ezspSendBootloadMessage(isBroadcast,
                                  destEui64,
@@ -44,19 +44,11 @@ EmberStatus emAfSendBootloadMessage(bool isBroadcast,
                                  message);
 }
 
-#ifdef UC_BUILD
-void emAfPluginStandaloneBootloaderCommonIncomingBootloadMessageCallback(EmberEUI64 longId,
-                                                                         uint8_t lastHopLqi,
-                                                                         int8_t lastHopRssi,
-                                                                         uint8_t messageLength,
-                                                                         uint8_t* messageContents)
-#else // !UC_BUILD
-void ezspIncomingBootloadMessageHandler(EmberEUI64 longId,
-                                        uint8_t lastHopLqi,
-                                        int8_t lastHopRssi,
-                                        uint8_t messageLength,
-                                        uint8_t* messageContents)
-#endif // UC_BUILD
+void sli_zigbee_af_standalone_bootloader_common_incoming_bootload_message_callback(EmberEUI64 longId,
+                                                                                   uint8_t lastHopLqi,
+                                                                                   int8_t lastHopRssi,
+                                                                                   uint8_t messageLength,
+                                                                                   uint8_t* messageContents)
 {
   if (messageLength > MAX_BOOTLOAD_MESSAGE_SIZE) {
     bootloadPrintln("Bootload message too long (%d > %d), dropping!",
@@ -70,15 +62,9 @@ void ezspIncomingBootloadMessageHandler(EmberEUI64 longId,
                                                                  messageContents);
 }
 
-#ifdef UC_BUILD
-void emAfPluginStandaloneBootloaderCommonBootloadTransmitCompleteCallback(EmberStatus status,
-                                                                          uint8_t messageLength,
-                                                                          uint8_t *messageContents)
-#else // !UC_BUILD
-void ezspBootloadTransmitCompleteHandler(EmberStatus status,
-                                         uint8_t messageLength,
-                                         uint8_t *messageContents)
-#endif // UC_BUILD
+void sli_zigbee_af_standalone_bootloader_common_bootload_transmit_complete_callback(EmberStatus status,
+                                                                                    uint8_t messageLength,
+                                                                                    uint8_t *messageContents)
 {
   if (status != EMBER_SUCCESS) {
     uint8_t commandId = 0xFF;
@@ -91,7 +77,7 @@ void ezspBootloadTransmitCompleteHandler(EmberStatus status,
   }
 }
 
-void emAfStandaloneBootloaderClientEncrypt(uint8_t* block, uint8_t* key)
+void sli_zigbee_af_standalone_bootloader_client_encrypt(uint8_t* block, uint8_t* key)
 {
   uint8_t temp[EMBER_ENCRYPTION_KEY_SIZE];
   ezspAesEncrypt(block, key, temp);

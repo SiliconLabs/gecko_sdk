@@ -3,7 +3,7 @@
 #include PLATFORM_HEADER
 #include CONFIGURATION_HEADER
 #include "stack/include/ember-types.h"
-#include "event_control/event.h"
+#include "event_queue/event-queue.h"
 #include "hal/hal.h"
 
 #include EMBER_AF_API_BULB_PWM_DRIVER
@@ -13,10 +13,10 @@
 //
 // API for blinking light value for user feedback.
 
-#define pwmBlinkEventControl  emberAfPluginBulbPwmDriverBlinkEventControl
+#define pwmBlinkEventControl  emberAfPluginBulbPwmDriverBlinkEvent
 
-EmberEventControl emberAfPluginBulbPwmDriverBlinkEventControl;
-EmberEventControl emberAfPluginBulbPwmDriverStatusEventControl;
+EmberEvent emberAfPluginBulbPwmDriverBlinkEvent;
+EmberEvent emberAfPluginBulbPwmDriverStatusEvent;
 
 enum {
   LED_ON            = 0x00,
@@ -55,7 +55,7 @@ typedef struct {
   void (*start)(void);
   void (*stop)(void);
 
-  EmberEventControl *eventControl;
+  EmberEvent *event;
 } BlinkState;
 
 BlinkState blinkState[BLINK_CHANNELS];
@@ -102,10 +102,10 @@ static void ledOn(uint8_t time, BlinkState *p)
   p->state = LED_ON;
 
   if (time > 0) {
-    emberEventControlSetDelayMS(*(p->eventControl),
-                                ((uint32_t) time) * SECONDS_TO_MILLISECONDS);
+    emberEventSetDelayMs(*(p->event),
+                         ((uint32_t) time) * SECONDS_TO_MILLISECONDS);
   } else {
-    emberEventControlSetInactive(*(p->eventControl));
+    emberEventSetInactive(*(p->event));
   }
 }
 
@@ -115,10 +115,10 @@ static void ledOff(uint8_t time, BlinkState *p)
   p->state = LED_OFF;
 
   if (time > 0) {
-    emberEventControlSetDelayMS(*(p->eventControl),
+    emberEventControlSetDelayMs(*(p->event),
                                 ((uint32_t) time) * SECONDS_TO_MILLISECONDS);
   } else {
-    emberEventControlSetInactive(*(p->eventControl));
+    emberEventControlSetInactive(*(p->event));
   }
 }
 
@@ -128,8 +128,8 @@ static void ledBlink(uint8_t count, uint16_t blinkTime, BlinkState *p)
 
   p->turnOff();
   p->state = LED_BLINKING_OFF;
-  emberEventControlSetDelayMS(*(p->eventControl),
-                              p->blinkTime);
+  emberEventSetDelayMs(*(p->event),
+                       p->blinkTime);
   p->count = count;
 }
 
@@ -171,15 +171,15 @@ static void blinkPattern(uint8_t    count,
     p->pattern[i] = pattern[i];
   }
 
-  emberEventControlSetDelayMS(*(p->eventControl),
-                              p->pattern[0]);
+  emberEventSetDelayMs(*(p->event),
+                       p->pattern[0]);
 
   p->patternIndex = 1;
 }
 
 void eventHandler(BlinkState *p)
 {
-  emberEventControlSetInactive(*(p->eventControl));
+  emberEventSetInactive(*(p->event));
   switch (p->state) {
     case LED_ON:
       p->turnOff();
@@ -205,8 +205,8 @@ void eventHandler(BlinkState *p)
       }
       if (p->count > 0) {
         p->state = LED_BLINKING_OFF;
-        emberEventControlSetDelayMS(*(p->eventControl),
-                                    p->blinkTime);
+        emberEventSetDelayMs(*(p->event),
+                             p->blinkTime);
       } else {
         p->state = LED_OFF;
         p->stop();
@@ -216,8 +216,8 @@ void eventHandler(BlinkState *p)
     case LED_BLINKING_OFF:
       p->turnOn();
       p->state = LED_BLINKING_ON;
-      emberEventControlSetDelayMS(*(p->eventControl),
-                                  p->blinkTime);
+      emberEventSetDelayMs(*(p->event),
+                           p->blinkTime);
       break;
     case LED_BLINK_PATTERN:
       if (p->count == 0) {
@@ -235,8 +235,8 @@ void eventHandler(BlinkState *p)
         p->turnOn();
       }
 
-      emberEventControlSetDelayMS(*(p->eventControl),
-                                  p->pattern[p->patternIndex]);
+      emberEventSetDelayMs(*(p->event),
+                           p->pattern[p->patternIndex]);
 
       p->patternIndex++;
 
@@ -259,15 +259,15 @@ void halBulbPwmDriverBlinkInit(void)
   blinkState[BLINK_LED].turnOff = turnLedOff;
   blinkState[BLINK_LED].start = ledBlinkStart;
   blinkState[BLINK_LED].stop = ledBlinkStop;
-  blinkState[BLINK_LED].eventControl =
-    &(emberAfPluginBulbPwmDriverBlinkEventControl);
+  blinkState[BLINK_LED].event =
+    &(emberAfPluginBulbPwmDriverBlinkEvent);
 
   blinkState[BLINK_STATUS].turnOn = turnStatusLedOn;
   blinkState[BLINK_STATUS].turnOff = turnStatusLedOff;
   blinkState[BLINK_STATUS].start = nullFunction;
   blinkState[BLINK_STATUS].stop = nullFunction;
-  blinkState[BLINK_STATUS].eventControl =
-    &(emberAfPluginBulbPwmDriverStatusEventControl);
+  blinkState[BLINK_STATUS].event =
+    &(emberAfPluginBulbPwmDriverStatusEvent);
 }
 
 // ******** APIs and Event Functions *************

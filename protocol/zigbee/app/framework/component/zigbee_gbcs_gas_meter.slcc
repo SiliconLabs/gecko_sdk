@@ -31,7 +31,7 @@ template_contribution:
        cluster_id: "0x0702"
        mfg_id: "NOT_MFG_SPECIFIC"
        side: "SERVER"
-       service_function: "emAfGbcsGasMeterSimpleMeteringClusterServerCommandParse"
+       service_function: "sli_zigbee_af_gbcs_gas_meter_simple_metering_cluster_server_command_parse"
   - name: zigbee_af_callback
     value:
       callback_type: event_init
@@ -53,7 +53,7 @@ template_contribution:
     value:
       group: gbcs-gas-meter
       name: report-attributes
-      handler: emAfPluginGbcsGasMeterCliReportAttributes
+      handler: sli_zigbee_af_gbcs_gas_meter_cli_report_attributes
       help: Reports the gas meter attributes to the mirror.
 
 documentation:

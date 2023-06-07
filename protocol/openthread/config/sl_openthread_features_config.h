@@ -97,16 +97,20 @@
 #define OPENTHREAD_CONFIG_CHANNEL_MONITOR_ENABLE    0
 #endif
 // </e>
-// <e>  Child Supervision
-#ifndef OPENTHREAD_CONFIG_CHILD_SUPERVISION_ENABLE
-#define OPENTHREAD_CONFIG_CHILD_SUPERVISION_ENABLE  0
-#endif
-// </e>
-// <e>  Commissioner
+
+// <e OPENTHREAD_CONFIG_COMMISSIONER_ENABLE>  Commissioner
 #ifndef OPENTHREAD_CONFIG_COMMISSIONER_ENABLE
 #define OPENTHREAD_CONFIG_COMMISSIONER_ENABLE       0
 #endif
+
+// <o OPENTHREAD_CONFIG_COMMISSIONER_MAX_JOINER_ENTRIES> Max Joiner Entries
+// <i> The maximum number of Joiner entries maintained by the Commissioner.
+// <d> 2
+#ifndef OPENTHREAD_CONFIG_COMMISSIONER_MAX_JOINER_ENTRIES
+#define OPENTHREAD_CONFIG_COMMISSIONER_MAX_JOINER_ENTRIES       2
+#endif
 // </e>
+
 // <e>  COAP API
 #ifndef OPENTHREAD_CONFIG_COAP_API_ENABLE
 #define OPENTHREAD_CONFIG_COAP_API_ENABLE           0
@@ -170,11 +174,6 @@
 // <e>  Joiner
 #ifndef OPENTHREAD_CONFIG_JOINER_ENABLE
 #define OPENTHREAD_CONFIG_JOINER_ENABLE             0
-#endif
-// </e>
-// <e>  Legacy Network
-#ifndef OPENTHREAD_CONFIG_LEGACY_ENABLE
-#define OPENTHREAD_CONFIG_LEGACY_ENABLE             0
 #endif
 // </e>
 // <e>  Link Raw Service
@@ -242,9 +241,9 @@
 #define OPENTHREAD_CONFIG_SNTP_CLIENT_ENABLE        0
 #endif
 // </e>
-// <e>  TMF Network Diagnostics for MTD
-#ifndef OPENTHREAD_CONFIG_TMF_NETWORK_DIAG_MTD_ENABLE
-#define OPENTHREAD_CONFIG_TMF_NETWORK_DIAG_MTD_ENABLE   0
+// <e>  TMF Network Diagnostic client API
+#ifndef OPENTHREAD_CONFIG_TMF_NETDIAG_CLIENT_ENABLE
+#define OPENTHREAD_CONFIG_TMF_NETDIAG_CLIENT_ENABLE   1
 #endif
 // </e>
 // <e>  Time Synchronization Service

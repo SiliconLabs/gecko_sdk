@@ -11,15 +11,15 @@ config_file:
   - path: protocol/z-wave/platform/SiliconLabs/PAL/config/cc_battery/cc_battery_config.h
     file_id: cc_battery_config
 source:
-  - path: protocol/z-wave/ZAF/CommandClasses/Battery/CC_Battery.c
-  - path: protocol/z-wave/ZAF/CommandClasses/Battery/cc_battery_io_weak.c
-  - path: protocol/z-wave/ZAF/CommandClasses/Battery/cc_battery_config_api.c
+  - path: protocol/z-wave/ZAF/CommandClasses/Battery/src/CC_Battery.c
+  - path: protocol/z-wave/ZAF/CommandClasses/Battery/src/cc_battery_io_weak.c
+  - path: protocol/z-wave/ZAF/CommandClasses/Battery/src/cc_battery_config_api.c
+  # Private header
+  - path: protocol/z-wave/ZAF/CommandClasses/Battery/src/cc_battery_io.h
 include:
-  - path: protocol/z-wave/ZAF/CommandClasses/Battery/
+  - path: protocol/z-wave/ZAF/CommandClasses/Battery/inc/
     file_list:
       - path: CC_Battery.h
-      - path: cc_battery_config_api.h
-      - path: cc_battery_io.h
 provides:
   - name: zw_cc_battery
 requires:

@@ -1,5 +1,5 @@
 /**
- * @file utils.h
+ * @file
  * @copyright 2022 Silicon Laboratories Inc.
  */
 
@@ -8,7 +8,7 @@
 
 #include <stdint.h>
 #include <ZW_application_transport_interface.h>
-#include <serialappl.h>
+#include <app.h>
 
 uint8_t QueueProtocolCommand(uint8_t *pCommand);
 

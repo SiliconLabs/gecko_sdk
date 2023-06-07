@@ -30,7 +30,7 @@
 
 #include "em_common.h"
 #include "sl_status.h"
-#include "sl_simple_timer.h"
+#include "app_timer.h"
 #include "gatt_db.h"
 #include "app_assert.h"
 #include "sl_gatt_service_battery.h"
@@ -43,14 +43,14 @@
 // -----------------------------------------------------------------------------
 // Private variables
 
-static sl_simple_timer_t batt_timer;
+static app_timer_t batt_timer;
 static uint8_t batt_connection = 0;
 
 // -----------------------------------------------------------------------------
 // Private function declarations
 
 static void batt_measurement_notify(void);
-static void batt_timer_cb(sl_simple_timer_t *timer, void *data);
+static void batt_timer_cb(app_timer_t *timer, void *data);
 static void batt_connection_closed_cb(sl_bt_evt_connection_closed_t *data);
 static void batt_measurement_read_cb(sl_bt_evt_gatt_server_user_read_request_t *data);
 static void batt_type_read_cb(sl_bt_evt_gatt_server_user_read_request_t *data);
@@ -71,7 +71,7 @@ static void batt_measurement_notify(void)
   app_assert_status(sc);
 }
 
-static void batt_timer_cb(sl_simple_timer_t *timer, void *data)
+static void batt_timer_cb(app_timer_t *timer, void *data)
 {
   (void)data;
   (void)timer;
@@ -83,7 +83,7 @@ static void batt_connection_closed_cb(sl_bt_evt_connection_closed_t *data)
 {
   (void)data;
   sl_status_t sc;
-  sc = sl_simple_timer_stop(&batt_timer);
+  sc = app_timer_stop(&batt_timer);
   app_assert_status(sc);
 }
 
@@ -122,11 +122,11 @@ static void batt_measurement_changed_cb(sl_bt_evt_gatt_server_characteristic_sta
   // indication or notification enabled
   if (sl_bt_gatt_disable != data->client_config_flags) {
     // start timer used for periodic notifications
-    sc = sl_simple_timer_start(&batt_timer,
-                               BATT_MEASUREMENT_INTERVAL_MS,
-                               batt_timer_cb,
-                               NULL,
-                               true);
+    sc = app_timer_start(&batt_timer,
+                         BATT_MEASUREMENT_INTERVAL_MS,
+                         batt_timer_cb,
+                         NULL,
+                         true);
     app_assert_status(sc);
     // Send the first notification
     batt_measurement_notify();
@@ -134,7 +134,7 @@ static void batt_measurement_changed_cb(sl_bt_evt_gatt_server_characteristic_sta
   // indication and notifications disabled
   else {
     // stop timer used for periodic notifications
-    sc = sl_simple_timer_stop(&batt_timer);
+    sc = app_timer_stop(&batt_timer);
     app_assert_status(sc);
   }
 }

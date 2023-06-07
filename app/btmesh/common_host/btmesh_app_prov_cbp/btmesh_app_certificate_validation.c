@@ -51,6 +51,9 @@
 
 /// Length of UUID in the canonical fields-and-hyphens format
 #define UUID_CANONICAL_STRING_LEN             36
+/// Length of the extra data in common name field
+/// " BCID:xxxx BPID:xxxx"
+#define COMMON_NAME_EXTRA_DATA                20
 
 /// Version field of the certificate, decimal 2 = v3
 #define CBP_CERTIFICATE_VERSION               2
@@ -264,7 +267,9 @@ sl_status_t btmesh_app_prov_cbp_validate_uuid(X509 *cert, uuid_128 *uuid)
                  &common_uuid.data[14],
                  &common_uuid.data[15]);
   // Compare the received string to the device under provision
-  if (len != UUID_CANONICAL_STRING_LEN || s < 16 || memcmp(uuid, &common_uuid, sizeof(uuid_128)) != 0) {
+  if (len != (UUID_CANONICAL_STRING_LEN + COMMON_NAME_EXTRA_DATA)
+      || s < 16
+      || memcmp(uuid, &common_uuid, sizeof(uuid_128)) != 0) {
     app_log_error("UUID of the device and in the certificate does not match" APP_LOG_NEW_LINE);
     return SL_STATUS_INVALID_PARAMETER;
   } else {

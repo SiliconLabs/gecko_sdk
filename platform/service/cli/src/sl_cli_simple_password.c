@@ -753,6 +753,9 @@ sl_status_t sli_cli_session_handler(sl_cli_handle_t handle)
           // passwords do not match
           write_string_lf(handle, SL_CLI_SIMPLE_PASSWORD_CONFIRMATION_DO_NOT_MATCH);
           s_state = INIT;
+          // clear the buffer and reset the buffer index
+          mbedtls_platform_zeroize(session->buffer, sizeof(session->buffer));
+          session->buffer_ix = 0;
           CORE_ATOMIC_SECTION(module_state = CONFIGURE; );
           loop = false;
         }

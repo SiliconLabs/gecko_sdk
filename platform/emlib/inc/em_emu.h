@@ -330,6 +330,15 @@ typedef enum {
 
 #if defined(EMU_SERIES2_DCDC_BUCK_PRESENT) \
   || defined(EMU_SERIES2_DCDC_BOOST_PRESENT)
+/** Return codes for EMU DCDC set mode. */
+typedef enum {
+  emuDcdcSetModeOk                        =  0, /** EMU DCDC MODE set success. */
+  emuDcdcSetModeBypassTimeOut             = -1, /** EMU DCDC MODE set bypass error. */
+  emuDcdcSetModeRegulationTimeOut         = -2, /** EMU DCDC MODE set regulation error. */
+} EMU_DcdcModeSetStatus_TypeDef;
+
+#define EMU_DCDC_MODE_SET_TIMEOUT           1000000   /** EMU DCDC MODE set timeout. */
+
 /** DCDC mode. */
 typedef enum {
   emuDcdcMode_Bypass     = _DCDC_CTRL_MODE_BYPASS,            /**< DCDC regulator bypass. */
@@ -396,19 +405,25 @@ typedef enum {
 
 /** DCDC Buck drive speed. */
 typedef enum {
-  emuDcdcDriveSpeed_BestEmi        = _DCDC_EM01CTRL0_DRVSPEED_BEST_EMI,        /**< Lowest efficiency, lowest EMI. */
-  emuDcdcDriveSpeed_Default        = _DCDC_EM01CTRL0_DRVSPEED_DEFAULT_SETTING, /**< Default efficiency, acceptable EMI level. */
-  emuDcdcDriveSpeed_Intermediate   = _DCDC_EM01CTRL0_DRVSPEED_INTERMEDIATE,    /**< Small increase in efficiency from the default setting. */
-  emuDcdcDriveSpeed_BestEfficiency = _DCDC_EM01CTRL0_DRVSPEED_BEST_EFFICIENCY  /**< Highest efficiency, highest EMI. Small increase in efficiency from INTERMEDIATE setting. */
+  emuDcdcDriveSpeed_BestEmi        = _DCDC_EM01CTRL0_DRVSPEED_DEFAULT_SETTING,        /**< Recommend no options other than DEFAULT be used here, as there is no benefit. */
+  emuDcdcDriveSpeed_Default        = _DCDC_EM01CTRL0_DRVSPEED_DEFAULT_SETTING,        /**< Recommend no options other than DEFAULT be used here, as there is no benefit. */
+  emuDcdcDriveSpeed_Intermediate   = _DCDC_EM01CTRL0_DRVSPEED_DEFAULT_SETTING,        /**< Recommend no options other than DEFAULT be used here, as there is no benefit. */
+  emuDcdcDriveSpeed_BestEfficiency = _DCDC_EM01CTRL0_DRVSPEED_DEFAULT_SETTING         /**< Recommend no options other than DEFAULT be used here, as there is no benefit. */
 } EMU_DcdcDriveSpeed_TypeDef;
 
 /** DCDC Buck peak current setting. */
 typedef enum {
 #if defined(_DCDC_EM23CTRL0_IPKVAL_Load5mA)
-  emuDcdcPeakCurrent_Load5mA  = _DCDC_EM23CTRL0_IPKVAL_Load5mA,  /**< Load 5mA, peak current 90mA */
+  emuDcdcPeakCurrent_Load5mA  = _DCDC_EM23CTRL0_IPKVAL_Load5mA,  /**< Load 5mA, peak current 90mA. */
+#endif
+#if defined(_DCDC_EM23CTRL0_IPKVAL_LOAD5MA)
+  emuDcdcPeakCurrent_Load5mA  = _DCDC_EM23CTRL0_IPKVAL_LOAD5MA,  /**< Load 5mA, peak current 90mA. */
 #endif
 #if defined(_DCDC_EM23CTRL0_IPKVAL_Load10mA)
-  emuDcdcPeakCurrent_Load10mA = _DCDC_EM23CTRL0_IPKVAL_Load10mA, /**< Load 10mA, peak current 150mA */
+  emuDcdcPeakCurrent_Load10mA = _DCDC_EM23CTRL0_IPKVAL_Load10mA, /**< Load 10mA, peak current 150mA. */
+#endif
+#if defined(_DCDC_EM23CTRL0_IPKVAL_LOAD10MA)
+  emuDcdcPeakCurrent_Load10mA = _DCDC_EM23CTRL0_IPKVAL_LOAD10MA, /**< Load 10mA, peak current 150mA. */
 #endif
 #if defined(_DCDC_EM01CTRL0_IPKVAL_Load28mA)
   emuDcdcPeakCurrent_Load28mA = _DCDC_EM01CTRL0_IPKVAL_Load28mA, /**< Load 28mA, peak current 70mA. */
@@ -446,10 +461,10 @@ typedef enum {
 #if defined(EMU_SERIES2_DCDC_BOOST_PRESENT)
 /** DCDC Boost drive speed. */
 typedef enum {
-  emuDcdcBoostDriveSpeed_BestEmi        = _DCDC_BSTEM01CTRL_DRVSPEED_BEST_EMI,        /**< Lowest efficiency, lowest EMI. */
-  emuDcdcBoostDriveSpeed_Default        = _DCDC_BSTEM01CTRL_DRVSPEED_DEFAULT_SETTING, /**< Default efficiency, acceptable EMI level. */
-  emuDcdcBoostDriveSpeed_Intermediate   = _DCDC_BSTEM01CTRL_DRVSPEED_INTERMEDIATE,    /**< Small increase in efficiency from the default setting. */
-  emuDcdcBoostDriveSpeed_BestEfficiency = _DCDC_BSTEM01CTRL_DRVSPEED_BEST_EFFICIENCY  /**< Highest efficiency, highest EMI. Small increase in efficiency from INTERMEDIATE setting. */
+  emuDcdcBoostDriveSpeed_BestEmi        = _DCDC_BSTEM01CTRL_DRVSPEED_DEFAULT_SETTING,        /**< Recommend no options other than DEFAULT be used here, as there is no benefit. */
+  emuDcdcBoostDriveSpeed_Default        = _DCDC_BSTEM01CTRL_DRVSPEED_DEFAULT_SETTING,        /**< Recommend no options other than DEFAULT be used here, as there is no benefit. */
+  emuDcdcBoostDriveSpeed_Intermediate   = _DCDC_BSTEM01CTRL_DRVSPEED_DEFAULT_SETTING,        /**< Recommend no options other than DEFAULT be used here, as there is no benefit. */
+  emuDcdcBoostDriveSpeed_BestEfficiency = _DCDC_BSTEM01CTRL_DRVSPEED_DEFAULT_SETTING         /**< Recommend no options other than DEFAULT be used here, as there is no benefit. */
 } EMU_DcdcBoostDriveSpeed_TypeDef;
 
 /** DCDC Boost EM01 peak current setting. */
@@ -916,31 +931,13 @@ typedef struct {
     emuDcdcDriveSpeed_Default,     /**< Default efficiency in EM0/1. */      \
     emuDcdcDriveSpeed_Default,     /**< Default efficiency in EM2/3. */      \
     emuDcdcPeakCurrent_Load60mA,   /**< Default peak current in EM0/1. */    \
-    emuDcdcPeakCurrent_Load36mA    /**< Default peak current in EM2/3. */    \
+    emuDcdcPeakCurrent_Load5mA     /**< Default peak current in EM2/3. */    \
   }
-#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)
-#define EMU_DCDCINIT_DEFAULT                                                 \
-  {                                                                          \
-    emuDcdcMode_Regulation,        /**< DCDC regulator on. */                \
-    emuVreginCmpThreshold_2v3,     /**< 2.3V VREGIN comparator threshold. */ \
-    emuDcdcTonMaxTimeout_1P19us,   /**< Ton max is 1.19us. */                \
-    emuDcdcDriveSpeed_Default,     /**< Default efficiency in EM0/1. */      \
-    emuDcdcDriveSpeed_Default,     /**< Default efficiency in EM2/3. */      \
-    emuDcdcPeakCurrent_Load36mA,   /**< Default peak current in EM0/1. */    \
-    emuDcdcPeakCurrent_Load36mA    /**< Default peak current in EM2/3. */    \
-  }
-#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)
-#define EMU_DCDCINIT_DEFAULT                                                 \
-  {                                                                          \
-    emuDcdcMode_Regulation,        /**< DCDC regulator on. */                \
-    emuVreginCmpThreshold_2v3,     /**< 2.3V VREGIN comparator threshold. */ \
-    emuDcdcTonMaxTimeout_1P19us,   /**< Ton max is 1.19us. */                \
-    emuDcdcDriveSpeed_Default,     /**< Default efficiency in EM0/1. */      \
-    emuDcdcDriveSpeed_Default,     /**< Default efficiency in EM2/3. */      \
-    emuDcdcPeakCurrent_Load60mA,   /**< Default peak current in EM0/1. */    \
-    emuDcdcPeakCurrent_Load36mA    /**< Default peak current in EM2/3. */    \
-  }
-#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)
+#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)  \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)  \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)  \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)
 #define EMU_DCDCINIT_DEFAULT                                                 \
   {                                                                          \
     emuDcdcMode_Regulation,        /**< DCDC regulator on. */                \
@@ -952,7 +949,7 @@ typedef struct {
     emuDcdcPeakCurrent_Load5mA     /**< Default peak current in EM2/3. */    \
   }
 #endif
-#endif /* SERIES2_DCDC_BBUCK_PRESENT */
+#endif /* SERIES2_DCDC_BUCK_PRESENT */
 
 #if defined(EMU_SERIES1_DCDC_BUCK_PRESENT)
 /** DCDC initialization structure. */
@@ -1180,10 +1177,13 @@ void EMU_BUStatEnSet(bool enable);
 void EMU_BUEnableSet(bool enable);
 #endif
 
-#if defined(EMU_SERIES1_DCDC_BUCK_PRESENT)   \
-  || (defined(EMU_SERIES2_DCDC_BUCK_PRESENT) \
-  || defined(EMU_SERIES2_DCDC_BOOST_PRESENT))
+#if defined(EMU_SERIES1_DCDC_BUCK_PRESENT)
 void EMU_DCDCModeSet(EMU_DcdcMode_TypeDef dcdcMode);
+#endif
+
+#if (defined(EMU_SERIES2_DCDC_BUCK_PRESENT) \
+  || defined(EMU_SERIES2_DCDC_BOOST_PRESENT))
+EMU_DcdcModeSetStatus_TypeDef EMU_DCDCModeSet(EMU_DcdcMode_TypeDef dcdcMode);
 #endif
 
 #if defined(EMU_SERIES2_DCDC_BUCK_PRESENT) \

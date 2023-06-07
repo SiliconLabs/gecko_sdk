@@ -1,0 +1,35 @@
+id: zigbee_secure_key_storage_upgrade
+package: Zigbee
+label: Zigbee Secure Key Storage Upgrade
+description: |-
+  This component is used to upgrade existing images currently using the legacy token-based key storage and
+  wishing to move their security keys into secure storage.  The component only needs to be included if a 
+  device currently has keys stored using the Classic Key Storage component. Note that GSDK 4.1.0.0 and 
+  earlier always stored keys in plaintext (classic) key storage. This component will perform no action 
+  if the device's keys have already been moved to secure key storage.
+category: Zigbee|Utility
+quality: production
+
+provides:
+  - name: zigbee_secure_key_storage_upgrade
+
+requires:
+  - name: zigbee_secure_key_storage
+
+source:
+  - path: protocol/zigbee/stack/security/zigbee-secure-key-storage-upgrade.c
+
+include:
+  - path: protocol/zigbee/stack/security/
+    file_list:
+      - path: zigbee-secure-key-storage-upgrade.h
+
+template_contribution:
+  - name: component_catalog
+    value: zigbee_secure_key_storage_upgrade
+  - name: event_handler
+    value:
+      event: stack_init
+      include: "zigbee-secure-key-storage-upgrade.h"
+      handler: sli_zb_sec_man_upgrade_key_storage
+    priority: -8923

@@ -5,11 +5,17 @@
 {% for periph in cpc_periph_type %}
 #include "sl_cpc_drv_secondary_spi_{{ periph }}_{{ instance }}_config.h"
 
+#define SL_CPC_DRV_SPI_IS_{{ periph | upper }}
+
 #define SL_CPC_DRV_SPI_RX_QUEUE_SIZE                SL_CPC_DRV_SPI_{{ instance | upper }}_RX_QUEUE_SIZE
 #define SL_CPC_DRV_SPI_TX_QUEUE_SIZE                SL_CPC_DRV_SPI_{{ instance | upper }}_TX_QUEUE_SIZE
-#define SL_CPC_DRV_SPI_BITRATE                      SL_CPC_DRV_SPI_{{ instance | upper }}_BITRATE
-#define SL_CPC_DRV_SPI_CS_FALLING_EDGE_INT_NO       SL_CPC_DRV_SPI_{{ instance | upper }}_CS_FALLING_EDGE_INT_NO
-#define SL_CPC_DRV_SPI_CS_RISING_EDGE_INT_NO        SL_CPC_DRV_SPI_{{ instance | upper }}_CS_RISING_EDGE_INT_NO
+
+#define SL_CPC_DRV_SPI_TX_AVAILABILITY_SYNCTRIG_CH  SL_CPC_DRV_SPI_{{ instance | upper }}_TX_AVAILABILITY_SYNCTRIG_CH
+#define SL_CPC_DRV_SPI_CS_SYNCTRIG_PRS_CH           SL_CPC_DRV_SPI_{{ instance | upper }}_CS_SYNCTRIG_PRS_CH
+#define SL_CPC_DRV_SPI_TXC_SYNCTRIG_PRS_CH          SL_CPC_DRV_SPI_{{ instance | upper }}_TXC_SYNCTRIG_PRS_CH
+{% if periph == 'eusart' %}
+#define SL_CPC_DRV_SPI_CS_EXTI_NUMBER               SL_CPC_DRV_SPI_{{ instance | upper }}_CS_EXTI_NUMBER
+{% endif %}
 
 #define SL_CPC_DRV_SPI_RX_IRQ_PORT                  SL_CPC_DRV_SPI_{{ instance | upper }}_RX_IRQ_PORT
 #define SL_CPC_DRV_SPI_RX_IRQ_PIN                   SL_CPC_DRV_SPI_{{ instance | upper }}_RX_IRQ_PIN

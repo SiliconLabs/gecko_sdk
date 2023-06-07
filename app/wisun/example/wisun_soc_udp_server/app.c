@@ -60,7 +60,7 @@ void app_task(void *args)
   static wisun_addr_t srv_addr_udp                = { 0U };
   static wisun_addr_t clnt_addr_udp               = { 0U };
   socklen_t len                                   = 0UL;
-  int32_t r                                       = RETVAL_ERROR;
+  int32_t r                                       = SOCKET_RETVAL_ERROR;
   int32_t sockd_udp_srv                           = SOCKET_INVALID_ID;
   const char *ip_str                              = NULL;
 

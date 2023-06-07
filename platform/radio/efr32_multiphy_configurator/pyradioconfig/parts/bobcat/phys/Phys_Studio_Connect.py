@@ -78,5 +78,4 @@ class PHYS_connect_Bobcat(IPhy):
         phy.profile_inputs.crc_byte_endian.value = model.vars.crc_byte_endian.var_enum.MSB_FIRST
         phy.profile_inputs.crc_bit_endian.value = model.vars.crc_bit_endian.var_enum.MSB_FIRST
         phy.profile_inputs.white_poly.value = model.vars.white_poly.var_enum.NONE
-        phy.profile_inputs.asynchronous_rx_enable.value = False
         return phy

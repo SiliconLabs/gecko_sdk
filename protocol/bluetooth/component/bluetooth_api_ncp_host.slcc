@@ -6,7 +6,7 @@ description: >
   SL_BT_API protocol
 
   This component does not require Bluetooth core or other Bluetooth features.
-category: Bluetooth|NCP|Host
+category: Bluetooth|Application|NCP Host Demo
 quality: production
 root_path: protocol/bluetooth
 include:

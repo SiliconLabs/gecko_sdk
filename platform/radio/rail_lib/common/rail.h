@@ -176,6 +176,55 @@ RAIL_Status_t RAIL_AddStateBuffer4(RAIL_Handle_t genericRailHandle);
  */
 RAIL_Status_t RAIL_UseDma(uint8_t channel);
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+/**
+ * Load the first image \ref RAIL_SEQ_IMAGE_1 into the radio sequencer during
+ * RAIL initialization.
+ *
+ * @param[in] genericRailHandle A generic RAIL instance handle.
+ * @return Status code indicating success of the function call.
+ *
+ * This function must only be called from within the RAIL callback context of
+ * \ref RAILCb_RadioSequencerImageLoad. Otherwise, the function returns \ref
+ * RAIL_STATUS_INVALID_STATE.
+ */
+RAIL_Status_t RAIL_LoadSequencerImage1(RAIL_Handle_t genericRailHandle);
+
+/**
+ * Load the second image \ref RAIL_SEQ_IMAGE_2 into the radio sequencer during
+ * RAIL initialization.
+ *
+ * @param[in] genericRailHandle A generic RAIL instance handle.
+ * @return Status code indicating success of the function call.
+ *
+ * This function must only be called from within the RAIL callback context of
+ * \ref RAILCb_RadioSequencerImageLoad. Otherwise, the function returns \ref
+ * RAIL_STATUS_INVALID_STATE. On platforms where \ref RAIL_SEQ_IMAGE_COUNT < 2,
+ * the function returns with \ref RAIL_STATUS_INVALID_CALL.
+ */
+RAIL_Status_t RAIL_LoadSequencerImage2(RAIL_Handle_t genericRailHandle);
+
+/**
+ * Callback used to load the radio sequencer image during RAIL initialization.
+ * This function is optional to implement.
+ *
+ * @return Status code indicating success of the function call.
+ *
+ * This callback is used by RAIL to load a radio sequencer image during \ref
+ * RAIL_Init via an API such as \ref RAIL_LoadSequencerImage1. If this
+ * function is not implemented, a default image will be loaded. On some
+ * platforms, (in particular EFR32XG24), not implementing this function may
+ * result in a larger overall code size due to unused sequencer images not
+ * being dead stripped.
+ *
+ * @note If this function is implemented without a call to an image loading API
+ *   such as \ref RAIL_LoadSequencerImage1, an assert will occur during
+ *   RAIL initialization. Similarly, if an image is loaded that is
+ *   unsupported by the platform, an assert will occur.
+ */
+RAIL_Status_t RAILCb_RadioSequencerImageLoad(void);
+#endif //DOXYGEN_SHOULD_SKIP_THIS
+
 /**
  * Initialize RAIL.
  *
@@ -1736,15 +1785,15 @@ uint16_t RAIL_WriteTxFifo(RAIL_Handle_t railHandle,
  * Set the address of the transmit FIFO, a circular buffer used for TX data.
  *
  * @param[in] railHandle A RAIL instance handle.
- * @param[in,out] addr A pointer to a read-write memory location in RAM
- *   used as the transmit FIFO. This memory must persist until the next call to
- *   this function.
+ * @param[in,out] addr An appropriately-aligned (see below) pointer to a read-write memory
+ *   location in RAM used as the transmit FIFO. This memory must persist until the next
+ *   call to this function or \ref RAIL_SetTxFifoAlt.
  * @param[in] initLength A number of initial bytes already in the transmit FIFO.
  * @param[in] size A desired size of the transmit FIFO in bytes.
  * @return Returns the FIFO size in bytes, 0 if an error occurs.
  *
- * This function sets the memory location for the transmit FIFO. It
- * must be called at least once before any transmit operations occur.
+ * This function sets the memory location for the transmit FIFO. \ref RAIL_SetTxFifo or
+ * \ref RAIL_SetTxFifoAlt must be called at least once before any transmit operations occur.
  *
  * FIFO size can be determined by the return value of this function. The
  * chosen size is determined based on the available FIFO sizes supported by the
@@ -1753,9 +1802,9 @@ uint16_t RAIL_WriteTxFifo(RAIL_Handle_t railHandle,
  * For more on supported FIFO sizes and alignments, see chip-specific
  * documentation, such as \ref efr32_main. The returned FIFO size will be the
  * closest allowed size less than or equal to the passed in size parameter,
- * unless the size parameter is smaller than the minimum FIFO size. If the
- * initLength parameter is larger than the returned size, the FIFO will be
- * filled up to its size.
+ * unless the size parameter is smaller than the minimum FIFO size, in that case
+ * 0 is returned. If the initLength parameter is larger than the returned
+ * size, the FIFO will be filled up to its size.
  *
  * A user may write to the custom memory location directly before calling this
  * function, or use \ref RAIL_WriteTxFifo to write to the memory location after
@@ -1786,6 +1835,39 @@ uint16_t RAIL_SetTxFifo(RAIL_Handle_t railHandle,
                         uint16_t initLength,
                         uint16_t size);
 
+/**
+ * Set the address of the transmit FIFO, a circular buffer used for TX data which
+ * can start at offset distance from the FIFO base address.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[in,out] addr An appropriately-aligned (see \ref RAIL_SetTxFifo description)
+ *   pointer to a read-write memory location in RAM used as the transmit FIFO. This memory
+ *   must persist until the next call to this function or \ref RAIL_SetTxFifo.
+ * @param[in] startOffset A number of bytes defining the start position of the TX data
+ *   from the transmit FIFO base address, only valid if initLength is not 0.
+ * @param[in] initLength The number of valid bytes already in the transmit FIFO after startOffset.
+ * @param[in] size A desired size of the transmit FIFO in bytes.
+ * @return Returns the FIFO size in bytes, 0 if an error occurs.
+ *
+ * This function is similar to \ref RAIL_SetTxFifo except a startOffset can be specified
+ * to indicate where the transmit packet data starts. This allows an application to
+ * place unaligned initial packet data within the aligned transmit FIFO (initLength > 0).
+ * Specifying a startOffset will not reduce the FIFO threshold or affect
+ * \ref RAIL_GetTxFifoSpaceAvailable().
+ * \ref RAIL_SetTxFifo or \ref RAIL_SetTxFifoAlt must be called at least once before any transmit
+ * operations occur.
+ * FIFO size handling is quite same as \ref RAIL_SetTxFifo. Only difference is that if the
+ * initLength plus startOffset parameters are larger than the returned size, the FIFO
+ * will be filled up to its size from startOffset.
+ * Note that the startOffset is essentially forgotten after the next transmit --
+ * i.e. it applies onto to the next transmit operation, and is not re-established when
+ * the transmit FIFO is reset.
+ */
+uint16_t RAIL_SetTxFifoAlt(RAIL_Handle_t railHandle,
+                           uint8_t *addr,
+                           uint16_t startOffset,
+                           uint16_t initLength,
+                           uint16_t size);
 /**
  * Set the address of the receive FIFO, a circular buffer used for RX data.
  *
@@ -2102,11 +2184,15 @@ RAIL_Status_t RAIL_GetTxTransitions(RAIL_Handle_t railHandle,
  *
  * Any call to \ref RAIL_Idle or \ref RAIL_StopTx will clear the pending
  * repeated transmits. The state will also be cleared by another call to this
- * function. To clear the repeated transmits before they've started without
- * stopping other radio actions, call this function with a \ref
- * RAIL_TxRepeatConfig_t::iterations count of 0. A DMP switch will clear this
+ * function. A DMP switch will clear this
  * state only if the initial transmit triggering the repeated transmits has
  * started.
+ *
+ * One can change the repeated transmit configuration by re-calling
+ * this function with new parameters as long as that occurs prior to
+ * calling a \ref Packet_TX API. Passing a \ref
+ * RAIL_TxRepeatConfig_t::iterations count of 0 will prevent the next
+ * transmit from repeating.
  *
  * The application is responsible for populating the transmit data to be used
  * by the repeated transmits via \ref RAIL_SetTxFifo or \ref RAIL_WriteTxFifo.
@@ -2117,9 +2203,10 @@ RAIL_Status_t RAIL_GetTxTransitions(RAIL_Handle_t railHandle,
  * Consider using \ref RAIL_TX_OPTION_RESEND if the same packet data is to
  * be repeated: then the Transmit FIFO only needs to be set/written once.
  *
- * Do not call this function after starting a transmit operation or before
- * processing the final transmit completion event of a prior transmit.
- * This function will fail to configure the repetition if a transmit of any
+ * Do not call this function after starting a transmit operation via a \ref
+ * Packet_TX API call or
+ * before processing the final transmit completion event of a prior transmit.
+ * This function will fail to (re)configure the repetition if a transmit of any
  * kind is ongoing, including during the time between an initial transmit and
  * the end of a previously-configured repetition.
  *
@@ -2282,6 +2369,35 @@ RAIL_RadioState_t RAIL_GetRadioState(RAIL_Handle_t railHandle);
  */
 RAIL_RadioStateDetail_t RAIL_GetRadioStateDetail(RAIL_Handle_t railHandle);
 
+/**
+ * Enable/disable caching of synth calibration value.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[in] enable A booloean to enable or disable caching of synth calibration.
+ * @return Status code indicating success of the function call.
+ *
+ * Once enabled, the sequencer will start caching synth calibration values for
+ * channels and apply them instead of performing calibration on every state
+ * transition and channel change.
+ * This will increase the transition time for the first time calibration is
+ * performed. Subsequent state transitions will be faster. The cache size is 2.
+ * \ref RAIL_IEEE802154_SUPPORTS_RX_CHANNEL_SWITCHING internally uses this feature
+ * and there is no need to enable/disable it. This function returns
+ * \ref RAIL_STATUS_INVALID_STATE if we try to disable it while
+ * \ref RAIL_IEEE802154_SUPPORTS_RX_CHANNEL_SWITCHING is enabled.
+ *
+ * @note This function will improve the minimum timings that can be achieved in
+ * \ref RAIL_StateTiming_t::idleToRx, \ref RAIL_StateTiming_t::idleToTx,
+ * \ref RAIL_StateTiming_t::rxToTx, \ref RAIL_StateTiming_t::txToRx and
+ * \ref RAIL_StateTiming_t::txToTx. A call to \ref RAIL_SetStateTiming()
+ * is needed to achieve lower transition times.
+ *
+ * @note On a protocol switch the cache is cleared, so it is not suitable for
+ * applications where a protocol switch happens frequently, like with
+ * Dynamic Multiprotocol.
+ */
+RAIL_Status_t RAIL_EnableCacheSynthCal(RAIL_Handle_t railHandle, bool enable);
+
 /** @} */ // end of group State_Transitions
 
 /******************************************************************************
@@ -2329,8 +2445,8 @@ RAIL_RadioStateDetail_t RAIL_GetRadioStateDetail(RAIL_Handle_t railHandle);
 /// \ref RAIL_ConvertRawToDbm and \ref RAIL_ConvertDbmToRaw,
 /// which convert between the dBm power and the raw power levels,
 /// provide a solution that fits all these applications.
-/// The levels of customizability are outlined below:
-///  1) No customizability needed: for a given dBm value, the result
+/// The levels of customization are outlined below:
+///  1) No customization needed: for a given dBm value, the result
 ///     of RAIL_ConvertDbmToRaw provides an appropriate
 ///     raw power level that, when written to the registers via
 ///     RAIL_SetPowerLevel, causes the chip to output at that
@@ -2660,12 +2776,12 @@ const RAIL_PaPowerSetting_t *RAIL_GetPowerSettingTable(RAIL_Handle_t railHandle,
  * power determined by \ref RAIL_SetTxPowerDbm().
  *
  * @param[in] railHandle A RAIL instance handle.
- * @param[in] paPowerSetting The desired pa power setting.
+ * @param[in] paPowerSetting The desired PA power setting.
  * @param[in] minPowerDbm The minimum power in dBm that the PA can output.
  * @param[in] maxPowerDbm The maximum power in dBm that the PA can output.
  * @param[in] currentPowerDbm The corresponding output power in dBm for this power setting.
  * @return RAIL Status variable indicate whether setting the
- *   pa power setting was successful.
+ *   PA power setting was successful.
  */
 RAIL_Status_t RAIL_SetPaPowerSetting(RAIL_Handle_t railHandle,
                                      RAIL_PaPowerSetting_t paPowerSetting,
@@ -2674,11 +2790,11 @@ RAIL_Status_t RAIL_SetPaPowerSetting(RAIL_Handle_t railHandle,
                                      RAIL_TxPower_t currentPowerDbm);
 
 /**
- * Get the TX pa power setting, which is used to configure power configurations
+ * Get the TX PA power setting, which is used to configure power configurations
  * when the dBm to paPowerSetting mapping table mode is used.
  *
  * @param[in] railHandle A RAIL instance handle.
- * @return The current pa power setting.
+ * @return The current PA power setting.
  */
 RAIL_PaPowerSetting_t RAIL_GetPaPowerSetting(RAIL_Handle_t railHandle);
 
@@ -2699,7 +2815,7 @@ RAIL_PaPowerSetting_t RAIL_GetPaPowerSetting(RAIL_Handle_t railHandle);
  * able to operate properly to ensure that PA Auto Mode functions correctly.
  * See the PA Conversions plugin or AN1127 for more details.
  *
- * @param[in] railHandle A RAIL instance handle.
+ * @param[in] railHandle A real (not generic) RAIL instance handle.
  * @param[in] enable Enable or disable PA Auto Mode.
  * @return Status parameter indicating success of function call.
  */
@@ -2708,7 +2824,8 @@ RAIL_Status_t RAIL_EnablePaAutoMode(RAIL_Handle_t railHandle, bool enable);
 /**
  * Query status of PA Auto Mode.
  *
- * @param[in] railHandle A RAIL instance handle on which to query PA Auto Mode status.
+ * @param[in] railHandle A real (not generic) RAIL instance handle on which to
+ * query PA Auto Mode status.
  * @return Indicator of whether Auto Mode is enabled (true) or not (false).
  */
 bool RAIL_IsPaAutoModeEnabled(RAIL_Handle_t railHandle);
@@ -4932,6 +5049,7 @@ bool RAIL_IsRfSensed(RAIL_Handle_t railHandle);
  * as channel changes will be done implicitly, without requiring numerous calls
  * to \ref RAIL_StartRx. Currently, while this feature is enabled, the radio
  * will hop channels in the given sequence each time it enters RX.
+ * Note that RX Channel hopping and EFR32xG25's concurrent mode are mutually exclusive.
  *
  * The channel hopping buffer requires RAIL_CHANNEL_HOPPING_BUFFER_SIZE_PER_CHANNEL
  * number of 32-bit words of overhead per channel, plus 3 words overall plus the
@@ -4976,13 +5094,13 @@ bool RAIL_IsRfSensed(RAIL_Handle_t railHandle);
  */
 
 /**
- * Configure RX Channel Hopping.
+ * Configure RX channel hopping.
  *
  * @param[in] railHandle A RAIL instance handle.
  * @param[in] config Configuration parameters for RX Channel Hopping.
  * @return Status code indicating success of the function call.
  *
- * Configure Channel Hopping channels, conditions, and parameters. This
+ * Configure channel hopping channels, conditions, and parameters. This
  * API must be called before \ref RAIL_EnableRxChannelHopping(). This API must
  * never be called while the radio is on with RX Duty Cycle or Channel
  * Hopping enabled.
@@ -5398,6 +5516,8 @@ uint32_t RAIL_GetRadioClockFreqHz(RAIL_Handle_t railHandle);
  *
  * @note This function proportionally affects the entire chip's timing
  *   across all its peripherals, including radio tuning and channel spacing.
+ *   It is recommended to call this function only when HFXO is not being used,
+ *   as it can cause disturbance on the HFXO frequency.
  *   A separate function, \ref RAIL_SetFreqOffset(), can be used to adjust
  *   just the radio tuner without disturbing channel spacing or other chip
  *   peripheral timing.
@@ -5654,7 +5774,7 @@ RAIL_Time_t RAIL_TimerTicksToUs(RAIL_TimerTick_t startTick,
 RAIL_TimerTick_t RAIL_UsToTimerTicks(RAIL_Time_t microseconds);
 
 /**
- * Enable Radio state change interrupt.
+ * Enable radio state change interrupt.
  *
  * @param[in] railHandle A RAIL instance handle.
  * @param[in] enable Enable/disable Radio state change interrupt.
@@ -5761,7 +5881,7 @@ RAIL_Status_t RAIL_GetTemperature(RAIL_Handle_t railHandle,
                                   int16_t tempBuffer[RAIL_TEMP_MEASURE_COUNT],
                                   bool reset);
 
-/** Number of bytes provided by \ref RAIL_GetSetEffControl(). */
+/** Number of bytes provided by \ref RAIL_GetSetEffClpcControl(). */
 #define RAIL_EFF_CONTROL_SIZE (52U)
 
 /**
@@ -5773,9 +5893,9 @@ RAIL_Status_t RAIL_GetTemperature(RAIL_Handle_t railHandle,
  * @param[in] reset Reset the EFF Control measurements.
  * @return Status code indicating success of the function call.
  */
-RAIL_Status_t RAIL_GetSetEffControl(RAIL_Handle_t railHandle,
-                                    uint16_t tempBuffer[RAIL_EFF_CONTROL_SIZE / sizeof(uint16_t)],
-                                    bool reset);
+RAIL_Status_t RAIL_GetSetEffClpcControl(RAIL_Handle_t railHandle,
+                                        uint16_t tempBuffer[RAIL_EFF_CONTROL_SIZE / sizeof(uint16_t)],
+                                        bool reset);
 
 /**
  * Copy the current FEM_DATA pin values into newMode. If changeMode is true,
@@ -5786,9 +5906,9 @@ RAIL_Status_t RAIL_GetSetEffControl(RAIL_Handle_t railHandle,
  * @param[in] changeMode If true, use newMode to update FEM_DATA pin values
  * @return Status code indicating success of the function call.
  */
-RAIL_Status_t RAIL_GetSetEffMode(RAIL_Handle_t railHandle,
-                                 uint8_t *newMode,
-                                 bool changeMode);
+RAIL_Status_t RAIL_GetSetEffClpcFemdata(RAIL_Handle_t railHandle,
+                                        uint8_t *newMode,
+                                        bool changeMode);
 
 /**
  * Copy the current Rural to Urban trip voltage into newTrip. If changeTrip is true,
@@ -5799,9 +5919,9 @@ RAIL_Status_t RAIL_GetSetEffMode(RAIL_Handle_t railHandle,
  * @param[in] changeTrip If true, use newTrip to update current Rural to Urban trip voltage
  * @return Status code indicating success of the function call.
  */
-RAIL_Status_t RAIL_GetSetEffRuralUrbanMv(RAIL_Handle_t railHandle,
-                                         uint16_t *newTrip,
-                                         bool changeTrip);
+RAIL_Status_t RAIL_GetSetEffLnaRuralUrbanMv(RAIL_Handle_t railHandle,
+                                            uint16_t *newTrip,
+                                            bool changeTrip);
 
 /**
  * Copy the current Urban to Bypass trip voltage into newTrip. If changeTrip is true,
@@ -5812,9 +5932,9 @@ RAIL_Status_t RAIL_GetSetEffRuralUrbanMv(RAIL_Handle_t railHandle,
  * @param[in] changeTrip If true, use newTrip to update current Urban to Bypass trip voltage
  * @return Status code indicating success of the function call.
  */
-RAIL_Status_t RAIL_GetSetEffUrbanBypassMv(RAIL_Handle_t railHandle,
-                                          uint16_t *newTrip,
-                                          bool changeTrip);
+RAIL_Status_t RAIL_GetSetEffLnaUrbanBypassMv(RAIL_Handle_t railHandle,
+                                             uint16_t *newTrip,
+                                             bool changeTrip);
 
 /**
  * Copy the current Urban dwell time into newDwellTime. If changeDwellTime is true,
@@ -5826,9 +5946,9 @@ RAIL_Status_t RAIL_GetSetEffUrbanBypassMv(RAIL_Handle_t railHandle,
  * @param[in] changeDwellTime If true, use newDwellTime to update current Urban dwell time
  * @return Status code indicating success of the function call.
  */
-RAIL_Status_t RAIL_GetSetEffUrbanDwellTimeMs(RAIL_Handle_t railHandle,
-                                             uint32_t *newDwellTime,
-                                             bool changeDwellTime);
+RAIL_Status_t RAIL_GetSetEffLnaUrbanDwellTimeMs(RAIL_Handle_t railHandle,
+                                                uint32_t *newDwellTime,
+                                                bool changeDwellTime);
 
 /**
  * Copy the current Bypass dwell time into newDwellTime. If changeDwellTime is true,
@@ -5840,9 +5960,9 @@ RAIL_Status_t RAIL_GetSetEffUrbanDwellTimeMs(RAIL_Handle_t railHandle,
  * @param[in] changeDwellTime If true, use newDwellTime to update current Bypass dwell time
  * @return Status code indicating success of the function call.
  */
-RAIL_Status_t RAIL_GetSetEffBypassDwellTimeMs(RAIL_Handle_t railHandle,
-                                              uint32_t *newDwellTime,
-                                              bool changeDwellTime);
+RAIL_Status_t RAIL_GetSetEffLnaBypassDwellTimeMs(RAIL_Handle_t railHandle,
+                                                 uint32_t *newDwellTime,
+                                                 bool changeDwellTime);
 
 /**
  * If changeValues is true, update current CLPC Fast Loop calibration
@@ -5855,10 +5975,10 @@ RAIL_Status_t RAIL_GetSetEffBypassDwellTimeMs(RAIL_Handle_t railHandle,
  * @param[in] changeValues If true, use new values to update the CLPC fast loop calibration
  * @return Status code indicating success of the function call.
  */
-RAIL_Status_t RAIL_GetSetClpcFastLoopCal(RAIL_Handle_t railHandle,
-                                         RAIL_EffModeSensor_t modeSensorIndex,
-                                         RAIL_EffCalConfig_t *calibrationEntry,
-                                         bool changeValues);
+RAIL_Status_t RAIL_GetSetEffClpcFastLoopCal(RAIL_Handle_t railHandle,
+                                            RAIL_EffModeSensor_t modeSensorIndex,
+                                            RAIL_EffCalConfig_t *calibrationEntry,
+                                            bool changeValues);
 
 /**
  * If changeValues is true, update current CLPC Fast Loop calibration
@@ -5872,11 +5992,11 @@ RAIL_Status_t RAIL_GetSetClpcFastLoopCal(RAIL_Handle_t railHandle,
  * @param[in] changeValues If true, use new values to update the CLPC fast loop calibration equations
  * @return Status code indicating success of the function call.
  */
-RAIL_Status_t RAIL_GetSetClpcFastLoopCalSlp(RAIL_Handle_t railHandle,
-                                            RAIL_EffModeSensor_t modeSensorIndex,
-                                            int16_t *newSlope1e1MvPerDdbm,
-                                            int16_t *newoffset290Ddbm,
-                                            bool changeValues);
+RAIL_Status_t RAIL_GetSetEffClpcFastLoopCalSlp(RAIL_Handle_t railHandle,
+                                               RAIL_EffModeSensor_t modeSensorIndex,
+                                               int16_t *newSlope1e1MvPerDdbm,
+                                               int16_t *newoffset290Ddbm,
+                                               bool changeValues);
 
 /**
  * If changeValues is true, update current CLPC Fast Loop Target and
@@ -5890,11 +6010,11 @@ RAIL_Status_t RAIL_GetSetClpcFastLoopCalSlp(RAIL_Handle_t railHandle,
  * @param[in] changeValues If true, use newTargetMv and newSlopeMvPerPaLevel to update the CLPC Fast Loop values
  * @return Status code indicating success of the function call.
  */
-RAIL_Status_t RAIL_GetSetClpcFastLoop(RAIL_Handle_t railHandle,
-                                      RAIL_EffModeSensor_t modeSensorIndex,
-                                      uint16_t *newTargetMv,
-                                      uint16_t *newSlopeMvPerPaLevel,
-                                      bool changeValues);
+RAIL_Status_t RAIL_GetSetEffClpcFastLoop(RAIL_Handle_t railHandle,
+                                         RAIL_EffModeSensor_t modeSensorIndex,
+                                         uint16_t *newTargetMv,
+                                         uint16_t *newSlopeMvPerPaLevel,
+                                         bool changeValues);
 
 /**
  * Copy the current CLPC Enable in to newClpcEnable. If changeClpcEnable is true,
@@ -5905,9 +6025,9 @@ RAIL_Status_t RAIL_GetSetClpcFastLoop(RAIL_Handle_t railHandle,
  * @param[in] changeClpcEnable If true, use newClpcEnable to update the current CLPC Enable
  * @return Status code indicating success of the function call.
  */
-RAIL_Status_t RAIL_GetSetClpcEnable(RAIL_Handle_t railHandle,
-                                    uint8_t *newClpcEnable,
-                                    bool changeClpcEnable);
+RAIL_Status_t RAIL_GetSetEffClpcEnable(RAIL_Handle_t railHandle,
+                                       uint8_t *newClpcEnable,
+                                       bool changeClpcEnable);
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 /**
@@ -6097,7 +6217,7 @@ void RAILCb_AssertFailed(RAIL_Handle_t railHandle,
  */
 
 /**
- * Start a Thermistor measurement. To get the Thermistor impedance, call the
+ * Start a thermistor measurement. To get the thermistor impedance, call the
  * function \ref RAIL_GetThermistorImpedance. On platforms having
  * \ref RAIL_SUPPORTS_EXTERNAL_THERMISTOR, this function reconfigures
  * GPIO_THMSW_EN_PIN located in GPIO_THMSW_EN_PORT.
@@ -6118,7 +6238,7 @@ void RAILCb_AssertFailed(RAIL_Handle_t railHandle,
 RAIL_Status_t RAIL_StartThermistorMeasurement(RAIL_Handle_t railHandle);
 
 /**
- * Get the thermistor impedance measurement and returns \ref
+ * Get the thermistor impedance measurement and return \ref
  * RAIL_INVALID_THERMISTOR_VALUE if the thermistor is not properly
  * configured or the thermistor measurement is not ready.
  *
@@ -6143,9 +6263,10 @@ RAIL_Status_t RAIL_GetThermistorImpedance(RAIL_Handle_t railHandle,
  *   in eighth of Celsius degree
  * @return Status code indicating success of the function call.
  *
- * This function is provided in the rail_util_thermistor plugin to get
- * accurate values from our boards thermistors. For a custom board, this
- * function could be modified and re-implemented for other needs.
+ * A version of this function is provided in the \ref rail_util_thermistor
+ * plugin for Silicon Labs radio boards. For custom boards this function can be
+ * modified and re-implemented as needed.
+ *
  * The variable railHandle is only used to indicate to the user from where the
  * function was called, so it is okay to use either a real protocol handle,
  * or one of the chip-specific ones, such as \ref RAIL_EFR32_HANDLE.
@@ -6279,7 +6400,7 @@ bool RAIL_SupportsSubGHzBand(RAIL_Handle_t railHandle);
 bool RAIL_SupportsDualBand(RAIL_Handle_t railHandle);
 
 /**
- * Indicate whether this chip supports bit masked address filtering
+ * Indicate whether this chip supports bit masked address filtering.
  *
  * @param[in] railHandle A RAIL instance handle.
  * @return true if bit masked address filtering is supported; false otherwise.
@@ -6669,6 +6790,18 @@ bool RAIL_BLE_SupportsCodedPhy(RAIL_Handle_t railHandle);
  */
 bool RAIL_BLE_SupportsCte(RAIL_Handle_t railHandle);
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+/**
+ * Indicate whether this chip supports BLE HADM.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if BLE HADM is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_BLE_SUPPORTS_HADM.
+ */
+bool RAIL_BLE_SupportsHadm(RAIL_Handle_t railHandle);
+#endif
+
 /**
  * Indicate whether this chip supports BLE IQ Sampling needed for
  * Angle-of-Arrival/Departure receives.
@@ -6730,6 +6863,18 @@ bool RAIL_BLE_SupportsSimulscanPhy(RAIL_Handle_t railHandle);
  * Runtime refinement of compile-time \ref RAIL_SUPPORTS_PROTOCOL_IEEE802154.
  */
 bool RAIL_SupportsProtocolIEEE802154(RAIL_Handle_t railHandle);
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+/**
+ * Indicate whether this chip supports the IEEE 802.15.4 2Mbps PHY.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if the 802.15.4 2Mbps PHY is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_IEEE802154_SUPPORTS_2MBPS_PHY.
+ */
+bool RAIL_IEEE802154_Supports2MbpsPhy(RAIL_Handle_t railHandle);
+#endif //DOXYGEN_SHOULD_SKIP_THIS
 
 /**
  * Indicate whether this chip supports the IEEE 802.15.4 Wi-Fi Coexistence PHY.
@@ -6880,7 +7025,7 @@ bool RAIL_IEEE802154_SupportsESubsetGB868(RAIL_Handle_t railHandle);
 bool RAIL_IEEE802154_SupportsG4ByteCrc(RAIL_Handle_t railHandle);
 
 /**
- * Indicate whether this chip supports IEEE 802.15.4G dynamic FEC
+ * Indicate whether this chip supports IEEE 802.15.4G dynamic FEC.
  *
  * @param[in] railHandle A RAIL instance handle.
  * @return true if dynamic FEC is supported; false otherwise.
@@ -6891,7 +7036,18 @@ bool RAIL_IEEE802154_SupportsG4ByteCrc(RAIL_Handle_t railHandle);
 bool RAIL_IEEE802154_SupportsGDynFec(RAIL_Handle_t railHandle);
 
 /**
- * Indicate whether this chip supports Wi-SUN mode switching
+ * Indicate whether this chip supports Wi-SUN.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if Wi-SUN is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref
+ * RAIL_SUPPORTS_PROTOCOL_WI_SUN.
+ */
+bool RAIL_SupportsProtocolWiSUN(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports Wi-SUN mode switching.
  *
  * @param[in] railHandle A RAIL instance handle.
  * @return true if Wi-SUN mode switching is supported; false otherwise.
@@ -6940,6 +7096,16 @@ bool RAIL_IEEE802154_SupportsGUnwhitenedRx(RAIL_Handle_t railHandle);
 bool RAIL_IEEE802154_SupportsGUnwhitenedTx(RAIL_Handle_t railHandle);
 
 /**
+ * Indicate whether this chip supports WMBUS simultaneous M2O RX of T and C modes.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if the WMBUS simultaneous M2O RX of T and C modes is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_WMBUS_SUPPORTS_SIMULTANEOUS_T_C_RX.
+ */
+bool RAIL_WMBUS_SupportsSimultaneousTCRx(RAIL_Handle_t railHandle);
+
+/**
  * Indicate whether this chip supports the Z-Wave protocol.
  *
  * @param[in] railHandle A RAIL instance handle.
@@ -6986,6 +7152,16 @@ bool RAIL_ZWAVE_SupportsRegionPti(RAIL_Handle_t railHandle);
  * @return true if signal identifier is supported; false otherwise.
  */
 bool RAIL_IEEE802154_SupportsSignalIdentifier(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports fast RX2RX.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if fast RX2RX is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_SUPPORTS_FAST_RX2RX.
+ */
+bool RAIL_SupportsFastRx2Rx(RAIL_Handle_t railHandle);
 
 /** @} */ // end of group Features
 

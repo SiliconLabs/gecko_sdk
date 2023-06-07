@@ -20,17 +20,11 @@
 #ifndef SILABS_UC_COMMAND_INTERPRETER_H
 #define SILABS_UC_COMMAND_INTERPRETER_H
 
-#if defined(UC_BUILD) && defined(SL_CATALOG_CLI_PRESENT)
+#if defined(SL_CATALOG_CLI_PRESENT)
 #include "sl_cli.h"
 #ifdef SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT
 #include "sl_zigbee_debug_print.h"
 #endif // SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT
-
-//define EmberEUI64 type if it's not already defined
-#ifndef EUI64_SIZE
-#define EUI64_SIZE 8
-typedef uint8_t EmberEUI64[EUI64_SIZE];
-#endif
 
 // TODO: doxygen
 uint8_t *sl_zigbee_cli_get_argument_string_and_length(sl_cli_command_arg_t *arguments,
@@ -66,11 +60,6 @@ uint8_t sl_zigbee_copy_eui64_arg(sl_cli_command_arg_t *arguments,
                           EMBER_ENCRYPTION_KEY_SIZE,        \
                           true))
 
-#elif !defined(UC_BUILD)
-#include PLATFORM_HEADER
-#include "app/util/serial/command-interpreter2.h"
-#define SL_CLI_COMMAND_ARG void
-#define SL_CLI_COMMAND_PARAM
-#endif // !UC_BUILD
+#endif // SL_CATALOG_CLI_PRESENT
 
 #endif // SILABS_UC_COMMAND_INTERPRETER_H

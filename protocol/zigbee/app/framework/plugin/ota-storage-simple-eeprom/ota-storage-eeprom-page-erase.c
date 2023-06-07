@@ -21,11 +21,7 @@
 #include "app/framework/plugin/ota-common/ota.h"
 #include "app/framework/plugin/ota-storage-common/ota-storage.h"
 
-#ifdef UC_BUILD
 #include "eeprom.h"
-#else // !UC_BUILD
-#include "util/plugin/plugin-common/eeprom/eeprom.h"
-#endif // UC_BUILD
 
 //#define DEBUG_PRINT
 #define OTA_STORAGE_EEPROM_INTERNAL_HEADER
@@ -91,7 +87,7 @@ static bool checkDelay(bool mustSetTimer)
       delay = 1;
     }
     debugPrint("Waiting %d ms for erase to complete.", delay);
-    slxu_zigbee_event_set_delay_ms(eraseEvent, delay);
+    sl_zigbee_event_set_delay_ms(eraseEvent, delay);
     return true;
   }
 
@@ -108,7 +104,7 @@ static bool eraseOperation(bool startNewErase,
 
   EMBER_TEST_ASSERT(!startNewErase
                     || (startNewErase
-                        && !slxu_zigbee_event_is_active(eraseEvent)));
+                        && !sl_zigbee_event_is_scheduled(eraseEvent)));
 
   // In case the first time we are called the EEPROM is busy,
   // we will delay.  However we haven't erased the first page
@@ -152,9 +148,9 @@ static bool eraseOperation(bool startNewErase,
 
   otaPrintln("EEPROM Erase complete");
 
-  if (!emAfOtaStorageCheckDownloadMetaData()) {
+  if (!sli_zigbee_af_ota_storage_check_download_meta_data()) {
     // This was a full erase that wiped the meta-data.
-    emAfOtaStorageWriteDownloadMetaData();
+    sli_zigbee_af_ota_storage_write_download_meta_data();
   }
 
   emberAfPluginOtaStorageSimpleEepromEraseCompleteCallback(success);
@@ -167,7 +163,7 @@ static bool isMultipleOfPageSize(uint32_t address)
   return ((pageSizeBits & address) == 0);
 }
 
-void emAfOtaStorageEepromInit(void)
+void sli_zigbee_af_ota_storage_eeprom_init(void)
 {
   uint16_t expectedCapabilities = (EEPROM_CAPABILITIES_PAGE_ERASE_REQD
                                    | EEPROM_CAPABILITIES_ERASE_SUPPORTED);
@@ -191,9 +187,9 @@ void emAfOtaStorageEepromInit(void)
          >= (spaceReservedForOta >> determinePageSizeLog()));
 }
 
-void emberAfPluginOtaStorageSimpleEepromPageEraseEventHandler(SLXU_UC_EVENT)
+void emberAfPluginOtaStorageSimpleEepromPageEraseEventHandler(sl_zigbee_event_t * event)
 {
-  slxu_zigbee_event_set_inactive(eraseEvent);
+  sl_zigbee_event_set_inactive(eraseEvent);
   continueEraseOperation();
 }
 
@@ -259,7 +255,7 @@ static uint32_t getOffsetFromByteMaskIndex(int32_t byteMaskIndex)
 
   if (otaOffset != 0) {
 #if defined(SOC_BOOTLOADING_SUPPORT)
-    otaOffset += emAfGetEblStartOffset();
+    otaOffset += sli_zigbee_af_get_ebl_start_offset();
 #else
     otaOffset -= OTA_HEADER_INDEX;
 #endif
@@ -277,7 +273,7 @@ static int32_t getByteMaskIndexFromOtaOffset(uint32_t otaOffset)
   int32_t adjustment;
 
 #if defined(SOC_BOOTLOADING_SUPPORT)
-  adjustment = emAfGetEblStartOffset();
+  adjustment = sli_zigbee_af_get_ebl_start_offset();
 #else
   adjustment = 0 - OTA_HEADER_INDEX;
 #endif
@@ -285,7 +281,7 @@ static int32_t getByteMaskIndexFromOtaOffset(uint32_t otaOffset)
   // debugPrint("Offset: 0x%4X, Adjustment: 0x%4X, EBL Start Offset: 0x%4X, Page Log: %d, Page Size: %d",
   //            otaOffset,
   //            adjustment,
-  //            emAfGetEblStartOffset(),
+  //            sli_zigbee_af_get_ebl_start_offset(),
   //            determinePageSizeLog(),
   //            emberAfPluginEepromInfo()->pageSize);
 
@@ -296,7 +292,7 @@ static int32_t getByteMaskIndexFromOtaOffset(uint32_t otaOffset)
   return (((otaOffset + adjustment) >> determinePageSizeLog()) - 1);
 }
 
-void emAfStorageEepromUpdateDownloadOffset(uint32_t otaOffsetNew, bool finalOffset)
+void sli_zigbee_af_storage_eeprom_update_download_offset(uint32_t otaOffsetNew, bool finalOffset)
 {
   int32_t byteMaskIndexNew = getByteMaskIndexFromOtaOffset(otaOffsetNew);
 
@@ -344,7 +340,7 @@ void emAfStorageEepromUpdateDownloadOffset(uint32_t otaOffsetNew, bool finalOffs
   }
 }
 
-void emAfOtaWipeStorageDevice(void)
+void sli_zigbee_af_ota_wipe_storage_device(void)
 {
   emberAfOtaStorageDriverInvalidateImageCallback();
 }
@@ -362,7 +358,7 @@ EmberAfOtaStorageStatus emberAfOtaStorageDriverInvalidateImageCallback(void)
 
 uint32_t emberAfOtaStorageDriverRetrieveLastStoredOffsetCallback(void)
 {
-  if (!emAfOtaStorageCheckDownloadMetaData()) {
+  if (!sli_zigbee_af_ota_storage_check_download_meta_data()) {
     return 0;
   }
 
@@ -399,7 +395,7 @@ EmberAfOtaStorageStatus emberAfOtaStorageDriverPrepareToResumeDownloadCallback(v
 }
 
 #if defined(DEBUG_PRINT)
-void emAfEepromTest(void)
+void sli_zigbee_af_eeprom_test(void)
 {
   // This function works only for blocking IO calls
 
@@ -438,13 +434,14 @@ void emAfEepromTest(void)
 
 #endif // !READ_MODIFY_WRITE_SUPPORT
 
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #ifdef SL_CATALOG_CLI_PRESENT
+
 #include "sl_cli.h"
-void emAfOtaWipeStorageDeviceCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_ota_wipe_storage_device_command(sl_cli_command_arg_t *arguments)
 {
   emberAfOtaStorageDriverInvalidateImageCallback();
 }
 #endif // SL_CATALOG_CLI_PRESENT
-#endif // UC_BUILD

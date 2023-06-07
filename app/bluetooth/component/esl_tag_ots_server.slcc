@@ -1,0 +1,56 @@
+id: esl_tag_ots_erver
+package: Bluetooth
+label: ESL Tag OTS Server
+description: >
+  Object Transfer Server component for the ESL Image tranfer. This is a hidden,
+  common component which contains the image storage type agnostic code, only.
+
+
+  This component is required by the actual ESL Image implementations utilizing
+  various storage technologies as their target - thus it can't be used as a
+  standalone component!
+category: Bluetooth|Application|GATT Services
+quality: production
+root_path: app/bluetooth/common/esl_tag_ots_server
+
+config_file:
+  - override:
+      component: ots_server
+      file_id: ots_server_config
+      instance: esl_image
+    path: config/sl_bt_ots_server_esl_image_config.h
+
+include:
+  - path: ./inc
+    file_list:
+      - path: esl_tag_ots_server.h
+
+source:
+  - path: src/esl_tag_ots_server.c
+
+provides:
+  - name: esl_tag_ots_server
+
+requires:
+  - name: ots_server
+
+recommends:
+  - {id: "ots_server", instance: ["esl_image"]}
+
+validation_library:
+  - path: ../../../common/validation/autonumber_common.lua
+    name: autonumber_common
+
+validation_helper:
+  - path: "config/validator.lua"
+
+ui_hints:
+  visibility: never
+
+template_contribution:
+  - name: bluetooth_on_event
+    value:
+      include: esl_tag_ots_server.h
+      function: esl_tag_ots_server_bt_on_event
+    priority: -8998  # must be put before esl_core_bt_on_event!
+

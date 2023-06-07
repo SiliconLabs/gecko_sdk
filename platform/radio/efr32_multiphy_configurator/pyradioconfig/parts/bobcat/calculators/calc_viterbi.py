@@ -44,3 +44,36 @@ class Calc_Viterbi_Bobcat(CALC_Viterbi_ocelot):
 
         self._reg_write(model.vars.MODEM_CHFCTRL_SWCOEFFEN, swcoeffen)
         self._reg_write(model.vars.MODEM_VTCORRCFG1_KSI3SWENABLE, ksi3swenable)
+
+    def calc_pmoffset_reg(self, model):
+        #Copied old Ocelot method to avoid regression impact on later parts
+
+        osr = model.vars.MODEM_TRECSCFG_TRECSOSR.value
+        pmwinsize = model.vars.pmacquingwin_actual.value
+        baudrate = model.vars.baudrate.value
+        dual_sync_en = model.vars.MODEM_CTRL1_DUALSYNC.value == 1
+        modulation_index = model.vars.modulation_index.value
+        freq_offset_hz = model.vars.freq_offset_hz.value
+
+        relative_freq_offs = freq_offset_hz / baudrate
+
+        if dual_sync_en and ((modulation_index <= 0.5 and relative_freq_offs > 0.57) or baudrate > 90000):
+            # Special case for dual syncword detection case where hard slicing on syncword is required
+            # because frequency tolerance is more difficult when RTSCHMODE is 1
+            pmoffset = osr * 2 + 2
+        else:
+            # + 2 for processing delay. See expsynclen register description. These are used in the same way.
+            pmoffset = osr * pmwinsize + 2
+
+        self._reg_write(model.vars.MODEM_TRECSCFG_PMOFFSET, pmoffset)
+
+    def calc_freqtrackmode_reg(self, model):
+        # Copied old Ocelot method to avoid regression impact on later parts
+        vtdemoden = model.vars.MODEM_VITERBIDEMOD_VTDEMODEN.value
+
+        if vtdemoden:
+            freqtrackmode = 1
+        else:
+            freqtrackmode = 0
+
+        self._reg_write(model.vars.MODEM_VTTRACK_FREQTRACKMODE, freqtrackmode)

@@ -22,7 +22,7 @@
 // <i> The maximum number of ZigBee PRO End Devices that can be supported by a single device.
 #define EMBER_MAX_END_DEVICE_CHILDREN   6
 
-// <o EMBER_PACKET_BUFFER_COUNT> Packet Buffer Count <20-254>
+// <o EMBER_PACKET_BUFFER_COUNT> Packet Buffer Count <20-255>
 // <i> Default: 75
 // <i> The maximum number of packet buffers supported by the system.  This is limited by the amount of available RAM.
 #define EMBER_PACKET_BUFFER_COUNT   75
@@ -66,6 +66,12 @@
 // <i> Default: 10
 // <i> The maximum number of APS unicast messages that can be queued up by the stack.  A message is considered queued when emberSendUnicast() is called and is de-queued when the emberMessageSentHandler() is called.
 #define EMBER_APS_UNICAST_MESSAGE_COUNT   10
+
+// <o SL_ZIGBEE_APS_DUPLICATE_REJECTION_MAX_ENTRIES> APS unicast Message Duplicate Rejection table Size <1-255>
+// <i> Default: 5
+// <i> The maximum number of APS unicast messages that can be stored in the stack, to reject duplicate processing/forwarding of APS messages.
+// <i> Size of 1 is basically the same thing as no duplicate rejection
+#define SL_ZIGBEE_APS_DUPLICATE_REJECTION_MAX_ENTRIES 5
 
 // <o EMBER_BROADCAST_TABLE_SIZE> Broadcast Table Size <15-254>
 // <i> Default: 15

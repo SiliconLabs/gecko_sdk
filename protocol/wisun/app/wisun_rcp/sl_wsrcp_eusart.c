@@ -36,15 +36,11 @@ void uart_hw_init(struct sl_wsrcp_uart *uart_ctxt)
     //CORE_SetNvicRamTableHandler(UART_RX_IRQ, uart_rx_irq);
     NVIC_ClearPendingIRQ(UART_RX_IRQ);
     NVIC_EnableIRQ(UART_RX_IRQ);
-#if defined(_CMU_HFPERCLKEN0_MASK)
-    CMU_ClockEnable(cmuClock_HFPER, true);
-#endif
     CMU_ClockEnable(cmuClock_GPIO, true);
-    CMU_ClockEnable(cmuClock_PRS, true);
     CMU_ClockEnable(UART_CLOCK, true);
-    CMU_ClockSelectSet(cmuClock_EM01GRPCCLK, cmuSelect_HFRCODPLL);
+    CMU_CLOCK_SELECT_SET(EM01GRPCCLK, HFRCODPLL);
     if (UART_CLOCK == cmuClock_EUSART0) {
-        CMU_ClockSelectSet(cmuClock_EUSART0CLK, cmuSelect_EM01GRPCCLK);
+        CMU_CLOCK_SELECT_SET(EUSART0CLK, EM01GRPCCLK);
     }
 
     GPIO_PinModeSet(UART_PORT_TX, UART_PIN_TX, gpioModePushPull, 1);

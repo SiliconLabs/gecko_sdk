@@ -1,7 +1,7 @@
 from pycalcmodel.core.output import ModelOutput, ModelOutputType
 
 
-def build_modem_regs_dumbo(model,profile, family):
+def build_modem_regs_dumbo(model,profile):
     profile.outputs.append(ModelOutput(model.vars.MODEM_CF_CFOSR, '',                ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.CF.CFOSR'                  ))
     profile.outputs.append(ModelOutput(model.vars.MODEM_CF_DEC0, '',                 ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.CF.DEC0'                   ))
     profile.outputs.append(ModelOutput(model.vars.MODEM_CF_DEC1, '',                 ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.CF.DEC1'                   ))

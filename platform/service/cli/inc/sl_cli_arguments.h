@@ -61,21 +61,21 @@
 #define SL_CLI_ARG_STRING     (0x06U)
 /// @brief HEX argument type
 #define SL_CLI_ARG_HEX        (0x07U)
-/// @brief Optional UINT8 argument type
+/// @brief Optional (zero or more) UINT8 argument type
 #define SL_CLI_ARG_UINT8OPT   (0x10U)
-/// @brief Optional UINT16 argument type
+/// @brief Optional (zero or more) UINT16 argument type
 #define SL_CLI_ARG_UINT16OPT  (0x11U)
-/// @brief Optional UINT32 argument type
+/// @brief Optional (zero or more) UINT32 argument type
 #define SL_CLI_ARG_UINT32OPT  (0x12U)
-/// @brief Optional INT8 argument type
+/// @brief Optional (zero or more) INT8 argument type
 #define SL_CLI_ARG_INT8OPT    (0x13U)
-/// @brief Optional INT16 argument type
+/// @brief Optional (zero or more) INT16 argument type
 #define SL_CLI_ARG_INT16OPT   (0x14U)
-/// @brief Optional INT32 argument type
+/// @brief Optional (zero or more) INT32 argument type
 #define SL_CLI_ARG_INT32OPT   (0x15U)
-/// @brief Optional STRING argument type
+/// @brief Optional (zero or more) STRING argument type
 #define SL_CLI_ARG_STRINGOPT  (0x16U)
-/// @brief Optional HEX argument type
+/// @brief Optional (zero or more) HEX argument type
 #define SL_CLI_ARG_HEXOPT     (0x17U)
 /// @brief ADDITIONAL argument type
 #define SL_CLI_ARG_ADDITIONAL (0x20U)
@@ -96,14 +96,14 @@ typedef enum sl_cli_arg{
   sl_cli_arg_int32       = SL_CLI_ARG_INT32,      ///< INT32 argument type
   sl_cli_arg_string      = SL_CLI_ARG_STRING,     ///< STRING argument type
   sl_cli_arg_hex         = SL_CLI_ARG_HEX,        ///< HEX argument type
-  sl_cli_arg_uint8opt    = SL_CLI_ARG_UINT8OPT,   ///< Optional UINT8 argument type
-  sl_cli_arg_uint16opt   = SL_CLI_ARG_UINT16OPT,  ///< Optional UINT16 argument type
-  sl_cli_arg_uint32opt   = SL_CLI_ARG_UINT32OPT,  ///< Optional UINT32 argument type
-  sl_cli_arg_int8opt     = SL_CLI_ARG_INT8OPT,    ///< Optional INT8 argument type
-  sl_cli_arg_int16opt    = SL_CLI_ARG_INT16OPT,   ///< Optional INT16 argument type
-  sl_cli_arg_int32opt    = SL_CLI_ARG_INT32OPT,   ///< Optional INT32 argument type
-  sl_cli_arg_stringopt   = SL_CLI_ARG_STRINGOPT,  ///< Optional STRING argument type
-  sl_cli_arg_hexopt      = SL_CLI_ARG_HEXOPT,     ///< Optional HEX argument type
+  sl_cli_arg_uint8opt    = SL_CLI_ARG_UINT8OPT,   ///< Optional (zero or more) UINT8 argument type
+  sl_cli_arg_uint16opt   = SL_CLI_ARG_UINT16OPT,  ///< Optional (zero or more) UINT16 argument type
+  sl_cli_arg_uint32opt   = SL_CLI_ARG_UINT32OPT,  ///< Optional (zero or more) UINT32 argument type
+  sl_cli_arg_int8opt     = SL_CLI_ARG_INT8OPT,    ///< Optional (zero or more) INT8 argument type
+  sl_cli_arg_int16opt    = SL_CLI_ARG_INT16OPT,   ///< Optional (zero or more) INT16 argument type
+  sl_cli_arg_int32opt    = SL_CLI_ARG_INT32OPT,   ///< Optional (zero or more) INT32 argument type
+  sl_cli_arg_stringopt   = SL_CLI_ARG_STRINGOPT,  ///< Optional (zero or more) STRING argument type
+  sl_cli_arg_hexopt      = SL_CLI_ARG_HEXOPT,     ///< Optional (zero or more) HEX argument type
   sl_cli_arg_additionnal = SL_CLI_ARG_ADDITIONAL, ///< ADDITIONAL argument type
   sl_cli_arg_wildcard    = SL_CLI_ARG_WILDCARD,   ///< WILDCARD argument type
   sl_cli_arg_group       = SL_CLI_ARG_GROUP,      ///< GROUP argument type

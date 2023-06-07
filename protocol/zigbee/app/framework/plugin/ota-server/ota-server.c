@@ -25,15 +25,10 @@
 #include "ota-server-dynamic-block-period.h"
 #include "app/framework/plugin/ota-server-policy/ota-server-policy.h"
 
-#ifdef UC_BUILD
 #include "zap-cluster-command-parser.h"
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
-#else // !UC_BUILD
-#include "callback.h"
-#ifdef EMBER_AF_PLUGIN_SUB_GHZ_SERVER
-#define SL_CATALOG_ZIGBEE_SUB_GHZ_SERVER_PRESENT
 #endif
-#endif // UC_BUILD
 
 #ifdef SL_CATALOG_ZIGBEE_SUB_GHZ_SERVER_PRESENT
 #include "app/framework/plugin/sub-ghz-server/sub-ghz-server.h"
@@ -75,17 +70,17 @@ uint8_t otaServerEndpoint = 0;  // invalid endpoint
 
 static bool commandParse(EmberAfClusterCommand* command);
 
-#define prepareClusterResponse(commandId, status) \
-  emAfOtaServerPrepareResponse(false,             \
-                               (commandId),       \
-                               (status),          \
-                               0)       // defaultResponsePayloadCommandId
+#define prepareClusterResponse(commandId, status)        \
+  sli_zigbee_af_ota_server_prepare_response(false,       \
+                                            (commandId), \
+                                            (status),    \
+                                            0) // defaultResponsePayloadCommandId
 
-#define prepareDefaultResponse(status, commandId)               \
-  emAfOtaServerPrepareResponse(true,                            \
-                               ZCL_DEFAULT_RESPONSE_COMMAND_ID, \
-                               (status),                        \
-                               (commandId))
+#define prepareDefaultResponse(status, commandId)                            \
+  sli_zigbee_af_ota_server_prepare_response(true,                            \
+                                            ZCL_DEFAULT_RESPONSE_COMMAND_ID, \
+                                            (status),                        \
+                                            (commandId))
 
 static void addEmberAfOtaImageIdIntoResponse(const EmberAfOtaImageId* id);
 
@@ -97,18 +92,18 @@ void emberAfOtaBootloadClusterServerInitCallback(uint8_t endpoint)
 {
   emberAfOtaStorageInitCallback();
   otaServerEndpoint = endpoint;
-  emAfOtaServerDynamicBlockPeriodInit();
+  sli_zigbee_af_ota_server_dynamic_block_period_init();
 }
 
 void emberAfOtaBootloadClusterServerTickCallback(uint8_t endpoint)
 {
-  emAfOtaPageRequestTick(endpoint);
+  sli_zigbee_af_ota_page_request_tick(endpoint);
 }
 
 // This tick is endpointless and declared differently in plugin.properties
 void emberAfOtaServerTick(void)
 {
-  emAfOtaServerDynamicBlockPeriodTick();
+  sli_zigbee_af_ota_server_dynamic_block_period_tick();
 }
 
 // -------------------------------------------------------
@@ -241,7 +236,7 @@ static void printBlockRequestInfo(const EmberAfOtaImageId* id,
 
 // This function is made non-static for the Page request code
 // It returns 0 on error, or the number of bytes sent on success.
-uint8_t emAfOtaImageBlockRequestHandler(EmberAfImageBlockRequestCallbackStruct* callbackData)
+uint8_t sli_zigbee_af_ota_image_block_request_handler(EmberAfImageBlockRequestCallbackStruct* callbackData)
 {
   uint8_t data[MAX_POSSIBLE_SERVER_BLOCK_SIZE];
   uint32_t actualLength;
@@ -300,7 +295,7 @@ uint8_t emAfOtaImageBlockRequestHandler(EmberAfImageBlockRequestCallbackStruct* 
       // this code as a simulated Image Block Request for processing purposes)
       if (callbackData->bitmask
           & EMBER_AF_IMAGE_BLOCK_REQUEST_SIMULATED_FROM_PAGE_REQUEST) {
-        (void)emAfOtaPageRequestErrorHandler(); // only aborts current session
+        (void)sli_zigbee_af_ota_page_request_error_handler(); // only aborts current session
       }
     }
     return 0;
@@ -330,7 +325,7 @@ uint8_t emAfOtaImageBlockRequestHandler(EmberAfImageBlockRequestCallbackStruct* 
   }
 
   if (status != EMBER_ZCL_STATUS_SUCCESS) {
-    if (!emAfOtaPageRequestErrorHandler()) {
+    if (!sli_zigbee_af_ota_page_request_error_handler()) {
       // If the page request code didn't handle the error (because this code
       // wasn't called due to a page request) then we send a normal
       // response.  We don't generate an error message because in that case
@@ -418,17 +413,17 @@ static void querySpecificFileRequestHandler(uint8_t* requestNodeAddress,
                          ZCL_QUERY_SPECIFIC_FILE_REQUEST_COMMAND_ID);
 }
 
-void emAfOtaServerPrepareResponse(bool useDefaultResponse,
-                                  uint8_t commandId,
-                                  uint8_t status,
-                                  uint8_t defaultResponsePayloadCommandId)
+void sli_zigbee_af_ota_server_prepare_response(bool useDefaultResponse,
+                                               uint8_t commandId,
+                                               uint8_t status,
+                                               uint8_t defaultResponsePayloadCommandId)
 {
   emberAfResponseApsFrame.sourceEndpoint = otaServerEndpoint;
   appResponseLength = 0;
   emberAfResponseApsFrame.clusterId = ZCL_OTA_BOOTLOAD_CLUSTER_ID;
 
   emberAfResponseApsFrame.options =
-    ((emAfOtaServerHandlingPageRequest()
+    ((sli_zigbee_af_ota_server_handling_page_request()
       && commandId == ZCL_IMAGE_BLOCK_RESPONSE_COMMAND_ID)
      ? EMBER_APS_OPTION_NONE
      : EMBER_APS_OPTION_RETRY);
@@ -481,7 +476,7 @@ static bool commandParse(EmberAfClusterCommand* command)
 
   if (commandId > LAST_MESSAGE_ID
       || (length
-          < (EMBER_AF_ZCL_OVERHEAD + emAfOtaMinMessageLengths[commandId]))) {
+          < (EMBER_AF_ZCL_OVERHEAD + sli_zigbee_af_ota_min_message_lengths[commandId]))) {
     return false;
   }
   switch (commandId) {
@@ -496,9 +491,9 @@ static bool commandParse(EmberAfClusterCommand* command)
 
       fieldControl = emberAfGetInt8u(buffer, index, length);
       index++;
-      index += emAfOtaParseImageIdFromMessage(&imageId,
-                                              &(buffer[index]),
-                                              length);
+      index += sli_zigbee_af_ota_parse_image_id_from_message(&imageId,
+                                                             &(buffer[index]),
+                                                             length);
 
       if (commandId == ZCL_QUERY_NEXT_IMAGE_REQUEST_COMMAND_ID) {
         if (fieldControl & QUERY_NEXT_IMAGE_HW_VER_PRESENT_MASK) {
@@ -542,7 +537,7 @@ static bool commandParse(EmberAfClusterCommand* command)
         callbackStruct.maxDataSize = maxDataSize;
         callbackStruct.bitmask |= MIN_BLOCK_REQUEST_SERVER_SUPPORT;
 
-        emAfOtaImageBlockRequestHandler(&callbackStruct);
+        sli_zigbee_af_ota_image_block_request_handler(&callbackStruct);
       } else { // ZCL_IMAGE_PAGE_REQUEST_COMMAND_ID
         uint16_t pageSize;
         uint16_t responseSpacing;
@@ -554,13 +549,13 @@ static bool commandParse(EmberAfClusterCommand* command)
         responseSpacing = emberAfGetInt16u(buffer, index, length);
         index += 2;
 
-        status = emAfOtaPageRequestHandler(command->apsFrame->sourceEndpoint,
-                                           otaServerEndpoint,
-                                           &imageId,
-                                           offset,
-                                           maxDataSize,
-                                           pageSize,
-                                           responseSpacing);
+        status = sli_zigbee_af_ota_page_request_handler(command->apsFrame->sourceEndpoint,
+                                                        otaServerEndpoint,
+                                                        &imageId,
+                                                        offset,
+                                                        maxDataSize,
+                                                        pageSize,
+                                                        responseSpacing);
 
         if (status != EMBER_ZCL_STATUS_SUCCESS) {
           prepareDefaultResponse(status,
@@ -573,9 +568,9 @@ static bool commandParse(EmberAfClusterCommand* command)
       uint8_t status = emberAfGetInt8u(buffer, index, length);
       index++;
       if (status == EMBER_ZCL_STATUS_SUCCESS) {
-        index += emAfOtaParseImageIdFromMessage(&imageId,
-                                                &(buffer[index]),
-                                                length);
+        index += sli_zigbee_af_ota_parse_image_id_from_message(&imageId,
+                                                               &(buffer[index]),
+                                                               length);
       }
       upgradeEndRequestHandler(command->source, status, &imageId);
       return true;
@@ -584,9 +579,9 @@ static bool commandParse(EmberAfClusterCommand* command)
       uint8_t* requestNodeAddress = &(buffer[index]);
       uint16_t currentStackVersion;
       index += 8;  // add 8 to jump over the requestNodeAddress
-      index += emAfOtaParseImageIdFromMessage(&imageId,
-                                              &(buffer[index]),
-                                              length);
+      index += sli_zigbee_af_ota_parse_image_id_from_message(&imageId,
+                                                             &(buffer[index]),
+                                                             length);
       currentStackVersion = emberAfGetInt16u(buffer, index, length);
       index += 2;
       querySpecificFileRequestHandler(requestNodeAddress,
@@ -614,8 +609,6 @@ void emberAfOtaServerSendUpgradeCommandCallback(EmberNodeId dest,
   }
 }
 
-#ifdef UC_BUILD
-
 uint32_t emberAfOtaClusterServerCommandParse(sl_service_opcode_t opcode,
                                              sl_service_function_context_t *context)
 {
@@ -628,5 +621,3 @@ uint32_t emberAfOtaClusterServerCommandParse(sl_service_opcode_t opcode,
           ? EMBER_ZCL_STATUS_SUCCESS
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
-
-#endif // UC_BUILD

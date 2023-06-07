@@ -76,6 +76,18 @@ void Interface::Init(void)
     }
 }
 
+void Interface::SetEnabled(bool aEnable)
+{
+    if (aEnable)
+    {
+        Enable();
+    }
+    else
+    {
+        Disable();
+    }
+}
+
 void Interface::Enable(void)
 {
     VerifyOrExit(!mEnabled);
@@ -173,7 +185,7 @@ exit:
 
 void Interface::HandleDiscoveredPeerInfo(const Peer::Info &aInfo)
 {
-    Peer *                 entry;
+    Peer                  *entry;
     Mac::ExtAddress        extAddress;
     MeshCoP::ExtendedPanId extPanId;
     bool                   isNew = false;
@@ -234,8 +246,8 @@ exit:
     return;
 }
 
-Error Interface::ParsePeerInfoTxtData(const Peer::Info &      aInfo,
-                                      Mac::ExtAddress &       aExtAddress,
+Error Interface::ParsePeerInfoTxtData(const Peer::Info       &aInfo,
+                                      Mac::ExtAddress        &aExtAddress,
                                       MeshCoP::ExtendedPanId &aExtPanId) const
 {
     Error                   error;
@@ -250,6 +262,15 @@ Error Interface::ParsePeerInfoTxtData(const Peer::Info &      aInfo,
 
     while ((error = iterator.GetNextEntry(entry)) == kErrorNone)
     {
+        // If the TXT data happens to have entries with key longer
+        // than `kMaxKeyLength`, `mKey` would be `nullptr` and full
+        // entry would be placed in `mValue`. We skip over such
+        // entries.
+        if (entry.mKey == nullptr)
+        {
+            continue;
+        }
+
         if (strcmp(entry.mKey, kTxtRecordExtAddressKey) == 0)
         {
             VerifyOrExit(!parsedExtAddress, error = kErrorParse);

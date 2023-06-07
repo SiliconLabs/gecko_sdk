@@ -25,7 +25,6 @@
 #include <time.h>
 #endif // UNIX_HOST
 #define MAX_PACKET_LENGTH 127
-#define MAX_ZIGBEE_TX_TEST_MESSAGE_LENGTH   80
 #define ZIGBEE_TX_TEST_MAX_INFLIGHT         5
 
 typedef struct {
@@ -56,36 +55,11 @@ static struct {
   InflightInfo inflightInfoTable[ZIGBEE_TX_TEST_MAX_INFLIGHT];
 } testParams;
 
-#ifndef UC_BUILD
-// CLI-runnable functions
-void emAfPluginThroughputCliSetAllParameters(void);
-void emAfPluginThroughputCliStartTest(void);
-void emAfPluginThroughputCliStopTest(void);
-void emAfPluginThroughputCliSetDestination(void);
-void emAfPluginThroughputCliSetInterval(void);
-void emAfPluginThroughputCliSetTestTimeout(void);
-void emAfPluginThroughputCliSetTestCount(void);
-void emAfPluginThroughputCliSetInFlightCount(void);
-void emAfPluginThroughputCliSetPacketSize(void);
-void emAfPluginThroughputCliSetApsAckOff(void);
-void emAfPluginThroughputCliSetApsAckOn(void);
-void emAfPluginThroughputCliPrintParameters(void);
-void emAfPluginThroughputCliPrintResult(void);
-void emAfPluginThroughputCliPrintCounters(void);
-void emAfPluginThroughputCliClearCounters(void);
-#else
 #include "sl_cli.h"
-#endif
 //stack events and handlers
-#ifdef UC_BUILD
 sl_zigbee_event_t emberAfPluginThroughputPacketSendEvent;
 #define throughputPacketSendEventControl (&emberAfPluginThroughputPacketSendEvent)
-void emberAfPluginThroughputPacketSendEventHandler(SLXU_UC_EVENT);
-#else
-EmberEventControl emberAfPluginThroughputPacketSendEventControl;
-#define throughputPacketSendEventControl emberAfPluginThroughputPacketSendEventControl
-void emberAfPluginThroughputPacketSendEventHandler(void);
-#endif
+void emberAfPluginThroughputPacketSendEventHandler(sl_zigbee_event_t * event);
 
 //Other declarations
 static uint8_t isRunning = 0;
@@ -113,12 +87,12 @@ enum printSelection {
 
 //---internal callback
 
-void emAfPluginThroughputInitCallback(SLXU_INIT_ARG)
+void sli_zigbee_af_throughput_init_callback(uint8_t init_level)
 {
-  SLXU_INIT_UNUSED_ARG;
+  (void)init_level;
 
-  slxu_zigbee_event_init(throughputPacketSendEventControl,
-                         emberAfPluginThroughputPacketSendEventHandler);
+  sl_zigbee_event_init(throughputPacketSendEventControl,
+                       emberAfPluginThroughputPacketSendEventHandler);
 }
 
 //-------------------------------------------------
@@ -252,16 +226,12 @@ static void startTest(void)
   }
   clearCounters();
   emberAfCorePrintln("Starting Test");
-#ifdef UC_BUILD
   emberAfPluginThroughputPacketSendEventHandler(throughputPacketSendEventControl);
-#else
-  emberAfPluginThroughputPacketSendEventHandler();
-#endif
 }
 
 static void stopTest(void)
 {
-  slxu_zigbee_event_set_inactive(throughputPacketSendEventControl);
+  sl_zigbee_event_set_inactive(throughputPacketSendEventControl);
   testParams.messageTotalCount = 0;
   isRunning = 0;
   emberAfCorePrintln("Test Aborted");
@@ -331,15 +301,14 @@ static bool messageSentHandler(EmberOutgoingMessageType type,
   return false;
 }
 
-#ifdef UC_BUILD
 #ifdef EZSP_HOST
-void emAfPluginThroughputMessageSentCallback(EmberOutgoingMessageType type,
-                                             uint16_t indexOrDestination,
-                                             EmberApsFrame *apsFrame,
-                                             uint8_t messageTag,
-                                             EmberStatus status,
-                                             uint8_t messageLength,
-                                             uint8_t *messageContents)
+void sli_zigbee_af_throughput_message_sent_callback(EmberOutgoingMessageType type,
+                                                    uint16_t indexOrDestination,
+                                                    EmberApsFrame *apsFrame,
+                                                    uint8_t messageTag,
+                                                    EmberStatus status,
+                                                    uint8_t messageLength,
+                                                    uint8_t *messageContents)
 {
   messageSentHandler(type,
                      indexOrDestination,
@@ -349,36 +318,20 @@ void emAfPluginThroughputMessageSentCallback(EmberOutgoingMessageType type,
                      status);
 }
 #else // SoC
-void emAfPluginThroughputMessageSentCallback(EmberIncomingMessageType type,
-                                             uint16_t indexOrDestination,
-                                             EmberApsFrame *apsFrame,
-                                             EmberMessageBuffer messageBuf,
-                                             EmberStatus status)
+void sli_zigbee_af_throughput_message_sent_callback(EmberIncomingMessageType type,
+                                                    uint16_t indexOrDestination,
+                                                    EmberApsFrame *apsFrame,
+                                                    EmberMessageBuffer messageBuf,
+                                                    EmberStatus status)
 {
   messageSentHandler(type,
                      indexOrDestination,
                      apsFrame,
-                     emGetBufferLength(messageBuf),
-                     emGetBufferPointer(messageBuf),
+                     sli_legacy_buffer_manager_get_buffer_length(messageBuf),
+                     sli_legacy_buffer_manager_get_buffer_pointer(messageBuf),
                      status);
 }
 #endif // EZSP_HOST
-#else // !UC_BUILD
-bool emberAfMessageSentCallback(EmberOutgoingMessageType type,
-                                uint16_t indexOrDestination,
-                                EmberApsFrame* apsFrame,
-                                uint16_t msgLen,
-                                uint8_t* message,
-                                EmberStatus status)
-{
-  return messageSentHandler(type,
-                            indexOrDestination,
-                            apsFrame,
-                            msgLen,
-                            message,
-                            status);
-}
-#endif // UC_BUILD
 
 static void getHeaderLen(void)
 {
@@ -387,7 +340,7 @@ static void getHeaderLen(void)
   uint8_t maxPayloadLen = emberAfMaximumApsPayloadLength(
     EMBER_OUTGOING_DIRECT,
     testParams.destination,
-    testFrame) - EMBER_AF_ZCL_MANUFACTURER_SPECIFIC_OVERHEAD;
+    testFrame);
   testParams.headerLength = MAX_PACKET_LENGTH - maxPayloadLen;
 }
 
@@ -395,10 +348,10 @@ static void printCounter(uint8_t id)
 {
   emberAfCorePrintln("%p: %u ", titleStrings[id], emberCounters[id]);
 }
-void emberAfPluginThroughputPacketSendEventHandler(SLXU_UC_EVENT)
+void emberAfPluginThroughputPacketSendEventHandler(sl_zigbee_event_t * event)
 {
   EmberApsFrame apsFrame;
-  uint8_t messagePayload[MAX_ZIGBEE_TX_TEST_MESSAGE_LENGTH];
+  uint8_t messagePayload[EMBER_AF_MAXIMUM_APS_PAYLOAD_LENGTH];
   uint16_t messageTag[1] = { 0 };
   uint8_t i;
   uint32_t txIntervalAdjustmentMs;
@@ -420,7 +373,7 @@ void emberAfPluginThroughputPacketSendEventHandler(SLXU_UC_EVENT)
   }
   if (testParams.maxInFlight > 0
       && testParams.currentInFlight >= testParams.maxInFlight) {
-    slxu_zigbee_event_set_delay_ms(throughputPacketSendEventControl, 1);
+    sl_zigbee_event_set_delay_ms(throughputPacketSendEventControl, 1);
     return;
   }
   apsFrame.sourceEndpoint = 0xFF;
@@ -429,14 +382,14 @@ void emberAfPluginThroughputPacketSendEventHandler(SLXU_UC_EVENT)
   apsFrame.profileId = 0x7F01; // test profile ID
   apsFrame.clusterId = 0x0001; // counted packets cluster
 
-  if (emAfSend(EMBER_OUTGOING_DIRECT,
-               testParams.destination,
-               &apsFrame,
-               testParams.payloadLength,
-               messagePayload,
-               messageTag,
-               0xFFFF,
-               0) == EMBER_SUCCESS) {
+  if (sli_zigbee_af_send(EMBER_OUTGOING_DIRECT,
+                         testParams.destination,
+                         &apsFrame,
+                         testParams.payloadLength,
+                         messagePayload,
+                         messageTag,
+                         0xFFFF,
+                         0) == EMBER_SUCCESS) {
     testParams.messageRunningCount++;
     testParams.currentInFlight++;
 
@@ -454,7 +407,7 @@ void emberAfPluginThroughputPacketSendEventHandler(SLXU_UC_EVENT)
 
   if (testParams.messageRunningCount
       >= testParams.messageTotalCount) {
-    slxu_zigbee_event_set_inactive(throughputPacketSendEventControl);
+    sl_zigbee_event_set_inactive(throughputPacketSendEventControl);
     isRunning = 0;
   } else {
     // txIntervalAdjustment subtracts out time spent in this function from the send loop timer,
@@ -465,31 +418,29 @@ void emberAfPluginThroughputPacketSendEventHandler(SLXU_UC_EVENT)
     } else {
       adjustedTxIntervalMs = testParams.txIntervalMs - txIntervalAdjustmentMs;
     }
-    slxu_zigbee_event_set_delay_ms(throughputPacketSendEventControl,
-                                   adjustedTxIntervalMs);
+    sl_zigbee_event_set_delay_ms(throughputPacketSendEventControl,
+                                 adjustedTxIntervalMs);
   }
 }
 
-#ifdef UC_BUILD
-
-void emAfPluginThroughputCliPrintParameters(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_throughput_cli_print_parameters(sl_cli_command_arg_t *arguments)
 {
   (void)arguments;
 
   printAllParameters();
 }
 
-void emAfPluginThroughputCliSetAllParameters(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_throughput_cli_set_all_parameters(sl_cli_command_arg_t *arguments)
 {
   static uint8_t minPacketLen;
 
-  testParams.destination = (uint16_t)emberUnsignedCommandArgument(0);
-  testParams.messageTotalCount = (uint16_t)emberUnsignedCommandArgument(1);
-  testParams.txIntervalMs = (uint16_t)emberUnsignedCommandArgument(2);
-  testParams.packetLength = (uint8_t)emberUnsignedCommandArgument(3);
-  testParams.maxInFlight = (uint8_t)emberUnsignedCommandArgument(4);
-  testParams.apsOptions = (EmberApsOption)emberUnsignedCommandArgument(5);
-  testParams.testTimeout = (uint32_t)emberUnsignedCommandArgument(6);
+  testParams.destination = sl_cli_get_argument_uint16(arguments, 0);
+  testParams.messageTotalCount = sl_cli_get_argument_uint16(arguments, 1);
+  testParams.txIntervalMs = sl_cli_get_argument_uint16(arguments, 2);
+  testParams.packetLength = sl_cli_get_argument_uint8(arguments, 3);
+  testParams.maxInFlight = sl_cli_get_argument_uint8(arguments, 4);
+  testParams.apsOptions = sl_cli_get_argument_uint16(arguments, 5);
+  testParams.testTimeout = sl_cli_get_argument_uint32(arguments, 6);
 
   // Check packet length parameter
   getHeaderLen();
@@ -510,9 +461,9 @@ void emAfPluginThroughputCliSetAllParameters(sl_cli_command_arg_t *arguments)
   printAllParameters();
 }
 
-void emAfPluginThroughputCliSetDestination(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_throughput_cli_set_destination(sl_cli_command_arg_t *arguments)
 {
-  testParams.destination = (uint16_t)emberUnsignedCommandArgument(0);
+  testParams.destination = sl_cli_get_argument_uint16(arguments, 0);
   getHeaderLen();
   testParams.packetLength = testParams.payloadLength + testParams.headerLength;
   if (testParams.packetLength > MAX_PACKET_LENGTH) {
@@ -522,23 +473,23 @@ void emAfPluginThroughputCliSetDestination(sl_cli_command_arg_t *arguments)
   printParameter(PACKET);
 }
 
-void emAfPluginThroughputCliSetTestCount(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_throughput_cli_set_test_count(sl_cli_command_arg_t *arguments)
 {
-  testParams.messageTotalCount = (uint16_t)emberUnsignedCommandArgument(0);
+  testParams.messageTotalCount = sl_cli_get_argument_uint16(arguments, 0);
   printParameter(COUNT);
 }
 
-void emAfPluginThroughputCliSetInterval(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_throughput_cli_set_interval(sl_cli_command_arg_t *arguments)
 {
-  testParams.txIntervalMs = (uint16_t)emberUnsignedCommandArgument(0);
+  testParams.txIntervalMs = sl_cli_get_argument_uint16(arguments, 0);
   printParameter(INTERVAL);
 }
 
-void emAfPluginThroughputCliSetPacketSize(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_throughput_cli_set_packet_size(sl_cli_command_arg_t *arguments)
 {
   static uint8_t minPacketLen;
 
-  testParams.packetLength = (uint8_t)emberUnsignedCommandArgument(0);
+  testParams.packetLength = sl_cli_get_argument_uint8(arguments, 0);
   getHeaderLen();
   minPacketLen = testParams.headerLength + 4;
 
@@ -555,9 +506,9 @@ void emAfPluginThroughputCliSetPacketSize(sl_cli_command_arg_t *arguments)
   printParameter(PACKET);
 }
 
-void emAfPluginThroughputCliSetInFlightCount(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_throughput_cli_set_in_flight_count(sl_cli_command_arg_t *arguments)
 {
-  testParams.maxInFlight = (uint8_t)emberUnsignedCommandArgument(0);
+  testParams.maxInFlight = sl_cli_get_argument_uint8(arguments, 0);
   if (testParams.maxInFlight > ZIGBEE_TX_TEST_MAX_INFLIGHT) {
     testParams.maxInFlight = ZIGBEE_TX_TEST_MAX_INFLIGHT;
   } else if (testParams.maxInFlight <= 0) {
@@ -566,53 +517,53 @@ void emAfPluginThroughputCliSetInFlightCount(sl_cli_command_arg_t *arguments)
   printParameter(INFLIGHT);
 }
 
-void emAfPluginThroughputCliSetApsAckOn(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_throughput_cli_set_aps_ack_on(sl_cli_command_arg_t *arguments)
 {
   testParams.apsOptions |= EMBER_APS_OPTION_RETRY;
   printParameter(APSOPTIONS);
 }
 
-void emAfPluginThroughputCliSetApsAckOff(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_throughput_cli_set_aps_ack_off(sl_cli_command_arg_t *arguments)
 {
   testParams.apsOptions &= ~EMBER_APS_OPTION_RETRY;
   printParameter(APSOPTIONS);
 }
 
-void emAfPluginThroughputCliSetTestTimeout(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_throughput_cli_set_test_timeout(sl_cli_command_arg_t *arguments)
 {
-  testParams.testTimeout = (uint32_t)emberUnsignedCommandArgument(0);
+  testParams.testTimeout = sl_cli_get_argument_uint32(arguments, 0);
   printParameter(TESTTIMEOUT);
 }
 
-void emAfPluginThroughputCliClearCounters(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_throughput_cli_clear_counters(sl_cli_command_arg_t *arguments)
 {
   (void)arguments;
 
   clearCounters();
 }
 
-void emAfPluginThroughputCliStopTest(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_throughput_cli_stop_test(sl_cli_command_arg_t *arguments)
 {
   (void)arguments;
 
   stopTest();
 }
 
-void emAfPluginThroughputCliStartTest(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_throughput_cli_start_test(sl_cli_command_arg_t *arguments)
 {
   (void)arguments;
 
   startTest();
 }
 
-void emAfPluginThroughputCliPrintResult(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_throughput_cli_print_result(sl_cli_command_arg_t *arguments)
 {
   (void) arguments;
 
   printResult();
 }
 
-void emAfPluginThroughputCliPrintCounters(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_throughput_cli_print_counters(sl_cli_command_arg_t *arguments)
 {
   #ifdef EZSP_HOST
   ezspReadCounters(emberCounters);
@@ -627,151 +578,3 @@ void emAfPluginThroughputCliPrintCounters(sl_cli_command_arg_t *arguments)
   printCounter(EMBER_COUNTER_APS_DATA_TX_UNICAST_RETRY);
   printCounter(EMBER_COUNTER_APS_DATA_TX_UNICAST_FAILED);
 }
-#else //UC_BUILD
-
-void emAfPluginThroughputCliPrintParameters(void)
-{
-  printAllParameters();
-}
-
-void emAfPluginThroughputCliSetAllParameters(void)
-{
-  static uint8_t minPacketLen;
-
-  testParams.destination = (uint16_t)emberUnsignedCommandArgument(0);
-  testParams.messageTotalCount = (uint16_t)emberUnsignedCommandArgument(1);
-  testParams.txIntervalMs = (uint16_t)emberUnsignedCommandArgument(2);
-  testParams.packetLength = (uint8_t)emberUnsignedCommandArgument(3);
-  testParams.maxInFlight = (uint8_t)emberUnsignedCommandArgument(4);
-  testParams.apsOptions = (EmberApsOption)emberUnsignedCommandArgument(5);
-  testParams.testTimeout = (uint32_t)emberUnsignedCommandArgument(6);
-
-  // Check packet length parameter
-  getHeaderLen();
-  minPacketLen = testParams.headerLength + 4;
-  if (testParams.packetLength < minPacketLen) {
-    testParams.packetLength = minPacketLen;
-  } else if (testParams.packetLength > MAX_PACKET_LENGTH) {
-    testParams.packetLength = MAX_PACKET_LENGTH;
-  }
-  testParams.payloadLength = testParams.packetLength - testParams.headerLength;
-
-  // Check in-flight parameter
-  if (testParams.maxInFlight > ZIGBEE_TX_TEST_MAX_INFLIGHT) {
-    testParams.maxInFlight = ZIGBEE_TX_TEST_MAX_INFLIGHT;
-  } else if (testParams.maxInFlight <= 0) {
-    testParams.maxInFlight = 1;
-  }
-  printAllParameters();
-}
-
-void emAfPluginThroughputCliSetDestination(void)
-{
-  testParams.destination = (uint16_t)emberUnsignedCommandArgument(0);
-  getHeaderLen();
-  testParams.packetLength = testParams.payloadLength + testParams.headerLength;
-  if (testParams.packetLength > MAX_PACKET_LENGTH) {
-    testParams.payloadLength = MAX_PACKET_LENGTH - testParams.headerLength;
-  }
-  printParameter(DESTINATION);
-  printParameter(PACKET);
-}
-
-void emAfPluginThroughputCliSetTestCount(void)
-{
-  testParams.messageTotalCount = (uint16_t)emberUnsignedCommandArgument(0);
-  printParameter(COUNT);
-}
-
-void emAfPluginThroughputCliSetInterval(void)
-{
-  testParams.txIntervalMs = (uint16_t)emberUnsignedCommandArgument(0);
-  printParameter(INTERVAL);
-}
-
-void emAfPluginThroughputCliSetPacketSize(void)
-{
-  static uint8_t minPacketLen;
-
-  testParams.packetLength = (uint8_t)emberUnsignedCommandArgument(0);
-  getHeaderLen();
-  minPacketLen = testParams.headerLength + 4;
-
-  if (testParams.packetLength < minPacketLen) {
-    testParams.packetLength = minPacketLen;
-  } else if (testParams.packetLength > MAX_PACKET_LENGTH) {
-    testParams.packetLength = MAX_PACKET_LENGTH;
-  }
-  testParams.payloadLength = testParams.packetLength - testParams.headerLength;
-
-  emberAfCorePrintln("Max packet: 127");
-  printParameter(HEADER);
-  printParameter(PAYLOAD);
-  printParameter(PACKET);
-}
-
-void emAfPluginThroughputCliSetInFlightCount(void)
-{
-  testParams.maxInFlight = (uint8_t)emberUnsignedCommandArgument(0);
-  if (testParams.maxInFlight > ZIGBEE_TX_TEST_MAX_INFLIGHT) {
-    testParams.maxInFlight = ZIGBEE_TX_TEST_MAX_INFLIGHT;
-  } else if (testParams.maxInFlight <= 0) {
-    testParams.maxInFlight = 1;
-  }
-  printParameter(INFLIGHT);
-}
-
-void emAfPluginThroughputCliSetApsAckOn(void)
-{
-  testParams.apsOptions |= EMBER_APS_OPTION_RETRY;
-  printParameter(APSOPTIONS);
-}
-
-void emAfPluginThroughputCliSetApsAckOff(void)
-{
-  testParams.apsOptions &= ~EMBER_APS_OPTION_RETRY;
-  printParameter(APSOPTIONS);
-}
-
-void emAfPluginThroughputCliSetTestTimeout(void)
-{
-  testParams.testTimeout = (uint32_t)emberUnsignedCommandArgument(0);
-  printParameter(TESTTIMEOUT);
-}
-
-void emAfPluginThroughputCliClearCounters(void)
-{
-  clearCounters();
-}
-
-void emAfPluginThroughputCliStopTest(void)
-{
-  stopTest();
-}
-
-void emAfPluginThroughputCliStartTest(void)
-{
-  startTest();
-}
-
-void emAfPluginThroughputCliPrintResult(void)
-{
-  printResult();
-}
-
-void emAfPluginThroughputCliPrintCounters(void)
-{
-  #ifdef EZSP_HOST
-  ezspReadCounters(emberCounters);
-  #endif // EZSP_HOST
-  emberAfCorePrintln(" ");
-  emberAfCorePrintln("COUNTERS");
-  printCounter(EMBER_COUNTER_PHY_CCA_FAIL_COUNT);
-  printCounter(EMBER_COUNTER_MAC_TX_UNICAST_SUCCESS);
-  printCounter(EMBER_COUNTER_MAC_TX_UNICAST_RETRY);
-  printCounter(EMBER_COUNTER_MAC_TX_UNICAST_FAILED);
-  printCounter(EMBER_COUNTER_APS_DATA_TX_UNICAST_SUCCESS);
-  printCounter(EMBER_COUNTER_APS_DATA_TX_UNICAST_RETRY);
-  printCounter(EMBER_COUNTER_APS_DATA_TX_UNICAST_FAILED);
-}
-#endif //UC_BUILD

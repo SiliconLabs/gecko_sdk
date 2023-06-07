@@ -3,7 +3,7 @@ label: "AoA Transmitter"
 package: "Bluetooth"
 description: >
   The Bluetooth Angle of Arrival (AoA) Constant Tone Extension (CTE) transmission feature
-category: "Bluetooth|Stack|Direction Finding"
+category: Bluetooth|Bluetooth LE Controller (Link Layer)|Additional Features
 quality: "production"
 root_path: "protocol/bluetooth"
 requires:

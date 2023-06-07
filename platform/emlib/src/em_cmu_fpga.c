@@ -66,6 +66,14 @@ CMU_Select_TypeDef cmu_eusart2_clk_source = cmuSelect_HFRCO;
 CMU_Select_TypeDef cmu_eusart3_clk_source = cmuSelect_HFRCO;
 CMU_Select_TypeDef cmu_eusart4_clk_source = cmuSelect_HFRCO;
 
+void sli_em_cmu_SYSCLKInitPreClockSelect(void)
+{
+}
+
+void sli_em_cmu_SYSCLKInitPostClockSelect(void)
+{
+}
+
 uint32_t Get_Fpga_Core_freq(void)
 {
   if ((SYSCFG->FPGAIPOTHW & SYSCFG_FPGAIPOTHW_FPGA_FPGA) != 0U) {

@@ -1,0 +1,25 @@
+id: "bluetooth_feature_sync_scanner"
+label: "Synchronization to periodic advertising trains by scanning"
+package: "Bluetooth"
+description: >
+  Synchronize to periodic advertising trains by scanning for extended
+  advertisements that provide the synchronization information.
+
+  The <bluetooth_feature_periodic_sync> component is automatically included to
+  provide support for periodic advertising trains that do not have subevents or
+  response slots. The application must explicitly include the
+  <bluetooth_feature_pawr_sync> component if it needs support for Periodic
+  Advertising with Responses (PAwR) trains.
+category: Bluetooth|Bluetooth LE Controller (Link Layer)|Features with Commands and Events
+quality: "production"
+root_path: "protocol/bluetooth"
+requires:
+  - name: "bluetooth_controller"
+  - name: "bluetooth_feature_sync"
+  - name: "bluetooth_feature_periodic_sync"
+  - name: "device_supports_bluetooth_advertising_extensions"
+provides:
+  - name: "bluetooth_feature_sync_scanner"
+template_contribution:
+  - name: component_catalog
+    value: bluetooth_feature_sync_scanner

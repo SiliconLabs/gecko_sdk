@@ -17,9 +17,16 @@
 
 #ifndef SILABS_NETWORK_STEERING_H
 #define SILABS_NETWORK_STEERING_H
-
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
+#include "sl_component_catalog.h"
+#endif
+#ifndef EMBER_SCRIPTED_TEST
+#ifdef SL_CATALOG_ZIGBEE_NETWORK_STEERING_PRESENT
 #include "network-steering-config.h"
+#else
+#include "config/network-steering-config.h"
+#endif
+#endif
 #if (EMBER_AF_PLUGIN_NETWORK_STEERING_OPTIMIZE_SCANS == 1)
 #define OPTIMIZE_SCANS
 #endif
@@ -29,17 +36,6 @@
 #if (EMBER_AF_PLUGIN_NETWORK_STEERING_TRY_ALL_KEYS == 1)
 #define TRY_ALL_KEYS
 #endif
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_NETWORK_STEERING_OPTIMIZE_SCANS
-#define OPTIMIZE_SCANS
-#endif
-#ifdef EMBER_AF_PLUGIN_NETWORK_STEERING_RADIO_TX_CALLBACK
-#define RADIO_TX_CALLBACK
-#endif
-#ifdef EMBER_AF_PLUGIN_NETWORK_STEERING_TRY_ALL_KEYS
-#define TRY_ALL_KEYS
-#endif
-#endif // UC_BUILD
 
 /**
  * @defgroup network-steering Network Steering
@@ -65,7 +61,7 @@
 // -----------------------------------------------------------------------------
 // Constants
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-extern const uint8_t emAfNetworkSteeringPluginName[];
+extern const uint8_t sli_zigbee_af_network_steering_plugin_name[];
 #endif //DOXYGEN_SHOULD_SKIP_THIS
 
 // -----------------------------------------------------------------------------
@@ -79,7 +75,7 @@ enum
 {
   EMBER_AF_PLUGIN_NETWORK_STEERING_STATE_NONE                         = 0x00,
   // The Use Configured Key states are only run if explicitly configured to do
-  // so. See emAfPluginNetworkSteeringSetConfiguredKey()
+  // so. See sli_zigbee_af_network_steering_set_configured_key()
 
 #ifndef OPTIMIZE_SCANS
   EMBER_AF_PLUGIN_NETWORK_STEERING_STATE_SCAN_PRIMARY_CONFIGURED      = 0x01,
@@ -128,15 +124,15 @@ typedef struct {
   EmberBeaconIterator beaconIterator;
 } NetworkSteeringState;
 
-extern EmberAfPluginNetworkSteeringOptions emAfPluginNetworkSteeringOptionsMask;
+extern EmberAfPluginNetworkSteeringOptions sli_zigbee_af_network_steering_options_mask;
 
 // -----------------------------------------------------------------------------
 // Globals
 
 /** @brief The first set of channels on which to search for joinable networks. */
-extern uint32_t emAfPluginNetworkSteeringPrimaryChannelMask;
+extern uint32_t sli_zigbee_af_network_steering_primary_channel_mask;
 /** @brief The second set of channels on which to search for joinable networks. */
-extern uint32_t emAfPluginNetworkSteeringSecondaryChannelMask;
+extern uint32_t sli_zigbee_af_network_steering_secondary_channel_mask;
 
 /**
  * @name API
@@ -154,10 +150,10 @@ extern uint32_t emAfPluginNetworkSteeringSecondaryChannelMask;
  * permit join message.
  *
  * If the node is not on a network, it scans a series of primary channels
- * (see ::emAfPluginNetworkSteeringPrimaryChannelMask) to find possible
+ * (see ::sli_zigbee_af_network_steering_primary_channel_mask) to find possible
  * networks to join. If it is unable to join any of those networks, it
  * tries scanning on a set of secondary channels
- * (see ::emAfPluginNetworkSteeringSecondaryChannelMask). Upon completion of
+ * (see ::sli_zigbee_af_network_steering_secondary_channel_mask). Upon completion of
  * this process, the plugin calls
  * ::emberAfPluginNetworkSteeringCompleteCallback with information regarding
  * the success or failure of the procedure.
@@ -262,17 +258,17 @@ EmberNodeType emberAfPluginNetworkSteeringGetNodeTypeCallback(EmberAfPluginNetwo
 /** @} */ // end of network-steering
 
 /** @brief Override the channel mask. */
-void emAfPluginNetworkSteeringSetChannelMask(uint32_t mask, bool secondaryMask);
+void sli_zigbee_af_network_steering_set_channel_mask(uint32_t mask, bool secondaryMask);
 
 /** @brief Set extended PAN ID to search for. */
-void emAfPluginNetworkSteeringSetExtendedPanIdFilter(uint8_t* extendedPanId,
-                                                     bool turnFilterOn);
+void sli_zigbee_af_network_steering_set_extended_pan_id_filter(uint8_t* extendedPanId,
+                                                               bool turnFilterOn);
 
 /** @brief Set a different key to use when joining. */
-void emAfPluginNetworkSteeringSetConfiguredKey(uint8_t *key,
-                                               bool useConfiguredKey);
+void sli_zigbee_af_network_steering_set_configured_key(uint8_t *key,
+                                                       bool useConfiguredKey);
 
 /** @brief Clean up the network steering process which took place */
-void emAfPluginNetworkSteeringCleanup(EmberStatus status);
+void sli_zigbee_af_network_steering_cleanup(EmberStatus status);
 
 #endif /* __NETWORK_STEERING_H__ */

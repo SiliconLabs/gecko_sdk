@@ -31,6 +31,11 @@
 #ifndef SL_HEALTH_THERMOMETER_CONFIG_H
 #define SL_HEALTH_THERMOMETER_CONFIG_H
 
+/***********************************************************************************************//**
+ * @addtogroup health_thermometer
+ * @{
+ **************************************************************************************************/
+
 // <<< Use Configuration Wizard in Context Menu >>>
 
 // <o SL_BT_HT_MEASUREMENT_INTERVAL_SEC> Health Thermometer Measurement Interval (UUID: 2A21) <1-65535>
@@ -53,4 +58,5 @@
 
 // <<< end of configuration section >>>
 
+/** @} (end addtogroup health_thermometer) */
 #endif // SL_HEALTH_THERMOMETER_CONFIG_H

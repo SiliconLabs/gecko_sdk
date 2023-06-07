@@ -229,7 +229,7 @@ typedef struct otMessageInfo
     otIp6Address mPeerAddr; ///< The peer IPv6 address.
     uint16_t     mSockPort; ///< The local transport-layer port.
     uint16_t     mPeerPort; ///< The peer transport-layer port.
-    const void * mLinkInfo; ///< A pointer to link-specific information.
+    const void  *mLinkInfo; ///< A pointer to link-specific information.
     uint8_t      mHopLimit; ///< The IPv6 Hop Limit value. Only applies if `mAllowZeroHopLimit` is FALSE.
                             ///< If `0`, IPv6 Hop Limit is default value `OPENTHREAD_CONFIG_IP6_HOP_LIMIT_DEFAULT`.
                             ///< Otherwise, specifies the IPv6 Hop Limit.
@@ -414,8 +414,8 @@ otMessage *otIp6NewMessage(otInstance *aInstance, const otMessageSettings *aSett
  * @sa otMessageFree
  *
  */
-otMessage *otIp6NewMessageFromBuffer(otInstance *             aInstance,
-                                     const uint8_t *          aData,
+otMessage *otIp6NewMessageFromBuffer(otInstance              *aInstance,
+                                     const uint8_t           *aData,
                                      uint16_t                 aDataLength,
                                      const otMessageSettings *aSettings);
 
@@ -610,11 +610,26 @@ bool otIp6ArePrefixesEqual(const otIp6Prefix *aFirst, const otIp6Prefix *aSecond
  * @param[in]   aString   A pointer to a NULL-terminated string.
  * @param[out]  aAddress  A pointer to an IPv6 address.
  *
- * @retval OT_ERROR_NONE          Successfully parsed the string.
- * @retval OT_ERROR_INVALID_ARGS  Failed to parse the string.
+ * @retval OT_ERROR_NONE   Successfully parsed @p aString and updated @p aAddress.
+ * @retval OT_ERROR_PARSE  Failed to parse @p aString as an IPv6 address.
  *
  */
 otError otIp6AddressFromString(const char *aString, otIp6Address *aAddress);
+
+/**
+ * This function converts a human-readable IPv6 prefix string into a binary representation.
+ *
+ * The @p aString parameter should be a string in the format "<address>/<plen>", where `<address>` is an IPv6
+ * address and `<plen>` is a prefix length.
+ *
+ * @param[in]   aString  A pointer to a NULL-terminated string.
+ * @param[out]  aPrefix  A pointer to an IPv6 prefix.
+ *
+ * @retval OT_ERROR_NONE   Successfully parsed the string as an IPv6 prefix and updated @p aPrefix.
+ * @retval OT_ERROR_PARSE  Failed to parse @p aString as an IPv6 prefix.
+ *
+ */
+otError otIp6PrefixFromString(const char *aString, otIp6Prefix *aPrefix);
 
 #define OT_IP6_ADDRESS_STRING_SIZE 40 ///< Recommended size for string representation of an IPv6 address.
 
@@ -786,7 +801,7 @@ void otIp6SetSlaacPrefixFilter(otInstance *aInstance, otIp6SlaacPrefixFilter aFi
  * @sa otIp6RegisterMulticastListeners
  *
  */
-typedef void (*otIp6RegisterMulticastListenersCallback)(void *              aContext,
+typedef void (*otIp6RegisterMulticastListenersCallback)(void               *aContext,
                                                         otError             aError,
                                                         uint8_t             aMlrStatus,
                                                         const otIp6Address *aFailedAddresses,
@@ -820,12 +835,12 @@ typedef void (*otIp6RegisterMulticastListenersCallback)(void *              aCon
  * @sa otIp6RegisterMulticastListenersCallback
  *
  */
-otError otIp6RegisterMulticastListeners(otInstance *                            aInstance,
-                                        const otIp6Address *                    aAddresses,
+otError otIp6RegisterMulticastListeners(otInstance                             *aInstance,
+                                        const otIp6Address                     *aAddresses,
                                         uint8_t                                 aAddressNum,
-                                        const uint32_t *                        aTimeout,
+                                        const uint32_t                         *aTimeout,
                                         otIp6RegisterMulticastListenersCallback aCallback,
-                                        void *                                  aContext);
+                                        void                                   *aContext);
 
 /**
  * This function sets the Mesh Local IID (for test purpose).
@@ -871,6 +886,12 @@ typedef struct otBorderRoutingCounters
     otPacketsAndBytes mInboundMulticast;  ///< The counters for inbound multicast.
     otPacketsAndBytes mOutboundUnicast;   ///< The counters for outbound unicast.
     otPacketsAndBytes mOutboundMulticast; ///< The counters for outbound multicast.
+    uint32_t          mRaRx;              ///< The number of received RA packets.
+    uint32_t          mRaTxSuccess;       ///< The number of RA packets successfully transmitted.
+    uint32_t          mRaTxFailure;       ///< The number of RA packets failed to transmit.
+    uint32_t          mRsRx;              ///< The number of received RS packets.
+    uint32_t          mRsTxSuccess;       ///< The number of RS packets successfully transmitted.
+    uint32_t          mRsTxFailure;       ///< The number of RS packets failed to transmit.
 } otBorderRoutingCounters;
 
 /**
@@ -884,6 +905,14 @@ typedef struct otBorderRoutingCounters
  *
  */
 const otBorderRoutingCounters *otIp6GetBorderRoutingCounters(otInstance *aInstance);
+
+/**
+ * Resets the Border Routing counters.
+ *
+ * @param[in]  aInstance  A pointer to an OpenThread instance.
+ *
+ */
+void otIp6ResetBorderRoutingCounters(otInstance *aInstance);
 
 /**
  * @}

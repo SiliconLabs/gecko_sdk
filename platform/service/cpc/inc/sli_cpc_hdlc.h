@@ -50,7 +50,7 @@
 #define SLI_CPC_HDLC_CONTROL_POS  4
 #define SLI_CPC_HDLC_HCS_POS      5
 
-#define SLI_CPC_HDLC_FRAME_TYPE_DATA          0
+#define SLI_CPC_HDLC_FRAME_TYPE_INFORMATION   0
 #define SLI_CPC_HDLC_FRAME_TYPE_SUPERVISORY   2
 #define SLI_CPC_HDLC_FRAME_TYPE_UNNUMBERED    3
 
@@ -62,13 +62,12 @@
 
 #define SLI_CPC_HDLC_CONTROL_UNNUMBERED_TYPE_MASK  0x37
 
-#define SLI_CPC_HDLC_ACK_SUPERVISORY_FUNCTION   0
-
 #define SLI_CPC_HDLC_CONTROL_UNNUMBERED_TYPE_INFORMATION  0x00
 #define SLI_CPC_HDLC_CONTROL_UNNUMBERED_TYPE_POLL_FINAL   0x04
 #define SLI_CPC_HDLC_CONTROL_UNNUMBERED_TYPE_RESET_SEQ    0x31
 #define SLI_CPC_HDLC_CONTROL_UNNUMBERED_TYPE_ACKNOWLEDGE  0x0E
 
+#define SLI_CPC_HDLC_ACK_SUPERVISORY_FUNCTION      0
 #define SLI_CPC_HDLC_REJECT_SUPERVISORY_FUNCTION   1
 #define SLI_CPC_HDLC_REJECT_PAYLOAD_SIZE  1
 
@@ -178,7 +177,7 @@ inline uint8_t sli_cpc_hdlc_get_frame_type(uint8_t control)
   uint8_t type = control >> SLI_CPC_HDLC_CONTROL_FRAME_TYPE_SHIFT;
 
   if (type == 1 || type == 0) {
-    type = SLI_CPC_HDLC_FRAME_TYPE_DATA;
+    type = SLI_CPC_HDLC_FRAME_TYPE_INFORMATION;
   }
 
   return type;
@@ -259,7 +258,7 @@ void sli_cpc_hdlc_create_header(uint8_t *header_buf,
  ******************************************************************************/
 inline uint8_t sli_cpc_hdlc_create_control_data(uint8_t seq, uint8_t ack, bool poll_final)
 {
-  uint8_t control = SLI_CPC_HDLC_FRAME_TYPE_DATA << SLI_CPC_HDLC_CONTROL_FRAME_TYPE_SHIFT;
+  uint8_t control = SLI_CPC_HDLC_FRAME_TYPE_INFORMATION << SLI_CPC_HDLC_CONTROL_FRAME_TYPE_SHIFT;
 
   control |= seq << SLI_CPC_HDLC_CONTROL_SEQ_SHIFT;
   control |= ack;

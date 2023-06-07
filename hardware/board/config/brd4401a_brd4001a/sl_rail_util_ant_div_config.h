@@ -67,12 +67,6 @@
 
 // <modem signal=(ANT0),(ANT1)> SL_RAIL_UTIL_ANT_DIV
 // $[MODEM_SL_RAIL_UTIL_ANT_DIV]
-#define SL_RAIL_UTIL_ANT_DIV_PERIPHERAL          MODEM
-
-// MODEM ANT0 on PC00
-#define SL_RAIL_UTIL_ANT_DIV_ANT0_PORT           gpioPortC
-#define SL_RAIL_UTIL_ANT_DIV_ANT0_PIN            0
-
 
 // [MODEM_SL_RAIL_UTIL_ANT_DIV]$
 

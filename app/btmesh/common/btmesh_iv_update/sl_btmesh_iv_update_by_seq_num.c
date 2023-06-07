@@ -37,7 +37,7 @@
 
 #include <stdbool.h>
 #include "app_assert.h"
-#include "sl_simple_timer.h"
+#include "app_timer.h"
 
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
@@ -62,8 +62,8 @@
 #define NORMAL_OPERATION 0
 #define IV_UPDATE_IN_PROGRESS 1
 
-static sl_simple_timer_t seq_num_testing_timer;
-static void on_seq_num_testing_timer(sl_simple_timer_t *handle, void *data);
+static app_timer_t seq_num_testing_timer;
+static void on_seq_num_testing_timer(app_timer_t *handle, void *data);
 
 static void seq_num_testing_start(void);
 static void seq_num_testing_stop(void);
@@ -107,7 +107,7 @@ void sl_btmesh_iv_update_by_seq_num_on_event(sl_btmesh_msg_t* evt)
 /***************************************************************************//**
  *  Check if any element's current sequence number is above the threshold
  ******************************************************************************/
-static void on_seq_num_testing_timer(sl_simple_timer_t *handle, void *data)
+static void on_seq_num_testing_timer(app_timer_t *handle, void *data)
 {
   (void)data;
   (void)handle;
@@ -129,11 +129,11 @@ static void on_seq_num_testing_timer(sl_simple_timer_t *handle, void *data)
  ******************************************************************************/
 static void seq_num_testing_start(void)
 {
-  sl_status_t sc = sl_simple_timer_start(&seq_num_testing_timer,
-                                         SL_BTMESH_IV_UPDATE_SEQ_NUM_TESTING_PERIOD_S * 1000,
-                                         on_seq_num_testing_timer,
-                                         NULL,
-                                         true);
+  sl_status_t sc = app_timer_start(&seq_num_testing_timer,
+                                   SL_BTMESH_IV_UPDATE_SEQ_NUM_TESTING_PERIOD_S * 1000,
+                                   on_seq_num_testing_timer,
+                                   NULL,
+                                   true);
   app_assert_status_f(sc, "Failed to start timer");
 }
 
@@ -142,7 +142,7 @@ static void seq_num_testing_start(void)
  ******************************************************************************/
 static void seq_num_testing_stop(void)
 {
-  sl_status_t sc = sl_simple_timer_stop(&seq_num_testing_timer);
+  sl_status_t sc = app_timer_stop(&seq_num_testing_timer);
   app_assert_status_f(sc, "Failed to stop timer");
 }
 

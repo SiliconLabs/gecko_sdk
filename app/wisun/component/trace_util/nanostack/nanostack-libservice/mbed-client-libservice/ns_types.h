@@ -40,9 +40,6 @@
  *
  * Also, a little extra care is required for public header files that could be
  * included from C++, especially as C++ lacks some C99 features.
- *
- * (TODO: as this is exposed to API users, do we need a predefine to distinguish
- * internal and external use, for finer control? Not yet, but maybe...)
  */
 
 /* Make sure <stdint.h> defines its macros if C++ */
@@ -291,6 +288,11 @@ typedef int_fast32_t int_fast24_t;
 
 /* There is inlining problem in GCC version 4.1.x and we know it works in 4.6.3 */
 #if defined __GNUC__ && NS_GCC_VERSION < 40600
+#undef NS_ALLOW_INLINING
+#endif
+
+/* IAR inlining is problematic with libraries */
+#if defined __IAR_SYSTEMS_ICC__
 #undef NS_ALLOW_INLINING
 #endif
 

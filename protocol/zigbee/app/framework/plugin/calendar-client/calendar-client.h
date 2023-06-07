@@ -15,9 +15,7 @@
  *
  ******************************************************************************/
 
-#ifdef UC_BUILD
 #include "calendar-client-config.h"
-#endif
 
 /**
  * @defgroup calendar-client Calendar Client

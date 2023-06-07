@@ -12,9 +12,7 @@ component:
   - id: "cli"
     instance:
     - example
-  - id: "iostream_eusart"
-    instance:
-      - vcom
+  - id: "iostream_recommended_stream"
   - id: "printf"
   - id: "sl_assert"
   - id: "zigbee_debug_print"
@@ -47,7 +45,6 @@ component:
   - id: "zigbee_zll_scenes_client"
   - id: "zigbee_zll_utility_client"
   - id: "zigbee_zll_utility_server"
-  - id: "zigbee_debug_basic"
   - id: simple_led
     instance:
       - led0
@@ -68,6 +65,12 @@ configuration:
     value: 1
   - name: SL_IOSTREAM_USART_VCOM_FLOW_CONTROL_TYPE
     value: usartHwFlowControlCtsAndRts
+    condition:
+      - "iostream_usart"
+  - name: SL_IOSTREAM_EUSART_VCOM_FLOW_CONTROL_TYPE
+    value: eusartHwFlowControlCtsAndRts
+    condition:
+      - "iostream_eusart"
   - name: SL_BOARD_ENABLE_SENSOR_MICROPHONE
     value: "1"
   - name: SL_CLI_MAX_INPUT_ARGUMENTS
@@ -80,6 +83,12 @@ configuration:
     value: 10
   - name: SL_IOSTREAM_USART_VCOM_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
     value: 0
+    condition:
+      - "iostream_usart"
+  - name: SL_IOSTREAM_EUSART_VCOM_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
+    value: 0
+    condition:
+      - "iostream_eusart"
   - name: SL_ML_AUDIO_FEATURE_GENERATION_AUDIO_BUFFER_SIZE
     value: 4096
   - name: SL_ML_AUDIO_FEATURE_GENERATION_AUDIO_GAIN

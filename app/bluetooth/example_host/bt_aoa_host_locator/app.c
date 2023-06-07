@@ -662,7 +662,7 @@ static void parse_config(const char *config)
     if (sc == SL_STATUS_OK) {
       antenna_switch_pattern_set = true;
       app_log_info("Antenna array set to:");
-      if (_app_log_check_level(APP_LOG_LEVEL_INFO)) {
+      if (app_log_check_level(APP_LOG_LEVEL_INFO)) {
         for (uint8_t i = 0; i < antenna_switch_pattern_size; i++) {
           app_log(" %d", antenna_switch_pattern[i]);
         }

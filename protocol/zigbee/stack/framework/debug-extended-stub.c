@@ -44,32 +44,32 @@ void emberDebugError(EmberStatus code)
   (void)code;
 }
 
-void emDebugClearStats(void)
+void sli_zigbee_debug_clear_stats(void)
 {
 }
 
-void emDebugPrintStats(void)
+void sli_zigbee_debug_print_stats(void)
 {
 }
 
-void emDebugStats(uint8_t index)
+void sli_zigbee_debug_stats(uint8_t index)
 {
   (void)index;
 }
 
-void emDebugApiTrace(uint16_t debugType, const char * formatString, ...)
+void sli_zigbee_debug_api_trace(uint16_t debugType, const char * formatString, ...)
 {
   (void)debugType;
   (void)formatString;
 }
 
-bool emDebugShouldIgnoreTraceForType(uint16_t debugType)
+bool sli_zigbee_debug_should_ignore_trace_for_type(uint16_t debugType)
 {
   (void)debugType;
   return false;
 }
 
-bool emDebugProcessIncomingFullDebugMessages(uint16_t debugType, uint8_t *data, uint8_t length)
+bool sli_zigbee_debug_process_incoming_full_debug_messages(uint16_t debugType, uint8_t *data, uint8_t length)
 {
   (void)debugType;
   (void)data;

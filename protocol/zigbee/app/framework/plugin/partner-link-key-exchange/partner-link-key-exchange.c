@@ -32,13 +32,10 @@
 #include "partner-link-key-exchange.h"
 
 #include "app/framework/util/af-main.h"
+#include "stack/include/zigbee-security-manager.h"
 
-#ifdef UC_BUILD
 sl_zigbee_event_t emberAfPluginPartnerLinkKeyExchangeTimeoutNetworkEvents[EMBER_SUPPORTED_NETWORKS];
-void emberAfPluginPartnerLinkKeyExchangeTimeoutNetworkEventHandler(SLXU_UC_EVENT);
-#else // !UC_BUILD
-extern EmberEventControl emberAfPluginPartnerLinkKeyExchangeTimeoutNetworkEventControls[];
-#endif // UC_BUILD
+void emberAfPluginPartnerLinkKeyExchangeTimeoutNetworkEventHandler(sl_zigbee_event_t * event);
 typedef struct {
   bool active;
   EmberNodeId target;
@@ -56,16 +53,16 @@ static EmberStatus continuePartnerLinkKeyExchangeCallback(EmberNodeId target,
                                                           uint8_t endpoint,
                                                           uint8_t destinationEndpoint);
 
-bool emAfAllowPartnerLinkKey = true;
+bool sli_zigbee_af_allow_partner_link_key = true;
 
 //-----Internal callback
 
-void emAfPluginPartnerLinkKeyExchangeInitCallback(SLXU_INIT_ARG)
+void sli_zigbee_af_partner_link_key_exchange_init_callback(uint8_t init_level)
 {
-  SLXU_INIT_UNUSED_ARG;
+  (void)init_level;
 
-  slxu_zigbee_network_event_init(emberAfPluginPartnerLinkKeyExchangeTimeoutNetworkEvents,
-                                 emberAfPluginPartnerLinkKeyExchangeTimeoutNetworkEventHandler);
+  sl_zigbee_network_event_init(emberAfPluginPartnerLinkKeyExchangeTimeoutNetworkEvents,
+                               emberAfPluginPartnerLinkKeyExchangeTimeoutNetworkEventHandler);
 }
 
 //-----
@@ -109,13 +106,8 @@ EmberStatus emberAfInitiatePartnerLinkKeyExchangeCallback(EmberNodeId target,
     state->initiatorEndpoint = destinationEndpoint;
     state->callback = callback;
     emberAfAddToCurrentAppTasks(EMBER_AF_WAITING_FOR_PARTNER_LINK_KEY_EXCHANGE);
-#ifdef UC_BUILD
     sl_zigbee_event_set_delay_ms(emberAfPluginPartnerLinkKeyExchangeTimeoutNetworkEvents,
                                  EMBER_AF_PLUGIN_PARTNER_LINK_KEY_EXCHANGE_TIMEOUT_MILLISECONDS);
-#else // !UC_BUILD
-    emberAfNetworkEventControlSetDelayMS(emberAfPluginPartnerLinkKeyExchangeTimeoutNetworkEventControls,
-                                         EMBER_AF_PLUGIN_PARTNER_LINK_KEY_EXCHANGE_TIMEOUT_MILLISECONDS);
-#endif // UC_BUILD
   }
   return status;
 }
@@ -224,7 +216,7 @@ EmberZdoStatus emberAfPartnerLinkKeyExchangeRequestCallback(EmberEUI64 partner)
     emberAfKeyEstablishmentClusterPrintln("");
   }
 
-  if (!emAfAllowPartnerLinkKey) {
+  if (!sli_zigbee_af_allow_partner_link_key) {
     emberAfKeyEstablishmentClusterPrintln("Partner link key not allowed.");
     return EMBER_ZDP_NOT_PERMITTED;
   }
@@ -301,7 +293,7 @@ void emberAfPluginPartnerLinkKeyExchangeZigbeeKeyEstablishmentCallback(EmberEUI6
   (void) emberAfPopNetworkIndex();
 }
 
-void emberAfPluginPartnerLinkKeyExchangeTimeoutNetworkEventHandler(SLXU_UC_EVENT)
+void emberAfPluginPartnerLinkKeyExchangeTimeoutNetworkEventHandler(sl_zigbee_event_t * event)
 {
   partnerLinkKeyExchangeComplete(false); // failure
 }
@@ -311,11 +303,7 @@ static void partnerLinkKeyExchangeComplete(bool success)
   PartnerLinkKeyExchangeState *state = &states[emberGetCurrentNetwork()];
 
   state->active = false;
-#ifdef UC_BUILD
   sl_zigbee_event_set_inactive(emberAfPluginPartnerLinkKeyExchangeTimeoutNetworkEvents);
-#else // !UC_BUILD
-  emberAfNetworkEventControlSetInactive(emberAfPluginPartnerLinkKeyExchangeTimeoutNetworkEventControls);
-#endif // UC_BUILD
   emberAfRemoveFromCurrentAppTasks(EMBER_AF_WAITING_FOR_PARTNER_LINK_KEY_EXCHANGE);
 
   if (state->callback != NULL) {
@@ -325,7 +313,11 @@ static void partnerLinkKeyExchangeComplete(bool success)
 
 static EmberZdoStatus validateKeyRequest(EmberEUI64 partner)
 {
-  EmberKeyStruct keyStruct;
+  sl_zb_sec_man_context_t context;
+  sl_zb_sec_man_aps_key_metadata_t key_data;
+  sl_zb_sec_man_init_context(&context);
+
+  context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_TC_LINK;
 
   // Partner link key requests are not valid for the trust center because it
   // already has a link key with all nodes on the network.
@@ -335,15 +327,19 @@ static EmberZdoStatus validateKeyRequest(EmberEUI64 partner)
 
   // We must have an authorized trust center link key before we are able to
   // process link key exchanges with other nodes.
-  if (emberGetKey(EMBER_TRUST_CENTER_LINK_KEY, &keyStruct) != EMBER_SUCCESS
-      || !(keyStruct.bitmask & EMBER_KEY_IS_AUTHORIZED)) {
+  if (SL_STATUS_OK != sl_zb_sec_man_get_aps_key_info(&context, &key_data)
+      || !(key_data.bitmask & EMBER_KEY_IS_AUTHORIZED)) {
     return EMBER_ZDP_NOT_AUTHORIZED;
   }
 
   // We need an existing entry or an empty entry in the key table to process a
   // partner link key exchange.
-  if (emberFindKeyTableEntry(partner, true) == 0xFF
-      && emberFindKeyTableEntry((uint8_t*)emberAfNullEui64, true) == 0xFF) {
+  sl_zb_sec_man_context_t context_existing;
+  sl_zb_sec_man_context_t context_open;
+  sl_zb_sec_man_export_link_key_by_eui(partner, &context_existing, NULL, NULL);
+  sl_zb_sec_man_export_link_key_by_eui(NULL, &context_open, NULL, NULL);
+  if (context_existing.key_index == 0xFF
+      && context_open.key_index == 0xFF) {
     return EMBER_ZDP_TABLE_FULL;
   }
 

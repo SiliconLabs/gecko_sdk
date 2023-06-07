@@ -1,0 +1,128 @@
+project_name: bt_ncp_esl_ap
+package: Bluetooth
+label: Bluetooth - NCP ESL Access Point
+description: >
+  Network Co-Processor (NCP) target application with additional features to
+  support the Electronic Shelf Label Profile ESL Access Point role.
+  Note: Some BLE features unused by the ESL Access Point are removed compared
+  to the NCP target application.
+category: Bluetooth Examples
+quality: production
+
+filter:
+  - name: "Wireless Technology"
+    value: ["Bluetooth"]
+  - name: "Device Type"
+    value: ["NCP"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]
+
+component:
+  - id: bluetooth_stack
+  - id: bluetooth_feature_legacy_advertiser
+  - id: bluetooth_feature_extended_advertiser
+  - id: bluetooth_feature_connection_phy_update
+  - id: bluetooth_feature_periodic_advertiser
+  - id: bluetooth_feature_pawr_advertiser
+  - id: bluetooth_feature_advertiser_past
+  - id: bluetooth_feature_connection
+  - id: bluetooth_feature_gap
+  - id: bluetooth_feature_gatt
+  - id: bluetooth_feature_gatt_server
+  - id: bluetooth_feature_nvm
+  - id: bluetooth_feature_legacy_scanner
+  - id: bluetooth_feature_extended_scanner
+  - id: bluetooth_feature_sm
+  - id: bluetooth_feature_system
+  - id: bluetooth_feature_dynamic_gattdb
+  - id: bluetooth_feature_l2cap
+  - id: ncp
+  - id: uartdrv_usart
+    instance:
+      - vcom
+  - id: mpu
+  - id: bootloader_interface
+  - id: sl_system
+  - id: device_init
+  - id: bt_post_build
+
+requires:
+  - name: bluetooth_feature_external_bonding_database
+
+source:
+  - path: main.c
+  - path: app.c
+
+include:
+  - path: .
+    file_list:
+      - path: app.h
+
+readme:
+  - path: readme.md
+
+other_file:
+  - path: image/readme_img0.png
+  - path: image/readme_img1.png
+  - path: image/readme_img2.png
+  - path: image/readme_img3.png
+  - path: image/readme_img4.png
+  - path: image/readme_img5.png
+  - path: image/readme_img7.png
+
+configuration:
+  - name: SL_STACK_SIZE
+    value: "2752"
+  - name: SL_HEAP_SIZE
+    value: "12288"
+  - name: SL_BT_CONFIG_MAX_CONNECTIONS
+    value: "8"
+  - name: SL_BT_CONFIG_MAX_SOFTWARE_TIMERS
+    value: "0"
+  - name: SL_BT_CONFIG_BUFFER_SIZE
+    value: "8192"
+  - name: SL_BT_CONFIG_USER_ADVERTISERS
+    value: "3"
+  - name: SL_BT_CONFIG_MAX_PERIODIC_ADVERTISERS
+    value: "2"
+  - name: SL_BT_CONFIG_MAX_PAWR_ADVERTISERS
+    value: "2"
+  - name: SL_DEVICE_INIT_LFRCO_PRECISION
+    value: "cmuPrecisionHigh"
+  - name: SL_DEVICE_INIT_LFXO_PRECISION
+    value: "50"
+    condition:
+      - hardware_board_has_lfxo
+  - name: SL_DEVICE_INIT_LFXO_CTUNE
+    value: "37"
+    condition:
+      - hardware_board_has_lfxo
+  - name: SL_BOARD_ENABLE_VCOM
+    value: "1"
+  - name: SL_UARTDRV_USART_VCOM_FLOW_CONTROL_TYPE
+    value: uartdrvFlowControlHwUart
+  - name: SL_PSA_KEY_USER_SLOT_COUNT
+    value: "0"
+    condition:
+      - psa_crypto
+  - name: SL_BT_GATTDB_INCLUDE_STATIC_DATABASE
+    value: "0"
+  - name: SL_BT_GATTDB_ENABLE_GATT_CACHING
+    value: "0"
+  - name: NVM3_DEFAULT_NVM_SIZE
+    value: "32768"
+
+tag:
+  - prebuilt_demo
+  - hardware:rf:band:2400
+  - hardware:device:sdid:!80
+  - hardware:device:sdid:!84
+  - hardware:device:sdid:!89
+  - hardware:device:sdid:!95
+  - hardware:device:sdid:!100
+  - hardware:device:sdid:!106
+
+ui_hints:
+  highlight:
+    - path: readme.md
+      focus: true

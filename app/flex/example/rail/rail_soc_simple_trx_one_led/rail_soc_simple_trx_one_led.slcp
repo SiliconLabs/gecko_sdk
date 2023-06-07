@@ -4,7 +4,7 @@ package: Flex
 description: "This application demonstrates the simplest exchange of transmit and receive operation between two nodes.
 Both nodes are capable of sending and receiving messages.
 On the WSTK, any button press (PB0/PB1) will send a message.
-LED0 will toggle on message send and LED1 will toggle on message receive.
+LED0 will toggle on message send and receive.
 CLI can also be used for sending and showing received messages.
 To send enter 'tx' or 'send'. By default the received packets will be printed out in terminal, to enable or disable print enter 'rx 1' ('receive 1') or 'rx 0' ('receive 0') in terminal.
 With one click this baremetal sample app can be run on an OS, currently MicriumOS and FreeRTOS is supported.
@@ -55,6 +55,8 @@ component:
 #----------------- Require list ----------------------
 requires:
   - name: a_radio_config
+  - name: sl_flex_rail_config
+  - name: sl_flex_rail_channel_selector
   - name: sl_simple_rail_os
     condition:
       - "kernel"

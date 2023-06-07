@@ -12,9 +12,9 @@ void sl_cpc_config_vcom(void)
   uint8_t flowcontrol;
 
   if (SL_CPC_DRV_{{ interface | upper }}_{{ instance | upper }}_FLOW_CONTROL_TYPE == {{ periph }}HwFlowControlCtsAndRts) {
-    flowcontrol = 0x03;
+    flowcontrol = COS_CONFIG_FLOWCONTROL_CTS_RTS;
   } else {
-    flowcontrol = 0x00;
+    flowcontrol = COS_CONFIG_FLOWCONTROL_NONE;
   }
 
   sl_cos_config_vcom(SL_CPC_DRV_{{ interface | upper }}_{{ instance | upper }}_BAUDRATE, flowcontrol);

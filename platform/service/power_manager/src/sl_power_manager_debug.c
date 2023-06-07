@@ -44,9 +44,11 @@ static sli_power_debug_requirement_entry_t  power_debug_entry_table[SL_POWER_MAN
 static sl_slist_node_t *power_debug_free_entry_list = NULL;
 static bool power_debug_ran_out_of_entry = false;
 
+#if (!defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT))
 static void power_manager_log_add_requirement(sl_slist_node_t **p_list,
                                               bool            add,
                                               const char      *name);
+#endif // !(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT)
 
 /***************************************************************************//**
  * Print a fancy table that describes the current requirements on each energy
@@ -89,6 +91,7 @@ void sli_power_manager_debug_init(void)
   }
 }
 
+#if !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT)
 /***************************************************************************//**
  * Log requirement to a list
  *
@@ -137,6 +140,7 @@ static void power_manager_log_add_requirement(sl_slist_node_t **p_list,
     sl_slist_push(&power_debug_free_entry_list, &entry_remove->node);
   }
 }
+#endif // !(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT)
 #endif // SL_POWER_MANAGER_DEBUG
 
 #undef sli_power_manager_debug_log_em_requirement
@@ -153,7 +157,7 @@ void sli_power_manager_debug_log_em_requirement(sl_power_manager_em_t em,
                                                 bool                  add,
                                                 const char            *name)
 {
-#if (SL_POWER_MANAGER_DEBUG == 1)
+#if (!defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT) && (SL_POWER_MANAGER_DEBUG == 1))
   if (em != SL_POWER_MANAGER_EM0) {
     power_manager_log_add_requirement(&power_manager_debug_requirement_em_table[em - 1], add, name);
   }

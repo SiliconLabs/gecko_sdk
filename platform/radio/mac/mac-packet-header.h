@@ -107,7 +107,7 @@ typedef struct {
 //--------------------------------------
 // Common in-memory stored appended info
 
-// When on emMacToNetworkQueue
+// When on sli_802154mac_to_network_queue
 typedef struct {
   // The link quality indicator of the received packet
   uint8_t lqi;

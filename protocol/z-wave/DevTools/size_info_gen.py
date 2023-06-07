@@ -1,3 +1,4 @@
+# Copyright (c) 2022 Silicon Laboratories Inc.
 import string
 import sys
 import getopt

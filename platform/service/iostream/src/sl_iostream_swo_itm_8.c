@@ -35,6 +35,7 @@
 
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
 #include "sl_power_manager.h"
+#include "em_device.h"
 #endif
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)

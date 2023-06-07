@@ -18,7 +18,7 @@ class calc_freq_offset_comp_viper(Calc_Freq_Offset_Comp_Bobcat):
         phscale = 2 ** model.vars.MODEM_TRECPMDET_PHSCALE.value
         mode_index = self.freq_comp_mode_index(model, mode)
         demod_sel = model.vars.demod_select.value
-        digmixfb = Calc_Utilities_Viper().get_fefilt_actual(model, 'DIGMIXCTRL_DIGMIXFBENABLE')
+        digmixfb = model.vars.MODEM_DIGMIXCTRL_DIGMIXFB.value
         baudrate = model.vars.rx_baud_rate_actual.value
         osr = model.vars.oversampling_rate_actual.value
         vtafcframe = model.vars.MODEM_REALTIMCFE_VTAFCFRAME.value
@@ -69,6 +69,10 @@ class calc_freq_offset_comp_viper(Calc_Freq_Offset_Comp_Bobcat):
             # digital mixer frequency comp
             afcscale =  model.vars.pro2_afc_gain.value /  res
             afcscale_tx = model.vars.pro2_afc_gain.value / synth_res
+        elif (demod_sel == model.vars.demod_select.var_enum.ENHANCED_DSSS):
+            # feedback 80% of estimated offset to digital mixer
+            afcscale = baudrate / (256 * res) * 0.8
+            afcscale_tx = baudrate / (256 * synth_res) * 0.8
         else:
             afcscale = 0.0
             afcscale_tx = 0.0
@@ -83,41 +87,10 @@ class calc_freq_offset_comp_viper(Calc_Freq_Offset_Comp_Bobcat):
         model.vars.afc_scale.value = afcscale
         model.vars.afc_scale_tx.value = afcscale_tx
 
-    def afc_adj_limit(self, model):
 
-        freq_limit = model.vars.freq_offset_hz.value
-        synth_res = model.vars.synth_res_actual.value
-        afclimreset = model.vars.afc_lim_reset_actual.value
-        digmix_res = model.vars.digmix_res_actual.value
-        digmixfb = Calc_Utilities_Viper().get_fefilt_actual(model, 'DIGMIXCTRL_DIGMIXFBENABLE')
-
-        if digmixfb:
-            res = digmix_res
+    def calc_freq_comp_mode(self, model):
+        demod_sel = model.vars.demod_select.value
+        if demod_sel == model.vars.demod_select.var_enum.ENHANCED_DSSS:
+            model.vars.afc_run_mode.value = model.vars.afc_run_mode.var_enum.ONE_SHOT
         else:
-            res = synth_res
-
-        # calculate limit
-        afcadjlim = freq_limit / res
-
-        # if AFC_LIM_RESET is enabled we reset to the center frequency
-        # once the accumulated offset reaches the limit. In this mode we
-        # like to set the limit to about 20% higher than where we like the
-        # limit to be
-        if afclimreset:
-            afcadjlim *= 1.2
-
-        return int(round(afcadjlim))
-
-    def calc_afc_adjlim_actual(self, model):
-
-        afcadjlim = model.vars.MODEM_AFCADJLIM_AFCADJLIM.value
-        synth_res = model.vars.synth_res_actual.value
-        digmix_res = model.vars.digmix_res_actual.value
-        digmixfb = digmixfb = Calc_Utilities_Viper().get_fefilt_actual(model, 'DIGMIXCTRL_DIGMIXFBENABLE')
-
-        if digmixfb:
-            res = digmix_res
-        else:
-            res = synth_res
-
-        model.vars.afc_limit_hz_actual.value = afcadjlim * res
+            super().calc_freq_comp_mode(model)

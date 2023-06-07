@@ -18,23 +18,6 @@
 #ifndef SILABS_ZCL_CLI_H
 #define SILABS_ZCL_CLI_H
 
-#ifndef UC_BUILD // In UC we only support generated CLI, no legacy
-#if !defined(EMBER_AF_GENERATE_CLI)
-void emAfCliSendCommand(void);
-void emAfCliSendUsingMulticastBindingCommand(void);
-void emAfCliBsendCommand(void);
-void emAfCliReadCommand(void);
-void emAfCliWriteCommand(void);
-void emAfCliTimesyncCommand(void);
-void emAfCliRawCommand(void);
-void emAfCliAddReportEntryCommand(void);
-#endif
-extern EmberCommandEntry keysCommands[];
-extern EmberCommandEntry interpanCommands[];
-extern EmberCommandEntry printCommands[];
-extern EmberCommandEntry zclCommands[];
-extern EmberCommandEntry certificationCommands[];
-#else
 #define SL_ZCL_CLI_ARG_UINT8                          0x01u
 #define SL_ZCL_CLI_ARG_UINT16                         0x02u
 #define SL_ZCL_CLI_ARG_UINT24                         0x03u
@@ -71,7 +54,6 @@ extern EmberCommandEntry certificationCommands[];
 #define SL_ZCL_CLI_ARG_HEX                            0x42u
 #define SL_ZCL_CLI_ARG_STRINGOPT                      0x43u
 #define SL_ZCL_CLI_ARG_HEXOPT                         0x44u
-#endif //UC_BUILD
 
 void zclSimpleCommand(uint8_t frameControl,
                       uint16_t clusterId,

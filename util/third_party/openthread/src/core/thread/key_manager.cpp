@@ -202,10 +202,7 @@ void KeyManager::Start(void)
     StartKeyRotationTimer();
 }
 
-void KeyManager::Stop(void)
-{
-    mKeyRotationTimer.Stop();
-}
+void KeyManager::Stop(void) { mKeyRotationTimer.Stop(); }
 
 void KeyManager::SetPskc(const Pskc &aPskc)
 {
@@ -241,7 +238,7 @@ void KeyManager::ResetFrameCounters(void)
 
 #if OPENTHREAD_FTD
     // reset router frame counters
-    for (Router &router : Get<RouterTable>().Iterate())
+    for (Router &router : Get<RouterTable>())
     {
         router.SetKeySequence(0);
         router.GetLinkFrameCounters().Reset();
@@ -287,7 +284,7 @@ exit:
     return;
 }
 
-void KeyManager::ComputeKeys(uint32_t aKeySequence, HashKeys &aHashKeys)
+void KeyManager::ComputeKeys(uint32_t aKeySequence, HashKeys &aHashKeys) const
 {
     Crypto::HmacSha256 hmac;
     uint8_t            keySequenceBytes[sizeof(uint32_t)];
@@ -309,7 +306,7 @@ void KeyManager::ComputeKeys(uint32_t aKeySequence, HashKeys &aHashKeys)
 }
 
 #if OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE
-void KeyManager::ComputeTrelKey(uint32_t aKeySequence, Mac::Key &aKey)
+void KeyManager::ComputeTrelKey(uint32_t aKeySequence, Mac::Key &aKey) const
 {
     Crypto::HkdfSha256 hkdf;
     uint8_t            salt[sizeof(uint32_t) + sizeof(kHkdfExtractSaltString)];
@@ -384,7 +381,7 @@ void KeyManager::SetCurrentKeySequence(uint32_t aKeySequence)
     mKeySequence = aKeySequence;
     UpdateKeyMaterial();
 
-    SetAllMacFrameCounters(0);
+    SetAllMacFrameCounters(0, /* aSetIfLarger */ false);
     mMleFrameCounter = 0;
 
     Get<Notifier>().Signal(kEventThreadKeySeqCounterChanged);
@@ -415,12 +412,14 @@ const Mac::KeyMaterial &KeyManager::GetTemporaryTrelMacKey(uint32_t aKeySequence
 }
 #endif
 
-void KeyManager::SetAllMacFrameCounters(uint32_t aMacFrameCounter)
+void KeyManager::SetAllMacFrameCounters(uint32_t aFrameCounter, bool aSetIfLarger)
 {
-    mMacFrameCounters.SetAll(aMacFrameCounter);
+    mMacFrameCounters.SetAll(aFrameCounter);
 
 #if OPENTHREAD_CONFIG_RADIO_LINK_IEEE_802_15_4_ENABLE
-    Get<Mac::SubMac>().SetFrameCounter(aMacFrameCounter);
+    Get<Mac::SubMac>().SetFrameCounter(aFrameCounter, aSetIfLarger);
+#else
+    OT_UNUSED_VARIABLE(aSetIfLarger);
 #endif
 }
 
@@ -444,9 +443,7 @@ exit:
     return;
 }
 #else
-void KeyManager::MacFrameCounterUsed(uint32_t)
-{
-}
+void KeyManager::MacFrameCounterUsed(uint32_t) {}
 #endif
 
 #if OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE
@@ -636,18 +633,16 @@ void KeyManager::SetNetworkKeyRef(otNetworkKeyRef aKeyRef)
 exit:
     return;
 }
-#endif // OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE
 
-void KeyManager::DeleteSecurityKeys(void)
+void KeyManager::DestroyTemporaryKeys(void)
 {
     mMleKey.Clear();
     mKek.Clear();
-    Get<Mac::SubMac>().DeleteMacKeys();
-    Get<Mac::Mac>().DeleteMacKeys();
-
-#if OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE
-    Crypto::Storage::DeletePersistentKeys();
-#endif
+    Get<Mac::SubMac>().ClearMacKeys();
+    Get<Mac::Mac>().ClearMode2Key();
 }
+
+void KeyManager::DestroyPersistentKeys(void) { Crypto::Storage::DestroyPersistentKeys(); }
+#endif // OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE
 
 } // namespace ot

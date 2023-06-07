@@ -46,16 +46,14 @@ namespace ot {
 
 AnycastLocator::AnycastLocator(Instance &aInstance)
     : InstanceLocator(aInstance)
-    , mCallback(nullptr)
-    , mContext(nullptr)
 
 {
 }
 
-Error AnycastLocator::Locate(const Ip6::Address &aAnycastAddress, Callback aCallback, void *aContext)
+Error AnycastLocator::Locate(const Ip6::Address &aAnycastAddress, LocatorCallback aCallback, void *aContext)
 {
     Error            error   = kErrorNone;
-    Coap::Message *  message = nullptr;
+    Coap::Message   *message = nullptr;
     Tmf::MessageInfo messageInfo(GetInstance());
 
     VerifyOrExit((aCallback != nullptr) && Get<Mle::Mle>().IsAnycastLocator(aAnycastAddress),
@@ -64,7 +62,7 @@ Error AnycastLocator::Locate(const Ip6::Address &aAnycastAddress, Callback aCall
     message = Get<Tmf::Agent>().NewConfirmablePostMessage(kUriAnycastLocate);
     VerifyOrExit(message != nullptr, error = kErrorNoBufs);
 
-    if (mCallback != nullptr)
+    if (mCallback.IsSet())
     {
         IgnoreError(Get<Tmf::Agent>().AbortTransaction(HandleResponse, this));
     }
@@ -73,16 +71,15 @@ Error AnycastLocator::Locate(const Ip6::Address &aAnycastAddress, Callback aCall
 
     SuccessOrExit(error = Get<Tmf::Agent>().SendMessage(*message, messageInfo, HandleResponse, this));
 
-    mCallback = aCallback;
-    mContext  = aContext;
+    mCallback.Set(aCallback, aContext);
 
 exit:
     FreeMessageOnError(message, error);
     return error;
 }
 
-void AnycastLocator::HandleResponse(void *               aContext,
-                                    otMessage *          aMessage,
+void AnycastLocator::HandleResponse(void                *aContext,
+                                    otMessage           *aMessage,
                                     const otMessageInfo *aMessageInfo,
                                     Error                aError)
 {
@@ -112,12 +109,12 @@ void AnycastLocator::HandleResponse(Coap::Message *aMessage, const Ip6::MessageI
     address = &meshLocalAddress;
 
 exit:
-    if (mCallback != nullptr)
+    if (mCallback.IsSet())
     {
-        Callback callback = mCallback;
+        Callback<LocatorCallback> callbackCopy = mCallback;
 
-        mCallback = nullptr;
-        callback(mContext, aError, address, rloc16);
+        mCallback.Clear();
+        callbackCopy.Invoke(aError, address, rloc16);
     }
 }
 

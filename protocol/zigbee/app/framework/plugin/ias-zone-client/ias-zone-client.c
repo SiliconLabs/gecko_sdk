@@ -50,10 +50,8 @@
 #include "af.h"
 #include "ias-zone-client.h"
 
-#ifdef UC_BUILD
 #include "ias-zone-client-config.h"
 #include "zap-cluster-command-parser.h"
-#endif
 
 //-----------------------------------------------------------------------------
 // Globals
@@ -72,14 +70,9 @@ static IasZoneClientState iasZoneClientState = IAS_ZONE_CLIENT_STATE_NONE;
 static uint8_t currentIndex = NO_INDEX;
 static uint8_t myEndpoint = 0;
 
-#ifdef UC_BUILD
 sl_zigbee_event_t emberAfPluginIasZoneClientStateMachineEvent;
 #define stateMachineEvent (&emberAfPluginIasZoneClientStateMachineEvent)
-void emberAfPluginIasZoneClientStateMachineEventHandler(SLXU_UC_EVENT);
-#else
-EmberEventControl emberAfPluginIasZoneClientStateMachineEventControl;
-#define stateMachineEvent emberAfPluginIasZoneClientStateMachineEventControl
-#endif
+void emberAfPluginIasZoneClientStateMachineEventHandler(sl_zigbee_event_t * event);
 //-----------------------------------------------------------------------------
 // Forward Declarations
 
@@ -92,15 +85,15 @@ static void iasClientLoadCommand(void);
 
 void emberAfIasZoneClusterClientInitCallback(uint8_t endpoint)
 {
-  slxu_zigbee_event_init(stateMachineEvent,
-                         emberAfPluginIasZoneClientStateMachineEventHandler);
+  sl_zigbee_event_init(stateMachineEvent,
+                       emberAfPluginIasZoneClientStateMachineEventHandler);
 
-  emAfClearServers();
+  sli_zigbee_af_clear_servers();
   myEndpoint = endpoint;
   iasClientLoadCommand();
 }
 
-void emAfClearServers(void)
+void sli_zigbee_af_clear_servers(void)
 {
   MEMSET(emberAfIasZoneClientKnownServers, 0xFF,
          sizeof(IasZoneDevice)
@@ -288,8 +281,6 @@ static uint8_t findIasZoneServerByNodeId(EmberNodeId nodeId)
 //----------------------------
 // Commands callbacks
 
-#ifdef UC_BUILD
-
 bool emberAfIasZoneClusterZoneStatusChangeNotificationCallback(EmberAfClusterCommand *cmd)
 {
   sl_zcl_ias_zone_cluster_zone_status_change_notification_command_t cmd_data;
@@ -343,64 +334,10 @@ bool emberAfIasZoneClusterZoneEnrollRequestCallback(EmberAfClusterCommand *cmd)
   return true;
 }
 
-#else // !UC_BUILD
-
-bool emberAfIasZoneClusterZoneStatusChangeNotificationCallback(uint16_t zoneStatus,
-                                                               uint8_t extendedStatus,
-                                                               uint8_t zoneId,
-                                                               uint16_t delay)
-{
-  uint8_t serverIndex = findIasZoneServerByNodeId(emberAfCurrentCommand()->source);
-  uint8_t status = EMBER_ZCL_STATUS_NOT_FOUND;
-  if (serverIndex != NO_INDEX) {
-    status = EMBER_ZCL_STATUS_SUCCESS;
-    setServerZoneStatus(serverIndex, zoneStatus);
-
-    emberAfIasZoneClusterPrintln("Zone %d status change, 0x%2X from 0x%2X",
-                                 zoneId,
-                                 zoneStatus,
-                                 emberAfCurrentCommand()->source);
-
-    // The Test case calls for readding attributes after status change.
-    //   that is silly for the production device.
-    // readIasZoneServerAttributes(emberAfCurrentCommand()->source);
-  }
-  emberAfSendDefaultResponse(emberAfCurrentCommand(), status);
-  return true;
-}
-
-bool emberAfIasZoneClusterZoneEnrollRequestCallback(uint16_t zoneType,
-                                                    uint16_t manufacturerCode)
-{
-  EmberAfIasEnrollResponseCode responseCode = EMBER_ZCL_IAS_ENROLL_RESPONSE_CODE_NO_ENROLL_PERMIT;
-  uint8_t zoneId = UNKNOWN_ZONE_ID;
-  uint8_t serverIndex = findIasZoneServerByNodeId(emberAfCurrentCommand()->source);
-  EmberStatus status;
-
-  if (serverIndex != NO_INDEX) {
-    responseCode = EMBER_ZCL_IAS_ENROLL_RESPONSE_CODE_SUCCESS;
-    zoneId = serverIndex;
-    setServerZoneId(serverIndex, zoneId);
-  }
-  emberAfFillCommandIasZoneClusterZoneEnrollResponse(responseCode,
-                                                     zoneId);
-  // Need to send this command with our source EUI because the server will
-  // check our EUI64 against his CIE Address to see if we're his CIE.
-  emberAfGetCommandApsFrame()->options |= EMBER_APS_OPTION_SOURCE_EUI64;
-  status = emberAfSendResponse();
-  emberAfCorePrintln("Sent enroll response with responseCode: 0x%X, zoneId: 0x%X, status: 0x%X",
-                     responseCode,
-                     zoneId,
-                     status);
-  return true;
-}
-
-#endif // UC_BUILD
-
-void emberAfPluginIasZoneClientStateMachineEventHandler(SLXU_UC_EVENT)
+void emberAfPluginIasZoneClientStateMachineEventHandler(sl_zigbee_event_t * event)
 {
   emberAfIasZoneClusterPrintln("IAS Zone Client Timeout waiting for message response.");
-  slxu_zigbee_event_set_inactive(stateMachineEvent);
+  sl_zigbee_event_set_inactive(stateMachineEvent);
   clearState();
 }
 
@@ -646,8 +583,6 @@ void emberAfPluginIasZoneClientReadAttributesResponseCallback(EmberAfClusterId c
   }
 }
 
-#ifdef UC_BUILD
-
 uint32_t emberAfIasZoneClusterClientCommandParse(sl_service_opcode_t opcode,
                                                  sl_service_function_context_t *context)
 {
@@ -675,5 +610,3 @@ uint32_t emberAfIasZoneClusterClientCommandParse(sl_service_opcode_t opcode,
           ? EMBER_ZCL_STATUS_SUCCESS
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
-
-#endif // UC_BUILD

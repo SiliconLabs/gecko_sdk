@@ -6,12 +6,25 @@
  * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
- * The licensor of this software is Silicon Laboratories Inc.  Your use of this
- * software is governed by the terms of Silicon Labs Master Software License
- * Agreement (MSLA) available at
- * www.silabs.com/about-us/legal/master-software-license-agreement.  This
- * software is distributed to you in Source Code format and is governed by the
- * sections of the MSLA applicable to Source Code.
+ * SPDX-License-Identifier: Zlib
+ *
+ * The licensor of this software is Silicon Laboratories Inc.
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty. In no event will the authors be held liable for any damages
+ * arising from the use of this software.
+ *
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
+ *
+ * 1. The origin of this software must not be misrepresented; you must not
+ *    claim that you wrote the original software. If you use this software
+ *    in a product, an acknowledgment in the product documentation would be
+ *    appreciated but is not required.
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.
+ * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
 
@@ -43,23 +56,25 @@ extern "C" {
 #define ENABLE_SECONDARY_DIRECTIONS 0
 #endif
 
+/// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
 #if (ENABLE_SECONDARY_DIRECTIONS == 0)
 #define JOYSTICK_MV_ERROR      JOYSTICK_MV_ERR_CARDINAL_ONLY           // tolerance in mV for cardinal
 #elif (ENABLE_SECONDARY_DIRECTIONS == 1)
 #define JOYSTICK_MV_ERROR      JOYSTICK_MV_ERR_CARDINAL_AND_SECONDARY  // tolerance in mV for cardinal and secondary
 #endif
+/// @endcond
 
-// Set CLK_ADC
-#define CLK_SRC_ADC_FREQ          5000000 // CLK_SRC_ADC
-#define CLK_ADC_FREQ              1000000 // CLK_ADC is 1 MHz
+/// MACROS to Set CLK_SRC_ADC_FREQ and CLK_ADC_FREQ
+#define CLK_SRC_ADC_FREQ          5000000 ///< A MACRO for clock source ADC frequency, clock source ADC frequency is 5MHZ.
+#define CLK_ADC_FREQ              1000000 ///< A MACRO for clock ADC, clock ADC frequency is 1 MHz.
 
-// Default Joystick handle structure
+/// Default Joystick handle structure
 #define JOYSTICK_HANDLE_DEFAULT                                                 \
   {                                                                             \
     SL_JOYSTICK_PORT,                 /*Joystick gpio port*/                    \
     SL_JOYSTICK_PIN,                  /*Joystick gpio pin*/                     \
     SL_JOYSTICK_DISABLED,             /*Joystick signal acquisition not start*/ \
-  }
+  } ///< Default Joystick handle structure
 
 /*******************************************************************************
  *****************************   DATA TYPES   *********************************
@@ -68,7 +83,8 @@ extern "C" {
 /// @name Direction Enums
 /// @anchor dir_enums
 /// @{
-
+/// @enum sl_joystick_position_t
+/// @brief enum for finding the position of Joystick.
 SL_ENUM(sl_joystick_position_t) {
   JOYSTICK_NONE = 0u,    ///< Not pressed
   JOYSTICK_C,            ///< Center
@@ -86,6 +102,7 @@ SL_ENUM(sl_joystick_position_t) {
 
 /// @}
 
+/// Joystick state (ENABLE / DISABLE) enum.
 SL_ENUM(sl_joystick_state_t) {
   SL_JOYSTICK_DISABLED = 0U,        ///< Analog Joystick data acquisition is disabled
   SL_JOYSTICK_ENABLED  = 1U,        ///< Analog Joystick data acquisition is enabled
@@ -98,6 +115,7 @@ typedef struct {
   sl_joystick_state_t        state;          ///< State of joystick
 } sl_joystick;
 
+/// sl_joystick_t is the alias name of sl_joystick.
 typedef sl_joystick sl_joystick_t;
 
 /*******************************************************************************
@@ -182,10 +200,6 @@ void sl_joystick_stop(sl_joystick_t *joystick_handle);
 ///   Once the joystick handle of type sl_joystick_t is defined, joystick functions
 ///   can be called being passed the defined handle. The functions include the following:
 ///
-///   @li @ref sl_joystick_init
-///   @li @ref sl_joystick_get_position
-///   @li @ref sl_joystick_start
-///   @li @ref sl_joystick_stop
 ///
 ///   @ref sl_joystick_init must be called followed by sl_joystick_start before
 ///   attempting to read the position of the joystick.

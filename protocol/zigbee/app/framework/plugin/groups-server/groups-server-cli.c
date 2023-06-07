@@ -20,9 +20,8 @@
 
 #include "groups-server.h"
 
-#ifdef UC_BUILD
 // plugin groups-server print
-void emAfGroupsServerCliPrint(sl_cli_command_arg_t *args)
+void sli_zigbee_af_groups_server_cli_print(sl_cli_command_arg_t *args)
 {
   EmberStatus status;
   uint8_t i;
@@ -38,42 +37,8 @@ void emAfGroupsServerCliPrint(sl_cli_command_arg_t *args)
 }
 
 // plugin groups-server clear
-void emAfGroupsServerCliClear(sl_cli_command_arg_t *args)
+void sli_zigbee_af_groups_server_cli_clear(sl_cli_command_arg_t *args)
 {
   emberAfCorePrintln("Clearing all groups.");
   emberAfGroupsClusterClearGroupTableCallback(EMBER_BROADCAST_ENDPOINT);
 }
-#else
-void emAfGroupsServerCliPrint(void);
-void emAfGroupsServerCliClear(void);
-
-#if !defined(EMBER_AF_GENERATE_CLI)
-EmberCommandEntry emberAfPluginGroupsServerCommands[] = {
-  emberCommandEntryAction("print", emAfGroupsServerCliPrint, "", "Print the state of the groups table."),
-  emberCommandEntryAction("clear", emAfGroupsServerCliClear, "", "Clear the groups table on every endpoint."),
-  emberCommandEntryTerminator(),
-};
-#endif // EMBER_AF_GENERATE_CLI
-// plugin groups-server print
-void emAfGroupsServerCliPrint(void)
-{
-  EmberStatus status;
-  uint8_t i;
-
-  for (i = 0; i < EMBER_BINDING_TABLE_SIZE; i++) {
-    EmberBindingTableEntry entry;
-    status = emberGetBinding(i, &entry);
-    if ((status == EMBER_SUCCESS) && (entry.type == EMBER_MULTICAST_BINDING)) {
-      emberAfCorePrintln("ep[%x] id[%2x]", entry.local,
-                         HIGH_LOW_TO_INT(entry.identifier[1], entry.identifier[0]));
-    }
-  }
-}
-
-// plugin groups-server clear
-void emAfGroupsServerCliClear(void)
-{
-  emberAfCorePrintln("Clearing all groups.");
-  emberAfGroupsClusterClearGroupTableCallback(EMBER_BROADCAST_ENDPOINT);
-}
-#endif

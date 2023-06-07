@@ -48,20 +48,9 @@ otCliCommand sl_ot_custom_commands[] = {
 };
 
 // This is needed because `sizeof` is calculated at compile time and can't be calculated outside of this source file.
-const size_t sl_ot_custom_commands_count = OT_ARRAY_LENGTH(sl_ot_custom_commands);
-
-void printCommands(otCliCommand commands[], size_t commandCount)
-{
-    for (size_t i = 0; i < commandCount; i++) {
-        otCliOutputFormat("%s\r\n", commands[i].mName);
-    }
-}
+const uint8_t sl_ot_custom_commands_count = OT_ARRAY_LENGTH(sl_ot_custom_commands);
 
 void sl_ot_custom_cli_init(void)
 {
-#if OPENTHREAD_COPROCESSOR
-    otCRPCSetUserCommands(sl_ot_custom_commands, sl_ot_custom_commands_count, NULL);
-#else
-    otCliSetUserCommands(sl_ot_custom_commands, sl_ot_custom_commands_count, NULL);
-#endif
+    IgnoreError(otCliSetUserCommands(sl_ot_custom_commands, sl_ot_custom_commands_count, NULL));
 }

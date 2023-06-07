@@ -209,8 +209,6 @@ static const int32_t RAIL_curvesSubgig[RAIL_PA_CURVES_SUBGIG_CURVES_NUM_VALUES] 
 static const int32_t RAIL_curvesEffSubgig[RAIL_PA_CURVES_EFF_SUBGIG_CURVES_NUM_VALUES] =
   RAIL_PA_CURVES_EFF_SUBGIG_CURVES;
 
-RAIL_DECLARE_TX_POWER_VBAT_CURVES_ALT;
-
 // This chip has the same curve for Vbat and DCDC
 #ifdef RAIL_PA_CONVERSIONS_WEAK
 __WEAK
@@ -305,6 +303,15 @@ static const RAIL_TxPowerCurveAlt_t RAIL_piecewiseDataHpVbat = {
   RAIL_PA_CURVES_2P4_HP_VBAT_MIN_POWER,
   RAIL_PA_CURVES_2P4_HP_VBAT_CURVES,
 };
+
+#if defined(RAIL_DECLARE_TX_POWER_DCDC_CURVES_ALT)
+static const RAIL_TxPowerCurveAlt_t RAIL_piecewiseDataHpDcdc = {
+  RAIL_PA_CURVES_2P4_HP_DCDC_MAX_POWER,
+  RAIL_PA_CURVES_2P4_HP_DCDC_MIN_POWER,
+  RAIL_PA_CURVES_2P4_HP_DCDC_CURVES,
+};
+#endif
+
 static const int16_t RAIL_curves24Lp[RAIL_PA_CURVES_LP_VALUES] =
   RAIL_PA_CURVES_2P4_LP_VBAT_CURVES;
 
@@ -340,7 +347,11 @@ const RAIL_TxPowerCurvesConfigAlt_t RAIL_TxPowerCurvesDcdc = {
       .segments = RAIL_PA_CURVES_PIECEWISE_SEGMENTS,
       .min = RAIL_TX_POWER_LEVEL_2P4_HP_MIN,
       .max = RAIL_TX_POWER_LEVEL_2P4_HP_MAX,
+#if defined(RAIL_DECLARE_TX_POWER_DCDC_CURVES_ALT)
+      .conversion = { .powerCurve = &RAIL_piecewiseDataHpDcdc },
+#else
       .conversion = { .powerCurve = &RAIL_piecewiseDataHpVbat },
+#endif
     },
     {                                                        \
       .algorithm = RAIL_PA_ALGORITHM_MAPPING_TABLE,          \

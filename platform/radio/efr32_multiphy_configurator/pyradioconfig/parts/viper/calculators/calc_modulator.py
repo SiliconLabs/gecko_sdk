@@ -2,8 +2,30 @@
 from pyradioconfig.parts.bobcat.calculators.calc_modulator import Calc_Modulator_Bobcat
 from pyradioconfig.calculator_model_framework.Utils.CustomExceptions import CalculationException
 from pyradioconfig.parts.common.calculators.calc_utilities import CALC_Utilities
+from enum import Enum
+from pycalcmodel.core.variable import ModelVariableFormat, CreateModelVariableEnum
 
 class calc_modulator_viper(Calc_Modulator_Bobcat):
+
+    def buildVariables(self, model):
+        super().buildVariables(model)
+
+        self._addModelVariable(model, 'modulator_select', Enum, ModelVariableFormat.DECIMAL,
+                               desc='determines modulator path')
+        model.vars.modulator_select.var_enum = CreateModelVariableEnum(
+            'ModSelEnum',
+            'List of supported modulator paths',
+            [['PH_MOD', 0, 'Phase modulator'],
+             ['IQ_MOD', 1, 'IQ modulator (direct upconversion)']])
+
+    def calc_tx_mode(self, model):
+        # IQ UPCONV by default
+        model.vars.modulator_select.value = model.vars.modulator_select.var_enum.IQ_MOD
+
+    def calc_txmod_reg(self, model):
+        modulator_select = model.vars.modulator_select.value
+
+        self._reg_write(model.vars.MODEM_TXMISC_TXMOD, int(modulator_select))
 
 
     def calc_tx_baud_rate_actual(self, model):
@@ -16,8 +38,9 @@ class calc_modulator_viper(Calc_Modulator_Bobcat):
 
         fxo = model.vars.xtal_frequency.value
         txbr_ratio = model.vars.txbr_ratio_actual.value
+        interp_factor = 2.0 if model.vars.br2m.value else 4.0
 
-        tx_baud_rate = fxo / 2.0 / 8.0 * txbr_ratio
+        tx_baud_rate = fxo / interp_factor / 8.0 * txbr_ratio
 
         model.vars.tx_baud_rate_actual.value = tx_baud_rate
 
@@ -29,7 +52,7 @@ class calc_modulator_viper(Calc_Modulator_Bobcat):
             model (ModelRoot) : Data model to read and write variables from
         """
         baudrate = model.vars.baudrate.value
-        if baudrate == 2000000:
+        if baudrate >= 2000000:
             br2m = 1
         else:
             br2m = 0
@@ -52,17 +75,34 @@ class calc_modulator_viper(Calc_Modulator_Bobcat):
         freq_dev_hz = model.vars.deviation.value * 1.0
         shaping_filter_gain = model.vars.shaping_filter_gain_iqmod_actual.value
         baudrate = model.vars.baudrate.value
+        modulator_select = model.vars.modulator_select.value
+
 
         if modformat == model.vars.modulation_type.var_enum.OQPSK:
-            modindex = round(0.5 / 2.0 / shaping_filter_gain / 8.0 * 2**12)/2**12
-        elif baudrate == 2000000:
-            gain_adj = 0.5/0.4830
-            modindex = round(freq_dev_hz * gain_adj / shaping_filter_gain / (fxo /2.0) * 2**12) / 2**12
+            #(1 / 2 * 0.5 * baud) / (shape_gain * conv_gain * freq_resoluion),
+            # conv_gain = (T_fxo * 2 / T_shape), freq --> phase --> freq
+            modindex = 0.5 / 2.0 / shaping_filter_gain / 8.0
+        elif baudrate >= 2000000:
+            modindex = freq_dev_hz / shaping_filter_gain / (fxo /2.0)
         else:
-            gain_adj = 0.5 / 0.4858
-            modindex = round(freq_dev_hz * gain_adj / shaping_filter_gain / (fxo/4.0) * 2 ** 12) / 2 ** 12
+            modindex = freq_dev_hz / shaping_filter_gain / (fxo/4.0)
 
-        model.vars.modindex.value = modindex
+        # gain adjustment for different modulation
+        if modulator_select == model.vars.modulator_select.var_enum.IQ_MOD:
+            if modformat == model.vars.modulation_type.var_enum.OQPSK:
+                gain_adj = 1.0
+            elif baudrate >= 2000000:
+                gain_adj = 0.5 / 0.4830        # for better mean value of DF1
+            else:
+                gain_adj = 0.5 / 0.4858
+
+        else:  #PHMOD
+            if baudrate == 1000000:
+                gain_adj = 1.0/4.0
+            else:
+                gain_adj = 0.5               # conversion gain adjustment since phmod modindex multiplier @ fxo
+
+        model.vars.modindex.value = modindex * gain_adj
 
 
     def calc_modindex_field(self, model):
@@ -74,12 +114,15 @@ class calc_modulator_viper(Calc_Modulator_Bobcat):
             model (ModelRoot) : Data model to read and write variables from
         """
 
-        modindex = model.vars.modindex.value * 2**8
+        modindex = model.vars.modindex.value
 
         # convert fractional modindex into m * 2^e format
-        m, e = CALC_Utilities().frac2exp(255, modindex)
+        m, e = CALC_Utilities().frac2exp(31, modindex, up=True)
         #flip sign of e for iqmod implementation
-        e = -e
+        #e = -e
+
+        # src_out frac 11 bits to 19 frac for fixed point implementation.
+        e = e + 8
 
         # MODEINDEXE is a signed value
         if e < 0:
@@ -114,7 +157,7 @@ class calc_modulator_viper(Calc_Modulator_Bobcat):
         if e > 15:
             e -= 32
 
-        model.vars.modindex_actual.value = 1.0 * m / 2**8 / 2**e
+        model.vars.modindex_actual.value = 1.0 * m / 2**(19-11) * 2**e
 
     def calc_tx_freq_dev_actual(self, model):
         """
@@ -129,10 +172,16 @@ class calc_modulator_viper(Calc_Modulator_Bobcat):
         modindex = model.vars.modindex_actual.value
         shaping_filter_gain = model.vars.shaping_filter_gain_iqmod_actual.value
         br2m = model.vars.br2m.value
+        modulator_select = model.vars.modulator_select.value
+
+        if modulator_select == model.vars.modulator_select.var_enum.IQ_MOD:
+            mod_samp_rate = fxo/2         # IQMOD
+        else:
+            mod_samp_rate = fxo           # PHMOD
 
         if modformat == model.vars.modulation_type.var_enum.FSK2 or \
            modformat == model.vars.modulation_type.var_enum.FSK4:
-            freq_dev_hz = modindex * (fxo /2.0 * shaping_filter_gain) / 2**(1.0-br2m)
+            freq_dev_hz = modindex * (mod_samp_rate * shaping_filter_gain) / 2**(1.0-br2m)
         else:
             freq_dev_hz = 0.0
 
@@ -147,7 +196,8 @@ class calc_modulator_viper(Calc_Modulator_Bobcat):
 
         #calculate baudrate to fxo ratio
         #For the phase modulator this should always be based on xtal rate (https://jira.silabs.com/browse/MCUW_RADIO_CFG-1626)
-        ratio =  (8.0 * baudrate) / (xtal_frequency_hz / 2.0)
+        interp_factor = 2.0 if model.vars.br2m.value else 4.0
+        ratio =  (8.0 * baudrate) / (xtal_frequency_hz / interp_factor)
         #Load local variables back into model variables
         model.vars.txbr_ratio.value = ratio
 

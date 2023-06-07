@@ -39,4 +39,6 @@ class calc_diversity_viper(Calc_Diversity_Bobcat):
         pass
 
     def calc_diversity_adprethresh(self, model):
-        pass
+        #Set to 0 for now (functionality not enabled)
+        self._reg_write(model.vars.MODEM_ANTDIVCTRL_ENADPRETHRESH, 0)
+        self._reg_write(model.vars.MODEM_ANTDIVCTRL_ADPRETHRESH, 0)

@@ -3,7 +3,7 @@ label: "AoD Transmitter"
 package: "Bluetooth"
 description: >
   The Bluetooth Angle of Departure (AoD) Constant Tone Extension (CTE) transmission feature
-category: "Bluetooth|Stack|Direction Finding"
+category: Bluetooth|Bluetooth LE Controller (Link Layer)|Additional Features
 quality: "experimental"
 root_path: "protocol/bluetooth"
 requires:

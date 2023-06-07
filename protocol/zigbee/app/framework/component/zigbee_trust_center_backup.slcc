@@ -86,7 +86,7 @@ template_contribution:
     value:
       group: trust-center-backup
       name: file-export
-      handler: emAfTcExportCommand
+      handler: sli_zigbee_af_tc_export_command
       help: Writes the TC backup data to a file.
       argument:
       - type: string
@@ -94,7 +94,7 @@ template_contribution:
     value:
       group: trust-center-backup
       name: file-import
-      handler: emAfTcImportCommand
+      handler: sli_zigbee_af_tc_import_command
       help: Reads the TC Backup data from a file and bring the TC back online.
       argument:
       - type: string
@@ -102,7 +102,7 @@ template_contribution:
     value:
       group: trust-center-backup
       name: backup-tokens
-      handler: emAfTrustCenterBackupSaveTokensToFileCli
+      handler: sli_zigbee_af_trust_center_backup_save_tokens_to_file_cli
       help: Reads all the tokens and saves in a file. Present file format is-
             TotalTokenCount(1 byte)
             Toekn0Id(4 Bytes) Token0Size(1 byte) Token0ArraySize(1 Byte) Token0Data((Size * ArraySize) bytes)
@@ -113,7 +113,7 @@ template_contribution:
     value:
       group: trust-center-backup
       name: restore-tokens
-      handler: emAfTrustCenterBackupRestoreTokensFromFileCli
+      handler: sli_zigbee_af_trust_center_backup_restore_tokens_from_file_cli
       help: Reads all the tokens and saves in a file. Present file format is
             TotalTokenCount(1 byte)
             Toekn0Id(4 Bytes) Token0Size(1 byte) Token0ArraySize(1 Byte) Token0Data((Size * ArraySize) bytes)
@@ -124,15 +124,15 @@ template_contribution:
     value:
       group: trust-center-backup
       name: reset-node
-      handler: emAfTrustCenterBackupRestoreResetNodeCli
+      handler: sli_zigbee_af_trust_center_backup_restore_reset_node_cli
       help: Resets the node only available in trust center back up component. This should be called after
-            the tokens have been restored from host using the CLI emAfTrustCenterBackupRestoreTokensFromFileCli.
+            the tokens have been restored from host using the CLI sli_zigbee_af_trust_center_backup_restore_tokens_from_file_cli.
             This command will perform a reset and reinitialize the node.
   - name: cli_command
     value:
       group: trust-center-backup
       name: update-zigbeed
-      handler: emAfTrustCenterBackupWriteNcpTokenToZigbeedTokensCli
+      handler: sli_zigbee_af_trust_center_backup_write_ncp_token_to_zigbeed_tokens_cli
       help: This command writes zigbeed tokens from a previously saved NCP nvm3 tokens file that is obtained by running the cli command plugin trust-center-backup backup-tokens token-File-name.
       argument:
       - type: string

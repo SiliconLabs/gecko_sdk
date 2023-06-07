@@ -32,7 +32,7 @@ template_contribution:
   - name: zigbee_af_callback
     value:
       callback_type: event_init
-      function_name: emAfPluginDoorLockServerInitEvents
+      function_name: sli_zigbee_af_door_lock_server_init_events
   - name: zigbee_af_callback
     value:
       callback_type: init_done
@@ -52,13 +52,13 @@ template_contribution:
     value:
       group: door-lock-server
       name: status
-      handler: emAfPluginDoorLockServerStatusCommand
+      handler: sli_zigbee_af_door_lock_server_status_command
       help: Prints out the current status of the door lock.
   - name: cli_command
     value:
       group: door-lock-server
       name: lock
-      handler: emAfPluginDoorLockServerLockOrUnlockCommand
+      handler: sli_zigbee_af_door_lock_server_lock_or_unlock_command
       help: Lock the door (on currently hardcoded endpoint 1).
       argument:
       - type: uint16
@@ -67,7 +67,7 @@ template_contribution:
     value:
       group: door-lock-server
       name: unlock
-      handler: emAfPluginDoorLockServerLockOrUnlockCommand
+      handler: sli_zigbee_af_door_lock_server_lock_or_unlock_command
       help: Unlocks the door (on currently hardcoded endpoint 1).
       argument:
       - type: uint16
@@ -76,19 +76,19 @@ template_contribution:
     value:
       group: door-lock-server
       name: open
-      handler: emAfPluginDoorLockServerOpenOrCloseCommand
+      handler: sli_zigbee_af_door_lock_server_open_or_close_command
       help: Opens the door (on currently hardcoded endpoint 1).
   - name: cli_command
     value:
       group: door-lock-server
       name: close
-      handler: emAfPluginDoorLockServerOpenOrCloseCommand
+      handler: sli_zigbee_af_door_lock_server_open_or_close_command
       help: Closes the door (on currently hardcoded endpoint 1).
   - name: cli_command
     value:
       group: door-lock-server
       name: apply-pin
-      handler: emAfPluginDoorLockServerApplyCodeCommand
+      handler: sli_zigbee_af_door_lock_server_apply_code_command
       help: Simulates a PIN being entered into the door lock.
       argument:
       - type: string
@@ -97,7 +97,7 @@ template_contribution:
     value:
       group: door-lock-server
       name: apply-rfid
-      handler: emAfPluginDoorLockServerApplyCodeCommand
+      handler: sli_zigbee_af_door_lock_server_apply_code_command
       help: Simulates an RFID device being brought within range of the door lock.
       argument:
       - type: string

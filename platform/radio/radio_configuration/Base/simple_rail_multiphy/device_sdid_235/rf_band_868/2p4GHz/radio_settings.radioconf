@@ -53,10 +53,6 @@
       <metadata>{"selectedPhy":"PHY_Studio_868M_2GFSK_38p4Kbps_20K"}</metadata>
       <profile_inputs>
         <input>
-          <key>asynchronous_rx_enable</key>
-          <value>false</value>
-        </input>
-        <input>
           <key>base_frequency_hz</key>
           <value>2450000000</value>
         </input>
@@ -83,14 +79,6 @@
         <input>
           <key>crc_input_order</key>
           <value>0</value>
-        </input>
-        <input>
-          <key>crc_invert</key>
-          <value>false</value>
-        </input>
-        <input>
-          <key>crc_pad_input</key>
-          <value>false</value>
         </input>
         <input>
           <key>crc_poly</key>
@@ -271,10 +259,6 @@
         <input>
           <key>modulation_type</key>
           <value>0</value>
-        </input>
-        <input>
-          <key>payload_crc_en</key>
-          <value>true</value>
         </input>
         <input>
           <key>payload_white_en</key>

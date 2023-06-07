@@ -20,20 +20,15 @@
 #include "app/framework/util/util.h"
 #include "stack/include/ember-duty-cycle.h"
 
-#ifdef UC_BUILD
 #include "zap-cluster-command-parser.h"
 #include "sub-ghz-server-config.h"
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #ifdef SL_CATALOG_ZIGBEE_OTA_SERVER_PRESENT
 #include "ota-server.h"
 #endif
-#define emberDutyCycleHandler emAfPluginSubGhzServerDutyCycleCallback
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_OTA_SERVER
-#include "app/framework/plugin/ota-server/ota-server.h"
-#define SL_CATALOG_ZIGBEE_OTA_SERVER_PRESENT
-#endif
-#endif // UC_BUILD
+#define emberDutyCycleHandler sli_zigbee_af_sub_ghz_server_duty_cycle_callback
 
 #include "sub-ghz-server.h"
 
@@ -165,9 +160,9 @@ static void updateClientSuspendTime(ClientTable* client,
     // then this will reset that half a second to a full csecond. Fortunately,
     // a) our tick period is one second, so we will never get too far off, and
     // b) suspening new clients is (hopefully) not taking place very frequently
-    slxu_zigbee_zcl_schedule_server_tick(emberAfPrimaryEndpointForCurrentNetworkIndex(),
-                                         ZCL_SUB_GHZ_CLUSTER_ID,
-                                         MILLISECOND_TICKS_PER_SECOND);
+    sl_zigbee_zcl_schedule_server_tick(emberAfPrimaryEndpointForCurrentNetworkIndex(),
+                                       ZCL_SUB_GHZ_CLUSTER_ID,
+                                       MILLISECOND_TICKS_PER_SECOND);
   }
 }
 
@@ -177,9 +172,9 @@ static void updateClientSuspendTime(ClientTable* client,
  * if the incoming message is Mgmt_NWK_Unsolicited_Enhanced_Update_notify.
  * That's it.
  */
-void emAfSubGhzServerZDOMessageReceivedCallback(EmberNodeId sender,
-                                                const uint8_t* payloadBuffer,
-                                                uint16_t payloadLength)
+void sli_zigbee_af_sub_ghz_server_zdo_message_received_callback(EmberNodeId sender,
+                                                                const uint8_t* payloadBuffer,
+                                                                uint16_t payloadLength)
 {
   if (payloadBuffer != NULL
       && payloadLength >= NWK_UNSOLICITED_ENHANCED_UPDATE_NOTIFY_CMD_PAYLOAD_LENGTH) {
@@ -202,7 +197,7 @@ void emAfSubGhzServerZDOMessageReceivedCallback(EmberNodeId sender,
       channelMask >>= 1;
     }
 
-    if (emAfValidateChannelPages(channelPage, channel) != EMBER_SUCCESS) {
+    if (sli_zigbee_af_validate_channel_pages(channelPage, channel) != EMBER_SUCCESS) {
       emberAfSubGhzClusterPrintln("Invalid channel mask: 0x%4x (page %d)",
                                   channelMask,
                                   channelPage);
@@ -277,7 +272,7 @@ uint16_t emberAfPluginSubGhzServerSuspendZclMessagesStatus(EmberNodeId nodeId)
 //------------------------------------------------------------------------------
 // Non-public global functions
 
-/** @brief An incoming message handler, called from emAfIncomingMessageHandler
+/** @brief An incoming message handler, called from sli_zigbee_af_incoming_message_handler
  *
  * Based on the Duty Cycle state, client's ID (has the client been suspended?)
  * and the message type, determines the right action, which could be one of:
@@ -299,11 +294,11 @@ uint16_t emberAfPluginSubGhzServerSuspendZclMessagesStatus(EmberNodeId nodeId)
  * This means we have to at least partially parse the incoming message BEFORE
  * we decide whether to let it through or not for parsing.
  */
-bool emAfSubGhzServerIncomingMessage(EmberIncomingMessageType type,
-                                     EmberApsFrame *apsFrame,
-                                     EmberNodeId sender,
-                                     uint16_t messageLength,
-                                     uint8_t *messageContents)
+bool sli_zigbee_af_sub_ghz_server_incoming_message(EmberIncomingMessageType type,
+                                                   EmberApsFrame *apsFrame,
+                                                   EmberNodeId sender,
+                                                   uint16_t messageLength,
+                                                   uint8_t *messageContents)
 {
   EmberDutyCycleState dcState;
   ClientTable* client = findOrMakeClient(sender);
@@ -497,33 +492,17 @@ static void jointDutyCycleHandler(uint8_t channelPage,
  *   the callback has extra two parameters containing the duty cycle information
  */
 
-#ifdef UC_BUILD
 #ifndef EZSP_HOST
-void emAfPluginSubGhzServerDutyCycleCallback(uint8_t channelPage,
-                                             uint8_t channel,
-                                             EmberDutyCycleState newState)
+void sli_zigbee_af_sub_ghz_server_duty_cycle_callback(uint8_t channelPage,
+                                                      uint8_t channel,
+                                                      EmberDutyCycleState newState)
 #else // EZSP_HOST
-void emAfPluginSubGhzServerDutyCycleCallback(uint8_t channelPage,
-                                             uint8_t channel,
-                                             EmberDutyCycleState newState,
-                                             uint8_t bogo_totalDevices,
-                                             EmberPerDeviceDutyCycle *bogo_arrayOfDutyCycles)
+void sli_zigbee_af_sub_ghz_server_duty_cycle_callback(uint8_t channelPage,
+                                                      uint8_t channel,
+                                                      EmberDutyCycleState newState,
+                                                      uint8_t bogo_totalDevices,
+                                                      EmberPerDeviceDutyCycle *bogo_arrayOfDutyCycles)
 #endif // EZSP_HOST
-#else // UC_BUILD
-#ifndef EZSP_HOST
-void emberDutyCycleHandler(uint8_t channelPage,
-                           uint8_t channel,
-                           EmberDutyCycleState newState)
-#else //EZSP_HOST
-void ezspDutyCycleHandler(uint8_t channelPage,
-                          uint8_t channel,
-                          EmberDutyCycleState newState,
-                          // EMZIGBEE-1173: the following two arguments do not contain valid values in 2017/Q3 Beta
-                          // As a workaround, call emberGetCurrentDutyCycle() inside the handler like we do on SoC
-                          uint8_t bogo_totalDevices,
-                          EmberPerDeviceDutyCycle *bogo_arrayOfDutyCycles)
-#endif // EZSP_HOST
-#endif // UC_BUILD
 {
 // Uncomment once EMZIGBEE-1173 is fixed
 // #ifndef EZSP_HOST
@@ -573,7 +552,7 @@ void emberAfSubGhzClusterServerTickCallback(uint8_t endpoint)
 
   // Schedule the next tick if required
   if (timerStillNeeded) {
-    slxu_zigbee_zcl_schedule_server_tick(endpoint, ZCL_SUB_GHZ_CLUSTER_ID, MILLISECOND_TICKS_PER_SECOND);
+    sl_zigbee_zcl_schedule_server_tick(endpoint, ZCL_SUB_GHZ_CLUSTER_ID, MILLISECOND_TICKS_PER_SECOND);
   }
 }
 
@@ -589,8 +568,6 @@ bool emberAfSubGhzClusterGetSuspendZclMessagesStatusCallback(void)
   }
   return true;
 }
-
-#ifdef UC_BUILD
 
 uint32_t emberAfSubGhzClusterServerCommandParse(sl_service_opcode_t opcode,
                                                 sl_service_function_context_t *context)
@@ -608,5 +585,3 @@ uint32_t emberAfSubGhzClusterServerCommandParse(sl_service_opcode_t opcode,
           ? EMBER_ZCL_STATUS_SUCCESS
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
-
-#endif // UC_BUILD

@@ -15,10 +15,26 @@
 #endif // EZSP_HOST
 
 
+{# AF_SUPPORT_INCOMING_MESSAGE #}
+#if defined(EMBER_AF_NCP) && defined(SL_CATALOG_ZIGBEE_AF_SUPPORT_PRESENT)
+// Incoming Message
+bool sli_zb_af_support_incoming_message(
+      // The aps Frame
+      EmberApsFrame *apsFrame);
+{% for cb in zigbee_stack_callback -%}
+{% if cb['callback_type'] == "af_support_incoming_message" -%}
+bool {{ cb['function_name'] }}(
+      // The aps Frame
+      EmberApsFrame *apsFrame)
+;
+{% endif -%}
+{% endfor -%}
+#endif // defined(EMBER_AF_NCP) && defined(SL_CATALOG_ZIGBEE_AF_SUPPORT_PRESENT)
+
 {# INCOMING_MESSAGE #}
 // Incoming Message
 #ifdef EZSP_HOST
-void emAfIncomingMessage(
+void sli_zb_af_incoming_message(
       // Incoming message type
       EmberIncomingMessageType type,
       // The aps Frame
@@ -65,7 +81,7 @@ void {{ cb['function_name'] }}(
 {% endif -%}
 {% endfor -%}
 #else // !EZSP_HOST
-void emAfIncomingMessage(
+void sli_zb_af_incoming_message(
       // Incoming message type
       EmberIncomingMessageType type,
       // The aps Frame
@@ -90,7 +106,7 @@ void {{ cb['function_name'] }}(
 {# MESSAGE_SENT #}
 // Message Sent
 #ifdef EZSP_HOST
-void emAfMessageSent(
+void sli_zigbee_af_message_sent(
       // Outgoing message type
       EmberOutgoingMessageType type,
       // Index or destination of the message
@@ -127,7 +143,7 @@ void {{ cb['function_name'] }}(
 {% endif -%}
 {% endfor -%}
 #else // !EZSP_HOST
-void emAfMessageSent(
+void sli_zigbee_af_message_sent(
       // Outgoing message type
       EmberOutgoingMessageType type,
       // Index or destination of the message
@@ -161,7 +177,7 @@ void {{ cb['function_name'] }}(
 {# TRUST_CENTER_JOIN #}
 // Trust Center Join
 #ifdef EZSP_HOST
-void emAfTrustCenterJoin(
+void sli_zigbee_af_trust_center_join(
       // Joining node's id
       EmberNodeId newNodeId,
       // Joining node's Eui64
@@ -190,7 +206,7 @@ void {{ cb['function_name'] }}(
 {% endif -%}
 {% endfor -%}
 #else // !EZSP_HOST
-void emAfTrustCenterJoin(
+void sli_zigbee_af_trust_center_join(
       // Joining node's id
       EmberNodeId newNodeId,
       // Joining node's Eui64
@@ -218,7 +234,7 @@ void {{ cb['function_name'] }}(
 
 {# MARK_BUFFERS #}
 // Mark Buffers
-void emAfMarkBuffers(void)
+void sli_zigbee_af_mark_buffers(void)
 ;
 {% for cb in zigbee_stack_callback -%}
 {% if cb['callback_type'] == "mark_buffers" -%}
@@ -230,7 +246,7 @@ void {{ cb['function_name'] }}(void)
 
 {# PACKET_HANDOFF_INCOMING #}
 // Packet Handoff Incoming
-void emAfPacketHandoffIncoming(
+void sli_zigbee_af_packet_handoff_incoming(
       EmberZigbeePacketType packetType,
       EmberMessageBuffer packetBuffer,
       uint8_t index,
@@ -252,7 +268,7 @@ void {{ cb['function_name'] }}(
 
 {# PACKET_HANDOFF_OUTGOING #}
 // Packet Handoff Outgoing
-void emAfPacketHandoffOutgoing(
+void sli_zigbee_af_packet_handoff_outgoing(
       EmberZigbeePacketType packetType,
       EmberMessageBuffer packetBuffer,
       uint8_t index,
@@ -274,7 +290,7 @@ void {{ cb['function_name'] }}(
 
 {# INCOMING_MFG_TEST_MESSAGE #}
 // Incoming Mfg Test Message
-void emAfIncomingMfgTestMessage(
+void sli_zigbee_af_incoming_mfg_test_message(
       uint8_t messageType,
       uint8_t dataLength,
       // Return: 
@@ -294,7 +310,7 @@ void {{ cb['function_name'] }}(
 
 {# OVERRIDE_INCOMING_ROUTE_RECORD #}
 // Override Incoming Route Record
-void emAfOverrideIncomingRouteRecord(
+void sli_zigbee_af_override_incoming_route_record(
       EmberNodeId source,
       EmberEUI64 sourceEui,
       uint8_t relayCount,
@@ -321,7 +337,7 @@ void {{ cb['function_name'] }}(
 {# OVERRIDE_APPEND_SOURCE_ROUTE #}
 // Override Append Source Route
 // Return: Added bytes
-void emAfOverrideAppendSourceRoute(
+void sli_zigbee_af_override_append_source_route(
       EmberNodeId destination,
       // Return: 
       EmberMessageBuffer *header,
@@ -343,7 +359,7 @@ void {{ cb['function_name'] }}(
 
 {# OVERRIDE_FURTHUR_INDEX_FOR_SOURCE_ROUTE_ADD_ENTRY #}
 // Override Furthur Index For Source Route Add Entry
-void emAfOverrideFurthurIndexForSourceRouteAddEntry(
+void sli_zigbee_af_override_furthur_index_for_source_route_add_entry(
       EmberNodeId id,
       // Return: 
       uint8_t *furtherIndex)
@@ -361,7 +377,7 @@ void {{ cb['function_name'] }}(
 
 {# STACK_STATUS #}
 // Stack Status
-void emAfStackStatus(
+void sli_zigbee_af_stack_status(
       // Stack status
       EmberStatus status)
 ;
@@ -375,9 +391,33 @@ void {{ cb['function_name'] }}(
 {% endfor -%}
 
 
+{# REDIRECT_OUTGOING_MESSAGE #}
+// Redirect Outgoing Message
+void sli_zigbee_af_redirect_outgoing_message(
+      // The mac index used to redirect messages
+      uint8_t mac_index,
+      // Packet buffer header
+      EmberMessageBuffer header,
+      // Transmit priority
+      uint8_t priority)
+;
+{% for cb in zigbee_stack_callback -%}
+{% if cb['callback_type'] == "redirect_outgoing_message" -%}
+void {{ cb['function_name'] }}(
+      // The mac index used to redirect messages
+      uint8_t mac_index,
+      // Packet buffer header
+      EmberMessageBuffer header,
+      // Transmit priority
+      uint8_t priority)
+;
+{% endif -%}
+{% endfor -%}
+
+
 {# ENERGY_SCAN_RESULT #}
 // Energy Scan Result
-void emAfEnergyScanResult(
+void sli_zigbee_af_energy_scan_result(
       // The 802.15.4 channel number that was scanned.
       uint8_t channel,
       // The maximum RSSI value found on the channel.
@@ -397,7 +437,7 @@ void {{ cb['function_name'] }}(
 
 {# NETWORK_FOUND #}
 // Network Found
-void emAfNetworkFound(
+void sli_zigbee_af_network_found(
       // The parameters associated with the network found.
       EmberZigbeeNetwork *networkFound,
       // The link quality indication of the network found.
@@ -421,7 +461,7 @@ void {{ cb['function_name'] }}(
 
 {# SCAN_COMPLETE #}
 // Scan Complete
-void emAfScanComplete(
+void sli_zigbee_af_scan_complete(
       // The channel on which the current error occurred. Undefined for the case
       // of EMBER_SUCCESS.
       uint8_t channel,
@@ -445,7 +485,7 @@ void {{ cb['function_name'] }}(
 
 {# UNUSED_PAN_ID_FOUND #}
 // Unused Pan Id Found
-void emAfUnusedPanIdFound(
+void sli_zigbee_af_unused_pan_id_found(
       // The unused panID which has been found.
       EmberPanId panId,
       // The channel that the unused panID was found on.
@@ -466,7 +506,7 @@ void {{ cb['function_name'] }}(
 {# CHILD_JOIN #}
 // Child Join
 #ifdef EZSP_HOST
-void emAfChildJoin(
+void sli_zigbee_af_child_join(
       // The index of the child of interest.
       uint8_t index,
       // True if the child is joining. False the child is leaving.
@@ -495,7 +535,7 @@ void {{ cb['function_name'] }}(
 {% endif -%}
 {% endfor -%}
 #else // !EZSP_HOST
-void emAfChildJoin(
+void sli_zigbee_af_child_join(
       // The index of the child of interest.
       uint8_t index,
       // True if the child is joining. False the child is leaving.
@@ -517,7 +557,7 @@ void {{ cb['function_name'] }}(
 {# DUTY_CYCLE #}
 // Duty Cycle
 #ifdef EZSP_HOST
-void emAfDutyCycle(
+void sli_zigbee_af_duty_cycle(
       // The channel page whose duty cycle state has changed.
       uint8_t channelPage,
       // The channel number whose duty cycle state has changed.
@@ -552,7 +592,7 @@ void {{ cb['function_name'] }}(
 {% endif -%}
 {% endfor -%}
 #else // !EZSP_HOST
-void emAfDutyCycle(
+void sli_zigbee_af_duty_cycle(
       // The channel page whose duty cycle state has changed.
       uint8_t channelPage,
       // The channel number whose duty cycle state has changed.
@@ -578,7 +618,7 @@ void {{ cb['function_name'] }}(
 {# REMOTE_SET_BINDING #}
 // Remote Set Binding
 // Return: ZDO response status.
-void emAfRemoteSetBinding(
+void sli_zigbee_af_remote_set_binding(
       // Return: The contents of the binding entry.
       EmberBindingTableEntry *entry)
 ;
@@ -595,7 +635,7 @@ void {{ cb['function_name'] }}(
 {# REMOTE_DELETE_BINDING #}
 // Remote Delete Binding
 // Return: ZDO response status
-void emAfRemoteDeleteBinding(
+void sli_zigbee_af_remote_delete_binding(
       // The index of the binding whose deletion was requested.
       uint8_t index)
 ;
@@ -611,7 +651,7 @@ void {{ cb['function_name'] }}(
 
 {# POLL_COMPLETE #}
 // Poll Complete
-void emAfPollComplete(
+void sli_zigbee_af_poll_complete(
       // An EmberStatus value: EMBER_SUCCESS - Data was received in response to
       // the poll. EMBER_MAC_NO_DATA - No data was pending.
       // EMBER_DELIVERY_FAILED - The poll message could not be sent.
@@ -635,7 +675,7 @@ void {{ cb['function_name'] }}(
 
 {# POLL #}
 // Poll
-void emAfPoll(
+void sli_zigbee_af_poll(
       // The node ID of the child that is requesting data.
       EmberNodeId childId,
       // True if transmit expected, false otherwise.
@@ -656,7 +696,7 @@ void {{ cb['function_name'] }}(
 {# DEBUG #}
 #ifdef EZSP_HOST
 // Debug
-void emAfDebug(
+void sli_zigbee_af_debug(
       // debug message length
       uint8_t messageLength,
       // debug message
@@ -674,7 +714,7 @@ void {{ cb['function_name'] }}(
 {% endfor -%}
 #else // !EZSP_HOST
 // Debug
-void emAfDebug(
+void sli_zigbee_af_debug(
       // debug message
       EmberMessageBuffer message)
 ;
@@ -691,7 +731,7 @@ void {{ cb['function_name'] }}(
 
 {# INCOMING_MANY_TO_ONE_ROUTE_REQUEST #}
 // Incoming Many To One Route Request
-void emAfIncomingManyToOneRouteRequest(
+void sli_zigbee_af_incoming_many_to_one_route_request(
       // The short id of the concentrator.
       EmberNodeId source,
       // The EUI64 of the concentrator.
@@ -719,7 +759,7 @@ void {{ cb['function_name'] }}(
 
 {# INCOMING_ROUTE_ERROR #}
 // Incoming Route Error
-void emAfIncomingRouteError(
+void sli_zigbee_af_incoming_route_error(
       // EMBER_SOURCE_ROUTE_FAILURE or EMBER_MANY_TO_ONE_ROUTE_FAILURE.
       EmberStatus status,
       // The short id of the remote node.
@@ -739,7 +779,7 @@ void {{ cb['function_name'] }}(
 
 {# INCOMING_NETWORK_STATUS #}
 // Incoming Network Status
-void emAfIncomingNetworkStatus(
+void sli_zigbee_af_incoming_network_status(
       // One byte over-the-air error code from network status message
       uint8_t errorCode,
       // The short ID of the remote node
@@ -759,7 +799,7 @@ void {{ cb['function_name'] }}(
 
 {# INCOMING_ROUTE_RECORD #}
 // Incoming Route Record
-void emAfIncomingRouteRecord(
+void sli_zigbee_af_incoming_route_record(
       // The source of the route record.
       EmberNodeId source,
       // The EUI64 of the source.
@@ -791,7 +831,7 @@ void {{ cb['function_name'] }}(
 
 {# ID_CONFLICT #}
 // Id Conflict
-void emAfIdConflict(
+void sli_zigbee_af_id_conflict(
       // The short id for which a conflict was detected
       EmberNodeId conflictingId)
 ;
@@ -808,7 +848,7 @@ void {{ cb['function_name'] }}(
 {# MAC_PASSTHROUGH_MESSAGE #}
 #ifdef EZSP_HOST
 // Mac Passthrough Message
-void emAfMacPassthroughMessage(
+void sli_zigbee_af_mac_passthrough_message(
       // The type of MAC passthrough message received.
       EmberMacPassthroughType messageType,
       // last hop lqi.
@@ -838,7 +878,7 @@ void {{ cb['function_name'] }}(
 {% endfor -%}
 #else // !EZSP_HOST
 // Mac Passthrough Message
-void emAfMacPassthroughMessage(
+void sli_zigbee_af_mac_passthrough_message(
       // The type of MAC passthrough message received.
       EmberMacPassthroughType messageType,
       // The raw message that was received.
@@ -859,7 +899,7 @@ void {{ cb['function_name'] }}(
 
 {# STACK_TOKEN_CHANGED #}
 // Stack Token Changed
-void emAfStackTokenChanged(
+void sli_zigbee_af_stack_token_changed(
       // The address of the stack token that has changed.
       uint16_t tokenAddress)
 ;
@@ -875,7 +915,7 @@ void {{ cb['function_name'] }}(
 
 {# TIMER #}
 // Timer
-void emAfTimer(
+void sli_zigbee_af_timer(
       // Which timer generated the callback (0 or 1).
       uint8_t timerId)
 ;
@@ -891,7 +931,7 @@ void {{ cb['function_name'] }}(
 
 {# COUNTER_ROLLOVER #}
 // Counter Rollover
-void emAfCounterRollover(
+void sli_zigbee_af_counterRollover(
       // Type of Counter
       EmberCounterType type)
 ;
@@ -907,7 +947,7 @@ void {{ cb['function_name'] }}(
 
 {# RAW_TRANSMIT_COMPLETE #}
 // Raw Transmit Complete
-void emAfRawTransmitComplete(
+void sli_zigbee_af_raw_transmit_complete(
       // message
       EmberMessageBuffer message,
       // EMBER_SUCCESS if the transmission was successful, or
@@ -929,7 +969,7 @@ void {{ cb['function_name'] }}(
 
 {# SWITCH_NETWORK_KEY #}
 // Switch Network Key
-void emAfSwitchNetworkKey(
+void sli_zigbee_af_switch_network_key(
       // The sequence number of the new network key.
       uint8_t sequenceNumber)
 ;
@@ -945,7 +985,7 @@ void {{ cb['function_name'] }}(
 
 {# ZIGBEE_KEY_ESTABLISHMENT #}
 // Zigbee Key Establishment
-void emAfZigbeeKeyEstablishment(
+void sli_zigbee_af_zigbee_key_establishment(
       // This is the IEEE address of the partner that the device successfully
       // established a key with. This value is all zeros on a failure.
       EmberEUI64 partner,
@@ -969,7 +1009,7 @@ void {{ cb['function_name'] }}(
 
 {# GENERATE_CBKE_KEYS #}
 // Generate Cbke Keys
-void emAfGenerateCbkeKeys(
+void sli_zigbee_af_generate_cbke_keys(
       // The result of the CBKE operation.
       EmberStatus status,
       // Return: The generated ephemeral public key.
@@ -989,7 +1029,7 @@ void {{ cb['function_name'] }}(
 
 {# CALCULATE_SMACS #}
 // Calculate Smacs
-void emAfCalculateSmacs(
+void sli_zigbee_af_calculate_smacs(
       // The Result of the CBKE operation.
       EmberStatus status,
       // Return: The calculated value of the initiator's SMAC
@@ -1014,7 +1054,7 @@ void {{ cb['function_name'] }}(
 {# DSA_SIGN #}
 #ifdef EZSP_HOST
 // Dsa Sign
-void emAfDsaSign(
+void sli_zigbee_af_dsa_sign(
       // The result of the DSA signing operation.
       EmberStatus status,
       // Message length
@@ -1038,7 +1078,7 @@ void {{ cb['function_name'] }}(
 {% endfor -%}
 #else // !EZSP_HOST
 // Dsa Sign
-void emAfDsaSign(
+void sli_zigbee_af_dsa_sign(
       // The result of the DSA signing operation.
       EmberStatus status,
       // The message and attached which includes the original message and the
@@ -1061,7 +1101,7 @@ void {{ cb['function_name'] }}(
 
 {# DSA_VERIFY #}
 // Dsa Verify
-void emAfDsaVerify(
+void sli_zigbee_af_dsa_verify(
       // The result of the DSA verification operation.
       EmberStatus status)
 ;
@@ -1078,7 +1118,7 @@ void {{ cb['function_name'] }}(
 {# INCOMING_BOOTLOAD_MESSAGE #}
 #ifdef EZSP_HOST
 // Incoming Bootload Message
-void emAfIncomingBootloadMessage(
+void sli_zigbee_af_incoming_bootload_message(
       // The EUI64 of the sending node.
       EmberEUI64 longId,
       // last hop lqi.
@@ -1108,7 +1148,7 @@ void {{ cb['function_name'] }}(
 {% endfor -%}
 #else // !EZSP_HOST
 // Incoming Bootload Message
-void emAfIncomingBootloadMessage(
+void sli_zigbee_af_incoming_bootload_message(
       // The EUI64 of the sending node.
       EmberEUI64 longId,
       // The bootload message that was sent.
@@ -1130,7 +1170,7 @@ void {{ cb['function_name'] }}(
 {# BOOTLOAD_TRANSMIT_COMPLETE #}
 #ifdef EZSP_HOST
 // Bootload Transmit Complete
-void emAfBootloadTransmitComplete(
+void sli_zigbee_af_bootload_transmit_complete(
       // An EmberStatus value of EMBER_SUCCESS if an ACK was received from the
       // destination or EMBER_DELIVERY_FAILED if no ACK was received.
       EmberStatus status,
@@ -1154,7 +1194,7 @@ void {{ cb['function_name'] }}(
 {% endfor -%}
 #else // !EZSP_HOST
 // Bootload Transmit Complete
-void emAfBootloadTransmitComplete(
+void sli_zigbee_af_bootload_transmit_complete(
       // The bootload message that was sent.
       EmberMessageBuffer message,
       // An EmberStatus value of EMBER_SUCCESS if an ACK was received from the
@@ -1178,7 +1218,7 @@ void {{ cb['function_name'] }}(
 {# ZLL_NETWORK_FOUND #}
 #ifdef EZSP_HOST
 // Zll Network Found
-void emAfZllNetworkFound(
+void sli_zigbee_af_zll_networkFound(
       // Information about the network.
       EmberZllNetwork *networkInfo,
       // Used to interpret deviceInfo field.
@@ -1208,7 +1248,7 @@ void {{ cb['function_name'] }}(
 {% endfor -%}
 #else // !EZSP_HOST
 // Zll Network Found
-void emAfZllNetworkFound(
+void sli_zigbee_af_zll_networkFound(
       // Return: Information about the network.
       const EmberZllNetwork *networkInfo,
       // Return: Device specific information.
@@ -1229,7 +1269,7 @@ void {{ cb['function_name'] }}(
 
 {# ZLL_SCAN_COMPLETE #}
 // Zll Scan Complete
-void emAfZllScanComplete(
+void sli_zigbee_af_zll_scan_complete(
       // Status of the operation.
       EmberStatus status)
 ;
@@ -1246,7 +1286,7 @@ void {{ cb['function_name'] }}(
 {# ZLL_ADDRESS_ASSIGNMENT #}
 #ifdef EZSP_HOST
 // Zll Address Assignment
-void emAfZllAddressAssignment(
+void sli_zb_af_zll_address_assignment(
       // Address assignment information.
       EmberZllAddressAssignment *addressInfo,
       // The link quality from the node that last relayed the message.
@@ -1268,7 +1308,7 @@ void {{ cb['function_name'] }}(
 {% endfor -%}
 #else // !EZSP_HOST
 // Zll Address Assignment
-void emAfZllAddressAssignment(
+void sli_zb_af_zll_address_assignment(
       // Return: Address assignment information.
       const EmberZllAddressAssignment *addressInfo)
 ;
@@ -1285,7 +1325,7 @@ void {{ cb['function_name'] }}(
 
 {# ZLL_TOUCH_LINK_TARGET #}
 // Zll Touch Link Target
-void emAfZllTouchLinkTarget(
+void sli_zigbee_af_zll_touch_link_target(
       // Return: Information about the network.
       const EmberZllNetwork *networkInfo)
 ;
@@ -1302,7 +1342,7 @@ void {{ cb['function_name'] }}(
 {# MAC_FILTER_MATCH_MESSAGE #}
 #ifdef EZSP_HOST
 // Mac Filter Match Message
-void emAfMacFilterMatchMessage(
+void sli_zigbee_af_mac_filter_match_message(
       // filter index match.
       uint8_t filterIndexMatch,
       // message type.
@@ -1336,7 +1376,7 @@ void {{ cb['function_name'] }}(
 {% endfor -%}
 #else // !EZSP_HOST
 // Mac Filter Match Message
-void emAfMacFilterMatchMessage(
+void sli_zigbee_af_mac_filter_match_message(
       // Return: macFilterMatchStruct.
       const EmberMacFilterMatchStruct *macFilterMatchStruct)
 ;
@@ -1353,7 +1393,7 @@ void {{ cb['function_name'] }}(
 
 {# D_GP_SENT #}
 // D Gp Sent
-void emAfDGpSent(
+void sli_zigbee_af_d_gp_sent(
       // An EmberStatus value indicating success or the reason for failure.
       EmberStatus status,
       // The handle of the GPDF.
@@ -1374,7 +1414,7 @@ void {{ cb['function_name'] }}(
 {# PAN_ID_CONFLICT #}
 // Pan Id Conflict
 // Return: An EmberStatus value indicating success or the reason for failure.
-void emAfPanIdConflict(
+void sli_zigbee_af_pan_id_conflict(
       // Number of conflict reports
       int8_t conflictCount)
 ;
@@ -1390,7 +1430,7 @@ void {{ cb['function_name'] }}(
 
 {# ORPHAN_NOTIFICATION #}
 // Orphan Notification
-void emAfOrphanNotification(
+void sli_zigbee_af_orphan_notification(
       // The 8 byte EUI64 of the sender.
       EmberEUI64 longId)
 ;
@@ -1406,7 +1446,7 @@ void {{ cb['function_name'] }}(
 
 {# COUNTER #}
 // Counter
-void emAfCounter(
+void sli_zigbee_af_counter(
       // Type of Counter
       EmberCounterType type,
       // Counter Info and value
@@ -1427,7 +1467,7 @@ void {{ cb['function_name'] }}(
 {# MAC_PASSTHROUGH_FILTER #}
 // Mac Passthrough Filter
 // Return: True if mac passthrough filter was matched. False otherwise.
-void emAfMacPassthroughFilter(
+void sli_zigbee_af_mac_passthrough_filter(
       // Return: Mac Header of the matched messgae
       uint8_t *macHeader)
 ;
@@ -1443,7 +1483,7 @@ void {{ cb['function_name'] }}(
 
 {# GENERATE_CBKE_KEYS_HANDLER283K1 #}
 // Generate Cbke Keys Handler283k1
-void emAfGenerateCbkeKeysHandler283k1(
+void sli_zigbee_af_generate_cbke_keys_handler283k1(
       // The result of the CBKE operation.
       EmberStatus status,
       // Return: The generated ephemeral public key.
@@ -1463,7 +1503,7 @@ void {{ cb['function_name'] }}(
 
 {# CALCULATE_SMACS_HANDLER283K1 #}
 // Calculate Smacs Handler283k1
-void emAfCalculateSmacsHandler283k1(
+void sli_zigbee_af_calculate_smacsHandler283k1(
       // The Result of the CBKE operation.
       EmberStatus status,
       // Return: The calculated value of the initiator's SMAC
@@ -1487,7 +1527,7 @@ void {{ cb['function_name'] }}(
 
 {# GPEP_INCOMING_MESSAGE #}
 // Gpep Incoming Message
-void emAfGpepIncomingMessage(
+void sli_zigbee_af_gpep_incoming_message(
       // The status of the GPDF receive.
       EmberStatus status,
       // The gpdLink value of the received GPDF.
@@ -1562,7 +1602,7 @@ void {{ cb['function_name'] }}(
 {# RTOS_IDLE #}
 // Rtos Idle
 // Return: True or False.
-void emAfRtosIdle(
+void sli_zigbee_af_rtos_idle(
       // Return: Idle time duration
       uint32_t *idleTimeMs)
 ;
@@ -1578,7 +1618,7 @@ void {{ cb['function_name'] }}(
 
 {# RTOS_STACK_WAKEUP_ISR #}
 // Rtos Stack Wakeup Isr
-void emAfRtosStackWakeupIsr(void)
+void sli_zb_af_rtos_stack_wakeup_isr(void)
 ;
 {% for cb in zigbee_stack_callback -%}
 {% if cb['callback_type'] == "rtos_stack_wakeup_isr" -%}
@@ -1590,7 +1630,7 @@ void {{ cb['function_name'] }}(void)
 
 {# RADIO_NEEDS_CALIBRATING #}
 // Radio Needs Calibrating
-void emAfRadioNeedsCalibrating(void)
+void sli_zigbee_af_radio_needs_calibrating(void)
 ;
 {% for cb in zigbee_stack_callback -%}
 {% if cb['callback_type'] == "radio_needs_calibrating" -%}
@@ -1602,7 +1642,7 @@ void {{ cb['function_name'] }}(void)
 
 {# SCAN_ERROR #}
 // Scan Error
-void emAfScanError(
+void sli_zigbee_af_scan_error(
       // The error status of a scan
       EmberStatus status)
 ;

@@ -1,6 +1,6 @@
 project_name: bt_soc_throughput_log
 package: Bluetooth
-label: Bluetooth - SoC Throughput
+label: Bluetooth - SoC Throughput (two buttons)
 description: >
   This example tests the throughput capabilities of the device and can be used
   to measure throughput between 2 *EFR32* devices, as well as between a device
@@ -87,6 +87,22 @@ configuration:
     value: "0"
     condition:
       - psa_crypto
+
+template_contribution:
+  - name: cli_command
+    value:
+      name: switch_to_central
+      handler: cli_switch_to_central
+      help: "Switch to central"
+    condition:
+      - cli
+  - name: cli_command
+    value:
+      name: switch_to_peripheral
+      handler: cli_switch_to_peripheral
+      help: "Switch to peripheral"
+    condition:
+      - cli
 
 tag:
   - hardware:rf:band:2400

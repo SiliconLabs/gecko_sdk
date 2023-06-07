@@ -51,11 +51,9 @@ void debugPrintTextAndHexData(const char* text, const char* data, int length);
 #if defined(EMBER_TEST) && defined(HASH_DEBUG_PRINT)
   #define simPrintText(...) fprintf(stderr, __VA_ARGS__)
 #elif defined(HASH_DEBUG_PRINT)
-EmberStatus emberSerialPrintf(uint8_t port, const char * formatString, ...);
-EmberStatus emberSerialPrintfLine(uint8_t port, const char * formatString, ...);
 EmberStatus emberSerialWaitSend(uint8_t port);
   #define HASH_DEBUG_PRINT_PORT 1
-  #define simPrintText(...) emberSerialPrintf(HASH_DEBUG_PRINT_PORT, __VA_ARGS__)
+  #define simPrintText(...) sl_zigbee_core_debug_print(__VA_ARGS__)
 #else
   #define simPrintTextAndHex(x, y)
   #define simPrintText(...)
@@ -92,8 +90,8 @@ static void simPrintTextAndHex(const char* text, const uint8_t* data)
 
 static void simPrintTextAndHex(const char * text, const uint8_t* data)
 {
-  (void) emberSerialPrintf(HASH_DEBUG_PRINT_PORT, "%p: ", text);
-  (void) emberSerialPrintfLine(HASH_DEBUG_PRINT_PORT, " %X%X%X%X%X%X%X%X  %X%X%X%X%X%X%X%X",
+  sl_zigbee_core_debug_print("%p: ", text);
+  sl_zigbee_core_debug_println(" %X%X%X%X%X%X%X%X  %X%X%X%X%X%X%X%X",
                                data[0],
                                data[1],
                                data[2],
@@ -124,7 +122,7 @@ static void aesHashNextBlock(const uint8_t *block, uint8_t *result)
 
   MEMCOPY(key, result, BLOCK_SIZE);
   MEMCOPY(result, block, BLOCK_SIZE);
-  emAesEncrypt(result, key);
+  sli_zigbee_aes_encrypt(result, key);
 
   for (i = 0; i < BLOCK_SIZE; i++) {
     result[i] ^= block[i];

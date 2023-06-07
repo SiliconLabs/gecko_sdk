@@ -87,26 +87,18 @@
 
 // <gpio> PB1_GPIO
 // $[GPIO_PB1_GPIO]
-#define PB1_GPIO_PORT       gpioPortA
-#define PB1_GPIO_PIN        13
 // [GPIO_PB1_GPIO]$
 
 // <gpio> PB2_GPIO
 // $[GPIO_PB2_GPIO]
-#define PB2_GPIO_PORT       gpioPortA
-#define PB2_GPIO_PIN        14
 // [GPIO_PB2_GPIO]$
 
 // <gpio> PB3_GPIO
 // $[GPIO_PB3_GPIO]
-#define PB3_GPIO_PORT       gpioPortC
-#define PB3_GPIO_PIN        5
 // [GPIO_PB3_GPIO]$
 
 // <gpio> PB4_GPIO
 // $[GPIO_PB4_GPIO]
-#define PB4_GPIO_PORT       gpioPortC
-#define PB4_GPIO_PIN        7
 // [GPIO_PB4_GPIO]$
 
 // <<< sl:end pin_tool >>>

@@ -89,7 +89,7 @@ class PHYS_Datasheet(IPhy):
         phy.profile_inputs.bitrate.value = 200000
         phy.profile_inputs.deviation.value = 100000
         phy.profile_inputs.agc_power_target.value = -8
-        if model.part_family.lower() in ['dumbo', 'jumbo', 'nerio', 'nixi']:
+        if model.part_family.lower() in ['dumbo', 'jumbo', 'nerio', 'nixi', 'unit_test_part']:
             phy.profile_inputs.pll_bandwidth_tx.value = model.vars.pll_bandwidth_tx.var_enum.BW_297KHz
 
     def PHY_Datasheet_915M_2GFSK_200Kbps_100K_antdiv(self, model, phy_name=None):
@@ -112,7 +112,7 @@ class PHYS_Datasheet(IPhy):
         phy.profile_inputs.timing_sample_threshold.value = 10
         phy.profile_inputs.symbols_in_timing_window.value = 14
 
-        if model.part_family.lower() in ['dumbo', 'jumbo', 'nerio', 'nixi']:
+        if model.part_family.lower() in ['dumbo', 'jumbo', 'nerio', 'nixi', 'unit_test_part']:
             # Series 1
             phy.profile_inputs.pll_bandwidth_tx.value = model.vars.pll_bandwidth_tx.var_enum.BW_297KHz
         else:
@@ -166,7 +166,7 @@ class PHYS_Datasheet(IPhy):
         phy.profile_inputs.timing_sample_threshold.value = 5
         phy.profile_inputs.symbols_in_timing_window.value = 14
 
-        if model.part_family.lower() in ['dumbo', 'jumbo', 'nerio', 'nixi']:
+        if model.part_family.lower() in ['dumbo', 'jumbo', 'nerio', 'nixi', 'unit_test_part']:
             phy.profile_inputs.pll_bandwidth_tx.value = model.vars.pll_bandwidth_tx.var_enum.BW_297KHz
         else:
             #  Series 2
@@ -226,7 +226,7 @@ class PHYS_Datasheet(IPhy):
         phy.profile_inputs.if_frequency_hz.value = 400000
         phy.profile_inputs.bandwidth_hz.value = 10000
         phy.profile_inputs.symbols_in_timing_window.value = 14
-        if model.part_family.lower() in ['dumbo', 'jumbo', 'nerio', 'nixi']:
+        if model.part_family.lower() in ['dumbo', 'jumbo', 'nerio', 'nixi', 'unit_test_part']:
             # Series 1
             phy.profile_inputs.pll_bandwidth_rx.value = model.vars.pll_bandwidth_rx.var_enum.BW_354KHz
         else:
@@ -332,7 +332,7 @@ class PHYS_Datasheet(IPhy):
 
         phy.profile_inputs.if_frequency_hz.value = 300000
         phy.profile_inputs.agc_settling_delay.value = 34 #Allowing this as no DEC values have changed
-        if model.part_family.lower() in ['dumbo', 'jumbo', 'nerio', 'nixi']:
+        if model.part_family.lower() in ['dumbo', 'jumbo', 'nerio', 'nixi', 'unit_test_part']:
             phy.profile_inputs.pll_bandwidth_tx.value = model.vars.pll_bandwidth_tx.var_enum.BW_297KHz
 
     def PHY_Datasheet_490M_2GFSK_100Kbps_50K(self,model, phy_name=None):

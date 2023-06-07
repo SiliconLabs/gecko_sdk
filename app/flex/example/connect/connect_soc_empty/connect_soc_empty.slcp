@@ -13,6 +13,7 @@ component:
   - id: connect_app_framework_common
   - id: mbedtls_core 
   - id: token_manager
+  - id: rail_util_pti
 #------------Memory Protection Unit-------------------
   - id: mpu
 #-----------Need while connect uses printf -----------
@@ -28,6 +29,9 @@ component:
 #----------------- Require list ----------------------
 requires:
   - name: a_radio_config
+  - name: radio_config_simple_connect_singlephy_device_family_fgm23
+    condition:
+      - "device_family_fgm23"
 
 #----------------- Project files ---------------------
 include:

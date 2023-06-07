@@ -24,17 +24,13 @@
 
 #include "app/framework/security/crypto-state.h"
 
-#ifdef UC_BUILD
-void emAfDemandResponseLoadControlClusterDsaSignCallback(EmberStatus status, EmberMessageBuffer message)
-#else // !UC_BUILD
-void emberDsaSignHandler(EmberStatus status, EmberMessageBuffer message)
-#endif // UC_BUILD
+void sli_zigbee_af_demand_response_load_control_cluster_dsa_sign_callback(EmberStatus status, EmberMessageBuffer message)
 {
   // Message has been queued by the stack for sending.  Nothing more to do.
-  emAfCryptoOperationComplete();
+  sli_zigbee_af_crypto_operation_complete();
 
   if (status != EMBER_SUCCESS) {
-    emAfNoteSignatureFailure();
+    sli_zigbee_af_note_signature_failure();
   }
 
   emberAfDemandResponseLoadControlClusterPrintln("emberDsaSignHandler() returned 0x%x",

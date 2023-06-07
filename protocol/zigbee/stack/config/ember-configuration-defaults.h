@@ -62,7 +62,7 @@
   #include CONFIGURATION_HEADER
 #endif
 
-#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
 #endif
 
@@ -393,6 +393,14 @@
 #ifndef EMBER_APS_UNICAST_MESSAGE_COUNT
   #define EMBER_APS_UNICAST_MESSAGE_COUNT 10
 #endif
+
+/** @brief Size of 1 is basically the same thing as no duplicate rejection
+ */
+#ifndef SL_ZIGBEE_APS_DUPLICATE_REJECTION_MAX_ENTRIES
+// NOTE a size of 1 is basically the same thing as no duplicate rejection
+#define SL_ZIGBEE_APS_DUPLICATE_REJECTION_MAX_ENTRIES 5
+#endif
+
 /** @brief The maximum number of bindings supported by the stack.
  * The default is 0 bindings. Each binding consumes 2 bytes of RAM.
  */
@@ -547,7 +555,7 @@
 
 /** @brief The length of time, in seconds, that a trust center will store
  *  a transient link key that a device can use to join its network. A
- *  transient key is added with a call to emberAddTransientLinkKey. After the
+ *  transient key is added with a call to sl_zb_sec_man_import_transient_key. After the
  *  transient key is added, it will be removed once this amount of time has
  *  passed. A joining device will not be able to use that key to join until
  *  it is added again on the trust center. The default value is 300 seconds,
@@ -555,6 +563,16 @@
  */
 #ifndef EMBER_TRANSIENT_KEY_TIMEOUT_S
   #define EMBER_TRANSIENT_KEY_TIMEOUT_S (300)
+#endif
+
+/** @brief A reserved emberTransientKeyTimeoutS value that, when stored with
+ *  a "transient" key, prevents its removal from the transient key table
+ *  when the session is active. Note that some standard security procedures
+ *  (e.g. Zigbee Direct) require session keys to remain active indefinitely
+ *  for the duration of the of the exchange.
+ */
+#ifndef EMBER_TRANSIENT_KEY_SESSION_TIMEOUT_VAL
+  #define EMBER_TRANSIENT_KEY_SESSION_TIMEOUT_VAL 0xFFFF
 #endif
 
 /** @brief The time the coordinator will wait (in seconds) for a second end
@@ -750,6 +768,12 @@
   #define SL_ZIGBEE_TRANSIENT_DEVICE_DEFAULT_TIMEOUT_MS (10000u)
 #endif
 
+//Allows the aps acks for APSME commands to be turned off or on
+//This should be "true" by default but to keep it consistend with the current stack behaviour this is "false" by default.
+#ifndef SL_ZIGBEE_ENABLE_APS_ACKS_FOR_COMMANDS
+  #define SL_ZIGBEE_ENABLE_APS_ACKS_FOR_COMMANDS (false)
+#endif
+
 #ifndef EMBER_CUSTOM_MAC_FILTER_TABLE_SIZE
 #if !defined(EMBER_TEST) && !defined(ZIGBEE_STACK_ON_HOST)
   #define EMBER_CUSTOM_MAC_FILTER_TABLE_SIZE 2
@@ -777,6 +801,13 @@
 #ifdef EMBER_TEST
   #undef EMBER_RADIO_802154_CCA_MODE
   #define EMBER_RADIO_802154_CCA_MODE 0
+#endif
+
+/**
+ * @brief the number of beacons to store when performing a beacon survey scan
+ */
+#ifndef SL_ZIGBEE_ZDO_BEACON_SURVEY_MAX_UNIQUE_NETWORKS
+  #define SL_ZIGBEE_ZDO_BEACON_SURVEY_MAX_UNIQUE_NETWORKS 8
 #endif
 
 /** @} END addtogroup */

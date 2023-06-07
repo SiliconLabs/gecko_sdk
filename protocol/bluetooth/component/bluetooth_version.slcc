@@ -3,7 +3,7 @@ label: "Bluetooth Version"
 package: "Bluetooth"
 description: >
   Bluetooth Low Energy stack and controller version information
-category: "Bluetooth|Stack"
+category: Bluetooth|Bluetooth Host (Stack)
 quality: "production"
 root_path: "protocol/bluetooth"
 include:

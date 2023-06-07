@@ -31,7 +31,7 @@ template_contribution:
   - name: zigbee_af_callback
     value:
       callback_type: event_init
-      function_name: emAfPluginManufacturingLibraryCliInitCallback    
+      function_name: sli_zigbee_af_manufacturing_library_cli_init_callback    
   - name: cli_group
     value:
       group: plugin
@@ -41,7 +41,7 @@ template_contribution:
     value:
       group: mfglib
       name: start
-      handler: emAfMfglibStartCommand
+      handler: sli_zigbee_af_mfglib_start_command
       help: Start the mfglib test mode.
       argument:
       - type: int8
@@ -50,7 +50,7 @@ template_contribution:
     value:
       group: mfglib
       name: stop
-      handler: emAfMfglibStopCommand
+      handler: sli_zigbee_af_mfglib_stop_command
       help: Stop the mfglib test mode.
   - name: cli_group
     value:
@@ -61,25 +61,25 @@ template_contribution:
     value:
       group: tone
       name: start
-      handler: emAfMfglibToneStartCommand
+      handler: sli_zigbee_af_mfglib_tone_start_command
       help: Starts a tone test.
   - name: cli_command
     value:
       group: tone
       name: stop
-      handler: emAfMfglibToneStopCommand
+      handler: sli_zigbee_af_mfglib_tone_stop_command
       help: Stops the tone test.
   - name: cli_command
     value:
       group: mfglib
       name: status
-      handler: emAfMfglibStatusCommand
+      handler: sli_zigbee_af_mfglib_status_command
       help: Prints the current status of the manufacturing library.
   - name: cli_command
     value:
       group: mfglib
       name: set-channel
-      handler: emAfMfglibSetChannelCommand
+      handler: sli_zigbee_af_mfglib_set_channel_command
       help: Sets the channel used by the manufacturing library for testing.
       argument:
       - type: uint8
@@ -88,7 +88,7 @@ template_contribution:
     value:
       group: mfglib
       name: set-power
-      handler: emAfMfglibSetPowerAndModeCommand
+      handler: sli_zigbee_af_mfglib_set_power_and_mode_command
       help: Set the power level and mode for the manufacturing test.
       argument:
       - type: int8
@@ -104,13 +104,13 @@ template_contribution:
     value:
       group: stream
       name: start
-      handler: emAfMfglibStreamStartCommand
+      handler: sli_zigbee_af_mfglib_stream_start_command
       help: Start the stream test.
   - name: cli_command
     value:
       group: stream
       name: stop
-      handler: emAfMfglibStreamStopCommand
+      handler: sli_zigbee_af_mfglib_stream_stop_command
       help: Stop the stream test.
   - name: cli_group
     value:
@@ -121,7 +121,7 @@ template_contribution:
     value:
       group: send
       name: random
-      handler: emAfMfglibSendCommand
+      handler: sli_zigbee_af_mfglib_send_command
       help: Send a series of test packets with random data..
       argument:
       - type: uint16
@@ -132,7 +132,7 @@ template_contribution:
     value:
       group: send
       name: test
-      handler: emAfMfglibSendCommand
+      handler: sli_zigbee_af_mfglib_send_command
       help: Send a series of test packets with fixed data.
       argument:
       - type: uint16
@@ -143,7 +143,7 @@ template_contribution:
     value:
       group: send
       name: message
-      handler: emAfMfglibSendMessageCommand
+      handler: sli_zigbee_af_mfglib_send_message_command
       help: Send a test message with the specified data in it.
       argument:
       - type: hex
@@ -154,7 +154,7 @@ template_contribution:
     value:
       group: mfglib
       name: sleep
-      handler: emAfMfglibSleepCommand
+      handler: sli_zigbee_af_mfglib_sleep_command
       help: Sleep.
       argument:
       - type: uint16
@@ -163,7 +163,7 @@ template_contribution:
     value:
       group: mfglib
       name: programEui
-      handler: emAfMfglibProgramEuiCommand
+      handler: sli_zigbee_af_mfglib_program_eui_command
       help: Program EUI.
       argument:
       - type: hex
@@ -172,7 +172,7 @@ template_contribution:
     value:
       group: mfglib
       name: mfgenable
-      handler: emAfMfglibEnableMfglib
+      handler: sli_zigbee_af_mfglib_enable_mfglib
       help: Enable mfglib.
       argument:
       - type: uint8
@@ -181,7 +181,7 @@ template_contribution:
     value:
       group: mfglib
       name: set-options
-      handler: emAfMfglibSetOptions
+      handler: sli_zigbee_af_mfglib_set_options
       help: Sets options in the manufacturing library for testing.
       argument:
       - type: uint8

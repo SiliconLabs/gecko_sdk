@@ -28,21 +28,13 @@
 
 //============================================================================
 // Globals
-#ifdef UC_BUILD
 #include "device-query-service-config.h"
 sl_zigbee_event_t emberAfPluginDeviceQueryServiceMyEvent;
 #define myEvent (&emberAfPluginDeviceQueryServiceMyEvent)
-void emberAfPluginDeviceQueryServiceMyEventHandler(SLXU_UC_EVENT);
+void emberAfPluginDeviceQueryServiceMyEventHandler(sl_zigbee_event_t * event);
 #if (EMBER_AF_PLUGIN_DEVICE_QUERY_SERVICE_AUTO_START == 1)
 #define AUTO_START
 #endif
-#else // !UC_BUILD
-EmberEventControl emberAfPluginDeviceQueryServiceMyEventControl;
-#define myEvent emberAfPluginDeviceQueryServiceMyEventControl
-#ifdef EMBER_AF_PLUGIN_DEVICE_QUERY_SERVICE_AUTO_START
-#define AUTO_START
-#endif
-#endif // UC_BUILD
 static EmberEUI64 currentEui64;
 static EmberNodeId currentNodeId = EMBER_NULL_NODE_ID;
 static uint8_t currentEndpointIndex;
@@ -112,7 +104,7 @@ bool emberAfPluginDeviceQueryServiceGetEnabledState(void)
 void emberAfPluginDeviceQueryServiceEnableDisable(bool enable)
 {
   enabled = enable;
-  slxu_zigbee_event_set_inactive(myEvent);
+  sl_zigbee_event_set_inactive(myEvent);
 }
 
 static void clearCurrentDevice(void)
@@ -121,15 +113,13 @@ static void clearCurrentDevice(void)
   currentNodeId = EMBER_NULL_NODE_ID;
 }
 
-#ifdef UC_BUILD
-
 void emberAfPluginDeviceQueryServiceInitCallback(uint8_t init_level)
 {
   switch (init_level) {
     case SL_ZIGBEE_INIT_LEVEL_EVENT:
     {
-      slxu_zigbee_network_event_init(myEvent,
-                                     emberAfPluginDeviceQueryServiceMyEventHandler);
+      sl_zigbee_network_event_init(myEvent,
+                                   emberAfPluginDeviceQueryServiceMyEventHandler);
       break;
     }
 
@@ -142,34 +132,21 @@ void emberAfPluginDeviceQueryServiceInitCallback(uint8_t init_level)
   }
 }
 
-#else // !UC_BUILD
-
-void emberAfPluginDeviceQueryServiceInitCallback(void)
-{
-  slxu_zigbee_network_event_init(myEvent,
-                                 emberAfPluginDeviceQueryServiceMyEventHandler);
-
-  debugPrintln("%p init called.", PLUGIN_NAME);
-  clearCurrentDevice();
-}
-
-#endif // UC_BUILD
-
 static void scheduleEvent(bool withDelay)
 {
   if (withDelay) {
     debugPrintln("%p scheduled event for %d qs", PLUGIN_NAME, DISCOVERY_DELAY_QS);
 
-    slxu_zigbee_event_set_delay_qs(myEvent, DISCOVERY_DELAY_QS);
+    sl_zigbee_event_set_delay_qs(myEvent, DISCOVERY_DELAY_QS);
   } else {
-    slxu_zigbee_event_set_active(myEvent);
+    sl_zigbee_event_set_active(myEvent);
   }
 }
 
-bool emAfPluginDeviceQueryPreZDOMessageReceived(EmberNodeId sender,
-                                                EmberApsFrame* apsFrame,
-                                                uint8_t* message,
-                                                uint16_t length)
+bool sli_zigbee_af_device_query_pre_zdo_message_received(EmberNodeId sender,
+                                                         EmberApsFrame* apsFrame,
+                                                         uint8_t* message,
+                                                         uint16_t length)
 {
   EmberEUI64 tempEui64;
   const EmberAfDeviceInfo *device;
@@ -219,8 +196,8 @@ bool emAfPluginDeviceQueryPreZDOMessageReceived(EmberNodeId sender,
                    PLUGIN_NAME,
                    currentNodeId);
 
-      emAfPluginDeviceDatabaseUpdateNodeStackRevision(currentEui64,
-                                                      stackRevision);
+      sli_zigbee_af_device_database_update_node_stack_revision(currentEui64,
+                                                               stackRevision);
 
       // This is the last state - we're done
       emberAfPluginDeviceDatabaseSetStatus(currentEui64,
@@ -242,7 +219,7 @@ static void noteFailedDiscovery(const EmberAfDeviceInfo* device)
 static void serviceDiscoveryCallback(const EmberAfServiceDiscoveryResult* result)
 {
   debugPrintln("%p serviceDiscoveryCallback()", PLUGIN_NAME);
-  slxu_zigbee_event_set_inactive(myEvent);
+  sl_zigbee_event_set_inactive(myEvent);
 
   if (!enabled) {
     return;
@@ -371,9 +348,9 @@ static void sendNodeDescriptorRequest(const EmberAfDeviceInfo* device)
   scheduleEvent(WITH_DELAY);
 }
 
-void emberAfPluginDeviceQueryServiceMyEventHandler(SLXU_UC_EVENT)
+void emberAfPluginDeviceQueryServiceMyEventHandler(sl_zigbee_event_t * event)
 {
-  slxu_zigbee_event_set_inactive(myEvent);
+  sl_zigbee_event_set_inactive(myEvent);
 
   debugPrintln("%p event", PLUGIN_NAME);
   const EmberAfDeviceInfo* device;

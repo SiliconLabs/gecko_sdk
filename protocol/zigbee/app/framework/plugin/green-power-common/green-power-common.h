@@ -71,8 +71,6 @@
 #define EMBER_AF_GP_APPLICATION_INFORMATION_SWITCH_INFORMATION_CONFIGURATION_SWITCH_TYPE     (0x30)
 #define EMBER_AF_GP_APPLICATION_INFORMATION_SWITCH_INFORMATION_CONFIGURATION_SWITCH_TYPE_OFFSET (4)
 
-#define GP_ENDPOINT (242)
-
 #define GP_COMMISSIONING_SECURITY_LEVEL_TO_OPTIONS_SHIFT (4)
 #define GP_COMMISSIONING_SECURITY_KEY_TYPE_TO_OPTIONS_SHIFT (6)
 #define EMBER_GP_NOTIFICATION_COMMISSIONED_GROUPCAST_SEQUENCE_NUMBER_OFFSET (9)
@@ -577,17 +575,17 @@ bool emberAfGreenPowerCommonGpAddrCompare(const EmberGpAddress * a1,
 /** @} */ // end of name API
 /** @} */ // end of green-power-common
 
-EmberNodeId emGpdAlias(EmberGpAddress *addr);
+EmberNodeId sli_zigbee_af_gpd_alias(EmberGpAddress *addr);
 
-bool emGpMakeAddr(EmberGpAddress *addr,
-                  EmberGpApplicationId appId,
-                  EmberGpSourceId srcId,
-                  uint8_t *gpdIeee,
-                  uint8_t endpoint);
-uint16_t emCopyAdditionalInfoBlockStructureToArray(uint8_t commandId,
-                                                   EmberGpTranslationTableAdditionalInfoBlockOptionRecordField *additionalInfoBlockIn,
-                                                   uint8_t *additionalInfoBlockOut);
-void emGpSpoofDeviceAnnce(uint16_t nodeId,
-                          EmberEUI64 eui64,
-                          uint8_t capabilities);
+bool sli_zigbee_af_gp_make_addr(EmberGpAddress *addr,
+                                EmberGpApplicationId appId,
+                                EmberGpSourceId srcId,
+                                uint8_t *gpdIeee,
+                                uint8_t endpoint);
+uint16_t sli_zigbee_af_copy_additional_info_block_structure_to_array(uint8_t commandId,
+                                                                     EmberGpTranslationTableAdditionalInfoBlockOptionRecordField *additionalInfoBlockIn,
+                                                                     uint8_t *additionalInfoBlockOut);
+void sli_zigbee_af_gp_spoof_device_annce(uint16_t nodeId,
+                                         EmberEUI64 eui64,
+                                         uint8_t capabilities);
 #endif //_GREEN_POWER_COMMON_H_

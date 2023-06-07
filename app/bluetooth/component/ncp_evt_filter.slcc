@@ -2,9 +2,14 @@ id: ncp_evt_filter
 label: NCP Event Filter Interface
 package: Bluetooth
 description: Component that provides the Bluetooth Network Co-Processor (NCP) Event Filter interface.
-category: Bluetooth|NCP|Target
+
+  This is a No-Code component if used together with NCP Interface component.
+category: Bluetooth|NCP Interface
 quality: production
 root_path: app/bluetooth/common/ncp_evt_filter
+tag:
+  - No-Code
+
 config_file:
   - path: config/sl_ncp_evt_filter_config.h
 source:

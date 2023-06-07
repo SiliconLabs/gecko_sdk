@@ -20,9 +20,6 @@
  ******************************************************************************/
 
 #include "app/framework/include/af.h"
-#ifndef UC_BUILD
-#include "callback.h"
-#endif
 #include "app/framework/plugin/ota-common/ota.h"
 #include "app/framework/plugin/ota-storage-common/ota-storage.h"
 #include "ota-server.h"
@@ -59,20 +56,20 @@ static void abortPageRequest(void);
 
 #if defined(EM_AF_TEST_HARNESS_CODE)
   #define pageRequestTickCallback(x, y) \
-  emAfServerPageRequestTickCallback(x, y)
+  sli_zigbee_af_server_page_request_tick_callback(x, y)
 #else
   #define pageRequestTickCallback(x, y) true
 #endif
 
 // -----------------------------------------------------------------------------
 
-uint8_t emAfOtaPageRequestHandler(uint8_t clientEndpoint,
-                                  uint8_t serverEndpoint,
-                                  const EmberAfOtaImageId* id,
-                                  uint32_t offset,
-                                  uint8_t maxDataSize,
-                                  uint16_t pageSize,
-                                  uint16_t responseSpacing)
+uint8_t sli_zigbee_af_ota_page_request_handler(uint8_t clientEndpoint,
+                                               uint8_t serverEndpoint,
+                                               const EmberAfOtaImageId* id,
+                                               uint32_t offset,
+                                               uint8_t maxDataSize,
+                                               uint16_t pageSize,
+                                               uint16_t responseSpacing)
 {
   uint32_t totalSize;
   uint8_t status;
@@ -115,26 +112,26 @@ uint8_t emAfOtaPageRequestHandler(uint8_t clientEndpoint,
                               : responseSpacing);
   totalBytesSent = 0;
 
-  emAfOtaPageRequestTick(serverEndpoint);
+  sli_zigbee_af_ota_page_request_tick(serverEndpoint);
 
   return EMBER_ZCL_STATUS_SUCCESS;
 }
 
-void emAfOtaPageRequestTick(uint8_t endpoint)
+void sli_zigbee_af_ota_page_request_tick(uint8_t endpoint)
 {
   if (requesterNodeId == EMBER_NULL_NODE_ID) {
     return;
   }
 
   sendBlockRequest();
-  slxu_zigbee_zcl_schedule_server_tick_extended(endpoint,
-                                                ZCL_OTA_BOOTLOAD_CLUSTER_ID,
-                                                requesterResponseSpacing,
-                                                EMBER_AF_SHORT_POLL,
-                                                EMBER_AF_OK_TO_SLEEP);
+  sl_zigbee_zcl_schedule_server_tick_extended(endpoint,
+                                              ZCL_OTA_BOOTLOAD_CLUSTER_ID,
+                                              requesterResponseSpacing,
+                                              EMBER_AF_SHORT_POLL,
+                                              EMBER_AF_OK_TO_SLEEP);
 }
 
-bool emAfOtaPageRequestErrorHandler(void)
+bool sli_zigbee_af_ota_page_request_error_handler(void)
 {
   if (handlingPageRequest) {
     abortPageRequest();
@@ -198,7 +195,7 @@ static void sendBlockRequest(void)
     callbackStruct.bitmask =
       EMBER_AF_IMAGE_BLOCK_REQUEST_SIMULATED_FROM_PAGE_REQUEST;
 
-    bytesSentThisTime = emAfOtaImageBlockRequestHandler(&callbackStruct);
+    bytesSentThisTime = sli_zigbee_af_ota_image_block_request_handler(&callbackStruct);
     emberAfSendResponse();
   } else {
     bytesSentThisTime += maxDataToSend;
@@ -220,7 +217,7 @@ static void sendBlockRequest(void)
   }
 }
 
-bool emAfOtaServerHandlingPageRequest(void)
+bool sli_zigbee_af_ota_server_handling_page_request(void)
 {
   return handlingPageRequest;
 }
@@ -228,27 +225,27 @@ bool emAfOtaServerHandlingPageRequest(void)
 //------------------------------------------------------------------------------
 #else // No page request support
 
-uint8_t emAfOtaPageRequestHandler(uint8_t clientEndpoint,
-                                  uint8_t serverEndpoint,
-                                  const EmberAfOtaImageId* id,
-                                  uint32_t offset,
-                                  uint8_t maxDataSize,
-                                  uint16_t pageSize,
-                                  uint16_t responseSpacing)
+uint8_t sli_zigbee_af_ota_page_request_handler(uint8_t clientEndpoint,
+                                               uint8_t serverEndpoint,
+                                               const EmberAfOtaImageId* id,
+                                               uint32_t offset,
+                                               uint8_t maxDataSize,
+                                               uint16_t pageSize,
+                                               uint16_t responseSpacing)
 {
   return EMBER_ZCL_STATUS_UNSUP_COMMAND;
 }
 
-bool emAfOtaPageRequestErrorHandler(void)
+bool sli_zigbee_af_ota_page_request_error_handler(void)
 {
   return false;
 }
 
-void emAfOtaPageRequestTick(uint8_t endpoint)
+void sli_zigbee_af_ota_page_request_tick(uint8_t endpoint)
 {
 }
 
-bool emAfOtaServerHandlingPageRequest(void)
+bool sli_zigbee_af_ota_server_handling_page_request(void)
 {
   return false;
 }

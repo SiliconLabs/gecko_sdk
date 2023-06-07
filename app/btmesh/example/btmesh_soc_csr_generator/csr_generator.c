@@ -123,7 +123,7 @@ static const uint8_t uid64_namespace[16] = {
 // Statich authentication data buffer
 static uint8_t auth_data[CRYPTO_AUTH_256_LEN] = { 0 };
 
-static char btmesh_common_name_uuid[37] = { 0 };
+static char btmesh_common_name_uuid[57] = { 0 };
 
 // CSR Subject name fields
 static subject_name_field_t subject_name_fields[] =
@@ -160,7 +160,7 @@ static subject_name_field_t subject_name_fields[] =
   },
   {
     .name_len = 2,
-    .value_len = 36, // 128-bit Mesh device UUID as hexes and dashes
+    .value_len = (sizeof(btmesh_common_name_uuid) - 1),
     .name = "CN", // shorthand for "commonName"
     .value = btmesh_common_name_uuid // To be filled in
   },
@@ -337,6 +337,14 @@ void csr_generate(void)
       sprintf(p, "%02x", uuid[i]);
       p += 2;
     }
+    // Fill in CID
+    *p++ = ' ';
+    sprintf(p, "BCID:" CSR_GENERATOR_COMPANY_ID);
+    p += 9;
+    // Fill in PID
+    *p++ = ' ';
+    sprintf(p, "BPID:" CSR_GENERATOR_PRODUCT_ID);
+    p += 9;
 
     mbedtls_ret = der_encode_csr(config.subject_name_field_array,
                                  config.subject_name_field_count,
@@ -440,7 +448,8 @@ static void update_provisoning_control_block(int32_t index,
 static sl_status_t crypto_init(void)
 {
   psa_status_t sc = PSA_ERROR_NOT_SUPPORTED;
-  if (SYSTEM_GetSecurityCapability() == securityCapabilityVault) {
+  if (SYSTEM_GetSecurityCapability() == securityCapabilityVault
+      || SYSTEM_GetSecurityCapability() == securityCapabilitySE) {
     sc = psa_crypto_init();
   }
 

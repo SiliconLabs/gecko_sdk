@@ -37,22 +37,22 @@
  ******************************   DEFINES   ************************************
  ******************************************************************************/
 
-
 // <e SL_TFLITE_MICRO_INTERPRETER_INIT_ENABLE> Automatically initialize model
-// <i> If this is enabled, TensorFlow Lite for Microcontrollers will be 
-// <i> initalized using metadata from the flatbuffer model in the 
+// <i> If this is enabled, TensorFlow Lite for Microcontrollers will be
+// <i> initalized using metadata from the flatbuffer model in the
 // <i> configuration folder.
-// <i> This includes instantiating an interpreter based on the model 
+// <i> This includes instantiating an interpreter based on the model
 // <i> operations and allocating memory required for the tensors. Modify
 // <i> the memory allocation size below.
 // <i> Default: 1
 #define SL_TFLITE_MICRO_INTERPRETER_INIT_ENABLE    (1)
 
 // <o SL_TFLITE_MICRO_ARENA_SIZE> Tensor Arena Size
-// <i> TensorFlow Lite for Microcontrollers requires a certain amount of 
+// <i> TensorFlow Lite for Microcontrollers requires a certain amount of
 // <i> preallocated working memory for input, output and intermediate arrays.
-// <i> The memory requirement varies between models, and is best found by trial 
-// <i> and error.
+// <i> The memory requirement varies between models, and can be found by trial
+// <i> and error. Alternatively, you can set this value to -1,
+// <i> then the arena size will be automatically inferred upon model initialization.
 // <i> Note: Models provided by the MLTK (Silicon Labs Machine Learning Toolkit)
 // <i> have a pre-configured arena size associated with them. Changing this
 // <i> configuration to a non-zero value will overwrite any pre-configured value

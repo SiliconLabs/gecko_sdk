@@ -20,15 +20,13 @@
 #include "app/framework/plugin/device-management-server/device-management-common.h"
 #include "app/framework/plugin/device-management-server/device-management-server.h"
 
-#ifdef UC_BUILD
 #include "zap-cluster-command-parser.h"
-#endif
 
 static EmberAfDeviceManagementInfo pmInfo;
 
-void emberAfPluginDeviceManagementServerInitCallback(SLXU_INIT_ARG)
+void emberAfPluginDeviceManagementServerInitCallback(uint8_t init_level)
 {
-  SLXU_INIT_UNUSED_ARG;
+  (void)init_level;
 
   // invalidate passwords since 0 means forever valid
   pmInfo.servicePassword.durationInMinutes = 1;
@@ -516,8 +514,6 @@ bool emberAfDeviceManagementClusterGetCINCallback(void)
   return true;
 }
 
-#ifdef UC_BUILD
-
 bool emberAfDeviceManagementClusterRequestNewPasswordCallback(EmberAfClusterCommand *cmd)
 {
   sl_zcl_device_management_cluster_request_new_password_command_t cmd_data;
@@ -563,51 +559,6 @@ bool emberAfDeviceManagementClusterReportEventConfigurationCallback(EmberAfClust
 
   return true;
 }
-
-#else // !UC_BUILD
-
-bool emberAfDeviceManagementClusterRequestNewPasswordCallback(uint8_t passwordType)
-{
-  EmberAfDeviceManagementPassword *password;
-  switch (passwordType) {
-    case SERVICE_PASSWORD:
-      password = &(pmInfo.servicePassword);
-      break;
-    case CONSUMER_PASSWORD:
-      password = &(pmInfo.consumerPassword);
-      break;
-    default:
-      emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_NOT_FOUND);
-      return true;
-  }
-
-  // Is the password still valid?
-  if ((password->durationInMinutes != 0)
-      && (emberAfGetCurrentTime() > password->implementationDateTime + (password->durationInMinutes * 60))) {
-    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_NOT_FOUND);
-  } else {
-    emberAfFillCommandDeviceManagementClusterRequestNewPasswordResponse(pmInfo.issuerEventId,
-                                                                        password->implementationDateTime,
-                                                                        password->durationInMinutes,
-                                                                        password->passwordType,
-                                                                        password->password);
-
-    emberAfSendResponse();
-  }
-
-  return true;
-}
-
-bool emberAfDeviceManagementClusterReportEventConfigurationCallback(uint8_t commandIndex,
-                                                                    uint8_t totalCommands,
-                                                                    uint8_t* eventConfigurationPayload)
-{
-  return true;
-}
-
-#endif // UC_BUILD
-
-#ifdef UC_BUILD
 
 uint32_t emberAfDeviceManagementClusterServerCommandParse(sl_service_opcode_t opcode,
                                                           sl_service_function_context_t *context)
@@ -656,5 +607,3 @@ uint32_t emberAfDeviceManagementClusterServerCommandParse(sl_service_opcode_t op
           ? EMBER_ZCL_STATUS_SUCCESS
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
-
-#endif // UC_BUILD

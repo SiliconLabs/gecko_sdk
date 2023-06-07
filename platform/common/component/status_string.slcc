@@ -17,3 +17,6 @@ provides:
 documentation:
   docset: gecko-platform
   document: common/api/group-status
+template_contribution:
+  - name: component_catalog
+    value: status_string

@@ -21,7 +21,7 @@
 #include <stdbool.h>
 #include "include/security.h"
 
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
 #endif
 
@@ -39,22 +39,22 @@
 static uint8_t loadedKey[EMBER_ENCRYPTION_KEY_SIZE] = { 0 };
 
 // Load the passed key into the encryption core.
-void emLoadKeyIntoCore(const uint8_t* key)
+void sli_util_load_key_into_core(const uint8_t* key)
 {
   MEMCOPY(loadedKey, key, sizeof(loadedKey));
 }
 
-void emGetKeyFromCore(uint8_t* key)
+void sli_zigbee_get_key_from_core(uint8_t* key)
 {
   MEMCOPY(key, loadedKey, sizeof(loadedKey));
 }
 
-void emSecurityHardwareInit(void)
+void sli_zigbee_security_hardware_init(void)
 {
   return;
 }
 
-void emStandAloneEncryptBlock(uint8_t* block)
+void sli_util_stand_alone_encrypt_block(uint8_t* block)
 {
   // Encrypt this block in place with the current key
   sl_status_t status = sli_aes_crypt_ecb_radio(
@@ -69,7 +69,7 @@ void emStandAloneEncryptBlock(uint8_t* block)
 //----------------------------------------------------------------
 // Wrapper for those that just want access to AES.
 
-void emAesEncrypt(uint8_t* block, const uint8_t* key)
+void sli_zigbee_aes_encrypt(uint8_t* block, const uint8_t* key)
 {
   // Encrypt this block in place with the current key
   sl_status_t status = sli_aes_crypt_ecb_radio(
@@ -81,7 +81,7 @@ void emAesEncrypt(uint8_t* block, const uint8_t* key)
   assert(status == SL_STATUS_OK);
 }
 
-void emAesDecrypt(uint8_t* block, const uint8_t* key)
+void sli_zigbee_aes_decrypt(uint8_t* block, const uint8_t* key)
 {
   // Encrypt this block in place with the current key
   sl_status_t status = sli_aes_crypt_ecb_radio(
@@ -122,21 +122,21 @@ void emAesDecrypt(uint8_t* block, const uint8_t* key)
 static uint8_t loadedKey[EMBER_ENCRYPTION_KEY_SIZE] = { 0 };
 
 // Load the passed key into the encryption core.
-void emLoadKeyIntoCore(const uint8_t* key)
+void sli_util_load_key_into_core(const uint8_t* key)
 {
   MEMCOPY(loadedKey, key, sizeof(loadedKey));
 }
 
-void emGetKeyFromCore(uint8_t* key)
+void sli_zigbee_get_key_from_core(uint8_t* key)
 {
   MEMCOPY(key, loadedKey, sizeof(loadedKey));
 }
 
-void emSecurityHardwareInit(void)
+void sli_zigbee_security_hardware_init(void)
 {
 }
 
-void emStandAloneEncryptBlock(uint8_t* block)
+void sli_util_stand_alone_encrypt_block(uint8_t* block)
 {
   // Encrypt this block in place with the current key
   size_t output_size = 0;
@@ -163,7 +163,7 @@ void emStandAloneEncryptBlock(uint8_t* block)
 //----------------------------------------------------------------
 // Wrapper for those that just want access to AES.
 
-void emAesEncrypt(uint8_t* block, const uint8_t* key)
+void sli_zigbee_aes_encrypt(uint8_t* block, const uint8_t* key)
 {
   size_t output_size = 0;
   psa_key_attributes_t key_attr = PSA_KEY_ATTRIBUTES_INIT;
@@ -187,7 +187,7 @@ void emAesEncrypt(uint8_t* block, const uint8_t* key)
   assert(output_size == SECURITY_BLOCK_SIZE);
 }
 
-void emAesDecrypt(uint8_t* block, const uint8_t* key)
+void sli_zigbee_aes_decrypt(uint8_t* block, const uint8_t* key)
 {
   size_t output_size = 0;
   psa_key_attributes_t key_attr = PSA_KEY_ATTRIBUTES_INIT;
@@ -220,11 +220,11 @@ static mbedtls_aes_context aesContext;
 #if defined(EMBER_TEST) || defined(SL_CATALOG_ZIGBEE_AES_SOFTWARE_PRESENT)
 // Mbed TLS doesn't seem to provide an easy way to get the key for platforms other than EFR32.
 // Ie. mbedtls_aes_context in mbedtls/aes.h vs. sl_crypto/include/aes_alt.h.
-// For ember test (or host apps) let's just store the key locally to easily provide emGetKeyFromCore.
+// For ember test (or host apps) let's just store the key locally to easily provide sli_zigbee_get_key_from_core.
 static uint8_t loadedKey[EMBER_ENCRYPTION_KEY_SIZE] = { 0 };
 
 // Load the passed key into the encryption core.
-void emLoadKeyIntoCore(const uint8_t* key)
+void sli_util_load_key_into_core(const uint8_t* key)
 {
   int status = mbedtls_aes_setkey_enc(&aesContext,
                                       key,
@@ -235,14 +235,14 @@ void emLoadKeyIntoCore(const uint8_t* key)
   MEMCOPY(loadedKey, key, sizeof(loadedKey));
 }
 
-void emGetKeyFromCore(uint8_t* key)
+void sli_zigbee_get_key_from_core(uint8_t* key)
 {
   MEMCOPY(key, loadedKey, sizeof(loadedKey));
 }
 
 #else //EMBER_TEST
 // Load the passed key into the encryption core.
-void emLoadKeyIntoCore(const uint8_t* key)
+void sli_util_load_key_into_core(const uint8_t* key)
 {
   int status = mbedtls_aes_setkey_enc(&aesContext,
                                       key,
@@ -251,18 +251,18 @@ void emLoadKeyIntoCore(const uint8_t* key)
   assert(status == 0);
 }
 
-void emGetKeyFromCore(uint8_t* key)
+void sli_zigbee_get_key_from_core(uint8_t* key)
 {
   MEMCOPY(key, aesContext.key, SECURITY_BLOCK_SIZE * sizeof(key[0]));
 }
 #endif
 
-void emSecurityHardwareInit(void)
+void sli_zigbee_security_hardware_init(void)
 {
   mbedtls_aes_init(&aesContext);
 }
 
-void emStandAloneEncryptBlock(uint8_t* block)
+void sli_util_stand_alone_encrypt_block(uint8_t* block)
 {
   // Encrypt this block in place with the current key
   int status = mbedtls_aes_crypt_ecb(&aesContext,
@@ -276,7 +276,7 @@ void emStandAloneEncryptBlock(uint8_t* block)
 //----------------------------------------------------------------
 // Wrapper for those that just want access to AES.
 
-void emAesEncrypt(uint8_t* block, const uint8_t* key)
+void sli_zigbee_aes_encrypt(uint8_t* block, const uint8_t* key)
 {
   int status = mbedtls_aes_setkey_enc(&aesContext,
                                       key,
@@ -292,7 +292,7 @@ void emAesEncrypt(uint8_t* block, const uint8_t* key)
   assert(status == 0);
 }
 
-void emAesDecrypt(uint8_t* block, const uint8_t* key)
+void sli_zigbee_aes_decrypt(uint8_t* block, const uint8_t* key)
 {
   int status = mbedtls_aes_setkey_dec(&aesContext,
                                       key,

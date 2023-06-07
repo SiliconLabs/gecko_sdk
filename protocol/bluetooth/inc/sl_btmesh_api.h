@@ -17396,9 +17396,9 @@ PACKSTRUCT( struct sl_btmesh_evt_fw_dist_server_dist_state_changed_s
 {
   uint16_t elem_index;       /**< Server model element index */
   uint8_t  state;            /**< Enum @ref
-                                  sl_btmesh_fw_dist_server_dist_step_t. Unsigned
-                                  8-bit integer */
-  uint16_t num_active_nodes; /**< Unsigned 16-bit integer */
+                                  sl_btmesh_fw_dist_server_dist_step_t. New
+                                  state of the Distribution */
+  uint16_t num_active_nodes; /**< Number of active nodes */
 });
 
 typedef struct sl_btmesh_evt_fw_dist_server_dist_state_changed_s sl_btmesh_evt_fw_dist_server_dist_state_changed_t;
@@ -18573,8 +18573,7 @@ sl_status_t sl_btmesh_fw_dist_client_setup_upload(uint16_t elem_index,
  *
  * @param[in] elem_index Client model element index
  * @param[in] metadata_len Length of data in @p metadata
- * @param[in] metadata Variable length byte array. The first byte defines the
- *   length of data that follows, 0 - 255 bytes.
+ * @param[in] metadata Metadata for the firmware image
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *

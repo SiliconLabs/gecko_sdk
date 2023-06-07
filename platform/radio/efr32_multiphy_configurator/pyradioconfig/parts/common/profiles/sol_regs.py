@@ -1,7 +1,7 @@
 from pycalcmodel.core.output import ModelOutput, ModelOutputType
 from pyradioconfig.calculator_model_framework.interfaces.itarget import ITarget
 
-def build_modem_regs_sol_only(model, profile, family):
+def build_modem_regs_sol_only(model, profile):
 
     profile.outputs.append(ModelOutput(model.vars.MODEM_CTRL5_INTOSR, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.CTRL5.INTOSR'           ))
     profile.outputs.append(ModelOutput(model.vars.MODEM_CTRL5_DEC2, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.CTRL5.DEC2'           ))
@@ -180,6 +180,7 @@ def build_modem_regs_sol_only(model, profile, family):
     profile.outputs.append(ModelOutput(model.vars.RAC_RX_FEFILTOUTPUTSEL, '',         ModelOutputType.SVD_REG_FIELD, readable_name='RAC.RX.FEFILTOUTPUTSEL'           ))
     profile.outputs.append(ModelOutput(model.vars.RAC_PATRIM6_TXTRIMBBREGFB, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.PATRIM6.TXTRIMBBREGFB'))
     profile.outputs.append(ModelOutput(model.vars.RAC_PATRIM6_TXTRIMFILGAIN, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.PATRIM6.TXTRIMFILGAIN'))
+    profile.outputs.append(ModelOutput(model.vars.RAC_PATRIM6_TXTRIMFILRES, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.PATRIM6.TXTRIMFILRES'))
     profile.outputs.append(ModelOutput(model.vars.AGC_SETTLINGINDCTRL_EN, '',         ModelOutputType.SVD_REG_FIELD, readable_name='AGC.SETTLINGINDCTRL.EN'           )) 
 
     profile.outputs.append(ModelOutput(model.vars.MODEM_PHDMODANTDIV_ANTDECRSTBYP, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.PHDMODANTDIV.ANTDECRSTBYP'           ))
@@ -254,7 +255,7 @@ def build_modem_regs_sol_only(model, profile, family):
     profile.outputs.append(ModelOutput(model.vars.SUNOFDM_TXCFG1_TXROTATERAMP, '', ModelOutputType.SVD_REG_FIELD, readable_name='SUNOFDM.TXCFG1.TXROTATERAMP'))
     profile.outputs.append(ModelOutput(model.vars.SUNOFDM_TXCFG1_TXHCSERRORS, '', ModelOutputType.SVD_REG_FIELD, readable_name='SUNOFDM.TXCFG1.TXHCSERRORS'))
     profile.outputs.append(ModelOutput(model.vars.SUNOFDM_TXCFG1_TXFCSERRORS, '', ModelOutputType.SVD_REG_FIELD, readable_name='SUNOFDM.TXCFG1.TXFCSERRORS'))
-    profile.outputs.append(ModelOutput(model.vars.SUNOFDM_ANT_ANTDIV, '', ModelOutputType.SVD_REG_FIELD, readable_name='SUNOFDM.ANT.ANTDIV'))
+    profile.outputs.append(ModelOutput(model.vars.SUNOFDM_TXCFG1_TXFCSBYP, '', ModelOutputType.SVD_REG_FIELD, readable_name='SUNOFDM.TXCFG1.TXFCSBYP'))
     profile.outputs.append(ModelOutput(model.vars.SUNOFDM_ANT_ANTSEL, '', ModelOutputType.SVD_REG_FIELD, readable_name='SUNOFDM.ANT.ANTSEL'))
     profile.outputs.append(ModelOutput(model.vars.SUNOFDM_PDET_PDETCORRELWIDTH, '', ModelOutputType.SVD_REG_FIELD, readable_name='SUNOFDM.PDET.PDETCORRELWIDTH'))
     profile.outputs.append(ModelOutput(model.vars.SUNOFDM_PDET_PDETCF, '', ModelOutputType.SVD_REG_FIELD, readable_name='SUNOFDM.PDET.PDETCF'))
@@ -332,6 +333,10 @@ def build_modem_regs_sol_only(model, profile, family):
     profile.outputs.append(ModelOutput(model.vars.SUNOFDM_PAPR_ENPAPR, '', ModelOutputType.SVD_REG_FIELD, readable_name='SUNOFDM.PAPR.ENPAPR'))
     profile.outputs.append(ModelOutput(model.vars.SUNOFDM_PAPR_GAINSAT, '', ModelOutputType.SVD_REG_FIELD, readable_name='SUNOFDM.PAPR.GAINSAT'))
     profile.outputs.append(ModelOutput(model.vars.SUNOFDM_PAPR_GAINATT, '', ModelOutputType.SVD_REG_FIELD, readable_name='SUNOFDM.PAPR.GAINATT'))
+    profile.outputs.append(ModelOutput(model.vars.SUNOFDM_ANTDIVDLY_AGCRELDLY, '', ModelOutputType.SVD_REG_FIELD, readable_name='SUNOFDM.ANTDIVDLY.AGCRELDLY'))
+    profile.outputs.append(ModelOutput(model.vars.SUNOFDM_ANTDIVDLY_AGCCONVDLY, '', ModelOutputType.SVD_REG_FIELD, readable_name='SUNOFDM.ANTDIVDLY.AGCCONVDLY'))
+    profile.outputs.append(ModelOutput(model.vars.SUNOFDM_ANTDIVDLY_SETTLINGTIME, '', ModelOutputType.SVD_REG_FIELD, readable_name='SUNOFDM.ANTDIVDLY.SETTLINGTIME'))
+    profile.outputs.append(ModelOutput(model.vars.SUNOFDM_ANTDIVDLY_ANTICPSWITCH, '', ModelOutputType.SVD_REG_FIELD, readable_name='SUNOFDM.ANTDIVDLY.ANTICPSWITCH'))
 
     #SUNOQPSK Peripheral
     profile.outputs.append(ModelOutput(model.vars.SUNOQPSK_VREGS_MAJORVERSION, '', ModelOutputType.SVD_REG_FIELD, readable_name='SUNOQPSK.VREGS.MAJORVERSION'))

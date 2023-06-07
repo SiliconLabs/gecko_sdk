@@ -38,7 +38,7 @@
 
 #ifdef UC_BUILD
 
-void emAfEepromDataPrintCommand(sl_cli_command_arg_t *arguments)
+void sli_eeprom_data_print_command(sl_cli_command_arg_t *arguments)
 {
   uint32_t offset = sl_cli_get_argument_uint32(arguments, 0);
   uint8_t data[DATA_BLOCK];
@@ -57,17 +57,17 @@ void emAfEepromDataPrintCommand(sl_cli_command_arg_t *arguments)
                           true); // CR between blocks?
 }
 
-void emAfEepromStatusCommand(sl_cli_command_arg_t *arguments)
+void sli_eeprom_status_command(sl_cli_command_arg_t *arguments)
 {
   uint8_t i;
   emberAfCorePrintln("EEPROM Initialized: %c",
-                     (emAfIsEepromInitialized()
+                     (sli_eeprom_is_eeprom_initialized()
                       ? 'y'
                       : 'n'));
   // NOTE:  Calling emberAfPluginEepromBusy() will actually initialize the
   // EEPROM, so we avoid triggering a side-effect during this 'status' command.
   emberAfCorePrintln("EEPROM Busy: %c",
-                     (!emAfIsEepromInitialized()
+                     (!sli_eeprom_is_eeprom_initialized()
                       ? '?'
                       : (emberAfPluginEepromBusy()
                          ? 'y'
@@ -77,12 +77,12 @@ void emAfEepromStatusCommand(sl_cli_command_arg_t *arguments)
 
   for (i = 0; i < EMBER_AF_PLUGIN_EEPROM_PARTIAL_WORD_STORAGE_COUNT; i++) {
     emberAfCorePrintln("Address: 0x%4X, Partial Word: 0x%X",
-                       emAfEepromSavedPartialWrites[i].address,
-                       emAfEepromSavedPartialWrites[i].data);
+                       sli_eeprom_saved_partial_writes[i].address,
+                       sli_eeprom_saved_partial_writes[i].data);
   }
 }
 
-void emAfEepromInfoCommand(sl_cli_command_arg_t *arguments)
+void sli_eeprom_info_command(sl_cli_command_arg_t *arguments)
 {
   const HalEepromInformationType* part = emberAfPluginEepromInfo();
   emberAfCorePrintln("\nEEPROM Info");
@@ -94,7 +94,7 @@ void emAfEepromInfoCommand(sl_cli_command_arg_t *arguments)
     if (part->version >= EEPROM_INFO_MIN_VERSION_WITH_WORD_SIZE_SUPPORT) {
       confirmedWordSize = true;
     }
-    emberAfCorePrintln("Part Description:          %p", part->partDescription);
+    emberAfCorePrintln("Part Description:          %s", ((part->partDescription != NULL) ? part->partDescription : "NA"));
     emberAfCorePrintln("Capabilities:              0x%2X", part->capabilitiesMask);
     emberAfCorePrintln("Page Erase time (s):      %d", part->pageEraseMs);
     if ((part->capabilitiesMask & EEPROM_CAPABILITIES_PART_ERASE_SECONDS)
@@ -115,7 +115,7 @@ void emAfEepromInfoCommand(sl_cli_command_arg_t *arguments)
 
 #else // !UC_BUILD
 
-void emAfEepromDataPrintCommand(void)
+void sli_eeprom_data_print_command(void)
 {
   uint32_t offset = emberUnsignedCommandArgument(0);
   uint8_t data[DATA_BLOCK];
@@ -134,17 +134,17 @@ void emAfEepromDataPrintCommand(void)
                           true); // CR between blocks?
 }
 
-void emAfEepromStatusCommand(void)
+void sli_eeprom_status_command(void)
 {
   uint8_t i;
   emberAfCorePrintln("EEPROM Initialized: %c",
-                     (emAfIsEepromInitialized()
+                     (sli_eeprom_is_eeprom_initialized()
                       ? 'y'
                       : 'n'));
   // NOTE:  Calling emberAfPluginEepromBusy() will actually initialize the
   // EEPROM, so we avoid triggering a side-effect during this 'status' command.
   emberAfCorePrintln("EEPROM Busy: %c",
-                     (!emAfIsEepromInitialized()
+                     (!sli_eeprom_is_eeprom_initialized()
                       ? '?'
                       : (emberAfPluginEepromBusy()
                          ? 'y'
@@ -154,12 +154,12 @@ void emAfEepromStatusCommand(void)
 
   for (i = 0; i < EMBER_AF_PLUGIN_EEPROM_PARTIAL_WORD_STORAGE_COUNT; i++) {
     emberAfCorePrintln("Address: 0x%4X, Partial Word: 0x%X",
-                       emAfEepromSavedPartialWrites[i].address,
-                       emAfEepromSavedPartialWrites[i].data);
+                       sli_eeprom_saved_partial_writes[i].address,
+                       sli_eeprom_saved_partial_writes[i].data);
   }
 }
 
-void emAfEepromInfoCommand(void)
+void sli_eeprom_info_command(void)
 {
   const HalEepromInformationType* part = emberAfPluginEepromInfo();
   emberAfCorePrintln("\nEEPROM Info");
@@ -171,7 +171,7 @@ void emAfEepromInfoCommand(void)
     if (part->version >= EEPROM_INFO_MIN_VERSION_WITH_WORD_SIZE_SUPPORT) {
       confirmedWordSize = true;
     }
-    emberAfCorePrintln("Part Description:          %p", part->partDescription);
+    emberAfCorePrintln("Part Description:          %p", part->partDescription ? part->partDescription : "NA");
     emberAfCorePrintln("Capabilities:              0x%2X", part->capabilitiesMask);
     emberAfCorePrintln("Page Erase time (s):      %d", part->pageEraseMs);
     if ((part->capabilitiesMask & EEPROM_CAPABILITIES_PART_ERASE_SECONDS)

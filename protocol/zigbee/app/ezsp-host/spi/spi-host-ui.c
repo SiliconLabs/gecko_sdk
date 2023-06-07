@@ -109,15 +109,19 @@ bool ezspInternalProcessCommandOptions(int argc, char *argv[], char *errStr)
       case 'd': {
   #ifdef SL_CATALOG_ZIGBEE_OTA_STORAGE_POSIX_FILESYSTEM_PRESENT
         char otaStorageDir[128];
+        int ret = 0;
         if (!optarg || (sscanf(optarg, "%127s", otaStorageDir) <= 0)) {
-          snprintf(errStr, ERR_LEN, "Invalid OTA files storage directory name %s.\n",
-                   optarg ? optarg : "NULL");
+          ret = snprintf(errStr, ERR_LEN, "Invalid OTA files storage directory name %s.\n",
+                         optarg ? optarg : "NULL");
         } else if (strlen(otaStorageDir) >= OTA_FILE_STORAGE_DIR_LENGTH) {
-          snprintf(errStr, ERR_LEN, "OTA files storage directory %s too long.\n",
-                   otaStorageDir);
+          ret = snprintf(errStr, ERR_LEN, "OTA files storage directory %s too long.\n",
+                         otaStorageDir);
         } else {
           otaStorageDir[OTA_FILE_STORAGE_DIR_LENGTH - 1] = '\0';
           strncpy(defaultStorageDirectory, otaStorageDir, OTA_FILE_STORAGE_DIR_LENGTH);
+        }
+        if (ret < 0) {
+          snprintf(errStr, ERR_LEN, "Error with OTA files storage directory.\n");
         }
   #endif  // SL_CATALOG_ZIGBEE_OTA_STORAGE_POSIX_FILESYSTEM_PRESENT
       }

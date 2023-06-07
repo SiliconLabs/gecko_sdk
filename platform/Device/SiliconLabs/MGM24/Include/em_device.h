@@ -44,8 +44,20 @@
 #if defined(MGM240L022RNF)
 #include "mgm240l022rnf.h"
 
+#elif defined(MGM240L022VIF)
+#include "mgm240l022vif.h"
+
 #elif defined(MGM240L022VNF)
 #include "mgm240l022vnf.h"
+
+#elif defined(MGM240LA22UIF)
+#include "mgm240la22uif.h"
+
+#elif defined(MGM240LA22VIF)
+#include "mgm240la22vif.h"
+
+#elif defined(MGM240LD22VIF)
+#include "mgm240ld22vif.h"
 
 #elif defined(MGM240PA22VNA)
 #include "mgm240pa22vna.h"

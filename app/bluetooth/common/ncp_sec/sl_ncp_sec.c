@@ -435,6 +435,7 @@ static sl_bt_msg_t* encrypt_message(sl_bt_msg_t *msg)
   psa_set_key_id(&attr, PSA_CIPHER_KEY_ID);
   psa_set_key_usage_flags(&attr, PSA_KEY_USAGE_ENCRYPT);
   psa_set_key_algorithm(&attr, PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 4));
+  psa_set_key_lifetime(&attr, PSA_KEY_LIFETIME_VOLATILE);
   psa_status_t status = psa_import_key(&attr,
                                        ccm_key,
                                        sizeof(ccm_key),
@@ -517,6 +518,7 @@ static sl_bt_msg_t* decrypt_command(sl_bt_msg_t *msg)
   psa_set_key_id(&attr, PSA_CIPHER_KEY_ID);
   psa_set_key_usage_flags(&attr, PSA_KEY_USAGE_DECRYPT);
   psa_set_key_algorithm(&attr, PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 4));
+  psa_set_key_lifetime(&attr, PSA_KEY_LIFETIME_VOLATILE);
   psa_status_t status = psa_import_key(&attr,
                                        ccm_key,
                                        sizeof(ccm_key),

@@ -39,7 +39,7 @@
 // Globals
 
 #ifdef DOXYGEN_SHOULD_SKIP_THIS
-enum EmAfPluginTestHarnessZ3DeviceModeEnum
+enum sli_zigbee_af_test_harness_z3_device_mode_enum
 #else
 enum
 #endif
@@ -51,9 +51,9 @@ enum
   EM_AF_PLUGIN_TEST_HARNESS_Z3_DEVICE_MODE_SLEEPY_ZED_NOT_ADDRESS_ASSIGNABLE = 0x04,
   EM_AF_PLUGIN_TEST_HARNESS_Z3_DEVICE_MODE_SLEEPY_ZED_ADDRESS_ASSIGNABLE = 0x05,
 };
-typedef uint8_t EmAfPluginTestHarnessZ3DeviceMode;
-extern EmAfPluginTestHarnessZ3DeviceMode emAfPluginTestHarnessZ3DeviceMode;
-extern uint16_t emAfPluginTestHarnessZ3TouchlinkProfileId;
+typedef uint8_t sli_zigbee_af_test_harness_z3_device_mode_type;
+extern sli_zigbee_af_test_harness_z3_device_mode_type sli_zigbee_af_test_harness_z3_device_mode;
+extern uint16_t sli_zigbee_af_test_harness_z3_touchlink_profile_id;
 
 #define EM_AF_PLUGIN_TEST_HARNESS_Z3_DEVICE_MODE_MAX \
   EM_AF_PLUGIN_TEST_HARNESS_Z3_DEVICE_MODE_SLEEPY_ZED_ADDRESS_ASSIGNABLE
@@ -64,8 +64,4 @@ extern uint16_t emAfPluginTestHarnessZ3TouchlinkProfileId;
 
 // -----------------------------------------------------------------------------
 // Utility API
-#ifdef UC_BUILD
-uint32_t emAfPluginTestHarnessZ3GetSignificantBit(SL_CLI_COMMAND_ARG, uint8_t commandIndex);
-#else
-uint32_t emAfPluginTestHarnessZ3GetSignificantBit(uint8_t commandIndex);
-#endif //UC_BUILD
+uint32_t sli_zigbee_af_test_harness_z3_get_significant_bit(SL_CLI_COMMAND_ARG, uint8_t commandIndex);

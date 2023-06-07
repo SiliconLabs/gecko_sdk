@@ -100,9 +100,6 @@ void app_init(void)
   // Init GUI
   sl_gui_init();
 
-  // Init resource handler
-  sl_wisun_coap_rhnd_init();
-
   // Init cli ping resource
   coap_resource.data.uri_path          = SL_WISUN_COAP_REMOTE_CTRL_PING_URI_PATH;
   coap_resource.data.resource_type     = SL_WISUN_COAP_REMOTE_CTRL_PING_RESOURCE_RT;

@@ -47,6 +47,12 @@
 #elif defined(EFR32MG27C140F768IM40)
 #include "efr32mg27c140f768im40.h"
 
+#elif defined(EFR32MG27C230F768IM32)
+#include "efr32mg27c230f768im32.h"
+
+#elif defined(EFR32MG27C230F768IM40)
+#include "efr32mg27c230f768im40.h"
+
 #else
 #error "em_device.h: PART NUMBER undefined"
 #endif

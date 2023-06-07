@@ -28,29 +28,34 @@
  *
  ******************************************************************************/
 
-#include "em_device.h"
+#include "sli_psa_driver_features.h"
 
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
 
 #include "psa/crypto.h"
+
 #include "sli_se_transparent_types.h"
 #include "sli_se_transparent_functions.h"
 
 #include <string.h>
 
-psa_status_t sli_se_transparent_aead_encrypt(const psa_key_attributes_t *attributes,
-                                             const uint8_t *key_buffer,
-                                             size_t key_buffer_size,
-                                             psa_algorithm_t alg,
-                                             const uint8_t *nonce,
-                                             size_t nonce_length,
-                                             const uint8_t *additional_data,
-                                             size_t additional_data_length,
-                                             const uint8_t *plaintext,
-                                             size_t plaintext_length,
-                                             uint8_t *ciphertext,
-                                             size_t ciphertext_size,
-                                             size_t *ciphertext_length)
+//------------------------------------------------------------------------------
+// One-shot driver entry points
+
+psa_status_t sli_se_transparent_aead_encrypt(
+  const psa_key_attributes_t *attributes,
+  const uint8_t *key_buffer,
+  size_t key_buffer_size,
+  psa_algorithm_t alg,
+  const uint8_t *nonce,
+  size_t nonce_length,
+  const uint8_t *additional_data,
+  size_t additional_data_length,
+  const uint8_t *plaintext,
+  size_t plaintext_length,
+  uint8_t *ciphertext,
+  size_t ciphertext_size,
+  size_t *ciphertext_length)
 {
   return sli_se_driver_aead_encrypt(attributes,
                                     key_buffer,
@@ -67,19 +72,20 @@ psa_status_t sli_se_transparent_aead_encrypt(const psa_key_attributes_t *attribu
                                     ciphertext_length);
 }
 
-psa_status_t sli_se_transparent_aead_decrypt(const psa_key_attributes_t *attributes,
-                                             const uint8_t *key_buffer,
-                                             size_t key_buffer_size,
-                                             psa_algorithm_t alg,
-                                             const uint8_t *nonce,
-                                             size_t nonce_length,
-                                             const uint8_t *additional_data,
-                                             size_t additional_data_length,
-                                             const uint8_t *ciphertext,
-                                             size_t ciphertext_length,
-                                             uint8_t *plaintext,
-                                             size_t plaintext_size,
-                                             size_t *plaintext_length)
+psa_status_t sli_se_transparent_aead_decrypt(
+  const psa_key_attributes_t *attributes,
+  const uint8_t *key_buffer,
+  size_t key_buffer_size,
+  psa_algorithm_t alg,
+  const uint8_t *nonce,
+  size_t nonce_length,
+  const uint8_t *additional_data,
+  size_t additional_data_length,
+  const uint8_t *ciphertext,
+  size_t ciphertext_length,
+  uint8_t *plaintext,
+  size_t plaintext_size,
+  size_t *plaintext_length)
 {
   return sli_se_driver_aead_decrypt(attributes,
                                     key_buffer,
@@ -96,11 +102,15 @@ psa_status_t sli_se_transparent_aead_decrypt(const psa_key_attributes_t *attribu
                                     plaintext_length);
 }
 
-psa_status_t sli_se_transparent_aead_encrypt_setup(sli_se_transparent_aead_operation_t *operation,
-                                                   const psa_key_attributes_t *attributes,
-                                                   const uint8_t *key_buffer,
-                                                   size_t key_buffer_size,
-                                                   psa_algorithm_t alg)
+//------------------------------------------------------------------------------
+// Multi-part driver entry points
+
+psa_status_t sli_se_transparent_aead_encrypt_setup(
+  sli_se_transparent_aead_operation_t *operation,
+  const psa_key_attributes_t *attributes,
+  const uint8_t *key_buffer,
+  size_t key_buffer_size,
+  psa_algorithm_t alg)
 {
   if (operation == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
@@ -121,11 +131,12 @@ psa_status_t sli_se_transparent_aead_encrypt_setup(sli_se_transparent_aead_opera
                                                   0);
 }
 
-psa_status_t sli_se_transparent_aead_decrypt_setup(sli_se_transparent_aead_operation_t *operation,
-                                                   const psa_key_attributes_t *attributes,
-                                                   const uint8_t *key_buffer,
-                                                   size_t key_buffer_size,
-                                                   psa_algorithm_t alg)
+psa_status_t sli_se_transparent_aead_decrypt_setup(
+  sli_se_transparent_aead_operation_t *operation,
+  const psa_key_attributes_t *attributes,
+  const uint8_t *key_buffer,
+  size_t key_buffer_size,
+  psa_algorithm_t alg)
 {
   if (operation == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
@@ -146,9 +157,10 @@ psa_status_t sli_se_transparent_aead_decrypt_setup(sli_se_transparent_aead_opera
                                                   0);
 }
 
-psa_status_t sli_se_transparent_aead_set_nonce(sli_se_transparent_aead_operation_t *operation,
-                                               const uint8_t *nonce,
-                                               size_t nonce_size)
+psa_status_t sli_se_transparent_aead_set_nonce(
+  sli_se_transparent_aead_operation_t *operation,
+  const uint8_t *nonce,
+  size_t nonce_size)
 {
   if (operation == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
@@ -159,9 +171,10 @@ psa_status_t sli_se_transparent_aead_set_nonce(sli_se_transparent_aead_operation
                                       nonce_size);
 }
 
-psa_status_t sli_se_transparent_aead_set_lengths(sli_se_transparent_aead_operation_t *operation,
-                                                 size_t ad_length,
-                                                 size_t plaintext_length)
+psa_status_t sli_se_transparent_aead_set_lengths(
+  sli_se_transparent_aead_operation_t *operation,
+  size_t ad_length,
+  size_t plaintext_length)
 {
   if (operation == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
@@ -172,22 +185,27 @@ psa_status_t sli_se_transparent_aead_set_lengths(sli_se_transparent_aead_operati
                                         plaintext_length);
 }
 
-psa_status_t sli_se_transparent_aead_update_ad(sli_se_transparent_aead_operation_t *operation,
-                                               const uint8_t *input,
-                                               size_t input_length)
+psa_status_t sli_se_transparent_aead_update_ad(
+  sli_se_transparent_aead_operation_t *operation,
+  const uint8_t *input,
+  size_t input_length)
 {
   if (operation == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
-  return sli_se_driver_aead_update_ad(&(operation->operation), operation->key, input, input_length);
+  return sli_se_driver_aead_update_ad(&(operation->operation),
+                                      operation->key,
+                                      input,
+                                      input_length);
 }
 
-psa_status_t sli_se_transparent_aead_update(sli_se_transparent_aead_operation_t *operation,
-                                            const uint8_t *input,
-                                            size_t input_length,
-                                            uint8_t *output,
-                                            size_t output_size,
-                                            size_t *output_length)
+psa_status_t sli_se_transparent_aead_update(
+  sli_se_transparent_aead_operation_t *operation,
+  const uint8_t *input,
+  size_t input_length,
+  uint8_t *output,
+  size_t output_size,
+  size_t *output_length)
 {
   if (operation == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
@@ -201,13 +219,14 @@ psa_status_t sli_se_transparent_aead_update(sli_se_transparent_aead_operation_t 
                                    output_length);
 }
 
-psa_status_t sli_se_transparent_aead_finish(sli_se_transparent_aead_operation_t *operation,
-                                            uint8_t *ciphertext,
-                                            size_t ciphertext_size,
-                                            size_t *ciphertext_length,
-                                            uint8_t *tag,
-                                            size_t tag_size,
-                                            size_t *tag_length)
+psa_status_t sli_se_transparent_aead_finish(
+  sli_se_transparent_aead_operation_t *operation,
+  uint8_t *ciphertext,
+  size_t ciphertext_size,
+  size_t *ciphertext_length,
+  uint8_t *tag,
+  size_t tag_size,
+  size_t *tag_length)
 {
   if (operation == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
@@ -223,12 +242,13 @@ psa_status_t sli_se_transparent_aead_finish(sli_se_transparent_aead_operation_t 
                                    tag_length);
 }
 
-psa_status_t sli_se_transparent_aead_verify(sli_se_transparent_aead_operation_t *operation,
-                                            uint8_t *plaintext,
-                                            size_t plaintext_size,
-                                            size_t *plaintext_length,
-                                            const uint8_t *tag,
-                                            size_t tag_length)
+psa_status_t sli_se_transparent_aead_verify(
+  sli_se_transparent_aead_operation_t *operation,
+  uint8_t *plaintext,
+  size_t plaintext_size,
+  size_t *plaintext_length,
+  const uint8_t *tag,
+  size_t tag_length)
 {
   if (operation == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
@@ -243,7 +263,8 @@ psa_status_t sli_se_transparent_aead_verify(sli_se_transparent_aead_operation_t 
                                    tag_length);
 }
 
-psa_status_t sli_se_transparent_aead_abort(sli_se_transparent_aead_operation_t *operation)
+psa_status_t sli_se_transparent_aead_abort(
+  sli_se_transparent_aead_operation_t *operation)
 {
   // No state is ever left in HW, so zeroing context should do the trick
   if (operation == NULL) {
@@ -251,7 +272,8 @@ psa_status_t sli_se_transparent_aead_abort(sli_se_transparent_aead_operation_t *
   }
 
   memset(operation, 0, sizeof(*operation));
+
   return PSA_SUCCESS;
 }
 
-#endif // defined(SEMAILBOX_PRESENT)
+#endif // SLI_MBEDTLS_DEVICE_HSE

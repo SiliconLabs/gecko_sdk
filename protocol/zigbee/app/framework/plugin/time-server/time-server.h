@@ -38,5 +38,5 @@
 
 /** @} */ // end of time-server
 
-uint32_t emAfTimeClusterServerGetCurrentTime(void);
-void emAfTimeClusterServerSetCurrentTime(uint32_t utcTime);
+uint32_t sli_zigbee_af_time_cluster_server_get_current_time(void);
+void sli_zigbee_af_time_cluster_server_set_current_time(uint32_t utcTime);

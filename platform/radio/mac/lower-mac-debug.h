@@ -180,7 +180,7 @@ void LOWER_MAC_DEBUG_ADD_ACTION(uint8_t action, uint64_t info)
 
   // Write the old tail
   debugActions[index].action = action;
-  debugActions[index].lowerMacState = emLowerMacState;
+  debugActions[index].lowerMacState = sli_802154mac_lower_mac_state;
   debugActions[index].flags = miscInternalFlags;
   debugActions[index].radioState = RAIL_GetRadioState(connectRailHandle);
   debugActions[index].infoLow = (info & 0xFFFFFFFF);

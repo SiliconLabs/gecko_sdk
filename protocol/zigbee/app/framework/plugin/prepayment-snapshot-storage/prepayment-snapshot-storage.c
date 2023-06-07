@@ -18,9 +18,7 @@
 #include "app/framework/include/af.h"
 #include "prepayment-snapshot-storage.h"
 
-#ifdef UC_BUILD
 #include "prepayment-snapshot-storage-config.h"
-#endif
 
 // Dependency check
 #if ( (!defined ZCL_USING_PREPAYMENT_CLUSTER_ACCUMULATED_DEBT_ATTRIBUTE)          \
@@ -66,9 +64,9 @@ static void initSchedules()
   }
 }
 
-void emberAfPluginPrepaymentSnapshotStorageInitCallback(SLXU_INIT_ARG)
+void emberAfPluginPrepaymentSnapshotStorageInitCallback(uint8_t init_level)
 {
-  SLXU_INIT_UNUSED_ARG;
+  (void)init_level;
 
   SnapshotIdCounter = INVALID_SNAPSHOT_ID;
   initSchedules();

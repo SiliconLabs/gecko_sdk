@@ -222,9 +222,9 @@ void otNat64InitAddressMappingIterator(otInstance *aInstance, otNat64AddressMapp
  * @retval OT_ERROR_NOT_FOUND  No subsequent NAT64 address mapping info was found.
  *
  */
-otError otNat64GetNextAddressMapping(otInstance *                   aInstance,
+otError otNat64GetNextAddressMapping(otInstance                    *aInstance,
                                      otNat64AddressMappingIterator *aIterator,
-                                     otNat64AddressMapping *        aMapping);
+                                     otNat64AddressMapping         *aMapping);
 
 /**
  * States of NAT64.
@@ -434,6 +434,18 @@ void otIp4ExtractFromIp6Address(uint8_t aPrefixLength, const otIp6Address *aIp6A
 void otIp4AddressToString(const otIp4Address *aAddress, char *aBuffer, uint16_t aSize);
 
 #define OT_IP4_CIDR_STRING_SIZE 20 ///< Length of 000.000.000.000/00 plus a suffix NUL
+
+/**
+ * This function converts a human-readable IPv4 CIDR string into a binary representation.
+ *
+ * @param[in]   aString   A pointer to a NULL-terminated string.
+ * @param[out]  aCidr     A pointer to an IPv4 CIDR.
+ *
+ * @retval OT_ERROR_NONE          Successfully parsed the string.
+ * @retval OT_ERROR_INVALID_ARGS  Failed to parse the string.
+ *
+ */
+otError otIp4CidrFromString(const char *aString, otIp4Cidr *aCidr);
 
 /**
  * Converts the IPv4 CIDR to a string.

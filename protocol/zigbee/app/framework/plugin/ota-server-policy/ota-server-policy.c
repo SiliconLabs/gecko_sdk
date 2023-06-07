@@ -17,9 +17,6 @@
  ******************************************************************************/
 
 #include "app/framework/include/af.h"
-#ifndef UC_BUILD
-#include "callback.h"
-#endif
 #include "app/framework/plugin/ota-common/ota.h"
 #include "app/framework/plugin/ota-server/ota-server.h"
 #include "app/framework/plugin/ota-server/ota-server-dynamic-block-period.h"
@@ -40,9 +37,10 @@ typedef enum {
 } NextVersionPolicy;
 #define QUERY_POLICY_MAX NO_NEXT_VERSION
 
-#ifdef UC_BUILD
 #include "ota-server-config.h"
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #ifdef SL_CATALOG_CLI_PRESENT
 #include "sl_cli_config.h"
 #if (SL_CLI_HELP_DESCRIPTION_ENABLED == 1)
@@ -52,14 +50,6 @@ typedef enum {
 #if (EMBER_AF_PLUGIN_OTA_SERVER_PAGE_REQUEST_SUPPORT == 1)
 #define OTA_SERVER_PAGE_REQUEST_SUPPORT
 #endif
-#else // !UC_BUILD
-#ifdef EMBER_COMMAND_INTEPRETER_HAS_DESCRIPTION_FIELD
-#define DESCRIPTION_FIELD
-#endif // EMBER_COMMAND_INTEPRETER_HAS_DESCRIPTION_FIELD
-#ifdef EMBER_AF_PLUGIN_OTA_SERVER_PAGE_REQUEST_SUPPORT
-#define OTA_SERVER_PAGE_REQUEST_SUPPORT
-#endif
-#endif // UC_BUILD
 
 #ifdef DESCRIPTION_FIELD
 static const char * nextVersionPolicyStrings[] = {
@@ -157,7 +147,7 @@ uint8_t testClientDelayUnit = OTA_SERVER_DO_NOT_OVERRIDE_CLIENT_DELAY_UNITS;
 
 // -----------------------------------------------------------------------------
 
-void emAfOtaServerPolicyPrint(void)
+void sli_zigbee_af_ota_server_policy_print(void)
 {
 #ifdef DESCRIPTION_FIELD
   otaPrintln("OTA Server Policies");
@@ -352,12 +342,12 @@ uint8_t emberAfOtaServerImageBlockRequestCallback(EmberAfImageBlockRequestCallba
         // client treats the field. If we haven't tested the client yet or don't
         // have a spot for it as an active OTA session, we tell it to
         // WAIT_FOR_DATA
-        status = emAfOtaServerCheckDynamicBlockPeriodDownload(data);
+        status = sli_zigbee_af_ota_server_check_dynamic_block_period_download(data);
         if (EMBER_ZCL_STATUS_WAIT_FOR_DATA == status) {
           return EMBER_ZCL_STATUS_WAIT_FOR_DATA;
         }
 
-        useSecondsDelay = emAfOtaServerDynamicBlockPeriodClientUsesSeconds(data->source);
+        useSecondsDelay = sli_zigbee_af_ota_server_dynamic_block_period_client_uses_seconds(data->source);
       }
       break;
 
@@ -403,7 +393,7 @@ bool emberAfOtaServerUpgradeEndRequestCallback(EmberNodeId source,
              source,
              status);
 
-  emAfOtaServerCompleteDynamicBlockPeriodDownload(source);
+  sli_zigbee_af_ota_server_complete_dynamic_block_period_download(source);
 
   if (status != EMBER_ZCL_STATUS_SUCCESS) {
     // If status != EMBER_ZCL_STATUS_SUCCESS then this callback is
@@ -421,14 +411,14 @@ bool emberAfOtaServerUpgradeEndRequestCallback(EmberNodeId source,
   return true;
 }
 
-void emAfOtaServerSetQueryPolicy(uint8_t value)
+void sli_zigbee_af_ota_server_set_query_policy(uint8_t value)
 {
   if (value <= QUERY_POLICY_MAX) {
     nextVersionPolicy = (NextVersionPolicy)value;
   }
 }
 
-void emAfOtaServerSetBlockRequestPolicy(uint8_t value)
+void sli_zigbee_af_ota_server_set_block_request_policy(uint8_t value)
 {
 #if defined EM_AF_TEST_HARNESS_CODE
   if (value <= BLOCK_REQUEST_POLICY_MAX) {
@@ -444,7 +434,7 @@ uint8_t emberAfOtaPageRequestServerPolicyCallback(void)
   return pageRequestStatus;
 }
 
-void emAfOtaServerSetPageRequestPolicy(uint8_t value)
+void sli_zigbee_af_ota_server_set_page_request_policy(uint8_t value)
 {
   // This allows test code to be compiled with support for page request but
   // tell requesting devices it doesn't support it.
@@ -453,7 +443,7 @@ void emAfOtaServerSetPageRequestPolicy(uint8_t value)
                        : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
 
-void emAfOtaServerSetUpgradePolicy(uint8_t value)
+void sli_zigbee_af_ota_server_set_upgrade_policy(uint8_t value)
 {
   if (value <= UPGRADE_POLICY_MAX) {
     upgradePolicy = (UpgradePolicy)value;
@@ -465,8 +455,8 @@ void emAfOtaServerSetUpgradePolicy(uint8_t value)
 // There is no reason in production why certain block responses
 // for a page request would need a callback, so that's why we wrap
 // this whole function in a #define.
-bool emAfServerPageRequestTickCallback(uint16_t relativeOffset,
-                                       uint8_t dataSize)
+bool sli_zigbee_af_server_page_request_tick_callback(uint16_t relativeOffset,
+                                                     uint8_t dataSize)
 {
   uint16_t block = (relativeOffset + dataSize) / dataSize;
   emberAfCoreFlush();
@@ -481,7 +471,7 @@ bool emAfServerPageRequestTickCallback(uint16_t relativeOffset,
 
 #endif
 
-void emAfSetPageRequestMissedBlockModulus(uint16_t modulus)
+void sli_zigbee_af_set_page_requestMissedBlockModulus(uint16_t modulus)
 {
 #if defined(EM_AF_TEST_HARNESS_CODE)
   missedBlockModulus = modulus;
@@ -490,7 +480,7 @@ void emAfSetPageRequestMissedBlockModulus(uint16_t modulus)
 #endif
 }
 
-void emAfOtaServerPolicySetMinBlockRequestPeriod(uint16_t minBlockPeriodMs)
+void sli_zigbee_af_ota_server_policy_set_min_block_request_period(uint16_t minBlockPeriodMs)
 {
   otaMinimumBlockPeriodMs = minBlockPeriodMs;
 }

@@ -96,8 +96,9 @@
 #define EMBER_AF_DOXYGEN_CLI__OTA_SERVER_COMMANDS
 /** @} END addtogroup */
 
-#ifdef  UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 
 void otaImageNotifyCommand(sl_cli_command_arg_t *arguments)
 {
@@ -122,19 +123,19 @@ void setPolicy(sl_cli_command_arg_t *arguments)
 {
   if (memcmp(arguments->argv[arguments->arg_ofs - 1], "image-req-min-period", strlen("image-req-min-period")) == 0 ) {
     uint16_t minBlockPeriodMs = sl_cli_get_argument_uint16(arguments, 0);
-    emAfOtaServerPolicySetMinBlockRequestPeriod(minBlockPeriodMs);
+    sli_zigbee_af_ota_server_policy_set_min_block_request_period(minBlockPeriodMs);
   } else {
     uint8_t value = sl_cli_get_argument_uint8(arguments, 0);
     if (memcmp(arguments->argv[arguments->arg_ofs - 1], "query", strlen("query")) == 0  ) {
-      emAfOtaServerSetQueryPolicy(value);
+      sli_zigbee_af_ota_server_set_query_policy(value);
     } else if (memcmp(arguments->argv[arguments->arg_ofs - 1], "block-request", strlen("block-request")) == 0  ) {
-      emAfOtaServerSetBlockRequestPolicy(value);
+      sli_zigbee_af_ota_server_set_block_request_policy(value);
     } else if (memcmp(arguments->argv[arguments->arg_ofs - 1], "upgrade", strlen("upgrade")) == 0  ) {
-      emAfOtaServerSetUpgradePolicy(value);
+      sli_zigbee_af_ota_server_set_upgrade_policy(value);
     } else if (memcmp(arguments->argv[arguments->arg_ofs - 1], "page-req-miss", strlen("page-req-miss")) == 0 ) {
-      emAfSetPageRequestMissedBlockModulus(value);
+      sli_zigbee_af_set_page_requestMissedBlockModulus(value);
     } else if (memcmp(arguments->argv[arguments->arg_ofs - 1], "page-req-sup", strlen("page-req-sup")) == 0 ) {
-      emAfOtaServerSetPageRequestPolicy(value);
+      sli_zigbee_af_ota_server_set_page_request_policy(value);
     }
   }
 }
@@ -166,163 +167,3 @@ void otaSendUpgradeCommand(sl_cli_command_arg_t *arguments)
 
   emberAfOtaServerSendUpgradeCommandCallback(dest, endpoint, &id);
 }
-
-#else //UC_BUILD
-
-#ifdef EMBER_AF_PLUGIN_OTA_SERVER
-
-//------------------------------------------------------------------------------
-// Globals
-
-void setPolicy(void);
-
-#if defined(EMBER_AF_PLUGIN_OTA_SERVER_POLICY)
-
-#ifndef EMBER_AF_GENERATE_CLI
-static const char * queryArguments[] = {
-  "Policy enumeration",
-  NULL,
-};
-
-static EmberCommandEntry policyCommands[] = {
-  emberCommandEntryAction("print", emAfOtaServerPolicyPrint, "",
-                          "Print the OTA Server's policies"),
-  emberCommandEntryActionWithDetails("query", setPolicy, "v",
-                                     "Set the OTA Server's query policy",
-                                     queryArguments),
-  emberCommandEntryAction("block-request", setPolicy, "v", ""),
-  emberCommandEntryAction("upgrade", setPolicy, "v", ""),
-  emberCommandEntryAction("page-req-miss", setPolicy, "v", ""),
-  emberCommandEntryAction("page-req-sup", setPolicy, "v", ""),
-  emberCommandEntryAction("image-req-min-period", setPolicy, "v", ""),
-  emberCommandEntryTerminator(),
-};
-#define POLICY_COMMANDS emberCommandEntryAction("policy", NULL, (const char *)policyCommands, ""),
-#endif // EMBER_AF_GENERATE_CLI
-
-#if defined(EMBER_TEST)
-#define LOAD_FILE_COMMAND emberCommandEntryAction("load-file", emAfOtaLoadFileCommand, "b", ""),
-#else
-#define LOAD_FILE_COMMAND
-#endif
-
-#endif //EMBER_AF_PLUGIN_OTA_SERVER_POLICY
-
-#ifndef EMBER_AF_GENERATE_CLI
-static const char * notifyArguments[] = {
-  "node ID destination",
-  "dest endpoint",
-  "payload type",
-  "jitter",
-  "manuf ID",
-  "image ID",
-  "version",
-  NULL,
-};
-
-#define OTA_SERVER_COMMANDS                                                       \
-  emberCommandEntryActionWithDetails("notify",                                    \
-                                     otaImageNotifyCommand,                       \
-                                     "vuuuvvw",                                   \
-                                     "Send a notification about a new OTA image", \
-                                     notifyArguments),                            \
-  emberCommandEntryAction("upgrade", otaSendUpgradeCommand, "vu", ""),            \
-  LOAD_FILE_COMMAND                                                               \
-  POLICY_COMMANDS                                                                 \
-  emberCommandEntryTerminator(),
-
-EmberCommandEntry emberAfPluginOtaServerCommands[] = {
-  OTA_SERVER_COMMANDS
-
-  emberCommandEntryTerminator(),
-};
-#endif // EMBER_AF_GENERATE_CLI
-
-//------------------------------------------------------------------------------
-// Forward Declarations
-
-//------------------------------------------------------------------------------
-// Functions
-
-// plugin ota-server notify <destination> <dst endpoint> <payload type>
-//   <queryJitter> <manufacturer-id> <image-type-id> <firmware-version>
-// Payload Type:
-//   0 = jitter value only
-//   1 = jitter and manufacuter id
-//   2 = jitter, manufacuter id, and device id
-//   3 = jitter, manufacuter id, device id, and firmware version
-//
-// The CLI requires all parameters, but if the payload type does not
-// require that parameter, simply set it to 0.
-void otaImageNotifyCommand(void)
-{
-  EmberAfOtaImageId id;
-  EmberNodeId dest = (EmberNodeId)emberUnsignedCommandArgument(0);
-  uint8_t endpoint = (uint8_t)emberUnsignedCommandArgument(1);
-  uint8_t payloadType = (uint8_t)emberUnsignedCommandArgument(2);
-  uint8_t jitter = (uint8_t)emberUnsignedCommandArgument(3);
-  id.manufacturerId = (uint16_t)emberUnsignedCommandArgument(4);
-  id.imageTypeId = (uint16_t)emberUnsignedCommandArgument(5);
-  id.firmwareVersion = emberUnsignedCommandArgument(6);
-
-  emberAfOtaServerSendImageNotifyCallback(dest,
-                                          endpoint,
-                                          payloadType,
-                                          jitter,
-                                          &id);
-}
-
-#if defined(EMBER_AF_PLUGIN_OTA_SERVER_POLICY)
-void setPolicy(void)
-{
-  if (emberCurrentCommand->name[0] == 'i') {
-    uint16_t minBlockPeriodMs = (uint16_t)emberUnsignedCommandArgument(0);
-    emAfOtaServerPolicySetMinBlockRequestPeriod(minBlockPeriodMs);
-  } else {
-    uint8_t value = (uint8_t)emberUnsignedCommandArgument(0);
-    if (emberCurrentCommand->name[0] == 'q') {
-      emAfOtaServerSetQueryPolicy(value);
-    } else if (emberCurrentCommand->name[0] == 'b') {
-      emAfOtaServerSetBlockRequestPolicy(value);
-    } else if (emberCurrentCommand->name[0] == 'u') {
-      emAfOtaServerSetUpgradePolicy(value);
-    } else if (emberCurrentCommand->name[0] == 'p') {
-      if (emberCurrentCommand->name[9] == 'm') {
-        emAfSetPageRequestMissedBlockModulus(value);
-      } else if (emberCurrentCommand->name[9] == 's') {
-        emAfOtaServerSetPageRequestPolicy(value);
-      }
-    }
-  }
-}
-#endif // EMBER_AF_PLUGIN_OTA_SERVER_POLICY
-
-// This should be deadstripped out if EMBER_TEST is undefined
-#ifdef EMBER_TEST
-void otaServerSetClientDelayUnits(void)
-{
-  #ifdef EMBER_AF_PLUGIN_OTA_SERVER_POLICY
-  extern uint8_t testClientDelayUnit;
-  testClientDelayUnit = (uint8_t)emberUnsignedCommandArgument(0);
-  #endif // EMBER_AF_PLUGIN_OTA_SERVER_POLICY
-}
-#endif
-
-void otaSendUpgradeCommand(void)
-{
-  EmberNodeId dest = (EmberNodeId)emberUnsignedCommandArgument(0);
-  uint8_t endpoint = (uint8_t)emberUnsignedCommandArgument(1);
-  EmberAfOtaImageId id;
-  id.manufacturerId = (uint16_t)emberUnsignedCommandArgument(2);
-  id.imageTypeId = (uint16_t)emberUnsignedCommandArgument(3);
-  id.firmwareVersion = (uint32_t)emberUnsignedCommandArgument(4);
-
-  // Use 0xFFFF for all three arguments if you want wildcard
-  // The wild cards tell any device to upgrade, regardless of manufacturer ID,
-  // image type, or version
-
-  emberAfOtaServerSendUpgradeCommandCallback(dest, endpoint, &id);
-}
-
-#endif // (EMBER_AF_PLUGIN_OTA_SERVER)
-#endif//UC_BUILD

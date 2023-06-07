@@ -19,7 +19,7 @@ requires:
 template_contribution:
   - name: psa_crypto_config
     value: PSA_WANT_ALG_GCM
-  - name: psa_crypto_config
+  - name: psa_crypto_builtin_config
     value: "MBEDTLS_PSA_BUILTIN_ALG_GCM 1"
     condition: [mbedtls_gcm]
 documentation:

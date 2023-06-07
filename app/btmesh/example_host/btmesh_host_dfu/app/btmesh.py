@@ -20,7 +20,7 @@
 #    misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-from btmesh.core import Btmesh
+from btmesh.root import Btmesh
 
 # The application handles only one NCP device so the Btmesh library can be
 # instantiated as a singleton

@@ -61,11 +61,17 @@ extern "C" {
 #elif (_SILICON_LABS_32B_SERIES_2_CONFIG == 8)
 #if defined(_SILICON_LABS_EFR32_SUBGHZ_HP_PA_PRESENT)
   #if (_SILICON_LABS_EFR32_SUBGHZ_HP_PA_MAX_OUTPUT_DBM == 20)
-  #include "efr32xg28/sl_rail_util_pa_curves_20dbm.h"
-  #elif (_SILICON_LABS_EFR32_SUBGHZ_HP_PA_MAX_OUTPUT_DBM == 10)
-  #include "efr32xg28/sl_rail_util_pa_curves_10dbm_434M.h"
+    #if defined(HARDWARE_BOARD_SUPPORTS_RF_BAND_868)
+      #include "efr32xg28/sl_rail_util_pa_curves_20dbm_868M.h"
+    #else
+      #include "efr32xg28/sl_rail_util_pa_curves_20dbm_915M.h"
+    #endif
   #else
-  #include "efr32xg28/sl_rail_util_pa_curves_14dbm.h"
+    #if defined(HARDWARE_BOARD_SUPPORTS_RF_BAND_868)
+      #include "efr32xg28/sl_rail_util_pa_curves_14dbm_868M.h"
+    #else
+      #include "efr32xg28/sl_rail_util_pa_curves_14dbm_915M.h"
+    #endif
   #endif
 #else
 #error "No valid PA available for selected chip."
@@ -82,7 +88,17 @@ extern "C" {
 #include "efr32xg25/sl_rail_util_pa_dbm_powersetting_mapping_table.h"
 #include "efr32xg25/sl_rail_util_pa_curves.h"
 #elif (_SILICON_LABS_32B_SERIES_2_CONFIG == 7)
-#include "efr32xg27/sl_rail_util_pa_curves.h"
+// EFR32XG27 boards come in two different packaging -- CSP and QFN
+// These packages have different matching circuits which leads
+// to different PA curves.
+// CSP packages have _SILICON_LABS_EFR32_2G4HZ_HP_PA_MAX_OUTPUT_DBM
+// = 4 whereas for QFN package it is 6 or 8dBm, so this parameter
+// is used to differentiate it.
+  #if (_SILICON_LABS_EFR32_2G4HZ_HP_PA_MAX_OUTPUT_DBM < 6)
+  #include "efr32xg27/sl_rail_util_pa_curves_CSP.h"
+  #else
+  #include "efr32xg27/sl_rail_util_pa_curves_QFN.h"
+  #endif
 #else
 #error "Unsupported platform!"
 #endif

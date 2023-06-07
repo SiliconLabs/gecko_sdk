@@ -56,7 +56,7 @@
  * @param endpoint The relevant endpoint.
  *
  **/
-void emAfPluginMessagingClientClearMessage(uint8_t endpoint);
+void sli_zigbee_af_messaging_client_clear_message(uint8_t endpoint);
 
 /**
  * @brief Print information about the message.
@@ -64,7 +64,7 @@ void emAfPluginMessagingClientClearMessage(uint8_t endpoint);
  * @param endpoint The relevant endpoint.
  *
  **/
-void emAfPluginMessagingClientPrintInfo(uint8_t endpoint);
+void sli_zigbee_af_messaging_client_print_info(uint8_t endpoint);
 
 /**
  * @brief Confirm a message.

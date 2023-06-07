@@ -17,23 +17,20 @@
 
 #ifndef REPORTING_H
 #define REPORTING_H
-
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
+#include "sl_component_catalog.h"
+#endif
+#ifdef SL_CATALOG_ZIGBEE_REPORTING_PRESENT
 #include "reporting-config.h"
+#else
+#include "app/framework/plugin/reporting/config/reporting-config.h"
+#endif
 #if (EMBER_AF_PLUGIN_REPORTING_ENABLE_EXPANDED_TABLE == 1)
 #define ENABLE_EXPANDED_TABLE
 #endif
 #if (EMBER_AF_PLUGIN_REPORTING_ENABLE_GROUP_BOUND_REPORTS == 1)
 #define ENABLE_GROUP_BOUND_REPORTS
 #endif
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_REPORTING_ENABLE_EXPANDED_TABLE
-#define ENABLE_EXPANDED_TABLE
-#endif
-#ifdef EMBER_AF_PLUGIN_REPORTING_ENABLE_GROUP_BOUND_REPORTS
-#define ENABLE_GROUP_BOUND_REPORTS
-#endif
-#endif // UC_BUILD
 
 //TODO: Properly doxygenate this file
 
@@ -100,9 +97,9 @@ typedef struct {
   uint32_t lastReportTimeMs;
   EmberAfDifferenceType lastReportValue;
   bool reportableChange;
-} EmAfPluginReportVolatileData;
+} sli_zigbee_af_report_volatile_data_type;
 
-extern EmAfPluginReportVolatileData emAfPluginReportVolatileData[];
+extern sli_zigbee_af_report_volatile_data_type sli_zigbee_af_report_volatile_data[];
 
 /**
  * @name API
@@ -183,15 +180,15 @@ bool emberAfPluginReportingGetDefaultReportingConfigCallback(EmberAfPluginReport
 /** @} */ // end of name Callbacks
 /** @} */ // end of reporting
 
-void emAfPluginReportingGetEntry(uint16_t index, EmberAfPluginReportingEntry *result);
-void emAfPluginReportingSetEntry(uint16_t index, EmberAfPluginReportingEntry *value);
-uint16_t emAfPluginReportingAddEntry(EmberAfPluginReportingEntry* newEntry);
-EmberStatus emAfPluginReportingRemoveEntry(uint16_t index);
-bool emAfPluginReportingDoEntriesMatch(const EmberAfPluginReportingEntry* const entry1,
-                                       const EmberAfPluginReportingEntry* const entry2);
-uint16_t emAfPluginReportingConditionallyAddReportingEntry(EmberAfPluginReportingEntry* newEntry);
+void sli_zigbee_af_reporting_get_entry(uint16_t index, EmberAfPluginReportingEntry *result);
+void sli_zigbee_af_reporting_set_entry(uint16_t index, EmberAfPluginReportingEntry *value);
+uint16_t sli_zigbee_af_reporting_add_entry(EmberAfPluginReportingEntry* newEntry);
+EmberStatus sli_zigbee_af_reporting_remove_entry(uint16_t index);
+bool sli_zigbee_af_reporting_do_entries_match(const EmberAfPluginReportingEntry* const entry1,
+                                              const EmberAfPluginReportingEntry* const entry2);
+uint16_t sli_zigbee_af_reporting_conditionally_add_reporting_entry(EmberAfPluginReportingEntry* newEntry);
 
-uint16_t emAfPluginReportingNumEntries(void);
-uint16_t emAfPluginReportingAppendEntry(EmberAfPluginReportingEntry* newEntry);
-void emAfPluginReportingGetLastValueAll(void);
+uint16_t sli_zigbee_af_reporting_num_entries(void);
+uint16_t sli_zigbee_af_reporting_append_entry(EmberAfPluginReportingEntry* newEntry);
+void sli_zigbee_af_reporting_get_last_value_all(void);
 #endif //REPORTING_H

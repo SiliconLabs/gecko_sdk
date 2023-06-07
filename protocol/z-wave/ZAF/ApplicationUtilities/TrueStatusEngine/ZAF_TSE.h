@@ -14,7 +14,7 @@
 #include "ZAF_types.h"
 #include <ZW_transport_api.h>
 #include <CC_Common.h>
-#include "ZW_TransportEndpoint.h"
+#include "zaf_transport_tx.h"
 
 
 /**
@@ -37,7 +37,7 @@ typedef struct _s_zaf_tse_data_input_template_t_
  * @param[out] txOptions Tx options of the current transmission
  * @param[in] pData Data relevant to the caller of TSE
  */
-typedef void (*zaf_tse_callback_t)(TRANSMIT_OPTIONS_TYPE_SINGLE_EX txOptions,
+typedef void (*zaf_tse_callback_t)(zaf_tx_options_t *txOptions,
                                    void* pData);
 
 /**
@@ -83,11 +83,11 @@ bool ZAF_TSE_Trigger(zaf_tse_callback_t pCallback,
 bool ZAF_TSE_Init();
 
 /**
- * Must be passed as a callback to Transport_SendRequestEP() in functions used as TSE callbacks.
+ * Must be passed as a callback to zaf_transport_tx() in functions used as TSE callbacks.
  *
  * One example is CC_BinarySwitch_report_stx().
  * @param pTransmissionResult Pointer to transmission data. The argument is not used, but exists
- *                            because Transport_SendRequestEP() takes an argument being a pointer
+ *                            because zaf_transport_tx() takes an argument being a pointer
  *                            to a function with this type.
  */
 void ZAF_TSE_TXCallback(transmission_result_t * pTransmissionResult);

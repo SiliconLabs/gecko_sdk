@@ -42,12 +42,13 @@ include:
   - path: protocol/zigbee/stack/include
     file_list:
       - path: zigbee-security-manager.h
+      - path: zigbee-security-manager-types.h
       - path: security.h
       - path: aes-mmo.h
   - path: protocol/zigbee/stack/security/
     file_list:
       - path: zigbee-security-manager-internal.h
-      - path: zigbee-security-manager-vault-support.h    
+      - path: zigbee-security-manager-vault-support.h
 
 source:
   - path: protocol/zigbee/stack/security/zigbee-security-manager.c

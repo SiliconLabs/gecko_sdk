@@ -28,12 +28,12 @@ from typing import Optional
 from bgapi.bglib import CommandFailedError
 
 import btmesh.util
-from bgapix.bglibx import (BGLibExt, BGLibExtRetryParams,
-                           BGLibExtSyncSignalException)
+from bgapix.bglibx import (BGLibExt, BGLibExtSyncSignalException,
+                           BGLibExtWaitEventError)
 from bgapix.slstatus import SlStatus
 from btmesh.db import ModelID
 from btmesh.mdl import NamedModelID
-from btmesh.util import BtmeshRetryParams
+from btmesh.util import BtmeshMulticastRetryParams, BtmeshRetryParams
 
 from .btmesh import app_btmesh
 from .cfg import app_cfg
@@ -43,6 +43,7 @@ from .cmd.dist import dist_cmd
 from .cmd.group import group_cmd
 from .cmd.node import node_cmd
 from .cmd.prov import prov_cmd
+from .cmd.proxy import proxy_cmd
 from .cmd.reset import reset_cmd
 from .cmd.scan import scan_cmd
 from .db import BtmeshDfuAppDbLoadError, app_db
@@ -53,7 +54,17 @@ from .util.argparsex import (ArgumentErrorExt, ArgumentHelpException,
 
 logger = logging.getLogger(__name__)
 
-APP_COMMANDS = [reset_cmd, scan_cmd, prov_cmd, node_cmd, group_cmd, conf_cmd, dfu_cmd, dist_cmd]
+APP_COMMANDS = [
+    reset_cmd,
+    scan_cmd,
+    prov_cmd,
+    proxy_cmd,
+    node_cmd,
+    group_cmd,
+    conf_cmd,
+    dfu_cmd,
+    dist_cmd,
+]
 
 
 class BtmeshDfuAppResetException(Exception):
@@ -131,28 +142,29 @@ class BtmeshDfuAppExec(cmd.Cmd):
             except BtmeshDfuAppDbLoadError as e:
                 app_ui.error(str(e))
         app_btmesh.setup(lib=self.lib, db=app_db.btmesh_db)
-        app_btmesh.open()
-        app_btmesh.subscribe(
+        app_btmesh.core.open()
+        app_btmesh.core.subscribe(
             event_name="bglibx_evt_signal_async_received",
             handler=self.handle_async_signal,
         )
-        app_btmesh.subscribe(
+        app_btmesh.core.subscribe(
             event_name="bglibx_evt_signal_sync_received",
             handler=self.handle_sync_signal,
         )
-        app_btmesh.subscribe(
+        app_btmesh.core.subscribe(
             event_name="bt_evt_system_boot", handler=self.handle_system_boot
         )
         if factory_reset:
             app_ui.info("Factory reset...")
-            app_btmesh.factory_reset(app_cfg.reset.factory_reset_delay_s)
+            app_btmesh.core.factory_reset(app_cfg.reset.factory_reset_delay_s)
             app_db.save()
         elif system_reset:
             # Optional system reset on the NCP device in order to move it into
             # known state because all bt and btmesh stack state machines are
             # reset to default state.
-            app_btmesh.system_reset()
+            app_btmesh.core.system_reset()
         app_grctrl.setup()
+        app_btmesh.proxy.verify_active_connections()
 
     def handle_system_boot(self, boot_event):
         if self.cmd_active and not self.reset_cmd_active:
@@ -161,7 +173,7 @@ class BtmeshDfuAppExec(cmd.Cmd):
             self.execute_boot_actions(boot_event)
 
     def execute_boot_actions(self, boot_event):
-        app_btmesh.on_system_boot(boot_event)
+        app_btmesh.core.on_system_boot(boot_event)
         self.prov_init()
 
     def prov_init(self):
@@ -194,25 +206,30 @@ class BtmeshDfuAppExec(cmd.Cmd):
         self.sar_local_conf()
 
     def dfu_init(self):
-        dfu_clt_retry_params = BGLibExtRetryParams(
+        dfu_clt_retry_params = BtmeshMulticastRetryParams(
             retry_max=app_cfg.dfu_clt.dfu_retry_max_default,
             retry_interval=app_cfg.dfu_clt.dfu_retry_interval_default,
             retry_cmd_max=app_cfg.common.retry_cmd_max_default,
             retry_cmd_interval=app_cfg.common.retry_cmd_interval_default,
+            retry_interval_lpn=app_cfg.dfu_clt.dfu_retry_interval_lpn_default,
+            multicast_threshold=app_cfg.dfu_clt.dfu_retry_multicast_threshold_default,
+            auto_unicast=app_cfg.common.retry_auto_unicast_default,
         )
-        dist_clt_retry_params = BtmeshRetryParams(
+        dist_clt_retry_params = BtmeshMulticastRetryParams(
             retry_max=app_cfg.dist_clt.dist_retry_max_default,
             retry_interval=app_cfg.dist_clt.dist_retry_interval_default,
-            retry_interval_lpn=app_cfg.dist_clt.dist_retry_interval_lpn_default,
             retry_cmd_max=app_cfg.common.retry_cmd_max_default,
             retry_cmd_interval=app_cfg.common.retry_cmd_interval_default,
+            retry_interval_lpn=app_cfg.dist_clt.dist_retry_interval_lpn_default,
+            multicast_threshold=app_cfg.dist_clt.dist_retry_multicast_threshold_default,
+            auto_unicast=app_cfg.common.retry_auto_unicast_default,
         )
         app_btmesh.mbt_clt.init(
             elem_index=app_cfg.mbt_clt.elem_index,
             max_servers=app_cfg.mbt_clt.max_servers,
             max_blocks=app_cfg.mbt_clt.max_blocks,
             max_chunks_per_block=app_cfg.mbt_clt.max_chunks_per_block,
-            retry_params_default=dfu_clt_retry_params,
+            retry_params_default=dfu_clt_retry_params.to_base(),
         )
         app_btmesh.dfu_clt.init(
             elem_index=app_cfg.dfu_clt.elem_index,
@@ -234,12 +251,14 @@ class BtmeshDfuAppExec(cmd.Cmd):
             retry_cmd_max=app_cfg.common.retry_cmd_max_default,
             retry_cmd_interval=app_cfg.common.retry_cmd_interval_default,
         )
-        silabs_conf_retry_params = BtmeshRetryParams(
+        silabs_conf_retry_params = BtmeshMulticastRetryParams(
             retry_max=app_cfg.conf.silabs_retry_max_default,
             retry_interval=app_cfg.conf.silabs_retry_interval_default,
             retry_interval_lpn=app_cfg.conf.silabs_retry_interval_lpn_default,
             retry_cmd_max=app_cfg.common.retry_cmd_max_default,
             retry_cmd_interval=app_cfg.common.retry_cmd_interval_default,
+            multicast_threshold=app_cfg.conf.silabs_retry_multicast_threshold_default,
+            auto_unicast=app_cfg.common.retry_auto_unicast_default,
         )
         reset_node_retry_params = BtmeshRetryParams(
             retry_max=app_cfg.conf.reset_node_retry_max_default,
@@ -251,7 +270,6 @@ class BtmeshDfuAppExec(cmd.Cmd):
         app_btmesh.conf.set_conf_retry_params_default(conf_retry_params)
         app_btmesh.conf.set_silabs_retry_params_default(silabs_conf_retry_params)
         app_btmesh.conf.set_reset_node_retry_params_default(reset_node_retry_params)
-
 
     def dfu_local_conf(self):
         # Set appkey bindings to BLOB Transfer Client model
@@ -291,38 +309,88 @@ class BtmeshDfuAppExec(cmd.Cmd):
 
     def sar_local_conf(self):
         if hasattr(self.lib.btmesh, "sar_config_server"):
-            # The SAR transmitter configuration getter and setter functions don't
-            # require initialization call and it is not mandatory to have SAR
-            # Configuration Server in the Device Composition Data.
+            # The SAR transmitter and receiver configuration getter and setter
+            # functions don't require initialization call and it is not mandatory
+            # to have SAR Configuration Server in the Device Composition Data.
             # These are necessary only to handle SAR Config messages.
-
-            # Get the current SAR Configuration Server Transmitter state to modify
-            # the critical parameter only and keep the default values of others.
+            if app_cfg.network.sar_tx_custom_local_params_enable:
+                self.lib.btmesh.sar_config_server.set_sar_transmitter(
+                    app_cfg.network.sar_tx_segment_interval_step_default,
+                    app_cfg.network.sar_tx_unicast_retrans_count_default,
+                    app_cfg.network.sar_tx_unicast_retrans_wo_progress_count_default,
+                    app_cfg.network.sar_tx_unicast_retrans_interval_step_default,
+                    app_cfg.network.sar_tx_unicast_retrans_interval_increment_default,
+                    app_cfg.network.sar_tx_multicast_retrans_count_default,
+                    app_cfg.network.sar_tx_multicast_retrans_interval_step_default,
+                )
             resp = self.lib.btmesh.sar_config_server.get_sar_transmitter()
-            # The BLOB Transfer procedure has a high-level retransmission logic
-            # which detects missing chunks and retransmits the missing ones.
-            # The retransmissions are disabled in Lower Transport layer because
-            # it slows down the BLOB Transfer significantly.
-            multicast_retrans_count = 0
-            self.lib.btmesh.sar_config_server.set_sar_transmitter(
-                resp.segment_interval_step,
-                resp.unicast_retrans_count,
-                resp.unicast_retrans_wo_progress_count,
-                resp.unicast_retrans_interval_step,
-                resp.unicast_retrans_interval_increment,
-                multicast_retrans_count,
-                resp.multicast_retrans_interval_step,
+            logger.debug(
+                f"Local SAR TX Segment Interval Step is "
+                f"{resp.segment_interval_step} ms."
+            )
+            logger.debug(
+                f"Local SAR TX Unicast Retransmissions Count is "
+                f"{resp.unicast_retrans_count} retransmissions."
+            )
+            logger.debug(
+                f"Local SAR TX Unicast Retransmissions Without Progress Count is "
+                f"{resp.unicast_retrans_wo_progress_count} retransmissions."
+            )
+            logger.debug(
+                f"Local SAR TX Unicast Retransmissions Interval Step is "
+                f"{resp.unicast_retrans_interval_step} ms."
+            )
+            logger.debug(
+                f"Local SAR TX Unicast Retransmissions Interval Increment is "
+                f"{resp.unicast_retrans_interval_increment} ms."
+            )
+            logger.debug(
+                f"Local SAR TX Multicast Retransmissions Count is "
+                f"{resp.multicast_retrans_count} retransmissions."
+            )
+            logger.debug(
+                f"Local SAR TX Multicast Retransmissions Interval Step is "
+                f"{resp.multicast_retrans_interval_step} ms."
+            )
+            if app_cfg.network.sar_rx_custom_local_params_enable:
+                self.lib.btmesh.sar_config_server.set_sar_receiver(
+                    app_cfg.network.sar_rx_segments_threshold_default,
+                    app_cfg.network.sar_rx_ack_delay_increment_default,
+                    app_cfg.network.sar_rx_discard_timeout_default,
+                    app_cfg.network.sar_rx_segment_interval_step_default,
+                    app_cfg.network.sar_rx_ack_retrans_count_default,
+                )
+            resp = self.lib.btmesh.sar_config_server.get_sar_receiver()
+            logger.debug(
+                f"Local SAR RX Segments Threshold is "
+                f"{resp.segments_threshold} segments."
+            )
+            logger.debug(
+                f"Local SAR RX Acknowledgment Delay Increment is "
+                f"{resp.ack_delay_increment} ({resp.ack_delay_increment + 1.5} "
+                f"segment transmission interval step)."
+            )
+            logger.debug(f"Local SAR RX Discard Timeout is {resp.discard_timeout} ms.")
+            logger.debug(
+                f"Local SAR RX Receiver Segment Interval Step is "
+                f"{resp.segment_interval_step} ms."
+            )
+            logger.debug(
+                f"Local SAR RX Acknowledgment Retransmissions Count is "
+                f"{resp.ack_retrans_count} retransmissions."
             )
 
     def close(self):
-        app_btmesh.close()
+        app_btmesh.core.close()
 
     def onecmd(self, line):
         self.async_signal_proc_on = False
         app_ui.log_user_input(line)
         exit_request = not self.interactive
         try:
-            app_btmesh.wait(timeout=0.0, max_time=None)
+            # Process the events which were accumulated before the command is
+            # started to avoid interference with the new command execution.
+            app_btmesh.core.wait(timeout=0.0, max_time=None)
             self.cmd_active = True
             exit_request = super().onecmd(line)
             app_db.save()
@@ -333,6 +401,8 @@ class BtmeshDfuAppExec(cmd.Cmd):
         except CommandFailedError as e:
             status_name = SlStatus.get_name(e.errorcode)
             app_ui.error(str(e) + f" ({status_name})")
+        except BGLibExtWaitEventError as e:
+            app_ui.error("Command is aborted due to timeout.")
         except BGLibExtSyncSignalException as e:
             app_ui.info("Command is aborted by user.")
         except BtmeshDfuAppResetException as e:
@@ -366,6 +436,12 @@ class BtmeshDfuAppExec(cmd.Cmd):
     def help_prov(self):
         prov_cmd.help()
 
+    def do_proxy(self, arg):
+        return proxy_cmd(arg)
+
+    def help_proxy(self):
+        proxy_cmd.help()
+
     def do_node(self, arg):
         return node_cmd(arg)
 
@@ -396,11 +472,11 @@ class BtmeshDfuAppExec(cmd.Cmd):
     def help_dist(self):
         dist_cmd.help()
 
-    def do_exit(self, args):
+    def do_exit(self, arg):
         return True
 
-    def do_print(self, args):
-        print(args)
+    def help_exit(self):
+        app_ui.info("The exit command terminates the application.")
 
 
 app_exec = BtmeshDfuAppExec()

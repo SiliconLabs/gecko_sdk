@@ -113,6 +113,10 @@ void cli_trig_mode_switch(sl_cli_command_arg_t *arguments)
   } else {
     app_log_info("Mode switch requested\n");
   }
+
+#if defined(SL_CATALOG_KERNEL_PRESENT)
+  app_task_notify();
+#endif
 }
 
 /******************************************************************************
@@ -131,6 +135,10 @@ void cli_end_mode_switch(sl_cli_command_arg_t *arguments)
                  "Current state is %s\n",
                  ms_state_str);
   }
+
+#if defined(SL_CATALOG_KERNEL_PRESENT)
+  app_task_notify();
+#endif
 }
 
 /******************************************************************************
@@ -164,6 +172,9 @@ void cli_set_channel(sl_cli_command_arg_t *arguments)
   } else {
     app_log_info("ERROR: Channel %d not available\n", new_channel);
   }
+#if defined(SL_CATALOG_KERNEL_PRESENT)
+  app_task_notify();
+#endif
 }
 
 /******************************************************************************
@@ -258,6 +269,10 @@ void cli_set_ofdm_rate(sl_cli_command_arg_t *arguments)
 
   set_ofdm_rate(ofdm_rate);
   app_log_info("Current OFDM rate: %d\n", get_ofdm_rate());
+
+#if defined(SL_CATALOG_KERNEL_PRESENT)
+  app_task_notify();
+#endif
 }
 
 /******************************************************************************
@@ -286,6 +301,10 @@ void cli_set_ofdm_scrambler(sl_cli_command_arg_t *arguments)
 
   set_ofdm_scrambler(ofdm_scrambler);
   app_log_info("Current OFDM scrambler: %d\n", get_ofdm_scrambler());
+
+#if defined(SL_CATALOG_KERNEL_PRESENT)
+  app_task_notify();
+#endif
 }
 
 /******************************************************************************

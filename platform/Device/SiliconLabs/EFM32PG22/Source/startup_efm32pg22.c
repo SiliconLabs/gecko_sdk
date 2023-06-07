@@ -168,8 +168,6 @@ void SW2_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
 void SW3_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
 void KERNEL0_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
 void KERNEL1_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
-void M33CTI0_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
-void M33CTI1_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
 void EMUEFP_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
 void DCDC_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
 void EUART0_RX_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
@@ -280,8 +278,8 @@ const tVectorEntry __VECTOR_TABLE[TOTAL_INTERRUPTS] __VECTOR_TABLE_ATTRIBUTE = {
   { SW3_IRQHandler },                              /* 39 = SW3 */
   { KERNEL0_IRQHandler },                          /* 40 = KERNEL0 */
   { KERNEL1_IRQHandler },                          /* 41 = KERNEL1 */
-  { M33CTI0_IRQHandler },                          /* 42 = M33CTI0 */
-  { M33CTI1_IRQHandler },                          /* 43 = M33CTI1 */
+  { Default_Handler },                             /* Reserved */
+  { Default_Handler },                             /* Reserved */
   { EMUEFP_IRQHandler },                           /* 44 = EMUEFP */
   { DCDC_IRQHandler },                             /* 45 = DCDC */
   { EUART0_RX_IRQHandler },                        /* 46 = EUART0_RX */

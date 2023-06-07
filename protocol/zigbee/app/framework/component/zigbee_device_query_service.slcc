@@ -41,24 +41,24 @@ template_contribution:
     value:
       group: device-query-service
       name: status
-      handler: emAfPluginDeviceQueryServiceStatusCommand
+      handler: sli_zigbee_af_device_query_service_status_command
       help: Prints the current status of the device query service.
   - name: cli_command
     value:
       group: device-query-service
       name: enable
-      handler: emAfPluginDeviceQueryServiceEnableDisableCommand
+      handler: sli_zigbee_af_device_query_service_enable_disable_command
       help: Enables the device query service.
   - name: cli_command
     value:
       group: device-query-service
       name: disable
-      handler: emAfPluginDeviceQueryServiceEnableDisableCommand
+      handler: sli_zigbee_af_device_query_service_enable_disable_command
       help: Disables the device query service.
   - name: zigbee_af_callback
     value:
       callback_type: pre_zdo_message_received
-      function_name: emAfPluginDeviceQueryPreZDOMessageReceived
+      function_name: sli_zigbee_af_device_query_pre_zdo_message_received
 documentation:
   docset: zigbee
   document: zigbee-af-api/device-query-service

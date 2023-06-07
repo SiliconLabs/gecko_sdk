@@ -11,6 +11,7 @@ component:
   - id: sl_system
   - id: device_init
   - id: connect_app_framework_common
+  - id: rail_util_pti
 #-----------------MAC mode needs ---------------------
   - id: connect_aes_security
   - id: connect_mac_queue
@@ -35,6 +36,9 @@ component:
 #----------------- Require list ----------------------
 requires:
   - name: a_radio_config
+  - name: radio_config_simple_connect_singlephy_device_family_fgm23
+    condition:
+      - "device_family_fgm23"
 
 #----------------- Project files ---------------------
 include:

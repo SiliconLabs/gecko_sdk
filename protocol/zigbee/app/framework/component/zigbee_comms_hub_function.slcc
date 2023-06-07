@@ -46,12 +46,12 @@ template_contribution:
   - name: zigbee_af_callback
     value:
       callback_type: event_init
-      function_name: emAfPluginCommsHubFunctionTunnelInit
+      function_name: sli_zigbee_af_comms_hub_function_tunnel_init
     priority: -1
   - name: zigbee_af_callback
     value:
       callback_type: local_data_init
-      function_name: emAfPluginCommsHubFunctionTunnelInit
+      function_name: sli_zigbee_af_comms_hub_function_tunnel_init
     priority: -1
   - name: zigbee_af_callback
     value:
@@ -71,7 +71,7 @@ template_contribution:
     value:
       group: comms-hub-function
       name: simulate-gbz-msg
-      handler: emAfPluginCommsHubFunctionCliSimulateGbzMsg
+      handler: sli_zigbee_af_comms_hub_function_cli_simulate_gbz_msg
       help: Simulates transmission of a GBZ message to the Comms Hub Function.
       argument:
       - type: hex
@@ -80,13 +80,13 @@ template_contribution:
     value:
       group: comms-hub-function
       name: print-supported-use-cases
-      handler: emAfPluginCommsHubFunctionCliPrintSupportedUseCases
+      handler: sli_zigbee_af_comms_hub_function_cli_print_supported_use_cases
       help: Prints the list of supported use cases.  The message code printed should be used with the simulate-gbz-msg command.
   - name: cli_command
     value:
       group: comms-hub-function
       name: send
-      handler: emAfPluginCommsHubFunctionCliSend
+      handler: sli_zigbee_af_comms_hub_function_cli_send
       help: Sends a message with hex payload.
       argument:
       - type: hex
@@ -95,7 +95,7 @@ template_contribution:
     value:
       group: comms-hub-function
       name: send_string
-      handler: emAfPluginCommsHubFunctionCliSend
+      handler: sli_zigbee_af_comms_hub_function_cli_send
       help: Sends a message with string payload.
       argument:
       - type: hex
@@ -104,7 +104,7 @@ template_contribution:
     value:
       group: comms-hub-function
       name: timeout
-      handler: emAfPluginCommsHubFunctionCliTimeout
+      handler: sli_zigbee_af_comms_hub_function_cli_timeout
       help: Sets the default sleepy message timeout.
       argument:
       - type: uint32
@@ -112,7 +112,7 @@ template_contribution:
     value:
       group: comms-hub-function
       name: get-tunnel-endpoint
-      handler: emAfPluginCommsHubFunctionCliGetTunnelEndpoint
+      handler: sli_zigbee_af_comms_hub_function_cli_get_tunnel_endpoint
       help: Retrievesthe tunneling endpoint for a given nodeId.
       argument:
       - type: uint16
@@ -120,7 +120,7 @@ template_contribution:
     value:
       group: comms-hub-function
       name: close-tunnel
-      handler: emAfPluginCommsHubFunctionCliCloseTunnel
+      handler: sli_zigbee_af_comms_hub_function_cli_close_tunnel
       help: Removes the tunnel for a given device.
       argument:
       - type: hex
@@ -128,7 +128,7 @@ template_contribution:
     value:
       group: comms-hub-function
       name: create-tunnel
-      handler: emAfPluginCommsHubFunctionCliCreateTunnel
+      handler: sli_zigbee_af_comms_hub_function_cli_create_tunnel
       help: Creates a tunnel for the given device and endpoint.
       argument:
       - type: hex
@@ -137,12 +137,12 @@ template_contribution:
     value:
       group: comms-hub-function
       name: print
-      handler: emAfPluginCommsHubFunctionCliPrint
+      handler: sli_zigbee_af_comms_hub_function_cli_print
       help: Prints the comms hub tunnel table.
   - name: zigbee_stack_callback
     value:
       callback_type: trust_center_join
-      function_name: emAfPluginCommsHubFunctionTrustCenterJoinCallback      
+      function_name: sli_zigbee_af_comms_hub_function_trust_center_join_callback      
 
 documentation:
   docset: zigbee

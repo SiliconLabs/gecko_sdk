@@ -31,6 +31,11 @@
 #ifndef SL_GATT_SERVICE_PRESSURE_CONFIG_H
 #define SL_GATT_SERVICE_PRESSURE_CONFIG_H
 
+/***********************************************************************************************//**
+ * @addtogroup gatt_service_pressure
+ * @{
+ **************************************************************************************************/
+
 // <<< Use Configuration Wizard in Context Menu >>>
 
 // <o SL_GATT_SERVICE_PRESSURE_INVALID> Dummy Pressure measurement results for uninitialized sensors. <0-0xFFFFFFFF>
@@ -38,4 +43,5 @@
 #define SL_GATT_SERVICE_PRESSURE_INVALID  0xFFFFFFFF
 // <<< end of configuration section >>>
 
+/** @} (end addtogroup gatt_service_pressure) */
 #endif // SL_GATT_SERVICE_PRESSURE_CONFIG_H

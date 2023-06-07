@@ -110,6 +110,9 @@
 // SWO message type for COS
 #define EM_COS_PACKET                   0X0080LU
 
+// MACRO for SWO channel 8
+#define SWO_VCOM_PTI_DATA_STRUCTURED_CHANNEL                   8U
+
 /*******************************************************************************
  ******************************   VARIABLES   **********************************
  ******************************************************************************/
@@ -155,7 +158,7 @@ static sl_status_t sli_cos_swo_itm_8_write(const void *buffer,
 void sl_cos_send_config(void)
 {
   // Configure SWO stimulus 8
-  sl_debug_swo_enable_itm(8U);
+  sl_debug_swo_enable_itm(SWO_VCOM_PTI_DATA_STRUCTURED_CHANNEL);
 
 #if defined (SLI_COS_UARTDRV_VCOM_PRESENT)
   sli_cos_vcom_write();
@@ -167,7 +170,10 @@ void sl_cos_send_config(void)
     sli_cos_pti_write();
   }
 #endif // SL_CATALOG_RAIL_UTIL_PTI_PRESENT
-
+  
+  // Disable SWO stimulus 8
+  sl_debug_swo_disable_itm(SWO_VCOM_PTI_DATA_STRUCTURED_CHANNEL);
+  
   return;
 }
 
@@ -183,8 +189,8 @@ static uint32_t sli_cos_vcom_config(uint32_t baudrate,
   uint32_t config = 0;
 
   // Packing baudrate, and flow control info to config.
-  config = config | (((baudrate) & (COS_CONFIG_BAUDRATE_MASK)) << COS_CONFIG_BAUDRATE_POS);
-  config = config | (((flow_control) & (COS_CONFIG_UART_FC_MASK)) << COS_CONFIG_UART_FC_POS);
+  config |= (((baudrate) & (COS_CONFIG_BAUDRATE_MASK)) << COS_CONFIG_BAUDRATE_POS);
+  config |= (((flow_control) & (COS_CONFIG_UART_FC_MASK)) << COS_CONFIG_UART_FC_POS);
 
   return config;
 }
@@ -214,9 +220,9 @@ static uint32_t sli_cos_pti_config(uint32_t baudrate,
   }
 
   // Packing baudrate, mode and interface info to config.
-  config = config | (((baudrate) & (COS_CONFIG_BAUDRATE_MASK)) << COS_CONFIG_BAUDRATE_POS);
-  config = config | (((mode_Val) & (COS_CONFIG_PTI_MODE_MASK)) << COS_CONFIG_PTI_MODE_POS);
-  config = config | (((interface) & (COS_CONFIG_PTI_INTERFACE_MASK)) << COS_CONFIG_PTI_INTERFACE_POS);
+  config |= (((baudrate) & (COS_CONFIG_BAUDRATE_MASK)) << COS_CONFIG_BAUDRATE_POS);
+  config |= (((mode_Val) & (COS_CONFIG_PTI_MODE_MASK)) << COS_CONFIG_PTI_MODE_POS);
+  config |= (((interface) & (COS_CONFIG_PTI_INTERFACE_MASK)) << COS_CONFIG_PTI_INTERFACE_POS);
 
   return config;
 }
@@ -281,9 +287,9 @@ void sl_cos_config_pti(uint32_t baudrate,
   Cos_Pti_Config.optionType = COS_CONFIG_OPTION_TYPE_PTI;
 
   // Packing baudrate, mode and interface info to config
-  config = config | (((baudrate) & (COS_CONFIG_BAUDRATE_MASK)) << COS_CONFIG_BAUDRATE_POS);
-  config = config | (((mode) & (COS_CONFIG_PTI_MODE_MASK)) << COS_CONFIG_PTI_MODE_POS);
-  config = config | (((interface) & (COS_CONFIG_PTI_INTERFACE_MASK)) << COS_CONFIG_PTI_INTERFACE_POS);
+  config |= (((baudrate) & (COS_CONFIG_BAUDRATE_MASK)) << COS_CONFIG_BAUDRATE_POS);
+  config |= (((mode) & (COS_CONFIG_PTI_MODE_MASK)) << COS_CONFIG_PTI_MODE_POS);
+  config |= (((interface) & (COS_CONFIG_PTI_INTERFACE_MASK)) << COS_CONFIG_PTI_INTERFACE_POS);
 
   Cos_Pti_Config.optionValue = config;
 
@@ -357,7 +363,7 @@ static sl_status_t sli_cos_swo_itm_8_write(const void *buffer,
       output_byte = buf[i - 6];
     }
 
-    sl_debug_swo_write(8U, output_byte);
+    sl_debug_swo_write(SWO_VCOM_PTI_DATA_STRUCTURED_CHANNEL, output_byte);
   }
 
   return SL_STATUS_OK;

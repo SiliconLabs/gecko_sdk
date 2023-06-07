@@ -28,19 +28,19 @@ static EmberMessageBuffer storedNetworks = EMBER_NULL_MESSAGE_BUFFER;
 
 #define NULL_PAN_ID 0xFFFF
 
-#define PLUGIN_NAME emAfNetworkSteeringPluginName
+#define PLUGIN_NAME sli_zigbee_af_network_steering_plugin_name
 
 //============================================================================
 // Forward Declarations
 
 //============================================================================
 
-uint8_t emAfPluginNetworkSteeringGetMaxPossiblePanIds(void)
+uint8_t sli_zigbee_af_network_steering_get_max_possible_pan_ids(void)
 {
   return MAX_NETWORKS;
 }
 
-void emAfPluginNetworkSteeringClearStoredPanIds(void)
+void sli_zigbee_af_network_steering_clear_stored_pan_ids(void)
 {
   if (storedNetworks != EMBER_NULL_MESSAGE_BUFFER) {
     emberReleaseMessageBuffer(storedNetworks);
@@ -48,14 +48,14 @@ void emAfPluginNetworkSteeringClearStoredPanIds(void)
   }
 }
 
-uint16_t* emAfPluginNetworkSteeringGetStoredPanIdPointer(uint8_t index)
+uint16_t* sli_zigbee_af_network_steering_get_stored_pan_id_pointer(uint8_t index)
 {
   if (index >= MAX_NETWORKS) {
     return NULL;
   }
 
   if (storedNetworks == EMBER_NULL_MESSAGE_BUFFER) {
-    storedNetworks = emAllocateBuffer(PACKET_BUFFER_SIZE);
+    storedNetworks = sli_legacy_buffer_manager_allocate_buffer(PACKET_BUFFER_SIZE);
     if (storedNetworks == EMBER_NULL_MESSAGE_BUFFER) {
       emberAfCorePrintln("Error: %p failed to allocate stack buffer.", PLUGIN_NAME);
       return NULL;
@@ -68,5 +68,5 @@ uint16_t* emAfPluginNetworkSteeringGetStoredPanIdPointer(uint8_t index)
 
 void emberAfPluginNetworkSteeringMarker(void)
 {
-  emMarkBuffer(&storedNetworks);
+  sli_legacy_buffer_manager_mark_buffer(&storedNetworks);
 }

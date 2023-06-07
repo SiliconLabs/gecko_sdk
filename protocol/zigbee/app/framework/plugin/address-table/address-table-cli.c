@@ -20,11 +20,8 @@
 #include "address-table.h"
 #include "app/util/serial/sl_zigbee_command_interpreter.h"
 
-#ifdef UC_BUILD
 #include "address-table-config.h"
-#endif
 
-#ifdef UC_BUILD
 //[plugin address-table set 0 {0200000000000000} 0xA3D1
 void emberAfPluginAddressTableAddCommand(sl_cli_command_arg_t *arguments)
 {
@@ -103,98 +100,3 @@ void emberAfPluginAddressTableSetCommand(sl_cli_command_arg_t *arguments)
   UNUSED_VAR(status);
   sl_zigbee_core_debug_println("set address %d: 0x%02X", index, status);
 }
-
-#else
-
-void emberAfPluginAddressTableAddCommand(void);
-void emberAfPluginAddressTableRemoveCommand(void);
-void emberAfPluginAddressTableLookupCommand(void);
-
-#if !defined(EMBER_AF_GENERATE_CLI)
-EmberCommandEntry emberAfPluginAddressTableCommands[] = {
-  emberCommandEntryAction("add", emberAfPluginAddressTableAddCommand, "b", "Add an entry to the address table."),
-  emberCommandEntryAction("remove", emberAfPluginAddressTableRemoveCommand, "b", "Remove an entry from the address table."),
-  emberCommandEntryAction("lookup", emberAfPluginAddressTableLookupCommand, "b", "Search for an entry in the address table."),
-  emberCommandEntryTerminator(),
-};
-#endif // EMBER_AF_GENERATE_CLI
-
-void emberAfPluginAddressTableAddCommand(void)
-{
-  uint8_t index;
-  EmberEUI64 entry;
-  emberCopyEui64Argument(0, entry);
-
-  index = emberAfPluginAddressTableAddEntry(entry);
-
-  if (index == EMBER_NULL_ADDRESS_TABLE_INDEX) {
-    emberAfCorePrintln("Table full, entry not added");
-  } else {
-    emberAfCorePrintln("Entry added at position 0x%x", index);
-  }
-}
-
-void emberAfPluginAddressTableRemoveCommand(void)
-{
-  EmberStatus status;
-  EmberEUI64 entry;
-  emberCopyEui64Argument(0, entry);
-
-  status = emberAfPluginAddressTableRemoveEntry(entry);
-
-  if (status == EMBER_SUCCESS) {
-    emberAfCorePrintln("Entry removed");
-  } else {
-    emberAfCorePrintln("Entry removal failed");
-  }
-}
-
-void emberAfPluginAddressTableLookupCommand(void)
-{
-  uint8_t index;
-  EmberEUI64 entry;
-  emberCopyEui64Argument(0, entry);
-  index = emberAfPluginAddressTableLookupByEui64(entry);
-
-  if (index == EMBER_NULL_ADDRESS_TABLE_INDEX) {
-    emberAfCorePrintln("Entry not found");
-  } else {
-    emberAfCorePrintln("Found entry at position 0x%x", index);
-  }
-}
-
-// plugin address-table print
-void emberAfPluginAddressTablePrintCommand(void)
-{
-  uint8_t i;
-  uint8_t used = 0;
-  emberAfAppPrintln("#  node   eui");
-  for (i = 0; i < emberAfGetAddressTableSize(); i++) {
-    EmberNodeId nodeId = emberGetAddressTableRemoteNodeId(i);
-    if (nodeId != EMBER_TABLE_ENTRY_UNUSED_NODE_ID) {
-      EmberEUI64 eui64;
-      used++;
-      emberAfAppPrint("%d: 0x%2x ", i, nodeId);
-      emberGetAddressTableRemoteEui64(i, eui64);
-      emberAfAppDebugExec(emberAfPrintBigEndianEui64(eui64));
-      emberAfAppPrintln("");
-      emberAfAppFlush();
-    }
-  }
-  emberAfAppPrintln("%d of %d entries used.",
-                    used,
-                    emberAfGetAddressTableSize());
-}
-// plugin address-table set <index> <eui64> <node id>
-void emberAfPluginAddressTableSetCommand(void)
-{
-  EmberEUI64 eui64;
-  EmberStatus status;
-  uint8_t index = (uint8_t)emberUnsignedCommandArgument(0);
-  EmberNodeId nodeId = (EmberNodeId)emberUnsignedCommandArgument(2);
-  emberCopyBigEndianEui64Argument(1, eui64);
-  status = emberAfSetAddressTableEntry(index, eui64, nodeId);
-  UNUSED_VAR(status);
-  emberAfAppPrintln("set address %d: 0x%x", index, status);
-}
-#endif //!UC_BUILD

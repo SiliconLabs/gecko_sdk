@@ -13,6 +13,7 @@ component:
     instance:
       - vcom
   - id: rail_util_pti
+  - id: bootloader_interface
 
 include:
   - path: .
@@ -36,7 +37,7 @@ configuration:
 
 tag:
   - prebuilt_demo
-  
+
 readme:
   - path: ./README-OT-NCP.md
 

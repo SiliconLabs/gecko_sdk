@@ -3,7 +3,7 @@ label: Bluetooth Feature Pack - AoA
 package: Bluetooth
 description: >
   Includes selection of Bluetooth stack AoA features.
-category: Bluetooth|Application
+category: Bluetooth|Application|Miscellaneous
 quality: production
 root_path: app/bluetooth
 requires:

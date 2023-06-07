@@ -50,6 +50,16 @@
       file_id: btl_uart_driver_cfg
     path: brd2601a/btl_uart_driver_cfg.h
   - override:
+      component: cpc_gpio_expander_gpio_instance
+      file_id: cpc_gpio_expander_gpio_config
+      instance: btn0
+    path: brd2601a/sl_cpc_gpio_expander_gpio_btn0_config.h
+  - override:
+      component: cpc_gpio_expander_gpio_instance
+      file_id: cpc_gpio_expander_gpio_config
+      instance: btn1
+    path: brd2601a/sl_cpc_gpio_expander_gpio_btn1_config.h
+  - override:
       component: cpc_secondary_driver_spi_eusart
       file_id: cpc_drv_secondary_spi_eusart_config
       instance: exp

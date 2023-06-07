@@ -14,6 +14,7 @@ requires:
    - name: "zigbee_binding"
 source:
   - path: protocol/zigbee/app/framework/plugin/groups-server/groups-server.c
+  - path: protocol/zigbee/app/framework/plugin/groups-server/groups-server-common.c
   - path: protocol/zigbee/app/framework/plugin/groups-server/groups-server-cli.c
     condition:
       - "cli"
@@ -22,6 +23,7 @@ include:
   - path: protocol/zigbee/app/framework/plugin/groups-server
     file_list:
       - path: groups-server.h
+      - path: groups-server-common.h
 template_contribution:
   - name: component_catalog
     value: zigbee_groups_server
@@ -34,13 +36,13 @@ template_contribution:
     value:
       group: groups-server
       name: print
-      handler: emAfGroupsServerCliPrint
+      handler: sli_zigbee_af_groups_server_cli_print
       help: Prints information about the contents of the groups table.
   - name: cli_command
     value:
       group: groups-server
       name: clear
-      handler: emAfGroupsServerCliClear
+      handler: sli_zigbee_af_groups_server_cli_clear
       help: Clears the groups table on every endpoint
   - name: cluster_functions
     value:

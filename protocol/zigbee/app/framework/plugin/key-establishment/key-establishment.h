@@ -17,10 +17,13 @@
  *
  ******************************************************************************/
 
-#ifdef UC_BUILD
-#include "zigbee_app_framework_callback.h"
+#ifdef SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
+#include "app/framework/common/zigbee_app_framework_callback.h"
+#endif
+
+#ifndef EMBER_SCRIPTED_TEST
 #include "zigbee_stack_callback_dispatcher.h"
-#endif  // UC_BUILD
+#endif // EMBER_SCRIPTED_TEST
 
 /**
  * @defgroup key-establishment Key Establishment Client/Server
@@ -78,26 +81,12 @@
 #define DEFAULT_EPHEMERAL_DATA_GENERATE_TIME_SECONDS   (10 + APS_ACK_TIMEOUT_SECONDS)
 #define DEFAULT_GENERATE_SHARED_SECRET_TIME_SECONDS    (15 + APS_ACK_TIMEOUT_SECONDS)
 
-extern const uint8_t emAfKeyEstablishMessageToDataSize[];
+extern const uint8_t sli_zigbee_af_key_establish_message_to_data_size[];
 
-#ifdef UC_BUILD
-  #define emAfPluginKeyEstablishmentGenerateCbkeKeysHandler          emAfGenerateCbkeKeysCallback
-  #define emAfPluginKeyEstablishmentCalculateSmacsHandler            emAfCalculateSmacsCallback
-  #define emAfPluginKeyEstablishmentGenerateCbkeKeysHandler283k1     emAfGenerateCbkeKeysCallback283k1
-  #define emAfPluginKeyEstablishmentCalculateSmacsHandler283k1       emAfCalculateSmacsCallback283k1
-#else // !UC_BUILD
-#ifdef EZSP_HOST
-  #define emAfPluginKeyEstablishmentGenerateCbkeKeysHandler          ezspGenerateCbkeKeysHandler
-  #define emAfPluginKeyEstablishmentCalculateSmacsHandler            ezspCalculateSmacsHandler
-  #define emAfPluginKeyEstablishmentGenerateCbkeKeysHandler283k1     ezspGenerateCbkeKeysHandler283k1
-  #define emAfPluginKeyEstablishmentCalculateSmacsHandler283k1       ezspCalculateSmacsHandler283k1
-#else // !EZSP_HOST
-  #define emAfPluginKeyEstablishmentGenerateCbkeKeysHandler          emberGenerateCbkeKeysHandler
-  #define emAfPluginKeyEstablishmentCalculateSmacsHandler            emberCalculateSmacsHandler
-  #define emAfPluginKeyEstablishmentGenerateCbkeKeysHandler283k1    emberGenerateCbkeKeysHandler283k1
-  #define emAfPluginKeyEstablishmentCalculateSmacsHandler283k1       emberCalculateSmacsHandler283k1
-#endif  // EZSP_HOST
-#endif  // UC_BUILD
+#define sli_zigbee_af_key_establishment_generate_cbke_keys_handler          sli_zigbee_af_generate_cbke_keys_callback
+#define sli_zigbee_af_key_establishment_calculate_smacs_handler            sli_zigbee_af_calculate_smacs_callback
+#define sli_zigbee_af_key_establishment_generate_cbke_keys_handler283k1     sli_zigbee_af_generate_cbke_keys_callback_283k1
+#define sli_zigbee_af_key_establishment_calculate_smacs_handler283k1       sli_zigbee_af_calculate_smacs_callback_283k1
 
 #define TERMINATE_STATUS_STRINGS { \
     "Success",                     \
@@ -127,18 +116,18 @@ typedef enum {
 
 typedef uint8_t KeyEstablishMessage;
 
-extern EmberAfCbkeKeyEstablishmentSuite emAfAvailableCbkeSuite;
-extern EmberAfCbkeKeyEstablishmentSuite emAfCurrentCbkeSuite;
-
+extern EmberAfCbkeKeyEstablishmentSuite sli_zigbee_af_available_cbke_suite;
+extern EmberAfCbkeKeyEstablishmentSuite sli_zigbee_af_current_cbke_suite;
+extern sl_zigbee_event_t emberAfPluginKeyEstablishmentApsDuplicateDetectionEvent;
 # define isCbkeKeyEstablishmentSuiteValid() \
-  (emAfCurrentCbkeSuite <= EMBER_AF_CBKE_KEY_ESTABLISHMENT_SUITE_283K1)
+  (sli_zigbee_af_current_cbke_suite <= EMBER_AF_CBKE_KEY_ESTABLISHMENT_SUITE_283K1)
 
 # define isCbkeKeyEstablishmentSuite163k1() \
-  (emAfCurrentCbkeSuite                     \
+  (sli_zigbee_af_current_cbke_suite         \
    == EMBER_AF_CBKE_KEY_ESTABLISHMENT_SUITE_163K1)
 
 # define isCbkeKeyEstablishmentSuite283k1() \
-  (emAfCurrentCbkeSuite                     \
+  (sli_zigbee_af_current_cbke_suite         \
    == EMBER_AF_CBKE_KEY_ESTABLISHMENT_SUITE_283K1)
 
 #define cleanupAndStop(message) cleanupAndStopWithDelay((message), 0)
@@ -158,11 +147,11 @@ void sendNextKeyEstablishMessage(KeyEstablishMessage message,
 /** @} */  // end of name API
 /** @} */  // end of key-establishment
 
-EmberStatus emGenerateCbkeKeysForCurve(void);
-void emAfKeyEstablishmentSelectCurve(EmberAfCbkeKeyEstablishmentSuite suite);
-EmberStatus emCalculateSmacsForCurve(bool amInitiator,
-                                     EmberCertificate283k1Data* partnerCert,
-                                     EmberPublicKey283k1Data* partnerEphemeralPublicKey);
+EmberStatus sli_zigbee_af_generate_cbke_keys_for_curve(void);
+void sli_zigbee_af_key_establishment_select_curve(EmberAfCbkeKeyEstablishmentSuite suite);
+EmberStatus sli_zigbee_af_calculate_smacs_for_curve(bool amInitiator,
+                                                    EmberCertificate283k1Data* partnerCert,
+                                                    EmberPublicKey283k1Data* partnerEphemeralPublicKey);
 /** @brief Clear data for store link key curve.
  *
  * @param storeLinkKet Ver.: always
@@ -220,8 +209,8 @@ bool emberAfPluginKeyEstablishmentInterPanCallback(EmberAfKeyEstablishmentNotify
                                                    uint8_t delayInSeconds);
 
 /** @} */  // end of key_establishment_cb
-void emAfSkipCheckSupportedCurves(EmberAfCbkeKeyEstablishmentSuite suite);
-void emAfSetAvailableCurves(EmberAfCbkeKeyEstablishmentSuite suite);
+void sli_zigbee_af_skip_check_supported_curves(EmberAfCbkeKeyEstablishmentSuite suite);
+void sli_zigbee_af_set_available_curves(EmberAfCbkeKeyEstablishmentSuite suite);
 // Test code
 #if defined(EMBER_TEST) && defined(EMBER_SCRIPTED_TEST)
 void scriptTestCheckpoint(char* formatString, ...);

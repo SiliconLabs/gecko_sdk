@@ -3,7 +3,7 @@
 #include PLATFORM_HEADER
 #include CONFIGURATION_HEADER
 #include "stack/include/ember-types.h"
-#include "event_control/event.h"
+#include "event_queue/event-queue.h"
 #include "hal/hal.h"
 
 #include EMBER_AF_API_BULB_PWM_DRIVER

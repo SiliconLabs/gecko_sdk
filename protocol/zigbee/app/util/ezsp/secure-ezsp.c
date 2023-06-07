@@ -80,7 +80,7 @@ static void arrayPrint(char* label, uint8_t* array, uint8_t length);
 //------------------------------------------------------------------------------
 // Internal functions and handlers.
 
-EzspStatus emSecureEzspDeInit(void)
+EzspStatus sli_zigbee_secure_ezsp_de_init(void)
 {
   secureEzspState = SECURE_EZSP_STATE_INITIAL;
   outgoingFrameCounter = 0x00000000;
@@ -93,12 +93,12 @@ EzspStatus emSecureEzspDeInit(void)
   return EZSP_SUCCESS;
 }
 
-bool emSecureEzspIsOn(void)
+bool sli_zigbee_secure_ezsp_is_on(void)
 {
   return (secureEzspState == SECURE_EZSP_STATE_SYNCED);
 }
 
-bool emSecureEzspParametersArePending(void)
+bool sli_zigbee_secure_ezsp_parameters_are_pending(void)
 {
   return (secureEzspState == SECURE_EZSP_STATE_PARAMETERS_PENDING);
 }
@@ -113,7 +113,7 @@ bool emSecureEzspParametersArePending(void)
 // ENCRYPTED_PAYLOAD [FRAME_ID_LB(1) | FRAME_ID_HB(1) | PARAMETERS] |
 // MIC(4)
 //------------------------------------------------------------------------------
-EzspStatus emSecureEzspEncode(void)
+EzspStatus sli_zigbee_secure_ezsp_encode(void)
 {
   uint8_t secureEzspStartIndex = EZSP_EXTENDED_FRAME_CONTROL_HB_INDEX + 1;
   uint8_t* secureEzspStartPointer = ezspFrameContents + secureEzspStartIndex;
@@ -136,7 +136,7 @@ EzspStatus emSecureEzspEncode(void)
   initializeOutgoingNonce(nonce);
 
   #ifdef EZSP_HOST
-  emLoadKeyIntoCore(emberKeyContents(&securityKey));
+  sli_util_load_key_into_core(emberKeyContents(&securityKey));
   #else
   sl_zb_sec_man_context_t context;
   sl_zb_sec_man_init_context(&context);
@@ -182,7 +182,7 @@ EzspStatus emSecureEzspEncode(void)
 // After this function:
 // SEQ(1) | FC_LB(1) | FC_HB(1) | FRAME_ID_LB(1) | FRAME_ID_HB(1) | PARAMETERS
 //------------------------------------------------------------------------------
-EzspStatus emSecureEzspDecode(void)
+EzspStatus sli_zigbee_secure_ezsp_decode(void)
 {
   uint8_t secureEzspStartIndex = EZSP_EXTENDED_FRAME_CONTROL_HB_INDEX + 1;
   uint8_t secureEzspFrameCounterIndex = secureEzspStartIndex + SECURE_EZSP_FRAME_COUNTER_INDEX;
@@ -222,7 +222,7 @@ EzspStatus emSecureEzspDecode(void)
   initializeIncomingNonce(nonce, incomingFrameCounter);
 
   #ifdef EZSP_HOST
-  emLoadKeyIntoCore(emberKeyContents(&securityKey));
+  sli_util_load_key_into_core(emberKeyContents(&securityKey));
   #else
   sl_zb_sec_man_context_t context;
   sl_zb_sec_man_init_context(&context);
@@ -265,32 +265,32 @@ EzspStatus emSecureEzspDecode(void)
   return EZSP_SUCCESS;
 }
 
-uint8_t emSecureEzspGetState(void)
+uint8_t sli_zigbee_secure_ezsp_get_state(void)
 {
   return secureEzspState;
 }
 
-void emSecureEzspSetState(uint8_t state)
+void sli_zigbee_secure_ezsp_set_state(uint8_t state)
 {
   secureEzspState = state;
 }
 
-EmberKeyData* emSecureEzspGetSecurityKey(void)
+EmberKeyData* sli_zigbee_secure_ezsp_get_security_key(void)
 {
   return &securityKey;
 }
 
-SecureEzspSecurityType emSecureEzspGetSecurityType(void)
+SecureEzspSecurityType sli_zigbee_secure_ezsp_get_security_type(void)
 {
   return securityType;
 }
 
-void emSecureEzspSetSecurityType(SecureEzspSecurityType type)
+void sli_zigbee_secure_ezsp_set_security_type(SecureEzspSecurityType type)
 {
   securityType = type;
 }
 
-void emSecureEzspSetSecurityLevel(SecureEzspSecurityLevel level)
+void sli_zigbee_secure_ezsp_set_security_level(SecureEzspSecurityLevel level)
 {
   securityLevel = level;
   UNUSED_VAR(securityLevel);
@@ -301,8 +301,8 @@ void emSecureEzspSetSecurityLevel(SecureEzspSecurityLevel level)
 // Both devices will construct a string of bits:  Rand-1 || Rand-2
 // Both devices will perform HMAC using the NCP Protocol Security Key using AES-MMO as the underlying hashing algorithm.
 // The resulting 16-byte number will be split into two 8-byte values as follows: Result = Session-ID-Host || Session-ID-NCP
-void emSecureEzspGenerateSessionIds(SecureEzspRandomNumber *hostRandomNumber,
-                                    SecureEzspRandomNumber *ncpRandomNumber)
+void sli_zigbee_secure_ezsp_generate_session_ids(SecureEzspRandomNumber *hostRandomNumber,
+                                                 SecureEzspRandomNumber *ncpRandomNumber)
 {
   uint8_t combinedRandomNumbers[SECURE_EZSP_RANDOM_NUMBER_SIZE * 2];
   uint8_t combinedSessionIds[SECURE_EZSP_SESSION_ID_SIZE * 2];
@@ -352,7 +352,7 @@ void emSecureEzspGenerateSessionIds(SecureEzspRandomNumber *hostRandomNumber,
   arrayPrint("NCP Session ID", SecureEzspSessionIdContents(&ncpSessionId), SECURE_EZSP_SESSION_ID_SIZE);
 }
 
-bool emSecureEzspIsSecurityKeySet(void)
+bool sli_zigbee_secure_ezsp_is_security_key_set(void)
 {
   //Use ZB security manager for NCP only
   #ifdef EZSP_HOST

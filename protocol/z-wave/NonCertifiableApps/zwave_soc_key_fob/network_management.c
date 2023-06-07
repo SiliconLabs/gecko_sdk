@@ -30,11 +30,8 @@
 #include <ZW_system_startup_api.h>
 #include <em_emu.h>
 #include <ZW_controller_api.h>
-#include <config_app.h>
 #include <zw_config_rf.h>
 #include <events.h>
-#include <zaf_event_helper.h>
-#include <zaf_job_helper.h>
 #include "network_management.h"
 
 //#define DEBUGPRINT

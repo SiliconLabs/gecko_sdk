@@ -17,9 +17,10 @@
 
 #include "sl_common.h"
 
-#ifdef UC_BUILD
 #include "af.h"
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #include "common.h"
 #ifdef SL_CATALOG_ZIGBEE_IAS_ZONE_CLIENT_PRESENT
 #include "ias-zone-client.h"
@@ -52,51 +53,14 @@
 #include "simple-metering-server.h"
 #define SIMPLE_METERING_SERVER_PRESENT
 #endif
-#include "zigbee_zcl_callback_dispatcher.h" // emAfRetrieveAttributeAndCraftResponse
+#include "zigbee_zcl_callback_dispatcher.h" // sli_zigbee_af_retrieve_attribute_and_craft_response
 #ifdef SL_CATALOG_ZIGBEE_GBCS_COMPATIBILITY_PRESENT
 #define GBCS_COMPATIBILITY_PRESENT
 #endif
-#else // !UC_BUILD
-#include "../include/af.h"
-#include "common.h"
-#include "../plugin/ias-zone-client/ias-zone-client.h"
-#ifdef EMBER_AF_PLUGIN_IAS_ZONE_CLIENT
-#define IAS_ZONE_CLIENT_PRESENT
-#endif
-#include "../plugin/key-establishment/key-establishment.h"
-#ifdef EMBER_AF_PLUGIN_KEY_ESTABLISHMENT
-#define KEY_ESTABLISHMENT_PRESENT
-#endif
-#include "../plugin/smart-energy-registration/smart-energy-registration.h"
-#include "../plugin/trust-center-keepalive/trust-center-keepalive.h"
-#ifdef EMBER_AF_PLUGIN_TRUST_CENTER_KEEPALIVE
-#define TRUST_CENTER_KEEPALIVE_PRESENT
-#endif
-#include "../plugin/test-harness/test-harness.h"
-#ifdef EMBER_AF_PLUGIN_TEST_HARNESS
-#define TEST_HARNESS_PRESENT
-#endif
-#ifdef EMBER_AF_PLUGIN_WWAH_SERVER_SILABS
-#include "../plugin/wwah-server-silabs/wwah-server-silabs.h"
-#define WWAH_SERVER_SILABS_PRESENT
-#endif
-#ifdef EMBER_AF_PLUGIN_COMMS_HUB_FUNCTION_SUB_GHZ
-#include "app/framework/plugin/comms-hub-function-sub-ghz/comms-hub-function-sub-ghz.h"
-#define COMMS_HUB_FUNCTION_SUB_GHZ_PRESENT
-#endif
-#include "../plugin/simple-metering-server/simple-metering-server.h"
-#ifdef EMBER_AF_PLUGIN_SIMPLE_METERING_SERVER
-#define SIMPLE_METERING_SERVER_PRESENT
-#endif
-#include "znet-bookkeeping.h" // emAfRetrieveAttributeAndCraftResponse
-#ifdef EMBER_AF_PLUGIN_GBCS_COMPATIBILITY
-#define GBCS_COMPATIBILITY_PRESENT
-#endif
-#endif // UC_BUILD
 
 // flag to keep track of the fact that we just sent a read attr for time and
 // we should set our time to the result of the read attr response.
-bool emAfSyncingTime = false;
+bool sli_zigbee_af_syncing_time = false;
 
 #ifdef GBCS_COMPATIBILITY_PRESENT
 // Some GBCS use cases (e.g. GCS15e, GCS21f) require that ReadAttributesResponse
@@ -142,7 +106,7 @@ static void printDiscoverCommandsResponse(bool generated,
 }
 #endif
 
-bool emAfProcessGlobalCommand(EmberAfClusterCommand *cmd)
+bool sli_zigbee_af_process_global_command(EmberAfClusterCommand *cmd)
 {
   uint16_t attrId;
   uint8_t frameControl;
@@ -267,22 +231,22 @@ bool emAfProcessGlobalCommand(EmberAfClusterCommand *cmd)
         // This plugin sets channel change notification flags and needs to know
         // when those flags have been read.
         if (clientServerMask == CLUSTER_MASK_SERVER) {
-          emAfCommsHubFunctionSubGhzReadAttributeNotification(cmd->source,
-                                                              clusterId,
-                                                              attrId);
+          sli_zigbee_af_comms_hub_function_sub_ghz_read_attribute_notification(cmd->source,
+                                                                               clusterId,
+                                                                               attrId);
         }
   #endif
 #endif
 
         // This function reads the attribute and creates the correct response
         // in the response buffer
-        if (!emAfRetrieveAttributeAndCraftResponse(cmd->apsFrame->destinationEndpoint,
-                                                   clusterId,
-                                                   attrId,
-                                                   clientServerMask,
-                                                   cmd->mfgCode,
-                                                   (EMBER_AF_RESPONSE_BUFFER_LEN
-                                                    - appResponseLength))) {
+        if (!sli_zigbee_af_retrieve_attribute_and_craft_response(cmd->apsFrame->destinationEndpoint,
+                                                                 clusterId,
+                                                                 attrId,
+                                                                 clientServerMask,
+                                                                 cmd->mfgCode,
+                                                                 (EMBER_AF_RESPONSE_BUFFER_LEN
+                                                                  - appResponseLength))) {
           status = emberAfRetrieveAttributeAndCraftResponse(cmd->apsFrame->destinationEndpoint,
                                                             clusterId,
                                                             attrId,
@@ -529,10 +493,10 @@ bool emAfProcessGlobalCommand(EmberAfClusterCommand *cmd)
       // Check for mfg-spec wildcard and resolve mfg code if necessary.
       if (cmd->mfgSpecific && cmd->mfgCode == 0xFFFFu) {
         uint16_t resolvedMfgCode
-          = emAfResolveMfgCodeForDiscoverAttribute(cmd->apsFrame->destinationEndpoint,
-                                                   clusterId,
-                                                   startingAttributeId,
-                                                   clientServerMask);
+          = sli_zigbee_af_resolve_mfg_code_for_discover_attribute(cmd->apsFrame->destinationEndpoint,
+                                                                  clusterId,
+                                                                  startingAttributeId,
+                                                                  clientServerMask);
         if (resolvedMfgCode != 0xFFFFu && mfgCodePtr != NULL) {
           // (Note: retain wildcard mfg code and let it fail if not resolved.)
           // Replace wildcard mfg code in cmd for subsequent extract processing.
@@ -581,7 +545,7 @@ bool emAfProcessGlobalCommand(EmberAfClusterCommand *cmd)
       // set and a Read Attributes Response command for the time comes in, we set
       // the time to the value in the message.
       if (clusterId == ZCL_TIME_CLUSTER_ID) {
-        if (emAfSyncingTime
+        if (sli_zigbee_af_syncing_time
             && !cmd->mfgSpecific
             && msgLen - msgIndex == 8u // attr:2 status:1 type:1 data:4
             && (emberAfGetInt16u(message, msgIndex, msgLen)
@@ -592,22 +556,22 @@ bool emAfProcessGlobalCommand(EmberAfClusterCommand *cmd)
                 == ZCL_UTC_TIME_ATTRIBUTE_TYPE)) {
           emberAfSetTime(emberAfGetInt32u(message, msgIndex + 4u, msgLen));
           emberAfDebugPrintln("time sync ok, time: %4x", emberAfGetCurrentTime());
-          emAfSyncingTime = false;
+          sli_zigbee_af_syncing_time = false;
         }
 #ifdef EMBER_AF_PLUGIN_SMART_ENERGY_REGISTRATION_TIME_SOURCE_REQUIRED
-        emAfPluginSmartEnergyRegistrationReadAttributesResponseCallback(message + msgIndex,
-                                                                        msgLen - msgIndex);
+        sli_zigbee_af_smart_energy_registration_read_attributes_response_callback(message + msgIndex,
+                                                                                  msgLen - msgIndex);
 #endif //EMBER_AF_PLUGIN_SMART_ENERGY_REGISTRATION_TIME_SOURCE_REQUIRED
 #ifdef WWAH_SERVER_SILABS_PRESENT
-        emAfPluginSlWwahReadAttributesResponseCallback(clusterId, message, msgLen);
+        sli_zigbee_af_sl_wwah_read_attributes_response_callback(clusterId, message, msgLen);
 #endif // WWAH_SERVER_SILABS_PRESENT
       }
 
 #ifdef TRUST_CENTER_KEEPALIVE_PRESENT
       if (clusterId == ZCL_KEEPALIVE_CLUSTER_ID
           && !cmd->mfgSpecific) {
-        emAfPluginTrustCenterKeepaliveReadAttributesResponseCallback(message + msgIndex,
-                                                                     msgLen - msgIndex);
+        sli_zigbee_af_trust_center_keepalive_read_attributes_response_callback(message + msgIndex,
+                                                                               msgLen - msgIndex);
       }
 #endif // TRUST_CENTER_KEEPALIVE_PRESENT
 
@@ -644,9 +608,9 @@ bool emAfProcessGlobalCommand(EmberAfClusterCommand *cmd)
                                                                        msgLen - msgIndex);
 #endif // SIMPLE_METERING_SERVER_PRESENT
 
-      if (!emAfReadAttributesResponse(clusterId,
-                                      message + msgIndex,
-                                      msgLen - msgIndex)) {
+      if (!sli_zigbee_af_read_attributes_response(clusterId,
+                                                  message + msgIndex,
+                                                  msgLen - msgIndex)) {
         emberAfSendDefaultResponse(cmd, EMBER_ZCL_STATUS_SUCCESS);
       }
       return true;
@@ -695,9 +659,9 @@ bool emAfProcessGlobalCommand(EmberAfClusterCommand *cmd)
 
     // ([attribute id:2] [type:1] [data:V])+
     case ZCL_REPORT_ATTRIBUTES_COMMAND_ID:
-      if (!emAfReportAttributes(clusterId,
-                                message + msgIndex,
-                                msgLen - msgIndex)) {
+      if (!sli_zigbee_af_report_attributes(clusterId,
+                                           message + msgIndex,
+                                           msgLen - msgIndex)) {
         emberAfSendDefaultResponse(cmd, EMBER_ZCL_STATUS_SUCCESS);
       }
       return true;
@@ -761,7 +725,7 @@ bool emAfProcessGlobalCommand(EmberAfClusterCommand *cmd)
       // Check for mfg-spec wildcard and resolve mfg code if necessary.
       if (cmd->mfgSpecific && cmd->mfgCode == 0xFFFF) {
         uint16_t resolvedMfgCode
-          = emAfResolveMfgCodeForDiscoverCommand(flag, cmd, clusterId, startCommandIdentifier);
+          = sli_zigbee_af_resolve_mfg_code_for_discover_command(flag, cmd, clusterId, startCommandIdentifier);
         if (resolvedMfgCode != 0xFFFF && mfgCodePtr != NULL) {
           // (Note: retain wildcard mfg code and let it fail if not resolved.)
           // Replace wildcard mfg code in cmd for subsequent extract processing.

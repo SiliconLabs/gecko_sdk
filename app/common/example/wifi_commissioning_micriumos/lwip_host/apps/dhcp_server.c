@@ -179,6 +179,9 @@ static uint16_t dhcpserver_find_requested_ip(struct pbuf * pbuf_in, uint8_t * ip
     if (val == optionID) {
       index++;
       size = pbuf_get_at(pbuf_in, index);
+      if (size != 4) {
+        return 0; // Reject packets that don't have an IPv4 address
+      }
       index++;
       pbuf_copy_partial(pbuf_in, ipaddr, size, index);
       index += size;

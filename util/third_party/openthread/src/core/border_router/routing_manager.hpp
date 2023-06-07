@@ -92,14 +92,25 @@ public:
      * This is used by `NetworkData::Publisher` to reserve entries for use by `RoutingManager`.
      *
      * The number of published entries accounts for:
-     * - Max number of discovered prefix entries,
-     * - One entry for local on-link prefixes,
-     * - Max number of old (deprecating) local on-link prefixes,
+     * - Route prefix `fc00::/7` or `::/0`
      * - One entry for NAT64 published prefix.
+     * - One extra entry for transitions.
      *
      */
-    static constexpr uint16_t kMaxPublishedPrefixes = OPENTHREAD_CONFIG_BORDER_ROUTING_MAX_DISCOVERED_PREFIXES + 1 +
-                                                      OPENTHREAD_CONFIG_BORDER_ROUTING_MAX_OLD_ON_LINK_PREFIXES + 1;
+    static constexpr uint16_t kMaxPublishedPrefixes = 3;
+
+    /**
+     * This enumeration represents the states of `RoutingManager`.
+     *
+     */
+    enum State : uint8_t
+    {
+        kStateUninitialized = OT_BORDER_ROUTING_STATE_UNINITIALIZED, ///< Uninitialized.
+        kStateDisabled      = OT_BORDER_ROUTING_STATE_DISABLED,      ///< Initialized but disabled.
+        kStateStopped       = OT_BORDER_ROUTING_STATE_STOPPED,       ///< Initialized & enabled, but currently stopped.
+        kStateRunning       = OT_BORDER_ROUTING_STATE_RUNNING,       ///< Initialized, enabled, and running.
+    };
+
     /**
      * This constructor initializes the routing manager.
      *
@@ -135,6 +146,26 @@ public:
     Error SetEnabled(bool aEnabled);
 
     /**
+     * This method indicates whether or not it is currently running.
+     *
+     * In order for the `RoutingManager` to be running it needs to be initialized and enabled, and device being
+     * attached.
+     *
+     * @retval TRUE  The RoutingManager is currently running.
+     * @retval FALSE The RoutingManager is not running.
+     *
+     */
+    bool IsRunning(void) const { return mIsRunning; }
+
+    /**
+     * This method gets the state of `RoutingManager`.
+     *
+     * @returns The current state of `RoutingManager`.
+     *
+     */
+    State GetState(void) const;
+
+    /**
      * This method requests the Border Routing Manager to stop.
      *
      * If Border Routing Manager is running, calling this method immediately stops it and triggers the preparation
@@ -150,27 +181,40 @@ public:
     void RequestStop(void) { Stop(); }
 
     /**
-     * This method gets the preference used when advertising Route Info Options (e.g., for discovered OMR prefixes) in
-     * Router Advertisement messages sent over the infrastructure link.
+     * This method gets the current preference used when advertising Route Info Options (RIO) in Router Advertisement
+     * messages sent over the infrastructure link.
      *
-     * @returns The Route Info Option preference.
+     * The RIO preference is determined as follows:
+     *
+     * - If explicitly set by user by calling `SetRouteInfoOptionPreference()`, the given preference is used.
+     * - Otherwise, it is determined based on device's role: Medium preference when in router/leader role and low
+     *   preference when in child role.
+     *
+     * @returns The current Route Info Option preference.
      *
      */
-    RoutePreference GetRouteInfoOptionPreference(void) const { return mRouteInfoOptionPreference; }
+    RoutePreference GetRouteInfoOptionPreference(void) const { return mRioPreference; }
 
     /**
-     * This method sets the preference to use when advertising Route Info Options (e.g., for discovered OMR prefixes)
-     * in Router Advertisement messages sent over the infrastructure link.
+     * This method explicitly sets the preference to use when advertising Route Info Options (RIO) in Router
+     * Advertisement messages sent over the infrastructure link.
      *
-     * By default BR will use 'medium' preference level but this method allows the default value to be changed. As an
-     * example, it can be set to 'low' preference in the case where device is a temporary BR (a mobile BR or a
-     * battery-powered BR) to indicate that other BRs (if any) should be preferred over this BR on the infrastructure
-     * link.
+     * After a call to this method, BR will use the given preference for all its advertised RIOs. The preference can be
+     * cleared by calling `ClearRouteInfoOptionPreference`()`.
      *
      * @param[in] aPreference   The route preference to use.
      *
      */
     void SetRouteInfoOptionPreference(RoutePreference aPreference);
+
+    /**
+     * This method clears a previously set preference value for advertised Route Info Options.
+     *
+     * After a call to this method, BR will use device role to determine the RIO preference: Medium preference when
+     * in router/leader role and low preference when in child role.
+     *
+     */
+    void ClearRouteInfoOptionPreference(void);
 
     /**
      * This method returns the local off-mesh-routable (OMR) prefix.
@@ -184,7 +228,7 @@ public:
      * @retval  kErrorNone          Successfully retrieved the OMR prefix.
      *
      */
-    Error GetOmrPrefix(Ip6::Prefix &aPrefix);
+    Error GetOmrPrefix(Ip6::Prefix &aPrefix) const;
 
     /**
      * This method returns the currently favored off-mesh-routable (OMR) prefix.
@@ -197,11 +241,11 @@ public:
      * @param[out] aPrefix         A reference to output the favored prefix.
      * @param[out] aPreference     A reference to output the preference associated with the favored OMR prefix.
      *
-     * @retval  kErrorInvalidState  The Border Routing Manager is not initialized yet.
+     * @retval  kErrorInvalidState  The Border Routing Manager is not running yet.
      * @retval  kErrorNone          Successfully retrieved the OMR prefix.
      *
      */
-    Error GetFavoredOmrPrefix(Ip6::Prefix &aPrefix, RoutePreference &aPreference);
+    Error GetFavoredOmrPrefix(Ip6::Prefix &aPrefix, RoutePreference &aPreference) const;
 
     /**
      * This method returns the on-link prefix for the adjacent infrastructure link.
@@ -213,10 +257,23 @@ public:
      * @param[out]  aPrefix  A reference to where the prefix will be output to.
      *
      * @retval  kErrorInvalidState  The Border Routing Manager is not initialized yet.
-     * @retval  kErrorNone          Successfully retrieved the on-link prefix.
+     * @retval  kErrorNone          Successfully retrieved the local on-link prefix.
      *
      */
-    Error GetOnLinkPrefix(Ip6::Prefix &aPrefix);
+    Error GetOnLinkPrefix(Ip6::Prefix &aPrefix) const;
+
+    /**
+     * This method returns the favored on-link prefix for the adjacent infrastructure link.
+     *
+     * The favored prefix is either a discovered prefix on the infrastructure link or the local on-link prefix.
+     *
+     * @param[out]  aPrefix  A reference to where the prefix will be output to.
+     *
+     * @retval  kErrorInvalidState  The Border Routing Manager is not initialized yet.
+     * @retval  kErrorNone          Successfully retrieved the favored on-link prefix.
+     *
+     */
+    Error GetFavoredOnLinkPrefix(Ip6::Prefix &aPrefix) const;
 
 #if OPENTHREAD_CONFIG_NAT64_BORDER_ROUTING_ENABLE
     /**
@@ -233,7 +290,7 @@ public:
     Nat64::State GetNat64PrefixManagerState(void) const { return mNat64PrefixManager.GetState(); }
 
     /**
-     * Enable or disable NAT64 orefix publishing.
+     * Enable or disable NAT64 prefix publishing.
      *
      * @param[in]  aEnabled   A boolean to enable/disable NAT64 prefix publishing.
      *
@@ -299,7 +356,7 @@ public:
      * @param[in] aOnMeshPrefixConfig  The on-mesh prefix configuration to check.
      *
      * @retval   TRUE    The prefix is a valid OMR prefix.
-     * @retval   FALE    The prefix is not a valid OMR prefix.
+     * @retval   FALSE   The prefix is not a valid OMR prefix.
      *
      */
     static bool IsValidOmrPrefix(const NetworkData::OnMeshPrefixConfig &aOnMeshPrefixConfig);
@@ -310,7 +367,7 @@ public:
      * @param[in]  aPrefix  The prefix to check.
      *
      * @retval   TRUE    The prefix is a valid OMR prefix.
-     * @retval   FALE    The prefix is not a valid OMR prefix.
+     * @retval   FALSE   The prefix is not a valid OMR prefix.
      *
      */
     static bool IsValidOmrPrefix(const Ip6::Prefix &aPrefix);
@@ -355,15 +412,6 @@ public:
      */
     void HandleSrpServerAutoEnableMode(void);
 #endif
-
-    /**
-     * Gets the state of RoutingManager.
-     *
-     * @retval TRUE  The RoutingManager is currently running.
-     * @retval FALSE The RoutingManager is not running.
-     *
-     */
-    bool IsRunning(void) const { return mIsRunning; }
 
 private:
     static constexpr uint8_t kMaxOnMeshPrefixes = OPENTHREAD_CONFIG_BORDER_ROUTING_MAX_ON_MESH_PREFIXES;
@@ -448,20 +496,17 @@ private:
         explicit DiscoveredPrefixTable(Instance &aInstance);
 
         void ProcessRouterAdvertMessage(const Ip6::Nd::RouterAdvertMessage &aRaMessage,
-                                        const Ip6::Address &                aSrcAddress);
-        void ProcessNeighborAdvertMessage(const Ip6::Nd::NeighborAdvertMessage &aNaMessage,
-                                          const Ip6::Address &                  aSrcAddress);
+                                        const Ip6::Address                 &aSrcAddress);
+        void ProcessNeighborAdvertMessage(const Ip6::Nd::NeighborAdvertMessage &aNaMessage);
 
-        void SetAllowDefaultRouteInNetData(bool aAllow);
+        bool ContainsDefaultOrNonUlaRoutePrefix(void) const;
+        bool ContainsNonUlaOnLinkPrefix(void) const;
+        bool ContainsUlaOnLinkPrefix(void) const;
 
         void FindFavoredOnLinkPrefix(Ip6::Prefix &aPrefix) const;
-        bool ContainsOnLinkPrefix(const Ip6::Prefix &aPrefix) const;
+
         void RemoveOnLinkPrefix(const Ip6::Prefix &aPrefix);
-
-        bool ContainsRoutePrefix(const Ip6::Prefix &aPrefix) const;
         void RemoveRoutePrefix(const Ip6::Prefix &aPrefix);
-
-        bool ShouldPublish(NetworkData::ExternalRouteConfig &aRouteConfig) const;
 
         void RemoveAllEntries(void);
         void RemoveOrDeprecateOldEntries(TimeMilli aTimeThreshold);
@@ -499,7 +544,26 @@ private:
                 }
 
                 const Ip6::Prefix &mPrefix;
-                bool               mType;
+                Type               mType;
+            };
+
+            struct Checker
+            {
+                enum Mode : uint8_t
+                {
+                    kIsUla,
+                    kIsNotUla,
+                };
+
+                Checker(Mode aMode, Type aType)
+                    : mMode(aMode)
+                    , mType(aType)
+
+                {
+                }
+
+                Mode mMode;
+                Type mType;
             };
 
             struct ExpirationChecker
@@ -517,8 +581,9 @@ private:
             void               SetFrom(const Ip6::Nd::RouteInfoOption &aRio);
             Type               GetType(void) const { return mType; }
             bool               IsOnLinkPrefix(void) const { return (mType == kTypeOnLink); }
+            bool               IsRoutePrefix(void) const { return (mType == kTypeRoute); }
             const Ip6::Prefix &GetPrefix(void) const { return mPrefix; }
-            const TimeMilli &  GetLastUpdateTime(void) const { return mLastUpdateTime; }
+            const TimeMilli   &GetLastUpdateTime(void) const { return mLastUpdateTime; }
             uint32_t           GetValidLifetime(void) const { return mValidLifetime; }
             void               ClearValidLifetime(void) { mValidLifetime = 0; }
             TimeMilli          GetExpireTime(void) const;
@@ -526,13 +591,14 @@ private:
             RoutePreference    GetPreference(void) const;
             bool               operator==(const Entry &aOther) const;
             bool               Matches(const Matcher &aMatcher) const;
-            bool               Matches(const ExpirationChecker &aCheker) const;
+            bool               Matches(const Checker &aChecker) const;
+            bool               Matches(const ExpirationChecker &aChecker) const;
 
             // Methods to use when `IsOnLinkPrefix()`
             uint32_t GetPreferredLifetime(void) const { return mShared.mPreferredLifetime; }
             void     ClearPreferredLifetime(void) { mShared.mPreferredLifetime = 0; }
             bool     IsDeprecated(void) const;
-            void     AdoptValidAndPreferredLiftimesFrom(const Entry &aEntry);
+            void     AdoptValidAndPreferredLifetimesFrom(const Entry &aEntry);
 
             // Method to use when `!IsOnlinkPrefix()`
             RoutePreference GetRoutePreference(void) const { return mShared.mRoutePreference; }
@@ -540,7 +606,7 @@ private:
         private:
             static uint32_t CalculateExpireDelay(uint32_t aValidLifetime);
 
-            Entry *     mNext;
+            Entry      *mNext;
             Ip6::Prefix mPrefix;
             Type        mType;
             TimeMilli   mLastUpdateTime;
@@ -556,11 +622,11 @@ private:
         {
             // The timeout (in msec) for router staying in active state
             // before starting the Neighbor Solicitation (NS) probes.
-            static constexpr uint32_t kActiveTimout = OPENTHREAD_CONFIG_BORDER_ROUTING_ROUTER_ACTIVE_CHECK_TIMEOUT;
+            static constexpr uint32_t kActiveTimeout = OPENTHREAD_CONFIG_BORDER_ROUTING_ROUTER_ACTIVE_CHECK_TIMEOUT;
 
             static constexpr uint8_t  kMaxNsProbes          = 5;    // Max number of NS probe attempts.
             static constexpr uint32_t kNsProbeRetryInterval = 1000; // In msec. Time between NS probe attempts.
-            static constexpr uint32_t kNsProbeTimout        = 2000; // In msec. Max Wait time after last NS probe.
+            static constexpr uint32_t kNsProbeTimeout       = 2000; // In msec. Max Wait time after last NS probe.
             static constexpr uint32_t kJitter               = 2000; // In msec. Jitter to randomize probe starts.
 
             static_assert(kMaxNsProbes < 255, "kMaxNsProbes MUST not be 255");
@@ -584,7 +650,7 @@ private:
         public:
             const Router *GetRouter(void) const { return static_cast<const Router *>(mPtr1); }
             void          SetRouter(const Router *aRouter) { mPtr1 = aRouter; }
-            const Entry * GetEntry(void) const { return static_cast<const Entry *>(mPtr2); }
+            const Entry  *GetEntry(void) const { return static_cast<const Entry *>(mPtr2); }
             void          SetEntry(const Entry *aEntry) { mPtr2 = aEntry; }
             TimeMilli     GetInitTime(void) const { return TimeMilli(mData32); }
             void          SetInitTime(void) { mData32 = TimerMilli::GetNow().GetValue(); }
@@ -593,11 +659,11 @@ private:
         void         ProcessDefaultRoute(const Ip6::Nd::RouterAdvertMessage::Header &aRaHeader, Router &aRouter);
         void         ProcessPrefixInfoOption(const Ip6::Nd::PrefixInfoOption &aPio, Router &aRouter);
         void         ProcessRouteInfoOption(const Ip6::Nd::RouteInfoOption &aRio, Router &aRouter);
-        bool         ContainsPrefix(const Entry::Matcher &aMatcher) const;
+        bool         Contains(const Entry::Checker &aChecker) const;
         void         RemovePrefix(const Entry::Matcher &aMatcher);
         void         RemoveOrDeprecateEntriesFromInactiveRouters(void);
         void         RemoveRoutersWithNoEntries(void);
-        Entry *      AllocateEntry(void) { return mEntryPool.Allocate(); }
+        Entry       *AllocateEntry(void) { return mEntryPool.Allocate(); }
         void         FreeEntry(Entry &aEntry) { mEntryPool.Free(aEntry); }
         void         FreeEntries(LinkedList<Entry> &aEntries);
         void         UpdateNetworkDataOnChangeTo(Entry &aEntry);
@@ -616,7 +682,6 @@ private:
         EntryTimer                 mEntryTimer;
         RouterTimer                mRouterTimer;
         SignalTask                 mSignalTask;
-        bool                       mAllowDefaultRouteInNetData;
     };
 
     class LocalOmrPrefix;
@@ -627,6 +692,7 @@ private:
         OmrPrefix(void) { Clear(); }
 
         bool               IsEmpty(void) const { return (mPrefix.GetLength() == 0); }
+        bool               IsInfrastructureDerived(void) const;
         void               SetFrom(const NetworkData::OnMeshPrefixConfig &aOnMeshPrefixConfig);
         void               SetFrom(const LocalOmrPrefix &aLocalOmrPrefix);
         const Ip6::Prefix &GetPrefix(void) const { return mPrefix; }
@@ -650,10 +716,19 @@ private:
         Error              AddToNetData(void);
         void               RemoveFromNetData(void);
         bool               IsAddedInNetData(void) const { return mIsAddedInNetData; }
+        void               UpdateDefaultRouteFlag(bool aDefaultRoute);
 
     private:
+        static constexpr uint16_t kInfoStringSize = 85;
+
+        typedef String<kInfoStringSize> InfoString;
+
+        Error      AddOrUpdate(void);
+        InfoString ToString(void) const;
+
         Ip6::Prefix mPrefix;
         bool        mIsAddedInNetData;
+        bool        mDefaultRoute;
     };
 
     void HandleOnLinkPrefixManagerTimer(void) { mOnLinkPrefixManager.HandleTimer(); }
@@ -671,9 +746,10 @@ private:
         void               Stop(void);
         void               Evaluate(void);
         const Ip6::Prefix &GetLocalPrefix(void) const { return mLocalPrefix; }
+        const Ip6::Prefix &GetFavoredDiscoveredPrefix(void) const { return mFavoredDiscoveredPrefix; }
         bool               IsInitalEvaluationDone(void) const;
         void               HandleDiscoveredPrefixTableChanged(void);
-        bool               ShouldPublish(NetworkData::ExternalRouteConfig &aRouteConfig) const;
+        bool               ShouldPublishUlaRoute(void) const;
         void               AppendAsPiosTo(Ip6::Nd::RouterAdvertMessage &aRaMessage);
         bool               IsPublishingOrAdvertising(void) const;
         void               HandleNetDataChange(void);
@@ -738,7 +814,7 @@ private:
         // lifetime, and selection of the NAT64 prefix to publish in
         // Network Data.
         //
-        // Calling methods except GeneratrLocalPrefix and SetEnabled
+        // Calling methods except GenerateLocalPrefix and SetEnabled
         // when disabled becomes no-op.
 
         explicit Nat64PrefixManager(Instance &aInstance);
@@ -753,12 +829,12 @@ private:
         const Ip6::Prefix &GetLocalPrefix(void) const { return mLocalPrefix; }
         const Ip6::Prefix &GetFavoredPrefix(RoutePreference &aPreference) const;
         void               Evaluate(void);
-        bool               ShouldPublish(NetworkData::ExternalRouteConfig &aRouteConfig) const;
         void               HandleDiscoverDone(const Ip6::Prefix &aPrefix);
         void               HandleTimer(void);
 
     private:
         void Discover(void);
+        void Publish(void);
 
         using Nat64Timer = TimerMilliIn<RoutingManager, &RoutingManager::HandleNat64PrefixManagerTimer>;
 
@@ -771,6 +847,46 @@ private:
         Nat64Timer      mTimer;
     };
 #endif // OPENTHREAD_CONFIG_NAT64_BORDER_ROUTING_ENABLE
+
+    class RoutePublisher : public InstanceLocator // Manages the routes that are published in net data
+    {
+    public:
+        explicit RoutePublisher(Instance &aInstance);
+
+        void Start(void) { Evaluate(); }
+        void Stop(void) { Unpublish(); }
+        void Evaluate(void);
+
+        RoutePreference GetPreference(void) const { return mPreference; }
+        void            SetPreference(RoutePreference aPreference);
+        void            ClearPreference(void);
+
+        void HandleRoleChanged(void);
+
+        static const Ip6::Prefix &GetUlaPrefix(void) { return AsCoreType(&kUlaPrefix); }
+
+    private:
+        static const otIp6Prefix kUlaPrefix;
+
+        enum State : uint8_t
+        {
+            kDoNotPublish,   // Do not publish any routes in network data.
+            kPublishDefault, // Publish "::/0" route in network data.
+            kPublishUla,     // Publish "fc00::/7" route in network data.
+        };
+
+        void DeterminePrefixFor(State aState, Ip6::Prefix &aPrefix) const;
+        void UpdatePublishedRoute(State aNewState);
+        void Unpublish(void);
+        void SetPreferenceBasedOnRole(void);
+        void UpdatePreference(RoutePreference aPreference);
+
+        static const char *StateToString(State aState);
+
+        State           mState;
+        RoutePreference mPreference;
+        bool            mUserSetPreference;
+    };
 
     struct RaInfo
     {
@@ -838,14 +954,15 @@ private:
     void  HandleNotifierEvents(Events aEvents);
     bool  IsInitialized(void) const { return mInfraIf.IsInitialized(); }
     bool  IsEnabled(void) const { return mIsEnabled; }
+    void  SetRioPreferenceBasedOnRole(void);
+    void  UpdateRioPreference(RoutePreference aPreference);
     Error LoadOrGenerateRandomBrUlaPrefix(void);
 
     void EvaluateRoutingPolicy(void);
     bool IsInitalPolicyEvaluationDone(void) const;
     void ScheduleRoutingPolicyEvaluation(ScheduleMode aMode);
+    void DetermineFavoredOmrPrefix(void);
     void EvaluateOmrPrefix(void);
-    void EvaluatePublishingPrefix(const Ip6::Prefix &aPrefix);
-    void UnpublishExternalRoute(const Ip6::Prefix &aPrefix);
     void HandleRsSenderFinished(TimeMilli aStartTime);
     void SendRouterAdvertisement(RouterAdvTxMode aRaTxMode);
 
@@ -853,12 +970,12 @@ private:
 
     void HandleRouterAdvertisement(const InfraIf::Icmp6Packet &aPacket, const Ip6::Address &aSrcAddress);
     void HandleRouterSolicit(const InfraIf::Icmp6Packet &aPacket, const Ip6::Address &aSrcAddress);
-    void HandleNeighborAdvertisement(const InfraIf::Icmp6Packet &aPacket, const Ip6::Address &aSrcAddress);
+    void HandleNeighborAdvertisement(const InfraIf::Icmp6Packet &aPacket);
     bool ShouldProcessPrefixInfoOption(const Ip6::Nd::PrefixInfoOption &aPio, const Ip6::Prefix &aPrefix);
     bool ShouldProcessRouteInfoOption(const Ip6::Nd::RouteInfoOption &aRio, const Ip6::Prefix &aPrefix);
     void UpdateDiscoveredPrefixTableOnNetDataChange(void);
     bool NetworkDataContainsOmrPrefix(const Ip6::Prefix &aPrefix) const;
-    bool NetworkDataContainsExternalRoute(const Ip6::Prefix &aPrefix) const;
+    bool NetworkDataContainsUlaRoute(void) const;
     void UpdateRouterAdvertHeader(const Ip6::Nd::RouterAdvertMessage *aRouterAdvertMessage);
     bool IsReceivedRouterAdvertFromManager(const Ip6::Nd::RouterAdvertMessage &aRaMessage) const;
     void ResetDiscoveredPrefixStaleTimer(void);
@@ -890,11 +1007,14 @@ private:
     // were advertised as RIO in the last sent RA message.
     OnMeshPrefixArray mAdvertisedPrefixes;
 
-    RoutePreference mRouteInfoOptionPreference;
+    RoutePreference mRioPreference;
+    bool            mUserSetRioPreference;
 
     OnLinkPrefixManager mOnLinkPrefixManager;
 
     DiscoveredPrefixTable mDiscoveredPrefixTable;
+
+    RoutePublisher mRoutePublisher;
 
 #if OPENTHREAD_CONFIG_NAT64_BORDER_ROUTING_ENABLE
     Nat64PrefixManager mNat64PrefixManager;
@@ -908,6 +1028,8 @@ private:
 };
 
 } // namespace BorderRouter
+
+DefineMapEnum(otBorderRoutingState, BorderRouter::RoutingManager::State);
 
 } // namespace ot
 

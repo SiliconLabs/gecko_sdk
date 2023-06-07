@@ -28,10 +28,10 @@ EzspStatus ezspSetSecurityKey(EmberKeyData *key,
   if (securityType == SECURE_EZSP_SECURITY_TYPE_PERMANENT) {
     return EZSP_ERROR_INVALID_CALL;
   } else if (securityType == SECURE_EZSP_SECURITY_TYPE_TEMPORARY) {
-    status = emSecureEzspSetSecurityKey(key);
+    status = sli_zigbee_secure_ezsp_set_security_key(key);
 
     if (status == EMBER_SUCCESS) {
-      emSecureEzspSetSecurityType(securityType);
+      sli_zigbee_secure_ezsp_set_security_type(securityType);
     }
 
     return status;
@@ -48,11 +48,11 @@ EzspStatus ezspSetSecurityParameters(SecureEzspSecurityLevel securityLevel,
     return EZSP_ERROR_SECURITY_PARAMETERS_INVALID;
   }
 
-  if (!emSecureEzspIsSecurityKeySet()) {
+  if (!sli_zigbee_secure_ezsp_is_security_key_set()) {
     return EZSP_ERROR_SECURITY_KEY_NOT_SET;
   }
 
-  if (!emSecureEzspParametersArePending()) {
+  if (!sli_zigbee_secure_ezsp_parameters_are_pending()) {
     return EZSP_ERROR_SECURITY_PARAMETERS_ALREADY_SET;
   }
 
@@ -64,29 +64,29 @@ EzspStatus ezspSetSecurityParameters(SecureEzspSecurityLevel securityLevel,
     return EZSP_ASH_NCP_FATAL_ERROR;
   }
 
-  emSecureEzspSetSecurityLevel(securityLevel);
-  emSecureEzspGenerateSessionIds(hostRandomNumber, returnNcpRandomNumber);
+  sli_zigbee_secure_ezsp_set_security_level(securityLevel);
+  sli_zigbee_secure_ezsp_generate_session_ids(hostRandomNumber, returnNcpRandomNumber);
 
   return EZSP_SUCCESS;
 }
 
 EzspStatus ezspResetToFactoryDefaults(void)
 {
-  if (emSecureEzspGetSecurityType() == SECURE_EZSP_SECURITY_TYPE_PERMANENT) {
+  if (sli_zigbee_secure_ezsp_get_security_type() == SECURE_EZSP_SECURITY_TYPE_PERMANENT) {
     return EZSP_ERROR_INVALID_CALL;
   }
 
-  if (emSecureEzspGetState() == SECURE_EZSP_STATE_INITIAL) {
+  if (sli_zigbee_secure_ezsp_get_state() == SECURE_EZSP_STATE_INITIAL) {
     return EZSP_ERROR_SECURITY_KEY_NOT_SET;
   }
 
-  return emSecureEzspReset();
+  return sli_zigbee_secure_ezsp_reset();
 }
 
 EzspStatus ezspGetSecurityKeyStatus(SecureEzspSecurityType *returnSecurityType)
 {
-  if (emSecureEzspIsSecurityKeySet()) {
-    *returnSecurityType = emSecureEzspGetSecurityType();
+  if (sli_zigbee_secure_ezsp_is_security_key_set()) {
+    *returnSecurityType = sli_zigbee_secure_ezsp_get_security_type();
     return EZSP_ERROR_SECURITY_KEY_ALREADY_SET;
   }
   return EZSP_ERROR_SECURITY_KEY_NOT_SET;

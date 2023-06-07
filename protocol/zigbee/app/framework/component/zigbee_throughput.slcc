@@ -18,11 +18,11 @@ template_contribution:
   - name: zigbee_af_callback
     value:
       callback_type: event_init
-      function_name: emAfPluginThroughputInitCallback  
+      function_name: sli_zigbee_af_throughput_init_callback  
   - name: zigbee_stack_callback
     value:
       callback_type: message_sent
-      function_name: emAfPluginThroughputMessageSentCallback  
+      function_name: sli_zigbee_af_throughput_message_sent_callback  
   - name: cli_group
     value:
       group: plugin
@@ -32,25 +32,25 @@ template_contribution:
     value:
       group: throughput
       name: start
-      handler: emAfPluginThroughputCliStartTest
+      handler: sli_zigbee_af_throughput_cli_start_test
       help: Start the throughput test.
   - name: cli_command
     value:
       group: throughput
       name: stop
-      handler: emAfPluginThroughputCliStopTest
+      handler: sli_zigbee_af_throughput_cli_stop_test
       help: Abort the test while running.
   - name: cli_command
     value:
       group: throughput
       name: print-result
-      handler: emAfPluginThroughputCliPrintResult
+      handler: sli_zigbee_af_throughput_cli_print_result
       help: Show the results of the last test.
   - name: cli_command
     value:
       group: throughput
       name: set-destination
-      handler: emAfPluginThroughputCliSetDestination
+      handler: sli_zigbee_af_throughput_cli_set_destination
       help: Set the destination nodeId
       argument:
       - type: uint16
@@ -59,7 +59,7 @@ template_contribution:
     value:
       group: throughput
       name: set-interval
-      handler: emAfPluginThroughputCliSetInterval
+      handler: sli_zigbee_af_throughput_cli_set_interval
       help: Set the interval
       argument:
       - type: uint16
@@ -68,7 +68,7 @@ template_contribution:
     value:
       group: throughput
       name: set-timeout
-      handler: emAfPluginThroughputCliSetTestTimeout
+      handler: sli_zigbee_af_throughput_cli_set_test_timeout
       help: Set the test timeout
       argument:
       - type: uint32
@@ -77,7 +77,7 @@ template_contribution:
     value:
       group: throughput
       name: set-count
-      handler: emAfPluginThroughputCliSetTestCount
+      handler: sli_zigbee_af_throughput_cli_set_test_count
       help: Set the number of packets to send
       argument:
       - type: uint16
@@ -86,7 +86,7 @@ template_contribution:
     value:
       group: throughput
       name: set-inflight
-      handler: emAfPluginThroughputCliSetInFlightCount
+      handler: sli_zigbee_af_throughput_cli_set_in_flight_count
       help: Set the number of packets in flight during the test.
       argument:
       - type: uint8
@@ -95,7 +95,7 @@ template_contribution:
     value:
       group: throughput
       name: set-packet-size
-      handler: emAfPluginThroughputCliSetPacketSize
+      handler: sli_zigbee_af_throughput_cli_set_packet_size
       help: Set the packet length
       argument:
       - type: uint8
@@ -104,7 +104,7 @@ template_contribution:
     value:
       group: throughput
       name: set-all
-      handler: emAfPluginThroughputCliSetAllParameters
+      handler: sli_zigbee_af_throughput_cli_set_all_parameters
       help: Set all parameters Destination Count Interval packetLength maxInFlight testTimeout
       argument:
       - type: uint16
@@ -125,29 +125,29 @@ template_contribution:
     value:
       group: throughput
       name: set-aps-ack-off
-      handler: emAfPluginThroughputCliSetApsAckOff
+      handler: sli_zigbee_af_throughput_cli_set_aps_ack_off
       help: Turn off APS acks
   - name: cli_command
     value:
       group: throughput
       name: set-aps-ack-on
-      handler: emAfPluginThroughputCliSetApsAckOn
+      handler: sli_zigbee_af_throughput_cli_set_aps_ack_on
       help: Turn on APS acks
   - name: cli_command
     value:
       group: throughput
       name: print-parameters
-      handler: emAfPluginThroughputCliPrintParameters
+      handler: sli_zigbee_af_throughput_cli_print_parameters
       help: Print all the test parameters
   - name: cli_command
     value:
       group: throughput
       name: print-counters
-      handler: emAfPluginThroughputCliPrintCounters
+      handler: sli_zigbee_af_throughput_cli_print_counters
       help: Print the stack counters
   - name: cli_command
     value:
       group: throughput
       name: clear-counters
-      handler: emAfPluginThroughputCliClearCounters
+      handler: sli_zigbee_af_throughput_cli_clear_counters
       help: Clear all the stack counters

@@ -9,12 +9,14 @@ description: >
 package: Z-Wave
 quality: production
 source:
-  - path: protocol/z-wave/ZAF/CommandClasses/Configuration/CC_Configuration.c
-  - path: protocol/z-wave/ZAF/CommandClasses/Configuration/cc_configuration_io.c
+  - path: protocol/z-wave/ZAF/CommandClasses/Configuration/src/CC_Configuration.c
+  - path: protocol/z-wave/ZAF/CommandClasses/Configuration/src/cc_configuration_io.c
 include:
-  - path: protocol/z-wave/ZAF/CommandClasses/Configuration/
+  - path: protocol/z-wave/ZAF/CommandClasses/Configuration/inc
     file_list:
      - path: CC_Configuration.h
+  - path: protocol/z-wave/ZAF/CommandClasses/Configuration/src
+    file_list:
      - path: cc_configuration_config_api.h
      - path: cc_configuration_io.h
 provides:

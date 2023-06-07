@@ -6,7 +6,7 @@ description: >
   which is 10dBm by default.
   If the selected power is higher than the limit then the device is going to use it only if there are 15 channels
   or more available.
-category: "Bluetooth|Feature"
+category: Bluetooth|Bluetooth LE Controller (Link Layer)|Additional Features
 quality: "production"
 root_path: "protocol/bluetooth"
 requires:

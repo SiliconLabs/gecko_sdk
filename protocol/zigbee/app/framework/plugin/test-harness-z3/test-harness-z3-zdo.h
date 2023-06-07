@@ -15,6 +15,6 @@
  *
  ******************************************************************************/
 
-EmberStatus emAfPluginTestHarnessZ3ZdoCommandResponseHandler(uint8_t *requestBuffer,
-                                                             uint8_t length,
-                                                             EmberApsFrame *apsFrame);
+EmberStatus sli_zigbee_af_test_harness_z3_zdo_command_response_handler(uint8_t *requestBuffer,
+                                                                       uint8_t length,
+                                                                       EmberApsFrame *apsFrame);

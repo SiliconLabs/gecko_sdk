@@ -9,7 +9,7 @@ package: Z-Wave
 quality: production
 component:
   # Z-Wave
-  - id: zw_controller
+  - id: zw_role_type_central_static_controller
   - id: zaf_ncp
   - id: zw_core
   - id: zw_appshw_serialapi
@@ -40,11 +40,10 @@ source:
   - path: comm_interface.c
   - path: nvm_backup_restore.c
   - path: serialapi_file.c
-  - path: serialappl.c
+  - path: app.c
   - path: utils.c
   - path: virtual_slave_node_info.c
   - path: main.c
-  - path: app.c
 include:
   - path: .
     file_list:
@@ -57,12 +56,10 @@ include:
       - path: controller_supported_func.h
       - path: nvm_backup_restore.h
       - path: serialapi_file.h
-      - path: serialappl.h
+      - path: app.h
       - path: slave_supported_func.h
       - path: utils.h
       - path: virtual_slave_node_info.h
-      - path: app.h
-      - path: config_app.h
   - path: "../../ZAF/configuration/inc/"
     file_list:
       - path: "zaf_config_security.h"
@@ -76,6 +73,17 @@ config_file:
     file_id: zaf_config
     condition: [device_series_2]
 configuration:
+  # Version numbers are equal to SDK_VERSION_MAJOR, SDK_VERSION_MINOR, SDK_VERSION_PATCH
+  - name: APP_VERSION
+    value: 7
+  - name: APP_REVISION
+    value: 20
+  - name: APP_PATCH
+    value: 0
+  - name: ZAF_CONFIG_GENERIC_TYPE
+    value: GENERIC_TYPE_STATIC_CONTROLLER
+  - name: ZAF_CONFIG_SPECIFIC_TYPE
+    value: SPECIFIC_TYPE_PC_CONTROLLER
   - name: ZAF_CONFIG_PRODUCT_ID
     value: 4 # Silicon Labs Z-Wave Serial API product ID
   - name: NVM3_DEFAULT_MAX_OBJECT_SIZE
@@ -117,9 +125,7 @@ configuration:
   - name: configTIMER_QUEUE_LENGTH
     value: 8
   - name: SL_DEVICE_INIT_DCDC_BYPASS
-    value: 1
-  - name: SL_POWER_MANAGER_LOWEST_EM_ALLOWED 
-    value: 3    
+    value: 1  
   - name: SL_PSA_ITS_USER_MAX_FILES
     value: 32
     condition: ["device_series_2", "device_security_vault"]
@@ -141,6 +147,8 @@ configuration:
     value: 128
   - name: ZAF_CONFIG_INSTALLER_ICON_TYPE
     value: 0
+  - name: ZAF_APP_NAME
+    value: '"serial_api_controller"'
 
 define:
   - name: APP_PROPERTIES_CONFIG_FILE
@@ -154,6 +162,9 @@ define:
 
 other_file:
   - path: ../../DevTools/postbuild.sh
+
+post_build:
+  profile: zwave_ncp_serial_api_controller
 
 tag:
   - prebuilt_demo

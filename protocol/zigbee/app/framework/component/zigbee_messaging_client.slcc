@@ -39,7 +39,7 @@ template_contribution:
     value:
       group: messaging-client
       name: confirm
-      handler: emAfMessagingClientCliConfirm
+      handler: sli_zigbee_af_messaging_client_cli_confirm
       help: Sends the message confirmation.
       argument:
       - type: uint8
@@ -48,7 +48,7 @@ template_contribution:
     value:
       group: messaging-client
       name: print
-      handler: emAfMessagingClientCliPrint
+      handler: sli_zigbee_af_messaging_client_cli_print
       help: Prints the message info.
       argument:
       - type: uint8
@@ -57,7 +57,7 @@ template_contribution:
     value:
       group: messaging-client
       name: clear
-      handler: emAfMessagingClientCliClear
+      handler: sli_zigbee_af_messaging_client_cli_clear
       help: Clears the message.
       argument:
       - type: uint8

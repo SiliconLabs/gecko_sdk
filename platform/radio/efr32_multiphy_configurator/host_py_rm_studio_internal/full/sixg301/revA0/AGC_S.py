@@ -1,0 +1,140 @@
+
+# -*- coding: utf-8 -*-
+
+__all__ = [ 'RM_Peripheral_AGC_S' ]
+
+from . static import Base_RM_Peripheral
+from . AGC_S_register import *
+
+class RM_Peripheral_AGC_S(Base_RM_Peripheral):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Peripheral_AGC_S, self).__init__(rmio, label,
+            0xA800C000, 'AGC_S',
+            u"",
+            [])
+        self.IPVERSION = RM_Register_AGC_S_IPVERSION(self.zz_rmio, self.zz_label)
+        self.zz_rdict['IPVERSION'] = self.IPVERSION
+        self.EN = RM_Register_AGC_S_EN(self.zz_rmio, self.zz_label)
+        self.zz_rdict['EN'] = self.EN
+        self.STATUS0 = RM_Register_AGC_S_STATUS0(self.zz_rmio, self.zz_label)
+        self.zz_rdict['STATUS0'] = self.STATUS0
+        self.STATUS1 = RM_Register_AGC_S_STATUS1(self.zz_rmio, self.zz_label)
+        self.zz_rdict['STATUS1'] = self.STATUS1
+        self.STATUS2 = RM_Register_AGC_S_STATUS2(self.zz_rmio, self.zz_label)
+        self.zz_rdict['STATUS2'] = self.STATUS2
+        self.RSSI = RM_Register_AGC_S_RSSI(self.zz_rmio, self.zz_label)
+        self.zz_rdict['RSSI'] = self.RSSI
+        self.FRAMERSSI = RM_Register_AGC_S_FRAMERSSI(self.zz_rmio, self.zz_label)
+        self.zz_rdict['FRAMERSSI'] = self.FRAMERSSI
+        self.CTRL0 = RM_Register_AGC_S_CTRL0(self.zz_rmio, self.zz_label)
+        self.zz_rdict['CTRL0'] = self.CTRL0
+        self.CTRL1 = RM_Register_AGC_S_CTRL1(self.zz_rmio, self.zz_label)
+        self.zz_rdict['CTRL1'] = self.CTRL1
+        self.CTRL2 = RM_Register_AGC_S_CTRL2(self.zz_rmio, self.zz_label)
+        self.zz_rdict['CTRL2'] = self.CTRL2
+        self.CTRL3 = RM_Register_AGC_S_CTRL3(self.zz_rmio, self.zz_label)
+        self.zz_rdict['CTRL3'] = self.CTRL3
+        self.CTRL4 = RM_Register_AGC_S_CTRL4(self.zz_rmio, self.zz_label)
+        self.zz_rdict['CTRL4'] = self.CTRL4
+        self.CTRL5 = RM_Register_AGC_S_CTRL5(self.zz_rmio, self.zz_label)
+        self.zz_rdict['CTRL5'] = self.CTRL5
+        self.CTRL6 = RM_Register_AGC_S_CTRL6(self.zz_rmio, self.zz_label)
+        self.zz_rdict['CTRL6'] = self.CTRL6
+        self.CTRL7 = RM_Register_AGC_S_CTRL7(self.zz_rmio, self.zz_label)
+        self.zz_rdict['CTRL7'] = self.CTRL7
+        self.RSSISTEPTHR = RM_Register_AGC_S_RSSISTEPTHR(self.zz_rmio, self.zz_label)
+        self.zz_rdict['RSSISTEPTHR'] = self.RSSISTEPTHR
+        self.MANGAIN = RM_Register_AGC_S_MANGAIN(self.zz_rmio, self.zz_label)
+        self.zz_rdict['MANGAIN'] = self.MANGAIN
+        self.IF = RM_Register_AGC_S_IF(self.zz_rmio, self.zz_label)
+        self.zz_rdict['IF'] = self.IF
+        self.IEN = RM_Register_AGC_S_IEN(self.zz_rmio, self.zz_label)
+        self.zz_rdict['IEN'] = self.IEN
+        self.CMD = RM_Register_AGC_S_CMD(self.zz_rmio, self.zz_label)
+        self.zz_rdict['CMD'] = self.CMD
+        self.GAINRANGE = RM_Register_AGC_S_GAINRANGE(self.zz_rmio, self.zz_label)
+        self.zz_rdict['GAINRANGE'] = self.GAINRANGE
+        self.AGCPERIOD0 = RM_Register_AGC_S_AGCPERIOD0(self.zz_rmio, self.zz_label)
+        self.zz_rdict['AGCPERIOD0'] = self.AGCPERIOD0
+        self.AGCPERIOD1 = RM_Register_AGC_S_AGCPERIOD1(self.zz_rmio, self.zz_label)
+        self.zz_rdict['AGCPERIOD1'] = self.AGCPERIOD1
+        self.HICNTREGION0 = RM_Register_AGC_S_HICNTREGION0(self.zz_rmio, self.zz_label)
+        self.zz_rdict['HICNTREGION0'] = self.HICNTREGION0
+        self.HICNTREGION1 = RM_Register_AGC_S_HICNTREGION1(self.zz_rmio, self.zz_label)
+        self.zz_rdict['HICNTREGION1'] = self.HICNTREGION1
+        self.STEPDWN = RM_Register_AGC_S_STEPDWN(self.zz_rmio, self.zz_label)
+        self.zz_rdict['STEPDWN'] = self.STEPDWN
+        self.GAINSTEPLIM0 = RM_Register_AGC_S_GAINSTEPLIM0(self.zz_rmio, self.zz_label)
+        self.zz_rdict['GAINSTEPLIM0'] = self.GAINSTEPLIM0
+        self.GAINSTEPLIM1 = RM_Register_AGC_S_GAINSTEPLIM1(self.zz_rmio, self.zz_label)
+        self.zz_rdict['GAINSTEPLIM1'] = self.GAINSTEPLIM1
+        self.PNRFATT0 = RM_Register_AGC_S_PNRFATT0(self.zz_rmio, self.zz_label)
+        self.zz_rdict['PNRFATT0'] = self.PNRFATT0
+        self.PNRFATT1 = RM_Register_AGC_S_PNRFATT1(self.zz_rmio, self.zz_label)
+        self.zz_rdict['PNRFATT1'] = self.PNRFATT1
+        self.PNRFATT2 = RM_Register_AGC_S_PNRFATT2(self.zz_rmio, self.zz_label)
+        self.zz_rdict['PNRFATT2'] = self.PNRFATT2
+        self.PNRFATT3 = RM_Register_AGC_S_PNRFATT3(self.zz_rmio, self.zz_label)
+        self.zz_rdict['PNRFATT3'] = self.PNRFATT3
+        self.PNRFATT4 = RM_Register_AGC_S_PNRFATT4(self.zz_rmio, self.zz_label)
+        self.zz_rdict['PNRFATT4'] = self.PNRFATT4
+        self.PNRFATT5 = RM_Register_AGC_S_PNRFATT5(self.zz_rmio, self.zz_label)
+        self.zz_rdict['PNRFATT5'] = self.PNRFATT5
+        self.PNRFATT6 = RM_Register_AGC_S_PNRFATT6(self.zz_rmio, self.zz_label)
+        self.zz_rdict['PNRFATT6'] = self.PNRFATT6
+        self.PNRFATT7 = RM_Register_AGC_S_PNRFATT7(self.zz_rmio, self.zz_label)
+        self.zz_rdict['PNRFATT7'] = self.PNRFATT7
+        self.PNRFATTALT = RM_Register_AGC_S_PNRFATTALT(self.zz_rmio, self.zz_label)
+        self.zz_rdict['PNRFATTALT'] = self.PNRFATTALT
+        self.LNAMIXCODE0 = RM_Register_AGC_S_LNAMIXCODE0(self.zz_rmio, self.zz_label)
+        self.zz_rdict['LNAMIXCODE0'] = self.LNAMIXCODE0
+        self.LNAMIXCODE1 = RM_Register_AGC_S_LNAMIXCODE1(self.zz_rmio, self.zz_label)
+        self.zz_rdict['LNAMIXCODE1'] = self.LNAMIXCODE1
+        self.PGACODE0 = RM_Register_AGC_S_PGACODE0(self.zz_rmio, self.zz_label)
+        self.zz_rdict['PGACODE0'] = self.PGACODE0
+        self.PGACODE1 = RM_Register_AGC_S_PGACODE1(self.zz_rmio, self.zz_label)
+        self.zz_rdict['PGACODE1'] = self.PGACODE1
+        self.LBT = RM_Register_AGC_S_LBT(self.zz_rmio, self.zz_label)
+        self.zz_rdict['LBT'] = self.LBT
+        self.MIRRORIF = RM_Register_AGC_S_MIRRORIF(self.zz_rmio, self.zz_label)
+        self.zz_rdict['MIRRORIF'] = self.MIRRORIF
+        self.SEQIF = RM_Register_AGC_S_SEQIF(self.zz_rmio, self.zz_label)
+        self.zz_rdict['SEQIF'] = self.SEQIF
+        self.SEQIEN = RM_Register_AGC_S_SEQIEN(self.zz_rmio, self.zz_label)
+        self.zz_rdict['SEQIEN'] = self.SEQIEN
+        self.RSSIABSTHR = RM_Register_AGC_S_RSSIABSTHR(self.zz_rmio, self.zz_label)
+        self.zz_rdict['RSSIABSTHR'] = self.RSSIABSTHR
+        self.LNABOOST = RM_Register_AGC_S_LNABOOST(self.zz_rmio, self.zz_label)
+        self.zz_rdict['LNABOOST'] = self.LNABOOST
+        self.ANTDIV = RM_Register_AGC_S_ANTDIV(self.zz_rmio, self.zz_label)
+        self.zz_rdict['ANTDIV'] = self.ANTDIV
+        self.DUALRFPKDTHD0 = RM_Register_AGC_S_DUALRFPKDTHD0(self.zz_rmio, self.zz_label)
+        self.zz_rdict['DUALRFPKDTHD0'] = self.DUALRFPKDTHD0
+        self.DUALRFPKDTHD1 = RM_Register_AGC_S_DUALRFPKDTHD1(self.zz_rmio, self.zz_label)
+        self.zz_rdict['DUALRFPKDTHD1'] = self.DUALRFPKDTHD1
+        self.SPARE = RM_Register_AGC_S_SPARE(self.zz_rmio, self.zz_label)
+        self.zz_rdict['SPARE'] = self.SPARE
+        self.FLARE = RM_Register_AGC_S_FLARE(self.zz_rmio, self.zz_label)
+        self.zz_rdict['FLARE'] = self.FLARE
+        self.STEPDWNSAFE = RM_Register_AGC_S_STEPDWNSAFE(self.zz_rmio, self.zz_label)
+        self.zz_rdict['STEPDWNSAFE'] = self.STEPDWNSAFE
+        self.CCADEBUG = RM_Register_AGC_S_CCADEBUG(self.zz_rmio, self.zz_label)
+        self.zz_rdict['CCADEBUG'] = self.CCADEBUG
+        self.TIACODE0 = RM_Register_AGC_S_TIACODE0(self.zz_rmio, self.zz_label)
+        self.zz_rdict['TIACODE0'] = self.TIACODE0
+        self.TIACODE1 = RM_Register_AGC_S_TIACODE1(self.zz_rmio, self.zz_label)
+        self.zz_rdict['TIACODE1'] = self.TIACODE1
+        self.LNAMIXCODE2 = RM_Register_AGC_S_LNAMIXCODE2(self.zz_rmio, self.zz_label)
+        self.zz_rdict['LNAMIXCODE2'] = self.LNAMIXCODE2
+        self.COLLDETCTRL = RM_Register_AGC_S_COLLDETCTRL(self.zz_rmio, self.zz_label)
+        self.zz_rdict['COLLDETCTRL'] = self.COLLDETCTRL
+        self.COLLDETTHD = RM_Register_AGC_S_COLLDETTHD(self.zz_rmio, self.zz_label)
+        self.zz_rdict['COLLDETTHD'] = self.COLLDETTHD
+        self.COLLDETSTATUS = RM_Register_AGC_S_COLLDETSTATUS(self.zz_rmio, self.zz_label)
+        self.zz_rdict['COLLDETSTATUS'] = self.COLLDETSTATUS
+        self.SETTLINGINDCTRL = RM_Register_AGC_S_SETTLINGINDCTRL(self.zz_rmio, self.zz_label)
+        self.zz_rdict['SETTLINGINDCTRL'] = self.SETTLINGINDCTRL
+        self.SETTLINGINDPER = RM_Register_AGC_S_SETTLINGINDPER(self.zz_rmio, self.zz_label)
+        self.zz_rdict['SETTLINGINDPER'] = self.SETTLINGINDPER
+        self.__dict__['zz_frozen'] = True

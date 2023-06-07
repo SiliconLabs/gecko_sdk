@@ -1,0 +1,40 @@
+id: zigbee_direct_tunneling
+label: Zigbee Direct Tunneling Functionality
+package: Zigbee
+category: Zigbee|Zigbee Direct ZDD
+quality: evaluation
+
+description: Zigbee Direct Tunneling functionality
+
+config_file:
+  - path: protocol/zigbee/app/framework/plugin-soc/zigbee_direct_tunneling/zigbee_direct_tunneling.xml
+    directory: btconf
+
+provides:
+  - name: zigbee_direct_tunneling
+
+requires:
+  - name: zigbee_app_framework_common
+  - name: zigbee_zcl_framework_core
+  - name: bluetooth_stack
+  - name: zigbee_direct_zdd
+
+include:
+  - path: protocol/zigbee/app/framework/plugin-soc/zigbee_direct_tunneling/
+    file_list:
+    - path: zigbee_direct_tunneling.h
+
+source:  
+  - path: protocol/zigbee/app/framework/plugin-soc/zigbee_direct_tunneling/zigbee_direct_tunneling.c
+
+template_contribution:
+  - name: component_catalog
+    value: zigbee_direct_tunneling
+  - name: zigbee_stack_callback
+    value:
+      callback_type: redirect_outgoing_message
+      function_name: sli_zigbee_af_plugin_zdd_tunneling_redirect_outgoing_message_callback
+
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/zigbee-direct-tunneling

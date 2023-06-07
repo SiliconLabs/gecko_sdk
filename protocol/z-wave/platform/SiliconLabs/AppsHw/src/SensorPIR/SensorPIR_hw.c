@@ -4,22 +4,21 @@
  * 
  * @copyright 2021 Silicon Laboratories Inc.
  */
-#include <SensorPIR_hw.h>
+#include <app_hw.h>
 #include <Assert.h>
 #include <board.h>
 #include <events.h>
 #include <ADC.h>
-#include <zaf_event_helper.h>
+#include <zaf_event_distributor_soc.h>
 //#define DEBUGPRINT
 #include <DebugPrint.h>
 #include <CC_Battery.h>
-#include <cc_battery_config_api.h>
 #include <zpal_init.h>
 
 #define MY_BATTERY_SPEC_LEVEL_FULL         3000  // My battery's 100% level (millivolts)
 #define MY_BATTERY_SPEC_LEVEL_EMPTY        2400  // My battery's 0% level (millivolts)
 
-#if defined(RADIO_BOARD_EFR32ZG13P32) || defined(RADIO_BOARD_EFR32ZG13S)
+#if defined(RADIO_BOARD_EFR32ZG13P32) || defined(RADIO_BOARD_EFR32ZG13S) || defined(RADIO_BOARD_BRD2603A)
   // The EFR32ZG13P32 device has reduced number of GPIO pins and hence less
   // button inputs available for the application to use. Therefore alternative
   // button mapping is required
@@ -66,7 +65,7 @@
                                                   // (i.e. it will generally not work with SensorPIR)
 
 /* Ensure we did not allocate the same physical button to more than one function */
-#if !defined(RADIO_BOARD_EFR32ZG13P32) && !defined(RADIO_BOARD_EFR32ZG13S) // Skipped for EFR32ZG13P32 where the shortage of GPIOs means we need to assign dual function to buttons
+#if !defined(RADIO_BOARD_EFR32ZG13P32) && !defined(RADIO_BOARD_EFR32ZG13S) && !defined(RADIO_BOARD_BRD2603A) // Skipped for EFR32ZG13P32 where the shortage of GPIOs means we need to assign dual function to buttons
 STATIC_ASSERT((APP_BUTTON_LEARN_RESET != PIR_EVENT_BTN) &&
               (APP_BUTTON_LEARN_RESET != BATTERY_REPORT_BTN) &&
               (PIR_EVENT_BTN != BATTERY_REPORT_BTN),
@@ -88,7 +87,7 @@ static void button_handler(BUTTON_EVENT event, bool is_called_from_isr)
   }
   else if (BTN_EVENT_SHORT_PRESS(BATTERY_REPORT_BTN) == event)
   {
-    app_event = EVENT_APP_BUTTON_BATTERY_REPORT;
+    app_event = EVENT_APP_BATTERY_REPORT;
   }
   else if (PIR_EVENT_TRANSITION_TO_ACTIVE(event))
   {
@@ -103,16 +102,16 @@ static void button_handler(BUTTON_EVENT event, bool is_called_from_isr)
   {
     if (is_called_from_isr)
     {
-      ZAF_EventHelperEventEnqueueFromISR(app_event);
+      zaf_event_distributor_enqueue_app_event_from_isr(app_event);
     }
     else
     {
-      ZAF_EventHelperEventEnqueue(app_event);
+      zaf_event_distributor_enqueue_app_event(app_event);
     }
   }
 }
 
-void SensorPIR_hw_init(void)
+void app_hw_init(void)
 {
   Board_SetButtonCallback(button_handler);
   Board_EnableButton(APP_BUTTON_LEARN_RESET);
@@ -183,14 +182,4 @@ CC_Battery_BatteryGet_handler(uint8_t endpoint)
     }
   }
   return roundedLevel;
-}
-
-void SensorPIR_hw_deep_sleep_wakeup_handler(void)
-{
-  uint32_t em4_wakeup_flags = Board_GetGpioEm4Flags();
-
-  if (0 != em4_wakeup_flags)
-  {
-    Board_ProcessEm4PinWakeupFlags(em4_wakeup_flags);
-  }
 }

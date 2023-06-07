@@ -4,18 +4,16 @@
  * 
  * @copyright 2021 Silicon Laboratories Inc.
  */
-#include <WallController_hw.h>
+#include <app_hw.h>
 #include <Assert.h>
 #include <ev_man.h>
 #include <events.h>
 #include <board.h>
-#include <zaf_event_helper.h>
+#include <zaf_event_distributor_soc.h>
+#include "wallcontroller_buttons.h"
 //#define DEBUGPRINT
 #include "DebugPrint.h"
 
-#define KEY01_BTN   APP_BUTTON_A
-#define KEY02_BTN   APP_BUTTON_B
-#define KEY03_BTN   APP_BUTTON_C
 
 STATIC_ASSERT((APP_BUTTON_LEARN_RESET != KEY01_BTN) &&
               (APP_BUTTON_LEARN_RESET != KEY02_BTN) &&
@@ -40,55 +38,55 @@ static void button_handler(BUTTON_EVENT event, bool is_called_from_isr)
   }
   else if (BTN_EVENT_SHORT_PRESS(KEY01_BTN) == event)
   {
-    app_event = EVENT_APP_BUTTON_KEY01_SHORT_PRESS;
+    app_event = EVENT_APP_KEY01_SHORT_PRESS;
   }
   else if (BTN_EVENT_HOLD(KEY01_BTN) == event)
   {
-    app_event = EVENT_APP_BUTTON_KEY01_HOLD;
+    app_event = EVENT_APP_KEY01_HOLD;
   }
   else if ((BTN_EVENT_UP(KEY01_BTN) == event) || (BTN_EVENT_LONG_PRESS(KEY01_BTN) == event))
   {
-    app_event = EVENT_APP_BUTTON_KEY01_RELEASE;
+    app_event = EVENT_APP_KEY01_RELEASE;
   }
   else if (BTN_EVENT_SHORT_PRESS(KEY02_BTN) == event)
   {
-    app_event = EVENT_APP_BUTTON_KEY02_SHORT_PRESS;
+    app_event = EVENT_APP_KEY02_SHORT_PRESS;
   }
   else if (BTN_EVENT_HOLD(KEY02_BTN) == event)
   {
-    app_event = EVENT_APP_BUTTON_KEY02_HOLD;
+    app_event = EVENT_APP_KEY02_HOLD;
   }
   else if ((BTN_EVENT_UP(KEY02_BTN) == event) || (BTN_EVENT_LONG_PRESS(KEY02_BTN) == event))
   {
-    app_event = EVENT_APP_BUTTON_KEY02_RELEASE;
+    app_event = EVENT_APP_KEY02_RELEASE;
   }
   else if (BTN_EVENT_SHORT_PRESS(KEY03_BTN) == event)
   {
-    app_event = EVENT_APP_BUTTON_KEY03_SHORT_PRESS;
+    app_event = EVENT_APP_KEY03_SHORT_PRESS;
   }
   else if (BTN_EVENT_HOLD(KEY03_BTN) == event)
   {
-    app_event = EVENT_APP_BUTTON_KEY03_HOLD;
+    app_event = EVENT_APP_KEY03_HOLD;
   }
   else if ((BTN_EVENT_UP(KEY03_BTN) == event) || (BTN_EVENT_LONG_PRESS(KEY03_BTN) == event))
   {
-    app_event = EVENT_APP_BUTTON_KEY03_RELEASE;
+    app_event = EVENT_APP_KEY03_RELEASE;
   }
 
   if (app_event != EVENT_EMPTY)
   {
     if (is_called_from_isr)
     {
-      ZAF_EventHelperEventEnqueueFromISR(app_event);
+      zaf_event_distributor_enqueue_app_event_from_isr(app_event);
     }
     else
     {
-      ZAF_EventHelperEventEnqueue(app_event);
+      zaf_event_distributor_enqueue_app_event(app_event);
     }
   }
 }
 
-void WallController_hw_init(void)
+void app_hw_init(void)
 {
   DPRINT("----------------------------------\n");
 

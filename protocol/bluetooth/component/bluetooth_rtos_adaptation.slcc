@@ -3,8 +3,10 @@ label: "Bluetooth RTOS Adaptation"
 package: "Bluetooth"
 description: >
   Bluetooth RTOS adaptation for running Bluetooth stack in a kernel.
-category: "Bluetooth|RTOS"
+category: Bluetooth|RTOS Adaptation
 quality: "production"
+ui_hints:
+  visibility: never
 root_path: "protocol/bluetooth"
 config_file:
   - path: "config/sl_bt_rtos_config.h"

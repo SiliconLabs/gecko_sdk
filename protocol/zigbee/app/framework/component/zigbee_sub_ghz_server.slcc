@@ -34,7 +34,7 @@ template_contribution:
   - name: zigbee_stack_callback
     value:
       callback_type: duty_cycle
-      function_name: emAfPluginSubGhzServerDutyCycleCallback
+      function_name: sli_zigbee_af_sub_ghz_server_duty_cycle_callback
   - name: cli_group
     value:
       group: plugin
@@ -49,13 +49,13 @@ template_contribution:
     value:
       group: channel-change
       name: print
-      handler: emAfSubGhzServerCliChannelChangePrint
+      handler: sli_zigbee_af_sub_ghz_server_cli_channel_change_print
       help: Print out the status of the sub-GHz channel change attribute.
   - name: cli_command
     value:
       group: channel-change
       name: set
-      handler: emAfSubGhzServerCliChannelChangeSet
+      handler: sli_zigbee_af_sub_ghz_server_cli_channel_change_set
       help: Set the status of the sub-GHz channel change attribute.
       argument:
       - type: uint32
@@ -69,13 +69,13 @@ template_contribution:
     value:
       group: channel-mask
       name: print
-      handler: emAfSubGhzServerCliChannelMaskPrint
+      handler: sli_zigbee_af_sub_ghz_server_cli_channel_mask_print
       help: Print out the status of all sub-GHz channel masks.
   - name: cli_command
     value:
       group: channel-mask
       name: set
-      handler: emAfSubGhzServerCliChannelMaskSet
+      handler: sli_zigbee_af_sub_ghz_server_cli_channel_mask_set
       help: Set one or more sub-GHz channel mask(s).
       argument:
       - type: uint32
@@ -95,13 +95,13 @@ template_contribution:
     value:
       group: limits
       name: print
-      handler: emAfSubGhzServerCliDutyCycleLimitsPrint
+      handler: sli_zigbee_af_sub_ghz_server_cli_duty_cycle_limits_print
       help: Print the current Duty Cycle limits.
   - name: cli_command
     value:
       group: limits
       name: set
-      handler: emAfSubGhzServerCliDutyCycleLimitsSet
+      handler: sli_zigbee_af_sub_ghz_server_cli_duty_cycle_limits_set
       help: Set the Duty Cycle limits.
       argument:
       - type: uint16
@@ -114,7 +114,7 @@ template_contribution:
     value:
       group: sub-ghz
       name: suspend-zcl-messages
-      handler: emAfSubGhzServerCliSuspendZclMessages
+      handler: sli_zigbee_af_sub_ghz_server_cli_suspend_zcl_messages
       help: Send the SuspendZCLMessages command to the given client.
       argument:
       - type: uint16
@@ -127,7 +127,7 @@ template_contribution:
     value:
       group: sub-ghz
       name: client-status
-      handler: emAfSubGhzServerCliClientStatus
+      handler: sli_zigbee_af_sub_ghz_server_cli_client_status
       help: Print the given Sub-GHZ given clients current status.
       argument:
       - type: uint16

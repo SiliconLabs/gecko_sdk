@@ -94,6 +94,17 @@ class CALC_CRC(ICalculator):
         # CRC_INVERT
         self._addModelVariable(model, 'crc_invert', bool, ModelVariableFormat.ASCII, 'Set to true if the CRC result is inverted')
 
+        # 802154 FCS Type
+        self._addModelVariable(model, 'fcs_type_802154', Enum, ModelVariableFormat.DECIMAL,
+                               desc='FCS type for 802154 PHYs')
+        model.vars.fcs_type_802154.var_enum = CreateModelVariableEnum(
+            enum_name='FcsTypeEnum',
+            enum_desc='802154 FCS Type',
+            member_data=[
+                ['TWO_BYTE', 1, '16-bit ITU-T CRC'],
+                ['FOUR_BYTE', 0, '32-bit ANSI X3.66-1979 CRC'],
+            ])
+
         """
         #Outputs
         """

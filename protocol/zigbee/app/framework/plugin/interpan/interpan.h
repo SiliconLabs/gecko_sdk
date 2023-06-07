@@ -19,7 +19,6 @@
 #ifndef SILABS_ZIGBEE_INTERPAN_H
 #define SILABS_ZIGBEE_INTERPAN_H
 
-#ifdef UC_BUILD
 #include "interpan-config.h"
 #if (EMBER_AF_PLUGIN_INTERPAN_ALLOW_REQUIRED_SMART_ENERGY_MESSAGES == 1)
 #define ALLOW_REQUIRED_SMART_ENERGY_MESSAGES
@@ -36,23 +35,6 @@
 #if (EMBER_AF_PLUGIN_INTERPAN_ALLOW_FRAGMENTATION == 1)
 #define ALLOW_FRAGMENTATION
 #endif
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_INTERPAN_ALLOW_REQUIRED_SMART_ENERGY_MESSAGES
-#define ALLOW_REQUIRED_SMART_ENERGY_MESSAGES
-#endif
-#ifdef EMBER_AF_PLUGIN_INTERPAN_ALLOW_SMART_ENERGY_RESPONSE_MESSAGES
-#define ALLOW_SMART_ENERGY_RESPONSE_MESSAGES
-#endif
-#ifdef EMBER_AF_PLUGIN_INTERPAN_ALLOW_KEY_ESTABLISHMENT
-#define ALLOW_KEY_ESTABLISHMENT
-#endif
-#ifdef EMBER_AF_PLUGIN_INTERPAN_ALLOW_APS_ENCRYPTED_MESSAGES
-#define ALLOW_APS_ENCRYPTED_MESSAGES
-#endif
-#ifdef EMBER_AF_PLUGIN_INTERPAN_ALLOW_FRAGMENTATION
-#define ALLOW_FRAGMENTATION
-#endif
-#endif // UC_BUILD
 
 /**
  * @defgroup interpan Interpan
@@ -230,11 +212,7 @@ typedef struct {
   uint8_t                   fragmentMaxLen;     // Max possible frag length
   uint8_t                   numFragments;       // Number of frags to be sent
   uint8_t                   fragmentNum;        // Running # of which frag is TX
-#ifdef UC_BUILD
   sl_zigbee_event_t*        event;
-#else
-  EmberEventControl*        eventControl;
-#endif
 } txFragmentedInterpanPacket;
 
 typedef struct {
@@ -243,11 +221,7 @@ typedef struct {
   uint16_t             bufLen;
   uint8_t              numFragments;
   uint8_t              lastFragmentNumReceived;
-#ifdef UC_BUILD
   sl_zigbee_event_t*   event;
-#else
-  EmberEventControl*   eventControl;
-#endif
 } rxFragmentedInterpanPacket;
 
 void interpanPluginSetFragmentMessageTimeout(uint16_t timeout); // seconds
@@ -329,20 +303,20 @@ void emberAfPluginInterpanFragmentTransmissionFailedCallback(uint8_t interpanFra
 /** @} */ // end of name Callbacks
 /** @} */ // end of interpan
 
-void interpanPluginInit(SLXU_INIT_ARG);
+void interpanPluginInit(uint8_t init_level);
 void interpanPluginSetMacMatchFilterEnable(bool enable);
 
-bool emAfPluginInterpanProcessMessage(uint8_t messageLength,
-                                      uint8_t *messageContents);
+bool sli_zigbee_af_interpan_process_message(uint8_t messageLength,
+                                            uint8_t *messageContents);
 
-EmberStatus emAfPluginInterpanSendRawMessage(uint8_t length, uint8_t* message);
+EmberStatus sli_zigbee_af_interpan_send_raw_message(uint8_t length, uint8_t* message);
 
-EmberStatus emAfInterpanApsCryptMessage(bool encrypt,
-                                        uint8_t* apsFrame,
-                                        uint8_t* messageLength,
-                                        uint8_t apsHeaderLength,
-                                        EmberEUI64 remoteEui64);
+EmberStatus sli_zigbee_af_interpan_aps_crypt_message(bool encrypt,
+                                                     uint8_t* apsFrame,
+                                                     uint8_t* messageLength,
+                                                     uint8_t apsHeaderLength,
+                                                     EmberEUI64 remoteEui64);
 
-void emAfPluginInterpanSetEnableState(bool enable);
+void sli_zigbee_af_interpan_set_enable_state(bool enable);
 
 #endif // SILABS_ZIGBEE_INTERPAN_H

@@ -13,7 +13,6 @@ provides:
   - name: psa_driver_source
 
 requires:
-  - name: device
   - name: psa_crypto_common
   - name: emlib_crypto
     condition: [device_has_crypto]
@@ -53,6 +52,9 @@ source:
     condition: [device_has_semailbox]
   - path: src/sli_se_driver_cipher.c
     condition: [device_has_semailbox]
+
+  - path: src/sli_cryptoacc_driver_key_derivation.c
+    condition: [device_has_cryptoacc, device_has_sepuf]
 
   # Transparent drivers
   - path: src/sli_crypto_transparent_driver_cipher.c

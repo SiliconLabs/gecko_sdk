@@ -20,8 +20,20 @@
 #ifndef SILABS_APP_UTIL_COMMON_H
 #define SILABS_APP_UTIL_COMMON_H
 
-// TODO: EMZIGBEE-6322 Remove this file when doing the UC_BUILD cleanup works.
-#include "app/util/common/uc-temp-macros.h"
+#ifdef SL_COMPONENT_CATALOG_PRESENT
+#include "sl_component_catalog.h"
+#endif
+#include "app/framework/common/zigbee_app_framework_common.h"
+#ifdef SL_CATALOG_CLI_PRESENT
+#include "sl_cli.h"
+#define SL_CLI_COMMAND_ARG sl_cli_command_arg_t * arguments
+#else // !SL_CATALOG_CLI_PRESENT
+#define SL_CLI_COMMAND_ARG void
+#endif // SL_CATALOG_CLI_PRESENT
+
+#if defined(SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT) && !defined(EMBER_SCRIPTED_TEST)
+#include "sl_zigbee_debug_print.h"
+#endif // SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT
 
 extern uint8_t serialPort;
 extern SerialBaudRate serialBaudRate;
@@ -34,7 +46,7 @@ void configureSerial(uint8_t port, SerialBaudRate rate);
 void toggleBlinker(void);
 
 #if !defined EZSP_HOST
-extern EmberEventControl blinkEvent;
+extern EmberEvent blinkEvent;
 #endif
 
 void initialize(void);
@@ -70,7 +82,7 @@ EmberStatus getOnlineNodeParameters(uint8_t* childCountReturn,
 EmberStatus getOfflineNodeParameters(EmberNodeId *myNodeIdReturn,
                                      EmberNodeType *myNodeTypeReturn,
                                      uint8_t* stackProfileReturn);
-void runEvents(EmberEventData* events);
+void runEvents(EmberEventQueue* event_queue);
 
 #define generateRandomKey(result) \
   (EMBER_SUCCESS == emberGenerateRandomKey(result))

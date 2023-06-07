@@ -38,7 +38,7 @@ template_contribution:
     value:
       group: events-server
       name: clear
-      handler: emAfEventsServerCliClear
+      handler: sli_zigbee_af_events_server_cli_clear
       help: Clears out the specified event log for the provided endpoint.
       argument:
       - type: uint8
@@ -49,7 +49,7 @@ template_contribution:
     value:
       group: events-server
       name: print
-      handler: emAfEventsServerCliPrint
+      handler: sli_zigbee_af_events_server_cli_print
       help: Prints the specified event log for the provided endpoint.
       argument:
       - type: uint8
@@ -60,7 +60,7 @@ template_contribution:
     value:
       group: events-server
       name: eprint
-      handler: emAfEventsServerCliPrintEvent
+      handler: sli_zigbee_af_events_server_cli_print_event
       help: Prints the event at the given index in the specified event log for the provided endpoint.
       argument:
       - type: uint8
@@ -73,7 +73,7 @@ template_contribution:
     value:
       group: events-server
       name: set
-      handler: emAfEventsServerCliSet
+      handler: sli_zigbee_af_events_server_cli_set
       help: Sets the event at the specified index in the event log for the provided endpoint.
       argument:
       - type: uint8
@@ -92,7 +92,7 @@ template_contribution:
     value:
       group: events-server
       name: add
-      handler: emAfEventsServerCliAdd
+      handler: sli_zigbee_af_events_server_cli_add
       help: Appends the event to the event log for the provided endpoint. Once the event      log is full, new events will start overwriting old events at the beginning of the table.
       argument:
       - type: uint8
@@ -109,7 +109,7 @@ template_contribution:
     value:
       group: events-server
       name: publish
-      handler: emAfEventsServerCliPublish
+      handler: sli_zigbee_af_events_server_cli_publish
       help: Publishes an event.
       argument:
       - type: uint16

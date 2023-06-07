@@ -21,6 +21,16 @@ static uint8_t pin;
 static uint8_t port;
 #endif // (!defined(SL_CATALOG_CPC_SECONDARY_PRESENT))
 
+SL_WEAK bool sl_hci_uart_is_ok_to_sleep(void)
+{
+  return true;
+}
+
+bool sl_btctrl_hci_sleep_is_ok_to_sleep(void)
+{
+  return sl_hci_uart_is_ok_to_sleep();
+}
+
 static void sl_btctrl_hci_clear_sleep_request(void)
 {
   sleep_requested = false;

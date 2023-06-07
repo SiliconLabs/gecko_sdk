@@ -112,22 +112,22 @@
 // <<< sl:start pin_tool >>>
 // <usart signal=TX,RX,CLK,CS> IOT_FLASH_CFG_EXP_SPI
 // $[USART_IOT_FLASH_CFG_EXP_SPI]
-#define IOT_FLASH_CFG_EXP_SPI_PERIPHERAL         USART0
-#define IOT_FLASH_CFG_EXP_SPI_PERIPHERAL_NO      0
+#define IOT_FLASH_CFG_EXP_SPI_PERIPHERAL         USART2
+#define IOT_FLASH_CFG_EXP_SPI_PERIPHERAL_NO      2
 
-// USART0 TX on PC00
+// USART2 TX on PC00
 #define IOT_FLASH_CFG_EXP_SPI_TX_PORT            gpioPortC
 #define IOT_FLASH_CFG_EXP_SPI_TX_PIN             0
 
-// USART0 RX on PC01
+// USART2 RX on PC01
 #define IOT_FLASH_CFG_EXP_SPI_RX_PORT            gpioPortC
 #define IOT_FLASH_CFG_EXP_SPI_RX_PIN             1
 
-// USART0 CLK on PC02
+// USART2 CLK on PC02
 #define IOT_FLASH_CFG_EXP_SPI_CLK_PORT           gpioPortC
 #define IOT_FLASH_CFG_EXP_SPI_CLK_PIN            2
 
-// USART0 CS on PC03
+// USART2 CS on PC03
 #define IOT_FLASH_CFG_EXP_SPI_CS_PORT            gpioPortC
 #define IOT_FLASH_CFG_EXP_SPI_CS_PIN             3
 

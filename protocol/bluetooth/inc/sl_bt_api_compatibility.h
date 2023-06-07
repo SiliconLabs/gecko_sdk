@@ -54,14 +54,24 @@ typedef enum
 } system_linklayer_config_key_t;
 
 /*
+ * Deprecated RESOURCE_* defines replaced by SL_BT_RESOURCE_*.
+ */
+#define RESOURCE_CONNECTION_TX_FLAGS_ERROR_PACKET_OVERFLOW 0x1       
+#define RESOURCE_CONNECTION_TX_FLAGS_ERROR_CORRUPT         0x2       
+
+
+/*
  * Deprecated and replaced by sl_bt_gap_address_type_t.
  */
 typedef enum
 {
-  gap_public_address               = 0x0,
-  gap_static_address               = 0x1,
-  gap_random_resolvable_address    = 0x2,
-  gap_random_nonresolvable_address = 0x3
+  gap_public_address                   = 0x0,
+  gap_static_address                   = 0x1,
+  gap_random_resolvable_address        = 0x2,
+  gap_random_nonresolvable_address     = 0x3,
+  gap_public_address_resolved_from_rpa = 0x4,
+  gap_static_address_resolved_from_rpa = 0x5,
+  gap_anonymous_address                = 0xff
 } gap_address_type_t;
 
 
@@ -110,8 +120,10 @@ typedef enum
 /*
  * Deprecated ADVERTISER_* defines replaced by SL_BT_ADVERTISER_*.
  */
-#define ADVERTISER_USE_NONRESOLVABLE_ADDRESS      0x4       
-#define ADVERTISER_USE_DEVICE_IDENTITY_IN_PRIVACY 0x10      
+#define ADVERTISER_USE_NONRESOLVABLE_ADDRESS          0x4       
+#define ADVERTISER_USE_DEVICE_IDENTITY_IN_PRIVACY     0x10      
+#define ADVERTISER_USE_FILTER_FOR_SCAN_REQUESTS       0x20      
+#define ADVERTISER_USE_FILTER_FOR_CONNECTION_REQUESTS 0x40      
 
 
 /*
@@ -195,6 +207,17 @@ typedef enum
   scanner_data_status_incomplete_more   = 0x1,
   scanner_data_status_incomplete_nomore = 0x2
 } scanner_data_status_t;
+
+/*
+ * Deprecated and replaced by sl_bt_scanner_filter_policy_t.
+ */
+typedef enum
+{
+  scanner_filter_policy_basic_unfiltered    = 0x0,
+  scanner_filter_policy_basic_filtered      = 0x1,
+  scanner_filter_policy_extended_unfiltered = 0x2,
+  scanner_filter_policy_extended_filtered   = 0x3
+} scanner_filter_policy_t;
 
 /*
  * Deprecated SCANNER_* defines replaced by SL_BT_SCANNER_*.
@@ -470,6 +493,7 @@ typedef enum
 #define SM_CONFIGURATION_CONNECTIONS_FROM_BONDED_DEVICES_ONLY 0x10      
 #define SM_CONFIGURATION_PREFER_MITM                          0x20      
 #define SM_CONFIGURATION_OOB_FROM_BOTH_DEVICES_REQUIRED       0x40      
+#define SM_CONFIGURATION_REJECT_DEBUG_KEYS                    0x80      
 
 
 /*
@@ -491,6 +515,15 @@ typedef enum
 } external_bondingdb_data_t;
 
 /*
+ * Deprecated and replaced by sl_bt_resolving_list_privacy_mode_t.
+ */
+typedef enum
+{
+  resolving_list_privacy_mode_network = 0x0,
+  resolving_list_privacy_mode_device  = 0x1
+} resolving_list_privacy_mode_t;
+
+/*
  * Deprecated and replaced by sl_bt_coex_option_t.
  */
 typedef enum
@@ -499,6 +532,135 @@ typedef enum
   coex_option_tx_abort      = 0x400,
   coex_option_high_priority = 0x800
 } coex_option_t;
+
+/*
+ * Deprecated and replaced by sl_bt_cs_role_t.
+ */
+typedef enum
+{
+  cs_role_initiator = 0x0,
+  cs_role_reflector = 0x1
+} cs_role_t;
+
+/*
+ * Deprecated and replaced by sl_bt_cs_role_status_t.
+ */
+typedef enum
+{
+  cs_role_status_disable = 0x0,
+  cs_role_status_enable  = 0x1
+} cs_role_status_t;
+
+/*
+ * Deprecated and replaced by sl_bt_cs_companion_signal_status_t.
+ */
+typedef enum
+{
+  cs_companion_signal_status_disable = 0x0,
+  cs_companion_signal_status_enable  = 0x1
+} cs_companion_signal_status_t;
+
+/*
+ * Deprecated and replaced by sl_bt_cs_procedure_state_t.
+ */
+typedef enum
+{
+  cs_procedure_state_disabled = 0x0,
+  cs_procedure_state_enabled  = 0x1
+} cs_procedure_state_t;
+
+/*
+ * Deprecated and replaced by sl_bt_cs_mode_t.
+ */
+typedef enum
+{
+  cs_mode_calibration = 0x0,
+  cs_mode_rtt         = 0x1,
+  cs_mode_pbr         = 0x2,
+  cs_mode_pbr_and_rtt = 0x3
+} cs_mode_t;
+
+/*
+ * Deprecated and replaced by sl_bt_cs_rtt_type_t.
+ */
+typedef enum
+{
+  cs_rtt_type_coarse                     = 0x0,
+  cs_rtt_type_fractional_96_bit_sounding = 0x2
+} cs_rtt_type_t;
+
+/*
+ * Deprecated and replaced by sl_bt_cs_channel_selection_algorithm_t.
+ */
+typedef enum
+{
+  cs_channel_selection_algorithm_3b                     = 0x0,
+  cs_channel_selection_algorithm_3c                     = 0x1,
+  cs_channel_selection_algorithm_user_shape_interleaved = 0x2
+} cs_channel_selection_algorithm_t;
+
+/*
+ * Deprecated and replaced by sl_bt_cs_ch3c_shape_t.
+ */
+typedef enum
+{
+  cs_ch3c_shape_hat         = 0x0,
+  cs_chc3_shape_interleaved = 0x1
+} cs_ch3c_shape_t;
+
+/*
+ * Deprecated and replaced by sl_bt_cs_done_status_t.
+ */
+typedef enum
+{
+  cs_done_status_complete                 = 0x0,
+  cs_done_status_partial_results_continue = 0x1,
+  cs_done_status_current_aborted          = 0xfe,
+  cs_done_status_all_aborted              = 0xff
+} cs_done_status_t;
+
+/*
+ * Deprecated and replaced by sl_bt_cs_abort_reason_t.
+ */
+typedef enum
+{
+  cs_abort_reason_no_abort              = 0x0,
+  cs_abort_reason_host_request          = 0x1,
+  cs_abort_reason_insufficient_channels = 0x2,
+  cs_abort_reason_no_map_update         = 0x3,
+  cs_abort_reason_unspecified           = 0xf
+} cs_abort_reason_t;
+
+/*
+ * Deprecated and replaced by sl_bt_cs_config_state_t.
+ */
+typedef enum
+{
+  cs_config_state_removed = 0x0,
+  cs_config_state_created = 0x1
+} cs_config_state_t;
+
+/*
+ * Deprecated and replaced by sl_bt_cs_test_tone_extension_t.
+ */
+typedef enum
+{
+  cs_test_tone_extension_both_without      = 0x0,
+  cs_test_tone_extension_reflector_without = 0x1,
+  cs_test_tone_extension_initiator_without = 0x2,
+  cs_test_tone_extension_both_with         = 0x3,
+  cs_test_tone_extension_round_robin       = 0x4
+} cs_test_tone_extension_t;
+
+/*
+ * Deprecated and replaced by sl_bt_cs_test_sounding_sequence_marker_t.
+ */
+typedef enum
+{
+  cs_test_sounding_sequence_marker_1           = 0x0,
+  cs_test_sounding_sequence_marker_2           = 0x1,
+  cs_test_sounding_sequence_marker_round_robin = 0x2
+} cs_test_sounding_sequence_marker_t;
 
 /*
  * Deprecated and replaced by sl_bt_l2cap_connection_result_t.

@@ -22,17 +22,11 @@
 #include "app/framework/plugin/ota-common/ota.h"
 #include "app/framework/plugin/ota-storage-common/ota-storage.h"
 
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #include "bootloader-interface-standalone.h"
 #include "ota-storage-common-config.h"
-#else // !UC_BUILD
-#include "enums.h"
-#include "hal/micro/bootloader-interface-standalone.h"
-#ifdef EMBER_AF_PLUGIN_EZSP_SPI
-#define SL_CATALOG_ZIGBEE_EZSP_SPI_PRESENT
-#endif
-#endif // UC_BUILD
 
 #ifdef SL_CATALOG_ZIGBEE_EZSP_UART_PRESENT
 #include "app/ezsp-host/ash/ash-host.h"
@@ -97,7 +91,7 @@ uint8_t emberAfOtaBootloadCallback(const EmberAfOtaImageId* id,
 
   bootloadPrintln("Starting bootloader communications.");
   emberAfCoreFlush();
-  if (!emAfStartNcpBootloaderCommunications()) {
+  if (!sli_zigbee_af_start_ncp_bootloader_communications()) {
     success = false;
     bootloadPrintln("Failed to start bootloading communications.");
     emberAfCoreFlush();
@@ -110,10 +104,10 @@ uint8_t emberAfOtaBootloadCallback(const EmberAfOtaImageId* id,
 
     // Use &= here to preserve the possible failed status returned
     // by transferFile()
-    success &= emAfRebootNcpAfterBootload();
+    success &= sli_zigbee_af_reboot_ncp_after_bootload();
   }
 
-  emAfPostNcpBootload(success);
+  sli_zigbee_af_post_ncp_bootload(success);
 
   return 0;
 }
@@ -137,10 +131,10 @@ static bool transferFile(const EmberAfOtaImageId* id,
   bootloadPrintln("Transferring EBL file to NCP...");
 
   if (EMBER_AF_OTA_STORAGE_SUCCESS
-      != emAfOtaStorageGetTagOffsetsAndSizes(id,
-                                             ncpUpgradeTagId,
-                                             &offsetPtr,
-                                             &endOffsetPtr)) {
+      != sli_zigbee_af_ota_storage_get_tag_offsets_and_sizes(id,
+                                                             ncpUpgradeTagId,
+                                                             &offsetPtr,
+                                                             &endOffsetPtr)) {
     bootloadPrintln("Failed to get offset and size for tag 0x%2X inside OTA file.",
                     ncpUpgradeTagId);
     return false;
@@ -156,13 +150,13 @@ static bool transferFile(const EmberAfOtaImageId* id,
     if (offset[i] != 0 && endOffset[i] != 0) {
       endOffset[i] += offset[i];
 
-      emAfPrintPercentageSetStartAndEnd(offset[i], endOffset[i]);
+      sli_zigbee_af_print_percentage_set_start_and_end(offset[i], endOffset[i]);
       bootloadPrintln("EBL data start: 0x%4X, end: 0x%4X, size: %d bytes",
                       offset[i],
                       endOffset[i],
                       endOffset[i] - offset[i]);
 
-      emAfInitXmodemState(START_IMMEDIATELY);
+      sli_zigbee_af_init_xmodsli_zigbee_state(START_IMMEDIATELY);
 
       while (offset[i] < endOffset[i]) {
         uint32_t returnedLength;
@@ -189,25 +183,25 @@ static bool transferFile(const EmberAfOtaImageId* id,
         }
 
         offset[i] += returnedLength;
-        if (!emAfSendXmodemData(block,
-                                (uint16_t)returnedLength,
-                                (offset[i] == endOffset[i]))) { // finish?
+        if (!sli_zigbee_af_send_xmodem_data(block,
+                                            (uint16_t)returnedLength,
+                                            (offset[i] == endOffset[i]))) { // finish?
           bootloadPrintln("Failed to send data to NCP.");
           emberAfCoreFlush();
           return false;
         }
 
-        emAfPrintPercentageUpdate("Transfer",
-                                  BOOTLOAD_PERCENTAGE_UPDATE,
-                                  offset[i]);
+        sli_zigbee_af_print_percentage_update("Transfer",
+                                              BOOTLOAD_PERCENTAGE_UPDATE,
+                                              offset[i]);
       }
 
       emberAfCoreFlush();
 
       // prepping NCP into flashing mode again for the next tag/image.
       if (tagCount > 0 && i + 1 < tagCount) {
-        emAfRebootNcpAfterBootload();
-        emAfStartNcpBootloaderCommunications();
+        sli_zigbee_af_reboot_ncp_after_bootload();
+        sli_zigbee_af_start_ncp_bootloader_communications();
       }
     }
   }

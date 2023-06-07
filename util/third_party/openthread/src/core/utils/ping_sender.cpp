@@ -127,7 +127,7 @@ void PingSender::Stop(void)
 void PingSender::SendPing(void)
 {
     TimeMilli        now     = TimerMilli::GetNow();
-    Message *        message = nullptr;
+    Message         *message = nullptr;
     Ip6::MessageInfo messageInfo;
 
     messageInfo.SetSockAddr(mConfig.GetSource());
@@ -135,7 +135,7 @@ void PingSender::SendPing(void)
     messageInfo.mHopLimit          = mConfig.mHopLimit;
     messageInfo.mAllowZeroHopLimit = mConfig.mAllowZeroHopLimit;
 
-    message = Get<Ip6::Icmp>().NewMessage(0);
+    message = Get<Ip6::Icmp>().NewMessage();
     VerifyOrExit(message != nullptr);
 
     SuccessOrExit(message->Append(HostSwap32(now.GetValue())));
@@ -181,8 +181,8 @@ void PingSender::HandleTimer(void)
     }
 }
 
-void PingSender::HandleIcmpReceive(void *               aContext,
-                                   otMessage *          aMessage,
+void PingSender::HandleIcmpReceive(void                *aContext,
+                                   otMessage           *aMessage,
                                    const otMessageInfo *aMessageInfo,
                                    const otIcmp6Header *aIcmpHeader)
 {
@@ -190,8 +190,8 @@ void PingSender::HandleIcmpReceive(void *               aContext,
                                                                 AsCoreType(aIcmpHeader));
 }
 
-void PingSender::HandleIcmpReceive(const Message &          aMessage,
-                                   const Ip6::MessageInfo & aMessageInfo,
+void PingSender::HandleIcmpReceive(const Message           &aMessage,
+                                   const Ip6::MessageInfo  &aMessageInfo,
                                    const Ip6::Icmp::Header &aIcmpHeader)
 {
     Reply    reply;

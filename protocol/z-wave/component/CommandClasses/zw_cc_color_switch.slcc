@@ -15,12 +15,14 @@ config_file:
   - path: protocol/z-wave/platform/SiliconLabs/PAL/config/cc_color_switch/cc_color_switch_config.h
     file_id: cc_color_switch_config
 source:
-  - path: protocol/z-wave/ZAF/CommandClasses/ColorSwitch/CC_ColorSwitch.c
-  - path: protocol/z-wave/ZAF/CommandClasses/ColorSwitch/cc_color_switch_io_weak.c
+  - path: protocol/z-wave/ZAF/CommandClasses/ColorSwitch/src/CC_ColorSwitch.c
+  - path: protocol/z-wave/ZAF/CommandClasses/ColorSwitch/src/cc_color_switch_io_weak.c
 include:
-  - path: protocol/z-wave/ZAF/CommandClasses/ColorSwitch/
+  - path: protocol/z-wave/ZAF/CommandClasses/ColorSwitch/inc/
     file_list:
     - path: CC_ColorSwitch.h
+  - path: protocol/z-wave/ZAF/CommandClasses/ColorSwitch/src/
+    file_list:
     - path: cc_color_switch_config_api.h
     - path: cc_color_switch_io.h
 provides:

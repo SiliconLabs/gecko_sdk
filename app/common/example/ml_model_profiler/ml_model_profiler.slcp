@@ -47,8 +47,6 @@ configuration:
     value: "1"
   - name: SL_IOSTREAM_EUSART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
     value: "1"
-  - name: SL_HEAP_SIZE
-    value: "0x3000"
   - name: SL_TFLITE_MICRO_INTERPRETER_INIT_ENABLE
     value: "0"
 toolchain_settings:
@@ -59,7 +57,7 @@ toolchain_settings:
   - option: gcc_linker_option
     value: "-u _printf_float"
   - option: optimize
-#   "value": "none"
+    #   "value": "none"
     "value": "speed"
 readme:
   - path: readme.md

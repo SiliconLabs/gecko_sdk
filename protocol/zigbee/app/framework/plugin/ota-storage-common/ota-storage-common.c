@@ -21,11 +21,12 @@
 
 #include "app/framework/plugin/ota-common/ota.h"
 #include "ota-storage.h"
-
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
+#include "sl_component_catalog.h"
+#endif // SL_COMPONENT_CATALOG_PRESEN
+#ifdef SL_CATALOG_ZIGBEE_OTAA_STORAGE_COMMON_PRESENT
 #include "ota-storage-common-config.h"
-#endif // UC_BUILD
-
+#endif
 #if defined (IMAGE_BUILDER)
 // For our PC tool, we use a simpler #define to turn on this code.
   #define ZCL_USING_OTA_BOOTLOAD_CLUSTER_CLIENT
@@ -41,7 +42,7 @@
 //------------------------------------------------------------------------------
 // API
 
-EmberAfOtaImageId emAfOtaStorageGetImageIdFromHeader(const EmberAfOtaHeader* header)
+EmberAfOtaImageId sli_zigbee_af_ota_storage_get_image_id_from_header(const EmberAfOtaHeader* header)
 {
   EmberAfOtaImageId id = INVALID_OTA_IMAGE_ID;
   id.manufacturerId = header->manufacturerId;
@@ -57,7 +58,7 @@ EmberAfOtaImageId emAfOtaStorageGetImageIdFromHeader(const EmberAfOtaHeader* hea
   return id;
 }
 
-uint16_t emGetUpgradeFileDestinationLength(uint16_t headerVersion)
+uint16_t sli_zigbee_af_get_upgrade_file_destination_length(uint16_t headerVersion)
 {
   if (!isValidHeaderVersion(headerVersion)) {
     return 0;
@@ -68,9 +69,9 @@ uint16_t emGetUpgradeFileDestinationLength(uint16_t headerVersion)
 // Although the header length is really 16-bit, we often want to use it to increment
 // a 32-bit offset variable, so just make it 32-bit.
 
-EmberAfOtaStorageStatus emAfOtaStorageGetHeaderLengthAndImageSize(const EmberAfOtaImageId* id,
-                                                                  uint32_t *returnHeaderLength,
-                                                                  uint32_t *returnImageSize)
+EmberAfOtaStorageStatus sli_zigbee_af_ota_storage_get_header_length_and_image_size(const EmberAfOtaImageId* id,
+                                                                                   uint32_t *returnHeaderLength,
+                                                                                   uint32_t *returnImageSize)
 {
   // The EmberAfOtaHeader struct is rather large, and on the 32-bit machines
   // all the 16-bit fields will be padded to 32-bits, thus increasing its size.
@@ -95,8 +96,8 @@ EmberAfOtaStorageStatus emAfOtaStorageGetHeaderLengthAndImageSize(const EmberAfO
   return status;
 }
 
-EmberAfOtaStorageStatus emAfOtaStorageGetZigbeeStackVersion(const EmberAfOtaImageId* id,
-                                                            uint16_t *returnZigbeeStackVersion)
+EmberAfOtaStorageStatus sli_zigbee_af_ota_storage_get_zigbee_stack_version(const EmberAfOtaImageId* id,
+                                                                           uint16_t *returnZigbeeStackVersion)
 {
   EmberAfOtaHeader fullHeader;
   EmberAfOtaStorageStatus status = emberAfOtaStorageGetFullHeaderCallback(id, &fullHeader);
@@ -111,10 +112,10 @@ EmberAfOtaStorageStatus emAfOtaStorageGetZigbeeStackVersion(const EmberAfOtaImag
   return status;
 }
 
-EmberAfOtaStorageStatus emAfOtaStorageGetTagOffsetAndSize(const EmberAfOtaImageId* id,
-                                                          uint16_t tag,
-                                                          uint32_t* returnTagOffset,
-                                                          uint32_t* returnTagSize)
+EmberAfOtaStorageStatus sli_zigbee_af_ota_storage_get_tag_offset_and_size(const EmberAfOtaImageId* id,
+                                                                          uint16_t tag,
+                                                                          uint32_t* returnTagOffset,
+                                                                          uint32_t* returnTagSize)
 {
   EmberAfTagData tags[EMBER_AF_PLUGIN_OTA_STORAGE_COMMON_MAX_TAGS_IN_OTA_FILE];
   uint16_t totalTags;
@@ -125,14 +126,14 @@ EmberAfOtaStorageStatus emAfOtaStorageGetTagOffsetAndSize(const EmberAfOtaImageI
   uint32_t tagLength = 0;
 
   if (EMBER_AF_OTA_STORAGE_SUCCESS
-      != emAfOtaStorageGetHeaderLengthAndImageSize(id,
-                                                   &offset,
-                                                   NULL) // image size return ptr (not needed)
+      != sli_zigbee_af_ota_storage_get_header_length_and_image_size(id,
+                                                                    &offset,
+                                                                    NULL) // image size return ptr (not needed)
       || (EMBER_AF_OTA_STORAGE_SUCCESS
-          != emAfOtaStorageReadAllTagInfo(id,
-                                          tags,
-                                          EMBER_AF_PLUGIN_OTA_STORAGE_COMMON_MAX_TAGS_IN_OTA_FILE,
-                                          &totalTags))) {
+          != sli_zigbee_af_ota_storage_read_all_tag_info(id,
+                                                         tags,
+                                                         EMBER_AF_PLUGIN_OTA_STORAGE_COMMON_MAX_TAGS_IN_OTA_FILE,
+                                                         &totalTags))) {
     return EMBER_AF_OTA_STORAGE_ERROR;
   }
 
@@ -154,10 +155,10 @@ EmberAfOtaStorageStatus emAfOtaStorageGetTagOffsetAndSize(const EmberAfOtaImageI
   return EMBER_AF_OTA_STORAGE_SUCCESS;
 }
 
-EmberAfOtaStorageStatus emAfOtaStorageGetTagOffsetsAndSizes(const EmberAfOtaImageId* id,
-                                                            uint16_t tag,
-                                                            uint32_t** returnTagOffset,
-                                                            uint32_t** returnTagSize)
+EmberAfOtaStorageStatus sli_zigbee_af_ota_storage_get_tag_offsets_and_sizes(const EmberAfOtaImageId* id,
+                                                                            uint16_t tag,
+                                                                            uint32_t** returnTagOffset,
+                                                                            uint32_t** returnTagSize)
 {
   EmberAfTagData tags[EMBER_AF_PLUGIN_OTA_STORAGE_COMMON_MAX_TAGS_IN_OTA_FILE];
   uint16_t totalTags;
@@ -167,14 +168,14 @@ EmberAfOtaStorageStatus emAfOtaStorageGetTagOffsetsAndSizes(const EmberAfOtaImag
   //Initializer needed according to Lint
 
   if (EMBER_AF_OTA_STORAGE_SUCCESS
-      != emAfOtaStorageGetHeaderLengthAndImageSize(id,
-                                                   &offset,
-                                                   NULL) // image size return ptr (not needed)
+      != sli_zigbee_af_ota_storage_get_header_length_and_image_size(id,
+                                                                    &offset,
+                                                                    NULL) // image size return ptr (not needed)
       || (EMBER_AF_OTA_STORAGE_SUCCESS
-          != emAfOtaStorageReadAllTagInfo(id,
-                                          tags,
-                                          EMBER_AF_PLUGIN_OTA_STORAGE_COMMON_MAX_TAGS_IN_OTA_FILE,
-                                          &totalTags))) {
+          != sli_zigbee_af_ota_storage_read_all_tag_info(id,
+                                                         tags,
+                                                         EMBER_AF_PLUGIN_OTA_STORAGE_COMMON_MAX_TAGS_IN_OTA_FILE,
+                                                         &totalTags))) {
     return EMBER_AF_OTA_STORAGE_ERROR;
   }
 
@@ -196,21 +197,21 @@ EmberAfOtaStorageStatus emAfOtaStorageGetTagOffsetsAndSizes(const EmberAfOtaImag
   }
 }
 
-EmberAfOtaStorageStatus emAfOtaStorageGetTagDataFromImage(const EmberAfOtaImageId* id,
-                                                          uint16_t tag,
-                                                          uint8_t* returnData,
-                                                          uint32_t* returnDataLength,
-                                                          uint32_t maxReturnDataLength)
+EmberAfOtaStorageStatus sli_zigbee_af_ota_storage_get_tag_data_from_image(const EmberAfOtaImageId* id,
+                                                                          uint16_t tag,
+                                                                          uint8_t* returnData,
+                                                                          uint32_t* returnDataLength,
+                                                                          uint32_t maxReturnDataLength)
 {
   uint32_t offset;
   uint32_t tagLength;
   EmberAfOtaStorageStatus status;
 
   status =
-    emAfOtaStorageGetTagOffsetAndSize(id,
-                                      tag,
-                                      &offset,
-                                      &tagLength);
+    sli_zigbee_af_ota_storage_get_tag_offset_and_size(id,
+                                                      tag,
+                                                      &offset,
+                                                      &tagLength);
   if (status != EMBER_AF_OTA_STORAGE_SUCCESS) {
     return status;
   }
@@ -226,17 +227,17 @@ EmberAfOtaStorageStatus emAfOtaStorageGetTagDataFromImage(const EmberAfOtaImageI
                                                 returnDataLength);
 }
 
-EmberAfOtaStorageStatus emAfOtaStorageGetRawHeaderData(const EmberAfOtaImageId* id,
-                                                       uint8_t* returnData,
-                                                       uint32_t* returnDataLength,
-                                                       uint32_t maxReturnDataLength)
+EmberAfOtaStorageStatus sli_zigbee_af_ota_storage_get_raw_header_data(const EmberAfOtaImageId* id,
+                                                                      uint8_t* returnData,
+                                                                      uint32_t* returnDataLength,
+                                                                      uint32_t maxReturnDataLength)
 {
   // We need to know the header size before we can get the raw data.
   uint32_t headerLength;
   EmberAfOtaStorageStatus status
-    = emAfOtaStorageGetHeaderLengthAndImageSize(id,
-                                                &headerLength,
-                                                NULL); // image size ptr (don't care)
+    = sli_zigbee_af_ota_storage_get_header_length_and_image_size(id,
+                                                                 &headerLength,
+                                                                 NULL); // image size ptr (don't care)
 
   if (status) {
     return status;
@@ -253,19 +254,19 @@ EmberAfOtaStorageStatus emAfOtaStorageGetRawHeaderData(const EmberAfOtaImageId* 
                                                 returnDataLength);
 }
 
-EmberAfOtaStorageStatus emAfOtaStorageReadAllTagInfo(const EmberAfOtaImageId* id,
-                                                     EmberAfTagData* tagInfo,
-                                                     uint16_t maxTags,
-                                                     uint16_t* totalTags)
+EmberAfOtaStorageStatus sli_zigbee_af_ota_storage_read_all_tag_info(const EmberAfOtaImageId* id,
+                                                                    EmberAfTagData* tagInfo,
+                                                                    uint16_t maxTags,
+                                                                    uint16_t* totalTags)
 {
   uint8_t tagData[TAG_OVERHEAD];
   uint32_t returnedLength;
   uint32_t offset;
   uint32_t imageSize;
   EmberAfOtaStorageStatus status
-    = emAfOtaStorageGetHeaderLengthAndImageSize(id,
-                                                &offset,
-                                                &imageSize);
+    = sli_zigbee_af_ota_storage_get_header_length_and_image_size(id,
+                                                                 &offset,
+                                                                 &imageSize);
 
   if (EMBER_AF_OTA_STORAGE_SUCCESS != status) {
     return status;

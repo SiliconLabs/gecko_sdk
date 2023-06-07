@@ -6,12 +6,25 @@
  * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
- * The licensor of this software is Silicon Laboratories Inc. Your use of this
- * software is governed by the terms of Silicon Labs Master Software License
- * Agreement (MSLA) available at
- * www.silabs.com/about-us/legal/master-software-license-agreement. This
- * software is distributed to you in Source Code format and is governed by the
- * sections of the MSLA applicable to Source Code.
+ * SPDX-License-Identifier: Zlib
+ *
+ * The licensor of this software is Silicon Laboratories Inc.
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty. In no event will the authors be held liable for any damages
+ * arising from the use of this software.
+ *
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
+ *
+ * 1. The origin of this software must not be misrepresented; you must not
+ *    claim that you wrote the original software. If you use this software
+ *    in a product, an acknowledgment in the product documentation would be
+ *    appreciated but is not required.
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.
+ * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
 
@@ -45,17 +58,6 @@ extern "C" {
 /***************************************************************************//**
  * @addtogroup memlcd MEMLCD - Memory LCD
  * @brief Memory LCD interface.
- *  
- * The memory LCD interface is built to use SPI communication either with usart 
- * or eusart. Configurations for three standard display are already supported 
- * (lpm013m126a, ls013b7dh03 and ls013b7dh06), but the @ref sl_memlcd_t 
- * structure can also be configured with a custom LCD's specifications.
- * To implement a fully custom memory LCD interface, see @ref memlcd_custom.
- * 
- * @note When using the EUSART as the communication engine, care must be taken
- *       to ensure the EUSART is re-enabled when coming back from EM2/3.
- *       This is automatically handle by the Power Manager when added to a project.
- *       See EMLIB Eusart - EM2 guideline for non EM2-Capable instance
  * @{
  ******************************************************************************/
 
@@ -180,29 +182,40 @@ const sl_memlcd_t *sl_memlcd_get(void);
 /***************************************************************************//**
  * @addtogroup memlcd MEMLCD - Memory LCD
  * @{
- * 
+ *
+ * The memory LCD interface is built to use SPI communication either with usart
+ * or eusart. Configurations for three standard display are already supported
+ * (lpm013m126a, ls013b7dh03 and ls013b7dh06), but the @ref sl_memlcd_t
+ * structure can also be configured with a custom LCD's specifications.
+ * To implement a fully custom memory LCD interface, see @ref memlcd_custom.
+ *
+ * @note When using the EUSART as the communication engine, care must be taken
+ *       to ensure the EUSART is re-enabled when coming back from EM2/3.
+ *       This is automatically handle by the Power Manager when added to a project.
+ *       See EMLIB Eusart - EM2 guideline for non EM2-Capable instance
+ *
  * @n @section memlcd_custom Custom Memory LCD
  *
- * The custom memory LCD is a module allowing the implementation of a LCD 
- * driver that can't use the already designed interface. To achieve this, 
+ * The custom memory LCD is a module allowing the implementation of a LCD
+ * driver that can't use the already designed interface. To achieve this,
  * conditions must be met.
- * 
+ *
  * The LCD driver and the communication need to be implemented manually.
  * However, some functions must be implemented and the @ref sl_memlcd_t
- * structure must be initialized for the GLIB library to work properly. 
+ * structure must be initialized for the GLIB library to work properly.
  * The functions to implement are @ref sl_memlcd_init, @ref sl_memlcd_power_on,
  * @ref sl_memlcd_draw and @ref sl_memlcd_get and they must follow the same
- * declaration as shown in the documentation. 
- * 
- * In the @ref sl_memlcd_init function, it is important to initialize a 
- * @ref sl_memlcd_t type variable and fill in the "height" and "width" fields 
+ * declaration as shown in the documentation.
+ *
+ * In the @ref sl_memlcd_init function, it is important to initialize a
+ * @ref sl_memlcd_t type variable and fill in the "height" and "width" fields
  * with the real specifications of the LCD display. This same variable must be
- * accessible from the @ref sl_memlcd_get function as the GLIB library will 
+ * accessible from the @ref sl_memlcd_get function as the GLIB library will
  * fetch the height and width of the display.
- * 
+ *
  * The @ref sl_memlcd_t structure contains a "custom_data" field to store any
  * custom structure needed for the implementation of the driver.
- * 
+ *
  ******************************************************************************/
 
 #ifdef __cplusplus

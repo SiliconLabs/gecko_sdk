@@ -23,7 +23,10 @@
 #ifndef __SL_RAIL_UTIL_ANT_DIV_H__
 #define __SL_RAIL_UTIL_ANT_DIV_H__
 
+#ifndef EMBER_TEST
 #include "rail.h"
+#endif
+
 #include "sl_status.h"
 
 #ifdef SL_COMPONENT_CATALOG_PRESENT
@@ -148,6 +151,7 @@ sl_status_t sl_rail_util_ant_div_set_rx_antenna_mode(sl_rail_util_antenna_mode_t
  */
 sl_rail_util_antenna_mode_t sl_rail_util_ant_div_get_rx_antenna_mode(void);
 
+#ifndef EMBER_TEST
 /** @brief Returns the current Rx antenna diversity optimized PHY select
  *
  * @return Whether or not the RX antenna diversity optimized PHY is selected
@@ -182,7 +186,7 @@ void sl_rail_util_ant_div_init_tx_options(RAIL_TxOptions_t *txOptions);
  * @param[out] antennaConfig The antenna configuration being used.
  */
 void sl_rail_util_ant_div_get_antenna_config(RAIL_AntennaConfig_t *antennaConfig);
-
+#endif
 /**
  * Update the antenna configuration based on previously selected antenna mode
  *

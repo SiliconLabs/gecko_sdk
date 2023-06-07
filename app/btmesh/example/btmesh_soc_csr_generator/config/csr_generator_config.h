@@ -102,6 +102,14 @@
 // <i> Organization Unit Identifier for CSR generation.
 #define CSR_GENERATOR_SUBJECT_ORGANIZATION_UNIT                 "Wireless"
 
+// <s CSR_GENERATOR_COMPANY_ID> Company Identifier
+// <i> Company Identifier as present in the device's DCD.
+#define CSR_GENERATOR_COMPANY_ID                                "02ff"
+
+// <s CSR_GENERATOR_PRODUCT_ID> Product Identifier
+// <i> Product Identifier as present in the device's DCD.
+#define CSR_GENERATOR_PRODUCT_ID                                "000c"
+
 // </h>
 
 // <<< end of configuration section >>>

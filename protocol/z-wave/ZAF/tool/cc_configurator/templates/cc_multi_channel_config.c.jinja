@@ -1,0 +1,41 @@
+/**
+ * @file
+ * Auto-generated configuration file for Command Class Multi Channel.
+ *
+ * This file defines the number of endpoints in a multi channel device and the generic type and
+ * specific type for each endpoint.
+ *
+ * @copyright 2023 Silicon Laboratories Inc.
+ */
+#include "cc_multi_channel_config_api.h"
+#include "ZW_classcmd.h"
+#include "Assert.h"
+#include "SizeOf.h"
+
+/*
+ * This array must be sorted by endpoint. The Z-Wave Command Class Configurator (Z3C) will sort
+ * the array, but if modified manually after generation, make sure to keep it sorted by endpoint.
+ */
+static const cc_multi_channel_config_t endpoints[] = {
+{% set endpoints_sorted = endpoints|sort(attribute='endpoint') %}
+{% for endpoint in endpoints_sorted %}
+  {
+    // Endpoint {{endpoint.endpoint}}
+    .generic_type  = {{endpoint.generic_type}},
+    .specific_type = {{endpoint.specific_type}}
+  },
+{% endfor %}
+};
+
+cc_multi_channel_config_t const * cc_multi_channel_get_config(void)
+{
+  return endpoints;
+}
+
+cc_multi_channel_config_t const * cc_multi_channel_get_config_endpoint(uint8_t endpoint)
+{
+  ASSERT(endpoint > 0);
+  ASSERT(endpoint <= sizeof_array(endpoints));
+  return &endpoints[endpoint - 1];
+}
+

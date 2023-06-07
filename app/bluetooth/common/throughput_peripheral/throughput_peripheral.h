@@ -30,6 +30,11 @@
 #ifndef THROUGHPUT_PERIPHERAL_H
 #define THROUGHPUT_PERIPHERAL_H
 
+/***********************************************************************************************//**
+ * @addtogroup throughput_peripheral
+ * @{
+ **************************************************************************************************/
+
 #include "throughput_types.h"
 #include "sl_power_manager.h"
 
@@ -60,9 +65,14 @@ typedef union {
  ******************************************************************************/
 
 /**************************************************************************//**
- * Enables the the transmission.
+ * Enables the transmission.
  *****************************************************************************/
 void throughput_peripheral_enable(void);
+
+/**************************************************************************//**
+ * Disables the transmission.
+ *****************************************************************************/
+sl_status_t throughput_peripheral_disable(void);
 
 /**************************************************************************//**
  * Sets the the transmission mode.
@@ -237,4 +247,5 @@ void throughput_peripheral_on_notification_change(throughput_notification_t noti
  *****************************************************************************/
 void throughput_peripheral_on_indication_change(throughput_notification_t indication);
 
+/** @} (end addtogroup throughput_peripheral) */
 #endif // THROUGHPUT_PERIPHERAL_H

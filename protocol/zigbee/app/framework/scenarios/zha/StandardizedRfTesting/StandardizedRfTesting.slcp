@@ -14,13 +14,10 @@ component:
   - id: cli
     instance:
     - example
-  - id: iostream_usart
-    instance:
-      - vcom
+  - id: "iostream_recommended_stream"
   - id: zigbee_debug_print
   - id: zigbee_pro_stack
   - id: zigbee_zcl_framework_core
-  - id: zigbee_debug_basic
   - id: zigbee_mfglib
   - id: zigbee_app_framework_common
 
@@ -29,6 +26,12 @@ configuration:
     value: 1
   - name: SL_IOSTREAM_USART_VCOM_FLOW_CONTROL_TYPE
     value: usartHwFlowControlCtsAndRts
+    condition:
+      - "iostream_usart"
+  - name: SL_IOSTREAM_EUSART_VCOM_FLOW_CONTROL_TYPE
+    value: eusartHwFlowControlCtsAndRts
+    condition:
+      - "iostream_eusart"
   - name: SL_CLI_MAX_INPUT_ARGUMENTS
     value: 16
   - name: SLI_ZIGBEE_PRIMARY_NETWORK_DEVICE_TYPE

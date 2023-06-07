@@ -35,21 +35,14 @@
   #include ZA_GENERATED_HEADER
 #endif
 
-#if defined(UC_BUILD)
-
-#include "zap-config.h"
-
-#else
-
-#ifdef ATTRIBUTE_STORAGE_CONFIGURATION
- #include ATTRIBUTE_STORAGE_CONFIGURATION
+#ifdef SL_COMPONENT_CATALOG_PRESENT
+#include "sl_component_catalog.h"
 #endif
 
-#endif // (UC_BUILD)
+#ifdef SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
+#include "zap-config.h"
+#endif
 
-#ifdef UC_BUILD
-
-#include "sl_component_catalog.h"
 #ifdef SL_CATALOG_ZIGBEE_DEVICE_CONFIG_PRESENT
 #include "zigbee_device_config.h"
 #endif
@@ -64,11 +57,11 @@
 #endif
 
 #if (SLI_ZIGBEE_SECONDARY_NETWORK_ENABLED == 0)
-#define EM_AF_GENERATED_NETWORK_STRINGS \
+#define EMBER_AF_GENERATED_NETWORK_STRINGS \
   "Primary (pro)",
 #else
-#define EM_AF_GENERATED_NETWORK_STRINGS \
-  "Primary (pro)",                      \
+#define EMBER_AF_GENERATED_NETWORK_STRINGS \
+  "Primary (pro)",                         \
   "Secondary (pro)",
 #endif
 
@@ -112,7 +105,9 @@
 #define EMBER_AF_HAS_SECURITY_PROFILE_SE_FULL
 #endif
 #if (SLI_ZIGBEE_PRIMARY_NETWORK_SECURITY_TYPE == SLI_ZIGBEE_NETWORK_SECURITY_TYPE_SE_TEST)
+#ifndef EMBER_AF_HAS_SECURITY_PROFILE_SE_TEST
 #define EMBER_AF_HAS_SECURITY_PROFILE_SE_TEST
+#endif
 #endif
 #if (SLI_ZIGBEE_PRIMARY_NETWORK_SECURITY_TYPE == SLI_ZIGBEE_NETWORK_SECURITY_TYPE_CUSTOM)
 #define EMBER_AF_HAS_SECURITY_PROFILE_CUSTOM
@@ -121,8 +116,6 @@
 #define EMBER_AF_HAS_SECURITY_PROFILE_Z3
 #endif
 
-#endif // UC_BUILD
-
 // *******************************************************************
 // pre-defined Devices
 //
@@ -130,14 +123,6 @@
 // do not use the EMBER_* versions from ember-types.h as these are in an
 // enum and are not available at preprocessor time. These need to be set
 // before the devices are loaded from ha-devices.h and se-devices.h
-#ifndef UC_BUILD
-#define ZA_COORDINATOR 1
-#define ZA_ROUTER 2
-#define ZA_END_DEVICE 3
-#define ZA_SLEEPY_END_DEVICE 4
-#define ZA_S2S_INITIATOR_DEVICE 5
-#define ZA_S2S_TARGET_DEVICE 6
-#endif // UC_BUILD
 
 #define CBA_PROFILE_ID (0x0105)
 #define HA_PROFILE_ID (0x0104)
@@ -152,11 +137,6 @@
 #define EMBER_COMPANY_MANUFACTURER_CODE 0x1002
 
 // This is now generated in zap-type.h
-#ifndef UC_BUILD
-#ifndef EMBER_AF_MANUFACTURER_CODE
-  #define EMBER_AF_MANUFACTURER_CODE 0x0000
-#endif
-#endif // UC_BUILD
 
 // This file determines the security profile used, and from that various
 // other security parameters.
@@ -186,12 +166,13 @@
 // The maximum APS payload, not including any APS options.  This value is also
 // available from emberMaximumApsPayloadLength() or ezspMaximumPayloadLength().
 // See http://portal.ember.com/faq/payload for more information.
-#ifdef EMBER_AF_HAS_SECURITY_PROFILE_NONE
-  #define EMBER_AF_MAXIMUM_APS_PAYLOAD_LENGTH \
-  (100 - EMBER_AF_SOURCE_ROUTING_RESERVED_PAYLOAD_LENGTH)
-#else
+#if ((defined(EMBER_AF_NCP) && defined(SL_CATALOG_ZIGBEE_AF_SUPPORT_PRESENT)) \
+  || !defined(EMBER_AF_HAS_SECURITY_PROFILE_NONE))
   #define EMBER_AF_MAXIMUM_APS_PAYLOAD_LENGTH \
   (82 - EMBER_AF_SOURCE_ROUTING_RESERVED_PAYLOAD_LENGTH)
+#else
+  #define EMBER_AF_MAXIMUM_APS_PAYLOAD_LENGTH \
+  (100 - EMBER_AF_SOURCE_ROUTING_RESERVED_PAYLOAD_LENGTH)
 #endif
 
 // Max PHY size = 128
@@ -291,7 +272,6 @@
   #endif
 #endif
 
-#ifdef UC_BUILD
 #if defined(SL_CATALOG_ZIGBEE_ADDRESS_TABLE_PRESENT)
 #include "address-table-config.h"
 #else // !SL_CATALOG_ZIGBEE_ADDRESS_TABLE_PRESENT
@@ -310,23 +290,6 @@
   (EMBER_AF_PLUGIN_ADDRESS_TABLE_SIZE \
    + EMBER_AF_PLUGIN_ADDRESS_TABLE_TRUST_CENTER_CACHE_SIZE)
 #endif //EMBER_ADDRESS_TABLE_SIZE
-#else // !UC_BUILD
-// The address table plugin is enabled by default. If it gets disabled for some
-// reason, we still need to define these #defines to some default value.
-#ifndef EMBER_AF_PLUGIN_ADDRESS_TABLE
-  #define EMBER_AF_PLUGIN_ADDRESS_TABLE_SIZE 2
-  #define EMBER_AF_PLUGIN_ADDRESS_TABLE_TRUST_CENTER_CACHE_SIZE 2
-#endif
-// The total size of the address table is the size of the section used by the
-// application plus the size of section used for the trust center address cache.
-// The NCP allows each section to be sized independently, but the SOC requires
-// a single configuration for the whole table.
-#ifndef EMBER_ADDRESS_TABLE_SIZE
-  #define EMBER_ADDRESS_TABLE_SIZE    \
-  (EMBER_AF_PLUGIN_ADDRESS_TABLE_SIZE \
-   + EMBER_AF_PLUGIN_ADDRESS_TABLE_TRUST_CENTER_CACHE_SIZE)
-#endif
-#endif // UC_BUILD
 
 #ifndef EMBER_AF_DEFAULT_APS_OPTIONS
 // BUGZID 12261: Concentrators use MTORRs for route discovery and should not

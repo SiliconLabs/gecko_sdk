@@ -47,36 +47,6 @@ local function report_warning(problem, target, description, quickfix)
                        quickfix)
 end
 
--- automatic conversion of input parameters
-local function autonumber(input)
-    local base = 10
-    local orig_input = input
-    if (type(input) == "string") then
-        input = input:gsub("[\(\)\"uUlL]", "")
-        if string.find(input,"[bxhBXH]") ~= nil then
-            if string.find(string.lower(input), "0b") == 1 then
-                input = input:gsub("[bB]","")
-                base = 2
-            elseif string.find(string.lower(input), "0x") == 1 then
-                input = input:gsub("[xXhH]","")
-                base = 16
-            end
-        elseif string.find(input, "0") == 1 then
-            base = 8
-        end
-    elseif (type(input) == "number") then
-        return input
-    else
-        log_error("autonumber() expects either a string or a number!")
-        return nil
-    end
-    local result = tonumber(input, base)
-    if result == nil then
-        log_error("Configured value is not valid: \"" .. tostring(orig_input) .. "\" - modify it to a numeric value!")
-    end
-    return result
-end
-
 -- Iterate over the configuration name and descriptor pairs from config_schema
 -- and checks if the configuration exists (for required config names) and
 -- converts it to the descriptor value type.
@@ -98,7 +68,7 @@ local function preprocess_config(preprocessed_config, config_schema)
             end
         else
             if (descriptor.value_type == "number") or (descriptor.value_type == "boolean") then
-                local num = autonumber(slc.config(name).value)
+                local num = autonumber_common.autonumber(slc.config(name).value)
                 if num ~= nil then
                     if (descriptor.value_type == "boolean") then
                         preprocessed_config[name] = (num ~= 0)
@@ -182,11 +152,10 @@ if status == STATUS.OK then
     -- It is guaranteed that all required config parameters exist and these are
     -- converted to the proper type
 
-    -- Commented due to max 1000 instruction per lua script limit
-    -- for name, value in pairs(config) do
-    --     -- Log the converted configuration parameters
-    --     log_info(name .. ": " .. tostring(value) .. " (type: " .. type(value) .. ")")
-    -- end
+    for name, value in pairs(config) do
+        -- Log the converted configuration parameters
+        log_info(name .. ": " .. tostring(value) .. " (type: " .. type(value) .. ")")
+    end
 
     if config[max_block_size_log] < config[min_block_size_log] then
         local problem = "Block size configuration invalid"
@@ -222,14 +191,14 @@ if status == STATUS.OK then
         local problem = "LPN mode and LPN component consistency issue"
         local description = "The LPN mode configuration option shall be turned on " ..
                             "if and only if the Low Power Node component is present"
-        report_error(problem,
-                     validation.target_for_defines({lpn_mode}),
-                     description,
-                     nil)
+        report_warning(problem,
+                       validation.target_for_defines({lpn_mode}),
+                       description,
+                       nil)
     elseif config[lpn_mode] then
         -- LPN mode is turned on and the LPN component exists in the project
 
-        if config[push_mode] or not config[pull_mode] then
+        if not config[pull_mode] then
             local problem = "Transfer mode inconsistency"
             local description = "Pull transfer mode is recommended for low power nodes"
             report_warning(problem,

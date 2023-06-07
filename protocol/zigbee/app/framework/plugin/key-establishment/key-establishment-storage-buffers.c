@@ -189,9 +189,9 @@ static void releaseAndNullBuffer(EmberMessageBuffer* buffer)
   *buffer = EMBER_NULL_MESSAGE_BUFFER;
 }
 
-void emMarkKeyEstablishmentBuffers(void)
+void sli_zigbee_af_mark_key_establishment_buffers(void)
 {
-  emMarkBuffer(&smacBuffer);
-  emMarkBuffer(&certBuffer283k1);
+  sli_legacy_buffer_manager_mark_buffer(&smacBuffer);
+  sli_legacy_buffer_manager_mark_buffer(&certBuffer283k1);
 }
 //------------------------------------------------------------------------------

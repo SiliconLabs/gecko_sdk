@@ -31,7 +31,9 @@
 #include "sl_service_function.h"
 
 #ifdef SL_COMPONENT_CATALOG_PRESENT
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 
 #ifdef SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
 #include "zcl-framework-core-config.h"
@@ -46,6 +48,7 @@
 * Customer should define these in their own application code
 ***************************************************************************/
 
+#ifndef EMBER_TEST
 void emberAfPrintWrapper(uint16_t area, const char * formatString, ...);
 void emberAfPrintBigEndianEui64Wrapper(uint8_t * eui, ...);
 void emberAfPrintBufferWrapper(uint16_t area, const uint8_t *buffer, uint16_t bufferLen, bool withSpace);
@@ -118,5 +121,7 @@ void emberAfGreenPowerClusterPrintStringWrapper(const uint8_t *buffer);
 #undef emberAfPrintBuffer
 #endif //emberAfPrintBuffer
 #define emberAfPrintBuffer(...) emberAfPrintBufferWrapper(__VA_ARGS__)
+
+#endif // !EMBER_TEST
 
 #endif //_SILABS_GREEN_POWER_PRINT_WRAPPER_H_

@@ -29,14 +29,14 @@ from typing import Callable, ClassVar, Dict, List, Optional
 
 from bgapi.bglib import BGEvent, CommandFailedError
 
-from bgapix.bglibx import BGLibExt, BGLibExtRetryParams
+from bgapix.bglibx import BGLibExtRetryParams
 from bgapix.slstatus import SlStatus
 
 from . import util
 from .conf import Configurator
-from .db import BtmeshDatabase, Node
+from .core import BtmeshComponent, BtmeshCore
 from .errors import BtmeshError, BtmeshErrorCode, BtmeshException
-from .event import LocalEvent, LocalEventBus
+from .event import LocalEvent
 
 logger = logging.getLogger(__name__)
 
@@ -125,7 +125,7 @@ class MBTServerInfo:
     timeout: bool
 
 
-class BlobTransferClient:
+class BlobTransferClient(BtmeshComponent):
     INVALID_BLOCK_SIZE_LOG = 0xFF
     MAX_CHUNK_SIZE_LIMIT = 241
     RETRY_CMD_ERR_CODES = (SlStatus.BUSY, SlStatus.NO_MORE_RESOURCE)
@@ -306,16 +306,12 @@ class BlobTransferClient:
 
     def __init__(
         self,
-        lib: BGLibExt,
-        db: BtmeshDatabase,
-        evtbus: LocalEventBus,
+        core: BtmeshCore,
         conf: Configurator,
         retry_params_default: BGLibExtRetryParams,
     ):
-        self.lib = lib
-        self.db = db
+        super().__init__(core)
         self.conf = conf
-        self.evtbus = evtbus
         self.retry_params_default = retry_params_default
         self.calc_block_size = self.calc_block_size_default
         self.calc_chunk_size = self.calc_chunk_size_default
@@ -351,6 +347,7 @@ class BlobTransferClient:
 
     def set_retry_params_default(self, retry_params: BGLibExtRetryParams):
         if retry_params:
+            assert isinstance(retry_params, BGLibExtRetryParams)
             self.retry_params_default = copy.copy(retry_params)
 
     def abort_transfer(self, elem_index: int):
@@ -368,7 +365,7 @@ class BlobTransferClient:
             events = self.lib.retry_until(
                 command,
                 *args,
-                **retry_params.to_dict(),
+                retry_params=retry_params,
                 retry_cmd_err_code=self.RETRY_CMD_ERR_CODES,
                 event_selector=event_selector,
                 **event_selector_params,

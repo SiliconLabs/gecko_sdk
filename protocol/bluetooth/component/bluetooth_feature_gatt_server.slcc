@@ -5,11 +5,12 @@ description: >
   GATT Server feature
 
   Enables the ability to browse and manage attributes in a local GATT database. 
-category: "Bluetooth|Stack"
+category: Bluetooth|Bluetooth Host (Stack)|Features with Commands and Events
 quality: "production"
 root_path: "protocol/bluetooth"
 requires:
   - name: "bluetooth_stack"
+  - name: "bluetooth_gatt_database"
 provides:
   - name: "bluetooth_feature_gatt_server"
 template_contribution:

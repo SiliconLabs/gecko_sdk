@@ -1,0 +1,20 @@
+id: power_manager_no_deepsleep
+label: "Power Manager: No Deepsleep"
+package: platform
+description: |
+  Power Manager when a project’s configuration specifies EM1 as the lowest 
+  energy mode. Therefore, deepsleep (EM2/EM3) is not supported meaning 
+  HFXO Manager is not required and can be excluded in order to reduce code size.
+category: Services|Power Manager
+quality: production
+provides:
+  - name: power_manager_no_deepsleep
+  - name: power_manager_energy_mode_impl
+requires:
+  - name: power_manager
+template_contribution:
+  - name: component_catalog
+    value: power_manager_no_deepsleep
+validation_helper:
+  - path: platform/service/power_manager/power_manager_energy_mode_validation.lua
+

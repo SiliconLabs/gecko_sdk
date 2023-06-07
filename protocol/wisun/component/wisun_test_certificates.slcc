@@ -13,4 +13,4 @@ provides:
   - name: "wisun_test_certificates"
 
 config_file:
-  - path: "plugin/wisun_test_certificates.h"
+  - path: "plugin/config/wisun_test_certificates.h"

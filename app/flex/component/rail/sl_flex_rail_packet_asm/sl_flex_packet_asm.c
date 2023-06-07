@@ -582,7 +582,6 @@ uint8_t *sl_flex_802154_packet_unpack_sunfsk_2byte_data_frame(const RAIL_RxPacke
   uint32_t phr = 0U;
   uint8_t *tmp = frame_buffer;
   uint8_t phr_size = 2U;
-  uint8_t fcsSizeByte = 0U;
 
   if ((packet_information == NULL) || (fcsType == NULL) || (whitening == NULL) || (frame_buffer == NULL) || (payload_size == NULL)) {
 #if defined(SL_CATALOG_APP_LOG_PRESENT)
@@ -598,8 +597,6 @@ uint8_t *sl_flex_802154_packet_unpack_sunfsk_2byte_data_frame(const RAIL_RxPacke
 
   *fcsType = (phr >> 12) & 0x01;
   *whitening = (phr >> 11) & 0x01;
-
-  fcsSizeByte = *fcsType ? 2 : 4;
 
   *payload_size = (phr & 0x7FF) - 4;
 

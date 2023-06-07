@@ -43,3 +43,5 @@ documentation:
       condition: [device_sdid_210]
     - page: emlib/api/efr32xg25/group-lesense
       condition: [device_sdid_220]
+    - page: emlib/api/efr32xg28/group-lesense
+      condition: [device_sdid_235]

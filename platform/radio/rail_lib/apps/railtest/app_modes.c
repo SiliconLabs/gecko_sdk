@@ -151,6 +151,7 @@ static void setAppModeInternal(void)
   } else if (((paramCurrAppMode == paramNextAppMode)
               && (!paramEnableMode || (paramNextAppMode == TX_STREAM)))
              || ((paramCurrAppMode == NONE) && paramEnableMode)) {
+    transitionAppMode(next);
     if (paramNextCommand) {
       if (next == TX_STREAM) {
         if (paramCurrAppMode == TX_STREAM) {
@@ -175,7 +176,6 @@ static void setAppModeInternal(void)
                       RAIL_GetTime());
       }
     }
-    transitionAppMode(next);
   } else { // Ignore mode change request
     if (paramNextCommand) {
       responsePrintError(paramNextCommand, 1, "Can't %s %s during %s",

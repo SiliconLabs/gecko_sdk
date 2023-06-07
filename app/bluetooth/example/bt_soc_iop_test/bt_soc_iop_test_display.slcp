@@ -33,7 +33,7 @@ component:
   - id: app_assert
   - id: component_catalog
   - id: mpu
-  - id: simple_timer
+  - id: app_timer
   - id: iostream_usart
     instance:
       - vcom

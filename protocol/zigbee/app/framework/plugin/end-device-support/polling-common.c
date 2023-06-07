@@ -30,21 +30,21 @@
   #define REMOVE_SHORT_POLLING_FOR_PARENT_CONNECTIVITY_TASK()
 #endif
 
-EmAfPollingState emAfPollingStates[EMBER_SUPPORTED_NETWORKS];
+sli_zigbee_af_polling_state sli_zigbee_af_polling_states[EMBER_SUPPORTED_NETWORKS];
 
 // This function is called when a poll completes and explains what happend with
 // the poll.  If the number of sequential data polls not ACKed by the parent
 // exceeds the threshold, we will try to find a new parent.
-void emAfPollCompleteHandler(EmberStatus status, uint8_t limit)
+void sli_zigbee_af_poll_complete_handler(EmberStatus status, uint8_t limit)
 {
-  EmAfPollingState *state;
+  sli_zigbee_af_polling_state *state;
   uint8_t networkIndex;
 
   (void) emberAfPushCallbackNetworkIndex();
   networkIndex = emberGetCurrentNetwork();
-  state = &emAfPollingStates[networkIndex];
+  state = &sli_zigbee_af_polling_states[networkIndex];
 
-  if (emAfEnablePollCompletedCallback) {
+  if (sli_zigbee_af_enable_poll_completed_callback) {
     emberAfPluginEndDeviceSupportPollCompletedCallback(status);
   }
 

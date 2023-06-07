@@ -50,7 +50,7 @@
 #endif // SL_CATALOG_APP_LOG_PRESENT
 
 #include "app_assert.h"
-#include "sl_simple_timer.h"
+#include "app_timer.h"
 #include "sl_malloc.h"
 
 #include "sl_btmesh_blob_storage_app_id.h"
@@ -95,7 +95,7 @@
 #define log_bytes_as_text(level, bytes, len, null_replacement_char) \
   _log_bytes_as_text(level, bytes, len, null_replacement_char)
 #define log_check_level(level) \
-  _app_log_check_level(level)
+  app_log_check_level(level)
 #else
 #define log_fwid_level(level, fwid, fwid_len, hex_format)
 #define log_metadata_level(level, metadata, metadata_len, hex_format)
@@ -210,7 +210,7 @@ typedef struct {
 /// Distribution process data representation
 typedef struct {
   /// Timer handler
-  struct sl_simple_timer timer;
+  struct app_timer timer;
   /// Size of the FW being transferred
   uint32_t fw_size;
   /// Number of nodes currently distributing to
@@ -518,7 +518,7 @@ static fw_dist_server_t* find_server(uint16_t elem_index)
   return NULL;
 }
 
-static void dist_retry_timer_cb(sl_simple_timer_t *timer, void *data)
+static void dist_retry_timer_cb(app_timer_t *timer, void *data)
 {
   (void) timer;
   fw_dist_server_t *const self = data;
@@ -544,11 +544,11 @@ static void dist_start_retry_timer(fw_dist_server_t *const self)
   // Wait the retry time to provide some time for the servers to respond. This
   // also spares bandwidth, because the Fw Distributor does not flood the mesh
   // network with messages.
-  sc = sl_simple_timer_start(&self->dist.timer,
-                             SL_BTMESH_FW_DIST_SERVER_RETRY_TIME_MS_CFG_VAL,
-                             dist_retry_timer_cb,
-                             self,
-                             false);
+  sc = app_timer_start(&self->dist.timer,
+                       SL_BTMESH_FW_DIST_SERVER_RETRY_TIME_MS_CFG_VAL,
+                       dist_retry_timer_cb,
+                       self,
+                       false);
   app_assert_status_f(sc,
                       "Failed to dist start retry timer (elem=%d)",
                       self->elem_index);
@@ -558,7 +558,7 @@ static void dist_stop_retry_timer(fw_dist_server_t *const self)
 {
   // It is not considered an error if stop is requested for a timer which is not
   // running, therefore stop is called here always to be safe.
-  sl_status_t sc = sl_simple_timer_stop(&self->dist.timer);
+  sl_status_t sc = app_timer_stop(&self->dist.timer);
 
   app_assert_status_f(sc,
                       "Failed to stop dist retry timer (elem=%d)",
@@ -2906,9 +2906,9 @@ static void dist_state_transition(fw_dist_server_t *const self,
     // has not processed the sl_btmesh_evt_fw_dist_server_dist_state_changed
     // event yet.
     // Note: This race condition exists because the retries are called by the
-    //       simple timer while each sl_btmesh_step processes one event in each
+    //       app timer while each sl_btmesh_step processes one event in each
     //       loop so the issue can occur if the BT Mesh stack generates multiple
-    //       events and the simple timer elapses. This is a very rare issue.
+    //       events and the app timer elapses. This is a very rare issue.
     // If the distribution step execution fails then it is a good strategy to
     // continue and start the retry timer. If the problem is temporary then the
     // retry call may recover the distribution process otherwise the distribution

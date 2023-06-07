@@ -1,5 +1,5 @@
 /**
- * @file slave_supported_func.h
+ * @file
  * @copyright 2022 Silicon Laboratories Inc.
  */
 

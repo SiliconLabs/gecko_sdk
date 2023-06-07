@@ -18,9 +18,10 @@
 #include "app/framework/include/af.h"
 #include PLATFORM_HEADER
 
-#ifdef UC_BUILD
 #include "heartbeat-config.h"
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #if defined(SL_CATALOG_LED0_PRESENT)
 #include "sl_simple_led_instances.h"
 #else
@@ -38,7 +39,7 @@ static void heartbeat_event_handler(sl_zigbee_event_t *event)
                                EMBER_AF_PLUGIN_HEARTBEAT_PERIOD_QS);
 }
 
-void emAfPluginHeartbeatInitCallback(uint8_t init_level)
+void sli_zigbee_af_heartbeat_init_callback(uint8_t init_level)
 {
   switch (init_level) {
     case SL_ZIGBEE_INIT_LEVEL_EVENT:
@@ -56,20 +57,3 @@ void emAfPluginHeartbeatInitCallback(uint8_t init_level)
     }
   }
 }
-
-#else // !UC_BUILD
-
-#include CONFIGURATION_HEADER
-
-void emberAfPluginHeartbeatTickCallback(void)
-{
-  static uint32_t lastMs = 0;
-  uint32_t nowMs = halCommonGetInt32uMillisecondTick();
-  if (EMBER_AF_PLUGIN_HEARTBEAT_PERIOD_QS * MILLISECOND_TICKS_PER_QUARTERSECOND
-      < elapsedTimeInt32u(lastMs, nowMs)) {
-    halToggleLed(BOARD_HEARTBEAT_LED);
-    lastMs = nowMs;
-  }
-}
-
-#endif // UC_BUILD

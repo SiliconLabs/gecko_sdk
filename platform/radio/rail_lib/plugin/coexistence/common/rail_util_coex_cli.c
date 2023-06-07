@@ -144,6 +144,11 @@ static COEX_CLI_config_t coex_gpios[] = {
 
 static bool coexInitialized = false;
 
+__WEAK void ll_scanHopToNextChannel(uint32_t minTimeToHop)
+{
+  (void)minTimeToHop;
+}
+
 static uint16_t fastRandom(void)
 {
   return COEX_HAL_GetPseudoRandom(0, 0xFFFF);

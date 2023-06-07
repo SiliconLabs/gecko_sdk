@@ -1,0 +1,18 @@
+id: zaf_appname_nvm
+label: ZAF Application Name - NVM
+category: Z-Wave|ZAF|Application Name
+description: >
+  Enables storage of the application's name in the non-volatile memory.
+  The application name can then be read from the NVM externally, using the
+  Silicon Labs Configurator from a desktop computer.
+  In situations when there are multiple Z-Wave devices are connected, this
+  speeds up the process of determining which application is flashed on each
+  device.
+package: Z-Wave
+quality: production
+source:
+  - path: "protocol/z-wave/ZAF/ApplicationUtilities/AppName/ZAF_AppName_nvm.c"
+provides:
+  - name: zaf_appname_nvm
+requires:
+  - name: zaf_appname

@@ -18,10 +18,8 @@
  * This file is included in token-stack.h
  */
 
-#ifdef UC_BUILD
-
 /* Token header for the token.properties. */
-#include "app/framework/util/tokens.h"
+#include "app/framework/include/af-types.h"
 
 /*
  * Plugin Tokens Section
@@ -59,5 +57,3 @@
 #ifdef CUSTOM_MFG_TOKEN_HEADER
 #include CUSTOM_MFG_TOKEN_HEADER
 #endif
-
-#endif // UC_BUILD

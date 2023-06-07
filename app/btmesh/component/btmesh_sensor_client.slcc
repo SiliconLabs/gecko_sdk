@@ -13,9 +13,27 @@ description: >
   when Sensor Server discovery has started, when a device is found.
   There is an interface to change the current property listened to and request
   data on said property.
+
+  This can be a Low-Code component. The bare minimum for e.g. listening to
+  a broadcast sensor server data is calling sl_btmesh_sensor_client_update_registered_devices
+  on initialization and implementing the relevant weak callbacks. The provided
+  callbacks are the following:
+
+  void sl_btmesh_sensor_client_on_discovery_started
+
+  void sl_btmesh_sensor_client_on_new_device_found
+
+  void sl_btmesh_sensor_client_on_new_temperature_data
+
+  void sl_btmesh_sensor_client_on_new_people_count_data
+
+  void sl_btmesh_sensor_client_on_new_illuminance_data
 category: "Bluetooth Mesh|Models|Sensors"
 quality: "production"
 root_path: "app/btmesh/common/btmesh_sensor_client"
+tag:
+  - Low-Code
+
 source:
   - path: "sl_btmesh_sensor_client.c"
 include:
@@ -31,6 +49,7 @@ provides:
 requires:
   - name: "app_assert"
   - name: "app_btmesh_util"
+  - name: "btmesh_provisionee"
   - name: "btmesh_stack_node"
   - name: "btmesh_stack_sensor_client"
   - name: "btmesh_stack"

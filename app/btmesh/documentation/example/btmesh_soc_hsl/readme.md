@@ -90,7 +90,7 @@ To test the application, do the following:
 
 ![Bluetooth Mesh Provisioning Device](readme_img3.png)
 
-7. Configure the device as **Light Lightness Server** and select the correct group to which the messages will be published (Demo group). If you want to test the Bluetooth Mesh Generic OnOff Model, the Light HSL Model, the Scene Model or some other Mesh Model, then select the respective client instead. You can use only one at a time in our mobile application. The mobile application does not support Light HSL Model yet, therefore use the Light Lightness Model.
+7. Configure the device as **Light Lightness Server** and select the correct group to which the messages will be published (Demo group). If you want to test the Bluetooth Mesh Generic OnOff Model, the Scene Model or some other Mesh Model, then select the respective client instead. You can use only one at a time in our mobile application. The mobile application does not support Light HSL Model yet, therefore use the Light Lightness Model.
 
 ![Bluetooth Mesh Device Configuration](readme_img4.png)
 

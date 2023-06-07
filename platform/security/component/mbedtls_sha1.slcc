@@ -15,7 +15,7 @@ provides:
   - name: mbedtls_sha_function
     allow_multiple: true
 requires:
-  - name: mbedtls_core
+  - name: mbedtls_hash
   - name: psa_crypto_sha1
     condition: [psa_crypto]
 template_contribution:

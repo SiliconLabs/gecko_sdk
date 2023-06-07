@@ -27,8 +27,6 @@ from . static import Base_RM_Device, RM_SVD_Info
 from .... common import RM_TrustZone_Access_Mode
 from . AGC_NS import *
 from . AGC_S import *
-from . FEFILT0_NS import *
-from . FEFILT0_S import *
 from . FRC_NS import *
 from . FRC_S import *
 from . MODEM_NS import *
@@ -115,16 +113,12 @@ class RM_Device_EFR32XG31XFULL_RevA0(Base_RM_Device):
         self.__dict__['zz_frozen'] = False
         super(RM_Device_EFR32XG31XFULL_RevA0, self).__init__(rmio, label,
             'EFR32XG31XFULL',
-            RM_SVD_Info('EFR32XG31XFULL_SEQ.svd', '0451f4887221866bfa4e53fff0d0c8b1'))
+            RM_SVD_Info('EFR32XG31XFULL_SEQ.svd', 'e7aa97fd51dc2d69dc09ffe30359f53d'))
 
         self.AGC_NS = RM_Peripheral_AGC_NS(self.zz_rmio, self.zz_label)
         self.zz_pdict['AGC_NS'] = self.AGC_NS
         self.AGC_S = RM_Peripheral_AGC_S(self.zz_rmio, self.zz_label)
         self.zz_pdict['AGC_S'] = self.AGC_S
-        self.FEFILT0_NS = RM_Peripheral_FEFILT0_NS(self.zz_rmio, self.zz_label)
-        self.zz_pdict['FEFILT0_NS'] = self.FEFILT0_NS
-        self.FEFILT0_S = RM_Peripheral_FEFILT0_S(self.zz_rmio, self.zz_label)
-        self.zz_pdict['FEFILT0_S'] = self.FEFILT0_S
         self.FRC_NS = RM_Peripheral_FRC_NS(self.zz_rmio, self.zz_label)
         self.zz_pdict['FRC_NS'] = self.FRC_NS
         self.FRC_S = RM_Peripheral_FRC_S(self.zz_rmio, self.zz_label)
@@ -150,7 +144,6 @@ class RM_Device_EFR32XG31XFULL_RevA0(Base_RM_Device):
 
         if default_tz_access_mode == RM_TrustZone_Access_Mode.TZ_SECURE:
             self.AGC = self.AGC_S
-            self.FEFILT0 = self.FEFILT0_S
             self.FRC = self.FRC_S
             self.MODEM = self.MODEM_S
             self.RAC = self.RAC_S
@@ -159,7 +152,6 @@ class RM_Device_EFR32XG31XFULL_RevA0(Base_RM_Device):
             pass
         elif default_tz_access_mode == RM_TrustZone_Access_Mode.TZ_NONSECURE:
             self.AGC = self.AGC_NS
-            self.FEFILT0 = self.FEFILT0_NS
             self.FRC = self.FRC_NS
             self.MODEM = self.MODEM_NS
             self.RAC = self.RAC_NS

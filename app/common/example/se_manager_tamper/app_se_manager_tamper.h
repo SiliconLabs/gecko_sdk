@@ -76,6 +76,13 @@ bool get_tamper_int_status(void);
 uint32_t * get_rst_cause_buf_ptr(void);
 
 /***************************************************************************//**
+ * Get tamper reset cause buffer pointer.
+ *
+ * @returns Returns pointer to reset cause buffer.
+ ******************************************************************************/
+uint32_t * get_tmp_rst_cause_buf_ptr(void);
+
+/***************************************************************************//**
  * Get SE status buffer pointer.
  *
  * @returns Returns pointer to SE status buffer.
@@ -88,6 +95,20 @@ sl_se_status_t * get_se_status_buf_ptr(void);
  * @returns Returns pointer to SE OTP configuration buffer.
  ******************************************************************************/
 sl_se_otp_init_t * get_se_otp_conf_buf_ptr(void);
+
+/***************************************************************************//**
+ * Get version data.
+ *
+ * @returns Returns the version.
+ ******************************************************************************/
+uint32_t get_version(void);
+
+/***************************************************************************//**
+ * Get flag for if reset cause was tamper.
+ *
+ * @returns Returns true if the reset cause was tamper.
+ ******************************************************************************/
+bool get_was_tamper_reset(void);
 
 /***************************************************************************//**
  * Initialize PRS for tamper.
@@ -109,11 +130,18 @@ sl_status_t init_se_manager(void);
 sl_status_t deinit_se_manager(void);
 
 /***************************************************************************//**
- * Get EMU->RSTCAUSE after a tamper reset.
+ * Get EMU->RSTCAUSE after a reset.
  *
  * @returns Returns status code, @ref sl_status.h.
  ******************************************************************************/
 sl_status_t get_reset_cause(void);
+
+/***************************************************************************//**
+ * Get tamper reset cause after a tamper reset.
+ *
+ * @returns Returns status code, @ref sl_status.h.
+ ******************************************************************************/
+sl_status_t get_tamper_reset_cause(void);
 
 /***************************************************************************//**
  * Get SE status.
@@ -121,6 +149,13 @@ sl_status_t get_reset_cause(void);
  * @returns Returns status code, @ref sl_status.h.
  ******************************************************************************/
 sl_status_t get_se_status(void);
+
+/***************************************************************************//**
+ * Get the SE firmware version.
+ *
+ * @returns Returns status code, @ref sl_status.h.
+ ******************************************************************************/
+sl_status_t get_se_version(void);
 
 /***************************************************************************//**
  * Get SE OTP configuration.

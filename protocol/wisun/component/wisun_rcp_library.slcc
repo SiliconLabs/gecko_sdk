@@ -19,10 +19,10 @@ requires:
 
 library:
   - path: stack/libwisun_rcp_efr32xg1x_gcc.a
-    condition: [device_has_usart, toolchain_gcc]
+    condition: [device_series_1, toolchain_gcc]
   - path: stack/libwisun_rcp_efr32xg2x_gcc.a
-    condition: [device_has_eusart, toolchain_gcc]
+    condition: [device_series_2, toolchain_gcc]
   - path: stack/libwisun_rcp_efr32xg1x_iar.a
-    condition: [device_has_usart, toolchain_iar]
+    condition: [device_series_1, toolchain_iar]
   - path: stack/libwisun_rcp_efr32xg2x_iar.a
-    condition: [device_has_eusart, toolchain_iar]
+    condition: [device_series_2, toolchain_iar]

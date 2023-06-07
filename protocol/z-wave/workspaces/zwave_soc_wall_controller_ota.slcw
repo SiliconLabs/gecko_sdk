@@ -1,0 +1,17 @@
+label: ZWave_SoC_WallController_Solution
+description: >
+  Demonstrates Wall Controller application combined with OTA bootloader.
+  The Z-Wave certified Wall Controller application shows a push-button
+  switch panel implementation to control devices in the Z-Wave network from
+  push buttons (physical or virtual) on a device that is meant to be mounted 
+  on a wall. Examples include scene and zone controllers and wall-mounted AV controllers.
+quality: production
+project:
+  - path: ../Apps/zwave_soc_wall_controller/zwave_soc_wall_controller.slcp
+    id: application
+    output: app
+  - path: ../UCBootLoader/bootloader-storage-internal-single-512k_ota.slcp
+    id: bootloader
+    output: boot
+post_build:
+  profile: zwave_soc_wall_controller_ws_postbuild

@@ -104,19 +104,9 @@ void Output::OutputLine(uint8_t aIndentSize, const char *aFormat, ...)
     OutputNewLine();
 }
 
-void Output::OutputNewLine(void)
-{
-    OutputFormat("\r\n");
-}
+void Output::OutputNewLine(void) { OutputFormat("\r\n"); }
 
-void Output::OutputSpaces(uint8_t aCount)
-{
-    char format[sizeof("%256s")];
-
-    snprintf(format, sizeof(format), "%%%us", aCount);
-
-    OutputFormat(format, "");
-}
+void Output::OutputSpaces(uint8_t aCount) { OutputFormat("%*s", aCount, ""); }
 
 void Output::OutputBytes(const uint8_t *aBytes, uint16_t aLength)
 {
@@ -166,10 +156,7 @@ void Output::OutputUint64Line(uint64_t aUint64)
     OutputNewLine();
 }
 
-void Output::OutputEnabledDisabledStatus(bool aEnabled)
-{
-    OutputLine(aEnabled ? "Enabled" : "Disabled");
-}
+void Output::OutputEnabledDisabledStatus(bool aEnabled) { OutputLine(aEnabled ? "Enabled" : "Disabled"); }
 
 #if OPENTHREAD_FTD || OPENTHREAD_MTD
 
@@ -274,12 +261,21 @@ void Output::OutputDnsTxtData(const uint8_t *aTxtData, uint16_t aTxtDataLength)
 
     OutputFormat("]");
 }
+
+const char *Output::PercentageToString(uint16_t aValue, PercentageStringBuffer &aBuffer)
+{
+    uint32_t     scaledValue = aValue;
+    StringWriter writer(aBuffer.mChars, sizeof(aBuffer.mChars));
+
+    scaledValue = (scaledValue * 10000) / 0xffff;
+    writer.Append("%u.%02u", static_cast<uint16_t>(scaledValue / 100), static_cast<uint16_t>(scaledValue % 100));
+
+    return aBuffer.mChars;
+}
+
 #endif // OPENTHREAD_FTD || OPENTHREAD_MTD
 
-void Output::OutputFormatV(const char *aFormat, va_list aArguments)
-{
-    mImplementer.OutputV(aFormat, aArguments);
-}
+void Output::OutputFormatV(const char *aFormat, va_list aArguments) { mImplementer.OutputV(aFormat, aArguments); }
 
 void OutputImplementer::OutputV(const char *aFormat, va_list aArguments)
 {
@@ -323,7 +319,7 @@ void OutputImplementer::OutputV(const char *aFormat, va_list aArguments)
 
         if (lineEnd > mOutputString)
         {
-            otLogCli(OT_LOG_LEVEL_DEBG, "Output: %s", mOutputString);
+            otLogCli(OPENTHREAD_CONFIG_CLI_LOG_INPUT_OUTPUT_LEVEL, "Output: %s", mOutputString);
         }
 
         lineEnd++;
@@ -364,7 +360,7 @@ void OutputImplementer::OutputV(const char *aFormat, va_list aArguments)
 
     if (truncated)
     {
-        otLogCli(OT_LOG_LEVEL_DEBG, "Output: %s ...", mOutputString);
+        otLogCli(OPENTHREAD_CONFIG_CLI_LOG_INPUT_OUTPUT_LEVEL, "Output: %s ...", mOutputString);
         mOutputLength = 0;
     }
 
@@ -383,7 +379,7 @@ void Output::LogInput(const Arg *aArgs)
         inputString.Append(isFirst ? "%s" : " %s", aArgs->GetCString());
     }
 
-    otLogCli(OT_LOG_LEVEL_DEBG, "Input: %s", inputString.AsCString());
+    otLogCli(OPENTHREAD_CONFIG_CLI_LOG_INPUT_OUTPUT_LEVEL, "Input: %s", inputString.AsCString());
 }
 #endif
 

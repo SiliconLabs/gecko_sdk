@@ -84,12 +84,12 @@ class profile_mbus_viper(Profile_Mbus_Bobcat):
         self._sw_profile_outputs_common.build_rail_outputs(model, profile)
 
         # Output fields
-        buildFrameOutputs(model, profile, family=family)
-        buildCrcOutputs(model, profile, family)
+        buildFrameOutputs(model, profile)
+        buildCrcOutputs(model, profile)
         buildWhiteOutputs(model, profile)
         buildFecOutputs(model, profile)
 
-        build_modem_regs_viper(model, profile, family = family)
+        build_modem_regs_viper(model, profile)
 
         build_ircal_sw_vars(model, profile)
 

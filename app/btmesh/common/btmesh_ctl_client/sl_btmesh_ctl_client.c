@@ -39,7 +39,7 @@
 #include "sl_btmesh_lib.h"
 
 #include "app_assert.h"
-#include "sl_simple_timer.h"
+#include "app_timer.h"
 #include "sl_btmesh_lighting_client.h"
 
 #ifdef SL_COMPONENT_CATALOG_PRESENT
@@ -78,8 +78,6 @@
 #define TEMPERATURE_SCALE_FACTOR  100
 /// Delta UV is hardcoded to 0
 #define DELTA_UV                  0
-/// Initial temperature percentage value
-#define TEMPERATURE_PCT_INIT      50
 /// Maximum temperature percentage value
 #define TEMPERATURE_PCT_MAX       100
 /// Temperature level initial value @ref temperature_level
@@ -88,14 +86,12 @@
 #define REQ_DELAY_MS              50
 
 /// periodic timer handle
-static sl_simple_timer_t ctl_retransmission_timer;
+static app_timer_t ctl_retransmission_timer;
 
 /// periodic timer callback
-static void ctl_retransmission_timer_cb(sl_simple_timer_t *handle,
+static void ctl_retransmission_timer_cb(app_timer_t *handle,
                                         void *data);
 
-/// temperature level percentage
-static uint8_t temperature_percent = TEMPERATURE_PCT_INIT;
 /// temperature level converted from percentage to actual value, range 0..65535
 static uint16_t temperature_level = TEMPERATURE_LEVEL_INIT;
 /// number of ctl requests to be sent
@@ -110,7 +106,7 @@ static uint8_t ctl_trid = 0;
  * The CTL request also send lightness_level which holds the latest desired light
  * lightness level and Delta UV which is hardcoded to 0 for this application.
  *
- * param[in] retrans  Indicates if this is the first request or a retransmission,
+ * @param[in] retrans Indicates if this is the first request or a retransmission,
  *                    possible values are 0 = first request, 1 = retransmission.
  *
  * @note This application sends multiple ctl requests for each
@@ -160,53 +156,17 @@ static void send_ctl_request(uint8_t retrans)
 }
 
 /*******************************************************************************
- * This function change the color temperature and sends it to the server.
- *
- * @param[in] change_percentage  Defines the color temperature percentage change,
- * possible values are  -100% - + 100%.
- *
- ******************************************************************************/
-void sl_btmesh_change_temperature(int8_t change_percentage)
-{
-  // Adjust light brightness, using Light Lightness model
-  if (change_percentage > 0) {
-    temperature_percent += change_percentage;
-    if (temperature_percent > TEMPERATURE_PCT_MAX) {
-#if (SL_BTMESH_CTL_CLIENT_TEMPERATURE_WRAP_ENABLED_CFG_VAL != 0)
-      temperature_percent = 0;
-#else
-      temperature_percent = TEMPERATURE_PCT_MAX;
-#endif
-    }
-  } else {
-    if (temperature_percent < (-change_percentage)) {
-#if (SL_BTMESH_CTL_CLIENT_TEMPERATURE_WRAP_ENABLED_CFG_VAL != 0)
-      temperature_percent = TEMPERATURE_PCT_MAX;
-#else
-      temperature_percent = 0;
-#endif
-    } else {
-      temperature_percent += change_percentage;
-    }
-  }
-
-  sl_btmesh_set_temperature(temperature_percent);
-}
-
-/*******************************************************************************
  * This function change the temperature and send it to the server.
  *
- * @param[in] new_color_temperature_percentage  Defines new color temperature
+ * @param[in] temperature_percent  Defines new color temperature
  * value as percentage.
  *    Valid values 0-100 %
  *
  ******************************************************************************/
-void sl_btmesh_set_temperature(uint8_t new_color_temperature_percentage)
+void sl_btmesh_set_temperature(uint8_t temperature_percent)
 {
   // Adjust light temperature, using Light CTL model
-  if (new_color_temperature_percentage <= TEMPERATURE_PCT_MAX) {
-    temperature_percent = new_color_temperature_percentage;
-  } else {
+  if (temperature_percent > TEMPERATURE_PCT_MAX) {
     return;
   }
 
@@ -229,11 +189,11 @@ void sl_btmesh_set_temperature(uint8_t new_color_temperature_percentage)
   // If there are more requests to send, start a repeating soft timer
   // to trigger retransmission of the request after 50 ms delay
   if (ctl_request_count > 0) {
-    sl_status_t sc = sl_simple_timer_start(&ctl_retransmission_timer,
-                                           SL_BTMESH_CTL_CLIENT_RETRANSMISSION_TIMEOUT_CFG_VAL,
-                                           ctl_retransmission_timer_cb,
-                                           NO_CALLBACK_DATA,
-                                           true);
+    sl_status_t sc = app_timer_start(&ctl_retransmission_timer,
+                                     SL_BTMESH_CTL_CLIENT_RETRANSMISSION_TIMEOUT_CFG_VAL,
+                                     ctl_retransmission_timer_cb,
+                                     NO_CALLBACK_DATA,
+                                     true);
     app_assert_status_f(sc, "Failed to start periodic timer");
   }
 }
@@ -243,7 +203,7 @@ void sl_btmesh_set_temperature(uint8_t new_color_temperature_percentage)
  * @param[in] handle pointer to handle instance
  * @param[in] data pointer to input data
  ******************************************************************************/
-static void  ctl_retransmission_timer_cb(sl_simple_timer_t *handle,
+static void  ctl_retransmission_timer_cb(app_timer_t *handle,
                                          void *data)
 {
   (void)data;
@@ -252,7 +212,7 @@ static void  ctl_retransmission_timer_cb(sl_simple_timer_t *handle,
   send_ctl_request(1);   // Retransmit ctl message
   // Stop retransmission timer if it was the last attempt
   if (ctl_request_count == 0) {
-    sl_status_t sc = sl_simple_timer_stop(&ctl_retransmission_timer);
+    sl_status_t sc = app_timer_stop(&ctl_retransmission_timer);
     app_assert_status_f(sc, "Failed to stop periodic timer");
   }
 }

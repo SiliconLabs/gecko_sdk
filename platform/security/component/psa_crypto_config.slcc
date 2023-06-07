@@ -11,22 +11,42 @@ provides:
   - name: psa_crypto_config
 
 include:
+  
   - path: config
     file_list:
-      - path: config-device-acceleration.h
+      - path: sli_psa_acceleration.h
+      - path: sli_psa_tfm_translation.h
+        condition: [tz_secure_key_library_s]
+      - path: sli_psa_tfm_translation.h
+        condition: [tz_secure_key_library_ns]
+
+  - path: config/preset
+    file_list:
+      - path: sli_psa_config_se_cpc_primary.h
+        condition: [se_cpc_primary]
 
 template_file:
-  - path: config/template/psa_crypto_config_autogen.h.jinja
-    # Use the unless condition since secure projects might also require the config files
+  - path: config/template/sli_psa_config_autogen.h.jinja
+    # We use tz_secure_key_library_s instead of trustzone_secure since the
+    # secure bootloader will need this file to build.
+    unless: [tz_secure_key_library_s, trustzone_nonsecure, se_cpc_primary]
+  - path: config/template/sli_psa_config_autogen.h.jinja
+    export: true
+    condition: [trustzone_nonsecure]
+
+  - path: config/template/sli_psa_builtin_config_autogen.h.jinja
+    # We use tz_secure_key_library_s instead of trustzone_secure since the
+    # secure bootloader will need this file to build.
     unless: [tz_secure_key_library_s, trustzone_nonsecure]
-  - path: config/template/psa_crypto_config_autogen.h.jinja
+  - path: config/template/sli_psa_builtin_config_autogen.h.jinja
     export: true
     condition: [trustzone_nonsecure]
 
 config_file:
   - path: config/template/psa_crypto_config.h
     file_id: psa_crypto_config
-    # Use the unless condition since secure projects might also require the config files
+    # We use tz_secure_key_library_s instead of trustzone_secure since the
+    # secure bootloader will need this file to build.
     unless: [tz_secure_key_library_s, trustzone_nonsecure]
   - path: config/template/psa_crypto_config.h
     file_id: psa_crypto_config
@@ -34,8 +54,13 @@ config_file:
     condition: [trustzone_nonsecure]
 
 define:
+
   - name: MBEDTLS_PSA_CRYPTO_CONFIG_FILE
     value: "<psa_crypto_config.h>"
+
+  - name: SLI_PSA_CONFIG_AUTOGEN_OVERRIDE_FILE
+    value: "<sli_psa_config_se_cpc_primary.h>"
+    condition: [se_cpc_primary]
 
 template_contribution:
   - name: mbedtls_config

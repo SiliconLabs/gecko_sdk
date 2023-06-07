@@ -19,10 +19,8 @@
 #include "../../util/common.h"
 #include "drlc-server.h"
 
-#ifdef UC_BUILD
 #include "drlc-server-config.h"
 #include "zap-cluster-command-parser.h"
-#endif // UC_BUILD
 
 static EmberAfLoadControlEvent scheduledLoadControlEventTable[EMBER_AF_DEMAND_RESPONSE_LOAD_CONTROL_CLUSTER_SERVER_ENDPOINT_COUNT][EMBER_AF_PLUGIN_DRLC_SERVER_SCHEDULED_EVENT_TABLE_SIZE];
 // The following matrix is a map of event order that is sorted by startTime and issuerEventId
@@ -33,10 +31,8 @@ static uint8_t eventOrderToLoadControlIndex[EMBER_AF_DEMAND_RESPONSE_LOAD_CONTRO
 
 void emberAfDemandResponseLoadControlClusterServerInitCallback(uint8_t endpoint)
 {
-  emAfClearScheduledLoadControlEvents(endpoint); //clear all events at init
+  sli_zigbee_af_clear_scheduled_load_control_events(endpoint); //clear all events at init
 }
-
-#ifdef UC_BUILD
 
 bool emberAfDemandResponseLoadControlClusterGetScheduledEventsCallback(EmberAfClusterCommand *cmd)
 {
@@ -68,8 +64,8 @@ bool emberAfDemandResponseLoadControlClusterGetScheduledEventsCallback(EmberAfCl
     // CCB 1297: events with startTime = "now" are sent with startTime = 0, not
     // the current time that we internally set it to at the time of creation
     // We do, however, update the duration based on the elapsed time
-    // emAfGetScheduledLoadControlEvent() normalizes the duration time
-    if (EMBER_SUCCESS != emAfGetScheduledLoadControlEvent(
+    // sli_zigbee_af_get_scheduled_load_control_event() normalizes the duration time
+    if (EMBER_SUCCESS != sli_zigbee_af_get_scheduled_load_control_event(
           emberAfCurrentEndpoint(),
           orderedIndex,
           &event)) {
@@ -162,136 +158,7 @@ bool emberAfDemandResponseLoadControlClusterReportEventStatusCallback(EmberAfClu
   return true;
 }
 
-#else // !UC_BUILD
-
-bool emberAfDemandResponseLoadControlClusterGetScheduledEventsCallback(uint32_t startTime,
-                                                                       uint8_t  numberOfEvents,
-                                                                       uint32_t issuerEventId)
-{
-  uint8_t i, sent = 0;
-  uint8_t ep = emberAfFindClusterServerEndpointIndex(emberAfCurrentEndpoint(),
-                                                     ZCL_DEMAND_RESPONSE_LOAD_CONTROL_CLUSTER_ID);
-  EmberAfClusterCommand *currentCommand = emberAfCurrentCommand();
-  uint8_t orderedIndex;
-  EmberAfLoadControlEvent event;
-
-  if (ep == 0xFF) {
-    return false;
-  }
-
-  // CCB 1297
-  // startTime = 0 does NOT mean get all events from "now"
-
-  // Go through our sorted table (by following the eventOrderToLoadControlIndex
-  // map) and send out the scheduled events
-  for (i = 0; i < EMBER_AF_PLUGIN_DRLC_SERVER_SCHEDULED_EVENT_TABLE_SIZE; i++) {
-    orderedIndex = eventOrderToLoadControlIndex[ep][i];
-    // If no more events have been set (and thus, ordered), break
-    if (ORDER_NOT_SET == orderedIndex) {
-      break;
-    }
-
-    // CCB 1297: events with startTime = "now" are sent with startTime = 0, not
-    // the current time that we internally set it to at the time of creation
-    // We do, however, update the duration based on the elapsed time
-    // emAfGetScheduledLoadControlEvent() normalizes the duration time
-    if (EMBER_SUCCESS != emAfGetScheduledLoadControlEvent(
-          emberAfCurrentEndpoint(),
-          orderedIndex,
-          &event)) {
-      continue;
-    }
-
-    // check how many we have sent, if they have a positive number of events
-    // they want returned and we have hit it we should exit.
-    if (numberOfEvents != 0 && sent >= numberOfEvents) {
-      break;
-    }
-
-    // If the event is inactive or its start time is before the requested start
-    // time we ignore it.
-    if (event.source[0] == 0xFF || event.startTime < startTime) {
-      continue;
-    }
-
-    // CCB 1297: filter on issuerEventId if it was sent in command
-    if ((issuerEventId != 0xFFFFFFFF)
-        && (event.startTime == startTime)
-        && (event.eventId < issuerEventId)) {
-      continue;
-    }
-
-    // send the event
-    emberAfFillCommandDemandResponseLoadControlClusterLoadControlEvent(event.eventId,
-                                                                       event.deviceClass,
-                                                                       event.utilityEnrollmentGroup,
-                                                                       event.startTime,
-                                                                       event.duration,
-                                                                       event.criticalityLevel,
-                                                                       event.coolingTempOffset,
-                                                                       event.heatingTempOffset,
-                                                                       event.coolingTempSetPoint,
-                                                                       event.heatingTempSetPoint,
-                                                                       event.avgLoadPercentage,
-                                                                       event.dutyCycle,
-                                                                       event.eventControl);
-    emberAfSetCommandEndpoints(currentCommand->apsFrame->destinationEndpoint,
-                               currentCommand->apsFrame->sourceEndpoint);
-    emberAfGetCommandApsFrame()->options |= EMBER_APS_OPTION_SOURCE_EUI64;
-    emberAfSendCommandUnicast(EMBER_OUTGOING_DIRECT, currentCommand->source);
-    sent++;  //record that we sent it. and continue
-  }
-
-  // Bug 13547:
-  //   Only send a Default response if there were no events returned.
-  //   The LCE messages are the "next" messages in the sequence so no
-  //   default response is needed for that successful case.
-  if (sent == 0) {
-    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_NOT_FOUND);
-  }
-
-  return true;
-}
-
-bool emberAfDemandResponseLoadControlClusterReportEventStatusCallback(uint32_t issuerEventId,
-                                                                      uint8_t eventStatus,
-                                                                      uint32_t eventStatusTime,
-                                                                      uint8_t criticalityLevelApplied,
-                                                                      uint16_t coolingTemperatureSetPointApplied,
-                                                                      uint16_t heatingTemperatureSetPointApplied,
-                                                                      int8_t averageLoadAdjustmentPercentageApplied,
-                                                                      uint8_t dutyCycleApplied,
-                                                                      uint8_t eventControl,
-                                                                      uint8_t signatureType,
-                                                                      uint8_t* signature)
-{
-  emberAfDemandResponseLoadControlClusterPrintln("= RX Event Status =");
-  emberAfDemandResponseLoadControlClusterPrintln("  eid: %4x", issuerEventId);
-  emberAfDemandResponseLoadControlClusterPrintln("   es: %x", eventStatus);
-  emberAfDemandResponseLoadControlClusterPrintln("  est: T%4x", eventStatusTime);
-  emberAfDemandResponseLoadControlClusterFlush();
-  emberAfDemandResponseLoadControlClusterPrintln("  cla: %x", criticalityLevelApplied);
-  emberAfDemandResponseLoadControlClusterFlush();
-  emberAfDemandResponseLoadControlClusterPrintln("ctspa: %2x (%d)",
-                                                 coolingTemperatureSetPointApplied,
-                                                 coolingTemperatureSetPointApplied);
-  emberAfDemandResponseLoadControlClusterPrintln("htspa: %2x (%d)",
-                                                 heatingTemperatureSetPointApplied,
-                                                 heatingTemperatureSetPointApplied);
-  emberAfDemandResponseLoadControlClusterFlush();
-  emberAfDemandResponseLoadControlClusterPrintln("  avg: %x",
-                                                 averageLoadAdjustmentPercentageApplied);
-  emberAfDemandResponseLoadControlClusterPrintln("   dc: %x", dutyCycleApplied);
-  emberAfDemandResponseLoadControlClusterPrintln("   ec: %x", eventControl);
-  emberAfDemandResponseLoadControlClusterFlush();
-
-  emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
-  return true;
-}
-
-#endif // UC_BUILD
-
-void emAfClearScheduledLoadControlEvents(uint8_t endpoint)
+void sli_zigbee_af_clear_scheduled_load_control_events(uint8_t endpoint)
 {
   uint8_t i;
   uint8_t ep = emberAfFindClusterServerEndpointIndex(endpoint, ZCL_DEMAND_RESPONSE_LOAD_CONTROL_CLUSTER_ID);
@@ -308,7 +175,7 @@ void emAfClearScheduledLoadControlEvents(uint8_t endpoint)
   clearEventOrderToLoadControlIndex(ep);
 }
 
-EmberStatus emAfGetScheduledLoadControlEvent(uint8_t endpoint, uint8_t index, EmberAfLoadControlEvent *event)
+EmberStatus sli_zigbee_af_get_scheduled_load_control_event(uint8_t endpoint, uint8_t index, EmberAfLoadControlEvent *event)
 {
   uint8_t ep = emberAfFindClusterServerEndpointIndex(endpoint, ZCL_DEMAND_RESPONSE_LOAD_CONTROL_CLUSTER_ID);
 
@@ -333,7 +200,7 @@ EmberStatus emAfGetScheduledLoadControlEvent(uint8_t endpoint, uint8_t index, Em
   return EMBER_INDEX_OUT_OF_RANGE;
 }
 
-EmberStatus emAfSetScheduledLoadControlEvent(uint8_t endpoint, uint8_t index, const EmberAfLoadControlEvent *event)
+EmberStatus sli_zigbee_af_set_scheduled_load_control_event(uint8_t endpoint, uint8_t index, const EmberAfLoadControlEvent *event)
 {
   uint8_t ep = emberAfFindClusterServerEndpointIndex(endpoint, ZCL_DEMAND_RESPONSE_LOAD_CONTROL_CLUSTER_ID);
 
@@ -359,9 +226,8 @@ EmberStatus emAfSetScheduledLoadControlEvent(uint8_t endpoint, uint8_t index, co
   return EMBER_INDEX_OUT_OF_RANGE;
 }
 
-void emAfPluginDrlcServerPrintInfo(uint8_t endpoint)
+void sli_zigbee_af_drlc_server_print_info(uint8_t endpoint)
 {
-#if ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_DEMAND_RESPONSE_LOAD_CONTROL_CLUSTER)) || defined(UC_BUILD))
   uint8_t i;
   uint8_t ep = emberAfFindClusterServerEndpointIndex(endpoint, ZCL_DEMAND_RESPONSE_LOAD_CONTROL_CLUSTER_ID);
 
@@ -400,17 +266,16 @@ void emAfPluginDrlcServerPrintInfo(uint8_t endpoint)
   }
   emberAfDemandResponseLoadControlClusterPrintln("Table size: %d",
                                                  EMBER_AF_PLUGIN_DRLC_SERVER_SCHEDULED_EVENT_TABLE_SIZE);
-#endif //defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_DEMAND_RESPONSE_LOAD_CONTROL_CLUSTER)
 }
 
-void emAfPluginDrlcServerSlceMessage(EmberNodeId nodeId,
-                                     uint8_t srcEndpoint,
-                                     uint8_t dstEndpoint,
-                                     uint8_t index)
+void sli_zigbee_af_drlc_server_slce_message(EmberNodeId nodeId,
+                                            uint8_t srcEndpoint,
+                                            uint8_t dstEndpoint,
+                                            uint8_t index)
 {
   EmberAfLoadControlEvent event;
   EmberStatus status;
-  status = emAfGetScheduledLoadControlEvent(srcEndpoint, index, &event);
+  status = sli_zigbee_af_get_scheduled_load_control_event(srcEndpoint, index, &event);
 
   if (status != EMBER_SUCCESS) {
     emberAfDemandResponseLoadControlClusterPrintln("send slce fail: 0x%x", status);
@@ -551,8 +416,6 @@ void clearEventOrderToLoadControlIndex(uint8_t ep)
   }
 }
 
-#ifdef UC_BUILD
-
 uint32_t emberAfDemandResponseLoadControlClusterServerCommandParse(sl_service_opcode_t opcode,
                                                                    sl_service_function_context_t *context)
 {
@@ -582,5 +445,3 @@ uint32_t emberAfDemandResponseLoadControlClusterServerCommandParse(sl_service_op
           ? EMBER_ZCL_STATUS_SUCCESS
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
-
-#endif // UC_BUILD

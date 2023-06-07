@@ -1,0 +1,16 @@
+#include "sl_cpc_gpio_expander.h"
+{% for instance in cpc_gpio_expander_gpio_instance %}
+#include "sl_cpc_gpio_expander_gpio_{{ instance }}_config.h"
+{% endfor %}
+
+sl_cpc_gpio_expander_handle_t sl_cpc_gpio_expander_handle_table[] = {
+
+{% for instance in cpc_gpio_expander_gpio_instance %}
+  { .port = SL_CPC_GPIO_EXPANDER_GPIO_{{ instance | upper }}_PORT, 
+    .pin = SL_CPC_GPIO_EXPANDER_GPIO_{{ instance | upper }}_PIN, 
+    .name = SL_CPC_GPIO_EXPANDER_GPIO_{{ instance | upper }}_NAME },
+{% endfor %}
+
+};
+
+const uint32_t sl_cpc_gpio_expander_handle_count = (sizeof(sl_cpc_gpio_expander_handle_table) / sizeof(sl_cpc_gpio_expander_handle_t));

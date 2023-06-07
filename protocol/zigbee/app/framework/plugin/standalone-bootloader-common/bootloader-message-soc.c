@@ -19,15 +19,13 @@
 #include "app/framework/include/af.h"
 #include "bootloader-protocol.h"
 
-#ifdef UC_BUILD
-#define emberBootloadTransmitCompleteHandler emAfPluginStandaloneBootloaderCommonBootloadTransmitCompleteCallback
-#define emberIncomingBootloadMessageHandler emAfPluginStandaloneBootloaderCommonIncomingBootloadMessageCallback
-#endif
+#define emberBootloadTransmitCompleteHandler sli_zigbee_af_standalone_bootloader_common_bootload_transmit_complete_callback
+#define emberIncomingBootloadMessageHandler sli_zigbee_af_standalone_bootloader_common_incoming_bootload_message_callback
 
 //------------------------------------------------------------------------------
 // External Declarations
 
-void emAesEncrypt(uint8_t *block, const uint8_t *key);
+void sli_zigbee_aes_encrypt(uint8_t *block, const uint8_t *key);
 
 //------------------------------------------------------------------------------
 // Globals
@@ -35,10 +33,10 @@ void emAesEncrypt(uint8_t *block, const uint8_t *key);
 //------------------------------------------------------------------------------
 // Functions
 
-EmberStatus emAfSendBootloadMessage(bool isBroadcast,
-                                    EmberEUI64 destEui64,
-                                    uint8_t length,
-                                    uint8_t* message)
+EmberStatus sli_zigbee_af_send_bootload_message(bool isBroadcast,
+                                                EmberEUI64 destEui64,
+                                                uint8_t length,
+                                                uint8_t* message)
 {
   EmberStatus status;
   EmberMessageBuffer buffer = emberFillLinkedBuffers(message,
@@ -87,7 +85,7 @@ void emberBootloadTransmitCompleteHandler(EmberMessageBuffer message,
   }
 }
 
-void emAfStandaloneBootloaderClientEncrypt(uint8_t* block, uint8_t* key)
+void sli_zigbee_af_standalone_bootloader_client_encrypt(uint8_t* block, uint8_t* key)
 {
-  emAesEncrypt(block, key);
+  sli_zigbee_aes_encrypt(block, key);
 }

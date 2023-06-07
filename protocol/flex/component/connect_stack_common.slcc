@@ -43,8 +43,6 @@ include:
       - path: "config/ember-configuration-defaults.h"
   - path: "stack/include/"
     file_list:
-      - path: "api-rename.h"
-      - path: "api-rename-undef.h"
       - path: "byte-utilities.h"
       - path: "ember-types.h"
       - path: "ember.h"
@@ -57,10 +55,16 @@ include:
       - path: "packet-buffer.h"
       - path: "stack-info.h"
       - path: "radio-stream.h"
+  - path: "stack/core"
+    file_list:
+      - path: "sli-connect-api.h"
 source:
       - path: "stack/config/ember-configuration.c"
       - path: "stack/config/stack-stubs.c"
       - path: "stack/config/stack-callback-stubs.c"
+      - path: "stack/core/sli-connect-api.c"
+        unless:
+          - connect_cmsis_stack_ipc
 config_file:
   - path: "stack/config/component_config/stack-common-config.h"
 define:

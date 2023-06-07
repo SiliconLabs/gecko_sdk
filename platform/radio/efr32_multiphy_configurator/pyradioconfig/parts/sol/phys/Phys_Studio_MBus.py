@@ -70,7 +70,7 @@ class PHYS_Mbus_Studio_Sol(PHYS_Mbus_Studio_Ocelot):
         return phy
 
 
-    def PHY_wMbus_ModeTC_M2O_100k_noFrame(self, model, phy_name=None):
+    def PHY_wMbus_ModeTC_M2O_100k_frameA(self, model, phy_name=None):
         pass
 
     #def PHY_wMbus_ModeT_M2O_100k_frameA(self, model, phy_name=None):

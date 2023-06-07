@@ -463,7 +463,7 @@ static otCliCommand bleCommands[] = {
 
 otError bleCommand(void *context, uint8_t argc, char *argv[])
 {
-    otError error = otCRPCHandleCommand(context, argc, argv, OT_ARRAY_LENGTH(bleCommands), bleCommands);
+    otError error = processCommand(context, argc, argv, OT_ARRAY_LENGTH(bleCommands), bleCommands);
 
     if (error == OT_ERROR_INVALID_COMMAND)
     {

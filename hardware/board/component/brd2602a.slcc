@@ -1,0 +1,72 @@
+!!omap
+- id: brd2602a
+- label: BRD2602A
+- package: platform
+- description: Board support for BRD2602A.
+- category: Platform|Board|Starter Kit
+- quality: production
+- requires:
+  - name: efr32bg27c140f768im40
+  - name: brd2602a_config
+- provides:
+  - name: brd2602a
+  - name: hardware_board
+  - name: hardware_board_stk
+  - name: hardware_board_from_stk
+  - name: hardware_board_has_si70xx
+  - name: hardware_board_has_tempsensor
+  - name: hardware_board_has_vcom
+  - name: hardware_board_has_spiflash
+  - name: hardware_board_has_hfxo
+  - name: hardware_board_has_lfxo
+  - name: hardware_board_supports_rf_band_2400
+  - name: hardware_board_supports_1_rf_band
+  - name: hardware_board_default_rf_band
+  - name: hardware_board_default_rf_band_2400
+- recommends:
+  - id: iostream_eusart
+    instance:
+    - vcom
+  - id: bootloader_uart_driver
+  - id: i2cspm
+    instance:
+    - sensor
+  - id: mic_pdm_driver
+  - id: simple_led
+    instance:
+    - led0
+  - id: simple_button
+    instance:
+    - btn0
+  - id: mx25_flash_shutdown_usart
+  - id: bootloader_spi_controller_usart_driver
+  - id: bootloader_spi_peripheral_usart_driver
+  - id: imu_driver_icm20689
+- template_contribution: []
+- define:
+  - name: SL_BOARD_NAME
+    value: '"BRD2602A"'
+  - name: SL_BOARD_REV
+    value: '"A02"'
+  - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_2400
+  - name: HARDWARE_BOARD_SUPPORTS_1_RF_BAND
+  - name: HARDWARE_BOARD_DEFAULT_RF_BAND_2400
+- tag:
+  - board:pn:BRD2602
+  - board:variant:A
+  - board:revision:A02
+  - board:device:efr32bg27c140f768im40
+  - hardware:has:vcom
+  - hardware:has:pti
+  - hardware:has:sensor:si7021
+  - hardware:has:sensor:si7210
+  - hardware:has:sensor:veml6035
+  - hardware:has:sensor:spk0641ht4h
+  - hardware:has:microphone
+  - hardware:has:led:1
+  - hardware:has:button:1
+  - hardware:has:memory:spi:mx25r8035f
+  - hardware:has:exp_header:spi
+  - hardware:has:exp_header:uart
+  - hardware:has:exp_header:i2c
+  - hardware:has:imu:icm-20689

@@ -18,9 +18,7 @@
 #ifndef GBCS_DEVICE_LOG_H_
 #define GBCS_DEVICE_LOG_H_
 
-#ifdef UC_BUILD
 #include "gbcs-device-log-config.h"
-#endif // UC_BUILD
 
 /**
  * @defgroup gbcs-device-log GBCS Device Log

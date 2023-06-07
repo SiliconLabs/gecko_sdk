@@ -24,6 +24,10 @@ include:
       - path: ias-zone-server.h
       - path: ias-zone-server-tokens.h
 template_contribution:
+  - name: zigbee_stack_callback
+    value:
+      callback_type: stack_status
+      function_name: emberAfPluginIasZoneServerStackStatusCallback
   - name: component_catalog
     value: zigbee_ias_zone_server
   - name: cluster_service

@@ -20,9 +20,12 @@
 #include "app/framework/util/util.h"
 #include "end-device-move.h"
 
-#ifdef UC_BUILD
+#include "stack/include/zigbee-security-manager.h"
+
 #include "end-device-support.h"
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #ifdef SL_CATALOG_ZIGBEE_NETWORK_FIND_SUB_GHZ_PRESENT
 #include "network-find.h"
 #endif
@@ -30,40 +33,16 @@
 #include "zll-commissioning-common.h"
 #endif
 sl_zigbee_event_t emberAfPluginEndDeviceSupportMoveNetworkEvents[EMBER_SUPPORTED_NETWORKS];
-void emberAfPluginEndDeviceSupportMoveNetworkEventHandler(SLXU_UC_EVENT);
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_NETWORK_FIND_SUB_GHZ
-  #include "app/framework/plugin/network-find/network-find.h"
-  #define SL_CATALOG_ZIGBEE_NETWORK_FIND_SUB_GHZ_PRESENT
-#endif
-#ifdef EMBER_AF_PLUGIN_NETWORK_FIND
-  #define SL_CATALOG_ZIGBEE_NETWORK_FIND_PRESENT
-#endif // EMBER_AF_PLUGIN_NETWORK_FIND
-#ifdef EMBER_AF_PLUGIN_ZLL_COMMISSIONING_COMMON
-  #include "app/framework/plugin/zll-commissioning-common/zll-commissioning-common.h"
-  #define SL_CATALOG_ZIGBEE_ZLL_COMMISSIONING_COMMON_PRESENT
-#endif
-extern EmberEventControl emberAfPluginEndDeviceSupportMoveNetworkEventControls[];
-#endif // UC_BUILD
+void emberAfPluginEndDeviceSupportMoveNetworkEventHandler(sl_zigbee_event_t * event);
 
 #if defined(SL_CATALOG_ZIGBEE_NETWORK_FIND_PRESENT) || defined(SL_CATALOG_ZIGBEE_NETWORK_FIND_SUB_GHZ_PRESENT)
-#ifdef UC_BUILD
 extern sl_zigbee_event_t emberAfPluginNetworkFindTickEvent;
 #define networkFindTickEventControl (&emberAfPluginNetworkFindTickEvent)
-#else // !UC_BUILD
-extern EmberEventControl emberAfPluginNetworkFindTickEventControl;
-#define networkFindTickEventControl emberAfPluginNetworkFindTickEventControl
-#endif // UC_BUILD
-extern void emberAfPluginNetworkFindTickEventHandler(SLXU_UC_EVENT);
+extern void emberAfPluginNetworkFindTickEventHandler(sl_zigbee_event_t * event);
 #endif // defined(SL_CATALOG_ZIGBEE_NETWORK_FIND_PRESENT) || defined(SL_CATALOG_ZIGBEE_NETWORK_FIND_SUB_GHZ_PRESENT)
 
 // *****************************************************************************
 // Globals
-
-#if defined(EMBER_SCRIPTED_TEST)
-uint8_t emAfRejoinAttemptsMax = 4;
-  #define EMBER_AF_REJOIN_ATTEMPTS_MAX emAfRejoinAttemptsMax
-#endif
 
 typedef struct {
   uint8_t moveAttempts; // counts *completed* attempts, i.e. 0 on 1st attempt
@@ -125,7 +104,6 @@ static void scheduleMoveEvent(void)
                         networkIndex,
                         state->moveAttempts);
     }
-#ifdef UC_BUILD
     sl_zigbee_event_set_delay_qs(emberAfPluginEndDeviceSupportMoveNetworkEvents,
                                  (state->moveAttempts == 0
 #ifdef SL_CATALOG_ZIGBEE_NETWORK_FIND_SUB_GHZ_PRESENT
@@ -134,16 +112,6 @@ static void scheduleMoveEvent(void)
 #endif // SL_CATALOG_ZIGBEE_NETWORK_FIND_SUB_GHZ_PRESENT
                                   ? 0
                                   : MOVE_DELAY_QS));
-#else // !UC_BUILD
-    emberAfNetworkEventControlSetDelayQS(emberAfPluginEndDeviceSupportMoveNetworkEventControls,
-                                         (state->moveAttempts == 0
-#ifdef SL_CATALOG_ZIGBEE_NETWORK_FIND_SUB_GHZ_PRESENT
-                                          || (state->moveAttempts >= MOVE_ATTEMPTS_BEFORE_TRYING_ALL_PAGES
-                                              && state->page > 0)
-#endif // SL_CATALOG_ZIGBEE_NETWORK_FIND_SUB_GHZ_PRESENT
-                                          ? 0
-                                          : MOVE_DELAY_QS));
-#endif // UC_BUILD
   } else {
     emberAfAppPrintln("Max move limit reached nwk %d: %d",
                       networkIndex,
@@ -152,21 +120,15 @@ static void scheduleMoveEvent(void)
   }
 }
 
-void emAfPluginEndDeviceSupportMoveInit(void)
+void sli_zigbee_af_end_device_support_move_init(void)
 {
-  #ifdef UC_BUILD
   sl_zigbee_network_event_init(emberAfPluginEndDeviceSupportMoveNetworkEvents,
                                emberAfPluginEndDeviceSupportMoveNetworkEventHandler);
-  #endif // UC_BUILD
 }
 
 bool emberAfMoveInProgressCallback(void)
 {
-#ifdef UC_BUILD
   return sl_zigbee_event_is_scheduled(emberAfPluginEndDeviceSupportMoveNetworkEvents);
-#else
-  return emberAfNetworkEventControlGetActive(emberAfPluginEndDeviceSupportMoveNetworkEventControls);
-#endif  // UC_BUILD
 }
 
 bool emberAfStartMoveCallback(void)
@@ -217,23 +179,24 @@ void emberAfStopMoveCallback(void)
   states[networkIndex].page = getFirstPage();
 #endif // SL_CATALOG_ZIGBEE_NETWORK_FIND_SUB_GHZ_PRESENT
 
-#ifdef UC_BUILD
   sl_zigbee_event_set_inactive(emberAfPluginEndDeviceSupportMoveNetworkEvents);
-#else // !UC_BUILD
-  emberEventControlSetInactive(emberAfPluginEndDeviceSupportMoveNetworkEventControls[networkIndex]);
-#endif // UC_BUILD
 }
 
 static bool checkForWellKnownTrustCenterLinkKey(void)
 {
 #if !defined(ALLOW_REJOINS_WITH_WELL_KNOWN_LINK_KEY)
-  EmberKeyStruct keyStruct;
-  EmberStatus status = emberGetKey(EMBER_TRUST_CENTER_LINK_KEY, &keyStruct);
+  sl_zb_sec_man_context_t context;
+  sl_zb_sec_man_key_t plaintext_key;
+  sl_zb_sec_man_init_context(&context);
+
+  context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_TC_LINK;
+
+  sl_status_t status = sl_zb_sec_man_export_key(&context, &plaintext_key);
 
   const EmberKeyData smartEnergyWellKnownTestKey = SE_SECURITY_TEST_LINK_KEY;
   const EmberKeyData zigbeeAlliance09Key = ZIGBEE_PROFILE_INTEROPERABILITY_LINK_KEY;
 
-  if (status != EMBER_SUCCESS) {
+  if (status != SL_STATUS_OK) {
     // Assume by default we have a well-known key if we failed to retrieve it.
     // This will prevent soliciting a TC rejoin that might expose the network
     // key such that a passive attacker can obtain the key.  Better to be
@@ -241,10 +204,10 @@ static bool checkForWellKnownTrustCenterLinkKey(void)
     return true;
   }
 
-  if ((0 == MEMCOMPARE(emberKeyContents(&(keyStruct.key)),
+  if ((0 == MEMCOMPARE(plaintext_key.key,
                        emberKeyContents(&(smartEnergyWellKnownTestKey)),
                        EMBER_ENCRYPTION_KEY_SIZE))
-      || (0 == MEMCOMPARE(emberKeyContents(&(keyStruct.key)),
+      || (0 == MEMCOMPARE(plaintext_key.key,
                           emberKeyContents(&(zigbeeAlliance09Key)),
                           EMBER_ENCRYPTION_KEY_SIZE))) {
     return true;
@@ -322,7 +285,7 @@ static uint32_t getChannelMask(const State *state)
 }
 #endif // NETWORK_FIND_SUB_GHZ
 
-void emberAfPluginEndDeviceSupportMoveNetworkEventHandler(SLXU_UC_EVENT)
+void emberAfPluginEndDeviceSupportMoveNetworkEventHandler(sl_zigbee_event_t * event)
 {
   const uint8_t networkIndex = emberGetCurrentNetwork();
   State *state = &states[networkIndex];
@@ -345,13 +308,8 @@ void emberAfPluginEndDeviceSupportMoveNetworkEventHandler(SLXU_UC_EVENT)
       || emberAfZllTouchLinkInProgress()) {
     // If we are trying to touchlink, then reschedule the rejoin attempt.
     emberAfDebugPrintln("Rescheduling move due to ZLL operation.");
-#ifdef UC_BUILD
     sl_zigbee_event_set_delay_qs(emberAfPluginEndDeviceSupportMoveNetworkEvents,
                                  MOVE_DELAY_QS * 2);
-#else // !UC_BUILD
-    emberAfNetworkEventControlSetDelayQS(emberAfPluginEndDeviceSupportMoveNetworkEventControls,
-                                         MOVE_DELAY_QS * 2);
-#endif // UC_BUILD
     return;
   }
 #endif // SL_CATALOG_ZIGBEE_ZLL_COMMISSIONING_COMMON_PRESENT
@@ -366,14 +324,10 @@ void emberAfPluginEndDeviceSupportMoveNetworkEventHandler(SLXU_UC_EVENT)
 #endif // SL_CATALOG_ZIGBEE_NETWORK_FIND_SUB_GHZ_PRESENT
 
 #if defined(SL_CATALOG_ZIGBEE_NETWORK_FIND_PRESENT) || defined(SL_CATALOG_ZIGBEE_NETWORK_FIND_SUB_GHZ_PRESENT)
-  if (slxu_zigbee_event_is_active(networkFindTickEventControl)) {
+  if (sl_zigbee_event_is_scheduled(networkFindTickEventControl)) {
     // if network find plugin hasn't finished yet then we need to
     // force it to stop searching for joinable networks.
-    #ifdef UC_BUILD
     emberAfPluginNetworkFindTickEventHandler(networkFindTickEventControl);
-    #else // !UC_BUILD
-    emberAfPluginNetworkFindTickEventHandler();
-    #endif // UC_BUILD
   }
 #endif // defined(SL_CATALOG_ZIGBEE_NETWORK_FIND_PRESENT) || defined(SL_CATALOG_ZIGBEE_NETWORK_FIND_SUB_GHZ_PRESENT)
   status = emberFindAndRejoinNetworkWithReason(secure,

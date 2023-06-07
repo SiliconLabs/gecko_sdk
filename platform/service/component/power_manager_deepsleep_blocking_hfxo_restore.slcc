@@ -1,0 +1,23 @@
+id: power_manager_deepsleep_blocking_hfxo_restore
+label: "Power Manager: Deepsleep with blocking on HFXO restore"
+package: platform
+description: |
+  Power Manager configuration supporting deepsleep (EM2/EM3).
+  When using HFXO and waiting for HFXO to be ready, this component does not rely on the HFXO Manager 
+  and HFXO interrupt. SYSCLK will wait for HFXO to be ready before being available, thus blocking any
+  processing on the core during that time.
+  This component improves power consumption while waiting for HFXO to be ready, but could lead to an
+  increase of interrupt latency if interrupts happen during said waiting time.
+  This component is not compatible with the SL_HFXO_MANAGER_SLEEPY_CRYSTAL_SUPPORT configuration.
+category: Services|Power Manager
+quality: production
+provides:
+  - name: power_manager_deepsleep_blocking_hfxo_restore
+  - name: power_manager_energy_mode_impl
+requires:
+  - name: power_manager
+  - name: device_has_rtcc
+  - name: device_series_2
+template_contribution:
+  - name: component_catalog
+    value: power_manager_deepsleep_blocking_hfxo_restore

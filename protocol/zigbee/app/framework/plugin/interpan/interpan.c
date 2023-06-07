@@ -19,9 +19,11 @@
 #include "app/framework/include/af.h"
 #include "app/framework/util/util.h"
 #include "interpan.h"
+#include "stack/include/zigbee-security-manager.h"
 
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #if defined(ALLOW_KEY_ESTABLISHMENT)
 #if defined(ZCL_TERMINATE_KEY_ESTABLISHMENT_FROM_SERVER_COMMAND_ID)
 #define ZCL_TERMINATE_KEY_ESTABLISHMENT_COMMAND_ID ZCL_TERMINATE_KEY_ESTABLISHMENT_FROM_SERVER_COMMAND_ID
@@ -31,14 +33,6 @@
 #error "ZCL TerminateKeyEstablishment Command ID not defined"
 #endif
 #endif // ALLOW_KEY_ESTABLISHMENT
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_ZLL_COMMISSIONING_CLIENT
-#define SL_CATALOG_ZIGBEE_ZLL_COMMISSIONING_CLIENT_PRESENT
-#endif
-#ifdef EMBER_AF_PLUGIN_ZLL_COMMISSIONING_SERVER
-#define SL_CATALOG_ZIGBEE_ZLL_COMMISSIONING_SERVER_PRESENT
-#endif
-#endif // UC_BUILD
 
 //------------------------------------------------------------------------------
 // Globals
@@ -124,7 +118,7 @@ static bool isMessageAllowed(EmberAfInterpanHeader *headerData,
                              uint8_t messageLength,
                              uint8_t *messageContents);
 
-#if ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_APP)) || (defined(UC_BUILD) && defined(SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT)))
+#if ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_APP)) || (defined(SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT)))
 static void printMessage(EmberAfInterpanHeader *headerData);
 #else
   #define printMessage(x)
@@ -155,23 +149,15 @@ static rxFragmentedInterpanPacket* rxPacketLookUp(EmberEUI64 sourceEui);
 static void freeTxPacketEntry(txFragmentedInterpanPacket *txPacket, EInterpanFragmentationStatus status);
 static void freeRxPacketEntry(rxFragmentedInterpanPacket *rxPacket, EInterpanFragmentationStatus status);
 
-#ifdef UC_BUILD
 sl_zigbee_event_t emberAfPluginInterpanFragmentTransmitEvent;
 sl_zigbee_event_t emberAfPluginInterpanFragmentReceiveEvent;
-void emberAfPluginInterpanFragmentTransmitEventHandler(SLXU_UC_EVENT);
-void emberAfPluginInterpanFragmentReceiveEventHandler(SLXU_UC_EVENT);
-#endif // UC_BUILD
+void emberAfPluginInterpanFragmentTransmitEventHandler(sl_zigbee_event_t * event);
+void emberAfPluginInterpanFragmentReceiveEventHandler(sl_zigbee_event_t * event);
 
 #endif // ALLOW_FRAGMENTATION
 
 // These have to stay outside the ifdef interpan frag check because AppBuilder
 // generates code that calls them, which cannot be ifdeffed
-#ifndef UC_BUILD
-EmberEventControl emberAfPluginInterpanFragmentTransmitEventControl;
-EmberEventControl emberAfPluginInterpanFragmentReceiveEventControl;
-void emberAfPluginInterpanFragmentTransmitEventHandler(EmberEventControl *control);
-void emberAfPluginInterpanFragmentReceiveEventHandler(EmberEventControl *control);
-#endif // UC_BUILD
 
 #define IPMF_MSG_TIMEOUT_MS       60 * 1000
 
@@ -280,16 +266,15 @@ static const EmberAfAllowedInterPanMessage messages[] = {
 #endif
 
 // Private ZLL API's
-bool emAfPluginZllCommissioningClientInterpanPreMessageReceivedCallback(const EmberAfInterpanHeader *header,
-                                                                        uint8_t msgLen,
-                                                                        uint8_t *message);
-bool emAfPluginZllCommissioningServerInterpanPreMessageReceivedCallback(const EmberAfInterpanHeader *header,
-                                                                        uint8_t msgLen,
-                                                                        uint8_t *message);
+bool sli_zigbee_af_zll_commissioning_client_interpan_pre_message_received_callback(const EmberAfInterpanHeader *header,
+                                                                                   uint8_t msgLen,
+                                                                                   uint8_t *message);
+bool sli_zigbee_af_zll_commissioning_server_interpan_pre_message_received_callback(const EmberAfInterpanHeader *header,
+                                                                                   uint8_t msgLen,
+                                                                                   uint8_t *message);
 
 //------------------------------------------------------------------------------
 
-#ifdef UC_BUILD
 void interpanPluginInit(uint8_t init_level)
 {
   switch (init_level) {
@@ -326,31 +311,10 @@ void interpanPluginInit(uint8_t init_level)
     }
   }
 }
-#else // !UC_BUILD
-void interpanPluginInit(void)
-{
-  gInterpanEnabled = true;
-  gMessageTimeout  = IPMF_MSG_TIMEOUT_MS;
-
-#if defined(ALLOW_FRAGMENTATION)
-  uint8_t i;
-
-  // The following two loops need adjustment if more than one packet is desired
-  for (i = 0; i < EMBER_AF_PLUGIN_INTERPAN_FRAGMENTATION_MAX_OUTGOING_PACKETS; i++) {
-    txPackets[i].messageType  = UNUSED_TX_PACKET_ENTRY;
-    txPackets[i].eventControl = &emberAfPluginInterpanFragmentTransmitEventControl;
-  }
-  for (i = 0; i < EMBER_AF_PLUGIN_INTERPAN_FRAGMENTATION_MAX_INCOMING_PACKETS; i++) {
-    MEMSET(rxPackets[i].sourceEui, 0, EUI64_SIZE);
-    rxPackets[i].eventControl = &emberAfPluginInterpanFragmentReceiveEventControl;
-  }
-#endif //ALLOW_FRAGMENTATION
-}
-#endif // UC_BUILD
 
 // This function sets the global state of inter-PAN. If state is true, inter-PAN
 // messages are sent and received, else, all inter-PANs are dropped.
-void emAfPluginInterpanSetEnableState(bool enable)
+void sli_zigbee_af_interpan_set_enable_state(bool enable)
 {
   if (gInterpanEnabled != enable) {
     gInterpanEnabled = enable;
@@ -409,16 +373,16 @@ static EmberStatus handleApsSecurity(bool encrypt,
                                      uint8_t maxLengthForEncryption,
                                      EmberAfInterpanHeader* header)
 {
-  uint8_t keyIndex;
   EmberStatus status;
 
   if (!(header->options & EMBER_AF_INTERPAN_OPTION_MAC_HAS_LONG_ADDRESS)) {
     // We won't encrypt/decrypt messages that don't have a long address.
     return EMBER_APS_ENCRYPTION_ERROR;
   }
-  keyIndex = emberFindKeyTableEntry(header->longAddress,
-                                    true);  // link key? (vs. master key)
-  if (keyIndex == 0xFF) {
+  sl_zb_sec_man_context_t context;
+  sl_zb_sec_man_export_link_key_by_eui(header->longAddress, &context, NULL, NULL);
+
+  if (context.key_index == 0xFF) {
     return EMBER_APS_ENCRYPTION_ERROR;
   }
 
@@ -430,11 +394,11 @@ static EmberStatus handleApsSecurity(bool encrypt,
 
   apsFrame[0] |= INTERPAN_APS_FRAME_SECURITY;
 
-  status = emAfInterpanApsCryptMessage(encrypt,
-                                       apsFrame,
-                                       messageLength,
-                                       apsHeaderLength,
-                                       header->longAddress);
+  status = sli_zigbee_af_interpan_aps_crypt_message(encrypt,
+                                                    apsFrame,
+                                                    messageLength,
+                                                    apsHeaderLength,
+                                                    header->longAddress);
   return status;
 }
 #endif
@@ -662,8 +626,8 @@ static uint8_t parseInterpanMessage(uint8_t *message,
   return (finger - message);
 }
 
-bool emAfPluginInterpanProcessMessage(uint8_t messageLength,
-                                      uint8_t *messageContents)
+bool sli_zigbee_af_interpan_process_message(uint8_t messageLength,
+                                            uint8_t *messageContents)
 {
   EmberApsFrame apsFrame;
   EmberIncomingMessageType type;
@@ -672,7 +636,7 @@ bool emAfPluginInterpanProcessMessage(uint8_t messageLength,
   uint8_t payloadOffset, payloadLength;
   uint8_t* payload;
 
-  emberAfDebugPrintln("emAfPluginInterpanProcessMessage");
+  emberAfDebugPrintln("sli_zigbee_af_interpan_process_message");
   payloadOffset = parseInterpanMessage(messageContents,
                                        &messageLength,
                                        &headerData);
@@ -688,14 +652,14 @@ bool emAfPluginInterpanProcessMessage(uint8_t messageLength,
                                                       payloadLength,
                                                       payload)
 #ifdef SL_CATALOG_ZIGBEE_ZLL_COMMISSIONING_CLIENT_PRESENT
-      || emAfPluginZllCommissioningClientInterpanPreMessageReceivedCallback(&headerData,
-                                                                            payloadLength,
-                                                                            payload)
+      || sli_zigbee_af_zll_commissioning_client_interpan_pre_message_received_callback(&headerData,
+                                                                                       payloadLength,
+                                                                                       payload)
 #endif // ZSL_CATALOG_ZIGBEE_ZLL_COMMISSIONING_CLIENT_PRESENT
 #ifdef SL_CATALOG_ZIGBEE_ZLL_COMMISSIONING_SERVER_PRESENT
-      || emAfPluginZllCommissioningServerInterpanPreMessageReceivedCallback(&headerData,
-                                                                            payloadLength,
-                                                                            payload)
+      || sli_zigbee_af_zll_commissioning_server_interpan_pre_message_received_callback(&headerData,
+                                                                                       payloadLength,
+                                                                                       payload)
 #endif // SL_CATALOG_ZIGBEE_ZLL_COMMISSIONING_SERVER_PRESENT
       ) {
     return true;
@@ -872,7 +836,7 @@ static bool isMessageAllowed(EmberAfInterpanHeader *headerData,
   return false;
 }
 
-#if ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_APP)) || (defined(UC_BUILD) && defined(SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT)))
+#if ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_APP)) || (defined(SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT)))
 
 static void printMessage(EmberAfInterpanHeader *headerData)
 {
@@ -930,7 +894,7 @@ EmberStatus emberAfInterpanSendMessageCallback(EmberAfInterpanHeader* header,
                                  &messageLength,
                                  &maxLen);
     if (status == EMBER_SUCCESS) {
-      status = emAfPluginInterpanSendRawMessage((uint8_t)maxLen, message);
+      status = sli_zigbee_af_interpan_send_raw_message((uint8_t)maxLen, message);
     }
   }
 #if defined(ALLOW_FRAGMENTATION)
@@ -1200,14 +1164,10 @@ EmberStatus interpanFragmentationSendIpmf(txFragmentedInterpanPacket *txPacket)
   emberAfAppPrintln("Sending interpan fragment %d of %d",
                     txPacket->fragmentNum, txPacket->numFragments - 1);
 
-  status = emAfPluginInterpanSendRawMessage(packetLen, message);
+  status = sli_zigbee_af_interpan_send_raw_message(packetLen, message);
 
   // Start a timer waiting for the IPMF response
-#ifdef UC_BUILD
   sl_zigbee_event_set_delay_ms(txPacket->event, gMessageTimeout);
-#else
-  emberEventControlSetDelayMS(*(txPacket->eventControl), gMessageTimeout);
-#endif
 
   return status;
 }
@@ -1266,11 +1226,7 @@ EmberStatus interpanFragmentationProcessIpmf(EmberAfInterpanHeader header,
   }
 
   // We received an IPMF, so turn off the timer for now
-#ifdef UC_BUILD
   sl_zigbee_event_set_inactive(rxPacket->event);
-#else
-  emberEventControlSetInactive(*(rxPacket->eventControl));
-#endif
 
   if (fragLen == 0) {
     emberAfAppPrintln("ERR: RX interpan fragment from ");
@@ -1365,16 +1321,12 @@ void interpanFragmentationSendIpmfResponse(EmberAfInterpanHeader header,
   messageLength += EMBER_APS_INTERPAN_FRAGMENTATION_RESPONSE_LEN;
 
   // Send the response
-  emAfPluginInterpanSendRawMessage(messageLength, message);
+  sli_zigbee_af_interpan_send_raw_message(messageLength, message);
 
   // Start a timer waiting for the next IPMF
   rxFragmentedInterpanPacket* rxPacket = rxPacketLookUp(header.longAddress);
   if (rxPacket) {
-#ifdef UC_BUILD
     sl_zigbee_event_set_delay_ms(rxPacket->event, gMessageTimeout);
-#else
-    emberEventControlSetDelayMS(*(rxPacket->eventControl), gMessageTimeout);
-#endif
   }
 }
 
@@ -1398,11 +1350,7 @@ void interpanFragmentationProcessIpmfResponse(EmberAfInterpanHeader header,
   }
 
   // We received an IPMF, so turn off the timer for now
-#ifdef UC_BUILD
   sl_zigbee_event_set_inactive(txPacket->event);
-#else
-  emberEventControlSetInactive(*(txPacket->eventControl));
-#endif
 
   if (fragmentNumAcked != txPacket->fragmentNum) {
     // Partner is not acking what we've sent it - error
@@ -1426,10 +1374,9 @@ void interpanFragmentationProcessIpmfResponse(EmberAfInterpanHeader header,
   interpanFragmentationSendIpmf(txPacket);
 }
 
-#ifdef UC_BUILD
 // This function is called when an inter-PAN fragment transmission fails to
 // receive a response within the allotted time
-void emberAfPluginInterpanFragmentTransmitEventHandler(SLXU_UC_EVENT)
+void emberAfPluginInterpanFragmentTransmitEventHandler(sl_zigbee_event_t * event)
 {
   sl_zigbee_event_set_inactive(event);
 
@@ -1447,7 +1394,7 @@ void emberAfPluginInterpanFragmentTransmitEventHandler(SLXU_UC_EVENT)
 
 // This function is called when an inter-PAN fragment reception fails to receive
 // the next fragment within the allotted time
-void emberAfPluginInterpanFragmentReceiveEventHandler(SLXU_UC_EVENT)
+void emberAfPluginInterpanFragmentReceiveEventHandler(sl_zigbee_event_t * event)
 {
   sl_zigbee_event_set_inactive(event);
 
@@ -1463,54 +1410,8 @@ void emberAfPluginInterpanFragmentReceiveEventHandler(SLXU_UC_EVENT)
     }
   }
 }
-#endif // UC_BUILD
 
 #endif // ALLOW_FRAGMENTATION
-
-#ifndef UC_BUILD
-
-// This function is called when an inter-PAN fragment transmission fails to
-// receive a response within the allotted time
-void emberAfPluginInterpanFragmentTransmitEventHandler(EmberEventControl *control)
-{
-  emberEventControlSetInactive(emberAfPluginInterpanFragmentReceiveEventControl);
-
-#if defined(ALLOW_FRAGMENTATION)
-  uint8_t i;
-  for (i = 0; i < EMBER_AF_PLUGIN_INTERPAN_FRAGMENTATION_MAX_OUTGOING_PACKETS; i++) {
-    txFragmentedInterpanPacket *txPacket = &(txPackets[i]);
-    if (txPacket->eventControl == control) {
-      emberAfAppPrintln("ERR: TX inter-PAN: fragment %d of %d has timed out "
-                        "waiting for a fragment response",
-                        txPacket->fragmentNum, txPacket->numFragments - 1);
-      freeTxPacketEntry(txPacket, IPMF_TX_TIMEOUT);
-    }
-  }
-#endif // ALLOW_FRAGMENTATION
-}
-
-// This function is called when an inter-PAN fragment reception fails to receive
-// the next fragment within the allotted time
-void emberAfPluginInterpanFragmentReceiveEventHandler(EmberEventControl *control)
-{
-  emberEventControlSetInactive(*control);
-
-#if defined(ALLOW_FRAGMENTATION)
-  uint8_t i;
-  for (i = 0; i < EMBER_AF_PLUGIN_INTERPAN_FRAGMENTATION_MAX_INCOMING_PACKETS; i++) {
-    rxFragmentedInterpanPacket *rxPacket = &(rxPackets[i]);
-    if (rxPacket->eventControl == control) {
-      emberAfAppPrintln("ERR: RX inter-PAN: fragment %d of %d has timed out "
-                        "waiting for the next fragment",
-                        rxPacket->lastFragmentNumReceived,
-                        rxPacket->numFragments - 1);
-      freeRxPacketEntry(rxPacket, IPMF_RX_TIMEOUT);
-    }
-  }
-#endif // ALLOW_FRAGMENTATION
-}
-
-#endif // UC_BUILD
 
 //------------------------------------------------------------------------------
 // Weak callback definitions.

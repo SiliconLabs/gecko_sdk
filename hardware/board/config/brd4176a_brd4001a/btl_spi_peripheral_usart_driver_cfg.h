@@ -45,22 +45,22 @@
 // <usart signal=TX,RX,CS,CLK> SL_USART_SPINCP
 
 // $[USART_SL_USART_SPINCP]
-#define SL_USART_SPINCP_PERIPHERAL               USART0
-#define SL_USART_SPINCP_PERIPHERAL_NO            0
+#define SL_USART_SPINCP_PERIPHERAL               USART2
+#define SL_USART_SPINCP_PERIPHERAL_NO            2
 
-// USART0 TX on PC00
+// USART2 TX on PC00
 #define SL_USART_SPINCP_TX_PORT                  gpioPortC
 #define SL_USART_SPINCP_TX_PIN                   0
 
-// USART0 RX on PC01
+// USART2 RX on PC01
 #define SL_USART_SPINCP_RX_PORT                  gpioPortC
 #define SL_USART_SPINCP_RX_PIN                   1
 
-// USART0 CS on PC03
+// USART2 CS on PC03
 #define SL_USART_SPINCP_CS_PORT                  gpioPortC
 #define SL_USART_SPINCP_CS_PIN                   3
 
-// USART0 CLK on PC02
+// USART2 CLK on PC02
 #define SL_USART_SPINCP_CLK_PORT                 gpioPortC
 #define SL_USART_SPINCP_CLK_PIN                  2
 

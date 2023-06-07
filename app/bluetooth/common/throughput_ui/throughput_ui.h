@@ -31,6 +31,11 @@
 #ifndef THROUGHPUT_UI_H
 #define THROUGHPUT_UI_H
 
+/***********************************************************************************************//**
+ * @addtogroup throughput_ui
+ * @{
+ **************************************************************************************************/
+
 #include "throughput_types.h"
 
 /*******************************************************************************
@@ -170,4 +175,5 @@ void throughput_ui_set_count(throughput_count_t count);
  *****************************************************************************/
 void throughput_ui_set_all(throughput_t status);
 
+/** @} (end addtogroup throughput_ui) */
 #endif // THROUGHPUT_UI_H

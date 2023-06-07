@@ -48,7 +48,7 @@ template_contribution:
     value:
       group: tunneling-client
       name: request
-      handler: emAfPluginTunnelingClientCliRequest
+      handler: sli_zigbee_af_tunneling_client_cli_request
       help: Requests a Tunneling cluster tunnel with a server.
       argument:
       - type: uint16
@@ -67,7 +67,7 @@ template_contribution:
     value:
       group: tunneling-client
       name: transfer
-      handler: emAfPluginTunnelingClientCliTransfer
+      handler: sli_zigbee_af_tunneling_client_cli_transfer
       help: Transfers data to a server through a Tunneling cluster tunnel.
       argument:
       - type: uint8
@@ -78,7 +78,7 @@ template_contribution:
     value:
       group: tunneling-client
       name: close
-      handler: emAfPluginTunnelingClientCliClose
+      handler: sli_zigbee_af_tunneling_client_cli_close
       help: Closes a Tunneling cluster tunnel.
       argument:
       - type: uint8
@@ -87,7 +87,7 @@ template_contribution:
     value:
       group: tunneling-client
       name: print
-      handler: emAfPluginTunnelingClientCliPrintCommand
+      handler: sli_zigbee_af_tunneling_client_cli_printCommand
       help: Prints out the status of active tunnels.
   - name: cluster_functions
     value:

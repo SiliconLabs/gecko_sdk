@@ -1,0 +1,667 @@
+id: rail_util_features
+label: RAIL Library Features, Core
+description: Radio Abstraction Interface Library (RAIL) Supported Features
+package: platform
+category: Platform|Radio
+quality: production
+ui_hints:
+  visibility: never
+provides:
+  - name: rail_util_features
+
+  - name: rail_supports_dual_band
+    condition:
+      - device_series_1 
+  - name: rail_supports_dual_band
+    condition:
+      - device_sdid_235
+ 
+  - name: rail_supports_2p4ghz_band
+    condition:
+      - device_series_1 
+  - name: rail_supports_2p4ghz_band
+    condition:
+      - device_sdid_200 
+  - name: rail_supports_2p4ghz_band
+    condition:
+      - device_sdid_205 
+  - name: rail_supports_2p4ghz_band
+    condition:
+      - device_sdid_215 
+  - name: rail_supports_2p4ghz_band
+    condition:
+      - device_sdid_230 
+  - name: rail_supports_2p4ghz_band
+    condition:
+      - device_sdid_235
+
+  - name: rail_supports_subghz_band
+    condition:
+      - device_series_1 
+  - name: rail_supports_subghz_band
+    condition:
+      - device_sdid_210 
+  - name: rail_supports_subghz_band
+    condition:
+      - device_sdid_220 
+  - name: rail_supports_subghz_band
+    condition:
+      - device_sdid_235
+ 
+  - name: rail_supports_ofdm_pa
+    condition:
+      - device_sdid_220
+ 
+  - name: rail_supports_addr_filter_address_bit_mask
+    condition:
+      - device_sdid_205 
+  - name: rail_supports_addr_filter_address_bit_mask
+    condition:
+      - device_sdid_210 
+  - name: rail_supports_addr_filter_address_bit_mask
+    condition:
+      - device_sdid_215 
+  - name: rail_supports_addr_filter_address_bit_mask
+    condition:
+      - device_sdid_220 
+  - name: rail_supports_addr_filter_address_bit_mask
+    condition:
+      - device_sdid_230 
+  - name: rail_supports_addr_filter_address_bit_mask
+    condition:
+      - device_sdid_235
+ 
+  - name: rail_supports_addr_filter_mask
+    condition:
+      - device_sdid_84 
+  - name: rail_supports_addr_filter_mask
+    condition:
+      - device_sdid_89 
+  - name: rail_supports_addr_filter_mask
+    condition:
+      - device_sdid_95 
+  - name: rail_supports_addr_filter_mask
+    condition:
+      - device_series_2
+ 
+  - name: rail_supports_alternate_tx_power
+    condition:
+      - device_sdid_84 
+  - name: rail_supports_alternate_tx_power
+    condition:
+      - device_sdid_89 
+  - name: rail_supports_alternate_tx_power
+    condition:
+      - device_sdid_95 
+  - name: rail_supports_alternate_tx_power
+    condition:
+      - device_sdid_210 
+  - name: rail_supports_alternate_tx_power
+    condition:
+      - device_sdid_235
+
+  - name: rail_supports_antenna_diversity
+    condition:
+      - device_sdid_84 
+  - name: rail_supports_antenna_diversity
+    condition:
+      - device_sdid_89 
+  - name: rail_supports_antenna_diversity
+    condition:
+      - device_sdid_95 
+  - name: rail_supports_antenna_diversity
+    condition:
+      - device_series_2
+
+  - name: rail_supports_path_diversity
+    condition:
+      - device_sdid_210 
+  - name: rail_supports_path_diversity
+    condition:
+      - device_sdid_235
+ 
+  - name: rail_supports_channel_hopping
+    condition:
+      - device_sdid_84 
+  - name: rail_supports_channel_hopping
+    condition:
+      - device_sdid_89 
+  - name: rail_supports_channel_hopping
+    condition:
+      - device_sdid_95 
+  - name: rail_supports_channel_hopping
+    condition:
+      - device_series_2
+
+  - name: rail_supports_dual_sync_words
+    condition:
+      - device_series_1 
+  - name: rail_supports_dual_sync_words
+    condition:
+      - device_series_2
+ 
+  - name: rail_supports_tx_to_tx
+    condition:
+      - device_sdid_84 
+  - name: rail_supports_tx_to_tx
+    condition:
+      - device_sdid_89 
+  - name: rail_supports_tx_to_tx
+    condition:
+      - device_sdid_95 
+  - name: rail_supports_tx_to_tx
+    condition:
+      - device_series_2
+ 
+  - name: rail_supports_external_thermistor
+    condition:
+      - device_sdid_205 
+  - name: rail_supports_external_thermistor
+    condition:
+      - device_sdid_210 
+  - name: rail_supports_external_thermistor
+    condition:
+      - device_sdid_220 
+  - name: rail_supports_external_thermistor
+    condition:
+      - device_sdid_230 
+  - name: rail_supports_external_thermistor
+    condition:
+      - device_sdid_235
+ 
+  - name: rail_supports_hfxo_compensation
+    condition:
+      - device_sdid_220
+ 
+  - name: rail_supports_auxadc
+    condition:
+      - device_sdid_205 
+  - name: rail_supports_auxadc
+    condition:
+      - device_sdid_210 
+  - name: rail_supports_auxadc
+    condition:
+      - device_sdid_220 
+  - name: rail_supports_auxadc
+    condition:
+      - device_sdid_230 
+  - name: rail_supports_auxadc
+    condition:
+      - device_sdid_235
+ 
+  - name: rail_supports_precision_lfrco
+    condition:
+      - device_sdid_89 
+  - name: rail_supports_precision_lfrco
+    condition:
+      - device_sdid_205 
+  - name: rail_supports_precision_lfrco
+    condition:
+      - device_sdid_230
+ 
+  - name: rail_supports_radio_entropy
+    condition:
+      - device_series_1 
+  - name: rail_supports_radio_entropy
+    condition:
+      - device_series_2
+ 
+  - name: rail_supports_rfsense_energy_detection
+    condition:
+      - device_series_1 
+  - name: rail_supports_rfsense_energy_detection
+    condition:
+      - device_sdid_205 
+  - name: rail_supports_rfsense_energy_detection
+    condition:
+      - device_sdid_230
+ 
+  - name: rail_supports_rfsense_selective_ook
+    condition:
+      - device_sdid_205 
+  - name: rail_supports_rfsense_selective_ook
+    condition:
+      - device_sdid_230
+
+  - name: rail_supports_eff
+    condition:
+      - device_sdid_220
+ 
+  - name: rail_supports_protocol_ble
+    condition:
+      - device_series_1 
+  - name: rail_supports_protocol_ble
+    condition:
+      - device_sdid_200 
+  - name: rail_supports_protocol_ble
+    condition:
+      - device_sdid_205 
+  - name: rail_supports_protocol_ble
+    condition:
+      - device_sdid_215 
+  - name: rail_supports_protocol_ble
+    condition:
+      - device_sdid_230 
+  - name: rail_supports_protocol_ble
+    condition:
+      - device_sdid_235
+ 
+  - name: rail_ble_supports_1mbps_non_viterbi
+    condition:
+      - device_series_1
+ 
+  - name: rail_ble_supports_1mbps_viterbi
+    condition:
+      - device_sdid_84 
+  - name: rail_ble_supports_1mbps_viterbi
+    condition:
+      - device_sdid_89 
+  - name: rail_ble_supports_1mbps_viterbi
+    condition:
+      - device_sdid_95 
+  - name: rail_ble_supports_1mbps_viterbi
+    condition:
+      - device_sdid_200 
+  - name: rail_ble_supports_1mbps_viterbi
+    condition:
+      - device_sdid_205 
+  - name: rail_ble_supports_1mbps_viterbi
+    condition:
+      - device_sdid_215 
+  - name: rail_ble_supports_1mbps_viterbi
+    condition:
+      - device_sdid_230 
+  - name: rail_ble_supports_1mbps_viterbi
+    condition:
+      - device_sdid_235
+ 
+  - name: rail_ble_supports_1mbps
+    condition:
+      - device_series_1 
+  - name: rail_ble_supports_1mbps
+    condition:
+      - device_sdid_200 
+  - name: rail_ble_supports_1mbps
+    condition:
+      - device_sdid_205 
+  - name: rail_ble_supports_1mbps
+    condition:
+      - device_sdid_215 
+  - name: rail_ble_supports_1mbps
+    condition:
+      - device_sdid_230 
+  - name: rail_ble_supports_1mbps
+    condition:
+      - device_sdid_235
+ 
+  - name: rail_ble_supports_2mbps_non_viterbi
+    condition:
+      - device_sdid_84 
+  - name: rail_ble_supports_2mbps_non_viterbi
+    condition:
+      - device_sdid_89 
+  - name: rail_ble_supports_2mbps_non_viterbi
+    condition:
+      - device_sdid_95
+ 
+  - name: rail_ble_supports_2mbps_viterbi
+    condition:
+      - device_sdid_84 
+  - name: rail_ble_supports_2mbps_viterbi
+    condition:
+      - device_sdid_89 
+  - name: rail_ble_supports_2mbps_viterbi
+    condition:
+      - device_sdid_95 
+  - name: rail_ble_supports_2mbps_viterbi
+    condition:
+      - device_sdid_200 
+  - name: rail_ble_supports_2mbps_viterbi
+    condition:
+      - device_sdid_205 
+  - name: rail_ble_supports_2mbps_viterbi
+    condition:
+      - device_sdid_215 
+  - name: rail_ble_supports_2mbps_viterbi
+    condition:
+      - device_sdid_230 
+  - name: rail_ble_supports_2mbps_viterbi
+    condition:
+      - device_sdid_235
+ 
+  - name: rail_ble_supports_2mbps
+    condition:
+      - device_sdid_84 
+  - name: rail_ble_supports_2mbps
+    condition:
+      - device_sdid_89 
+  - name: rail_ble_supports_2mbps
+    condition:
+      - device_sdid_95 
+  - name: rail_ble_supports_2mbps
+    condition:
+      - device_sdid_200 
+  - name: rail_ble_supports_2mbps
+    condition:
+      - device_sdid_205 
+  - name: rail_ble_supports_2mbps
+    condition:
+      - device_sdid_215 
+  - name: rail_ble_supports_2mbps
+    condition:
+      - device_sdid_230 
+  - name: rail_ble_supports_2mbps
+    condition:
+      - device_sdid_235
+ 
+  - name: rail_ble_supports_antenna_switching
+    condition:
+      - device_sdid_205 
+  - name: rail_ble_supports_antenna_switching
+    condition:
+      - device_sdid_215 
+  - name: rail_ble_supports_antenna_switching
+    condition:
+      - device_sdid_230
+ 
+  - name: rail_ble_supports_coded_phy
+    condition:
+      - device_sdid_89 
+  - name: rail_ble_supports_coded_phy
+    condition:
+      - device_sdid_200 
+  - name: rail_ble_supports_coded_phy
+    condition:
+      - device_sdid_205 
+  - name: rail_ble_supports_coded_phy
+    condition:
+      - device_sdid_215 
+  - name: rail_ble_supports_coded_phy
+    condition:
+      - device_sdid_230
+
+  - name: rail_ble_supports_simulscan_phy
+    condition:
+      - device_sdid_205 
+  - name: rail_ble_supports_simulscan_phy
+    condition:
+      - device_sdid_215 
+  - name: rail_ble_supports_simulscan_phy
+    condition:
+      - device_sdid_230
+ 
+  - name: rail_ble_supports_cte
+    condition:
+      - device_sdid_205 
+  - name: rail_ble_supports_cte
+    condition:
+      - device_sdid_215 
+  - name: rail_ble_supports_cte
+    condition:
+      - device_sdid_230
+ 
+  - name: rail_ble_supports_quuppa
+    condition:
+      - device_sdid_205 
+  - name: rail_ble_supports_quuppa
+    condition:
+      - device_sdid_230
+ 
+  - name: rail_ble_supports_iq_sampling
+    condition:
+      - device_sdid_205 
+  - name: rail_ble_supports_iq_sampling
+    condition:
+      - device_sdid_215 
+  - name: rail_ble_supports_iq_sampling
+    condition:
+      - device_sdid_230
+
+  - name: rail_ble_supports_hadm
+    condition:
+      - device_sdid_215
+
+  - name: rail_ble_supports_phy_switch_to_rx
+    condition:
+      - device_sdid_84 
+  - name: rail_ble_supports_phy_switch_to_rx
+    condition:
+      - device_sdid_89 
+  - name: rail_ble_supports_phy_switch_to_rx
+    condition:
+      - device_sdid_95 
+  - name: rail_ble_supports_phy_switch_to_rx
+    condition:
+      - device_sdid_200 
+  - name: rail_ble_supports_phy_switch_to_rx
+    condition:
+      - device_sdid_205 
+  - name: rail_ble_supports_phy_switch_to_rx
+    condition:
+      - device_sdid_215 
+  - name: rail_ble_supports_phy_switch_to_rx
+    condition:
+      - device_sdid_230 
+  - name: rail_ble_supports_phy_switch_to_rx
+    condition:
+      - device_sdid_235
+
+  - name: rail_supports_protocol_ieee802154
+    condition:
+      - device_series_1 
+  - name: rail_supports_protocol_ieee802154
+    condition:
+      - device_series_2
+ 
+  - name: rail_ieee802154_supports_coex_phy
+    condition:
+      - device_sdid_84 
+  - name: rail_ieee802154_supports_coex_phy
+    condition:
+      - device_sdid_89 
+  - name: rail_ieee802154_supports_coex_phy
+    condition:
+      - device_sdid_95
+
+  - name: rail_supports_ieee802154_band_2p4
+    condition:
+      - device_series_1 
+  - name: rail_supports_ieee802154_band_2p4
+    condition:
+      - device_sdid_200 
+  - name: rail_supports_ieee802154_band_2p4
+    condition:
+      - device_sdid_205 
+  - name: rail_supports_ieee802154_band_2p4
+    condition:
+      - device_sdid_215 
+  - name: rail_supports_ieee802154_band_2p4
+    condition:
+      - device_sdid_230
+ 
+  - name: rail_ieee802154_supports_rx_channel_switching
+    condition:
+      - device_sdid_200 
+  - name: rail_ieee802154_supports_rx_channel_switching
+    condition:
+      - device_sdid_215
+ 
+  - name: rail_ieee802154_supports_fem_phy
+    condition:
+      - device_series_1 
+  - name: rail_ieee802154_supports_fem_phy
+    condition:
+      - device_sdid_200 
+  - name: rail_ieee802154_supports_fem_phy
+    condition:
+      - device_sdid_205 
+  - name: rail_ieee802154_supports_fem_phy
+    condition:
+      - device_sdid_215 
+  - name: rail_ieee802154_supports_fem_phy
+    condition:
+      - device_sdid_230
+ 
+  - name: rail_ieee802154_supports_e_subset_gb868
+    condition:
+      - device_series_1 
+  - name: rail_ieee802154_supports_e_subset_gb868
+    condition:
+      - device_series_2
+
+  - name: rail_ieee802154_supports_e_enhanced_ack
+    condition:
+      - device_series_1 
+  - name: rail_ieee802154_supports_e_enhanced_ack
+    condition:
+      - device_series_2
+
+  - name: rail_ieee802154_supports_e_multipurpose_frames
+    condition:
+      - device_sdid_84 
+  - name: rail_ieee802154_supports_e_multipurpose_frames
+    condition:
+      - device_sdid_89 
+  - name: rail_ieee802154_supports_e_multipurpose_frames
+    condition:
+      - device_sdid_95 
+  - name: rail_ieee802154_supports_e_multipurpose_frames
+    condition:
+      - device_series_2
+ 
+  - name: rail_ieee802154_supports_cancel_frame_pending_lookup
+    condition:
+      - device_series_1 
+  - name: rail_ieee802154_supports_cancel_frame_pending_lookup
+    condition:
+      - device_series_2
+
+  - name: rail_supports_dbm_powersetting_mapping_table
+    condition:
+      - device_sdid_220
+ 
+  - name: rail_wmbus_supports_simultaneous_t_c_rx
+    condition:
+      - device_sdid_210 
+  - name: rail_wmbus_supports_simultaneous_t_c_rx
+    condition:
+      - device_sdid_235
+ 
+  - name: rail_supports_protocol_zwave
+    condition:
+      - device_sdid_89 
+  - name: rail_supports_protocol_zwave
+    condition:
+      - device_sdid_95 
+  - name: rail_supports_protocol_zwave
+    condition:
+      - device_sdid_210 
+  - name: rail_supports_protocol_zwave
+    condition:
+      - device_sdid_235
+ 
+  - name: rail_zwave_supports_ed_phy
+    condition:
+      - device_sdid_89 
+  - name: rail_zwave_supports_ed_phy
+    condition:
+      - device_sdid_95
+ 
+  - name: rail_zwave_supports_conc_phy
+    condition:
+      - device_sdid_210 
+  - name: rail_zwave_supports_conc_phy
+    condition:
+      - device_sdid_235
+ 
+  - name: rail_supports_sq_phy
+    condition:
+      - device_sdid_210 
+  - name: rail_supports_sq_phy
+    condition:
+      - device_sdid_215 
+  - name: rail_supports_sq_phy
+    condition:
+      - device_sdid_220 
+  - name: rail_supports_sq_phy
+    condition:
+      - device_sdid_235
+ 
+  - name: rail_zwave_supports_region_pti
+    condition:
+      - device_sdid_89 
+  - name: rail_zwave_supports_region_pti
+    condition:
+      - device_sdid_95 
+  - name: rail_zwave_supports_region_pti
+    condition:
+      - device_sdid_210 
+  - name: rail_zwave_supports_region_pti
+    condition:
+      - device_sdid_235
+ 
+  - name: rail_supports_rx_raw_data
+    condition:
+      - device_series_1 
+  - name: rail_supports_rx_raw_data
+    condition:
+      - device_series_2
+ 
+  - name: rail_supports_direct_mode
+    condition:
+      - device_series_1 
+  - name: rail_supports_direct_mode
+    condition:
+      - device_sdid_210 
+  - name: rail_supports_direct_mode
+    condition:
+      - device_sdid_235
+ 
+  - name: rail_supports_rx_direct_mode_data_to_fifo
+    condition:
+      - device_sdid_210 
+  - name: rail_supports_rx_direct_mode_data_to_fifo
+    condition:
+      - device_sdid_235
+ 
+  - name: rail_supports_mfm
+    condition:
+      - device_sdid_210 
+  - name: rail_supports_mfm
+    condition:
+      - device_sdid_235
+ 
+  - name: rail_ieee802154_supports_signal_identifier
+    condition:
+      - device_sdid_215
+ 
+  - name: rail_ble_supports_signal_identifier
+    condition:
+      - device_sdid_215
+ 
+  - name: rail_supports_rssi_detect_threshold
+    condition:
+      - device_sdid_210 
+  - name: rail_supports_rssi_detect_threshold
+    condition:
+      - device_sdid_220
+ 
+  - name: rail_supports_thermal_protection
+    condition:
+      - device_sdid_220
+ 
+  - name: rail_supports_fast_rx2rx
+    condition:
+      - device_sdid_205 
+  - name: rail_supports_fast_rx2rx
+    condition:
+      - device_sdid_210 
+  - name: rail_supports_fast_rx2rx
+    condition:
+      - device_sdid_220 
+  - name: rail_supports_fast_rx2rx
+    condition:
+      - device_sdid_230 
+  - name: rail_supports_fast_rx2rx
+    condition:
+      - device_sdid_235

@@ -5,7 +5,7 @@ description: >
   Bluetooth Low Energy stack and configurations
 
   In addition to this core component, select features needed by the application.
-category: "Bluetooth|Stack"
+category: Bluetooth|Bluetooth Host (Stack)
 quality: "production"
 root_path: "protocol/bluetooth"
 config_file:
@@ -23,6 +23,9 @@ include:
       - path: "sl_bt_mbedtls_context.h"
         condition:
           - "device_series_1"
+  - path: "bgstack/ll/inc/"
+    file_list:
+      - path: sl_btctrl_linklayer.h
 source:
   - path: "src/sl_bt_stack_init.c"
   - path: "src/sl_bt_mbedtls_context.c"
@@ -34,151 +37,51 @@ template_file:
 other_file:
   - path: "api/sl_bt.xapi"
 library:
-#EFR32BG1B
-  - path: "lib/EFR32BG1B/GCC/libbluetooth.a"
-    condition: ["toolchain_gcc","device_family_efr32bg1b"]
-  - path: "lib/EFR32BG1B/IAR/libbluetooth.a"
-    condition: ["toolchain_iar","device_family_efr32bg1b"]
-#EFR32BG1P
-  - path: "lib/EFR32BG1P/GCC/libbluetooth.a"
-    condition: ["toolchain_gcc","device_family_efr32bg1p"]
-  - path: "lib/EFR32BG1P/IAR/libbluetooth.a"
-    condition: ["toolchain_iar","device_family_efr32bg1p"]
-#BGM1
-  - path: "lib/EFR32BG1P/GCC/libbluetooth.a"
-    condition: ["toolchain_gcc","device_family_bgm1"]
-  - path: "lib/EFR32BG1P/IAR/libbluetooth.a"
-    condition: ["toolchain_iar","device_family_bgm1"]
-#EFR32MG1P
-  - path: "lib/EFR32MG1P/GCC/libbluetooth.a"
-    condition: ["toolchain_gcc","device_family_efr32mg1p"]
-  - path: "lib/EFR32MG1P/IAR/libbluetooth.a"
-    condition: ["toolchain_iar","device_family_efr32mg1p"]
-#MGM1
-  - path: "lib/EFR32MG1P/GCC/libbluetooth.a"
-    condition: ["toolchain_gcc","device_family_mgm1"]
-  - path: "lib/EFR32MG1P/IAR/libbluetooth.a"
-    condition: ["toolchain_iar","device_family_mgm1"]
-#EFR32BG12P
-  - path: "lib/EFR32BG12P/GCC/libbluetooth.a"
-    condition: ["toolchain_gcc","device_family_efr32bg12p"]
-  - path: "lib/EFR32BG12P/IAR/libbluetooth.a"
-    condition: ["toolchain_iar","device_family_efr32bg12p"]
-#EFR32MG12P
-  - path: "lib/EFR32MG12P/GCC/libbluetooth.a"
-    condition: ["toolchain_gcc","device_family_efr32mg12p"]
-  - path: "lib/EFR32MG12P/IAR/libbluetooth.a"
-    condition: ["toolchain_iar","device_family_efr32mg12p"]
-#MGM12
-  - path: "lib/EFR32MG12P/GCC/libbluetooth.a"
-    condition: ["toolchain_gcc","device_family_mgm12"]
-  - path: "lib/EFR32MG12P/IAR/libbluetooth.a"
-    condition: ["toolchain_iar","device_family_mgm12"]
-#EFR32BG13P
-  - path: "lib/EFR32BG13P/GCC/libbluetooth.a"
-    condition: ["toolchain_gcc","device_family_efr32bg13p"]
-  - path: "lib/EFR32BG13P/IAR/libbluetooth.a"
-    condition: ["toolchain_iar","device_family_efr32bg13p"]
-#BGM13
-  - path: "lib/EFR32BG13P/GCC/libbluetooth.a"
-    condition: ["toolchain_gcc","device_family_bgm13"]
-  - path: "lib/EFR32BG13P/IAR/libbluetooth.a"
-    condition: ["toolchain_iar","device_family_bgm13"]
-#EFR32MG13P
-  - path: "lib/EFR32MG13P/GCC/libbluetooth.a"
-    condition: ["toolchain_gcc","device_family_efr32mg13p"]
-  - path: "lib/EFR32MG13P/IAR/libbluetooth.a"
-    condition: ["toolchain_iar","device_family_efr32mg13p"]
-#MGM13
-  - path: "lib/EFR32MG13P/GCC/libbluetooth.a"
-    condition: ["toolchain_gcc","device_family_mgm13"]
-  - path: "lib/EFR32MG13P/IAR/libbluetooth.a"
-    condition: ["toolchain_iar","device_family_mgm13"]
-#EFR32MG14P
-  - path: "lib/EFR32MG14P/GCC/libbluetooth.a"
-    condition: ["toolchain_gcc","device_family_efr32mg14p"]
-  - path: "lib/EFR32MG14P/IAR/libbluetooth.a"
-    condition: ["toolchain_iar","device_family_efr32mg14p"]
-#EFR32BG21
-  - path: "lib/EFR32BG21/GCC/libbluetooth.a"
-    condition: ["toolchain_gcc","device_family_efr32bg21"]
-  - path: "lib/EFR32BG21/IAR/libbluetooth.a"
-    condition: ["toolchain_iar","device_family_efr32bg21"]
-#BGM21
-  - path: "lib/EFR32BG21/GCC/libbluetooth.a"
-    condition: ["toolchain_gcc","device_family_bgm21"]
-  - path: "lib/EFR32BG21/IAR/libbluetooth.a"
-    condition: ["toolchain_iar","device_family_bgm21"]
-#EFR32MG21
-  - path: "lib/EFR32MG21/GCC/libbluetooth.a"
-    condition: ["toolchain_gcc","device_family_efr32mg21"]
-  - path: "lib/EFR32MG21/IAR/libbluetooth.a"
-    condition: ["toolchain_iar","device_family_efr32mg21"]
-#MGM21
-  - path: "lib/EFR32MG21/GCC/libbluetooth.a"
-    condition: ["toolchain_gcc","device_family_mgm21"]
-  - path: "lib/EFR32MG21/IAR/libbluetooth.a"
-    condition: ["toolchain_iar","device_family_mgm21"]
-#EFR32BG22
-  - path: "lib/EFR32BG22/GCC/libbluetooth.a"
-    condition: ["toolchain_gcc","device_family_efr32bg22"]
-  - path: "lib/EFR32BG22/IAR/libbluetooth.a"
-    condition: ["toolchain_iar","device_family_efr32bg22"]
-#BGM22
-  - path: "lib/EFR32BG22/GCC/libbluetooth.a"
-    condition: ["toolchain_gcc","device_family_bgm22"]
-  - path: "lib/EFR32BG22/IAR/libbluetooth.a"
-    condition: ["toolchain_iar","device_family_bgm22"]
-#EFR32MG22
-  - path: "lib/EFR32MG22/GCC/libbluetooth.a"
-    condition: ["toolchain_gcc","device_family_efr32mg22"]
-  - path: "lib/EFR32MG22/IAR/libbluetooth.a"
-    condition: ["toolchain_iar","device_family_efr32mg22"]
-#MGM22
-  - path: "lib/EFR32MG22/GCC/libbluetooth.a"
-    condition: ["toolchain_gcc","device_family_mgm22"]
-  - path: "lib/EFR32MG22/IAR/libbluetooth.a"
-    condition: ["toolchain_iar","device_family_mgm22"]
-#EFR32MG24
-  - path: "lib/EFR32MG24/GCC/libbluetooth.a"
-    condition: ["toolchain_gcc","device_family_efr32mg24"]
-  - path: "lib/EFR32MG24/IAR/libbluetooth.a"
-    condition: ["toolchain_iar","device_family_efr32mg24"]
-#EFR32BG24
-  - path: "lib/EFR32BG24/GCC/libbluetooth.a"
-    condition: ["toolchain_gcc","device_family_efr32bg24"]
-  - path: "lib/EFR32BG24/IAR/libbluetooth.a"
-    condition: ["toolchain_iar","device_family_efr32bg24"]
-#MGM24
-  - path: "lib/EFR32MG24/GCC/libbluetooth.a"
-    condition: ["toolchain_gcc","device_family_mgm24"]
-  - path: "lib/EFR32MG24/IAR/libbluetooth.a"
-    condition: ["toolchain_iar","device_family_mgm24"]
-#BGM24
-  - path: "lib/EFR32BG24/GCC/libbluetooth.a"
-    condition: ["toolchain_gcc","device_family_bgm24"]
-  - path: "lib/EFR32BG24/IAR/libbluetooth.a"
-    condition: ["toolchain_iar","device_family_bgm24"]
-#EFR32MG27
-  - path: "lib/EFR32MG27/GCC/libbluetooth.a"
-    condition: ["toolchain_gcc","device_family_efr32mg27"]
-  - path: "lib/EFR32MG27/IAR/libbluetooth.a"
-    condition: ["toolchain_iar","device_family_efr32mg27"]
-#EFR32BG27
-  - path: "lib/EFR32BG27/GCC/libbluetooth.a"
-    condition: ["toolchain_gcc","device_family_efr32bg27"]
-  - path: "lib/EFR32BG27/IAR/libbluetooth.a"
-    condition: ["toolchain_iar","device_family_efr32bg27"]
-#EFR32FG28
-  - path: "lib/EFR32FG28/GCC/libbluetooth.a"
-    condition: ["toolchain_gcc","device_family_efr32fg28"]
-  - path: "lib/EFR32FG28/IAR/libbluetooth.a"
-    condition: ["toolchain_iar","device_family_efr32fg28"]
-#EFR32ZG28
-  - path: "lib/EFR32ZG28/GCC/libbluetooth.a"
-    condition: ["toolchain_gcc","device_family_efr32zg28"]
-  - path: "lib/EFR32ZG28/IAR/libbluetooth.a"
-    condition: ["toolchain_iar","device_family_efr32zg28"]
+#EFR32XG1
+  - path: "lib/EFR32XG1/GCC/libbluetooth.a"
+    condition: ["toolchain_gcc","device_sdid_80"]
+  - path: "lib/EFR32XG1/IAR/libbluetooth.a"
+    condition: ["toolchain_iar","device_sdid_80"]
+#EFR32XG12
+  - path: "lib/EFR32XG12/GCC/libbluetooth.a"
+    condition: ["toolchain_gcc","device_generic_family_efr32xg12"]
+  - path: "lib/EFR32XG12/IAR/libbluetooth.a"
+    condition: ["toolchain_iar","device_generic_family_efr32xg12"]
+#EFR32XG13
+  - path: "lib/EFR32XG13/GCC/libbluetooth.a"
+    condition: ["toolchain_gcc","device_generic_family_efr32xg13"]
+  - path: "lib/EFR32XG13/IAR/libbluetooth.a"
+    condition: ["toolchain_iar","device_generic_family_efr32xg13"]
+#EFR32XG14
+  - path: "lib/EFR32XG14/GCC/libbluetooth.a"
+    condition: ["toolchain_gcc","device_generic_family_efr32xg14"]
+  - path: "lib/EFR32XG14/IAR/libbluetooth.a"
+    condition: ["toolchain_iar","device_generic_family_efr32xg14"]
+#EFR32XG21
+  - path: "lib/EFR32XG21/GCC/libbluetooth.a"
+    condition: ["toolchain_gcc","device_generic_family_efr32xg21"]
+  - path: "lib/EFR32XG21/IAR/libbluetooth.a"
+    condition: ["toolchain_iar","device_generic_family_efr32xg21"]
+#EFR32XG22
+  - path: "lib/EFR32XG22/GCC/libbluetooth.a"
+    condition: ["toolchain_gcc","device_generic_family_efr32xg22"]
+  - path: "lib/EFR32XG22/IAR/libbluetooth.a"
+    condition: ["toolchain_iar","device_generic_family_efr32xg22"]
+#EFR32XG24
+  - path: "lib/EFR32XG24/GCC/libbluetooth.a"
+    condition: ["toolchain_gcc","device_generic_family_efr32xg24"]
+  - path: "lib/EFR32XG24/IAR/libbluetooth.a"
+    condition: ["toolchain_iar","device_generic_family_efr32xg24"]
+#EFR32XG27
+  - path: "lib/EFR32XG27/GCC/libbluetooth.a"
+    condition: ["toolchain_gcc","device_generic_family_efr32xg27"]
+  - path: "lib/EFR32XG27/IAR/libbluetooth.a"
+    condition: ["toolchain_iar","device_generic_family_efr32xg27"]
+#EFR32XG28
+  - path: "lib/EFR32XG28/GCC/libbluetooth.a"
+    condition: ["toolchain_gcc","device_generic_family_efr32xg28"]
+  - path: "lib/EFR32XG28/IAR/libbluetooth.a"
+    condition: ["toolchain_iar","device_generic_family_efr32xg28"]
 
 template_contribution:
   - name: component_catalog
@@ -225,6 +128,7 @@ requires:
   - name: "bluetooth_version"
   - name: "bluetooth_configuration"
   - name: "bluetooth_gattdb_definition"
+  - name: "emlib_system"
   - name: "sleeptimer"
   - name: "rail_lib"
   - name: "rail_util_pa"

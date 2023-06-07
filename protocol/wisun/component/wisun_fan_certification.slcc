@@ -19,4 +19,4 @@ define:
   - name: "WISUN_FAN_CERTIFICATION"
 
 config_file:
-  - path: "plugin/sl_wisun_alliance_certificates.h"
+  - path: "plugin/config/sl_wisun_alliance_certificates.h"

@@ -3,7 +3,7 @@ label: Certificate Based Authentication and Pairing
 package: Bluetooth
 description: >
   Establish Certificate Based Authentication and Pairing
-category: Bluetooth|Middleware
+category: Bluetooth|Application|Miscellaneous
 quality: experimental
 root_path: app/bluetooth/common/cbap
 include:
@@ -25,10 +25,10 @@ requires:
   - name: bluetooth_feature_gatt_server
   - name: bluetooth_feature_sm
   - name: app_assert
-  - name: simple_timer
+  - name: app_timer
   - name: cbap_lib
 recommends:
-  - id: simple_timer
+  - id: app_timer
 provides:
   - name: cbap
 template_contribution:

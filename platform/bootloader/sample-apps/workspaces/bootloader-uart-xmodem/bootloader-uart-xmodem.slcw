@@ -1,0 +1,13 @@
+label: bootloader-uart-xmodem-workspace
+quality: production
+description: >
+  TrustZone is used to split into a Secure and Non-Secure bootloader. This workspace contains the secure and non-secure part of the bootloader and builds them together.
+project:
+  - path: bootloader-uart-xmodem-secure.slcp
+    id: bootloader-uart-xmodem-secure
+    output: bootloader-uart-xmodem-secure
+  - path: bootloader-uart-xmodem-nonsecure.slcp
+    id: bootloader-uart-xmodem-nonsecure
+    output: bootloader-uart-xmodem-nonsecure
+post_build:
+  profile: bootloader_tz_workspace

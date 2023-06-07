@@ -19,7 +19,6 @@
  *
  ******************************************************************************/
 
-#if defined(UC_BUILD)
 #include "sl_cli.h"
 #include "sl_zigbee_command_interpreter.h"
 
@@ -100,4 +99,3 @@ uint8_t sl_zigbee_copy_eui64_arg(sl_cli_command_arg_t *arguments,
   }
   return (uint16_t) len;
 }
-#endif

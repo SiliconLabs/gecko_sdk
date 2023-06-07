@@ -6,20 +6,41 @@
  * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
- * The licensor of this software is Silicon Laboratories Inc. Your use of this
- * software is governed by the terms of Silicon Labs Master Software License
- * Agreement (MSLA) available at
- * www.silabs.com/about-us/legal/master-software-license-agreement. This
- * software is distributed to you in Source Code format and is governed by the
- * sections of the MSLA applicable to Source Code.
+ * SPDX-License-Identifier: Zlib
+ *
+ * The licensor of this software is Silicon Laboratories Inc.
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty. In no event will the authors be held liable for any damages
+ * arising from the use of this software.
+ *
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
+ *
+ * 1. The origin of this software must not be misrepresented; you must not
+ *    claim that you wrote the original software. If you use this software
+ *    in a product, an acknowledgment in the product documentation would be
+ *    appreciated but is not required.
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.
+ * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
 
 #include "peripheral_sysrtc.h"
 #include "sl_sleeptimer.h"
 #include "sli_sleeptimer_hal.h"
+#if !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT) && defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+#include "sli_hfxo_manager.h"
+#endif
 #include "em_core.h"
 #include "em_cmu.h"
+#include "em_prs.h"
+
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+#include "sl_power_manager.h"
+#endif
 
 #if SL_SLEEPTIMER_PERIPHERAL == SL_SLEEPTIMER_PERIPHERAL_SYSRTC
 
@@ -32,6 +53,8 @@
 
 static bool cc_disabled = true;
 
+static bool cc1_disabled = true;
+
 __STATIC_INLINE uint32_t get_time_diff(uint32_t a,
                                        uint32_t b);
 
@@ -42,6 +65,7 @@ void sleeptimer_hal_init_timer(void)
 {
   sl_sysrtc_config_t sysrtc_config = SYSRTC_CONFIG_DEFAULT;
   sl_sysrtc_group_config_t group_config = SYSRTC_GROUP_CONFIG_DEFAULT;
+  const sl_sysrtc_group_channel_compare_config_t group_compare_channel_config = SYSRTC_GROUP_CHANNEL_COMPARE_CONFIG_EARLY_WAKEUP;
 
   CMU_ClockEnable(cmuClock_SYSRTC, true);
 
@@ -52,6 +76,8 @@ void sleeptimer_hal_init_timer(void)
   sl_sysrtc_init(&sysrtc_config);
 
   group_config.compare_channel0_enable = false;
+  group_config.compare_channel1_enable = false;
+  group_config.p_compare_channel1_config = &group_compare_channel_config;
   sl_sysrtc_init_group(0u, &group_config);
 
   sl_sysrtc_disable_group_interrupts(0u, _SYSRTC_GRP0_IEN_MASK);
@@ -61,6 +87,11 @@ void sleeptimer_hal_init_timer(void)
 
   NVIC_ClearPendingIRQ(SYSRTC_APP_IRQn);
   NVIC_EnableIRQ(SYSRTC_APP_IRQn);
+
+  // Initialize PRS to start HFXO for early wakeup
+  CMU_ClockEnable(cmuClock_PRS, true);
+  PRS_ConnectSignal(1UL, prsTypeAsync, prsSignalSYSRTC0_GRP0OUT1);
+  PRS_ConnectConsumer(1UL, prsTypeAsync, prsConsumerHFXO0_OSCREQ);
 }
 
 /******************************************************************************
@@ -72,7 +103,7 @@ uint32_t sleeptimer_hal_get_counter(void)
 }
 
 /******************************************************************************
- * Gets SYSRTC compare value.
+ * Gets SYSRTC channel zero's compare value.
  *****************************************************************************/
 uint32_t sleeptimer_hal_get_compare(void)
 {
@@ -80,7 +111,7 @@ uint32_t sleeptimer_hal_get_compare(void)
 }
 
 /******************************************************************************
- * Sets SYSRTC compare value.
+ * Sets SYSRTC channel zero's compare value.
  *
  * @note Compare match value is set to the requested value - 1. This is done
  * to compensate for the fact that the BURTC compare match interrupt always
@@ -115,6 +146,47 @@ void sleeptimer_hal_set_compare(uint32_t value)
   if (cc_disabled) {
     SYSRTC0->GRP0_CTRL |= SYSRTC_GRP0_CTRL_CMP0EN;
     cc_disabled = false;
+  }
+}
+
+/*******************************************************************************
+ * Sets SYSRTC channel one's compare value.
+ *
+ * @note Compare match value is set to the requested value - 1. This is done
+ * to compensate for the fact that the BURTC compare match interrupt always
+ * triggers at the end of the requested ticks and that the IRQ handler is
+ * executed when current tick count == compare_value + 1.
+ ******************************************************************************/
+void sleeptimer_hal_set_compare_prs_hfxo_startup(int32_t value)
+{
+  CORE_DECLARE_IRQ_STATE;
+  uint32_t counter;
+  uint32_t compare_value;
+
+  CORE_ENTER_CRITICAL();
+
+  counter = sleeptimer_hal_get_counter();
+
+  compare_value = value + counter;
+
+  // Add margin if necessary
+  if (get_time_diff(compare_value, counter) < SLEEPTIMER_COMPARE_MIN_DIFF) {
+    compare_value = counter + SLEEPTIMER_COMPARE_MIN_DIFF;
+  }
+
+#if !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT) && defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+  sli_hfxo_prs_manager_begin_startup_measurement(compare_value);
+#endif
+
+  compare_value %= SLEEPTIMER_TMR_WIDTH;
+
+  sl_sysrtc_set_group_compare_channel_value(0u, 1u, compare_value - 1);
+
+  CORE_EXIT_CRITICAL();
+
+  if (cc1_disabled) {
+    SYSRTC0->GRP0_CTRL |= SYSRTC_GRP0_CTRL_CMP1EN;
+    cc1_disabled = false;
   }
 }
 
@@ -254,4 +326,24 @@ uint16_t sleeptimer_hal_get_clock_accuracy(void)
   return CMU_LF_ClockPrecisionGet(cmuClock_SYSRTC);
 }
 
+/***************************************************************************//**
+ * Set lowest energy mode based on a project's configurations and clock source
+ *
+ * @note If power_manager_no_deepsleep component is included in a project, the
+ *       lowest possible energy mode is EM1, else lowest energy mode is
+ *       determined by clock source.
+ ******************************************************************************/
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+void sli_sleeptimer_set_pm_em_requirement(void)
+{
+  switch (CMU->SYSRTC0CLKCTRL & _CMU_SYSRTC0CLKCTRL_CLKSEL_MASK) {
+    case CMU_SYSRTC0CLKCTRL_CLKSEL_LFRCO:
+    case CMU_SYSRTC0CLKCTRL_CLKSEL_LFXO:
+      sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM2);
+      break;
+    default:
+      break;
+  }
+}
+#endif
 #endif

@@ -30,9 +30,9 @@
 #ifndef SL_SE_MANAGER_TYPES_H
 #define SL_SE_MANAGER_TYPES_H
 
-#include "em_device.h"
+#include "sli_se_manager_features.h"
 
-#if defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT) || defined(DOXYGEN)
+#if defined(SLI_MAILBOX_COMMAND_SUPPORTED) || defined(SLI_VSE_MAILBOX_COMMAND_SUPPORTED)
 
 /// @addtogroup sl_se_manager
 /// @{
@@ -57,16 +57,16 @@ extern "C" {
 typedef enum {
   SL_SE_KEY_TYPE_IMMUTABLE_BOOT = 0,
   SL_SE_KEY_TYPE_IMMUTABLE_AUTH,
-#if defined(SEMAILBOX_PRESENT) || defined(DOXYGEN)
+#if defined(SLI_MAILBOX_COMMAND_SUPPORTED)
   SL_SE_KEY_TYPE_IMMUTABLE_AES_128,
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || defined(DOXYGEN)
+#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
   SL_SE_KEY_TYPE_IMMUTABLE_ATTESTATION,
   SL_SE_KEY_TYPE_IMMUTABLE_SE_ATTESTATION,
 #endif // _SILICON_LABS_SECURITY_FEATURE_VAULT
-#endif // SEMAILBOX_PRESENT
+#endif // SLI_MAILBOX_COMMAND_SUPPORTED
 } sl_se_device_key_type_t;
 
-#if defined(SEMAILBOX_PRESENT) && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || defined(DOXYGEN)
+#if defined(SLI_MAILBOX_COMMAND_SUPPORTED) && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
 /// SE tamper signal levels
 typedef uint8_t sl_se_tamper_level_t;
 
@@ -106,7 +106,7 @@ typedef struct {
   /// secure-booted image, including the last page if end of signature is not
   /// page-aligned.
   bool secure_boot_page_lock_full;
-#if defined(SEMAILBOX_PRESENT) && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || defined(DOXYGEN)
+#if defined(SLI_MAILBOX_COMMAND_SUPPORTED) && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
   /// List of tamper levels to configure for the different tamper sources.
   sl_se_tamper_level_t tamper_levels[SL_SE_TAMPER_SIGNAL_NUM_SIGNALS];
   /// Reset period for the tamper filter counter.
@@ -139,13 +139,13 @@ typedef struct {
  ******************************************************************************/
 typedef struct sl_se_command_context_t {
   SE_Command_t  command;             ///< SE mailbox command struct
-#if defined(SL_SE_MANAGER_YIELD_WHILE_WAITING_FOR_COMMAND_COMPLETION) || defined(DOXYGEN)
+#if defined(SL_SE_MANAGER_YIELD_WHILE_WAITING_FOR_COMMAND_COMPLETION)
   bool          yield;               ///< If true, yield the CPU core while
                                      ///< waiting for the SE mailbox command
                                      ///< to complete. If false, busy-wait, by
                                      ///< polling the SE mailbox response
                                      ///< register.
-#endif // SEMAILBOX_PRESENT
+#endif // SL_SE_MANAGER_YIELD_WHILE_WAITING_FOR_COMMAND_COMPLETION
 } sl_se_command_context_t;
 
 /// @} (end addtogroup sl_se_manager_core)
@@ -156,7 +156,7 @@ typedef struct sl_se_command_context_t {
 /// SE Debug lock flags
 typedef uint32_t sl_se_debug_flags_t;
 
-#if defined(SEMAILBOX_PRESENT) || defined(DOXYGEN)
+#if defined(SLI_MAILBOX_COMMAND_SUPPORTED)
 /// Debug lock options
 typedef struct {
   /// Non-Secure, Invasive debug access enabled if true. If false, it is not
@@ -193,7 +193,7 @@ typedef struct {
   /// True if locked with @ref sl_se_apply_debug_lock().
   /// False if new clean, erased or unlocked with @ref sl_se_open_debug().
   bool debug_port_lock_state;
-  #if defined(SEMAILBOX_PRESENT) || defined(DOXYGEN)
+  #if defined(SLI_MAILBOX_COMMAND_SUPPORTED)
   /// Debug option configuration as set by @ref sl_se_set_debug_options().
   sl_se_debug_options_t options_config;
   /// Current state of debug options, locked by @ref sl_se_set_debug_options() and
@@ -204,7 +204,7 @@ typedef struct {
 
 /// @} (end addtogroup sl_se_manager_util)
 
-#if defined(SEMAILBOX_PRESENT) || defined(DOXYGEN)
+#if defined(SLI_MAILBOX_COMMAND_SUPPORTED)
 
 /// @addtogroup sl_se_manager_key_handling
 /// @{
@@ -262,7 +262,7 @@ typedef struct {
   const void* domain;
 } sl_se_key_descriptor_t;
 
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || defined(DOXYGEN)
+#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
 /// Custom Weierstrass curve structure.
 typedef struct {
   /// Domain size in bytes.
@@ -344,7 +344,7 @@ typedef struct {
   uint8_t  iv[13];                  ///< Nonce (MAX size is 13 bytes)
   uint32_t tag_len;                 ///< Tag length
   sl_se_cipher_operation_t     mode;///< CCM mode (decrypt or encrypt)
-  #if (_SILICON_LABS_32B_SERIES_2_CONFIG == 1)
+  #if defined(SLI_SE_MAJOR_VERSION_ONE)
   uint8_t nonce_counter[16];        ///< Counter to keep CTR state
   uint8_t iv_len;                   ///< Nonce length
   uint8_t cbc_mac_state[16];        ///< State of authenication/MAC
@@ -362,7 +362,7 @@ typedef struct {
 typedef struct {
   uint64_t len;                     ///< Total length of the encrypted data
   uint64_t add_len;                 ///< Total length of the additional data
-  #if (_SILICON_LABS_32B_SERIES_2_CONFIG < 3)
+  #if defined(SLI_SE_MAJOR_VERSION_ONE)
   uint8_t  tagbuf[16];              ///< Tag
   uint8_t previous_se_ctx[32];      ///< SE state from previous operation
   #endif
@@ -384,7 +384,7 @@ typedef enum {
   SL_SE_HASH_SHA1,      ///< SHA-1
   SL_SE_HASH_SHA224,    ///< SHA-224
   SL_SE_HASH_SHA256,    ///< SHA-256
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || defined(DOXYGEN)
+#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
   SL_SE_HASH_SHA384,    ///< SHA-384
   SL_SE_HASH_SHA512,    ///< SHA-512
 #endif
@@ -414,7 +414,7 @@ typedef struct {
   uint8_t  buffer[64];              ///< Data block being processed
 } sl_se_sha256_multipart_context_t;
 
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || defined(DOXYGEN)
+#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
 /// SHA-384 streaming context.
 typedef struct {
   sl_se_hash_type_t      hash_type; ///< Hash streaming context
@@ -471,7 +471,7 @@ typedef struct {
   uint8_t Xp[64];                     ///< Their point (round 2)
 } sl_se_ecjpake_context_t;
 
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || defined(DOXYGEN)
+#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
 /// Typedef sl_se_pbkdf2_prf_type_t to sl_se_hash_type_t in order to maintain
 /// backward compatibility. Defines for mapping the PRF identifiers to the
 /// underlying hash enum values exists in sl_se_manager_defines.h.
@@ -480,7 +480,7 @@ typedef sl_se_hash_type_t sl_se_pbkdf2_prf_type_t;
 
 /// @} (end addtogroup sl_se_manager_key_derivation)
 
-#endif // defined(SEMAILBOX_PRESENT)
+#endif // defined(SLI_MAILBOX_COMMAND_SUPPORTED)
 
 #ifdef __cplusplus
 }
@@ -488,6 +488,6 @@ typedef sl_se_hash_type_t sl_se_pbkdf2_prf_type_t;
 
 /// @} (end addtogroup sl_se_manager)
 
-#endif // defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT)
+#endif // defined(SLI_MAILBOX_COMMAND_SUPPORTED) || defined(SLI_VSE_MAILBOX_COMMAND_SUPPORTED)
 
 #endif // SL_SE_MANAGER_TYPES_H

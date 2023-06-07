@@ -44,9 +44,11 @@
 #include "sl_wisun_ip6string.h"
 #include "sl_wisun_types.h"
 #include "sl_string.h"
-
 #if !defined(SL_CATALOG_WISUN_NCP_PRESENT)
-#include "sl_wisun_connection_params_api.h"
+  #include "sl_wisun_connection_params_api.h"
+#endif
+#if defined(SL_CATALOG_WISUN_LFN_DEVICE_SUPPORT_PRESENT)
+  #include "sl_wisun_lfn_params_api.h"
 #endif
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -97,6 +99,12 @@ extern const app_enum_t app_regulation_enum[];
 
 /// Channel spacing
 extern const app_enum_t app_wisun_phy_channel_spacing_enum[];
+
+/// Device type
+extern const app_enum_t app_wisun_device_type_enum[];
+
+/// LFN profile
+extern const app_enum_t app_wisun_lfn_profile_enum[];
 
 // -----------------------------------------------------------------------------
 //                          Public Function Declarations
@@ -176,6 +184,30 @@ const char * app_wisun_trace_util_phy_cfg_type_to_str(const uint32_t val);
 const char * app_wisun_trace_util_ch_spacing_to_str(const uint32_t val);
 
 /**************************************************************************//**
+ * @brief Convert Profile to string
+ * @details Converter function
+ * @param val Value to find
+ * @return const char* String value
+ *****************************************************************************/
+const char * app_wisun_trace_util_profile_to_str(const uint32_t val);
+
+/**************************************************************************//**
+ * @brief Convert Device type to string
+ * @details Converter function
+ * @param val Value to find
+ * @return const char* String value
+ *****************************************************************************/
+const char * app_wisun_trace_util_device_type_to_str(const uint32_t val);
+
+/**************************************************************************//**
+ * @brief Convert LFN profile to string
+ * @details Converter function
+ * @param val Value to find
+ * @return const char* String value
+ *****************************************************************************/
+const char * app_wisun_trace_util_lfn_profile_to_str(const uint32_t val);
+
+/**************************************************************************//**
  * @brief Swapping short unsigned integer endianess
  * @details It swaps the value pointed.
  * @param[in] num The swappng number
@@ -234,9 +266,9 @@ __STATIC_INLINE void app_wisun_destroy_phy_str(const char *str)
  * @brief Get connection parameters by network size
  * @details Certificate and Auto network sizes are not supported
  * @param[in] nw_size Network size
- * @return const sl_wisun_connection_params_t* constant pointer of connection 
- *                                             parameters on success, 
- *                                             otherwise NULL 
+ * @return const sl_wisun_connection_params_t* constant pointer of connection
+ *                                             parameters on success,
+ *                                             otherwise NULL
  *****************************************************************************/
 const sl_wisun_connection_params_t *sl_wisun_get_conn_param_by_nw_size(const sl_wisun_network_size_t nw_size);
 #endif

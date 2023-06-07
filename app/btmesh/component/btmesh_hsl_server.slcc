@@ -9,9 +9,18 @@ description: >
   HSL Setup Server model.
   
   This component implements callbacks, control, and report functionality.
+
+  This is a Low-Code component. The following weak callbacks are available to
+  implement the relevant light source handling:
+
+  void sl_btmesh_hsl_hue_cb(uint16_t hue);
+  void sl_btmesh_hsl_saturation_cb(uint16_t saturation);
 category: "Bluetooth Mesh|Models|Lighting"
 quality: "production"
 root_path: "app/btmesh/common/btmesh_hsl_server"
+tag:
+  - Low-Code
+
 config_file:
   - path: btmesh_hsl_server.dcd
     directory: btmeshconf
@@ -29,14 +38,15 @@ provides:
 requires:
   - name: "app_assert"
   - name: "bluetooth_feature_nvm"
+  - name: "btmesh_provisionee"
   - name: "btmesh_stack_generic_server"
   - name: "btmesh_stack_node"
   - name: "btmesh_generic_server"
   - name: "btmesh_lighting_server"
   - name: "btmesh_stack"
-  - name: "simple_timer"
+  - name: "app_timer"
 recommends:
-  - id: "simple_timer"
+  - id: "app_timer"
 
 template_contribution:
   - name: "btmesh_on_event"

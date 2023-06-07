@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<gatt>
+  <!--Silicon Labs ESL Tag Image-->
+  <service advertise="true" id="esl_tag_service" name="Silicon Labs ESL Tag" requirement="mandatory" sourceId="" type="primary" uuid="1857" instance_id="silabs_esl">
+    <!--Image Information-->
+    <characteristic const="false" id="esl_image_info" name="Image Information" sourceId="" uuid="2bfb">
+      <informativeText>The Image Information characteristic contains a single field, Max_Image_Index, whose value is a 8-bit integer (uint8_t) in the range 0x00 to 0xFF. An Image_Index value serves as a pointer to an individual image storage location on the ESL Tag (Server). This value must be constant for the lifecycle of the ESL Tag. This is an optional characteristic which shall not be exposed if no image storage on the Tag is supported. </informativeText>
+      <value length="1" type="hex" variable_length="false">00</value>
+      <properties>
+        <read authenticated="false" bonded="true" encrypted="true"/>
+      </properties>
+    </characteristic>
+  </service>
+</gatt>

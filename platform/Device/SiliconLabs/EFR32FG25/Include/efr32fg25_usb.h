@@ -133,7 +133,7 @@ typedef struct {
 #define _USB_CTRL_VBSSNSLEN_MASK            0x20000UL                                   /**< Bit mask for USB_VBSSNSLEN                  */
 #define _USB_CTRL_VBSSNSLEN_DEFAULT         0x00000000UL                                /**< Mode DEFAULT for USB_CTRL                   */
 #define USB_CTRL_VBSSNSLEN_DEFAULT          (_USB_CTRL_VBSSNSLEN_DEFAULT << 17)         /**< Shifted mode DEFAULT for USB_CTRL           */
-#define USB_CTRL_VBUSOVRIDE                 (0x1UL << 18)                               /**< vbus over ride to GPPLL                     */
+#define USB_CTRL_VBUSOVRIDE                 (0x1UL << 18)                               /**< VBUS override to GPPLL                      */
 #define _USB_CTRL_VBUSOVRIDE_SHIFT          18                                          /**< Shift value for USB_VBUSOVRIDE              */
 #define _USB_CTRL_VBUSOVRIDE_MASK           0x40000UL                                   /**< Bit mask for USB_VBUSOVRIDE                 */
 #define _USB_CTRL_VBUSOVRIDE_DEFAULT        0x00000001UL                                /**< Mode DEFAULT for USB_CTRL                   */
@@ -142,17 +142,17 @@ typedef struct {
 #define _USB_CTRL_FSSLEW_MASK               0xE00000UL                                  /**< Bit mask for USB_FSSLEW                     */
 #define _USB_CTRL_FSSLEW_DEFAULT            0x00000007UL                                /**< Mode DEFAULT for USB_CTRL                   */
 #define USB_CTRL_FSSLEW_DEFAULT             (_USB_CTRL_FSSLEW_DEFAULT << 21)            /**< Shifted mode DEFAULT for USB_CTRL           */
-#define USB_CTRL_DISRUPTX                   (0x1UL << 24)                               /**< disable tx pull up res                      */
+#define USB_CTRL_DISRUPTX                   (0x1UL << 24)                               /**< Disable TX pull-up resistor                 */
 #define _USB_CTRL_DISRUPTX_SHIFT            24                                          /**< Shift value for USB_DISRUPTX                */
 #define _USB_CTRL_DISRUPTX_MASK             0x1000000UL                                 /**< Bit mask for USB_DISRUPTX                   */
 #define _USB_CTRL_DISRUPTX_DEFAULT          0x00000001UL                                /**< Mode DEFAULT for USB_CTRL                   */
 #define USB_CTRL_DISRUPTX_DEFAULT           (_USB_CTRL_DISRUPTX_DEFAULT << 24)          /**< Shifted mode DEFAULT for USB_CTRL           */
-#define USB_CTRL_BYPSVREG                   (0x1UL << 25)                               /**< bypass_vreg signal to phy                   */
+#define USB_CTRL_BYPSVREG                   (0x1UL << 25)                               /**< Bypass VREG signal to USB PHY               */
 #define _USB_CTRL_BYPSVREG_SHIFT            25                                          /**< Shift value for USB_BYPSVREG                */
 #define _USB_CTRL_BYPSVREG_MASK             0x2000000UL                                 /**< Bit mask for USB_BYPSVREG                   */
 #define _USB_CTRL_BYPSVREG_DEFAULT          0x00000001UL                                /**< Mode DEFAULT for USB_CTRL                   */
 #define USB_CTRL_BYPSVREG_DEFAULT           (_USB_CTRL_BYPSVREG_DEFAULT << 25)          /**< Shifted mode DEFAULT for USB_CTRL           */
-#define USB_CTRL_ENDATACAP                  (0x1UL << 26)                               /**< adds 40pf cap to dm/dp in tx mode           */
+#define USB_CTRL_ENDATACAP                  (0x1UL << 26)                               /**< Add 40pf cap to D+/D- in TX mode            */
 #define _USB_CTRL_ENDATACAP_SHIFT           26                                          /**< Shift value for USB_ENDATACAP               */
 #define _USB_CTRL_ENDATACAP_MASK            0x4000000UL                                 /**< Bit mask for USB_ENDATACAP                  */
 #define _USB_CTRL_ENDATACAP_DEFAULT         0x00000000UL                                /**< Mode DEFAULT for USB_CTRL                   */
@@ -161,12 +161,12 @@ typedef struct {
 /* Bit fields for USB IF */
 #define _USB_IF_RESETVALUE                  0x00000000UL                                /**< Default value for USB_IF                    */
 #define _USB_IF_MASK                        0x00000003UL                                /**< Mask for USB_IF                             */
-#define USB_IF_VBUS                         (0x1UL << 0)                                /**< VBUS_SENSE_IRQ                              */
+#define USB_IF_VBUS                         (0x1UL << 0)                                /**< VBUS_SENSE interrupt flag                   */
 #define _USB_IF_VBUS_SHIFT                  0                                           /**< Shift value for USB_VBUS                    */
 #define _USB_IF_VBUS_MASK                   0x1UL                                       /**< Bit mask for USB_VBUS                       */
 #define _USB_IF_VBUS_DEFAULT                0x00000000UL                                /**< Mode DEFAULT for USB_IF                     */
 #define USB_IF_VBUS_DEFAULT                 (_USB_IF_VBUS_DEFAULT << 0)                 /**< Shifted mode DEFAULT for USB_IF             */
-#define USB_IF_DWCOTG                       (0x1UL << 1)                                /**< DWC OTG IRQ flg                             */
+#define USB_IF_DWCOTG                       (0x1UL << 1)                                /**< DWC_OTG interrupt flag                      */
 #define _USB_IF_DWCOTG_SHIFT                1                                           /**< Shift value for USB_DWCOTG                  */
 #define _USB_IF_DWCOTG_MASK                 0x2UL                                       /**< Bit mask for USB_DWCOTG                     */
 #define _USB_IF_DWCOTG_DEFAULT              0x00000000UL                                /**< Mode DEFAULT for USB_IF                     */
@@ -175,12 +175,12 @@ typedef struct {
 /* Bit fields for USB IEN */
 #define _USB_IEN_RESETVALUE                 0x00000000UL                                /**< Default value for USB_IEN                   */
 #define _USB_IEN_MASK                       0x00000003UL                                /**< Mask for USB_IEN                            */
-#define USB_IEN_VBUS                        (0x1UL << 0)                                /**< VBUS_SENSE Enable                           */
+#define USB_IEN_VBUS                        (0x1UL << 0)                                /**< VBUS_SENSE interrupt enable                 */
 #define _USB_IEN_VBUS_SHIFT                 0                                           /**< Shift value for USB_VBUS                    */
 #define _USB_IEN_VBUS_MASK                  0x1UL                                       /**< Bit mask for USB_VBUS                       */
 #define _USB_IEN_VBUS_DEFAULT               0x00000000UL                                /**< Mode DEFAULT for USB_IEN                    */
 #define USB_IEN_VBUS_DEFAULT                (_USB_IEN_VBUS_DEFAULT << 0)                /**< Shifted mode DEFAULT for USB_IEN            */
-#define USB_IEN_DWCOTG                      (0x1UL << 1)                                /**< DWC_otg IRQ Enable                          */
+#define USB_IEN_DWCOTG                      (0x1UL << 1)                                /**< DWC_OTG interrupt enable                    */
 #define _USB_IEN_DWCOTG_SHIFT               1                                           /**< Shift value for USB_DWCOTG                  */
 #define _USB_IEN_DWCOTG_MASK                0x2UL                                       /**< Bit mask for USB_DWCOTG                     */
 #define _USB_IEN_DWCOTG_DEFAULT             0x00000000UL                                /**< Mode DEFAULT for USB_IEN                    */

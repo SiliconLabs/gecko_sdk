@@ -18,6 +18,7 @@ include:
   - path: util/third_party/openthread/src/cli
     file_list:
       - path: cli.hpp
+      - path: cli_br.hpp
       - path: cli_coap.hpp
       - path: cli_coap_secure.hpp
       - path: cli_commissioner.hpp
@@ -35,6 +36,7 @@ include:
 source:
       - path: util/third_party/openthread/examples/apps/cli/cli_uart.cpp
       - path: util/third_party/openthread/src/cli/cli.cpp
+      - path: util/third_party/openthread/src/cli/cli_br.cpp
       - path: util/third_party/openthread/src/cli/cli_coap.cpp
       - path: util/third_party/openthread/src/cli/cli_coap_secure.cpp
       - path: util/third_party/openthread/src/cli/cli_commissioner.cpp

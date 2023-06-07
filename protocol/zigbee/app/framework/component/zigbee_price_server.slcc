@@ -47,7 +47,7 @@ template_contribution:
     value:
       group: price-server
       name: init
-      handler: emAfPriceServerCliInit
+      handler: sli_zigbee_af_price_server_cli_init
       help: Initializes the price info for the provided endpoint.
       argument:
       - type: uint8
@@ -56,7 +56,7 @@ template_contribution:
     value:
       group: price-server
       name: print
-      handler: emAfPriceServerCliPrint
+      handler: sli_zigbee_af_price_server_cli_print
       help: Prints the price info for the provided endpoint.
       argument:
       - type: uint8
@@ -65,7 +65,7 @@ template_contribution:
     value:
       group: price-server
       name: clear
-      handler: emAfPriceServerCliClear
+      handler: sli_zigbee_af_price_server_cli_clear
       help: Clears out the currently set price for the supplied endpoint.
       argument:
       - type: uint8
@@ -74,7 +74,7 @@ template_contribution:
     value:
       group: price-server
       name: who
-      handler: emAfPriceServerCliWho
+      handler: sli_zigbee_af_price_server_cli_who
       help: Sets identifying information about the price.
       argument:
       - type: uint32
@@ -87,7 +87,7 @@ template_contribution:
     value:
       group: price-server
       name: what
-      handler: emAfPriceServerCliWhat
+      handler: sli_zigbee_af_price_server_cli_what
       help: Indicates what units the price is presented in.
       argument:
       - type: uint8
@@ -104,7 +104,7 @@ template_contribution:
     value:
       group: price-server
       name: when
-      handler: emAfPriceServerCliWhen
+      handler: sli_zigbee_af_price_server_cli_when
       help: Sets start time and duration for the price.
       argument:
       - type: uint32
@@ -113,7 +113,7 @@ template_contribution:
     value:
       group: price-server
       name: price
-      handler: emAfPriceServerCliPrice
+      handler: sli_zigbee_af_price_server_cli_price
       help: Sets the single price held within the price server component.
       argument:
       - type: uint32
@@ -128,7 +128,7 @@ template_contribution:
     value:
       group: price-server
       name: alternate
-      handler: emAfPriceServerCliAlternate
+      handler: sli_zigbee_af_price_server_cli_alternate
       help: Sets the alternate values for the price.
       argument:
       - type: uint32
@@ -141,7 +141,7 @@ template_contribution:
     value:
       group: price-server
       name: ack
-      handler: emAfPriceServerCliAck
+      handler: sli_zigbee_af_price_server_cli_ack
       help: Turns price acknowledgement on or off depending on passed boolean value.
       argument:
       - type: uint8
@@ -150,7 +150,7 @@ template_contribution:
     value:
       group: price-server
       name: valid
-      handler: emAfPriceServerCliValid
+      handler: sli_zigbee_af_price_server_cli_valid
       help: Makes a price at a given index valid.
       argument:
       - type: uint8
@@ -161,7 +161,7 @@ template_contribution:
     value:
       group: price-server
       name: invalid
-      handler: emAfPriceServerCliValid
+      handler: sli_zigbee_af_price_server_cli_valid
       help: Makes a price at a given index invalid.
       argument:
       - type: uint8
@@ -172,7 +172,7 @@ template_contribution:
     value:
       group: price-server
       name: get
-      handler: emAfPriceServerCliGet
+      handler: sli_zigbee_af_price_server_cli_get
       help: Retrieves a price from a given index into the price buffer for editing.
       argument:
       - type: uint8
@@ -183,7 +183,7 @@ template_contribution:
     value:
       group: price-server
       name: sprint
-      handler: emAfPriceServerCliSprint
+      handler: sli_zigbee_af_price_server_cli_sprint
       help: Prints the contents of the price buffer for the provided endpoint.
       argument:
       - type: uint8
@@ -192,7 +192,7 @@ template_contribution:
     value:
       group: price-server
       name: publish
-      handler: emAfPriceServerCliPublish
+      handler: sli_zigbee_af_price_server_cli_publish
       help: Publishes the current price.
       argument:
       - type: uint16
@@ -207,7 +207,7 @@ template_contribution:
     value:
       group: price-server
       name: pub-tariff-info
-      handler: emAfPriceServerCliPubTariffInfo
+      handler: sli_zigbee_af_price_server_cli_pub_tariff_info
       help: Publishes the tariff info.
       argument:
       - type: uint16
@@ -227,7 +227,7 @@ template_contribution:
     value:
       group: conversion-factor
       name: add
-      handler: emAfPriceServerCliConversionFactorAdd
+      handler: sli_zigbee_af_price_server_cli_conversion_factor_add
       help: Sets the conversion factor information in the conversion factor table.
       argument:
       - type: uint8
@@ -239,7 +239,7 @@ template_contribution:
     value:
       group: conversion-factor
       name: clear
-      handler: emAfPriceServerCliConversionFactorClear
+      handler: sli_zigbee_af_price_server_cli_conversion_factor_clear
       help: Clears the conversion factor table.
       argument:
       - type: uint8
@@ -247,7 +247,7 @@ template_contribution:
     value:
       group: conversion-factor
       name: print
-      handler: emAfPriceServerCliConversionFactorPrint
+      handler: sli_zigbee_af_price_server_cli_conversion_factor_print
       help: Prints the conversion factor table.
       argument:
       - type: uint8
@@ -255,7 +255,7 @@ template_contribution:
     value:
       group: conversion-factor
       name: pub
-      handler: emAfPriceServerCliConversionFactorPub
+      handler: sli_zigbee_af_price_server_cli_conversion_factor_pub
       help: Publishes the specified conversion factor entry.
       argument:
       - type: uint8
@@ -275,7 +275,7 @@ template_contribution:
     value:
       group: calorific-value
       name: add
-      handler: emAfPriceServerCliCalorificValueAdd
+      handler: sli_zigbee_af_price_server_cli_calorific_value_add
       help: Sets the calorific value in table.
       argument:
       - type: uint8
@@ -288,7 +288,7 @@ template_contribution:
     value:
       group: calorific-value
       name: clear
-      handler: emAfPriceServerCliCalorificValueClear
+      handler: sli_zigbee_af_price_server_cli_calorific_value_clear
       help: Clears the table.
       argument:
       - type: uint8
@@ -296,7 +296,7 @@ template_contribution:
     value:
       group: calorific-value
       name: print
-      handler: emAfPriceServerCliCalorificValuePrint
+      handler: sli_zigbee_af_price_server_cli_calorific_value_print
       help: Prints the table.
       argument:
       - type: uint8
@@ -309,7 +309,7 @@ template_contribution:
     value:
       group: block-period
       name: print
-      handler: emAfPriceServerCliBlockPeriodPrint
+      handler: sli_zigbee_af_price_server_cli_block_period_print
       help: Prints the block period table.
       argument:
       - type: uint8
@@ -318,7 +318,7 @@ template_contribution:
     value:
       group: block-period
       name: add
-      handler: emAfPriceServerCliBlockPeriodAdd
+      handler: sli_zigbee_af_price_server_cli_block_period_add
       help: Sets the block period value in the table.
       argument:
       - type: uint8
@@ -336,7 +336,7 @@ template_contribution:
     value:
       group: block-period
       name: pub
-      handler: emAfPriceServerCliBlockPeriodPub
+      handler: sli_zigbee_af_price_server_cli_block_period_pub
       help: Sends a Publish Block Period command.
       argument:
       - type: uint16
@@ -347,7 +347,7 @@ template_contribution:
     value:
       group: block-period
       name: clear
-      handler: emAfPriceServerCliBlockPeriodClear
+      handler: sli_zigbee_af_price_server_cli_block_period_clear
       help: Clears the local Block Period table.
       argument:
       - type: uint8
@@ -360,7 +360,7 @@ template_contribution:
     value:
       group: co2-val
       name: add
-      handler: emAfPriceServerCliCo2ValueAdd
+      handler: sli_zigbee_af_price_server_cli_co2_value_add
       help: Sets the CO2 value in table.
       argument:
       - type: uint8
@@ -375,7 +375,7 @@ template_contribution:
     value:
       group: co2-val
       name: clear
-      handler: emAfPriceServerCliCo2ValueClear
+      handler: sli_zigbee_af_price_server_cli_co2_value_clear
       help: Clears the table.
       argument:
       - type: uint8
@@ -383,7 +383,7 @@ template_contribution:
     value:
       group: co2-val
       name: print
-      handler: emAfPriceServerCliCo2ValuePrint
+      handler: sli_zigbee_af_price_server_cli_co2_value_print
       help: Prints the table.
       argument:
       - type: uint8
@@ -391,7 +391,7 @@ template_contribution:
     value:
       group: co2-val
       name: pub
-      handler: emAfPriceServerCliCo2ValuePub
+      handler: sli_zigbee_af_price_server_cli_co2_value_pub
       help: Publishes a table entry.
       argument:
       - type: uint16
@@ -411,7 +411,7 @@ template_contribution:
     value:
       group: tier-label
       name: set
-      handler: emAfPriceServerCliTierLabelSet
+      handler: sli_zigbee_af_price_server_cli_tier_label_set
       help: Sets specific info for the tier label.
       argument:
       - type: uint8
@@ -426,7 +426,7 @@ template_contribution:
     value:
       group: tier-label
       name: add-label
-      handler: emAfPriceServerCliTierLabelAddLabel
+      handler: sli_zigbee_af_price_server_cli_tier_label_add_label
       help: Adds additional tier labels to a given tier.
       argument:
       - type: uint8
@@ -437,7 +437,7 @@ template_contribution:
     value:
       group: tier-label
       name: print
-      handler: emAfPriceServerCliTierLabelPrint
+      handler: sli_zigbee_af_price_server_cli_tier_label_print
       help: Prints the table.
       argument:
       - type: uint8
@@ -445,7 +445,7 @@ template_contribution:
     value:
       group: tier-label
       name: pub
-      handler: emAfPriceServerCliTierLabelPub
+      handler: sli_zigbee_af_price_server_cli_tier_label_pub
       help: Publishes the table.
       argument:
       - type: uint16
@@ -465,7 +465,7 @@ template_contribution:
     value:
       group: billing-period
       name: add
-      handler: emAfPriceServerCliBillingPeriodAdd
+      handler: sli_zigbee_af_price_server_cli_billing_period_add
       help: Sets specific info for the billing period.
       argument:
       - type: uint8
@@ -479,7 +479,7 @@ template_contribution:
     value:
       group: billing-period
       name: print
-      handler: emAfPriceServerCliBillingPeriodPrint
+      handler: sli_zigbee_af_price_server_cli_billing_period_print
       help: Prints the table.
       argument:
       - type: uint8
@@ -487,7 +487,7 @@ template_contribution:
     value:
       group: billing-period
       name: pub
-      handler: emAfPriceServerCliBillingPeriodPub
+      handler: sli_zigbee_af_price_server_cli_billing_period_pub
       help: Publishes a billing period entry.
       argument:
       - type: uint16
@@ -502,7 +502,7 @@ template_contribution:
     value:
       group: billing-period
       name: repeat
-      handler: emAfPriceServerCliBillingPeriodRepeat
+      handler: sli_zigbee_af_price_server_cli_billing_period_repeat
       help: Sets whether or not a billing period should repeat after it finishes. Per the SE spec, the billing period is supposed to repeat, but this command can be used to turn that feature off for debugging.
       argument:
       - type: uint8
@@ -516,7 +516,7 @@ template_contribution:
     value:
       group: consol-bill
       name: add
-      handler: emAfPriceServerCliConsolidatedBillAdd
+      handler: sli_zigbee_af_price_server_cli_consolidated_bill_add
       help: Sets specific info for the consolidated bill.
       argument:
       - type: uint8
@@ -533,7 +533,7 @@ template_contribution:
     value:
       group: consol-bill
       name: print
-      handler: emAfPriceServerCliConsolidatedBillPrint
+      handler: sli_zigbee_af_price_server_cli_consolidated_bill_print
       help: Prints the consolidated bills table.
       argument:
       - type: uint8
@@ -542,7 +542,7 @@ template_contribution:
     value:
       group: consol-bill
       name: pub
-      handler: emAfPriceServerCliConsolidatedBillPub
+      handler: sli_zigbee_af_price_server_cli_consolidated_bill_pub
       help: Publishes a billing period entry.
       argument:
       - type: uint16
@@ -562,7 +562,7 @@ template_contribution:
     value:
       group: cpp-event
       name: set
-      handler: emAfPriceServerCliCppEventSet
+      handler: sli_zigbee_af_price_server_cli_cpp_event_set
       help: Configures values for a CPP event.
       argument:
       - type: uint8
@@ -578,7 +578,7 @@ template_contribution:
     value:
       group: cpp-event
       name: pub
-      handler: emAfPriceServerCliCppEventPub
+      handler: sli_zigbee_af_price_server_cli_cpp_event_pub
       help: Publishes a CPP event command using the configured values for the CPP event.
       argument:
       - type: uint16
@@ -588,7 +588,7 @@ template_contribution:
     value:
       group: cpp-event
       name: print
-      handler: emAfPriceServerCliCppEventPrint
+      handler: sli_zigbee_af_price_server_cli_cpp_event_print
       help: Prints the current CPP event values.
       argument:
       - type: uint8
@@ -601,7 +601,7 @@ template_contribution:
     value:
       group: credit-pmt
       name: pub
-      handler: emAfPriceServerCliCreditPaymentPub
+      handler: sli_zigbee_af_price_server_cli_credit_payment_pub
       help: Publishes Credit Payment command.
       argument:
       - type: uint16
@@ -616,7 +616,7 @@ template_contribution:
     value:
       group: credit-pmt
       name: set
-      handler: emAfPriceServerCliCreditPaymentSet
+      handler: sli_zigbee_af_price_server_cli_credit_payment_set
       help: Sets specific info for a credit payment.
       argument:
       - type: uint8
@@ -639,7 +639,7 @@ template_contribution:
     value:
       group: currency-conv
       name: pub
-      handler: emAfPriceServerCliCurrencyConversionPub
+      handler: sli_zigbee_af_price_server_cli_currency_conversion_pub
       help: Publishes the currency conversion command.
       argument:
       - type: uint16
@@ -652,7 +652,7 @@ template_contribution:
     value:
       group: currency-conv
       name: set
-      handler: emAfPriceServerCliCurrencyConversionSet
+      handler: sli_zigbee_af_price_server_cli_currency_conversion_set
       help: Configures the currency conversion settings.
       argument:
       - type: uint8
@@ -674,7 +674,7 @@ template_contribution:
     value:
       group: tariff-cancel
       name: set
-      handler: emAfPriceServerCliTariffCancellationSet
+      handler: sli_zigbee_af_price_server_cli_tariffCancellationSet
       help: Sets the values of the Tariff Cancellation structure.
       argument:
       - type: uint8
@@ -686,7 +686,7 @@ template_contribution:
     value:
       group: tariff-cancel
       name: pub
-      handler: emAfPriceServerCliTariffCancellationPub
+      handler: sli_zigbee_af_price_server_cli_tariffCancellationPub
       help: Sends a Tariff Cancellation command using the values of the Tariff Cancellation structure.
       argument:
       - type: uint16

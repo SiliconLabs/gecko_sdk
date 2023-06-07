@@ -85,8 +85,8 @@ __STATIC_INLINE uint8_t sl_wisun_ip6tos(const void *ip6addr, char *p)
  *          or 0 for an error, such as 'prefix_len' > 128
  *****************************************************************************/
 __STATIC_INLINE uint8_t sl_wisun_ip6_prefix_tos(const void *prefix,
-                                              uint8_t prefix_len,
-                                              char *p)
+                                                uint8_t prefix_len,
+                                                char *p)
 {
   return (uint8_t)ip6_prefix_tos(prefix, (uint_fast8_t)prefix_len, p);
 }

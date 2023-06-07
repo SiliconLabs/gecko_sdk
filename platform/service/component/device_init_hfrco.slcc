@@ -53,7 +53,7 @@ template_contribution:
       event: platform_init
       include: sl_device_init_hfrco.h
       handler: sl_device_init_hfrco
-    priority: -9750
+    priority: -9700
   - name: device_init_clocks_present
     value: hfrco
 documentation:

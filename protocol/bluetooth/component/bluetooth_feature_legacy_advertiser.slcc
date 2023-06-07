@@ -7,7 +7,7 @@ description: >
   advertisements that use legacy advertising PDUs. Common advertising functionalities,
   e.g., advertising set creation, and address settings etc., are provided by its
   base component <bluetooth_feature_advertiser>.
-category: "Bluetooth|Feature"
+category: Bluetooth|Bluetooth LE Controller (Link Layer)|Features with Commands and Events
 quality: "production"
 root_path: "protocol/bluetooth"
 requires:

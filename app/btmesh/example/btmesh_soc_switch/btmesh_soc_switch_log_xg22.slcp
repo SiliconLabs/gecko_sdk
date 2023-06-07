@@ -24,7 +24,6 @@ component:
   - id: bootloader_interface
   - id: app_button_press
   - id: btmesh_ctl_client
-  - id: btmesh_event_log
   - id: btmesh_factory_reset
   - id: btmesh_stack_gatt_prov_bearer
   - id: btmesh_stack_relay
@@ -41,20 +40,12 @@ component:
     instance:
     - example
   - id: gatt_service_device_information
-  - id: iostream_usart
-    instance:
-      - vcom
+  - id: iostream_recommended_stream
   - id: mpu
   - id: rail_util_pti
-  - id: simple_button
-    instance:
-      - btn0
-      - btn1
-  - id: simple_led
-    instance:
-      - led0
-      - led1
-  - id: simple_timer
+  - id: simple_button_recommended_instance
+  - id: simple_led_recommended_instance
+  - id: app_timer
 
 source:
   - path: app.c
@@ -98,12 +89,12 @@ other_file:
 configuration:
   - name: APP_LOG_LEVEL
     value: "APP_LOG_LEVEL_INFO"
+  - name: NVM3_DEFAULT_NVM_SIZE
+    value: "0x6000"
   - name: NVM3_DEFAULT_CACHE_SIZE
     value: 100
   - name: SL_BOARD_ENABLE_VCOM
     value: "1"
-    condition:
-      - "iostream_usart"
   - name: SL_BTMESH_BLOB_TRANSFER_SERVER_MAX_BLOCK_SIZE_LOG_CFG_VAL
     value: "9"
   - name: SL_BTMESH_BLOB_TRANSFER_SERVER_LPN_MODE_CFG_VAL
@@ -145,8 +136,8 @@ template_contribution:
 tag:
   - hardware:device:sdid:205
   - hardware:board_only
-  - hardware:component:button:2+
-  - hardware:component:led:2+
+  - hardware:component:button:1+
+  - hardware:component:led:1+
   - hardware:device:flash:512
   - hardware:device:ram:32
   - hardware:rf:band:2400

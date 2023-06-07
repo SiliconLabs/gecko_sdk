@@ -31,6 +31,11 @@
 #ifndef SL_NCP_EVT_FILTER_CONFIG_H
 #define SL_NCP_EVT_FILTER_CONFIG_H
 
+/***********************************************************************************************//**
+ * @addtogroup ncp_evt_filter
+ * @{
+ **************************************************************************************************/
+
 // <<< Use Configuration Wizard in Context Menu >>>
 
 // <o SL_NCP_EVT_FILTER_ARRAY_LENGTH> Array length of the event filter <1-16>
@@ -39,4 +44,5 @@
 #define SL_NCP_EVT_FILTER_ARRAY_LENGTH     8
 // <<< end of configuration section >>>
 
+/** @} (end addtogroup ncp_evt_filter) */
 #endif // SL_NCP_EVT_FILTER_CONFIG_H

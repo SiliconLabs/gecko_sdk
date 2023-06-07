@@ -37,6 +37,11 @@
 #include <openthread/platform/crypto.h>
 #include "utils/code_utils.h"
 
+#include <mbedtls/ecdsa.h>
+#include <mbedtls/md.h>
+#include <mbedtls/pk.h>
+#include "mbedtls/psa_util.h"
+
 #if OPENTHREAD_CONFIG_CRYPTO_LIB == OPENTHREAD_CONFIG_CRYPTO_LIB_PSA
 
 // Helper function to convert otCryptoKeyType to psa_key_type_t
@@ -56,6 +61,10 @@ static psa_key_type_t getPsaKeyType(otCryptoKeyType aKeyType)
 
     case OT_CRYPTO_KEY_TYPE_HMAC:
         aPsaKeyType = PSA_KEY_TYPE_HMAC;
+        break;
+
+    case OT_CRYPTO_KEY_TYPE_ECDSA:
+        aPsaKeyType = PSA_KEY_TYPE_ECC_KEY_PAIR(PSA_ECC_FAMILY_SECP_R1);
         break;
     }
 
@@ -79,6 +88,10 @@ static psa_algorithm_t getPsaAlgorithm(otCryptoKeyAlgorithm aKeyAlgorithm)
 
     case OT_CRYPTO_KEY_ALG_HMAC_SHA_256:
         aPsaKeyAlgorithm = PSA_ALG_HMAC(PSA_ALG_SHA_256);
+        break;
+
+    case OT_CRYPTO_KEY_ALG_ECDSA:
+        aPsaKeyAlgorithm = PSA_ALG_ECDSA(PSA_ALG_ANY_HASH);
         break;
     }
 
@@ -137,6 +150,32 @@ void otPlatCryptoInit(void)
     (void) sl_sec_man_init();
 }
 
+static otError extractPrivateKeyFromDer(uint8_t *aPrivateKey, const uint8_t *aDer, uint8_t aDerLen)
+{
+    otError              error = OT_ERROR_NONE;
+    mbedtls_pk_context   pk;
+    mbedtls_ecp_keypair *keyPair;
+
+    mbedtls_pk_init(&pk);
+
+    otEXPECT_ACTION(mbedtls_pk_setup(&pk, mbedtls_pk_info_from_type(MBEDTLS_PK_ECKEY)) == 0, error = OT_ERROR_FAILED);
+
+    #if (MBEDTLS_VERSION_NUMBER >= 0x03000000)
+    otEXPECT_ACTION(mbedtls_pk_parse_key(&pk, aDer, aDerLen, NULL, 0,
+                                    mbedtls_psa_get_random, MBEDTLS_PSA_RANDOM_STATE) == 0,
+                error = OT_ERROR_PARSE);
+    #else
+    otEXPECT_ACTION(mbedtls_pk_parse_key(&pk, aDer, aDerLen, NULL, 0) == 0,
+                error = OT_ERROR_PARSE);
+    #endif
+
+    keyPair = mbedtls_pk_ec(pk);
+    mbedtls_mpi_write_binary(&keyPair->MBEDTLS_PRIVATE(d), aPrivateKey, SL_OPENTHREAD_ECDSA_PRIVATE_KEY_SIZE);
+
+exit:
+    return error;
+}
+
 otError otPlatCryptoImportKey(otCryptoKeyRef *     aKeyId,
                               otCryptoKeyType      aKeyType,
                               otCryptoKeyAlgorithm aKeyAlgorithm,
@@ -145,13 +184,23 @@ otError otPlatCryptoImportKey(otCryptoKeyRef *     aKeyId,
                               const uint8_t *      aKey,
                               size_t               aKeyLen)
 {
-    otError             error = OT_ERROR_NONE;
-    sl_sec_man_status_t status;
+    otError        error       = OT_ERROR_NONE;
+    psa_status_t   status;
+    uint8_t        aPrivateKey[SL_OPENTHREAD_ECDSA_PRIVATE_KEY_SIZE];
+    const uint8_t *keyToImport = aKey;
+    size_t         keySize     = aKeyLen;
+
+    if (aKeyType == OT_CRYPTO_KEY_TYPE_ECDSA) {
+        error = extractPrivateKeyFromDer(aPrivateKey, aKey, aKeyLen);
+        keyToImport = aPrivateKey;
+        keySize = SL_OPENTHREAD_ECDSA_PRIVATE_KEY_SIZE;
+    }
 
     status = sl_sec_man_import_key(aKeyId, getPsaKeyType(aKeyType), getPsaAlgorithm(aKeyAlgorithm),
-                                   getPsaKeyUsage(aKeyUsage), getPsaKeyPersistence(aKeyPersistence), aKey, aKeyLen);
+                                   getPsaKeyUsage(aKeyUsage), getPsaKeyPersistence(aKeyPersistence),
+                                   keyToImport, keySize);
 
-    otEXPECT_ACTION((status == SL_SECURITY_MAN_SUCCESS), error = OT_ERROR_FAILED);
+    otEXPECT_ACTION((status == PSA_SUCCESS), error = OT_ERROR_FAILED);
 
 exit:
     return error;
@@ -159,12 +208,12 @@ exit:
 
 otError otPlatCryptoExportKey(otCryptoKeyRef aKeyId, uint8_t *aBuffer, size_t aBufferLen, size_t *aKeyLen)
 {
-    otError             error = OT_ERROR_NONE;
-    sl_sec_man_status_t status;
+    otError      error = OT_ERROR_NONE;
+    psa_status_t status;
 
     status = sl_sec_man_export_key(aKeyId, aBuffer, aBufferLen, aKeyLen);
 
-    otEXPECT_ACTION((status == SL_SECURITY_MAN_SUCCESS), error = OT_ERROR_FAILED);
+    otEXPECT_ACTION((status == PSA_SUCCESS), error = OT_ERROR_FAILED);
 
 exit:
     return error;
@@ -172,12 +221,12 @@ exit:
 
 otError otPlatCryptoDestroyKey(otCryptoKeyRef aKeyId)
 {
-    otError             error = OT_ERROR_NONE;
-    sl_sec_man_status_t status;
+    otError      error = OT_ERROR_NONE;
+    psa_status_t status;
 
     status = sl_sec_man_destroy_key(aKeyId);
 
-    otEXPECT_ACTION((status == SL_SECURITY_MAN_SUCCESS), error = OT_ERROR_FAILED);
+    otEXPECT_ACTION((status == PSA_SUCCESS), error = OT_ERROR_FAILED);
 
 exit:
     return error;
@@ -187,7 +236,7 @@ bool otPlatCryptoHasKey(otCryptoKeyRef aKeyRef)
 {
     psa_key_attributes_t aAttr = PSA_KEY_ATTRIBUTES_INIT;
 
-    return (sl_sec_man_get_key_attributes(aKeyRef, &aAttr) == SL_SECURITY_MAN_SUCCESS);
+    return (sl_sec_man_get_key_attributes(aKeyRef, &aAttr) == PSA_SUCCESS);
 }
 
 // AES  Implementation
@@ -214,15 +263,15 @@ exit:
 
 otError otPlatCryptoAesEncrypt(otCryptoContext *aContext, const uint8_t *aInput, uint8_t *aOutput)
 {
-    otError             error = OT_ERROR_NONE;
-    sl_sec_man_status_t status;
-    otCryptoKeyRef *    mKeyRef = NULL;
+    otError          error   = OT_ERROR_NONE;
+    psa_status_t     status;
+    otCryptoKeyRef * mKeyRef = NULL;
 
     otEXPECT_ACTION(((aContext != NULL) && (aContext->mContext != NULL) && (aOutput != NULL) && (aInput != NULL)), error = OT_ERROR_INVALID_ARGS);
     mKeyRef = (otCryptoKeyRef *)aContext->mContext;
     status  = sl_sec_man_aes_encrypt(*mKeyRef, PSA_ALG_ECB_NO_PADDING, aInput, aOutput);
 
-    otEXPECT_ACTION((status == SL_SECURITY_MAN_SUCCESS), error = OT_ERROR_FAILED);
+    otEXPECT_ACTION((status == PSA_SUCCESS), error = OT_ERROR_FAILED);
 
 exit:
     return error;
@@ -246,13 +295,13 @@ otError otPlatCryptoHmacSha256Init(otCryptoContext *aContext)
 
 otError otPlatCryptoHmacSha256Deinit(otCryptoContext *aContext)
 {
-    otError error = OT_ERROR_NONE;
+    otError              error         = OT_ERROR_NONE;
     psa_mac_operation_t *mMacOperation = (psa_mac_operation_t *)aContext->mContext;
-    sl_sec_man_status_t  status;
+    psa_status_t         status;
 
     status = sl_sec_man_hmac_deinit(mMacOperation);
 
-    otEXPECT_ACTION((status == SL_SECURITY_MAN_SUCCESS), error = OT_ERROR_FAILED);
+    otEXPECT_ACTION((status == PSA_SUCCESS), error = OT_ERROR_FAILED);
 
 exit:
     return error;
@@ -262,11 +311,11 @@ otError otPlatCryptoHmacSha256Start(otCryptoContext *aContext, const otCryptoKey
 {
     otError              error         = OT_ERROR_NONE;
     psa_mac_operation_t *mMacOperation = (psa_mac_operation_t *)aContext->mContext;
-    sl_sec_man_status_t  status;
+    psa_status_t         status;
 
     status = sl_sec_man_hmac_start(mMacOperation, aKey->mKeyRef);
 
-    otEXPECT_ACTION((status == SL_SECURITY_MAN_SUCCESS), error = OT_ERROR_FAILED);
+    otEXPECT_ACTION((status == PSA_SUCCESS), error = OT_ERROR_FAILED);
 
 exit:
     return error;
@@ -276,11 +325,11 @@ otError otPlatCryptoHmacSha256Update(otCryptoContext *aContext, const void *aBuf
 {
     otError              error         = OT_ERROR_NONE;
     psa_mac_operation_t *mMacOperation = (psa_mac_operation_t *)aContext->mContext;
-    sl_sec_man_status_t  status;
+    psa_status_t         status;
 
     status = sl_sec_man_hmac_update(mMacOperation, (const uint8_t *)aBuf, (size_t)aBufLength);
 
-    otEXPECT_ACTION((status == SL_SECURITY_MAN_SUCCESS), error = OT_ERROR_FAILED);
+    otEXPECT_ACTION((status == PSA_SUCCESS), error = OT_ERROR_FAILED);
 
 exit:
     return error;
@@ -290,11 +339,11 @@ otError otPlatCryptoHmacSha256Finish(otCryptoContext *aContext, uint8_t *aBuf, s
 {
     otError              error         = OT_ERROR_NONE;
     psa_mac_operation_t *mMacOperation = (psa_mac_operation_t *)aContext->mContext;
-    sl_sec_man_status_t  status;
+    psa_status_t         status;
 
     status = sl_sec_man_hmac_finish(mMacOperation, aBuf, aBufLength);
 
-    otEXPECT_ACTION((status == SL_SECURITY_MAN_SUCCESS), error = OT_ERROR_FAILED);
+    otEXPECT_ACTION((status == PSA_SUCCESS), error = OT_ERROR_FAILED);
 
 exit:
     return error;
@@ -308,14 +357,14 @@ otError otPlatCryptoHkdfExpand(otCryptoContext * aContext,
                                uint8_t *         aOutputKey,
                                uint16_t          aOutputKeyLength)
 {
-    otError             error = OT_ERROR_NONE;
-    sl_sec_man_status_t status;
+    otError      error = OT_ERROR_NONE;
+    psa_status_t status;
 
     otEXPECT_ACTION(((aContext != NULL) && (aContext->mContext != NULL) && (aInfo != NULL) && (aOutputKey != NULL)), error = OT_ERROR_INVALID_ARGS);
 
     status = sl_sec_man_key_derivation_expand(aContext->mContext, aInfo, aInfoLength, aOutputKey, aOutputKeyLength);
 
-    otEXPECT_ACTION((status == SL_SECURITY_MAN_SUCCESS), error = OT_ERROR_FAILED);
+    otEXPECT_ACTION((status == PSA_SUCCESS), error = OT_ERROR_FAILED);
 
 exit:
     return error;
@@ -326,15 +375,15 @@ otError otPlatCryptoHkdfExtract(otCryptoContext *  aContext,
                                 uint16_t           aSaltLength,
                                 const otCryptoKey *aKey)
 {
-    otError             error = OT_ERROR_NONE;
-    sl_sec_man_status_t status;
+    otError      error = OT_ERROR_NONE;
+    psa_status_t status;
 
     otEXPECT_ACTION(((aContext != NULL) && (aContext->mContext != NULL) && (aKey != NULL) && (aSalt != NULL) && (aSaltLength != 0)),
                     error = OT_ERROR_INVALID_ARGS);
 
     status = sl_sec_man_key_derivation_extract(aContext->mContext, PSA_ALG_SHA_256, aKey->mKeyRef, aSalt, aSaltLength);
 
-    otEXPECT_ACTION((status == SL_SECURITY_MAN_SUCCESS), error = OT_ERROR_FAILED);
+    otEXPECT_ACTION((status == PSA_SUCCESS), error = OT_ERROR_FAILED);
 
 exit:
     return error;
@@ -362,7 +411,7 @@ otError otPlatCryptoSha256Deinit(otCryptoContext *aContext)
     psa_hash_operation_t *ctx   = (psa_hash_operation_t *)aContext->mContext;
 
     otEXPECT_ACTION((ctx != NULL), error = OT_ERROR_INVALID_ARGS);
-    otEXPECT_ACTION((sl_sec_man_hash_deinit(ctx) == SL_SECURITY_MAN_SUCCESS), error = OT_ERROR_FAILED);
+    otEXPECT_ACTION((sl_sec_man_hash_deinit(ctx) == PSA_SUCCESS), error = OT_ERROR_FAILED);
 
 exit:
     return error;
@@ -375,7 +424,7 @@ otError otPlatCryptoSha256Start(otCryptoContext *aContext)
     psa_hash_operation_t *ctx   = (psa_hash_operation_t *)aContext->mContext;
 
     otEXPECT_ACTION((ctx != NULL), error = OT_ERROR_INVALID_ARGS);
-    otEXPECT_ACTION((sl_sec_man_hash_start(ctx, PSA_ALG_SHA_256) == SL_SECURITY_MAN_SUCCESS), error = OT_ERROR_FAILED);
+    otEXPECT_ACTION((sl_sec_man_hash_start(ctx, PSA_ALG_SHA_256) == PSA_SUCCESS), error = OT_ERROR_FAILED);
 
 exit:
     return error;
@@ -388,7 +437,7 @@ otError otPlatCryptoSha256Update(otCryptoContext *aContext, const void *aBuf, ui
     psa_hash_operation_t *ctx   = (psa_hash_operation_t *)aContext->mContext;
 
     otEXPECT_ACTION(((ctx != NULL) && (aBuf != NULL)), error = OT_ERROR_INVALID_ARGS);
-    otEXPECT_ACTION((sl_sec_man_hash_update(ctx, (uint8_t *)aBuf, aBufLength) == SL_SECURITY_MAN_SUCCESS), error = OT_ERROR_FAILED);
+    otEXPECT_ACTION((sl_sec_man_hash_update(ctx, (uint8_t *)aBuf, aBufLength) == PSA_SUCCESS), error = OT_ERROR_FAILED);
 
 exit:
     return error;
@@ -402,69 +451,67 @@ otError otPlatCryptoSha256Finish(otCryptoContext *aContext, uint8_t *aHash, uint
     psa_hash_operation_t *ctx         = (psa_hash_operation_t *)aContext->mContext;
 
     otEXPECT_ACTION(((ctx != NULL) && (aHash != NULL)), error = OT_ERROR_INVALID_ARGS);
-    otEXPECT_ACTION((sl_sec_man_hash_finish(ctx, aHash, aHashSize, &aHashLength) == SL_SECURITY_MAN_SUCCESS),
+    otEXPECT_ACTION((sl_sec_man_hash_finish(ctx, aHash, aHashSize, &aHashLength) == PSA_SUCCESS),
                     error = OT_ERROR_FAILED);
 
 exit:
     return error;
 }
 
-otError otPlatCryptoEcdsaGenerateKey(otPlatCryptoEcdsaKeyPair *aKeyPair)
+otError otPlatCryptoEcdsaGenerateAndImportKey(otCryptoKeyRef aKeyRef)
 {
-    otError               error         = OT_ERROR_NONE;
-    size_t                aKeyLength    = 256;
-    sl_sec_man_status_t   status;
+    otError      error      = OT_ERROR_NONE;
+    size_t       aKeyLength = 256;
+    psa_status_t status;
 
-    otEXPECT_ACTION((aKeyPair != NULL), error = OT_ERROR_INVALID_ARGS);
-
-    status = sl_sec_man_generate_key(   &aKeyPair->mKeyRef,
+    status = sl_sec_man_generate_key(   &aKeyRef,
                                         PSA_KEY_TYPE_ECC_KEY_PAIR(PSA_ECC_FAMILY_SECP_R1),
                                         PSA_ALG_ECDSA(PSA_ALG_ANY_HASH),
                                         (PSA_KEY_USAGE_SIGN_HASH | PSA_KEY_USAGE_VERIFY_HASH),
                                         PSA_KEY_LIFETIME_PERSISTENT,
                                         aKeyLength);
 
-    otEXPECT_ACTION((status == SL_SECURITY_MAN_SUCCESS), error = OT_ERROR_FAILED);
+    otEXPECT_ACTION((status == PSA_SUCCESS), error = OT_ERROR_FAILED);
 
 exit:
     return error;
 }
 
-otError otPlatCryptoEcdsaGetPublicKey(const otPlatCryptoEcdsaKeyPair *aKeyPair, otPlatCryptoEcdsaPublicKey *aPublicKey)
+otError otPlatCryptoEcdsaExportPublicKey(otCryptoKeyRef aKeyRef, otPlatCryptoEcdsaPublicKey *aPublicKey)
 {
-    otError               error         = OT_ERROR_NONE;
-    size_t                aKeyLength;
-    sl_sec_man_status_t   status;
-    uint8_t               aByteArray[OT_CRYPTO_ECDSA_PUBLIC_KEY_SIZE + 1];
+    otError      error = OT_ERROR_NONE;
+    size_t       aKeyLength;
+    psa_status_t status;
+    uint8_t      aByteArray[OT_CRYPTO_ECDSA_PUBLIC_KEY_SIZE + 1];
 
-    otEXPECT_ACTION(((aKeyPair != NULL) && (aPublicKey != NULL)), error = OT_ERROR_INVALID_ARGS);
+    otEXPECT_ACTION((aPublicKey != NULL), error = OT_ERROR_INVALID_ARGS);
     
     // Use byte array to get the public key because PSA adds a encoding header at the beginning of the array.
     //It is easier to export it to a byte array and copy only the public key to output array.
-    status = sl_sec_man_export_public_key(  aKeyPair->mKeyRef,
+    status = sl_sec_man_export_public_key(  aKeyRef,
                                             aByteArray,
                                             sizeof(aByteArray),
                                             &aKeyLength);
 
     memcpy(aPublicKey->m8, &aByteArray[1], OT_CRYPTO_ECDSA_PUBLIC_KEY_SIZE);
-    otEXPECT_ACTION((status == SL_SECURITY_MAN_SUCCESS), error = OT_ERROR_FAILED);
+    otEXPECT_ACTION((status == PSA_SUCCESS), error = OT_ERROR_FAILED);
 
 exit:
     return error;
 }
 
-otError otPlatCryptoEcdsaSign(const otPlatCryptoEcdsaKeyPair *aKeyPair,
-                              const otPlatCryptoSha256Hash *  aHash,
-                              otPlatCryptoEcdsaSignature *    aSignature)
+otError otPlatCryptoEcdsaSignUsingKeyRef(otCryptoKeyRef                aKeyRef,
+                                         const otPlatCryptoSha256Hash *aHash,
+                                         otPlatCryptoEcdsaSignature   *aSignature)
 {
-    otError               error         = OT_ERROR_NONE;
-    size_t                aSignatureLength;
-    sl_sec_man_status_t   status;
-    bool                  aIsHash       = true;
+    otError      error   = OT_ERROR_NONE;
+    size_t       aSignatureLength;
+    psa_status_t status;
+    bool         aIsHash = true;
 
-    otEXPECT_ACTION(((aKeyPair != NULL) && (aHash != NULL) && (aSignature != NULL)), error = OT_ERROR_INVALID_ARGS);
+    otEXPECT_ACTION(((aHash != NULL) && (aSignature != NULL)), error = OT_ERROR_INVALID_ARGS);
     
-    status = sl_sec_man_sign(   aKeyPair->mKeyRef,
+    status = sl_sec_man_sign(   aKeyRef,
                                 PSA_ALG_ECDSA(PSA_ALG_SHA_256),
                                 aHash->m8,
                                 sizeof(aHash->m8),
@@ -473,37 +520,24 @@ otError otPlatCryptoEcdsaSign(const otPlatCryptoEcdsaKeyPair *aKeyPair,
                                 &aSignatureLength,
                                 aIsHash);
 
-    otEXPECT_ACTION((status == SL_SECURITY_MAN_SUCCESS), error = OT_ERROR_FAILED);
+    otEXPECT_ACTION((status == PSA_SUCCESS), error = OT_ERROR_FAILED);
 
 exit:
     return error;
 }
 
-otError otPlatCryptoEcdsaVerify(const otPlatCryptoEcdsaPublicKey *aPublicKey,
-                                const otPlatCryptoSha256Hash *    aHash,
-                                const otPlatCryptoEcdsaSignature *aSignature)
+otError otPlatCryptoEcdsaVerifyUsingKeyRef(otCryptoKeyRef                    aKeyRef,
+                                           const otPlatCryptoSha256Hash     *aHash,
+                                           const otPlatCryptoEcdsaSignature *aSignature)
 {
-    otError                     error         = OT_ERROR_NONE;
-    otCryptoKeyRef              aKeyId;
-    sl_sec_man_status_t         status;
-    bool                        aIsHash       = true;
-    uint8_t                     aByteArray[OT_CRYPTO_ECDSA_PUBLIC_KEY_SIZE + 1];
+    otError      error   = OT_ERROR_NONE;
+    psa_status_t status;
+    bool         aIsHash = true;
 
-    otEXPECT_ACTION(((aPublicKey != NULL) && (aHash != NULL) && (aSignature != NULL)), error = OT_ERROR_INVALID_ARGS);
+    otEXPECT_ACTION(((aHash != NULL) && (aSignature != NULL)), error = OT_ERROR_INVALID_ARGS);
 
-    //First import the received public key into PSA.
-    aByteArray[0] = 0x04; //Encoding header for PSA, always 0x04
-    memcpy(&aByteArray[1], aPublicKey->m8, OT_CRYPTO_ECDSA_PUBLIC_KEY_SIZE);
-
-    status = sl_sec_man_import_key(&aKeyId, PSA_KEY_TYPE_ECC_PUBLIC_KEY(PSA_ECC_FAMILY_SECP_R1), 
-                                   PSA_ALG_ECDSA(PSA_ALG_ANY_HASH),
-                                   PSA_KEY_USAGE_VERIFY_HASH, PSA_KEY_LIFETIME_VOLATILE, 
-                                   aByteArray, sizeof(aByteArray));
-
-    otEXPECT_ACTION((status == SL_SECURITY_MAN_SUCCESS), error = OT_ERROR_FAILED);
-    
     //Verify the signature.
-    status = sl_sec_man_verify( aKeyId,
+    status = sl_sec_man_verify( aKeyRef,
                                 PSA_ALG_ECDSA(PSA_ALG_SHA_256),
                                 aHash->m8,
                                 sizeof(aHash->m8),
@@ -511,10 +545,7 @@ otError otPlatCryptoEcdsaVerify(const otPlatCryptoEcdsaPublicKey *aPublicKey,
                                 sizeof(aSignature->m8),
                                 aIsHash);
 
-    otEXPECT_ACTION((status == SL_SECURITY_MAN_SUCCESS), error = OT_ERROR_FAILED);
-
-    //Destroy the imported key.
-    status = sl_sec_man_destroy_key(aKeyId);
+    otEXPECT_ACTION((status == PSA_SUCCESS), error = OT_ERROR_FAILED);
 
 exit:
     return error;

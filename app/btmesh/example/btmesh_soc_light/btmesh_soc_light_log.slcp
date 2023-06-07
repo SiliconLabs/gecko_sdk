@@ -23,7 +23,6 @@ component:
   - id: bluetooth_feature_system
   - id: bootloader_interface
   - id: btmesh_ctl_server
-  - id: btmesh_event_log
   - id: btmesh_factory_reset
   - id: btmesh_stack_gatt_prov_bearer
   - id: btmesh_stack_relay
@@ -44,20 +43,15 @@ component:
     instance:
     - example
   - id: gatt_service_device_information
-  - id: iostream_usart
-    instance:
-      - vcom
+  - id: iostream_recommended_stream
   - id: mpu
   - id: pwm
     instance:
       - led0
       - led1
   - id: rail_util_pti
-  - id: simple_button
-    instance:
-      - btn0
-      - btn1
-  - id: simple_timer
+  - id: simple_button_recommended_instance
+  - id: app_timer
 
 source:
   - path: app.c
@@ -103,6 +97,8 @@ other_file:
 configuration:
   - name: APP_LOG_LEVEL
     value: "APP_LOG_LEVEL_INFO"
+  - name: NVM3_DEFAULT_NVM_SIZE
+    value: "0x6000"
   - name: SL_BTMESH_CONFIG_MAX_PROV_BEARERS
     value: "3"
   - name: SL_BTMESH_LC_SERVER_PROPERTY_STATE_DEFAULT_ENABLE_CFG_VAL
@@ -127,8 +123,6 @@ configuration:
     value: "1"
   - name: SL_BOARD_ENABLE_VCOM
     value: "1"
-    condition:
-      - "iostream_usart"
   - name: SL_BTMESH_FW_UPDATE_SERVER_FWID_CFG_VAL
     value: '"socbtmlight_v1"'
   - name: SL_HEAP_SIZE
@@ -155,7 +149,6 @@ tag:
   - hardware:component:display:!ls013b7dh03
   - hardware:component:led:2+
   - hardware:device:sdid:!205
-  - hardware:device:sdid:!215
   - hardware:rf:band:2400
   - prebuilt_demo
 

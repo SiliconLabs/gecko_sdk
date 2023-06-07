@@ -28,38 +28,37 @@
  *
  ******************************************************************************/
 
-// -------------------------------------
-// Includes
-
-#include "psa/crypto_platform.h"
+#include "sli_psa_driver_features.h"
 
 #if defined(MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG) || defined(MBEDTLS_ENTROPY_HARDWARE_ALT)
-#include "em_device.h"
+
 #include "psa/crypto.h"
 #include "psa/crypto_extra.h"
+#include "psa/crypto_platform.h"
+
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
+  #include "sl_se_manager.h"
+  #include "sl_se_manager_entropy.h"
+#elif defined(SLI_MBEDTLS_DEVICE_VSE)
+  #include "sx_trng.h"
+  #include "cryptolib_types.h"
+  #include "cryptoacc_management.h"
+#elif defined(SLI_MBEDTLS_DEVICE_S1) && defined(SLI_PSA_DRIVER_FEATURE_TRNG)
+  #include "sli_crypto_trng_driver.h"
+#endif
+
+// -----------------------------------------------------------------------------
+// Typedefs
 
 #if !defined(MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG)
 typedef void mbedtls_psa_external_random_context_t;
 #endif
 
-#if defined(SEMAILBOX_PRESENT)
-  #include "sl_se_manager.h"
-  #include "sl_se_manager_entropy.h"
-#endif
+// -----------------------------------------------------------------------------
+// Static functions
 
-#if defined(CRYPTOACC_PRESENT)
-  #include "sx_trng.h"
-  #include "cryptolib_types.h"
-  #include "cryptoacc_management.h"
-#endif
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
 
-#if defined(TRNG_PRESENT) \
-  && !defined(_SILICON_LABS_GECKO_INTERNAL_SDID_95)
-  #define SLI_RNG_TRNG_ENABLED
-  #include "sli_crypto_trng_driver.h"
-#endif
-
-#if defined(SEMAILBOX_PRESENT)
 static psa_status_t se_get_random(unsigned char *output,
                                   size_t len,
                                   size_t *out_len)
@@ -90,9 +89,9 @@ static psa_status_t se_get_random(unsigned char *output,
   *out_len = 0;
   return PSA_ERROR_HARDWARE_FAILURE;
 }
-#endif // SEMAILBOX_PRESENT
 
-#if defined(CRYPTOACC_PRESENT)
+#elif defined(SLI_MBEDTLS_DEVICE_VSE)
+
 static psa_status_t cryptoacc_get_random(unsigned char *output,
                                          size_t len,
                                          size_t *out_len)
@@ -120,33 +119,43 @@ static psa_status_t cryptoacc_get_random(unsigned char *output,
 
   return trng_status;
 }
-#endif // CRYPTOACC_PRESENT
+
+#endif // SLI_MBEDTLS_DEVICE_HSE / SLI_MBEDTLS_DEVICE_VSE
+
+// -----------------------------------------------------------------------------
+// Global entry points
 
 psa_status_t mbedtls_psa_external_get_random(
   mbedtls_psa_external_random_context_t *context,
-  uint8_t *output, size_t output_size, size_t *output_length)
+  uint8_t *output,
+  size_t output_size,
+  size_t *output_length)
 {
   (void)context;
 
-  // Implement chunking support here, as the PSA core doesn't implement it (yet)
-#if defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT) || defined(SLI_RNG_TRNG_ENABLED)
+  #if defined(SLI_PSA_DRIVER_FEATURE_TRNG)
+
   psa_status_t entropy_status = PSA_ERROR_CORRUPTION_DETECTED;
   size_t entropy_max_retries = 5;
   *output_length = 0;
 
+  // Implement chunking support here, as the PSA core doesn't implement it (yet).
+
   while (entropy_max_retries > 0 && entropy_status != PSA_SUCCESS) {
     size_t offset = *output_length;
-    #if defined(SEMAILBOX_PRESENT)
-    entropy_status = se_get_random(&output[offset], output_size - offset, output_length);
 
-    #elif defined(CRYPTOACC_PRESENT)
-    entropy_status = cryptoacc_get_random(&output[offset], output_size - offset, output_length);
-
-    #elif defined(SLI_RNG_TRNG_ENABLED)
-    entropy_status = sli_crypto_trng_get_random(&output[offset], output_size - offset, output_length);
-
-    #else
-      #error "No known entropy source for external random function"
+    #if defined(SLI_MBEDTLS_DEVICE_HSE)
+    entropy_status = se_get_random(&output[offset],
+                                   output_size - offset,
+                                   output_length);
+    #elif defined(SLI_MBEDTLS_DEVICE_VSE)
+    entropy_status = cryptoacc_get_random(&output[offset],
+                                          output_size - offset,
+                                          output_length);
+    #elif defined(SLI_MBEDTLS_DEVICE_S1) && defined(SLI_PSA_DRIVER_FEATURE_TRNG)
+    entropy_status = sli_crypto_trng_get_random(&output[offset],
+                                                output_size - offset,
+                                                output_length);
     #endif
 
     *output_length += offset;
@@ -161,12 +170,15 @@ psa_status_t mbedtls_psa_external_get_random(
 
   return entropy_status;
 
-#else // SE/CRYPTOACC/TRNG_ENABLED
+  #else // SLI_PSA_DRIVER_FEATURE_TRNG
+
   (void) output;
   (void) output_size;
   (void) output_length;
+
   return PSA_ERROR_HARDWARE_FAILURE;
-#endif
+
+  #endif // SLI_PSA_DRIVER_FEATURE_TRNG
 }
 
-#endif // MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG || defined(MBEDTLS_ENTROPY_HARDWARE_ALT)
+#endif // MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG || MBEDTLS_ENTROPY_HARDWARE_ALT

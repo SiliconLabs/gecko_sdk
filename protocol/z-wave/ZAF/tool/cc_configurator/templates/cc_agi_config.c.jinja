@@ -5,114 +5,105 @@
  * @copyright 2022 Silicon Laboratories Inc.
  */
 
-#include <stdint.h>
-#include <stdbool.h>
-#include <SizeOf.h>
-#include <Assert.h>
-#include <cc_association_config.h>
-#include <ZAF_types.h>
-#include <ZW_TransportEndpoint.h>
-#include <agi.h>
-#include <SizeOf.h>
 #include <cc_agi_config_api.h>
+#include <Assert.h>
+#include <SizeOf.h>
 
-{% if endpoints | length == 1 %}
-{% if endpoints[0].endpoint == 0 %}
-static const AGI_GROUP AGI_TABLE_ROOT_DEVICE_GROUPS[] = 
+{# Generate group names and array of commands for each endpoint.
+ #}
+{% set endpoints_sorted = endpoints|sort(attribute='endpoint') %}
+{% for endpoint in endpoints_sorted %}
+  {% for group in endpoint.groups %}
+static const char GROUP_NAME_ENDPOINT_{{ endpoint.endpoint }}_GROUP_{{ loop.index + 1 }}[] = "{{ group.name }}";
+static const ccc_pair_t COMMANDS_ENDPOINT_{{ endpoint.endpoint }}_GROUP_{{ loop.index + 1 }}[] = {
+    {% for command in group.commands %}
+  {
+    .cmdClass = {{ command.command_class }},
+    .cmd = {{ command.command }}
+  },
+    {% endfor %}
+};
+  {% endfor %}
+{% endfor %}
+
+{# Generate group array for root device.
+ # For an application without endpoints, this array will contain the groups defined for the root
+ # device. For an application with endpoints, this array will contain a copy of all the groups from
+ # each endpoint.
+ #}
+static const cc_agi_group_t ROOT_DEVICE_GROUPS[] =
 {
-{% for endpoint_index in endpoints %}
-{% for group_index in endpoint_index['groups'] %}
-  { 
-    .profile    = { .profile_MS = {{group_index['profile_msb']}}, .profile_LS = {{group_index['profile_lsb']}} }, 
-    .cmdGrpSize = {{group_index['commands'] | length }}, 
-    .cmdGrp     = { 
-                  {% for command_pair in group_index['commands'] %}
-                    [{{ loop.index0 }}] = { .cmdClass = {{command_pair['command_class']}}, .cmd = {{command_pair['command']}} }, 
-                  {% endfor %}
-                  }, 
-    .groupName  = "{{group_index['name']}}" 
-  }, 
+{% for endpoint in endpoints_sorted %}
+{% for group in endpoint.groups %}
+  {
+    .name = GROUP_NAME_ENDPOINT_{{ endpoint.endpoint }}_GROUP_{{ loop.index + 1 }},
+    .name_length = sizeof(GROUP_NAME_ENDPOINT_{{ endpoint.endpoint }}_GROUP_{{ loop.index + 1 }}),
+    .profile = {
+      .profile_MS = {{ group.profile_msb }},
+      .profile_LS = {{ group.profile_lsb }}
+    },
+    .ccc_pairs = COMMANDS_ENDPOINT_{{ endpoint.endpoint }}_GROUP_{{ loop.index + 1 }},
+    .ccc_pair_count = sizeof_array(COMMANDS_ENDPOINT_{{ endpoint.endpoint }}_GROUP_{{ loop.index + 1 }}),
+  },
 {% endfor %}
 {% endfor %}
 };
+
+{# Generate group arrays for each endpoint if more than one endpoint is defined.
+ # An application cannot have one endpoint only. Hence, if more than one endpoint is defined, it
+ # means that the application supports endpoints.
+ #}
+{% if endpoints_sorted | length > 1 %}
+
+{% for endpoint in endpoints_sorted %}
+static const cc_agi_group_t ENDPOINT_{{ endpoint.endpoint }}_GROUPS[] =
+{
+{% for group in endpoint.groups %}
+  {
+    .name = GROUP_NAME_ENDPOINT_{{ endpoint.endpoint }}_GROUP_{{ loop.index + 1 }},
+    .name_length = sizeof(GROUP_NAME_ENDPOINT_{{ endpoint.endpoint }}_GROUP_{{ loop.index + 1 }}),
+    .profile = {
+      .profile_MS = {{ group.profile_msb }},
+      .profile_LS = {{ group.profile_lsb }}
+    }, 
+    .ccc_pairs = COMMANDS_ENDPOINT_{{ endpoint.endpoint }}_GROUP_{{ loop.index + 1 }},
+    .ccc_pair_count = sizeof_array(COMMANDS_ENDPOINT_{{ endpoint.endpoint }}_GROUP_{{ loop.index + 1 }}),
+  },
+{% endfor %}
+};
+{% endfor %}
+
 {% endif %}
-{% else %}
-
-static const AGI_GROUP AGI_TABLE_ROOT_DEVICE_GROUPS[] = 
-{
-{% for endpoint_index in endpoints %}
-{% for group_index in endpoint_index['groups'] %}
-  { 
-    .profile    = { .profile_MS = {{group_index['profile_msb']}}, .profile_LS = {{group_index['profile_lsb']}} }, 
-    .cmdGrpSize = {{group_index['commands'] | length }}, 
-    .cmdGrp     = { 
-                  {% for command_pair in group_index['commands'] %}
-                    [{{ loop.index0 }}] = { .cmdClass = {{command_pair['command_class']}}, .cmd = {{command_pair['command']}} }, 
-                  {% endfor %}
-                  }, 
-    .groupName  = "{{group_index['name']}}" 
-  }, 
-{% endfor %}
-{% endfor %}
-};
-
-{% for endpoint_index in endpoints %}
-static const AGI_GROUP AGI_TABLE_ENDPOINT_{{ endpoint_index['endpoint'] }}_GROUPS[] = 
-{
-{% for group_index in endpoint_index['groups'] %}
-  { 
-    .profile    = { .profile_MS = {{group_index['profile_msb']}}, .profile_LS = {{group_index['profile_lsb']}} }, 
-    .cmdGrpSize = {{group_index['commands'] | length }}, 
-    .cmdGrp     = { 
-                  {% for command_pair in group_index['commands'] %}
-                    [{{ loop.index0 }}] = { .cmdClass = {{command_pair['command_class']}}, .cmd = {{command_pair['command']}} }, 
-                  {% endfor %}
-                  }, 
-    .groupName  = "{{group_index['name']}}" 
-  }, 
-{% endfor %}
-};
-{% endfor %}
-
+static const cc_agi_config_t config[] = {
+  {
+    .groups = ROOT_DEVICE_GROUPS,
+    .group_count = sizeof_array(ROOT_DEVICE_GROUPS)
+  },
+{% if endpoints_sorted | length > 1 %}
+  {% for endpoint in endpoints_sorted %}
+  {
+    .groups = ENDPOINT_{{ endpoint.endpoint }}_GROUPS,
+    .group_count = sizeof_array(ENDPOINT_{{ endpoint.endpoint }}_GROUPS)
+  },
+  {% endfor %}
 {% endif %}
-
-{% set gns = namespace() %}
-{% set gns.counter = 0  %}
-{% for endpoint_index in endpoints %}
-{% for group_index in endpoint_index['groups'] %}
-    {%  set gns.counter = gns.counter + 1 %}
-{% endfor %}
-{% endfor %}
-
-static const AGI_TABLE myAgi = 
-{
-  .tableEndpoint = {
-                    [0] = {
-                            .pTable = AGI_TABLE_ROOT_DEVICE_GROUPS,
-{% if endpoints[0].endpoint == 0  %}
-                            .tableSize = {{gns.counter }} 
-                          },
-{% else %}
-                            .tableSize = {{gns.counter}}
-                          },
-                  {% for endpoint_index in endpoints %}
-                    [{{endpoint_index['endpoint']}}] = {
-                            .pTable = AGI_TABLE_ENDPOINT_{{ endpoint_index['endpoint'] }}_GROUPS,
-                            .tableSize = {{ endpoint_index['groups'] | length }}
-                          },
-                  {% endfor %}
-{% endif %}
-                   },
 };
 
-
-const AGI_TABLE* cc_agi_get_config(void)
+const cc_agi_config_t * cc_agi_get_config(void)
 {
-  return &myAgi;
+  return config;
 }
 
-const AGI_GROUP* cc_agi_get_rootdevice_groups(void)
+uint8_t cc_agi_config_get_group_count_by_endpoint(uint8_t endpoint)
 {
-  return (AGI_GROUP*)&AGI_TABLE_ROOT_DEVICE_GROUPS;
+  if (endpoint > sizeof_array(config)) {
+    return 0;
+  }
+  return config[endpoint].group_count;
+}
+
+const cc_agi_group_t * cc_agi_get_rootdevice_groups(void)
+{
+  return ROOT_DEVICE_GROUPS;
 }
 

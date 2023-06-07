@@ -1,4 +1,8 @@
-Bluetooth Mesh SDK 4.2.1.0
-- Targeted quality improvements and bugfixes
+Bluetooth Mesh SDK 5.0.0.0
+- Support for Mesh Protocol 1.1
+- Support for Mesh Model 1.1
+- Support for Mesh Binary Large Object Transfer
+- Support for Mesh Device Firmware Update 
+
 
 

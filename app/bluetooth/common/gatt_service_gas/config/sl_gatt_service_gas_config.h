@@ -31,6 +31,11 @@
 #ifndef SL_GATT_SERVICE_GAS_CONFIG_H
 #define SL_GATT_SERVICE_GAS_CONFIG_H
 
+/***********************************************************************************************//**
+ * @addtogroup gatt_service_gas
+ * @{
+ **************************************************************************************************/
+
 // <<< Use Configuration Wizard in Context Menu >>>
 
 // <o SL_GATT_SERVICE_GAS_ECO2_INVALID> Dummy Equivalent CO2 level measurement results for uninitialized sensors. <0-0xFFFF>
@@ -42,4 +47,5 @@
 #define SL_GATT_SERVICE_GAS_TVOC_INVALID  0xFFFF
 // <<< end of configuration section >>>
 
+/** @} (end addtogroup gatt_service_gas) */
 #endif // SL_GATT_SERVICE_GAS_CONFIG_H

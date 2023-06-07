@@ -20,3 +20,7 @@ define:
     value: 128
     condition:
     - "device_family_efr32mg1"
+  - name: SL_OPENTHREAD_RADIO_RX_BUFFER_COUNT
+    value: 1
+    condition:
+    - "device_family_efr32mg1"

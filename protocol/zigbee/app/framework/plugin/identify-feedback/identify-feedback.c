@@ -24,33 +24,24 @@
 #include "hal/hal.h"
 #endif // !defined(EZSP_HOST)
 
-#ifdef UC_BUILD
 #include "identify-feedback-config.h"
 sl_zigbee_event_t emberAfPluginIdentifyFeedbackProvideFeedbackEvent;
 #define provideFeedbackEventControl (&emberAfPluginIdentifyFeedbackProvideFeedbackEvent)
-void emberAfPluginIdentifyFeedbackProvideFeedbackEventHandler(SLXU_UC_EVENT);
+void emberAfPluginIdentifyFeedbackProvideFeedbackEventHandler(sl_zigbee_event_t * event);
 #if (EMBER_AF_PLUGIN_IDENTIFY_FEEDBACK_LED_FEEDBACK == 1)
 #define LED_FEEDBACK
 #endif
-#else // !UC_BUILD
-EmberEventControl emberAfPluginIdentifyFeedbackProvideFeedbackEventControl;
-#define provideFeedbackEventControl (emberAfPluginIdentifyFeedbackProvideFeedbackEventControl)
-void emberAfPluginIdentifyFeedbackProvideFeedbackEventHandler(void);
-#ifdef EMBER_AF_PLUGIN_IDENTIFY_FEEDBACK_LED_FEEDBACK
-#define LED_FEEDBACK
-#endif
-#endif // UC_BUILD
 
 static bool identifyTable[EMBER_AF_IDENTIFY_CLUSTER_SERVER_ENDPOINT_COUNT];
 
-void emAfPluginIdentifyInitCallback(SLXU_INIT_ARG)
+void sli_zigbee_af_identify_init_callback(uint8_t init_level)
 {
-  SLXU_INIT_UNUSED_ARG;
+  (void)init_level;
 
-  slxu_zigbee_event_init(provideFeedbackEventControl,
-                         emberAfPluginIdentifyFeedbackProvideFeedbackEventHandler);
+  sl_zigbee_event_init(provideFeedbackEventControl,
+                       emberAfPluginIdentifyFeedbackProvideFeedbackEventHandler);
 }
-void emberAfPluginIdentifyFeedbackProvideFeedbackEventHandler(SLXU_UC_EVENT)
+void emberAfPluginIdentifyFeedbackProvideFeedbackEventHandler(sl_zigbee_event_t * event)
 {
 #if !defined(EZSP_HOST)
 #ifdef LED_FEEDBACK
@@ -61,8 +52,8 @@ void emberAfPluginIdentifyFeedbackProvideFeedbackEventHandler(SLXU_UC_EVENT)
 #endif // LED_FEEDBACK
 #endif
 
-  slxu_zigbee_event_set_delay_ms(provideFeedbackEventControl,
-                                 MILLISECOND_TICKS_PER_SECOND);
+  sl_zigbee_event_set_delay_ms(provideFeedbackEventControl,
+                               MILLISECOND_TICKS_PER_SECOND);
 }
 
 void emberAfPluginIdentifyStartFeedbackCallback(uint8_t endpoint,
@@ -83,10 +74,10 @@ void emberAfPluginIdentifyStartFeedbackCallback(uint8_t endpoint,
 
   // This initialization is needed because this callback is invoked in the
   // component init callback, so it may occur before this component init callback.
-  slxu_zigbee_event_init(provideFeedbackEventControl,
-                         emberAfPluginIdentifyFeedbackProvideFeedbackEventHandler);
-  slxu_zigbee_event_set_delay_ms(provideFeedbackEventControl,
-                                 MILLISECOND_TICKS_PER_SECOND);
+  sl_zigbee_event_init(provideFeedbackEventControl,
+                       emberAfPluginIdentifyFeedbackProvideFeedbackEventHandler);
+  sl_zigbee_event_set_delay_ms(provideFeedbackEventControl,
+                               MILLISECOND_TICKS_PER_SECOND);
 }
 
 void emberAfPluginIdentifyStopFeedbackCallback(uint8_t endpoint)
@@ -110,5 +101,5 @@ void emberAfPluginIdentifyStopFeedbackCallback(uint8_t endpoint)
   }
 
   emberAfIdentifyClusterPrintln("No endpoints identifying; stopping identification feedback.");
-  slxu_zigbee_event_set_inactive(provideFeedbackEventControl);
+  sl_zigbee_event_set_inactive(provideFeedbackEventControl);
 }

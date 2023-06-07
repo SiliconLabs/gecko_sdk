@@ -80,7 +80,7 @@
  *
  * @param    mask    Mask of bits to check if set.
  *
- * @return   true, if ALL specified bit(s) are     set in value.
+ * @return   true,  if ALL specified bit(s) are set in value.
  *
  *           false, if ALL specified bit(s) are NOT set in value.
  *
@@ -100,7 +100,7 @@
  *
  * @param    mask    Mask of bits to check if clear.
  *
- * @return   true, if ALL specified bit(s) are     clear in value.
+ * @return   true,  if ALL specified bit(s) are clear in value.
  *
  *           false, if ALL specified bit(s) are NOT clear in value.
  *
@@ -119,7 +119,7 @@
  *
  * @param    mask    Mask of bits to check if set (see Note #2).
  *
- * @return   true, if ANY specified bit(s) are     set in value.
+ * @return   true,  if ANY specified bit(s) are set in value.
  *
  *           false, if ALL specified bit(s) are NOT set in value.
  *
@@ -139,7 +139,7 @@
  *
  * @param    mask    Mask of bits to check if clear (see Note #2).
  *
- * @return   true, if ANY specified bit(s) are     clear in value.
+ * @return   true,   if ANY specified bit(s) are clear in value.
  *
  *           false,  if ALL specified bit(s) are NOT clear in value.
  *
@@ -149,6 +149,19 @@
  *******************************************************************************************************/
 
 #define  SL_IS_ANY_BIT_CLEAR(val, mask)  ((((val) & (mask)) == (mask))  ? (false) : (true))
+
+/****************************************************************************************************//**
+ *                                            SL_MATH_IS_PWR2()
+ *
+ * @brief    Determine if a value is a power of 2.
+ *
+ * @param    val     Value.
+ *
+ * @return   true,  'val' is a power of 2.
+ *           false, 'val' is not a power of 2.
+ *******************************************************************************************************/
+
+#define  SL_MATH_IS_PWR2(val)   ((((val) != 0u) && (((val) & ((val) - 1u)) == 0u)) ? true : false)
 
 /*******************************************************************************
  ******************************   DEFINES   ************************************

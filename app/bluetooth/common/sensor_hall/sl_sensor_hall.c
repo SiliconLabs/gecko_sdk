@@ -63,7 +63,7 @@ sl_status_t sl_sensor_hall_init(void)
   sl_i2cspm_t *hall_sensor = sl_sensor_select(SL_BOARD_SENSOR_HALL);
   sc = sl_board_enable_sensor(SL_BOARD_SENSOR_HALL);
   app_assert((SL_STATUS_OK == sc) && (NULL != hall_sensor),
-             "[E: %#04x] Si7210 sensor not available\n",
+             "[E: %#04lx] Si7210 sensor not available" APP_LOG_NL,
              sc);
 
   sc = sl_si7210_init(hall_sensor);

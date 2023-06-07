@@ -18,9 +18,7 @@
 #ifndef COMMS_HUB_FUNCTION_H_INCLUDED
 #define COMMS_HUB_FUNCTION_H_INCLUDED
 
-#ifdef UC_BUILD
 #include "comms-hub-function-config.h"
-#endif // UC_BUILD
 
 /**
  * @defgroup comms-hub-function Comms Hub Function
@@ -92,7 +90,7 @@ EmberAfPluginCommsHubFunctionStatus emberAfPluginCommsHubFunctionSend(EmberEUI64
  *
  * @param timeout Timeout in seconds.
  */
-void emAfPluginCommsHubFunctionSetDefaultTimeout(uint32_t timeout);
+void sli_zigbee_af_comms_hub_function_set_default_timeout(uint32_t timeout);
 
 /**
  * @brief Update Functional Notification Flags for the given device.
@@ -104,9 +102,9 @@ void emAfPluginCommsHubFunctionSetDefaultTimeout(uint32_t timeout);
  * @param setMask Each flag to be set has the corresponding bit set to 1,
  *  all other flags have the corresponding bit set to 0
  */
-EmberAfPluginCommsHubFunctionStatus emAfUpdateFunctionalNotificationFlagsByEui64(EmberEUI64 deviceId,
-                                                                                 uint32_t resetMask,
-                                                                                 uint32_t setMask);
+EmberAfPluginCommsHubFunctionStatus sli_zigbee_af_update_functional_notification_flags_by_eui64(EmberEUI64 deviceId,
+                                                                                                uint32_t resetMask,
+                                                                                                uint32_t setMask);
 
 /**
  * @brief Update Functional Notification Flags on the given endpoint.
@@ -117,9 +115,9 @@ EmberAfPluginCommsHubFunctionStatus emAfUpdateFunctionalNotificationFlagsByEui64
  * @param setMask Each flag to be set has the corresponding bit set to 1,
  *  all other flags have the corresponding bit set to 0.
  */
-EmberAfPluginCommsHubFunctionStatus emAfUpdateFunctionalNotificationFlagsByEndpoint(uint8_t endpoint,
-                                                                                    uint32_t resetMask,
-                                                                                    uint32_t setMask);
+EmberAfPluginCommsHubFunctionStatus sli_zigbee_af_update_functional_notification_flags_by_endpoint(uint8_t endpoint,
+                                                                                                   uint32_t resetMask,
+                                                                                                   uint32_t setMask);
 
 /** @} */ // end of name APIs
 
@@ -150,7 +148,7 @@ EmberAfPluginCommsHubFunctionStatus emAfUpdateFunctionalNotificationFlagsByEndpo
  * @param deviceId An identifier of the device from which a tunnel is requested
  * @return True if the tunnel should be allowed, false otherwise.
  */
-bool emAfPluginCommsHubFunctionTunnelAcceptCallback(EmberEUI64 deviceId);
+bool sli_zigbee_af_comms_hub_function_tunnel_accept_callback(EmberEUI64 deviceId);
 
 /**
  * @brief Notify that tunnel data was received.
@@ -163,9 +161,9 @@ bool emAfPluginCommsHubFunctionTunnelAcceptCallback(EmberEUI64 deviceId);
  * @param length The length of the data received
  * @param payload Data received.
  */
-void emAfPluginCommsHubFunctionTunnelDataReceivedCallback(EmberEUI64 senderDeviceId,
-                                                          uint16_t length,
-                                                          uint8_t *payload);
+void sli_zigbee_af_comms_hub_function_tunnel_data_received_callback(EmberEUI64 senderDeviceId,
+                                                                    uint16_t length,
+                                                                    uint8_t *payload);
 
 /** @brief Send.
  *

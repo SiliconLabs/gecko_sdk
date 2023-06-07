@@ -30,9 +30,9 @@
 #ifndef SE_MANAGER_INTERNAL_H
 #define SE_MANAGER_INTERNAL_H
 
-#include "em_device.h"
+#include "sli_se_manager_features.h"
 
-#if defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT) || defined(DOXYGEN)
+#if defined(SLI_MAILBOX_COMMAND_SUPPORTED) || defined(SLI_VSE_MAILBOX_COMMAND_SUPPORTED)
 
 #include "sl_status.h"
 #include "em_se.h"
@@ -79,7 +79,7 @@ extern "C" {
 #define SLI_SE_RESPONSE_NOT_INITIALIZED         0x000B0000UL
 /// Abort status code is given when no operation is attempted.
 #define SLI_SE_RESPONSE_ABORT                   0x00FF0000UL
-#if defined(CRYPTOACC_PRESENT) || defined(DOXYGEN)
+#if defined(CRYPTOACC_PRESENT)
 /// Root Code Mailbox is invalid.
 #define SLI_SE_RESPONSE_MAILBOX_INVALID         0x00FE0000UL
 #endif
@@ -107,7 +107,7 @@ extern "C" {
 #define SLI_SE_COMMAND_DBG_LOCK_APPLY           0x430C0000UL
 
 // Commands limited to SE devices
-#if defined(SEMAILBOX_PRESENT) || defined(DOXYGEN)
+#if defined(SLI_MAILBOX_COMMAND_SUPPORTED)
   #define SLI_SE_COMMAND_CREATE_KEY               0x02000000UL
   #define SLI_SE_COMMAND_READPUB_KEY              0x02010000UL
 
@@ -150,13 +150,13 @@ extern "C" {
   #define SLI_SE_COMMAND_DBG_LOCK_STATUS          0x43110000UL
   #define SLI_SE_COMMAND_DBG_SET_RESTRICTIONS     0x43120000UL
   #define SLI_SE_COMMAND_PROTECTED_REGISTER       0x43210000UL
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
+#if defined(SLI_SE_COMMAND_STATUS_READ_RSTCAUSE_AVAILABLE)
 // SLI_SE_COMMAND_STATUS_READ_RSTCAUSE is only available on xG21 devices (series-2-config-1)
   #define SLI_SE_COMMAND_STATUS_READ_RSTCAUSE     0x43220000UL
 #endif
     #define SLI_SE_COMMAND_READ_USER_CERT_SIZE      0x43FA0000UL
     #define SLI_SE_COMMAND_READ_USER_CERT           0x43FB0000UL
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || defined(DOXYGEN)
+#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
     #define SLI_SE_COMMAND_ATTEST_PSA_IAT           0x0A030000UL
     #define SLI_SE_COMMAND_ATTEST_CONFIG            0x0A040000UL
   #endif
@@ -175,10 +175,10 @@ extern "C" {
   #define SLI_SE_COMMAND_INIT_PUBKEY_SIGNATURE    0xFF090001UL
   #define SLI_SE_COMMAND_READ_PUBKEY_SIGNATURE    0xFF0A0001UL
   #define SLI_SE_COMMAND_INIT_AES_128_KEY         0xFF0B0001UL
-#endif // SEMAILBOX_PRESENT
+#endif // SLI_MAILBOX_COMMAND_SUPPORTED
 
 // Commands limited to SE Vault High devices
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || defined(DOXYGEN)
+#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
     #define SLI_SE_COMMAND_WRAP_KEY                 0x01000000UL
     #define SLI_SE_COMMAND_UNWRAP_KEY               0x01020000UL
     #define SLI_SE_COMMAND_DELETE_KEY               0x01050000UL
@@ -207,10 +207,10 @@ extern "C" {
 #define SLI_SE_KEY_TYPE_AUTH                    0x00000200UL
 
 // Options limited to SE devices
-#if defined(SEMAILBOX_PRESENT) || defined(DOXYGEN)
+#if defined(SLI_MAILBOX_COMMAND_SUPPORTED)
 /// Root pubkey
   #define SLI_SE_KEY_TYPE_ROOT                    0x00000300UL
-  #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || defined(DOXYGEN)
+  #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
 /// Attestation pubkey
     #define SLI_SE_KEY_TYPE_ATTEST                0x00000400UL
   #endif // _SILICON_LABS_SECURITY_FEATURE_VAULT
@@ -251,18 +251,18 @@ extern "C" {
   #define SLI_SE_COMMAND_CERT_SE                  0x00000200UL
   #define SLI_SE_COMMAND_CERT_HOST                0x00000300UL
 
-  #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || defined(DOXYGEN)
+  #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
 /// Use SHA384 as hash algorithm
     #define SLI_SE_COMMAND_OPTION_HASH_SHA384       0x00000500UL
 /// Use SHA512 as hash algorithm
     #define SLI_SE_COMMAND_OPTION_HASH_SHA512       0x00000600UL
   #endif
-#endif // SEMAILBOX_PRESENT
+#endif // SLI_MAILBOX_COMMAND_SUPPORTED
 
 // -------------------------------
 // Other defines
 
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MAILBOX_COMMAND_SUPPORTED)
 // Due to a problem with the countermeasures applied to
 // accelerated point multiplication over elliptic curves,
 // it is possible that random errors are encountered (this
@@ -273,15 +273,6 @@ extern "C" {
 // lower the error probability further when using purposely
 // small or large scalars, for example during testing.
   #define SLI_SE_MAX_POINT_MULT_RETRIES   3U
-#endif
-
-// EFR32xG23+ doesn't require padding of curve elements or other keys
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG) \
-  && (_SILICON_LABS_32B_SERIES_2_CONFIG < 3)
-  #define SLI_SE_KEY_PADDING_REQUIRED
-  #define SLI_SE_P521_PADDING_BYTES 2
-#else
-  #define SLI_SE_P521_PADDING_BYTES 0
 #endif
 
 // -------------------------------
@@ -304,7 +295,7 @@ extern "C" {
   cmd_ctx->command.data_out = NULL;                \
   cmd_ctx->command.num_parameters = 0;
 
-#if defined(SEMAILBOX_PRESENT) || defined(DOXYGEN)
+#if defined(SLI_MAILBOX_COMMAND_SUPPORTED)
 /***************************************************************************//**
  * @brief
  *   Helper macros to add key parameters and input/output blocks to SE commands
@@ -365,7 +356,7 @@ extern "C" {
     return (status);                                                 \
   }                                                                  \
   SE_addDataOutput(&cmd_ctx->command, &key_output_buffer);
-#endif // SEMAILBOX_PRESENT
+#endif // SLI_MAILBOX_COMMAND_SUPPORTED
 
 /*******************************************************************************
  *****************************   PROTOTYPES   **********************************
@@ -405,7 +396,7 @@ sl_status_t sli_se_lock_release(void);
  ******************************************************************************/
 sl_status_t sli_se_execute_and_wait(sl_se_command_context_t *cmd_ctx);
 
-#if defined(SEMAILBOX_PRESENT) || defined(DOXYGEN)
+#if defined(SLI_MAILBOX_COMMAND_SUPPORTED)
 // Key handling helper functions
 sl_status_t sli_key_get_storage_size(const sl_se_key_descriptor_t* key,
                                      uint32_t *storage_size);
@@ -423,12 +414,12 @@ sl_status_t sli_se_get_auth_buffer(const sl_se_key_descriptor_t* key,
                                    SE_DataTransfer_t* auth_buffer);
 sl_status_t sli_se_get_key_input_output(const sl_se_key_descriptor_t* key,
                                         SE_DataTransfer_t* buffer);
-#endif // SEMAILBOX_PRESENT
+#endif // SLI_MAILBOX_COMMAND_SUPPORTED
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT) */
+#endif /* defined(SLI_MAILBOX_COMMAND_SUPPORTED) || defined(SLI_VSE_MAILBOX_COMMAND_SUPPORTED) */
 
 #endif /* SE_MANAGER_INTERNAL_H */

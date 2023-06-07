@@ -19,9 +19,7 @@
 #include "../../include/af.h"
 #include "messaging-server.h"
 
-#ifdef UC_BUILD
 #include "zap-cluster-command-parser.h"
-#endif
 
 // The internal message is stored in the same structure type that is defined
 // publicly.  The internal state of the message is stored in the
@@ -88,8 +86,6 @@ bool emberAfMessagingClusterGetLastMessageCallback(void)
   return true;
 }
 
-#ifdef UC_BUILD
-
 bool emberAfMessagingClusterMessageConfirmationCallback(EmberAfClusterCommand *cmd)
 {
   (void)cmd;
@@ -110,22 +106,6 @@ bool emberAfMessagingClusterMessageConfirmationCallback(EmberAfClusterCommand *c
   emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
   return true;
 }
-
-#else // !UC_BUILD
-
-bool emberAfMessagingClusterMessageConfirmationCallback(uint32_t messageId,
-                                                        uint32_t confirmationTime,
-                                                        uint8_t messageConfirmationControl,
-                                                        uint8_t *messageResponse)
-{
-  emberAfMessagingClusterPrintln("RX: MessageConfirmation 0x%4x, 0x%4x",
-                                 messageId,
-                                 confirmationTime);
-  emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
-  return true;
-}
-
-#endif // UC_BUILD
 
 bool emberAfPluginMessagingServerGetMessage(uint8_t endpoint,
                                             EmberAfPluginMessagingServerMessage *message)
@@ -184,7 +164,7 @@ void emberAfPluginMessagingServerSetMessage(uint8_t endpoint,
   msgTable[ep].messageStatusControl |= (VALID | ACTIVE);
 }
 
-void emAfPluginMessagingServerPrintInfo(uint8_t endpoint)
+void sli_zigbee_af_messaging_server_print_info(uint8_t endpoint)
 {
   uint8_t ep = emberAfFindClusterServerEndpointIndex(endpoint, ZCL_MESSAGING_CLUSTER_ID);
 
@@ -262,8 +242,6 @@ void emberAfPluginMessagingServerCancelMessage(EmberNodeId nodeId,
   }
 }
 
-#ifdef UC_BUILD
-
 uint32_t emberAfMessagingClusterServerCommandParse(sl_service_opcode_t opcode,
                                                    sl_service_function_context_t *context)
 {
@@ -293,5 +271,3 @@ uint32_t emberAfMessagingClusterServerCommandParse(sl_service_opcode_t opcode,
           ? EMBER_ZCL_STATUS_SUCCESS
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
-
-#endif // UC_BUILD

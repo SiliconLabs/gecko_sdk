@@ -33,6 +33,7 @@ typedef struct {
   uint32_t bc_interval_ms;
   uint8_t bc_dwell_interval_ms;
   uint8_t gtk[4][16];
+  uint8_t gtk_set;
   uint8_t gak[4][16];
   uint8_t lfn_gak[3][16];
   uint8_t state;
@@ -45,11 +46,14 @@ typedef struct {
   uint8_t chan_plan_id;
   uint8_t phy_mode_id;
   uint8_t phy_config_type;
+  uint8_t device_type;
   uint8_t fec;
   uint8_t rx_phy_mode_ids[SL_WISUN_MAX_PHY_MODE_ID_COUNT];
   uint8_t rx_phy_mode_ids_count;
+  uint8_t rx_mdr_capable;
   uint16_t protocol_id;
   uint16_t channel_id;
+  uint8_t lfn_profile;
 } app_settings_wisun_t;
 
 typedef struct {

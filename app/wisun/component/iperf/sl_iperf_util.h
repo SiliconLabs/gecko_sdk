@@ -196,8 +196,8 @@ const char * sl_iperf_opt_bw_format_to_str(const sl_iperf_opt_bw_format format);
  * @param[in] status Status value
  *****************************************************************************/
 __STATIC_INLINE void sl_iperf_test_set_err_and_stat(sl_iperf_test_t * const test,
-                                                  sl_iperf_error_t err,
-                                                  sl_iperf_status_t status)
+                                                    sl_iperf_error_t err,
+                                                    sl_iperf_status_t status)
 {
   test->err = err;
   test->status = status;

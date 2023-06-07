@@ -77,4 +77,13 @@ typedef uint16_t EmberMacFilterMatchData;
 // Last entry should set this and nothing else.  No other bits will be examined.
 #define EMBER_MAC_FILTER_MATCH_END                     0x8000
 
+typedef uint64_t sl_mac_child_status_flags_t;
+
+typedef struct {
+  uint8_t mac_index;
+  EmberNodeId short_id;
+  EmberEUI64 long_id;
+  sl_mac_child_status_flags_t info;
+} sl_mac_child_entry_t;
+
 #endif

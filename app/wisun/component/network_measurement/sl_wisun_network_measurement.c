@@ -86,7 +86,7 @@ static void _interrupt_ping(void *args);
  * @return false Not requested
  *****************************************************************************/
 __STATIC_INLINE bool _is_measurable(const sl_wisun_nwm_target_type_t meas_type,
-                                  const sl_wisun_nwm_node_type_t node_type);
+                                    const sl_wisun_nwm_node_type_t node_type);
 
 /**************************************************************************//**
  * @brief Init measurable elements
@@ -216,7 +216,7 @@ static void _interrupt_ping(void *args)
 }
 
 __STATIC_INLINE bool _is_measurable(const sl_wisun_nwm_target_type_t meas_type,
-                                  const sl_wisun_nwm_node_type_t node_type)
+                                    const sl_wisun_nwm_node_type_t node_type)
 {
   if (meas_type == SL_WISUN_NWM_TARGET_TYPE_ALL ||
 

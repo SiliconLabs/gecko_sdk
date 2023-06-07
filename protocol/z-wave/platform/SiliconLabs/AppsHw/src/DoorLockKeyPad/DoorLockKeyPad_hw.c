@@ -4,22 +4,25 @@
  * 
  * @copyright 2021 Silicon Laboratories Inc.
  */
-#include <DoorLockKeyPad_hw.h>
+#include <app_hw.h>
 #include <board.h>
 #include <ADC.h>
 #include <events.h>
 #include <Assert.h>
-#include <zaf_event_helper.h>
+#include <zaf_event_distributor_soc.h>
 //#define DEBUGPRINT
 #include <DebugPrint.h>
 #include <CC_Battery.h>
-#include <cc_battery_config_api.h>
+#include "CC_DoorLock.h"
+#include "CC_UserCode.h"
+#include "cc_user_code_config.h"
+#include "AppTimer.h"
 
-#define DOORHANDLE_BTN       APP_BUTTON_A
-#define BATTERY_REPORT_BTN   APP_BUTTON_B
-#define ENTER_USER_CODE      APP_BUTTON_C
-#define LATCH_STATUS_LED     APP_LED_A
-#define BOLT_STATUS_LED      APP_LED_B
+#define DOORHANDLE_BTN         APP_BUTTON_A
+#define BATTERY_REPORT_BTN     APP_BUTTON_B
+#define ENTER_USER_CODE        APP_BUTTON_C
+#define DOOR_HANDLE_STATUS_LED APP_LED_A
+#define BOLT_STATUS_LED        APP_LED_B
 
 /* Ensure we did not allocate the same physical button or led to more than one function */
 STATIC_ASSERT((APP_BUTTON_LEARN_RESET != DOORHANDLE_BTN) &&
@@ -29,18 +32,34 @@ STATIC_ASSERT((APP_BUTTON_LEARN_RESET != DOORHANDLE_BTN) &&
               (DOORHANDLE_BTN != ENTER_USER_CODE) &&
               (BATTERY_REPORT_BTN != ENTER_USER_CODE),
               STATIC_ASSERT_FAILED_button_overlap);
-STATIC_ASSERT((APP_LED_INDICATOR != LATCH_STATUS_LED) &&
+STATIC_ASSERT((APP_LED_INDICATOR != DOOR_HANDLE_STATUS_LED) &&
               (APP_LED_INDICATOR != BOLT_STATUS_LED) &&
-              (LATCH_STATUS_LED != BOLT_STATUS_LED),
+              (DOOR_HANDLE_STATUS_LED != BOLT_STATUS_LED),
               STATIC_ASSERT_FAILED_led_overlap);
 
 
 #define MY_BATTERY_SPEC_LEVEL_FULL         3000  // My battery's 100% level (millivolts)
 #define MY_BATTERY_SPEC_LEVEL_EMPTY        2400  // My battery's 0% level (millivolts)
 
+/// Timeout simulates hardware action. Can be removed when the actual hardware is used.
+#define CC_DOOR_LOCK_DEFAULT_OPERATION_SET_TIMEOUT 2000
+
+static door_lock_hw_data_t door_lock_hw = {0};
+
+/// Timer used by Supervision Get handler.
+static SSwTimer door_lock_operation_set_timer;
+
+static uint8_t user_code[] = CC_USER_CODE_DEFAULT;
+static cc_user_code_event_validate_data_t user_code_event_validate_data;
+
+static void door_lock_operation_set_callback(SSwTimer *pTimer);
+
 static void button_handler(BUTTON_EVENT event, bool is_called_from_isr)
 {
   uint8_t app_event = EVENT_EMPTY;
+  uint16_t command_class = COMMAND_CLASS_NO_OPERATION;
+  uint8_t cc_event;
+  void *cc_data;
 
       /* Outside door handle #1 deactivated?
        * NB: If DOORHANDLE_BTN is held for more than 5 seconds then BTN_EVENT_LONG_PRESS
@@ -57,11 +76,27 @@ static void button_handler(BUTTON_EVENT event, bool is_called_from_isr)
   }
   else if (BTN_EVENT_SHORT_PRESS(BATTERY_REPORT_BTN) == event)
   {
-    app_event = EVENT_APP_BUTTON_BATTERY_REPORT;
+    app_event = EVENT_APP_BATTERY_REPORT;
   }
   else if (BTN_EVENT_SHORT_PRESS(ENTER_USER_CODE) == event)
   {
-    app_event = EVENT_APP_BUTTON_ENTER_USER_CODE;
+    /*
+     * This events simulates entering a user code on a key pad.
+     * The entered user code is hardcoded with the value of the default user
+     * code of the application. Hence, the lock can be secured/unsecured by
+     * default.
+     *
+     * If the user code for user ID 1 is changed to something else than the
+     * default user code the lock can no longer be secured/unsecured by
+     * this event.
+     */
+    DPRINT("\r\nUser code entered!\r\n");
+    user_code_event_validate_data.id = 1;
+    user_code_event_validate_data.data = user_code;
+    user_code_event_validate_data.length = sizeof(user_code);
+    command_class = COMMAND_CLASS_USER_CODE;
+    cc_event = CC_USER_CODE_EVENT_VALIDATE;
+    cc_data = &user_code_event_validate_data;
   }
   else if (BTN_EVENT_HOLD(DOORHANDLE_BTN) == event)
   {
@@ -77,16 +112,24 @@ static void button_handler(BUTTON_EVENT event, bool is_called_from_isr)
   {
     if (is_called_from_isr)
     {
-      ZAF_EventHelperEventEnqueueFromISR(app_event);
+      zaf_event_distributor_enqueue_app_event_from_isr(app_event);
     }
     else
     {
-      ZAF_EventHelperEventEnqueue(app_event);
+      zaf_event_distributor_enqueue_app_event(app_event);
     }
+  }
+
+  if(command_class != COMMAND_CLASS_NO_OPERATION) {
+    if (is_called_from_isr) {
+      zaf_event_distributor_enqueue_cc_event_from_isr(command_class, cc_event, cc_data);
+    } else {
+      zaf_event_distributor_enqueue_cc_event(command_class, cc_event, cc_data);
+    }    
   }
 }
 
-void DoorLockKeyPad_hw_init(void)
+void app_hw_init(void)
 {
   DPRINT("-----------------------------------\n");
   DPRINTF("%s: Hold/release: Activate/deactivate outside door handle #1\n", Board_GetButtonLabel(DOORHANDLE_BTN));
@@ -95,7 +138,7 @@ void DoorLockKeyPad_hw_init(void)
   DPRINT("      Hold 5 sec: Reset\n");
   DPRINTF("%s: Enter user code\n", Board_GetButtonLabel(ENTER_USER_CODE));
   DPRINTF("%s: Learn mode + identify\n", Board_GetLedLabel(APP_LED_INDICATOR));
-  DPRINTF("%s: Latch closed(off)/open(on)\n", Board_GetLedLabel(LATCH_STATUS_LED));
+  DPRINTF("%s: Latch closed(off)/open(on)\n", Board_GetLedLabel(DOOR_HANDLE_STATUS_LED));
   DPRINTF("%s: Bolt locked(on)/unlocked(off)\n", Board_GetLedLabel(BOLT_STATUS_LED));
   DPRINT("-----------------------------------\n\n");
 
@@ -104,16 +147,44 @@ void DoorLockKeyPad_hw_init(void)
   Board_EnableButton(DOORHANDLE_BTN);
   Board_EnableButton(BATTERY_REPORT_BTN);
   Board_EnableButton(ENTER_USER_CODE);
+
+  AppTimerRegister(&door_lock_operation_set_timer, false, door_lock_operation_set_callback);
 }
 
-void cc_door_lock_latch_status_handler(bool opened)
+void cc_door_lock_handle_set(bool pressed)
 {
-  Board_SetLed(LATCH_STATUS_LED, opened ? LED_ON : LED_OFF);
+  door_lock_hw.handle_pressed = pressed;
+  Board_SetLed(DOOR_HANDLE_STATUS_LED, pressed ? LED_ON : LED_OFF);
+  DPRINTF("Handle %s\r\n", pressed ? "pressed":"not pressed");
 }
 
-void cc_door_lock_bolt_status_handler(bool locked)
+void cc_door_lock_latch_set(bool opened)
 {
+  door_lock_hw.latch_closed = !opened;
+  DPRINTF("Latch %s\r\n", opened ? "open":"false");
+}
+
+void cc_door_lock_bolt_set(bool locked)
+{
+  door_lock_hw.bolt_unlocked = !locked;
   Board_SetLed(BOLT_STATUS_LED, locked ? LED_ON : LED_OFF);
+  DPRINTF("Bolt %s\r\n", locked ? "locked":"unlocked");
+}
+
+
+bool door_lock_hw_bolt_is_unlocked()
+{
+  return door_lock_hw.bolt_unlocked;
+}
+
+bool door_lock_hw_latch_is_closed()
+{
+  return door_lock_hw.latch_closed;
+}
+
+bool door_lock_hw_handle_is_pressed()
+{
+  return door_lock_hw.handle_pressed;
 }
 
 uint8_t 
@@ -160,3 +231,33 @@ CC_Battery_BatteryGet_handler(uint8_t endpoint)
   }
   return roundedLevel;
 }
+
+uint8_t cc_door_lock_mode_hw_change(door_lock_mode_t mode)
+{
+  DPRINTF("%s(): Switch to %s mode %#02x\r\n",
+          __func__,
+          (DOOR_MODE_SECURED == mode) ? "Secured":"Unsecured",
+          mode);
+  // Timed change happened - simulate timed hardware operation
+  // This will also stop any active session
+  door_lock_operation_set_timer.dummy[0] = (uint8_t)mode;
+  TimerStart(&door_lock_operation_set_timer,
+             CC_DOOR_LOCK_DEFAULT_OPERATION_SET_TIMEOUT);
+
+  // Return estimated duration
+  return CC_DOOR_LOCK_DEFAULT_OPERATION_SET_TIMEOUT/1000;
+}
+
+void
+door_lock_operation_set_callback(SSwTimer *pTimer)
+{
+  UNUSED(pTimer);
+  door_lock_mode_t mode = (door_lock_mode_t)pTimer->dummy[0];
+  cc_door_lock_bolt_set((mode == DOOR_MODE_SECURED));
+
+  zaf_event_distributor_enqueue_cc_event(
+      COMMAND_CLASS_DOOR_LOCK,
+      CC_DOOR_LOCK_EVENT_HW_OPERATION_DONE,
+      NULL);
+}
+

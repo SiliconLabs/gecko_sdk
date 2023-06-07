@@ -4,7 +4,7 @@
  */
 
 #include <string.h>
-#include <serialappl.h>
+#include <app.h>
 #include <nvm_backup_restore.h>
 #include <utils.h>
 #include <ZW_controller_api.h>

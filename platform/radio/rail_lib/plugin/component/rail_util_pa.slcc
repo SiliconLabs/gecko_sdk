@@ -138,15 +138,17 @@ include:
       - device_sdid_220
   - path: platform/radio/rail_lib/plugin/pa-conversions/efr32xg27
     file_list:
-      - path: sl_rail_util_pa_curves.h
+      - path: sl_rail_util_pa_curves_QFN.h
+      - path: sl_rail_util_pa_curves_CSP.h
     condition:
       - device_series_2
       - device_sdid_230
   - path: platform/radio/rail_lib/plugin/pa-conversions/efr32xg28
     file_list:
-      - path: sl_rail_util_pa_curves_14dbm.h
-      - path: sl_rail_util_pa_curves_20dbm.h
-      - path: sl_rail_util_pa_curves_10dbm_434M.h
+      - path: sl_rail_util_pa_curves_14dbm_868M.h
+      - path: sl_rail_util_pa_curves_14dbm_915M.h
+      - path: sl_rail_util_pa_curves_20dbm_868M.h
+      - path: sl_rail_util_pa_curves_20dbm_868M.h
     condition:
       - device_series_2
       - device_sdid_235

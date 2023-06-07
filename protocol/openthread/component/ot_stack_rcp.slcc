@@ -23,8 +23,6 @@ define:
     value: "\"sl_openthread_features_config.h\""
   - name: OPENTHREAD_CONFIG_FILE
     value: "\"sl_openthread_generic_config.h\""
-  - name: OPENTHREAD_COPROCESSOR
-    value: 1
   - name: OPENTHREAD_RADIO
     value: 1
   - name: OPENTHREAD_SPINEL_CONFIG_OPENTHREAD_MESSAGE_ENABLE

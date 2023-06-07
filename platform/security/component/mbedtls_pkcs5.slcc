@@ -1,7 +1,7 @@
 id: mbedtls_pkcs5
 package: platform
 quality: production
-label: PKCS #5
+label: PKCS#5
 description: >-
   This component enables the implementation of PBES2- and PBKDF2 algorithms from
   RSA Labratories' PKCS #5 specification.

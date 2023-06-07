@@ -6,12 +6,25 @@
  * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
- * The licensor of this software is Silicon Laboratories Inc.  Your use of this
- * software is governed by the terms of Silicon Labs Master Software License
- * Agreement (MSLA) available at
- * www.silabs.com/about-us/legal/master-software-license-agreement.  This
- * software is distributed to you in Source Code format and is governed by the
- * sections of the MSLA applicable to Source Code.
+ * SPDX-License-Identifier: Zlib
+ *
+ * The licensor of this software is Silicon Laboratories Inc.
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty. In no event will the authors be held liable for any damages
+ * arising from the use of this software.
+ *
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
+ *
+ * 1. The origin of this software must not be misrepresented; you must not
+ *    claim that you wrote the original software. If you use this software
+ *    in a product, an acknowledgment in the product documentation would be
+ *    appreciated but is not required.
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.
+ * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
 
@@ -995,12 +1008,6 @@ int USBD_Write(int epAddr, void *data, int byteCount,
   The source files for the USB device stack resides in the usb directory
   and follows the naming convention: em_usbd<em>nnn</em>.c/h.
 
-  @li @ref usb_device_intro
-  @li @ref usb_device_api
-  @li @ref usb_device_conf
-  @li @ref usb_device_powersave
-  @li @ref usb_device_example1
-
 @n @section usb_device_intro Introduction
 
   The USB device protocol stack provides an API which makes it possible to
@@ -1037,8 +1044,8 @@ int USBD_Write(int epAddr, void *data, int byteCount,
     than your device expects, round buffer size up to the next multiple of
     maxpacket size for the relevant endpoint to avoid data corruption.
 
-    Transmit buffers passed to @htmlonly USBD_Write() @endhtmlonly must be
-    statically allocated because @htmlonly USBD_Write() @endhtmlonly only
+    Transmit buffers passed to USBD_Write() must be
+    statically allocated because USBD_Write() only
     initiates the transfer. When the host decide to actually perform the
     transfer, your data must be available.
 
@@ -1052,9 +1059,9 @@ int USBD_Write(int epAddr, void *data, int byteCount,
 
   @ref USBD_Read(), @ref USBD_Write() @n
     These functions initiate data transfers.
-    @n @htmlonly USBD_Read() @endhtmlonly initiate a transfer of data @em
+    @n USBD_Read() initiate a transfer of data @em
     from host @em to device (an @em OUT transfer in USB terminology).
-    @n @htmlonly USBD_Write() @endhtmlonly initiate a transfer of data @em from
+    @n USBD_Write() initiate a transfer of data @em from
     device @em to host (an @em IN transfer).
 
     When the USB host actually performs the transfer, your application will be
@@ -1063,8 +1070,8 @@ int USBD_Write(int epAddr, void *data, int byteCount,
 
   @ref USBD_AbortTransfer(), @ref USBD_AbortAllTransfers() @n
     These functions terminate transfers that are initiated, but has not yet
-    taken place. If a transfer is initiated with @htmlonly USBD_Read()
-    or USBD_Write(), @endhtmlonly but the USB host never actually peform
+    taken place. If a transfer is initiated with USBD_Read()
+    or USBD_Write(), but the USB host never actually peform
     the transfers, these functions will deactivate the transfer setup to make
     the USB device endpoint hardware ready for new (and potentially) different
     transfers.
@@ -1072,7 +1079,7 @@ int USBD_Write(int epAddr, void *data, int byteCount,
   @ref USBD_Connect(), @ref USBD_Disconnect() @n
     These functions turns the data-line (D+ or D-) pullup on or off. They can be
     used to force reenumeration. It's good practice to delay at least one second
-    between @htmlonly USBD_Disconnect() and USBD_Connect() @endhtmlonly
+    between USBD_Disconnect() and USBD_Connect()
     to allow the USB host to unload the currently active device driver.
 
   @ref USBD_EpIsBusy() @n
@@ -1113,9 +1120,9 @@ int USBD_Write(int epAddr, void *data, int byteCount,
     will be aborted if host stalls the endpoint, if host resets your device, if
     host unconfigures your device or if you unplug your device cable and the
     device is selfpowered.
-    @htmlonly USB_XferCompleteCb_TypeDef() @endhtmlonly is also called if your
-    application use @htmlonly USBD_AbortTransfer() or USBD_AbortAllTransfers()
-    @endhtmlonly calls.
+    USB_XferCompleteCb_TypeDef() is also called if your
+    application use USBD_AbortTransfer() or USBD_AbortAllTransfers()
+    calls.
     @note This callback is called from within an interrupt handler with
           interrupts disabled.
 
@@ -1162,8 +1169,8 @@ int USBD_Write(int epAddr, void *data, int byteCount,
           used inside interrupt handlers.
     @n @n USBTIMER_DelayUs() Active wait microsecond delay function. Can also be
           used inside interrupt handlers.
-    @n @n USBTIMER_Init() Initialize the timer system. Called by @htmlonly
-          USBD_Init(), @endhtmlonly but your application must call it again to
+    @n @n USBTIMER_Init() Initialize the timer system. Called by
+          USBD_Init(), but your application must call it again to
           reinitialize whenever you change the HFPERCLK frequency.
     @n @n USBTIMER_Start() Start a timer. You can configure the USB device stack
           to provide any number of timers. The timers have 1 ms resolution, your
@@ -1476,7 +1483,7 @@ static const USBD_Init_TypeDef initstruct =
 
   @n Now we have to implement vendor unique USB setup commands to control the
   LED's (see callbacks variable above). Notice that the buffer variable below is
-  statically allocated because @htmlonly USBD_Write() @endhtmlonly only
+  statically allocated because USBD_Write() only
   initiates the transfer. When the host actually performs the transfer, the
   SetupCmd() function will have returned ! @n @n
 

@@ -27,44 +27,23 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
+
 #ifndef SLI_PSA_DRIVER_COMMON_H
 #define SLI_PSA_DRIVER_COMMON_H
 
 /// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
 
-#include "em_device.h"
 #include "psa/crypto.h"
+
 #include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/*******************************************************************************
- * @brief
- *   Validate the PKCS#7 padding contained in the final block of plaintext
- *   in certain block cipher modes of operation. Based on the get_pkcs_padding()
- *   implementation in Mbed TLS.
- *
- * @param[in] padded_data
- *   A buffer of (at least) size 16 containing the padded final block.
- *
- * @param padded_data_length
- *   The length of the paddad data (should be 16). Parameter is mainly kept used
- *   in order to make it harder for the compiler to optimize out some of the
- *   "time-constantness".
- *
- * @param padding_bytes
- *   The expected padding bytes (likely derived from padded_block[15]).
- *
- * @return
- *   PSA_SUCCESS if the padding is valid, PSA_ERROR_INVALID_PADDING otherwise.
- ******************************************************************************/
-psa_status_t sli_psa_validate_pkcs7_padding(uint8_t *padded_data,
-                                            size_t padded_data_length,
-                                            uint8_t padding_bytes);
+// -----------------------------------------------------------------------------
+// Static inline functions
 
-__STATIC_INLINE
 /*******************************************************************************
  * @brief
  *   Validate that a elliptic curve (in Weierstrass form) private key is valid.
@@ -79,9 +58,10 @@ __STATIC_INLINE
  * @return
  *   PSA_SUCCESS if the key is in [1, n-1], PSA_ERROR_INVALID_ARGUMENT otherwise.
  ******************************************************************************/
-psa_status_t sli_psa_validate_ecc_weierstrass_privkey(const void *privkey,
-                                                      const void *modulus,
-                                                      size_t privkey_size)
+static inline psa_status_t sli_psa_validate_ecc_weierstrass_privkey(
+  const void *privkey,
+  const void *modulus,
+  size_t privkey_size)
 {
   // Compare private key to maximum allowed value, n - 1,
   // and also check that it is non-zero.
@@ -127,14 +107,15 @@ psa_status_t sli_psa_validate_ecc_weierstrass_privkey(const void *privkey,
  * @param[in] n
  *   Number of bytes to clear.
  ******************************************************************************/
-__STATIC_INLINE
-psa_status_t sli_psa_zeroize(void *v, size_t n)
+static inline psa_status_t sli_psa_zeroize(void *v, size_t n)
 {
-  if (n > 0) {
-    volatile unsigned char *p = v;
-    while (n--) {
-      *p++ = 0;
-    }
+  if (n == 0) {
+    return PSA_SUCCESS;
+  }
+
+  volatile unsigned char *p = v;
+  while (n--) {
+    *p++ = 0;
   }
   return PSA_SUCCESS;
 }
@@ -155,10 +136,9 @@ psa_status_t sli_psa_zeroize(void *v, size_t n)
  * @return
  *   Zero if the buffer contents are equal, non-zero otherwise.
  ******************************************************************************/
-__STATIC_INLINE
-uint8_t sli_psa_safer_memcmp(const uint8_t *a,
-                             const uint8_t *b,
-                             size_t n)
+static inline uint8_t sli_psa_safer_memcmp(const uint8_t *a,
+                                           const uint8_t *b,
+                                           size_t n)
 {
   uint8_t diff = 0u;
 
@@ -169,18 +149,77 @@ uint8_t sli_psa_safer_memcmp(const uint8_t *a,
   return diff;
 }
 
-#if defined(SLI_PSA_SUPPORT_GCM_IV_CALCULATION)
-// See function documentation in sli_psa_driver_ghash.c
+// -----------------------------------------------------------------------------
+// Function declarations
+
+/*******************************************************************************
+ * @brief
+ *   Validate the PKCS#7 padding contained in the final block of plaintext
+ *   in certain block cipher modes of operation. Based on the get_pkcs_padding()
+ *   implementation in Mbed TLS.
+ *
+ * @param[in] padded_data
+ *   A buffer of (at least) size 16 containing the padded final block.
+ *
+ * @param padded_data_length
+ *   The length of the paddad data (should be 16). Parameter is mainly kept used
+ *   in order to make it harder for the compiler to optimize out some of the
+ *   "time-constantness".
+ *
+ * @param padding_bytes
+ *   The expected padding bytes (likely derived from padded_block[15]).
+ *
+ * @return
+ *   PSA_SUCCESS if the padding is valid, PSA_ERROR_INVALID_PADDING otherwise.
+ ******************************************************************************/
+psa_status_t sli_psa_validate_pkcs7_padding(uint8_t *padded_data,
+                                            size_t padded_data_length,
+                                            uint8_t padding_bytes);
+
+#if defined(SLI_PSA_DRIVER_FEATURE_GCM_IV_CALCULATION)
+
+/**
+ * \brief Initialize Galois field (2^128) multiplication table
+ *
+ * This function is used as part of a software-based GHASH (as defined in
+ * AES-GCM) algorithm, and originates from the mbed TLS implementation in gcm.c
+ *
+ * It takes the in the 'H' value for the GHASH operation (which is a block of
+ * zeroes encrypted using AES-ECB with the key to be used for GHASH/GCM), and
+ * converts it into a multiplication table for later use by the multiplication
+ * function.
+ *
+ * \param[in] Ek  'H' value for which to create the multiplication tables
+ * \param[out] HL Lower multiplication table for 'H'
+ * \param[out] HH Upper multiplication table for 'H'
+ */
 void sli_psa_software_ghash_setup(const uint8_t Ek[16],
                                   uint64_t HL[16],
                                   uint64_t HH[16]);
 
+/**
+ * \brief Galois field (2^128) multiplication operation
+ *
+ * This function is used as part of a software-based GHASH (as defined in
+ * AES-GCM) algorithm, and originates from the mbed TLS implementation in gcm.c
+ *
+ * This function takes in a 128-bit scalar and multiplies it with H (Galois
+ * field multiplication as defined in AES-GCM). H is not provided to this
+ * function directly. Instead, multiplication tables for the specific H need to
+ * be calculated first by \ref sli_psa_software_ghash_setup, and passed to this
+ * function.
+ *
+ * \param[in]   HL      Lower multiplication table for 'H'
+ * \param[in]   HH      Upper multiplication table for 'H'
+ * \param[out]  output  Output buffer for the multiplication result
+ * \param[in]   input   Input buffer for the scalar to multiply
+ */
 void sli_psa_software_ghash_multiply(const uint64_t HL[16],
                                      const uint64_t HH[16],
                                      uint8_t output[16],
                                      const uint8_t input[16]);
 
-#endif /* SLI_PSA_SUPPORT_GCM_IV_CALCULATION */
+#endif // SLI_PSA_DRIVER_FEATURE_GCM_IV_CALCULATION
 
 // Declare the TRNG function prototype if it's not already declared by PSA
 #if defined(MBEDTLS_ENTROPY_HARDWARE_ALT) && !defined(MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG)

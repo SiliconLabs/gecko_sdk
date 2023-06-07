@@ -49,10 +49,10 @@ EmberStatus emberAfPluginStandaloneBootloaderCommonSendMessage(bool isBroadcast,
                                                                uint8_t length,
                                                                uint8_t* message)
 {
-  EmberStatus status = emAfSendBootloadMessage(isBroadcast,
-                                               targetEui,
-                                               length,
-                                               message);
+  EmberStatus status = sli_zigbee_af_send_bootload_message(isBroadcast,
+                                                           targetEui,
+                                                           length,
+                                                           message);
   if (EMBER_SUCCESS != status) {
     bootloadPrintln("Failed to send bootload message type: 0x%X, status: 0x%X",
                     message[1],
@@ -78,7 +78,7 @@ uint8_t emberAfPluginStandaloneBootloaderCommonMakeHeader(uint8_t *message, uint
 }
 
 // Make sure we have a NULL delemiter and ignore 0xFF characters
-void emAfStandaloneBootloaderCommonPrintHardwareTag(uint8_t* text)
+void sli_zigbee_af_standalone_bootloader_common_print_hardware_tag(uint8_t* text)
 {
   uint8_t hardwareTagString[EMBER_AF_STANDALONE_BOOTLOADER_HARDWARE_TAG_LENGTH + 1];
   uint8_t i;

@@ -1,0 +1,16 @@
+id: se_cpc_common
+package: platform
+label: Secure Engine Co-Processor Communcation Common
+description: >-
+  This component provides common files for Secure Engine mailbox support over CPC
+category: Platform|Security|Secure Engine CPC
+quality: evaluation
+root_path: platform/security/sl_component/sl_secure_engine_cpc
+ui_hints:
+  visibility: never
+include:
+  - path: inc/common
+    file_list:
+      - path: sli_se_cpc.h
+provides:
+  - name: se_cpc_common

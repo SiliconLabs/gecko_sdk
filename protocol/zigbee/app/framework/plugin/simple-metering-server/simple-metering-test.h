@@ -15,21 +15,15 @@
  *
  ******************************************************************************/
 
-void emAfTestMeterTick(uint8_t endpoint);
-void emAfTestMeterInit(uint8_t endpoint);
+void sli_zigbee_af_test_meter_tick(uint8_t endpoint);
+void sli_zigbee_af_test_meter_init(uint8_t endpoint);
 
 // The Test meter's profile interval period timeframe enum value
 // is 3 which according to the SE spec is 15 minutes
-#ifdef UC_BUILD
 #ifdef SL_CATALOG_ZIGBEE_SIMPLE_METERING_SERVER_TEST_METER_PRESENT
 #define SIMPLE_METERING_SERVER_TEST_METER_ENABLED
 #define TEST_METER_ENABLE
 #endif // SL_CATALOG_ZIGBEE_SIMPLE_METERING_SERVER_TEST_METER_PRESENT
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_SIMPLE_METERING_SERVER_TEST_METER_ENABLE
-#define SIMPLE_METERING_SERVER_TEST_METER_ENABLED
-#endif // EMBER_AF_PLUGIN_SIMPLE_METERING_SERVER_TEST_METER_ENABLE
-#endif // UC_BUILD
 
 #ifdef SIMPLE_METERING_SERVER_TEST_METER_ENABLED
 #define PROFILE_INTERVAL_PERIOD_TIMEFRAME 3
@@ -55,12 +49,12 @@ void afTestMeterRandomError(uint8_t changeIn256);
 
 void afTestMeterEnableProfiles(uint8_t enable);
 
-bool emAfTestMeterGetProfiles(uint8_t intervalChannel,
-                              uint32_t endTime,
-                              uint8_t numberOfPeriods);
+bool sli_zigbee_af_test_meter_get_profiles(uint8_t intervalChannel,
+                                           uint32_t endTime,
+                                           uint8_t numberOfPeriods);
 #else
-bool emAfTestMeterGetProfiles(uint8_t intervalChannel,
-                              uint32_t endTime,
-                              uint8_t numberOfPeriods);
+bool sli_zigbee_af_test_meter_get_profiles(uint8_t intervalChannel,
+                                           uint32_t endTime,
+                                           uint8_t numberOfPeriods);
 
 #endif // SIMPLE_METERING_SERVER_TEST_METER_ENABLED

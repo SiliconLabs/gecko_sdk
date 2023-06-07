@@ -16,9 +16,7 @@
  *
  ******************************************************************************/
 
-#ifdef UC_BUILD
 #include "meter-mirror-config.h"
-#endif // UC_BUILD
 
 /**
  * @defgroup meter-mirror  Meter Mirror Server
@@ -157,4 +155,4 @@ void emberAfPluginMeterMirrorReportingCompleteCallback(uint8_t endpoint);
 /** @} */ // end of name Callbacks
 /** @} */ // end of meter-mirror
 
-uint8_t emAfPluginMeterMirrorGetMirrorsAllocated(void);
+uint8_t sli_zigbee_af_meter_mirror_get_mirrors_allocated(void);

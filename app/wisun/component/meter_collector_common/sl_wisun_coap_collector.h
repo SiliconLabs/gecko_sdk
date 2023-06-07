@@ -34,6 +34,7 @@
 // -----------------------------------------------------------------------------
 //                                   Includes
 // -----------------------------------------------------------------------------
+#include "sl_status.h"
 #include "sl_wisun_app_core.h"
 #include "sl_wisun_coap.h"
 #include "sli_wisun_meter_collector.h"
@@ -61,27 +62,27 @@ void sl_wisun_coap_collector_init(void);
 /**************************************************************************//**
  * @brief Prepare CoAP request.
  * @details Should be used in thread init part
- * @return true Success
- * @return false Failure
+ * @return SL_STATUS_OK Success
+ * @return SL_STATUS_FAIL Failure
  *****************************************************************************/
-bool sl_wisun_coap_collector_prepare_meas_request(void);
+sl_status_t sl_wisun_coap_collector_prepare_meas_request(void);
 
 /**************************************************************************//**
 * @brief Prepare LED Toggle request.
 * @details It should be used before sending
 * @param[in] led_id LED ID
-* @return true Success
-* @return false Failure
+* @return SL_STATUS_OK Success
+* @return SL_STATUS_FAIL Failure
 ******************************************************************************/
-bool sl_wisun_coap_collector_prepare_led_toggle_request(const uint8_t led_id);
+sl_status_t sl_wisun_coap_collector_prepare_led_toggle_request(const uint8_t led_id);
 
 /**************************************************************************//**
 * @brief Send LED toggle request.
 * @details Send the prepared request to the meter
 * @param[in] meter_addr Meter address
-* @return true Success
-* @return false Failure
+* @return SL_STATUS_OK Success
+* @return SL_STATUS_FAIL Failure
 ******************************************************************************/
-bool sl_wisun_coap_collector_send_led_toggle_request(const wisun_addr_t * const meter_addr);
+sl_status_t sl_wisun_coap_collector_send_led_toggle_request(const wisun_addr_t * const meter_addr);
 
 #endif

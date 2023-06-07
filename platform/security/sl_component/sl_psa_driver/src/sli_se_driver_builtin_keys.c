@@ -28,16 +28,21 @@
  *
  ******************************************************************************/
 
-#include "em_device.h"
+#include "sli_psa_driver_features.h"
 
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
 
 #include <psa/crypto.h>
+
 #include "sli_se_opaque_types.h"
+#include "sl_psa_values.h"
 
-#include "string.h"
+#include <string.h>
 
-#if defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS)
+// -----------------------------------------------------------------------------
+// Driver entry points
+
+#if defined(SLI_PSA_DRIVER_FEATURE_BUILTIN_KEYS)
 
 psa_status_t sli_se_opaque_get_builtin_key(psa_drv_slot_number_t slot_number,
                                            psa_key_attributes_t *attributes,
@@ -50,7 +55,7 @@ psa_status_t sli_se_opaque_get_builtin_key(psa_drv_slot_number_t slot_number,
 
   // Set key type and permissions according to key ID
   switch ( slot_number ) {
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+    #if defined(SLI_PSA_DRIVER_FEATURE_ATTESTATION)
     case SL_SE_KEY_SLOT_APPLICATION_ATTESTATION_KEY:
       psa_set_key_bits(attributes, 256);
       psa_set_key_type(attributes, PSA_KEY_TYPE_ECC_KEY_PAIR(PSA_ECC_FAMILY_SECP_R1) );
@@ -63,7 +68,7 @@ psa_status_t sli_se_opaque_get_builtin_key(psa_drv_slot_number_t slot_number,
       psa_set_key_usage_flags(attributes, PSA_KEY_USAGE_VERIFY_HASH);
       psa_set_key_algorithm(attributes, PSA_ALG_ECDSA(PSA_ALG_ANY_HASH));
       break;
-#endif // _SILICON_LABS_SECURITY_FEATURE_VAULT
+    #endif // SLI_PSA_DRIVER_FEATURE_ATTESTATION
     case SL_SE_KEY_SLOT_APPLICATION_SECURE_BOOT_KEY:
       psa_set_key_bits(attributes, 256);
       psa_set_key_type(attributes, PSA_KEY_TYPE_ECC_PUBLIC_KEY(PSA_ECC_FAMILY_SECP_R1) );
@@ -116,24 +121,26 @@ psa_status_t sli_se_opaque_get_builtin_key(psa_drv_slot_number_t slot_number,
 
   memcpy(key_buffer, &header, sizeof(sli_se_opaque_key_context_header_t));
   *key_buffer_length = sizeof(sli_se_opaque_key_context_header_t);
+
   return(PSA_SUCCESS);
 }
 
 #if !defined(PSA_CRYPTO_DRIVER_TEST)
+
 psa_status_t mbedtls_psa_platform_get_builtin_key(
   mbedtls_svc_key_id_t key_id,
   psa_key_lifetime_t *lifetime,
   psa_drv_slot_number_t *slot_number)
 {
   switch (MBEDTLS_SVC_KEY_ID_GET_KEY_ID(key_id)) {
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+    #if defined(SLI_PSA_DRIVER_FEATURE_ATTESTATION)
     case SL_SE_BUILTIN_KEY_APPLICATION_ATTESTATION_ID:
       *slot_number = SL_SE_KEY_SLOT_APPLICATION_ATTESTATION_KEY;
       break;
     case SL_SE_BUILTIN_KEY_SYSTEM_ATTESTATION_ID:
       *slot_number = SL_SE_KEY_SLOT_SE_ATTESTATION_KEY;
       break;
-#endif // _SILICON_LABS_SECURITY_FEATURE_VAULT
+    #endif // SLI_PSA_DRIVER_FEATURE_ATTESTATION
     case SL_SE_BUILTIN_KEY_SECUREBOOT_ID:
       *slot_number = SL_SE_KEY_SLOT_APPLICATION_SECURE_BOOT_KEY;
       break;
@@ -152,11 +159,12 @@ psa_status_t mbedtls_psa_platform_get_builtin_key(
   *lifetime = PSA_KEY_LIFETIME_FROM_PERSISTENCE_AND_LOCATION(
     PSA_KEY_PERSISTENCE_READ_ONLY,
     PSA_KEY_LOCATION_SLI_SE_OPAQUE);
+
   return(PSA_SUCCESS);
 }
 
-#endif /* !PSA_CRYPTO_DRIVER_TEST */
+#endif // !PSA_CRYPTO_DRIVER_TEST
 
-#endif /* MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS */
+#endif // SLI_PSA_DRIVER_FEATURE_BUILTIN_KEYS
 
-#endif /* SEMAILBOX_PRESENT */
+#endif // SLI_MBEDTLS_DEVICE_HSE

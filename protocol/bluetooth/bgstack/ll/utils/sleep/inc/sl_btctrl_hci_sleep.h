@@ -11,6 +11,7 @@ void sl_btctrl_hci_sleep_sleep(void);
 bool sl_btctrl_hci_sleep_request();
 sl_status_t sl_bthci_sleep_wakeup_callback();
 void sl_btctrl_hci_sleep_require_em1(bool req);
+bool sl_btctrl_hci_sleep_is_ok_to_sleep(void);
 
 #ifndef SL_BTCTRL_HCI_SLEEP_EXCLUDE_WEAKS
 SL_WEAK bool sl_btctrl_hci_sleep_request()

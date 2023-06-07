@@ -57,22 +57,22 @@ extern "C" {
 #define RAIL_PA_CURVES_2P4_LP_VBAT_MIN_POWER      -260
 #define RAIL_PA_CURVES_2P4_LP_VBAT_CURVES \
   {                                       \
-    -250, /*! Power Level 0 */            \
-    -148, /*! Power Level 1 */            \
-    -95,  /*! Power Level 2 */            \
-    -68,  /*! Power Level 3 */            \
-    -51,  /*! Power Level 4 */            \
+    -252, /*! Power Level 0 */            \
+    -149, /*! Power Level 1 */            \
+    -97,  /*! Power Level 2 */            \
+    -69,  /*! Power Level 3 */            \
+    -52,  /*! Power Level 4 */            \
     -40,  /*! Power Level 5 */            \
     -32,  /*! Power Level 6 */            \
     -26,  /*! Power Level 7 */            \
     -22,  /*! Power Level 8 */            \
     -18,  /*! Power Level 9 */            \
-    -16,  /*! Power Level 10 */           \
+    -15,  /*! Power Level 10 */           \
     -13,  /*! Power Level 11 */           \
-    -12,  /*! Power Level 12 */           \
-    -10,  /*! Power Level 13 */           \
-    -9,   /*! Power Level 14 */           \
-    -9,   /*! Power Level 15 */           \
+    -11,  /*! Power Level 12 */           \
+    -9,  /*! Power Level 13 */            \
+    -8,   /*! Power Level 14 */           \
+    -7,   /*! Power Level 15 */           \
   }
 // *INDENT-OFF*
 // Macro to declare the variables needed to initialize RAIL_TxPowerCurvesConfig_t for use in

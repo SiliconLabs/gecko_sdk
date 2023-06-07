@@ -9,7 +9,7 @@ description: >
 package: Z-Wave
 quality: production
 source:
-  - path: protocol/z-wave/ZAF/CommandClasses/DoorLock/cc_door_lock_nvm.c
+  - path: protocol/z-wave/ZAF/CommandClasses/DoorLock/src/cc_door_lock_nvm.c
 provides:
   - name: zw_cc_door_lock_nvm
 requires:

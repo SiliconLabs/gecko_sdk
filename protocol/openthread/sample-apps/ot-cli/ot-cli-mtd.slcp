@@ -13,6 +13,7 @@ component:
     instance:
       - vcom
   - id: rail_util_pti
+  - id: bootloader_interface
 ## Disabling RTOS by default
 # - id: freertos
 # - id: freertos_heap_3

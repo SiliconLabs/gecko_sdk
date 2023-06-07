@@ -43,6 +43,7 @@ ui_hints:
 tag:
   - hardware:component:led:2+
   - hardware:component:sensor:si7021
+  - hardware:device:ram:10
 configuration:
   - name: SL_BOARD_ENABLE_VCOM
     value: 1

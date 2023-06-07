@@ -24,9 +24,7 @@
 
 #include "app/framework/plugin/ota-common/ota.h"
 
-#ifdef UC_BUILD
 #include "standalone-bootloader-server-config.h"
-#endif // UC_BUILD
 
 //------------------------------------------------------------------------------
 // Globals
@@ -67,14 +65,9 @@ static BootloadServerState serverBootloadState = SERVER_BOOTLOAD_STATE_NONE;
 #define DELAY_BEFORE_CHECKING_IF_BOOTLOADER_ACTIVE_SECONDS 2
 #define DELAY_BEFORE_SENDING_BOOTLOAD_DATA_SECONDS 2
 
-#ifdef UC_BUILD
 sl_zigbee_event_t emberAfPluginStandaloneBootloaderServerMyEventEventControl;
 #define myEvent (&emberAfPluginStandaloneBootloaderServerMyEventEventControl)
-void emberAfPluginStandaloneBootloaderServerMyEventEventHandler(SLXU_UC_EVENT);
-#else // !UC_BUILD
-EmberEventControl emberAfPluginStandaloneBootloaderServerMyEventEventControl;
-#define myEvent emberAfPluginStandaloneBootloaderServerMyEventEventControl
-#endif // UC_BUILD
+void emberAfPluginStandaloneBootloaderServerMyEventEventHandler(sl_zigbee_event_t * event);
 
 // We remember the last target client as an optimization.
 // This way a CLI user can broadcast the query and then simply bootload the
@@ -98,7 +91,7 @@ static uint32_t tagSize;
 //------------------------------------------------------------------------------
 // Functions
 
-void emAfStandaloneBootloaderServerPrintStatus(void)
+void sli_zigbee_af_standalone_bootloader_server_print_status(void)
 {
   bootloadPrintln("Server State: %p", serverStateStrings[serverBootloadState]);
   bootloadPrint("Key Data: ");
@@ -112,7 +105,7 @@ static void resetServerState(bool success)
   // We don't clear the targetClient struct so it can potentially be re-used
   // in a subsequent bootload.
   serverBootloadState = SERVER_BOOTLOAD_STATE_NONE;
-  slxu_zigbee_event_set_inactive(myEvent);
+  sl_zigbee_event_set_inactive(myEvent);
 }
 
 static bool isTargetClientDataValid(void)
@@ -120,15 +113,13 @@ static bool isTargetClientDataValid(void)
   return (0 != MEMCOMPARE(broadcastEui64, targetClient.eui64, EUI64_SIZE));
 }
 
-#ifdef UC_BUILD
-
 void emberAfPluginStandaloneBootloaderServerInitCallback(uint8_t init_level)
 {
   switch (init_level) {
     case SL_ZIGBEE_INIT_LEVEL_EVENT:
     {
-      slxu_zigbee_event_init(myEvent,
-                             emberAfPluginStandaloneBootloaderServerMyEventEventHandler);
+      sl_zigbee_event_init(myEvent,
+                           emberAfPluginStandaloneBootloaderServerMyEventEventHandler);
       break;
     }
 
@@ -139,15 +130,6 @@ void emberAfPluginStandaloneBootloaderServerInitCallback(uint8_t init_level)
     }
   }
 }
-
-#else // !UC_BUILD
-
-void emberAfPluginStandaloneBootloaderServerInitCallback(void)
-{
-  MEMSET(&targetClient, 0xFF, sizeof(EmberAfStandaloneBootloaderQueryResponseData));
-}
-
-#endif // UC_BUILD
 
 static EmberStatus sendQuery(const EmberEUI64 targetEui)
 {
@@ -239,7 +221,7 @@ static void printTargetClientInfo(const char * prefixString)
                      : "no"));
     bootloadPrintln("  MFG ID:       0x%2X", targetClient.mfgId);
     bootloadPrint("  Hardware Tag: ");
-    emAfStandaloneBootloaderCommonPrintHardwareTag(targetClient.hardwareTag);
+    sli_zigbee_af_standalone_bootloader_common_print_hardware_tag(targetClient.hardwareTag);
     bootloadPrintln("  Capabilities: 0x%X", targetClient.capabilities);
     bootloadPrintln("  Platform:     0x%X", targetClient.platform);
     bootloadPrintln("  Micro:        0x%X", targetClient.micro);
@@ -249,7 +231,7 @@ static void printTargetClientInfo(const char * prefixString)
   }
 }
 
-void emAfStandaloneBootloaderServerPrintTargetClientInfoCommand(void)
+void sli_zigbee_af_standalone_bootloader_server_print_target_client_info_command(void)
 {
   printTargetClientInfo("Current target client: ");
 }
@@ -273,8 +255,8 @@ static void sendLaunchRequest(void)
                                                               outgoingBlock);
   if (status == EMBER_SUCCESS) {
     serverBootloadState = SERVER_BOOTLOAD_STATE_LAUNCH_REQUEST_SENT;
-    slxu_zigbee_event_set_delay_qs(myEvent,
-                                   LAUNCH_REQUEST_TIMEOUT_SECONDS << 2);
+    sl_zigbee_event_set_delay_qs(myEvent,
+                                 LAUNCH_REQUEST_TIMEOUT_SECONDS << 2);
   } else {
     resetServerState(false);
   }
@@ -308,12 +290,12 @@ static EmberStatus getNextBootloaderBlock(uint32_t address, // relative to 0
   EmberAfOtaStorageStatus status;
 
   if (address == 0) {
-    emAfPrintPercentageSetStartAndEnd(0,    // starting offset
-                                      tagSize); // end offset
+    sli_zigbee_af_print_percentage_set_start_and_end(0,    // starting offset
+                                                     tagSize); // end offset
   }
-  emAfPrintPercentageUpdate("Xmodem Transfer",
-                            5, // update frequency (e.g. every 5%)
-                            address);
+  sli_zigbee_af_print_percentage_update("Xmodem Transfer",
+                                        5, // update frequency (e.g. every 5%)
+                                        address);
 
   status =
     emberAfOtaStorageReadImageDataCallback(&imageToBootload,
@@ -341,7 +323,7 @@ static void xmodemComplete(bool success)
 
 static void startSendingXmodemData(void)
 {
-  slxu_zigbee_event_set_inactive(myEvent);
+  sl_zigbee_event_set_inactive(myEvent);
   serverBootloadState = SERVER_BOOTLOAD_STATE_SENDING_DATA;
   if (EMBER_SUCCESS != emberAfPluginXmodemSenderStart(xmodemSendRoutine,
                                                       getNextBootloaderBlock,
@@ -414,8 +396,8 @@ static void processChallenge(EmberEUI64 longId,
           &(message[BOOTLOAD_MESSAGE_OVERHEAD]),
           BOOTLOAD_AUTH_CHALLENGE_SIZE);
 
-  emAfStandaloneBootloaderClientEncrypt(&(outgoingBlock[index]),
-                                        (uint8_t*)emberKeyContents(&bootloadKey));
+  sli_zigbee_af_standalone_bootloader_client_encrypt(&(outgoingBlock[index]),
+                                                     (uint8_t*)emberKeyContents(&bootloadKey));
 
   index += BOOTLOAD_AUTH_RESPONSE_SIZE;
   status = emberAfPluginStandaloneBootloaderCommonSendMessage(false,
@@ -424,8 +406,8 @@ static void processChallenge(EmberEUI64 longId,
                                                               outgoingBlock);
   if (status == EMBER_SUCCESS) {
     serverBootloadState = SERVER_BOOTLOAD_STATE_DELAY_BEFORE_CHECK_IF_BOOTLOADER_ACTIVE;
-    slxu_zigbee_event_set_delay_qs(myEvent,
-                                   DELAY_BEFORE_SENDING_BOOTLOAD_DATA_SECONDS << 2);
+    sl_zigbee_event_set_delay_qs(myEvent,
+                                 DELAY_BEFORE_SENDING_BOOTLOAD_DATA_SECONDS << 2);
   } else {
     resetServerState(false);
   }
@@ -462,10 +444,10 @@ EmberStatus emberAfPluginStandaloneBootloaderServerStartClientBootload(EmberEUI6
     bootloadPrintln("Error:  Cannot find image ID within storage.");
     return EMBER_INVALID_CALL;
   }
-  if (EMBER_AF_OTA_STORAGE_SUCCESS != emAfOtaStorageGetTagOffsetAndSize(id,
-                                                                        tag,
-                                                                        &tagOffset,
-                                                                        &tagSize)) {
+  if (EMBER_AF_OTA_STORAGE_SUCCESS != sli_zigbee_af_ota_storage_get_tag_offset_and_size(id,
+                                                                                        tag,
+                                                                                        &tagOffset,
+                                                                                        &tagSize)) {
     bootloadPrintln("Error: Cannot find tag 0x%2X within passed image ID", tag);
     return EMBER_INVALID_CALL;
   }
@@ -475,25 +457,25 @@ EmberStatus emberAfPluginStandaloneBootloaderServerStartClientBootload(EmberEUI6
   status = sendQuery(longId);
   if (status == EMBER_SUCCESS) {
     serverBootloadState = SERVER_BOOTLOAD_STATE_UNICAST_QUERY_SENT;
-    slxu_zigbee_event_set_delay_qs(myEvent,
-                                   QUERY_TIMEOUT_SECONDS << 2);
+    sl_zigbee_event_set_delay_qs(myEvent,
+                                 QUERY_TIMEOUT_SECONDS << 2);
   } else {
     resetServerState(false);
   }
   return status;
 }
 
-void emberAfPluginStandaloneBootloaderServerMyEventEventHandler(SLXU_UC_EVENT)
+void emberAfPluginStandaloneBootloaderServerMyEventEventHandler(sl_zigbee_event_t * event)
 {
-  slxu_zigbee_event_set_inactive(myEvent);
+  sl_zigbee_event_set_inactive(myEvent);
   if (serverBootloadState == SERVER_BOOTLOAD_STATE_UNICAST_QUERY_SENT) {
     bootloadPrint("Error: Timed out waiting for device to respond to bootloader query");
   } else if (serverBootloadState == SERVER_BOOTLOAD_STATE_DELAY_BEFORE_CHECK_IF_BOOTLOADER_ACTIVE) {
     bootloadPrintln("Checking if bootloader is now active on client");
     if (EMBER_SUCCESS == sendQuery(targetClient.eui64)) {
       serverBootloadState = SERVER_BOOTLOAD_STATE_CHECK_IF_BOOTLOADER_ACTIVE_SENT;
-      slxu_zigbee_event_set_delay_qs(myEvent,
-                                     QUERY_TIMEOUT_SECONDS << 2);
+      sl_zigbee_event_set_delay_qs(myEvent,
+                                   QUERY_TIMEOUT_SECONDS << 2);
     } else {
       bootloadPrintln("Error: Giving up bootload of client");
       resetServerState(false);

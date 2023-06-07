@@ -40,6 +40,7 @@
 #include <openthread/platform/udp.h>
 
 #include "common/as_core_type.hpp"
+#include "common/callback.hpp"
 #include "common/clearable.hpp"
 #include "common/linked_list.hpp"
 #include "common/locator.hpp"
@@ -161,6 +162,24 @@ public:
         explicit Socket(Instance &aInstance);
 
         /**
+         * This method returns a new UDP message with default settings (link security enabled and `kPriorityNormal`)
+         *
+         * @returns A pointer to the message or `nullptr` if no buffers are available.
+         *
+         */
+        Message *NewMessage(void);
+
+        /**
+         * This method returns a new UDP message with default settings (link security enabled and `kPriorityNormal`)
+         *
+         * @param[in]  aReserved  The number of header bytes to reserve after the UDP header.
+         *
+         * @returns A pointer to the message or `nullptr` if no buffers are available.
+         *
+         */
+        Message *NewMessage(uint16_t aReserved);
+
+        /**
          * This method returns a new UDP message with sufficient header space reserved.
          *
          * @param[in]  aReserved  The number of header bytes to reserve after the UDP header.
@@ -169,7 +188,7 @@ public:
          * @returns A pointer to the message or `nullptr` if no buffers are available.
          *
          */
-        Message *NewMessage(uint16_t aReserved, const Message::Settings &aSettings = Message::Settings::GetDefault());
+        Message *NewMessage(uint16_t aReserved, const Message::Settings &aSettings);
 
         /**
          * This method opens the UDP socket.
@@ -280,7 +299,7 @@ public:
 
 #if OPENTHREAD_CONFIG_BACKBONE_ROUTER_ENABLE
         /**
-         * This method configures the UDP socket to join a mutlicast group on a Host network interface.
+         * This method configures the UDP socket to join a multicast group on a Host network interface.
          *
          * @param[in]  aNetifIdentifier     The network interface identifier.
          * @param[in]  aAddress             The multicast group address.
@@ -533,6 +552,24 @@ public:
     uint16_t GetEphemeralPort(void);
 
     /**
+     * This method returns a new UDP message with default settings (link security enabled and `kPriorityNormal`)
+     *
+     * @returns A pointer to the message or `nullptr` if no buffers are available.
+     *
+     */
+    Message *NewMessage(void);
+
+    /**
+     * This method returns a new UDP message with default settings (link security enabled and `kPriorityNormal`)
+     *
+     * @param[in]  aReserved  The number of header bytes to reserve after the UDP header.
+     *
+     * @returns A pointer to the message or `nullptr` if no buffers are available.
+     *
+     */
+    Message *NewMessage(uint16_t aReserved);
+
+    /**
      * This method returns a new UDP message with sufficient header space reserved.
      *
      * @param[in]  aReserved  The number of header bytes to reserve after the UDP header.
@@ -541,7 +578,7 @@ public:
      * @returns A pointer to the message or `nullptr` if no buffers are available.
      *
      */
-    Message *NewMessage(uint16_t aReserved, const Message::Settings &aSettings = Message::Settings::GetDefault());
+    Message *NewMessage(uint16_t aReserved, const Message::Settings &aSettings);
 
     /**
      * This method sends an IPv6 datagram.
@@ -593,11 +630,7 @@ public:
      * @param[in]   aContext    A pointer to arbitrary context information.
      *
      */
-    void SetUdpForwarder(otUdpForwarder aForwarder, void *aContext)
-    {
-        mUdpForwarder        = aForwarder;
-        mUdpForwarderContext = aContext;
-    }
+    void SetUdpForwarder(otUdpForwarder aForwarder, void *aContext) { mUdpForwarder.Set(aForwarder, aContext); }
 #endif
 
     /**
@@ -652,8 +685,7 @@ private:
     SocketHandle *mPrevBackboneSockets;
 #endif
 #if OPENTHREAD_CONFIG_UDP_FORWARD_ENABLE
-    void *         mUdpForwarderContext;
-    otUdpForwarder mUdpForwarder;
+    Callback<otUdpForwarder> mUdpForwarder;
 #endif
 };
 

@@ -2,7 +2,7 @@ id: bt_iop_post_build
 package: Bluetooth
 label: BLE Interoperability Test Post Build
 description: Post build scripts for BLE Interoperability Test.
-category: Bluetooth|Application
+category: Bluetooth|Application|Miscellaneous
 quality: production
 ui_hints:
   visibility: never

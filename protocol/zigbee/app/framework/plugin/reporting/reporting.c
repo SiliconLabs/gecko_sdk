@@ -58,19 +58,12 @@ static void markReportTableChange(uint8_t *dataRef,
                                   EmberAfAttributeType dataType,
                                   const EmberAfPluginReportingEntry* const entry,
                                   uint8_t entryIndex);
-#ifdef UC_BUILD
 sl_zigbee_event_t emberAfPluginReportingTickEvent;
 #define tickEvent (&emberAfPluginReportingTickEvent)
-void emberAfPluginReportingTickEventHandler(SLXU_UC_EVENT);
-#else
-#ifdef EMBER_TEST
-#define emberAfDetectReportChangedCallback(value1, value2, dataType) 0
-#endif
-EmberEventControl emberAfPluginReportingTickEventControl;
-#define tickEvent emberAfPluginReportingTickEventControl
-#endif // UC_BUILD
+void emberAfPluginReportingTickEventHandler(sl_zigbee_event_t * event);
+#define slxu_zigbee_event_init(x, y) sl_zigbee_event_init(x, y)
 
-EmAfPluginReportVolatileData emAfPluginReportVolatileData[REPORT_TABLE_SIZE];
+sli_zigbee_af_report_volatile_data_type sli_zigbee_af_report_volatile_data[REPORT_TABLE_SIZE];
 
 static void retrySendReport(EmberOutgoingMessageType type,
                             uint16_t indexOrDestination,
@@ -113,41 +106,37 @@ static uint32_t computeStringHash(uint8_t *data, uint8_t length)
 
 #ifdef EZSP_HOST
 static EmberAfPluginReportingEntry table[REPORT_TABLE_SIZE];
-void emAfPluginReportingGetEntry(uint16_t index, EmberAfPluginReportingEntry *result)
+void sli_zigbee_af_reporting_get_entry(uint16_t index, EmberAfPluginReportingEntry *result)
 {
   ifValidIndex(MEMMOVE(result, &table[index], sizeof(EmberAfPluginReportingEntry)));
 }
-void emAfPluginReportingSetEntry(uint16_t index, EmberAfPluginReportingEntry *value)
+void sli_zigbee_af_reporting_set_entry(uint16_t index, EmberAfPluginReportingEntry *value)
 {
   ifValidIndex(MEMMOVE(&table[index], value, sizeof(EmberAfPluginReportingEntry)));
 }
 #elif (ENABLE_EXPANDED_TABLE)
 #define reportingTableKey(index) (NVM3KEY_REPORTING_TABLE_EXPANDED + (index))
-void emAfPluginReportingGetEntry(uint16_t index, EmberAfPluginReportingEntry *result)
+void sli_zigbee_af_reporting_get_entry(uint16_t index, EmberAfPluginReportingEntry *result)
 {
   ifValidIndex(nvm3_readData(nvm3_defaultHandle, reportingTableKey(index), result, sizeof(EmberAfPluginReportingEntry)));
 }
-void emAfPluginReportingSetEntry(uint16_t index, EmberAfPluginReportingEntry *value)
+void sli_zigbee_af_reporting_set_entry(uint16_t index, EmberAfPluginReportingEntry *value)
 {
   ifValidIndex(nvm3_writeData(nvm3_defaultHandle, reportingTableKey(index), value, sizeof(EmberAfPluginReportingEntry)));
 }
 #else
-void emAfPluginReportingGetEntry(uint16_t index, EmberAfPluginReportingEntry *result)
+void sli_zigbee_af_reporting_get_entry(uint16_t index, EmberAfPluginReportingEntry *result)
 {
   ifValidIndex(halCommonGetIndexedToken(result, TOKEN_REPORT_TABLE, index));
 }
-void emAfPluginReportingSetEntry(uint16_t index, EmberAfPluginReportingEntry *value)
+void sli_zigbee_af_reporting_set_entry(uint16_t index, EmberAfPluginReportingEntry *value)
 {
   ifValidIndex(halCommonSetIndexedToken(TOKEN_REPORT_TABLE, index, value));
 }
 #endif
 
 // TODO: renamed for naming consistency purposes
-#ifdef UC_BUILD
-void emAfPluginReportingStackStatusCallback(EmberStatus status)
-#else
-void emberAfPluginReportingStackStatusCallback(EmberStatus status)
-#endif
+void sli_zigbee_af_reporting_stack_status_callback(EmberStatus status)
 {
   if (status == EMBER_NETWORK_UP) {
     // Load default reporting configurations
@@ -156,8 +145,6 @@ void emberAfPluginReportingStackStatusCallback(EmberStatus status)
     scheduleTick();
   }
 }
-
-#ifdef UC_BUILD
 
 void emberAfPluginReportingInitCallback(uint8_t init_level)
 {
@@ -181,7 +168,7 @@ void emberAfPluginReportingInitCallback(uint8_t init_level)
       for (i = 0; i < REPORT_TABLE_SIZE; i++) {
         EmberAfPluginReportingEntry entry;
         entry.endpoint = EMBER_AF_PLUGIN_REPORTING_UNUSED_ENDPOINT_ID;
-        emAfPluginReportingGetEntry(i, &entry);
+        sli_zigbee_af_reporting_get_entry(i, &entry);
         if (entry.endpoint == EMBER_AF_PLUGIN_REPORTING_UNUSED_ENDPOINT_ID) {
           // we structure the table so that all "active" entries fall within
           // a single range.  When we encounter an unused entry, assume
@@ -190,7 +177,7 @@ void emberAfPluginReportingInitCallback(uint8_t init_level)
         }
         if (emberAfEndpointIsEnabled(entry.endpoint)
             && entry.direction == EMBER_ZCL_REPORTING_DIRECTION_REPORTED) {
-          emAfPluginReportVolatileData[i].reportableChange = true;
+          sli_zigbee_af_report_volatile_data[i].reportableChange = true;
         }
       }
       reportTableActiveLength = i;
@@ -204,42 +191,12 @@ void emberAfPluginReportingInitCallback(uint8_t init_level)
   }
 }
 
-#else // !UC_BUILD
-
-void emberAfPluginReportingInitCallback(void)
-{
-  // On device initialization, any attributes that have been set up to report
-  // should generate an attribute report.
-  uint16_t i;
-
-  for (i = 0; i < REPORT_TABLE_SIZE; i++) {
-    EmberAfPluginReportingEntry entry;
-    entry.endpoint = EMBER_AF_PLUGIN_REPORTING_UNUSED_ENDPOINT_ID;
-    emAfPluginReportingGetEntry(i, &entry);
-    if (entry.endpoint == EMBER_AF_PLUGIN_REPORTING_UNUSED_ENDPOINT_ID) {
-      // we structure the table so that all "active" entries fall within
-      // a single range.  When we encounter an unused entry, assume
-      // we've reached the end of active entries and break the loop
-      break;
-    }
-    if (emberAfEndpointIsEnabled(entry.endpoint)
-        && entry.direction == EMBER_ZCL_REPORTING_DIRECTION_REPORTED) {
-      emAfPluginReportVolatileData[i].reportableChange = true;
-    }
-  }
-
-  reportTableActiveLength = i;
-  scheduleTick();
-}
-
-#endif // UC_BUILD
-
-uint16_t emAfPluginReportingNumEntries(void)
+uint16_t sli_zigbee_af_reporting_num_entries(void)
 {
   return reportTableActiveLength;
 }
 
-void emberAfPluginReportingTickEventHandler(SLXU_UC_EVENT)
+void emberAfPluginReportingTickEventHandler(sl_zigbee_event_t * event)
 {
   EmberApsFrame *apsFrame = NULL;
   EmberAfStatus status;
@@ -255,17 +212,17 @@ void emberAfPluginReportingTickEventHandler(SLXU_UC_EVENT)
   for (i = 0; i < reportTableActiveLength; i++) {
     EmberAfPluginReportingEntry entry;
     uint32_t elapsedMs;
-    emAfPluginReportingGetEntry(i, &entry);
+    sli_zigbee_af_reporting_get_entry(i, &entry);
     // We will only send reports for active reported attributes and only if a
     // reportable change has occurred and the minimum interval has elapsed or
     // if the maximum interval is set and has elapsed.
-    elapsedMs = elapsedTimeInt32u(emAfPluginReportVolatileData[i].lastReportTimeMs,
+    elapsedMs = elapsedTimeInt32u(sli_zigbee_af_report_volatile_data[i].lastReportTimeMs,
                                   halCommonGetInt32uMillisecondTick());
     if (!emberAfEndpointIsEnabled(entry.endpoint)
         || entry.direction != EMBER_ZCL_REPORTING_DIRECTION_REPORTED
         || (elapsedMs
             < entry.data.reported.minInterval * MILLISECOND_TICKS_PER_SECOND)
-        || (!emAfPluginReportVolatileData[i].reportableChange
+        || (!sli_zigbee_af_report_volatile_data[i].reportableChange
             && (entry.data.reported.maxInterval == 0
                 || (elapsedMs
                     < (entry.data.reported.maxInterval
@@ -368,8 +325,8 @@ void emberAfPluginReportingTickEventHandler(SLXU_UC_EVENT)
     // as still being ready to be reported, and will schedule the handler
     // to execute again IMMEDIATELY. If the problematic attribute condition
     // persists, the handler will effectively try to execute continuously.
-    emAfPluginReportVolatileData[i].reportableChange = false;
-    emAfPluginReportVolatileData[i].lastReportTimeMs = halCommonGetInt32uMillisecondTick();
+    sli_zigbee_af_report_volatile_data[i].reportableChange = false;
+    sli_zigbee_af_report_volatile_data[i].lastReportTimeMs = halCommonGetInt32uMillisecondTick();
   }
 
   if (apsFrame != NULL) {
@@ -661,7 +618,7 @@ bool emberAfReadReportingConfigurationCommandCallback(const EmberAfClusterComman
     // the status field and all fields except direction and attribute identifier
     // to be omitted if there is no report configuration found.
     for (i = 0; i < reportTableActiveLength; i++) {
-      emAfPluginReportingGetEntry(i, &entry);
+      sli_zigbee_af_reporting_get_entry(i, &entry);
       if (entry.direction == direction
           && entry.endpoint == cmd->apsFrame->destinationEndpoint
           && entry.clusterId == cmd->apsFrame->clusterId
@@ -719,11 +676,11 @@ EmberStatus emberAfClearReportTableCallback(void)
   while (reportTableActiveLength > 0) {
     removeConfiguration(reportTableActiveLength - 1);
   }
-  slxu_zigbee_event_set_inactive(tickEvent);
+  sl_zigbee_event_set_inactive(tickEvent);
   return EMBER_SUCCESS;
 }
 
-EmberStatus emAfPluginReportingRemoveEntry(uint16_t index)
+EmberStatus sli_zigbee_af_reporting_remove_entry(uint16_t index)
 {
   EmberStatus status = EMBER_INDEX_OUT_OF_RANGE;
   if (index < reportTableActiveLength) {
@@ -735,12 +692,12 @@ EmberStatus emAfPluginReportingRemoveEntry(uint16_t index)
 
 // This function will check all entries in report table and update
 // lastReportValue field with current value of attributes
-void emAfPluginReportingGetLastValueAll(void)
+void sli_zigbee_af_reporting_get_last_value_all(void)
 {
   uint16_t i;
   for (i = 0; i < reportTableActiveLength; i++) {
     EmberAfPluginReportingEntry entry;
-    emAfPluginReportingGetEntry(i, &entry);
+    sli_zigbee_af_reporting_get_entry(i, &entry);
     if (emberAfEndpointIsEnabled(entry.endpoint)
         && entry.direction == EMBER_ZCL_REPORTING_DIRECTION_REPORTED) {
       readAttributeAndGetLastValue(&entry, i, NULL, NULL, NULL, 0, true);
@@ -762,7 +719,7 @@ static void markReportTableChange(uint8_t *dataRef,
   // on the minimum reporting interval.  This is handled in the scheduler.
   EmberAfDifferenceType difference
     = emberAfGetDifference(dataRef,
-                           emAfPluginReportVolatileData[entryIndex].lastReportValue,
+                           sli_zigbee_af_report_volatile_data[entryIndex].lastReportValue,
                            dataSize,
                            dataType);
   uint8_t analogOrDiscrete = emberAfGetAttributeAnalogOrDiscreteType(dataType);
@@ -786,7 +743,7 @@ static void markReportTableChange(uint8_t *dataRef,
 
   if ((analogOrDiscrete == EMBER_AF_DATA_TYPE_DISCRETE && difference != 0)
       || (analogOrDiscrete == EMBER_AF_DATA_TYPE_ANALOG && changed)) {
-    emAfPluginReportVolatileData[entryIndex].reportableChange = true;
+    sli_zigbee_af_report_volatile_data[entryIndex].reportableChange = true;
     scheduleTick();
   }
 }
@@ -805,14 +762,14 @@ static EmberStatus readAttributeAndGetLastValue(const EmberAfPluginReportingEntr
   uint16_t dataSize;
   EmberAfAttributeType dataType;
 
-  EmberStatus status = emAfReadAttribute(entry->endpoint,
-                                         entry->clusterId,
-                                         entry->attributeId,
-                                         entry->mask,
-                                         entry->manufacturerCode,
-                                         readData,
-                                         READ_DATA_SIZE,
-                                         &dataType);
+  EmberStatus status = sli_zigbee_af_read_attribute(entry->endpoint,
+                                                    entry->clusterId,
+                                                    entry->attributeId,
+                                                    entry->mask,
+                                                    entry->manufacturerCode,
+                                                    readData,
+                                                    READ_DATA_SIZE,
+                                                    &dataType);
 
   if (status != EMBER_ZCL_STATUS_SUCCESS) {
     emberAfReportingPrintln("ERR: reading cluster 0x%2x attribute 0x%2x: 0x%x",
@@ -859,16 +816,16 @@ static EmberStatus readAttributeAndGetLastValue(const EmberAfPluginReportingEntr
     return EMBER_ZCL_STATUS_SUCCESS;
   }
 
-  if (copySize <= sizeof(emAfPluginReportVolatileData[entryIndex].lastReportValue)) {
-    emAfPluginReportVolatileData[entryIndex].lastReportValue = 0;
+  if (copySize <= sizeof(sli_zigbee_af_report_volatile_data[entryIndex].lastReportValue)) {
+    sli_zigbee_af_report_volatile_data[entryIndex].lastReportValue = 0;
 #if (BIGENDIAN_CPU)
-    MEMMOVE(((uint8_t *)&emAfPluginReportVolatileData[entryIndex].lastReportValue
-             + sizeof(emAfPluginReportVolatileData[entryIndex].lastReportValue)
+    MEMMOVE(((uint8_t *)&sli_zigbee_af_report_volatile_data[entryIndex].lastReportValue
+             + sizeof(sli_zigbee_af_report_volatile_data[entryIndex].lastReportValue)
              - copySize),
             copyData,
             copySize);
 #else
-    MEMMOVE(&emAfPluginReportVolatileData[entryIndex].lastReportValue, copyData, copySize);
+    MEMMOVE(&sli_zigbee_af_report_volatile_data[entryIndex].lastReportValue, copyData, copySize);
 #endif
   }
 
@@ -896,7 +853,7 @@ void emberAfReportingAttributeChangeCallback(uint8_t endpoint,
   uint16_t i;
   for (i = 0; i < reportTableActiveLength; i++) {
     EmberAfPluginReportingEntry entry;
-    emAfPluginReportingGetEntry(i, &entry);
+    sli_zigbee_af_reporting_get_entry(i, &entry);
     if (entry.direction == EMBER_ZCL_REPORTING_DIRECTION_REPORTED
         && entry.endpoint == endpoint
         && entry.clusterId == clusterId
@@ -920,8 +877,8 @@ void emberAfReportingAttributeChangeCallback(uint8_t endpoint,
   }
 }
 
-bool emAfPluginReportingDoEntriesMatch(const EmberAfPluginReportingEntry* const entry1,
-                                       const EmberAfPluginReportingEntry* const entry2)
+bool sli_zigbee_af_reporting_do_entries_match(const EmberAfPluginReportingEntry* const entry1,
+                                              const EmberAfPluginReportingEntry* const entry2)
 {
   // Verify that the reporting parameters of both entries match.
   // If the entries are for EMBER_ZCL_REPORTING_DIRECTION_REPORTED, the
@@ -943,7 +900,7 @@ bool emAfPluginReportingDoEntriesMatch(const EmberAfPluginReportingEntry* const 
   return false;
 }
 
-uint16_t emAfPluginReportingAddEntry(EmberAfPluginReportingEntry* newEntry)
+uint16_t sli_zigbee_af_reporting_add_entry(EmberAfPluginReportingEntry* newEntry)
 {
   uint16_t i;
   EmberAfPluginReportingEntry oldEntry;
@@ -951,23 +908,23 @@ uint16_t emAfPluginReportingAddEntry(EmberAfPluginReportingEntry* newEntry)
   // If an entry already exists, or exists but with different parameters,
   // overwrite it with the new entry to prevent pollution of the report table
   for (i = 0; i < reportTableActiveLength; i++) {
-    emAfPluginReportingGetEntry(i, &oldEntry);
-    if (emAfPluginReportingDoEntriesMatch(&oldEntry, newEntry)) {
-      emAfPluginReportingSetEntry(i, newEntry);
+    sli_zigbee_af_reporting_get_entry(i, &oldEntry);
+    if (sli_zigbee_af_reporting_do_entries_match(&oldEntry, newEntry)) {
+      sli_zigbee_af_reporting_set_entry(i, newEntry);
       return i;
     }
   }
 
   // if no entry is found, add it to an unused index
-  return emAfPluginReportingAppendEntry(newEntry);
+  return sli_zigbee_af_reporting_append_entry(newEntry);
 }
 
-uint16_t emAfPluginReportingAppendEntry(EmberAfPluginReportingEntry* newEntry)
+uint16_t sli_zigbee_af_reporting_append_entry(EmberAfPluginReportingEntry* newEntry)
 {
   uint16_t index = NULL_INDEX;
   if (reportTableActiveLength < REPORT_TABLE_SIZE) {
     index = reportTableActiveLength;
-    emAfPluginReportingSetEntry(index, newEntry);
+    sli_zigbee_af_reporting_set_entry(index, newEntry);
     reportTableActiveLength++;
   }
   return index;
@@ -979,17 +936,17 @@ static void scheduleTick(void)
   uint16_t i;
   for (i = 0; i < reportTableActiveLength; i++) {
     EmberAfPluginReportingEntry entry;
-    emAfPluginReportingGetEntry(i, &entry);
+    sli_zigbee_af_reporting_get_entry(i, &entry);
     if (emberAfEndpointIsEnabled(entry.endpoint)
         && entry.direction == EMBER_ZCL_REPORTING_DIRECTION_REPORTED) {
       uint32_t minIntervalMs = (entry.data.reported.minInterval
                                 * MILLISECOND_TICKS_PER_SECOND);
       uint32_t maxIntervalMs = (entry.data.reported.maxInterval
                                 * MILLISECOND_TICKS_PER_SECOND);
-      uint32_t elapsedMs = elapsedTimeInt32u(emAfPluginReportVolatileData[i].lastReportTimeMs,
+      uint32_t elapsedMs = elapsedTimeInt32u(sli_zigbee_af_report_volatile_data[i].lastReportTimeMs,
                                              halCommonGetInt32uMillisecondTick());
       uint32_t remainingMs = MAX_INT32U_VALUE;
-      if (emAfPluginReportVolatileData[i].reportableChange) {
+      if (sli_zigbee_af_report_volatile_data[i].reportableChange) {
         remainingMs = (minIntervalMs < elapsedMs
                        ? 0
                        : minIntervalMs - elapsedMs);
@@ -1005,10 +962,10 @@ static void scheduleTick(void)
   }
   if (delayMs != MAX_INT32U_VALUE) {
     emberAfDebugPrintln("sched report event for: 0x%4x", delayMs);
-    slxu_zigbee_event_set_delay_ms(tickEvent, delayMs);
+    sl_zigbee_event_set_delay_ms(tickEvent, delayMs);
   } else {
     emberAfDebugPrintln("deactivate report event");
-    slxu_zigbee_event_set_inactive(tickEvent);
+    sl_zigbee_event_set_inactive(tickEvent);
   }
 }
 
@@ -1016,23 +973,23 @@ static void removeConfiguration(uint16_t index)
 {
   if (index < reportTableActiveLength) {
     EmberAfPluginReportingEntry entry;
-    emAfPluginReportingGetEntry(index, &entry);
+    sli_zigbee_af_reporting_get_entry(index, &entry);
     entry.endpoint = EMBER_AF_PLUGIN_REPORTING_UNUSED_ENDPOINT_ID;
     reportTableActiveLength--;
     if (reportTableActiveLength == index) {
       // we are removing the last entry from the list
-      emAfPluginReportingSetEntry(index, &entry);
+      sli_zigbee_af_reporting_set_entry(index, &entry);
     } else {
       // we are removing an entry from the middle of the list
       // must perform a swap in order to maintain list structure
       EmberAfPluginReportingEntry swap;
-      EmAfPluginReportVolatileData ramSwap;
+      sli_zigbee_af_report_volatile_data_type ramSwap;
       // swap with the last entry
-      emAfPluginReportingGetEntry(reportTableActiveLength, &swap);
-      ramSwap = emAfPluginReportVolatileData[reportTableActiveLength];
-      emAfPluginReportingSetEntry(index, &swap);
-      emAfPluginReportVolatileData[index] = ramSwap;
-      emAfPluginReportingSetEntry(reportTableActiveLength, &entry);
+      sli_zigbee_af_reporting_get_entry(reportTableActiveLength, &swap);
+      ramSwap = sli_zigbee_af_report_volatile_data[reportTableActiveLength];
+      sli_zigbee_af_reporting_set_entry(index, &swap);
+      sli_zigbee_af_report_volatile_data[index] = ramSwap;
+      sli_zigbee_af_reporting_set_entry(reportTableActiveLength, &entry);
       // TODO add a callback that fires when indices change to inform anyone who might be watching a specific index
     }
 
@@ -1076,7 +1033,7 @@ EmberAfStatus emberAfPluginReportingConfigureReportedAttribute(const EmberAfPlug
   // with the new configuration.  Otherwise, a new entry will be created and
   // initialized.
   for (i = 0; i < reportTableActiveLength; i++) {
-    emAfPluginReportingGetEntry(i, &entry);
+    sli_zigbee_af_reporting_get_entry(i, &entry);
     if (entry.direction == EMBER_ZCL_REPORTING_DIRECTION_REPORTED
         && entry.endpoint == newEntry->endpoint
         && entry.clusterId == newEntry->clusterId
@@ -1149,11 +1106,11 @@ EmberAfStatus emberAfPluginReportingConfigureReportedAttribute(const EmberAfPlug
       reportTableActiveLength++;
     }
     // Always update the lastReportTimeMs and lastReportValue when the entry is updated or newly added
-    emAfPluginReportVolatileData[index].lastReportTimeMs = halCommonGetInt32uMillisecondTick();
+    sli_zigbee_af_report_volatile_data[index].lastReportTimeMs = halCommonGetInt32uMillisecondTick();
     if (readAttributeAndGetLastValue(&entry, index, NULL, NULL, NULL, 0, false) != EMBER_ZCL_STATUS_SUCCESS) {
-      emAfPluginReportVolatileData[index].lastReportValue = 0;
+      sli_zigbee_af_report_volatile_data[index].lastReportValue = 0;
     }
-    emAfPluginReportingSetEntry(index, &entry);
+    sli_zigbee_af_reporting_set_entry(index, &entry);
     scheduleTick();
   }
   return status;
@@ -1174,7 +1131,7 @@ static EmberAfStatus configureReceivedAttribute(const EmberAfClusterCommand *cmd
   // with the new configuration.  Otherwise, a new entry will be created and
   // initialized.
   for (i = 0; i < reportTableActiveLength; i++) {
-    emAfPluginReportingGetEntry(i, &entry);
+    sli_zigbee_af_reporting_get_entry(i, &entry);
     if (entry.direction == EMBER_ZCL_REPORTING_DIRECTION_RECEIVED
         && entry.endpoint == cmd->apsFrame->destinationEndpoint
         && entry.clusterId == cmd->apsFrame->clusterId
@@ -1221,7 +1178,7 @@ static EmberAfStatus configureReceivedAttribute(const EmberAfClusterCommand *cmd
       reportTableActiveLength++;
     }
 
-    emAfPluginReportingSetEntry(index, &entry);
+    sli_zigbee_af_reporting_set_entry(index, &entry);
   }
   return status;
 }
@@ -1255,8 +1212,8 @@ static bool reportEntryDoesNotExist(const EmberAfPluginReportingEntry* newEntry)
   EmberAfPluginReportingEntry entry;
 
   for (i = 0; i < reportTableActiveLength; i++) {
-    emAfPluginReportingGetEntry(i, &entry);
-    if (emAfPluginReportingDoEntriesMatch(&entry, newEntry)) {
+    sli_zigbee_af_reporting_get_entry(i, &entry);
+    if (sli_zigbee_af_reporting_do_entries_match(&entry, newEntry)) {
       return false;
     }
   }
@@ -1264,10 +1221,10 @@ static bool reportEntryDoesNotExist(const EmberAfPluginReportingEntry* newEntry)
   return true;
 }
 
-uint16_t emAfPluginReportingConditionallyAddReportingEntry(EmberAfPluginReportingEntry* newEntry)
+uint16_t sli_zigbee_af_reporting_conditionally_add_reporting_entry(EmberAfPluginReportingEntry* newEntry)
 {
   if (reportEntryDoesNotExist(newEntry)) {
-    return emAfPluginReportingAppendEntry(newEntry);
+    return sli_zigbee_af_reporting_append_entry(newEntry);
   }
   return 0;
 }
@@ -1290,11 +1247,9 @@ WEAK(bool emberAfPluginReportingGetDefaultReportingConfigCallback(EmberAfPluginR
   return true;
 }
 
-#ifdef UC_BUILD
 WEAK(bool emberAfDetectReportChangedCallback(EmberAfDifferenceType threshold,
                                              EmberAfDifferenceType diff,
                                              EmberAfAttributeType dataType))
 {
   return false;
 }
-#endif

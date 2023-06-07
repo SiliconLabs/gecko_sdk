@@ -26,7 +26,7 @@ template_contribution:
   - name: zigbee_stack_callback
     value:
       callback_type: zll_touch_link_target
-      function_name: emAfZllTouchLinkTargetCallback
+      function_name: sli_zigbee_af_zll_touch_link_target_callback
 documentation:
   docset: zigbee
   document: zigbee-af-api/zll-commissioning-server

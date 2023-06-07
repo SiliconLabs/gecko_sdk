@@ -4,9 +4,14 @@ package: "Btmesh"
 description: >
   Used to support the control and reporting functionality of a node that can
   participate in a scene.
+
+  This is a No-Code component.
 category: "Bluetooth Mesh|Models|Time and Scenes"
 quality: "production"
 root_path: "app/btmesh/common/btmesh_scene_server"
+tag:
+  - No-Code
+
 source:
   - path: "sl_btmesh_scene_server.c"
 include:
@@ -17,6 +22,7 @@ provides:
   - name: "btmesh_scene_server"
 requires:
   - name: "app_assert"
+  - name: "btmesh_provisionee"
   - name: "btmesh_stack_scene_server"
   - name: "btmesh_stack_scene_setup_server"
   - name: "btmesh_stack"

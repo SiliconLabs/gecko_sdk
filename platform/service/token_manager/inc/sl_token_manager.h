@@ -225,7 +225,6 @@ extern const void * const tokenDefaults[];
 ///
 ///   @details
 ///
-///   @li @ref token_manager_intro
 ///
 /// @n @section token_manager_intro Introduction
 ///

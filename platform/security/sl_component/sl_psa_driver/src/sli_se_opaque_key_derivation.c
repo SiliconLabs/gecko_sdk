@@ -28,19 +28,16 @@
  *
  ******************************************************************************/
 
-#include "em_device.h"
+#include "sli_psa_driver_features.h"
 
-#if defined(SEMAILBOX_PRESENT)
-#include "psa/crypto_platform.h"
+#if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
 
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) \
-  || defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS)
+#include "psa/crypto.h"
 
 #include "sli_se_driver_key_derivation.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+//------------------------------------------------------------------------------
+// Driver entry points
 
 psa_status_t sli_se_opaque_key_agreement(psa_algorithm_t alg,
                                          const psa_key_attributes_t *attributes,
@@ -63,8 +60,4 @@ psa_status_t sli_se_opaque_key_agreement(psa_algorithm_t alg,
                                      output_length);
 }
 
-#ifdef __cplusplus
-}
-#endif
-#endif // VAULT || MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS
-#endif // SEMAILBOX_PRESENT
+#endif // SLI_MBEDTLS_DEVICE_HSE && SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS

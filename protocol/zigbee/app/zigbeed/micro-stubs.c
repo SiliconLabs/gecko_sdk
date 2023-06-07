@@ -76,7 +76,7 @@ void halStackSymbolDelayAIsr(void)
 {
 }
 
-// Referenced from emNetworkCheckIncomingQueue in network.c
+// Referenced from sli_zigbee_network_check_incoming_queue in network.c
 // Stub in platform/base/hal/micro/generic/led-stub.c
 void halStackIndicateActivity(bool turnOn)
 {

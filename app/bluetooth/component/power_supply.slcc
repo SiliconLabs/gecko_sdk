@@ -2,9 +2,12 @@ id: power_supply
 label: Power supply measurement
 package: Bluetooth
 description: Power supply measurement HW abstraction designed for Thunderboard.
-category: Application|Sensor
+category: Bluetooth|Application|Miscellaneous
 quality: production
 root_path: app/bluetooth/common/power_supply
+tag:
+  - No-Code
+
 source:
   - path: sl_power_supply.c
 include:

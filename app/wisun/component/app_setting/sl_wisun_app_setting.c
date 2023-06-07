@@ -54,6 +54,9 @@
 /// Settings notification error flag mask
 #define APP_SETTINGS_NOTIFICATION_ERROR_FLAG_MSK    (1U << APP_SETTINGS_NOTIFICATION_ERROR_FLAG_BIT)
 
+/// Default Network name for initialization
+#define APP_SETTINGS_DEFAULT_NETWORK_NAME           "Wi-SUN Network"
+
 /// Setting notification descriptor
 typedef struct app_setting_notif_dsc {
   /// Event ID
@@ -136,14 +139,32 @@ static app_setting_wisun_t _wisun_app_settings = { 0 };
 
 /// Default settings structure
 static const app_setting_wisun_t wisun_app_settings_default = {
+#if defined(WISUN_CONFIG_NETWORK_NAME)
   .network_name = WISUN_CONFIG_NETWORK_NAME,
+#else
+  .network_name = APP_SETTINGS_DEFAULT_NETWORK_NAME,
+#endif
+#if defined(WISUN_CONFIG_NETWORK_SIZE)
   .network_size = WISUN_CONFIG_NETWORK_SIZE,
+#else
+  .network_size = SL_WISUN_NETWORK_SIZE_SMALL,
+#endif
 #if defined(WISUN_CONFIG_TX_POWER)
   .tx_power = WISUN_CONFIG_TX_POWER,
 #else
   .tx_power = 20U,
 #endif
   .is_default_phy = true,
+#if defined(WISUN_CONFIG_DEVICE_TYPE)
+  .device_type = WISUN_CONFIG_DEVICE_TYPE,
+#else
+  .device_type = SL_WISUN_ROUTER,
+#endif
+#if defined(WISUN_CONFIG_DEVICE_PROFILE)
+  .lfn_profile = WISUN_CONFIG_DEVICE_PROFILE,
+#else
+  .lfn_profile = SL_WISUN_LFN_PROFILE_TEST,
+#endif
 #if defined(WISUN_CONFIG_DEFAULT_PHY_FAN10)
   .phy = {
     .type = WISUN_CONFIG_DEFAULT_PHY_FAN10,
@@ -511,13 +532,13 @@ __STATIC_INLINE void _app_wisun_mutex_release(void)
 
 static const char* _app_check_nw_name(const char *name, size_t *const name_len)
 {
-  const char* ret_name = WISUN_CONFIG_NETWORK_NAME;
+  const char* ret_name = APP_SETTINGS_DEFAULT_NETWORK_NAME;
 
   *name_len = sl_strnlen((char*)name, SL_WISUN_NETWORK_NAME_SIZE);
   if (!(*name_len < SL_WISUN_NETWORK_NAME_SIZE) || (*name_len == 0) ) {
     // sets the default name and its size
-    ret_name = WISUN_CONFIG_NETWORK_NAME;
-    *name_len = sl_strnlen(WISUN_CONFIG_NETWORK_NAME, SL_WISUN_NETWORK_NAME_SIZE);
+    ret_name = APP_SETTINGS_DEFAULT_NETWORK_NAME;
+    *name_len = sl_strnlen(APP_SETTINGS_DEFAULT_NETWORK_NAME, SL_WISUN_NETWORK_NAME_SIZE);
     printf("\r\n[Warning: The name of Wi-SUN network is incorrect, default name used, \"%s\" ]\r\n", ret_name);
   } else {
     ret_name = name;

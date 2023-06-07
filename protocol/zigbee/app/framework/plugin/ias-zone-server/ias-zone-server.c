@@ -31,13 +31,22 @@
 #include "hal/hal.h"
 
 #ifdef EMBER_SCRIPTED_TEST
-#include "app/framework/plugin/ias-zone-server/ias-zone-server-test.h"
-#endif
+ #ifndef SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
+ #define SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
+ #endif
+ #include "app/framework/plugin/ias-zone-server/ias-zone-server-test.h"
+ #include "app/zaptest/unit-test/zap-id.h"
+// needed to get defines from zap-command-structs.h
+ #include "zap-command-structs.h"
+ #include "zap-cluster-command-parser.h"
+#else // EMBER_SCRIPTED_TEST
+ #include "ias-zone-server-config.h"
+ #include "zap-cluster-command-parser.h"
+#endif // EMBER_SCRIPTED_TEST
 
-#ifdef UC_BUILD
-#include "ias-zone-server-config.h"
-#include "zap-cluster-command-parser.h"
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #ifdef SL_CATALOG_ZIGBEE_WWAH_APP_EVENT_RETRY_MANAGER_PRESENT
 #include "wwah-app-event-retry-manager-config.h"
 #endif
@@ -47,17 +56,6 @@
 #if (EMBER_AF_PLUGIN_IAS_ZONE_SERVER_UNLIMITED_RETRIES == 1)
 #define UNLIMITED_RETRIES
 #endif
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_WWAH_APP_EVENT_RETRY_MANAGER
-#define SL_CATALOG_ZIGBEE_WWAH_APP_EVENT_RETRY_MANAGER_PRESENT
-#endif
-#ifdef EMBER_AF_PLUGIN_IAS_ZONE_SERVER_ENABLE_QUEUE
-#define ENABLE_QUEUE
-#endif
-#ifdef EMBER_AF_PLUGIN_IAS_ZONE_SERVER_UNLIMITED_RETRIES
-#define UNLIMITED_RETRIES
-#endif
-#endif // UC_BUILD
 
 #define UNDEFINED_ZONE_ID 0xFF
 #define DELAY_TIMER_MS (1 * MILLISECOND_TICKS_PER_SECOND)
@@ -91,14 +89,9 @@ typedef struct {
 
 //-----------------------------------------------------------------------------
 // Globals
-#ifdef UC_BUILD
 sl_zigbee_event_t emberAfPluginIasZoneServerManageQueueEvent;
 #define serverManageQueueEventControl (&emberAfPluginIasZoneServerManageQueueEvent)
-void emberAfPluginIasZoneServerManageQueueEventHandler(SLXU_UC_EVENT);
-#else // !UC_BUILD
-EmberEventControl emberAfPluginIasZoneServerManageQueueEventControl;
-#define serverManageQueueEventControl emberAfPluginIasZoneServerManageQueueEventControl
-#endif // UC_BUILD
+void emberAfPluginIasZoneServerManageQueueEventHandler(sl_zigbee_event_t * event);
 
 static EmberAfIasZoneEnrollmentMode enrollmentMethod;
 
@@ -275,11 +268,11 @@ EmberAfStatus emberAfIasZoneClusterServerPreAttributeChangedCallback(
     // be sent.  But we also delay to give the client time to configure us.
     emberAfIasZoneClusterPrintln("Sending enrollment after %d ms",
                                  DELAY_TIMER_MS);
-    slxu_zigbee_zcl_schedule_server_tick_extended(endpoint,
-                                                  ZCL_IAS_ZONE_CLUSTER_ID,
-                                                  DELAY_TIMER_MS,
-                                                  EMBER_AF_SHORT_POLL,
-                                                  EMBER_AF_STAY_AWAKE);
+    sl_zigbee_zcl_schedule_server_tick_extended(endpoint,
+                                                ZCL_IAS_ZONE_CLUSTER_ID,
+                                                DELAY_TIMER_MS,
+                                                EMBER_AF_SHORT_POLL,
+                                                EMBER_AF_STAY_AWAKE);
   }
 
   return EMBER_ZCL_STATUS_SUCCESS;
@@ -348,8 +341,6 @@ static void updateEnrollState(uint8_t endpoint, bool enrolled)
 //------------------------
 // Commands callbacks
 
-#ifdef UC_BUILD
-
 bool emberAfIasZoneClusterZoneEnrollResponseCallback(EmberAfClusterCommand *cmd)
 {
   sl_zcl_ias_zone_cluster_zone_enroll_response_command_t cmd_data;
@@ -383,39 +374,6 @@ bool emberAfIasZoneClusterZoneEnrollResponseCallback(EmberAfClusterCommand *cmd)
   emberAfAppPrintln("ERROR: IAS Zone Server unable to read zone ID attribute");
   return true;
 }
-
-#else // !UC_BUILD
-
-bool emberAfIasZoneClusterZoneEnrollResponseCallback(uint8_t enrollResponseCode,
-                                                     uint8_t zoneId)
-{
-  uint8_t endpoint;
-  uint8_t epZoneId;
-  EmberAfStatus status;
-
-  endpoint = emberAfCurrentEndpoint();
-  status = emberAfReadServerAttribute(endpoint,
-                                      ZCL_IAS_ZONE_CLUSTER_ID,
-                                      ZCL_ZONE_ID_ATTRIBUTE_ID,
-                                      &epZoneId,
-                                      sizeof(uint8_t));
-  if (status == EMBER_ZCL_STATUS_SUCCESS) {
-    if (enrollResponseCode == EMBER_ZCL_IAS_ENROLL_RESPONSE_CODE_SUCCESS) {
-      updateEnrollState(endpoint, true);
-      setZoneId(endpoint, zoneId);
-    } else {
-      updateEnrollState(endpoint, false);
-      setZoneId(endpoint, UNDEFINED_ZONE_ID);
-    }
-
-    return true;
-  }
-
-  emberAfAppPrintln("ERROR: IAS Zone Server unable to read zone ID attribute");
-  return true;
-}
-
-#endif // UC_BUILD
 
 static EmberStatus sendZoneUpdate(uint16_t zoneStatus,
                                   uint16_t timeSinceStatusOccurredQs,
@@ -466,9 +424,9 @@ EmberStatus emberAfPluginIasZoneServerUpdateZoneStatus(
   if (enrollmentMethod == EMBER_ZCL_IAS_ZONE_ENROLLMENT_MODE_TRIP_TO_PAIR) {
     // If unenrolled, send Zone Enroll Request command.
     if (!emberAfIasZoneClusterAmIEnrolled(endpoint)) {
-      slxu_zigbee_zcl_schedule_server_tick(endpoint,
-                                           ZCL_IAS_ZONE_CLUSTER_ID,
-                                           DELAY_TIMER_MS);
+      sl_zigbee_zcl_schedule_server_tick(endpoint,
+                                         ZCL_IAS_ZONE_CLUSTER_ID,
+                                         DELAY_TIMER_MS);
       // Don't send the zone status update since not enrolled.
       return EMBER_SUCCESS;
     }
@@ -494,7 +452,7 @@ EmberStatus emberAfPluginIasZoneServerUpdateZoneStatus(
       emberAfStartMoveCallback();
     } else if (networkState == EMBER_JOINED_NETWORK) {
       resetCurrentQueueRetryParams();
-      slxu_zigbee_event_set_active(serverManageQueueEventControl);
+      sl_zigbee_event_set_active(serverManageQueueEventControl);
     }
 
     return EMBER_SUCCESS;
@@ -526,7 +484,7 @@ EmberStatus emberAfPluginIasZoneServerUpdateZoneStatus(
   return sendStatus;
 }
 
-void emberAfPluginIasZoneServerManageQueueEventHandler(SLXU_UC_EVENT)
+void emberAfPluginIasZoneServerManageQueueEventHandler(sl_zigbee_event_t * event)
 {
 #if defined(ENABLE_QUEUE)
   IasZoneStatusQueueEntry *bufferStart;
@@ -536,7 +494,7 @@ void emberAfPluginIasZoneServerManageQueueEventHandler(SLXU_UC_EVENT)
 
   //If the queue was emptied without our interaction, do nothing
   if (messageQueue.entriesInQueue == 0) {
-    slxu_zigbee_event_set_inactive(serverManageQueueEventControl);
+    sl_zigbee_event_set_inactive(serverManageQueueEventControl);
     return;
   }
 
@@ -556,8 +514,8 @@ void emberAfPluginIasZoneServerManageQueueEventHandler(SLXU_UC_EVENT)
     emberAfIasZoneClusterPrintln(
       "Not enough time passed for a retry, sleeping %d more mS",
       airTimeRemainingMs);
-    slxu_zigbee_event_set_delay_ms(serverManageQueueEventControl,
-                                   airTimeRemainingMs);
+    sl_zigbee_event_set_delay_ms(serverManageQueueEventControl,
+                                 airTimeRemainingMs);
   } else {
     status = bufferStart->status;
     emberAfIasZoneClusterPrintln(
@@ -568,17 +526,17 @@ void emberAfPluginIasZoneServerManageQueueEventHandler(SLXU_UC_EVENT)
       elapsedTimeQs,
       queueRetryParams.currentRetryCount);
     sendZoneUpdate(status, elapsedTimeQs, bufferStart->endpoint);
-    slxu_zigbee_event_set_inactive(serverManageQueueEventControl);
+    sl_zigbee_event_set_inactive(serverManageQueueEventControl);
   }
 #else // !ENABLE_QUEUE
-  slxu_zigbee_event_set_inactive(serverManageQueueEventControl);
+  sl_zigbee_event_set_inactive(serverManageQueueEventControl);
 #endif // ENABLE_QUEUE
 }
 
 void emberAfIasZoneClusterServerInitCallback(uint8_t endpoint)
 {
-  slxu_zigbee_event_init(serverManageQueueEventControl,
-                         emberAfPluginIasZoneServerManageQueueEventHandler);
+  sl_zigbee_event_init(serverManageQueueEventControl,
+                       emberAfPluginIasZoneServerManageQueueEventHandler);
   EmberAfIasZoneType zoneType;
   if (!areZoneServerAttributesTokenized(endpoint)) {
     emberAfAppPrint("WARNING: ATTRIBUTES ARE NOT BEING STORED IN FLASH! ");
@@ -736,7 +694,7 @@ void emberAfPluginIasZoneServerStackStatusCallback(EmberStatus status)
     // If we're reconnecting, send any items still in the queue
     emberAfIasZoneClusterPrintln(
       "Rejoined network, retransmiting any queued event");
-    slxu_zigbee_event_set_active(serverManageQueueEventControl);
+    sl_zigbee_event_set_active(serverManageQueueEventControl);
 #endif // ENABLE_QUEUE
   }
 }
@@ -788,7 +746,7 @@ void emberAfIasZoneServerSetStatusQueueRetryParamsToDefault(void)
 
 void emberAfIasZoneServerDiscardPendingEventsInStatusQueue(void)
 {
-  slxu_zigbee_event_set_inactive(serverManageQueueEventControl);
+  sl_zigbee_event_set_inactive(serverManageQueueEventControl);
   bufferInit(&messageQueue);
   resetCurrentQueueRetryParams();
 }
@@ -894,8 +852,8 @@ void emberAfIasZoneClusterServerMessageSentCallback(
       queueRetryParams.currentBackoffTimeSec);
 
     // Delay according to the current retransmit backoff time.
-    slxu_zigbee_event_set_delay_ms(serverManageQueueEventControl,
-                                   queueRetryParams.currentBackoffTimeSec * MILLISECOND_TICKS_PER_SECOND);
+    sl_zigbee_event_set_delay_ms(serverManageQueueEventControl,
+                                 queueRetryParams.currentBackoffTimeSec * MILLISECOND_TICKS_PER_SECOND);
 
     // The backoff time needs to be increased if the maximum backoff time is not reached yet.
     if ((queueRetryParams.currentBackoffTimeSec * queueRetryParams.config.backoffSeqCommonRatio)
@@ -918,7 +876,7 @@ void emberAfIasZoneClusterServerMessageSentCallback(
     resetCurrentQueueRetryParams();
 
     if (messageQueue.entriesInQueue) {
-      slxu_zigbee_event_set_active(serverManageQueueEventControl);
+      sl_zigbee_event_set_active(serverManageQueueEventControl);
     }
   }
 #endif // ENABLE_QUEUE
@@ -997,8 +955,6 @@ uint16_t computeElapsedTimeQs(IasZoneStatusQueueEntry *entry)
 }
 #endif // ENABLE_QUEUE
 
-#ifdef UC_BUILD
-
 uint32_t emberAfIasZoneClusterServerCommandParse(sl_service_opcode_t opcode,
                                                  sl_service_function_context_t *context)
 {
@@ -1021,5 +977,3 @@ uint32_t emberAfIasZoneClusterServerCommandParse(sl_service_opcode_t opcode,
           ? EMBER_ZCL_STATUS_SUCCESS
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
-
-#endif // UC_BUILD

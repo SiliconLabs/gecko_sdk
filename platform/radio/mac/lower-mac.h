@@ -58,7 +58,7 @@ enum
 #endif // CSL_SUPPORT
 };
 
-extern LowerMacState emLowerMacState;
+extern LowerMacState sli_802154mac_lower_mac_state;
 
 // MAC TX Options Bitmask
 #ifdef DOXYGEN_SHOULD_SKIP_THIS
@@ -121,7 +121,7 @@ void sl_mac_lower_mac_stop_transmit_tone(uint8_t mac_index);
 //zigbee specific, and only needed for mac certification
 uint8_t sl_mac_lower_mac_convert_rssi_to_ed(uint8_t mac_index, int8_t rssi);
 
-bool emRadioPacketTraceEnabled(void);
+bool sli_802154phy_radio_packet_trace_enabled(void);
 
 // This function will handle radio state for force sleep/wakeup calls
 // to the device when component zigbee_force_sleep_and_wakeup is enabled
@@ -331,21 +331,10 @@ bool sl_mac_802154_filter(uint8_t *packet);
 //#define MAX_RADIO_POWER 3
 #endif
 
-#if defined(EMBER_STACK_CONNECT) && !defined(EVENT_CONTROL_SYSTEM)
-#define EVENT_CONTROL_SYSTEM
-#endif
-
-#ifndef EVENT_CONTROL_SYSTEM
 #define sli_mac_inactivate_event(x) emberEventSetInactive(&(x))
 #define sli_mac_activate_event(x) emberEventSetActive(&(x))
 #define sli_mac_set_event_delay_ms(x, y) emberEventSetDelayMs(&(x), y)
 #define sli_mac_event_is_active(x) emberEventIsScheduled(&(x))
-#else
-#define sli_mac_inactivate_event(x) emberEventControlSetInactive(x)
-#define sli_mac_activate_event(x) emberEventControlSetActive(x)
-#define sli_mac_set_event_delay_ms(x, y) emberEventControlSetDelayMS(x, y)
-#define sli_mac_event_is_active(x) emberEventControlGetActive(x)
-#endif
 
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"

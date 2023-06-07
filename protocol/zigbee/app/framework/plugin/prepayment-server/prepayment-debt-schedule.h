@@ -26,7 +26,7 @@ typedef struct {
   uint8_t  collectionFrequency;   // Time between collections (hour, day, week, month, etc)
   uint8_t  debtType;
   uint8_t  endpoint;
-} emDebtScheduleEntry;
+} sli_zigbee_af_debt_schedule_entry;
 
 /**
  * @brief Initializes the debt schedule.

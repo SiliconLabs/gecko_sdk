@@ -18,9 +18,7 @@
 #include "app/framework/include/af.h"
 #include "app/framework/util/attribute-storage.h"
 
-#ifdef UC_BUILD
 #include "zap-cluster-command-parser.h"
-#endif
 
 /** @brief Is Color Supported
  *
@@ -176,9 +174,9 @@ void emberAfColorControlClusterServerTickCallback(uint8_t endpoint)
   }
 
   //schedule the next tick
-  slxu_zigbee_zcl_schedule_server_tick(endpoint,
-                                       ZCL_COLOR_CONTROL_CLUSTER_ID,
-                                       state->eventDuration);
+  sl_zigbee_zcl_schedule_server_tick(endpoint,
+                                     ZCL_COLOR_CONTROL_CLUSTER_ID,
+                                     state->eventDuration);
 }
 
 // Clear remaining time
@@ -283,8 +281,6 @@ static EmberAfStatus colorControlReadCurrentSaturation(uint8_t endpoint,
 
 /****************** COMMAND HANDLERS **********************/
 
-#ifdef UC_BUILD
-
 static bool moveToHueCommandHandler(uint8_t hue,
                                     uint8_t direction,
                                     uint16_t transitionTime,
@@ -366,9 +362,9 @@ static bool moveToHueCommandHandler(uint8_t hue,
   colorControlSetColorModeToZero();
 
   // Schedule the next tick
-  if (slxu_zigbee_zcl_schedule_server_tick(emberAfCurrentEndpoint(),
-                                           ZCL_COLOR_CONTROL_CLUSTER_ID,
-                                           state->eventDuration)
+  if (sl_zigbee_zcl_schedule_server_tick(emberAfCurrentEndpoint(),
+                                         ZCL_COLOR_CONTROL_CLUSTER_ID,
+                                         state->eventDuration)
       != EMBER_SUCCESS) {
     status = EMBER_ZCL_STATUS_FAILURE;
   } else {
@@ -441,8 +437,8 @@ bool emberAfColorControlClusterMoveHueCallback(EmberAfClusterCommand *cmd)
   switch (moveMode) {
     case EMBER_ZCL_HUE_MOVE_MODE_STOP:
       state->active = false;
-      slxu_zigbee_zcl_deactivate_server_tick(emberAfCurrentEndpoint(),
-                                             ZCL_COLOR_CONTROL_CLUSTER_ID);
+      sl_zigbee_zcl_deactivate_server_tick(emberAfCurrentEndpoint(),
+                                           ZCL_COLOR_CONTROL_CLUSTER_ID);
 #ifdef ZCL_USING_COLOR_CONTROL_CLUSTER_COLOR_CONTROL_REMAINING_TIME_ATTRIBUTE
       colorControlClearRemainingTime(emberAfCurrentEndpoint());
 #endif // ZCL_USING_COLOR_CONTROL_CLUSTER_COLOR_CONTROL_REMAINING_TIME_ATTRIBUTE
@@ -468,9 +464,9 @@ bool emberAfColorControlClusterMoveHueCallback(EmberAfClusterCommand *cmd)
   colorControlSetColorModeToZero();
 
   //schedule the next tick
-  if (slxu_zigbee_zcl_schedule_server_tick(emberAfCurrentEndpoint(),
-                                           ZCL_COLOR_CONTROL_CLUSTER_ID,
-                                           state->eventDuration)
+  if (sl_zigbee_zcl_schedule_server_tick(emberAfCurrentEndpoint(),
+                                         ZCL_COLOR_CONTROL_CLUSTER_ID,
+                                         state->eventDuration)
       != EMBER_SUCCESS) {
     status = EMBER_ZCL_STATUS_FAILURE;
   } else {
@@ -572,9 +568,9 @@ bool emberAfColorControlClusterStepHueCallback(EmberAfClusterCommand *cmd)
   colorControlSetColorModeToZero();
 
   //schedule the next tick
-  if (slxu_zigbee_zcl_schedule_server_tick(emberAfCurrentEndpoint(),
-                                           ZCL_COLOR_CONTROL_CLUSTER_ID,
-                                           state->eventDuration)
+  if (sl_zigbee_zcl_schedule_server_tick(emberAfCurrentEndpoint(),
+                                         ZCL_COLOR_CONTROL_CLUSTER_ID,
+                                         state->eventDuration)
       != EMBER_SUCCESS) {
     status = EMBER_ZCL_STATUS_FAILURE;
   } else {
@@ -646,9 +642,9 @@ static bool moveToSaturationCommandHandler(uint8_t saturation,
   colorControlSetColorModeToZero();
 
   //schedule the next tick
-  if (slxu_zigbee_zcl_schedule_server_tick(emberAfCurrentEndpoint(),
-                                           ZCL_COLOR_CONTROL_CLUSTER_ID,
-                                           state->eventDuration)
+  if (sl_zigbee_zcl_schedule_server_tick(emberAfCurrentEndpoint(),
+                                         ZCL_COLOR_CONTROL_CLUSTER_ID,
+                                         state->eventDuration)
       != EMBER_SUCCESS) {
     status = EMBER_ZCL_STATUS_FAILURE;
   } else {
@@ -719,8 +715,8 @@ bool emberAfColorControlClusterMoveSaturationCallback(EmberAfClusterCommand *cmd
   switch (moveMode) {
     case EMBER_ZCL_SATURATION_MOVE_MODE_STOP:
       state->active = false;
-      slxu_zigbee_zcl_deactivate_server_tick(emberAfCurrentEndpoint(),
-                                             ZCL_COLOR_CONTROL_CLUSTER_ID);
+      sl_zigbee_zcl_deactivate_server_tick(emberAfCurrentEndpoint(),
+                                           ZCL_COLOR_CONTROL_CLUSTER_ID);
 #ifdef ZCL_USING_COLOR_CONTROL_CLUSTER_COLOR_CONTROL_REMAINING_TIME_ATTRIBUTE
       colorControlClearRemainingTime(emberAfCurrentEndpoint());
 #endif // ZCL_USING_COLOR_CONTROL_CLUSTER_COLOR_CONTROL_REMAINING_TIME_ATTRIBUTE
@@ -746,9 +742,9 @@ bool emberAfColorControlClusterMoveSaturationCallback(EmberAfClusterCommand *cmd
   colorControlSetColorModeToZero();
 
   //schedule the next tick
-  if (slxu_zigbee_zcl_schedule_server_tick(emberAfCurrentEndpoint(),
-                                           ZCL_COLOR_CONTROL_CLUSTER_ID,
-                                           state->eventDuration)
+  if (sl_zigbee_zcl_schedule_server_tick(emberAfCurrentEndpoint(),
+                                         ZCL_COLOR_CONTROL_CLUSTER_ID,
+                                         state->eventDuration)
       != EMBER_SUCCESS) {
     status = EMBER_ZCL_STATUS_FAILURE;
   } else {
@@ -847,9 +843,9 @@ bool emberAfColorControlClusterStepSaturationCallback(EmberAfClusterCommand *cmd
   colorControlSetColorModeToZero();
 
   //schedule the next tick
-  if (slxu_zigbee_zcl_schedule_server_tick(emberAfCurrentEndpoint(),
-                                           ZCL_COLOR_CONTROL_CLUSTER_ID,
-                                           state->eventDuration)
+  if (sl_zigbee_zcl_schedule_server_tick(emberAfCurrentEndpoint(),
+                                         ZCL_COLOR_CONTROL_CLUSTER_ID,
+                                         state->eventDuration)
       != EMBER_SUCCESS) {
     status = EMBER_ZCL_STATUS_FAILURE;
   } else {
@@ -955,9 +951,9 @@ bool emberAfColorControlClusterMoveToHueAndSaturationCallback(EmberAfClusterComm
   state->active = true;
 
   //schedule the next tick
-  if (slxu_zigbee_zcl_schedule_server_tick(emberAfCurrentEndpoint(),
-                                           ZCL_COLOR_CONTROL_CLUSTER_ID,
-                                           state->eventDuration)
+  if (sl_zigbee_zcl_schedule_server_tick(emberAfCurrentEndpoint(),
+                                         ZCL_COLOR_CONTROL_CLUSTER_ID,
+                                         state->eventDuration)
       != EMBER_SUCCESS) {
     status = EMBER_ZCL_STATUS_FAILURE;
   } else {
@@ -971,618 +967,6 @@ bool emberAfColorControlClusterMoveToHueAndSaturationCallback(EmberAfClusterComm
 
   return true;
 }
-
-#else // !UC_BUILD
-
-// Move hue to a given hue, taking transitionTime until completed.
-bool emberAfColorControlClusterMoveToHueCallback(uint8_t hue,
-                                                 uint8_t direction,
-                                                 uint16_t transitionTime,
-                                                 uint8_t optionsMask,
-                                                 uint8_t optionsOverride)
-{
-  ColorControlState *state = getColorControlState(emberAfCurrentEndpoint());
-  EmberAfStatus status;
-  uint8_t currentHue, currentSaturation;
-
-  emberAfColorControlClusterPrintln("ColorControl: MoveToHue (%x, %x, %2x)",
-                                    hue,
-                                    direction,
-                                    transitionTime);
-
-  if (state == NULL) {
-    status = EMBER_ZCL_STATUS_FAILURE;
-    goto send_default_response;
-  }
-
-  // If the color specified is not achievable by the hardware, then the
-  // color shall not be set and a ZCL default response command shall be
-  // generated with status code equal to INVALID_VALUE.
-  status = colorControlReadCurrentSaturation(emberAfCurrentEndpoint(),
-                                             &currentSaturation);
-  if (status != EMBER_ZCL_STATUS_SUCCESS) {
-    goto send_default_response;
-  }
-  if (!emberAfPluginColorControlIsColorSupportedCallback(hue, currentSaturation)) {
-    status = EMBER_ZCL_STATUS_INVALID_VALUE;
-    goto send_default_response;
-  }
-
-  status = colorControlReadCurrentHue(emberAfCurrentEndpoint(), &currentHue);
-  if (status != EMBER_ZCL_STATUS_SUCCESS) {
-    goto send_default_response;
-  }
-
-  // Nothing to do, prevents divide-by-zero
-  if ( hue == currentHue ) {
-    status = EMBER_ZCL_STATUS_SUCCESS;
-    goto send_default_response;
-  }
-
-  // As hue is effectively measured on a circle, the new hue may be moved to in
-  // either direction.  The direction of hue change is given by the Direction
-  // field. If Directionis "Shortest distance," the direction is taken that
-  // involves the shortest path round the circle.  This case corresponds to
-  // expected normal usage.  If Direction is "Longest distance," the direction
-  // is taken that involves the longest path round the circle.  This case can be
-  // used for "rainbow effects."  In both cases, if both distances are the same,
-  // the Up direction shall be taken.
-  switch (direction) {
-    case EMBER_ZCL_HUE_DIRECTION_SHORTEST_DISTANCE:
-      state->hueMoveDirection = ((uint8_t) (hue - currentHue) <= 127 ? true : false);
-      break;
-    case EMBER_ZCL_HUE_DIRECTION_LONGEST_DISTANCE:
-      state->hueMoveDirection = ((uint8_t) (hue - currentHue) >= 127 ? true : false);
-      break;
-    case EMBER_ZCL_HUE_DIRECTION_UP:
-      state->hueMoveDirection = true;
-      break;
-    case EMBER_ZCL_HUE_DIRECTION_DOWN:
-      state->hueMoveDirection = false;
-      break;
-    default:
-      status = EMBER_ZCL_STATUS_INVALID_FIELD;
-      goto send_default_response;
-  }
-
-  state->commandId = ZCL_MOVE_TO_HUE_COMMAND_ID;
-  state->elapsedTime = 0;
-  state->hueMoveToLevel = hue;
-  state->transitionTime = transitionTime * MILLISECOND_TICKS_PER_SECOND / 10;
-  state->eventDuration = state->transitionTime / ((state->hueMoveDirection)
-                                                  ? (hue - currentHue)
-                                                  : (currentHue - hue));
-  // Set the Color Mode attribute to zero as per the spec, ignoring any errors.
-  colorControlSetColorModeToZero();
-
-  // Schedule the next tick
-  if (slxu_zigbee_zcl_schedule_server_tick(emberAfCurrentEndpoint(),
-                                           ZCL_COLOR_CONTROL_CLUSTER_ID,
-                                           state->eventDuration)
-      != EMBER_SUCCESS) {
-    status = EMBER_ZCL_STATUS_FAILURE;
-  } else {
-    status = EMBER_ZCL_STATUS_SUCCESS;
-  }
-
-  state->active = true;
-  goto send_default_response;
-
-  send_default_response:
-  emberAfSendImmediateDefaultResponse(status);
-  return true;
-}
-
-// Move hue continuously at the given rate. If mode is stop, then stop.
-bool emberAfColorControlClusterMoveHueCallback(uint8_t moveMode,
-                                               uint8_t rate,
-                                               uint8_t optionsMask,
-                                               uint8_t optionsOverride)
-{
-  ColorControlState *state = getColorControlState(emberAfCurrentEndpoint());
-  EmberAfStatus status;
-
-  emberAfColorControlClusterPrintln("ColorControl: MoveHue (%x, %x)",
-                                    moveMode,
-                                    rate);
-
-  if (state == NULL) {
-    status = EMBER_ZCL_STATUS_FAILURE;
-    goto send_default_response;
-  }
-
-  // If the rate is set to 0, then the command shall have no effect
-  // and a ZCL default response command shall be generated with status
-  // code equal to INVALID_VALUE.
-
-  if (rate == 0) {
-    status = EMBER_ZCL_STATUS_INVALID_FIELD;
-    goto send_default_response;
-  }
-
-  state->active = true;
-
-  switch (moveMode) {
-    case EMBER_ZCL_HUE_MOVE_MODE_STOP:
-      state->active = false;
-      slxu_zigbee_zcl_deactivate_server_tick(emberAfCurrentEndpoint(),
-                                             ZCL_COLOR_CONTROL_CLUSTER_ID);
-#ifdef ZCL_USING_COLOR_CONTROL_CLUSTER_COLOR_CONTROL_REMAINING_TIME_ATTRIBUTE
-      colorControlClearRemainingTime(emberAfCurrentEndpoint());
-#endif // ZCL_USING_COLOR_CONTROL_CLUSTER_COLOR_CONTROL_REMAINING_TIME_ATTRIBUTE
-      status = EMBER_ZCL_STATUS_SUCCESS;
-      goto send_default_response;
-    case EMBER_ZCL_HUE_MOVE_MODE_UP:
-      state->hueMoveDirection = true;
-      break;
-    case EMBER_ZCL_HUE_MOVE_MODE_DOWN:
-      state->hueMoveDirection = false;
-      break;
-    default:
-      status = EMBER_ZCL_STATUS_INVALID_FIELD;
-      goto send_default_response;
-  }
-
-  state->commandId = ZCL_MOVE_HUE_COMMAND_ID;
-  if (state->active) {
-    state->eventDuration = MILLISECOND_TICKS_PER_SECOND / rate;
-  }
-
-  // Set the Color Mode attribute to zero as per the spec, ignoring any errors.
-  colorControlSetColorModeToZero();
-
-  //schedule the next tick
-  if (slxu_zigbee_zcl_schedule_server_tick(emberAfCurrentEndpoint(),
-                                           ZCL_COLOR_CONTROL_CLUSTER_ID,
-                                           state->eventDuration)
-      != EMBER_SUCCESS) {
-    status = EMBER_ZCL_STATUS_FAILURE;
-  } else {
-    status = EMBER_ZCL_STATUS_SUCCESS;
-  }
-
-  goto send_default_response;
-
-  send_default_response:
-  emberAfSendImmediateDefaultResponse(status);
-
-  return true;
-}
-
-// Step hue by one step, taking time as specified.
-bool emberAfColorControlClusterStepHueCallback(uint8_t stepMode,
-                                               uint8_t stepSize,
-                                               uint8_t transitionTime,
-                                               uint8_t optionsMask,
-                                               uint8_t optionsOverride)
-{
-  ColorControlState *state = getColorControlState(emberAfCurrentEndpoint());
-  EmberAfStatus status;
-  uint8_t currentHue, currentSaturation;
-
-  emberAfColorControlClusterPrintln("ColorControl: StepHue (%x, %x, %x)",
-                                    stepMode,
-                                    stepSize,
-                                    transitionTime);
-
-  if (state == NULL) {
-    status = EMBER_ZCL_STATUS_FAILURE;
-    goto send_default_response;
-  }
-
-  status = colorControlReadCurrentHue(emberAfCurrentEndpoint(), &currentHue);
-  if (status != EMBER_ZCL_STATUS_SUCCESS) {
-    goto send_default_response;
-  }
-
-  // Add or subtract the step size to/from the current hue to get the final hue.
-  // However, the range for hues is 0x00 to 0xFE, so if we land on 0xFF or if we
-  // roll past it, we have to add or subtract one to the final hue, effectively
-  // skipping over the invalid 0xFF.
-  switch (stepMode) {
-    case EMBER_ZCL_HUE_STEP_MODE_UP:
-      state->hueMoveToLevel = currentHue + stepSize;
-      if (stepSize == 0xFF - currentHue) {
-        state->hueMoveToLevel++;
-      }
-      state->hueMoveDirection = true;
-      break;
-    case EMBER_ZCL_HUE_STEP_MODE_DOWN:
-      state->hueMoveToLevel = currentHue - stepSize;
-      if (stepSize == currentHue - 1) {
-        state->hueMoveToLevel--;
-      }
-      state->hueMoveDirection = false;
-      break;
-    default:
-      status = EMBER_ZCL_STATUS_INVALID_FIELD;
-      goto send_default_response;
-  }
-
-  // If the color specified is not achievable by the hardware, then the
-  // color shall not be set and a ZCL default response command shall be
-  // generated with status code equal to INVALID_VALUE.
-  status = colorControlReadCurrentSaturation(emberAfCurrentEndpoint(),
-                                             &currentSaturation);
-  if (status != EMBER_ZCL_STATUS_SUCCESS) {
-    goto send_default_response;
-  }
-
-  if (!emberAfPluginColorControlIsColorSupportedCallback(state->hueMoveToLevel,
-                                                         currentSaturation)
-      || stepSize == 0 ) {
-    status = EMBER_ZCL_STATUS_INVALID_VALUE;
-    goto send_default_response;
-  }
-
-  state->commandId = ZCL_STEP_HUE_COMMAND_ID;
-  state->transitionTime = transitionTime * MILLISECOND_TICKS_PER_SECOND / 10;
-  state->elapsedTime = 0;
-  state->eventDuration = state->transitionTime / stepSize;
-
-  state->active = true;
-
-  // Set the Color Mode attribute to zero as per the spec, ignoring any errors.
-  colorControlSetColorModeToZero();
-
-  //schedule the next tick
-  if (slxu_zigbee_zcl_schedule_server_tick(emberAfCurrentEndpoint(),
-                                           ZCL_COLOR_CONTROL_CLUSTER_ID,
-                                           state->eventDuration)
-      != EMBER_SUCCESS) {
-    status = EMBER_ZCL_STATUS_FAILURE;
-  } else {
-    status = EMBER_ZCL_STATUS_SUCCESS;
-  }
-
-  goto send_default_response;
-
-  send_default_response:
-  emberAfSendImmediateDefaultResponse(status);
-
-  return true;
-}
-
-// Move saturation to a given saturation, taking transitionTime until completed.
-bool emberAfColorControlClusterMoveToSaturationCallback(uint8_t saturation,
-                                                        uint16_t transitionTime,
-                                                        uint8_t optionsMask,
-                                                        uint8_t optionsOverride)
-{
-  ColorControlState *state = getColorControlState(emberAfCurrentEndpoint());
-  EmberAfStatus status;
-  uint8_t currentHue, currentSaturation;
-
-  emberAfColorControlClusterPrintln("ColorControl: MoveToSaturation (%x, %2x)",
-                                    saturation,
-                                    transitionTime);
-
-  if (state == NULL) {
-    status = EMBER_ZCL_STATUS_FAILURE;
-    goto send_default_response;
-  }
-
-  // If the color specified is not achievable by the hardware, then the
-  // color shall not be set and a ZCL default response command shall be
-  // generated with status code equal to INVALID_VALUE.
-  status = colorControlReadCurrentHue(emberAfCurrentEndpoint(),
-                                      &currentHue);
-  if (status != EMBER_ZCL_STATUS_SUCCESS) {
-    goto send_default_response;
-  }
-  if (!emberAfPluginColorControlIsColorSupportedCallback(currentHue, saturation)) {
-    status = EMBER_ZCL_STATUS_INVALID_VALUE;
-    goto send_default_response;
-  }
-
-  status = colorControlReadCurrentSaturation(emberAfCurrentEndpoint(),
-                                             &currentSaturation);
-  if (status != EMBER_ZCL_STATUS_SUCCESS) {
-    goto send_default_response;
-  }
-
-  // Nothing to do, prevent divide-by-zero
-  if ( saturation == currentSaturation ) {
-    status = EMBER_ZCL_STATUS_SUCCESS;
-    goto send_default_response;
-  }
-
-  state->commandId = ZCL_MOVE_TO_SATURATION_COMMAND_ID;
-  state->elapsedTime = 0;
-  state->saturationMoveToLevel = saturation;
-  state->satMoveDirection =
-    (saturation > currentSaturation ? true : false);
-  state->eventDuration = state->transitionTime / ((state->satMoveDirection)
-                                                  ? (saturation - currentSaturation)
-                                                  : (currentSaturation - saturation));
-
-  // Set the Color Mode attribute to zero as per the spec, ignoring any errors.
-  colorControlSetColorModeToZero();
-
-  //schedule the next tick
-  if (slxu_zigbee_zcl_schedule_server_tick(emberAfCurrentEndpoint(),
-                                           ZCL_COLOR_CONTROL_CLUSTER_ID,
-                                           state->eventDuration)
-      != EMBER_SUCCESS) {
-    status = EMBER_ZCL_STATUS_FAILURE;
-  } else {
-    status = EMBER_ZCL_STATUS_SUCCESS;
-  }
-
-  goto send_default_response;
-
-  send_default_response:
-  emberAfSendImmediateDefaultResponse(status);
-
-  return true;
-}
-
-// Move sat continuously at the given rate. If mode is stop, then stop.
-bool emberAfColorControlClusterMoveSaturationCallback(uint8_t moveMode,
-                                                      uint8_t rate,
-                                                      uint8_t optionsMask,
-                                                      uint8_t optionsOverride)
-{
-  ColorControlState *state = getColorControlState(emberAfCurrentEndpoint());
-  EmberAfStatus status;
-
-  emberAfColorControlClusterPrintln("ColorControl: MoveSaturation (%x, %x)",
-                                    moveMode,
-                                    rate);
-
-  if (state == NULL) {
-    status = EMBER_ZCL_STATUS_FAILURE;
-    goto send_default_response;
-  }
-
-  // If the rate is set to 0, then the command shall have no effect
-  // and a ZCL default response command shall be generated with status
-  // code equal to INVALID_VALUE.
-
-  if (rate == 0) {
-    status = EMBER_ZCL_STATUS_INVALID_FIELD;
-    goto send_default_response;
-  }
-
-  state->active = true;
-
-  switch (moveMode) {
-    case EMBER_ZCL_SATURATION_MOVE_MODE_STOP:
-      state->active = false;
-      slxu_zigbee_zcl_deactivate_server_tick(emberAfCurrentEndpoint(),
-                                             ZCL_COLOR_CONTROL_CLUSTER_ID);
-#ifdef ZCL_USING_COLOR_CONTROL_CLUSTER_COLOR_CONTROL_REMAINING_TIME_ATTRIBUTE
-      colorControlClearRemainingTime(emberAfCurrentEndpoint());
-#endif // ZCL_USING_COLOR_CONTROL_CLUSTER_COLOR_CONTROL_REMAINING_TIME_ATTRIBUTE
-      status = EMBER_ZCL_STATUS_SUCCESS;
-      goto send_default_response;
-    case EMBER_ZCL_SATURATION_MOVE_MODE_UP:
-      state->satMoveDirection = true;
-      break;
-    case EMBER_ZCL_SATURATION_MOVE_MODE_DOWN:
-      state->satMoveDirection = false;
-      break;
-    default:
-      status = EMBER_ZCL_STATUS_INVALID_FIELD;
-      goto send_default_response;
-  }
-
-  state->commandId = ZCL_MOVE_SATURATION_COMMAND_ID;
-  if (state->active) {
-    state->eventDuration = MILLISECOND_TICKS_PER_SECOND / rate;
-  }
-
-  // Set the Color Mode attribute to zero as per the spec, ignoring any errors.
-  colorControlSetColorModeToZero();
-
-  //schedule the next tick
-  if (slxu_zigbee_zcl_schedule_server_tick(emberAfCurrentEndpoint(),
-                                           ZCL_COLOR_CONTROL_CLUSTER_ID,
-                                           state->eventDuration)
-      != EMBER_SUCCESS) {
-    status = EMBER_ZCL_STATUS_FAILURE;
-  } else {
-    status = EMBER_ZCL_STATUS_SUCCESS;
-  }
-  goto send_default_response;
-
-  send_default_response:
-  emberAfSendImmediateDefaultResponse(status);
-
-  return true;
-}
-
-// Step sat by one step, taking time as specified.
-bool emberAfColorControlClusterStepSaturationCallback(uint8_t stepMode,
-                                                      uint8_t stepSize,
-                                                      uint8_t transitionTime,
-                                                      uint8_t optionsMask,
-                                                      uint8_t optionsOverride)
-{
-  ColorControlState *state = getColorControlState(emberAfCurrentEndpoint());
-  EmberAfStatus status;
-  uint8_t currentHue, currentSaturation;
-
-  emberAfColorControlClusterPrintln("ColorControl: StepSaturation (%x, %x, %x)",
-                                    stepMode,
-                                    stepSize,
-                                    transitionTime);
-
-  if (state == NULL) {
-    status = EMBER_ZCL_STATUS_FAILURE;
-    goto send_default_response;
-  }
-
-  status = colorControlReadCurrentSaturation(emberAfCurrentEndpoint(),
-                                             &currentSaturation);
-  if (status != EMBER_ZCL_STATUS_SUCCESS) {
-    goto send_default_response;
-  }
-
-  // Add or subtract the step size to/from the current saturation to get the
-  // final saturation.  However, the range for saturations is 0x00 to 0xFE, so
-  // don't increment or decrement past those bounds.
-  switch (stepMode) {
-    case EMBER_ZCL_SATURATION_STEP_MODE_UP:
-      state->saturationMoveToLevel = (stepSize > 0xFE - currentSaturation
-                                      ? 0xFE
-                                      : currentSaturation + stepSize);
-      state->satMoveDirection = true;
-      break;
-    case EMBER_ZCL_SATURATION_STEP_MODE_DOWN:
-      state->saturationMoveToLevel = (stepSize > currentSaturation
-                                      ? 0x00
-                                      : currentSaturation - stepSize);
-      state->satMoveDirection = false;
-      break;
-    default:
-      status = EMBER_ZCL_STATUS_INVALID_FIELD;
-      goto send_default_response;
-  }
-
-  // If the color specified is not achievable by the hardware, then the
-  // color shall not be set and a ZCL default response command shall be
-  // generated with status code equal to INVALID_VALUE.
-  status = colorControlReadCurrentHue(emberAfCurrentEndpoint(),
-                                      &currentHue);
-  if (status != EMBER_ZCL_STATUS_SUCCESS) {
-    goto send_default_response;
-  }
-
-  if (!emberAfPluginColorControlIsColorSupportedCallback(currentHue,
-                                                         state->saturationMoveToLevel)
-      || stepSize == 0 ) {
-    status = EMBER_ZCL_STATUS_INVALID_VALUE;
-    goto send_default_response;
-  }
-
-  state->commandId = ZCL_STEP_SATURATION_COMMAND_ID;
-  state->transitionTime = transitionTime * MILLISECOND_TICKS_PER_SECOND / 10;
-  state->elapsedTime = 0;
-  state->eventDuration = state->transitionTime / stepSize;
-
-  state->active = true;
-
-  // Set the Color Mode attribute to zero as per the spec, ignoring any errors.
-  colorControlSetColorModeToZero();
-
-  //schedule the next tick
-  if (slxu_zigbee_zcl_schedule_server_tick(emberAfCurrentEndpoint(),
-                                           ZCL_COLOR_CONTROL_CLUSTER_ID,
-                                           state->eventDuration)
-      != EMBER_SUCCESS) {
-    status = EMBER_ZCL_STATUS_FAILURE;
-  } else {
-    status = EMBER_ZCL_STATUS_SUCCESS;
-  }
-
-  goto send_default_response;
-
-  send_default_response:
-  emberAfSendImmediateDefaultResponse(status);
-
-  return true;
-}
-
-// Move hue and saturation to a given values, taking time as specified.
-bool emberAfColorControlClusterMoveToHueAndSaturationCallback(uint8_t hue,
-                                                              uint8_t saturation,
-                                                              uint16_t transitionTime,
-                                                              uint8_t optionsMask,
-                                                              uint8_t optionsOverride)
-{
-  ColorControlState *state = getColorControlState(emberAfCurrentEndpoint());
-  EmberAfStatus status;
-  uint8_t currentSaturation, currentHue, hueDiff, satDiff;
-
-  emberAfColorControlClusterPrintln("ColorControl: MoveToHueAndSaturation (%x, %x, %2x)",
-                                    hue,
-                                    saturation,
-                                    transitionTime);
-
-  if (state == NULL) {
-    status = EMBER_ZCL_STATUS_FAILURE;
-    goto send_default_response;
-  }
-
-  // If the color specified is not achievable by the hardware, then the
-  // color shall not be set and a ZCL default response command shall be
-  // generated with status code equal to INVALID_VALUE.
-  if (!emberAfPluginColorControlIsColorSupportedCallback(hue, saturation)) {
-    status = EMBER_ZCL_STATUS_INVALID_VALUE;
-    goto send_default_response;
-  }
-
-  status = colorControlReadCurrentSaturation(emberAfCurrentEndpoint(),
-                                             &currentSaturation);
-  if (status != EMBER_ZCL_STATUS_SUCCESS) {
-    goto send_default_response;
-  }
-
-  status = colorControlReadCurrentHue(emberAfCurrentEndpoint(), &currentHue);
-  if (status != EMBER_ZCL_STATUS_SUCCESS) {
-    goto send_default_response;
-  }
-
-  state->commandId = ZCL_MOVE_TO_HUE_AND_SATURATION_COMMAND_ID;
-  state->hueMoveToLevel = hue;
-  state->hueMoveDirection = (hue - currentHue <= 127 ? true : false);
-  hueDiff = (state->hueMoveDirection ? hue - currentHue : currentHue - hue);
-
-  state->saturationMoveToLevel = saturation;
-  state->satMoveDirection = (saturation - currentSaturation <= 127 ? true : false);
-  satDiff = (state->satMoveDirection
-             ? saturation - currentSaturation
-             : currentSaturation - saturation);
-
-  if (hueDiff == 0) {
-    return emberAfColorControlClusterMoveToSaturationCallback(saturation,
-                                                              transitionTime,
-                                                              0x00,  // optionsMask
-                                                              0x00); // optionsOverride
-  } else if (satDiff == 0) {
-    return emberAfColorControlClusterMoveToHueCallback(hue,
-                                                       EMBER_ZCL_HUE_DIRECTION_SHORTEST_DISTANCE,
-                                                       transitionTime,
-                                                       0x00,  // optionsMask
-                                                       0x00); // optionsOverride
-  }
-
-  state->elapsedTime = 0;
-  state->acceleratedHue = hueDiff > satDiff;
-  state->acceleratedMoveRate = (state->acceleratedHue
-                                ? hueDiff / satDiff
-                                : satDiff / hueDiff);
-
-  state->transitionTime = transitionTime * MILLISECOND_TICKS_PER_SECOND / 10;
-  state->eventDuration = state->transitionTime / ((state->acceleratedHue)
-                                                  ? hueDiff
-                                                  : satDiff);
-
-  // Set the Color Mode attribute to zero as per the spec, ignoring any errors.
-  colorControlSetColorModeToZero();
-
-  state->active = true;
-
-  //schedule the next tick
-  if (slxu_zigbee_zcl_schedule_server_tick(emberAfCurrentEndpoint(),
-                                           ZCL_COLOR_CONTROL_CLUSTER_ID,
-                                           state->eventDuration)
-      != EMBER_SUCCESS) {
-    status = EMBER_ZCL_STATUS_FAILURE;
-  } else {
-    status = EMBER_ZCL_STATUS_SUCCESS;
-  }
-
-  goto send_default_response;
-
-  send_default_response:
-  emberAfSendImmediateDefaultResponse(status);
-
-  return true;
-}
-
-#endif // UC_BUILD
 
 static bool colorControlHueAndSaturationHandler(uint8_t endpoint)
 {
@@ -1677,8 +1061,6 @@ static bool colorControlHueAndSaturationHandler(uint8_t endpoint)
   return proceed;
 }
 
-#ifdef UC_BUILD
-
 uint32_t emberAfColorControlClusterServerCommandParse(sl_service_opcode_t opcode,
                                                       sl_service_function_context_t *context)
 {
@@ -1731,5 +1113,3 @@ uint32_t emberAfColorControlClusterServerCommandParse(sl_service_opcode_t opcode
           ? EMBER_ZCL_STATUS_SUCCESS
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
-
-#endif // UC_BUILD

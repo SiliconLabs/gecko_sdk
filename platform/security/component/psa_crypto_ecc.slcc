@@ -32,10 +32,10 @@ template_contribution:
     value: PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY
   - name: psa_crypto_config
     value: PSA_WANT_KEY_TYPE_ECC_KEY_PAIR
-  - name: psa_crypto_config
+  - name: psa_crypto_builtin_config
     value: "MBEDTLS_PSA_BUILTIN_KEY_TYPE_ECC_PUBLIC_KEY 1"
     condition: [mbedtls_ecc]
-  - name: psa_crypto_config
+  - name: psa_crypto_builtin_config
     value: "MBEDTLS_PSA_BUILTIN_KEY_TYPE_ECC_KEY_PAIR 1"
     condition: [mbedtls_ecc]
   - name: mbedtls_config

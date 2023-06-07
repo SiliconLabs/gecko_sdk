@@ -41,6 +41,7 @@
 #include "sl_simple_button_instances.h"
 #include "sl_simple_led_instances.h"
 #include "sl_flex_rail_package_assistant.h"
+#include "sl_flex_rail_config.h"
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)
 #include "app_task_init.h"
@@ -52,12 +53,6 @@
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
-/// Size of the RX FIFO
-#define RX_FIFO_SIZE (256U)
-
-/// Size of the TX FIFO
-#define TX_FIFO_SIZE (64U)
-
 /// Transmit data length
 #define TX_PAYLOAD_LENGTH (16U)
 
@@ -197,10 +192,10 @@ static volatile uint64_t current_rail_err = 0;
 static volatile RAIL_Status_t calibration_status = 0;
 
 /// Receive FIFO
-static __ALIGNED(RAIL_FIFO_ALIGNMENT) uint8_t rx_fifo[RX_FIFO_SIZE];
+static __ALIGNED(RAIL_FIFO_ALIGNMENT) uint8_t rx_fifo[SL_FLEX_RAIL_RX_FIFO_SIZE];
 
 /// Transmit FIFO
-static __ALIGNED(RAIL_FIFO_ALIGNMENT) uint8_t tx_fifo[TX_FIFO_SIZE];
+static __ALIGNED(RAIL_FIFO_ALIGNMENT) uint8_t tx_fifo[SL_FLEX_RAIL_TX_FIFO_SIZE];
 
 /// Transmit packet
 static uint8_t out_packet[TX_PAYLOAD_LENGTH] = {
@@ -225,12 +220,12 @@ void set_up_tx_fifo(RAIL_Handle_t rail_handle)
   allocated_tx_fifo_size = RAIL_SetTxFifo(rail_handle,
                                           tx_fifo,
                                           0,
-                                          TX_FIFO_SIZE);
-  app_assert(allocated_tx_fifo_size == TX_FIFO_SIZE,
+                                          SL_FLEX_RAIL_TX_FIFO_SIZE);
+  app_assert(allocated_tx_fifo_size == SL_FLEX_RAIL_TX_FIFO_SIZE,
              "RAIL_SetTxFifo() failed to allocate a large enough fifo "
              "(%d bytes instead of %d bytes)\n",
              allocated_tx_fifo_size,
-             TX_FIFO_SIZE);
+             SL_FLEX_RAIL_TX_FIFO_SIZE);
 }
 
 /******************************************************************************

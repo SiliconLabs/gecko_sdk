@@ -272,7 +272,7 @@ static void app_cli_task(void *argument)
   }
 
   if (app_settings_app.autoconnect) {
-    app_join(app_settings_wisun.phy_config_type);
+    app_join((sl_wisun_phy_config_type_t)app_settings_wisun.phy_config_type);
   }
 
   osThreadExit();
@@ -571,9 +571,14 @@ static void app_handle_join_state_ind(sl_wisun_evt_t *evt)
 {
   const app_enum_t *ptr;
 
-  ptr = app_util_get_enum_by_integer(app_settings_wisun_join_state_enum, evt->evt.join_state.join_state);
+  if (app_settings_wisun.device_type == SL_WISUN_LFN) {
+    ptr = app_util_get_enum_by_integer(app_settings_wisun_join_state_enum_lfn, evt->evt.join_state.join_state);
+  } else {
+    ptr = app_util_get_enum_by_integer(app_settings_wisun_join_state_enum_ffn, evt->evt.join_state.join_state);
+  }
+
   if (ptr) {
-    printf("[Join state: %s (%lu)]\r\n", ptr->value_str, ptr->value);
+    printf("[%s]\r\n", ptr->value_str);
   }
 }
 
@@ -652,6 +657,10 @@ static void app_join(sl_wisun_phy_config_type_t phy_config_type)
   sl_wisun_channel_mask_t channel_mask;
   sl_wisun_phy_config_t phy_config;
   sl_wisun_connection_params_t params;
+  sl_wisun_lfn_params_t lfn_params;
+  uint8_t phy_mode_id_count, is_mdr_command_capable;
+  uint8_t phy_mode_id[SL_WISUN_MAX_PHY_MODE_ID_COUNT];
+  uint8_t *phy_mode_id_p, *phy_mode_id_count_p;
 
   app_wisun_cli_mutex_lock();
 
@@ -679,8 +688,9 @@ static void app_join(sl_wisun_phy_config_type_t phy_config_type)
         phy_config.config.explicit.phy_mode_id = app_settings_wisun.phy_mode_id;
         break;
       case SL_WISUN_PHY_CONFIG_IDS:
-        phy_config.config.ids.protocol_id = app_settings_wisun.protocol_id;
-        phy_config.config.ids.channel_id  = app_settings_wisun.channel_id;
+        phy_config.config.ids.protocol_id  = app_settings_wisun.protocol_id;
+        phy_config.config.ids.channel_id   = app_settings_wisun.channel_id;
+        phy_config.config.ids.phy_mode_id  = app_settings_wisun.phy_mode_id;
         break;
       default:
         printf("[Failed: unsupported PHY configuration type: %u]\r\n", phy_config_type);
@@ -727,6 +737,28 @@ static void app_join(sl_wisun_phy_config_type_t phy_config_type)
   if (ret != SL_STATUS_OK) {
     printf("[Failed: unable to set network size: %lu]\r\n", ret);
     goto cleanup;
+  }
+
+  if (app_settings_wisun.device_type == SL_WISUN_LFN) {
+    switch (app_settings_wisun.lfn_profile) {
+      case SL_WISUN_LFN_PROFILE_TEST:
+        lfn_params = SL_WISUN_PARAMS_LFN_TEST;
+        break;
+      case SL_WISUN_LFN_PROFILE_BALANCED:
+        lfn_params = SL_WISUN_PARAMS_LFN_BALANCED;
+        break;
+      case SL_WISUN_LFN_PROFILE_ECO:
+        lfn_params = SL_WISUN_PARAMS_LFN_ECO;
+        break;
+      default:
+        printf("[Failed: unsupported LFN profile]\r\n");
+        goto cleanup;
+    }
+    ret = sl_wisun_set_lfn_parameters(&lfn_params);
+    if (ret != SL_STATUS_OK) {
+      printf("[Failed: unable to set LFN parameters: %lu]\r\n", ret);
+      goto cleanup;
+    }
   }
 
   ret = sl_wisun_set_tx_power(app_settings_wisun.tx_power);
@@ -787,23 +819,17 @@ static void app_join(sl_wisun_phy_config_type_t phy_config_type)
     goto cleanup;
   }
 
-  ret = sl_wisun_set_regulation(app_settings_wisun.regulation);
+  ret = sl_wisun_set_regulation((sl_wisun_regulation_t)app_settings_wisun.regulation);
   if (ret != SL_STATUS_OK) {
     printf("[Failed: unable to set regional regulation: %lu]\r\n", ret);
     goto cleanup;
   }
 
-#if RAIL_IEEE802154_SUPPORTS_G_MODESWITCH
-  if (app_settings_wisun.rx_phy_mode_ids_count) {
-    ret = sl_wisun_set_pom_ie(app_settings_wisun.rx_phy_mode_ids_count,
-                              app_settings_wisun.rx_phy_mode_ids,
-                              0);
-    if (ret != SL_STATUS_OK) {
-      printf("[Failed: unable to RX PhyModeId list: %lu]\r\n", ret);
-      goto cleanup;
-    }
+  ret = sl_wisun_set_pti_state(app_settings_app.pti_state);
+  if (ret != SL_STATUS_OK) {
+    printf("[Failed to set PTI state]\r\n");
+    goto cleanup;
   }
-#endif
 
   ret = sl_wisun_join((const uint8_t *)app_settings_wisun.network_name, &phy_config);
   if (ret == SL_STATUS_OK) {
@@ -812,7 +838,41 @@ static void app_join(sl_wisun_phy_config_type_t phy_config_type)
     printf("[Connecting to \"%s\"]\r\n", app_settings_wisun.network_name);
   } else {
     printf("[Connection failed: %lu]\r\n", ret);
+    goto cleanup;
   }
+
+#if RAIL_IEEE802154_SUPPORTS_G_MODESWITCH
+  // Configure POM-IE
+  // If PhyModeIds are set by user, send them to the stack, otherwise
+  // retrieve the default PhyModeIds from the stack first
+  if (app_settings_wisun.rx_phy_mode_ids_count == 0) {
+    // Check if default PhyList can be retrieved from device
+    if (sl_wisun_get_pom_ie(&phy_mode_id_count, phy_mode_id, &is_mdr_command_capable) == SL_STATUS_OK) {
+      phy_mode_id_p = phy_mode_id;
+      phy_mode_id_count_p = &phy_mode_id_count;
+    } else {
+      // POM-IE not available
+      goto cleanup;
+    }
+  } else {
+    phy_mode_id_p = app_settings_wisun.rx_phy_mode_ids;
+    phy_mode_id_count_p = &app_settings_wisun.rx_phy_mode_ids_count;
+  }
+
+  ret = sl_wisun_set_pom_ie(*phy_mode_id_count_p,
+                            phy_mode_id_p,
+                            app_settings_wisun.rx_mdr_capable);
+  if (ret != SL_STATUS_OK) {
+    printf("[Failed: unable to RX PhyModeId list: %lu]\r\n", ret);
+    goto cleanup;
+  }
+#else
+  (void)phy_mode_id_count;
+  (void)is_mdr_command_capable;
+  (void)phy_mode_id;
+  (void)phy_mode_id_p;
+  (void)phy_mode_id_count_p;
+#endif
 
 cleanup:
 
@@ -1823,6 +1883,23 @@ cleanup:
   app_wisun_cli_mutex_unlock();
 }
 
+void app_set_lfn_support(sl_cli_command_arg_t *arguments)
+{
+  sl_status_t ret;
+  uint8_t lfn_limit;
+
+  app_wisun_cli_mutex_lock();
+
+  lfn_limit = sl_cli_get_argument_uint8(arguments, 0);
+
+  ret = sl_wisun_set_lfn_support(lfn_limit);
+  if (ret != SL_STATUS_OK) {
+    printf("[Failed: unable to set LFN support: %lu]\r\n", ret);
+  }
+
+  app_wisun_cli_mutex_unlock();
+}
+
 
 void app_rftest_start_stream(sl_cli_command_arg_t *arguments)
 {
@@ -2032,4 +2109,42 @@ void app_set_unicast_tx_mode(sl_cli_command_arg_t *arguments)
   }
 
   app_wisun_cli_mutex_unlock();
+}
+
+/* CLI app mode switch */
+void app_mode_switch(sl_cli_command_arg_t *arguments)
+{
+  sl_status_t res;
+  sl_wisun_mac_address_t address;
+  uint8_t mode = sl_cli_get_argument_uint8(arguments, 0);
+  uint8_t phy_mode_id = sl_cli_get_argument_uint8(arguments, 1);
+  char *address_str = "ff:ff:ff:ff:ff:ff:ff:ff";
+
+  if (sl_cli_get_argument_count(arguments) > 2) {
+    // to get the third argument that is the specified address
+    address_str = sl_cli_get_argument_string(arguments, 2);
+    if (address_str == NULL) {
+      printf("[Failed: invalid address string argument]\r\n");
+      return;
+    }
+  }
+
+  // Attempt to convert the MAC address string
+  res = app_util_get_mac_address(&address, address_str);
+  if (res != SL_STATUS_OK) {
+    printf("[Failed: unable to parse the MAC address: %lu]\r\n", res);
+    return;
+  }
+
+  res = sl_wisun_set_mode_switch(mode, phy_mode_id, &address);
+  switch (res) {
+    case SL_STATUS_OK:
+      printf("[Mode switch succeeded]\r\n");
+      break;
+    case SL_STATUS_NOT_SUPPORTED:
+      printf("[Mode switch feature not supported on this chip]\r\n");
+      break;
+    default:
+      printf("[Mode switch failed]\r\n");
+  }
 }

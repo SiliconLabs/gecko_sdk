@@ -1,0 +1,53 @@
+!!omap
+- id: brd2010b
+- label: BRD2010B
+- package: platform
+- description: Board support for BRD2010B.
+- category: Platform|Board|Starter Kit
+- quality: production
+- requires:
+  - name: efm32zg222f32
+  - name: brd2010b_config
+- provides:
+  - name: brd2010b
+  - name: hardware_board
+  - name: hardware_board_stk
+  - name: hardware_board_from_stk
+  - name: hardware_board_has_vcom
+  - name: hardware_board_has_hfxo
+  - name: hardware_board_has_lfxo
+- recommends:
+  - id: iostream_usart
+    instance:
+    - vcom
+  - id: bootloader_uart_driver
+  - id: ls013b7dh03
+  - id: memlcd_usart
+  - id: simple_led
+    instance:
+    - led0
+    - led1
+  - id: simple_button
+    instance:
+    - btn0
+    - btn1
+  - id: bootloader_spi_peripheral_usart_driver
+- template_contribution: []
+- define:
+  - name: SL_BOARD_NAME
+    value: '"BRD2010B"'
+  - name: SL_BOARD_REV
+    value: '"A00"'
+- tag:
+  - board:pn:BRD2010
+  - board:variant:B
+  - board:revision:A00
+  - board:device:efm32zg222f32
+  - hardware:has:vcom
+  - hardware:has:display:ls013b7dh03
+  - hardware:has:led:2
+  - hardware:has:button:2
+  - hardware:has:touch
+  - hardware:has:exp_header:spi
+  - hardware:has:exp_header:uart
+  - hardware:has:exp_header:i2c

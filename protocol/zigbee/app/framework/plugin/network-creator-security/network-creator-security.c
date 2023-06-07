@@ -20,13 +20,15 @@
 #include "app/framework/util/af-main.h"
 
 #include "network-creator-security.h"
+#include "stack/include/zigbee-security-manager.h"
 
 #include "app/framework/security/af-security.h" // emAfAllowTrustCenterRejoins
 #include "app/util/zigbee-framework/zigbee-device-common.h" // emberLeaveRequest
 
-#ifdef UC_BUILD
 #include "network-creator-security-config.h"
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #if (EMBER_AF_PLUGIN_NETWORK_CREATOR_SECURITY_ALLOW_HA_DEVICES_TO_STAY == 1)
 #define ALLOW_HA_DEVICES_TO_STAY
 #endif
@@ -36,20 +38,6 @@
 #if (EMBER_AF_PLUGIN_NETWORK_CREATOR_SECURITY_ALLOW_TC_REJOIN_WITH_WELL_KNOWN_KEY == 1)
 #define ALLOW_TC_REJOIN_WITH_WELL_KNOWN_KEY
 #endif
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_NETWORK_CREATOR_SECURITY_ALLOW_HA_DEVICES_TO_STAY
-#define ALLOW_HA_DEVICES_TO_STAY
-#endif
-#ifdef EMBER_AF_PLUGIN_NETWORK_CREATOR_SECURITY_BDB_JOIN_USES_INSTALL_CODE_KEY
-#define BDB_JOIN_USES_INSTALL_CODE_KEY
-#endif
-#ifdef EMBER_AF_PLUGIN_NETWORK_CREATOR_SECURITY_ALLOW_TC_REJOIN_WITH_WELL_KNOWN_KEY
-#define ALLOW_TC_REJOIN_WITH_WELL_KNOWN_KEY
-#endif
-#ifdef EMBER_AF_PLUGIN_TEST_HARNESS_Z3
-#define SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT
-#endif
-#endif // UC_BUILD
 
 #ifdef EZSP_HOST
 // NCP
@@ -65,7 +53,7 @@
   (void)ezspSetConfigurationValue(EZSP_CONFIG_TC_REJOINS_USING_WELL_KNOWN_KEY_TIMEOUT_S, (timeout))
 #else
 // SoC
-extern uint16_t emAllowTcRejoinsUsingWellKnownKeyTimeoutSec;
+extern uint16_t sli_zigbee_allow_tc_rejoins_using_well_known_key_timeout_sec;
   #define allowTrustCenterLinkKeyRequests() \
   emberTrustCenterLinkKeyRequestPolicy = EMBER_ALLOW_TC_LINK_KEY_REQUEST_AND_SEND_CURRENT_KEY
   #define allowTrustCenterLinkKeyRequestsAndGenerateNewKeys() \
@@ -75,20 +63,8 @@ extern uint16_t emAllowTcRejoinsUsingWellKnownKeyTimeoutSec;
   #define setTcRejoinsUsingWellKnownKeyAllowed(allow) \
   emberSetTcRejoinsUsingWellKnownKeyAllowed((allow))
   #define setTcRejoinsUsingWellKnownKeyTimeout(timeout) \
-  emAllowTcRejoinsUsingWellKnownKeyTimeoutSec = (timeout)
+  sli_zigbee_allow_tc_rejoins_using_well_known_key_timeout_sec = (timeout)
 #endif
-
-#define ZIGBEE_3_CENTRALIZED_SECURITY_LINK_KEY         \
-  {                                                    \
-    { 0x5A, 0x69, 0x67, 0x42, 0x65, 0x65, 0x41, 0x6C,  \
-      0x6C, 0x69, 0x61, 0x6E, 0x63, 0x65, 0x30, 0x39 } \
-  }
-
-#define ZIGBEE_3_DISTRIBUTED_SECURITY_LINK_KEY         \
-  {                                                    \
-    { 0xD0, 0xD1, 0xD2, 0xD3, 0xD4, 0xD5, 0xD6, 0xD7,  \
-      0xD8, 0xD9, 0xDA, 0xDB, 0xDC, 0xDD, 0xDE, 0xDF } \
-  }
 
 #ifndef EMBER_AF_PLUGIN_NETWORK_CREATOR_SECURITY_NETWORK_OPEN_TIME_S
   #define EMBER_AF_PLUGIN_NETWORK_CREATOR_SECURITY_NETWORK_OPEN_TIME_S (300)
@@ -107,27 +83,25 @@ extern uint16_t emAllowTcRejoinsUsingWellKnownKeyTimeoutSec;
 
 bool allowHaDevices = ALLOW_HA_DEVICES;
 EmberKeyData distributedKey = ZIGBEE_3_DISTRIBUTED_SECURITY_LINK_KEY;
+#ifdef SL_CATALOG_ZIGBEE_DIRECT_ZDD_PRESENT
+extern void sli_zigbee_zdd_update_keys(EmberInitialSecurityState *state);
+#endif // SL_CATALOG_ZIGBEE_DIRECT_ZDD_PRESENT
 
 // -----------------------------------------------------------------------------
 // Internal Declarations
 
-#ifdef UC_BUILD
-void emberAfPluginNetworkCreatorSecurityOpenNetworkNetworkEventHandler(SLXU_UC_EVENT);
+void emberAfPluginNetworkCreatorSecurityOpenNetworkNetworkEventHandler(sl_zigbee_event_t * event);
 sl_zigbee_event_t emberAfPluginNetworkCreatorSecurityOpenNetworkNetworkEvents[EMBER_SUPPORTED_NETWORKS];
 #define openNetworkEventControl (emberAfPluginNetworkCreatorSecurityOpenNetworkNetworkEvents)
-#else
-extern EmberEventControl emberAfPluginNetworkCreatorSecurityOpenNetworkNetworkEventControls[];
-#define openNetworkEventControl (emberAfPluginNetworkCreatorSecurityOpenNetworkNetworkEventControls)
-#endif // UC_BUILD
 
 static uint16_t openNetworkTimeRemainingS;
 
 // -----------------------------------------------------------------------------
 // Framework Callbacks
 
-void emberAfPluginNetworkCreatorSecurityInitCallback(SLXU_INIT_ARG)
+void emberAfPluginNetworkCreatorSecurityInitCallback(uint8_t init_level)
 {
-  SLXU_INIT_UNUSED_ARG;
+  (void)init_level;
 
 #if defined(EZSP_HOST) && defined(BDB_JOIN_USES_INSTALL_CODE_KEY)
   EzspStatus status = emberAfSetEzspPolicy(EZSP_TRUST_CENTER_POLICY,
@@ -143,16 +117,12 @@ void emberAfPluginNetworkCreatorSecurityInitCallback(SLXU_INIT_ARG)
   }
 #endif // EZSP_HOST && BDB_JOIN_USES_INSTALL_CODE_KEY
 
-  slxu_zigbee_network_event_init(openNetworkEventControl,
-                                 emberAfPluginNetworkCreatorSecurityOpenNetworkNetworkEventHandler);
+  sl_zigbee_network_event_init(openNetworkEventControl,
+                               emberAfPluginNetworkCreatorSecurityOpenNetworkNetworkEventHandler);
 }
 
 // TODO: renamed for naming consistency purposes
-#ifdef UC_BUILD
-void emAfPluginNetworkCreatorSecurityStackStatusCallback(EmberStatus status)
-#else
-void emberAfPluginNetworkCreatorSecurityStackStatusCallback(EmberStatus status)
-#endif
+void sli_zigbee_af_network_creator_security_stack_status_callback(EmberStatus status)
 {
 #ifdef EMBER_AF_HAS_COORDINATOR_NETWORK
   if (status == EMBER_NETWORK_UP
@@ -192,7 +162,7 @@ static bool isWildcardEui64(EmberEUI64 eui64)
 #endif // defined(EMBER_AF_HAS_COORDINATOR_NETWORK) || defined(SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT)
 
 #if defined(SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT)
-extern uint8_t emAfPluginTestHarnessZ3ServerMaskHigh;
+extern uint8_t sli_zigbee_af_test_harness_z3_server_mask_high;
 #endif // defined(SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT)
 
 void emberAfPluginNetworkCreatorSecurityZigbeeKeyEstablishmentCallback(EmberEUI64 eui64,
@@ -205,7 +175,7 @@ void emberAfPluginNetworkCreatorSecurityZigbeeKeyEstablishmentCallback(EmberEUI6
 
 #if defined(SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT)
   // Do nothing if we are pretending to be r20 or lower.
-  if (emAfPluginTestHarnessZ3ServerMaskHigh == 0) {
+  if (sli_zigbee_af_test_harness_z3_server_mask_high == 0) {
     return;
   }
 #endif // defined(SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT)
@@ -287,6 +257,9 @@ EmberStatus emberAfPluginNetworkCreatorSecurityStart(bool centralizedNetwork)
     goto kickout;
   }
 
+#ifdef SL_CATALOG_ZIGBEE_DIRECT_ZDD_PRESENT
+  sli_zigbee_zdd_update_keys(&state);
+#endif // SL_CATALOG_ZIGBEE_DIRECT_ZDD_PRESENT
   // Set the initial security data.
   status = emberSetInitialSecurityState(&state);
   if (status != EMBER_SUCCESS) {
@@ -308,7 +281,7 @@ EmberStatus emberAfPluginNetworkCreatorSecurityOpenNetwork(void)
   emberAfCorePrintln("open-network not permitted when install code joins are required");
   return EMBER_INVALID_CALL;
 #endif //BDB_JOIN_USES_INSTALL_CODE_KEY
-  EmberStatus status = EMBER_SUCCESS;
+  sl_status_t status = SL_STATUS_OK;
   EmberCurrentSecurityState securityState;
 
   if (emberAfNetworkState() != EMBER_JOINED_NETWORK) {
@@ -335,21 +308,18 @@ EmberStatus emberAfPluginNetworkCreatorSecurityOpenNetwork(void)
                                      ? NETWORK_OPEN_TIME_S
                                      : EMBER_TRANSIENT_KEY_TIMEOUT_S;
       setTransientKeyTimeout(transientKeyTimeout);
-      status = emberAddTransientLinkKey(wildcardEui64, &centralizedKey);
+      status = sl_zb_sec_man_import_transient_key(wildcardEui64,
+                                                  (sl_zb_sec_man_key_t*)&centralizedKey);
     }
   #endif // defined(EMBER_AF_HAS_COORDINATOR_NETWORK) || defined(SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT)
   }
 
-  if (status == EMBER_SUCCESS) {
+  if (status == SL_STATUS_OK) {
     openNetworkTimeRemainingS = NETWORK_OPEN_TIME_S;
-#ifdef UC_BUILD
     sl_zigbee_event_set_active(openNetworkEventControl);
-#else
-    emberAfNetworkEventControlSetActive(openNetworkEventControl);
-#endif
   }
 
-  return status;
+  return ((status == SL_STATUS_OK) ? EMBER_SUCCESS : EMBER_NO_BUFFERS);
 }
 
 EmberStatus emberAfPluginNetworkCreatorSecurityCloseNetwork(void)
@@ -358,11 +328,7 @@ EmberStatus emberAfPluginNetworkCreatorSecurityCloseNetwork(void)
 
   if (emberAfNetworkState() == EMBER_JOINED_NETWORK) {
     emberClearTransientLinkKeys();
-#ifdef UC_BUILD
     sl_zigbee_event_set_inactive(openNetworkEventControl);
-#else
-    emberAfNetworkEventControlSetInactive(openNetworkEventControl);
-#endif
     zaTrustCenterSetJoinPolicy(EMBER_ALLOW_REJOINS_ONLY);
     status = emberAfPermitJoin(0, true); // broadcast
   }
@@ -385,17 +351,14 @@ EmberStatus emberAfPluginNetworkCreatorSecurityOpenNetworkWithKeyPair(EmberEUI64
                                    ? NETWORK_OPEN_TIME_S
                                    : EMBER_TRANSIENT_KEY_TIMEOUT_S;
     setTransientKeyTimeout(transientKeyTimeout);
-    status = emberAddTransientLinkKey(eui64, &keyData);
+    status = sl_zb_sec_man_import_transient_key(eui64,
+                                                (sl_zb_sec_man_key_t*)&keyData);
   }
 #endif // defined(EMBER_AF_HAS_COORDINATOR_NETWORK) || defined(SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT)
 
   if (status == EMBER_SUCCESS) {
     openNetworkTimeRemainingS = NETWORK_OPEN_TIME_S;
-#ifdef UC_BUILD
     sl_zigbee_event_set_active(openNetworkEventControl);
-#else
-    emberAfNetworkEventControlSetActive(openNetworkEventControl);
-#endif
   }
 
   return status;
@@ -404,16 +367,12 @@ EmberStatus emberAfPluginNetworkCreatorSecurityOpenNetworkWithKeyPair(EmberEUI64
 // -----------------------------------------------------------------------------
 // Internal Definitions
 
-void emberAfPluginNetworkCreatorSecurityOpenNetworkNetworkEventHandler(SLXU_UC_EVENT)
+void emberAfPluginNetworkCreatorSecurityOpenNetworkNetworkEventHandler(sl_zigbee_event_t * event)
 {
-  EmberStatus status = EMBER_SUCCESS;
+  sl_status_t status = SL_STATUS_OK;
   uint8_t permitJoinTime;
 
-#ifdef UC_BUILD
   sl_zigbee_event_set_inactive(openNetworkEventControl);
-#else
-  emberAfNetworkEventControlSetInactive(openNetworkEventControl);
-#endif
 
   // If we have left the network, then we don't need to proceed further.
   if (emberAfNetworkState() != EMBER_JOINED_NETWORK) {
@@ -423,33 +382,26 @@ void emberAfPluginNetworkCreatorSecurityOpenNetworkNetworkEventHandler(SLXU_UC_E
   if (openNetworkTimeRemainingS > EMBER_AF_PERMIT_JOIN_MAX_TIMEOUT) {
     permitJoinTime = EMBER_AF_PERMIT_JOIN_MAX_TIMEOUT;
     openNetworkTimeRemainingS -= EMBER_AF_PERMIT_JOIN_MAX_TIMEOUT;
-#ifdef UC_BUILD
     sl_zigbee_event_set_delay_qs(openNetworkEventControl,
                                  (EMBER_AF_PERMIT_JOIN_MAX_TIMEOUT << 2));
-#else
-    emberAfNetworkEventControlSetDelayQS(openNetworkEventControl,
-                                         (EMBER_AF_PERMIT_JOIN_MAX_TIMEOUT << 2));
-#endif
   } else {
     permitJoinTime = openNetworkTimeRemainingS;
     openNetworkTimeRemainingS = 0;
   }
 
-  if (status == EMBER_SUCCESS) {
 #if defined(EZSP_HOST)
-    EzspDecisionBitmask policy = (EZSP_DECISION_ALLOW_JOINS | EZSP_DECISION_ALLOW_UNSECURED_REJOINS);
+  EzspDecisionBitmask policy = (EZSP_DECISION_ALLOW_JOINS | EZSP_DECISION_ALLOW_UNSECURED_REJOINS);
 #if defined(BDB_JOIN_USES_INSTALL_CODE_KEY)
-    policy |= EZSP_DECISION_JOINS_USE_INSTALL_CODE_KEY;
+  policy |= EZSP_DECISION_JOINS_USE_INSTALL_CODE_KEY;
 #endif // BDB_JOIN_USES_INSTALL_CODE_KEY
-    emberAfSetEzspPolicy(EZSP_TRUST_CENTER_POLICY,
-                         policy,
-                         "Trust Center Policy",
-                         "Allow preconfigured key joins");
+  emberAfSetEzspPolicy(EZSP_TRUST_CENTER_POLICY,
+                       policy,
+                       "Trust Center Policy",
+                       "Allow preconfigured key joins");
 #else // !EZSP_HOST
-    zaTrustCenterSetJoinPolicy(EMBER_USE_PRECONFIGURED_KEY);
+  zaTrustCenterSetJoinPolicy(EMBER_USE_PRECONFIGURED_KEY);
 #endif // EZSP_HOST
-    status = emberAfPermitJoin(permitJoinTime, true); // broadcast permit join
-  }
+  status = emberAfPermitJoin(permitJoinTime, true);   // broadcast permit join
 
   emberAfCorePrintln("%s: %s: 0x%X",
                      EMBER_AF_PLUGIN_NETWORK_CREATOR_SECURITY_PLUGIN_NAME,

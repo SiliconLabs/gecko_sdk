@@ -17,8 +17,14 @@
 
 #include "app/framework/include/af.h"
 
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
+#include "sl_component_catalog.h"
+#endif
+
+#ifdef SL_CATALOG_ZIGBEE_FIND_AND_BIND_TARGET_PRESENT
 #include "find-and-bind-target-config.h"
+#else
+#include "config/find-and-bind-target-config.h"
 #endif
 
 #include "find-and-bind-target.h"

@@ -21,8 +21,8 @@ typedef struct tIrqCfg{
   uint8_t irqEdgeCfg;
   bool irqEnabled;
   void (*irqISR)(void); // fxn pointer for non-default ISR
-  EmberEventControl *irqEventHandler; // ember event for default delayed
-                                      // handling
+  EmberEvent *irqEventHandler; // ember event for default delayed
+  // handling
 } HalGenericInterruptControlIrqCfg;
 
 #endif // __GENERIC_INTERRUPT_CONTROL_EFR32_H__

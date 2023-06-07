@@ -3,7 +3,7 @@ label: HCI UART Handler
 package: Bluetooth
 description: UART Handler for HCI
 
-category: Bluetooth|Controller
+category: Bluetooth|Host Controller Interface (HCI)
 quality: production
 root_path: protocol/bluetooth/bgstack/ll/utils/hci_packet
 source:

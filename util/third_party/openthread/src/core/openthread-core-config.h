@@ -41,6 +41,7 @@
 #define OT_THREAD_VERSION_1_1 2
 #define OT_THREAD_VERSION_1_2 3
 #define OT_THREAD_VERSION_1_3 4
+#define OT_THREAD_VERSION_1_3_1 5
 
 #define OPENTHREAD_CORE_CONFIG_H_IN
 
@@ -66,7 +67,6 @@
 #include "config/child_supervision.h"
 #include "config/coap.h"
 #include "config/commissioner.h"
-#include "config/coprocessor_rpc.h"
 #include "config/crypto.h"
 #include "config/dataset_updater.h"
 #include "config/dhcp6_client.h"
@@ -83,13 +83,16 @@
 #include "config/link_raw.h"
 #include "config/logging.h"
 #include "config/mac.h"
+#include "config/mesh_diag.h"
 #include "config/misc.h"
 #include "config/mle.h"
 #include "config/nat64.h"
 #include "config/netdata_publisher.h"
+#include "config/network_diagnostic.h"
 #include "config/parent_search.h"
 #include "config/ping_sender.h"
 #include "config/platform.h"
+#include "config/power_calibration.h"
 #include "config/radio_link.h"
 #include "config/sntp_client.h"
 #include "config/srp_client.h"

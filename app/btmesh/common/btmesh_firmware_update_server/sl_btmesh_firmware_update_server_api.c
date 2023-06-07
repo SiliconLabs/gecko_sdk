@@ -49,7 +49,7 @@
 static uint32_t fw_verify_prg_kb_on_lcd = FW_VERIFY_PRG_KB_ON_LCD_UNKNOWN;
 #endif // SL_CATALOG_BTMESH_WSTK_LCD_PRESENT
 
-#include "sl_simple_timer.h"
+#include "app_timer.h"
 
 #include "btl_interface.h"
 #include "sl_btmesh_blob_storage.h"
@@ -91,7 +91,7 @@ static sl_bt_uuid_64_t blob_id_cache = { .data = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
  * @param handle Timer handler
  * @param data Callback data
  ******************************************************************************/
-static void apply_step(sl_simple_timer_t *handle, void *data);
+static void apply_step(app_timer_t *handle, void *data);
 
 SL_WEAK sl_btmesh_fw_update_server_verify_state_t
 sl_btmesh_fw_update_server_verify_start(sl_bt_uuid_64_t const *const blob_id,
@@ -259,7 +259,7 @@ SL_WEAK void sl_btmesh_fw_update_server_apply(void)
   sl_btmesh_blob_storage_slot_metadata_cache_t const *cache;
   uint32_t len;
   uint32_t idx;
-  static sl_simple_timer_t timer;
+  static app_timer_t timer;
 
   sl_btmesh_blob_storage_get_cache(&cache, &len);
 
@@ -289,7 +289,7 @@ SL_WEAK void sl_btmesh_fw_update_server_apply(void)
     // Erase NVM data
     sl_bt_nvm_erase_all();
     // Delay install
-    sl_simple_timer_start(&timer, 1000, apply_step, NULL, true);
+    app_timer_start(&timer, 1000, apply_step, NULL, true);
     apply_cntdwn = APPLY_DELAY;
   }
 #ifdef SL_CATALOG_BTMESH_WSTK_LCD_PRESENT
@@ -299,7 +299,7 @@ SL_WEAK void sl_btmesh_fw_update_server_apply(void)
 #endif // SL_CATALOG_BTMESH_WSTK_LCD_PRESENT
 }
 
-static void apply_step(sl_simple_timer_t *handle, void *data)
+static void apply_step(app_timer_t *handle, void *data)
 {
   (void)handle;
   (void)data;

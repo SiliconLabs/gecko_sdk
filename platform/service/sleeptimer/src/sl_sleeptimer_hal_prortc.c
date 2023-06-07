@@ -38,6 +38,10 @@
 #include  <sl_component_catalog.h>
 #endif
 
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+#include "sl_power_manager.h"
+#endif
+
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && defined(_SILICON_LABS_32B_SERIES_2_CONFIG) \
   && (_SILICON_LABS_32B_SERIES_2_CONFIG == 1)
 #include "sli_power_manager.h"
@@ -476,4 +480,35 @@ uint16_t sleeptimer_hal_get_clock_accuracy(void)
   return precision;
 }
 
+/***************************************************************************//**
+ * Set lowest energy mode based on a project's configurations and clock source
+ *
+ * @note If power_manager_no_deepsleep component is included in a project, the
+ *       lowest possible energy mode is EM1, else lowest energy mode is
+ *       determined by clock source.
+ ******************************************************************************/
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+void sli_sleeptimer_set_pm_em_requirement(void)
+{
+#if defined(_SILICON_LABS_32B_SERIES_1)
+  switch (CMU->LFRCLKSEL & _CMU_LFRCLKSEL_LFR_MASK) {
+    case CMU_LFRCLKSEL_LFR_LFRCO:
+    case CMU_LFRCLKSEL_LFR_LFXO:
+      sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM2);
+      break;
+    default:
+      break;
+  }
+#else
+  switch (CMU->PRORTCCLKCTRL & _CMU_PRORTCCLKCTRL_CLKSEL_MASK) {
+    case CMU_PRORTCCLKCTRL_CLKSEL_LFRCO:
+    case CMU_PRORTCCLKCTRL_CLKSEL_LFXO:
+      sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM2);
+      break;
+    default:
+      break;
+  }
+#endif
+}
+#endif
 #endif

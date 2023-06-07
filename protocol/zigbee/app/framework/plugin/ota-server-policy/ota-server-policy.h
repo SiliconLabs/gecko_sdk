@@ -94,13 +94,13 @@ uint8_t emberAfOtaServerImageBlockRequestCallback(EmberAfImageBlockRequestCallba
 /** @} */ // end of name Callbacks
 /** @} */ // end of ota-server-policy
 
-void emAfOtaServerPolicyPrint(void);
+void sli_zigbee_af_ota_server_policy_print(void);
 
-void emAfOtaServerSetQueryPolicy(uint8_t value);
-void emAfOtaServerSetBlockRequestPolicy(uint8_t value);
-void emAfOtaServerSetUpgradePolicy(uint8_t value);
+void sli_zigbee_af_ota_server_set_query_policy(uint8_t value);
+void sli_zigbee_af_ota_server_set_block_request_policy(uint8_t value);
+void sli_zigbee_af_ota_server_set_upgrade_policy(uint8_t value);
 
-bool emAfServerPageRequestTickCallback(uint16_t relativeOffset, uint8_t blockSize);
-void emAfSetPageRequestMissedBlockModulus(uint16_t modulus);
-void emAfOtaServerSetPageRequestPolicy(uint8_t value);
-void emAfOtaServerPolicySetMinBlockRequestPeriod(uint16_t minBlockRequestPeriodMS);
+bool sli_zigbee_af_server_page_request_tick_callback(uint16_t relativeOffset, uint8_t blockSize);
+void sli_zigbee_af_set_page_requestMissedBlockModulus(uint16_t modulus);
+void sli_zigbee_af_ota_server_set_page_request_policy(uint8_t value);
+void sli_zigbee_af_ota_server_policy_set_min_block_request_period(uint16_t minBlockRequestPeriodMS);

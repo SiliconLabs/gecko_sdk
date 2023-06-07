@@ -60,9 +60,9 @@ typedef struct {
   EmberNodeId nodeId;
   uint8_t     unitDiscoveryState; // STATE_ values
   uint32_t    msTickWhenLastSeen;
-} EmAfOtaServerDownloadingNode;
+} sli_zigbee_af_ota_server_downloading_node;
 
-EmAfOtaServerDownloadingNode downloadingNodes[MAX_DOWNLOADS];
+sli_zigbee_af_ota_server_downloading_node downloadingNodes[MAX_DOWNLOADS];
 
 #ifdef EMBER_TEST
  #define debugPrintln(...) emberAfOtaBootloadClusterPrintln(__VA_ARGS__)
@@ -92,7 +92,7 @@ uint8_t getIndexForDownloadingNodeId(EmberNodeId nodeId)
   return nodeIndex;
 }
 
-void emAfOtaServerDynamicBlockPeriodInit()
+void sli_zigbee_af_ota_server_dynamic_block_period_init()
 {
   // Initialize array to have no current OTA downloads
   uint8_t nodeIndex;
@@ -103,7 +103,7 @@ void emAfOtaServerDynamicBlockPeriodInit()
   }
 }
 
-void emAfOtaServerDynamicBlockPeriodTick()
+void sli_zigbee_af_ota_server_dynamic_block_period_tick()
 {
   uint8_t nodeIndex;
   uint32_t currentMsTick = halCommonGetInt32uMillisecondTick();
@@ -133,7 +133,7 @@ void emAfOtaServerDynamicBlockPeriodTick()
 // Request, or WAIT_FOR_DATA, which means either we don't know how the client is
 // treating the field or it's the first time we see this node and don't have
 // room for it in the active OTA downloads array
-uint8_t emAfOtaServerCheckDynamicBlockPeriodDownload(EmberAfImageBlockRequestCallbackStruct *data)
+uint8_t sli_zigbee_af_ota_server_check_dynamic_block_period_download(EmberAfImageBlockRequestCallbackStruct *data)
 {
   uint8_t nodeIndex;
   uint32_t secondsElapsed;
@@ -197,7 +197,7 @@ uint8_t emAfOtaServerCheckDynamicBlockPeriodDownload(EmberAfImageBlockRequestCal
 
 // This function is called when a client sends an UpgradeEndRequest, signalling
 // that is is complete with its OTA download
-void emAfOtaServerCompleteDynamicBlockPeriodDownload(EmberNodeId clientId)
+void sli_zigbee_af_ota_server_complete_dynamic_block_period_download(EmberNodeId clientId)
 {
   uint8_t nodeIndex = getIndexForDownloadingNodeId(clientId);
   if (nodeIndex < MAX_DOWNLOADS) {
@@ -209,7 +209,7 @@ void emAfOtaServerCompleteDynamicBlockPeriodDownload(EmberNodeId clientId)
 
 // NOTE: this should only be called once we've discovered how the client is
 // treating the Minimum Block Period field
-bool emAfOtaServerDynamicBlockPeriodClientUsesSeconds(EmberNodeId clientId)
+bool sli_zigbee_af_ota_server_dynamic_block_period_client_uses_seconds(EmberNodeId clientId)
 {
   uint8_t nodeIndex = getIndexForDownloadingNodeId(clientId);
 

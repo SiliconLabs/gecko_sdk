@@ -95,6 +95,24 @@ otbrError DBusMessageEncode(DBusMessageIter *aIter, const RcpInterfaceMetrics &a
 otbrError DBusMessageExtract(DBusMessageIter *aIter, RcpInterfaceMetrics &aRcpInterfaceMetrics);
 otbrError DBusMessageEncode(DBusMessageIter *aIter, const RadioCoexMetrics &aRadioCoexMetrics);
 otbrError DBusMessageExtract(DBusMessageIter *aIter, RadioCoexMetrics &aRadioCoexMetrics);
+otbrError DBusMessageEncode(DBusMessageIter *aIter, const BorderRoutingCounters::PacketsAndBytes &aPacketAndBytes);
+otbrError DBusMessageExtract(DBusMessageIter *aIter, BorderRoutingCounters::PacketsAndBytes &aPacketAndBytes);
+otbrError DBusMessageEncode(DBusMessageIter *aIter, const BorderRoutingCounters &aBorderRoutingCounters);
+otbrError DBusMessageExtract(DBusMessageIter *aIter, BorderRoutingCounters &aBorderRoutingCounters);
+otbrError DBusMessageEncode(DBusMessageIter *aIter, const Nat64ComponentState &aNat64State);
+otbrError DBusMessageExtract(DBusMessageIter *aIter, Nat64ComponentState &aNat64State);
+otbrError DBusMessageEncode(DBusMessageIter *aIter, const Nat64TrafficCounters &aCounters);
+otbrError DBusMessageExtract(DBusMessageIter *aIter, Nat64TrafficCounters &aCounters);
+otbrError DBusMessageEncode(DBusMessageIter *aIter, const Nat64PacketCounters &aCounters);
+otbrError DBusMessageExtract(DBusMessageIter *aIter, Nat64PacketCounters &aCounters);
+otbrError DBusMessageEncode(DBusMessageIter *aIter, const Nat64ProtocolCounters &aCounters);
+otbrError DBusMessageExtract(DBusMessageIter *aIter, Nat64ProtocolCounters &aCounters);
+otbrError DBusMessageEncode(DBusMessageIter *aIter, const Nat64AddressMapping &aMapping);
+otbrError DBusMessageExtract(DBusMessageIter *aIter, Nat64AddressMapping &aMapping);
+otbrError DBusMessageEncode(DBusMessageIter *aIter, const Nat64ErrorCounters &aCounters);
+otbrError DBusMessageExtract(DBusMessageIter *aIter, Nat64ErrorCounters &aCounters);
+otbrError DBusMessageEncode(DBusMessageIter *aIter, const InfraLinkInfo &aInfraLinkInfo);
+otbrError DBusMessageExtract(DBusMessageIter *aIter, InfraLinkInfo &aInfraLinkInfo);
 
 template <typename T> struct DBusTypeTrait;
 
@@ -173,15 +191,15 @@ template <> struct DBusTypeTrait<std::vector<ChannelQuality>>
 template <> struct DBusTypeTrait<NeighborInfo>
 {
     // struct of { uint64, uint32, uint16, uint32, uint32, uint8,
-    //             uint8, uint8, uint16, uint16, bool, bool, bool, bool }
-    static constexpr const char *TYPE_AS_STRING = "(tuquuyyyqqbbbb)";
+    //             uint8, uint8, uint16, uint16, uint16, bool, bool, bool, bool }
+    static constexpr const char *TYPE_AS_STRING = "(tuquuyyyqqqbbbb)";
 };
 
 template <> struct DBusTypeTrait<std::vector<NeighborInfo>>
 {
     // array of struct of { uint64, uint32, uint16, uint32, uint32, uint8,
-    //                      uint8, uint8, uint16, uint16, bool, bool, bool }
-    static constexpr const char *TYPE_AS_STRING = "a(tuquuyyyqqbbbb)";
+    //                      uint8, uint8, uint16, uint16, uint16, bool, bool, bool }
+    static constexpr const char *TYPE_AS_STRING = "a(tuquuyyyqqqbbbb)";
 };
 
 template <> struct DBusTypeTrait<ChildInfo>
@@ -194,8 +212,8 @@ template <> struct DBusTypeTrait<ChildInfo>
 template <> struct DBusTypeTrait<ActiveScanResult>
 {
     // struct of { uint64, string, uint64, array<uint8>, uint16, uint16, uint8,
-    //             uint8, uint8, uint8, bool, bool }
-    static constexpr const char *TYPE_AS_STRING = "(tstayqqyyyybb)";
+    //             int16, uint8, uint8, bool, bool }
+    static constexpr const char *TYPE_AS_STRING = "(tstayqqynyybb)";
 };
 
 template <> struct DBusTypeTrait<EnergyScanResult>
@@ -252,12 +270,12 @@ template <> struct DBusTypeTrait<SrpServerInfo>
 
 template <> struct DBusTypeTrait<MdnsTelemetryInfo>
 {
-    // struct of { struct of { uint32, uint32, uint32, uint32, uint32, uint32 },
-    //              struct of { uint32, uint32, uint32, uint32, uint32, uint32 },
-    //              struct of { uint32, uint32, uint32, uint32, uint32, uint32 },
-    //              struct of { uint32, uint32, uint32, uint32, uint32, uint32 },
+    // struct of { struct of { uint32, uint32, uint32, uint32, uint32, uint32, uint32, uint32 },
+    //              struct of { uint32, uint32, uint32, uint32, uint32, uint32, uint32, uint32 },
+    //              struct of { uint32, uint32, uint32, uint32, uint32, uint32, uint32, uint32 },
+    //              struct of { uint32, uint32, uint32, uint32, uint32, uint32, uint32, uint32 },
     //              uint32, uint32, uint32, uint32 }
-    static constexpr const char *TYPE_AS_STRING = "((uuuuuu)(uuuuuu)(uuuuuu)(uuuuuu)uuuu)";
+    static constexpr const char *TYPE_AS_STRING = "((uuuuuuuu)(uuuuuuuu)(uuuuuuuu)(uuuuuuuu)uuuu)";
 };
 
 template <> struct DBusTypeTrait<DnssdCounters>
@@ -284,6 +302,88 @@ template <> struct DBusTypeTrait<RadioCoexMetrics>
     //             uint32, uint32, uint32, uint32, uint32, uint32, uint32, uint32,
     //             uint32, uint32, bool }
     static constexpr const char *TYPE_AS_STRING = "(uuuuuuuuuuuuuuuuuub)";
+};
+
+template <> struct DBusTypeTrait<BorderRoutingCounters>
+{
+    // struct of { struct of { uint64, uint64 },
+    //             struct of { uint64, uint64 },
+    //             struct of { uint64, uint64 },
+    //             struct of { uint64, uint64 },
+    //             uint32, uint32, uint32, uint32, uint32, uint32 }
+    static constexpr const char *TYPE_AS_STRING = "((tt)(tt)(tt)(tt)uuuuuu)";
+};
+
+template <> struct DBusTypeTrait<Nat64ComponentState>
+{
+    // struct of { uint8, uint8 }
+    static constexpr const char *TYPE_AS_STRING = "(ss)";
+};
+
+template <> struct DBusTypeTrait<Nat64TrafficCounters>
+{
+    // struct of { uint64, uint64, uint64, uint64 }
+    static constexpr const char *TYPE_AS_STRING = "(tttt)";
+};
+
+template <> struct DBusTypeTrait<Nat64PacketCounters>
+{
+    // struct of { uint64, uint64 }
+    static constexpr const char *TYPE_AS_STRING = "(tt)";
+};
+
+template <> struct DBusTypeTrait<Nat64ProtocolCounters>
+{
+    // struct of { struct of { uint64, uint64, uint64, uint64 }
+    //             struct of { uint64, uint64, uint64, uint64 }
+    //             struct of { uint64, uint64, uint64, uint64 }
+    //             struct of { uint64, uint64, uint64, uint64 } }
+    static constexpr const char *TYPE_AS_STRING = "((tttt)(tttt)(tttt)(tttt))";
+};
+
+template <> struct DBusTypeTrait<Nat64AddressMapping>
+{
+    // struct of {
+    //             uint64,
+    //             array of uint8,
+    //             array of uint8,
+    //             uint32,
+    //             struct of {
+    //               struct of { uint64, uint64, uint64, uint64 }
+    //               struct of { uint64, uint64, uint64, uint64 }
+    //               struct of { uint64, uint64, uint64, uint64 }
+    //               struct of { uint64, uint64, uint64, uint64 } } }
+    static constexpr const char *TYPE_AS_STRING = "(tayayu((tttt)(tttt)(tttt)(tttt)))";
+};
+
+template <> struct DBusTypeTrait<std::vector<Nat64AddressMapping>>
+{
+    // array of struct of {
+    //             uint64,
+    //             array of uint8,
+    //             array of uint8,
+    //             uint32,
+    //             struct of {
+    //               struct of { uint64, uint64, uint64, uint64 }
+    //               struct of { uint64, uint64, uint64, uint64 }
+    //               struct of { uint64, uint64, uint64, uint64 }
+    //               struct of { uint64, uint64, uint64, uint64 } } }
+    static constexpr const char *TYPE_AS_STRING = "a(tayayu((tttt)(tttt)(tttt)(tttt)))";
+};
+
+template <> struct DBusTypeTrait<Nat64ErrorCounters>
+{
+    // struct of { struct of { uint64, uint64 }
+    //             struct of { uint64, uint64 }
+    //             struct of { uint64, uint64 }
+    //             struct of { uint64, uint64 } }
+    static constexpr const char *TYPE_AS_STRING = "((tt)(tt)(tt)(tt))";
+};
+
+template <> struct DBusTypeTrait<InfraLinkInfo>
+{
+    // struct of { string, bool, bool, bool, uint32, uint32, uint32 }
+    static constexpr const char *TYPE_AS_STRING = "(sbbbuuu)";
 };
 
 template <> struct DBusTypeTrait<int8_t>
@@ -338,6 +438,12 @@ template <> struct DBusTypeTrait<std::string>
 {
     static constexpr int         TYPE           = DBUS_TYPE_STRING;
     static constexpr const char *TYPE_AS_STRING = DBUS_TYPE_STRING_AS_STRING;
+};
+
+template <> struct DBusTypeTrait<bool>
+{
+    static constexpr int         TYPE           = DBUS_TYPE_BOOLEAN;
+    static constexpr const char *TYPE_AS_STRING = DBUS_TYPE_BOOLEAN_AS_STRING;
 };
 
 otbrError DBusMessageEncode(DBusMessageIter *aIter, bool aValue);
@@ -400,7 +506,7 @@ template <typename T> otbrError DBusMessageExtractPrimitive(DBusMessageIter *aIt
 {
     DBusMessageIter subIter;
     otbrError       error = OTBR_ERROR_NONE;
-    T *             val;
+    T              *val;
     int             n;
     int             subtype;
 
@@ -428,7 +534,7 @@ template <typename T, size_t SIZE> otbrError DBusMessageExtract(DBusMessageIter 
 {
     DBusMessageIter subIter;
     otbrError       error = OTBR_ERROR_NONE;
-    T *             val;
+    T              *val;
     int             n;
     int             subtype;
 

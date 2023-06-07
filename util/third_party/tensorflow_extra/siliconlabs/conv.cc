@@ -6,9 +6,7 @@
 #include "tensorflow/lite/micro/kernels/kernel_util.h"
 #include "CMSIS/NN/Include/arm_nnfunctions.h"
 
-#include "sl_mvp_config.h"
 #include "sl_mvp_ml_conv2d.h"
-
 
 namespace tflite {
 namespace sl {
@@ -333,7 +331,7 @@ TfLiteStatus eval_cmsis_int8(TfLiteContext* context,
   if (data->scratch_buffer_index > -1) {
     ctx.buf = context->GetScratchBuffer(context, data->scratch_buffer_index);
   }
-  TFLITE_DCHECK_EQ(ARM_MATH_SUCCESS,
+  TFLITE_DCHECK_EQ(ARM_CMSIS_NN_SUCCESS,
                    arm_convolve_wrapper_s8(
                      &ctx, &conv_params, &quant_params,
                      &input_dims,  tflite::micro::GetTensorData<int8_t>(input),
@@ -417,7 +415,9 @@ TfLiteRegistration Register_CONV_2D() {
           /*profiling_string=*/nullptr,
           /*builtin_code=*/0,
           /*custom_name=*/nullptr,
-          /*version=*/0};
+          /*version=*/0,
+          /*registration_external=*/nullptr
+  };
 }
 
 }  // namespace tflite

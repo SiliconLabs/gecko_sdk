@@ -136,6 +136,68 @@ void fetchEmberRouteTableEntry(EmberRouteTableEntry *value);
 #define fetchEmberKeyData(value) \
   (fetchInt8uArray(EMBER_ENCRYPTION_KEY_SIZE, (value)->contents))
 
+#define append_sl_zb_sec_man_key_t(value) \
+  (appendInt8uArray(EMBER_ENCRYPTION_KEY_SIZE, (value)->key))
+
+#define fetch_sl_zb_sec_man_key_t(value) \
+  (fetchInt8uArray(EMBER_ENCRYPTION_KEY_SIZE, (value)->key))
+
+#define append_sl_zb_sec_man_context_t(value)      \
+  do {                                             \
+    appendInt8u((value)->core_key_type);           \
+    appendInt8u((value)->key_index);               \
+    appendInt8u((value)->derived_type);            \
+    appendInt8uArray(EUI64_SIZE, (value)->eui64);  \
+    appendInt8u((value)->multi_network_index);     \
+    appendInt8u((value)->flags);                   \
+    appendInt32u((value)->psa_key_alg_permission); \
+  } while (0)
+
+#define fetch_sl_zb_sec_man_context_t(value)         \
+  do {                                               \
+    (value)->core_key_type = fetchInt8u();           \
+    (value)->key_index = fetchInt8u();               \
+    (value)->derived_type = fetchInt8u();            \
+    fetchInt8uArray(EUI64_SIZE, (value)->eui64);     \
+    (value)->multi_network_index = fetchInt8u();     \
+    (value)->flags = fetchInt8u();                   \
+    (value)->psa_key_alg_permission = fetchInt32u(); \
+  } while (0)
+
+#define append_sl_zb_sec_man_network_key_info_t(value)     \
+  do {                                                     \
+    appendInt8u((value)->network_key_set);                 \
+    appendInt8u((value)->alternate_network_key_set);       \
+    appendInt8u((value)->network_key_sequence_number);     \
+    appendInt8u((value)->alt_network_key_sequence_number); \
+    appendInt32u((value)->network_key_frame_counter);      \
+  } while (0)
+
+#define fetch_sl_zb_sec_man_network_key_info_t(value)        \
+  do {                                                       \
+    (value)->network_key_set = fetchInt8u();                 \
+    (value)->alternate_network_key_set = fetchInt8u();       \
+    (value)->network_key_sequence_number = fetchInt8u();     \
+    (value)->alt_network_key_sequence_number = fetchInt8u(); \
+    (value)->network_key_frame_counter = fetchInt32u();      \
+  } while (0)
+
+#define append_sl_zb_sec_man_aps_key_metadata_t(value) \
+  do {                                                 \
+    appendInt16u((value)->bitmask);                    \
+    appendInt32u((value)->outgoing_frame_counter);     \
+    appendInt32u((value)->incoming_frame_counter);     \
+    appendInt16u((value)->ttl_in_seconds);             \
+  } while (0)
+
+#define fetch_sl_zb_sec_man_aps_key_metadata_t(value) \
+  do {                                                \
+    (value)->bitmask = fetchInt16u();                 \
+    (value)->outgoing_frame_counter = fetchInt32u();  \
+    (value)->incoming_frame_counter = fetchInt32u();  \
+    (value)->ttl_in_seconds = fetchInt16u();          \
+  } while (0)
+
 #define appendEmberTransientKeyData(value)        \
   do {                                            \
     appendInt8uArray(EUI64_SIZE, (value)->eui64); \
@@ -397,7 +459,7 @@ void formatStructEmberPerDeviceDutyCycleIntoBytes(uint8_t maxDevices,
 // Make sure to pass references to all of the variables! And if an array is
 // passed, the length needs to come directly after it. This length should
 // be a reference as well.
-void emAfFetchOrAppend(bool fetch, const char * format, ...);
+void sli_zigbee_af_fetch_or_append(bool fetch, const char * format, ...);
 
 void appendEmberTokenData(EmberTokenData * tokenData);
 void fetchEmberTokenData(EmberTokenData * tokenData);

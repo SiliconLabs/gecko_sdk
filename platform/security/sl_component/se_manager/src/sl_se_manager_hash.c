@@ -27,11 +27,11 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
-#include "em_device.h"
-
-#if defined(SEMAILBOX_PRESENT)
 
 #include "sl_se_manager.h"
+
+#if defined(SLI_MAILBOX_COMMAND_SUPPORTED)
+
 #include "sli_se_manager_internal.h"
 #include "em_se.h"
 #include "sl_assert.h"
@@ -391,7 +391,7 @@ sl_status_t sl_se_hash_multipart_update(void *hash_type_ctx,
 
   // We only support hashing up to 4 GB data
   // so if anything but counter[0] is set, return NOT_SUPPORTED
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG >= 3)
+#if defined(SLI_SE_MAJOR_VERSION_TWO)
   for (size_t i = 1; i < countersize; i++) {
     if (counter[i] != 0) {
       return SL_STATUS_NOT_SUPPORTED;
@@ -439,7 +439,7 @@ sl_status_t sl_se_hash_multipart_finish(void *hash_type_ctx,
   size_t countersize, blocksize, outputsize;
   uint8_t *state;
   uint32_t *counter;
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG >= 3)
+#if defined(SLI_SE_MAJOR_VERSION_TWO)
   uint32_t command_word = SLI_SE_COMMAND_HASHFINISH;
   uint8_t *buffer;
   size_t state_len;
@@ -477,7 +477,7 @@ sl_status_t sl_se_hash_multipart_finish(void *hash_type_ctx,
       counter = ((sl_se_sha1_multipart_context_t*)hash_type_ctx)->total;
       outputsize = 20;
       blocksize = 64;
-    #if (_SILICON_LABS_32B_SERIES_2_CONFIG >= 3)
+    #if defined(SLI_SE_MAJOR_VERSION_TWO)
       state_len = 20;
       command_word |= SLI_SE_COMMAND_OPTION_HASH_SHA1;
       buffer = ((sl_se_sha1_multipart_context_t*)hash_type_ctx)->buffer;
@@ -488,7 +488,7 @@ sl_status_t sl_se_hash_multipart_finish(void *hash_type_ctx,
       counter = ((sl_se_sha224_multipart_context_t*)hash_type_ctx)->total;
       outputsize = 28;
       blocksize = 64;
-    #if (_SILICON_LABS_32B_SERIES_2_CONFIG >= 3)
+    #if defined(SLI_SE_MAJOR_VERSION_TWO)
       state_len = 32;
       command_word |= SLI_SE_COMMAND_OPTION_HASH_SHA224;
       buffer = ((sl_se_sha224_multipart_context_t*)hash_type_ctx)->buffer;
@@ -499,7 +499,7 @@ sl_status_t sl_se_hash_multipart_finish(void *hash_type_ctx,
       counter = ((sl_se_sha256_multipart_context_t*)hash_type_ctx)->total;
       outputsize = 32;
       blocksize = 64;
-    #if (_SILICON_LABS_32B_SERIES_2_CONFIG >= 3)
+    #if defined(SLI_SE_MAJOR_VERSION_TWO)
       state_len = 32;
       command_word |= SLI_SE_COMMAND_OPTION_HASH_SHA256;
       buffer = ((sl_se_sha256_multipart_context_t*)hash_type_ctx)->buffer;
@@ -512,7 +512,7 @@ sl_status_t sl_se_hash_multipart_finish(void *hash_type_ctx,
       counter = ((sl_se_sha384_multipart_context_t*)hash_type_ctx)->total;
       outputsize = 48;
       blocksize = 128;
-    #if (_SILICON_LABS_32B_SERIES_2_CONFIG >= 3)
+    #if defined(SLI_SE_MAJOR_VERSION_TWO)
       state_len = 64;
       command_word |= SLI_SE_COMMAND_OPTION_HASH_SHA384;
       buffer = ((sl_se_sha384_multipart_context_t*)hash_type_ctx)->buffer;
@@ -523,7 +523,7 @@ sl_status_t sl_se_hash_multipart_finish(void *hash_type_ctx,
       counter = ((sl_se_sha512_multipart_context_t*)hash_type_ctx)->total;
       outputsize = 64;
       blocksize = 128;
-    #if (_SILICON_LABS_32B_SERIES_2_CONFIG >= 3)
+    #if defined(SLI_SE_MAJOR_VERSION_TWO)
       state_len = 64;
       command_word |= SLI_SE_COMMAND_OPTION_HASH_SHA512;
       buffer = ((sl_se_sha512_multipart_context_t*)hash_type_ctx)->buffer;
@@ -540,7 +540,7 @@ sl_status_t sl_se_hash_multipart_finish(void *hash_type_ctx,
   }
 
   countersize = blocksize / 32;
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG >= 3)
+#if defined(SLI_SE_MAJOR_VERSION_TWO)
 
   // We only support hashing up to 4 GB data
   // so if anything but counter[0] is set, return NOT_SUPPORTED
@@ -598,7 +598,7 @@ sl_status_t sl_se_hash_multipart_finish(void *hash_type_ctx,
   if (status == SL_STATUS_OK) {
     memcpy(digest_out, state, outputsize);
   }
-#endif // (_SILICON_LABS_32B_SERIES_2_CONFIG >= 3)
+#endif // SLI_SE_MAJOR_VERSION_TWO
   return status;
 }
 
@@ -670,4 +670,4 @@ sl_status_t sl_se_hash(sl_se_command_context_t *cmd_ctx,
 
 /** @} (end addtogroup sl_se) */
 
-#endif // defined(SEMAILBOX_PRESENT)
+#endif // defined(SLI_MAILBOX_COMMAND_SUPPORTED)

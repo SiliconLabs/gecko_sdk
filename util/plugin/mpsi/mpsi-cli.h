@@ -7,40 +7,40 @@
 #define __MPSI_CLI_H__
 
 #if defined (EMBER_STACK_ZIGBEE)
-#define emAfPluginMpsiCliEntryAction(command, function, paramList, help) \
+#define sli_mpsi_cli_entry_action(command, function, paramList, help) \
   emberCommandEntryAction(command, function, paramList, help)
 
-#define emAfPluginMpsiCliEntryTerminator() \
+#define sli_mpsi_cli_entry_terminator() \
   emberCommandEntryTerminator()
 
-#define emAfPluginMpsiCliSignedCommandArgument(arg) \
+#define sli_mpsi_cli_signed_command_argument(arg) \
   emberSignedCommandArgument(arg)
 
-#define emAfPluginMpsiCliUnsignedCommandArgument(arg) \
+#define sli_mpsi_cli_unsigned_command_argument(arg) \
   emberUnsignedCommandArgument(arg)
 
-#define emAfPluginMpsiCliCopyStringArgument(arg, buffer, length, leftPad) \
+#define sli_mpsi_cli_copy_string_argument(arg, buffer, length, leftPad) \
   emberCopyStringArgument(arg, buffer, length, leftPad)
 
 #define CLI_HANDLER_PARAM_LIST void
 
 #elif defined (EMBER_STACK_BLE)
-#define emAfPluginMpsiCliEntryAction(command, function, paramList, help) \
+#define sli_mpsi_cli_entry_action(command, function, paramList, help) \
   COMMAND_ENTRY(command, paramList, function, help)
 
-#define emAfPluginMpsiCliEntryTerminator() \
+#define sli_mpsi_cli_entry_terminator() \
   COMMAND_SEPARATOR("")
 
-#define emAfPluginMpsiCliSignedCommandArgument(arg) \
+#define sli_mpsi_cli_signed_command_argument(arg) \
   ciGetSigned(buf[arg + 1])
 
-#define emAfPluginMpsiCliUnsignedCommandArgument(arg) \
+#define sli_mpsi_cli_unsigned_command_argument(arg) \
   ciGetUnsigned(buf[arg + 1])
 
-uint8_t emAfPluginMpsiCliCopyStringArgument(uint8_t arg,
-                                            uint8_t *buffer,
-                                            uint8_t length,
-                                            bool    leftPad)
+uint8_t sli_mpsi_cli_copy_string_argument(uint8_t arg,
+                                          uint8_t *buffer,
+                                          uint8_t length,
+                                          bool    leftPad)
 {
   MEMMOVE(buffer, buf[arg], length);
   (void)leftPad;
@@ -53,16 +53,16 @@ uint8_t emAfPluginMpsiCliCopyStringArgument(uint8_t arg,
 #error "MPSI CLI: Unsupported stack!"
 #endif
 
-#define MPSI_COMMAND_LIST                                               \
-  emAfPluginMpsiCliEntryAction("receive-message",                       \
-                               emAfPluginMpsiCliReceiveMessage, "uvub", \
-                               "Simulate receiving an MPSI message"),   \
-  emAfPluginMpsiCliEntryAction("send-message",                          \
-                               emAfPluginMpsiCliSendMessage, "uvub",    \
-                               "Simulate sending an MPSI message"),     \
-  emAfPluginMpsiCliEntryTerminator()
+#define MPSI_COMMAND_LIST                                          \
+  sli_mpsi_cli_entry_action("receive-message",                     \
+                            sli_mpsi_cli_receive_message, "uvub",  \
+                            "Simulate receiving an MPSI message"), \
+  sli_mpsi_cli_entry_action("send-message",                        \
+                            sli_mpsi_cli_send_message, "uvub",     \
+                            "Simulate sending an MPSI message"),   \
+  sli_mpsi_cli_entry_terminator()
 
-void emAfPluginMpsiCliReceiveMessage(CLI_HANDLER_PARAM_LIST);
-void emAfPluginMpsiCliSendMessage(CLI_HANDLER_PARAM_LIST);
+void sli_mpsi_cli_receive_message(CLI_HANDLER_PARAM_LIST);
+void sli_mpsi_cli_send_message(CLI_HANDLER_PARAM_LIST);
 
 #endif // __MPSI_CLI_H__

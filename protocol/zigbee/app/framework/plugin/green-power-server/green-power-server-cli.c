@@ -14,8 +14,9 @@
  * sections of the MSLA applicable to Source Code.
  *
  ******************************************************************************/
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #ifdef SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
 #include "app/framework/include/af.h"
 #else // !SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
@@ -23,39 +24,29 @@
 #endif //SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
 #include "green-power-server.h"
 #include "green-power-common.h"
-#else // !UC_BUILD
-#include "app/framework/include/af.h"
-#include EMBER_AF_API_GREEN_POWER_SERVER
-#include EMBER_AF_API_GREEN_POWER_COMMON
 
-#ifndef EMBER_AF_GENERATE_CLI
-#error The Green Power Server plugin is not compatible with the legacy CLI.
-#endif
-
-#endif // UC_BUILD
-
-bool emAfPluginGreenPowerServerGpSinkCommissioningModeCommandHandler(uint8_t options,
-                                                                     uint16_t gpmAddrForSecurity,
-                                                                     uint16_t gpmAddrForPairing,
-                                                                     uint8_t sinkEndpoint);
+bool sli_zigbee_af_green_power_server_gp_sink_commissioning_mode_command_handler(uint8_t options,
+                                                                                 uint16_t gpmAddrForSecurity,
+                                                                                 uint16_t gpmAddrForPairing,
+                                                                                 uint8_t sinkEndpoint);
 
 // Sink Commissioning Mode Enter
 void emberAfPluginGreenPowerServerCommissioningMode(SL_CLI_COMMAND_ARG)
 {
-  uint8_t options = emberUnsignedCommandArgument(0);
-  uint16_t gpmAddressSecurity = emberUnsignedCommandArgument(1);
-  uint16_t gpmAddressPairing = emberUnsignedCommandArgument(2);
-  uint8_t endpoint = emberUnsignedCommandArgument(3);
-  emAfPluginGreenPowerServerGpSinkCommissioningModeCommandHandler(options,
-                                                                  gpmAddressSecurity,
-                                                                  gpmAddressPairing,
-                                                                  endpoint);
+  uint8_t options = sl_cli_get_argument_uint8(arguments, 0);
+  uint16_t gpmAddressSecurity = sl_cli_get_argument_uint16(arguments, 1);
+  uint16_t gpmAddressPairing = sl_cli_get_argument_uint16(arguments, 2);
+  uint8_t endpoint = sl_cli_get_argument_uint8(arguments, 3);
+  sli_zigbee_af_green_power_server_gp_sink_commissioning_mode_command_handler(options,
+                                                                              gpmAddressSecurity,
+                                                                              gpmAddressPairing,
+                                                                              endpoint);
 }
 
 // Sink Commissioning Window Extend
 void emberAfGreenPowerClusterGpSinkCliCommissioningWindowExtend(SL_CLI_COMMAND_ARG)
 {
-  uint16_t commissioningWindow = emberUnsignedCommandArgument(0);
+  uint16_t commissioningWindow = sl_cli_get_argument_uint16(arguments, 0);
   emberAfGreenPowerClusterGpSinkCommissioningWindowExtend(commissioningWindow);
 }
 

@@ -20,7 +20,6 @@ component:
   - id: bluetooth_stack
   - id: bluetooth_feature_connection
   - id: bluetooth_feature_gatt
-  - id: bluetooth_feature_gatt_server
   - id: bluetooth_feature_legacy_scanner
   - id: bluetooth_feature_system
   - id: bluetooth_feature_power_control

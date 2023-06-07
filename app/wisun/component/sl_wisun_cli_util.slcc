@@ -8,7 +8,6 @@ root_path: "app/wisun/component/cli_util"
 provides:
   - name: sl_wisun_cli_util
 requires:
-  - name: cli
   - name: "sl_wisun_trace_util"
 source:
   - path: "sl_wisun_cli_util.c"
@@ -25,6 +24,7 @@ config_file:
 
 ui_hints:
   visibility: never
+
 #-------------- Template Contribution ----------------
 template_contribution:
 #---------------- Component Catalog ------------------
@@ -34,50 +34,6 @@ template_contribution:
       include: "sl_wisun_cli_core.h"
       handler: "app_wisun_cli_init"
 
+#---------------- Component Catalog ------------------
   - name: component_catalog
     value: wisun_cli_util
-
-  - name: "cli_group"
-    value:
-      name: "wisun"
-      help: "Wi-SUN commands"
-      shortcuts:
-        - name: "w"
-  - name: "cli_command"
-    value:
-      group: "wisun"
-      name: "set"
-      handler: "app_set"
-      help: "Set a variable"
-      shortcuts:
-        - name: "s"
-      argument:
-        - type: wildcard
-          help: "empty | help | [string] Key [string] Value"
-  - name: "cli_command"
-    value:
-      group: "wisun"
-      name: "get"
-      handler: "app_get"
-      help: "Get a variable"
-      shortcuts:
-        - name: "g"
-      argument:
-        - type: wildcard
-          help: "empty | help | [string] Key"
-  - name: "cli_command"
-    value:
-      group: "wisun"
-      name: "save"
-      handler: "app_save"
-      help: "Save variables to non-volatile storage"
-      shortcuts:
-        - name: "a"
-  - name: "cli_command"
-    value:
-      group: "wisun"
-      name: "reset"
-      handler: "app_reset"
-      help: "Reset variables to default settings"
-      shortcuts:
-        - name: "r"

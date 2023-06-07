@@ -23,6 +23,7 @@ component:
   - id: "silabs_core_sl_malloc"
   - id: "sl_wisun_cli_util"
   - id: "wisun_full_radioconf"
+  - id: "sl_wisun_app_cli"
   - id: "cli"
     instance:
       - vcom
@@ -32,10 +33,6 @@ component:
 
 requires:
   - name: "wisun_radioconf"
-  - name: "wisun_br_mode_switch_cli"
-    condition: [device_sdid_220]
-  - name: "rail_util_eff"
-    condition: [hardware_board_has_eff]
 
 source:
   - path: "app.c"
@@ -52,6 +49,7 @@ include:
     - path: "app_certificate_store.h"
 define:
   - name: "DEBUG_EFM_USER"
+  - name: "WISUN_CLI_SAMPLE_APP"
 configuration:
   - name: "SL_BOARD_ENABLE_VCOM"
     value: "1"
@@ -96,20 +94,13 @@ configuration:
     value: "0"
   - name: "NVM3_DEFAULT_MAX_OBJECT_SIZE"
     value: "1900"
-  - name: SL_RAIL_UTIL_PA_SELECTION_SUBGHZ
-    value: "RAIL_TX_POWER_MODE_SUBGIG_EFF_20DBM"
-    condition: [hardware_board_has_eff]
-  - name: RAIL_UTIL_EFF_MAX_TX_CONTINUOUS_POWER_DBM
-    value: 20
-    condition: [hardware_board_has_eff]
-  - name: RAIL_UTIL_EFF_MAX_TX_DUTY_CYCLE
-    value: 100
-    condition: [hardware_board_has_eff]
   - name: SL_RAIL_UTIL_PTI_BAUD_RATE_HZ
     value: "3200000"
   - name: SL_DEVICE_INIT_RFFPLL_BAND
     value: "1"
     condition: [device_sdid_220, hardware_board_default_rf_band_470]
+  - name: SL_CLI_VCOM_TASK_STACK_SIZE
+    value: 500
 
 template_contribution:
   - name: "cli_command"
@@ -225,6 +216,32 @@ template_contribution:
       argument:
         - type: uint8
           help: "mode: 0=default, 1=slot"
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "set_lfn_support"
+      handler: "app_set_lfn_support"
+      help: "configure LFN support"
+      argument:
+        - type: uint8
+          help: "lfn_limit: Number of locally supported LFN"
+        - type: uint8
+          help: "lfn_support_pan: Enable or disable LFN support at PAN (0|1)"
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "mode_switch"
+      handler: "app_mode_switch"
+      help: "configure mode witch: w ms"
+      shortcuts:
+        - name: "ms"
+      argument:
+        - type: uint8
+          help: "mode: 0=disabled, 1=enabled, 2=default"
+        - type: uint8
+          help: "PhyModeId"
+        - type: stringopt
+          help: "neighbor MAC address (optional)"
 
 readme:
   - path: ../../../../app/wisun/documentation/example/wisun_br/readme.md

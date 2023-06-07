@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--Silicon Labs ESL Core Profile-->
+<gatt>
+  <!--Silicon Labs ESL Tag Core-->
+  <service advertise="true" id="esl_tag_service" name="Silicon Labs ESL Tag" requirement="mandatory" sourceId="" type="primary" uuid="1857" instance_id="silabs_esl">
+    <informativeText>Electronic Shelf Label (ESL) Tag is a Bluetooth Low Energy device that can display a graphic (e.g., containing a price) for an item that is offered for sale on a retail shelf. An ESL Tag consists of three independent, optional elements: a display, a light, and a sensor. This service exposes the attributes of these three elements.</informativeText>
+
+    <!--ESL Address-->
+    <characteristic const="false" id="esl_address" name="ESL Address" sourceId="" uuid="2bf6">
+      <informativeText>The ESL Access Point shall configure the ESL Address by writing an ESL Address value to this characteristic. Each ESL Address consists of 15 bits and is split into a Group ID and an ESL ID. The ESL ID is at the low byte, it's an 8-bit value, valid in the range of 1-255. 0 is the default (reset) value meaning no address assigned to the device yet. At the high byte position there's the 7bit Group ID ranging from 0-127. The most significant bit within the high byte is reserved for future use. Each ESL is a member of a single group. Therefore, with 128 groups and 255 ESL IDs per group, a total of 32,640 ESL devices can be allocated a locally unique address. Accessing ESL address requires encryption.</informativeText>
+      <value length="2" type="user" variable_length="false">0000</value>
+      <properties>
+        <write authenticated="false" bonded="true" encrypted="true"/>
+      </properties>
+    </characteristic>
+
+    <!--AP Sync Key Material-->
+    <characteristic const="false" id="esl_ap_sync_key" name="AP Sync Key Material" sourceId="" uuid="2bf7">
+      <informativeText> The ESL Access Point shall configure The ESL Access Point Sync Key Material by writing The ESL Access Point Sync Key Material value of The ESL Access Point to this characteristic. The ESL Access Point Sync Key Material haracteristic is a 24 octet value. This characteristic enables the transfer of the key that is used in the Synchronized state, once it is configured by The ESL Access Point acting as a Client. Accessing AP Sync Key Material requires encryption.</informativeText>
+      <value length="24" type="user" variable_length="false">00</value>
+      <properties>
+        <write authenticated="false" bonded="true" encrypted="true"/>
+      </properties>
+    </characteristic>
+
+    <!--ESL Response Key Material-->
+    <characteristic const="false" id="esl_response_key" name="ESL Response Key Material" sourceId="" uuid="2bf8">
+      <informativeText>The ESL Response Key Material characteristic value provides a key for use in the Encrypted Advertising Data feature described in the Bluetooth Core Specification. The ESL Response Key Material characteristic value is a 24 octet value. It is configured when an AP, acting as a Client, writes a value to this cryptographic key which will then used by the ESL when the ESL sends responses to The ESL Access Point. The ESL Response Key Material value is intended to be different for each ESL in a system and enables ESL responses to be authenticated in the Synchronized state.</informativeText>
+      <value length="24" type="user" variable_length="false">00</value>
+      <properties>
+        <write authenticated="false" bonded="true" encrypted="true"/>
+      </properties>
+    </characteristic>
+
+    <!--ESL Current Absolute Time-->
+    <characteristic const="false" id="esl_absolute_time" name="ESL Current Absolute Time" sourceId="" uuid="2bf9">
+      <informativeText>The ESL Current Absolute Time characteristic value is a 32-bit reference time integer value (uint32) with a resolution of 1 millisecond (ms). After an AP (Client) sets this value the ESL Tag (Server) shall set its current system time to this value. The Server shall increment the value by 1 in every 1 ms. Therefore, this value can be used to set up timed commands in the Server in advance (e.g. a deferred image display).</informativeText>
+      <value length="4" type="user" variable_length="false">00000000</value>
+      <properties>
+        <write authenticated="false" bonded="true" encrypted="true"/>
+      </properties>
+    </characteristic>
+
+    <!--ESL Control Point-->
+    <characteristic const="false" id="esl_control_point" name="ESL Control Point" sourceId="" uuid="2bfe">
+      <informativeText>The ESL Control Point allows an AP (Client) to write commands to an ESL Tag (Server) while in a connection. The Server sends a response to each command as a notification of the ESL Control Point characteristic. When written or notified, the format of the characteristic value shall be a single Length Tag Value (LTV) formatted element. The commands that an AP may write to the ECP and their LTV format are specified in the ESL Service specification.</informativeText>
+      <value length="0" type="user" variable_length="true"/>
+      <properties>
+        <write authenticated="false" bonded="true" encrypted="true"/>
+        <write_no_response authenticated="false" bonded="true" encrypted="true"/>
+        <notify authenticated="false" bonded="true" encrypted="true"/>
+      </properties>
+    </characteristic>
+  </service>
+</gatt>

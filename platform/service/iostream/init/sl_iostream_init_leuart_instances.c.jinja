@@ -2,6 +2,9 @@
 #include "em_leuart.h"
 #include "sl_iostream_uart.h"
 #include "sl_iostream_leuart.h"
+{% if "vcom" in iostream_leuart_instances and enable_config_over_swo %}
+#include "sl_cos.h"
+{% endif %}
 // Include instance config {# Include instance config #}
 {% for instance in iostream_leuart_instances %} #include "sl_iostream_leuart_{{ instance }}_config.h"
 {% endfor %}
@@ -90,6 +93,12 @@ sl_status_t sl_iostream_leuart_init_{{ instance }}(void)
                                    &config_{{ instance }},
                                    &context_{{ instance }});
   EFM_ASSERT(status == SL_STATUS_OK);
+
+  {% if "vcom" in iostream_leuart_instances and enable_config_over_swo %}
+  // Send VCOM config to WSTK
+  // LEUART does not support HWFC, always set flowcontrol to COS_CONFIG_FLOWCONTROL_NONE
+  sl_cos_config_vcom( (uint32_t) SL_IOSTREAM_LEUART_{{ instance | upper }}_BAUDRATE, COS_CONFIG_FLOWCONTROL_NONE);
+  {% endif %}
 
   return status;
 }

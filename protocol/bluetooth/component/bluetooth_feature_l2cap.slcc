@@ -3,7 +3,7 @@ label: "L2CAP"
 package: "Bluetooth"
 description: >
   This component provides the L2CAP Connection Oriented Channel feature.
-category: "Bluetooth|Stack"
+category: Bluetooth|Bluetooth Host (Stack)|Features with Commands and Events
 quality: "production"
 root_path: "protocol/bluetooth"
 requires:

@@ -33,6 +33,7 @@ file(READ .default-version OT_DEFAULT_VERSION)
 string(STRIP ${OT_DEFAULT_VERSION} OT_DEFAULT_VERSION)
 
 project(openthread VERSION ${OT_DEFAULT_VERSION})
+include(CTest)
 
 option(OT_BUILD_EXECUTABLES "Build executables" ON)
 option(OT_COVERAGE "enable coverage" OFF)
@@ -106,13 +107,15 @@ endif()
 message(STATUS "Package Version: ${OT_PACKAGE_VERSION}")
 
 set(OT_THREAD_VERSION "1.3" CACHE STRING "Thread version chosen by the user at configure time")
-set_property(CACHE OT_THREAD_VERSION PROPERTY STRINGS "1.1" "1.2" "1.3")
+set_property(CACHE OT_THREAD_VERSION PROPERTY STRINGS "1.1" "1.2" "1.3" "1.3.1")
 if(${OT_THREAD_VERSION} EQUAL "1.1")
     target_compile_definitions(ot-config INTERFACE "OPENTHREAD_CONFIG_THREAD_VERSION=OT_THREAD_VERSION_1_1")
 elseif(${OT_THREAD_VERSION} EQUAL "1.2")
     target_compile_definitions(ot-config INTERFACE "OPENTHREAD_CONFIG_THREAD_VERSION=OT_THREAD_VERSION_1_2")
 elseif(${OT_THREAD_VERSION} EQUAL "1.3")
     target_compile_definitions(ot-config INTERFACE "OPENTHREAD_CONFIG_THREAD_VERSION=OT_THREAD_VERSION_1_3")
+elseif(${OT_THREAD_VERSION} EQUAL "1.3.1")
+    target_compile_definitions(ot-config INTERFACE "OPENTHREAD_CONFIG_THREAD_VERSION=OT_THREAD_VERSION_1_3_1")
 else()
     message(FATAL_ERROR "Thread version unknown: ${OT_THREAD_VERSION}")
 endif()
@@ -205,11 +208,8 @@ endif()
 add_subdirectory(src)
 add_subdirectory(third_party EXCLUDE_FROM_ALL)
 
-if(OT_PLATFORM STREQUAL "simulation")
-    enable_testing()
-endif()
-
 add_subdirectory(tests)
+add_subdirectory(tools)
 
 add_custom_target(print-ot-config ALL
                   COMMAND ${CMAKE_COMMAND}

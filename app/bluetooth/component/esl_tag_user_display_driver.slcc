@@ -1,0 +1,31 @@
+id: esl_tag_user_display_driver
+package: Bluetooth
+label: ESL Tag User Defined Display Driver
+description: >
+  This component provides skeleton code for a user defined display driver - to
+  be filled in with actual low level driver code for driving any arbitrary ESL
+  Tag display type. See the Doxygen comments in the header file on usage.
+
+  This is a Custom-Code component.
+category: Bluetooth|Application|Miscellaneous
+quality: production
+root_path: app/bluetooth/common/esl_tag_user_display_driver
+tag:
+  - Custom-Code
+
+include:
+  - path: ./inc
+    file_list:
+      - path: esl_tag_user_display_driver.h
+
+source:
+  - path: src/esl_tag_user_display_driver.c
+    project:
+      transfer_ownership: true
+      directory: .
+
+provides:
+  - name: esl_tag_user_display_driver
+
+requires:
+  - name: esl_tag_display

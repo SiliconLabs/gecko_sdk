@@ -191,16 +191,12 @@ class RM_Peripheral_RAC_NS(Base_RM_Peripheral):
         self.zz_rdict['AGCOVERWRITE0'] = self.AGCOVERWRITE0
         self.AGCOVERWRITE1 = RM_Register_RAC_NS_AGCOVERWRITE1(self.zz_rmio, self.zz_label)
         self.zz_rdict['AGCOVERWRITE1'] = self.AGCOVERWRITE1
-        self.AGCOVERWRITE2 = RM_Register_RAC_NS_AGCOVERWRITE2(self.zz_rmio, self.zz_label)
-        self.zz_rdict['AGCOVERWRITE2'] = self.AGCOVERWRITE2
         self.SPARE = RM_Register_RAC_NS_SPARE(self.zz_rmio, self.zz_label)
         self.zz_rdict['SPARE'] = self.SPARE
         self.PACTRL = RM_Register_RAC_NS_PACTRL(self.zz_rmio, self.zz_label)
         self.zz_rdict['PACTRL'] = self.PACTRL
-        self.FENOTCH0 = RM_Register_RAC_NS_FENOTCH0(self.zz_rmio, self.zz_label)
-        self.zz_rdict['FENOTCH0'] = self.FENOTCH0
-        self.FENOTCH1 = RM_Register_RAC_NS_FENOTCH1(self.zz_rmio, self.zz_label)
-        self.zz_rdict['FENOTCH1'] = self.FENOTCH1
+        self.RADIOCLKCTRL = RM_Register_RAC_NS_RADIOCLKCTRL(self.zz_rmio, self.zz_label)
+        self.zz_rdict['RADIOCLKCTRL'] = self.RADIOCLKCTRL
         self.SCRATCH0 = RM_Register_RAC_NS_SCRATCH0(self.zz_rmio, self.zz_label)
         self.zz_rdict['SCRATCH0'] = self.SCRATCH0
         self.SCRATCH1 = RM_Register_RAC_NS_SCRATCH1(self.zz_rmio, self.zz_label)
@@ -217,6 +213,8 @@ class RM_Peripheral_RAC_NS(Base_RM_Peripheral):
         self.zz_rdict['SCRATCH6'] = self.SCRATCH6
         self.SCRATCH7 = RM_Register_RAC_NS_SCRATCH7(self.zz_rmio, self.zz_label)
         self.zz_rdict['SCRATCH7'] = self.SCRATCH7
+        self.FSWCTRL = RM_Register_RAC_NS_FSWCTRL(self.zz_rmio, self.zz_label)
+        self.zz_rdict['FSWCTRL'] = self.FSWCTRL
         self.THMSW = RM_Register_RAC_NS_THMSW(self.zz_rmio, self.zz_label)
         self.zz_rdict['THMSW'] = self.THMSW
         self.DIAGAALTEN = RM_Register_RAC_NS_DIAGAALTEN(self.zz_rmio, self.zz_label)

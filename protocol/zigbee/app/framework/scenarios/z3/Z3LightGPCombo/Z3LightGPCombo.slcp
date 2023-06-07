@@ -12,9 +12,7 @@ component:
   - id: "cli"
     instance:
     - example
-  - id: "iostream_usart"
-    instance:
-      - vcom
+  - id: "iostream_recommended_stream"
   - id: "zigbee_debug_print"
   - id: "zigbee_pro_stack"
   - id: "zigbee_source_route"
@@ -34,8 +32,11 @@ component:
   - id: "zigbee_find_and_bind_target"
   - id: "zigbee_green_power_common"
   - id: "zigbee_green_power_client"
+  - id: "zigbee_green_power_client_cli"
   - id: "zigbee_green_power_server"
+  - id: "zigbee_green_power_server_cli"
   - id: "zigbee_green_power_translation_table"
+  - id: "zigbee_green_power_translation_table_cli"
   - id: "zigbee_interpan"
   - id: "zigbee_zll_commissioning_common"
   - id: "zigbee_zll_commissioning_server"
@@ -51,7 +52,6 @@ component:
   - id: "zigbee_zll_utility_server"
   - id: "zigbee_scan_dispatch"
   - id: "zigbee_update_tc_link_key"
-  - id: "zigbee_debug_basic"
   - id: simple_led
     instance:
       - led0
@@ -77,6 +77,12 @@ configuration:
     value: 1
   - name: SL_IOSTREAM_USART_VCOM_FLOW_CONTROL_TYPE
     value: usartHwFlowControlCtsAndRts
+    condition:
+      - "iostream_usart"
+  - name: SL_IOSTREAM_EUSART_VCOM_FLOW_CONTROL_TYPE
+    value: eusartHwFlowControlCtsAndRts
+    condition:
+      - "iostream_eusart"
   - name: SL_CLI_MAX_INPUT_ARGUMENTS
     value: 16
   - name: SLI_ZIGBEE_PRIMARY_NETWORK_DEVICE_TYPE

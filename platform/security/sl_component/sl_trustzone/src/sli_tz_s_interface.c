@@ -34,6 +34,8 @@
   #include "tz_service_config_autogen.h"
 #endif
 
+#include "psa/crypto_types.h"
+
 #include "sli_tz_iovec_check.h"
 #include "sli_tz_s_interface.h"
 
@@ -151,14 +153,14 @@ int32_t sli_tz_s_interface_dispatch_nvm3(sli_tz_invec in_vec[],
                                              out_len,
                                              &iovec_copy);
   if (status != SLI_TZ_IOVEC_OK) {
-    return PSA_ERROR_INVALID_ARGUMENT;
+    return ECODE_NVM3_ERR_PARAMETER;
   }
 
   SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(iovec_copy.in_vec[0], sli_tz_fn_id);
 
   sli_tz_fn_id function_id = *((sli_tz_fn_id *)iovec_copy.in_vec[0].base);
   if (function_id >= SLI_TZ_SERVICE_NVM3_MAX_SID) {
-    return PSA_ERROR_INVALID_ARGUMENT;
+    return ECODE_NVM3_ERR_PARAMETER;
   }
 
   // Check that potential nvm3_Init_t struct doesn't contain illegal pointers.
@@ -175,7 +177,7 @@ int32_t sli_tz_s_interface_dispatch_nvm3(sli_tz_invec in_vec[],
 
     status = sli_tz_nvm3_init_struct_points_to_ns(&init_copy);
     if (status != SLI_TZ_IOVEC_OK) {
-      return PSA_ERROR_INVALID_ARGUMENT;
+      return ECODE_NVM3_ERR_PARAMETER;
     }
   }
 
@@ -184,7 +186,7 @@ int32_t sli_tz_s_interface_dispatch_nvm3(sli_tz_invec in_vec[],
   nvm3_Handle_t *passed_handle = (nvm3_Handle_t *)iovec_copy.in_vec[1].base;
   if (NVM3_FUNCTION_HAS_HANDLE_STRUCT_PARAM(function_id)) {
     // The handle struct is passed in in_vec[1] for all functions using it
-    // (with the exception of tfm_nvm3_open() since it's used as an output
+    // (with the exception of sli_tz_nvm3_open() since it's used as an output
     // there). We don't reach here for that function, though.
     SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(iovec_copy.in_vec[1], nvm3_Handle_t);
 
@@ -205,7 +207,7 @@ int32_t sli_tz_s_interface_dispatch_nvm3(sli_tz_invec in_vec[],
 
       status = sli_tz_nvm3_handle_struct_points_to_ns(&handle_copy);
       if (status != SLI_TZ_IOVEC_OK) {
-        return PSA_ERROR_INVALID_ARGUMENT;
+        return ECODE_NVM3_ERR_PARAMETER;
       }
     }
   }

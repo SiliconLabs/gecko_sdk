@@ -12,8 +12,22 @@ class Profile_Base_Bobcat(Profile_Base_Ocelot):
         self._family = "bobcat"
         self._sw_profile_outputs_common = sw_profile_outputs_common_bobcat()
 
+    def build_optional_profile_inputs(self, model, profile):
+        IProfile.make_optional_input(profile, model.vars.syncword_tx_skip, "syncword",
+                                     readable_name="Sync Word TX Skip", default=False)
+        IProfile.make_optional_input(profile, model.vars.symbol_encoding, "symbol_coding",
+                                     readable_name="Symbol Encoding", default=model.vars.symbol_encoding.var_enum.NRZ)
+        IProfile.make_optional_input(profile, model.vars.test_ber, "testing",
+                                     readable_name="Reconfigure for BER testing", default=False)
+        IProfile.make_optional_input(profile, model.vars.deviation_tol_ppm, 'modem', default=0,
+                                     readable_name="Maximum deviation offset expected in ppm", value_limit_min=0,
+                                     value_limit_max=500000)
+        self.make_optional_input(profile, model.vars.shaping_filter_param, "modem",
+                                 readable_name="Shaping Filter Parameter (BT or R)", value_limit_min=0.3,
+                                 value_limit_max=2.0, fractional_digits=2, default=0.5)
+
     def buildRegisterOutputs(self, model, profile):
-        build_modem_regs_bobcat(model, profile, self._family)
+        build_modem_regs_bobcat(model, profile)
 
     def build_advanced_profile_inputs(self, model, profile):
         IProfile.make_linked_io(profile, model.vars.fec_tx_enable, 'Channel_Coding', readable_name="Enable FEC")
@@ -53,6 +67,8 @@ class Profile_Base_Bobcat(Profile_Base_Ocelot):
                                 readable_name="Length of the First Word", value_limit_min=1, value_limit_max=8)
 
     def build_hidden_profile_inputs(self, model, profile):
+        IProfile.make_hidden_input(profile, model.vars.asynchronous_rx_enable, "Advanced",
+                                     readable_name="Enable Asynchronous direct mode")
         IProfile.make_hidden_input(profile, model.vars.src1_range_available_minimum, "modem",
                                    readable_name="SRC range minimum", value_limit_min=125, value_limit_max=155)
         IProfile.make_hidden_input(profile, model.vars.input_decimation_filter_allow_dec3, "modem",

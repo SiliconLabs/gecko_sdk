@@ -20,7 +20,7 @@
 
 {# NCP INIT #}
 // NCP Init
-void emAfNcpInit(bool memoryAllocation);
+void sli_zb_af_ncp_init(bool memoryAllocation);
 {% for cb in zigbee_af_callback -%}
 {% if cb['callback_type'] == "ncp_init" -%}
 void {{ cb['function_name'] }}(bool memoryAllocation);

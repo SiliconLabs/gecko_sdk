@@ -16,7 +16,9 @@
  *
  ******************************************************************************/
 
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 
 #ifdef SL_CATALOG_ZIGBEE_ZCL_CLI_PRESENT
 #include "sl_cli.h"

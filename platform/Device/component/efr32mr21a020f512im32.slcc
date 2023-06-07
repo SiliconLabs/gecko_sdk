@@ -9,10 +9,10 @@
     unless:
     - device_content_override
 - source:
-  - path: platform/Device/SiliconLabs/EFR32MR21/Source/system_efr32mr21.c
+  - path: platform/Device/SiliconLabs/EFR32MR21/Source/startup_efr32mr21.c
     unless:
     - device_content_override
-  - path: platform/Device/SiliconLabs/EFR32MR21/Source/startup_efr32mr21.c
+  - path: platform/Device/SiliconLabs/EFR32MR21/Source/system_efr32mr21.c
     unless:
     - device_content_override
 - include:

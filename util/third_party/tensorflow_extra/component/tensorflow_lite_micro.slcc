@@ -4,7 +4,7 @@ label: TensorFlow Lite Micro
 description: >
   This component provides TensorFlow Lite for Microcontrollers,
   a set of tools designed to run machine-learning models on microcontrollers.
-  Git commit 10b1223343303b45e6f62a433e25efb5f87958d7 of tflite-micro is used.
+  Git commit 78cd5a615ca7eb5bc18d6190abc7da12b03fb7b9 of tflite-micro is used.
 
   By default, this component attempts to include kernel implementations which
   are optimized for the given hardware. To use the reference software
@@ -48,6 +48,7 @@ include:
   - path: tensorflow_extra/inc
     file_list:
       - path: sl_tflite_micro_init.h
+      - path: sl_tflite_micro_debug_log.h
   - path: tflite-micro/
     file_list:
       - path: tensorflow/lite/builtin_op_data.h
@@ -61,6 +62,9 @@ include:
       - path: tensorflow/lite/core/api/flatbuffer_conversions.h
       - path: tensorflow/lite/core/api/op_resolver.h
       - path: tensorflow/lite/core/api/tensor_utils.h
+      - path: tensorflow/lite/core/c/builtin_op_data.h
+      - path: tensorflow/lite/core/c/c_api_types.h
+      - path: tensorflow/lite/core/c/common.h
       - path: tensorflow/lite/kernels/kernel_util.h
       - path: tensorflow/lite/kernels/op_macros.h
       - path: tensorflow/lite/kernels/padding.h
@@ -94,6 +98,7 @@ include:
       - path: tensorflow/lite/kernels/internal/reference/depthwiseconv_float.h
       - path: tensorflow/lite/kernels/internal/reference/depthwiseconv_uint8.h
       - path: tensorflow/lite/kernels/internal/reference/dequantize.h
+      - path: tensorflow/lite/kernels/internal/reference/div.h
       - path: tensorflow/lite/kernels/internal/reference/elu.h
       - path: tensorflow/lite/kernels/internal/reference/exp.h
       - path: tensorflow/lite/kernels/internal/reference/fill.h
@@ -122,6 +127,7 @@ include:
       - path: tensorflow/lite/kernels/internal/reference/resize_bilinear.h
       - path: tensorflow/lite/kernels/internal/reference/resize_nearest_neighbor.h
       - path: tensorflow/lite/kernels/internal/reference/round.h
+      - path: tensorflow/lite/kernels/internal/reference/select.h
       - path: tensorflow/lite/kernels/internal/reference/slice.h
       - path: tensorflow/lite/kernels/internal/reference/softmax.h
       - path: tensorflow/lite/kernels/internal/reference/space_to_batch_nd.h
@@ -152,12 +158,13 @@ include:
       - path: tensorflow/lite/micro/micro_allocator.h
       - path: tensorflow/lite/micro/micro_arena_constants.h
       - path: tensorflow/lite/micro/micro_context.h
-      - path: tensorflow/lite/micro/micro_error_reporter.h
       - path: tensorflow/lite/micro/micro_graph.h
       - path: tensorflow/lite/micro/micro_interpreter.h
+      - path: tensorflow/lite/micro/micro_log.h
       - path: tensorflow/lite/micro/micro_mutable_op_resolver.h
       - path: tensorflow/lite/micro/micro_op_resolver.h
       - path: tensorflow/lite/micro/micro_profiler.h
+      - path: tensorflow/lite/micro/micro_profiler_interface.h
       - path: tensorflow/lite/micro/micro_resource_variable.h
       - path: tensorflow/lite/micro/micro_string.h
       - path: tensorflow/lite/micro/micro_time.h
@@ -169,8 +176,10 @@ include:
       - path: tensorflow/lite/micro/test_helper_custom_ops.h
       - path: tensorflow/lite/micro/test_helpers.h
       - path: tensorflow/lite/micro/arena_allocator/ibuffer_allocator.h
-      - path: tensorflow/lite/micro/arena_allocator/recording_simple_memory_allocator.h
-      - path: tensorflow/lite/micro/arena_allocator/simple_memory_allocator.h
+      - path: tensorflow/lite/micro/arena_allocator/non_persistent_arena_buffer_allocator.h
+      - path: tensorflow/lite/micro/arena_allocator/persistent_arena_buffer_allocator.h
+      - path: tensorflow/lite/micro/arena_allocator/recording_single_arena_buffer_allocator.h
+      - path: tensorflow/lite/micro/arena_allocator/single_arena_buffer_allocator.h
       - path: tensorflow/lite/micro/kernels/activation_utils.h
       - path: tensorflow/lite/micro/kernels/activations.h
       - path: tensorflow/lite/micro/kernels/add.h
@@ -193,30 +202,37 @@ include:
       - path: tensorflow/lite/micro/kernels/lstm_shared.h
       - path: tensorflow/lite/micro/kernels/micro_ops.h
       - path: tensorflow/lite/micro/kernels/micro_tensor_utils.h
-      - path: tensorflow/lite/micro/kernels/micro_utils.h
       - path: tensorflow/lite/micro/kernels/mul.h
+      - path: tensorflow/lite/micro/kernels/pad.h
       - path: tensorflow/lite/micro/kernels/pooling.h
       - path: tensorflow/lite/micro/kernels/prelu.h
       - path: tensorflow/lite/micro/kernels/quantize.h
+      - path: tensorflow/lite/micro/kernels/reduce.h
       - path: tensorflow/lite/micro/kernels/softmax.h
       - path: tensorflow/lite/micro/kernels/sub.h
       - path: tensorflow/lite/micro/kernels/svdf.h
+      - path: tensorflow/lite/micro/kernels/unidirectional_sequence_lstm_test_config.h
       - path: tensorflow/lite/micro/memory_planner/greedy_memory_planner.h
       - path: tensorflow/lite/micro/memory_planner/linear_memory_planner.h
       - path: tensorflow/lite/micro/memory_planner/memory_plan_struct.h
       - path: tensorflow/lite/micro/memory_planner/micro_memory_planner.h
       - path: tensorflow/lite/micro/memory_planner/non_persistent_buffer_planner_shim.h
+      - path: tensorflow/lite/micro/tflite_bridge/flatbuffer_conversions_bridge.h
+      - path: tensorflow/lite/micro/tflite_bridge/micro_error_reporter.h
+      - path: tensorflow/lite/micro/tflite_bridge/op_resolver_bridge.h
       - path: tensorflow/lite/schema/schema_generated.h
       - path: tensorflow/lite/schema/schema_utils.h
 source:
   - path: tensorflow_extra/src/sl_tflite_micro_init.cc
-  - path: tflite-micro/tensorflow/lite/c/common.cc
   - path: tflite-micro/tensorflow/lite/core/api/error_reporter.cc
   - path: tflite-micro/tensorflow/lite/core/api/flatbuffer_conversions.cc
   - path: tflite-micro/tensorflow/lite/core/api/op_resolver.cc
   - path: tflite-micro/tensorflow/lite/core/api/tensor_utils.cc
+  - path: tflite-micro/tensorflow/lite/core/c/common.cc
   - path: tflite-micro/tensorflow/lite/kernels/kernel_util.cc
+  - path: tflite-micro/tensorflow/lite/kernels/internal/portable_tensor_utils.cc
   - path: tflite-micro/tensorflow/lite/kernels/internal/quantization_util.cc
+  - path: tflite-micro/tensorflow/lite/kernels/internal/tensor_utils.cc
   - path: tflite-micro/tensorflow/lite/kernels/internal/reference/portable_tensor_utils.cc
   - path: tflite-micro/tensorflow/lite/micro/all_ops_resolver.cc
   - path: tflite-micro/tensorflow/lite/micro/fake_micro_context.cc
@@ -225,9 +241,9 @@ source:
   - path: tflite-micro/tensorflow/lite/micro/micro_allocation_info.cc
   - path: tflite-micro/tensorflow/lite/micro/micro_allocator.cc
   - path: tflite-micro/tensorflow/lite/micro/micro_context.cc
-  - path: tflite-micro/tensorflow/lite/micro/micro_error_reporter.cc
   - path: tflite-micro/tensorflow/lite/micro/micro_graph.cc
   - path: tflite-micro/tensorflow/lite/micro/micro_interpreter.cc
+  - path: tflite-micro/tensorflow/lite/micro/micro_log.cc
   - path: tflite-micro/tensorflow/lite/micro/micro_profiler.cc
   - path: tflite-micro/tensorflow/lite/micro/micro_resource_variable.cc
   - path: tflite-micro/tensorflow/lite/micro/micro_string.cc
@@ -237,12 +253,20 @@ source:
   - path: tflite-micro/tensorflow/lite/micro/system_setup.cc
   - path: tflite-micro/tensorflow/lite/micro/test_helper_custom_ops.cc
   - path: tflite-micro/tensorflow/lite/micro/test_helpers.cc
-  - path: tflite-micro/tensorflow/lite/micro/arena_allocator/recording_simple_memory_allocator.cc
-  - path: tflite-micro/tensorflow/lite/micro/arena_allocator/simple_memory_allocator.cc
+  - path: tflite-micro/tensorflow/lite/micro/arena_allocator/non_persistent_arena_buffer_allocator.cc
+  - path: tflite-micro/tensorflow/lite/micro/arena_allocator/persistent_arena_buffer_allocator.cc
+  - path: tflite-micro/tensorflow/lite/micro/arena_allocator/recording_single_arena_buffer_allocator.cc
+  - path: tflite-micro/tensorflow/lite/micro/arena_allocator/single_arena_buffer_allocator.cc
   - path: tflite-micro/tensorflow/lite/micro/cortex_m_generic/micro_time.cc
+    condition: [device_cortexm]
+  - path: tflite-micro/tensorflow/lite/micro/micro_time.cc
+    condition: [simulation]
   - path: tflite-micro/tensorflow/lite/micro/memory_planner/greedy_memory_planner.cc
   - path: tflite-micro/tensorflow/lite/micro/memory_planner/linear_memory_planner.cc
   - path: tflite-micro/tensorflow/lite/micro/memory_planner/non_persistent_buffer_planner_shim.cc
+  - path: tflite-micro/tensorflow/lite/micro/tflite_bridge/flatbuffer_conversions_bridge.cc
+  - path: tflite-micro/tensorflow/lite/micro/tflite_bridge/micro_error_reporter.cc
+  - path: tflite-micro/tensorflow/lite/micro/tflite_bridge/op_resolver_bridge.cc
   - path: tflite-micro/tensorflow/lite/schema/schema_utils.cc
 config_file:
   - path: tensorflow_extra/config/sl_tflite_micro_config.h
@@ -258,4 +282,7 @@ documentation:
   docset: gecko-platform
   document: machine-learning/tensorflow/overview
 define:
-  - name: "TF_LITE_STATIC_MEMORY"
+  - name: TF_LITE_STATIC_MEMORY
+  - name: CMSIS_DEVICE_ARM_CORTEX_M_XX_HEADER_FILE
+    value: '\"em_device.h\"'
+    condition: [device_cortexm]

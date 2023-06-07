@@ -34,7 +34,6 @@
 
 #include <string.h>
 #include <stdio.h>
-#include "socket_hnd.h"
 #include "socket.h"
 #include "sl_wisun_udp_client.h"
 
@@ -77,7 +76,7 @@ void sl_wisun_udp_client_create(void)
 /* close tcp client socket */
 void sl_wisun_udp_client_close(const int32_t sockid)
 {
-  if (close(sockid) == RETVAL_ERROR) {
+  if (close(sockid) == SOCKET_RETVAL_ERROR) {
     printf("[Failed to close socket: %ld]\n", sockid);
   }
 }
@@ -102,14 +101,14 @@ void sl_wisun_udp_client_write(const int32_t sockid, const char *remote_ip_addre
   server_addr.sin6_family = AF_WISUN;
   server_addr.sin6_port = remote_port;
   if (inet_pton(AF_WISUN, remote_ip_address,
-                &server_addr.sin6_addr) == RETVAL_ERROR) {
+                &server_addr.sin6_addr) == SOCKET_RETVAL_ERROR) {
     printf("[Invalid IP address: %s]\n", remote_ip_address);
     return;
   }
 
   res = sendto(sockid, str, strlen(str), 0,
                (const struct sockaddr *) &server_addr, sizeof(server_addr));
-  if (res == RETVAL_ERROR) {
+  if (res == SOCKET_RETVAL_ERROR) {
     printf("[Failed to send on socket: %ld]\n", sockid);
   }
 }
@@ -125,7 +124,7 @@ void sl_wisun_udp_client_read(const int32_t sockid, const uint16_t size)
   for (uint16_t i = 0; i < size; ++i) {
     res = recvfrom(sockid, &c, 1, 0,
                    (struct sockaddr *)&server_addr, &len);
-    if (res == RETVAL_ERROR || !res) {
+    if (res == SOCKET_RETVAL_ERROR || !res) {
       break;
     }
     printf("%c", c);

@@ -1,0 +1,287 @@
+project_name: "z3-light_ot-ftd_soc"
+label: "z3-light_ot-ftd_soc"
+package: "Zigbee"
+category: "Zigbee Application"
+quality: "experimental"
+
+component:
+  - id: "cli"
+    instance:
+    - example
+  - id: "iostream_recommended_stream"
+  - id: "zigbee_debug_print"
+  - id: "zigbee_pro_stack"
+  - id: "rail_mux"
+  - id: "zigbee_source_route"
+  - id: "zigbee_binding_table"
+  - id: "zigbee_stack_diagnostics"
+  - id: "zigbee_gp"
+  - id: "zigbee_install_code"
+  - id: "zigbee_zll"
+  - id: "zigbee_zcl_framework_core"
+  - id: "zigbee_color_control_server"
+  - id: "zigbee_groups_server"
+  - id: "zigbee_identify"
+  - id: "zigbee_level_control"
+  - id: "zigbee_on_off"
+  - id: "zigbee_zll_on_off_server"
+  - id: "zigbee_counters"
+  - id: "zigbee_find_and_bind_target"
+  - id: "zigbee_green_power_common"
+  - id: "zigbee_green_power_client"
+  - id: "zigbee_green_power_client_cli"
+  - id: "zigbee_interpan"
+  - id: "zigbee_zll_commissioning_common"
+  - id: "zigbee_zll_commissioning_server"
+  - id: "zigbee_network_creator"
+  - id: "zigbee_network_creator_security"
+  - id: "zigbee_network_steering"
+  - id: "zigbee_reporting"
+  - id: "zigbee_zll_identify_server"
+  - id: "zigbee_zll_level_control_server"
+  - id: "zigbee_scenes"
+  - id: "zigbee_zll_scenes_server"
+  - id: "zigbee_basic"
+  - id: "zigbee_zll_utility_server"
+  - id: "zigbee_scan_dispatch"
+  - id: "zigbee_update_tc_link_key"
+  - id: "ot_stack_ftd"
+  # -- LEDs and Buttons GPIO Conflcit Note --
+  # Some of the development boards (and modules) have limited GPIO to be used by
+  # application and share the exact same port/pin definition between leds and
+  # buttons. These are defined in the board configuration as indexed instances.
+  # The simple_led and simple_button components instantiate the same order of
+  # configuration from boards. So led0 and btn0 instances end up using the same
+  # GPIO configuration in that case. To avoid this conflict, in this slcp, led0
+  # and btn1 are instanciated (and not led0 and btn0) as default instances.
+  - id: simple_led
+    instance:
+      - led0
+  - id: simple_button
+    instance:
+      - btn1
+  # -- End of LED and BUtton GPIO Conflcit Note --
+  - id: "zigbee_application_bootloader"
+
+configuration:
+  - name: SL_BOARD_ENABLE_VCOM
+    value: 1
+  - name: SL_IOSTREAM_USART_VCOM_FLOW_CONTROL_TYPE
+    value: usartHwFlowControlCtsAndRts
+    condition:
+      - "iostream_usart"
+  - name: SL_IOSTREAM_EUSART_VCOM_FLOW_CONTROL_TYPE
+    value: eusartHwFlowControlCtsAndRts
+    condition:
+      - "iostream_eusart"
+  - name: SL_CLI_MAX_INPUT_ARGUMENTS
+    value: 16
+  - name: SLI_ZIGBEE_PRIMARY_NETWORK_DEVICE_TYPE
+    value: SLI_ZIGBEE_NETWORK_DEVICE_TYPE_ROUTER
+  - name: SLI_ZIGBEE_PRIMARY_NETWORK_SECURITY_TYPE
+    value: SLI_ZIGBEE_NETWORK_SECURITY_TYPE_3_0
+  - name: SL_CLI_PROMPT_STRING
+    value:  "\"z3-light_ot-ftd_soc>\""
+  - name: NVM3_DEFAULT_NVM_SIZE
+    value: 36864
+    condition:
+      - device_series_1
+  - name: NVM3_DEFAULT_NVM_SIZE
+    value: 32768
+    condition:
+      - device_series_2
+  # If using zigbee_secure_key_storage we do not need to support backwards
+  # compatibility because we have never deployed images with keys in PSA
+  # As a result, these lines end up saving some code space
+  - name: SL_PSA_ITS_SUPPORT_V1_DRIVER
+    value: 0
+  - name: SL_PSA_ITS_SUPPORT_V2_DRIVER
+    value: 0
+  - name: SL_PSA_ITS_SUPPORT_V3_DRIVER
+    value: 1
+  - name: SL_IOSTREAM_USART_VCOM_RX_BUFFER_SIZE
+    value: 128 # Increase from default for open thread
+    condition:
+      - "iostream_usart"
+  - name: SL_IOSTREAM_EUSART_VCOM_RX_BUFFER_SIZE
+    value: 128 # Increase from default for open thread
+    condition:
+      - "iostream_eusart"
+  - name: SL_HEAP_SIZE
+    value: 16384 # Increase from default for open thread
+    condition: [freertos]
+  - name: SL_STACK_SIZE
+    value: 4608 # Increase from default for open thread
+  - name: LIB_MEM_CFG_HEAP_SIZE
+    value: 0
+  - name: SL_IOSTREAM_USART_VCOM_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
+    value: 1
+    condition:
+      - "iostream_usart"
+  - name: SL_IOSTREAM_EUSART_VCOM_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
+    value: 1
+    condition:
+      - "iostream_eusart"
+  - name: SL_OPENTHREAD_RTOS_TASK_PRIORITY
+    value: 49 #Same as Zigbee
+  - name: SL_CLI_HELP_DESCRIPTION_ENABLED
+    value: 0 # Code space savings
+
+define:
+  - name: "OS_CFG_COMPAT_INIT"
+  - name: SL_OPENTHREAD_RADIO_RX_BUFFER_COUNT
+    value: 1
+  - name: OPENTHREAD_CONFIG_HISTORY_TRACKER_ENABLE
+    value: 1
+
+source:
+  - path: "main.c"
+  - path: "app.c"
+  - path: "app_ot_cli.c"
+
+config_file:
+  - path: "config/zcl/zcl_config.zap"
+    file_id: zap_configuration_file_id
+    directory: "zcl"
+
+include:
+  - path: "./"
+
+description: |-
+  This is a modified version of Zigbee 3.0 light application + OT-FTD application, that enables using the same rail handle with 2 different 15.4 stacks. This app brings in CMSIS-RTOS by default
+
+readme:
+  - path: ./readme.html
+
+ui_hints:
+  highlight:
+    - path: readme.html
+      focus: false
+
+template_contribution:
+  - name: cli_command
+    value:
+      name: dataset_new
+      handler: dataset_init_new
+      help: thread dataset init new
+    unless:
+      - zigbee_simulation  
+
+  - name: cli_command
+    value:
+      name: factory_reset
+      handler: factory_reset
+      help: thread factory reset
+    unless:
+      - zigbee_simulation  
+
+  - name: cli_command
+    value:
+      name: dataset_get_active
+      handler: dataset_get_active
+      help: get current dataset
+    unless:
+      - zigbee_simulation  
+
+  - name: cli_command
+    value:
+      name: dataset_commit_active
+      handler: dataset_commit_active
+      help: thread dataset commit active
+    unless:
+      - zigbee_simulation   
+
+  - name: cli_command
+    value:
+      name: dataset_networkkey
+      handler: dataset_networkkey
+      argument:
+      - type: hex
+        help: "Network key"
+      help: thread dataset networkkey
+    unless:
+      - zigbee_simulation   
+
+  - name: cli_command
+    value:
+      name: dataset_channel
+      handler: dataset_channel
+      argument:
+      - type: uint8
+        help: "Radio channel"
+      help: thread dataset channel
+    unless:
+      - zigbee_simulation   
+
+  - name: cli_command
+    value:
+      name: dataset_pan_id
+      handler: dataset_pan_id
+      argument:
+      - type: uint16
+        help: "Pan ID"
+      help: thread dataset panID
+    unless:
+      - zigbee_simulation   
+
+  - name: cli_command
+    value:
+      name: dataset_extended_pan_id
+      handler: dataset_extended_pan_id
+      argument:
+      - type: hex
+        help: "Extended PANID"
+      help: thread dataset ext PANID
+    unless:
+      - zigbee_simulation   
+
+  - name: cli_command
+    value:
+      name: dataset
+      handler: dataset_print
+      help: thread dataset
+    unless:
+      - zigbee_simulation  
+
+  - name: cli_command
+    value:
+      name: ifconfig_up
+      handler: ifconfig_up
+      help: thread ifconfig up
+    unless:
+      - zigbee_simulation
+
+  - name: cli_command
+    value:
+      name: thread_start
+      handler: thread_start
+      help: start thread network
+    unless:
+      - zigbee_simulation  
+
+  - name: cli_command
+    value:
+      name: thread_state
+      handler: thread_state
+      help: print thread state
+    unless:
+      - zigbee_simulation   
+
+  - name: cli_command
+    value:
+      name: thread_ipaddr
+      handler: thread_ipaddr
+      help: print ip address
+    unless:
+      - zigbee_simulation
+
+  - name: cli_command
+    value:
+      name: ping_ipaddr
+      handler: thread_ping_ipaddr
+      help: ping ip address
+      argument:
+      - type: string
+        help: destination IPV6 address
+    unless:
+      - zigbee_simulation

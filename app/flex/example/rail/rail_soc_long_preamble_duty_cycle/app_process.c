@@ -45,6 +45,8 @@
 #include "sl_simple_led_instances.h"
 #include "sl_duty_cycle_config.h"
 #include "sl_flex_rail_package_assistant.h"
+#include "sl_flex_rail_config.h"
+#include "sl_flex_rail_channel_selector.h"
 
 #if DUTY_CYCLE_USE_LCD_BUTTON
 #include "app_graphics.h"
@@ -61,8 +63,6 @@
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
-/// Size of RAIL RX/TX FIFO
-#define RAIL_FIFO_SIZE (256U)
 /// Transmit data length
 #define TX_PAYLOAD_LENGTH (16U)
 /// Application type string
@@ -134,8 +134,8 @@ static volatile uint64_t current_rail_err = 0;
 static volatile RAIL_Status_t calibration_status = 0;
 
 /// Receive and Send FIFO
-static __ALIGNED(RAIL_FIFO_ALIGNMENT) uint8_t rx_fifo[RAIL_FIFO_SIZE];
-static __ALIGNED(RAIL_FIFO_ALIGNMENT) uint8_t tx_fifo[RAIL_FIFO_SIZE];
+static __ALIGNED(RAIL_FIFO_ALIGNMENT) uint8_t rx_fifo[SL_FLEX_RAIL_RX_FIFO_SIZE];
+static __ALIGNED(RAIL_FIFO_ALIGNMENT) uint8_t tx_fifo[SL_FLEX_RAIL_TX_FIFO_SIZE];
 
 /// Transmit packet
 static uint8_t out_packet[TX_PAYLOAD_LENGTH] = {
@@ -176,11 +176,11 @@ static RAIL_ScheduleRxConfig_t rx_schedule_config = {
 void set_up_tx_fifo(RAIL_Handle_t rail_handle)
 {
   uint16_t allocated_tx_fifo_size = 0;
-  allocated_tx_fifo_size = RAIL_SetTxFifo(rail_handle, tx_fifo, 0, RAIL_FIFO_SIZE);
-  app_assert(allocated_tx_fifo_size == RAIL_FIFO_SIZE,
+  allocated_tx_fifo_size = RAIL_SetTxFifo(rail_handle, tx_fifo, 0, SL_FLEX_RAIL_TX_FIFO_SIZE);
+  app_assert(allocated_tx_fifo_size == SL_FLEX_RAIL_TX_FIFO_SIZE,
              "RAIL_SetTxFifo() failed to allocate a large enough fifo (%d bytes instead of %d bytes)\n",
              allocated_tx_fifo_size,
-             RAIL_FIFO_SIZE);
+             SL_FLEX_RAIL_TX_FIFO_SIZE);
 }
 
 /*******************************************************************************
@@ -314,11 +314,11 @@ void app_process_action(RAIL_Handle_t rail_handle)
   if (duty_cycle_end) {
     duty_cycle_end = false;
 #if DUTY_CYCLE_ALLOW_EM2 == 0
-    RAIL_StartRx(rail_handle, CHANNEL, NULL);
+    RAIL_StartRx(rail_handle, get_selected_channel(), NULL);
 #else
     rx_schedule_config.start = duty_cycle_config.delay;
     RAIL_Idle(rail_handle, RAIL_IDLE_ABORT, true);
-    RAIL_ScheduleRx(rail_handle, CHANNEL, &rx_schedule_config, NULL);
+    RAIL_ScheduleRx(rail_handle, get_selected_channel(), &rx_schedule_config, NULL);
 #endif
   }
 }
@@ -436,7 +436,7 @@ static RAIL_Status_t send_tx_packet(RAIL_Handle_t rail_handle)
   RAIL_Status_t rail_status;
 
   prepare_package(rail_handle, out_packet, sizeof(out_packet));
-  rail_status = RAIL_StartTx(rail_handle, CHANNEL, RAIL_TX_OPTION_ALT_PREAMBLE_LEN, NULL);
+  rail_status = RAIL_StartTx(rail_handle, get_selected_channel(), RAIL_TX_OPTION_ALT_PREAMBLE_LEN, NULL);
 #if defined(SL_CATALOG_APP_LOG_PRESENT)
   if (rail_status != RAIL_STATUS_NO_ERROR) {
     app_log_warning("RAIL_StartTx() result:%d ", rail_status);

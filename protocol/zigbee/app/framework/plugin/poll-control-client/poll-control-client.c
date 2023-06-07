@@ -21,26 +21,24 @@
 #include "af.h"
 #include "poll-control-client.h"
 
-#ifdef UC_BUILD
 #include "poll-control-client-config.h"
 #include "zap-cluster-command-parser.h"
-#endif
 
 static bool fastPolling = false;
 static bool respondToCheckIn = true;
 static uint16_t fastPollingTimeout = EMBER_AF_PLUGIN_POLL_CONTROL_CLIENT_DEFAULT_FAST_POLL_TIMEOUT;
 
-void emAfSetFastPollingMode(bool mode)
+void sli_zigbee_af_set_fast_polling_mode(bool mode)
 {
   fastPolling = mode;
 }
 
-void emAfSetFastPollingTimeout(uint16_t timeout)
+void sli_zigbee_af_set_fast_polling_timeout(uint16_t timeout)
 {
   fastPollingTimeout = timeout;
 }
 
-void emAfSetResponseMode(bool mode)
+void sli_zigbee_af_set_response_mode(bool mode)
 {
   respondToCheckIn = mode;
 }
@@ -56,7 +54,7 @@ bool emberAfPollControlClusterCheckInCallback(void)
   return true;
 }
 
-void emAfPollControlClientPrint(void)
+void sli_zigbee_af_poll_control_client_print(void)
 {
   emberAfPollControlClusterPrintln("Poll Control Client:\n%p %p\n%p 0x%2x",
                                    "fast polling: ",
@@ -64,8 +62,6 @@ void emAfPollControlClientPrint(void)
                                    "fast polling timeout: ",
                                    fastPollingTimeout);
 }
-
-#ifdef UC_BUILD
 
 uint32_t emberAfPollControlClusterClientCommandParse(sl_service_opcode_t opcode,
                                                      sl_service_function_context_t *context)
@@ -82,5 +78,3 @@ uint32_t emberAfPollControlClusterClientCommandParse(sl_service_opcode_t opcode,
           ? EMBER_ZCL_STATUS_SUCCESS
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
-
-#endif // UC_BUILD

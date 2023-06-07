@@ -70,13 +70,7 @@
 #define SL_CPC_DRV_UART_MIKROE_RX_PORT           gpioPortD
 #define SL_CPC_DRV_UART_MIKROE_RX_PIN            5
 
-// EUSART1 CTS on PA09
-#define SL_CPC_DRV_UART_MIKROE_CTS_PORT          gpioPortA
-#define SL_CPC_DRV_UART_MIKROE_CTS_PIN           9
 
-// EUSART1 RTS on PA08
-#define SL_CPC_DRV_UART_MIKROE_RTS_PORT          gpioPortA
-#define SL_CPC_DRV_UART_MIKROE_RTS_PIN           8
 
 // [EUSART_SL_CPC_DRV_UART_MIKROE]$
 // <<< sl:end pin_tool >>>

@@ -15,7 +15,9 @@
  ******************************************************************************/
 
 #include PLATFORM_HEADER
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 
 #include "ember.h"
 

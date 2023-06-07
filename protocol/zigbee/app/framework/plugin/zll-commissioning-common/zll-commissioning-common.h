@@ -18,7 +18,6 @@
 #ifndef __ZLL_COMMISIONING_COMMON_H__
 #define __ZLL_COMMISIONING_COMMON_H__
 
-#ifdef UC_BUILD
 #include "zll-commissioning-common-config.h"
 #if (EMBER_AF_PLUGIN_ZLL_COMMISSIONING_COMMON_SCAN_SECONDARY_CHANNELS == 1)
 #define SCAN_SECONDARY_CHANNELS
@@ -26,14 +25,6 @@
 #if (EMBER_AF_PLUGIN_ZLL_COMMISSIONING_COMMON_ZIGBEE3_SUPPORT == 1)
 #define ZIGBEE3_SUPPORT
 #endif
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_ZLL_COMMISSIONING_COMMON_SCAN_SECONDARY_CHANNELS
-#define SCAN_SECONDARY_CHANNELS
-#endif
-#ifdef EMBER_AF_PLUGIN_ZLL_COMMISSIONING_COMMON_ZIGBEE3_SUPPORT
-#define ZIGBEE3_SUPPORT
-#endif
-#endif // UC_BUILD
 
 /**
  * @defgroup zll-commissioning-common ZLL Commissioning Common
@@ -167,21 +158,21 @@ void emberAfPluginZllCommissioningCommonResetToFactoryNewCallback(void);
 /** @} */ // end of name Callbacks
 
 // Global data for all ZLL commissioning plugins.
-extern EmberZllNetwork emAfZllNetwork;
-extern uint16_t emAfZllFlags;
-extern uint8_t emAfInitiatorRejoinRetryCount;
+extern EmberZllNetwork sli_zigbee_af_zll_network;
+extern uint16_t sli_zigbee_af_zll_flags;
+extern uint8_t sli_zigbee_af_initiatorRejoinRetryCount;
 
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
 #endif
 
 #if (defined(SL_CATALOG_ZIGBEE_ZLL_COMMISSIONING_CLIENT_PRESENT) || defined(EMBER_AF_PLUGIN_ZLL_COMMISSIONING_CLIENT))
 // Sub-device info (mainly for client, but server needs to initialize the count).
-extern EmberZllDeviceInfoRecord emAfZllSubDevices[];
-extern uint8_t emAfZllSubDeviceCount;
+extern EmberZllDeviceInfoRecord sli_zigbee_af_zll_sub_devices[];
+extern uint8_t sli_zigbee_af_zll_sub_device_count;
 
 // The identify duration may be updated by CLI command.
-extern uint16_t emAfZllIdentifyDurationSec;
+extern uint16_t sli_zigbee_af_zll_identify_duration_sec;
 #endif
 
 // State bits for client and server.
@@ -204,22 +195,22 @@ enum
   RESETTING_TO_FACTORY_NEW    = 0x0200,
 };
 
-#define touchLinkInProgress()      (emAfZllFlags                     \
+#define touchLinkInProgress()      (sli_zigbee_af_zll_flags          \
                                     & (SCAN_FOR_TOUCH_LINK           \
                                        | SCAN_FOR_DEVICE_INFORMATION \
                                        | SCAN_FOR_IDENTIFY           \
                                        | SCAN_FOR_RESET              \
                                        | TOUCH_LINK_TARGET))
-#define scanForTouchLink()         (emAfZllFlags & SCAN_FOR_TOUCH_LINK)
-#define scanForDeviceInformation() (emAfZllFlags & SCAN_FOR_DEVICE_INFORMATION)
-#define scanForIdentify()          (emAfZllFlags & SCAN_FOR_IDENTIFY)
-#define scanForReset()             (emAfZllFlags & SCAN_FOR_RESET)
-#define targetNetworkFound()       (emAfZllFlags & TARGET_NETWORK_FOUND)
-#define abortingTouchLink()        (emAfZllFlags & ABORTING_TOUCH_LINK)
-#define scanComplete()             (emAfZllFlags & SCAN_COMPLETE)
-#define touchLinkTarget()          (emAfZllFlags & TOUCH_LINK_TARGET)
-#define formingNetwork()           (emAfZllFlags & FORMING_NETWORK)
-#define resettingToFactoryNew()    (emAfZllFlags & RESETTING_TO_FACTORY_NEW)
+#define scanForTouchLink()         (sli_zigbee_af_zll_flags & SCAN_FOR_TOUCH_LINK)
+#define scanForDeviceInformation() (sli_zigbee_af_zll_flags & SCAN_FOR_DEVICE_INFORMATION)
+#define scanForIdentify()          (sli_zigbee_af_zll_flags & SCAN_FOR_IDENTIFY)
+#define scanForReset()             (sli_zigbee_af_zll_flags & SCAN_FOR_RESET)
+#define targetNetworkFound()       (sli_zigbee_af_zll_flags & TARGET_NETWORK_FOUND)
+#define abortingTouchLink()        (sli_zigbee_af_zll_flags & ABORTING_TOUCH_LINK)
+#define scanComplete()             (sli_zigbee_af_zll_flags & SCAN_COMPLETE)
+#define touchLinkTarget()          (sli_zigbee_af_zll_flags & TOUCH_LINK_TARGET)
+#define formingNetwork()           (sli_zigbee_af_zll_flags & FORMING_NETWORK)
+#define resettingToFactoryNew()    (sli_zigbee_af_zll_flags & RESETTING_TO_FACTORY_NEW)
 
 // The bits for cluster-specific command (0) and disable default response (4)
 // are always set.  The direction bit (3) is only set for server-to-client

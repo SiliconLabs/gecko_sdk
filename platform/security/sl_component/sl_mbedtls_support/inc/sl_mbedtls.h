@@ -39,4 +39,4 @@
  */
 void sl_mbedtls_init(void);
 
-#endif
+#endif // SL_MBEDTLS_H

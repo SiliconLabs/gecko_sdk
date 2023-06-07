@@ -2,6 +2,9 @@
 #include "sl_iostream.h"
 #include "sl_iostream_uart.h"
 #include "sl_iostream_eusart.h"
+{% if "vcom" in iostream_eusart_instances and enable_config_over_swo %}
+#include "sl_cos.h"
+{% endif %}
 // Include instance config {# Include instance config #}
 {% for instance in iostream_eusart_instances %} #include "sl_iostream_eusart_{{ instance }}_config.h"
 {% endfor %}
@@ -119,6 +122,33 @@ sl_status_t sl_iostream_eusart_init_{{ instance }}(void)
                                   &config_{{ instance }},
                                   &context_{{ instance }});
   EFM_ASSERT(status == SL_STATUS_OK);
+
+  {% if "vcom" in iostream_eusart_instances and enable_config_over_swo %}
+  // Send VCOM config to WSTK
+  uint8_t flow_control = COS_CONFIG_FLOWCONTROL_NONE;
+  if (!uart_config_{{ instance }}.sw_flow_control) {
+    switch (SL_IOSTREAM_EUSART_{{ instance | upper }}_FLOW_CONTROL_TYPE)
+    {
+      case eusartHwFlowControlNone:
+        flow_control = COS_CONFIG_FLOWCONTROL_NONE;
+        break;
+      case eusartHwFlowControlCts:
+        flow_control = COS_CONFIG_FLOWCONTROL_CTS;
+        break;
+      case eusartHwFlowControlRts:
+        flow_control = COS_CONFIG_FLOWCONTROL_RTS;
+        break;
+      case eusartHwFlowControlCtsAndRts:
+        flow_control = COS_CONFIG_FLOWCONTROL_CTS_RTS;
+        break;
+      default:
+        // Invalid flow control type
+        EFM_ASSERT(0);
+        break;
+    }
+  }
+  sl_cos_config_vcom((uint32_t) SL_IOSTREAM_EUSART_{{ instance | upper }}_BAUDRATE, flow_control);
+  {% endif %}
 
   return status;
 }

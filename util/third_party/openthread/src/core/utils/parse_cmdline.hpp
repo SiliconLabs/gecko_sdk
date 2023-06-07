@@ -291,7 +291,7 @@ otError ParseAsHexString(const char *aString, uint16_t &aSize, uint8_t *aBuffer)
  * @param[out]    aBuffer    A pointer to a buffer to output the parsed byte sequence.
  *
  * @retval kErrorNone        The string was parsed successfully to the end of string.
- * @retval kErrorPedning     The string segment was parsed successfully, but there are additional bytes remaining
+ * @retval kErrorPending     The string segment was parsed successfully, but there are additional bytes remaining
  *                           to be parsed.
  * @retval kErrorInvalidArgs The string does not contain valid format hex digits.
  *
@@ -657,57 +657,32 @@ template <uint8_t kLength> inline otError ParseCmd(char *aCommandString, Arg (&a
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // Specializations of `Arg::ParseAs<Type>()` method.
 
-template <> inline otError Arg::ParseAs(uint8_t &aValue) const
-{
-    return ParseAsUint8(aValue);
-}
+template <> inline otError Arg::ParseAs(uint8_t &aValue) const { return ParseAsUint8(aValue); }
 
-template <> inline otError Arg::ParseAs(uint16_t &aValue) const
-{
-    return ParseAsUint16(aValue);
-}
+template <> inline otError Arg::ParseAs(uint16_t &aValue) const { return ParseAsUint16(aValue); }
 
-template <> inline otError Arg::ParseAs(uint32_t &aValue) const
-{
-    return ParseAsUint32(aValue);
-}
+template <> inline otError Arg::ParseAs(uint32_t &aValue) const { return ParseAsUint32(aValue); }
 
-template <> inline otError Arg::ParseAs(uint64_t &aValue) const
-{
-    return ParseAsUint64(aValue);
-}
+template <> inline otError Arg::ParseAs(uint64_t &aValue) const { return ParseAsUint64(aValue); }
 
-template <> inline otError Arg::ParseAs(bool &aValue) const
-{
-    return ParseAsBool(aValue);
-}
+template <> inline otError Arg::ParseAs(bool &aValue) const { return ParseAsBool(aValue); }
 
-template <> inline otError Arg::ParseAs(int8_t &aValue) const
-{
-    return ParseAsInt8(aValue);
-}
+template <> inline otError Arg::ParseAs(int8_t &aValue) const { return ParseAsInt8(aValue); }
 
-template <> inline otError Arg::ParseAs(int16_t &aValue) const
-{
-    return ParseAsInt16(aValue);
-}
+template <> inline otError Arg::ParseAs(int16_t &aValue) const { return ParseAsInt16(aValue); }
 
-template <> inline otError Arg::ParseAs(int32_t &aValue) const
+template <> inline otError Arg::ParseAs(int32_t &aValue) const { return ParseAsInt32(aValue); }
+
+template <> inline otError Arg::ParseAs(const char *&aValue) const
 {
-    return ParseAsInt32(aValue);
+    return IsEmpty() ? OT_ERROR_INVALID_ARGS : (aValue = GetCString(), OT_ERROR_NONE);
 }
 
 #if OPENTHREAD_FTD || OPENTHREAD_MTD
 
-template <> inline otError Arg::ParseAs(otIp6Address &aValue) const
-{
-    return ParseAsIp6Address(aValue);
-}
+template <> inline otError Arg::ParseAs(otIp6Address &aValue) const { return ParseAsIp6Address(aValue); }
 
-template <> inline otError Arg::ParseAs(otIp6Prefix &aValue) const
-{
-    return ParseAsIp6Prefix(aValue);
-}
+template <> inline otError Arg::ParseAs(otIp6Prefix &aValue) const { return ParseAsIp6Prefix(aValue); }
 
 #endif
 

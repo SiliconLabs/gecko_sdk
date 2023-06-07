@@ -1,5 +1,5 @@
 /**
- * @file cmd_handlers.h
+ * @file
  * @copyright 2022 Silicon Laboratories Inc.
  */
 
@@ -12,6 +12,13 @@
 #ifdef ZW_CONTROLLER
 #include <ZW_controller_api.h>
 #endif
+
+/**
+ * @addtogroup Apps
+ * @{
+ * @addtogroup SerialAPI
+ * @{
+ */
 
 typedef void (*cmd_handler_t)(const comm_interface_frame_ptr);
 
@@ -54,5 +61,10 @@ void cmd_foreach(cmd_foreach_callback_t callback, cmd_context_t context);
 #ifdef ZW_CONTROLLER
 void ZCB_ComplHandler_ZW_NodeManagement(LEARN_INFO_T *statusInfo);
 #endif
+
+/**
+ * @}
+ * @}
+ */ 
 
 #endif /* CMD_HANDLER_H_ */

@@ -28,12 +28,12 @@ requires:
 template_contribution:
   - name: psa_crypto_config
     value: PSA_WANT_ALG_CHACHA20_POLY1305
-  - name: psa_crypto_config
+  - name: psa_crypto_builtin_config
     value: "MBEDTLS_PSA_BUILTIN_ALG_CHACHA20_POLY1305 1"
     condition: [mbedtls_chachapoly]
   - name: psa_crypto_config
     value: PSA_WANT_KEY_TYPE_CHACHA20
-  - name: psa_crypto_config
+  - name: psa_crypto_builtin_config
     value: "MBEDTLS_PSA_BUILTIN_KEY_TYPE_CHACHA20 1"
     condition: [mbedtls_chachapoly]
 documentation:

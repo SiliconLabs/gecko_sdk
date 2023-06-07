@@ -33,13 +33,19 @@
 // -----------------------------------------------------------------------------
 #include <stdint.h>
 #include "sl_component_catalog.h"
+#if defined(SL_CATALOG_APP_ASSERT_PRESENT)
 #include "app_assert.h"
+#endif
+#if defined(SL_CATALOG_APP_LOG_PRESENT)
 #include "app_log.h"
+#endif
 #include "rail.h"
 #include "app_process.h"
 #include "sl_simple_button_instances.h"
 #include "sl_simple_led_instances.h"
 #include "sl_flex_rail_package_assistant.h"
+#include "sl_flex_rail_config.h"
+#include "sl_flex_rail_channel_selector.h"
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)
 #include "app_task_init.h"
@@ -48,11 +54,13 @@
 #include "rail_types.h"
 #include "cmsis_compiler.h"
 
+#if defined(SL_CATALOG_RAIL_SIMPLE_CPC_PRESENT)
+#include "sl_rail_simple_cpc.h"
+#endif
+
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
-/// Size of RAIL RX/TX FIFO
-#define RAIL_FIFO_SIZE (256U)
 /// Transmit data length
 #define TX_PAYLOAD_LENGTH (16U)
 
@@ -91,9 +99,9 @@ static volatile uint64_t error_code = 0;
 static volatile RAIL_Status_t calibration_status = 0;
 
 /// Receive and Send FIFO
-static __ALIGNED(RAIL_FIFO_ALIGNMENT) uint8_t rx_fifo[RAIL_FIFO_SIZE];
+static __ALIGNED(RAIL_FIFO_ALIGNMENT) uint8_t rx_fifo[SL_FLEX_RAIL_RX_FIFO_SIZE];
 
-static __ALIGNED(RAIL_FIFO_ALIGNMENT) uint8_t tx_fifo[RAIL_FIFO_SIZE];
+static __ALIGNED(RAIL_FIFO_ALIGNMENT) uint8_t tx_fifo[SL_FLEX_RAIL_TX_FIFO_SIZE];
 
 /// Transmit packet
 static uint8_t out_packet[TX_PAYLOAD_LENGTH] = {
@@ -122,6 +130,9 @@ void app_process_action(RAIL_Handle_t rail_handle)
   // Status indicator of the RAIL API calls
   RAIL_Status_t rail_status = RAIL_STATUS_NO_ERROR;
   RAIL_Status_t calibration_status_buff = RAIL_STATUS_NO_ERROR;
+  #if defined(SL_CATALOG_RAIL_SIMPLE_CPC_PRESENT)
+  uint8_t success_sent = 0x01;
+  #endif
 
   if (packet_recieved) {
     packet_recieved = false;
@@ -153,10 +164,15 @@ void app_process_action(RAIL_Handle_t rail_handle)
         uint16_t packet_size = unpack_packet(rx_fifo, &packet_info, &start_of_packet);
         rail_status = RAIL_ReleaseRxPacket(rail_handle, rx_packet_handle);
         if (rail_status != RAIL_STATUS_NO_ERROR) {
+#if defined(SL_CATALOG_APP_LOG_PRESENT)
           app_log_warning("RAIL_ReleaseRxPacket() result:%d", rail_status);
+#endif
         }
         if (rx_requested) {
           printf_rx_packet(start_of_packet, packet_size);
+#if defined(SL_CATALOG_RAIL_SIMPLE_CPC_PRESENT)
+          sl_rail_simple_cpc_transmit(packet_size, start_of_packet);
+#endif
         }
         sl_led_toggle(&sl_led_led0);
         rx_packet_handle = RAIL_GetRxPacketInfo(rail_handle, RAIL_RX_PACKET_HANDLE_OLDEST_COMPLETE, &packet_info);
@@ -164,7 +180,13 @@ void app_process_action(RAIL_Handle_t rail_handle)
       state = S_IDLE;
       break;
     case S_PACKET_SENT:
+#if defined(SL_CATALOG_APP_LOG_PRESENT)
       app_log_info("Packet has been sent\n");
+#endif
+#if defined(SL_CATALOG_RAIL_SIMPLE_CPC_PRESENT)
+      sl_rail_simple_cpc_transmit(1, &success_sent);
+#endif
+
 #if defined(SL_CATALOG_LED1_PRESENT)
       sl_led_toggle(&sl_led_led1);
 #else
@@ -174,34 +196,44 @@ void app_process_action(RAIL_Handle_t rail_handle)
       break;
     case S_RX_PACKET_ERROR:
       // Handle Rx error
+#if defined(SL_CATALOG_APP_LOG_PRESENT)
       app_log_error("Radio RX Error occurred\nEvents: %llX\n", error_code);
+#endif
       state = S_IDLE;
       break;
     case S_TX_PACKET_ERROR:
       // Handle Tx error
+#if defined(SL_CATALOG_APP_LOG_PRESENT)
       app_log_error("Radio TX Error occurred\nEvents: %llX\n", error_code);
+#endif
       state = S_IDLE;
       break;
     case S_IDLE:
       if (tx_requested) {
         prepare_package(rail_handle, out_packet, sizeof(out_packet));
-        rail_status = RAIL_StartTx(rail_handle, CHANNEL, RAIL_TX_OPTIONS_DEFAULT, NULL);
+        rail_status = RAIL_StartTx(rail_handle, get_selected_channel(), RAIL_TX_OPTIONS_DEFAULT, NULL);
         if (rail_status != RAIL_STATUS_NO_ERROR) {
+#if defined(SL_CATALOG_APP_LOG_PRESENT)
           app_log_warning("RAIL_StartTx() result:%d ", rail_status);
+#endif
         }
         tx_requested = false;
       }
       break;
     case S_CALIBRATION_ERROR:
       calibration_status_buff = calibration_status;
+#if defined(SL_CATALOG_APP_LOG_PRESENT)
       app_log_error("Radio Calibration Error occurred\nEvents: %llX\nRAIL_Calibrate() result:%d\n",
                     error_code,
                     calibration_status_buff);
+#endif
       state = S_IDLE;
       break;
     default:
       // Unexpected state
+#if defined(SL_CATALOG_APP_LOG_PRESENT)
       app_log_error("Unexpected Simple TRX state occurred:%d\n", state);
+#endif
       break;
   }
 }
@@ -258,6 +290,23 @@ void sl_button_on_change(const sl_button_t *handle)
 #endif
 }
 
+#if defined(SL_CATALOG_RAIL_SIMPLE_CPC_PRESENT)
+void sl_rail_simple_cpc_receive_cb(sl_status_t status, uint32_t len, uint8_t *data)
+{
+  //SL_STATUS_OK
+  if (status == SL_STATUS_OK) {
+    if (len == 1) {
+      if (data[0] == 0x01 || data[0] == '1') {
+        tx_requested = true;
+      }
+      if (data[0] == 0x00 || data[0] == '0') {
+        rx_requested = !rx_requested;
+      }
+    }
+  }
+}
+#endif
+
 /******************************************************************************
  * Set up the rail TX fifo for later usage
  * @param rail_handle Which rail handler should be updated
@@ -265,11 +314,13 @@ void sl_button_on_change(const sl_button_t *handle)
 void set_up_tx_fifo(RAIL_Handle_t rail_handle)
 {
   uint16_t allocated_tx_fifo_size = 0;
-  allocated_tx_fifo_size = RAIL_SetTxFifo(rail_handle, tx_fifo, 0, RAIL_FIFO_SIZE);
-  app_assert(allocated_tx_fifo_size == RAIL_FIFO_SIZE,
+  allocated_tx_fifo_size = RAIL_SetTxFifo(rail_handle, tx_fifo, 0, SL_FLEX_RAIL_TX_FIFO_SIZE);
+#if defined(SL_CATALOG_APP_ASSERT_PRESENT)
+  app_assert(allocated_tx_fifo_size == SL_FLEX_RAIL_TX_FIFO_SIZE,
              "RAIL_SetTxFifo() failed to allocate a large enough fifo (%d bytes instead of %d bytes)\n",
              allocated_tx_fifo_size,
-             RAIL_FIFO_SIZE);
+             SL_FLEX_RAIL_TX_FIFO_SIZE);
+#endif
 }
 
 // -----------------------------------------------------------------------------

@@ -33,7 +33,7 @@ enum {
   EM_AF_NO_CRYPTO_OPERATION,
   EM_AF_CRYPTO_OPERATION_IN_PROGRESS,
 };
-typedef uint8_t EmAfCryptoStatus;
+typedef uint8_t sli_zigbee_af_crypto_status;
 
 #define EM_AF_CRYPTO_STATUS_TEXT \
   {                              \
@@ -42,16 +42,16 @@ typedef uint8_t EmAfCryptoStatus;
     NULL                         \
   }
 
-EmAfCryptoStatus emAfGetCryptoStatus(void);
-void emAfSetCryptoStatus(EmAfCryptoStatus newStatus);
+sli_zigbee_af_crypto_status sli_zigbee_af_get_crypto_status(void);
+void sli_zigbee_af_set_crypto_status(sli_zigbee_af_crypto_status newStatus);
 
-#define emAfSetCryptoOperationInProgress() \
-  (emAfSetCryptoStatus(EM_AF_CRYPTO_OPERATION_IN_PROGRESS))
+#define sli_zigbee_af_set_crypto_operation_in_progress() \
+  (sli_zigbee_af_set_crypto_status(EM_AF_CRYPTO_OPERATION_IN_PROGRESS))
 
-#define emAfIsCryptoOperationInProgress() \
-  (EM_AF_CRYPTO_OPERATION_IN_PROGRESS == emAfGetCryptoStatus())
+#define sli_zigbee_af_is_crypto_operation_in_progress() \
+  (EM_AF_CRYPTO_OPERATION_IN_PROGRESS == sli_zigbee_af_get_crypto_status())
 
-#define emAfCryptoOperationComplete() \
-  (emAfSetCryptoStatus(EM_AF_NO_CRYPTO_OPERATION))
+#define sli_zigbee_af_crypto_operation_complete() \
+  (sli_zigbee_af_set_crypto_status(EM_AF_NO_CRYPTO_OPERATION))
 
 #endif // SILABS_CRYPTO_STATE_H

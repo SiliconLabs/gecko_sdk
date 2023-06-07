@@ -37,17 +37,7 @@
 #include <stdarg.h>
 #include <stdbool.h>
 
-// -----------------------------------------------------------------------------
-// SPI Default configuration value
-#ifndef SL_CPC_DRV_SPI_FRAME_LENGTH
-#define SL_CPC_DRV_SPI_FRAME_LENGTH          8
-#endif
-#ifndef SL_CPC_DRV_SPI_BIT_ORDER
-#define SL_CPC_DRV_SPI_BIT_ORDER             spidrvBitOrderMsbFirst
-#endif
-#ifndef SL_CPC_DRV_SPI_BIT_ORSL_CPC_DRV_SPI_CLOCK_MODEDER
-#define SL_CPC_DRV_SPI_CLOCK_MODE            spidrvClockMode0
-#endif
+#define SLI_CPC_RX_FRAME_MAX_LENGTH ((uint16_t)(SLI_CPC_RX_DATA_MAX_LENGTH + SLI_CPC_HDLC_HEADER_RAW_SIZE))
 
 typedef struct {
   bool use_raw_rx_buffer;
@@ -123,15 +113,15 @@ void sli_cpc_drv_notify_tx_complete(sl_cpc_buffer_handle_t *buffer_handle);
  ******************************************************************************/
 void sli_cpc_drv_notify_rx_data(void);
 
-/***************************************************************************/ /**
- * Check if the driver is out of RX buffers
+/***************************************************************************//**
+ * Get currently configured bus bitrate
  ******************************************************************************/
-bool sli_cpc_drv_is_out_of_rx_buffers(void);
+uint32_t sli_cpc_drv_get_bus_bitrate(void);
 
 /***************************************************************************//**
- * Get currently configured bus speed
+ * Get maximum bus bitrate
  ******************************************************************************/
-uint32_t sli_cpc_drv_get_bus_speed(void);
+uint32_t sli_cpc_drv_get_bus_max_bitrate(void);
 
 /** @} (end addtogroup cpc) */
 

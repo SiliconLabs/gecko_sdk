@@ -9,7 +9,6 @@ provides:
   - name: "zigbee_ble_dmp_cli"
 requires:
   - name: "zigbee_app_framework_common"
-  - name: "zigbee_zcl_framework_core"
   - name: "bluetooth_stack"
 
 source:  

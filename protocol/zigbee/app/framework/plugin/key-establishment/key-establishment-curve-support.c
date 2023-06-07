@@ -112,7 +112,7 @@ EmberAfKeyEstablishmentNotifyMessage sendCertificate(void)
   return NO_APP_MESSAGE;
 }
 
-EmberStatus emGenerateCbkeKeysForCurve(void)
+EmberStatus sli_zigbee_af_generate_cbke_keys_for_curve(void)
 {
   EmberStatus status;
   if (isCbkeKeyEstablishmentSuite163k1()) {
@@ -125,9 +125,9 @@ EmberStatus emGenerateCbkeKeysForCurve(void)
   return status;
 }
 
-EmberStatus emCalculateSmacsForCurve(bool amInitiator,
-                                     EmberCertificate283k1Data* partnerCert,
-                                     EmberPublicKey283k1Data* partnerEphemeralPublicKey)
+EmberStatus sli_zigbee_af_calculate_smacs_for_curve(bool amInitiator,
+                                                    EmberCertificate283k1Data* partnerCert,
+                                                    EmberPublicKey283k1Data* partnerEphemeralPublicKey)
 {
   EmberStatus status;
   emberAfKeyEstablishmentClusterPrintln("calculateSmacs()");

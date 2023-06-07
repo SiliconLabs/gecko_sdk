@@ -39,7 +39,7 @@
 #include "app_framework_common.h"
 // Ensure that psa is initialized corretly
 #include "psa/crypto.h"
-#include "mbedtls_config_autogen.h"
+#include "mbedtls/build_info.h"
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs

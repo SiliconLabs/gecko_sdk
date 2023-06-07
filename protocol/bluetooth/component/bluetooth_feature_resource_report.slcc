@@ -1,0 +1,16 @@
+id: "bluetooth_feature_resource_report"
+label: "Resource usage report in Bluetooth stack"
+package: "Bluetooth"
+description: >
+  Reports the memory buffer usage in the Bluetooth stack.
+category: Bluetooth|Bluetooth Host (Stack)|Features with Commands and Events
+quality: "production"
+root_path: "protocol/bluetooth"
+requires:
+  - name: "bluetooth_stack"
+provides:
+  - name: "bluetooth_feature_resource_report"
+template_contribution:
+  - name: component_catalog
+    value: bluetooth_feature_resource_report
+

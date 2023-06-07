@@ -19,11 +19,11 @@
 
 #include PLATFORM_HEADER
 
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #ifdef SL_CATALOG_ZIGBEE_SECURE_EZSP_PRESENT
 #define EMBER_AF_PLUGIN_SECURE_EZSP
-#endif
 #endif
 
 #include "stack/include/ember-types.h"
@@ -59,7 +59,7 @@ static void callbackPointerInit(void);
 //----------------------------------------------------------------
 // Global Variables
 
-uint8_t emSupportedNetworks = EMBER_SUPPORTED_NETWORKS;
+uint8_t sli_zigbee_supported_networks = EMBER_SUPPORTED_NETWORKS;
 
 uint8_t ezspSleepMode = EZSP_FRAME_CONTROL_IDLE;
 
@@ -68,7 +68,7 @@ static bool sendingCommand = false;
 static uint8_t ezspSequence = 0;
 
 // Multi-network support: this variable is equivalent to the
-// emApplicationNetworkIndex vaiable for SOC. It stores the ezsp network index.
+// sli_zigbee_application_network_index vaiable for SOC. It stores the ezsp network index.
 // It gets included in the frame control of every EZSP message to the NCP.
 // The public APIs emberGetCurrentNetwork() and emberSetCurrentNetwork() set/get
 // this value.
@@ -419,7 +419,7 @@ uint8_t emberGetCallbackNetwork(void)
 
 EmberStatus emberSetCurrentNetwork(uint8_t index)
 {
-  if (index < emSupportedNetworks) {
+  if (index < sli_zigbee_supported_networks) {
     ezspApplicationNetworkIndex = index;
     return EMBER_SUCCESS;
   } else {
@@ -553,8 +553,8 @@ static uint8_t responseReceived(void)
   if ((serialGetResponseByte(EZSP_EXTENDED_FRAME_CONTROL_HB_INDEX) & EZSP_EXTENDED_FRAME_FORMAT_VERSION_MASK)
       == EZSP_EXTENDED_FRAME_FORMAT_VERSION) {
     // use extended ezsp frame format
-    responseFrameControl = emEzspGetFrameControl();
-    responseFrameId = emEzspGetFrameId();
+    responseFrameControl = sli_zigbee_ezsp_get_frame_control();
+    responseFrameId = sli_zigbee_ezsp_get_frame_id();
     parametersIndex = EZSP_EXTENDED_PARAMETERS_INDEX;
     if (HIGH_BYTE(responseFrameControl) & EZSP_EXTENDED_FRAME_CONTROL_RESERVED_MASK) {
       // reject if unsupported frame
@@ -563,9 +563,9 @@ static uint8_t responseReceived(void)
                == EZSP_EXTENDED_FRAME_CONTROL_SECURE) {
       // if security bit is enabled in extended frame control byte,
       // then decode the packet
-      if (emSecureEzspIsOn()) {
-        status = emSecureEzspDecode();
-        responseFrameId = emEzspGetFrameId();;
+      if (sli_zigbee_secure_ezsp_is_on()) {
+        status = sli_zigbee_secure_ezsp_decode();
+        responseFrameId = sli_zigbee_ezsp_get_frame_id();;
         if (responseFrameId == EZSP_INVALID_COMMAND) {
           status = serialGetResponseByte(parametersIndex);
         }
@@ -574,7 +574,7 @@ static uint8_t responseReceived(void)
       }
     } else {
       // if parameters pending, only allow certain commands
-      if (emSecureEzspParametersArePending()
+      if (sli_zigbee_secure_ezsp_parameters_are_pending()
           && responseFrameId != EZSP_SET_SECURITY_PARAMETERS
           && responseFrameId != EZSP_SET_SECURITY_KEY
           && responseFrameId != EZSP_RESET_TO_FACTORY_DEFAULTS
@@ -585,7 +585,7 @@ static uint8_t responseReceived(void)
       }
 
       // reject if security established, unless it is reset command
-      if (emSecureEzspIsOn()
+      if (sli_zigbee_secure_ezsp_is_on()
           && responseFrameId != EZSP_RESET_TO_FACTORY_DEFAULTS) {
         status = EZSP_ERROR_UNSECURE_FRAME;
       }
@@ -652,11 +652,11 @@ static EzspStatus sendCommand(void)
   if (serialGetResponseByte(EZSP_FRAME_ID_INDEX) == EZSP_VERSION && (!initialEzspVersionSent)) {
     initialEzspVersionSent = true;
   } else {
-    if (emSecureEzspIsOn()
-        && emEzspGetFrameId() != EZSP_RESET_TO_FACTORY_DEFAULTS) {
+    if (sli_zigbee_secure_ezsp_is_on()
+        && sli_zigbee_ezsp_get_frame_id() != EZSP_RESET_TO_FACTORY_DEFAULTS) {
       serialSetCommandByte(EZSP_EXTENDED_FRAME_CONTROL_HB_INDEX,
                            (EZSP_EXTENDED_FRAME_CONTROL_SECURE | EZSP_EXTENDED_FRAME_FORMAT_VERSION));
-      emSecureEzspEncode();
+      sli_zigbee_secure_ezsp_encode();
     } else {
       serialSetCommandByte(EZSP_EXTENDED_FRAME_CONTROL_HB_INDEX, EZSP_EXTENDED_FRAME_FORMAT_VERSION);
     }

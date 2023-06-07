@@ -3,7 +3,7 @@ from pycalcmodel.core.output import ModelOutput, ModelOutputType
 from pyradioconfig.calculator_model_framework.interfaces.iprofile import IProfile
 
 
-def buildModemAdvancedInputs(model, profile, family):
+def buildModemAdvancedInputs(model, profile):
     IProfile.make_linked_io(profile, model.vars.timing_detection_threshold        , 'Advanced', readable_name='Timing Detection Threshold',                   value_limit_min=0,      value_limit_max=255)
     IProfile.make_linked_io(profile, model.vars.timing_sample_threshold           , 'Advanced', readable_name="Timing Samples Threshold",                     value_limit_min=0,      value_limit_max=100)
     IProfile.make_linked_io(profile, model.vars.freq_offset_hz                    , 'Advanced', readable_name="Frequency Offset Compensation (AFC) Limit",                          value_limit_min=0,      value_limit_max=500000, units_multiplier=UnitsMultiplier.KILO)
@@ -36,7 +36,7 @@ def buildModemAdvancedInputs(model, profile, family):
     IProfile.make_hidden_input(profile, model.vars.rx_bitrate_offset_hz              , 'Advanced', readable_name="RX Baudrate offset",                           value_limit_min=0,      value_limit_max=200000)
     IProfile.make_linked_io(profile, model.vars.agc_speed                         , 'Advanced', readable_name="AGC Speed")
     IProfile.make_linked_io(profile, model.vars.frequency_comp_mode               , 'Advanced', readable_name="Frequency Compensation Mode")
-    if family != "dumbo":
+    if model.part_family.lower() not in ["dumbo","unit_test_part"]:
         IProfile.make_linked_io(profile, model.vars.src_disable                       , 'Advanced', readable_name="SRC Operation")
         IProfile.make_hidden_input(profile, model.vars.viterbi_enable                 , "Advanced", readable_name="Enable Viterbi")
         IProfile.make_hidden_input(profile, model.vars.dsa_enable                     , 'Advanced', readable_name="Enable DSA")
@@ -44,7 +44,7 @@ def buildModemAdvancedInputs(model, profile, family):
         IProfile.make_linked_io(profile, model.vars.etsi_cat1_compatible              , 'Advanced', readable_name="ETSI Category 1 Compatibility")
         IProfile.make_linked_io(profile, model.vars.target_osr, 'Advanced',readable_name="Target oversampling rate", value_limit_min=3, value_limit_max=8)
 
-    if family == "dumbo":
+    if model.part_family.lower() in ["dumbo","unit_test_part"]:
         IProfile.make_linked_io(profile, model.vars.ook_slicer_level                  , 'Advanced', readable_name="OOK slicer level",
                                 value_limit_min=1,     value_limit_max=10)
     else:
@@ -53,7 +53,7 @@ def buildModemAdvancedInputs(model, profile, family):
 
     IProfile.make_hidden_input(profile, model.vars.in_2fsk_opt_scope, 'Advanced', readable_name="Include in 2FSK optimization scope")
 
-    if family != "dumbo":
+    if model.part_family.lower() not in ["dumbo","unit_test_part"]:
         # Expose diversity registers as advanced inputs
         IProfile.make_linked_io(profile, model.vars.antdivmode, 'Advanced', readable_name="Antenna diversity mode")
         IProfile.make_linked_io(profile, model.vars.antdivrepeatdis, 'Advanced', readable_name="Diversity Select-Best repeat")

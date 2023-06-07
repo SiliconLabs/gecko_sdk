@@ -19,6 +19,7 @@ limitations under the License.
 #include "tensorflow/lite/kernels/internal/reference/l2normalization.h"
 #include "tensorflow/lite/kernels/kernel_util.h"
 #include "tensorflow/lite/micro/kernels/kernel_util.h"
+#include "tensorflow/lite/micro/micro_log.h"
 
 namespace tflite {
 namespace ops {
@@ -126,8 +127,8 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
         tflite::micro::GetTensorData<int8_t>(input),
         tflite::micro::GetTensorData<int8_t>(output));
   } else {
-    TF_LITE_KERNEL_LOG(context, "Output type is %s, requires float.",
-                       TfLiteTypeGetName(output->type));
+    MicroPrintf("Output type is %s, requires float.",
+                TfLiteTypeGetName(output->type));
     return kTfLiteError;
   }
 
@@ -137,14 +138,7 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
 }  // namespace l2norm
 
 TfLiteRegistration Register_L2NORM_REF() {
-  return {/*init=*/l2norm::Init,
-          /*free=*/nullptr,
-          /*prepare=*/l2norm::Prepare,
-          /*invoke=*/l2norm::Eval,
-          /*profiling_string=*/nullptr,
-          /*builtin_code=*/0,
-          /*custom_name=*/nullptr,
-          /*version=*/0};
+  return tflite::micro::RegisterOp(l2norm::Init, l2norm::Prepare, l2norm::Eval);
 }
 
 TfLiteRegistration Register_L2_NORMALIZATION() { return Register_L2NORM_REF(); }

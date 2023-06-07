@@ -20,14 +20,7 @@
 #include "af.h"
 
 static const uint8_t attributeSizes[] =
-#ifdef UC_BUILD
   ZAP_GENERATED_ATTRIBUTE_SIZES;
-#else
-// Appbuilder generated a weird file that gets injected in here into branches
-{
-#include "attribute-size.h"
-};
-#endif
 
 uint8_t emberAfGetDataSize(uint8_t dataType)
 {

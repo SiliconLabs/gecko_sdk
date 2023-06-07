@@ -18,22 +18,22 @@
 #include "xncp.h"
 #include "app/util/ezsp/ezsp-frame-utilities.h"
 
-bool emXNcpAllowIncomingEzspCommand(void)
+bool sli_zigbee_xncp_allow_incoming_ezsp_command(void)
 {
   return true;
 }
 
-bool emXNcpAllowOutgoingEzspCallback(uint8_t *callback,
-                                     uint8_t callbackLength)
+bool sli_zigbee_xncp_allow_outgoing_ezsp_callback(uint8_t *callback,
+                                                  uint8_t callbackLength)
 {
   (void)callback;
   (void)callbackLength;
   return true;
 }
 
-bool emAfPluginXncpIncomingMessageCallback(EmberIncomingMessageType type,
-                                           EmberApsFrame *apsFrame,
-                                           EmberMessageBuffer message)
+bool sli_zigbee_af_xncp_incoming_message_callback(EmberIncomingMessageType type,
+                                                  EmberApsFrame *apsFrame,
+                                                  EmberMessageBuffer message)
 {
   (void)type;
   (void)apsFrame;
@@ -41,12 +41,12 @@ bool emAfPluginXncpIncomingMessageCallback(EmberIncomingMessageType type,
   return false;
 }
 
-void emXNcpHandleIncomingCustomEzspMessage(void)
+void sli_zigbee_xncp_handle_incoming_custom_ezsp_message(void)
 {
   appendInt8u(EMBER_INVALID_CALL);
   appendInt8u(0); // Bug 14838: We always need to append the reply length
 }
-void emXNcpHandleGetInfoCommand(void)
+void sli_zigbee_xncp_handle_get_info_command(void)
 {
   appendInt8u(EMBER_INVALID_CALL);
 }

@@ -40,7 +40,7 @@
 #include "sl_btmesh_dcd.h"
 
 #include "app_assert.h"
-#include "sl_simple_timer.h"
+#include "app_timer.h"
 
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
@@ -171,31 +171,31 @@ static void scene_server_reset_register_impl(uint16_t elem_index);
 #endif
 
 // Timer handles
-static sl_simple_timer_t lighting_pri_level_move_timer;
-static sl_simple_timer_t lighting_transition_complete_timer;
-static sl_simple_timer_t lighting_level_transition_complete_timer;
-static sl_simple_timer_t lighting_onoff_transition_complete_timer;
-static sl_simple_timer_t lighting_delayed_pri_level_timer;
-static sl_simple_timer_t lighting_delayed_lightness_request_timer;
-static sl_simple_timer_t lighting_delayed_onoff_request_timer;
-static sl_simple_timer_t lighting_state_store_timer;
+static app_timer_t lighting_pri_level_move_timer;
+static app_timer_t lighting_transition_complete_timer;
+static app_timer_t lighting_level_transition_complete_timer;
+static app_timer_t lighting_onoff_transition_complete_timer;
+static app_timer_t lighting_delayed_pri_level_timer;
+static app_timer_t lighting_delayed_lightness_request_timer;
+static app_timer_t lighting_delayed_onoff_request_timer;
+static app_timer_t lighting_state_store_timer;
 
 // Timer callbacks
-static void lighting_pri_level_move_timer_cb(sl_simple_timer_t *handle,
+static void lighting_pri_level_move_timer_cb(app_timer_t *handle,
                                              void *data);
-static void lighting_transition_complete_timer_cb(sl_simple_timer_t *handle,
+static void lighting_transition_complete_timer_cb(app_timer_t *handle,
                                                   void *data);
-static void lighting_level_transition_complete_timer_cb(sl_simple_timer_t *handle,
+static void lighting_level_transition_complete_timer_cb(app_timer_t *handle,
                                                         void *data);
-static void lighting_onoff_transition_complete_timer_cb(sl_simple_timer_t *handle,
+static void lighting_onoff_transition_complete_timer_cb(app_timer_t *handle,
                                                         void *data);
-static void lighting_delayed_pri_level_timer_cb(sl_simple_timer_t *handle,
+static void lighting_delayed_pri_level_timer_cb(app_timer_t *handle,
                                                 void *data);
-static void lighting_delayed_lightness_request_timer_cb(sl_simple_timer_t *handle,
+static void lighting_delayed_lightness_request_timer_cb(app_timer_t *handle,
                                                         void *data);
-static void lighting_delayed_onoff_request_timer_cb(sl_simple_timer_t *handle,
+static void lighting_delayed_onoff_request_timer_cb(app_timer_t *handle,
                                                     void *data);
-static void lighting_state_store_timer_cb(sl_simple_timer_t *handle,
+static void lighting_state_store_timer_cb(app_timer_t *handle,
                                           void *data);
 
 /*******************************************************************************
@@ -497,11 +497,11 @@ static void onoff_request(uint16_t model_id,
       // that will trigger the change after the given delay
       // Current state remains as is for now
       lightbulb_state.onoff_target = request->on_off;
-      sl_status_t sc = sl_simple_timer_start(&lighting_delayed_onoff_request_timer,
-                                             delay_ms,
-                                             lighting_delayed_onoff_request_timer_cb,
-                                             NO_CALLBACK_DATA,
-                                             false);
+      sl_status_t sc = app_timer_start(&lighting_delayed_onoff_request_timer,
+                                       delay_ms,
+                                       lighting_delayed_onoff_request_timer_cb,
+                                       NO_CALLBACK_DATA,
+                                       false);
       app_assert_status_f(sc, "Failed to start Delayed ON/OFF Request timer");
       // store transition parameter for later use
       delayed_onoff_trans = transition_ms;
@@ -523,11 +523,11 @@ static void onoff_request(uint16_t model_id,
       sl_btmesh_lighting_set_level(lightbulb_state.lightness_target,
                                    transition_ms);
       // lightbulb current state will be updated when transition is complete
-      sl_status_t sc = sl_simple_timer_start(&lighting_onoff_transition_complete_timer,
-                                             transition_ms,
-                                             lighting_onoff_transition_complete_timer_cb,
-                                             NO_CALLBACK_DATA,
-                                             false);
+      sl_status_t sc = app_timer_start(&lighting_onoff_transition_complete_timer,
+                                       transition_ms,
+                                       lighting_onoff_transition_complete_timer_cb,
+                                       NO_CALLBACK_DATA,
+                                       false);
       app_assert_status_f(sc, "Failed to start ON/OFF Transition Complete timer");
     }
     lightbulb_state_changed();
@@ -619,11 +619,11 @@ static void onoff_recall(uint16_t model_id,
         lightbulb_state.onoff_current = MESH_GENERIC_ON_OFF_STATE_ON;
       }
       // lightbulb current state will be updated when transition is complete
-      sl_status_t sc = sl_simple_timer_start(&lighting_onoff_transition_complete_timer,
-                                             transition_ms,
-                                             lighting_onoff_transition_complete_timer_cb,
-                                             NO_CALLBACK_DATA,
-                                             false);
+      sl_status_t sc = app_timer_start(&lighting_onoff_transition_complete_timer,
+                                       transition_ms,
+                                       lighting_onoff_transition_complete_timer_cb,
+                                       NO_CALLBACK_DATA,
+                                       false);
       app_assert_status_f(sc, "Failed to start ON/OFF Transition Complete timer");
     }
     lightbulb_state_changed();
@@ -688,11 +688,11 @@ static void delayed_onoff_request(void)
                                  delayed_onoff_trans);
 
     // state is updated when transition is complete
-    sl_status_t sc = sl_simple_timer_start(&lighting_onoff_transition_complete_timer,
-                                           delayed_onoff_trans,
-                                           lighting_onoff_transition_complete_timer_cb,
-                                           NO_CALLBACK_DATA,
-                                           false);
+    sl_status_t sc = app_timer_start(&lighting_onoff_transition_complete_timer,
+                                     delayed_onoff_trans,
+                                     lighting_onoff_transition_complete_timer_cb,
+                                     NO_CALLBACK_DATA,
+                                     false);
     app_assert_status_f(sc, "Failed to start ON/OFF Transition Complete timer");
   }
 }
@@ -1230,11 +1230,11 @@ static void lightness_request(uint16_t model_id,
       // that will trigger the change after the given delay
       // Current state remains as is for now
       lightbulb_state.lightness_target = actual_request;
-      sl_status_t sc = sl_simple_timer_start(&lighting_delayed_lightness_request_timer,
-                                             delay_ms,
-                                             lighting_delayed_lightness_request_timer_cb,
-                                             NO_CALLBACK_DATA,
-                                             false);
+      sl_status_t sc = app_timer_start(&lighting_delayed_lightness_request_timer,
+                                       delay_ms,
+                                       lighting_delayed_lightness_request_timer_cb,
+                                       NO_CALLBACK_DATA,
+                                       false);
       app_assert_status_f(sc, "Failed to start Delayed Lightness Request timer");
       // store transition parameter for later use
       delayed_lightness_trans = transition_ms;
@@ -1245,11 +1245,11 @@ static void lightness_request(uint16_t model_id,
                                    transition_ms);
 
       // lightbulb current state will be updated when transition is complete
-      sl_status_t sc = sl_simple_timer_start(&lighting_transition_complete_timer,
-                                             transition_ms,
-                                             lighting_transition_complete_timer_cb,
-                                             NO_CALLBACK_DATA,
-                                             false);
+      sl_status_t sc = app_timer_start(&lighting_transition_complete_timer,
+                                       transition_ms,
+                                       lighting_transition_complete_timer_cb,
+                                       NO_CALLBACK_DATA,
+                                       false);
       app_assert_status_f(sc, "Failed to start Lighting Transition Complete timer");
     }
     lightbulb_state_changed();
@@ -1382,11 +1382,11 @@ static void lightness_recall(uint16_t model_id,
       lightbulb_state.lightness_current = current->lightness.level;
     } else {
       // lightbulb current state will be updated when transition is complete
-      sl_status_t sc = sl_simple_timer_start(&lighting_transition_complete_timer,
-                                             transition_ms,
-                                             lighting_transition_complete_timer_cb,
-                                             NO_CALLBACK_DATA,
-                                             false);
+      sl_status_t sc = app_timer_start(&lighting_transition_complete_timer,
+                                       transition_ms,
+                                       lighting_transition_complete_timer_cb,
+                                       NO_CALLBACK_DATA,
+                                       false);
       app_assert_status_f(sc, "Failed to start Lighting Transition Complete timer");
     }
     lightbulb_state_changed();
@@ -1444,11 +1444,11 @@ static void delayed_lightness_request(void)
                                  lightness_kind);
   } else {
     // state is updated when transition is complete
-    sl_status_t sc = sl_simple_timer_start(&lighting_transition_complete_timer,
-                                           delayed_lightness_trans,
-                                           lighting_transition_complete_timer_cb,
-                                           NO_CALLBACK_DATA,
-                                           false);
+    sl_status_t sc = app_timer_start(&lighting_transition_complete_timer,
+                                     delayed_lightness_trans,
+                                     lighting_transition_complete_timer_cb,
+                                     NO_CALLBACK_DATA,
+                                     false);
     app_assert_status_f(sc, "Failed to start Lighting Transition Complete timer");
   }
 }
@@ -1821,11 +1821,11 @@ static void pri_level_move_schedule_next_request(int32_t remaining_delta)
                                  + move_pri_level_delta,
                                  move_pri_level_trans);
   }
-  sl_status_t sc = sl_simple_timer_start(&lighting_pri_level_move_timer,
-                                         transition_ms,
-                                         lighting_pri_level_move_timer_cb,
-                                         NO_CALLBACK_DATA,
-                                         false);
+  sl_status_t sc = app_timer_start(&lighting_pri_level_move_timer,
+                                   transition_ms,
+                                   lighting_pri_level_move_timer_cb,
+                                   NO_CALLBACK_DATA,
+                                   false);
   app_assert_status_f(sc, "Failed to start Pri Level timer");
 }
 
@@ -1868,9 +1868,9 @@ static void pri_level_move_request(void)
 static void pri_level_move_stop(void)
 {
   // Cancel timers
-  sl_status_t sc = sl_simple_timer_stop(&lighting_delayed_pri_level_timer);
+  sl_status_t sc = app_timer_stop(&lighting_delayed_pri_level_timer);
   app_assert_status_f(sc, "Failed to stop Delayed Primary Level timer");
-  sc = sl_simple_timer_stop(&lighting_pri_level_move_timer);
+  sc = app_timer_stop(&lighting_pri_level_move_timer);
   app_assert_status_f(sc, "Failed to stop Primary Level Move timer");
   //Reset move parameters
   move_pri_level_delta = 0;
@@ -1940,11 +1940,11 @@ static void pri_level_request(uint16_t model_id,
           lightbulb_state.pri_level_target = request->level;
           lightbulb_state.lightness_target = lightness;
           pri_level_request_kind = mesh_generic_request_level;
-          sl_status_t sc = sl_simple_timer_start(&lighting_delayed_pri_level_timer,
-                                                 delay_ms,
-                                                 lighting_delayed_pri_level_timer_cb,
-                                                 NO_CALLBACK_DATA,
-                                                 false);
+          sl_status_t sc = app_timer_start(&lighting_delayed_pri_level_timer,
+                                           delay_ms,
+                                           lighting_delayed_pri_level_timer_cb,
+                                           NO_CALLBACK_DATA,
+                                           false);
           app_assert_status_f(sc, "Failed to start Delayed Primary Level timer");
 
           // store transition parameter for later use
@@ -1956,11 +1956,11 @@ static void pri_level_request(uint16_t model_id,
           sl_btmesh_lighting_set_level(lightness, transition_ms);
 
           // lightbulb current state will be updated when transition is complete
-          sl_status_t sc = sl_simple_timer_start(&lighting_level_transition_complete_timer,
-                                                 transition_ms,
-                                                 lighting_level_transition_complete_timer_cb,
-                                                 NO_CALLBACK_DATA,
-                                                 false);
+          sl_status_t sc = app_timer_start(&lighting_level_transition_complete_timer,
+                                           transition_ms,
+                                           lighting_level_transition_complete_timer_cb,
+                                           NO_CALLBACK_DATA,
+                                           false);
           app_assert_status_f(sc, "Failed to start Primary Level Transition Complete timer");
         }
 
@@ -2001,11 +2001,11 @@ static void pri_level_request(uint16_t model_id,
           lightbulb_state.pri_level_target = requested_level;
           lightbulb_state.lightness_target = lightness;
           pri_level_request_kind = mesh_generic_request_level_move;
-          sl_status_t sc = sl_simple_timer_start(&lighting_delayed_pri_level_timer,
-                                                 delay_ms,
-                                                 lighting_delayed_pri_level_timer_cb,
-                                                 NO_CALLBACK_DATA,
-                                                 false);
+          sl_status_t sc = app_timer_start(&lighting_delayed_pri_level_timer,
+                                           delay_ms,
+                                           lighting_delayed_pri_level_timer_cb,
+                                           NO_CALLBACK_DATA,
+                                           false);
           app_assert_status_f(sc, "Failed to start Delayed Primary Level timer");
         } else {
           // no delay so start move
@@ -2039,11 +2039,11 @@ static void pri_level_request(uint16_t model_id,
         // Current state remains as is for now
         remaining_ms = delay_ms;
         pri_level_request_kind = mesh_generic_request_level_halt;
-        sl_status_t sc = sl_simple_timer_start(&lighting_delayed_pri_level_timer,
-                                               delay_ms,
-                                               lighting_delayed_pri_level_timer_cb,
-                                               NO_CALLBACK_DATA,
-                                               false);
+        sl_status_t sc = app_timer_start(&lighting_delayed_pri_level_timer,
+                                         delay_ms,
+                                         lighting_delayed_pri_level_timer_cb,
+                                         NO_CALLBACK_DATA,
+                                         false);
         app_assert_status_f(sc, "Failed to start Delayed Primary Level timer");
       } else {
         pri_level_move_stop();
@@ -2139,11 +2139,11 @@ static void pri_level_recall(uint16_t model_id,
       lightbulb_state.pri_level_current = current->level.level;
     } else {
       // lightbulb current state will be updated when transition is complete
-      sl_status_t sc = sl_simple_timer_start(&lighting_level_transition_complete_timer,
-                                             transition_ms,
-                                             lighting_level_transition_complete_timer_cb,
-                                             NO_CALLBACK_DATA,
-                                             false);
+      sl_status_t sc = app_timer_start(&lighting_level_transition_complete_timer,
+                                       transition_ms,
+                                       lighting_level_transition_complete_timer_cb,
+                                       NO_CALLBACK_DATA,
+                                       false);
       app_assert_status_f(sc, "Failed to start Primary Level Transition Complete timer");
     }
     lightbulb_state_changed();
@@ -2195,11 +2195,11 @@ static void delayed_pri_level_request(void)
                                      delayed_pri_level_trans);
       } else {
         // state is updated when transition is complete
-        sl_status_t sc = sl_simple_timer_start(&lighting_level_transition_complete_timer,
-                                               delayed_pri_level_trans,
-                                               lighting_level_transition_complete_timer_cb,
-                                               NO_CALLBACK_DATA,
-                                               false);
+        sl_status_t sc = app_timer_start(&lighting_level_transition_complete_timer,
+                                         delayed_pri_level_trans,
+                                         lighting_level_transition_complete_timer_cb,
+                                         NO_CALLBACK_DATA,
+                                         false);
         app_assert_status_f(sc, "Failed to start Primary Level Transition Complete timer");
       }
       break;
@@ -2384,11 +2384,11 @@ static sl_status_t lightbulb_state_store(void)
  ******************************************************************************/
 static void lightbulb_state_changed(void)
 {
-  sl_status_t sc = sl_simple_timer_start(&lighting_state_store_timer,
-                                         SL_BTMESH_LIGHTING_SERVER_NVM_SAVE_TIME_CFG_VAL,
-                                         lighting_state_store_timer_cb,
-                                         NO_CALLBACK_DATA,
-                                         false);
+  sl_status_t sc = app_timer_start(&lighting_state_store_timer,
+                                   SL_BTMESH_LIGHTING_SERVER_NVM_SAVE_TIME_CFG_VAL,
+                                   lighting_state_store_timer_cb,
+                                   NO_CALLBACK_DATA,
+                                   false);
   app_assert_status_f(sc, "Failed to start State Store timer");
 }
 
@@ -2431,11 +2431,11 @@ void sl_btmesh_lighting_server_init(void)
         sl_btmesh_lighting_set_level(lightbulb_state.lightness_current,
                                      IMMEDIATE);
         sl_status_t sc =
-          sl_simple_timer_start(&lighting_transition_complete_timer,
-                                transition_ms,
-                                lighting_transition_complete_timer_cb,
-                                NO_CALLBACK_DATA,
-                                false);
+          app_timer_start(&lighting_transition_complete_timer,
+                          transition_ms,
+                          lighting_transition_complete_timer_cb,
+                          NO_CALLBACK_DATA,
+                          false);
         app_assert_status_f(sc, "Failed to start Lighting Transition Complete timer");
         sl_btmesh_lighting_set_level(lightbulb_state.lightness_target,
                                      transition_ms);
@@ -2456,11 +2456,11 @@ void sl_btmesh_lighting_server_init(void)
           sl_btmesh_lighting_set_level(lightbulb_state.lightness_current,
                                        IMMEDIATE);
           sl_status_t sc =
-            sl_simple_timer_start(&lighting_transition_complete_timer,
-                                  transition_ms,
-                                  lighting_transition_complete_timer_cb,
-                                  NO_CALLBACK_DATA,
-                                  false);
+            app_timer_start(&lighting_transition_complete_timer,
+                            transition_ms,
+                            lighting_transition_complete_timer_cb,
+                            NO_CALLBACK_DATA,
+                            false);
           app_assert_status_f(sc, "Failed to start Lighting Transition Complete timer");
           sl_btmesh_lighting_set_level(lightbulb_state.lightness_target,
                                        transition_ms);
@@ -2652,7 +2652,7 @@ static void scene_server_reset_register_impl(uint16_t elem_index)
  * @param[in] handle Pointer to the timer handle
  * @param[in] data   Pointer to the timer data
  ******************************************************************************/
-static void lighting_pri_level_move_timer_cb(sl_simple_timer_t *handle,
+static void lighting_pri_level_move_timer_cb(app_timer_t *handle,
                                              void *data)
 {
   (void)data;
@@ -2667,7 +2667,7 @@ static void lighting_pri_level_move_timer_cb(sl_simple_timer_t *handle,
  * @param[in] handle Pointer to the timer handle
  * @param[in] data   Pointer to the timer data
  ******************************************************************************/
-static void lighting_transition_complete_timer_cb(sl_simple_timer_t *handle,
+static void lighting_transition_complete_timer_cb(app_timer_t *handle,
                                                   void *data)
 {
   (void)data;
@@ -2683,7 +2683,7 @@ static void lighting_transition_complete_timer_cb(sl_simple_timer_t *handle,
  * @param[in] handle Pointer to the timer handle
  * @param[in] data   Pointer to the timer data
  ******************************************************************************/
-static void lighting_level_transition_complete_timer_cb(sl_simple_timer_t *handle,
+static void lighting_level_transition_complete_timer_cb(app_timer_t *handle,
                                                         void *data)
 {
   (void)data;
@@ -2699,7 +2699,7 @@ static void lighting_level_transition_complete_timer_cb(sl_simple_timer_t *handl
  * @param[in] handle Pointer to the timer handle
  * @param[in] data   Pointer to the timer data
  ******************************************************************************/
-static void lighting_onoff_transition_complete_timer_cb(sl_simple_timer_t *handle,
+static void lighting_onoff_transition_complete_timer_cb(app_timer_t *handle,
                                                         void *data)
 {
   (void)data;
@@ -2715,7 +2715,7 @@ static void lighting_onoff_transition_complete_timer_cb(sl_simple_timer_t *handl
  * @param[in] handle Pointer to the timer handle
  * @param[in] data   Pointer to the timer data
  ******************************************************************************/
-static void lighting_delayed_pri_level_timer_cb(sl_simple_timer_t *handle,
+static void lighting_delayed_pri_level_timer_cb(app_timer_t *handle,
                                                 void *data)
 {
   (void)data;
@@ -2731,7 +2731,7 @@ static void lighting_delayed_pri_level_timer_cb(sl_simple_timer_t *handle,
  * @param[in] handle Pointer to the timer handle
  * @param[in] data   Pointer to the timer data
  ******************************************************************************/
-static void lighting_delayed_lightness_request_timer_cb(sl_simple_timer_t *handle,
+static void lighting_delayed_lightness_request_timer_cb(app_timer_t *handle,
                                                         void *data)
 {
   (void)data;
@@ -2746,7 +2746,7 @@ static void lighting_delayed_lightness_request_timer_cb(sl_simple_timer_t *handl
  * @param[in] handle Pointer to the timer handle
  * @param[in] data   Pointer to the timer data
  ******************************************************************************/
-static void lighting_delayed_onoff_request_timer_cb(sl_simple_timer_t *handle,
+static void lighting_delayed_onoff_request_timer_cb(app_timer_t *handle,
                                                     void *data)
 {
   (void)data;
@@ -2761,7 +2761,7 @@ static void lighting_delayed_onoff_request_timer_cb(sl_simple_timer_t *handle,
  * @param[in] handle Pointer to the timer handle
  * @param[in] data   Pointer to the timer data
  ******************************************************************************/
-static void lighting_state_store_timer_cb(sl_simple_timer_t *handle,
+static void lighting_state_store_timer_cb(app_timer_t *handle,
                                           void *data)
 {
   (void)data;

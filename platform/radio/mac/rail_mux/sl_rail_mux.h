@@ -71,6 +71,7 @@
 #include "rail_types.h"
 #include "rail_ieee802154.h"
 #include "rail_util_ieee802154/sl_rail_util_ieee802154_stack_event.h"
+#include "coexistence/protocol/ieee802154_uc/coexistence-802154.h"
 
 typedef enum {
   SCHEDULED_TX_REQUEST,
@@ -94,6 +95,8 @@ typedef struct {
   uint8_t *data_ptr;
 } sli_fifo_tx_info_t;
 
+typedef void (*COEX_CounterHandler_t)(sl_rail_util_coex_event_t event);
+
 typedef struct {
   RAIL_Config_t *rail_config;
   RAIL_InitCompleteCallbackPtr_t init_callback;
@@ -104,6 +107,7 @@ typedef struct {
   RAIL_TxPower_t tx_power;
   RAIL_MultiTimer_t timer;
   RAIL_TimerCallback_t timer_callback;
+  COEX_CounterHandler_t coex_counter_handler;
 
   // 802.15.4 specific fields
   RAIL_IEEE802154_AddrConfig_t addr_802154;
@@ -124,6 +128,12 @@ void sl_rail_mux_YieldRadio(RAIL_Handle_t railHandle);
 RAIL_Status_t sl_rail_mux_ConfigRxOptions(RAIL_Handle_t railHandle,
                                           RAIL_RxOptions_t mask,
                                           RAIL_RxOptions_t options);
+
+RAIL_Status_t sl_rail_mux_SetStateTiming (RAIL_Handle_t railHandle,
+                                          RAIL_StateTiming_t *timings);
+
+RAIL_Status_t sl_rail_mux_IEEE802154_SetRxToEnhAckTx(RAIL_Handle_t railHandle,
+                                                     RAIL_TransitionTime_t *pRxToEnhAckTx);
 
 int8_t sl_rail_mux_GetRssiOffset(RAIL_Handle_t railHandle);
 
@@ -147,6 +157,8 @@ RAIL_Status_t sl_rail_mux_SetTaskPriority(RAIL_Handle_t railHandle,
                                           RAIL_TaskType_t taskType);
 
 RAIL_Status_t sl_rail_mux_IEEE802154_Config2p4GHzRadio(RAIL_Handle_t railHandle);
+
+RAIL_Status_t sl_rail_mux_IEEE802154_Config2p4GHzRadioAntDiv(RAIL_Handle_t railHandle);
 
 RAIL_Status_t sl_rail_mux_ConfigEvents(RAIL_Handle_t railHandle,
                                        RAIL_Events_t mask,
@@ -278,6 +290,13 @@ RAIL_Status_t sl_rail_mux_StartTx(RAIL_Handle_t railHandle,
                                   RAIL_TxOptions_t options,
                                   const RAIL_SchedulerInfo_t *schedulerInfo);
 
+RAIL_Status_t sl_rail_mux_StartScheduledCcaCsmaTx(RAIL_Handle_t railHandle,
+                                                  uint16_t channel,
+                                                  RAIL_TxOptions_t options,
+                                                  const RAIL_ScheduleTxConfig_t *scheduleTxConfig,
+                                                  const RAIL_CsmaConfig_t *csmaConfig,
+                                                  const RAIL_SchedulerInfo_t *schedulerInfo);
+
 RAIL_Status_t sl_rail_mux_StartTxStream(RAIL_Handle_t railHandle,
                                         uint16_t channel,
                                         RAIL_StreamMode_t mode);
@@ -353,6 +372,9 @@ RAIL_Status_t sl_rail_mux_SetNextTxRepeat(RAIL_Handle_t railHandle,
                                           const RAIL_TxRepeatConfig_t *repeatConfig);
 
 void sl_rail_mux_update_active_radio_config(void);
+
+void sl_rail_mux_set_coex_counter_handler(RAIL_Handle_t railHandle,
+                                          COEX_CounterHandler_t counter_handler);
 
 sl_rail_util_ieee802154_stack_status_t sl_rail_mux_ieee802154_on_event(RAIL_Handle_t railHandle,
                                                                        sl_rail_util_ieee802154_stack_event_t stack_event,

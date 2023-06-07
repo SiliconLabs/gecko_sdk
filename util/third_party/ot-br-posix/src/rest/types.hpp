@@ -38,7 +38,15 @@
 #include <string>
 #include <vector>
 
+#include <openthread/border_agent.h>
+
 #include "openthread/netdiag.h"
+
+#define OT_REST_ACCEPT_HEADER "Accept"
+#define OT_REST_CONTENT_TYPE_HEADER "Content-Type"
+
+#define OT_REST_CONTENT_TYPE_JSON "application/json"
+#define OT_REST_CONTENT_TYPE_PLAIN "text/plain"
 
 using std::chrono::steady_clock;
 
@@ -59,9 +67,13 @@ enum class HttpMethod : std::uint8_t
 enum class HttpStatusCode : std::uint16_t
 {
     kStatusOk                  = 200,
+    kStatusCreated             = 201,
+    kStatusNoContent           = 204,
+    kStatusBadRequest          = 400,
     kStatusResourceNotFound    = 404,
     kStatusMethodNotAllowed    = 405,
     kStatusRequestTimeout      = 408,
+    kStatusConflict            = 409,
     kStatusInternalServerError = 500,
 };
 
@@ -86,6 +98,7 @@ enum class ConnectionState : std::uint8_t
 };
 struct NodeInfo
 {
+    uint8_t        mBaId[OT_BORDER_AGENT_ID_LENGTH];
     uint32_t       mRole;
     uint32_t       mNumOfRouter;
     uint16_t       mRloc16;

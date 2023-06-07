@@ -15,13 +15,9 @@
  *
  ******************************************************************************/
 
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_TEST_HARNESS
-#define SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
 #endif
-#endif // UC_BUILD
 
 /**
  * @defgroup test-harness Test Harness
@@ -47,54 +43,48 @@
 #define CBKE_OPERATION_GENERATE_SECRET_283K1 3
 
 #if defined(SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT)
-extern EmberEventControl emAfKeyEstablishmentTestHarnessEventControl;
+extern EmberEventControl sli_zigbee_af_key_establishment_test_harness_eventControl;
 
-extern uint16_t emAfKeyEstablishmentTestHarnessGenerateKeyTime;
-extern uint16_t emAfKeyEstablishmentTestHarnessConfirmKeyTime;
+extern uint16_t sli_zigbee_af_key_establishment_test_harness_generate_key_time;
+extern uint16_t sli_zigbee_af_key_establishment_test_harness_confirm_key_time;
 
-extern uint16_t emAfKeyEstablishmentTestHarnessAdvertisedGenerateKeyTime;
+extern uint16_t sli_zigbee_af_key_establishment_test_harness_advertised_generate_key_time;
 
-extern bool emAfTestHarnessAllowRegistration;
+extern bool sli_zigbee_af_test_harness_allow_registration;
 
 // Allows test harness to change the message or suppress it.
 // Returns true if the message should be sent, false if not.
-bool emAfKeyEstablishmentTestHarnessMessageSendCallback(uint8_t message);
+bool sli_zigbee_af_key_establishment_test_harness_message_send_callback(uint8_t message);
 
-bool emAfKeyEstablishmentTestHarnessCbkeCallback(uint8_t cbkeOperation,
-                                                 uint8_t* data1,
-                                                 uint8_t* data2);
-void emAfKeyEstablishmentTestHarnessEventHandler(SLXU_UC_EVENT);
+bool sli_zigbee_af_key_establishment_test_harness_cbke_callback(uint8_t cbkeOperation,
+                                                                uint8_t* data1,
+                                                                uint8_t* data2);
+void sli_zigbee_af_key_establishment_test_harness_event_handler(sl_zigbee_event_t * event);
 
-#ifndef UC_BUILD
-extern EmberEventControl emAfKeyEstablishmentTestHarnessEventControl;
-  #define EMBER_AF_TEST_HARNESS_EVENT_STRINGS "Test harness",
-  #define EMBER_KEY_ESTABLISHMENT_TEST_HARNESS_EVENT \
-  { &emAfKeyEstablishmentTestHarnessEventControl, emAfKeyEstablishmentTestHarnessEventHandler },
-#endif // UC_BUILD
   #define EMBER_AF_CUSTOM_KE_EPHEMERAL_DATA_GENERATE_TIME_SECONDS \
-  emAfKeyEstablishmentTestHarnessGenerateKeyTime
+  sli_zigbee_af_key_establishment_test_harness_generate_key_time
   #define EMBER_AF_CUSTOM_KE_GENERATE_SHARED_SECRET_TIME_SECONDS \
-  emAfKeyEstablishmentTestHarnessConfirmKeyTime
+  sli_zigbee_af_key_establishment_test_harness_confirm_key_time
 
   #define EM_AF_ADVERTISED_EPHEMERAL_DATA_GEN_TIME_SECONDS \
-  emAfKeyEstablishmentTestHarnessAdvertisedGenerateKeyTime
+  sli_zigbee_af_key_establishment_test_harness_advertised_generate_key_time
 
-extern bool emKeyEstablishmentPolicyAllowNewKeyEntries;
-extern bool emAfTestHarnessSupportForNewPriceFields;
+extern bool sli_zigbee_af_key_establishment_policy_allow_new_key_entries;
+extern bool sli_zigbee_af_test_harness_support_for_new_price_fields;
 
-  #define sendSE11PublishPriceCommand emAfTestHarnessSupportForNewPriceFields
+  #define sendSE11PublishPriceCommand sli_zigbee_af_test_harness_support_for_new_price_fields
 
 #else
   #define sendSE11PublishPriceCommand true
 
   #define EMBER_AF_TEST_HARNESS_EVENT_STRINGS
 
-  #define emAfKeyEstablishmentTestHarnessMessageSendCallback(x)      (true)
-  #define emAfKeyEstablishmentTestHarnessCbkeCallback(x, y, z) (false)
+  #define sli_zigbee_af_key_establishment_test_harness_message_send_callback(x)      (true)
+  #define sli_zigbee_af_key_establishment_test_harness_cbke_callback(x, y, z) (false)
 
   #define EMBER_KEY_ESTABLISHMENT_TEST_HARNESS_EVENT
 
-  #define emAfTestHarnessAllowRegistration (1)
+  #define sli_zigbee_af_test_harness_allow_registration (1)
 #endif
 
 /**
@@ -140,5 +130,5 @@ void emberAfPluginTestHarnessReadAttributesResponseCallback(EmberAfClusterId clu
 /** @} */ // end of name Callbacks
 /** @} */ // end of test-harness
 
-void emAfTestHarnessResetApsFrameCounter(void);
-void emAfTestHarnessAdvanceApsFrameCounter(void);
+void sli_zigbee_af_test_harness_reset_aps_frame_counter(void);
+void sli_zigbee_af_test_harness_advance_aps_frame_counter(void);

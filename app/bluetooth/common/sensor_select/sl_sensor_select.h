@@ -31,6 +31,11 @@
 #ifndef SL_SENSOR_SELECT_H
 #define SL_SENSOR_SELECT_H
 
+/***********************************************************************************************//**
+ * @addtogroup sensor_select
+ * @{
+ **************************************************************************************************/
+
 #include "sl_i2cspm.h"
 #include "sl_board_control.h"
 
@@ -41,4 +46,5 @@
  *****************************************************************************/
 sl_i2cspm_t* sl_sensor_select(sl_board_sensor_t sensor);
 
+/** @} (end addtogroup sensor_select) */
 #endif // SL_SENSOR_SELECT_H

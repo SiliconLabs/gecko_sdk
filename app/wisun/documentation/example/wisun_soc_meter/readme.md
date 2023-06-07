@@ -20,11 +20,13 @@ To get started with the example, follow the steps below:
 * Using Simplicity Studio, open consoles on both the Meter and Collector devices.
 * Wait for the Collector and Meter to join the Wi-SUN Border Router network.
 
-Refer to the associated sections in [QSG181: Wi-SUN SDK Quick Start Guide](https://www.silabs.com/documents/public/quick-start-guides/qsg181-wi-sun-sdk-quick-start-guide.pdf) if you want step-by-step guidelines for each operation.
+See the associated sections in [QSG181: Wi-SUN SDK Quick Start Guide](https://www.silabs.com/documents/public/quick-start-guides/qsg181-wi-sun-sdk-quick-start-guide.pdf) for step-by-step guidelines for each operation.
 
 ## Send Sensor Data to a Collector
 
-The three Wi-SUN devices (Border Router, Meter, Collector) are now part of the same Wi-SUN network. Refer to the *Wi-SUN - SoC Collector* readme to configure the Collector. When the Meter sends sensor data to the Collector, a message is output in the console.
+The three Wi-SUN devices (Border Router, Meter, Collector) are now part of the same Wi-SUN network. See the *Wi-SUN - SoC Collector* readme to configure the Collector.
+The Meter sends its schedule time of sending also. In LFN device mode, the schedule time is different based on the selected LFN profile.
+When the Meter sends sensor data to the Collector, a message is output in the console, as follows.
 
     [fd2a:6e01:9bfc:990c:20d:6fff:fe20:bd45: Measurement packet has been sent (16 bytes)]
 

@@ -13,7 +13,7 @@
 #include PLATFORM_HEADER
 #include CONFIGURATION_HEADER
 #include "stack/include/ember-types.h"
-#include "event_control/event.h"
+#include "event_queue/event-queue.h"
 #include "hal/hal.h"
 #include "hal/plugin/i2c-driver/i2c-driver.h"
 #include "app/util/serial/command-interpreter2.h"
@@ -66,7 +66,7 @@ typedef enum {
 
 // ------------------------------------------------------------------------------
 // Plugin events
-EmberEventControl emberAfPluginSb1GestureSensorMessageReadyEventControl;
+EmberEvent emberAfPluginSb1GestureSensorMessageReadyEvent;
 
 // ------------------------------------------------------------------------------
 // callbacks that must be implemented
@@ -99,7 +99,7 @@ void emberAfPluginSb1GestureSensorInitCallback(void)
                                                          SB1_IRQ_NUMBER);
 #endif
   halGenericInterruptControlIrqEventRegister(irqConfig,
-                                             &emberAfPluginSb1GestureSensorMessageReadyEventControl);
+                                             &emberAfPluginSb1GestureSensorMessageReadyEvent);
   halGenericInterruptControlIrqEnable(irqConfig);
 }
 
@@ -121,8 +121,8 @@ void emberAfPluginSb1GestureSensorMessageReadyEventHandler(void)
 
   // We're guaranteed a separate interrupt if the sb1 has another message for
   // us, so we're ok to only execute this once.
-  emberEventControlSetInactive(
-    emberAfPluginSb1GestureSensorMessageReadyEventControl);
+  emberEventSetInactive(
+    emberAfPluginSb1GestureSensorMessageReadyEvent);
 
   // Verify that a message still exists that needs to be read
   if (halGenericInterruptControlIrqReadGpio(irqConfig)) {
@@ -218,8 +218,8 @@ uint8_t halSb1GestureSensorMsgReady(void)
 uint8_t halSb1GestureSensorCheckForMsg(void)
 {
   if (halSb1GestureSensorMsgReady()) {
-    emberEventControlSetActive(
-      emberAfPluginSb1GestureSensorMessageReadyEventControl);
+    emberEventSetActive(
+      emberAfPluginSb1GestureSensorMessageReadyEvent);
     return(true);
   }
   return(false);
@@ -231,7 +231,7 @@ uint8_t halSb1GestureSensorCheckForMsg(void)
 // ******************************************************************************
 // Cli command to print the state of the IRQ: message ready or no message rdy
 // ******************************************************************************
-void emAfPluginSb1MessageReady(void)
+void sli_sb1_message_ready(void)
 {
 #if defined(SB1_IRQ_IN_REG) && defined(SB1_IRQ_PIN)
   // clear int before read to avoid potential of missing interrupt
@@ -251,7 +251,7 @@ void emAfPluginSb1MessageReady(void)
 // CLI command to read a single I2C message.  Good for getting raw trace or
 // toggling an unserviced IRQ that didn't get picked up by the int handler
 // ******************************************************************************
-void emAfPluginSb1ReadMessage(void)
+void sli_sb1_read_message(void)
 {
   uint8_t slave_addr;
   uint8_t data[SB1_GESTURE_MSG_LEN] = { 0 };
@@ -279,7 +279,7 @@ void emAfPluginSb1ReadMessage(void)
 // function will perform no sanity checking to verify that the gesture or
 // button are sane and exist on the attached sb1 gesture recognition sensor.
 // ******************************************************************************
-void emAfPluginSb1SendGesture(void)
+void sli_sb1_send_gesture(void)
 {
   uint8_t gesture = (uint8_t)emberUnsignedCommandArgument(0);
   uint8_t button = (uint8_t)emberUnsignedCommandArgument(1);

@@ -24,7 +24,7 @@
 #include "ember.h"
 
 #include "multi-mac.h"
-#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
 #endif
 
@@ -45,9 +45,9 @@
 #if !defined(ZIGBEE_STACK_ON_HOST) && !defined(PHY_EM250)
 #include "upper-mac.h"
 #endif // !defined(ZIGBEE_STACK_ON_HOST) && !defined(PHY_EM250)
-#define emSubGhzRadioChannel sl_mac_upper_mac_state[1].nwk_radio_parameters[0].channel
-#define emSubGhzRadioPower sl_mac_upper_mac_state[1].nwk_radio_parameters[0].tx_power
-#define MAX_RADIO_POWER_USER_PROVIDED  emSubGhzRadioPower
+#define sli_zigbee_sub_ghz_radio_channel sl_mac_upper_mac_state[1].nwk_radio_parameters[0].channel
+#define sli_zigbee_sub_ghz_radio_power sl_mac_upper_mac_state[1].nwk_radio_parameters[0].tx_power
+#define MAX_RADIO_POWER_USER_PROVIDED  sli_zigbee_sub_ghz_radio_power
 #elif defined(EMBER_MULTI_NETWORK_STRIPPED)
 #if !defined(ZIGBEE_STACK_ON_HOST) && !defined(PHY_EM250)
 #include "upper-mac.h"
@@ -57,20 +57,20 @@
 #define MAX_RADIO_POWER_USER_PROVIDED  10
 #endif//#ifndef ZIGBEE_STACK_ON_HOST
 #else
-extern uint8_t emCurrentNetworkIndex;
-extern void emEnableApplicationCurrentNetwork(void);
-extern void emRestoreCurrentNetworkInternal(void);
-#define emRestoreCurrentNetwork() (emRestoreCurrentNetworkInternal())
+extern uint8_t sli_zigbee_current_network_index;
+extern void sli_zigbee_enable_application_current_network(void);
+extern void sli_zigbee_restore_current_network_internal(void);
+#define sli_zigbee_restore_current_network() (sli_zigbee_restore_current_network_internal())
 #if !defined(ZIGBEE_STACK_ON_HOST) && !defined(PHY_EM250)
 #include "upper-mac.h"
-#define MAX_RADIO_POWER_USER_PROVIDED   (sl_mac_upper_mac_state[0].nwk_radio_parameters[emCurrentNetworkIndex].tx_power)
+#define MAX_RADIO_POWER_USER_PROVIDED   (sl_mac_upper_mac_state[0].nwk_radio_parameters[sli_zigbee_current_network_index].tx_power)
 #else
 // there is no radio on Linux, so this value is picked at random
 #define MAX_RADIO_POWER_USER_PROVIDED  10
 #endif//#ifndef ZIGBEE_STACK_ON_HOST
 #endif
 
-typedef uint8_t EmMacFrameInfoElementType;
+typedef uint8_t sli_802154mac_frame_info_element_type;
 enum {
   EM_MAC_FRAME_INFO_ELEMENT_HEADER_TYPE  = 0,
   EM_MAC_FRAME_INFO_ELEMENT_PAYLOAD_TYPE = 1,
@@ -88,16 +88,16 @@ enum {
  */
 typedef struct {
   uint16_t id;
-  EmMacFrameInfoElementType type;
+  sli_802154mac_frame_info_element_type type;
   uint8_t indexInPacket;
   uint8_t length;
-} EmMacInfoElementField;
+} sli_802154mac_info_element_field;
 
 typedef enum {
   EM_MAC_FRAME_INFO_ELEMENTS_NOT_PRESENT,
   EM_MAC_FRAME_INFO_ELEMENTS_PRESENT_AND_VALID,
   EM_MAC_FRAME_INFO_ELEMENTS_PRESENT_WITH_ERRORS,
-} EmMacFrameInfoElementParseResult;
+} sli_802154mac_frame_info_element_parse_result;
 
 enum {
   NULL_OPERATION,

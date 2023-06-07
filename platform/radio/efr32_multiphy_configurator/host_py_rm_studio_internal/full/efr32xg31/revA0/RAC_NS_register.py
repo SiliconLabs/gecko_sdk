@@ -156,7 +156,7 @@ class RM_Register_RAC_NS_CTRL(Base_RM_Register):
             0xb8020000, 0x014,
             'CTRL', 'RAC_NS.CTRL', 'read-write',
             u"",
-            0x00000000, 0x1F0107EF,
+            0x08000000, 0x1F0107EF,
             0x00001000, 0x00002000,
             0x00003000)
 
@@ -218,7 +218,7 @@ class RM_Register_RAC_NS_IF(Base_RM_Register):
             0xb8020000, 0x01C,
             'IF', 'RAC_NS.IF', 'read-write',
             u"",
-            0x00000000, 0x00FF000F,
+            0x00000000, 0xFFFFFF0F,
             0x00001000, 0x00002000,
             0x00003000)
 
@@ -242,7 +242,7 @@ class RM_Register_RAC_NS_IEN(Base_RM_Register):
             0xb8020000, 0x020,
             'IEN', 'RAC_NS.IEN', 'read-write',
             u"",
-            0x00000000, 0x00FF000F,
+            0x00000000, 0xFFFFFF0F,
             0x00001000, 0x00002000,
             0x00003000)
 
@@ -2228,7 +2228,7 @@ class RM_Register_RAC_NS_AGCOVERWRITE0(Base_RM_Register):
             0xb8020000, 0x1A0,
             'AGCOVERWRITE0', 'RAC_NS.AGCOVERWRITE0', 'read-write',
             u"",
-            0x00000000, 0x03F0FFFF,
+            0x00000000, 0x1FFFFFFF,
             0x00001000, 0x00002000,
             0x00003000)
 
@@ -2244,10 +2244,20 @@ class RM_Register_RAC_NS_AGCOVERWRITE0(Base_RM_Register):
         self.zz_fdict['MANLNAMIXSLICE0'] = self.MANLNAMIXSLICE0
         self.MANLNAMIXSLICE1 = RM_Field_RAC_NS_AGCOVERWRITE0_MANLNAMIXSLICE1(self)
         self.zz_fdict['MANLNAMIXSLICE1'] = self.MANLNAMIXSLICE1
+        self.ENMANTIACOMP = RM_Field_RAC_NS_AGCOVERWRITE0_ENMANTIACOMP(self)
+        self.zz_fdict['ENMANTIACOMP'] = self.ENMANTIACOMP
+        self.MANTIACOMP = RM_Field_RAC_NS_AGCOVERWRITE0_MANTIACOMP(self)
+        self.zz_fdict['MANTIACOMP'] = self.MANTIACOMP
         self.MANPGAGAIN = RM_Field_RAC_NS_AGCOVERWRITE0_MANPGAGAIN(self)
         self.zz_fdict['MANPGAGAIN'] = self.MANPGAGAIN
         self.MANIFADCSCALE = RM_Field_RAC_NS_AGCOVERWRITE0_MANIFADCSCALE(self)
         self.zz_fdict['MANIFADCSCALE'] = self.MANIFADCSCALE
+        self.ENMANLNAMIXCUREN = RM_Field_RAC_NS_AGCOVERWRITE0_ENMANLNAMIXCUREN(self)
+        self.zz_fdict['ENMANLNAMIXCUREN'] = self.ENMANLNAMIXCUREN
+        self.MANLNAMIXCUREN0 = RM_Field_RAC_NS_AGCOVERWRITE0_MANLNAMIXCUREN0(self)
+        self.zz_fdict['MANLNAMIXCUREN0'] = self.MANLNAMIXCUREN0
+        self.MANLNAMIXCUREN1 = RM_Field_RAC_NS_AGCOVERWRITE0_MANLNAMIXCUREN1(self)
+        self.zz_fdict['MANLNAMIXCUREN1'] = self.MANLNAMIXCUREN1
         self.__dict__['zz_frozen'] = True
 
 
@@ -2269,34 +2279,6 @@ class RM_Register_RAC_NS_AGCOVERWRITE1(Base_RM_Register):
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Register_RAC_NS_AGCOVERWRITE2(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_RAC_NS_AGCOVERWRITE2, self).__init__(rmio, label,
-            0xb8020000, 0x1A8,
-            'AGCOVERWRITE2', 'RAC_NS.AGCOVERWRITE2', 'read-write',
-            u"",
-            0x00000000, 0x0000FFFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.ENMANFENOTCH = RM_Field_RAC_NS_AGCOVERWRITE2_ENMANFENOTCH(self)
-        self.zz_fdict['ENMANFENOTCH'] = self.ENMANFENOTCH
-        self.MANFENOTCHEN = RM_Field_RAC_NS_AGCOVERWRITE2_MANFENOTCHEN(self)
-        self.zz_fdict['MANFENOTCHEN'] = self.MANFENOTCHEN
-        self.MANFENOTCHATTNSEL = RM_Field_RAC_NS_AGCOVERWRITE2_MANFENOTCHATTNSEL(self)
-        self.zz_fdict['MANFENOTCHATTNSEL'] = self.MANFENOTCHATTNSEL
-        self.MANFENOTCHRATTNENRF0 = RM_Field_RAC_NS_AGCOVERWRITE2_MANFENOTCHRATTNENRF0(self)
-        self.zz_fdict['MANFENOTCHRATTNENRF0'] = self.MANFENOTCHRATTNENRF0
-        self.MANFENOTCHRATTNENRF1 = RM_Field_RAC_NS_AGCOVERWRITE2_MANFENOTCHRATTNENRF1(self)
-        self.zz_fdict['MANFENOTCHRATTNENRF1'] = self.MANFENOTCHRATTNENRF1
-        self.MANFENOTCHCAPCRSE = RM_Field_RAC_NS_AGCOVERWRITE2_MANFENOTCHCAPCRSE(self)
-        self.zz_fdict['MANFENOTCHCAPCRSE'] = self.MANFENOTCHCAPCRSE
-        self.MANFENOTCHCAPFINE = RM_Field_RAC_NS_AGCOVERWRITE2_MANFENOTCHCAPFINE(self)
-        self.zz_fdict['MANFENOTCHCAPFINE'] = self.MANFENOTCHCAPFINE
-        self.__dict__['zz_frozen'] = True
-
-
 class RM_Register_RAC_NS_SPARE(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
@@ -2304,7 +2286,7 @@ class RM_Register_RAC_NS_SPARE(Base_RM_Register):
             0xb8020000, 0x1C4,
             'SPARE', 'RAC_NS.SPARE', 'read-write',
             u"",
-            0x00000000, 0xFFFFFE3F,
+            0x00000000, 0xFFC1FE3F,
             0x00001000, 0x00002000,
             0x00003000)
 
@@ -2316,8 +2298,6 @@ class RM_Register_RAC_NS_SPARE(Base_RM_Register):
         self.zz_fdict['TX0DBMSPARE'] = self.TX0DBMSPARE
         self.SYSPARE = RM_Field_RAC_NS_SPARE_SYSPARE(self)
         self.zz_fdict['SYSPARE'] = self.SYSPARE
-        self.FENOTCHSPARE = RM_Field_RAC_NS_SPARE_FENOTCHSPARE(self)
-        self.zz_fdict['FENOTCHSPARE'] = self.FENOTCHSPARE
         self.LNAMIXSPARE = RM_Field_RAC_NS_SPARE_LNAMIXSPARE(self)
         self.zz_fdict['LNAMIXSPARE'] = self.LNAMIXSPARE
         self.IFADCCTRLRESERVED = RM_Field_RAC_NS_SPARE_IFADCCTRLRESERVED(self)
@@ -2363,43 +2343,21 @@ class RM_Register_RAC_NS_PACTRL(Base_RM_Register):
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Register_RAC_NS_FENOTCH0(Base_RM_Register):
+class RM_Register_RAC_NS_RADIOCLKCTRL(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
-        super(RM_Register_RAC_NS_FENOTCH0, self).__init__(rmio, label,
-            0xb8020000, 0x1CC,
-            'FENOTCH0', 'RAC_NS.FENOTCH0', 'read-write',
+        super(RM_Register_RAC_NS_RADIOCLKCTRL, self).__init__(rmio, label,
+            0xb8020000, 0x3D0,
+            'RADIOCLKCTRL', 'RAC_NS.RADIOCLKCTRL', 'read-write',
             u"",
-            0x00004000, 0x00007000,
+            0x00000000, 0x00000003,
             0x00001000, 0x00002000,
             0x00003000)
 
-        self.FENOTCHVBIAS = RM_Field_RAC_NS_FENOTCH0_FENOTCHVBIAS(self)
-        self.zz_fdict['FENOTCHVBIAS'] = self.FENOTCHVBIAS
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_RAC_NS_FENOTCH1(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_RAC_NS_FENOTCH1, self).__init__(rmio, label,
-            0xb8020000, 0x1D0,
-            'FENOTCH1', 'RAC_NS.FENOTCH1', 'read-write',
-            u"",
-            0x00000000, 0x001FFF05,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.FENOTCHENVDDSW = RM_Field_RAC_NS_FENOTCH1_FENOTCHENVDDSW(self)
-        self.zz_fdict['FENOTCHENVDDSW'] = self.FENOTCHENVDDSW
-        self.FENOTCHRCCALEN = RM_Field_RAC_NS_FENOTCH1_FENOTCHRCCALEN(self)
-        self.zz_fdict['FENOTCHRCCALEN'] = self.FENOTCHRCCALEN
-        self.FENOTCHRCCALCOUNTER = RM_Field_RAC_NS_FENOTCH1_FENOTCHRCCALCOUNTER(self)
-        self.zz_fdict['FENOTCHRCCALCOUNTER'] = self.FENOTCHRCCALCOUNTER
-        self.FENOTCHRCCALOSC = RM_Field_RAC_NS_FENOTCH1_FENOTCHRCCALOSC(self)
-        self.zz_fdict['FENOTCHRCCALOSC'] = self.FENOTCHRCCALOSC
-        self.FENOTCHRCCALOUT = RM_Field_RAC_NS_FENOTCH1_FENOTCHRCCALOUT(self)
-        self.zz_fdict['FENOTCHRCCALOUT'] = self.FENOTCHRCCALOUT
+        self.CLKSRWHSPRESC = RM_Field_RAC_NS_RADIOCLKCTRL_CLKSRWHSPRESC(self)
+        self.zz_fdict['CLKSRWHSPRESC'] = self.CLKSRWHSPRESC
+        self.CLKSRWLSPRESC = RM_Field_RAC_NS_RADIOCLKCTRL_CLKSRWLSPRESC(self)
+        self.zz_fdict['CLKSRWLSPRESC'] = self.CLKSRWLSPRESC
         self.__dict__['zz_frozen'] = True
 
 
@@ -2528,6 +2486,24 @@ class RM_Register_RAC_NS_SCRATCH7(Base_RM_Register):
 
         self.SCRATCH7 = RM_Field_RAC_NS_SCRATCH7_SCRATCH7(self)
         self.zz_fdict['SCRATCH7'] = self.SCRATCH7
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Register_RAC_NS_FSWCTRL(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_RAC_NS_FSWCTRL, self).__init__(rmio, label,
+            0xb8020000, 0x600,
+            'FSWCTRL', 'RAC_NS.FSWCTRL', 'read-write',
+            u"",
+            0x00000001, 0x00000003,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.FSWRISCVCLKDIS = RM_Field_RAC_NS_FSWCTRL_FSWRISCVCLKDIS(self)
+        self.zz_fdict['FSWRISCVCLKDIS'] = self.FSWRISCVCLKDIS
+        self.FSWRISCVRESET = RM_Field_RAC_NS_FSWCTRL_FSWRISCVRESET(self)
+        self.zz_fdict['FSWRISCVRESET'] = self.FSWRISCVRESET
         self.__dict__['zz_frozen'] = True
 
 

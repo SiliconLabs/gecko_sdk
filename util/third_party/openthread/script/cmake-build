@@ -62,60 +62,57 @@
 
 set -euxo pipefail
 
-OT_CMAKE_NINJA_TARGET=${OT_CMAKE_NINJA_TARGET:-}
+OT_CMAKE_NINJA_TARGET=${OT_CMAKE_NINJA_TARGET-}
 
 OT_SRCDIR="$(cd "$(dirname "$0")"/.. && pwd)"
-
 readonly OT_SRCDIR
-readonly OT_PLATFORMS=(simulation posix)
-readonly OT_POSIX_SIM_COMMON_OPTIONS=(
+
+OT_PLATFORMS=(simulation posix android-ndk)
+readonly OT_PLATFORMS
+
+OT_POSIX_SIM_COMMON_OPTIONS=(
     "-DOT_ANYCAST_LOCATOR=ON"
     "-DOT_BORDER_AGENT=ON"
+    "-DOT_BORDER_AGENT_ID=ON"
     "-DOT_BORDER_ROUTER=ON"
-    "-DOT_COAP=ON"
-    "-DOT_COAP_BLOCK=ON"
-    "-DOT_COAP_OBSERVE=ON"
-    "-DOT_COAPS=ON"
-    "-DOT_COMMISSIONER=ON"
     "-DOT_CHANNEL_MANAGER=ON"
     "-DOT_CHANNEL_MONITOR=ON"
     "-DOT_CHILD_SUPERVISION=ON"
+    "-DOT_COAP=ON"
+    "-DOT_COAPS=ON"
+    "-DOT_COAP_BLOCK=ON"
+    "-DOT_COAP_OBSERVE=ON"
+    "-DOT_COMMISSIONER=ON"
+    "-DOT_COMPILE_WARNING_AS_ERROR=ON"
+    "-DOT_COVERAGE=ON"
     "-DOT_DATASET_UPDATER=ON"
     "-DOT_DHCP6_CLIENT=ON"
     "-DOT_DHCP6_SERVER=ON"
     "-DOT_DIAGNOSTIC=ON"
+    "-DOT_DNSSD_SERVER=ON"
     "-DOT_DNS_CLIENT=ON"
     "-DOT_ECDSA=ON"
     "-DOT_HISTORY_TRACKER=ON"
     "-DOT_IP6_FRAGM=ON"
     "-DOT_JAM_DETECTION=ON"
     "-DOT_JOINER=ON"
-    "-DOT_LEGACY=ON"
+    "-DOT_LOG_LEVEL_DYNAMIC=ON"
     "-DOT_MAC_FILTER=ON"
-    "-DOT_MTD_NETDIAG=ON"
     "-DOT_NEIGHBOR_DISCOVERY_AGENT=ON"
     "-DOT_NETDATA_PUBLISHER=ON"
+    "-DOT_NETDIAG_CLIENT=ON"
     "-DOT_PING_SENDER=ON"
+    "-DOT_RCP_RESTORATION_MAX_COUNT=2"
+    "-DOT_RCP_TX_WAIT_TIME_SECS=5"
     "-DOT_REFERENCE_DEVICE=ON"
     "-DOT_SERVICE=ON"
     "-DOT_SNTP_CLIENT=ON"
     "-DOT_SRP_CLIENT=ON"
-    "-DOT_COVERAGE=ON"
-    "-DOT_LOG_LEVEL_DYNAMIC=ON"
-    "-DOT_COMPILE_WARNING_AS_ERROR=ON"
-    "-DOT_RCP_RESTORATION_MAX_COUNT=2"
+    "-DOT_SRP_SERVER=ON"
     "-DOT_RCP_TX_WAIT_TIME_SECS=5"
     "-DOT_UPTIME=ON"
 )
-
-readonly OT_POSIX_MULTIPAN_RCP_OPTIONS=(
-    "-DOT_MULTIPAN_RCP=ON"
-    "-DOT_RCP_RESTORATION_MAX_COUNT=100"
-    "-DOT_RCP_TX_WAIT_TIME_SECS=6"
-    "-DOT_POSIX_MAX_POWER_TABLE=OFF"
-    "-DOT_CHANNEL_MANAGER=OFF"
-    "-DOT_CHANNEL_MONITOR=OFF"
-)
+readonly OT_POSIX_SIM_COMMON_OPTIONS
 
 die()
 {
@@ -154,35 +151,80 @@ main()
     # Check if the platform supports cmake.
     echo "${OT_PLATFORMS[@]}" | grep -wq "${platform}" || die "${platform}"
 
-    local posix_build_type=""
-    if [[ ${platform} == posix* ]] && [[ "$#" -ge 2 ]] && [[ "$2" == multipan_rcp* ]]; then
-        posix_build_type="$2"
-        shift
-    fi
-
     shift
     local local_options=()
     local options=(
-        "-DOT_PLATFORM=${platform}"
         "-DOT_SLAAC=ON"
     )
 
     case "${platform}" in
+        android-ndk)
+            if [ -z "${NDK-}" ]; then
+                echo "
+The 'NDK' environment variable needs to point to the Android NDK toolchain.
+Please ensure the NDK is downloaded and extracted then try to run this script again
+
+For example:
+    NDK=/opt/android-ndk-r25c ./script/cmake-build-android
+
+You can download the NDK at https://developer.android.com/ndk/downloads
+
+            "
+                exit 1
+            fi
+
+            NDK_CMAKE_TOOLCHAIN_FILE="${NDK?}/build/cmake/android.toolchain.cmake"
+            if [ ! -f "${NDK_CMAKE_TOOLCHAIN_FILE}" ]; then
+                echo "
+Could not fild the Android NDK CMake toolchain file
+- NDK=${NDK}
+- NDK_CMAKE_TOOLCHAIN_FILE=${NDK_CMAKE_TOOLCHAIN_FILE}
+
+            "
+                exit 2
+            fi
+            local_options+=(
+                "-DOT_LOG_OUTPUT=PLATFORM_DEFINED"
+
+                # Add Android NDK flags
+                "-DOT_ANDROID_NDK=1"
+                "-DCMAKE_TOOLCHAIN_FILE=${NDK?}/build/cmake/android.toolchain.cmake"
+
+                # Android API needs to be >= android-24 for `getifsaddrs()`
+                "-DANDROID_PLATFORM=android-24"
+
+                # Store thread settings in the CWD when executing ot-cli or ot-daemon
+                '-DOT_POSIX_SETTINGS_PATH="./thread"'
+            )
+
+            # Rewrite platform to posix
+            platform="posix"
+
+            # Check if OT_DAEMON or OT_APP_CLI flags are needed
+            if [[ ${OT_CMAKE_NINJA_TARGET[*]} =~ "ot-daemon" ]] || [[ ${OT_CMAKE_NINJA_TARGET[*]} =~ "ot-ctl" ]]; then
+                local_options+=("-DOT_DAEMON=ON")
+            elif [[ ${OT_CMAKE_NINJA_TARGET[*]} =~ "ot-cli" ]]; then
+                local_options+=("-DOT_APP_CLI=ON")
+            fi
+
+            options+=("${local_options[@]}")
+            ;;
+
         posix)
             local_options+=(
+                "-DOT_TCP=OFF"
                 "-DOT_LOG_OUTPUT=PLATFORM_DEFINED"
                 "-DOT_POSIX_MAX_POWER_TABLE=ON"
             )
             options+=("${OT_POSIX_SIM_COMMON_OPTIONS[@]}" "${local_options[@]}")
-
-            case "${posix_build_type}" in
-                multipan_rcp)
-                    options+=("${local_options[@]}" "${OT_POSIX_MULTIPAN_RCP_OPTIONS[@]}")
-                    ;;
-            esac
             ;;
         simulation)
-            local_options=("-DOT_LINK_RAW=ON")
+            local_options+=(
+                "-DOT_LINK_RAW=ON"
+                "-DOT_DNS_DSO=ON"
+                "-DOT_DNS_CLIENT_OVER_TCP=ON"
+                "-DOT_UDP_FORWARD=ON"
+            )
             options+=("${OT_POSIX_SIM_COMMON_OPTIONS[@]}" "${local_options[@]}")
             ;;
         *)
@@ -190,6 +232,9 @@ main()
             ;;
     esac
 
+    options+=(
+        "-DOT_PLATFORM=${platform}"
+    )
     options+=("$@")
     build "${platform}" "${options[@]}"
 }

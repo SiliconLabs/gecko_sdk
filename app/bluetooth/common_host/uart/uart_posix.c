@@ -37,6 +37,7 @@
 #include <termios.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
+#include <sys/select.h>
 
 #include "uart.h"
 
@@ -144,14 +145,42 @@ int32_t uartRxNonBlocking(void *handle, uint32_t dataLength, uint8_t *data)
 
 int32_t uartRxPeek(void *handle)
 {
-  int32_t bytesInBuf;
+  int32_t bytesInBuf = -1, fd_num;
+  fd_set read_fds;
+  struct timeval timeout;
 
   if (*(int32_t *)handle == -1) {
     return -1;
   }
 
-  if (-1 == ioctl(*(int32_t *)handle, FIONREAD, (int *)&bytesInBuf)) {
+  // Clear set to initialize
+  FD_ZERO(&read_fds);
+
+  // Add uart file descriptor to the fd set +1 because this is the usage of select()
+  // This is necessary always becaus after select the descriptor state will be changed
+  fd_num = *(int32_t *)handle + 1;
+
+  // Add uart file descriptor to the selected set
+  FD_SET(*(int32_t *)handle, &read_fds);
+
+  timeout.tv_sec = 0;
+  timeout.tv_usec = 5000;
+  // Select read file descriptors for 5ms blocking
+  if (-1 == select(fd_num, &read_fds, NULL, NULL, &timeout)) {
+    // During application init phase system calls could interrupt select() this would cause a return with -1.
+    // This is not a valid issue here, thus it shall be bypassed
+    if (EINTR == errno) {
+      return 0;
+    }
     return -1;
+  } else {
+    // Check if select really took the target file descriptor from the set
+    if (!FD_ISSET(fd_num, &read_fds)) {
+      // Detected data rate, the read bytes has to be checked
+      if (-1 == ioctl(*(int32_t *)handle, FIONREAD, (int *)&bytesInBuf)) {
+        return -1;
+      }
+    }
   }
 
   return bytesInBuf;

@@ -1,0 +1,149 @@
+project_name: btmesh_soc_empty_cbp_tz
+package: Btmesh
+label: Bluetooth Mesh - SoC Empty with Certificate-Based Provisioning support
+description: >
+  Demonstrates the bare minimum needed for a Bluetooth Mesh C application that
+  allows Certificate-Based Provisioning (CBP). The application starts Unprovisioned
+  Device Beaconing after boot waiting to be provisioned to a Mesh Network.
+
+category: Bluetooth Mesh Examples
+quality: experimental
+
+filter:
+  - name: "Wireless Technology"
+    value: ["Bluetooth Mesh"]
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "Project Difficulty"
+    value: ["Beginner"]
+
+component:
+  - id: app_assert
+  - id: app_log
+  - id: bootloader_interface
+  - id: bootloader_app_properties
+  - id: btmesh_stack_gatt_prov_bearer
+  - id: btmesh_stack_node
+  - id: btmesh_stack_relay
+  - id: btmesh_provisionee
+  - id: btmesh_proxy
+  - id: btmesh_stack
+  - id: iostream_usart
+    instance:
+      - vcom
+  - id: mpu
+  - id: rail_util_pti
+  - id: trustzone_nonsecure
+  - id: nvm3_default
+  - id: tz_secure_key_library  
+
+source:
+  - path: app.c
+  - path: main.c
+
+include:
+  - path: .
+    file_list:
+    - path: app.h
+
+config_file:
+  - override:
+      component: btmesh_dcd_configuration
+      file_id: dcd_configuration_file_id
+    path: dcd_config.btmeshconf
+    directory: btmeshconf
+
+requires:
+  - name: armv8m.main
+
+conflicts:
+  - name: device_security_vault
+
+readme:
+  - path: ../../documentation/example/btmesh_soc_empty_cbp/readme.md
+
+other_file:
+  - path: ../../../bluetooth/script/create_bl_files.bat
+  - path: ../../../bluetooth/script/create_bl_files.sh
+  - path: ../../documentation/example/btmesh_soc_empty_cbp/readme_img0.png
+
+import:
+  # Import the config files from the TZ Secure application
+  - id: btmesh_soc_tz_secure_application
+  
+configuration:
+  - name: APP_LOG_LEVEL
+    value: "APP_LOG_LEVEL_INFO"
+  - name: NVM3_DEFAULT_NVM_SIZE
+    value: "0x6000"
+  - name: SL_BOARD_ENABLE_VCOM
+    value: "1"
+  - name: SL_BTMESH_CONFIG_MAX_PROV_BEARERS
+    value: "3"
+  - name: SL_BTMESH_PROVISIONEE_INIT_PROV_RECORDS_CFG_VAL
+    value: 1
+  - name: SL_BTMESH_PROVISIONEE_OOB_ENABLE_CFG_VAL
+    value: 1
+  - name: SL_BTMESH_PROVISIONEE_OOB_PUBLIC_KEY_ENABLE_CFG_VAL
+    value: 1
+  - name: SL_HEAP_SIZE
+    value: "0x4000"
+  - name: SL_IOSTREAM_USART_VCOM_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
+    value: "0"
+  - name: SL_PSA_KEY_USER_SLOT_COUNT
+    value: "0"
+    condition:
+      - psa_crypto
+  - name: SL_STACK_SIZE
+    value: "0x1000"
+
+template_contribution:
+  - name: memory_flash_start
+    value: 0x20000
+    condition: [device_sdid_200]
+    unless: [bootloader_interface]
+  - name: memory_flash_start
+    value: 0x20000
+    condition: [device_sdid_205]
+    unless: [bootloader_interface]
+  - name: memory_flash_start
+    value: 0x8020000
+    unless: [device_sdid_200, device_sdid_205, bootloader_interface]
+
+  # Offset due to secure-application if bootloader is used
+  - name: memory_flash_start
+    value: 0x2C000
+    condition: [device_sdid_200, bootloader_interface]
+  - name: memory_flash_start
+    value: 0x2C000
+    condition: [device_sdid_205, bootloader_interface]
+  - name: memory_flash_start
+    value: 0x802C000
+    condition: [bootloader_interface]
+    unless: [device_sdid_200, device_sdid_205]
+
+
+  - name: memory_flash_size
+    value: 0x64000
+  - name: memory_ram_start
+    value: 0x20003000
+  - name: memory_ram_size
+    value: 0x8000
+
+
+tag:
+  - hardware:device:flash:512
+  - hardware:device:ram:32
+  - hardware:rf:band:2400
+
+ui_hints:
+  highlight:
+    - path: config/btconf/gatt_configuration.btconf
+      focus: false
+    - path: config/btmeshconf/dcd_config.btmeshconf
+      focus: false
+    - path: readme.md
+      focus: true
+
+post_build:
+  profile: btmesh_tz_non_secure_application

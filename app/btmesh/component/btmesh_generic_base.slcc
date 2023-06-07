@@ -18,6 +18,7 @@ template_file:
   - path: "sl_btmesh_generic_base.h.jinja"
 requires:
   - name: "app_assert"
+  - name: "btmesh_provisionee"
   - name: "btmesh_stack"
   - name: "btmesh_core"
 provides:

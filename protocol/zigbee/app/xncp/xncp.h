@@ -48,35 +48,17 @@ EmberStatus emberAfPluginXncpIncomingCustomFrameCallback(uint8_t messageLength,
                                                          uint8_t *replyPayloadLength,
                                                          uint8_t *replyPayload);
 
-#ifdef UC_BUILD
 bool emberAfPluginXncpIncomingMessageCallback(EmberIncomingMessageType type,
                                               EmberApsFrame *apsFrame,
                                               EmberMessageBuffer message);
-#else  // !UC_BUILD
-bool emberAfIncomingMessageCallback(EmberIncomingMessageType type,
-                                    EmberApsFrame *apsFrame,
-                                    EmberMessageBuffer message);
-#endif  //UC_BUILD
 
-#ifdef UC_BUILD
 bool emberAfPluginXncpPermitNcpToHostFrameCallback(uint16_t frameId,
                                                    uint8_t payloadLength,
                                                    uint8_t *payload);
-#else   // !UC_BUILD
-bool emberAfPluginCommandHandlerPermitNcpToHostFrameCallback(uint16_t frameId,
-                                                             uint8_t payloadLength,
-                                                             uint8_t *payload);
-#endif  // UC_BUILD
 
-#ifdef UC_BUILD
 bool emberAfPluginXncpPermitHostToNcpFrameCallback(uint16_t frameId,
                                                    uint8_t payloadLength,
                                                    uint8_t *payload);
-#else  // !UC_BUILD
-bool emberAfPluginCommandHandlerPermitHostToNcpFrameCallback(uint16_t frameId,
-                                                             uint8_t payloadLength,
-                                                             uint8_t *payload);
-#endif // UC_BUILD
 
 //------------------------------------------------------------------------------
 // Public APIs
@@ -86,14 +68,14 @@ EmberStatus emberAfPluginXncpSendCustomEzspMessage(uint8_t length, uint8_t *payl
 //------------------------------------------------------------------------------
 // Private APIs
 
-EmberStatus emXncpInit(void);
-bool emXNcpAllowIncomingEzspCommand(void);
-bool emXNcpAllowOutgoingEzspCallback(uint8_t *callback,
-                                     uint8_t callbackLength);
-bool emAfPluginXncpIncomingMessageCallback(EmberIncomingMessageType type,
-                                           EmberApsFrame *apsFrame,
-                                           EmberMessageBuffer message);
-void emXNcpHandleIncomingCustomEzspMessage(void);
-void emXNcpHandleGetInfoCommand(void);
+EmberStatus sli_zigbee_xncp_init(void);
+bool sli_zigbee_xncp_allow_incoming_ezsp_command(void);
+bool sli_zigbee_xncp_allow_outgoing_ezsp_callback(uint8_t *callback,
+                                                  uint8_t callbackLength);
+bool sli_zigbee_af_xncp_incoming_message_callback(EmberIncomingMessageType type,
+                                                  EmberApsFrame *apsFrame,
+                                                  EmberMessageBuffer message);
+void sli_zigbee_xncp_handle_incoming_custom_ezsp_message(void);
+void sli_zigbee_xncp_handle_get_info_command(void);
 
 #endif // SILABS_XNCP_H

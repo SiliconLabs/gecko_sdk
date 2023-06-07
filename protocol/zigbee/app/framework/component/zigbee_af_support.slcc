@@ -1,0 +1,76 @@
+package: "Zigbee"
+id: "zigbee_af_support"
+label: "Application Framework Support Component"
+category: Zigbee|Green Power
+quality: "production"
+description: "This component provides AF implementation which can be used on NCP applications"
+provides:
+  - name: "zigbee_af_support"
+
+requires:
+  - name: "zigbee_green_power_adapter"
+    condition:
+      - zigbee_ncp
+
+config_file:
+  - path: protocol/zigbee/app/framework/plugin/af-support/config/af-support-config.h
+
+source:
+  - path: protocol/zigbee/app/framework/plugin/af-support/af-support.c
+    condition:
+      - zigbee_ncp
+  - path: protocol/zigbee/app/em260/command-handlers-af-support.c
+    condition:
+      - zigbee_ncp
+  - path: protocol/zigbee/app/framework/util/af-soc-common.c
+    condition:
+      - zigbee_ncp
+  - path: protocol/zigbee/app/framework/plugin/groups-server/groups-server-common.c
+    condition:
+      - zigbee_ncp
+  - path: protocol/zigbee/app/framework/util/print.c
+    condition:
+      - zigbee_ncp
+      - zigbee_simulation
+   # printing on ncp is not really useful, it may cause unnecessary code size increment,
+   # however it might be useful on simulation where we can create automation test cases.
+  - path: protocol/zigbee/app/framework/util/print-formatter.c
+    condition:
+      - zigbee_ncp
+      - zigbee_simulation
+  - path: protocol/zigbee/app/framework/plugin/af-support/af-support-host.c
+    condition:
+      - zigbee_ezsp
+
+include:
+  - path: protocol/zigbee/app/framework/plugin/af-support
+    file_list:
+      - path: af-support.h
+      - path: af-support-host.h
+        condition:
+          - zigbee_ezsp
+
+template_contribution:
+  - name: component_catalog
+    value: zigbee_af_support
+  - name: zigbee_stack_callback
+    value:
+      callback_type: af_support_incoming_message
+      function_name: sli_zb_af_support_incoming_message_callback
+    condition:
+      - zigbee_ncp
+  - name: zigbee_af_callback
+    value:
+      callback_type: init_done
+      function_name: sli_zb_af_support_init_callback
+    priority: -9700
+    condition:
+      - zigbee_ncp
+# emberAfInit must be preceeded by sli_zb_af_support_init_callback
+  - name: zigbee_af_callback
+    value:
+      callback_type: init_done
+      function_name: emberAfInit
+    priority: -9600
+    condition:
+      - zigbee_ncp

@@ -5,7 +5,7 @@ description: >
   The Static memory management component provides a static memory management implementation for Application Scheduler.
   It provides APIs for allocating and freeing memory.
 package: platform
-quality: experimental
+quality: evaluation
 
 provides:
   - name: app_scheduler_memory

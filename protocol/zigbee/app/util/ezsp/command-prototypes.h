@@ -16,13 +16,13 @@
 //------------------------------------------------------------------------------
 
 // The command allows the Host to specify the desired EZSP version and must be
-// sent before any other command. This document describes EZSP version 9 and
-// stack type 2 (mesh). The response provides information about the firmware
-// running on the NCP.
-// Return: The EZSP version the NCP is using (9).
+// sent before any other command. The response provides information about the
+// firmware running on the NCP.
+// Return: The EZSP version the NCP is using.
 uint8_t ezspVersion(
   // The EZSP version the Host wishes to use. To successfully set the
-  // version and allow other commands, this must be 9.
+  // version and allow other commands, this must be same as
+  // EZSP_PROTOCOL_VERSION.
   uint8_t desiredProtocolVersion,
   // Return: The type of stack running on the NCP (2).
   uint8_t *stackType,
@@ -52,6 +52,50 @@ EzspStatus ezspSetConfigurationValue(
   EzspConfigId configId,
   // The new configuration value.
   uint16_t value);
+
+// Read attribute data on NCP endpoints.
+// Return: An EmberStatus value indicating success or the reason for failure.
+EmberStatus ezspReadAttribute(
+  // Endpoint
+  uint8_t endpoint,
+  // Cluster.
+  uint16_t cluster,
+  // Attribute ID.
+  uint16_t attributeId,
+  // Mask.
+  uint8_t mask,
+  // Manufacturer code.
+  uint16_t manufacturerCode,
+  // Return: Attribute data type.
+  uint8_t *dataType,
+  // Return: Length of attribute data.
+  uint8_t *readLength,
+  // Return: Attribute data.
+  uint8_t *dataPtr);
+
+// Write attribute data on NCP endpoints.
+// Return: An EmberStatus value indicating success or the reason for failure.
+EmberStatus ezspWriteAttribute(
+  // Endpoint
+  uint8_t endpoint,
+  // Cluster.
+  uint16_t cluster,
+  // Attribute ID.
+  uint16_t attributeId,
+  // Mask.
+  uint8_t mask,
+  // Manufacturer code.
+  uint16_t manufacturerCode,
+  // Override read only and data type.
+  bool overrideReadOnlyAndDataType,
+  // Override read only and data type.
+  bool justTest,
+  // Attribute data type.
+  uint8_t dataType,
+  // Attribute data length.
+  uint8_t dataLength,
+  // Attribute data.
+  uint8_t *data);
 
 // Configures endpoint information on the NCP. The NCP does not remember these
 // settings after a reset. Endpoints can be added by the Host after the NCP has
@@ -1749,6 +1793,23 @@ EmberStatus ezspGetKey(
   // Return: The structure containing the key and its associated data.
   EmberKeyStruct *keyStruct);
 
+// Exports a key from security manager based on passed context.
+void ezspExportKey(
+  // Metadata to identify the requested key.
+  sl_zb_sec_man_context_t *context,
+  // Return: Data to store the exported key in.
+  sl_zb_sec_man_key_t *key,
+  // Return: The success or failure code of the operation.
+  sl_status_t *status);
+
+// Imports a key into security manager based on passed context.
+// Return: The success or failure code of the operation.
+sl_status_t ezspImportKey(
+  // Metadata to identify where the imported key should be stored.
+  sl_zb_sec_man_context_t *context,
+  // The key to be imported.
+  sl_zb_sec_man_key_t *key);
+
 // Callback
 // A callback to inform the application that the Network Key has been updated
 // and the node has been switched over to use the new key. The actual key being
@@ -1911,6 +1972,102 @@ EmberStatus ezspGetTransientKeyTableEntry(
   // Return: The transient key structure that is filled in upon success.
   EmberTransientKeyData *transientKeyData);
 
+// Retrieve information about the current and alternate network key, excluding
+// their contents.
+// Return: Success or failure of retrieving network key info.
+sl_status_t ezspGetNetworkKeyInfo(
+  // Return: Information about current and alternate network keys.
+  sl_zb_sec_man_network_key_info_t *network_key_info);
+
+// Retrieve metadata about an APS link key.  Does not retrieve contents.
+void ezspGetApsKeyInfo(
+  // Context used to input information about key.
+  sl_zb_sec_man_context_t *context_in,
+  // Return: EUI64 associated with this APS link key
+  EmberEUI64 eui,
+  // Return: Metadata about the referenced key.
+  sl_zb_sec_man_aps_key_metadata_t *key_data,
+  // Return: Status of metadata retrieval operation.
+  sl_status_t *status);
+
+// Import an application link key into the key table.
+// Return: Status of key import operation.
+sl_status_t ezspImportLinkKey(
+  // Index where this key is to be imported to.
+  uint8_t index,
+  // EUI64 this key is associated with.
+  EmberEUI64 address,
+  // The key data to be imported.
+  sl_zb_sec_man_key_t *plaintext_key);
+
+// Export the link key at given index from the key table.
+void ezspExportLinkKeyByIndex(
+  // Index of key to export.
+  uint8_t index,
+  // Return: EUI64 associated with the exported key.
+  EmberEUI64 eui,
+  // Return: The exported key.
+  sl_zb_sec_man_key_t *plaintext_key,
+  // Return: Metadata about the key.
+  sl_zb_sec_man_aps_key_metadata_t *key_data,
+  // Return: Status of key export operation.
+  sl_status_t *status);
+
+// Export the link key associated with the given EUI from the key table.
+void ezspExportLinkKeyByEui(
+  // EUI64 associated with the key to export.
+  EmberEUI64 eui,
+  // Return: The exported key.
+  sl_zb_sec_man_key_t *plaintext_key,
+  // Return: Key index of the exported key.
+  uint8_t *index,
+  // Return: Metadata about the key.
+  sl_zb_sec_man_aps_key_metadata_t *key_data,
+  // Return: Status of key export operation.
+  sl_status_t *status);
+
+// Check whether a key context can be used to load a valid key.
+// Return: Validity of the checked context.
+sl_status_t ezspCheckKeyContext(
+  // Context struct to check the validity of.
+  sl_zb_sec_man_context_t *context);
+
+// Import a transient link key.
+// Return: Status of key import operation.
+sl_status_t ezspImportTransientKey(
+  // EUI64 associated with this transient key.
+  EmberEUI64 eui64,
+  // The key to import.
+  sl_zb_sec_man_key_t *plaintext_key,
+  // Flags associated with this transient key.
+  sl_zigbee_sec_man_flags_t flags);
+
+// Export a transient link key from a given table index.
+void ezspExportTransientKeyByIndex(
+  // Index to export from.
+  uint8_t index,
+  // Return: Context struct for export operation.
+  sl_zb_sec_man_context_t *context,
+  // Return: The exported key.
+  sl_zb_sec_man_key_t *plaintext_key,
+  // Return: Metadata about the key.
+  sl_zb_sec_man_aps_key_metadata_t *key_data,
+  // Return: Status of key export operation.
+  sl_status_t *status);
+
+// Export a transient link key associated with a given EUI64
+void ezspExportTransientKeyByEui(
+  // Index to export from.
+  EmberEUI64 eui,
+  // Return: Context struct for export operation.
+  sl_zb_sec_man_context_t *context,
+  // Return: The exported key.
+  sl_zb_sec_man_key_t *plaintext_key,
+  // Return: Metadata about the key.
+  sl_zb_sec_man_aps_key_metadata_t *key_data,
+  // Return: Status of key export operation.
+  sl_status_t *status);
+
 //------------------------------------------------------------------------------
 // Trust Center Frames
 //------------------------------------------------------------------------------
@@ -1951,15 +2108,6 @@ EmberStatus ezspBroadcastNextNetworkKey(
 // Return: EmberStatus value that indicates the success or failure of the
 // command.
 EmberStatus ezspBroadcastNetworkKeySwitch(void);
-
-// This function causes a coordinator to become the Trust Center when it is
-// operating in a network that is not using one. It will send out an updated
-// Network Key to all devices that will indicate a transition of the network to
-// now use a Trust Center. The Trust Center should also switch all devices to
-// using this new network key with the appropriate API.
-EmberStatus ezspBecomeTrustCenter(
-  // The key data for the Updated Network Key.
-  EmberKeyData *newNetworkKey);
 
 // This routine processes the passed chunk of data and updates the hash context
 // based on it. If the 'finalize' parameter is not set, then the length of the
@@ -2759,6 +2907,21 @@ void ezspGpSinkTableSetSecurityFrameCounter(
   uint8_t index,
   // Security Frame Counter
   uint32_t sfc);
+
+// Puts the GPS in commissioning mode.
+// Return: An EmberStatus value indicating success or the reason for failure.
+EmberStatus ezspGpSinkCommission(
+  // commissioning options
+  uint8_t options,
+  // gpm address for security.
+  uint16_t gpmAddrForSecurity,
+  // gpm address for pairing.
+  uint16_t gpmAddrForPairing,
+  // sink endpoint.
+  uint8_t sinkEndpoint);
+
+// Clears all entries within the translation table.
+void ezspGpTranslationTableClear(void);
 
 //------------------------------------------------------------------------------
 // Secure EZSP Frames

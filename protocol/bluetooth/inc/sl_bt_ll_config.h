@@ -44,16 +44,20 @@ typedef struct {
   uint8_t _reserved;
   uint8_t adv_step;
   uint8_t scan_step;
+  uint8_t pawr_tx_min;
+  uint8_t pawr_tx_max;
+  uint8_t pawr_rx_min;
+  uint8_t pawr_rx_max;
 } sl_bt_bluetooth_ll_priorities;
 
 //Default priority configuration
-#define SL_BT_BLUETOOTH_PRIORITIES_DEFAULT { 191, 143, 175, 127, 135, 0, 55, 15, 16, 16, 0, 4, 4 }
+#define SL_BT_BLUETOOTH_PRIORITIES_DEFAULT { 191, 143, 175, 127, 135, 0, 55, 15, 16, 16, 0, 4, 4, 15, 5, 20, 10 }
 
 #define SL_BT_BLUETOOTH_PA_AUTOMODE 0xff
 
+#include "sl_common.h"
+SL_PACK_START(1)
 typedef struct {
-  uint8_t activate_power_control;
-
   int8_t golden_rssi_min_1m; //<! Golden range lowest RSSI for 1M PHY.
   int8_t golden_rssi_max_1m; //<! Golden range highest RSSI for 1M PHY.
 
@@ -65,7 +69,10 @@ typedef struct {
 
   int8_t golden_rssi_min_coded_s2; //<! Golden range lowest RSSI for Coded PHY w/ S=2.
   int8_t golden_rssi_max_coded_s2; //<! Golden range highest RSSI for Coded PHY w/ S=2.
-} sl_bt_ll_power_control_config_t;
+
+  uint8_t activate_power_control;
+} SL_ATTRIBUTE_PACKED sl_bt_ll_power_control_config_t;
+SL_PACK_END()
 
 #define SL_BT_USE_MAX_POWER_LEVEL_SUPPORTED_BY_RADIO 0x7fff
 #define SL_BT_USE_MIN_POWER_LEVEL_SUPPORTED_BY_RADIO 0x7fff

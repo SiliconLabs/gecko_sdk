@@ -23,22 +23,13 @@
 #include "app/framework/util/af-event.h"
 #include "app/framework/util/time-util.h"
 
-#ifdef UC_BUILD
 #include "zigbee_zcl_callback_dispatcher.h"
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #ifdef SL_CATALOG_ZIGBEE_NETWORK_TEST_PRESENT
 #include "network_test_config.h"
 #endif //SL_CATALOG_ZIGBEE_NETWORK_TEST_PRESENT
-#else // !UC_BUILD
-#include "znet-bookkeeping.h"
-#endif // UC_BUILD
-
-#ifndef UC_BUILD
-#include "hal/micro/crc.h"
-#ifdef EMBER_TEST
-#define emberAfGetDiffCallback(value1, value2, dataType) 0
-#endif
-#endif
 
 #ifndef ZCL_SL_WWAH_CLUSTER_ID
 #define ZCL_SL_WWAH_CLUSTER_ID 0xFC57u
@@ -69,10 +60,10 @@ EmberAfClusterCommand curCmd;
 // This struct is allocated on the stack inside
 // emberAfProcessMessage. The pointer below is set
 // to NULL when the function exits.
-EmberAfClusterCommand *emAfCurrentCommand;
+EmberAfClusterCommand *sli_zigbee_af_current_command;
 
 // variable used for toggling Aps Link security. Set by the CLI
-uint8_t emAfTestApsSecurityOverride = APS_TEST_SECURITY_DEFAULT;
+uint8_t sli_zigbee_af_test_aps_security_override = APS_TEST_SECURITY_DEFAULT;
 
 // DEPRECATED.
 uint8_t emberAfIncomingZclSequenceNumber = 0xFFu;
@@ -85,11 +76,11 @@ uint8_t emberAfSequenceNumber = 0xFFu;
 
 // A bool value so we know when the device is performing
 // key establishment.
-bool emAfDeviceIsPerformingKeyEstablishment = false;
+bool sli_zigbee_af_device_is_performing_key_establishment = false;
 
 static uint8_t /*enum EmberAfRetryOverride*/ emberAfApsRetryOverride = EMBER_AF_RETRY_OVERRIDE_NONE;
-static uint8_t /*enum EmberAfDisableDefaultResponse*/ emAfDisableDefaultResponse = EMBER_AF_DISABLE_DEFAULT_RESPONSE_NONE;
-static uint8_t /*enum EmberAfDisableDefaultResponse*/ emAfSavedDisableDefaultResponseVale = EMBER_AF_DISABLE_DEFAULT_RESPONSE_NONE;
+static uint8_t /*enum EmberAfDisableDefaultResponse*/ sli_zigbee_af_disable_default_response = EMBER_AF_DISABLE_DEFAULT_RESPONSE_NONE;
+static uint8_t /*enum EmberAfDisableDefaultResponse*/ sli_zigbee_af_saved_disable_default_response_vale = EMBER_AF_DISABLE_DEFAULT_RESPONSE_NONE;
 
 // Holds the response type
 uint8_t emberAfResponseType = ZCL_UTIL_RESP_NORMAL;
@@ -108,16 +99,7 @@ static const uint8_t emberAfAnalogDiscreteThresholds[] = {
   0xFF, EMBER_AF_DATA_TYPE_NONE
 };
 
-uint8_t emAfExtendedPanId[EXTENDED_PAN_ID_SIZE] = { 0, 0, 0, 0, 0, 0, 0, 0, };
-
-#ifndef UC_BUILD
-#ifdef EMBER_AF_GENERATED_PLUGIN_INIT_FUNCTION_DECLARATIONS
-EMBER_AF_GENERATED_PLUGIN_INIT_FUNCTION_DECLARATIONS
-#endif
-#ifdef EMBER_AF_GENERATED_PLUGIN_TICK_FUNCTION_DECLARATIONS
-EMBER_AF_GENERATED_PLUGIN_TICK_FUNCTION_DECLARATIONS
-#endif
-#endif // UC_BUILD
+uint8_t sli_zigbee_af_extended_pan_id[EXTENDED_PAN_ID_SIZE] = { 0, 0, 0, 0, 0, 0, 0, 0, };
 
 //------------------------------------------------------------------------------
 
@@ -277,9 +259,9 @@ static void prepareForResponse(const EmberAfClusterCommand *cmd)
 // ****************************************
 // Initialize Clusters
 // ****************************************
-void emberAfInit(SLXU_INIT_ARG)
+void emberAfInit(uint8_t init_level)
 {
-  SLXU_INIT_UNUSED_ARG;
+  (void)init_level;
 
   uint8_t i;
 #ifdef EMBER_AF_ENABLE_STATISTICS
@@ -301,33 +283,13 @@ void emberAfInit(SLXU_INIT_ARG)
                            &emberAfResponseApsFrame);
 
 // TODO: this is now done by the app framework common component
-#ifndef UC_BUILD
-  // initialize event management system
-  emAfInitEvents();
-#endif
 
 // TODO: in UC this is done via templating/bookkeeping
-#ifndef UC_BUILD
-#ifdef EMBER_AF_GENERATED_PLUGIN_INIT_FUNCTION_CALLS
-  EMBER_AF_GENERATED_PLUGIN_INIT_FUNCTION_CALLS
-#endif
-#endif // UC_BUILD
 
-  emAfCallInits();
+  sli_zigbee_af_call_inits();
 }
 
 // TODO: this is now done by the app framework common component
-#ifndef UC_BUILD
-void emberAfTick(void)
-{
-  // Call the AFV2-specific per-endpoint callbacks
-  // Anything that defines callbacks as void *TickCallback(void) is called in
-  // emAfInit(), which is a generated file
-#ifdef EMBER_AF_GENERATED_PLUGIN_TICK_FUNCTION_CALLS
-  EMBER_AF_GENERATED_PLUGIN_TICK_FUNCTION_CALLS
-#endif
-}
-#endif // UC_BUILD
 
 // ****************************************
 // This function is called by the application when the stack goes down,
@@ -423,7 +385,7 @@ uint16_t emberAfGetMfgCodeFromCurrentCommand(void)
 
 static void printIncomingZclMessage(const EmberAfClusterCommand *cmd)
 {
-#if ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_APP)) || (UC_BUILD && !defined(LARGE_NETWORK_TESTING) ))
+#if ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_APP)) || (!defined(LARGE_NETWORK_TESTING) ))
   if (emberAfPrintReceivedMessages) {
     emberAfAppPrint("\r\nT%4x:", emberAfGetCurrentTime());
     emberAfAppPrint("RX len %d, ep %x, clus 0x%2x ",
@@ -493,55 +455,9 @@ static bool dispatchZclMessage(EmberAfClusterCommand *cmd)
     return false;
   } else {
     return (cmd->clusterSpecific
-            ? emAfProcessClusterSpecificCommand(cmd)
-            : emAfProcessGlobalCommand(cmd));
+            ? sli_zigbee_af_process_cluster_specific_command(cmd)
+            : sli_zigbee_af_process_global_command(cmd));
   }
-}
-
-bool emberAfProcessMessageIntoZclCmd(EmberApsFrame* apsFrame,
-                                     EmberIncomingMessageType type,
-                                     uint8_t* message,
-                                     uint16_t messageLength,
-                                     EmberNodeId source,
-                                     InterPanHeader* interPanHeader,
-                                     EmberAfClusterCommand* returnCmd)
-{
-  uint8_t minLength = (message[0] & ZCL_MANUFACTURER_SPECIFIC_MASK
-                       ? EMBER_AF_ZCL_MANUFACTURER_SPECIFIC_OVERHEAD
-                       : EMBER_AF_ZCL_OVERHEAD);
-
-  if (messageLength < minLength) {
-    emberAfAppPrintln("%pRX pkt too short: %d < %d", "ERROR: ", messageLength, minLength);
-    return false;
-  }
-
-  // Populate the cluster command struct for processing.
-  returnCmd->apsFrame        = apsFrame;
-  returnCmd->type            = type;
-  returnCmd->source          = source;
-  returnCmd->buffer          = message;
-  returnCmd->bufLen          = messageLength;
-  returnCmd->clusterSpecific = (message[0] & ZCL_CLUSTER_SPECIFIC_COMMAND);
-  returnCmd->mfgSpecific     = (message[0] & ZCL_MANUFACTURER_SPECIFIC_MASK);
-  returnCmd->direction       = ((message[0] & ZCL_FRAME_CONTROL_DIRECTION_MASK)
-                                ? ZCL_DIRECTION_SERVER_TO_CLIENT
-                                : ZCL_DIRECTION_CLIENT_TO_SERVER);
-  returnCmd->payloadStartIndex = 1u;
-  if (returnCmd->mfgSpecific) {
-    returnCmd->mfgCode = emberAfGetInt16u(message, returnCmd->payloadStartIndex, messageLength);
-    returnCmd->payloadStartIndex += 2u;
-  } else {
-    returnCmd->mfgCode = EMBER_AF_NULL_MANUFACTURER_CODE;
-  }
-  returnCmd->seqNum         = message[returnCmd->payloadStartIndex++];
-  returnCmd->commandId      = message[returnCmd->payloadStartIndex++];
-  if ( returnCmd->payloadStartIndex > returnCmd->bufLen ) {
-    emberAfAppPrintln("%pRX pkt malformed: %d < %d", "ERROR: ", returnCmd->bufLen, returnCmd->payloadStartIndex);
-    return false;
-  }
-  returnCmd->interPanHeader = interPanHeader;
-  returnCmd->networkIndex   = emberGetCurrentNetwork();
-  return true;
 }
 
 // a single call to process global and cluster-specific messages and callbacks.
@@ -566,7 +482,7 @@ bool emberAfProcessMessage(EmberApsFrame *apsFrame,
     goto kickout;
   }
 
-  emAfCurrentCommand = &curCmd;
+  sli_zigbee_af_current_command = &curCmd;
 
   // All of these should be covered by the EmberAfClusterCommand but are
   // still here until all the code is moved over to use the cmd. -WEH
@@ -575,7 +491,7 @@ bool emberAfProcessMessage(EmberApsFrame *apsFrame,
   printIncomingZclMessage(&curCmd);
   prepareForResponse(&curCmd);
 
-  if (emAfPreCommandReceived(&curCmd)) {
+  if (sli_zigbee_af_pre_command_received(&curCmd)) {
     msgHandled = true;
     goto kickout;
   }
@@ -659,7 +575,7 @@ bool emberAfProcessMessage(EmberApsFrame *apsFrame,
   MEMSET(&interpanResponseHeader,
          0u,
          sizeof(EmberAfInterpanHeader));
-  emAfCurrentCommand = NULL;
+  sli_zigbee_af_current_command = NULL;
   return msgHandled;
 }
 
@@ -697,7 +613,7 @@ EmberAfRetryOverride emberAfGetRetryOverride(void)
   return (EmberAfRetryOverride) emberAfApsRetryOverride;
 }
 
-void emAfApplyRetryOverride(EmberApsOption *options)
+void sli_zigbee_af_apply_retry_override(EmberApsOption *options)
 {
   if (options == NULL) {
     return;
@@ -712,25 +628,25 @@ void emAfApplyRetryOverride(EmberApsOption *options)
 
 void emberAfSetDisableDefaultResponse(EmberAfDisableDefaultResponse value)
 {
-  emAfDisableDefaultResponse = value;
+  sli_zigbee_af_disable_default_response = value;
   if (value != EMBER_AF_DISABLE_DEFAULT_RESPONSE_ONE_SHOT) {
-    emAfSavedDisableDefaultResponseVale = value;
+    sli_zigbee_af_saved_disable_default_response_vale = value;
   }
 }
 
 EmberAfDisableDefaultResponse emberAfGetDisableDefaultResponse(void)
 {
-  return (EmberAfDisableDefaultResponse) emAfDisableDefaultResponse;
+  return (EmberAfDisableDefaultResponse) sli_zigbee_af_disable_default_response;
 }
 
-void emAfApplyDisableDefaultResponse(uint8_t *frame_control)
+void sli_zigbee_af_apply_disable_default_response(uint8_t *frame_control)
 {
   if (frame_control == NULL) {
     return;
-  } else if (emAfDisableDefaultResponse == EMBER_AF_DISABLE_DEFAULT_RESPONSE_ONE_SHOT) {
-    emAfDisableDefaultResponse = emAfSavedDisableDefaultResponseVale;
+  } else if (sli_zigbee_af_disable_default_response == EMBER_AF_DISABLE_DEFAULT_RESPONSE_ONE_SHOT) {
+    sli_zigbee_af_disable_default_response = sli_zigbee_af_saved_disable_default_response_vale;
     *frame_control |= ZCL_DISABLE_DEFAULT_RESPONSE_MASK;
-  } else if (emAfDisableDefaultResponse == EMBER_AF_DISABLE_DEFAULT_RESPONSE_PERMANENT) {
+  } else if (sli_zigbee_af_disable_default_response == EMBER_AF_DISABLE_DEFAULT_RESPONSE_PERMANENT) {
     *frame_control |= ZCL_DISABLE_DEFAULT_RESPONSE_MASK;
   } else {
     // MISRA requires ..else if.. to have terminating else.
@@ -897,7 +813,7 @@ bool emberAfDetermineIfLinkSecurityIsRequired(uint8_t commandId,
 
   // If we have turned off all APS security (needed for testing), then just
   // always return false.
-  if ((emAfTestApsSecurityOverride == APS_TEST_SECURITY_DISABLED) || afNoSecurityForDefaultResponse) {
+  if ((sli_zigbee_af_test_aps_security_override == APS_TEST_SECURITY_DISABLED) || afNoSecurityForDefaultResponse) {
     afNoSecurityForDefaultResponse = false;
     return false;
   }
@@ -915,9 +831,9 @@ bool emberAfDetermineIfLinkSecurityIsRequired(uint8_t commandId,
   // At this point if the CLI command has been issued, it's safe to over any other settings
   // and return.
   // This change allows HA applications to use the CLI option to enable APS security.
-  if (emAfTestApsSecurityOverride == APS_TEST_SECURITY_ENABLED) {
+  if (sli_zigbee_af_test_aps_security_override == APS_TEST_SECURITY_ENABLED) {
     return true;
-  } else if (emAfTestApsSecurityOverride == APS_TEST_SECURITY_DISABLED) {
+  } else if (sli_zigbee_af_test_aps_security_override == APS_TEST_SECURITY_DISABLED) {
     //The default return value before this change.
     return false;
   } else {
@@ -1192,72 +1108,6 @@ bool emberAfIsTypeSigned(EmberAfAttributeType dataType)
           && dataType <= ZCL_INT64S_ATTRIBUTE_TYPE);
 }
 
-#ifndef UC_BUILD
-
-EmberStatus emberAfEndpointEventControlSetInactive(EmberEventControl *controls,
-                                                   uint8_t endpoint)
-{
-  uint8_t index = emberAfIndexFromEndpoint(endpoint);
-  if (index == 0xFFu) {
-    return EMBER_INVALID_ENDPOINT;
-  }
-  emberEventControlSetInactive(controls[index]);
-  return EMBER_SUCCESS;
-}
-
-bool emberAfEndpointEventControlGetActive(EmberEventControl *controls,
-                                          uint8_t endpoint)
-{
-  uint8_t index = emberAfIndexFromEndpoint(endpoint);
-  return (index != 0xFFu && emberEventControlGetActive(controls[index]));
-}
-
-EmberStatus emberAfEndpointEventControlSetActive(EmberEventControl *controls,
-                                                 uint8_t endpoint)
-{
-  uint8_t index = emberAfIndexFromEndpoint(endpoint);
-  if (index == 0xFFu) {
-    return EMBER_INVALID_ENDPOINT;
-  }
-  emberEventControlSetActive(controls[index]);
-  return EMBER_SUCCESS;
-}
-
-EmberStatus emberAfEndpointEventControlSetDelayMS(EmberEventControl *controls,
-                                                  uint8_t endpoint,
-                                                  uint32_t delayMs)
-{
-  uint8_t index = emberAfIndexFromEndpoint(endpoint);
-  if (index == 0xFFu) {
-    return EMBER_INVALID_ENDPOINT;
-  }
-  return emberAfEventControlSetDelayMS(&controls[index], delayMs);
-}
-
-EmberStatus emberAfEndpointEventControlSetDelayQS(EmberEventControl *controls,
-                                                  uint8_t endpoint,
-                                                  uint32_t delayQs)
-{
-  uint8_t index = emberAfIndexFromEndpoint(endpoint);
-  if (index == 0xFFu) {
-    return EMBER_INVALID_ENDPOINT;
-  }
-  return emberAfEventControlSetDelayQS(&controls[index], delayQs);
-}
-
-EmberStatus emberAfEndpointEventControlSetDelayMinutes(EmberEventControl *controls,
-                                                       uint8_t endpoint,
-                                                       uint16_t delayM)
-{
-  uint8_t index = emberAfIndexFromEndpoint(endpoint);
-  if (index == 0xFFu) {
-    return EMBER_INVALID_ENDPOINT;
-  }
-  return emberAfEventControlSetDelayMinutes(&controls[index], delayM);
-}
-
-#endif // UC_BUILD
-
 bool emberAfIsThisMyEui64(EmberEUI64 eui64)
 {
   EmberEUI64 myEui64;
@@ -1320,7 +1170,7 @@ uint32_t emberAfGetBufferCrc(uint8_t *pbuffer, uint16_t length, uint32_t initial
    31     915            0-26                    0-26
 
  */
-EmberStatus emAfValidateChannelPages(uint8_t page, uint8_t channel)
+EmberStatus sli_zigbee_af_validate_channel_pages(uint8_t page, uint8_t channel)
 {
   switch (page) {
     case 0u:
@@ -1392,7 +1242,7 @@ uint8_t emberAfGetChannelFrom8bitEncodedChanPg(uint8_t chanPg)
 
 uint8_t emberAfMake8bitEncodedChanPg(uint8_t page, uint8_t channel)
 {
-  if (emAfValidateChannelPages(page, channel) != EMBER_SUCCESS) {
+  if (sli_zigbee_af_validate_channel_pages(page, channel) != EMBER_SUCCESS) {
     return 0xFFu;
   }
 
@@ -1414,11 +1264,9 @@ uint8_t emberAfMake8bitEncodedChanPg(uint8_t page, uint8_t channel)
   }
 }
 
-#ifdef UC_BUILD
 WEAK(EmberAfDifferenceType emberAfGetDiffCallback(EmberAfDifferenceType value1,
                                                   EmberAfDifferenceType value2,
                                                   EmberAfAttributeType dataType))
 {
   return 0;
 }
-#endif

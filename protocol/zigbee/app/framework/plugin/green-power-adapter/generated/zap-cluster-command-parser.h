@@ -35,12 +35,20 @@
  * @{
  */
 
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #ifdef SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
 
 #include "af.h"
 #include "zap-command-structs.h"
 
+/** @brief Parser function for "GetLocalesSupported" ZCL command from "Basic" cluster
+ */
+EmberAfStatus zcl_decode_basic_cluster_get_locales_supported_command (EmberAfClusterCommand * cmd, sl_zcl_basic_cluster_get_locales_supported_command_t *cmd_struct);
+/** @brief Parser function for "GetLocalesSupportedResponse" ZCL command from "Basic" cluster
+ */
+EmberAfStatus zcl_decode_basic_cluster_get_locales_supported_response_command (EmberAfClusterCommand * cmd, sl_zcl_basic_cluster_get_locales_supported_response_command_t *cmd_struct);
 /** @brief Parser function for "Identify" ZCL command from "Identify" cluster
  */
 EmberAfStatus zcl_decode_identify_cluster_identify_command (EmberAfClusterCommand * cmd, sl_zcl_identify_cluster_identify_command_t *cmd_struct);
@@ -167,6 +175,9 @@ EmberAfStatus zcl_decode_level_control_cluster_move_with_on_off_command (EmberAf
 /** @brief Parser function for "StepWithOnOff" ZCL command from "Level Control" cluster
  */
 EmberAfStatus zcl_decode_level_control_cluster_step_with_on_off_command (EmberAfClusterCommand * cmd, sl_zcl_level_control_cluster_step_with_on_off_command_t *cmd_struct);
+/** @brief Parser function for "MoveToClosestFrequency" ZCL command from "Level Control" cluster
+ */
+EmberAfStatus zcl_decode_level_control_cluster_move_to_closest_frequency_command (EmberAfClusterCommand * cmd, sl_zcl_level_control_cluster_move_to_closest_frequency_command_t *cmd_struct);
 /** @brief Parser function for "ResetAlarm" ZCL command from "Alarms" cluster
  */
 EmberAfStatus zcl_decode_alarms_cluster_reset_alarm_command (EmberAfClusterCommand * cmd, sl_zcl_alarms_cluster_reset_alarm_command_t *cmd_struct);
@@ -491,6 +502,18 @@ EmberAfStatus zcl_decode_door_lock_cluster_get_rfid_command (EmberAfClusterComma
 /** @brief Parser function for "ClearRfid" ZCL command from "Door Lock" cluster
  */
 EmberAfStatus zcl_decode_door_lock_cluster_clear_rfid_command (EmberAfClusterCommand * cmd, sl_zcl_door_lock_cluster_clear_rfid_command_t *cmd_struct);
+/** @brief Parser function for "SetDisposableSchedule" ZCL command from "Door Lock" cluster
+ */
+EmberAfStatus zcl_decode_door_lock_cluster_set_disposable_schedule_command (EmberAfClusterCommand * cmd, sl_zcl_door_lock_cluster_set_disposable_schedule_command_t *cmd_struct);
+/** @brief Parser function for "GetDisposableSchedule" ZCL command from "Door Lock" cluster
+ */
+EmberAfStatus zcl_decode_door_lock_cluster_get_disposable_schedule_command (EmberAfClusterCommand * cmd, sl_zcl_door_lock_cluster_get_disposable_schedule_command_t *cmd_struct);
+/** @brief Parser function for "ClearDisposableSchedule" ZCL command from "Door Lock" cluster
+ */
+EmberAfStatus zcl_decode_door_lock_cluster_clear_disposable_schedule_command (EmberAfClusterCommand * cmd, sl_zcl_door_lock_cluster_clear_disposable_schedule_command_t *cmd_struct);
+/** @brief Parser function for "ClearBiometricCredential" ZCL command from "Door Lock" cluster
+ */
+EmberAfStatus zcl_decode_door_lock_cluster_clear_biometric_credential_command (EmberAfClusterCommand * cmd, sl_zcl_door_lock_cluster_clear_biometric_credential_command_t *cmd_struct);
 /** @brief Parser function for "LockDoorResponse" ZCL command from "Door Lock" cluster
  */
 EmberAfStatus zcl_decode_door_lock_cluster_lock_door_response_command (EmberAfClusterCommand * cmd, sl_zcl_door_lock_cluster_lock_door_response_command_t *cmd_struct);
@@ -569,6 +592,21 @@ EmberAfStatus zcl_decode_door_lock_cluster_clear_rfid_response_command (EmberAfC
 /** @brief Parser function for "ClearAllRfidsResponse" ZCL command from "Door Lock" cluster
  */
 EmberAfStatus zcl_decode_door_lock_cluster_clear_all_rfids_response_command (EmberAfClusterCommand * cmd, sl_zcl_door_lock_cluster_clear_all_rfids_response_command_t *cmd_struct);
+/** @brief Parser function for "SetDisposableScheduleResponse" ZCL command from "Door Lock" cluster
+ */
+EmberAfStatus zcl_decode_door_lock_cluster_set_disposable_schedule_response_command (EmberAfClusterCommand * cmd, sl_zcl_door_lock_cluster_set_disposable_schedule_response_command_t *cmd_struct);
+/** @brief Parser function for "GetDisposableScheduleResponse" ZCL command from "Door Lock" cluster
+ */
+EmberAfStatus zcl_decode_door_lock_cluster_get_disposable_schedule_response_command (EmberAfClusterCommand * cmd, sl_zcl_door_lock_cluster_get_disposable_schedule_response_command_t *cmd_struct);
+/** @brief Parser function for "ClearDisposableScheduleResponse" ZCL command from "Door Lock" cluster
+ */
+EmberAfStatus zcl_decode_door_lock_cluster_clear_disposable_schedule_response_command (EmberAfClusterCommand * cmd, sl_zcl_door_lock_cluster_clear_disposable_schedule_response_command_t *cmd_struct);
+/** @brief Parser function for "ClearBiometricCredentialResponse" ZCL command from "Door Lock" cluster
+ */
+EmberAfStatus zcl_decode_door_lock_cluster_clear_biometric_credential_response_command (EmberAfClusterCommand * cmd, sl_zcl_door_lock_cluster_clear_biometric_credential_response_command_t *cmd_struct);
+/** @brief Parser function for "ClearAllBiometricCredentialsResponse" ZCL command from "Door Lock" cluster
+ */
+EmberAfStatus zcl_decode_door_lock_cluster_clear_all_biometric_credentials_response_command (EmberAfClusterCommand * cmd, sl_zcl_door_lock_cluster_clear_all_biometric_credentials_response_command_t *cmd_struct);
 /** @brief Parser function for "OperationEventNotification" ZCL command from "Door Lock" cluster
  */
 EmberAfStatus zcl_decode_door_lock_cluster_operation_event_notification_command (EmberAfClusterCommand * cmd, sl_zcl_door_lock_cluster_operation_event_notification_command_t *cmd_struct);
@@ -743,9 +781,12 @@ EmberAfStatus zcl_decode_11073_protocol_tunnel_cluster_disconnect_request_comman
 /** @brief Parser function for "ConnectStatusNotification" ZCL command from "11073 Protocol Tunnel" cluster
  */
 EmberAfStatus zcl_decode_11073_protocol_tunnel_cluster_connect_status_notification_command (EmberAfClusterCommand * cmd, sl_zcl_11073_protocol_tunnel_cluster_connect_status_notification_command_t *cmd_struct);
-/** @brief Parser function for "TransferApdu" ZCL command from "ISO 7816 Protocol Tunnel" cluster
+/** @brief Parser function for "TransferApduFromClient" ZCL command from "ISO 7816 Protocol Tunnel" cluster
  */
-EmberAfStatus zcl_decode_iso_7816_protocol_tunnel_cluster_transfer_apdu_command (EmberAfClusterCommand * cmd, sl_zcl_iso_7816_protocol_tunnel_cluster_transfer_apdu_command_t *cmd_struct);
+EmberAfStatus zcl_decode_iso_7816_protocol_tunnel_cluster_transfer_apdu_from_client_command (EmberAfClusterCommand * cmd, sl_zcl_iso_7816_protocol_tunnel_cluster_transfer_apdu_from_client_command_t *cmd_struct);
+/** @brief Parser function for "TransferApduFromServer" ZCL command from "ISO 7816 Protocol Tunnel" cluster
+ */
+EmberAfStatus zcl_decode_iso_7816_protocol_tunnel_cluster_transfer_apdu_from_server_command (EmberAfClusterCommand * cmd, sl_zcl_iso_7816_protocol_tunnel_cluster_transfer_apdu_from_server_command_t *cmd_struct);
 /** @brief Parser function for "GetCurrentPrice" ZCL command from "Price" cluster
  */
 EmberAfStatus zcl_decode_price_cluster_get_current_price_command (EmberAfClusterCommand * cmd, sl_zcl_price_cluster_get_current_price_command_t *cmd_struct);
@@ -1142,9 +1183,9 @@ EmberAfStatus zcl_decode_key_establishment_cluster_ephemeral_data_request_comman
 /** @brief Parser function for "ConfirmKeyDataRequest" ZCL command from "Key Establishment" cluster
  */
 EmberAfStatus zcl_decode_key_establishment_cluster_confirm_key_data_request_command (EmberAfClusterCommand * cmd, sl_zcl_key_establishment_cluster_confirm_key_data_request_command_t *cmd_struct);
-/** @brief Parser function for "TerminateKeyEstablishment" ZCL command from "Key Establishment" cluster
+/** @brief Parser function for "TerminateKeyEstablishmentFromClient" ZCL command from "Key Establishment" cluster
  */
-EmberAfStatus zcl_decode_key_establishment_cluster_terminate_key_establishment_command (EmberAfClusterCommand * cmd, sl_zcl_key_establishment_cluster_terminate_key_establishment_command_t *cmd_struct);
+EmberAfStatus zcl_decode_key_establishment_cluster_terminate_key_establishment_from_client_command (EmberAfClusterCommand * cmd, sl_zcl_key_establishment_cluster_terminate_key_establishment_from_client_command_t *cmd_struct);
 /** @brief Parser function for "InitiateKeyEstablishmentResponse" ZCL command from "Key Establishment" cluster
  */
 EmberAfStatus zcl_decode_key_establishment_cluster_initiate_key_establishment_response_command (EmberAfClusterCommand * cmd, sl_zcl_key_establishment_cluster_initiate_key_establishment_response_command_t *cmd_struct);
@@ -1154,6 +1195,9 @@ EmberAfStatus zcl_decode_key_establishment_cluster_ephemeral_data_response_comma
 /** @brief Parser function for "ConfirmKeyDataResponse" ZCL command from "Key Establishment" cluster
  */
 EmberAfStatus zcl_decode_key_establishment_cluster_confirm_key_data_response_command (EmberAfClusterCommand * cmd, sl_zcl_key_establishment_cluster_confirm_key_data_response_command_t *cmd_struct);
+/** @brief Parser function for "TerminateKeyEstablishmentFromServer" ZCL command from "Key Establishment" cluster
+ */
+EmberAfStatus zcl_decode_key_establishment_cluster_terminate_key_establishment_from_server_command (EmberAfClusterCommand * cmd, sl_zcl_key_establishment_cluster_terminate_key_establishment_from_server_command_t *cmd_struct);
 /** @brief Parser function for "RequestInformation" ZCL command from "Information" cluster
  */
 EmberAfStatus zcl_decode_information_cluster_request_information_command (EmberAfClusterCommand * cmd, sl_zcl_information_cluster_request_information_command_t *cmd_struct);
@@ -1445,66 +1489,6 @@ EmberAfStatus zcl_decode_zll_commissioning_cluster_get_group_identifiers_respons
 /** @brief Parser function for "GetEndpointListResponse" ZCL command from "ZLL Commissioning" cluster
  */
 EmberAfStatus zcl_decode_zll_commissioning_cluster_get_endpoint_list_response_command (EmberAfClusterCommand * cmd, sl_zcl_zll_commissioning_cluster_get_endpoint_list_response_command_t *cmd_struct);
-/** @brief Parser function for "ScanNetworks" ZCL command from "Network Provisioning" cluster
- */
-EmberAfStatus zcl_decode_network_provisioning_cluster_scan_networks_command (EmberAfClusterCommand * cmd, sl_zcl_network_provisioning_cluster_scan_networks_command_t *cmd_struct);
-/** @brief Parser function for "ScanNetworksResp" ZCL command from "Network Provisioning" cluster
- */
-EmberAfStatus zcl_decode_network_provisioning_cluster_scan_networks_resp_command (EmberAfClusterCommand * cmd, sl_zcl_network_provisioning_cluster_scan_networks_resp_command_t *cmd_struct);
-/** @brief Parser function for "AddWiFiNetwork" ZCL command from "Network Provisioning" cluster
- */
-EmberAfStatus zcl_decode_network_provisioning_cluster_add_wi_fi_network_command (EmberAfClusterCommand * cmd, sl_zcl_network_provisioning_cluster_add_wi_fi_network_command_t *cmd_struct);
-/** @brief Parser function for "AddWiFiNetworkResp" ZCL command from "Network Provisioning" cluster
- */
-EmberAfStatus zcl_decode_network_provisioning_cluster_add_wi_fi_network_resp_command (EmberAfClusterCommand * cmd, sl_zcl_network_provisioning_cluster_add_wi_fi_network_resp_command_t *cmd_struct);
-/** @brief Parser function for "UpdateWiFiNetwork" ZCL command from "Network Provisioning" cluster
- */
-EmberAfStatus zcl_decode_network_provisioning_cluster_update_wi_fi_network_command (EmberAfClusterCommand * cmd, sl_zcl_network_provisioning_cluster_update_wi_fi_network_command_t *cmd_struct);
-/** @brief Parser function for "UpdateWiFiNetworkResp" ZCL command from "Network Provisioning" cluster
- */
-EmberAfStatus zcl_decode_network_provisioning_cluster_update_wi_fi_network_resp_command (EmberAfClusterCommand * cmd, sl_zcl_network_provisioning_cluster_update_wi_fi_network_resp_command_t *cmd_struct);
-/** @brief Parser function for "AddThreadNetwork" ZCL command from "Network Provisioning" cluster
- */
-EmberAfStatus zcl_decode_network_provisioning_cluster_add_thread_network_command (EmberAfClusterCommand * cmd, sl_zcl_network_provisioning_cluster_add_thread_network_command_t *cmd_struct);
-/** @brief Parser function for "AddThreadNetworkResp" ZCL command from "Network Provisioning" cluster
- */
-EmberAfStatus zcl_decode_network_provisioning_cluster_add_thread_network_resp_command (EmberAfClusterCommand * cmd, sl_zcl_network_provisioning_cluster_add_thread_network_resp_command_t *cmd_struct);
-/** @brief Parser function for "UpdateThreadNetwork" ZCL command from "Network Provisioning" cluster
- */
-EmberAfStatus zcl_decode_network_provisioning_cluster_update_thread_network_command (EmberAfClusterCommand * cmd, sl_zcl_network_provisioning_cluster_update_thread_network_command_t *cmd_struct);
-/** @brief Parser function for "UpdateThreadNetworkResp" ZCL command from "Network Provisioning" cluster
- */
-EmberAfStatus zcl_decode_network_provisioning_cluster_update_thread_network_resp_command (EmberAfClusterCommand * cmd, sl_zcl_network_provisioning_cluster_update_thread_network_resp_command_t *cmd_struct);
-/** @brief Parser function for "RemoveNetwork" ZCL command from "Network Provisioning" cluster
- */
-EmberAfStatus zcl_decode_network_provisioning_cluster_remove_network_command (EmberAfClusterCommand * cmd, sl_zcl_network_provisioning_cluster_remove_network_command_t *cmd_struct);
-/** @brief Parser function for "RemoveNetworkResp" ZCL command from "Network Provisioning" cluster
- */
-EmberAfStatus zcl_decode_network_provisioning_cluster_remove_network_resp_command (EmberAfClusterCommand * cmd, sl_zcl_network_provisioning_cluster_remove_network_resp_command_t *cmd_struct);
-/** @brief Parser function for "EnableNetwork" ZCL command from "Network Provisioning" cluster
- */
-EmberAfStatus zcl_decode_network_provisioning_cluster_enable_network_command (EmberAfClusterCommand * cmd, sl_zcl_network_provisioning_cluster_enable_network_command_t *cmd_struct);
-/** @brief Parser function for "EnableNetworkResp" ZCL command from "Network Provisioning" cluster
- */
-EmberAfStatus zcl_decode_network_provisioning_cluster_enable_network_resp_command (EmberAfClusterCommand * cmd, sl_zcl_network_provisioning_cluster_enable_network_resp_command_t *cmd_struct);
-/** @brief Parser function for "DisableNetwork" ZCL command from "Network Provisioning" cluster
- */
-EmberAfStatus zcl_decode_network_provisioning_cluster_disable_network_command (EmberAfClusterCommand * cmd, sl_zcl_network_provisioning_cluster_disable_network_command_t *cmd_struct);
-/** @brief Parser function for "DisableNetworkResp" ZCL command from "Network Provisioning" cluster
- */
-EmberAfStatus zcl_decode_network_provisioning_cluster_disable_network_resp_command (EmberAfClusterCommand * cmd, sl_zcl_network_provisioning_cluster_disable_network_resp_command_t *cmd_struct);
-/** @brief Parser function for "TestNetwork" ZCL command from "Network Provisioning" cluster
- */
-EmberAfStatus zcl_decode_network_provisioning_cluster_test_network_command (EmberAfClusterCommand * cmd, sl_zcl_network_provisioning_cluster_test_network_command_t *cmd_struct);
-/** @brief Parser function for "TestNetworkResp" ZCL command from "Network Provisioning" cluster
- */
-EmberAfStatus zcl_decode_network_provisioning_cluster_test_network_resp_command (EmberAfClusterCommand * cmd, sl_zcl_network_provisioning_cluster_test_network_resp_command_t *cmd_struct);
-/** @brief Parser function for "GetLastNetworkProvisioningResult" ZCL command from "Network Provisioning" cluster
- */
-EmberAfStatus zcl_decode_network_provisioning_cluster_get_last_network_provisioning_result_command (EmberAfClusterCommand * cmd, sl_zcl_network_provisioning_cluster_get_last_network_provisioning_result_command_t *cmd_struct);
-/** @brief Parser function for "SayHelloFromClient" ZCL command from "Demo" cluster
- */
-EmberAfStatus zcl_decode_demo_cluster_say_hello_from_client_command (EmberAfClusterCommand * cmd, sl_zcl_demo_cluster_say_hello_from_client_command_t *cmd_struct);
 /** @brief Parser function for "CommandOne" ZCL command from "Sample Mfg Specific Cluster" cluster
  */
 EmberAfStatus zcl_decode_sample_mfg_specific_cluster_cluster_command_one_command (EmberAfClusterCommand * cmd, sl_zcl_sample_mfg_specific_cluster_cluster_command_one_command_t *cmd_struct);

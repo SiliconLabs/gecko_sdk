@@ -34,7 +34,7 @@ template_contribution:
   - name: zigbee_af_callback
     value:
       callback_type: init_done
-      function_name: emAfPluginOtaStorageSimpleInitCallback    
+      function_name: sli_zigbee_af_ota_storage_simple_init_callback    
 documentation:
   docset: zigbee
   document: zigbee-af-api/ota-storage-simple

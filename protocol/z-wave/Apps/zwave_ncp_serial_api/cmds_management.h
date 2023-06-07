@@ -1,5 +1,5 @@
 /**
- * @file cmds_management.h
+ * @file
  * @copyright 2022 Silicon Laboratories Inc.
  */
 

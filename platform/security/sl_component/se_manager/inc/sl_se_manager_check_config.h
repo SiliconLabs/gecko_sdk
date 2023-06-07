@@ -37,7 +37,7 @@
 
 #if defined(SL_SE_MANAGER_THREADING)                                    \
   && !defined(SL_SE_MANAGER_YIELD_WHILE_WAITING_FOR_COMMAND_COMPLETION) \
-  && !defined(CRYPTOACC_PRESENT)
+  && !defined(SLI_VSE_MAILBOX_COMMAND_SUPPORTED)
 #error "Yield when waiting for SE commands to finish is currently required in RTOS mode."
 #endif
 #if defined(SL_SE_MANAGER_YIELD_WHILE_WAITING_FOR_COMMAND_COMPLETION) \
@@ -50,7 +50,7 @@
 #error "RTOS requires threading mode."
 #endif
 
-#if (defined(CRYPTOACC_PRESENT) && defined(SL_SE_MANAGER_YIELD_WHILE_WAITING_FOR_COMMAND_COMPLETION))
+#if (defined(SLI_VSE_MAILBOX_COMMAND_SUPPORTED) && defined(SL_SE_MANAGER_YIELD_WHILE_WAITING_FOR_COMMAND_COMPLETION))
 #error "Yield support is not available on EFR32xG22 devices"
 #endif
 

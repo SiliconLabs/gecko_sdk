@@ -35,7 +35,6 @@ recommends:
 
 provides:
   - name: mbedtls_slcrypto
-  - name: mbedtls_slcrypto_version
 
 template_contribution:
   - name: event_handler

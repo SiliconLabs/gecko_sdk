@@ -38,7 +38,6 @@ if(NOT DEFINED OT_PLATFORM_LIB_FTD)
 endif()
 
 target_link_libraries(ot-cli-ftd PRIVATE
-    $<$<BOOL:${OT_LINKER_MAP}>:-Wl,-Map=bin/ot-cli-ftd.map>
     openthread-cli-ftd
     ${OT_PLATFORM_LIB_FTD}
     openthread-ftd
@@ -48,6 +47,14 @@ target_link_libraries(ot-cli-ftd PRIVATE
     ot-config-ftd
     ot-config
 )
+
+if(OT_LINKER_MAP)
+    if("${CMAKE_CXX_COMPILER_ID}" MATCHES "AppleClang")
+        target_link_libraries(ot-cli-ftd PRIVATE -Wl,-map,ot-cli-ftd.map)
+    else()
+        target_link_libraries(ot-cli-ftd PRIVATE -Wl,-Map=ot-cli-ftd.map)
+    endif()
+endif()
 
 install(TARGETS ot-cli-ftd
     DESTINATION bin)

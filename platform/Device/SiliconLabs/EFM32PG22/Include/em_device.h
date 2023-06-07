@@ -53,12 +53,6 @@
 #elif defined(EFM32PG22C200F256IM40)
 #include "efm32pg22c200f256im40.h"
 
-#elif defined(EFM32PG22C200F32IM32)
-#include "efm32pg22c200f32im32.h"
-
-#elif defined(EFM32PG22C200F32IM40)
-#include "efm32pg22c200f32im40.h"
-
 #elif defined(EFM32PG22C200F512IM32)
 #include "efm32pg22c200f512im32.h"
 

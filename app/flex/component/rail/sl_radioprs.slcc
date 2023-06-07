@@ -3,15 +3,18 @@ label: "Flex - RAIL PRS Support"
 package: Flex
 description: "Helper for setting Radio debug PRS signals."
 category: "Flex|RAIL|Utility"
-quality: "experimental"
+quality: "production"
 instantiable:
   prefix: inst
 root_path: app/flex/component/rail/sl_radioprs
 config_file:
   - path: "config/s1/sl_radioprs_{{instance}}_config.h"
     condition: [ 'device_series_1' ]
+  - path: "config/s2/xg21/sl_radioprs_{{instance}}_config.h"
+    condition: [ 'device_sdid_200' ]
   - path: "config/s2/sl_radioprs_{{instance}}_config.h"
     condition: [ 'device_series_2' ]
+    unless: [ 'device_sdid_200' ]
 template_file:
   - path: template/s1/sl_radioprs_init_instances.c.jinja
     condition: [ 'device_series_1' ]

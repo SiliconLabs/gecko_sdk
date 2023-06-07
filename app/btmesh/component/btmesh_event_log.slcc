@@ -28,5 +28,10 @@ template_contribution:
   - name: "btmesh_on_event"
     value:
       include: "sl_btmesh_event_log.h"
-      function: "sl_btmesh_handle_btmesh_logging_events"
+      function: "sl_btmesh_log_btmesh_events"
+    priority: -9000
+  - name: "bluetooth_on_event"
+    value:
+      include: "sl_btmesh_event_log.h"
+      function: "sl_btmesh_log_bt_connection_events"
     priority: -9000

@@ -12,8 +12,9 @@
 #include <ZAF_Common_interface.h>
 #include <zaf_event_distributor_soc.h>
 #include <zaf_event_distributor_soc_config.h>
-#include <zaf_event_helper.h>
+#if defined(ZAF_USE_LEGACY_JOB_HELPER)
 #include <zaf_job_helper.h>
+#endif /* defined(ZAF_USE_LEGACY_JOB_HELPER) */
 #include <ZW_TransportSecProtocol.h>
 #include <ev_man.h>
 #include <board_indicator.h>
@@ -24,13 +25,37 @@
 #include <zpal_misc.h>
 #include <zpal_watchdog.h>
 #include <CC_DeviceResetLocally.h>
+#include <CC_Indicator.h>
 
 //#define DEBUGPRINT
 #include "DebugPrint.h"
 
-static void EventHandlerZwRx(void);
-static void EventHandlerZwCommandStatus(void);
-static void EventHandlerApp(void);
+/**
+ * This is the first of the registered app handlers
+ */
+extern const zaf_event_distributor_cc_event_handler_map_latest_t __start__zaf_event_distributor_cc_event_handler;
+#define cc_event_handler_start __start__zaf_event_distributor_cc_event_handler
+/**
+ * This marks the end of the handlers. The element
+ * after the last element. This means that this element
+ * is not valid.
+ */
+extern const zaf_event_distributor_cc_event_handler_map_latest_t __stop__zaf_event_distributor_cc_event_handler;
+#define cc_event_handler_stop __stop__zaf_event_distributor_cc_event_handler
+
+// The data used in the EventHandlerCC queue would be
+typedef struct {
+  const void* data;               ///< This must point to a global data
+  uint16_t command_class;
+  uint8_t event;
+} event_cc_t;
+
+/**
+ * Callback type for zaf_event_distributor_cc_event_handler_for_each().
+ *
+ * The ZAF Event Distributor Handler Map must always be the latest available version.
+ */
+typedef void (*cc_event_handler_invoker_callback_t)(zaf_event_distributor_cc_event_handler_map_latest_t const * const handler_entry, void* args);
 
 // Event distributor object
 static SEventDistributor g_EventDistributor;
@@ -40,19 +65,19 @@ static SEventDistributor g_EventDistributor;
  */
 static SQueueNotifying m_AppEventNotifyingQueue;
 static StaticQueue_t m_AppEventQueueObject;
-static uint8_t eventQueueStorage[ZAF_EVENT_DISTRIBUTOR_SOC_CONFIG_APP_QUEUE_SIZE];
+static uint8_t m_AppEventQueueStorage[ZAF_EVENT_DISTRIBUTOR_SOC_CONFIG_APP_QUEUE_SIZE];
 static QueueHandle_t m_AppEventQueue;
+
+/**
+ * The following four variables are used for the command class event queue.
+ */
+static SQueueNotifying m_CCEventNotifyingQueue;
+static StaticQueue_t m_CCEventQueueObject;
+static event_cc_t m_CCEventQueueStorage[ZAF_EVENT_DISTRIBUTOR_SOC_CONFIG_CC_QUEUE_SIZE];
+static QueueHandle_t m_CCEventQueue;
+
 static bool learnModeInProgress;
 static bool resetInProgress;
-
-// Event distributor event handler table
-static const EventDistributorEventHandler g_aEventHandlerTable[4] =
-{
-  AppTimerNotificationHandler,  // EAPPLICATIONEVENT_TIMER
-  EventHandlerZwRx,             // EAPPLICATIONEVENT_ZWRX
-  EventHandlerZwCommandStatus,  // EAPPLICATIONEVENT_ZWCOMMANDSTATUS
-  EventHandlerApp               // EAPPLICATIONEVENT_APP
-};
 
 static void
 set_protocol_default(void)
@@ -72,10 +97,27 @@ set_protocol_default(void)
   ASSERT(EQUEUENOTIFYING_STATUS_SUCCESS == Status);
 }
 
+static void
+learn_mode_finished_or_stop(void)
+{
+  Board_IndicateStatus(BOARD_STATUS_IDLE);
+  //Go back to smart start if the node was never included.
+  //Protocol will not commence SmartStart if the node is already included in the network.
+  ZAF_setNetworkLearnMode(E_NETWORK_LEARN_MODE_INCLUSION_SMARTSTART);
+
+  learnModeInProgress = false;
+
+  /* If we are in a network and the Identify LED state was changed to idle due to learn mode, report it to lifeline */
+  if (!Board_IsIndicatorActive()) {
+    CC_Indicator_RefreshIndicatorProperties();
+  }
+}
+
 /**
  * @brief Called when protocol puts a frame on the ZwRxQueue.
  */
-static void EventHandlerZwRx(void)
+static void
+EventHandlerZwRx(void)
 {
   SApplicationHandles* pAppHandles;
   SZwaveReceivePackage RxPackage;
@@ -109,7 +151,8 @@ static void EventHandlerZwRx(void)
 /**
  * @brief Triggered when protocol puts a message on the ZwCommandStatusQueue.
  */
-static void EventHandlerZwCommandStatus(void)
+static void
+EventHandlerZwCommandStatus(void)
 {
   SApplicationHandles* pAppHandles;
   SZwaveCommandStatusPackage Status;
@@ -129,8 +172,13 @@ static void EventHandlerZwCommandStatus(void)
         } else {
           DPRINTF("Tx Status received: %#02x\r\n", pTxStatus->TxStatus);
           if (pTxStatus->Handle) {
-            ZW_TX_Callback_t pCallback = (ZW_TX_Callback_t)pTxStatus->Handle;
-            pCallback(pTxStatus->TxStatus, &pTxStatus->ExtendedTxStatus);
+            ZAF_TX_Callback_t callback = (ZAF_TX_Callback_t)pTxStatus->Handle;
+            transmission_result_t result = {
+              .status = pTxStatus->TxStatus,
+              .isFinished = TRANSMISSION_RESULT_UNKNOWN
+            };
+            callback(&result);
+            zaf_stay_awake();
           }
         }
 
@@ -154,15 +202,15 @@ static void EventHandlerZwCommandStatus(void)
               || (SECURITY_KEY_NONE != GetHighestSecureLevel(pAppHandles->pNetworkInfo->SecurityKeys))) {
             zafi_nvm_app_set_default_configuration();
           }
-          ZAF_EventHelperEventEnqueue(EVENT_SYSTEM_LEARNMODE_FINISHED);
+          zaf_event_distributor_enqueue_app_event(EVENT_SYSTEM_LEARNMODE_FINISHED);
           ZAF_Transport_OnLearnCompleted();
         } else if (ELEARNSTATUS_SMART_START_IN_PROGRESS == Status.Content.LearnModeStatus.Status) {
-          ZAF_EventHelperEventEnqueue(EVENT_SYSTEM_SMARTSTART_IN_PROGRESS);
+          zaf_event_distributor_enqueue_app_event(EVENT_SYSTEM_SMARTSTART_IN_PROGRESS);
         } else if (ELEARNSTATUS_LEARN_MODE_COMPLETED_TIMEOUT == Status.Content.LearnModeStatus.Status) {
-          ZAF_EventHelperEventEnqueue(EVENT_SYSTEM_LEARNMODE_FINISHED);
+          zaf_event_distributor_enqueue_app_event(EVENT_SYSTEM_LEARNMODE_FINISHED);
         } else if (ELEARNSTATUS_LEARN_MODE_COMPLETED_FAILED == Status.Content.LearnModeStatus.Status) {
           //Reformats protocol and application NVM. Then soft reset.
-          ZAF_EventHelperEventEnqueue(EVENT_SYSTEM_RESET);
+          zaf_event_distributor_enqueue_app_event(EVENT_SYSTEM_RESET);
         }
         break;
       }
@@ -175,7 +223,7 @@ static void EventHandlerZwCommandStatus(void)
       case EZWAVECOMMANDSTATUS_SET_DEFAULT:
       { // Received when protocol is started (not implemented yet), and when SetDefault command is completed
         DPRINT("Protocol Ready\r\n");
-        ZAF_EventHelperEventEnqueue(EVENT_SYSTEM_FLUSHMEM_READY);
+        zaf_event_distributor_enqueue_app_event(EVENT_SYSTEM_FLUSHMEM_READY);
 
         break;
       }
@@ -223,9 +271,9 @@ event_manager(const uint8_t event)
   switch (event) {
     case EVENT_SYSTEM_LEARNMODE_TOGGLE:
       if (learnModeInProgress) {
-        ZAF_EventHelperEventEnqueue(EVENT_SYSTEM_LEARNMODE_STOP);
+        zaf_event_distributor_enqueue_app_event(EVENT_SYSTEM_LEARNMODE_STOP);
       } else {
-        ZAF_EventHelperEventEnqueue(EVENT_SYSTEM_LEARNMODE_START);
+        zaf_event_distributor_enqueue_app_event(EVENT_SYSTEM_LEARNMODE_START);
       }
       break;
     case EVENT_SYSTEM_LEARNMODE_START:
@@ -246,16 +294,14 @@ event_manager(const uint8_t event)
     }
     case EVENT_SYSTEM_LEARNMODE_STOP:
       ZAF_setNetworkLearnMode(E_NETWORK_LEARN_MODE_DISABLE);
-    /* fall through */
-    case EVENT_SYSTEM_LEARNMODE_FINISHED:
-      Board_IndicateStatus(BOARD_STATUS_IDLE);
-      //Go back to smart start if the node was never included.
-      //Protocol will not commence SmartStart if the node is already included in the network.
-      ZAF_setNetworkLearnMode(E_NETWORK_LEARN_MODE_INCLUSION_SMARTSTART);
 
-      learnModeInProgress = false;
+      learn_mode_finished_or_stop();
       break;
+    case EVENT_SYSTEM_LEARNMODE_FINISHED:
+      zaf_learn_mode_finished();
 
+      learn_mode_finished_or_stop();
+      break;
     case EVENT_SYSTEM_FLUSHMEM_READY:
       zafi_nvm_app_reset();
       if (resetInProgress) {
@@ -283,7 +329,8 @@ event_manager(const uint8_t event)
   zaf_event_distributor_app_event_manager(event);
 }
 
-static void EventHandlerApp(void)
+static void
+EventHandlerApp(void)
 {
   uint8_t event;
 
@@ -293,17 +340,63 @@ static void EventHandlerApp(void)
   }
 }
 
+/**
+ * Call the handler for a given table entry and pass the event and the data
+ *
+ * @param[in] handler_entry An entry in the map
+ * @param[in] args Arguments passed to the handler. See \ref context_t.
+ */
+static void
+call_handler(zaf_event_distributor_cc_event_handler_map_latest_t const * const handler_entry, void* args)
+{
+  event_cc_t *event_cc;
+
+  event_cc = (event_cc_t*)args;
+  if (handler_entry->command_class == event_cc->command_class && handler_entry->handler) {
+    handler_entry->handler(event_cc->event, event_cc->data);
+  }
+}
+
+static void
+cc_handlers_for_each(cc_event_handler_invoker_callback_t callback, void* args)
+{
+  zaf_event_distributor_cc_event_handler_map_latest_t const * iter = &cc_event_handler_start;
+  for (; iter < &cc_event_handler_stop; ++iter) {
+    callback(iter, args);
+  }
+}
+
+static void
+EventHandlerCC(void)
+{
+  event_cc_t event_cc;
+
+  while (xQueueReceive(m_CCEventQueue, (uint8_t*)(&event_cc), 0) == pdTRUE) {
+    DPRINTF("CC:%d Event: %d\n", event_cc.command_class, event_cc.event);
+    cc_handlers_for_each(call_handler, &event_cc);
+  }
+}
+
 /*
  * Initialized all modules related to event queuing, task notifying and job registering.
  */
-static void EventQueueInit()
+static void
+EventQueueInit()
 {
   // Initialize Queue Notifier for events in the application.
   m_AppEventQueue = xQueueCreateStatic(
-    sizeof_array(eventQueueStorage),
-    sizeof(eventQueueStorage[0]),
-    (uint8_t*)eventQueueStorage,
+    sizeof_array(m_AppEventQueueStorage),
+    sizeof(m_AppEventQueueStorage[0]),
+    (uint8_t*)m_AppEventQueueStorage,
     &m_AppEventQueueObject
+    );
+
+  // Initialize Queue Notifier for events in the application.
+  m_CCEventQueue = xQueueCreateStatic(
+    sizeof_array(m_CCEventQueueStorage),
+    sizeof(m_CCEventQueueStorage[0]),
+    (uint8_t*)m_CCEventQueueStorage,
+    &m_CCEventQueueObject
     );
 
   /*
@@ -317,18 +410,36 @@ static void EventQueueInit()
     EAPPLICATIONEVENT_APP);
 
   /*
-   * Wraps the QueueNotifying module for simple event generations!
+   * Registers events with associated data, and notifies
+   * the specific task about a pending job
    */
-  ZAF_EventHelperInit(&m_AppEventNotifyingQueue);
+  QueueNotifyingInit(
+    &m_CCEventNotifyingQueue,
+    m_CCEventQueue,
+    ZAF_getAppTaskHandle(),
+    EAPPLICATIONEVENT_CC);
 
+#if defined(ZAF_USE_LEGACY_JOB_HELPER)
   /*
    * Creates an internal queue to store no more than @ref JOB_QUEUE_BUFFER_SIZE jobs.
-   * This module has no notification feature!
+   * This module has no notification feature
    */
   ZAF_JobHelperInit();
+#endif /* defined(ZAF_USE_LEGACY_JOB_HELPER) */
 }
 
-void zaf_event_distributor_init(void)
+// Event distributor event handler table
+static const EventDistributorEventHandler g_aEventHandlerTable[] =
+{
+  AppTimerNotificationHandler,  // EAPPLICATIONEVENT_TIMER
+  EventHandlerZwRx,             // EAPPLICATIONEVENT_ZWRX
+  EventHandlerZwCommandStatus,  // EAPPLICATIONEVENT_ZWCOMMANDSTATUS
+  EventHandlerApp,              // EAPPLICATIONEVENT_APP
+  EventHandlerCC,               // EAPPLICATIONEVENT_CC
+};
+
+void
+zaf_event_distributor_init(void)
 {
   learnModeInProgress = false;
   resetInProgress = false;
@@ -348,9 +459,76 @@ zaf_event_distributor_is_primary_controller(void)
   return 0;
 }
 
-const SEventDistributor *zaf_event_distributor_get(void)
+const SEventDistributor *
+zaf_event_distributor_get(void)
 {
   return &g_EventDistributor;
+}
+
+bool zaf_event_distributor_enqueue_app_event(const uint8_t event)
+{
+  EQueueNotifyingStatus Status;
+
+  Status = QueueNotifyingSendToBack(&m_AppEventNotifyingQueue, &event, 0);
+  if (Status != EQUEUENOTIFYING_STATUS_SUCCESS) {
+    DPRINT("Failed to queue event\n");
+    return false;
+  }
+
+  return true;
+}
+
+bool zaf_event_distributor_enqueue_app_event_from_isr(const uint8_t event)
+{
+  EQueueNotifyingStatus Status;
+
+  Status = QueueNotifyingSendToBackFromISR(&m_AppEventNotifyingQueue, &event);
+  if (Status != EQUEUENOTIFYING_STATUS_SUCCESS) {
+    DPRINT("Failed to queue event\n");
+    return false;
+  }
+
+  return true;
+}
+
+bool zaf_event_distributor_enqueue_cc_event(const uint16_t command_class,
+                                            const uint8_t event,
+                                            const void* data)
+{
+  EQueueNotifyingStatus Status;
+  const event_cc_t event_cc = {
+    .command_class = command_class,
+    .event = event,
+    .data = data
+  };
+
+  Status = QueueNotifyingSendToBack(&m_CCEventNotifyingQueue, (const uint8_t*) &event_cc, 0);
+  if (Status != EQUEUENOTIFYING_STATUS_SUCCESS) {
+    DPRINT("Failed to queue event\n");
+    return false;
+  }
+
+  return true;
+}
+
+bool zaf_event_distributor_enqueue_cc_event_from_isr(const uint16_t command_class,
+                                                     const uint8_t event,
+                                                     const void* data)
+{
+  EQueueNotifyingStatus Status;
+  const event_cc_t event_cc = {
+    .command_class = command_class,
+    .event = event,
+    .data = data
+  };
+
+  Status = QueueNotifyingSendToBackFromISR(&m_CCEventNotifyingQueue, (const uint8_t*) &event_cc);
+  if (Status != EQUEUENOTIFYING_STATUS_SUCCESS) {
+    DPRINT("Failed to queue event\n");
+    return false;
+  }
+
+  return true;
 }
 
 /**
@@ -376,3 +554,6 @@ zaf_event_distributor_app_zw_command_status(SZwaveCommandStatusPackage *Status)
 {
   UNUSED(Status);
 }
+
+/* Register dummy entry to ensure that the section exists */
+ZAF_EVENT_DISTRIBUTOR_REGISTER_CC_EVENT_HANDLER(0xFF, NULL);

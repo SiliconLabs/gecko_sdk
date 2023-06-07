@@ -45,7 +45,7 @@ template_contribution:
   - name: zigbee_stack_callback
     value:
       callback_type: stack_status
-      function_name: emAfPluginNetworkSteeringStackStatusCallback
+      function_name: sli_zigbee_af_network_steering_stack_status_callback
   - name: zigbee_stack_callback
     value:
       callback_type: mark_buffers
@@ -53,7 +53,7 @@ template_contribution:
   - name: zigbee_af_callback
     value:
       callback_type: event_init
-      function_name: emAfPluginNetworkSteeringInitCallback
+      function_name: sli_zigbee_af_network_steering_init_callback
   - name: cli_group
     value:
       group: plugin

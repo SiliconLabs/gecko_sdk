@@ -39,7 +39,7 @@ component:
       - vcom
   - id: iostream_retarget_stdio
   - id: printf
-  - id: simple_timer_micriumos
+  - id: app_timer_micriumos
   - id: health_thermometer
   - id: i2cspm
     instance:

@@ -144,6 +144,26 @@ extern "C" {
  ********************************   ENUMS   ************************************
  ******************************************************************************/
 
+/** Disable clocks configuration */
+#if defined(_SILICON_LABS_32B_SERIES_2)
+#define _CMU_EM01GRPACLKCTRL_CLKSEL_DISABLED         0x00000000UL                                 /**< Mode DISABLED  for CMU_EM01GRPACLKCTRL        */
+#define CMU_EM01GRPACLKCTRL_CLKSEL_DISABLED          (_CMU_EM01GRPACLKCTRL_CLKSEL_DISABLED  << 0)   /**< Shifted mode DISABLED  for CMU_EM01GRPACLKCTRL*/
+#define _CMU_EM01GRPBCLKCTRL_CLKSEL_DISABLED         0x00000000UL                                 /**< Mode DISABLED  for CMU_EM01GRPBCLKCTRL        */
+#define CMU_EM01GRPBCLKCTRL_CLKSEL_DISABLED          (_CMU_EM01GRPBCLKCTRL_CLKSEL_DISABLED  << 0)   /**< Shifted mode DISABLED  for CMU_EM01GRPBCLKCTRL*/
+#define _CMU_EM23GRPACLKCTRL_CLKSEL_DISABLED        0x00000000UL                               /**< Mode DISABLED for CMU_EM23GRPACLKCTRL        */
+#define CMU_EM23GRPACLKCTRL_CLKSEL_DISABLED         (_CMU_EM23GRPACLKCTRL_CLKSEL_DISABLED << 0) /**< Shifted mode DISABLED for CMU_EM23GRPACLKCTRL*/
+#define _CMU_EM4GRPACLKCTRL_CLKSEL_DISABLED         0x00000000UL                              /**< Mode DISABLED for CMU_EM4GRPACLKCTRL         */
+#define CMU_EM4GRPACLKCTRL_CLKSEL_DISABLED          (_CMU_EM4GRPACLKCTRL_CLKSEL_DISABLED << 0) /**< Shifted mode DISABLED for CMU_EM4GRPACLKCTRL */
+#define _CMU_WDOG0CLKCTRL_CLKSEL_DISABLED           0x00000000UL                                /**< Mode DISABLED for CMU_WDOG0CLKCTRL           */
+#define CMU_WDOG0CLKCTRL_CLKSEL_DISABLED            (_CMU_WDOG0CLKCTRL_CLKSEL_DISABLED << 0)     /**< Shifted mode DISABLED for CMU_WDOG0CLKCTRL   */
+#define _CMU_WDOG1CLKCTRL_CLKSEL_DISABLED           0x00000000UL                                /**< Mode DISABLED for CMU_WDOG1CLKCTRL           */
+#define CMU_WDOG1CLKCTRL_CLKSEL_DISABLED            (_CMU_WDOG1CLKCTRL_CLKSEL_DISABLED << 0)     /**< Shifted mode DISABLED for CMU_WDOG1CLKCTRL   */
+#define _CMU_EUSART0CLKCTRL_CLKSEL_DISABLED        0x00000000UL                                  /**< Mode DISABLED for CMU_EUSART0CLKCTRL        */
+#define CMU_EUSART0CLKCTRL_CLKSEL_DISABLED         (_CMU_EUSART0CLKCTRL_CLKSEL_DISABLED << 0)    /**< Shifted mode DISABLED for CMU_EUSART0CLKCTRL*/
+#define _CMU_SYSRTC0CLKCTRL_CLKSEL_DISABLED         0x00000000UL                              /**< Mode DISABLED for CMU_SYSRTC0CLKCTRL         */
+#define CMU_SYSRTC0CLKCTRL_CLKSEL_DISABLED          (_CMU_SYSRTC0CLKCTRL_CLKSEL_DISABLED << 0) /**< Shifted mode DISABLED for CMU_SYSRTC0CLKCTRL */
+#endif // (_SILICON_LABS_32B_SERIES_2)
+
 /** Clock divider configuration */
 typedef uint32_t CMU_ClkDiv_TypeDef;
 
@@ -483,7 +503,7 @@ SL_ENUM_GENERIC(CMU_Clock_TypeDef, uint32_t) {
   cmuClock_EUSART4 = (CMU_CLKEN1_EN_REG << CMU_EN_REG_POS)
                      | (_CMU_CLKEN1_EUSART4_SHIFT << CMU_EN_BIT_POS),           /**< EUSART4 clock. */
 #endif
-#if defined(IFADCDEBUG_PRESENT)
+#if defined(_CMU_CLKEN1_IFADCDEBUG_SHIFT)
   cmuClock_IFADCDEBUG = (CMU_CLKEN1_EN_REG << CMU_EN_REG_POS)
                         | (_CMU_CLKEN1_IFADCDEBUG_SHIFT << CMU_EN_BIT_POS),     /**< IFADCDEBUG clock. */
 #endif
@@ -1287,6 +1307,7 @@ CMU_Select_TypeDef         CMU_ClockSelectGet(CMU_Clock_TypeDef clock);
 void                       CMU_ClockSelectSet(CMU_Clock_TypeDef clock,
                                               CMU_Select_TypeDef ref);
 uint16_t                   CMU_LF_ClockPrecisionGet(CMU_Clock_TypeDef clock);
+uint16_t                   CMU_HF_ClockPrecisionGet(CMU_Clock_TypeDef clock);
 CMU_HFRCODPLLFreq_TypeDef  CMU_HFRCODPLLBandGet(void);
 void                       CMU_HFRCODPLLBandSet(CMU_HFRCODPLLFreq_TypeDef freq);
 bool                       CMU_DPLLLock(const CMU_DPLLInit_TypeDef *init);
@@ -1318,6 +1339,8 @@ void                       CMU_HFXOCoreBiasCurrentCalibrate(void);
 void                       CMU_LFXOInit(const CMU_LFXOInit_TypeDef *lfxoInit);
 void                       CMU_LFXOPrecisionSet(uint16_t precision);
 uint16_t                   CMU_LFXOPrecisionGet(void);
+void                       CMU_HFXOPrecisionSet(uint16_t precision);
+uint16_t                   CMU_HFXOPrecisionGet(void);
 #if defined(PLFRCO_PRESENT)
 void                       CMU_LFRCOSetPrecision(CMU_Precision_TypeDef precision);
 #endif
@@ -3272,6 +3295,7 @@ uint32_t              CMU_ClockPrescGet(CMU_Clock_TypeDef clock);
 void                  CMU_ClockSelectSet(CMU_Clock_TypeDef clock, CMU_Select_TypeDef ref);
 CMU_Select_TypeDef    CMU_ClockSelectGet(CMU_Clock_TypeDef clock);
 uint16_t              CMU_LF_ClockPrecisionGet(CMU_Clock_TypeDef clock);
+uint16_t              CMU_HF_ClockPrecisionGet(CMU_Clock_TypeDef clock);
 
 #if defined(CMU_OSCENCMD_DPLLEN)
 bool                  CMU_DPLLLock(const CMU_DPLLInit_TypeDef *init);
@@ -3311,6 +3335,8 @@ void                  CMU_LCDClkFDIVSet(uint32_t div);
 void                  CMU_LFXOInit(const CMU_LFXOInit_TypeDef *lfxoInit);
 void                  CMU_LFXOPrecisionSet(uint16_t precision);
 uint16_t              CMU_LFXOPrecisionGet(void);
+void                  CMU_HFXOPrecisionSet(uint16_t precision);
+uint16_t              CMU_HFXOPrecisionGet(void);
 
 void                  CMU_OscillatorEnable(CMU_Osc_TypeDef osc, bool enable, bool wait);
 uint32_t              CMU_OscillatorTuningGet(CMU_Osc_TypeDef osc);

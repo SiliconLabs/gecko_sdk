@@ -1,9 +1,9 @@
 /***************************************************************************//**
  * @file
- * @brief Core application logic.
+ * @brief Thunderboard demo application
  *******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -37,7 +37,7 @@
 #include "app_log.h"
 #include "app_assert.h"
 #include "sl_bluetooth.h"
-#include "sl_simple_timer.h"
+#include "app_timer.h"
 #include "advertise.h"
 #include "sl_power_supply.h"
 #include "board.h"
@@ -111,14 +111,14 @@
 // Private variables
 
 // Timer
-static sl_simple_timer_t shutdown_timer;
+static app_timer_t shutdown_timer;
 
 // -----------------------------------------------------------------------------
 // Private function declarations
 
 static void shutdown_start_timer(void);
 static void shutdown_stop_timer(void);
-static void shutdown(sl_simple_timer_t *timer, void *data);
+static void shutdown(app_timer_t *timer, void *data);
 static void sensor_init(void);
 static void sensor_deinit(void);
 
@@ -127,7 +127,7 @@ static void sensor_deinit(void);
 
 void app_init(void)
 {
-  app_log_info("Thuderboard demo initialised" APP_LOG_NL);
+  app_log_info("Silicon Labs Thunderboard / DevKit demo" APP_LOG_NL);
   sl_power_supply_probe();
   shutdown_start_timer();
 #if defined(BOARD_RGBLED_COUNT) && (BOARD_RGBLED_COUNT > 0)
@@ -165,8 +165,8 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
                    evt->data.evt_system_boot.build);
       sc = sl_bt_system_get_identity_address(&address, &address_type);
       app_assert_status(sc);
-      app_log_info("Bluetooth %s address: %02X:%02X:%02X:%02X:%02X:%02X",
-                   address_type ? "static random" : "public device" APP_LOG_NL,
+      app_log_info("Bluetooth %s address: %02X:%02X:%02X:%02X:%02X:%02X" APP_LOG_NL,
+                   address_type ? "static random" : "public device",
                    address.addr[5],
                    address.addr[4],
                    address.addr[3],
@@ -213,7 +213,7 @@ void sl_button_on_change(const sl_button_t *handle)
 // -----------------------------------------------------------------------------
 // Shutdown feature function definitions
 
-static void shutdown(sl_simple_timer_t *timer, void *data)
+static void shutdown(app_timer_t *timer, void *data)
 {
   (void)timer;
   (void)data;
@@ -235,7 +235,7 @@ static void shutdown_start_timer(void)
 {
   sl_status_t sc;
   if (sl_power_supply_is_low_power()) {
-    sc = sl_simple_timer_start(&shutdown_timer, SHUTDOWN_TIMEOUT_MS, shutdown, NULL, false);
+    sc = app_timer_start(&shutdown_timer, SHUTDOWN_TIMEOUT_MS, shutdown, NULL, false);
     app_assert_status(sc);
   }
 }
@@ -243,7 +243,7 @@ static void shutdown_start_timer(void)
 static void shutdown_stop_timer(void)
 {
   sl_status_t sc;
-  sc = sl_simple_timer_stop(&shutdown_timer);
+  sc = app_timer_stop(&shutdown_timer);
   app_assert_status(sc);
 }
 
@@ -359,7 +359,7 @@ sl_status_t sl_gatt_service_hall_get(float *field_strength, bool *alert, bool *t
   sl_status_t sc;
   sc = sl_sensor_hall_get(field_strength, alert, tamper);
   if (SL_STATUS_OK == sc) {
-    app_log_info("Magnetic Flux = %4.3f mT" APP_LOG_NL, *field_strength);
+    app_log_info("Magnetic flux = %4.3f mT" APP_LOG_NL, *field_strength);
   } else if (SL_STATUS_NOT_INITIALIZED == sc) {
     app_log_info("Hall sensor is not initialized." APP_LOG_NL);
   } else {
@@ -375,8 +375,8 @@ sl_status_t sl_gatt_service_light_get(float *lux, float *uvi)
   sl_status_t sc;
   sc = sl_sensor_light_get(lux, uvi);
   if (SL_STATUS_OK == sc) {
-    app_log_info("Amb light = %f Lux" APP_LOG_NL, *lux);
-    app_log_info("UV Index = %d" APP_LOG_NL, *uvi);
+    app_log_info("Ambient light = %f lux" APP_LOG_NL, *lux);
+    app_log_info("UV Index = %u" APP_LOG_NL, (unsigned int)*uvi);
   } else if (SL_STATUS_NOT_INITIALIZED == sc) {
     app_log_info("Ambient light and UV index sensor is not initialized." APP_LOG_NL);
   } else {
@@ -392,11 +392,11 @@ sl_status_t sl_gatt_service_lux_get(float *lux)
   sl_status_t sc;
   sc = sl_sensor_lux_get(lux);
   if (SL_STATUS_OK == sc) {
-    app_log_info("Amb light = %f Lux\r\n", *lux);
+    app_log_info("Ambient light = %f lux" APP_LOG_NL, *lux);
   } else if (SL_STATUS_NOT_INITIALIZED == sc) {
     app_log_info("Ambient light sensor is not initialized." APP_LOG_NL);
   } else {
-    app_log_status_error_f(sc, "Light sensor measurement failed\n");
+    app_log_status_error_f(sc, "Light sensor measurement failed" APP_LOG_NL);
   }
   return sc;
 }
@@ -409,7 +409,7 @@ sl_status_t sl_gatt_service_rht_get(uint32_t *rh, int32_t *t)
   sc = sl_sensor_rht_get(rh, t);
   if (SL_STATUS_OK == sc) {
     app_log_info("Humidity = %3.2f %%RH" APP_LOG_NL, (float)*rh / 1000.0f);
-    app_log_info("Temp = %3.2f C" APP_LOG_NL, (float)*t / 1000.0f);
+    app_log_info("Temperature = %3.2f C" APP_LOG_NL, (float)*t / 1000.0f);
   } else if (SL_STATUS_NOT_INITIALIZED == sc) {
     app_log_info("Relative Humidity and Temperature sensor is not initialized." APP_LOG_NL);
   } else {
@@ -440,7 +440,7 @@ sl_status_t sl_gatt_service_imu_calibrate(void)
   if (SL_STATUS_NOT_INITIALIZED == sc) {
     app_log_info("Inertial Measurement Unit sensor is not initialized." APP_LOG_NL);
   } else {
-    app_log_info("IMU calibration status: %d" APP_LOG_NL, sc);
+    app_log_info("IMU calibration status: %ld" APP_LOG_NL, sc);
   }
   return sc;
 }
@@ -479,7 +479,7 @@ sl_status_t sl_gatt_service_pressure_get(float *pressure)
   if (SL_STATUS_OK == sc) {
     app_log_info("Pressure = %0.3f mbar" APP_LOG_NL, *pressure);
   } else if (SL_STATUS_NOT_INITIALIZED == sc) {
-    app_log_info("Air Pressure sensor is not initialized." APP_LOG_NL);
+    app_log_info("Air pressure sensor is not initialized" APP_LOG_NL);
   } else {
     app_log_status_error_f(sc, "Pressure sensor measurement failed" APP_LOG_NL);
   }
@@ -512,7 +512,7 @@ sl_status_t sl_gatt_service_sound_get(float *sound_level)
   sl_status_t sc;
   sc = sl_sensor_sound_get(sound_level);
   if (SL_STATUS_OK == sc) {
-    app_log_info("Sound Level = %3.2f dBA" APP_LOG_NL, *sound_level);
+    app_log_info("Sound level = %3.2f dBA" APP_LOG_NL, *sound_level);
   } else if (SL_STATUS_NOT_INITIALIZED == sc) {
     app_log_info("Sound level sensor is not initialized." APP_LOG_NL);
   } else {

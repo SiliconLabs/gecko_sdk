@@ -4,6 +4,22 @@ from pro2_chip_configurator.src.si4440_modem_calc.decode_api import en4gfsk,enoo
 class Calc_Pro2_Demod_Sol(CALC_Pro2_Demod_Ocelot):
     pass
 
+    def calc_run_pro2(self, model):
+        """Overriding to accommodate SOL ANTDIV PHYs"""
+
+        bcr_demod_en = model.vars.bcr_demod_en.value
+        bcr_detector_en = model.vars.MODEM_PHDMODCTRL_BCRDETECTOR.value
+        demod_select = model.vars.demod_select.value
+
+
+        if bcr_demod_en or (bcr_detector_en == 1 and demod_select != model.vars.demod_select.var_enum.SOFT_DEMOD):
+            super().calc_run_pro2(model)
+        else:
+            #Write default values to the BCR demod regs
+            self.write_unused_pro2_dsa_regs(model)
+            self.write_unused_bcr_regs(model)
+
+
     def _map_pro2_outputs(self, model, pro2_calculator_obj):
         # This function maps the pro2 calculator outputs to radio configurator variables / outputs
 
@@ -14,8 +30,6 @@ class Calc_Pro2_Demod_Sol(CALC_Pro2_Demod_Ocelot):
         self._reg_write(model.vars.MODEM_BCRDEMODCTRL_RAWFASTMA, pro2_calculator_obj.demodulator.fields.fast_ma)
         self._reg_write(model.vars.MODEM_BCRDEMODCTRL_SPIKEREMOV, pro2_calculator_obj.demodulator.fields.spike_rm_en)
         self._reg_write(model.vars.MODEM_BCRDEMODCTRL_RAWFLTSEL, pro2_calculator_obj.demodulator.fields.rawflt_sel)
-        self._reg_write(model.vars.MODEM_BCRDEMODCTRL_PREATH, pro2_calculator_obj.demodulator.fields.preath)
-        self._reg_write(model.vars.MODEM_BCRDEMODCTRL_SKIPSYN, pro2_calculator_obj.demodulator.fields.skipsyn)
         self._reg_write(model.vars.MODEM_BCRDEMODCTRL_PMPATTERN, pro2_calculator_obj.demodulator.fields.pm_pattern)
         self._reg_write(model.vars.MODEM_BCRDEMODCTRL_SLICERFAST, pro2_calculator_obj.demodulator.fields.slicer_fast)
         self._reg_write(model.vars.MODEM_BCRDEMODCTRL_DETECTORSEL, pro2_calculator_obj.demodulator.fields.detector)
@@ -40,9 +54,7 @@ class Calc_Pro2_Demod_Sol(CALC_Pro2_Demod_Ocelot):
 
         # Write BCRCTRL0
         self._reg_write(model.vars.MODEM_BCRCTRL0_BCRNCOFF, int(pro2_calculator_obj.demodulator.fields.ncoff))
-        self._reg_write(model.vars.MODEM_BCRCTRL0_BCRALIGN, pro2_calculator_obj.demodulator.fields.bcr_align_en)
         self._reg_write(model.vars.MODEM_BCRCTRL0_DISTOGG, pro2_calculator_obj.demodulator.fields.distogg)
-        self._reg_write(model.vars.MODEM_BCRCTRL0_CRFAST, pro2_calculator_obj.demodulator.fields.crfast)
         self._reg_write(model.vars.MODEM_BCRCTRL0_BCRERRRSTEN, 1)
         self._reg_write(model.vars.MODEM_BCRCTRL0_BCRFBBYP, pro2_calculator_obj.demodulator.fields.bcrfbbyp)
 
@@ -52,7 +64,6 @@ class Calc_Pro2_Demod_Sol(CALC_Pro2_Demod_Ocelot):
         self._reg_write(model.vars.MODEM_BCRCTRL1_RXNCOCOMP, pro2_calculator_obj.demodulator.fields.rxncocomp)
         self._reg_write(model.vars.MODEM_BCRCTRL1_RXCOMPLAT, pro2_calculator_obj.demodulator.fields.rxcomp_lat)
         self._reg_write(model.vars.MODEM_BCRCTRL1_ESCMIDPT, pro2_calculator_obj.demodulator.fields.esc_midpt)
-        self._reg_write(model.vars.MODEM_BCRCTRL1_DISMIDPT, pro2_calculator_obj.demodulator.fields.dis_midpt)
         self._reg_write(model.vars.MODEM_BCRCTRL1_BCROSR, int(pro2_calculator_obj.demodulator.fields.OSR_rx_BCR))
         self._reg_write(model.vars.MODEM_BCRCTRL1_ESTOSREN, pro2_calculator_obj.demodulator.fields.est_osr_en)
         self._reg_write(model.vars.MODEM_BCRCTRL1_BCRSWSYCW, pro2_calculator_obj.demodulator.fields.bcr_sw_sycw)
@@ -75,7 +86,6 @@ class Calc_Pro2_Demod_Sol(CALC_Pro2_Demod_Ocelot):
         self._reg_write(model.vars.MODEM_BCRDEMODAFC1_ONESHOTAFCEN, pro2_calculator_obj.demodulator.fields.oneshot_afc)
         self._reg_write(model.vars.MODEM_BCRDEMODAFC1_SKIPPMDET, pro2_calculator_obj.demodulator.fields.skip_pm_det)
         self._reg_write(model.vars.MODEM_BCRDEMODAFC1_ENAFCFRZ, pro2_calculator_obj.demodulator.fields.afc_freez_en)
-        self._reg_write(model.vars.MODEM_BCRDEMODAFC1_ENAFC, pro2_calculator_obj.demodulator.fields.afc_est_en)
         self._reg_write(model.vars.MODEM_BCRDEMODAFC1_ENFBPLL, int(pro2_calculator_obj.demodulator.fields.afc_fb_pll))
         self._reg_write(model.vars.MODEM_BCRDEMODAFC1_HALFPHCOMP, 0)
         self._reg_write(model.vars.MODEM_BCRDEMODAFC1_PMRSTEN, 0)
@@ -110,8 +120,6 @@ class Calc_Pro2_Demod_Sol(CALC_Pro2_Demod_Ocelot):
         self._reg_write(model.vars.MODEM_BCRDEMODRSSI_PRWOFFSET, 0)
 
         # Write BCRDEMODARR0
-        self._reg_write(model.vars.MODEM_BCRDEMODARR0_SCHPRDLO, pro2_calculator_obj.demodulator.fields.schprd_low)
-        self._reg_write(model.vars.MODEM_BCRDEMODARR0_SCHPRDHI, pro2_calculator_obj.demodulator.fields.schprd_h)
         self._reg_write(model.vars.MODEM_BCRDEMODARR0_ARRRSTEN, pro2_calculator_obj.demodulator.fields.arr_rst_en)
         self._reg_write(model.vars.MODEM_BCRDEMODARR0_ARRTOLER, pro2_calculator_obj.demodulator.fields.arr_toler)
         self._reg_write(model.vars.MODEM_BCRDEMODARR0_DIFF0RSTEN, pro2_calculator_obj.demodulator.fields.diff0rst_en)
@@ -305,6 +313,9 @@ class Calc_Pro2_Demod_Sol(CALC_Pro2_Demod_Ocelot):
 
         self._reg_write(model.vars.MODEM_BCRDEMODAFC1_ONESHOTWAITCNT, oneshot_waitcnt)
 
+    def _map_directmode_crslow(self, model, pro2_calculator_obj):
+        pass
+
     def calc_crslow(self, model):
         #This function calculates the value of MODEM_BCRCTRL0_CRSLOW
         # Reading variables from model variables
@@ -315,6 +326,7 @@ class Calc_Pro2_Demod_Sol(CALC_Pro2_Demod_Ocelot):
         baudrate_tol_req_ppm = model.vars.baudrate_tol_ppm.value
         mod_format = model.vars.modulation_type.value
         FSK4 = model.vars.modulation_type.var_enum.FSK4
+        directmode_rx = model.vars.directmode_rx.value
 
         API_Max_Rb_Error = abs (baudrate_tol_req_ppm / (1e6))
 
@@ -345,10 +357,14 @@ class Calc_Pro2_Demod_Sol(CALC_Pro2_Demod_Ocelot):
             else:
                 API_Rb_error = 2       # level 2 fpr baudrate tolerance of 2% or more
 
+
+            if directmode_rx != model.vars.directmode_rx.var_enum.DISABLED and \
+                    mod_format == model.vars.modulation_type.var_enum.FSK2:
+                crslow = 0            # Make CRSLOW as fast as possible in direct mode FSK
+
             #  Different conditions below come from original calculation in _calc_step_6 defined in
             # libraries/host_py_radio_config/Package/pro2_chip_configurator/src/si4440_modem_calc/pro2_ocelotdemodulatorcore.py
-
-            if (pm_pattern == 0):  # 1010 PM pattern: Min pm length = 32 bit
+            elif (pm_pattern == 0):  # 1010 PM pattern: Min pm length = 32 bit
                 if  (API_Rb_error >= 2):
                     crslow = 0
                 elif (API_Rb_error >= 1 and API_Rb_error< 2):

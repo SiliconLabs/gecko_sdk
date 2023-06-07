@@ -3,7 +3,7 @@ label:  "AFH"
 package: "Bluetooth"
 description: >
   Bluetooth Adaptive Frequency Hopping (AFH) feature
-category: "Bluetooth|Feature"
+category: Bluetooth|Bluetooth Host (Stack)|Additional Features
 quality: "production"
 root_path: "protocol/bluetooth"
 requires:

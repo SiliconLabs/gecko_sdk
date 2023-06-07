@@ -17,6 +17,7 @@ component:
       - btn0
       - btn1
   - id: rail_util_pti
+  - id: bootloader_interface
 
 include:
   - path: .

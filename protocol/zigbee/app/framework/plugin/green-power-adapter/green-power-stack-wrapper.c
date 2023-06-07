@@ -16,7 +16,9 @@
  ******************************************************************************/
 #include "green-power-stack-wrapper.h"
 
-const EmAfZigbeeProNetwork emAfZigbeeProNetworks[] = { { 2, 5 } };
+const sli_zigbee_af_zigbee_pro_network sli_zigbee_af_zigbee_pro_networks[] = { { 2, 5 } };
+
+#if (EMBER_AF_PLUGIN_GREEN_POWER_ADAPTER_USE_CUSTOM_GP_STACK == 1)
 
 WEAK(bool emberGpProxyTableProcessGpPairingWrapper(uint32_t options,
                                                    EmberGpAddress* addr,
@@ -32,13 +34,13 @@ WEAK(bool emberGpProxyTableProcessGpPairingWrapper(uint32_t options,
   return false;
 }
 
-WEAK(EmberStatus emGpProxyTableSetEntryWrapper(uint8_t proxyIndex,
-                                               EmberGpProxyTableEntry *entry))
+WEAK(EmberStatus sli_zigbee_af_gp_proxy_table_set_entryWrapper(uint8_t proxyIndex,
+                                                               EmberGpProxyTableEntry *entry))
 {
   return EMBER_INVALID_CALL;
 }
 
-WEAK(void emGpProxyTableInitWrapper(void))
+WEAK(void sli_zigbee_af_gp_proxy_table_init_wrapper(void))
 {
 }
 
@@ -47,7 +49,7 @@ WEAK(EmberStatus emberGpProxyTableGetEntryWrapper(uint8_t proxyIndex,
 {
   return EMBER_INVALID_CALL;
 }
-WEAK(uint8_t emGpProxyTableGetFreeEntryIndexWrapper(void))
+WEAK(uint8_t sli_zigbee_af_gp_proxy_table_get_free_entry_indexWrapper(void))
 {
   return 0xff;
 }
@@ -55,39 +57,39 @@ WEAK(uint8_t emberGpProxyTableLookupWrapper(EmberGpAddress *addr))
 {
   return 0xff;
 }
-WEAK(uint8_t emGpProxyTableFindOrAllocateEntryWrapper(EmberGpAddress *addr))
+WEAK(uint8_t sli_zigbee_af_gp_proxy_table_find_or_allocate_entryWrapper(EmberGpAddress *addr))
 {
   return 0xff;
 }
-WEAK(void emGpProxyTableAddSinkWrapper(uint8_t index,
-                                       uint8_t commMode,
-                                       EmberEUI64 sinkIeeeAddress,
-                                       EmberNodeId sinkNwkAddress,
-                                       uint16_t sinkGroupId,
-                                       uint16_t assignedAlias))
+WEAK(void sli_zigbee_af_gp_proxy_table_add_sink_wrapper(uint8_t index,
+                                                        uint8_t commMode,
+                                                        EmberEUI64 sinkIeeeAddress,
+                                                        EmberNodeId sinkNwkAddress,
+                                                        uint16_t sinkGroupId,
+                                                        uint16_t assignedAlias))
 {
 }
-WEAK(void emGpProxyTableRemoveSinkWrapper(uint8_t index,
-                                          EmberEUI64 sinkIeeeAddress,
-                                          uint16_t sinkGroupId,
-                                          uint16_t assignedAlias))
+WEAK(void sli_zigbee_af_gp_proxy_table_remove_sink_wrapper(uint8_t index,
+                                                           EmberEUI64 sinkIeeeAddress,
+                                                           uint16_t sinkGroupId,
+                                                           uint16_t assignedAlias))
 {
 }
-WEAK(void emGpProxyTableRemoveEntryWrapper(uint8_t index))
+WEAK(void sli_zigbee_af_gp_proxy_table_remove_entry_wrapper(uint8_t index))
 {
 }
-WEAK(void emGpProxyTableSetKeyWrapper(uint8_t index, uint8_t * gpdKey, EmberGpKeyType securityKeyType))
+WEAK(void sli_zigbee_af_gp_proxy_table_set_key_wrapper(uint8_t index, uint8_t * gpdKey, EmberGpKeyType securityKeyType))
 {
 }
-WEAK(void emGpProxyTableGetKeyWrapper(uint8_t index, EmberKeyData *key))
+WEAK(void sli_zigbee_af_gp_proxy_table_get_key_wrapper(uint8_t index, EmberKeyData *key))
 {
 }
-WEAK(bool emGpAddressMatchWrapper(const EmberGpAddress *a1, const EmberGpAddress *a2))
+WEAK(bool sli_zigbee_af_gp_address_matchWrapper(const EmberGpAddress *a1, const EmberGpAddress *a2))
 {
   return false;
 }
 
-WEAK(void emClearGpTxQueueWrapper(void))
+WEAK(void sli_zigbee_af_clear_gp_tx_queueWrapper(void))
 {
 }
 
@@ -108,7 +110,7 @@ WEAK(uint8_t emberGpSinkTableEntryInUseWrapper(uint8_t sinkTableIndex))
 {
   return 0xff;
 }
-WEAK(uint8_t emGpSinkTableGetFreeEntryIndexWrapper(void))
+WEAK(uint8_t sli_zigbee_af_gp_sink_table_get_free_entry_index_wrapper(void))
 {
   return 0xff;
 }
@@ -118,14 +120,14 @@ WEAK(uint8_t emberGpSinkTableFindOrAllocateEntryWrapper(EmberGpAddress *addr))
   return 0xff;
 }
 
-WEAK(void emGpSinkTableAddGroupWrapper(uint8_t index,
-                                       uint16_t sinkGroupId,
-                                       uint16_t alias))
+WEAK(void sli_zigbee_af_gp_sink_table_add_group_wrapper(uint8_t index,
+                                                        uint16_t sinkGroupId,
+                                                        uint16_t alias))
 {
 }
-WEAK(bool emGpSinkTableRemoveGroupWrapper(uint8_t index,
-                                          uint16_t sinkGroupId,
-                                          uint16_t assignedAlias))
+WEAK(bool sli_zigbee_af_gp_sink_table_remove_group_wrapper(uint8_t index,
+                                                           uint16_t sinkGroupId,
+                                                           uint16_t assignedAlias))
 {
   return false;
 }
@@ -141,39 +143,4 @@ WEAK(void emberGpSinkTableSetSecurityFrameCounterWrapper(uint8_t index,
 {
 }
 
-// Stack Handlers
-void emAfIncomingMessageHandler(EmberIncomingMessageType type,
-                                EmberApsFrame *apsFrame,
-                                uint8_t lastHopLqi,
-                                int8_t lastHopRssi,
-                                uint16_t messageLength,
-                                uint8_t *messageContents);
-
-WEAK(void emAfIncomingMessageCallback(EmberIncomingMessageType type,
-                                      EmberApsFrame *apsFrame,
-                                      EmberMessageBuffer message))
-{
-  uint8_t lastHopLqi;
-  int8_t lastHopRssi;
-
-  emberGetLastHopLqi(&lastHopLqi);
-  emberGetLastHopRssi(&lastHopRssi);
-
-  emAfIncomingMessageHandler(type,
-                             apsFrame,
-                             lastHopLqi,
-                             lastHopRssi,
-                             emGetBufferLength(message),
-                             emGetBufferPointer(message));
-}
-
-void emberAfIncomingMessageCallback(
-  // Incoming message type
-  EmberIncomingMessageType type,
-  // The aps Frame
-  EmberApsFrame *apsFrame,
-  // message
-  EmberMessageBuffer message)
-{
-  emAfIncomingMessageCallback(type, apsFrame, message);
-}
+#endif // (EMBER_AF_PLUGIN_GREEN_POWER_ADAPTER_USE_CUSTOM_GP_STACK == 1)

@@ -26,18 +26,18 @@
 // Returns true if the device should continue to process, false if it
 // should be dropped.
 
-const EmberLibraryStatus emEnhancedBeaconRequestLibraryStatus = EMBER_LIBRARY_IS_STUB;
+const EmberLibraryStatus sli_zigbee_enhanced_beacon_request_library_status = EMBER_LIBRARY_IS_STUB;
 
 EmberMessageBuffer deviceEnhancedBeaconRequestFilterList = EMBER_NULL_MESSAGE_BUFFER;
 uint8_t joinListUpdateId = 0;
 
-void emMarkEnhancedBeaconBuffers(void)
+void sli_zigbee_mark_enhanced_beacon_buffers(void)
 {
 }
 
-bool emZigbeeProcessEnhancedBeaconRequest(PacketHeader header,
-                                          EmMacFrameInfoElementParseResult result,
-                                          EmMacInfoElementField* infoElementsArray)
+bool sli_zigbee_process_enhanced_beacon_request(PacketHeader header,
+                                                sli_802154mac_frame_info_element_parse_result result,
+                                                sli_802154mac_info_element_field* infoElementsArray)
 {
   (void)header;
   (void)infoElementsArray;
@@ -48,45 +48,45 @@ bool emZigbeeProcessEnhancedBeaconRequest(PacketHeader header,
   return false;
 }
 
-EmberStatus emZigbeeSendEnhancedBeaconRequest(uint8_t mac_index, bool firstTimeJoin)
+EmberStatus sli_zigbee_send_enhanced_beacon_request(uint8_t mac_index, bool firstTimeJoin)
 {
   (void)mac_index;
   (void)firstTimeJoin;
   return EMBER_LIBRARY_NOT_PRESENT;
 }
 
-bool emCheckEBRFilterList(uint8_t * longId)
+bool sli_zigbee_check_ebr_filter_list(uint8_t * longId)
 {
   (void)longId;
   return true;
 }
 
-void emJoinListAdd(EmberEUI64 longId)
+void sli_zigbee_join_list_add(EmberEUI64 longId)
 {
   (void)longId;
 }
 
-void emJoinListDelete(EmberEUI64 longId)
+void sli_zigbee_join_list_delete(EmberEUI64 longId)
 {
   (void)longId;
 }
 
-void emJoinListClear(void)
+void sli_zigbee_join_list_clear(void)
 {
 }
 
-EmberMessageBuffer emGetJoinListPointer(void)
+EmberMessageBuffer sli_zigbee_get_join_list_pointer(void)
 {
   return EMBER_NULL_MESSAGE_BUFFER;
 }
 
-int8_t emFindEbrPowerByEui64(EmberEUI64 eui64)
+int8_t sli_zigbee_find_ebr_power_by_eui64(EmberEUI64 eui64)
 {
   (void)eui64;
   return MAX_RADIO_POWER_USER_PROVIDED;
 }
 
-void emRemoveEbrPowerAndEui64Entry(EmberEUI64 eui64)
+void sli_zigbee_remove_ebr_power_and_eui64_entry(EmberEUI64 eui64)
 {
   (void)eui64;
 }
@@ -103,20 +103,20 @@ void emberSetChildPower(uint8_t childIndex, int8_t newPower)
   (void)newPower;
 }
 
-uint8_t emGetEbrPowerAndEuiListPointer(uint8_t **buffer)
+uint8_t sli_zigbee_get_ebr_power_and_eui_list_pointer(uint8_t **buffer)
 {
   (void)buffer;
   return 0;
 }
 
-bool emAddEbrEuiAndPowerEntry(EmberEUI64 eui64, int8_t newPower)
+bool sli_zigbee_add_ebr_eui_and_power_entry(EmberEUI64 eui64, int8_t newPower)
 {
   (void)eui64;
   (void)newPower;
   return false;
 }
 
-void emMacSendEnhancedBeacon(uint8_t mac_index)
+void sli_802154mac_send_enhanced_beacon(uint8_t mac_index)
 {
   (void)mac_index;
 }

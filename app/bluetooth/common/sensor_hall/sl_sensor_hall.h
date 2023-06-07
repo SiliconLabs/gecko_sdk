@@ -31,6 +31,11 @@
 #ifndef SL_SENSOR_HALL_H
 #define SL_SENSOR_HALL_H
 
+/***********************************************************************************************//**
+ * @addtogroup sensor_hall
+ * @{
+ **************************************************************************************************/
+
 #include <stdbool.h>
 #include "sl_status.h"
 
@@ -63,4 +68,5 @@ void sl_sensor_hall_deinit(void);
  *****************************************************************************/
 sl_status_t sl_sensor_hall_get(float *field_strength, bool *alert, bool *tamper);
 
+/** @} (end addtogroup sensor_hall) */
 #endif // SL_SENSOR_HALL_H

@@ -44,11 +44,6 @@
 // <i> CTL model retransmission timeout.
 #define SL_BTMESH_CTL_CLIENT_RETRANSMISSION_TIMEOUT_CFG_VAL   (50)
 
-// <q SL_BTMESH_CTL_CLIENT_TEMPERATURE_WRAP_ENABLED_CFG_VAL> Enable color temperature wraparound
-// <i> Default: 0
-// <i> If the color temperature reaches the max or min value then it wraps around.
-#define SL_BTMESH_CTL_CLIENT_TEMPERATURE_WRAP_ENABLED_CFG_VAL   (0)
-
 // <e SL_BTMESH_CTL_CLIENT_LOGGING_CFG_VAL> Enable Logging
 // <i> Default: 1
 // <i> Enable / disable Logging for CTL Client model specific messages for this component.

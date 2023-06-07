@@ -26,7 +26,7 @@
  * This function initializes the table of device tunnel endpoints.
  *
  */
-void emberAfPluginTunnelingEndpointInit(SLXU_INIT_ARG);
+void emberAfPluginTunnelingEndpointInit(uint8_t init_level);
 
 /**
  * @brief Adds a tunneling endpoint.

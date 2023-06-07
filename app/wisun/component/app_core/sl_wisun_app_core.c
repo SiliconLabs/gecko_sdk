@@ -34,13 +34,13 @@
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
-#include "sl_component_catalog.h"
 #include "sl_status.h"
 #include "sl_wisun_app_core.h"
 #include "sl_wisun_app_core_util_config.h"
 #include "cmsis_os2.h"
 #include "sl_cmsis_os2_common.h"
 #include "sl_status.h"
+#include "sl_wisun_types.h"
 #include "sl_wisun_api.h"
 #include "sl_wisun_config.h"
 #include "sl_sleeptimer.h"
@@ -48,12 +48,15 @@
 #include "sl_wisun_trace_util.h"
 
 #if defined(SL_CATALOG_WISUN_APP_SETTING_PRESENT)
-#  include "sl_wisun_app_setting.h"
+  #include "sl_wisun_app_setting.h"
 #endif
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
+
+/// MDR capability
+#define APP_WISUN_MDR_COMMAND_CAPABILITY                  0U
 
 ///  Release mutex and return
 #define _return_and_mtx_release() \
@@ -75,6 +78,8 @@ typedef struct app_setting_wisun{
   char network_name[SL_WISUN_NETWORK_NAME_SIZE + 1];
   uint8_t network_size;
   int8_t tx_power;
+  uint8_t device_type;
+  uint8_t lfn_profile;
   bool is_default_phy;
   sl_wisun_phy_config_t phy;
 } app_setting_wisun_t;
@@ -89,14 +94,14 @@ typedef struct app_setting_wisun{
  * @param[in] setting setting structure that contains basic configuration
  * @return sl_status_t SL_STATUS_OK if it is successful.
  *****************************************************************************/
-__STATIC_INLINE sl_status_t _app_wisun_application_setting(const app_setting_wisun_t * const setting);
+static sl_status_t _app_wisun_application_setting(const app_setting_wisun_t * const setting);
 
 /**************************************************************************//**
  * @brief Security setting
  * @details It setup Wi-SUN with security related configuration.
  * @return sl_status_t SL_STATUS_OK if it is successful.
  *****************************************************************************/
-__STATIC_INLINE sl_status_t _app_wisun_security_setting(void);
+sl_status_t _app_wisun_security_setting(void);
 
 #if (WISUN_APP_REGULATION != REGULATION_NONE)
 /**************************************************************************//**
@@ -126,9 +131,9 @@ __STATIC_INLINE void _app_wisun_mutex_release(void);
  * @param[in] addr_type address type
  * @param[in] addr address
  *****************************************************************************/
-__STATIC_INLINE void _store_address(const char *addr_name,
-                                  const sl_wisun_ip_address_type_t addr_type,
-                                  sl_wisun_ip_address_t *addr);
+static void _store_address(const char *addr_name,
+                           const sl_wisun_ip_address_type_t addr_type,
+                           sl_wisun_ip_address_t *addr);
 
 /**************************************************************************//**
  * @brief Setting error flag
@@ -159,14 +164,32 @@ static uint16_t _get_cert_str_len(const uint8_t *cert, const uint16_t max_cert_l
 /// Create default setting if app settings is not available
 #if !defined(SL_CATALOG_WISUN_APP_SETTING_PRESENT)
 static const app_setting_wisun_t _app_default_settings = {
+#if defined(WISUN_CONFIG_NETWORK_NAME)
   .network_name = WISUN_CONFIG_NETWORK_NAME,
+#else
+  .network_name = "Wi-SUN Network",
+#endif
+#if defined(WISUN_CONFIG_NETWORK_SIZE)
   .network_size = WISUN_CONFIG_NETWORK_SIZE,
+#else
+  .network_size = SL_WISUN_NETWORK_SIZE_SMALL,
+#endif
 #if defined(WISUN_CONFIG_TX_POWER)
   .tx_power = WISUN_CONFIG_TX_POWER,
 #else
   .tx_power = 20U,
 #endif
   .is_default_phy = true,
+#if defined(WISUN_CONFIG_DEVICE_TYPE)
+  .device_type = WISUN_CONFIG_DEVICE_TYPE,
+#else
+  .device_type = SL_WISUN_ROUTER,
+#endif
+#if defined(WISUN_CONFIG_DEVICE_PROFILE)
+  .lfn_profile = WISUN_CONFIG_DEVICE_PROFILE,
+#else
+  .lfn_profile = SL_WISUN_LFN_PROFILE_TEST,
+#endif
 #if defined(WISUN_CONFIG_DEFAULT_PHY_FAN10)
   .phy = {
     .type = WISUN_CONFIG_DEFAULT_PHY_FAN10,
@@ -185,6 +208,57 @@ static const app_setting_wisun_t _app_default_settings = {
   .phy = { 0 },
 #endif
 };
+#endif
+
+/// Implement default certificates for Empty application
+#if defined(SL_CATALOG_WISUN_EMPTY_PRESENT)
+
+#if !defined(WISUN_CONFIG_DEVICE_PRIVATE_KEY_PRESENT)
+//! Wi-SUN Device private key
+static const uint8_t wisun_config_device_private_key[] = {
+  "-----BEGIN PRIVATE KEY-----\r\n"
+  "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQguF1oBuIMzOtpsOMH\r\n"
+  "df97vr2GppQfXOKDJ4RogFMk7QChRANCAASo6qu6eHf6ACvzdrrC2kH5CFG8zij1\r\n"
+  "1N1V40KjRqZeHNtSwXKXDs6BuCq2gIpCC5hOxuJyl4sxa/hNXsnFfoiP\r\n"
+  "-----END PRIVATE KEY-----"
+};
+#endif
+
+#if !defined(WISUN_CONFIG_DEVICE_CERTIFICATE_PRESENT)
+//! Wi-SUN Device certificate
+static const uint8_t wisun_config_device_certificate[] = {
+  "-----BEGIN CERTIFICATE-----\r\n"
+  "MIIByDCCAW6gAwIBAgIUPRtrFcA6dw03sTpD1dArHpFi65gwCgYIKoZIzj0EAwIw\r\n"
+  "HjEcMBoGA1UEAwwTV2ktU1VOIERlbW8gUm9vdCBDQTAgFw0yMTAzMDEwNzQyNDBa\r\n"
+  "GA85OTk5MTIzMTIzNTk1OVowHTEbMBkGA1UEAwwSV2ktU1VOIERlbW8gRGV2aWNl\r\n"
+  "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEqOqrunh3+gAr83a6wtpB+QhRvM4o\r\n"
+  "9dTdVeNCo0amXhzbUsFylw7OgbgqtoCKQguYTsbicpeLMWv4TV7JxX6Ij6OBiDCB\r\n"
+  "hTAOBgNVHQ8BAf8EBAMCA4gwIQYDVR0lAQH/BBcwFQYJKwYBBAGC5CUBBggrBgEF\r\n"
+  "BQcDAjAvBgNVHREBAf8EJTAjoCEGCCsGAQUFBwgEoBUwEwYJKwYBBAGCt0ECBAYx\r\n"
+  "MjM0NTYwHwYDVR0jBBgwFoAUk2TUDvdoou5d8Kz6crzFH01POiQwCgYIKoZIzj0E\r\n"
+  "AwIDSAAwRQIhANBxFWMzNMKyA+nMK0sbCUpqK1gVMyeoKqh0zvS3COyLAiAx8nCN\r\n"
+  "B7RkW8RmZ0UMWY26g7P6TbqJiAI3zoKkSxpJPg==\r\n"
+  "-----END CERTIFICATE-----"
+};
+#endif
+
+#if !defined(WISUN_CONFIG_CA_CERTIFICATE_PRESENT)
+//! Wi-SUN CA certificate
+static const uint8_t wisun_config_ca_certificate[] = {
+  "-----BEGIN CERTIFICATE-----\r\n"
+  "MIIBojCCAUmgAwIBAgIUSOJfgI08JDWdAjuqvH3REMyjjFswCgYIKoZIzj0EAwIw\r\n"
+  "HjEcMBoGA1UEAwwTV2ktU1VOIERlbW8gUm9vdCBDQTAgFw0yMTAyMjIwOTU5NDFa\r\n"
+  "GA85OTk5MTIzMTIzNTk1OVowHjEcMBoGA1UEAwwTV2ktU1VOIERlbW8gUm9vdCBD\r\n"
+  "QTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABG1Mn4dd9+IVJZSEcjpFKehvvRyQ\r\n"
+  "t9QcIBCN2ysf+BJUlFfU8TvC3w2waFrLuC+JHM+1TBEm1GLNDF7piCgqltWjYzBh\r\n"
+  "MBIGA1UdEwEB/wQIMAYBAf8CAQIwCwYDVR0PBAQDAgEGMB0GA1UdDgQWBBSTZNQO\r\n"
+  "92ii7l3wrPpyvMUfTU86JDAfBgNVHSMEGDAWgBSTZNQO92ii7l3wrPpyvMUfTU86\r\n"
+  "JDAKBggqhkjOPQQDAgNHADBEAiAdlM3ENdd7GHHbTsTiZMc7T5DDFQ2abeUI1be+\r\n"
+  "ytGaAAIgZREIYV4yhjoluqT4+snj/zQkqEqcYh/DMbx2gLKDgZ4=\r\n"
+  "-----END CERTIFICATE-----"
+};
+#endif
+
 #endif
 
 /// Here we track if regional regulation is active or not
@@ -250,7 +324,7 @@ void sl_wisun_connected_event_hnd(sl_wisun_evt_t *evt)
   uint32_t time_ms = 0;
   (void) evt;
   if (evt->evt.connected.status != SL_STATUS_OK) {
-    printf("[Connection failed. Status: %lu]", evt->evt.connected.status);
+    printf("[Connection failed. Status: %lu]\n", evt->evt.connected.status);
     return;
   }
   // store the current addresses
@@ -466,16 +540,73 @@ sl_wisun_join_state_t app_wisun_get_join_state(void)
   return join_state;
 }
 
+#if defined(SL_CATALOG_WISUN_LFN_DEVICE_SUPPORT_PRESENT)
+
+sl_wisun_device_type_t app_wisun_get_device_type(void)
+{
+  return (sl_wisun_device_type_t)_setting.device_type;
+}
+
+sl_wisun_lfn_profile_t app_wisun_get_lfn_profile(void)
+{
+  return (sl_wisun_lfn_profile_t)_setting.lfn_profile;
+}
+
+const sl_wisun_lfn_params_t *app_wisun_get_lfn_params(void)
+{
+  // Not lfn device
+  if (_setting.device_type != SL_WISUN_LFN) {
+    return NULL;
+  }
+
+  switch (_setting.lfn_profile) {
+    case SL_WISUN_LFN_PROFILE_TEST:
+      return &SL_WISUN_PARAMS_LFN_TEST;
+    case SL_WISUN_LFN_PROFILE_BALANCED:
+      return &SL_WISUN_PARAMS_LFN_BALANCED;
+    case SL_WISUN_LFN_PROFILE_ECO:
+      return &SL_WISUN_PARAMS_LFN_ECO;
+    default:
+      return NULL;
+  }
+}
+#endif
+
 // -----------------------------------------------------------------------------
 //                          Static Function Definitions
 // -----------------------------------------------------------------------------
 
-__STATIC_INLINE sl_status_t _app_wisun_application_setting(const app_setting_wisun_t * const setting)
+static sl_status_t _app_wisun_application_setting(const app_setting_wisun_t * const setting)
 {
   sl_status_t ret = SL_STATUS_FAIL;
   const sl_wisun_connection_params_t *conn_param = NULL;
+#if defined(WISUN_CONFIG_BROADCAST_RETRIES)
+  sl_wisun_connection_params_t update_param = { 0 };
+#endif
 
   conn_param = sl_wisun_get_conn_param_by_nw_size((sl_wisun_network_size_t) setting->network_size);
+
+  ret = sl_wisun_set_device_type((sl_wisun_device_type_t)setting->device_type);
+  if (ret != SL_STATUS_OK) {
+    printf("[Failed: unable to set device type: %lu]\n", ret);
+    return ret;
+  }
+#if defined(SL_CATALOG_WISUN_LFN_DEVICE_SUPPORT_PRESENT)
+  if (setting->device_type == SL_WISUN_LFN) {
+    // Store LFN profile based on wisun config
+    ret = sl_wisun_set_lfn_parameters(app_wisun_get_lfn_params());
+    if (ret != SL_STATUS_OK) {
+      printf("[Failed: unable to set device type: %lu]\n", ret);
+      return ret;
+    }
+  }
+#endif
+
+#if defined(WISUN_CONFIG_BROADCAST_RETRIES)
+  memcpy(&update_param, conn_param, sizeof(sl_wisun_connection_params_t));
+  update_param.mpl.trickle_expirations = WISUN_CONFIG_BROADCAST_RETRIES;
+  conn_param = &update_param;
+#endif
 
   // sets the network name
   ret = sl_wisun_set_connection_parameters(conn_param);
@@ -492,6 +623,22 @@ __STATIC_INLINE sl_status_t _app_wisun_application_setting(const app_setting_wis
     _app_wisun_core_set_error(SET_TX_POWER_ERROR_FLAG_BIT);
     return ret;
   }
+#if defined(WISUN_CONFIG_ALLOWED_CHANNELS)
+  ret = sl_wisun_set_channel_mask(&wisun_config_allowed_channels_mask);
+  if (ret != SL_STATUS_OK) {
+    printf("[Failed: unable to set allowed channels: %lu]\n", ret);
+    return ret;
+  }
+#endif
+#if defined(WISUN_CONFIG_MODE_SWITCH_PHYS_NUMBER)
+  ret = sl_wisun_set_pom_ie(WISUN_CONFIG_MODE_SWITCH_PHYS_NUMBER,
+                            (uint8_t *)wisun_config_ms_phys,
+                            APP_WISUN_MDR_COMMAND_CAPABILITY);
+  if (ret != SL_STATUS_OK) {
+    printf("[Failed: unable to set mode switch phys: %lu]\n", ret);
+    return ret;
+  }
+#endif
 
 #if defined(WISUN_CONFIG_DWELL_INTERVAL)
   // sets unicast
@@ -540,7 +687,7 @@ __STATIC_INLINE sl_status_t _app_wisun_application_setting(const app_setting_wis
   return ret;
 }
 
-__STATIC_INLINE sl_status_t _app_wisun_security_setting(void)
+sl_status_t _app_wisun_security_setting(void)
 {
   sl_status_t ret = SL_STATUS_FAIL;
   const uint32_t max_cert_str_len = 2048U;
@@ -627,13 +774,20 @@ __STATIC_INLINE void _app_wisun_mutex_release(void)
 }
 
 /* Storing address */
-__STATIC_INLINE void _store_address(const char *addr_name,
-                                  const sl_wisun_ip_address_type_t addr_type,
-                                  sl_wisun_ip_address_t *addr)
+static void _store_address(const char *addr_name,
+                           const sl_wisun_ip_address_type_t addr_type,
+                           sl_wisun_ip_address_t *addr)
 {
   sl_status_t stat = SL_STATUS_FAIL;
   const char *ip_str = NULL;
 
+#if defined(SL_CATALOG_WISUN_LFN_DEVICE_SUPPORT_PRESENT)
+  // skip BR address failure for LFN node
+  if (addr_type == SL_WISUN_IP_ADDRESS_TYPE_BORDER_ROUTER
+      && _setting.device_type == SL_WISUN_LFN) {
+    return;
+  }
+#endif
   stat = sl_wisun_get_ip_address(addr_type, addr);
 
   ip_str = app_wisun_trace_util_get_ip_str(addr);

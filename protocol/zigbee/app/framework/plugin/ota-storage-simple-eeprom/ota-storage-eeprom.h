@@ -16,9 +16,10 @@
  *
  ******************************************************************************/
 
-#ifdef UC_BUILD
 #include "ota-storage-simple-eeprom-config.h"
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #if (EMBER_AF_PLUGIN_OTA_STORAGE_SIMPLE_EEPROM_SOC_BOOTLOADING_SUPPORT == 1)
 #define SOC_BOOTLOADING_SUPPORT
 #endif
@@ -28,14 +29,6 @@
 #ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
   #include "test-harness-config.h"
 #endif //SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_OTA_STORAGE_SIMPLE_EEPROM_SOC_BOOTLOADING_SUPPORT
-#define SOC_BOOTLOADING_SUPPORT
-#endif
-#if (EMBER_AF_PLUGIN_OTA_STORAGE_SIMPLE_EEPROM_READ_MODIFY_WRITE_SUPPORT == TRUE)
-#define READ_MODIFY_WRITE_SUPPORT
-#endif
-#endif // UC_BUILD
 
 #if !defined(OTA_STORAGE_EEPROM_INTERNAL_HEADER)
 #error "Do not include this header with files outside of app/framework/plugin/ota-storage-simple-eeprom/"
@@ -255,12 +248,12 @@ uint32_t otaStorageEepromGetImageInfoStartAddress();
 
 /** @} */ // end of name API
 
-void emAfOtaStorageWriteInt32uToEeprom(uint32_t value, uint32_t realOffset);
-uint32_t emAfOtaStorageReadInt32uFromEeprom(uint32_t realOffset);
-void emAfStorageEepromUpdateDownloadOffset(uint32_t offset, bool finalOffset);
+void sli_zigbee_af_ota_storage_write_int32u_to_eeprom(uint32_t value, uint32_t realOffset);
+uint32_t sli_zigbee_af_ota_storage_read_int32u_from_eeprom(uint32_t realOffset);
+void sli_zigbee_af_storage_eeprom_update_download_offset(uint32_t offset, bool finalOffset);
 
-bool emAfOtaStorageDriverGetRealOffset(uint32_t* offset,
-                                       uint32_t* length);
+bool sli_zigbee_af_ota_storage_driver_get_real_offset(uint32_t* offset,
+                                                      uint32_t* length);
 /**
  * @name Callbacks
  * @{
@@ -276,22 +269,17 @@ void emberAfPluginOtaStorageSimpleEepromEraseCompleteCallback(bool success);
 /** @} */ // end of name Callbacks
 /** @} */ // end of ota-storage-simple-eeprom
 
-#ifdef UC_BUILD
 extern sl_zigbee_event_t emberAfPluginOtaStorageSimpleEepromPageEraseEvent;
-extern void emberAfPluginOtaStorageSimpleEepromPageEraseEventHandler(SLXU_UC_EVENT);
+extern void emberAfPluginOtaStorageSimpleEepromPageEraseEventHandler(sl_zigbee_event_t * event);
 #define eraseEvent (&emberAfPluginOtaStorageSimpleEepromPageEraseEvent)
-#else
-extern EmberEventControl emberAfPluginOtaStorageSimpleEepromPageEraseEventControl;
-#define eraseEvent emberAfPluginOtaStorageSimpleEepromPageEraseEventControl
-#endif
 
-bool emAfOtaStorageCheckDownloadMetaData(void);
-void emAfOtaStorageWriteDownloadMetaData(void);
-void emAfOtaStorageEepromInit(void);
-uint8_t emAfOtaStorageDriverGetWordSize(void);
+bool sli_zigbee_af_ota_storage_check_download_meta_data(void);
+void sli_zigbee_af_ota_storage_write_download_meta_data(void);
+void sli_zigbee_af_ota_storage_eeprom_init(void);
+uint8_t sli_zigbee_af_ota_storage_driver_get_word_size(void);
 
 #if defined(SOC_BOOTLOADING_SUPPORT)
-uint32_t emAfGetEblStartOffset(void);
+uint32_t sli_zigbee_af_get_ebl_start_offset(void);
 #endif
 
 // Very very verbose debug printing.

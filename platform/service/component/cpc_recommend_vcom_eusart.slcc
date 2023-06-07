@@ -10,7 +10,7 @@
 - requires:
   - name: device_has_eusart
   - name: hardware_board_has_vcom
-  - name: cpc_config_vcom_eusart
+  - name: cpc_config_vcom
 - provides:
   - name: cpc_recommend_vcom
   - name: cpc_recommend_vcom_eusart
@@ -18,6 +18,6 @@
   - id: cpc_secondary_driver_uart_eusart
     instance: 
     - vcom
-  - id: cpc_config_vcom_eusart
+  - id: cpc_config_vcom
     instance:
     - vcom

@@ -38,8 +38,6 @@
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
-/// Size of RAIL RX/TX FIFO
-#define RAIL_FIFO_SIZE (256U)
 /// Transmit data length
 #define TX_PAYLOAD_LENGTH (16U)
 /// Used for checking, if the incoming message comes from a light device

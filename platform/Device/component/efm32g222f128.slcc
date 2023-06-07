@@ -9,10 +9,10 @@
     unless:
     - device_content_override
 - source:
-  - path: platform/Device/SiliconLabs/EFM32G/Source/system_efm32g.c
+  - path: platform/Device/SiliconLabs/EFM32G/Source/startup_efm32g.c
     unless:
     - device_content_override
-  - path: platform/Device/SiliconLabs/EFM32G/Source/startup_efm32g.c
+  - path: platform/Device/SiliconLabs/EFM32G/Source/system_efm32g.c
     unless:
     - device_content_override
 - include:

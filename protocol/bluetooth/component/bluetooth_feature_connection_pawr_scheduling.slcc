@@ -1,0 +1,36 @@
+id: "bluetooth_feature_connection_pawr_scheduling"
+label:  "PAwR-aware Connection Scheduling Algorithm"
+package: "Bluetooth"
+description: >
+  The component provides a connection scheduling algorithm which has been
+  designed to be used especially with applications that use several concurrent
+  connections while advertising using Periodic Advertising with Responses (PAwR).
+  The algorithm tries to distribute the connections such a way they are
+  distracted as little as possible by the PAwR train.
+
+  For optimal performance the algorithm user should
+  * configure first the PAwR train
+  * use connection intervals which are equal to subevent interval
+
+  Despite of the above recommendations the algorithm, and the connections, can be
+  expected to work with different parameterization but performance is not likely
+  optimal.
+category: Bluetooth|Bluetooth LE Controller (Link Layer)|Features with Commands and Events
+quality: "production"
+root_path: "protocol/bluetooth"
+requires:
+  - name: "bluetooth_feature_pawr_advertiser"
+  - name: "bluetooth_feature_connection"
+provides:
+  - name: "bluetooth_feature_connection_pawr_scheduling"
+conflicts:
+  - name: "bluetooth_feature_ll_even_scheduling"
+template_contribution:
+  - name: component_catalog
+    value: bluetooth_feature_connection_pawr_scheduling
+  - name: bluetooth_controller_init
+    value:
+      function: "sl_btctrl_enable_pawr_connsch()"
+    # note: priority of this component needs to be lower than
+    # bluetooth_feature_connection to ensure it's enabled before
+    priority: 4

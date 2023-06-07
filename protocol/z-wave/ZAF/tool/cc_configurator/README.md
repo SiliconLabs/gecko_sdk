@@ -29,6 +29,29 @@ Each command class defines it's properties based on the requirements for it.
 Below each Command Class properties are defined
 Non mandatory fields are displayed within parentheses
 
+### zw_cc_multi_channel_support
+
+This section configures the generic type and specific type for each endpoint.
+
+This configuration is only relevant for a multi channel device like a power strip or a sensor with
+multiple sensors of the same type, for example two temperature sensors.
+
+```yaml
+zw_cc_multi_channel_support:
+  endpoints:
+    - endpoint: 1
+      generic_type: <generic type for endpoint 1>
+      specific_type: <specific type for endpoint 1>
+    - endpoint: 2
+      generic_type: <generic type for endpoint 2>
+      specific_type: <specific type for endpoint 2>
+    - endpoint: <N-127>
+      generic_type: <generic type>
+      specific_type: <specific type>
+```
+
+Please see PowerStrip.cc_config for an example.
+
 ### zw_cc_binary_switch
 
 The Command Class Binary Switch advanced configurator is defined as follows:
@@ -144,24 +167,20 @@ The Command Class Notification configurator is defined as follows:
 zw_cc_notification:
   notifications:
     - type: <notification_type_t>
-      (end_point: <Integer 0-255>)
-      agi_prifile: <agi_profile_t>
-      events:
-        <notification_event_state>
-        <notification_event_state>
-        ...
-      current_event: <notification_event_state>
-      status: <NOTIFICATION_STATUS>
+      (endpoint: <Integer 0-127>)
+      agi_profile: <agi_profile_t>
+      state_events:
+        - <notification_event_state 1>
+        - <notification_event_state 2>
+        - <notification_event_state N>
     ...
     - type: <notification_type_t>
-      (end_point: <Integer 0-255>)
-      agi_prifile: <agi_profile_t>
-      events:
-        <notification_event_state>
-        <notification_event_state>
-        ...
-      current_event: <notification_event_state>
-      status: <NOTIFICATION_STATUS>
+      (endpoint: <Integer 0-127>)
+      agi_profile: <agi_profile_t>
+      state_events:
+        - <notification_event_state 1>
+        - <notification_event_state 2>
+        - <notification_event_state N>
 ```
 
 ### zw_cc_agi
@@ -182,3 +201,25 @@ zw_cc_association:
 
 ```
 The endpoints have to be specified in ascending order.
+
+### zw_cc_central_scene
+
+The Command Class Central Scene configurator is defined as follows
+
+```yaml
+zw_cc_central_scene:
+  central_scene:
+    identical: <Integer 0-1 - Mandatory field only if all scenes are identical> 
+    number_of_scenes: <1-255 - Mandatory field if and only if all scenes are identical>
+    scenes:
+      - scene: <Integer 0 - number_of_scenes>
+        attributes:
+          - attribute: CENTRAL_SCENE_NOTIFICATION_KEY_ATTRIBUTES_KEY_PRESSED_1_TIME_V2
+          - attribute: CENTRAL_SCENE_NOTIFICATION_KEY_ATTRIBUTES_KEY_RELEASED_V2
+          ...
+      - scene: <Integer 0-127 First scene is mandatory. The rest of scenes are mandatory if and only if scenes are not identical>
+        attributes:
+          - attribute: CENTRAL_SCENE_NOTIFICATION_KEY_ATTRIBUTES_KEY_RELEASED_V2
+          - attribute: CENTRAL_SCENE_NOTIFICATION_KEY_ATTRIBUTES_KEY_HELD_DOWN_V2
+          ...
+```

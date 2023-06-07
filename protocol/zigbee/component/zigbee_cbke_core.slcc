@@ -45,37 +45,37 @@ template_contribution:
   - name: zigbee_stack_callback
     value:
       callback_type: dsa_sign
-      function_name: emAfDsaSignCallback
+      function_name: sli_zigbee_af_dsa_sign_callback
     condition:  
        - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: dsa_verify
-      function_name: emAfDsaVerifyCallback
+      function_name: sli_zigbee_af_dsa_verify_callback
     condition:  
        - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: generate_cbke_keys
-      function_name: emAfGenerateCbkeKeysCallback
+      function_name: sli_zigbee_af_generate_cbke_keys_callback
     condition:  
        - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: calculate_smacs
-      function_name: emAfCalculateSmacsCallback
+      function_name: sli_zigbee_af_calculate_smacs_callback
     condition:  
        - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: generate_cbke_keys_handler283k1
-      function_name: emAfGenerateCbkeKeysCallback283k1
+      function_name: sli_zigbee_af_generate_cbke_keys_callback_283k1
     condition:  
        - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: calculate_smacs_handler283k1
-      function_name: emAfCalculateSmacsCallback283k1
+      function_name: sli_zigbee_af_calculate_smacs_callback_283k1
     condition:  
        - zigbee_ncp
   - name: zigbee_ncp_callback

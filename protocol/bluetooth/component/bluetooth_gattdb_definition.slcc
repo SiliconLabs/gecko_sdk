@@ -3,7 +3,7 @@ label: "Bluetooth GATT database structure definition"
 package: "Bluetooth"
 description: >
   Bluetooth GATT database structure definition
-category: "Bluetooth|Stack"
+category: Bluetooth|Bluetooth Host (Stack)
 quality: "production"
 root_path: "protocol/bluetooth"
 include:

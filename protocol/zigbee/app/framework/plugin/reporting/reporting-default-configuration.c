@@ -68,11 +68,11 @@ static void scanTableAddDefaultConfigs(void)
 
   // scan the table entries, marking matching generated defaults as DONT_ADD
   EmberAfPluginReportingEntry tableEntry;
-  for (i = 0; i < emAfPluginReportingNumEntries(); i++) {
-    emAfPluginReportingGetEntry(i, &tableEntry);
+  for (i = 0; i < sli_zigbee_af_reporting_num_entries(); i++) {
+    sli_zigbee_af_reporting_get_entry(i, &tableEntry);
     for (uint16_t j = 0; j < EMBER_AF_GENERATED_REPORTING_CONFIG_DEFAULTS_TABLE_SIZE; j++) {
       if ((addConfigsBitmask[ADD_CONFIG_INDEX(j)] & ADD_CONFIG_BIT(j))
-          && emAfPluginReportingDoEntriesMatch(&tableEntry, &generatedReportingConfigDefaults[j])) {
+          && sli_zigbee_af_reporting_do_entries_match(&tableEntry, &generatedReportingConfigDefaults[j])) {
         addConfigsBitmask[ADD_CONFIG_INDEX(j)] &= ~ADD_CONFIG_BIT(j);
       }
     }
@@ -84,7 +84,7 @@ static void scanTableAddDefaultConfigs(void)
     //  to the table at the next available free index
     if (addConfigsBitmask[ADD_CONFIG_INDEX(i)] & ADD_CONFIG_BIT(i)) {
       tableEntry = generatedReportingConfigDefaults[i];
-      if (emAfPluginReportingAppendEntry(&tableEntry) == NULL_INDEX) {
+      if (sli_zigbee_af_reporting_append_entry(&tableEntry) == NULL_INDEX) {
         // if we are out of free indices, break the loop
         // we may run out of free indices if the number of configurations we receive over
         // the air exceeds the number of free spaces allocated by the plugin option

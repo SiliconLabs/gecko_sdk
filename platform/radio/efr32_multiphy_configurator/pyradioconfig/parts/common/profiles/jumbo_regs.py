@@ -1,7 +1,7 @@
 from pycalcmodel.core.output import ModelOutput,ModelOutputType
 
 
-def build_modem_regs_jumbo(model,profile, family):
+def build_modem_regs_jumbo(model,profile):
     # Output fields
     profile.outputs.append(ModelOutput(model.vars.MODEM_CF_CFOSR, '',                ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.CF.CFOSR'                  ))
     profile.outputs.append(ModelOutput(model.vars.MODEM_CF_DEC0, '',                 ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.CF.DEC0'                   ))
@@ -35,7 +35,7 @@ def build_modem_regs_jumbo(model,profile, family):
     profile.outputs.append(ModelOutput(model.vars.MODEM_CTRL2_DEVWEIGHTDIS, '',      ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.CTRL2.DEVWEIGHTDIS'        ))
     profile.outputs.append(ModelOutput(model.vars.MODEM_CTRL2_SQITHRESH, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.CTRL2.SQITHRESH'           ))
     profile.outputs.append(ModelOutput(model.vars.MODEM_CTRL2_RXPINMODE, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.CTRL2.RXPINMODE'           ))
-    if family == 'nerio':       # this is probably a bug.  This probably should be included in all profiles
+    if model.part_family.lower() == 'nerio':       # this is probably a bug.  This probably should be included in all profiles
         profile.outputs.append(ModelOutput(model.vars.MODEM_CTRL2_RATESELMODE, '',       ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.CTRL2.RATESELMODE'         ))
     profile.outputs.append(ModelOutput(model.vars.MODEM_CTRL3_TSAMPDEL, '',          ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.CTRL3.TSAMPDEL'            ))
     profile.outputs.append(ModelOutput(model.vars.MODEM_CTRL3_TSAMPLIM, '',          ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.CTRL3.TSAMPLIM'            ))
@@ -71,7 +71,7 @@ def build_modem_regs_jumbo(model,profile, family):
     profile.outputs.append(ModelOutput(model.vars.MODEM_CTRL6_PSTIMABORT2, '',       ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.CTRL6.PSTIMABORT2'         ))
     profile.outputs.append(ModelOutput(model.vars.MODEM_CTRL6_PSTIMABORT3,'',        ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.CTRL6.PSTIMABORT3'         ))
     profile.outputs.append(ModelOutput(model.vars.MODEM_CTRL6_ARW, '',               ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.CTRL6.ARW'                 ))
-    if family == 'nerio':           # this is probably a bug.  This probably should be included in all profiles
+    if model.part_family.lower() == 'nerio':           # this is probably a bug.  This probably should be included in all profiles
         profile.outputs.append(ModelOutput(model.vars.MODEM_CTRL6_CODINGB, '',           ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.CTRL6.CODINGB'             ))
     profile.outputs.append(ModelOutput(model.vars.MODEM_CTRL6_TIMTHRESHGAIN, '',     ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.CTRL6.TIMTHRSHGAIN'        ))
     profile.outputs.append(ModelOutput(model.vars.MODEM_CTRL6_CPLXCORREN, '',        ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.CTRL6.CPLXCORREN'          ))
@@ -384,7 +384,7 @@ def build_modem_regs_jumbo(model,profile, family):
 
     profile.outputs.append(ModelOutput(model.vars.SEQ_PERIODICDEMODRSTPERIOD_PERIOD, '', ModelOutputType.SEQ_REG_FIELD, readable_name='SEQ.PERIODICDEMODRSTPERIOD.PERIOD'  ))
 
-    if family == 'nerio':       # this register is exclusive to Nerio, for now (RAIL_LIB-2563)
+    if model.part_family.lower() == 'nerio':       # this register is exclusive to Nerio, for now (RAIL_LIB-2563)
         profile.outputs.append(ModelOutput(model.vars.SEQ_MISC_BLE_VITERBI_FIX_EN,   '', ModelOutputType.SEQ_REG_FIELD, readable_name='SEQ.MISC.BLE_VITERBI_FIX_EN'))
 
     profile.outputs.append(ModelOutput(model.vars.SEQ_BBSS_GROUP_4_BBSS_LEVEL_4_VALUE, '', ModelOutputType.SEQ_REG_FIELD, readable_name='SEQ.BBSS_GROUP_4.BBSS_LEVEL_4_VALUE'))

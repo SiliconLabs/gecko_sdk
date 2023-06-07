@@ -22,32 +22,22 @@
 
 //------------------------------------------------------------------------------
 
-#ifdef UC_BUILD
-void emAfPluginInterpanMacFilterMatchMessageCallback(uint8_t filterIndexMatch,
-                                                     EmberMacPassthroughType legacyPassthroughType,
-                                                     uint8_t lastHopLqi,
-                                                     int8_t lastHopRssi,
-                                                     uint8_t messageLength,
-                                                     uint8_t *messageContents)
-#else // !UC_BUILD
-void ezspMacFilterMatchMessageHandler(uint8_t filterIndexMatch,
-                                      EmberMacPassthroughType legacyPassthroughType,
-                                      uint8_t lastHopLqi,
-                                      int8_t lastHopRssi,
-                                      uint8_t messageLength,
-                                      uint8_t *messageContents)
-#endif
+void sli_zigbee_af_interpan_mac_filter_match_message_callback(uint8_t filterIndexMatch,
+                                                              EmberMacPassthroughType legacyPassthroughType,
+                                                              uint8_t lastHopLqi,
+                                                              int8_t lastHopRssi,
+                                                              uint8_t messageLength,
+                                                              uint8_t *messageContents)
 {
-  emAfPluginInterpanProcessMessage(messageLength,
-                                   messageContents);
+  sli_zigbee_af_interpan_process_message(messageLength,
+                                         messageContents);
 }
 
-EmberStatus emAfPluginInterpanSendRawMessage(uint8_t length, uint8_t* message)
+EmberStatus sli_zigbee_af_interpan_send_raw_message(uint8_t length, uint8_t* message)
 {
   return ezspSendRawMessage(length, message);
 }
 
-#ifdef UC_BUILD
 void emberAfPluginInterpanNcpInitCallback(bool memoryAllocation)
 {
   interpanPluginInit(SL_ZIGBEE_INIT_LEVEL_EVENT);
@@ -72,41 +62,6 @@ void emberAfPluginInterpanNcpInitCallback(bool memoryAllocation)
     interpanPluginSetMacMatchFilterEnable(true);
   }
 }
-
-#else // !UC_BUILD
-
-void emberAfPluginInterpanNcpInitCallback(bool memoryAllocation)
-{
-  interpanPluginInit();
-
-  EmberMacFilterMatchData filters[] = {
-    EMBER_AF_PLUGIN_INTERPAN_FILTER_LIST
-  };
-  EzspStatus status;
-
-  if (memoryAllocation) {
-    status = ezspSetConfigurationValue(EZSP_CONFIG_MAC_FILTER_TABLE_SIZE,
-                                       (sizeof(filters)
-                                        / sizeof(EmberMacFilterMatchData)) + 1);
-    if (status != EZSP_SUCCESS) {
-      emberAfAppPrintln("%p%p failed 0x%x",
-                        "Error: ",
-                        "Sizing MAC filter table",
-                        status);
-      return;
-    }
-  } else {
-    interpanPluginSetMacMatchFilterEnable(true);
-  }
-}
-#endif // UC_BUILD
-
-#ifndef UC_BUILD
-void emberAfPluginInterpanInitCallback(SLXU_INIT_ARG)
-{
-  SLXU_INIT_UNUSED_ARG;
-}
-#endif // UC_BUILD
 
 void interpanPluginSetMacMatchFilterEnable(bool enable)
 {
@@ -133,11 +88,11 @@ void interpanPluginSetMacMatchFilterEnable(bool enable)
   }
 }
 
-EmberStatus emAfInterpanApsCryptMessage(bool encrypt,
-                                        uint8_t* message,
-                                        uint8_t* messageLength,
-                                        uint8_t apsHeaderEndIndex,
-                                        EmberEUI64 remoteEui64)
+EmberStatus sli_zigbee_af_interpan_aps_crypt_message(bool encrypt,
+                                                     uint8_t* message,
+                                                     uint8_t* messageLength,
+                                                     uint8_t apsHeaderEndIndex,
+                                                     EmberEUI64 remoteEui64)
 {
 #if defined(ALLOW_APS_ENCRYPTED_MESSAGES)
   #error Not supported by EZSP

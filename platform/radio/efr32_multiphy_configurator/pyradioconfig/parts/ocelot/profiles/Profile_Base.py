@@ -7,9 +7,8 @@ from pyradioconfig.parts.common.utils.units_multiplier import UnitsMultiplier
 
 class Profile_Base_Ocelot(Profile_Base):
 
-    """
-    Init internal variables
-    """
+    bandwidth_limit_adc = 2530000
+
     def __init__(self):
         super().__init__()
         self._description = "Profile used for most PHYs on EFR32xG23 parts"
@@ -50,8 +49,8 @@ class Profile_Base_Ocelot(Profile_Base):
         self._sw_profile_outputs_common.build_rail_outputs(model, profile)
 
         # Output fields
-        buildFrameOutputs(model, profile, family=family)
-        buildCrcOutputs(model, profile, family)
+        buildFrameOutputs(model, profile)
+        buildCrcOutputs(model, profile)
         buildWhiteOutputs(model, profile)
         buildFecOutputs(model, profile)
 
@@ -82,7 +81,7 @@ class Profile_Base_Ocelot(Profile_Base):
         IProfile.make_required_input(profile, model.vars.syncword_1, "syncword", readable_name="Sync Word 1",
                                      value_limit_min=long(0), value_limit_max=long(0xffffffff))
         IProfile.make_required_input(profile, model.vars.syncword_length, "syncword", readable_name="Sync Word Length",
-                                     value_limit_min=0, value_limit_max=32)
+                                     value_limit_min=2, value_limit_max=32)
 
         IProfile.make_required_input(profile, model.vars.preamble_pattern_len, "preamble",
                                      readable_name="Preamble Pattern Length", value_limit_min=0, value_limit_max=4)
@@ -113,8 +112,8 @@ class Profile_Base_Ocelot(Profile_Base):
     def build_optional_profile_inputs(self, model, profile):
         IProfile.make_optional_input(profile, model.vars.syncword_tx_skip, "syncword",
                                      readable_name="Sync Word TX Skip", default=False)
-        IProfile.make_optional_input(profile, model.vars.asynchronous_rx_enable, "modem",
-                                     readable_name="Enable Asynchronous direct mode", default=False)
+        IProfile.make_optional_input(profile, model.vars.directmode_rx, "modem",
+                                     readable_name="RX Direct Mode", default=model.vars.directmode_rx.var_enum.DISABLED)
         IProfile.make_optional_input(profile, model.vars.symbol_encoding, "symbol_coding",
                                      readable_name="Symbol Encoding", default=model.vars.symbol_encoding.var_enum.NRZ)
         IProfile.make_optional_input(profile, model.vars.test_ber, "testing",
@@ -141,11 +140,10 @@ class Profile_Base_Ocelot(Profile_Base):
         # We should set the limt to to the ADC limit, since the overall bandwidth is limited by the ADC bandwidth, not the
         # limit by the decimators.   See https://jira.silabs.com/browse/MCUW_RADIO_CFG-554 for additional discussion on this.
         bandwidth_limit_decimators = 3400000
-        bandwidth_limit_adc = 2530000
+
         IProfile.make_linked_io(profile, model.vars.bandwidth_hz, 'Advanced',
                                 readable_name="Acquisition Channel Bandwidth", value_limit_min=100,
-                                value_limit_max=bandwidth_limit_adc, units_multiplier=UnitsMultiplier.KILO)
-
+                                value_limit_max=self.bandwidth_limit_adc, units_multiplier=UnitsMultiplier.KILO)
         IProfile.make_linked_io(profile, model.vars.if_frequency_hz, 'Advanced', readable_name="IF Frequency",
                                 value_limit_min=70000, value_limit_max=1900000, units_multiplier=UnitsMultiplier.KILO)
         IProfile.make_linked_io(profile, model.vars.rssi_period, 'Advanced', readable_name="RSSI Update Period",
@@ -164,6 +162,8 @@ class Profile_Base_Ocelot(Profile_Base):
                                 readable_name="Length of the First Word", value_limit_min=1, value_limit_max=8)
 
     def build_hidden_profile_inputs(self, model, profile):
+        IProfile.make_hidden_input(profile, model.vars.asynchronous_rx_enable, "Advanced",
+                                     readable_name="Enable Asynchronous direct mode")
         IProfile.make_hidden_input(profile, model.vars.src1_range_available_minimum, "modem",
                                    readable_name="SRC range minimum", value_limit_min=125, value_limit_max=155)
         IProfile.make_hidden_input(profile, model.vars.input_decimation_filter_allow_dec3, "modem",
@@ -245,6 +245,9 @@ class Profile_Base_Ocelot(Profile_Base):
         IProfile.make_hidden_input(profile, model.vars.ircal_power_level, 'Advanced',
                                    readable_name="IR cal power level (amplitude)", value_limit_min=0,
                                    value_limit_max=255)
+        IProfile.make_hidden_input(profile, model.vars.lock_bandwidth_hz, 'Advanced',
+                                readable_name="Lock Channel Bandwidth", value_limit_min=100,
+                                value_limit_max=self.bandwidth_limit_adc, units_multiplier=UnitsMultiplier.KILO)
 
     def build_frame_configuration_inputs(self, model, profile):
         self._frame_profile_inputs_common.build_frame_inputs(model, profile)
@@ -265,8 +268,7 @@ class Profile_Base_Ocelot(Profile_Base):
         self.make_deprecated_input(profile, model.vars.src_disable)
 
     def buildRegisterOutputs(self, model, profile):
-        family = self._family
-        build_modem_regs_ocelot(model, profile, family)
+        build_modem_regs_ocelot(model, profile)
 
     def profile_calculate(self, model):
 

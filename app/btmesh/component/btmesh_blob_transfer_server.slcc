@@ -26,6 +26,7 @@ include:
 requires:
   - name: app_assert
   - name: app_btmesh_util
+  - name: btmesh_provisionee
   - name: btmesh_stack
   - name: btmesh_core
   - name: btmesh_blob_storage
@@ -46,5 +47,8 @@ template_contribution:
       event: internal_app_process_action
       include: sl_btmesh_blob_transfer_server.h
       handler: sl_btmesh_blob_transfer_server_step_handle
+validation_library:
+  - path: ../../../common/validation/autonumber_common.lua
+    name: autonumber_common
 validation_helper:
   - path: btmesh_blob_transfer_server_validation.lua

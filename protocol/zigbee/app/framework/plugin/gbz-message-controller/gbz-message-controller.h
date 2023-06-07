@@ -151,19 +151,19 @@ typedef struct {
 typedef struct {
   uint8_t * payload;
   uint8_t payloadLength;
-} EmAfGbzPayloadHeader;
+} sli_zigbee_af_gbz_payload_header;
 
 /*
  * @brief A link list that keeps track of raw data that represents appended
  *        GBZ Use Case-Specific components.
  */
-struct EmAfGbzUseCaseSpecificComponent{
+struct sli_zigbee_af_gbz_use_case_specific_component{
   uint8_t * payload;
   uint16_t payloadLength;
-  struct EmAfGbzUseCaseSpecificComponent * next;
+  struct sli_zigbee_af_gbz_use_case_specific_component * next;
 };
 
-typedef struct EmAfGbzUseCaseSpecificComponent EmAfGbzUseCaseSpecificComponent;
+typedef struct sli_zigbee_af_gbz_use_case_specific_component sli_zigbee_af_gbz_use_case_specific_component;
 
 typedef struct {
   uint8_t * payload;
@@ -180,9 +180,9 @@ typedef struct {
   uint16_t commandLength;
 
   // used when allocateMemoryForResponses is true
-  EmAfGbzUseCaseSpecificComponent * responses;
-  EmAfGbzUseCaseSpecificComponent * lastResponse;
-  EmAfGbzPayloadHeader * header;
+  sli_zigbee_af_gbz_use_case_specific_component * responses;
+  sli_zigbee_af_gbz_use_case_specific_component * lastResponse;
+  sli_zigbee_af_gbz_payload_header * header;
 
   // otherwise.
   uint8_t nextEncryptedComponentZclSequenceNumber;
@@ -337,8 +337,8 @@ void emberAfPluginGbzMessageControllerPrintCommandInfo(EmberAfGbzZclCommand  * g
 /**
  * @brief Get the length of the overall GBZ message.
  */
-uint16_t emAfPluginGbzMessageControllerGetLength(EmberAfGbzZclCommand * cmd,
-                                                 EmberAfGbzMessageData * msg);
+uint16_t sli_zigbee_af_gbz_message_controller_get_length(EmberAfGbzZclCommand * cmd,
+                                                         EmberAfGbzMessageData * msg);
 
 /**
  * @brief Indicate whether the ZCL payload will be encrypted.

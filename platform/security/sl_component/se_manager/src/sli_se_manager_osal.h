@@ -57,7 +57,7 @@
 extern "C" {
 #endif
 
-#if defined(SL_SE_MANAGER_THREADING) || defined(DOXYGEN)
+#if defined(SL_SE_MANAGER_THREADING)
 
 /***************************************************************************//**
  * @brief          Initialize a given mutex

@@ -70,6 +70,7 @@ sl_status_t sl_device_init_hfxo(void)
 
   SystemHFXOClockSet(SL_DEVICE_INIT_HFXO_FREQ);
   CMU_HFXOInit(&hfxoInit);
+  CMU_HFXOPrecisionSet(SL_DEVICE_INIT_HFXO_PRECISION);
 
 #if defined(_CMU_HFXOCTRL_AUTOSTARTEM0EM1_MASK)
   if (SL_DEVICE_INIT_HFXO_AUTOSTART) {

@@ -3,7 +3,7 @@ label: HCI CPC component
 package: Bluetooth
 description: CPC component for HCI
 
-category: Bluetooth|Controller
+category: Bluetooth|Host Controller Interface (HCI)
 quality: experimental
 root_path: protocol/bluetooth/bgstack/ll/utils/hci_packet
 source:

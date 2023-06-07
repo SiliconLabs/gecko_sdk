@@ -19,26 +19,26 @@
 #include "stack/include/ember-types.h"
 #include "stack/include/library.h"
 
-EmberStatus emGpInit(void)
+EmberStatus sli_zigbee_gp_init(void)
 {
   return EMBER_SUCCESS;
 }
 
-void emGpProxyTableInit(void)
+void sli_zigbee_af_gp_proxy_table_init(void)
 {
 }
-void emGpIncomingMessageHandler(PacketHeader header)
+void sli_zigbee_gp_incoming_message_handler(PacketHeader header)
 {
   (void)header;
 }
 //CGP Stub
 
 // CGP-DATA.request
-void emCGpSend(bool useCca,
-               EmberGpAddress *src,
-               EmberGpAddress *dst,
-               uint8_t gpdCommandId,
-               EmberMessageBuffer asdu)
+void sli_zigbee_c_gp_send(bool useCca,
+                          EmberGpAddress *src,
+                          EmberGpAddress *dst,
+                          uint8_t gpdCommandId,
+                          EmberMessageBuffer asdu)
 {
   (void)useCca;
   (void)src;
@@ -49,7 +49,7 @@ void emCGpSend(bool useCca,
 }
 
 //CGP-DATA.confirm
-void emCGpSentHandler(EmberStatus status, uint8_t gpMpduHandle)
+void sli_zigbee_c_gp_sent_handler(EmberStatus status, uint8_t gpMpduHandle)
 {
   (void)status;
   (void)gpMpduHandle;
@@ -57,11 +57,11 @@ void emCGpSentHandler(EmberStatus status, uint8_t gpMpduHandle)
 }
 
 //dGP-DATA.indication
-void emDGpIncomingMessageHandler(uint8_t lqi,
-                                 uint8_t sequenceNumber,
-                                 EmberCGpAddress const *src,
-                                 EmberCGpAddress const *dst,
-                                 PacketHeader header)
+void sli_zigbee_d_gp_incoming_message_handler(uint8_t lqi,
+                                              uint8_t sequenceNumber,
+                                              EmberCGpAddress const *src,
+                                              EmberCGpAddress const *dst,
+                                              PacketHeader header)
 //uint8_t gpMpduLength,
 //uint8_t const *gpMpdu);
 {
@@ -180,30 +180,30 @@ void emberGpSecurityResponse(EmberStatus status,
   return;
 }
 
-void emReadGpTokens(void)
+void sli_zigbee_read_gp_tokens(void)
 {
   return;
 }
 
-bool emIsGpIdConflict(EmberNodeId shortId)
+bool sli_zigbee_is_gp_id_conflict(EmberNodeId shortId)
 {
   (void)shortId;
   return false;
 }
 
-void emDetectGpIdConflictAndResolve(EmberNodeId shortId,
-                                    uint8_t *longId)
+void sli_zigbee_detect_gp_id_conflict_and_resolve(EmberNodeId shortId,
+                                                  uint8_t *longId)
 {
   (void)shortId;
   (void)longId;
 }
-void emUpdateGpProxyTable(uint8_t *longId, EmberNodeId shortId)
+void sli_zigbee_update_gp_proxy_table(uint8_t *longId, EmberNodeId shortId)
 {
   (void)longId;
   (void)shortId;
 }
 
-void emGpTxEventHandler(void)
+void sli_zigbee_gp_tx_event_handler(void)
 {
 }
 

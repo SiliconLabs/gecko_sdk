@@ -28,8 +28,8 @@
 // Forward Declarations
 
 // Internal stack routines
-void emResetApsFrameCounter(void);
-void emTestHarnessAdvanceApsFrameCounter(void);
+void sli_zigbee_reset_aps_frame_counter(void);
+void sli_zigbee_test_harness_advance_aps_frame_counter(void);
 
 // This adds very verbose printing that is useful only for debugging the
 // hash calculation
@@ -38,18 +38,18 @@ void emTestHarnessAdvanceApsFrameCounter(void);
 //------------------------------------------------------------------------------
 // Functions
 
-void emAfTestHarnessResetApsFrameCounter(void)
+void sli_zigbee_af_test_harness_reset_aps_frame_counter(void)
 {
   // Reseting the outgoing APS frame counter is non-standard and not
   // a good idea, especially on the TC.  This is necessary for Smart Energy
   // Key establihsment tests 15.39 and 15.40.  It is only necessary for a test
   // harness device.
-  emResetApsFrameCounter();
+  sli_zigbee_reset_aps_frame_counter();
 }
 
-void emAfTestHarnessAdvanceApsFrameCounter(void)
+void sli_zigbee_af_test_harness_advance_aps_frame_counter(void)
 {
-  emTestHarnessAdvanceApsFrameCounter();
+  sli_zigbee_test_harness_advance_aps_frame_counter();
 }
 
 //------------------------------------------------------------------------------

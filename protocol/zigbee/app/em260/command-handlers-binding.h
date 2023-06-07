@@ -22,7 +22,6 @@ EmberStatus emberAfEzspSetBindingCommandCallback(uint8_t index,
 
 EmberStatus emberAfEzspDeleteBindingCommandCallback(uint8_t index);
 
-#ifndef UC_BUILD
 void emberAfPluginEzspBindingPolicyCommandCallback(EmberAfPluginEzspPolicyCommandContext* context);
 void emberAfPluginEzspBindingConfigurationValueCommandCallback(EmberAfPluginEzspConfigurationValueCommandContext* context);
 void emberAfPluginEzspBindingPolicyCommandCallback(EmberAfPluginEzspPolicyCommandContext* context);
@@ -32,4 +31,3 @@ void emberAfPluginEzspBindingPolicyCommandCallback(EmberAfPluginEzspPolicyComman
 // Framework callbacks
 
 void emberAfPluginEzspBindingPermitHostToNcpFrameCallback(bool *permit);
-#endif  // UC_BUILD

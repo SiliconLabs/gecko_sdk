@@ -28,12 +28,14 @@
 #define DERIVE_LOAD_KEY_TAG      0x02
 #define DERIVE_VERIFY_KEY_TAG    0x03
 
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
-#endif // UC_BUILD
+#endif
 
-// zigbeed does not have access to psa/crypto.h
+// zigbeed does not have access to psa/crypto.h, and some unit tests without it
+// will compile this file as well.
 #ifndef SL_CATALOG_ZIGBEE_STACK_UNIX_PRESENT
+#ifdef PSA_CRYPTO_H
 
 //We're using some PSA APIs for all parts in zigbee-security-manager
 #include "psa/crypto.h"
@@ -66,6 +68,7 @@
 
 #endif // if defined(MBEDTLS_PSA_ACCEL_KEY_TYPE_AES) && defined(MBEDTLS_PSA_ACCEL_ALG_CCM) && defined(PSA_WANT_ALG_CCM) && defined(MBEDTLS_PSA_CRYPTO_DRIVERS)
 
+#endif // PSA_CRYPTO_H
 #endif // !SL_CATALOG_ZIGBEE_STACK_UNIX_PRESENT
 
 sl_status_t zb_sec_man_check_key_context(sl_zb_sec_man_context_t* context);
@@ -119,13 +122,6 @@ sl_status_t zb_sec_man_hmac_aes_mmo(const uint8_t* input,
                                     const uint8_t data_length,
                                     uint8_t* output);
 
-sl_status_t zb_sec_man_aes_ccm(uint8_t* nonce,
-                               bool encrypt,
-                               const uint8_t* input,
-                               uint8_t encryption_start_index,
-                               uint8_t length,
-                               uint8_t* output);
-
 sl_status_t zb_sec_man_fetch_tc_link_key_info(sl_zb_sec_man_context_t* context,
                                               sl_zb_sec_man_aps_key_metadata_t* key_data);
 sl_status_t zb_sec_man_fetch_transient_key_info(sl_zb_sec_man_context_t* context,
@@ -134,5 +130,11 @@ sl_status_t zb_sec_man_fetch_link_key_table_key_info(sl_zb_sec_man_context_t* co
                                                      sl_zb_sec_man_aps_key_metadata_t* key_data);
 
 sl_status_t zb_sec_man_delete_transient_key_by_eui(sl_zb_sec_man_context_t* context);
+
+//Backs up a loaded context state.
+//If direction is true, save in backup; if false, restore from it.
+//Used by functions that are called by Zigbee Security Manager and also call an API within it
+//(so they can restore the state they were called from).
+void zb_sec_man_backup_key_context(bool direction);
 
 #endif // _ZIGBEE_SECURITY_MANAGER_INTERNAL_H_

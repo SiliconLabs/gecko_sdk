@@ -18,7 +18,6 @@
 #include "app/framework/include/af.h"
 #include "button-joining.h"
 
-#ifdef UC_BUILD
 // TODO: temporary defines, these are defined in the app-builder generated
 // board header.
 #define BUTTON0         0
@@ -33,34 +32,3 @@ void emberAfPluginButtonJoiningButton1Command(sl_cli_command_arg_t *arguments)
 {
   emberAfPluginButtonJoiningPressButton(BUTTON1);
 }
-#else
-
-void emberAfPluginButtonJoiningButton0Command(void);
-void emberAfPluginButtonJoiningButton1Command(void);
-
-extern void emberAfPluginButtonJoiningPressButton(uint8_t button);
-
-#if !defined(EMBER_AF_GENERATE_CLI)
-EmberCommandEntry emberAfPluginButtonJoiningCommands[] = {
-  emberCommandEntryAction("button0",
-                          emberAfPluginButtonJoiningButton0Command,
-                          "",
-                          "Press button 0"),
-  emberCommandEntryAction("button1",
-                          emberAfPluginButtonJoiningButton1Command,
-                          "",
-                          "Press button 1"),
-  emberCommandEntryTerminator(),
-};
-#endif // EMBER_AF_GENERATE_CLI
-
-void emberAfPluginButtonJoiningButton0Command(void)
-{
-  emberAfPluginButtonJoiningPressButton(BUTTON0);
-}
-
-void emberAfPluginButtonJoiningButton1Command(void)
-{
-  emberAfPluginButtonJoiningPressButton(BUTTON1);
-}
-#endif

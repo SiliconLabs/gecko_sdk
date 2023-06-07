@@ -15,11 +15,7 @@
  *
  ******************************************************************************/
 #include "gpd-components-common.h"
-#ifndef UC_BUILD
-#include "gpd-callbacks.h"
-#else
 #include "gpd-cb.h"
-#endif
 
 static uint8_t txMpdu[EMBER_GPD_TX_MPDU_SIZE];
 static uint8_t rxMpdu[EMBER_GPD_RX_MPDU_SIZE];

@@ -32,6 +32,7 @@ component:
     instance:
       - vcom
   - id: rail_util_pti
+  - id: bootloader_interface
 
 include:
   - path: .
@@ -66,6 +67,8 @@ configuration:
     value: 16384
   - name: SL_STACK_SIZE
     value: 4608
+  - name: OPENTHREAD_CONFIG_TMF_NETDIAG_CLIENT_ENABLE
+    value: 0
 
 tag:
   - prebuilt_demo

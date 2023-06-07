@@ -65,9 +65,9 @@ class Calc_Synth_Sol(CALC_Synth_ocelot):
 
     def calc_tx_mode(self, model):
 
-        softmodem_modulator_select = model.vars.softmodem_modulator_select.value
+        modulator_select = model.vars.modulator_select.value
 
-        if (softmodem_modulator_select == model.vars.softmodem_modulator_select.var_enum.IQ_MOD):
+        if (modulator_select == model.vars.modulator_select.var_enum.IQ_MOD):
             model.vars.synth_tx_mode.value = model.vars.synth_tx_mode.var_enum.MODE2
         else:
             CALC_Synth_ocelot.calc_tx_mode(self,model)
@@ -87,6 +87,7 @@ class Calc_Synth_Sol(CALC_Synth_ocelot):
         bandwidth_forced = (model.vars.bandwidth_hz.value_forced != None)
         adc_rate_mode = model.vars.adc_rate_mode.value #We can't use the actual rate mode, because the IF goes into calculating the actual VCO, which goes into final ADC divider
         modulation_type = model.vars.modulation_type.value
+        conc_ofdm = (model.vars.conc_ofdm_option.value != model.vars.conc_ofdm_option.var_enum.NONE)
 
         if adc_rate_mode == model.vars.adc_rate_mode.var_enum.EIGHTHRATE:
             bandwidth_adc_hz = 150e3
@@ -99,26 +100,41 @@ class Calc_Synth_Sol(CALC_Synth_ocelot):
             band_edge_min = 100e3
 
         if (modulation_type == model.vars.modulation_type.var_enum.OFDM) and not bandwidth_forced:
-            ofdm_option = model.vars.ofdm_option.value
+            ofdm_option = int(model.vars.ofdm_option.value)
             #Setting the IF freq at 1/2 chsp
-            if ofdm_option == model.vars.ofdm_option.var_enum.OPT1:
-                if_frequency_hz = 600000
-            elif ofdm_option == model.vars.ofdm_option.var_enum.OPT2:
-                if_frequency_hz = 400000
-            elif ofdm_option == model.vars.ofdm_option.var_enum.OPT3:
-                if_frequency_hz = 200000
-            else:
-                if_frequency_hz = 100000
+            if_frequency_hz = self.lookup_ofdm_if_freq(ofdm_option)
         else:
-            if_frequency_min = 80e3
-            if_frequency_hz = max(if_frequency_min, band_edge_min + bandwidth_hz / 2)
+            if_frequency_hz = self.get_if_freq(band_edge_min, bandwidth_hz)
+
+        min_if_hz = int(if_frequency_hz) #Store the minimum IF for RAIL before we choose the larger IF for concurrent purposes
+
+        if conc_ofdm:
+            conc_ofdm_option = int(model.vars.conc_ofdm_option.value)-1
+            ofdm_if_frequency_hz = self.lookup_ofdm_if_freq(conc_ofdm_option)
+            if_frequency_hz = max(if_frequency_hz, ofdm_if_frequency_hz) #Use the larger of the FSK and OFDM IF values
 
         if ( (if_frequency_hz + bandwidth_hz / 2) > bandwidth_adc_hz):
             LogMgr.Warning("WARNING: IF + BW/2 > ADC Bandwidth")
 
         #Load local variables back into model variables
-        model.vars.min_if_hz.value = int(if_frequency_hz) #Store this minimum separately since if_frequency_hz may be overridden
+        model.vars.min_if_hz.value = min_if_hz
         model.vars.if_frequency_hz.value = int(if_frequency_hz)
+
+    def get_if_freq(self, band_edge_min, bandwidth_hz):
+        if_frequency_min = 80e3
+        if_frequency_hz = max(if_frequency_min, band_edge_min + bandwidth_hz / 2)
+        return int(if_frequency_hz)
+
+    def lookup_ofdm_if_freq(self, ofdm_opt):
+        if ofdm_opt == 0: #OPT1
+            ofdm_if_freq = 600000
+        elif ofdm_opt == 1: #OPT2
+            ofdm_if_freq = 400000
+        elif ofdm_opt == 2: #OPT3
+            ofdm_if_freq = 200000
+        else: #OPT4
+            ofdm_if_freq = 100000
+        return ofdm_if_freq
 
     def calc_pga_lna_bw_reg(self, model):
 
@@ -171,5 +187,16 @@ class Calc_Synth_Sol(CALC_Synth_ocelot):
 
     def calc_ifadcplldcofilter_reg(self, model):
         pass
+
+    def calc_adc_clock_config(self, model):
+        #Always use FULLRATE for Wi-SUN Concurrent PHYs
+        conc_ofdm_option = model.vars.conc_ofdm_option.value
+
+        if conc_ofdm_option != model.vars.conc_ofdm_option.var_enum.NONE:
+            model.vars.adc_rate_mode.value = model.vars.adc_rate_mode.var_enum.FULLRATE
+            model.vars.adc_clock_mode.value = model.vars.adc_clock_mode.var_enum.HFXOMULT
+        else:
+            super().calc_adc_clock_config(model)
+
 
 

@@ -107,13 +107,14 @@ class Phy_Internal_Base(object):
             ##### RF peak detector threshold configuration
             phy.profile_outputs.RAC_PGACTRL_LNAMIXRFPKDTHRESHSEL.override = 2
 
-		##### IF peak detector configuration
-		# enable I/Q latch
-        phy.profile_outputs.RAC_PGACTRL_PGAENLATCHI.override = 1
-        phy.profile_outputs.RAC_PGACTRL_PGAENLATCHQ.override = 1
-		# set IF peak detector threshold
-        phy.profile_outputs.RAC_PGACTRL_PGATHRPKDHISEL.override = 5
-        phy.profile_outputs.RAC_PGACTRL_PGATHRPKDLOSEL.override = 1
+        if model.part_family.lower() not in ["rainier"]:
+            ##### IF peak detector configuration
+            # enable I/Q latch
+            phy.profile_outputs.RAC_PGACTRL_PGAENLATCHI.override = 1
+            phy.profile_outputs.RAC_PGACTRL_PGAENLATCHQ.override = 1
+            # set IF peak detector threshold
+            phy.profile_outputs.RAC_PGACTRL_PGATHRPKDHISEL.override = 5
+            phy.profile_outputs.RAC_PGACTRL_PGATHRPKDLOSEL.override = 1
 
     @staticmethod
     def AGC_SLOW_LOOP_base(phy, model):

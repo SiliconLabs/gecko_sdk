@@ -46,7 +46,7 @@
 
 using namespace ot;
 
-// Note: We support the following scenrios:
+// Note: We support the following scenarios:
 // - Using OpenThread's routing manager, while using external NAT64 translator (like tayga).
 // - Using OpenThread's NAT64 translator, while using external routing manager.
 // So OPENTHREAD_CONFIG_NAT64_TRANSLATOR_ENABLE translator and OPENTHREAD_CONFIG_NAT64_BORDER_ROUTING_ENABLE are two
@@ -80,9 +80,9 @@ void otNat64InitAddressMappingIterator(otInstance *aInstance, otNat64AddressMapp
     AsCoreType(aInstance).Get<Nat64::Translator>().InitAddressMappingIterator(*aIterator);
 }
 
-otError otNat64GetNextAddressMapping(otInstance *                   aInstance,
+otError otNat64GetNextAddressMapping(otInstance                    *aInstance,
                                      otNat64AddressMappingIterator *aIterator,
-                                     otNat64AddressMapping *        aMapping)
+                                     otNat64AddressMapping         *aMapping)
 {
     AssertPointerIsNotNull(aIterator);
     AssertPointerIsNotNull(aMapping);
@@ -165,6 +165,8 @@ void otIp4AddressToString(const otIp4Address *aAddress, char *aBuffer, uint16_t 
 
     AsCoreType(aAddress).ToString(aBuffer, aSize);
 }
+
+otError otIp4CidrFromString(const char *aString, otIp4Cidr *aCidr) { return AsCoreType(aCidr).FromString(aString); }
 
 void otIp4CidrToString(const otIp4Cidr *aCidr, char *aBuffer, uint16_t aSize)
 {

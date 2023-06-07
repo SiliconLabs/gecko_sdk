@@ -33,13 +33,13 @@
 /** @} */ // end of poll-control-client
 
 // Set fast polling mode
-void emAfSetFastPollingMode(bool mode);
+void sli_zigbee_af_set_fast_polling_mode(bool mode);
 
 // Set fast polling timeout
-void emAfSetFastPollingTimeout(uint16_t timeout);
+void sli_zigbee_af_set_fast_polling_timeout(uint16_t timeout);
 
 // Set response mode
-void emAfSetResponseMode(bool mode);
+void sli_zigbee_af_set_response_mode(bool mode);
 
 // Print mode and timeout
-void emAfPollControlClientPrint(void);
+void sli_zigbee_af_poll_control_client_print(void);

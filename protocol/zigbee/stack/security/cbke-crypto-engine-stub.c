@@ -21,36 +21,36 @@
 #include "stack/include/library.h"
 #include "stack/include/ember-types-internal.h"
 
-CryptoOperation emNextCryptoOperation = NULL_OPERATION;
+CryptoOperation sli_zigbee_next_crypto_operation = NULL_OPERATION;
 uint8_t* partnerEuiBigEndian = NULL;
 // Normally these bools never change in the stub library. However for testing
 // it is easier to use the stub version of the library, and allow them to be
 // changed.
-EMBER_TEST_EXTERNAL_CONST bool emKeysAuthorizedByDefault  = true;
-EMBER_TEST_EXTERNAL_CONST bool emAppKeyRequestsAreAllowed = true;
-bool emUseStaticEmpheralKeys = false;
-const EmberLibraryStatus emCbkeCoreLibraryStatus = EMBER_LIBRARY_IS_STUB;
+EMBER_TEST_EXTERNAL_CONST bool sli_zigbee_keys_authorized_by_default  = true;
+EMBER_TEST_EXTERNAL_CONST bool sli_zigbee_app_key_requests_are_allowed = true;
+bool sli_zigbee_use_static_empheral_keys = false;
+const EmberLibraryStatus sli_zigbee_cbke_core_library_status = EMBER_LIBRARY_IS_STUB;
 //------------------------------------------------------------------------------
 
-bool emIsCbkeEnabled(void)
+bool sli_zigbee_is_cbke_enabled(void)
 {
   return false;
 }
 
-bool emCbkeIsIdle(void)
+bool sli_zigbee_cbke_is_idle(void)
 {
   return true;
 }
 
-void emCbkeTick(void)
+void sli_zigbee_cbke_tick(void)
 {
 }
 
-void emPrepareForCbkeOperation(void)
+void sli_zigbee_prepare_for_cbke_operation(void)
 {
 }
 
-void emPrepForEccOperation(uint8_t index, bool start)
+void sli_zigbee_prep_for_ecc_operation(uint8_t index, bool start)
 {
   (void)index;
   (void)start;
@@ -60,41 +60,41 @@ void startupRadio(void)
 {
 }
 
-int emWatchdogTickle(void)
+int sli_zigbee_watchdog_tickle(void)
 {
   return EMBER_ERR_FATAL;
 }
 
-bool emAreKeysAuthorizedByDefault(void)
+bool sli_zigbee_are_keys_authorized_by_default(void)
 {
   // By default without the CBKE library we assume that all keys added
   // (via emberSetInitialSecurityState() or emberAddOrUpdateKeyTableEntry())
   // are authorized for APS data messages.
-  return emKeysAuthorizedByDefault;         // true
+  return sli_zigbee_keys_authorized_by_default;         // true
 }
 
-bool emDoesSecurityPolicyAllowAppKeyRequests(EmberEUI64 partner1,
-                                             EmberEUI64 partner2)
+bool sli_zigbee_does_security_policy_allow_app_key_requests(EmberEUI64 partner1,
+                                                            EmberEUI64 partner2)
 {
   (void)partner1;
   (void)partner2;
-  return emAppKeyRequestsAreAllowed;       // true
+  return sli_zigbee_app_key_requests_are_allowed;       // true
 }
 
-EmberStatus emValidatePartnerLinkKeyRequest(EmberEUI64 partner)
+EmberStatus sli_zigbee_validate_partner_link_key_request(EmberEUI64 partner)
 {
   (void)partner;
   return EMBER_LIBRARY_NOT_PRESENT;
 }
 
-int emRandomDataGenerator(void *buffer, uint32_t size)
+int sli_zigbee_random_data_generator(void *buffer, uint32_t size)
 {
   (void)buffer;
   (void)size;
   return EMBER_ERR_FATAL;
 }
 
-int emHashFunction(uint8_t* digest, uint32_t size, uint8_t* data)
+int sli_zigbee_hash_function(uint8_t* digest, uint32_t size, uint8_t* data)
 {
   (void)digest;
   (void)size;

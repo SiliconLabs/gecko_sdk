@@ -10,7 +10,7 @@
 #include PLATFORM_HEADER
 #include CONFIGURATION_HEADER
 #include "stack/include/ember-types.h"
-#include "event_control/event.h"
+#include "event_queue/event-queue.h"
 #include "hal/hal.h"
 #include EMBER_AF_API_BUTTON_INTERFACE
 #include "hal/micro/system-timer.h"
@@ -41,11 +41,11 @@ enum {
 
 // ------------------------------------------------------------------------------
 // Plugin events
-EmberEventControl emberAfPluginButtonInterfaceButton0PressedEventControl;
-EmberEventControl emberAfPluginButtonInterfaceButton0ReleasedEventControl;
-EmberEventControl emberAfPluginButtonInterfaceButton1PressedEventControl;
-EmberEventControl emberAfPluginButtonInterfaceButton1ReleasedEventControl;
-EmberEventControl emberAfPluginButtonInterfaceButtonTimeoutEventControl;
+EmberEvent emberAfPluginButtonInterfaceButton0PressedEvent;
+EmberEvent emberAfPluginButtonInterfaceButton0ReleasedEvent;
+EmberEvent emberAfPluginButtonInterfaceButton1PressedEvent;
+EmberEvent emberAfPluginButtonInterfaceButton1ReleasedEvent;
+EmberEvent emberAfPluginButtonInterfaceButtonTimeoutEvent;
 
 // ------------------------------------------------------------------------------
 // plugin private function prototypes
@@ -76,19 +76,19 @@ static uint8_t button1PressedState = BUTTON_PRESSED_AT_STARTUP;
 
 // ------------------------------------------------------------------------------
 // Plugin event handlers
-void emberAfPluginButtonInterfaceButtonTimeoutEventHandler(void)
+void emberAfPluginButtonInterfaceButtonTimeoutEventHandler(EmberEvent* event)
 {
-  emberEventControlSetInactive(
-    emberAfPluginButtonInterfaceButtonTimeoutEventControl);
+  emberEventSetInactive(
+    emberAfPluginButtonInterfaceButtonTimeoutEvent);
 
   clearButtonCounters();
 }
 
-void emberAfPluginButtonInterfaceButton0PressedEventHandler(void)
+void emberAfPluginButtonInterfaceButton0PressedEventHandler(EmberEvent* event)
 {
-  // if the button is being pressed, we must deactivate this event control.
-  emberEventControlSetInactive(
-    emberAfPluginButtonInterfaceButtonTimeoutEventControl);
+  // if the button is being pressed, we must deactivate this event.
+  emberEventSetInactive(
+    emberAfPluginButtonInterfaceButtonTimeoutEvent);
 
   if (button0LastState != BUTTON_STATE_LOW) {
     button0LastState = BUTTON_STATE_LOW;
@@ -98,16 +98,16 @@ void emberAfPluginButtonInterfaceButton0PressedEventHandler(void)
     case BUTTON_PRESSED_AT_STARTUP:
     case BUTTON_IDLE:
       button0PressedState = BUTTON_PRESSED_SHORT;
-      emberEventControlSetDelayMS(
-        emberAfPluginButtonInterfaceButton0PressedEventControl,
+      emberEventSetDelayMs(
+        emberAfPluginButtonInterfaceButton0PressedEvent,
         BUTTON_TIMEOUT_MS);
       button0Timer = halCommonGetInt16uMillisecondTick();
       break;
     case BUTTON_PRESSED_SHORT:
       button0PressedState = BUTTON_PRESSED_LONG;
     case BUTTON_PRESSED_LONG:
-      emberEventControlSetInactive(
-        emberAfPluginButtonInterfaceButton0PressedEventControl);
+      emberEventSetInactive(
+        emberAfPluginButtonInterfaceButton0PressedEvent);
       emberAfPluginButtonInterfaceButton0PressingCallback();
       break;
   }
@@ -115,13 +115,13 @@ void emberAfPluginButtonInterfaceButton0PressedEventHandler(void)
   return;
 }
 
-void emberAfPluginButtonInterfaceButton0ReleasedEventHandler(void)
+void emberAfPluginButtonInterfaceButton0ReleasedEventHandler(EmberEvent* event)
 {
   uint16_t timePressed = halCommonGetInt16uMillisecondTick() - button0Timer;
-  emberEventControlSetInactive(
-    emberAfPluginButtonInterfaceButton0ReleasedEventControl);
-  emberEventControlSetInactive(
-    emberAfPluginButtonInterfaceButton0PressedEventControl);
+  emberEventSetInactive(
+    emberAfPluginButtonInterfaceButton0ReleasedEvent);
+  emberEventSetInactive(
+    emberAfPluginButtonInterfaceButton0PressedEvent);
 
   if (button0LastState != BUTTON_STATE_HIGH) {
     button0LastState = BUTTON_STATE_HIGH;
@@ -135,17 +135,17 @@ void emberAfPluginButtonInterfaceButton0ReleasedEventHandler(void)
     clearButtonCounters();
   } else {
     emberAfPluginButtonInterfaceButton0PressedShortCallback(button0Counter);
-    emberEventControlSetActive(
-      emberAfPluginButtonInterfaceButtonTimeoutEventControl);
+    emberEventSetActive(
+      emberAfPluginButtonInterfaceButtonTimeoutEvent);
   }
   button0PressedState = BUTTON_IDLE;
 }
 
-void emberAfPluginButtonInterfaceButton1PressedEventHandler(void)
+void emberAfPluginButtonInterfaceButton1PressedEventHandler(EmberEvent* event)
 {
-  // if the button is being pressed, we must deactivate this event control.
-  emberEventControlSetInactive(
-    emberAfPluginButtonInterfaceButtonTimeoutEventControl);
+  // if the button is being pressed, we must deactivate this event.
+  emberEventSetInactive(
+    emberAfPluginButtonInterfaceButtonTimeoutEvent);
 
   if (button1LastState != BUTTON_STATE_LOW) {
     button1LastState = BUTTON_STATE_LOW;
@@ -155,16 +155,16 @@ void emberAfPluginButtonInterfaceButton1PressedEventHandler(void)
     case BUTTON_PRESSED_AT_STARTUP:
     case BUTTON_IDLE:
       button1PressedState = BUTTON_PRESSED_SHORT;
-      emberEventControlSetDelayMS(
-        emberAfPluginButtonInterfaceButton1PressedEventControl,
+      emberEventSetDelayMs(
+        emberAfPluginButtonInterfaceButton1PressedEvent,
         BUTTON_TIMEOUT_MS);
       button1Timer = halCommonGetInt16uMillisecondTick();
       break;
     case BUTTON_PRESSED_SHORT:
       button1PressedState = BUTTON_PRESSED_LONG;
     case BUTTON_PRESSED_LONG:
-      emberEventControlSetDelayMS(
-        emberAfPluginButtonInterfaceButton1PressedEventControl,
+      emberEventSetDelayMs(
+        emberAfPluginButtonInterfaceButton1PressedEvent,
         BUTTON_SHORT_TIMEOUT);
       emberAfPluginButtonInterfaceButton1PressingCallback();
       break;
@@ -173,13 +173,13 @@ void emberAfPluginButtonInterfaceButton1PressedEventHandler(void)
   return;
 }
 
-void emberAfPluginButtonInterfaceButton1ReleasedEventHandler(void)
+void emberAfPluginButtonInterfaceButton1ReleasedEventHandler(EmberEvent* event)
 {
   uint16_t timePressed = halCommonGetInt16uMillisecondTick() - button1Timer;
-  emberEventControlSetInactive(
-    emberAfPluginButtonInterfaceButton1ReleasedEventControl);
-  emberEventControlSetInactive(
-    emberAfPluginButtonInterfaceButton1PressedEventControl);
+  emberEventSetInactive(
+    emberAfPluginButtonInterfaceButton1ReleasedEvent);
+  emberEventSetInactive(
+    emberAfPluginButtonInterfaceButton1PressedEvent);
 
   if (button1LastState != BUTTON_STATE_HIGH) {
     button1LastState = BUTTON_STATE_HIGH;
@@ -195,8 +195,8 @@ void emberAfPluginButtonInterfaceButton1ReleasedEventHandler(void)
     clearButtonCounters();
   } else {
     emberAfPluginButtonInterfaceButton1PressedShortCallback(button1Counter);
-    emberEventControlSetActive(
-      emberAfPluginButtonInterfaceButtonTimeoutEventControl);
+    emberEventSetActive(
+      emberAfPluginButtonInterfaceButtonTimeoutEvent);
   }
   button1PressedState = BUTTON_IDLE;
 }
@@ -305,19 +305,19 @@ void emberAfHalButtonIsrCallback(uint8_t button, uint8_t state)
       // been
       // 1 when the button GPIO is low and 0 when the GPIO is high.
       if (button0Polarity == EMBER_AF_BUTTON_INTERFACE_POLARITY_ACTIVE_LO) {
-        emberEventControlSetActive(
-          emberAfPluginButtonInterfaceButton0PressedEventControl);
+        emberEventSetActive(
+          emberAfPluginButtonInterfaceButton0PressedEvent);
       } else { // button0Polarity == ACTIVE_HI
-        emberEventControlSetActive(
-          emberAfPluginButtonInterfaceButton0ReleasedEventControl);
+        emberEventSetActive(
+          emberAfPluginButtonInterfaceButton0ReleasedEvent);
       }
     } else { // state == BUTTON_RELEASED
       if (button0Polarity == EMBER_AF_BUTTON_INTERFACE_POLARITY_ACTIVE_LO) {
-        emberEventControlSetActive(
-          emberAfPluginButtonInterfaceButton0ReleasedEventControl);
+        emberEventSetActive(
+          emberAfPluginButtonInterfaceButton0ReleasedEvent);
       } else { // button0Polairty == ACTIVE_HI
-        emberEventControlSetActive(
-          emberAfPluginButtonInterfaceButton0PressedEventControl);
+        emberEventSetActive(
+          emberAfPluginButtonInterfaceButton0PressedEvent);
       }
     }
   }
@@ -326,19 +326,19 @@ void emberAfHalButtonIsrCallback(uint8_t button, uint8_t state)
   if (button == BUTTON1) {
     if (state == BUTTON_PRESSED) {
       if (button1Polarity == EMBER_AF_BUTTON_INTERFACE_POLARITY_ACTIVE_LO) {
-        emberEventControlSetActive(
-          emberAfPluginButtonInterfaceButton1PressedEventControl);
+        emberEventSetActive(
+          emberAfPluginButtonInterfaceButton1PressedEvent);
       } else { // button1Polarity == ACTIVE_HI
-        emberEventControlSetActive(
-          emberAfPluginButtonInterfaceButton1ReleasedEventControl);
+        emberEventSetActive(
+          emberAfPluginButtonInterfaceButton1ReleasedEvent);
       }
     } else { // state == BUTTON_RELEASED
       if (button1Polarity == EMBER_AF_BUTTON_INTERFACE_POLARITY_ACTIVE_LO) {
-        emberEventControlSetActive(
-          emberAfPluginButtonInterfaceButton1ReleasedEventControl);
+        emberEventSetActive(
+          emberAfPluginButtonInterfaceButton1ReleasedEvent);
       } else { // button1Polairty == ACTIVE_HI
-        emberEventControlSetActive(
-          emberAfPluginButtonInterfaceButton1PressedEventControl);
+        emberEventSetActive(
+          emberAfPluginButtonInterfaceButton1PressedEvent);
       }
     }
   }

@@ -98,7 +98,7 @@ void emberAfPluginMpsiStorageInitCallback(void)
   gMpsiStoragePluginInitialized = true;
 }
 
-uint8_t emAfPluginMpsiStorageStoreMessage(MpsiMessage_t* mpsiMessage)
+uint8_t sli_mpsi_storage_store_message(MpsiMessage_t* mpsiMessage)
 {
   uint16_t    tag;
   uint8_t     flags, len, payload[MPSI_STORAGE_PAYLOAD_LEN];
@@ -189,7 +189,7 @@ bool verifyAllMpsiStorageMessagesSupported()
     // If we don't understand the message and it's not meant for the Mobile App,
     // return false
     if ((MPSI_SUCCESS
-         != emAfPluginMpsiMessageIdSupportedByLocalStack(mpsiMessage.messageId))
+         != sli_mpsi_message_id_supported_by_local_stack(mpsiMessage.messageId))
         && (MPSI_APP_ID_MOBILE_APP != mpsiMessage.destinationAppId)) {
       mpsiStoragePrintln("MPSI Storage: found unsupported MPSI message in "
                          "storage destAppId(0x%X) ID(0x%2X)",

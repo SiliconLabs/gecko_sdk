@@ -31,6 +31,11 @@
 #ifndef SL_NCP_EVT_FILTER_COMMON_H
 #define SL_NCP_EVT_FILTER_COMMON_H
 
+/***********************************************************************************************//**
+ * @addtogroup ncp_evt_filter
+ * @{
+ **************************************************************************************************/
+
 // Manage event filter user command
 #define SL_NCP_EVT_FILTER_CMD_ADD_ID    0
 #define SL_NCP_EVT_FILTER_CMD_REMOVE_ID 1
@@ -41,4 +46,5 @@
 #define SL_NCP_EVT_FILTER_CMD_REMOVE_LEN 5
 #define SL_NCP_EVT_FILTER_CMD_RESET_LEN  1
 
+/** @} (end addtogroup ncp_evt_filter) */
 #endif // SL_NCP_EVT_FILTER_COMMON_H

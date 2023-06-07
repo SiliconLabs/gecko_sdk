@@ -22,8 +22,7 @@
 
 #include <openthread/cli.h>
 #include "common/code_utils.hpp"
-#include "sl_rail_util_ant_div.h"
-#include "sl_rail_util_ieee802154_phy_select.h"
+#include "radio_vendor.h"
 #include "sl_ot_custom_cli.h"
 
 #ifdef SL_COMPONENT_CATALOG_PRESENT
@@ -42,13 +41,16 @@ static otError getAntennaTxModeCommand(void *context, uint8_t argc, char *argv[]
     OT_UNUSED_VARIABLE(argc);
     OT_UNUSED_VARIABLE(argv);
 
-    uint8_t antennaMode = (uint8_t)sl_rail_util_ant_div_get_tx_antenna_mode();
+    otError error = OT_ERROR_NONE;
+    uint8_t antennaMode;
+
+    SuccessOrExit(error = otPlatRadioVendorGetTxAntennaMode(&antennaMode));
     otCliOutputFormat("TX antenna mode:%d", antennaMode);
     otCliOutputFormat("\r\n");
 
-    return OT_ERROR_NONE;
+exit:
+    return error;
 }
-
 
 //-----------------------------------------------------------------------------
 // Set TX antenna mode (0-don't switch,1-primary,2-secondary,3-TX antenna diversity)
@@ -57,11 +59,13 @@ static otError getAntennaTxModeCommand(void *context, uint8_t argc, char *argv[]
 static otError setAntennaTxModeCommand(void *context, uint8_t argc, char *argv[])
 {
     OT_UNUSED_VARIABLE(context);
+
     otError error = OT_ERROR_NONE;
     VerifyOrExit(argc == 1, error = OT_ERROR_INVALID_ARGS);
 
     uint8_t antennaMode = (uint8_t)strtoul(argv[0], NULL, 10);
-    sl_rail_util_ant_div_set_tx_antenna_mode(antennaMode);
+
+    SuccessOrExit(error = otPlatRadioVendorSetTxAntennaMode(antennaMode));
     otCliOutputFormat("\r\n");
 
 exit:
@@ -79,11 +83,15 @@ static otError getAntennaRxModeCommand(void *context, uint8_t argc, char *argv[]
     OT_UNUSED_VARIABLE(argc);
     OT_UNUSED_VARIABLE(argv);
 
-    uint8_t antennaMode = (uint8_t)sl_rail_util_ant_div_get_rx_antenna_mode();
+    otError error = OT_ERROR_NONE;
+    uint8_t antennaMode;
+
+    SuccessOrExit(error = otPlatRadioVendorGetRxAntennaMode(&antennaMode));
     otCliOutputFormat("RX antenna mode:%d", antennaMode);
     otCliOutputFormat("\r\n");
 
-    return OT_ERROR_NONE;
+exit:
+    return error;
 }
 
 
@@ -99,7 +107,7 @@ static otError setAntennaRxModeCommand(void *context, uint8_t argc, char *argv[]
 
     uint8_t antennaMode = (uint8_t)strtoul(argv[0], NULL, 10);
 
-    if (sl_rail_util_ant_div_set_rx_antenna_mode(antennaMode) != SL_STATUS_OK) {
+    if (otPlatRadioVendorSetRxAntennaMode(antennaMode) != OT_ERROR_NONE) {
         otCliOutputFormat("Requires switching from standard PHY to diversity PHY. Not supported.");
     }
     otCliOutputFormat("\r\n");
@@ -133,7 +141,10 @@ static otError getActivePhyCommand(void *context, uint8_t argc, char *argv[])
     OT_UNUSED_VARIABLE(argc);
     OT_UNUSED_VARIABLE(argv);
 
-    uint8_t activePhy = (uint8_t)sl_rail_util_ieee802154_get_active_radio_config();
+    otError error = OT_ERROR_NONE;
+    uint8_t activePhy;
+
+    SuccessOrExit(error = otPlatRadioVendorGetActivePhy(&activePhy));
 
     if (activePhy >= PHY_COUNT) {
         activePhy = PHY_COUNT;
@@ -141,7 +152,8 @@ static otError getActivePhyCommand(void *context, uint8_t argc, char *argv[])
     otCliOutputFormat("Active Radio PHY:%s", phyNames[activePhy]);
     otCliOutputFormat("\r\n");
 
-    return OT_ERROR_NONE;
+exit:
+    return error;
 }
 
 //-----------------------------------------------------------------------------
@@ -157,7 +169,7 @@ static otCliCommand antennaCommands[] = {
 
 otError antennaCommand(void *context, uint8_t argc, char *argv[])
 {
-    otError error = otCRPCHandleCommand(context, argc, argv, OT_ARRAY_LENGTH(antennaCommands), antennaCommands);
+    otError error = processCommand(context, argc, argv, OT_ARRAY_LENGTH(antennaCommands), antennaCommands);
 
     if (error == OT_ERROR_INVALID_COMMAND)
     {
@@ -176,5 +188,4 @@ static otError helpCommand(void *context, uint8_t argc, char *argv[])
 
     return OT_ERROR_NONE;
 }
-
 #endif // SL_OPENTHREAD_ANT_DIV_CLI_ENABLE

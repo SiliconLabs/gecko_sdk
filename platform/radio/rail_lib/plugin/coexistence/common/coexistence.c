@@ -98,7 +98,8 @@ static COEX_GpioConfig_t wifiTxCfg = {
 #endif //SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
   .options = (COEX_GpioOptions_t)(COEX_GPIO_OPTION_INT_ASSERTED
                                   | COEX_GPIO_OPTION_INT_DEASSERTED),
-  .cb = &COEX_WIFI_TX_ISR
+  //The WiFi TX interrupt is connected by PRS to the signal identifier reset
+  .cb = NULL
 };
 #endif
 
@@ -705,15 +706,16 @@ __STATIC_INLINE void COEX_SetPriorityAndRequest(bool request, bool priority)
       COEX_HAL_ClearRequest();
     } else {
       COEX_HAL_SetPwmRequest();
+      COEX_HAL_ClearPriority(); \
       COEX_HAL_ClearRequest();
-      COEX_HAL_ClearPriority();
     }
   }
 }
+
 __STATIC_INLINE void COEX_ClearRequestAndPriority(void)
 {
-  COEX_HAL_ClearPriority();
-  COEX_HAL_ClearRequest();
+  COEX_HAL_ClearPriority(); \
+  COEX_HAL_ClearRequest();  \
   COEX_HAL_ClearPwmRequest();
 }
 #else //!COEX_HAL_FAST_REQUEST

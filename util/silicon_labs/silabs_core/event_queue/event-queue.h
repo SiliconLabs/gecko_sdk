@@ -184,13 +184,13 @@ typedef struct EventQueue_s {
  *
  * Events with this in their type may only be scheduled with a zero delay.
  */
-void emIsrEventMarker(struct Event_s *event);
+void sli_zigbee_isr_event_marker(struct Event_s *event);
 
 /**
  * Initialize 'queue'.  This must be called before any use of 'queue'
  * or any of its events.
  */
-void emInitializeEventQueue(EmberEventQueue *queue);
+void sli_zigbee_initialize_event_queue(EmberEventQueue *queue);
 
 /**
  * Unschedule all the events.

@@ -742,6 +742,45 @@ static Ecode_t SPIDRV_InitEusart(SPIDRV_Handle_t handle, SPIDRV_Init_t *initData
  ******************************************************************************/
 Ecode_t SPIDRV_DeInit(SPIDRV_Handle_t handle)
 {
+#if defined(USART_PRESENT)
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  int8_t USART_spiPortNum = -1;
+#endif
+#endif
+
+#if defined(EUSART_PRESENT)
+  int8_t EUSART_spiPortNum = -1;
+#endif
+
+  if (0) {
+  }
+#if defined(USART_PRESENT)
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  else if (handle->peripheralType == spidrvPeripheralTypeUsart) {
+#if (USART_COUNT == 1) && !defined(USART_NUM)
+    USART_spiPortNum = 0;
+#else
+    USART_spiPortNum = USART_NUM((USART_TypeDef*)handle->peripheral.usartPort);
+#endif
+    if (USART_spiPortNum == -1) {
+      return ECODE_EMDRV_SPIDRV_PARAM_ERROR;
+    }
+  }
+#endif
+#endif
+#if defined (EUSART_PRESENT)
+  else if (handle->peripheralType == spidrvPeripheralTypeEusart) {
+#if (EUSART_COUNT == 1) && !defined(EUSART_NUM)
+    EUSART_spiPortNum = 0;
+#else
+    EUSART_spiPortNum = EUSART_NUM((EUSART_TypeDef*)handle->peripheral.eusartPort);
+#endif
+    if (EUSART_spiPortNum == -1) {
+      return ECODE_EMDRV_SPIDRV_PARAM_ERROR;
+    }
+  }
+#endif
+
   if (handle == NULL) {
     return ECODE_EMDRV_SPIDRV_ILLEGAL_HANDLE;
   }
@@ -768,6 +807,40 @@ Ecode_t SPIDRV_DeInit(SPIDRV_Handle_t handle)
 #if defined(EUSART_PRESENT)
   else if (handle->peripheralType == spidrvPeripheralTypeEusart) {
     EUSART_Reset(handle->peripheral.eusartPort);
+  }
+#endif
+
+  if (0) {
+  }
+#if defined(USART_PRESENT)
+  else if (handle->peripheralType == spidrvPeripheralTypeUsart) {
+#if defined(USART_ROUTEPEN_TXPEN)
+    handle->peripheral.usartPort->ROUTELOC0 = _USART_ROUTELOC0_RESETVALUE;
+    handle->peripheral.usartPort->ROUTEPEN = _USART_ROUTEPEN_RESETVALUE;
+#elif defined(GPIO_USART_ROUTEEN_TXPEN)
+    GPIO->USARTROUTE[USART_spiPortNum].ROUTEEN = _GPIO_USART_ROUTEEN_RESETVALUE;
+    GPIO->USARTROUTE[USART_spiPortNum].TXROUTE = _GPIO_USART_TXROUTE_RESETVALUE;
+    GPIO->USARTROUTE[USART_spiPortNum].RXROUTE = _GPIO_USART_RXROUTE_RESETVALUE;
+    GPIO->USARTROUTE[USART_spiPortNum].CLKROUTE = _GPIO_USART_CLKROUTE_RESETVALUE;
+    if (handle->initData.csControl == spidrvCsControlAuto) {
+      // SPI 4 wire mode
+      GPIO->USARTROUTE[USART_spiPortNum].CSROUTE = _GPIO_USART_CSROUTE_RESETVALUE;
+    }
+#else
+    handle->peripheral.usartPort->ROUTE = _USART_ROUTE_RESETVALUE;
+#endif
+  }
+#endif
+#if defined(EUSART_PRESENT)
+  else if (handle->peripheralType == spidrvPeripheralTypeEusart) {
+    GPIO->EUSARTROUTE[EUSART_spiPortNum].TXROUTE = _GPIO_EUSART_TXROUTE_RESETVALUE;
+    GPIO->EUSARTROUTE[EUSART_spiPortNum].RXROUTE = _GPIO_EUSART_RXROUTE_RESETVALUE;
+    GPIO->EUSARTROUTE[EUSART_spiPortNum].SCLKROUTE = _GPIO_EUSART_SCLKROUTE_RESETVALUE;
+    if (handle->initData.csControl == spidrvCsControlAuto) {
+      // SPI 4 wire mode, Chip Select controled by the peripheral
+      GPIO->EUSARTROUTE[EUSART_spiPortNum].CSROUTE = _GPIO_EUSART_CSROUTE_RESETVALUE;
+    }
+    GPIO->EUSARTROUTE[EUSART_spiPortNum].ROUTEEN = _GPIO_EUSART_ROUTEEN_RESETVALUE;
   }
 #endif
 
@@ -2489,11 +2562,6 @@ static void on_power_manager_event(sl_power_manager_em_t from,
    The spidrv.c and spidrv.h source files for the SPI driver library are in the
    emdrv/spidrv folder.
 
-   @li @ref spidrv_intro
-   @li @ref spidrv_conf
-   @li @ref spidrv_api
-   @li @ref spidrv_example
-
    @n @section spidrv_intro Introduction
    The SPI driver supports the SPI capabilities of EFM32/EZR32/EFR32 USARTs.
    The driver is fully reentrant, supports several driver instances, and
@@ -2544,7 +2612,7 @@ static void on_power_manager_event(sl_power_manager_em_t from,
 
    @ref SPIDRV_Init(), @ref SPIDRV_DeInit() @n
     These functions initialize or deinitializes the SPIDRV driver. Typically,
-    @htmlonly SPIDRV_Init() @endhtmlonly is called once in the startup code.
+    SPIDRV_Init() is called once in the startup code.
 
    @ref SPIDRV_GetTransferStatus() @n
     Query the status of a transfer. Reports number of items (frames) transmitted

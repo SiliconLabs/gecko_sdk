@@ -1,0 +1,14 @@
+package: Zigbee
+description: This component houses the start of the enhanced routing routines used in Zigbee R23.
+id: zigbee_enhanced_routing
+label: Zigbee Enhanced Routing With LQI
+category: Zigbee|Utility
+quality: production
+provides:
+   - name: "zigbee_enhanced_routing"
+source:
+  - path: protocol/zigbee/app/framework/common/zigbee_enhanced_routing.c
+
+template_contribution:
+  - name: component_catalog
+    value: zigbee_enhanced_routing

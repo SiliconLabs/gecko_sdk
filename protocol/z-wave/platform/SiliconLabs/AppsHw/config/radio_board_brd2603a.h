@@ -8,7 +8,11 @@
 #define RADIO_BOARD_BRD2603A_H
 
 #include "radio_board_brd2603a_button.h"
+#if defined(ZW_APPSHW_POWERSTRIP)
+#include "radio_board_brd2603a_led_pwm.h"
+#else
 #include "radio_board_brd2603a_led.h"
+#endif
 
 /*************************************************************************/
 /* Map physical board IO devices to application LEDs and buttons         */

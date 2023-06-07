@@ -42,8 +42,9 @@
 // Platform specific includes
 #include "throughput_central_system.h"
 
-#define CONFIG_KEY_SET_AFH                               12
-
+/*******************************************************************************
+ *******************************  DEFINITIONS   ********************************
+ ******************************************************************************/
 // Timeout for result indication in seconds
 #define THROUGHPUT_CENTRAL_RESULT_TIMEOUT                1.0f
 
@@ -66,6 +67,9 @@
 
 #define CONFIG_TX_POWER_MIN                         -100
 
+/*******************************************************************************
+ *****************************  LOCAL VARIABLES   ******************************
+ ******************************************************************************/
 /// Enabled state
 static bool enabled = false;
 
@@ -113,7 +117,7 @@ static uint8_t received_counter = 0;
 static bool first_packet = true;
 
 // BLE connection handle
-static uint8_t connection_handle = 0xFF;
+static uint8_t connection_handle_central = SL_BT_INVALID_CONNECTION_HANDLE;
 static uint32_t  service_handle = 0xFFFFFFFF;
 static uint16_t  notifications_handle = 0xFFFF;
 static uint16_t  indications_handle = 0xFFFF;
@@ -122,6 +126,9 @@ static throughput_central_characteristic_found_t characteristic_found;
 static action_t action = act_none;
 static uint16_t result_handle = 0xFFFF;
 
+/*******************************************************************************
+ ********************************  CONSTANTS   *********************************
+ ******************************************************************************/
 const char *device_name = "Throughput Test"; // Device name to match against scan results.
 
 // bbb99e70-fff7-46cf-abc7-2d32c71820f2
@@ -140,7 +147,9 @@ const uint8_t transmission_characteristic_uuid[] = { 0x18, 0x77, 0xc6, 0x2b, 0xf
 const uint8_t result_characteristic_uuid[] = { 0x1b, 0x29, 0xcc, 0xa6, 0x03, 0xb9, 0xeb, 0x9e,
                                                0x0c, 0x40, 0x0f, 0xb0, 0x27, 0x22, 0xf3, 0xad };
 
-// Function declarations
+/*******************************************************************************
+ *******************  FORWARD DECLARATION OF FUNCTIONS   ***********************
+ ******************************************************************************/
 static void handle_scan_event(bd_addr *address,
                               uint8_t address_type,
                               uint8_t * data,
@@ -158,6 +167,315 @@ static void throughput_central_scanning_stop(void);
 static sl_status_t throughput_central_scanning_apply_phy(throughput_scan_phy_t phy);
 static bool throughput_central_allowlist_apply();
 static bool throughput_address_compare(uint8_t *address1, uint8_t *address2);
+static void throughput_central_reset(void);
+
+/*******************************************************************************
+ **************************   LOCAL FUNCTIONS   ********************************
+ ******************************************************************************/
+
+/***************************************************************************//**
+ * Check received data for lost or error packages.
+ * @param[in] data received data
+ * @param[in] len length of the data
+ ******************************************************************************/
+static void check_received_data(uint8_t * data, uint8_t len)
+{
+  uint8_t counter;
+
+  if (len == 0) {
+    central_state.packet_error++;
+    return;
+  }
+
+  counter = data[0];
+
+  if (first_packet) {
+    // Accept remote counter
+    received_counter = counter;
+    first_packet = false;
+  } else {
+    // Increment local counter
+    received_counter = (received_counter + 1) % 100;
+  }
+  if (counter != received_counter) {
+    // Lost packet is found
+    uint8_t lost_packet_count = 0;
+    // Calculate lost packet count
+    if (counter > received_counter) {
+      lost_packet_count = counter - received_counter;
+    } else if (counter < received_counter) {
+      lost_packet_count = 100 + counter - received_counter;
+    }
+    central_state.packet_lost += lost_packet_count;
+    // Sync to remote counter
+    received_counter = counter;
+  }
+
+  // Check data for bit errors
+  for (int i = 1; i < len; i++) {
+    if ( data[i] != (uint8_t) 'a' + (uint8_t) ((i - 1) % 26) ) {
+      central_state.packet_error++;
+      break;
+    }
+  }
+}
+
+static void handle_scan_event(bd_addr *address,
+                              uint8_t address_type,
+                              uint8_t * data,
+                              uint16_t len)
+{
+  sl_status_t sc;
+
+  if ((central_state.discovery_state == THROUGHPUT_DISCOVERY_STATE_SCAN)
+      & process_scan_response(data, len)) {
+    // Apply allowlist filtering
+    if (false == throughput_central_allowlist_apply(address->addr)) {
+      return;
+    }
+
+    // Stop scanning
+    app_log_info("Scanning stop." APP_LOG_NL);
+    sc = sl_bt_scanner_stop();
+    app_assert_status(sc);
+
+    // Open the connection
+    central_state.discovery_state = THROUGHPUT_DISCOVERY_STATE_CONN;
+    throughput_central_on_discovery_state_change(central_state.discovery_state);
+
+    sc = sl_bt_connection_open(*address,
+                               address_type,
+                               central_state.phy,
+                               &connection_handle_central);
+
+    // Handle if the default PHY is not supported
+    if (sc == SL_STATUS_INVALID_PARAMETER) {
+      app_log_status_warning_f(sc, "Connection PHY is not supported and set to 1M PHY" APP_LOG_NL);
+
+      central_state.phy = sl_bt_gap_phy_coding_1m_uncoded;
+      sc = sl_bt_connection_open(*address,
+                                 address_type,
+                                 central_state.phy,
+                                 &connection_handle_central);
+    }
+    // Assertion to first or second attempt to connect
+    app_assert_status(sc);
+  } else {
+    waiting_indication();
+  }
+}
+
+// Cycle through advertisement contents and look for matching device name.
+static bool process_scan_response(uint8_t *data, uint16_t data_len)
+{
+  int i = 0;
+  bool device_name_match = false;
+  uint8_t advertisement_length;
+  uint8_t advertisement_type;
+
+  while (i < (data_len - 1)) {
+    advertisement_length = data[i];
+    advertisement_type = data[i + 1];
+
+    /* Type 0x09 = Complete Local Name, 0x08 Shortened Name */
+    if (advertisement_type == 0x09) {
+      /* Check if device name is Throughput Tester */
+      if (memcmp(data + i + 2, device_name, strlen(device_name)) == 0) {
+        device_name_match = true;
+        break;
+      }
+    }
+    /* Jump to next AD record */
+    i = i + advertisement_length + 1;
+  }
+
+  return (device_name_match);
+}
+
+// Helper function to make the discovery and subscribing flow correct.
+// Action enum values indicate which procedure was completed.
+static void process_procedure_complete_event(sl_bt_msg_t *evt)
+{
+  uint16_t procedure_result =  evt->data.evt_gatt_procedure_completed.result;
+  sl_status_t sc;
+
+  switch (action) {
+    case act_discover_service:
+      action = act_none;
+      app_assert_status(procedure_result);
+      if (!procedure_result) {
+        // Discover successful, start characteristic discovery.
+        sc = sl_bt_gatt_discover_characteristics(connection_handle_central, service_handle);
+        app_assert_status(sc);
+        action = act_discover_characteristics;
+        central_state.discovery_state = THROUGHPUT_DISCOVERY_STATE_CHARACTERISTICS;
+        throughput_central_on_discovery_state_change(central_state.discovery_state);
+      }
+      break;
+    case act_discover_characteristics:
+      action = act_none;
+      app_assert_status(procedure_result);
+      if (!procedure_result) {
+        if (characteristic_found.all == THROUGHPUT_CENTRAL_CHARACTERISTICS_ALL) {
+          central_state.discovery_state = THROUGHPUT_DISCOVERY_STATE_FINISHED;
+          throughput_central_on_discovery_state_change(central_state.discovery_state);
+          sc = sl_bt_gatt_set_characteristic_notification(connection_handle_central, notifications_handle, sl_bt_gatt_notification);
+          app_assert_status(sc);
+          action = act_enable_notification;
+        }
+      }
+      break;
+    case act_enable_notification:
+      action = act_none;
+      app_assert_status(procedure_result);
+      if (!procedure_result) {
+        // Notifications turned on, turn on indication
+        central_state.notifications = sl_bt_gatt_notification;
+        throughput_central_on_notification_change(central_state.notifications);
+        sl_bt_gatt_set_characteristic_notification(connection_handle_central, indications_handle, sl_bt_gatt_indication);
+        action = act_enable_indication;
+      }
+      break;
+    case act_enable_indication:
+      action = act_enable_indication;
+      app_assert_status(procedure_result);
+      if (!procedure_result) {
+        // Subscribe to peripheral result.
+        central_state.indications = sl_bt_gatt_indication;
+        throughput_central_on_indication_change(central_state.indications);
+        sc = sl_bt_gatt_set_characteristic_notification(connection_handle_central, transmission_handle, sl_bt_gatt_notification);
+        app_assert_status(sc);
+        action = act_enable_transmission_notification;
+      }
+      break;
+    case act_enable_transmission_notification:
+      action = act_none;
+      app_assert_status(procedure_result);
+      if (!procedure_result) {
+        // Subscribe to peripheral result.
+        sc = sl_bt_gatt_set_characteristic_notification(connection_handle_central, result_handle, sl_bt_gatt_indication);
+        app_assert_status(sc);
+        action = act_subscribe_result;
+      }
+      break;
+    case act_subscribe_result:
+      action = act_none;
+      app_assert_status(procedure_result);
+      if (!procedure_result) {
+        central_state.state = THROUGHPUT_STATE_SUBSCRIBED;
+        throughput_central_on_state_change(central_state.state);
+        // Start RSSI refresh timer
+        timer_refresh_rssi_start();
+      }
+      break;
+    case act_none:
+      break;
+    default:
+      break;
+  }
+}
+
+// Check if found characteristic matches the UUIDs that we are searching for.
+static void check_characteristic_uuid(sl_bt_msg_t *evt)
+{
+  if (evt->data.evt_gatt_characteristic.uuid.len == UUID_LEN) {
+    if (memcmp(notifications_characteristic_uuid, evt->data.evt_gatt_characteristic.uuid.data, UUID_LEN) == 0) {
+      notifications_handle = evt->data.evt_gatt_characteristic.characteristic;
+      characteristic_found.characteristic.notification = true;
+      throughput_central_on_characteristics_found(characteristic_found);
+    } else if (memcmp(indications_characteristic_uuid, evt->data.evt_gatt_characteristic.uuid.data, UUID_LEN) == 0) {
+      indications_handle = evt->data.evt_gatt_characteristic.characteristic;
+      characteristic_found.characteristic.indication = true;
+      throughput_central_on_characteristics_found(characteristic_found);
+    } else if (memcmp(transmission_characteristic_uuid, evt->data.evt_gatt_characteristic.uuid.data, UUID_LEN) == 0) {
+      transmission_handle = evt->data.evt_gatt_characteristic.characteristic;
+      characteristic_found.characteristic.transmission_on = true;
+      throughput_central_on_characteristics_found(characteristic_found);
+    } else if (memcmp(result_characteristic_uuid, evt->data.evt_gatt_characteristic.uuid.data, UUID_LEN) == 0) {
+      result_handle = evt->data.evt_gatt_characteristic.characteristic;
+      characteristic_found.characteristic.result = true;
+      throughput_central_on_characteristics_found(characteristic_found);
+    }
+  }
+}
+
+static void reset_variables(void)
+{
+  connection_handle_central = SL_BT_INVALID_CONNECTION_HANDLE;
+  service_handle = 0xFFFFFFFF;
+  notifications_handle = 0xFFFF;
+  indications_handle = 0xFFFF;
+  transmission_handle = 0xFFFF;
+  characteristic_found.all = 0;
+
+  bytes_received = 0;
+  operation_count = 0;
+
+  received_counter = 0;
+  first_packet = true;
+
+  central_state.notifications = sl_bt_gatt_disable;
+  central_state.indications = sl_bt_gatt_disable;
+
+  central_state.throughput = 0;
+  central_state.throughput_peripheral_side = 0;
+  central_state.count = 0;
+  central_state.packet_error = 0;
+  central_state.packet_lost = 0;
+}
+
+/**************************************************************************//**
+ * Reset configuration
+ *****************************************************************************/
+static void throughput_central_reset(void)
+{
+  // Stop RSSI refresh timer
+  timer_refresh_rssi_stop();
+
+  connection_handle_central = SL_BT_INVALID_CONNECTION_HANDLE;
+  central_state.discovery_state = THROUGHPUT_DISCOVERY_STATE_IDLE;
+
+  // Notify state change
+  throughput_central_on_discovery_state_change(central_state.discovery_state);
+  // Reset variables
+  reset_variables();
+}
+
+static bool throughput_central_allowlist_apply(uint8_t *address)
+{
+  bool ret_val = false;
+  throughput_allowlist_t *current_entry = &central_state.allowlist;
+
+  if (current_entry->next == NULL) {
+    ret_val = true;
+  }
+
+  //Search for the last entry in the list
+  while (current_entry->next != NULL) {
+    if (true == throughput_address_compare(current_entry->address.addr, address)) {
+      ret_val = true;
+      break;
+    }
+    current_entry = current_entry->next;
+  }
+
+  return ret_val;
+}
+
+/**************************************************************************//**
+ * Set PHY used for scanning.
+ *****************************************************************************/
+static sl_status_t throughput_central_scanning_apply_phy(throughput_scan_phy_t phy)
+{
+  throughput_central_scanning_stop();
+  central_state.scan_phy = phy;
+  throughput_central_scanning_start();
+  return SL_STATUS_OK;
+}
+
+/*******************************************************************************
+ **************************   GLOBAL FUNCTIONS   *******************************
+ ******************************************************************************/
 
 /**************************************************************************//**
  * Event handler for timer
@@ -165,8 +483,8 @@ static bool throughput_address_compare(uint8_t *address1, uint8_t *address2);
 void timer_on_refresh_rssi(void)
 {
   sl_status_t sc;
-  if (connection_handle != 0xFF  && central_state.state != THROUGHPUT_STATE_TEST) {
-    sc = sl_bt_connection_get_rssi(connection_handle);
+  if (connection_handle_central != SL_BT_INVALID_CONNECTION_HANDLE  && central_state.state != THROUGHPUT_STATE_TEST) {
+    sc = sl_bt_connection_get_rssi(connection_handle_central);
     app_assert_status(sc);
   }
 }
@@ -211,9 +529,9 @@ void bt_on_event_central(sl_bt_msg_t *evt)
       }
       break;
     case sl_bt_evt_connection_opened_id:
-      connection_handle = evt->data.evt_connection_opened.connection;
+      connection_handle_central = evt->data.evt_connection_opened.connection;
       // Set remote connection power reporting - needed for Power Control
-      sc = sl_bt_connection_set_remote_power_reporting(connection_handle,
+      sc = sl_bt_connection_set_remote_power_reporting(connection_handle_central,
                                                        power_control_enabled);
       app_assert_status(sc);
 
@@ -223,7 +541,7 @@ void bt_on_event_central(sl_bt_msg_t *evt)
       central_state.discovery_state = THROUGHPUT_DISCOVERY_STATE_SERVICE;
       throughput_central_on_discovery_state_change(central_state.discovery_state);
 
-      sc = sl_bt_gatt_discover_primary_services_by_uuid(connection_handle,
+      sc = sl_bt_gatt_discover_primary_services_by_uuid(connection_handle_central,
                                                         UUID_LEN,
                                                         service_uuid);
       app_assert_status(sc);
@@ -313,17 +631,21 @@ void bt_on_event_central(sl_bt_msg_t *evt)
       break;
 
     case sl_bt_evt_connection_closed_id:
-      // Stop RSSI refresh timer
-      timer_refresh_rssi_stop();
-      // Notify state change
-      central_state.state = THROUGHPUT_STATE_DISCONNECTED;
+
+      if (central_state.state == THROUGHPUT_STATE_UNINITALIZING) {
+        enabled = false;
+        central_state.state = THROUGHPUT_STATE_UNINITALIZED;
+        // Delete the connection, reset variables, stop timers
+        throughput_central_reset();
+      } else {
+        central_state.state = THROUGHPUT_STATE_DISCONNECTED;
+        // Delete the connection, reset variables, stop timers
+        throughput_central_reset();
+        throughput_central_scanning_start();
+      }
+
       throughput_central_on_state_change(central_state.state);
-      central_state.discovery_state = THROUGHPUT_DISCOVERY_STATE_IDLE;
-      throughput_central_on_discovery_state_change(central_state.discovery_state);
-      // Reset variables
-      reset_variables();
-      // Start scanning
-      throughput_central_scanning_start();
+
       break;
 
     case sl_bt_evt_connection_rssi_id:
@@ -334,256 +656,6 @@ void bt_on_event_central(sl_bt_msg_t *evt)
     default:
       break;
   }
-}
-/***************************************************************************//**
- * Check received data for lost or error packages.
- * @param[in] data received data
- * @param[in] len length of the data
- ******************************************************************************/
-static void check_received_data(uint8_t * data, uint8_t len)
-{
-  uint8_t counter;
-
-  if (len == 0) {
-    central_state.packet_error++;
-    return;
-  }
-
-  counter = data[0];
-
-  if (first_packet) {
-    // Accept remote counter
-    received_counter = counter;
-    first_packet = false;
-  } else {
-    // Increment local counter
-    received_counter = (received_counter + 1) % 100;
-  }
-  if (counter != received_counter) {
-    // Lost packet is found
-    uint8_t lost_packet_count = 0;
-    // Calculate lost packet count
-    if (counter > received_counter) {
-      lost_packet_count = counter - received_counter;
-    } else if (counter < received_counter) {
-      lost_packet_count = 100 + counter - received_counter;
-    }
-    central_state.packet_lost += lost_packet_count;
-    // Sync to remote counter
-    received_counter = counter;
-  }
-
-  // Check data for bit errors
-  for (int i = 1; i < len; i++) {
-    if ( data[i] != (uint8_t) 'a' + (uint8_t) ((i - 1) % 26) ) {
-      central_state.packet_error++;
-      break;
-    }
-  }
-}
-
-static void handle_scan_event(bd_addr *address,
-                              uint8_t address_type,
-                              uint8_t * data,
-                              uint16_t len)
-{
-  sl_status_t sc;
-
-  if ((central_state.discovery_state == THROUGHPUT_DISCOVERY_STATE_SCAN)
-      & process_scan_response(data, len)) {
-    // Apply allowlist filtering
-    if (false == throughput_central_allowlist_apply(address->addr)) {
-      return;
-    }
-
-    // Stop scanning
-    app_log_info("Scanning stop." APP_LOG_NL);
-    sc = sl_bt_scanner_stop();
-    app_assert_status(sc);
-
-    // Open the connection
-    central_state.discovery_state = THROUGHPUT_DISCOVERY_STATE_CONN;
-    throughput_central_on_discovery_state_change(central_state.discovery_state);
-
-    sc = sl_bt_connection_open(*address,
-                               address_type,
-                               central_state.phy,
-                               &connection_handle);
-
-    // Handle if the default PHY is not supported
-    if (sc == SL_STATUS_INVALID_PARAMETER) {
-      app_log_status_warning_f(sc, "Connection PHY is not supported and set to 1M PHY" APP_LOG_NL);
-
-      central_state.phy = sl_bt_gap_phy_coding_1m_uncoded;
-      sc = sl_bt_connection_open(*address,
-                                 address_type,
-                                 central_state.phy,
-                                 &connection_handle);
-    }
-    // Assertion to first or second attempt to connect
-    app_assert_status(sc);
-  } else {
-    waiting_indication();
-  }
-}
-
-// Cycle through advertisement contents and look for matching device name.
-static bool process_scan_response(uint8_t *data, uint16_t data_len)
-{
-  int i = 0;
-  bool device_name_match = false;
-  uint8_t advertisement_length;
-  uint8_t advertisement_type;
-
-  while (i < (data_len - 1)) {
-    advertisement_length = data[i];
-    advertisement_type = data[i + 1];
-
-    /* Type 0x09 = Complete Local Name, 0x08 Shortened Name */
-    if (advertisement_type == 0x09) {
-      /* Check if device name is Throughput Tester */
-      if (memcmp(data + i + 2, device_name, strlen(device_name)) == 0) {
-        device_name_match = true;
-        break;
-      }
-    }
-    /* Jump to next AD record */
-    i = i + advertisement_length + 1;
-  }
-
-  return (device_name_match);
-}
-
-// Helper function to make the discovery and subscribing flow correct.
-// Action enum values indicate which procedure was completed.
-static void process_procedure_complete_event(sl_bt_msg_t *evt)
-{
-  uint16_t procedure_result =  evt->data.evt_gatt_procedure_completed.result;
-  sl_status_t sc;
-
-  switch (action) {
-    case act_discover_service:
-      action = act_none;
-      app_assert_status(procedure_result);
-      if (!procedure_result) {
-        // Discover successful, start characteristic discovery.
-        sc = sl_bt_gatt_discover_characteristics(connection_handle, service_handle);
-        app_assert_status(sc);
-        action = act_discover_characteristics;
-        central_state.discovery_state = THROUGHPUT_DISCOVERY_STATE_CHARACTERISTICS;
-        throughput_central_on_discovery_state_change(central_state.discovery_state);
-      }
-      break;
-    case act_discover_characteristics:
-      action = act_none;
-      app_assert_status(procedure_result);
-      if (!procedure_result) {
-        if (characteristic_found.all == THROUGHPUT_CENTRAL_CHARACTERISTICS_ALL) {
-          central_state.discovery_state = THROUGHPUT_DISCOVERY_STATE_FINISHED;
-          throughput_central_on_discovery_state_change(central_state.discovery_state);
-          sc = sl_bt_gatt_set_characteristic_notification(connection_handle, notifications_handle, sl_bt_gatt_notification);
-          app_assert_status(sc);
-          action = act_enable_notification;
-        }
-      }
-      break;
-    case act_enable_notification:
-      action = act_none;
-      app_assert_status(procedure_result);
-      if (!procedure_result) {
-        // Notifications turned on, turn on indication
-        central_state.notifications = sl_bt_gatt_notification;
-        throughput_central_on_notification_change(central_state.notifications);
-        sl_bt_gatt_set_characteristic_notification(connection_handle, indications_handle, sl_bt_gatt_indication);
-        action = act_enable_indication;
-      }
-      break;
-    case act_enable_indication:
-      action = act_enable_indication;
-      app_assert_status(procedure_result);
-      if (!procedure_result) {
-        // Subscribe to peripheral result.
-        central_state.indications = sl_bt_gatt_indication;
-        throughput_central_on_indication_change(central_state.indications);
-        sc = sl_bt_gatt_set_characteristic_notification(connection_handle, transmission_handle, sl_bt_gatt_notification);
-        app_assert_status(sc);
-        action = act_enable_transmission_notification;
-      }
-      break;
-    case act_enable_transmission_notification:
-      action = act_none;
-      app_assert_status(procedure_result);
-      if (!procedure_result) {
-        // Subscribe to peripheral result.
-        sc = sl_bt_gatt_set_characteristic_notification(connection_handle, result_handle, sl_bt_gatt_indication);
-        app_assert_status(sc);
-        action = act_subscribe_result;
-      }
-      break;
-    case act_subscribe_result:
-      action = act_none;
-      app_assert_status(procedure_result);
-      if (!procedure_result) {
-        central_state.state = THROUGHPUT_STATE_SUBSCRIBED;
-        throughput_central_on_state_change(central_state.state);
-        // Start RSSI refresh timer
-        timer_refresh_rssi_start();
-      }
-      break;
-    case act_none:
-      break;
-    default:
-      break;
-  }
-}
-
-// Check if found characteristic matches the UUIDs that we are searching for.
-static void check_characteristic_uuid(sl_bt_msg_t *evt)
-{
-  if (evt->data.evt_gatt_characteristic.uuid.len == UUID_LEN) {
-    if (memcmp(notifications_characteristic_uuid, evt->data.evt_gatt_characteristic.uuid.data, UUID_LEN) == 0) {
-      notifications_handle = evt->data.evt_gatt_characteristic.characteristic;
-      characteristic_found.characteristic.notification = true;
-      throughput_central_on_characteristics_found(characteristic_found);
-    } else if (memcmp(indications_characteristic_uuid, evt->data.evt_gatt_characteristic.uuid.data, UUID_LEN) == 0) {
-      indications_handle = evt->data.evt_gatt_characteristic.characteristic;
-      characteristic_found.characteristic.indication = true;
-      throughput_central_on_characteristics_found(characteristic_found);
-    } else if (memcmp(transmission_characteristic_uuid, evt->data.evt_gatt_characteristic.uuid.data, UUID_LEN) == 0) {
-      transmission_handle = evt->data.evt_gatt_characteristic.characteristic;
-      characteristic_found.characteristic.transmission_on = true;
-      throughput_central_on_characteristics_found(characteristic_found);
-    } else if (memcmp(result_characteristic_uuid, evt->data.evt_gatt_characteristic.uuid.data, UUID_LEN) == 0) {
-      result_handle = evt->data.evt_gatt_characteristic.characteristic;
-      characteristic_found.characteristic.result = true;
-      throughput_central_on_characteristics_found(characteristic_found);
-    }
-  }
-}
-
-static void reset_variables(void)
-{
-  connection_handle = 0xFF;
-  service_handle = 0xFFFFFFFF;
-  notifications_handle = 0xFFFF;
-  indications_handle = 0xFFFF;
-  transmission_handle = 0xFFFF;
-  characteristic_found.all = 0;
-
-  bytes_received = 0;
-  operation_count = 0;
-
-  received_counter = 0;
-  first_packet = true;
-
-  central_state.notifications = sl_bt_gatt_disable;
-  central_state.indications = sl_bt_gatt_disable;
-
-  central_state.throughput = 0;
-  central_state.throughput_peripheral_side = 0;
-  central_state.count = 0;
-  central_state.packet_error = 0;
-  central_state.packet_lost = 0;
 }
 
 bool throughput_central_decode_address(char * addess_str, uint8_t *address)
@@ -673,27 +745,6 @@ bool throughput_central_allowlist_add(uint8_t *address)
   return ret_val;
 }
 
-static bool throughput_central_allowlist_apply(uint8_t *address)
-{
-  bool ret_val = false;
-  throughput_allowlist_t *current_entry = &central_state.allowlist;
-
-  if (current_entry->next == NULL) {
-    ret_val = true;
-  }
-
-  //Search for the last entry in the list
-  while (current_entry->next != NULL) {
-    if (true == throughput_address_compare(current_entry->address.addr, address)) {
-      ret_val = true;
-      break;
-    }
-    current_entry = current_entry->next;
-  }
-
-  return ret_val;
-}
-
 bool throughput_address_compare(uint8_t *address1, uint8_t *address2)
 {
   bool ret_val = false;
@@ -719,26 +770,11 @@ void throughput_central_scanning_stop(void)
 }
 
 // Apply phy for scanning
-static sl_status_t throughput_central_scanning_apply_phy(throughput_scan_phy_t phy)
-{
-  throughput_central_scanning_stop();
-  central_state.scan_phy = phy;
-  throughput_central_scanning_start();
-  return SL_STATUS_OK;
-}
-
 // Start scanning
 void throughput_central_scanning_start(void)
 {
   sl_status_t sc;
   int16_t tx_power_min, tx_power_max;
-
-  // if the power is greater than 10 dBm AFH must be used
-  uint32_t afh_bit = (central_state.tx_power_requested > 10);
-  sc = sl_bt_system_linklayer_configure(CONFIG_KEY_SET_AFH,
-                                        sizeof(afh_bit),
-                                        (uint8_t *)&afh_bit);
-  app_assert_status(sc);
 
   app_log_info("Scanning started..." APP_LOG_NL);
 
@@ -817,7 +853,7 @@ void handle_throughput_central_stop(bool send_transmission_on)
     finish_time = time_elapsed;
 
     // Triggers the data transmission end on remote
-    sc = sl_bt_gatt_write_characteristic_value_without_response(connection_handle,
+    sc = sl_bt_gatt_write_characteristic_value_without_response(connection_handle_central,
                                                                 transmission_handle,
                                                                 1,
                                                                 &value,
@@ -886,7 +922,7 @@ void handle_throughput_central_start(bool send_transmission_on)
 
   if (send_transmission_on) {
     // This triggers the data transmission on remote side
-    sc = sl_bt_gatt_write_characteristic_value_without_response(connection_handle,
+    sc = sl_bt_gatt_write_characteristic_value_without_response(connection_handle_central,
                                                                 transmission_handle,
                                                                 1,
                                                                 &value,
@@ -914,7 +950,7 @@ void throughput_central_scanning_restart(void)
     return;
   }
   if (close_required) {
-    sc = sl_bt_connection_close(connection_handle);
+    sc = sl_bt_connection_close(connection_handle_central);
     app_assert_status(sc);
   } else {
     throughput_central_scanning_stop();
@@ -1044,7 +1080,7 @@ sl_status_t throughput_central_set_connection_parameters(throughput_time_t min_i
     central_state.connection_timeout = timeout;
 
     // Set connection parameters for this connection.
-    res = sl_bt_connection_set_parameters(connection_handle,
+    res = sl_bt_connection_set_parameters(connection_handle_central,
                                           central_state.connection_interval_min,
                                           central_state.connection_interval_max,
                                           central_state.connection_responder_latency,
@@ -1130,7 +1166,7 @@ sl_status_t throughput_central_set_connection_phy(throughput_phy_t phy)
     if (phy == sl_bt_gap_phy_coding_500k_coded) {
       accepted_phy = sl_bt_gap_phy_coded;
     }
-    res = sl_bt_connection_set_preferred_phy(connection_handle,
+    res = sl_bt_connection_set_preferred_phy(connection_handle_central,
                                              phy,
                                              accepted_phy);
   }
@@ -1198,7 +1234,6 @@ void throughput_central_enable(void)
   sl_status_t sc;
   int16_t tx_power_min, tx_power_max;
   uint8_t address[ADR_LEN];
-  uint32_t afh_bit;
 
   #ifdef SL_CATALOG_THROUGHPUT_UI_PRESENT
   throughput_ui_init();
@@ -1236,12 +1271,6 @@ void throughput_central_enable(void)
   } else {
     power_control_enabled = sl_bt_connection_power_reporting_disable;
   }
-  // if the power is greater than 10 dBm AFH must be used
-  afh_bit = (central_state.tx_power_requested > 10);
-  sc = sl_bt_system_linklayer_configure(CONFIG_KEY_SET_AFH,
-                                        sizeof(afh_bit),
-                                        (uint8_t *)&afh_bit);
-  app_assert_status(sc);
 
   // Convert power to mdBm
   int16_t power = ( ((int16_t)central_state.tx_power) * 10);
@@ -1291,6 +1320,33 @@ void throughput_central_enable(void)
   throughput_central_scanning_start();
 
   enabled = true;
+}
+
+/**************************************************************************//**
+ * Disable receiver.
+ *****************************************************************************/
+sl_status_t throughput_central_disable(void)
+{
+  sl_status_t sc = SL_STATUS_OK;
+
+  if (central_state.state == THROUGHPUT_STATE_TEST) {
+    return SL_STATUS_INVALID_STATE;
+  }
+
+  // Stop scanning
+  throughput_central_scanning_stop();
+
+  if (central_state.state != THROUGHPUT_STATE_DISCONNECTED) {
+    sc = sl_bt_connection_close(connection_handle_central);
+    central_state.state = THROUGHPUT_STATE_UNINITALIZING;
+  } else {
+    central_state.state = THROUGHPUT_STATE_UNINITALIZED;
+    enabled = false;
+    throughput_central_reset();
+  }
+
+  throughput_central_on_state_change(central_state.state);
+  return sc;
 }
 
 #ifdef SL_CATALOG_POWER_MANAGER_PRESENT
@@ -1362,6 +1418,12 @@ SL_WEAK void throughput_central_on_state_change(throughput_state_t state)
       break;
     case THROUGHPUT_STATE_TEST:
       app_log_info(THROUGHPUT_UI_STATE_TEST_TEXT);
+      break;
+    case THROUGHPUT_STATE_UNINITALIZED:
+      app_log_info(THROUGHPUT_UI_STATE_UNINITIALIZED_TEXT);
+      break;
+    case THROUGHPUT_STATE_UNINITALIZING:
+      app_log_info(THROUGHPUT_UI_STATE_UNINITIALIZING_TEXT);
       break;
     default:
       app_log_info(THROUGHPUT_UI_STATE_UNKNOWN_TEXT);

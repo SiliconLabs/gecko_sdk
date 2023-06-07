@@ -27,11 +27,11 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
-#include "em_device.h"
-
-#if defined(SEMAILBOX_PRESENT)
 
 #include "sl_se_manager.h"
+
+#if defined(SLI_MAILBOX_COMMAND_SUPPORTED)
+
 #include "sli_se_manager_internal.h"
 #include "em_se.h"
 #include "sl_assert.h"
@@ -442,9 +442,11 @@ sl_status_t sl_se_ccm_encrypt_and_tag(sl_se_command_context_t *cmd_ctx,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
+#if !defined(SLI_SE_MANAGER_HOST_SYSTEM)
   if ((uint32_t)output + length > RAM_MEM_END) {
     return SL_STATUS_INVALID_PARAMETER;
   }
+#endif // SLI_SE_MANAGER_HOST_SYSTEM
 
   sli_se_command_init(cmd_ctx, SLI_SE_COMMAND_AES_CCM_ENCRYPT);
 
@@ -519,9 +521,11 @@ sl_status_t sl_se_ccm_auth_decrypt(sl_se_command_context_t *cmd_ctx,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
+#if !defined(SLI_SE_MANAGER_HOST_SYSTEM)
   if ((uint32_t)output + length > RAM_MEM_END) {
     return SL_STATUS_INVALID_PARAMETER;
   }
+#endif // SLI_SE_MANAGER_HOST_SYSTEM
 
   sli_se_command_init(cmd_ctx, SLI_SE_COMMAND_AES_CCM_DECRYPT);
 
@@ -558,7 +562,7 @@ sl_status_t sl_se_ccm_auth_decrypt(sl_se_command_context_t *cmd_ctx,
   }
 }
 
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 1)
+#if defined(SLI_SE_MAJOR_VERSION_ONE)
 sl_status_t sl_se_ccm_multipart_starts(sl_se_ccm_multipart_context_t *ccm_ctx,
                                        sl_se_command_context_t *cmd_ctx,
                                        const sl_se_key_descriptor_t *key,
@@ -910,9 +914,9 @@ sl_status_t sl_se_ccm_multipart_finish(sl_se_ccm_multipart_context_t *ccm_ctx,
   *output_length = 0;
   return SL_STATUS_OK;
 }
-#endif// _SILICON_LABS_32B_SERIES_2_CONFIG == 1
+#endif // SLI_SE_MAJOR_VERSION_ONE
 
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
+#if defined(SLI_SE_MAJOR_VERSION_TWO)
 /***************************************************************************//**
  *   Prepare a CCM streaming command context object to be used in subsequent
  *   CCM streaming function calls.
@@ -1038,7 +1042,7 @@ sl_status_t sl_se_ccm_multipart_starts(sl_se_ccm_multipart_context_t *ccm_ctx,
  *   It is called between sl_se_ccm_multipart_starts() and sl_se_ccm_multipart_finish().
  *   Can be called repeatedly.
  ******************************************************************************/
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
+#if defined(SLI_SE_MAJOR_VERSION_TWO)
 sl_status_t sl_se_ccm_multipart_update(sl_se_ccm_multipart_context_t *ccm_ctx,
                                        sl_se_command_context_t *cmd_ctx,
                                        const sl_se_key_descriptor_t *key,
@@ -1071,9 +1075,11 @@ sl_status_t sl_se_ccm_multipart_update(sl_se_ccm_multipart_context_t *ccm_ctx,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
+#if !defined(SLI_SE_MANAGER_HOST_SYSTEM)
   if ((uint32_t)output + length > RAM_MEM_END) {
     return SL_STATUS_INVALID_PARAMETER;
   }
+#endif // SLI_SE_MANAGER_HOST_SYSTEM
 
   SE_Command_t *se_cmd = &cmd_ctx->command;
   *output_length = 0;
@@ -1220,7 +1226,7 @@ sl_status_t sl_se_ccm_multipart_update(sl_se_ccm_multipart_context_t *ccm_ctx,
  *   Finish a CCM streaming operation and return the resulting CCM tag.
  *   It is called after sl_se_ccm_multipart_update().
  ******************************************************************************/
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
+#if defined(SLI_SE_MAJOR_VERSION_TWO)
 sl_status_t sl_se_ccm_multipart_finish(sl_se_ccm_multipart_context_t *ccm_ctx,
                                        sl_se_command_context_t *cmd_ctx,
                                        const sl_se_key_descriptor_t *key,
@@ -1815,7 +1821,7 @@ sl_status_t sl_se_gcm_auth_decrypt(sl_se_command_context_t *cmd_ctx,
   return status;
 }
 
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
+#if defined(SLI_SE_MAJOR_VERSION_TWO)
 /***************************************************************************//**
  * GCM  multipart encryption/decryption, initial stage.
  ******************************************************************************/
@@ -1995,7 +2001,7 @@ sl_status_t sl_se_gcm_multipart_starts(sl_se_gcm_multipart_context_t *gcm_ctx,
 }
 #endif
 
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
+#if defined(SLI_SE_MAJOR_VERSION_TWO)
 /***************************************************************************//**
  * GCM multipart encryption/decryption, update stage.
  ******************************************************************************/
@@ -2166,7 +2172,7 @@ sl_status_t sl_se_gcm_multipart_update(sl_se_gcm_multipart_context_t *gcm_ctx,
   return SL_STATUS_OK;
 }
 
-#else //devices with _SILICON_LABS_32B_SERIES_2_CONFIG < 3
+#else // SLI_SE_MAJOR_VERSION_ONE
 /***************************************************************************//**
  * GCM multipart encryption/decryption, update stage.
  ******************************************************************************/
@@ -2452,7 +2458,7 @@ sl_status_t sl_se_gcm_multipart_finish(sl_se_gcm_multipart_context_t *gcm_ctx,
   length = gcm_ctx->final_data_length;
   gcm_ctx->len += ((length % 16 != 0) ? length : 0);
 
-  #if (_SILICON_LABS_32B_SERIES_2_CONFIG < 3)
+  #if defined(SLI_SE_MAJOR_VERSION_ONE)
   if ((gcm_ctx->add_len > 0) && (gcm_ctx->len == 0)) {
     if (gcm_ctx->mode == SL_SE_DECRYPT) {
       if (memcmp_time_cst(tag, gcm_ctx->tagbuf, tag_length)) {
@@ -2466,7 +2472,7 @@ sl_status_t sl_se_gcm_multipart_finish(sl_se_gcm_multipart_context_t *gcm_ctx,
   }
   #endif
 
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG < 3)
+#if defined(SLI_SE_MAJOR_VERSION_ONE)
   // For xG21 devices, since the multipart finish command cannot handle cases without
   // more data being passed as part of the finish call, there are two cases for which
   // a finish call can condense into a one-shot operation:
@@ -2531,7 +2537,7 @@ sl_status_t sl_se_gcm_multipart_finish(sl_se_gcm_multipart_context_t *gcm_ctx,
   SE_DataTransfer_t data_in =
     SE_DATATRANSFER_DEFAULT(gcm_ctx->final_data, length);
 
-  #if (_SILICON_LABS_32B_SERIES_2_CONFIG < 3)
+  #if defined(SLI_SE_MAJOR_VERSION_ONE)
   SE_DataTransfer_t iv_ctx_in = SE_DATATRANSFER_DEFAULT((length % 16 != 0 || length == 0) ? gcm_ctx->se_ctx : gcm_ctx->previous_se_ctx, sizeof(gcm_ctx->previous_se_ctx));
   #else
   SE_DataTransfer_t iv_ctx_in = SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx, sizeof(gcm_ctx->se_ctx));
@@ -2826,4 +2832,4 @@ sl_status_t sl_se_poly1305_genkey_tag(sl_se_command_context_t *cmd_ctx,
 
 /** @} (end addtogroup sl_se) */
 
-#endif // defined(SEMAILBOX_PRESENT)
+#endif // defined(SLI_MAILBOX_COMMAND_SUPPORTED)

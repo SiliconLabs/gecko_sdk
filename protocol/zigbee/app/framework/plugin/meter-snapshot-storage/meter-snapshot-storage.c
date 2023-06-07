@@ -82,9 +82,9 @@ static EmberAfSnapshotSchedulePayload *allocateSchedule(void)
   return NULL;
 }
 
-void emberAfPluginMeterSnapshotStorageInitCallback(SLXU_INIT_ARG)
+void emberAfPluginMeterSnapshotStorageInitCallback(uint8_t init_level)
 {
-  SLXU_INIT_UNUSED_ARG;
+  (void)init_level;
 
   snapshotIdCounter = INVALID_SNAPSHOT_ID;
   initSchedules();

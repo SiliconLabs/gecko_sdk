@@ -15,9 +15,7 @@
  *
  ******************************************************************************/
 
-#ifdef UC_BUILD
 #include "ias-zone-server-config.h"
-#endif
 
 /**
  * Custom Application Tokens

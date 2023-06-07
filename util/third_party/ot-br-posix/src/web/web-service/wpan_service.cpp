@@ -59,7 +59,7 @@ std::string WpanService::HandleGetQRCodeRequest()
     std::string                 response;
     int                         ret = kWpanStatus_Ok;
     otbr::Web::OpenThreadClient client(mIfName);
-    char *                      rval;
+    char                       *rval;
 
     VerifyOrExit(client.Connect(), ret = kWpanStatus_SetFailed);
 
@@ -99,7 +99,7 @@ std::string WpanService::HandleJoinNetworkRequest(const std::string &aJoinReques
     bool                        defaultRoute;
     int                         ret = kWpanStatus_Ok;
     otbr::Web::OpenThreadClient client(mIfName);
-    char *                      rval;
+    char                       *rval;
 
     VerifyOrExit(client.Connect(), ret = kWpanStatus_SetFailed);
 
@@ -330,7 +330,7 @@ std::string WpanService::HandleStatusRequest()
     std::string                 response, networkName, extPanId, propertyValue;
     int                         ret = kWpanStatus_Ok;
     otbr::Web::OpenThreadClient client(mIfName);
-    char *                      rval;
+    char                       *rval;
 
     networkInfo["WPAN service"] = "uninitialized";
     VerifyOrExit(client.Connect(), ret = kWpanStatus_SetFailed);
@@ -482,7 +482,7 @@ std::string WpanService::HandleAvailableNetworkRequest()
     {
         char panId[OT_PANID_LENGTH * 2 + 3], hardwareAddress[OT_HARDWARE_ADDRESS_LENGTH * 2 + 1];
         otbr::Utils::Bytes2Hex(mNetworks[i].mHardwareAddress, OT_HARDWARE_ADDRESS_LENGTH, hardwareAddress);
-        sprintf(panId, "0x%X", mNetworks[i].mPanId);
+        snprintf(panId, sizeof(panId), "0x%X", mNetworks[i].mPanId);
         networkInfo[i]["pi"] = panId;
         networkInfo[i]["ch"] = mNetworks[i].mChannel;
         networkInfo[i]["ha"] = hardwareAddress;
@@ -505,7 +505,7 @@ int WpanService::GetWpanServiceStatus(std::string &aNetworkName, std::string &aE
 {
     int                         status = kWpanStatus_Ok;
     otbr::Web::OpenThreadClient client(mIfName);
-    const char *                rval;
+    const char                 *rval;
 
     VerifyOrExit(client.Connect(), status = kWpanStatus_Uninitialized);
     rval = client.Execute("state");
@@ -542,7 +542,7 @@ std::string WpanService::HandleCommission(const std::string &aCommissionRequest)
     int              ret = kWpanStatus_Ok;
     std::string      pskd;
     std::string      response;
-    const char *     rval;
+    const char      *rval;
 
     VerifyOrExit(reader.parse(aCommissionRequest.c_str(), root) == true, ret = kWpanStatus_ParseRequestFailed);
     pskd = root["pskd"].asString();
@@ -593,7 +593,7 @@ exit:
 }
 
 int WpanService::joinActiveDataset(otbr::Web::OpenThreadClient &aClient,
-                                   const std::string &          aNetworkKey,
+                                   const std::string           &aNetworkKey,
                                    uint16_t                     aChannel,
                                    uint16_t                     aPanId)
 {
@@ -610,9 +610,9 @@ exit:
 }
 
 int WpanService::formActiveDataset(otbr::Web::OpenThreadClient &aClient,
-                                   const std::string &          aNetworkKey,
-                                   const std::string &          aNetworkName,
-                                   const std::string &          aPskc,
+                                   const std::string           &aNetworkKey,
+                                   const std::string           &aNetworkName,
+                                   const std::string           &aPskc,
                                    uint16_t                     aChannel,
                                    uint64_t                     aExtPanId,
                                    uint16_t                     aPanId)

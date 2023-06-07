@@ -31,6 +31,11 @@
 #ifndef SL_SIMPLE_COM_H
 #define SL_SIMPLE_COM_H
 
+/***********************************************************************************************//**
+ * @addtogroup simple_com
+ * @{
+ **************************************************************************************************/
+
 #include <stdint.h>
 #include "sl_status.h"
 
@@ -74,4 +79,5 @@ void sl_simple_com_os_task_init(void);
  *****************************************************************************/
 void sl_simple_com_os_task_proceed(void);
 
+/** @} (end addtogroup simple_com) */
 #endif // SL_SIMPLE_COM_H

@@ -23,37 +23,16 @@
 
 //-----------------------------------------------------------------------------
 // Forward Declarations
-#ifndef UC_BUILD
-void emAfSubGhzServerCliChannelChangePrint(void);
-void emAfSubGhzServerCliChannelChangeSet(void);
-void emAfSubGhzServerCliChannelMaskPrint(void);
-void emAfSubGhzServerCliChannelMaskSet(void);
-void emAfSubGhzServerCliDutyCycleLimitsPrint(void);
-void emAfSubGhzServerCliDutyCycleLimitsSet(void);
-void emAfSubGhzServerCliSuspendZclMessages(void);
-void emAfSubGhzServerCliClientStatus(void);
-EmberCommandEntry emberAfSubGhzServerCommands[] = {
-  emberCommandEntryActionWithDetails("channel-change print", emAfSubGhzServerCliChannelChangePrint, "", "Print out the status of the sub-GHz channel change attribute.", NULL),
-  emberCommandEntryActionWithDetails("channel-change set", emAfSubGhzServerCliChannelChangeSet, "w", "Set the status of the sub-GHz channel change attribute.", emAfSubGhzServerCliChannelChangeSetArguments),
-  emberCommandEntryActionWithDetails("channel-mask print", emAfSubGhzServerCliChannelMaskPrint, "", "Print out the status of all sub-GHz channel masks.", NULL),
-  emberCommandEntryActionWithDetails("channel-mask set", emAfSubGhzServerCliChannelMaskSet, "wwww", "Set one or more sub-GHz channel mask(s).", emAfSubGhzServerCliChannelMaskSetArguments),
-  emberCommandEntryActionWithDetails("limits print", emAfSubGhzServerCliDutyCycleLimitsPrint, "", "Print the current Duty Cycle limits.", NULL),
-  emberCommandEntryActionWithDetails("limits set", emAfSubGhzServerCliDutyCycleLimitsSet, "vvv", "Set the current Duty Cycle limits.", emAfSubGhzServerCliDutyCycleLimitsSetArguments),
-  emberCommandEntryActionWithDetails("suspend-zcl-messages", emAfSubGhzServerCliSuspendZclMessages, "vuu", "Send the SuspendZCLMessages command to the given client.", emAfSubGhzServerCliSuspendZclMessagesArguments),
-  emberCommandEntryActionWithDetails("client-status", emAfSubGhzServerCliClientStatus, "v", "Print the given Sub-GHZ given client's current status.", emAfSubGhzServerCliClientStatusArguments),
-  emberCommandEntryTerminator()
-};
-#endif
 
 //-----------------------------------------------------------------------------
 // Globals Declarations
 
-const char * emAfSubGhzServerCliChannelChangeSetArguments[] = {
+const char * sli_zigbee_af_sub_ghz_server_cli_channel_change_setArguments[] = {
   "Channel change attribute (bit mask)",
   NULL
 };
 
-const char * emAfSubGhzServerCliChannelMaskSetArguments[] = {
+const char * sli_zigbee_af_sub_ghz_server_cli_channel_mask_set_arguments[] = {
   "Channel 28 mask",
   "Channel 29 mask",
   "Channel 30 mask",
@@ -61,21 +40,21 @@ const char * emAfSubGhzServerCliChannelMaskSetArguments[] = {
   NULL
 };
 
-const char * emAfSubGhzServerCliDutyCycleLimitsSetArguments[] = {
+const char * sli_zigbee_af_sub_ghz_server_cli_duty_cycle_limits_set_arguments[] = {
   "'Limited' Duty Cycle state threshold in % * 100 (i.e. 150 = 1.5%, 10000 = 100.00%)",
   "'Critical' Duty Cycle state threshold in % * 100",
   "'Suspended' Duty Cycle state threshold in % * 100",
   NULL
 };
 
-const char * emAfSubGhzServerCliSuspendZclMessagesArguments[] = {
+const char * sli_zigbee_af_sub_ghz_server_cli_suspend_zcl_messagesArguments[] = {
   "Node ID of the given client",
   "Endpoint of the given client",
   "Period in minutes",
   NULL
 };
 
-const char * emAfSubGhzServerCliClientStatusArguments[] = {
+const char * sli_zigbee_af_sub_ghz_server_cli_client_statusArguments[] = {
   "Node ID of the given client",
   NULL
 };
@@ -128,18 +107,14 @@ static void printAttributes(const uint16_t attributeIds[], int n)
  *
  * All the attributes are in the server and they are all the same type.
  */
-#ifndef UC_BUILD
-static void setAttributes(const uint16_t attributeIds[], int n)
-#else // !UC_BUILD
 static void setAttributes(sl_cli_command_arg_t *arguments, const uint16_t attributeIds[], int n)
-#endif  // UC_BUILD
 {
   const uint8_t endpoint = emberAfPrimaryEndpointForCurrentNetworkIndex();
   uint32_t      value;
   int           i;
 
   for (i = 0; i < n; ++i) {
-    value = emberUnsignedCommandArgument(i);
+    value = sl_cli_get_argument_uint32(arguments, i);
     const EmberAfStatus status = emberAfWriteAttribute(endpoint,
                                                        ZCL_SUB_GHZ_CLUSTER_ID,
                                                        attributeIds[i],
@@ -171,28 +146,15 @@ static const uint16_t ChannelChangeAttribs[] = {
   ZCL_SUB_GHZ_CLUSTER_CHANNEL_CHANGE_ATTRIBUTE_ID
 };
 
-#ifndef UC_BUILD
-void emAfSubGhzServerCliChannelChangePrint(void)
-#else
-void emAfSubGhzServerCliChannelChangePrint(sl_cli_command_arg_t *arguments)
-#endif
+void sli_zigbee_af_sub_ghz_server_cli_channel_change_print(sl_cli_command_arg_t *arguments)
 {
   printAttributes(ChannelChangeAttribs,
                   sizeof ChannelChangeAttribs / sizeof ChannelChangeAttribs[0]);
 }
-#ifndef UC_BUILD
-void emAfSubGhzServerCliChannelChangeSet(void)
-#else
-void emAfSubGhzServerCliChannelChangeSet(sl_cli_command_arg_t *arguments)
-#endif
+void sli_zigbee_af_sub_ghz_server_cli_channel_change_set(sl_cli_command_arg_t *arguments)
 {
-#ifndef UC_BUILD
-  setAttributes(ChannelChangeAttribs,
-                sizeof ChannelChangeAttribs / sizeof ChannelChangeAttribs[0]);
-#else // !UC_BUILD
   setAttributes(arguments, ChannelChangeAttribs,
                 sizeof ChannelChangeAttribs / sizeof ChannelChangeAttribs[0]);
-#endif  // UC_BUILD
 }
 
 /** @brief A set of definition and fuctions to print/set the Sub-GHz cluster's
@@ -204,37 +166,20 @@ static const uint16_t ChannelMaskAttribs[] = {
   ZCL_SUB_GHZ_CLUSTER_PAGE_30_CHANNEL_MASK_ATTRIBUTE_ID,
   ZCL_SUB_GHZ_CLUSTER_PAGE_31_CHANNEL_MASK_ATTRIBUTE_ID
 };
-#ifndef UC_BUILD
-void emAfSubGhzServerCliChannelMaskPrint(void)
-#else
-void emAfSubGhzServerCliChannelMaskPrint(sl_cli_command_arg_t *arguments)
-#endif
+void sli_zigbee_af_sub_ghz_server_cli_channel_mask_print(sl_cli_command_arg_t *arguments)
 {
   printAttributes(ChannelMaskAttribs,
                   sizeof ChannelMaskAttribs / sizeof ChannelMaskAttribs[0]);
 }
-#ifndef UC_BUILD
-void emAfSubGhzServerCliChannelMaskSet(void)
-#else
-void emAfSubGhzServerCliChannelMaskSet(sl_cli_command_arg_t *arguments)
-#endif
+void sli_zigbee_af_sub_ghz_server_cli_channel_mask_set(sl_cli_command_arg_t *arguments)
 {
-#ifndef UC_BUILD
-  setAttributes(ChannelMaskAttribs,
-                sizeof ChannelMaskAttribs / sizeof ChannelMaskAttribs[0]);
-#else // !UC_BUILD
   setAttributes(arguments, ChannelMaskAttribs,
                 sizeof ChannelMaskAttribs / sizeof ChannelMaskAttribs[0]);
-#endif  // UC_BUILD
 }
 
 /** @brief Print the current Duty Cycle limits
  */
-#ifndef UC_BUILD
-void emAfSubGhzServerCliDutyCycleLimitsPrint(void)
-#else
-void emAfSubGhzServerCliDutyCycleLimitsPrint(sl_cli_command_arg_t *arguments)
-#endif
+void sli_zigbee_af_sub_ghz_server_cli_duty_cycle_limits_print(sl_cli_command_arg_t *arguments)
 {
   static const char* const dcStateStr[] = {
     "Off",      // EMBER_DUTY_CYCLE_TRACKING_OFF                    = 0,
@@ -290,18 +235,14 @@ void emAfSubGhzServerCliDutyCycleLimitsPrint(sl_cli_command_arg_t *arguments)
 
 /** @brief Set the Duty Cycle limits
  */
-#ifndef UC_BUILD
-void emAfSubGhzServerCliDutyCycleLimitsSet(void)
-#else
-void emAfSubGhzServerCliDutyCycleLimitsSet(sl_cli_command_arg_t *arguments)
-#endif
+void sli_zigbee_af_sub_ghz_server_cli_duty_cycle_limits_set(sl_cli_command_arg_t *arguments)
 {
   EmberDutyCycleLimits limits = { 0 };
   EmberStatus          status;
 
-  limits.limitThresh = emberUnsignedCommandArgument(0);
-  limits.critThresh  = emberUnsignedCommandArgument(1);
-  limits.suspLimit   = emberUnsignedCommandArgument(2);
+  limits.limitThresh = sl_cli_get_argument_uint16(arguments, 0);
+  limits.critThresh  = sl_cli_get_argument_uint16(arguments, 1);
+  limits.suspLimit   = sl_cli_get_argument_uint16(arguments, 2);
 
   status = emberSetDutyCycleLimitsInStack(&limits);
   printSuccessOrError(status);
@@ -313,17 +254,13 @@ void emAfSubGhzServerCliDutyCycleLimitsSet(sl_cli_command_arg_t *arguments)
  * @param endpoint .. client's endpoint
  * @param period .... suspension perion in minutes
  */
-#ifndef UC_BUILD
-void emAfSubGhzServerCliSuspendZclMessages(void)
-#else
-void emAfSubGhzServerCliSuspendZclMessages(sl_cli_command_arg_t *arguments)
-#endif
+void sli_zigbee_af_sub_ghz_server_cli_suspend_zcl_messages(sl_cli_command_arg_t *arguments)
 {
   EmberStatus status;
 
-  EmberNodeId nodeId = (EmberNodeId)emberUnsignedCommandArgument(0);
-  uint8_t endpoint = (uint8_t)emberUnsignedCommandArgument(1);
-  uint8_t period = (uint8_t)emberUnsignedCommandArgument(2);
+  EmberNodeId nodeId = sl_cli_get_argument_uint16(arguments, 0);
+  uint8_t endpoint = sl_cli_get_argument_uint8(arguments, 1);
+  uint8_t period = sl_cli_get_argument_uint8(arguments, 2);
 
   status = emberAfPluginSubGhzServerSendSuspendZclMessagesCommand(nodeId,
                                                                   endpoint,
@@ -335,13 +272,9 @@ void emAfSubGhzServerCliSuspendZclMessages(sl_cli_command_arg_t *arguments)
  *
  * @param nodeId .... client's node ID
  */
-#ifndef UC_BUILD
-void emAfSubGhzServerCliClientStatus(void)
-#else
-void emAfSubGhzServerCliClientStatus(sl_cli_command_arg_t *arguments)
-#endif
+void sli_zigbee_af_sub_ghz_server_cli_client_status(sl_cli_command_arg_t *arguments)
 {
-  EmberNodeId nodeId = (EmberNodeId)emberUnsignedCommandArgument(0);
+  EmberNodeId nodeId = sl_cli_get_argument_uint16(arguments, 0);
   uint16_t t = emberAfPluginSubGhzServerSuspendZclMessagesStatus(nodeId);
 
   if (t > 0) {

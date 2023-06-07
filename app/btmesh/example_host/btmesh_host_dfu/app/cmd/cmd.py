@@ -28,10 +28,12 @@ from typing import Callable, Dict, List, Optional, Sequence, Tuple
 import btmesh.util
 from bgapix.bglibx import BGLibExtRetryParams
 from btmesh.db import FWID, ModelID, Node
-from btmesh.util import BtmeshRetryParams
+from btmesh.util import (BtmeshMulticastRetryParams, BtmeshRetryParams,
+                         ConnectionParamsRange)
 
 from ..db import BtmeshDfuAppGroup, app_db
-from ..ui import AppUIColumnInfo, BtmeshDfuAppParseSpecError, app_ui
+from ..ui import (AppUIColumnInfo, BtmeshDfuAppParseSpecError,
+                  BtmeshDfuAppSpecName, app_ui)
 from ..util.argparsex import ArgumentParserExt
 
 
@@ -63,6 +65,14 @@ class BtmeshCmd(abc.ABC):
     ELEM_ADDRS_OPT_SHORT = ""
     ELEM_ADDRS_OPTS = f"{ELEM_ADDRS_OPT_LONG}"
 
+    BD_ADDRS_OPT_LONG = "--bd-addrs"
+    BD_ADDRS_OPTS = f"{BD_ADDRS_OPT_LONG}"
+    BD_ADDRS_ATTR_NAME = BD_ADDRS_OPT_LONG[2:].replace("-", "_")
+
+    BD_ADDR_OPT_LONG = "--bd-addr"
+    BD_ADDR_OPTS = f"{BD_ADDR_OPT_LONG}"
+    BD_ADDR_ATTR_NAME = BD_ADDR_OPT_LONG[2:].replace("-", "_")
+
     RETRY_MAX_OPT_LONG = "--retry-max"
     RETRY_MAX_OPTS = f"{RETRY_MAX_OPT_LONG}"
     RETRY_MAX_ATTR_NAME = RETRY_MAX_OPT_LONG[2:].replace("-", "_")
@@ -82,6 +92,35 @@ class BtmeshCmd(abc.ABC):
     RETRY_CMD_INT_OPT_LONG = "--retry-cmd-interval"
     RETRY_CMD_INT_OPTS = f"{RETRY_CMD_INT_OPT_LONG}"
     RETRY_CMD_INT_ATTR_NAME = RETRY_CMD_INT_OPT_LONG[2:].replace("-", "_")
+
+    RETRY_MULCAST_THR_OPT_LONG = "--retry-multicast-thr"
+    RETRY_MULCAST_THR_OPTS = f"{RETRY_MULCAST_THR_OPT_LONG}"
+    RETRY_MULCAST_THR_ATTR_NAME = RETRY_MULCAST_THR_OPT_LONG[2:].replace("-", "_")
+
+    RETRY_AUTO_UNICAST_OPT_LONG = "--retry-auto-unicast"
+    RETRY_AUTO_UNICAST_OPTS = f"{RETRY_AUTO_UNICAST_OPT_LONG}"
+    RETRY_AUTO_UNICAST_ATTR_NAME = RETRY_AUTO_UNICAST_OPT_LONG[2:].replace("-", "_")
+
+    CONN_OPEN_TIMEOUT_OPT_LONG = "--conn-open-timeout"
+    CONN_OPEN_TIMEOUT_ATTR_NAME = CONN_OPEN_TIMEOUT_OPT_LONG[2:].replace("-", "_")
+
+    CONN_MIN_INTERVAL_OPT_LONG = "--conn-min-interval"
+    CONN_MIN_INTERVAL_ATTR_NAME = CONN_MIN_INTERVAL_OPT_LONG[2:].replace("-", "_")
+
+    CONN_MAX_INTERVAL_OPT_LONG = "--conn-max-interval"
+    CONN_MAX_INTERVAL_ATTR_NAME = CONN_MAX_INTERVAL_OPT_LONG[2:].replace("-", "_")
+
+    CONN_LATENCY_OPT_LONG = "--conn-latency"
+    CONN_LATENCY_ATTR_NAME = CONN_LATENCY_OPT_LONG[2:].replace("-", "_")
+
+    CONN_TIMEOUT_OPT_LONG = "--conn-timeout"
+    CONN_TIMEOUT_ATTR_NAME = CONN_TIMEOUT_OPT_LONG[2:].replace("-", "_")
+
+    CONN_MIN_CE_LENGTH_OPT_LONG = "--conn-min-ce-len"
+    CONN_MIN_CE_LENGTH_ATTR_NAME = CONN_MIN_CE_LENGTH_OPT_LONG[2:].replace("-", "_")
+
+    CONN_MAX_CE_LENGTH_OPT_LONG = "--conn-max-ce-len"
+    CONN_MAX_CE_LENGTH_ATTR_NAME = CONN_MAX_CE_LENGTH_OPT_LONG[2:].replace("-", "_")
 
     RETRY_MAX_HELP_DEFAULT = (
         "Maximum command retry count when the expected event is not received "
@@ -121,6 +160,98 @@ class BtmeshCmd(abc.ABC):
         "The retry command interval is measured between commands in seconds "
         "during retry when the command fails due to recoverable error. "
         "Example: keep time between commands to wait to free dynamic memory. "
+    )
+
+    RETRY_MULCAST_THR_HELP_DEFAULT = (
+        "If the number of remaining node elements (element addresses) with "
+        "missing status messages exceeds or equals to the retry multicast "
+        "threshold then the group address is used to send BT Mesh messages, "
+        "otherwise each element address is looped through one by one. "
+        "Zero value means unicast addressing."
+    )
+
+    RETRY_AUTO_UNICAST_HELP_DEFAULT = (
+        "If auto unicast retry feature is turned on and the multicast retry "
+        "procedure fails before the number of remaining nodes elements (element "
+        "addresses) with missing status messages goes below the retry "
+        "multicast threshold then an additional unicast retry procedure is "
+        "executed otherwise the remaining node elements fail with timeout."
+    )
+
+    CONN_OPEN_TIMEOUT_MS_HELP_DEFAULT = (
+        "Bluetooth connection opening and proxy connection establishment "
+        "timeout in milliseconds."
+        "(default: %(default)s ms)"
+    )
+
+    CONN_MIN_INTERVAL_MS_HELP_DEFAULT = (
+        f"Minimum value for the connection event interval in milliseconds. "
+        f"Range: {btmesh.util.CONN_INTERVAL_MS_MIN} ms - "
+        f"{btmesh.util.CONN_INTERVAL_MS_MAX} ms; "
+        f"Resolution: {btmesh.util.CONN_INTERVAL_MS_RES} ms "
+        "(default: %(default)s ms)"
+    )
+
+    CONN_MAX_INTERVAL_MS_HELP_DEFAULT = (
+        f"Maximum value for the connection event interval in milliseconds. "
+        f"Range: {btmesh.util.CONN_INTERVAL_MS_MIN} ms - "
+        f"{btmesh.util.CONN_INTERVAL_MS_MAX} ms; "
+        f"Resolution: {btmesh.util.CONN_INTERVAL_MS_RES} ms "
+        "(default: %(default)s ms)"
+    )
+
+    CONN_LATENCY_HELP_DEFAULT = (
+        f"Peripheral latency, which defines how many connection intervals the "
+        f"peripheral can skip if it has no data to send. "
+        f"Range: 0x{btmesh.util.CONN_LATENCY_MIN:04X}-"
+        f"0x{btmesh.util.CONN_LATENCY_MAX:04X} "
+        "(default: %(default)s ms)"
+    )
+
+    CONN_TIMEOUT_MS_HELP_DEFAULT = (
+        f"Supervision timeout in milliseconds, which defines the time that the "
+        f"connection is maintained although the devices can't communicate at the "
+        f"currently configured connection intervals. "
+        f"The supervision timeout value in milliseconds shall be larger than "
+        f"(1 + latency) * max_interval * 2, where max_interval is given "
+        f"in milliseconds. "
+        f"Range: {btmesh.util.CONN_TIMEOUT_MS_MIN} ms - "
+        f"{btmesh.util.CONN_TIMEOUT_MS_MAX} ms; "
+        f"Resolution: {btmesh.util.CONN_TIMEOUT_MS_RES} ms "
+        "(default: %(default)s ms)"
+    )
+
+    CONN_MIN_CE_LENGTH_MS_HELP_DEFAULT = (
+        f"Minimum length of the connection event. "
+        f"This value defines the minimum time that should be given to the "
+        f"connection event in a situation where other tasks need to run "
+        f"immediately after the connection event. When the value is very small, "
+        f"the connection event still has at least one TX/RX operation. "
+        f"If this value is increased, more time is reserved for the connection "
+        f"event so it can transmit and receive more packets in a connection "
+        f"interval. "
+        f"Range: {btmesh.util.CONN_EVT_LEN_CNT_MIN} ms - "
+        f"{btmesh.util.CONN_EVT_LEN_CNT_MAX} ms "
+        f"(multiplied by {btmesh.util.CONN_EVT_LEN_MS_RES}) "
+        f"Resolution: {btmesh.util.CONN_EVT_LEN_MS_RES} ms "
+        "(default: %(default)s ms)"
+    )
+
+    CONN_MAX_CE_LENGTH_MS_HELP_DEFAULT = (
+        f"Maximum length of the connection event. "
+        f"This value is used for limiting the connection event length so that "
+        f"a connection that has large amounts of data to transmit or receive "
+        f"doesn't block other tasks. "
+        f"Limiting the connection event is a hard stop. If there is no enough "
+        f"time to send or receive a packet, the connection event will be closed. "
+        f"If the value is set to 0, the connection event still has at least one "
+        f"TX/RX operation. This is useful to limit power consumption or leave "
+        f"more time to other tasks. "
+        f"Range: {btmesh.util.CONN_EVT_LEN_CNT_MIN} ms - "
+        f"{btmesh.util.CONN_EVT_LEN_CNT_MAX} ms "
+        f"(multiplied by {btmesh.util.CONN_EVT_LEN_MS_RES}) "
+        f"Resolution: {btmesh.util.CONN_EVT_LEN_MS_RES} ms "
+        "(default: %(default)s ms)"
     )
 
     COLUMNS_OPT_LONG = "--columns"
@@ -215,6 +346,32 @@ class BtmeshCmd(abc.ABC):
             help=(help if help else self.RETRY_CMD_INTERVAL_HELP_DEFAULT),
         )
 
+    def add_retry_multicast_threshold_arg(
+        self,
+        parser: ArgumentParserExt,
+        default: Optional[int] = None,
+        help: str = "",
+    ) -> None:
+        parser.add_argument(
+            self.RETRY_MULCAST_THR_OPT_LONG,
+            type=int,
+            default=default,
+            help=(help if help else self.RETRY_MULCAST_THR_HELP_DEFAULT),
+        )
+
+    def add_retry_auto_unicast_arg(
+        self,
+        parser: ArgumentParserExt,
+        default: Optional[str] = "off",
+        help: str = "",
+    ) -> None:
+        parser.add_argument(
+            self.RETRY_AUTO_UNICAST_OPT_LONG,
+            choices=["on", "off"],
+            default=default,
+            help=(help if help else self.RETRY_AUTO_UNICAST_HELP_DEFAULT),
+        )
+
     def add_basic_retry_args(
         self,
         parser: ArgumentParserExt,
@@ -251,6 +408,33 @@ class BtmeshCmd(abc.ABC):
             parser=parser,
             default=retry_interval_lpn_default,
             help=retry_interval_lpn_help,
+        )
+
+    def add_btmesh_multicast_basic_retry_args(
+        self,
+        parser: ArgumentParserExt,
+        retry_max_default: Optional[int] = None,
+        retry_interval_default: Optional[float] = None,
+        retry_interval_lpn_default: Optional[float] = None,
+        retry_multicast_threshold_default: Optional[int] = None,
+        retry_max_help: str = "",
+        retry_interval_help: str = "",
+        retry_interval_lpn_help: str = "",
+        retry_multicast_threshold_help: str = "",
+    ):
+        self.add_btmesh_basic_retry_args(
+            parser=parser,
+            retry_max_default=retry_max_default,
+            retry_interval_default=retry_interval_default,
+            retry_interval_lpn_default=retry_interval_lpn_default,
+            retry_max_help=retry_max_help,
+            retry_interval_help=retry_interval_help,
+            retry_interval_lpn_help=retry_interval_lpn_help,
+        )
+        self.add_retry_multicast_threshold_arg(
+            parser=parser,
+            default=retry_multicast_threshold_default,
+            help=retry_multicast_threshold_help,
         )
 
     def add_retry_args(
@@ -312,6 +496,48 @@ class BtmeshCmd(abc.ABC):
             help=retry_interval_lpn_help,
         )
 
+    def add_btmesh_multicast_retry_args(
+        self,
+        parser: ArgumentParserExt,
+        retry_max_default: Optional[int] = None,
+        retry_interval_default: Optional[float] = None,
+        retry_interval_lpn_default: Optional[float] = None,
+        retry_cmd_max_default: Optional[int] = None,
+        retry_cmd_interval_default: Optional[float] = None,
+        retry_multicast_threshold_default: Optional[int] = None,
+        retry_auto_unicast_default: Optional[bool] = None,
+        retry_max_help: str = "",
+        retry_interval_help: str = "",
+        retry_interval_lpn_help: str = "",
+        retry_cmd_max_help: str = "",
+        retry_cmd_interval_help: str = "",
+        retry_multicast_threshold_help: str = "",
+        retry_auto_unicast_help: str = "",
+    ):
+        self.add_btmesh_retry_args(
+            parser,
+            retry_max_default=retry_max_default,
+            retry_interval_default=retry_interval_default,
+            retry_interval_lpn_default=retry_interval_lpn_default,
+            retry_cmd_max_default=retry_cmd_max_default,
+            retry_cmd_interval_default=retry_cmd_interval_default,
+            retry_max_help=retry_max_help,
+            retry_interval_help=retry_interval_help,
+            retry_interval_lpn_help=retry_interval_lpn_help,
+            retry_cmd_max_help=retry_cmd_max_help,
+            retry_cmd_interval_help=retry_cmd_interval_help,
+        )
+        self.add_retry_multicast_threshold_arg(
+            parser,
+            default=retry_multicast_threshold_default,
+            help=retry_multicast_threshold_help,
+        )
+        self.add_retry_auto_unicast_arg(
+            parser,
+            default=retry_auto_unicast_default,
+            help=retry_auto_unicast_help,
+        )
+
     def process_retry_params(
         self, pargs, retry_params_default: BGLibExtRetryParams = None
     ) -> BGLibExtRetryParams:
@@ -320,14 +546,18 @@ class BtmeshCmd(abc.ABC):
         retry_cmd_max = getattr(pargs, self.RETRY_CMD_MAX_ATTR_NAME, None)
         retry_cmd_interval = getattr(pargs, self.RETRY_CMD_INT_ATTR_NAME, None)
         if retry_params_default:
-            retry_params = copy.copy(retry_params_default)
-            if retry_max:
+            # The default retry parameter might a subclass of BGLibExtRetryParams
+            # so make sure that the returned type is BGLibExtRetryParams.
+            # The to_base() method creates a new object from the default which
+            # is important in order to avoid modifying the method parameter.
+            retry_params = retry_params_default.to_base()
+            if retry_max is not None:
                 retry_params.retry_max = retry_max
-            if retry_interval:
+            if retry_interval is not None:
                 retry_params.retry_interval = retry_interval
-            if retry_cmd_max:
+            if retry_cmd_max is not None:
                 retry_params.retry_cmd_max = retry_cmd_max
-            if retry_cmd_interval:
+            if retry_cmd_interval is not None:
                 retry_params.retry_cmd_interval = retry_cmd_interval
         else:
             if retry_max is None:
@@ -349,7 +579,9 @@ class BtmeshCmd(abc.ABC):
     def process_btmesh_retry_params(
         self, pargs, retry_params_default: BtmeshRetryParams = None
     ) -> BtmeshRetryParams:
-        base_retry_params = self.process_retry_params(pargs, retry_params_default)
+        base_retry_params = self.process_retry_params(
+            pargs, retry_params_default.to_base(use_interval_lpn=False)
+        )
         retry_interval_lpn = getattr(pargs, self.RETRY_INT_LPN_ATTR_NAME, None)
         if retry_params_default:
             if retry_interval_lpn is None:
@@ -365,6 +597,207 @@ class BtmeshCmd(abc.ABC):
             retry_interval_lpn=retry_interval_lpn,
         )
         return retry_params
+
+    def process_btmesh_multicast_retry_params(
+        self, pargs, retry_params_default: BtmeshMulticastRetryParams = None
+    ) -> BtmeshMulticastRetryParams:
+        btmesh_retry_params = self.process_btmesh_retry_params(
+            pargs, retry_params_default
+        )
+        retry_multicast_threshold = getattr(
+            pargs, self.RETRY_MULCAST_THR_ATTR_NAME, None
+        )
+        retry_auto_unicast_raw = getattr(pargs, self.RETRY_AUTO_UNICAST_ATTR_NAME, None)
+        if retry_auto_unicast_raw is None:
+            retry_auto_unicast = None
+        else:
+            if retry_auto_unicast_raw == "on":
+                retry_auto_unicast = True
+            else:
+                retry_auto_unicast = False
+        if retry_params_default:
+            if retry_multicast_threshold is None:
+                retry_multicast_threshold = retry_params_default.multicast_threshold
+            if retry_auto_unicast is None:
+                retry_auto_unicast = retry_params_default.auto_unicast
+        else:
+            if retry_multicast_threshold is None:
+                raise ValueError(f"The {self.RETRY_MULCAST_THR_OPTS} arg is missing.")
+            if retry_auto_unicast is None:
+                raise ValueError(f"The {self.RETRY_AUTO_UNICAST_OPTS} arg is missing.")
+        retry_params = BtmeshMulticastRetryParams(
+            retry_max=btmesh_retry_params.retry_max,
+            retry_interval=btmesh_retry_params.retry_interval,
+            retry_cmd_max=btmesh_retry_params.retry_cmd_max,
+            retry_cmd_interval=btmesh_retry_params.retry_cmd_interval,
+            retry_interval_lpn=btmesh_retry_params.retry_interval_lpn,
+            multicast_threshold=retry_multicast_threshold,
+            auto_unicast=retry_auto_unicast,
+        )
+        return retry_params
+
+    def add_connection_open_timeout_arg(
+        self,
+        parser: ArgumentParserExt,
+        default: float = 5_000.0,
+        help: str = CONN_OPEN_TIMEOUT_MS_HELP_DEFAULT,
+    ):
+        parser.add_argument(
+            self.CONN_OPEN_TIMEOUT_OPT_LONG,
+            type=float,
+            default=default,
+            help=help,
+        )
+
+    def process_connection_open_timeout(self, pargs) -> float:
+        open_timeout_ms = getattr(pargs, self.CONN_OPEN_TIMEOUT_ATTR_NAME, None)
+        return open_timeout_ms
+
+    def add_connection_params_range_args(
+        self,
+        parser: ArgumentParserExt,
+        min_interval_ms_default: float = 7.5,
+        max_interval_ms_default: float = 4_000.0,
+        latency_default: int = 1,
+        timeout_ms_default: float = 20_000.0,
+        min_ce_length_ms_default: float = 0,
+        max_ce_length_ms_default: float = 0xFFFF * 0.625,
+        min_interval_ms_help: str = CONN_MIN_INTERVAL_MS_HELP_DEFAULT,
+        max_interval_ms_help: str = CONN_MAX_INTERVAL_MS_HELP_DEFAULT,
+        latency_help: str = CONN_LATENCY_HELP_DEFAULT,
+        timeout_ms_help: str = CONN_TIMEOUT_MS_HELP_DEFAULT,
+        min_ce_length_ms_help=CONN_MIN_CE_LENGTH_MS_HELP_DEFAULT,
+        max_ce_length_ms_help=CONN_MAX_CE_LENGTH_MS_HELP_DEFAULT,
+    ):
+        parser.add_argument(
+            self.CONN_MIN_INTERVAL_OPT_LONG,
+            type=float,
+            default=min_interval_ms_default,
+            help=min_interval_ms_help,
+        )
+        parser.add_argument(
+            self.CONN_MAX_INTERVAL_OPT_LONG,
+            type=float,
+            default=max_interval_ms_default,
+            help=max_interval_ms_help,
+        )
+        parser.add_argument(
+            self.CONN_LATENCY_OPT_LONG,
+            type=int,
+            default=latency_default,
+            help=latency_help,
+        )
+        parser.add_argument(
+            self.CONN_TIMEOUT_OPT_LONG,
+            type=float,
+            default=timeout_ms_default,
+            help=timeout_ms_help,
+        )
+        parser.add_argument(
+            self.CONN_MIN_CE_LENGTH_OPT_LONG,
+            type=float,
+            default=min_ce_length_ms_default,
+            help=min_ce_length_ms_help,
+        )
+        parser.add_argument(
+            self.CONN_MAX_CE_LENGTH_OPT_LONG,
+            type=float,
+            default=max_ce_length_ms_default,
+            help=max_ce_length_ms_help,
+        )
+
+    def process_connection_params_range(
+        self, pargs, conn_params_range_default: Optional[ConnectionParamsRange] = None
+    ) -> ConnectionParamsRange:
+        min_interval_ms = getattr(pargs, self.CONN_MIN_INTERVAL_ATTR_NAME, None)
+        max_interval_ms = getattr(pargs, self.CONN_MAX_INTERVAL_ATTR_NAME, None)
+        latency = getattr(pargs, self.CONN_LATENCY_ATTR_NAME, None)
+        timeout_ms = getattr(pargs, self.CONN_TIMEOUT_ATTR_NAME, None)
+        min_ce_length_ms = getattr(pargs, self.CONN_MIN_CE_LENGTH_ATTR_NAME, None)
+        max_ce_length_ms = getattr(pargs, self.CONN_MAX_CE_LENGTH_ATTR_NAME, None)
+        if conn_params_range_default:
+            conn_params_range = copy.copy(conn_params_range_default)
+            if min_interval_ms:
+                conn_params_range.min_interval_ms = min_interval_ms
+            if max_interval_ms:
+                conn_params_range.max_interval_ms = max_interval_ms
+            if latency:
+                conn_params_range.latency = latency
+            if timeout_ms:
+                conn_params_range.timeout_ms = timeout_ms
+            if min_ce_length_ms:
+                conn_params_range.min_ce_length_ms = min_ce_length_ms
+            if max_ce_length_ms:
+                conn_params_range.max_ce_length_ms = max_ce_length_ms
+            conn_params_range.validate()
+        else:
+            if min_interval_ms is None:
+                raise ValueError(
+                    f"The {self.CONN_MIN_INTERVAL_OPT_LONG} arg is missing."
+                )
+            if max_interval_ms is None:
+                raise ValueError(
+                    f"The {self.CONN_MAX_INTERVAL_OPT_LONG} arg is missing."
+                )
+            if latency is None:
+                raise ValueError(f"The {self.CONN_LATENCY_OPT_LONG} arg is missing.")
+            if timeout_ms is None:
+                raise ValueError(f"The {self.CONN_TIMEOUT_OPT_LONG} arg is missing.")
+            if min_ce_length_ms is None:
+                raise ValueError(
+                    f"The {self.CONN_MIN_CE_LENGTH_OPT_LONG} arg is missing."
+                )
+            if max_ce_length_ms is None:
+                raise ValueError(
+                    f"The {self.CONN_MAX_CE_LENGTH_OPT_LONG} arg is missing."
+                )
+            conn_params_range = ConnectionParamsRange(
+                min_interval_ms=min_interval_ms,
+                max_interval_ms=max_interval_ms,
+                latency=latency,
+                timeout_ms=timeout_ms,
+                min_ce_length_ms=min_ce_length_ms,
+                max_ce_length_ms=max_ce_length_ms,
+            )
+        return conn_params_range
+
+    def add_bd_addrs_arg(self, parser: ArgumentParserExt, help: str = ""):
+        parser.add_argument(
+            self.BD_ADDRS_OPT_LONG,
+            metavar="<bdaddrspec>",
+            nargs="+",
+            help=f"{help} {app_ui.BDADDRSPEC_HELP}",
+        )
+
+    def add_bd_addr_arg(self, parser: ArgumentParserExt, help: str = ""):
+        parser.add_argument(
+            self.BD_ADDR_OPT_LONG,
+            metavar="<bdaddrspec>",
+            help=f"{help} {app_ui.BDADDRSPEC_HELP}",
+        )
+
+    def process_bd_addrs_arg(self, pargs):
+        bdaddrspecs = getattr(pargs, self.BD_ADDRS_ATTR_NAME)
+        return self.parse_bdaddrspecs(bdaddrspecs)
+
+    def process_bd_addr_arg(self, pargs):
+        bdaddrspec = getattr(pargs, self.BD_ADDR_ATTR_NAME)
+        return self.parse_bdaddrspec(bdaddrspec)
+
+    def add_node_pos_arg(
+        self,
+        parser: ArgumentParserExt,
+        required: bool = True,
+        help: str = "",
+    ):
+        # The nargs with None value defaults to single argument
+        nargs = None if required else "?"
+        parser.add_argument(
+            "nodespec",
+            metavar="<nodespec>",
+            nargs=nargs,
+            help=f"{help} {app_ui.NODESPEC_HELP}",
+        )
 
     def add_nodes_pos_arg(
         self,
@@ -653,6 +1086,31 @@ class BtmeshCmd(abc.ABC):
             columns = columns_arg
         selected_columns = {col: column_info_dict[col].header for col in columns}
         return selected_columns
+
+    @spec_parse_error_handler
+    def parse_bdaddrspecs(
+        self, bdaddrspecs, filter_duplicates: bool = True
+    ) -> List[str]:
+        return app_ui.parse_bdaddrspecs(
+            bdaddrspecs, filter_duplicates=filter_duplicates
+        )
+
+    @spec_parse_error_handler
+    def parse_bdaddrspec(self, bdaddrspec, filter_duplicates: bool = True) -> str:
+        return app_ui.parse_bdaddrspec(bdaddrspec, filter_duplicates=filter_duplicates)
+
+    @spec_parse_error_handler
+    def parse_nodespec(
+        self, nodespec, node_list: Sequence[Node], filter_duplicates: bool = True
+    ) -> List[Node]:
+        nodes = app_ui.parse_nodespecs(nodespec, node_list, filter_duplicates)
+        if len(nodes) != 1:
+            raise BtmeshDfuAppParseSpecError(
+                f"The nodespec shall specify one node only. ({nodespec}).",
+                spec_name=BtmeshDfuAppSpecName.NODESPEC,
+                spec_value=nodespec,
+            )
+        return nodes[0]
 
     @spec_parse_error_handler
     def parse_nodespecs(

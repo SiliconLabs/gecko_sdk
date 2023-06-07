@@ -47,6 +47,7 @@
 #include "common/random.hpp"
 #include "common/serial_number.hpp"
 #include "common/timer.hpp"
+#include "common/uptime.hpp"
 #include "mac/mac_types.hpp"
 #include "net/ip6.hpp"
 #include "radio/radio.hpp"
@@ -224,7 +225,7 @@ public:
      * @param[in]  aState  The state value.
      *
      */
-    void SetState(State aState) { mState = static_cast<uint8_t>(aState); }
+    void SetState(State aState);
 
     /**
      * This method indicates whether the neighbor is in the Invalid state.
@@ -364,10 +365,12 @@ public:
     NetworkData::Type GetNetworkDataType(void) const { return GetDeviceMode().GetNetworkDataType(); }
 
     /**
-     * This method sets all bytes of the Extended Address to zero.
+     * This method returns the Extended Address.
+     *
+     * @returns A const reference to the Extended Address.
      *
      */
-    void ClearExtAddress(void) { memset(&mMacAddr, 0, sizeof(mMacAddr)); }
+    const Mac::ExtAddress &GetExtAddress(void) const { return mMacAddr; }
 
     /**
      * This method returns the Extended Address.
@@ -375,7 +378,7 @@ public:
      * @returns A reference to the Extended Address.
      *
      */
-    const Mac::ExtAddress &GetExtAddress(void) const { return mMacAddr; }
+    Mac::ExtAddress &GetExtAddress(void) { return mMacAddr; }
 
     /**
      * This method sets the Extended Address.
@@ -540,7 +543,7 @@ public:
      * This method MUST be used only when the tag is set (and not cleared). Otherwise its behavior is undefined.
      *
      * The tag value compassion follows the Serial Number Arithmetic logic from RFC-1982. It is semantically equivalent
-     * to `LastRxFragementTag > aTag`.
+     * to `LastRxFragmentTag > aTag`.
      *
      * @param[in] aTag   A tag value to compare against.
      *
@@ -584,7 +587,7 @@ public:
      */
     bool IsEnhancedKeepAliveSupported(void) const
     {
-        return mState != kStateInvalid && mVersion >= OT_THREAD_VERSION_1_2;
+        return (mState != kStateInvalid) && (mVersion >= kThreadVersion1p2);
     }
 
     /**
@@ -666,6 +669,16 @@ public:
      *
      */
     uint8_t GetChallengeSize(void) const { return sizeof(mValidPending.mPending.mChallenge); }
+
+#if OPENTHREAD_CONFIG_UPTIME_ENABLE
+    /**
+     * This method returns the connection time (in seconds) of the neighbor (seconds since entering `kStateValid`).
+     *
+     * @returns The connection time (in seconds), zero if device is not currently in `kStateValid`.
+     *
+     */
+    uint32_t GetConnectionTime(void) const;
+#endif
 
 #if OPENTHREAD_CONFIG_TIME_SYNC_ENABLE
     /**
@@ -838,6 +851,9 @@ private:
     // and this neighbor is the Subject.
     LinkMetrics::Metrics mEnhAckProbingMetrics;
 #endif
+#if OPENTHREAD_CONFIG_UPTIME_ENABLE
+    uint32_t mConnectionStart;
+#endif
 };
 
 #if OPENTHREAD_FTD
@@ -857,7 +873,7 @@ class Child : public Neighbor,
     class AddressIteratorBuilder;
 
 public:
-    static constexpr uint8_t kMaxRequestTlvs = 5;
+    static constexpr uint8_t kMaxRequestTlvs = 6;
 
     /**
      * This class represents diagnostic information for a Thread Child.
@@ -979,7 +995,7 @@ public:
          * @returns A reference to the `Ip6::Address` entry currently pointed by the iterator.
          *
          */
-        const Ip6::Address &operator*(void)const { return *GetAddress(); }
+        const Ip6::Address &operator*(void) const { return *GetAddress(); }
 
         /**
          * This method overloads operator `==` to evaluate whether or not two `Iterator` instances are equal.
@@ -1010,7 +1026,7 @@ public:
 
         void Update(void);
 
-        const Child &            mChild;
+        const Child             &mChild;
         Ip6::Address::TypeFilter mFilter;
         Index                    mIndex;
         Ip6::Address             mMeshLocalAddress;
@@ -1210,7 +1226,21 @@ public:
      */
     void SetRequestTlv(uint8_t aIndex, uint8_t aType) { mRequestTlvs[aIndex] = aType; }
 
-#if OPENTHREAD_CONFIG_CHILD_SUPERVISION_ENABLE
+    /**
+     * This method returns the supervision interval (in seconds).
+     *
+     * @returns The supervision interval (in seconds).
+     *
+     */
+    uint16_t GetSupervisionInterval(void) const { return mSupervisionInterval; }
+
+    /**
+     * This method sets the supervision interval.
+     *
+     * @param[in] aInterval  The supervision interval (in seconds).
+     *
+     */
+    void SetSupervisionInterval(uint16_t aInterval) { mSupervisionInterval = aInterval; }
 
     /**
      * This method increments the number of seconds since last supervision of the child.
@@ -1232,13 +1262,11 @@ public:
      */
     void ResetSecondsSinceLastSupervision(void) { mSecondsSinceSupervision = 0; }
 
-#endif // #if OPENTHREAD_CONFIG_CHILD_SUPERVISION_ENABLE
-
 #if OPENTHREAD_FTD && OPENTHREAD_CONFIG_TMF_PROXY_MLR_ENABLE
     /**
      * This method returns MLR state of an IPv6 multicast address.
      *
-     * @note The @p aAdddress reference MUST be from `IterateIp6Addresses()` or `AddressIterator`.
+     * @note The @p aAddress reference MUST be from `IterateIp6Addresses()` or `AddressIterator`.
      *
      * @param[in] aAddress  The IPv6 multicast address.
      *
@@ -1250,7 +1278,7 @@ public:
     /**
      * This method sets MLR state of an IPv6 multicast address.
      *
-     * @note The @p aAdddress reference MUST be from `IterateIp6Addresses()` or `AddressIterator`.
+     * @note The @p aAddress reference MUST be from `IterateIp6Addresses()` or `AddressIterator`.
      *
      * @param[in] aAddress  The IPv6 multicast address.
      * @param[in] aState    The target MLR state.
@@ -1310,7 +1338,7 @@ private:
         AddressIterator end(void) { return AddressIterator(mChild, AddressIterator::kEndIterator); }
 
     private:
-        const Child &            mChild;
+        const Child             &mChild;
         Ip6::Address::TypeFilter mFilter;
     };
 
@@ -1331,9 +1359,8 @@ private:
         uint8_t mAttachChallenge[Mle::kMaxChallengeSize]; ///< The challenge value
     };
 
-#if OPENTHREAD_CONFIG_CHILD_SUPERVISION_ENABLE
-    uint16_t mSecondsSinceSupervision; ///< Number of seconds since last supervision of the child.
-#endif
+    uint16_t mSupervisionInterval;     // Supervision interval for the child (in sec).
+    uint16_t mSecondsSinceSupervision; // Number of seconds since last supervision of the child.
 
     static_assert(OPENTHREAD_CONFIG_NUM_MESSAGE_BUFFERS < 8192, "mQueuedMessageCount cannot fit max required!");
 };
@@ -1402,14 +1429,6 @@ public:
     uint8_t GetNextHop(void) const { return mNextHop; }
 
     /**
-     * This method sets the router ID of the next hop to this router.
-     *
-     * @param[in]  aRouterId  The router ID of the next hop to this router.
-     *
-     */
-    void SetNextHop(uint8_t aRouterId) { mNextHop = aRouterId; }
-
-    /**
      * This method gets the link quality out value for this router.
      *
      * @returns The link quality out value for this router.
@@ -1442,12 +1461,25 @@ public:
     uint8_t GetCost(void) const { return mCost; }
 
     /**
-     * This method sets the router cost to this router.
+     * This method sets the next hop and cost to this router.
      *
-     * @param[in]  aCost  The router cost to this router.
+     * @param[in]  aNextHop  The Router ID of the next hop to this router.
+     * @param[in]  aCost     The cost to this router.
+     *
+     * @retval TRUE   If there was a change, i.e., @p aNextHop or @p aCost were different from their previous values.
+     * @retval FALSE  If no change to next hop and cost values (new values are the same as before).
      *
      */
-    void SetCost(uint8_t aCost) { mCost = aCost; }
+    bool SetNextHopAndCost(uint8_t aNextHop, uint8_t aCost);
+
+    /**
+     * This method sets the next hop to this router as invalid and clears the cost.
+     *
+     * @retval TRUE   If there was a change (next hop was valid before).
+     * @retval FALSE  No change to next hop (next hop was invalid before).
+     *
+     */
+    bool SetNextHopToInvalid(void);
 
 private:
     uint8_t mNextHop;            ///< The next hop towards this router

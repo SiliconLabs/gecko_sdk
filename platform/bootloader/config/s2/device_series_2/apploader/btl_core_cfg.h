@@ -94,7 +94,7 @@
 // <i> On Series-1 devices this is only applicable to devices that use the bootloader area of flash (EFR32xG12 and later).
 #define BOOTLOADER_WRITE_DISABLE                    0
 
-// <o BTL_UPGRADE_LOCATION_BASE> Base address of bootloader upgrade image
+// <o BTL_UPGRADE_LOCATION_BASE> Base address of bootloader upgrade image <f.h>
 // <i> Default: 0x8000
 // <i> At the upgrade stage of the bootloader, the running main bootloader extracts the upgrade image from the GBL file,
 // <i> and stores it in internal flash at the address chosen. The address need to be a multiple of the page size.
@@ -103,7 +103,7 @@
 // <o BOOTLOADER_VERSION_MAIN_CUSTOMER> Bootloader Version Main Customer
 // <i> Default: 0
 // <i> Bootloader Version Main Customer
-#define BOOTLOADER_VERSION_MAIN_CUSTOMER                    2
+#define BOOTLOADER_VERSION_MAIN_CUSTOMER                    0
 
 // <e USE_CUSTOM_APP_SIZE> Use custom Bootloader Application Size
 // <i> Default: 0

@@ -22,30 +22,30 @@
 #include "af.h"
 
 // Reset Attributes
-void emAfResetAttributes(uint8_t endpointId);
+void sli_zigbee_af_reset_attributes(uint8_t endpointId);
 
 // Pre command received
-bool emAfPreCommandReceived(EmberAfClusterCommand* cmd);
+bool sli_zigbee_af_pre_command_received(EmberAfClusterCommand* cmd);
 bool emberAfPreCommandReceivedCallback(EmberAfClusterCommand* cmd);
 
 // Pre ZDO message received
-bool emAfPreZDOMessageReceived(EmberNodeId nodeId, EmberApsFrame* apsFrame, uint8_t* message, uint16_t length);
+bool sli_zigbee_af_pre_zdo_message_received(EmberNodeId nodeId, EmberApsFrame* apsFrame, uint8_t* message, uint16_t length);
 bool emberAfPreZDOMessageReceivedCallback(EmberNodeId nodeId, EmberApsFrame* apsFrame, uint8_t* message, uint16_t length);
 
 // ZDO message received
-void emAfZDOMessageReceived(EmberNodeId sender, EmberApsFrame* apsFrame, uint8_t* message, uint16_t length);
+void sli_zigbee_af_zdo_message_received(EmberNodeId sender, EmberApsFrame* apsFrame, uint8_t* message, uint16_t length);
 
 // Retrieve attribute and craft response
-bool emAfRetrieveAttributeAndCraftResponse(uint8_t endpoint, EmberAfClusterId clusterId, EmberAfAttributeId attrId, uint8_t mask, uint16_t manufacturerCode, uint16_t readLength);
-bool emAfPluginGreenPowerClientRetrieveAttributeAndCraftResponse(uint8_t endpoint, EmberAfClusterId clusterId, EmberAfAttributeId attrId, uint8_t mask, uint16_t manufacturerCode, uint16_t readLength);
-bool emAfPluginGreenPowerServerRetrieveAttributeAndCraftResponse(uint8_t endpoint, EmberAfClusterId clusterId, EmberAfAttributeId attrId, uint8_t mask, uint16_t manufacturerCode, uint16_t readLength);
+bool sli_zigbee_af_retrieve_attribute_and_craft_response(uint8_t endpoint, EmberAfClusterId clusterId, EmberAfAttributeId attrId, uint8_t mask, uint16_t manufacturerCode, uint16_t readLength);
+bool sli_zigbee_af_green_power_client_retrieve_attribute_and_craft_response(uint8_t endpoint, EmberAfClusterId clusterId, EmberAfAttributeId attrId, uint8_t mask, uint16_t manufacturerCode, uint16_t readLength);
+bool sli_zigbee_af_green_power_server_retrieve_attribute_and_craft_response(uint8_t endpoint, EmberAfClusterId clusterId, EmberAfAttributeId attrId, uint8_t mask, uint16_t manufacturerCode, uint16_t readLength);
 
-bool emAfReadAttributesResponse(EmberAfClusterId clusterId, uint8_t* buffer, uint16_t bufLen);
+bool sli_zigbee_af_read_attributes_response(EmberAfClusterId clusterId, uint8_t* buffer, uint16_t bufLen);
 // Read attributes response
 bool emberAfReadAttributesResponseCallback(EmberAfClusterId clusterId, uint8_t* buffer, uint16_t bufLen);
 
 // Report attributes
-bool emAfReportAttributes(EmberAfClusterId clusterId, uint8_t * buffer, uint16_t bufLen);
+bool sli_zigbee_af_report_attributes(EmberAfClusterId clusterId, uint8_t * buffer, uint16_t bufLen);
 bool emberAfReportAttributesCallback(EmberAfClusterId clusterId, uint8_t * buffer, uint16_t bufLen);
 
 #endif // SL_ZIGBEE_AF_CALLBACK_DISPATCHER_H

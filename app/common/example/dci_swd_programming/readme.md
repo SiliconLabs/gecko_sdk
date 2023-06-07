@@ -21,6 +21,8 @@ The following DCI operations are supported in this example:
 * READ SERIAL NUMBER
 * READ PUBLIC SIGN KEY
 * READ PUBLIC COMMAND KEY
+* READ LOCK STATUS
+* SET DEBUG RESTRICTIONS
 * ENABLE SECURE DEBUG
 * DISABLE SECURE DEBUG
 * LOCK DEVICE
@@ -85,5 +87,4 @@ The following SWD operations are supported in this example:
 
 
 [AN1303: Programming Series 2 Devices using the Debug Challenge Interface (DCI) and Serial Wire Debug (SWD)](https://www.silabs.com/documents/public/application-notes/an1303-efr32-dci-swd-programming.pdf)
-
 

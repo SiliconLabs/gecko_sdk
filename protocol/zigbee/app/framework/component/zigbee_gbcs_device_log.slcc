@@ -40,25 +40,25 @@ template_contribution:
     value:
       group: gbcs-device-log
       name: clear
-      handler: emAfPluginGbcsDeviceLogCliClear
+      handler: sli_zigbee_af_gbcs_device_log_cli_clear
       help: Clears all entries from the GBCS Device Log.
   - name: cli_command
     value:
       group: gbcs-device-log
       name: reset
-      handler: emAfPluginGbcsDeviceLogCliReset
+      handler: sli_zigbee_af_gbcs_device_log_cli_reset
       help: Resets the GBCS Device Log to include just those entries configured with the component.
   - name: cli_command
     value:
       group: gbcs-device-log
       name: count
-      handler: emAfPluginGbcsDeviceLogCliCount
+      handler: sli_zigbee_af_gbcs_device_log_cli_count
       help: Gets the number of entries in the GBCS Device Log.
   - name: cli_command
     value:
       group: gbcs-device-log
       name: store
-      handler: emAfPluginGbcsDeviceLogCliStore
+      handler: sli_zigbee_af_gbcs_device_log_cli_store
       help: Adds or updates an entry within the GBCS Device Log.
       argument:
       - type: hex
@@ -69,7 +69,7 @@ template_contribution:
     value:
       group: gbcs-device-log
       name: remove
-      handler: emAfPluginGbcsDeviceLogCliRemove
+      handler: sli_zigbee_af_gbcs_device_log_cli_remove
       help: Removes an entry from the GBCS Device Log.
       argument:
       - type: hex
@@ -78,7 +78,7 @@ template_contribution:
     value:
       group: gbcs-device-log
       name: get
-      handler: emAfPluginGbcsDeviceLogCliGet
+      handler: sli_zigbee_af_gbcs_device_log_cli_get
       help: Gets device info about an entry in the GBCS Device Log.
       argument:
       - type: hex
@@ -87,7 +87,7 @@ template_contribution:
     value:
       group: gbcs-device-log
       name: exists
-      handler: emAfPluginGbcsDeviceLogCliExists
+      handler: sli_zigbee_af_gbcs_device_log_cli_exists
       help: Checks to see if a device exists in the GBCS Device Log.
       argument:
       - type: hex
@@ -98,13 +98,13 @@ template_contribution:
     value:
       group: gbcs-device-log
       name: print
-      handler: emAfPluginGbcsDeviceLogCliPrint
+      handler: sli_zigbee_af_gbcs_device_log_cli_print
       help: Prints all entries in the GBCS Device log.
   - name: cli_command
     value:
       group: gbcs-device-log
       name: is-sleepy
-      handler: emAfPluginGbcsDeviceLogCliIsSleepy
+      handler: sli_zigbee_af_gbcs_device_log_cli_is_sleepy
       help: Checks if the given device type is a sleepy device.
       argument:
       - type: uint8
@@ -113,7 +113,7 @@ template_contribution:
     value:
       group: gbcs-device-log
       name: fill
-      handler: emAfPluginGbcsDeviceLogCliFill
+      handler: sli_zigbee_af_gbcs_device_log_cli_fill
       help: Helper command to fill the GBCS Device Log with random info.
 documentation:
   docset: zigbee

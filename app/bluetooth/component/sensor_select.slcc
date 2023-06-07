@@ -2,9 +2,12 @@ id: sensor_select
 label: Sensor select utility
 package: Bluetooth
 description: Utility for selecting I2C sensors, designed for Thunderboard.
-category: Application|Sensor
+category: Bluetooth|Application|Miscellaneous
 quality: production
 root_path: app/bluetooth/common/sensor_select
+tag:
+  - No-Code
+
 source:
   - path: sl_sensor_select.c
 include:

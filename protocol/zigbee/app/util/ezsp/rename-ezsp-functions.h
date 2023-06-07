@@ -63,9 +63,6 @@
 
 #define emberSetConcentrator                ezspSetConcentrator
 #define emberSetSourceRouteDiscoveryMode    ezspSetSourceRouteDiscoveryMode
-// pro-compliance
-#define emberConcentratorNoteRouteError     ezspConcentratorNoteRouteError
-#define emberIncomingNetworkStatusHandler   ezspIncomingNetworkStatusHandler
 
 #define emberConcentratorNoteDeliveryFailure  ezspConcentratorNoteDeliveryFailure
 
@@ -135,11 +132,14 @@
 #define emberClearTransientLinkKeys         ezspClearTransientLinkKeys
 #define emberUpdateTcLinkKey                ezspUpdateTcLinkKey
 #define emberSendTrustCenterLinkKey         ezspSendTrustCenterLinkKey
+#define sl_zb_sec_man_get_network_key_info  ezspGetNetworkKeyInfo
+#define sl_zb_sec_man_import_link_key       ezspImportLinkKey
+#define sl_zb_sec_man_check_key_context     ezspCheckKeyContext
+#define zb_sec_man_import_transient_key     ezspImportTransientKey
 
 //ezspTrustCenter Frames
 #define emberBroadcastNextNetworkKey        ezspBroadcastNextNetworkKey
 #define emberBroadcastNetworkKeySwitch      ezspBroadcastNetworkKeySwitch
-#define emberBecomeTrustCenter              ezspBecomeTrustCenter
 
 #define emberUnicastCurrentNetworkKey       ezspUnicastCurrentNetworkKey
 

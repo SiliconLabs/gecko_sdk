@@ -1,2 +1,8 @@
-Wi-SUN SDK 1.5.2.0
--Targeted quality improvements and bug fixes
+Wi-SUN SDK 1.6.0.0
+- Wi-SUN Stack
+  - EFR32FG28 support 
+  - Connection time improvements
+  - LFN support improvements
+- Wi-SUN Applications
+  - Firmware over-the-air update
+  - Wi-SUN configurator update

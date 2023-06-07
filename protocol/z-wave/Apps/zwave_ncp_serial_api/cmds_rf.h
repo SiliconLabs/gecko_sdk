@@ -1,5 +1,5 @@
 /**************************************************************************//**
- * @file cmds_rf.h
+ * @file
  * @brief The header file for command handling of RF related serialAPI
  * commands
  * @copyright 2022 Silicon Laboratories Inc.

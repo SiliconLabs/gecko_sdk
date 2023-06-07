@@ -36,17 +36,21 @@
 #include "app_log.h"
 
 #include "sl_btmesh_api.h"
+
+#ifdef SL_CATALOG_BTMESH_FACTORY_RESET_PRESENT
 #include "sl_btmesh_factory_reset.h"
+#endif // SL_CATALOG_BTMESH_FACTORY_RESET_PRESENT
+
 #include "sl_btmesh_sensor_client.h"
 
 /// Integer part of illuminance
-#define INT_ILLUM(x) (x / 100)
+#define INT_ILLUM(x)  (x / 100)
 /// Fractional part of illuminance
 #define FRAC_ILLUM(x) (x % 100)
 /// Integer part of temperature
-#define INT_TEMP(x) (x / 2)
+#define INT_TEMP(x)   (x / 2)
 /// Fractional part of temperature
-#define FRAC_TEMP(x) ((x * 5) % 10)
+#define FRAC_TEMP(x)  ((x % 2) ? 5 : 0)
 
 // -----------------------------------------------------------------------------
 // BT mesh Sensor Client Callbacks

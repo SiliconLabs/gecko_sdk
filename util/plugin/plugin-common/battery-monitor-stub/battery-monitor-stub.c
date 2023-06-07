@@ -2,10 +2,10 @@
 
 #include PLATFORM_HEADER
 #include "stack/include/ember-types.h"
-#include "event_control/event.h"
+#include "event_queue/event-queue.h"
 
 // Events
-EmberEventControl emberAfPluginBatteryMonitorReadADCEventControl;
+EmberEvent emberAfPluginBatteryMonitorReadADCEvent;
 
 uint16_t halGetBatteryVoltageMilliV(void)
 {
@@ -16,7 +16,7 @@ void halBatteryMonitorInitialize(void)
 {
 }
 
-void emberAfPluginBatteryMonitorReadADCEventHandler(void)
+void emberAfPluginBatteryMonitorReadADCEventHandler(EmberEvent *event)
 {
 }
 

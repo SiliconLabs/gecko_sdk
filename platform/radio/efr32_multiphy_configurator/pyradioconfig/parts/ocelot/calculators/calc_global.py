@@ -77,6 +77,8 @@ class CALC_Global_ocelot(CALC_Global_lynx):
         self._add_SYNTHENCTRL_regs(model)
         self._add_TXRAMP_regs(model)
 
+        self._add_REALTIMECFE_EXTENSCHBYP_field(model)
+
         self._addModelRegister(model, 'MODEM.BCRDEMODCTRL.BCRDEMODEN', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'MODEM.BCRDEMODCTRL.RAWSYN', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'MODEM.BCRDEMODCTRL.PH0SIZE', int, ModelVariableFormat.HEX)
@@ -93,10 +95,10 @@ class CALC_Global_ocelot(CALC_Global_lynx):
         self._addModelRegister(model, 'MODEM.BCRDEMODCTRL.PHSRCSEL', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'MODEM.BCRDEMODCTRL.BBPMDETEN', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'MODEM.BCRDEMODCTRL.CONSCHKBYP', int, ModelVariableFormat.HEX)
-#        self._addModelRegister(model, 'MODEM.BCRDEMODCTRL.INVPREATH', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'MODEM.BCRDEMODCTRL.INVRXBIT', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'MODEM.BCRDEMODCTRL.MANCHPH', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'MODEM.BCRDEMODCTRL.PULCORRBYP', int, ModelVariableFormat.HEX)
+        self._addModelRegister(model, 'MODEM.BCRDEMODCTRL.DIRECTMODE', int, ModelVariableFormat.HEX)
 
         self._addModelRegister(model, 'MODEM.BCRDEMODOOK.OOKFRZEN', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'MODEM.BCRDEMODOOK.RAWGAIN', int, ModelVariableFormat.HEX)
@@ -171,12 +173,6 @@ class CALC_Global_ocelot(CALC_Global_lynx):
 
         self._addModelRegister(model, 'MODEM.BCRDEMODRSSI.RSSIARRTHD', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'MODEM.BCRDEMODRSSI.MUTERSSICNT', int, ModelVariableFormat.HEX)
-#        self._addModelRegister(model, 'MODEM.BCRDEMODRSSI.MUTERSSISEL', int, ModelVariableFormat.HEX)
-#        self._addModelRegister(model, 'MODEM.BCRDEMODRSSI.RSSIJMPTHD', int, ModelVariableFormat.HEX)
-#        self._addModelRegister(model, 'MODEM.BCRDEMODRSSI.RSSIJMPUP', int, ModelVariableFormat.HEX)
-#        self._addModelRegister(model, 'MODEM.BCRDEMODRSSI.ENJMPRX', int, ModelVariableFormat.HEX)
-#        self._addModelRegister(model, 'MODEM.BCRDEMODRSSI.ENRSSIJMP', int, ModelVariableFormat.HEX)
-#        self._addModelRegister(model, 'MODEM.BCRDEMODRSSI.RSSIMASEL', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'MODEM.BCRDEMODRSSI.RSSIMATAP', int, ModelVariableFormat.HEX)
 
         self._addModelRegister(model, 'MODEM.BCRDEMODARR0.SCHPRDLO', int, ModelVariableFormat.HEX)
@@ -202,14 +198,9 @@ class CALC_Global_ocelot(CALC_Global_lynx):
         self._addModelRegister(model, 'MODEM.BCRDEMODARR1.BCRCFESRC', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'MODEM.BCRDEMODARR1.ENCFEQUAL', int, ModelVariableFormat.HEX)
 
-        # self._addModelRegister(model, 'AGC.CTRL4.PERIODRFPKD', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'MODEM.DCCOMP.DCGAINGEAREN', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'MODEM.DCCOMP.DCGAINGEAR', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'MODEM.DCCOMP.DCGAINGEARSMPS', int, ModelVariableFormat.HEX)
-
-        # Read-only
-        # self._addModelRegister(model, 'MODEM.POE.POEI', int, ModelVariableFormat.HEX)
-        # self._addModelRegister(model, 'MODEM.POE.POEQ', int, ModelVariableFormat.HEX)
 
         self._addModelRegister(model, 'MODEM.VTBLETIMING.DISDEMODOF', int, ModelVariableFormat.HEX)
 
@@ -256,7 +247,6 @@ class CALC_Global_ocelot(CALC_Global_lynx):
         self._addModelRegister(model, 'MODEM.FRMSCHTIME.PMENDSCHEN', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'MODEM.FRMSCHTIME.PMRSTSYCNEN', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'MODEM.FRMSCHTIME.DSARSTSYCNEN', int, ModelVariableFormat.HEX)
-        self._addModelRegister(model, 'MODEM.REALTIMCFE.EXTENSCHBYP', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'RAC.LNAMIXDEBUG.LNAMIXDISMXR0', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'RAC.LNAMIXTRIM0.LNAMIXLNA0CAPSEL', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'RAC.LNAMIXTRIM0.LNAMIXMXRBIAS0', int, ModelVariableFormat.HEX)
@@ -373,8 +363,6 @@ class CALC_Global_ocelot(CALC_Global_lynx):
         self._addModelRegister(model, 'AGC.GAINSTEPLIM1.LNAINDEXMAX', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'AGC.GAINSTEPLIM1.PGAINDEXMAX', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'AGC.GAINSTEPLIM1.PNINDEXMAX', int, ModelVariableFormat.HEX)
-        #self._addModelRegister(model, 'AGC.PNRFATT0.LNAMIXRFATT1', int, ModelVariableFormat.HEX)
-        #self._addModelRegister(model, 'AGC.PNRFATT0.LNAMIXRFATT2', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'AGC.PNRFATT10.LNAMIXRFATT21', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'AGC.PNRFATT10.LNAMIXRFATT22', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'AGC.PNRFATT1.LNAMIXRFATT3', int, ModelVariableFormat.HEX)
@@ -497,11 +485,13 @@ class CALC_Global_ocelot(CALC_Global_lynx):
         self._addModelRegister(model, 'FRC.CTRL.SKIPRXSUPSTATEWHITEN', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'FRC.CTRL.SKIPTXTRAILDATAWHITEN', int, ModelVariableFormat.HEX)
 
+    def _add_REALTIMECFE_EXTENSCHBYP_field(self, model):
+        self._addModelRegister(model, 'MODEM.REALTIMCFE.EXTENSCHBYP', int, ModelVariableFormat.HEX)
+
     def _add_IFADCTRIM1_regs(self, model):
         self._addModelRegister(model, 'RAC.IFADCTRIM1.IFADCENSUBGMODE', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'RAC.IFADCTRIM1.IFADCENXOBYPASS', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'RAC.IFADCTRIM1.IFADCTZ', int, ModelVariableFormat.HEX)
-        # self._addModelRegister(model, 'RAC.IFADCTRIM1.IFADCENNEGRES', int, ModelVariableFormat.HEX)
 
     def _add_RAC_PGACTRL(self, model):
         self._addModelRegister(model, 'RAC.PGACTRL.LNAMIXRFPKDTHRESHSEL', int, ModelVariableFormat.HEX)

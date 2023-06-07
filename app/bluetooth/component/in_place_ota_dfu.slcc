@@ -2,12 +2,23 @@ id: in_place_ota_dfu
 label: In-Place OTA DFU
 package: Bluetooth
 description: >
-  Component that provides in-place over-the-air (OTA) device firmware 
+  Component that provides in-place over-the-air (OTA) device firmware
   update (DFU) functionality. In this solution, the application flash area is
   used as a temporary storage for the update.
-category: Bluetooth|OTA
+
+  This is a Low-Code component because additional security measures might be
+  needed from user side for checking the correct security status. Our minimal
+  solution can be seen in
+
+  sl_bt_in_place_ota_dfu_security_status()
+
+  function in sl_bt_in_place_ota_dfu.c file.
+category: Bluetooth|Application|Firmware Update
 quality: production
 root_path: app/bluetooth/common/in_place_ota_dfu
+tag:
+  - Low-Code
+
 config_file:
   - path: config/sl_bt_in_place_ota_dfu_config.h
   - path: in_place_ota_dfu.xml

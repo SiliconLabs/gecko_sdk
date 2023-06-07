@@ -52,7 +52,7 @@ static bool uart_handle_rx_dma_complete(unsigned int chan, unsigned int seq_num,
     (void)seq_num;
 
     // Protect descr_cnt_rx and rx_ring against uart_handle_rx_dma_timeout()
-    CORE_ENTER_CRITICAL();
+    CORE_ENTER_ATOMIC();
     for (i = 0; i < sizeof(uart_ctxt->buf_rx[0]); i++) {
         ret = ring_push(&uart_ctxt->rx_ring, uart_ctxt->buf_rx[uart_ctxt->descr_cnt_rx][i]);
         BUG_ON(ret, "buffer overflow");
@@ -60,7 +60,7 @@ static bool uart_handle_rx_dma_complete(unsigned int chan, unsigned int seq_num,
     uart_ctxt->descr_cnt_rx += 1;
     uart_ctxt->descr_cnt_rx %= ARRAY_SIZE(uart_ctxt->buf_rx);
     uart_rx_ready(uart_ctxt);
-    CORE_EXIT_CRITICAL();
+    CORE_EXIT_ATOMIC();
     return true;
 }
 
@@ -83,7 +83,7 @@ void uart_handle_rx_dma_timeout(struct sl_wsrcp_uart *uart_ctxt)
     size_t i;
 
     // Protect descr_cnt_rx and rx_ring against uart_handle_rx_dma_complete()
-    CORE_ENTER_CRITICAL();
+    CORE_ENTER_ATOMIC();
     // Begin of realtime constrained section
     // (with USART, we need to execute that in less than 5µs for a 2Mbps UART link)
     // (with EUSART, thanks to it 16bytes depth fifo , we need to execute the
@@ -103,7 +103,7 @@ void uart_handle_rx_dma_timeout(struct sl_wsrcp_uart *uart_ctxt)
         BUG_ON(ret, "buffer overflow");
     }
     uart_rx_ready(uart_ctxt);
-    CORE_EXIT_CRITICAL();
+    CORE_EXIT_ATOMIC();
 }
 
 void uart_handle_rx_overflow(struct sl_wsrcp_uart *uart_ctxt)
@@ -193,14 +193,17 @@ int uart_rx(struct sl_wsrcp_uart *uart_ctxt, void *buf, int buf_len)
             buf8[frame_len++] = data;
     } while (data != 0x7E);
 
-    BUG_ON(frame_len <= 2);
+    if (frame_len <= 2) {
+        WARN("short frame");
+        return uart_rx(uart_ctxt, buf, buf_len);
+    }
     frame_len -= sizeof(uint16_t);
     crc = crc16(buf8, frame_len);
     if (memcmp(buf8 + frame_len, &crc, sizeof(uint16_t))) {
         WARN("bad crc, frame dropped");
         uart_crc_error(uart_ctxt, *(uint16_t *)(buf8 + frame_len), frame_len, buf8[0], uart_ctxt->irq_overflow_cnt);
         uart_ctxt->irq_overflow_cnt = 0;
-        return 0;
+        return uart_rx(uart_ctxt, buf, buf_len);
     }
     TRACE(TR_HDLC, "hdlc rx: %s (%d bytes)",
            bytes_str(buf, frame_len, NULL, trace_buffer, sizeof(trace_buffer), DELIM_SPACE | ELLIPSIS_STAR), frame_len);

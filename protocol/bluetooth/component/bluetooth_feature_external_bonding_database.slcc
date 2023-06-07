@@ -7,7 +7,7 @@ description: >
   persistent data required for Bluetooth bondings. The Bluetooth stack sends
   events to the application to store bonding data and to request the application
   to pass required bonding data to the Bluetooth stack when relevant.
-category: "Bluetooth|Feature"
+category: Bluetooth|Bluetooth Host (Stack)|Features with Commands and Events
 quality: "production"
 root_path: "protocol/bluetooth"
 provides:

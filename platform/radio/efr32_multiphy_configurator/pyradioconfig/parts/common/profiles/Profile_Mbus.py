@@ -71,19 +71,19 @@ class Profile_Mbus(IProfile):
         profile.outputs.append(ModelOutput(model.vars.ircal_power_level, '', ModelOutputType.RAIL_CONFIG, readable_name='IR cal power level (amplitude)'))
 
         # Output fields
-        buildFrameOutputs(model, profile, family=family)
-        buildCrcOutputs(model, profile, family)
+        buildFrameOutputs(model, profile)
+        buildCrcOutputs(model, profile)
         buildWhiteOutputs(model, profile)
         buildFecOutputs(model, profile)
 
-        if family == "dumbo":
-            build_modem_regs_dumbo(model, profile, family = family)
+        if family in ["dumbo","unit_test_part"]:
+            build_modem_regs_dumbo(model, profile)
         elif family == "jumbo":
-            build_modem_regs_jumbo(model, profile, family = family)
+            build_modem_regs_jumbo(model, profile)
         elif family == "nerio":
-            build_modem_regs_jumbo(model, profile, family = family)
+            build_modem_regs_jumbo(model, profile)
         elif family == "nixi":
-            build_modem_regs_nixi(model, profile, family = family)
+            build_modem_regs_nixi(model, profile)
 
         if family == "nerio" or family == "nixi":
             buildLongRangeOutputs(model, profile)

@@ -618,7 +618,7 @@ static void _iperf_start(void *args)
   sl_iperf_test_init(&test, _options.mode, _options.protocol);
   // set stored options
   memcpy(&test.opt, &_options, sizeof(sl_iperf_opt_t));
-  printf("Start iperf");
+  printf("Start iperf\n");
   // adds the test to the queue
   if (!sl_iperf_test_add(&test)) {
     printf("[Adding test to queue failed]\n");

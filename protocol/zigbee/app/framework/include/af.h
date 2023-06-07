@@ -64,48 +64,42 @@ extern void emberAfPluginTestHarnessZ3ZllStuffEventHandler(sl_zigbee_event_t * e
 
 #endif // SL_COMPONENT_CATALOG_PRESENT
 
-#ifdef UC_BUILD
+#ifdef SL_CATALOG_CLI_PRESENT
+#include "sl_cli.h"
+#define SL_CLI_COMMAND_ARG sl_cli_command_arg_t * arguments
+#else // !SL_CATALOG_CLI_PRESENT
+#define SL_CLI_COMMAND_ARG void
+#endif // SL_CATALOG_CLI_PRESENT
+
+#if defined(SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT) && !defined(EMBER_SCRIPTED_TEST)
+#include "sl_zigbee_debug_print.h"
+#endif // SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT
+
 #include "serial/serial.h"
 #include "sl_endianness.h"
 // Temporary fix for UC_ALPHA_2, see EMZIGBEE-6782
 #include "plugin-component-mappings.h"
 #include "af-storage.h"
+
 #include "zap-command.h"
 #include "zap-id.h"
-#include "zap-type.h"
 #include "zap-print.h"
+#include "zap-enabled-incoming-commands.h"
+#include "zap-type.h"
+#include "app/framework/common/zigbee_app_framework_common.h"
+
 #include "app/framework/util/util.h"
 #include "app/framework/util/global-callback.h"
 #include "app/framework/util/global-other-callback.h"
 #include "app/framework/service-function/sl_service_function.h"
-#include "zap-enabled-incoming-commands.h"
-#include "zigbee_app_framework_common.h"
+
 #include "app/framework/util/zcl-debug-print.h"
-#else // !UC_BUILD
-#include "plugin/serial/serial.h"
-#include "event_control/event.h"
-#include "att-storage.h"
-#include "call-command-handler.h"
-#include "client-command-macro.h"
-#include "callback.h"
-#include "af-structs.h"
-#include "attribute-type.h"
-#include "attribute-id.h"
-#include "cluster-id.h"
-#include "command-id.h"
-#include "enums.h"
-#include "print-cluster.h"
-#include "af-legacy.h"
-#include "debug-printing.h"
-#include "app/util/serial/command-interpreter2.h"
-#include "app/framework/cli/zcl-cli.h"
-#endif // UC_BUILD
 
 #include "app/framework/util/client-api.h"
 
-// TODO: EMZIGBEE-6322 Remove this file when doing the UC_BUILD cleanup works.
-#include "app/util/common/uc-temp-macros.h"
+#include "app/util/serial/sl_zigbee_command_interpreter.h"
 
+extern uint8_t ascii_lut[];
 /**
  * @defgroup attribute-storage Attribute Storage
  * @ingroup af
@@ -600,16 +594,16 @@ uint8_t emberAfGetOpenNetworkDurationSec(void);
 
 #if !defined(DOXYGEN_SHOULD_SKIP_THIS)
 // master array of all defined endpoints
-extern EmberAfDefinedEndpoint emAfEndpoints[];
+extern EmberAfDefinedEndpoint sli_zigbee_af_endpoints[];
 
 // Master array of all Zigbee PRO networks.
-extern const EmAfZigbeeProNetwork emAfZigbeeProNetworks[];
+extern const sli_zigbee_af_zigbee_pro_network sli_zigbee_af_zigbee_pro_networks[];
 
 // The current Zigbee PRO network or NULL.
-extern const EmAfZigbeeProNetwork *emAfCurrentZigbeeProNetwork;
+extern const sli_zigbee_af_zigbee_pro_network *sli_zigbee_af_current_zigbee_pro_network;
 
 // True if the current network is a Zigbee PRO network.
-#define emAfProIsCurrentNetwork() (emAfCurrentZigbeeProNetwork != NULL)
+#define sli_zigbee_af_pro_is_current_network() (sli_zigbee_af_current_zigbee_pro_network != NULL)
 #endif
 
 /**
@@ -659,22 +653,22 @@ uint8_t emberAfFindClusterServerEndpointIndex(uint8_t endpoint, EmberAfClusterId
 /**
  * @brief Take an index of an endpoint and return the profile ID for it.
  */
-#define emberAfProfileIdFromIndex(index) (emAfEndpoints[(index)].profileId)
+#define emberAfProfileIdFromIndex(index) (sli_zigbee_af_endpoints[(index)].profileId)
 
 /**
  * @brief Take an index of an endpoint and return the device ID for it.
  */
-#define emberAfDeviceIdFromIndex(index) (emAfEndpoints[(index)].deviceId)
+#define emberAfDeviceIdFromIndex(index) (sli_zigbee_af_endpoints[(index)].deviceId)
 
 /**
  * @brief Take an index of an endpoint and return the device version for it.
  */
-#define emberAfDeviceVersionFromIndex(index) (emAfEndpoints[(index)].deviceVersion)
+#define emberAfDeviceVersionFromIndex(index) (sli_zigbee_af_endpoints[(index)].deviceVersion)
 
 /**
  * @brief Take an index of an endpoint and return the network index for it.
  */
-#define emberAfNetworkIndexFromEndpointIndex(index) (emAfEndpoints[(index)].networkIndex)
+#define emberAfNetworkIndexFromEndpointIndex(index) (sli_zigbee_af_endpoints[(index)].networkIndex)
 
 /**
  * @brief Return the network index of a given endpoint.
@@ -695,7 +689,7 @@ uint8_t emberAfNetworkIndexFromEndpoint(uint8_t endpoint);
 /**
  * @brief Return the primary endpoint.
  */
-#define emberAfPrimaryEndpoint() (emAfEndpoints[0].endpoint)
+#define emberAfPrimaryEndpoint() (sli_zigbee_af_endpoints[0].endpoint)
 
 /**
  * @brief Return the total number of endpoints (dynamic and pre-compiled).
@@ -1890,8 +1884,8 @@ EmberStatus emberAfRemoveAddressTableEntry(uint8_t index);
  * is used outside the command context, the returned EmberAfClusterCommand pointer
  * will be null.
  */
-#define emberAfCurrentCommand() (emAfCurrentCommand)
-extern EmberAfClusterCommand *emAfCurrentCommand;
+#define emberAfCurrentCommand() (sli_zigbee_af_current_command)
+extern EmberAfClusterCommand *sli_zigbee_af_current_command;
 #endif
 
 /**
@@ -2030,7 +2024,6 @@ bool emberAfIsCurrentSecurityProfileSmartEnergy(void);
 /** @name API */
 // @{
 
-#ifdef UC_BUILD
 /** @brief Runtime subscription to specific incoming ZCL commands.
  *
  * @param cluster_id    The cluster ID of the ZCL messages to subscribe to.
@@ -2058,7 +2051,6 @@ sl_status_t sl_zigbee_subscribe_to_zcl_commands(uint16_t cluster_id,
                                                 uint16_t manufacturer_id,
                                                 uint8_t direction,
                                                 sl_service_function_t service_function);
-#endif // UC_BUILD
 
 /** @} */ // end of name API
 /** @} */ // end of zcl_commands
@@ -2209,8 +2201,8 @@ uint8_t emberAfPrimaryEndpointForCurrentNetworkIndex(void);
  * @return An ::EmberStatus value that indicates either that the network stack
  * has been successfully initialized or the reason for failure.
  */
-EmberStatus emAfInitializeNetworkIndexStack(void);
-void emAfAssertNetworkIndexStackIsEmpty(void);
+EmberStatus sli_zigbee_af_initializeNetworkIndexStack(void);
+void sli_zigbee_af_assert_network_index_stack_is_empty(void);
 #endif
 
 /** @} */ // end of API
@@ -2230,12 +2222,10 @@ void emAfAssertNetworkIndexStackIsEmpty(void);
 #define emberAfMaxPowerLevel() (3)
 
 #if !defined(DOXYGEN_SHOULD_SKIP_THIS)
-#ifdef UC_BUILD
 // This macro used to be generated by AppBuilder, defining it disables legacy CLI commands.
 // Legacy CLI is no longer supported and will eventually be cleaned up (see EMZIGBEE-868),
 // until then define this statically.
 #define EMBER_AF_GENERATE_CLI
-#endif // UC_BUILD
 #endif // !DOXYGEN_SHOULD_SKIP_THIS
 
 #endif // SILABS_AF_API

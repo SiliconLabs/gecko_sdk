@@ -109,6 +109,9 @@ The following buttons and LEDs are used.
     <th>Action</th>
     <th>Description</th>
 </tr><tr>
+    <th>WSTK</th>
+    <th>800 Dev Kit</th>
+</tr><tr>
     <td>RST</td>
     <td>Press</td>
     <td>Resets the firmware of an application (like losing power). All volatile memory will be cleared.</td>
@@ -141,6 +144,7 @@ The following buttons and LEDs are used.
 </tr><tr>
     <td>Hold for at least 5 seconds and release</td>
     <td>Perform a reset to factory default operation of the device, and a Device Reset Locally Notification Command is sent via Lifeline.</td>
+    <td></td>
 </tr><tr>
     <td rowspan="3">BTN2</td>
     <td>Press</td>
@@ -148,6 +152,7 @@ The following buttons and LEDs are used.
         <li>Lifeline with Central Scene Key Attribute "Key Pressed 1 Time"</li>
         <li>Trigger association group 4: Basic Set</li>
     </ul></td>
+    <td rowspan="6">Not supported</td>
 </tr><tr>
     <td>Hold start</td>
     <td><ul>

@@ -74,8 +74,8 @@
 
 // <h> Power settings
 
-// <o THROUGHPUT_CENTRAL_TX_POWER> Default maximum TX power in dBm
-// <i> Default: 100
+// <o THROUGHPUT_CENTRAL_TX_POWER> TX power limit set by the component (in dBm)
+// <i> Default: 10, however maximum value depends on system settings
 #define THROUGHPUT_CENTRAL_TX_POWER                      10
 
 // <q THROUGHPUT_CENTRAL_POWER_CONTROL_ENABLE> Adaptive power control

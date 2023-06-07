@@ -54,17 +54,7 @@
 #define SL_CPC_SECURITY_OK_TO_UNBIND 0xAAAAAAAAAAAAAAAA
 
 /***************************************************************************/ /**
- * @addtogroup cpc_security_secondary
- * @brief CPC Security Secondary
- * @details
- * ## Overview
- *
- *   TODO
- *
- * ## Initialization
- *
- *   TODO
- *
+ * @addtogroup cpc-security CPC-Security
  * @{
  ******************************************************************************/
 

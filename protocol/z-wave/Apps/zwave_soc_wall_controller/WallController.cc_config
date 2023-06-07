@@ -2,13 +2,13 @@ zw_cc_agi:
   endpoints:
     - endpoint: 0
       groups:
-        - name: BTN0
+        - name: BTN0 - Basic
           profile_msb: ASSOCIATION_GROUP_INFO_REPORT_PROFILE_CONTROL
           profile_lsb: ASSOCIATION_GROUP_INFO_REPORT_PROFILE_CONTROL_KEY01
           commands:
             - command_class: COMMAND_CLASS_BASIC_V2
               command: BASIC_SET_V2
-        - name: BTN0
+        - name: BTN0 - Multilevel
           profile_msb: ASSOCIATION_GROUP_INFO_REPORT_PROFILE_CONTROL
           profile_lsb: ASSOCIATION_GROUP_INFO_REPORT_PROFILE_CONTROL_KEY01
           commands:
@@ -16,13 +16,13 @@ zw_cc_agi:
               command: SWITCH_MULTILEVEL_START_LEVEL_CHANGE_V4
             - command_class: COMMAND_CLASS_SWITCH_MULTILEVEL_V4
               command: SWITCH_MULTILEVEL_STOP_LEVEL_CHANGE_V4
-        - name: BTN2
+        - name: BTN2 - Basic
           profile_msb: ASSOCIATION_GROUP_INFO_REPORT_PROFILE_CONTROL
           profile_lsb: ASSOCIATION_GROUP_INFO_REPORT_PROFILE_CONTROL_KEY02
           commands:
             - command_class: COMMAND_CLASS_BASIC_V2
               command: BASIC_SET_V2
-        - name: BTN2
+        - name: BTN2 - Multilevel
           profile_msb: ASSOCIATION_GROUP_INFO_REPORT_PROFILE_CONTROL
           profile_lsb: ASSOCIATION_GROUP_INFO_REPORT_PROFILE_CONTROL_KEY02
           commands:
@@ -30,13 +30,13 @@ zw_cc_agi:
               command: SWITCH_MULTILEVEL_START_LEVEL_CHANGE_V4
             - command_class: COMMAND_CLASS_SWITCH_MULTILEVEL_V4
               command: SWITCH_MULTILEVEL_STOP_LEVEL_CHANGE_V4
-        - name: BTN3
+        - name: BTN3 - Basic
           profile_msb: ASSOCIATION_GROUP_INFO_REPORT_PROFILE_CONTROL
           profile_lsb: ASSOCIATION_GROUP_INFO_REPORT_PROFILE_CONTROL_KEY03
           commands:
             - command_class: COMMAND_CLASS_BASIC_V2
               command: BASIC_SET_V2
-        - name: BTN3
+        - name: BTN3 - Multilevel
           profile_msb: ASSOCIATION_GROUP_INFO_REPORT_PROFILE_CONTROL
           profile_lsb: ASSOCIATION_GROUP_INFO_REPORT_PROFILE_CONTROL_KEY03
           commands:
@@ -44,3 +44,14 @@ zw_cc_agi:
               command: SWITCH_MULTILEVEL_START_LEVEL_CHANGE_V4
             - command_class: COMMAND_CLASS_SWITCH_MULTILEVEL_V4
               command: SWITCH_MULTILEVEL_STOP_LEVEL_CHANGE_V4
+
+zw_cc_central_scene:
+  central_scene:
+    identical: 1 
+    number_of_scenes: 3
+    scenes:
+      - scene: 1
+        attributes:
+          - CENTRAL_SCENE_NOTIFICATION_KEY_ATTRIBUTES_KEY_PRESSED_1_TIME_V2
+          - CENTRAL_SCENE_NOTIFICATION_KEY_ATTRIBUTES_KEY_RELEASED_V2
+          - CENTRAL_SCENE_NOTIFICATION_KEY_ATTRIBUTES_KEY_HELD_DOWN_V2

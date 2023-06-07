@@ -152,7 +152,7 @@ class RM_Register_SUNOFDM_TXCFG1(Base_RM_Register):
             0xb500fc00, 0x01C,
             'TXCFG1', 'SUNOFDM.TXCFG1', 'read-write',
             u"",
-            0x00000000, 0x00000007,
+            0x00000000, 0x0000000F,
             0x00001000, 0x00002000,
             0x00003000)
 
@@ -162,6 +162,8 @@ class RM_Register_SUNOFDM_TXCFG1(Base_RM_Register):
         self.zz_fdict['TXHCSERRORS'] = self.TXHCSERRORS
         self.TXFCSERRORS = RM_Field_SUNOFDM_TXCFG1_TXFCSERRORS(self)
         self.zz_fdict['TXFCSERRORS'] = self.TXFCSERRORS
+        self.TXFCSBYP = RM_Field_SUNOFDM_TXCFG1_TXFCSBYP(self)
+        self.zz_fdict['TXFCSBYP'] = self.TXFCSBYP
         self.__dict__['zz_frozen'] = True
 
 
@@ -172,7 +174,7 @@ class RM_Register_SUNOFDM_ANT(Base_RM_Register):
             0xb500fc00, 0x020,
             'ANT', 'SUNOFDM.ANT', 'read-write',
             u"",
-            0x00000000, 0x00000007,
+            0x00000000, 0xFFFF000F,
             0x00001000, 0x00002000,
             0x00003000)
 
@@ -180,6 +182,10 @@ class RM_Register_SUNOFDM_ANT(Base_RM_Register):
         self.zz_fdict['ANTDIV'] = self.ANTDIV
         self.ANTSEL = RM_Field_SUNOFDM_ANT_ANTSEL(self)
         self.zz_fdict['ANTSEL'] = self.ANTSEL
+        self.ANTCORRTHR = RM_Field_SUNOFDM_ANT_ANTCORRTHR(self)
+        self.zz_fdict['ANTCORRTHR'] = self.ANTCORRTHR
+        self.ANTRSSITHR = RM_Field_SUNOFDM_ANT_ANTRSSITHR(self)
+        self.zz_fdict['ANTRSSITHR'] = self.ANTRSSITHR
         self.__dict__['zz_frozen'] = True
 
 
@@ -756,6 +762,350 @@ class RM_Register_SUNOFDM_TXFILTCOEFF7(Base_RM_Register):
         self.zz_fdict['COEFF14'] = self.COEFF14
         self.COEFF15 = RM_Field_SUNOFDM_TXFILTCOEFF7_COEFF15(self)
         self.zz_fdict['COEFF15'] = self.COEFF15
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Register_SUNOFDM_ANTDIVDLY(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_SUNOFDM_ANTDIVDLY, self).__init__(rmio, label,
+            0xb500fc00, 0x0A8,
+            'ANTDIVDLY', 'SUNOFDM.ANTDIVDLY', 'read-write',
+            u"",
+            0x00000000, 0xFFFFFFFF,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.AGCRELDLY = RM_Field_SUNOFDM_ANTDIVDLY_AGCRELDLY(self)
+        self.zz_fdict['AGCRELDLY'] = self.AGCRELDLY
+        self.AGCCONVDLY = RM_Field_SUNOFDM_ANTDIVDLY_AGCCONVDLY(self)
+        self.zz_fdict['AGCCONVDLY'] = self.AGCCONVDLY
+        self.SETTLINGTIME = RM_Field_SUNOFDM_ANTDIVDLY_SETTLINGTIME(self)
+        self.zz_fdict['SETTLINGTIME'] = self.SETTLINGTIME
+        self.ANTICPSWITCH = RM_Field_SUNOFDM_ANTDIVDLY_ANTICPSWITCH(self)
+        self.zz_fdict['ANTICPSWITCH'] = self.ANTICPSWITCH
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Register_SUNOFDM_PREEMPH(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_SUNOFDM_PREEMPH, self).__init__(rmio, label,
+            0xb500fc00, 0x0AC,
+            'PREEMPH', 'SUNOFDM.PREEMPH', 'read-write',
+            u"",
+            0x00000000, 0xFFFF0003,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.PREEMPHEN = RM_Field_SUNOFDM_PREEMPH_PREEMPHEN(self)
+        self.zz_fdict['PREEMPHEN'] = self.PREEMPHEN
+        self.PREEMPHSTFEN = RM_Field_SUNOFDM_PREEMPH_PREEMPHSTFEN(self)
+        self.zz_fdict['PREEMPHSTFEN'] = self.PREEMPHSTFEN
+        self.MCSTABLE = RM_Field_SUNOFDM_PREEMPH_MCSTABLE(self)
+        self.zz_fdict['MCSTABLE'] = self.MCSTABLE
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Register_SUNOFDM_PREEMPHCOGR0(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_SUNOFDM_PREEMPHCOGR0, self).__init__(rmio, label,
+            0xb500fc00, 0x0B0,
+            'PREEMPHCOGR0', 'SUNOFDM.PREEMPHCOGR0', 'read-write',
+            u"",
+            0x00000000, 0xFFFFFFFF,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.COEFF0 = RM_Field_SUNOFDM_PREEMPHCOGR0_COEFF0(self)
+        self.zz_fdict['COEFF0'] = self.COEFF0
+        self.COEFF1 = RM_Field_SUNOFDM_PREEMPHCOGR0_COEFF1(self)
+        self.zz_fdict['COEFF1'] = self.COEFF1
+        self.COEFF2 = RM_Field_SUNOFDM_PREEMPHCOGR0_COEFF2(self)
+        self.zz_fdict['COEFF2'] = self.COEFF2
+        self.COEFF3 = RM_Field_SUNOFDM_PREEMPHCOGR0_COEFF3(self)
+        self.zz_fdict['COEFF3'] = self.COEFF3
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Register_SUNOFDM_PREEMPHCOGR1(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_SUNOFDM_PREEMPHCOGR1, self).__init__(rmio, label,
+            0xb500fc00, 0x0B4,
+            'PREEMPHCOGR1', 'SUNOFDM.PREEMPHCOGR1', 'read-write',
+            u"",
+            0x00000000, 0xFFFFFFFF,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.COEFF4 = RM_Field_SUNOFDM_PREEMPHCOGR1_COEFF4(self)
+        self.zz_fdict['COEFF4'] = self.COEFF4
+        self.COEFF5 = RM_Field_SUNOFDM_PREEMPHCOGR1_COEFF5(self)
+        self.zz_fdict['COEFF5'] = self.COEFF5
+        self.COEFF6 = RM_Field_SUNOFDM_PREEMPHCOGR1_COEFF6(self)
+        self.zz_fdict['COEFF6'] = self.COEFF6
+        self.COEFF7 = RM_Field_SUNOFDM_PREEMPHCOGR1_COEFF7(self)
+        self.zz_fdict['COEFF7'] = self.COEFF7
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Register_SUNOFDM_PREEMPHCOGR2(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_SUNOFDM_PREEMPHCOGR2, self).__init__(rmio, label,
+            0xb500fc00, 0x0B8,
+            'PREEMPHCOGR2', 'SUNOFDM.PREEMPHCOGR2', 'read-write',
+            u"",
+            0x00000000, 0xFFFFFFFF,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.COEFF8 = RM_Field_SUNOFDM_PREEMPHCOGR2_COEFF8(self)
+        self.zz_fdict['COEFF8'] = self.COEFF8
+        self.COEFF9 = RM_Field_SUNOFDM_PREEMPHCOGR2_COEFF9(self)
+        self.zz_fdict['COEFF9'] = self.COEFF9
+        self.COEFF10 = RM_Field_SUNOFDM_PREEMPHCOGR2_COEFF10(self)
+        self.zz_fdict['COEFF10'] = self.COEFF10
+        self.COEFF11 = RM_Field_SUNOFDM_PREEMPHCOGR2_COEFF11(self)
+        self.zz_fdict['COEFF11'] = self.COEFF11
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Register_SUNOFDM_PREEMPHCOGR3(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_SUNOFDM_PREEMPHCOGR3, self).__init__(rmio, label,
+            0xb500fc00, 0x0BC,
+            'PREEMPHCOGR3', 'SUNOFDM.PREEMPHCOGR3', 'read-write',
+            u"",
+            0x00000000, 0xFFFFFFFF,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.COEFF12 = RM_Field_SUNOFDM_PREEMPHCOGR3_COEFF12(self)
+        self.zz_fdict['COEFF12'] = self.COEFF12
+        self.COEFF13 = RM_Field_SUNOFDM_PREEMPHCOGR3_COEFF13(self)
+        self.zz_fdict['COEFF13'] = self.COEFF13
+        self.COEFF14 = RM_Field_SUNOFDM_PREEMPHCOGR3_COEFF14(self)
+        self.zz_fdict['COEFF14'] = self.COEFF14
+        self.COEFF15 = RM_Field_SUNOFDM_PREEMPHCOGR3_COEFF15(self)
+        self.zz_fdict['COEFF15'] = self.COEFF15
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Register_SUNOFDM_PREEMPHCOGR4(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_SUNOFDM_PREEMPHCOGR4, self).__init__(rmio, label,
+            0xb500fc00, 0x0C0,
+            'PREEMPHCOGR4', 'SUNOFDM.PREEMPHCOGR4', 'read-write',
+            u"",
+            0x00000000, 0xFFFFFFFF,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.COEFF16 = RM_Field_SUNOFDM_PREEMPHCOGR4_COEFF16(self)
+        self.zz_fdict['COEFF16'] = self.COEFF16
+        self.COEFF17 = RM_Field_SUNOFDM_PREEMPHCOGR4_COEFF17(self)
+        self.zz_fdict['COEFF17'] = self.COEFF17
+        self.COEFF18 = RM_Field_SUNOFDM_PREEMPHCOGR4_COEFF18(self)
+        self.zz_fdict['COEFF18'] = self.COEFF18
+        self.COEFF19 = RM_Field_SUNOFDM_PREEMPHCOGR4_COEFF19(self)
+        self.zz_fdict['COEFF19'] = self.COEFF19
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Register_SUNOFDM_PREEMPHCOGR5(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_SUNOFDM_PREEMPHCOGR5, self).__init__(rmio, label,
+            0xb500fc00, 0x0C4,
+            'PREEMPHCOGR5', 'SUNOFDM.PREEMPHCOGR5', 'read-write',
+            u"",
+            0x00000000, 0xFFFFFFFF,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.COEFF20 = RM_Field_SUNOFDM_PREEMPHCOGR5_COEFF20(self)
+        self.zz_fdict['COEFF20'] = self.COEFF20
+        self.COEFF21 = RM_Field_SUNOFDM_PREEMPHCOGR5_COEFF21(self)
+        self.zz_fdict['COEFF21'] = self.COEFF21
+        self.COEFF22 = RM_Field_SUNOFDM_PREEMPHCOGR5_COEFF22(self)
+        self.zz_fdict['COEFF22'] = self.COEFF22
+        self.COEFF23 = RM_Field_SUNOFDM_PREEMPHCOGR5_COEFF23(self)
+        self.zz_fdict['COEFF23'] = self.COEFF23
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Register_SUNOFDM_PREEMPHCOGR6(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_SUNOFDM_PREEMPHCOGR6, self).__init__(rmio, label,
+            0xb500fc00, 0x0C8,
+            'PREEMPHCOGR6', 'SUNOFDM.PREEMPHCOGR6', 'read-write',
+            u"",
+            0x00000000, 0xFFFFFFFF,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.COEFF24 = RM_Field_SUNOFDM_PREEMPHCOGR6_COEFF24(self)
+        self.zz_fdict['COEFF24'] = self.COEFF24
+        self.COEFF25 = RM_Field_SUNOFDM_PREEMPHCOGR6_COEFF25(self)
+        self.zz_fdict['COEFF25'] = self.COEFF25
+        self.COEFF26 = RM_Field_SUNOFDM_PREEMPHCOGR6_COEFF26(self)
+        self.zz_fdict['COEFF26'] = self.COEFF26
+        self.COEFF27 = RM_Field_SUNOFDM_PREEMPHCOGR6_COEFF27(self)
+        self.zz_fdict['COEFF27'] = self.COEFF27
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Register_SUNOFDM_PREEMPHCOGR7(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_SUNOFDM_PREEMPHCOGR7, self).__init__(rmio, label,
+            0xb500fc00, 0x0CC,
+            'PREEMPHCOGR7', 'SUNOFDM.PREEMPHCOGR7', 'read-write',
+            u"",
+            0x00000000, 0xFFFFFFFF,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.COEFF28 = RM_Field_SUNOFDM_PREEMPHCOGR7_COEFF28(self)
+        self.zz_fdict['COEFF28'] = self.COEFF28
+        self.COEFF29 = RM_Field_SUNOFDM_PREEMPHCOGR7_COEFF29(self)
+        self.zz_fdict['COEFF29'] = self.COEFF29
+        self.COEFF30 = RM_Field_SUNOFDM_PREEMPHCOGR7_COEFF30(self)
+        self.zz_fdict['COEFF30'] = self.COEFF30
+        self.COEFF31 = RM_Field_SUNOFDM_PREEMPHCOGR7_COEFF31(self)
+        self.zz_fdict['COEFF31'] = self.COEFF31
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Register_SUNOFDM_PREEMPHCOGR8(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_SUNOFDM_PREEMPHCOGR8, self).__init__(rmio, label,
+            0xb500fc00, 0x0D0,
+            'PREEMPHCOGR8', 'SUNOFDM.PREEMPHCOGR8', 'read-write',
+            u"",
+            0x00000000, 0xFFFFFFFF,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.COEFF32 = RM_Field_SUNOFDM_PREEMPHCOGR8_COEFF32(self)
+        self.zz_fdict['COEFF32'] = self.COEFF32
+        self.COEFF33 = RM_Field_SUNOFDM_PREEMPHCOGR8_COEFF33(self)
+        self.zz_fdict['COEFF33'] = self.COEFF33
+        self.COEFF34 = RM_Field_SUNOFDM_PREEMPHCOGR8_COEFF34(self)
+        self.zz_fdict['COEFF34'] = self.COEFF34
+        self.COEFF35 = RM_Field_SUNOFDM_PREEMPHCOGR8_COEFF35(self)
+        self.zz_fdict['COEFF35'] = self.COEFF35
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Register_SUNOFDM_PREEMPHCOGR9(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_SUNOFDM_PREEMPHCOGR9, self).__init__(rmio, label,
+            0xb500fc00, 0x0D4,
+            'PREEMPHCOGR9', 'SUNOFDM.PREEMPHCOGR9', 'read-write',
+            u"",
+            0x00000000, 0xFFFFFFFF,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.COEFF36 = RM_Field_SUNOFDM_PREEMPHCOGR9_COEFF36(self)
+        self.zz_fdict['COEFF36'] = self.COEFF36
+        self.COEFF37 = RM_Field_SUNOFDM_PREEMPHCOGR9_COEFF37(self)
+        self.zz_fdict['COEFF37'] = self.COEFF37
+        self.COEFF38 = RM_Field_SUNOFDM_PREEMPHCOGR9_COEFF38(self)
+        self.zz_fdict['COEFF38'] = self.COEFF38
+        self.COEFF39 = RM_Field_SUNOFDM_PREEMPHCOGR9_COEFF39(self)
+        self.zz_fdict['COEFF39'] = self.COEFF39
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Register_SUNOFDM_PREEMPHCOGR10(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_SUNOFDM_PREEMPHCOGR10, self).__init__(rmio, label,
+            0xb500fc00, 0x0D8,
+            'PREEMPHCOGR10', 'SUNOFDM.PREEMPHCOGR10', 'read-write',
+            u"",
+            0x00000000, 0xFFFFFFFF,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.COEFF40 = RM_Field_SUNOFDM_PREEMPHCOGR10_COEFF40(self)
+        self.zz_fdict['COEFF40'] = self.COEFF40
+        self.COEFF41 = RM_Field_SUNOFDM_PREEMPHCOGR10_COEFF41(self)
+        self.zz_fdict['COEFF41'] = self.COEFF41
+        self.COEFF42 = RM_Field_SUNOFDM_PREEMPHCOGR10_COEFF42(self)
+        self.zz_fdict['COEFF42'] = self.COEFF42
+        self.COEFF43 = RM_Field_SUNOFDM_PREEMPHCOGR10_COEFF43(self)
+        self.zz_fdict['COEFF43'] = self.COEFF43
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Register_SUNOFDM_PREEMPHCOGR11(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_SUNOFDM_PREEMPHCOGR11, self).__init__(rmio, label,
+            0xb500fc00, 0x0DC,
+            'PREEMPHCOGR11', 'SUNOFDM.PREEMPHCOGR11', 'read-write',
+            u"",
+            0x00000000, 0xFFFFFFFF,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.COEFF44 = RM_Field_SUNOFDM_PREEMPHCOGR11_COEFF44(self)
+        self.zz_fdict['COEFF44'] = self.COEFF44
+        self.COEFF45 = RM_Field_SUNOFDM_PREEMPHCOGR11_COEFF45(self)
+        self.zz_fdict['COEFF45'] = self.COEFF45
+        self.COEFF46 = RM_Field_SUNOFDM_PREEMPHCOGR11_COEFF46(self)
+        self.zz_fdict['COEFF46'] = self.COEFF46
+        self.COEFF47 = RM_Field_SUNOFDM_PREEMPHCOGR11_COEFF47(self)
+        self.zz_fdict['COEFF47'] = self.COEFF47
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Register_SUNOFDM_PREEMPHCOGR12(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_SUNOFDM_PREEMPHCOGR12, self).__init__(rmio, label,
+            0xb500fc00, 0x0E0,
+            'PREEMPHCOGR12', 'SUNOFDM.PREEMPHCOGR12', 'read-write',
+            u"",
+            0x00000000, 0xFFFFFFFF,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.COEFF48 = RM_Field_SUNOFDM_PREEMPHCOGR12_COEFF48(self)
+        self.zz_fdict['COEFF48'] = self.COEFF48
+        self.COEFF49 = RM_Field_SUNOFDM_PREEMPHCOGR12_COEFF49(self)
+        self.zz_fdict['COEFF49'] = self.COEFF49
+        self.COEFF50 = RM_Field_SUNOFDM_PREEMPHCOGR12_COEFF50(self)
+        self.zz_fdict['COEFF50'] = self.COEFF50
+        self.COEFF51 = RM_Field_SUNOFDM_PREEMPHCOGR12_COEFF51(self)
+        self.zz_fdict['COEFF51'] = self.COEFF51
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Register_SUNOFDM_ANTDIVDLY2(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_SUNOFDM_ANTDIVDLY2, self).__init__(rmio, label,
+            0xb500fc00, 0x0E4,
+            'ANTDIVDLY2', 'SUNOFDM.ANTDIVDLY2', 'read-write',
+            u"",
+            0x00000000, 0x000003FF,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.AGCCONVDLYRED = RM_Field_SUNOFDM_ANTDIVDLY2_AGCCONVDLYRED(self)
+        self.zz_fdict['AGCCONVDLYRED'] = self.AGCCONVDLYRED
         self.__dict__['zz_frozen'] = True
 
 

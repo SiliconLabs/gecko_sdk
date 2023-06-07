@@ -178,10 +178,7 @@ void SystemInit(void)
  * as SMU is used to configure the trustzone state of the system. */
 #if !defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_NONSECURE) \
   && defined(__TZ_PRESENT)
-
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG >= 2)
   CMU->CLKEN1_SET = CMU_CLKEN1_SMU;
-#endif
 
   /* config SMU to Secure and other peripherals to Non-Secure. */
   SMU->PPUSATD0_CLR = _SMU_PPUSATD0_MASK;

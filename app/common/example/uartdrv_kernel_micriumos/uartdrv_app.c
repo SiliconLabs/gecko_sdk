@@ -94,12 +94,15 @@ static void UART_rx_callback(UARTDRV_Handle_t handle,
     if (*data == '\r' || *data == '\n') {
       buffer[index] = '\0';
 
-      sprintf(reply, "\r\n\r\nYou wrote:\r\n\r\n %s \r\n\r\n> ", buffer);
+      //  Handling CR+LF (\r+\n) condition
+      if (index > 0) {
+        sprintf(reply, "\r\n\r\nYou wrote: %s \r\n\r\n> ", buffer);
 
-      // Echo the input string
-      UARTDRV_Transmit(sl_uartdrv_leuart_vcom_handle,
-                       (uint8_t *)reply, strlen(reply),
-                       UART_tx_callback);
+        // Echo the input string
+        UARTDRV_Transmit(sl_uartdrv_leuart_vcom_handle,
+                         (uint8_t *)reply, strlen(reply),
+                         UART_tx_callback);
+      }
       index = 0;
     } else {
       if (index < INPUT_BUFSIZE - 1) {

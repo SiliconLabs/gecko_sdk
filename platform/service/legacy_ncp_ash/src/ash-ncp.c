@@ -140,33 +140,33 @@ static MessageBufferQueue reTxQueue = { EMBER_NULL_MESSAGE_BUFFER };
 
 static EmberMessageBuffer sendBuffer;
 #ifdef EM_BUFFER_USAGE
-void emMarkAshBuffers(void)
+void sli_util_mark_ash_buffers(void)
 {
   if (rxDataBuffer != EMBER_NULL_MESSAGE_BUFFER) {
-    emBufferUsage[rxDataBuffer] |= BIT(EM_BUFFER_USAGE_Q_ASH);
+    sli_legacy_buffer_manager_buffer_usage[rxDataBuffer] |= BIT(EM_BUFFER_USAGE_Q_ASH);
   }
   if (sendState == SEND_STATE_TX_DATA
       || sendState == SEND_STATE_RETX_DATA) {
-    emBufferUsage[sendBuffer] |= BIT(EM_BUFFER_USAGE_Q_ASH);
+    sli_legacy_buffer_manager_buffer_usage[sendBuffer] |= BIT(EM_BUFFER_USAGE_Q_ASH);
   }
   WALK_QUEUE(&txHighQueue, finger,
-             { emBufferUsage[finger] |= BIT(EM_BUFFER_USAGE_Q_ASH); });
+             { sli_legacy_buffer_manager_buffer_usage[finger] |= BIT(EM_BUFFER_USAGE_Q_ASH); });
   WALK_QUEUE(&txQueue, finger,
-             { emBufferUsage[finger] |= BIT(EM_BUFFER_USAGE_Q_ASH); });
+             { sli_legacy_buffer_manager_buffer_usage[finger] |= BIT(EM_BUFFER_USAGE_Q_ASH); });
   WALK_QUEUE(&reTxQueue, finger,
-             { emBufferUsage[finger] |= BIT(EM_BUFFER_USAGE_Q_ASH); });
-  emBufferUsage[rxFirstDataBuffer] |= BIT(EM_BUFFER_USAGE_Q_ASH);
+             { sli_legacy_buffer_manager_buffer_usage[finger] |= BIT(EM_BUFFER_USAGE_Q_ASH); });
+  sli_legacy_buffer_manager_buffer_usage[rxFirstDataBuffer] |= BIT(EM_BUFFER_USAGE_Q_ASH);
 }
 #endif
 
-void emMarkAshBuffers(void)
+void sli_util_mark_ash_buffers(void)
 {
-  emMarkBuffer(&rxDataBuffer);
-  emMarkBuffer(&txHighQueue);
-  emMarkBuffer(&txQueue);
-  emMarkBuffer(&reTxQueue);
-  emMarkBuffer(&rxFirstDataBuffer);
-  emMarkBuffer(&sendBuffer);
+  sli_legacy_buffer_manager_mark_buffer(&rxDataBuffer);
+  sli_legacy_buffer_manager_mark_buffer(&txHighQueue);
+  sli_legacy_buffer_manager_mark_buffer(&txQueue);
+  sli_legacy_buffer_manager_mark_buffer(&reTxQueue);
+  sli_legacy_buffer_manager_mark_buffer(&rxFirstDataBuffer);
+  sli_legacy_buffer_manager_mark_buffer(&sendBuffer);
 }
 
 #ifdef SLEEPY_EZSP_UART
@@ -216,7 +216,7 @@ static uint8_t staticBuffer[EZSP_MAX_FRAME_LENGTH];
 
 EmberMessageBuffer ashAllocateStaticBuffers(void)
 {
-  rxFirstDataBuffer = emAllocateIndirectBuffer(staticBuffer, NULL, EZSP_MAX_FRAME_LENGTH);
+  rxFirstDataBuffer = sli_legacy_buffer_manager_allocate_indirect_buffer(staticBuffer, NULL, EZSP_MAX_FRAME_LENGTH);
   rxFirstDataBufferFree = true;
 
   return rxFirstDataBuffer;
@@ -281,9 +281,9 @@ void ashSend(EmberMessageBuffer buffer, bool highPriority)
   ashTraceDataTXEvent(buffer);
   ashRandomizeBuffer(buffer);
   if (highPriority) {
-    emMessageBufferQueueAdd(&txHighQueue, buffer);
+    sli_legacy_packet_buffer_queue_add(&txHighQueue, buffer);
   } else {
-    emMessageBufferQueueAdd(&txQueue, buffer);
+    sli_legacy_packet_buffer_queue_add(&txQueue, buffer);
   }
 }
 
@@ -573,12 +573,12 @@ void ashSendExec(void)
         } else if ((WITHIN_RANGE(ackRx,
                                  frmTx,
                                  ackRx + ashReadConfigOrDefault(txK, ASH_TX_K) - 1))
-                   && (!emMessageBufferQueueIsEmpty(&txHighQueue)
-                       || ((!emMessageBufferQueueIsEmpty(&txQueue)
+                   && (!sli_legacy_packet_buffer_queue_is_empty(&txHighQueue)
+                       || ((!sli_legacy_packet_buffer_queue_is_empty(&txQueue)
                             && ashNrTimerHasExpired())))) {
-          sendQueue = emMessageBufferQueueIsEmpty(&txHighQueue)
+          sendQueue = sli_legacy_packet_buffer_queue_is_empty(&txHighQueue)
                       ? &txQueue : &txHighQueue;
-          sendBuffer = emBufferQueueHead(sendQueue);
+          sendBuffer = sli_legacy_buffer_manager_buffer_queue_head(sendQueue);
           len = emberMessageBufferLength(sendBuffer) + 1;
           txControl = ASH_CONTROL_DATA
                       | (frmTx << ASH_FRMNUM_BIT)
@@ -621,8 +621,8 @@ void ashSendExec(void)
         } else {                              // frame txed - do bookkeeping
           if (sendState == SEND_STATE_TX_DATA) {
             INC8(frmTx);
-            (void)emMessageBufferQueueRemoveHead(sendQueue); // save txed data
-            emMessageBufferQueueAdd(&reTxQueue, sendBuffer);  // in retx queue
+            (void)sli_legacy_packet_buffer_queue_remove_head(sendQueue); // save txed data
+            sli_legacy_packet_buffer_queue_add(&reTxQueue, sendBuffer);  // in retx queue
           } else {
             INC8(frmReTx);
           }
@@ -667,7 +667,7 @@ static void ashScrubReTxQueue(void)
   EmberMessageBuffer buffer;
 
   while (ackRx != frmReTxHead) {
-    buffer = emMessageBufferQueueRemoveHead(&reTxQueue);
+    buffer = sli_legacy_packet_buffer_queue_remove_head(&reTxQueue);
     if (buffer == rxFirstDataBuffer) {
       rxFirstDataBufferFree = true;
     }
@@ -686,9 +686,9 @@ static EmberMessageBuffer ashMessageBufferQueueNthEntry(MessageBufferQueue *q,
   {
     DECLARE_INTERRUPT_STATE;
     DISABLE_INTERRUPTS();
-    buffer = emBufferQueueHead(q);
+    buffer = sli_legacy_buffer_manager_buffer_queue_head(q);
     while (n) {
-      buffer = emBufferQueueNext(q, buffer);
+      buffer = sli_legacy_buffer_manager_buffer_queue_next(q, buffer);
       n--;
     }
     RESTORE_INTERRUPTS();
@@ -919,19 +919,19 @@ static void ashPrintFrame(uint8_t c)
 
 static void ashPrintStatus(void)
 {
-  emDebugBinaryFormat(EM_DEBUG_EZSP_UART,
-                      "BBBBBBBBBWB",
-                      ASH_VERSION,
-                      EZSP_ASH_STATUS,
-                      ackRx,
-                      ackTx,
-                      frmTx,
-                      frmRx,
-                      frmReTx,
-                      emMessageBufferQueueLength(&reTxQueue),
-                      ashTimeouts,
-                      ashGetAckPeriod(),
-                      emPacketBufferFreeCount);
+  sli_zigbee_debug_binary_format(EM_DEBUG_EZSP_UART,
+                                 "BBBBBBBBBWB",
+                                 ASH_VERSION,
+                                 EZSP_ASH_STATUS,
+                                 ackRx,
+                                 ackTx,
+                                 frmTx,
+                                 frmRx,
+                                 frmReTx,
+                                 sli_zigbee_message_buffer_queue_length(&reTxQueue),
+                                 ashTimeouts,
+                                 ashGetAckPeriod(),
+                                 emPacketBufferFreeCount);
 }
 
 static void ashPrintTime(void)
@@ -1008,61 +1008,61 @@ static void ashTraceEventDebugOnly(EzspStatus status)
 {
 #if !defined(EMBER_TEST)
   if (status == EZSP_ASH_STARTED) {
-    emDebugBinaryFormat(EM_DEBUG_EZSP_UART,
-                        "BBlf",
-                        ASH_VERSION,
-                        EZSP_ASH_STARTED,
-                        MFG_ASH_CONFIG_ARRAY_SIZE * sizeof(tokTypeMfgAshConfig),
-                        ASH_TOKEN_ADDRESS);
+    sli_zigbee_debug_binary_format(EM_DEBUG_EZSP_UART,
+                                   "BBlf",
+                                   ASH_VERSION,
+                                   EZSP_ASH_STARTED,
+                                   MFG_ASH_CONFIG_ARRAY_SIZE * sizeof(tokTypeMfgAshConfig),
+                                   ASH_TOKEN_ADDRESS);
   } else {
-    emDebugBinaryFormat(EM_DEBUG_EZSP_UART,
-                        "BBBB",
-                        ASH_VERSION,
-                        status,
-                        rxControl,
-                        rxLen);
+    sli_zigbee_debug_binary_format(EM_DEBUG_EZSP_UART,
+                                   "BBBB",
+                                   ASH_VERSION,
+                                   status,
+                                   rxControl,
+                                   rxLen);
   }
 #endif
 }
 //Sends an ACK message.
 static void ashTraceAckEvent(EzspStatus status, uint8_t ackNum)
 {
-  emDebugBinaryFormat(EM_DEBUG_EZSP_UART,
-                      "BBB",
-                      ASH_VERSION,
-                      status,
-                      ackNum);
+  sli_zigbee_debug_binary_format(EM_DEBUG_EZSP_UART,
+                                 "BBB",
+                                 ASH_VERSION,
+                                 status,
+                                 ackNum);
 }
 //Sends an RSTACK message to Network Analyzer
 static void ashTraceRstackEvent(uint16_t rstCode)
 {
-  emDebugBinaryFormat(EM_DEBUG_EZSP_UART,
-                      "BBBBB",
-                      ASH_VERSION,
-                      EZSP_ASH_TX,
-                      ASH_CONTROL_RSTACK,
-                      ASH_VERSION,
-                      rstCode);
+  sli_zigbee_debug_binary_format(EM_DEBUG_EZSP_UART,
+                                 "BBBBB",
+                                 ASH_VERSION,
+                                 EZSP_ASH_TX,
+                                 ASH_CONTROL_RSTACK,
+                                 ASH_VERSION,
+                                 rstCode);
 }
 
 //Sends an RST message to Network Analyzer
 static void ashTraceRstEvent()
 {
-  emDebugBinaryFormat(EM_DEBUG_EZSP_UART,
-                      "BBB",
-                      ASH_VERSION,
-                      EZSP_ASH_RST_RECEIVED,
-                      rxControl);
+  sli_zigbee_debug_binary_format(EM_DEBUG_EZSP_UART,
+                                 "BBB",
+                                 ASH_VERSION,
+                                 EZSP_ASH_RST_RECEIVED,
+                                 rxControl);
 }
 //Sends back a received DATA frame to Network Analyzer
 static void ashTraceDataRXEvent()
 {
-  emDebugBinaryFormat(EM_DEBUG_EZSP_UART,
-                      "BBBb",
-                      ASH_VERSION,
-                      EZSP_ASH_RX,
-                      rxControl,
-                      rxDataBuffer);
+  sli_zigbee_debug_binary_format(EM_DEBUG_EZSP_UART,
+                                 "BBBb",
+                                 ASH_VERSION,
+                                 EZSP_ASH_RX,
+                                 rxControl,
+                                 rxDataBuffer);
 }
 //This function occasionally has acks and naks come through, hence the logic.
 static void ashTraceDataTXEvent(EmberMessageBuffer buffer)
@@ -1076,12 +1076,12 @@ static void ashTraceDataTXEvent(EmberMessageBuffer buffer)
     }
   }
 
-  emDebugBinaryFormat(EM_DEBUG_EZSP_UART,
-                      "BBBb",
-                      ASH_VERSION,
-                      EZSP_ASH_TX,
-                      txControl,
-                      buffer);
+  sli_zigbee_debug_binary_format(EM_DEBUG_EZSP_UART,
+                                 "BBBb",
+                                 ASH_VERSION,
+                                 EZSP_ASH_TX,
+                                 txControl,
+                                 buffer);
 }
 
 //------------------------------------------------------------------------------
@@ -1123,8 +1123,8 @@ bool serialOkToBootload(void)
             ? (ackTx == frmRx)                  // do not need to send an ACK
             : true)
         && !(callbackPending())
-        && emMessageBufferQueueIsEmpty(&txQueue)
-        && emMessageBufferQueueIsEmpty(&txHighQueue)
+        && sli_legacy_packet_buffer_queue_is_empty(&txQueue)
+        && sli_legacy_packet_buffer_queue_is_empty(&txHighQueue)
         && (sendState == SEND_STATE_IDLE)       // nothing being transmitted now
         && halInternalUartTxIsIdle(ASH_PORT)    // uart TX FIFO and shifter empty
         );
@@ -1171,8 +1171,8 @@ bool serialOkToSleep(void)
     && (ackTx == frmRx)                     // do not need to send an ACK
     && (ackRx == frmTx)                     // not waiting to receive an ACK
     && !(callbackPending())
-    && emMessageBufferQueueIsEmpty(&txQueue)
-    && emMessageBufferQueueIsEmpty(&txHighQueue)
+    && sli_legacy_packet_buffer_queue_is_empty(&txQueue)
+    && sli_legacy_packet_buffer_queue_is_empty(&txHighQueue)
     && (sendState == SEND_STATE_IDLE)       // nothing being transmitted now
     && halInternalUartTxIsIdle(ASH_PORT)    // uart TX FIFO and shifter empty
     && halInternalUartFlowControlRxIsEnabled(ASH_PORT)  // host not being held off

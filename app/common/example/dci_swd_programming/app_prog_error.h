@@ -60,6 +60,7 @@
 #define DCI_RESPONSE_SECUREBOOT_ERROR           31
 #define DCI_RESPONSE_SELFTEST_ERROR             32
 #define DCI_RESPONSE_NOT_INITIALIZED            33
+#define DCI_ERROR_INVALID_DBG_RESTRICT          34
 
 /***************************************************************************//**
  * @note

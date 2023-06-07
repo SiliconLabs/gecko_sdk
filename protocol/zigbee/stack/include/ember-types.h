@@ -36,7 +36,6 @@
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #include "stack/config/ember-configuration-defaults.h"
-#include "stack/include/ember-static-struct.h"
 #endif //DOXYGEN_SHOULD_SKIP_THIS
 
 #include "mac-types.h"
@@ -425,6 +424,11 @@ typedef uint16_t EmberDutyCycleHectoPct;
 #define EMBER_BROADCAST_ENDPOINT 0xFFu
 
 /**
+ * @brief The GP endpoint, as defined in the ZigBee spec.
+ */
+#define EMBER_GP_ENDPOINT 0xF2u
+
+/**
  * @brief The profile ID used by the ZigBee Device Object (ZDO).
  */
 #define EMBER_ZDO_PROFILE_ID  0x0000u
@@ -652,6 +656,8 @@ typedef struct {
  *   rejoining.
  */
 typedef struct {
+  EmberPanId panId;
+  EmberNodeId sender;
   uint8_t channel;
   uint8_t lqi;
   int8_t rssi;
@@ -659,11 +665,16 @@ typedef struct {
   uint8_t nwkUpdateId;
   int8_t power;           // Only valid if enhanced beacon
   int8_t parentPriority;  // TC connectivity and long uptime from capacity field
-  bool enhanced     : 1;  // Enhanced or regular beacon
-  bool permitJoin   : 1;
-  bool hasCapacity  : 1;
-  EmberPanId panId;
-  EmberNodeId sender;
+  uint8_t supportedKeyNegotiationMethods;
+  bool extended_beacon;
+  bool enhanced             : 1;  // Enhanced or regular beacon
+  bool permitJoin           : 1;
+  bool hasCapacity          : 1;
+  bool tcConnectivity       : 1;
+  bool longUptime           : 1;
+  bool preferParent         : 1;
+  bool macDataPollKeepalive : 1;
+  bool endDeviceKeepalive   : 1;
   uint8_t extendedPanId[EXTENDED_PAN_ID_SIZE];
 } EmberBeaconData;
 
@@ -1217,6 +1228,31 @@ enum
       not need to send any messages to begin communicating on the network.
    */
   EMBER_USE_CONFIGURED_NWK_STATE    = 3,
+
+  /** This enumeration causes an unencrypted Network Commissioning Request to be
+      sent out with joinType set to initial join. The trust center may respond
+      by establishing a new dynamic link key and then sending the network key.
+      Network Commissioning Requests should only be sent to parents that support
+      processing of the command.
+   */
+  EMBER_USE_NWK_COMMISSIONING_JOIN = 4,
+
+  /** This enumeration causes an unencrypted Network Commissioning Request to be
+      sent out with joinType set to rejoin. The trust center may respond
+      by establishing a new dynamic link key and then sending the network key.
+      Network Commissioning Requests should only be sent to parents that support
+      processing of the command.
+   */
+  EMBER_USE_NWK_COMMISSIONING_REJOIN = 5,
+
+  /** This enumeration causes an encrypted Network Commissioning Request to be
+      sent out with joinType set to rejoin. This enumeration is used by devices
+      that already have the network key and wish to recover connection to a
+      parent or the network in general.
+      Network Commissioning Requests should only be sent to parents that support
+      processing of the command.
+   */
+  EMBER_USE_NWK_COMMISSIONING_REJOIN_HAVE_NWK_KEY = 6,
 };
 
 /** @brief Holds network parameters.
@@ -1349,8 +1385,7 @@ typedef struct {
 typedef struct {
   /** The neighbor's two-byte network ID.*/
   uint16_t shortId;
-  /** An exponentially weighted moving average of the link quality
-   *  values of incoming packets from this neighbor as reported by the PHY.*/
+  /** Filtered Link Quality indicator */
   uint8_t  averageLqi;
   /** The incoming cost for this neighbor, computed from the average LQI.
    *  Values range from 1 for a good link to 7 for a bad link.*/
@@ -1520,7 +1555,7 @@ enum
   EMBER_COUNTER_RELAYED_UNICAST = 28,
 
   /** The number of times a packet was dropped due to reaching the preset
-      PHY-to-MAC queue limit (emMaxPhyToMacQueueLength).  The limit will
+      PHY-to-MAC queue limit (sli_mac_phy_to_mac_queue_length).  The limit will
       determine how many messages are accepted by the PHY between calls to
       emberTick(). After that limit is reached, packets will be dropped.
       The number of dropped packets will be recorded in this counter.
@@ -2043,6 +2078,10 @@ enum
   // Bits 13-15 are unused.
 };
 
+/** @brief This denotes that the device can require a resync of the APS frame counter.
+ */
+#define EMBER_TC_SUPPORTS_FC_SYNC   0x00800000UL
+
 /** @brief This is the legacy name for the Distributed Trust Center Mode.
  */
 #define EMBER_NO_TRUST_CENTER_MODE   EMBER_DISTRIBUTED_TRUST_CENTER_MODE
@@ -2196,6 +2235,21 @@ enum
    * and are not exportable. In such cases, keyData will not house the actual
    * key contents. */
   EMBER_KEY_HAS_KEY_DATA               = 0x0100,
+  /** This indicates that the key represents a Device Authentication Token
+   * and is not an encryption key.  The Authentication token is persisted
+   * for the lifetime of the device on the network and used to validate
+   * and update the device connection. It is only removed when the device
+   * leaves or is decommissioned from the network
+   */
+  EMBER_KEY_IS_AUTHENTICATION_TOKEN    = 0x0200,
+  /** This indicates that the key has been derived by the Dynamic Link Key
+   * feature.
+   */
+  EMBER_DLK_DERIVED_KEY                = 0x0400,
+  /** This indicates that the device this key is being used to communicate with
+   * supports the APS frame counter synchronization procedure.
+   */
+  EMBER_KEY_FC_SYNC_SUPPORTED           = 0x0800,
 };
 
 /** @brief This data structure contains the transient key data that is used
@@ -2621,28 +2675,36 @@ enum
 {
   // These values are taken from Table 48 of ZDP Errata 043238r003 and Table 2
   // of NWK 02130r10.
-  EMBER_ZDP_SUCCESS                   = 0x00,
+  EMBER_ZDP_SUCCESS                    = 0x00,
   // 0x01 to 0x7F are reserved
-  EMBER_ZDP_INVALID_REQUEST_TYPE      = 0x80,
-  EMBER_ZDP_DEVICE_NOT_FOUND          = 0x81,
-  EMBER_ZDP_INVALID_ENDPOINT          = 0x82,
-  EMBER_ZDP_NOT_ACTIVE                = 0x83,
-  EMBER_ZDP_NOT_SUPPORTED             = 0x84,
-  EMBER_ZDP_TIMEOUT                   = 0x85,
-  EMBER_ZDP_NO_MATCH                  = 0x86,
-  // 0x87 is reserved                 = 0x87,
-  EMBER_ZDP_NO_ENTRY                  = 0x88,
-  EMBER_ZDP_NO_DESCRIPTOR             = 0x89,
-  EMBER_ZDP_INSUFFICIENT_SPACE        = 0x8a,
-  EMBER_ZDP_NOT_PERMITTED             = 0x8b,
-  EMBER_ZDP_TABLE_FULL                = 0x8c,
-  EMBER_ZDP_NOT_AUTHORIZED            = 0x8d,
-  EMBER_ZDP_DEVICE_BINDING_TABLE_FULL = 0x8e,
-  EMBER_ZDP_INVALID_INDEX             = 0x8f,
+  EMBER_ZDP_INVALID_REQUEST_TYPE       = 0x80,
+  EMBER_ZDP_DEVICE_NOT_FOUND           = 0x81,
+  EMBER_ZDP_INVALID_ENDPOINT           = 0x82,
+  EMBER_ZDP_NOT_ACTIVE                 = 0x83,
+  EMBER_ZDP_NOT_SUPPORTED              = 0x84,
+  EMBER_ZDP_TIMEOUT                    = 0x85,
+  EMBER_ZDP_NO_MATCH                   = 0x86,
+  // 0x87 is reserved                  = 0x87,
+  EMBER_ZDP_NO_ENTRY                   = 0x88,
+  EMBER_ZDP_NO_DESCRIPTOR              = 0x89,
+  EMBER_ZDP_INSUFFICIENT_SPACE         = 0x8a,
+  EMBER_ZDP_NOT_PERMITTED              = 0x8b,
+  EMBER_ZDP_TABLE_FULL                 = 0x8c,
+  EMBER_ZDP_NOT_AUTHORIZED             = 0x8d,
+  EMBER_ZDP_DEVICE_BINDING_TABLE_FULL  = 0x8e,
+  EMBER_ZDP_INVALID_INDEX              = 0x8f,
+  EMBER_ZDP_FRAME_TOO_LARGE            = 0x90,
+  EMBER_ZDP_BAD_KEY_NEGOTIATION_METHOD = 0x91,
+  EMBER_ZDP_TEMPORARY_FAILURE          = 0x92,
 
-  EMBER_NWK_ALREADY_PRESENT           = 0xC5,
-  EMBER_NWK_TABLE_FULL                = 0xC7,
-  EMBER_NWK_UNKNOWN_DEVICE            = 0xC8
+  EMBER_APS_SECURITY_FAIL              = 0xad,
+
+  EMBER_NWK_ALREADY_PRESENT            = 0xc5,
+  EMBER_NWK_TABLE_FULL                 = 0xc7,
+  EMBER_NWK_UNKNOWN_DEVICE             = 0xc8,
+
+  EMBER_NWK_MISSING_TLV                = 0xd6,
+  EMBER_NWK_INVALID_TLV                = 0xd7,
 };
 
 /**
@@ -2681,9 +2743,9 @@ enum
 /// <br> @{
 ///
 /// @code
-/// Request:  <transaction sequence number: 1> <node ID:2>
+/// Request:  <transaction sequence number: 1> <node ID:2> <tlvs: varies>
 /// Response: <transaction sequence number: 1> <status:1> <node ID:2>
-//            <node descriptor: 13>
+//            <node descriptor: 13> <tlvs: varies>
 //
 //  Node Descriptor field is divided into subfields of bitmasks as follows:
 //      (Note: All lengths below are given in bits rather than bytes.)
@@ -2764,19 +2826,6 @@ enum
 #define MATCH_DESCRIPTORS_RESPONSE   0x8006u
 /// @}
 
-/// @name Discovery Cache Request / Response
-/// <br> @{
-///
-/// @code
-/// Request:  <transaction sequence number: 1>
-///           <source node ID:2> <source EUI64:8>
-/// Response: <transaction sequence number: 1>
-///           <status (== EMBER_ZDP_SUCCESS):1>
-/// @endcode
-#define DISCOVERY_CACHE_REQUEST      0x0012u
-#define DISCOVERY_CACHE_RESPONSE     0x8012u
-/// @}
-
 /// @name End Device Announce and End Device Announce Response
 /// <br> @{
 ///
@@ -2835,8 +2884,8 @@ enum
   EMBER_ZDP_SECONDARY_TRUST_CENTER        = 0x0002,
   EMBER_ZDP_PRIMARY_BINDING_TABLE_CACHE   = 0x0004,
   EMBER_ZDP_SECONDARY_BINDING_TABLE_CACHE = 0x0008,
-  EMBER_ZDP_PRIMARY_DISCOVERY_CACHE       = 0x0010,
-  EMBER_ZDP_SECONDARY_DISCOVERY_CACHE     = 0x0020,
+  EMBER_ZDP_PRIMARY_DISCOVERY_CACHE       = 0x0010, /** DEPRECATED */
+  EMBER_ZDP_SECONDARY_DISCOVERY_CACHE     = 0x0020, /** DEPRECATED */
   EMBER_ZDP_NETWORK_MANAGER               = 0x0040,
   // Bits 0x0080 to 0x8000 are reserved.
 };
@@ -2870,6 +2919,20 @@ enum
 /// @endcode
 #define END_DEVICE_BIND_REQUEST      0x0020u
 #define END_DEVICE_BIND_RESPONSE     0x8020u
+/// @}
+
+/// @name Clear All Bindings Request / Response
+/// <br> @{
+///
+/// @code
+/// Request:  <transaction sequence number: 1>
+///           <clear all bindings request EUI64 TLV:Variable>
+/// Clear all bindings request EUI64 TLV:
+///           <Count N:1><EUI64 1:8>...<EUI64 N:8>
+/// Response: <transaction sequence number: 1> <status:1>
+/// @endcode
+#define CLEAR_ALL_BINDINGS_REQUEST      0x002Bu
+#define CLEAR_ALL_BINDINGS_RESPONSE     0x802Bu
 /// @}
 
 /// @name Binding types and Request / Response
@@ -3075,6 +3138,234 @@ enum
 
 /// @}
 
+/// @name Beacon Survey Request / Response
+/// <br> @{
+///
+/// This command can be used by a remote device to survey the end
+/// devices to determine how many potential parents they have
+/// access to.
+///
+/// @code
+/// Request:  <transaction sequence number: 1>
+///           <TLVs: varies>
+///
+/// Contains one Beacon Survey Configuration TLV (variable octets),
+/// which contain the ScanChannelListStructure (variable length)
+/// and the ConfigurationBitmask (1 octet). This information provides
+/// the configuration for the end device's beacon survey.
+/// See R23 spec section 2.4.3.3.12 for the request and 3.2.2.2.1
+/// for the ChannelListStructure.
+///
+/// @code
+/// Response:  <transaction sequence number: 1>
+///            <status: 1>
+///            <TLVs: varies>
+///
+/// Contains one Beacon Survey Results TLV (4 octets), which contain
+/// the number of on-network, off-network, potential parent and total
+/// beacons recorded. If the device that received the request is not a
+/// router, a Potential Parent TLV (variable octects) will be found. This
+/// will contain information on the device's current parent, as well as
+/// any potential parents found via beacons (up to a maximum of 5). A
+/// Pan ID Conflict TLV can also found in the response.
+/// See R23 spec section 2.4.4.3.13 for the response.
+/// @endcode
+#define BEACON_SURVEY_REQUEST       0x003Cu
+#define BEACON_SURVEY_RESPONSE      0x803Cu
+/// @}
+
+/// @name Security Start Key Negotiation Request / Response
+/// <br> @{
+///
+/// @code
+/// Request:  <transaction sequence number: 1>
+///           <TLVs: varies>
+///
+/// Contains one or more Curve25519 Public Point TLVs (40 octets),
+/// which contain an EUI64 and the 32-byte Curve public point.
+/// See R23 spec section 2.4.3.4.1
+///
+/// @note This command SHALL NOT be APS encrypted regardless of
+/// whether sent before or after the device joins the network.
+/// This command SHALL be network encrypted if the device has a
+/// network key, i.e. it has joined the network earlier and wants
+/// to negotiate or renegotiate a new link key; otherwise, if it
+/// is used prior to joining the network, it SHALL NOT be network
+///  encrypted.
+///
+/// Response: <transaction sequence number: 1> <status:1>
+///           <TLVs: varies>
+///
+/// Contains one or more Curve25519 Public Point TLVs (40 octets),
+/// which contain an EUI64 and the 32-byte Curve public point, or
+/// Local TLVs.
+/// See R23 spec section 2.4.4.4.1
+///
+/// @note This command SHALL NOT be APS encrypted. When performing
+/// Key Negotiation with an unauthenticated neighbor that is not
+/// yet on the network, network layer encryption SHALL NOT be used
+/// on the message. If the message is being sent to unauthenticated
+/// device that is not on the network and is not a neighbor, it
+/// SHALL be relayed as described in section 4.6.3.7.7. Otherwise
+/// the message SHALL have network layer encryption.
+/// @endcode
+#define KEY_NEGOTIATION_REQUEST       0x0040u
+#define KEY_NEGOTIATION_RESPONSE      0x8040u
+/// @}
+
+/// @name Retrieve Authentication Token Request / Response
+/// <br> @{
+///
+/// @code
+/// Request:  <transaction sequence number: 1>
+///           <TLVs: varies>
+///
+/// Contains one or more Authentication Token ID TLVs (1 octet),
+/// which contain the TLV Type Tag ID of the source of the
+/// authentication token. See R23 spec section 2.4.3.4.2
+///
+/// Response: <transaction sequence number: 1> <status:1>
+///           <TLVs: varies>
+///
+/// Contains one or more 128-bit Symmetric Passphrase Global TLVs
+/// (16 octets), which contain the symmetric passphrase authentication
+/// token. See R23 spec section 2.4.4.4.2
+///
+/// @endcode
+#define AUTHENTICATION_TOKEN_REQUEST      0x0041u
+#define AUTHENTICATION_TOKEN_RESPONSE     0x8041u
+/// @}
+
+/// @name Retrieve Authentication Level Request / Response
+/// <br> @{
+///
+/// @code
+/// Request:  <transaction sequence number: 1>
+///           <TLVs: varies>
+///
+/// Contains one or more Target IEEE Address TLVs (8 octets),
+/// which contain the EUI64 of the device of interest.
+/// See R23 spec section 2.4.3.4.3
+///
+/// Response: <transaction sequence number: 1> <status:1>
+///           <TLVs: varies>
+///
+/// Contains one or more Device Authentication Level TLVs
+/// (10 octets), which contain the EUI64 of the inquired device,
+/// along with the its initial join method and its active link
+/// key update method.
+/// See R23 spec section 2.4.4.4.3
+///
+/// @endcode
+#define AUTHENTICATION_LEVEL_REQUEST      0x0042u
+#define AUTHENTICATION_LEVEL_RESPONSE     0x8042u
+/// @}
+
+/// @name Set Configuration Request / Response
+/// <br> @{
+///
+/// @code
+/// Request:  <transaction sequence number: 1>
+///           <TLVs: varies>
+///
+/// Contains one or more Global TLVs (1 octet),
+/// which contain the TLV Type Tag ID, and their
+/// value.
+///
+/// Response: <transaction sequence number: 1> <status:1>
+///
+/// @endcode
+#define SET_CONFIGURATION_REQUEST      0x0043u
+#define SET_CONFIGURATION_RESPONSE     0x8043u
+/// @}
+
+/// @name Get Configuration Request / Response
+/// <br> @{
+///
+/// @code
+/// Request:  <transaction sequence number: 1>
+///           <TLVs: varies>
+///
+/// Contains one or more TLVs (1 octet),
+/// which the sender wants to get information
+///
+/// Response: <transaction sequence number: 1> <status:1>
+///           <TLVs: varies>
+///
+/// Contains one or more TLV tag Ids and their values
+/// in response to the request
+///
+/// @endcode
+#define GET_CONFIGURATION_REQUEST      0x0044u
+#define GET_CONFIGURATION_RESPONSE     0x8044u
+/// @}
+
+/// @name Security Start Key Update Request / Response
+/// <br> @{
+///
+/// @code
+/// Request:  <transaction sequence number: 1>
+///           <TLVs: varies>
+///
+/// Contains one or more TLVs. These TLVs can be Selected Key
+/// Negotiation Method TLVs (10 octets), Fragmentation Parameters
+/// Global TLVs (5 octets), or other TLVs.
+/// See R23 spec section 2.4.3.4.6
+///
+/// @note This SHALL NOT be APS encrypted or NWK encrypted if the
+/// link key update mechanism is done as part of the initial join
+/// and before the receiving device has been issued a network
+/// key. This SHALL be both APS encrypted and NWK encrypted if
+/// the link key update mechanism is performed to refresh the
+/// link key when the receiving device has the network key and
+/// has previously successfully joined the network.
+///
+/// Response: <transaction sequence number: 1> <status:1>
+///
+/// See R23 spec section 2.4.4.4.6
+///
+/// @note This command SHALL be APS encrypted.
+/// @endcode
+#define KEY_UPDATE_REQUEST       0x0045u
+#define KEY_UPDATE_RESPONSE      0x8045u
+/// @}
+
+/// @name Security Decommission Request / Response
+/// <br> @{
+///
+/// @code
+/// Request:  <transaction sequence number: 1>
+///           <security decommission request EUI64 TLV:Variable>
+/// Security Decommission request EUI64 TLV:
+///           <Count N:1><EUI64 1:8>...<EUI64 N:8>
+/// Response: <transaction sequence number: 1> <status:1>
+/// @endcode
+#define SECURITY_DECOMMISSION_REQUEST      0x0046u
+#define SECURITY_DECOMMISSION_RESPONSE     0x8046u
+/// @}
+
+/// @name Challenge for APS frame counter synchronization
+/// <br> @{
+///
+/// @code
+/// Request:  <transaction sequence number: 1>
+///           <TLVs: varies>
+///
+/// Contains at least the APS Frame Counter Challenge TLV, which holds the
+/// sender EUI and the 64 bit challenge value.
+///
+/// Response: <transaction sequence number: 1>
+///           <TLVs: varies>
+///
+/// Contains at least the APS Frame Counter Response TLV, which holds the
+/// sender EUI, received challenge value, APS frame counter, challenge
+/// security frame counter, and 8-byte MIC.
+///
+/// @endcode
+#define SECURITY_CHALLENGE_REQUEST      0x0047u
+#define SECURITY_CHALLENGE_RESPONSE     0x8047u
+/// @}
+
 /// @name Unsupported
 /// <br> @{
 ///  Not mandatory and not supported.
@@ -3090,6 +3381,19 @@ enum
 #define NETWORK_DISCOVERY_RESPONSE   0x8030u
 #define DIRECT_JOIN_REQUEST          0x0035u
 #define DIRECT_JOIN_RESPONSE         0x8035u
+
+/// @name Discovery Cache Request / Response
+/// <br> @{
+/// DEPRECATED
+/// @code
+/// Request:  <transaction sequence number: 1>
+///           <source node ID:2> <source EUI64:8>
+/// Response: <transaction sequence number: 1>
+///           <status (== EMBER_ZDP_SUCCESS):1>
+/// @endcode
+#define DISCOVERY_CACHE_REQUEST      0x0012u
+#define DISCOVERY_CACHE_RESPONSE     0x8012u
+/// @}
 
 #define CLUSTER_ID_RESPONSE_MINIMUM  0x8000u
 /// @}
@@ -3189,6 +3493,7 @@ enum {
   // Meaning rolling avg of RSSI over the last window of packets (16 for now) have been
   // lower than minRssiForReceivingPkts.
   // The rolling average is (re)initiated after the last successful (re)join.
+  PREFERRED_PARENT        = 0x60  // This is information we provide for routers.
 };
 
 /**
@@ -3401,10 +3706,211 @@ enum
   SL_PASSIVE_ACK_THRESHOLD_WITH_REBROADCAST_ALL_NODES
 };
 
+/**
+ * @brief represents a single entry in the APS duplicate rejection table
+ */
+typedef struct aps_duplicate_msg_entry {
+  uint32_t crc_digest;
+} sl_zigbee_aps_duplicate_msg_entry_t;
+
 /** @} END addtogroup
  */
+
+typedef struct {
+  uint16_t destination;
+  uint16_t nextHop;
+  uint8_t  status;
+  uint8_t  cost;
+  uint8_t  networkIndex;
+} sli_zigbee_route_table_entry_t;
+
+typedef struct {
+  uint16_t source;
+  uint16_t sender;
+  uint8_t  id;
+  uint8_t  forwardRoutingCost;
+  uint8_t  quarterSecondsToLive;
+  uint8_t  routeTableIndex;
+  uint8_t  networkIndex;
+} sli_zigbee_discovery_table_entry_t;
+
+typedef struct {
+  uint16_t source;
+  uint8_t  sequence;
+  uint8_t  numAcks;
+  uint32_t neighborBitmask;
+} sli_zigbee_broadcast_table_entry_t;
+
+// an entry in the neighbor table.  nodes directly measure the incoming
+// link quality, but rely on the neighbors to tell them their outgoing link
+// quality.
+//
+// we use an uint16_t rather than an uint8_t for the incoming link quality
+// value in order to have the needed precision to perform rolling averages.
+//
+// the age field is incremented every neighbor exchange period, and set
+// to zero upon reception of a neighbor exchange message which lists us.
+// thus it indicates the time since last obtaining a valid outgoing cost.
+//
+// the overlap count is used in the neighbor selection algorithm
+// to favor neighborhoods that have low overlap with ours.
+//
+// the active network key bit is used to indicate whether our neighbors
+// are using the active network key (my key) or the alternate
+// one.  this is important for knowing when to reset their frame counter.
+// for children's frame counters, see 'child.h'.
+
+// the neighbor association bit indicates whether the device was added to the
+// neighbor table because it associated to the local node (vs link status
+// message).  it is used to help pick which neighbor to remove from the
+// neighbor table.
+
+typedef struct {
+  EmberNodeId id;
+  uint16_t incoming;
+  uint8_t exchange;      // 0xf0 age in neighbor exchange periods
+                         // 0x07 outgoing cost (bottom 3 bits)
+                         // bit 0x08 is unused
+  uint8_t connectivity;  // overlap in bits 0,1
+                         // bits 2 and 3 are used to store information about
+                         // the previous incoming cost which can be 1,3,5,7
+                         // neighbor using my active network key in bit 4
+                         // bit 5 is reserved
+                         // neighbor association in bit 6
+                         // neighbor security capability in bit 7 (1 = high,
+                         //   0 = standard)
+  EmberEUI64 eui64;
+  uint8_t mac_interface_table_index;
+  uint8_t lqi_for_median[3];
+} sli_zigbee_neighbor_table_entry_t;
+
+typedef struct {
+  PacketHeader header;
+  uint8_t attempts;  // Top/bottom nibble is successful/remaining attempts.
+  uint16_t timer;
+  uint16_t startTime;
+} sli_zigbee_retry_queue_entry_t;
+
+typedef struct storeAndForwardEntryS {
+  PacketHeader header;
+  uint8_t attempts;    // Top/bottom nibble is successful/remaining attempts.
+  uint16_t timer;
+  uint16_t startTime;
+  uint16_t initialDelay;
+} sli_zigbee_store_and_forward_queue_entry_t;
+
+typedef struct {
+  EmberNodeId shortId;
+  EmberEUI64 longId;
+  uint8_t flags;
+} sli_zigbee_address_table_entry_t;
+
+typedef struct {
+  uint16_t msLeft;                // Time until resending or giving up.
+  PacketHeader header;          // The complete message.
+  uint8_t mode;                   // One of the EMBER_OUTGOING_... values.
+  uint8_t status;                 // See below.
+  uint8_t addressIndex;           // Index into the address or binding tables.
+} sli_zigbee_aps_unicast_message_data_t;
+
+typedef struct {
+  // Child Table Info
+  sl_mac_child_entry_t *childTable;
+  uint16_t *childStatus;
+  uint32_t *childTimers;
+  uint16_t *childLqi;
+
+  // Routing Table Info
+  uint8_t *routeRecordTable;
+
+  // Child Table End Device Info
+  uint8_t *endDeviceTimeout;
+  uint8_t endDeviceChildCount;
+
+  // Used for sending link status more quickly at startup
+  // and only used by routers.
+  uint8_t fastLinkStatusCount;
+
+  // Broadcast Table Info
+  uint8_t broadcastHead;
+  uint8_t inInitialBroadcastTimeout;
+  uint32_t broadcastAgeCutoffIndexes;
+  sli_zigbee_broadcast_table_entry_t *broadcastTable;
+
+  // Association info
+  bool permitJoining;
+  bool macPermitAssociation;
+  bool allowRejoinsWithWellKnownKey;
+
+  // Parent announcement
+  uint8_t parentAnnounceIndex;
+  uint8_t totalInitialChildren;
+
+  // PanId conflict info
+  EmberPanId newPanId;
+} sli_zigbee_pan_info_t;
+
+typedef struct {
+  uint8_t stackProfile;
+  uint8_t nodeType;
+  uint8_t zigbeeState;
+  uint8_t dynamicCapabilities;
+
+  uint8_t zigbeeNetworkSecurityLevel;
+  uint32_t securityStateBitmask;
+  uint8_t zigbeeSequenceNumber;
+  uint8_t apsSequenceNumber;
+
+  // Network security stuff
+  uint8_t securityKeySequenceNumber;
+  uint32_t nextNwkFrameCounter;
+
+  // APS security stuff
+  uint32_t incomingTcLinkKeyFrameCounter;
+
+  // Neighbor table
+  sli_zigbee_neighbor_table_entry_t *neighborTable;
+  uint8_t neighborTableSize;
+  uint8_t neighborCount;
+
+  // Incoming frame counters table
+  uint32_t* frameCounters;
+
+  // The number of ticks since our last successful poll.  Ticks are
+  // in seconds.
+  uint32_t ticksSinceLastPoll; // for timing out our parent
+  uint32_t msSinceLastPoll;   // for APS retry timeout adjustment
+
+  // Transmission statistics that are reported in NWK_UPDATE_RESPONSE ZDO
+  // messages.
+  uint16_t unicastTxAttempts;
+  uint16_t unicastTxFailures;
+  uint16_t parentNwkInformation;
+
+  // Child aging stuff
+  //----------------------------------------------------------------
+  // The last time we updated the child timers for each unit.
+  // The milliseconds needs to be larger because we use it on children, who
+  // may go a long time between calls to emberTick().
+  uint16_t lastChildAgeTimeSeconds;
+  uint32_t lastChildAgeTimeMs;
+
+  // PAN info contains collection of elements needed to accommodate
+  // single network, multi network and multi PAN use cases.
+  sli_zigbee_pan_info_t *panInfoData;
+} EmberNetworkInfo;
+
+// Note:
+// For single network case:
+//  - EmberNetworkInfo and sli_zigbee_pan_info: Single instance present.
+// For multi network case:
+//  - EmberNetworkInfo: Instance present for each network.
+//  - sli_zigbee_pan_info: Single Instance present.
+// For multi PAN case"
+//  - EmberNetworkInfo and sli_zigbee_pan_info: Instance present for each network.
 
 #endif // SLABS_EMBER_TYPES_H
 
 #include "stack/include/zll-types.h"
 #include "stack/include/gp-types.h"
+#include "stack/include/zigbee-security-manager-types.h"

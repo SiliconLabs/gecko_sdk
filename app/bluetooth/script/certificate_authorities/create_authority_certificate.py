@@ -57,7 +57,8 @@ def main(level,
          subj_state,
          subj_common_name,
          subj_locality,
-         subj_email_address):
+         subj_email_address,
+         subj_policy_oid):
 
     # Check arguments
     if level < 0:
@@ -131,7 +132,7 @@ def main(level,
 
     if level == 0:
         # Create root certificate. Self-signing.
-        cert = create_certificate(key.public_key(), key, subjects, subjects, validity)
+        cert = create_certificate(key.public_key(), key, subjects, subjects, validity, subj_policy_oid)
     else:
         # Create intermediate certificate.
         # Retrieve the private key and the certificate of the higher authority.
@@ -147,7 +148,7 @@ def main(level,
             raise Exception('The validity period of ' + path_prev_cert + ' has expired.')
 
         # Sign with the key of the higher authority.
-        cert = create_certificate(key.public_key(), root_key, subjects, root_cert.issuer, validity)
+        cert = create_certificate(key.public_key(), root_key, subjects, root_cert.issuer, validity, subj_policy_oid)
     
     # Write the certificate to file in PEM format.
     with open(path_cert, 'wb') as f:
@@ -156,7 +157,7 @@ def main(level,
     convert_header(path_cert, path_template) # Create header for SoC example
     print(name + ' authority certificate created.')
 
-def create_certificate(public_key, signing_key, subjects, issuer, validity):
+def create_certificate(public_key, signing_key, subjects, issuer, validity, policy_oid):
     ''' Create an x509 certificate object.
 
     Keyword arguments:
@@ -186,6 +187,17 @@ def create_certificate(public_key, signing_key, subjects, issuer, validity):
     # Add extensions
     cert = cert.add_extension(x509.SubjectKeyIdentifier.from_public_key(public_key), critical=False)
     cert = cert.add_extension(x509.BasicConstraints(ca=True, path_length=None), critical=True)
+    
+    # Add certificate policy if present
+    if policy_oid is not None:
+        obj_id = x509.ObjectIdentifier(policy_oid)
+        policy_info = [
+            x509.PolicyInformation(
+                obj_id,
+                []
+            )
+        ]
+        cert = cert.add_extension(x509.CertificatePolicies(policies=policy_info), critical=True)
 
     # Sign certificate
     cert = cert.sign(signing_key, cryptography.hazmat.primitives.hashes.SHA256())
@@ -294,6 +306,12 @@ def load_args():
                         type=str,
                         help='The e-mail address unit subject of the x509 certificate.',
                         dest='email_address')
+
+    parser.add_argument('-cp', '--certificatePolicy',
+                        type=str,
+                        help='The optional Certificate Policy Information extension. '\
+                             'Only a policy OID is supported.',
+                        dest='policy_oid')
     
     return parser.parse_args()
 
@@ -308,4 +326,5 @@ if __name__ == '__main__':
          args.state,
          args.common_name,
          args.locality,
-         args.email_address)
+         args.email_address,
+         args.policy_oid)

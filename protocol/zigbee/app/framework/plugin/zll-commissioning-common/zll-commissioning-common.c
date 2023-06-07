@@ -27,8 +27,9 @@
   #error ZLL is not supported with multiple networks.
 #endif
 
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #ifdef SL_CATALOG_ZIGBEE_NETWORK_CREATOR_PRESENT
 #define NETWORK_CREATOR_PRESENT
 #include "network-creator.h"
@@ -43,21 +44,6 @@
 #ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT
 #define TEST_HARNESS_Z3_PRESENT
 #endif
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_NETWORK_CREATOR
-#include EMBER_AF_API_NETWORK_CREATOR
-#define NETWORK_CREATOR_PRESENT
-#endif
-#ifdef EMBER_AF_PLUGIN_ZLL_COMMISSIONING_CLIENT
-#define ZLL_COMMISSIONING_CLIENT_PRESENT
-#endif
-#ifdef EMBER_AF_PLUGIN_ZLL_COMMISSIONING_SERVER
-#define ZLL_COMMISSIONING_SERVER_PRESENT
-#endif
-#ifdef EMBER_AF_PLUGIN_TEST_HARNESS_Z3
-#define TEST_HARNESS_Z3_PRESENT
-#endif
-#endif // UC_BUILD
 
 //------------------------------------------------------------------------------
 // Globals
@@ -66,44 +52,44 @@
 
 // The target network - used by both client and server sides, the latter mainly for
 // the touchlink complete callback to the application.
-EmberZllNetwork emAfZllNetwork;
+EmberZllNetwork sli_zigbee_af_zll_network;
 
 #ifdef ZLL_COMMISSIONING_CLIENT_PRESENT
 // Sub-device info (mainly for client, but server needs to initialize the count)
-EmberZllDeviceInfoRecord emAfZllSubDevices[EMBER_AF_PLUGIN_ZLL_COMMISSIONING_CLIENT_SUB_DEVICE_TABLE_SIZE];
-uint8_t emAfZllSubDeviceCount = 0;
+EmberZllDeviceInfoRecord sli_zigbee_af_zll_sub_devices[EMBER_AF_PLUGIN_ZLL_COMMISSIONING_CLIENT_SUB_DEVICE_TABLE_SIZE];
+uint8_t sli_zigbee_af_zll_sub_device_count = 0;
 #endif // ZLL_COMMISSIONING_CLIENT_PRESENT
 
 // The module state for both client and server.
-uint16_t emAfZllFlags = INITIAL;
+uint16_t sli_zigbee_af_zll_flags = INITIAL;
 
 // TL Rejoin stage allows a fixed number of retries (in case Beacon responses are missing).
 #define INITIATOR_REJOIN_MAX_RETRIES   4
-uint8_t emAfInitiatorRejoinRetryCount = 0;
+uint8_t sli_zigbee_af_initiatorRejoinRetryCount = 0;
 
 #ifdef PLUGIN_DEBUG
-static const uint8_t emAfZllCommissioningPluginName[] = "ZLL Commissioning Common";
-#define PLUGIN_NAME emAfZllCommissioningPluginName
+static const uint8_t sli_zigbee_af_zll_commissioning_plugin_name[] = "ZLL Commissioning Common";
+#define PLUGIN_NAME sli_zigbee_af_zll_commissioning_plugin_name
 #endif
 
 #ifdef TEST_HARNESS_Z3_PRESENT
-extern EmberEvent emZigbeeLeaveEvent;
+extern EmberEvent sli_zigbee_leave_event;
 #endif
 
 // Private ZLL commissioning functions
-void emAfZllFinishNetworkFormationForRouter(EmberStatus status);
-void emAfZllAbortTouchLink(EmberAfZllCommissioningStatus reason);
-void emAfZllStackStatus(EmberStatus status);
-void emAfZllInitializeRadio(void);
-bool emAfZllStealingAllowed(void);
-bool emAfZllRemoteResetAllowed(void);
+void sli_zigbee_af_zll_finish_network_formation_for_router(EmberStatus status);
+void sli_zigbee_af_zll_abort_touch_link(EmberAfZllCommissioningStatus reason);
+void sli_zigbee_af_zll_stack_status(EmberStatus status);
+void sli_zigbee_af_zll_initialize_radio(void);
+bool sli_zigbee_af_zll_stealing_allowed(void);
+bool sli_zigbee_af_zll_remote_reset_allowed(void);
 
 // Forward references
-bool emAfZllAmFactoryNew(void);
+bool sli_zigbee_af_zll_am_factory_new(void);
 #ifdef EZSP_HOST
 void emberAfPluginZllCommissioningCommonNcpInitCallback(bool memoryAllocation);
 #else
-void emberAfPluginZllCommissioningCommonInitCallback(SLXU_INIT_ARG);
+void emberAfPluginZllCommissioningCommonInitCallback(uint8_t init_level);
 #endif
 
 //------------------------------------------------------------------------------
@@ -122,18 +108,18 @@ static void initFactoryNew(void)
 {
   // The initialization is only performed if we are factory new in the BDB sense,
   // i.e. not joined to a centralized or distributed network.
-  if (emAfZllAmFactoryNew()) {
+  if (sli_zigbee_af_zll_am_factory_new()) {
     emberAfAppPrintln("ZllCommInit - device is not joined to a network");
 
     // Set the default ZLL node type for both client and server, for Scan Request
     // and Scan Response messages respectively.
-    emberSetZllNodeType((emAfCurrentZigbeeProNetwork->nodeType
+    emberSetZllNodeType((sli_zigbee_af_current_zigbee_pro_network->nodeType
                          == EMBER_COORDINATOR)
                         ? EMBER_ROUTER
-                        : emAfCurrentZigbeeProNetwork->nodeType);
+                        : sli_zigbee_af_current_zigbee_pro_network->nodeType);
 
 #ifdef ZLL_COMMISSIONING_SERVER_PRESENT
-    emAfZllInitializeRadio();
+    sli_zigbee_af_zll_initialize_radio();
 #endif
 
 #ifdef ZLL_COMMISSIONING_CLIENT_PRESENT
@@ -166,53 +152,49 @@ static void completeResetToFactoryNew(void)
 #ifdef EZSP_HOST
   emberAfPluginZllCommissioningCommonNcpInitCallback(false);
 #else
-#ifdef UC_BUILD
   // TODO: fix this once we port the init callback
   emberAfPluginZllCommissioningCommonInitCallback(SL_ZIGBEE_INIT_LEVEL_EVENT);
-#else // !UC_BUILD
-  emberAfPluginZllCommissioningCommonInitCallback();
-#endif
 #endif
   emberAfPluginZllCommissioningCommonResetToFactoryNewCallback();
-  emAfZllFlags = INITIAL;
+  sli_zigbee_af_zll_flags = INITIAL;
 }
 
 //------------------------------------------------------------------------------
 // ZLL commissioning private functions
 
-bool emAfZllAmFactoryNew(void)
+bool sli_zigbee_af_zll_am_factory_new(void)
 {
   EmberTokTypeStackZllData token;
   emberZllGetTokenStackZllData(&token);
   return isFactoryNew(token.bitmask);
 }
 
-void emAfZllTouchLinkComplete(void)
+void sli_zigbee_af_zll_touch_link_complete(void)
 {
   EmberNodeType nodeType;
   EmberNetworkParameters parameters;
   emberAfGetNetworkParameters(&nodeType, &parameters);
-  emAfZllNetwork.zigbeeNetwork.channel = parameters.radioChannel;
-  emAfZllNetwork.zigbeeNetwork.panId = parameters.panId;
-  MEMMOVE(emAfZllNetwork.zigbeeNetwork.extendedPanId,
+  sli_zigbee_af_zll_network.zigbeeNetwork.channel = parameters.radioChannel;
+  sli_zigbee_af_zll_network.zigbeeNetwork.panId = parameters.panId;
+  MEMMOVE(sli_zigbee_af_zll_network.zigbeeNetwork.extendedPanId,
           parameters.extendedPanId,
           EXTENDED_PAN_ID_SIZE);
-  emAfZllNetwork.zigbeeNetwork.nwkUpdateId = parameters.nwkUpdateId;
+  sli_zigbee_af_zll_network.zigbeeNetwork.nwkUpdateId = parameters.nwkUpdateId;
 #ifdef ZLL_COMMISSIONING_CLIENT_PRESENT
-  emberAfPluginZllCommissioningCommonTouchLinkCompleteCallback(&emAfZllNetwork,
-                                                               emAfZllSubDeviceCount,
-                                                               (emAfZllSubDeviceCount == 0
+  emberAfPluginZllCommissioningCommonTouchLinkCompleteCallback(&sli_zigbee_af_zll_network,
+                                                               sli_zigbee_af_zll_sub_device_count,
+                                                               (sli_zigbee_af_zll_sub_device_count == 0
                                                                 ? NULL
-                                                                : emAfZllSubDevices));
+                                                                : sli_zigbee_af_zll_sub_devices));
 #else
-  emberAfPluginZllCommissioningCommonTouchLinkCompleteCallback(&emAfZllNetwork, 0, NULL);
+  emberAfPluginZllCommissioningCommonTouchLinkCompleteCallback(&sli_zigbee_af_zll_network, 0, NULL);
 #endif // ZLL_COMMISSIONING_CLIENT_PRESENT
 
   // Update module state after the callback call.
-  emAfZllFlags = INITIAL;
+  sli_zigbee_af_zll_flags = INITIAL;
 }
 
-EmberNodeType emAfZllGetLogicalNodeType(void)
+EmberNodeType sli_zigbee_af_zll_get_logical_node_type(void)
 {
   EmberNodeType nodeType;
   EmberStatus status = emberAfGetNodeType(&nodeType);
@@ -220,7 +202,7 @@ EmberNodeType emAfZllGetLogicalNodeType(void)
   // Note, we only report as a coordinator if we are a currently
   // coordinator on a centralized network.
   if (status == EMBER_NOT_JOINED) {
-    nodeType = emAfCurrentZigbeeProNetwork->nodeType;
+    nodeType = sli_zigbee_af_current_zigbee_pro_network->nodeType;
     if (nodeType == EMBER_COORDINATOR) {
       nodeType = EMBER_ROUTER;
     }
@@ -235,7 +217,7 @@ EmberNodeType emAfZllGetLogicalNodeType(void)
 // Note that it WILL now result in a 'ZLL' distributed network being created, i.e.,
 // a network appropriate to a address-assignment-capable touchlink initiator,
 // with address and group ranges assigned to it.
-EmberStatus emAfZllFormNetwork(uint8_t channel, int8_t power, EmberPanId panId)
+EmberStatus sli_zigbee_af_zll_form_network(uint8_t channel, int8_t power, EmberPanId panId)
 {
   // Create a distributed commissioning network using the ZLL link key.
   EmberZllNetwork network;
@@ -246,17 +228,17 @@ EmberStatus emAfZllFormNetwork(uint8_t channel, int8_t power, EmberPanId panId)
   EmberTokTypeStackZllData token;
   emberZllGetTokenStackZllData(&token);
   network.state = token.bitmask & 0xffff;
-  network.nodeType = emAfZllGetLogicalNodeType();
+  network.nodeType = sli_zigbee_af_zll_get_logical_node_type();
   emberAfZllSetInitialSecurityState();
   EmberStatus status = emberZllFormNetwork(&network, power);
   debugPrintln("%p: emberZllFormNetwork - status = %X, node type = %d", PLUGIN_NAME, status, network.nodeType);
   if (status == EMBER_SUCCESS) {
-    emAfZllFlags |= FORMING_NETWORK;
+    sli_zigbee_af_zll_flags |= FORMING_NETWORK;
   }
   return status;
 }
 
-EmberZllPolicy emAfZllGetPolicy(void)
+EmberZllPolicy sli_zigbee_af_zll_get_policy(void)
 {
   EmberZllPolicy policy;
 #ifdef EZSP_HOST
@@ -272,19 +254,19 @@ EmberZllPolicy emAfZllGetPolicy(void)
 //------------------------------------------------------------------------------
 // Public functions
 
-void emberAfPluginZllCommissioningCommonInitCallback(SLXU_INIT_ARG)
+void emberAfPluginZllCommissioningCommonInitCallback(uint8_t init_level)
 {
-  SLXU_INIT_UNUSED_ARG;
+  (void)init_level;
 
 #ifndef EZSP_HOST
   // Set the policy for both server and client.
   EmberZllPolicy policy = EMBER_ZLL_POLICY_ENABLED;
 #ifdef ZLL_COMMISSIONING_SERVER_PRESENT
   policy |= EMBER_ZLL_POLICY_TARGET;
-  if (emAfZllStealingAllowed()) {
+  if (sli_zigbee_af_zll_stealing_allowed()) {
     policy |= EMBER_ZLL_POLICY_STEALING_ENABLED;
   }
-  if (emAfZllRemoteResetAllowed()) {
+  if (sli_zigbee_af_zll_remote_reset_allowed()) {
     policy |= EMBER_ZLL_POLICY_REMOTE_RESET_ENABLED;
   }
 #endif
@@ -309,10 +291,10 @@ void emberAfPluginZllCommissioningCommonNcpInitCallback(bool memoryAllocation)
     EmberZllPolicy policy = EMBER_ZLL_POLICY_ENABLED;
 #ifdef ZLL_COMMISSIONING_SERVER_PRESENT
     policy |= EMBER_ZLL_POLICY_TARGET;
-    if (emAfZllStealingAllowed()) {
+    if (sli_zigbee_af_zll_stealing_allowed()) {
       policy |= EMBER_ZLL_POLICY_STEALING_ENABLED;
     }
-    if (emAfZllRemoteResetAllowed()) {
+    if (sli_zigbee_af_zll_remote_reset_allowed()) {
       policy |= EMBER_ZLL_POLICY_REMOTE_RESET_ENABLED;
     }
 #endif
@@ -375,9 +357,9 @@ void emberAfZllResetToFactoryNew(void)
 {
   // The leave will cause the ZLL state to be set to 'factory new',
   // but after a short delay.
-  emAfZllFlags |= RESETTING_TO_FACTORY_NEW;
+  sli_zigbee_af_zll_flags |= RESETTING_TO_FACTORY_NEW;
 
-  debugPrintln("emberAfZllResetToFactoryNew - flags = %X, networkState = %X", emAfZllFlags, emberNetworkState());
+  debugPrintln("emberAfZllResetToFactoryNew - flags = %X, networkState = %X", sli_zigbee_af_zll_flags, emberNetworkState());
 
   // Note that we won't get a network down stack status if we
   // are currently trying to join - the leave will complete silently.
@@ -397,28 +379,24 @@ void emberAfZllResetToFactoryNew(void)
     // Complete the leave immediately without the usual delay for a local reset
     // (this is to accommodate ZTT scripts which issue a 'network leave'
     // which is immediately followed by a 'reset').
-    emberEventSetActive(&emZigbeeLeaveEvent);
+    emberEventSetActive(&sli_zigbee_leave_event);
   }
 #endif
 }
 
 // TODO: renamed for naming consistency purposes
-#ifdef UC_BUILD
-void emAfPluginZllCommissioningCommonStackStatusCallback(EmberStatus status)
-#else
-void emberAfPluginZllCommissioningCommonStackStatusCallback(EmberStatus status)
-#endif
+void sli_zigbee_af_zll_commissioning_common_stack_status_callback(EmberStatus status)
 {
   // If we are forming a network for a router initiator, then we handle
   // this status separately.
   // During touch linking, EMBER_NETWORK_UP means the process is complete.  Any
   // other status, unless we're busy joining or rejoining, means that the touch
   // link failed.
-  debugPrintln("%p: ZllCommStackStatus: status = %X, flags = %X", PLUGIN_NAME, status, emAfZllFlags);
+  debugPrintln("%p: ZllCommStackStatus: status = %X, flags = %X", PLUGIN_NAME, status, sli_zigbee_af_zll_flags);
 
 #if defined(ZLL_COMMISSIONING_CLIENT_PRESENT) && defined(NETWORK_CREATOR_PRESENT)
   if (formingNetwork()) {
-    emAfZllFinishNetworkFormationForRouter(status);
+    sli_zigbee_af_zll_finish_network_formation_for_router(status);
   } else
 #endif
 
@@ -429,7 +407,7 @@ void emberAfPluginZllCommissioningCommonStackStatusCallback(EmberStatus status)
     }
   } else if (touchLinkInProgress()) { // including TOUCH_LINK_TARGET
     if (status == EMBER_NETWORK_UP) {
-      emAfZllTouchLinkComplete();
+      sli_zigbee_af_zll_touch_link_complete();
     } else if (status == EMBER_NETWORK_DOWN) {
       // We don't do anything here for a network down.
     } else {
@@ -437,18 +415,18 @@ void emberAfPluginZllCommissioningCommonStackStatusCallback(EmberStatus status)
                         "Error: ",
                         "Touch linking failed: ",
                         "joining failed",
-                        status, emAfZllFlags);
+                        status, sli_zigbee_af_zll_flags);
 #ifdef ZLL_COMMISSIONING_CLIENT_PRESENT
       if (!touchLinkTarget()) {
         if ((emberAfNetworkState() == EMBER_JOINED_NETWORK_NO_PARENT)
-            && (emAfInitiatorRejoinRetryCount < INITIATOR_REJOIN_MAX_RETRIES)) {
+            && (sli_zigbee_af_initiatorRejoinRetryCount < INITIATOR_REJOIN_MAX_RETRIES)) {
           // The TL initiator has joined the target's Pan but the final Rejoin
           // has failed (e.g. if the target fails to send a Beacon Response
           // during the rejoin).  We allow a number of Rejoin retries here.
-          ++emAfInitiatorRejoinRetryCount;
+          ++sli_zigbee_af_initiatorRejoinRetryCount;
           emberRejoinNetwork(true);
         } else {
-          emAfZllAbortTouchLink(EMBER_AF_ZLL_JOINING_FAILED);
+          sli_zigbee_af_zll_abort_touch_link(EMBER_AF_ZLL_JOINING_FAILED);
         }
       }
 #endif
@@ -492,7 +470,7 @@ bool emberAfZllTouchLinkInProgress(void)
 // initiator, as well as touchlink target.
 EmberStatus emberAfZllDisable(void)
 {
-  EmberZllPolicy policy = emAfZllGetPolicy();
+  EmberZllPolicy policy = sli_zigbee_af_zll_get_policy();
   EmberStatus status;
 #ifndef EZSP_HOST
   status = emberZllSetPolicy(policy & ~EMBER_ZLL_POLICY_ENABLED);
@@ -507,16 +485,16 @@ EmberStatus emberAfZllDisable(void)
 
 EmberStatus emberAfZllEnable(void)
 {
-  EmberZllPolicy policy = emAfZllGetPolicy();
+  EmberZllPolicy policy = sli_zigbee_af_zll_get_policy();
   EmberStatus status;
 
   // Re-enable stealing and remote reset, if we have server-side, and the plugin option permits it.
   policy |= EMBER_ZLL_POLICY_ENABLED;
 #ifdef ZLL_COMMISSIONING_SERVER_PRESENT
-  if (emAfZllStealingAllowed()) {
+  if (sli_zigbee_af_zll_stealing_allowed()) {
     policy |= EMBER_ZLL_POLICY_STEALING_ENABLED;
   }
-  if (emAfZllRemoteResetAllowed()) {
+  if (sli_zigbee_af_zll_remote_reset_allowed()) {
     policy |= EMBER_ZLL_POLICY_REMOTE_RESET_ENABLED;
   }
 #endif

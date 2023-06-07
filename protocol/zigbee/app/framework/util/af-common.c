@@ -29,7 +29,9 @@
   #include "stack/include/cbke-crypto-engine.h"  // emberGetCertificate()
 #endif
 
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 
 #ifdef SL_CATALOG_ZIGBEE_SUB_GHZ_CLIENT_PRESENT
 #include "sub-ghz-client.h"
@@ -105,34 +107,34 @@ static void printMessage(EmberIncomingMessageType type,
 //------------------------------------------------------------------------------
 // Internal callbacks
 
-// This is called from emAfIncomingMessageCallback() in af-soc.c or af-host.c
-void emAfIncomingMessageHandler(EmberIncomingMessageType type,
-                                EmberApsFrame *apsFrame,
-                                uint8_t lastHopLqi,
-                                int8_t lastHopRssi,
-                                uint16_t messageLength,
-                                uint8_t *messageContents)
+// This is called from sli_zigbee_af_incoming_message_callback() in af-soc.c or af-host.c
+void sli_zigbee_af_incoming_message_handler(EmberIncomingMessageType type,
+                                            EmberApsFrame *apsFrame,
+                                            uint8_t lastHopLqi,
+                                            int8_t lastHopRssi,
+                                            uint16_t messageLength,
+                                            uint8_t *messageContents)
 {
   EmberNodeId sender = emberGetSender();
   EmberAfIncomingMessage im;
 
 #ifdef SL_CATALOG_ZIGBEE_FRAGMENTATION_PRESENT
-  if (emAfFragmentationIncomingMessage(type,
-                                       apsFrame,
-                                       sender,
-                                       &messageContents,
-                                       &messageLength)) {
+  if (sli_zigbee_af_fragmentation_incoming_message(type,
+                                                   apsFrame,
+                                                   sender,
+                                                   &messageContents,
+                                                   &messageLength)) {
     emberAfDebugPrintln("%pfragment processed.", "Fragmentation:");
     return;
   }
 #endif // SL_CATALOG_ZIGBEE_FRAGMENTATION_PRESENT
 
 #ifdef SL_CATALOG_ZIGBEE_SUB_GHZ_SERVER_PRESENT
-  if (emAfSubGhzServerIncomingMessage(type,
-                                      apsFrame,
-                                      sender,
-                                      messageLength,
-                                      messageContents)) {
+  if (sli_zigbee_af_sub_ghz_server_incoming_message(type,
+                                                    apsFrame,
+                                                    sender,
+                                                    messageLength,
+                                                    messageContents)) {
     emberAfDebugPrintln("Sub-GHz: incoming message rejected.");
     return;
   }
@@ -161,15 +163,15 @@ void emAfIncomingMessageHandler(EmberIncomingMessageType type,
   }
 
   // Handle service discovery responses.
-  if (emAfServiceDiscoveryIncoming(sender,
-                                   apsFrame,
-                                   messageContents,
-                                   messageLength)) {
+  if (sli_zigbee_af_service_discovery_incoming(sender,
+                                               apsFrame,
+                                               messageContents,
+                                               messageLength)) {
     return;
   }
 
   // Handle ZDO messages.
-  if (emAfProcessZdo(sender, apsFrame, messageContents, messageLength)) {
+  if (sli_zigbee_af_process_zdo(sender, apsFrame, messageContents, messageLength)) {
     return;
   }
 
@@ -184,14 +186,14 @@ void emAfIncomingMessageHandler(EmberIncomingMessageType type,
   }
 }
 
-// This is called from emAfMessageSentCallback() in af-soc.c or af-host.c
-void emAfMessageSentHandler(EmberOutgoingMessageType type,
-                            uint16_t indexOrDestination,
-                            EmberApsFrame *apsFrame,
-                            EmberStatus status,
-                            uint16_t messageLength,
-                            uint8_t *messageContents,
-                            uint16_t messageTag)
+// This is called from sli_zigbee_af_message_sent_callback() in af-soc.c or af-host.c
+void sli_zigbee_af_message_sent_handler(EmberOutgoingMessageType type,
+                                        uint16_t indexOrDestination,
+                                        EmberApsFrame *apsFrame,
+                                        EmberStatus status,
+                                        uint16_t messageLength,
+                                        uint8_t *messageContents,
+                                        uint16_t messageTag)
 {
   EmberAfMessageSentFunction callback;
   if (status != EMBER_SUCCESS) {
@@ -239,13 +241,13 @@ void emAfMessageSentHandler(EmberOutgoingMessageType type,
                              status);
 }
 
-WEAK(void emAfStackStatusCallback(EmberStatus status))
+WEAK(void sli_zigbee_af_stack_status_callback(EmberStatus status))
 {
   emberAfAppFlush();
 
   // To be extra careful, we clear the network cache whenever a new status is
   // received.
-  emAfClearNetworkCache(emberGetCurrentNetwork());
+  sli_zigbee_af_clear_network_cache(emberGetCurrentNetwork());
 
   switch (status) {
     case EMBER_NETWORK_UP:
@@ -256,7 +258,7 @@ WEAK(void emAfStackStatusCallback(EmberStatus status))
       // Set the runtime security settings as soon as the stack goes up.
       EmberExtendedSecurityBitmask oldExtended;
       EmberExtendedSecurityBitmask newExtended = 0;
-      const EmberAfSecurityProfileData *data = emAfGetCurrentSecurityProfileData();
+      const EmberAfSecurityProfileData *data = sli_zigbee_af_get_current_security_profile_data();
       bool trustCenter = (emberAfGetNodeId() == EMBER_TRUST_CENTER_NODE_ID);
       if (data != NULL) {
         newExtended = (trustCenter
@@ -623,8 +625,8 @@ void emberAfPrintMessageData(uint8_t* data, uint16_t length)
 #endif // EMBER_AF_PRINT_APP
 }
 
-void emAfPrintStatus(const char * task,
-                     EmberStatus status)
+void sli_zigbee_af_print_status(const char * task,
+                                EmberStatus status)
 {
   if (status == EMBER_SUCCESS) {
     emberAfPrint(emberAfPrintActiveArea,
@@ -649,8 +651,8 @@ EmberStatus emberAfPermitJoin(uint8_t duration,
     emberAfAppPrintln("Limiting duration of permit join from forever (255) to 254");
     duration = EMBER_AF_PERMIT_JOIN_MAX_TIMEOUT;
   }
-  return emAfPermitJoin(duration,
-                        broadcastMgmtPermitJoin);
+  return sli_zigbee_af_permit_join(duration,
+                                   broadcastMgmtPermitJoin);
 }
 
 EmberAfCbkeKeyEstablishmentSuite emberAfIsFullSmartEnergySecurityPresent(void)
@@ -681,19 +683,19 @@ EmberStatus emberAfFormNetwork(EmberNetworkParameters *parameters)
 {
   EmberStatus status = EMBER_INVALID_CALL;
   EmberCurrentSecurityState securityState;
-  if (emAfProIsCurrentNetwork()) {
+  if (sli_zigbee_af_pro_is_current_network()) {
     emberAfCorePrintln("%ping on ch %d, panId 0x%2X",
                        "Form",
                        parameters->radioChannel,
                        parameters->panId);
     emberAfCoreFlush();
-    if (emAfCurrentZigbeeProNetwork->nodeType == EMBER_COORDINATOR) {
+    if (sli_zigbee_af_current_zigbee_pro_network->nodeType == EMBER_COORDINATOR) {
       zaTrustCenterSecurityInit(true); // centralized network
     }
     // ignore return value for now since it always returns EMBER_SUCCESS
     (void)emberGetCurrentSecurityState(&securityState);
-    if (emAfCurrentZigbeeProNetwork->nodeType == EMBER_COORDINATOR  \
-        || ((emAfCurrentZigbeeProNetwork->nodeType == EMBER_ROUTER) \
+    if (sli_zigbee_af_current_zigbee_pro_network->nodeType == EMBER_COORDINATOR  \
+        || ((sli_zigbee_af_current_zigbee_pro_network->nodeType == EMBER_ROUTER) \
             && (securityState.bitmask & EMBER_DISTRIBUTED_TRUST_CENTER_MODE))) {
       status = emberFormNetwork(parameters);
     } else {
@@ -707,8 +709,8 @@ EmberStatus emberAfFormNetwork(EmberNetworkParameters *parameters)
 EmberStatus emberAfJoinNetwork(EmberNetworkParameters *parameters)
 {
   EmberStatus status = EMBER_INVALID_CALL;
-  if (emAfProIsCurrentNetwork()) {
-    EmberNodeType nodeType = emAfCurrentZigbeeProNetwork->nodeType;
+  if (sli_zigbee_af_pro_is_current_network()) {
+    EmberNodeType nodeType = sli_zigbee_af_current_zigbee_pro_network->nodeType;
     if (nodeType == EMBER_COORDINATOR) {
       nodeType = EMBER_ROUTER;
     }
@@ -746,9 +748,9 @@ static const EmberReleaseTypeStruct releaseTypes[] = {
 //------------------------------------------------------------------------------
 // Internal APIs
 
-// Called from emAfInitCallback() in af-soc.c or af-host.c
+// Called from sli_zigbee_af_initCallback() in af-soc.c or af-host.c
 // Initialize stack profile and security level based on security profile.
-void emAfNetworkSecurityInit(void)
+void sli_zigbee_af_network_security_init(void)
 {
   // Typically, we initialize the stack profile based on EMBER_STACK_PROFILE
   // and initialize the security level based on EMBER_SECURITY_LEVEL.
@@ -765,8 +767,8 @@ void emAfNetworkSecurityInit(void)
   uint8_t securityLevel;
   for (uint8_t i = 0; i < EMBER_SUPPORTED_NETWORKS; i++) {
     (void) emberAfPushNetworkIndex(i);
-    if (emAfProIsCurrentNetwork()) {
-      switch (emAfCurrentZigbeeProNetwork->securityProfile) {
+    if (sli_zigbee_af_pro_is_current_network()) {
+      switch (sli_zigbee_af_current_zigbee_pro_network->securityProfile) {
         case EMBER_AF_SECURITY_PROFILE_NONE:
           stackProfile = EMBER_STACK_PROFILE_NONE;
           securityLevel = EMBER_SECURITY_LEVEL_NONE;
@@ -782,7 +784,7 @@ void emAfNetworkSecurityInit(void)
           break;
         default:
           emberAfCorePrintln("Invalid Security Profile: 0x%X",
-                             emAfCurrentZigbeeProNetwork->securityProfile);
+                             sli_zigbee_af_current_zigbee_pro_network->securityProfile);
           EMBER_TEST_ASSERT(false);
           (void) emberAfPopNetworkIndex();
           return;
@@ -799,25 +801,25 @@ void emAfNetworkSecurityInit(void)
 // type of the device must match the one used previously, but note that
 // coordinator-capable devices are allowed to initialize as routers.
 #if (EMBER_AF_TC_SWAP_OUT_TEST == 0)
-void emAfNetworkInit(SLXU_INIT_ARG)
+void sli_zigbee_af_network_init(uint8_t init_level)
 {
-  SLXU_INIT_UNUSED_ARG;
+  (void)init_level;
 
   uint8_t i;
   for (i = 0; i < EMBER_SUPPORTED_NETWORKS; i++) {
     bool initialize = true;
     (void) emberAfPushNetworkIndex(i);
-    emAfClearNetworkCache(i);
-    if (emAfProIsCurrentNetwork()) {
+    sli_zigbee_af_clear_network_cache(i);
+    if (sli_zigbee_af_pro_is_current_network()) {
       EmberNodeType nodeType;
-      if (emAfCurrentZigbeeProNetwork->nodeType == EMBER_COORDINATOR) {
+      if (sli_zigbee_af_current_zigbee_pro_network->nodeType == EMBER_COORDINATOR) {
         zaTrustCenterSecurityPolicyInit();
       }
       if (emberAfGetNodeType(&nodeType) == EMBER_SUCCESS
-          && (nodeType != emAfCurrentZigbeeProNetwork->nodeType
+          && (nodeType != sli_zigbee_af_current_zigbee_pro_network->nodeType
               && (nodeType != EMBER_S2S_INITIATOR_DEVICE)
               && (nodeType != EMBER_S2S_TARGET_DEVICE)
-              && (emAfCurrentZigbeeProNetwork->nodeType != EMBER_COORDINATOR
+              && (sli_zigbee_af_current_zigbee_pro_network->nodeType != EMBER_COORDINATOR
                   || nodeType != EMBER_ROUTER))) {
         initialize = false;
       }
@@ -829,14 +831,14 @@ void emAfNetworkInit(SLXU_INIT_ARG)
     (void) emberAfPopNetworkIndex();
   }
 }
-//EMBER_AF_TC_SWAP_OUT_TEST Prevent calling emAfNetworkInit during stack initialization
+//EMBER_AF_TC_SWAP_OUT_TEST Prevent calling sli_zigbee_af_network_init during stack initialization
 #else // EMBER_AF_TC_SWAP_OUT_TEST
-void emAfNetworkInit(SLXU_INIT_ARG)
+void sli_zigbee_af_network_init(uint8_t init_level)
 {
 }
 #endif //EMBER_AF_TC_SWAP_OUT_TEST
-// Called from emAfInitCallback() in af-soc.c or af-host.c
-void emAfInitializeMessageSentCallbackArray(void)
+// Called from sli_zigbee_af_initCallback() in af-soc.c or af-host.c
+void sli_zigbee_af_initialize_message_sent_callback_array(void)
 {
   uint8_t i;
   for (i = 0; i < EMBER_AF_MESSAGE_SENT_CALLBACK_TABLE_SIZE; i++) {
@@ -846,8 +848,8 @@ void emAfInitializeMessageSentCallbackArray(void)
 }
 
 // Old API that doesn't restrict prevent permit joining forever (255)
-EmberStatus emAfPermitJoin(uint8_t duration,
-                           bool broadcastMgmtPermitJoin)
+EmberStatus sli_zigbee_af_permit_join(uint8_t duration,
+                                      bool broadcastMgmtPermitJoin)
 {
   EmberStatus status = emberPermitJoining(duration);
   emberAfAppPrintln("pJoin for %d sec: 0x%x", duration, status);
@@ -857,10 +859,10 @@ EmberStatus emAfPermitJoin(uint8_t duration,
   return status;
 }
 
-bool emAfProcessZdo(EmberNodeId sender,
-                    EmberApsFrame* apsFrame,
-                    uint8_t* message,
-                    uint16_t length)
+bool sli_zigbee_af_process_zdo(EmberNodeId sender,
+                               EmberApsFrame* apsFrame,
+                               uint8_t* message,
+                               uint16_t length)
 {
   if (apsFrame->profileId != EMBER_ZDO_PROFILE_ID) {
     return false;
@@ -906,11 +908,11 @@ bool emAfProcessZdo(EmberNodeId sender,
       break;
   }
 
-  if (emAfPreZDOMessageReceived(sender, apsFrame, message, length)) {
+  if (sli_zigbee_af_pre_zdo_message_received(sender, apsFrame, message, length)) {
     goto zdoProcessingDone;
   }
 
-  emAfZDOMessageReceived(sender, apsFrame, message, length);
+  sli_zigbee_af_zdo_message_received(sender, apsFrame, message, length);
 
   switch (apsFrame->clusterId) {
     case BIND_RESPONSE:
@@ -918,7 +920,7 @@ bool emAfProcessZdo(EmberNodeId sender,
       break;
 #ifdef SL_CATALOG_ZIGBEE_SUB_GHZ_SERVER_PRESENT
     case NWK_UNSOLICITED_ENHANCED_UPDATE_NOTIFY:
-      emAfSubGhzServerZDOMessageReceivedCallback(sender, message, length);
+      sli_zigbee_af_sub_ghz_server_zdo_message_received_callback(sender, message, length);
       break;
 #endif
     default:
@@ -935,7 +937,7 @@ bool emAfProcessZdo(EmberNodeId sender,
   return true;
 }
 
-void emAfParseAndPrintVersion(EmberVersion versionStruct)
+void sli_zigbee_af_parse_and_print_version(EmberVersion versionStruct)
 {
   uint8_t i = 0;
   const char * typeText = NULL;
@@ -1104,27 +1106,27 @@ static EmberStatus send(EmberOutgoingMessageType type,
   }
 
   // SE 1.4 requires an option to disable APS ACK and Default Response
-  emAfApplyDisableDefaultResponse(&message[0]);
-  emAfApplyRetryOverride(&apsFrame->options);
+  sli_zigbee_af_apply_disable_default_response(&message[0]);
+  sli_zigbee_af_apply_retry_override(&apsFrame->options);
 
   if (messageLength
       <= emberAfMaximumApsPayloadLength(type, indexOrDestination, apsFrame)) {
-    status = emAfSend(type,
-                      indexOrDestination,
-                      apsFrame,
-                      (uint8_t)messageLength,
-                      message,
-                      &messageTag,
-                      alias,
-                      sequence);
+    status = sli_zigbee_af_send(type,
+                                indexOrDestination,
+                                apsFrame,
+                                (uint8_t)messageLength,
+                                message,
+                                &messageTag,
+                                alias,
+                                sequence);
 #ifdef SL_CATALOG_ZIGBEE_FRAGMENTATION_PRESENT
   } else if (!broadcast) {
-    status = emAfFragmentationSendUnicast(type,
-                                          indexOrDestination,
-                                          apsFrame,
-                                          message,
-                                          messageLength,
-                                          &messageTag);
+    status = sli_zigbee_af_fragmentation_send_unicast(type,
+                                                      indexOrDestination,
+                                                      apsFrame,
+                                                      message,
+                                                      messageLength,
+                                                      &messageTag);
     emberAfDebugPrintln("%pstart:len=%d.", "Fragmentation:", messageLength);
 #endif // SL_CATALOG_ZIGBEE_FRAGMENTATION_PRESENT
   } else {
@@ -1135,7 +1137,7 @@ static EmberStatus send(EmberOutgoingMessageType type,
   // If this was a critical message queue entry, fire the callback
   if ((status != EMBER_SUCCESS)
       && (callback == emberAfPluginCriticalMessageQueueEnqueueCallback
-          || callback == emAfPluginCriticalMessageQueueRetryCallback)) {
+          || callback == sli_zigbee_af_critical_message_queue_retry_callback)) {
     callback(type,
              indexOrDestination,
              apsFrame,
@@ -1158,7 +1160,7 @@ static EmberStatus send(EmberOutgoingMessageType type,
     // We consider "in progress" signed messages as being sent successfully.
     // The stack will send the message after signing.
     status = EMBER_SUCCESS;
-    emAfSetCryptoOperationInProgress();
+    sli_zigbee_af_set_crypto_operation_in_progress();
   }
 
   if (status == EMBER_SUCCESS) {

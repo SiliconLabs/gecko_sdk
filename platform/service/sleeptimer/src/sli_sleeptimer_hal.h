@@ -91,6 +91,14 @@ uint32_t sleeptimer_hal_get_compare(void);
 void sleeptimer_hal_set_compare(uint32_t value);
 
 /*******************************************************************************
+ * Hardware Abstraction Layer to set a comparator value to trigger a
+ * peripheral request signal to initialize.
+ *
+ * @param value Number of ticks to set.
+ ******************************************************************************/
+void sleeptimer_hal_set_compare_prs_hfxo_startup(int32_t value);
+
+/*******************************************************************************
  * Hardware Abstraction Layer to get the timer frequency.
  ******************************************************************************/
 uint32_t sleeptimer_hal_get_timer_frequency(void);

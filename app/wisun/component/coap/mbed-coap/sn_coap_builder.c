@@ -372,14 +372,13 @@ uint16_t(sn_coap_builder_calc_needed_packet_data_size_2)(const sn_coap_hdr_s * s
  */
 static uint_fast8_t sn_coap_builder_options_calculate_jump_need(const sn_coap_hdr_s *src_coap_msg_ptr)
 {
-  uint8_t previous_option_number = 0;
+  uint8_t previous_option_number  = 0;
   uint_fast8_t needed_space       = 0;
 
   const sn_coap_options_list_s* options_list_ptr = src_coap_msg_ptr->options_list_ptr;
 
   if (options_list_ptr != NULL) {
     /* If option numbers greater than 12 is not used, then jumping is not needed */
-    //TODO: Check if this is really needed! Does it enhance perf? If not -> remove
     if (!options_list_ptr->uri_query_ptr
         && options_list_ptr->accept == COAP_CT_NONE
         && !options_list_ptr->location_query_ptr
@@ -785,14 +784,13 @@ static uint8_t *sn_coap_builder_options_build_add_multiple_option(uint8_t * rest
     const uint8_t * restrict query_ptr  = src_pptr;
     uint_fast8_t query_part_count       = 0;
     uint_fast16_t query_len             = src_len;
-    uint_fast8_t i                      = 0;
     uint_fast16_t query_part_offset     = 0;
 
     /* Get query part count */
     query_part_count = sn_coap_builder_options_get_option_part_count(query_len, query_ptr, option);
 
     /* * * * Options by adding all parts to option * * * */
-    for (i = 0; i < query_part_count; i++) {
+    for (uint_fast8_t i = 0; i < query_part_count; i++) {
       /* Get length of query part */
       uint_fast16_t one_query_part_len = sn_coap_builder_options_get_option_part_length_from_whole_option_string(query_len, query_ptr, i, option);
 
@@ -821,13 +819,12 @@ static uint8_t *sn_coap_builder_options_build_add_multiple_option(uint8_t * rest
 static uint_fast16_t sn_coap_builder_options_calc_option_size(uint16_t query_len, const uint8_t *query_ptr, sn_coap_option_numbers_e option)
 {
   uint_fast8_t  query_part_count  = sn_coap_builder_options_get_option_part_count(query_len, query_ptr, option);
-  uint_fast8_t  i                 = 0;
   uint_fast16_t ret_value         = 0;
 
   /* * * * * * * * * * * * * * * * * * * * * * * * */
   /* * * * Calculate Uri-query options length  * * */
   /* * * * * * * * * * * * * * * * * * * * * * * * */
-  for (i = 0; i < query_part_count; i++) {
+  for (uint_fast8_t i = 0; i < query_part_count; i++) {
     /* * * Length of Option number and Option value length * * */
 
     /* Get length of Query part */
@@ -852,11 +849,6 @@ static uint_fast16_t sn_coap_builder_options_calc_option_size(uint16_t query_len
           return 0;
         }
         break;
-//            case (COAP_OPTION_ACCEPT):          /* Length 0-2 */
-//                if (one_query_part_len > 2) {
-//                    return 0;
-//                }
-//                break;
       default:
         break;         //impossible scenario currently
     }
@@ -943,7 +935,6 @@ static uint_fast16_t sn_coap_builder_options_get_option_part_length_from_whole_o
 {
   uint_fast16_t returned_query_part_len = 0;
   uint_fast8_t  temp_query_index        = 0;
-  uint_fast16_t query_len_index         = 0;
   uint_fast8_t  char_to_search          = '&';
 
   if (option == COAP_OPTION_URI_PATH || option == COAP_OPTION_LOCATION_PATH) {
@@ -951,7 +942,7 @@ static uint_fast16_t sn_coap_builder_options_get_option_part_length_from_whole_o
   }
 
   /* Loop whole query and search '\0' characters */
-  for (query_len_index = 0; query_len_index < query_len; query_len_index++) {
+  for (uint_fast16_t query_len_index = 0; query_len_index < query_len; query_len_index++) {
     /* Store character to temp_char for helping debugging */
     uint_fast8_t temp_char = *query_ptr;
 
@@ -1001,7 +992,6 @@ static int_fast16_t sn_coap_builder_options_get_option_part_position(uint_fast16
 {
   uint_fast16_t returned_query_part_offset = 0;
   uint_fast8_t  temp_query_index           = 0;
-  uint_fast16_t query_len_index            = 0;
   uint_fast8_t  char_to_search             = '&';
 
   if (option == COAP_OPTION_URI_PATH || option == COAP_OPTION_LOCATION_PATH) {
@@ -1017,7 +1007,7 @@ static int_fast16_t sn_coap_builder_options_get_option_part_position(uint_fast16
   }
 
   /* Loop whole query and search separator characters */
-  for (query_len_index = 0; query_len_index < query_len; query_len_index++) {
+  for (uint_fast16_t query_len_index = 0; query_len_index < query_len; query_len_index++) {
     /* Store character to temp_char for helping debugging */
     uint_fast8_t temp_char = *query_ptr;
 

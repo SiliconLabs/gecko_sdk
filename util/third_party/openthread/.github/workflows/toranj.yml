@@ -28,11 +28,20 @@
 
 name: Toranj
 
-on: [push, pull_request]
+on:
+  push:
+    branches-ignore:
+      - 'dependabot/**'
+  pull_request:
+    branches:
+      - 'main'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || (github.repository == 'openthread/openthread' && github.run_id) || github.ref }}
   cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
 
@@ -42,12 +51,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        TORANJ_RADIO: ['15.4', 'trel', 'multi']
+        TORANJ_RADIO: ['15.4']
     env:
       COVERAGE: 1
       TORANJ_RADIO : ${{ matrix.TORANJ_RADIO }}
+      TORANJ_NCP : 1
+      TORANJ_EVENT_NAME: ${{ github.event_name }}
     steps:
-    - uses: actions/checkout@v3
+    - name: Harden Runner
+      uses: step-security/harden-runner@6b3083af2869dc3314a0257a42f4af696cc79ba3 # v2.3.1
+      with:
+        egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+
+    - uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
       with:
         submodules: true
     - name: Bootstrap
@@ -55,48 +71,28 @@ jobs:
         GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
       run: |
         sudo rm /etc/apt/sources.list.d/* && sudo apt-get update
-        sudo apt-get --no-install-recommends install -y dbus libdbus-1-dev
-        sudo apt-get --no-install-recommends install -y autoconf-archive
-        sudo apt-get --no-install-recommends install -y libarchive-tools
-        sudo apt-get --no-install-recommends install -y libtool
-        sudo apt-get --no-install-recommends install -y libglib2.0-dev
-        sudo apt-get --no-install-recommends install -y lcov
-
-        sudo add-apt-repository universe
-        sudo apt-get update
-        sudo apt-get --no-install-recommends install -y libboost-all-dev python2
-
-        script/git-tool clone --depth=1 --branch=master https://github.com/openthread/wpantund.git
-        cd wpantund
-        ./bootstrap.sh
-        ./configure
-        sudo make -j2
-        sudo make install
     - name: Build & Run
       run: |
         top_builddir=$(pwd)/build/toranj ./tests/toranj/start.sh
-    - name: Generate Coverage
-      if: "matrix.TORANJ_RADIO != 'multi'"
-      run: |
-        ./script/test generate_coverage gcc
-    - uses: actions/upload-artifact@v3
-      if: "matrix.TORANJ_RADIO != 'multi'"
-      with:
-        name: cov-toranj-ncp-${{ matrix.TORANJ_RADIO }}
-        path: tmp/coverage.info
+
 
   toranj-cli:
     name: toranj-cli-${{ matrix.TORANJ_RADIO }}
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        TORANJ_RADIO: ['15.4']
+        TORANJ_RADIO: ['15.4', 'trel', 'multi']
     env:
       COVERAGE: 1
       TORANJ_RADIO : ${{ matrix.TORANJ_RADIO }}
       TORANJ_CLI: 1
     steps:
-    - uses: actions/checkout@v3
+    - name: Harden Runner
+      uses: step-security/harden-runner@6b3083af2869dc3314a0257a42f4af696cc79ba3 # v2.3.1
+      with:
+        egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+
+    - uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
       with:
         submodules: true
     - name: Bootstrap
@@ -104,7 +100,7 @@ jobs:
         GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
       run: |
         sudo rm /etc/apt/sources.list.d/* && sudo apt-get update
-        sudo apt-get --no-install-recommends install -y lcov
+        sudo apt-get --no-install-recommends install -y ninja-build lcov
         python3 -m pip install -r tests/scripts/thread-cert/requirements.txt
     - name: Build & Run
       run: |
@@ -113,7 +109,7 @@ jobs:
       if: "matrix.TORANJ_RADIO != 'multi'"
       run: |
         ./script/test generate_coverage gcc
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
       if: "matrix.TORANJ_RADIO != 'multi'"
       with:
         name: cov-toranj-cli-${{ matrix.TORANJ_RADIO }}
@@ -123,7 +119,12 @@ jobs:
     name: toranj-unittest
     runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@v3
+    - name: Harden Runner
+      uses: step-security/harden-runner@6b3083af2869dc3314a0257a42f4af696cc79ba3 # v2.3.1
+      with:
+        egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+
+    - uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
       with:
         submodules: true
     - name: Bootstrap
@@ -142,24 +143,28 @@ jobs:
 
   upload-coverage:
     needs:
-    - toranj-ncp
     - toranj-cli
     runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@v3
+    - name: Harden Runner
+      uses: step-security/harden-runner@6b3083af2869dc3314a0257a42f4af696cc79ba3 # v2.3.1
+      with:
+        egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+
+    - uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
       with:
         submodules: true
     - name: Bootstrap
       run: |
         sudo apt-get --no-install-recommends install -y lcov
-    - uses: actions/download-artifact@v2
+    - uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
       with:
         path: coverage/
     - name: Combine Coverage
       run: |
         script/test combine_coverage
     - name: Upload Coverage
-      uses: codecov/codecov-action@v2
+      uses: codecov/codecov-action@894ff025c7b54547a9a2a1e9f228beae737ad3c2 # v3.1.3
       with:
         files: final.info
         fail_ci_if_error: true
@@ -168,7 +173,12 @@ jobs:
     needs: upload-coverage
     runs-on: ubuntu-20.04
     steps:
-    - uses: geekyeggo/delete-artifact@v2
+    - name: Harden Runner
+      uses: step-security/harden-runner@6b3083af2869dc3314a0257a42f4af696cc79ba3 # v2.3.1
+      with:
+        egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+
+    - uses: geekyeggo/delete-artifact@54ab544f12cdb7b71613a16a2b5a37a9ade990af # v2.0.0
       with:
         name: cov-*
         useGlob: true

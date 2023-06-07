@@ -58,9 +58,9 @@ uint16_t emberAfPluginMpsiDeserialize(uint8_t       *buffer,
   return (pBuffer - buffer);
 }
 
-uint8_t emAfPluginMpsiSerializeSpecificMessage(void     *specificMpsiMessage,
-                                               uint16_t  messageId,
-                                               uint8_t  *buffer)
+uint8_t sli_mpsi_serialize_specific_message(void     *specificMpsiMessage,
+                                            uint16_t  messageId,
+                                            uint8_t  *buffer)
 {
   uint8_t* pBuffer = buffer;
   uint8_t  numBytes;
@@ -223,9 +223,9 @@ uint8_t emAfPluginMpsiSerializeSpecificMessage(void     *specificMpsiMessage,
   return (pBuffer - buffer);
 }
 
-uint8_t emAfPluginMpsiDeserializeSpecificMessage(uint8_t  *buffer,
-                                                 uint16_t  messageId,
-                                                 void     *specificMpsiMessage)
+uint8_t sli_mpsi_deserialize_specific_message(uint8_t  *buffer,
+                                              uint16_t  messageId,
+                                              void     *specificMpsiMessage)
 {
   uint8_t* pBuffer = buffer;
   uint8_t  numBytes;

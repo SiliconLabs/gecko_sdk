@@ -1,5 +1,5 @@
 /**
- * @file ev_man.h
+ * @file
  * @brief Framework event manager, handling all event types for the framework
  * @copyright 2018 Silicon Laboratories Inc.
  */

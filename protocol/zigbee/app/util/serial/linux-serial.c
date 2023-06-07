@@ -29,16 +29,11 @@
 #include <stdarg.h>     /* va_list, va_start, va_arg, va_end */
 
 #include "hal/hal.h"
-#ifndef UC_BUILD
-#include "plugin/serial/serial.h"
-#include "plugin/serial/ember-printf.h"
-#else
 #include "serial/serial.h"
 #include "platform/service/legacy_printf/inc/sl_legacy_printf.h"
 EmberStatus emberSerialWriteData(uint8_t port, uint8_t *data, uint8_t length);
 #define NO_READLINE // disable readline in UC
 //#include "serial/ember-printf.h"
-#endif
 #include "command-interpreter2.h"
 #include "cli.h"
 
@@ -83,11 +78,7 @@ EmberStatus emberSerialWriteData(uint8_t port, uint8_t *data, uint8_t length);
 
 #include "linux-serial.h"
 
-#ifdef UC_BUILD
 #include "ember-printf-convert.h"
-#else
-#include "plugin/serial/ember-printf-convert.h"
-#endif // UC_BUILD
 
 // Don't like readline and the GPL requirements?  Use 'libedit'.
 // It is a call-for-call compatible with the readline library but is
@@ -819,10 +810,10 @@ EmberStatus emberSerialGuaranteedPrintf(uint8_t port, const char * format, ...)
 // that use since it doesn't make much sense in the case of a gateway
 // application.  If the application really wants to do something special for
 // printing formatted output it should call sprintf() on its own.
-uint8_t emPrintfInternal(emPrintfFlushHandler handler,
-                         uint8_t port,
-                         const char * buff,
-                         va_list list)
+uint8_t sli_util_printf_internal(emPrintfFlushHandler handler,
+                                 uint8_t port,
+                                 const char * buff,
+                                 va_list list)
 {
   (void) handler;
 

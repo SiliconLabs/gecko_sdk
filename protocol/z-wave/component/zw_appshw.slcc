@@ -11,6 +11,7 @@ ui_hints:
 include:
   - path: "protocol/z-wave/AppsHw/inc"
     file_list:
+      - path: "app_hw.h"
       - path: "board_indicator.h"
       - path: "board_init.h"
   - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/inc"

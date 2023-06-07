@@ -21,13 +21,9 @@
 #include "price-server.h"
 #include "price-server-tick.h"
 
-#ifdef UC_BUILD
 #include "zap-cluster-command-parser.h"
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_TEST_HARNESS
-#define SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
-#endif
 #endif
 
 #ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
@@ -50,7 +46,7 @@ static void emberAfPriceClearConversionFactorTable(uint8_t endpoint);
 static void emberAfPriceClearBillingPeriodTable(uint8_t endpoint);
 static void emberAfPriceClearCancelTariffTable(uint8_t endpoint);
 static void emberAfPriceClearCurrencyConversionTable(uint8_t endpoint);
-static void emAfPriceServerScheduleGetScheduledPrices(uint8_t endpoint);
+static void sli_zigbee_af_price_server_schedule_get_scheduled_prices(uint8_t endpoint);
 static void sortCreditPaymentEntries(uint8_t *entries, uint8_t numValidEntries, EmberAfPriceCreditPayment *table);
 static void emberAfPriceUpdateConversionFactorAttribs(uint8_t endpoint, uint32_t conversionFactor, uint8_t conversionFactorTrailingDigit);
 static void emberAfPriceUpdateCalorificValueAttribs(uint8_t endpoint, uint32_t calorificValue,
@@ -339,7 +335,6 @@ void emberAfPricePrint(const EmberAfScheduledPrice *price)
 
 void emberAfPricePrintPriceTable(uint8_t endpoint)
 {
-#if ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_PRICE_CLUSTER)) || defined(UC_BUILD))
   uint8_t i;
   uint8_t ep = emberAfFindClusterServerEndpointIndex(endpoint, ZCL_PRICE_CLUSTER_ID);
   uint8_t currPriceIndex = emberAfGetCurrentPriceIndex(endpoint);
@@ -364,12 +359,10 @@ void emberAfPricePrintPriceTable(uint8_t endpoint)
                                (i == currPriceIndex ? " (Current Price)" : ""));
     emberAfPricePrint(&priceTable[ep][i]);
   }
-#endif // ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_PRICE_CLUSTER)) || defined(UC_BUILD))
 }
 
 void emberAfPrintBillingPeriodTable(uint8_t endpoint)
 {
-#if ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_PRICE_CLUSTER)) || defined(UC_BUILD))
   uint8_t i = 0;
   uint8_t ep = emberAfFindClusterServerEndpointIndex(endpoint, ZCL_PRICE_CLUSTER_ID);
   EmberAfPriceCommonInfo * curInfo = NULL;
@@ -391,12 +384,10 @@ void emberAfPrintBillingPeriodTable(uint8_t endpoint)
     emberAfPriceClusterPrintln("  [%d]: billingPeriodDurationType: 0x%X", i, billingPeriod->billingPeriodDurationType);
     emberAfPriceClusterPrintln("  [%d]: tariffType: 0x%X", i, billingPeriod->tariffType);
   }
-#endif // ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_PRICE_CLUSTER)) || defined(UC_BUILD))
 }
 
 void emberAfPrintConsolidatedBillTableEntry(uint8_t endpoint, uint8_t index)
 {
-#if ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_PRICE_CLUSTER)) || defined(UC_BUILD))
   uint8_t ep = emberAfFindClusterServerEndpointIndex(endpoint, ZCL_PRICE_CLUSTER_ID);
   if (ep == ZCL_PRICE_INVALID_ENDPOINT_INDEX) {
     return;
@@ -417,12 +408,10 @@ void emberAfPrintConsolidatedBillTableEntry(uint8_t endpoint, uint8_t index)
     emberAfPriceClusterPrintln("  [%d]: currency: 0x%x", index, priceServerInfo.consolidatedBillsTable.consolidatedBills[ep][index].currency);
     emberAfPriceClusterPrintln("  [%d]: billTrailingDigit: 0x%x", index, priceServerInfo.consolidatedBillsTable.consolidatedBills[ep][index].billTrailingDigit);
   }
-#endif // ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_PRICE_CLUSTER)) || defined(UC_BUILD))
 }
 
 void emberAfPrintConversionTable(uint8_t endpoint)
 {
-#if ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_PRICE_CLUSTER)) || defined(UC_BUILD))
   uint8_t i = 0;
   uint8_t ep = emberAfFindClusterServerEndpointIndex(endpoint, ZCL_PRICE_CLUSTER_ID);
   if (ep == ZCL_PRICE_INVALID_ENDPOINT_INDEX) {
@@ -436,12 +425,10 @@ void emberAfPrintConversionTable(uint8_t endpoint)
     emberAfPriceClusterPrintln("  [%d]: conversionFactor: 0x%4x", i, priceServerInfo.conversionFactorTable.priceConversionFactors[ep][i].conversionFactor);
     emberAfPriceClusterPrintln("  [%d]: conversionFactorTrailingDigit: 0x%X", i, priceServerInfo.conversionFactorTable.priceConversionFactors[ep][i].conversionFactorTrailingDigit);
   }
-#endif // ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_PRICE_CLUSTER)) || defined(UC_BUILD))
 }
 
 void emberAfPrintCo2ValuesTable(uint8_t endpoint)
 {
-#if ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_PRICE_CLUSTER)) || defined(UC_BUILD))
   uint8_t ep = emberAfFindClusterServerEndpointIndex(endpoint, ZCL_PRICE_CLUSTER_ID);
   if (ep == ZCL_PRICE_INVALID_ENDPOINT_INDEX) {
     return;
@@ -459,12 +446,10 @@ void emberAfPrintCo2ValuesTable(uint8_t endpoint)
     emberAfPriceClusterPrintln("  [%d]: co2ValueUnit: 0x%x", i, priceServerInfo.co2ValueTable.co2Values[ep][i].co2ValueUnit);
     emberAfPriceClusterPrintln("  [%d]: co2ValueTrailingDigit: 0x%X", i, priceServerInfo.co2ValueTable.co2Values[ep][i].co2ValueTrailingDigit);
   }
-#endif // ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_PRICE_CLUSTER)) || defined(UC_BUILD))
 }
 
 void emberAfPrintTierLabelsTable(uint8_t endpoint)
 {
-#if ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_PRICE_CLUSTER)) || defined(UC_BUILD))
   uint8_t ep = emberAfFindClusterServerEndpointIndex(endpoint, ZCL_PRICE_CLUSTER_ID);
   if (ep == ZCL_PRICE_INVALID_ENDPOINT_INDEX) {
     return;
@@ -484,12 +469,10 @@ void emberAfPrintTierLabelsTable(uint8_t endpoint)
       emberAfPriceClusterPrintln("");
     }
   }
-#endif // ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_PRICE_CLUSTER)) || defined(UC_BUILD))
 }
 
 void emberAfPrintCalorificValuesTable(uint8_t endpoint)
 {
-#if ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_PRICE_CLUSTER)) || defined(UC_BUILD))
   uint8_t i;
   uint8_t ep = emberAfFindClusterServerEndpointIndex(endpoint, ZCL_PRICE_CLUSTER_ID);
   if (ep == ZCL_PRICE_INVALID_ENDPOINT_INDEX) {
@@ -504,7 +487,6 @@ void emberAfPrintCalorificValuesTable(uint8_t endpoint)
     emberAfPriceClusterPrintln("  [%d]: calorificValueUnit: 0x%X", i, priceServerInfo.calorificValueTable.calorificValues[ep][i].calorificValueUnit);
     emberAfPriceClusterPrintln("  [%d]: calorificValueTrailingDigit: 0x%X", i, priceServerInfo.calorificValueTable.calorificValues[ep][i].calorificValueTrailingDigit);
   }
-#endif // ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_PRICE_CLUSTER)) || defined(UC_BUILD))
 }
 
 void emberAfPriceClusterServerInitCallback(uint8_t endpoint)
@@ -603,7 +585,7 @@ void emberAfPriceClusterServerInitCallback(uint8_t endpoint)
   emberAfPriceClearCurrencyConversionTable(endpoint);
 }
 
-static uint32_t emAfPriceServerSecondsUntilNextGetScheduledPrices;  // Time until next Get Scheduled Prices should be sent.
+static uint32_t sli_zigbee_af_price_server_seconds_until_next_get_scheduled_prices;  // Time until next Get Scheduled Prices should be sent.
 
 void emberAfPriceServerSendGetScheduledPrices(uint8_t endpoint)
 {
@@ -614,7 +596,7 @@ void emberAfPriceServerSendGetScheduledPrices(uint8_t endpoint)
   ep = emberAfFindClusterServerEndpointIndex(endpoint, ZCL_PRICE_CLUSTER_ID);
   if (ep == ZCL_PRICE_INVALID_ENDPOINT_INDEX) {
     //  emberAfPriceClusterPrintln("== ABORT, ep=0xFF, endpoint=%d", endpoint );
-    emAfPriceServerSecondsUntilNextGetScheduledPrices = PRICE_EVENT_TIME_NO_PENDING_EVENTS;
+    sli_zigbee_af_price_server_seconds_until_next_get_scheduled_prices = PRICE_EVENT_TIME_NO_PENDING_EVENTS;
     return;
   }
 
@@ -649,22 +631,22 @@ void emberAfPriceServerSendGetScheduledPrices(uint8_t endpoint)
   if ( (partner.numberOfEvents != 0u)
        && (partner.index < EMBER_AF_PLUGIN_PRICE_SERVER_PRICE_TABLE_SIZE) ) {
 //      minEventDelayQSec = 0;    //MILLISECOND_TICKS_PER_QUARTERSECOND;
-    emAfPriceServerSecondsUntilNextGetScheduledPrices = 0;
+    sli_zigbee_af_price_server_seconds_until_next_get_scheduled_prices = 0;
   } else {
     partner.index = ZCL_PRICE_INVALID_INDEX;
 //    minEventDelayQSec = PRICE_EVENT_TIME_NO_PENDING_EVENTS;
-    emAfPriceServerSecondsUntilNextGetScheduledPrices = PRICE_EVENT_TIME_NO_PENDING_EVENTS;
+    sli_zigbee_af_price_server_seconds_until_next_get_scheduled_prices = PRICE_EVENT_TIME_NO_PENDING_EVENTS;
   }
 }
 
 uint32_t emberAfPriceServerSecondsUntilGetScheduledPricesEvent(void)
 {
-  return emAfPriceServerSecondsUntilNextGetScheduledPrices;
+  return sli_zigbee_af_price_server_seconds_until_next_get_scheduled_prices;
 }
 
-static void emAfPriceServerScheduleGetScheduledPrices(uint8_t endpoint)
+static void sli_zigbee_af_price_server_schedule_get_scheduled_prices(uint8_t endpoint)
 {
-  emAfPriceServerSecondsUntilNextGetScheduledPrices = 0;
+  sli_zigbee_af_price_server_seconds_until_next_get_scheduled_prices = 0;
   emberAfPriceClusterScheduleTickCallback(endpoint, EMBER_AF_PRICE_SERVER_GET_SCHEDULED_PRICES_EVENT_MASK);
 }
 
@@ -797,11 +779,7 @@ void sendValidCmdEntries(uint8_t cmdId,
                                                                  priceServerInfo.calorificValueTable.calorificValues[endpoint][tableIndex].calorificValue,
                                                                  priceServerInfo.calorificValueTable.calorificValues[endpoint][tableIndex].calorificValueUnit,
                                                                  priceServerInfo.calorificValueTable.calorificValues[endpoint][tableIndex].calorificValueTrailingDigit);
-  #ifdef UC_BUILD
     } else if (cmdId == ZCL_PUBLISH_CO2_VALUE_COMMAND_ID) {
-  #else
-    } else if (cmdId == ZCL_PUBLISH_C_O2_VALUE_COMMAND_ID) {
-  #endif  // UC_BUILD
       emberAfPriceClusterPrintln("Sending Co2 value: table[%d]", tableIndex);
       (void) emberAfFillCommandPriceClusterPublishCO2Value(priceServerInfo.co2ValueTable.co2Values[endpoint][tableIndex].providerId,
                                                            priceServerInfo.co2ValueTable.commonInfos[endpoint][tableIndex].issuerEventId,
@@ -2509,8 +2487,6 @@ bool emberAfPriceClusterGetTariffCancellationCallback(void)
   return true;
 }
 
-#ifdef UC_BUILD
-
 bool emberAfPriceClusterGetCurrentPriceCallback(EmberAfClusterCommand *cmd)
 {
   sl_zcl_price_cluster_get_current_price_command_t cmd_data;
@@ -2581,7 +2557,7 @@ bool emberAfPriceClusterGetScheduledPricesCallback(EmberAfClusterCommand *cmd)
     partner.sequence = cmd->seqNum;
     partner.index = 0;
 
-    emAfPriceServerScheduleGetScheduledPrices(emberAfCurrentEndpoint());
+    sli_zigbee_af_price_server_schedule_get_scheduled_prices(emberAfCurrentEndpoint());
   }
   return true;
 }
@@ -2991,447 +2967,6 @@ bool emberAfPriceClusterGetCreditPaymentCallback(EmberAfClusterCommand *cmd)
   return true;
 }
 
-#else // !UC_BUILD
-
-bool emberAfPriceClusterGetCurrentPriceCallback(uint8_t commandOptions)
-{
-  EmberAfScheduledPrice price;
-  emberAfPriceClusterPrintln("RX: GetCurrentPrice 0x%X", commandOptions);
-  if (!emberAfGetCurrentPrice(emberAfCurrentEndpoint(), &price)) {
-    emberAfPriceClusterPrintln("no valid price to return!");
-    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_NOT_FOUND);
-  } else {
-    fillPublishPriceCommand(price);
-    emberAfSendResponse();
-  }
-  return true;
-}
-
-bool emberAfPriceClusterGetScheduledPricesCallback(uint32_t startTime,
-                                                   uint8_t numberOfEvents)
-{
-  EmberAfClusterCommand *cmd = emberAfCurrentCommand();
-  uint8_t endpoint = emberAfCurrentEndpoint();
-
-  emberAfPriceClusterPrintln("RX: GetScheduledPrices 0x%4x, 0x%X",
-                             startTime,
-                             numberOfEvents);
-
-  // Only one GetScheduledPrices can be processed at a time.
-  if (partner.index != ZCL_PRICE_INVALID_INDEX) {
-    emberAfSendDefaultResponse(cmd, EMBER_ZCL_STATUS_FAILURE);
-    return true;
-  }
-
-  partner.startTime = (startTime == ZCL_PRICE_CLUSTER_START_TIME_NOW
-                       ? emberAfGetCurrentTime()
-                       : startTime);
-  uint8_t scheduledPrices = scheduledPriceCount(endpoint, partner.startTime);
-
-  if (numberOfEvents == ZCL_PRICE_CLUSTER_NUMBER_OF_EVENTS_ALL) {
-    partner.numberOfEvents = scheduledPrices;
-  } else {
-    partner.numberOfEvents = (scheduledPrices > numberOfEvents)
-                             ? numberOfEvents
-                             : scheduledPrices;
-  }
-
-  if (partner.numberOfEvents == 0u) {
-    emberAfPriceClusterPrintln("no valid price to return!");
-    emberAfSendDefaultResponse(cmd, EMBER_ZCL_STATUS_NOT_FOUND);
-  } else {
-    partner.isIntraPan = (cmd->interPanHeader == NULL);
-    if (partner.isIntraPan) {
-      partner.pan.intra.nodeId = cmd->source;
-      partner.pan.intra.clientEndpoint = cmd->apsFrame->sourceEndpoint;
-      partner.pan.intra.serverEndpoint = cmd->apsFrame->destinationEndpoint;
-    } else {
-      partner.pan.inter.panId = cmd->interPanHeader->panId;
-      (void) MEMMOVE(partner.pan.inter.eui64, cmd->interPanHeader->longAddress, EUI64_SIZE);
-    }
-    partner.sequence = cmd->seqNum;
-    partner.index = 0;
-
-    emAfPriceServerScheduleGetScheduledPrices(emberAfCurrentEndpoint() );
-  }
-  return true;
-}
-
-bool emberAfPriceClusterPriceAcknowledgementCallback(uint32_t providerId,
-                                                     uint32_t issuerEventId,
-                                                     uint32_t priceAckTime,
-                                                     uint8_t control)
-{
-  emberAfPriceClusterPrintln("RX: PriceAcknowledgement 0x%4x, 0x%4x, 0x%4x, 0x%x",
-                             providerId,
-                             issuerEventId,
-                             priceAckTime,
-                             control);
-  return true;
-}
-
-bool emberAfPriceClusterGetBlockPeriodsCallback(uint32_t startTime, uint8_t numberOfEvents, uint8_t tariffType)
-{
-  uint8_t  validEntries[EMBER_AF_PLUGIN_PRICE_SERVER_BLOCK_PERIOD_TABLE_SIZE];
-  uint8_t  validEntriesIndex = 0;
-  uint32_t endTimeUtc;
-  uint8_t  i;
-
-  uint8_t endpoint = emberAfCurrentEndpoint();
-  uint8_t ep = emberAfFindClusterServerEndpointIndex(endpoint, ZCL_PRICE_CLUSTER_ID);
-  if ( ep == ZCL_PRICE_INVALID_ENDPOINT_INDEX ) {
-    return false;
-  }
-  emberAfPriceClusterPrintln("RX: Get Block Period");
-  if ( startTime == 0u ) {
-    startTime = emberAfGetCurrentTime();
-  }
-
-  for ( i = 0; i < EMBER_AF_PLUGIN_PRICE_SERVER_BLOCK_PERIOD_TABLE_SIZE; i++ ) {
-    if ( priceServerInfo.blockPeriodTable.commonInfos[ep][i].valid ) {
-      if ((tariffType == TARIFF_TYPE_UNSPECIFIED)
-          || ((priceServerInfo.blockPeriodTable.blockPeriods[ep][i].tariffType & TARIFF_TYPE_MASK) == (tariffType & TARIFF_TYPE_MASK))) {
-        // According to "Get Consolidated Bill" command documentation, this response should
-        // include consolidated bills that are already active.  So, send back any with
-        // end time that is > earliestStartTime.
-        endTimeUtc = priceServerInfo.blockPeriodTable.commonInfos[ep][i].startTime + priceServerInfo.blockPeriodTable.commonInfos[ep][i].durationSec;
-        if ( (startTime < endTimeUtc) ) {
-          validEntries[validEntriesIndex] = i;
-          // NOTE:  Incrementing validEntriesIndex first ensures that all entries are sent if numberOfEvents == 0.
-          validEntriesIndex++;
-          if ( validEntriesIndex == numberOfEvents ) {
-            break;
-          }
-        }
-      }
-    }
-  }
-  // Have a set of valid block periods.  Total number == validEntriesIndex.
-  sendValidCmdEntries(ZCL_PUBLISH_BLOCK_PERIOD_COMMAND_ID, ep, validEntries, validEntriesIndex);
-
-  return true;
-}
-
-bool emberAfPriceClusterGetConversionFactorCallback(uint32_t earliestStartTime,
-                                                    uint32_t minIssuerEventId,
-                                                    uint8_t numberOfCommands)
-{
-  uint8_t cmdCount;
-  uint8_t validCmds[EMBER_AF_PLUGIN_PRICE_SERVER_CONVERSION_FACTOR_TABLE_SIZE];
-  uint8_t endpoint = emberAfCurrentEndpoint();
-  uint8_t ep = emberAfFindClusterServerEndpointIndex(endpoint, ZCL_PRICE_CLUSTER_ID);
-  if ( ep == ZCL_PRICE_INVALID_ENDPOINT_INDEX ) {
-    return false;
-  }
-  cmdCount = emberAfPluginPriceCommonFindValidEntries(validCmds,
-                                                      EMBER_AF_PLUGIN_PRICE_SERVER_CONVERSION_FACTOR_TABLE_SIZE,
-                                                      priceServerInfo.conversionFactorTable.commonInfos[ep],
-                                                      earliestStartTime,
-                                                      minIssuerEventId,
-                                                      numberOfCommands);
-
-  sendValidCmdEntries(ZCL_PUBLISH_CONVERSION_FACTOR_COMMAND_ID, ep,
-                      validCmds,
-                      cmdCount);
-  return true;
-}
-
-bool emberAfPriceClusterGetCalorificValueCallback(uint32_t earliestStartTime,
-                                                  uint32_t minIssuerEventId,
-                                                  uint8_t numberOfCommands)
-{
-  uint8_t cmdCount;
-  uint8_t validCmds[EMBER_AF_PLUGIN_PRICE_SERVER_CALORIFIC_VALUE_TABLE_SIZE];
-  uint8_t endpoint = emberAfCurrentEndpoint();
-  uint8_t ep = emberAfFindClusterServerEndpointIndex(endpoint, ZCL_PRICE_CLUSTER_ID);
-  if ( ep == ZCL_PRICE_INVALID_ENDPOINT_INDEX ) {
-    return false;
-  }
-  cmdCount = emberAfPluginPriceCommonFindValidEntries(validCmds,
-                                                      EMBER_AF_PLUGIN_PRICE_SERVER_CALORIFIC_VALUE_TABLE_SIZE,
-                                                      priceServerInfo.calorificValueTable.commonInfos[ep],
-                                                      earliestStartTime,
-                                                      minIssuerEventId,
-                                                      numberOfCommands);
-
-  sendValidCmdEntries(ZCL_PUBLISH_CALORIFIC_VALUE_COMMAND_ID, ep,
-                      validCmds,
-                      cmdCount);
-  return true;
-}
-
-bool emberAfPriceClusterGetCO2ValueCallback(uint32_t earliestStartTime,
-                                            uint32_t minIssuerEventId,
-                                            uint8_t numberOfCommands,
-                                            uint8_t tariffType)
-{
-  uint8_t cmdCount;
-  uint8_t validCmds[EMBER_AF_PLUGIN_PRICE_SERVER_CO2_VALUE_TABLE_SIZE];
-  uint8_t endpoint = emberAfCurrentEndpoint();
-  uint8_t ep = emberAfFindClusterServerEndpointIndex(endpoint, ZCL_PRICE_CLUSTER_ID);
-  if ( ep == ZCL_PRICE_INVALID_ENDPOINT_INDEX ) {
-    return false;
-  }
-  cmdCount = emberAfPluginPriceCommonFindValidEntries(validCmds,
-                                                      EMBER_AF_PLUGIN_PRICE_SERVER_CO2_VALUE_TABLE_SIZE,
-                                                      priceServerInfo.co2ValueTable.commonInfos[ep],
-                                                      earliestStartTime,
-                                                      minIssuerEventId,
-                                                      numberOfCommands);
-
-  // eliminate commands with mismatching tariffType
-  // upper nibble is reserved. we'll ignore them.
-  if (tariffType != TARIFF_TYPE_UNSPECIFIED) {
-    uint8_t i;
-    for (i = 0; i < cmdCount; i++) {
-      uint8_t index = validCmds[i];
-      if ((priceServerInfo.co2ValueTable.co2Values[ep][index].tariffType & TARIFF_TYPE_MASK) != (tariffType & TARIFF_TYPE_MASK)) {
-        validCmds[i] = ZCL_PRICE_INVALID_INDEX;
-      }
-    }
-  }
-  sendValidCmdEntries(ZCL_PUBLISH_C_O2_VALUE_COMMAND_ID, ep, validCmds, cmdCount);
-  return true;
-}
-
-bool emberAfPriceClusterGetTierLabelsCallback(uint32_t issuerTariffId)
-{
-  uint8_t i;
-  uint8_t validCmds[EMBER_AF_PLUGIN_PRICE_SERVER_TIER_LABELS_TABLE_SIZE];
-  uint8_t endpoint = emberAfCurrentEndpoint();
-  uint8_t validCmdCnt = 0;
-  uint8_t ep = emberAfFindClusterServerEndpointIndex(endpoint, ZCL_PRICE_CLUSTER_ID);
-  if ( ep == ZCL_PRICE_INVALID_ENDPOINT_INDEX ) {
-    return false;
-  }
-
-  for (i = 0; i < EMBER_AF_PLUGIN_PRICE_SERVER_TIER_LABELS_TABLE_SIZE; i++) {
-    if ( (priceServerInfo.tierLabelTable.entry[ep][i].issuerTariffId == issuerTariffId)
-         && (priceServerInfo.tierLabelTable.entry[ep][i].valid != 0u) ) {
-      validCmds[validCmdCnt] = i;
-      validCmdCnt++;
-    }
-  }
-  sendValidCmdEntries(ZCL_PUBLISH_TIER_LABELS_COMMAND_ID, ep, validCmds, validCmdCnt);
-  return true;
-}
-
-bool emberAfPriceClusterGetBillingPeriodCallback(uint32_t earliestStartTime,
-                                                 uint32_t minIssuerEventId,
-                                                 uint8_t numberOfCommands,
-                                                 uint8_t tariffType)
-{
-  uint32_t issuerEventId;
-  uint32_t startTime;
-  uint32_t durationSec;
-  uint8_t  curTariffType;
-  bool  validEntry;
-
-  uint8_t validEntries[EMBER_AF_PLUGIN_PRICE_SERVER_BILLING_PERIOD_TABLE_SIZE];
-  uint8_t validEntryIndex = 0;
-  uint8_t requestEntryCount = EMBER_AF_PLUGIN_PRICE_SERVER_BILLING_PERIOD_TABLE_SIZE;
-  uint8_t i;
-
-  uint8_t endpoint = emberAfCurrentEndpoint();
-  uint8_t ep = emberAfFindClusterServerEndpointIndex(endpoint, ZCL_PRICE_CLUSTER_ID);
-  if ( ep == ZCL_PRICE_INVALID_ENDPOINT_INDEX ) {
-    return false;
-  }
-  emberAfPriceClusterPrintln("RX: GetBillingPeriod, 0x%4X, 0x%4X, 0x%X, 0x%X",
-                             earliestStartTime,
-                             minIssuerEventId,
-                             numberOfCommands,
-                             tariffType);
-
-  if ((numberOfCommands != 0x00u) && (requestEntryCount > numberOfCommands)) {
-    requestEntryCount = numberOfCommands;
-  }
-  if ( earliestStartTime == 0u ) {
-    earliestStartTime = emberAfGetCurrentTime();
-  }
-
-  (void) MEMSET(validEntries, 0xFF, EMBER_AF_PLUGIN_PRICE_SERVER_BILLING_PERIOD_TABLE_SIZE);
-
-  for (i = 0; i < EMBER_AF_PLUGIN_PRICE_SERVER_BILLING_PERIOD_TABLE_SIZE; i++) {
-    issuerEventId = priceServerInfo.billingPeriodTable.commonInfos[ep][i].issuerEventId;
-    startTime = priceServerInfo.billingPeriodTable.commonInfos[ep][i].startTime;
-    durationSec = priceServerInfo.billingPeriodTable.commonInfos[ep][i].durationSec;
-    curTariffType = priceServerInfo.billingPeriodTable.billingPeriods[ep][i].tariffType;
-    validEntry = priceServerInfo.billingPeriodTable.commonInfos[ep][i].valid;
-
-    if (!validEntry) {
-      continue;
-    }
-    emberAfPriceClusterPrintln("priceServerInfo for entry index: %d", i);
-    emberAfPriceClusterPrintln("start time: 0x%4x", startTime);
-    emberAfPriceClusterPrintln("end time: 0x%4x", startTime + durationSec);
-    emberAfPriceClusterPrintln("duration: 0x%4x", durationSec);
-
-    // invalid entry tariffType
-    if (tariffType != TARIFF_TYPE_DONT_CARE) {
-      if ((tariffType & TARIFF_TYPE_MASK) !=  (curTariffType & TARIFF_TYPE_MASK)) {
-        continue;
-      }
-    }
-
-    if (earliestStartTime > (startTime + durationSec)) {
-      continue;
-    }
-
-    if ((minIssuerEventId != 0xFFFFFFFFU)
-        && (minIssuerEventId > issuerEventId)) {
-      continue;
-    }
-
-    // valid entry
-    validEntries[validEntryIndex] = i;
-    validEntryIndex++;
-    if (requestEntryCount == validEntryIndex) {
-      break;
-    }
-  }
-
-  sendValidCmdEntries(ZCL_PUBLISH_BILLING_PERIOD_COMMAND_ID, ep, validEntries, validEntryIndex);
-  return true;
-}
-
-bool emberAfPriceClusterGetConsolidatedBillCallback(uint32_t earliestStartTime,
-                                                    uint32_t minIssuerEventId,
-                                                    uint8_t numberOfCommands,
-                                                    uint8_t tariffType)
-{
-  uint8_t  validEntries[EMBER_AF_PLUGIN_PRICE_SERVER_CONSOLIDATED_BILL_TABLE_SIZE];
-  uint8_t  validEntriesIndex = 0;
-  uint32_t endTimeUtc;
-  uint8_t  i;
-
-  uint8_t endpoint = emberAfCurrentEndpoint();
-  uint8_t ep = emberAfFindClusterServerEndpointIndex(endpoint, ZCL_PRICE_CLUSTER_ID);
-  if ( ep == ZCL_PRICE_INVALID_ENDPOINT_INDEX ) {
-    return false;
-  }
-
-  emberAfPriceClusterPrintln("RX: GetConsolidatedBill, 0x%4X, 0x%4X, 0x%X, 0x%X",
-                             earliestStartTime,
-                             minIssuerEventId,
-                             numberOfCommands,
-                             tariffType);
-
-  if ( minIssuerEventId == EVENT_ID_UNSPECIFIED ) {
-    minIssuerEventId = 0;   // Allow all event IDs
-  }
-  if ( earliestStartTime == 0u ) {
-    earliestStartTime = emberAfGetCurrentTime();
-  }
-
-  for ( i = 0; i < EMBER_AF_PLUGIN_PRICE_SERVER_CONSOLIDATED_BILL_TABLE_SIZE; i++ ) {
-    if ( priceServerInfo.consolidatedBillsTable.commonInfos[ep][i].valid ) {
-      emberAfPriceClusterPrintln("===  i=%d, st=0x%4x, ev=%d, tar=%d,   st[]=0x%4x, ev[]=%d, tar[]=%d",
-                                 i, earliestStartTime, minIssuerEventId, tariffType,
-                                 priceServerInfo.consolidatedBillsTable.commonInfos[ep][i].startTime,
-                                 priceServerInfo.consolidatedBillsTable.commonInfos[ep][i].issuerEventId,
-                                 priceServerInfo.consolidatedBillsTable.consolidatedBills[ep][i].tariffType);
-
-      if ((tariffType == TARIFF_TYPE_UNSPECIFIED)
-          || ((priceServerInfo.consolidatedBillsTable.consolidatedBills[ep][i].tariffType & TARIFF_TYPE_MASK)
-              == (tariffType & TARIFF_TYPE_MASK))) {
-        // According to "Get Consolidated Bill" command documentation, this response should
-        // include consolidated bills that are already active.  So, send back any with
-        // end time that is > earliestStartTime.
-        endTimeUtc = priceServerInfo.consolidatedBillsTable.commonInfos[ep][i].startTime + priceServerInfo.consolidatedBillsTable.commonInfos[ep][i].durationSec;
-        if ( (earliestStartTime < endTimeUtc) && (minIssuerEventId <= priceServerInfo.consolidatedBillsTable.commonInfos[ep][i].issuerEventId) ) {
-          validEntries[validEntriesIndex] = i;
-          validEntriesIndex++;
-          // NOTE:  Incrementing validEntriesIndex first ensures that all entries are sent if numberOfCommands == 0.
-          if ( validEntriesIndex == numberOfCommands ) {
-            break;
-          }
-        }
-      }
-    }
-  }
-  // Have a set of valid consolidated bills.  Total number == validEntriesIndex.
-  sendValidCmdEntries(ZCL_PUBLISH_CONSOLIDATED_BILL_COMMAND_ID, ep, validEntries, validEntriesIndex);
-
-  return true;
-}
-
-bool emberAfPriceClusterCppEventResponseCallback(uint32_t issuerEventId, uint8_t cppAuth)
-{
-  uint8_t endpoint = emberAfCurrentEndpoint();
-  uint8_t ep = emberAfFindClusterServerEndpointIndex(endpoint, ZCL_PRICE_CLUSTER_ID);
-  if ( ep == ZCL_PRICE_INVALID_ENDPOINT_INDEX ) {
-    return false;
-  }
-  emberAfPriceClusterPrintln("Rx: Cpp Event Response, issuerEventId=0x%4x, auth=%d,   storedCppAuth=%d", issuerEventId, cppAuth,
-                             priceServerInfo.cppTable.cppEvent[ep].cppAuth);
-  if ( priceServerInfo.cppTable.cppEvent[ep].cppAuth == EMBER_AF_PLUGIN_PRICE_CPP_AUTH_PENDING ) {
-    // Update the CPP auth status based on the Cpp Event Response we received from the client.
-    // Send another CPP Event with the updated status to confirm.  See D.4.2.4.12.4,  Fig D-88.
-//    priceServerInfo.cppEvent.cppAuth = cppAuth;
-//    priceServerInfo.cppEvent.commonInfos.issuerEventId++;    // Test 12.68 Item 5 requires this message have a different event ID than
-    // the event ID used in the Pending status message.  IS THIS RIGHT?
-    emberAfPriceClusterPrintln("Send CPP Event, stat=%d", cppAuth);
-    (void) emberAfFillCommandPriceClusterPublishCppEvent(priceServerInfo.cppTable.cppEvent[ep].providerId,
-                                                         priceServerInfo.cppTable.commonInfos[ep].issuerEventId,
-                                                         priceServerInfo.cppTable.commonInfos[ep].startTime,
-                                                         priceServerInfo.cppTable.cppEvent[ep].durationInMinutes,
-                                                         priceServerInfo.cppTable.cppEvent[ep].tariffType,
-                                                         priceServerInfo.cppTable.cppEvent[ep].cppPriceTier,
-                                                         cppAuth);
-
-    emberAfSendResponse();
-  }
-  //else{
-  // PER SE TEST 12.70, item 3-5, server should not send a message if an asynch CPP Event Response is received.
-  //emberAfSendImmediateDefaultResponse( EMBER_ZCL_STATUS_SUCCESS );
-  //}
-  return true;
-}
-
-bool emberAfPriceClusterGetCreditPaymentCallback(uint32_t latestEndTime, uint8_t numberOfRecords)
-{
-  uint8_t  validEntries[EMBER_AF_PLUGIN_PRICE_SERVER_CREDIT_PAYMENT_TABLE_SIZE];
-  uint8_t  validEntriesIndex = 0;
-  uint8_t  i;
-  uint8_t endpoint = emberAfCurrentEndpoint();
-  uint8_t ep = emberAfFindClusterServerEndpointIndex(endpoint, ZCL_PRICE_CLUSTER_ID);
-  if ( ep == ZCL_PRICE_INVALID_ENDPOINT_INDEX ) {
-    return false;
-  }
-
-  emberAfPriceClusterPrintln("Rx: GetCreditPayment, endTime=%d, nr=%d", latestEndTime, numberOfRecords);
-  if ( numberOfRecords == 0u ) {
-    numberOfRecords = EMBER_AF_PLUGIN_PRICE_SERVER_CREDIT_PAYMENT_TABLE_SIZE;
-  }
-  if ( latestEndTime == 0u ) {
-    latestEndTime = emberAfGetCurrentTime();
-  }
-
-  for ( i = 0; i < EMBER_AF_PLUGIN_PRICE_SERVER_CREDIT_PAYMENT_TABLE_SIZE; i++ ) {
-    if ( (priceServerInfo.creditPaymentTable.commonInfos[ep][i].valid) && (priceServerInfo.creditPaymentTable.creditPayment[ep][i].creditPaymentDate <= latestEndTime) ) {
-      validEntries[validEntriesIndex] = i;
-      validEntriesIndex++;
-      // NOTE:  Incrementing validEntriesIndex first ensures that all entries are sent if numberOfEvents == 0.
-      if ( validEntriesIndex == numberOfRecords ) {
-        break;
-      }
-    }
-  }
-  if ( validEntriesIndex == 0u ) {
-    emberAfPriceClusterPrintln("No matching credit payments");
-  }
-  sortCreditPaymentEntries(validEntries, validEntriesIndex, priceServerInfo.creditPaymentTable.creditPayment[ep]);
-
-  sendValidCmdEntries(ZCL_PUBLISH_CREDIT_PAYMENT_COMMAND_ID, ep, validEntries, validEntriesIndex);
-
-  return true;
-}
-
-#endif // UC_BUILD
-
-#ifdef UC_BUILD
-
 bool emberAfPriceClusterGetTariffInformationCallback(EmberAfClusterCommand *cmd);
 bool emberAfPriceClusterGetPriceMatrixCallback(EmberAfClusterCommand *cmd);
 bool emberAfPriceClusterGetBlockThresholdsCallback(EmberAfClusterCommand *cmd);
@@ -3476,7 +3011,6 @@ uint32_t emberAfPriceClusterServerCommandParse(sl_service_opcode_t opcode,
         wasHandled = emberAfPriceClusterGetCalorificValueCallback(cmd);
         break;
       }
-  #ifdef TARIFF_MATRIX_SUPPORT
       case ZCL_GET_TARIFF_INFORMATION_COMMAND_ID:
       {
         wasHandled = emberAfPriceClusterGetTariffInformationCallback(cmd);
@@ -3492,7 +3026,6 @@ uint32_t emberAfPriceClusterServerCommandParse(sl_service_opcode_t opcode,
         wasHandled = emberAfPriceClusterGetBlockThresholdsCallback(cmd);
         break;
       }
-  #endif // TARIFF_MATRIX_SUPPORT
       case ZCL_GET_CO2_VALUE_COMMAND_ID:
       {
         wasHandled = emberAfPriceClusterGetCO2ValueCallback(cmd);
@@ -3542,5 +3075,3 @@ uint32_t emberAfPriceClusterServerCommandParse(sl_service_opcode_t opcode,
           ? EMBER_ZCL_STATUS_SUCCESS
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
-
-#endif // UC_BUILD

@@ -9,6 +9,7 @@ provides:
 requires:
   - name: ot_stack
   - name: ot_ncp
+  - name: ot_ncp_vendor_extension
   - name: cpc_secondary
   - name: ot_coex
 # Work around broken TRNG on MG1, MG13, and MG14 parts
@@ -21,20 +22,26 @@ requires:
   - name: mbedtls_entropy_adc
     condition:
       - "device_sdid_95"
-# For fast channel switching on MG24
+# For concurrent listening on xG24
   - name: rail_util_dma
     condition:
       - device_sdid_215
+# For concurrent listening on xG21    
+  - name: rail_util_dma
+    condition:
+      - device_sdid_200
 recommends:
   - id: ot_stack_rcp
   - id: ot_coex
-root_path: util/third_party/openthread/src
 include:
-  - path: ncp
+  - path: util/third_party/openthread/src/
+    file_list:
+      - path: ncp/ncp_base.hpp
+  - path: protocol/openthread/platform-abstraction/ncp/
     file_list:
       - path: ncp_cpc.hpp
 source:
-      - path: ncp/ncp_cpc.cpp
+  - path: protocol/openthread/platform-abstraction/ncp/ncp_cpc.cpp
 
 template_contribution:
   - name: component_catalog
@@ -45,10 +52,8 @@ define:
     value: 0
   - name: OPENTHREAD_CONFIG_NCP_CPC_ENABLE
     value: 1
-  - name: OPENTHREAD_CONFIG_COPROCESSOR_RPC_OUTPUT_BUFFER_SIZE
-    value: 512
-    condition:
-    - "device_family_efr32mg1"
+  - name: OPENTHREAD_CONFIG_NCP_CPC_TX_CHUNK_SIZE
+    value: 2048
 
 toolchain_settings:
   - option: optimize

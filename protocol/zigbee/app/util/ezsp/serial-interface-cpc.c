@@ -92,7 +92,7 @@ EzspStatus ezspInit(void)
                      reset_crash_callback);
 
       attempts++;
-      if ( ret < 0 ) {
+      if ( ret != 0 ) {
         sleep(1);
       }
     } while ((ret != 0) && (attempts < max_restart_attempts));
@@ -117,10 +117,10 @@ EzspStatus ezspInit(void)
     do {
       ret = cpc_restart(&zigbee_cpc_handle);
       attempts++;
-      if ( ret < 0 ) {
+      if (ret < 0) {
         sleep(1);
       }
-    } while ((ret != 0) && (attempts < max_restart_attempts));
+    } while ((ret < 0) && (attempts < max_restart_attempts));
 
     if (ret < 0) {
       printf("cpc_restart error: 0x%0X", ret);
@@ -136,17 +136,16 @@ EzspStatus ezspInit(void)
                             SL_CPC_ENDPOINT_ZIGBEE,
                             ZIGBEE_CPC_TRANSMIT_WINDOW);
     attempts++;
-    if ( ret < 0 ) {
+    if ( ret <= 0 ) {
       sleep(1);
     }
-  } while ((ret != 0) && (attempts < max_restart_attempts));
+  } while ((ret <= 0) && (attempts < max_restart_attempts));
 
-  printf("Connected to CPC daemon, endpoint %d: %s (errno %d)\n",
+  printf("Connected to CPC daemon, endpoint %d: %s\n",
          SL_CPC_ENDPOINT_ZIGBEE,
-         ret >= 0 ? "OK" : "ERROR",
-         errno);
+         ret > 0 ? "OK" : "ERROR");
 
-  if (ret < 0) {
+  if (ret <= 0) {
     return EZSP_CPC_ERROR_INIT;
   }
   endpoint_was_opened = true;

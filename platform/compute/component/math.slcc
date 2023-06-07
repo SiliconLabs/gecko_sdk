@@ -1,0 +1,18 @@
+id: math
+label: Math
+package: platform
+description: >
+  This component provides some math features.
+category: Platform|Compute
+quality: production
+root_path: platform/compute/math
+source:
+  - path: src/sl_math_matrix.c
+include:
+  - path: inc
+    file_list:
+      - path: sl_math_matrix.h
+provides:
+  - name: math
+requires:
+  - name: math_types

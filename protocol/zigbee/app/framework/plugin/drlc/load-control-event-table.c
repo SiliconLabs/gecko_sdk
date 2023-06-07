@@ -20,17 +20,15 @@
 #include "../../util/common.h"
 #include "load-control-event-table.h"
 
-#ifdef UC_BUILD
 #include "drlc-config.h"
-#endif // UC_BUILD
 
 #include "app/framework/plugin/esi-management/esi-management.h"
 
-static void emAfCallEventAction(EmberAfLoadControlEvent *event,
-                                uint8_t eventStatus,
-                                uint8_t sequenceNumber,
-                                bool replyToSingleEsi,
-                                uint8_t esiIndex);
+static void sli_zigbee_af_call_event_action(EmberAfLoadControlEvent *event,
+                                            uint8_t eventStatus,
+                                            uint8_t sequenceNumber,
+                                            bool replyToSingleEsi,
+                                            uint8_t esiIndex);
 
 // This assumes that the Option Flag Enum uses only two bits
 const uint8_t controlValueToStatusEnum[] = {
@@ -129,7 +127,7 @@ static void esiDeletionCallback(uint8_t esiIndex)
  * and sends informational messages about event start
  * and event complete.
  */
-void emAfLoadControlEventTableTick(uint8_t endpoint)
+void sli_zigbee_af_load_control_event_table_tick(uint8_t endpoint)
 {
   uint32_t ct = emberAfGetCurrentTime();
   uint8_t ep = emberAfFindClusterClientEndpointIndex(endpoint, ZCL_DEMAND_RESPONSE_LOAD_CONTROL_CLUSTER_ID);
@@ -153,11 +151,11 @@ void emAfLoadControlEventTableTick(uint8_t endpoint)
            + e->event.startRand   // CCB 1513: startRand does affect end time
            + ((uint32_t)e->event.duration * 60)
            + e->event.durationRand) <= ct) {
-        emAfCallEventAction(&(e->event),
-                            controlValueToStatusEnum[e->event.optionControl],
-                            emberAfNextSequence(),
-                            false,
-                            0);
+        sli_zigbee_af_call_event_action(&(e->event),
+                                        controlValueToStatusEnum[e->event.optionControl],
+                                        emberAfNextSequence(),
+                                        false,
+                                        0);
         voidAllEntriesWithEventId(endpoint,
                                   e->event.eventId);
         return;
@@ -176,13 +174,13 @@ void emAfLoadControlEventTableTick(uint8_t endpoint)
         // Bug: 13546
         // When the event starts always send a Report Event status message.
         // If user opted-out, then send that status instead of event started.
-        emAfCallEventAction(&(e->event),
-                            ((e->event.optionControl & EVENT_OPT_FLAG_OPT_IN)
-                             ? EMBER_ZCL_AMI_EVENT_STATUS_EVENT_STARTED
-                             : EMBER_ZCL_AMI_EVENT_STATUS_USER_HAS_CHOOSE_TO_OPT_OUT),
-                            emberAfNextSequence(),
-                            false,
-                            0);
+        sli_zigbee_af_call_event_action(&(e->event),
+                                        ((e->event.optionControl & EVENT_OPT_FLAG_OPT_IN)
+                                         ? EMBER_ZCL_AMI_EVENT_STATUS_EVENT_STARTED
+                                         : EMBER_ZCL_AMI_EVENT_STATUS_USER_HAS_CHOOSE_TO_OPT_OUT),
+                                        emberAfNextSequence(),
+                                        false,
+                                        0);
         e->entryStatus = ENTRY_STARTED;
         // We may have waited for a previous event to finish due to a delay
         // In that case, we need to keep track of our current start time so that
@@ -195,22 +193,22 @@ void emAfLoadControlEventTableTick(uint8_t endpoint)
       }
     } else if (e->entryStatus == ENTRY_IS_SUPERSEDED_EVENT) {
       if (e->event.startTime <= ct) {
-        emAfCallEventAction(&(e->event),
-                            EMBER_ZCL_AMI_EVENT_STATUS_THE_EVENT_HAS_BEEN_SUPERSEDED,
-                            emberAfNextSequence(),
-                            false,
-                            0);
+        sli_zigbee_af_call_event_action(&(e->event),
+                                        EMBER_ZCL_AMI_EVENT_STATUS_THE_EVENT_HAS_BEEN_SUPERSEDED,
+                                        emberAfNextSequence(),
+                                        false,
+                                        0);
         voidAllEntriesWithEventId(endpoint,
                                   e->event.eventId);
         return;
       }
     } else if (e->entryStatus == ENTRY_IS_CANCELLED_EVENT) {
       if (e->event.startTime <= ct) {
-        emAfCallEventAction(&(e->event),
-                            EMBER_ZCL_AMI_EVENT_STATUS_THE_EVENT_HAS_BEEN_CANCELED,
-                            emberAfNextSequence(),
-                            false,
-                            0);
+        sli_zigbee_af_call_event_action(&(e->event),
+                                        EMBER_ZCL_AMI_EVENT_STATUS_THE_EVENT_HAS_BEEN_CANCELED,
+                                        emberAfNextSequence(),
+                                        false,
+                                        0);
         voidAllEntriesWithEventId(endpoint,
                                   e->event.eventId);
         return;
@@ -223,8 +221,8 @@ void emAfLoadControlEventTableTick(uint8_t endpoint)
  * This function is used to schedule events in the
  * load control event table.
  */
-void emAfScheduleLoadControlEvent(uint8_t endpoint,
-                                  EmberAfLoadControlEvent *newEvent)
+void sli_zigbee_af_schedule_load_control_event(uint8_t endpoint,
+                                               EmberAfLoadControlEvent *newEvent)
 {
   uint8_t i;
   uint8_t ep = emberAfFindClusterClientEndpointIndex(endpoint, ZCL_DEMAND_RESPONSE_LOAD_CONTROL_CLUSTER_ID);
@@ -242,21 +240,21 @@ void emAfScheduleLoadControlEvent(uint8_t endpoint,
   //validate starttime + duration
   if (newEvent->startTime == 0xffffffffUL
       || newEvent->duration > 0x5a0) {
-    emAfCallEventAction(newEvent,
-                        EMBER_ZCL_AMI_EVENT_STATUS_LOAD_CONTROL_EVENT_COMMAND_REJECTED,
-                        emberAfCurrentCommand()->seqNum,
-                        true,
-                        esiIndex);
+    sli_zigbee_af_call_event_action(newEvent,
+                                    EMBER_ZCL_AMI_EVENT_STATUS_LOAD_CONTROL_EVENT_COMMAND_REJECTED,
+                                    emberAfCurrentCommand()->seqNum,
+                                    true,
+                                    esiIndex);
     return;
   }
 
   //validate expiration
   if (ct > (newEvent->startTime + ((uint32_t)newEvent->duration * 60))) {
-    emAfCallEventAction(newEvent,
-                        EMBER_ZCL_AMI_EVENT_STATUS_REJECTED_EVENT_EXPIRED,
-                        emberAfCurrentCommand()->seqNum,
-                        true,
-                        esiIndex);
+    sli_zigbee_af_call_event_action(newEvent,
+                                    EMBER_ZCL_AMI_EVENT_STATUS_REJECTED_EVENT_EXPIRED,
+                                    emberAfCurrentCommand()->seqNum,
+                                    true,
+                                    esiIndex);
     return;
   }
 
@@ -279,11 +277,11 @@ void emAfScheduleLoadControlEvent(uint8_t endpoint,
       if ((e->event.esiBitmask & BIT(esiIndex)) == 0
           && esiIndex < EMBER_AF_PLUGIN_ESI_MANAGEMENT_ESI_TABLE_SIZE) {
         e->event.esiBitmask |= BIT(esiIndex);
-        emAfCallEventAction(&(e->event),
-                            EMBER_ZCL_AMI_EVENT_STATUS_LOAD_CONTROL_EVENT_COMMAND_RX,
-                            emberAfCurrentCommand()->seqNum,
-                            true,
-                            esiIndex);
+        sli_zigbee_af_call_event_action(&(e->event),
+                                        EMBER_ZCL_AMI_EVENT_STATUS_LOAD_CONTROL_EVENT_COMMAND_RX,
+                                        emberAfCurrentCommand()->seqNum,
+                                        true,
+                                        esiIndex);
       }
 
       return;
@@ -328,11 +326,11 @@ void emAfScheduleLoadControlEvent(uint8_t endpoint,
       // and we respond.
       if (esiIndex < EMBER_AF_PLUGIN_ESI_MANAGEMENT_ESI_TABLE_SIZE) {
         e->event.esiBitmask = BIT(esiIndex);
-        emAfCallEventAction(&(e->event),
-                            EMBER_ZCL_AMI_EVENT_STATUS_LOAD_CONTROL_EVENT_COMMAND_RX,
-                            emberAfCurrentCommand()->seqNum,
-                            true,
-                            esiIndex);
+        sli_zigbee_af_call_event_action(&(e->event),
+                                        EMBER_ZCL_AMI_EVENT_STATUS_LOAD_CONTROL_EVENT_COMMAND_RX,
+                                        emberAfCurrentCommand()->seqNum,
+                                        true,
+                                        esiIndex);
       }
 
       return;
@@ -343,16 +341,16 @@ void emAfScheduleLoadControlEvent(uint8_t endpoint,
   // don't have any room in the table and must reject scheduling. We reject but
   // others have chosen to bump the earliest event. There is an ongoing
   // discussion on this issue will be discussed for possible CCB.
-  emAfCallEventAction(newEvent,
-                      EMBER_ZCL_AMI_EVENT_STATUS_LOAD_CONTROL_EVENT_COMMAND_REJECTED,
-                      emberAfCurrentCommand()->seqNum,
-                      true,
-                      esiIndex);
+  sli_zigbee_af_call_event_action(newEvent,
+                                  EMBER_ZCL_AMI_EVENT_STATUS_LOAD_CONTROL_EVENT_COMMAND_REJECTED,
+                                  emberAfCurrentCommand()->seqNum,
+                                  true,
+                                  esiIndex);
 }
 
-void emAfLoadControlEventOptInOrOut(uint8_t endpoint,
-                                    uint32_t eventId,
-                                    bool optIn)
+void sli_zigbee_af_load_control_event_opt_in_or_out(uint8_t endpoint,
+                                                    uint32_t eventId,
+                                                    bool optIn)
 {
   uint8_t i;
   uint8_t ep = emberAfFindClusterClientEndpointIndex(endpoint, ZCL_DEMAND_RESPONSE_LOAD_CONTROL_CLUSTER_ID);
@@ -391,7 +389,7 @@ void emAfLoadControlEventOptInOrOut(uint8_t endpoint,
       // message.
       if (!(e->event.optionControl & ~EVENT_OPT_FLAG_OPT_IN
             && e->entryStatus == ENTRY_SCHEDULED)) {
-        emAfCallEventAction(
+        sli_zigbee_af_call_event_action(
           &(e->event),
           (optIn
            ? EMBER_ZCL_AMI_EVENT_STATUS_USER_HAS_CHOOSE_TO_OPT_IN
@@ -405,10 +403,10 @@ void emAfLoadControlEventOptInOrOut(uint8_t endpoint,
   }
 }
 
-void emAfCancelLoadControlEvent(uint8_t endpoint,
-                                uint32_t eventId,
-                                uint8_t cancelControl,
-                                uint32_t effectiveTime)
+void sli_zigbee_af_cancel_load_control_event(uint8_t endpoint,
+                                             uint32_t eventId,
+                                             uint8_t cancelControl,
+                                             uint32_t effectiveTime)
 {
   uint8_t i;
   uint8_t ep = emberAfFindClusterClientEndpointIndex(endpoint, ZCL_DEMAND_RESPONSE_LOAD_CONTROL_CLUSTER_ID);
@@ -430,11 +428,11 @@ void emAfCancelLoadControlEvent(uint8_t endpoint,
       if ((effectiveTime == 0xffffffffUL)
           || (effectiveTime > (e->event.startTime
                                + (((uint32_t) e->event.duration) * 60)))) {
-        emAfCallEventAction(&(e->event),
-                            EMBER_ZCL_AMI_EVENT_STATUS_REJECTED_INVALID_CANCEL_COMMAND_INVALID_EFFECTIVE_TIME,
-                            emberAfCurrentCommand()->seqNum,
-                            true,
-                            esiIndex);
+        sli_zigbee_af_call_event_action(&(e->event),
+                                        EMBER_ZCL_AMI_EVENT_STATUS_REJECTED_INVALID_CANCEL_COMMAND_INVALID_EFFECTIVE_TIME,
+                                        emberAfCurrentCommand()->seqNum,
+                                        true,
+                                        esiIndex);
         return;
       }
 
@@ -461,15 +459,15 @@ void emAfCancelLoadControlEvent(uint8_t endpoint,
   undefEvent.destinationEndpoint =
     emberAfCurrentCommand()->apsFrame->destinationEndpoint;
   undefEvent.eventId = eventId;
-  emAfCallEventAction(&undefEvent,
-                      EMBER_ZCL_AMI_EVENT_STATUS_REJECTED_INVALID_CANCEL_UNDEFINED_EVENT,
-                      emberAfCurrentCommand()->seqNum,
-                      true,
-                      esiIndex);
+  sli_zigbee_af_call_event_action(&undefEvent,
+                                  EMBER_ZCL_AMI_EVENT_STATUS_REJECTED_INVALID_CANCEL_UNDEFINED_EVENT,
+                                  emberAfCurrentCommand()->seqNum,
+                                  true,
+                                  esiIndex);
 }
 
-bool emAfCancelAllLoadControlEvents(uint8_t endpoint,
-                                    uint8_t cancelControl)
+bool sli_zigbee_af_cancel_all_load_control_events(uint8_t endpoint,
+                                                  uint8_t cancelControl)
 {
   uint8_t i;
   uint8_t ep = emberAfFindClusterClientEndpointIndex(endpoint, ZCL_DEMAND_RESPONSE_LOAD_CONTROL_CLUSTER_ID);
@@ -483,18 +481,18 @@ bool emAfCancelAllLoadControlEvents(uint8_t endpoint,
   for (i = 0; i < EMBER_AF_PLUGIN_DRLC_EVENT_TABLE_SIZE; i++) {
     e = &loadControlEventTable[ep][i];
     if (e->entryStatus != ENTRY_VOID) {
-      emAfCancelLoadControlEvent(endpoint, e->event.eventId, cancelControl, 0);
+      sli_zigbee_af_cancel_load_control_event(endpoint, e->event.eventId, cancelControl, 0);
       generatedResponse = true;
     }
   }
   return generatedResponse;
 }
 
-static void emAfCallEventAction(EmberAfLoadControlEvent *event,
-                                uint8_t eventStatus,
-                                uint8_t sequenceNumber,
-                                bool replyToSingleEsi,
-                                uint8_t esiIndex)
+static void sli_zigbee_af_call_event_action(EmberAfLoadControlEvent *event,
+                                            uint8_t eventStatus,
+                                            uint8_t sequenceNumber,
+                                            bool replyToSingleEsi,
+                                            uint8_t esiIndex)
 {
   if (replyToSingleEsi) {
     EmberAfPluginEsiManagementEsiEntry* esiEntry =
@@ -515,14 +513,13 @@ static void emAfCallEventAction(EmberAfLoadControlEvent *event,
   }
 }
 
-void emAfNoteSignatureFailure(void)
+void sli_zigbee_af_note_signature_failure(void)
 {
   emberAfDemandResponseLoadControlClusterPrintln("Failed to append signature to message.");
 }
 
-void emAfLoadControlEventTablePrint(uint8_t endpoint)
+void sli_zigbee_af_load_control_event_table_print(uint8_t endpoint)
 {
-#if ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_DEMAND_RESPONSE_LOAD_CONTROL_CLUSTER)) || defined(UC_BUILD))
   uint8_t ep = emberAfFindClusterClientEndpointIndex(endpoint, ZCL_DEMAND_RESPONSE_LOAD_CONTROL_CLUSTER_ID);
   LoadControlEventTableEntry *e;
   uint8_t i;
@@ -546,18 +543,17 @@ void emAfLoadControlEventTablePrint(uint8_t endpoint)
                                                    e->event.optionControl);
     emberAfDemandResponseLoadControlClusterFlush();
   }
-#endif //defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_DEMAND_RESPONSE_LOAD_CONTROL_CLUSTER)
 }
 
-void emAfLoadControlEventTableInit(uint8_t endpoint)
+void sli_zigbee_af_load_control_event_table_init(uint8_t endpoint)
 {
   // Subscribe receive deletion announcements.
   emberAfPluginEsiManagementSubscribeToDeletionAnnouncements(esiDeletionCallback);
 
-  emAfLoadControlEventTableClear(endpoint);
+  sli_zigbee_af_load_control_event_table_clear(endpoint);
 }
 
-void emAfLoadControlEventTableClear(uint8_t endpoint)
+void sli_zigbee_af_load_control_event_table_clear(uint8_t endpoint)
 {
   uint8_t ep = emberAfFindClusterClientEndpointIndex(endpoint, ZCL_DEMAND_RESPONSE_LOAD_CONTROL_CLUSTER_ID);
   uint8_t i;

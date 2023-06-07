@@ -3,11 +3,14 @@ label: Application OTA DFU
 package: Bluetooth
 description: >
  Component that provides over-the-air (OTA) device firmware update (DFU)
- functionality in user application during runtime. No need to enter 
+ functionality in user application during runtime. No need to enter
  a specialized OTA state to update, and no AppLoader utility required.
-category: Bluetooth|OTA
+ No code is required from user to enable this component.
+category: Bluetooth|Application|Firmware Update
 quality: production
 root_path: app/bluetooth/common/app_ota_dfu
+tag:
+  - No-Code
 
 config_file:
   - path: app_ota_dfu.xml

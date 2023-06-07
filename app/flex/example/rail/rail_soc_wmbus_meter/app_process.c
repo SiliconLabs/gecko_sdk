@@ -46,13 +46,11 @@
 
 #include "rail_types.h"
 #include "cmsis_compiler.h"
+#include "sl_flex_rail_config.h"
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
-/// TX buffer length
-#define BUFFER_LENGTH  (512U)
-
 // -----------------------------------------------------------------------------
 //                          Static Function Declarations
 // -----------------------------------------------------------------------------
@@ -95,7 +93,7 @@ static volatile bool ok_to_sleep = true;
 static uint16_t last_tx_length = 0U;
 
 /// Buffer to store in packets before sending
-static __ALIGNED(RAIL_FIFO_ALIGNMENT) uint8_t tx_buffer[BUFFER_LENGTH];
+static __ALIGNED(RAIL_FIFO_ALIGNMENT) uint8_t tx_buffer[SL_FLEX_RAIL_TX_FIFO_SIZE];
 
 /// WMBus specific parameters
 static uint32_t wmbus_app_period_acc = 500e3;
@@ -287,8 +285,8 @@ void sl_rail_util_on_event(RAIL_Handle_t rail_handle, RAIL_Events_t events)
  ******************************************************************************/
 void send_packet_at(RAIL_Handle_t rail_handle, uint16_t length, uint32_t send_at)
 {
-  last_tx_length = WMBUS_phy_software(tx_buffer, (uint8_t) length, BUFFER_LENGTH);
-  RAIL_SetTxFifo(rail_handle, tx_buffer, last_tx_length, BUFFER_LENGTH);
+  last_tx_length = WMBUS_phy_software(tx_buffer, (uint8_t) length, SL_FLEX_RAIL_TX_FIFO_SIZE);
+  RAIL_SetTxFifo(rail_handle, tx_buffer, last_tx_length, SL_FLEX_RAIL_TX_FIFO_SIZE);
   if ( last_tx_length != length ) {
     //Only for Series 1 Mode T M2O
     RAIL_SetFixedLength(rail_handle, last_tx_length);
@@ -299,5 +297,5 @@ void send_packet_at(RAIL_Handle_t rail_handle, uint16_t length, uint32_t send_at
     .mode = RAIL_TIME_ABSOLUTE,
     .when = send_at,
   };
-  RAIL_StartScheduledTx(rail_handle, TX_CHANNEL, RAIL_TX_OPTIONS_DEFAULT, &schedule, NULL);
+  RAIL_StartScheduledTx(rail_handle, get_selected_channel(), RAIL_TX_OPTIONS_DEFAULT, &schedule, NULL);
 }

@@ -146,10 +146,12 @@ typedef struct {
 #define _DEVINFO_PART_FAMILY_FG                                  0x00000000UL                            /**< Mode FG for DEVINFO_PART                    */
 #define _DEVINFO_PART_FAMILY_ZG                                  0x00000003UL                            /**< Mode ZG for DEVINFO_PART                    */
 #define _DEVINFO_PART_FAMILY_PG                                  0x00000005UL                            /**< Mode PG for DEVINFO_PART                    */
+#define _DEVINFO_PART_FAMILY_SG                                  0x00000008UL                            /**< Mode SG for DEVINFO_PART                    */
 #define DEVINFO_PART_FAMILY_DEFAULT                              (_DEVINFO_PART_FAMILY_DEFAULT << 24)    /**< Shifted mode DEFAULT for DEVINFO_PART       */
 #define DEVINFO_PART_FAMILY_FG                                   (_DEVINFO_PART_FAMILY_FG << 24)         /**< Shifted mode FG for DEVINFO_PART            */
 #define DEVINFO_PART_FAMILY_ZG                                   (_DEVINFO_PART_FAMILY_ZG << 24)         /**< Shifted mode ZG for DEVINFO_PART            */
 #define DEVINFO_PART_FAMILY_PG                                   (_DEVINFO_PART_FAMILY_PG << 24)         /**< Shifted mode PG for DEVINFO_PART            */
+#define DEVINFO_PART_FAMILY_SG                                   (_DEVINFO_PART_FAMILY_SG << 24)         /**< Shifted mode SG for DEVINFO_PART            */
 
 /* Bit fields for DEVINFO MEMINFO */
 #define _DEVINFO_MEMINFO_RESETVALUE                              0x00000000UL                                  /**< Default value for DEVINFO_MEMINFO           */

@@ -26,36 +26,37 @@
 #include "stack/include/stack-info.h"
 #include "stack/include/aes-mmo.h"
 
-#ifdef UC_BUILD
- #include "sl_component_catalog.h"
-#endif // UC_BUILD
+ #ifdef SL_COMPONENT_CATALOG_PRESENT
+#include "sl_component_catalog.h"
+#endif
 
 // Externs
-extern void emGetKeyFromCore(uint8_t* key);
-extern void emLoadKeyIntoCore(const uint8_t* key);
-extern EmberStatus emAddTransientLinkKey(const EmberKeyStruct* keyStruct);
-extern EmberStatus emGetTransientKeyTableEntry(uint8_t index, EmberTransientKeyData *transientKeyData);
-extern bool emGetTrustCenterEui64(EmberEUI64 address);
+extern void sli_zigbee_get_key_from_core(uint8_t* key);
+extern void sli_util_load_key_into_core(const uint8_t* key);
+extern EmberStatus sli_zigbee_add_transient_link_key(const EmberKeyStruct* keyStruct);
+extern EmberStatus sli_zigbee_get_transient_key_table_entry(uint8_t index, EmberTransientKeyData *transientKeyData);
+extern bool sli_zigbee_get_trust_center_eui64(EmberEUI64 address);
 extern bool findTransientLinkKey(const EmberEUI64 eui64ToFind,
                                  EmberTransientKeyData *keyDataReturn,
                                  EmberKeyStructBitmask* bitmask);
 extern bool removeTransientLinkKey(const EmberEUI64 eui64ToFind,
                                    EmberKeyStructBitmask* bitmask);
-extern void emStackTokenPrimitive(bool tokenRead,
-                                  void* tokenStruct,
-                                  uint16_t tokenAddress,
-                                  uint8_t length);
-extern EmberStatus emGetKeyTableEntry(uint8_t index, EmberKeyStruct *result);
-extern uint8_t emFindKeyTableEntry(EmberEUI64 address, bool linkKey);
-extern void emMfgSecurityConfigModifyKey(EmberKeyData* key);
-extern bool emMemoryByteCompare(const uint8_t *bytes, uint8_t count, uint8_t target);
-extern bool emIsTokenDataInitialized(uint8_t* data, uint8_t length);
-extern EmberStatus emSetKeyTableEntry(bool erase,
-                                      uint8_t index,
-                                      EmberKeyStruct* keyStruct);
-extern bool emIsNullKey(EmberKeyData * key);
+extern void sli_zigbee_stack_token_primitive(bool tokenRead,
+                                             void* tokenStruct,
+                                             uint16_t tokenAddress,
+                                             uint8_t length);
+extern EmberStatus sli_zigbee_get_key_table_entry(uint8_t index, EmberKeyStruct *result);
+extern uint8_t sli_zigbee_find_key_table_entry(EmberEUI64 address, bool linkKey, uint8_t bitmask);
+extern void sli_legacy_mfg_security_config_modify_key(EmberKeyData* key);
+extern bool sli_zigbee_af_memory_byte_compare(const uint8_t *bytes, uint8_t count, uint8_t target);
+extern bool sli_zigbee_is_token_data_initialized(uint8_t* data, uint8_t length);
+extern EmberStatus sli_zigbee_af_set_key_table_entry(bool erase,
+                                                     uint8_t index,
+                                                     EmberKeyStruct* keyStruct);
+extern bool sli_zigbee_is_null_key(EmberKeyData * key);
+extern uint32_t emberGetSecurityFrameCounter(void);
 //used for software fallback of CCM*
-extern void emStandAloneEncryptBlock(uint8_t *block);
+extern void sli_util_stand_alone_encrypt_block(uint8_t *block);
 
 // Globals
 // The global context key, or key that is used in crypto operations
@@ -64,21 +65,49 @@ static uint8_t zb_sec_man_context_key[EMBER_ENCRYPTION_KEY_SIZE];
 // A scratch key that we only need temporarily, like CBKE operations
 static uint8_t zb_sec_man_internal_key[EMBER_ENCRYPTION_KEY_SIZE];
 
+//Backup of the context key, in case anything called by zb_sec_man APIs
+//needs to load an internal key.
+static uint8_t zb_sec_man_context_key_backup[EMBER_ENCRYPTION_KEY_SIZE];
+
+//MIC length to be used by AES-CCM.  Changing this to a value besides 4
+//requires calling sl_zb_sec_man_aes_ccm_extended directly (calling the
+//regular sl_zb_sec_man_aes_ccm sets it back to 4).
+static uint8_t stored_mic_length = 4;
+
 // Eventually pull this from aps-keys-full.h
 #define KEY_TABLE_ENTRY_HAS_PSA_ID          (BIT(6))
+
+// This bit indicates if entry in the key table is a Symmetric Passphrase
+#define KEY_TABLE_SYMMETRIC_PASSPHRASE      (BIT(7))
+
+void sl_zb_sec_man_init_context(sl_zb_sec_man_context_t* context)
+{
+  MEMSET(context, 0, sizeof(*context));
+}
+
+//Stub (sets a value that is unused in this implementation)
+void sl_zb_sec_man_set_context_aes_ecb_alg(sl_zb_sec_man_context_t* context)
+{
+  (void) context;
+}
+
+void sl_zb_sec_man_set_context_extended_ccm_alg(sl_zb_sec_man_context_t* context)
+{
+  (void) context;
+}
 
 sl_status_t zb_sec_man_store_nwk_key(sl_zb_sec_man_context_t* context,
                                      sl_zb_sec_man_key_t* plaintext_key)
 {
   tokTypeStackKeys tok;
   if (context->key_index == 1) {
-    emStackTokenPrimitive(true, &tok, TOKEN_STACK_ALTERNATE_KEY, TOKEN_STACK_ALTERNATE_KEY_SIZE);
+    sli_zigbee_stack_token_primitive(true, &tok, TOKEN_STACK_ALTERNATE_KEY, TOKEN_STACK_ALTERNATE_KEY_SIZE);
     MEMMOVE(tok.networkKey, plaintext_key->key, sizeof(plaintext_key->key));
-    emStackTokenPrimitive(false, &tok, TOKEN_STACK_ALTERNATE_KEY, TOKEN_STACK_ALTERNATE_KEY_SIZE);
+    sli_zigbee_stack_token_primitive(false, &tok, TOKEN_STACK_ALTERNATE_KEY, TOKEN_STACK_ALTERNATE_KEY_SIZE);
   } else {
-    emStackTokenPrimitive(true, &tok, TOKEN_STACK_KEYS, TOKEN_STACK_KEYS_SIZE);
+    sli_zigbee_stack_token_primitive(true, &tok, TOKEN_STACK_KEYS, TOKEN_STACK_KEYS_SIZE);
     MEMMOVE(tok.networkKey, plaintext_key->key, sizeof(plaintext_key->key));
-    emStackTokenPrimitive(false, &tok, TOKEN_STACK_KEYS, TOKEN_STACK_KEYS_SIZE);
+    sli_zigbee_stack_token_primitive(false, &tok, TOKEN_STACK_KEYS, TOKEN_STACK_KEYS_SIZE);
   }
 
   return SL_STATUS_OK;
@@ -89,9 +118,9 @@ sl_status_t zb_sec_man_fetch_nwk_key(sl_zb_sec_man_context_t* context,
 {
   tokTypeStackKeys tok;
   if (context->key_index == 1) {
-    emStackTokenPrimitive(true, &tok, TOKEN_STACK_ALTERNATE_KEY, TOKEN_STACK_ALTERNATE_KEY_SIZE);
+    sli_zigbee_stack_token_primitive(true, &tok, TOKEN_STACK_ALTERNATE_KEY, TOKEN_STACK_ALTERNATE_KEY_SIZE);
   } else {
-    emStackTokenPrimitive(true, &tok, TOKEN_STACK_KEYS, TOKEN_STACK_KEYS_SIZE);
+    sli_zigbee_stack_token_primitive(true, &tok, TOKEN_STACK_KEYS, TOKEN_STACK_KEYS_SIZE);
   }
   MEMMOVE(plaintext_key->key, tok.networkKey, sizeof(plaintext_key->key));
   return SL_STATUS_OK;
@@ -101,9 +130,9 @@ sl_status_t zb_sec_man_store_tc_link_key(sl_zb_sec_man_context_t* context,
                                          sl_zb_sec_man_key_t* plaintext_key)
 {
   tokTypeStackTrustCenter tok;
-  emStackTokenPrimitive(true, &tok, TOKEN_STACK_TRUST_CENTER, TOKEN_STACK_TRUST_CENTER_SIZE);
+  sli_zigbee_stack_token_primitive(true, &tok, TOKEN_STACK_TRUST_CENTER, TOKEN_STACK_TRUST_CENTER_SIZE);
   MEMMOVE(tok.key, plaintext_key->key, sizeof(plaintext_key->key));
-  emStackTokenPrimitive(false, &tok, TOKEN_STACK_TRUST_CENTER, TOKEN_STACK_TRUST_CENTER_SIZE);
+  sli_zigbee_stack_token_primitive(false, &tok, TOKEN_STACK_TRUST_CENTER, TOKEN_STACK_TRUST_CENTER_SIZE);
   return SL_STATUS_OK;
 }
 
@@ -112,7 +141,7 @@ sl_status_t zb_sec_man_fetch_tc_link_key(sl_zb_sec_man_context_t* context,
 {
   EmberEUI64 tcAddress;
   if (emberGetNodeId() != 0x0000
-      && emGetTrustCenterEui64(tcAddress)) {
+      && sli_zigbee_get_trust_center_eui64(tcAddress)) {
     if ((context->flags & ZB_SEC_MAN_FLAG_EUI_IS_VALID)
         && (0 != MEMCOMPARE(context->eui64, tcAddress, EUI64_SIZE))) {
       return SL_STATUS_NOT_FOUND;
@@ -122,7 +151,7 @@ sl_status_t zb_sec_man_fetch_tc_link_key(sl_zb_sec_man_context_t* context,
   }
 
   tokTypeStackTrustCenter tok;
-  emStackTokenPrimitive(true, &tok, TOKEN_STACK_TRUST_CENTER, TOKEN_STACK_TRUST_CENTER_SIZE);
+  sli_zigbee_stack_token_primitive(true, &tok, TOKEN_STACK_TRUST_CENTER, TOKEN_STACK_TRUST_CENTER_SIZE);
   MEMMOVE(plaintext_key->key, tok.key, sizeof(plaintext_key->key));
 
   return SL_STATUS_OK;
@@ -148,8 +177,14 @@ sl_status_t zb_sec_man_store_transient_key(sl_zb_sec_man_context_t* context,
   if (context->flags & ZB_SEC_MAN_FLAG_UNCONFIRMED_TRANSIENT_KEY) {
     keyStruct.bitmask |= EMBER_UNCONFIRMED_TRANSIENT_KEY;
   }
+  if (context->flags & ZB_SEC_MAN_FLAG_AUTHENTICATED_DYNAMIC_LINK_KEY) {
+    keyStruct.bitmask |= EMBER_DLK_DERIVED_KEY;
+  }
+  if (context->flags & ZB_SEC_MAN_FLAG_EUI_IS_VALID) {
+    keyStruct.bitmask |= EMBER_KEY_HAS_PARTNER_EUI64;
+  }
 
-  status = emAddTransientLinkKey(&keyStruct);
+  status = sli_zigbee_add_transient_link_key(&keyStruct);
 
   return (status == EMBER_SUCCESS) ? SL_STATUS_OK : SL_STATUS_FAIL;
 }
@@ -161,11 +196,14 @@ sl_status_t zb_sec_man_fetch_transient_key(sl_zb_sec_man_context_t* context,
   EmberTransientKeyData transientKeyData;
 
   if (context->flags & ZB_SEC_MAN_FLAG_KEY_INDEX_IS_VALID) {
-    status = emGetTransientKeyTableEntry(context->key_index, &transientKeyData);
+    status = sli_zigbee_get_transient_key_table_entry(context->key_index, &transientKeyData);
   } else if (context->flags & ZB_SEC_MAN_FLAG_EUI_IS_VALID) {
     EmberKeyStructBitmask bitmask = 0;
     if (context->flags & ZB_SEC_MAN_FLAG_UNCONFIRMED_TRANSIENT_KEY) {
       bitmask |= EMBER_UNCONFIRMED_TRANSIENT_KEY;
+    }
+    if (context->flags & ZB_SEC_MAN_FLAG_AUTHENTICATED_DYNAMIC_LINK_KEY) {
+      bitmask |= EMBER_DLK_DERIVED_KEY;
     }
     bool found = findTransientLinkKey(context->eui64, &transientKeyData, &bitmask);
     status = found ? EMBER_SUCCESS : EMBER_NOT_FOUND;
@@ -179,6 +217,12 @@ sl_status_t zb_sec_man_fetch_transient_key(sl_zb_sec_man_context_t* context,
   context->multi_network_index = transientKeyData.networkIndex;
   if (transientKeyData.bitmask & EMBER_UNCONFIRMED_TRANSIENT_KEY) {
     context->flags |= ZB_SEC_MAN_FLAG_UNCONFIRMED_TRANSIENT_KEY;
+  }
+  if (transientKeyData.bitmask & EMBER_DLK_DERIVED_KEY) {
+    context->flags |= ZB_SEC_MAN_FLAG_AUTHENTICATED_DYNAMIC_LINK_KEY;
+  }
+  if (transientKeyData.bitmask & EMBER_KEY_HAS_PARTNER_EUI64) {
+    context->flags |= ZB_SEC_MAN_FLAG_EUI_IS_VALID;
   }
   MEMMOVE(plaintext_key->key, transientKeyData.keyData.contents, EMBER_ENCRYPTION_KEY_SIZE);
 
@@ -287,10 +331,26 @@ sl_status_t zb_sec_man_store_in_link_key_table(sl_zb_sec_man_context_t* context,
   MEMMOVE(keyStruct.partnerEUI64, context->eui64, EUI64_SIZE);
   MEMMOVE(keyStruct.key.contents, plaintext_key->key, EMBER_ENCRYPTION_KEY_SIZE);
   keyStruct.type = EMBER_APPLICATION_LINK_KEY;
+  keyStruct.bitmask = context->flags & ZB_SEC_MAN_FLAG_SYMMETRIC_PASSPHRASE
+                      ? EMBER_KEY_IS_AUTHENTICATION_TOKEN : 0;
 
-  EmberStatus status = emSetKeyTableEntry(false,  // no delete
-                                          context->key_index,
-                                          &keyStruct);
+  //Find a key index if 0xFF was passed in for it
+  //(update existing key with this EUI or find an open entry)
+  if (context->key_index == 0xFF) {
+    sl_zb_sec_man_context_t temp_context;
+    sl_zb_sec_man_export_link_key_by_eui(context->eui64, &temp_context, NULL, NULL);
+    if (temp_context.key_index == 0xFF) {
+      sl_zb_sec_man_export_link_key_by_eui(NULL, &temp_context, NULL, NULL);
+      if (temp_context.key_index == 0xFF) {
+        return SL_STATUS_FULL;
+      }
+    }
+    context->key_index = temp_context.key_index;
+  }
+
+  EmberStatus status = sli_zigbee_af_set_key_table_entry(false,  // no delete
+                                                         context->key_index,
+                                                         &keyStruct);
 
   if (status == EMBER_SUCCESS) {
     tokTypeStackKeyTable tok;
@@ -299,6 +359,9 @@ sl_status_t zb_sec_man_store_in_link_key_table(sl_zb_sec_man_context_t* context,
             plaintext_key->key,
             EMBER_ENCRYPTION_KEY_SIZE);
     tok[KEY_ENTRY_INFO_OFFSET] |= EMBER_KEY_HAS_KEY_DATA;
+    if (context->flags & ZB_SEC_MAN_FLAG_SYMMETRIC_PASSPHRASE) {
+      tok[KEY_ENTRY_INFO_OFFSET] |= KEY_TABLE_SYMMETRIC_PASSPHRASE;
+    }
     halCommonSetIndexedToken(TOKEN_STACK_KEY_TABLE, context->key_index, (void*)&tok);
   }
 
@@ -310,16 +373,17 @@ sl_status_t zb_sec_man_fetch_from_link_key_table(sl_zb_sec_man_context_t* contex
 {
   EmberStatus status = EMBER_ERR_FATAL;
   EmberKeyStruct keyStruct;
-  bool lookForEmptyEntry = emMemoryByteCompare(context->eui64, EUI64_SIZE, 0x0);
+  bool lookForEmptyEntry = sli_zigbee_af_memory_byte_compare(context->eui64, EUI64_SIZE, 0x0);
 
   if (context->flags & ZB_SEC_MAN_FLAG_KEY_INDEX_IS_VALID) {
-    status = emGetKeyTableEntry(context->key_index, &keyStruct);
+    status = sli_zigbee_get_key_table_entry(context->key_index, &keyStruct);
     MEMMOVE(context->eui64, keyStruct.partnerEUI64, EUI64_SIZE);
   } else if (context->flags & ZB_SEC_MAN_FLAG_EUI_IS_VALID) {
-    context->key_index = emFindKeyTableEntry(context->eui64, true); // linkKey
+    uint8_t bitmask = (context->flags & ZB_SEC_MAN_FLAG_SYMMETRIC_PASSPHRASE) ? KEY_TABLE_SYMMETRIC_PASSPHRASE : 0;
+    context->key_index = sli_zigbee_find_key_table_entry(context->eui64, true, bitmask); // linkKey
     status = (context->key_index != 0xFF) ? EMBER_SUCCESS : EMBER_NOT_FOUND;
     if (context->key_index != 0xFF && !lookForEmptyEntry) {
-      status = emGetKeyTableEntry(context->key_index, &keyStruct);
+      status = sli_zigbee_get_key_table_entry(context->key_index, &keyStruct);
     }
   }
 
@@ -329,13 +393,13 @@ sl_status_t zb_sec_man_fetch_from_link_key_table(sl_zb_sec_man_context_t* contex
 
   tokTypeStackKeyTable tok;
   halCommonGetIndexedToken(&tok, TOKEN_STACK_KEY_TABLE, context->key_index);
-  // Ensure that the token does not point to a PSA ID. If this asserts, it
-  // means you have attempted to downgrade from an image that stored keys in
-  // secure vault to an image that does not; this is prohibited. The token
-  // houses the ID in PSA where the key lives, and since we don't have PSA
-  // support, we can't possibly function correctly. This is a misconfiguration.
-  // Either flash an image with the Zigbee Secure Key Storage component or
-  // masserase to blow away your tokens (which will wipe your persistence)
+  // Ensure that the token does not point to a PSA ID.  If this asserts, it
+  // means that you have attempted to downgrade from an image that stored keys in
+  // secure vault to an image that does not; this is prohibited.  The token
+  // houses the ID in PSA where the key lives, and since we don't have PSA key
+  // storage support enabled, we can't possibly function correctly.
+  // This is a misconfiguration.  Either flash an image with the Zigbee Secure Key Storage
+  // component or masserase to blow away your tokens (which will wipe your persistence)
   assert((tok[KEY_ENTRY_INFO_OFFSET] & KEY_TABLE_ENTRY_HAS_PSA_ID) == 0);
   MEMMOVE(plaintext_key->key,
           &(tok[KEY_ENTRY_KEY_DATA_OFFSET]),
@@ -351,12 +415,18 @@ sl_status_t sl_zb_sec_man_delete_transient_key(sl_zb_sec_man_context_t* context)
   if (context->flags & ZB_SEC_MAN_FLAG_UNCONFIRMED_TRANSIENT_KEY) {
     transientKeyData.bitmask |= EMBER_UNCONFIRMED_TRANSIENT_KEY;
   }
+  if (context->flags & ZB_SEC_MAN_FLAG_AUTHENTICATED_DYNAMIC_LINK_KEY) {
+    transientKeyData.bitmask |= EMBER_DLK_DERIVED_KEY;
+  }
 
   if (context->flags & ZB_SEC_MAN_FLAG_KEY_INDEX_IS_VALID) {
-    EmberStatus status = emGetTransientKeyTableEntry(context->key_index, &transientKeyData);
+    EmberStatus status = sli_zigbee_get_transient_key_table_entry(context->key_index, &transientKeyData);
     if (status != EMBER_SUCCESS) {
       return SL_STATUS_NOT_FOUND;
     }
+    //Allows deleting transient keys by index (for clearing the table)
+    MEMMOVE(context->eui64, transientKeyData.eui64, sizeof(EmberEUI64));
+    context->flags |= ZB_SEC_MAN_FLAG_EUI_IS_VALID;
   }
 
   return (removeTransientLinkKey(context->eui64, &transientKeyData.bitmask) ? SL_STATUS_OK : SL_STATUS_NOT_FOUND);
@@ -367,15 +437,16 @@ sl_status_t sl_zb_sec_man_delete_key_table_key(sl_zb_sec_man_context_t* context)
   EmberStatus status = EMBER_ERR_FATAL;
 
   if (context->flags & ZB_SEC_MAN_FLAG_EUI_IS_VALID) {
-    context->key_index = emFindKeyTableEntry(context->eui64, true); // linkKey
+    uint8_t bitmask = (context->flags & ZB_SEC_MAN_FLAG_SYMMETRIC_PASSPHRASE) ? KEY_TABLE_SYMMETRIC_PASSPHRASE : 0;
+    context->key_index = sli_zigbee_find_key_table_entry(context->eui64, true, bitmask); // linkKey
   }
 
   if (context->key_index != 0xFF) {
     EmberKeyStruct keyStruct;
     MEMSET(&keyStruct, 0, sizeof(EmberKeyStruct));
-    status = emSetKeyTableEntry(true,   // delete
-                                context->key_index,
-                                NULL);  // key data, don't care
+    status = sli_zigbee_af_set_key_table_entry(true,   // delete
+                                               context->key_index,
+                                               NULL); // key data, don't care
   }
 
   return (status == EMBER_SUCCESS) ? SL_STATUS_OK : SL_STATUS_NOT_FOUND;
@@ -401,7 +472,7 @@ void sl_zb_sec_man_hmac_aes_mmo(const uint8_t* input,
                                 uint8_t* output)
 {
   //load key from other function calls first
-  emGetKeyFromCore((uint8_t*) &zb_sec_man_context_key);
+  sli_zigbee_get_key_from_core((uint8_t*) &zb_sec_man_context_key);
 
   uint8_t buffer[ENCRYPTION_BLOCK_SIZE];
   uint8_t run;
@@ -427,7 +498,7 @@ void sl_zb_sec_man_hmac_aes_mmo(const uint8_t* input,
   }
 }
 
-#if defined(MBEDTLS_PSA_ACCEL_KEY_TYPE_AES) && defined(MBEDTLS_PSA_ACCEL_ALG_CCM) && defined(PSA_WANT_ALG_CCM) && defined(MBEDTLS_PSA_CRYPTO_DRIVERS)
+#if defined(MBEDTLS_PSA_ACCEL_KEY_TYPE_AES) && defined(MBEDTLS_PSA_ACCEL_ALG_CCM) && defined(PSA_WANT_ALG_CCM) && defined(MBEDTLS_PSA_CRYPTO_DRIVERS) && defined(PSA_CRYPTO_H)
 sl_status_t sl_zb_sec_man_aes_ccm(uint8_t* nonce,
                                   bool encrypt,
                                   const uint8_t* input,
@@ -435,6 +506,7 @@ sl_status_t sl_zb_sec_man_aes_ccm(uint8_t* nonce,
                                   uint8_t length,
                                   uint8_t* output)
 {
+  stored_mic_length = mic_length;
   //Ported over from the PSA implementations inside ccm-star.c
   psa_status_t psa_status;
   size_t tag_len;
@@ -452,20 +524,20 @@ sl_status_t sl_zb_sec_man_aes_ccm(uint8_t* nonce,
   if (encrypt) {
     psa_status = AEAD_ENCRYPT_TAG_FCT(
       &attr, zb_sec_man_context_key, sizeof(zb_sec_man_context_key),
-      PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, MIC_LENGTH),
+      PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, stored_mic_length),
       nonce, NONCE_LENGTH,
       input, encryption_start_index,
       input + encryption_start_index, length - encryption_start_index,
       output + encryption_start_index, length - encryption_start_index, &output_length,
-      output + length, MIC_LENGTH, &tag_len);
+      output + length, stored_mic_length, &tag_len);
   } else {
     psa_status = AEAD_DECRYPT_TAG_FCT(
       &attr, zb_sec_man_context_key, sizeof(zb_sec_man_context_key),
-      PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, MIC_LENGTH),
+      PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, stored_mic_length),
       nonce, NONCE_LENGTH,
       input, encryption_start_index,
       input + encryption_start_index, length - encryption_start_index,
-      input + length, MIC_LENGTH,
+      input + length, stored_mic_length,
       output + encryption_start_index, length - encryption_start_index, &output_length);
   }
 
@@ -476,11 +548,50 @@ sl_status_t sl_zb_sec_man_aes_ccm(uint8_t* nonce,
   }
 
   if (psa_status != PSA_SUCCESS || output_length != (uint8_t) (length - encryption_start_index)
-      || (encrypt && tag_len != MIC_LENGTH)) {
+      || (encrypt && tag_len != stored_mic_length)) {
     return SL_STATUS_INVALID_PARAMETER;
   } else {
     return SL_STATUS_OK;
   }
+}
+
+sl_status_t sl_zb_sec_man_aes_128_crypt_block(bool encrypt,
+                                              const uint8_t* input,
+                                              uint8_t* output)
+{
+  //Ported from PSA wrapper versions of sli_zigbee_aes_encrypt/Decrypt
+  size_t output_size = 0;
+  psa_key_attributes_t key_attr = PSA_KEY_ATTRIBUTES_INIT;
+
+  psa_set_key_type(&key_attr, PSA_KEY_TYPE_AES);
+  psa_set_key_bits(&key_attr, PSA_BYTES_TO_BITS(EMBER_ENCRYPTION_KEY_SIZE));
+  psa_status_t psa_status;
+
+  if (encrypt) {
+    psa_status = CIPHER_SINGLE_SHOT_ENC_FCT(
+      &key_attr,
+      (const uint8_t*) &zb_sec_man_context_key,
+      EMBER_ENCRYPTION_KEY_SIZE,
+      PSA_ALG_ECB_NO_PADDING,
+      NULL, 0,
+      input, SECURITY_BLOCK_SIZE,
+      output, SECURITY_BLOCK_SIZE,
+      &output_size);
+  } else {
+    psa_status = CIPHER_SINGLE_SHOT_DEC_FCT(
+      &key_attr,
+      (const uint8_t*) &zb_sec_man_context_key,
+      EMBER_ENCRYPTION_KEY_SIZE,
+      PSA_ALG_ECB_NO_PADDING,
+      input, SECURITY_BLOCK_SIZE,
+      output, SECURITY_BLOCK_SIZE,
+      &output_size);
+  }
+
+  psa_reset_key_attributes(&key_attr);
+  assert((psa_status == PSA_SUCCESS)
+         && (output_size == ENCRYPTION_BLOCK_SIZE));
+  return SL_STATUS_OK;
 }
 
 #else //no support for PSA APIs at all; compile with software implementation of CCM*.
@@ -510,7 +621,7 @@ static void encryptNonce(uint8_t *nonce,
   block[STANDALONE_VARIABLE_FIELD_INDEX_HIGH] = HIGH_BYTE(variableField);
   block[STANDALONE_VARIABLE_FIELD_INDEX_LOW] = LOW_BYTE(variableField);
 
-  emStandAloneEncryptBlock(block);
+  sli_util_stand_alone_encrypt_block(block);
 }
 
 static uint16_t min(uint16_t num1,
@@ -541,7 +652,7 @@ static uint8_t xorBytesIntoBlock(uint8_t *block,
     i += copied;
 
     if (blockIndex == ENCRYPTION_BLOCK_SIZE) {
-      emStandAloneEncryptBlock(block);
+      sli_util_stand_alone_encrypt_block(block);
       blockIndex = 0;
     }
   }
@@ -595,28 +706,30 @@ static sl_status_t zb_sec_man_calc_encrypt_mic(uint8_t* nonce,
 
     // finish off authData if not on an encryption block boundary
     if (blockIndex > 0) {
-      emStandAloneEncryptBlock(encryptionBlock);
+      sli_util_stand_alone_encrypt_block(encryptionBlock);
       blockIndex = 0;
     }
   }
 
-  MEMCOPY(data + length, encryptionBlock, MIC_LENGTH);
+  MEMCOPY(data + length, encryptionBlock, stored_mic_length);
   // The MIC gets encrypted as block zero of the message.
-  ccmEncryptData(data + length, MIC_LENGTH, 0, nonce);
+  ccmEncryptData(data + length, stored_mic_length, 0, nonce);
   return SL_STATUS_OK;
 }
 
 //Software implementation here is based on implementation for emberCcmCalculateAndEncryptMic,
 //but assumes packet input/output format.
 //output points to auth data, with encrypt data at encryption_start_index past it and MIC
-//starting at output + length (4 bytes long)
-sl_status_t sl_zb_sec_man_aes_ccm(uint8_t* nonce,
-                                  bool encrypt,
-                                  const uint8_t* input,
-                                  uint8_t encryption_start_index,
-                                  uint8_t length,
-                                  uint8_t* output)
+//starting at output + length (mic_length bytes long)
+sl_status_t sl_zb_sec_man_aes_ccm_extended(uint8_t* nonce,
+                                           bool encrypt,
+                                           const uint8_t* input,
+                                           uint8_t encryption_start_index,
+                                           uint8_t length,
+                                           uint8_t mic_length,
+                                           uint8_t* output)
 {
+  stored_mic_length = mic_length;
   //Move input into output location for in-place encryption
   MEMCOPY(output, input, length);
   bool authenticated;
@@ -630,13 +743,28 @@ sl_status_t sl_zb_sec_man_aes_ccm(uint8_t* nonce,
     uint8_t temp[TEMP_BUFFER_SIZE];
     MEMCOPY(temp, output, length);
     zb_sec_man_calc_encrypt_mic(nonce, temp, encryption_start_index, length);
-    authenticated = MEMCOMPARE(input + length, temp + length, MIC_LENGTH) == 0;
+    authenticated = MEMCOMPARE(input + length, temp + length, stored_mic_length) == 0;
     if (!authenticated) {
       //MIC check failed
       return SL_STATUS_INVALID_SIGNATURE;
     }
   }
 
+  return SL_STATUS_OK;
+}
+
+sl_status_t sl_zb_sec_man_aes_128_crypt_block(bool encrypt,
+                                              const uint8_t* input,
+                                              uint8_t* output)
+{
+  MEMCOPY(output, input, ENCRYPTION_BLOCK_SIZE);
+  // On hardware, this calls PSA, else our software implementation in aes-ecb.c
+  // is called (on zigbeed, for instance)
+  if (encrypt) {
+    sli_zigbee_aes_encrypt(output, (const uint8_t*)&zb_sec_man_context_key);
+  } else {
+    sli_zigbee_aes_decrypt(output, (const uint8_t*)&zb_sec_man_context_key);
+  }
   return SL_STATUS_OK;
 }
 
@@ -668,7 +796,7 @@ sl_status_t zb_sec_man_derive_key(sl_zb_sec_man_key_t* source_key,
   //callers must set the core key type correctly to ensure that
   //key derivation is done correctly.
 
-  emLoadKeyIntoCore((uint8_t*) source_key);
+  sli_util_load_key_into_core((uint8_t*) source_key);
 
   switch (context->derived_type) {
     case SL_ZB_SEC_MAN_DERIVED_KEY_TYPE_KEY_TRANSPORT_KEY:
@@ -770,8 +898,18 @@ sl_status_t sl_zb_sec_man_load_key_context(sl_zb_sec_man_context_t* context)
     MEMCOPY(&zb_sec_man_context_key, &plaintext_key, EMBER_ENCRYPTION_KEY_SIZE);
   }
   //TODO: Investigate removing this (and only using zb_sec_man_context_key as the "core")
-  emLoadKeyIntoCore((const uint8_t *)&zb_sec_man_context_key);
+  sli_util_load_key_into_core((const uint8_t *)&zb_sec_man_context_key);
   return SL_STATUS_OK;
+}
+
+//allows some AES-MMO functions to use sl_zb_sec_man APIs for AES encryption
+void zb_sec_man_backup_key_context(bool direction)
+{
+  if (direction) {
+    MEMMOVE(&zb_sec_man_context_key_backup, &zb_sec_man_context_key, EMBER_ENCRYPTION_KEY_SIZE);
+  } else {
+    MEMMOVE(&zb_sec_man_context_key, &zb_sec_man_context_key_backup, EMBER_ENCRYPTION_KEY_SIZE);
+  }
 }
 
 sl_status_t zb_sec_man_delete_key_by_psa_id(UNUSED uint32_t psa_id)
@@ -779,14 +917,14 @@ sl_status_t zb_sec_man_delete_key_by_psa_id(UNUSED uint32_t psa_id)
   return SL_STATUS_NOT_SUPPORTED;
 }
 
-sl_status_t zb_sec_man_store_internal_key(UNUSED sl_zb_sec_man_context_t* context,
+sl_status_t zb_sec_man_store_internal_key(sl_zb_sec_man_context_t* context,
                                           sl_zb_sec_man_key_t* plaintext_key)
 {
   MEMMOVE(&zb_sec_man_internal_key, plaintext_key, EMBER_ENCRYPTION_KEY_SIZE);
   return SL_STATUS_OK;
 }
 
-sl_status_t zb_sec_man_fetch_internal_key(UNUSED sl_zb_sec_man_context_t* context,
+sl_status_t zb_sec_man_fetch_internal_key(sl_zb_sec_man_context_t* context,
                                           sl_zb_sec_man_key_t* plaintext_key)
 {
   MEMMOVE(plaintext_key, &zb_sec_man_internal_key, EMBER_ENCRYPTION_KEY_SIZE);
@@ -797,12 +935,14 @@ sl_status_t sl_zb_sec_man_get_network_key_info(sl_zb_sec_man_network_key_info_t 
 {
   tokTypeStackKeys tok;
   //Fetch Alternate nwk key info
-  emStackTokenPrimitive(true, &tok, TOKEN_STACK_ALTERNATE_KEY, TOKEN_STACK_ALTERNATE_KEY_SIZE);
+  sli_zigbee_stack_token_primitive(true, &tok, TOKEN_STACK_ALTERNATE_KEY, TOKEN_STACK_ALTERNATE_KEY_SIZE);
   network_key_info->alt_network_key_sequence_number = tok.activeKeySeqNum;
-  network_key_info->alternate_network_key_set = !emIsNullKey((EmberKeyData*)tok.networkKey);
+  network_key_info->alternate_network_key_set = !sli_zigbee_is_null_key((EmberKeyData*)tok.networkKey);
   //Fetch nwk key info
-  emStackTokenPrimitive(true, &tok, TOKEN_STACK_KEYS, TOKEN_STACK_KEYS_SIZE);
+  sli_zigbee_stack_token_primitive(true, &tok, TOKEN_STACK_KEYS, TOKEN_STACK_KEYS_SIZE);
   network_key_info->network_key_sequence_number = tok.activeKeySeqNum;
-  network_key_info->network_key_set = !emIsNullKey((EmberKeyData*)tok.networkKey);
+  network_key_info->network_key_set = !sli_zigbee_is_null_key((EmberKeyData*)tok.networkKey);
+  // Fetch nwk key frame counter info
+  network_key_info->network_key_frame_counter = emberGetSecurityFrameCounter();
   return SL_STATUS_OK;
 }

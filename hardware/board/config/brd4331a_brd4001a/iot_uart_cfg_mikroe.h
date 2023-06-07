@@ -101,14 +101,14 @@
 // <<< sl:start pin_tool >>>
 // <usart signal=TX,RX,(CLK),(CS),(RTS),(CTS)> IOT_UART_CFG_MIKROE
 // $[USART_IOT_UART_CFG_MIKROE]
-#define IOT_UART_CFG_MIKROE_PERIPHERAL           USART0
-#define IOT_UART_CFG_MIKROE_PERIPHERAL_NO        0
+#define IOT_UART_CFG_MIKROE_PERIPHERAL           USART1
+#define IOT_UART_CFG_MIKROE_PERIPHERAL_NO        1
 
-// USART0 TX on PB01
+// USART1 TX on PB01
 #define IOT_UART_CFG_MIKROE_TX_PORT              gpioPortB
 #define IOT_UART_CFG_MIKROE_TX_PIN               1
 
-// USART0 RX on PB02
+// USART1 RX on PB02
 #define IOT_UART_CFG_MIKROE_RX_PORT              gpioPortB
 #define IOT_UART_CFG_MIKROE_RX_PIN               2
 

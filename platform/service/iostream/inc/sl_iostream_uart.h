@@ -177,6 +177,9 @@ typedef struct {
  ******************************************************************************/
 __STATIC_INLINE sl_status_t sl_iostream_uart_deinit(sl_iostream_uart_t *iostream_uart)
 {
+  #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+  iostream_uart->set_rx_energy_mode_restriction(iostream_uart->stream.context, false);
+  #endif
   return iostream_uart->deinit(iostream_uart);
 }
 

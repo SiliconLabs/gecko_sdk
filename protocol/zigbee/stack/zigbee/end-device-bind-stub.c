@@ -20,15 +20,15 @@
 #include "stack/include/ember-types.h"
 #include "stack/include/library.h"
 
-const EmberLibraryStatus emEndDeviceBindLibraryStatus =
+const EmberLibraryStatus sli_zigbee_end_device_bind_library_status =
   EMBER_LIBRARY_IS_STUB;
 
-bool emHandleEndDeviceBindRequest(EmberNodeId source,
-                                  EmberApsOption options,
-                                  uint8_t sequence,
-                                  PacketHeader payloadBuffer,
-                                  uint8_t payloadIndex,
-                                  uint8_t length)
+bool sli_zigbee_handle_end_device_bind_request(EmberNodeId source,
+                                               EmberApsOption options,
+                                               uint8_t sequence,
+                                               PacketHeader payloadBuffer,
+                                               uint8_t payloadIndex,
+                                               uint8_t length)
 {
   (void)source;
   (void)options;
@@ -39,15 +39,15 @@ bool emHandleEndDeviceBindRequest(EmberNodeId source,
   return false;
 }
 
-void emZigbeeDeviceIdTableUpdated(EmberEUI64 longId, EmberNodeId shortId)
+void sli_zigbee_device_id_table_updated(EmberEUI64 longId, EmberNodeId shortId)
 {
   (void)longId;
   (void)shortId;
 }
 
-void emZigbeeDeviceBindUnbindResponse(bool bind,
-                                      EmberNodeId source,
-                                      uint8_t status)
+void sli_zigbee_device_bind_unbind_response(bool bind,
+                                            EmberNodeId source,
+                                            uint8_t status)
 {
   (void)bind;
   (void)source;

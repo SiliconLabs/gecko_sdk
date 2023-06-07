@@ -31,6 +31,11 @@
 #ifndef SL_GATT_SERVICE_RHT_CONFIG_H
 #define SL_GATT_SERVICE_RHT_CONFIG_H
 
+/***********************************************************************************************//**
+ * @addtogroup gatt_service_rht
+ * @{
+ **************************************************************************************************/
+
 // <<< Use Configuration Wizard in Context Menu >>>
 
 // <o SL_GATT_SERVICE_RHT_RH_INVALID> Dummy Relative Humidity measurement results for uninitialized sensors. <0-0xFFFF>
@@ -42,4 +47,5 @@
 #define SL_GATT_SERVICE_RHT_T_INVALID  0x7FFF
 // <<< end of configuration section >>>
 
+/** @} (end addtogroup gatt_service_rht) */
 #endif // SL_GATT_SERVICE_RHT_CONFIG_H

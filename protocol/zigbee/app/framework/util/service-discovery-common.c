@@ -78,11 +78,7 @@
 //   local device initiated the request.  Therefore we can only allow one
 //    outstanding request at a time.
 
-#ifdef UC_BUILD
-sl_zigbee_event_t emAfServiceDiscoveryEvents[EMBER_SUPPORTED_SERVICE_DISCOVERY_STATES_PER_NETWORK][EMBER_SUPPORTED_NETWORKS];
-#else
-EmberEventControl emAfServiceDiscoveryEventControls[EMBER_SUPPORTED_SERVICE_DISCOVERY_STATES_PER_NETWORK][EMBER_SUPPORTED_NETWORKS];
-#endif // UC_BUILD
+sl_zigbee_event_t sli_zigbee_af_service_discovery_events[EMBER_SUPPORTED_SERVICE_DISCOVERY_STATES_PER_NETWORK][EMBER_SUPPORTED_NETWORKS];
 
 typedef struct {
   bool active;
@@ -139,11 +135,7 @@ static void firstTimeInitStates(void);
 static ServiceDiscoveryState *findUnusedState(void);
 static ServiceDiscoveryState *findStateForResponse(uint8_t sequenceNumber, uint8_t networkIndex);
 uint8_t emberGetLastAppZigDevRequestSequence(void);
-#ifdef UC_BUILD
 static ServiceDiscoveryState *find_state_for_event_control(sl_zigbee_event_t *event);
-#else
-static ServiceDiscoveryState *findStateForEventControl(EmberEventControl *control);
-#endif // UC_BUILD
 static bool isStateActiveInCurrentNetwork(void);
 #ifdef EMBER_TEST
 void setDiscoveryStateLimit(uint8_t limit);
@@ -151,18 +143,16 @@ void setDiscoveryStateLimit(uint8_t limit);
 
 //==============================================================================
 
-#ifdef UC_BUILD
-void emAfServiceDiscoveryInitEventsCallback(SLXU_INIT_ARG)
+void sli_zigbee_af_service_discovery_init_events_callback(uint8_t init_level)
 {
-  SLXU_INIT_UNUSED_ARG;
+  (void)init_level;
 
   uint8_t i;
   for (i = 0u; i < EMBER_SUPPORTED_SERVICE_DISCOVERY_STATES_PER_NETWORK; i++) {
-    sl_zigbee_network_event_init(emAfServiceDiscoveryEvents[i],
-                                 emAfServiceDiscoveryTimeoutHandler);
+    sl_zigbee_network_event_init(sli_zigbee_af_service_discovery_events[i],
+                                 sli_zigbee_af_service_discovery_timeout_handler);
   }
 }
-#endif // UC_BUILD
 
 EmberStatus emberAfFindDevicesByProfileAndCluster(EmberNodeId target,
                                                   EmberAfProfileId profileId,
@@ -188,7 +178,7 @@ EmberStatus emberAfFindDevicesByProfileAndCluster(EmberNodeId target,
     target = EMBER_RX_ON_WHEN_IDLE_BROADCAST_ADDRESS;
   }
 
-  status = emAfSendMatchDescriptor(target, profileId, clusterId, serverCluster);
+  status = sli_zigbee_af_send_match_descriptor(target, profileId, clusterId, serverCluster);
   // Get the sequence number sent in the request.
   uint8_t sequenceNumber = emberGetLastAppZigDevRequestSequence();
   if (status != EMBER_SUCCESS) {
@@ -366,13 +356,8 @@ static void setupDiscoveryData(ServiceDiscoveryState *state,
   emberAfServiceDiscoveryPrintln("%pWaiting %d sec for discovery to complete",
                                  PREFIX,
                                  EMBER_AF_DISCOVERY_TIMEOUT_QS >> 2);
-#ifdef UC_BUILD
-  sl_zigbee_event_set_delay_qs(emAfServiceDiscoveryEvents[state->stateIndex],
+  sl_zigbee_event_set_delay_qs(sli_zigbee_af_service_discovery_events[state->stateIndex],
                                EMBER_AF_DISCOVERY_TIMEOUT_QS);
-#else
-  emberAfNetworkEventControlSetDelayQS(emAfServiceDiscoveryEventControls[state->stateIndex],
-                                       EMBER_AF_DISCOVERY_TIMEOUT_QS);
-#endif // UC_BUILD
   // keep sleepy end devices out of hibernation until
   // service discovery is complete
   emberAfAddToCurrentAppTasks(EMBER_AF_WAITING_FOR_SERVICE_DISCOVERY);
@@ -388,11 +373,7 @@ static void serviceDiscoveryComplete(ServiceDiscoveryState *state)
   (void) emberAfPushNetworkIndex(state->networkIndex);
   state->active = false;
   emberAfServiceDiscoveryPrintln("%pcomplete.\n", PREFIX);
-#ifdef UC_BUILD
-  sl_zigbee_event_set_inactive(emAfServiceDiscoveryEvents[state->stateIndex]);
-#else
-  emberAfNetworkEventControlSetInactive(emAfServiceDiscoveryEventControls[state->stateIndex]);
-#endif // UC_BUILD
+  sl_zigbee_event_set_inactive(sli_zigbee_af_service_discovery_events[state->stateIndex]);
   // Since there can be multiple states active on the same network,
   // emberAfRemoveFromCurrentAppTasks should be called only when all the states
   // in the current network are inactive.
@@ -415,22 +396,13 @@ static void serviceDiscoveryComplete(ServiceDiscoveryState *state)
   (void) emberAfPopNetworkIndex();
 }
 
-#ifdef UC_BUILD
-void emAfServiceDiscoveryTimeoutHandler(sl_zigbee_event_t *event)
+void sli_zigbee_af_service_discovery_timeout_handler(sl_zigbee_event_t *event)
 {
   ServiceDiscoveryState *state = find_state_for_event_control(event);
   serviceDiscoveryComplete(state);
 }
-#else
-void emAfServiceDiscoveryTimeoutHandler(EmberEventControl *control)
-{
-  emberEventControlSetInactive(*control);
-  ServiceDiscoveryState *state = findStateForEventControl(control);
-  serviceDiscoveryComplete(state);
-}
-#endif // UC_BUILD
 
-void emAfServiceDiscoveryComplete(uint8_t networkIndex, uint8_t sequenceNumber)
+void sli_zigbee_af_service_discovery_complete(uint8_t networkIndex, uint8_t sequenceNumber)
 {
   ServiceDiscoveryState *state = findStateForResponse(sequenceNumber, networkIndex);
   serviceDiscoveryComplete(state);
@@ -638,10 +610,10 @@ static bool processActiveEndpointResponse(ServiceDiscoveryState* state,
   return true;
 }
 
-bool emAfServiceDiscoveryIncoming(EmberNodeId sender,
-                                  EmberApsFrame *apsFrame,
-                                  const uint8_t *message,
-                                  uint16_t length)
+bool sli_zigbee_af_service_discovery_incoming(EmberNodeId sender,
+                                              EmberApsFrame *apsFrame,
+                                              const uint8_t *message,
+                                              uint16_t length)
 {
   ServiceDiscoveryState *state = findStateForResponse(message[0], emberGetCurrentNetwork());
   if (state == NULL) {
@@ -746,33 +718,18 @@ static ServiceDiscoveryState *findStateForResponse(uint8_t sequenceNumber, uint8
    Return: A pointer to the service discovery state which corresponds to the
    control.
  */
-#ifdef UC_BUILD
 static ServiceDiscoveryState *find_state_for_event_control(sl_zigbee_event_t *event)
 {
   firstTimeInitStates();
   for (uint8_t si = 0u; si < stateLimit; si++) {
     for (uint8_t ni = 0u; ni < EMBER_SUPPORTED_NETWORKS; ni++) {
-      if (event == &emAfServiceDiscoveryEvents[si][ni]) {
+      if (event == &sli_zigbee_af_service_discovery_events[si][ni]) {
         return &states[si][ni];
       }
     }
   }
   return NULL;
 }
-#else
-static ServiceDiscoveryState *findStateForEventControl(EmberEventControl *control)
-{
-  firstTimeInitStates();
-  for (uint8_t si = 0u; si < stateLimit; si++) {
-    for (uint8_t ni = 0u; ni < EMBER_SUPPORTED_NETWORKS; ni++) {
-      if (control == &emAfServiceDiscoveryEventControls[si][ni]) {
-        return &states[si][ni];
-      }
-    }
-  }
-  return NULL;
-}
-#endif // UC_BUILD
 
 /**
    Description: Checking if there are any active states in the current network.

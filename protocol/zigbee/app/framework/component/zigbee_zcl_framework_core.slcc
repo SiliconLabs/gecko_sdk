@@ -56,7 +56,6 @@ include:
       - path: print.h
       - path: service-discovery.h
       - path: time-util.h
-      - path: tokens.h
       - path: util.h
       - path: zcl-debug-print.h
   - path: protocol/zigbee/app/framework/security
@@ -83,15 +82,9 @@ include:
       - path: common.h
       - path: library.h
       - path: form-and-join.h
-  #TODO: temporary, see EMZIGBEE-6322    
-      - path: uc-temp-macros.h
   - path: protocol/zigbee/app/util/security
     file_list:
       - path: security.h
-  # TODO: this is needed since af-main-common.c declares emberAfInvalidImageId and assigns it to INVALID_OTA_IMAGE_ID which is defined in this header.
-  - path: protocol/zigbee/app/framework/plugin/ota-storage-common
-    file_list:
-      - path: ota-storage.h
   - path: protocol/zigbee/app/util/ezsp
     file_list:
       - path: ezsp-enum.h
@@ -132,6 +125,9 @@ source:
   - path: protocol/zigbee/app/framework/util/af-soc.c
     condition:
       - zigbee_stack_common
+  - path: protocol/zigbee/app/framework/util/af-soc-common.c
+    condition:
+      - zigbee_stack_common
   - path: protocol/zigbee/app/framework/security/af-security-common.c
   - path: protocol/zigbee/app/framework/security/af-trust-center.c
   - path: protocol/zigbee/app/framework/security/crypto-state.c
@@ -153,6 +149,7 @@ source:
   - path: protocol/zigbee/app/framework/util/service-discovery-common.c
   - path: protocol/zigbee/app/framework/util/time-util.c
   - path: protocol/zigbee/app/framework/util/util.c
+  - path: protocol/zigbee/app/framework/util/zcl-util.c
   - path: protocol/zigbee/app/framework/util/service-discovery-soc.c
     condition:
       - zigbee_stack_common
@@ -182,14 +179,14 @@ template_contribution:
   - name: zigbee_af_callback
     value:
       callback_type: event_init
-      function_name: emAfZclFrameworkCoreInitEventsCallback
+      function_name: sli_zigbee_af_zcl_framework_core_init_events_callback
     priority: -9700
   - name: zigbee_af_callback
     value:
       callback_type: event_init
-      function_name: emAfServiceDiscoveryInitEventsCallback
+      function_name: sli_zigbee_af_service_discovery_init_events_callback
     priority: -9700
-# emberAfInit must be preceeded by emAfZclFrameworkCoreInitEventsCallback
+# emberAfInit must be preceeded by sli_zigbee_af_zcl_framework_core_init_events_callback
   - name: zigbee_af_callback
     value:
       callback_type: init_done
@@ -198,25 +195,25 @@ template_contribution:
   - name: zigbee_af_callback
     value:
       callback_type: init_done
-      function_name: emAfInitCallback
+      function_name: sli_zigbee_af_initCallback
     priority: -9900
   - name: zigbee_af_callback
     value:
       callback_type: init_done
-      function_name: emAfNetworkInit
+      function_name: sli_zigbee_af_network_init
     priority: 1000
   # The priority has been set to -9900 here because
-  # when we call emAfPluginNetworkCreatorSecurityStackStatusCallback
+  # when we call sli_zigbee_af_network_creator_security_stack_status_callback
   # after form a network, the NodeID is not set to EMBER_TRUST_CENTER_NODE_ID
   - name: zigbee_stack_callback
     value:
       callback_type: stack_status
-      function_name: emAfStackStatusCallback
+      function_name: sli_zigbee_af_stack_status_callback
     priority: -9900
   - name: zigbee_stack_callback
     value:
       callback_type: incoming_message
-      function_name: emAfIncomingMessageCallback
+      function_name: sli_zigbee_af_incoming_message_callback
 
 # "plugin" sub-group - to be used by all plugin-specific commands
   - name: cli_group

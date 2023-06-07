@@ -86,6 +86,7 @@
 #include "mbedtls/sha1.h"
 #include "mbedtls/sha256.h"
 #include "mbedtls/sha512.h"
+#include "mbedtls/threading.h"
 
 #define ARRAY_LENGTH( array ) ( sizeof( array ) / sizeof( *( array ) ) )
 
@@ -907,7 +908,7 @@ static psa_status_t psa_get_and_lock_key_slot_with_policy(
     psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
     psa_key_slot_t *slot;
 
-    status = psa_get_and_lock_key_slot( key, p_slot );
+    status = psa_get_and_lock_key_slot( key, p_slot, PSA_INTENT_READ );
     if( status != PSA_SUCCESS )
         return( status );
     slot = *p_slot;
@@ -993,22 +994,26 @@ psa_status_t psa_remove_key_data_from_memory( psa_key_slot_t *slot )
 }
 
 /** Completely wipe a slot in memory, including its policy.
- * Persistent storage is not affected. */
+  * Persistent storage is not affected. */
 psa_status_t psa_wipe_key_slot( psa_key_slot_t *slot )
 {
     psa_status_t status = psa_remove_key_data_from_memory( slot );
 
    /*
     * As the return error code may not be handled in case of multiple errors,
-    * do our best to report an unexpected lock counter. Assert with
-    * MBEDTLS_TEST_HOOK_TEST_ASSERT that the lock counter is equal to one:
+    * do our best to report an unexpected state. Assert with
+    * MBEDTLS_TEST_HOOK_TEST_ASSERT that the state is as expected:
     * if the MBEDTLS_TEST_HOOKS configuration option is enabled and the
     * function is called as part of the execution of a test suite, the
     * execution of the test suite is stopped in error if the assertion fails.
     */
-    if( slot->lock_count != 1 )
+
+    if( ( slot->state != PSA_STATE_WIPING && slot->state != PSA_STATE_DESTROYING ) ||
+        slot->reader_count != 0 )
     {
-        MBEDTLS_TEST_HOOK_TEST_ASSERT( slot->lock_count == 1 );
+        MBEDTLS_TEST_HOOK_TEST_ASSERT( slot->state == PSA_STATE_WIPING ||
+                                       slot->state == PSA_STATE_DESTROYING );
+        MBEDTLS_TEST_HOOK_TEST_ASSERT( slot->reader_count == 0 );
         status = PSA_ERROR_CORRUPTION_DETECTED;
     }
 
@@ -1024,41 +1029,16 @@ psa_status_t psa_wipe_key_slot( psa_key_slot_t *slot )
     return( status );
 }
 
-psa_status_t psa_destroy_key( mbedtls_svc_key_id_t key )
+psa_status_t psa_finish_key_destruction( psa_key_slot_t *slot )
 {
-    psa_key_slot_t *slot;
     psa_status_t status; /* status of the last operation */
     psa_status_t overall_status = PSA_SUCCESS;
 #if defined(MBEDTLS_PSA_CRYPTO_SE_C)
     psa_se_drv_table_entry_t *driver;
 #endif /* MBEDTLS_PSA_CRYPTO_SE_C */
 
-    if( mbedtls_svc_key_id_is_null( key ) )
-        return( PSA_SUCCESS );
-
-    /*
-     * Get the description of the key in a key slot. In case of a persistent
-     * key, this will load the key description from persistent memory if not
-     * done yet. We cannot avoid this loading as without it we don't know if
-     * the key is operated by an SE or not and this information is needed by
-     * the current implementation.
-     */
-    status = psa_get_and_lock_key_slot( key, &slot );
-    if( status != PSA_SUCCESS )
-        return( status );
-
-    /*
-     * If the key slot containing the key description is under access by the
-     * library (apart from the present access), the key cannot be destroyed
-     * yet. For the time being, just return in error. Eventually (to be
-     * implemented), the key should be destroyed when all accesses have
-     * stopped.
-     */
-    if( slot->lock_count > 1 )
-    {
-       psa_unlock_key_slot( slot );
-       return( PSA_ERROR_GENERIC_ERROR );
-    }
+    if( slot->state != PSA_STATE_DESTROYING )
+        return( PSA_ERROR_BAD_STATE );
 
     if( PSA_KEY_LIFETIME_IS_READ_ONLY( slot->attr.lifetime ) )
     {
@@ -1068,7 +1048,13 @@ psa_status_t psa_destroy_key( mbedtls_svc_key_id_t key )
          * Just do the best we can, which is to wipe the copy in memory
          * (done in this function's cleanup code). */
         overall_status = PSA_ERROR_NOT_PERMITTED;
-        goto exit;
+
+        status = psa_wipe_key_slot( slot );
+        /* Prioritize CORRUPTION_DETECTED from wiping over a storage error */
+        if( status != PSA_SUCCESS )
+            overall_status = status;
+
+        return( overall_status );
     }
 
 #if defined(MBEDTLS_PSA_CRYPTO_SE_C)
@@ -1130,14 +1116,46 @@ psa_status_t psa_destroy_key( mbedtls_svc_key_id_t key )
         if( overall_status == PSA_SUCCESS )
             overall_status = status;
     }
+exit:
 #endif /* MBEDTLS_PSA_CRYPTO_SE_C */
 
-exit:
     status = psa_wipe_key_slot( slot );
     /* Prioritize CORRUPTION_DETECTED from wiping over a storage error */
     if( status != PSA_SUCCESS )
         overall_status = status;
+
     return( overall_status );
+}
+
+psa_status_t psa_destroy_key( mbedtls_svc_key_id_t key )
+{
+    psa_key_slot_t *slot;
+    psa_status_t status; /* status of the last operation */
+
+    if( mbedtls_svc_key_id_is_null( key ) )
+        return( PSA_SUCCESS );
+
+    /*
+     * Get the description of the key in a key slot. In case of a persistent
+     * key, this will load the key description from persistent memory if not
+     * done yet. We cannot avoid this loading as without it we don't know if
+     * the key is operated by an SE or not and this information is needed by
+     * the current implementation.
+     */
+    status = psa_get_and_lock_key_slot( key, &slot, PSA_INTENT_DESTROY );
+    if( status != PSA_SUCCESS )
+        return( status );
+
+    if( psa_slot_has_no_readers( slot ) )
+    {
+        MBEDTLS_MUTEX_LOCK_CHECK( &mbedtls_psa_slots_mutex );
+        status = psa_finish_key_destruction( slot );
+        MBEDTLS_MUTEX_UNLOCK_CHECK( &mbedtls_psa_slots_mutex );
+    }
+    else
+        status = PSA_ERROR_DELAYED;
+
+    return( status );
 }
 
 #if defined(MBEDTLS_PSA_BUILTIN_KEY_TYPE_RSA_KEY_PAIR) || \
@@ -1591,9 +1609,13 @@ static psa_status_t psa_start_key_creation(
     if( status != PSA_SUCCESS )
         return( status );
 
+    MBEDTLS_MUTEX_LOCK_CHECK( &mbedtls_psa_slots_mutex );
     status = psa_get_empty_key_slot( &volatile_key_id, p_slot );
     if( status != PSA_SUCCESS )
+    {
+        MBEDTLS_MUTEX_UNLOCK_CHECK( &mbedtls_psa_slots_mutex );
         return( status );
+    }
     slot = *p_slot;
 
     /* We're storing the declared bit-size of the key. It's up to each
@@ -1645,7 +1667,10 @@ static psa_status_t psa_start_key_creation(
         status = psa_find_se_slot_for_key( attributes, method, *p_drv,
                                            &slot_number );
         if( status != PSA_SUCCESS )
+        {
+            MBEDTLS_MUTEX_UNLOCK_CHECK( &mbedtls_psa_slots_mutex );
             return( status );
+        }
 
         if( ! PSA_KEY_LIFETIME_IS_VOLATILE( attributes->core.lifetime ) )
         {
@@ -1657,6 +1682,7 @@ static psa_status_t psa_start_key_creation(
             if( status != PSA_SUCCESS )
             {
                 (void) psa_crypto_stop_transaction( );
+                MBEDTLS_MUTEX_UNLOCK_CHECK( &mbedtls_psa_slots_mutex );
                 return( status );
             }
         }
@@ -1668,10 +1694,13 @@ static psa_status_t psa_start_key_creation(
     if( *p_drv == NULL && method == PSA_KEY_CREATION_REGISTER )
     {
         /* Key registration only makes sense with a secure element. */
+        MBEDTLS_MUTEX_UNLOCK_CHECK( &mbedtls_psa_slots_mutex );
         return( PSA_ERROR_INVALID_ARGUMENT );
     }
 #endif /* MBEDTLS_PSA_CRYPTO_SE_C */
+    psa_slot_change_state( slot, PSA_STATE_CREATING );
 
+    MBEDTLS_MUTEX_UNLOCK_CHECK( &mbedtls_psa_slots_mutex );
     return( PSA_SUCCESS );
 }
 
@@ -1714,6 +1743,7 @@ static psa_status_t psa_finish_key_creation(
     (void) slot;
     (void) driver;
 
+    MBEDTLS_MUTEX_LOCK_CHECK( &mbedtls_psa_slots_mutex );
 #if defined(MBEDTLS_PSA_CRYPTO_STORAGE_C)
     if( ! PSA_KEY_LIFETIME_IS_VOLATILE( slot->attr.lifetime ) )
     {
@@ -1744,6 +1774,11 @@ static psa_status_t psa_finish_key_creation(
                                               slot->key.bytes );
         }
     }
+    if( status != PSA_SUCCESS )
+    {
+        MBEDTLS_MUTEX_UNLOCK_CHECK( &mbedtls_psa_slots_mutex );
+        return( status );
+    }
 #endif /* defined(MBEDTLS_PSA_CRYPTO_STORAGE_C) */
 
 #if defined(MBEDTLS_PSA_CRYPTO_SE_C)
@@ -1759,6 +1794,7 @@ static psa_status_t psa_finish_key_creation(
         if( status != PSA_SUCCESS )
         {
             psa_destroy_persistent_key( slot->attr.id );
+            MBEDTLS_MUTEX_UNLOCK_CHECK( &mbedtls_psa_slots_mutex );
             return( status );
         }
         status = psa_crypto_stop_transaction( );
@@ -1768,11 +1804,12 @@ static psa_status_t psa_finish_key_creation(
     if( status == PSA_SUCCESS )
     {
         *key = slot->attr.id;
-        status = psa_unlock_key_slot( slot );
+        status = psa_slot_change_state( slot, PSA_STATE_UNUSED );
         if( status != PSA_SUCCESS )
             *key = MBEDTLS_SVC_KEY_ID_INIT;
     }
 
+    MBEDTLS_MUTEX_UNLOCK_CHECK( &mbedtls_psa_slots_mutex );
     return( status );
 }
 
@@ -1796,6 +1833,10 @@ static void psa_fail_key_creation( psa_key_slot_t *slot,
     if( slot == NULL )
         return;
 
+#if defined(MBEDTLS_THREADING_C)
+    (void) mbedtls_mutex_lock( &mbedtls_psa_slots_mutex );
+#endif
+
 #if defined(MBEDTLS_PSA_CRYPTO_SE_C)
     /* TODO: If the key has already been created in the secure
      * element, and the failure happened later (when saving metadata
@@ -1813,7 +1854,11 @@ static void psa_fail_key_creation( psa_key_slot_t *slot,
     (void) psa_crypto_stop_transaction( );
 #endif /* MBEDTLS_PSA_CRYPTO_SE_C */
 
-    psa_wipe_key_slot( slot );
+    (void) psa_slot_change_state( slot, PSA_STATE_WIPING );
+    (void) psa_wipe_key_slot( slot );
+#if defined(MBEDTLS_THREADING_C)
+    (void) mbedtls_mutex_unlock( &mbedtls_psa_slots_mutex );
+#endif
 }
 
 /** Validate optional attributes during key creation.
@@ -5655,6 +5700,50 @@ psa_status_t psa_key_derivation_input_key(
     return( ( status == PSA_SUCCESS ) ? unlock_status : status );
 }
 
+#if defined(MBEDTLS_PSA_CRYPTO_DRIVERS)
+
+#include "sli_psa_driver_features.h"
+
+psa_status_t sli_se_driver_single_shot_hkdf(
+    psa_algorithm_t alg,
+    const psa_key_attributes_t *key_in_attributes,
+    const uint8_t *key_in_buffer,
+    size_t key_in_buffer_size,
+    const uint8_t* info,
+    size_t info_length,
+    const uint8_t* salt,
+    size_t salt_length,
+    const psa_key_attributes_t *key_out_attributes,
+    uint8_t *key_out_buffer,
+    size_t key_out_buffer_size);
+
+psa_status_t sli_se_driver_single_shot_pbkdf2(
+  psa_algorithm_t alg,
+  const psa_key_attributes_t *key_in_attributes,
+  const uint8_t *key_in_buffer,
+  size_t key_in_buffer_size,
+  const uint8_t* salt,
+  size_t salt_length,
+  const psa_key_attributes_t *key_out_attributes,
+  uint32_t iterations,
+  uint8_t *key_out_buffer,
+  size_t key_out_buffer_size);
+
+#if defined(SLI_MBEDTLS_DEVICE_VSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
+psa_status_t sli_cryptoacc_driver_single_shot_pbkdf2(
+  psa_algorithm_t alg,
+  const psa_key_attributes_t *key_in_attributes,
+  const uint8_t *key_in_buffer,
+  size_t key_in_buffer_size,
+  const uint8_t* salt,
+  size_t salt_length,
+  const psa_key_attributes_t *key_out_attributes,
+  uint32_t iterations,
+  uint8_t *key_out_buffer,
+  size_t key_out_buffer_size);
+#endif
+#endif /* MBEDTLS_PSA_CRYPTO_DRIVERS */
+
 psa_status_t sl_psa_key_derivation_single_shot(
     psa_algorithm_t alg,
     mbedtls_svc_key_id_t key_in,
@@ -5713,9 +5802,7 @@ psa_status_t sl_psa_key_derivation_single_shot(
          * the SE as an accelerator, we can skip the wrapper layer and call the
          * driver functions directly. */
         if (PSA_ALG_IS_HKDF(alg))
-#if defined(PSA_WANT_ALG_HKDF) \
-        && (defined(SEMAILBOX_PRESENT) \
-        && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT))
+#if defined(SLI_PSA_DRIVER_FEATURE_HKDF)
         {
             status = sli_se_driver_single_shot_hkdf(
                 alg, &key_in_attributes, input_key_slot->key.data,
@@ -5723,7 +5810,7 @@ psa_status_t sl_psa_key_derivation_single_shot(
                 key_out_attributes, output_key_slot->key.data,
                 output_key_slot->key.bytes);
         }
-#else /* PSA_WANT_ALG_HKDF && SEMAILBOX_PRESENT && VAULT */
+#else /* SLI_PSA_DRIVER_FEATURE_HKDF */
         {
             (void)info;
             (void)info_length;
@@ -5733,11 +5820,30 @@ psa_status_t sl_psa_key_derivation_single_shot(
 
             status = PSA_ERROR_NOT_SUPPORTED;
         }
-#endif /* PSA_WANT_ALG_HKDF && SEMAILBOX_PRESENT && VAULT */
+#endif /* SLI_PSA_DRIVER_FEATURE_HKDF */
         else if ( (PSA_ALG_IS_PBKDF2_HMAC(alg) || (alg == PSA_ALG_PBKDF2_AES_CMAC_PRF_128)) )
-#if (defined(PSA_WANT_ALG_PBKDF2_HMAC) || defined(PSA_WANT_ALG_PBKDF2_AES_CMAC_PRF_128)) \
-        && (defined(SEMAILBOX_PRESENT) \
-        && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT))
+#if defined(SLI_PSA_DRIVER_FEATURE_PBKDF2)
+#if defined(SLI_MBEDTLS_DEVICE_VSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
+        {
+            if (alg == PSA_ALG_PBKDF2_AES_CMAC_PRF_128)
+            {
+                status = sli_cryptoacc_driver_single_shot_pbkdf2(
+                    alg, &key_in_attributes, input_key_slot->key.data,
+                    input_key_slot->key.bytes, salt, salt_length,
+                    key_out_attributes, iterations, output_key_slot->key.data,
+                    output_key_slot->key.bytes);
+            }
+            else
+            {
+                (void)salt;
+                (void)salt_length;
+                (void)iterations;
+                (void)key_in_attributes;
+                
+                status = PSA_ERROR_NOT_SUPPORTED;
+            }
+        }
+#else /* SLI_MBEDTLS_DEVICE_VSE && SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS */
         {
             status = sli_se_driver_single_shot_pbkdf2(
                 alg, &key_in_attributes, input_key_slot->key.data,
@@ -5745,7 +5851,8 @@ psa_status_t sl_psa_key_derivation_single_shot(
                 key_out_attributes, iterations, output_key_slot->key.data,
                 output_key_slot->key.bytes);
         }
-#else /* PSA_WANT_ALG_PBKDF2 && SEMAILBOX_PRESENT && VAULT */
+#endif /* SLI_MBEDTLS_DEVICE_VSE && SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS */
+#else /* SLI_PSA_DRIVER_FEATURE_PBKDF2 */
         {
             (void)salt;
             (void)salt_length;
@@ -5754,7 +5861,7 @@ psa_status_t sl_psa_key_derivation_single_shot(
 
             status = PSA_ERROR_NOT_SUPPORTED;
         }
-#endif /* PSA_WANT_ALG_PBKDF2 && SEMAILBOX_PRESENT && VAULT */
+#endif /* SLI_PSA_DRIVER_FEATURE_PBKDF2 */
         else
         {
             status = PSA_ERROR_NOT_SUPPORTED;
@@ -5774,6 +5881,8 @@ exit:
 
     return( ( status == PSA_SUCCESS ) ? unlock_status : status );
 }
+
+
 
 /****************************************************************/
 /* Key agreement */

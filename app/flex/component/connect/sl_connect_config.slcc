@@ -1,0 +1,16 @@
+id: "sl_connect_config"
+label: "Connect configuration values"
+package: "Flex"
+description: "Provides apps with adjustable Connect configuration values like different kinds of buffers used by apps and components."
+category: "Flex|Connect|Utility"
+quality: "production"
+root_path: "app/flex/component/connect/sl_connect_config"
+provides:
+  - name: "connect_config"
+config_file:
+  - path: "config/sl_connect_config.h"
+
+template_contribution:
+#---------------- Component Catalog ------------------
+  - name: component_catalog
+    value: flex_connect_config

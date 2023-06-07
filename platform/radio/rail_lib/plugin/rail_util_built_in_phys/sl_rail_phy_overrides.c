@@ -48,6 +48,11 @@ const RAIL_ChannelConfig_t *const RAIL_BLE_Phy2MbpsAox =
 #endif
 #endif
 
+#if RAIL_BLE_SUPPORTS_HADM
+const RAIL_ChannelConfig_t *const RAIL_BLE_Phy1MbpsViterbiHadm = NULL;
+const RAIL_ChannelConfig_t *const RAIL_BLE_Phy2MbpsViterbiHadm = NULL;
+#endif
+
 #if RAIL_BLE_SUPPORTS_CODED_PHY
 const RAIL_ChannelConfig_t *const RAIL_BLE_Phy125kbps =
   &sl_rail_ble_phy_125kbps_38M4Hz_channelConfig;
@@ -63,6 +68,11 @@ const RAIL_ChannelConfig_t *const RAIL_BLE_PhySimulscan =
 #if RAIL_SUPPORTS_2P4GHZ_BAND && RAIL_SUPPORTS_PROTOCOL_IEEE802154
 const RAIL_ChannelConfig_t *const RAIL_IEEE802154_Phy2p4GHz =
   &sl_rail_ieee802154_phy_2G4Hz_38M4Hz_channelConfig;
+#endif
+
+#if RAIL_IEEE802154_SUPPORTS_2MBPS_PHY
+const RAIL_ChannelConfig_t *const RAIL_IEEE802154_Phy2p4GHz2Mbps =
+  &sl_rail_ieee802154_phy_2G4Hz_2Mbps_38M4Hz_channelConfig;
 #endif
 
 #if RAIL_SUPPORTS_ANTENNA_DIVERSITY && RAIL_SUPPORTS_2P4GHZ_BAND \
@@ -128,6 +138,11 @@ const RAIL_ChannelConfig_t *const RAIL_BLE_Phy2MbpsAox =
 #endif
 #endif
 
+#if RAIL_BLE_SUPPORTS_HADM
+const RAIL_ChannelConfig_t *const RAIL_BLE_Phy1MbpsViterbiHadm = NULL;
+const RAIL_ChannelConfig_t *const RAIL_BLE_Phy2MbpsViterbiHadm = NULL;
+#endif
+
 #if RAIL_BLE_SUPPORTS_CODED_PHY
 const RAIL_ChannelConfig_t *const RAIL_BLE_Phy125kbps =
   &sl_rail_ble_phy_125kbps_39MHz_channelConfig;
@@ -159,6 +174,11 @@ const RAIL_ChannelConfig_t *const RAIL_IEEE802154_Phy2p4GHzCoex =
 #if RAIL_IEEE802154_SUPPORTS_COEX_PHY && RAIL_SUPPORTS_ANTENNA_DIVERSITY
 const RAIL_ChannelConfig_t *const RAIL_IEEE802154_Phy2p4GHzAntDivCoex =
   &sl_rail_ieee802154_phy_2G4Hz_antdiv_coex_39MHz_channelConfig;
+#endif
+
+#if RAIL_IEEE802154_SUPPORTS_2MBPS_PHY
+const RAIL_ChannelConfig_t *const RAIL_IEEE802154_Phy2p4GHz2Mbps =
+  &sl_rail_ieee802154_phy_2G4Hz_2Mbps_39MHz_channelConfig;
 #endif
 
 #if RAIL_IEEE802154_SUPPORTS_FEM_PHY
@@ -208,6 +228,13 @@ const RAIL_ChannelConfig_t *const RAIL_BLE_Phy2MbpsAox =
 #endif
 #endif
 
+#if RAIL_BLE_SUPPORTS_HADM
+const RAIL_ChannelConfig_t *const RAIL_BLE_Phy1MbpsViterbiHadm =
+  &sl_rail_ble_phy_1Mbps_viterbi_hadm_40MHz_channelConfig;
+const RAIL_ChannelConfig_t *const RAIL_BLE_Phy2MbpsViterbiHadm =
+  &sl_rail_ble_phy_2Mbps_viterbi_hadm_40MHz_channelConfig;
+#endif
+
 #if RAIL_BLE_SUPPORTS_CODED_PHY
 const RAIL_ChannelConfig_t *const RAIL_BLE_Phy125kbps =
   &sl_rail_ble_phy_125kbps_40MHz_channelConfig;
@@ -239,6 +266,11 @@ const RAIL_ChannelConfig_t *const RAIL_IEEE802154_Phy2p4GHzCoex =
 #if RAIL_IEEE802154_SUPPORTS_COEX_PHY && RAIL_SUPPORTS_ANTENNA_DIVERSITY
 const RAIL_ChannelConfig_t *const RAIL_IEEE802154_Phy2p4GHzAntDivCoex =
   &sl_rail_ieee802154_phy_2G4Hz_antdiv_coex_40MHz_channelConfig;
+#endif
+
+#if RAIL_IEEE802154_SUPPORTS_2MBPS_PHY
+const RAIL_ChannelConfig_t *const RAIL_IEEE802154_Phy2p4GHz2Mbps =
+  &sl_rail_ieee802154_phy_2G4Hz_2Mbps_40MHz_channelConfig;
 #endif
 
 #if RAIL_IEEE802154_SUPPORTS_FEM_PHY

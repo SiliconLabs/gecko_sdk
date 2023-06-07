@@ -34,6 +34,12 @@
   - condition:
     - brd4001a
     override:
+      component: bootloader_ezsp_gpio_activation
+      file_id: ezsp_gpio_activation_cfg
+    path: brd4272a_brd4001a/btl_ezsp_gpio_activation_cfg.h
+  - condition:
+    - brd4001a
+    override:
       component: bootloader_gpio_activation
       file_id: btl_gpio_activation_cfg
     path: brd4272a_brd4001a/btl_gpio_activation_cfg.h
@@ -49,6 +55,20 @@
       component: bootloader_spi_peripheral_eusart_driver
       file_id: btl_spi_peripheral_eusart_driver_cfg
     path: brd4272a_brd4001a/btl_spi_peripheral_eusart_driver_cfg.h
+  - condition:
+    - brd4001a
+    override:
+      component: cpc_gpio_expander_gpio_instance
+      file_id: cpc_gpio_expander_gpio_config
+      instance: btn0
+    path: brd4272a_brd4001a/sl_cpc_gpio_expander_gpio_btn0_config.h
+  - condition:
+    - brd4001a
+    override:
+      component: cpc_gpio_expander_gpio_instance
+      file_id: cpc_gpio_expander_gpio_config
+      instance: btn1
+    path: brd4272a_brd4001a/sl_cpc_gpio_expander_gpio_btn1_config.h
   - condition:
     - brd4001a
     override:
@@ -247,6 +267,12 @@
   - condition:
     - brd4002a
     override:
+      component: bootloader_ezsp_gpio_activation
+      file_id: ezsp_gpio_activation_cfg
+    path: brd4272a_brd4002a/btl_ezsp_gpio_activation_cfg.h
+  - condition:
+    - brd4002a
+    override:
       component: bootloader_gpio_activation
       file_id: btl_gpio_activation_cfg
     path: brd4272a_brd4002a/btl_gpio_activation_cfg.h
@@ -262,6 +288,20 @@
       component: bootloader_spi_peripheral_eusart_driver
       file_id: btl_spi_peripheral_eusart_driver_cfg
     path: brd4272a_brd4002a/btl_spi_peripheral_eusart_driver_cfg.h
+  - condition:
+    - brd4002a
+    override:
+      component: cpc_gpio_expander_gpio_instance
+      file_id: cpc_gpio_expander_gpio_config
+      instance: btn0
+    path: brd4272a_brd4002a/sl_cpc_gpio_expander_gpio_btn0_config.h
+  - condition:
+    - brd4002a
+    override:
+      component: cpc_gpio_expander_gpio_instance
+      file_id: cpc_gpio_expander_gpio_config
+      instance: btn1
+    path: brd4272a_brd4002a/sl_cpc_gpio_expander_gpio_btn1_config.h
   - condition:
     - brd4002a
     override:

@@ -13,6 +13,8 @@ class PhyFilters_Sol(IPhyFilter):
                            'Phys_Internal_Base_ValOnly',
                            'Phys_Internal_Connect',
                            'Phys_Internal_SUN_OQPSK',
+                           'Phys_Internal_WiSUN_Concurrent',
+                           'Phys_Internal_WiSUN_Concurrent_ValOnly',
                            'Phys_Internal_WiSUN_FSK',
                            'Phys_Internal_WiSUN_OFDM',
                            'Phys_RAIL_Base_Standard_BLE',
@@ -23,7 +25,7 @@ class PhyFilters_Sol(IPhyFilter):
     # Studio white list (these PHYs show in Studio as proprietary starting points)
     simplicity_studio_phy_groups = ['Phys_Studio_Base',
                                     'Phys_Studio_Base_Standard_SUNFSK',
-                                    'Phys_Studio_Base_Sidewalk',
+                                    'Phys_Studio_Sidewalk',
                                     'Phys_Studio_Connect',
                                     'Phys_Studio_SUN_OQPSK',
                                     'phys_studio_wisun_fan_1_0',

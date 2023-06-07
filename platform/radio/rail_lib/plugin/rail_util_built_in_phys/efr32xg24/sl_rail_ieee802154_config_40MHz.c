@@ -2,8 +2,8 @@
  * @brief RAIL Configuration
  * @details
  *   WARNING: Auto-Generated Radio Config  -  DO NOT EDIT
- *   Radio Configurator Version: 2022.10.1
- *   RAIL Adapter Version: 2.4.20
+ *   Radio Configurator Version: 2302.2.1
+ *   RAIL Adapter Version: 2.4.31
  *   RAIL Compatibility: 2.x
  *******************************************************************************
  * # License
@@ -70,7 +70,7 @@ static RAIL_ChannelConfigEntryAttr_t channelConfigEntryAttr = {
 };
 
 static const uint32_t phyInfo_0[] = {
-  13UL,
+  15UL,
   0x00666666UL, // 102.39999999999999
   (uint32_t) NULL,
   (uint32_t) irCalConfig,
@@ -89,10 +89,11 @@ static const uint32_t phyInfo_0[] = {
   1999969UL,
   (uint32_t) NULL,
   (uint32_t) NULL,
+  (uint32_t) NULL,
 };
 
 static const uint32_t phyInfo_1[] = {
-  13UL,
+  15UL,
   0x00666666UL, // 102.39999999999999
   (uint32_t) NULL,
   (uint32_t) irCalConfig,
@@ -109,6 +110,7 @@ static const uint32_t phyInfo_1[] = {
   0UL,
   0UL,
   1999969UL,
+  (uint32_t) NULL,
   (uint32_t) NULL,
   (uint32_t) NULL,
 };
@@ -492,6 +494,7 @@ const RAIL_ChannelConfigEntry_t sl_rail_ieee802154_phy_2G4Hz_40MHz_channels[] = 
 #ifdef RADIO_CONFIG_ENABLE_STACK_INFO
     .stackInfo = NULL,
 #endif
+    .alternatePhy = NULL,
   },
 };
 
@@ -511,6 +514,7 @@ const RAIL_ChannelConfigEntry_t sl_rail_ieee802154_phy_2G4Hz_antdiv_40MHz_channe
 #ifdef RADIO_CONFIG_ENABLE_STACK_INFO
     .stackInfo = NULL,
 #endif
+    .alternatePhy = NULL,
   },
 };
 
@@ -530,6 +534,7 @@ const RAIL_ChannelConfigEntry_t sl_rail_ieee802154_phy_2G4Hz_antdiv_fem_40MHz_ch
 #ifdef RADIO_CONFIG_ENABLE_STACK_INFO
     .stackInfo = NULL,
 #endif
+    .alternatePhy = NULL,
   },
 };
 
@@ -549,6 +554,7 @@ const RAIL_ChannelConfigEntry_t sl_rail_ieee802154_phy_2G4Hz_fem_40MHz_channels[
 #ifdef RADIO_CONFIG_ENABLE_STACK_INFO
     .stackInfo = NULL,
 #endif
+    .alternatePhy = NULL,
   },
 };
 
@@ -558,6 +564,7 @@ const RAIL_ChannelConfig_t sl_rail_ieee802154_phy_2G4Hz_40MHz_channelConfig = {
   .configs = sl_rail_ieee802154_phy_2G4Hz_40MHz_channels,
   .length = 1U,
   .signature = 0UL,
+  .xtalFrequencyHz = 40000000UL,
 };
 
 const RAIL_ChannelConfig_t sl_rail_ieee802154_phy_2G4Hz_antdiv_40MHz_channelConfig = {
@@ -566,6 +573,7 @@ const RAIL_ChannelConfig_t sl_rail_ieee802154_phy_2G4Hz_antdiv_40MHz_channelConf
   .configs = sl_rail_ieee802154_phy_2G4Hz_antdiv_40MHz_channels,
   .length = 1U,
   .signature = 0UL,
+  .xtalFrequencyHz = 40000000UL,
 };
 
 const RAIL_ChannelConfig_t sl_rail_ieee802154_phy_2G4Hz_antdiv_fem_40MHz_channelConfig = {
@@ -574,6 +582,7 @@ const RAIL_ChannelConfig_t sl_rail_ieee802154_phy_2G4Hz_antdiv_fem_40MHz_channel
   .configs = sl_rail_ieee802154_phy_2G4Hz_antdiv_fem_40MHz_channels,
   .length = 1U,
   .signature = 0UL,
+  .xtalFrequencyHz = 40000000UL,
 };
 
 const RAIL_ChannelConfig_t sl_rail_ieee802154_phy_2G4Hz_fem_40MHz_channelConfig = {
@@ -582,4 +591,5 @@ const RAIL_ChannelConfig_t sl_rail_ieee802154_phy_2G4Hz_fem_40MHz_channelConfig 
   .configs = sl_rail_ieee802154_phy_2G4Hz_fem_40MHz_channels,
   .length = 1U,
   .signature = 0UL,
+  .xtalFrequencyHz = 40000000UL,
 };

@@ -23,19 +23,17 @@
 #include "hal/hal.h"
 #include "include/error.h"
 
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
 #endif
 
-#ifdef UC_BUILD
-#if (defined SL_CATALOG_ZIGBEE_STRONG_RANDOM_API_RADIO_PRESENT)
+#if (defined SL_CATALOG_ZIGBEE_STRONG_RANDOM_API_RADIO_PRESENT) || defined (EMBER_SCRIPTED_TEST)
 #define USE_RADIO_API_FOR_TRNG
 #elif (defined SL_CATALOG_ZIGBEE_STRONG_RANDOM_API_PSA_PRESENT)
 #define USE_PSA_API_FOR_TRNG
-#else // None of the components present, then error
+#elif !defined(USE_RADIO_API_FOR_TRNG) && !defined(USE_PSA_API_FOR_TRNG) // None of the components present, then error
 #error Must select one of the strong random api with radio or PSA Crypto
 #endif // SL_CATALOG_ZIGBEE_STRONG_RANDOM_API_
-#endif // UC_BUILD
 
 #if defined(MBEDTLS_CONFIG_FILE)
 #include MBEDTLS_CONFIG_FILE
@@ -44,7 +42,7 @@
 #if defined(USE_PSA_API_FOR_TRNG)
 #include "psa/crypto.h"
 #else // defined(USE_PSA_API_FOR_TRNG)
-extern bool emRadioGetRandomNumbers(uint16_t *randomNumber, uint8_t count);
+extern bool sli_802154phy_radio_get_random_numbers(uint16_t *randomNumber, uint8_t count);
 #endif // defined(USE_PSA_API_FOR_TRNG)
 
 EmberStatus emberGetStrongRandomNumberArray(uint16_t *randomNumber, uint8_t count)
@@ -57,7 +55,7 @@ EmberStatus emberGetStrongRandomNumberArray(uint16_t *randomNumber, uint8_t coun
   if (status != PSA_SUCCESS) {
 #else // defined(USE_MBEDTLS_API_FOR_TRNG)
   // Get random numbers from the radio API
-  if (!emRadioGetRandomNumbers(randomNumber, count)) {
+  if (!sli_802154phy_radio_get_random_numbers(randomNumber, count)) {
 #endif // defined(USE_MBEDTLS_API_FOR_TRNG)
     return EMBER_INSUFFICIENT_RANDOM_DATA;
   }

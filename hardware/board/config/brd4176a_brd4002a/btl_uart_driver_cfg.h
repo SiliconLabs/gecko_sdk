@@ -52,14 +52,14 @@
 // <<< sl:start pin_tool >>>
 // <usart signal=TX,RX,(CTS),(RTS)> SL_SERIAL_UART
 // $[USART_SL_SERIAL_UART]
-#define SL_SERIAL_UART_PERIPHERAL                USART1
-#define SL_SERIAL_UART_PERIPHERAL_NO             1
+#define SL_SERIAL_UART_PERIPHERAL                USART0
+#define SL_SERIAL_UART_PERIPHERAL_NO             0
 
-// USART1 TX on PA05
+// USART0 TX on PA05
 #define SL_SERIAL_UART_TX_PORT                   gpioPortA
 #define SL_SERIAL_UART_TX_PIN                    5
 
-// USART1 RX on PA06
+// USART0 RX on PA06
 #define SL_SERIAL_UART_RX_PORT                   gpioPortA
 #define SL_SERIAL_UART_RX_PIN                    6
 

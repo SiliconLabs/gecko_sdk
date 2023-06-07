@@ -74,8 +74,8 @@ static void demangleSymbol(int aIndex, const char *aSymbol)
     int                status;
     char               program[kMaxNameSize + 1];
     char               mangledName[kMaxNameSize + 1];
-    char *             demangledName = nullptr;
-    char *             functionName  = nullptr;
+    char              *demangledName = nullptr;
+    char              *functionName  = nullptr;
     unsigned int       offset        = 0;
     unsigned int       address       = 0;
 
@@ -113,8 +113,8 @@ exit:
 static void dumpStack(void)
 {
     constexpr uint8_t kMaxDepth = 50;
-    void *            stack[kMaxDepth];
-    char **           symbols;
+    void             *stack[kMaxDepth];
+    char            **symbols;
     int               depth;
 
     depth   = backtrace(stack, kMaxDepth);
@@ -132,6 +132,17 @@ exit:
     return;
 }
 #endif // OPENTHREAD_POSIX_CONFIG_ANDROID_ENABLE
+static constexpr uint8_t kNumSignals           = 6;
+static constexpr int     kSignals[kNumSignals] = {SIGABRT, SIGILL, SIGSEGV, SIGBUS, SIGTRAP, SIGFPE};
+static struct sigaction  sSigActions[kNumSignals];
+
+static void resetSignalActions(void)
+{
+    for (uint8_t i = 0; i < kNumSignals; i++)
+    {
+        sigaction(kSignals[i], &sSigActions[i], (struct sigaction *)nullptr);
+    }
+}
 
 static void signalCritical(int sig, siginfo_t *info, void *ucontext)
 {
@@ -144,7 +155,9 @@ static void signalCritical(int sig, siginfo_t *info, void *ucontext)
     dumpStack();
 
     otLogCritPlat("------------------ END OF CRASH ------------------");
-    exit(EXIT_FAILURE);
+
+    resetSignalActions();
+    raise(sig);
 }
 
 void platformBacktraceInit(void)
@@ -154,16 +167,12 @@ void platformBacktraceInit(void)
     sigact.sa_sigaction = &signalCritical;
     sigact.sa_flags     = SA_RESTART | SA_SIGINFO | SA_NOCLDWAIT;
 
-    sigaction(SIGABRT, &sigact, (struct sigaction *)nullptr);
-    sigaction(SIGILL, &sigact, (struct sigaction *)nullptr);
-    sigaction(SIGSEGV, &sigact, (struct sigaction *)nullptr);
-    sigaction(SIGBUS, &sigact, (struct sigaction *)nullptr);
-    sigaction(SIGTRAP, &sigact, (struct sigaction *)nullptr);
-    sigaction(SIGFPE, &sigact, (struct sigaction *)nullptr);
+    for (uint8_t i = 0; i < kNumSignals; i++)
+    {
+        sigaction(kSignals[i], &sigact, &sSigActions[i]);
+    }
 }
 #else  // OPENTHREAD_POSIX_CONFIG_ANDROID_ENABLE || defined(__GLIBC__)
-void platformBacktraceInit(void)
-{
-}
+void platformBacktraceInit(void) {}
 #endif // OPENTHREAD_POSIX_CONFIG_ANDROID_ENABLE || defined(__GLIBC__)
 #endif // OPENTHREAD_POSIX_CONFIG_BACKTRACE_ENABLE

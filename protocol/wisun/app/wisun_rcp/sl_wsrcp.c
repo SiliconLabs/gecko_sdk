@@ -36,7 +36,7 @@ struct sl_wsrcp_app g_rcp_ctxt = { 0 };
  * send reset indication | on reset request | on boot
  */
 
-#ifdef WISUN_RCP_USE_CPC
+#if defined SL_CATALOG_CPC_SECONDARY_PRESENT
 #include <sl_cpc.h>
 #include "sl_wsrcp_cpc.h"
 
@@ -65,6 +65,48 @@ static void wisun_rcp_init_bus(struct sl_wsrcp_app *rcp_app)
 {
     cpc_init(&rcp_app->cpc_ep);
     rcp_app->rcp_mac = wsmac_register(cpc_tx, cpc_rx, &rcp_app->cpc_ep);
+}
+
+#elif defined SL_CATALOG_IOSTREAM_UART_COMMON_PRESENT
+
+#include "sl_wsrcp_uart_plt.h"
+
+static int wisun_rcp_uart_plt_tx(void *cb_data, const void *buf, int buf_len)
+{
+    return uart_plt_tx(cb_data, buf, buf_len);
+}
+
+static int wisun_rcp_uart_plt_rx(void *cb_data, void *buf, int buf_len)
+{
+    return uart_plt_rx(cb_data, buf, buf_len);
+}
+
+void uart_plt_rx_ready(struct sl_wsrcp_uart_plt *uart_ctxt)
+{
+    struct sl_wsrcp_app *rcp_app = container_of(uart_ctxt, struct sl_wsrcp_app, uart_plt);
+
+    osEventFlagsSet(rcp_app->main_events, RX_UART);
+}
+
+void uart_plt_crc_error(struct sl_wsrcp_uart_plt *uart_ctxt, uint16_t crc, int frame_len, uint8_t header, uint8_t irq_err_counter)
+{
+    struct sl_wsrcp_app *rcp_app = container_of(uart_ctxt, struct sl_wsrcp_app, uart_plt);
+
+    wsmac_report_rx_crc_error(rcp_app->rcp_mac, crc, frame_len, header, irq_err_counter);
+}
+
+void wsmac_on_reset_req(struct sl_wsrcp_mac *rcp_mac)
+{
+    (void)rcp_mac;
+
+    NVIC_SystemReset();
+}
+
+static void wisun_rcp_init_bus(struct sl_wsrcp_app *rcp_app)
+{
+    uart_plt_init(&rcp_app->uart_plt);
+    rcp_app->rcp_mac = wsmac_register(wisun_rcp_uart_plt_tx, wisun_rcp_uart_plt_rx, &rcp_app->uart_plt);
+    wsmac_send_reset_ind(rcp_app->rcp_mac);
 }
 
 #else
@@ -137,6 +179,7 @@ void wisun_rcp_init(void)
         .stack_size = 2048, // Default value is not enough
     };
 
+    sl_iostream_set_default(sl_iostream_rtt_handle);
     SEGGER_RTT_SetFlagsUpBuffer(0, SEGGER_RTT_MODE_NO_BLOCK_SKIP);
     export_debugger_data();
     // Note: this function is launched before the Operating System, you can't

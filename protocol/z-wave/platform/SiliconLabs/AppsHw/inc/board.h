@@ -300,7 +300,7 @@ button_id_t Board_GetButtonId(GPIO_Port_TypeDef port, uint32_t pin);
 button_id_t Board_GetButtonIdFromEm4PinWakeupFlags(uint32_t *wakeup_pin_flags);
 
 /**
- * @brief Returns the last returned event via the zaf_event_helper.h module!
+ * @brief Returns the last button event
  *
  * @attention The function delete the event, so subsequent calls will not be
  * able to fetch the event. For this reason, only one UserTask should ideally
@@ -407,8 +407,12 @@ void Board_SliderEventHandlerEx(button_id_t btn,
 
 /* -------------------------------- LEDS ------------------------------- */
 
-#if defined(LED1_GPIO_PORT)
+#if defined(LED1_LABEL) && defined(LED1_GPIO_PORT)
   #define LED1_AVAILABLE       true
+#elif defined(LED1_LABEL) && !defined(LED1_GPIO_PORT)
+  #define LED1_AVAILABLE       false
+  #define LED1_GPIO_PORT       101
+  #define LED1_GPIO_PIN        201
 #else
   #define LED1_AVAILABLE       false
   #define LED1_LABEL           "-"
@@ -417,8 +421,12 @@ void Board_SliderEventHandlerEx(button_id_t btn,
   #define LED1_ON_VALUE        0
 #endif
 
-#if defined(LED2_GPIO_PORT)
+#if defined(LED2_LABEL) && defined(LED2_GPIO_PORT)
   #define LED2_AVAILABLE       true
+#elif defined(LED2_LABEL) && !defined(LED2_GPIO_PORT)
+  #define LED2_AVAILABLE       false
+  #define LED2_GPIO_PORT       102
+  #define LED2_GPIO_PIN        202
 #else
   #define LED2_AVAILABLE       false
   #define LED2_LABEL           "-"
@@ -427,8 +435,12 @@ void Board_SliderEventHandlerEx(button_id_t btn,
   #define LED2_ON_VALUE        0
 #endif
 
-#if defined(LED3_GPIO_PORT)
+#if defined(LED3_LABEL) && defined(LED3_GPIO_PORT)
   #define LED3_AVAILABLE       true
+#elif defined(LED3_LABEL) && !defined(LED3_GPIO_PORT)
+  #define LED3_AVAILABLE       false
+  #define LED3_GPIO_PORT       103
+  #define LED3_GPIO_PIN        203
 #else
   #define LED3_AVAILABLE       false
   #define LED3_LABEL           "-"
@@ -437,8 +449,12 @@ void Board_SliderEventHandlerEx(button_id_t btn,
   #define LED3_ON_VALUE        0
 #endif
 
-#if defined(LED4_GPIO_PORT)
+#if defined(LED4_LABEL) && defined(LED4_GPIO_PORT)
   #define LED4_AVAILABLE       true
+#elif defined(LED4_LABEL) && !defined(LED4_GPIO_PORT)
+  #define LED4_AVAILABLE       false
+  #define LED4_GPIO_PORT       104
+  #define LED4_GPIO_PIN        204
 #else
   #define LED4_AVAILABLE       false
   #define LED4_LABEL           "-"
@@ -449,8 +465,12 @@ void Board_SliderEventHandlerEx(button_id_t btn,
 
 /* ------------------------------ BUTTONS ------------------------------ */
 
-#if defined(PB1_GPIO_PORT)
+#if defined(PB1_LABEL) && defined(PB1_GPIO_PORT)
   #define PB1_AVAILABLE       true
+#elif defined(PB1_LABEL) && !defined(PB1_GPIO_PORT)
+  #define PB1_AVAILABLE       false
+  #define PB1_GPIO_PORT       101
+  #define PB1_GPIO_PIN        201
 #else
   #define PB1_AVAILABLE       false
   #define PB1_LABEL           "-"
@@ -461,8 +481,12 @@ void Board_SliderEventHandlerEx(button_id_t btn,
   #define PB1_CAN_WAKEUP_EM4  false
 #endif
 
-#if defined(PB2_GPIO_PORT)
+#if defined(PB2_LABEL) && defined(PB2_GPIO_PORT)
   #define PB2_AVAILABLE       true
+#elif defined(PB2_LABEL) && !defined(PB2_GPIO_PORT)
+  #define PB2_AVAILABLE       false
+  #define PB2_GPIO_PORT       102
+  #define PB2_GPIO_PIN        202
 #else
   #define PB2_AVAILABLE       false
   #define PB2_LABEL           "-"
@@ -473,8 +497,12 @@ void Board_SliderEventHandlerEx(button_id_t btn,
   #define PB2_CAN_WAKEUP_EM4  false
 #endif
 
-#if defined(PB3_GPIO_PORT)
+#if defined(PB3_LABEL) && defined(PB3_GPIO_PORT)
   #define PB3_AVAILABLE       true
+#elif defined(PB3_LABEL) && !defined(PB3_GPIO_PORT)
+  #define PB3_AVAILABLE       false
+  #define PB3_GPIO_PORT       103
+  #define PB3_GPIO_PIN        203
 #else
   #define PB3_AVAILABLE       false
   #define PB3_LABEL           "-"
@@ -485,8 +513,12 @@ void Board_SliderEventHandlerEx(button_id_t btn,
   #define PB3_CAN_WAKEUP_EM4  false
 #endif
 
-#if defined(PB4_GPIO_PORT)
+#if defined(PB4_LABEL) && defined(PB4_GPIO_PORT)
   #define PB4_AVAILABLE       true
+#elif defined(PB4_LABEL) && !defined(PB4_GPIO_PORT)
+  #define PB4_AVAILABLE       false
+  #define PB4_GPIO_PORT       104
+  #define PB4_GPIO_PIN        204
 #else
   #define PB4_AVAILABLE       false
   #define PB4_LABEL           "-"
@@ -497,8 +529,12 @@ void Board_SliderEventHandlerEx(button_id_t btn,
   #define PB4_CAN_WAKEUP_EM4  false
 #endif
 
-#if defined(PB5_GPIO_PORT)
+#if defined(PB5_LABEL) && defined(PB5_GPIO_PORT)
   #define PB5_AVAILABLE       true
+#elif defined(PB5_LABEL) && !defined(PB5_GPIO_PORT)
+  #define PB5_AVAILABLE       false
+  #define PB5_GPIO_PORT       105
+  #define PB5_GPIO_PIN        205
 #else
   #define PB5_AVAILABLE       false
   #define PB5_LABEL           "-"
@@ -509,8 +545,12 @@ void Board_SliderEventHandlerEx(button_id_t btn,
   #define PB5_CAN_WAKEUP_EM4  false
 #endif
 
-#if defined(PB6_GPIO_PORT)
+#if defined(PB6_LABEL) && defined(PB6_GPIO_PORT)
   #define PB6_AVAILABLE       true
+#elif defined(PB6_LABEL) && !defined(PB6_GPIO_PORT)
+  #define PB6_AVAILABLE       false
+  #define PB6_GPIO_PORT       106
+  #define PB6_GPIO_PIN        206
 #else
   #define PB6_AVAILABLE       false
   #define PB6_LABEL           "-"
@@ -521,8 +561,12 @@ void Board_SliderEventHandlerEx(button_id_t btn,
   #define PB6_CAN_WAKEUP_EM4  false
 #endif
 
-#if defined(SLIDER1_GPIO_PORT)
+#if defined(SLIDER1_LABEL) && defined(SLIDER1_GPIO_PORT)
   #define SLIDER1_AVAILABLE      true
+#elif defined(SLIDER1_LABEL) && !defined(SLIDER1_GPIO_PORT)
+  #define SLIDER1_AVAILABLE      false
+  #define SLIDER1_GPIO_PORT      111
+  #define SLIDER1_GPIO_PIN       211
 #else
   #define SLIDER1_AVAILABLE      false
   #define SLIDER1_LABEL          "-"

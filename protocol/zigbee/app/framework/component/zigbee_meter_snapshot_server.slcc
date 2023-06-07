@@ -36,7 +36,7 @@ template_contribution:
     value:
       group: meter-snapshot-server
       name: take
-      handler: emAfMeterSnapshotServerCliTake
+      handler: sli_zigbee_af_meter_snapshot_server_cli_take
       help: Takes a snapshot.
       argument:
       - type: uint8
@@ -47,7 +47,7 @@ template_contribution:
     value:
       group: meter-snapshot-server
       name: publish
-      handler: emAfMeterSnapshotServerCliPublish
+      handler: sli_zigbee_af_meter_snapshot_server_cli_publish
       help: Publishes a snapshot.
       argument:
       - type: uint16

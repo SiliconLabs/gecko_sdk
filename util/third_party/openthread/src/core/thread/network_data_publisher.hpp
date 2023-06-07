@@ -46,6 +46,7 @@
 #include <openthread/netdata_publisher.h>
 
 #include "border_router/routing_manager.hpp"
+#include "common/callback.hpp"
 #include "common/clearable.hpp"
 #include "common/equatable.hpp"
 #include "common/error.hpp"
@@ -212,7 +213,7 @@ public:
      * @param[in] aContext         A pointer to application-specific context (used when @p aCallback is invoked).
      *
      */
-    void SetPrefixCallback(PrefixCallback aCallback, void *aContext);
+    void SetPrefixCallback(PrefixCallback aCallback, void *aContext) { mPrefixCallback.Set(aCallback, aContext); }
 
     /**
      * This method requests an on-mesh prefix to be published in the Thread Network Data.
@@ -266,6 +267,43 @@ public:
     Error PublishExternalRoute(const ExternalRouteConfig &aConfig, Requester aRequester);
 
     /**
+     * This method replaces a previously published external route.
+     *
+     * Only stable entries can be published (i.e.,`aConfig.mStable` MUST be `true`).
+     *
+     * If there is no previously published external route matching @p aPrefix, this method behaves similarly to
+     * `PublishExternalRoute()`, i.e., it will start the process of publishing @a aConfig as an external route in the
+     * Thread Network Data.
+     *
+     * If there is a previously published route entry matching @p aPrefix, it will be replaced with the new prefix from
+     * @p aConfig.
+     *
+     * - If the @p aPrefix was already added in the Network Data, the change to the new prefix in @p aConfig is
+     *   immediately reflected in the Network Data. This ensures that route entries in the Network Data are not
+     *   abruptly removed and the transition from aPrefix to the new prefix is smooth.
+     *
+     * - If the old published @p aPrefix was not added in the Network Data, it will be replaced with the new @p aConfig
+     *   prefix but it will not be immediately added. Instead, it will start the process of publishing it in the
+     *   Network Data (monitoring the Network Data to determine when/if to add the prefix, depending on the number of
+     *   similar prefixes present in the Network Data).
+     *
+     * @param[in] aPrefix         The previously published external route prefix to replace.
+     * @param[in] aConfig         The external route config to publish.
+     * @param[in] aRequester      The requester (`kFromUser` or `kFromRoutingManager` module).
+     *
+     * @retval kErrorNone         The external route is published successfully.
+     * @retval kErrorInvalidArgs  The @p aConfig is not valid (bad prefix, invalid flag combinations, or not stable).
+     * @retval kErrorNoBufs       Could not allocate an entry for the new request. Publisher supports a limited number
+     *                            of entries (shared between on-mesh prefix and external route) determined by config
+     *                            `OPENTHREAD_CONFIG_NETDATA_PUBLISHER_MAX_PREFIX_ENTRIES`.
+     *
+     *
+     */
+    Error ReplacePublishedExternalRoute(const Ip6::Prefix         &aPrefix,
+                                        const ExternalRouteConfig &aConfig,
+                                        Requester                  aRequester);
+
+    /**
      * This method indicates whether or not currently a published prefix entry (on-mesh or external route) is added to
      * the Thread Network Data.
      *
@@ -305,10 +343,10 @@ private:
         // All intervals are in milliseconds.
         static constexpr uint32_t kMaxDelayToAdd    = OPENTHREAD_CONFIG_NETDATA_PUBLISHER_MAX_DELAY_TO_ADD;
         static constexpr uint32_t kMaxDelayToRemove = OPENTHREAD_CONFIG_NETDATA_PUBLISHER_MAX_DELAY_TO_REMOVE;
-        static constexpr uint32_t kExtraDelayToRemovePeferred =
+        static constexpr uint32_t kExtraDelayToRemovePreferred =
             OPENTHREAD_CONFIG_NETDATA_PUBLISHER_EXTRA_DELAY_TIME_TO_REMOVE_PREFERRED;
 
-        static constexpr uint16_t kInfoStringSize = 50;
+        static constexpr uint16_t kInfoStringSize = 60;
 
         typedef String<kInfoStringSize> InfoString;
 
@@ -346,7 +384,7 @@ private:
 
     public:
         explicit DnsSrpServiceEntry(Instance &aInstance);
-        void SetCallback(DnsSrpServiceCallback aCallback, void *aContext);
+        void SetCallback(DnsSrpServiceCallback aCallback, void *aContext) { mCallback.Set(aCallback, aContext); }
         void PublishAnycast(uint8_t aSequenceNumber);
         void PublishUnicast(const Ip6::Address &aAddress, uint16_t aPort);
         void PublishUnicast(uint16_t aPort);
@@ -401,9 +439,8 @@ private:
         void CountAnycastEntries(uint8_t &aNumEntries, uint8_t &aNumPreferredEntries) const;
         void CountUnicastEntries(uint8_t &aNumEntries, uint8_t &aNumPreferredEntries) const;
 
-        Info                  mInfo;
-        DnsSrpServiceCallback mCallback;
-        void *                mCallbackContext;
+        Info                            mInfo;
+        Callback<DnsSrpServiceCallback> mCallback;
     };
 #endif // OPENTHREAD_CONFIG_TMF_NETDATA_SERVICE_ENABLE
 
@@ -467,8 +504,8 @@ private:
 #endif
 
 #if OPENTHREAD_CONFIG_BORDER_ROUTER_ENABLE
-    PrefixEntry *      FindOrAllocatePrefixEntry(const Ip6::Prefix &aPrefix, Requester aRequester);
-    PrefixEntry *      FindMatchingPrefixEntry(const Ip6::Prefix &aPrefix);
+    PrefixEntry       *FindOrAllocatePrefixEntry(const Ip6::Prefix &aPrefix, Requester aRequester);
+    PrefixEntry       *FindMatchingPrefixEntry(const Ip6::Prefix &aPrefix);
     const PrefixEntry *FindMatchingPrefixEntry(const Ip6::Prefix &aPrefix) const;
     bool               IsAPrefixEntry(const Entry &aEntry) const;
     void               NotifyPrefixEntryChange(Event aEvent, const Ip6::Prefix &aPrefix) const;
@@ -485,9 +522,8 @@ private:
 #endif
 
 #if OPENTHREAD_CONFIG_BORDER_ROUTER_ENABLE
-    PrefixEntry    mPrefixEntries[kMaxUserPrefixEntries + kMaxRoutingManagerPrefixEntries];
-    PrefixCallback mPrefixCallback;
-    void *         mPrefixCallbackContext;
+    PrefixEntry              mPrefixEntries[kMaxUserPrefixEntries + kMaxRoutingManagerPrefixEntries];
+    Callback<PrefixCallback> mPrefixCallback;
 #endif
 
     PublisherTimer mTimer;

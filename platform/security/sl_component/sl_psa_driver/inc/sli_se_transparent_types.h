@@ -27,6 +27,7 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
+
 #ifndef SLI_SE_TRANSPARENT_TYPES_H
 #define SLI_SE_TRANSPARENT_TYPES_H
 
@@ -42,21 +43,22 @@
  * \{
  ******************************************************************************/
 
-#include "em_device.h"
+#include "sli_psa_driver_features.h"
 
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
 
 #include "sl_se_manager_types.h"
+
 #include "sli_se_driver_aead.h"
 #include "sli_se_driver_mac.h"
 #include "sli_se_driver_cipher.h"
+
 // Replace inclusion of crypto_driver_common.h with the new psa driver interface
 // header file when it becomes available.
 #include "psa/crypto_driver_common.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+// -----------------------------------------------------------------------------
+// Types
 
 /// PSA transparent accelerator driver compatible context structure
 typedef struct {
@@ -65,10 +67,10 @@ typedef struct {
     sl_se_sha1_multipart_context_t      sha1_context;
     sl_se_sha224_multipart_context_t    sha224_context;
     sl_se_sha256_multipart_context_t    sha256_context;
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || defined(DOXYGEN)
+    #if defined(SLI_MBEDTLS_DEVICE_HSE_VAULT_HIGH)
     sl_se_sha384_multipart_context_t    sha384_context;
     sl_se_sha512_multipart_context_t    sha512_context;
-#endif
+    #endif
   } streaming_contexts;
 } sli_se_transparent_hash_operation_t;
 
@@ -84,17 +86,17 @@ typedef union {
     uint8_t key[32];
     size_t key_len;
   } cipher_mac;
-  #if defined(PSA_WANT_ALG_HMAC)
+  #if defined(SLI_PSA_DRIVER_FEATURE_HMAC)
   struct {
     psa_algorithm_t alg;
     sli_se_transparent_hash_operation_t hash_ctx;
-    #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+    #if defined(SLI_MBEDTLS_DEVICE_HSE_VAULT_HIGH)
     uint8_t opad[128];
     #else
     uint8_t opad[64];
     #endif
   } hmac;
-  #endif /* PSA_WANT_ALG_HMAC */
+  #endif /* SLI_PSA_DRIVER_FEATURE_HMAC */
 } sli_se_transparent_mac_operation_t;
 
 typedef struct {
@@ -103,11 +105,7 @@ typedef struct {
   sli_se_driver_aead_operation_t operation;
 } sli_se_transparent_aead_operation_t;
 
-#ifdef __cplusplus
-}
-#endif
-
-#endif // SEMAILBOX_PRESENT
+#endif // SLI_MBEDTLS_DEVICE_HSE
 
 /** \} (end addtogroup sl_psa_drivers_se) */
 /** \} (end addtogroup sl_psa_drivers) */

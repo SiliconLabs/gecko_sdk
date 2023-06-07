@@ -31,6 +31,11 @@
 #ifndef SL_BT_OTS_CLIENT_H
 #define SL_BT_OTS_CLIENT_H
 
+/***********************************************************************************************//**
+ * @addtogroup ots_client
+ * @{
+ **************************************************************************************************/
+
 #include <stdbool.h>
 #include <stdint.h>
 #include "sl_bt_ots_datatypes.h"
@@ -235,9 +240,11 @@ typedef void (*sl_bt_ots_client_group_metadata_read_t)(sl_bt_ots_client_handle_t
  * status.
  * @param[in] client           Client handle.
  * @param[in] result           Status of the initialization.
+ * @param[in] gattdb_handles   GATT database handles.
  ******************************************************************************/
-typedef void (*sl_bt_ots_client_init_callback_t)(sl_bt_ots_client_handle_t client,
-                                                 sl_status_t               result);
+typedef void (*sl_bt_ots_client_init_callback_t)(sl_bt_ots_client_handle_t  client,
+                                                 sl_status_t                result,
+                                                 sl_bt_ots_gattdb_handles_t *gattdb_handles);
 
 /// OTS Object Client Callbacks
 typedef struct {
@@ -304,16 +311,18 @@ typedef struct sl_bt_ots_client {
 
 /***************************************************************************//**
  * Initialize Object Client.
- * @param[in] client     Client handle.
- * @param[in] connection Client connection handle.
- * @param[in] service    GATT database handle for the OTS service.
- * @param[in] callbacks  Client callbacks' structure.
- * @return               Status code
+ * @param[in] client         Client handle.
+ * @param[in] connection     Client connection handle.
+ * @param[in] service        GATT database handle for the OTS service.
+ * @param[in] callbacks      Client callbacks' structure.
+ * @param[in] gattdb_handles GATT database handles or NULL if not present.
+ * @return                   Status code
  ******************************************************************************/
 sl_status_t sl_bt_ots_client_init(sl_bt_ots_client_handle_t    client,
                                   uint8_t                      connection,
                                   uint32_t                     service,
-                                  sl_bt_ots_client_callbacks_t *callbacks);
+                                  sl_bt_ots_client_callbacks_t *callbacks,
+                                  sl_bt_ots_gattdb_handles_t   *gattdb_handles);
 
 /***************************************************************************//**
  * Read Object Transfer Service Features supported by the Server.
@@ -689,4 +698,5 @@ bool sli_bt_ots_client_is_ok_to_sleep(void);
 };
 #endif
 
+/** @} (end addtogroup ots_client) */
 #endif // SL_BT_OTS_CLIENT_H

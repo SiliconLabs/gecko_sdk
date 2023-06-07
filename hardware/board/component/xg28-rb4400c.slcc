@@ -1,0 +1,22 @@
+!!omap
+- id: xg28_rb4400c
+- label: XG28-RB4400C
+- package: platform
+- description: Kit BSP support for the xG28 Dual Band +14 dBm Radio Board.
+- category: Platform|Board|Kit|Radio Board
+- quality: production
+- requires:
+  - name: hardware_board_from_xg28-rb4400c
+- provides:
+  - name: hardware_kit
+  - name: hardware_kit_rb
+- define:
+  - name: SL_KIT_NAME
+    value: '"XG28-RB4400C"'
+  - name: SL_KIT_REV
+    value: '"A00"'
+- tag:
+  - kit:opn:xG28-RB4400C
+  - kit:pn:RB4400
+  - kit:variant:C
+  - kit:revision:A00

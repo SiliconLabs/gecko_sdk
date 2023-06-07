@@ -34,13 +34,13 @@ template_contribution:
     value:
       group: ota-storage-common
       name: printImages
-      handler: emAfOtaPrintAllImages
+      handler: sli_zigbee_af_ota_print_all_images
       help: Prints the images.
   - name: cli_command
     value:
       group: ota-storage-common
       name: delete
-      handler: emAfOtaImageDelete
+      handler: sli_zigbee_af_ota_image_delete
       help: Deletes the image at the specified index.
       argument:
       - type: uint8
@@ -49,19 +49,19 @@ template_contribution:
     value:
       group: ota-storage-common
       name: reload
-      handler: emAfOtaReloadStorageDevice
+      handler: sli_zigbee_af_ota_reload_storage_device
       help: Reload the storage device.
   - name: cli_command
     value:
       group: ota-storage-common
       name: storage-info
-      handler: emAfOtaStorageInfoPrint
+      handler: sli_zigbee_af_ota_storage_info_print
       help: Prints information about the storage device.
   - name: cli_command
     value:
       group: ota-storage-common
       name: data-print
-      handler: emAfOtaStorageDataPrint
+      handler: sli_zigbee_af_ota_storage_data_print
       help: Prints arbitrary bytes of the OTA image on disk.
       argument:
       - type: uint8

@@ -508,7 +508,7 @@ static int parse_scan_data(uint8_t *data, uint8_t len, bd_addr *addr)
   uint8_t i = 0;
   while (i < len) {
     if (data[i + 1] == GAP_ADDR_TYPE) {
-      memcpy(addr, &data[i + 3], sizeof(bd_addr));
+      memcpy(addr, &data[i + 2], sizeof(bd_addr));
       return 0;
     } else {
       i += data[i] + 1;

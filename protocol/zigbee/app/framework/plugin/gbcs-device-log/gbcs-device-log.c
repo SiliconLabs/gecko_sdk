@@ -58,9 +58,9 @@ static uint8_t findFreeDeviceLogEntry(void);
 //------------------------------------------------------------------------------
 // Initialization
 
-void emberAfPluginGbcsDeviceLogInitCallback(SLXU_INIT_ARG)
+void emberAfPluginGbcsDeviceLogInitCallback(uint8_t init_level)
 {
-  SLXU_INIT_UNUSED_ARG;
+  (void)init_level;
 
   emberAfPluginGbcsDeviceLogReset();
 }

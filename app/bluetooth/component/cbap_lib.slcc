@@ -3,7 +3,7 @@ label: Certificate Based Authentication and Pairing Library
 package: Bluetooth
 description: >
   Handles the certificate and OOB data authentication.
-category: Bluetooth|Middleware
+category: Bluetooth|Application|Miscellaneous
 quality: experimental
 ui_hints:
   visibility: never

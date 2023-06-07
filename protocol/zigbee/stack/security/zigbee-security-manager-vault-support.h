@@ -17,6 +17,9 @@
  *
  ******************************************************************************/
 
+#ifndef ZIGBEE_SECURITY_MANAGER_VAULT_SUPPORT_H
+#define ZIGBEE_SECURITY_MANAGER_VAULT_SUPPORT_H
+
 #include "security_manager.h"
 
 #define ZB_PSA_KEY_TYPE (PSA_KEY_TYPE_AES)
@@ -41,6 +44,7 @@
 #define ZB_PSA_KEY_ID_ZLL_ENCRYPT_KEY                 (ZB_PSA_KEY_ID_MIN + 3)
 #define ZB_PSA_KEY_ID_ZLL_PRE_CONFIGURED_KEY          (ZB_PSA_KEY_ID_MIN + 4)
 #define ZB_PSA_KEY_ID_SECURE_EZSP_KEY                 (ZB_PSA_KEY_ID_MIN + 5)
+#define ZB_PSA_KEY_ID_VERSION_KEY                     (ZB_PSA_KEY_ID_MIN + 16)
 #define ZB_PSA_KEY_ID_LINK_KEY_TABLE_START            (ZB_PSA_KEY_ID_MIN + LINK_KEY_TABLE_OFFSET)
 #define ZB_PSA_KEY_ID_LINK_KEY_TABLE_END              (ZB_PSA_KEY_ID_LINK_KEY_TABLE_START + EMBER_KEY_TABLE_SIZE)
 #define ZB_PSA_KEY_ID_GP_PROXY_TABLE_START            (ZB_PSA_KEY_ID_MIN + GREEN_POWER_PROXY_TABLE_OFFSET)
@@ -48,4 +52,12 @@
 #define ZB_PSA_KEY_ID_GP_SINK_TABLE_START             (ZB_PSA_KEY_ID_MIN + GREEN_POWER_SINK_TABLE_OFFSET)
 #define ZB_PSA_KEY_ID_GP_SINK_TABLE_END               (ZB_PSA_KEY_ID_LINK_KEY_TABLE_START + EMBER_GP_SINK_TABLE_SIZE)
 
-sl_status_t sec_man_to_sl_status(sl_sec_man_status_t sec_man_error);
+sl_status_t psa_to_sl_status(psa_status_t sec_man_error);
+
+//Set version key byte in PSA to the most recent value
+sl_status_t zb_sec_man_store_version_key(void);
+//Get version key byte currently stored in PSA
+//(to see if something may be outdated)
+sl_status_t zb_sec_man_fetch_version_key(uint8_t* version);
+
+#endif // ZIGBEE_SECURITY_MANAGER_VAULT_SUPPORT_H

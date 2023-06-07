@@ -33,29 +33,29 @@
 #include "sl_memory_config.h"
 
 #if defined(__GNUC__)
-  /* Declare stack object used with gcc */
-  static char sl_stack[SL_STACK_SIZE] __attribute__ ((aligned(8), used, section(".stack")));
+/* Declare stack object used with gcc */
+static char sl_stack[SL_STACK_SIZE] __attribute__ ((aligned(8), used, section(".stack")));
 
-  /* Declare the minimum heap object used with gcc */
+/* Declare the minimum heap object used with gcc */
   #if SL_HEAP_SIZE > 0
-    static char sl_heap[SL_HEAP_SIZE]   __attribute__ ((aligned(8), used, section(".heap")));
+static char sl_heap[SL_HEAP_SIZE]   __attribute__ ((aligned(8), used, section(".heap")));
   #endif
 
-  /*
-   * Declare the base and limit of the full heap region used with gcc. To make
-   * use of otherwise unused memory, the total heap region be larger than the
-   * minimum heap allocation above.
-   */
-  extern char __HeapBase[];
-  extern char __HeapLimit[];
+/*
+ * Declare the base and limit of the full heap region used with gcc. To make
+ * use of otherwise unused memory, the total heap region be larger than the
+ * minimum heap allocation above.
+ */
+extern char __HeapBase[];
+extern char __HeapLimit[];
 
 #elif defined(__ICCARM__)
-  /* Declare stack object used with iar */
-  __root char sl_stack[SL_STACK_SIZE] @ ".stack";
+/* Declare stack object used with iar */
+__root char sl_stack[SL_STACK_SIZE] @ ".stack";
 
-  /* Declare the minimum heap object used with iar */
+/* Declare the minimum heap object used with iar */
   #if SL_HEAP_SIZE > 0
-    __root char sl_heap[SL_HEAP_SIZE] @ ".heap";
+__root char sl_heap[SL_HEAP_SIZE] @ ".heap";
   #endif
   #pragma section="HEAP"
 

@@ -7,10 +7,16 @@ description: >
   Setup Server model which is present on the same element.
   
   This component implements temperature, people count, and illuminance measurements.
-  It provides callback functions for each property. 
+  It provides callback functions for each property.
+
+  This is a No-Code component if using a Silicon Labs device and the relevant
+  components for their respective hardware.
 category: "Bluetooth Mesh|Models|Sensors"
 quality: "production"
 root_path: "app/btmesh/common/btmesh_sensor_server"
+tag:
+  - No-Code
+
 include:
   - path: ""
     file_list:
@@ -29,11 +35,12 @@ provides:
 requires:
   - name: "app_assert"
   - name: "app_btmesh_util"
+  - name: "btmesh_provisionee"
   - name: "btmesh_stack_node"
   - name: "btmesh_stack_sensor_server"
   - name: "btmesh_stack_sensor_setup_server"
   - name: "btmesh_stack"
-  - name: "simple_timer"
+  - name: "app_timer"
 
 template_contribution:
   - name: "btmesh_on_event"

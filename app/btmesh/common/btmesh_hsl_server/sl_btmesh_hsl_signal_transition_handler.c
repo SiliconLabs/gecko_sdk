@@ -36,7 +36,7 @@
 #include "em_common.h"
 #include "sl_status.h"
 
-#include "sl_simple_timer.h"
+#include "app_timer.h"
 
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
@@ -84,12 +84,12 @@ static uint32_t saturation_transtime_elapsed;
 /// non-zero if saturation transition is active
 static uint8_t saturation_transitioning;
 
-static sl_simple_timer_t hue_transition_timer;
-static sl_simple_timer_t saturation_transition_timer;
+static app_timer_t hue_transition_timer;
+static app_timer_t saturation_transition_timer;
 
 // Timer callbacks
-static void hue_transition_timer_cb(sl_simple_timer_t *timer, void *data);
-static void saturation_transition_timer_cb(sl_simple_timer_t *timer, void *data);
+static void hue_transition_timer_cb(app_timer_t *timer, void *data);
+static void saturation_transition_timer_cb(app_timer_t *timer, void *data);
 
 ////////////////////////////////////////////////////////////////////////////////
 //    HSL Callbacks                                                           //
@@ -118,7 +118,7 @@ SL_WEAK void sl_btmesh_hsl_saturation_on_ui_update(uint16_t saturation)
 /***************************************************************************//**
  * Handler for Hue Transition Timer, which manages LEDs transitions.
  ******************************************************************************/
-static void hue_transition_timer_cb(sl_simple_timer_t *timer, void *data)
+static void hue_transition_timer_cb(app_timer_t *timer, void *data)
 {
   (void)data;
   (void)timer;
@@ -127,7 +127,7 @@ static void hue_transition_timer_cb(sl_simple_timer_t *timer, void *data)
   static uint16_t time_elapsed_since_ui_update = SL_BTMESH_HSL_SERVER_HUE_UI_UPDATE_PERIOD_CFG_VAL;
 
   if (!hue_transitioning) {
-    sl_status_t sc = sl_simple_timer_stop(&hue_transition_timer);
+    sl_status_t sc = app_timer_stop(&hue_transition_timer);
     app_assert_status_f(sc, "Failed to stop Periodic Hue Transition Timer");
     return;
   } else {
@@ -177,7 +177,7 @@ static void hue_transition_timer_cb(sl_simple_timer_t *timer, void *data)
 /***************************************************************************//**
  * Handler for Saturation Transition Timer, which manages LEDs transitions.
  ******************************************************************************/
-static void saturation_transition_timer_cb(sl_simple_timer_t *timer, void *data)
+static void saturation_transition_timer_cb(app_timer_t *timer, void *data)
 {
   (void)data;
   (void)timer;
@@ -186,7 +186,7 @@ static void saturation_transition_timer_cb(sl_simple_timer_t *timer, void *data)
   static uint16_t time_elapsed_since_ui_update = SL_BTMESH_HSL_SERVER_SATURATION_UI_UPDATE_PERIOD_CFG_VAL;
 
   if (!saturation_transitioning) {
-    sl_status_t sc = sl_simple_timer_stop(&saturation_transition_timer);
+    sl_status_t sc = app_timer_stop(&saturation_transition_timer);
     app_assert_status_f(sc, "Failed to stop Periodic Saturation Transition Timer");
     return;
   } else {
@@ -261,7 +261,7 @@ void sl_btmesh_hsl_set_hue_level(uint16_t hue, uint32_t transition_ms)
     /* if a transition was in progress, cancel it */
     if (hue_transitioning) {
       hue_transitioning = 0;
-      sl_status_t sc = sl_simple_timer_stop(&hue_transition_timer);
+      sl_status_t sc = app_timer_stop(&hue_transition_timer);
       app_assert_status_f(sc, "Failed to stop periodic Hue Transition Timer");
     }
     sl_btmesh_hsl_hue_on_ui_update(current_hue);
@@ -278,11 +278,11 @@ void sl_btmesh_hsl_set_hue_level(uint16_t hue, uint32_t transition_ms)
 
   // enabling timer IRQ -> the temperature is adjusted in timer interrupt
   // gradually until target temperature is reached.
-  sl_status_t sc = sl_simple_timer_start(&hue_transition_timer,
-                                         SL_BTMESH_HSL_SERVER_HUE_UPDATE_PERIOD_CFG_VAL,
-                                         hue_transition_timer_cb,
-                                         NO_CALLBACK_DATA,
-                                         true);
+  sl_status_t sc = app_timer_start(&hue_transition_timer,
+                                   SL_BTMESH_HSL_SERVER_HUE_UPDATE_PERIOD_CFG_VAL,
+                                   hue_transition_timer_cb,
+                                   NO_CALLBACK_DATA,
+                                   true);
   app_assert_status_f(sc, "Failed to start periodic Hue Transition Timer");
 
   return;
@@ -316,7 +316,7 @@ void sl_btmesh_hsl_set_saturation_level(uint16_t saturation, uint32_t transition
     /* if a transition was in progress, cancel it */
     if (saturation_transitioning) {
       saturation_transitioning = 0;
-      sl_status_t sc = sl_simple_timer_stop(&saturation_transition_timer);
+      sl_status_t sc = app_timer_stop(&saturation_transition_timer);
       app_assert_status_f(sc, "Failed to stop periodic Saturation Transition Timer");
     }
     sl_btmesh_hsl_saturation_on_ui_update(current_saturation);
@@ -333,11 +333,11 @@ void sl_btmesh_hsl_set_saturation_level(uint16_t saturation, uint32_t transition
 
   // enabling timer IRQ -> the temperature is adjusted in timer interrupt
   // gradually until target temperature is reached.
-  sl_status_t sc = sl_simple_timer_start(&saturation_transition_timer,
-                                         SL_BTMESH_HSL_SERVER_SATURATION_UPDATE_PERIOD_CFG_VAL,
-                                         saturation_transition_timer_cb,
-                                         NO_CALLBACK_DATA,
-                                         true);
+  sl_status_t sc = app_timer_start(&saturation_transition_timer,
+                                   SL_BTMESH_HSL_SERVER_SATURATION_UPDATE_PERIOD_CFG_VAL,
+                                   saturation_transition_timer_cb,
+                                   NO_CALLBACK_DATA,
+                                   true);
   app_assert_status_f(sc, "Failed to start periodic Saturation Transition Timer");
 
   return;

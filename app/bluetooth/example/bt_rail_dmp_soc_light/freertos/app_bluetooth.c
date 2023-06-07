@@ -53,7 +53,7 @@
 #include "app_bluetooth.h"
 #include "app_proprietary.h"
 #include "sl_status.h"
-#include "sl_simple_timer.h"
+#include "app_timer.h"
 
 // -----------------------------------------------------------------------------
 // Constant definitions and macros
@@ -231,7 +231,7 @@ static response_data_t response_data = {
 static SemaphoreHandle_t light_mutex_handle;
 static StaticSemaphore_t light_mutex_buffer;
 /// single timer handle
-static sl_simple_timer_t app_single_timer;
+static app_timer_t app_single_timer;
 
 // -----------------------------------------------------------------------------
 // Private function definitions
@@ -324,7 +324,7 @@ void demo_queue_post(demo_msg_t msg)
  * @param[in] handle timer handle
  * @param[in] data additional data
  *****************************************************************************/
-static void app_single_timer_cb(sl_simple_timer_t *handle,
+static void app_single_timer_cb(app_timer_t *handle,
                                 void *data)
 {
   (void)data;
@@ -981,11 +981,11 @@ static void bt_event_handler_task(void *p_arg)
             // indication case, wait for response
             if (waitForResponse) {
               // Start the timer
-              sc = sl_simple_timer_start(&app_single_timer,
-                                         TIMEOUT_INDICATE_MS,
-                                         app_single_timer_cb,
-                                         (void *)NULL,
-                                         false);
+              sc = app_timer_start(&app_single_timer,
+                                   TIMEOUT_INDICATE_MS,
+                                   app_single_timer_cb,
+                                   (void *)NULL,
+                                   false);
 
               app_assert_status(sc);
               // Go and wait for response in BLE_STATE_WAIT
@@ -1009,7 +1009,7 @@ static void bt_event_handler_task(void *p_arg)
           if (received_ble_msg.message.command
               == BLE_COMMAND_INDICATION_SUCCESS) {
             // stop direction indication confirmation timer
-            sc = sl_simple_timer_stop(&app_single_timer);
+            sc = app_timer_stop(&app_single_timer);
             app_assert_status(sc);
             // Go to indication, to indicate next client
             ble_state = BLE_STATE_INDICATE;

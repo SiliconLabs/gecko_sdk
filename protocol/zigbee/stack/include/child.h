@@ -326,11 +326,14 @@ EmberEUI64 emberGetParentEui64(void);
 
 #else // Doxygen ignores the following
 
-extern uint8_t emMaxEndDeviceChildren;    // A maximum for this node.
+// A maximum for this node.
+sl_status_t sl_zigbee_set_max_end_device_children(uint8_t max);
+uint8_t sl_zigbee_get_max_end_device_children(void);
 
 // The '+ 0' prevents anyone from accidentally assigning to these.
 #define emberRouterChildCount()    0
-#define emberMaxChildCount()       (emMaxEndDeviceChildren + 0)
+#define emberMaxChildCount()       sl_zigbee_get_max_end_device_children()
+
 #define emberMaxRouterChildCount() 0
 
 // Implemented in ember-stack-common.c.

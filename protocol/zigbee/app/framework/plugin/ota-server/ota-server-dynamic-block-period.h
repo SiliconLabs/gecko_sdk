@@ -22,19 +22,19 @@
 #include "ota-server.h"
 
 #ifdef DYNAMIC_MIN_BLOCK_PERIOD_SUPPORT
-void    emAfOtaServerDynamicBlockPeriodInit();
-void    emAfOtaServerDynamicBlockPeriodTick();
-uint8_t emAfOtaServerCheckDynamicBlockPeriodDownload(EmberAfImageBlockRequestCallbackStruct *data);
-void    emAfOtaServerCompleteDynamicBlockPeriodDownload(EmberNodeId clientId);
-bool    emAfOtaServerDynamicBlockPeriodClientUsesSeconds(EmberNodeId clientId);
+void    sli_zigbee_af_ota_server_dynamic_block_period_init();
+void    sli_zigbee_af_ota_server_dynamic_block_period_tick();
+uint8_t sli_zigbee_af_ota_server_check_dynamic_block_period_download(EmberAfImageBlockRequestCallbackStruct *data);
+void    sli_zigbee_af_ota_server_complete_dynamic_block_period_download(EmberNodeId clientId);
+bool    sli_zigbee_af_ota_server_dynamic_block_period_client_uses_seconds(EmberNodeId clientId);
 #else // DYNAMIC_MIN_BLOCK_PERIOD_SUPPORT
 // Stubs
-  #define emAfOtaServerDynamicBlockPeriodInit()
-  #define emAfOtaServerDynamicBlockPeriodTick()
-  #define emAfOtaServerCheckDynamicBlockPeriodDownload(arg) \
+  #define sli_zigbee_af_ota_server_dynamic_block_period_init()
+  #define sli_zigbee_af_ota_server_dynamic_block_period_tick()
+  #define sli_zigbee_af_ota_server_check_dynamic_block_period_download(arg) \
   EMBER_ZCL_STATUS_SUCCESS
-  #define emAfOtaServerCompleteDynamicBlockPeriodDownload(arg)
-  #define emAfOtaServerDynamicBlockPeriodClientUsesSeconds(arg) false
+  #define sli_zigbee_af_ota_server_complete_dynamic_block_period_download(arg)
+  #define sli_zigbee_af_ota_server_dynamic_block_period_client_uses_seconds(arg) false
 #endif // DYNAMIC_MIN_BLOCK_PERIOD_SUPPORT
 
 #endif // OTA_SERVER_DYNAMIC_BLOCK_PERIOD_H

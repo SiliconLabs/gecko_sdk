@@ -31,6 +31,11 @@
 #ifndef SL_GATT_SERVICE_IMU_H
 #define SL_GATT_SERVICE_IMU_H
 
+/***********************************************************************************************//**
+ * @addtogroup gatt_service_imu
+ * @{
+ **************************************************************************************************/
+
 #include "sl_bt_api.h"
 
 /**************************************************************************//**
@@ -67,4 +72,5 @@ sl_status_t sl_gatt_service_imu_calibrate(void);
  *****************************************************************************/
 void sl_gatt_service_imu_enable(bool enable);
 
+/** @} (end addtogroup gatt_service_imu) */
 #endif // SL_GATT_SERVICE_IMU_H

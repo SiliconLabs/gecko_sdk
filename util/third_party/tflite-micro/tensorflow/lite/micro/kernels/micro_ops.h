@@ -33,6 +33,8 @@ namespace tflite {
 
 TfLiteRegistration Register_ADD();
 TfLiteRegistration Register_ADD_N();
+TfLiteRegistration Register_ARG_MAX();
+TfLiteRegistration Register_ARG_MIN();
 TfLiteRegistration Register_ASSIGN_VARIABLE();
 TfLiteRegistration Register_AVERAGE_POOL_2D();
 TfLiteRegistration Register_BATCH_TO_SPACE_ND();
@@ -67,17 +69,22 @@ TfLiteRegistration Register_MAX_POOL_2D();
 TfLiteRegistration Register_MIRROR_PAD();
 TfLiteRegistration Register_PRELU();
 TfLiteRegistration Register_MUL();
+TfLiteRegistration Register_PAD();
+TfLiteRegistration Register_PADV2();
 TfLiteRegistration Register_QUANTIZE();
 TfLiteRegistration Register_READ_VARIABLE();
 TfLiteRegistration Register_RELU();
 TfLiteRegistration Register_RELU6();
 TfLiteRegistration Register_RESIZE_BILINEAR();
+TfLiteRegistration Register_SELECT_V2();
 TfLiteRegistration Register_SHAPE();
 TfLiteRegistration Register_SLICE();
 TfLiteRegistration Register_SPACE_TO_BATCH_ND();
 TfLiteRegistration Register_SPACE_TO_DEPTH();
+TfLiteRegistration Register_SQUARED_DIFFERENCE();
 TfLiteRegistration Register_SQUEEZE();
 TfLiteRegistration Register_SUB();
+TfLiteRegistration Register_SUM();
 TfLiteRegistration Register_SVDF();
 TfLiteRegistration Register_TRANSPOSE();
 TfLiteRegistration Register_TRANSPOSE_CONV();
@@ -91,8 +98,6 @@ namespace ops {
 namespace micro {
 
 TfLiteRegistration Register_ABS();
-TfLiteRegistration Register_ARG_MAX();
-TfLiteRegistration Register_ARG_MIN();
 TfLiteRegistration Register_CEIL();
 TfLiteRegistration Register_CONCATENATION();
 TfLiteRegistration Register_COS();
@@ -105,14 +110,10 @@ TfLiteRegistration Register_LESS_EQUAL();
 TfLiteRegistration Register_LOG();
 TfLiteRegistration Register_LOGICAL_NOT();
 TfLiteRegistration Register_MAXIMUM();
-TfLiteRegistration Register_MEAN();
 TfLiteRegistration Register_MINIMUM();
 TfLiteRegistration Register_NEG();
 TfLiteRegistration Register_NOT_EQUAL();
 TfLiteRegistration Register_PACK();
-TfLiteRegistration Register_PAD();
-TfLiteRegistration Register_PADV2();
-TfLiteRegistration Register_REDUCE_MAX();
 TfLiteRegistration Register_RESHAPE();
 TfLiteRegistration Register_RESIZE_NEAREST_NEIGHBOR();
 TfLiteRegistration Register_ROUND();

@@ -7,6 +7,7 @@ description: >
   connections. The algorithm tries to distribute the connections such a way
   they are distributed over the time as evenly as possible without overlapping,
   and all connections should get equal, fair share of the air interface resource.
+
   For optimal performance the algorithm user should
   * initiate the first connection with the longest connection interval if
     all connections do not have the same interval.
@@ -14,16 +15,19 @@ description: >
     allow (via min-max range), integer fractions of the first interval.
   * make the first interval long enough such that all connections would fit within
     the interval with reasonable transmission time.
+
   Despite of the above recommendations the algorithm, and the connections, can be
   expected to work with different parameterization but performance is not likely
   optimal.
-category: "Bluetooth|Feature"
+category: Bluetooth|Bluetooth LE Controller (Link Layer)|Additional Features
 quality: "production"
 root_path: "protocol/bluetooth"
 requires:
   - name: "bluetooth_controller"
 provides:
   - name: "bluetooth_feature_even_scheduling"
+conflicts:
+  - name: "bluetooth_feature_connection_pawr_scheduling"
 template_contribution:
   - name: component_catalog
     value: bluetooth_feature_even_scheduling

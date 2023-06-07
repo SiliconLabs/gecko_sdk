@@ -45,6 +45,9 @@ config_file:
     condition: [brd2603a]
   - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/config/radio_board_brd2603a_led.h"
     condition: [brd2603a]
+    unless: [zw_appshw_powerstrip]
+  - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/config/radio_board_brd2603a_led_pwm.h"
+    condition: [brd2603a, zw_appshw_powerstrip]
 
     # Margay basic peripheral description files (Pintool compatible)
   - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/config/extension_board_8029a_efr32zg28.h"

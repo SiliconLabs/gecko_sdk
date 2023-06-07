@@ -190,6 +190,9 @@ typedef struct {
 //minimum required by the spec is 2
 #define GP_SINK_LIST_ENTRIES 2
 
+// The size of the SinkList entries in sink table in format of octet string that has a format of {<1 byte length>, <n bytes for sink groups>}
+#define GP_SIZE_OF_SINK_LIST_ENTRIES_OCTET_STRING (1 + (GP_SINK_LIST_ENTRIES * (sizeof(EmberGpSinkGroup))))
+
 /** @brief The internal representation of a proxy or sink table entry.
  */
 typedef struct {

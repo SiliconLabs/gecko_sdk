@@ -14,6 +14,7 @@
   - name: hardware_board
   - name: hardware_board_rb
   - name: hardware_board_from_stk
+  - name: hardware_board_from_xg24-rb4115a
   - name: hardware_board_has_vcom
   - name: hardware_board_has_spiflash
   - name: hardware_board_has_hfxo
@@ -36,7 +37,7 @@
     instance:
     - btn0
     - btn1
-  - id: mx25_flash_shutdown_eusart
+  - id: mx25_flash_shutdown_usart
   - id: bootloader_spi_controller_usart_driver
   - id: bootloader_spi_peripheral_usart_driver
 - template_contribution:

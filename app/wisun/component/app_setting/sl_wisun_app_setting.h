@@ -79,6 +79,10 @@ typedef struct {
   uint8_t network_size;
   /// TX Power
   int8_t tx_power;
+  /// Device type
+  uint8_t device_type;
+  /// LFN profile
+  uint8_t lfn_profile;
   /// default flag
   bool is_default_phy;
   /// PHY settings

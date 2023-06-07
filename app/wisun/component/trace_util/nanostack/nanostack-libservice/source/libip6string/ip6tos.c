@@ -29,7 +29,8 @@
 uint_fast8_t ip6tos(const void *ip6addr, char *p)
 {
   char *p_orig = p;
-  uint_fast8_t zero_start = 255, zero_len = 1;
+  uint_fast8_t zero_start = 255;
+  uint_fast8_t zero_len = 1;
   const uint8_t *addr = ip6addr;
   uint_fast16_t part;
 

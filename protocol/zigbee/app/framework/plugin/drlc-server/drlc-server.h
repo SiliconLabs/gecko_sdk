@@ -61,25 +61,25 @@
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
 // used by the CLI to clear all scheduled events in the DRLC server
-void emAfClearScheduledLoadControlEvents(uint8_t endpoint);
+void sli_zigbee_af_clear_scheduled_load_control_events(uint8_t endpoint);
 
 // Retrieves the load control event at the given index.
-EmberStatus emAfGetScheduledLoadControlEvent(uint8_t endpoint,
-                                             uint8_t index,
-                                             EmberAfLoadControlEvent *event);
+EmberStatus sli_zigbee_af_get_scheduled_load_control_event(uint8_t endpoint,
+                                                           uint8_t index,
+                                                           EmberAfLoadControlEvent *event);
 
 // Sets the load control event at the given index.  The first byte of the
 // source field should be set to 0x00 for active or 0xFF for inactive.
-EmberStatus emAfSetScheduledLoadControlEvent(uint8_t endpoint,
-                                             uint8_t index,
-                                             const EmberAfLoadControlEvent *event);
+EmberStatus sli_zigbee_af_set_scheduled_load_control_event(uint8_t endpoint,
+                                                           uint8_t index,
+                                                           const EmberAfLoadControlEvent *event);
 
-void emAfPluginDrlcServerPrintInfo(uint8_t endpoint);
+void sli_zigbee_af_drlc_server_print_info(uint8_t endpoint);
 
-void emAfPluginDrlcServerSlceMessage(EmberNodeId nodeId,
-                                     uint8_t srcEndpoint,
-                                     uint8_t dstEndpoint,
-                                     uint8_t index);
+void sli_zigbee_af_drlc_server_slce_message(EmberNodeId nodeId,
+                                            uint8_t srcEndpoint,
+                                            uint8_t dstEndpoint,
+                                            uint8_t index);
 
 // These internal functions help maintain event order, which is sorted by
 // start time and issuer event ID. This is needed when responding to

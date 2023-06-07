@@ -45,7 +45,7 @@
 #endif // SL_CATALOG_APP_LOG_PRESENT
 
 #include "app_assert.h"
-#include "sl_simple_timer.h"
+#include "app_timer.h"
 
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"

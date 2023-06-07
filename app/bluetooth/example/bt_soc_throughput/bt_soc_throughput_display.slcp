@@ -1,6 +1,6 @@
 project_name: bt_soc_throughput_display
 package: Bluetooth
-label: Bluetooth - SoC Throughput
+label: Bluetooth - SoC Throughput (with display)
 description: >
   This example tests the throughput capabilities of the device and can be used
   to measure throughput between 2 *EFR32* devices, as well as between a device
@@ -24,9 +24,7 @@ component:
   - id: bootloader_interface
   - id: app_assert
   - id: app_log
-  - id: iostream_usart
-    instance:
-      - vcom
+  - id: iostream_recommended_stream
   - id: component_catalog
   - id: mpu
   - id: simple_button
@@ -83,12 +81,26 @@ configuration:
     value: "1"
   - name: SL_BOARD_ENABLE_VCOM
     value: "1"
-    condition:
-      - iostream_usart
   - name: SL_PSA_KEY_USER_SLOT_COUNT
     value: "0"
     condition:
       - psa_crypto
+
+template_contribution:
+  - name: cli_command
+    value:
+      name: switch_to_central
+      handler: cli_switch_to_central
+      help: "Switch to central"
+    condition:
+      - cli
+  - name: cli_command
+    value:
+      name: switch_to_peripheral
+      handler: cli_switch_to_peripheral
+      help: "Switch to peripheral"
+    condition:
+      - cli
 
 tag:
   - hardware:rf:band:2400

@@ -1,6 +1,6 @@
 id: mbedtls_ccm
 package: platform
-label: CCM Mode
+label: CCM
 description: >-
   This component provides support for authenticated encryption and decryption
   in CCM mode for block ciphers using Mbed TLS.

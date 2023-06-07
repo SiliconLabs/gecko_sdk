@@ -22,6 +22,7 @@ component:
   - id: cli
     instance:
       - "example"
+  - id: rail_util_pti
   # Connect components
   - id: connect_debug_print
   - id: connect_app_framework_common
@@ -102,8 +103,28 @@ configuration:
       - "device_sdid_200"
   - name: SL_HEAP_SIZE
     value: "16000"
+    unless:
+      - "device_sdid_230"
+      - "device_sdid_235"
+  - name: SL_HEAP_SIZE
+    value: "20000"
+    condition:
+      - "device_sdid_230"
+  - name: SL_HEAP_SIZE
+    value: "20000"
+    condition:
+      - "device_sdid_235"
   - name: APP_LOG_PREFIX_ENABLE
     value: "0"
+  - name: "SL_CLI_EXAMPLE_TASK_STACK_SIZE"
+    value: "1024"
+  - name: "configTOTAL_HEAP_SIZE"
+    value: "12288"
+    condition: [device_sdid_230]
+  - name: "configTOTAL_HEAP_SIZE"
+    value: "12288"
+    condition: [device_sdid_235]
+
 #----------------- USART configs ---------------------
   - name: SL_BOARD_ENABLE_VCOM
     value: "1"

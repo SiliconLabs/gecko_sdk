@@ -5,7 +5,7 @@
  * @copyright 2022 Silicon Laboratories Inc.
  */
 #include <SerialAPI_hw.h>
-#include <config_app.h>
+#include <app_hw.h>
 #include <zw_region_config.h>
 #include <board.h>
 //#define DEBUGPRINT
@@ -66,7 +66,7 @@ static void gpioCallbackuzbsuspend(uint8_t pin);
 
 #endif /*USB_SUSPEND_SUPPORT*/
 
-void SerialAPI_hw_init(void)
+void app_hw_init(void)
 {
   uint8_t region;
 

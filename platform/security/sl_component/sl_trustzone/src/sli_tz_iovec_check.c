@@ -138,11 +138,9 @@ uint32_t sli_tz_iovecs_live_in_ns(sli_tz_invec in_vec[],
 
 uint32_t sli_tz_nvm3_init_struct_points_to_ns(nvm3_Init_t *init_copy)
 {
-  #if !defined(SLI_TZ_SERVICE_NVM3_DISABLE_REGION_VALIDATION)
   if (!object_lives_in_ns(init_copy->nvmAdr, init_copy->nvmSize)) {
     return SLI_TZ_IOVEC_ERROR;
   }
-  #endif
 
   // The flash handle- and cache pointers must explicitly be set to NULL by NS
   // to make it clear that it allow the secure application to manage these
@@ -156,11 +154,9 @@ uint32_t sli_tz_nvm3_init_struct_points_to_ns(nvm3_Init_t *init_copy)
 
 uint32_t sli_tz_nvm3_handle_struct_points_to_ns(nvm3_Handle_t *handle_copy)
 {
-  #if !defined(SLI_TZ_SERVICE_NVM3_DISABLE_REGION_VALIDATION)
   if (!object_lives_in_ns(handle_copy->nvmAdr, handle_copy->nvmSize)) {
     return SLI_TZ_IOVEC_ERROR;
   }
-  #endif
 
   // Make sure that the cache pointer passed has indeed been allocated and
   // installed by the secure library.
@@ -176,16 +172,14 @@ uint32_t sli_tz_nvm3_handle_struct_points_to_ns(nvm3_Handle_t *handle_copy)
     return SLI_TZ_IOVEC_ERROR;
   }
 
-  #if !defined(SLI_TZ_SERVICE_NVM3_DISABLE_REGION_VALIDATION)
   if (!object_lives_in_ns(handle_copy->fifoFirstObj, sizeof(nvm3_Obj_t))
       || !object_lives_in_ns(handle_copy->fifoNextObj, sizeof(nvm3_Obj_t))) {
     return SLI_TZ_IOVEC_ERROR;
   }
-  #endif
 
   // We only allow the use of the flash HAL defined in nvm3_hal_flash.c. The
   // pointer to this struct is installed in the handle by the secure app (see
-  // tfm_nvm3_open / tfm_nvm3_init_default).
+  // sli_tz_nvm3_open / sli_tz_nvm3_init_default).
   extern const nvm3_HalHandle_t nvm3_halFlashHandle;
   if (handle_copy->halHandle != &nvm3_halFlashHandle) {
     return SLI_TZ_IOVEC_ERROR;

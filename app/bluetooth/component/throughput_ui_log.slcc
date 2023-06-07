@@ -3,12 +3,15 @@ package: Bluetooth
 label: Throughput User Interface API with logging
 description: |-
   API for printing throughput test state and results to log
-category: Bluetooth|Application|Throughput
+category: Bluetooth|Application|Test
 quality: production
 root_path: app/bluetooth/common/throughput_ui
+tag:
+  - No-Code
+
 include:
   - path: .
-    file_list: 
+    file_list:
       - path: throughput_ui.h
       - path: throughput_ui_types.h
 source:

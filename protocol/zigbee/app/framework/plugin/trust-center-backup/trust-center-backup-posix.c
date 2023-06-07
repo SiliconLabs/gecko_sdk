@@ -24,6 +24,9 @@
 #include "app/framework/util/util.h"
 #include "app/util/serial/sl_zigbee_command_interpreter.h"
 #include "app/framework/plugin/trust-center-backup/trust-center-backup.h"
+#include "stack/include/zigbee-security-manager.h"
+#include "stack/security/zigbee-security-manager-host.h"
+#include "stack/config/token-stack.h"
 
 #include "app/framework/util/af-main.h"
 
@@ -34,12 +37,15 @@
 // Hence, declare it as extern here.
 extern size_t strnlen (const char *, size_t);
 
-#ifdef UC_BUILD
-#include "trust-center-backup-config.h"
+#ifndef EMBER_SCRIPTED_TEST
+  #include "trust-center-backup-config.h"
+#else
+  #include "config/trust-center-backup-config.h"
+#endif
+
 #if (EMBER_AF_PLUGIN_TRUST_CENTER_BACKUP_POSIX_FILE_BACKUP_SUPPORT == 1)
   #define POSIX_FILE_BACKUP_SUPPORT
 #endif // EMBER_AF_PLUGIN_TRUST_CENTER_BACKUP_POSIX_FILE_BACKUP_SUPPORT
-#endif // UC_BUILD
 
 #if defined(EMBER_TEST)
   #define POSIX_FILE_BACKUP_SUPPORT
@@ -178,6 +184,146 @@ EmberStatus emberAfTrustCenterExportBackupToFile(const char* filepath)
   return returnValue;
 }
 
+//Secure key storage needs to export the keys first so backup file has them
+EmberStatus sli_zigbee_af_trust_center_backup_save_keys_to_data(EmberTokenData* data_s, uint32_t nvm3Key, uint8_t index)
+{
+  sl_status_t status = SL_STATUS_OK;
+  #ifndef EMBER_SCRIPTED_TEST
+  sl_zb_sec_man_context_t context;
+  sl_zb_sec_man_init_context(&context);
+  sl_zb_sec_man_key_t plaintext_key;
+  if (nvm3Key == NVM3KEY_STACK_KEYS) {
+    context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_NETWORK;
+    context.key_index = 0;
+    status = sl_zb_sec_man_export_key(&context, &plaintext_key);
+    tokTypeStackKeys* tok = (tokTypeStackKeys*) data_s->data;
+    MEMMOVE(tok->networkKey, &plaintext_key, EMBER_ENCRYPTION_KEY_SIZE);
+  } else if (nvm3Key == NVM3KEY_STACK_ALTERNATE_KEY) {
+    context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_NETWORK;
+    context.key_index = 1;
+    status = sl_zb_sec_man_export_key(&context, &plaintext_key);
+    tokTypeStackKeys* tok = (tokTypeStackKeys*) data_s->data;
+    MEMMOVE(tok->networkKey, &plaintext_key, EMBER_ENCRYPTION_KEY_SIZE);
+  } else if (nvm3Key == NVM3KEY_STACK_TRUST_CENTER) {
+    context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_TC_LINK;
+    status = sl_zb_sec_man_export_key(&context, &plaintext_key);
+    tokTypeStackTrustCenter* tok = (tokTypeStackTrustCenter*) data_s->data;
+    MEMMOVE(tok->key, &plaintext_key, EMBER_ENCRYPTION_KEY_SIZE);
+  } else if (nvm3Key == NVM3KEY_STACK_KEY_TABLE) {
+    context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_APP_LINK;
+    context.key_index = index;
+    //this must be set to export a specific link key from table
+    context.flags |= ZB_SEC_MAN_FLAG_KEY_INDEX_IS_VALID;
+    status = sl_zb_sec_man_export_key(&context, &plaintext_key);
+    //tokTypeStackKeyTable is just an array of uint8_ts, so it's easier to work with those directly
+    //to specify the saved key's address rather than trying to get it from a pointer to the type
+    uint8_t* tok = (uint8_t*) (data_s->data);
+    MEMMOVE(tok + KEY_ENTRY_KEY_DATA_OFFSET, &plaintext_key, EMBER_ENCRYPTION_KEY_SIZE);
+  }
+  #if defined(SL_CATALOG_ZIGBEE_GREEN_POWER_PRESENT)
+  else if (nvm3Key == NVM3KEY_STACK_GP_PROXY_TABLE) {
+    context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_GREEN_POWER_PROXY_TABLE_KEY;
+    context.key_index = index;
+    status = sl_zb_sec_man_export_key(&context, &plaintext_key);
+    tokTypeStackGpProxyTableEntry* tok = (tokTypeStackGpProxyTableEntry*) data_s->data;
+    MEMMOVE(tok->gpdKey, &plaintext_key, EMBER_ENCRYPTION_KEY_SIZE);
+  } else if (nvm3Key == NVM3KEY_STACK_GP_SINK_TABLE) {
+    context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_GREEN_POWER_SINK_TABLE_KEY;
+    context.key_index = index;
+    status = sl_zb_sec_man_export_key(&context, &plaintext_key);
+    tokTypeStackGpSinkTableEntry* tok = (tokTypeStackGpSinkTableEntry*) data_s->data;
+    MEMMOVE(tok->gpdKey, &plaintext_key, EMBER_ENCRYPTION_KEY_SIZE);
+  }
+  #endif //SL_CATALOG_ZIGBEE_GREEN_POWER_PRESENT
+  #if defined(SL_CATALOG_ZIGBEE_LIGHT_LINK_PRESENT)
+  else if (nvm3Key == NVM3KEY_STACK_ZLL_SECURITY) {
+    context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_ZLL_ENCRYPTION_KEY;
+    status = sl_zb_sec_man_export_key(&context, &plaintext_key);
+    tokTypeStackZllSecurity* tok = (tokTypeStackZllSecurity*) data_s->data;
+    MEMMOVE(tok->encryptionKey, &plaintext_key, EMBER_ENCRYPTION_KEY_SIZE);
+    context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_ZLL_PRECONFIGURED_KEY;
+    status = sl_zb_sec_man_export_key(&context, &plaintext_key);
+    MEMMOVE(tok->preconfiguredKey, &plaintext_key, EMBER_ENCRYPTION_KEY_SIZE);
+  } else {
+    //nothing needs to be done for non-key tokens
+  }
+  #endif //SL_CATALOG_ZIGBEE_LIGHT_LINK_PRESENT
+  #endif //!EMBER_SCRIPTED_TEST
+  return status;
+}
+
+EmberStatus sli_zigbee_af_trust_center_backup_restore_keys_from_data(EmberTokenData* data_s, uint32_t nvm3Key, uint8_t index)
+{
+#ifndef EMBER_SCRIPTED_TEST
+  sl_zb_sec_man_context_t context;
+  sl_zb_sec_man_key_t null_key[EMBER_ENCRYPTION_KEY_SIZE] = { 0xFF };
+
+  sl_zb_sec_man_init_context(&context);
+  sl_zb_sec_man_key_t plaintext_key;
+  if (nvm3Key == NVM3KEY_STACK_KEYS) {
+    context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_NETWORK;
+    context.key_index = 0;
+    tokTypeStackKeys* tok = (tokTypeStackKeys*) data_s->data;
+    MEMMOVE(&plaintext_key, tok->networkKey, EMBER_ENCRYPTION_KEY_SIZE);
+    (void) sl_zb_sec_man_import_key(&context, &plaintext_key);
+    MEMMOVE(tok->networkKey, &null_key, EMBER_ENCRYPTION_KEY_SIZE);
+  } else if (nvm3Key == NVM3KEY_STACK_ALTERNATE_KEY) {
+    context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_NETWORK;
+    context.key_index = 1;
+    tokTypeStackKeys* tok = (tokTypeStackKeys*) data_s->data;
+    MEMMOVE(&plaintext_key, tok->networkKey, EMBER_ENCRYPTION_KEY_SIZE);
+    (void) sl_zb_sec_man_import_key(&context, &plaintext_key);
+    MEMMOVE(tok->networkKey, &null_key, EMBER_ENCRYPTION_KEY_SIZE);
+  } else if (nvm3Key == NVM3KEY_STACK_TRUST_CENTER) {
+    context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_TC_LINK;
+    tokTypeStackTrustCenter* tok = (tokTypeStackTrustCenter*) data_s->data;
+    MEMMOVE(&plaintext_key, tok->key, EMBER_ENCRYPTION_KEY_SIZE);
+    (void) sl_zb_sec_man_import_key(&context, &plaintext_key);
+    MEMMOVE(tok->key, &null_key, EMBER_ENCRYPTION_KEY_SIZE);
+  } else if (nvm3Key == NVM3KEY_STACK_KEY_TABLE) {
+    context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_APP_LINK;
+    context.key_index = index;
+    context.flags |= ZB_SEC_MAN_FLAG_KEY_INDEX_IS_VALID;
+    uint8_t* tok = (uint8_t*) data_s->data;
+    MEMMOVE(&plaintext_key, tok + KEY_ENTRY_KEY_DATA_OFFSET, EMBER_ENCRYPTION_KEY_SIZE);
+    (void) sl_zb_sec_man_import_key(&context, &plaintext_key);
+    MEMMOVE(tok + KEY_ENTRY_KEY_DATA_OFFSET, &null_key, EMBER_ENCRYPTION_KEY_SIZE);
+  }
+  #if defined(SL_CATALOG_ZIGBEE_GREEN_POWER_PRESENT)
+  else if (nvm3Key == NVM3KEY_STACK_GP_PROXY_TABLE) {
+    context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_GREEN_POWER_PROXY_TABLE_KEY;
+    context.key_index = index;
+    tokTypeStackGpProxyTableEntry* tok = (tokTypeStackGpProxyTableEntry*) data_s->data;
+    MEMMOVE(&plaintext_key, tok->gpdKey, EMBER_ENCRYPTION_KEY_SIZE);
+    sl_zb_sec_man_import_key(&context, &plaintext_key);
+    MEMMOVE(tok->gpdKey, &null_key, EMBER_ENCRYPTION_KEY_SIZE);
+  } else if (nvm3Key == NVM3KEY_STACK_GP_SINK_TABLE) {
+    context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_GREEN_POWER_SINK_TABLE_KEY;
+    context.key_index = index;
+    tokTypeStackGpSinkTableEntry* tok = (tokTypeStackGpSinkTableEntry*) data_s->data;
+    MEMMOVE(&plaintext_key, tok->gpdKey, EMBER_ENCRYPTION_KEY_SIZE);
+    sl_zb_sec_man_import_key(&context, &plaintext_key);
+    MEMMOVE(tok->gpdKey, &null_key, EMBER_ENCRYPTION_KEY_SIZE);
+  }
+  #endif
+  #if defined(SL_CATALOG_ZIGBEE_LIGHT_LINK_PRESENT)
+  else if (nvm3Key == NVM3KEY_STACK_ZLL_SECURITY) {
+    context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_ZLL_ENCRYPTION_KEY;
+    tokTypeStackZllSecurity* tok = (tokTypeStackZllSecurity*) data_s->data;
+    MEMMOVE(&plaintext_key, tok->encryptionKey, EMBER_ENCRYPTION_KEY_SIZE);
+    sl_zb_sec_man_import_key(&context, &plaintext_key);
+    MEMMOVE(tok->encryptionKey, &null_key, EMBER_ENCRYPTION_KEY_SIZE);
+    context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_ZLL_PRECONFIGURED_KEY;
+    MEMMOVE(&plaintext_key, tok->preconfiguredKey, EMBER_ENCRYPTION_KEY_SIZE);
+    sl_zb_sec_man_import_key(&context, &plaintext_key);
+    MEMMOVE(tok->preconfiguredKey, &null_key, EMBER_ENCRYPTION_KEY_SIZE);
+  } else {
+  }
+  #endif
+#endif //!EMBER_SCRIPTED_TEST
+  return SL_STATUS_OK;
+}
+
 // The binary file format to save the tokens are
 //
 // Number of Tokens (1 byte)
@@ -203,6 +349,17 @@ EmberStatus emberAfTrustCenterBackupSaveTokensToFile(const char* filepath)
   // ------- Token Data Saving to the provided File -----------
   uint8_t numberOfTokens = emberGetTokenCount();
   if (numberOfTokens) {
+    uint8_t secure_key_storage_present;
+    #if !defined(EMBER_SCRIPTED_TEST) && defined(EZSP_HOST)
+    //returns 1 if NCP has secure key storage (where these tokens do not store the key data).
+    //Don't compile for scripted test or any non-host code due to linker issues.
+    secure_key_storage_present = sl_zb_sec_man_version();
+    #elif defined(SL_CATALOG_ZIGBEE_SECURE_KEY_STORAGE_PRESENT)
+    //if this is running on SoC with secure key storage
+    secure_key_storage_present = 1;
+    #else
+    secure_key_storage_present = 0;
+    #endif
     fwrite(&numberOfTokens, 1, 1, output);
     for (uint8_t tokenIndex = 0; tokenIndex < numberOfTokens; tokenIndex++) {
       EmberTokenInfo tokenInfo;
@@ -220,6 +377,12 @@ EmberStatus emberAfTrustCenterBackupSaveTokensToFile(const char* filepath)
                                                     arrayIndex,
                                                     &tokenData);
           if (getStatus == EMBER_SUCCESS) {
+            #ifndef EMBER_SCRIPTED_TEST
+            if (secure_key_storage_present == 1) {
+              //Populate keys into tokenData because tokens do not contain them with secure key storage
+              sli_zigbee_af_trust_center_backup_save_keys_to_data(&tokenData, tokenInfo.nvm3Key, arrayIndex);
+            }
+            #endif //!EMBER_SCRIPTED_TEST
             // Check the Key to see if the token to save is restoredEui64, in that case
             // check if it is blank, then save the node EUI64 in its place, else save the value
             // received from the API. Once it saves, during restore process the set token will
@@ -400,7 +563,18 @@ EmberStatus emberAfTrustCenterBackupRestoreTokensFromFile(const char* filepath)
   uint8_t numberOfTokens = 0;
   fread(&numberOfTokens, 1, 1, input);
   //printf("numberOfTokens = %d\n", numberOfTokens);
+  uint8_t secure_key_storage_present;
+  #if !defined(EMBER_SCRIPTED_TEST) && defined(EZSP_HOST)
+  secure_key_storage_present = sl_zb_sec_man_version();
+  #elif defined(SL_CATALOG_ZIGBEE_SECURE_KEY_STORAGE_PRESENT)
+  //if this is running on SoC with secure key storage
+  secure_key_storage_present = 1;
+  #else
+  secure_key_storage_present = 0;
+  #endif
   for (uint8_t i = 0; i < numberOfTokens; i++) {
+    EmberTokenInfo tokenInfo;
+    (void) emberGetTokenInfo(i, &tokenInfo);
     uint32_t token = 0;
     uint8_t size = 0;
     uint8_t arraySize = 0;
@@ -419,6 +593,12 @@ EmberStatus emberAfTrustCenterBackupRestoreTokensFromFile(const char* filepath)
       EmberTokenData tokenData;
       tokenData.size = size;
       tokenData.data = (void*)tokenDataDump;
+      #ifndef EMBER_SCRIPTED_TEST
+      if (secure_key_storage_present == 1) {
+        //do not keep keys in classic key storage upon restoration
+        sli_zigbee_af_trust_center_backup_restore_keys_from_data(&tokenData, tokenInfo.nvm3Key, arrayIndex);
+      }
+      #endif //!EMBER_SCRIPTED_TEST
       EmberStatus setStatus = emberSetTokenData(token,
                                                 arrayIndex,
                                                 &tokenData);

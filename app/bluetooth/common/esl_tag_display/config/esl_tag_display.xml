@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<gatt>
+  <!--Silicon Labs ESL Tag Display-->
+  <service advertise="true" id="esl_tag_service" name="Silicon Labs ESL Tag" requirement="mandatory" sourceId="" type="primary" uuid="1857"  instance_id="silabs_esl">
+    <!--Display Information-->
+    <characteristic const="false" id="esl_display_info" name="Display Information" sourceId="" uuid="2bfa">
+      <informativeText>The Display Information characteristic is an array of zero or more Display Data Structures. This characteristic is optional - if there's no display on the ESL Tag, this characteristic shall be omitted from the ESL Service. Display Data Structures contain two 16 bit fields for width and height [in pixels] of the display, and an 8 bit display type field in the format described in Electronic Shelf Label Service Specification (rev.:d09r08), section 3.6.1. This value must be constant for the lifecycle of the ESL Tag.</informativeText>
+      <value length="0" type="user" variable_length="true">0000000000</value>
+      <properties>
+        <read authenticated="false" bonded="true" encrypted="true"/>
+      </properties>
+    </characteristic>
+  </service>
+</gatt>

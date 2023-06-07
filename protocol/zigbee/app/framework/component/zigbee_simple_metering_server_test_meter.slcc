@@ -33,13 +33,13 @@ template_contribution:
     value:
       group: simple-metering-server
       name: print
-      handler: emAfPluginSimpleMeteringServerCliPrint
+      handler: sli_zigbee_af_simple_metering_server_cli_print
       help: Prints the test meters.
   - name: cli_command
     value:
       group: simple-metering-server
       name: rate
-      handler: emAfPluginSimpleMeteringServerCliRate
+      handler: sli_zigbee_af_simple_metering_server_cli_rate
       help: Changes the rate argument.
       argument:
       - type: uint16
@@ -50,7 +50,7 @@ template_contribution:
     value:
       group: simple-metering-server
       name: variance
-      handler: emAfPluginSimpleMeteringServerCliVariance
+      handler: sli_zigbee_af_simple_metering_server_cli_variance
       help: Change the variance in the test data created by the test meter.
       argument:
       - type: uint16
@@ -58,7 +58,7 @@ template_contribution:
     value:
       group: simple-metering-server
       name: adjust
-      handler: emAfPluginSimpleMeteringServerCliAdjust
+      handler: sli_zigbee_af_simple_metering_server_cli_adjust
       help: Adjusts the test meter.
       argument:
       - type: uint8
@@ -67,7 +67,7 @@ template_contribution:
     value:
       group: simple-metering-server
       name: "off"
-      handler: emAfPluginSimpleMeteringServerCliOff
+      handler: sli_zigbee_af_simple_metering_server_cli_off
       help: Turns off output from the test meter.
       argument:
       - type: uint8
@@ -76,7 +76,7 @@ template_contribution:
     value:
       group: simple-metering-server
       name: electric
-      handler: emAfPluginSimpleMeteringServerCliElectric
+      handler: sli_zigbee_af_simple_metering_server_cli_electric
       help: Turns test meter into an electric meter.
       argument:
       - type: uint8
@@ -85,7 +85,7 @@ template_contribution:
     value:
       group: simple-metering-server
       name: gas
-      handler: emAfPluginSimpleMeteringServerCliGas
+      handler: sli_zigbee_af_simple_metering_server_cli_gas
       help: Turns test meter into a gas meter.
       argument:
       - type: uint8
@@ -94,7 +94,7 @@ template_contribution:
     value:
       group: simple-metering-server
       name: rnd_error
-      handler: emAfPluginSimpleMeteringServerCliRandomError
+      handler: sli_zigbee_af_simple_metering_server_cli_random_error
       help: Sets the random error to the value provided, which is the chance in 256 of an error occurring.
       argument:
       - type: uint8
@@ -103,7 +103,7 @@ template_contribution:
     value:
       group: simple-metering-server
       name: set_error
-      handler: emAfPluginSimpleMeteringServerCliSetError
+      handler: sli_zigbee_af_simple_metering_server_cli_set_error
       help: Sets the meters status attribute ID to the passed error value.
       argument:
       - type: uint8
@@ -114,7 +114,7 @@ template_contribution:
     value:
       group: simple-metering-server
       name: profiles
-      handler: emAfPluginSimpleMeteringServerCliProfiles
+      handler: sli_zigbee_af_simple_metering_server_cli_profiles
       help: Turns on and off profiles on the test meter server.
       argument:
       - type: uint8

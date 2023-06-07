@@ -73,6 +73,14 @@ config_file:
   directory: rail
   condition:
   - brd4401b
+- path: platform/radio/radio_configuration/WiSUN/brd_wisun_singlephy/device_sdid_235/NA_1_1b/radio_settings.radioconf
+  directory: rail
+  condition:
+  - brd4400c
+- path: platform/radio/radio_configuration/WiSUN/brd_wisun_singlephy/device_sdid_235/NA_1_1b/radio_settings.radioconf
+  directory: rail
+  condition:
+  - brd4401c
 
 #CN_1_1b/radio_settings based on boards
 - path: platform/radio/radio_configuration/WiSUN/brd_wisun_singlephy/device_sdid_84/CN_1_1b/radio_settings.radioconf

@@ -20,25 +20,16 @@
 
 #include "test-harness.h"
 
-#ifdef UC_BUILD
 #include "test-harness-config.h"
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_FRAGMENTATION
-#define SL_CATALOG_ZIGBEE_FRAGMENTATION_PRESENT
-#endif
 #endif
 
 //------------------------------------------------------------------------------
 // Globals
-#ifdef UC_BUILD
 sl_zigbee_event_t emberAfPluginTestHarnessReadWriteAttributesTimeoutEvent;
 #define readWriteAttributesTimeoutEventControl (&emberAfPluginTestHarnessReadWriteAttributesTimeoutEvent)
-void emberAfPluginTestHarnessReadWriteAttributesTimeoutEventHandler(SLXU_UC_EVENT);
-#else
-EmberEventControl emberAfPluginTestHarnessReadWriteAttributesTimeoutEventControl;
-#define readWriteAttributesTimeoutEventControl emberAfPluginTestHarnessReadWriteAttributesTimeoutEventControl
-#endif
+void emberAfPluginTestHarnessReadWriteAttributesTimeoutEventHandler(sl_zigbee_event_t * event);
 
 typedef enum {
   READ_WRITE_TEST_STATE_NONE,
@@ -99,31 +90,6 @@ static uint16_t timeoutSeconds = 3;
 
 void startTestCommand(SL_CLI_COMMAND_ARG);
 void setOptionsCommand(SL_CLI_COMMAND_ARG);
-#ifndef UC_BUILD
-static void attributeTestStatusCommand(void);
-EmberCommandEntry emAfReadWriteAttributeTestCommands[] = {
-  emberCommandEntryActionWithDetails("set-dest",
-                                     setDestinationCommand,
-                                     "vu",
-                                     "Set Attribute Test Destination address and endpoint",
-                                     setDestCommandArguments),
-  emberCommandEntryActionWithDetails("start-test",
-                                     startTestCommand,
-                                     "vvvu",
-                                     "Start read-write attribute test",
-                                     startTestArguments),
-  emberCommandEntryActionWithDetails("options",
-                                     setOptionsCommand,
-                                     "uv",
-                                     "Set test options",
-                                     optionCommandArguments),
-  emberCommandEntryAction("status",
-                          attributeTestStatusCommand,
-                          "",
-                          "Print the current test parameters."),
-  emberCommandEntryTerminator(),
-};
-#endif // UC_BUILD
 
 #define UNKNOWN_RESULT 0xFF
 typedef struct  {
@@ -255,10 +221,10 @@ static void bigReadCommand(void);
 
 //------------------------------------------------------------------------------
 // Functions
-#if (!defined(UC_BUILD) || defined(SL_CATALOG_CLI_PRESENT))
+#if (defined(SL_CATALOG_CLI_PRESENT))
 void setOptionsCommand(SL_CLI_COMMAND_ARG)
 {
-  uint8_t temp = (uint8_t)emberUnsignedCommandArgument(0);
+  uint8_t temp = sl_cli_get_argument_uint8(arguments, 0);
   if (temp > TEST_TYPE_MAX) {
     uint8_t i;
     emberAfCorePrintln("Error: Invalid test type number.  Valid numbers are:");
@@ -268,14 +234,14 @@ void setOptionsCommand(SL_CLI_COMMAND_ARG)
     return;
   }
 
-  timeoutSeconds = (uint16_t)emberUnsignedCommandArgument(1);
+  timeoutSeconds = sl_cli_get_argument_uint16(arguments, 1);
   testType = temp;
 }
 
 void setDestinationCommand(SL_CLI_COMMAND_ARG)
 {
-  destAddress = (EmberNodeId)emberUnsignedCommandArgument(0);
-  destEndpoint = (uint8_t)emberUnsignedCommandArgument(1);
+  destAddress = sl_cli_get_argument_uint16(arguments, 0);
+  destEndpoint = sl_cli_get_argument_uint8(arguments, 1);
 }
 
 static void readWriteAttributeTest(void)
@@ -300,10 +266,10 @@ static void readWriteAttributeTest(void)
 
 void startTestCommand(SL_CLI_COMMAND_ARG)
 {
-  testClusterId = (uint16_t)emberUnsignedCommandArgument(0);
-  attributeIdStart = (uint16_t)emberUnsignedCommandArgument(1);
-  attributeIdEnd = (uint16_t)emberUnsignedCommandArgument(2);
-  clientToServer = (bool)emberUnsignedCommandArgument(3);
+  testClusterId = sl_cli_get_argument_uint16(arguments, 0);
+  attributeIdStart = sl_cli_get_argument_uint16(arguments, 1);
+  attributeIdEnd = sl_cli_get_argument_uint16(arguments, 2);
+  clientToServer = (bool)sl_cli_get_argument_uint32(arguments, 3);
   if (attributeIdStart > attributeIdEnd) {
     emberAfCorePrintln("Error:  Start ID must be less than or equal to end ID.");
     return;
@@ -318,7 +284,7 @@ void startTestCommand(SL_CLI_COMMAND_ARG)
   }
 }
 
-#endif //!defined(UC_BUILD)...
+#endif
 
 static const char* gettAttributeTypeString(uint8_t attributeType)
 {
@@ -369,7 +335,7 @@ bool checkTestComplete(void)
   if ((attributeIdStart + currentIndex) > attributeIdEnd) {
     emberAfCorePrintln("Done.\n");
     printResults();
-    slxu_zigbee_event_set_inactive(readWriteAttributesTimeoutEventControl);
+    sl_zigbee_event_set_inactive(readWriteAttributesTimeoutEventControl);
     return true;
   }
   return false;
@@ -385,8 +351,8 @@ static void sendCommand(bool read)
                       : "Write"),
                      attributeIdStart + currentIndex);
   if (status == EMBER_SUCCESS) {
-    slxu_zigbee_event_set_delay_qs(readWriteAttributesTimeoutEventControl,
-                                   timeoutSeconds << 2);
+    sl_zigbee_event_set_delay_qs(readWriteAttributesTimeoutEventControl,
+                                 timeoutSeconds << 2);
   } else {
     emberAfCorePrintln("Error: Failed to send command (0x%X)", status);
   }
@@ -440,7 +406,7 @@ void emberAfPluginTestHarnessReadAttributesResponseCallback(EmberAfClusterId clu
       // Might be an APS retry, ignore.
       return;
     }
-    slxu_zigbee_event_set_inactive(readWriteAttributesTimeoutEventControl);
+    sl_zigbee_event_set_inactive(readWriteAttributesTimeoutEventControl);
     attributeResults[currentIndex].readResult = result;
     if (result == EMBER_ZCL_STATUS_SUCCESS) {
       uint8_t type = buffer[3];
@@ -490,7 +456,7 @@ void emberAfPluginTestHarnessWriteAttributesResponseCallback(EmberAfClusterId cl
     if (attributeId != (currentIndex + attributeIdStart)) {
       return;
     }
-    slxu_zigbee_event_set_inactive(readWriteAttributesTimeoutEventControl);
+    sl_zigbee_event_set_inactive(readWriteAttributesTimeoutEventControl);
     attributeResults[currentIndex].writeResult = buffer[0];
     currentIndex++;
     if (!checkTestComplete()) {
@@ -499,7 +465,7 @@ void emberAfPluginTestHarnessWriteAttributesResponseCallback(EmberAfClusterId cl
   }
 }
 
-void emberAfPluginTestHarnessReadWriteAttributesTimeoutEventHandler(SLXU_UC_EVENT)
+void emberAfPluginTestHarnessReadWriteAttributesTimeoutEventHandler(sl_zigbee_event_t * event)
 {
   if (readWriteState == READ_WRITE_TEST_STATE_WRITE_SENT
       || readWriteState == READ_WRITE_TEST_STATE_READ_SENT) {
@@ -515,15 +481,6 @@ void emberAfPluginTestHarnessReadWriteAttributesTimeoutEventHandler(SLXU_UC_EVEN
   }
 }
 
-#ifndef UC_BUILD
-static void attributeTestStatusCommand(void)
-{
-  emberAfCorePrintln("Test Type: %p\n", testTypeStrings[testType]);
-  emberAfCorePrintln("Test Target Destination Node ID: 0x%2X", destAddress);
-  emberAfCorePrintln("Test Target Destination EP:      %d", destEndpoint);
-}
-#endif
-
 static void bigReadCommand(void)
 {
   uint16_t currentAttributeId;
@@ -533,15 +490,15 @@ static void bigReadCommand(void)
   emberAfCorePrintln("Warning:  Fragmentation plugin not enabled.  Will not be able to fit many attributes.");
   #endif
 
-  if (emAfZclBufferLen < (EMBER_AF_ZCL_OVERHEAD
-                          + ((attributeIdEnd - attributeIdStart) << 1))) {
+  if (sli_zigbee_af_zcl_bufferLen < (EMBER_AF_ZCL_OVERHEAD
+                                     + ((attributeIdEnd - attributeIdStart) << 1))) {
     emberAfCorePrintln("Error:  Too many attributes (%d) to fit into super buffer (max attributes: %d)",
                        (attributeIdEnd + 1 - attributeIdStart),
                        // 3 bytes = Overhead
                        //   ZCL Frame control (1-byte)
                        //   ZCL Command ID (1-byte)
                        //   Sequence Number
-                       (emAfZclBufferLen - EMBER_AF_ZCL_OVERHEAD) >> 1);  // each attribute is 2-bytes
+                       (sli_zigbee_af_zcl_bufferLen - EMBER_AF_ZCL_OVERHEAD) >> 1);  // each attribute is 2-bytes
     return;
   }
 
@@ -554,10 +511,10 @@ static void bigReadCommand(void)
                                    "");
   for (currentAttributeId = attributeIdStart;
        currentAttributeId <= attributeIdEnd
-       && *emAfResponseLengthPtr < emAfZclBufferLen;
+       && *sli_zigbee_af_response_length_ptr < sli_zigbee_af_zcl_bufferLen;
        currentAttributeId++) {
-    emAfZclBuffer[(*emAfResponseLengthPtr)++] = LOW_BYTE(currentAttributeId);
-    emAfZclBuffer[(*emAfResponseLengthPtr)++] = HIGH_BYTE(currentAttributeId);
+    sli_zigbee_af_zcl_buffer[(*sli_zigbee_af_response_length_ptr)++] = LOW_BYTE(currentAttributeId);
+    sli_zigbee_af_zcl_buffer[(*sli_zigbee_af_response_length_ptr)++] = HIGH_BYTE(currentAttributeId);
   }
 
   emberAfSetCommandEndpoints(SOURCE_ENDPOINT, destEndpoint);

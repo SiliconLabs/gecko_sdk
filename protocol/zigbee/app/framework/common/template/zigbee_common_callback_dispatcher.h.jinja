@@ -23,7 +23,7 @@
 
 {# EVENT INIT -#}
 // Event Init
-void emAfEventInit(void);
+void sli_zigbee_af_event_init(void);
 {% for cb in zigbee_af_callback -%}
 {% if cb['callback_type'] == "event_init" or cb['callback_type'] == "init" -%}
 void {{ cb['function_name'] }}(uint8_t init_level);
@@ -32,7 +32,7 @@ void {{ cb['function_name'] }}(uint8_t init_level);
 
 {# LOCAL DATA INIT -#}
 // Local data Init
-void emAfLocalDataInit(void);
+void sli_zigbee_af_local_data_init(void);
 {% for cb in zigbee_af_callback -%}
 {% if cb['callback_type'] == "local_data_init" -%}
 void {{ cb['function_name'] }}(uint8_t init_level);
@@ -41,7 +41,7 @@ void {{ cb['function_name'] }}(uint8_t init_level);
 
 {# INIT DONE -#}
 // Init done
-void emAfInitDone(void);
+void sli_zigbee_af_initDone(void);
 {% for cb in zigbee_af_callback -%}
 {% if cb['callback_type'] == "init_done" -%}
 void {{ cb['function_name'] }}(uint8_t init_level);
@@ -50,7 +50,7 @@ void {{ cb['function_name'] }}(uint8_t init_level);
 
 {# TICK #}
 // Tick
-void emAfTick(void);
+void sli_zigbee_af_tick(void);
 {% for cb in zigbee_af_callback -%}
 {% if cb['callback_type'] == "tick" -%}
 void {{ cb['function_name'] }}(void);

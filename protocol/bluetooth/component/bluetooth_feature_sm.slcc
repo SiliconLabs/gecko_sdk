@@ -3,7 +3,7 @@ label: "Security Manager"
 package: "Bluetooth"
 description: >
   Bluetooth security manager (SM) feature
-category: "Bluetooth|Stack"
+category: Bluetooth|Bluetooth Host (Stack)|Features with Commands and Events
 quality: "production"
 root_path: "protocol/bluetooth"
 requires:

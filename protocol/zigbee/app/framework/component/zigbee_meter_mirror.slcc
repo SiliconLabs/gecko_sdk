@@ -28,7 +28,7 @@ template_contribution:
       cluster_id: "0x0702"
       mfg_id: "NOT_MFG_SPECIFIC"
       side: "CLIENT"
-      service_function: "emAfMeterMirrorSimpleMeteringClusterClientCommandParse"
+      service_function: "sli_zigbee_af_meter_mirror_simple_metering_cluster_client_command_parse"
   - name: zigbee_af_callback
     value:
       callback_type: init_done
@@ -46,13 +46,13 @@ template_contribution:
     value:
       group: meter-mirror
       name: status
-      handler: emAfPluginMeterMirrorStatusCommand
+      handler: sli_zigbee_af_meter_mirror_status_command
       help: Prints the status of all mirrors.
   - name: cli_command
     value:
       group: meter-mirror
       name: remove
-      handler: emAfPluginMeterMirrorRemoveCommand
+      handler: sli_zigbee_af_meter_mirror_remove_command
       help: Manually removes a registered mirror at the specified endpoint.
       argument:
       - type: uint8

@@ -41,6 +41,7 @@
 #include "app_process.h"
 #include "sl_simple_led_instances.h"
 #include "sl_component_catalog.h"
+#include "sl_flex_rail_channel_selector.h"
 #if defined(SL_CATALOG_APP_LOG_PRESENT)
 #include "app_log.h"
 #endif
@@ -141,7 +142,7 @@ RAIL_Handle_t app_init(void)
   RAIL_EnableRxDutyCycle(rail_handle, true);
 
   // Start RX
-  RAIL_StartRx(rail_handle, CHANNEL, NULL);
+  RAIL_StartRx(rail_handle, get_selected_channel(), NULL);
 
 #if DUTY_CYCLE_ALLOW_EM2 == 1
   // EM2 sleep level

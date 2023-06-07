@@ -25,4 +25,4 @@
 // -----------------------------------------------------------------------------
 // Globals
 
-extern bool emAfPluginTestHarnessZ3IgnoreLeaveCommands;
+extern bool sli_zigbee_af_test_harness_z3_ignore_leave_commands;

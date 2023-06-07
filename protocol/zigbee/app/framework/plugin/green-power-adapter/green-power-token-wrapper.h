@@ -22,6 +22,7 @@
 * Token stub functions
 * Customer should define these in their own application code
 ***************************************************************************/
+#if (EMBER_AF_PLUGIN_GREEN_POWER_ADAPTER_USE_CUSTOM_TOKEN_SYSTEM == 1)
 void halCommonSetTokenWrapper(uint16_t token, void *data);
 void halCommonGetTokenWrapper(void *data, uint16_t token);
 void halCommonSetIndexedTokenWrapper(uint16_t token, uint8_t index, void *data);
@@ -46,5 +47,6 @@ void halCommonGetIndexedTokenWrapper(void *data, uint16_t token, uint8_t index);
 #undef halCommonGetIndexedToken
 #endif //halCommonGetIndexedToken
 #define halCommonGetIndexedToken(data, token, index) halCommonGetIndexedTokenWrapper(data, token, index)
+#endif // (EMBER_AF_PLUGIN_GREEN_POWER_ADAPTER_USE_CUSTOM_TOKEN_SYSTEM == 1)
 
 #endif //_SILABS_GREEN_POWER_TOKEN_WRAPPER_H_

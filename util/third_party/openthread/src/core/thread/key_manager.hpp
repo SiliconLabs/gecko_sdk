@@ -254,7 +254,7 @@ public:
      * @returns A key reference to the Thread Network Key.
      *
      */
-    NetworkKeyRef GetNetworkKeyRef(void) { return mNetworkKeyRef; }
+    NetworkKeyRef GetNetworkKeyRef(void) const { return mNetworkKeyRef; }
 
     /**
      * This method sets the Thread Network Key using Key Reference.
@@ -299,7 +299,7 @@ public:
      * @returns A key reference to the PSKc.
      *
      */
-    const PskcRef &GetPskcRef(void) { return mPskcRef; }
+    const PskcRef &GetPskcRef(void) const { return mPskcRef; }
 
     /**
      * This method sets the PSKc as a Key reference.
@@ -401,10 +401,12 @@ public:
     /**
      * This method sets the current MAC Frame Counter value for all radio links.
      *
-     * @param[in]  aMacFrameCounter  The MAC Frame Counter value.
-     *
+     * @param[in] aFrameCounter  The MAC Frame Counter value.
+     * @param[in] aSetIfLarger   If `true`, set only if the new value @p aFrameCounter is larger than current value.
+     *                           If `false`, set the new value independent of the current value.
+
      */
-    void SetAllMacFrameCounters(uint32_t aMacFrameCounter);
+    void SetAllMacFrameCounters(uint32_t aFrameCounter, bool aSetIfLarger);
 
     /**
      * This method sets the MAC Frame Counter value which is stored in non-volatile memory.
@@ -445,7 +447,7 @@ public:
     void IncrementMleFrameCounter(void);
 
     /**
-     * This method returns the KEK as `KekKeyMaterail`
+     * This method returns the KEK as `KekKeyMaterial`
      *
      * @returns The KEK as `KekKeyMaterial`.
      *
@@ -543,16 +545,24 @@ public:
      *
      * This is called to indicate the @p aMacFrameCounter value is now used.
      *
-     * @param[in]  aMacFrameCounter  The 15.4 link MAC frame counter value.
+     * @param[in]  aMacFrameCounter     The 15.4 link MAC frame counter value.
      *
      */
     void MacFrameCounterUsed(uint32_t aMacFrameCounter);
 
+#if OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE
     /**
-     * This method deletes all the volatile mle and mac keys dtored in PSA ITS.
+     * This method destroys all the volatile mac keys stored in PSA ITS.
      *
      */
-    void DeleteSecurityKeys(void);
+    void DestroyTemporaryKeys(void);
+
+    /**
+     * This method destroys all the persistent keys stored in PSA ITS.
+     *
+     */
+    void DestroyPersistentKeys(void);
+#endif
 
 private:
     static constexpr uint32_t kDefaultKeySwitchGuardTime = 624;
@@ -575,10 +585,10 @@ private:
         const Mac::Key &GetMacKey(void) const { return mKeys.mMacKey; }
     };
 
-    void ComputeKeys(uint32_t aKeySequence, HashKeys &aHashKeys);
+    void ComputeKeys(uint32_t aKeySequence, HashKeys &aHashKeys) const;
 
 #if OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE
-    void ComputeTrelKey(uint32_t aKeySequence, Mac::Key &aKey);
+    void ComputeTrelKey(uint32_t aKeySequence, Mac::Key &aKey) const;
 #endif
 
     void StartKeyRotationTimer(void);

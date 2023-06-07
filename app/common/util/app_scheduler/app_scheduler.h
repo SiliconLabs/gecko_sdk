@@ -111,6 +111,19 @@ sl_status_t app_scheduler_reschedule(app_scheduler_task_handle_t handle,
                                      uint32_t delay_ms);
 
 /***************************************************************************//**
+ * Get the reamining time in ms for a given, scheduled task
+ *
+ * @param[in] handle            Handle of the task.
+ * @param[in] time_ms           Remaining time in ms
+ *
+ * @retval SL_STATUS_NOT_FOUND  Handle could not be identified
+ * @retval SL_STATUS_OK         Operation was successful, error otherwise
+ * @return Status of the operation.
+ ******************************************************************************/
+sl_status_t app_scheduler_get_remaining_time_ms(app_scheduler_task_handle_t handle,
+                                                uint32_t *time_ms);
+
+/***************************************************************************//**
  * Get the delay or period in ms for a given, scheduled task
  *
  * @param[in] handle   Handle of the task to be queried

@@ -18,8 +18,6 @@
 #include "../../include/af.h"
 #include "../scenes-client/scenes-client.h"
 
-#ifdef UC_BUILD
-
 #include "zap-cluster-command-parser.h"
 
 bool emberAfScenesClusterEnhancedAddSceneResponseCallback(EmberAfClusterCommand *cmd)
@@ -72,50 +70,6 @@ bool emberAfScenesClusterCopySceneResponseCallback(EmberAfClusterCommand *cmd)
   return true;
 }
 
-#else // !UC_BUILD
-
-bool emberAfScenesClusterEnhancedAddSceneResponseCallback(uint8_t status,
-                                                          uint16_t groupId,
-                                                          uint8_t sceneId)
-{
-  return emberAfPluginScenesClientParseAddSceneResponse(emberAfCurrentCommand(),
-                                                        status,
-                                                        groupId,
-                                                        sceneId);
-}
-
-bool emberAfScenesClusterEnhancedViewSceneResponseCallback(uint8_t status,
-                                                           uint16_t groupId,
-                                                           uint8_t sceneId,
-                                                           uint16_t transitionTime,
-                                                           uint8_t *sceneName,
-                                                           uint8_t *extensionFieldSets)
-{
-  return emberAfPluginScenesClientParseViewSceneResponse(emberAfCurrentCommand(),
-                                                         status,
-                                                         groupId,
-                                                         sceneId,
-                                                         transitionTime,
-                                                         sceneName,
-                                                         extensionFieldSets);
-}
-
-bool emberAfScenesClusterCopySceneResponseCallback(uint8_t status,
-                                                   uint16_t groupIdFrom,
-                                                   uint8_t sceneIdFrom)
-{
-  emberAfScenesClusterPrintln("RX: CopySceneResponse 0x%x, 0x%2x, 0x%x",
-                              status,
-                              groupIdFrom,
-                              sceneIdFrom);
-  emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
-  return true;
-}
-
-#endif // UC_BUILD
-
-#ifdef UC_BUILD
-
 uint32_t emberAfZllScenesClusterClientCommandParse(sl_service_opcode_t opcode,
                                                    sl_service_function_context_t *context)
 {
@@ -148,5 +102,3 @@ uint32_t emberAfZllScenesClusterClientCommandParse(sl_service_opcode_t opcode,
           ? EMBER_ZCL_STATUS_SUCCESS
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
-
-#endif // UC_BUILD

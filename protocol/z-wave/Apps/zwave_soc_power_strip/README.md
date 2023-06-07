@@ -210,27 +210,30 @@ The following LEDs and buttons shown in the next table below are used.
 
 <table>
 <tr>
-    <th>Button</th>
-    <th>Action</th>
-    <th>Description</th>
+    <th rowspan="2">Button</th>
+    <th rowspan="2">Action</th>
+    <th colspan="2">Description</th>
+</tr><tr>
+    <th>WSTK</th>
+    <th>800 Dev Kit</th>
 </tr><tr>
     <td>RST</td>
     <td>Press</td>
-    <td>Resets the firmware of an application (like losing power). All volatile memory will be cleared.</td>
+    <td colspan="2">Resets the firmware of an application (like losing power). All volatile memory will be cleared.</td>
 </tr><tr>
     <td>BTN0</td>
     <td>Keypress</td>
-    <td>Switch on/off endpoint 1</td>
+    <td colspan="2">Switch on/off endpoint 1</td>
 </tr><tr>
     <td rowspan="2">BTN1</td>
     <td>Press</td>
-    <td>
+    <td colspan="2">
         Enter "learn mode" (sending node info frame) to add/remove the device.<br>
         Removing the device from a network will reset it.
     </td>
 </tr><tr>
     <td>Hold for at least 5 seconds and release</td>
-    <td>Perform a reset to factory default operation of the device, and a Device Reset Locally Notification Command is sent via Lifeline.</td>
+    <td colspan="2">Perform a reset to factory default operation of the device, and a Device Reset Locally Notification Command is sent via Lifeline.</td>
 </tr><tr>
     <td>BTN2</td>
     <td>Keypress</td>
@@ -239,6 +242,7 @@ The following LEDs and buttons shown in the next table below are used.
       Pressing push-button turns light on/off and holding push-button
       performs dimming of light (toggle up/down)
     </td>
+    <td></td>
 </tr><tr>
     <td>BTN3</td>
     <td>Keypress</td>
@@ -256,25 +260,32 @@ The following LEDs and buttons shown in the next table below are used.
       </ol>
       <p>One notification will be transmitted every 30 seconds.</p>
     </td>
+    <td></td>
 </tr>
 </table>
 
 <table>
 <tr>
-    <th>LED</th>
-    <th>Description</th>
+    <th rowspan="2">LED</th>
+    <th colspan="2">Description</th>
+</tr><tr>
+    <th>WSTK</th>
+    <th>800 Dev Kit</th>
 </tr><tr>
     <td>LED0</td>
-    <td>Endpoint 1 (switch on/off)</td>
+    <td colspan="2">Endpoint 1 (switch on/off)</td>
 </tr><tr>
     <td>LED1</td>
     <td>
       Blinks with 1 Hz when learn mode is active.
       Used for Indicator Command Class.
     </td>
+    <td>Endpoint 2 (dimmer)</td>
 </tr><tr>
     <td>RGB</td>
     <td>Endpoint 2 (dimmer)</td>
+    <td>
+    </td>
 </tr>
 </table>
 

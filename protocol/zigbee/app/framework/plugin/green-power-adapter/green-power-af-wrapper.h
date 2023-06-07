@@ -18,6 +18,7 @@
 #ifndef _SILABS_GREEN_POWER_AF_WRAPPER_H_
 #define _SILABS_GREEN_POWER_AF_WRAPPER_H_
 
+#include "zap-config.h"
 #include "zap-command.h"
 #include "zap-id.h"
 #include "zap-type.h"
@@ -30,7 +31,9 @@
 #include "sl_service_function.h"
 
 #ifdef SL_COMPONENT_CATALOG_PRESENT
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 
 #ifdef SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
 #include "zcl-framework-core-config.h"
@@ -47,6 +50,7 @@
 extern uint8_t  appResponseData[EMBER_AF_MAXIMUM_SEND_PAYLOAD_LENGTH];
 extern uint16_t appResponseLength;
 
+#if (EMBER_AF_PLUGIN_GREEN_POWER_ADAPTER_USE_CUSTOM_ATTRIBUTE_SYSTEM == 1)
 EmberAfStatus emberAfReadAttributeWrapper(uint8_t endpoint,
                                           EmberAfClusterId cluster,
                                           EmberAfAttributeId attributeID,
@@ -65,12 +69,23 @@ EmberAfStatus emberAfWriteClientAttributeWrapper(uint8_t endpoint,
                                                  EmberAfAttributeId attributeID,
                                                  uint8_t* dataPtr,
                                                  EmberAfAttributeType dataType);
-bool emberAfAttributeWriteAccessCallback(int8u endpoint,
-                                         EmberAfClusterId clusterId,
-                                         int16u manufacturerCode,
-                                         int16u attributeId);
-bool emberAfMemoryByteCompare(const uint8_t* pointer, uint8_t count, uint8_t byteValue);
-uint8_t emberAfGetRadioChannelWrapper(void);
+bool emberAfContainsServerWrapper(uint8_t endpoint, EmberAfClusterId clusterId);
+bool emberAfContainsClientWrapper(uint8_t endpoint, EmberAfClusterId clusterId);
+
+#define emberAfReadAttribute emberAfReadAttributeWrapper
+#define emberAfWriteAttribute emberAfWriteAttributeWrapper
+#define emberAfWriteClientAttribute emberAfWriteClientAttributeWrapper
+#define emberAfContainsServer emberAfContainsServerWrapper
+#define emberAfContainsClient emberAfContainsClientWrapper
+
+#elif defined(EMBER_AF_NCP) && defined(SL_CATALOG_ZIGBEE_AF_SUPPORT_PRESENT)
+bool emberAfContainsServerWrapper(uint8_t endpoint, EmberAfClusterId clusterId);
+bool emberAfContainsClientWrapper(uint8_t endpoint, EmberAfClusterId clusterId);
+#define emberAfContainsServer emberAfContainsServerWrapper
+#define emberAfContainsClient emberAfContainsClientWrapper
+#endif // (EMBER_AF_PLUGIN_GREEN_POWER_ADAPTER_USE_CUSTOM_ATTRIBUTE_SYSTEM == 1)
+
+#if (EMBER_AF_PLUGIN_GREEN_POWER_ADAPTER_USE_CUSTOM_AF_INTERFACE == 1)
 EmberApsFrame *emberAfGetCommandApsFrameWrapper(void);
 EmberStatus emberAfSendCommandUnicastWrapper(EmberOutgoingMessageType type,
                                              uint16_t indexOrDestination);
@@ -85,14 +100,21 @@ uint16_t emberAfFillExternalBufferWrapper(uint8_t frameControl,
                                           uint8_t commandId,
                                           const char *format,
                                           ...);
-#define emberAfReadAttribute emberAfReadAttributeWrapper
-#define emberAfWriteAttribute emberAfWriteAttributeWrapper
-#define emberAfWriteClientAttribute emberAfWriteClientAttributeWrapper
-#define emberAfGetRadioChannel emberAfGetRadioChannelWrapper
+
 #define emberAfGetCommandApsFrame emberAfGetCommandApsFrameWrapper
 #define emberAfSendCommandUnicast emberAfSendCommandUnicastWrapper
 #define emberAfSendCommandBroadcastWithAlias emberAfSendCommandBroadcastWithAliasWrapper
 #define emberAfSendCommandMulticastWithAlias emberAfSendCommandMulticastWithAliasWrapper
 #define emberAfFillExternalBuffer emberAfFillExternalBufferWrapper
+#endif // (EMBER_AF_PLUGIN_GREEN_POWER_ADAPTER_USE_CUSTOM_AF_INTERFACE == 1)
+
+bool emberAfAttributeWriteAccessCallback(int8u endpoint,
+                                         EmberAfClusterId clusterId,
+                                         int16u manufacturerCode,
+                                         int16u attributeId);
+bool emberAfMemoryByteCompare(const uint8_t* pointer, uint8_t count, uint8_t byteValue);
+uint8_t emberAfGetRadioChannelWrapper(void);
+
+#define emberAfGetRadioChannel emberAfGetRadioChannelWrapper
 
 #endif //_SILABS_GREEN_POWER_AF_WRAPPER_H_

@@ -106,7 +106,7 @@ sl_status_t sli_coulomb_counter_hal_int_is_set(uint8_t flag, bool *is_set)
   if (flag == SL_COULOMB_COUNTER_INT_CALIBRATION_DONE) {
     reg = CMU_IntGet() & CMU_IF_CALRDY;
   } else if (flag == SL_COULOMB_COUNTER_INT_COUNTER_FULL) {
-     reg = sl_dcdc_coulomb_counter_get_interrupts() & (DCDC_CCIF_EM0OF | DCDC_CCIF_EM2OF);
+    reg = sl_dcdc_coulomb_counter_get_interrupts() & (DCDC_CCIF_EM0OF | DCDC_CCIF_EM2OF);
   } else {
     return SL_STATUS_FAIL;
   }
@@ -408,7 +408,7 @@ sl_status_t sli_coulomb_counter_hal_cal_read_result(uint16_t *result)
  * @brief
  *   Perform the Charge-Per-Pulse (CPP) Calculation.
  *
-* @note
+ * @note
  *   The Charge-Per-Pulse (CPP) Calculation is explained in the
  *   reference manual in the Calibration Section.
  ******************************************************************************/

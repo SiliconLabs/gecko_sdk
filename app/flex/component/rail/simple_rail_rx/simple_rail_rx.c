@@ -37,6 +37,8 @@
 #include "simple_rail_rx.h"
 #include "rail_types.h"
 #include "cmsis_compiler.h"
+#include "sl_status.h"
+#include "sl_flex_rail_config.h"
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -71,7 +73,7 @@ static volatile uint64_t current_rail_rx_err = 0;
 // Return value of setting the state machine of simple_rail_rx
 static sl_status_t simple_rail_rx_status;
 /// Receive FIFO, can be used by other C modules
-static __ALIGNED(RAIL_FIFO_ALIGNMENT) uint8_t sl_rx_fifo[RAIL_RX_FIFO_SIZE];
+static __ALIGNED(RAIL_FIFO_ALIGNMENT) uint8_t sl_rx_fifo[SL_FLEX_RAIL_RX_FIFO_SIZE];
 /// If state machine update has an error in interrupt, print it in tick
 static volatile bool rx_state_machine_update_failed = false;
 

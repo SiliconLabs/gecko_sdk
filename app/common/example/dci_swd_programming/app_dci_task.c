@@ -130,6 +130,11 @@ void set_dci_command(uint32_t *cmd_buf)
       *(++cmd_buf) = COMMAND_READ_SERIAL;
       break;
 
+    case READ_LOCK_STATUS:
+      *cmd_buf = NO_ARGUMENT_LENGTH;
+      *(++cmd_buf) = COMMAND_READ_LOCK_STATUS;
+      break;
+
     case READ_PUB_SIGN_KEY:
       *cmd_buf = NO_ARGUMENT_LENGTH;
       *(++cmd_buf) = COMMAND_READ_PUB_SIGN_KEY;
@@ -298,6 +303,14 @@ void set_dci_command(uint32_t *cmd_buf)
     case DISABLE_DEVICE_ERASE:
       *cmd_buf = NO_ARGUMENT_LENGTH;
       *(++cmd_buf) = COMMAND_DEVICE_ERASE_DISABLE;
+      break;
+
+    case SET_DBG_RESTRICTIONS:
+      *cmd_buf = UPGRADE_SE_FIRMWARE_LENGTH; /*this is really the one param length*/
+      *(++cmd_buf) = COMMAND_DBG_SET_RESTRICTION;
+      if (*(++cmd_buf) >= DCI_TASK_NUM) {
+        RAISE(DCI_ERROR_INVALID_DBG_RESTRICT);
+      }
       break;
 
     default:

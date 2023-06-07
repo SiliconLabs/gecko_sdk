@@ -40,13 +40,8 @@ HIDDEN EmberEventControl cleanupEvent;
 #else
 // Compiled in the context of an Afv2 application and AppBuilder will generate
 // event names and functions.
-#ifdef UC_BUILD
 extern sl_zigbee_event_t emberAfPluginFormAndJoinCleanupEvent;
 #define cleanupEvent (&emberAfPluginFormAndJoinCleanupEvent)
-#else
-extern EmberEventControl emberAfPluginFormAndJoinCleanupEventControl;
-#define cleanupEvent emberAfPluginFormAndJoinCleanupEventControl
-#endif// UC_BUILD
 #endif
 
 #define CLEANUP_TIMEOUT_QS 120
@@ -66,17 +61,17 @@ NetworkInfo *formAndJoinGetNetworkPointer(uint8_t index)
 
 void formAndJoinSetCleanupTimeout(void)
 {
-  slxu_zigbee_event_set_delay_qs(cleanupEvent, CLEANUP_TIMEOUT_QS);
+  sl_zigbee_event_set_delay_qs(cleanupEvent, CLEANUP_TIMEOUT_QS);
 }
 
 bool formAndJoinAllocateBuffer(void)
 {
-  dataCache = emAllocateBuffer(32);
+  dataCache = sli_legacy_buffer_manager_allocate_buffer(32);
   return (dataCache == EMBER_NULL_MESSAGE_BUFFER ? false : true);
 }
 uint8_t*   getFormAndJoinBufferPointer(void)
 {
-  return emGetBufferPointer(dataCache);
+  return sli_legacy_buffer_manager_get_buffer_pointer(dataCache);
 }
 
 // Set the dataCache length in terms of the number of NetworkInfo entries.
@@ -98,47 +93,10 @@ void formAndJoinReleaseBuffer(void)
     emberReleaseMessageBuffer(dataCache);
     dataCache = EMBER_NULL_MESSAGE_BUFFER;
   }
-  slxu_zigbee_event_set_inactive(cleanupEvent);
+  sl_zigbee_event_set_inactive(cleanupEvent);
 }
 
 void formAndJoinMarkBuffers(void)
 {
-  emMarkBuffer(&dataCache);
+  sli_legacy_buffer_manager_mark_buffer(&dataCache);
 }
-
-#ifndef UC_BUILD
-
-static void cleanupEventHandler(SLXU_UC_EVENT)
-{
-  slxu_zigbee_event_set_inactive(cleanupEvent);
-  emberFormAndJoinCleanup(EMBER_SUCCESS);
-}
-
-static EmberEventData formAndJoinEvents[] =
-{
-  { &cleanupEvent, cleanupEventHandler },
-  { NULL, NULL }         // terminator
-};
-
-void emberFormAndJoinTick(void)
-{
-  emberRunEvents(formAndJoinEvents);
-}
-
-static EmberTaskId formAndJoinTask;
-
-void emberFormAndJoinTaskInit(void)
-{
-  formAndJoinTask = emberTaskInit(formAndJoinEvents);
-}
-
-void emberFormAndJoinRunTask(void)
-{
-  emberRunTask(formAndJoinTask);
-  ATOMIC(
-    // Its always safe to idle this task since it only depends on the event
-    emberMarkTaskIdle(formAndJoinTask);
-    )
-}
-
-#endif // UC_BUILD

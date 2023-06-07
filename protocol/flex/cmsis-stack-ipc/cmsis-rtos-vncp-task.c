@@ -33,9 +33,8 @@
 #include "cmsis-rtos-ipc-config.h"
 #include "sl_component_catalog.h"
 
-#include "stack/include/api-rename.h"
 #include "stack/include/ember.h"
-#include "stack/include/api-rename-undef.h"
+#include "stack/core/sli-connect-api.h"
 
 #include "hal.h"
 

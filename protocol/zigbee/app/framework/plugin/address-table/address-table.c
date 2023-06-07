@@ -18,9 +18,7 @@
 #include "app/framework/include/af.h"
 #include "address-table.h"
 
-#ifdef UC_BUILD
 #include "address-table-config.h"
-#endif
 
 #define FREE_EUI64 { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF }
 
@@ -88,9 +86,9 @@ void emberAfPluginAddressTableNcpInitCallback(bool memoryAllocation)
 EmberStatus emberAfSendCommandUnicastToEui64(EmberEUI64 destination)
 {
   return emberAfSendUnicastToEui64(destination,
-                                   emAfCommandApsFrame,
-                                   *emAfResponseLengthPtr,
-                                   emAfZclBuffer);
+                                   sli_zigbee_af_command_aps_frame,
+                                   *sli_zigbee_af_response_length_ptr,
+                                   sli_zigbee_af_zcl_buffer);
 }
 
 uint8_t emberAfLookupAddressTableEntryByEui64(EmberEUI64 longId)

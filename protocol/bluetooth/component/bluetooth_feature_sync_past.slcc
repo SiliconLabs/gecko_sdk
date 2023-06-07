@@ -9,8 +9,8 @@ description: >
   Use this component on the device that needs to initiate PAST to a remote
   device. To receive PAST from a remote device, use
   <bluetooth_feature_past_receiver>.
-category: "Bluetooth|Feature"
-quality: "experimental"
+category: Bluetooth|Bluetooth LE Controller (Link Layer)|Features with Commands and Events
+quality: "production"
 root_path: "protocol/bluetooth"
 requires:
   - name: "bluetooth_controller"

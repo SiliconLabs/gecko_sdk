@@ -31,6 +31,11 @@
 #ifndef SL_WAKE_LOCK_CONFIG_H
 #define SL_WAKE_LOCK_CONFIG_H
 
+/***********************************************************************************************//**
+ * @addtogroup wake_lock
+ * @{
+ **************************************************************************************************/
+
 // <<< Use Configuration Wizard in Context Menu >>>
 
 // <h>Modes of operation
@@ -74,4 +79,5 @@
 
 // <<< sl:end pin_tool >>>
 
+/** @} (end addtogroup wake_lock) */
 #endif // SL_WAKE_LOCK_CONFIG_H

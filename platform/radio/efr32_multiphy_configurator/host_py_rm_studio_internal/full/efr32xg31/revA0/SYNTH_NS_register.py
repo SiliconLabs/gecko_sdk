@@ -823,3 +823,19 @@ class RM_Register_SYNTH_NS_SEQIEN(Base_RM_Register):
         self.__dict__['zz_frozen'] = True
 
 
+class RM_Register_SYNTH_NS_FREQ1(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_SYNTH_NS_FREQ1, self).__init__(rmio, label,
+            0xb8018000, 0x0C0,
+            'FREQ1', 'SYNTH_NS.FREQ1', 'read-write',
+            u"",
+            0x00000000, 0x0FFFFFFF,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.FREQ = RM_Field_SYNTH_NS_FREQ1_FREQ(self)
+        self.zz_fdict['FREQ'] = self.FREQ
+        self.__dict__['zz_frozen'] = True
+
+

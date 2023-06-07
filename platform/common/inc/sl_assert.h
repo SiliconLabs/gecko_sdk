@@ -72,6 +72,13 @@ extern "C" {
  ******************************************************************************/
 /* Due to footprint considerations, we only pass file name and line number, */
 /* not the assert expression (nor function name (C99)) */
+/***************************************************************************//**
+ * @brief
+ *    Assert function for EFM.
+ * @param[in] file -  path and file name of the assert.
+ *
+ * @param[in] line - line number, in the file.
+ ******************************************************************************/
 void assertEFM(const char *file, int line);
 /** Default assertion is not operational */
 #define EFM_ASSERT(expr)    ((expr) ? ((void)0) : assertEFM(__FILE__, __LINE__))

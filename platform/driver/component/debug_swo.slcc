@@ -29,6 +29,11 @@ requires:
   - name: status
   - name: emlib_cmu
   - name: emlib_gpio
+    condition: [device_series_0]
+  - name: emlib_gpio
+    condition: [device_series_1]
+  - name: emlib_gpio
+    condition: [device_series_2]
   - name: cmsis_core
 config_file:
   - path: config/s0/tg/sl_debug_swo_config.h
@@ -43,6 +48,8 @@ config_file:
     condition: [device_series_1]
   - path: config/s2/sl_debug_swo_config.h
     condition: [device_series_2]
+  - path: config/s3/sl_debug_swo_config.h
+    condition: [device_series_3]
 template_contribution:
   - name: event_handler
     value:

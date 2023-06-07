@@ -31,6 +31,11 @@
 #ifndef SL_SENSOR_PRESSURE_H
 #define SL_SENSOR_PRESSURE_H
 
+/***********************************************************************************************//**
+ * @addtogroup sensor_pressure
+ * @{
+ **************************************************************************************************/
+
 #include "sl_status.h"
 
 /**************************************************************************//**
@@ -59,4 +64,5 @@ void sl_sensor_pressure_deinit(void);
  *****************************************************************************/
 sl_status_t sl_sensor_pressure_get(float *pressure);
 
+/** @} (end addtogroup sensor_pressure) */
 #endif // SL_SENSOR_PRESSURE_H

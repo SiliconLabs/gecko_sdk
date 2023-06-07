@@ -20,10 +20,29 @@
  ******************************************************************************/
 
 #include <openthread/cli.h>
-#include <openthread/coprocessor_rpc.h>
 
 extern otCliCommand sl_ot_custom_commands[];
-extern const size_t sl_ot_custom_commands_count;
+extern const uint8_t sl_ot_custom_commands_count;
+
+/**
+ * Iterates over list of commands in @p aCommands to match the name
+ * of the command referred to in @p aArgs and execute the handler
+ * function if found.
+ *
+ * @param[in] *aContext	        Pointer to openthread instance
+ * @param[in]  aArgsLength      Number of arguments in @p aArgs
+ * @param[in] *aArgs[]          Array of arguments to pass to handler
+ * @param[in]  aCommandsLength  Number of subcommands in @p aCommands
+ * @param[in]  aCommands[]      List of subcommands registered by cli module
+ *
+ * @returns The result of the executed handler, or OT_ERROR_INVALID_ARGS if command was not found.
+ */
+
+otError processCommand(void *aContext,
+                       uint8_t aArgsLength,
+                       char *aArgs[],
+                       uint8_t aCommandsLength,
+                       const otCliCommand aCommands[]);
 
 /**
  * Print all commands in @p commands

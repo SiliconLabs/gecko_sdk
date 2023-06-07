@@ -19,22 +19,7 @@
 #include "device-management-client.h"
 #include "app/framework/plugin/device-management-server/device-management-common.h"
 
-#ifdef UC_BUILD
-
-void emAfDeviceManagementClientCliPrint(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_device_management_client_cli_print(sl_cli_command_arg_t *arguments)
 {
   emberAfDeviceManagementClientPrint();
 }
-
-#else
-#ifndef EMBER_AF_GENERATE_CLI
-  #error The Device Management Client plugin is not compatible with the legacy CLI.
-#endif
-
-void emAfDeviceManagementClientCliPrint(void);
-
-void emAfDeviceManagementClientCliPrint(void)
-{
-  emberAfDeviceManagementClientPrint();
-}
-#endif

@@ -17,7 +17,9 @@
 
 #include PLATFORM_HEADER
 
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #include "hal.h"
 #include "stack/include/ember.h"
 #include "stack/include/gp-types.h"
@@ -39,9 +41,9 @@ static sl_zigbee_event_t gp_transmit_complete_event;
 // Extern and forward declarations
 
 extern uint8_t sl_mac_lower_mac_get_radio_channel(uint8_t mac_index);
-extern EmberMessageBuffer emGpdfMakeHeader(bool useCca,
-                                           EmberGpAddress *src,
-                                           EmberGpAddress *dst);
+extern EmberMessageBuffer sli_zigbee_gpdf_make_header(bool useCca,
+                                                      EmberGpAddress *src,
+                                                      EmberGpAddress *dst);
 extern void emberDGpSentHandler(EmberStatus status,
                                 uint8_t gpepHandle);
 extern EmberStatus emberAfPluginXncpSendCustomEzspMessage(uint8_t length, uint8_t *payload);
@@ -255,10 +257,10 @@ EmberStatus emberAfPluginXncpIncomingCustomFrameCallback(uint8_t messageLength,
   return EMBER_INVALID_CALL;
 }
 
-EmberPacketAction emAfPacketHandoffIncomingCallback(EmberZigbeePacketType packetType,
-                                                    EmberMessageBuffer packetBuffer,
-                                                    uint8_t index,
-                                                    void *data)
+EmberPacketAction sli_zigbee_af_packet_handoff_incoming_callback(EmberZigbeePacketType packetType,
+                                                                 EmberMessageBuffer packetBuffer,
+                                                                 uint8_t index,
+                                                                 void *data)
 {
   uint8_t size_p = emberMessageBufferLength(packetBuffer) - index;
   uint8_t packetData[128];
@@ -314,7 +316,7 @@ static EmberGpTxQueueEntry* get_gp_stub_tx_queue(EmberGpAddress* addr)
                                          &dataLength,
                                          128) != EMBER_NULL_MESSAGE_BUFFER) {
     // Allocate a buffer and prepare a outgoing MAC header using gpd address in the emGpTxQueue
-    EmberMessageBuffer header = emGpdfMakeHeader(true, NULL, &(emGpTxQueue.addr));
+    EmberMessageBuffer header = sli_zigbee_gpdf_make_header(true, NULL, &(emGpTxQueue.addr));
     // Add the command Id from the queue to the buffer
     uint8_t len = emberMessageBufferLength(header) + 1;
     emberAppendToLinkedBuffers(header, &(emGpTxQueue.gpdCommandId), 1);

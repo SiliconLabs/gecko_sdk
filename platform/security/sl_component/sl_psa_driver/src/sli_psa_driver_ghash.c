@@ -28,16 +28,16 @@
  *
  ******************************************************************************/
 
-// -------------------------------------
-// Includes
+#include "sli_psa_driver_features.h"
+
+#if defined(SLI_PSA_DRIVER_FEATURE_GCM_IV_CALCULATION)
 
 #include "psa/crypto.h"
+
 #include "sli_psa_driver_common.h"
 
-// Software GHASH is only required when requested on devices needing it
-#if (defined(SEMAILBOX_PRESENT)   \
-  || defined(CRYPTOACC_PRESENT) ) \
-  && defined(SLI_PSA_SUPPORT_GCM_IV_CALCULATION)
+// -----------------------------------------------------------------------------
+// Macros
 
 #ifndef GET_UINT32_BE
 #define GET_UINT32_BE(n, b, i)               \
@@ -59,21 +59,20 @@
   }
 #endif
 
-/**
- * \brief Initialize Galois field (2^128) multiplication table
- *
- * This function is used as part of a software-based GHASH (as defined in
- * AES-GCM) algorithm, and originates from the mbed TLS implementation in gcm.c
- *
- * It takes the in the 'H' value for the GHASH operation (which is a block of
- * zeroes encrypted using AES-ECB with the key to be used for GHASH/GCM), and
- * converts it into a multiplication table for later use by the multiplication
- * function.
- *
- * \param[in] Ek  'H' value for which to create the multiplication tables
- * \param[out] HL Lower multiplication table for 'H'
- * \param[out] HH Upper multiplication table for 'H'
- */
+// -----------------------------------------------------------------------------
+// Static constants
+
+static const uint64_t last4[16] =
+{
+  0x0000, 0x1c20, 0x3840, 0x2460,
+  0x7080, 0x6ca0, 0x48c0, 0x54e0,
+  0xe100, 0xfd20, 0xd940, 0xc560,
+  0x9180, 0x8da0, 0xa9c0, 0xb5e0
+};
+
+// -----------------------------------------------------------------------------
+// Global functions
+
 void sli_psa_software_ghash_setup(const uint8_t Ek[16],
                                   uint64_t HL[16],
                                   uint64_t HH[16])
@@ -119,31 +118,6 @@ void sli_psa_software_ghash_setup(const uint8_t Ek[16],
   }
 }
 
-static const uint64_t last4[16] =
-{
-  0x0000, 0x1c20, 0x3840, 0x2460,
-  0x7080, 0x6ca0, 0x48c0, 0x54e0,
-  0xe100, 0xfd20, 0xd940, 0xc560,
-  0x9180, 0x8da0, 0xa9c0, 0xb5e0
-};
-
-/**
- * \brief Galois field (2^128) multiplication operation
- *
- * This function is used as part of a software-based GHASH (as defined in
- * AES-GCM) algorithm, and originates from the mbed TLS implementation in gcm.c
- *
- * This function takes in a 128-bit scalar and multiplies it with H (Galois
- * field multiplication as defined in AES-GCM). H is not provided to this
- * function directly. Instead, multiplication tables for the specific H need to
- * be calculated first by \ref sli_psa_software_ghash_setup, and passed to this
- * function.
- *
- * \param[in]   HL      Lower multiplication table for 'H'
- * \param[in]   HH      Upper multiplication table for 'H'
- * \param[out]  output  Output buffer for the multiplication result
- * \param[in]   input   Input buffer for the scalar to multiply
- */
 void sli_psa_software_ghash_multiply(const uint64_t HL[16],
                                      const uint64_t HH[16],
                                      uint8_t output[16],
@@ -185,4 +159,4 @@ void sli_psa_software_ghash_multiply(const uint64_t HL[16],
   PUT_UINT32_BE(zl, output, 12);
 }
 
-#endif // (SEMAILBOX_PRESENT || CRYPTOACC_PRESENT) && SLI_PSA_SUPPORT_GCM_IV_CALCULATION
+#endif // SLI_PSA_DRIVER_FEATURE_GCM_IV_CALCULATION

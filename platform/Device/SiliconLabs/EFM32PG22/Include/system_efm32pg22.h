@@ -66,22 +66,18 @@ extern uint32_t SystemHfrcoFreq;     /**< System HFRCO frequency */
 #endif
 
 /*Re-direction of IRQn.*/
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG >= 2)
 #if defined (SL_TRUSTZONE_SECURE)
 #define SMU_PRIVILEGED_IRQn    SMU_S_PRIVILEGED_IRQn
 #else
 #define SMU_PRIVILEGED_IRQn    SMU_NS_PRIVILEGED_IRQn
 #endif /* SL_TRUSTZONE_SECURE */
-#endif /* _SILICON_LABS_32B_SERIES_2_CONFIG */
 
 /*Re-direction of IRQHandler.*/
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG >= 2)
 #if defined (SL_TRUSTZONE_SECURE)
 #define SMU_PRIVILEGED_IRQHandler    SMU_S_PRIVILEGED_IRQHandler
 #else
 #define SMU_PRIVILEGED_IRQHandler    SMU_NS_PRIVILEGED_IRQHandler
 #endif /* SL_TRUSTZONE_SECURE */
-#endif /* _SILICON_LABS_32B_SERIES_2_CONFIG */
 
 /*******************************************************************************
  *****************************   PROTOTYPES   **********************************
@@ -145,8 +141,6 @@ void SW2_IRQHandler(void);               /**< SW2 IRQ Handler */
 void SW3_IRQHandler(void);               /**< SW3 IRQ Handler */
 void KERNEL0_IRQHandler(void);           /**< KERNEL0 IRQ Handler */
 void KERNEL1_IRQHandler(void);           /**< KERNEL1 IRQ Handler */
-void M33CTI0_IRQHandler(void);           /**< M33CTI0 IRQ Handler */
-void M33CTI1_IRQHandler(void);           /**< M33CTI1 IRQ Handler */
 void EMUEFP_IRQHandler(void);            /**< EMUEFP IRQ Handler */
 void DCDC_IRQHandler(void);              /**< DCDC IRQ Handler */
 void EUART0_RX_IRQHandler(void);         /**< EUART0_RX IRQ Handler */

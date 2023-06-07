@@ -6,7 +6,7 @@
     <properties key="solutionReferenceId" value="app.bluetooth.example.bt_soc_cbap.bt_soc_cbap_tz.slcw"/>
     <properties key="projectFilePaths" value="example/bt_soc_cbap/bt_soc_cbap_tz.slcw"/>
     <properties key="readmeFiles" value=""/>
-    <properties key="boardCompatibility" value="brd4109a brd4110a brd4111a brd4113a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4186a brd4187a brd4194a brd4308a brd4308b brd4309a brd4309b com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2602a brd4109a brd4110a brd4110b brd4111a brd4111b brd4113a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4186a brd4187a brd4194a brd4308a brd4308b brd4309a brd4309b com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32[bm]g21.* .*efr32[bm]g22.* .*efr32[bm]g24.* .*efr32[bm]g27.* .*efr32[fz]g28a.* .*[bm]gm21.* .*[bm]gm22.* .*[bm]gm24.* .*[bm]gm27.*"/>
     <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc"/>
@@ -22,7 +22,7 @@
     <properties key="solutionReferenceId" value="app.bluetooth.example.bt_soc_csr_generator.bt_soc_csr_generator_tz.slcw"/>
     <properties key="projectFilePaths" value="example/bt_soc_csr_generator/bt_soc_csr_generator_tz.slcw"/>
     <properties key="readmeFiles" value=""/>
-    <properties key="boardCompatibility" value="brd4109a brd4110a brd4111a brd4113a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4186a brd4187a brd4194a brd4308a brd4308b brd4309a brd4309b com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2602a brd4109a brd4110a brd4110b brd4111a brd4111b brd4113a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4186a brd4187a brd4194a brd4308a brd4308b brd4309a brd4309b com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32[bm]g21.* .*efr32[bm]g22.* .*efr32[bm]g24.* .*efr32[bm]g27.* .*efr32[fz]g28a.* .*[bm]gm21.* .*[bm]gm22.* .*[bm]gm24.* .*[bm]gm27.*"/>
     <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc"/>
@@ -32,13 +32,58 @@
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
     <properties key="solutionProjects" value="app.bluetooth.example.bt_soc_tz_secure_application.bt_soc_tz_secure_application.slcp app.bluetooth.example.bt_soc_csr_generator.bt_soc_csr_generator_tz_ns.slcp platform.bootloader.sample-apps.workspaces.bootloader-apploader.bootloader-apploader-secure.slcp platform.bootloader.sample-apps.workspaces.bootloader-apploader.bootloader-apploader-nonsecure.slcp"/>
   </descriptors>
+  <descriptors name="bt_abr_ncp_initiator" label="Bluetooth - ABR NCP" description="ABR Network Co-Processor (NCP) target application. Runs the Bluetooth stack and provides access to it by exposing the Bluetooth API (BGAPI) via UART connection. NCP mode makes it possible to run your application on a host controller or PC. This example does not have a GATT database, but makes it possible to build one from the application using Dynamic GATT API.&#xA;">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="app.bluetooth.example.bt_abr_ncp_initiator.bt_abr_ncp_initiator.slcp"/>
+    <properties key="projectFilePaths" value="example/bt_abr_ncp_initiator/bt_abr_ncp_initiator.slcp"/>
+    <properties key="readmeFiles" value="example/bt_abr_ncp_initiator/readme.md"/>
+    <properties key="boardCompatibility" value="brd4198a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32mg24.*"/>
+    <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc"/>
+    <properties key="category" value="Bluetooth Examples"/>
+    <properties key="quality" value="EXPERIMENTAL"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value=""/>
+  </descriptors>
+  <descriptors name="bt_abr_soc_initiator" label="Bluetooth - SoC ABR initiator" description="ABR initiator for Bluetooth. The example connects to an ABR reflector and starts distance measurement. Results are printed on the display of the WSTK.&#xA;">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="app.bluetooth.example.bt_abr_soc_initiator.bt_abr_soc_initiator.slcp"/>
+    <properties key="projectFilePaths" value="example/bt_abr_soc_initiator/bt_abr_soc_initiator.slcp"/>
+    <properties key="readmeFiles" value="example/bt_abr_soc_initiator/readme.md"/>
+    <properties key="boardCompatibility" value="brd4198a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32mg24.*"/>
+    <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc"/>
+    <properties key="category" value="Bluetooth Examples"/>
+    <properties key="quality" value="EXPERIMENTAL"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value=""/>
+  </descriptors>
+  <descriptors name="bt_abr_soc_reflector" label="Bluetooth - SoC ABR reflector" description="ABR reflector for Bluetooth. The example sends measurement results to the initiator via GATT. The application starts advertising after boot and restarts advertising after a connection is closed. It also supports Over-the-Air Device Firmware Upgrade (OTA DFU).&#xA;">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="app.bluetooth.example.bt_abr_soc_reflector.bt_abr_soc_reflector.slcp"/>
+    <properties key="projectFilePaths" value="example/bt_abr_soc_reflector/bt_abr_soc_reflector.slcp"/>
+    <properties key="readmeFiles" value="example/bt_abr_soc_reflector/readme.md"/>
+    <properties key="boardCompatibility" value="brd4198a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32mg24.*"/>
+    <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc"/>
+    <properties key="category" value="Bluetooth Examples"/>
+    <properties key="quality" value="EXPERIMENTAL"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value=""/>
+  </descriptors>
   <descriptors name="bt_soc_cbap" label="Bluetooth - SoC Certificate Based Authentication and Pairing (Secure Vault)&#xA;" description="Demonstrates Certificate Based Authentication and Pairing over BLE. This example utilizes Secure Vault for storing keys.&#xA;">
     <properties key="namespace" value="template.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="app.bluetooth.example.bt_soc_cbap.bt_soc_cbap.slcp"/>
     <properties key="projectFilePaths" value="example/bt_soc_cbap/bt_soc_cbap.slcp"/>
     <properties key="readmeFiles" value="example/bt_soc_cbap/readme.md"/>
-    <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd2704a brd4115a brd4181c brd4186b brd4186c brd4187b brd4187c brd4188a brd4188b brd4195a brd4195b brd4196a brd4196b brd4198a brd4308c brd4308d brd4316a brd4317a brd4318a brd4319a brd4332a brd4335a brd4400a brd4400b brd4401a brd4401b com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd2704a brd4181c brd4186b brd4186c brd4187b brd4187c brd4188a brd4188b brd4195a brd4195b brd4196a brd4196b brd4198a brd4308c brd4308d brd4316a brd4317a brd4318a brd4319a brd4335a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32[bm]g21b.* .*efr32[bm]g24b.* .*efr32[fz]g28b.* .*[bm]gm210pb.* .*[bm]gm240pb.* .*[bm]gm240sb.* .*[bm]gm241sd.* .*mgm240sd.* .*mgm240l0.*"/>
     <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
@@ -68,7 +113,7 @@
     <properties key="solutionReferenceId" value="app.bluetooth.example.bt_soc_csr_generator.bt_soc_csr_generator.slcp"/>
     <properties key="projectFilePaths" value="example/bt_soc_csr_generator/bt_soc_csr_generator.slcp"/>
     <properties key="readmeFiles" value="example/bt_soc_csr_generator/readme.md"/>
-    <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd2704a brd4115a brd4181c brd4186b brd4186c brd4187b brd4187c brd4188a brd4188b brd4195a brd4195b brd4196a brd4196b brd4198a brd4308c brd4308d brd4316a brd4317a brd4318a brd4319a brd4332a brd4335a brd4400a brd4400b brd4401a brd4401b com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd2704a brd4181c brd4186b brd4186c brd4187b brd4187c brd4188a brd4188b brd4195a brd4195b brd4196a brd4196b brd4198a brd4308c brd4308d brd4316a brd4317a brd4318a brd4319a brd4335a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32[bm]g21b.* .*efr32[bm]g24b.* .*efr32[fz]g28b.* .*[bm]gm210pb.* .*[bm]gm240pb.* .*[bm]gm240sb.* .*[bm]gm241sd.* .*mgm240sd.* .*mgm240l0.*"/>
     <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>

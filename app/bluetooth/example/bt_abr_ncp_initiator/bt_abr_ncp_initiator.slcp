@@ -1,0 +1,84 @@
+project_name: bt_abr_ncp_initiator
+package: Bluetooth
+label: Bluetooth - ABR NCP
+description: >
+  ABR Network Co-Processor (NCP) target application. Runs the Bluetooth stack
+  and provides access to it by exposing the Bluetooth API (BGAPI) via UART
+  connection. NCP mode makes it possible to run your application on a host
+  controller or PC. This example does not have a GATT database, but makes it
+  possible to build one from the application using Dynamic GATT API.
+category: Bluetooth Examples
+quality: experimental
+
+component:
+  - id: toolchain_gcc
+  - id: bluetooth_stack
+  - id: bluetooth_feature_legacy_advertiser
+  - id: bluetooth_feature_extended_advertiser
+  - id: bluetooth_feature_periodic_advertiser
+  - id: bluetooth_feature_connection
+  - id: bluetooth_feature_gap
+  - id: bluetooth_feature_gatt
+  - id: bluetooth_feature_gatt_server
+  - id: bluetooth_feature_nvm
+  - id: bluetooth_feature_scanner
+  - id: bluetooth_feature_sm
+  - id: bluetooth_feature_sync
+  - id: bluetooth_feature_system
+  - id: bluetooth_feature_dynamic_gattdb
+  - id: bluetooth_feature_test
+  - id: bluetooth_feature_cs
+  - id: bluetooth_feature_cs_test
+  - id: ncp
+  - id: uartdrv_usart
+    instance:
+      - vcom
+  - id: mpu
+  - id: sl_system
+  - id: device_init
+  - id: bootloader_interface
+
+source:
+  - path: main.c
+  - path: app.c
+
+include:
+  - path: .
+    file_list:
+      - path: app.h
+
+readme:
+  - path: readme.md
+
+other_file:
+  - path: ../../script/create_bl_files.bat
+  - path: ../../script/create_bl_files.sh
+  - path: image/readme_img0.png
+
+configuration:
+  - name: SL_STACK_SIZE
+    value: "2752"
+  - name: SL_HEAP_SIZE
+    value: "10000"
+  - name: SL_BT_CONFIG_USER_ADVERTISERS
+    value: 4
+  - name: SL_BOARD_ENABLE_VCOM
+    value: 1
+  - name: SL_UARTDRV_USART_VCOM_FLOW_CONTROL_TYPE
+    value: uartdrvFlowControlHw
+  - name: SL_PSA_KEY_USER_SLOT_COUNT
+    value: "0"
+    condition:
+      - psa_crypto
+  - name: SL_DEVICE_INIT_HFXO_FREQ
+    value: 40000000
+
+tag:
+  - prebuilt_demo
+  - hardware:rf:band:2400
+  - hardware:device:sdid:!80
+
+ui_hints:
+  highlight:
+    - path: readme.md
+      focus: true

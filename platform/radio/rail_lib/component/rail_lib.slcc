@@ -25,6 +25,11 @@ requires:
     condition: [hardware_board_has_eff]
   - name: fem_util
     condition: [device_is_module]
+  - name: rail_util_sequencer
+    condition: [device_sdid_215]
+  - name: rail_util_features
+  - name: rail_util_power_manager_init
+    condition: [power_manager]
 
   # Note: In the future, this rail_util_rf_path dependency needs to be required by a more generic component.
   - name: rail_util_rf_path
@@ -62,6 +67,9 @@ include:
   - path: platform/radio/rail_lib/protocol/ieee802154
     file_list:
       - path: rail_ieee802154.h
+  - path: platform/radio/rail_lib/protocol/wmbus
+    file_list:
+      - path: rail_wmbus.h
   - path: platform/radio/rail_lib/protocol/zwave
     file_list:
       - path: rail_zwave.h

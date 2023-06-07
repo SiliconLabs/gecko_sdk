@@ -6,9 +6,15 @@ description: >
   The UART driver is not able to receive data in EM2 (deep sleep) mode, therefore an external signal is needed to wake the controller up before UART communication.
   This component can be used with NCP host and NCP target applications. Waking up is automatic after signal arrival, but application has to decide about sleep.
   This functionality requires two dedicated pins to work.
-category: Application|Utility
+
+  This is a No-Code component if used together with NCP Interface or
+  NCP Host Communication Interface components.
+category: Bluetooth|Application|Miscellaneous
 quality: production
 root_path: app/bluetooth/common/wake_lock
+tag:
+  - No-Code
+
 config_file:
   - path: config/sl_wake_lock_config.h
 source:

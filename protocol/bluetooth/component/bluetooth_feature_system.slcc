@@ -4,7 +4,7 @@ package: "Bluetooth"
 description: >
   Local device configruation and software timers
 
-category: "Bluetooth|Stack"
+category: Bluetooth|Bluetooth Host (Stack)|Features with Commands and Events
 quality: "production"
 root_path: "protocol/bluetooth"
 requires:

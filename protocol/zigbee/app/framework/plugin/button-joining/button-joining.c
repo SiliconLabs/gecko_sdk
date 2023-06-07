@@ -26,9 +26,10 @@
 //------------------------------------------------------------------------------
 // Forward Declaration
 
-#ifdef UC_BUILD
 #include "button-joining-config.h"
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #ifdef SL_CATALOG_ZIGBEE_NETWORK_CREATOR_SECURITY_PRESENT
 #include "network-creator-security.h"
 #endif
@@ -40,31 +41,12 @@
 #endif
 sl_zigbee_event_t emberAfPluginButtonJoiningButton0Event;
 #define buttonEvent0 (&emberAfPluginButtonJoiningButton0Event)
-void emberAfPluginButtonJoiningButton0EventHandler(SLXU_UC_EVENT);
+void emberAfPluginButtonJoiningButton0EventHandler(sl_zigbee_event_t * event);
 sl_zigbee_event_t emberAfPluginButtonJoiningButton1Event;
 #define buttonEvent1 (&emberAfPluginButtonJoiningButton1Event)
-void emberAfPluginButtonJoiningButton1EventHandler(SLXU_UC_EVENT);
+void emberAfPluginButtonJoiningButton1EventHandler(sl_zigbee_event_t * event);
 #define BUTTON0         0
 #define BUTTON1         1
-#else // !UC_BUILD
-#include "app/framework/util/af-main.h"
-#ifdef EMBER_AF_PLUGIN_NETWORK_CREATOR_SECURITY
-#include "app/framework/plugin/network-creator-security/network-creator-security.h"
-#define SL_CATALOG_ZIGBEE_NETWORK_CREATOR_SECURITY_PRESENT
-#endif
-#ifdef EMBER_AF_PLUGIN_NETWORK_CREATOR
-#include "app/framework/plugin/network-creator/network-creator.h"
-#define SL_CATALOG_ZIGBEE_NETWORK_CREATOR_PRESENT
-#endif
-#ifdef EMBER_AF_PLUGIN_NETWORK_STEERING
-#include "app/framework/plugin/network-steering/network-steering.h"
-#define SL_CATALOG_ZIGBEE_NETWORK_STEERING_PRESENT
-#endif
-EmberEventControl emberAfPluginButtonJoiningButton0EventControl;
-EmberEventControl emberAfPluginButtonJoiningButton1EventControl;
-#define buttonEvent0 emberAfPluginButtonJoiningButton0EventControl
-#define buttonEvent1 emberAfPluginButtonJoiningButton1EventControl
-#endif // UC_BUILD
 
 static bool buttonPress(uint8_t button, uint8_t state);
 static uint32_t  buttonPressDurationMs = 0;
@@ -79,19 +61,19 @@ static uint32_t  buttonPressDurationMs = 0;
 //------------------------------------------------------------------------------
 
 // Event init only.
-void emAfPluginButtonJoiningInitCallback(SLXU_INIT_ARG)
+void sli_zigbee_af_button_joining_init_callback(uint8_t init_level)
 {
-  SLXU_INIT_UNUSED_ARG;
+  (void)init_level;
 
-  slxu_zigbee_event_init(&emberAfPluginButtonJoiningButton0Event,
-                         emberAfPluginButtonJoiningButton0EventHandler);
-  slxu_zigbee_event_init(&emberAfPluginButtonJoiningButton1Event,
-                         emberAfPluginButtonJoiningButton1EventHandler);
+  sl_zigbee_event_init(&emberAfPluginButtonJoiningButton0Event,
+                       emberAfPluginButtonJoiningButton0EventHandler);
+  sl_zigbee_event_init(&emberAfPluginButtonJoiningButton1Event,
+                       emberAfPluginButtonJoiningButton1EventHandler);
 }
 
-void emberAfPluginButtonJoiningButton0EventHandler(SLXU_UC_EVENT)
+void emberAfPluginButtonJoiningButton0EventHandler(sl_zigbee_event_t * event)
 {
-  slxu_zigbee_event_set_inactive(buttonEvent0);
+  sl_zigbee_event_set_inactive(buttonEvent0);
 
   if (buttonPressDurationMs >= BUTTON_HOLD_DURATION_MS) {
     emberAfCorePrintln("Leaving network due to button press.");
@@ -132,9 +114,9 @@ void emberAfPluginButtonJoiningButton0EventHandler(SLXU_UC_EVENT)
   }
 }
 
-void emberAfPluginButtonJoiningButton1EventHandler(SLXU_UC_EVENT)
+void emberAfPluginButtonJoiningButton1EventHandler(sl_zigbee_event_t * event)
 {
-  slxu_zigbee_event_set_inactive(buttonEvent1);
+  sl_zigbee_event_set_inactive(buttonEvent1);
   emberAfPluginButtonJoiningButtonEventCallback(1, // button 1 is pressed
                                                 buttonPressDurationMs);
 }
@@ -161,7 +143,6 @@ static bool buttonPress(uint8_t button, uint8_t state)
 {
   // ISR CONTEXT!!!
   static uint32_t timeMs;
-  #ifdef UC_BUILD
   sl_zigbee_event_t *eventControl;
   if (button == BUTTON0) {
     eventControl = buttonEvent0;
@@ -171,25 +152,12 @@ static bool buttonPress(uint8_t button, uint8_t state)
     return false;
   }
 
-  #else
-  EmberEventControl* event;
-
-  if (button == BUTTON0) {
-    event = &buttonEvent0;
-  } else if (button == BUTTON1) {
-    event = &buttonEvent1;
-  } else {
-    return false;
-  }
-
-  EmberEventControl eventControl = *event;
-  #endif
   if (state == BUTTON_PRESSED) {
     buttonPressDurationMs = 0;
     timeMs = halCommonGetInt32uMillisecondTick();
   } else {
     buttonPressDurationMs = elapsedTimeInt32u(timeMs, halCommonGetInt32uMillisecondTick());
-    slxu_zigbee_event_set_active(eventControl);
+    sl_zigbee_event_set_active(eventControl);
   }
 
   return true;

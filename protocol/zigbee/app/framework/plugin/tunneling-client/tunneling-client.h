@@ -15,9 +15,7 @@
  *
  ******************************************************************************/
 
-#ifdef UC_BUILD
 #include "tunneling-client-config.h"
-#endif // UC_BUILD
 
 /**
  * @defgroup tunneling-client Tunneling Client
@@ -210,4 +208,4 @@ void emberAfPluginTunnelingClientTransferDataFailureCallback(uint16_t indexOfDes
 /** @} */ // end of Callbacks
 /** @} */ // end of tunneling-client
 
-void emAfPluginTunnelingClientCliPrint(void);
+void sli_zigbee_af_tunneling_client_cli_print(void);

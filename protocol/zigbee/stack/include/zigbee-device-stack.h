@@ -203,4 +203,16 @@ void emberSetZDOConfigurationMode(bool enabled);
  */
 void emberSetPendingNetworkUpdateChannel(uint8_t channel);
 
+/**
+ * @brief This is an API to set the device capability extension TLV used by Zigbee Direct.
+ *
+ *
+ * If the local device is a Zigbee virtual Device it needs to present the capability extension
+ * TLV in the network commissioning request within the joiner encapsulation TLV.
+ * This is required only for a Zigbee Virtual Device.
+ *  @param attach_tlv    boolean value to indicate if the tlv should be attached to the joiner encapsulation tlv , set true to attach
+ *  @param  capability_extension_bitmask 2 bytes value to be set as described in the Zigbee Direct specification.
+ */
+void sl_set_device_capability_extension_field_for_zigbee_virtual_device(boolean attach_tlv, uint16_t capability_extension_bitmask);
+
 #endif  // SILABS_ZIGBEE_DEVICE_STACK_H

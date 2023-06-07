@@ -31,15 +31,10 @@
 //------------------------------------------------------------------------------
 // Forward Declaration
 
-#ifdef UC_BUILD
 #include "ezmode-commissioning-config.h"
 sl_zigbee_event_t emberAfPluginEzmodeCommissioningStateEvent;
 #define stateEvent (&emberAfPluginEzmodeCommissioningStateEvent)
-void emberAfPluginEzmodeCommissioningStateEventHandler(SLXU_UC_EVENT);
-#else
-EmberEventControl emberAfPluginEzmodeCommissioningStateEventControl;
-#define stateEvent emberAfPluginEzmodeCommissioningStateEventControl
-#endif
+void emberAfPluginEzmodeCommissioningStateEventHandler(sl_zigbee_event_t * event);
 static void serviceDiscoveryCallback(const EmberAfServiceDiscoveryResult *result);
 static void createBinding(uint8_t *address);
 
@@ -91,22 +86,22 @@ static void identifyRequestMessageSentCallback(EmberOutgoingMessageType type,
   if (ezModeState == EZMODE_IDENTIFY ) {
     if (status == EMBER_SUCCESS) {
       ezModeState = EZMODE_IDENTIFY_WAIT;
-      slxu_zigbee_event_set_delay_ms(stateEvent,
-                                     (10 * MILLISECOND_TICKS_PER_SECOND));
+      sl_zigbee_event_set_delay_ms(stateEvent,
+                                   (10 * MILLISECOND_TICKS_PER_SECOND));
     } else {
       complete();
     }
   }
 }
 
-void emAfPluginEzmodeCommissioningInitCallback(SLXU_INIT_ARG)
+void sli_zigbee_af_ezmode_commissioning_init_callback(uint8_t init_level)
 {
-  SLXU_INIT_UNUSED_ARG;
+  (void)init_level;
 
-  slxu_zigbee_event_init(&emberAfPluginEzmodeCommissioningStateEvent,
-                         emberAfPluginEzmodeCommissioningStateEventHandler);
+  sl_zigbee_event_init(&emberAfPluginEzmodeCommissioningStateEvent,
+                       emberAfPluginEzmodeCommissioningStateEventHandler);
 }
-void emberAfPluginEzmodeCommissioningStateEventHandler(SLXU_UC_EVENT)
+void emberAfPluginEzmodeCommissioningStateEventHandler(sl_zigbee_event_t * event)
 {
   EmberStatus status;
   EmberEUI64 add;
@@ -116,17 +111,17 @@ void emberAfPluginEzmodeCommissioningStateEventHandler(SLXU_UC_EVENT)
     return;
   }
 
-  slxu_zigbee_event_set_inactive(stateEvent);
+  sl_zigbee_event_set_inactive(stateEvent);
   switch (ezModeState) {
     case EZMODE_BROAD_PJOIN:
       emberAfCorePrintln("<ezmode bpjoin>");
-      emAfPermitJoin(180, true); //Send out a broadcast pjoin
+      sli_zigbee_af_permit_join(180, true); //Send out a broadcast pjoin
       ezModeState = EZMODE_IDENTIFY;
-      slxu_zigbee_event_set_delay_ms(stateEvent, MILLISECOND_TICKS_PER_SECOND);
+      sl_zigbee_event_set_delay_ms(stateEvent, MILLISECOND_TICKS_PER_SECOND);
       break;
     case EZMODE_IDENTIFY:
       emberAfCorePrintln("<ezmode identify>");
-      emAfPermitJoin(180, true); //Send out a broadcast pjoin
+      sli_zigbee_af_permit_join(180, true); //Send out a broadcast pjoin
       emberAfFillCommandIdentifyClusterIdentifyQuery();
       emberAfSetCommandEndpoints(ezmodeClientEndpoint,
                                  EMBER_BROADCAST_ENDPOINT);
@@ -209,7 +204,7 @@ EmberStatus emberAfEzmodeClientCommission(uint8_t endpoint,
   ezmodeClientEndpoint = endpoint;
   ezModeState = EZMODE_BROAD_PJOIN;
   networkIndex = emberGetCurrentNetwork();
-  slxu_zigbee_event_set_active(stateEvent);
+  sl_zigbee_event_set_active(stateEvent);
   return EMBER_SUCCESS;
 }
 
@@ -224,7 +219,7 @@ bool emberAfIdentifyClusterIdentifyQueryResponseCallback(uint16_t timeout)
       currentIdentifyingAddress = emberAfCurrentCommand()->source;
       currentIdentifyingEndpoint = emberAfCurrentCommand()->apsFrame->sourceEndpoint;
       ezModeState = EZMODE_MATCH;
-      slxu_zigbee_event_set_active(stateEvent);
+      sl_zigbee_event_set_active(stateEvent);
     }
     emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
   }
@@ -247,7 +242,7 @@ static void createBinding(uint8_t *address)
         && MEMCOMPARE(candidate.identifier, address, EUI64_SIZE) == 0) {
       bindingIndex = i;
       ezModeState = EZMODE_BOUND;
-      slxu_zigbee_event_set_active(stateEvent);
+      sl_zigbee_event_set_active(stateEvent);
       return;
     }
   }
@@ -264,7 +259,7 @@ static void createBinding(uint8_t *address)
         emberSetBindingRemoteNodeId(i, currentIdentifyingAddress);
         bindingIndex = i;
         ezModeState = EZMODE_BOUND;
-        slxu_zigbee_event_set_active(stateEvent);
+        sl_zigbee_event_set_active(stateEvent);
         return;
       }
     }
@@ -298,7 +293,7 @@ static void serviceDiscoveryCallback(const EmberAfServiceDiscoveryResult *result
           if (cluster == clusterIdsForEzModeMatch[j]) {
             ezmodeClientCluster = cluster;
             ezModeState = EZMODE_BIND;
-            slxu_zigbee_event_set_active(stateEvent);
+            sl_zigbee_event_set_active(stateEvent);
             return;
           }
         }

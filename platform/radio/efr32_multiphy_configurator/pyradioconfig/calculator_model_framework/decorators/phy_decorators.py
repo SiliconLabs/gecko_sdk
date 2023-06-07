@@ -45,7 +45,7 @@ def do_not_inherit_phys(cls):
 def _phypass(self, model, phy_name=None):
     pass
 
-def concurrent_phy(phy_name,reg_field_list): #decorator maker
+def concurrent_phy(phy_name,reg_field_list,override_dict=None): #decorator maker
     def inner_decorator(f):
         @wraps(f)
         def wrapped(*args, **kwargs):
@@ -56,19 +56,23 @@ def concurrent_phy(phy_name,reg_field_list): #decorator maker
             phy = f(*args, **kwargs)
 
             #Now generate a calculator model for the second (concurrent) PHY
-            concurrent_model = CalcManager(part_family=model.part_family, part_rev='model.part_rev', target=model.target).calculate_phy(phy_name=phy_name)
+            concurrent_model = CalcManager(part_family=model.part_family, part_rev=model.part_revision, target=model.target).calculate_phy(phy_name=phy_name,optional_inputs=override_dict)
 
             #Assign special concurrent PHY variables
             model.vars.alt_min_if_hz.value_forced = concurrent_model.vars.min_if_hz.value
             model.vars.alt_softmodem_used.value_forced = 1 if \
                 concurrent_model.vars.demod_select.value == concurrent_model.vars.demod_select.var_enum.SOFT_DEMOD else 0
+            model.vars.alt_wisun_mode_switch_phr.value_forced = concurrent_model.vars.wisun_mode_switch_phr.value
+            model.vars.alt_wisun_phy_mode_id.value_forced = concurrent_model.vars.wisun_phy_mode_id.value
+            model.vars.alt_stack_info.value_forced = concurrent_model.vars.stack_info.value
 
             #Finally loop go through the Profile Outputs for the concurrent PHY and copy them over
             for reg_field in reg_field_list:
                 for profile_output in concurrent_model.profile.outputs:
                     if (profile_output.output_type == ModelOutputType.SVD_REG_FIELD) and (re.search("^"+reg_field.lower(),profile_output.var_name.lower())):
                         original_phy_profile_output = getattr(phy.profile_outputs, profile_output.var_name)
-                        original_phy_profile_output.override = profile_output.var_value
+                        if original_phy_profile_output.override is None: #If already forced then use that value
+                            original_phy_profile_output.override = profile_output.var_value
 
             return phy
         return wrapped

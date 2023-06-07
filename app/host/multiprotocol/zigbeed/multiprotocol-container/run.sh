@@ -74,14 +74,18 @@ while [[ $# -gt 0 ]]; do
             docker exec -it multiprotocol systemctl start otbr
             sleep 5
             echo "Starting ot-ctl..."
-            echo "(If errors persist, run 'journalctl -fex' inside container for logs.)"
             echo "Press ENTER for prompt..."
             echo
             while 
                 docker exec -it multiprotocol ot-ctl
                 [[ $? -eq 1 ]]
             do
-                sleep 1
+                sleep 3
+                echo "Failed to start ot-ctl, restarting..."
+                docker exec -it multiprotocol systemctl restart otbr-agent
+                docker exec -it multiprotocol systemctl restart otbr
+                echo "(If errors persist, run 'journalctl -fex' inside container for logs.)"
+                echo "Press ENTER for prompt..."
             done
             exit
             ;;

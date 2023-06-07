@@ -34,6 +34,12 @@
   - condition:
     - brd4001a
     override:
+      component: bootloader_gpio_activation
+      file_id: btl_gpio_activation_cfg
+    path: brd4191a_brd4001a/btl_gpio_activation_cfg.h
+  - condition:
+    - brd4001a
+    override:
       component: bootloader_spi_controller_usart_driver
       file_id: btl_spi_controller_usart_driver_cfg
     path: brd4191a_brd4001a/btl_spi_controller_usart_driver_cfg.h
@@ -149,6 +155,12 @@
       component: bootloader_euart_driver
       file_id: btl_euart_driver_cfg
     path: brd4191a_brd4002a/btl_euart_driver_cfg.h
+  - condition:
+    - brd4002a
+    override:
+      component: bootloader_gpio_activation
+      file_id: btl_gpio_activation_cfg
+    path: brd4191a_brd4002a/btl_gpio_activation_cfg.h
   - condition:
     - brd4002a
     override:

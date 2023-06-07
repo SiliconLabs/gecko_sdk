@@ -37,7 +37,7 @@
  *
  * Any code which holds on to buffers beyond the context in which they
  * are allocated must provide a marking function to prevent them from
- * being garbage collected.  See emReclaimUnusedBuffers for details.
+ * being garbage collected.  See sli_legacy_buffer_manager_reclaim_unused_buffers for details.
  * @{
  */
 
@@ -55,85 +55,85 @@ typedef Buffer EmberMessageBuffer;
 /** @brief Allocates a buffer
  *
  */
-Buffer emAllocateBuffer(uint16_t dataSizeInBytes);
+Buffer sli_legacy_buffer_manager_allocate_buffer(uint16_t dataSizeInBytes);
 #else
-Buffer emReallyAllocateBuffer(uint16_t dataSizeInBytes, bool async);
+Buffer sli_legacy_buffer_manager_really_allocate_buffer(uint16_t dataSizeInBytes, bool async);
 
-#define emAllocateBuffer(dataSizeInBytes) \
-  emReallyAllocateBuffer(dataSizeInBytes, false)
+#define sli_legacy_buffer_manager_allocate_buffer(dataSizeInBytes) \
+  sli_legacy_buffer_manager_really_allocate_buffer(dataSizeInBytes, false)
 #endif
 
 /** @brief gets a pointer to the specified buffer
  *
  */
-uint8_t *emGetBufferPointer(Buffer buffer);
+uint8_t* sli_legacy_buffer_manager_get_buffer_pointer(Buffer buffer);
 
 /** @brief gets the length of the specified buffer
  *
  */
-uint16_t emGetBufferLength(Buffer buffer);
+uint16_t sli_legacy_buffer_manager_get_buffer_length(Buffer buffer);
 
 /** @brief allocates a buffer and fills it with the given null terminated string
  *
  * 'contents' may be NULL, in which case NULL_BUFFER is returned.
  */
-Buffer emFillStringBuffer(const uint8_t *contents);
+Buffer sli_legacy_buffer_manager_fill_string_buffer(const uint8_t *contents);
 
 #ifdef DOXYGEN_SHOULD_SKIP_THIS
 /** @brief Allocates a buffer and fills with length bytes of contents
  *
  */
-Buffer emFillBuffer(const uint8_t *contents, uint16_t length);
+Buffer sli_legacy_buffer_manager_fill_buffer(const uint8_t *contents, uint16_t length);
 #else
-#define emFillBuffer(contents, length) \
-  emReallyFillBuffer(contents, length, false)
+#define sli_legacy_buffer_manager_fill_buffer(contents, length) \
+  sli_legacy_buffer_manager_really_fill_buffer(contents, length, false)
 
-Buffer emReallyFillBuffer(const uint8_t *contents, uint16_t length, bool async);
+Buffer sli_legacy_buffer_manager_really_fill_buffer(const uint8_t *contents, uint16_t length, bool async);
 #endif
 
 /** @brief returns the number of bytes of buffer space currently in use
  *
  */
-uint16_t emBufferBytesUsed(void);
+uint16_t sli_legacy_buffer_manager_buffer_bytes_used(void);
 /** @brief returns the number of available bytes remaining in the buffer system
  *
  */
-uint16_t emBufferBytesRemaining(void);
+uint16_t sli_legacy_buffer_manager_buffer_bytes_remaining(void);
 /** @brief returns the number of bytes allocated to the buffer system
  *
  */
-uint16_t emBufferBytesTotal(void);
+uint16_t sli_legacy_buffer_manager_buffer_bytes_total(void);
 
 // Every buffer has two links to other buffers.  For packets, these
 // are used to organize buffers into queues and to associate header
 // and payload buffers.
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-Buffer emGetBufferLink(Buffer buffer, uint8_t i);
-void emSetBufferLink(Buffer buffer, uint8_t i, Buffer newLink);
+Buffer sli_legacy_buffer_manager_get_buffer_link(Buffer buffer, uint8_t i);
+void sli_legacy_buffer_manager_set_buffer_link(Buffer buffer, uint8_t i, Buffer newLink);
 
 #define QUEUE_LINK   0
 #define PAYLOAD_LINK 1
 
-#define emGetQueueLink(buffer)   (emGetBufferLink((buffer), QUEUE_LINK))
-#define emGetPayloadLink(buffer) (emGetBufferLink((buffer), PAYLOAD_LINK))
+#define sli_legacy_buffer_manager_get_queue_link(buffer)   (sli_legacy_buffer_manager_get_buffer_link((buffer), QUEUE_LINK))
+#define sli_legacy_buffer_manager_get_payload_link(buffer) (sli_legacy_buffer_manager_get_buffer_link((buffer), PAYLOAD_LINK))
 
-#define emSetQueueLink(buffer, new) \
-  (emSetBufferLink((buffer), QUEUE_LINK, (new)))
-#define emSetPayloadLink(buffer, new) \
-  (emSetBufferLink((buffer), PAYLOAD_LINK, (new)))
+#define sli_legacy_buffer_manager_set_queue_link(buffer, new) \
+  (sli_legacy_buffer_manager_set_buffer_link((buffer), QUEUE_LINK, (new)))
+#define sli_legacy_buffer_manager_set_payload_link(buffer, new) \
+  (sli_legacy_buffer_manager_set_buffer_link((buffer), PAYLOAD_LINK, (new)))
 
 // Bookkeeping.
-void emInitializeBuffers(void);
-bool emPointsIntoHeap(void *pointer);
+void sli_legacy_buffer_manager_initialize_buffers(void);
+bool sli_legacy_buffer_manager_points_into_heap(void *pointer);
 
-uint16_t emGetTracedBytes(void);
+uint16_t sli_legacy_buffer_manager_get_traced_bytes(void);
 #endif
 
 /** @brief returns whether the given buffer is valid
  *
  */
-bool emIsValidBuffer(Buffer buffer);
+bool sli_legacy_buffer_manager_is_valid_buffer(Buffer buffer);
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 // Buffer space can be reserved to prevent it from being allocated
@@ -151,15 +151,15 @@ bool emIsValidBuffer(Buffer buffer);
 // satisified or if there is no reservation in place and a synchronous
 // allocation cannot be satisfied.
 
-#define emAllocateAsyncBuffer(dataSizeInBytes) \
-  emReallyAllocateBuffer(dataSizeInBytes, true)
+#define sli_legacy_buffer_manager_allocate_async_buffer(dataSizeInBytes) \
+  sli_legacy_buffer_manager_really_allocate_buffer(dataSizeInBytes, true)
 
-Buffer emAllocateIndirectBuffer(uint8_t *contents,
-                                void    *freePtr,
-                                uint16_t length);
+Buffer sli_legacy_buffer_manager_allocate_indirect_buffer(uint8_t *contents,
+                                                          void    *freePtr,
+                                                          uint16_t length);
 
-bool emSetReservedBufferSpace(uint16_t dataSizeInBytes);
-void emEndBufferSpaceReservation(void);
+bool sli_legacy_buffer_manager_set_reserved_buffer_space(uint16_t dataSizeInBytes);
+void sli_legacy_buffer_manager_end_buffer_space_reservation(void);
 #endif
 
 //----------------------------------------------------------------
@@ -167,12 +167,12 @@ void emEndBufferSpaceReservation(void);
 /** @brief Truncates the buffer.  New length cannot be longer than the old length.
  *
  */
-void emSetBufferLength(Buffer buffer, uint16_t length);
+void sli_legacy_buffer_manager_set_buffer_length(Buffer buffer, uint16_t length);
 
 /** @brief Truncates the buffer, removing bytes from the front.  New length cannot be longer than the old length.
  *
  */
-void emSetBufferLengthFromEnd(Buffer buffer, uint16_t length);
+void sli_legacy_buffer_manager_set_buffer_length_from_end(Buffer buffer, uint16_t length);
 
 typedef void (*Marker)(Buffer *buffer);
 typedef void (*BufferMarker)(void);
@@ -202,43 +202,43 @@ typedef void (*BufferMarker)(void);
  *   void myBufferMarker(void)
  *   {
  *     ... myBuffer ...
- *     emMarkBuffer(&myBuffer);
+ *     sli_legacy_buffer_manager_mark_buffer(&myBuffer);
  *   }
  *
  * Wrong:
  *   void myBufferMarker(void)
  *   {
- *     emMarkBuffer(&myBuffer);
+ *     sli_legacy_buffer_manager_mark_buffer(&myBuffer);
  *     ... myBuffer ...
  *   }
  *
  */
-void emReclaimUnusedBuffers(const BufferMarker *markers);
+void sli_legacy_buffer_manager_reclaim_unused_buffers(const BufferMarker *markers);
 
 /** @brief Marks the passed buffer.  Called from Marker function
  */
-void emMarkBuffer(Buffer *root);
+void sli_legacy_buffer_manager_mark_buffer(Buffer *root);
 
 /** @brief weakly mark buffer
  *
- * emMarkBufferWeak only operates during the update references phase
+ * sli_legacy_buffer_manager_mark_buffer_weak only operates during the update references phase
  * if emMark Buffer is called on the same buffer elsewhere, the weak
  * reference will be updated.  If a buffer is only weakly marked, the
  * update phase will replace it with NULL_BUFFER
  */
-void emMarkBufferWeak(Buffer *root);
+void sli_legacy_buffer_manager_mark_buffer_weak(Buffer *root);
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-bool emMarkAmalgamateQueue(Buffer *queue);
+bool sli_legacy_buffer_manager_mark_amalgamate_queue(Buffer *queue);
 
-void emReclaimUnusedBuffersAndAmalgamate(const BufferMarker *markers,
-                                         uint8_t* scratchpad,
-                                         uint16_t scratchpadSize);
+void sli_legacy_buffer_manager_reclaim_unused_buffers_and_amalgamate(const BufferMarker *markers,
+                                                                   uint8_t* scratchpad,
+                                                                   uint16_t scratchpadSize);
 
-void emPrintBuffers(uint8_t port, const BufferMarker *markers);
+void sli_legacy_buffer_manager_print_buffers(uint8_t port, const BufferMarker *markers);
 
 // A utility for marking a buffer via a pointer to its contents.
-void emMarkBufferPointer(void **pointerLoc);
+void sli_legacy_buffer_manager_mark_buffer_pointer(void **pointerLoc);
 #endif
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -250,28 +250,28 @@ void emberMarkApplicationBuffersHandler(void);
 #endif
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-uint16_t emBufferChainByteLength(Buffer buffer, uint8_t link);
-#define emTotalPayloadLength(buffer) \
-  (emBufferChainByteLength((buffer), 1))
+uint16_t sli_legacy_buffer_manager_buffer_chain_byte_length(Buffer buffer, uint8_t link);
+#define sli_legacy_buffer_manager_total_payload_length(buffer) \
+  (sli_legacy_buffer_manager_buffer_chain_byte_length((buffer), 1))
 #endif
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 // The PHY->MAC queue is special in that it can be added to in ISR context.
-void emPhyToMacQueueAdd(Buffer newTail);
-Buffer emPhyToMacQueueRemoveHead(void);
-bool emPhyToMacQueueIsEmpty(void);
-void emEmptyPhyToMacQueue(void);
+void sli_802154phy_phy_to_mac_queue_add(Buffer newTail);
+Buffer sli_802154phy_phy_to_mac_queue_remove_head(void);
+bool sli_802154phy_phy_to_mac_queue_is_empty(void);
+void sli_legacy_buffer_manager_empty_phy_to_mac_queue(void);
 
-void emMultiPhyToMacQueueAdd(uint8_t mac_index, Buffer newTail);
-Buffer emMultiPhyToMacQueueRemoveHead(uint8_t mac_index);
-bool emMultiPhyToMacQueueIsEmpty(uint8_t mac_index);
-void emMultiEmptyPhyToMacQueue(uint8_t mac_index);
+void sli_legacy_buffer_manager_multi_phy_to_mac_queue_add(uint8_t mac_index, Buffer newTail);
+Buffer sli_legacy_buffer_manager_multi_phy_to_mac_queue_remove_head(uint8_t mac_index);
+bool sli_legacy_buffer_manager_multi_phy_to_mac_queue_is_empty(uint8_t mac_index);
+void sli_legacy_buffer_manager_multi_empty_phy_to_mac_queue(uint8_t mac_index);
 
 // Allow the wakeup code to save and restore the heap pointer.  This is
-// much faster than emReclaimUnusedBuffers() but requires that the caller
+// much faster than sli_legacy_buffer_manager_reclaim_unused_buffers() but requires that the caller
 // knows that there are no references anywhere to newly allocated buffers.
-uint16_t emSaveHeapState(void);
-void emRestoreHeapState(uint16_t state);
+uint16_t sli_legacy_buffer_manager_save_heap_state(void);
+void sli_legacy_buffer_manager_restore_heap_state(uint16_t state);
 
 // This handler is called when freeing memory allocated with
 // emberAllocateMemoryForPacketHandler(). You will be passed the reference that was
@@ -296,22 +296,22 @@ void* emberGetObjectRefFromBuffer(Buffer b);
 //----------------------------------------------------------------
 // Utilities used by buffer-malloc.c
 
-Buffer emBufferPointerToBuffer(uint16_t *bufferPointer);
-Buffer emFollowingBuffer(Buffer buffer);
-void emMergeBuffers(Buffer first, Buffer second);
-Buffer emSplitBuffer(Buffer buffer, uint16_t newLength);
+Buffer sli_legacy_buffer_manager_buffer_pointer_to_buffer(uint16_t *bufferPointer);
+Buffer sli_legacy_buffer_manager_following_buffer(Buffer buffer);
+void sli_legacy_buffer_manager_merge_buffers(Buffer first, Buffer second);
+Buffer sli_legacy_buffer_manager_split_buffer(Buffer buffer, uint16_t newLength);
 
 // Prototypes for the MessageBuffer interface
-void emReallyCopyToLinkedBuffers(const uint8_t *contents,
-                                 Buffer buffer,
-                                 uint8_t startIndex,
-                                 uint8_t length,
-                                 uint8_t direction);
+void sli_legacy_packet_buffer_really_copy_to_linked_buffers(const uint8_t *contents,
+                                                            Buffer buffer,
+                                                            uint8_t startIndex,
+                                                            uint8_t length,
+                                                            uint8_t direction);
 
-#define bufferUse(tag)    do { emBufferUsage(tag); } while (0)
-#define endBufferUse(tag) do { emEndBufferUsage(); } while (0)
-void emBufferUsage(const char *tag);
-void emEndBufferUsage(void);
+#define bufferUse(tag)    do { sli_legacy_buffer_manager_buffer_usage(tag); } while (0)
+#define endBufferUse(tag) do { sli_legacy_buffer_manager_end_buffer_usage(); } while (0)
+void sli_legacy_buffer_manager_buffer_usage(const char *tag);
+void sli_legacy_buffer_manager_end_buffer_usage(void);
 
 //----------------------------------------------------------------
 // The heap is allocated elsewhere.
@@ -320,7 +320,7 @@ extern uint16_t heapMemory[];
 extern const uint32_t heapMemorySize;
 
 // This is a no-op on real hardware.  It only has an effect in simulation.
-void emResizeHeap(uint32_t newSize);
+void sli_legacy_buffer_manager_resize_heap(uint32_t newSize);
 #endif //DOXYGEN_SHOULD_SKIP_THIS
 
 /** @} END addtogroup */

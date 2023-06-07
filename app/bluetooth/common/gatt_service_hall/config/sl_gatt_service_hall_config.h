@@ -31,6 +31,11 @@
 #ifndef SL_GATT_SERVICE_HALL_CONFIG_H
 #define SL_GATT_SERVICE_HALL_CONFIG_H
 
+/***********************************************************************************************//**
+ * @addtogroup gatt_service_hall
+ * @{
+ **************************************************************************************************/
+
 // <<< Use Configuration Wizard in Context Menu >>>
 
 // <o SL_GATT_SERVICE_HALL_FIELD_STRENGTH_INVALID> Dummy field strength measurement results for uninitialized sensors. <0-0x7FFFFFFF>
@@ -48,4 +53,5 @@
 #define SL_GATT_SERVICE_HALL_TAMPER_INVALID  true
 // <<< end of configuration section >>>
 
+/** @} (end addtogroup gatt_service_hall) */
 #endif // SL_GATT_SERVICE_HALL_CONFIG_H

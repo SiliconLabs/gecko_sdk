@@ -52,6 +52,24 @@ extern "C" {
  *****************************************************************************/
 sl_status_t sli_wisun_get_rail_handle(RAIL_Handle_t *handle);
 
+/**************************************************************************//**
+ * @brief Set the MAC mode switch configuration
+ * @param[in] mode Indicate if the device can use mode switch feature
+ *                 with the neighbor indicated by \p neighbor_address
+ *                 It uses sl_wisun_mode_switch_mode_t enum.
+ *                 SL_WISUN_MODE_SWITCH_DEFAULT can't be used with
+ *                 \p neighbor_address = **sl_wisun_broadcast_mac**
+ *
+ * @param[in] phy_mode_id PhyModeId to use on mode switch when enabled
+ *                        This parameter is ignored when \p mode = SL_WISUN_MODE_SWITCH_DEFAULT
+ * @param[in] neighbor_address MAC address of the peer to configure mode switch to
+ *                             Can be **sl_wisun_broadcast_mac** to configure default
+ *                             mode switch behaviour for all non configured neighbors
+ * @return SL_STATUS_OK if successful, an error code otherwise
+ *****************************************************************************/
+#define sl_wisun_set_mac_mode_switch(mode, phy_mode_id, neighbor_address) \
+                   sl_wisun_config_mode_switch(mode, phy_mode_id, neighbor_address, true)
+
 /** @} (end SL_WISUN_INTERNAL_API) */
 
 #ifdef __cplusplus

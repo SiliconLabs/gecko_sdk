@@ -26,11 +26,9 @@
 #include "app/util/serial/sl_zigbee_command_interpreter.h"
 #include "identify.h"
 
-#ifdef UC_BUILD
 // plugin identify print
-void emAfPluginIdentifyCliPrint(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_identify_cli_print(sl_cli_command_arg_t *arguments)
 {
-#if ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_IDENTIFY_CLUSTER)) || defined(UC_BUILD))
   uint8_t i;
   for (i = 0; i < emberAfEndpointCount(); ++i) {
     uint8_t endpoint = emberAfEndpointFromIndex(i);
@@ -40,32 +38,4 @@ void emAfPluginIdentifyCliPrint(sl_cli_command_arg_t *arguments)
                                    ? "true"
                                    : "false"));
   }
-#endif //defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_IDENTIFY_CLUSTER)
 }
-
-#else
-void emAfPluginIdentifyCliPrint(void);
-
-#if !defined(EMBER_AF_GENERATE_CLI)
-EmberCommandEntry emberAfPluginIdentifyCommands[] = {
-  emberCommandEntryAction("print", emAfPluginIdentifyCliPrint, "", "Print the identify state of each endpoint"),
-  emberCommandEntryTerminator(),
-};
-#endif // EMBER_AF_GENERATE_CLI
-
-// plugin identify print
-void emAfPluginIdentifyCliPrint(void)
-{
-#if defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_IDENTIFY_CLUSTER)
-  uint8_t i;
-  for (i = 0; i < emberAfEndpointCount(); ++i) {
-    uint8_t endpoint = emberAfEndpointFromIndex(i);
-    emberAfIdentifyClusterPrintln("Endpoint 0x%x is identifying: %p",
-                                  endpoint,
-                                  (emberAfIsDeviceIdentifying(endpoint)
-                                   ? "true"
-                                   : "false"));
-  }
-#endif //defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_IDENTIFY_CLUSTER)
-}
-#endif

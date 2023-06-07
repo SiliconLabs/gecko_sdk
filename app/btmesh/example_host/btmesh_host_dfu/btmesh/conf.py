@@ -25,17 +25,65 @@ import dataclasses
 import enum
 from typing import Iterable, List, Optional, Union
 
-from bgapi.bglib import CommandError, CommandFailedError
+from bgapi.bglib import BGEvent, CommandError, CommandFailedError
 
-from bgapix.bglibx import (BGLibExt, BGLibExtRetryParams,
-                           BGLibExtWaitEventError, EventParamValues)
+from bgapix.bglibx import (BGLibExtRetryParams, BGLibExtWaitEventError,
+                           EventParamValues)
 from bgapix.slstatus import SlStatus
 
 from . import util
+from .core import (BtmeshAddressList, BtmeshBaseStatus, BtmeshComponent,
+                   BtmeshCore, BtmeshStatusErrorClass)
 from .db import DCD, BtmeshDatabase, DCDElement, ModelID, Node
 from .errors import BtmeshError, BtmeshErrorCode
-from .event import LocalEventBus
-from .util import BtmeshRetryParams
+from .util import BtmeshMulticastRetryParams, BtmeshRetryParams
+
+
+@enum.unique
+class GattProxyState(util.BtmeshIntEnum):
+    DISABLED = 0
+    ENABLED = 1
+    UNSUPPORTED = 2
+    UNKNOWN_VALUE = util.ENUM_UNKNOWN_VALUE
+
+
+@enum.unique
+class NodeIdentityState(util.BtmeshIntEnum):
+    DISABLED = 0
+    ENABLED = 1
+    UNSUPPORTED = 2
+    UNKNOWN_VALUE = util.ENUM_UNKNOWN_VALUE
+
+
+@dataclasses.dataclass
+class ConfigStatus:
+    node: Node
+
+    @classmethod
+    def from_event(cls, node: Node, events: Iterable[BGEvent]):
+        raise NotImplementedError(f"The {cls.__name__} can't be instantiated.")
+
+
+@dataclasses.dataclass
+class GattProxyStatus(ConfigStatus):
+    state: GattProxyState
+
+    @classmethod
+    def from_event(cls, node: Node, events: Iterable[BGEvent]):
+        event = events[0]
+        return GattProxyStatus(node=node, state=GattProxyState.from_int(event.value))
+
+
+@dataclasses.dataclass
+class NodeIdentityStatus(ConfigStatus):
+    state: NodeIdentityState
+
+    @classmethod
+    def from_event(cls, node: Node, events: Iterable[BGEvent]):
+        event = events[0]
+        return NodeIdentityStatus(
+            node=node, state=NodeIdentityState.from_int(event.value)
+        )
 
 
 @enum.unique
@@ -44,6 +92,7 @@ class SilabsConfStatus(util.BtmeshIntEnum):
     UNKNOWN_COMMAND = 0x01
     INVALID_PARAMETER = 0x02
     DOES_NOT_EXISTS = 0x03
+    COMMAND_ERROR = 0xFFFE
     TIMEOUT = 0xFFFF
     UNKNOWN_VALUE = util.ENUM_UNKNOWN_VALUE
 
@@ -66,54 +115,78 @@ class SilabsConfTxOpt(util.BtmeshIntFlag):
 
 
 @dataclasses.dataclass
-class SilabsConfBaseStatus:
+class SilabsConfBaseStatus(BtmeshBaseStatus):
     node: Node
     status: SilabsConfStatus
 
     @classmethod
-    def from_event(cls, node: Node, event):
-        raise NotImplementedError(f"The {cls.__name__} can't be instantiated.")
+    def create_command_error(
+        cls, db: BtmeshDatabase, addr: int, command_result: SlStatus
+    ) -> "SilabsConfBaseStatus":
+        node = db.get_node_by_prim_addr(addr)
+        return cls(
+            command_result=command_result,
+            node=node,
+            status=SilabsConfStatus.COMMAND_ERROR,
+        )
 
     @classmethod
-    def create_status_timeout(cls, node):
-        raise NotImplementedError(f"The {cls.__name__} can't be instantiated.")
+    def create_timeout(cls, db: BtmeshDatabase, addr: int) -> "SilabsConfBaseStatus":
+        node = db.get_node_by_prim_addr(addr)
+        return cls(
+            command_result=SlStatus.OK,
+            node=node,
+            status=SilabsConfStatus.TIMEOUT,
+        )
+
+    def get_error_class(self) -> BtmeshStatusErrorClass:
+        if self.command_result != SlStatus.OK:
+            return BtmeshStatusErrorClass.COMMAND_ERROR
+        elif self.status == SilabsConfStatus.TIMEOUT:
+            return BtmeshStatusErrorClass.TIMEOUT
+        elif self.status == SilabsConfStatus.SUCCESS:
+            return BtmeshStatusErrorClass.SUCCESS
+        else:
+            return BtmeshStatusErrorClass.FAILURE
+
+    def get_addr(self) -> int:
+        return self.node.prim_addr
 
 
 @dataclasses.dataclass
 class SilabsConfTxStatus(SilabsConfBaseStatus):
-    tx_phy: Optional[SilabsConfTxPhy]
-    tx_options: Optional[SilabsConfTxOpt]
+    tx_phy: Optional[SilabsConfTxPhy] = None
+    tx_options: Optional[SilabsConfTxOpt] = None
 
     @classmethod
-    def from_event(cls, node: Node, event):
-        assert node.prim_addr == event.server
+    def create_from_events(
+        cls, db: BtmeshDatabase, events: Iterable[BGEvent]
+    ) -> "SilabsConfTxStatus":
+        event = next(iter(events))
+        node = db.get_node_by_prim_addr(event.server)
         return SilabsConfTxStatus(
+            command_result=SlStatus.OK,
             node=node,
             status=SilabsConfStatus.from_int(event.status),
             tx_phy=SilabsConfTxPhy.from_int(event.tx_phy),
             tx_options=SilabsConfTxOpt.from_int(event.tx_options_bitmap),
         )
 
-    @classmethod
-    def create_status_timeout(cls, node):
-        return SilabsConfTxStatus(
-            node=node,
-            status=SilabsConfStatus.TIMEOUT,
-            tx_phy=None,
-            tx_options=None,
-        )
-
 
 @dataclasses.dataclass
 class SilabsConfModelStatus(SilabsConfBaseStatus):
-    elem_index: Optional[int]
-    model: Optional[ModelID]
-    enabled: Optional[bool]
+    elem_index: Optional[int] = None
+    model: Optional[ModelID] = None
+    enabled: Optional[bool] = None
 
     @classmethod
-    def from_event(cls, node: Node, event):
-        assert node.prim_addr == event.server
+    def create_from_events(
+        cls, db: BtmeshDatabase, events: Iterable[BGEvent]
+    ) -> "SilabsConfModelStatus":
+        event = next(iter(events))
+        node = db.get_node_by_prim_addr(event.server)
         return SilabsConfModelStatus(
+            command_result=SlStatus.OK,
             node=node,
             status=SilabsConfStatus.from_int(event.status),
             elem_index=event.elem_index,
@@ -121,40 +194,26 @@ class SilabsConfModelStatus(SilabsConfBaseStatus):
             enabled=event.value,
         )
 
-    @classmethod
-    def create_status_timeout(cls, node):
-        return SilabsConfModelStatus(
-            node=node,
-            status=SilabsConfStatus.TIMEOUT,
-            elem_index=None,
-            model=None,
-            enabled=None,
-        )
-
 
 @dataclasses.dataclass
 class SilabsConfNetworkPduStatus(SilabsConfBaseStatus):
-    pdu_max_size: Optional[int]
+    pdu_max_size: Optional[int] = None
 
     @classmethod
-    def from_event(cls, node: Node, event):
-        assert node.prim_addr == event.server
+    def create_from_events(
+        cls, db: BtmeshDatabase, events: Iterable[BGEvent]
+    ) -> "SilabsConfNetworkPduStatus":
+        event = next(iter(events))
+        node = db.get_node_by_prim_addr(event.server)
         return SilabsConfNetworkPduStatus(
+            command_result=SlStatus.OK,
             node=node,
             status=SilabsConfStatus.from_int(event.status),
             pdu_max_size=event.pdu_max_size,
         )
 
-    @classmethod
-    def create_status_timeout(cls, node):
-        return SilabsConfNetworkPduStatus(
-            node=node,
-            status=SilabsConfStatus.TIMEOUT,
-            pdu_max_size=None,
-        )
 
-
-class Configurator:
+class Configurator(BtmeshComponent):
     NETKEY_IDX = 0
     DCD_PAGE_0 = 0
     DCD_HEADER_LEN = 10
@@ -166,16 +225,12 @@ class Configurator:
 
     def __init__(
         self,
-        lib: BGLibExt,
-        db: BtmeshDatabase,
-        evtbus: LocalEventBus,
+        core: BtmeshCore,
         conf_retry_params_default: BtmeshRetryParams,
-        silabs_retry_params_default: BtmeshRetryParams,
+        silabs_retry_params_default: BtmeshMulticastRetryParams,
         reset_node_retry_params_default: BtmeshRetryParams,
     ):
-        self.lib = lib
-        self.db = db
-        self.evtbus = evtbus
+        super().__init__(core)
         self.conf_retry_params_default = conf_retry_params_default
         self.silabs_retry_params_default = silabs_retry_params_default
         self.reset_node_retry_params_default = reset_node_retry_params_default
@@ -190,35 +245,13 @@ class Configurator:
         if retry_params:
             self.conf_retry_params_default = copy.copy(retry_params)
 
-    def set_silabs_retry_params_default(self, retry_params: BtmeshRetryParams):
+    def set_silabs_retry_params_default(self, retry_params: BtmeshMulticastRetryParams):
         if retry_params:
             self.silabs_retry_params_default = copy.copy(retry_params)
 
     def set_reset_node_retry_params_default(self, retry_params: BtmeshRetryParams):
         if retry_params:
             self.reset_node_retry_params_default = copy.copy(retry_params)
-
-    def any_lpn(self, nodes: Iterable[Node], skip_local: bool = True) -> bool:
-        for node in nodes:
-            if skip_local:
-                rsp = self.lib.btmesh.node.get_uuid()
-                prov_uuid = rsp.uuid
-                if node.uuid == prov_uuid:
-                    continue
-            dcd = self.get_dcd_cached(node, retry_params=self.conf_retry_params_default)
-            if dcd.lpn:
-                return True
-        return False
-
-    def any_lpn_in_elem_addrs(
-        self, elem_addrs: Iterable[int], skip_local: bool = True
-    ) -> bool:
-        nodes_dict = {}
-        for addr in elem_addrs:
-            util.validate_unicast_address(addr)
-            node = self.db.get_node_by_elem_addr(addr)
-            nodes_dict[node.prim_addr] = node
-        return self.any_lpn(nodes_dict.values())
 
     def config_procedure(
         self,
@@ -229,7 +262,7 @@ class Configurator:
         final_event_name,
         output_event_names=[],
         retry_params: BtmeshRetryParams = None,
-    ):
+    ) -> Iterable[BGEvent]:
         if retry_params is None:
             retry_params = self.conf_retry_params_default
         if isinstance(output_event_names, str):
@@ -277,7 +310,7 @@ class Configurator:
                 self.NETKEY_IDX,
                 node.prim_addr,
                 *args,
-                **retry_params.to_dict(),
+                retry_params=retry_params,
                 retry_cmd_err_code=[SlStatus.NO_MORE_RESOURCE, SlStatus.INVALID_STATE],
                 retry_event_selector=retry_event_selector,
                 event_selector=event_selector,
@@ -302,6 +335,68 @@ class Configurator:
             )
         return [evt for evt in events if evt in output_event_names]
 
+    def set_gatt_proxy(
+        self,
+        node: Node,
+        state: GattProxyState,
+        retry_params: BtmeshRetryParams = None,
+    ) -> None:
+        self.config_procedure(
+            "Set GATT Proxy state",
+            self.lib.btmesh.config_client.set_gatt_proxy,
+            node,
+            state.value,
+            final_event_name="btmesh_evt_config_client_gatt_proxy_status",
+            retry_params=retry_params,
+        )
+
+    def get_gatt_proxy(
+        self,
+        node: Node,
+        retry_params: BtmeshRetryParams = None,
+    ) -> GattProxyStatus:
+        events = self.config_procedure(
+            "Get GATT Proxy state",
+            self.lib.btmesh.config_client.get_gatt_proxy,
+            node,
+            final_event_name="btmesh_evt_config_client_gatt_proxy_status",
+            retry_params=retry_params,
+        )
+        return GattProxyStatus.from_event(events)
+
+    def set_node_identity(
+        self,
+        node: Node,
+        netkey_index: int,
+        state: NodeIdentityState,
+        retry_params: BtmeshRetryParams = None,
+    ) -> None:
+        self.config_procedure(
+            "Set Node Identity state",
+            self.lib.btmesh.config_client.set_identity,
+            node,
+            netkey_index,
+            state.value,
+            final_event_name="btmesh_evt_config_client_identity_status",
+            retry_params=retry_params,
+        )
+
+    def get_node_identity(
+        self,
+        node: Node,
+        netkey_index: int,
+        retry_params: BtmeshRetryParams = None,
+    ) -> NodeIdentityState:
+        events = self.config_procedure(
+            "Get Node Identity state",
+            self.lib.btmesh.config_client.get_identity,
+            node,
+            netkey_index,
+            final_event_name="btmesh_evt_config_client_identity_status",
+            retry_params=retry_params,
+        )
+        return NodeIdentityStatus.from_event(events)
+
     def concat_config_event_bytes(self, attr, events, event_filter=lambda e: True):
         barr = bytearray()
         for evt in filter(event_filter, events):
@@ -314,9 +409,7 @@ class Configurator:
         update_db: bool = True,
         retry_params: BtmeshRetryParams = None,
     ) -> DCD:
-        rsp = self.lib.btmesh.node.get_uuid()
-        prov_uuid = rsp.uuid
-        if node.uuid == prov_uuid:
+        if node.uuid == self.db.prov_uuid:
             # The DCD of the Provisioner can be queried by node command only.
             # No retry is necessary because it is a local command (no msg sent)
             self.lib.btmesh.node.get_local_dcd(self.DCD_PAGE_0)
@@ -708,71 +801,29 @@ class Configurator:
         *args,
         final_event_name: str,
         silabs_conf_status_class: SilabsConfBaseStatus,
-        retry_params: BtmeshRetryParams = None,
+        retry_params: BtmeshMulticastRetryParams = None,
         **final_event_params,
     ):
         if isinstance(nodes, Node):
             nodes = [nodes]
         if retry_params is None:
             retry_params = self.silabs_retry_params_default
-        # If there is at least one LPN in the nodes then the LPN specific retry
-        # interval is used instead of the regular one.
-        if retry_params.retry_interval != retry_params.retry_interval_lpn:
-            any_lpn = self.any_lpn(nodes, skip_local=True)
-            retry_params = retry_params.to_base(use_interval_lpn=any_lpn)
-        else:
-            retry_params = retry_params.to_base(use_interval_lpn=False)
-        status_evt_list = []
-        if group_addr is util.UNASSIGNED_ADDR:
-            for node in nodes:
-                try:
-                    status_evt = self.lib.retry_until(
-                        cmd,
-                        node.prim_addr,
-                        appkey_index,
-                        *args,
-                        **retry_params.to_dict(),
-                        retry_cmd_err_code=[SlStatus.NO_MORE_RESOURCE],
-                        event_selector=final_event_name,
-                        server=node.prim_addr,
-                        **final_event_params,
-                    )[0]
-                except BGLibExtWaitEventError as e:
-                    continue
-                status_evt_list.append(status_evt)
-        else:
-            util.validate_group_address(group_addr)
-            event_selector = {
-                final_event_name: {
-                    "#unique": "server",
-                    "server": EventParamValues(n.prim_addr for n in nodes),
-                }
-            }
-            event_selector[final_event_name].update(final_event_params)
-            try:
-                status_evt_list = self.lib.retry_until(
-                    cmd,
-                    group_addr,
-                    appkey_index,
-                    *args,
-                    retry_int_rst_on_evt=True,
-                    **retry_params.to_dict(),
-                    retry_cmd_err_code=[SlStatus.NO_MORE_RESOURCE],
-                    event_selector=event_selector,
-                    final_event_count=len(nodes),
-                )
-            except BGLibExtWaitEventError as e:
-                status_evt_list = e.events
-        status_list = []
-        for node in nodes:
-            for evt in status_evt_list:
-                if node.prim_addr == evt.server:
-                    status = silabs_conf_status_class.from_event(node, evt)
-                    break
-            else:
-                status = silabs_conf_status_class.create_status_timeout(node)
-            status_list.append(status)
-        return status_list
+        addr_list = BtmeshAddressList(
+            (node.prim_addr for node in nodes), group_addr=group_addr
+        )
+        addr_status_dict = self.core.send_until(
+            cmd,
+            addr_list,
+            appkey_index,
+            *args,
+            event_selector=final_event_name,
+            status_class=silabs_conf_status_class,
+            retry_int_rst_on_evt=True,
+            retry_params=retry_params,
+            retry_cmd_err_code=[SlStatus.NO_MORE_RESOURCE],
+            **final_event_params,
+        )
+        return list(addr_status_dict.values())
 
     def silabs_set_tx(
         self,
@@ -781,7 +832,7 @@ class Configurator:
         tx_opt: SilabsConfTxOpt,
         group_addr: int = util.UNASSIGNED_ADDR,
         appkey_index: int = 0,
-        retry_params: BtmeshRetryParams = None,
+        retry_params: BtmeshMulticastRetryParams = None,
     ) -> List[SilabsConfTxStatus]:
         return self.silabs_conf_procedure(
             self.lib.btmesh.silabs_config_client.set_tx,
@@ -803,7 +854,7 @@ class Configurator:
         enable: bool,
         group_addr: int = util.UNASSIGNED_ADDR,
         appkey_index: int = 0,
-        retry_params: BtmeshRetryParams = None,
+        retry_params: BtmeshMulticastRetryParams = None,
     ) -> List[SilabsConfModelStatus]:
         return self.silabs_conf_procedure(
             self.lib.btmesh.silabs_config_client.set_model_enable,
@@ -828,7 +879,7 @@ class Configurator:
         pdu_max_size: int,
         group_addr: int = util.UNASSIGNED_ADDR,
         appkey_index: int = 0,
-        retry_params: BtmeshRetryParams = None,
+        retry_params: BtmeshMulticastRetryParams = None,
     ) -> List[SilabsConfNetworkPduStatus]:
         return self.silabs_conf_procedure(
             self.lib.btmesh.silabs_config_client.set_network_pdu,

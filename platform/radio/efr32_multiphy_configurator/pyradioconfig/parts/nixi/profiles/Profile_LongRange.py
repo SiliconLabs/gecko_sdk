@@ -11,9 +11,9 @@ class Profile_Long_Range_Nixi(Profile_Long_Range_Jumbo):
 
     def build_register_profile_outputs(self, model, profile):
         family = self._family
-        build_modem_regs_nixi(model, profile, family)
-        buildFrameOutputs(model, profile, family)
-        buildCrcOutputs(model, profile, family)
+        build_modem_regs_nixi(model, profile)
+        buildFrameOutputs(model, profile)
+        buildCrcOutputs(model, profile)
         buildWhiteOutputs(model, profile)
         buildFecOutputs(model, profile)
         buildLongRangeOutputs(model, profile)

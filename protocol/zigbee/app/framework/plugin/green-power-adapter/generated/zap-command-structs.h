@@ -34,7 +34,9 @@
  * @{
  */
 
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #ifdef SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
 
 #include "sl_signature_decode.h"
@@ -68,10 +70,6 @@
 #define ZAP_SIGNATURE_TYPE_LONG_STRING   (SL_SIGNATURE_FIELD_LONG_STRING)
 #define ZAP_SIGNATURE_TYPE_ARRAY         (SL_SIGNATURE_FIELD_POINTER)
 #define ZAP_SIGNATURE_TYPE_POINTER       (SL_SIGNATURE_FIELD_POINTER)
-
-// TODO: These need to be validated. Not sure we copy them out.
-#define ZAP_SIGNATURE_TYPE_IEEE_ADDRESS (SL_SIGNATURE_FIELD_MASK_BLOB | 0x08)
-#define ZAP_SIGNATURE_TYPE_SECURITY_KEY (SL_SIGNATURE_FIELD_MASK_BLOB | 0x10)
 
 /** @brief Structure for ZCL command "GetZoneIdMapResponse" from "IAS ACE"
  */
@@ -321,15 +319,19 @@ typedef struct __zcl_color_control_cluster_color_loop_set_command {
   uint8_t direction;
   uint16_t time;
   uint16_t startHue;
+  uint8_t optionsMask;
+  uint8_t optionsOverride;
 } sl_zcl_color_control_cluster_color_loop_set_command_t;
 
-#define sl_zcl_color_control_cluster_color_loop_set_command_signature  {                                        \
-    5,                                                                                                          \
-    (ZAP_SIGNATURE_TYPE_BITMAP8), offsetof(sl_zcl_color_control_cluster_color_loop_set_command_t, updateFlags), \
-    (ZAP_SIGNATURE_TYPE_ENUM8), offsetof(sl_zcl_color_control_cluster_color_loop_set_command_t, action),        \
-    (ZAP_SIGNATURE_TYPE_ENUM8), offsetof(sl_zcl_color_control_cluster_color_loop_set_command_t, direction),     \
-    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_color_control_cluster_color_loop_set_command_t, time),         \
-    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_color_control_cluster_color_loop_set_command_t, startHue),     \
+#define sl_zcl_color_control_cluster_color_loop_set_command_signature  {                                                                                     \
+    7,                                                                                                                                                       \
+    (ZAP_SIGNATURE_TYPE_BITMAP8), offsetof(sl_zcl_color_control_cluster_color_loop_set_command_t, updateFlags),                                              \
+    (ZAP_SIGNATURE_TYPE_ENUM8), offsetof(sl_zcl_color_control_cluster_color_loop_set_command_t, action),                                                     \
+    (ZAP_SIGNATURE_TYPE_ENUM8), offsetof(sl_zcl_color_control_cluster_color_loop_set_command_t, direction),                                                  \
+    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_color_control_cluster_color_loop_set_command_t, time),                                                      \
+    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_color_control_cluster_color_loop_set_command_t, startHue),                                                  \
+    (SL_SIGNATURE_FIELD_MASK_OPTIONAL_FIELD | ZAP_SIGNATURE_TYPE_BITMAP8), offsetof(sl_zcl_color_control_cluster_color_loop_set_command_t, optionsMask),     \
+    (SL_SIGNATURE_FIELD_MASK_OPTIONAL_FIELD | ZAP_SIGNATURE_TYPE_BITMAP8), offsetof(sl_zcl_color_control_cluster_color_loop_set_command_t, optionsOverride), \
 }
 
 /** @brief Structure for ZCL command "LocationDataNotification" from "RSSI Location"
@@ -543,14 +545,14 @@ typedef struct __zcl_commissioning_cluster_reset_startup_parameters_command {
 typedef struct __zcl_rssi_location_cluster_get_location_data_command {
   uint8_t flags;
   uint8_t numberResponses;
-  uint8_t * targetAddress;
+  uint8_t targetAddress[8];
 } sl_zcl_rssi_location_cluster_get_location_data_command_t;
 
-#define sl_zcl_rssi_location_cluster_get_location_data_command_signature  {                                               \
-    3,                                                                                                                    \
-    (ZAP_SIGNATURE_TYPE_BITMAP8), offsetof(sl_zcl_rssi_location_cluster_get_location_data_command_t, flags),              \
-    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_rssi_location_cluster_get_location_data_command_t, numberResponses),      \
-    (ZAP_SIGNATURE_TYPE_IEEE_ADDRESS), offsetof(sl_zcl_rssi_location_cluster_get_location_data_command_t, targetAddress), \
+#define sl_zcl_rssi_location_cluster_get_location_data_command_signature  {                                                \
+    3,                                                                                                                     \
+    (ZAP_SIGNATURE_TYPE_BITMAP8), offsetof(sl_zcl_rssi_location_cluster_get_location_data_command_t, flags),               \
+    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_rssi_location_cluster_get_location_data_command_t, numberResponses),       \
+    (SL_SIGNATURE_FIELD_MASK_BLOB | 8), offsetof(sl_zcl_rssi_location_cluster_get_location_data_command_t, targetAddress), \
 }
 
 /** @brief Structure for ZCL command "GetPowerProfilePriceExtended" from "Power Profile"
@@ -776,6 +778,19 @@ typedef struct __zcl_chatting_cluster_start_chat_request_command {
     (ZAP_SIGNATURE_TYPE_CHAR_STRING), offsetof(sl_zcl_chatting_cluster_start_chat_request_command_t, name),     \
     (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_chatting_cluster_start_chat_request_command_t, uid),           \
     (ZAP_SIGNATURE_TYPE_CHAR_STRING), offsetof(sl_zcl_chatting_cluster_start_chat_request_command_t, nickname), \
+}
+
+/** @brief Structure for ZCL command "GetLocalesSupported" from "Basic"
+ */
+typedef struct __zcl_basic_cluster_get_locales_supported_command {
+  uint8_t * startLocale;
+  uint8_t maxLocalesRequested;
+} sl_zcl_basic_cluster_get_locales_supported_command_t;
+
+#define sl_zcl_basic_cluster_get_locales_supported_command_signature  {                                              \
+    2,                                                                                                               \
+    (ZAP_SIGNATURE_TYPE_CHAR_STRING), offsetof(sl_zcl_basic_cluster_get_locales_supported_command_t, startLocale),   \
+    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_basic_cluster_get_locales_supported_command_t, maxLocalesRequested), \
 }
 
 /** @brief Structure for ZCL command "LockDoor" from "Door Lock"
@@ -1425,19 +1440,6 @@ typedef struct __zcl_scenes_cluster_remove_all_scenes_response_command {
     (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_scenes_cluster_remove_all_scenes_response_command_t, groupId), \
 }
 
-/** @brief Structure for ZCL command "EnhancedMoveHue" from "Color Control"
- */
-typedef struct __zcl_color_control_cluster_enhanced_move_hue_command {
-  uint8_t moveMode;
-  uint16_t rate;
-} sl_zcl_color_control_cluster_enhanced_move_hue_command_t;
-
-#define sl_zcl_color_control_cluster_enhanced_move_hue_command_signature  {                                   \
-    2,                                                                                                        \
-    (ZAP_SIGNATURE_TYPE_ENUM8), offsetof(sl_zcl_color_control_cluster_enhanced_move_hue_command_t, moveMode), \
-    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_color_control_cluster_enhanced_move_hue_command_t, rate),    \
-}
-
 /** @brief Structure for ZCL command "SearchGame" from "Gaming"
  */
 typedef struct __zcl_gaming_cluster_search_game_command {
@@ -1464,6 +1466,23 @@ typedef struct __zcl_chatting_cluster_start_chat_response_command {
     (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_chatting_cluster_start_chat_response_command_t, cid),   \
 }
 
+/** @brief Structure for ZCL command "EnhancedMoveHue" from "Color Control"
+ */
+typedef struct __zcl_color_control_cluster_enhanced_move_hue_command {
+  uint8_t moveMode;
+  uint16_t rate;
+  uint8_t optionsMask;
+  uint8_t optionsOverride;
+} sl_zcl_color_control_cluster_enhanced_move_hue_command_t;
+
+#define sl_zcl_color_control_cluster_enhanced_move_hue_command_signature  {                                                                                     \
+    4,                                                                                                                                                          \
+    (ZAP_SIGNATURE_TYPE_ENUM8), offsetof(sl_zcl_color_control_cluster_enhanced_move_hue_command_t, moveMode),                                                   \
+    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_color_control_cluster_enhanced_move_hue_command_t, rate),                                                      \
+    (SL_SIGNATURE_FIELD_MASK_OPTIONAL_FIELD | ZAP_SIGNATURE_TYPE_BITMAP8), offsetof(sl_zcl_color_control_cluster_enhanced_move_hue_command_t, optionsMask),     \
+    (SL_SIGNATURE_FIELD_MASK_OPTIONAL_FIELD | ZAP_SIGNATURE_TYPE_BITMAP8), offsetof(sl_zcl_color_control_cluster_enhanced_move_hue_command_t, optionsOverride), \
+}
+
 /** @brief Structure for ZCL command "ViewGroupResponse" from "Groups"
  */
 typedef struct __zcl_groups_cluster_view_group_response_command {
@@ -1484,16 +1503,16 @@ typedef struct __zcl_groups_cluster_view_group_response_command {
 typedef struct __zcl_11073_protocol_tunnel_cluster_connect_request_command {
   uint8_t connectControl;
   uint16_t idleTimeout;
-  uint8_t * managerTarget;
+  uint8_t managerTarget[8];
   uint8_t managerEndpoint;
 } sl_zcl_11073_protocol_tunnel_cluster_connect_request_command_t;
 
-#define sl_zcl_11073_protocol_tunnel_cluster_connect_request_command_signature  {                                               \
-    4,                                                                                                                          \
-    (ZAP_SIGNATURE_TYPE_ENUM8), offsetof(sl_zcl_11073_protocol_tunnel_cluster_connect_request_command_t, connectControl),       \
-    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_11073_protocol_tunnel_cluster_connect_request_command_t, idleTimeout),         \
-    (ZAP_SIGNATURE_TYPE_IEEE_ADDRESS), offsetof(sl_zcl_11073_protocol_tunnel_cluster_connect_request_command_t, managerTarget), \
-    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_11073_protocol_tunnel_cluster_connect_request_command_t, managerEndpoint),      \
+#define sl_zcl_11073_protocol_tunnel_cluster_connect_request_command_signature  {                                                \
+    4,                                                                                                                           \
+    (ZAP_SIGNATURE_TYPE_ENUM8), offsetof(sl_zcl_11073_protocol_tunnel_cluster_connect_request_command_t, connectControl),        \
+    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_11073_protocol_tunnel_cluster_connect_request_command_t, idleTimeout),          \
+    (SL_SIGNATURE_FIELD_MASK_BLOB | 8), offsetof(sl_zcl_11073_protocol_tunnel_cluster_connect_request_command_t, managerTarget), \
+    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_11073_protocol_tunnel_cluster_connect_request_command_t, managerEndpoint),       \
 }
 
 /** @brief Structure for ZCL command "EnhancedStepHue" from "Color Control"
@@ -1502,13 +1521,17 @@ typedef struct __zcl_color_control_cluster_enhanced_step_hue_command {
   uint8_t stepMode;
   uint16_t stepSize;
   uint16_t transitionTime;
+  uint8_t optionsMask;
+  uint8_t optionsOverride;
 } sl_zcl_color_control_cluster_enhanced_step_hue_command_t;
 
-#define sl_zcl_color_control_cluster_enhanced_step_hue_command_signature  {                                          \
-    3,                                                                                                               \
-    (ZAP_SIGNATURE_TYPE_ENUM8), offsetof(sl_zcl_color_control_cluster_enhanced_step_hue_command_t, stepMode),        \
-    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_color_control_cluster_enhanced_step_hue_command_t, stepSize),       \
-    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_color_control_cluster_enhanced_step_hue_command_t, transitionTime), \
+#define sl_zcl_color_control_cluster_enhanced_step_hue_command_signature  {                                                                                     \
+    5,                                                                                                                                                          \
+    (ZAP_SIGNATURE_TYPE_ENUM8), offsetof(sl_zcl_color_control_cluster_enhanced_step_hue_command_t, stepMode),                                                   \
+    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_color_control_cluster_enhanced_step_hue_command_t, stepSize),                                                  \
+    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_color_control_cluster_enhanced_step_hue_command_t, transitionTime),                                            \
+    (SL_SIGNATURE_FIELD_MASK_OPTIONAL_FIELD | ZAP_SIGNATURE_TYPE_BITMAP8), offsetof(sl_zcl_color_control_cluster_enhanced_step_hue_command_t, optionsMask),     \
+    (SL_SIGNATURE_FIELD_MASK_OPTIONAL_FIELD | ZAP_SIGNATURE_TYPE_BITMAP8), offsetof(sl_zcl_color_control_cluster_enhanced_step_hue_command_t, optionsOverride), \
 }
 
 /** @brief Structure for ZCL command "MoveColorTemperature" from "Color Control"
@@ -1851,19 +1874,34 @@ typedef struct __zcl_ias_zone_cluster_zone_enroll_response_command {
     (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_ias_zone_cluster_zone_enroll_response_command_t, zoneId),             \
 }
 
-/** @brief Structure for ZCL command "TerminateKeyEstablishment" from "Key Establishment"
+/** @brief Structure for ZCL command "TerminateKeyEstablishmentFromClient" from "Key Establishment"
  */
-typedef struct __zcl_key_establishment_cluster_terminate_key_establishment_command {
+typedef struct __zcl_key_establishment_cluster_terminate_key_establishment_from_client_command {
   uint8_t statusCode;
   uint8_t waitTime;
   uint16_t keyEstablishmentSuite;
-} sl_zcl_key_establishment_cluster_terminate_key_establishment_command_t;
+} sl_zcl_key_establishment_cluster_terminate_key_establishment_from_client_command_t;
 
-#define sl_zcl_key_establishment_cluster_terminate_key_establishment_command_signature  {                                                   \
-    3,                                                                                                                                      \
-    (ZAP_SIGNATURE_TYPE_ENUM8), offsetof(sl_zcl_key_establishment_cluster_terminate_key_establishment_command_t, statusCode),               \
-    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_key_establishment_cluster_terminate_key_establishment_command_t, waitTime),                 \
-    (ZAP_SIGNATURE_TYPE_BITMAP16), offsetof(sl_zcl_key_establishment_cluster_terminate_key_establishment_command_t, keyEstablishmentSuite), \
+#define sl_zcl_key_establishment_cluster_terminate_key_establishment_from_client_command_signature  {                                                   \
+    3,                                                                                                                                                  \
+    (ZAP_SIGNATURE_TYPE_ENUM8), offsetof(sl_zcl_key_establishment_cluster_terminate_key_establishment_from_client_command_t, statusCode),               \
+    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_key_establishment_cluster_terminate_key_establishment_from_client_command_t, waitTime),                 \
+    (ZAP_SIGNATURE_TYPE_BITMAP16), offsetof(sl_zcl_key_establishment_cluster_terminate_key_establishment_from_client_command_t, keyEstablishmentSuite), \
+}
+
+/** @brief Structure for ZCL command "TerminateKeyEstablishmentFromServer" from "Key Establishment"
+ */
+typedef struct __zcl_key_establishment_cluster_terminate_key_establishment_from_server_command {
+  uint8_t statusCode;
+  uint8_t waitTime;
+  uint16_t keyEstablishmentSuite;
+} sl_zcl_key_establishment_cluster_terminate_key_establishment_from_server_command_t;
+
+#define sl_zcl_key_establishment_cluster_terminate_key_establishment_from_server_command_signature  {                                                   \
+    3,                                                                                                                                                  \
+    (ZAP_SIGNATURE_TYPE_ENUM8), offsetof(sl_zcl_key_establishment_cluster_terminate_key_establishment_from_server_command_t, statusCode),               \
+    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_key_establishment_cluster_terminate_key_establishment_from_server_command_t, waitTime),                 \
+    (ZAP_SIGNATURE_TYPE_BITMAP16), offsetof(sl_zcl_key_establishment_cluster_terminate_key_establishment_from_server_command_t, keyEstablishmentSuite), \
 }
 
 /** @brief Structure for ZCL command "Move" from "Level Control"
@@ -2167,57 +2205,57 @@ typedef struct __zcl_information_cluster_request_preference_confirmation_command
 /** @brief Structure for ZCL command "GetDeviceConfiguration" from "RSSI Location"
  */
 typedef struct __zcl_rssi_location_cluster_get_device_configuration_command {
-  uint8_t * targetAddress;
+  uint8_t targetAddress[8];
 } sl_zcl_rssi_location_cluster_get_device_configuration_command_t;
 
-#define sl_zcl_rssi_location_cluster_get_device_configuration_command_signature  {                                               \
-    1,                                                                                                                           \
-    (ZAP_SIGNATURE_TYPE_IEEE_ADDRESS), offsetof(sl_zcl_rssi_location_cluster_get_device_configuration_command_t, targetAddress), \
+#define sl_zcl_rssi_location_cluster_get_device_configuration_command_signature  {                                                \
+    1,                                                                                                                            \
+    (SL_SIGNATURE_FIELD_MASK_BLOB | 8), offsetof(sl_zcl_rssi_location_cluster_get_device_configuration_command_t, targetAddress), \
 }
 
 /** @brief Structure for ZCL command "RequestOwnLocation" from "RSSI Location"
  */
 typedef struct __zcl_rssi_location_cluster_request_own_location_command {
-  uint8_t * blindNode;
+  uint8_t blindNode[8];
 } sl_zcl_rssi_location_cluster_request_own_location_command_t;
 
-#define sl_zcl_rssi_location_cluster_request_own_location_command_signature  {                                           \
-    1,                                                                                                                   \
-    (ZAP_SIGNATURE_TYPE_IEEE_ADDRESS), offsetof(sl_zcl_rssi_location_cluster_request_own_location_command_t, blindNode), \
+#define sl_zcl_rssi_location_cluster_request_own_location_command_signature  {                                            \
+    1,                                                                                                                    \
+    (SL_SIGNATURE_FIELD_MASK_BLOB | 8), offsetof(sl_zcl_rssi_location_cluster_request_own_location_command_t, blindNode), \
 }
 
 /** @brief Structure for ZCL command "DisconnectRequest" from "11073 Protocol Tunnel"
  */
 typedef struct __zcl_11073_protocol_tunnel_cluster_disconnect_request_command {
-  uint8_t * managerIEEEAddress;
+  uint8_t managerIEEEAddress[8];
 } sl_zcl_11073_protocol_tunnel_cluster_disconnect_request_command_t;
 
-#define sl_zcl_11073_protocol_tunnel_cluster_disconnect_request_command_signature  {                                                    \
-    1,                                                                                                                                  \
-    (ZAP_SIGNATURE_TYPE_IEEE_ADDRESS), offsetof(sl_zcl_11073_protocol_tunnel_cluster_disconnect_request_command_t, managerIEEEAddress), \
+#define sl_zcl_11073_protocol_tunnel_cluster_disconnect_request_command_signature  {                                                     \
+    1,                                                                                                                                   \
+    (SL_SIGNATURE_FIELD_MASK_BLOB | 8), offsetof(sl_zcl_11073_protocol_tunnel_cluster_disconnect_request_command_t, managerIEEEAddress), \
 }
 
 /** @brief Structure for ZCL command "AnchorNodeAnnounce" from "RSSI Location"
  */
 typedef struct __zcl_rssi_location_cluster_anchor_node_announce_command {
-  uint8_t * anchorNodeIeeeAddress;
+  uint8_t anchorNodeIeeeAddress[8];
   int16_t coordinate1;
   int16_t coordinate2;
   int16_t coordinate3;
 } sl_zcl_rssi_location_cluster_anchor_node_announce_command_t;
 
-#define sl_zcl_rssi_location_cluster_anchor_node_announce_command_signature  {                                                       \
-    4,                                                                                                                               \
-    (ZAP_SIGNATURE_TYPE_IEEE_ADDRESS), offsetof(sl_zcl_rssi_location_cluster_anchor_node_announce_command_t, anchorNodeIeeeAddress), \
-    (ZAP_SIGNATURE_TYPE_INT16S), offsetof(sl_zcl_rssi_location_cluster_anchor_node_announce_command_t, coordinate1),                 \
-    (ZAP_SIGNATURE_TYPE_INT16S), offsetof(sl_zcl_rssi_location_cluster_anchor_node_announce_command_t, coordinate2),                 \
-    (ZAP_SIGNATURE_TYPE_INT16S), offsetof(sl_zcl_rssi_location_cluster_anchor_node_announce_command_t, coordinate3),                 \
+#define sl_zcl_rssi_location_cluster_anchor_node_announce_command_signature  {                                                        \
+    4,                                                                                                                                \
+    (SL_SIGNATURE_FIELD_MASK_BLOB | 8), offsetof(sl_zcl_rssi_location_cluster_anchor_node_announce_command_t, anchorNodeIeeeAddress), \
+    (ZAP_SIGNATURE_TYPE_INT16S), offsetof(sl_zcl_rssi_location_cluster_anchor_node_announce_command_t, coordinate1),                  \
+    (ZAP_SIGNATURE_TYPE_INT16S), offsetof(sl_zcl_rssi_location_cluster_anchor_node_announce_command_t, coordinate2),                  \
+    (ZAP_SIGNATURE_TYPE_INT16S), offsetof(sl_zcl_rssi_location_cluster_anchor_node_announce_command_t, coordinate3),                  \
 }
 
 /** @brief Structure for ZCL command "RssiResponse" from "RSSI Location"
  */
 typedef struct __zcl_rssi_location_cluster_rssi_response_command {
-  uint8_t * replyingDevice;
+  uint8_t replyingDevice[8];
   int16_t coordinate1;
   int16_t coordinate2;
   int16_t coordinate3;
@@ -2227,7 +2265,7 @@ typedef struct __zcl_rssi_location_cluster_rssi_response_command {
 
 #define sl_zcl_rssi_location_cluster_rssi_response_command_signature  {                                                 \
     6,                                                                                                                  \
-    (ZAP_SIGNATURE_TYPE_IEEE_ADDRESS), offsetof(sl_zcl_rssi_location_cluster_rssi_response_command_t, replyingDevice),  \
+    (SL_SIGNATURE_FIELD_MASK_BLOB | 8), offsetof(sl_zcl_rssi_location_cluster_rssi_response_command_t, replyingDevice), \
     (ZAP_SIGNATURE_TYPE_INT16S), offsetof(sl_zcl_rssi_location_cluster_rssi_response_command_t, coordinate1),           \
     (ZAP_SIGNATURE_TYPE_INT16S), offsetof(sl_zcl_rssi_location_cluster_rssi_response_command_t, coordinate2),           \
     (ZAP_SIGNATURE_TYPE_INT16S), offsetof(sl_zcl_rssi_location_cluster_rssi_response_command_t, coordinate3),           \
@@ -2238,20 +2276,20 @@ typedef struct __zcl_rssi_location_cluster_rssi_response_command {
 /** @brief Structure for ZCL command "ShortAddressChange" from "SL Works With All Hubs"
  */
 typedef struct __zcl_sl_works_with_all_hubs_cluster_short_address_change_command {
-  uint8_t * deviceEui64;
+  uint8_t deviceEui64[8];
   uint16_t deviceShort;
 } sl_zcl_sl_works_with_all_hubs_cluster_short_address_change_command_t;
 
-#define sl_zcl_sl_works_with_all_hubs_cluster_short_address_change_command_signature  {                                             \
-    2,                                                                                                                              \
-    (ZAP_SIGNATURE_TYPE_IEEE_ADDRESS), offsetof(sl_zcl_sl_works_with_all_hubs_cluster_short_address_change_command_t, deviceEui64), \
-    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_sl_works_with_all_hubs_cluster_short_address_change_command_t, deviceShort),       \
+#define sl_zcl_sl_works_with_all_hubs_cluster_short_address_change_command_signature  {                                              \
+    2,                                                                                                                               \
+    (SL_SIGNATURE_FIELD_MASK_BLOB | 8), offsetof(sl_zcl_sl_works_with_all_hubs_cluster_short_address_change_command_t, deviceEui64), \
+    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_sl_works_with_all_hubs_cluster_short_address_change_command_t, deviceShort),        \
 }
 
 /** @brief Structure for ZCL command "QuerySpecificFileRequest" from "Over the Air Bootloading"
  */
 typedef struct __zcl_over_the_air_bootloading_cluster_query_specific_file_request_command {
-  uint8_t * requestNodeAddress;
+  uint8_t requestNodeAddress[8];
   uint16_t manufacturerId;
   uint16_t imageType;
   uint32_t fileVersion;
@@ -2260,7 +2298,7 @@ typedef struct __zcl_over_the_air_bootloading_cluster_query_specific_file_reques
 
 #define sl_zcl_over_the_air_bootloading_cluster_query_specific_file_request_command_signature  {                                                     \
     5,                                                                                                                                               \
-    (ZAP_SIGNATURE_TYPE_IEEE_ADDRESS), offsetof(sl_zcl_over_the_air_bootloading_cluster_query_specific_file_request_command_t, requestNodeAddress),  \
+    (SL_SIGNATURE_FIELD_MASK_BLOB | 8), offsetof(sl_zcl_over_the_air_bootloading_cluster_query_specific_file_request_command_t, requestNodeAddress), \
     (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_over_the_air_bootloading_cluster_query_specific_file_request_command_t, manufacturerId),            \
     (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_over_the_air_bootloading_cluster_query_specific_file_request_command_t, imageType),                 \
     (ZAP_SIGNATURE_TYPE_INT32U), offsetof(sl_zcl_over_the_air_bootloading_cluster_query_specific_file_request_command_t, fileVersion),               \
@@ -2270,7 +2308,7 @@ typedef struct __zcl_over_the_air_bootloading_cluster_query_specific_file_reques
 /** @brief Structure for ZCL command "EndpointInformation" from "ZLL Commissioning"
  */
 typedef struct __zcl_zll_commissioning_cluster_endpoint_information_command {
-  uint8_t * ieeeAddress;
+  uint8_t ieeeAddress[8];
   uint16_t networkAddress;
   uint8_t endpointId;
   uint16_t profileId;
@@ -2278,27 +2316,27 @@ typedef struct __zcl_zll_commissioning_cluster_endpoint_information_command {
   uint8_t version;
 } sl_zcl_zll_commissioning_cluster_endpoint_information_command_t;
 
-#define sl_zcl_zll_commissioning_cluster_endpoint_information_command_signature  {                                             \
-    6,                                                                                                                         \
-    (ZAP_SIGNATURE_TYPE_IEEE_ADDRESS), offsetof(sl_zcl_zll_commissioning_cluster_endpoint_information_command_t, ieeeAddress), \
-    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_zll_commissioning_cluster_endpoint_information_command_t, networkAddress),    \
-    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_zll_commissioning_cluster_endpoint_information_command_t, endpointId),         \
-    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_zll_commissioning_cluster_endpoint_information_command_t, profileId),         \
-    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_zll_commissioning_cluster_endpoint_information_command_t, deviceId),          \
-    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_zll_commissioning_cluster_endpoint_information_command_t, version),            \
+#define sl_zcl_zll_commissioning_cluster_endpoint_information_command_signature  {                                              \
+    6,                                                                                                                          \
+    (SL_SIGNATURE_FIELD_MASK_BLOB | 8), offsetof(sl_zcl_zll_commissioning_cluster_endpoint_information_command_t, ieeeAddress), \
+    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_zll_commissioning_cluster_endpoint_information_command_t, networkAddress),     \
+    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_zll_commissioning_cluster_endpoint_information_command_t, endpointId),          \
+    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_zll_commissioning_cluster_endpoint_information_command_t, profileId),          \
+    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_zll_commissioning_cluster_endpoint_information_command_t, deviceId),           \
+    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_zll_commissioning_cluster_endpoint_information_command_t, version),             \
 }
 
 /** @brief Structure for ZCL command "SendPings" from "RSSI Location"
  */
 typedef struct __zcl_rssi_location_cluster_send_pings_command {
-  uint8_t * targetAddress;
+  uint8_t targetAddress[8];
   uint8_t numberRssiMeasurements;
   uint16_t calculationPeriod;
 } sl_zcl_rssi_location_cluster_send_pings_command_t;
 
 #define sl_zcl_rssi_location_cluster_send_pings_command_signature  {                                                 \
     3,                                                                                                               \
-    (ZAP_SIGNATURE_TYPE_IEEE_ADDRESS), offsetof(sl_zcl_rssi_location_cluster_send_pings_command_t, targetAddress),   \
+    (SL_SIGNATURE_FIELD_MASK_BLOB | 8), offsetof(sl_zcl_rssi_location_cluster_send_pings_command_t, targetAddress),  \
     (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_rssi_location_cluster_send_pings_command_t, numberRssiMeasurements), \
     (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_rssi_location_cluster_send_pings_command_t, calculationPeriod),     \
 }
@@ -2306,29 +2344,29 @@ typedef struct __zcl_rssi_location_cluster_send_pings_command {
 /** @brief Structure for ZCL command "ReportRssiMeasurements" from "RSSI Location"
  */
 typedef struct __zcl_rssi_location_cluster_report_rssi_measurements_command {
-  uint8_t * measuringDevice;
+  uint8_t measuringDevice[8];
   uint8_t neighbors;
   /* TYPE WARNING: NeighborInfo array defaults to */ uint8_t * neighborsInfo;
 } sl_zcl_rssi_location_cluster_report_rssi_measurements_command_t;
 
-#define sl_zcl_rssi_location_cluster_report_rssi_measurements_command_signature  {                                                 \
-    3,                                                                                                                             \
-    (ZAP_SIGNATURE_TYPE_IEEE_ADDRESS), offsetof(sl_zcl_rssi_location_cluster_report_rssi_measurements_command_t, measuringDevice), \
-    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_rssi_location_cluster_report_rssi_measurements_command_t, neighbors),              \
-    (ZAP_SIGNATURE_TYPE_ARRAY), offsetof(sl_zcl_rssi_location_cluster_report_rssi_measurements_command_t, neighborsInfo),          \
+#define sl_zcl_rssi_location_cluster_report_rssi_measurements_command_signature  {                                                  \
+    3,                                                                                                                              \
+    (SL_SIGNATURE_FIELD_MASK_BLOB | 8), offsetof(sl_zcl_rssi_location_cluster_report_rssi_measurements_command_t, measuringDevice), \
+    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_rssi_location_cluster_report_rssi_measurements_command_t, neighbors),               \
+    (ZAP_SIGNATURE_TYPE_ARRAY), offsetof(sl_zcl_rssi_location_cluster_report_rssi_measurements_command_t, neighborsInfo),           \
 }
 
 /** @brief Structure for ZCL command "MatchProtocolAddressResponse" from "Generic Tunnel"
  */
 typedef struct __zcl_generic_tunnel_cluster_match_protocol_address_response_command {
-  uint8_t * deviceIeeeAddress;
+  uint8_t deviceIeeeAddress[8];
   uint8_t * protocolAddress;
 } sl_zcl_generic_tunnel_cluster_match_protocol_address_response_command_t;
 
-#define sl_zcl_generic_tunnel_cluster_match_protocol_address_response_command_signature  {                                                   \
-    2,                                                                                                                                       \
-    (ZAP_SIGNATURE_TYPE_IEEE_ADDRESS), offsetof(sl_zcl_generic_tunnel_cluster_match_protocol_address_response_command_t, deviceIeeeAddress), \
-    (ZAP_SIGNATURE_TYPE_OCTET_STRING), offsetof(sl_zcl_generic_tunnel_cluster_match_protocol_address_response_command_t, protocolAddress),   \
+#define sl_zcl_generic_tunnel_cluster_match_protocol_address_response_command_signature  {                                                    \
+    2,                                                                                                                                        \
+    (SL_SIGNATURE_FIELD_MASK_BLOB | 8), offsetof(sl_zcl_generic_tunnel_cluster_match_protocol_address_response_command_t, deviceIeeeAddress), \
+    (ZAP_SIGNATURE_TYPE_OCTET_STRING), offsetof(sl_zcl_generic_tunnel_cluster_match_protocol_address_response_command_t, protocolAddress),    \
 }
 
 /** @brief Structure for ZCL command "MoveColor" from "Color Control"
@@ -2471,6 +2509,17 @@ typedef struct __zcl_scenes_cluster_get_scene_membership_command {
     (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_scenes_cluster_get_scene_membership_command_t, groupId), \
 }
 
+/** @brief Structure for ZCL command "MoveToClosestFrequency" from "Level Control"
+ */
+typedef struct __zcl_level_control_cluster_move_to_closest_frequency_command {
+  uint16_t frequency;
+} sl_zcl_level_control_cluster_move_to_closest_frequency_command_t;
+
+#define sl_zcl_level_control_cluster_move_to_closest_frequency_command_signature  {                                     \
+    1,                                                                                                                  \
+    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_level_control_cluster_move_to_closest_frequency_command_t, frequency), \
+}
+
 /** @brief Structure for ZCL command "SetShortPollInterval" from "Poll Control"
  */
 typedef struct __zcl_poll_control_cluster_set_short_poll_interval_command {
@@ -2557,6 +2606,39 @@ typedef struct __zcl_door_lock_cluster_clear_rfid_command {
 #define sl_zcl_door_lock_cluster_clear_rfid_command_signature  {                                  \
     1,                                                                                            \
     (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_door_lock_cluster_clear_rfid_command_t, userId), \
+}
+
+/** @brief Structure for ZCL command "GetDisposableSchedule" from "Door Lock"
+ */
+typedef struct __zcl_door_lock_cluster_get_disposable_schedule_command {
+  uint16_t userId;
+} sl_zcl_door_lock_cluster_get_disposable_schedule_command_t;
+
+#define sl_zcl_door_lock_cluster_get_disposable_schedule_command_signature  {                                  \
+    1,                                                                                                         \
+    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_door_lock_cluster_get_disposable_schedule_command_t, userId), \
+}
+
+/** @brief Structure for ZCL command "ClearDisposableSchedule" from "Door Lock"
+ */
+typedef struct __zcl_door_lock_cluster_clear_disposable_schedule_command {
+  uint16_t userId;
+} sl_zcl_door_lock_cluster_clear_disposable_schedule_command_t;
+
+#define sl_zcl_door_lock_cluster_clear_disposable_schedule_command_signature  {                                  \
+    1,                                                                                                           \
+    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_door_lock_cluster_clear_disposable_schedule_command_t, userId), \
+}
+
+/** @brief Structure for ZCL command "ClearBiometricCredential" from "Door Lock"
+ */
+typedef struct __zcl_door_lock_cluster_clear_biometric_credential_command {
+  uint16_t userId;
+} sl_zcl_door_lock_cluster_clear_biometric_credential_command_t;
+
+#define sl_zcl_door_lock_cluster_clear_biometric_credential_command_signature  {                                  \
+    1,                                                                                                            \
+    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_door_lock_cluster_clear_biometric_credential_command_t, userId), \
 }
 
 /** @brief Structure for ZCL command "WindowCoveringGoToLiftValue" from "Window Covering"
@@ -2922,13 +3004,17 @@ typedef struct __zcl_color_control_cluster_enhanced_move_to_hue_command {
   uint16_t enhancedHue;
   uint8_t direction;
   uint16_t transitionTime;
+  uint8_t optionsMask;
+  uint8_t optionsOverride;
 } sl_zcl_color_control_cluster_enhanced_move_to_hue_command_t;
 
-#define sl_zcl_color_control_cluster_enhanced_move_to_hue_command_signature  {                                          \
-    3,                                                                                                                  \
-    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_color_control_cluster_enhanced_move_to_hue_command_t, enhancedHue),    \
-    (ZAP_SIGNATURE_TYPE_ENUM8), offsetof(sl_zcl_color_control_cluster_enhanced_move_to_hue_command_t, direction),       \
-    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_color_control_cluster_enhanced_move_to_hue_command_t, transitionTime), \
+#define sl_zcl_color_control_cluster_enhanced_move_to_hue_command_signature  {                                                                                     \
+    5,                                                                                                                                                             \
+    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_color_control_cluster_enhanced_move_to_hue_command_t, enhancedHue),                                               \
+    (ZAP_SIGNATURE_TYPE_ENUM8), offsetof(sl_zcl_color_control_cluster_enhanced_move_to_hue_command_t, direction),                                                  \
+    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_color_control_cluster_enhanced_move_to_hue_command_t, transitionTime),                                            \
+    (SL_SIGNATURE_FIELD_MASK_OPTIONAL_FIELD | ZAP_SIGNATURE_TYPE_BITMAP8), offsetof(sl_zcl_color_control_cluster_enhanced_move_to_hue_command_t, optionsMask),     \
+    (SL_SIGNATURE_FIELD_MASK_OPTIONAL_FIELD | ZAP_SIGNATURE_TYPE_BITMAP8), offsetof(sl_zcl_color_control_cluster_enhanced_move_to_hue_command_t, optionsOverride), \
 }
 
 /** @brief Structure for ZCL command "RequestTunnelResponse" from "Tunneling"
@@ -3245,6 +3331,21 @@ typedef struct __zcl_door_lock_cluster_get_log_record_response_command {
     (ZAP_SIGNATURE_TYPE_CHAR_STRING), offsetof(sl_zcl_door_lock_cluster_get_log_record_response_command_t, pin),          \
 }
 
+/** @brief Structure for ZCL command "SetDisposableSchedule" from "Door Lock"
+ */
+typedef struct __zcl_door_lock_cluster_set_disposable_schedule_command {
+  uint16_t userId;
+  uint32_t localStartTime;
+  uint32_t localEndTime;
+} sl_zcl_door_lock_cluster_set_disposable_schedule_command_t;
+
+#define sl_zcl_door_lock_cluster_set_disposable_schedule_command_signature  {                                          \
+    3,                                                                                                                 \
+    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_door_lock_cluster_set_disposable_schedule_command_t, userId),         \
+    (ZAP_SIGNATURE_TYPE_INT32U), offsetof(sl_zcl_door_lock_cluster_set_disposable_schedule_command_t, localStartTime), \
+    (ZAP_SIGNATURE_TYPE_INT32U), offsetof(sl_zcl_door_lock_cluster_set_disposable_schedule_command_t, localEndTime),   \
+}
+
 /** @brief Structure for ZCL command "ModifyFileRequest" from "Data Sharing"
  */
 typedef struct __zcl_data_sharing_cluster_modify_file_request_command {
@@ -3359,13 +3460,17 @@ typedef struct __zcl_color_control_cluster_enhanced_move_to_hue_and_saturation_c
   uint16_t enhancedHue;
   uint8_t saturation;
   uint16_t transitionTime;
+  uint8_t optionsMask;
+  uint8_t optionsOverride;
 } sl_zcl_color_control_cluster_enhanced_move_to_hue_and_saturation_command_t;
 
-#define sl_zcl_color_control_cluster_enhanced_move_to_hue_and_saturation_command_signature  {                                          \
-    3,                                                                                                                                 \
-    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_color_control_cluster_enhanced_move_to_hue_and_saturation_command_t, enhancedHue),    \
-    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_color_control_cluster_enhanced_move_to_hue_and_saturation_command_t, saturation),      \
-    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_color_control_cluster_enhanced_move_to_hue_and_saturation_command_t, transitionTime), \
+#define sl_zcl_color_control_cluster_enhanced_move_to_hue_and_saturation_command_signature  {                                                                                     \
+    5,                                                                                                                                                                            \
+    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_color_control_cluster_enhanced_move_to_hue_and_saturation_command_t, enhancedHue),                                               \
+    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_color_control_cluster_enhanced_move_to_hue_and_saturation_command_t, saturation),                                                 \
+    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_color_control_cluster_enhanced_move_to_hue_and_saturation_command_t, transitionTime),                                            \
+    (SL_SIGNATURE_FIELD_MASK_OPTIONAL_FIELD | ZAP_SIGNATURE_TYPE_BITMAP8), offsetof(sl_zcl_color_control_cluster_enhanced_move_to_hue_and_saturation_command_t, optionsMask),     \
+    (SL_SIGNATURE_FIELD_MASK_OPTIONAL_FIELD | ZAP_SIGNATURE_TYPE_BITMAP8), offsetof(sl_zcl_color_control_cluster_enhanced_move_to_hue_and_saturation_command_t, optionsOverride), \
 }
 
 /** @brief Structure for ZCL command "AddScene" from "Scenes"
@@ -3419,6 +3524,23 @@ typedef struct __zcl_scenes_cluster_recall_scene_command {
     (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_scenes_cluster_recall_scene_command_t, groupId),                                                 \
     (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_scenes_cluster_recall_scene_command_t, sceneId),                                                  \
     (SL_SIGNATURE_FIELD_MASK_OPTIONAL_FIELD | ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_scenes_cluster_recall_scene_command_t, transitionTime), \
+}
+
+/** @brief Structure for ZCL command "GetDisposableScheduleResponse" from "Door Lock"
+ */
+typedef struct __zcl_door_lock_cluster_get_disposable_schedule_response_command {
+  uint16_t userId;
+  uint8_t status;
+  uint32_t localStartTime;
+  uint32_t localEndTime;
+} sl_zcl_door_lock_cluster_get_disposable_schedule_response_command_t;
+
+#define sl_zcl_door_lock_cluster_get_disposable_schedule_response_command_signature  {                                          \
+    4,                                                                                                                          \
+    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_door_lock_cluster_get_disposable_schedule_response_command_t, userId),         \
+    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_door_lock_cluster_get_disposable_schedule_response_command_t, status),          \
+    (ZAP_SIGNATURE_TYPE_INT32U), offsetof(sl_zcl_door_lock_cluster_get_disposable_schedule_response_command_t, localStartTime), \
+    (ZAP_SIGNATURE_TYPE_INT32U), offsetof(sl_zcl_door_lock_cluster_get_disposable_schedule_response_command_t, localEndTime),   \
 }
 
 /** @brief Structure for ZCL command "PublishEventLog" from "Events"
@@ -3670,17 +3792,6 @@ typedef struct __zcl_zll_commissioning_cluster_reset_to_factory_new_request_comm
     (ZAP_SIGNATURE_TYPE_INT32U), offsetof(sl_zcl_zll_commissioning_cluster_reset_to_factory_new_request_command_t, transaction), \
 }
 
-/** @brief Structure for ZCL command "GetLastNetworkProvisioningResult" from "Network Provisioning"
- */
-typedef struct __zcl_network_provisioning_cluster_get_last_network_provisioning_result_command {
-  uint32_t TimeoutMs;
-} sl_zcl_network_provisioning_cluster_get_last_network_provisioning_result_command_t;
-
-#define sl_zcl_network_provisioning_cluster_get_last_network_provisioning_result_command_signature  {                                     \
-    1,                                                                                                                                    \
-    (ZAP_SIGNATURE_TYPE_INT32U), offsetof(sl_zcl_network_provisioning_cluster_get_last_network_provisioning_result_command_t, TimeoutMs), \
-}
-
 /** @brief Structure for ZCL command "CancelLoadControlEvent" from "Demand Response and Load Control"
  */
 typedef struct __zcl_demand_response_and_load_control_cluster_cancel_load_control_event_command {
@@ -3919,20 +4030,20 @@ typedef struct __zcl_electrical_measurement_cluster_get_measurement_profile_resp
 typedef struct __zcl_zll_commissioning_cluster_network_start_response_command {
   uint32_t transaction;
   uint8_t status;
-  uint8_t * extendedPanId;
+  uint8_t extendedPanId[8];
   uint8_t networkUpdateId;
   uint8_t logicalChannel;
   uint16_t panId;
 } sl_zcl_zll_commissioning_cluster_network_start_response_command_t;
 
-#define sl_zcl_zll_commissioning_cluster_network_start_response_command_signature  {                                               \
-    6,                                                                                                                             \
-    (ZAP_SIGNATURE_TYPE_INT32U), offsetof(sl_zcl_zll_commissioning_cluster_network_start_response_command_t, transaction),         \
-    (ZAP_SIGNATURE_TYPE_ENUM8), offsetof(sl_zcl_zll_commissioning_cluster_network_start_response_command_t, status),               \
-    (ZAP_SIGNATURE_TYPE_IEEE_ADDRESS), offsetof(sl_zcl_zll_commissioning_cluster_network_start_response_command_t, extendedPanId), \
-    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_zll_commissioning_cluster_network_start_response_command_t, networkUpdateId),      \
-    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_zll_commissioning_cluster_network_start_response_command_t, logicalChannel),       \
-    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_zll_commissioning_cluster_network_start_response_command_t, panId),               \
+#define sl_zcl_zll_commissioning_cluster_network_start_response_command_signature  {                                                \
+    6,                                                                                                                              \
+    (ZAP_SIGNATURE_TYPE_INT32U), offsetof(sl_zcl_zll_commissioning_cluster_network_start_response_command_t, transaction),          \
+    (ZAP_SIGNATURE_TYPE_ENUM8), offsetof(sl_zcl_zll_commissioning_cluster_network_start_response_command_t, status),                \
+    (SL_SIGNATURE_FIELD_MASK_BLOB | 8), offsetof(sl_zcl_zll_commissioning_cluster_network_start_response_command_t, extendedPanId), \
+    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_zll_commissioning_cluster_network_start_response_command_t, networkUpdateId),       \
+    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_zll_commissioning_cluster_network_start_response_command_t, logicalChannel),        \
+    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_zll_commissioning_cluster_network_start_response_command_t, panId),                \
 }
 
 /** @brief Structure for ZCL command "ReportEventStatus" from "Energy Management"
@@ -3997,22 +4108,22 @@ typedef struct __zcl_demand_response_and_load_control_cluster_report_event_statu
  */
 typedef struct __zcl_mdu_pairing_cluster_pairing_request_command {
   uint32_t localPairingInformationVersion;
-  uint8_t * eui64OfRequestingDevice;
+  uint8_t eui64OfRequestingDevice[8];
 } sl_zcl_mdu_pairing_cluster_pairing_request_command_t;
 
 #define sl_zcl_mdu_pairing_cluster_pairing_request_command_signature  {                                                          \
     2,                                                                                                                           \
     (ZAP_SIGNATURE_TYPE_INT32U), offsetof(sl_zcl_mdu_pairing_cluster_pairing_request_command_t, localPairingInformationVersion), \
-    (ZAP_SIGNATURE_TYPE_IEEE_ADDRESS), offsetof(sl_zcl_mdu_pairing_cluster_pairing_request_command_t, eui64OfRequestingDevice),  \
+    (SL_SIGNATURE_FIELD_MASK_BLOB | 8), offsetof(sl_zcl_mdu_pairing_cluster_pairing_request_command_t, eui64OfRequestingDevice), \
 }
 
 /** @brief Structure for ZCL command "NetworkStartRequest" from "ZLL Commissioning"
  */
 typedef struct __zcl_zll_commissioning_cluster_network_start_request_command {
   uint32_t transaction;
-  uint8_t * extendedPanId;
+  uint8_t extendedPanId[8];
   uint8_t keyIndex;
-  /* TYPE WARNING: security_key defaults to */ uint8_t *  encryptedNetworkKey;
+  uint8_t encryptedNetworkKey[16];
   uint8_t logicalChannel;
   uint16_t panId;
   uint16_t networkAddress;
@@ -4022,16 +4133,16 @@ typedef struct __zcl_zll_commissioning_cluster_network_start_request_command {
   uint16_t freeNetworkAddressRangeEnd;
   uint16_t freeGroupIdentifierRangeBegin;
   uint16_t freeGroupIdentifierRangeEnd;
-  uint8_t * initiatorIeeeAddress;
+  uint8_t initiatorIeeeAddress[8];
   uint16_t initiatorNetworkAddress;
 } sl_zcl_zll_commissioning_cluster_network_start_request_command_t;
 
 #define sl_zcl_zll_commissioning_cluster_network_start_request_command_signature  {                                                         \
     15,                                                                                                                                     \
     (ZAP_SIGNATURE_TYPE_INT32U), offsetof(sl_zcl_zll_commissioning_cluster_network_start_request_command_t, transaction),                   \
-    (ZAP_SIGNATURE_TYPE_IEEE_ADDRESS), offsetof(sl_zcl_zll_commissioning_cluster_network_start_request_command_t, extendedPanId),           \
+    (SL_SIGNATURE_FIELD_MASK_BLOB | 8), offsetof(sl_zcl_zll_commissioning_cluster_network_start_request_command_t, extendedPanId),          \
     (ZAP_SIGNATURE_TYPE_ENUM8), offsetof(sl_zcl_zll_commissioning_cluster_network_start_request_command_t, keyIndex),                       \
-    (ZAP_SIGNATURE_TYPE_SECURITY_KEY), offsetof(sl_zcl_zll_commissioning_cluster_network_start_request_command_t, encryptedNetworkKey),     \
+    (SL_SIGNATURE_FIELD_MASK_BLOB | 16), offsetof(sl_zcl_zll_commissioning_cluster_network_start_request_command_t, encryptedNetworkKey),   \
     (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_zll_commissioning_cluster_network_start_request_command_t, logicalChannel),                 \
     (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_zll_commissioning_cluster_network_start_request_command_t, panId),                         \
     (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_zll_commissioning_cluster_network_start_request_command_t, networkAddress),                \
@@ -4041,7 +4152,7 @@ typedef struct __zcl_zll_commissioning_cluster_network_start_request_command {
     (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_zll_commissioning_cluster_network_start_request_command_t, freeNetworkAddressRangeEnd),    \
     (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_zll_commissioning_cluster_network_start_request_command_t, freeGroupIdentifierRangeBegin), \
     (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_zll_commissioning_cluster_network_start_request_command_t, freeGroupIdentifierRangeEnd),   \
-    (ZAP_SIGNATURE_TYPE_IEEE_ADDRESS), offsetof(sl_zcl_zll_commissioning_cluster_network_start_request_command_t, initiatorIeeeAddress),    \
+    (SL_SIGNATURE_FIELD_MASK_BLOB | 8), offsetof(sl_zcl_zll_commissioning_cluster_network_start_request_command_t, initiatorIeeeAddress),   \
     (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_zll_commissioning_cluster_network_start_request_command_t, initiatorNetworkAddress),       \
 }
 
@@ -4049,9 +4160,9 @@ typedef struct __zcl_zll_commissioning_cluster_network_start_request_command {
  */
 typedef struct __zcl_zll_commissioning_cluster_network_join_router_request_command {
   uint32_t transaction;
-  uint8_t * extendedPanId;
+  uint8_t extendedPanId[8];
   uint8_t keyIndex;
-  /* TYPE WARNING: security_key defaults to */ uint8_t *  encryptedNetworkKey;
+  uint8_t encryptedNetworkKey[16];
   uint8_t networkUpdateId;
   uint8_t logicalChannel;
   uint16_t panId;
@@ -4067,9 +4178,9 @@ typedef struct __zcl_zll_commissioning_cluster_network_join_router_request_comma
 #define sl_zcl_zll_commissioning_cluster_network_join_router_request_command_signature  {                                                         \
     14,                                                                                                                                           \
     (ZAP_SIGNATURE_TYPE_INT32U), offsetof(sl_zcl_zll_commissioning_cluster_network_join_router_request_command_t, transaction),                   \
-    (ZAP_SIGNATURE_TYPE_IEEE_ADDRESS), offsetof(sl_zcl_zll_commissioning_cluster_network_join_router_request_command_t, extendedPanId),           \
+    (SL_SIGNATURE_FIELD_MASK_BLOB | 8), offsetof(sl_zcl_zll_commissioning_cluster_network_join_router_request_command_t, extendedPanId),          \
     (ZAP_SIGNATURE_TYPE_ENUM8), offsetof(sl_zcl_zll_commissioning_cluster_network_join_router_request_command_t, keyIndex),                       \
-    (ZAP_SIGNATURE_TYPE_SECURITY_KEY), offsetof(sl_zcl_zll_commissioning_cluster_network_join_router_request_command_t, encryptedNetworkKey),     \
+    (SL_SIGNATURE_FIELD_MASK_BLOB | 16), offsetof(sl_zcl_zll_commissioning_cluster_network_join_router_request_command_t, encryptedNetworkKey),   \
     (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_zll_commissioning_cluster_network_join_router_request_command_t, networkUpdateId),                \
     (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_zll_commissioning_cluster_network_join_router_request_command_t, logicalChannel),                 \
     (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_zll_commissioning_cluster_network_join_router_request_command_t, panId),                         \
@@ -4086,9 +4197,9 @@ typedef struct __zcl_zll_commissioning_cluster_network_join_router_request_comma
  */
 typedef struct __zcl_zll_commissioning_cluster_network_join_end_device_request_command {
   uint32_t transaction;
-  uint8_t * extendedPanId;
+  uint8_t extendedPanId[8];
   uint8_t keyIndex;
-  /* TYPE WARNING: security_key defaults to */ uint8_t *  encryptedNetworkKey;
+  uint8_t encryptedNetworkKey[16];
   uint8_t networkUpdateId;
   uint8_t logicalChannel;
   uint16_t panId;
@@ -4104,9 +4215,9 @@ typedef struct __zcl_zll_commissioning_cluster_network_join_end_device_request_c
 #define sl_zcl_zll_commissioning_cluster_network_join_end_device_request_command_signature  {                                                         \
     14,                                                                                                                                               \
     (ZAP_SIGNATURE_TYPE_INT32U), offsetof(sl_zcl_zll_commissioning_cluster_network_join_end_device_request_command_t, transaction),                   \
-    (ZAP_SIGNATURE_TYPE_IEEE_ADDRESS), offsetof(sl_zcl_zll_commissioning_cluster_network_join_end_device_request_command_t, extendedPanId),           \
+    (SL_SIGNATURE_FIELD_MASK_BLOB | 8), offsetof(sl_zcl_zll_commissioning_cluster_network_join_end_device_request_command_t, extendedPanId),          \
     (ZAP_SIGNATURE_TYPE_ENUM8), offsetof(sl_zcl_zll_commissioning_cluster_network_join_end_device_request_command_t, keyIndex),                       \
-    (ZAP_SIGNATURE_TYPE_SECURITY_KEY), offsetof(sl_zcl_zll_commissioning_cluster_network_join_end_device_request_command_t, encryptedNetworkKey),     \
+    (SL_SIGNATURE_FIELD_MASK_BLOB | 16), offsetof(sl_zcl_zll_commissioning_cluster_network_join_end_device_request_command_t, encryptedNetworkKey),   \
     (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_zll_commissioning_cluster_network_join_end_device_request_command_t, networkUpdateId),                \
     (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_zll_commissioning_cluster_network_join_end_device_request_command_t, logicalChannel),                 \
     (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_zll_commissioning_cluster_network_join_end_device_request_command_t, panId),                         \
@@ -4123,21 +4234,21 @@ typedef struct __zcl_zll_commissioning_cluster_network_join_end_device_request_c
  */
 typedef struct __zcl_zll_commissioning_cluster_network_update_request_command {
   uint32_t transaction;
-  uint8_t * extendedPanId;
+  uint8_t extendedPanId[8];
   uint8_t networkUpdateId;
   uint8_t logicalChannel;
   uint16_t panId;
   uint16_t networkAddress;
 } sl_zcl_zll_commissioning_cluster_network_update_request_command_t;
 
-#define sl_zcl_zll_commissioning_cluster_network_update_request_command_signature  {                                               \
-    6,                                                                                                                             \
-    (ZAP_SIGNATURE_TYPE_INT32U), offsetof(sl_zcl_zll_commissioning_cluster_network_update_request_command_t, transaction),         \
-    (ZAP_SIGNATURE_TYPE_IEEE_ADDRESS), offsetof(sl_zcl_zll_commissioning_cluster_network_update_request_command_t, extendedPanId), \
-    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_zll_commissioning_cluster_network_update_request_command_t, networkUpdateId),      \
-    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_zll_commissioning_cluster_network_update_request_command_t, logicalChannel),       \
-    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_zll_commissioning_cluster_network_update_request_command_t, panId),               \
-    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_zll_commissioning_cluster_network_update_request_command_t, networkAddress),      \
+#define sl_zcl_zll_commissioning_cluster_network_update_request_command_signature  {                                                \
+    6,                                                                                                                              \
+    (ZAP_SIGNATURE_TYPE_INT32U), offsetof(sl_zcl_zll_commissioning_cluster_network_update_request_command_t, transaction),          \
+    (SL_SIGNATURE_FIELD_MASK_BLOB | 8), offsetof(sl_zcl_zll_commissioning_cluster_network_update_request_command_t, extendedPanId), \
+    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_zll_commissioning_cluster_network_update_request_command_t, networkUpdateId),       \
+    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_zll_commissioning_cluster_network_update_request_command_t, logicalChannel),        \
+    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_zll_commissioning_cluster_network_update_request_command_t, panId),                \
+    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_zll_commissioning_cluster_network_update_request_command_t, networkAddress),       \
 }
 
 /** @brief Structure for ZCL command "IdentifyRequest" from "ZLL Commissioning"
@@ -4909,7 +5020,7 @@ typedef struct __zcl_zll_commissioning_cluster_scan_response_command {
   uint8_t zllInformation;
   uint16_t keyBitmask;
   uint32_t responseId;
-  uint8_t * extendedPanId;
+  uint8_t extendedPanId[8];
   uint8_t networkUpdateId;
   uint8_t logicalChannel;
   uint16_t panId;
@@ -4923,26 +5034,26 @@ typedef struct __zcl_zll_commissioning_cluster_scan_response_command {
   uint8_t groupIdCount;
 } sl_zcl_zll_commissioning_cluster_scan_response_command_t;
 
-#define sl_zcl_zll_commissioning_cluster_scan_response_command_signature  {                                               \
-    18,                                                                                                                   \
-    (ZAP_SIGNATURE_TYPE_INT32U), offsetof(sl_zcl_zll_commissioning_cluster_scan_response_command_t, transaction),         \
-    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_zll_commissioning_cluster_scan_response_command_t, rssiCorrection),       \
-    (ZAP_SIGNATURE_TYPE_BITMAP8), offsetof(sl_zcl_zll_commissioning_cluster_scan_response_command_t, zigbeeInformation),  \
-    (ZAP_SIGNATURE_TYPE_BITMAP8), offsetof(sl_zcl_zll_commissioning_cluster_scan_response_command_t, zllInformation),     \
-    (ZAP_SIGNATURE_TYPE_BITMAP16), offsetof(sl_zcl_zll_commissioning_cluster_scan_response_command_t, keyBitmask),        \
-    (ZAP_SIGNATURE_TYPE_INT32U), offsetof(sl_zcl_zll_commissioning_cluster_scan_response_command_t, responseId),          \
-    (ZAP_SIGNATURE_TYPE_IEEE_ADDRESS), offsetof(sl_zcl_zll_commissioning_cluster_scan_response_command_t, extendedPanId), \
-    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_zll_commissioning_cluster_scan_response_command_t, networkUpdateId),      \
-    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_zll_commissioning_cluster_scan_response_command_t, logicalChannel),       \
-    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_zll_commissioning_cluster_scan_response_command_t, panId),               \
-    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_zll_commissioning_cluster_scan_response_command_t, networkAddress),      \
-    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_zll_commissioning_cluster_scan_response_command_t, numberOfSubDevices),   \
-    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_zll_commissioning_cluster_scan_response_command_t, totalGroupIds),        \
-    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_zll_commissioning_cluster_scan_response_command_t, endpointId),           \
-    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_zll_commissioning_cluster_scan_response_command_t, profileId),           \
-    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_zll_commissioning_cluster_scan_response_command_t, deviceId),            \
-    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_zll_commissioning_cluster_scan_response_command_t, version),              \
-    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_zll_commissioning_cluster_scan_response_command_t, groupIdCount),         \
+#define sl_zcl_zll_commissioning_cluster_scan_response_command_signature  {                                                \
+    18,                                                                                                                    \
+    (ZAP_SIGNATURE_TYPE_INT32U), offsetof(sl_zcl_zll_commissioning_cluster_scan_response_command_t, transaction),          \
+    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_zll_commissioning_cluster_scan_response_command_t, rssiCorrection),        \
+    (ZAP_SIGNATURE_TYPE_BITMAP8), offsetof(sl_zcl_zll_commissioning_cluster_scan_response_command_t, zigbeeInformation),   \
+    (ZAP_SIGNATURE_TYPE_BITMAP8), offsetof(sl_zcl_zll_commissioning_cluster_scan_response_command_t, zllInformation),      \
+    (ZAP_SIGNATURE_TYPE_BITMAP16), offsetof(sl_zcl_zll_commissioning_cluster_scan_response_command_t, keyBitmask),         \
+    (ZAP_SIGNATURE_TYPE_INT32U), offsetof(sl_zcl_zll_commissioning_cluster_scan_response_command_t, responseId),           \
+    (SL_SIGNATURE_FIELD_MASK_BLOB | 8), offsetof(sl_zcl_zll_commissioning_cluster_scan_response_command_t, extendedPanId), \
+    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_zll_commissioning_cluster_scan_response_command_t, networkUpdateId),       \
+    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_zll_commissioning_cluster_scan_response_command_t, logicalChannel),        \
+    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_zll_commissioning_cluster_scan_response_command_t, panId),                \
+    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_zll_commissioning_cluster_scan_response_command_t, networkAddress),       \
+    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_zll_commissioning_cluster_scan_response_command_t, numberOfSubDevices),    \
+    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_zll_commissioning_cluster_scan_response_command_t, totalGroupIds),         \
+    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_zll_commissioning_cluster_scan_response_command_t, endpointId),            \
+    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_zll_commissioning_cluster_scan_response_command_t, profileId),            \
+    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_zll_commissioning_cluster_scan_response_command_t, deviceId),             \
+    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_zll_commissioning_cluster_scan_response_command_t, version),               \
+    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_zll_commissioning_cluster_scan_response_command_t, groupIdCount),          \
 }
 
 /** @brief Structure for ZCL command "ConfigureNotificationFlags" from "Simple Metering"
@@ -4975,7 +5086,7 @@ typedef struct __zcl_mdu_pairing_cluster_pairing_response_command {
   uint8_t totalNumberOfDevices;
   uint8_t commandIndex;
   uint8_t totalNumberOfCommands;
-  /* TYPE WARNING: IEEE_ADDRESS array defaults to */ uint8_t * eui64s;
+  uint8_t eui64s[8];
 } sl_zcl_mdu_pairing_cluster_pairing_response_command_t;
 
 #define sl_zcl_mdu_pairing_cluster_pairing_response_command_signature  {                                                     \
@@ -4984,7 +5095,7 @@ typedef struct __zcl_mdu_pairing_cluster_pairing_response_command {
     (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_mdu_pairing_cluster_pairing_response_command_t, totalNumberOfDevices),       \
     (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_mdu_pairing_cluster_pairing_response_command_t, commandIndex),               \
     (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_mdu_pairing_cluster_pairing_response_command_t, totalNumberOfCommands),      \
-    (ZAP_SIGNATURE_TYPE_ARRAY), offsetof(sl_zcl_mdu_pairing_cluster_pairing_response_command_t, eui64s),                     \
+    (SL_SIGNATURE_FIELD_MASK_BLOB | 8), offsetof(sl_zcl_mdu_pairing_cluster_pairing_response_command_t, eui64s),             \
 }
 
 /** @brief Structure for ZCL command "DeviceInformationResponse" from "ZLL Commissioning"
@@ -5603,6 +5714,50 @@ typedef struct __zcl_door_lock_cluster_clear_all_rfids_response_command {
     (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_door_lock_cluster_clear_all_rfids_response_command_t, status), \
 }
 
+/** @brief Structure for ZCL command "SetDisposableScheduleResponse" from "Door Lock"
+ */
+typedef struct __zcl_door_lock_cluster_set_disposable_schedule_response_command {
+  uint8_t status;
+} sl_zcl_door_lock_cluster_set_disposable_schedule_response_command_t;
+
+#define sl_zcl_door_lock_cluster_set_disposable_schedule_response_command_signature  {                                 \
+    1,                                                                                                                 \
+    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_door_lock_cluster_set_disposable_schedule_response_command_t, status), \
+}
+
+/** @brief Structure for ZCL command "ClearDisposableScheduleResponse" from "Door Lock"
+ */
+typedef struct __zcl_door_lock_cluster_clear_disposable_schedule_response_command {
+  uint8_t status;
+} sl_zcl_door_lock_cluster_clear_disposable_schedule_response_command_t;
+
+#define sl_zcl_door_lock_cluster_clear_disposable_schedule_response_command_signature  {                                 \
+    1,                                                                                                                   \
+    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_door_lock_cluster_clear_disposable_schedule_response_command_t, status), \
+}
+
+/** @brief Structure for ZCL command "ClearBiometricCredentialResponse" from "Door Lock"
+ */
+typedef struct __zcl_door_lock_cluster_clear_biometric_credential_response_command {
+  uint8_t status;
+} sl_zcl_door_lock_cluster_clear_biometric_credential_response_command_t;
+
+#define sl_zcl_door_lock_cluster_clear_biometric_credential_response_command_signature  {                                 \
+    1,                                                                                                                    \
+    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_door_lock_cluster_clear_biometric_credential_response_command_t, status), \
+}
+
+/** @brief Structure for ZCL command "ClearAllBiometricCredentialsResponse" from "Door Lock"
+ */
+typedef struct __zcl_door_lock_cluster_clear_all_biometric_credentials_response_command {
+  uint8_t status;
+} sl_zcl_door_lock_cluster_clear_all_biometric_credentials_response_command_t;
+
+#define sl_zcl_door_lock_cluster_clear_all_biometric_credentials_response_command_signature  {                                 \
+    1,                                                                                                                         \
+    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_door_lock_cluster_clear_all_biometric_credentials_response_command_t, status), \
+}
+
 /** @brief Structure for ZCL command "WindowCoveringGoToLiftPercentage" from "Window Covering"
  */
 typedef struct __zcl_window_covering_cluster_window_covering_go_to_lift_percentage_command {
@@ -5763,108 +5918,17 @@ typedef struct __zcl_gaming_cluster_general_response_command {
     (ZAP_SIGNATURE_TYPE_CHAR_STRING), offsetof(sl_zcl_gaming_cluster_general_response_command_t, message), \
 }
 
-/** @brief Structure for ZCL command "AddWiFiNetworkResp" from "Network Provisioning"
+/** @brief Structure for ZCL command "GetLocalesSupportedResponse" from "Basic"
  */
-typedef struct __zcl_network_provisioning_cluster_add_wi_fi_network_resp_command {
-  uint8_t ErrorCode;
-  uint8_t * DebugText;
-} sl_zcl_network_provisioning_cluster_add_wi_fi_network_resp_command_t;
+typedef struct __zcl_basic_cluster_get_locales_supported_response_command {
+  uint8_t discoveryComplete;
+  /* TYPE WARNING: CHAR_STRING array defaults to */ uint8_t * localeSupported;
+} sl_zcl_basic_cluster_get_locales_supported_response_command_t;
 
-#define sl_zcl_network_provisioning_cluster_add_wi_fi_network_resp_command_signature  {                                          \
-    2,                                                                                                                           \
-    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_network_provisioning_cluster_add_wi_fi_network_resp_command_t, ErrorCode),       \
-    (ZAP_SIGNATURE_TYPE_CHAR_STRING), offsetof(sl_zcl_network_provisioning_cluster_add_wi_fi_network_resp_command_t, DebugText), \
-}
-
-/** @brief Structure for ZCL command "UpdateWiFiNetworkResp" from "Network Provisioning"
- */
-typedef struct __zcl_network_provisioning_cluster_update_wi_fi_network_resp_command {
-  uint8_t ErrorCode;
-  uint8_t * DebugText;
-} sl_zcl_network_provisioning_cluster_update_wi_fi_network_resp_command_t;
-
-#define sl_zcl_network_provisioning_cluster_update_wi_fi_network_resp_command_signature  {                                          \
-    2,                                                                                                                              \
-    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_network_provisioning_cluster_update_wi_fi_network_resp_command_t, ErrorCode),       \
-    (ZAP_SIGNATURE_TYPE_CHAR_STRING), offsetof(sl_zcl_network_provisioning_cluster_update_wi_fi_network_resp_command_t, DebugText), \
-}
-
-/** @brief Structure for ZCL command "AddThreadNetworkResp" from "Network Provisioning"
- */
-typedef struct __zcl_network_provisioning_cluster_add_thread_network_resp_command {
-  uint8_t ErrorCode;
-  uint8_t * DebugText;
-} sl_zcl_network_provisioning_cluster_add_thread_network_resp_command_t;
-
-#define sl_zcl_network_provisioning_cluster_add_thread_network_resp_command_signature  {                                          \
-    2,                                                                                                                            \
-    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_network_provisioning_cluster_add_thread_network_resp_command_t, ErrorCode),       \
-    (ZAP_SIGNATURE_TYPE_CHAR_STRING), offsetof(sl_zcl_network_provisioning_cluster_add_thread_network_resp_command_t, DebugText), \
-}
-
-/** @brief Structure for ZCL command "UpdateThreadNetworkResp" from "Network Provisioning"
- */
-typedef struct __zcl_network_provisioning_cluster_update_thread_network_resp_command {
-  uint8_t ErrorCode;
-  uint8_t * DebugText;
-} sl_zcl_network_provisioning_cluster_update_thread_network_resp_command_t;
-
-#define sl_zcl_network_provisioning_cluster_update_thread_network_resp_command_signature  {                                          \
-    2,                                                                                                                               \
-    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_network_provisioning_cluster_update_thread_network_resp_command_t, ErrorCode),       \
-    (ZAP_SIGNATURE_TYPE_CHAR_STRING), offsetof(sl_zcl_network_provisioning_cluster_update_thread_network_resp_command_t, DebugText), \
-}
-
-/** @brief Structure for ZCL command "RemoveNetworkResp" from "Network Provisioning"
- */
-typedef struct __zcl_network_provisioning_cluster_remove_network_resp_command {
-  uint8_t ErrorCode;
-  uint8_t * DebugText;
-} sl_zcl_network_provisioning_cluster_remove_network_resp_command_t;
-
-#define sl_zcl_network_provisioning_cluster_remove_network_resp_command_signature  {                                          \
-    2,                                                                                                                        \
-    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_network_provisioning_cluster_remove_network_resp_command_t, ErrorCode),       \
-    (ZAP_SIGNATURE_TYPE_CHAR_STRING), offsetof(sl_zcl_network_provisioning_cluster_remove_network_resp_command_t, DebugText), \
-}
-
-/** @brief Structure for ZCL command "EnableNetworkResp" from "Network Provisioning"
- */
-typedef struct __zcl_network_provisioning_cluster_enable_network_resp_command {
-  uint8_t ErrorCode;
-  uint8_t * DebugText;
-} sl_zcl_network_provisioning_cluster_enable_network_resp_command_t;
-
-#define sl_zcl_network_provisioning_cluster_enable_network_resp_command_signature  {                                          \
-    2,                                                                                                                        \
-    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_network_provisioning_cluster_enable_network_resp_command_t, ErrorCode),       \
-    (ZAP_SIGNATURE_TYPE_CHAR_STRING), offsetof(sl_zcl_network_provisioning_cluster_enable_network_resp_command_t, DebugText), \
-}
-
-/** @brief Structure for ZCL command "DisableNetworkResp" from "Network Provisioning"
- */
-typedef struct __zcl_network_provisioning_cluster_disable_network_resp_command {
-  uint8_t ErrorCode;
-  uint8_t * DebugText;
-} sl_zcl_network_provisioning_cluster_disable_network_resp_command_t;
-
-#define sl_zcl_network_provisioning_cluster_disable_network_resp_command_signature  {                                          \
-    2,                                                                                                                         \
-    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_network_provisioning_cluster_disable_network_resp_command_t, ErrorCode),       \
-    (ZAP_SIGNATURE_TYPE_CHAR_STRING), offsetof(sl_zcl_network_provisioning_cluster_disable_network_resp_command_t, DebugText), \
-}
-
-/** @brief Structure for ZCL command "TestNetworkResp" from "Network Provisioning"
- */
-typedef struct __zcl_network_provisioning_cluster_test_network_resp_command {
-  uint8_t ErrorCode;
-  uint8_t * DebugText;
-} sl_zcl_network_provisioning_cluster_test_network_resp_command_t;
-
-#define sl_zcl_network_provisioning_cluster_test_network_resp_command_signature  {                                          \
+#define sl_zcl_basic_cluster_get_locales_supported_response_command_signature  {                                            \
     2,                                                                                                                      \
-    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_network_provisioning_cluster_test_network_resp_command_t, ErrorCode),       \
-    (ZAP_SIGNATURE_TYPE_CHAR_STRING), offsetof(sl_zcl_network_provisioning_cluster_test_network_resp_command_t, DebugText), \
+    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_basic_cluster_get_locales_supported_response_command_t, discoveryComplete), \
+    (ZAP_SIGNATURE_TYPE_ARRAY), offsetof(sl_zcl_basic_cluster_get_locales_supported_response_command_t, localeSupported),   \
 }
 
 /** @brief Structure for ZCL command "ZoneStatusChanged" from "IAS ACE"
@@ -5889,7 +5953,7 @@ typedef struct __zcl_ias_ace_cluster_zone_status_changed_command {
 typedef struct __zcl_ias_ace_cluster_get_zone_information_response_command {
   uint8_t zoneId;
   uint16_t zoneType;
-  uint8_t * ieeeAddress;
+  uint8_t ieeeAddress[8];
   uint8_t * zoneLabel;
 } sl_zcl_ias_ace_cluster_get_zone_information_response_command_t;
 
@@ -5897,7 +5961,7 @@ typedef struct __zcl_ias_ace_cluster_get_zone_information_response_command {
     4,                                                                                                                                                              \
     (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_ias_ace_cluster_get_zone_information_response_command_t, zoneId),                                                   \
     (ZAP_SIGNATURE_TYPE_ENUM16), offsetof(sl_zcl_ias_ace_cluster_get_zone_information_response_command_t, zoneType),                                                \
-    (ZAP_SIGNATURE_TYPE_IEEE_ADDRESS), offsetof(sl_zcl_ias_ace_cluster_get_zone_information_response_command_t, ieeeAddress),                                       \
+    (SL_SIGNATURE_FIELD_MASK_BLOB | 8), offsetof(sl_zcl_ias_ace_cluster_get_zone_information_response_command_t, ieeeAddress),                                      \
     (SL_SIGNATURE_FIELD_MASK_OPTIONAL_FIELD | ZAP_SIGNATURE_TYPE_CHAR_STRING), offsetof(sl_zcl_ias_ace_cluster_get_zone_information_response_command_t, zoneLabel), \
 }
 
@@ -6247,18 +6311,18 @@ typedef struct __zcl_over_the_air_bootloading_cluster_image_block_request_comman
   uint32_t fileVersion;
   uint32_t fileOffset;
   uint8_t maxDataSize;
-  uint8_t * requestNodeAddress;
+  uint8_t requestNodeAddress[8];
 } sl_zcl_over_the_air_bootloading_cluster_image_block_request_command_t;
 
-#define sl_zcl_over_the_air_bootloading_cluster_image_block_request_command_signature  {                                                    \
-    7,                                                                                                                                      \
-    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_over_the_air_bootloading_cluster_image_block_request_command_t, fieldControl),              \
-    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_over_the_air_bootloading_cluster_image_block_request_command_t, manufacturerId),           \
-    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_over_the_air_bootloading_cluster_image_block_request_command_t, imageType),                \
-    (ZAP_SIGNATURE_TYPE_INT32U), offsetof(sl_zcl_over_the_air_bootloading_cluster_image_block_request_command_t, fileVersion),              \
-    (ZAP_SIGNATURE_TYPE_INT32U), offsetof(sl_zcl_over_the_air_bootloading_cluster_image_block_request_command_t, fileOffset),               \
-    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_over_the_air_bootloading_cluster_image_block_request_command_t, maxDataSize),               \
-    (ZAP_SIGNATURE_TYPE_IEEE_ADDRESS), offsetof(sl_zcl_over_the_air_bootloading_cluster_image_block_request_command_t, requestNodeAddress), \
+#define sl_zcl_over_the_air_bootloading_cluster_image_block_request_command_signature  {                                                     \
+    7,                                                                                                                                       \
+    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_over_the_air_bootloading_cluster_image_block_request_command_t, fieldControl),               \
+    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_over_the_air_bootloading_cluster_image_block_request_command_t, manufacturerId),            \
+    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_over_the_air_bootloading_cluster_image_block_request_command_t, imageType),                 \
+    (ZAP_SIGNATURE_TYPE_INT32U), offsetof(sl_zcl_over_the_air_bootloading_cluster_image_block_request_command_t, fileVersion),               \
+    (ZAP_SIGNATURE_TYPE_INT32U), offsetof(sl_zcl_over_the_air_bootloading_cluster_image_block_request_command_t, fileOffset),                \
+    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_over_the_air_bootloading_cluster_image_block_request_command_t, maxDataSize),                \
+    (SL_SIGNATURE_FIELD_MASK_BLOB | 8), offsetof(sl_zcl_over_the_air_bootloading_cluster_image_block_request_command_t, requestNodeAddress), \
 }
 
 /** @brief Structure for ZCL command "ImagePageRequest" from "Over the Air Bootloading"
@@ -6272,20 +6336,20 @@ typedef struct __zcl_over_the_air_bootloading_cluster_image_page_request_command
   uint8_t maxDataSize;
   uint16_t pageSize;
   uint16_t responseSpacing;
-  uint8_t * requestNodeAddress;
+  uint8_t requestNodeAddress[8];
 } sl_zcl_over_the_air_bootloading_cluster_image_page_request_command_t;
 
-#define sl_zcl_over_the_air_bootloading_cluster_image_page_request_command_signature  {                                                    \
-    9,                                                                                                                                     \
-    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_over_the_air_bootloading_cluster_image_page_request_command_t, fieldControl),              \
-    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_over_the_air_bootloading_cluster_image_page_request_command_t, manufacturerId),           \
-    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_over_the_air_bootloading_cluster_image_page_request_command_t, imageType),                \
-    (ZAP_SIGNATURE_TYPE_INT32U), offsetof(sl_zcl_over_the_air_bootloading_cluster_image_page_request_command_t, fileVersion),              \
-    (ZAP_SIGNATURE_TYPE_INT32U), offsetof(sl_zcl_over_the_air_bootloading_cluster_image_page_request_command_t, fileOffset),               \
-    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_over_the_air_bootloading_cluster_image_page_request_command_t, maxDataSize),               \
-    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_over_the_air_bootloading_cluster_image_page_request_command_t, pageSize),                 \
-    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_over_the_air_bootloading_cluster_image_page_request_command_t, responseSpacing),          \
-    (ZAP_SIGNATURE_TYPE_IEEE_ADDRESS), offsetof(sl_zcl_over_the_air_bootloading_cluster_image_page_request_command_t, requestNodeAddress), \
+#define sl_zcl_over_the_air_bootloading_cluster_image_page_request_command_signature  {                                                     \
+    9,                                                                                                                                      \
+    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_over_the_air_bootloading_cluster_image_page_request_command_t, fieldControl),               \
+    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_over_the_air_bootloading_cluster_image_page_request_command_t, manufacturerId),            \
+    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_over_the_air_bootloading_cluster_image_page_request_command_t, imageType),                 \
+    (ZAP_SIGNATURE_TYPE_INT32U), offsetof(sl_zcl_over_the_air_bootloading_cluster_image_page_request_command_t, fileVersion),               \
+    (ZAP_SIGNATURE_TYPE_INT32U), offsetof(sl_zcl_over_the_air_bootloading_cluster_image_page_request_command_t, fileOffset),                \
+    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_over_the_air_bootloading_cluster_image_page_request_command_t, maxDataSize),                \
+    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_over_the_air_bootloading_cluster_image_page_request_command_t, pageSize),                  \
+    (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_over_the_air_bootloading_cluster_image_page_request_command_t, responseSpacing),           \
+    (SL_SIGNATURE_FIELD_MASK_BLOB | 8), offsetof(sl_zcl_over_the_air_bootloading_cluster_image_page_request_command_t, requestNodeAddress), \
 }
 
 /** @brief Structure for ZCL command "SetYeardaySchedule" from "Door Lock"
@@ -6521,18 +6585,6 @@ typedef struct __zcl_simple_metering_cluster_request_fast_poll_mode_command {
     2,                                                                                                                           \
     (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_simple_metering_cluster_request_fast_poll_mode_command_t, fastPollUpdatePeriod), \
     (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_simple_metering_cluster_request_fast_poll_mode_command_t, duration),             \
-}
-
-/** @brief Structure for ZCL command "SayHelloFromClient" from "Demo"
- */
-typedef struct __zcl_demo_cluster_say_hello_from_client_command {
-  uint8_t numberOfTimes;
-} sl_zcl_demo_cluster_say_hello_from_client_command_t;
-
-#define sl_zcl_demo_cluster_say_hello_from_client_command_signature  {                                        \
-    2,                                                                                                        \
-    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_demo_cluster_say_hello_from_client_command_t, numberOfTimes), \
-    (ZAP_SIGNATURE_TYPE_INT8U), offsetof(sl_zcl_demo_cluster_say_hello_from_client_command_t, numberOfTimes), \
 }
 
 /** @brief Structure for ZCL command "GetZoneStatus" from "IAS ACE"
@@ -6939,15 +6991,26 @@ typedef struct __zcl_11073_protocol_tunnel_cluster_transfer_apdu_command {
     (ZAP_SIGNATURE_TYPE_OCTET_STRING), offsetof(sl_zcl_11073_protocol_tunnel_cluster_transfer_apdu_command_t, apdu), \
 }
 
-/** @brief Structure for ZCL command "TransferApdu" from "ISO 7816 Protocol Tunnel"
+/** @brief Structure for ZCL command "TransferApduFromClient" from "ISO 7816 Protocol Tunnel"
  */
-typedef struct __zcl_iso_7816_protocol_tunnel_cluster_transfer_apdu_command {
+typedef struct __zcl_iso_7816_protocol_tunnel_cluster_transfer_apdu_from_client_command {
   uint8_t * apdu;
-} sl_zcl_iso_7816_protocol_tunnel_cluster_transfer_apdu_command_t;
+} sl_zcl_iso_7816_protocol_tunnel_cluster_transfer_apdu_from_client_command_t;
 
-#define sl_zcl_iso_7816_protocol_tunnel_cluster_transfer_apdu_command_signature  {                                      \
-    1,                                                                                                                  \
-    (ZAP_SIGNATURE_TYPE_OCTET_STRING), offsetof(sl_zcl_iso_7816_protocol_tunnel_cluster_transfer_apdu_command_t, apdu), \
+#define sl_zcl_iso_7816_protocol_tunnel_cluster_transfer_apdu_from_client_command_signature  {                                      \
+    1,                                                                                                                              \
+    (ZAP_SIGNATURE_TYPE_OCTET_STRING), offsetof(sl_zcl_iso_7816_protocol_tunnel_cluster_transfer_apdu_from_client_command_t, apdu), \
+}
+
+/** @brief Structure for ZCL command "TransferApduFromServer" from "ISO 7816 Protocol Tunnel"
+ */
+typedef struct __zcl_iso_7816_protocol_tunnel_cluster_transfer_apdu_from_server_command {
+  uint8_t * apdu;
+} sl_zcl_iso_7816_protocol_tunnel_cluster_transfer_apdu_from_server_command_t;
+
+#define sl_zcl_iso_7816_protocol_tunnel_cluster_transfer_apdu_from_server_command_signature  {                                      \
+    1,                                                                                                                              \
+    (ZAP_SIGNATURE_TYPE_OCTET_STRING), offsetof(sl_zcl_iso_7816_protocol_tunnel_cluster_transfer_apdu_from_server_command_t, apdu), \
 }
 
 /** @brief Structure for ZCL command "UnlockTokens" from "Configuration Cluster"
@@ -7185,145 +7248,6 @@ typedef struct __zcl_payment_cluster_buy_confirm_command {
     (ZAP_SIGNATURE_TYPE_OCTET_STRING), offsetof(sl_zcl_payment_cluster_buy_confirm_command_t, timestamp),    \
     (ZAP_SIGNATURE_TYPE_INT16U), offsetof(sl_zcl_payment_cluster_buy_confirm_command_t, transId),            \
     (ZAP_SIGNATURE_TYPE_ENUM8), offsetof(sl_zcl_payment_cluster_buy_confirm_command_t, transStatus),         \
-}
-
-/** @brief Structure for ZCL command "ScanNetworks" from "Network Provisioning"
- */
-typedef struct __zcl_network_provisioning_cluster_scan_networks_command {
-  uint8_t * SSID;
-  uint8_t * Breadcrumb;
-  uint32_t TimeoutMs;
-} sl_zcl_network_provisioning_cluster_scan_networks_command_t;
-
-#define sl_zcl_network_provisioning_cluster_scan_networks_command_signature  {                                      \
-    3,                                                                                                              \
-    (ZAP_SIGNATURE_TYPE_OCTET_STRING), offsetof(sl_zcl_network_provisioning_cluster_scan_networks_command_t, SSID), \
-    (ZAP_SIGNATURE_TYPE_INT64U), offsetof(sl_zcl_network_provisioning_cluster_scan_networks_command_t, Breadcrumb), \
-    (ZAP_SIGNATURE_TYPE_INT32U), offsetof(sl_zcl_network_provisioning_cluster_scan_networks_command_t, TimeoutMs),  \
-}
-
-/** @brief Structure for ZCL command "AddThreadNetwork" from "Network Provisioning"
- */
-typedef struct __zcl_network_provisioning_cluster_add_thread_network_command {
-  uint8_t * OperationalDataset;
-  uint8_t * Breadcrumb;
-  uint32_t TimeoutMs;
-} sl_zcl_network_provisioning_cluster_add_thread_network_command_t;
-
-#define sl_zcl_network_provisioning_cluster_add_thread_network_command_signature  {                                                    \
-    3,                                                                                                                                 \
-    (ZAP_SIGNATURE_TYPE_OCTET_STRING), offsetof(sl_zcl_network_provisioning_cluster_add_thread_network_command_t, OperationalDataset), \
-    (ZAP_SIGNATURE_TYPE_INT64U), offsetof(sl_zcl_network_provisioning_cluster_add_thread_network_command_t, Breadcrumb),               \
-    (ZAP_SIGNATURE_TYPE_INT32U), offsetof(sl_zcl_network_provisioning_cluster_add_thread_network_command_t, TimeoutMs),                \
-}
-
-/** @brief Structure for ZCL command "UpdateThreadNetwork" from "Network Provisioning"
- */
-typedef struct __zcl_network_provisioning_cluster_update_thread_network_command {
-  uint8_t * OperationalDataset;
-  uint8_t * Breadcrumb;
-  uint32_t TimeoutMs;
-} sl_zcl_network_provisioning_cluster_update_thread_network_command_t;
-
-#define sl_zcl_network_provisioning_cluster_update_thread_network_command_signature  {                                                    \
-    3,                                                                                                                                    \
-    (ZAP_SIGNATURE_TYPE_OCTET_STRING), offsetof(sl_zcl_network_provisioning_cluster_update_thread_network_command_t, OperationalDataset), \
-    (ZAP_SIGNATURE_TYPE_INT64U), offsetof(sl_zcl_network_provisioning_cluster_update_thread_network_command_t, Breadcrumb),               \
-    (ZAP_SIGNATURE_TYPE_INT32U), offsetof(sl_zcl_network_provisioning_cluster_update_thread_network_command_t, TimeoutMs),                \
-}
-
-/** @brief Structure for ZCL command "RemoveNetwork" from "Network Provisioning"
- */
-typedef struct __zcl_network_provisioning_cluster_remove_network_command {
-  uint8_t * NetworkID;
-  uint8_t * Breadcrumb;
-  uint32_t TimeoutMs;
-} sl_zcl_network_provisioning_cluster_remove_network_command_t;
-
-#define sl_zcl_network_provisioning_cluster_remove_network_command_signature  {                                           \
-    3,                                                                                                                    \
-    (ZAP_SIGNATURE_TYPE_OCTET_STRING), offsetof(sl_zcl_network_provisioning_cluster_remove_network_command_t, NetworkID), \
-    (ZAP_SIGNATURE_TYPE_INT64U), offsetof(sl_zcl_network_provisioning_cluster_remove_network_command_t, Breadcrumb),      \
-    (ZAP_SIGNATURE_TYPE_INT32U), offsetof(sl_zcl_network_provisioning_cluster_remove_network_command_t, TimeoutMs),       \
-}
-
-/** @brief Structure for ZCL command "EnableNetwork" from "Network Provisioning"
- */
-typedef struct __zcl_network_provisioning_cluster_enable_network_command {
-  uint8_t * NetworkID;
-  uint8_t * Breadcrumb;
-  uint32_t TimeoutMs;
-} sl_zcl_network_provisioning_cluster_enable_network_command_t;
-
-#define sl_zcl_network_provisioning_cluster_enable_network_command_signature  {                                           \
-    3,                                                                                                                    \
-    (ZAP_SIGNATURE_TYPE_OCTET_STRING), offsetof(sl_zcl_network_provisioning_cluster_enable_network_command_t, NetworkID), \
-    (ZAP_SIGNATURE_TYPE_INT64U), offsetof(sl_zcl_network_provisioning_cluster_enable_network_command_t, Breadcrumb),      \
-    (ZAP_SIGNATURE_TYPE_INT32U), offsetof(sl_zcl_network_provisioning_cluster_enable_network_command_t, TimeoutMs),       \
-}
-
-/** @brief Structure for ZCL command "DisableNetwork" from "Network Provisioning"
- */
-typedef struct __zcl_network_provisioning_cluster_disable_network_command {
-  uint8_t * NetworkID;
-  uint8_t * Breadcrumb;
-  uint32_t TimeoutMs;
-} sl_zcl_network_provisioning_cluster_disable_network_command_t;
-
-#define sl_zcl_network_provisioning_cluster_disable_network_command_signature  {                                           \
-    3,                                                                                                                     \
-    (ZAP_SIGNATURE_TYPE_OCTET_STRING), offsetof(sl_zcl_network_provisioning_cluster_disable_network_command_t, NetworkID), \
-    (ZAP_SIGNATURE_TYPE_INT64U), offsetof(sl_zcl_network_provisioning_cluster_disable_network_command_t, Breadcrumb),      \
-    (ZAP_SIGNATURE_TYPE_INT32U), offsetof(sl_zcl_network_provisioning_cluster_disable_network_command_t, TimeoutMs),       \
-}
-
-/** @brief Structure for ZCL command "TestNetwork" from "Network Provisioning"
- */
-typedef struct __zcl_network_provisioning_cluster_test_network_command {
-  uint8_t * NetworkID;
-  uint8_t * Breadcrumb;
-  uint32_t TimeoutMs;
-} sl_zcl_network_provisioning_cluster_test_network_command_t;
-
-#define sl_zcl_network_provisioning_cluster_test_network_command_signature  {                                           \
-    3,                                                                                                                  \
-    (ZAP_SIGNATURE_TYPE_OCTET_STRING), offsetof(sl_zcl_network_provisioning_cluster_test_network_command_t, NetworkID), \
-    (ZAP_SIGNATURE_TYPE_INT64U), offsetof(sl_zcl_network_provisioning_cluster_test_network_command_t, Breadcrumb),      \
-    (ZAP_SIGNATURE_TYPE_INT32U), offsetof(sl_zcl_network_provisioning_cluster_test_network_command_t, TimeoutMs),       \
-}
-
-/** @brief Structure for ZCL command "AddWiFiNetwork" from "Network Provisioning"
- */
-typedef struct __zcl_network_provisioning_cluster_add_wi_fi_network_command {
-  uint8_t * SSID;
-  uint8_t * Credentials;
-  uint8_t * Breadcrumb;
-  uint32_t TimeoutMs;
-} sl_zcl_network_provisioning_cluster_add_wi_fi_network_command_t;
-
-#define sl_zcl_network_provisioning_cluster_add_wi_fi_network_command_signature  {                                             \
-    4,                                                                                                                         \
-    (ZAP_SIGNATURE_TYPE_OCTET_STRING), offsetof(sl_zcl_network_provisioning_cluster_add_wi_fi_network_command_t, SSID),        \
-    (ZAP_SIGNATURE_TYPE_OCTET_STRING), offsetof(sl_zcl_network_provisioning_cluster_add_wi_fi_network_command_t, Credentials), \
-    (ZAP_SIGNATURE_TYPE_INT64U), offsetof(sl_zcl_network_provisioning_cluster_add_wi_fi_network_command_t, Breadcrumb),        \
-    (ZAP_SIGNATURE_TYPE_INT32U), offsetof(sl_zcl_network_provisioning_cluster_add_wi_fi_network_command_t, TimeoutMs),         \
-}
-
-/** @brief Structure for ZCL command "UpdateWiFiNetwork" from "Network Provisioning"
- */
-typedef struct __zcl_network_provisioning_cluster_update_wi_fi_network_command {
-  uint8_t * SSID;
-  uint8_t * Credentials;
-  uint8_t * Breadcrumb;
-  uint32_t TimeoutMs;
-} sl_zcl_network_provisioning_cluster_update_wi_fi_network_command_t;
-
-#define sl_zcl_network_provisioning_cluster_update_wi_fi_network_command_signature  {                                             \
-    4,                                                                                                                            \
-    (ZAP_SIGNATURE_TYPE_OCTET_STRING), offsetof(sl_zcl_network_provisioning_cluster_update_wi_fi_network_command_t, SSID),        \
-    (ZAP_SIGNATURE_TYPE_OCTET_STRING), offsetof(sl_zcl_network_provisioning_cluster_update_wi_fi_network_command_t, Credentials), \
-    (ZAP_SIGNATURE_TYPE_INT64U), offsetof(sl_zcl_network_provisioning_cluster_update_wi_fi_network_command_t, Breadcrumb),        \
-    (ZAP_SIGNATURE_TYPE_INT32U), offsetof(sl_zcl_network_provisioning_cluster_update_wi_fi_network_command_t, TimeoutMs),         \
 }
 
 /** @brief Structure for ZCL command "EphemeralDataRequest" from "Key Establishment"
@@ -7750,7 +7674,7 @@ typedef struct __zcl_prepayment_cluster_get_prepay_snapshot_command {
 typedef struct __zcl_green_power_cluster_gp_pairing_search_command {
   uint16_t options;
   uint32_t gpdSrcId;
-  uint8_t * gpdIeee;
+  uint8_t gpdIeee[8];
   uint8_t endpoint;
 } sl_zcl_green_power_cluster_gp_pairing_search_command_t;
 
@@ -7759,7 +7683,7 @@ typedef struct __zcl_green_power_cluster_gp_pairing_search_command {
 typedef struct __zcl_green_power_cluster_gp_notification_command {
   uint16_t options;
   uint32_t gpdSrcId;
-  uint8_t * gpdIeee;
+  uint8_t gpdIeee[8];
   uint8_t gpdEndpoint;
   uint32_t gpdSecurityFrameCounter;
   uint8_t gpdCommandId;
@@ -7773,7 +7697,7 @@ typedef struct __zcl_green_power_cluster_gp_notification_command {
 typedef struct __zcl_green_power_cluster_gp_commissioning_notification_command {
   uint16_t options;
   uint32_t gpdSrcId;
-  uint8_t * gpdIeee;
+  uint8_t gpdIeee[8];
   uint8_t endpoint;
   uint32_t gpdSecurityFrameCounter;
   uint8_t gpdCommandId;
@@ -7788,7 +7712,7 @@ typedef struct __zcl_green_power_cluster_gp_commissioning_notification_command {
 typedef struct __zcl_green_power_cluster_gp_translation_table_update_command {
   uint16_t options;
   uint32_t gpdSrcId;
-  uint8_t * gpdIeee;
+  uint8_t gpdIeee[8];
   uint8_t endpoint;
   /* TYPE WARNING: GpTranslationTableUpdateTranslation array defaults to */ uint8_t * translations;
 } sl_zcl_green_power_cluster_gp_translation_table_update_command_t;
@@ -7798,14 +7722,14 @@ typedef struct __zcl_green_power_cluster_gp_translation_table_update_command {
 typedef struct __zcl_green_power_cluster_gp_pairing_command {
   uint32_t options;
   uint32_t gpdSrcId;
-  uint8_t * gpdIeee;
+  uint8_t gpdIeee[8];
   uint8_t endpoint;
-  uint8_t * sinkIeeeAddress;
+  uint8_t sinkIeeeAddress[8];
   uint16_t sinkNwkAddress;
   uint16_t sinkGroupId;
   uint8_t deviceId;
   uint32_t gpdSecurityFrameCounter;
-  /* TYPE WARNING: security_key defaults to */ uint8_t *  gpdKey;
+  uint8_t gpdKey[16];
   uint16_t assignedAlias;
   uint8_t groupcastRadius;
 } sl_zcl_green_power_cluster_gp_pairing_command_t;
@@ -7815,7 +7739,7 @@ typedef struct __zcl_green_power_cluster_gp_pairing_command {
 typedef struct __zcl_green_power_cluster_gp_proxy_table_request_command {
   uint8_t options;
   uint32_t gpdSrcId;
-  uint8_t * gpdIeee;
+  uint8_t gpdIeee[8];
   uint8_t endpoint;
   uint8_t index;
 } sl_zcl_green_power_cluster_gp_proxy_table_request_command_t;
@@ -7826,7 +7750,7 @@ typedef struct __zcl_green_power_cluster_gp_pairing_configuration_command {
   uint8_t actions;
   uint16_t options;
   uint32_t gpdSrcId;
-  uint8_t * gpdIeee;
+  uint8_t gpdIeee[8];
   uint8_t endpoint;
   uint8_t deviceId;
   uint8_t groupListCount;
@@ -7835,7 +7759,7 @@ typedef struct __zcl_green_power_cluster_gp_pairing_configuration_command {
   uint8_t groupcastRadius;
   uint8_t securityOptions;
   uint32_t gpdSecurityFrameCounter;
-  /* TYPE WARNING: security_key defaults to */ uint8_t *  gpdSecurityKey;
+  uint8_t gpdSecurityKey[16];
   uint8_t numberOfPairedEndpoints;
   /* TYPE WARNING: INT8U array defaults to */ uint8_t * pairedEndpoints;
   uint8_t applicationInformation;
@@ -7861,7 +7785,7 @@ typedef struct __zcl_green_power_cluster_gp_response_command {
   uint16_t tempMasterShortAddress;
   uint8_t tempMasterTxChannel;
   uint32_t gpdSrcId;
-  uint8_t * gpdIeee;
+  uint8_t gpdIeee[8];
   uint8_t endpoint;
   uint8_t gpdCommandId;
   uint8_t * gpdCommandPayload;
@@ -7880,7 +7804,7 @@ typedef struct __zcl_green_power_cluster_gp_proxy_commissioning_mode_command {
 typedef struct __zcl_green_power_cluster_gp_notification_response_command {
   uint8_t options;
   uint32_t gpdSrcId;
-  uint8_t * gpdIeee;
+  uint8_t gpdIeee[8];
   uint8_t endpoint;
   uint32_t gpdSecurityFrameCounter;
 } sl_zcl_green_power_cluster_gp_notification_response_command_t;
@@ -7890,7 +7814,7 @@ typedef struct __zcl_green_power_cluster_gp_notification_response_command {
 typedef struct __zcl_green_power_cluster_gp_tunneling_stop_command {
   uint8_t options;
   uint32_t gpdSrcId;
-  uint8_t * gpdIeee;
+  uint8_t gpdIeee[8];
   uint8_t endpoint;
   uint32_t gpdSecurityFrameCounter;
   uint16_t gppShortAddress;
@@ -7931,7 +7855,7 @@ typedef struct __zcl_sl_works_with_all_hubs_cluster_powering_on_notification_com
 typedef struct __zcl_green_power_cluster_gp_sink_table_request_command {
   uint8_t options;
   uint32_t gpdSrcId;
-  uint8_t * gpdIeee;
+  uint8_t gpdIeee[8];
   uint8_t endpoint;
   uint8_t index;
 } sl_zcl_green_power_cluster_gp_sink_table_request_command_t;
@@ -7953,15 +7877,6 @@ typedef struct __zcl_sl_works_with_all_hubs_cluster_use_trust_center_for_cluster
   uint8_t clusterStatusLength;
   /* TYPE WARNING: WwahClusterStatusToUseTC array defaults to */ uint8_t * clusterStatus;
 } sl_zcl_sl_works_with_all_hubs_cluster_use_trust_center_for_cluster_server_response_command_t;
-
-/** @brief Structure for ZCL command "ScanNetworksResp" from "Network Provisioning"
- */
-typedef struct __zcl_network_provisioning_cluster_scan_networks_resp_command {
-  uint8_t ErrorCode;
-  uint8_t * DebugText;
-  /* TYPE WARNING: WiFiInterfaceScanResult array defaults to */ uint8_t * WiFiScanResults;
-  /* TYPE WARNING: ThreadInterfaceScanResult array defaults to */ uint8_t * ThreadScanResults;
-} sl_zcl_network_provisioning_cluster_scan_networks_resp_command_t;
 
 /** @brief Structure for ZCL command "EnableApsLinkKeyAuthorization" from "SL Works With All Hubs"
  */

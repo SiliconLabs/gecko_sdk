@@ -33,19 +33,8 @@
 // *****************************************************************************
 // Globals
 
-#ifdef UC_BUILD
 #include "concentrator-config.h"
-#ifdef EZSP_HOST
-#define ezspIncomingRouteErrorHandler emAfPluginConcentratorIncomingRouteErrorCallback
-#else // !EZSP_HOST
-#define emberIncomingRouteErrorHandler emAfPluginConcentratorIncomingRouteErrorCallback
-#endif // EZSP_HOST
 // TODO: It appears that the "update" event is not used at all in the code.
-// Once we clean up the UC_BUILD we should just remove it completely.
-#else // !UC_BUILD
-EmberEventControl emberAfPluginConcentratorUpdateEventControl;
-#define myEvent emberAfPluginConcentratorUpdateEventControl
-#endif // UC_BUILD
 
 #define MIN_QS (EMBER_AF_PLUGIN_CONCENTRATOR_MIN_TIME_BETWEEN_BROADCASTS_SECONDS << 2)
 #define MAX_QS (EMBER_AF_PLUGIN_CONCENTRATOR_MAX_TIME_BETWEEN_BROADCASTS_SECONDS << 2)
@@ -66,7 +55,7 @@ typedef enum {
   #error "Concentrator support only allowed on routers and coordinators."
 #endif
 
-extern uint8_t emSupportedNetworks;
+extern uint8_t sli_zigbee_supported_networks;
 
 //This is used to store the sourceRouteOverhead to our last sender
 //It defaults to 0xFF if no valid sourceRoute is found. When available, it
@@ -81,21 +70,21 @@ static uint8_t sourceRouteOverheads[EMBER_SUPPORTED_NETWORKS];
 
 // EMINSIGHT-2484 - allow applications to set whether or not they want
 // routers to send mtorrs.
-EmberAfPluginConcentratorRouterBehavior emAfPluginConcentratorRouterBehaviors[EMBER_SUPPORTED_NETWORKS];
+EmberAfPluginConcentratorRouterBehavior sli_zigbee_af_concentrator_router_behaviors[EMBER_SUPPORTED_NETWORKS];
 
 // *****************************************************************************
 // Functions
 
-void emberAfPluginConcentratorInitCallback(SLXU_INIT_ARG)
+void emberAfPluginConcentratorInitCallback(uint8_t init_level)
 {
-  SLXU_INIT_UNUSED_ARG;
+  (void)init_level;
 
-  for (uint8_t i = 0; i < emSupportedNetworks; i++) {
+  for (uint8_t i = 0; i < sli_zigbee_supported_networks; i++) {
 #if defined(EZSP_HOST)
     targetIds[i] = EMBER_UNKNOWN_NODE_ID;
     sourceRouteOverheads[i] = EZSP_SOURCE_ROUTE_OVERHEAD_UNKNOWN;
 #endif // EZSP_HOST
-    emAfPluginConcentratorRouterBehaviors[i] = EMBER_AF_PLUGIN_CONCENTRATOR_DEFAULT_ROUTER_BEHAVIOR;
+    sli_zigbee_af_concentrator_router_behaviors[i] = EMBER_AF_PLUGIN_CONCENTRATOR_DEFAULT_ROUTER_BEHAVIOR;
   }
 }
 
@@ -154,14 +143,6 @@ uint8_t emberAfGetSourceRouteOverheadCallback(EmberNodeId destination)
 #endif
 }
 
-void emberIncomingRouteErrorHandler(EmberStatus status, EmberNodeId target)
-{
-}
-
-void ezspIncomingRouteErrorHandler(EmberStatus status, EmberNodeId target)
-{
-}
-
 void emberAfPluginConcentratorStackStatusCallback(EmberStatus status)
 {
   (void)emberSetCurrentNetwork(emberGetCallbackNetwork());
@@ -171,7 +152,7 @@ void emberAfPluginConcentratorStackStatusCallback(EmberStatus status)
       && !emberStackIsPerformingRejoin()) {
     //now we clear/init the source route table everytime the network is up , therefore we do clear the source route table on rejoin.
   } else if (status == EMBER_NETWORK_UP) {
-    if ((emAfPluginConcentratorRouterBehavior == EMBER_AF_PLUGIN_CONCENTRATOR_ROUTER_BEHAVIOR_FULL)
+    if ((sli_zigbee_af_concentrator_router_behavior == EMBER_AF_PLUGIN_CONCENTRATOR_ROUTER_BEHAVIOR_FULL)
         || (emberAfGetNodeType(&nodeType) == EMBER_SUCCESS
             && nodeType == EMBER_COORDINATOR)) {
       emberSetConcentrator(true,

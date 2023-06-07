@@ -25,32 +25,32 @@
 //------------------------------------------------------------------------------
 // Globals
 
-EmberEvent emZllTouchLinkEvent;
+EmberEvent sli_zigbee_zll_touch_link_event;
 
-const EmberLibraryStatus emZllLibraryStatus = EMBER_LIBRARY_IS_STUB;
+const EmberLibraryStatus sli_zigbee_zll_library_status = EMBER_LIBRARY_IS_STUB;
 
 //------------------------------------------------------------------------------
 // Forward Declarations
 
 //------------------------------------------------------------------------------
 
-EmberStatus emZllSendScanRequest(void)
+EmberStatus sli_zigbee_zll_send_scan_request(void)
 {
   return EMBER_LIBRARY_NOT_PRESENT;
 }
 
-uint8_t emGetNextScanChannel(uint8_t currentChannel)
+uint8_t sli_zigbee_get_next_scan_channel(uint8_t currentChannel)
 {
   return currentChannel + 1;
 }
 
-bool emGoToNextScanChannel(uint8_t currentChannel)
+bool sli_zigbee_go_to_next_scan_channel(uint8_t currentChannel)
 {
   (void)currentChannel;
   return true;
 }
 
-bool emZllScanComplete(void)
+bool sli_zigbee_zll_scan_complete(void)
 {
   return false;
 }
@@ -59,24 +59,24 @@ void emberZllClearTokens(void)
 {
 }
 
-bool emProcessZllInterpanStackMessage(const EmberMacFilterMatchStruct* macFilterMatchStruct)
+bool sli_zigbee_process_zll_interpan_stack_message(const EmberMacFilterMatchStruct* macFilterMatchStruct)
 {
   (void)macFilterMatchStruct;
   return false;
 }
 
-bool emZllStackStatusHandler(EmberStatus status)
+bool sli_zigbee_zll_stack_status_handler(EmberStatus status)
 {
   (void)status;
   return false;
 }
 
-bool emZllWaitingForInterpanResponse(void)
+bool sli_zigbee_zll_waiting_for_interpan_response(void)
 {
   return false;
 }
 
-void emZllDeviceAnnounceHandler(EmberNodeId source, EmberNodeId nodeId, uint8_t capabilities)
+void sli_zigbee_zll_device_announce_handler(EmberNodeId source, EmberNodeId nodeId, uint8_t capabilities)
 {
   (void)source;
   (void)nodeId;
@@ -88,7 +88,7 @@ bool emberIsZllNetwork(void)
   return false;
 }
 
-void emZllInit(void)
+void sli_zigbee_zll_init(void)
 {
 }
 
@@ -185,7 +185,7 @@ EmberStatus emberZllSetPolicy(EmberZllPolicy policy)
   return EMBER_LIBRARY_NOT_PRESENT;
 }
 
-EmberNodeType emZllGetNodeType(void)
+EmberNodeType sli_zigbee_zll_get_node_type(void)
 {
   return EMBER_UNKNOWN_DEVICE;
 }
@@ -200,7 +200,7 @@ bool emberZllRxOnWhenIdleGetActive(void)
   return false;
 }
 
-void emZllSuspendRxOnWhenIdle(bool mode)
+void sli_zigbee_zll_suspend_rx_on_when_idle(bool mode)
 {
   (void)mode;
 }
@@ -225,7 +225,7 @@ void emberSetZllSecondaryChannelMask(uint32_t mask)
   (void)mask;
 }
 
-void emMarkZllBuffers(void)
+void sli_zigbee_mark_zll_buffers(void)
 {
 }
 

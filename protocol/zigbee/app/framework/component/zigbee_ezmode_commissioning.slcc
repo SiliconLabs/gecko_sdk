@@ -26,7 +26,7 @@ template_contribution:
   - name: zigbee_af_callback
     value:
       callback_type: event_init
-      function_name: emAfPluginEzmodeCommissioningInitCallback
+      function_name: sli_zigbee_af_ezmode_commissioning_init_callback
   - name: cli_group
     value:
       group: plugin

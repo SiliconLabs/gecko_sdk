@@ -20,15 +20,11 @@
 #include "prepayment-debt-log.h"
 #include "prepayment-debt-schedule.h"
 
-#ifdef UC_BUILD
 #include "prepayment-server-config.h"
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
-#include "zap-cluster-command-parser.h"
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_GBCS_COMPATIBILITY
-#define SL_CATALOG_ZIGBEE_GBCS_COMPATIBILITY_PRESENT
 #endif
-#endif // UC_BUILD
+#include "zap-cluster-command-parser.h"
 
 // Each entry stores information from a debt collection event where an amount was applied towards debt reduction.
 typedef struct {
@@ -36,7 +32,7 @@ typedef struct {
   uint32_t amountCollected;
   uint32_t outstandingDebt;
   uint8_t  debtType;    // Indicates if the entry is for Debt #1, #2, or #3
-} emDebtLogEntry;
+} sli_zigbee_af_debt_log_entry;
 
 #define DEBT_LOG_TABLE_SIZE  EMBER_AF_PLUGIN_PREPAYMENT_SERVER_DEBT_LOG_CAPACITY
 #define DEBT_TYPE_INVALID    0xFE
@@ -55,7 +51,7 @@ enum {
   CHANGE_DEBT_AMOUNT_TYPE_3_INC = 0x05,
 };
 
-static emDebtLogEntry DebtLogTable[DEBT_LOG_TABLE_SIZE];
+static sli_zigbee_af_debt_log_entry DebtLogTable[DEBT_LOG_TABLE_SIZE];
 
 static uint8_t getNextAvailableDebtLogIndex(void);
 static uint8_t getMostRecentDebtLogEntry(uint8_t debtType);
@@ -316,8 +312,6 @@ static void emberAfPluginPrepaymentServerPublishDebtLog(EmberNodeId nodeId, uint
 //-----------------------
 // ZCL commands callbacks
 
-#ifdef UC_BUILD
-
 // Handles the prepayment Change Debt command.
 bool emberAfPrepaymentClusterChangeDebtCallback(EmberAfClusterCommand *cmd)
 {
@@ -454,143 +448,6 @@ bool emberAfPrepaymentClusterGetDebtRepaymentLogCallback(EmberAfClusterCommand *
 
   return true;
 }
-
-#else // !UC_BUILD
-
-// Handles the prepayment Change Debt command.
-bool emberAfPrepaymentClusterChangeDebtCallback(uint32_t issuerEventId,
-                                                uint8_t* debtLabel,
-                                                uint32_t debtAmount,
-                                                uint8_t debtRecoveryMethod,
-                                                uint8_t debtAmountType,
-                                                uint32_t debtRecoveryStartTime,
-                                                uint16_t debtRecoveryCollectionTime,
-                                                uint8_t debtRecoveryFrequency,
-                                                uint32_t debtRecoveryAmount,
-                                                uint16_t debtRecoveryBalancePercentage)
-{
-  uint8_t endpoint;
-  uint16_t attributeId;
-  uint8_t  attributeGroupOffset;
-  uint32_t currentDebt;
-  uint8_t  debtType;
-
-  endpoint = emberAfCurrentEndpoint();
-
-  // Look at the debtAmountType field to see how to process the new debt -
-  // could be applied incrementally or absolutely.
-  // The debtAmountType also indicates which debt type is being updated.
-
-  if ( debtAmountType <= CHANGE_DEBT_AMOUNT_TYPE_1_INC ) {
-    attributeGroupOffset = 0;   // DEBT_#1
-    debtType = 0;
-  } else if ( debtAmountType <= CHANGE_DEBT_AMOUNT_TYPE_2_INC ) {
-    attributeGroupOffset = DEBT_RECOVERY_GROUP_DELTA;   // DEBT_#2
-    debtType = 1;
-  } else if ( debtAmountType <= CHANGE_DEBT_AMOUNT_TYPE_3_INC ) {
-    attributeGroupOffset = (DEBT_RECOVERY_GROUP_DELTA * 2);   // DEBT_#3
-    debtType = 2;
-  } else {
-    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_NOT_FOUND);
-    return true;
-  }
-
-  // TODO:  Ensure the event Id is > any previous event ID for this debt type.
-
-  currentDebt = 0;
-  if ( (debtAmount != DEBT_ATTRIB_NO_CHANGE32) && (debtAmountType & DEBT_TYPE_INCREMENT_FLAG) ) {
-    attributeId = ZCL_DEBT_AMOUNT_1_ATTRIBUTE_ID + attributeGroupOffset;
-    emberAfReadAttribute(endpoint, ZCL_PREPAYMENT_CLUSTER_ID, attributeId,
-                         CLUSTER_MASK_SERVER, (uint8_t *)&currentDebt, 4, NULL);
-
-    debtAmount += currentDebt;    // Increment new value to the current debt.
-  }
-
-  // Update attribute values, but only if they are not set to NO_CHANGES values
-  if ( debtLabel[0] != 0xFF ) {
-    attributeId = ZCL_DEBT_LABEL_1_ATTRIBUTE_ID + attributeGroupOffset;
-    (void) emberAfWriteAttribute(endpoint, ZCL_PREPAYMENT_CLUSTER_ID, attributeId, CLUSTER_MASK_SERVER,
-                                 debtLabel, ZCL_OCTET_STRING_ATTRIBUTE_TYPE);
-  }
-
-  if ( debtAmount != DEBT_ATTRIB_NO_CHANGE32 ) {
-    attributeId = ZCL_DEBT_AMOUNT_1_ATTRIBUTE_ID + attributeGroupOffset;
-    (void) emberAfWriteAttribute(endpoint, ZCL_PREPAYMENT_CLUSTER_ID, attributeId, CLUSTER_MASK_SERVER,
-                                 (uint8_t *)&debtAmount, ZCL_INT32U_ATTRIBUTE_TYPE);
-  }
-
-  if ( debtRecoveryMethod != DEBT_ATTRIB_NO_CHANGE8 ) {
-    attributeId = ZCL_DEBT_RECOVERY_METHOD_1_ATTRIBUTE_ID + attributeGroupOffset;
-    (void) emberAfWriteAttribute(endpoint, ZCL_PREPAYMENT_CLUSTER_ID, attributeId, CLUSTER_MASK_SERVER,
-                                 &debtRecoveryMethod, ZCL_INT8U_ATTRIBUTE_TYPE);
-  }
-
-  if ( debtRecoveryStartTime != DEBT_ATTRIB_NO_CHANGE32 ) {
-    attributeId = ZCL_DEBT_RECOVERY_START_TIME_1_ATTRIBUTE_ID + attributeGroupOffset;
-    (void) emberAfWriteAttribute(endpoint, ZCL_PREPAYMENT_CLUSTER_ID, attributeId, CLUSTER_MASK_SERVER,
-                                 (uint8_t *)&debtRecoveryStartTime, ZCL_UTC_TIME_ATTRIBUTE_TYPE);
-  } else {
-    attributeId = ZCL_DEBT_RECOVERY_START_TIME_1_ATTRIBUTE_ID + attributeGroupOffset;
-    emberAfReadAttribute(endpoint, ZCL_PREPAYMENT_CLUSTER_ID, attributeId, CLUSTER_MASK_SERVER,
-                         (uint8_t *)&debtRecoveryStartTime, 4, NULL);
-  }
-
-  if ( debtRecoveryCollectionTime != DEBT_ATTRIB_NO_CHANGE16 ) {
-    attributeId = ZCL_DEBT_RECOVERY_COLLECTION_TIME_1_ATTRIBUTE_ID + attributeGroupOffset;
-    (void) emberAfWriteAttribute(endpoint, ZCL_PREPAYMENT_CLUSTER_ID, attributeId, CLUSTER_MASK_SERVER,
-                                 (uint8_t *)&debtRecoveryCollectionTime, ZCL_INT16U_ATTRIBUTE_TYPE);
-  } else {
-    attributeId = ZCL_DEBT_RECOVERY_COLLECTION_TIME_1_ATTRIBUTE_ID + attributeGroupOffset;
-    emberAfReadAttribute(endpoint, ZCL_PREPAYMENT_CLUSTER_ID, attributeId, CLUSTER_MASK_SERVER,
-                         (uint8_t *)&debtRecoveryCollectionTime, 2, NULL);
-  }
-
-  if ( debtRecoveryFrequency != DEBT_ATTRIB_NO_CHANGE8 ) {
-    attributeId = ZCL_DEBT_RECOVERY_FREQUENCY_1_ATTRIBUTE_ID + attributeGroupOffset;
-    (void) emberAfWriteAttribute(endpoint, ZCL_PREPAYMENT_CLUSTER_ID, attributeId, CLUSTER_MASK_SERVER,
-                                 &debtRecoveryFrequency, ZCL_INT8U_ATTRIBUTE_TYPE);
-  } else {
-    attributeId = ZCL_DEBT_RECOVERY_FREQUENCY_1_ATTRIBUTE_ID + attributeGroupOffset;
-    emberAfReadAttribute(endpoint, ZCL_PREPAYMENT_CLUSTER_ID, attributeId, CLUSTER_MASK_SERVER,
-                         &debtRecoveryFrequency, 1, NULL);
-  }
-
-  if ( debtRecoveryAmount != DEBT_ATTRIB_NO_CHANGE32 ) {
-    attributeId = ZCL_DEBT_RECOVERY_AMOUNT_1_ATTRIBUTE_ID + attributeGroupOffset;
-    (void) emberAfWriteAttribute(endpoint, ZCL_PREPAYMENT_CLUSTER_ID, attributeId, CLUSTER_MASK_SERVER,
-                                 (uint8_t *)&debtRecoveryAmount, ZCL_INT32U_ATTRIBUTE_TYPE);
-  }
-
-  if ( debtRecoveryBalancePercentage != DEBT_ATTRIB_NO_CHANGE16 ) {
-    attributeId = ZCL_DEBT_RECOVERY_TOP_UP_PERCENTAGE_1_ATTRIBUTE_ID + attributeGroupOffset;
-    (void) emberAfWriteAttribute(endpoint, ZCL_PREPAYMENT_CLUSTER_ID, attributeId, CLUSTER_MASK_SERVER,
-                                 (uint8_t *)&debtRecoveryBalancePercentage, ZCL_INT16U_ATTRIBUTE_TYPE);
-  }
-  emberAfPrepaymentClusterPrintln("RX Change Debt");
-  emberAfPluginPrepaymentServerScheduleDebtRepayment(endpoint, issuerEventId, debtType, debtRecoveryCollectionTime,
-                                                     debtRecoveryStartTime, debtRecoveryFrequency);
-  return true;
-}
-
-// Handles the Get Debt Repayment Log command and sends a "Publish Debt Log" response
-// command that provides the requested info from the debt log.
-bool emberAfPrepaymentClusterGetDebtRepaymentLogCallback(uint32_t latestEndTime, uint8_t numberOfDebts, uint8_t debtType)
-{
-  EmberNodeId nodeId;
-  uint8_t srcEndpoint, dstEndpoint;
-
-  emberAfPrepaymentClusterPrintln("RX: GetDebtLog, endTime=0x%4x, numDebts=%d, debtType=%d", latestEndTime, numberOfDebts, debtType);
-  nodeId = emberAfCurrentCommand()->source;
-  srcEndpoint = emberAfGetCommandApsFrame()->destinationEndpoint;
-  dstEndpoint = emberAfGetCommandApsFrame()->sourceEndpoint;
-  emberAfSetCommandEndpoints(srcEndpoint, dstEndpoint);
-
-  emberAfPluginSendPublishDebtLog(nodeId, srcEndpoint, dstEndpoint, latestEndTime, numberOfDebts, debtType);
-
-  return true;
-}
-
-#endif // UC_BUILD
 
 void emberAfPluginPrepaymentPrintDebtLogIndex(uint8_t index)
 {

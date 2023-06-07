@@ -18,6 +18,18 @@
  * @{
  */
 
+/**
+ * Initiates the transmission of a multicast request
+ * 
+ * @param[in] pProfile pointer to AGI profile or NULL for lifeline
+ * @param[in] endpoint source endpoint
+ * @param[in] pcmdGrp command class and command
+ * @param[in] pPayload payload
+ * @param[in] size size of payload
+ * @param[in] fSupervisionEnable enable or not supervision
+ * @param[in] pCbFunc Callback function to be called when transmission is done/failed.
+ * @return JOB_STATUS Status of the job.
+ */
 JOB_STATUS cc_engine_multicast_request(const AGI_PROFILE* pProfile,
                                        uint8_t endpoint,
                                        CMD_CLASS_GRP *pcmdGrp,

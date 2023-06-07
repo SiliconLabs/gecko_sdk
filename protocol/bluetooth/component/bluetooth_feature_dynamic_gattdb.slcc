@@ -18,7 +18,7 @@ description: >
 
   See the configuration of this component and the Bluetooth API reference manual
   section "GATT Database" for more details.
-category: "Bluetooth|Stack"
+category: Bluetooth|Bluetooth Host (Stack)|Features with Commands and Events
 quality: "production"
 root_path: "protocol/bluetooth"
 config_file:
@@ -27,6 +27,8 @@ requires:
   - name: "bluetooth_stack"
 provides:
   - name: "bluetooth_feature_dynamic_gattdb"
+  - name: "bluetooth_gatt_database"
+    allow_multiple: true
 template_contribution:
   - name: component_catalog
     value: bluetooth_feature_dynamic_gattdb

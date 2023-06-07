@@ -1,0 +1,55 @@
+!!omap
+- id: brd2506a
+- label: BRD2506A
+- package: platform
+- description: Board support for BRD2506A.
+- category: Platform|Board|Starter Kit
+- quality: production
+- requires:
+  - name: efm32pg28b310f1024im68
+  - name: brd2506a_config
+- provides:
+  - name: brd2506a
+  - name: hardware_board
+  - name: hardware_board_stk
+  - name: hardware_board_from_stk
+  - name: hardware_board_from_pg28-pk2506a
+  - name: hardware_board_has_vcom
+  - name: hardware_board_has_hfxo
+  - name: hardware_board_has_lfxo
+- recommends:
+  - id: iostream_eusart
+    instance:
+    - vcom
+  - id: bootloader_uart_driver
+  - id: i2cspm
+    instance:
+    - sensor
+  - id: simple_led
+    instance:
+    - led0
+    - led1
+  - id: simple_button
+    instance:
+    - btn0
+    - btn1
+  - id: bootloader_spi_peripheral_usart_driver
+- template_contribution: []
+- define:
+  - name: SL_BOARD_NAME
+    value: '"BRD2506A"'
+  - name: SL_BOARD_REV
+    value: '"A02"'
+- tag:
+  - board:pn:BRD2506
+  - board:variant:A
+  - board:revision:A02
+  - board:device:efm32pg28b310f1024im68
+  - hardware:has:vcom
+  - hardware:has:sensor:si7021
+  - hardware:has:led:2
+  - hardware:has:button:2
+  - hardware:has:lcd
+  - hardware:has:exp_header:spi
+  - hardware:has:exp_header:uart
+  - hardware:has:exp_header:i2c

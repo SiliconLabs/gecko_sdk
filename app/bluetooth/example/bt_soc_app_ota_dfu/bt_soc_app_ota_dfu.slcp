@@ -38,7 +38,7 @@ component:
     instance:
       - vcom
   - id: mpu
-  - id: simple_timer
+  - id: app_timer
   - id: bt_post_build
 
 source:

@@ -584,7 +584,7 @@ void formatStructEmberPerDeviceDutyCycleIntoBytes(uint8_t maxDevices,
   }
 }
 
-void emAfFetchOrAppend(bool fetch, const char * format, ...)
+void sli_zigbee_af_fetch_or_append(bool fetch, const char * format, ...)
 {
   char *c = (char *)format;
   uintptr_t ptr;

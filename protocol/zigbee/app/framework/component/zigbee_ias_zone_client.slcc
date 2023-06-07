@@ -41,13 +41,13 @@ template_contribution:
     value:
       group: ias-zone-client
       name: print-servers
-      handler: emAfPluginIasZoneClientPrintServersCommand
+      handler: sli_zigbee_af_ias_zone_client_print_servers_command
       help: Prints the known IAS Zone Servers.
   - name: cli_command
     value:
       group: ias-zone-client
       name: clear-all
-      handler: emAfPluginIasZoneClientClearAllServersCommand
+      handler: sli_zigbee_af_ias_zone_client_clear_all_servers_command
       help: Clears all known IAS Zone Servers from a local device.
   - name: cluster_functions
     value:

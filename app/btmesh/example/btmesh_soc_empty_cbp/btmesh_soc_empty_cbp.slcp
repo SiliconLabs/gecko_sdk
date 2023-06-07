@@ -60,10 +60,10 @@ other_file:
 configuration:
   - name: APP_LOG_LEVEL
     value: "APP_LOG_LEVEL_INFO"
+  - name: NVM3_DEFAULT_NVM_SIZE
+    value: "0x6000"
   - name: SL_BOARD_ENABLE_VCOM
     value: "1"
-    condition:
-      - iostream_usart
   - name: SL_BTMESH_CONFIG_MAX_PROV_BEARERS
     value: "3"
   - name: SL_BTMESH_PROVISIONEE_INIT_PROV_RECORDS_CFG_VAL

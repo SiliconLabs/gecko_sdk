@@ -124,10 +124,7 @@ exit:
     return error;
 }
 
-Instance &Tcp::Endpoint::GetInstance(void) const
-{
-    return AsNonConst(AsCoreType(GetTcb().instance));
-}
+Instance &Tcp::Endpoint::GetInstance(void) const { return AsNonConst(AsCoreType(GetTcb().instance)); }
 
 const SockAddr &Tcp::Endpoint::GetLocalAddress(void) const
 {
@@ -172,7 +169,7 @@ exit:
 Error Tcp::Endpoint::Connect(const SockAddr &aSockName, uint32_t aFlags)
 {
     Error               error = kErrorNone;
-    struct tcpcb &      tp    = GetTcb();
+    struct tcpcb       &tp    = GetTcb();
     struct sockaddr_in6 sin6p;
 
     OT_UNUSED_VARIABLE(aFlags);
@@ -287,10 +284,7 @@ exit:
     return error;
 }
 
-bool Tcp::Endpoint::IsClosed(void) const
-{
-    return GetTcb().t_state == TCP6S_CLOSED;
-}
+bool Tcp::Endpoint::IsClosed(void) const { return GetTcb().t_state == TCP6S_CLOSED; }
 
 uint8_t Tcp::Endpoint::TimerFlagToIndex(uint8_t aTimerFlag)
 {
@@ -483,25 +477,16 @@ size_t Tcp::Endpoint::GetInFlightBytes(void) const
     return tp.snd_max - tp.snd_una;
 }
 
-size_t Tcp::Endpoint::GetBacklogBytes(void) const
-{
-    return GetSendBufferBytes() - GetInFlightBytes();
-}
+size_t Tcp::Endpoint::GetBacklogBytes(void) const { return GetSendBufferBytes() - GetInFlightBytes(); }
 
-Address &Tcp::Endpoint::GetLocalIp6Address(void)
-{
-    return *reinterpret_cast<Address *>(&GetTcb().laddr);
-}
+Address &Tcp::Endpoint::GetLocalIp6Address(void) { return *reinterpret_cast<Address *>(&GetTcb().laddr); }
 
 const Address &Tcp::Endpoint::GetLocalIp6Address(void) const
 {
     return *reinterpret_cast<const Address *>(&GetTcb().laddr);
 }
 
-Address &Tcp::Endpoint::GetForeignIp6Address(void)
-{
-    return *reinterpret_cast<Address *>(&GetTcb().faddr);
-}
+Address &Tcp::Endpoint::GetForeignIp6Address(void) { return *reinterpret_cast<Address *>(&GetTcb().faddr); }
 
 const Address &Tcp::Endpoint::GetForeignIp6Address(void) const
 {
@@ -543,10 +528,7 @@ exit:
     return error;
 }
 
-Instance &Tcp::Listener::GetInstance(void) const
-{
-    return AsNonConst(AsCoreType(GetTcbListen().instance));
-}
+Instance &Tcp::Listener::GetInstance(void) const { return AsNonConst(AsCoreType(GetTcbListen().instance)); }
 
 Error Tcp::Listener::Listen(const SockAddr &aSockName)
 {
@@ -586,15 +568,9 @@ exit:
     return error;
 }
 
-bool Tcp::Listener::IsClosed(void) const
-{
-    return GetTcbListen().t_state == TCP6S_CLOSED;
-}
+bool Tcp::Listener::IsClosed(void) const { return GetTcbListen().t_state == TCP6S_CLOSED; }
 
-Address &Tcp::Listener::GetLocalIp6Address(void)
-{
-    return *reinterpret_cast<Address *>(&GetTcbListen().laddr);
-}
+Address &Tcp::Listener::GetLocalIp6Address(void) { return *reinterpret_cast<Address *>(&GetTcbListen().laddr); }
 
 const Address &Tcp::Listener::GetLocalIp6Address(void) const
 {
@@ -630,7 +606,7 @@ Error Tcp::HandleMessage(ot::Ip6::Header &aIp6Header, Message &aMessage, Message
     uint8_t  headerSize;
 
     struct ip6_hdr *ip6Header;
-    struct tcphdr * tcpHeader;
+    struct tcphdr  *tcpHeader;
 
     Endpoint *endpoint;
     Endpoint *endpointPrev;
@@ -660,7 +636,7 @@ Error Tcp::HandleMessage(ot::Ip6::Header &aIp6Header, Message &aMessage, Message
     {
         struct tcplp_signals sig;
         int                  nextAction;
-        struct tcpcb *       tp = &endpoint->GetTcb();
+        struct tcpcb        *tp = &endpoint->GetTcb();
 
         otLinkedBuffer *priorHead    = lbuf_head(&tp->sendbuf);
         size_t          priorBacklog = endpoint->GetSendBufferBytes() - endpoint->GetInFlightBytes();
@@ -691,10 +667,10 @@ exit:
     return error;
 }
 
-void Tcp::ProcessSignals(Endpoint &            aEndpoint,
-                         otLinkedBuffer *      aPriorHead,
+void Tcp::ProcessSignals(Endpoint             &aEndpoint,
+                         otLinkedBuffer       *aPriorHead,
                          size_t                aPriorBacklog,
-                         struct tcplp_signals &aSignals)
+                         struct tcplp_signals &aSignals) const
 {
     VerifyOrExit(IsInitialized(aEndpoint) && !aEndpoint.IsClosed());
     if (aSignals.conn_established && aEndpoint.mEstablishedCallback != nullptr)
@@ -804,14 +780,11 @@ bool Tcp::AutoBind(const SockAddr &aPeer, SockAddr &aToBind, bool aBindAddress, 
 
     if (aBindAddress)
     {
-        MessageInfo                  peerInfo;
-        const Netif::UnicastAddress *netifAddress;
+        const Address *source;
 
-        peerInfo.Clear();
-        peerInfo.SetPeerAddr(aPeer.GetAddress());
-        netifAddress = Get<Ip6>().SelectSourceAddress(peerInfo);
-        VerifyOrExit(netifAddress != nullptr, success = false);
-        aToBind.GetAddress() = netifAddress->GetAddress();
+        source = Get<Ip6>().SelectSourceAddress(aPeer.GetAddress());
+        VerifyOrExit(source != nullptr, success = false);
+        aToBind.SetAddress(*source);
     }
 
     if (aBindPort)
@@ -944,7 +917,7 @@ extern "C" {
 otMessage *tcplp_sys_new_message(otInstance *aInstance)
 {
     Instance &instance = AsCoreType(aInstance);
-    Message * message  = instance.Get<ot::Ip6::Ip6>().NewMessage(0);
+    Message  *message  = instance.Get<ot::Ip6::Ip6>().NewMessage(0);
 
     if (message)
     {
@@ -963,8 +936,8 @@ void tcplp_sys_free_message(otInstance *aInstance, otMessage *aMessage)
 
 void tcplp_sys_send_message(otInstance *aInstance, otMessage *aMessage, otMessageInfo *aMessageInfo)
 {
-    Instance &   instance = AsCoreType(aInstance);
-    Message &    message  = AsCoreType(aMessage);
+    Instance    &instance = AsCoreType(aInstance);
+    Message     &message  = AsCoreType(aMessage);
     MessageInfo &info     = AsCoreType(aMessageInfo);
 
     LogDebg("Sending TCP segment: payload_size = %d", static_cast<int>(message.GetLength()));
@@ -972,15 +945,9 @@ void tcplp_sys_send_message(otInstance *aInstance, otMessage *aMessage, otMessag
     IgnoreError(instance.Get<ot::Ip6::Ip6>().SendDatagram(message, info, kProtoTcp));
 }
 
-uint32_t tcplp_sys_get_ticks(void)
-{
-    return TimerMilli::GetNow().GetValue();
-}
+uint32_t tcplp_sys_get_ticks(void) { return TimerMilli::GetNow().GetValue(); }
 
-uint32_t tcplp_sys_get_millis(void)
-{
-    return TimerMilli::GetNow().GetValue();
-}
+uint32_t tcplp_sys_get_millis(void) { return TimerMilli::GetNow().GetValue(); }
 
 void tcplp_sys_set_timer(struct tcpcb *aTcb, uint8_t aTimerFlag, uint32_t aDelay)
 {
@@ -996,11 +963,11 @@ void tcplp_sys_stop_timer(struct tcpcb *aTcb, uint8_t aTimerFlag)
 
 struct tcpcb *tcplp_sys_accept_ready(struct tcpcb_listen *aTcbListen, struct in6_addr *aAddr, uint16_t aPort)
 {
-    Tcp::Listener &               listener = Tcp::Listener::FromTcbListen(*aTcbListen);
-    Tcp &                         tcp      = listener.Get<Tcp>();
-    struct tcpcb *                rv       = (struct tcpcb *)-1;
+    Tcp::Listener                &listener = Tcp::Listener::FromTcbListen(*aTcbListen);
+    Tcp                          &tcp      = listener.Get<Tcp>();
+    struct tcpcb                 *rv       = (struct tcpcb *)-1;
     otSockAddr                    addr;
-    otTcpEndpoint *               endpointPtr;
+    otTcpEndpoint                *endpointPtr;
     otTcpIncomingConnectionAction action;
 
     VerifyOrExit(listener.mAcceptReadyCallback != nullptr);
@@ -1042,13 +1009,13 @@ exit:
 }
 
 bool tcplp_sys_accepted_connection(struct tcpcb_listen *aTcbListen,
-                                   struct tcpcb *       aAccepted,
-                                   struct in6_addr *    aAddr,
+                                   struct tcpcb        *aAccepted,
+                                   struct in6_addr     *aAddr,
                                    uint16_t             aPort)
 {
     Tcp::Listener &listener = Tcp::Listener::FromTcbListen(*aTcbListen);
     Tcp::Endpoint &endpoint = Tcp::Endpoint::FromTcb(*aAccepted);
-    Tcp &          tcp      = endpoint.Get<Tcp>();
+    Tcp           &tcp      = endpoint.Get<Tcp>();
     bool           accepted = true;
 
     if (listener.mAcceptDoneCallback != nullptr)
@@ -1132,9 +1099,9 @@ void tcplp_sys_panic(const char *aFormat, ...)
     OT_ASSERT(false);
 }
 
-bool tcplp_sys_autobind(otInstance *      aInstance,
+bool tcplp_sys_autobind(otInstance       *aInstance,
                         const otSockAddr *aPeer,
-                        otSockAddr *      aToBind,
+                        otSockAddr       *aToBind,
                         bool              aBindAddress,
                         bool              aBindPort)
 {
@@ -1151,15 +1118,9 @@ uint32_t tcplp_sys_generate_isn()
     return isn;
 }
 
-uint16_t tcplp_sys_hostswap16(uint16_t aHostPort)
-{
-    return HostSwap16(aHostPort);
-}
+uint16_t tcplp_sys_hostswap16(uint16_t aHostPort) { return HostSwap16(aHostPort); }
 
-uint32_t tcplp_sys_hostswap32(uint32_t aHostPort)
-{
-    return HostSwap32(aHostPort);
-}
+uint32_t tcplp_sys_hostswap32(uint32_t aHostPort) { return HostSwap32(aHostPort); }
 }
 
 #endif // OPENTHREAD_CONFIG_TCP_ENABLE

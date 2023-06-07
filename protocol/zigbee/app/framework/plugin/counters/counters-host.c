@@ -24,19 +24,15 @@
 uint16_t emberCounters[EMBER_COUNTER_TYPE_COUNT];
 uint16_t emberCountersThresholds[EMBER_COUNTER_TYPE_COUNT];
 
-void emberAfPluginCountersInitCallback(SLXU_INIT_ARG)
+void emberAfPluginCountersInitCallback(uint8_t init_level)
 {
-  SLXU_INIT_UNUSED_ARG;
+  (void)init_level;
 
   emberAfPluginCountersClear();
   emberAfPluginCountersResetThresholds();
 }
 
-#ifdef UC_BUILD
-void emAfCounterRolloverCallback(EmberCounterType type)
-#else // !UC_BUILD
-void ezspCounterRolloverHandler(EmberCounterType type)
-#endif // UC_BUILD
+void sli_zigbee_af_counter_rollover_callback(EmberCounterType type)
 {
   emberAfPluginCountersRolloverCallback(type);
 }

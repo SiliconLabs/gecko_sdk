@@ -206,4 +206,231 @@ SYSTEM_SecurityCapability_TypeDef SYSTEM_GetSecurityCapability(void)
   return sc;
 }
 
+/***************************************************************************//**
+ * @brief
+ *   Get the unique number for this device.
+ *
+ * @return
+ *   Unique number for this device.
+ ******************************************************************************/
+uint64_t SYSTEM_GetUnique(void)
+{
+#if defined (_DEVINFO_EUI64H_MASK)
+  uint32_t tmp = DEVINFO->EUI64L;
+  return (uint64_t)((uint64_t)DEVINFO->EUI64H << 32) | tmp;
+#elif defined(_DEVINFO_UNIQUEH_MASK)
+  uint32_t tmp = DEVINFO->UNIQUEL;
+  return (uint64_t)((uint64_t)DEVINFO->UNIQUEH << 32) | tmp;
+#else
+#error (em_system.c): Location of device unique number is not defined.
+#endif
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Get the production revision for this part.
+ *
+ * @return
+ *   Production revision for this part.
+ ******************************************************************************/
+uint8_t SYSTEM_GetProdRev(void)
+{
+#if defined (_DEVINFO_PART_PROD_REV_MASK)
+  return (uint8_t)((DEVINFO->PART & _DEVINFO_PART_PROD_REV_MASK)
+                   >> _DEVINFO_PART_PROD_REV_SHIFT);
+#elif defined (_DEVINFO_INFO_PRODREV_MASK)
+  return (uint8_t)((DEVINFO->INFO & _DEVINFO_INFO_PRODREV_MASK)
+                   >> _DEVINFO_INFO_PRODREV_SHIFT);
+#else
+#error (em_system.c): Location of production revision is not defined.
+#endif
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Get the SRAM Base Address.
+ *
+ * @note
+ *   This function is used to retrieve the base address of the SRAM.
+ *
+ * @return
+ *   Base address SRAM (32-bit unsigned integer).
+ ******************************************************************************/
+uint32_t SYSTEM_GetSRAMBaseAddress(void)
+{
+  return (uint32_t)SRAM_BASE;
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Get the SRAM size (in KB).
+ *
+ * @note
+ *   This function retrieves SRAM size by reading the chip device
+ *   info structure. If your binary is made for one specific device only,
+ *   use SRAM_SIZE instead.
+ *
+ * @return
+ *   Size of internal SRAM (in KB).
+ ******************************************************************************/
+uint16_t SYSTEM_GetSRAMSize(void)
+{
+  uint16_t sizekb;
+
+#if defined(_EFM32_GECKO_FAMILY)
+  /* Early Gecko devices had a bug where SRAM and Flash size were swapped. */
+  if (SYSTEM_GetProdRev() < 5) {
+    sizekb = (DEVINFO->MSIZE & _DEVINFO_MSIZE_FLASH_MASK)
+             >> _DEVINFO_MSIZE_FLASH_SHIFT;
+  }
+#endif
+  sizekb = (uint16_t)((DEVINFO->MSIZE & _DEVINFO_MSIZE_SRAM_MASK)
+                      >> _DEVINFO_MSIZE_SRAM_SHIFT);
+
+#if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_80) && defined(_EFR_DEVICE)
+  /* Do not include EFR32xG1 RAMH. */
+  sizekb--;
+#endif
+
+  return sizekb;
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Get the flash size (in KB).
+ *
+ * @note
+ *   This function retrieves flash size by reading the chip device
+ *   info structure. If your binary is made for one specific device only,
+ *   use FLASH_SIZE instead.
+ *
+ * @return
+ *   Size of internal flash (in KB).
+ ******************************************************************************/
+uint16_t SYSTEM_GetFlashSize(void)
+{
+#if defined(_EFM32_GECKO_FAMILY)
+  /* Early Gecko devices had a bug where SRAM and Flash size were swapped. */
+  if (SYSTEM_GetProdRev() < 5) {
+    return (DEVINFO->MSIZE & _DEVINFO_MSIZE_SRAM_MASK)
+           >> _DEVINFO_MSIZE_SRAM_SHIFT;
+  }
+#endif
+  return (uint16_t)((DEVINFO->MSIZE & _DEVINFO_MSIZE_FLASH_MASK)
+                    >> _DEVINFO_MSIZE_FLASH_SHIFT);
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Get the flash page size in bytes.
+ *
+ * @note
+ *   This function retrieves flash page size by reading the chip device
+ *   info structure. If your binary is made for one specific device only,
+ *   use FLASH_PAGE_SIZE instead.
+ *
+ * @return
+ *   Page size of internal flash in bytes.
+ ******************************************************************************/
+uint32_t SYSTEM_GetFlashPageSize(void)
+{
+  uint32_t tmp;
+
+#if defined(_SILICON_LABS_32B_SERIES_0)
+
+#if defined(_EFM32_GIANT_FAMILY)
+  if (SYSTEM_GetProdRev() < 18) {
+    /* Early Giant/Leopard devices did not have MEMINFO in DEVINFO. */
+    return FLASH_PAGE_SIZE;
+  }
+#elif defined(_EFM32_ZERO_FAMILY)
+  if (SYSTEM_GetProdRev() < 24) {
+    /* Early Zero devices have an incorrect DEVINFO flash page size */
+    return FLASH_PAGE_SIZE;
+  }
+#endif
+#endif
+
+#if defined(_DEVINFO_MEMINFO_FLASHPAGESIZE_MASK)
+  tmp = (DEVINFO->MEMINFO & _DEVINFO_MEMINFO_FLASHPAGESIZE_MASK)
+        >> _DEVINFO_MEMINFO_FLASHPAGESIZE_SHIFT;
+#elif defined(_DEVINFO_MEMINFO_FLASH_PAGE_SIZE_MASK)
+  tmp = (DEVINFO->MEMINFO & _DEVINFO_MEMINFO_FLASH_PAGE_SIZE_MASK)
+        >> _DEVINFO_MEMINFO_FLASH_PAGE_SIZE_SHIFT;
+#else
+#error (em_system.c): Location of flash page size is not defined.
+#endif
+
+  return 1UL << ((tmp + 10UL) & 0x1FUL);
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Get the MCU part number.
+ *
+ * @return
+ *   The part number of MCU.
+ ******************************************************************************/
+uint16_t SYSTEM_GetPartNumber(void)
+{
+#if defined(_DEVINFO_PART_DEVICENUM_MASK)
+  return (uint16_t)((DEVINFO->PART & _DEVINFO_PART_DEVICENUM_MASK)
+                    >> _DEVINFO_PART_DEVICENUM_SHIFT);
+#elif defined(_DEVINFO_PART_DEVICE_NUMBER_MASK)
+  return (uint16_t)((DEVINFO->PART & _DEVINFO_PART_DEVICE_NUMBER_MASK)
+                    >> _DEVINFO_PART_DEVICE_NUMBER_SHIFT);
+#else
+#error (em_system.c): Location of device part number is not defined.
+#endif
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Get the calibration temperature (in degrees Celsius).
+ *
+ * @return
+ *   Calibration temperature in Celsius.
+ ******************************************************************************/
+uint8_t SYSTEM_GetCalibrationTemperature(void)
+{
+#if defined(_DEVINFO_CAL_TEMP_MASK)
+  return (uint8_t)((DEVINFO->CAL & _DEVINFO_CAL_TEMP_MASK)
+                   >> _DEVINFO_CAL_TEMP_SHIFT);
+#elif defined(_DEVINFO_CALTEMP_TEMP_MASK)
+  return (uint8_t)((DEVINFO->CALTEMP & _DEVINFO_CALTEMP_TEMP_MASK)
+                   >> _DEVINFO_CALTEMP_TEMP_SHIFT);
+#else
+#error (em_system.c): Location of calibration temperature is not defined.
+#endif
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Get the MCU family identifier.
+ *
+ * @note
+ *   This function retrieves family ID by reading the chip's device info
+ *   structure in flash memory. Users can retrieve family ID directly
+ *   by reading DEVINFO->PART item and decode with mask and shift
+ *   \#defines defined in \<part_family\>_devinfo.h (refer to code
+ *   below for details).
+ *
+ * @return
+ *   Family identifier of MCU.
+ ******************************************************************************/
+SYSTEM_PartFamily_TypeDef SYSTEM_GetFamily(void)
+{
+#if defined(_DEVINFO_PART_FAMILY_MASK)
+  return (SYSTEM_PartFamily_TypeDef)
+         ((uint32_t)((DEVINFO->PART & (_DEVINFO_PART_FAMILY_MASK
+                                       | _DEVINFO_PART_FAMILYNUM_MASK))));
+#elif defined(_DEVINFO_PART_DEVICE_FAMILY_MASK)
+  return (SYSTEM_PartFamily_TypeDef)
+         ((uint32_t)((DEVINFO->PART & _DEVINFO_PART_DEVICE_FAMILY_MASK)
+                     >> _DEVINFO_PART_DEVICE_FAMILY_SHIFT));
+#else
+  #error (em_system.h): Location of device family name is not defined.
+#endif
+}
+
 /** @} (end addtogroup system) */

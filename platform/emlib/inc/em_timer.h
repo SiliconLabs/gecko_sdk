@@ -66,10 +66,8 @@ extern "C" {
 #else
 #define TIMER_CH_VALID(ch)    ((ch) < 4)
 #endif
-#elif defined(_SILICON_LABS_32B_SERIES_2)
-#define TIMER_CH_VALID(ch)    ((ch) < 3)
 #else
-#error "Unknown device. Undefined number of channels."
+#define TIMER_CH_VALID(ch)    ((ch) < 3)
 #endif
 
 #if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_80)

@@ -31,6 +31,11 @@
 #ifndef SL_GATT_SERVICE_SOUND_H
 #define SL_GATT_SERVICE_SOUND_H
 
+/***********************************************************************************************//**
+ * @addtogroup gatt_service_sound
+ * @{
+ **************************************************************************************************/
+
 #include "sl_bt_api.h"
 
 /**************************************************************************//**
@@ -47,4 +52,5 @@ void sl_gatt_service_sound_on_event(sl_bt_msg_t *evt);
  *****************************************************************************/
 sl_status_t sl_gatt_service_sound_get(float *sound_level);
 
+/** @} (end addtogroup gatt_service_sound) */
 #endif // SL_GATT_SERVICE_SOUND_H

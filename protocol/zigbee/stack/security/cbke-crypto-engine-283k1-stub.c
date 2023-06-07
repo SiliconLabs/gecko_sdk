@@ -20,9 +20,9 @@
 #include "stack/include/ember-types.h"
 #include "stack/include/library.h"
 
-const EmberLibraryStatus emCbke283k1LibraryStatus = EMBER_LIBRARY_IS_STUB;
+const EmberLibraryStatus sli_zigbee_cbke283k1_library_status = EMBER_LIBRARY_IS_STUB;
 
-bool emRealECCLibraryPresent283k1(void)
+bool sli_zigbee_real_ecc_library_present283k1(void)
 {
   return false;
 }
@@ -54,7 +54,7 @@ void invalidatePartnerData283k1(void)
 {
 }
 
-void emInitializeCbke283k1(void)
+void sli_zigbee_initialize_cbke283k1(void)
 {
 }
 
@@ -74,9 +74,9 @@ EmberStatus emberSetPreinstalledCbkeData283k1(EmberPublicKey283k1Data* caPublic,
   return EMBER_LIBRARY_NOT_PRESENT;
 }
 
-EmberStatus emGetCbkeData283k1(EmberCertificate283k1Data* myCertPtr,
-                               EmberPrivateKey283k1Data* myStaticPrivateKeyPtr,
-                               EmberPublicKey283k1Data* caPublicKeyPtr)
+EmberStatus sli_zigbee_get_cbke_data283k1(EmberCertificate283k1Data* myCertPtr,
+                                          EmberPrivateKey283k1Data* myStaticPrivateKeyPtr,
+                                          EmberPublicKey283k1Data* caPublicKeyPtr)
 {
   (void)myCertPtr;
   (void)myStaticPrivateKeyPtr;

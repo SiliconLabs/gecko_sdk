@@ -91,7 +91,7 @@ __STATIC_INLINE void _turn_off_leds(void);
  * @param[in,out] led_instance LED instance
  *****************************************************************************/
 __STATIC_INLINE void _set_led_instance(const bool led_sate,
-                                     const sl_led_t *led_instance);
+                                       const sl_led_t *led_instance);
 
 /**************************************************************************//**
  * @brief LED mutex acquire
@@ -365,7 +365,7 @@ __STATIC_INLINE void _turn_off_leds(void)
 
 /* Set LED instance */
 __STATIC_INLINE void _set_led_instance(const bool led_sate,
-                                     const sl_led_t *led_instance)
+                                       const sl_led_t *led_instance)
 {
   if (led_sate) {
     sl_led_turn_on(led_instance);

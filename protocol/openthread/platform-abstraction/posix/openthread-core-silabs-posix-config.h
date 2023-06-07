@@ -46,45 +46,37 @@
  *
  * UART: OT_POSIX_RCP_BUS_UART
  * SPI: OT_POSIX_RCP_BUS_SPI
- * CPC: OT_POSIX_RCP_BUS_CPC
+ * CPC: OT_POSIX_RCP_BUS_VENDOR
  *
  */
 #ifndef OPENTHREAD_POSIX_CONFIG_RCP_BUS
 #define OPENTHREAD_POSIX_CONFIG_RCP_BUS OT_POSIX_RCP_BUS_UART
 #endif
 
+/**
+ * Provide radio url help message for vendor RCP bus configuration
+ */
+
+// NOTE: The following URL help message is intended to support this configuration:
+// #if OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE && 
+// #if OPENTHREAD_POSIX_CONFIG_RCP_BUS = OT_CONFIG_RCP_BUS_VENDOR
+
+#define OT_VENDOR_RADIO_URL_HELP_BUS                                 \
+    "    spinel+cpc://cpcd_0?${Parameters} for connecting to cpcd\n" \
+    "Parameters:\n"                                                  \
+    "    cpc-bus-speed[=speed]         CPC bus speed used for communicating with RCP.\n"
+
 /******************************************************************************
- * Co-processor RPC defaults
+ * CLI Interpreter defaults
  *****************************************************************************/
 
 /**
- * Default to 1 to enable Host->Co-processor remote procedure call support.
+ * Default to 2 to allow adding cli user commands in addition to posix commands
  */
-#ifndef OPENTHREAD_CONFIG_COPROCESSOR_RPC_ENABLE
-#define OPENTHREAD_CONFIG_COPROCESSOR_RPC_ENABLE 1
+
+#ifndef OPENTHREAD_CONFIG_CLI_MAX_USER_CMD_ENTRIES
+#define OPENTHREAD_CONFIG_CLI_MAX_USER_CMD_ENTRIES 2
 #endif
-
-#if OPENTHREAD_CONFIG_COPROCESSOR_RPC_ENABLE
-
-// NOTE: The following must be true otherwise prints on the POSIX Host will be truncated.
-// OPENTHREAD_CONFIG_CLI_MAX_LINE_LENGTH >= OPENTHREAD_CONFIG_COPROCESSOR_RPC_OUTPUT_BUFFER_SIZE
-
-/**
- * Force maximum size of the CLI line in bytes including the null terminator.
- *
- */
-#undef OPENTHREAD_CONFIG_CLI_MAX_LINE_LENGTH
-#define OPENTHREAD_CONFIG_CLI_MAX_LINE_LENGTH 1200
-
-// 
-/**
- * Force OpenThread Co-processor Remote Procedure Call output buffer size in bytes
- *
- */
-#undef OPENTHREAD_CONFIG_COPROCESSOR_RPC_OUTPUT_BUFFER_SIZE
-#define OPENTHREAD_CONFIG_COPROCESSOR_RPC_OUTPUT_BUFFER_SIZE 1200
-
-#endif // OPENTHREAD_CONFIG_COPROCESSOR_RPC_ENABLE
 
 /******************************************************************************
  * MultiPan RCP (CPC) defaults

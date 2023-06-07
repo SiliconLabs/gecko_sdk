@@ -69,14 +69,22 @@ template_contribution:
     condition:
     - "brd4400a"
   - name: component_catalog
-    value: "BRD4401A"
-    condition:
-    - "brd4401a"
-  - name: component_catalog
     value: "BRD4400B"
     condition:
     - "brd4400b"
   - name: component_catalog
+    value: "BRD4400C"
+    condition:
+    - "brd4400c"
+  - name: component_catalog
+    value: "BRD4401A"
+    condition:
+    - "brd4401a"
+  - name: component_catalog
     value: "BRD4401B"
     condition:
     - "brd4401b"
+  - name: component_catalog
+    value: "BRD4401C"
+    condition:
+    - "brd4401c"

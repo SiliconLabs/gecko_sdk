@@ -9,10 +9,10 @@
     unless:
     - device_content_override
 - source:
-  - path: platform/Device/SiliconLabs/MGM22/Source/system_mgm22.c
+  - path: platform/Device/SiliconLabs/MGM22/Source/startup_mgm22.c
     unless:
     - device_content_override
-  - path: platform/Device/SiliconLabs/MGM22/Source/startup_mgm22.c
+  - path: platform/Device/SiliconLabs/MGM22/Source/system_mgm22.c
     unless:
     - device_content_override
 - include:

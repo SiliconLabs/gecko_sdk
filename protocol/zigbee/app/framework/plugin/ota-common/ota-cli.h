@@ -18,38 +18,4 @@
  ******************************************************************************/
 
 // Common CLI interface
-EmberAfOtaImageId emAfOtaFindImageIdByIndex(uint8_t index);
-#ifndef UC_BUILD
-void emAfOtaPrintAllImages(void);
-
-void emAfOtaReloadStorageDevice(void);
-
-#define OTA_COMMON_COMMANDS                                                      \
-  emberCommandEntryAction("printImages", emAfOtaPrintAllImages, "", ""),         \
-  emberCommandEntryAction("delete", (CommandAction)emAfOtaImageDelete, "u", ""), \
-  emberCommandEntryAction("reload", emAfOtaReloadStorageDevice, "", ""),         \
-  emberCommandEntryAction("storage-info", emAfOtaStorageInfoPrint, "", ""),      \
-  emberCommandEntryTerminator(),                                                 \
-
-
-// Client CLI interface
-
-#if !defined (EMBER_AF_PLUGIN_OTA_CLIENT)
-  #define OTA_CLIENT_COMMANDS
-#endif
-
-void otaFindServerCommand(void);
-void otaQueryServerCommand(void);
-void otaUsePageRequestCommand(void);
-void otaQuerySpecificFileCommand(void);
-void otaSendUpgradeCommand(void);
-void emAfOtaImageDelete(void);
-
-// Server CLI interface
-
-#if !defined (EMBER_AF_PLUGIN_OTA_SERVER)
-  #define OTA_SERVER_COMMANDS
-#endif
-
-void otaImageNotifyCommand(void);
-#endif
+EmberAfOtaImageId sli_zigbee_af_ota_find_image_id_by_index(uint8_t index);

@@ -36,12 +36,14 @@
 
 #include <openthread/backbone_router_ftd.h>
 #include <openthread/dataset.h>
+#include <openthread/dnssd_server.h>
 #include <openthread/logging.h>
 #include <openthread/nat64.h>
 #include <openthread/srp_server.h>
 #include <openthread/tasklet.h>
 #include <openthread/thread.h>
 #include <openthread/thread_ftd.h>
+#include <openthread/trel.h>
 #include <openthread/platform/logging.h>
 #include <openthread/platform/misc.h>
 #include <openthread/platform/radio.h>
@@ -54,10 +56,6 @@
 #include "proto/feature_flag.pb.h"
 #endif
 
-#if OTBR_ENABLE_LEGACY
-#include <ot-legacy-pairing-ext.h>
-#endif
-
 namespace otbr {
 namespace Ncp {
 
@@ -65,9 +63,9 @@ static const uint16_t kThreadVersion11 = 2; ///< Thread Version 1.1
 static const uint16_t kThreadVersion12 = 3; ///< Thread Version 1.2
 static const uint16_t kThreadVersion13 = 4; ///< Thread Version 1.3
 
-ControllerOpenThread::ControllerOpenThread(const char *                     aInterfaceName,
+ControllerOpenThread::ControllerOpenThread(const char                      *aInterfaceName,
                                            const std::vector<const char *> &aRadioUrls,
-                                           const char *                     aBackboneInterfaceName,
+                                           const char                      *aBackboneInterfaceName,
                                            bool                             aDryRun,
                                            bool                             aEnableAutoAttach)
     : mInstance(nullptr)
@@ -124,6 +122,45 @@ otbrLogLevel ControllerOpenThread::ConvertToOtbrLogLevel(otLogLevel aLogLevel)
     return otbrLogLevel;
 }
 
+#if OTBR_ENABLE_FEATURE_FLAGS
+/* Converts ProtoLogLevel to otbrLogLevel */
+otbrLogLevel ConvertProtoToOtbrLogLevel(ProtoLogLevel aProtoLogLevel)
+{
+    otbrLogLevel otbrLogLevel;
+
+    switch (aProtoLogLevel)
+    {
+    case PROTO_LOG_EMERG:
+        otbrLogLevel = OTBR_LOG_EMERG;
+        break;
+    case PROTO_LOG_ALERT:
+        otbrLogLevel = OTBR_LOG_ALERT;
+        break;
+    case PROTO_LOG_CRIT:
+        otbrLogLevel = OTBR_LOG_CRIT;
+        break;
+    case PROTO_LOG_ERR:
+        otbrLogLevel = OTBR_LOG_ERR;
+        break;
+    case PROTO_LOG_WARNING:
+        otbrLogLevel = OTBR_LOG_WARNING;
+        break;
+    case PROTO_LOG_NOTICE:
+        otbrLogLevel = OTBR_LOG_NOTICE;
+        break;
+    case PROTO_LOG_INFO:
+        otbrLogLevel = OTBR_LOG_INFO;
+        break;
+    case PROTO_LOG_DEBUG:
+    default:
+        otbrLogLevel = OTBR_LOG_DEBUG;
+        break;
+    }
+
+    return otbrLogLevel;
+}
+#endif
+
 otLogLevel ControllerOpenThread::ConvertToOtLogLevel(otbrLogLevel aLevel)
 {
     otLogLevel level;
@@ -154,19 +191,27 @@ otLogLevel ControllerOpenThread::ConvertToOtLogLevel(otbrLogLevel aLevel)
     return level;
 }
 
+otError ControllerOpenThread::SetOtbrAndOtLogLevel(otbrLogLevel aLevel)
+{
+    otError error = OT_ERROR_NONE;
+    otbrLogSetLevel(aLevel);
+    error = otLoggingSetLevel(ConvertToOtLogLevel(aLevel));
+    return error;
+}
+
 void ControllerOpenThread::Init(void)
 {
     otbrError  error = OTBR_ERROR_NONE;
     otLogLevel level = ConvertToOtLogLevel(otbrLogGetLevel());
 
+#if OTBR_ENABLE_FEATURE_FLAGS && OTBR_ENABLE_TREL
+    FeatureFlagList featureFlagList;
+#endif
+
     VerifyOrExit(otLoggingSetLevel(level) == OT_ERROR_NONE, error = OTBR_ERROR_OPENTHREAD);
 
     mInstance = otSysInit(&mConfig);
     assert(mInstance != nullptr);
-
-#if OTBR_ENABLE_LEGACY
-    otLegacyInit();
-#endif
 
     {
         otError result = otSetStateChangedCallback(mInstance, &ControllerOpenThread::HandleStateChanged, this);
@@ -175,12 +220,30 @@ void ControllerOpenThread::Init(void)
         VerifyOrExit(result == OT_ERROR_NONE, error = OTBR_ERROR_OPENTHREAD);
     }
 
+#if OTBR_ENABLE_FEATURE_FLAGS && OTBR_ENABLE_TREL
+    // Enable/Disable trel according to feature flag default value.
+    otTrelSetEnabled(mInstance, featureFlagList.enable_trel());
+#endif
+
 #if OTBR_ENABLE_SRP_ADVERTISING_PROXY
+#if OTBR_ENABLE_SRP_SERVER_AUTO_ENABLE_MODE
+    // Let SRP server use auto-enable mode. The auto-enable mode delegates the control of SRP server to the Border
+    // Routing Manager. SRP server automatically starts when bi-directional connectivity is ready.
+    otSrpServerSetAutoEnableMode(mInstance, /* aEnabled */ true);
+#else
     otSrpServerSetEnabled(mInstance, /* aEnabled */ true);
 #endif
+#endif
+
+#if !OTBR_ENABLE_FEATURE_FLAGS
+    // Bring up all features when feature flags is not supported.
 #if OTBR_ENABLE_NAT64
     otNat64SetEnabled(mInstance, /* aEnabled */ true);
 #endif
+#if OTBR_ENABLE_DNS_UPSTREAM_QUERY
+    otDnssdUpstreamQuerySetEnabled(mInstance, /* aEnabled */ true);
+#endif
+#endif // OTBR_ENABLE_FEATURE_FLAGS
 
     mThreadHelper = std::unique_ptr<otbr::agent::ThreadHelper>(new otbr::agent::ThreadHelper(mInstance, this));
 
@@ -195,7 +258,25 @@ otError ControllerOpenThread::ApplyFeatureFlagList(const FeatureFlagList &aFeatu
     // Save a cached copy of feature flags for debugging purpose.
     mAppliedFeatureFlagListBytes = aFeatureFlagList.SerializeAsString();
 
-    // TODO: apply the feature flags through API.
+#if OTBR_ENABLE_NAT64
+    otNat64SetEnabled(mInstance, aFeatureFlagList.enable_nat64());
+#endif
+
+    if (aFeatureFlagList.enable_detailed_logging())
+    {
+        error = SetOtbrAndOtLogLevel(ConvertProtoToOtbrLogLevel(aFeatureFlagList.detailed_logging_level()));
+    }
+    else
+    {
+        error = SetOtbrAndOtLogLevel(otbrLogGetDefaultLevel());
+    }
+
+#if OTBR_ENABLE_TREL
+    otTrelSetEnabled(mInstance, aFeatureFlagList.enable_trel());
+#endif
+#if OTBR_ENABLE_DNS_UPSTREAM_QUERY
+    otDnssdUpstreamQuerySetEnabled(mInstance, aFeatureFlagList.enable_dns_upstream_query());
+#endif
 
     return error;
 }
@@ -211,27 +292,6 @@ void ControllerOpenThread::Deinit(void)
 
 void ControllerOpenThread::HandleStateChanged(otChangedFlags aFlags)
 {
-    if (aFlags & OT_CHANGED_THREAD_ROLE)
-    {
-        switch (otThreadGetDeviceRole(mInstance))
-        {
-        case OT_DEVICE_ROLE_DISABLED:
-#if OTBR_ENABLE_LEGACY
-            otLegacyStop();
-#endif
-            break;
-        case OT_DEVICE_ROLE_CHILD:
-        case OT_DEVICE_ROLE_ROUTER:
-        case OT_DEVICE_ROLE_LEADER:
-#if OTBR_ENABLE_LEGACY
-            otLegacyStart();
-#endif
-            break;
-        default:
-            break;
-        }
-    }
-
     for (auto &stateCallback : mThreadStateChangedCallbacks)
     {
         stateCallback(aFlags);

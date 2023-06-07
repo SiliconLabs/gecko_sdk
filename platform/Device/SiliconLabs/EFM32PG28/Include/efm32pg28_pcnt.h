@@ -3,21 +3,21 @@
  * @brief EFM32PG28 PCNT register and bit field definitions
  ******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
- * 
+ *
  * The licensor of this software is Silicon Laboratories Inc.
- * 
+ *
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
  * arising from the use of this software.
- * 
+ *
  * Permission is granted to anyone to use this software for any purpose,
  * including commercial applications, and to alter it and redistribute it
  * freely, subject to the following restrictions:
- * 
+ *
  * 1. The origin of this software must not be misrepresented; you must not
  *    claim that you wrote the original software. If you use this software
  *    in a product, an acknowledgment in the product documentation would be
@@ -29,7 +29,6 @@
  *****************************************************************************/
 #ifndef EFM32PG28_PCNT_H
 #define EFM32PG28_PCNT_H
-
 #define PCNT_HAS_SET_CLEAR
 
 /**************************************************************************//**
@@ -43,75 +42,74 @@
  *****************************************************************************/
 
 /** PCNT Register Declaration. */
-typedef struct
-{
-  __IM  uint32_t             IPVERSION;              /**< IP version ID                                      */
-  __IOM uint32_t             EN;                     /**< Module Enable Register                             */
-  __IOM uint32_t             SWRST;                  /**< Software Reset Register                            */
-  __IOM uint32_t             CFG;                    /**< Configuration Register                             */
-  __IOM uint32_t             CTRL;                   /**< Control Register                                   */
-  __IOM uint32_t             CMD;                    /**< Command Register                                   */
-  __IM  uint32_t             STATUS;                 /**< Status Register                                    */
-  __IOM uint32_t             IF;                     /**< Interrupt Flag Register                            */
-  __IOM uint32_t             IEN;                    /**< Interrupt Enable Register                          */
-  __IM  uint32_t             CNT;                    /**< Counter Value Register                             */
-  __IM  uint32_t             AUXCNT;                 /**< Auxiliary Counter Value Register                   */
-  __IOM uint32_t             TOP;                    /**< Top Value Register                                 */
-  __IOM uint32_t             TOPB;                   /**< Counter Top Value Buffer Register                  */
-  __IOM uint32_t             OVSCTRL;                /**< Oversampling Control Register                      */
-  __IM  uint32_t             SYNCBUSY;               /**< Synchronization Busy Register                      */
-  __IOM uint32_t             LOCK;                   /**< Configuration Lock Register                        */
-        uint32_t             RESERVED0[1008U];  /**< Reserved for future use                            */
-  __IM  uint32_t             IPVERSION_SET;          /**< IP version ID                                      */
-  __IOM uint32_t             EN_SET;                 /**< Module Enable Register                             */
-  __IOM uint32_t             SWRST_SET;              /**< Software Reset Register                            */
-  __IOM uint32_t             CFG_SET;                /**< Configuration Register                             */
-  __IOM uint32_t             CTRL_SET;               /**< Control Register                                   */
-  __IOM uint32_t             CMD_SET;                /**< Command Register                                   */
-  __IM  uint32_t             STATUS_SET;             /**< Status Register                                    */
-  __IOM uint32_t             IF_SET;                 /**< Interrupt Flag Register                            */
-  __IOM uint32_t             IEN_SET;                /**< Interrupt Enable Register                          */
-  __IM  uint32_t             CNT_SET;                /**< Counter Value Register                             */
-  __IM  uint32_t             AUXCNT_SET;             /**< Auxiliary Counter Value Register                   */
-  __IOM uint32_t             TOP_SET;                /**< Top Value Register                                 */
-  __IOM uint32_t             TOPB_SET;               /**< Counter Top Value Buffer Register                  */
-  __IOM uint32_t             OVSCTRL_SET;            /**< Oversampling Control Register                      */
-  __IM  uint32_t             SYNCBUSY_SET;           /**< Synchronization Busy Register                      */
-  __IOM uint32_t             LOCK_SET;               /**< Configuration Lock Register                        */
-        uint32_t             RESERVED1[1008U];  /**< Reserved for future use                            */
-  __IM  uint32_t             IPVERSION_CLR;          /**< IP version ID                                      */
-  __IOM uint32_t             EN_CLR;                 /**< Module Enable Register                             */
-  __IOM uint32_t             SWRST_CLR;              /**< Software Reset Register                            */
-  __IOM uint32_t             CFG_CLR;                /**< Configuration Register                             */
-  __IOM uint32_t             CTRL_CLR;               /**< Control Register                                   */
-  __IOM uint32_t             CMD_CLR;                /**< Command Register                                   */
-  __IM  uint32_t             STATUS_CLR;             /**< Status Register                                    */
-  __IOM uint32_t             IF_CLR;                 /**< Interrupt Flag Register                            */
-  __IOM uint32_t             IEN_CLR;                /**< Interrupt Enable Register                          */
-  __IM  uint32_t             CNT_CLR;                /**< Counter Value Register                             */
-  __IM  uint32_t             AUXCNT_CLR;             /**< Auxiliary Counter Value Register                   */
-  __IOM uint32_t             TOP_CLR;                /**< Top Value Register                                 */
-  __IOM uint32_t             TOPB_CLR;               /**< Counter Top Value Buffer Register                  */
-  __IOM uint32_t             OVSCTRL_CLR;            /**< Oversampling Control Register                      */
-  __IM  uint32_t             SYNCBUSY_CLR;           /**< Synchronization Busy Register                      */
-  __IOM uint32_t             LOCK_CLR;               /**< Configuration Lock Register                        */
-        uint32_t             RESERVED2[1008U];  /**< Reserved for future use                            */
-  __IM  uint32_t             IPVERSION_TGL;          /**< IP version ID                                      */
-  __IOM uint32_t             EN_TGL;                 /**< Module Enable Register                             */
-  __IOM uint32_t             SWRST_TGL;              /**< Software Reset Register                            */
-  __IOM uint32_t             CFG_TGL;                /**< Configuration Register                             */
-  __IOM uint32_t             CTRL_TGL;               /**< Control Register                                   */
-  __IOM uint32_t             CMD_TGL;                /**< Command Register                                   */
-  __IM  uint32_t             STATUS_TGL;             /**< Status Register                                    */
-  __IOM uint32_t             IF_TGL;                 /**< Interrupt Flag Register                            */
-  __IOM uint32_t             IEN_TGL;                /**< Interrupt Enable Register                          */
-  __IM  uint32_t             CNT_TGL;                /**< Counter Value Register                             */
-  __IM  uint32_t             AUXCNT_TGL;             /**< Auxiliary Counter Value Register                   */
-  __IOM uint32_t             TOP_TGL;                /**< Top Value Register                                 */
-  __IOM uint32_t             TOPB_TGL;               /**< Counter Top Value Buffer Register                  */
-  __IOM uint32_t             OVSCTRL_TGL;            /**< Oversampling Control Register                      */
-  __IM  uint32_t             SYNCBUSY_TGL;           /**< Synchronization Busy Register                      */
-  __IOM uint32_t             LOCK_TGL;               /**< Configuration Lock Register                        */
+typedef struct {
+  __IM uint32_t  IPVERSION;                     /**< IP version ID                                      */
+  __IOM uint32_t EN;                            /**< Module Enable Register                             */
+  __IOM uint32_t SWRST;                         /**< Software Reset Register                            */
+  __IOM uint32_t CFG;                           /**< Configuration Register                             */
+  __IOM uint32_t CTRL;                          /**< Control Register                                   */
+  __IOM uint32_t CMD;                           /**< Command Register                                   */
+  __IM uint32_t  STATUS;                        /**< Status Register                                    */
+  __IOM uint32_t IF;                            /**< Interrupt Flag Register                            */
+  __IOM uint32_t IEN;                           /**< Interrupt Enable Register                          */
+  __IM uint32_t  CNT;                           /**< Counter Value Register                             */
+  __IM uint32_t  AUXCNT;                        /**< Auxiliary Counter Value Register                   */
+  __IOM uint32_t TOP;                           /**< Top Value Register                                 */
+  __IOM uint32_t TOPB;                          /**< Counter Top Value Buffer Register                  */
+  __IOM uint32_t OVSCTRL;                       /**< Oversampling Control Register                      */
+  __IM uint32_t  SYNCBUSY;                      /**< Synchronization Busy Register                      */
+  __IOM uint32_t LOCK;                          /**< Configuration Lock Register                        */
+  uint32_t       RESERVED0[1008U];              /**< Reserved for future use                            */
+  __IM uint32_t  IPVERSION_SET;                 /**< IP version ID                                      */
+  __IOM uint32_t EN_SET;                        /**< Module Enable Register                             */
+  __IOM uint32_t SWRST_SET;                     /**< Software Reset Register                            */
+  __IOM uint32_t CFG_SET;                       /**< Configuration Register                             */
+  __IOM uint32_t CTRL_SET;                      /**< Control Register                                   */
+  __IOM uint32_t CMD_SET;                       /**< Command Register                                   */
+  __IM uint32_t  STATUS_SET;                    /**< Status Register                                    */
+  __IOM uint32_t IF_SET;                        /**< Interrupt Flag Register                            */
+  __IOM uint32_t IEN_SET;                       /**< Interrupt Enable Register                          */
+  __IM uint32_t  CNT_SET;                       /**< Counter Value Register                             */
+  __IM uint32_t  AUXCNT_SET;                    /**< Auxiliary Counter Value Register                   */
+  __IOM uint32_t TOP_SET;                       /**< Top Value Register                                 */
+  __IOM uint32_t TOPB_SET;                      /**< Counter Top Value Buffer Register                  */
+  __IOM uint32_t OVSCTRL_SET;                   /**< Oversampling Control Register                      */
+  __IM uint32_t  SYNCBUSY_SET;                  /**< Synchronization Busy Register                      */
+  __IOM uint32_t LOCK_SET;                      /**< Configuration Lock Register                        */
+  uint32_t       RESERVED1[1008U];              /**< Reserved for future use                            */
+  __IM uint32_t  IPVERSION_CLR;                 /**< IP version ID                                      */
+  __IOM uint32_t EN_CLR;                        /**< Module Enable Register                             */
+  __IOM uint32_t SWRST_CLR;                     /**< Software Reset Register                            */
+  __IOM uint32_t CFG_CLR;                       /**< Configuration Register                             */
+  __IOM uint32_t CTRL_CLR;                      /**< Control Register                                   */
+  __IOM uint32_t CMD_CLR;                       /**< Command Register                                   */
+  __IM uint32_t  STATUS_CLR;                    /**< Status Register                                    */
+  __IOM uint32_t IF_CLR;                        /**< Interrupt Flag Register                            */
+  __IOM uint32_t IEN_CLR;                       /**< Interrupt Enable Register                          */
+  __IM uint32_t  CNT_CLR;                       /**< Counter Value Register                             */
+  __IM uint32_t  AUXCNT_CLR;                    /**< Auxiliary Counter Value Register                   */
+  __IOM uint32_t TOP_CLR;                       /**< Top Value Register                                 */
+  __IOM uint32_t TOPB_CLR;                      /**< Counter Top Value Buffer Register                  */
+  __IOM uint32_t OVSCTRL_CLR;                   /**< Oversampling Control Register                      */
+  __IM uint32_t  SYNCBUSY_CLR;                  /**< Synchronization Busy Register                      */
+  __IOM uint32_t LOCK_CLR;                      /**< Configuration Lock Register                        */
+  uint32_t       RESERVED2[1008U];              /**< Reserved for future use                            */
+  __IM uint32_t  IPVERSION_TGL;                 /**< IP version ID                                      */
+  __IOM uint32_t EN_TGL;                        /**< Module Enable Register                             */
+  __IOM uint32_t SWRST_TGL;                     /**< Software Reset Register                            */
+  __IOM uint32_t CFG_TGL;                       /**< Configuration Register                             */
+  __IOM uint32_t CTRL_TGL;                      /**< Control Register                                   */
+  __IOM uint32_t CMD_TGL;                       /**< Command Register                                   */
+  __IM uint32_t  STATUS_TGL;                    /**< Status Register                                    */
+  __IOM uint32_t IF_TGL;                        /**< Interrupt Flag Register                            */
+  __IOM uint32_t IEN_TGL;                       /**< Interrupt Enable Register                          */
+  __IM uint32_t  CNT_TGL;                       /**< Counter Value Register                             */
+  __IM uint32_t  AUXCNT_TGL;                    /**< Auxiliary Counter Value Register                   */
+  __IOM uint32_t TOP_TGL;                       /**< Top Value Register                                 */
+  __IOM uint32_t TOPB_TGL;                      /**< Counter Top Value Buffer Register                  */
+  __IOM uint32_t OVSCTRL_TGL;                   /**< Oversampling Control Register                      */
+  __IM uint32_t  SYNCBUSY_TGL;                  /**< Synchronization Busy Register                      */
+  __IOM uint32_t LOCK_TGL;                      /**< Configuration Lock Register                        */
 } PCNT_TypeDef;
 /** @} End of group EFM32PG28_PCNT */
 
@@ -123,11 +121,11 @@ typedef struct
  *****************************************************************************/
 
 /* Bit fields for PCNT IPVERSION */
-#define _PCNT_IPVERSION_RESETVALUE              0x00000001UL                            /**< Default value for PCNT_IPVERSION            */
-#define _PCNT_IPVERSION_MASK                    0xFFFFFFFFUL                            /**< Mask for PCNT_IPVERSION                     */
-#define _PCNT_IPVERSION_IPVERSION_SHIFT         0                                       /**< Shift value for PCNT_IPVERSION              */
-#define _PCNT_IPVERSION_IPVERSION_MASK          0xFFFFFFFFUL                            /**< Bit mask for PCNT_IPVERSION                 */
-#define _PCNT_IPVERSION_IPVERSION_DEFAULT       0x00000001UL                            /**< Mode DEFAULT for PCNT_IPVERSION             */
+#define _PCNT_IPVERSION_RESETVALUE              0x00000001UL                             /**< Default value for PCNT_IPVERSION            */
+#define _PCNT_IPVERSION_MASK                    0xFFFFFFFFUL                             /**< Mask for PCNT_IPVERSION                     */
+#define _PCNT_IPVERSION_IPVERSION_SHIFT         0                                        /**< Shift value for PCNT_IPVERSION              */
+#define _PCNT_IPVERSION_IPVERSION_MASK          0xFFFFFFFFUL                             /**< Bit mask for PCNT_IPVERSION                 */
+#define _PCNT_IPVERSION_IPVERSION_DEFAULT       0x00000001UL                             /**< Mode DEFAULT for PCNT_IPVERSION             */
 #define PCNT_IPVERSION_IPVERSION_DEFAULT        (_PCNT_IPVERSION_IPVERSION_DEFAULT << 0) /**< Shifted mode DEFAULT for PCNT_IPVERSION     */
 
 /* Bit fields for PCNT EN */
@@ -299,41 +297,41 @@ typedef struct
 #define PCNT_CMD_STOPAUXCNT_DEFAULT             (_PCNT_CMD_STOPAUXCNT_DEFAULT << 11)    /**< Shifted mode DEFAULT for PCNT_CMD           */
 
 /* Bit fields for PCNT STATUS */
-#define _PCNT_STATUS_RESETVALUE                 0x00000000UL                            /**< Default value for PCNT_STATUS               */
-#define _PCNT_STATUS_MASK                       0x0000001FUL                            /**< Mask for PCNT_STATUS                        */
-#define PCNT_STATUS_DIR                         (0x1UL << 0)                            /**< Current Counter Direction                   */
-#define _PCNT_STATUS_DIR_SHIFT                  0                                       /**< Shift value for PCNT_DIR                    */
-#define _PCNT_STATUS_DIR_MASK                   0x1UL                                   /**< Bit mask for PCNT_DIR                       */
-#define _PCNT_STATUS_DIR_DEFAULT                0x00000000UL                            /**< Mode DEFAULT for PCNT_STATUS                */
-#define _PCNT_STATUS_DIR_UP                     0x00000000UL                            /**< Mode UP for PCNT_STATUS                     */
-#define _PCNT_STATUS_DIR_DOWN                   0x00000001UL                            /**< Mode DOWN for PCNT_STATUS                   */
-#define PCNT_STATUS_DIR_DEFAULT                 (_PCNT_STATUS_DIR_DEFAULT << 0)         /**< Shifted mode DEFAULT for PCNT_STATUS        */
-#define PCNT_STATUS_DIR_UP                      (_PCNT_STATUS_DIR_UP << 0)              /**< Shifted mode UP for PCNT_STATUS             */
-#define PCNT_STATUS_DIR_DOWN                    (_PCNT_STATUS_DIR_DOWN << 0)            /**< Shifted mode DOWN for PCNT_STATUS           */
-#define PCNT_STATUS_TOPBV                       (0x1UL << 1)                            /**< TOP Buffer Valid                            */
-#define _PCNT_STATUS_TOPBV_SHIFT                1                                       /**< Shift value for PCNT_TOPBV                  */
-#define _PCNT_STATUS_TOPBV_MASK                 0x2UL                                   /**< Bit mask for PCNT_TOPBV                     */
-#define _PCNT_STATUS_TOPBV_DEFAULT              0x00000000UL                            /**< Mode DEFAULT for PCNT_STATUS                */
-#define PCNT_STATUS_TOPBV_DEFAULT               (_PCNT_STATUS_TOPBV_DEFAULT << 1)       /**< Shifted mode DEFAULT for PCNT_STATUS        */
-#define PCNT_STATUS_PCNTLOCKSTATUS              (0x1UL << 2)                            /**< Lock Status                                 */
-#define _PCNT_STATUS_PCNTLOCKSTATUS_SHIFT       2                                       /**< Shift value for PCNT_PCNTLOCKSTATUS         */
-#define _PCNT_STATUS_PCNTLOCKSTATUS_MASK        0x4UL                                   /**< Bit mask for PCNT_PCNTLOCKSTATUS            */
-#define _PCNT_STATUS_PCNTLOCKSTATUS_DEFAULT     0x00000000UL                            /**< Mode DEFAULT for PCNT_STATUS                */
-#define _PCNT_STATUS_PCNTLOCKSTATUS_UNLOCKED    0x00000000UL                            /**< Mode UNLOCKED for PCNT_STATUS               */
-#define _PCNT_STATUS_PCNTLOCKSTATUS_LOCKED      0x00000001UL                            /**< Mode LOCKED for PCNT_STATUS                 */
-#define PCNT_STATUS_PCNTLOCKSTATUS_DEFAULT      (_PCNT_STATUS_PCNTLOCKSTATUS_DEFAULT << 2) /**< Shifted mode DEFAULT for PCNT_STATUS        */
+#define _PCNT_STATUS_RESETVALUE                 0x00000000UL                                /**< Default value for PCNT_STATUS               */
+#define _PCNT_STATUS_MASK                       0x0000001FUL                                /**< Mask for PCNT_STATUS                        */
+#define PCNT_STATUS_DIR                         (0x1UL << 0)                                /**< Current Counter Direction                   */
+#define _PCNT_STATUS_DIR_SHIFT                  0                                           /**< Shift value for PCNT_DIR                    */
+#define _PCNT_STATUS_DIR_MASK                   0x1UL                                       /**< Bit mask for PCNT_DIR                       */
+#define _PCNT_STATUS_DIR_DEFAULT                0x00000000UL                                /**< Mode DEFAULT for PCNT_STATUS                */
+#define _PCNT_STATUS_DIR_UP                     0x00000000UL                                /**< Mode UP for PCNT_STATUS                     */
+#define _PCNT_STATUS_DIR_DOWN                   0x00000001UL                                /**< Mode DOWN for PCNT_STATUS                   */
+#define PCNT_STATUS_DIR_DEFAULT                 (_PCNT_STATUS_DIR_DEFAULT << 0)             /**< Shifted mode DEFAULT for PCNT_STATUS        */
+#define PCNT_STATUS_DIR_UP                      (_PCNT_STATUS_DIR_UP << 0)                  /**< Shifted mode UP for PCNT_STATUS             */
+#define PCNT_STATUS_DIR_DOWN                    (_PCNT_STATUS_DIR_DOWN << 0)                /**< Shifted mode DOWN for PCNT_STATUS           */
+#define PCNT_STATUS_TOPBV                       (0x1UL << 1)                                /**< TOP Buffer Valid                            */
+#define _PCNT_STATUS_TOPBV_SHIFT                1                                           /**< Shift value for PCNT_TOPBV                  */
+#define _PCNT_STATUS_TOPBV_MASK                 0x2UL                                       /**< Bit mask for PCNT_TOPBV                     */
+#define _PCNT_STATUS_TOPBV_DEFAULT              0x00000000UL                                /**< Mode DEFAULT for PCNT_STATUS                */
+#define PCNT_STATUS_TOPBV_DEFAULT               (_PCNT_STATUS_TOPBV_DEFAULT << 1)           /**< Shifted mode DEFAULT for PCNT_STATUS        */
+#define PCNT_STATUS_PCNTLOCKSTATUS              (0x1UL << 2)                                /**< Lock Status                                 */
+#define _PCNT_STATUS_PCNTLOCKSTATUS_SHIFT       2                                           /**< Shift value for PCNT_PCNTLOCKSTATUS         */
+#define _PCNT_STATUS_PCNTLOCKSTATUS_MASK        0x4UL                                       /**< Bit mask for PCNT_PCNTLOCKSTATUS            */
+#define _PCNT_STATUS_PCNTLOCKSTATUS_DEFAULT     0x00000000UL                                /**< Mode DEFAULT for PCNT_STATUS                */
+#define _PCNT_STATUS_PCNTLOCKSTATUS_UNLOCKED    0x00000000UL                                /**< Mode UNLOCKED for PCNT_STATUS               */
+#define _PCNT_STATUS_PCNTLOCKSTATUS_LOCKED      0x00000001UL                                /**< Mode LOCKED for PCNT_STATUS                 */
+#define PCNT_STATUS_PCNTLOCKSTATUS_DEFAULT      (_PCNT_STATUS_PCNTLOCKSTATUS_DEFAULT << 2)  /**< Shifted mode DEFAULT for PCNT_STATUS        */
 #define PCNT_STATUS_PCNTLOCKSTATUS_UNLOCKED     (_PCNT_STATUS_PCNTLOCKSTATUS_UNLOCKED << 2) /**< Shifted mode UNLOCKED for PCNT_STATUS       */
-#define PCNT_STATUS_PCNTLOCKSTATUS_LOCKED       (_PCNT_STATUS_PCNTLOCKSTATUS_LOCKED << 2) /**< Shifted mode LOCKED for PCNT_STATUS         */
-#define PCNT_STATUS_CNTRUNNING                  (0x1UL << 3)                            /**< Main Counter running status                 */
-#define _PCNT_STATUS_CNTRUNNING_SHIFT           3                                       /**< Shift value for PCNT_CNTRUNNING             */
-#define _PCNT_STATUS_CNTRUNNING_MASK            0x8UL                                   /**< Bit mask for PCNT_CNTRUNNING                */
-#define _PCNT_STATUS_CNTRUNNING_DEFAULT         0x00000000UL                            /**< Mode DEFAULT for PCNT_STATUS                */
-#define PCNT_STATUS_CNTRUNNING_DEFAULT          (_PCNT_STATUS_CNTRUNNING_DEFAULT << 3)  /**< Shifted mode DEFAULT for PCNT_STATUS        */
-#define PCNT_STATUS_AUXCNTRUNNING               (0x1UL << 4)                            /**< Aux Counter running status                  */
-#define _PCNT_STATUS_AUXCNTRUNNING_SHIFT        4                                       /**< Shift value for PCNT_AUXCNTRUNNING          */
-#define _PCNT_STATUS_AUXCNTRUNNING_MASK         0x10UL                                  /**< Bit mask for PCNT_AUXCNTRUNNING             */
-#define _PCNT_STATUS_AUXCNTRUNNING_DEFAULT      0x00000000UL                            /**< Mode DEFAULT for PCNT_STATUS                */
-#define PCNT_STATUS_AUXCNTRUNNING_DEFAULT       (_PCNT_STATUS_AUXCNTRUNNING_DEFAULT << 4) /**< Shifted mode DEFAULT for PCNT_STATUS        */
+#define PCNT_STATUS_PCNTLOCKSTATUS_LOCKED       (_PCNT_STATUS_PCNTLOCKSTATUS_LOCKED << 2)   /**< Shifted mode LOCKED for PCNT_STATUS         */
+#define PCNT_STATUS_CNTRUNNING                  (0x1UL << 3)                                /**< Main Counter running status                 */
+#define _PCNT_STATUS_CNTRUNNING_SHIFT           3                                           /**< Shift value for PCNT_CNTRUNNING             */
+#define _PCNT_STATUS_CNTRUNNING_MASK            0x8UL                                       /**< Bit mask for PCNT_CNTRUNNING                */
+#define _PCNT_STATUS_CNTRUNNING_DEFAULT         0x00000000UL                                /**< Mode DEFAULT for PCNT_STATUS                */
+#define PCNT_STATUS_CNTRUNNING_DEFAULT          (_PCNT_STATUS_CNTRUNNING_DEFAULT << 3)      /**< Shifted mode DEFAULT for PCNT_STATUS        */
+#define PCNT_STATUS_AUXCNTRUNNING               (0x1UL << 4)                                /**< Aux Counter running status                  */
+#define _PCNT_STATUS_AUXCNTRUNNING_SHIFT        4                                           /**< Shift value for PCNT_AUXCNTRUNNING          */
+#define _PCNT_STATUS_AUXCNTRUNNING_MASK         0x10UL                                      /**< Bit mask for PCNT_AUXCNTRUNNING             */
+#define _PCNT_STATUS_AUXCNTRUNNING_DEFAULT      0x00000000UL                                /**< Mode DEFAULT for PCNT_STATUS                */
+#define PCNT_STATUS_AUXCNTRUNNING_DEFAULT       (_PCNT_STATUS_AUXCNTRUNNING_DEFAULT << 4)   /**< Shifted mode DEFAULT for PCNT_STATUS        */
 
 /* Bit fields for PCNT IF */
 #define _PCNT_IF_RESETVALUE                     0x00000000UL                            /**< Default value for PCNT_IF                   */
@@ -481,4 +479,4 @@ typedef struct
 /** @} End of group EFM32PG28_PCNT */
 /** @} End of group Parts */
 
-#endif // EFM32PG28_PCNT_H
+#endif /* EFM32PG28_PCNT_H */

@@ -18,19 +18,10 @@
 #ifndef SIMPLE_METERING_SERVER_H_
 #define SIMPLE_METERING_SERVER_H_
 
-#ifdef UC_BUILD
 #include "simple-metering-server-config.h"
 #if (EMBER_AF_PLUGIN_SIMPLE_METERING_SERVER_TEST_METER_ERRORS == 1)
 #define TEST_METER_ERRORS
 #endif
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_SIMPLE_METERING_SERVER_TEST_METER_ENABLE
-#define TEST_METER_ENABLE
-#endif // EMBER_AF_PLUGIN_SIMPLE_METERING_SERVER_TEST_METER_ENABLE
-#ifdef EMBER_AF_PLUGIN_SIMPLE_METERING_SERVER_TEST_METER_ERRORS
-#define TEST_METER_ERRORS
-#endif // EMBER_AF_PLUGIN_SIMPLE_METERING_SERVER_TEST_METER_ERRORS
-#endif // UC_BUILD
 
 /**
  * @defgroup simple-metering-server Simple Metering Server
@@ -99,6 +90,6 @@ void emberAfPluginSimpleMeteringServerProcessNotificationFlagsCallback(uint16_t 
 /** @} */ // end of Callbacks
 /** @} */ // end of simple-metering-server
 
-void emAfToggleFastPolling(uint8_t enableFastPolling);
+void sli_zigbee_af_toggle_fast_polling(uint8_t enableFastPolling);
 
 #endif /* SIMPLE_METERING_SERVER_H_ */

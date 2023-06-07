@@ -10,6 +10,8 @@ provides:
 
 source:
   - path: "sl_wisun_mode_switch_cli.c"
+    condition:
+      - "cli"
 
 ui_hints:
   visibility: never
@@ -21,13 +23,15 @@ template_contribution:
       help: "Wi-SUN commands"
       shortcuts:
         - name: "w"
+    condition:
+      - "cli"
 
   - name: "cli_command"
     value:
       group: "wisun"
       name: "mode_switch"
       handler: "app_mode_switch"
-      help: "configure mode witch: w ms"
+      help: "configure PHY mode switch: w ms"
       shortcuts:
         - name: "ms"
       argument:
@@ -37,6 +41,8 @@ template_contribution:
           help: "PhyModeId"
         - type: stringopt
           help: "neighbor MAC address (optional)"
+    condition:
+      - "cli"
 
 #---------------- Component Catalog ------------------
   - name: component_catalog

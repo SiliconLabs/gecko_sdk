@@ -18,6 +18,7 @@ component:
   - id: app_assert
   - id: legacy_hal
   - id: token_manager
+  - id: rail_util_pti
   # Connect components
   - id: connect_debug_print
   - id: connect_app_framework_common

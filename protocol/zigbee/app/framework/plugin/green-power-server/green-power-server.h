@@ -115,6 +115,22 @@ enum
   COMMISSIONING_TIMEOUT_TYPE_COMMISSIONING_WINDOW_TIMEOUT = 2
 }; // The commissioning timeout type.
 
+typedef uint8_t EmberSinkPairingStatus;
+#ifdef DOXYGEN_SHOULD_SKIP_THIS
+enum PairingStatus
+#else
+enum
+#endif
+{
+  SINK_PAIRING_STATUS_SUCCESS = 0,
+  SINK_PAIRING_STATUS_FAILURE = 1,
+  SINK_PAIRING_STATUS_IN_PROGRESS = 2,
+  SINK_PAIRING_STATUS_FAIL_NO_MATCHING_FUNCTIONALITY = 3,
+  SINK_PAIRING_STATUS_FAIL_ADDING_TRANSLATION = 4,
+  SINK_PAIRING_STATUS_FAIL_NO_SPACE_IN_SINK_TABLE = 5,
+  SINK_PAIRING_STATUS_FAIL_ENTRY_CORRUPTED = 6,
+}; // The pairing status.
+
 typedef struct {
   bool sendGpPairingInUnicastMode;
   bool unicastCommunication;
@@ -156,6 +172,10 @@ typedef struct {
   EmberGpApplicationInfo        applicationInfo;
   uint8_t                       securityKeyType;
 
+  // The memory space for holding the grouplist from GpPairingConfig command.
+  // This is a octet string with format of {<1 byte length, <n bytes grouplist>}
+  uint8_t                       groupList[GP_SIZE_OF_SINK_LIST_ENTRIES_OCTET_STRING];
+
   // data link to generic switch
   EmberGpSwitchInformation      switchInformationStruct;
 
@@ -173,24 +193,17 @@ typedef struct {
   bool                          doNotSendGpPairing;
 } GpCommDataSaved;
 
-#ifdef UC_BUILD
+typedef GpCommDataSaved EmberCommissioningGpd;
+
 extern sl_zigbee_event_t emberAfPluginGreenPowerServerGenericSwitchCommissioningTimeoutEvent;
-void emberAfPluginGreenPowerServerGenericSwitchCommissioningTimeoutEventHandler(SLXU_UC_EVENT);
+void emberAfPluginGreenPowerServerGenericSwitchCommissioningTimeoutEventHandler(sl_zigbee_event_t * event);
 extern sl_zigbee_event_t emberAfPluginGreenPowerServerMultiSensorCommissioningTimeoutEvent;
-void emberAfPluginGreenPowerServerMultiSensorCommissioningTimeoutEventHandler(SLXU_UC_EVENT);
+void emberAfPluginGreenPowerServerMultiSensorCommissioningTimeoutEventHandler(sl_zigbee_event_t * event);
 extern sl_zigbee_event_t emberAfPluginGreenPowerServerCommissioningWindowTimeoutEvent;
-void emberAfPluginGreenPowerServerCommissioningWindowTimeoutEventHandler(SLXU_UC_EVENT);
+void emberAfPluginGreenPowerServerCommissioningWindowTimeoutEventHandler(sl_zigbee_event_t * event);
 #define genericSwitchCommissioningTimeout (&emberAfPluginGreenPowerServerGenericSwitchCommissioningTimeoutEvent)
 #define multiSensorCommissioningTimeout (&emberAfPluginGreenPowerServerMultiSensorCommissioningTimeoutEvent)
 #define commissioningWindowTimeout (&emberAfPluginGreenPowerServerCommissioningWindowTimeoutEvent)
-#else // !UC_BUILD
-extern EmberEventControl emberAfPluginGreenPowerServerGenericSwitchCommissioningTimeoutEventControl;
-extern EmberEventControl emberAfPluginGreenPowerServerMultiSensorCommissioningTimeoutEventControl;
-extern EmberEventControl emberAfPluginGreenPowerServerCommissioningWindowTimeoutEventControl;
-#define genericSwitchCommissioningTimeout emberAfPluginGreenPowerServerGenericSwitchCommissioningTimeoutEventControl
-#define multiSensorCommissioningTimeout emberAfPluginGreenPowerServerMultiSensorCommissioningTimeoutEventControl
-#define commissioningWindowTimeout emberAfPluginGreenPowerServerCommissioningWindowTimeoutEventControl
-#endif // UC_BUILD
 
 /**
  * @name API
@@ -211,7 +224,7 @@ extern EmberEventControl emberAfPluginGreenPowerServerCommissioningWindowTimeout
  * @returns Information on the commissioning pointed by a structure
  * GpCommDataSaved type about the GPD.
  */
-GpCommDataSaved * emberAfGreenPowerServerFindCommissioningGpdInstance(EmberGpAddress * gpdAddr);
+EmberCommissioningGpd * emberAfGreenPowerServerFindCommissioningGpdInstance(EmberGpAddress * gpdAddr);
 /** @brief Delete a GPD commissioning instance in a multiple GPD commissioning
  * session.
  *
@@ -263,6 +276,22 @@ EmberAfGreenPowerServerCommissioningState *emberAfGreenPowerClusterGetServerComm
 EmberAfStatus emberAfGreenPowerServerDeriveSharedKeyFromSinkAttribute(uint8_t * gpsSecurityKeyTypeAtrribute,
                                                                       EmberKeyData * gpSharedKeyAttribute,
                                                                       EmberGpAddress * gpdAddr);
+/** @brief Clears the entry for a GPD in sink table.
+ *
+ * This function clears the entries in the sink table for a given gpd.
+ * In a sink table, there is unique entry for each GPD based on its addressing. When the
+ * GPD addressing uses application id=0b000 with 32 bit sourceId, there is just one
+ * entry for each GPD. But, when the GPD addressing with application Id=0b010 that is EUI64
+ * with endpoint id, for each unique endpoint, there can be an entry in sink table. Hence,
+ * when this function is called with application Id=0b010,EUI64 with endpoint id=0xff(all endpoints),
+ * it clears all the entry for that GPD with supplied EUI64.
+ * With clear up the gpd from sink table it also clears the translation table for that GPD.
+ *
+ * @param gpdAddr GPD address Ver.: always
+ *
+ *
+ */
+void emberAfGreenPowerServerRemoveSinkEntry(EmberGpAddress *gpdAddr);
 /** @} */ // end of name API
 
 /**
@@ -438,6 +467,47 @@ void emberAfGreenPowerClusterCommissioningMessageStatusNotificationCallback(Embe
                                                                             uint16_t destination,
                                                                             EmberStatus status);
 
+/** @brief Update alias information callback.
+ *
+ * This function is called by the green power server plugin during
+ * commissioning to update alias information from user.
+ *
+ * @param gpdAddr GPD address Ver.: always
+ * @param alias        Ver.: always
+ *
+ * @returns true if the alias is updated by the caller.
+ */
+bool emberAfPluginGreenPowerServerUpdateAliasCallback(EmberGpAddress *gpdAddr,
+                                                      uint16_t *alias);
+/** @brief Green power server pairing complete callback
+ *
+ * This function is called by the Green Power Server plugin during the pairing
+ * process to indicate the status. This may be called multiple times for a single
+ * pairing session. This provides the status as well as the current GPD context.
+ * This callback can be monitored to get information in case a GPD commissioning
+ * that has started ended up in success or failure. This callback does not give
+ * any information about a commissioning GPDF that gets filtered out ealier in the
+ * commissioning processing.
+ *
+ * @param status status of the pairing Ver.: always
+ * @param commissioningGpd context of the GPD that is currently commissioning Ver.: always
+ */
+void emberAfGreenPowerServerPairingStatusCallback(EmberSinkPairingStatus status,
+                                                  EmberCommissioningGpd *commissioningGpd);
+
+/** @brief Green power server update sink list callback
+ *
+ * This callback is called by the green power server at a final stagee during pairing process.
+ * At this point the commissioning sink is ready to be saved or updated into the sink table
+ * and GpPairing announcement. This callback is helpful to supply or update the associated
+ * parameters to the sink entry.
+ * For example, a sink application can update a group list groupcast comminication.
+ *
+ *
+ * @param commissioningGpd context of the GPD that is currently commissioning Ver.: always
+ */
+void emberAfPluginGreenPowerServerPreSinkPairingCallback(EmberCommissioningGpd *commissioningGpd);
+
 /** @} */ // end of gp_server_cb
 /** @} */ // end of name Callbacks
 
@@ -453,57 +523,50 @@ extern EmberStatus ezspProxyBroadcast(EmberNodeId source,
                                       uint8_t *messageContents,
                                       uint8_t *apsSequence);
 
-#ifdef UC_BUILD
 /*
  * Disable default response bit should be set per GP Spec 14-0563-08
  */
 extern bool emberAfGreenPowerClusterGpProxyCommissioningModeCallback(EmberAfClusterCommand *cmd);
-#else
-
-extern bool emberAfGreenPowerClusterGpProxyCommissioningModeCallback(uint8_t options,
-                                                                     uint16_t commissioningWindow,
-                                                                     uint8_t channel);
-#endif //UC_BUILD
 
 // security function prototypes
-bool emGpKeyTcLkDerivation(EmberGpAddress * gpdAddr,
-                           uint32_t gpdSecurityFrameCounter,
-                           uint8_t mic[4],
-                           EmberKeyData * key,
-                           bool directionIncomming);
-bool emGpCalculateIncomingCommandMic(EmberGpAddress * gpdAddr,
-                                     bool rxAfterTx,
-                                     uint8_t keyType,
-                                     uint8_t securityLevel,
-                                     uint32_t gpdSecurityFrameCounter,
-                                     uint8_t gpdCommandId,
-                                     uint8_t * gpdCommandPayload,
-                                     bool encryptedPayload,
-                                     uint8_t mic[4]);
-bool emGpCalculateIncomingCommandDecrypt(EmberGpAddress * gpdAddr,
-                                         uint32_t gpdSecurityFrameCounter,
-                                         uint8_t payloadLength,
-                                         uint8_t * payload);
+bool sli_zigbee_af_gp_key_tc_lk_derivation(EmberGpAddress * gpdAddr,
+                                           uint32_t gpdSecurityFrameCounter,
+                                           uint8_t mic[4],
+                                           EmberKeyData * key,
+                                           bool directionIncomming);
+bool sli_zigbee_af_gp_calculate_incoming_command_mic(EmberGpAddress * gpdAddr,
+                                                     bool rxAfterTx,
+                                                     uint8_t keyType,
+                                                     uint8_t securityLevel,
+                                                     uint32_t gpdSecurityFrameCounter,
+                                                     uint8_t gpdCommandId,
+                                                     uint8_t * gpdCommandPayload,
+                                                     bool encryptedPayload,
+                                                     uint8_t mic[4]);
+bool sli_zigbee_af_gp_calculate_incoming_command_decrypt(EmberGpAddress * gpdAddr,
+                                                         uint32_t gpdSecurityFrameCounter,
+                                                         uint8_t payloadLength,
+                                                         uint8_t * payload);
 // gp security test function
-void emGpTestSecurity(void);
+void sli_zigbee_af_gp_test_security(void);
 
-EmberAfStatus emGpAddToApsGroup(uint8_t endpoint, uint16_t groupId);
+EmberAfStatus sli_zigbee_af_gp_add_to_aps_group(uint8_t endpoint, uint16_t groupId);
 // GP helper functions
-bool emGpEndpointAndClusterIdValidation(uint8_t endpoint,
-                                        bool server,
-                                        EmberAfClusterId clusterId);
-const uint8_t * emGpFindReportId(uint8_t reportId,
-                                 uint8_t numberOfReports,
-                                 const uint8_t * reports);
-uint8_t emGetCommandListFromDeviceIdLookup(uint8_t gpdDeviceId,
-                                           uint8_t * gpdCommandList);
-uint8_t emGetClusterListFromDeviceIdLookup(uint8_t gpdDeviceId,
-                                           ZigbeeCluster * gpdClusterList);
-bool emGetClusterListFromCmdIdLookup(uint8_t gpdCommandId,
-                                     ZigbeeCluster * gpdCluster);
-void emGpForwardGpdCommandDefault(EmberGpAddress *addr,
-                                  uint8_t gpdCommandId,
-                                  uint8_t *gpdCommandPayload);
+bool sli_zigbee_af_gp_endpoint_and_cluster_id_validation(uint8_t endpoint,
+                                                         bool server,
+                                                         EmberAfClusterId clusterId);
+const uint8_t * sli_zigbee_af_gp_find_report_id(uint8_t reportId,
+                                                uint8_t numberOfReports,
+                                                const uint8_t * reports);
+uint8_t sli_zigbee_af_get_command_list_from_device_id_lookup(uint8_t gpdDeviceId,
+                                                             uint8_t * gpdCommandList);
+uint8_t sli_zigbee_af_get_cluster_list_from_device_id_lookup(uint8_t gpdDeviceId,
+                                                             ZigbeeCluster * gpdClusterList);
+bool sli_zigbee_af_get_cluster_list_from_cmd_id_lookup(uint8_t gpdCommandId,
+                                                       ZigbeeCluster * gpdCluster);
+void sli_zigbee_af_gp_forward_gpd_command_default(EmberGpAddress *addr,
+                                                  uint8_t gpdCommandId,
+                                                  uint8_t *gpdCommandPayload);
 void emberAfGreenPowerServerSinkTableInit(void);
 
 #endif //_GREEN_POWER_SERVER_H_

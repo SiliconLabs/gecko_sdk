@@ -8,9 +8,14 @@ description: >
     - Automatic unprovisioned device beaconing on the selected bearers (PB-ADV, PB-GATT)
     - Out-of-band authentication settings
     - Helper functions for OOB authentication
+  
+  This is a No-Code component.
 category: "Bluetooth Mesh"
 quality: "production"
 root_path: "app/btmesh/common/btmesh_provisionee"
+tag:
+  - No-Code
+
 config_file:
   - path: "config/sl_btmesh_provisionee_config.h"
 source:

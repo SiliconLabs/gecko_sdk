@@ -22,7 +22,6 @@ template_contribution:
   - name: component_catalog
     value: zigbee_r22_support
 
-
 documentation:
   docset: zigbee
   document: zigbee-af-api/r22-support

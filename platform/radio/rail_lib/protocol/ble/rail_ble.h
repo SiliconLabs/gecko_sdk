@@ -206,6 +206,22 @@ extern const RAIL_ChannelConfig_t *const RAIL_BLE_Phy1MbpsViterbi;
  */
 extern const RAIL_ChannelConfig_t *const RAIL_BLE_Phy2MbpsViterbi;
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+/**
+ * Default PHY to use for BLE 1M Viterbi HADM. Will be NULL if
+ * \ref RAIL_BLE_SUPPORTS_HADM is 0. On EFR32XG24, this will also
+ * be NULL for non 40MHz HFXO frequencies.
+ */
+extern const RAIL_ChannelConfig_t *const RAIL_BLE_Phy1MbpsViterbiHadm;
+
+/**
+ * Default PHY to use for BLE 2M Viterbi HADM. Will be NULL if
+ * \ref RAIL_BLE_SUPPORTS_HADM is 0. On EFR32XG24, this will also
+ * be NULL for non 40MHz HFXO frequencies.
+ */
+extern const RAIL_ChannelConfig_t *const RAIL_BLE_Phy2MbpsViterbiHadm;
+#endif
+
 /**
  * PHY to use for BLE 2M with AoX functionality. Will be NULL if either
  * \ref RAIL_BLE_SUPPORTS_2MBPS_VITERBI or \ref RAIL_BLE_SUPPORTS_AOX is 0.
@@ -436,12 +452,42 @@ RAIL_Status_t RAIL_BLE_ConfigPhyCoded(RAIL_Handle_t railHandle,
  */
 RAIL_Status_t RAIL_BLE_ConfigPhySimulscan(RAIL_Handle_t railHandle);
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+/**
+ * Switch to the 1 Mbps BLE PHY for HADM.
+ *
+ * @param[in] railHandle A handle for RAIL instance.
+ * @return A status code indicating success of the function call.
+ *
+ * Use this function to switch back to the BLE 1 Mbps HADM PHY from
+ * another configuration. You may only call this
+ * function after initializing BLE and while the radio is idle.
+ *
+ * @note This PHY is only supported when \ref RAIL_BLE_SUPPORTS_HADM is not 0.
+ */
+RAIL_Status_t RAIL_BLE_ConfigPhy1MbpsHadm(RAIL_Handle_t railHandle);
+
+/**
+ * Switch to the 2 Mbps BLE PHY for HADM.
+ *
+ * @param[in] railHandle A handle for RAIL instance.
+ * @return A status code indicating success of the function call.
+ *
+ * Use this function to switch back to the BLE 2 Mbps HADM PHY from
+ * another configuration. You may only call this
+ * function after initializing BLE and while the radio is idle.
+ *
+ * @note This PHY is only supported when \ref RAIL_BLE_SUPPORTS_HADM is not 0.
+ */
+RAIL_Status_t RAIL_BLE_ConfigPhy2MbpsHadm(RAIL_Handle_t railHandle);
+#endif
+
 /**
  * Change BLE radio parameters.
  *
  * @param[in] railHandle A handle for RAIL instance.
  * @param[in] crcInit The value to use for CRC initialization.
- * @param[in] accessAddress The access address to use for the connection.  The
+ * @param[in] accessAddress The access address to use for the connection. The
  * bits of this parameter are transmitted or received LSB first.
  * @param[in] channel The logical channel that you're changing to, which
  * initializes the whitener if used.
@@ -518,7 +564,7 @@ RAIL_Status_t RAIL_BLE_ConfigSignalIdentifier(RAIL_Handle_t railHandle,
                                               RAIL_BLE_SignalIdentifierMode_t signalIdentifierMode);
 
 /**
- * Enable or Disable signal identifier interrupt for BLE signal detection.
+ * Enable or disable signal identifier interrupt for BLE signal detection.
  *
  * @param[in] railHandle A RAIL instance handle.
  * @param[in] enable Signal detection is enabled if true, disabled if false.
@@ -797,6 +843,454 @@ RAIL_Status_t RAIL_BLE_ConfigAoxAntenna(RAIL_Handle_t railHandle,
                                         RAIL_BLE_AoxAntennaConfig_t *antennaConfig);
 
 /** @} */  // end of group AoX
+
+ #ifndef DOXYGEN_SHOULD_SKIP_THIS
+/******************************************************************************
+ * High Accuracy Distance Measurement (HADM)
+ *****************************************************************************/
+/**
+ * @addtogroup HADM High Accuracy Distance Measurement
+ * @{
+ * @brief These APIs are to a stack implementing BLE's high accuracy distance
+ * measurement functionality.
+ *
+ * They are designed for use by the Silicon Labs BLE stack only at this time and
+ * may cause problems if accessed directly.
+ */
+
+/**
+ * @enum RAIL_BLE_HadmRole_t
+ * @brief The device role during HADM events.
+ */
+RAIL_ENUM(RAIL_BLE_HadmRole_t) {
+  /** Device cannot perform HADM events. */
+  RAIL_BLE_HADM_ROLE_UNASSIGNED = 0,
+  /** Device is an initiator during HADM events */
+  RAIL_BLE_HADM_ROLE_INITIATOR = 1,
+  /** Device is a reflector during HADM events */
+  RAIL_BLE_HADM_ROLE_REFLECTOR = 2,
+};
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+// Self-referencing defines minimize compiler complaints when using RAIL_ENUM
+#define RAIL_BLE_HADM_ROLE_UNASSIGNED ((RAIL_BLE_HadmRole_t) RAIL_BLE_HADM_ROLE_UNASSIGNED)
+#define RAIL_BLE_HADM_ROLE_INITIATOR  ((RAIL_BLE_HadmRole_t) RAIL_BLE_HADM_ROLE_INITIATOR)
+#define RAIL_BLE_HADM_ROLE_REFLECTOR  ((RAIL_BLE_HadmRole_t) RAIL_BLE_HADM_ROLE_REFLECTOR)
+#endif//DOXYGEN_SHOULD_SKIP_THIS
+
+/**
+ * @struct RAIL_BLE_HadmResults_t
+ * @brief Contains measurement results from HADM step
+ */
+typedef struct {
+  uint32_t result[7]; /**< HADM measurement data for a particular step. */
+} RAIL_BLE_HadmResults_t;
+
+/**
+ * @enum RAIL_BLE_HadmRttType_t
+ * @brief HADM RTT Types.
+ */
+RAIL_ENUM(RAIL_BLE_HadmRttType_t) {
+  /** Coarse cost function engine method RTT. */
+  RAIL_BLE_HADM_RTT_COARSE = 0U,
+  /** 96 bit sounding sequence method RTT. */
+  RAIL_BLE_HADM_RTT_96B_SS = 2U,
+};
+
+/**
+ * @struct RAIL_BLE_HadmConfig_t
+ * @brief Contains arguments for \ref RAIL_BLE_ConfigHadm function.
+ */
+typedef struct RAIL_BLE_HadmConfig {
+  RAIL_BLE_HadmRole_t role; /**< The device role during HADM event. */
+  bool iqAvgEnabled; /**< Enable IQ Averaging. */
+  uint16_t hadmSqteSteps; /**< Number of steps in HADM event. */
+  /** Pointer to HADM measurements. Set to NULL if unused. */
+  RAIL_BLE_HadmResults_t *pHadmDataOutput;
+  uint16_t t_fcs; /**< Frequency change spacing (in us). */
+  uint16_t t_ip1; /**< Interlude period for mode 0 & 1 steps (in us). */
+  uint16_t t_ip2; /**< Interlude period for mode 2 steps (in us). */
+  uint16_t t_pm; /**< Phase measurement time (in us). */
+  uint32_t *iqBuffer; /**< Pointer to buffer where IQ data will be written. */
+  uint16_t iqBufferSize; /**< Size of IQ buffer in 32 bit words. */
+  RAIL_BLE_HadmRttType_t rttType; /**< RTT type returned during mode 1 step. */
+  bool disableRttGdComp; /**< Debug flag to disable RTT GD compensation. */
+  bool maintainSync; /**< Deprecated & ignored field, will be removed. */
+  bool disableToneExtensionSlot; /**< Disable tone extension slots in event. */
+} RAIL_BLE_HadmConfig_t;
+
+/** The maximum number of HADM steps allowed during a HADM event */
+#define RAIL_BLE_HADM_MAX_SQTE_STEPS 512
+
+/**
+ * @enum RAIL_BLE_HadmStepState_t
+ * @brief The current HADM step state.
+ */
+RAIL_ENUM(RAIL_BLE_HadmStepState_t) {
+  /** HADM step state idle */
+  RAIL_BLE_HADM_STATE_IDLE = 0,
+  /** HADM step state initiator initiator transmit mode 0 */
+  RAIL_BLE_HADM_STATE_I_TX_MODE0 = 1,
+  /** HADM step state initiator reflector transmit mode 0 */
+  RAIL_BLE_HADM_STATE_R_TX_MODE0 = 2,
+  /** HADM step state initiator initiator transmit mode 1 */
+  RAIL_BLE_HADM_STATE_I_TX_MODE1 = 3,
+  /** HADM step state initiator reflector transmit mode 1 */
+  RAIL_BLE_HADM_STATE_R_TX_MODE1 = 4,
+  /** HADM step state initiator initiator transmit mode 2 */
+  RAIL_BLE_HADM_STATE_R_TX_MODE2 = 6,
+  /** HADM step state initiator reflector transmit mode 2 */
+  RAIL_BLE_HADM_STATE_I_TX_MODE2 = 7,
+};
+
+/**
+ * First step state for HADM mode 0.
+ */
+#define RAIL_BLE_HADM_STEP_MODE0             RAIL_BLE_HADM_STATE_I_TX_MODE0
+
+/**
+ * First step state for HADM mode 1.
+ */
+#define RAIL_BLE_HADM_STEP_MODE1             RAIL_BLE_HADM_STATE_I_TX_MODE1
+
+/**
+ * First step state for HADM mode 2.
+ */
+#define RAIL_BLE_HADM_STEP_MODE2             RAIL_BLE_HADM_STATE_I_TX_MODE2
+
+/**
+ * @enum RAIL_BLE_HadmStepMode_t
+ * @brief The HADM step mode.
+ */
+RAIL_ENUM(RAIL_BLE_HadmStepMode_t) {
+  RAIL_BLE_HADM_MODE_0,   /**< HADM step mode 0. */
+  RAIL_BLE_HADM_MODE_1,   /**< HADM step mode 1. */
+  RAIL_BLE_HADM_MODE_2,   /**< HADM step mode 2. */
+  RAIL_BLE_HADM_MODE_3,   /**< HADM step mode 3. */
+};
+
+/**
+ * @enum RAIL_BLE_HadmAntennaId_t
+ * @brief The HADM antenna ID.
+ */
+RAIL_ENUM(RAIL_BLE_HadmAntennaId_t) {
+  RAIL_BLE_HADM_ANTENNA_1 = 1,   /**< HADM antenna ID 1. */
+  RAIL_BLE_HADM_ANTENNA_2 = 2,   /**< HADM antenna ID 2. */
+  RAIL_BLE_HADM_ANTENNA_3 = 3,   /**< HADM antenna ID 3. */
+  RAIL_BLE_HADM_ANTENNA_4 = 4,   /**< HADM antenna ID 4. */
+};
+
+/**
+ * @enum RAIL_BLE_HadmRttPacketQuality_t
+ * @brief HADM RTT packet quality.
+ */
+RAIL_ENUM(RAIL_BLE_HadmRttPacketQuality_t) {
+  /** Access address check succeeded. */
+  RAIL_BLE_HADM_RTT_AA_SUCCESS = 0U,
+  /** Access address had one or more bit errors. */
+  RAIL_BLE_HADM_RTT_AA_BIT_ERRORS = 1U,
+  /** Access address not found. */
+  RAIL_BLE_HADM_RTT_AA_NOT_FOUND = 2U,
+};
+
+/**
+ * @struct RAIL_BLE_HadmMode0Results_t
+ * @brief Contains HADM mode 0 step measurement results.
+ */
+typedef struct RAIL_BLE_HadmMode0Results {
+  /** Mode of HADM step. */
+  uint8_t mode;
+  /** Antenna ID. */
+  RAIL_BLE_HadmAntennaId_t antenna;
+  /** RSSI during step in integer dBm. */
+  int8_t rssi;
+  /** Packet quality */
+  uint8_t packetQuality;
+  /**
+   * For devices configured as an initiator, the measured frequency offset
+   * in Hz between the two devices during a HADM mode 0 step. For devices
+   * configured as a reflector, this value will always be 0.
+   */
+  int32_t freqOffsetHz;
+  /** The gain setting. */
+  uint32_t stepGainSetting;
+} RAIL_BLE_HadmMode0Results_t;
+
+/**
+ *  A sentinel value to indicate an invalid rtt time value in
+ *  \ref RAIL_BLE_HadmMode1Results_t::rttHalfNs
+ */
+#define RAIL_BLE_HADM_INVALID_RTT_VALUE ((int16_t)0x8000)
+
+/**
+ * @struct RAIL_BLE_HadmMode1Results_t
+ * @brief Contains HADM mode 1 step measurement results.
+ */
+typedef struct RAIL_BLE_HadmMode1Results {
+  /** Mode of HADM step. */
+  uint8_t mode;
+  /** Antenna ID. */
+  RAIL_BLE_HadmAntennaId_t antenna;
+  /** RSSI during step in integer dBm. */
+  int8_t rssi;
+  /** Packet quality */
+  uint8_t packetQuality;
+  /**
+   * For the initiator, this is the time (in 0.5 ns units) between time of
+   * departure and time of arrival excluding known offsets such as interlude
+   * period and packet length.
+   * For the reflector, this is the time (in 0.5 ns units) between time of
+   * arrival and time of departure excluding known offsets such as interlude
+   * period and packet length.
+   */
+  int16_t rttHalfNs;
+  /** Reserved */
+  uint16_t reserved1;
+  /** Reserved */
+  uint32_t reserved2;
+} RAIL_BLE_HadmMode1Results_t;
+
+/**
+ * @struct RAIL_BLE_HadmMode2Results_t
+ * @brief Contains HADM mode 2 step measurement results.
+ */
+typedef struct RAIL_BLE_HadmMode2Results {
+  /** Mode of HADM step. */
+  uint8_t mode;
+  /** Reserved */
+  uint8_t reserved0;
+  /** Reserved */
+  int16_t reserved1;
+  /** Reserved */
+  uint32_t reserved2[2];
+} RAIL_BLE_HadmMode2Results_t;
+
+/**
+ * @struct RAIL_BLE_HadmStepResults_t
+ * @brief Generic HADM step mode result structure. Based on the value of the
+ *   mode field, this structure can be type cast to the appropriate mode
+ *   specific structure \ref RAIL_BLE_HadmMode0Results_t,
+ *   \ref RAIL_BLE_HadmMode1Results_t, or RAIL_BLE_HadmMode2Results_t.
+ */
+typedef struct RAIL_BLE_HadmStepResults {
+  /** Mode of HADM step. */
+  uint8_t mode;
+  /** Reserved */
+  uint8_t reserved0;
+  /** Reserved */
+  int16_t reserved1;
+  /** Reserved */
+  uint32_t reserved2[2];
+} RAIL_BLE_HadmStepResults_t;
+
+/**
+ * @struct RAIL_BLE_HadmMode0DebugResults_t
+ * @brief Contains HADM mode 0 step measurement debug results.
+ */
+typedef struct RAIL_BLE_HadmMode0DebugResults {
+  uint32_t reserved[4];
+} RAIL_BLE_HadmMode0DebugResults_t;
+
+/**
+ * @struct RAIL_BLE_HadmMode1DebugResults_t
+ * @brief Contains HADM mode 1 step measurement debug results.
+ */
+typedef struct RAIL_BLE_HadmMode1DebugResults {
+  uint16_t toxClks;
+  int16_t fracRttHalfNs;
+  uint32_t coarseRttHalfNs;
+  int32_t gdCompRttHalfNs;
+  int32_t toxWithOffsetsRttHalfNs;
+} RAIL_BLE_HadmMode1DebugResults_t;
+
+/**
+ * @struct RAIL_BLE_HadmMode2DebugResults_t
+ * @brief Contains HADM mode 2 step measurement debug results.
+ */
+typedef struct RAIL_BLE_HadmMode2DebugResults {
+  uint32_t reserved[4];
+} RAIL_BLE_HadmMode2DebugResults_t;
+
+/**
+ * @struct RAIL_BLE_HadmStepDebugResults_t
+ * @brief Generic HADM step mode debug result structure. Based on the value of
+ *   the mode field, this structure can be type cast to the appropriate mode
+ *   specific structure \ref RAIL_BLE_HadmMode0DebugResults_t,
+ *   \ref RAIL_BLE_HadmMode1DebugResults_t, or RAIL_BLE_HadmMode2DebugResults_t.
+ */
+typedef struct RAIL_BLE_HadmStepDebugResults {
+  uint32_t reserved;
+  uint32_t reserved1;
+  uint32_t reserved2;
+  uint32_t reserved3;
+} RAIL_BLE_HadmStepDebugResults_t;
+
+/**
+ * @struct RAIL_BLE_HadmStepConfig_t
+ * @brief Contains arguments for \ref RAIL_BLE_SetNextHadmStep.
+ */
+typedef struct RAIL_BLE_HadmStepConfig {
+  /** Sets the HADM step state. */
+  RAIL_BLE_HadmStepState_t stepState;
+  /** Reserved */
+  uint8_t reserved0;
+  /** Sets the HADM step logical channel. */
+  uint16_t channel;
+  /**
+   * A pointer to an array of HADM step results. These results will be
+   * populated after the completion of the HADM step. This array can be cast to
+   * \ref RAIL_BLE_HadmMode0Results_t, \ref RAIL_BLE_HadmMode1Results_t, or
+   * \ref RAIL_BLE_HadmMode2Results_t as appropriate to read mode specific
+   * results.
+   */
+  RAIL_BLE_HadmStepResults_t *pResults;
+  /**
+   * A pointer to an array of HADM step debug results. These results will be
+   * populated after the completion of the HADM step. This array can be cast to
+   * \ref RAIL_BLE_HadmMode0DebugResults_t, \ref
+   * RAIL_BLE_HadmMode1DebugResults_t, or \ref RAIL_BLE_HadmMode2DebugResults_t
+   * as appropriate to read mode specific debug results.
+   *
+   * Setting this pointer to NULL means no debug data will be collected.
+   */
+  RAIL_BLE_HadmStepDebugResults_t *pDebugResults;
+  /**
+   * Pointer to contiguous global read-write memory that will be used
+   * by RAIL to store channel switching information.
+   * It need not be initialized and applications should never write
+   * data anywhere in this buffer.
+   *
+   * @note the size in words of this buffer must be at least as large as
+   * 3 + /ref RAIL_CHANNEL_HOPPING_BUFFER_SIZE_PER_CHANNEL. This buffer
+   * is for internal use to the library.
+   */
+  uint32_t *pBuffer;
+  /**
+   * This parameter must be set to the length of the buffer array. This way,
+   * during configuration, the software can confirm it's writing within the
+   * range of the buffer. The configuration API will return an error
+   * if bufferLength is insufficient.
+   */
+  uint16_t bufferLength;
+} RAIL_BLE_HadmStepConfig_t;
+
+/**
+ * @struct RAIL_BLE_HadmPacketConfig_t
+ * @brief Contains arguments for \ref RAIL_BLE_SetHadmPacketConfig.
+ */
+typedef struct RAIL_BLE_HadmPacketConfig {
+  /** The access address used for this HADM step. */
+  uint32_t accessAddress;
+  /**
+   * Length of packet payload in bytes. Should not include trailer, guard,
+   * or UC bits.
+   */
+  uint16_t packetLength;
+  /**
+   * Transmit tone during tone extension slot in mode 2 packet.
+   * This field is ignored during RX and for all non mode 2 packets.
+   */
+  bool transmitToneExtension;
+} RAIL_BLE_HadmPacketConfig_t;
+
+/**
+ * Configure High Accuracy Distance Measurement (HADM) functionality.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[in] hadmConfig Configuration options for HADM.
+ * @return RAIL_Status_t indicating success or failure of the call.
+ *
+ * @warning This API is not safe to use in a multiprotocol app.
+ */
+RAIL_Status_t RAIL_BLE_ConfigHadm(RAIL_Handle_t railHandle,
+                                  const RAIL_BLE_HadmConfig_t *hadmConfig);
+
+/**
+ * Enable High Accuracy Distance Measurement (HADM) functionality.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[in] enable Enable or disable HADM functionality.
+ * @return RAIL_Status_t indicating success or failure of the call.
+ *
+ * @warning This API is not safe to use in a multiprotocol app.
+ */
+RAIL_Status_t RAIL_BLE_EnableHadm(RAIL_Handle_t railHandle,
+                                  bool enable);
+
+/**
+ * Configure packet for current HADM half step.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[in] hadmPacketConfig Configuration for packet.
+ * @return RAIL_Status_t indicating success or failure of the call.
+ *
+ * @warning This API is not safe to use in a multiprotocol app.
+ *
+ * @note For any particular HADM half step, this API must be called after
+ *   \ref RAIL_BLE_SetNextHadmStep is called to configure that HADM step.
+ *
+ * @note For transmitted mode 1 packets with non 0 length payloads,
+ *   \ref RAIL_WriteTxFifo must also be called with argument writeLength set to
+ *   the same value as \ref RAIL_BLE_HadmPacketConfig_t::packetLength.
+ *   For transmitted mode 1 packets with 0 length payloads, \ref
+ *   RAIL_WriteTxFifo does need not to be called; however if it is called, it
+ *   must be called with argument writeLength also set to 0.
+ *   For transmitted mode 0 or mode 2 packets, RAIL_WriteTxFifo should not be
+ *   called at all.
+ */
+RAIL_Status_t RAIL_BLE_SetHadmPacketConfig(RAIL_Handle_t railHandle,
+                                           const RAIL_BLE_HadmPacketConfig_t *hadmPacketConfig);
+
+/**
+ * Set up the next HADM step.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[in,out] hadmStepConfig Configuration options for next HADM step.
+ * @param[in] pend If true, apply configuration at next appropriate radio
+ *   transition (i.e. at Rx2Tx for an initiator, or Tx2Rx for a reflector).
+ *   Otherwise, apply configuration immediately.
+ * @return RAIL_Status_t indicating success or failure of the call.
+ *
+ * @note When the next HADM step is to be pended, the specified step in
+ * hadmStepConfig must be the initial step state for a particular mode (e.g.
+ * \ref RAIL_BLE_HADM_STEP_MODE0, \ref RAIL_BLE_HADM_STEP_MODE1, or \ref
+ * RAIL_BLE_HADM_STEP_MODE2). Otherwise this API will return \ref
+ * RAIL_STATUS_INVALID_PARAMETER.
+ *
+ * @warning This API is not safe to use in a multiprotocol app.
+ */
+RAIL_Status_t RAIL_BLE_SetNextHadmStep(RAIL_Handle_t railHandle,
+                                       const RAIL_BLE_HadmStepConfig_t *hadmStepConfig,
+                                       bool pend);
+
+/**
+ * Get the length of captured IQ data from most recent RX.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return The number of captured IQ samples. Zero is returned if no samples
+ *   were captured or if \ref RAIL_BLE_HadmConfig_t::iqBuffer is
+ *   uninitialized.
+ *
+ * @warning This API is not safe to use in a multiprotocol app.
+ */
+uint16_t RAIL_BLE_GetHadmIQCaptureBufferLength(RAIL_Handle_t railHandle);
+
+/**
+ * Set the RTT board offset (half ns).
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[in] offsetHalfNs RTT board offset in units of half ns.
+ * @return RAIL_Status_t indicating success or failure of the call.
+ *
+ * This API can be used to set a board calibrated offset that will be applied
+ * to all \ref RAIL_BLE_HadmMode1Results_t::rttHalfNs values returned during
+ * HADM mode 1 steps.
+ */
+RAIL_Status_t RAIL_SetHadmBoardRttOffset(RAIL_Handle_t railHandle,
+                                         int32_t offsetHalfNs);
+
+/** @} */  // end of group HADM
+#endif//DOXYGEN_SHOULD_SKIP_THIS
 
 /// @addtogroup BLETX2TX BLE TX Channel Hopping
 /// @{

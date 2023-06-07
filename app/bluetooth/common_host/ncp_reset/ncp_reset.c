@@ -32,18 +32,18 @@
 #include "ncp_reset.h"
 #include "sl_bt_api.h"
 #include "app_log.h"
-#include "sl_simple_timer.h"
+#include "app_timer.h"
 #include "ncp_host.h"
 #include "app_assert.h"
 
 #define MAX_NCP_BOOT_N 5
 #define BOOT_DELAY_MS 1000
 
-static void ncp_reset_on_boot_timer_expire(sl_simple_timer_t *timer, void *data);
+static void ncp_reset_on_boot_timer_expire(app_timer_t *timer, void *data);
 
 static bool ncp_booted;
 static uint8_t ncp_boot_retries;
-static sl_simple_timer_t boot_timer;
+static app_timer_t boot_timer;
 
 /**************************************************************************//**
  * Ble event callback
@@ -54,7 +54,7 @@ sl_status_t ncp_reset_on_event(sl_bt_msg_t *evt)
   // Catch boot event...
   if (ncp_booted || SL_BT_MSG_ID(evt->header) == sl_bt_evt_system_boot_id) {
     if (!ncp_booted) {
-      sl_simple_timer_stop(&boot_timer);
+      app_timer_stop(&boot_timer);
       app_log_info("NCP booted." APP_LOG_NL);
       ncp_booted = true;
     }
@@ -82,14 +82,14 @@ void ncp_reset(void)
 
   sl_bt_system_reset(sl_bt_system_boot_mode_normal);
 
-  sc = sl_simple_timer_start(&boot_timer, BOOT_DELAY_MS, ncp_reset_on_boot_timer_expire, NULL, true);
+  sc = app_timer_start(&boot_timer, BOOT_DELAY_MS, ncp_reset_on_boot_timer_expire, NULL, true);
   app_assert_status(sc);
 }
 
 /**************************************************************************//**
  * Boot timer callback.
  *****************************************************************************/
-static void ncp_reset_on_boot_timer_expire(sl_simple_timer_t *timer, void *data)
+static void ncp_reset_on_boot_timer_expire(app_timer_t *timer, void *data)
 {
   sl_status_t sc;
 
@@ -103,7 +103,7 @@ static void ncp_reset_on_boot_timer_expire(sl_simple_timer_t *timer, void *data)
     sl_bt_system_reset(sl_bt_system_boot_mode_normal);
     ncp_boot_retries++;
   } else {
-    sl_simple_timer_stop(&boot_timer);
+    app_timer_stop(&boot_timer);
     app_assert(false, "Failed to reset NCP. Giving up.");
   }
 }

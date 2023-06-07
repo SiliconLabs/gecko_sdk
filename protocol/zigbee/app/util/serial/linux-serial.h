@@ -34,14 +34,4 @@ int emberSerialGetInputFd(uint8_t port);
 void emberSerialSendReadyToRead(uint8_t port);
 
 // For users of app/util/serial/command-interpreter.h
-#ifndef UC_BUILD
-void emberSerialCommandCompletionInit(EmberCommandEntry* listOfCommands);
-
-#if defined(GATEWAY_APP) && !defined(EMBER_AF_PLUGIN_GATEWAY)
-// For users of app/util/serial/cli.h
-void emberSerialCommandCompletionInitCli(cliSerialCmdEntry* cliCmdList,
-                                         int cliCmdListLength);
-#endif
-
-#endif // UC_BUILD
 /** @} END addtogroup */

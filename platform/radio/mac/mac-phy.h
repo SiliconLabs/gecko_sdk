@@ -70,13 +70,13 @@ typedef struct {
   #define MAX_CHANNELS_PER_PAGE     27u // channels 0-26 // Must be < 32!
   #define CHANNEL_BITS              5u  // need 5 bits for 27 channels
 // Some macros for messing with single-byte-encoded MAC Page+Channel values
-  #define emMacPgChanPg(macPgChan)  ((uint8_t)(macPgChan) >> CHANNEL_BITS)
-  #define emMacPgChanCh(macPgChan)  ((uint8_t)(macPgChan) & (BIT(CHANNEL_BITS) - 1))
-  #define emMacPgChan(page, chan)   (((uint8_t)((page) << CHANNEL_BITS)) \
-                                     | ((chan) & (BIT(CHANNEL_BITS) - 1)))
+  #define sli_802154mac_pg_chan_pg(macPgChan)  ((uint8_t)(macPgChan) >> CHANNEL_BITS)
+  #define sli_802154mac_pg_chan_ch(macPgChan)  ((uint8_t)(macPgChan) & (BIT(CHANNEL_BITS) - 1))
+  #define sli_802154mac_pg_chan(page, chan)   (((uint8_t)((page) << CHANNEL_BITS)) \
+                                               | ((chan) & (BIT(CHANNEL_BITS) - 1)))
 
-uint8_t emPhyGetChannelPageForChannel(uint8_t macPgChan);
-uint8_t emPhyGetChannelPageInUse(void);
+uint8_t sli_802154phy_get_channel_page_for_channel(uint8_t macPgChan);
+uint8_t sli_802154phy_get_channel_page_in_use(void);
 
 #else//!MAC_HAS_CHANNEL_PAGES
 
@@ -84,12 +84,12 @@ uint8_t emPhyGetChannelPageInUse(void);
   #define MAX_CHANNELS_PER_PAGE     255u // channels 0-254
   #define CHANNEL_BITS              8u   // need 8 bits for 255 channels
 // Some macros for messing with single-byte-encoded MAC Page+Channel values
-  #define emMacPgChanPg(macPgChan)  0
-  #define emMacPgChanCh(macPgChan)  (macPgChan)
-  #define emMacPgChan(page, chan)   (chan)
-  #define emPhyGetChannelPageForChannel(macPgChan)  (0)
-  #define emPhyGetChannelPageInUse()                (0)
-  #define emPhyGetChannelPageForChannel(macPgChan)  (0)
+  #define sli_802154mac_pg_chan_pg(macPgChan)  0
+  #define sli_802154mac_pg_chan_ch(macPgChan)  (macPgChan)
+  #define sli_802154mac_pg_chan(page, chan)   (chan)
+  #define sli_802154phy_get_channel_page_for_channel(macPgChan)  (0)
+  #define sli_802154phy_get_channel_page_in_use()                (0)
+  #define sli_802154phy_get_channel_page_for_channel(macPgChan)  (0)
 
 #endif//MAC_HAS_CHANNEL_PAGES
 
@@ -109,8 +109,8 @@ uint8_t emPhyGetChannelPageInUse(void);
 #define SL_NUM_802_15_4_CHANNELS \
   (SL_MAX_802_15_4_CHANNEL_NUMBER - SL_MIN_802_15_4_CHANNEL_NUMBER + 1)
 //-------zigbee stack calls
-void emRadioInit(RadioPowerMode initialRadioPowerMode);
-void emRadioSeedRandom(void);
+void sli_802154phy_radio_init(RadioPowerMode initialRadioPowerMode);
+void sli_802154phy_radio_seed_random(void);
 
 #ifdef EMBER_TEST
 bool _radioReceive(uint8_t *packet, uint32_t rxSynctime, uint8_t linkQuality);

@@ -34,11 +34,10 @@
  * - All command classes that have registered an init function.
  * - Generates the three lists of command classes used for Node Information Frame, etc.
  *
- * @param pAppProtocolConfig Protocol Configuration struct
  * @param AppTaskHandle Task handle
  * @param pAppHandles pointer to Application Handle in application
  */
-void ZAF_Init(SProtocolConfig_t const * const pAppProtocolConfig, TaskHandle_t AppTaskHandle, SApplicationHandles *pAppHandles);
+void ZAF_Init(TaskHandle_t AppTaskHandle, SApplicationHandles *pAppHandles);
 
 /**
  * Reset ZAF and command classes that have registered a reset function with a REGISTER_CC macro.
@@ -62,12 +61,14 @@ TaskHandle_t ZAF_getAppTaskHandle();
 void zaf_stay_awake(void);
 
 /**
- * Reboot into the bootloader to install the new image
- *
- * The function should only be called either after successful OTA image update, or FW update
- * activation set command is received
+ * Function called when the \ref EVENT_SYSTEM_LEARNMODE_FINISHED is received
+ * 
+ * This function is weakly defined and can be overwritten by one command class.
+ * Applications should not overwrite this function instead they should handle
+ * the event.
+ * CC WakeUp overwrites it.
  */
-void ZAF_bootloader_reboot_and_install(void);
+void zaf_learn_mode_finished(void);
 
 /**
  * @} // ZAF_IF

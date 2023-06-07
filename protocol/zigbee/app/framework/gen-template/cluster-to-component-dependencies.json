@@ -276,6 +276,12 @@
     ]
   },
   {
+    "clusterCode": "zigbee direct configuration-server",
+    "value": [
+      "zigbee_direct_zdd"
+    ]
+  },
+  {
     "clusterCode": "zll commissioning-client",
     "value": [
       "zigbee_zll_commissioning_client"

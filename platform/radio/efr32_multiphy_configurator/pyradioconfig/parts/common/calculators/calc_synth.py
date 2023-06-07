@@ -238,7 +238,7 @@ class CALC_Synth(ICalculator):
         lodiv_section_c = [1, 2, 3, 4, 5]       # last in lodiv_chain_option tuple, low order bits in register
 
         # For parts after Dumbo, A divide by 7 option was added to one stage
-        if part_family != "dumbo":
+        if part_family not in ["dumbo","unit_test_part"]:
             # Now add a bit of a hack...
             # We've already characterized Jumbo and Dumbo in the 169MHz range quite a bit using the divide by 15 lodiv.
             # For now at least, if we're able to use a divide by 15 in that area, then we'll use it.  We'll not enable the

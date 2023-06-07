@@ -33,7 +33,7 @@
 
 #if defined(__cplusplus) || defined(DOXYGEN)
 #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
-#include "tensorflow/lite/micro/micro_error_reporter.h"
+#include "tensorflow/lite/micro/tflite_bridge/micro_error_reporter.h"
 #include "tensorflow/lite/micro/micro_interpreter.h"
 
 /***************************************************************************//**
@@ -44,7 +44,26 @@
  * functions to access the input and output tensors are also provided.
  * @{
  ******************************************************************************/
-
+/***************************************************************************//**
+ * @brief
+ *  Estimate the arena size for a given model.
+ * @param[in] model Pointer to the model to estimate the arena size for.
+ * @param[in] opcode_resolver The opcode resolver to use for the model.
+ * @param[out] estimated_size The estimated size of the arena, as output.
+ *
+ * @return
+ *   True if the estimation was successful, false otherwise.
+ ******************************************************************************/
+bool sl_tflite_micro_estimate_arena_size(const tflite::Model* model, const tflite::MicroOpResolver &opcode_resolver, size_t* estimated_size);
+/***************************************************************************//**
+ * @brief Dynamically allocate a buffer that can be used for the tensor arena.
+ * @param[in] arena_size The size of the arena to allocate.
+ * @param[out] tensor_arena Pointer to the allocated tensor arena buffer.
+ * @return
+ *   A pointer to the allocated base buffer. Returns nullptr if the allocation failed.
+ *   The base buffer is used for freeing the allocated memory.
+ ******************************************************************************/
+uint8_t *sl_tflite_micro_allocate_tensor_arena(size_t arena_size, uint8_t** tensor_arena);
 /***************************************************************************//**
  *  @brief
      Get a pointer to the TensorFlow Lite Micro error reporter created by the
@@ -87,13 +106,10 @@ TfLiteTensor* sl_tflite_micro_get_output_tensor();
  * @brief
  *  Get a pointer to the opcode resolver for the flatbuffer given by the configuration.
  *
- * @param[in] error_reporter
- *   A pointer to the error reporter.
- *
  * @return
  *   The address to the opcode resolver.
  ******************************************************************************/
-tflite::MicroOpResolver &sl_tflite_micro_opcode_resolver(tflite::ErrorReporter* error_reporter);
+tflite::MicroOpResolver &sl_tflite_micro_opcode_resolver();
 #endif
 
 #ifdef __cplusplus

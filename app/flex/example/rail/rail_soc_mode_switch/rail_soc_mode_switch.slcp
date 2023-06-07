@@ -49,6 +49,7 @@ component:
 #----------------- Require list ----------------------
 requires:
   - name: a_radio_config
+  - name: sl_flex_rail_config
   - name: sl_simple_rail_os
     condition:
       - "kernel"
@@ -130,6 +131,9 @@ configuration:
     value: "1"
   - name: OS_CFG_TASK_PROFILE_EN
     value: "1"
+#------------- RAIL init, Configuration --------------
+  - name: SL_FLEX_RAIL_TX_FIFO_SIZE
+    value: "128"
 #------------- RAIL init, Project --------------------
   - name: SL_RAIL_UTIL_INIT_INIT_COMPLETE_CALLBACK_INST0_ENABLE
     value: "1"

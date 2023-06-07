@@ -72,10 +72,11 @@ extern "C" {
  *   the mbedTLS library. Additionally, em_crypto.h implement the AES API of the
  *   em_aes.h (supported by classic EFM32) for backward compatibility. The
  *   following list summarizes the em_crypto.h interface:
- *   @li AES (Advanced Encryption Standard) @ref crypto_aes
- *   @li SHA (Secure Hash Algorithm) @ref crypto_sha
- *   @li Big Integer multiplier @ref crypto_mul
- *   @li Functions for loading data and executing instruction sequences @ref crypto_exec
+ *
+ *   - AES (Advanced Encryption Standard) [AES](/gecko-platform/<docspace-docleaf-version>/platform-emlib-efr32xg1/crypto#aes)
+ *   - SHA (Secure Hash Algorithm) [SHA](/gecko-platform/<docspace-docleaf-version>/platform-emlib-efr32xg1/crypto#sha)
+ *   - Big Integer multiplier [CRYPTO_Mul](/gecko-platform/<docspace-docleaf-version>/platform-emlib-efr32xg1/crypto#crypto-mul)
+ *   - Functions for loading data and executing instruction sequences [Load and Execute Instruction Sequences](/gecko-platform/<docspace-docleaf-version>/platform-emlib-efr32xg1/crypto#load-and-execute-instruction-sequences)
  *
  *   @n @section crypto_aes AES
  *   The AES APIs include support for AES-128 and AES-256 with block cipher

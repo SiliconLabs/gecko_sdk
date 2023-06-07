@@ -28,7 +28,6 @@
 #include "gpf-structured-data.h"
 #include "app/framework/plugin/events-server/events-server.h"
 
-#ifdef UC_BUILD
 #include "zap-cluster-command-parser.h"
 
 extern bool emberAfSimpleMeteringClusterGetNotifiedMessageCallback(EmberAfClusterCommand *cmd);
@@ -43,7 +42,6 @@ extern bool emberAfPrepaymentClusterPublishTopUpLogCallback(EmberAfClusterComman
 extern bool emberAfPrepaymentClusterGetTopUpLogCallback(EmberAfClusterCommand *cmd);
 extern bool emberAfPrepaymentClusterPublishDebtLogCallback(EmberAfClusterCommand *cmd);
 extern bool emberAfPrepaymentClusterGetDebtRepaymentLogCallback(EmberAfClusterCommand *cmd);
-#endif  // UC_BUILD
 
 // default configurations
 #define DEFAULT_TABLE_SET_INDEX (0)
@@ -67,8 +65,6 @@ static void hideEndpoint(uint8_t endpoint)
 #endif
 }
 
-#ifdef UC_BUILD
-
 sl_zigbee_event_t emberAfPluginGasProxyFunctionGsmeSyncEndpointEvents[FIXED_ENDPOINT_COUNT];
 sl_zigbee_event_t emberAfPluginGasProxyFunctionCatchupEvent;
 
@@ -89,8 +85,8 @@ void emberAfPluginGasProxyFunctionInitCallback(uint8_t init_level)
                                       endpoint_array[i]);
       }
 
-      slxu_zigbee_event_init(&emberAfPluginGasProxyFunctionCatchupEvent,
-                             emberAfPluginGasProxyFunctionCatchupEventHandler);
+      sl_zigbee_event_init(&emberAfPluginGasProxyFunctionCatchupEvent,
+                           emberAfPluginGasProxyFunctionCatchupEventHandler);
       break;
     }
 
@@ -110,35 +106,19 @@ void emberAfPluginGasProxyFunctionInitCallback(uint8_t init_level)
   }
 }
 
-#else // !UC_BUILD
-
-void emberAfPluginGasProxyFunctionInitCallback(void)
-{
-  slxu_zigbee_event_init(&emberAfPluginGasProxyFunctionCatchupEvent,
-                         emberAfPluginGasProxyFunctionCatchupEventHandler);
-
-  emberAfPluginGasProxyFunctionInitStructuredData();
-  // try to hide hidden endpoint from service discovery.
-  hideEndpoint(EMBER_AF_PLUGIN_GAS_PROXY_FUNCTION_HIDDEN_CLIENT_SIDE_ENDPOINT);
-
-  MEMSET(&currentGpfMessage, 0x00, sizeof(EmberAfGpfMessage));
-}
-
-#endif // UC_BUILD
-
 /*  @brief  Log all GPF commands to GPF Event Log.
  *
  *  In GBCS v0.81, the GPF shall be capable of logging all Commands
  *  received and Outcomes in the GPF Event Log(4.6.3.8). If the message is
  *  too long, the data will be truncated.
  *  */
-void emAfPluginGasProxyFunctionLogEvent(uint8_t * gbzCmd,
-                                        uint16_t  gbzCmdLen,
-                                        uint8_t * gbzResp,
-                                        uint16_t  gbzRespLen,
-                                        uint16_t eventId,
-                                        EmberAfGPFMessageType cmdType,
-                                        uint16_t messageCode)
+void sli_zigbee_af_gas_proxy_function_log_event(uint8_t * gbzCmd,
+                                                uint16_t  gbzCmdLen,
+                                                uint8_t * gbzResp,
+                                                uint16_t  gbzRespLen,
+                                                uint16_t eventId,
+                                                EmberAfGPFMessageType cmdType,
+                                                uint16_t messageCode)
 {
   EmberAfEvent event;
   uint8_t * logMsg = event.eventData;
@@ -389,15 +369,15 @@ EmberStatus emberAfPluginGasProxyFunctionTapOffMessageHandler(uint8_t * gbzComma
   }
 
   // time to log these lovely TOM commands to the Event log.
-  emAfPluginGasProxyFunctionLogEvent(gbzCommands,
-                                     gbzCommandsLength,
-                                     gbzCommandsResponse,
-                                     gbzCommandsResponseLength,
-                                     (status == EMBER_SUCCESS)
-                                     ?  GBCS_EVENT_ID_IMM_HAN_CMD_RXED_ACTED
-                                     : GBCS_EVENT_ID_IMM_HAN_CMD_RXED_NOT_ACTED,
-                                     EMBER_AF_GPF_MESSAGE_TYPE_TOM,
-                                     messageCode);
+  sli_zigbee_af_gas_proxy_function_log_event(gbzCommands,
+                                             gbzCommandsLength,
+                                             gbzCommandsResponse,
+                                             gbzCommandsResponseLength,
+                                             (status == EMBER_SUCCESS)
+                                             ?  GBCS_EVENT_ID_IMM_HAN_CMD_RXED_ACTED
+                                             : GBCS_EVENT_ID_IMM_HAN_CMD_RXED_NOT_ACTED,
+                                             EMBER_AF_GPF_MESSAGE_TYPE_TOM,
+                                             messageCode);
 
   emberAfCurrentCommand() = NULL;
   return status;
@@ -458,14 +438,14 @@ static bool sendNextNonTomZclCmd(void)
   return true;
 }
 
-uint32_t emAfGasProxyFunctionGetGbzStartTime(void)
+uint32_t sli_zigbee_af_gas_proxy_function_get_gbz_start_time(void)
 {
   return (!nonTomHandlingActive) ? 0 : nonTomGbzStartTime;
 }
 
-void emAfGasProxyFunctionAlert(uint16_t alertCode,
-                               EmberAfClusterCommand *cmd,
-                               uint16_t messageCode)
+void sli_zigbee_af_gas_proxy_function_alert(uint16_t alertCode,
+                                            EmberAfClusterCommand *cmd,
+                                            uint16_t messageCode)
 {
   EmberAfGbzZclCommand gbzZclCmd = { 0 };
   EmberAfGbzMessageCreatorState creator;
@@ -564,13 +544,13 @@ EmberStatus emberAfPluginGasProxyFunctionNonTapOffMessageHandler(uint8_t * gbzCo
     nonTomHandlingActive = false;
 
     // Log Non-Actioned Non-TOM
-    emAfPluginGasProxyFunctionLogEvent(gbzCommands,
-                                       gbzCommandsLength,
-                                       NULL,
-                                       0,
-                                       GBCS_EVENT_ID_IMM_HAN_CMD_RXED_NOT_ACTED,
-                                       EMBER_AF_GPF_MESSAGE_TYPE_NON_TOM,
-                                       messageCode);
+    sli_zigbee_af_gas_proxy_function_log_event(gbzCommands,
+                                               gbzCommandsLength,
+                                               NULL,
+                                               0,
+                                               GBCS_EVENT_ID_IMM_HAN_CMD_RXED_NOT_ACTED,
+                                               EMBER_AF_GPF_MESSAGE_TYPE_NON_TOM,
+                                               messageCode);
   }
   return status;
 }
@@ -624,13 +604,13 @@ static void captureNonTomZclCmdResp(EmberAfClusterCommand * cmd)
     gbzResponse->freeRequired = false;
 
     // Log Actioned Non TOM
-    emAfPluginGasProxyFunctionLogEvent(nonTomGbzRequestParser.command,
-                                       nonTomGbzRequestParser.length,
-                                       gbzResponse->payload,
-                                       gbzResponse->payloadLength,
-                                       GBCS_EVENT_ID_IMM_HAN_CMD_RXED_ACTED,
-                                       EMBER_AF_GPF_MESSAGE_TYPE_NON_TOM,
-                                       nonTomGbzRequestParser.messageCode);
+    sli_zigbee_af_gas_proxy_function_log_event(nonTomGbzRequestParser.command,
+                                               nonTomGbzRequestParser.length,
+                                               gbzResponse->payload,
+                                               gbzResponse->payloadLength,
+                                               GBCS_EVENT_ID_IMM_HAN_CMD_RXED_ACTED,
+                                               EMBER_AF_GPF_MESSAGE_TYPE_NON_TOM,
+                                               nonTomGbzRequestParser.messageCode);
 
     emberAfPluginGbzMessageControllerParserCleanup(&nonTomGbzRequestParser);
     emberAfPluginGbzMessageControllerCreatorCleanup(&nonTomGbzResponseCreator);
@@ -643,7 +623,7 @@ static void captureNonTomZclCmdResp(EmberAfClusterCommand * cmd)
 /* @brief Capture ZCL response from replayed Non-TOM messages. The captured responses
  * is packed up and delivered to the application via a GBZ message buffer
  */
-bool emAfPluginGasProxyFunctionPreCommandReceivedCallback(EmberAfClusterCommand* cmd)
+bool sli_zigbee_af_gas_proxy_function_pre_command_received_callback(EmberAfClusterCommand* cmd)
 {
   if (!nonTomHandlingActive
       || (cmd->source != emberGetNodeId())) {
@@ -665,8 +645,6 @@ bool emAfPluginGasProxyFunctionPreCommandReceivedCallback(EmberAfClusterCommand*
 }
 
 // ZCL command callbacks
-
-#ifdef UC_BUILD
 
 // Calendar Client commands
 
@@ -727,11 +705,6 @@ bool emberAfCalendarClusterPublishCalendarCallback(EmberAfClusterCommand *cmd)
 
 bool emberAfCalendarClusterPublishDayProfileCallback(EmberAfClusterCommand *cmd)
 {
-
-
-
-
-
   sl_zcl_calendar_cluster_publish_day_profile_command_t cmd_data;
   uint16_t dayScheduleEntriesLength;
 
@@ -761,11 +734,6 @@ bool emberAfCalendarClusterPublishDayProfileCallback(EmberAfClusterCommand *cmd)
 
 bool emberAfCalendarClusterPublishSeasonsCallback(EmberAfClusterCommand *cmd)
 {
-
-
-
-
-
   sl_zcl_calendar_cluster_publish_seasons_command_t cmd_data;
   bool success;
   uint16_t seasonEntriesLength;
@@ -1302,641 +1270,6 @@ bool emberAfPriceClusterPublishBillingPeriodCallback(EmberAfClusterCommand *cmd)
   return true;
 }
 
-#else // !UC_BUILD
-
-bool emberAfCalendarClusterPublishCalendarCallback(uint32_t providerId,
-                                                   uint32_t issuerEventId,
-                                                   uint32_t issuerCalendarId,
-                                                   uint32_t startTime,
-                                                   uint8_t  calendarType,
-                                                   uint8_t  calendarTimeReference,
-                                                   uint8_t  *calendarName,
-                                                   uint8_t  numberOfSeasons,
-                                                   uint8_t  numberOfWeekProfiles,
-                                                   uint8_t  numberOfDayProfiles)
-{
-  bool status;
-
-  emberAfPluginGasProxyFunctionPrintln("GPF: RX: PublishCalendar 0x%4x, 0x%4x, 0x%4x, 0x%4x, 0x%x, \"",
-                                       providerId,
-                                       issuerEventId,
-                                       issuerCalendarId,
-                                       startTime,
-                                       calendarType);
-  emberAfPluginGasProxyFunctionPrintString(calendarName);
-  emberAfPluginGasProxyFunctionPrintln("\", %d, %d, %d",
-                                       numberOfSeasons,
-                                       numberOfWeekProfiles,
-                                       numberOfDayProfiles);
-
-  if (emberAfPluginGasProxyFunctionIgnoreFutureCommand(startTime)) {
-    emberAfPluginGasProxyFunctionPrintln("GPF: Ignoring future dated command.");
-    return true;
-  }
-
-  status = emberAfCalendarCommonAddCalInfo(providerId,
-                                           issuerEventId,
-                                           issuerCalendarId,
-                                           startTime,
-                                           calendarType,
-                                           calendarName,
-                                           numberOfSeasons,
-                                           numberOfWeekProfiles,
-                                           numberOfDayProfiles);
-
-  if (status) {
-    emberAfPluginGasProxyFunctionPrintln("GPF: Updated: Calendar");
-    emberAfPluginGasProxyFunctionPrintln("GPF:          providerId: 0x%4X", providerId);
-    emberAfPluginGasProxyFunctionPrintln("GPF:          issuerEventId: 0x%4X", issuerEventId);
-    emberAfPluginGasProxyFunctionPrintln("GPF:          issuerCalendarId: 0x%4X", issuerCalendarId);
-    emberAfPluginGasProxyFunctionPrintln("GPF:          startTimeUtc: 0x%4X", startTime);
-    emberAfPluginGasProxyFunctionPrintln("GPF:          calendarType: 0x%X", calendarType);
-    emberAfPluginGasProxyFunctionPrint("GPF:          calendarName: ");
-    emberAfPluginGasProxyFunctionPrintString(calendarName);
-    emberAfPluginGasProxyFunctionPrintln("");
-    emberAfPluginGasProxyFunctionPrintln("GPF:          numberOfSeasons: 0x%X", numberOfSeasons);
-    emberAfPluginGasProxyFunctionPrintln("GPF:          numberOfWeekProfiles: 0x%X", numberOfWeekProfiles);
-    emberAfPluginGasProxyFunctionPrintln("GPF:          numberOfDayProfiles: 0x%X", numberOfDayProfiles);
-  }
-
-  return true;
-}
-
-bool emberAfCalendarClusterPublishDayProfileCallback(uint32_t providerId,
-                                                     uint32_t issuerEventId,
-                                                     uint32_t issuerCalendarId,
-                                                     uint8_t dayId,
-                                                     uint8_t totalNumberOfScheduleEntries,
-                                                     uint8_t commandIndex,
-                                                     uint8_t totalNumberOfCommands,
-                                                     uint8_t calendarType,
-                                                     uint8_t *dayScheduleEntries)
-{
-
-
-
-
-
-  bool status;
-  uint16_t dayScheduleEntriesLength = fieldLength(dayScheduleEntries);
-
-  emberAfPluginGasProxyFunctionPrintln("GPF: RX: PublishDayProfile 0x%4x, 0x%4x, 0x%4x, %d, %d, %d, %d, 0x%x",
-                                       providerId,
-                                       issuerEventId,
-                                       issuerCalendarId,
-                                       dayId,
-                                       totalNumberOfScheduleEntries,
-                                       commandIndex,
-                                       totalNumberOfCommands,
-                                       calendarType);
-
-  status = emberAfCalendarCommonAddDayProfInfo(issuerCalendarId,
-                                               dayId,
-                                               dayScheduleEntries,
-                                               dayScheduleEntriesLength);
-  return true;
-}
-
-bool emberAfCalendarClusterPublishSeasonsCallback(uint32_t providerId,
-                                                  uint32_t issuerEventId,
-                                                  uint32_t issuerCalendarId,
-                                                  uint8_t commandIndex,
-                                                  uint8_t totalNumberOfCommands,
-                                                  uint8_t *seasonEntries)
-{
-
-
-
-
-
-  bool success;
-  uint16_t seasonEntriesLength = fieldLength(seasonEntries);
-  uint8_t unknownWeekIdSeasonsMask = 0;
-
-  emberAfPluginGasProxyFunctionPrintln("GPF: RX: PublishSeasons 0x%4x, 0x%4x, 0x%4x, %d, %d",
-                                       providerId,
-                                       issuerEventId,
-                                       issuerCalendarId,
-                                       commandIndex,
-                                       totalNumberOfCommands);
-
-  success = emberAfCalendarServerAddSeasonsInfo(issuerCalendarId,
-                                                seasonEntries,
-                                                seasonEntriesLength,
-                                                &unknownWeekIdSeasonsMask);
-
-  if (!success && unknownWeekIdSeasonsMask != 0) {
-    emberAfPluginGasProxyFunctionUnknownSeasonWeekIdCallback(issuerCalendarId,
-                                                             seasonEntries,
-                                                             seasonEntriesLength,
-                                                             unknownWeekIdSeasonsMask);
-  }
-
-  return true;
-}
-
-bool emberAfCalendarClusterPublishSpecialDaysCallback(uint32_t providerId,
-                                                      uint32_t issuerEventId,
-                                                      uint32_t issuerCalendarId,
-                                                      uint32_t startTime,
-                                                      uint8_t calendarType,
-                                                      uint8_t totalNumberOfSpecialDays,
-                                                      uint8_t commandIndex,
-                                                      uint8_t totalNumberOfCommands,
-                                                      uint8_t *specialDayEntries)
-{
-  uint16_t speicalDaysEntriesLength = fieldLength(specialDayEntries);
-  uint8_t unknownSpecialDaysMask = 0;
-  bool success;
-
-  emberAfPluginGasProxyFunctionPrintln("GPF: RX: PublishSpecialDays 0x%4x, 0x%4x, 0x%4x, 0x%4x, 0x%x, %d, %d, %d, [",
-                                       providerId,
-                                       issuerEventId,
-                                       issuerCalendarId,
-                                       startTime,
-                                       calendarType,
-                                       totalNumberOfSpecialDays,
-                                       commandIndex,
-                                       totalNumberOfCommands);
-  // TODO: print specialDayEntries
-  emberAfPluginGasProxyFunctionPrintln("]");
-
-  if (emberAfPluginGasProxyFunctionIgnoreFutureCommand(startTime)) {
-    emberAfPluginGasProxyFunctionPrintln("GPF: Ignoring future dated command.");
-    return true;
-  }
-
-  success = emberAfCalendarCommonAddSpecialDaysInfo(issuerCalendarId,
-                                                    totalNumberOfSpecialDays,
-                                                    specialDayEntries,
-                                                    speicalDaysEntriesLength,
-                                                    &unknownSpecialDaysMask);
-  if (!success && unknownSpecialDaysMask != 0) {
-    emberAfPluginGasProxyFunctionUnknownSpecialDaysDayIdCallback(issuerCalendarId,
-                                                                 specialDayEntries,
-                                                                 speicalDaysEntriesLength,
-                                                                 unknownSpecialDaysMask);
-  }
-
-  return true;
-}
-
-bool emberAfCalendarClusterPublishWeekProfileCallback(uint32_t providerId,
-                                                      uint32_t issuerEventId,
-                                                      uint32_t issuerCalendarId,
-                                                      uint8_t weekId,
-                                                      uint8_t dayIdRefMonday,
-                                                      uint8_t dayIdRefTuesday,
-                                                      uint8_t dayIdRefWednesday,
-                                                      uint8_t dayIdRefThursday,
-                                                      uint8_t dayIdRefFriday,
-                                                      uint8_t dayIdRefSaturday,
-                                                      uint8_t dayIdRefSunday)
-{
-  bool status;
-  emberAfPluginGasProxyFunctionPrintln("GPF: RX: PublishWeekProfile 0x%4x, 0x%4x, 0x%4x, %d, %d, %d, %d, %d, %d, %d, %d",
-                                       providerId,
-                                       issuerEventId,
-                                       issuerCalendarId,
-                                       weekId,
-                                       dayIdRefMonday,
-                                       dayIdRefTuesday,
-                                       dayIdRefWednesday,
-                                       dayIdRefThursday,
-                                       dayIdRefFriday,
-                                       dayIdRefSaturday,
-                                       dayIdRefSunday);
-
-  status = emberAfCalendarServerAddWeekProfInfo(issuerCalendarId,
-                                                weekId,
-                                                dayIdRefMonday,
-                                                dayIdRefTuesday,
-                                                dayIdRefWednesday,
-                                                dayIdRefThursday,
-                                                dayIdRefFriday,
-                                                dayIdRefSaturday,
-                                                dayIdRefSunday);
-  return true;
-}
-
-bool emberAfDeviceManagementClusterPublishChangeOfSupplierCallback(uint32_t currentProviderId,
-                                                                   uint32_t issuerEventId,
-                                                                   uint8_t tariffType,
-                                                                   uint32_t proposedProviderId,
-                                                                   uint32_t providerChangeImplementationTime,
-                                                                   uint32_t providerChangeControl,
-                                                                   uint8_t *proposedProviderName,
-                                                                   uint8_t *proposedProviderContactDetails)
-{
-  EmberAfDeviceManagementSupplier supplier;
-  emberAfPluginGasProxyFunctionPrintln("GPF: RX: PublishChangeOfSupplier: 0x%4X, 0x%4X, 0x%X, 0x%4X, 0x%4X, 0x%4X, ",
-                                       currentProviderId,
-                                       issuerEventId,
-                                       tariffType,
-                                       proposedProviderId,
-                                       providerChangeImplementationTime,
-                                       providerChangeControl);
-  emberAfPluginGasProxyFunctionPrintString(proposedProviderName);
-  emberAfPluginGasProxyFunctionPrintln(", ");
-  emberAfPluginGasProxyFunctionPrintString(proposedProviderContactDetails);
-  emberAfPluginGasProxyFunctionPrintln("");
-
-  if (emberAfPluginGasProxyFunctionIgnoreFutureCommand(providerChangeImplementationTime)) {
-    emberAfPluginGasProxyFunctionPrintln("GPF: Ignoring future dated command.");
-    return true;
-  }
-
-  supplier.proposedProviderId = proposedProviderId;
-  supplier.implementationDateTime = providerChangeImplementationTime;
-  supplier.providerChangeControl = providerChangeControl;
-  emberAfCopyString(supplier.proposedProviderName,
-                    proposedProviderName,
-                    EMBER_AF_DEVICE_MANAGEMENT_MAXIMUM_PROPOSED_PROVIDER_NAME_LENGTH);
-  emberAfCopyString(supplier.proposedProviderContactDetails,
-                    proposedProviderContactDetails,
-                    EMBER_AF_DEVICE_MANAGEMENT_MAXIMUM_PROPOSED_PROVIDER_CONTACT_DETAILS_LENGTH);
-
-  emberAfPluginDeviceManagementSetSupplier(EMBER_AF_PLUGIN_GAS_PROXY_FUNCTION_ESI_ENDPOINT, &supplier);
-  return true;
-}
-
-bool emberAfDeviceManagementClusterPublishChangeOfTenancyCallback(uint32_t providerId,
-                                                                  uint32_t issuerEventId,
-                                                                  uint8_t tariffType,
-                                                                  uint32_t implementationDateTime,
-                                                                  uint32_t proposedTenancyChangeControl)
-{
-  EmberAfDeviceManagementTenancy tenancy;
-  bool result;
-  EmberAfStatus status;
-
-  emberAfPluginGasProxyFunctionPrintln("RX: PublishChangeOfTenancy: 0x%4X, 0x%4X, 0x%X, 0x%4X, 0x%4X",
-                                       providerId,
-                                       issuerEventId,
-                                       tariffType,
-                                       implementationDateTime,
-                                       proposedTenancyChangeControl);
-
-  if (emberAfPluginGasProxyFunctionIgnoreFutureCommand(implementationDateTime)) {
-    emberAfPluginGasProxyFunctionPrintln("GPF: Ignoring future dated command.");
-    return true;
-  }
-
-  tenancy.implementationDateTime = implementationDateTime;
-  tenancy.tenancy = proposedTenancyChangeControl;
-  tenancy.providerId = providerId;
-  tenancy.issuerEventId = issuerEventId;
-  tenancy.tariffType = tariffType;
-
-  result = emberAfPluginDeviceManagementSetTenancy(&tenancy, true);
-
-  if (result) {
-    emberAfPluginGasProxyFunctionPrintln("GPF: Updated: Tenancy");
-    emberAfPluginGasProxyFunctionPrintln("              implementationTime: 0x%4X", tenancy.implementationDateTime);
-    emberAfPluginGasProxyFunctionPrintln("              tenancy: 0x%4X", tenancy.tenancy);
-    status = EMBER_ZCL_STATUS_SUCCESS;
-  } else {
-    emberAfPluginGasProxyFunctionPrintln("GPF: Unable to update tenancy due to mismatching information.");
-    status = EMBER_ZCL_STATUS_FAILURE;
-  }
-
-  emberAfSendImmediateDefaultResponse(status);
-  return true;
-}
-
-bool emberAfPriceClusterPublishCalorificValueCallback(uint32_t issuerEventId,
-                                                      uint32_t startTime,
-                                                      uint32_t calorificValue,
-                                                      uint8_t calorificValueUnit,
-                                                      uint8_t calorificValueTrailingDigit)
-{
-  EmberAfStatus status;
-
-  emberAfPluginGasProxyFunctionPrintln("GPF: RX: PublishCalorificValue 0x%4X, 0x%4X, 0x%4X, 0x%X, 0x%X",
-                                       issuerEventId,
-                                       startTime,
-                                       calorificValue,
-                                       calorificValueUnit,
-                                       calorificValueTrailingDigit);
-
-  if (emberAfPluginGasProxyFunctionIgnoreFutureCommand(startTime)) {
-    emberAfPluginGasProxyFunctionPrintln("GPF: Ignoring future dated command.");
-    return true;
-  }
-
-  status = emberAfPluginPriceServerCalorificValueAdd(EMBER_AF_PLUGIN_GAS_PROXY_FUNCTION_ESI_ENDPOINT,
-                                                     issuerEventId,
-                                                     startTime,
-                                                     calorificValue,
-                                                     calorificValueUnit,
-                                                     calorificValueTrailingDigit);
-  if (status != EMBER_ZCL_STATUS_SUCCESS) {
-    emberAfPluginGasProxyFunctionPrintln("GPF: ERR: Unable to update calorific value (status:0x%X).", status);
-  }
-  return true;
-}
-
-bool emberAfPriceClusterPublishConversionFactorCallback(uint32_t issuerEventId,
-                                                        uint32_t startTime,
-                                                        uint32_t conversionFactor,
-                                                        uint8_t conversionFactorTrailingDigit)
-{
-  EmberStatus status;
-
-  emberAfPluginGasProxyFunctionPrintln("GPF: RX: PublishConversionFactor 0x%4X, 0x%4X, 0x%4X, 0x%X",
-                                       issuerEventId,
-                                       startTime,
-                                       conversionFactor,
-                                       conversionFactorTrailingDigit);
-
-  if (emberAfPluginGasProxyFunctionIgnoreFutureCommand(startTime)) {
-    emberAfPluginGasProxyFunctionPrintln("GPF: Ignoring future dated command.");
-    return true;
-  }
-
-  status = emberAfPluginPriceServerConversionFactorAdd(EMBER_AF_PLUGIN_GAS_PROXY_FUNCTION_ESI_ENDPOINT,
-                                                       issuerEventId,
-                                                       startTime,
-                                                       conversionFactor,
-                                                       conversionFactorTrailingDigit);
-  if (status != EMBER_ZCL_STATUS_SUCCESS) {
-    emberAfPluginGasProxyFunctionPrintln("GPF: ERR: Unable to update conversion factor (status:0x%X).", status);
-  }
-  return true;
-}
-
-bool emberAfPriceClusterPublishBlockThresholdsCallback(uint32_t providerId,
-                                                       uint32_t issuerEventId,
-                                                       uint32_t startTime,
-                                                       uint32_t issuerTariffId,
-                                                       uint8_t commandIndex,
-                                                       uint8_t numberOfCommands,
-                                                       uint8_t subpayloadControl,
-                                                       uint8_t* payload)
-{
-  emberAfPluginGasProxyFunctionPrintln("GPF: RX: PublishBlockThresholds 0x%4X, 0x%4X, 0x%4X, 0x%4X, 0x%X, 0x%X, 0x%X",
-                                       providerId,
-                                       issuerEventId,
-                                       startTime,
-                                       issuerTariffId,
-                                       commandIndex,
-                                       numberOfCommands,
-                                       subpayloadControl);
-
-  if (emberAfPluginGasProxyFunctionIgnoreFutureCommand(startTime)) {
-    emberAfPluginGasProxyFunctionPrintln("GPF: Ignoring future dated command.");
-    return true;
-  }
-
-  emberAfPriceAddBlockThresholdsTableEntry(EMBER_AF_PLUGIN_GAS_PROXY_FUNCTION_ESI_ENDPOINT,
-                                           providerId,
-                                           issuerEventId,
-                                           startTime,
-                                           issuerTariffId,
-                                           commandIndex,
-                                           numberOfCommands,
-                                           subpayloadControl,
-                                           payload);
-
-  return true;
-}
-
-bool emberAfPriceClusterPublishTariffInformationCallback(uint32_t providerId,
-                                                         uint32_t issuerEventId,
-                                                         uint32_t issuerTariffId,
-                                                         uint32_t startTime,
-                                                         uint8_t tariffTypeChargingScheme,
-                                                         uint8_t *tariffLabel,
-                                                         uint8_t numberOfPriceTiersInUse,
-                                                         uint8_t numberOfBlockThresholdsInUse,
-                                                         uint8_t unitOfMeasure,
-                                                         uint16_t currency,
-                                                         uint8_t priceTrailingDigit,
-                                                         uint32_t standingCharge,
-                                                         uint8_t tierBlockMode,
-                                                         uint32_t blockThresholdMultiplier,
-                                                         uint32_t blockThresholdDivisor)
-{
-  EmberAfPriceCommonInfo info;
-  EmberAfScheduledTariff tariff;
-
-  emberAfPluginGasProxyFunctionPrintln("GPF: RX: PublishTariffInformationReceived");
-  emberAfPriceClusterPrint("RX: PublishTariffInformation 0x%4x, 0x%4x, 0x%4x, 0x%4x, 0x%x, \"",
-                           providerId,
-                           issuerEventId,
-                           issuerTariffId,
-                           startTime,
-                           tariffTypeChargingScheme);
-
-  emberAfPriceClusterPrintString(tariffLabel);
-  emberAfPriceClusterPrint("\"");
-  emberAfPriceClusterPrint(", 0x%x, 0x%x, 0x%x, 0x%2x, 0x%x",
-                           numberOfPriceTiersInUse,
-                           numberOfBlockThresholdsInUse,
-                           unitOfMeasure,
-                           currency,
-                           priceTrailingDigit);
-  emberAfPriceClusterPrintln(", 0x%4x, 0x%x, 0x%4x, 0x%4x",
-                             standingCharge,
-                             tierBlockMode,
-                             blockThresholdMultiplier,
-                             blockThresholdDivisor);
-  emberAfPriceClusterFlush();
-
-  if (emberAfPluginGasProxyFunctionIgnoreFutureCommand(startTime)) {
-    emberAfPluginGasProxyFunctionPrintln("GPF: Ignoring future dated command.");
-    return true;
-  }
-
-  info.startTime = startTime;
-  info.issuerEventId = issuerEventId;
-  tariff.providerId = providerId;
-  tariff.issuerTariffId = issuerTariffId;
-  tariff.tariffTypeChargingScheme = tariffTypeChargingScheme;
-  emberAfCopyString(tariff.tariffLabel, tariffLabel, ZCL_PRICE_CLUSTER_MAXIMUM_RATE_LABEL_LENGTH);
-  tariff.numberOfPriceTiersInUse = numberOfPriceTiersInUse;
-  tariff.numberOfBlockThresholdsInUse = numberOfBlockThresholdsInUse;
-  tariff.unitOfMeasure = unitOfMeasure;
-  tariff.currency = currency;
-  tariff.priceTrailingDigit = priceTrailingDigit;
-  tariff.standingCharge = standingCharge;
-  tariff.tierBlockMode = tierBlockMode;
-  tariff.blockThresholdMultiplier = blockThresholdMultiplier;
-  tariff.blockThresholdDivisor = blockThresholdDivisor;
-  tariff.status |= FUTURE;
-
-  emberAfPriceAddTariffTableEntry(EMBER_AF_PLUGIN_GAS_PROXY_FUNCTION_ESI_ENDPOINT,
-                                  &info,
-                                  &tariff);
-  return true;
-}
-
-bool emberAfPriceClusterPublishPriceMatrixCallback(uint32_t providerId,
-                                                   uint32_t issuerEventId,
-                                                   uint32_t startTime,
-                                                   uint32_t issuerTariffId,
-                                                   uint8_t commandIndex,
-                                                   uint8_t numberOfCommands,
-                                                   uint8_t subPayloadControl,
-                                                   uint8_t* payload)
-{
-  emberAfPluginGasProxyFunctionPrintln("GPF: RX: PublishPriceMatrix 0x%4X, 0x%4X, 0x%4X, 0x%4X, 0x%X, 0x%X, 0x%X",
-                                       providerId,
-                                       issuerEventId,
-                                       startTime,
-                                       issuerTariffId,
-                                       commandIndex,
-                                       numberOfCommands,
-                                       subPayloadControl);
-
-  if (emberAfPluginGasProxyFunctionIgnoreFutureCommand(startTime)) {
-    emberAfPluginGasProxyFunctionPrintln("GPF: Ignoring future dated command.");
-    return true;
-  }
-
-  emberAfPriceAddPriceMatrixRaw(EMBER_AF_PLUGIN_GAS_PROXY_FUNCTION_ESI_ENDPOINT,
-                                providerId,
-                                issuerEventId,
-                                startTime,
-                                issuerTariffId,
-                                commandIndex,
-                                numberOfCommands,
-                                subPayloadControl,
-                                payload);
-
-  return true;
-}
-
-bool emberAfMessagingClusterDisplayMessageCallback(uint32_t messageId,
-                                                   uint8_t messageControl,
-                                                   uint32_t startTime,
-                                                   uint16_t durationInMinutes,
-                                                   uint8_t* msg,
-                                                   uint8_t optionalExtendedMessageControl)
-{
-  EmberAfPluginMessagingServerMessage message;
-  uint8_t msgLength = emberAfStringLength(msg) + 1;
-
-  if (msgLength > EMBER_AF_PLUGIN_MESSAGING_SERVER_MESSAGE_SIZE) {
-    emberAfPluginGasProxyFunctionPrint("GPF: ERR: Message too long for messaging server message buffer.");
-    return true;
-  }
-
-  if (emberAfPluginGasProxyFunctionIgnoreFutureCommand(startTime)) {
-    emberAfPluginGasProxyFunctionPrintln("GPF: Ignoring future dated command.");
-    return true;
-  }
-
-  message.messageId = messageId;
-  message.messageControl = messageControl;
-  message.startTime = startTime;
-  message.durationInMinutes = durationInMinutes;
-  MEMCOPY(message.message, msg, msgLength);
-  message.extendedMessageControl = optionalExtendedMessageControl;
-
-  emberAfPluginGasProxyFunctionPrint("GPF: RX: DisplayMessage"
-                                     " 0x%4x, 0x%x, 0x%4x, 0x%2x, \"",
-                                     messageId,
-                                     messageControl,
-                                     startTime,
-                                     durationInMinutes);
-  emberAfPluginGasProxyFunctionPrintString(msg);
-  emberAfPluginGasProxyFunctionPrint(", 0x%X", optionalExtendedMessageControl);
-  emberAfPluginGasProxyFunctionPrintln("\"");
-
-  emberAfPluginMessagingServerSetMessage(EMBER_AF_PLUGIN_GAS_PROXY_FUNCTION_ESI_ENDPOINT,
-                                         &message);
-  return true;
-}
-
-bool emberAfPriceClusterPublishBlockPeriodCallback(uint32_t providerId,
-                                                   uint32_t issuerEventId,
-                                                   uint32_t blockPeriodStartTime,
-                                                   uint32_t blockPeriodDuration,
-                                                   uint8_t blockPeriodControl,
-                                                   uint8_t blockPeriodDurationType,
-                                                   uint8_t tariffType,
-                                                   uint8_t tariffResolutionPeriod)
-{
-  uint32_t thresholdMultiplier;
-  uint32_t thresholdDivisor;
-  emberAfPluginGasProxyFunctionPrintln("GPF: RX: PublishBlockPeriod 0x%4X, 0x%4X, 0x%4X, 0x%4X, 0x%X, 0x%X, 0x%X, 0x%X",
-                                       providerId,
-                                       issuerEventId,
-                                       blockPeriodStartTime,
-                                       blockPeriodDuration,
-                                       blockPeriodControl,
-                                       blockPeriodDurationType,
-                                       tariffType,
-                                       tariffResolutionPeriod);
-
-  if (emberAfPluginGasProxyFunctionIgnoreFutureCommand(blockPeriodStartTime)) {
-    emberAfPluginGasProxyFunctionPrintln("GPF: Ignoring future dated command.");
-    return true;
-  }
-
-  emberAfReadAttribute(EMBER_AF_PLUGIN_GAS_PROXY_FUNCTION_ESI_ENDPOINT,
-                       ZCL_PRICE_CLUSTER_ID,
-                       ZCL_THRESHOLD_MULTIPLIER_ATTRIBUTE_ID,
-                       CLUSTER_MASK_SERVER,
-                       (uint8_t *)&(thresholdMultiplier),
-                       emberAfGetDataSize(ZCL_INT24U_ATTRIBUTE_TYPE),
-                       NULL);
-
-  emberAfReadAttribute(EMBER_AF_PLUGIN_GAS_PROXY_FUNCTION_ESI_ENDPOINT,
-                       ZCL_PRICE_CLUSTER_ID,
-                       ZCL_THRESHOLD_DIVISOR_ATTRIBUTE_ID,
-                       CLUSTER_MASK_SERVER,
-                       (uint8_t *)&(thresholdDivisor),
-                       emberAfGetDataSize(ZCL_INT24U_ATTRIBUTE_TYPE),
-                       NULL);
-
-  emberAfPluginPriceServerBlockPeriodAdd(EMBER_AF_PLUGIN_GAS_PROXY_FUNCTION_ESI_ENDPOINT,
-                                         providerId,
-                                         issuerEventId,
-                                         blockPeriodStartTime,
-                                         blockPeriodDuration,
-                                         blockPeriodControl,
-                                         blockPeriodDurationType,
-                                         thresholdMultiplier,
-                                         thresholdDivisor,
-                                         tariffType,
-                                         tariffResolutionPeriod);
-  return true;
-}
-
-bool emberAfPriceClusterPublishBillingPeriodCallback(uint32_t providerId,
-                                                     uint32_t issuerEventId,
-                                                     uint32_t billingPeriodStartTime,
-                                                     uint32_t billingPeriodDuration,
-                                                     uint8_t billingPeriodDurationType,
-                                                     uint8_t tariffType)
-{
-  emberAfPluginGasProxyFunctionPrintln("GPF: RX: PublishBillingPeriod 0x%4X, 0x%4X, 0x%4X, 0x%4X, 0x%X, 0x%X",
-                                       providerId,
-                                       issuerEventId,
-                                       billingPeriodStartTime,
-                                       billingPeriodDuration,
-                                       billingPeriodDurationType,
-                                       tariffType);
-
-  if (emberAfPluginGasProxyFunctionIgnoreFutureCommand(billingPeriodStartTime)) {
-    emberAfPluginGasProxyFunctionPrintln("GPF: Ignoring future dated command.");
-    return true;
-  }
-
-  emberAfPluginPriceServerBillingPeriodAdd(EMBER_AF_PLUGIN_GAS_PROXY_FUNCTION_ESI_ENDPOINT,
-                                           billingPeriodStartTime,
-                                           issuerEventId,
-                                           providerId,
-                                           billingPeriodDuration,
-                                           billingPeriodDurationType,
-                                           tariffType);
-  return true;
-}
-
-#endif // UC_BUILD
-
 bool emberAfSimpleMeteringClusterRequestMirrorCallback(void)
 {
   EmberEUI64 otaEui;
@@ -2029,10 +1362,8 @@ bool emberAfPluginGasProxyFunctionIgnoreFutureCommand(uint32_t startTime)
   return false;
 }
 
-#ifdef UC_BUILD
-
-uint32_t emAfGasProxyFunctionCalendarClusterClientCommandParse(sl_service_opcode_t opcode,
-                                                               sl_service_function_context_t *context)
+uint32_t sli_zigbee_af_gas_proxy_function_calendar_cluster_client_command_parse(sl_service_opcode_t opcode,
+                                                                                sl_service_function_context_t *context)
 {
   EmberAfClusterCommand *cmd = (EmberAfClusterCommand *)context->data;
   bool wasHandled = false;
@@ -2072,8 +1403,8 @@ uint32_t emAfGasProxyFunctionCalendarClusterClientCommandParse(sl_service_opcode
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
 
-uint32_t emAfGasProxyFunctionDeviceManagementClusterClientCommandParse(sl_service_opcode_t opcode,
-                                                                       sl_service_function_context_t *context)
+uint32_t sli_zigbee_af_gas_proxy_function_device_management_cluster_client_command_parse(sl_service_opcode_t opcode,
+                                                                                         sl_service_function_context_t *context)
 {
   (void)opcode;
 
@@ -2100,8 +1431,8 @@ uint32_t emAfGasProxyFunctionDeviceManagementClusterClientCommandParse(sl_servic
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
 
-uint32_t emAfGasProxyFunctionPriceClusterClientCommandParse(sl_service_opcode_t opcode,
-                                                            sl_service_function_context_t *context)
+uint32_t sli_zigbee_af_gas_proxy_function_price_cluster_client_command_parse(sl_service_opcode_t opcode,
+                                                                             sl_service_function_context_t *context)
 {
   (void)opcode;
 
@@ -2153,8 +1484,8 @@ uint32_t emAfGasProxyFunctionPriceClusterClientCommandParse(sl_service_opcode_t 
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
 
-uint32_t emAfGasProxyFunctionMessagingClusterClientCommandParse(sl_service_opcode_t opcode,
-                                                                sl_service_function_context_t *context)
+uint32_t sli_zigbee_af_gas_proxy_function_messaging_cluster_client_command_parse(sl_service_opcode_t opcode,
+                                                                                 sl_service_function_context_t *context)
 {
   (void)opcode;
 
@@ -2176,8 +1507,8 @@ uint32_t emAfGasProxyFunctionMessagingClusterClientCommandParse(sl_service_opcod
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
 
-uint32_t emAfGasProxyFunctionSimpleMeteringClusterClientCommandParse(sl_service_opcode_t opcode,
-                                                                     sl_service_function_context_t *context)
+uint32_t sli_zigbee_af_gas_proxy_function_simple_metering_cluster_client_command_parse(sl_service_opcode_t opcode,
+                                                                                       sl_service_function_context_t *context)
 {
   (void)opcode;
 
@@ -2219,8 +1550,8 @@ uint32_t emAfGasProxyFunctionSimpleMeteringClusterClientCommandParse(sl_service_
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
 
-uint32_t emAfGasProxyFunctionSimpleMeteringClusterServerCommandParse(sl_service_opcode_t opcode,
-                                                                     sl_service_function_context_t *context)
+uint32_t sli_zigbee_af_gas_proxy_function_simple_metering_cluster_server_command_parse(sl_service_opcode_t opcode,
+                                                                                       sl_service_function_context_t *context)
 {
   (void)opcode;
 
@@ -2247,8 +1578,8 @@ uint32_t emAfGasProxyFunctionSimpleMeteringClusterServerCommandParse(sl_service_
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
 
-uint32_t emAfGasProxyFunctionPrepaymentClusterClientCommandParse(sl_service_opcode_t opcode,
-                                                                 sl_service_function_context_t *context)
+uint32_t sli_zigbee_af_gas_proxy_function_prepayment_cluster_client_command_parse(sl_service_opcode_t opcode,
+                                                                                  sl_service_function_context_t *context)
 {
   (void)opcode;
 
@@ -2280,8 +1611,8 @@ uint32_t emAfGasProxyFunctionPrepaymentClusterClientCommandParse(sl_service_opco
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
 
-uint32_t emAfGasProxyFunctionPrepaymentClusterServerCommandParse(sl_service_opcode_t opcode,
-                                                                 sl_service_function_context_t *context)
+uint32_t sli_zigbee_af_gas_proxy_function_prepayment_cluster_server_command_parse(sl_service_opcode_t opcode,
+                                                                                  sl_service_function_context_t *context)
 {
   (void)opcode;
 
@@ -2312,4 +1643,3 @@ uint32_t emAfGasProxyFunctionPrepaymentClusterServerCommandParse(sl_service_opco
           ? EMBER_ZCL_STATUS_SUCCESS
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
-#endif // UC_BUILD

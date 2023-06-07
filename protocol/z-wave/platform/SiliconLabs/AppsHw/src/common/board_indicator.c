@@ -7,8 +7,8 @@
 /****************************************************************************/
 /*                              INCLUDE FILES                               */
 /****************************************************************************/
-#include "board_indicator.h"
 #include "board.h"
+#include "board_indicator.h"
 //#define DEBUGPRINT
 #include "DebugPrint.h"
 #include "Assert.h"
@@ -86,6 +86,7 @@ void Board_IndicateStatus(board_status_t status)
 void Board_IndicatorInit(void)
 {
   Board_IndicatorInitLed(APP_LED_INDICATOR);
+  Board_IndicateStatus(BOARD_STATUS_IDLE);
 }
 
 void Board_IndicatorInitLed(led_id_t led)

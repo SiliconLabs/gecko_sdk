@@ -1,0 +1,13 @@
+label: bootloader-spi-ezsp-workspace
+quality: production
+description: >
+  TrustZone is used to split into a Secure and Non-Secure bootloader. This workspace contains the secure and non-secure part of the bootloader and builds them together.
+project:
+  - path: bootloader-spi-ezsp-secure.slcp
+    id: bootloader-spi-ezsp-secure
+    output: bootloader-spi-ezsp-secure
+  - path: bootloader-spi-ezsp-nonsecure.slcp
+    id: bootloader-spi-ezsp-nonsecure
+    output: bootloader-spi-ezsp-nonsecure
+post_build:
+  profile: bootloader_tz_workspace

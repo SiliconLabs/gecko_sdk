@@ -31,6 +31,11 @@
 #ifndef SL_BT_APP_OTA_DFU_H
 #define SL_BT_APP_OTA_DFU_H
 
+/***********************************************************************************************//**
+ * @addtogroup app_ota_dfu
+ * @{
+ **************************************************************************************************/
+
 #include "sl_bgapi.h"
 #include "sl_power_manager.h"
 
@@ -154,4 +159,5 @@ void sl_bt_app_ota_dfu_reboot(void);
  *****************************************************************************/
 void sl_bt_app_ota_dfu_on_status_event(sl_bt_app_ota_dfu_status_evt_t *evt);
 
+/** @} (end addtogroup app_ota_dfu) */
 #endif // SL_BT_APP_OTA_DFU_H

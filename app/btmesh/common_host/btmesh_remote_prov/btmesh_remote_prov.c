@@ -39,7 +39,7 @@
 #include "btmesh_prov.h"
 #include "btmesh_remote_prov.h"
 #include "btmesh_db.h"
-#include "sl_simple_timer.h"
+#include "app_timer.h"
 
 // -----------------------------------------------------------------------------
 // Macros
@@ -95,9 +95,9 @@ static uint8_t serverlist_index;
 /// Current retry numbers of server scan capabilities
 static uint8_t scan_capabilities_retry_count;
 /// Timer for server scan capabilities report
-static sl_simple_timer_t get_capabilities_timer;
+static app_timer_t get_capabilities_timer;
 /// Timer for remote scanning unprovisioned devices
-static sl_simple_timer_t unprov_scan_timer;
+static app_timer_t unprov_scan_timer;
 
 // -----------------------------------------------------------------------------
 // Static Function Declarations
@@ -123,7 +123,7 @@ static sl_status_t start_next_capabilities_scan(void);
 * @param[in] timer Pointer to the timer used
 * @param[in] data Data from the timer
 *******************************************************************************/
-static void on_get_capabilities_timer(sl_simple_timer_t *timer, void *data);
+static void on_get_capabilities_timer(app_timer_t *timer, void *data);
 
 /***************************************************************************//**
 * Get unprovisioned nodes scan timer callback
@@ -131,7 +131,7 @@ static void on_get_capabilities_timer(sl_simple_timer_t *timer, void *data);
 * @param[in] timer Pointer to the timer used
 * @param[in] data Data from the timer
 *******************************************************************************/
-static void on_unprov_scan_timer(sl_simple_timer_t *timer, void *data);
+static void on_unprov_scan_timer(app_timer_t *timer, void *data);
 
 // -----------------------------------------------------------------------------
 // Function definitions
@@ -268,11 +268,11 @@ sl_status_t btmesh_remote_prov_start_server_capabilities_scan(uint16_t netkey_in
                                  serverlist[serverlist_index].server_address);
       } else {
         // Start timer for scan capabilities response timeout
-        sc = sl_simple_timer_start(&get_capabilities_timer,
-                                   SCAN_CAPABILITIES_TIMEOUT,
-                                   on_get_capabilities_timer,
-                                   NULL,
-                                   false);
+        sc = app_timer_start(&get_capabilities_timer,
+                             SCAN_CAPABILITIES_TIMEOUT,
+                             on_get_capabilities_timer,
+                             NULL,
+                             false);
         if (SL_STATUS_OK != sc) {
           app_log_status_warning_f(sc, "Failed to start capabilities timer" APP_LOG_NEW_LINE);
         }
@@ -301,11 +301,11 @@ sl_status_t btmesh_remote_prov_start_device_scan_by_address(uint16_t netkey_inde
     app_log_status_warning_f(sc, "Failed to start remote scan!" APP_LOG_NEW_LINE);
   } else {
     timeout_ms = timeout * 1000;
-    sc = sl_simple_timer_start(&unprov_scan_timer,
-                               timeout_ms,
-                               on_unprov_scan_timer,
-                               NULL,
-                               false);
+    sc = app_timer_start(&unprov_scan_timer,
+                         timeout_ms,
+                         on_unprov_scan_timer,
+                         NULL,
+                         false);
     if (SL_STATUS_OK != sc) {
       app_log_status_warning_f(sc, "Failed to start scanning timer" APP_LOG_NEW_LINE);
     }
@@ -476,7 +476,7 @@ static void serverlist_reorder(void)
 static sl_status_t start_next_capabilities_scan(void)
 {
   sl_status_t ret_val = SL_STATUS_OK;
-  sl_status_t sc = sl_simple_timer_stop(&get_capabilities_timer);
+  sl_status_t sc = app_timer_stop(&get_capabilities_timer);
   if (SL_STATUS_OK != sc) {
     app_log_status_warning_f(sc, "Failed to stop timer!" APP_LOG_NEW_LINE);
     ret_val = sc;
@@ -495,11 +495,11 @@ static sl_status_t start_next_capabilities_scan(void)
                                serverlist[serverlist_index].server_address);
       ret_val = sc;
     }
-    sc = sl_simple_timer_start(&get_capabilities_timer,
-                               SCAN_CAPABILITIES_TIMEOUT,
-                               on_get_capabilities_timer,
-                               NULL,
-                               false);
+    sc = app_timer_start(&get_capabilities_timer,
+                         SCAN_CAPABILITIES_TIMEOUT,
+                         on_get_capabilities_timer,
+                         NULL,
+                         false);
     if (SL_STATUS_OK != sc) {
       app_log_status_warning_f(sc, "Failed to start capabilities timer next server" APP_LOG_NEW_LINE);
       ret_val = sc;
@@ -514,7 +514,7 @@ static sl_status_t start_next_capabilities_scan(void)
 // -----------------------------------------------------------------------------
 // Timer callbacks
 
-static void on_get_capabilities_timer(sl_simple_timer_t *timer, void *data)
+static void on_get_capabilities_timer(app_timer_t *timer, void *data)
 {
   (void)data;
   (void)timer;
@@ -530,11 +530,11 @@ static void on_get_capabilities_timer(sl_simple_timer_t *timer, void *data)
                                "Failed to restart scan capabilities for server: 0x%04x in cb!" APP_LOG_NEW_LINE,
                                serverlist[serverlist_index].server_address);
     }
-    sc = sl_simple_timer_start(&get_capabilities_timer,
-                               SCAN_CAPABILITIES_TIMEOUT,
-                               on_get_capabilities_timer,
-                               NULL,
-                               false);
+    sc = app_timer_start(&get_capabilities_timer,
+                         SCAN_CAPABILITIES_TIMEOUT,
+                         on_get_capabilities_timer,
+                         NULL,
+                         false);
     if (SL_STATUS_OK != sc) {
       app_log_status_warning_f(sc, "Failed to start capabilities timer in callback retry" APP_LOG_NEW_LINE);
     }
@@ -551,11 +551,11 @@ static void on_get_capabilities_timer(sl_simple_timer_t *timer, void *data)
                                  "Failed to start scan capabilities for next server: 0x%04x in cb!" APP_LOG_NEW_LINE,
                                  serverlist[serverlist_index].server_address);
       }
-      sc = sl_simple_timer_start(&get_capabilities_timer,
-                                 SCAN_CAPABILITIES_TIMEOUT,
-                                 on_get_capabilities_timer,
-                                 NULL,
-                                 false);
+      sc = app_timer_start(&get_capabilities_timer,
+                           SCAN_CAPABILITIES_TIMEOUT,
+                           on_get_capabilities_timer,
+                           NULL,
+                           false);
       if (SL_STATUS_OK != sc) {
         app_log_status_warning_f(sc, "Failed to start capabilities timer in callback next server" APP_LOG_NEW_LINE);
       }
@@ -567,7 +567,7 @@ static void on_get_capabilities_timer(sl_simple_timer_t *timer, void *data)
   }
 }
 
-static void on_unprov_scan_timer(sl_simple_timer_t *timer, void *data)
+static void on_unprov_scan_timer(app_timer_t *timer, void *data)
 {
   (void)data;
   (void)timer;

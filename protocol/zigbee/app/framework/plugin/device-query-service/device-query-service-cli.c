@@ -27,13 +27,12 @@
 // Forward declarations
 
 //============================================================================
-#ifdef UC_BUILD
-void emAfPluginDeviceQueryServiceEnableDisableCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_device_query_service_enable_disable_command(sl_cli_command_arg_t *arguments)
 {
   emberAfPluginDeviceQueryServiceEnableDisable(memcmp(arguments->argv[arguments->arg_ofs - 1], "enable", strlen("enable")) == 0);
 }
 
-void emAfPluginDeviceQueryServiceStatusCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_device_query_service_status_command(sl_cli_command_arg_t *arguments)
 {
   EmberEUI64 currentEui64;
   bool enabled = emberAfPluginDeviceQueryServiceGetEnabledState();
@@ -48,25 +47,3 @@ void emAfPluginDeviceQueryServiceStatusCommand(sl_cli_command_arg_t *arguments)
                       ? ""
                       : emberAfPluginDeviceDatabaseGetStatusString(device->status)));
 }
-#else
-void emAfPluginDeviceQueryServiceEnableDisableCommand(void)
-{
-  emberAfPluginDeviceQueryServiceEnableDisable(emberCommandName()[0] == 'e');
-}
-
-void emAfPluginDeviceQueryServiceStatusCommand(void)
-{
-  EmberEUI64 currentEui64;
-  bool enabled = emberAfPluginDeviceQueryServiceGetEnabledState();
-  emberAfPluginDeviceQueryServiceGetCurrentDiscoveryTargetEui64(currentEui64);
-  emberAfCorePrintln("Enabled: %p", enabled ? "yes" : "no");
-  emberAfCorePrint("Current Discovery Target: ");
-  emberAfPrintBigEndianEui64(currentEui64);
-  emberAfCorePrintln("");
-  const EmberAfDeviceInfo* device = emberAfPluginDeviceDatabaseFindDeviceByEui64(currentEui64);
-  emberAfCorePrintln("Status: %p",
-                     (device == NULL
-                      ? ""
-                      : emberAfPluginDeviceDatabaseGetStatusString(device->status)));
-}
-#endif

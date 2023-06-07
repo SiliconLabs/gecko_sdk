@@ -19,7 +19,9 @@
 #include "basic.h"
 #include "app/framework/util/attribute-storage.h"
 #if defined(SL_COMPONENT_CATALOG_PRESENT)
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #ifdef SL_CATALOG_ZIGBEE_REPORTING_PRESENT
 #include "reporting.h"
 #endif // SL_CATALOG_ZIGBEE_REPORTING_PRESENT
@@ -36,13 +38,11 @@ bool emberAfBasicClusterResetToFactoryDefaultsCallback(void)
   emberAfResetAttributes(emberAfCurrentEndpoint());
   emberAfPluginBasicResetToFactoryDefaultsCallback(emberAfCurrentEndpoint());
 #ifdef SL_CATALOG_ZIGBEE_REPORTING_PRESENT
-  emAfPluginReportingGetLastValueAll();
+  sli_zigbee_af_reporting_get_last_value_all();
 #endif // SL_CATALOG_ZIGBEE_REPORTING_PRESENT
   emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
   return true;
 }
-
-#ifdef UC_BUILD
 
 uint32_t emberAfBasicClusterServerCommandParse(sl_service_opcode_t opcode,
                                                sl_service_function_context_t *context)
@@ -58,5 +58,3 @@ uint32_t emberAfBasicClusterServerCommandParse(sl_service_opcode_t opcode,
           ? EMBER_ZCL_STATUS_SUCCESS
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
-
-#endif // UC_BUILD

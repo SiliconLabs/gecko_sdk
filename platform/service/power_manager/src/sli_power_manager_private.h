@@ -73,7 +73,7 @@ void sli_power_manager_apply_em(sl_power_manager_em_t em);
 
 void sli_power_manager_debug_init(void);
 
-#if (SL_POWER_MANAGER_LOWEST_EM_ALLOWED != 1)
+#if !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT)
 void sli_power_manager_save_states(void);
 
 void sli_power_manager_handle_pre_deepsleep_operations(void);
@@ -94,20 +94,26 @@ uint32_t sli_power_manager_convert_delay_us_to_tick(uint32_t time_us);
  ******************************************************************************/
 uint32_t sli_power_manager_get_default_high_frequency_minimum_offtime(void);
 
-#if defined(EMU_VSCALE_PRESENT)
+/*******************************************************************************
+ * Restores the Low Frequency clocks according to which LF oscillators are used.
+ ******************************************************************************/
+void sli_power_manager_low_frequency_restore(void);
+
+/***************************************************************************//**
+ * Informs the power manager if the high accuracy/high frequency clock
+ * is used, prior to scheduling an early clock restore.
+ *
+ * @return true if HFXO is used, else false.
+ ******************************************************************************/
+bool sli_power_manager_is_high_freq_accuracy_clk_used(void);
+#endif
+
 /***************************************************************************//**
  * Enable or disable fast wake-up in EM2 and EM3
  *
  * @note Will also update the wake up time from EM2 to EM0.
  ******************************************************************************/
 void sli_power_manager_em23_voltage_scaling_enable_fast_wakeup(bool enable);
-#endif
-
-/*******************************************************************************
- * Restores the Low Frequency clocks according to which LF oscillators are used.
- ******************************************************************************/
-void sli_power_manager_low_frequency_restore(void);
-#endif
 
 /*******************************************************************************
  * Gets the delay associated the wake-up process from EM23.

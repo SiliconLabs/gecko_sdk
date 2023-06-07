@@ -74,16 +74,26 @@ typedef struct _RECEIVE_OPTIONS_TYPE_EX_
   uint8_t statusUpdate             : 1;   ///< Is statusUpdate enabled for current session
 } RECEIVE_OPTIONS_TYPE_EX;
 
+/**
+ * Allocates space for Supervision when used to declare a buffer.
+ */
+typedef struct
+{
+  uint8_t multichanCmdEncap[4]; //4 = sizeof(ZW_MULTI_CHANNEL_CMD_ENCAP_V2_FRAME) - sizeof(ALL_EXCEPT_ENCAP)
+  ZW_SUPERVISION_GET_FRAME supervisionGet;
+  ZW_APPLICATION_TX_BUFFER appTxBuf;
+} ZAF_TRANSPORT_TX_BUFFER;
 
 /**
  * @enum e_cmd_handler_return_code_t
  */
 typedef enum
 {
-  E_CMD_HANDLER_RETURN_CODE_FAIL,           ///< the command was not accepted or accepted but failed to execute. Command class returns FAIL
-  E_CMD_HANDLER_RETURN_CODE_HANDLED,        ///< the command was accepted and executed by the command handler. Command class returns SUCCESS
-  E_CMD_HANDLER_RETURN_CODE_WORKING,        ///< the command was accepted but is not fully executed. Command class returns WORKING
-  E_CMD_HANDLER_RETURN_CODE_NOT_SUPPORTED,  ///< the command handler does not support this command. Command class returns NO_SUPPORT
+  E_CMD_HANDLER_RETURN_CODE_FAIL,           ///< Not accepted or accepted but failed to execute. Command class returns FAIL
+  E_CMD_HANDLER_RETURN_CODE_HANDLED,        ///< Accepted and executed by the command handler. Command class returns SUCCESS
+  E_CMD_HANDLER_RETURN_CODE_WORKING,        ///< Accepted but is not fully executed. Command class returns WORKING
+  E_CMD_HANDLER_RETURN_CODE_NOT_SUPPORTED,  ///< Command handler does not support this command. Command class returns NO_SUPPORT
+  E_CMD_HANDLER_RETURN_CODE_NO_CHANGE,      ///< Accepted but device was already in final state, so no change was made. Command class returns SUCCESS
 } e_cmd_handler_return_code_t;
 
 /**
@@ -149,8 +159,11 @@ typedef job_status_t JOB_STATUS;
  */
 typedef enum
 {
-  TRANSMISSION_RESULT_NOT_FINISHED,   /**< Still transmitting. */
-  TRANSMISSION_RESULT_FINISHED        /**< Done transmitting to all nodes. */
+  TRANSMISSION_RESULT_NOT_FINISHED, /**< Still transmitting. */
+  TRANSMISSION_RESULT_FINISHED,     /**< Done transmitting to all nodes. */
+  TRANSMISSION_RESULT_UNKNOWN       /**< Reserved for callbacks from the stack
+                                         as the stack supplies no valid value
+                                         for the finish field. */
 } TRANSMISSION_RESULT_FINISH_STATUS;
 
 /**
@@ -180,6 +193,22 @@ typedef received_frame_status_t(*cc_handler_v2_t)(
     uint8_t,
     ZW_APPLICATION_TX_BUFFER *,
     uint8_t *);
+
+typedef struct _cc_handler_input_t {
+  RECEIVE_OPTIONS_TYPE_EX * rx_options;
+  ZW_APPLICATION_TX_BUFFER * frame;
+  uint8_t length;
+} cc_handler_input_t;
+
+typedef struct _cc_handler_output_t {
+  ZW_APPLICATION_TX_BUFFER * frame;
+  uint8_t length;
+  uint8_t duration;
+} cc_handler_output_t;
+
+typedef received_frame_status_t(*cc_handler_v3_t)(
+    cc_handler_input_t *,
+    cc_handler_output_t *);
 
 /**
  * Basic Set mapper function type.
@@ -313,6 +342,43 @@ extern const CC_handler_map_latest_t __start__cc_handlers_v3;
 extern const CC_handler_map_latest_t __stop__cc_handlers_v3;
 #define cc_handlers_stop __stop__cc_handlers_v3
 #endif
+
+/**
+ * Registers a given command class with version, handler, etc.
+ *
+ * Every CC must register itself using the latest REGISTER_CC macro. Doing so will enable ZAF
+ * to process certain parts without the need for additional handling in the application.
+ * One example being the dispatching of command class frames to the correct command class.
+ *
+ * Using this macro will make the linker place a variable in a specific linker section which
+ * effectively will create an array of registered command classes. ZAF uses this array to look
+ * up different information about the supported command classes.
+ *
+ * Please see existing command classes for examples of usage.
+ *
+ * @remark Requires a CC handler matching @ref cc_handler_v3_t.
+ *
+ * @param[in] cc                  The command class number, e.g. COMMAND_CLASS_VERSION.
+ * @param[in] version             The version of the command class the the implementation covers.
+ * @param[in] handler             Address of the handler function.
+ * @param[in] basic_set_mapper    Address of the Basic Set mapper function.
+ * @param[in] basic_get_mapper    Address of the Basic Get mapper function.
+ * @param[in] lifeline_report_cb  Pointer to a function that will set one or more command class /
+ *                                command pairs.
+ *                                Some command classes are required to report via Lifeline and each
+ *                                Lifeline report callback will populate the list of command class /
+ *                                command pairs for the Association Group Command List Report.
+ *                                The list of mandatory command class / command pairs can be found
+ *                                under "Lifeline Reports" in
+ *                                https://sdomembers.z-wavealliance.org/wg/AWG/document/120.
+ * @param[in] flags               Reserved for future use.
+ * @param[in] init_cb             The CC init function to be invoked by ZAF_Init().
+ * @param[in] reset_cb            The CC reset function to be invoked on factory reset.
+ */
+#define REGISTER_CC_V5(cc,version,handler,basic_set_mapper,basic_get_mapper, lifeline_report_cb, flags, init_cb, reset_cb) \
+  static const CC_handler_map_latest_t thisHandler##cc __attribute__((aligned(4), __used__, __section__( HANDLER_SECTION ))) = {3,cc,version,(cc_handler_t)handler,basic_set_mapper,basic_get_mapper,lifeline_report_cb,flags,init_cb,reset_cb}; \
+  void * dummy##cc
+
 
 /**
  * Registers a given command class with version, handler, etc.

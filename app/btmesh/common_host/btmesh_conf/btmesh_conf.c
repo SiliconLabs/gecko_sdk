@@ -474,7 +474,7 @@ bool btmesh_conf_any_severe_log_level(uint8_t start_level)
 {
   bool enabled = false;
   for (int16_t level = start_level; 0 <= level; level--) {
-    enabled = enabled || _app_log_check_level(level);
+    enabled = enabled || app_log_check_level(level);
   }
   return enabled;
 }

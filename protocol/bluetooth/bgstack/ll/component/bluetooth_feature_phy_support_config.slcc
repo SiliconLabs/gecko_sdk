@@ -6,7 +6,7 @@ description: >
   Selecting fewer PHYs than the radio supports implies a smaller flash footprint.
   Note that this component won't allow using PHYs which the device radio does not support.
 
-category: Bluetooth|Controller
+category: Bluetooth|Host Controller Interface (HCI)
 quality: production
 root_path: "protocol/bluetooth/bgstack/ll"
 config_file:

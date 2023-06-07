@@ -31,6 +31,11 @@
 #ifndef SL_GATT_SERVICE_CTE_CONNECTIONLESS_CONFIG_H
 #define SL_GATT_SERVICE_CTE_CONNECTIONLESS_CONFIG_H
 
+/***********************************************************************************************//**
+ * @addtogroup gatt_service_cte_connectionless
+ * @{
+ **************************************************************************************************/
+
 // <<< Use Configuration Wizard in Context Menu >>>
 
 // <o SL_GATT_SERVICE_CTE_CONNECTIONLESS_ADV_INTERVAL> Connectionless CTE advertising interval in units of 1.25 ms <6-65535>
@@ -56,4 +61,5 @@
 
 // <<< end of configuration section >>>
 
+/** @} (end addtogroup gatt_service_cte_connectionless) */
 #endif // SL_GATT_SERVICE_CTE_CONNECTIONLESS_CONFIG_H

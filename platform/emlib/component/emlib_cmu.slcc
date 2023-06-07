@@ -68,3 +68,7 @@ documentation:
       condition: [device_sdid_215]
     - page: emlib/api/efr32xg25/group-cmu
       condition: [device_sdid_220]
+    - page: emlib/api/efr32xg27/group-cmu
+      condition: [device_sdid_230]
+    - page: emlib/api/efr32xg28/group-cmu
+      condition: [device_sdid_235]

@@ -31,6 +31,11 @@
 #ifndef SL_GATT_SERVICE_GAS_H
 #define SL_GATT_SERVICE_GAS_H
 
+/***********************************************************************************************//**
+ * @addtogroup gatt_service_gas
+ * @{
+ **************************************************************************************************/
+
 #include "sl_bt_api.h"
 
 /**************************************************************************//**
@@ -48,4 +53,5 @@ void sl_gatt_service_gas_on_event(sl_bt_msg_t *evt);
  *****************************************************************************/
 sl_status_t sl_gatt_service_gas_get(uint16_t *eco2, uint16_t *tvoc);
 
+/** @} (end addtogroup gatt_service_gas) */
 #endif // SL_GATT_SERVICE_GAS_H

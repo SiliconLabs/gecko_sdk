@@ -173,7 +173,7 @@ public:
      * @param[in, out] aTypeId    A reference to a Type ID variable to update.
      *
      */
-    static void MarkAsReserverd(uint8_t &aTypeId) { aTypeId = (aTypeId & ~kTypeMask) | kTypeReserved; }
+    static void MarkAsReserved(uint8_t &aTypeId) { aTypeId = (aTypeId & ~kTypeMask) | kTypeReserved; }
 
     TypeId(void) = delete;
 };
@@ -273,8 +273,8 @@ class SeriesInfo : public LinkedListEntry<SeriesInfo>
 public:
     /**
      * This constant represents Link Probe when filtering frames to be accounted using Series Flag. There's
-     * already `kFcfFrameData`, `kFcfFrameAck` and `kFcfFrameMacCmd`. This item is added so that we can
-     * filter a Link Probe for series in the same way as other frames.
+     * already `Mac::Frame::kTypeData`, `Mac::Frame::kTypeAck` and `Mac::Frame::kTypeMacCmd`. This item is
+     * added so that we can filter a Link Probe for series in the same way as other frames.
      *
      */
     static constexpr uint8_t kSeriesTypeLinkProbe = 0;

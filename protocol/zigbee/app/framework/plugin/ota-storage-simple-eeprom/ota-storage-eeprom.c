@@ -21,11 +21,7 @@
 #include "app/framework/plugin/ota-common/ota.h"
 #include "app/framework/plugin/ota-storage-common/ota-storage.h"
 
-#ifdef UC_BUILD
 #include "eeprom.h"
-#else // !UC_BUILD
-#include "util/plugin/plugin-common/eeprom/eeprom.h"
-#endif // UC_BUILD
 
 //#define DEBUG_PRINT
 #define OTA_STORAGE_EEPROM_INTERNAL_HEADER
@@ -36,15 +32,9 @@
  #include "hal/micro/unix/simulation/fake-eeprom.h"
 #endif // EMBER_TEST
 
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_SLOT_MANAGER
-// TODO: EMZIGBEE-7087 - update/confirm this define once the "slot manager"
-//                       plugin is ported.
-#define SL_CATALOG_SLOT_MANAGER_PRESENT
 #endif
-#endif // UC_BUILD
 
 #ifdef SL_CATALOG_SLOT_MANAGER_PRESENT
 #include "slot-manager.h"
@@ -62,15 +52,8 @@ static void printDataBlock(const uint8_t* block);
 #endif // DEBUG_PRINT
 
 void calculateSlotAndEepromOffsets();
-void emAfEepromInfoCommand(void);
+void sli_eeprom_info_command(void);
 
-#ifndef UC_BUILD
-#if !defined(EMBER_AF_GENERATE_CLI)
- #ifndef READ_MODIFY_WRITE_SUPPORT
-void emAfOtaWipeStorageDevice(void);
- #endif // !READ_MODIFY_WRITE_SUPPORT
-#endif // !EMBER_AF_GENERATE_CLI
-#endif
 //------------------------------------------------------------------------------
 // Globals
 
@@ -95,11 +78,7 @@ void emAfOtaWipeStorageDevice(void);
 #endif // SLOT_STRATEGY == (USE_FIRST_SLOT | USE_LAST_SLOT | USE_SPECIFIC_SLOT)
 
 // Only needed for Page-erase-required flash parts.
-#ifdef UC_BUILD
 sl_zigbee_event_t emberAfPluginOtaStorageSimpleEepromPageEraseEvent;
-#else
-EmberEventControl emberAfPluginOtaStorageSimpleEepromPageEraseEventControl;
-#endif
 
 static uint32_t gOtaEepromSize    = EEPROM_END - EEPROM_START;
 static uint32_t gOtaStorageStart  = EEPROM_START;
@@ -113,18 +92,6 @@ static uint32_t gOtaImageInfoStart = EEPROM_END \
 static uint32_t gOtaImageInfoStart = EEPROM_START;
 #endif // SOC_BOOTLOADING_SUPPORT
 
-#ifndef UC_BUILD
-#if !defined(EMBER_AF_GENERATE_CLI)
-EmberCommandEntry emberAfPluginOtaStorageSimpleEepromCommands[] = {
- #ifndef READ_MODIFY_WRITE_SUPPORT
-  emberCommandEntryActionWithDetails("wipe", emAfOtaWipeStorageDevice, "",
-                                     "Wipes all data in the storage device.",
-                                     NULL),
- #endif // !READ_MODIFY_WRITE_SUPPORT
-  emberCommandEntryTerminator()
-};
-#endif // !EMBER_AF_GENERATE_CLI
-#endif
 //------------------------------------------------------------------------------
 
 #if defined(EMBER_TEST)
@@ -133,7 +100,7 @@ EmberCommandEntry emberAfPluginOtaStorageSimpleEepromCommands[] = {
 #define EMBER_TEST_EEPROM_WORD_SIZE MAX_WORD_SIZE
 #endif
 
-void emAfSetupFakeEepromForSimulation(void)
+void sli_zigbee_af_setup_fake_eeprom_for_simulation(void)
 {
   setupFakeEeprom(gOtaEepromSize,
                   gOtaStorageStart,    // offset
@@ -141,12 +108,12 @@ void emAfSetupFakeEepromForSimulation(void)
                   emberAfPluginEepromInfo()->pageEraseMs,
                   (COMPILED_FOR_READ_MODIFY_WRITE == false),
                   EMBER_TEST_EEPROM_WORD_SIZE);      // word size
-  emAfPluginEepromFakeEepromCallback();
+  sli_eeprom_fake_eeprom_callback();
 }
 
 #endif // EMBER_TEST
 
-uint32_t emAfOtaStorageReadInt32uFromEeprom(uint32_t realOffset)
+uint32_t sli_zigbee_af_ota_storage_read_int32u_from_eeprom(uint32_t realOffset)
 {
   uint8_t value[4];
   emberAfPluginEepromRead(realOffset, value, 4);
@@ -156,9 +123,9 @@ uint32_t emAfOtaStorageReadInt32uFromEeprom(uint32_t realOffset)
           + ((uint32_t)value[3] << 24));
 }
 
-void emAfOtaStorageWriteInt32uToEeprom(uint32_t value, uint32_t realOffset)
+void sli_zigbee_af_ota_storage_write_int32u_to_eeprom(uint32_t value, uint32_t realOffset)
 {
-  uint32_t oldValue = emAfOtaStorageReadInt32uFromEeprom(realOffset);
+  uint32_t oldValue = sli_zigbee_af_ota_storage_read_int32u_from_eeprom(realOffset);
   if (oldValue != value) {
     uint8_t data[4];
     data[0] = value;
@@ -172,10 +139,10 @@ void emAfOtaStorageWriteInt32uToEeprom(uint32_t value, uint32_t realOffset)
 
 #if defined (SOC_BOOTLOADING_SUPPORT)
 
-uint32_t emAfGetEblStartOffset(void)
+uint32_t sli_zigbee_af_get_ebl_start_offset(void)
 {
-  return emAfOtaStorageReadInt32uFromEeprom(gOtaImageInfoStart
-                                            + EBL_START_OFFSET_INDEX);
+  return sli_zigbee_af_ota_storage_read_int32u_from_eeprom(gOtaImageInfoStart
+                                                           + EBL_START_OFFSET_INDEX);
 }
 
 static void setEblStartOffset(uint32_t eblStart)
@@ -184,13 +151,13 @@ static void setEblStartOffset(uint32_t eblStart)
              eblStart,
              gOtaImageInfoStart + EBL_START_OFFSET_INDEX);
   debugFlush();
-  emAfOtaStorageWriteInt32uToEeprom(eblStart,
-                                    gOtaImageInfoStart
-                                    + EBL_START_OFFSET_INDEX);
+  sli_zigbee_af_ota_storage_write_int32u_to_eeprom(eblStart,
+                                                   gOtaImageInfoStart
+                                                   + EBL_START_OFFSET_INDEX);
 
   #if defined(DEBUG_PRINT)
   {
-    uint32_t offset = emAfGetEblStartOffset();
+    uint32_t offset = sli_zigbee_af_get_ebl_start_offset();
     debugPrint("EBL Start Offset: 0x%4X", offset);
   }
   #endif // DEBUG_PRINT
@@ -200,7 +167,7 @@ static void setEblStartOffset(uint32_t eblStart)
 bool emberAfOtaStorageDriverInitCallback(void)
 {
   #if defined(EMBER_TEST)
-  emAfSetupFakeEepromForSimulation();
+  sli_zigbee_af_setup_fake_eeprom_for_simulation();
   #endif
 
   // First, if we're using slots, calculate EEPROM start, end, and length
@@ -211,17 +178,17 @@ bool emberAfOtaStorageDriverInitCallback(void)
   if (emberAfPluginEepromInfo() != NULL) {
     assert(emberAfPluginEepromInfo()->partSize >= gOtaEepromSize);
   }
-  emAfOtaStorageEepromInit();
+  sli_zigbee_af_ota_storage_eeprom_init();
 
   return true;
 }
 
-void emAfPluginOtaStorageSimpleEepromInitCallback(uint8_t init_level)
+void sli_zigbee_af_ota_storage_simple_eeprom_init_callback(uint8_t init_level)
 {
-  SLXU_INIT_UNUSED_ARG;
+  (void)init_level;
 
-  slxu_zigbee_event_init(eraseEvent,
-                         emberAfPluginOtaStorageSimpleEepromPageEraseEventHandler);
+  sl_zigbee_event_init(eraseEvent,
+                       emberAfPluginOtaStorageSimpleEepromPageEraseEventHandler);
 }
 
 // Returns true if the operation crosses the break in the OTA image
@@ -230,14 +197,14 @@ void emAfPluginOtaStorageSimpleEepromInitCallback(uint8_t init_level)
 // This will be based on the start offset of the EEPROM (since the user
 // may have allocated a subset of the EEPROM for OTA and not positioned
 // the OTA data at offset 0), and after the image info meta-data.
-bool emAfOtaStorageDriverGetRealOffset(uint32_t* offset,
-                                       uint32_t* length)
+bool sli_zigbee_af_ota_storage_driver_get_real_offset(uint32_t* offset,
+                                                      uint32_t* length)
 {
   bool spansBreak = false;
   uint32_t realOffset = gOtaImageInfoStart + OTA_HEADER_INDEX + *offset;
 
 #if defined(SOC_BOOTLOADING_SUPPORT)
-  uint32_t eblOffset = emAfGetEblStartOffset();
+  uint32_t eblOffset = sli_zigbee_af_get_ebl_start_offset();
 
   if (*offset < eblOffset) {
     // Layout 2, before the break in the OTA image, but spans the break.
@@ -283,7 +250,7 @@ static bool readWritePrimitive(bool read,
 
   debugPrint("readWritePrimitive(): OTA offset 0x%4X, length %l", offset, length);
 
-  bool spansBreak = emAfOtaStorageDriverGetRealOffset(&realOffset, &realLength);
+  bool spansBreak = sli_zigbee_af_ota_storage_driver_get_real_offset(&realOffset, &realLength);
   if (spansBreak) {
     count = 2;
   }
@@ -341,7 +308,7 @@ static bool readWritePrimitive(bool read,
 //   It is not the same as the OTA file magic number.
 //   It is used solely to verify the validity of the
 //   meta-data stored ahead of the OTA file.
-bool emAfOtaStorageCheckDownloadMetaData(void)
+bool sli_zigbee_af_ota_storage_check_download_meta_data(void)
 {
   uint8_t magicNumberExpected[] = { MAGIC_NUMBER, VERSION_NUMBER };
   uint8_t magicNumberActual[MAGIC_NUMBER_SIZE + VERSION_NUMBER_SIZE];
@@ -361,8 +328,8 @@ bool emAfOtaStorageCheckDownloadMetaData(void)
 }
 
 // NOTE:  The magic number referenced here is the "Ember" Magic number.
-// See comment above "emAfOtaStorageCheckDownloadMetaData()".
-void emAfOtaStorageWriteDownloadMetaData(void)
+// See comment above "sli_zigbee_af_ota_storage_check_download_meta_data()".
+void sli_zigbee_af_ota_storage_write_download_meta_data(void)
 {
   uint8_t magicNumber[] = { MAGIC_NUMBER, VERSION_NUMBER };
   debugPrint("Writing download meta-data (magic number and version)");
@@ -426,8 +393,8 @@ bool emberAfOtaStorageDriverWriteCallback(const uint8_t* dataToWrite,
                          offset,
                          length,
                          NULL)) {      // readData pointer
-    emAfStorageEepromUpdateDownloadOffset(offset + length,
-                                          false);  // final offset?
+    sli_zigbee_af_storage_eeprom_update_download_offset(offset + length,
+                                                        false); // final offset?
     return true;
   }
   return false;
@@ -436,8 +403,8 @@ bool emberAfOtaStorageDriverWriteCallback(const uint8_t* dataToWrite,
 void emberAfOtaStorageDriverDownloadFinishCallback(uint32_t finalOffset)
 {
   debugPrint("Noting final download offset 0x%4X", finalOffset);
-  emAfStorageEepromUpdateDownloadOffset(finalOffset,
-                                        true);  // final offset?
+  sli_zigbee_af_storage_eeprom_update_download_offset(finalOffset,
+                                                      true); // final offset?
   emberAfPluginEepromFlushSavedPartialWrites();
   return;
 }
@@ -522,7 +489,7 @@ void calculateSlotAndEepromOffsets()
 #endif // SL_CATALOG_SLOT_MANAGER_PRESENT
 }
 
-uint32_t emAfOtaStorageGetSlot(void)
+uint32_t sli_zigbee_af_ota_storage_get_slot(void)
 {
   return gOtaSlotToUse;
 }
@@ -542,7 +509,7 @@ uint32_t otaStorageEepromGetImageInfoStartAddress()
   return gOtaImageInfoStart;
 }
 
-void emAfOtaStorageDriverInfoPrint(void)
+void sli_zigbee_af_ota_storage_driver_info_print(void)
 {
   uint32_t downloadOffset =
     emberAfOtaStorageDriverRetrieveLastStoredOffsetCallback();
@@ -563,7 +530,7 @@ void emAfOtaStorageDriverInfoPrint(void)
 
 #if defined(SOC_BOOTLOADING_SUPPORT)
   otaPrintFlush();
-  otaPrintln("EBL Start Offset:           0x%4X", emAfGetEblStartOffset());
+  otaPrintln("EBL Start Offset:           0x%4X", sli_zigbee_af_get_ebl_start_offset());
   otaPrintFlush();
 #endif // SOC_BOOTLOADING_SUPPORT
 
@@ -597,7 +564,7 @@ void emAfOtaStorageDriverInfoPrint(void)
   printImageInfoStartData();
 #endif // DEBUG_PRINT
 
-  emAfEepromInfoCommand();
+  sli_eeprom_info_command();
 }
 
 #if defined(DEBUG_PRINT)

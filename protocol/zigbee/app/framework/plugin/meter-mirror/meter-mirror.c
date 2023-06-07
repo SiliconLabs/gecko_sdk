@@ -19,15 +19,11 @@
 #include "app/framework/util/util.h"
 #include "meter-mirror.h"
 
-#ifdef UC_BUILD
 #include "meter-mirror-config.h"
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
-#include "zap-cluster-command-parser.h"
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_GBCS_COMPATIBILITY
-#define SL_CATALOG_ZIGBEE_GBCS_COMPATIBILITY_PRESENT
 #endif
-#endif // UC_BUILD
+#include "zap-cluster-command-parser.h"
 
 //----------------------------------------------------------------------------
 // Globals
@@ -70,7 +66,7 @@ static MirrorEntry mirrorList[EMBER_AF_PLUGIN_METER_MIRROR_MAX_MIRRORS];
 //-----------------------------------------------------------------------------
 // Functions
 
-uint8_t emAfPluginMeterMirrorGetMirrorsAllocated(void)
+uint8_t sli_zigbee_af_meter_mirror_get_mirrors_allocated(void)
 {
   uint8_t mirrors = 0;
   uint8_t i;
@@ -88,7 +84,7 @@ static void updatePhysicalEnvironment(void)
 #ifdef SL_CATALOG_ZIGBEE_GBCS_COMPATIBILITY_PRESENT
     HAVE_MIRROR_CAPACITY;
 #else
-    (emAfPluginMeterMirrorGetMirrorsAllocated() < EMBER_AF_PLUGIN_METER_MIRROR_MAX_MIRRORS
+    (sli_zigbee_af_meter_mirror_get_mirrors_allocated() < EMBER_AF_PLUGIN_METER_MIRROR_MAX_MIRRORS
      ? HAVE_MIRROR_CAPACITY
      : NO_MIRROR_CAPACITY);
 #endif
@@ -105,7 +101,7 @@ static void updatePhysicalEnvironment(void)
   }
 }
 
-void emClearMirrorByEndpoint(uint8_t endpoint)
+void sli_zigbee_af_clear_mirror_by_endpoint(uint8_t endpoint)
 {
 }
 
@@ -161,9 +157,9 @@ bool emberAfPluginMeterMirrorGetEndpointByEui64(EmberEUI64 eui64,
   return true;
 }
 
-void emberAfPluginMeterMirrorInitCallback(SLXU_INIT_ARG)
+void emberAfPluginMeterMirrorInitCallback(uint8_t init_level)
 {
-  SLXU_INIT_UNUSED_ARG;
+  (void)init_level;
 
   // disable all mirror endpoints
   uint8_t i;
@@ -220,7 +216,7 @@ uint16_t emberAfPluginMeterMirrorRequestMirror(EmberEUI64 requestingDeviceIeeeAd
   uint8_t endpoint = EMBER_AF_PLUGIN_METER_MIRROR_ENDPOINT_START;
   EmberStatus status;
 
-  if (emAfPluginMeterMirrorGetMirrorsAllocated() >= EMBER_AF_PLUGIN_METER_MIRROR_MAX_MIRRORS
+  if (sli_zigbee_af_meter_mirror_get_mirrors_allocated() >= EMBER_AF_PLUGIN_METER_MIRROR_MAX_MIRRORS
       && index == INVALID_INDEX) {
     return INVALID_MIRROR_ENDPOINT;
   }
@@ -235,6 +231,7 @@ uint16_t emberAfPluginMeterMirrorRequestMirror(EmberEUI64 requestingDeviceIeeeAd
   index = findMirrorIndex(nullEui64);
   if (index == INVALID_INDEX) {
     emberAfSimpleMeteringClusterPrintln("No free mirror endpoints for new mirror.\n");
+    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_INSUFFICIENT_SPACE);
     return INVALID_MIRROR_ENDPOINT;
   }
 
@@ -265,54 +262,6 @@ uint16_t emberAfPluginMeterMirrorRequestMirror(EmberEUI64 requestingDeviceIeeeAd
   emberAfPluginMeterMirrorMirrorAddedCallback(requestingDeviceIeeeAddress, endpoint);
   return endpoint;
 }
-
-#ifndef UC_BUILD
-bool emberAfSimpleMeteringClusterConfigureMirrorCallback(uint32_t issuerEventId,
-                                                         uint32_t reportingInterval,
-                                                         uint8_t mirrorNotificationReporting,
-                                                         uint8_t notificationScheme)
-{
-  EmberAfStatus status = EMBER_ZCL_STATUS_SUCCESS;
-  uint8_t endpoint = emberAfCurrentEndpoint();
-  EmberEUI64 sendersEui;
-  uint8_t index;
-
-  emberAfSimpleMeteringClusterPrintln("ConfigureMirror on endpoint 0x%x", endpoint);
-
-  if (EMBER_SUCCESS != emberLookupEui64ByNodeId(emberAfCurrentCommand()->source, sendersEui)) {
-    emberAfSimpleMeteringClusterPrintln("Error: Meter Mirror plugin cannot determine EUI64 for node ID 0x%2X",
-                                        emberAfCurrentCommand()->source);
-    status = EMBER_ZCL_STATUS_FAILURE;
-    goto kickout;
-  }
-
-  index = findMirrorIndex(sendersEui);
-  if (index == INVALID_INDEX) {
-    emberAfSimpleMeteringClusterPrint("Error: Meter mirror plugin received unknown report from ");
-    emberAfPrintBigEndianEui64(sendersEui);
-    emberAfSimpleMeteringClusterPrintln("");
-    status = EMBER_ZCL_STATUS_NOT_AUTHORIZED;
-    goto kickout;
-  }
-
-  if (mirrorList[index].issuerEventId == 0
-      || issuerEventId > mirrorList[index].issuerEventId) {
-    if (notificationScheme > 0x02) {
-      status = EMBER_ZCL_STATUS_INVALID_FIELD;
-      goto kickout;
-    }
-
-    mirrorList[index].issuerEventId = issuerEventId;
-    mirrorList[index].reportingInterval = reportingInterval;
-    mirrorList[index].mirrorNotificationReporting = mirrorNotificationReporting;
-    mirrorList[index].notificationScheme = notificationScheme;
-  }
-
-  kickout:
-  emberAfSendImmediateDefaultResponse(status);
-  return true;
-}
-#endif  // UC_BUILD
 
 uint16_t emberAfPluginSimpleMeteringClientRemoveMirrorCallback(EmberEUI64 requestingDeviceIeeeAddress)
 {
@@ -391,8 +340,9 @@ bool emberAfReportAttributesCallback(EmberAfClusterId clusterId,
   }
 
   endpoint = (index + EMBER_AF_PLUGIN_METER_MIRROR_ENDPOINT_START);
+  EmberAfStatus status = EMBER_ZCL_STATUS_SUCCESS;
   while (bufIndex + ATTRIBUTE_OVERHEAD < bufLen) {
-    EmberAfStatus status;
+    status = EMBER_ZCL_STATUS_SUCCESS;
     EmberAfAttributeId attributeId;
     EmberAfAttributeType dataType;
     uint16_t dataSize;
@@ -449,10 +399,19 @@ bool emberAfReportAttributesCallback(EmberAfClusterId clusterId,
                                              attributeId,
                                              data,
                                              dataType);
+        if (status == EMBER_ZCL_STATUS_UNSUPPORTED_ATTRIBUTE) {
+          // Unsupported attribute to mirror, terminate loop
+          status = EMBER_ZCL_STATUS_INSUFFICIENT_SPACE;
+          break;
+        }
       }
 
       emberAfSimpleMeteringClusterPrintln("Mirror attribute 0x%2x: 0x%x", attributeId, status);
       bufIndex += dataSize;
+      if (status == EMBER_ZCL_STATUS_UNREPORTABLE_ATTRIBUTE) {
+        emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_INSUFFICIENT_SPACE);
+        return true;
+      }
     } else {
       // dataSize exceeds buffer length, terminate loop
       emberAfSimpleMeteringClusterPrintln("ERR: attr:%2x size %d exceeds buffer size", attributeId, dataSize);
@@ -480,8 +439,7 @@ bool emberAfReportAttributesCallback(EmberAfClusterId clusterId,
       // return emberAfMeterMirrorSendMirrorReportAttributeResponseCallback(...)
     }
   }
-
-  emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
+  emberAfSendImmediateDefaultResponse(status);
   return true;
 }
 
@@ -547,8 +505,6 @@ static bool sendMirrorReportAttributeResponse(uint8_t endpoint, uint8_t index)
   return true;
 }
 
-#ifdef UC_BUILD
-
 bool emberAfSimpleMeteringClusterConfigureMirrorCallback(EmberAfClusterCommand *cmd)
 {
   sl_zcl_simple_metering_cluster_configure_mirror_command_t cmd_data;
@@ -603,8 +559,8 @@ bool emberAfSimpleMeteringClusterConfigureMirrorCallback(EmberAfClusterCommand *
   return true;
 }
 
-uint32_t emAfMeterMirrorSimpleMeteringClusterClientCommandParse(sl_service_opcode_t opcode,
-                                                                sl_service_function_context_t *context)
+uint32_t sli_zigbee_af_meter_mirror_simple_metering_cluster_client_command_parse(sl_service_opcode_t opcode,
+                                                                                 sl_service_function_context_t *context)
 {
   (void)opcode;
 
@@ -624,4 +580,3 @@ uint32_t emAfMeterMirrorSimpleMeteringClusterClientCommandParse(sl_service_opcod
           ? EMBER_ZCL_STATUS_SUCCESS
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
-#endif  // UC_BUILD

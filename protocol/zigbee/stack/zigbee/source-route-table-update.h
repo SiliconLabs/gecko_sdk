@@ -20,8 +20,8 @@
 
 // source-route-table related
 
-extern uint8_t emSourceRouteTableSize;
-extern SourceRouteTableEntry emSourceRouteTableData[];
+extern uint8_t sli_zigbee_source_route_table_size;
+extern SourceRouteTableEntry sli_zigbee_source_route_table_data[];
 extern uint8_t sourceRouteTableEntryCount[];
 extern uint8_t sourceRouteTableNewestIndex[];
 
@@ -30,16 +30,16 @@ extern uint8_t sourceRouteTableNewestIndex[];
 // 0xFF.
 #define SOURCE_ROUTE_NULL_INDEX 0xFF
 
-uint8_t emSourceRouteFindIndex(EmberNodeId id);
-uint8_t emSourceRouteAddEntry(EmberNodeId id,
-                              uint8_t furtherIndex);
-EmberStatus emSourceRouteDeleteEntry(EmberNodeId id);
-void emSourceRouteTableInit(void);
-void emSourceRouteUpdateInit(void);
-uint8_t emSourceRouteGetCount(void);
-void emSourceRouteClearTable(void);
-uint8_t emSourceRouteAddEntryWithCloserNextHop(EmberNodeId newId,
-                                               EmberNodeId closerNodeId);
+uint8_t sli_zigbee_source_route_find_index(EmberNodeId id);
+uint8_t sli_zigbee_source_route_add_entry(EmberNodeId id,
+                                          uint8_t furtherIndex);
+EmberStatus sli_zigbee_source_route_delete_entry(EmberNodeId id);
+void sli_zigbee_source_route_table_init(void);
+void sli_zigbee_source_route_update_init(void);
+uint8_t sli_zigbee_source_route_get_count(void);
+void sli_zigbee_source_route_clear_table(void);
+uint8_t sli_zigbee_source_route_add_entryWithCloserNextHop(EmberNodeId newId,
+                                                           EmberNodeId closerNodeId);
 
 /** @brief Updates the source route entry based on new information about the
  * change of the child's parent and status
@@ -48,10 +48,10 @@ uint8_t emSourceRouteAddEntryWithCloserNextHop(EmberNodeId newId,
  * @param ourChild      True if the child is associated to the local node
  * @param deviceLeft    True if device has left network
  */
-void emChangeSourceRouteEntry (EmberNodeId newChildId,
-                               EmberNodeId newParentId,
-                               bool ourChild,
-                               bool deviceLeft);
+void sli_zigbee_change_source_route_entry (EmberNodeId newChildId,
+                                           EmberNodeId newParentId,
+                                           bool ourChild,
+                                           bool deviceLeft);
 
 /** @brief
  *
@@ -66,8 +66,8 @@ void emChangeSourceRouteEntry (EmberNodeId newChildId,
  * @return The size in bytes of the source route frame, or zero
  * if one isn't available.
  */
-uint8_t emAppendSourceRoute (EmberNodeId destination,
-                             EmberMessageBuffer* header);
+uint8_t sli_zigbee_append_source_route (EmberNodeId destination,
+                                        EmberMessageBuffer* header);
 
 /** @brief Reports the arrival of a route record command frame
  *
@@ -85,11 +85,11 @@ uint8_t emAppendSourceRoute (EmberNodeId destination,
  * to the local device is listed last.  Short IDs are stored low byte first.  Be
  * careful to use buffer-boundary-safe APIs to read the list.
  */
-void emIncomingRouteRecord(EmberNodeId source,
-                           EmberEUI64 sourceEui,
-                           uint8_t relayCount,
-                           EmberMessageBuffer header,
-                           uint8_t relayListIndex);
+void sli_zigbee_incoming_route_record(EmberNodeId source,
+                                      EmberEUI64 sourceEui,
+                                      uint8_t relayCount,
+                                      EmberMessageBuffer header,
+                                      uint8_t relayListIndex);
 
 /** @brief The application can implement this callback to
  * override the sourceroute's closer index. This is added as part of support for Digi's wish to control everything about our source route.

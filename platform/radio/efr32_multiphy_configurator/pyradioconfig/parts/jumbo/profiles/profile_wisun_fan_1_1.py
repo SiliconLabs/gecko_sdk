@@ -45,6 +45,7 @@ class ProfileWisunFan1v1Jumbo(IProfile):
         self._lookup_from_wisun_mode(model)
         self._lookup_from_channel_plan(model)
         self._lookup_syncword_from_fec(model)
+        self._handle_concurrent_ofdm(model)
 
     def build_required_profile_inputs(self, model, profile):
 
@@ -117,9 +118,9 @@ class ProfileWisunFan1v1Jumbo(IProfile):
 
     def build_register_profile_outputs(self, model, profile):
         family = self._family
-        build_modem_regs_jumbo(model, profile, family)
-        buildFrameOutputs(model, profile, family)
-        buildCrcOutputs(model, profile, family)
+        build_modem_regs_jumbo(model, profile)
+        buildFrameOutputs(model, profile)
+        buildCrcOutputs(model, profile)
         buildWhiteOutputs(model, profile)
         buildFecOutputs(model, profile)
 
@@ -463,3 +464,7 @@ class ProfileWisunFan1v1Jumbo(IProfile):
 
         model.vars.syncword_0.value_forced = syncword_0
         model.vars.syncword_1.value_forced = syncword_1
+
+    def _handle_concurrent_ofdm(self, model):
+        #Not supported until Sol
+        pass

@@ -33,7 +33,6 @@
 #include "cmsis-rtos-ipc-config.h"
 #include "cmsis-rtos-support.h"
 
-#include "stack/include/api-rename.h"
 #include "stack/include/ember.h"
 
 //------------------------------------------------------------------------------

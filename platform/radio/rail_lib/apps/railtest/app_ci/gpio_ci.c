@@ -94,3 +94,29 @@ void setGpioOutPin(sl_cli_command_arg_t *args)
 
   responsePrint(sl_cli_get_command_string(args, 0), "Status:Success.");
 }
+
+void setAntDivPin(sl_cli_command_arg_t *args)
+{
+  RAIL_AntennaConfig_t antennaConfig;
+
+  antennaConfig.ant0Port = sl_cli_get_argument_uint8(args, 0);
+  antennaConfig.ant0Pin  = sl_cli_get_argument_uint8(args, 1);
+  antennaConfig.ant1Port = sl_cli_get_argument_uint8(args, 2);
+  antennaConfig.ant1Pin  = sl_cli_get_argument_uint8(args, 3);
+
+  if (sl_cli_get_argument_count(args) == 6) {
+    antennaConfig.ant0PinEn = ((sl_cli_get_argument_uint8(args, 4)) ? true : false);
+    antennaConfig.ant1PinEn = ((sl_cli_get_argument_uint8(args, 5)) ? true : false);
+  } else if (sl_cli_get_argument_count(args) == 5) {
+    antennaConfig.ant0PinEn = ((sl_cli_get_argument_uint8(args, 4)) ? true : false);
+    antennaConfig.ant1PinEn = ((sl_cli_get_argument_uint8(args, 4)) ? false : true);
+  } else {
+    antennaConfig.ant0PinEn = true;
+    antennaConfig.ant1PinEn = true;
+  }
+
+  if (RAIL_ConfigAntenna(RAIL_EFR32_HANDLE, &antennaConfig) != RAIL_STATUS_NO_ERROR) {
+    responsePrint(sl_cli_get_command_string(args, 0), "Status:Error.");
+  }
+  responsePrint(sl_cli_get_command_string(args, 0), "Status:Success.");
+}

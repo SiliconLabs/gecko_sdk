@@ -49,7 +49,7 @@ endif
 
 override C_SRC += \
 $(SDK_DIR)/app/bluetooth/common_host/app_sleep/app_sleep.c \
-$(SDK_DIR)/app/bluetooth/common_host/host_comm/host_comm.c \
+$(foreach OS_i, $(OS), $(SDK_DIR)/app/bluetooth/common_host/host_comm/host_comm_$(OS_i).c) \
 $(SDK_DIR)/app/bluetooth/common_host/ncp_host/ncp_host.c \
 $(foreach OS_i, $(OS), $(SDK_DIR)/app/bluetooth/common_host/tcp/tcp_$(OS_i).c) \
 $(foreach OS_i, $(OS), $(SDK_DIR)/app/bluetooth/common_host/uart/uart_$(OS_i).c) \
@@ -87,26 +87,26 @@ endif
 ifneq ($(CPC), 0)
   ifeq (, $(filter $(MAKECMDGOALS), export))
     ifeq ($(OS), win)
-    $(error CPC is not supported on Windows OS!)
+      $(error CPC is not supported on Windows!)
     endif
     ifeq ($(UNAME), darwin)
-    $(error CPC is not supported on MacOS!)
+      $(error CPC is not supported on macOS!)
     endif
     ifeq ($(CPC_DIR), )
-      $(error Please set CPC library dir: CPC_DIR! e.g. /home/user/cpc)
+      $(info CPC library dir in CPC_DIR is not set, linking with installed libcpc)
+      override LDFLAGS += -lcpc
+    else
+      $(info CPC_DIR has been set, linking with specified libcpc)
+      # CPCd is outside of GSDK. Therefore, add it directly as a compiler flag
+      # instead of adding it to INCLUDEPATHS.
+      override CFLAGS += -I"$(CPC_DIR)/daemon/lib"
+      LIBS += $(CPC_DIR)/daemon/build/libcpc.so
     endif
   endif
+
   override INCLUDEPATHS += $(SDK_DIR)/app/bluetooth/common_host/cpc
-  # CPCd is outside of GSDK. Therefore, add it directly as a compiler flag
-  # instead of adding it to INCLUDEPATHS.
-  override CFLAGS += -I"$(CPC_DIR)/daemon/lib"
-
   override C_SRC += $(SDK_DIR)/app/bluetooth/common_host/cpc/cpc.c
-
-  LIBS += $(CPC_DIR)/daemon/build/libcpc.so
-
   override CFLAGS += -DCPC
-
   override LDFLAGS += -lpthread -lutil
 endif
 

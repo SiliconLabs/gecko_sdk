@@ -21,47 +21,14 @@
 
 // *****************************************************************************
 // Globals
-#ifdef UC_BUILD
 
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #include "trust-center-nwk-key-update-periodic-config.h"
 sl_zigbee_event_t emberAfPluginTrustCenterNwkKeyUpdatePeriodicMyEvent;
 #define myEvent (&emberAfPluginTrustCenterNwkKeyUpdatePeriodicMyEvent)
-void emberAfPluginTrustCenterNwkKeyUpdatePeriodicMyEventHandler(SLXU_UC_EVENT);
-
-#else // !UC_BUILD
-
-#ifdef EMBER_AF_PLUGIN_TEST_HARNESS
-#define SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT
-#endif
-
-EmberEventControl emberAfPluginTrustCenterNwkKeyUpdatePeriodicMyEventControl;
-#define myEvent emberAfPluginTrustCenterNwkKeyUpdatePeriodicMyEventControl
-
-// App builder settings
-#define KEY_UPDATE_PERIOD EMBER_AF_PLUGIN_TRUST_CENTER_NWK_KEY_UPDATE_PERIODIC_KEY_UPDATE_PERIOD
-#define KEY_UPDATE_UNITS EMBER_AF_PLUGIN_TRUST_CENTER_NWK_KEY_UPDATE_PERIODIC_KEY_UPDATE_UNITS
-
-#define DAYS    0
-#define MINUTES 1
-#define HOURS   2
-
-// All numbers in minutes
-#if KEY_UPDATE_UNITS == DAYS
-  #define KEY_UPDATE_MULTIPLIER (24 * 60)
-  #define KEY_UPDATE_UNITS_STRING "days"
-#elif KEY_UPDATE_UNITS == HOURS
-  #define KEY_UPDATE_MULTIPLIER (60)
-  #define KEY_UPDATE_UNITS_STRING "hours"
-#elif KEY_UPDATE_UNITS == MINUTES
-  #define KEY_UPDATE_MULTIPLIER (1)
-  #define KEY_UPDATE_UNITS_STRING "minutes"
-#else
-  #error "Error: Unknown value for EMBER_AF_PLUGIN_TRUST_CENTER_NWK_KEY_UPDATE_PERIODIC_KEY_UPDATE_UNITS"
-#endif
-
-#define KEY_UPDATE_PERIOD_MINUTES (KEY_UPDATE_PERIOD * KEY_UPDATE_MULTIPLIER)
-#endif // UC_BUILD
+void emberAfPluginTrustCenterNwkKeyUpdatePeriodicMyEventHandler(sl_zigbee_event_t * event);
 
 // All delays are converted into milliseconds. Ensure that the converted millisecond value
 // is under EMBER_MAX_EVENT_DELAY_MS
@@ -75,12 +42,12 @@ extern EmberStatus emberAfTrustCenterStartNetworkKeyUpdate(void);
 
 static void scheduleNextUpdate(void)
 {
-  slxu_zigbee_event_set_delay_minutes(myEvent, KEY_UPDATE_PERIOD_MINUTES);
+  sl_zigbee_event_set_delay_minutes(myEvent, KEY_UPDATE_PERIOD_MINUTES);
   emberAfAppPrintln("Next NWK key update in %d minutes",
                     KEY_UPDATE_PERIOD_MINUTES);
 }
 
-void emberAfPluginTrustCenterNwkKeyUpdatePeriodicMyEventHandler(SLXU_UC_EVENT)
+void emberAfPluginTrustCenterNwkKeyUpdatePeriodicMyEventHandler(sl_zigbee_event_t * event)
 {
   // A very simple approach is to always kick off the NWK key update
   // assuming it will take much longer to complete than the period
@@ -94,15 +61,13 @@ void emberAfPluginTrustCenterNwkKeyUpdatePeriodicMyEventHandler(SLXU_UC_EVENT)
   scheduleNextUpdate();
 }
 
-#ifdef UC_BUILD
-
 void emberAfPluginTrustCenterNwkKeyUpdatePeriodicInitCallback(uint8_t init_level)
 {
   switch (init_level) {
     case SL_ZIGBEE_INIT_LEVEL_EVENT:
     {
-      slxu_zigbee_event_init(myEvent,
-                             emberAfPluginTrustCenterNwkKeyUpdatePeriodicMyEventHandler);
+      sl_zigbee_event_init(myEvent,
+                           emberAfPluginTrustCenterNwkKeyUpdatePeriodicMyEventHandler);
       break;
     }
 
@@ -120,20 +85,3 @@ void emberAfPluginTrustCenterNwkKeyUpdatePeriodicInitCallback(uint8_t init_level
     }
   }
 }
-
-#else // !UC_BUILD
-
-void emberAfPluginTrustCenterNwkKeyUpdatePeriodicInitCallback(void)
-{
-  // Even though we might not be on a network at this point,
-  // we want to schedule the process for sending key updates from
-  // now on.
-
-  // However for the test-harness, we manually manipulate the process
-  // so we don't want it to automatically kick off.
-#if !defined(SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT)
-  scheduleNextUpdate();
-#endif
-}
-
-#endif // UC_BUILD

@@ -40,7 +40,7 @@ component:
     instance:
       - vcom
   - id: mpu
-  - id: simple_timer_freertos
+  - id: app_timer_freertos
   - id: sl_system
   - id: device_init
   - id: bt_post_build

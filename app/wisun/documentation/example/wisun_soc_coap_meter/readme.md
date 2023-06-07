@@ -1,6 +1,6 @@
 # Wi-SUN - SoC CoAP Meter
 
-The Wi-SUN CoAP Meter sample application demonstrates the use of the Constrained Application Protocol (CoAP) protocol to emulate a metering-like application. The CoAP Meter's purpose is to send sensor measurements to a CoAP Collector device in the same Wi-SUN network. It also shows an implementation example of an application layer library on top of the Wi-SUN stack (i.e., CoAP).
+The Wi-SUN CoAP Meter sample application demonstrates the use of the Constrained Application Protocol (CoAP) protocol to emulate a metering-like application. The CoAP Meter sends sensor measurements to a CoAP Collector device in the same Wi-SUN network. It also shows an implementation example of an application layer library on top of the Wi-SUN stack (i.e., CoAP).
 
 ## Getting Started
 
@@ -20,11 +20,11 @@ To get started with the example, follow the steps below:
 * Using Simplicity Studio, open consoles on both the Meter and Collector devices.
 * Wait for the CoAP Collector and Meter to join the Wi-SUN Border Router network.
 
-Refer to the associated sections in [QSG181: Wi-SUN SDK Quick Start Guide](https://www.silabs.com/documents/public/quick-start-guides/qsg181-wi-sun-sdk-quick-start-guide.pdf) if you want step-by-step guidelines for each operation.
+See the associated sections in [QSG181: Wi-SUN SDK Quick Start Guide](https://www.silabs.com/documents/public/quick-start-guides/qsg181-wi-sun-sdk-quick-start-guide.pdf) for step-by-step guidelines for each operation.
 
 ## Send Sensor Data to a CoAP Collector
 
-The three Wi-SUN devices (Border Router, CoAP Meter, CoAP Collector) are now part of the same Wi-SUN network. Refer to the *Wi-SUN - SoC CoAP Collector* readme to configure the CoAP Collector. When the CoAP Meter receives a request from the CoAP Collector, the CoAP packet is output in the console.
+The three Wi-SUN devices (Border Router, CoAP Meter, CoAP Collector) are now part of the same Wi-SUN network. See the *Wi-SUN - SoC CoAP Collector* readme to configure the CoAP Collector. When the CoAP Meter receives a request from the CoAP Collector, the CoAP packet is output in the console.
 
     [CoAP-RHND-Service: Received packet]
     {
@@ -41,7 +41,9 @@ The three Wi-SUN devices (Border Router, CoAP Meter, CoAP Collector) are now par
     "payload": "n/a",
     }
 
-The CoAP Meter application replies with a packet of its own containing sensor data. The sensor data consists of actual temperature and relative humidity sensor measurements from the SI7021 I²C sensor and dummy lux values. The response CoAP packet is output in the console.
+The CoAP Meter application replies with a packet of its own containing sensor data. The sensor data consists of actual temperature and relative humidity sensor measurements from the SI7021 I²C sensor and dummy lux values. 
+The IP address of the CoAP meter and its schedule time to send are included in the pakcet payload also. In LFN device mode, the schedule time is different based on the selected LFN profile.
+The response CoAP packet is output in the console.
 
     [CoAP-RHND-Service: Response packet]
     {
@@ -56,25 +58,27 @@ The CoAP Meter application replies with a packet of its own containing sensor da
     "token": "n/a",
     "uri_path": "n/a",
     "payload": 
-    {
+    { 
+      "fd12:3456::62a4:23ff:fe37:a757 - 5000" : {
         "id": 366,
         "temp": 31.20,
         "hum": 41.20,
         "lx": 480
+      }
     }
 
     }
 
-This CoAP packet is sent to the CoAP Collector and is output in the CoAP Collector console on reception.
+The CoAP packet is sent to the CoAP Collector and is output in the CoAP Collector console on reception.
 
-There are more registered resources in CoAP Meter application: sensor/all (mentioned above), sensor/temperature, sensor/humidity, sensor/light and gpio/led. Based on Resource Discovery feature and Resource Handler service, all information about resources are available using any third-party CoAP client application, like libcoap-client.
+CoAP Meter application includes sensor/all (mentioned above), sensor/temperature, sensor/humidity, sensor/light and gpio/led, as additional registered resources. Based on Resource Discovery feature and Resource Handler service, information about resources is available using any third-party CoAP client application, like libcoap-client.
 
-## Get Sensor Data using libcoap Client over a Backhaul Connection
+## Get Sensor Data Using libcoap Client over a Backhaul Connection
 
 Any CoAP client that has IPv6 connectivity with the Wi-SUN CoAP Meter can retrieve the sensor metering data.
 
-Using libcoap you can also toggle the board LEDs and discover the attributes hosted by a CoAP server.
- Please refer to  [AN1332: Silicon Labs Wi-SUN Network Setup and Configuration](https://www.silabs.com/documents/public/application-notes/an1332-wi-sun-network-configuration.pdf) for more information.
+Using libcoap, you can also toggle the board LEDs and discover the attributes hosted by a CoAP server.
+ See  [AN1332: Silicon Labs Wi-SUN Network Setup and Configuration](https://www.silabs.com/documents/public/application-notes/an1332-wi-sun-network-configuration.pdf) for more information.
 
 
 ## Troubleshooting

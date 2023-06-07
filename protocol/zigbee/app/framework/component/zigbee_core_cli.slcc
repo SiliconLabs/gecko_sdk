@@ -24,7 +24,7 @@ template_contribution:
   - name: cli_command
     value:
       name: info
-      handler: emAfCliInfoCommand
+      handler: sli_zigbee_af_cli_info_command
       help: "Prints information about the network state, clusters, and endpoints."
   - name: cli_command
     value:
@@ -34,7 +34,7 @@ template_contribution:
   - name: cli_command
     value:
       name: bsend
-      handler: emAfCliBsendCommand
+      handler: sli_zigbee_af_cli_bsend_command
       help: "Sends a message."
       argument:
       - type: uint8
@@ -92,7 +92,7 @@ template_contribution:
   - name: cli_command
     value:
       name: raw
-      handler: emAfCliRawCommand
+      handler: sli_zigbee_af_cli_raw_command
       help: "Creates a message by specifying the raw bytes. Use the send command to send the message once it has been created. Ex: raw 0x000F {00 0A 00 11 22 33 44 55} sends a message to cluster 15 (0x000F) of length 8 which includes the ZCL header."
       argument:
       - type: uint16
@@ -112,7 +112,7 @@ template_contribution:
   - name: cli_command
     value:
       name: send-using-multicast-binding
-      handler: emAfCliSendUsingMulticastBindingCommand
+      handler: sli_zigbee_af_cli_send_using_multicast_binding_command
       help: "When sending using a binding, specifies whether a multicast binding should be used."
       argument:
       - type: uint8
@@ -120,7 +120,7 @@ template_contribution:
   - name: cli_command
     value:
       name: timesync
-      handler: emAfCliTimesyncCommand
+      handler: sli_zigbee_af_cli_timesync_command
       help: "Sends a read attr for the time of the device specified. It sets a flag so when it gets the response it writes the time to its own time attr."
       argument:
       - type: uint16

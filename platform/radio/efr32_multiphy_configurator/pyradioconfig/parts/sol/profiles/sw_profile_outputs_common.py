@@ -101,6 +101,8 @@ class sw_profile_outputs_common_sol(sw_profile_outputs_common_ocelot):
                                            readable_name='RSSI compensation value calculated from decimation and digital gains'))
         profile.outputs.append(ModelOutput(model.vars.stack_info, '', ModelOutputType.RAIL_CONFIG,
                                            readable_name='Stack information containing protocol and PHY IDs'))
+        profile.outputs.append(ModelOutput(model.vars.alt_stack_info, '', ModelOutputType.RAIL_CONFIG,
+                                           readable_name='Stack information containing protocol and PHY IDs for alternate PHY'))
         profile.outputs.append(ModelOutput(model.vars.rx_sync_delay_ns, '', ModelOutputType.RAIL_CONFIG,
                                            readable_name='Time needed from start of preamble on-air to sync detect'))
         profile.outputs.append(ModelOutput(model.vars.rx_eof_delay_ns, '', ModelOutputType.RAIL_CONFIG,

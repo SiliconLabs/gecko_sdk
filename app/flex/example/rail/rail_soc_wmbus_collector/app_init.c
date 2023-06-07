@@ -35,6 +35,7 @@
 #include "app_process.h"
 #include "sl_simple_led_instances.h"
 #include "sl_wmbus_support.h"
+#include "sl_flex_rail_channel_selector.h"
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -77,7 +78,7 @@ RAIL_Handle_t app_init(void)
   WMBUSframe_crypto5SetKey(cryptoKey);
 
   RAIL_Idle(rail_handle, RAIL_IDLE, true);
-  RAIL_StartRx(rail_handle, 0, NULL);
+  RAIL_StartRx(rail_handle, get_selected_channel(), NULL);
 
   return rail_handle;
 }

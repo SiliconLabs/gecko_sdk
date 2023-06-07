@@ -4,7 +4,7 @@ package: "Bluetooth"
 description: >
   This component provides utility functions related to OTA DFU, such as a
   unified API for resetting the device to DFU mode.
-category: "Bluetooth|OTA"
+category: Bluetooth|Apploader
 quality: "production"
 root_path: "protocol/bluetooth"
 include:

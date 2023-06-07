@@ -14,10 +14,16 @@
  * sections of the MSLA applicable to Source Code.
  *
  ******************************************************************************/
-
-#ifdef UC_BUILD
-#include "ota-client-config.h"
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
+
+#ifdef EMBER_SCRIPTED_TEST
+#include "config/ota-client-config.h"
+#else
+#include "ota-client-config.h"
+#endif
+
 #if (EMBER_AF_PLUGIN_OTA_CLIENT_AUTO_START == 1)
 #define AUTO_START
 #endif
@@ -33,24 +39,6 @@
 #if (EMBER_AF_PLUGIN_OTA_CLIENT_SIGNATURE_VERIFICATION_SUPPORT == 1)
 #define SIGNATURE_VERIFICATION_SUPPORT
 #endif
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_OTA_CLIENT_AUTO_START
-#define AUTO_START
-#endif
-#ifdef EMBER_AF_PLUGIN_OTA_CLIENT_USE_PAGE_REQUEST
-#define USE_PAGE_REQUEST
-#endif
-#ifdef EMBER_AF_PLUGIN_OTA_CLIENT_IGNORE_LOOPBACK_SERVER
-#define IGNORE_LOOPBACK_SERVER
-#endif
-#ifdef EMBER_AF_PLUGIN_OTA_CLIENT_IGNORE_NON_TRUST_CENTER
-#define IGNORE_NON_TRUST_CENTER
-#endif
-#if defined(EMBER_AF_PLUGIN_OTA_CLIENT_SIGNATURE_VERIFICATION_SUPPORT) \
-  || defined(SL_CATALOG_ZIGBEE_OTA_CLIENT_SIGNATURE_VERIFY_SUPPORT_PRESENT)
-#define SIGNATURE_VERIFICATION_SUPPORT
-#endif
-#endif // UC_BUILD
 
 /**
  * @defgroup ota-client OTA Client
@@ -135,7 +123,7 @@
   #define EMBER_AF_OTA_CLIENT_PAGE_REQUEST_SPACING_MS 50L
 #endif
 
-// This is the time delay between calls to emAfOtaImageDownloadVerify().
+// This is the time delay between calls to verifying the OTA image.
 // Verification can take a while (especially in the case of signature
 // checking for Smart Energy) so this provides the ability for other
 // parts of the system to run.
@@ -172,7 +160,7 @@
 // TODO: ungate this when the facilities are in place to do so
 // for generated CLI
 //#if defined(EMBER_TEST)
-extern uint8_t emAfOtaClientStopDownloadPercentage;
+extern uint8_t sli_zigbee_af_ota_client_stopDownloadPercentage;
 //#endif
 
 /**
@@ -246,11 +234,11 @@ void emberAfPluginOtaClientPreBootloadCallback(uint8_t srcEndpoint,
 /** @} */ // end of name Callbacks
 /** @} */ // end of ota-client
 
-void emAfOtaClientStop(void);
-void emAfOtaClientPrintState(void);
-void emAfSendImageBlockRequestTest(void);
+void sli_zigbee_af_ota_client_stop(void);
+void sli_zigbee_af_ota_client_print_state(void);
+void sli_zigbee_af_send_image_block_request_test(void);
 
-void emAfSetPageRequest(bool pageRequest);
-bool emAfUsingPageRequest(void);
+void sli_zigbee_af_set_page_request(bool pageRequest);
+bool sli_zigbee_af_using_page_request(void);
 
-void emAfOtaBootloadClusterClientResumeAfterErase(bool success);
+void sli_zigbee_af_ota_bootload_cluster_client_resume_after_erase(bool success);

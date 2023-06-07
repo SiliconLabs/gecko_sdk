@@ -89,6 +89,7 @@ class CALC_Radio(ICalculator):
                 ['BW_200KHz', 2, 'PLL loop filter bandwidth is approximately 200 KHz'],
                 ['BW_250KHz', 3, 'PLL loop filter bandwidth is approximately 250 KHz'],
                 ['BW_300KHz', 6, 'PLL loop filter bandwidth is approximately 300 KHz'],
+                ['FASTSWITCH', 7, 'PLL loop filter bandwidth setting for 802154 fast switching'],
             ]
 
         var.var_enum = CreateModelVariableEnum(
@@ -147,7 +148,7 @@ class CALC_Radio(ICalculator):
         self._addModelRegister(model, 'RAC.VCOCTRL.VCOAMPLITUDE'       , int, ModelVariableFormat.HEX )   
         if model.part_family.lower() in ["dumbo", "jumbo", "nerio", "nixi", "panther", "lynx", "leopard", "unit_test_part"]:
             self._addModelRegister(model, 'RAC.VCOCTRL.VCODETAMPLITUDE'    , int, ModelVariableFormat.HEX )
-        elif model.part_family.lower() not in ['bobcat']:
+        elif model.part_family.lower() not in ['bobcat', 'caracal']:
             self._addModelRegister(model, 'RAC.VCOCTRL.VCODETAMPLITUDERX'    , int, ModelVariableFormat.HEX )   
             self._addModelRegister(model, 'RAC.VCOCTRL.VCODETAMPLITUDETX'    , int, ModelVariableFormat.HEX )   
         self._addModelRegister(model, 'RAC.VCOCTRL.VCODETEN'           , int, ModelVariableFormat.HEX )

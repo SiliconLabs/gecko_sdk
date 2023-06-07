@@ -36,14 +36,23 @@
 
 #if defined(EMBER_SCRIPTED_TEST)
   #include "app/framework/test/test-framework.h"
+  #include "config/mac-address-filtering-config.h"
+
+extern uint8_t sl_zigbee_copy_eui64_arg(sl_cli_command_arg_t *arguments,
+                                        uint8_t index,
+                                        uint8_t *dest,
+                                        bool big_endian);
+
+extern uint32_t sl_cli_get_argument_uint32(sl_cli_command_arg_t *a, uint32_t n);
+extern uint8_t *sl_zigbee_cli_get_argument_string_and_length(sl_cli_command_arg_t *arguments,
+                                                             int8_t index,
+                                                             uint8_t *length);
+
 #else
+  #include "mac-address-filtering-config.h"
   #define expectCheckpoint(...)
   #define debug(...)
 #endif
-
-#ifdef UC_BUILD
-#include "mac-address-filtering-config.h"
-#endif // UC_BUILD
 
 #if defined (EMBER_SCRIPTED_TEST)
   #define EMBER_AF_PLUGIN_MAC_ADDRESS_FILTERING_SHORT_ADDRESS_FILTER_LENGTH 10
@@ -53,11 +62,6 @@
   #undef EMBER_SUPPORTED_NETWORKS
   #define EMBER_SUPPORTED_NETWORKS 1
 #elif defined (PRO_COMPLIANCE)
-  #ifndef UC_BUILD
-    #define EMBER_AF_PLUGIN_MAC_ADDRESS_FILTERING_SHORT_ADDRESS_FILTER_LENGTH 4
-    #define EMBER_AF_PLUGIN_MAC_ADDRESS_FILTERING_LONG_ADDRESS_FILTER_LENGTH  4
-    #define EMBER_AF_PLUGIN_MAC_ADDRESS_FILTERING_PAN_ID_FILTER_LENGTH 2
-  #endif // UC_BUILD
 
   #undef EMBER_SUPPORTED_NETWORKS
   #define EMBER_SUPPORTED_NETWORKS 1
@@ -210,6 +214,8 @@ typedef enum {
 
 static const EmberEUI64 zeroEui64 = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
+#if (defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_DIAGNOSTICS_CLUSTER)) || (SL_ZIGBEE_DEBUG_CORE_GROUP_ENABLED == 1)
+
 static const MacAddressFilterOptionsDescription optionsDescription[] = {
   { MAC_FILTER_OPTIONS_NO_ADDRESS_MASK, "No Address Packets  ", "Accept   ", "Drop     " },
   { MAC_FILTER_OPTIONS_SHORT_ADDRESS_LIST_MASK, "Short Address Filter", "Whitelist", "Blacklist" },
@@ -218,7 +224,7 @@ static const MacAddressFilterOptionsDescription optionsDescription[] = {
 
   { 0, NULL, NULL, NULL }, // terminator
 };
-
+#endif
 static MacAddressFilterGlobals macAddressFilterData;
 
 // *****************************************************************************
@@ -575,9 +581,9 @@ EmberPacketAction emberAfIncomingPacketFilterCallback(EmberZigbeePacketType pack
   }
 }
 
-void emberAfPluginMacAddressFilteringInitCallback(SLXU_INIT_ARG)
+void emberAfPluginMacAddressFilteringInitCallback(uint8_t init_level)
 {
-  SLXU_INIT_UNUSED_ARG;
+  (void)init_level;
 
   MEMSET(&macAddressFilterData, 0, sizeof(MacAddressFilterGlobals));
   macAddressFilterData.options = MAC_FILTER_OPTIONS_DEFAULTS;
@@ -592,9 +598,9 @@ void emberAfPluginMacAddressFilteringInitCallback(SLXU_INIT_ARG)
 // <generate-cli-xml> Description: Enable/disable filtering of no-address messages.
 // <generate-cli-xml> Arg: enable | bool | True means drop no-address messages, false means allow.
 
-void emberAfPluginMacAddressFilteringFilterNoAddressCommand(SL_CLI_COMMAND_ARG)
+void emberAfPluginMacAddressFilteringFilterNoAddressCommand(sl_cli_command_arg_t * arguments)
 {
-  bool filterNoAddress = (bool)emberUnsignedCommandArgument(0);
+  bool filterNoAddress = (bool)sl_cli_get_argument_uint32(arguments, 0);
 
   if (filterNoAddress) {
     macAddressFilterData.options &= ~MAC_FILTER_OPTIONS_ALLOW_NO_ADDRESS;
@@ -606,8 +612,9 @@ void emberAfPluginMacAddressFilteringFilterNoAddressCommand(SL_CLI_COMMAND_ARG)
 // <generate-cli-xml> Command: plugin mac-address-filtering print-config
 // <generate-cli-xml> Description: Prints the current filtering config and statistics.
 
-void emberAfPluginMacAddressFilteringPrintConfigCommand(SL_CLI_COMMAND_ARG)
+void emberAfPluginMacAddressFilteringPrintConfigCommand(sl_cli_command_arg_t * arguments)
 {
+  #if (defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_DIAGNOSTICS_CLUSTER)) || (SL_ZIGBEE_DEBUG_CORE_GROUP_ENABLED == 1)
   uint8_t i;
   emberAfCorePrintln("Total MAC Packets received: %lu", macAddressFilterData.totalPackets);
   emberAfCorePrintln("Options bitmask: 0x%X", macAddressFilterData.options);
@@ -650,15 +657,16 @@ void emberAfPluginMacAddressFilteringPrintConfigCommand(SL_CLI_COMMAND_ARG)
                          macAddressFilterData.macLongAddressList[i].matchCount);
     }
   }
+  #endif
 }
 
 // <generate-cli-xml> Command: plugin mac-address-filtering short-address-list add <node-id>
 // <generate-cli-xml> Description: Adds an address to the short address list.
 // <generate-cli-xml> Arg: node-id | EmberNodeId | The node-id to add to the short list.
 
-void emberAfPluginMacAddressFilteringAddShortAddressCommand(SL_CLI_COMMAND_ARG)
+void emberAfPluginMacAddressFilteringAddShortAddressCommand(sl_cli_command_arg_t * arguments)
 {
-  EmberNodeId nodeId = (uint16_t)emberUnsignedCommandArgument(0);
+  EmberNodeId nodeId = (uint16_t)sl_cli_get_argument_uint32(arguments, 0);
   uint8_t i = 0;
   for (i = 0; i < EMBER_AF_PLUGIN_MAC_ADDRESS_FILTERING_SHORT_ADDRESS_FILTER_LENGTH; i++) {
     if (EMBER_NULL_NODE_ID
@@ -675,21 +683,15 @@ void emberAfPluginMacAddressFilteringAddShortAddressCommand(SL_CLI_COMMAND_ARG)
 
 #define WHITELIST_CHARACTER_INDEX 4
 
-#ifdef UC_BUILD
 static void changeListConfig(bool currentConfigIsWhitelist,
                              MacFilterType type,
                              MacAddressFilterOptions valueForWhitelist,
                              sl_cli_command_arg_t *arguments)
-#else
-static void changeListConfig(bool currentConfigIsWhitelist,
-                             MacFilterType type,
-                             MacAddressFilterOptions valueForWhitelist)
-#endif // UC_BUILD
 {
   bool changeToWhitelist = false;
   uint8_t* pointer
-    = emberStringCommandArgument(-1,   // argument number
-                                 NULL); // returned length
+    = sl_zigbee_cli_get_argument_string_and_length(arguments, -1,   // argument number
+                                                   NULL); // returned length
 
   if (pointer[WHITELIST_CHARACTER_INDEX] == 'w') {
     changeToWhitelist = true;
@@ -734,61 +736,47 @@ static void changeListConfig(bool currentConfigIsWhitelist,
 //   we don't need two actual C functions.  But the script wants
 //   to parse the next C function line as the command to be executed.
 //   Just add a forward declaration and all is well.
-void emberAfPluginMacAddressFilteringSetShortAddressListType(SL_CLI_COMMAND_ARG);
+void emberAfPluginMacAddressFilteringSetShortAddressListType(sl_cli_command_arg_t * arguments);
 
 // <generate-cli-xml> Command: plugin mac-address-filtering short-address-list set-blacklist
 // <generate-cli-xml> Description:  Sets the short address list filter to a blacklist.
 
-void emberAfPluginMacAddressFilteringSetShortAddressListType(SL_CLI_COMMAND_ARG)
+void emberAfPluginMacAddressFilteringSetShortAddressListType(sl_cli_command_arg_t * arguments)
 {
-#ifdef UC_BUILD
   changeListConfig((macAddressFilterData.options
                     & MAC_FILTER_OPTIONS_SHORT_ADDRESS_WHITELIST),
                    MAC_FILTER_TYPE_SHORT_ADDRESS,
                    MAC_FILTER_OPTIONS_SHORT_ADDRESS_WHITELIST,
                    arguments);
-#else
-  changeListConfig((macAddressFilterData.options
-                    & MAC_FILTER_OPTIONS_SHORT_ADDRESS_WHITELIST),
-                   MAC_FILTER_TYPE_SHORT_ADDRESS,
-                   MAC_FILTER_OPTIONS_SHORT_ADDRESS_WHITELIST);
-#endif // UC_BUILD
 }
 
 // <generate-cli-xml> Command: plugin mac-address-filtering long-address-list set-whitelist
 // <generate-cli-xml> Description: Sets the long address list filter to a whitelist.
 
 // NOTE 2:  Forward declaration on purpose.  See Note 1 above.
-void emberAfPluginMacAddressFilteringSetLongAddressListType(SL_CLI_COMMAND_ARG);
+void emberAfPluginMacAddressFilteringSetLongAddressListType(sl_cli_command_arg_t * arguments);
 
 // <generate-cli-xml> Command: plugin mac-address-filtering long-address-list set-blacklist
 // <generate-cli-xml> Description: Sets the long address list filter to a blacklist.
 
-void emberAfPluginMacAddressFilteringSetLongAddressListType(SL_CLI_COMMAND_ARG)
+void emberAfPluginMacAddressFilteringSetLongAddressListType(sl_cli_command_arg_t * arguments)
 {
-#ifdef UC_BUILD
   changeListConfig((macAddressFilterData.options
                     & MAC_FILTER_OPTIONS_LONG_ADDRESS_WHITELIST),
                    MAC_FILTER_TYPE_LONG_ADDRESS,
                    MAC_FILTER_OPTIONS_LONG_ADDRESS_WHITELIST,
                    arguments);
-#else
-  changeListConfig((macAddressFilterData.options
-                    & MAC_FILTER_OPTIONS_LONG_ADDRESS_WHITELIST),
-                   MAC_FILTER_TYPE_LONG_ADDRESS,
-                   MAC_FILTER_OPTIONS_LONG_ADDRESS_WHITELIST);
-#endif // UC_BUILD
 }
 
 // <generate-cli-xml> Command: plugin mac-address-filtering long-address-list add <eui64>
 // <generate-cli-xml> Description: Adds a long address to the long address filter.
 // <generate-cli-xml> Arg: eui64 | EmberEUI64 | The long address to add.
 
-void emberAfPluginMacAddressFilteringAddLongAddressCommand(SL_CLI_COMMAND_ARG)
+void emberAfPluginMacAddressFilteringAddLongAddressCommand(sl_cli_command_arg_t * arguments)
 {
   uint8_t i;
   EmberEUI64 eui64;
-  emberCopyBigEndianEui64Argument(0, eui64);
+  sl_zigbee_copy_eui64_arg(arguments, 0, eui64, true);
   for (i = 0; i < EMBER_AF_PLUGIN_MAC_ADDRESS_FILTERING_LONG_ADDRESS_FILTER_LENGTH; i++) {
     if (0 == MEMCOMPARE(macAddressFilterData.macLongAddressList[i].longAddress,
                         zeroEui64,
@@ -807,7 +795,7 @@ void emberAfPluginMacAddressFilteringAddLongAddressCommand(SL_CLI_COMMAND_ARG)
 // <generate-cli-xml> Command: plugin mac-address-filtering short-address-list clear
 // <generate-cli-xml> Description: Clears the short address list filter.
 
-void emberAfPluginMacAddressFilteringClearShortAddressList(SL_CLI_COMMAND_ARG)
+void emberAfPluginMacAddressFilteringClearShortAddressList(sl_cli_command_arg_t * arguments)
 {
   clearShortFilterList();
   emberAfCorePrintln("Short address list cleared.");
@@ -816,7 +804,7 @@ void emberAfPluginMacAddressFilteringClearShortAddressList(SL_CLI_COMMAND_ARG)
 // <generate-cli-xml> Command: plugin mac-address-filtering long-address-list clear
 // <generate-cli-xml> Description: Clears the long address list filter.
 
-void emberAfPluginMacAddressFilteringClearLongAddressList(SL_CLI_COMMAND_ARG)
+void emberAfPluginMacAddressFilteringClearLongAddressList(sl_cli_command_arg_t * arguments)
 {
   clearLongFilterlist();
   emberAfCorePrintln("Long address list cleared.");
@@ -826,9 +814,9 @@ void emberAfPluginMacAddressFilteringClearLongAddressList(SL_CLI_COMMAND_ARG)
 // <generate-cli-xml> Description: Adds a PAN ID to the filter.
 // <generate-cli-xml> Arg: pan-id | uint16_t | The PAN ID to add to the list.
 
-void emberAfPluginMacAddressFilteringAddPanIdCommand(SL_CLI_COMMAND_ARG)
+void emberAfPluginMacAddressFilteringAddPanIdCommand(sl_cli_command_arg_t * arguments)
 {
-  EmberPanId panId = (EmberPanId)emberUnsignedCommandArgument(0);
+  EmberPanId panId = (EmberPanId)sl_cli_get_argument_uint32(arguments, 0);
   uint8_t i = 0;
   for (i = 0; i < EMBER_AF_PLUGIN_MAC_ADDRESS_FILTERING_PAN_ID_FILTER_LENGTH; i++) {
     if (BROADCAST_PAN_ID
@@ -847,9 +835,9 @@ void emberAfPluginMacAddressFilteringAddPanIdCommand(SL_CLI_COMMAND_ARG)
 // <generate-cli-xml> Description: Deletes an entry in the PAN ID list filter.
 // <generate-cli-xml> Arg: index | uint8_t | The index of the entry to delete.
 
-void emberAfPluginMacAddressFilteringPanIdDeleteEntry(SL_CLI_COMMAND_ARG)
+void emberAfPluginMacAddressFilteringPanIdDeleteEntry(sl_cli_command_arg_t * arguments)
 {
-  uint8_t index = emberUnsignedCommandArgument(0);
+  uint8_t index = sl_cli_get_argument_uint32(arguments, 0);
   if (index >= EMBER_AF_PLUGIN_MAC_ADDRESS_FILTERING_PAN_ID_FILTER_LENGTH) {
     emberAfCorePrintln("Error: Index is greater than or equal to list length (%d)",
                        EMBER_AF_PLUGIN_MAC_ADDRESS_FILTERING_PAN_ID_FILTER_LENGTH);
@@ -863,7 +851,7 @@ void emberAfPluginMacAddressFilteringPanIdDeleteEntry(SL_CLI_COMMAND_ARG)
 // <generate-cli-xml> Command: plugin mac-address-filtering pan-id-list clear
 // <generate-cli-xml> Description: Clears the PAN ID list filter.
 
-void emberAfPluginMacAddressFilteringClearPanIdList(SL_CLI_COMMAND_ARG)
+void emberAfPluginMacAddressFilteringClearPanIdList(sl_cli_command_arg_t * arguments)
 {
   clearPanIdFilterList();
 }
@@ -872,36 +860,26 @@ void emberAfPluginMacAddressFilteringClearPanIdList(SL_CLI_COMMAND_ARG)
 // <generate-cli-xml> Description:  Sets the PAN-ID list filter to a whitelist.
 
 // NOTE 3: See Note 1 as to why we have a forward declaration here.
-void emberAfPluginMacAddressFilteringSetPanIdListType(SL_CLI_COMMAND_ARG);
+void emberAfPluginMacAddressFilteringSetPanIdListType(sl_cli_command_arg_t * arguments);
 
 // <generate-cli-xml> Command: plugin mac-address-filtering pan-id-list set-blacklist
 // <generate-cli-xml> Description:  Sets the PAN_ID list filter to a blacklist.
 
-void emberAfPluginMacAddressFilteringSetPanIdListType(SL_CLI_COMMAND_ARG)
+void emberAfPluginMacAddressFilteringSetPanIdListType(sl_cli_command_arg_t * arguments)
 {
-#ifdef UC_BUILD
   changeListConfig(macAddressFilterData.options & MAC_FILTER_OPTIONS_DEST_PAN_ID_WHITELIST,
                    MAC_FILTER_TYPE_PAN_ID,
                    MAC_FILTER_OPTIONS_DEST_PAN_ID_WHITELIST,
                    arguments);
-#else
-  changeListConfig(macAddressFilterData.options & MAC_FILTER_OPTIONS_DEST_PAN_ID_WHITELIST,
-                   MAC_FILTER_TYPE_PAN_ID,
-                   MAC_FILTER_OPTIONS_DEST_PAN_ID_WHITELIST);
-#endif // UC_BUILD
 }
 
 // <generate-cli-xml> Command: plugin mac-address-filtering reset
 // <generate-cli-xml> Description: Resets the state of the plugin to the default of no filtering.
 
-void emberAfPluginMacAddressFilteringReset(SL_CLI_COMMAND_ARG)
+void emberAfPluginMacAddressFilteringReset(sl_cli_command_arg_t * arguments)
 {
-#ifdef UC_BUILD
   // TODO: update once we port the init callback
   emberAfPluginMacAddressFilteringInitCallback(SL_ZIGBEE_INIT_LEVEL_LOCAL_DATA);
-#else // !UC_BUILD
-  emberAfPluginMacAddressFilteringInitCallback();
-#endif // UC_BUILD
   emberAfCorePrintln("All filter data cleared.");
 }
 
@@ -909,9 +887,9 @@ void emberAfPluginMacAddressFilteringReset(SL_CLI_COMMAND_ARG)
 // <generate-cli-xml> Description: Deletes an entry in the short address list filter.
 // <generate-cli-xml> Arg: index | uint8_t | The index of the entry to delete.
 
-void emberAfPluginMacAddressFilteringShortAddressDeleteEntry(SL_CLI_COMMAND_ARG)
+void emberAfPluginMacAddressFilteringShortAddressDeleteEntry(sl_cli_command_arg_t * arguments)
 {
-  uint8_t index = emberUnsignedCommandArgument(0);
+  uint8_t index = sl_cli_get_argument_uint32(arguments, 0);
   if (index >= EMBER_AF_PLUGIN_MAC_ADDRESS_FILTERING_SHORT_ADDRESS_FILTER_LENGTH) {
     emberAfCorePrintln("Error: Index is greater than or equal to list length (%d)",
                        EMBER_AF_PLUGIN_MAC_ADDRESS_FILTERING_SHORT_ADDRESS_FILTER_LENGTH);
@@ -926,9 +904,9 @@ void emberAfPluginMacAddressFilteringShortAddressDeleteEntry(SL_CLI_COMMAND_ARG)
 // <generate-cli-xml> Description: Deletes an entry in the long address list filter.
 // <generate-cli-xml> Arg: index | uint8_t | The entry in the long address list to delete.
 
-void emberAfPluginMacAddressFilteringLongAddressDeleteEntry(SL_CLI_COMMAND_ARG)
+void emberAfPluginMacAddressFilteringLongAddressDeleteEntry(sl_cli_command_arg_t * arguments)
 {
-  uint8_t index = emberUnsignedCommandArgument(0);
+  uint8_t index = sl_cli_get_argument_uint32(arguments, 0);
   if (index >= EMBER_AF_PLUGIN_MAC_ADDRESS_FILTERING_LONG_ADDRESS_FILTER_LENGTH) {
     emberAfCorePrintln("Error: Index is greater than or equal to list length (%d)",
                        EMBER_AF_PLUGIN_MAC_ADDRESS_FILTERING_LONG_ADDRESS_FILTER_LENGTH);
@@ -970,7 +948,7 @@ void emberAfPluginMacAddressFilteringGetStats(bool shortMode,
 // <generate-cli-xml> Command: plugin mac-address-filtering clear-stats
 // <generate-cli-xml> Description:  Clears all packet counts for all modes.  Leaves config and lists intact.
 
-void emberAfPluginMacAddressFilteringClearStats(SL_CLI_COMMAND_ARG)
+void emberAfPluginMacAddressFilteringClearStats(sl_cli_command_arg_t * arguments)
 {
   clearStatsForFilterType(MAC_FILTER_TYPE_NO_ADDRESS);
   clearStatsForFilterType(MAC_FILTER_TYPE_SHORT_ADDRESS);

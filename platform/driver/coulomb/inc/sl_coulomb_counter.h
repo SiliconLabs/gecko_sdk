@@ -373,13 +373,6 @@ sl_coulomb_counter_calibration_status_t sl_coulomb_counter_calibrate(void);
 ///
 ///   @details
 ///
-///   @li @ref coulomb_counter_intro
-///   @li @ref coulomb_counter_calibration
-///   @li @ref coulomb_counter_em2_output
-///   @li @ref coulomb_counter_recalibration
-///   @li @ref coulomb_counter_configuration
-///   @li @ref coulomb_counter_usage
-///
 ///   @n @section coulomb_counter_intro Introduction
 ///
 ///   DCDC converters use pulse-frequency modulation (PFM) to drive outputs.

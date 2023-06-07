@@ -16,7 +16,9 @@
 
 #define CURRENT_MODULE_NAME "zigbee_app_framework_sleep"
 
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #include PLATFORM_HEADER
 
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_CATALOG_ZIGBEE_PRO_COMPLIANCE_PRESENT)
@@ -25,9 +27,9 @@
 #include "zigbee_app_framework_common.h"
 #include "zigbee_sleep_config.h"
 #include "sl_power_manager.h"
-#ifndef EMBER_AF_NCP
-  #include "app/framework/include/af.h"
-#endif //#ifndef EMBER_AF_NCP
+#ifdef SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
+#include "af.h"
+#endif //SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
 #include "em_common.h"
 
 // This next line is a workaround for RAIL_LIB-6303 and can go away once that
@@ -45,8 +47,8 @@
 bool emberAfPluginIdleSleepOkToIdleCallback(void);
 bool emberAfPluginIdleSleepOkToSleepCallback(uint32_t durationMs);
 
-bool emAfOkToIdleOrSleep(void);
-bool emAfCheckStayAwakeWhenNotJoined(void);
+bool sli_zigbee_af_ok_to_idle_or_sleep(void);
+bool sli_zigbee_af_check_stay_awake_when_not_joined(void);
 
 //------------------------------------------------------------------------------
 // Static and externs
@@ -61,8 +63,8 @@ static sl_power_manager_em_transition_event_info_t pm_event_info =
 { POWER_MANAGER_EVENTS_OF_INTEREST,
   energy_mode_transition_callback };
 
-bool emAfStayAwakeWhenNotJoined = (SL_ZIGBEE_APP_FRAMEWORK_STAY_AWAKE_WHEN_NOT_JOINED ? true : false);
-bool emAfForceEndDeviceToStayAwake = false;
+bool sli_zigbee_af_stay_awake_when_not_joined = (SL_ZIGBEE_APP_FRAMEWORK_STAY_AWAKE_WHEN_NOT_JOINED ? true : false);
+bool sli_zigbee_af_force_end_device_to_stay_awake = false;
 uint32_t lastWakeupMs = 0;
 
 #if !defined(SL_CATALOG_KERNEL_PRESENT)
@@ -174,7 +176,7 @@ uint32_t sli_zigbee_app_framework_set_pm_requirements_and_get_ms_to_next_wakeup(
   in_sleep_backoff = false;
   #endif
   bool ok_to_nap = emberOkToNap();
-  bool ok_to_idle_or_sleep = emAfOkToIdleOrSleep();
+  bool ok_to_idle_or_sleep = sli_zigbee_af_ok_to_idle_or_sleep();
 
   // Check if the micro can go into EM2
   bool sleep_allowed = (ok_to_nap && ok_to_idle_or_sleep && !in_sleep_backoff);
@@ -233,7 +235,7 @@ uint32_t sli_zigbee_app_framework_set_pm_requirements_and_get_ms_to_next_wakeup(
 
 void emberAfForceEndDeviceToStayAwake(bool stayAwake)
 {
-  emAfForceEndDeviceToStayAwake = stayAwake;
+  sli_zigbee_af_force_end_device_to_stay_awake = stayAwake;
 }
 
 #if defined(SL_CATALOG_SIMPLE_BUTTON_PRESENT) && (SL_ZIGBEE_APP_FRAMEWORK_USE_BUTTON_TO_STAY_AWAKE == 1)
@@ -244,7 +246,7 @@ void sl_button_on_change(const sl_button_t *handle)
   // If button 0 is pressed, stay awake
   if ( sl_button_get_state(handle) == SL_SIMPLE_BUTTON_PRESSED ) {
     emberAfForceEndDeviceToStayAwake(SL_SIMPLE_BUTTON_INSTANCE(0) == handle);
-    if (emAfForceEndDeviceToStayAwake) {
+    if (sli_zigbee_af_force_end_device_to_stay_awake) {
       sl_zigbee_common_rtos_wakeup_stack_task();
     }
   }
@@ -258,13 +260,13 @@ extern bool zigbee_cpc_is_tx_queue_empty(void);
 #endif
 #endif
 
-bool emAfOkToIdleOrSleep(void)
+bool sli_zigbee_af_ok_to_idle_or_sleep(void)
 {
-  if (emAfForceEndDeviceToStayAwake) {
+  if (sli_zigbee_af_force_end_device_to_stay_awake) {
     return false;
   }
 
-  if (emAfCheckStayAwakeWhenNotJoined()) {
+  if (sli_zigbee_af_check_stay_awake_when_not_joined()) {
     return false;
   }
 
@@ -279,17 +281,17 @@ bool emAfOkToIdleOrSleep(void)
  #endif
  #endif  // EMBER_AF_NCP
 
- #ifndef EMBER_AF_NCP
+ #ifdef SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
   return (emberAfGetCurrentSleepControlCallback() != EMBER_AF_STAY_AWAKE);
- #else // EMBER_AF_NCP
+ #else // SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
   return true;   // There is only idling on NCP, hence return true always.
- #endif  // EMBER_AF_NCP
+ #endif  // SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
 }
 
-bool emAfCheckStayAwakeWhenNotJoined(void)
+bool sli_zigbee_af_check_stay_awake_when_not_joined(void)
 {
-  #ifndef EMBER_AF_NCP
-  if (emAfStayAwakeWhenNotJoined) {
+ #ifdef SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
+  if (sli_zigbee_af_stay_awake_when_not_joined) {
     bool awake = false;
     for (uint8_t i = 0; !awake && i < EMBER_SUPPORTED_NETWORKS; i++) {
       if (emberAfPushNetworkIndex(i) == EMBER_SUCCESS) {
@@ -303,7 +305,7 @@ bool emAfCheckStayAwakeWhenNotJoined(void)
       return true;
     }
   }
-  #endif // EMBER_AF_NCP
+  #endif // SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
   return false;
 }
 

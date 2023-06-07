@@ -20,8 +20,8 @@
 #    misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-from btmesh.core import Btmesh
 from btmesh.db import DCD, Node
+from btmesh.root import Btmesh
 from btmesh.util import BtmeshRetryParams
 
 from .cfg import app_cfg

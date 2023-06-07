@@ -40,7 +40,7 @@
 #include "sl_app_common.h"
 #include "app_init.h"
 #include "stack-info.h"
-#include "mbedtls_config_autogen.h"
+#include "mbedtls/build_info.h"
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs

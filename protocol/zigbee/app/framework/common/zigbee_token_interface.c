@@ -17,7 +17,9 @@
 #include PLATFORM_HEADER
 #include "hal.h"
 #include "stack/include/ember.h"
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 
 #if (defined(SL_CATALOG_TOKEN_MANAGER_PRESENT))
 

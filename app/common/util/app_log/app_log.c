@@ -77,7 +77,7 @@ static uint8_t level_mask =
 /***************************************************************************//**
  * Checking log level
  ******************************************************************************/
-bool _app_log_check_level(uint8_t level)
+bool app_log_check_level(uint8_t level)
 {
   bool ret = true;
   if (level_filter_enabled) {

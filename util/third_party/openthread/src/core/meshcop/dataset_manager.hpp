@@ -37,6 +37,7 @@
 
 #include "openthread-core-config.h"
 
+#include "common/callback.hpp"
 #include "common/locator.hpp"
 #include "common/non_copyable.hpp"
 #include "common/timer.hpp"
@@ -145,11 +146,11 @@ public:
      * @retval kErrorBusy    A previous request is ongoing.
      *
      */
-    Error SendSetRequest(const Dataset::Info &    aDatasetInfo,
-                         const uint8_t *          aTlvs,
+    Error SendSetRequest(const Dataset::Info     &aDatasetInfo,
+                         const uint8_t           *aTlvs,
                          uint8_t                  aLength,
                          otDatasetMgmtSetCallback aCallback,
-                         void *                   aContext);
+                         void                    *aContext);
 
     /**
      * This method sends a MGMT_GET request.
@@ -164,9 +165,9 @@ public:
      *
      */
     Error SendGetRequest(const Dataset::Components &aDatasetComponents,
-                         const uint8_t *            aTlvTypes,
+                         const uint8_t             *aTlvTypes,
                          uint8_t                    aLength,
-                         const otIp6Address *       aAddress) const;
+                         const otIp6Address        *aAddress) const;
 #if OPENTHREAD_FTD
     /**
      * This method appends the MLE Dataset TLV but excluding MeshCoP Sub Timestamp TLV.
@@ -332,8 +333,8 @@ protected:
     bool         mTimestampValid : 1;
 
 private:
-    static void HandleMgmtSetResponse(void *               aContext,
-                                      otMessage *          aMessage,
+    static void HandleMgmtSetResponse(void                *aContext,
+                                      otMessage           *aMessage,
                                       const otMessageInfo *aMessageInfo,
                                       Error                aError);
     void        HandleMgmtSetResponse(Coap::Message *aMessage, const Ip6::MessageInfo *aMessageInfo, Error aError);
@@ -344,9 +345,9 @@ private:
     void  HandleDatasetUpdated(void);
     Error AppendDatasetToMessage(const Dataset::Info &aDatasetInfo, Message &aMessage) const;
     void  SendSet(void);
-    void  SendGetResponse(const Coap::Message &   aRequest,
+    void  SendGetResponse(const Coap::Message    &aRequest,
                           const Ip6::MessageInfo &aMessageInfo,
-                          uint8_t *               aTlvs,
+                          uint8_t                *aTlvs,
                           uint8_t                 aLength) const;
 
 #if OPENTHREAD_FTD
@@ -359,8 +360,7 @@ private:
     bool       mMgmtPending : 1;
     TimerMilli mTimer;
 
-    otDatasetMgmtSetCallback mMgmtSetCallback;
-    void *                   mMgmtSetCallbackContext;
+    Callback<otDatasetMgmtSetCallback> mMgmtSetCallback;
 };
 
 class ActiveDatasetManager : public DatasetManager, private NonCopyable
@@ -428,7 +428,7 @@ public:
      * @retval kErrorParse    Could not parse the Dataset from @p aMessage.
      *
      */
-    Error Save(const Timestamp &aTimestamp, const Message &aMessage, uint16_t aOffset, uint8_t aLength);
+    Error Save(const Timestamp &aTimestamp, const Message &aMessage, uint16_t aOffset, uint16_t aLength);
 
     /**
      * This method sets the Operational Dataset in non-volatile memory.
@@ -562,7 +562,7 @@ public:
      * @param[in]  aLength     The length of the Operational Dataset.
      *
      */
-    Error Save(const Timestamp &aTimestamp, const Message &aMessage, uint16_t aOffset, uint8_t aLength);
+    Error Save(const Timestamp &aTimestamp, const Message &aMessage, uint16_t aOffset, uint16_t aLength);
 
     /**
      * This method saves the Operational Dataset in non-volatile memory.

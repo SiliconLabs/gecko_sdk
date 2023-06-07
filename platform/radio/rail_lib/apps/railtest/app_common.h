@@ -230,6 +230,12 @@ typedef enum RailRfSenseMode {
   RAIL_RFSENSE_MODE_SELECTIVE_OOK,
 } RailRfSenseMode_t;
 
+typedef enum bleHadmEvent {
+  BLE_HADM_PACKET_RECEIVED,
+  BLE_HADM_PACKET_SENT,
+  BLE_HADM_PACKET_RX_TIMEOUT,
+} bleHadmEvent_t;
+
 #if RAIL_IEEE802154_SUPPORTS_G_MODESWITCH && defined(WISUN_MODESWITCHPHRS_ARRAY_SIZE)
 typedef enum ModeSwitchState {
   IDLE,               /* Not in mode switch*/
@@ -473,6 +479,7 @@ extern volatile uint16_t rxDataSourceEventState;
 extern uint8_t logLevel;
 extern uint8_t txData[SL_RAIL_TEST_MAX_PACKET_LENGTH];
 extern uint16_t txDataLen;
+extern uint16_t offsetInTxFifo;
 
 #if RAIL_IEEE802154_SUPPORTS_G_MODESWITCH && defined(WISUN_MODESWITCHPHRS_ARRAY_SIZE)
 extern uint8_t txData_2B[2];
@@ -600,6 +607,8 @@ RAIL_Status_t configureTxFifo(void);
 void updateStats(int32_t newValue, Stats_t *stats);
 void rfSensedCheck(void);
 
+uint8_t *getTxFifoBaseAddress(void);
+
 RAIL_FrequencyOffset_t getRxFreqOffset(void);
 void changeChannel(uint32_t i);
 void pendPacketTx(void);
@@ -648,6 +657,7 @@ uint16_t getLikelyChannel(void);
 void RAILCb_TxPacketSent(RAIL_Handle_t railHandle, bool isAck);
 void RAILCb_RxPacketAborted(RAIL_Handle_t railHandle);
 void RAILCb_RxPacketReceived(RAIL_Handle_t railHandle);
+void RAILCb_RxTimeout(RAIL_Handle_t railHandle);
 void RAILCb_TxFifoAlmostEmpty(RAIL_Handle_t railHandle);
 void RAILCb_RxFifoAlmostFull(RAIL_Handle_t railHandle);
 void RAILCb_RxChannelHoppingComplete(RAIL_Handle_t railHandle);

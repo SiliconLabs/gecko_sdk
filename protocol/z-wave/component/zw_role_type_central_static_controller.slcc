@@ -1,4 +1,4 @@
-id: zw_controller
+id: zw_role_type_central_static_controller
 label: Z-Wave Central Static Controller
 category: Z-Wave|Role Types
 description: >
@@ -6,15 +6,21 @@ description: >
   operating as a central controller.
 
   These are typically routers, central gateways or some types of central communication panel.
-  Note: The actual role type and device option mask is controlled by the applicaiton.
+  Note: The actual role type and device option mask is controlled by the application.
+
+  Define ZAF_CONFIG_DEVICE_OPTION_MASK is automatically set by this component.
 package: Z-Wave
 quality: production
 define:
   - name: ZW_CONTROLLER
   - name: ZW_CONTROLLER_STATIC
   - name: ZW_CONTROLLER_BRIDGE
+  - name: ZAF_CONFIG_DEVICE_OPTION_MASK
+    value: GENERIC_TYPE_STATIC_CONTROLLER
+  - name: ZAF_CONFIG_DEVICE_OPTION_MASK
+    value: APPLICATION_NODEINFO_LISTENING
 provides:
-  - name: zw_controller
+  - name: zw_role_type_central_static_controller
   - name: zw_role_type
 requires:
   - name: psa_crypto

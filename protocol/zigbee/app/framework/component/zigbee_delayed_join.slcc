@@ -37,13 +37,13 @@ template_contribution:
     value:
       group: delayed-join
       name: activate
-      handler: emAfDelayedJoinActivateCommand
+      handler: sli_zigbee_af_delayed_join_activate_command
       help: Sets the TC join policy to delayed-join.
   - name: cli_command
     value:
       group: delayed-join
       name: send-network-key
-      handler: emAfDelayedJoinSendNetworkKeyCommand
+      handler: sli_zigbee_af_delayed_join_send_network_key_command
       help: Triggers sending the encrypted network key to the joining node.
       argument:
       - type: uint16
@@ -58,14 +58,14 @@ template_contribution:
     value:
       group: delayed-join
       name: set-key-timeout
-      handler: emAfDelayedJoinSetNetworkKeyTimeoutCommand
+      handler: sli_zigbee_af_delayed_join_set_network_key_timeout_command
       help: Extends the joiner timeout to wait for the network key during join.
       argument:
       - type: uint8
   - name: zigbee_stack_callback
     value:
       callback_type: trust_center_join
-      function_name: emAfPluginDelayedJoinTrustCenterJoinCallback      
+      function_name: sli_zigbee_af_delayed_join_trust_center_join_callback      
 
 documentation:
   docset: zigbee

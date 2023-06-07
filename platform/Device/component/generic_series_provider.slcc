@@ -1,0 +1,10 @@
+id: generic_series_provider
+package: platform
+description: Silicon Labs Generic provider.
+category: Platform|Device|Generic provider
+quality: production
+ui_hints:
+  visibility: never
+provides:
+  - name: device_series_3
+

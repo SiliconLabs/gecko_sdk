@@ -17,7 +17,7 @@
 
 #include "app/framework/include/af.h"
 
-const EmAfZigbeeProNetwork *emAfCurrentZigbeeProNetwork = NULL;
+const sli_zigbee_af_zigbee_pro_network *sli_zigbee_af_current_zigbee_pro_network = NULL;
 
 //#define NETWORK_INDEX_DEBUG
 #if defined(EMBER_TEST) || defined(NETWORK_INDEX_DEBUG)
@@ -27,11 +27,11 @@ const EmAfZigbeeProNetwork *emAfCurrentZigbeeProNetwork = NULL;
 #endif
 
 #if EMBER_SUPPORTED_NETWORKS == 1
-EmberStatus emAfInitializeNetworkIndexStack(void)
+EmberStatus sli_zigbee_af_initializeNetworkIndexStack(void)
 {
   NETWORK_INDEX_ASSERT(emberGetCurrentNetwork() == 0);
   NETWORK_INDEX_ASSERT(EMBER_AF_DEFAULT_NETWORK_INDEX == 0);
-  emAfCurrentZigbeeProNetwork = &emAfZigbeeProNetworks[0];
+  sli_zigbee_af_current_zigbee_pro_network = &sli_zigbee_af_zigbee_pro_networks[0];
   return EMBER_SUCCESS;
 }
 
@@ -67,7 +67,7 @@ EmberStatus emberAfPopNetworkIndex(void)
   return EMBER_SUCCESS;
 }
 
-void emAfAssertNetworkIndexStackIsEmpty(void)
+void sli_zigbee_af_assert_network_index_stack_is_empty(void)
 {
   NETWORK_INDEX_ASSERT(emberGetCurrentNetwork() == 0);
 }
@@ -95,49 +95,6 @@ uint8_t emberAfNetworkIndexFromEndpoint(uint8_t endpoint)
   return 0;
 }
 
-#ifndef UC_BUILD
-
-void emberAfNetworkEventControlSetInactive(EmberEventControl *controls)
-{
-  NETWORK_INDEX_ASSERT(emberGetCurrentNetwork() == 0);
-  emberEventControlSetInactive(controls[0]);
-}
-
-bool emberAfNetworkEventControlGetActive(EmberEventControl *controls)
-{
-  NETWORK_INDEX_ASSERT(emberGetCurrentNetwork() == 0);
-  return emberEventControlGetActive(controls[0]);
-}
-
-void emberAfNetworkEventControlSetActive(EmberEventControl *controls)
-{
-  NETWORK_INDEX_ASSERT(emberGetCurrentNetwork() == 0);
-  emberEventControlSetActive(controls[0]);
-}
-
-EmberStatus emberAfNetworkEventControlSetDelayMS(EmberEventControl *controls,
-                                                 uint32_t delayMs)
-{
-  NETWORK_INDEX_ASSERT(emberGetCurrentNetwork() == 0);
-  return emberAfEventControlSetDelayMS(&controls[0], delayMs);
-}
-
-EmberStatus emberAfNetworkEventControlSetDelayQS(EmberEventControl *controls,
-                                                 uint32_t delayQs)
-{
-  NETWORK_INDEX_ASSERT(emberGetCurrentNetwork() == 0);
-  return emberAfEventControlSetDelayQS(&controls[0], delayQs);
-}
-
-EmberStatus emberAfNetworkEventControlSetDelayMinutes(EmberEventControl *controls,
-                                                      uint16_t delayM)
-{
-  NETWORK_INDEX_ASSERT(emberGetCurrentNetwork() == 0);
-  return emberAfEventControlSetDelayMinutes(&controls[0], delayM);
-}
-
-#endif // UC_BUILD
-
 #else // if EMBER_SUPPORTED_NETWORKS == 1
 
 // We use two bits to describe a network index and sixteen bits to store our
@@ -162,12 +119,12 @@ static EmberStatus setCurrentNetwork(void)
   NETWORK_INDEX_ASSERT(emberGetCurrentNetwork() == networkIndex);
   if (status == EMBER_SUCCESS) {
     //TODO RF4CE removal: can we get rid of the separate pro network??
-    emAfCurrentZigbeeProNetwork = &emAfZigbeeProNetworks[networkIndex];
+    sli_zigbee_af_current_zigbee_pro_network = &sli_zigbee_af_zigbee_pro_networks[networkIndex];
   }
   return status;
 }
 
-EmberStatus emAfInitializeNetworkIndexStack(void)
+EmberStatus sli_zigbee_af_initializeNetworkIndexStack(void)
 {
   EmberStatus status;
   NETWORK_INDEX_ASSERT(networkIndices == 0);
@@ -240,7 +197,7 @@ EmberStatus emberAfPopNetworkIndex(void)
   return status;
 }
 
-void emAfAssertNetworkIndexStackIsEmpty(void)
+void sli_zigbee_af_assert_network_index_stack_is_empty(void)
 {
   NETWORK_INDEX_ASSERT(networkIndices == 0);
   NETWORK_INDEX_ASSERT(emberGetCurrentNetwork() == EMBER_AF_DEFAULT_NETWORK_INDEX);
@@ -269,48 +226,5 @@ uint8_t emberAfNetworkIndexFromEndpoint(uint8_t endpoint)
   NETWORK_INDEX_ASSERT(index != 0xFF);
   return (index == 0xFF ? 0xFF : emberAfNetworkIndexFromEndpointIndex(index));
 }
-
-#ifndef UC_BUILD
-
-void emberAfNetworkEventControlSetInactive(EmberEventControl *controls)
-{
-  EmberEventControl *control = controls + emberGetCurrentNetwork();
-  emberEventControlSetInactive(*control);
-}
-
-bool emberAfNetworkEventControlGetActive(EmberEventControl *controls)
-{
-  EmberEventControl *control = controls + emberGetCurrentNetwork();
-  return emberEventControlGetActive(*control);
-}
-
-void emberAfNetworkEventControlSetActive(EmberEventControl *controls)
-{
-  EmberEventControl *control = controls + emberGetCurrentNetwork();
-  emberEventControlSetActive(*control);
-}
-
-EmberStatus emberAfNetworkEventControlSetDelayMS(EmberEventControl *controls,
-                                                 uint32_t delayMs)
-{
-  EmberEventControl *control = controls + emberGetCurrentNetwork();
-  return emberAfEventControlSetDelayMS(control, delayMs);
-}
-
-EmberStatus emberAfNetworkEventControlSetDelayQS(EmberEventControl *controls,
-                                                 uint32_t delayQs)
-{
-  EmberEventControl *control = controls + emberGetCurrentNetwork();
-  return emberAfEventControlSetDelayQS(control, delayQs);
-}
-
-EmberStatus emberAfNetworkEventControlSetDelayMinutes(EmberEventControl *controls,
-                                                      uint16_t delayM)
-{
-  EmberEventControl *control = controls + emberGetCurrentNetwork();
-  return emberAfEventControlSetDelayMinutes(control, delayM);
-}
-
-#endif // UC_BUILD
 
 #endif // EMBER_SUPPORTED_NETWORKS

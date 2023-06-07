@@ -55,14 +55,9 @@ static uint8_t   sendBuff[MAX_BUFFER_SIZE + 1];
 #define MIN_CLI_MESSAGE_SIZE 3
 #define MAX_CLI_MESSAGE_SIZE 16
 
-#ifdef UC_BUILD
 sl_zigbee_event_t emberAfPluginManufacturingLibraryCliCheckSendCompleteEvent;
 #define checkSendCompleteEventControl (&emberAfPluginManufacturingLibraryCliCheckSendCompleteEvent)
-void emberAfPluginManufacturingLibraryCliCheckSendCompleteEventHandler(SLXU_UC_EVENT);
-#else // !UC_BUILD
-EmberEventControl emberAfPluginManufacturingLibraryCliCheckSendCompleteEventControl;
-#define checkSendCompleteEventControl emberAfPluginManufacturingLibraryCliCheckSendCompleteEventControl
-#endif // UC_BUILD
+void emberAfPluginManufacturingLibraryCliCheckSendCompleteEventHandler(sl_zigbee_event_t * event);
 
 static uint16_t savedPacketCount = 0;
 
@@ -99,29 +94,28 @@ bool emberAfMfglibEnabled(void)
   return false;
 #endif
 
-  (void) emberSerialPrintf(APP_SERIAL,
-                           "MFG_LIB Enabled %x\r\n", enabled);
+  sl_zigbee_core_debug_print("MFG_LIB Enabled %x\r\n", enabled);
 
   return enabled;
 }
 
 // -----------------------------------------------------------------------------
 
-void emAfPluginManufacturingLibraryCliInitCallback(SLXU_INIT_ARG)
+void sli_zigbee_af_manufacturing_library_cli_init_callback(uint8_t init_level)
 {
-  SLXU_INIT_UNUSED_ARG;
+  (void)init_level;
 
-  slxu_zigbee_event_init(checkSendCompleteEventControl,
-                         emberAfPluginManufacturingLibraryCliCheckSendCompleteEventHandler);
+  sl_zigbee_event_init(checkSendCompleteEventControl,
+                       emberAfPluginManufacturingLibraryCliCheckSendCompleteEventHandler);
 }
 
 // This is unfortunate but there is no callback indicating when sending is complete
 // for all packets.  So we must create a timer that checks whether the packet count
 // has increased within the last second.
 
-void emberAfPluginManufacturingLibraryCliCheckSendCompleteEventHandler(SLXU_UC_EVENT)
+void emberAfPluginManufacturingLibraryCliCheckSendCompleteEventHandler(sl_zigbee_event_t * event)
 {
-  slxu_zigbee_event_set_inactive(checkSendCompleteEventControl);
+  sl_zigbee_event_set_inactive(checkSendCompleteEventControl);
   if (!inReceivedStream) {
     return;
   }
@@ -138,8 +132,8 @@ void emberAfPluginManufacturingLibraryCliCheckSendCompleteEventHandler(SLXU_UC_E
     mfgCurrentPacketCounter = 0;
   } else {
     savedPacketCount = mfgTotalPacketCounter;
-    slxu_zigbee_event_set_delay_qs(checkSendCompleteEventControl,
-                                   CHECK_SEND_COMPLETE_DELAY_QS);
+    sl_zigbee_event_set_delay_qs(checkSendCompleteEventControl,
+                                 CHECK_SEND_COMPLETE_DELAY_QS);
   }
 }
 
@@ -186,7 +180,7 @@ static void mfglibRxHandler(uint8_t *packet,
     savedLinkQuality = linkQuality;
     savedPktLength = *packet;
     MEMMOVE(savedPkt, (packet + 1), savedPktLength);
-    slxu_zigbee_event_set_active(checkSendCompleteEventControl);
+    sl_zigbee_event_set_active(checkSendCompleteEventControl);
   }
 }
 
@@ -223,23 +217,21 @@ void emberAfMfglibStop(void)
   }
 }
 
-#ifdef UC_BUILD
-
 #include "app/util/serial/sl_zigbee_command_interpreter.h"
 
-void emAfMfglibStartCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_mfglib_start_command(sl_cli_command_arg_t *arguments)
 {
   bool wantCallback = sl_cli_get_argument_uint8(arguments, 0);
 
   emberAfMfglibStart(wantCallback);
 }
 
-void emAfMfglibStopCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_mfglib_stop_command(sl_cli_command_arg_t *arguments)
 {
   emberAfMfglibStop();
 }
 
-void emAfMfglibToneStartCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_mfglib_tone_start_command(sl_cli_command_arg_t *arguments)
 {
   EmberStatus status = mfglibStartTone();
   emberAfCorePrintln("%p start tone 0x%X", PLUGIN_NAME, status);
@@ -248,7 +240,7 @@ void emAfMfglibToneStartCommand(sl_cli_command_arg_t *arguments)
   }
 }
 
-void emAfMfglibToneStopCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_mfglib_tone_stop_command(sl_cli_command_arg_t *arguments)
 {
   EmberStatus status = mfglibStopTone();
   emberAfCorePrintln("%p stop tone 0x%X", PLUGIN_NAME, status);
@@ -257,7 +249,7 @@ void emAfMfglibToneStopCommand(sl_cli_command_arg_t *arguments)
   }
 }
 
-void emAfMfglibStreamStartCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_mfglib_stream_start_command(sl_cli_command_arg_t *arguments)
 {
   EmberStatus status = mfglibStartStream();
   emberAfCorePrintln("%p start stream 0x%X", PLUGIN_NAME, status);
@@ -266,7 +258,7 @@ void emAfMfglibStreamStartCommand(sl_cli_command_arg_t *arguments)
   }
 }
 
-void emAfMfglibStreamStopCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_mfglib_stream_stop_command(sl_cli_command_arg_t *arguments)
 {
   EmberStatus status = mfglibStopStream();
   emberAfCorePrintln("%p stop stream 0x%X", PLUGIN_NAME, status);
@@ -275,7 +267,7 @@ void emAfMfglibStreamStopCommand(sl_cli_command_arg_t *arguments)
   }
 }
 
-void emAfMfglibSendCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_mfglib_send_command(sl_cli_command_arg_t *arguments)
 {
   bool random = memcmp(sl_cli_get_command_string(arguments, 3 /*arguments->arg_ofs - 1 */),
                        "random", strlen("random")) == 0;
@@ -301,7 +293,7 @@ void emAfMfglibSendCommand(sl_cli_command_arg_t *arguments)
   emberAfCorePrintln("%p send packet, status 0x%X", PLUGIN_NAME, status);
 }
 
-void emAfMfglibSendMessageCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_mfglib_send_message_command(sl_cli_command_arg_t *arguments)
 {
   size_t length = 0;
   uint8_t *message = sl_cli_get_argument_hex(arguments, 0, &length);
@@ -329,7 +321,7 @@ void emAfMfglibSendMessageCommand(sl_cli_command_arg_t *arguments)
   emberAfCorePrintln("%p send message, status 0x%X", PLUGIN_NAME, status);
 }
 
-void emAfMfglibStatusCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_mfglib_status_command(sl_cli_command_arg_t *arguments)
 {
   uint8_t channel = mfglibGetChannel();
   int8_t power = mfglibGetPower();
@@ -345,14 +337,14 @@ void emAfMfglibStatusCommand(sl_cli_command_arg_t *arguments)
   emberAfCorePrintln("Total %p packets received: %d", PLUGIN_NAME, mfgTotalPacketCounter);
 }
 
-void emAfMfglibSetChannelCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_mfglib_set_channel_command(sl_cli_command_arg_t *arguments)
 {
   uint8_t channel = sl_cli_get_argument_uint8(arguments, 0);
   EmberStatus status = mfglibSetChannel(channel);
   emberAfCorePrintln("%p set channel, status 0x%X", PLUGIN_NAME, status);
 }
 
-void emAfMfglibSetPowerAndModeCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_mfglib_set_power_and_mode_command(sl_cli_command_arg_t *arguments)
 {
   int8_t power = sl_cli_get_argument_uint8(arguments, 0);
   uint16_t mode = sl_cli_get_argument_uint16(arguments, 1);
@@ -360,7 +352,7 @@ void emAfMfglibSetPowerAndModeCommand(sl_cli_command_arg_t *arguments)
   emberAfCorePrintln("%p set power and mode, status 0x%X", PLUGIN_NAME, status);
 }
 
-void emAfMfglibSleepCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_mfglib_sleep_command(sl_cli_command_arg_t *arguments)
 {
   (void)arguments;
 
@@ -382,7 +374,7 @@ void emAfMfglibSleepCommand(sl_cli_command_arg_t *arguments)
 // plugin mfglib programEui { 01 02 03 04 05 06 07 08 }
 // Note:  this command is OTP.  It only works once.  To re-run, you
 // must erase the chip.
-void emAfMfglibProgramEuiCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_mfglib_program_eui_command(sl_cli_command_arg_t *arguments)
 {
   EmberEUI64 eui64;
 
@@ -396,7 +388,7 @@ void emAfMfglibProgramEuiCommand(sl_cli_command_arg_t *arguments)
 #endif
 }
 
-void emAfMfglibEnableMfglib(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_mfglib_enable_mfglib(sl_cli_command_arg_t *arguments)
 {
 #ifndef EMBER_TEST
   uint8_t enabled = sl_cli_get_argument_uint8(arguments, 0);
@@ -405,209 +397,9 @@ void emAfMfglibEnableMfglib(sl_cli_command_arg_t *arguments)
 #endif
 }
 
-void emAfMfglibSetOptions(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_mfglib_set_options(sl_cli_command_arg_t *arguments)
 {
   uint8_t options = sl_cli_get_argument_uint8(arguments, 0);
   EmberStatus status = mfglibSetOptions(options);
   emberAfCorePrintln("%p set options, status 0x%X", PLUGIN_NAME, status);
 }
-
-#else // !UC_BUILD
-
-// -----------------------------------------------------------------------------
-// Forward Declarations
-
-void emAfMfglibStartCommand(void)
-{
-  bool wantCallback = (bool)emberUnsignedCommandArgument(0);
-
-  emberAfMfglibStart(wantCallback);
-}
-
-void emAfMfglibStopCommand(void)
-{
-  emberAfMfglibStop();
-}
-
-void emAfMfglibToneStartCommand(void)
-{
-  EmberStatus status = mfglibStartTone();
-  emberAfCorePrintln("%p start tone 0x%X", PLUGIN_NAME, status);
-  if (status == EMBER_SUCCESS) {
-    mfgToneTestRunning = true;
-  }
-}
-
-void emAfMfglibToneStopCommand(void)
-{
-  EmberStatus status = mfglibStopTone();
-  emberAfCorePrintln("%p stop tone 0x%X", PLUGIN_NAME, status);
-  if (status == EMBER_SUCCESS) {
-    mfgToneTestRunning = false;
-  }
-}
-
-void emAfMfglibStreamStartCommand(void)
-{
-  EmberStatus status = mfglibStartStream();
-  emberAfCorePrintln("%p start stream 0x%X", PLUGIN_NAME, status);
-  if (status == EMBER_SUCCESS) {
-    mfgStreamTestRunning = true;
-  }
-}
-
-void emAfMfglibStreamStopCommand(void)
-{
-  EmberStatus status = mfglibStopStream();
-  emberAfCorePrintln("%p stop stream 0x%X", PLUGIN_NAME, status);
-  if (status == EMBER_SUCCESS) {
-    mfgStreamTestRunning = false;
-  }
-}
-
-void emAfMfglibSendCommand(void)
-{
-  bool random = (emberCommandName()[0] == 'r');
-  uint16_t numPackets = (uint16_t)emberUnsignedCommandArgument(0);
-  uint8_t length = (uint16_t)emberUnsignedCommandArgument(1);
-
-  if (length > MAX_BUFFER_SIZE) {
-    emberAfCorePrintln("Error: Length cannot be bigger than %d", MAX_BUFFER_SIZE);
-    return;
-  }
-
-  if (numPackets == 0) {
-    emberAfCorePrintln("Error: Number of packets cannot be 0.");
-    return;
-  }
-
-  fillBuffer(sendBuff, length, random);
-
-  // The second parameter to the mfglibSendPacket() is the
-  // number of "repeats", therefore we decrement numPackets by 1.
-  numPackets--;
-  EmberStatus status = mfglibSendPacket(sendBuff, numPackets);
-  emberAfCorePrintln("%p send packet, status 0x%X", PLUGIN_NAME, status);
-}
-
-void emAfMfglibSendMessageCommand(void)
-{
-  uint8_t length = 0;
-  uint8_t *message = emberStringCommandArgument(0, &length);
-  uint16_t numPackets = (uint16_t)emberUnsignedCommandArgument(1);
-
-  if (length < MIN_CLI_MESSAGE_SIZE) {
-    emberAfCorePrintln("Error: Minimum length is %d bytes.", MIN_CLI_MESSAGE_SIZE);
-    return;
-  }
-
-  if (length > MAX_CLI_MESSAGE_SIZE) {
-    emberAfCorePrintln("Error: Maximum length is %d bytes.", MAX_CLI_MESSAGE_SIZE);
-    return;
-  }
-
-  if (numPackets == 0) {
-    emberAfCorePrintln("Error: Number of packets cannot be 0.");
-    return;
-  }
-
-  sendBuff[0] = length + 2; // message length plus 2-byte CRC
-  MEMMOVE(sendBuff + 1, message, length);
-  numPackets--;
-  EmberStatus status = mfglibSendPacket(sendBuff, numPackets);
-  emberAfCorePrintln("%p send message, status 0x%X", PLUGIN_NAME, status);
-}
-
-void emAfMfglibStatusCommand(void)
-{
-  uint8_t channel = mfglibGetChannel();
-  int8_t power = mfglibGetPower();
-  uint16_t powerMode = emberGetTxPowerMode();
-  uint8_t options = mfglibGetOptions();
-  emberAfCorePrintln("Channel: %d", channel);
-  emberAfCorePrintln("Power: %d", power);
-  emberAfCorePrintln("Power Mode: 0x%2X", powerMode);
-  emberAfCorePrintln("Options: 0x%X", options);
-  emberAfCorePrintln("%p running: %p", PLUGIN_NAME, (mfgLibRunning ? "yes" : "no"));
-  emberAfCorePrintln("%p tone test running: %p", PLUGIN_NAME, (mfgToneTestRunning ? "yes" : "no"));
-  emberAfCorePrintln("%p stream test running: %p", PLUGIN_NAME, (mfgStreamTestRunning ? "yes" : "no"));
-  emberAfCorePrintln("Total %p packets received: %d", PLUGIN_NAME, mfgTotalPacketCounter);
-}
-
-void emAfMfglibSetChannelCommand(void)
-{
-  uint8_t channel = (uint8_t)emberUnsignedCommandArgument(0);
-  EmberStatus status = mfglibSetChannel(channel);
-  emberAfCorePrintln("%p set channel, status 0x%X", PLUGIN_NAME, status);
-}
-
-void emAfMfglibSetPowerAndModeCommand(void)
-{
-  int8_t power = (int8_t)emberSignedCommandArgument(0);
-  uint16_t mode = (uint16_t)emberUnsignedCommandArgument(1);
-  EmberStatus status = mfglibSetPower(mode, power);
-  emberAfCorePrintln("%p set power and mode, status 0x%X", PLUGIN_NAME, status);
-}
-
-void emAfMfglibSleepCommand(void)
-{
-  uint32_t sleepDurationMS = (uint32_t)emberUnsignedCommandArgument(0);
-
-  // turn off the radio
-  emberStackPowerDown();
-
-  ATOMIC(
-    // turn off board and peripherals
-    halPowerDown();
-    // turn micro to power save mode - wakes on external interrupt
-    // or when the time specified expires
-    halSleepForMilliseconds(&sleepDurationMS);
-    // power up board and peripherals
-    halPowerUp();
-    );
-  // power up radio
-  emberStackPowerUp();
-
-  emberAfEepromNoteInitializedStateCallback(false);
-
-  // Allow the stack to time out any of its events and check on its
-  // own network state.
-  emberTick();
-}
-
-// Function to program a custom EUI64 into the chip.
-// Example:
-// plugin mfglib programEui { 01 02 03 04 05 06 07 08 }
-// Note:  this command is OTP.  It only works once.  To re-run, you
-// must erase the chip.
-void emAfMfglibProgramEuiCommand(void)
-{
-  EmberEUI64 eui64;
-
-  emberAfCopyBigEndianEui64Argument(0, eui64);
-
-  // potentially verify first few bytes for customer OUI
-
-#ifndef EMBER_TEST
-  // OK, we verified the customer OUI.  Let's program it here.
-  halInternalSetMfgTokenData(TOKEN_MFG_CUSTOM_EUI_64, (uint8_t *) &eui64, EUI64_SIZE);
-#endif
-}
-
-void emAfMfglibEnableMfglib(void)
-{
-#ifndef EMBER_TEST
-  uint8_t enabled = (uint8_t) emberSignedCommandArgument(0);
-
-  halCommonSetToken(TOKEN_MFG_LIB_ENABLED, &enabled);
-#endif
-}
-
-void emAfMfglibSetOptions(void)
-{
-  uint8_t options = (uint8_t)emberUnsignedCommandArgument(0);
-  EmberStatus status = mfglibSetOptions(options);
-  emberAfCorePrintln("%p set options, status 0x%X", PLUGIN_NAME, status);
-}
-
-#endif // UC_BUILD

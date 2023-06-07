@@ -49,25 +49,25 @@ extern "C" {
  */
 RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
 {
-  /** Appended info missing from Rx packet. */
+  /** Appended info missing from RX packet. */
   RAIL_ASSERT_FAILED_APPENDED_INFO_MISSING = 0,
   /** Receive FIFO too small for IR calibration. */
   RAIL_ASSERT_FAILED_RX_FIFO_BYTES = 1,
   /** Error reading back packet payload. */
   RAIL_ASSERT_FAILED_RX_FIFO_ZERO_BYTES_READ = 2,
-  /** Receive fifo entry has invalid status. */
+  /** Receive FIFO entry has invalid status. */
   RAIL_ASSERT_FAILED_ILLEGAL_RXLEN_ENTRY_STATUS = 3,
-  /** Receive fifo entry bad packet length. */
+  /** Receive FIFO entry bad packet length. */
   RAIL_ASSERT_FAILED_BAD_PACKET_LENGTH = 4,
   /** Unable to configure radio for IR calibration. */
   RAIL_ASSERT_FAILED_SYNTH_DIVCTRL_ENUM_CONVERSION_ERROR = 5,
-  /** Reached unexpected state while handling Rx fifo events. */
+  /** Reached unexpected state while handling RX FIFO events. */
   RAIL_ASSERT_FAILED_UNEXPECTED_STATE_RX_FIFO = 6,
-  /** Reached unexpected state while handling RXLEN fifo events. */
+  /** Reached unexpected state while handling RXLEN FIFO events. */
   RAIL_ASSERT_FAILED_UNEXPECTED_STATE_RXLEN_FIFO = 7,
-  /** Reached unexpected state while handling Tx fifo events. */
+  /** Reached unexpected state while handling TX FIFO events. */
   RAIL_ASSERT_FAILED_UNEXPECTED_STATE_TX_FIFO = 8,
-  /** Reached unexpected state while handling Tx ACK fifo events. */
+  /** Reached unexpected state while handling TX ACK FIFO events. */
   RAIL_ASSERT_FAILED_UNEXPECTED_STATE_TXACK_FIFO = 9,
   /** No memory to store receive packet. */
   RAIL_ASSERT_FAILED_PBUFFER_NOT_DEFINED = 10,
@@ -181,8 +181,8 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
   RAIL_ASSERT_SEQ_INVALID_PA_SELECTED = 64,
   /** Invalid/unsupported channel config. */
   RAIL_ASSERT_FAILED_INVALID_CHANNEL_CONFIG = 65,
-  /** The dynamic frame length configuration is invalid. */
-  RAIL_ASSERT_INVALID_DYNAMIC_FRAME_LENGTH = 66,
+  /** Radio Calculator configuration HFXO frequency mismatch with chip */
+  RAIL_ASSERT_INVALID_XTAL_FREQUENCY = 66,
   /** Failed to enable EM1P energy mode. */
   RAIL_ASSERT_FAILED_EM1P_ENTRY = 67,
   /** Failed to disable EM1P energy mode. */
@@ -213,6 +213,12 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
   RAIL_ASSERT_INVALID_LOG2X4_CLEAR_CONDITION = 80,
   /** Failed to complete DMA write */
   RAIL_ASSERT_FAILED_DMA_WRITE_INCOMPLETE = 81,
+  /** RAIL does not support this Radio Calculator configuration */
+  RAIL_ASSERT_CALCULATOR_NOT_SUPPORTED = 82,
+  /** Invalid binary image was loaded onto the sequencer */
+  RAIL_ASSERT_INVALID_SEQUENCER_IMAGE = 83,
+  /** No image selected to be loaded onto the sequencer */
+  RAIL_ASSERT_MISSING_SEQUENCER_IMAGE = 84,
 };
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -283,7 +289,7 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
 #define RAIL_ASSERT_INVALID_PA_OPERATION                       ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_INVALID_PA_OPERATION)
 #define RAIL_ASSERT_SEQ_INVALID_PA_SELECTED                    ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_SEQ_INVALID_PA_SELECTED)
 #define RAIL_ASSERT_FAILED_INVALID_CHANNEL_CONFIG              ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_INVALID_CHANNEL_CONFIG)
-#define RAIL_ASSERT_INVALID_DYNAMIC_FRAME_LENGTH               ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_INVALID_DYNAMIC_FRAME_LENGTH)
+#define RAIL_ASSERT_INVALID_XTAL_FREQUENCY                     ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_INVALID_XTAL_FREQUENCY)
 #define RAIL_ASSERT_FAILED_EM1P_ENTRY                          ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_EM1P_ENTRY)
 #define RAIL_ASSERT_FAILED_EM1P_EXIT                           ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_EM1P_EXIT)
 #define RAIL_ASSERT_FAILED_RTCC_SYNC_STOP                      ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_RTCC_SYNC_STOP)
@@ -299,6 +305,9 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
 #define RAIL_ASSERT_FAILED_RTCC_SYNC_STALE_DATA                ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_RTCC_SYNC_STALE_DATA)
 #define RAIL_ASSERT_INVALID_LOG2X4_CLEAR_CONDITION             ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_INVALID_LOG2X4_CLEAR_CONDITION)
 #define RAIL_ASSERT_FAILED_DMA_WRITE_INCOMPLETE                ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_DMA_WRITE_INCOMPLETE)
+#define RAIL_ASSERT_CALCULATOR_NOT_SUPPORTED                   ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_CALCULATOR_NOT_SUPPORTED)
+#define RAIL_ASSERT_INVALID_SEQUENCER_IMAGE                    ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_INVALID_SEQUENCER_IMAGE)
+#define RAIL_ASSERT_MISSING_SEQUENCER_IMAGE                    ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_MISSING_SEQUENCER_IMAGE)
 #endif//DOXYGEN_SHOULD_SKIP_THIS
 
 /// Use this define to create an array of error messages that map to the codes
@@ -326,16 +335,16 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
 /// @endcode
 ///
 #define RAIL_ASSERT_ERROR_MESSAGES {                                                   \
-    /* 0*/ "Appended info missing from Rx packet",                                     \
+    /* 0*/ "Appended info missing from RX packet",                                     \
     /* 1*/ "Receive FIFO too small for IR calibration",                                \
     /* 2*/ "Error reading back packet payload",                                        \
-    /* 3*/ "Receive fifo entry has invalid status",                                    \
-    /* 4*/ "Receive fifo entry bad packet length",                                     \
+    /* 3*/ "Receive FIFO entry has invalid status",                                    \
+    /* 4*/ "Receive FIFO entry bad packet length",                                     \
     /* 5*/ "Unable to configure radio for IR calibration",                             \
-    /* 6*/ "Reached unexpected state while handling Rx fifo events",                   \
-    /* 7*/ "Reached unexpected state while handling RXLEN fifo events",                \
-    /* 8*/ "Reached unexpected state while handling Tx fifo events",                   \
-    /* 9*/ "Reached unexpected state while handling Tx ACK fifo events",               \
+    /* 6*/ "Reached unexpected state while handling RX FIFO events",                   \
+    /* 7*/ "Reached unexpected state while handling RXLEN FIFO events",                \
+    /* 8*/ "Reached unexpected state while handling TX FIFO events",                   \
+    /* 9*/ "Reached unexpected state while handling TX ACK FIFO events",               \
     /*10*/ "No memory to store receive packet",                                        \
     /*11*/ "Packet length longer than the receive FIFO size",                          \
     /*12*/ "Invalid radio clock prescaler",                                            \
@@ -392,7 +401,7 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
     /*63*/ "The current PA config does not allow for this operation",                  \
     /*64*/ "The sequencer selected an invalid PA",                                     \
     /*65*/ "Invalid/unsupported channel config",                                       \
-    /*66*/ "The dynamic frame length configuration is invalid",                        \
+    /*66*/ "Radio Calculator configuration HFXO frequency mismatch with chip",         \
     /*67*/ "Failed to enable EM1P energy mode",                                        \
     /*68*/ "Failed to disable EM1P energy mode",                                       \
     /*69*/ "Failed to disable RTCC synchronization",                                   \
@@ -408,6 +417,9 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
     /*79*/ "Attempted to sleep with stale RTCC synchronization data",                  \
     /*80*/ "Attempted to clear LOG2X4 with a DEC1 value not equal to 0",               \
     /*81*/ "Failed to complete DMA write",                                             \
+    /*82*/ "RAIL does not support this Radio Calculator configuration",                \
+    /*83*/ "Invalid binary image loaded on sequencer",                                 \
+    /*84*/ "No image selected to be loaded on sequencer",                              \
 }
 
 /**

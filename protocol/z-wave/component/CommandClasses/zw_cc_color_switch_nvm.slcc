@@ -9,7 +9,7 @@ description: >
 package: Z-Wave
 quality: production
 source:
-  - path: protocol/z-wave/ZAF/CommandClasses/ColorSwitch/cc_color_switch_nvm.c
+  - path: protocol/z-wave/ZAF/CommandClasses/ColorSwitch/src/cc_color_switch_nvm.c
 provides:
   - name: zw_cc_color_switch_nvm
 requires:

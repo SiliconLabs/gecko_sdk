@@ -1,0 +1,20 @@
+id: wisun_rcp_uart_plt
+label: Wi-SUN Border Router RCP
+description: Provide Wi-SUN Border Router RCP UART interface using the plateform driver.
+package: wisun
+category: Wi-SUN
+quality: production
+root_path: protocol/wisun/app/wisun_rcp
+
+define:
+  - name: DEBUG_EFM_USER
+
+provides:
+  - name: wisun_rcp_uart_plt
+  - name: wisun_rcp_interface
+
+source:
+  - path: sl_wsrcp_crc.h
+  - path: sl_wsrcp_crc.c
+  - path: sl_wsrcp_uart_plt.h
+  - path: sl_wsrcp_uart_plt.c

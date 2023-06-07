@@ -207,8 +207,8 @@ def get_csr(ram_data, path_dir):
 
     # Write CSR to file.
     common_name = csr.subject.get_attributes_for_oid(x509.oid.NameOID.COMMON_NAME)[0].value
-    path_csr = os.path.join(path_dir, common_name + '.csr')
-    
+    # Trim filename to UUID in case extended BT Mesh CN
+    path_csr = os.path.join(path_dir, common_name[0:36] + '.csr')
     with open(path_csr, 'wb') as f:
         f.write(csr.public_bytes(serialization.Encoding.PEM))
 

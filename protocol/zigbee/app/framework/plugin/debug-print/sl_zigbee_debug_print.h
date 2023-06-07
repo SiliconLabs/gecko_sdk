@@ -21,7 +21,13 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "sl_status.h"
-#include "sl_zigbee_debug_print_config.h"
+
+#ifdef SL_COMPONENT_CATALOG_PRESENT
+ #include "sl_component_catalog.h"
+ #ifdef SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT
+  #include "sl_zigbee_debug_print_config.h"
+ #endif // SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT
+#endif // SL_COMPONENT_CATALOG_PRESENT
 
 /**
  * @defgroup debug-print Debug Print
@@ -43,7 +49,7 @@ void sli_zigbee_debug_print(uint32_t group_type, bool new_line, const char* form
 
 #if defined(EMBER_TEST) && !defined(ZIGBEE_PRO_COMPLIANCE_ON_HOST)
 #include <stdint.h>
-#include "printf-sim.h"
+#include "tool/simulator/child/up_misc/printf-sim.h"
 #define local_printf printf_sim
 #define local_vprintf vprintf_sim
 #else

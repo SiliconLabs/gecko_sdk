@@ -18,6 +18,7 @@ config_file:
 requires:
   - name: sl_system
   - name: zigbee_pro_stack_support
+  - name: zigbee_enhanced_routing
   - name: zigbee_phy
   - name: cmsis_rtos2
     condition:
@@ -86,6 +87,10 @@ include:
 define:
   # TEMPORARY define that can be used in the C code to keep the code building
   # for app builder while we make changes to make it work within UC.
+  # This cannot go away until all Jam targets port to UC or a make target
+  # If this gets removed, we also need to ensure make targets, like unit
+  # tests, are not broken by this removal
+  # EMZIGBEE-11236
   - name: UC_BUILD
 
 # NOTE: Some cflags come in via platform/common/toolchain/toolchains.slct
@@ -102,10 +107,6 @@ toolchain_settings:
     value: "-Werror"
     condition:
       - zigbee_pro_stack_common_source
-
-# TODO: EMZIGBEE-6659    
-  - option: gcc_compiler_option
-    value: "-Wno-format"
 
 template_file:
   - path: protocol/zigbee/app/framework/common/template/zigbee_stack_callback_dispatcher.h.jinja
@@ -164,6 +165,9 @@ template_contribution:
       event: is_ok_to_sleep
       include: "zigbee_app_framework_common.h"
       handler: sli_zigbee_app_framework_is_ok_to_sleep
+    condition:
+      - power_manager
+
   - name: zigbee_stack_callback
     value:
       callback_type: rtos_stack_wakeup_isr
@@ -175,18 +179,18 @@ template_contribution:
       event: sleep_on_isr_exit
       include: "zigbee_app_framework_common.h"
       handler: sli_zigbee_sleep_on_isr_exit
-    unless:
-      - zigbee_pro_compliance
+    condition:
+      - power_manager
+      - zigbee_zcl_framework_core
 
   - name: cli_group
     value:
       group: plugin
       name: idle-sleep
       help: "Commands to control idling/sleeping of the device"
-    unless:
-      - zigbee_pro_compliance
     condition:
       - power_manager
+      - zigbee_zcl_framework_core
   
   - name: cli_command
     value:
@@ -194,10 +198,9 @@ template_contribution:
       name: status
       handler: emberAfPluginIdleSleepStatusCommand
       help: "Display the sleep status"
-    unless:
-      - zigbee_pro_compliance
     condition:
       - power_manager
+      - zigbee_zcl_framework_core
 
   - name: cli_command
     value:
@@ -207,10 +210,9 @@ template_contribution:
       help: "Set or clear force awake"
       argument:
       - type: uint8
-    unless:
-      - zigbee_pro_compliance
     condition:
       - power_manager
+      - zigbee_zcl_framework_core
 
   - name: cli_command
     value:
@@ -220,10 +222,9 @@ template_contribution:
       help: "Set or clear stay awake when not joined"
       argument:
       - type: uint8
-    unless:
-      - zigbee_pro_compliance
     condition:
       - power_manager
+      - zigbee_zcl_framework_core
       
 tag:
   - "idle-sleep"

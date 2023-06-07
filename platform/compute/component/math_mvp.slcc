@@ -1,0 +1,70 @@
+id: math_mvp
+label: MVP Math
+package: platform
+description: >
+  This component provides a MVP accelerated math library for float16 datatypes.
+category: Platform|Compute
+quality: production
+root_path: platform/compute/math/mvp
+source:
+  - path: src/sl_math_mvp_util.c
+  - path: src/sl_math_mvp_complex_matrix_mult.c
+  - path: src/sl_math_mvp_complex_vector_conjugate.c
+  - path: src/sl_math_mvp_complex_vector_dot_product.c
+  - path: src/sl_math_mvp_complex_vector_mult.c
+  - path: src/sl_math_mvp_complex_vector_magnitude_squared.c
+  - path: src/sl_math_mvp_matrix_add.c
+  - path: src/sl_math_mvp_matrix_sub.c
+  - path: src/sl_math_mvp_matrix_mult.c
+  - path: src/sl_math_mvp_matrix_vector_mult.c
+  - path: src/sl_math_mvp_matrix_scale.c
+  - path: src/sl_math_mvp_matrix_transpose.c
+  - path: src/sl_math_mvp_vector_abs.c
+  - path: src/sl_math_mvp_vector_add.c
+  - path: src/sl_math_mvp_vector_clamp.c
+  - path: src/sl_math_mvp_vector_clip.c
+  - path: src/sl_math_mvp_vector_copy.c
+  - path: src/sl_math_mvp_vector_dot_product.c
+  - path: src/sl_math_mvp_vector_fill.c
+  - path: src/sl_math_mvp_vector_mult.c
+  - path: src/sl_math_mvp_vector_negate.c
+  - path: src/sl_math_mvp_vector_offset.c
+  - path: src/sl_math_mvp_vector_scale.c
+  - path: src/sl_math_mvp_vector_sub.c
+include:
+  - path: inc
+    file_list:
+      - path: sl_math_mvp.h
+      - path: sl_math_mvp_util.h
+      - path: sl_math_mvp_complex_matrix_mult.h
+      - path: sl_math_mvp_complex_vector_conjugate.h
+      - path: sl_math_mvp_complex_vector_dot_product.h
+      - path: sl_math_mvp_complex_vector_mult.h
+      - path: sl_math_mvp_complex_vector_magnitude_squared.h
+      - path: sl_math_mvp_matrix_add.h
+      - path: sl_math_mvp_matrix_sub.h
+      - path: sl_math_mvp_matrix_mult.h
+      - path: sl_math_mvp_matrix_vector_mult.h
+      - path: sl_math_mvp_matrix_scale.h
+      - path: sl_math_mvp_matrix_transpose.h
+      - path: sl_math_mvp_vector_abs.h
+      - path: sl_math_mvp_vector_add.h
+      - path: sl_math_mvp_vector_clamp.h
+      - path: sl_math_mvp_vector_clip.h
+      - path: sl_math_mvp_vector_copy.h
+      - path: sl_math_mvp_vector_dot_product.h
+      - path: sl_math_mvp_vector_fill.h
+      - path: sl_math_mvp_vector_mult.h
+      - path: sl_math_mvp_vector_negate.h
+      - path: sl_math_mvp_vector_offset.h
+      - path: sl_math_mvp_vector_scale.h
+      - path: sl_math_mvp_vector_sub.h
+provides:
+  - name: math_mvp
+requires:
+  - name: driver_mvp
+  - name: math
+  - name: emlib_common
+  - name: status
+  - name: device_has_mvp
+  - name: component_catalog

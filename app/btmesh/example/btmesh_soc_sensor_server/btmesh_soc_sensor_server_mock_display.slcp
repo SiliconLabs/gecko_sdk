@@ -23,7 +23,6 @@ component:
   - id: bluetooth_feature_system
   - id: bootloader_interface
   - id: app_button_press
-  - id: btmesh_event_log
   - id: btmesh_factory_reset
   - id: btmesh_stack_gatt_prov_bearer
   - id: btmesh_stack_relay
@@ -40,21 +39,13 @@ component:
     instance:
     - example
   - id: gatt_service_device_information
-  - id: iostream_usart
-    instance:
-      - vcom
+  - id: iostream_recommended_stream
   - id: mpu
   - id: rail_util_pti
   - id: sensor_rht_mock
-  - id: simple_button
-    instance:
-      - btn0
-      - btn1
-  - id: simple_led
-    instance:
-      - led0
-      - led1
-  - id: simple_timer
+  - id: simple_button_recommended_instance
+  - id: simple_led_recommended_instance
+  - id: app_timer
 
 source:
   - path: app.c
@@ -100,12 +91,12 @@ configuration:
     value: "APP_LOG_LEVEL_INFO"
   - name: NVM3_DEFAULT_CACHE_SIZE
     value: 100
+  - name: NVM3_DEFAULT_NVM_SIZE
+    value: "0x6000"
   - name: SL_BOARD_ENABLE_DISPLAY
     value: "1"
   - name: SL_BOARD_ENABLE_VCOM
     value: "1"
-    condition:
-      - "iostream_usart"
   - name: SL_BTMESH_CONFIG_MAX_PROV_BEARERS
     value: "3"
   - name: SL_BTMESH_FW_UPDATE_SERVER_FWID_CFG_VAL
@@ -138,13 +129,12 @@ template_contribution:
 
 tag:
   - hardware:board_only
-  - hardware:component:button:2+
+  - hardware:component:button:1+
   - hardware:component:display:ls013b7dh03
-  - hardware:component:led:2+
+  - hardware:component:led:1+
   - hardware:component:sensor:!si7021
   - hardware:device:ram:32
   - hardware:device:flash:512
-  - hardware:device:sdid:!215
   - hardware:rf:band:2400
   - prebuilt_demo
 

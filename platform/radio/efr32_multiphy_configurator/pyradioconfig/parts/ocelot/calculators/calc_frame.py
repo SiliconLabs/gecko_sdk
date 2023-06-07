@@ -40,3 +40,16 @@ class CALC_Frame_ocelot(CALC_Frame_panther):
 
         # Write the register
         self._reg_write(model.vars.FRC_CTRL_LPMODEDIS, lpmodedis)
+
+    def calc_ctrl2_rxfrcdis(self, model):
+        # This method calculates the RXFRCDIS field
+        # Disable writing to FRC in direct mode
+
+        directmode_rx = model.vars.directmode_rx.value
+
+        if directmode_rx != model.vars.directmode_rx.var_enum.DISABLED:
+            rxfrcdis = 1
+        else:
+            rxfrcdis = 0
+
+        self._reg_write(model.vars.MODEM_CTRL2_RXFRCDIS, rxfrcdis)

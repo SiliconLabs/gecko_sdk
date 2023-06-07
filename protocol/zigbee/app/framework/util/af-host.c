@@ -17,7 +17,9 @@
 
 #include "af.h"
 #include "micro.h"
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 
 #include "app/framework/util/af-main.h"
 #include "app/framework/util/common.h"
@@ -47,11 +49,11 @@
 // Fake certificates are constructed by setting the data to all F's
 // but using the device's real IEEE in the cert.  The Key establishment
 // code requires access to the local IEEE to do this.
-EmberEUI64 emLocalEui64;
+EmberEUI64 sli_802154mac_local_eui64;
 
 // the stack version that the NCP is running
 static uint16_t ncpStackVer;
-
+static uint32_t ezsp_error_queue_full_counter = 0;
 // We only get the sender EUI callback when the sender EUI is in the incoming
 // message. This keeps track of if the value in the variable is valid or not.
 // This is set to VALID (true) when the callback happens and set to INVALID
@@ -77,7 +79,7 @@ static NetworkCache networkCache[EMBER_SUPPORTED_NETWORKS];
 
 //------------------------------------------------------------------------------
 // Forward declarations
-void emAfResetAndInitNCP(void);
+void sli_zigbee_af_reset_and_init_ncp(void);
 uint8_t emberAfGetNcpConfigItem(EzspConfigId id);
 static void createEndpoint(uint8_t endpointIndex);
 static void setPacketBufferCount(void);
@@ -86,7 +88,7 @@ static uint8_t ezspNextSequence(void);
 //------------------------------------------------------------------------------
 // Internal callbacks
 
-void emAfInitCallback(void)
+void sli_zigbee_af_initCallback(void)
 {
   //Initialize the hal
   halInit();
@@ -98,14 +100,14 @@ void emAfInitCallback(void)
 
   // This will initialize the stack of networks maintained by the framework,
   // including setting the default network.
-  emAfInitializeNetworkIndexStack();
+  sli_zigbee_af_initializeNetworkIndexStack();
 
   // We must initialize the endpoint information first so
-  // that they are correctly added by emAfResetAndInitNCP()
+  // that they are correctly added by sli_zigbee_af_reset_and_init_ncp()
   emberAfEndpointConfigure();
 
   // initialize the network co-processor (NCP)
-  emAfResetAndInitNCP();
+  sli_zigbee_af_reset_and_init_ncp();
 }
 
 //------------------------------------------------------------------------------
@@ -158,7 +160,7 @@ void emberAfGetMfgString(uint8_t* returnData)
 // Platform dependent interface to get various stack parameters.
 void emberAfGetEui64(EmberEUI64 returnEui64)
 {
-  MEMCOPY(returnEui64, emLocalEui64, EUI64_SIZE);
+  MEMCOPY(returnEui64, sli_802154mac_local_eui64, EUI64_SIZE);
 }
 
 uint8_t emberAfGetKeyTableSize(void)
@@ -383,7 +385,7 @@ EzspStatus emberAfSetEzspConfigValue(EzspConfigId configId,
   emberAfAppFlush();
   emberAfAppPrint("Ezsp Config: set %p to 0x%2x:", configIdName, value);
 
-  emberAfAppDebugExec(emAfPrintStatus("set", ezspStatus));
+  emberAfAppDebugExec(sli_zigbee_af_print_status("set", ezspStatus));
   emberAfAppFlush();
 
   emberAfAppPrintln("");
@@ -409,8 +411,8 @@ EzspStatus emberAfSetEzspPolicy(EzspPolicyId policyId,
   emberAfAppPrint("Ezsp Policy: set %p to \"%p\":",
                   policyName,
                   decisionName);
-  emberAfAppDebugExec(emAfPrintStatus("set",
-                                      ezspStatus));
+  emberAfAppDebugExec(sli_zigbee_af_print_status("set",
+                                                 ezspStatus));
   emberAfAppPrintln("");
   emberAfAppFlush();
   return ezspStatus;
@@ -445,7 +447,7 @@ EzspStatus emberAfSetEzspValue(EzspValueId valueId,
       break;
   }
 
-  emberAfAppDebugExec(emAfPrintStatus("set", ezspStatus));
+  emberAfAppDebugExec(sli_zigbee_af_print_status("set", ezspStatus));
   emberAfAppPrintln("");
   emberAfAppFlush();
   return ezspStatus;
@@ -501,7 +503,7 @@ bool emberAfNcpNeedsReset(void)
 // Internal APIs
 
 // initialize the network co-processor (NCP)
-void emAfResetAndInitNCP(void)
+void sli_zigbee_af_reset_and_init_ncp(void)
 {
   uint8_t ep;
   EzspStatus ezspStatus;
@@ -521,9 +523,9 @@ void emAfResetAndInitNCP(void)
   }
 
   // send the version command before any other commands
-  emAfCliVersionCommand();
+  sli_zigbee_af_cli_version_command();
 
-  emSecureEzspInit();
+  sli_zigbee_secure_ezsp_init();
 
   // The random number generator on the host needs to be seeded with some
   // random data, which we can get from the NCP.
@@ -562,7 +564,7 @@ void emAfResetAndInitNCP(void)
   emberAfSetEzspConfigValue(EZSP_CONFIG_SUPPORTED_NETWORKS,
                             EMBER_SUPPORTED_NETWORKS,
                             "supported networks");
-  emAfNetworkSecurityInit();
+  sli_zigbee_af_network_security_init();
 
   uint8_t mode = EMBER_END_DEVICE_KEEP_ALIVE_SUPPORT_MODE;
 
@@ -607,14 +609,14 @@ void emAfResetAndInitNCP(void)
   // that affects table sizes should occur, which means it must happen before
   // setPacketBufferCount.
   memoryAllocation = true;
-  emAfNcpInit(memoryAllocation);
+  sli_zb_af_ncp_init(memoryAllocation);
   emberAfNcpInitCallback(memoryAllocation);
   setPacketBufferCount();
 
   // Call the plugin and user-specific NCP inits again.  This is where non-
   // sizing configuration should occur.
   memoryAllocation = false;
-  emAfNcpInit(memoryAllocation);
+  sli_zb_af_ncp_init(memoryAllocation);
   emberAfNcpInitCallback(memoryAllocation);
 
 #ifdef EMBER_AF_MAX_TOTAL_CLUSTER_COUNT
@@ -641,10 +643,10 @@ void emAfResetAndInitNCP(void)
   cacheConfigIdValuesAllowed = true;
 
   // Set the localEui64 global
-  ezspGetEui64(emLocalEui64);
+  ezspGetEui64(sli_802154mac_local_eui64);
 
   // Initialize messageSentCallbacks table
-  emAfInitializeMessageSentCallbackArray();
+  sli_zigbee_af_initialize_message_sent_callback_array();
 
 #ifdef SL_CATALOG_ZIGBEE_GREEN_POWER_SERVER_PRESENT
   // Initialize the GP Sink Table.
@@ -656,7 +658,7 @@ extern bool in_ncp_reset(void);
 #else
 #define in_ncp_reset() false
 #endif
-void emAfHostFrameworkTick(void)
+void sli_zigbee_af_host_framework_tick(void)
 {
   do {
     halResetWatchdog();   // Periodically reset the watchdog.
@@ -672,15 +674,17 @@ void emAfHostFrameworkTick(void)
     if (ncpNeedsResetAndInit || in_ncp_reset() ) {
       ncpNeedsResetAndInit = false;
       // re-initialize the NCP
-      emAfResetAndInitNCP();
-      emAfNetworkInit(SL_ZIGBEE_INIT_LEVEL_DONE);
+      emberAfAppPrint("ezsp_error_queue_full_counter = 0x%0X\n", ezsp_error_queue_full_counter);
+      ezsp_error_queue_full_counter = 0;
+      sli_zigbee_af_reset_and_init_ncp();
+      sli_zigbee_af_network_init(SL_ZIGBEE_INIT_LEVEL_DONE);
     }
     // Wait until ECC operations are done.  Don't allow any of the clusters
     // to send messages as the NCP is busy doing ECC
-  } while (emAfIsCryptoOperationInProgress());
+  } while (sli_zigbee_af_is_crypto_operation_in_progress());
 }
 
-void emAfClearNetworkCache(uint8_t networkIndex)
+void sli_zigbee_af_clear_network_cache(uint8_t networkIndex)
 {
   networkCache[networkIndex].nodeId = EMBER_NULL_NODE_ID;
   networkCache[networkIndex].panId = 0xFFFF;
@@ -688,7 +692,7 @@ void emAfClearNetworkCache(uint8_t networkIndex)
   networkCache[networkIndex].radioChannel = 0xFF;
 }
 
-void emAfCliVersionCommand(void)
+void sli_zigbee_af_cli_version_command(void)
 {
   // Note that NCP == Network Co-Processor
 
@@ -733,12 +737,12 @@ void emAfCliVersionCommand(void)
     emberAfAppPrintln("stack ver [0x%2x]", ncpStackVer);
   } else {
     // NCP has new style version number
-    emAfParseAndPrintVersion(versionStruct);
+    sli_zigbee_af_parse_and_print_version(versionStruct);
   }
   emberAfAppFlush();
 }
 
-uint8_t emAfGetPacketBufferFreeCount(void)
+uint8_t sli_zigbee_af_get_packet_buffer_free_count(void)
 {
   uint8_t freeCount;
   uint8_t valueLength = 1;
@@ -748,7 +752,7 @@ uint8_t emAfGetPacketBufferFreeCount(void)
   return freeCount;
 }
 
-uint8_t emAfGetPacketBufferTotalCount(void)
+uint8_t sli_zigbee_af_get_packet_buffer_total_count(void)
 {
   uint16_t value;
   ezspGetConfigurationValue(EZSP_CONFIG_PACKET_BUFFER_COUNT,
@@ -756,14 +760,14 @@ uint8_t emAfGetPacketBufferTotalCount(void)
   return (uint8_t)value;
 }
 
-EmberStatus emAfSend(EmberOutgoingMessageType type,
-                     uint16_t indexOrDestination,
-                     EmberApsFrame *apsFrame,
-                     uint8_t messageLength,
-                     uint8_t *message,
-                     uint16_t *messageTag,
-                     EmberNodeId alias,
-                     uint8_t sequence)
+EmberStatus sli_zigbee_af_send(EmberOutgoingMessageType type,
+                               uint16_t indexOrDestination,
+                               EmberApsFrame *apsFrame,
+                               uint8_t messageLength,
+                               uint8_t *message,
+                               uint16_t *messageTag,
+                               EmberNodeId alias,
+                               uint8_t sequence)
 {
   EmberStatus status = EMBER_SUCCESS;
   *messageTag = ezspNextSequence();
@@ -836,7 +840,7 @@ EmberStatus emAfSend(EmberOutgoingMessageType type,
   return status;
 }
 
-void emAfPrintEzspEndpointFlags(uint8_t endpoint)
+void sli_zigbee_af_print_ezsp_endpoint_flags(uint8_t endpoint)
 {
   EzspEndpointFlags flags;
   EzspStatus status = ezspGetEndpointFlags(endpoint,
@@ -974,7 +978,11 @@ static uint8_t ezspNextSequence(void)
 // This is called when an EZSP error is reported
 void ezspErrorHandler(EzspStatus status)
 {
-  emberAfCorePrintln("ERROR: ezspErrorHandler 0x%x", status);
+  if ( status != EZSP_ERROR_QUEUE_FULL ) {
+    emberAfCorePrintln("ERROR: ezspErrorHandler 0x%x", status);
+  } else {
+    ezsp_error_queue_full_counter++;
+  }
   emberAfCoreFlush();
 
   ncpNeedsResetAndInit = emberAfPluginZclFrameworkCoreEzspErrorCallback(status);
@@ -992,15 +1000,15 @@ void ezspIncomingSenderEui64Handler(EmberEUI64 senderEui64)
 //------------------------------------------------------------------------------
 // Stack Callbacks for Dispatcher
 
-void emAfIncomingMessageCallback(EmberIncomingMessageType type,
-                                 EmberApsFrame *apsFrame,
-                                 uint8_t lastHopLqi,
-                                 int8_t lastHopRssi,
-                                 EmberNodeId sender,
-                                 uint8_t bindingIndex,
-                                 uint8_t addressIndex,
-                                 uint8_t messageLength,
-                                 uint8_t *messageContents)
+void sli_zigbee_af_incoming_message_callback(EmberIncomingMessageType type,
+                                             EmberApsFrame *apsFrame,
+                                             uint8_t lastHopLqi,
+                                             int8_t lastHopRssi,
+                                             EmberNodeId sender,
+                                             uint8_t bindingIndex,
+                                             uint8_t addressIndex,
+                                             uint8_t messageLength,
+                                             uint8_t *messageContents)
 {
   uint8_t sourceRouteOverhead;
   (void) emberAfPushCallbackNetworkIndex();
@@ -1014,12 +1022,12 @@ void emAfIncomingMessageCallback(EmberIncomingMessageType type,
   currentSender = sender;
   currentBindingIndex = bindingIndex;
   currentAddressIndex = addressIndex;
-  emAfIncomingMessageHandler(type,
-                             apsFrame,
-                             lastHopLqi,
-                             lastHopRssi,
-                             messageLength,
-                             messageContents);
+  sli_zigbee_af_incoming_message_handler(type,
+                                         apsFrame,
+                                         lastHopLqi,
+                                         lastHopRssi,
+                                         messageLength,
+                                         messageContents);
   currentSenderEui64IsValid = false;
   currentSender = EMBER_NULL_NODE_ID;
   currentBindingIndex = EMBER_NULL_BINDING;
@@ -1030,78 +1038,78 @@ void emAfIncomingMessageCallback(EmberIncomingMessageType type,
   (void) emberAfPopNetworkIndex();
 }
 
-extern void emAfMessageSent(EmberOutgoingMessageType type,
-                            uint16_t indexOrDestination,
-                            EmberApsFrame *apsFrame,
-                            uint8_t messageTag,
-                            EmberStatus status,
-                            uint8_t messageLength,
-                            uint8_t *messageContents);
+extern void sli_zigbee_af_message_sent(EmberOutgoingMessageType type,
+                                       uint16_t indexOrDestination,
+                                       EmberApsFrame *apsFrame,
+                                       uint8_t messageTag,
+                                       EmberStatus status,
+                                       uint8_t messageLength,
+                                       uint8_t *messageContents);
 
 // Called when a message we sent is acked by the destination or when an
 // ack fails to arrive after several retransmissions.
-void emAfMessageSentCallback(EmberOutgoingMessageType type,
-                             uint16_t indexOrDestination,
-                             EmberApsFrame *apsFrame,
-                             uint8_t messageTag,
-                             EmberStatus status,
-                             uint8_t messageLength,
-                             uint8_t *messageContents)
+void sli_zigbee_af_message_sent_callback(EmberOutgoingMessageType type,
+                                         uint16_t indexOrDestination,
+                                         EmberApsFrame *apsFrame,
+                                         uint8_t messageTag,
+                                         EmberStatus status,
+                                         uint8_t messageLength,
+                                         uint8_t *messageContents)
 {
 #ifdef SL_CATALOG_ZIGBEE_FRAGMENTATION_PRESENT
   // This call if returns true, ends up calling
-  // emAfFragmentationMessageSentHandler() when the last fragment was received.
-  if (emAfFragmentationMessageSent(apsFrame, status)) {
+  // sli_zigbee_af_fragmentation_message_sent_handler() when the last fragment was received.
+  if (sli_zigbee_af_fragmentation_message_sent(apsFrame, status)) {
     return;
   }
 #endif //SL_CATALOG_ZIGBEE_FRAGMENTATION_PRESENT
 
-  emAfMessageSentHandler(type,
-                         indexOrDestination,
-                         apsFrame,
-                         status,
-                         messageLength,
-                         messageContents,
-                         messageTag);
+  sli_zigbee_af_message_sent_handler(type,
+                                     indexOrDestination,
+                                     apsFrame,
+                                     status,
+                                     messageLength,
+                                     messageContents,
+                                     messageTag);
 
   // Generated dispatcher
-  emAfMessageSent(type,
-                  indexOrDestination,
-                  apsFrame,
-                  messageTag,
-                  status,
-                  messageLength,
-                  messageContents);
+  sli_zigbee_af_message_sent(type,
+                             indexOrDestination,
+                             apsFrame,
+                             messageTag,
+                             status,
+                             messageLength,
+                             messageContents);
 }
 
 #ifdef SL_CATALOG_ZIGBEE_FRAGMENTATION_PRESENT
-void emAfFragmentationMessageSentHandler(EmberOutgoingMessageType type,
-                                         uint16_t indexOrDestination,
-                                         EmberApsFrame *apsFrame,
-                                         uint8_t *buffer,
-                                         uint16_t bufLen,
-                                         EmberStatus status,
-                                         uint16_t messageTag)
+void sli_zigbee_af_fragmentation_message_sent_handler(EmberOutgoingMessageType type,
+                                                      uint16_t indexOrDestination,
+                                                      EmberApsFrame *apsFrame,
+                                                      uint8_t *buffer,
+                                                      uint16_t bufLen,
+                                                      EmberStatus status,
+                                                      uint16_t messageTag)
 {
   // the fragmented message is no longer in process
   emberAfDebugPrintln("%pend.", "Fragmentation:");
 
-  emAfMessageSentHandler(type,
-                         indexOrDestination,
-                         apsFrame,
-                         status,
-                         bufLen,
-                         buffer,
-                         messageTag);
+  sli_zigbee_af_message_sent_handler(type,
+                                     indexOrDestination,
+                                     apsFrame,
+                                     status,
+                                     bufLen,
+                                     buffer,
+                                     messageTag);
 
   // Generated dispatcher
-  emAfMessageSent(type,
-                  indexOrDestination,
-                  apsFrame,
-                  messageTag,
-                  status,
-                  bufLen,
-                  buffer);
+  sli_zigbee_af_message_sent(type,
+                             indexOrDestination,
+                             apsFrame,
+                             messageTag,
+                             status,
+                             bufLen,
+                             buffer);
 
   // EMZIGBEE-4437: setting back the buffers to the original in case someone set
   // that to something else.

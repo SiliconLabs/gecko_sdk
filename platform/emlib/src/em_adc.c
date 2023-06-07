@@ -386,8 +386,14 @@ void ADC_Init(ADC_TypeDef *adc, const ADC_Init_TypeDef *init)
     if ((adc->CTRL & _ADC_CTRL_ADCCLKMODE_MASK) == ADC_CTRL_ADCCLKMODE_SYNC)
 #endif
     {
-      EFM_ASSERT(presc >= ADC_PrescaleCalc(ADC_MAX_CLOCK, 0));
-      EFM_ASSERT(presc <= ADC_PrescaleCalc(ADC_MIN_CLOCK, 0));
+#if defined(_CMU_HFPERPRESCC_MASK)
+      uint32_t hfperFreq = CMU_ClockFreqGet(cmuClock_HFPERC);
+#else
+      uint32_t hfperFreq = CMU_ClockFreqGet(cmuClock_HFPER);
+#endif
+      uint32_t adcFreq = hfperFreq / (presc + 1);
+      EFM_ASSERT(adcFreq >= ADC_MIN_CLOCK);
+      EFM_ASSERT(adcFreq <= ADC_MAX_CLOCK);
     }
   }
 
@@ -407,6 +413,12 @@ void ADC_Init(ADC_TypeDef *adc, const ADC_Init_TypeDef *init)
   if (init->tailgate) {
     tmp |= ADC_CTRL_TAILGATE;
   }
+#if defined(_ADC_CTRL_SINGLEDMAWU_MASK)
+  /* make sure we don't clear the ADC_CTRL_SINGLEDMAWU bit if it has been initialized by ADC_InitSingle */
+  if (adc->CTRL & _ADC_CTRL_SINGLEDMAWU_MASK) {
+    tmp |= _ADC_CTRL_SINGLEDMAWU_MASK;
+  }
+#endif
   adc->CTRL = tmp;
 
 #if defined(_ADC_CTRL_ADCCLKMODE_MASK)
@@ -1012,8 +1024,6 @@ uint8_t ADC_PrescaleCalc(uint32_t adcFreq, uint32_t hfperFreq)
     adcFreq = ADC_MAX_CLOCK;
   } else if (adcFreq < ADC_MIN_CLOCK) {
     adcFreq = ADC_MIN_CLOCK;
-  } else {
-    /* Valid frequency. */
   }
 
   /* Use current HFPERCLK / HFPERCCLK frequency. */
@@ -1029,6 +1039,8 @@ uint8_t ADC_PrescaleCalc(uint32_t adcFreq, uint32_t hfperFreq)
   if (ret > 0U) {
     ret--;
   }
+
+  EFM_ASSERT(ret <= (_ADC_CTRL_PRESC_MASK >> _ADC_CTRL_PRESC_SHIFT));
 
   if (ret > (_ADC_CTRL_PRESC_MASK >> _ADC_CTRL_PRESC_SHIFT)) {
     ret = _ADC_CTRL_PRESC_MASK >> _ADC_CTRL_PRESC_SHIFT;

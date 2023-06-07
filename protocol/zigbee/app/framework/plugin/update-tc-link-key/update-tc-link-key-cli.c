@@ -21,21 +21,9 @@
 #include "app/framework/plugin/network-steering/network-steering.h"
 #include "app/framework/plugin/network-steering/network-steering-internal.h"
 
-#ifdef UC_BUILD
 #include "app/util/serial/sl_zigbee_command_interpreter.h"
 void emberAfPluginSetTCLinkKeyUpdateTimerCommand(sl_cli_command_arg_t *arguments)
 {
   uint32_t timeInMilliseconds = sl_cli_get_argument_uint32(arguments, 0);
   emberAfPluginSetTCLinkKeyUpdateTimerMilliSeconds(timeInMilliseconds);
 }
-#else //UC_BUILD
-// -----------------------------------------------------------------------------
-// Helper macros and functions
-
-void emberAfPluginSetTCLinkKeyUpdateTimerCommand(void)
-{
-  uint32_t timeInMilliseconds = (uint32_t)emberUnsignedCommandArgument(0);
-  emberAfPluginSetTCLinkKeyUpdateTimerMilliSeconds(timeInMilliseconds);
-}
-
-#endif // UC_BUILD

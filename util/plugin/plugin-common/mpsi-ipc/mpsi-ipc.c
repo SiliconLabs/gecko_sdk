@@ -97,7 +97,7 @@ void emberAfPluginMpsiIpcTickCallback(void)
   }
 }
 
-uint8_t emAfPluginMpsiIpcSendMessage(MpsiMessage_t* mpsiMessage)
+uint8_t sli_mpsi_ipc_send_message(MpsiMessage_t* mpsiMessage)
 {
   MessageQBuffer_t messageBuffer;
   int rv;

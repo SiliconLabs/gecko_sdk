@@ -29,6 +29,8 @@ enum op_support { kMvp, kTFLMrefF32, kTFLMrefI8 };
 
 struct OpData {
   op_support  supported;
+  float       activation_min_f32;
+  float       activation_max_f32;
   int         scratch_buffer_index;
   sli_mvp_ml_transpose_conv2d_s8_params_t op_params;
 
@@ -198,6 +200,10 @@ TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node)
 
   } else if (input->type == kTfLiteFloat32) {
     data->supported = kTFLMrefF32;
+    CalculateActivationRange(params->activation,
+                             &data->activation_min_f32,
+                             &data->activation_max_f32);
+
   } else {
     TF_LITE_KERNEL_LOG(context, "Type %s not currently supported.",
                        TfLiteTypeGetName(input->type));
@@ -218,7 +224,7 @@ TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node)
   if (bias != nullptr) {
     micro_context->DeallocateTempTfLiteTensor(bias);
   }
-  
+
   return kTfLiteOk;
 }
 
@@ -267,6 +273,8 @@ TfLiteStatus eval_tflm_int8(TfLiteContext* context,
   op_params.stride_width             = data->op_params.stride_width;
   op_params.padding_values.height    = data->op_params.pad_height;
   op_params.padding_values.width     = data->op_params.pad_width;
+  op_params.quantized_activation_min = data->op_params.output_activation_min;
+  op_params.quantized_activation_max = data->op_params.output_activation_max;
 
   reference_integer_ops::TransposeConv(op_params,
                                        data->per_channel_output_multiplier,
@@ -299,6 +307,8 @@ TfLiteStatus eval_float(TfLiteConvParams* params,
   op_params.padding_values.height  = data->op_params.pad_height;
   op_params.stride_width           = data->op_params.stride_width;
   op_params.stride_height          = data->op_params.stride_height;
+  op_params.float_activation_min   = data->activation_min_f32;
+  op_params.float_activation_max   = data->activation_max_f32;
 
   reference_ops::TransposeConv(op_params,
                                tflite::micro::GetTensorShape(input),
@@ -355,7 +365,9 @@ TfLiteRegistration Register_TRANSPOSE_CONV() {
           /*profiling_string=*/nullptr,
           /*builtin_code=*/0,
           /*custom_name=*/nullptr,
-          /*version=*/0};
+          /*version=*/0,
+          /*registration_external=*/nullptr
+  };
 }
 
 }  // namespace tflite

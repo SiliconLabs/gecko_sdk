@@ -46,8 +46,9 @@ static bool executingCallbacks = false;
 
 static LinkListItem* theList = NULL;
 
-const char emAfFileDescriptorDispatchPluginName[] = "FD Dispatch";
-#define PLUGIN_NAME emAfFileDescriptorDispatchPluginName
+static uint8_t cliLoopCount = 0;
+const char sli_zigbee_af_file_descriptor_dispatch_plugin_name[] = "FD Dispatch";
+#define PLUGIN_NAME sli_zigbee_af_file_descriptor_dispatch_plugin_name
 
 //#define DEBUG_ON
 #if defined(DEBUG_ON)
@@ -287,6 +288,7 @@ EmberStatus emberAfPluginFileDescriptorDispatchWaitForEvents(uint32_t timeoutMs)
   debugPrint("%p select() called, highestFd %d, timeout %d ms", PLUGIN_NAME, highestFd, timeoutMs);
 
   int status = 0;
+  int cliReadFd = sli_cli_get_pipe_read_fd();
   if (highestFd >= 0) {
     status = select(highestFd + 1,   // per select() manpage
                     &readSet,
@@ -295,13 +297,16 @@ EmberStatus emberAfPluginFileDescriptorDispatchWaitForEvents(uint32_t timeoutMs)
                     (timeoutMs != MAX_INT32U_VALUE
                      ? &timeoutStruct
                      : NULL));
-
-    // If the command is handled by the CLI component, read the data
-    // to empty the pipe so that it is ready for the next command.
-    if (sli_cli_is_input_handled()) {
-      char buff[SL_CLI_THREADED_HOST_PIPE_DATA_LENGTH];
+    cliLoopCount++;
+    // If the command is handled by the CLI component,
+    // or if the data is available to read on the CLI pipe read fd but is not handled
+    // in the CLI component for an amount of time,
+    // read the data to empty the pipe so that it is ready for the next command.
+    if (sli_cli_is_input_handled() || (status > 0 && cliLoopCount == MAX_INT8U_VALUE && FD_ISSET(cliReadFd, &readSet))) {
+      static char buff[SL_CLI_THREADED_HOST_PIPE_DATA_LENGTH];
       assert(SL_CLI_THREADED_HOST_PIPE_DATA_LENGTH
              == read(sli_cli_get_pipe_read_fd(), buff, SL_CLI_THREADED_HOST_PIPE_DATA_LENGTH));
+      cliLoopCount = 0;
     }
   }
   if (status < 0 && errno != EINTR) {

@@ -41,6 +41,10 @@ def handle_templates(configuration: Any) -> List[cc_data]:
             'cc_zwaveplusinfo_config.c.jinja'], 'endpoints'),
         cc_base('zw_cc_agi', [
             'cc_agi_config.c.jinja'], 'endpoints'),
+        cc_base('zw_cc_multi_channel', [
+            'cc_multi_channel_config.c.jinja'], 'endpoints'),
+        cc_base('zw_cc_central_scene', [
+            'cc_central_scene_config.c.jinja'], 'central_scene'),
     ]
     current_dir = os.path.dirname(os.path.abspath(__file__))
     templates_dir = os.path.join(current_dir, "templates")

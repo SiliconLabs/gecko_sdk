@@ -31,4 +31,4 @@ categories.
 
 Details about the model architectures and scripts for generating the models can
 be found in the [Silicon Labs machine learning applications](https://github.com/SiliconLabs/machine_learning_applications/tree/main/) repository, under
-```voice/keyword_spotting/model```.
+```application/voice/keyword_spotting/model```.

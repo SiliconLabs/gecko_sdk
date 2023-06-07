@@ -39,7 +39,7 @@ template_contribution:
     value:
       group: command-relay
       name: add
-      handler: emAfPluginCommandRelayAddCommand
+      handler: sli_zigbee_af_command_relay_add_command
       help: Retransmit commands from inDevice to outDevice.
       argument:
       - type: hex
@@ -58,7 +58,7 @@ template_contribution:
     value:
       group: command-relay
       name: remove
-      handler: emAfPluginCommandRelayRemoveCommand
+      handler: sli_zigbee_af_command_relay_removeCommand
       help: Deletes a relay between devices.
       argument:
       - type: hex
@@ -77,31 +77,31 @@ template_contribution:
     value:
       group: command-relay
       name: clear
-      handler: emAfPluginCommandRelayClearCommand
+      handler: sli_zigbee_af_command_relay_clear_command
       help: Clear all relays.
   - name: cli_command
     value:
       group: command-relay
       name: save
-      handler: emAfPluginCommandRelaySaveCommand
+      handler: sli_zigbee_af_command_relay_save_command
       help: Save to disk.
   - name: cli_command
     value:
       group: command-relay
       name: load
-      handler: emAfPluginCommandRelayLoadCommand
+      handler: sli_zigbee_af_command_relay_load_command
       help: Load from disk.
   - name: cli_command
     value:
       group: command-relay
       name: print
-      handler: emAfPluginCommandRelayPrintCommand
+      handler: sli_zigbee_af_command_relay_printCommand
       help: Print relays.
   - name: zigbee_af_callback
     value:
       callback_type: pre_command_received
-      function_name: emAfPluginCommandRelayPreCommandReceivedCallback    
+      function_name: sli_zigbee_af_command_relay_pre_command_received_callback    
   - name: zigbee_af_device_table_callback
     value:
       callback_type: device_left
-      function_name: emAfPluginCommandRelayRemoveDeviceByEui64
+      function_name: sli_zigbee_af_command_relay_remove_device_by_eui64

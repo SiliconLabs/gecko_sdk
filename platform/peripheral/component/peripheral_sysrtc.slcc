@@ -28,3 +28,5 @@ documentation:
       condition: [device_sdid_215]
     - page: emlib/api/efr32xg25/group-sysrtc
       condition: [device_sdid_220]
+    - page: emlib/api/efr32xg28/group-sysrtc
+      condition: [device_sdid_235]

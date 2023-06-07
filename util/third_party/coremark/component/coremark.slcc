@@ -2,9 +2,12 @@ id: coremark
 label: "Coremark Benchmark"
 package: platform
 description: >
-    CoreMark is a simple, yet sophisticated benchmark that is designed specifically to
-    test the functionality of a processor core. Running CoreMark produces a single-number
+    CoreMark component provides a way to measure the performance of central processing units (CPU)
+    used in embedded systems, CoreMark is a simple, yet sophisticated benchmark that is designed
+    specifically to test the functionality of a processor core. Running CoreMark produces a single-number
     score allowing users to make quick comparisons between processors.
+    Note:
+    For more information related to CoreMark library, please refer https://www.eembc.org/coremark/
 category: Application|Benchmark
 quality: production
 root_path: util/third_party/coremark

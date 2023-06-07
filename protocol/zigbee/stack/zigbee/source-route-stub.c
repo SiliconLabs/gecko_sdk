@@ -27,25 +27,25 @@
 
 //Mtorr related functions
 
-void emSourceRouteUpdateEventHandler(void)
+void sli_zigbee_source_route_update_event_handler(void)
 {
 }
 
-void emConcentratorSupportRouteErrorHandler(EmberStatus status,
-                                            EmberNodeId nodeId)
+void sli_zigbee_concentrator_support_route_error_handler(EmberStatus status,
+                                                         EmberNodeId nodeId)
 {
   (void)status;
   (void)nodeId;
 }
 
 //source route table related functions
-uint8_t emSourceRouteFindIndex(EmberNodeId id)
+uint8_t sli_zigbee_source_route_find_index(EmberNodeId id)
 {
   return SOURCE_ROUTE_NULL_INDEX;
 }
 
-uint8_t emSourceRouteAddEntryWithCloserNextHop(EmberNodeId newId,
-                                               EmberNodeId closerNodeId)
+uint8_t sli_zigbee_source_route_add_entryWithCloserNextHop(EmberNodeId newId,
+                                                           EmberNodeId closerNodeId)
 {
   (void)newId;
   (void)closerNodeId;
@@ -62,10 +62,10 @@ uint8_t emberGetSourceRouteTableTotalSize(void)
   return 0;
 }
 
-void emChangeSourceRouteEntry(EmberNodeId newChildId,
-                              EmberNodeId newParentId,
-                              bool ourChild,
-                              bool deviceLeft)
+void sli_zigbee_change_source_route_entry(EmberNodeId newChildId,
+                                          EmberNodeId newParentId,
+                                          bool ourChild,
+                                          bool deviceLeft)
 {
   (void)newChildId;
   (void)newParentId;
@@ -73,25 +73,25 @@ void emChangeSourceRouteEntry(EmberNodeId newChildId,
   (void)deviceLeft;
 }
 
-void emIncomingRouteRecord(EmberNodeId source,
-                           EmberEUI64 sourceEui,
-                           uint8_t relayCount,
-                           EmberMessageBuffer header,
-                           uint8_t relayListIndex)
+void sli_zigbee_incoming_route_record(EmberNodeId source,
+                                      EmberEUI64 sourceEui,
+                                      uint8_t relayCount,
+                                      EmberMessageBuffer header,
+                                      uint8_t relayListIndex)
 {
   bool apiConsumed = true;
-  emEnableApplicationCurrentNetwork(); // SET app current network
+  sli_zigbee_enable_application_current_network(); // SET app current network
   emberOverrideIncomingRouteRecordHandler(source,
                                           sourceEui,
                                           relayCount,
                                           header,
                                           relayListIndex,
                                           &apiConsumed);
-  emRestoreCurrentNetwork();   // RESTORE
+  sli_zigbee_restore_current_network();   // RESTORE
 }
 
-uint8_t emAppendSourceRoute(EmberNodeId destination,
-                            EmberMessageBuffer* header)
+uint8_t sli_zigbee_append_source_route(EmberNodeId destination,
+                                       EmberMessageBuffer* header)
 {
   bool appConsumed = true;
   return emberOverrideAppendSourceRouteHandler(destination, header, &appConsumed);
@@ -113,11 +113,11 @@ uint8_t emberGetSourceRouteOverhead(EmberNodeId destination)
   return 0;
 }
 
-void emSourceRouteTableInit(void)
+void sli_zigbee_source_route_table_init(void)
 {
 }
 
-void emSourceRouteUpdateInit(void)
+void sli_zigbee_source_route_update_init(void)
 {
 }
 

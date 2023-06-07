@@ -34,6 +34,7 @@
 #include "thread/tmf.hpp"
 
 #include "common/locator_getters.hpp"
+#include "net/ip6_types.hpp"
 
 namespace ot {
 namespace Tmf {
@@ -41,10 +42,7 @@ namespace Tmf {
 //----------------------------------------------------------------------------------------------------------------------
 // MessageInfo
 
-void MessageInfo::SetSockAddrToRloc(void)
-{
-    SetSockAddr(Get<Mle::MleRouter>().GetMeshLocal16());
-}
+void MessageInfo::SetSockAddrToRloc(void) { SetSockAddr(Get<Mle::MleRouter>().GetMeshLocal16()); }
 
 Error MessageInfo::SetSockAddrToRlocPeerAddrToLeaderAloc(void)
 {
@@ -87,10 +85,7 @@ Agent::Agent(Instance &aInstance)
     SetResourceHandler(&HandleResource);
 }
 
-Error Agent::Start(void)
-{
-    return Coap::Start(kUdpPort, Ip6::kNetifThread);
-}
+Error Agent::Start(void) { return Coap::Start(kUdpPort, Ip6::kNetifThread); }
 
 template <> void Agent::HandleTmf<kUriRelayRx>(Message &aMessage, const Ip6::MessageInfo &aMessageInfo)
 {
@@ -105,9 +100,9 @@ template <> void Agent::HandleTmf<kUriRelayRx>(Message &aMessage, const Ip6::Mes
 #endif
 }
 
-bool Agent::HandleResource(CoapBase &              aCoapBase,
-                           const char *            aUriPath,
-                           Message &               aMessage,
+bool Agent::HandleResource(CoapBase               &aCoapBase,
+                           const char             *aUriPath,
+                           Message                &aMessage,
                            const Ip6::MessageInfo &aMessageInfo)
 {
     return static_cast<Agent &>(aCoapBase).HandleResource(aUriPath, aMessage, aMessageInfo);
@@ -129,6 +124,7 @@ bool Agent::HandleResource(const char *aUriPath, Message &aMessage, const Ip6::M
         Case(kUriEnergyScan, EnergyScanServer);
         Case(kUriActiveGet, MeshCoP::ActiveDatasetManager);
         Case(kUriPendingGet, MeshCoP::PendingDatasetManager);
+        Case(kUriPanIdQuery, PanIdQueryServer);
 
 #if OPENTHREAD_FTD
         Case(kUriAddressQuery, AddressResolver);
@@ -143,7 +139,6 @@ bool Agent::HandleResource(const char *aUriPath, Message &aMessage, const Ip6::M
         Case(kUriCommissionerGet, NetworkData::Leader);
         Case(kUriCommissionerSet, NetworkData::Leader);
         Case(kUriAnnounceBegin, AnnounceBeginServer);
-        Case(kUriPanIdQuery, PanIdQueryServer);
         Case(kUriRelayTx, MeshCoP::JoinerRouter);
 #endif
 
@@ -170,11 +165,12 @@ bool Agent::HandleResource(const char *aUriPath, Message &aMessage, const Ip6::M
         Case(kUriAnycastLocate, AnycastLocator);
 #endif
 
-#if OPENTHREAD_FTD || OPENTHREAD_CONFIG_TMF_NETWORK_DIAG_MTD_ENABLE
-        Case(kUriDiagnosticGetRequest, NetworkDiagnostic::NetworkDiagnostic);
-        Case(kUriDiagnosticGetQuery, NetworkDiagnostic::NetworkDiagnostic);
-        Case(kUriDiagnosticGetAnswer, NetworkDiagnostic::NetworkDiagnostic);
-        Case(kUriDiagnosticReset, NetworkDiagnostic::NetworkDiagnostic);
+        Case(kUriDiagnosticGetRequest, NetworkDiagnostic::Server);
+        Case(kUriDiagnosticGetQuery, NetworkDiagnostic::Server);
+        Case(kUriDiagnosticReset, NetworkDiagnostic::Server);
+
+#if OPENTHREAD_CONFIG_TMF_NETDIAG_CLIENT_ENABLE
+        Case(kUriDiagnosticGetAnswer, NetworkDiagnostic::Client);
 #endif
 
 #if OPENTHREAD_FTD && OPENTHREAD_CONFIG_BACKBONE_ROUTER_ENABLE
@@ -228,6 +224,53 @@ exit:
     return isTmf;
 }
 
+uint8_t Agent::PriorityToDscp(Message::Priority aPriority)
+{
+    uint8_t dscp = Ip6::kDscpTmfNormalPriority;
+
+    switch (aPriority)
+    {
+    case Message::kPriorityNet:
+        dscp = Ip6::kDscpTmfNetPriority;
+        break;
+
+    case Message::kPriorityHigh:
+    case Message::kPriorityNormal:
+        break;
+
+    case Message::kPriorityLow:
+        dscp = Ip6::kDscpTmfLowPriority;
+        break;
+    }
+
+    return dscp;
+}
+
+Message::Priority Agent::DscpToPriority(uint8_t aDscp)
+{
+    Message::Priority priority = Message::kPriorityNet;
+
+    // If the sender does not use TMF specific DSCP value, we use
+    // `kPriorityNet`. This ensures that senders that do not use the
+    // new value (older firmware) experience the same behavior as
+    // before where all TMF message were treated as `kPriorityNet`.
+
+    switch (aDscp)
+    {
+    case Ip6::kDscpTmfNetPriority:
+    default:
+        break;
+    case Ip6::kDscpTmfNormalPriority:
+        priority = Message::kPriorityNormal;
+        break;
+    case Ip6::kDscpTmfLowPriority:
+        priority = Message::kPriorityLow;
+        break;
+    }
+
+    return priority;
+}
+
 #if OPENTHREAD_CONFIG_DTLS_ENABLE
 
 SecureAgent::SecureAgent(Instance &aInstance)
@@ -236,9 +279,9 @@ SecureAgent::SecureAgent(Instance &aInstance)
     SetResourceHandler(&HandleResource);
 }
 
-bool SecureAgent::HandleResource(CoapBase &              aCoapBase,
-                                 const char *            aUriPath,
-                                 Message &               aMessage,
+bool SecureAgent::HandleResource(CoapBase               &aCoapBase,
+                                 const char             *aUriPath,
+                                 Message                &aMessage,
                                  const Ip6::MessageInfo &aMessageInfo)
 {
     return static_cast<SecureAgent &>(aCoapBase).HandleResource(aUriPath, aMessage, aMessageInfo);

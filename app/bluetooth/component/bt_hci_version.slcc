@@ -4,9 +4,12 @@ package: "Bluetooth"
 description: >
   Provides vendor specific commands to HCI to read version information.
   Version information by default is the Bluetooth software version, this can be customized in sl_bt_hci_version_config.h file.
-category: "Bluetooth|Controller"
+category: Bluetooth|Host Controller Interface (HCI)
 quality: "production"
 root_path: "app/bluetooth/common/hci_version"
+tag:
+  - No-Code
+
 config_file:
   - path: "config/sl_bt_hci_version_config.h"
 include:

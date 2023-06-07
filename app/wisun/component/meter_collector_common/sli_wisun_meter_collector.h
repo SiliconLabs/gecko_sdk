@@ -88,8 +88,10 @@
 
 /// Meter entry type definition
 typedef struct sl_wisun_meter_entry {
-  /// Used slot indication
-  bool used;
+  /// Schedule in millisecond
+  uint32_t schedule;
+  /// Schedule tick counter
+  uint32_t schedule_tick_counter;
   /// Address structure for meter
   wisun_addr_t addr;
   /// Request sent timestamp
@@ -123,7 +125,7 @@ typedef struct sl_wisun_meter_request {
 typedef sl_wisun_meter_entry_t * (*sl_wisun_collector_recv_hnd_t)(int32_t);
 
 /// Collector send handler type definition
-typedef bool (*sl_wisun_collector_send_hnd_t)(int32_t, sl_wisun_meter_entry_t *, sl_wisun_meter_request_t *);
+typedef sl_status_t (*sl_wisun_collector_send_hnd_t)(int32_t, sl_wisun_meter_entry_t *, sl_wisun_meter_request_t *);
 
 /// Collector measurement timeout handler type definition
 typedef void (*sl_wisun_collector_timeout_hnd_t)(sl_wisun_meter_entry_t *);
@@ -155,6 +157,8 @@ typedef struct sl_wisun_meter_hnd {
 typedef struct sl_wisun_meter_packet {
   /// ID
   uint16_t id;
+  /// Schedule    [millisecond]
+  uint32_t schedule;
   /// Temperature [milliCelsius]
   int32_t temperature;
   /// Humidity    [Rel% * 1000]
@@ -168,6 +172,8 @@ SL_PACK_START(1)
 typedef struct sl_wisun_meter_packet_packed {
   /// ID
   uint16_t id;
+  /// Schedule    [millisecond]
+  uint32_t schedule;
   /// Temperature [milliCelsius]
   int32_t temperature;
   /// Humidity    [Rel% * 1000]

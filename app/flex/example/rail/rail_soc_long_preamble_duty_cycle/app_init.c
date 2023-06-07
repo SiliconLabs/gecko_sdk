@@ -47,6 +47,7 @@
 #include "sl_duty_cycle_config.h"
 #include "sl_duty_cycle_utility.h"
 #include "sl_power_manager.h"
+#include "sl_flex_rail_channel_selector.h"
 
 #if DUTY_CYCLE_USE_LCD_BUTTON == 1
   #include "app_graphics.h"
@@ -115,7 +116,7 @@ RAIL_Handle_t app_init(void)
   bit_rate = RAIL_GetBitRate(rail_handle);
 
   // EFR32xG23 chips support the new RadioConfigurator Fast Preamble Settings
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG != 3) && (_SILICON_LABS_32B_SERIES_2_CONFIG != 4)  && (_SILICON_LABS_32B_SERIES_2_CONFIG != 5)
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG != 3) && (_SILICON_LABS_32B_SERIES_2_CONFIG != 4)  && (_SILICON_LABS_32B_SERIES_2_CONFIG != 5) && (_SILICON_LABS_32B_SERIES_2_CONFIG != 8)
   // preamble length in bits
   uint16_t preamble_bit_length = 0;
 
@@ -160,13 +161,13 @@ RAIL_Handle_t app_init(void)
 #if defined(SL_CATALOG_APP_LOG_PRESENT)
   // CLI info message
   print_sample_app_name("Long Preamble Duty Cycle");
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG != 3) && (_SILICON_LABS_32B_SERIES_2_CONFIG != 4)  && (_SILICON_LABS_32B_SERIES_2_CONFIG != 5)
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG != 3) && (_SILICON_LABS_32B_SERIES_2_CONFIG != 4) && (_SILICON_LABS_32B_SERIES_2_CONFIG != 5) && (_SILICON_LABS_32B_SERIES_2_CONFIG != 8)
   app_log_info("Preamble length %d for bitrate %d b/s with %d us off time\n",
                preamble_bit_length,
                bit_rate,
                duty_cycle_config.delay);
 #else
-  app_log_info("Bitrate %d b/s with %d us off time\n",
+  app_log_info("Bitrate %d b/s with %d us off time. Duty cycling with signal qualifier.\n",
                bit_rate,
                duty_cycle_config.delay);
 #endif
@@ -182,7 +183,7 @@ RAIL_Handle_t app_init(void)
   RAIL_EnableRxDutyCycle(rail_handle, true);
 
   // Start RX
-  RAIL_StartRx(rail_handle, CHANNEL, NULL);
+  RAIL_StartRx(rail_handle, get_selected_channel(), NULL);
 
 #if DUTY_CYCLE_ALLOW_EM2 == 1
   // EM2 sleep level

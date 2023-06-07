@@ -36,6 +36,7 @@
 #include <assert.h>
 #include <string.h>
 #include "sl_wisun_coap.h"
+#include "sl_wisun_coap_rhnd.h"
 #include "cmsis_os2.h"
 #include "sl_cmsis_os2_common.h"
 
@@ -107,8 +108,8 @@ __STATIC_INLINE void _wisun_coap_mutex_release(void);
  * @param[in] hex_format enable or disable hex format
  *****************************************************************************/
 __STATIC_INLINE void _pretty_buff_print(const uint8_t *buff_ptr,
-                                      const uint16_t len,
-                                      const bool hex_format);
+                                        const uint16_t len,
+                                        const bool hex_format);
 // -----------------------------------------------------------------------------
 //                                Global Variables
 // -----------------------------------------------------------------------------
@@ -128,11 +129,6 @@ static sl_wisun_coap_t _coap;
 static osMutexId_t _wisun_coap_mtx;
 
 /**************************************************************************//**
- * @brief CoAP lib state variable
- *****************************************************************************/
-static bool _is_initialized = false;
-
-/**************************************************************************//**
  * @brief Wi-SUN CoAP mutex attribute
  *****************************************************************************/
 static const osMutexAttr_t _wisun_coap_mtx_attr = {
@@ -147,14 +143,10 @@ static const osMutexAttr_t _wisun_coap_mtx_attr = {
 // -----------------------------------------------------------------------------
 
 /* Init CoAP descriptor */
-bool sl_wisun_coap_init(const sl_wisun_coap_tx_callback tx_callback,
+void sl_wisun_coap_init(const sl_wisun_coap_tx_callback tx_callback,
                         const sl_wisun_coap_rx_callback rx_callback,
                         const sl_wisun_coap_version_t   version)
 {
-  bool rval = false;
-
-  _is_initialized = false;
-
   // init wisun coap mutex
   _wisun_coap_mtx = osMutexNew(&_wisun_coap_mtx_attr);
   assert(_wisun_coap_mtx != NULL);
@@ -166,36 +158,23 @@ bool sl_wisun_coap_init(const sl_wisun_coap_tx_callback tx_callback,
   _wisun_coap_mem_init();
 #endif
   // init handler
-  _coap.malloc      = sl_wisun_coap_malloc;                    // malloc
-  _coap.free        = sl_wisun_coap_free;                      // free
+  _coap.malloc      = sl_wisun_coap_malloc;                       // malloc
+  _coap.free        = sl_wisun_coap_free;                         // free
   _coap.tx_callback = tx_callback == NULL
                       ? &_default_coap_tx_callback : tx_callback; // tx callback
   _coap.rx_callback = rx_callback == NULL
                       ? &_default_coap_rx_callback : rx_callback; // rx callback
-  _coap.version     = version;                                 // coap version
+  _coap.version     = version;                                    // coap version
 
   // lib handler init
   _coap.handler     = sn_coap_protocol_init(_coap.malloc,
                                             _coap.free,
                                             _coap.tx_callback,
                                             _coap.rx_callback);
-  _is_initialized = _coap.handler == NULL ? false : true;
-  rval = _is_initialized;
+
   _wisun_coap_mutex_release();
 
-  // return with the result of protocol init
-  return rval;
-}
-
-/* Get state */
-bool sl_wisun_coap_is_initialized(void)
-{
-  bool rval = false;
-  _wisun_coap_mutex_acquire();
-  rval = _is_initialized;
-  _wisun_coap_mutex_release();
-
-  return rval;
+  sl_wisun_coap_rhnd_init();
 }
 
 /* Wi-SUN CoAP malloc */
@@ -285,7 +264,7 @@ void sl_wisun_coap_print_packet(const sl_wisun_coap_packet_t *packet, const bool
     printf("n/a\",\n");
   } else {
     _pretty_buff_print(packet->token_ptr, (uint16_t) packet->token_len, hex_format);
-    printf(",\"\n");
+    printf("\",\n");
   }
 
   // uri path
@@ -405,13 +384,17 @@ static int8_t _default_coap_rx_callback(sn_coap_hdr_s *header, sn_nsdl_addr_s *a
 /* Mutex acquire */
 __STATIC_INLINE void _wisun_coap_mutex_acquire(void)
 {
-  assert(osMutexAcquire(_wisun_coap_mtx, osWaitForever) == osOK);
+  if (osKernelGetState() == osKernelRunning) {
+    assert(osMutexAcquire(_wisun_coap_mtx, osWaitForever) == osOK);
+  }
 }
 
 /* Mutex release */
 __STATIC_INLINE void _wisun_coap_mutex_release(void)
 {
-  assert(osMutexRelease(_wisun_coap_mtx) == osOK);
+  if (osKernelGetState() == osKernelRunning) {
+    assert(osMutexRelease(_wisun_coap_mtx) == osOK);
+  }
 }
 
 /* Pretty buffer printer */

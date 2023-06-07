@@ -18,9 +18,7 @@
 #include "af.h"
 #include "door-lock-server.h"
 
-#ifdef UC_BUILD
 #include "zap-cluster-command-parser.h"
-#endif
 
 static void setActuatorEnable(void)
 {
@@ -68,26 +66,21 @@ static void setLanguage(void)
   }
 }
 
-void emberAfPluginDoorLockServerInitCallback(SLXU_INIT_ARG)
+void emberAfPluginDoorLockServerInitCallback(uint8_t init_level)
 {
-  SLXU_INIT_UNUSED_ARG;
+  (void)init_level;
 
-#ifndef UC_BUILD
-  // In UC this function is template-contributed directly in the event_init
-  // context.
-  emAfPluginDoorLockServerInitEvents();
-#endif
-  emAfPluginDoorLockServerInitUser();
-  emAfPluginDoorLockServerInitSchedule();
+  sli_zigbee_af_door_lock_server_init_user();
+  sli_zigbee_af_door_lock_server_init_schedule();
 
   setActuatorEnable();
   setDoorState();
   setLanguage();
 }
 
-void emAfPluginDoorLockServerWriteAttributes(const EmAfPluginDoorLockServerAttributeData *data,
-                                             uint8_t dataLength,
-                                             const char *description)
+void sli_zigbee_af_door_lock_server_write_attributes(const sli_zigbee_af_door_lock_server_attribute_data *data,
+                                                     uint8_t dataLength,
+                                                     const char *description)
 {
   for (uint8_t i = 0; i < dataLength; i++) {
     EmberAfStatus status
@@ -105,7 +98,7 @@ void emAfPluginDoorLockServerWriteAttributes(const EmAfPluginDoorLockServerAttri
   }
 }
 
-EmberAfStatus emAfPluginDoorLockServerNoteDoorStateChanged(EmberAfDoorState state)
+EmberAfStatus sli_zigbee_af_door_lock_server_note_door_state_changed(EmberAfDoorState state)
 {
   EmberAfStatus status = EMBER_ZCL_STATUS_SUCCESS;
 
@@ -146,8 +139,6 @@ EmberAfStatus emAfPluginDoorLockServerNoteDoorStateChanged(EmberAfDoorState stat
 
   return status;
 }
-
-#ifdef UC_BUILD
 
 bool emberAfDoorLockClusterLockDoorCallback(EmberAfClusterCommand *cmd);
 bool emberAfDoorLockClusterUnlockDoorCallback(EmberAfClusterCommand *cmd);
@@ -335,5 +326,3 @@ uint32_t emberAfDoorLockClusterServerCommandParse(sl_service_opcode_t opcode,
           ? EMBER_ZCL_STATUS_SUCCESS
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
-
-#endif // UC_BUILD

@@ -34,7 +34,7 @@
 
 #include "em_common.h"
 #include "app_assert.h"
-#include "sl_simple_timer.h"
+#include "app_timer.h"
 
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
@@ -64,9 +64,9 @@
 #define NO_CALLBACK_DATA               (void *)NULL
 
 // periodic timer handle
-static sl_simple_timer_t restart_timer;
+static app_timer_t restart_timer;
 // periodic timer callback
-static void prov_decor_restart_timer_cb(sl_simple_timer_t *handle,
+static void prov_decor_restart_timer_cb(app_timer_t *handle,
                                         void *data);
 
 // -----------------------------------------------------------------------------
@@ -179,11 +179,11 @@ void sl_btmesh_handle_provisioning_decorator_event(sl_btmesh_msg_t *evt)
                SL_BTMESH_PROVISIONING_DECORATOR_RESTART_TIMER_TIMEOUT_CFG_VAL);
 
       sl_status_t sc =
-        sl_simple_timer_start(&restart_timer,
-                              SL_BTMESH_PROVISIONING_DECORATOR_RESTART_TIMER_TIMEOUT_CFG_VAL,
-                              prov_decor_restart_timer_cb,
-                              NO_CALLBACK_DATA,
-                              false);
+        app_timer_start(&restart_timer,
+                        SL_BTMESH_PROVISIONING_DECORATOR_RESTART_TIMER_TIMEOUT_CFG_VAL,
+                        prov_decor_restart_timer_cb,
+                        NO_CALLBACK_DATA,
+                        false);
       app_assert_status_f(sc, "Failed to start timer");
       break;
     }
@@ -199,7 +199,7 @@ void sl_btmesh_handle_provisioning_decorator_event(sl_btmesh_msg_t *evt)
  * @param[in] handle  Pointer to the timer handle
  * @param[in] data    Pointer to callback data
  ******************************************************************************/
-static void prov_decor_restart_timer_cb(sl_simple_timer_t *handle,
+static void prov_decor_restart_timer_cb(app_timer_t *handle,
                                         void *data)
 {
   (void)data;

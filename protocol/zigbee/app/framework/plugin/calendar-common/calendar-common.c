@@ -39,9 +39,9 @@ uint32_t nonDisablementCalendarId  = EMBER_AF_PLUGIN_CALENDAR_COMMON_INVALID_CAL
 //-----------------------------------------------------------------------------
 
 // Templated to the "local_data_init" context.
-void emberAfPluginCalendarCommonInitCallback(SLXU_INIT_ARG)
+void emberAfPluginCalendarCommonInitCallback(uint8_t init_level)
 {
-  SLXU_INIT_UNUSED_ARG;
+  (void)init_level;
 
   uint8_t i;
   for (i = 0; i < EMBER_AF_PLUGIN_CALENDAR_COMMON_TOTAL_CALENDARS; i++) {
@@ -139,12 +139,12 @@ bool emberAfCalendarCommonSetCalInfo(uint8_t index,
   return true;
 }
 
-
-
-
-
-
-
+//
+/*
+ * Note: Nested and overlapping calendars are not allowed. SE specifications
+ * elaborate more on the details in PublishCalendar Command description.
+ */
+//
 bool emberAfCalendarCommonAddCalInfo(uint32_t providerId,
                                      uint32_t issuerEventId,
                                      uint32_t issuerCalendarId,

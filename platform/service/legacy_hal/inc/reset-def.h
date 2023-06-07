@@ -92,12 +92,12 @@
   #undef BOOTLOADER
 #endif
 
-//[[
+//
 //   The first 3 (unknown, fib, and bootloader) reset base types and their
 //     extended values should never be changed, as they are used by
 //     bootloaders in the field which can never be changed.
 //   The later reset base and extended types may be changed over time
-//]]
+//
 
 RESET_BASE_DEF(UNKNOWN, 0x00U, "UNK")                    // Underterminable cause
 RESET_EXT_DEF(UNKNOWN, UNKNOWN, 0x00U, "UNK")               // Undeterminable cause
@@ -136,7 +136,7 @@ RESET_EXT_DEF(BOOTLOADER, FORCE, 0x05U, "FRC")                 // Forced bootloa
 RESET_EXT_DEF(BOOTLOADER, OTAVALID, 0x06U, "OTA")              // OTA Bootloader mode activation
 RESET_EXT_DEF(BOOTLOADER, DEEPSLEEP, 0x07U, "DSL")             // Bootloader initiated deep sleep
 
-//[[ -- Reset types below here may be changed in the future if absolutely necessary -- ]]
+// -- Reset types below here may be changed in the future if absolutely necessary --
 
 RESET_BASE_DEF(EXTERNAL, 0x03U, "EXT")                     // External reset trigger
 RESET_EXT_DEF(EXTERNAL, UNKNOWN, 0x00U, "UNK")                // Unknown external cause (should never occur)

@@ -68,7 +68,7 @@ enum {
 #define OTA_TAG_MANUFACTURER_SPECIFIC_END       0xFFFF
 
 extern EmberNodeId upgradeServerNodeId;
-extern const uint8_t emAfOtaMinMessageLengths[];
+extern const uint8_t sli_zigbee_af_ota_min_message_lengths[];
 
 #define EM_AF_OTA_MAX_COMMAND_ID ZCL_QUERY_SPECIFIC_FILE_RESPONSE_COMMAND_ID
 
@@ -90,9 +90,9 @@ extern const uint8_t emAfOtaMinMessageLengths[];
  * Zigbee OTA updates
  *
  */
-EmberAfOtaImageId emAfOtaCreateEmberAfOtaImageIdStruct(uint16_t manufacturerId,
-                                                       uint16_t imageType,
-                                                       uint32_t fileVersion);
+EmberAfOtaImageId sli_zigbee_af_ota_create_ember_af_ota_image_id_struct(uint16_t manufacturerId,
+                                                                        uint16_t imageType,
+                                                                        uint32_t fileVersion);
 
 /** @brief Parses the Image ID from message
  *
@@ -104,9 +104,9 @@ EmberAfOtaImageId emAfOtaCreateEmberAfOtaImageIdStruct(uint16_t manufacturerId,
  *
  * @note This assumes the message has already been validated for its length
  */
-uint8_t emAfOtaParseImageIdFromMessage(EmberAfOtaImageId* returnId,
-                                       const uint8_t* buffer,
-                                       uint8_t length);
+uint8_t sli_zigbee_af_ota_parse_image_id_from_message(EmberAfOtaImageId* returnId,
+                                                      const uint8_t* buffer,
+                                                      uint8_t length);
 
 #if defined(EMBER_AF_PRINT_CORE)
 /** @brief Sets the starting and end offset for percentage prints
@@ -114,7 +114,7 @@ uint8_t emAfOtaParseImageIdFromMessage(EmberAfOtaImageId* returnId,
  * @param startingOffset Starting offset
  * @param endOffset End Offset
  */
-void emAfPrintPercentageSetStartAndEnd(uint32_t startingOffset, uint32_t endOffset);
+void sli_zigbee_af_print_percentage_set_start_and_end(uint32_t startingOffset, uint32_t endOffset);
 
 /** @brief Prints the percentage Update
  *
@@ -125,9 +125,9 @@ void emAfPrintPercentageSetStartAndEnd(uint32_t startingOffset, uint32_t endOffs
  * @return uint8_t percentage completed
  *
  */
-uint8_t emAfPrintPercentageUpdate(const char * prefixString,
-                                  uint8_t updateFrequency,
-                                  uint32_t currentOffset);
+uint8_t sli_zigbee_af_print_percentage_update(const char * prefixString,
+                                              uint8_t updateFrequency,
+                                              uint32_t currentOffset);
 
 /** @brief Calculate percentage
  *
@@ -137,9 +137,9 @@ uint8_t emAfPrintPercentageUpdate(const char * prefixString,
  * @return Percentage complete
  *
  */
-uint8_t emAfCalculatePercentage(uint32_t currentOffset, uint32_t imageSize);
+uint8_t sli_zigbee_af_calculate_percentage(uint32_t currentOffset, uint32_t imageSize);
 #else
-  #define emAfPrintPercentageSetStartAndEnd(x, y)
-  #define emAfPrintPercentageUpdate(x, y, z)
-  #define emAfCalculatePercentage(x, y) (0)
+  #define sli_zigbee_af_print_percentage_set_start_and_end(x, y)
+  #define sli_zigbee_af_print_percentage_update(x, y, z)
+  #define sli_zigbee_af_calculate_percentage(x, y) (0)
 #endif

@@ -1189,6 +1189,7 @@ typedef enum EZwaveCommandType
    * @param[out] GetTxPowerMaximumSupported.tx_power_max_supported maximum settable tx power in deci dBm
    */
   EZWAVECOMMANDTYPE_ZW_GET_TX_POWER_MAX_SUPPORTED,
+  EZWAVECOMMANDTYPE_REQUESTNODETYPE_NEIGHBORUPDATE, // 134
 
   NUM_EZWAVECOMMANDTYPE
 } EZwaveCommandType;
@@ -1232,6 +1233,7 @@ typedef enum EZwaveCommandStatusType
   EZWAVECOMMANDSTATUS_PM_SET_POWERDOWN_CALLBACK,                    /**< EZWAVECOMMANDSTATUS_PM_SET_POWERDOWN_CALLBACK */
   EZWAVECOMMANDSTATUS_ZW_GET_INCLUDED_NODES,                        /**< EZWAVECOMMANDSTATUS_ZW_GET_INCLUDED_NODES */
   EZWAVECOMMANDSTATUS_ZW_REQUESTNODENEIGHBORUPDATE,                 /**< EZWAVECOMMANDSTATUS_ZW_REQUESTNODENEIGHBORUPDATE */
+  EZWAVECOMMANDSTATUS_ZW_REQUESTNODETYPE_NEIGHBORUPDATE,             /**< EZWAVECOMMANDSTATUS_ZW_REQUESTNODETYPENEIGHBORUPDATE */
   EZWAVECOMMANDSTATUS_ZW_INITIATE_SHUTDOWN,                         /**< EZWAVECOMMANDSTATUS_ZW_INITIATE_SHUTDOWN */
   EZWAVECOMMANDSTATUS_ZW_GET_INCLUDED_LR_NODES,                     /**< EZWAVECOMMANDSTATUS_ZW_GET_INCLUDED_LR_NODES */
   EZWAVECOMMANDSTATUS_ZW_GET_LR_CHANNEL,                            /**< EZWAVECOMMANDSTATUS_ZW_GET_LR_CHANNEL */
@@ -1825,6 +1827,15 @@ typedef struct SCommandRequestNodeNeighborUpdate
   node_id_t NodeId;                // Node to have its neighbors discovered..
 } SCommandRequestNodeNeighborUpdate;
 
+typedef struct SCommandRequestNodeTypeNeighborUpdate
+{
+  void            (*Handle)(void); // Placeholder for callback function
+                                   // Will be returned with transmit status
+                                   // Allows application to recognize frames
+
+  E_SYSTEM_TYPE NodeType;	  
+  node_id_t NodeId;                // Node to have its neighbors discovered..
+} SCommandRequestNodeTypeNeighborUpdate;
 
 typedef struct SZWaveGetRoutingInfoStatus
 {
@@ -2253,6 +2264,7 @@ typedef union UCommandStatus
   SZWaveGetIncludedNodes        GetIncludedNodes;
   SZWaveGetIncludedNodesLR      GetIncludedNodesLR;
   SZWaveGeneric8bStatus         RequestNodeNeigborUpdateStatus;
+  SZWaveGeneric8bStatus         RequestNodeTypeNeigborUpdateStatus;
   SZWaveGeneric8bStatus         InitiateShutdownStatus;
   SZWaveGeneric8bStatus         GetLRChannel;
   SZWaveGeneric8bStatus         SetLRChannel;
@@ -2310,6 +2322,7 @@ typedef union UCommandParameters
   SCommandNvmBackupRestore            NvmBackupRestore;
   SCommandSetSecurityKeys             SetSecurityKeys;
   SCommandRequestNodeNeighborUpdate   RequestNodeNeighborUpdate;
+  SCommandRequestNodeTypeNeighborUpdate   RequestNodeTypeNeighborUpdate;
   SCommandInitiateShutdown            InitiateShutdown;
   SCommandGeniric8bParameter          SetLRChannel;
   SCommandGeniric8bParameter          SetLRVirtualNodeIDs;

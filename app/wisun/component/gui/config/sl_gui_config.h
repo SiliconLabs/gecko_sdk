@@ -35,8 +35,8 @@
 // <h> Display configuration
 
 // <o SL_GUI_STACK_SIZE_WORD> GUI event thread stack size in word
-// <i> Default: 144
-#define SL_GUI_STACK_SIZE_WORD              144U
+// <i> Default: 128
+#define SL_GUI_STACK_SIZE_WORD              128U
 
 // <o SL_GUI_MESSAGE_QUEUE_SIZE> GUI event thread message queue size
 // <i> Default: 16

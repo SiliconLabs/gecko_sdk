@@ -25,6 +25,7 @@
 #include "comms-hub-function.h"
 #include "comms-hub-tunnel-endpoints.h"
 #include "tunnel-manager.h"
+#include "zigbee-security-manager.h"
 
 // default sleep message timeout is 24 hours
 #define DEFAULT_SLEEPY_MSG_TIMEOUT_SEC (60 * 60 * 24)
@@ -53,14 +54,9 @@ static uint8_t tunnelTargetAttempts = 0;
 // and unresponsive).
 #define MAX_TUNNEL_TARGET_ATTEMPTS 5
 
-#ifdef UC_BUILD
 sl_zigbee_event_t emberAfPluginCommsHubFunctionTunnelCheckEvent;
 #define tunnelCheckEventControl (&emberAfPluginCommsHubFunctionTunnelCheckEvent)
-void emberAfPluginCommsHubFunctionTunnelCheckEventHandler(SLXU_UC_EVENT);
-#else
-EmberEventControl emberAfPluginCommsHubFunctionTunnelCheckEventControl;
-#define tunnelCheckEventControl emberAfPluginCommsHubFunctionTunnelCheckEventControl
-#endif
+void emberAfPluginCommsHubFunctionTunnelCheckEventHandler(sl_zigbee_event_t * event);
 
 #define PLUGIN_DEBUG
 #if defined(PLUGIN_DEBUG)
@@ -93,15 +89,13 @@ static bool checkForSpecificDeviceThatNeedsTunnelCreated(EmberNodeId nodeId,
 //------------------------------------------------------------------------------
 // API functions
 
-#ifdef UC_BUILD
-
 void emberAfPluginCommsHubFunctionInitCallback(uint8_t init_level)
 {
   switch (init_level) {
     case SL_ZIGBEE_INIT_LEVEL_EVENT:
     {
-      slxu_zigbee_network_event_init(&emberAfPluginCommsHubFunctionTunnelCheckEvent,
-                                     emberAfPluginCommsHubFunctionTunnelCheckEventHandler);
+      sl_zigbee_network_event_init(&emberAfPluginCommsHubFunctionTunnelCheckEvent,
+                                   emberAfPluginCommsHubFunctionTunnelCheckEventHandler);
       break;
     }
 
@@ -112,20 +106,6 @@ void emberAfPluginCommsHubFunctionInitCallback(uint8_t init_level)
     }
   }
 }
-
-#else // !UC_BUILD
-
-void emberAfPluginCommsHubFunctionInitCallback(void)
-{
-  slxu_zigbee_network_event_init(&emberAfPluginCommsHubFunctionTunnelCheckEvent,
-                                 emberAfPluginCommsHubFunctionTunnelCheckEventHandler);
-
-  discoveryInProgress = false;
-  emAfPluginCommsHubFunctionTunnelInit();
-  emberAfPluginTunnelingEndpointInit();
-}
-
-#endif // UC_BUILD
 
 EmberAfPluginCommsHubFunctionStatus emberAfPluginCommsHubFunctionSend(EmberEUI64 destinationDeviceId,
                                                                       uint16_t length,
@@ -185,7 +165,7 @@ EmberAfPluginCommsHubFunctionStatus emberAfPluginCommsHubFunctionSend(EmberEUI64
     isSleepyDevice = false;
 
     // Not a sleepy device so send the message now.
-    if (emAfPluginCommsHubFunctionTunnelSendData(destinationDeviceId, 0, NULL, length, payload)) {
+    if (sli_zigbee_af_comms_hub_function_tunnel_send_data(destinationDeviceId, 0, NULL, length, payload)) {
       status = EMBER_AF_CHF_STATUS_SUCCESS;
     } else {
       char * msg = "CHF: Unable to send the message through tunnel to destination";
@@ -226,7 +206,7 @@ EmberAfPluginCommsHubFunctionStatus emberAfPluginCommsHubFunctionSend(EmberEUI64
   return status;
 }
 
-void emAfPluginCommsHubFunctionSetDefaultTimeout(uint32_t timeout)
+void sli_zigbee_af_comms_hub_function_set_default_timeout(uint32_t timeout)
 {
   defaultMessageTimeout = timeout;
 }
@@ -234,43 +214,31 @@ void emAfPluginCommsHubFunctionSetDefaultTimeout(uint32_t timeout)
 //------------------------------------------------------------------------------
 // Callback Functions
 
-#ifdef UC_BUILD
 #ifdef EZSP_HOST
-void emAfPluginCommsHubFunctionTrustCenterJoinCallback(EmberNodeId newNodeId,
-                                                       EmberEUI64 newNodeEui64,
-                                                       EmberDeviceUpdate status,
-                                                       EmberJoinDecision decision,
-                                                       EmberNodeId parentOfNewNode)
+void sli_zigbee_af_comms_hub_function_trust_center_join_callback(EmberNodeId newNodeId,
+                                                                 EmberEUI64 newNodeEui64,
+                                                                 EmberDeviceUpdate status,
+                                                                 EmberJoinDecision decision,
+                                                                 EmberNodeId parentOfNewNode)
 #else // !EZSP_HOST
-void emAfPluginCommsHubFunctionTrustCenterJoinCallback(EmberNodeId newNodeId,
-                                                       EmberEUI64 newNodeEui64,
-                                                       EmberDeviceUpdate status,
-                                                       EmberNodeId parentOfNewNode)
+void sli_zigbee_af_comms_hub_function_trust_center_join_callback(EmberNodeId newNodeId,
+                                                                 EmberEUI64 newNodeEui64,
+                                                                 EmberDeviceUpdate status,
+                                                                 EmberNodeId parentOfNewNode)
 #endif // EZSP_HOST
-#else // !UC_BUILD
-void emberAfTrustCenterJoinCallback(EmberNodeId newNodeId,
-                                    EmberEUI64 newNodeEui64,
-                                    EmberNodeId parentOfNewNode,
-                                    EmberDeviceUpdate status,
-                                    EmberJoinDecision decision)
-#endif // UC_BUILD
 {
   pluginDebugPrint("%p: TrustCenterJoin 0x%2x ", PLUGIN_NAME, newNodeId);
   pluginDebugExec(emberAfPrintBigEndianEui64(newNodeEui64));
-#ifdef UC_BUILD
 #ifdef EZSP_HOST
   pluginDebugPrintln(" 0x%2x 0x%x 0x%x", parentOfNewNode, status, decision);
 #else // !EZSP_HOST
   pluginDebugPrintln(" 0x%2x 0x%x", parentOfNewNode, status);
 #endif // EZSP_HOST
-#else // !UC_BUILD
-  pluginDebugPrintln(" 0x%2x 0x%x 0x%x", parentOfNewNode, status, decision);
-#endif // UC_BUILD
 
   // If a device is leaving or rejoining the trust center we may have knowledge of a
   // tunnel previous established with that device.  If so remove all knowledge
   // of that tunnel because it is no longer valid.
-  emAfPluginCommsHubFunctionTunnelCleanup(newNodeEui64);
+  sli_zigbee_af_comms_hub_function_tunnel_cleanup(newNodeEui64);
 
   if (EMBER_DEVICE_LEFT != status) {
     // If the device did a first time join, then it will not have
@@ -388,7 +356,7 @@ static void tunnelDiscoveryCallback(const EmberAfServiceDiscoveryResult *result)
       status = emberLookupEui64ByNodeId(result->matchAddress, eui64);
       if ( (status == EMBER_SUCCESS) && (epList->count >= 1) ) {
         emberAfPluginAddTunnelingEndpoint(result->matchAddress, (uint8_t *)epList->list, epList->count);
-        emAfPluginCommsHubFunctionTunnelCreate(eui64, epList->list[0]);
+        sli_zigbee_af_comms_hub_function_tunnel_create(eui64, epList->list[0]);
       } else {
         // Failed to store endpoint.  Try with default endpoint.
         emberAfPluginCommsHubFunctionPrintln("Error: Failure to find address or endpoint, status=0x%x, nodeId=0x%2x, epCount=%d",
@@ -412,7 +380,7 @@ static void tunnelDiscoveryCallback(const EmberAfServiceDiscoveryResult *result)
           && emberAfPluginGbcsDeviceLogRetrieveByIndex(currentDeviceLogEntry,
                                                        deviceEui64,
                                                        &deviceInfo)) {
-        slxu_zigbee_event_set_active(tunnelCheckEventControl);
+        sl_zigbee_event_set_active(tunnelCheckEventControl);
       }
     }
   }
@@ -421,7 +389,7 @@ static void tunnelDiscoveryCallback(const EmberAfServiceDiscoveryResult *result)
 /*
  * @brief Logging timed out message to CHF Event Log.
  */
-void emAfPluginCommsHubFunctionLogTimedOutMessageEvent(EmberAfSleepyMessage * sleepyMessage)
+void sli_zigbee_af_comms_hub_function_log_timed_out_message_event(EmberAfSleepyMessage * sleepyMessage)
 {
 #if defined(ZCL_USING_EVENTS_CLUSTER_SERVER)
   EmberAfEvent event;
@@ -451,7 +419,7 @@ void emberAfPluginSleepyMessageQueueMessageTimedOutCallback(EmberAfSleepyMessage
 
   if (emberAfPluginSleepyMessageQueueGetPendingMessage(sleepyMessageId, &sleepyMessage)) {
     emberAfPluginSleepyMessageQueueRemoveMessage(sleepyMessageId);
-    emAfPluginCommsHubFunctionLogTimedOutMessageEvent(&sleepyMessage);
+    sli_zigbee_af_comms_hub_function_log_timed_out_message_event(&sleepyMessage);
     emberAfPluginCommsHubFunctionSendCallback(EMBER_AF_CHF_STATUS_SEND_TIMEOUT,
                                               sleepyMessage.dstEui64,
                                               sleepyMessage.length,
@@ -487,7 +455,7 @@ void emberAfPluginGbcsDeviceLogDeviceRemovedCallback(EmberEUI64 deviceId)
     sleepyMessageId = emberAfPluginSleepyMessageQueueGetPendingMessageId(deviceId);
   }
   clearTunnelMessagePending(deviceId);
-  emAfPluginCommsHubFunctionTunnelDestroy(deviceId);
+  sli_zigbee_af_comms_hub_function_tunnel_destroy(deviceId);
 }
 
 /**
@@ -500,7 +468,7 @@ void emberAfPluginGbcsDeviceLogDeviceRemovedCallback(EmberEUI64 deviceId)
  * @param deviceId Identifier of the device from which a tunnel is requested
  * @return true is the tunnel should be allowed, false otherwise
  */
-bool emAfPluginCommsHubFunctionTunnelAcceptCallback(EmberEUI64 deviceId)
+bool sli_zigbee_af_comms_hub_function_tunnel_accept_callback(EmberEUI64 deviceId)
 {
   EmberAfGBCSDeviceLogInfo deviceInfo;
 
@@ -519,9 +487,9 @@ bool emAfPluginCommsHubFunctionTunnelAcceptCallback(EmberEUI64 deviceId)
  * @param length The length of the data received
  * @param payload The data received
  */
-void emAfPluginCommsHubFunctionTunnelDataReceivedCallback(EmberEUI64 senderDeviceId,
-                                                          uint16_t length,
-                                                          uint8_t *payload)
+void sli_zigbee_af_comms_hub_function_tunnel_data_received_callback(EmberEUI64 senderDeviceId,
+                                                                    uint16_t length,
+                                                                    uint8_t *payload)
 {
   EmberAfGBCSDeviceLogInfo deviceInfo;
   uint8_t tunnelHeader[2];
@@ -540,7 +508,7 @@ void emAfPluginCommsHubFunctionTunnelDataReceivedCallback(EmberEUI64 senderDevic
 
   //  Check to make sure the destination device is in the device log.
   if (!emberAfPluginGbcsDeviceLogGet(senderDeviceId, &deviceInfo)) {
-    emAfPluginCommsHubFunctionTunnelDestroy(senderDeviceId);
+    sli_zigbee_af_comms_hub_function_tunnel_destroy(senderDeviceId);
     emberAfPluginCommsHubFunctionPrintln("Given destination device ID has not been configured in the GBCS device log");
     return;
   }
@@ -571,7 +539,7 @@ void emAfPluginCommsHubFunctionTunnelDataReceivedCallback(EmberEUI64 senderDevic
       }
       tunnelHeader[0] = TUNNEL_MANAGER_HEADER_GET_RESPONSE;
       tunnelHeader[1] = pendingMessages;
-      result = emAfPluginCommsHubFunctionTunnelSendData(senderDeviceId, 2, tunnelHeader, dataLen, data);
+      result = sli_zigbee_af_comms_hub_function_tunnel_send_data(senderDeviceId, 2, tunnelHeader, dataLen, data);
 
       // If we sent or attempted to send a message from the sleepy queue then
       // we need to let the calling application know the status of that message.
@@ -614,9 +582,9 @@ void emAfPluginCommsHubFunctionTunnelDataReceivedCallback(EmberEUI64 senderDevic
 
 /** @brief Upfate Functional Notification Flags routines
  */
-EmberAfPluginCommsHubFunctionStatus emAfUpdateFunctionalNotificationFlagsByEndpoint(uint8_t endpoint,
-                                                                                    uint32_t resetMask,
-                                                                                    uint32_t setMask)
+EmberAfPluginCommsHubFunctionStatus sli_zigbee_af_update_functional_notification_flags_by_endpoint(uint8_t endpoint,
+                                                                                                   uint32_t resetMask,
+                                                                                                   uint32_t setMask)
 {
   EmberAfStatus status;
   uint32_t notificationFlags;
@@ -647,9 +615,9 @@ EmberAfPluginCommsHubFunctionStatus emAfUpdateFunctionalNotificationFlagsByEndpo
   return EMBER_AF_CHF_STATUS_SUCCESS;
 }
 
-EmberAfPluginCommsHubFunctionStatus emAfUpdateFunctionalNotificationFlagsByEui64(EmberEUI64 deviceId,
-                                                                                 uint32_t resetMask,
-                                                                                 uint32_t setMask)
+EmberAfPluginCommsHubFunctionStatus sli_zigbee_af_update_functional_notification_flags_by_eui64(EmberEUI64 deviceId,
+                                                                                                uint32_t resetMask,
+                                                                                                uint32_t setMask)
 {
   uint8_t mirrorEndpoint;
 
@@ -658,9 +626,9 @@ EmberAfPluginCommsHubFunctionStatus emAfUpdateFunctionalNotificationFlagsByEui64
     return EMBER_AF_CHF_STATUS_NO_MIRROR;
   }
 
-  return emAfUpdateFunctionalNotificationFlagsByEndpoint(mirrorEndpoint,
-                                                         resetMask,
-                                                         setMask);
+  return sli_zigbee_af_update_functional_notification_flags_by_endpoint(mirrorEndpoint,
+                                                                        resetMask,
+                                                                        setMask);
 }
 
 //------------------------------------------------------------------------------
@@ -668,25 +636,25 @@ EmberAfPluginCommsHubFunctionStatus emAfUpdateFunctionalNotificationFlagsByEui64
 
 static EmberAfPluginCommsHubFunctionStatus setTunnelMessagePending(EmberEUI64 deviceId)
 {
-  return emAfUpdateFunctionalNotificationFlagsByEui64(deviceId,
-                                                      0xFFFFFFFF,
-                                                      EMBER_AF_METERING_FNF_TUNNEL_MESSAGE_PENDING);
+  return sli_zigbee_af_update_functional_notification_flags_by_eui64(deviceId,
+                                                                     0xFFFFFFFF,
+                                                                     EMBER_AF_METERING_FNF_TUNNEL_MESSAGE_PENDING);
 }
 
 static EmberAfPluginCommsHubFunctionStatus clearTunnelMessagePending(EmberEUI64 deviceId)
 {
-  return emAfUpdateFunctionalNotificationFlagsByEui64(deviceId,
-                                                      ~EMBER_AF_METERING_FNF_TUNNEL_MESSAGE_PENDING,
-                                                      0);
+  return sli_zigbee_af_update_functional_notification_flags_by_eui64(deviceId,
+                                                                     ~EMBER_AF_METERING_FNF_TUNNEL_MESSAGE_PENDING,
+                                                                     0);
 }
 
-void emberAfPluginCommsHubFunctionTunnelCheckEventHandler(SLXU_UC_EVENT)
+void emberAfPluginCommsHubFunctionTunnelCheckEventHandler(sl_zigbee_event_t * event)
 {
   uint32_t delay = (EMBER_AF_PLUGIN_COMMS_HUB_FUNCTION_TUNNEL_CHECK_PERIOD_SECONDS
                     * MILLISECOND_TICKS_PER_SECOND);
   if (delay <= EMBER_MAX_EVENT_DELAY_MS) {
-    slxu_zigbee_event_set_delay_ms(tunnelCheckEventControl,
-                                   delay);
+    sl_zigbee_event_set_delay_ms(tunnelCheckEventControl,
+                                 delay);
   }
   if (discoveryInProgress) {
     return;
@@ -745,12 +713,16 @@ static bool checkForSpecificDeviceThatNeedsTunnelCreated(EmberNodeId nodeId,
   pluginDebugExec(emberAfPrintBigEndianEui64(deviceEui64));
   if (emberAfPluginGbcsDeviceLogGet(deviceEui64, &deviceInfo)
       && deviceTypeRequiresTunnelInitiated(deviceInfo)
-      && !emAfPluginCommsHubFunctionTunnelExists(deviceEui64)) {
-    EmberKeyStruct keyStruct;
-    uint8_t index = emberFindKeyTableEntry(deviceEui64, true);
-    if (((index != 0xFF)
-         && (EMBER_SUCCESS == emberGetKeyTableEntry(index, &keyStruct))
-         && (keyStruct.bitmask & EMBER_KEY_IS_AUTHORIZED))
+      && !sli_zigbee_af_comms_hub_function_tunnel_exists(deviceEui64)) {
+    sl_zb_sec_man_aps_key_metadata_t key_info;
+    sl_zb_sec_man_context_t context;
+    sl_zb_sec_man_init_context(&context);
+    context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_APP_LINK;
+    context.flags |= ZB_SEC_MAN_FLAG_KEY_INDEX_IS_VALID;
+    sl_status_t status = sl_zb_sec_man_export_link_key_by_eui(deviceEui64, &context, NULL, &key_info);
+    if (((context.key_index != 0xFF)
+         && (SL_STATUS_OK == status)
+         && (key_info.bitmask & EMBER_KEY_IS_AUTHORIZED))
 #ifdef EMBER_TEST
         || (emberAfIsFullSmartEnergySecurityPresent() == EMBER_AF_INVALID_KEY_ESTABLISHMENT_SUITE)
 #endif //EMBER_TEST
@@ -794,9 +766,9 @@ void emberAfPluginCommsHubFunctionStackStatusCallback(EmberStatus status)
 {
   if (status != EMBER_NETWORK_UP) {
     if (status == EMBER_NETWORK_DOWN) {
-      slxu_zigbee_event_set_inactive(tunnelCheckEventControl);
+      sl_zigbee_event_set_inactive(tunnelCheckEventControl);
     } else {
-      slxu_zigbee_event_set_delay_ms(tunnelCheckEventControl, 0);
+      sl_zigbee_event_set_delay_ms(tunnelCheckEventControl, 0);
     }
     return;
   }
@@ -807,7 +779,7 @@ void emberAfPluginCommsHubFunctionStackStatusCallback(EmberStatus status)
   discoveryInProgress = false;
 
   emberAfCorePrintln("%p: Setting up event for monitoring tunnels.", PLUGIN_NAME);
-  slxu_zigbee_event_set_delay_ms(tunnelCheckEventControl,
-                                 (EMBER_AF_PLUGIN_COMMS_HUB_FUNCTION_TUNNEL_CHECK_PERIOD_SECONDS
-                                  * MILLISECOND_TICKS_PER_SECOND));
+  sl_zigbee_event_set_delay_ms(tunnelCheckEventControl,
+                               (EMBER_AF_PLUGIN_COMMS_HUB_FUNCTION_TUNNEL_CHECK_PERIOD_SECONDS
+                                * MILLISECOND_TICKS_PER_SECOND));
 }

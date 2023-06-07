@@ -33,6 +33,8 @@
 #include "stack/include/ember.h"
 
 #include "cmsis-rtos-support.h"
+#include "csp-command-utils.h"
+#include "csp-format.h"
 
 // TODO: This is for IAR, for GCC it should be "unsigned long"
 typedef unsigned int PointerType;
@@ -47,19 +49,11 @@ static EmberBuffer callbackBuffer[EMBER_AF_PLUGIN_CMSIS_RTOS_MAX_CALLBACK_QUEUE_
 //------------------------------------------------------------------------------
 // Forward declarations
 
-static uint16_t formatBinaryManagementCommand(uint8_t *buffer,
-                                              uint16_t bufferSize,
-                                              uint16_t identifier,
-                                              const char *format,
-                                              va_list argumentList);
-
 static uint32_t pendCommandPendingFlag(void);
 static void postCommandPendingFlag(void);
 static void pendResponsePendingFlag(void);
 static void postResponsePendingFlag(void);
 static void postCallbackPendingFlag(void);
-
-static void fetchParams(uint8_t *readPointer, PGM_P format, va_list args);
 
 //------------------------------------------------------------------------------
 // Internal APIs
@@ -91,50 +85,24 @@ void emAfPluginCmsisRtosIpcInit(void)
   assert(callbackQueue != NULL);
 }
 
-void emAfPluginCmsisRtosSendBlockingCommand(uint16_t identifier,
-                                            const char *format,
-                                            ...)
+uint8_t *sendBlockingCommand(uint8_t *apiCommandBuffer)
 {
-  va_list argumentList;
-
   // This API can not be called from the stack task (the stack task calls
   // stack APIs directly).
-  assert(!emAfPluginCmsisRtosIsCurrentTaskStackTask());
-
-  // Write the command in the command API buffer.
-  va_start(argumentList, format);
-  formatBinaryManagementCommand(apiCommandData,
-                                sizeof(apiCommandData),
-                                identifier,
-                                format,
-                                argumentList);
-  va_end(argumentList);
+  assert(!isCurrentTaskStackTask());
 
   // Post the "command pending" flag, wake up the stack and pend for the
   // "response" pending flag.
   postCommandPendingFlag();
   emAfPluginCmsisRtosWakeUpConnectStackTask();
   pendResponsePendingFlag();
+  return apiCommandData;
 }
 
-void emAfPluginCmsisRtosSendResponse(uint16_t identifier,
-                                     const char *format,
-                                     ...)
+void sendResponse(uint8_t *apiCommandBuffer, uint16_t commandLength)
 {
-  va_list argumentList;
-
   // This API must be called from the stack task.
-  assert(emAfPluginCmsisRtosIsCurrentTaskStackTask());
-
-  // Write the command in the command API buffer.
-  va_start(argumentList, format);
-  formatBinaryManagementCommand(apiCommandData,
-                                sizeof(apiCommandData),
-                                identifier,
-                                format,
-                                argumentList);
-  va_end(argumentList);
-
+  assert(isCurrentTaskStackTask());
   postResponsePendingFlag();
 }
 
@@ -143,7 +111,7 @@ void emAfPluginCmsisRtosProcessIncomingApiCommand(void)
   uint32_t status = pendCommandPendingFlag();
 
   // This API must be called from the stack task.
-  assert(emAfPluginCmsisRtosIsCurrentTaskStackTask());
+  assert(isCurrentTaskStackTask());
 
   /* Need to check that the pend did not result in an error
    * and that the expected flag is present.
@@ -152,54 +120,17 @@ void emAfPluginCmsisRtosProcessIncomingApiCommand(void)
     uint16_t commandId =
       emberFetchHighLowInt16u(apiCommandData);
 
-    emAfPluginCmsisRtosHandleIncomingApiCommand(commandId);
+    handleIncomingApiCommand(commandId, apiCommandData);
   }
 }
 
-void emAfPluginCmsisRtosSendCallbackCommand(uint16_t identifier,
-                                            const char *format,
-                                            ...)
+void sendCallbackCommand(uint8_t *callbackCommandBuffer, uint16_t commandLength)
 {
-  va_list argumentList;
-  const char *formatFinger;
-  uint8_t commandLength = 2; // command ID
   uint8_t i;
   EmberBufferDesc callbackBufferDescriptorPut = { NULL, 0 };
 
   // This API must be called from the stack task.
-  assert(emAfPluginCmsisRtosIsCurrentTaskStackTask());
-
-  // Compute the amount of memory we need to allocate.
-  va_start(argumentList, format);
-  for (formatFinger = (char *) format; *formatFinger != 0; formatFinger++) {
-    switch (*formatFinger) {
-      case 'u':
-        va_arg(argumentList, unsigned int);
-        commandLength++;
-        break;
-      case 's':
-        va_arg(argumentList, int);
-        commandLength++;
-        break;
-      case 'v':
-        va_arg(argumentList, unsigned int);
-        commandLength += sizeof(uint16_t);
-        break;
-      case 'w':
-        va_arg(argumentList, uint32_t);
-        commandLength += sizeof(uint32_t);
-        break;
-      case 'b': {
-        va_arg(argumentList, const uint8_t*);
-        commandLength += va_arg(argumentList, int) + 1;
-        break;
-      }
-      default:
-        assert(false);
-        break;
-    }
-  }
-  va_end(argumentList);
+  assert(isCurrentTaskStackTask());
 
   // Enqueing the callback in the app framework task queue.
   emberAfPluginCmsisRtosAcquireBufferSystemMutex();
@@ -218,14 +149,8 @@ void emAfPluginCmsisRtosSendCallbackCommand(uint16_t identifier,
   }
 
   // Write the callback command to the callback buffer.
-  va_start(argumentList, format);
-  formatBinaryManagementCommand(emberGetBufferPointer(callbackBuffer[i]),
-                                commandLength,
-                                identifier,
-                                format,
-                                argumentList);
-  va_end(argumentList);
-
+  MEMCOPY(emberGetBufferPointer(callbackBuffer[i]), callbackCommandBuffer, commandLength);
+  free(callbackCommandBuffer);
   callbackBufferDescriptorPut.buffer_addr = &callbackBuffer[i];
   callbackBufferDescriptorPut.buffer_length = commandLength;
 
@@ -251,7 +176,7 @@ bool emAfPluginCmsisRtosProcessIncomingCallbackCommand(void)
 
   // This API can not be called from the stack task (the stack task calls
   // stack APIs directly).
-  assert(!emAfPluginCmsisRtosIsCurrentTaskStackTask());
+  assert(!isCurrentTaskStackTask());
 
   osMessageQueueGet(callbackQueue,
                     (void *)&callbackBufferDescriptorGet,
@@ -278,8 +203,8 @@ bool emAfPluginCmsisRtosProcessIncomingCallbackCommand(void)
 
     commandId = emberFetchHighLowInt16u(callbackData);
 
-    emAfPluginCmsisRtosHandleIncomingCallbackCommand(commandId,
-                                                     callbackData + 2);
+    handleIncomingCallbackCommand(commandId,
+                                  callbackData + 2);
 
     return true;
   }
@@ -287,43 +212,33 @@ bool emAfPluginCmsisRtosProcessIncomingCallbackCommand(void)
   return false;
 }
 
-bool emAfPluginCmsisRtosIsCurrentTaskStackTask(void)
+bool isCurrentTaskStackTask(void)
 {
   return (osThreadGetId() == emAfPluginCmsisRtosGetStackTcb());
 }
 
-void emAfPluginCmsisRtosAcquireCommandMutex(void)
+void acquireCommandMutex(void)
 {
-  assert(!emAfPluginCmsisRtosIsCurrentTaskStackTask());
+  assert(!isCurrentTaskStackTask());
 
   assert(osMutexAcquire(commandMutex, osWaitForever) == osOK);
 }
 
-void emAfPluginCmsisRtosReleaseCommandMutex(void)
+void releaseCommandMutex(void)
 {
-  assert(!emAfPluginCmsisRtosIsCurrentTaskStackTask());
+  assert(!isCurrentTaskStackTask());
 
   assert(osMutexRelease(commandMutex) == osOK);
 }
 
-void emAfPluginCmsisRtosFetchApiParams(PGM_P format, ...)
+uint8_t *getApiCommandPointer()
 {
-  va_list argumentList;
-
-  va_start(argumentList, format);
-  // Start fetching right after the command ID
-  fetchParams(apiCommandData + 2, format, argumentList);
-  va_end(argumentList);
+  return apiCommandData;
 }
 
-void emAfPluginCmsisRtosFetchCallbackParams(uint8_t *callbackParams,
-                                            PGM_P format,
-                                            ...)
+uint8_t *allocateCallbackCommandPointer()
 {
-  va_list argumentList;
-  va_start(argumentList, format);
-  fetchParams(callbackParams, format, argumentList);
-  va_end(argumentList);
+  return (uint8_t *)malloc(MAX_STACK_API_COMMAND_SIZE);
 }
 
 //------------------------------------------------------------------------------
@@ -340,163 +255,6 @@ void emAfPluginCmsisRtosMarkBuffersCallback(void)
 
 //------------------------------------------------------------------------------
 // Static functions
-
-// TODO: the two functions below can be consolidated
-
-static void fetchParams(uint8_t *readPointer, PGM_P format, va_list args)
-{
-  char *c = (char *)format;
-  void* ptr;
-
-  while (*c) {
-    ptr = va_arg(args, void*);
-
-    switch (*c) {
-      case 's': {
-        uint8_t *realPointer = (uint8_t *)ptr;
-        if (ptr) {
-          *realPointer = (uint8_t)*readPointer;
-        }
-        readPointer++;
-      }
-      break;
-      case 'u': {
-        uint8_t *realPointer = (uint8_t *)ptr;
-        if (ptr) {
-          *realPointer = (uint8_t)*readPointer;
-        }
-        readPointer++;
-      }
-      break;
-      case 'v': {
-        uint16_t *realPointer = (uint16_t *)ptr;
-        *realPointer = emberFetchHighLowInt16u(readPointer);
-        readPointer += 2;
-      }
-      break;
-      case 'w': {
-        uint32_t *realPointer = (uint32_t *)ptr;
-        if (ptr) {
-          *realPointer = emberFetchHighLowInt32u(readPointer);
-        }
-        readPointer += 4;
-      }
-      break;
-      case 'b': {
-        uint8_t *realArray = (uint8_t *)ptr;
-        uint8_t *lengthPointer = (uint8_t *)va_arg(args, void*);
-        *lengthPointer = *readPointer;
-        readPointer++;
-        uint8_t bufferSize = (uint8_t)va_arg(args, int);
-
-        if (ptr) {
-          if (*lengthPointer < bufferSize) {
-            MEMMOVE(realArray, readPointer, *lengthPointer);
-          } else {
-            MEMMOVE(realArray, readPointer, bufferSize);
-          }
-        }
-        readPointer += *lengthPointer;
-        // Propagate correct length value in calling function
-        *lengthPointer = (*lengthPointer > bufferSize
-                          ? bufferSize
-                          : *lengthPointer);
-      }
-      break;
-      case 'p': {
-        uint8_t **realPointer = (uint8_t **)ptr;
-        uint8_t *lengthPointer = (uint8_t *)va_arg(args, void*);
-        *lengthPointer = *readPointer;
-        readPointer++;
-
-        if (ptr) {
-          *realPointer = readPointer;
-        }
-        readPointer += *lengthPointer;
-      }
-      break;
-      default:
-        ; // meh
-    }
-    c++;
-  }
-}
-
-static uint16_t formatBinaryManagementCommand(uint8_t *buffer,
-                                              uint16_t bufferSize,
-                                              uint16_t identifier,
-                                              const char *format,
-                                              va_list argumentList)
-{
-  uint8_t *finger = buffer;
-  const char *formatFinger;
-
-  MEMSET(buffer, 0, bufferSize);
-
-  // store the identifier
-  emberStoreHighLowInt16u(finger, identifier);
-  finger += sizeof(uint16_t);
-
-  // We use primitive types to retrieve va_args because gcc on some
-  // platforms (eg., unix hosts) complains about automatic variable
-  // promotion in variadic functions.
-  // [eg: warning: 'uint8_t' is promoted to 'int' when passed through '...']
-  //
-  // An exception is made for the uint32_t case:  Here we need to check the size
-  // of unsigned int, which can be smaller on platforms such as the c8051.
-
-  for (formatFinger = (char *) format; *formatFinger != 0; formatFinger++) {
-    switch (*formatFinger) {
-      case 'u':
-        *finger++ = va_arg(argumentList, unsigned int);
-        break;
-      case 's':
-        *finger++ = va_arg(argumentList, int);
-        break;
-      case 'v':
-        emberStoreHighLowInt16u(finger, va_arg(argumentList, unsigned int));
-        finger += sizeof(uint16_t);
-        break;
-      case 'w':
-        if (sizeof(unsigned int) < sizeof(uint32_t)) {
-          emberStoreHighLowInt32u(finger, va_arg(argumentList, uint32_t));
-        } else {
-          emberStoreHighLowInt32u(finger, va_arg(argumentList, unsigned int));
-        }
-        finger += sizeof(uint32_t);
-        break;
-      case 'b': {
-        const uint8_t *data = va_arg(argumentList, const uint8_t*);
-        // store the size, must fit into a byte
-        uint8_t dataSize = va_arg(argumentList, int);
-        *finger++ = dataSize;
-
-        if (dataSize > 0) {
-          // Checking for NULL here save's every caller from checking.  We assume
-          // the if dataSize is not zero then we should send all zeroes.
-          if (data != NULL) {
-            MEMCOPY(finger, data, dataSize);
-          } else {
-            MEMSET(finger, 0, dataSize);
-          }
-        }
-
-        finger += dataSize;
-        break;
-      }
-      default:
-        // confused!
-        assert(false);
-        break;
-    }
-  }
-
-  uint16_t length = finger - buffer;
-  // sanity check
-  assert(length <= bufferSize);
-
-  return length;
-}
 
 static uint32_t pendCommandPendingFlag(void)
 {

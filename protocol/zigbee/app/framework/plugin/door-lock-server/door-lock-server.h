@@ -43,7 +43,7 @@
 typedef struct {
   EmberAfAttributeId id;
   uint16_t value;
-} EmAfPluginDoorLockServerAttributeData;
+} sli_zigbee_af_door_lock_server_attribute_data;
 
 /** @brief Activate Door Lock
  *
@@ -57,13 +57,13 @@ bool emberAfPluginDoorLockServerActivateDoorLockCallback(bool activate);
 // value on the DOOR_LOCK_SERVER_ENDPOINT. If this function encounters a failure,
 // it will print something out. The description parameter is a string that
 // describes the type of attributes that are being written.
-void emAfPluginDoorLockServerWriteAttributes(const EmAfPluginDoorLockServerAttributeData *data,
-                                             uint8_t dataLength,
-                                             const char *description);
+void sli_zigbee_af_door_lock_server_write_attributes(const sli_zigbee_af_door_lock_server_attribute_data *data,
+                                                     uint8_t dataLength,
+                                                     const char *description);
 
 // This function should be called when the door state has changed. A status
 // describing the success or failure of the update will be returned.
-EmberAfStatus emAfPluginDoorLockServerNoteDoorStateChanged(EmberAfDoorState state);
+EmberAfStatus sli_zigbee_af_door_lock_server_note_door_state_changed(EmberAfDoorState state);
 #endif
 
 // At boot, the NumberOfPINUsersSupported attribute will be written to this
@@ -187,15 +187,15 @@ bool emberAfPluginDoorLockServerGetLogEntry(uint16_t *entryId,
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 // Initialize the Door Lock users.
-void emAfPluginDoorLockServerInitUser(void);
+void sli_zigbee_af_door_lock_server_init_user(void);
 
 // Initialize events.
-void emAfPluginDoorLockServerInitEvents(void);
+void sli_zigbee_af_door_lock_server_init_events(void);
 
 // Set the user type associated with the provided user ID (userId) and return
 // true if successful.
-bool emAfPluginDoorLockServerSetPinUserType(uint16_t userId,
-                                            EmberAfDoorLockUserType type);
+bool sli_zigbee_af_door_lock_server_set_pin_user_type(uint16_t userId,
+                                                      EmberAfDoorLockUserType type);
 #endif
 
 typedef struct {
@@ -239,7 +239,7 @@ EmberAfStatus emberAfPluginDoorLockServerApplyRfid(uint8_t *rfid,
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 // Initialize the Door Lock schedules.
-void emAfPluginDoorLockServerInitSchedule(void);
+void sli_zigbee_af_door_lock_server_init_schedule(void);
 #endif
 
 typedef struct {
@@ -280,18 +280,14 @@ typedef struct {
 // space available (spaceAvail) and if so it will send a DefaultResponse
 // command with the status of EMBER_ZCL_STATUS_INSUFFICIENT_SPACE and return
 // false. Otherwise, it will return true.
-bool emAfPluginDoorLockServerCheckForSufficientSpace(uint8_t spaceReq, uint8_t spaceAvail);
+bool sli_zigbee_af_door_lock_server_check_for_sufficient_space(uint8_t spaceReq, uint8_t spaceAvail);
 #endif
 
 // Critical Message Queue
 // If the Critical Message Queue Plugin is available, use it for event notifications
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_CRITICAL_MESSAGE_QUEUE
-#define SL_CATALOG_ZIGBEE_CRITICAL_MESSAGE_QUEUE_PRESENT
 #endif
-#endif // UC_BUILD
 
 #ifdef SL_CATALOG_ZIGBEE_CRITICAL_MESSAGE_QUEUE_PRESENT
 #include "../critical-message-queue/critical-message-queue.h"

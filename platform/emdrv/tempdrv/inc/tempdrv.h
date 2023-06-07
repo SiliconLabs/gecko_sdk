@@ -47,8 +47,6 @@ extern "C" {
  *        Subsequent sections provide more insight into TEMPDRV driver.
  *   @details
  *
- *   @li @ref tempdrv_intro
- *   @li @ref tempdrv_usage
  *
  *   @n @section tempdrv_intro Introduction
  *        TEMPDRV provides a user-friendly interface to the EMU internal
@@ -93,8 +91,9 @@ extern "C" {
 /** @} (end addtogroup tempdrv_error_codes) */
 
 /**
- * Temperature limit. This is used in the TEMPDRV to specify the
- * direction of temperature change.
+ * @enum TEMPDRV_LimitType_t
+ * @brief Temperature limit.
+ *   This is used in the TEMPDRV to specify the direction of temperature change.
  */
 typedef enum TEMPDRV_LimitType{
   TEMPDRV_LIMIT_LOW  = 0,   /**< Temperature low. Used to specify that a temperature is decreasing. */

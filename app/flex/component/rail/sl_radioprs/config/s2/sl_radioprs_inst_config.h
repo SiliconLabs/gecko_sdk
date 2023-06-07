@@ -12,8 +12,8 @@
 // <PRS_RACL_PAEN=> PA enabled for TX
 // <PRS_MODEML_ANT0=> Antenna 0
 // <PRS_MODEML_ANT1=> Antenna 1
-// <PRS_MODEML_DCLK=> RX data clock
-// <PRS_MODEML_DOUT=> RX data out
+// <PRS_MODEML_DCLK=> Modem clock out
+// <PRS_MODEML_DOUT=> Modem data out
 // <PRS_MODEML_FRAMEDET=> Sync detected
 // <PRS_MODEML_FRAMESENT=> Sync sent
 // <PRS_MODEM_PREDET=> Preamble detected

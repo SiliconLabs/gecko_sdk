@@ -31,7 +31,7 @@ template_contribution:
   - name: zigbee_stack_callback
     value:
       callback_type: mac_filter_match_message
-      function_name: emAfPluginInterpanMacFilterMatchMessageCallback
+      function_name: sli_zigbee_af_interpan_mac_filter_match_message_callback
   - name: zigbee_af_callback
     value:
       callback_type: event_init
@@ -59,19 +59,19 @@ template_contribution:
     value:
       group: interpan
       name: enable
-      handler: emAfInterpanEnableCommand
+      handler: sli_zigbee_af_interpan_enable_command
       help: Enables inter-PAN globally.
   - name: cli_command
     value:
       group: interpan
       name: disable
-      handler: emAfInterpanDisableCommand
+      handler: sli_zigbee_af_interpan_disable_command
       help: Disables inter-PAN globally.
   - name: cli_command
     value:
       group: interpan
       name: fragment-test
-      handler: emAfInterpanFragmentTestCommand
+      handler: sli_zigbee_af_interpan_fragment_test_command
       help: Sends a message of specified length of random values to target device over inter-PAN.
       argument:
       - type: uint16
@@ -86,7 +86,7 @@ template_contribution:
     value:
       group: interpan
       name: set-msg-timeout
-      handler: emAfInterpanSetMessageTimeoutCommand
+      handler: sli_zigbee_af_interpan_set_message_timeout_command
       help: Sets the timeout for inter-PAN messages sent and received.
       argument:
       - type: uint8
@@ -95,7 +95,7 @@ template_contribution:
     value:
       group: interpan
       name: group
-      handler: emAfInterpanGroupShortCommand
+      handler: sli_zigbee_af_interpan_group_short_command
       help: Send an interpan message to a group id.
       argument:
       - type: uint16
@@ -108,7 +108,7 @@ template_contribution:
     value:
       group: interpan
       name: short
-      handler: emAfInterpanGroupShortCommand
+      handler: sli_zigbee_af_interpan_group_short_command
       help: Send an interpan message to a short id.
       argument:
       - type: uint16
@@ -121,7 +121,7 @@ template_contribution:
     value:
       group: interpan
       name: long
-      handler: emAfInterpanLongCommand
+      handler: sli_zigbee_af_interpan_long_command
       help: Send an interpan message to an 8-byte EUI64.
       argument:
       - type: hex

@@ -33,8 +33,6 @@
 
 #include "network_diagnostic.hpp"
 
-#if OPENTHREAD_FTD || OPENTHREAD_CONFIG_TMF_NETWORK_DIAG_MTD_ENABLE
-
 #include "coap/coap_message.hpp"
 #include "common/array.hpp"
 #include "common/as_core_type.hpp"
@@ -50,6 +48,7 @@
 #include "thread/mle_router.hpp"
 #include "thread/thread_netif.hpp"
 #include "thread/thread_tlvs.hpp"
+#include "thread/version.hpp"
 
 namespace ot {
 
@@ -57,136 +56,85 @@ RegisterLogModule("NetDiag");
 
 namespace NetworkDiagnostic {
 
-NetworkDiagnostic::NetworkDiagnostic(Instance &aInstance)
+const char Server::kVendorName[]      = OPENTHREAD_CONFIG_NET_DIAG_VENDOR_NAME;
+const char Server::kVendorModel[]     = OPENTHREAD_CONFIG_NET_DIAG_VENDOR_MODEL;
+const char Server::kVendorSwVersion[] = OPENTHREAD_CONFIG_NET_DIAG_VENDOR_SW_VERSION;
+
+//---------------------------------------------------------------------------------------------------------------------
+// Server
+
+Server::Server(Instance &aInstance)
     : InstanceLocator(aInstance)
-    , mReceiveDiagnosticGetCallback(nullptr)
-    , mReceiveDiagnosticGetCallbackContext(nullptr)
 {
+    static_assert(sizeof(kVendorName) <= sizeof(VendorNameTlv::StringType), "VENDOR_NAME is too long");
+    static_assert(sizeof(kVendorModel) <= sizeof(VendorModelTlv::StringType), "VENDOR_MODEL is too long");
+    static_assert(sizeof(kVendorSwVersion) <= sizeof(VendorSwVersionTlv::StringType), "VENDOR_SW_VERSION is too long");
+
+#if OPENTHREAD_CONFIG_NET_DIAG_VENDOR_INFO_SET_API_ENABLE
+    memcpy(mVendorName, kVendorName, sizeof(kVendorName));
+    memcpy(mVendorModel, kVendorModel, sizeof(kVendorModel));
+    memcpy(mVendorSwVersion, kVendorSwVersion, sizeof(kVendorSwVersion));
+#endif
 }
 
-Error NetworkDiagnostic::SendDiagnosticGet(const Ip6::Address &           aDestination,
-                                           const uint8_t                  aTlvTypes[],
-                                           uint8_t                        aCount,
-                                           otReceiveDiagnosticGetCallback aCallback,
-                                           void *                         aCallbackContext)
+#if OPENTHREAD_CONFIG_NET_DIAG_VENDOR_INFO_SET_API_ENABLE
+
+Error Server::SetVendorName(const char *aVendorName)
 {
-    Error error;
+    return SetVendorString(mVendorName, sizeof(mVendorName), aVendorName);
+}
 
-    SuccessOrExit(error = SendDiagnosticCommand(kDiagnosticGet, aDestination, aTlvTypes, aCount));
+Error Server::SetVendorModel(const char *aVendorModel)
+{
+    return SetVendorString(mVendorModel, sizeof(mVendorModel), aVendorModel);
+}
 
-    mReceiveDiagnosticGetCallback        = aCallback;
-    mReceiveDiagnosticGetCallbackContext = aCallbackContext;
+Error Server::SetVendorSwVersion(const char *aVendorSwVersion)
+{
+    return SetVendorString(mVendorSwVersion, sizeof(mVendorSwVersion), aVendorSwVersion);
+}
 
-    LogInfo("Sent diagnostic get");
+Error Server::SetVendorString(char *aDestString, uint16_t kMaxSize, const char *aSrcString)
+{
+    Error    error = kErrorInvalidArgs;
+    uint16_t length;
+
+    VerifyOrExit(aSrcString != nullptr);
+
+    length = StringLength(aSrcString, kMaxSize);
+    VerifyOrExit(length < kMaxSize);
+
+    VerifyOrExit(IsValidUtf8String(aSrcString));
+
+    memcpy(aDestString, aSrcString, length + 1);
+    error = kErrorNone;
 
 exit:
     return error;
 }
 
-Error NetworkDiagnostic::SendDiagnosticCommand(CommandType         aCommandType,
-                                               const Ip6::Address &aDestination,
-                                               const uint8_t       aTlvTypes[],
-                                               uint8_t             aCount)
+#endif // OPENTHREAD_CONFIG_NET_DIAG_VENDOR_INFO_SET_API_ENABLE
+
+void Server::PrepareMessageInfoForDest(const Ip6::Address &aDestination, Tmf::MessageInfo &aMessageInfo) const
 {
-    Error                 error;
-    Coap::Message *       message = nullptr;
-    Tmf::MessageInfo      messageInfo(GetInstance());
-    Coap::ResponseHandler handler = nullptr;
-
-    switch (aCommandType)
+    if (aDestination.IsMulticast())
     {
-    case kDiagnosticGet:
-        if (aDestination.IsMulticast())
-        {
-            message = Get<Tmf::Agent>().NewNonConfirmablePostMessage(kUriDiagnosticGetQuery);
-            messageInfo.SetMulticastLoop(true);
-        }
-        else
-        {
-            handler = &NetworkDiagnostic::HandleDiagnosticGetResponse;
-            message = Get<Tmf::Agent>().NewConfirmablePostMessage(kUriDiagnosticGetRequest);
-        }
-        break;
-
-    case kDiagnosticReset:
-        message = Get<Tmf::Agent>().NewConfirmablePostMessage(kUriDiagnosticReset);
-        break;
-    }
-
-    VerifyOrExit(message != nullptr, error = kErrorNoBufs);
-
-    if (aCount > 0)
-    {
-        SuccessOrExit(error = Tlv::Append<TypeListTlv>(*message, aTlvTypes, aCount));
+        aMessageInfo.SetMulticastLoop(true);
     }
 
     if (aDestination.IsLinkLocal() || aDestination.IsLinkLocalMulticast())
     {
-        messageInfo.SetSockAddr(Get<Mle::MleRouter>().GetLinkLocalAddress());
+        aMessageInfo.SetSockAddr(Get<Mle::MleRouter>().GetLinkLocalAddress());
     }
     else
     {
-        messageInfo.SetSockAddrToRloc();
+        aMessageInfo.SetSockAddrToRloc();
     }
 
-    messageInfo.SetPeerAddr(aDestination);
-
-    error = Get<Tmf::Agent>().SendMessage(*message, messageInfo, handler, this);
-
-exit:
-    FreeMessageOnError(message, error);
-    return error;
+    aMessageInfo.SetPeerAddr(aDestination);
 }
 
-void NetworkDiagnostic::HandleDiagnosticGetResponse(void *               aContext,
-                                                    otMessage *          aMessage,
-                                                    const otMessageInfo *aMessageInfo,
-                                                    Error                aResult)
-{
-    static_cast<NetworkDiagnostic *>(aContext)->HandleDiagnosticGetResponse(AsCoapMessagePtr(aMessage),
-                                                                            AsCoreTypePtr(aMessageInfo), aResult);
-}
-
-void NetworkDiagnostic::HandleDiagnosticGetResponse(Coap::Message *         aMessage,
-                                                    const Ip6::MessageInfo *aMessageInfo,
-                                                    Error                   aResult)
-{
-    SuccessOrExit(aResult);
-    VerifyOrExit(aMessage->GetCode() == Coap::kCodeChanged, aResult = kErrorFailed);
-
-exit:
-    if (mReceiveDiagnosticGetCallback)
-    {
-        mReceiveDiagnosticGetCallback(aResult, aMessage, aMessageInfo, mReceiveDiagnosticGetCallbackContext);
-    }
-    else
-    {
-        LogDebg("Received diagnostic get response, error = %s", ErrorToString(aResult));
-    }
-}
-
-template <>
-void NetworkDiagnostic::HandleTmf<kUriDiagnosticGetAnswer>(Coap::Message &         aMessage,
-                                                           const Ip6::MessageInfo &aMessageInfo)
-{
-    VerifyOrExit(aMessage.IsConfirmablePostRequest());
-
-    LogInfo("Diagnostic get answer received");
-
-    if (mReceiveDiagnosticGetCallback)
-    {
-        mReceiveDiagnosticGetCallback(kErrorNone, &aMessage, &aMessageInfo, mReceiveDiagnosticGetCallbackContext);
-    }
-
-    SuccessOrExit(Get<Tmf::Agent>().SendEmptyAck(aMessage, aMessageInfo));
-
-    LogInfo("Sent diagnostic answer acknowledgment");
-
-exit:
-    return;
-}
-
-Error NetworkDiagnostic::AppendIp6AddressList(Message &aMessage)
+Error Server::AppendIp6AddressList(Message &aMessage)
 {
     Error    error = kErrorNone;
     uint16_t count = 0;
@@ -201,7 +149,7 @@ Error NetworkDiagnostic::AppendIp6AddressList(Message &aMessage)
     {
         Tlv tlv;
 
-        tlv.SetType(NetworkDiagnosticTlv::kIp6AddressList);
+        tlv.SetType(Tlv::kIp6AddressList);
         tlv.SetLength(static_cast<uint8_t>(count * Ip6::Address::kSize));
         SuccessOrExit(error = aMessage.Append(tlv));
     }
@@ -209,7 +157,7 @@ Error NetworkDiagnostic::AppendIp6AddressList(Message &aMessage)
     {
         ExtendedTlv extTlv;
 
-        extTlv.SetType(NetworkDiagnosticTlv::kIp6AddressList);
+        extTlv.SetType(Tlv::kIp6AddressList);
         extTlv.SetLength(count * Ip6::Address::kSize);
         SuccessOrExit(error = aMessage.Append(extTlv));
     }
@@ -224,10 +172,12 @@ exit:
 }
 
 #if OPENTHREAD_FTD
-Error NetworkDiagnostic::AppendChildTable(Message &aMessage)
+Error Server::AppendChildTable(Message &aMessage)
 {
     Error    error = kErrorNone;
-    uint16_t count = 0;
+    uint16_t count;
+
+    VerifyOrExit(Get<Mle::MleRouter>().IsRouterOrLeader());
 
     count = Min(Get<ChildTable>().GetNumChildren(Child::kInStateValid), kMaxChildEntries);
 
@@ -235,7 +185,7 @@ Error NetworkDiagnostic::AppendChildTable(Message &aMessage)
     {
         Tlv tlv;
 
-        tlv.SetType(NetworkDiagnosticTlv::kChildTable);
+        tlv.SetType(Tlv::kChildTable);
         tlv.SetLength(static_cast<uint8_t>(count * sizeof(ChildTableEntry)));
         SuccessOrExit(error = aMessage.Append(tlv));
     }
@@ -243,7 +193,7 @@ Error NetworkDiagnostic::AppendChildTable(Message &aMessage)
     {
         ExtendedTlv extTlv;
 
-        extTlv.SetType(NetworkDiagnosticTlv::kChildTable);
+        extTlv.SetType(Tlv::kChildTable);
         extTlv.SetLength(count * sizeof(ChildTableEntry));
         SuccessOrExit(error = aMessage.Append(extTlv));
     }
@@ -262,6 +212,7 @@ Error NetworkDiagnostic::AppendChildTable(Message &aMessage)
 
         entry.Clear();
         entry.SetTimeout(timeout + 4);
+        entry.SetLinkQuality(child.GetLinkQualityIn());
         entry.SetChildId(Mle::ChildIdFromRloc16(child.GetRloc16()));
         entry.SetMode(child.GetDeviceMode());
 
@@ -273,183 +224,176 @@ exit:
 }
 #endif // OPENTHREAD_FTD
 
-void NetworkDiagnostic::FillMacCountersTlv(MacCountersTlv &aMacCountersTlv)
+Error Server::AppendMacCounters(Message &aMessage)
 {
-    const otMacCounters &macCounters = Get<Mac::Mac>().GetCounters();
+    MacCountersTlv       tlv;
+    const otMacCounters &counters = Get<Mac::Mac>().GetCounters();
 
-    aMacCountersTlv.SetIfInUnknownProtos(macCounters.mRxOther);
-    aMacCountersTlv.SetIfInErrors(macCounters.mRxErrNoFrame + macCounters.mRxErrUnknownNeighbor +
-                                  macCounters.mRxErrInvalidSrcAddr + macCounters.mRxErrSec + macCounters.mRxErrFcs +
-                                  macCounters.mRxErrOther);
-    aMacCountersTlv.SetIfOutErrors(macCounters.mTxErrCca);
-    aMacCountersTlv.SetIfInUcastPkts(macCounters.mRxUnicast);
-    aMacCountersTlv.SetIfInBroadcastPkts(macCounters.mRxBroadcast);
-    aMacCountersTlv.SetIfInDiscards(macCounters.mRxAddressFiltered + macCounters.mRxDestAddrFiltered +
-                                    macCounters.mRxDuplicated);
-    aMacCountersTlv.SetIfOutUcastPkts(macCounters.mTxUnicast);
-    aMacCountersTlv.SetIfOutBroadcastPkts(macCounters.mTxBroadcast);
-    aMacCountersTlv.SetIfOutDiscards(macCounters.mTxErrBusyChannel);
+    memset(&tlv, 0, sizeof(tlv));
+
+    tlv.Init();
+    tlv.SetIfInUnknownProtos(counters.mRxOther);
+    tlv.SetIfInErrors(counters.mRxErrNoFrame + counters.mRxErrUnknownNeighbor + counters.mRxErrInvalidSrcAddr +
+                      counters.mRxErrSec + counters.mRxErrFcs + counters.mRxErrOther);
+    tlv.SetIfOutErrors(counters.mTxErrCca);
+    tlv.SetIfInUcastPkts(counters.mRxUnicast);
+    tlv.SetIfInBroadcastPkts(counters.mRxBroadcast);
+    tlv.SetIfInDiscards(counters.mRxAddressFiltered + counters.mRxDestAddrFiltered + counters.mRxDuplicated);
+    tlv.SetIfOutUcastPkts(counters.mTxUnicast);
+    tlv.SetIfOutBroadcastPkts(counters.mTxBroadcast);
+    tlv.SetIfOutDiscards(counters.mTxErrBusyChannel);
+
+    return tlv.AppendTo(aMessage);
 }
 
-Error NetworkDiagnostic::FillRequestedTlvs(const Message &       aRequest,
-                                           Message &             aResponse,
-                                           NetworkDiagnosticTlv &aNetworkDiagnosticTlv)
+Error Server::AppendRequestedTlvs(const Message &aRequest, Message &aResponse)
 {
-    Error    error  = kErrorNone;
-    uint16_t offset = 0;
-    uint8_t  type;
+    Error    error;
+    uint16_t offset;
+    uint16_t length;
+    uint16_t endOffset;
 
-    offset = aRequest.GetOffset() + sizeof(NetworkDiagnosticTlv);
+    SuccessOrExit(error = Tlv::FindTlvValueOffset(aRequest, Tlv::kTypeList, offset, length));
+    endOffset = offset + length;
 
-    for (uint32_t i = 0; i < aNetworkDiagnosticTlv.GetLength(); i++)
+    for (; offset < endOffset; offset++)
     {
-        SuccessOrExit(error = aRequest.Read(offset, type));
+        uint8_t tlvType;
 
-        switch (type)
+        SuccessOrExit(error = aRequest.Read(offset, tlvType));
+        SuccessOrExit(error = AppendDiagTlv(tlvType, aResponse));
+    }
+
+exit:
+    return error;
+}
+
+Error Server::AppendDiagTlv(uint8_t aTlvType, Message &aMessage)
+{
+    Error error = kErrorNone;
+
+    switch (aTlvType)
+    {
+    case Tlv::kExtMacAddress:
+        error = Tlv::Append<ExtMacAddressTlv>(aMessage, Get<Mac::Mac>().GetExtAddress());
+        break;
+
+    case Tlv::kAddress16:
+        error = Tlv::Append<Address16Tlv>(aMessage, Get<Mle::MleRouter>().GetRloc16());
+        break;
+
+    case Tlv::kMode:
+        error = Tlv::Append<ModeTlv>(aMessage, Get<Mle::MleRouter>().GetDeviceMode().Get());
+        break;
+
+    case Tlv::kVersion:
+        error = Tlv::Append<VersionTlv>(aMessage, kThreadVersion);
+        break;
+
+    case Tlv::kTimeout:
+        VerifyOrExit(!Get<Mle::MleRouter>().IsRxOnWhenIdle());
+        error = Tlv::Append<TimeoutTlv>(aMessage, Get<Mle::MleRouter>().GetTimeout());
+        break;
+
+    case Tlv::kLeaderData:
+    {
+        LeaderDataTlv tlv;
+
+        tlv.Init();
+        tlv.Set(Get<Mle::MleRouter>().GetLeaderData());
+        error = tlv.AppendTo(aMessage);
+        break;
+    }
+
+    case Tlv::kNetworkData:
+        error = Tlv::Append<NetworkDataTlv>(aMessage, Get<NetworkData::Leader>().GetBytes(),
+                                            Get<NetworkData::Leader>().GetLength());
+        break;
+
+    case Tlv::kIp6AddressList:
+        error = AppendIp6AddressList(aMessage);
+        break;
+
+    case Tlv::kMacCounters:
+        error = AppendMacCounters(aMessage);
+        break;
+
+    case Tlv::kVendorName:
+        error = Tlv::Append<VendorNameTlv>(aMessage, GetVendorName());
+        break;
+
+    case Tlv::kVendorModel:
+        error = Tlv::Append<VendorModelTlv>(aMessage, GetVendorModel());
+        break;
+
+    case Tlv::kVendorSwVersion:
+        error = Tlv::Append<VendorSwVersionTlv>(aMessage, GetVendorSwVersion());
+        break;
+
+    case Tlv::kThreadStackVersion:
+        error = Tlv::Append<ThreadStackVersionTlv>(aMessage, otGetVersionString());
+        break;
+
+    case Tlv::kChannelPages:
+    {
+        ChannelPagesTlv tlv;
+        uint8_t         length = 0;
+
+        tlv.Init();
+
+        for (uint8_t page = 0; page < sizeof(Radio::kSupportedChannelPages) * CHAR_BIT; page++)
         {
-        case NetworkDiagnosticTlv::kExtMacAddress:
-            SuccessOrExit(error = Tlv::Append<ExtMacAddressTlv>(aResponse, Get<Mac::Mac>().GetExtAddress()));
-            break;
-
-        case NetworkDiagnosticTlv::kAddress16:
-            SuccessOrExit(error = Tlv::Append<Address16Tlv>(aResponse, Get<Mle::MleRouter>().GetRloc16()));
-            break;
-
-        case NetworkDiagnosticTlv::kMode:
-            SuccessOrExit(error = Tlv::Append<ModeTlv>(aResponse, Get<Mle::MleRouter>().GetDeviceMode().Get()));
-            break;
-
-        case NetworkDiagnosticTlv::kTimeout:
-            if (!Get<Mle::MleRouter>().IsRxOnWhenIdle())
+            if (Radio::kSupportedChannelPages & (1 << page))
             {
-                SuccessOrExit(error = Tlv::Append<TimeoutTlv>(aResponse, Get<Mle::MleRouter>().GetTimeout()));
+                tlv.GetChannelPages()[length++] = page;
             }
+        }
 
-            break;
+        tlv.SetLength(length);
+        error = tlv.AppendTo(aMessage);
+
+        break;
+    }
 
 #if OPENTHREAD_FTD
-        case NetworkDiagnosticTlv::kConnectivity:
-        {
-            ConnectivityTlv tlv;
 
-            tlv.Init();
-            Get<Mle::MleRouter>().FillConnectivityTlv(tlv);
-            SuccessOrExit(error = tlv.AppendTo(aResponse));
-            break;
-        }
+    case Tlv::kConnectivity:
+    {
+        ConnectivityTlv tlv;
 
-        case NetworkDiagnosticTlv::kRoute:
-        {
-            RouteTlv tlv;
+        tlv.Init();
+        Get<Mle::MleRouter>().FillConnectivityTlv(tlv);
+        error = tlv.AppendTo(aMessage);
+        break;
+    }
 
-            tlv.Init();
-            Get<Mle::MleRouter>().FillRouteTlv(tlv);
-            SuccessOrExit(error = tlv.AppendTo(aResponse));
-            break;
-        }
-#endif
+    case Tlv::kRoute:
+    {
+        RouteTlv tlv;
 
-        case NetworkDiagnosticTlv::kLeaderData:
-        {
-            LeaderDataTlv tlv;
+        tlv.Init();
+        Get<RouterTable>().FillRouteTlv(tlv);
+        SuccessOrExit(error = tlv.AppendTo(aMessage));
+        break;
+    }
 
-            tlv.Init();
-            tlv.Set(Get<Mle::MleRouter>().GetLeaderData());
-            SuccessOrExit(error = tlv.AppendTo(aResponse));
-            break;
-        }
+    case Tlv::kChildTable:
+        error = AppendChildTable(aMessage);
+        break;
 
-        case NetworkDiagnosticTlv::kNetworkData:
-        {
-            NetworkData::NetworkData &netData = Get<NetworkData::Leader>();
+    case Tlv::kMaxChildTimeout:
+    {
+        uint32_t maxTimeout;
 
-            SuccessOrExit(error = Tlv::Append<NetworkDataTlv>(aResponse, netData.GetBytes(), netData.GetLength()));
-            break;
-        }
+        SuccessOrExit(Get<Mle::MleRouter>().GetMaxChildTimeout(maxTimeout));
+        error = Tlv::Append<MaxChildTimeoutTlv>(aMessage, maxTimeout);
+        break;
+    }
 
-        case NetworkDiagnosticTlv::kIp6AddressList:
-            SuccessOrExit(error = AppendIp6AddressList(aResponse));
-            break;
+#endif // OPENTHREAD_FTD
 
-        case NetworkDiagnosticTlv::kMacCounters:
-        {
-            MacCountersTlv tlv;
-            memset(&tlv, 0, sizeof(tlv));
-            tlv.Init();
-            FillMacCountersTlv(tlv);
-            SuccessOrExit(error = tlv.AppendTo(aResponse));
-            break;
-        }
-
-        case NetworkDiagnosticTlv::kBatteryLevel:
-        {
-            // Thread 1.1.1 Specification Section 10.11.4.2:
-            // Omitted if the battery level is not measured, is unknown or the device does not
-            // operate on battery power.
-            break;
-        }
-
-        case NetworkDiagnosticTlv::kSupplyVoltage:
-        {
-            // Thread 1.1.1 Specification Section 10.11.4.3:
-            // Omitted if the supply voltage is not measured, is unknown.
-            break;
-        }
-
-#if OPENTHREAD_FTD
-        case NetworkDiagnosticTlv::kChildTable:
-        {
-            // Thread 1.1.1 Specification Section 10.11.2.2:
-            // If a Thread device is unable to supply a specific Diagnostic TLV, that TLV is omitted.
-            // Here only Leader or Router may have children.
-            if (Get<Mle::MleRouter>().IsRouterOrLeader())
-            {
-                SuccessOrExit(error = AppendChildTable(aResponse));
-            }
-            break;
-        }
-#endif
-
-        case NetworkDiagnosticTlv::kChannelPages:
-        {
-            uint8_t         length   = 0;
-            uint32_t        pageMask = Radio::kSupportedChannelPages;
-            ChannelPagesTlv tlv;
-
-            tlv.Init();
-            for (uint8_t page = 0; page < sizeof(pageMask) * 8; page++)
-            {
-                if (pageMask & (1 << page))
-                {
-                    tlv.GetChannelPages()[length++] = page;
-                }
-            }
-
-            tlv.SetLength(length);
-            SuccessOrExit(error = tlv.AppendTo(aResponse));
-            break;
-        }
-
-#if OPENTHREAD_FTD
-        case NetworkDiagnosticTlv::kMaxChildTimeout:
-        {
-            uint32_t maxTimeout;
-
-            if (Get<Mle::MleRouter>().GetMaxChildTimeout(maxTimeout) == kErrorNone)
-            {
-                SuccessOrExit(error = Tlv::Append<MaxChildTimeoutTlv>(aResponse, maxTimeout));
-            }
-
-            break;
-        }
-#endif
-
-        default:
-            // Skip unrecognized TLV type.
-            break;
-        }
-
-        offset += sizeof(type);
+    default:
+        break;
     }
 
 exit:
@@ -457,113 +401,72 @@ exit:
 }
 
 template <>
-void NetworkDiagnostic::HandleTmf<kUriDiagnosticGetQuery>(Coap::Message &aMessage, const Ip6::MessageInfo &aMessageInfo)
+void Server::HandleTmf<kUriDiagnosticGetQuery>(Coap::Message &aMessage, const Ip6::MessageInfo &aMessageInfo)
 {
-    Error                error   = kErrorNone;
-    Coap::Message *      message = nullptr;
-    NetworkDiagnosticTlv networkDiagnosticTlv;
-    Tmf::MessageInfo     messageInfo(GetInstance());
+    Error            error    = kErrorNone;
+    Coap::Message   *response = nullptr;
+    Tmf::MessageInfo responseInfo(GetInstance());
 
     VerifyOrExit(aMessage.IsPostRequest(), error = kErrorDrop);
 
-    LogInfo("Received diagnostic get query");
+    LogInfo("Received %s from %s", UriToString<kUriDiagnosticGetQuery>(),
+            aMessageInfo.GetPeerAddr().ToString().AsCString());
 
-    SuccessOrExit(error = aMessage.Read(aMessage.GetOffset(), networkDiagnosticTlv));
-
-    VerifyOrExit(networkDiagnosticTlv.GetType() == NetworkDiagnosticTlv::kTypeList, error = kErrorParse);
-
-    // DIAG_GET.qry may be sent as a confirmable message.
+    // DIAG_GET.qry may be sent as a confirmable request.
     if (aMessage.IsConfirmable())
     {
-        if (Get<Tmf::Agent>().SendEmptyAck(aMessage, aMessageInfo) == kErrorNone)
-        {
-            LogInfo("Sent diagnostic get query acknowledgment");
-        }
+        IgnoreError(Get<Tmf::Agent>().SendEmptyAck(aMessage, aMessageInfo));
     }
 
-    message = Get<Tmf::Agent>().NewConfirmablePostMessage(kUriDiagnosticGetAnswer);
-    VerifyOrExit(message != nullptr, error = kErrorNoBufs);
+    response = Get<Tmf::Agent>().NewConfirmablePostMessage(kUriDiagnosticGetAnswer);
+    VerifyOrExit(response != nullptr, error = kErrorNoBufs);
 
-    if (aMessageInfo.GetPeerAddr().IsLinkLocal())
-    {
-        messageInfo.SetSockAddr(Get<Mle::MleRouter>().GetLinkLocalAddress());
-    }
-    else
-    {
-        messageInfo.SetSockAddrToRloc();
-    }
+    SuccessOrExit(error = AppendRequestedTlvs(aMessage, *response));
 
-    messageInfo.SetPeerAddr(aMessageInfo.GetPeerAddr());
-
-    SuccessOrExit(error = FillRequestedTlvs(aMessage, *message, networkDiagnosticTlv));
-
-    SuccessOrExit(error = Get<Tmf::Agent>().SendMessage(*message, messageInfo, nullptr, this));
-
-    LogInfo("Sent diagnostic get answer");
+    PrepareMessageInfoForDest(aMessageInfo.GetPeerAddr(), responseInfo);
+    SuccessOrExit(error = Get<Tmf::Agent>().SendMessage(*response, responseInfo));
 
 exit:
-    FreeMessageOnError(message, error);
+    FreeMessageOnError(response, error);
 }
 
 template <>
-void NetworkDiagnostic::HandleTmf<kUriDiagnosticGetRequest>(Coap::Message &         aMessage,
-                                                            const Ip6::MessageInfo &aMessageInfo)
+void Server::HandleTmf<kUriDiagnosticGetRequest>(Coap::Message &aMessage, const Ip6::MessageInfo &aMessageInfo)
 {
-    Error                error   = kErrorNone;
-    Coap::Message *      message = nullptr;
-    NetworkDiagnosticTlv networkDiagnosticTlv;
-    Ip6::MessageInfo     messageInfo(aMessageInfo);
+    Error          error    = kErrorNone;
+    Coap::Message *response = nullptr;
 
     VerifyOrExit(aMessage.IsConfirmablePostRequest(), error = kErrorDrop);
 
-    LogInfo("Received diagnostic get request");
+    LogInfo("Received %s from %s", UriToString<kUriDiagnosticGetRequest>(),
+            aMessageInfo.GetPeerAddr().ToString().AsCString());
 
-    SuccessOrExit(error = aMessage.Read(aMessage.GetOffset(), networkDiagnosticTlv));
+    response = Get<Tmf::Agent>().NewResponseMessage(aMessage);
+    VerifyOrExit(response != nullptr, error = kErrorNoBufs);
 
-    VerifyOrExit(networkDiagnosticTlv.GetType() == NetworkDiagnosticTlv::kTypeList, error = kErrorParse);
-
-    message = Get<Tmf::Agent>().NewResponseMessage(aMessage);
-    VerifyOrExit(message != nullptr, error = kErrorNoBufs);
-
-    SuccessOrExit(error = FillRequestedTlvs(aMessage, *message, networkDiagnosticTlv));
-
-    SuccessOrExit(error = Get<Tmf::Agent>().SendMessage(*message, messageInfo));
-
-    LogInfo("Sent diagnostic get response");
+    SuccessOrExit(error = AppendRequestedTlvs(aMessage, *response));
+    SuccessOrExit(error = Get<Tmf::Agent>().SendMessage(*response, aMessageInfo));
 
 exit:
-    FreeMessageOnError(message, error);
+    FreeMessageOnError(response, error);
 }
 
-Error NetworkDiagnostic::SendDiagnosticReset(const Ip6::Address &aDestination,
-                                             const uint8_t       aTlvTypes[],
-                                             uint8_t             aCount)
+template <> void Server::HandleTmf<kUriDiagnosticReset>(Coap::Message &aMessage, const Ip6::MessageInfo &aMessageInfo)
 {
-    Error error;
-
-    SuccessOrExit(error = SendDiagnosticCommand(kDiagnosticReset, aDestination, aTlvTypes, aCount));
-    LogInfo("Sent network diagnostic reset");
-
-exit:
-    return error;
-}
-
-template <>
-void NetworkDiagnostic::HandleTmf<kUriDiagnosticReset>(Coap::Message &aMessage, const Ip6::MessageInfo &aMessageInfo)
-{
-    uint16_t             offset = 0;
-    uint8_t              type;
-    NetworkDiagnosticTlv tlv;
-
-    LogInfo("Received diagnostic reset request");
+    uint16_t offset = 0;
+    uint8_t  type;
+    Tlv      tlv;
 
     VerifyOrExit(aMessage.IsConfirmablePostRequest());
 
+    LogInfo("Received %s from %s", UriToString<kUriDiagnosticReset>(),
+            aMessageInfo.GetPeerAddr().ToString().AsCString());
+
     SuccessOrExit(aMessage.Read(aMessage.GetOffset(), tlv));
 
-    VerifyOrExit(tlv.GetType() == NetworkDiagnosticTlv::kTypeList);
+    VerifyOrExit(tlv.GetType() == Tlv::kTypeList);
 
-    offset = aMessage.GetOffset() + sizeof(NetworkDiagnosticTlv);
+    offset = aMessage.GetOffset() + sizeof(Tlv);
 
     for (uint8_t i = 0; i < tlv.GetLength(); i++)
     {
@@ -571,23 +474,134 @@ void NetworkDiagnostic::HandleTmf<kUriDiagnosticReset>(Coap::Message &aMessage, 
 
         switch (type)
         {
-        case NetworkDiagnosticTlv::kMacCounters:
+        case Tlv::kMacCounters:
             Get<Mac::Mac>().ResetCounters();
-            LogInfo("Received diagnostic reset type kMacCounters(9)");
             break;
 
         default:
-            LogInfo("Received diagnostic reset other type %d not resetable", type);
             break;
         }
     }
 
-    SuccessOrExit(Get<Tmf::Agent>().SendEmptyAck(aMessage, aMessageInfo));
-
-    LogInfo("Sent diagnostic reset acknowledgment");
+    IgnoreError(Get<Tmf::Agent>().SendEmptyAck(aMessage, aMessageInfo));
 
 exit:
     return;
+}
+
+#if OPENTHREAD_CONFIG_TMF_NETDIAG_CLIENT_ENABLE
+
+//---------------------------------------------------------------------------------------------------------------------
+// Client
+
+Client::Client(Instance &aInstance)
+    : InstanceLocator(aInstance)
+{
+}
+
+Error Client::SendDiagnosticGet(const Ip6::Address &aDestination,
+                                const uint8_t       aTlvTypes[],
+                                uint8_t             aCount,
+                                GetCallback         aCallback,
+                                void               *aContext)
+{
+    Error error;
+
+    if (aDestination.IsMulticast())
+    {
+        error = SendCommand(kUriDiagnosticGetQuery, aDestination, aTlvTypes, aCount);
+    }
+    else
+    {
+        error = SendCommand(kUriDiagnosticGetRequest, aDestination, aTlvTypes, aCount, &HandleGetResponse, this);
+    }
+
+    SuccessOrExit(error);
+
+    mGetCallback.Set(aCallback, aContext);
+
+exit:
+    return error;
+}
+
+Error Client::SendCommand(Uri                   aUri,
+                          const Ip6::Address   &aDestination,
+                          const uint8_t         aTlvTypes[],
+                          uint8_t               aCount,
+                          Coap::ResponseHandler aHandler,
+                          void                 *aContext)
+{
+    Error            error;
+    Coap::Message   *message = nullptr;
+    Tmf::MessageInfo messageInfo(GetInstance());
+
+    switch (aUri)
+    {
+    case kUriDiagnosticGetQuery:
+        message = Get<Tmf::Agent>().NewNonConfirmablePostMessage(aUri);
+        break;
+
+    case kUriDiagnosticGetRequest:
+    case kUriDiagnosticReset:
+        message = Get<Tmf::Agent>().NewConfirmablePostMessage(aUri);
+        break;
+
+    default:
+        OT_ASSERT(false);
+    }
+
+    VerifyOrExit(message != nullptr, error = kErrorNoBufs);
+
+    if (aCount > 0)
+    {
+        SuccessOrExit(error = Tlv::Append<TypeListTlv>(*message, aTlvTypes, aCount));
+    }
+
+    Get<Server>().PrepareMessageInfoForDest(aDestination, messageInfo);
+
+    SuccessOrExit(error = Get<Tmf::Agent>().SendMessage(*message, messageInfo, aHandler, aContext));
+
+    LogInfo("Sent %s to %s", UriToString(aUri), aDestination.ToString().AsCString());
+
+exit:
+    FreeMessageOnError(message, error);
+    return error;
+}
+
+void Client::HandleGetResponse(void *aContext, otMessage *aMessage, const otMessageInfo *aMessageInfo, Error aResult)
+{
+    static_cast<Client *>(aContext)->HandleGetResponse(AsCoapMessagePtr(aMessage), AsCoreTypePtr(aMessageInfo),
+                                                       aResult);
+}
+
+void Client::HandleGetResponse(Coap::Message *aMessage, const Ip6::MessageInfo *aMessageInfo, Error aResult)
+{
+    SuccessOrExit(aResult);
+    VerifyOrExit(aMessage->GetCode() == Coap::kCodeChanged, aResult = kErrorFailed);
+
+exit:
+    mGetCallback.InvokeIfSet(aResult, aMessage, aMessageInfo);
+}
+
+template <>
+void Client::HandleTmf<kUriDiagnosticGetAnswer>(Coap::Message &aMessage, const Ip6::MessageInfo &aMessageInfo)
+{
+    VerifyOrExit(aMessage.IsConfirmablePostRequest());
+
+    LogInfo("Received %s from %s", ot::UriToString<kUriDiagnosticGetAnswer>(),
+            aMessageInfo.GetPeerAddr().ToString().AsCString());
+
+    mGetCallback.InvokeIfSet(kErrorNone, &aMessage, &aMessageInfo);
+
+    IgnoreError(Get<Tmf::Agent>().SendEmptyAck(aMessage, aMessageInfo));
+
+exit:
+    return;
+}
+
+Error Client::SendDiagnosticReset(const Ip6::Address &aDestination, const uint8_t aTlvTypes[], uint8_t aCount)
+{
+    return SendCommand(kUriDiagnosticReset, aDestination, aTlvTypes, aCount);
 }
 
 static void ParseRoute(const RouteTlv &aRouteTlv, otNetworkDiagRoute &aNetworkDiagRoute)
@@ -623,9 +637,9 @@ static inline void ParseMacCounters(const MacCountersTlv &aMacCountersTlv, otNet
     aMacCounters.mIfOutDiscards      = aMacCountersTlv.GetIfOutDiscards();
 }
 
-Error NetworkDiagnostic::GetNextDiagTlv(const Coap::Message &aMessage, Iterator &aIterator, TlvInfo &aTlvInfo)
+Error Client::GetNextDiagTlv(const Coap::Message &aMessage, Iterator &aIterator, TlvInfo &aTlvInfo)
 {
-    Error    error  = kErrorNotFound;
+    Error    error;
     uint16_t offset = (aIterator == 0) ? aMessage.GetOffset() : aIterator;
 
     while (offset < aMessage.GetLength())
@@ -657,16 +671,16 @@ Error NetworkDiagnostic::GetNextDiagTlv(const Coap::Message &aMessage, Iterator 
 
         switch (tlv.GetType())
         {
-        case NetworkDiagnosticTlv::kExtMacAddress:
+        case Tlv::kExtMacAddress:
             SuccessOrExit(error =
                               Tlv::Read<ExtMacAddressTlv>(aMessage, offset, AsCoreType(&aTlvInfo.mData.mExtAddress)));
             break;
 
-        case NetworkDiagnosticTlv::kAddress16:
+        case Tlv::kAddress16:
             SuccessOrExit(error = Tlv::Read<Address16Tlv>(aMessage, offset, aTlvInfo.mData.mAddr16));
             break;
 
-        case NetworkDiagnosticTlv::kMode:
+        case Tlv::kMode:
         {
             uint8_t mode;
 
@@ -675,11 +689,11 @@ Error NetworkDiagnostic::GetNextDiagTlv(const Coap::Message &aMessage, Iterator 
             break;
         }
 
-        case NetworkDiagnosticTlv::kTimeout:
+        case Tlv::kTimeout:
             SuccessOrExit(error = Tlv::Read<TimeoutTlv>(aMessage, offset, aTlvInfo.mData.mTimeout));
             break;
 
-        case NetworkDiagnosticTlv::kConnectivity:
+        case Tlv::kConnectivity:
         {
             ConnectivityTlv connectivityTlv;
 
@@ -690,7 +704,7 @@ Error NetworkDiagnostic::GetNextDiagTlv(const Coap::Message &aMessage, Iterator 
             break;
         }
 
-        case NetworkDiagnosticTlv::kRoute:
+        case Tlv::kRoute:
         {
             RouteTlv routeTlv;
             uint16_t bytesToRead = static_cast<uint16_t>(Min(tlv.GetSize(), static_cast<uint32_t>(sizeof(routeTlv))));
@@ -702,7 +716,7 @@ Error NetworkDiagnostic::GetNextDiagTlv(const Coap::Message &aMessage, Iterator 
             break;
         }
 
-        case NetworkDiagnosticTlv::kLeaderData:
+        case Tlv::kLeaderData:
         {
             LeaderDataTlv leaderDataTlv;
 
@@ -713,7 +727,7 @@ Error NetworkDiagnostic::GetNextDiagTlv(const Coap::Message &aMessage, Iterator 
             break;
         }
 
-        case NetworkDiagnosticTlv::kNetworkData:
+        case Tlv::kNetworkData:
             static_assert(sizeof(aTlvInfo.mData.mNetworkData.m8) >= NetworkData::NetworkData::kMaxSize,
                           "NetworkData array in `otNetworkDiagTlv` is too small");
 
@@ -722,11 +736,11 @@ Error NetworkDiagnostic::GetNextDiagTlv(const Coap::Message &aMessage, Iterator 
             aMessage.ReadBytes(valueOffset, aTlvInfo.mData.mNetworkData.m8, tlvLength);
             break;
 
-        case NetworkDiagnosticTlv::kIp6AddressList:
+        case Tlv::kIp6AddressList:
         {
             uint16_t      addrListLength = GetArrayLength(aTlvInfo.mData.mIp6AddrList.mList);
             Ip6::Address *addrEntry      = AsCoreTypePtr(&aTlvInfo.mData.mIp6AddrList.mList[0]);
-            uint8_t &     addrCount      = aTlvInfo.mData.mIp6AddrList.mCount;
+            uint8_t      &addrCount      = aTlvInfo.mData.mIp6AddrList.mCount;
 
             VerifyOrExit((tlvLength % Ip6::Address::kSize) == 0, error = kErrorParse);
 
@@ -748,7 +762,7 @@ Error NetworkDiagnostic::GetNextDiagTlv(const Coap::Message &aMessage, Iterator 
             break;
         }
 
-        case NetworkDiagnosticTlv::kMacCounters:
+        case Tlv::kMacCounters:
         {
             MacCountersTlv macCountersTlv;
 
@@ -758,19 +772,19 @@ Error NetworkDiagnostic::GetNextDiagTlv(const Coap::Message &aMessage, Iterator 
             break;
         }
 
-        case NetworkDiagnosticTlv::kBatteryLevel:
+        case Tlv::kBatteryLevel:
             SuccessOrExit(error = Tlv::Read<BatteryLevelTlv>(aMessage, offset, aTlvInfo.mData.mBatteryLevel));
             break;
 
-        case NetworkDiagnosticTlv::kSupplyVoltage:
+        case Tlv::kSupplyVoltage:
             SuccessOrExit(error = Tlv::Read<SupplyVoltageTlv>(aMessage, offset, aTlvInfo.mData.mSupplyVoltage));
             break;
 
-        case NetworkDiagnosticTlv::kChildTable:
+        case Tlv::kChildTable:
         {
             uint16_t   childInfoLength = GetArrayLength(aTlvInfo.mData.mChildTable.mTable);
             ChildInfo *childInfo       = &aTlvInfo.mData.mChildTable.mTable[0];
-            uint8_t &  childCount      = aTlvInfo.mData.mChildTable.mCount;
+            uint8_t   &childCount      = aTlvInfo.mData.mChildTable.mCount;
 
             VerifyOrExit((tlvLength % sizeof(ChildTableEntry)) == 0, error = kErrorParse);
 
@@ -786,8 +800,9 @@ Error NetworkDiagnostic::GetNextDiagTlv(const Coap::Message &aMessage, Iterator 
 
                 SuccessOrExit(error = aMessage.Read(valueOffset, entry));
 
-                childInfo->mTimeout = entry.GetTimeout();
-                childInfo->mChildId = entry.GetChildId();
+                childInfo->mTimeout     = entry.GetTimeout();
+                childInfo->mLinkQuality = entry.GetLinkQuality();
+                childInfo->mChildId     = entry.GetChildId();
                 entry.GetMode().Get(childInfo->mMode);
 
                 childCount++;
@@ -799,14 +814,35 @@ Error NetworkDiagnostic::GetNextDiagTlv(const Coap::Message &aMessage, Iterator 
             break;
         }
 
-        case NetworkDiagnosticTlv::kChannelPages:
+        case Tlv::kChannelPages:
             aTlvInfo.mData.mChannelPages.mCount =
                 static_cast<uint8_t>(Min(tlvLength, GetArrayLength(aTlvInfo.mData.mChannelPages.m8)));
             aMessage.ReadBytes(valueOffset, aTlvInfo.mData.mChannelPages.m8, aTlvInfo.mData.mChannelPages.mCount);
             break;
 
-        case NetworkDiagnosticTlv::kMaxChildTimeout:
+        case Tlv::kMaxChildTimeout:
             SuccessOrExit(error = Tlv::Read<MaxChildTimeoutTlv>(aMessage, offset, aTlvInfo.mData.mMaxChildTimeout));
+            break;
+
+        case Tlv::kVersion:
+            SuccessOrExit(error = Tlv::Read<VersionTlv>(aMessage, offset, aTlvInfo.mData.mVersion));
+            break;
+
+        case Tlv::kVendorName:
+            SuccessOrExit(error = Tlv::Read<VendorNameTlv>(aMessage, offset, aTlvInfo.mData.mVendorName));
+            break;
+
+        case Tlv::kVendorModel:
+            SuccessOrExit(error = Tlv::Read<VendorModelTlv>(aMessage, offset, aTlvInfo.mData.mVendorModel));
+            break;
+
+        case Tlv::kVendorSwVersion:
+            SuccessOrExit(error = Tlv::Read<VendorSwVersionTlv>(aMessage, offset, aTlvInfo.mData.mVendorSwVersion));
+            break;
+
+        case Tlv::kThreadStackVersion:
+            SuccessOrExit(error =
+                              Tlv::Read<ThreadStackVersionTlv>(aMessage, offset, aTlvInfo.mData.mThreadStackVersion));
             break;
 
         default:
@@ -822,16 +858,45 @@ Error NetworkDiagnostic::GetNextDiagTlv(const Coap::Message &aMessage, Iterator 
             // Exit if a TLV is recognized and parsed successfully.
             aTlvInfo.mType = tlv.GetType();
             aIterator      = offset;
+            error          = kErrorNone;
             ExitNow();
         }
     }
+
+    error = kErrorNotFound;
 
 exit:
     return error;
 }
 
+#if OT_SHOULD_LOG_AT(OT_LOG_LEVEL_INFO)
+
+const char *Client::UriToString(Uri aUri)
+{
+    const char *str = "";
+
+    switch (aUri)
+    {
+    case kUriDiagnosticGetQuery:
+        str = ot::UriToString<kUriDiagnosticGetQuery>();
+        break;
+    case kUriDiagnosticGetRequest:
+        str = ot::UriToString<kUriDiagnosticGetRequest>();
+        break;
+    case kUriDiagnosticReset:
+        str = ot::UriToString<kUriDiagnosticReset>();
+        break;
+    default:
+        break;
+    }
+
+    return str;
+}
+
+#endif // #if OT_SHOULD_LOG_AT(OT_LOG_LEVEL_INFO)
+
+#endif // OPENTHREAD_CONFIG_TMF_NETDIAG_CLIENT_ENABLE
+
 } // namespace NetworkDiagnostic
 
 } // namespace ot
-
-#endif // OPENTHREAD_FTD || OPENTHREAD_CONFIG_TMF_NETWORK_DIAG_MTD_ENABLE

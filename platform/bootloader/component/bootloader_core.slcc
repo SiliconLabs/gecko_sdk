@@ -83,6 +83,10 @@ requires:
     condition: [device_generic_family_efr32xg28, bootloader_uart_xmodem]
   - name: bootloader_tz_secure_config
     condition: [device_generic_family_efr32xg28, bootloader_spiflash_storage_sfdp]
+  - name: bootloader_tz_secure_config
+    condition: [device_family_efm32pg28, bootloader_internal_storage]
+  - name: bootloader_tz_secure_config
+    condition: [device_family_efm32pg28, bootloader_uart_xmodem]
   - name: sl_fault_injection_hardening
     condition: [device_series_2]
 recommends:

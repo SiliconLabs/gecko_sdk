@@ -15,19 +15,7 @@
  *
  ******************************************************************************/
 
-#ifdef UC_BUILD
 #include "green-power-server-config.h"
-#else // !UC_BUILD
-// In Appbuilder, the EMBER_AF_PLUGIN_GREEN_POWER_SERVER_USE_TOKENS is defined
-// (in auto generated AF header) if-and-only-if the token is enabled by user,
-// so just redefine it to 1 else to 0.
-#ifdef EMBER_AF_PLUGIN_GREEN_POWER_SERVER_USE_TOKENS
-#undef EMBER_AF_PLUGIN_GREEN_POWER_SERVER_USE_TOKENS
-#define EMBER_AF_PLUGIN_GREEN_POWER_SERVER_USE_TOKENS 1
-#else
-#define EMBER_AF_PLUGIN_GREEN_POWER_SERVER_USE_TOKENS 0
-#endif // EMBER_AF_PLUGIN_GREEN_POWER_SERVER_USE_TOKENS
-#endif // UC_BUILD
 
 #if (EMBER_AF_PLUGIN_GREEN_POWER_SERVER_USE_TOKENS == 1)
 

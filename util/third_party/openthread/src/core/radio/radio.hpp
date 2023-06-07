@@ -45,7 +45,8 @@
 
 namespace ot {
 
-static constexpr uint32_t kUsPerTenSymbols = OT_US_PER_TEN_SYMBOLS; ///< The microseconds per 10 symbols.
+static constexpr uint32_t kUsPerTenSymbols = OT_US_PER_TEN_SYMBOLS; ///< Time for 10 symbols in units of microseconds
+static constexpr uint32_t kRadioHeaderShrDuration = 160;            ///< Duration of SHR in us
 
 #if OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
 /**
@@ -104,6 +105,8 @@ public:
 #endif
 
     static constexpr int8_t kInvalidRssi = OT_RADIO_RSSI_INVALID; ///< Invalid RSSI value.
+
+    static constexpr int8_t kDefaultReceiveSensitivity = -110; ///< Default receive sensitivity (in dBm).
 
     static_assert((OPENTHREAD_CONFIG_RADIO_2P4GHZ_OQPSK_SUPPORT || OPENTHREAD_CONFIG_RADIO_915MHZ_OQPSK_SUPPORT ||
                    OPENTHREAD_CONFIG_PLATFORM_RADIO_PROPRIETARY_SUPPORT),
@@ -300,6 +303,18 @@ public:
     }
 
     /**
+     * This method sets the current MAC Frame Counter value only if the new given value is larger than the current
+     * value.
+     *
+     * @param[in] aMacFrameCounter  The MAC Frame Counter value.
+     *
+     */
+    void SetMacFrameCounterIfLarger(uint32_t aMacFrameCounter)
+    {
+        otPlatRadioSetMacFrameCounterIfLarger(GetInstancePtr(), aMacFrameCounter);
+    }
+
+    /**
      * This method gets the radio's transmit power in dBm.
      *
      * @param[out] aPower    A reference to output the transmit power in dBm.
@@ -359,43 +374,6 @@ public:
      *
      */
     void SetPromiscuous(bool aEnable);
-
-#if OPENTHREAD_CONFIG_DIAG_ENABLE
-    /**
-     * This method enables transmitting stream random character mode.
-     *
-     */
-    Error TxStreamRandom(void);
-
-    /**
-     * This method enables transmitting stream unmodulated tone mode.
-     *
-     */
-    Error TxStreamTone(void);
-
-    /**
-     * This method disables transmitting stream mode.
-     *
-     */
-    Error TxStreamStop(void);
-
-    Error TxStreamAutoAck(uint8_t autoAckEnabled);
-    Error TxStreamAddrMatch(uint8_t enable);
-
-    // coex
-    Error CoexSetPriorityPulseWidth(uint8_t pulseWidthUs);
-    Error CoexSetRadioHoldoff(bool enabled);
-    Error CoexSetRequestPwm(uint8_t ptaReq, void *ptaCb, uint8_t dutyCycle, uint8_t periodHalfMs);
-
-    Error CoexSetOptions(uint32_t options);
-
-    Error CoexSetPhySelectTimeout(uint8_t timeoutMs);
-
-    Error CoexGetPhySelectTimeout(uint8_t *timeoutMs);
-    Error CoexGetPriorityPulseWidth(uint8_t *pulseWidthUs);
-    Error CoexGetOptions(uint32_t *options);
-    Error CoexGetRequestPwmArgs(uint8_t *req, uint8_t *dutyCycle, uint8_t *periodHalfMs);
-#endif // OPENTHREAD_CONFIG_DIAG_ENABLE
 
     /**
      * This method returns the current state of the radio.
@@ -506,7 +484,7 @@ public:
     uint8_t GetCslAccuracy(void);
 
     /**
-     * Get the fixed uncertainty of the Device for scheduling CSL Transmissions in units of 10 microseconds.
+     * Get the fixed uncertainty of the Device for scheduling CSL operations in units of 10 microseconds.
      *
      * @returns The CSL Uncertainty in units of 10 us.
      *
@@ -675,7 +653,7 @@ public:
      */
     Error ConfigureEnhAckProbing(otLinkMetrics            aLinkMetrics,
                                  const Mac::ShortAddress &aShortAddress,
-                                 const Mac::ExtAddress &  aExtAddress)
+                                 const Mac::ExtAddress   &aExtAddress)
     {
         return otPlatRadioConfigureEnhAckProbing(GetInstancePtr(), aLinkMetrics, aShortAddress, &aExtAddress);
     }
@@ -703,25 +681,16 @@ private:
 //---------------------------------------------------------------------------------------------------------------------
 // Radio APIs that are always mapped to the same `otPlatRadio` function (independent of the link type)
 
-inline const char *Radio::GetVersionString(void)
-{
-    return otPlatRadioGetVersionString(GetInstancePtr());
-}
+inline const char *Radio::GetVersionString(void) { return otPlatRadioGetVersionString(GetInstancePtr()); }
 
 inline void Radio::GetIeeeEui64(Mac::ExtAddress &aIeeeEui64)
 {
     otPlatRadioGetIeeeEui64(GetInstancePtr(), aIeeeEui64.m8);
 }
 
-inline uint32_t Radio::GetSupportedChannelMask(void)
-{
-    return otPlatRadioGetSupportedChannelMask(GetInstancePtr());
-}
+inline uint32_t Radio::GetSupportedChannelMask(void) { return otPlatRadioGetSupportedChannelMask(GetInstancePtr()); }
 
-inline uint32_t Radio::GetPreferredChannelMask(void)
-{
-    return otPlatRadioGetPreferredChannelMask(GetInstancePtr());
-}
+inline uint32_t Radio::GetPreferredChannelMask(void) { return otPlatRadioGetPreferredChannelMask(GetInstancePtr()); }
 
 //---------------------------------------------------------------------------------------------------------------------
 // If IEEE 802.15.4 is among supported radio links, provide inline
@@ -729,20 +698,11 @@ inline uint32_t Radio::GetPreferredChannelMask(void)
 
 #if OPENTHREAD_CONFIG_RADIO_LINK_IEEE_802_15_4_ENABLE
 
-inline otRadioCaps Radio::GetCaps(void)
-{
-    return otPlatRadioGetCaps(GetInstancePtr());
-}
+inline otRadioCaps Radio::GetCaps(void) { return otPlatRadioGetCaps(GetInstancePtr()); }
 
-inline int8_t Radio::GetReceiveSensitivity(void) const
-{
-    return otPlatRadioGetReceiveSensitivity(GetInstancePtr());
-}
+inline int8_t Radio::GetReceiveSensitivity(void) const { return otPlatRadioGetReceiveSensitivity(GetInstancePtr()); }
 
-inline void Radio::SetPanId(Mac::PanId aPanId)
-{
-    otPlatRadioSetPanId(GetInstancePtr(), aPanId);
-}
+inline void Radio::SetPanId(Mac::PanId aPanId) { otPlatRadioSetPanId(GetInstancePtr(), aPanId); }
 
 inline void Radio::SetMacKey(uint8_t                 aKeyIdMode,
                              uint8_t                 aKeyId,
@@ -761,15 +721,9 @@ inline void Radio::SetMacKey(uint8_t                 aKeyIdMode,
     otPlatRadioSetMacKey(GetInstancePtr(), aKeyIdMode, aKeyId, &aPrevKey, &aCurrKey, &aNextKey, aKeyType);
 }
 
-inline Error Radio::GetTransmitPower(int8_t &aPower)
-{
-    return otPlatRadioGetTransmitPower(GetInstancePtr(), &aPower);
-}
+inline Error Radio::GetTransmitPower(int8_t &aPower) { return otPlatRadioGetTransmitPower(GetInstancePtr(), &aPower); }
 
-inline Error Radio::SetTransmitPower(int8_t aPower)
-{
-    return otPlatRadioSetTransmitPower(GetInstancePtr(), aPower);
-}
+inline Error Radio::SetTransmitPower(int8_t aPower) { return otPlatRadioSetTransmitPower(GetInstancePtr(), aPower); }
 
 inline Error Radio::GetCcaEnergyDetectThreshold(int8_t &aThreshold)
 {
@@ -781,119 +735,21 @@ inline Error Radio::SetCcaEnergyDetectThreshold(int8_t aThreshold)
     return otPlatRadioSetCcaEnergyDetectThreshold(GetInstancePtr(), aThreshold);
 }
 
-inline bool Radio::GetPromiscuous(void)
-{
-    return otPlatRadioGetPromiscuous(GetInstancePtr());
-}
+inline bool Radio::GetPromiscuous(void) { return otPlatRadioGetPromiscuous(GetInstancePtr()); }
 
-inline void Radio::SetPromiscuous(bool aEnable)
-{
-    otPlatRadioSetPromiscuous(GetInstancePtr(), aEnable);
-}
+inline void Radio::SetPromiscuous(bool aEnable) { otPlatRadioSetPromiscuous(GetInstancePtr(), aEnable); }
 
-#if OPENTHREAD_CONFIG_DIAG_ENABLE
-inline Error Radio::TxStreamRandom(void)
-{
-    return otPlatDiagTxStreamRandom();
-}
+inline otRadioState Radio::GetState(void) { return otPlatRadioGetState(GetInstancePtr()); }
 
-inline Error Radio::TxStreamTone(void)
-{
-    return otPlatDiagTxStreamTone();
-}
+inline Error Radio::Enable(void) { return otPlatRadioEnable(GetInstancePtr()); }
 
-inline Error Radio::TxStreamStop(void)
-{
-    return otPlatDiagTxStreamStop();
-}
+inline Error Radio::Disable(void) { return otPlatRadioDisable(GetInstancePtr()); }
 
-inline Error Radio::TxStreamAddrMatch(uint8_t enable)
-{
-    return otPlatDiagTxStreamAddrMatch(enable);
-}
+inline bool Radio::IsEnabled(void) { return otPlatRadioIsEnabled(GetInstancePtr()); }
 
-inline Error Radio::TxStreamAutoAck(uint8_t autoAckEnabled)
-{
-    return otPlatDiagTxStreamAutoAck(autoAckEnabled);
-}
+inline Error Radio::Sleep(void) { return otPlatRadioSleep(GetInstancePtr()); }
 
-inline Error Radio::CoexSetPriorityPulseWidth(uint8_t pulseWidthUs)
-{
-    return otPlatDiagCoexSetPriorityPulseWidth(pulseWidthUs);
-}
-
-inline Error Radio::CoexSetRadioHoldoff(bool enabled)
-{
-    return otPlatDiagCoexSetRadioHoldoff(enabled);
-}
-
-inline Error Radio::CoexSetRequestPwm(uint8_t ptaReq, void *ptaCb, uint8_t dutyCycle, uint8_t periodHalfMs)
-{
-    OT_UNUSED_VARIABLE(ptaCb);
-    return otPlatDiagCoexSetRequestPwm(ptaReq, nullptr, dutyCycle, periodHalfMs);
-}
-
-inline Error Radio::CoexSetPhySelectTimeout(uint8_t timeoutMs)
-{
-    return otPlatDiagCoexSetPhySelectTimeout(timeoutMs);
-}
-
-inline Error Radio::CoexSetOptions(uint32_t options)
-{
-    return otPlatDiagCoexSetOptions(options);
-}
-
-inline Error Radio::CoexGetPhySelectTimeout(uint8_t *timeoutMs)
-{
-    return otPlatDiagCoexGetPhySelectTimeout(timeoutMs);
-}
-
-inline Error Radio::CoexGetOptions(uint32_t *options)
-{
-    return otPlatDiagCoexGetOptions(options);
-}
-
-inline Error Radio::CoexGetPriorityPulseWidth(uint8_t *pulseWidthUs)
-{
-    return otPlatDiagCoexGetPriorityPulseWidth(pulseWidthUs);
-}
-
-inline Error Radio::CoexGetRequestPwmArgs(uint8_t *req, uint8_t *dutyCycle, uint8_t *periodHalfMs)
-{
-    return otPlatDiagCoexGetRequestPwmArgs(req, dutyCycle, periodHalfMs);
-}
-
-#endif // OPENTHREAD_CONFIG_DIAG_ENABLE
-
-inline otRadioState Radio::GetState(void)
-{
-    return otPlatRadioGetState(GetInstancePtr());
-}
-
-inline Error Radio::Enable(void)
-{
-    return otPlatRadioEnable(GetInstancePtr());
-}
-
-inline Error Radio::Disable(void)
-{
-    return otPlatRadioDisable(GetInstancePtr());
-}
-
-inline bool Radio::IsEnabled(void)
-{
-    return otPlatRadioIsEnabled(GetInstancePtr());
-}
-
-inline Error Radio::Sleep(void)
-{
-    return otPlatRadioSleep(GetInstancePtr());
-}
-
-inline Error Radio::Receive(uint8_t aChannel)
-{
-    return otPlatRadioReceive(GetInstancePtr(), aChannel);
-}
+inline Error Radio::Receive(uint8_t aChannel) { return otPlatRadioReceive(GetInstancePtr(), aChannel); }
 
 #if OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
 inline void Radio::UpdateCslSampleTime(uint32_t aCslSampleTime)
@@ -913,17 +769,11 @@ inline Error Radio::EnableCsl(uint32_t aCslPeriod, otShortAddress aShortAddr, co
 #endif
 
 #if OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE || OPENTHREAD_CONFIG_MAC_CSL_TRANSMITTER_ENABLE
-inline uint8_t Radio::GetCslAccuracy(void)
-{
-    return otPlatRadioGetCslAccuracy(GetInstancePtr());
-}
+inline uint8_t Radio::GetCslAccuracy(void) { return otPlatRadioGetCslAccuracy(GetInstancePtr()); }
 #endif
 
 #if OPENTHREAD_CONFIG_MAC_CSL_TRANSMITTER_ENABLE
-inline uint8_t Radio::GetCslUncertainty(void)
-{
-    return otPlatRadioGetCslUncertainty(GetInstancePtr());
-}
+inline uint8_t Radio::GetCslUncertainty(void) { return otPlatRadioGetCslUncertainty(GetInstancePtr()); }
 #endif
 
 inline Mac::TxFrame &Radio::GetTransmitBuffer(void)
@@ -931,20 +781,14 @@ inline Mac::TxFrame &Radio::GetTransmitBuffer(void)
     return *static_cast<Mac::TxFrame *>(otPlatRadioGetTransmitBuffer(GetInstancePtr()));
 }
 
-inline int8_t Radio::GetRssi(void)
-{
-    return otPlatRadioGetRssi(GetInstancePtr());
-}
+inline int8_t Radio::GetRssi(void) { return otPlatRadioGetRssi(GetInstancePtr()); }
 
 inline Error Radio::EnergyScan(uint8_t aScanChannel, uint16_t aScanDuration)
 {
     return otPlatRadioEnergyScan(GetInstancePtr(), aScanChannel, aScanDuration);
 }
 
-inline void Radio::EnableSrcMatch(bool aEnable)
-{
-    otPlatRadioEnableSrcMatch(GetInstancePtr(), aEnable);
-}
+inline void Radio::EnableSrcMatch(bool aEnable) { otPlatRadioEnableSrcMatch(GetInstancePtr(), aEnable); }
 
 inline Error Radio::AddSrcMatchShortEntry(Mac::ShortAddress aShortAddress)
 {
@@ -966,15 +810,9 @@ inline Error Radio::ClearSrcMatchExtEntry(const Mac::ExtAddress &aExtAddress)
     return otPlatRadioClearSrcMatchExtEntry(GetInstancePtr(), &aExtAddress);
 }
 
-inline void Radio::ClearSrcMatchShortEntries(void)
-{
-    otPlatRadioClearSrcMatchShortEntries(GetInstancePtr());
-}
+inline void Radio::ClearSrcMatchShortEntries(void) { otPlatRadioClearSrcMatchShortEntries(GetInstancePtr()); }
 
-inline void Radio::ClearSrcMatchExtEntries(void)
-{
-    otPlatRadioClearSrcMatchExtEntries(GetInstancePtr());
-}
+inline void Radio::ClearSrcMatchExtEntries(void) { otPlatRadioClearSrcMatchExtEntries(GetInstancePtr()); }
 
 #else //----------------------------------------------------------------------------------------------------------------
 
@@ -983,22 +821,13 @@ inline otRadioCaps Radio::GetCaps(void)
     return OT_RADIO_CAPS_ACK_TIMEOUT | OT_RADIO_CAPS_CSMA_BACKOFF | OT_RADIO_CAPS_TRANSMIT_RETRIES;
 }
 
-inline int8_t Radio::GetReceiveSensitivity(void) const
-{
-    return -110;
-}
+inline int8_t Radio::GetReceiveSensitivity(void) const { return kDefaultReceiveSensitivity; }
 
-inline void Radio::SetPanId(Mac::PanId)
-{
-}
+inline void Radio::SetPanId(Mac::PanId) {}
 
-inline void Radio::SetExtendedAddress(const Mac::ExtAddress &)
-{
-}
+inline void Radio::SetExtendedAddress(const Mac::ExtAddress &) {}
 
-inline void Radio::SetShortAddress(Mac::ShortAddress)
-{
-}
+inline void Radio::SetShortAddress(Mac::ShortAddress) {}
 
 inline void Radio::SetMacKey(uint8_t,
                              uint8_t,
@@ -1008,102 +837,34 @@ inline void Radio::SetMacKey(uint8_t,
 {
 }
 
-inline Error Radio::GetTransmitPower(int8_t &)
-{
-    return kErrorNotImplemented;
-}
+inline Error Radio::GetTransmitPower(int8_t &) { return kErrorNotImplemented; }
 
-inline Error Radio::SetTransmitPower(int8_t)
-{
-    return kErrorNotImplemented;
-}
+inline Error Radio::SetTransmitPower(int8_t) { return kErrorNotImplemented; }
 
-inline Error Radio::GetCcaEnergyDetectThreshold(int8_t &)
-{
-    return kErrorNotImplemented;
-}
+inline Error Radio::GetCcaEnergyDetectThreshold(int8_t &) { return kErrorNotImplemented; }
 
-inline Error Radio::SetCcaEnergyDetectThreshold(int8_t)
-{
-    return kErrorNotImplemented;
-}
+inline Error Radio::SetCcaEnergyDetectThreshold(int8_t) { return kErrorNotImplemented; }
 
-inline bool Radio::GetPromiscuous(void)
-{
-    return false;
-}
+inline bool Radio::GetPromiscuous(void) { return false; }
 
-inline void Radio::SetPromiscuous(bool)
-{
-}
+inline void Radio::SetPromiscuous(bool) {}
 
-#if OPENTHREAD_CONFIG_DIAG_ENABLE
+inline otRadioState Radio::GetState(void) { return OT_RADIO_STATE_DISABLED; }
 
-inline Error Radio::TxStreamRandom(void)
-{
-    return kErrorNone;
-}
+inline Error Radio::Enable(void) { return kErrorNone; }
 
-inline Error Radio::TxStreamTone(void)
-{
-    return kErrorNone;
-}
+inline Error Radio::Disable(void) { return kErrorInvalidState; }
 
-inline Error Radio::TxStreamStop(void)
-{
-    return kErrorNone;
-}
+inline bool Radio::IsEnabled(void) { return true; }
 
-inline Error Radio::TxStreamAddrMatch(uint8_t enable)
-{
-    return kErrorNone;
-}
+inline Error Radio::Sleep(void) { return kErrorNone; }
 
-inline Error Radio::TxStreamAutoAck(uint8_t autoAckEnabled)
-{
-    return kErrorNone;
-}
-#endif // OPENTHREAD_CONFIG_DIAG_ENABLE
-
-inline otRadioState Radio::GetState(void)
-{
-    return OT_RADIO_STATE_DISABLED;
-}
-
-inline Error Radio::Enable(void)
-{
-    return kErrorNone;
-}
-
-inline Error Radio::Disable(void)
-{
-    return kErrorInvalidState;
-}
-
-inline bool Radio::IsEnabled(void)
-{
-    return true;
-}
-
-inline Error Radio::Sleep(void)
-{
-    return kErrorNone;
-}
-
-inline Error Radio::Receive(uint8_t)
-{
-    return kErrorNone;
-}
+inline Error Radio::Receive(uint8_t) { return kErrorNone; }
 
 #if OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
-inline void Radio::UpdateCslSampleTime(uint32_t)
-{
-}
+inline void Radio::UpdateCslSampleTime(uint32_t) {}
 
-inline Error Radio::ReceiveAt(uint8_t, uint32_t, uint32_t)
-{
-    return kErrorNone;
-}
+inline Error Radio::ReceiveAt(uint8_t, uint32_t, uint32_t) { return kErrorNone; }
 
 inline Error Radio::EnableCsl(uint32_t, otShortAddress aShortAddr, const otExtAddress *)
 {
@@ -1112,15 +873,9 @@ inline Error Radio::EnableCsl(uint32_t, otShortAddress aShortAddr, const otExtAd
 #endif
 
 #if OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE || OPENTHREAD_CONFIG_MAC_CSL_TRANSMITTER_ENABLE
-inline uint8_t Radio::GetCslAccuracy(void)
-{
-    return UINT8_MAX;
-}
+inline uint8_t Radio::GetCslAccuracy(void) { return UINT8_MAX; }
 
-inline uint8_t Radio::GetCslUncertainty(void)
-{
-    return UINT8_MAX;
-}
+inline uint8_t Radio::GetCslUncertainty(void) { return UINT8_MAX; }
 #endif
 
 inline Mac::TxFrame &Radio::GetTransmitBuffer(void)
@@ -1128,52 +883,25 @@ inline Mac::TxFrame &Radio::GetTransmitBuffer(void)
     return *static_cast<Mac::TxFrame *>(otPlatRadioGetTransmitBuffer(GetInstancePtr()));
 }
 
-inline Error Radio::Transmit(Mac::TxFrame &)
-{
-    return kErrorAbort;
-}
+inline Error Radio::Transmit(Mac::TxFrame &) { return kErrorAbort; }
 
-inline int8_t Radio::GetRssi(void)
-{
-    return kInvalidRssi;
-}
+inline int8_t Radio::GetRssi(void) { return kInvalidRssi; }
 
-inline Error Radio::EnergyScan(uint8_t, uint16_t)
-{
-    return kErrorNotImplemented;
-}
+inline Error Radio::EnergyScan(uint8_t, uint16_t) { return kErrorNotImplemented; }
 
-inline void Radio::EnableSrcMatch(bool)
-{
-}
+inline void Radio::EnableSrcMatch(bool) {}
 
-inline Error Radio::AddSrcMatchShortEntry(Mac::ShortAddress)
-{
-    return kErrorNone;
-}
+inline Error Radio::AddSrcMatchShortEntry(Mac::ShortAddress) { return kErrorNone; }
 
-inline Error Radio::AddSrcMatchExtEntry(const Mac::ExtAddress &)
-{
-    return kErrorNone;
-}
+inline Error Radio::AddSrcMatchExtEntry(const Mac::ExtAddress &) { return kErrorNone; }
 
-inline Error Radio::ClearSrcMatchShortEntry(Mac::ShortAddress)
-{
-    return kErrorNone;
-}
+inline Error Radio::ClearSrcMatchShortEntry(Mac::ShortAddress) { return kErrorNone; }
 
-inline Error Radio::ClearSrcMatchExtEntry(const Mac::ExtAddress &)
-{
-    return kErrorNone;
-}
+inline Error Radio::ClearSrcMatchExtEntry(const Mac::ExtAddress &) { return kErrorNone; }
 
-inline void Radio::ClearSrcMatchShortEntries(void)
-{
-}
+inline void Radio::ClearSrcMatchShortEntries(void) {}
 
-inline void Radio::ClearSrcMatchExtEntries(void)
-{
-}
+inline void Radio::ClearSrcMatchExtEntries(void) {}
 
 #endif // #if OPENTHREAD_CONFIG_RADIO_LINK_IEEE_802_15_4_ENABLE
 

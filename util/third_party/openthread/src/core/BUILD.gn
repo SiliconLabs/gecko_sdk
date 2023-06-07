@@ -39,6 +39,8 @@ if (openthread_enable_core_config_args) {
       defines += [ "OPENTHREAD_CONFIG_THREAD_VERSION=OT_THREAD_VERSION_1_2" ]
     } else if (openthread_config_thread_version == "1.3") {
       defines += [ "OPENTHREAD_CONFIG_THREAD_VERSION=OT_THREAD_VERSION_1_3" ]
+    } else if (openthread_config_thread_version == "1.3.1") {
+      defines += [ "OPENTHREAD_CONFIG_THREAD_VERSION=OT_THREAD_VERSION_1_3_1" ]
     } else if (openthread_config_thread_version != "") {
       assert(false,
              "Unrecognized Thread version: ${openthread_config_thread_version}")
@@ -98,10 +100,6 @@ if (openthread_enable_core_config_args) {
       defines += [ "OPENTHREAD_CONFIG_CHANNEL_MONITOR_ENABLE=1" ]
     }
 
-    if (openthread_config_child_supervision_enable) {
-      defines += [ "OPENTHREAD_CONFIG_CHILD_SUPERVISION_ENABLE=1" ]
-    }
-
     if (openthread_config_coap_api_enable) {
       defines += [ "OPENTHREAD_CONFIG_COAP_API_ENABLE=1" ]
     }
@@ -116,10 +114,6 @@ if (openthread_enable_core_config_args) {
 
     if (openthread_config_commissioner_enable) {
       defines += [ "OPENTHREAD_CONFIG_COMMISSIONER_ENABLE=1" ]
-    }
-
-    if (openthread_config_coprocessor_rpc_enable) {
-      defines += [ "OPENTHREAD_CONFIG_COPROCESSOR_RPC_ENABLE=1" ]
     }
 
     if (openthread_config_mac_csl_receiver_enable) {
@@ -174,10 +168,6 @@ if (openthread_enable_core_config_args) {
       defines += [ "OPENTHREAD_CONFIG_JOINER_ENABLE=1" ]
     }
 
-    if (openthread_config_legacy_enable) {
-      defines += [ "OPENTHREAD_CONFIG_LEGACY_ENABLE=1" ]
-    }
-
     if (openthread_config_link_metrics_initiator_enable) {
       defines += [ "DOPENTHREAD_CONFIG_MLE_LINK_METRICS_INITIATOR_ENABLE=1" ]
     }
@@ -206,17 +196,18 @@ if (openthread_enable_core_config_args) {
       defines += [ "OPENTHREAD_CONFIG_MLE_LONG_ROUTES_ENABLE=1" ]
     }
 
-    if (openthread_config_tmf_network_diag_mtd_enable) {
-      defines += [ "OPENTHREAD_CONFIG_TMF_NETWORK_DIAG_MTD_ENABLE=1" ]
-    }
-
     if (openthread_config_multiple_instance_enable) {
       defines += [ "OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE=1" ]
+    }
+
+    if (openthread_config_tmf_netdiag_client_enable) {
+      defines += [ "OPENTHREAD_CONFIG_TMF_NETDIAG_CLIENT_ENABLE=1" ]
     }
 
     if (openthread_config_platform_netif_enable) {
       defines += [ "OPENTHREAD_CONFIG_PLATFORM_NETIF_ENABLE=1" ]
     }
+
 
     if (openthread_config_platform_udp_enable) {
       defines += [ "OPENTHREAD_CONFIG_PLATFORM_UDP_ENABLE=1" ]
@@ -319,7 +310,6 @@ openthread_core_files = [
   "api/coap_api.cpp",
   "api/coap_secure_api.cpp",
   "api/commissioner_api.cpp",
-  "api/coprocessor_rpc_api.cpp",
   "api/crypto_api.cpp",
   "api/dataset_api.cpp",
   "api/dataset_ftd_api.cpp",
@@ -339,6 +329,7 @@ openthread_core_files = [
   "api/link_metrics_api.cpp",
   "api/link_raw_api.cpp",
   "api/logging_api.cpp",
+  "api/mesh_diag_api.cpp",
   "api/message_api.cpp",
   "api/multi_radio_api.cpp",
   "api/nat64_api.cpp",
@@ -391,6 +382,7 @@ openthread_core_files = [
   "common/binary_search.cpp",
   "common/binary_search.hpp",
   "common/bit_vector.hpp",
+  "common/callback.hpp",
   "common/clearable.hpp",
   "common/code_utils.hpp",
   "common/const_cast.hpp",
@@ -436,6 +428,8 @@ openthread_core_files = [
   "common/owned_ptr.hpp",
   "common/owning_list.hpp",
   "common/pool.hpp",
+  "common/preference.cpp",
+  "common/preference.hpp",
   "common/ptr_wrapper.hpp",
   "common/random.cpp",
   "common/random.hpp",
@@ -460,15 +454,12 @@ openthread_core_files = [
   "common/type_traits.hpp",
   "common/uptime.cpp",
   "common/uptime.hpp",
-  "coprocessor/rpc.cpp",
-  "coprocessor/rpc.hpp",
   "crypto/aes_ccm.cpp",
   "crypto/aes_ccm.hpp",
   "crypto/aes_ecb.cpp",
   "crypto/aes_ecb.hpp",
   "crypto/context_size.hpp",
   "crypto/crypto_platform.cpp",
-  "crypto/ecdsa.cpp",
   "crypto/ecdsa.hpp",
   "crypto/hkdf_sha256.cpp",
   "crypto/hkdf_sha256.hpp",
@@ -476,8 +467,6 @@ openthread_core_files = [
   "crypto/hmac_sha256.hpp",
   "crypto/mbedtls.cpp",
   "crypto/mbedtls.hpp",
-  "crypto/pbkdf2_cmac.cpp",
-  "crypto/pbkdf2_cmac.hpp",
   "crypto/sha256.cpp",
   "crypto/sha256.hpp",
   "crypto/storage.cpp",
@@ -553,6 +542,7 @@ openthread_core_files = [
   "net/dns_client.hpp",
   "net/dns_dso.cpp",
   "net/dns_dso.hpp",
+  "net/dns_platform.cpp",
   "net/dns_types.cpp",
   "net/dns_types.hpp",
   "net/dnssd_server.cpp",
@@ -614,6 +604,8 @@ openthread_core_files = [
   "thread/anycast_locator.cpp",
   "thread/anycast_locator.hpp",
   "thread/child_mask.hpp",
+  "thread/child_supervision.cpp",
+  "thread/child_supervision.hpp",
   "thread/child_table.cpp",
   "thread/child_table.hpp",
   "thread/csl_tx_scheduler.cpp",
@@ -646,6 +638,7 @@ openthread_core_files = [
   "thread/mle.hpp",
   "thread/mle_router.cpp",
   "thread/mle_router.hpp",
+  "thread/mle_tlvs.cpp",
   "thread/mle_tlvs.hpp",
   "thread/mle_types.cpp",
   "thread/mle_types.hpp",
@@ -699,8 +692,6 @@ openthread_core_files = [
   "utils/channel_manager.hpp",
   "utils/channel_monitor.cpp",
   "utils/channel_monitor.hpp",
-  "utils/child_supervision.cpp",
-  "utils/child_supervision.hpp",
   "utils/flash.cpp",
   "utils/flash.hpp",
   "utils/heap.cpp",
@@ -709,12 +700,16 @@ openthread_core_files = [
   "utils/history_tracker.hpp",
   "utils/jam_detector.cpp",
   "utils/jam_detector.hpp",
+  "utils/mesh_diag.cpp",
+  "utils/mesh_diag.hpp",
   "utils/otns.cpp",
   "utils/otns.hpp",
   "utils/parse_cmdline.cpp",
   "utils/parse_cmdline.hpp",
   "utils/ping_sender.cpp",
   "utils/ping_sender.hpp",
+  "utils/power_calibration.cpp",
+  "utils/power_calibration.hpp",
   "utils/slaac_address.cpp",
   "utils/slaac_address.hpp",
   "utils/srp_client_buffers.cpp",
@@ -722,7 +717,6 @@ openthread_core_files = [
 ]
 
 openthread_radio_sources = [
-  "api/coprocessor_rpc_api.cpp",
   "api/diags_api.cpp",
   "api/error_api.cpp",
   "api/instance_api.cpp",
@@ -733,6 +727,8 @@ openthread_radio_sources = [
   "common/binary_search.cpp",
   "common/binary_search.hpp",
   "common/error.hpp",
+  "common/frame_builder.cpp",
+  "common/frame_builder.hpp",
   "common/instance.cpp",
   "common/log.cpp",
   "common/random.cpp",
@@ -740,7 +736,6 @@ openthread_radio_sources = [
   "common/tasklet.cpp",
   "common/timer.cpp",
   "common/uptime.cpp",
-  "coprocessor/rpc.cpp",
   "crypto/aes_ccm.cpp",
   "crypto/aes_ecb.cpp",
   "crypto/crypto_platform.cpp",
@@ -756,6 +751,7 @@ openthread_radio_sources = [
   "radio/radio_platform.cpp",
   "thread/link_quality.cpp",
   "utils/parse_cmdline.cpp",
+  "utils/power_calibration.cpp",
 ]
 
 header_pattern = [
@@ -778,7 +774,6 @@ source_set("libopenthread_core_config") {
     "config/child_supervision.h",
     "config/coap.h",
     "config/commissioner.h",
-    "config/coprocessor_rpc.h",
     "config/crypto.h",
     "config/dataset_updater.h",
     "config/dhcp6_client.h",
@@ -795,14 +790,17 @@ source_set("libopenthread_core_config") {
     "config/link_raw.h",
     "config/logging.h",
     "config/mac.h",
+    "config/mesh_diag.h",
     "config/misc.h",
     "config/mle.h",
     "config/nat64.h",
     "config/netdata_publisher.h",
+    "config/network_diagnostic.h",
     "config/openthread-core-config-check.h",
     "config/parent_search.h",
     "config/ping_sender.h",
     "config/platform.h",
+    "config/power_calibration.h",
     "config/radio_link.h",
     "config/sntp_client.h",
     "config/srp_client.h",

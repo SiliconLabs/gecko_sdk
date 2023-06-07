@@ -23,6 +23,7 @@
 #include "ash-protocol.h"
 #include "app/ezsp-host/ezsp-host-io.h"
 
+// TODO: try to remove once EMZIGBEE-11229 is complete
 #ifndef UC_BUILD
 #include "plugin/serial/serial.h"
 #else

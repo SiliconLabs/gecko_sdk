@@ -27,18 +27,20 @@
 #include "app/framework/plugin/network-creator-security/network-creator-security.h"
 #include "app/framework/plugin/network-creator/network-creator.h"
 #include "app/framework/plugin/reporting/reporting.h"
+#include "stack/include/zigbee-security-manager.h"
 #ifdef SL_CATALOG_ZIGBEE_BLE_EVENT_HANDLER_PRESENT
 #include "sl_ble_event_handler.h"
 #endif
 
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 
 #ifdef SL_CATALOG_ZIGBEE_NETWORK_TEST_PRESENT
 #include "network_test_config.h"
 #endif //SL_CATALOG_ZIGBEE_NETWORK_TEST_PRESENT
 
 #if (LARGE_NETWORK_TESTING == 0)
-#include "app/util/common/uc-temp-macros.h"
 
 #ifdef SL_CATALOG_ZIGBEE_DISPLAY_PRESENT
 #include "sl_dmp_ui.h"
@@ -398,10 +400,10 @@ static bool startPjoinAndIdentifying(uint16_t identifyTime)
   EmberStatus status;
   EmberEUI64 wildcardEui64 =
   { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, };
-  EmberKeyData centralizedKey = { { 0x5A, 0x69, 0x67, 0x42, 0x65, 0x65, 0x41,
-                                    0x6C, 0x6C, 0x69, 0x61, 0x6E, 0x63, 0x65, 0x30, 0x39 } };
+  sl_zb_sec_man_key_t centralizedKey = { { 0x5A, 0x69, 0x67, 0x42, 0x65, 0x65, 0x41,
+                                           0x6C, 0x6C, 0x69, 0x61, 0x6E, 0x63, 0x65, 0x30, 0x39 } };
 
-  emberAddTransientLinkKey(wildcardEui64, &centralizedKey);
+  (void) sl_zb_sec_man_import_transient_key(wildcardEui64, &centralizedKey);
   status = emberPermitJoining(identifyTime);
 
   emberAfWriteServerAttribute(emberAfPrimaryEndpoint(),

@@ -1,5 +1,5 @@
 id: "sl_wisun_rht_measurement"
-label: "Relative humdity and temperature measurement"
+label: "Relative humidity and temperature measurement"
 package: "wisun"
 description: "The component provides thread safe and bare-metal compatible temperature and relative humidity measurement with the Si7021 I2C sensor."
 category: "Wi-SUN|Application"

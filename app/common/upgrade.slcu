@@ -1,0 +1,36 @@
+upgrade:
+  - sdk:
+      id: gecko_sdk
+      version: "4.3.0"
+    component:
+      - trigger: simple_timer
+        description: >
+          The Simple Timer component has been modified and moved.
+        remove:
+          - simple_timer
+        add:
+          - app_timer
+    component:
+      - trigger: simple_timer_freertos
+        description: >
+          The Simple Timer (FreeRTOS) component has been modified and moved.
+        remove:
+          - simple_timer_freertos
+        add:
+          - app_timer_freertos
+    component:
+      - trigger: simple_timer_freertos_static
+        description: >
+          The Simple Timer (FreeRTOS with static memory allocation) component has been modified and moved.
+        remove:
+          - simple_timer_freertos_static
+        add:
+          - app_timer_freertos_static
+    component:
+      - trigger: simple_timer_micriumos
+        description: >
+          The Simple Timer (Micrium RTOS) component has been modified and moved.
+        remove:
+          - simple_timer_micriumos
+        add:
+          - app_timer_micriumos

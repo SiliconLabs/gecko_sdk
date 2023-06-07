@@ -5,7 +5,7 @@ tag:
       device:
         memory:
           flash: 216
-          ram: 25
+          ram: 26
       board:
         rf_bands:
           - any

@@ -35,15 +35,7 @@
   (SL_MAC_CHILD_HAS_PENDING_SHORT_INDIRECT_MESSAGE \
    | SL_MAC_CHILD_HAS_PENDING_LONG_INDIRECT_MESSAGE)
 
-typedef uint64_t sl_mac_child_status_flags_t;
 #define SL_MAC_MAX_CHILD_TABLE_SIZE 64
-
-typedef struct {
-  uint8_t mac_index;
-  EmberNodeId short_id;
-  EmberEUI64 long_id;
-  sl_mac_child_status_flags_t info;
-} sl_mac_child_entry_t;
 
 extern uint8_t sl_mac_child_table_size;
 

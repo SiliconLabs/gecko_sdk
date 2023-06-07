@@ -360,25 +360,23 @@ class Calc_Demodulator_Bobcat(CALC_Demodulator_ocelot):
     def calc_rssi_rf_adjust_db(self, model):
         model.vars.rssi_rf_adjust_db.value = -8.0
 
-    def calc_digmixfreq_val(self,model):
-        """
-        Exact copy of old implementation
-        This is needed to shield Ocelot SubG low-side injection fix from Bobcat 2.4G fix (happening separately)
-        """
+    def calc_directmode_regs(self, model):
+        # Set defaults to disabled for Bobcat (or 2.4GHz parts)
+        model.vars.directmode_rx.value = model.vars.directmode_rx.var_enum.DISABLED
+        model.vars.asynchronous_rx_enable.value = False
 
-        digmix_res = model.vars.digmix_res_actual.value
-        fif = model.vars.if_frequency_hz_actual.value  # IF frequency based on the actual SYNTH settings
+    def calc_bandwdith_tol(self, model):
+        # For 2.4GHz PHYs that use divided down LO for ADC, we inherently will have some bandwidth tolerance
+        # based on the amount the clock is allowed to change
 
-        model.vars.digmixfreq.value = int(round(fif / digmix_res))
+        protocol_id = model.vars.protocol_id.value
+        base_frequency_hz = model.vars.base_frequency_hz.value
 
-    def calc_digmixfreq_actual(self,model):
-        """
-        Exact copy of old implementation
-        This is needed to shield Ocelot SubG low-side injection fix from Bobcat 2.4G fix (happening separately)
-        """
+        if protocol_id == model.vars.protocol_id.var_enum.Zigbee:
+            # Assume our target bandwidth_hz applies to center of band
+            # Therefore we are allowed tolerance based on how far away we currently are
+            bandwidth_tol = abs((base_frequency_hz-2450e6)/base_frequency_hz)
+        else:
+            bandwidth_tol = 0.0
 
-        #Load model variables into local variables
-        digmixfreq_reg = model.vars.MODEM_DIGMIXCTRL_DIGMIXFREQ.value
-
-        #Calculate the actual mixer frequency
-        model.vars.digmixfreq_actual.value = int(digmixfreq_reg * model.vars.digmix_res_actual.value)
+        model.vars.bandwidth_tol.value = float(bandwidth_tol)

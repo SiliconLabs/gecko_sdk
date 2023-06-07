@@ -29,8 +29,8 @@
 
 #include "api/btl_interface.h"
 
-extern uint8_t emGetPhyRadioChannel(void);
-extern int8_t emGetPhyRadioPower(void);
+extern uint8_t sli_802154phy_get_phy_radio_channel(void);
+extern int8_t sli_802154phy_get_phy_radio_power(void);
 
 #if !defined _SILICON_LABS_32B_SERIES_1_CONFIG_1
 

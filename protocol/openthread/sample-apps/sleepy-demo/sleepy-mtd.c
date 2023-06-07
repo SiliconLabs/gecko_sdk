@@ -44,8 +44,8 @@
 #define MULTICAST_PORT 123
 #define RECV_PORT 234
 #define SLEEPY_POLL_PERIOD_MS 2000
-#define MTD_MESSAGE "mtd button"
 #define FTD_MESSAGE "ftd button"
+#define MTD_MESSAGE "mtd button"
 
 // Forward declarations
 otInstance *otGetInstance(void);
@@ -53,20 +53,23 @@ void mtdReceiveCallback(void *aContext, otMessage *aMessage, const otMessageInfo
 extern void otSysEventSignalPending(void);
 
 // Variables
-static otUdpSocket         sMtdSocket;
-static bool                sButtonPressed                 = false;
-static bool                sRxOnIdleButtonPressed         = false;
-static bool                sAllowSleep                    = false;
+static otUdpSocket sMtdSocket;
+static bool        sButtonPressed         = false;
+static bool        sRxOnIdleButtonPressed = false;
+static bool        sAllowSleep            = false;
+static bool        sPrintState            = false;
 
 void sleepyInit(void)
 {
     otError error;
-    otCliOutputFormat("sleepy-demo-mtd started\r\n");
+    otCliOutputFormat("sleepy-demo-mtd starting in EM1 (idle) mode\r\n");
+    otCliOutputFormat("Press Button 0 to toggle between EM1 (idle) and EM2 (sleep) modes\r\n");
 
-    otLinkModeConfig config;
+    otCliOutputFormat("[poll period: %d ms.]\r\n", SLEEPY_POLL_PERIOD_MS);
     SuccessOrExit(error = otLinkSetPollPeriod(otGetInstance(), SLEEPY_POLL_PERIOD_MS));
 
-    config.mRxOnWhenIdle = true;
+    otLinkModeConfig config;
+    config.mRxOnWhenIdle = 0;
     config.mDeviceType   = 0;
     config.mNetworkData  = 0;
     SuccessOrExit(error = otThreadSetLinkMode(otGetInstance(), config));
@@ -189,29 +192,22 @@ void sl_button_on_change(const sl_button_t *handle)
 
 void applicationTick(void)
 {
-    otLinkModeConfig config;
     otMessageInfo    messageInfo;
     otMessage       *message = NULL;
     const char      *payload = MTD_MESSAGE;
+
+    if (sPrintState)
+    {
+        otCliOutputFormat("sleepy-demo-mtd switching to %s mode\r\n", sAllowSleep ? "EM2 (sleep)" : "EM1 (idle)");
+        sPrintState = false;
+    }
 
     // Check for BTN0 button press
     if (sRxOnIdleButtonPressed)
     {
         sRxOnIdleButtonPressed = false;
         sAllowSleep            = !sAllowSleep;
-        config.mRxOnWhenIdle   = !sAllowSleep;
-        config.mDeviceType     = 0;
-        config.mNetworkData    = 0;
-
-        // Reattach from network if device wants to become sleepy
-        if (!config.mRxOnWhenIdle)
-        {
-            SuccessOrExit(otThreadBecomeDetached(otGetInstance()));
-        }
-
-        // Set the Link Mode
-        // NOTE: Setting the Link Mode when a device is detached also causes the device to attempt to attach
-        SuccessOrExit(otThreadSetLinkMode(otGetInstance(), config));
+        sPrintState            = true;
 
 #if (defined(SL_CATALOG_KERNEL_PRESENT) && defined(SL_CATALOG_POWER_MANAGER_PRESENT))
         if (sAllowSleep)

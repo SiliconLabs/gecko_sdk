@@ -28,7 +28,7 @@ template_contribution:
   - name: zigbee_af_callback
     value:
       callback_type: event_init
-      function_name: emAfPluginFindAndBindInitiatorInitCallback
+      function_name: sli_zigbee_af_find_and_bind_initiator_init_callback
   - name: cluster_service
     value:
        cluster_id: "0x0003"

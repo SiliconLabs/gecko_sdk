@@ -21,14 +21,10 @@
 #include "app/framework/plugin/device-management-server/device-management-common.h"
 #include "device-management-client.h"
 
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
-#include "zap-cluster-command-parser.h"
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_SIMPLE_METERING_SERVER
-#define SL_CATALOG_ZIGBEE_SIMPLE_METERING_SERVER_PRESENT
 #endif
-#endif // UC_BUILD
+#include "zap-cluster-command-parser.h"
 
 static EmberAfDeviceManagementInfo pmInfo;
 static EmberAfDeviceManagementPassword servicePassword;
@@ -454,13 +450,11 @@ void emberAfDeviceManagementClusterClientTickCallback(uint8_t endpoint)
 
   // Reschedule the next tick, if necessary
   if (pmInfo.pendingUpdates != 0) {
-    slxu_zigbee_zcl_schedule_client_tick(endpoint,
-                                         ZCL_DEVICE_MANAGEMENT_CLUSTER_ID,
-                                         nextTick * MILLISECOND_TICKS_PER_SECOND);
+    sl_zigbee_zcl_schedule_client_tick(endpoint,
+                                       ZCL_DEVICE_MANAGEMENT_CLUSTER_ID,
+                                       nextTick * MILLISECOND_TICKS_PER_SECOND);
   }
 }
-
-#ifdef UC_BUILD
 
 bool emberAfDeviceManagementClusterPublishChangeOfTenancyCallback(EmberAfClusterCommand *cmd)
 {
@@ -525,10 +519,10 @@ bool emberAfDeviceManagementClusterPublishChangeOfTenancyCallback(EmberAfCluster
     pmInfo.pendingUpdates &= ~EMBER_AF_DEVICE_MANAGEMENT_CHANGE_OF_TENANCY_PENDING_MASK;
   } else {
     // Otherwise, wait until the time of implementation
-    slxu_zigbee_zcl_schedule_client_tick(endpoint,
-                                         ZCL_DEVICE_MANAGEMENT_CLUSTER_ID,
-                                         (cmd_data.implementationDateTime - currentTime)
-                                         * MILLISECOND_TICKS_PER_SECOND);
+    sl_zigbee_zcl_schedule_client_tick(endpoint,
+                                       ZCL_DEVICE_MANAGEMENT_CLUSTER_ID,
+                                       (cmd_data.implementationDateTime - currentTime)
+                                       * MILLISECOND_TICKS_PER_SECOND);
     pmInfo.pendingUpdates |= EMBER_AF_DEVICE_MANAGEMENT_CHANGE_OF_TENANCY_PENDING_MASK;
   }
 
@@ -593,10 +587,10 @@ bool emberAfDeviceManagementClusterPublishChangeOfSupplierCallback(EmberAfCluste
     pmInfo.pendingUpdates &= ~EMBER_AF_DEVICE_MANAGEMENT_CHANGE_OF_SUPPLIER_PENDING_MASK;
   } else {
     // Otherwise, wait until the time of implementation
-    slxu_zigbee_zcl_schedule_client_tick(endpoint,
-                                         ZCL_DEVICE_MANAGEMENT_CLUSTER_ID,
-                                         (cmd_data.providerChangeImplementationTime - currentTime)
-                                         * MILLISECOND_TICKS_PER_SECOND);
+    sl_zigbee_zcl_schedule_client_tick(endpoint,
+                                       ZCL_DEVICE_MANAGEMENT_CLUSTER_ID,
+                                       (cmd_data.providerChangeImplementationTime - currentTime)
+                                       * MILLISECOND_TICKS_PER_SECOND);
     pmInfo.pendingUpdates |= EMBER_AF_DEVICE_MANAGEMENT_CHANGE_OF_SUPPLIER_PENDING_MASK;
   }
 
@@ -637,10 +631,10 @@ bool emberAfDeviceManagementClusterRequestNewPasswordResponseCallback(EmberAfClu
     } else {
       pass = &(servicePassword);
       pmInfo.pendingUpdates |= EMBER_AF_DEVICE_MANAGEMENT_UPDATE_SERVICE_PASSWORD_PENDING_MASK;
-      slxu_zigbee_zcl_schedule_client_tick(endpoint,
-                                           ZCL_DEVICE_MANAGEMENT_CLUSTER_ID,
-                                           (cmd_data.implementationDateTime - currentTime)
-                                           * MILLISECOND_TICKS_PER_SECOND);
+      sl_zigbee_zcl_schedule_client_tick(endpoint,
+                                         ZCL_DEVICE_MANAGEMENT_CLUSTER_ID,
+                                         (cmd_data.implementationDateTime - currentTime)
+                                         * MILLISECOND_TICKS_PER_SECOND);
     }
   } else if (cmd_data.passwordType & CONSUMER_PASSWORD) {
     if (currentTime == cmd_data.implementationDateTime || cmd_data.implementationDateTime == (0x00000000)) {
@@ -648,10 +642,10 @@ bool emberAfDeviceManagementClusterRequestNewPasswordResponseCallback(EmberAfClu
     } else {
       pass = &(consumerPassword);
       pmInfo.pendingUpdates |= EMBER_AF_DEVICE_MANAGEMENT_UPDATE_CONSUMER_PASSWORD_PENDING_MASK;
-      slxu_zigbee_zcl_schedule_client_tick(endpoint,
-                                           ZCL_DEVICE_MANAGEMENT_CLUSTER_ID,
-                                           (cmd_data.implementationDateTime - currentTime)
-                                           * MILLISECOND_TICKS_PER_SECOND);
+      sl_zigbee_zcl_schedule_client_tick(endpoint,
+                                         ZCL_DEVICE_MANAGEMENT_CLUSTER_ID,
+                                         (cmd_data.implementationDateTime - currentTime)
+                                         * MILLISECOND_TICKS_PER_SECOND);
     }
   } else {
     status = EMBER_ZCL_STATUS_INVALID_VALUE;
@@ -741,10 +735,10 @@ bool emberAfDeviceManagementClusterUpdateSiteIdCallback(EmberAfClusterCommand *c
       pmInfo.pendingUpdates &= ~EMBER_AF_DEVICE_MANAGEMENT_UPDATE_SITE_ID_PENDING_MASK;
       MEMSET(&(pmInfo.siteId), 0, sizeof(EmberAfDeviceManagementSiteId));
     } else {
-      slxu_zigbee_zcl_schedule_client_tick(endpoint,
-                                           ZCL_DEVICE_MANAGEMENT_CLUSTER_ID,
-                                           (cmd_data.siteIdTime - currentTime)
-                                           * MILLISECOND_TICKS_PER_SECOND);
+      sl_zigbee_zcl_schedule_client_tick(endpoint,
+                                         ZCL_DEVICE_MANAGEMENT_CLUSTER_ID,
+                                         (cmd_data.siteIdTime - currentTime)
+                                         * MILLISECOND_TICKS_PER_SECOND);
       pmInfo.pendingUpdates |= EMBER_AF_DEVICE_MANAGEMENT_UPDATE_SITE_ID_PENDING_MASK;
       emberAfCopyString(pmInfo.siteId.siteId,
                         cmd_data.siteId,
@@ -825,10 +819,10 @@ bool emberAfDeviceManagementClusterUpdateCINCallback(EmberAfClusterCommand *cmd)
 #endif
       pmInfo.pendingUpdates &= ~EMBER_AF_DEVICE_MANAGEMENT_UPDATE_CIN_PENDING_MASK;
     } else {
-      slxu_zigbee_zcl_schedule_client_tick(endpoint,
-                                           ZCL_DEVICE_MANAGEMENT_CLUSTER_ID,
-                                           (cmd_data.implementationTime - currentTime)
-                                           * MILLISECOND_TICKS_PER_SECOND);
+      sl_zigbee_zcl_schedule_client_tick(endpoint,
+                                         ZCL_DEVICE_MANAGEMENT_CLUSTER_ID,
+                                         (cmd_data.implementationTime - currentTime)
+                                         * MILLISECOND_TICKS_PER_SECOND);
       pmInfo.pendingUpdates |= EMBER_AF_DEVICE_MANAGEMENT_UPDATE_CIN_PENDING_MASK;
       status = EMBER_ZCL_STATUS_SUCCESS;
     }
@@ -948,536 +942,6 @@ bool emberAfDeviceManagementClusterSetEventConfigurationCallback(EmberAfClusterC
   return true;
 }
 
-#else // !UC_BUILD
-
-bool emberAfDeviceManagementClusterPublishChangeOfTenancyCallback(uint32_t supplierId,
-                                                                  uint32_t issuerEventId,
-                                                                  uint8_t tariffType,
-                                                                  uint32_t implementationDateTime,
-                                                                  uint32_t proposedTenancyChangeControl)
-{
-  uint32_t currentTime = emberAfGetCurrentTime();
-  uint8_t endpoint = emberAfCurrentEndpoint();
-  EmberAfStatus status;
-
-  emberAfDeviceManagementClusterPrintln("RX: PublishChangeOfTenancy: 0x%4X, 0x%4X, 0x%X, 0x%4X, 0x%4X",
-                                        supplierId,
-                                        issuerEventId,
-                                        tariffType,
-                                        implementationDateTime,
-                                        proposedTenancyChangeControl);
-
-  if (pmInfo.providerId == 0) {
-    pmInfo.providerId = supplierId;
-  }
-
-  if (issuerEventId > pmInfo.issuerEventId) {
-    pmInfo.issuerEventId = issuerEventId;
-  }
-
-  pmInfo.tariffType = (EmberAfTariffType)tariffType;
-
-  pmInfo.tenancy.implementationDateTime = implementationDateTime;
-  pmInfo.tenancy.tenancy = proposedTenancyChangeControl;
-
-  // Even if we aren't to immediately action the change of tenancy,
-  // we still set these attributes accordingly
-  status = emberAfWriteAttribute(endpoint,
-                                 ZCL_DEVICE_MANAGEMENT_CLUSTER_ID,
-                                 ZCL_CHANGE_OF_TENANCY_UPDATE_DATE_TIME_ATTRIBUTE_ID,
-                                 CLUSTER_MASK_CLIENT,
-                                 (uint8_t*)&implementationDateTime,
-                                 ZCL_UTC_TIME_ATTRIBUTE_TYPE);
-
-  if (status != EMBER_ZCL_STATUS_SUCCESS) {
-    goto kickout;
-  }
-
-  status = emberAfWriteAttribute(endpoint,
-                                 ZCL_DEVICE_MANAGEMENT_CLUSTER_ID,
-                                 ZCL_PROPOSED_TENANCY_CHANGE_CONTROL_ATTRIBUTE_ID,
-                                 CLUSTER_MASK_CLIENT,
-                                 (uint8_t*)&proposedTenancyChangeControl,
-                                 ZCL_INT32U_ATTRIBUTE_TYPE);
-
-  if (status != EMBER_ZCL_STATUS_SUCCESS) {
-    goto kickout;
-  }
-
-  // If the time has passed since the change of tenancy was to be implemented, take action
-  if (currentTime >= implementationDateTime) {
-    emberAfPluginDeviceManagementClientEnactChangeOfTenancyCallback(endpoint,
-                                                                    &(pmInfo.tenancy));
-    pmInfo.pendingUpdates &= ~EMBER_AF_DEVICE_MANAGEMENT_CHANGE_OF_TENANCY_PENDING_MASK;
-  } else {
-    // Otherwise, wait until the time of implementation
-    slxu_zigbee_zcl_schedule_client_tick(endpoint,
-                                         ZCL_DEVICE_MANAGEMENT_CLUSTER_ID,
-                                         (implementationDateTime - currentTime)
-                                         * MILLISECOND_TICKS_PER_SECOND);
-    pmInfo.pendingUpdates |= EMBER_AF_DEVICE_MANAGEMENT_CHANGE_OF_TENANCY_PENDING_MASK;
-  }
-
-  kickout:
-  emberAfSendImmediateDefaultResponse(status);
-  return true;
-}
-
-bool emberAfDeviceManagementClusterPublishChangeOfSupplierCallback(uint32_t currentProviderId,
-                                                                   uint32_t issuerEventId,
-                                                                   uint8_t  tariffType,
-                                                                   uint32_t proposedProviderId,
-                                                                   uint32_t providerChangeImplementationTime,
-                                                                   uint32_t providerChangeControl,
-                                                                   uint8_t* proposedProviderName,
-                                                                   uint8_t* proposedProviderContactDetails)
-{
-  EmberAfStatus status = EMBER_ZCL_STATUS_SUCCESS;
-  uint32_t currentTime = emberAfGetCurrentTime();
-  uint8_t endpoint = emberAfCurrentEndpoint();
-
-  emberAfDeviceManagementClusterPrintln("RX: PublishChangeOfSupplier: 0x%4X, 0x%4X, 0x%X, 0x%4X, 0x%4X, 0x%4X, ",
-                                        currentProviderId,
-                                        issuerEventId,
-                                        tariffType,
-                                        proposedProviderId,
-                                        providerChangeImplementationTime,
-                                        providerChangeControl);
-  emberAfDeviceManagementClusterPrintString(proposedProviderName);
-  emberAfDeviceManagementClusterPrintln(", ");
-  emberAfDeviceManagementClusterPrintString(proposedProviderContactDetails);
-  emberAfDeviceManagementClusterPrintln("");
-
-  if (proposedProviderName == NULL) {
-    status = EMBER_ZCL_STATUS_INVALID_VALUE;
-    goto kickout;
-  }
-
-  if (pmInfo.providerId == 0) {
-    pmInfo.providerId = currentProviderId;
-  }
-
-  if (pmInfo.issuerEventId == 0) {
-    pmInfo.issuerEventId = issuerEventId;
-  }
-
-  pmInfo.tariffType = (EmberAfTariffType) tariffType;
-
-  pmInfo.supplier.proposedProviderId = proposedProviderId;
-  pmInfo.supplier.implementationDateTime = providerChangeImplementationTime;
-  pmInfo.supplier.providerChangeControl = providerChangeControl;
-  emberAfCopyString(pmInfo.supplier.proposedProviderName,
-                    proposedProviderName,
-                    EMBER_AF_DEVICE_MANAGEMENT_MAXIMUM_PROPOSED_PROVIDER_NAME_LENGTH);
-  emberAfCopyString(pmInfo.supplier.proposedProviderContactDetails,
-                    proposedProviderContactDetails,
-                    EMBER_AF_DEVICE_MANAGEMENT_MAXIMUM_PROPOSED_PROVIDER_CONTACT_DETAILS_LENGTH);
-
-  // If the time has passed since the change of supplier was to be implemented, take action
-  if (currentTime >= providerChangeImplementationTime) {
-    emberAfPluginDeviceManagementClientEnactChangeOfSupplierCallback(endpoint,
-                                                                     &(pmInfo.supplier));
-    pmInfo.pendingUpdates &= ~EMBER_AF_DEVICE_MANAGEMENT_CHANGE_OF_SUPPLIER_PENDING_MASK;
-  } else {
-    // Otherwise, wait until the time of implementation
-    slxu_zigbee_zcl_schedule_client_tick(endpoint,
-                                         ZCL_DEVICE_MANAGEMENT_CLUSTER_ID,
-                                         (providerChangeImplementationTime - currentTime)
-                                         * MILLISECOND_TICKS_PER_SECOND);
-    pmInfo.pendingUpdates |= EMBER_AF_DEVICE_MANAGEMENT_CHANGE_OF_SUPPLIER_PENDING_MASK;
-  }
-
-  kickout:
-  emberAfSendImmediateDefaultResponse(status);
-  return true;
-}
-
-bool emberAfDeviceManagementClusterRequestNewPasswordResponseCallback(uint32_t issuerEventId,
-                                                                      uint32_t implementationDateTime,
-                                                                      uint16_t durationInMinutes,
-                                                                      uint8_t passwordType,
-                                                                      uint8_t* password)
-{
-  uint32_t currentTime = emberAfGetCurrentTime();
-  uint8_t endpoint = emberAfCurrentEndpoint();
-  EmberAfDeviceManagementPassword *pass;
-  EmberAfStatus status = EMBER_ZCL_STATUS_SUCCESS;
-
-  if (password == NULL) {
-    status = EMBER_ZCL_STATUS_INVALID_VALUE;
-    goto kickout;
-  }
-
-  if (issuerEventId > pmInfo.issuerEventId) {
-    pmInfo.issuerEventId = issuerEventId;
-  }
-
-  if (implementationDateTime < currentTime && implementationDateTime != 0x00000000) {
-    goto kickout;
-  }
-
-  if (passwordType & SERVICE_PASSWORD) {
-    if (currentTime == implementationDateTime || implementationDateTime == 0x00000000) {
-      pass = &(pmInfo.servicePassword);
-    } else {
-      pass = &(servicePassword);
-      pmInfo.pendingUpdates |= EMBER_AF_DEVICE_MANAGEMENT_UPDATE_SERVICE_PASSWORD_PENDING_MASK;
-      slxu_zigbee_zcl_schedule_client_tick(endpoint,
-                                           ZCL_DEVICE_MANAGEMENT_CLUSTER_ID,
-                                           (implementationDateTime - currentTime)
-                                           * MILLISECOND_TICKS_PER_SECOND);
-    }
-  } else if (passwordType & CONSUMER_PASSWORD) {
-    if (currentTime == implementationDateTime || implementationDateTime == (0x00000000)) {
-      pass = &(pmInfo.consumerPassword);
-    } else {
-      pass = &(consumerPassword);
-      pmInfo.pendingUpdates |= EMBER_AF_DEVICE_MANAGEMENT_UPDATE_CONSUMER_PASSWORD_PENDING_MASK;
-      slxu_zigbee_zcl_schedule_client_tick(endpoint,
-                                           ZCL_DEVICE_MANAGEMENT_CLUSTER_ID,
-                                           (implementationDateTime - currentTime)
-                                           * MILLISECOND_TICKS_PER_SECOND);
-    }
-  } else {
-    status = EMBER_ZCL_STATUS_INVALID_VALUE;
-    goto kickout;
-  }
-
-  pass->implementationDateTime = implementationDateTime;
-  pass->durationInMinutes = durationInMinutes;
-  pass->passwordType = passwordType;
-  emberAfCopyString(pass->password,
-                    password,
-                    EMBER_AF_DEVICE_MANAGEMENT_MAXIMUM_PASSWORD_LENGTH);
-
-  kickout:
-  emberAfSendImmediateDefaultResponse(status);
-  return true;
-}
-
-bool emberAfDeviceManagementClusterUpdateSiteIdCallback(uint32_t issuerEventId,
-                                                        uint32_t implementationDateTime,
-                                                        uint32_t providerId,
-                                                        uint8_t* siteId)
-{
-  uint32_t currentTime = emberAfGetCurrentTime();
-  uint8_t endpoint = emberAfCurrentEndpoint();
-  EmberAfStatus status = EMBER_ZCL_STATUS_FAILURE;
-
-  if (pmInfo.providerId != providerId) {
-    status = EMBER_ZCL_STATUS_NOT_AUTHORIZED;
-    goto kickout;
-  }
-
-  emberAfCopyString(pmInfo.siteId.siteId,
-                    siteId,
-                    EMBER_AF_DEVICE_MANAGEMENT_MAXIMUM_SITE_ID_LENGTH);
-
-  // If implementationDateTime is 0xFFFFFFFF, cancel any pending change and replace it with
-  // the incoming site ID
-  // cancelling a scheduled update
-  if (implementationDateTime == 0xFFFFFFFF) {
-    if ((pmInfo.pendingUpdates & EMBER_AF_DEVICE_MANAGEMENT_UPDATE_SITE_ID_PENDING_MASK)
-        && (pmInfo.providerId == providerId)
-        && (pmInfo.siteId.issuerEventId == issuerEventId)) {
-      pmInfo.pendingUpdates &= ~EMBER_AF_DEVICE_MANAGEMENT_UPDATE_SITE_ID_PENDING_MASK;
-      MEMSET(&(pmInfo.siteId), 0, sizeof(EmberAfDeviceManagementSiteId));
-      status = EMBER_ZCL_STATUS_SUCCESS;
-    } else {
-      emberAfDeviceManagementClusterPrintln("Unable to cancel scheduled siteId update.");
-      emberAfDeviceManagementClusterPrintln("Provider ID: 0x%4x", pmInfo.providerId);
-      emberAfDeviceManagementClusterPrintln("Issuer Event ID: 0x%4x", pmInfo.issuerEventId);
-      emberAfDeviceManagementClusterPrintPendingStatus(EMBER_AF_DEVICE_MANAGEMENT_UPDATE_SITE_ID_PENDING_MASK);
-      status = EMBER_ZCL_STATUS_FAILURE;
-      goto kickout;
-    }
-  } else { // schedule siteid update or immediate update
-    if (issuerEventId > pmInfo.issuerEventId) {
-      pmInfo.issuerEventId = issuerEventId;
-    } else {
-      status = EMBER_ZCL_STATUS_FAILURE;
-      goto kickout;
-    }
-
-    // implementation time:
-    //   0x00000000 - execute cmd immediately
-    //   0xFFFFFFFF - cancel update (case covered by previous code blok)
-    //   otherwise  - schedule for new pending action
-    if (implementationDateTime == 0x00000000) {
-      // Are we meter or ihd?
-      // Meter - update attr and reply with error if not sucessful
-      // Ihd - no update attr needed. reply success.
-      status = emberAfWriteAttribute(endpoint,
-                                     ZCL_SIMPLE_METERING_CLUSTER_ID,
-                                     ZCL_SITE_ID_ATTRIBUTE_ID,
-                                     CLUSTER_MASK_SERVER,
-                                     (uint8_t*)siteId,
-                                     ZCL_OCTET_STRING_ATTRIBUTE_TYPE);
-      if (emberAfContainsServer(emberAfCurrentEndpoint(), ZCL_SIMPLE_METERING_CLUSTER_ID)
-          && (status != EMBER_ZCL_STATUS_SUCCESS)) {
-        emberAfDeviceManagementClusterPrintln("Unable to write siteId attr in Metering cluster: 0x%d", status);
-        status = EMBER_ZCL_STATUS_FAILURE;
-      } else {
-        status = EMBER_ZCL_STATUS_SUCCESS;
-      }
-      pmInfo.pendingUpdates &= ~EMBER_AF_DEVICE_MANAGEMENT_UPDATE_SITE_ID_PENDING_MASK;
-      MEMSET(&(pmInfo.siteId), 0, sizeof(EmberAfDeviceManagementSiteId));
-    } else {
-      slxu_zigbee_zcl_schedule_client_tick(endpoint,
-                                           ZCL_DEVICE_MANAGEMENT_CLUSTER_ID,
-                                           (implementationDateTime - currentTime)
-                                           * MILLISECOND_TICKS_PER_SECOND);
-      pmInfo.pendingUpdates |= EMBER_AF_DEVICE_MANAGEMENT_UPDATE_SITE_ID_PENDING_MASK;
-      emberAfCopyString(pmInfo.siteId.siteId,
-                        siteId,
-                        EMBER_AF_DEVICE_MANAGEMENT_MAXIMUM_SITE_ID_LENGTH);
-      pmInfo.siteId.implementationDateTime = implementationDateTime;
-      pmInfo.siteId.issuerEventId = issuerEventId;
-      status = EMBER_ZCL_STATUS_SUCCESS;
-    }
-  }
-
-  kickout:
-  emberAfSendImmediateDefaultResponse(status);
-  return true;
-}
-
-bool emberAfDeviceManagementClusterSetSupplyStatusCallback(uint32_t issuerEventId,
-                                                           uint8_t supplyTamperState,
-                                                           uint8_t supplyDepletionState,
-                                                           uint8_t supplyUncontrolledFlowState,
-                                                           uint8_t loadLimitSupplyState)
-{
-  EmberAfDeviceManagementSupplyStatusFlags *flags = &(pmInfo.supplyStatusFlags);
-  uint8_t endpoint = emberAfCurrentEndpoint();
-
-  if (pmInfo.issuerEventId == 0) {
-    pmInfo.issuerEventId = issuerEventId;
-  }
-
-  flags->supplyTamperState = supplyTamperState;
-  flags->supplyDepletionState = supplyDepletionState;
-  flags->supplyUncontrolledFlowState = supplyUncontrolledFlowState;
-  flags->loadLimitSupplyState = loadLimitSupplyState;
-
-  emberAfPluginDeviceManagementClientSetSupplyStatusCallback(endpoint,
-                                                             flags);
-
-  emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
-  return true;
-}
-
-bool emberAfDeviceManagementClusterPublishUncontrolledFlowThresholdCallback(uint32_t providerId,
-                                                                            uint32_t issuerEventId,
-                                                                            uint16_t uncontrolledFlowThreshold,
-                                                                            uint8_t unitOfMeasure,
-                                                                            uint16_t multiplier,
-                                                                            uint16_t divisor,
-                                                                            uint8_t stabilisationPeriod,
-                                                                            uint16_t measurementPeriod)
-{
-  EmberAfDeviceManagementUncontrolledFlowThreshold *threshold = &(pmInfo.threshold);
-  uint8_t endpoint = emberAfCurrentEndpoint();
-
-  if (pmInfo.providerId == 0) {
-    pmInfo.providerId = providerId;
-  }
-
-  if (pmInfo.issuerEventId == 0) {
-    pmInfo.issuerEventId = issuerEventId;
-  }
-
-  threshold->uncontrolledFlowThreshold = uncontrolledFlowThreshold;
-  threshold->unitOfMeasure = unitOfMeasure;
-  threshold->multiplier = multiplier;
-  threshold->divisor = divisor;
-  threshold->stabilisationPeriod = stabilisationPeriod;
-  threshold->measurementPeriod = measurementPeriod;
-
-  emberAfPluginDeviceManagementClientEnactUpdateUncontrolledFlowThresholdCallback(endpoint,
-                                                                                  threshold);
-
-  emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
-  return true;
-}
-
-bool emberAfDeviceManagementClusterUpdateCINCallback(uint32_t issuerEventId,
-                                                     uint32_t implementationDateTime,
-                                                     uint32_t providerId,
-                                                     uint8_t* customerIdNumber)
-{
-  uint32_t currentTime = emberAfGetCurrentTime();
-  uint8_t endpoint = emberAfCurrentEndpoint();
-  EmberAfStatus status = EMBER_ZCL_STATUS_FAILURE;
-
-  if (pmInfo.providerId != providerId) {
-    status = EMBER_ZCL_STATUS_NOT_AUTHORIZED;
-    goto kickout;
-  }
-
-  // cancelling a scheduled update
-  if (implementationDateTime == 0xFFFFFFFF) {
-    if ((pmInfo.pendingUpdates & EMBER_AF_DEVICE_MANAGEMENT_UPDATE_CIN_PENDING_MASK)
-        && (pmInfo.providerId == providerId)
-        && (pmInfo.cin.issuerEventId == issuerEventId)) {
-      pmInfo.pendingUpdates &= ~EMBER_AF_DEVICE_MANAGEMENT_UPDATE_CIN_PENDING_MASK;
-      MEMSET(&(pmInfo.cin), 0, sizeof(EmberAfDeviceManagementCIN));
-      status = EMBER_ZCL_STATUS_SUCCESS;
-    } else {
-      emberAfDeviceManagementClusterPrintln("Unable to cancel scheduled CIN update.");
-      emberAfDeviceManagementClusterPrintln("Provider ID: 0x%4x", pmInfo.providerId);
-      emberAfDeviceManagementClusterPrintln("Issuer Event ID: 0x%4x", pmInfo.issuerEventId);
-      emberAfDeviceManagementClusterPrintPendingStatus(EMBER_AF_DEVICE_MANAGEMENT_UPDATE_CIN_PENDING_MASK);
-      status = EMBER_ZCL_STATUS_FAILURE;
-      goto kickout;
-    }
-  } else { // schedule CIN update or immediate update
-    if (issuerEventId > pmInfo.issuerEventId) {
-      pmInfo.issuerEventId = issuerEventId;
-    } else {
-      status = EMBER_ZCL_STATUS_FAILURE;
-      goto kickout;
-    }
-
-    // implementation time:
-    //   0x00000000 - execute cmd immediately
-    //   0xFFFFFFFF - cancel update (case covered by previous code blok)
-    //   otherwise  - schedule for new pending action
-    if (implementationDateTime == 0x00000000) {
-#ifdef SL_CATALOG_ZIGBEE_SIMPLE_METERING_SERVER_PRESENT
-      // only try to update attr if we actually implement cluster / ESI
-      status = emberAfWriteAttribute(endpoint,
-                                     ZCL_SIMPLE_METERING_CLUSTER_ID,
-                                     ZCL_CUSTOMER_ID_NUMBER_ATTRIBUTE_ID,
-                                     CLUSTER_MASK_SERVER,
-                                     (uint8_t*)customerIdNumber,
-                                     ZCL_OCTET_STRING_ATTRIBUTE_TYPE);
-      if (status != EMBER_ZCL_STATUS_SUCCESS) {
-        emberAfDeviceManagementClusterPrintln("Unable to write CIN attr in Metering cluster: 0x%d", status);
-        status = EMBER_ZCL_STATUS_FAILURE;
-      } else {
-#endif
-      status = EMBER_ZCL_STATUS_SUCCESS;
-#ifdef SL_CATALOG_ZIGBEE_SIMPLE_METERING_SERVER_PRESENT
-    }
-#endif
-      pmInfo.pendingUpdates &= ~EMBER_AF_DEVICE_MANAGEMENT_UPDATE_CIN_PENDING_MASK;
-    } else {
-      slxu_zigbee_zcl_schedule_client_tick(endpoint,
-                                           ZCL_DEVICE_MANAGEMENT_CLUSTER_ID,
-                                           (implementationDateTime - currentTime)
-                                           * MILLISECOND_TICKS_PER_SECOND);
-      pmInfo.pendingUpdates |= EMBER_AF_DEVICE_MANAGEMENT_UPDATE_CIN_PENDING_MASK;
-      status = EMBER_ZCL_STATUS_SUCCESS;
-    }
-
-    emberAfCopyString(pmInfo.cin.cin, customerIdNumber, EMBER_AF_DEVICE_MANAGEMENT_MAXIMUM_CIN_LENGTH);
-    pmInfo.cin.implementationDateTime = implementationDateTime;
-    pmInfo.cin.issuerEventId = issuerEventId;
-  }
-
-  kickout:
-  emberAfSendImmediateDefaultResponse(status);
-  return true;
-}
-
-bool emberAfDeviceManagementClusterGetEventConfigurationCallback(uint16_t eventId)
-{
-  uint8_t endpoint = emberAfCurrentEndpoint();
-  uint8_t eventConfiguration;
-  EmberAfStatus status;
-  if ((eventId & 0xFF) == 0xFF) {
-    //emberAfDeviceManagementClusterPrintln("Wildcard profile Id requested %u",eventId & 0xFF00);
-    uint8_t attributeSet = (eventId & 0xFF00) >> 8;
-    //emberAfDeviceManagementClusterPrintln("attribute set %u",attributeSet);
-    if ((attributeSet < 1 || attributeSet > 8) && attributeSet != 0xFF) {
-      status = EMBER_ZCL_STATUS_NOT_FOUND;
-      emberAfSendImmediateDefaultResponse(status);
-      return true;
-    } else {
-      sendDeviceManagementClusterReportWildCardAttribute(attributeSet,
-                                                         endpoint);
-      return true;
-    }
-  } else {
-    emberAfDeviceManagementClusterPrintln("Get Event callback %u", eventId);
-    status = emberAfReadClientAttribute(endpoint,
-                                        ZCL_DEVICE_MANAGEMENT_CLUSTER_ID,
-                                        eventId,
-                                        (uint8_t *)&eventConfiguration,
-                                        sizeof(eventConfiguration));
-    emberAfDeviceManagementClusterPrintln("Get Event status %u eventConfiguration %u", status, eventConfiguration);
-
-    if (status == EMBER_ZCL_STATUS_SUCCESS) {
-      (void) emberAfFillExternalBuffer((ZCL_CLUSTER_SPECIFIC_COMMAND
-                                        | ZCL_FRAME_CONTROL_CLIENT_TO_SERVER),
-                                       ZCL_DEVICE_MANAGEMENT_CLUSTER_ID,
-                                       ZCL_REPORT_EVENT_CONFIGURATION_COMMAND_ID,
-                                       "uu",
-                                       0,
-                                       1);
-      (void) emberAfPutInt16uInResp(eventId);
-      (void) emberAfPutInt8uInResp(eventConfiguration);
-      emberAfSendResponse();
-      return true;
-    } else {
-      status = EMBER_ZCL_STATUS_NOT_FOUND;
-      emberAfSendImmediateDefaultResponse(status);
-      return true;
-    }
-  }
-}
-
-bool emberAfDeviceManagementClusterSetEventConfigurationCallback(uint32_t issuerEventId,
-                                                                 uint32_t startDateTime,
-                                                                 uint8_t eventConfiguration,
-                                                                 uint8_t configurationControl,
-                                                                 uint8_t* eventConfigurationPayload)
-{
-  uint8_t payloadIndex = 0;
-  switch (configurationControl) {
-    case EMBER_ZCL_EVENT_CONFIGURATION_CONTROL_APPLY_BY_LIST: {
-      uint8_t numberOfEvents = eventConfigurationPayload[0];
-      emberAfDeviceManagementClusterPrintln("Number of Events %u", numberOfEvents);
-      payloadIndex = 1;
-      while (payloadIndex < numberOfEvents * 2) {
-        uint16_t attributeId = emberAfGetInt16u(eventConfigurationPayload, payloadIndex, numberOfEvents * 2 + 1);
-        payloadIndex += 2;
-        emberAfDeviceManagementClusterPrintln("AttributeId 0x%2x", attributeId);
-        writeDeviceManagementAttribute(attributeId, eventConfiguration);
-      }
-      break;
-    }
-    case EMBER_ZCL_EVENT_CONFIGURATION_CONTROL_APPLY_BY_EVENT_GROUP: {
-      uint16_t eventGroupId = emberAfGetInt16u(eventConfigurationPayload, 0, 2);
-      uint8_t attributeSet = (eventGroupId & 0xFF00) >> 8;
-      writeDeviceManagementClusterWildCardAttribute(attributeSet,
-                                                    emberAfCurrentEndpoint(),
-                                                    eventConfiguration);
-      break;
-    }
-    case EMBER_ZCL_EVENT_CONFIGURATION_CONTROL_APPLY_BY_LOG_TYPE: {
-      uint8_t logType = eventConfigurationPayload[0];
-      writeDeviceManagementClusterByLogTypeAttribute(logType,
-                                                     emberAfCurrentEndpoint(),
-                                                     eventConfiguration);
-      break;
-    }
-    case EMBER_ZCL_EVENT_CONFIGURATION_CONTROL_APPLY_BY_CONFIGURATION_MATCH: {
-      uint8_t currentConfiguration = eventConfigurationPayload[0];
-      writeDeviceManagementClusterByMatchingAttribute(currentConfiguration,
-                                                      emberAfCurrentEndpoint(),
-                                                      eventConfiguration);
-      break;
-    }
-    default:
-      emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_INVALID_VALUE);
-  }
-  return true;
-}
-
-#endif // UC_BUILD
-
 void emberAfDeviceManagementClientPrint(void)
 
 {
@@ -1535,8 +999,6 @@ void emberAfDeviceManagementClientPrint(void)
   emberAfDeviceManagementClusterPrintln("== End of Device Management Information ==");
 }
 
-#ifdef UC_BUILD
-
 uint32_t emberAfDeviceManagementClusterClientCommandParse(sl_service_opcode_t opcode,
                                                           sl_service_function_context_t *context)
 {
@@ -1589,5 +1051,3 @@ uint32_t emberAfDeviceManagementClusterClientCommandParse(sl_service_opcode_t op
           ? EMBER_ZCL_STATUS_SUCCESS
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
-
-#endif // UC_BUILD

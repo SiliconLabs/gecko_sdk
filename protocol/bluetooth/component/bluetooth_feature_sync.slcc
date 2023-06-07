@@ -3,7 +3,7 @@ label: "Periodic Advertising Synchronization"
 package: "Bluetooth"
 description: >
   Bluetooth periodic advertising synchronization feature
-category: "Bluetooth|Feature"
+category: Bluetooth|Bluetooth LE Controller (Link Layer)|Features with Commands and Events
 quality: "production"
 root_path: "protocol/bluetooth"
 requires:

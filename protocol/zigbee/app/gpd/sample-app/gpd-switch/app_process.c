@@ -21,22 +21,48 @@
 #include <stdint.h>
 #include "app_init.h"
 #include "gpd-components-common.h"
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #include "sl_sleeptimer.h"
-#include "sl_simple_button_instances.h"
-#include "sl_simple_led_instances.h"
 #include "nvm3.h"
 #ifdef SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT
 #include "sl_zigbee_debug_print.h"
 #endif // SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT
+
+#ifdef SL_CATALOG_SIMPLE_BUTTON_PRESENT
+#include "sl_simple_button_instances.h"
 #ifdef SL_CATALOG_SIMPLE_BUTTON_BTN0_PRESENT
 #include "sl_simple_button_btn0_config.h"
 #define BUTTON_INSTANCE_0 sl_button_btn0
-#endif
+#endif //SL_CATALOG_SIMPLE_BUTTON_BTN0_PRESENT
 #ifdef SL_CATALOG_SIMPLE_BUTTON_BTN1_PRESENT
 #include "sl_simple_button_btn1_config.h"
 #define BUTTON_INSTANCE_1 sl_button_btn1
+#endif //SL_CATALOG_SIMPLE_BUTTON_BTN1_PRESENT
+#endif //SL_CATALOG_SIMPLE_BUTTON_PRESENT
+
+#ifdef SL_CATALOG_SIMPLE_LED_PRESENT
+#include "sl_simple_led_instances.h"
+// LED Indication
+#ifdef SL_CATALOG_SIMPLE_LED_LED0_PRESENT
+#define ACTIVITY_LED sl_led_led0 //BOARDLED0
+#endif //SL_CATALOG_SIMPLE_LED_LED0_PRESENT
+#ifdef SL_CATALOG_SIMPLE_LED_LED1_PRESENT
+#define COMMISSIONING_STATE_LED sl_led_led1 //BOARDLED1
+#else
+#define COMMISSIONING_STATE_LED sl_led_led0 //BOARDLED0
 #endif
+
+#define BOARD_LED_ON(led) sl_led_turn_on(&led)
+#define BOARD_LED_OFF(led) sl_led_turn_off(&led)
+
+#else
+#define BOARD_LED_ON(led)
+#define BOARD_LED_OFF(led)
+
+#endif //SL_CATALOG_SIMPLE_LED_PRESENT
+
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
@@ -63,17 +89,6 @@
   #define EM4WU_EM4WUEN_NUM       (1)
   #define EM4WU_EM4WUEN_MASK      ((1 << EM4WU_EM4WUEN_NUM) << _GPIO_EM4WUEN_EM4WUEN_SHIFT)
 #endif
-
-// LED Indication
-#define ACTIVITY_LED sl_led_led0 //BOARDLED0
-#ifdef SL_CATALOG_SIMPLE_LED_LED1_PRESENT
-#define COMMISSIONING_STATE_LED sl_led_led1 //BOARDLED1
-#else
-#define COMMISSIONING_STATE_LED sl_led_led0 //BOARDLED0
-#endif
-
-#define BOARD_LED_ON(led) sl_led_turn_on(&led)
-#define BOARD_LED_OFF(led) sl_led_turn_off(&led)
 
 // App button press event types
 enum {
@@ -384,7 +399,7 @@ static void appEm4TimerCallback(sl_sleeptimer_timer_handle_t *handle, void *cont
 
 static void gpdConfigGpiosForEm4(void)
 {
-#ifdef EM4WU_PORT
+#if (defined EM4WU_PORT && defined EM4WU_EM4WUEN_MASK)
   // Turn on the clock for the GPIO
   CMU_ClockEnable(cmuClock_GPIO, true);
   GPIO_Unlock();

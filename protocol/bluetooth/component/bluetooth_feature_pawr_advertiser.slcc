@@ -1,0 +1,29 @@
+id: "bluetooth_feature_pawr_advertiser"
+label: "Periodic Advertising using PAwR trains"
+package: "Bluetooth"
+description: >
+  This component provides the commands and events for advertising using the
+  Periodic Advertising with Responses (PAwR) feature.
+category: Bluetooth|Bluetooth LE Controller (Link Layer)|Features with Commands and Events
+quality: "production"
+root_path: "protocol/bluetooth"
+config_file:
+  - path: "config/sl_bt_pawr_advertiser_config.h"
+requires:
+  - name: "bluetooth_controller"
+  - name: "bluetooth_feature_periodic_advertiser"
+  - name: "device_supports_bluetooth_advertising_extensions"
+recommends:
+  - id: "bluetooth_feature_pawr_conn_scheduling"
+provides:
+  - name: "bluetooth_feature_pawr_advertiser"
+template_contribution:
+  - name: component_catalog
+    value: bluetooth_feature_pawr_advertiser
+  - name: bluetooth_controller_init
+    value:
+      include: "sl_bt_pawr_advertiser_config.h"
+      extern_declare: "sl_status_t sl_btctrl_pawr_advertiser_configure(struct sl_btctrl_pawr_advertiser_config *pawr_config)"
+      function: "{ struct sl_btctrl_pawr_advertiser_config _pawr_config = {.max_pawr_sets = SL_BT_CONFIG_MAX_PAWR_ADVERTISERS, .max_advertised_data_length_hint = SL_BT_CONFIG_MAX_PAWR_ADVERTISED_DATA_LENGTH_HINT, .subevent_data_request_count = SL_BT_CONFIG_PAWR_PACKET_REQUEST_COUNT, .subevent_data_request_advance = SL_BT_CONFIG_PAWR_PACKET_REQUEST_ADVANCE }; sl_btctrl_pawr_advertiser_configure(&_pawr_config); }"
+      deinit: "{ struct sl_btctrl_pawr_advertiser_config _pawr_config = {.max_pawr_sets = 0, }; sl_btctrl_pawr_advertiser_configure(&_pawr_config); }"
+    priority: 3

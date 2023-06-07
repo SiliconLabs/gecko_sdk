@@ -33,7 +33,7 @@
     instance:
     - sensor
   - id: ls013b7dh03
-  - id: memlcd_eusart
+  - id: memlcd_usart
   - id: simple_led
     instance:
     - led0
@@ -42,7 +42,7 @@
     instance:
     - btn0
     - btn1
-  - id: mx25_flash_shutdown_eusart
+  - id: mx25_flash_shutdown_usart
   - id: bootloader_spi_controller_usart_driver
   - id: bootloader_spi_peripheral_usart_driver
 - template_contribution:

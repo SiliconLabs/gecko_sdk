@@ -6,12 +6,25 @@
  * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
- * The licensor of this software is Silicon Laboratories Inc. Your use of this
- * software is governed by the terms of Silicon Labs Master Software License
- * Agreement (MSLA) available at
- * www.silabs.com/about-us/legal/master-software-license-agreement. This
- * software is distributed to you in Source Code format and is governed by the
- * sections of the MSLA applicable to Source Code.
+ * SPDX-License-Identifier: Zlib
+ *
+ * The licensor of this software is Silicon Laboratories Inc.
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty. In no event will the authors be held liable for any damages
+ * arising from the use of this software.
+ *
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
+ *
+ * 1. The origin of this software must not be misrepresented; you must not
+ *    claim that you wrote the original software. If you use this software
+ *    in a product, an acknowledgment in the product documentation would be
+ *    appreciated but is not required.
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.
+ * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
 
@@ -142,11 +155,11 @@ void sli_keyscan_driver_hal_init_gpio(void)
 
   // KEYSCAN_E301 - Connect unused rows 3, 4, and 5 to row 2, a single used row
   GPIO->KEYSCANROUTE.ROWSENSE3ROUTE = SL_KEYSCAN_DRIVER_KEYSCAN_ROW_SENSE_2_PORT << _GPIO_KEYSCAN_ROWSENSE3ROUTE_PORT_SHIFT
-                                     | SL_KEYSCAN_DRIVER_KEYSCAN_ROW_SENSE_2_PIN << _GPIO_KEYSCAN_ROWSENSE3ROUTE_PIN_SHIFT;
+                                      | SL_KEYSCAN_DRIVER_KEYSCAN_ROW_SENSE_2_PIN << _GPIO_KEYSCAN_ROWSENSE3ROUTE_PIN_SHIFT;
   GPIO->KEYSCANROUTE.ROWSENSE4ROUTE = SL_KEYSCAN_DRIVER_KEYSCAN_ROW_SENSE_2_PORT << _GPIO_KEYSCAN_ROWSENSE4ROUTE_PORT_SHIFT
-                                     | SL_KEYSCAN_DRIVER_KEYSCAN_ROW_SENSE_2_PIN << _GPIO_KEYSCAN_ROWSENSE4ROUTE_PIN_SHIFT;
+                                      | SL_KEYSCAN_DRIVER_KEYSCAN_ROW_SENSE_2_PIN << _GPIO_KEYSCAN_ROWSENSE4ROUTE_PIN_SHIFT;
   GPIO->KEYSCANROUTE.ROWSENSE5ROUTE = SL_KEYSCAN_DRIVER_KEYSCAN_ROW_SENSE_2_PORT << _GPIO_KEYSCAN_ROWSENSE5ROUTE_PORT_SHIFT
-                                     | SL_KEYSCAN_DRIVER_KEYSCAN_ROW_SENSE_2_PIN << _GPIO_KEYSCAN_ROWSENSE5ROUTE_PIN_SHIFT;
+                                      | SL_KEYSCAN_DRIVER_KEYSCAN_ROW_SENSE_2_PIN << _GPIO_KEYSCAN_ROWSENSE5ROUTE_PIN_SHIFT;
 
 #if (SL_KEYSCAN_DRIVER_ROW_NUMBER >= 4u)
   GPIO->KEYSCANROUTE.ROWSENSE3ROUTE = (SL_KEYSCAN_DRIVER_KEYSCAN_ROW_SENSE_3_PORT << _GPIO_KEYSCAN_ROWSENSE3ROUTE_PORT_SHIFT)
@@ -155,9 +168,9 @@ void sli_keyscan_driver_hal_init_gpio(void)
 
   // KEYSCAN_E301 - Connect unused rows 4, and 5 to row 3, a single used row
   GPIO->KEYSCANROUTE.ROWSENSE4ROUTE = SL_KEYSCAN_DRIVER_KEYSCAN_ROW_SENSE_3_PORT << _GPIO_KEYSCAN_ROWSENSE4ROUTE_PORT_SHIFT
-                                     | SL_KEYSCAN_DRIVER_KEYSCAN_ROW_SENSE_3_PIN << _GPIO_KEYSCAN_ROWSENSE4ROUTE_PIN_SHIFT;
+                                      | SL_KEYSCAN_DRIVER_KEYSCAN_ROW_SENSE_3_PIN << _GPIO_KEYSCAN_ROWSENSE4ROUTE_PIN_SHIFT;
   GPIO->KEYSCANROUTE.ROWSENSE5ROUTE = SL_KEYSCAN_DRIVER_KEYSCAN_ROW_SENSE_3_PORT << _GPIO_KEYSCAN_ROWSENSE5ROUTE_PORT_SHIFT
-                                     | SL_KEYSCAN_DRIVER_KEYSCAN_ROW_SENSE_3_PIN << _GPIO_KEYSCAN_ROWSENSE5ROUTE_PIN_SHIFT;
+                                      | SL_KEYSCAN_DRIVER_KEYSCAN_ROW_SENSE_3_PIN << _GPIO_KEYSCAN_ROWSENSE5ROUTE_PIN_SHIFT;
 
 #if (SL_KEYSCAN_DRIVER_ROW_NUMBER >= 5u)
   GPIO->KEYSCANROUTE.ROWSENSE4ROUTE = (SL_KEYSCAN_DRIVER_KEYSCAN_ROW_SENSE_4_PORT << _GPIO_KEYSCAN_ROWSENSE4ROUTE_PORT_SHIFT)
@@ -166,7 +179,7 @@ void sli_keyscan_driver_hal_init_gpio(void)
 
   // KEYSCAN_E301 - Connect unused row 5 to row 4, a single used row
   GPIO->KEYSCANROUTE.ROWSENSE5ROUTE = SL_KEYSCAN_DRIVER_KEYSCAN_ROW_SENSE_4_PORT << _GPIO_KEYSCAN_ROWSENSE5ROUTE_PORT_SHIFT
-                                     | SL_KEYSCAN_DRIVER_KEYSCAN_ROW_SENSE_4_PIN << _GPIO_KEYSCAN_ROWSENSE5ROUTE_PIN_SHIFT;
+                                      | SL_KEYSCAN_DRIVER_KEYSCAN_ROW_SENSE_4_PIN << _GPIO_KEYSCAN_ROWSENSE5ROUTE_PIN_SHIFT;
 
 #if (SL_KEYSCAN_DRIVER_ROW_NUMBER >= 6u)
   GPIO->KEYSCANROUTE.ROWSENSE5ROUTE = (SL_KEYSCAN_DRIVER_KEYSCAN_ROW_SENSE_5_PORT << _GPIO_KEYSCAN_ROWSENSE5ROUTE_PORT_SHIFT)
@@ -216,7 +229,7 @@ void sli_keyscan_driver_hal_get_column_row(uint8_t *p_column,
   status = sl_keyscan_get_status();
 
   /* KEYSCAN_E301: The unused row bits in the KEYSCAN_STATUS field should be masked
-   so that unused row bits are set to 1, indicating a key is not pressed. */
+     so that unused row bits are set to 1, indicating a key is not pressed. */
   mask = ((1 <<  SL_KEYSCAN_DRIVER_ROW_NUMBER) - 1) << _KEYSCAN_STATUS_ROW_SHIFT;
   status |= (mask ^ _KEYSCAN_STATUS_ROW_MASK);
 

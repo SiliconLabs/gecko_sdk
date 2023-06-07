@@ -10,7 +10,7 @@
 #include CONFIGURATION_HEADER
 
 #include "stack/include/ember-types.h"
-#include "event_control/event.h"
+#include "event_queue/event-queue.h"
 
 #include "hal/hal.h"
 #include "hal/micro/micro.h"
@@ -52,8 +52,8 @@
 // Plugin private variables
 
 // Events used internal to the plugin
-EmberEventControl emberAfPluginGpioSensorInterruptEventControl;
-EmberEventControl emberAfPluginGpioSensorDebounceEventControl;
+EmberEvent emberAfPluginGpioSensorInterruptEvent;
+EmberEvent emberAfPluginGpioSensorDebounceEvent;
 
 // State variables to track the status of the gpio sensor
 static HalGpioSensorState lastSensorStatus = HAL_GPIO_SENSOR_ACTIVE;
@@ -86,11 +86,11 @@ void emberAfPluginGpioSensorInitCallback(void)
 // activated by the GIC plugin when an interrupt occurs on the gpio sensor.  It
 // determines whether the button is asserted or deasserted based on the polarity
 // option and GPIO state, and calls the appropriate assert or deassert handler.
-void emberAfPluginGpioSensorInterruptEventHandler(void)
+void emberAfPluginGpioSensorInterruptEventHandler(EmberEvent* event)
 {
   uint8_t reedValue;
 
-  emberEventControlSetInactive(emberAfPluginGpioSensorInterruptEventControl);
+  emberEventSetInactive(emberAfPluginGpioSensorInterruptEvent);
 
   reedValue = halGenericInterruptControlIrqReadGpio(irqConfig);
 
@@ -116,9 +116,9 @@ void emberAfPluginGpioSensorInterruptEventHandler(void)
 // being verified as needing to take action.  In the case of a bounce scenario,
 // this event will be cancelled by the debounce state machine before it can
 // execute.
-void emberAfPluginGpioSensorDebounceEventHandler(void)
+void emberAfPluginGpioSensorDebounceEventHandler(EmberEvent* event)
 {
-  emberEventControlSetInactive(emberAfPluginGpioSensorDebounceEventControl);
+  emberEventSetInactive(emberAfPluginGpioSensorDebounceEvent);
   lastSensorStatus = newSensorStatus;
 
   emberAfPluginGpioSensorStateChangedCallback(newSensorStatus);

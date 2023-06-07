@@ -31,10 +31,16 @@
 #ifndef SL_BT_IBEACON_H
 #define SL_BT_IBEACON_H
 
+/***********************************************************************************************//**
+ * @addtogroup ibeacon
+ * @{
+ **************************************************************************************************/
+
 /**************************************************************************//**
  * Bluetooth stack event handler.
  * @param[in] evt Event coming from the Bluetooth stack.
  *****************************************************************************/
 void sli_bt_ibeacon_on_event(sl_bt_msg_t *evt);
 
+/** @} (end addtogroup ibeacon) */
 #endif // SL_BT_IBEACON_H

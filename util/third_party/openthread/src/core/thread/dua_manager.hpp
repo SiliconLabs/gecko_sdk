@@ -110,8 +110,7 @@ public:
      * @param[in]  aConfig  The Primary Backbone Router service.
      *
      */
-    void HandleBackboneRouterPrimaryUpdate(BackboneRouter::Leader::State               aState,
-                                           const BackboneRouter::BackboneRouterConfig &aConfig);
+    void HandleBackboneRouterPrimaryUpdate(BackboneRouter::Leader::State aState, const BackboneRouter::Config &aConfig);
 
 #if OPENTHREAD_CONFIG_DUA_ENABLE
 
@@ -198,8 +197,8 @@ private:
 
     void UpdateTimeTickerRegistration(void);
 
-    static void HandleDuaResponse(void *               aContext,
-                                  otMessage *          aMessage,
+    static void HandleDuaResponse(void                *aContext,
+                                  otMessage           *aMessage,
                                   const otMessageInfo *aMessageInfo,
                                   Error                aResult);
     void        HandleDuaResponse(Coap::Message *aMessage, const Ip6::MessageInfo *aMessageInfo, Error aResult);

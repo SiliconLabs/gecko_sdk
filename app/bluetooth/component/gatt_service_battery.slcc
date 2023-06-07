@@ -4,9 +4,12 @@ package: Bluetooth
 description: >
   Provides battery sensor data in GATT characteristics.
   Designed for the Thunderboard smartphone app.
-category: Bluetooth|GATT
+category: Bluetooth|Application|GATT Services
 quality: production
 root_path: app/bluetooth/common/gatt_service_battery
+tag:
+  - No-Code
+
 config_file:
   - path: gatt_service_battery.xml
     directory: btconf
@@ -22,7 +25,7 @@ requires:
   - name: bluetooth_stack
   - name: gatt_configuration
   - name: bluetooth_feature_gatt_server
-  - name: simple_timer
+  - name: app_timer
   - name: app_assert
 template_contribution:
   - name: bluetooth_on_event

@@ -35,6 +35,9 @@
 #include "sl_sleeptimer.h"
 #include "sl_assert.h"
 #include "sl_status.h"
+#if defined(_SILICON_LABS_32B_SERIES_2) && defined(SYSRTC_PRESENT)
+#include "peripheral_sysrtc.h"
+#endif
 #include <stdbool.h>
 
 /*******************************************************************************
@@ -44,7 +47,11 @@
 #define HFXO_STARTUP_TIME_TABLE_SIZE  10
 
 // Default time value in microseconds required to wake-up the hfxo oscillator.
+#if defined(_SILICON_LABS_32B_SERIES_2) && defined(SYSRTC_PRESENT)
+#define HFXO_STARTUP_TIME_DEFAULT_VALUE_US  (300u)
+#else
 #define HFXO_STARTUP_TIME_DEFAULT_VALUE_US  (600u)
+#endif
 
 /*******************************************************************************
  *****************************   DATA TYPES   **********************************
@@ -65,9 +72,13 @@ static uint8_t hfxo_startup_time_table_index = 0;
 
 static uint32_t hfxo_startup_time_sum_average = 0;
 
-static uint32_t hfxo_startup_time_tc_inital = 0;
+static uint32_t hfxo_startup_time_tc_initial = 0;
+
+static uint32_t hfxo_prs_startup_time_tc_initial = 0;
 
 static bool hfxo_measurement_on = false;
+
+static bool hfxo_prs_measurement_on = false;
 
 /*******************************************************************************
  **************************   GLOBAL FUNCTIONS   *******************************
@@ -143,7 +154,17 @@ __WEAK void sl_hfxo_manager_notify_consecutive_failed_startups(void)
 void sli_hfxo_manager_begin_startup_measurement(void)
 {
   hfxo_measurement_on = true;
-  hfxo_startup_time_tc_inital = sl_sleeptimer_get_tick_count();
+  hfxo_startup_time_tc_initial = sl_sleeptimer_get_tick_count();
+}
+
+/***************************************************************************//**
+ * Function to call when a compare match event produces a PRS signal to
+   start HFXO. Save comapre value.
+ ******************************************************************************/
+void sli_hfxo_prs_manager_begin_startup_measurement(uint32_t compare_value)
+{
+  hfxo_prs_measurement_on = true;
+  hfxo_prs_startup_time_tc_initial = compare_value;
 }
 
 /***************************************************************************//**
@@ -152,12 +173,32 @@ void sli_hfxo_manager_begin_startup_measurement(void)
  ******************************************************************************/
 void sli_hfxo_manager_end_startup_measurement(void)
 {
-  if (hfxo_measurement_on == false) {
+  if ((hfxo_measurement_on == false) && (hfxo_prs_measurement_on == false)) {
     return;
   }
 
+  // If hfxo_prs_measurement_on is also true do not compute HFXO time measurement
+  if ((hfxo_measurement_on == true) && (hfxo_prs_measurement_on == true)) {
+    hfxo_measurement_on = false;
+    hfxo_prs_measurement_on = false;
+    return;
+  }
+
+  // Ensure that HFXO time measurement is accurate
+  if (hfxo_prs_measurement_on == true) {
+    if ((hfxo_prs_startup_time_tc_initial >= sl_sleeptimer_get_tick_count())
+        || (hfxo_prs_startup_time_tc_initial <= 0)) {
+      hfxo_prs_measurement_on = false;
+      return;
+    }
+  }
+
   // Complete HFXO restore time measurement
-  hfxo_last_startup_time = sl_sleeptimer_get_tick_count() - hfxo_startup_time_tc_inital;
+  if (hfxo_measurement_on == true) {
+    hfxo_last_startup_time = sl_sleeptimer_get_tick_count() - hfxo_startup_time_tc_initial;
+  } else {
+    hfxo_last_startup_time = sl_sleeptimer_get_tick_count() -  hfxo_prs_startup_time_tc_initial;
+  }
 
   // With low precision clock, the HFXO startup time measure could be zero.
   // In that case, ensure it's a least 1 tick.
@@ -173,6 +214,7 @@ void sli_hfxo_manager_end_startup_measurement(void)
   hfxo_startup_time_table_index %= HFXO_STARTUP_TIME_TABLE_SIZE;
 
   hfxo_measurement_on = false;
+  hfxo_prs_measurement_on = false;
 }
 
 /***************************************************************************//**

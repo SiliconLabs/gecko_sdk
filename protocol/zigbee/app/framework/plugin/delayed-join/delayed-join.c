@@ -28,18 +28,10 @@
 // *****************************************************************************
 // Functions
 
-#ifdef UC_BUILD
-void emAfPluginDelayedJoinTrustCenterJoinCallback(EmberNodeId newNodeId,
-                                                  EmberEUI64 newNodeEui64,
-                                                  EmberDeviceUpdate status,
-                                                  EmberNodeId parentOfNewNode)
-#else // !UC_BUILD
-void emberAfTrustCenterJoinCallback(EmberNodeId newNodeId,
-                                    EmberEUI64 newNodeEui64,
-                                    EmberNodeId parentOfNewNode,
-                                    EmberDeviceUpdate status,
-                                    EmberJoinDecision decision)
-#endif // UC_BUILD
+void sli_zigbee_af_delayed_join_trust_center_join_callback(EmberNodeId newNodeId,
+                                                           EmberEUI64 newNodeEui64,
+                                                           EmberDeviceUpdate status,
+                                                           EmberNodeId parentOfNewNode)
 {
   emberAfCorePrintln("%s: 0x%04X %s %02X %s: 0x%04X",
                      EMBER_AF_PLUGIN_DELAYED_JOIN_PLUGIN_NAME,
@@ -48,13 +40,6 @@ void emberAfTrustCenterJoinCallback(EmberNodeId newNodeId,
                      status,
                      " with parentId",
                      parentOfNewNode);
-#ifndef UC_BUILD
-  emberAfPluginDelayedJoinCallback(newNodeId,
-                                   newNodeEui64,
-                                   parentOfNewNode,
-                                   status,
-                                   decision);
-#endif // UC_BUILD
 }
 
 void emberAfPluginDelayedJoinStackStatusCallback(EmberStatus status)

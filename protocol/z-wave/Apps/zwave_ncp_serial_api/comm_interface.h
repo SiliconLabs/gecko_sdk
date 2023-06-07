@@ -1,5 +1,5 @@
 /**
- * @file comm_interface.h
+ * @file
  * @copyright 2022 Silicon Laboratories Inc.
  */
 
@@ -9,6 +9,13 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
+
+/**
+ * @addtogroup Apps
+ * @{
+ * @addtogroup SerialAPI
+ * @{
+ */
 
 #define RECEIVE_BUFFER_SIZE     180
 #define FRAME_LENGTH_MIN        3
@@ -65,5 +72,10 @@ void comm_interface_set_ack_timeout_ms(uint32_t t);
 uint32_t comm_interface_get_byte_timeout_ms(void);
 void comm_interface_set_byte_timeout_ms(uint32_t t);
 comm_interface_parse_result_t comm_interface_parse_data(bool ack);
+
+/**
+ * @}
+ * @}
+ */ 
 
 #endif /* __COMM_INTERFACE__ */

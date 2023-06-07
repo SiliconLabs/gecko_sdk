@@ -1,0 +1,44 @@
+id: esl_tag_nvm_image
+package: Bluetooth
+label: ESL Tag NVM Image
+description: >
+  Extends the Bluetooth Electronic Shelf Label design with image handling
+  capabilities and associated features, including OTS image transfer capability
+  as per ESL profile and service specifications. Best suited for larger
+  multi-colour displays.
+
+
+  This component utilizes the non-volatile memory on the target MCU.
+
+  This is a Low-Code component. For reference API usage please see
+  Bluetooth - SoC ESL Tag example application.
+category: Bluetooth|Application|GATT Services
+quality: production
+root_path: app/bluetooth/common/esl_tag_nvm_image
+tag:
+  - Low-Code
+
+config_file:
+  - path: config/esl_tag_nvm_image.xml
+    file_id: esl_tag_nvm_image_characteristics
+    directory: btconf
+  - path: config/esl_tag_image_config.h
+    file_id: esl_tag_image_config
+
+include:
+  - path: ./inc
+    file_list:
+      - path: esl_tag_image.h
+
+source:
+  - path: src/esl_tag_nvm_image.c
+
+provides:
+  - name: esl_tag_image
+  - name: esl_tag_nvm_image
+
+requires:
+  - name: nvm3_lib
+  - name: nvm3_default
+  - name: esl_tag_core
+  - name: esl_tag_ots_server

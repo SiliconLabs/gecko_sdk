@@ -16,7 +16,9 @@
 
 #ifndef ZIGBEE_APP_FRAMEWORK_COMMON_H
 #define ZIGBEE_APP_FRAMEWORK_COMMON_H
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #include "zigbee_app_framework_event.h"
 
 #define SL_ZIGBEE_INIT_LEVEL_EVENT      0x00

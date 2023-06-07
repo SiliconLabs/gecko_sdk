@@ -60,10 +60,10 @@ class BtmeshResetCmd(BtmeshCmd):
         if pargs.type == "factory":
             app_db.clear()
             app_db.save()
-            app_btmesh.factory_reset(app_cfg.reset.factory_reset_delay_s)
+            app_btmesh.core.factory_reset(app_cfg.reset.factory_reset_delay_s)
             app_ui.info("Factory reset completed")
         else:
-            app_btmesh.system_reset()
+            app_btmesh.core.system_reset()
             app_ui.info("System reset completed")
         return False
 

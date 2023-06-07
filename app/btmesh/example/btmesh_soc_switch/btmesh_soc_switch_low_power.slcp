@@ -36,15 +36,9 @@ component:
   - id: gatt_service_device_information
   - id: mpu
   - id: rail_util_pti
-  - id: simple_button
-    instance:
-      - btn0
-      - btn1
-  - id: simple_led
-    instance:
-      - led0
-      - led1
-  - id: simple_timer
+  - id: simple_button_recommended_instance
+  - id: simple_led_recommended_instance
+  - id: app_timer
 
 source:
   - path: app.c
@@ -86,6 +80,8 @@ other_file:
 configuration:
   - name: SL_BTMESH_LPN_POLL_TIMEOUT_CFG_VAL
     value: 120000
+  - name: NVM3_DEFAULT_NVM_SIZE
+    value: "0x6000"
   - name: NVM3_DEFAULT_CACHE_SIZE
     value: 100
   - name: SL_BTMESH_BLOB_TRANSFER_SERVER_MAX_BLOCK_SIZE_LOG_CFG_VAL
@@ -117,8 +113,8 @@ configuration:
 
 tag:
   - hardware:board_only
-  - hardware:component:button:2+
-  - hardware:component:led:2+
+  - hardware:component:button:1+
+  - hardware:component:led:1+
   - hardware:device:flash:512
   - hardware:device:ram:32
   - hardware:rf:band:2400

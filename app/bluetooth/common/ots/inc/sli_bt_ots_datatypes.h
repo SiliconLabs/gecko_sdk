@@ -37,9 +37,9 @@ extern "C" {
 
 #define OTS_SPSM                      0x0025
 #define INVALID_INDEX                 SL_BT_CONFIG_MAX_CONNECTIONS
-#define INVALID_SERVICE_HANDLE        0
+#define INVALID_SERVICE_HANDLE        (UINT32_MAX)
 #define INVALID_CONNECTION_HANDLE     SL_BT_INVALID_CONNECTION_HANDLE
-#define INVALID_CHARACTERISTIC_HANDLE 0
+#define INVALID_CHARACTERISTIC_HANDLE (UINT16_MAX)
 
 #define CHECK_NULL(x)              \
   if (x == NULL) {                 \

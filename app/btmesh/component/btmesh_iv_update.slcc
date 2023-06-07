@@ -31,9 +31,9 @@ requires:
   - name: "app_btmesh_util"
   - name: "btmesh_stack_node"
   - name: "btmesh_stack"
-  - name: "simple_timer"
+  - name: "app_timer"
 recommends:
-  - id: "simple_timer"
+  - id: "app_timer"
   
 template_contribution:
   - name: "btmesh_on_event"

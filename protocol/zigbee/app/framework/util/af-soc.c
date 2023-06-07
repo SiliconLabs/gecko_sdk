@@ -16,7 +16,9 @@
  ******************************************************************************/
 
 #include "af.h"
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 
 #include "app/framework/util/af-main.h"
 #include "app/framework/util/attribute-storage.h"
@@ -42,15 +44,12 @@
 //------------------------------------------------------------------------------
 // Forward declarations
 
-static uint16_t calculateMessageTagHash(uint8_t *messageContents,
-                                        uint8_t messageLength);
-
 //------------------------------------------------------------------------------
 // Internal callbacks
 
-void emAfInitCallback(SLXU_INIT_ARG)
+void sli_zigbee_af_initCallback(uint8_t init_level)
 {
-  SLXU_INIT_UNUSED_ARG;
+  (void)init_level;
 
   emberAfCorePrintln("Reset info: 0x%x (%p)",
                      halGetResetInfo(),
@@ -72,10 +71,10 @@ void emAfInitCallback(SLXU_INIT_ARG)
 
   // This will initialize the stack of networks maintained by the framework,
   // including setting the default network.
-  emAfInitializeNetworkIndexStack();
+  sli_zigbee_af_initializeNetworkIndexStack();
 
   // Initialize messageSentCallbacks table
-  emAfInitializeMessageSentCallbackArray();
+  sli_zigbee_af_initialize_message_sent_callback_array();
 
   emberAfEndpointConfigure();
 
@@ -84,7 +83,7 @@ void emAfInitCallback(SLXU_INIT_ARG)
   securityAddressCacheInit(EMBER_AF_PLUGIN_ADDRESS_TABLE_SIZE,                     // offset
                            EMBER_AF_PLUGIN_ADDRESS_TABLE_TRUST_CENTER_CACHE_SIZE); // size
 
-  emAfNetworkSecurityInit();
+  sli_zigbee_af_network_security_init();
 
   // Set the manufacturing code. This is defined by ZigBee document 053874r10
   // Ember's ID is 0x1002 and is the default, but this can be overridden in App Builder.
@@ -97,7 +96,7 @@ void emAfInitCallback(SLXU_INIT_ARG)
   (void)emberSetRadioIeee802154CcaMode(EMBER_RADIO_802154_CCA_MODE);
 }
 
-EmberZdoStatus emAfRemoteSetBindingCallback(EmberBindingTableEntry *entry)
+EmberZdoStatus sli_zigbee_af_remote_set_binding_callback(EmberBindingTableEntry *entry)
 {
   EmberZdoStatus status = EMBER_ZDP_TABLE_FULL;
 #if (EMBER_BINDING_TABLE_SIZE > 0)
@@ -138,7 +137,7 @@ EmberZdoStatus emAfRemoteSetBindingCallback(EmberBindingTableEntry *entry)
   return status;
 }
 
-EmberZdoStatus emAfRemoteDeleteBindingCallback(uint8_t index)
+EmberZdoStatus sli_zigbee_af_remote_delete_binding_callback(uint8_t index)
 {
   EmberStatus deleteStatus;
   EmberZdoStatus status;
@@ -158,9 +157,9 @@ EmberZdoStatus emAfRemoteDeleteBindingCallback(uint8_t index)
   return status;
 }
 
-void emAfIncomingMessageCallback(EmberIncomingMessageType type,
-                                 EmberApsFrame *apsFrame,
-                                 EmberMessageBuffer message)
+void sli_zigbee_af_incoming_message_callback(EmberIncomingMessageType type,
+                                             EmberApsFrame *apsFrame,
+                                             EmberMessageBuffer message)
 {
   uint8_t lastHopLqi;
   int8_t lastHopRssi;
@@ -168,87 +167,87 @@ void emAfIncomingMessageCallback(EmberIncomingMessageType type,
   emberGetLastHopLqi(&lastHopLqi);
   emberGetLastHopRssi(&lastHopRssi);
 
-  emAfIncomingMessageHandler(type,
-                             apsFrame,
-                             lastHopLqi,
-                             lastHopRssi,
-                             emGetBufferLength(message),
-                             emGetBufferPointer(message));
+  sli_zigbee_af_incoming_message_handler(type,
+                                         apsFrame,
+                                         lastHopLqi,
+                                         lastHopRssi,
+                                         sli_legacy_buffer_manager_get_buffer_length(message),
+                                         sli_legacy_buffer_manager_get_buffer_pointer(message));
 }
 
-extern void emAfMessageSent(EmberOutgoingMessageType type,
-                            uint16_t indexOrDestination,
-                            EmberApsFrame *apsFrame,
-                            EmberMessageBuffer message,
-                            EmberStatus status);
+extern void sli_zigbee_af_message_sent(EmberOutgoingMessageType type,
+                                       uint16_t indexOrDestination,
+                                       EmberApsFrame *apsFrame,
+                                       EmberMessageBuffer message,
+                                       EmberStatus status);
 
 // Called when a message we sent is acked by the destination or when an
 // ack fails to arrive after several retransmissions.
-void emAfMessageSentCallback(EmberOutgoingMessageType type,
-                             uint16_t indexOrDestination,
-                             EmberApsFrame *apsFrame,
-                             EmberMessageBuffer message,
-                             EmberStatus status)
+void sli_zigbee_af_message_sent_callback(EmberOutgoingMessageType type,
+                                         uint16_t indexOrDestination,
+                                         EmberApsFrame *apsFrame,
+                                         EmberMessageBuffer message,
+                                         EmberStatus status)
 {
-  uint8_t* messageContents = emGetBufferPointer(message);
-  uint8_t messageLength = emGetBufferLength(message);
+  uint8_t* messageContents = sli_legacy_buffer_manager_get_buffer_pointer(message);
+  uint8_t messageLength = sli_legacy_buffer_manager_get_buffer_length(message);
   uint16_t messageTag;
 
 #ifdef SL_CATALOG_ZIGBEE_FRAGMENTATION_PRESENT
   // This call if returns true, ends up calling
-  // emAfFragmentationMessageSentHandler() when the last fragment was received.
-  if (emAfFragmentationMessageSent(apsFrame, status)) {
+  // sli_zigbee_af_fragmentation_message_sent_handler() when the last fragment was received.
+  if (sli_zigbee_af_fragmentation_message_sent(apsFrame, status)) {
     return;
   }
 #endif //SL_CATALOG_ZIGBEE_FRAGMENTATION_PRESENT
 
   emberConcentratorNoteDeliveryFailure(type, status);
 
-  messageTag = calculateMessageTagHash(messageContents, messageLength);
+  messageTag = sli_zigbee_af_calculate_message_tag_hash(messageContents, messageLength);
 
-  emAfMessageSentHandler(type,
-                         indexOrDestination,
-                         apsFrame,
-                         status,
-                         messageLength,
-                         messageContents,
-                         messageTag);
+  sli_zigbee_af_message_sent_handler(type,
+                                     indexOrDestination,
+                                     apsFrame,
+                                     status,
+                                     messageLength,
+                                     messageContents,
+                                     messageTag);
 
   // Generated dispatcher
-  emAfMessageSent(type,
-                  indexOrDestination,
-                  apsFrame,
-                  message,
-                  status);
+  sli_zigbee_af_message_sent(type,
+                             indexOrDestination,
+                             apsFrame,
+                             message,
+                             status);
 }
 
 #ifdef SL_CATALOG_ZIGBEE_FRAGMENTATION_PRESENT
-void emAfFragmentationMessageSentHandler(EmberOutgoingMessageType type,
-                                         uint16_t indexOrDestination,
-                                         EmberApsFrame *apsFrame,
-                                         uint8_t *buffer,
-                                         uint16_t bufLen,
-                                         EmberStatus status,
-                                         uint16_t messageTag)
+void sli_zigbee_af_fragmentation_message_sent_handler(EmberOutgoingMessageType type,
+                                                      uint16_t indexOrDestination,
+                                                      EmberApsFrame *apsFrame,
+                                                      uint8_t *buffer,
+                                                      uint16_t bufLen,
+                                                      EmberStatus status,
+                                                      uint16_t messageTag)
 {
   EmberMessageBuffer message = emberFillLinkedBuffers(buffer, bufLen);
 
   // the fragmented message is no longer in process
   emberAfDebugPrintln("%pend.", "Fragmentation:");
-  emAfMessageSentHandler(type,
-                         indexOrDestination,
-                         apsFrame,
-                         status,
-                         bufLen,
-                         buffer,
-                         messageTag);
+  sli_zigbee_af_message_sent_handler(type,
+                                     indexOrDestination,
+                                     apsFrame,
+                                     status,
+                                     bufLen,
+                                     buffer,
+                                     messageTag);
 
   // Generated dispatcher
-  emAfMessageSent(type,
-                  indexOrDestination,
-                  apsFrame,
-                  message,
-                  status);
+  sli_zigbee_af_message_sent(type,
+                             indexOrDestination,
+                             apsFrame,
+                             message,
+                             status);
 
   // EMZIGBEE-4437: setting back the buffers to the original in case someone set
   // that to something else.
@@ -347,37 +346,14 @@ EmberStatus emberAfSendEndDeviceBind(uint8_t endpoint)
 
 uint8_t emberGetEndpoint(uint8_t index)
 {
-  uint8_t endpoint = EMBER_AF_INVALID_ENDPOINT;
-  if (emberAfGetEndpointByIndexCallback(index, &endpoint)) {
-    return endpoint;
-  }
-  return (((emberAfNetworkIndexFromEndpointIndex(index)
-            == emberGetCallbackNetwork())
-           && emberAfEndpointIndexIsEnabled(index))
-          ? emberAfEndpointFromIndex(index)
-          : 0xFF);
+  return sli_zigbee_af_get_endpoint(index);
 }
 
 // must return the endpoint desc of the endpoint specified
 bool emberGetEndpointDescription(uint8_t endpoint,
                                  EmberEndpointDescription *result)
 {
-  if (emberAfGetEndpointDescriptionCallback(endpoint, result)) {
-    return true;
-  }
-  uint8_t endpointIndex = emberAfIndexFromEndpoint(endpoint);
-  if (endpointIndex == 0xFF
-      || (endpointIndex >= MAX_ENDPOINT_COUNT)
-      || (emberAfNetworkIndexFromEndpointIndex(endpointIndex)
-          != emberGetCallbackNetwork())) {
-    return false;
-  }
-  result->profileId          = emberAfProfileIdFromIndex(endpointIndex);
-  result->deviceId           = emberAfDeviceIdFromIndex(endpointIndex);
-  result->deviceVersion      = emberAfDeviceVersionFromIndex(endpointIndex);
-  result->inputClusterCount  = emberAfClusterCount(endpoint, true);
-  result->outputClusterCount = emberAfClusterCount(endpoint, false);
-  return true;
+  return sli_zigbee_af_get_endpoint_description(endpoint, result);
 }
 
 // must return the clusterId at listIndex in the list specified for the
@@ -386,21 +362,7 @@ uint16_t emberGetEndpointCluster(uint8_t endpoint,
                                  EmberClusterListId listId,
                                  uint8_t listIndex)
 {
-  EmberAfCluster *cluster = NULL;
-  uint8_t endpointIndex = emberAfIndexFromEndpoint(endpoint);
-  if (endpointIndex == 0xFF
-      || (endpointIndex >= MAX_ENDPOINT_COUNT)
-      || (emberAfNetworkIndexFromEndpointIndex(endpointIndex)
-          != emberGetCallbackNetwork())) {
-    return 0xFFFF;
-  } else if (listId == EMBER_INPUT_CLUSTER_LIST) {
-    cluster = emberAfGetNthCluster(endpoint, listIndex, true);
-  } else if (listId == EMBER_OUTPUT_CLUSTER_LIST) {
-    cluster = emberAfGetNthCluster(endpoint, listIndex, false);
-  } else {
-    // MISRA requires ..else if.. to have terminating else.
-  }
-  return (cluster == NULL ? 0xFFFF : cluster->clusterId);
+  return sli_zigbee_af_get_endpoint_cluster(endpoint, listId, listIndex);
 }
 
 void emberAfGetEui64(EmberEUI64 returnEui64)
@@ -490,76 +452,15 @@ EmberStatus emberAfGetChildData(uint8_t index,
 //------------------------------------------------------------------------------
 // Internal APIs
 
-EmberStatus emAfSend(EmberOutgoingMessageType type,
-                     uint16_t indexOrDestination,
-                     EmberApsFrame *apsFrame,
-                     uint8_t messageLength,
-                     uint8_t *message,
-                     uint16_t *messageTag,
-                     EmberNodeId alias,
-                     uint8_t sequence)
+uint8_t sli_zigbee_af_get_packet_buffer_free_count(void)
+
 {
-  EmberMessageBuffer payload = emberFillLinkedBuffers(message, messageLength);
-  if (payload == EMBER_NULL_MESSAGE_BUFFER) {
-    return EMBER_NO_BUFFERS;
-  } else {
-    EmberStatus status;
-
-    *messageTag = calculateMessageTagHash(message, messageLength);
-
-    switch (type) {
-      case EMBER_OUTGOING_DIRECT:
-      case EMBER_OUTGOING_VIA_ADDRESS_TABLE:
-      case EMBER_OUTGOING_VIA_BINDING:
-        status = emberSendUnicast(type, indexOrDestination, apsFrame, payload);
-        break;
-      case EMBER_OUTGOING_MULTICAST:
-        status = emberSendMulticast(apsFrame,
-                                    ZA_MAX_HOPS, // radius
-                                    ZA_MAX_HOPS, // nonmember radius
-                                    payload);
-        break;
-      case EMBER_OUTGOING_MULTICAST_WITH_ALIAS:
-        status = emberSendMulticastWithAlias(apsFrame,
-                                             apsFrame->radius, //radius
-                                             apsFrame->radius, //nonmember radius
-                                             payload,
-                                             alias,
-                                             sequence);
-        break;
-      case EMBER_OUTGOING_BROADCAST:
-        status = emberSendBroadcast(indexOrDestination,
-                                    apsFrame,
-                                    ZA_MAX_HOPS, // radius
-                                    payload);
-        break;
-      case EMBER_OUTGOING_BROADCAST_WITH_ALIAS:
-        status = emberProxyBroadcast(alias,
-                                     indexOrDestination,
-                                     sequence,
-                                     apsFrame,
-                                     apsFrame->radius, // radius
-                                     payload);
-        break;
-      default:
-        status = EMBER_BAD_ARGUMENT;
-        break;
-    }
-
-    emberReleaseMessageBuffer(payload);
-
-    return status;
-  }
+  return sli_legacy_buffer_manager_buffer_bytes_remaining() / PACKET_BUFFER_SIZE;
 }
 
-uint8_t emAfGetPacketBufferFreeCount(void)
+uint8_t sli_zigbee_af_get_packet_buffer_total_count(void)
 {
-  return emBufferBytesRemaining() / PACKET_BUFFER_SIZE;
-}
-
-uint8_t emAfGetPacketBufferTotalCount(void)
-{
-  return emBufferBytesTotal() / PACKET_BUFFER_SIZE;
+  return sli_legacy_buffer_manager_buffer_bytes_total() / PACKET_BUFFER_SIZE;
 }
 
 uint8_t emberAfGetOpenNetworkDurationSec(void)
@@ -567,31 +468,17 @@ uint8_t emberAfGetOpenNetworkDurationSec(void)
   return sli_zigbee_get_permit_joining_remaining_duration_sec();
 }
 
-void emAfCliVersionCommand(void)
+void sli_zigbee_af_cli_version_command(void)
 {
-  emAfParseAndPrintVersion(emberVersion);
+  sli_zigbee_af_parse_and_print_version(emberVersion);
 }
 
-void emAfPrintEzspEndpointFlags(uint8_t endpoint)
+void sli_zigbee_af_print_ezsp_endpoint_flags(uint8_t endpoint)
 {
   // Not applicable for SOC
 }
 
-//------------------------------------------------------------------------------
-// Static functions
-
-#define INVALID_MESSAGE_TAG 0x0000
-static uint16_t calculateMessageTagHash(uint8_t *messageContents,
-                                        uint8_t messageLength)
+uint8_t emberGetEndpointCount(void)
 {
-  uint8_t temp[EMBER_ENCRYPTION_KEY_SIZE];
-  uint16_t hashReturn = 0;
-  emberAesHashSimple(messageLength, messageContents, temp);
-  for (uint8_t i = 0; i < EMBER_ENCRYPTION_KEY_SIZE; i += 2) {
-    hashReturn ^= *((uint16_t *)(temp + i));
-  }
-  if (hashReturn == INVALID_MESSAGE_TAG) {
-    hashReturn = 1;
-  }
-  return hashReturn;
+  return emberAfEndpointCount();
 }

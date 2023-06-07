@@ -31,6 +31,11 @@
 #ifndef SL_BT_IN_PLACE_OTA_DFU_H
 #define SL_BT_IN_PLACE_OTA_DFU_H
 
+/***********************************************************************************************//**
+ * @addtogroup in_place_ota_dfu
+ * @{
+ **************************************************************************************************/
+
 #include "sl_bt_api.h"
 #include "sl_bt_in_place_ota_dfu_config.h"
 
@@ -58,4 +63,5 @@ void sl_bt_in_place_ota_dfu_on_event(sl_bt_msg_t *evt);
 sl_bt_in_place_ota_dfu_security_sts_t sl_bt_in_place_ota_dfu_security_status(bd_addr address,
                                                                              uint8_t connection,
                                                                              uint8_t bonding);
+/** @} (end addtogroup in_place_ota_dfu) */
 #endif // SL_BT_IN_PLACE_OTA_DFU_H

@@ -105,7 +105,7 @@ static void encryptNonce(const uint8_t nonce[SECURITY_BLOCK_SIZE],
 //  simPrint("nonce: %02X %02X %02X]\n", flags, HIGH_BYTE(variableField),
 //           LOW_BYTE(variableField));
 
-  emStandAloneEncryptBlock(block);
+  sli_util_stand_alone_encrypt_block(block);
 }
 
 //----------------------------------------------------------------
@@ -143,7 +143,7 @@ static uint8_t xorBytesIntoBlock(uint8_t *block,
     i += copied;
 
     if (blockIndex == SECURITY_BLOCK_SIZE) {
-      emStandAloneEncryptBlock(block);
+      sli_util_stand_alone_encrypt_block(block);
       blockIndex = 0;
     }
   }
@@ -194,7 +194,7 @@ static void calculateMic(const uint8_t *authenticate,
     // Finish off authentication if not on a block boundary.
     if (0 < blockIndex) {
 //      simPrint("finish %d", blockIndex);
-      emStandAloneEncryptBlock(encryptionBlock);
+      sli_util_stand_alone_encrypt_block(encryptionBlock);
       blockIndex = 0;
     }
   }
@@ -239,13 +239,13 @@ static void encryptBytes(uint8_t* bytes,
 //----------------------------------------------------------------
 // The core encryption function.
 
-void emCcmEncrypt(const uint8_t *nonce,
-                  uint8_t *authenticate,
-                  uint16_t authenticateLength,
-                  uint8_t *encrypt,
-                  uint16_t encryptLength,
-                  uint8_t *mic,
-                  uint8_t packetMicLength)
+void sli_zigbee_ccm_encrypt(const uint8_t *nonce,
+                            uint8_t *authenticate,
+                            uint16_t authenticateLength,
+                            uint8_t *encrypt,
+                            uint16_t encryptLength,
+                            uint8_t *mic,
+                            uint8_t packetMicLength)
 {
   if (0 < packetMicLength) {
     calculateMic(authenticate,
@@ -263,19 +263,19 @@ void emCcmEncrypt(const uint8_t *nonce,
   }
 }
 
-void emCcmEncryptPacket(const uint8_t *nonce,
-                        uint8_t *packet,
-                        uint16_t authenticateLength,
-                        uint16_t encryptLength,
-                        uint8_t packetMicLength)
+void sli_zigbee_ccm_encrypt_packet(const uint8_t *nonce,
+                                   uint8_t *packet,
+                                   uint16_t authenticateLength,
+                                   uint16_t encryptLength,
+                                   uint8_t packetMicLength)
 {
-  emCcmEncrypt(nonce,
-               packet,
-               authenticateLength,
-               packet + authenticateLength,
-               encryptLength,
-               packet + authenticateLength + encryptLength,
-               packetMicLength);
+  sli_zigbee_ccm_encrypt(nonce,
+                         packet,
+                         authenticateLength,
+                         packet + authenticateLength,
+                         encryptLength,
+                         packet + authenticateLength + encryptLength,
+                         packetMicLength);
 }
 
 //----------------------------------------------------------------
@@ -283,12 +283,12 @@ void emCcmEncryptPacket(const uint8_t *nonce,
 
 // packetLength does not include the MIC.
 
-bool emCcmDecryptPacket(const uint8_t *nonce,
-                        uint8_t *packet,
-                        uint16_t authenticateLength,
-                        uint8_t *encrypt,
-                        uint16_t encryptLength,
-                        uint8_t packetMicLength)
+bool sli_zigbee_ccm_decrypt_packet(const uint8_t *nonce,
+                                   uint8_t *packet,
+                                   uint16_t authenticateLength,
+                                   uint8_t *encrypt,
+                                   uint16_t encryptLength,
+                                   uint8_t packetMicLength)
 {
   encryptPayload(encrypt, encryptLength, nonce);
 

@@ -48,8 +48,8 @@
 #error "The task register API currently only supports a maximum of 255 registers"
 #endif
 // Check if the user has overwritten the configNUM_THREAD_LOCAL_STORAGE_POINTERS config
-#if configNUM_THREAD_LOCAL_STORAGE_POINTERS < (configNUM_USER_THREAD_LOCAL_STORAGE_POINTERS + \
-                                               configNUM_SDK_THREAD_LOCAL_STORAGE_POINTERS)
+#if configNUM_THREAD_LOCAL_STORAGE_POINTERS < (configNUM_USER_THREAD_LOCAL_STORAGE_POINTERS \
+                                               + configNUM_SDK_THREAD_LOCAL_STORAGE_POINTERS)
 #error "Please use the configUSER_NUM_THREAD_LOCAL_STORAGE_POINTERS to configure the local storage pointers"
 #endif
 #elif defined(SL_CATALOG_MICRIUMOS_KERNEL_PRESENT)

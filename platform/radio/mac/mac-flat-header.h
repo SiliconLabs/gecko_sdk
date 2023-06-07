@@ -18,7 +18,7 @@
 
 #ifndef MAC_FLAT_HEADER_H
 #define MAC_FLAT_HEADER_H
-
+#include "mac-header.h"
 // -----------------------------------------------------------------------------
 // Internal APIs
 

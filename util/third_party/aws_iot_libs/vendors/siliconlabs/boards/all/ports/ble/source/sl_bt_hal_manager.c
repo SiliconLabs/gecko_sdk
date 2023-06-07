@@ -51,6 +51,22 @@ static const BTCallbacks_t * pxBtManagerCallbacks = NULL;
 #define SM_CONFIGURE_FLAG_ALLOW_CONNECTIONS_ONLY_FROM_BONDED_DEVICES ((uint8_t) 0x10)
 
 /**
+ * @brief Default Scan interval, as documented in @ref
+ * sl_bt_scanner_set_parameters().
+ */
+#ifndef SL_BT_DEFAULT_SCAN_INTERVAL
+#define SL_BT_DEFAULT_SCAN_INTERVAL ((uint16_t) 16)
+#endif
+
+/**
+ * @brief Default Scan window, as documented in @ref
+ * sl_bt_scanner_set_parameters().
+ */
+#ifndef SL_BT_DEFAULT_SCAN_WINDOW
+#define SL_BT_DEFAULT_SCAN_WINDOW ((uint16_t) 16)
+#endif
+
+/**
  * @brief Default max MTU of the SL Bluetooth stack, as documented in @ref
  * sl_bt_gatt_set_max_mtu().
  */
@@ -254,7 +270,7 @@ static BTStatus_t prvInitBluetoothState( void )
                                     xSlBtHalManager.usMaxMtu, sl_status );
     return prvSlStatusToBTStatus( sl_status );
   }
-  SILABS_BLE_LOG_PRINT_DEBUG( "  set usMaxMtu=%"PRIu16, xSlBtHalManager.usMaxMtu);
+  SILABS_BLE_LOG_PRINT_DEBUG( "  set usMaxMtu=%"PRIu16, xSlBtHalManager.usMaxMtu );
 
   /* Set default bondable mode */
   xSlBtHalManager.ucBondable = SL_BT_DEFAULT_BONDABLE;
@@ -323,6 +339,18 @@ static BTStatus_t prvInitBluetoothState( void )
     return prvSlStatusToBTStatus( sl_status );
   }
   SILABS_BLE_LOG_PRINT_DEBUG( "  set TX power min=%"PRId16", max=%"PRId16, sSetMinPower, sSetMaxPower );
+
+  /* Set default scanner parameters */
+  sl_status = sl_bt_scanner_set_parameters( sl_bt_scanner_scan_mode_active,
+                                            SL_BT_DEFAULT_SCAN_INTERVAL,
+                                            SL_BT_DEFAULT_SCAN_WINDOW );
+  if( sl_status != SL_STATUS_OK )
+  {
+    SILABS_BLE_LOG_FUNC_EXIT_ERROR(
+      "sl_bt_scanner_set_parameters(interval=%"PRIu16", window=%"PRIu16") failed, sl_status=0x%"PRIx32,
+      SL_BT_DEFAULT_SCAN_INTERVAL, SL_BT_DEFAULT_SCAN_WINDOW, sl_status );
+    return prvSlStatusToBTStatus( sl_status );
+  }
 
   SILABS_BLE_LOG_FUNC_EXIT_DEBUG( "status=%d", eBTStatusSuccess );
   return eBTStatusSuccess;

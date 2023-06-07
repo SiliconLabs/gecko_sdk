@@ -16,9 +16,8 @@ config_file:
   - path: protocol/z-wave/platform/SiliconLabs/PAL/config/cc_binary_switch/cc_binary_switch_config.h
     file_id: cc_binary_switch_config
 source:
-  - path: protocol/z-wave/ZAF/CommandClasses/BinarySwitch/CC_BinarySwitch.c
+  - path: protocol/z-wave/ZAF/CommandClasses/BinarySwitch/src/CC_BinarySwitch.c
 include:
-  - path: protocol/z-wave/ZAF/CommandClasses/BinarySwitch
+  - path: protocol/z-wave/ZAF/CommandClasses/BinarySwitch/inc/
     file_list:
       - path: CC_BinarySwitch.h
-      - path: cc_binary_switch_config_api.h

@@ -616,10 +616,6 @@ class CALC_Frame(ICalculator):
         # Calculate length location as normal
         model.vars.var_length_loc.value = model.vars.header_size_internal.value - model.vars.var_length_numbytes.value
 
-        # Error if advanced input specifies byte location too large for header
-        if (model.vars.var_length_loc.value > (model.vars.header_size_internal.value - model.vars.var_length_numbytes.value) ) :
-            raise CalculationException("Cannot set variable length byte location {} beyond header of only {} bytes!".format(model.vars.var_length_loc.value,model.vars.header_size_internal.value))
-
         # We should never have the var_length_numbytes larger than the total header size.  If it is, var_length_loc
         # will go negative.  If it does, fix it.
         if model.vars.var_length_loc.value < 0:

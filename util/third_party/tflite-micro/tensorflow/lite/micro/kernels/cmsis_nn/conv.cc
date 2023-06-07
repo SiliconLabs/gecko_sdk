@@ -15,8 +15,8 @@ limitations under the License.
 
 #include "tensorflow/lite/micro/kernels/conv.h"
 
-#include "CMSIS/NN/Include/arm_nn_types.h"
-#include "CMSIS/NN/Include/arm_nnfunctions.h"
+#include "Include/arm_nn_types.h"
+#include "Include/arm_nnfunctions.h"
 #include "tensorflow/lite/c/builtin_op_data.h"
 #include "tensorflow/lite/c/common.h"
 #include "tensorflow/lite/kernels/internal/common.h"
@@ -27,6 +27,7 @@ limitations under the License.
 #include "tensorflow/lite/kernels/kernel_util.h"
 #include "tensorflow/lite/kernels/padding.h"
 #include "tensorflow/lite/micro/kernels/kernel_util.h"
+#include "tensorflow/lite/micro/micro_log.h"
 
 namespace tflite {
 namespace {
@@ -37,11 +38,6 @@ struct OpData {
   // Index to buffer for optimizations if applicable.
   int buffer_idx;
 };
-
-// TODO(b/169801227): This global struct is needed for the linker to drop unused
-// code (for example, by using Register_CONV_2D_INT8 instead of
-// Register_CONV_2D).
-TfLiteRegistration conv_registration;
 
 void* Init(TfLiteContext* context, const char* buffer, size_t length) {
   TFLITE_DCHECK(context->AllocatePersistentBuffer != nullptr);
@@ -93,6 +89,15 @@ TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node) {
   output_dims.w = output->dims->data[2];
   output_dims.c = output_shape.Dims(3);
 
+  if (filter->type == kTfLiteInt4) {
+    int filter_size =
+        RuntimeShape(filter->dims->size,
+                     reinterpret_cast<const int32_t*>(filter->dims->data))
+            .FlatSize();
+    context->RequestScratchBufferInArena(
+        context, filter_size, &data->reference_op_data.filter_buffer_index);
+  }
+
   if (input->type == kTfLiteInt8 || input->type == kTfLiteInt16) {
     const int num_channels = filter->dims->data[kConvQuantizedDimension];
     data->reference_op_data.per_channel_output_multiplier =
@@ -126,6 +131,8 @@ TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node) {
       buf_size = arm_convolve_wrapper_s8_get_buffer_size(
           &conv_params, &input_dims, &filter_dims, &output_dims);
     } else if (input->type == kTfLiteInt16) {
+      TF_LITE_ENSURE_EQ(context, input->params.zero_point, 0);
+      TF_LITE_ENSURE_EQ(context, output->params.zero_point, 0);
       buf_size = arm_convolve_wrapper_s16_get_buffer_size(
           &conv_params, &input_dims, &filter_dims, &output_dims);
     }
@@ -186,7 +193,7 @@ TfLiteStatus EvalQuantizedPerChannel(TfLiteContext* context, TfLiteNode* node,
   const int batch_size = MatchingDim(input_shape, 0, output_shape, 0);
   const int input_depth = MatchingDim(input_shape, 3, filter_shape, 3);
   const int output_depth = MatchingDim(filter_shape, 0, output_shape, 3);
-  if (tflite::micro::GetTensorData<int8_t>(bias)) {
+  if (tflite::micro::GetOptionalTensorData<int8_t>(bias)) {
     TFLITE_DCHECK_EQ(bias_shape.FlatSize(), output_depth);
   }
 
@@ -238,9 +245,9 @@ TfLiteStatus EvalQuantizedPerChannel(TfLiteContext* context, TfLiteNode* node,
           &ctx, &conv_params, &quant_params, &input_dims,
           tflite::micro::GetTensorData<int8_t>(input), &filter_dims,
           tflite::micro::GetTensorData<int8_t>(filter), &bias_dims,
-          tflite::micro::GetTensorData<int32_t>(bias), &output_dims,
+          tflite::micro::GetOptionalTensorData<int32_t>(bias), &output_dims,
           tflite::micro::GetTensorData<int8_t>(output)),
-      ARM_MATH_SUCCESS);
+      ARM_CMSIS_NN_SUCCESS);
 
   return kTfLiteOk;
 }
@@ -284,7 +291,7 @@ TfLiteStatus EvalQuantizedPerChannel16x8(
   const int batch_size = MatchingDim(input_shape, 0, output_shape, 0);
   const int input_depth = MatchingDim(input_shape, 3, filter_shape, 3);
   const int output_depth = MatchingDim(filter_shape, 0, output_shape, 3);
-  if (tflite::micro::GetTensorData<int8_t>(bias)) {
+  if (tflite::micro::GetOptionalTensorData<int8_t>(bias)) {
     TFLITE_DCHECK_EQ(bias_shape.FlatSize(), output_depth);
   }
 
@@ -334,9 +341,9 @@ TfLiteStatus EvalQuantizedPerChannel16x8(
           &ctx, &conv_params, &quant_params, &input_dims,
           tflite::micro::GetTensorData<int16_t>(input), &filter_dims,
           tflite::micro::GetTensorData<int8_t>(filter), &bias_dims,
-          tflite::micro::GetTensorData<int64_t>(bias), &output_dims,
+          tflite::micro::GetOptionalTensorData<int64_t>(bias), &output_dims,
           tflite::micro::GetTensorData<int16_t>(output)),
-      ARM_MATH_SUCCESS);
+      ARM_CMSIS_NN_SUCCESS);
 
   return kTfLiteOk;
 }
@@ -407,7 +414,8 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
   TF_LITE_ENSURE_MSG(
       context,
       input->type == filter->type ||
-          (input->type == kTfLiteInt16 && filter->type == kTfLiteInt8),
+          (input->type == kTfLiteInt16 && filter->type == kTfLiteInt8) ||
+          (input->type == kTfLiteInt8 && filter->type == kTfLiteInt4),
       "Hybrid models are not supported on TFLite Micro.");
 
   switch (input->type) {  // Already know in/out types are same.
@@ -419,23 +427,52 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
           tflite::micro::GetTensorShape(filter),
           tflite::micro::GetTensorData<float>(filter),
           tflite::micro::GetTensorShape(bias),
-          tflite::micro::GetTensorData<float>(bias),
+          tflite::micro::GetOptionalTensorData<float>(bias),
           tflite::micro::GetTensorShape(output),
           tflite::micro::GetTensorData<float>(output),
           tflite::micro::GetTensorShape(nullptr), nullptr);
       break;
     }
     case kTfLiteInt8:
-      return EvalQuantizedPerChannel(context, node, params, data, input, filter,
-                                     bias, output);
+      switch (filter->type) {
+        case kTfLiteInt8: {
+          return EvalQuantizedPerChannel(context, node, params, data, input,
+                                         filter, bias, output);
+        }
+
+        case kTfLiteInt4: {
+          int8_t* unpacked_filter_data =
+              static_cast<int8_t*>(context->GetScratchBuffer(
+                  context, data.reference_op_data.filter_buffer_index));
+          reference_integer_ops::ConvPerChannelWithPackedInt4Weights(
+              ConvParamsQuantized(params, data.reference_op_data),
+              data.reference_op_data.per_channel_output_multiplier,
+              data.reference_op_data.per_channel_output_shift,
+              tflite::micro::GetTensorShape(input),
+              tflite::micro::GetTensorData<int8_t>(input),
+              tflite::micro::GetTensorShape(filter),
+              tflite::micro::GetTensorData<int8_t>(filter),
+              unpacked_filter_data, tflite::micro::GetTensorShape(bias),
+              tflite::micro::GetOptionalTensorData<int32_t>(bias),
+              tflite::micro::GetTensorShape(output),
+              tflite::micro::GetTensorData<int8_t>(output));
+          return kTfLiteOk;
+        }
+        default: {
+          MicroPrintf("Filter type %s (%d) not supported.",
+                      TfLiteTypeGetName(filter->type), filter->type);
+          return kTfLiteError;
+        }
+      }
+
       break;
     case kTfLiteInt16:
       return EvalQuantizedPerChannel16x8(context, node, params, data, input,
                                          filter, bias, output);
       break;
     default:
-      TF_LITE_KERNEL_LOG(context, "Type %s (%d) not supported.",
-                         TfLiteTypeGetName(input->type), input->type);
+      MicroPrintf("Type %s (%d) not supported.", TfLiteTypeGetName(input->type),
+                  input->type);
       return kTfLiteError;
   }
   return kTfLiteOk;
@@ -444,39 +481,15 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
 }  // namespace
 
 TfLiteRegistration Register_CONV_2D() {
-  conv_registration.init = Init;
-  conv_registration.free = nullptr;
-  conv_registration.prepare = Prepare;
-  conv_registration.invoke = Eval;
-  conv_registration.profiling_string = nullptr;
-  conv_registration.builtin_code = 0;
-  conv_registration.custom_name = nullptr;
-  conv_registration.version = 0;
-  return conv_registration;
+  return tflite::micro::RegisterOp(Init, Prepare, Eval);
 }
 
 TfLiteRegistration Register_CONV_2D_INT8() {
-  conv_registration.init = Init;
-  conv_registration.free = nullptr;
-  conv_registration.prepare = Prepare;
-  conv_registration.invoke = EvalInt8;
-  conv_registration.profiling_string = nullptr;
-  conv_registration.builtin_code = 0;
-  conv_registration.custom_name = nullptr;
-  conv_registration.version = 0;
-  return conv_registration;
+  return tflite::micro::RegisterOp(Init, Prepare, EvalInt8);
 }
 
 TfLiteRegistration Register_CONV_2D_INT16() {
-  conv_registration.init = Init;
-  conv_registration.free = nullptr;
-  conv_registration.prepare = Prepare;
-  conv_registration.invoke = EvalInt16x8;
-  conv_registration.profiling_string = nullptr;
-  conv_registration.builtin_code = 0;
-  conv_registration.custom_name = nullptr;
-  conv_registration.version = 0;
-  return conv_registration;
+  return tflite::micro::RegisterOp(Init, Prepare, EvalInt16x8);
 }
 
 }  // namespace tflite

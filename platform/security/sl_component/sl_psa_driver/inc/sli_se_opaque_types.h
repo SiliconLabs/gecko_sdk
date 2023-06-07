@@ -27,24 +27,24 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
+
 #ifndef SLI_SE_OPAQUE_TYPES_H
 #define SLI_SE_OPAQUE_TYPES_H
 
-#include "em_device.h"
+#include "sli_psa_driver_features.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
 
 #include "sl_se_manager_defines.h"
 #include "sl_se_manager_types.h"
+
 #include "sl_psa_values.h"
+
 #include "sli_se_driver_aead.h"
 #include "sli_se_driver_mac.h"
 #include "sli_se_driver_key_derivation.h"
 #include "sli_se_driver_cipher.h"
+
 // Replace inclusion of crypto_driver_common.h with the new psa driver interface
 // header file when it becomes available.
 #include "psa/crypto_driver_common.h"
@@ -60,24 +60,25 @@ extern "C" {
  * \{
  ******************************************************************************/
 
-/*******************************************************************************
- * Defines *
- ******************************************************************************/
+// -----------------------------------------------------------------------------
+// Defines
 
 /// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
 
 /// Location value for keys to be stored encrypted with the device-unique secret,
-/// or for accessing the built-in keys on Vault devices.
-#define PSA_KEY_LOCATION_SLI_SE_OPAQUE  PSA_KEY_LOCATION_SL_SE_OPAQUE
+/// or for accessing the built-in keys on Vault devices. Kept for backward
+/// compatibility reasons. Users should use SL_PSA_KEY_LOCATION_WRAPPED or
+/// SL_PSA_KEY_LOCATION_BUILTIN instead.
+#define PSA_KEY_LOCATION_SLI_SE_OPAQUE  ((psa_key_location_t)0x000001UL)
 
 /// Version of opaque header struct
 #define SLI_SE_OPAQUE_KEY_CONTEXT_VERSION (0x01)
 
-/*******************************************************************************
- * Structs *
- ******************************************************************************/
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) \
-  || defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS)
+// -----------------------------------------------------------------------------
+// Types
+
+#if defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
+
 /// Key header for context struct of opaque registered keys
 typedef struct {
   /// Version field for the struct
@@ -150,12 +151,9 @@ typedef struct {
   sli_se_driver_cipher_operation_t operation;
 } sli_se_opaque_cipher_operation_t;
 
-#endif // _SILICON_LABS_SECURITY_FEATURE_VAULT || MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS
-#endif // SEMALBOX_PRESENT
+#endif // SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS
 
-#ifdef __cplusplus
-}
-#endif
+#endif // SLI_MBEDTLS_DEVICE_HSE
 
 /// @endcond
 /** \} (end addtogroup sl_psa_drivers_se) */

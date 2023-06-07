@@ -1,13 +1,13 @@
 from pycalcmodel.core.output import ModelOutput, ModelOutputType
 from pyradioconfig.parts.common.profiles.ocelot_regs import build_modem_regs_ocelot
 
-def build_modem_regs_bobcat(model, profile, family):
-    build_modem_regs_ocelot(model, profile, family)
+def build_modem_regs_bobcat(model, profile):
+    build_modem_regs_ocelot(model, profile)
     build_modem_regs_bobcat_only(model, profile)
     build_rac_clkmult_regs(model, profile)
 
 def build_modem_regs_bobcat_only(model, profile):
-    if model.part_family.lower() in ["bobcat"]:
+    if model.part_family.lower() in ["bobcat", "caracal"]:
         profile.outputs.append(ModelOutput(model.vars.MODEM_ADQUAL8_ADBAAGCTHR, '', ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.ADQUAL8.ADBAAGCTHR'))
         profile.outputs.append(ModelOutput(model.vars.MODEM_ADQUAL8_ADBAMODE, '', ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.ADQUAL8.ADBAMODE'))
         profile.outputs.append(ModelOutput(model.vars.MODEM_ADQUAL8_ADBACORRTHR2, '', ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.ADQUAL8.ADBACORRTHR2'))
@@ -74,8 +74,8 @@ def build_modem_regs_bobcat_only(model, profile):
         profile.outputs.append(ModelOutput(model.vars.MODEM_ADPC10_ADBBSSCHANGEEN, '', ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.ADPC10.ADBBSSCHANGEEN'))
         profile.outputs.append(ModelOutput(model.vars.MODEM_ADPC10_ADBBSSCHGUPTHR, '', ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.ADPC10.ADBBSSCHGUPTHR'))
         profile.outputs.append(ModelOutput(model.vars.MODEM_ADPC10_ADBBSSCHGDNTHR, '', ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.ADPC10.ADBBSSCHGDNTHR'))
-        profile.outputs.append(ModelOutput(model.vars.MODEM_CHFCTRL_CHFSWSEL, '', ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.CHFCTRL.CHFSWSEL'))        
 
+    profile.outputs.append(ModelOutput(model.vars.MODEM_CHFCTRL_CHFSWSEL, '', ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.CHFCTRL.CHFSWSEL'))
     profile.outputs.append(ModelOutput(model.vars.MODEM_COCURRMODE_CONCURRENT, '', ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.COCURRMODE.CONCURRENT' ))
     profile.outputs.append(ModelOutput(model.vars.MODEM_LONGRANGE_LRBLE, '', ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.LONGRANGE.LRBLE' ))
     profile.outputs.append(ModelOutput(model.vars.MODEM_LONGRANGE_LRBLEDSA, '', ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.LONGRANGE.LRBLEDSA' ))
@@ -110,8 +110,8 @@ def build_modem_regs_bobcat_only(model, profile):
     profile.outputs.append(ModelOutput(model.vars.AGC_PNRFATT7_LNAMIXRFATT23, '', ModelOutputType.SVD_REG_FIELD, readable_name='AGC.PNRFATT7.LNAMIXRFATT23'))
     profile.outputs.append(ModelOutput(model.vars.AGC_PNRFATT7_LNAMIXRFATT24, '', ModelOutputType.SVD_REG_FIELD, readable_name='AGC.PNRFATT7.LNAMIXRFATT24'))
 
-    profile.outputs.append(ModelOutput(model.vars.RAC_SYLOEN_SYLODIVRLOADCCLKSEL, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.SYLOEN.SYLODIVRLOADCCLKSEL'))
-
+    if model.part_family.lower() not in ["rainier"]:
+        profile.outputs.append(ModelOutput(model.vars.RAC_SYLOEN_SYLODIVRLOADCCLKSEL, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.SYLOEN.SYLODIVRLOADCCLKSEL'))
 
 def build_rac_clkmult_regs(model, profile):
     # commented out registers are defined in lynx_regs.py (Lynx calculator didn't output all registers as clkmult was not used for IFADC clocking in prod PHYs)
@@ -125,9 +125,18 @@ def build_rac_clkmult_regs(model, profile):
     profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN0_CLKMULTENDRVADC, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN0.CLKMULTENDRVADC'))
     # profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN0_CLKMULTENDRVN, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN0.CLKMULTENDRVN'))
     # profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN0_CLKMULTENDRVP, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN0.CLKMULTENDRVP'))
-    profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN0_CLKMULTENDRVRX2P4G, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN0.CLKMULTENDRVRX2P4G'))
-    profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN0_CLKMULTENDRVRXSUBG, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN0.CLKMULTENDRVRXSUBG'))
-    profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN0_CLKMULTENDRVTXDUALB, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN0.CLKMULTENDRVTXDUALB'))
+
+    if model.part_family.lower() not in ["rainier"]:
+        profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN0_CLKMULTENDRVRX2P4G, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN0.CLKMULTENDRVRX2P4G'))
+        profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN0_CLKMULTENDRVRXSUBG, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN0.CLKMULTENDRVRXSUBG'))
+        profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN0_CLKMULTENDRVTXDUALB, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN0.CLKMULTENDRVTXDUALB'))
+        profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN0_CLKMULTREG2ADJI, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN0.CLKMULTREG2ADJI'))
+        profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN0_CLKMULTREG1ADJV, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN0.CLKMULTREG1ADJV'))
+        profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN0_CLKMULTREG2ADJV, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN0.CLKMULTREG2ADJV'))
+        profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTCTRL_CLKMULTDIVN, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTCTRL.CLKMULTDIVN'))
+        profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTCTRL_CLKMULTDIVR, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTCTRL.CLKMULTDIVR'))
+        profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTCTRL_CLKMULTDIVX, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTCTRL.CLKMULTDIVX'))
+
     profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN0_CLKMULTENFBDIV, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN0.CLKMULTENFBDIV'))
     profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN0_CLKMULTENREFDIV, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN0.CLKMULTENREFDIV'))
     profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN0_CLKMULTENREG1, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN0.CLKMULTENREG1'))
@@ -136,9 +145,6 @@ def build_rac_clkmult_regs(model, profile):
     profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN0_CLKMULTENROTDET, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN0.CLKMULTENROTDET'))
     # profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN0_CLKMULTENBYPASS40MHZ, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN0.CLKMULTENBYPASS40MHZ'))
     profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN0_CLKMULTFREQCAL, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN0.CLKMULTFREQCAL'))
-    profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN0_CLKMULTREG2ADJI, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN0.CLKMULTREG2ADJI'))
-    profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN0_CLKMULTREG1ADJV, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN0.CLKMULTREG1ADJV'))
-    profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN0_CLKMULTREG2ADJV, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN0.CLKMULTREG2ADJV'))
     # profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN0_CLKMULTREG3ADJV, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN0.CLKMULTREG3ADJV'))
     profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN1_CLKMULTINNIBBLE, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN1.CLKMULTINNIBBLE'))
     profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN1_CLKMULTLDFNIB, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN1.CLKMULTLDFNIB'))
@@ -146,9 +152,6 @@ def build_rac_clkmult_regs(model, profile):
     profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN1_CLKMULTRDNIBBLE, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN1.CLKMULTRDNIBBLE'))
     profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN1_CLKMULTLDCNIB, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN1.CLKMULTLDCNIB'))
     # profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN1_CLKMULTDRVAMPSEL, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN1.CLKMULTDRVAMPSEL'))
-    profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTCTRL_CLKMULTDIVN, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTCTRL.CLKMULTDIVN'))
-    profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTCTRL_CLKMULTDIVR, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTCTRL.CLKMULTDIVR'))
-    profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTCTRL_CLKMULTDIVX, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTCTRL.CLKMULTDIVX'))
     profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTCTRL_CLKMULTENRESYNC, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTCTRL.CLKMULTENRESYNC'))
     profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTCTRL_CLKMULTVALID, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTCTRL.CLKMULTVALID'))
 

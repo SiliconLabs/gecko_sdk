@@ -18,26 +18,8 @@
 #include "app/framework/include/af.h"
 #include "scenes.h"
 
-#ifdef UC_BUILD
 void sli_plugin_scenes_server_clear(sl_cli_command_arg_t *arguments)
 {
   emberAfCorePrintln("Clearing all scenes.");
   emberAfScenesClusterClearSceneTableCallback(EMBER_BROADCAST_ENDPOINT);
 }
-#else //UC_BUILD
-void emAfPluginScenesServerClear(void);
-
-#if !defined(EMBER_AF_GENERATE_CLI)
-EmberCommandEntry emberAfPluginScenesCommands[] = {
-  emberCommandEntryAction("print", emAfPluginScenesServerPrintInfo, "", "Print the scenes table."),
-  emberCommandEntryAction("clear", emAfPluginScenesServerClear, "", "Clear the scenes table on every endpoint."),
-  emberCommandEntryTerminator(),
-};
-#endif // EMBER_AF_GENERATE_CLI
-
-void emAfPluginScenesServerClear(void)
-{
-  emberAfCorePrintln("Clearing all scenes.");
-  emberAfScenesClusterClearSceneTableCallback(EMBER_BROADCAST_ENDPOINT);
-}
-#endif

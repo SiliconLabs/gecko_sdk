@@ -30,9 +30,9 @@
 #ifndef SL_SE_MANAGER_KEY_DERIVATION_H
 #define SL_SE_MANAGER_KEY_DERIVATION_H
 
-#include "em_device.h"
+#include "sli_se_manager_features.h"
 
-#if defined(SEMAILBOX_PRESENT) || defined(DOXYGEN)
+#if defined(SLI_MAILBOX_COMMAND_SUPPORTED)
 
 /// @addtogroup sl_se_manager
 /// @{
@@ -338,7 +338,7 @@ sl_status_t sl_se_ecjpake_write_round_two(sl_se_ecjpake_context_t *ctx,
 // -------------------------------
 // Key derivation functions
 
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || defined(DOXYGEN)
+#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
 /***************************************************************************//**
  * @brief
  *   Derive a pseudorandom key from the input key material using HKDF.
@@ -431,6 +431,6 @@ sl_status_t sl_se_derive_key_pbkdf2(sl_se_command_context_t *cmd_ctx,
 /// @} (end addtogroup sl_se_manager_key_derivation)
 /// @} (end addtogroup sl_se_manager)
 
-#endif // defined(SEMAILBOX_PRESENT)
+#endif // defined(SLI_MAILBOX_COMMAND_SUPPORTED)
 
 #endif // SL_SE_MANAGER_KEY_DERIVATION_H

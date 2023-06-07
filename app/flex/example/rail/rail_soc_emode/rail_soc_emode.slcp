@@ -44,6 +44,8 @@ component:
 #----------------- Require list ----------------------
 requires:
   - name: a_radio_config
+  - name: sl_flex_rail_config
+  - name: sl_flex_rail_channel_selector
   - name: sl_simple_rail_os
     condition:
       - "kernel"
@@ -198,9 +200,6 @@ configuration:
     value: "(1)"
   - name: SL_IOSTREAM_EUSART_VCOM_FLOW_CONTROL_TYPE
     value: "eusartHwFlowControlNone"
-#------------- POWER Settings ----------------
-  - name: SL_POWER_MANAGER_LOWEST_EM_ALLOWED
-    value: "3"
 #------------- RFFPLL init ----------------
   - name: SL_DEVICE_INIT_RFFPLL_BAND
     value: "1"

@@ -41,7 +41,7 @@ static EmberNodeId discoverNode;
 
 // --------------------------------
 // Print commands
-void emAfDeviceTablePrintEUI64(uint8_t *eui64)
+void sli_zigbee_af_device_table_print_eui64(uint8_t *eui64)
 {
   uint8_t i;
   for (i = 8; i > 0; i--) {
@@ -256,7 +256,7 @@ void emberAfDeviceTablePrintDeviceTable(void)
        index++) {
     if (deviceTable[index].nodeId != EMBER_AF_PLUGIN_DEVICE_TABLE_NULL_NODE_ID) {
       emberAfCorePrint("%d %2x:  ", totalDevices, deviceTable[index].nodeId);
-      emAfDeviceTablePrintEUI64(deviceTable[index].eui64);
+      sli_zigbee_af_device_table_print_eui64(deviceTable[index].eui64);
       emberAfCorePrint(" %d ", deviceTable[index].endpoint);
       printDeviceId(deviceTable[index].deviceId);
       printState(deviceTable[index].state);
@@ -267,7 +267,7 @@ void emberAfDeviceTablePrintDeviceTable(void)
   emberAfCorePrintln("Total Devices %d", totalDevices);
 }
 
-void emAfDeviceTablePrintBuffer(uint8_t *buffer, uint16_t bufLen)
+void sli_zigbee_af_device_table_print_buffer(uint8_t *buffer, uint16_t bufLen)
 {
   int i;
   for (i = 0; i < bufLen; i++) {
@@ -290,15 +290,14 @@ void deviceTabeCliServiceDiscoveryCallback(const EmberAfServiceDiscoveryResult* 
     emberAfDeviceTableNewDeviceJoinHandler(discoverNode, eui64ptr);
   }
 }
-#ifdef UC_BUILD
 
-void emAfDeviceTableIndexRemoveCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_device_table_index_remove_command(sl_cli_command_arg_t *arguments)
 {
   uint16_t index = sl_cli_get_argument_uint8(arguments, 0);
-  emAfPluginDeviceTableDeleteEntry(index);
+  sli_zigbee_af_device_table_delete_entry(index);
 }
 
-void emAfDeviceTableRemoveCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_device_table_remove_command(sl_cli_command_arg_t *arguments)
 {
   EmberEUI64 eui64;
   uint16_t index;
@@ -307,12 +306,12 @@ void emAfDeviceTableRemoveCommand(sl_cli_command_arg_t *arguments)
   index = emberAfDeviceTableGetFirstIndexFromEui64(eui64);
 
   while (index != EMBER_AF_PLUGIN_DEVICE_TABLE_NULL_INDEX) {
-    emAfPluginDeviceTableDeleteEntry(index);
-    index = emAfDeviceTableFindNextEndpoint(index);
+    sli_zigbee_af_device_table_delete_entry(index);
+    index = sli_zigbee_af_device_table_find_next_endpoint(index);
   }
 }
 
-void emAfDeviceTableIndexRouteRepairCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_device_table_index_route_repair_command(sl_cli_command_arg_t *arguments)
 {
   uint16_t index = sl_cli_get_argument_uint8(arguments, 0);
   uint16_t nodeId = emberAfDeviceTableGetNodeIdFromIndex(index);
@@ -323,7 +322,7 @@ void emAfDeviceTableIndexRouteRepairCommand(sl_cli_command_arg_t *arguments)
   }
 }
 
-void emAfDeviceTableRouteRepairCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_device_table_route_repair_command(sl_cli_command_arg_t *arguments)
 {
   uint16_t nodeId;
   EmberEUI64 eui64;
@@ -337,20 +336,20 @@ void emAfDeviceTableRouteRepairCommand(sl_cli_command_arg_t *arguments)
   }
 }
 
-void emAfDeviceTableDiscoverPresentNodeCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_device_table_discover_present_node_command(sl_cli_command_arg_t *arguments)
 {
   discoverNode = (EmberNodeId)sl_cli_get_argument_uint16(arguments, 0);
   emberAfFindIeeeAddress(discoverNode,
                          deviceTabeCliServiceDiscoveryCallback);
 }
 
-void emAfDeviceTableIndexSendCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_device_table_index_send_command(sl_cli_command_arg_t *arguments)
 {
   uint16_t index = (uint16_t)sl_cli_get_argument_uint16(arguments, 0);
   emberAfDeviceTableCliIndexSend(index);
 }
 
-void emAfDeviceTableSendCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_device_table_send_command(sl_cli_command_arg_t *arguments)
 {
   uint8_t endpoint = sl_cli_get_argument_uint8(arguments, 1);
   EmberEUI64 eui64;
@@ -359,104 +358,18 @@ void emAfDeviceTableSendCommand(sl_cli_command_arg_t *arguments)
   emberAfDeviceTableSend(eui64, endpoint);
 }
 
-void emAfDeviceTableSaveCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_device_table_saveCommand(sl_cli_command_arg_t *arguments)
 {
-  emAfDeviceTableSave();
+  sli_zigbee_af_device_table_save();
 }
 
-void emAfDeviceTableLoadCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_device_table_loadCommand(sl_cli_command_arg_t *arguments)
 {
-  emAfDeviceTableLoad();
+  sli_zigbee_af_device_table_load();
 }
 
-void emAfPluginDeviceTableSendLeaveCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_device_table_send_leave_command(sl_cli_command_arg_t *arguments)
 {
   EmberEUI64 eui64;
   sl_zigbee_copy_eui64_arg(arguments, 0, eui64, true);
 }
-
-#else
-void emAfDeviceTableIndexRemoveCommand(void)
-{
-  uint16_t index = (uint8_t)emberUnsignedCommandArgument(0);
-  emAfPluginDeviceTableDeleteEntry(index);
-}
-
-void emAfDeviceTableRemoveCommand(void)
-{
-  EmberEUI64 eui64;
-  uint16_t index;
-
-  emberCopyBigEndianEui64Argument(0, eui64);
-  index = emberAfDeviceTableGetFirstIndexFromEui64(eui64);
-
-  while (index != EMBER_AF_PLUGIN_DEVICE_TABLE_NULL_INDEX) {
-    emAfPluginDeviceTableDeleteEntry(index);
-    index = emAfDeviceTableFindNextEndpoint(index);
-  }
-}
-
-void emAfDeviceTableIndexRouteRepairCommand(void)
-{
-  uint16_t index = (uint8_t)emberUnsignedCommandArgument(0);
-  uint16_t nodeId = emberAfDeviceTableGetNodeIdFromIndex(index);
-
-  if (nodeId != EMBER_AF_PLUGIN_DEVICE_TABLE_NULL_NODE_ID) {
-    emberAfCorePrintln("ROUTE REPAIR:  CLI");
-    emberAfPluginDeviceTableInitiateRouteRepair(nodeId);
-  }
-}
-
-void emAfDeviceTableRouteRepairCommand(void)
-{
-  uint16_t nodeId;
-  EmberEUI64 eui64;
-
-  emberCopyBigEndianEui64Argument(0, eui64);
-  nodeId = emberAfDeviceTableGetNodeIdFromEui64(eui64);
-
-  if (nodeId != EMBER_AF_PLUGIN_DEVICE_TABLE_NULL_NODE_ID) {
-    emberAfCorePrintln("ROUTE REPAIR:  CLI");
-    emberAfPluginDeviceTableInitiateRouteRepair(nodeId);
-  }
-}
-
-void emAfDeviceTableDiscoverPresentNodeCommand(void)
-{
-  discoverNode = (EmberNodeId)emberUnsignedCommandArgument(0);
-  emberAfFindIeeeAddress(discoverNode,
-                         deviceTabeCliServiceDiscoveryCallback);
-}
-
-void emAfDeviceTableIndexSendCommand(void)
-{
-  uint16_t index = (uint16_t)emberUnsignedCommandArgument(0);
-  emberAfDeviceTableCliIndexSend(index);
-}
-
-void emAfDeviceTableSendCommand(void)
-{
-  uint8_t endpoint = (uint8_t)emberUnsignedCommandArgument(1);
-  EmberEUI64 eui64;
-
-  emberCopyBigEndianEui64Argument(0, eui64);
-  emberAfDeviceTableSend(eui64, endpoint);
-}
-
-void emAfDeviceTableSaveCommand(void)
-{
-  emAfDeviceTableSave();
-}
-
-void emAfDeviceTableLoadCommand(void)
-{
-  emAfDeviceTableLoad();
-}
-
-void emAfPluginDeviceTableSendLeaveCommand(void)
-{
-  EmberEUI64 eui64;
-  emberCopyBigEndianEui64Argument(0, eui64);
-}
-
-#endif

@@ -26,7 +26,6 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 #
 
-
 if(OTBR_MDNS STREQUAL "avahi")
     add_library(otbr-mdns
         mdns.cpp
@@ -46,10 +45,6 @@ if(OTBR_MDNS STREQUAL "avahi")
 endif()
 
 if(OTBR_MDNS STREQUAL "mDNSResponder")
-    if(CMAKE_SYSTEM_NAME MATCHES Android)
-        include(mDNSResponder.cmake)
-    endif()
-
     add_library(otbr-mdns
         mdns.cpp
         mdns_mdnssd.cpp
@@ -62,6 +57,6 @@ if(OTBR_MDNS STREQUAL "mDNSResponder")
             otbr-common
         PRIVATE
             otbr-utils
-            $<IF:$<STREQUAL:${CMAKE_SYSTEM_NAME},Android>,mdnssd,dns_sd>
+            dns_sd
     )
 endif()

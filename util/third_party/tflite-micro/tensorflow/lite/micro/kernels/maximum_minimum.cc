@@ -23,6 +23,7 @@ limitations under the License.
 #include "tensorflow/lite/kernels/kernel_util.h"
 #include "tensorflow/lite/kernels/op_macros.h"
 #include "tensorflow/lite/micro/kernels/kernel_util.h"
+#include "tensorflow/lite/micro/micro_log.h"
 
 namespace tflite {
 namespace ops {
@@ -98,15 +99,13 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
         TFLiteOperation<int64_t, OpType>(context, node, op_context);
         break;
       default:
-        TF_LITE_KERNEL_LOG(context,
-                           "Type %s (%d) is not supported by Maximum/Minimum.",
-                           TfLiteTypeGetName(op_context.output->type),
-                           op_context.output->type);
+        MicroPrintf("Type %s (%d) is not supported by Maximum/Minimum.",
+                    TfLiteTypeGetName(op_context.output->type),
+                    op_context.output->type);
         return kTfLiteError;
     }
   } else {
-    TF_LITE_KERNEL_LOG(context,
-                       "Kernel type not supported by Maximum/Minimum.");
+    MicroPrintf("Kernel type not supported by Maximum/Minimum.");
     return kTfLiteError;
   }
   return kTfLiteOk;
@@ -115,29 +114,17 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
 }  // namespace maximum_minimum
 
 TfLiteRegistration Register_MAXIMUM() {
-  return {/*init=*/nullptr,
-          /*free=*/nullptr,
-          /*prepare=*/nullptr,
-          /*invoke=*/
-          maximum_minimum::Eval<maximum_minimum::kReference,
-                                maximum_minimum::MaximumOp>,
-          /*profiling_string=*/nullptr,
-          /*builtin_code=*/0,
-          /*custom_name=*/nullptr,
-          /*version=*/0};
+  return tflite::micro::RegisterOp(
+      nullptr, nullptr,
+      maximum_minimum::Eval<maximum_minimum::kReference,
+                            maximum_minimum::MaximumOp>);
 }
 
 TfLiteRegistration Register_MINIMUM() {
-  return {/*init=*/nullptr,
-          /*free=*/nullptr,
-          /*prepare=*/nullptr,
-          /*invoke=*/
-          maximum_minimum::Eval<maximum_minimum::kReference,
-                                maximum_minimum::MinimumOp>,
-          /*profiling_string=*/nullptr,
-          /*builtin_code=*/0,
-          /*custom_name=*/nullptr,
-          /*version=*/0};
+  return tflite::micro::RegisterOp(
+      nullptr, nullptr,
+      maximum_minimum::Eval<maximum_minimum::kReference,
+                            maximum_minimum::MinimumOp>);
 }
 
 }  // namespace micro

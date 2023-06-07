@@ -31,6 +31,11 @@
 #ifndef SL_GATT_SERVICE_AIO_H
 #define SL_GATT_SERVICE_AIO_H
 
+/***********************************************************************************************//**
+ * @addtogroup gatt_service_aio
+ * @{
+ **************************************************************************************************/
+
 #include "sl_bt_api.h"
 
 /**************************************************************************//**
@@ -49,4 +54,5 @@ void sl_gatt_service_aio_on_change(void);
  *****************************************************************************/
 void sl_gatt_service_aio_step(void);
 
+/** @} (end addtogroup gatt_service_aio) */
 #endif // SL_GATT_SERVICE_AIO_H

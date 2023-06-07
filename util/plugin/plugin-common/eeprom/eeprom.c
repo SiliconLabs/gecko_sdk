@@ -90,10 +90,10 @@
   halAppBootloaderShutdown()
 #endif
 
-EmAfPartialWriteStruct emAfEepromSavedPartialWrites[EMBER_AF_PLUGIN_EEPROM_PARTIAL_WORD_STORAGE_COUNT];
+sli_eeprom_partial_write_struct sli_eeprom_saved_partial_writes[EMBER_AF_PLUGIN_EEPROM_PARTIAL_WORD_STORAGE_COUNT];
 // the following would allow up to EMBER_AF_PLUGIN_EEPROM_PARTIAL_WORD_STORAGE_COUNT number of out of order
 // ota block deliveries, especially useful when PAGE_REQUEST is in place
-EmAfPartialWriteStruct emAfEepromPostPartialWrites[EMBER_AF_PLUGIN_EEPROM_PARTIAL_WORD_STORAGE_COUNT];
+sli_eeprom_partial_write_struct sli_eeprom_post_partial_writes[EMBER_AF_PLUGIN_EEPROM_PARTIAL_WORD_STORAGE_COUNT];
 // We cache the word size because determining the size requires calling into the
 // bootloader and potentially reading it from the part itself.  Several pieces
 // of code reference the word size quite often and therefore this will reduce
@@ -149,12 +149,12 @@ void emberAfPluginEepromInitCallback(void)
 // so this code helps manage that state and automatically re-init the driver
 // if it is needed.
 
-bool emAfIsEepromInitialized(void)
+bool sli_eeprom_is_eeprom_initialized(void)
 {
   return eepromState >= HAL_EEPROM_INITIALIZED;
 }
 
-void emAfPluginEepromStateUpdate(HalEepromState newState)
+void sli_util_af_plugin_eeprom_state_update(HalEepromState newState)
 {
   if (eepromState != newState) {
     emberAfPluginEepromStateChangeCallback(eepromState, newState);
@@ -184,11 +184,11 @@ void emberAfPluginEepromNoteInitializedState(bool state)
 {
   // Only change to initialized if not already in an initialized state
   if (state == true && eepromState < HAL_EEPROM_INITIALIZED) {
-    emAfPluginEepromStateUpdate(HAL_EEPROM_INITIALIZED);
+    sli_util_af_plugin_eeprom_state_update(HAL_EEPROM_INITIALIZED);
   }
   // Only change to uninitialized if not already in an uninitialized state
   else if (state == false && eepromState >= HAL_EEPROM_INITIALIZED) {
-    emAfPluginEepromStateUpdate(HAL_EEPROM_UNINITIALIZED);
+    sli_util_af_plugin_eeprom_state_update(HAL_EEPROM_UNINITIALIZED);
   }
 }
 
@@ -202,14 +202,14 @@ static void eepromFirstTimeInit(void)
                          ? PAGE_ERASE_REQUIRED
                          : PAGE_ERASE_NOT_NEEDED);
 
-      MEMSET(emAfEepromSavedPartialWrites,
+      MEMSET(sli_eeprom_saved_partial_writes,
              0xFF,
-             sizeof(EmAfPartialWriteStruct)
+             sizeof(sli_eeprom_partial_write_struct)
              * EMBER_AF_PLUGIN_EEPROM_PARTIAL_WORD_STORAGE_COUNT);
 
-      MEMSET(emAfEepromPostPartialWrites,
+      MEMSET(sli_eeprom_post_partial_writes,
              0xFF,
-             sizeof(EmAfPartialWriteStruct)
+             sizeof(sli_eeprom_partial_write_struct)
              * EMBER_AF_PLUGIN_EEPROM_PARTIAL_WORD_STORAGE_COUNT);
 
       // We can't do partial writes with a word size above 4.
@@ -226,7 +226,7 @@ static void eepromFirstTimeInit(void)
 
 void emberAfPluginEepromInit(void)
 {
-  if (emAfIsEepromInitialized()) {
+  if (sli_eeprom_is_eeprom_initialized()) {
     return;
   }
 
@@ -246,7 +246,7 @@ const HalEepromInformationType* emberAfPluginEepromInfo(void)
 
 static void clearPartialWrite(uint8_t index)
 {
-  MEMSET(&(emAfEepromSavedPartialWrites[index]), 0xFF, sizeof(EmAfPartialWriteStruct));
+  MEMSET(&(sli_eeprom_saved_partial_writes[index]), 0xFF, sizeof(sli_eeprom_partial_write_struct));
 }
 
 static void clearPostPartialWrite(uint8_t index)
@@ -254,7 +254,7 @@ static void clearPostPartialWrite(uint8_t index)
   if (postPartialentries) {
     --postPartialentries;
   }
-  MEMSET(&(emAfEepromPostPartialWrites[index]), 0xFF, sizeof(EmAfPartialWriteStruct));
+  MEMSET(&(sli_eeprom_post_partial_writes[index]), 0xFF, sizeof(sli_eeprom_partial_write_struct));
 }
 
 static uint8_t checkForPostcedingPartialWrite(uint32_t address)
@@ -263,25 +263,25 @@ static uint8_t checkForPostcedingPartialWrite(uint32_t address)
   eepromDebugPrintln("checkForPostcedingPartialWrite() address: 0x%4X", address);
   uint8_t wordsize = emberAfPluginEepromGetWordSize();
   for (i = 0; i < EMBER_AF_PLUGIN_EEPROM_PARTIAL_WORD_STORAGE_COUNT; i++) {
-    eepromDebugPrintln("Post Partial write index %d, address 0x%4X", i, emAfEepromPostPartialWrites[i].address);
-    uint32_t tempAddress = emAfEepromPostPartialWrites[i].address; // this is the address in the middle of the block
+    eepromDebugPrintln("Post Partial write index %d, address 0x%4X", i, sli_eeprom_post_partial_writes[i].address);
+    uint32_t tempAddress = sli_eeprom_post_partial_writes[i].address; // this is the address in the middle of the block
     if (tempAddress != INVALID_ADDRESS
         && ((tempAddress
-             - (wordsize - emAfEepromPostPartialWrites[i].count)) == address)) {
+             - (wordsize - sli_eeprom_post_partial_writes[i].count)) == address)) {
       return i;
     }
   }
   return INVALID_INDEX;
 }
 
-static uint8_t addPostPartialWrite(const EmAfPartialWriteStruct* newPartialWrite)
+static uint8_t addPostPartialWrite(const sli_eeprom_partial_write_struct* newPartialWrite)
 {
   uint8_t i;
   for (i = 0; i < EMBER_AF_PLUGIN_EEPROM_PARTIAL_WORD_STORAGE_COUNT; i++) {
-    if (emAfEepromPostPartialWrites[i].address == INVALID_ADDRESS) {
-      MEMMOVE(&(emAfEepromPostPartialWrites[i]),
+    if (sli_eeprom_post_partial_writes[i].address == INVALID_ADDRESS) {
+      MEMMOVE(&(sli_eeprom_post_partial_writes[i]),
               newPartialWrite,
-              sizeof(EmAfPartialWriteStruct));
+              sizeof(sli_eeprom_partial_write_struct));
       eepromDebugPrintln("Stored post partial write at index %d", i);
       ++postPartialentries;
       return EEPROM_SUCCESS;
@@ -295,25 +295,25 @@ static uint8_t checkForPreceedingPartialWrite(uint32_t address)
   uint8_t i;
   eepromDebugPrintln("checkForPreceedingPartialWrite() address: 0x%4X", address);
   for (i = 0; i < EMBER_AF_PLUGIN_EEPROM_PARTIAL_WORD_STORAGE_COUNT; i++) {
-    eepromDebugPrintln("Partial write index %d, address 0x%4X", i, emAfEepromSavedPartialWrites[i].address);
-    uint32_t tempAddress = emAfEepromSavedPartialWrites[i].address;
+    eepromDebugPrintln("Partial write index %d, address 0x%4X", i, sli_eeprom_saved_partial_writes[i].address);
+    uint32_t tempAddress = sli_eeprom_saved_partial_writes[i].address;
     if (tempAddress != INVALID_ADDRESS
         && ((tempAddress
-             + emAfEepromSavedPartialWrites[i].count) == address)) {
+             + sli_eeprom_saved_partial_writes[i].count) == address)) {
       return i;
     }
   }
   return INVALID_INDEX;
 }
 
-static uint8_t addPartialWrite(const EmAfPartialWriteStruct* newPartialWrite)
+static uint8_t addPartialWrite(const sli_eeprom_partial_write_struct* newPartialWrite)
 {
   uint8_t i;
   for (i = 0; i < EMBER_AF_PLUGIN_EEPROM_PARTIAL_WORD_STORAGE_COUNT; i++) {
-    if (emAfEepromSavedPartialWrites[i].address == INVALID_ADDRESS) {
-      MEMMOVE(&(emAfEepromSavedPartialWrites[i]),
+    if (sli_eeprom_saved_partial_writes[i].address == INVALID_ADDRESS) {
+      MEMMOVE(&(sli_eeprom_saved_partial_writes[i]),
               newPartialWrite,
-              sizeof(EmAfPartialWriteStruct));
+              sizeof(sli_eeprom_partial_write_struct));
       eepromDebugPrintln("Stored partial write at index %d", i);
       return EEPROM_SUCCESS;
     }
@@ -322,7 +322,7 @@ static uint8_t addPartialWrite(const EmAfPartialWriteStruct* newPartialWrite)
 }
 
 #if defined(EMBER_TEST)
-void emAfPluginEepromFakeEepromCallback(void)
+void sli_eeprom_fake_eeprom_callback(void)
 {
   // The fake (simulated) EEPROM gets initialized at a funny time,
   // after emberAfPluginEepromInit().  We must reinitialize the known
@@ -347,8 +347,8 @@ static uint8_t postcedingPartialWrite(uint32_t address,
 {
   uint8_t index = INVALID_INDEX;
   uint8_t status = EEPROM_SUCCESS;
-  EmAfPartialWriteStruct tempPrePartialWrite = { INVALID_ADDRESS, { 0xFF }, 0 };
-  EmAfPartialWriteStruct tempPostPartialWrite = { INVALID_ADDRESS, { 0xFF }, 0 };
+  sli_eeprom_partial_write_struct tempPrePartialWrite = { INVALID_ADDRESS, { 0xFF }, 0 };
+  sli_eeprom_partial_write_struct tempPostPartialWrite = { INVALID_ADDRESS, { 0xFF }, 0 };
   uint8_t wordSize = emberAfPluginEepromGetWordSize();
   //**********************************************************************
   //using the begining bytes of new data:
@@ -401,7 +401,7 @@ static uint8_t postcedingPartialWrite(uint32_t address,
   //**********************************************************************
 
   if (totalLength > 0u) {
-    emAfPluginEepromStateUpdate(HAL_EEPROM_WRITING);
+    sli_util_af_plugin_eeprom_state_update(HAL_EEPROM_WRITING);
    #ifdef _SILICON_LABS_32B_SERIES_2
     // we need 32 bits alignment for some boards e.g. 4181
     MEMCOPY(ota_buff,
@@ -412,7 +412,7 @@ static uint8_t postcedingPartialWrite(uint32_t address,
     status = eepromWrite(address, data, totalLength);
    #endif
 
-    emAfPluginEepromStateUpdate(HAL_EEPROM_INITIALIZED);
+    sli_util_af_plugin_eeprom_state_update(HAL_EEPROM_INITIALIZED);
   }
 
   //#########
@@ -425,7 +425,7 @@ uint8_t emberAfPluginEepromWrite(uint32_t address,
                                  uint16_t totalLength)
 {
   uint8_t status = EEPROM_SUCCESS;
-  EmAfPartialWriteStruct tempPartialWrite = { INVALID_ADDRESS, { 0xFF }, 0 };
+  sli_eeprom_partial_write_struct tempPartialWrite = { INVALID_ADDRESS, { 0xFF }, 0 };
   emberAfPluginEepromInit();
   uint8_t wordSize = emberAfPluginEepromGetWordSize();
 
@@ -441,25 +441,25 @@ uint8_t emberAfPluginEepromWrite(uint32_t address,
       return postcedingPartialWrite(address, data, totalLength);
     } else {
       uint8_t copyLength;
-      uint8_t partialLength = wordSize - emAfEepromSavedPartialWrites[index].count;
+      uint8_t partialLength = wordSize - sli_eeprom_saved_partial_writes[index].count;
       if (totalLength > partialLength) {
         copyLength = partialLength;
       } else {
         copyLength = totalLength;
       }
-      MEMCOPY(&(emAfEepromSavedPartialWrites[index].data[emAfEepromSavedPartialWrites[index].count]),
+      MEMCOPY(&(sli_eeprom_saved_partial_writes[index].data[sli_eeprom_saved_partial_writes[index].count]),
               data,
               copyLength);
       totalLength -= copyLength;
-      emAfEepromSavedPartialWrites[index].count += copyLength;
+      sli_eeprom_saved_partial_writes[index].count += copyLength;
       address += copyLength;
 
-      if (emAfEepromSavedPartialWrites[index].count == wordSize) {
-        emAfPluginEepromStateUpdate(HAL_EEPROM_WRITING);
-        status = eepromWrite(emAfEepromSavedPartialWrites[index].address,
-                             emAfEepromSavedPartialWrites[index].data,
+      if (sli_eeprom_saved_partial_writes[index].count == wordSize) {
+        sli_util_af_plugin_eeprom_state_update(HAL_EEPROM_WRITING);
+        status = eepromWrite(sli_eeprom_saved_partial_writes[index].address,
+                             sli_eeprom_saved_partial_writes[index].data,
                              wordSize);
-        emAfPluginEepromStateUpdate(HAL_EEPROM_INITIALIZED);
+        sli_util_af_plugin_eeprom_state_update(HAL_EEPROM_INITIALIZED);
         data += copyLength;
         EMBER_TEST_ASSERT(status == EEPROM_SUCCESS);
         clearPartialWrite(index);
@@ -495,7 +495,7 @@ uint8_t emberAfPluginEepromWrite(uint32_t address,
                      address,
                      totalLength);
   if (totalLength > 0u) {
-    emAfPluginEepromStateUpdate(HAL_EEPROM_WRITING);
+    sli_util_af_plugin_eeprom_state_update(HAL_EEPROM_WRITING);
 
 #ifdef _SILICON_LABS_32B_SERIES_2
     // we need 32 bits alignment for some boards e.g. 4181
@@ -506,7 +506,7 @@ uint8_t emberAfPluginEepromWrite(uint32_t address,
 #else
     status = eepromWrite(address, data, totalLength);
 #endif
-    emAfPluginEepromStateUpdate(HAL_EEPROM_INITIALIZED);
+    sli_util_af_plugin_eeprom_state_update(HAL_EEPROM_INITIALIZED);
   }
 
   EMBER_TEST_ASSERT(status == EEPROM_SUCCESS);
@@ -524,17 +524,17 @@ uint8_t emberAfPluginEepromWrite(uint32_t address,
             tempPartialWrite.data,
             tempPartialWrite.count);
     MEMCOPY(ota_buff + tempPartialWrite.count,
-            emAfEepromPostPartialWrites[index].data,
-            emAfEepromPostPartialWrites[index].count);
+            sli_eeprom_post_partial_writes[index].data,
+            sli_eeprom_post_partial_writes[index].count);
 
-    if (wordSize != (emAfEepromPostPartialWrites[index].count + tempPartialWrite.count)) {
+    if (wordSize != (sli_eeprom_post_partial_writes[index].count + tempPartialWrite.count)) {
       // we have gotten to state where our partial write cache entry is fragmented
       // this shoudl not happen, unless ota-server is funky and sending us wrong sized blocks
       assert(false);
     }
     status = eepromWrite(tempPartialWrite.address, ota_buff, wordSize);
 
-    emAfPluginEepromStateUpdate(HAL_EEPROM_INITIALIZED);
+    sli_util_af_plugin_eeprom_state_update(HAL_EEPROM_INITIALIZED);
     clearPostPartialWrite(index);
   } else {
     // The remaining unalighed write must be added to preceding cache table,
@@ -561,13 +561,13 @@ uint8_t emberAfPluginEepromFlushSavedPartialWrites(void)
   emberAfPluginEepromInit();
 
   for (i = 0; i < EMBER_AF_PLUGIN_EEPROM_PARTIAL_WORD_STORAGE_COUNT; i++) {
-    if (emAfEepromSavedPartialWrites[i].address != INVALID_ADDRESS) {
+    if (sli_eeprom_saved_partial_writes[i].address != INVALID_ADDRESS) {
       uint8_t status;
-      emAfPluginEepromStateUpdate(HAL_EEPROM_WRITING);
-      status = eepromWrite(emAfEepromSavedPartialWrites[i].address,
-                           emAfEepromSavedPartialWrites[i].data,
+      sli_util_af_plugin_eeprom_state_update(HAL_EEPROM_WRITING);
+      status = eepromWrite(sli_eeprom_saved_partial_writes[i].address,
+                           sli_eeprom_saved_partial_writes[i].data,
                            emberAfPluginEepromGetWordSize());
-      emAfPluginEepromStateUpdate(HAL_EEPROM_INITIALIZED);
+      sli_util_af_plugin_eeprom_state_update(HAL_EEPROM_INITIALIZED);
       EMBER_TEST_ASSERT(status == EEPROM_SUCCESS);
       if (status != EEPROM_SUCCESS) {
         return status;
@@ -585,9 +585,9 @@ uint8_t emberAfPluginEepromRead(uint32_t address,
 
   emberAfPluginEepromInit();
 
-  emAfPluginEepromStateUpdate(HAL_EEPROM_READING);
+  sli_util_af_plugin_eeprom_state_update(HAL_EEPROM_READING);
   status = eepromRead(address, data, totalLength);
-  emAfPluginEepromStateUpdate(HAL_EEPROM_INITIALIZED);
+  sli_util_af_plugin_eeprom_state_update(HAL_EEPROM_INITIALIZED);
 
   EMBER_TEST_ASSERT(status == EEPROM_SUCCESS);
 
@@ -600,16 +600,16 @@ uint8_t emberAfPluginEepromErase(uint32_t address, uint32_t totalLength)
   uint8_t status;
   emberAfPluginEepromInit();
 
-  emAfPluginEepromStateUpdate(HAL_EEPROM_ERASING);
+  sli_util_af_plugin_eeprom_state_update(HAL_EEPROM_ERASING);
   status = eepromErase(address, totalLength);
-  emAfPluginEepromStateUpdate(HAL_EEPROM_INITIALIZED);
+  sli_util_af_plugin_eeprom_state_update(HAL_EEPROM_INITIALIZED);
 
   EMBER_TEST_ASSERT(status == EEPROM_SUCCESS);
 
   for (i = 0; i < EMBER_AF_PLUGIN_EEPROM_PARTIAL_WORD_STORAGE_COUNT; i++) {
-    if (emAfEepromSavedPartialWrites[i].address != INVALID_ADDRESS
-        && emAfEepromSavedPartialWrites[i].address >= address
-        && emAfEepromSavedPartialWrites[i].address < (address + totalLength)) {
+    if (sli_eeprom_saved_partial_writes[i].address != INVALID_ADDRESS
+        && sli_eeprom_saved_partial_writes[i].address >= address
+        && sli_eeprom_saved_partial_writes[i].address < (address + totalLength)) {
       clearPartialWrite(i);
     }
   }
@@ -627,11 +627,11 @@ bool emberAfPluginEepromBusy(void)
 // necessary.
 bool emberAfPluginEepromShutdown(void)
 {
-  if (!emAfIsEepromInitialized()) {
+  if (!sli_eeprom_is_eeprom_initialized()) {
     return false;
   }
 
   eepromShutdown();
-  emAfPluginEepromStateUpdate(HAL_EEPROM_SHUTDOWN);
+  sli_util_af_plugin_eeprom_state_update(HAL_EEPROM_SHUTDOWN);
   return true;
 }

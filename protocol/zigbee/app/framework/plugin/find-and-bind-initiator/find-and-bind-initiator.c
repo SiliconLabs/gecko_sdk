@@ -18,11 +18,11 @@
 #include "app/framework/include/af.h"
 
 #include "app/framework/util/af-main.h" // emberAfGetBindingTableSize
-
-#ifdef UC_BUILD
+#ifndef EMBER_SCRIPTED_TEST
 #include "find-and-bind-initiator-config.h"
-#include "zap-cluster-command-parser.h"
 #endif
+
+#include "zap-cluster-command-parser.h"
 
 #include "find-and-bind-initiator.h"
 
@@ -57,13 +57,8 @@
 // -----------------------------------------------------------------------------
 // Globals
 
-#ifdef UC_BUILD
 sl_zigbee_event_t emberAfPluginFindAndBindInitiatorCheckTargetResponsesEvent;
 #define checkTargetResponsesEventControl (&emberAfPluginFindAndBindInitiatorCheckTargetResponsesEvent)
-#else
-EmberEventControl emberAfPluginFindAndBindInitiatorCheckTargetResponsesEventControl;
-#define checkTargetResponsesEventControl emberAfPluginFindAndBindInitiatorCheckTargetResponsesEventControl
-#endif
 
 typedef struct {
   EmberNodeId nodeId;
@@ -139,8 +134,8 @@ EmberStatus emberAfPluginFindAndBindInitiatorStart(uint8_t endpoint)
 
   status = broadcastIdentifyQuery();
   if (status == EMBER_SUCCESS) {
-    slxu_zigbee_event_set_delay_ms(checkTargetResponsesEventControl,
-                                   EMBER_AF_PLUGIN_FIND_AND_BIND_INITIATOR_TARGET_RESPONSES_DELAY_MS);
+    sl_zigbee_event_set_delay_ms(checkTargetResponsesEventControl,
+                                 EMBER_AF_PLUGIN_FIND_AND_BIND_INITIATOR_TARGET_RESPONSES_DELAY_MS);
     state = FIND_TARGETS;
   } else {
     cleanupAndStop(status);
@@ -149,12 +144,12 @@ EmberStatus emberAfPluginFindAndBindInitiatorStart(uint8_t endpoint)
   return status;
 }
 
-void emberAfPluginFindAndBindInitiatorCheckTargetResponsesEventHandler(SLXU_UC_EVENT)
+void emberAfPluginFindAndBindInitiatorCheckTargetResponsesEventHandler(sl_zigbee_event_t * event)
 {
   EmberStatus status = EMBER_SUCCESS;
   bool finished = false;
 
-  slxu_zigbee_event_set_inactive(checkTargetResponsesEventControl);
+  sl_zigbee_event_set_inactive(checkTargetResponsesEventControl);
 
   switch (state) {
     case FIND_TARGETS:
@@ -200,8 +195,6 @@ void emberAfPluginFindAndBindInitiatorCheckTargetResponsesEventHandler(SLXU_UC_E
   }
 }
 
-#ifdef UC_BUILD
-
 bool emberAfIdentifyClusterIdentifyQueryResponseCallback(EmberAfClusterCommand *cmd)
 {
   (void)cmd;
@@ -245,47 +238,12 @@ bool emberAfIdentifyClusterIdentifyQueryResponseCallback(EmberAfClusterCommand *
   return true;
 }
 
-#else // !UC_BUILD
-
-bool emberAfIdentifyClusterIdentifyQueryResponseCallback(uint16_t timeout)
+void sli_zigbee_af_find_and_bind_initiator_init_callback(uint8_t init_level)
 {
-  EmberAfClusterCommand *currentCommand;
-  FindAndBindTargetInfo targetInfo;
-  uint8_t i;
+  (void)init_level;
 
-  currentCommand = emberAfCurrentCommand();
-
-  if (currentCommand->apsFrame->destinationEndpoint == initiatorEndpoint) {
-    targetInfo.nodeId   = currentCommand->source;
-    targetInfo.endpoint = currentCommand->apsFrame->sourceEndpoint;
-    // If you haven't added the response yet, then add it now.
-    for (i = 0;
-         (i < targetResponsesReceived
-          && !targetInfosAreEqual(targetInfo, targetResponses[i]));
-         i++) {
-      ; // pass
-    }
-    if (i < EMBER_AF_PLUGIN_FIND_AND_BIND_INITIATOR_TARGET_RESPONSES_COUNT
-        && i == targetResponsesReceived) {
-      targetResponses[i].nodeId = currentCommand->source;
-      targetResponses[i].endpoint = currentCommand->apsFrame->sourceEndpoint;
-      targetResponsesReceived++;
-    }
-  }
-
-  emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
-
-  return true;
-}
-
-#endif // UC_BUILD
-
-void emAfPluginFindAndBindInitiatorInitCallback(SLXU_INIT_ARG)
-{
-  SLXU_INIT_UNUSED_ARG;
-
-  slxu_zigbee_event_init(checkTargetResponsesEventControl,
-                         emberAfPluginFindAndBindInitiatorCheckTargetResponsesEventHandler);
+  sl_zigbee_event_init(checkTargetResponsesEventControl,
+                       emberAfPluginFindAndBindInitiatorCheckTargetResponsesEventHandler);
 }
 
 // -----------------------------------------------------------------------------
@@ -365,7 +323,7 @@ static void handleIeeeAddrResponse(const EmberAfServiceDiscoveryResult *result)
           result->responseData,
           EUI64_SIZE);
 
-  slxu_zigbee_event_set_active(checkTargetResponsesEventControl);
+  sl_zigbee_event_set_active(checkTargetResponsesEventControl);
 }
 
 static EmberStatus sendSimpleDescriptorRequest()
@@ -411,7 +369,7 @@ static void handleSimpleDescriptorResponse(const EmberAfServiceDiscoveryResult *
                      clusterList->outClusterList,
                      &status);
 
-  slxu_zigbee_event_set_active(checkTargetResponsesEventControl);
+  sl_zigbee_event_set_active(checkTargetResponsesEventControl);
 }
 
 static void processClusterList(bool clientList,
@@ -509,8 +467,6 @@ static void cleanupAndStop(EmberStatus status)
   emberAfPluginFindAndBindInitiatorCompleteCallback(status);
 }
 
-#ifdef UC_BUILD
-
 uint32_t emberAfIdentifyClusterClientCommandParse(sl_service_opcode_t opcode,
                                                   sl_service_function_context_t *context)
 {
@@ -526,5 +482,3 @@ uint32_t emberAfIdentifyClusterClientCommandParse(sl_service_opcode_t opcode,
           ? EMBER_ZCL_STATUS_SUCCESS
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
-
-#endif // UC_BUILD

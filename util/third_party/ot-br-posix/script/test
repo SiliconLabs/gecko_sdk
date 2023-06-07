@@ -33,17 +33,37 @@
 # shellcheck source=script/_initrc
 . "$(dirname "$0")"/_initrc
 
-readonly OTBR_COLOR_PASS='\033[0;32m'
-readonly OTBR_COLOR_FAIL='\033[0;31m'
-readonly OTBR_COLOR_NONE='\033[0m'
-readonly QUIET=${QUIET:-1}
+readonly OTBR_VERBOSE=${OTBR_VERBOSE:-0}
 
-readonly OTBR_BUILD_TYPE="${OTBR_BUILD_TYPE:-Debug}"
-readonly OTBR_COVERAGE="${OTBR_COVERAGE:-0}"
-readonly OTBR_MDNS="${OTBR_MDNS:-}"
-readonly OTBR_REST="${OTBR_REST:-}"
-readonly OTBR_OPTIONS="${OTBR_OPTIONS:-}"
-readonly OTBR_TOP_BUILDDIR="${BUILD_DIR}/otbr"
+OTBR_COLOR_PASS='\033[0;32m'
+readonly OTBR_COLOR_PASS
+
+OTBR_COLOR_FAIL='\033[0;31m'
+readonly OTBR_COLOR_FAIL
+
+OTBR_COLOR_NONE='\033[0m'
+readonly OTBR_COLOR_NONE
+
+QUIET=${QUIET:-1}
+readonly QUIET
+
+OTBR_BUILD_TYPE="${OTBR_BUILD_TYPE:-Debug}"
+readonly OTBR_BUILD_TYPE
+
+OTBR_COVERAGE="${OTBR_COVERAGE:-0}"
+readonly OTBR_COVERAGE
+
+OTBR_MDNS="${OTBR_MDNS-}"
+readonly OTBR_MDNS
+
+OTBR_REST="${OTBR_REST-}"
+readonly OTBR_REST
+
+OTBR_OPTIONS="${OTBR_OPTIONS-}"
+readonly OTBR_OPTIONS
+
+OTBR_TOP_BUILDDIR="${BUILD_DIR}/otbr"
+readonly OTBR_TOP_BUILDDIR
 
 #######################################
 # Run test and print result.
@@ -63,7 +83,7 @@ print_result()
 
     echo -e "$(date) Running $*"
 
-    if [[ ${QUIET} == 1 ]]; then
+    if [[ ${OTBR_VERBOSE} == 0 ]]; then
         "$@" &>test.log || exit_code=$?
     else
         "$@" || exit_code=$?
@@ -78,7 +98,7 @@ print_result()
     echo -e "${prefix} $*"
 
     # only output log on failure
-    if [[ ${QUIET} == 1 && ${exit_code} != 0 ]]; then
+    if [[ ${OTBR_VERBOSE} == 0 && ${exit_code} != 0 ]]; then
         cat test.log
     fi
 
@@ -111,6 +131,7 @@ do_build()
         "-DOT_THREAD_VERSION=1.3"
         "-DOTBR_DBUS=ON"
         "-DOTBR_FEATURE_FLAGS=ON"
+        "-DOTBR_TELEMETRY_DATA_API=ON"
         "-DOTBR_WEB=ON"
         "-DOTBR_UNSECURE_JOIN=ON"
         "-DOTBR_TREL=ON"

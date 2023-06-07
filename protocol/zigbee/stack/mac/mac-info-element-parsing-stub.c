@@ -24,10 +24,10 @@
 
 //-----------------------------------------------------------------------------
 
-EmMacFrameInfoElementParseResult emMacParseInfoElementsInPacket(PacketHeader header,
-                                                                EmMacInfoElementField* infoElementsArray,
-                                                                uint8_t  maxInfoElementCount,
-                                                                uint8_t* macInfoElementsLength)
+sli_802154mac_frame_info_element_parse_result sli_802154mac_parse_info_elements_in_packet(PacketHeader header,
+                                                                                          sli_802154mac_info_element_field* infoElementsArray,
+                                                                                          uint8_t  maxInfoElementCount,
+                                                                                          uint8_t* macInfoElementsLength)
 {
   (void)infoElementsArray;
   (void)maxInfoElementCount;
@@ -46,14 +46,14 @@ EmMacFrameInfoElementParseResult emMacParseInfoElementsInPacket(PacketHeader hea
   return EM_MAC_FRAME_INFO_ELEMENTS_PRESENT_WITH_ERRORS;
 }
 
-bool emMacHeaderGetInfoElementsLength(PacketHeader header,
-                                      uint8_t* returnMacInfoElementLength)
+bool sli_802154mac_header_get_info_elements_length(PacketHeader header,
+                                                   uint8_t* returnMacInfoElementLength)
 {
-  EmMacFrameInfoElementParseResult result
-    = emMacParseInfoElementsInPacket(header,
-                                     NULL,
-                                     0,
-                                     returnMacInfoElementLength);
+  sli_802154mac_frame_info_element_parse_result result
+    = sli_802154mac_parse_info_elements_in_packet(header,
+                                                  NULL,
+                                                  0,
+                                                  returnMacInfoElementLength);
 
   if (EM_MAC_FRAME_INFO_ELEMENTS_PRESENT_WITH_ERRORS == result) {
     return false;

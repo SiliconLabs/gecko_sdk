@@ -47,7 +47,7 @@ template_contribution:
     value:
       group: standalone-bootloader-server
       name: status
-      handler: emAfStandaloneBootloaderServerPrintStatus
+      handler: sli_zigbee_af_standalone_bootloader_server_print_status
       help: Prints the standalone bootload servers current status.
   - name: cli_command
     value:
@@ -59,7 +59,7 @@ template_contribution:
     value:
       group: standalone-bootloader-server
       name: print-target
-      handler: emAfStandaloneBootloaderServerPrintTargetClientInfoCommand
+      handler: sli_zigbee_af_standalone_bootloader_server_print_target_client_info_command
       help: Prints the cached info about the current bootload target.
   - name: cli_group
     value:

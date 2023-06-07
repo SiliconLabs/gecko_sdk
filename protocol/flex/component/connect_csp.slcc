@@ -1,0 +1,36 @@
+id: connect_csp
+label: Connect Serialization Protocol component
+package: Flex
+description: Provides source files for components requiring CSP
+category: Connect
+quality: production
+ui_hints:
+  visibility: never
+
+provides:
+  - name: connect_csp
+
+requires:
+  - name: connect_stack_common
+
+source:
+  - path: "protocol/flex/csp/csp-format.c"
+  - path: "protocol/flex/csp/csp-command-app.c"
+    condition: 
+        - "connect_cmsis_stack_ipc"
+  - path: "protocol/flex/csp/csp-command-vncp.c"
+  - path: "protocol/flex/csp/csp-command-callbacks.c"
+  - path: "protocol/flex/ncp/ncp-stubs.c"
+    unless: [connect_ncp]
+
+include:
+  - path: protocol/flex/csp
+    file_list:
+      - path: csp-command-utils.h
+      - path: csp-format.h
+      - path: csp-api-enum-gen.h
+      - path: csp-enum.h
+      - path: csp-common.h
+  - path: "protocol/flex/ncp"
+    file_list:
+      - path: "ncp-security.h"

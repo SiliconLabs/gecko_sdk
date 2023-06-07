@@ -10,7 +10,7 @@ quality: production
 
 filter:
   - name: "Wireless Technology"
-    value: ["Bluetooth", "Connect"]
+    value: ["Bluetooth"]
   - name: "Capability"
     value: ["Multiprotocol"]
   - name: "Device Type"

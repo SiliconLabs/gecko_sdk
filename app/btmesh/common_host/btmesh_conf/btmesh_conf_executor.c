@@ -217,7 +217,7 @@ const char *executor_state_to_string(btmesh_conf_executor_state_t state)
  * @param[in] timer Pointer to the elapsed timer instance
  * @param[in] data Pointer to the configuration executor instance
  ******************************************************************************/
-static void executor_on_timer_elapsed(sl_simple_timer_t *timer, void *data);
+static void executor_on_timer_elapsed(app_timer_t *timer, void *data);
 
 /***************************************************************************//**
  * Provide information about retry occurrence during the execution of current
@@ -671,7 +671,7 @@ static void executor_state_transition(btmesh_conf_executor_t *const self,
         app_log_debug("BT Mesh Config Executor (id=%d) stops "
                       "request busy retry timer." NL,
                       self->id);
-        sl_status_t sc = sl_simple_timer_stop(&self->timer);
+        sl_status_t sc = app_timer_stop(&self->timer);
         app_assert_status_f(sc, "Failed to stop btmesh_conf_executor timer." NL);
         self->timer_active = false;
       }
@@ -682,7 +682,7 @@ static void executor_state_transition(btmesh_conf_executor_t *const self,
         app_log_debug("BT Mesh Config Executor (id=%d) stops "
                       "waiting for event timeout timer." NL,
                       self->id);
-        sl_status_t sc = sl_simple_timer_stop(&self->timer);
+        sl_status_t sc = app_timer_stop(&self->timer);
         app_assert_status_f(sc, "Failed to stop btmesh_conf_executor timer." NL);
         self->timer_active = false;
       }
@@ -711,11 +711,11 @@ static void executor_state_transition(btmesh_conf_executor_t *const self,
       app_log_debug("BT Mesh Config Executor (id=%d) starts "
                     "request busy retry timer." NL,
                     self->id);
-      sc = sl_simple_timer_start(&self->timer,
-                                 SL_BTMESH_CONF_REQUEST_BUSY_RETRY_INTERVAL_MS_CFG_VAL,
-                                 executor_on_timer_elapsed,
-                                 self,
-                                 false);
+      sc = app_timer_start(&self->timer,
+                           SL_BTMESH_CONF_REQUEST_BUSY_RETRY_INTERVAL_MS_CFG_VAL,
+                           executor_on_timer_elapsed,
+                           self,
+                           false);
       app_assert_status_f(sc, "Failed to start btmesh_conf_executor timer." NL);
       self->timer_active = true;
       break;
@@ -727,11 +727,11 @@ static void executor_state_transition(btmesh_conf_executor_t *const self,
       app_log_debug("BT Mesh Config Executor (id=%d) starts "
                     "waiting for event timeout timer." NL,
                     self->id);
-      sc = sl_simple_timer_start(&self->timer,
-                                 SL_BTMESH_CONF_EVENT_WAIT_TIMEOUT_MS_CFG_VAL,
-                                 executor_on_timer_elapsed,
-                                 self,
-                                 false);
+      sc = app_timer_start(&self->timer,
+                           SL_BTMESH_CONF_EVENT_WAIT_TIMEOUT_MS_CFG_VAL,
+                           executor_on_timer_elapsed,
+                           self,
+                           false);
       app_assert_status_f(sc, "Failed to start btmesh_conf_executor timer." NL);
       self->timer_active = true;
       break;
@@ -742,7 +742,7 @@ static void executor_state_transition(btmesh_conf_executor_t *const self,
   }
 }
 
-static void executor_on_timer_elapsed(sl_simple_timer_t *timer, void *data)
+static void executor_on_timer_elapsed(app_timer_t *timer, void *data)
 {
   btmesh_conf_executor_t *const self = (btmesh_conf_executor_t *const)data;
   switch (self->state) {

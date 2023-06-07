@@ -20,31 +20,31 @@
 #include "stack/include/ember.h"
 #include "app/util/ezsp/ezsp-protocol.h"
 
-EzspStatus emSecureEzspInit(void)
+EzspStatus sli_zigbee_secure_ezsp_init(void)
 {
   return EZSP_ERROR_INVALID_CALL;
 }
-EzspStatus emSecureEzspDeInit(void)
+EzspStatus sli_zigbee_secure_ezsp_de_init(void)
 {
   return EZSP_ERROR_INVALID_CALL;
 }
-bool emSecureEzspIsOn(void)
+bool sli_zigbee_secure_ezsp_is_on(void)
 {
   return false;
 }
-EzspStatus emSecureEzspEncode(void)
+EzspStatus sli_zigbee_secure_ezsp_encode(void)
 {
   return EZSP_ERROR_INVALID_CALL;
 }
-EzspStatus emSecureEzspDecode(void)
+EzspStatus sli_zigbee_secure_ezsp_decode(void)
 {
   return EZSP_ERROR_INVALID_CALL;
 }
-void emSecureEzspSetState(uint8_t state)
+void sli_zigbee_secure_ezsp_set_state(uint8_t state)
 {
   (void)state;
 }
-bool emSecureEzspParametersArePending(void)
+bool sli_zigbee_secure_ezsp_parameters_are_pending(void)
 {
   return false;
 }

@@ -81,6 +81,7 @@ sl_status_t sl_device_init_hfxo(void)
 
   SystemHFXOClockSet(SL_DEVICE_INIT_HFXO_FREQ);
   CMU_HFXOInit(&hfxoInit);
+  CMU_HFXOPrecisionSet(SL_DEVICE_INIT_HFXO_PRECISION);
 
   return SL_STATUS_OK;
 }

@@ -51,6 +51,12 @@
 // <i> This is the port number where Meter is listening
 // <1-65536>
 #define SL_WISUN_METER_PORT                                             5683U
+
+// <o SL_WISUN_METER_DEFAULT_PERIOD_MS> Measuring period time [ms]
+// <i> Default: 5000
+// <i> Meter default period time for iterating measurement
+#define SL_WISUN_METER_DEFAULT_PERIOD_MS                                5000U
+
 // </h>
 
 // <h>Wi-SUN Collector configuration

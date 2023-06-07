@@ -382,11 +382,15 @@ class CALC_AGC_ocelot(CALC_AGC_panther):
 
         demod_sel = model.vars.demod_select.value
         preamsch = model.vars.MODEM_TRECPMDET_PREAMSCH.value
+        directmode_rx = model.vars.directmode_rx.value
+        mod_type = model.vars.modulation_type.value
 
-        # we like AGC to freeze once timing is detected (MODE=1) to avoid AGC changes while receiving data
-        # the only exception to this is the case where we are directly searching for the sync word when using Viterbi
-        # in this case we need to set the MODE=2 to freeze the AGC when frame is detected
-        if (demod_sel == model.vars.demod_select.var_enum.TRECS_VITERBI or demod_sel == model.vars.demod_select.var_enum.TRECS_SLICER):
+        if directmode_rx != model.vars.directmode_rx.var_enum.DISABLED:
+            mode = 0            # OOK has DSA detection disabled. FSK has issue of LO leakage locking up detector
+        elif (demod_sel == model.vars.demod_select.var_enum.TRECS_VITERBI or demod_sel == model.vars.demod_select.var_enum.TRECS_SLICER):
+            # we like AGC to freeze once timing is detected (MODE=1) to avoid AGC changes while receiving data
+            # the only exception to this is the case where we are directly searching for the sync word when using Viterbi
+            # in this case we need to set the MODE=2 to freeze the AGC when frame is detected
             if preamsch:
                 mode = 1
             else:

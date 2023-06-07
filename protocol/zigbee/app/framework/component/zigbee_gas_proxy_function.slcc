@@ -47,55 +47,55 @@ template_contribution:
   - name: zigbee_af_callback
     value:
       callback_type: pre_command_received
-      function_name: emAfPluginGasProxyFunctionPreCommandReceivedCallback
+      function_name: sli_zigbee_af_gas_proxy_function_pre_command_received_callback
   - name: cluster_service
     value:
       cluster_id: "0x0708"
       mfg_id: "NOT_MFG_SPECIFIC"
       side: "CLIENT"
-      service_function: "emAfGasProxyFunctionDeviceManagementClusterClientCommandParse"
+      service_function: "sli_zigbee_af_gas_proxy_function_device_management_cluster_client_command_parse"
   - name: cluster_service
     value:
       cluster_id: "0x0707"
       mfg_id: "NOT_MFG_SPECIFIC"
       side: "CLIENT"
-      service_function: "emAfGasProxyFunctionCalendarClusterClientCommandParse"
+      service_function: "sli_zigbee_af_gas_proxy_function_calendar_cluster_client_command_parse"
   - name: cluster_service
     value:
       cluster_id: "0x0700"
       mfg_id: "NOT_MFG_SPECIFIC"
       side: "CLIENT"
-      service_function: "emAfGasProxyFunctionPriceClusterClientCommandParse"
+      service_function: "sli_zigbee_af_gas_proxy_function_price_cluster_client_command_parse"
   - name: cluster_service
     value:
       cluster_id: "0x0703"
       mfg_id: "NOT_MFG_SPECIFIC"
       side: "CLIENT"
-      service_function: "emAfGasProxyFunctionMessagingClusterClientCommandParse"
+      service_function: "sli_zigbee_af_gas_proxy_function_messaging_cluster_client_command_parse"
   - name: cluster_service
     value:
       cluster_id: "0x0702"
       mfg_id: "NOT_MFG_SPECIFIC"
       side: "CLIENT"
-      service_function: "emAfGasProxyFunctionSimpleMeteringClusterClientCommandParse"
+      service_function: "sli_zigbee_af_gas_proxy_function_simple_metering_cluster_client_command_parse"
   - name: cluster_service
     value:
       cluster_id: "0x0702"
       mfg_id: "NOT_MFG_SPECIFIC"
       side: "SERVER"
-      service_function: "emAfGasProxyFunctionSimpleMeteringClusterServerCommandParse"
+      service_function: "sli_zigbee_af_gas_proxy_function_simple_metering_cluster_server_command_parse"
   - name: cluster_service
     value:
       cluster_id: "0x0705"
       mfg_id: "NOT_MFG_SPECIFIC"
       side: "CLIENT"
-      service_function: "emAfGasProxyFunctionPrepaymentClusterClientCommandParse"
+      service_function: "sli_zigbee_af_gas_proxy_function_prepayment_cluster_client_command_parse"
   - name: cluster_service
     value:
       cluster_id: "0x0705"
       mfg_id: "NOT_MFG_SPECIFIC"
       side: "SERVER"
-      service_function: "emAfGasProxyFunctionPrepaymentClusterServerCommandParse"
+      service_function: "sli_zigbee_af_gas_proxy_function_prepayment_cluster_server_command_parse"
   - name: cli_group
     value:
       group: plugin
@@ -105,7 +105,7 @@ template_contribution:
     value:
       group: gas-proxy-function
       name: simulate-gbz-msg
-      handler: emAfPluginGasProxyFunctionCliSimulateGbzMsg
+      handler: sli_zigbee_af_gas_proxy_function_cli_simulate_gbz_msg
       help: Simulates transmission of a GBZ message to the Gas Proxy Function.
       argument:
       - type: uint16
@@ -113,25 +113,25 @@ template_contribution:
     value:
       group: gas-proxy-function
       name: simulate-gbz-msg-creation
-      handler: emAfPluginGasProxyFunctionCliSimulateGbzMsgCreation
+      handler: sli_zigbee_af_gas_proxy_function_cli_simulate_gbz_msg_creation
       help: Tests the GBZ message controller API.
   - name: cli_command
     value:
       group: gas-proxy-function
       name: print-supported-use-cases
-      handler: emAfPluginGasProxyFunctionCliPrintSupportedUseCases
+      handler: sli_zigbee_af_gas_proxy_function_cli_print_supported_use_cases
       help: Prints the list of supported use cases.  The message code printed should be used with the simulate-gbz-msg command.
   - name: cli_command
     value:
       group: gas-proxy-function
       name: print-log-catchups-in-progress
-      handler: emAfPrintLogCatchupsInProgress
+      handler: sli_zigbee_af_print_log_catchups_in_progress
       help: Prints the number of logs that are currently catching up with missed entries.
   - name: cli_command
     value:
       group: gas-proxy-function
       name: simulate-future-dated-msg
-      handler: emAfPluginGasProxyFunctionCliSimulateFutureDatedMsg
+      handler: sli_zigbee_af_gas_proxy_function_cli_simulate_future_dated_msg
       help: Simulates transmission of a GBZ message to the Gas Proxy Function.
   - name: cluster_functions
     value:

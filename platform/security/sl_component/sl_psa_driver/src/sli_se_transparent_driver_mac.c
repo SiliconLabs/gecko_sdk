@@ -28,11 +28,12 @@
  *
  ******************************************************************************/
 
-#include "em_device.h"
+#include "sli_psa_driver_features.h"
 
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
 
 #include "psa/crypto.h"
+
 #include "sli_se_transparent_types.h"
 #include "sli_se_transparent_functions.h"
 #include "sli_psa_driver_common.h"
@@ -44,17 +45,18 @@
 
 // Make sure that the two locations of 'alg' are in the same place, since we
 // access them interchangeably.
-#if defined(PSA_WANT_ALG_HMAC)
+#if defined(SLI_PSA_DRIVER_FEATURE_HMAC)
 _Static_assert(offsetof(sli_se_transparent_mac_operation_t, hmac.alg)
                == offsetof(sli_se_transparent_mac_operation_t,
                            cipher_mac.operation.alg),
                "hmac.alg and cipher_mac.oepration.alg are not aliases");
-#endif
+#endif // SLI_PSA_DRIVER_FEATURE_MAC
 
 //------------------------------------------------------------------------------
 // Static functions
 
-#if defined(PSA_WANT_ALG_CMAC) || defined(PSA_WANT_ALG_CBC_MAC)
+#if defined(SLI_PSA_DRIVER_FEATURE_CMAC) || defined(SLI_PSA_DRIVER_FEATURE_CBC_MAC)
+
 static psa_status_t sli_se_transparent_driver_symmetric_key_from_context(
   sl_se_key_descriptor_t* key_desc,
   sli_se_transparent_mac_operation_t* operation)
@@ -84,11 +86,11 @@ static psa_status_t sli_se_transparent_driver_symmetric_key_from_context(
 
   return PSA_SUCCESS;
 }
-#endif // PSA_WANT_ALG_CMAC || PSA_WANT_ALG_CBC_MAC
 
-#if defined(PSA_WANT_ALG_CMAC)     \
-  || defined(PSA_WANT_ALG_CBC_MAC) \
-  || defined(PSA_WANT_ALG_HMAC)
+#endif // SLI_PSA_DRIVER_FEATURE_CMAC || SLI_PSA_DRIVER_FEATURE_CBC_MAC
+
+#if defined(SLI_PSA_DRIVER_FEATURE_MAC)
+
 static psa_status_t sli_se_transparent_driver_symmetric_key_from_psa(
   sl_se_key_descriptor_t* key_desc,
   const psa_key_attributes_t *attributes,
@@ -104,7 +106,7 @@ static psa_status_t sli_se_transparent_driver_symmetric_key_from_psa(
   psa_key_type_t keytype = psa_get_key_type(attributes);
 
   switch (keytype) {
-    #if defined(PSA_WANT_ALG_CMAC) || defined(PSA_WANT_ALG_CBC_MAC)
+    #if defined(SLI_PSA_DRIVER_FEATURE_CMAC) || defined(SLI_PSA_DRIVER_FEATURE_CBC_MAC)
     case PSA_KEY_TYPE_AES: {
       switch (psa_get_key_bits(attributes)) {
         case 128:
@@ -124,14 +126,16 @@ static psa_status_t sli_se_transparent_driver_symmetric_key_from_psa(
       }
       break;
     }
-    #endif // PSA_WANT_ALG_CMAC || PSA_WANT_ALG_CBC_MAC
-    #if defined(PSA_WANT_ALG_HMAC)
+    #endif // SLI_PSA_DRIVER_FEATURE_CMAC || SLI_PSA_DRIVER_FEATURE_CBC_MAC
+
+    #if defined(SLI_PSA_DRIVER_FEATURE_HMAC)
     case PSA_KEY_TYPE_HMAC: {
       key_desc->size = psa_get_key_bits(attributes) / 8;
       key_desc->type = SL_SE_KEY_TYPE_SYMMETRIC;
       break;
     }
-    #endif // PSA_WANT_ALG_HMAC
+    #endif // SLI_PSA_DRIVER_FEATURE_HMAC
+
     default:
       return PSA_ERROR_INVALID_ARGUMENT;
       break;
@@ -143,10 +147,11 @@ static psa_status_t sli_se_transparent_driver_symmetric_key_from_psa(
 
   return PSA_SUCCESS;
 }
-#endif // PSA_WANT_ALG_CMAC || PSA_WANT_ALG_CBC_MAC || PSA_WANT_ALG_HMAC
+
+#endif // SLI_PSA_DRIVER_FEATURE_MAC
 
 //------------------------------------------------------------------------------
-// Driver entry points
+// Single-shot driver entry points
 
 psa_status_t sli_se_transparent_mac_compute(
   const psa_key_attributes_t *attributes,
@@ -159,9 +164,7 @@ psa_status_t sli_se_transparent_mac_compute(
   size_t mac_size,
   size_t *mac_length)
 {
-#if defined(PSA_WANT_ALG_CMAC)     \
-  || defined(PSA_WANT_ALG_CBC_MAC) \
-  || defined(PSA_WANT_ALG_HMAC)
+  #if defined(SLI_PSA_DRIVER_FEATURE_MAC)
 
   if (key_buffer == NULL
       || attributes == NULL) {
@@ -187,7 +190,7 @@ psa_status_t sli_se_transparent_mac_compute(
                                    mac_size,
                                    mac_length);
 
-#else // PSA_WANT_ALG_CMAC || PSA_WANT_ALG_CBC_MAC || PSA_WANT_ALG_HMAC
+  #else // SLI_PSA_DRIVER_FEATURE_MAC
 
   (void)attributes;
   (void)key_buffer;
@@ -200,8 +203,12 @@ psa_status_t sli_se_transparent_mac_compute(
   (void)mac_length;
 
   return PSA_ERROR_NOT_SUPPORTED;
-#endif
+
+  #endif // SLI_PSA_DRIVER_FEATURE_MAC
 }
+
+//------------------------------------------------------------------------------
+// Multi-part driver entry points
 
 psa_status_t sli_se_transparent_mac_sign_setup(
   sli_se_transparent_mac_operation_t *operation,
@@ -210,9 +217,7 @@ psa_status_t sli_se_transparent_mac_sign_setup(
   size_t key_buffer_size,
   psa_algorithm_t alg)
 {
-#if defined(PSA_WANT_ALG_CMAC)     \
-  || defined(PSA_WANT_ALG_CBC_MAC) \
-  || defined(PSA_WANT_ALG_HMAC)
+  #if defined(SLI_PSA_DRIVER_FEATURE_MAC_MULTIPART)
 
   if (operation == NULL
       || attributes == NULL
@@ -225,7 +230,7 @@ psa_status_t sli_se_transparent_mac_sign_setup(
   // start by resetting context
   memset(operation, 0, sizeof(*operation));
 
-  #if defined(PSA_WANT_ALG_HMAC)
+  #if defined(SLI_PSA_DRIVER_FEATURE_HMAC)
   if (PSA_ALG_IS_HMAC(alg)) {
     // SE does not support multipart HMAC. Construct it from hashing instead.
     // Check key type and output size
@@ -294,9 +299,9 @@ psa_status_t sli_se_transparent_mac_sign_setup(
     operation->hmac.alg = alg;
     return PSA_SUCCESS;
   }
-  #endif // PSA_WANT_ALG_HMAC
+  #endif   // SLI_PSA_DRIVER_FEATURE_HMAC
 
-  #if defined(PSA_WANT_ALG_CMAC) || defined(PSA_WANT_ALG_CBC_MAC)
+  #if defined(SLI_PSA_DRIVER_FEATURE_CMAC) || defined(SLI_PSA_DRIVER_FEATURE_CBC_MAC)
   status = sli_se_driver_mac_sign_setup(&(operation->cipher_mac.operation),
                                         attributes,
                                         alg);
@@ -329,11 +334,11 @@ psa_status_t sli_se_transparent_mac_sign_setup(
   }
 
   return PSA_SUCCESS;
-  #else // PSA_WANT_ALG_CMAC || PSA_WANT_ALG_CBC_MAC
+  #else   // SLI_PSA_DRIVER_FEATURE_CMAC || SLI_PSA_DRIVER_FEATURE_CBC_MAC
   return PSA_ERROR_NOT_SUPPORTED;
-  #endif // PSA_WANT_ALG_CMAC || PSA_WANT_ALG_CBC_MAC
+  #endif   // SLI_PSA_DRIVER_FEATURE_CMAC || SLI_PSA_DRIVER_FEATURE_CBC_MAC
 
-#else // PSA_WANT_ALG_CMAC || PSA_WANT_ALG_CBC_MAC || PSA_WANT_ALG_HMAC
+  #else // SLI_PSA_DRIVER_FEATURE_MAC_MULTIPART
 
   (void)operation;
   (void)attributes;
@@ -342,7 +347,8 @@ psa_status_t sli_se_transparent_mac_sign_setup(
   (void)alg;
 
   return PSA_ERROR_NOT_SUPPORTED;
-#endif
+
+  #endif // SLI_PSA_DRIVER_FEATURE_MAC_MULTIPART
 }
 
 psa_status_t sli_se_transparent_mac_verify_setup(
@@ -367,25 +373,23 @@ psa_status_t sli_se_transparent_mac_update(
   const uint8_t *input,
   size_t input_length)
 {
-#if defined(PSA_WANT_ALG_CMAC)     \
-  || defined(PSA_WANT_ALG_CBC_MAC) \
-  || defined(PSA_WANT_ALG_HMAC)
+  #if defined(SLI_PSA_DRIVER_FEATURE_MAC_MULTIPART)
 
   if (operation == NULL
       || (input == NULL && input_length > 0)) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
-  #if defined(PSA_WANT_ALG_HMAC)
+  #if defined(SLI_PSA_DRIVER_FEATURE_HMAC)
   if (PSA_ALG_IS_HMAC(operation->hmac.alg)) {
     return sli_se_transparent_hash_update(
       &operation->hmac.hash_ctx,
       input,
       input_length);
   }
-  #endif
+  #endif   // SLI_PSA_DRIVER_FEATURE_HMAC
 
-  #if defined(PSA_WANT_ALG_CMAC) || defined(PSA_WANT_ALG_CBC_MAC)
+  #if defined(SLI_PSA_DRIVER_FEATURE_CMAC) || defined(SLI_PSA_DRIVER_FEATURE_CBC_MAC)
   // Ephemeral contexts
   sl_se_key_descriptor_t key_desc = { 0 };
 
@@ -400,18 +404,19 @@ psa_status_t sli_se_transparent_mac_update(
                                   &key_desc,
                                   input,
                                   input_length);
-  #else // PSA_WANT_ALG_CMAC || PSA_WANT_ALG_CBC_MAC
+  #else   // SLI_PSA_DRIVER_FEATURE_CMAC || SLI_PSA_DRIVER_FEATURE_CBC_MAC
   return PSA_ERROR_NOT_SUPPORTED;
-  #endif // PSA_WANT_ALG_CMAC || PSA_WANT_ALG_CBC_MAC
+  #endif   // SLI_PSA_DRIVER_FEATURE_CMAC || SLI_PSA_DRIVER_FEATURE_CBC_MAC
 
-#else // PSA_WANT_ALG_CMAC || PSA_WANT_ALG_CBC_MAC || PSA_WANT_ALG_HMAC
+  #else // SLI_PSA_DRIVER_FEATURE_MAC_MULTIPART
 
   (void)operation;
   (void)input;
   (void)input_length;
 
   return PSA_ERROR_NOT_SUPPORTED;
-#endif
+
+  #endif // SLI_PSA_DRIVER_FEATURE_MAC_MULTIPART
 }
 
 psa_status_t sli_se_transparent_mac_sign_finish(
@@ -420,9 +425,7 @@ psa_status_t sli_se_transparent_mac_sign_finish(
   size_t mac_size,
   size_t *mac_length)
 {
-#if defined(PSA_WANT_ALG_CMAC)     \
-  || defined(PSA_WANT_ALG_CBC_MAC) \
-  || defined(PSA_WANT_ALG_HMAC)
+  #if defined(SLI_PSA_DRIVER_FEATURE_MAC_MULTIPART)
 
   if (operation == NULL
       || mac == NULL
@@ -431,14 +434,14 @@ psa_status_t sli_se_transparent_mac_sign_finish(
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
-  #if defined(PSA_WANT_ALG_HMAC)
+  #if defined(SLI_PSA_DRIVER_FEATURE_HMAC)
   if (PSA_ALG_IS_HMAC(operation->hmac.alg)) {
     uint8_t buffer[sizeof(operation->hmac.opad)
                    + (sizeof(operation->hmac.opad) / 2)];
     size_t olen = 0;
     psa_algorithm_t hash_alg = PSA_ALG_HMAC_GET_HASH(operation->hmac.alg);
 
-    #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_SE)
+    #if !defined(SLI_PSA_DRIVER_FEATURE_HASH_STATE_64)
     if (hash_alg == PSA_ALG_SHA_384 || hash_alg == PSA_ALG_SHA_512) {
       // Could only reach here if the programmer has made some errors. Take the
       // safe approach of checking just in case, in order to avoid certain
@@ -446,10 +449,10 @@ psa_status_t sli_se_transparent_mac_sign_finish(
       return PSA_ERROR_BAD_STATE;
     }
     size_t blocklen = 64;
-    #else // (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_SE)
+    #else
     size_t blocklen
       = (hash_alg == PSA_ALG_SHA_384 || hash_alg == PSA_ALG_SHA_512) ? 128 : 64;
-    #endif // (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_SE)
+    #endif
 
     // Construct outer hash input from opad and hash result
     memcpy(buffer, operation->hmac.opad, blocklen);
@@ -492,9 +495,9 @@ psa_status_t sli_se_transparent_mac_sign_finish(
     memset(buffer, 0, sizeof(buffer));
     return PSA_SUCCESS;
   }
-  #endif // PSA_WANT_ALG_HMAC
+  #endif   // SLI_PSA_DRIVER_FEATURE_HMAC
 
-  #if defined(PSA_WANT_ALG_CMAC) || defined(PSA_WANT_ALG_CBC_MAC)
+  #if defined(SLI_PSA_DRIVER_FEATURE_CMAC) || defined(SLI_PSA_DRIVER_FEATURE_CBC_MAC)
   // Ephemeral contexts
   sl_se_key_descriptor_t key_desc = { 0 };
 
@@ -510,11 +513,11 @@ psa_status_t sli_se_transparent_mac_sign_finish(
                                        mac,
                                        mac_size,
                                        mac_length);
-  #else // PSA_WANT_ALG_CMAC || PSA_WANT_ALG_CBC_MAC
+  #else   // SLI_PSA_DRIVER_FEATURE_CMAC || SLI_PSA_DRIVER_FEATURE_CBC_MAC
   return PSA_ERROR_NOT_SUPPORTED;
-  #endif // PSA_WANT_ALG_CMAC || PSA_WANT_ALG_CBC_MAC
+  #endif   // SLI_PSA_DRIVER_FEATURE_CMAC || SLI_PSA_DRIVER_FEATURE_CBC_MAC
 
-#else // PSA_WANT_ALG_CMAC || PSA_WANT_ALG_CBC_MAC || PSA_WANT_ALG_HMAC
+  #else // SLI_PSA_DRIVER_FEATURE_MAC_MULTIPART
 
   (void)operation;
   (void)mac;
@@ -522,7 +525,8 @@ psa_status_t sli_se_transparent_mac_sign_finish(
   (void)mac_length;
 
   return PSA_ERROR_NOT_SUPPORTED;
-#endif
+
+  #endif // SLI_PSA_DRIVER_FEATURE_MAC_MULTIPART
 }
 
 psa_status_t sli_se_transparent_mac_verify_finish(
@@ -530,9 +534,7 @@ psa_status_t sli_se_transparent_mac_verify_finish(
   const uint8_t *mac,
   size_t mac_length)
 {
-#if defined(PSA_WANT_ALG_CMAC)     \
-  || defined(PSA_WANT_ALG_CBC_MAC) \
-  || defined(PSA_WANT_ALG_HMAC)
+  #if defined(SLI_PSA_DRIVER_FEATURE_MAC_MULTIPART)
 
   // Since the PSA Crypto core exposes the verify functionality of the drivers
   // without actually implementing the fallback to 'sign' when the driver
@@ -560,22 +562,20 @@ psa_status_t sli_se_transparent_mac_verify_finish(
   memset(calculated_mac, 0, sizeof(calculated_mac));
   return status;
 
-#else // PSA_WANT_ALG_CMAC || PSA_WANT_ALG_CBC_MAC || PSA_WANT_ALG_HMAC
+  #else // SLI_PSA_DRIVER_FEATURE_MAC_MULTIPART
 
   (void)operation;
   (void)mac;
   (void)mac_length;
 
   return PSA_ERROR_NOT_SUPPORTED;
-#endif
+  #endif // SLI_PSA_DRIVER_FEATURE_MAC_MULTIPART
 }
 
 psa_status_t sli_se_transparent_mac_abort(
   sli_se_transparent_mac_operation_t *operation)
 {
-#if defined(PSA_WANT_ALG_CMAC)     \
-  || defined(PSA_WANT_ALG_CBC_MAC) \
-  || defined(PSA_WANT_ALG_HMAC)
+  #if defined(SLI_PSA_DRIVER_FEATURE_MAC_MULTIPART)
 
   // There's no state in hardware that we need to preserve, so zeroing out the
   // context suffices.
@@ -587,12 +587,12 @@ psa_status_t sli_se_transparent_mac_abort(
 
   return PSA_SUCCESS;
 
-#else // PSA_WANT_ALG_CMAC || PSA_WANT_ALG_CBC_MAC || PSA_WANT_ALG_HMAC
+  #else // SLI_PSA_DRIVER_FEATURE_MAC_MULTIPART
 
   (void)operation;
 
   return PSA_ERROR_NOT_SUPPORTED;
-#endif
+  #endif // SLI_PSA_DRIVER_FEATURE_MAC_MULTIPART
 }
 
-#endif // defined(SEMAILBOX_PRESENT)
+#endif // SLI_MBEDTLS_DEVICE_HSE

@@ -20,9 +20,7 @@
 #include "prepayment-modes-table.h"
 #include "prepayment-tick.h"
 
-#ifdef UC_BUILD
 #include "prepayment-server-config.h"
-#endif // UC_BUILD
 
 #define CHANGE_PAYMENT_MODE_DATETIME_NOW    0x00000000
 #define CHANGE_PAYMENT_MODE_DATETIME_CANCEL 0xFFFFFFFF
@@ -39,16 +37,16 @@ typedef struct {
   uint16_t paymentControlConfig;
   uint8_t  endpoint;
   uint8_t  active;
-} emPendingPaymentMode;
+} sli_zigbee_af_pending_payment_mode;
 
-static emPendingPaymentMode PendingPaymentModes[MAX_NUM_PENDING_PAYMENT_MODES];
+static sli_zigbee_af_pending_payment_mode PendingPaymentModes[MAX_NUM_PENDING_PAYMENT_MODES];
 
 void initPrepaymentModesTableIndex(uint8_t x);
 void updatePaymentControlConfiguration(uint8_t endpoint, uint16_t paymentControlConfig);
-uint16_t emAfPrepaymentModesGetCurrentMode(void);
+uint16_t sli_zigbee_af_prepayment_modes_get_current_mode(void);
 void scheduleNextMode(uint8_t endpoint);
 
-void emInitPrepaymentModesTable()
+void sli_zigbee_af_init_prepayment_modes_table()
 {
   uint8_t x;
   for ( x = 0; x < MAX_NUM_PENDING_PAYMENT_MODES; x++ ) {
@@ -182,7 +180,7 @@ uint32_t emberAfPrepaymentServerSecondsUntilPaymentModeEvent(uint32_t timeNowUtc
 
 void emberAfPrepaymentServerSetPaymentMode(uint8_t endpoint)
 {
-  uint16_t paymentControlConfig = emAfPrepaymentModesGetCurrentMode();
+  uint16_t paymentControlConfig = sli_zigbee_af_prepayment_modes_get_current_mode();
   if ( paymentControlConfig != INVALID_PAYMENT_CONTROL_CONFIG ) {
     // Eventually, this will be used to change prepayment modes, etc.
     // For now, it exists to make sure I understand how to invoke it.
@@ -190,7 +188,7 @@ void emberAfPrepaymentServerSetPaymentMode(uint8_t endpoint)
   }
 }
 
-uint16_t emAfPrepaymentModesGetCurrentMode()
+uint16_t sli_zigbee_af_prepayment_modes_get_current_mode()
 {
   uint8_t x;
   uint32_t now;

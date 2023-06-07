@@ -22,11 +22,7 @@
 #include "nvm3.h"
 #include "sl_wisun_cli_util.h"
 #include "app_certificate_store.h"
-
-// Temporarily declared here
-extern const uint8_t WISUN_ROOT_CERTIFICATE[];
-extern const uint8_t WISUN_SERVER_CERTIFICATE[];
-extern const uint8_t WISUN_SERVER_KEY[];
+#include "wisun_test_certificates.h"
 
 static const app_enum_t app_certificate_type_enum[] =
 {

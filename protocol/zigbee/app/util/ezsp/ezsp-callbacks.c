@@ -48,43 +48,11 @@ WEAK(void ezspDebugHandler(uint8_t messageLength,
 }
 #endif
 
-#ifndef UC_BUILD
-#ifndef EZSP_APPLICATION_HAS_CHILD_JOIN_HANDLER
-void ezspChildJoinHandler(uint8_t index,
-                          bool joining,
-                          EmberNodeId childId,
-                          EmberEUI64 childEui64,
-                          EmberNodeType childType)
-{
-}
-#endif
-#endif // UC_BUILD
-
-#ifndef UC_BUILD
-#ifndef EZSP_APPLICATION_HAS_TRUST_CENTER_JOIN_HANDLER
-void ezspTrustCenterJoinHandler(EmberNodeId newNodeId,
-                                EmberEUI64 newNodeEui64,
-                                EmberDeviceUpdate status,
-                                EmberJoinDecision policyDecision,
-                                EmberNodeId parentOfNewNode)
-{
-}
-#endif
-#endif // UC_BUILD
-
 #ifndef EZSP_APPLICATION_HAS_ZIGBEE_KEY_ESTABLISHMENT_HANDLER
 void ezspZigbeeKeyEstablishmentHandler(EmberEUI64 partner, EmberKeyStatus status)
 {
 }
 #endif
-
-#ifndef UC_BUILD
-#ifndef EZSP_APPLICATION_HAS_SWITCH_NETWORK_KEY_HANDLER
-void ezspSwitchNetworkKeyHandler(uint8_t sequenceNumber)
-{
-}
-#endif
-#endif // UC_BUILD
 
 #ifndef EZSP_APPLICATION_HAS_REMOTE_BINDING_HANDLER
 WEAK(void ezspRemoteSetBindingHandler(EmberBindingTableEntry *entry,
@@ -146,12 +114,14 @@ WEAK(void ezspIncomingRouteErrorHandler(EmberStatus status, EmberNodeId target))
 }
 
 #ifndef EZSP_APPLICATION_HAS_INCOMING_NETWORK_STATUS_HANDLER
+
 WEAK(void ezspIncomingNetworkStatusHandler(uint8_t errorCode, EmberNodeId target))
 {
 }
-#endif
 
+#endif
 #ifndef EZSP_APPLICATION_HAS_ROUTE_RECORD_HANDLER
+
 WEAK(void ezspIncomingRouteRecordHandler(EmberNodeId source,
                                          EmberEUI64 sourceEui,
                                          uint8_t lastHopLqi,
@@ -161,7 +131,6 @@ WEAK(void ezspIncomingRouteRecordHandler(EmberNodeId source,
 {
 }
 #endif
-
 #ifndef EZSP_APPLICATION_HAS_BOOTLOADER_HANDLER
 WEAK(void ezspIncomingBootloadMessageHandler(EmberEUI64 longId,
                                              uint8_t lastHopLqi,
@@ -240,16 +209,6 @@ WEAK(void ezspCalculateSmacsHandler283k1(EmberStatus status,
                                          EmberSmacData* responderSmac))
 {
 }
-#ifndef UC_BUILD
-// Elliptical Cryptography Digital Signature Algorithm (ECDSA)
-#ifndef EZSP_APPLICATION_HAS_DSA_SIGN_HANDLER
-void ezspDsaSignHandler(EmberStatus status,
-                        uint8_t messageLength,
-                        uint8_t* messageContents)
-{
-}
-#endif
-#endif // UC_BUILD
 // Elliptical Cryptography Digital Signature Verification
 #ifndef EZSP_APPLICATION_HAS_DSA_VERIFY_HANDLER
 WEAK(void ezspDsaVerifyHandler(EmberStatus status))
@@ -357,14 +316,35 @@ WEAK(void ezspDGpSentHandler(EmberStatus status, uint8_t gpepHandle))
 {
 }
 
-#ifndef UC_BUILD
-#ifndef EZSP_APPLICATION_HAS_DUTY_CYCLE_HANDLER
-void ezspDutyCycleHandler(uint8_t channelPage,
-                          uint8_t channel,
-                          EmberDutyCycleState state,
-                          uint8_t totalDevices,
-                          EmberPerDeviceDutyCycle *arrayOfDeviceDutyCycles)
+WEAK(void ezspDsaSignHandler(EmberStatus status,
+                             uint8_t messageLength,
+                             uint8_t* messageContents))
 {
 }
-#endif
-#endif // UC_BUILD
+WEAK(void ezspChildJoinHandler(uint8_t index,
+                               bool joining,
+                               EmberNodeId childId,
+                               EmberEUI64 childEui64,
+                               EmberNodeType childType))
+{
+}
+
+WEAK(void ezspDutyCycleHandler(uint8_t channelPage,
+                               uint8_t channel,
+                               EmberDutyCycleState state,
+                               uint8_t totalDevices,
+                               EmberPerDeviceDutyCycle *arrayOfDeviceDutyCycles))
+{
+}
+
+WEAK(void ezspSwitchNetworkKeyHandler(uint8_t sequenceNumber))
+{
+}
+
+WEAK(void ezspTrustCenterJoinHandler(EmberNodeId newNodeId,
+                                     EmberEUI64 newNodeEui64,
+                                     EmberDeviceUpdate status,
+                                     EmberJoinDecision policyDecision,
+                                     EmberNodeId parentOfNewNode))
+{
+}

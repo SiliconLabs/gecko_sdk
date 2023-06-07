@@ -20,14 +20,14 @@
 #include "stack/include/ember-types.h"
 #include "stack/include/library.h"
 
-const EmberLibraryStatus emBindingTableLibraryStatus = EMBER_LIBRARY_IS_STUB;
+const EmberLibraryStatus sli_zigbee_binding_table_library_status = EMBER_LIBRARY_IS_STUB;
 
-void emForgetBindingShortId(EmberNodeId shortId)
+void sli_zigbee_forget_binding_short_id(EmberNodeId shortId)
 {
   (void)shortId;
 }
 
-EmberNodeId emUpdateBindingRemoteNode(EmberEUI64 longId, EmberNodeId shortId)
+EmberNodeId sli_zigbee_update_binding_remote_node(EmberEUI64 longId, EmberNodeId shortId)
 {
   (void)longId;
   (void)shortId;
@@ -40,7 +40,7 @@ void emberSetBindingRemoteNodeId(uint8_t i, EmberNodeId shortId)
   (void)shortId;
 }
 
-void emUpdateBindingFlags(EmberEUI64 longId, uint8_t flags)
+void sli_zigbee_update_binding_flags(EmberEUI64 longId, uint8_t flags)
 {
   (void)longId;
   (void)flags;
@@ -60,18 +60,18 @@ EmberStatus emberSetBinding(uint8_t index, EmberBindingTableEntry *value)
   return EMBER_LIBRARY_NOT_PRESENT;
 }
 
-uint8_t emFindMulticastBinding(uint8_t start, EmberMulticastId multicastId)
+uint8_t sli_zigbee_find_multicast_binding(uint8_t start, EmberMulticastId multicastId)
 {
   (void)start;
   (void)multicastId;
   return EMBER_NULL_BINDING;
 }
 
-uint8_t emFindUnicastBinding(EmberNodeId shortId,
-                             uint8_t *longId,
-                             bool ignoreEndpoints,
-                             uint8_t localEndpoint,
-                             uint8_t remoteEndpoint)
+uint8_t sli_zigbee_find_unicast_binding(EmberNodeId shortId,
+                                        uint8_t *longId,
+                                        bool ignoreEndpoints,
+                                        uint8_t localEndpoint,
+                                        uint8_t remoteEndpoint)
 {
   (void)shortId;
   (void)longId;
@@ -81,20 +81,20 @@ uint8_t emFindUnicastBinding(EmberNodeId shortId,
   return EMBER_NULL_BINDING;
 }
 
-void emGetZigbeeBinding(uint8_t index,
-                        EmberBindingTableEntry *binding,
-                        EmberEUI64 sourceLongId)
+void sli_zigbee_get_zigbee_binding(uint8_t index,
+                                   EmberBindingTableEntry *binding,
+                                   EmberEUI64 sourceLongId)
 {
   (void)index;
   (void)binding;
   (void)sourceLongId;
 }
 
-bool emRemoteModifyBinding(EmberBindingTableEntry *binding,
-                           EmberEUI64 sourceLongId,
-                           bool isSet,
-                           bool *success,
-                           EmberZdoStatus *status)
+bool sli_zigbee_remote_modify_binding(EmberBindingTableEntry *binding,
+                                      EmberEUI64 sourceLongId,
+                                      bool isSet,
+                                      bool *success,
+                                      EmberZdoStatus *status)
 {
   (void)binding;
   (void)sourceLongId;
@@ -104,13 +104,13 @@ bool emRemoteModifyBinding(EmberBindingTableEntry *binding,
   return false;
 }
 
-void emInitializeBindingTable(void)
+void sli_zigbee_initialize_binding_table(void)
 {
 }
 
-bool emHandleBindUnbindRequests(EmberNodeId source,
-                                uint8_t *contents,
-                                uint16_t clusterId)
+bool sli_zigbee_handle_bind_unbind_requests(EmberNodeId source,
+                                            uint8_t *contents,
+                                            uint16_t clusterId)
 {
   (void)source;
   (void)contents;
@@ -118,9 +118,9 @@ bool emHandleBindUnbindRequests(EmberNodeId source,
   return false;
 }
 
-bool emHandleBindingTableRequest(EmberApsOption options,
-                                 EmberNodeId source,
-                                 uint8_t *contents)
+bool sli_zigbee_handle_binding_table_request(EmberApsOption options,
+                                             EmberNodeId source,
+                                             uint8_t *contents)
 {
   (void)options;
   (void)source;

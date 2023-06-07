@@ -20,7 +20,9 @@
 #include PLATFORM_HEADER
 
 #ifdef SL_COMPONENT_CATALOG_PRESENT
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #include "green-power-adapter-config.h"
 #endif // SL_COMPONENT_CATALOG_PRESENT
 
@@ -39,35 +41,35 @@
 
 typedef void (*pluginGPAdatperEventHandler_t)(sl_zigbee_event_wrapper_t *);
 
-void slxu_zigbee_event_init_wrapper(sl_zigbee_event_wrapper_t *event, pluginGPAdatperEventHandler_t handler);
-void slxu_zigbee_event_set_delay_ms_wrapper(sl_zigbee_event_wrapper_t *event, uint32_t delayMs);
-void slxu_zigbee_event_set_inactive_wrapper(sl_zigbee_event_wrapper_t *event);
-bool slxu_zigbee_event_is_active_wrapper(sl_zigbee_event_wrapper_t *event);
+void sl_zigbee_event_init_wrapper(sl_zigbee_event_wrapper_t *event, pluginGPAdatperEventHandler_t handler);
+void sl_zigbee_event_set_delay_ms_wrapper(sl_zigbee_event_wrapper_t *event, uint32_t delayMs);
+void sl_zigbee_event_set_inactive_wrapper(sl_zigbee_event_wrapper_t *event);
+bool sl_zigbee_event_is_active_wrapper(sl_zigbee_event_wrapper_t *event);
 
 #ifdef sl_zigbee_event_t
 #undef sl_zigbee_event_t
 #endif
 #define sl_zigbee_event_t sl_zigbee_event_wrapper_t
 
-#ifdef slxu_zigbee_event_init
-#undef slxu_zigbee_event_init
+#ifdef sl_zigbee_event_init
+#undef sl_zigbee_event_init
 #endif
-#define slxu_zigbee_event_init(...) slxu_zigbee_event_init_wrapper(__VA_ARGS__)
+#define sl_zigbee_event_init(...) sl_zigbee_event_init_wrapper(__VA_ARGS__)
 
-#ifdef slxu_zigbee_event_set_delay_ms
-#undef slxu_zigbee_event_set_delay_ms
+#ifdef sl_zigbee_event_set_delay_ms
+#undef sl_zigbee_event_set_delay_ms
 #endif
-#define slxu_zigbee_event_set_delay_ms(...) slxu_zigbee_event_set_delay_ms_wrapper(__VA_ARGS__)
+#define sl_zigbee_event_set_delay_ms(...) sl_zigbee_event_set_delay_ms_wrapper(__VA_ARGS__)
 
-#ifdef slxu_zigbee_event_set_inactive
-#undef slxu_zigbee_event_set_inactive
+#ifdef sl_zigbee_event_set_inactive
+#undef sl_zigbee_event_set_inactive
 #endif
-#define slxu_zigbee_event_set_inactive(...) slxu_zigbee_event_set_inactive_wrapper(__VA_ARGS__)
+#define sl_zigbee_event_set_inactive(...) sl_zigbee_event_set_inactive_wrapper(__VA_ARGS__)
 
-#ifdef slxu_zigbee_event_is_active
-#undef slxu_zigbee_event_is_active
+#ifdef sl_zigbee_event_is_active
+#undef sl_zigbee_event_is_active
 #endif
-#define slxu_zigbee_event_is_active(...) slxu_zigbee_event_is_active_wrapper(__VA_ARGS__)
+#define sl_zigbee_event_is_scheduled(...) sl_zigbee_event_is_active_wrapper(__VA_ARGS__)
 
 #endif // (EMBER_AF_PLUGIN_GREEN_POWER_ADAPTER_USE_CUSTOM_EVENT_SYSTEM == 1)
 

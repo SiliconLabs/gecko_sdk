@@ -16,9 +16,6 @@
  ******************************************************************************/
 
 #include "app/framework/include/af.h"
-#ifndef UC_BUILD
-#include "callback.h"
-#endif
 #include "app/framework/util/util.h"
 #include "app/framework/util/common.h"
 #include "app/framework/util/af-event.h"
@@ -53,7 +50,7 @@ static State states[EMBER_SUPPORTED_NETWORKS] = { { 0 } };
 #else
   #define ENABLE_POLL_COMPLETED_CALLBACK_DEFAULT false
 #endif
-bool emAfEnablePollCompletedCallback = ENABLE_POLL_COMPLETED_CALLBACK_DEFAULT;
+bool sli_zigbee_af_enable_poll_completed_callback = ENABLE_POLL_COMPLETED_CALLBACK_DEFAULT;
 
 #ifndef EMBER_AF_HAS_END_DEVICE_NETWORK
   #error "End device support only allowed on end devices."
@@ -62,9 +59,9 @@ bool emAfEnablePollCompletedCallback = ENABLE_POLL_COMPLETED_CALLBACK_DEFAULT;
 // *****************************************************************************
 // Functions
 
-void emberAfPluginEndDeviceSupportInitCallback(SLXU_INIT_ARG)
+void emberAfPluginEndDeviceSupportInitCallback(uint8_t init_level)
 {
-  SLXU_INIT_UNUSED_ARG;
+  (void)init_level;
 
   uint8_t i;
   for (i = 0; i < EMBER_SUPPORTED_NETWORKS; i++) {
@@ -85,18 +82,12 @@ void emberAfPluginEndDeviceSupportInitCallback(SLXU_INIT_ARG)
     states[i].lastAppTaskScheduleTime = 0;
     states[i].pollControl = EMBER_AF_LONG_POLL;
   }
-
-#ifndef UC_BUILD
-  // In UC these are templated directly to the event_init context.
-  emAfPluginEndDeviceSupportMoveInit();
-  emAfPluginEndDeviceSupportPollingInit();
-#endif // !UC_BUILD
 }
 
 void emberAfAddToCurrentAppTasksCallback(EmberAfApplicationTask tasks)
 {
-  if (emAfProIsCurrentNetwork()
-      && (EMBER_SLEEPY_END_DEVICE <= emAfCurrentZigbeeProNetwork->nodeType
+  if (sli_zigbee_af_pro_is_current_network()
+      && (EMBER_SLEEPY_END_DEVICE <= sli_zigbee_af_current_zigbee_pro_network->nodeType
           || tasks == EMBER_AF_FORCE_SHORT_POLL_FOR_PARENT_CONNECTIVITY)) {
     // Allow short poll on non-sleepy/EMBER_END_DEVICE as well only if device is
     // in EMBER_AF_FORCE_SHORT_POLL_FOR_PARENT_CONNECTIVITY task.
@@ -176,8 +167,8 @@ void emberAfSetShortPollIntervalQsCallback(uint16_t shortPollIntervalQs)
 
 uint32_t emberAfGetCurrentPollIntervalMsCallback(void)
 {
-  if (emAfProIsCurrentNetwork()
-      && (EMBER_SLEEPY_END_DEVICE <= emAfCurrentZigbeeProNetwork->nodeType
+  if (sli_zigbee_af_pro_is_current_network()
+      && (EMBER_SLEEPY_END_DEVICE <= sli_zigbee_af_current_zigbee_pro_network->nodeType
           || (emberAfGetCurrentAppTasksCallback() & EMBER_AF_FORCE_SHORT_POLL_FOR_PARENT_CONNECTIVITY))) {
     // Allow short poll on non-sleepy/EMBER_END_DEVICE as well only if device is
     // in EMBER_AF_FORCE_SHORT_POLL_FOR_PARENT_CONNECTIVITY task.
@@ -238,7 +229,6 @@ void emberAfSetWakeTimeoutBitmaskCallback(EmberAfApplicationTask tasks)
   state->wakeTimeoutBitmask = tasks;
 }
 
-#ifdef UC_BUILD
 #include "zap-event.h"
 
 EmberAfEventPollControl emberAfGetCurrentPollControlCallback(void)
@@ -258,28 +248,6 @@ EmberAfEventPollControl emberAfGetCurrentPollControlCallback(void)
 #endif
   return pollControl;
 }
-
-#else // !UC_BUILD
-
-EmberAfEventPollControl emberAfGetCurrentPollControlCallback(void)
-{
-  uint8_t networkIndex = emberGetCurrentNetwork();
-  EmberAfEventPollControl pollControl = states[networkIndex].pollControl;
-#ifdef EMBER_AF_GENERATED_EVENT_CONTEXT
-  uint8_t i;
-  for (i = 0; i < emAfAppEventContextLength; i++) {
-    EmberAfEventContext *context = &emAfAppEventContext[i];
-    if (networkIndex == emberAfNetworkIndexFromEndpoint(context->endpoint)
-        && emberEventControlGetActive(*context->eventControl)
-        && pollControl < context->pollControl) {
-      pollControl = context->pollControl;
-    }
-  }
-#endif
-  return pollControl;
-}
-
-#endif // UC_BUILD
 
 EmberAfEventPollControl emberAfGetDefaultPollControlCallback(void)
 {

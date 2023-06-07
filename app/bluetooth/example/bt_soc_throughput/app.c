@@ -40,7 +40,7 @@
 #include "sl_status.h"
 #include "sl_simple_button.h"
 #include "sl_simple_button_instances.h"
-#include "sl_simple_timer.h"
+#include "app_timer.h"
 
 #ifdef SL_CATALOG_SIMPLE_LED_PRESENT
 #include "sl_simple_led_instances.h"
@@ -58,6 +58,12 @@
 
 #define PB0_VALUE    ((uint8_t)(1 << 0))  ///< Button 0 pressed.
 #define PB1_VALUE    ((uint8_t)(1 << 1))  ///< Button 1 pressed.
+
+/// Enabled, if switching roles (central - peripheral)
+bool switching_roles = false;
+
+// Desired role for throughput
+throughput_role_t global_desired_role;
 
 /// Current role for throughput
 throughput_role_t role;
@@ -80,19 +86,93 @@ uint8_t button_change = 0;
 #if SL_SIMPLE_BUTTON_COUNT == 1
 
 /// Timer for button press handling
-sl_simple_timer_t button_timer;
+app_timer_t button_timer;
 
 /// Timer rised for short press
 bool button_timer_rised = false;
 
 #endif //SL_SIMPLE_BUTTON_COUNT
 
-void app_handle_button_press();
+/*******************************************************************************
+ *******************  FORWARD DECLARATION OF FUNCTIONS   ***********************
+ ******************************************************************************/
+static void app_handle_button_press(void);
+static void enable_new_throughput_role(throughput_role_t new_role);
+static sl_status_t set_role_request_and_disable_current_role(throughput_role_t role_request);
+static void set_role(throughput_role_t new_role);
+static void handle_cli_switch_command(throughput_role_t role_request);
 
-/**************************************************************************//**
- * Checks buttons on start.
- * @return the button code that is pressed
- *****************************************************************************/
+/*******************************************************************************
+ **************************   LOCAL FUNCTIONS   ********************************
+ ******************************************************************************/
+static void enable_new_throughput_role(throughput_role_t new_role)
+{
+  switch (new_role) {
+    case THROUGHPUT_ROLE_CENTRAL:
+      set_role(new_role);
+      throughput_central_enable();
+      break;
+
+    case THROUGHPUT_ROLE_PERIPHERAL:
+      set_role(new_role);
+      throughput_peripheral_enable();
+      break;
+  }
+}
+
+static sl_status_t set_role_request_and_disable_current_role(throughput_role_t role_request)
+{
+  sl_status_t sc = 0;
+
+  // If state is not disconnected, we have to make sure, it will be disconnected
+  switch (role) {
+    case THROUGHPUT_ROLE_CENTRAL:
+      sc = throughput_central_disable();
+      break;
+
+    case THROUGHPUT_ROLE_PERIPHERAL:
+      sc = throughput_peripheral_disable();
+      break;
+
+    default:
+      // Set the current role and desired role to the same role
+      set_role(role);
+      sc = SL_STATUS_NOT_FOUND;
+      break;
+  }
+
+  if (sc == SL_STATUS_OK) {
+    global_desired_role = role_request;
+  }
+
+  return sc;
+}
+
+static void set_role(throughput_role_t new_role)
+{
+  role = new_role;
+  // Make sure the global, desired role will change
+  global_desired_role = role;
+}
+
+static void handle_cli_switch_command(throughput_role_t role_request)
+{
+  sl_status_t sc = SL_STATUS_OK;
+
+  if (role != role_request) {
+    sc = set_role_request_and_disable_current_role(role_request);
+  } else {
+    app_log_warning("Already in that state." APP_LOG_NL);
+  }
+
+  if (sc != SL_STATUS_OK) {
+    app_log_warning("There was an error during state change. STATUS: %lx" APP_LOG_NL, sc);
+  }
+}
+
+/*******************************************************************************
+ **************************   GLOBAL FUNCTIONS   *******************************
+ ******************************************************************************/
 uint8_t app_check_buttons()
 {
   uint8_t ret = 0;
@@ -212,7 +292,7 @@ void app_test(bool start)
 /**************************************************************************//**
  * Timer callback
  *****************************************************************************/
-void app_button_timer_callback(sl_simple_timer_t *timer, void *data)
+void app_button_timer_callback(app_timer_t *timer, void *data)
 {
   (void) data;
   (void) timer;
@@ -232,13 +312,13 @@ void app_handle_button_press()
 #elif SL_SIMPLE_BUTTON_COUNT == 1
   if (button_current) {
     button_timer_rised = false;
-    sl_simple_timer_start(&button_timer,
-                          BUTTON_TIMEOUT,
-                          app_button_timer_callback,
-                          NULL,
-                          false);
+    app_timer_start(&button_timer,
+                    BUTTON_TIMEOUT,
+                    app_button_timer_callback,
+                    NULL,
+                    false);
   } else {
-    sl_simple_timer_stop(&button_timer);
+    app_timer_stop(&button_timer);
     if (button_timer_rised) {
       app_test(false);
     } else {
@@ -293,14 +373,16 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
       if (app_check_buttons()) {
         // Enable throughput test in Central mode if button is pressed
         app_log_info("Button is pressed on start: Central mode set." APP_LOG_NL);
-        role = THROUGHPUT_ROLE_CENTRAL;
+        set_role(THROUGHPUT_ROLE_CENTRAL);
+
         throughput_central_enable();
         // Mask first button release
         mask_release = true;
       } else {
         // Enable throughput test in Peripheral mode
         app_log_info("Peripheral mode set." APP_LOG_NL);
-        role = THROUGHPUT_ROLE_PERIPHERAL;
+        set_role(THROUGHPUT_ROLE_PERIPHERAL);
+
         throughput_peripheral_enable();
       }
       break;
@@ -326,6 +408,22 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
     default:
       break;
   }
+}
+
+/**************************************************************************//**
+ * CLI command to switch from current state to central
+ *****************************************************************************/
+void cli_switch_to_central(void)
+{
+  handle_cli_switch_command(THROUGHPUT_ROLE_CENTRAL);
+}
+
+/**************************************************************************//**
+ * CLI command to switch from current state to peripheral
+ *****************************************************************************/
+void cli_switch_to_peripheral(void)
+{
+  handle_cli_switch_command(THROUGHPUT_ROLE_PERIPHERAL);
 }
 
 /*******************************************************************************
@@ -395,4 +493,32 @@ void throughput_central_on_finish(throughput_value_t throughput,
   throughput_ui_set_throughput(throughput);
   throughput_ui_set_count(count);
   throughput_ui_update();
+}
+
+/**************************************************************************//**
+ * Callback to handle state change.
+ * @param[in] state current state
+ *****************************************************************************/
+void throughput_central_on_state_change(throughput_state_t state)
+{
+  throughput_ui_set_state(state);
+  throughput_ui_update();
+
+  if (state == THROUGHPUT_STATE_UNINITALIZED) {
+    enable_new_throughput_role(THROUGHPUT_ROLE_PERIPHERAL);
+  }
+}
+
+/**************************************************************************//**
+ * Callback to handle state change.
+ * @param[in] state current state
+ *****************************************************************************/
+void throughput_peripheral_on_state_change(throughput_state_t state)
+{
+  throughput_ui_set_state(state);
+  throughput_ui_update();
+
+  if (state == THROUGHPUT_STATE_UNINITALIZED) {
+    enable_new_throughput_role(THROUGHPUT_ROLE_CENTRAL);
+  }
 }

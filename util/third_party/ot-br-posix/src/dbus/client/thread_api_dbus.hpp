@@ -138,13 +138,13 @@ public:
      * @retval ...         OpenThread defined error value otherwise
      *
      */
-    ClientError Attach(const std::string &         aNetworkName,
+    ClientError Attach(const std::string          &aNetworkName,
                        uint16_t                    aPanId,
                        uint64_t                    aExtPanId,
                        const std::vector<uint8_t> &aNetworkKey,
                        const std::vector<uint8_t> &aPSKc,
                        uint32_t                    aChannelMask,
-                       const OtResultHandler &     aHandler);
+                       const OtResultHandler      &aHandler);
 
     /**
      * This method attaches the device to the Thread network.
@@ -230,12 +230,12 @@ public:
      * @retval ...         OpenThread defined error value otherwise
      *
      */
-    ClientError JoinerStart(const std::string &    aPskd,
-                            const std::string &    aProvisioningUrl,
-                            const std::string &    aVendorName,
-                            const std::string &    aVendorModel,
-                            const std::string &    aVendorSwVersion,
-                            const std::string &    aVendorData,
+    ClientError JoinerStart(const std::string     &aPskd,
+                            const std::string     &aProvisioningUrl,
+                            const std::string     &aVendorName,
+                            const std::string     &aVendorModel,
+                            const std::string     &aVendorSwVersion,
+                            const std::string     &aVendorData,
                             const OtResultHandler &aHandler);
 
     /**
@@ -309,18 +309,6 @@ public:
     ClientError SetMeshLocalPrefix(const std::array<uint8_t, OTBR_IP6_PREFIX_SIZE> &aPrefix);
 
     /**
-     * This method sets the legacy prefix of ConnectIP.
-     *
-     * @param[in] aPrefix  The address prefix.
-     *
-     * @retval ERROR_NONE  Successfully performed the dbus function call
-     * @retval ERROR_DBUS  dbus encode/decode error
-     * @retval ...         OpenThread defined error value otherwise
-     *
-     */
-    ClientError SetLegacyUlaPrefix(const std::array<uint8_t, OTBR_IP6_PREFIX_SIZE> &aPrefix);
-
-    /**
      * This method sets the active operational dataset.
      *
      * @param[out] aDataset  The active operational dataset
@@ -368,6 +356,18 @@ public:
      *
      */
     ClientError SetRadioRegion(const std::string &aRadioRegion);
+
+    /**
+     * This method sets the NAT64 switch.
+     *
+     * @param[in] aEnable  A boolean to enable/disable the NAT64.
+     *
+     * @retval ERROR_NONE  Successfully performed the dbus function call
+     * @retval ERROR_DBUS  dbus encode/decode error
+     * @retval ...         OpenThread defined error value otherwise
+     *
+     */
+    ClientError SetNat64Enabled(bool aEnabled);
 
     /**
      * This method gets the link operating mode.
@@ -500,6 +500,18 @@ public:
      *
      */
     ClientError GetSupportedChannelMask(uint32_t &aChannelMask);
+
+    /**
+     * This method gets the preferred channel mask.
+     *
+     * @param[out] aChannelMask  The channel mask.
+     *
+     * @retval ERROR_NONE  Successfully performed the dbus function call
+     * @retval ERROR_DBUS  dbus encode/decode error
+     * @retval ...         OpenThread defined error value otherwise
+     *
+     */
+    ClientError GetPreferredChannelMask(uint32_t &aChannelMask);
 
     /**
      * This method gets the Thread routing locator
@@ -796,6 +808,67 @@ public:
      */
     ClientError UpdateVendorMeshCopTxtEntries(std::vector<TxtEntry> &aUpdate);
 
+    /**
+     * This method gets the state of NAT64.
+     *
+     * @param[out] aState  The NAT64 state of each components.
+     *
+     * @retval ERROR_NONE  Successfully performed the dbus function call
+     * @retval ERROR_DBUS  dbus encode/decode error
+     * @retval ...         OpenThread defined error value otherwise
+     *
+     */
+    ClientError GetNat64State(Nat64ComponentState &aState);
+
+    /**
+     * This method gets the active NAT64 mappings.
+     *
+     * @param[out] aMappings  The active NAT64 mappings.
+     *
+     * @retval ERROR_NONE  Successfully performed the dbus function call
+     * @retval ERROR_DBUS  dbus encode/decode error
+     * @retval ...         OpenThread defined error value otherwise
+     *
+     */
+    ClientError GetNat64Mappings(std::vector<Nat64AddressMapping> &aMappings);
+
+    /**
+     * This method gets the NAT64 traffic counters.
+     *
+     * @param[out] aCounters  The NAT64 traffic counters.
+     *
+     * @retval ERROR_NONE  Successfully performed the dbus function call
+     * @retval ERROR_DBUS  dbus encode/decode error
+     * @retval ...         OpenThread defined error value otherwise
+     *
+     */
+    ClientError GetNat64ProtocolCounters(Nat64ProtocolCounters &aCounters);
+
+    /**
+     * This method gets the NAT64 error counters.
+     *
+     * @param[out] aCounters  The NAT64 error counters.
+     *
+     * @retval ERROR_NONE  Successfully performed the dbus function call
+     * @retval ERROR_DBUS  dbus encode/decode error
+     * @retval ...         OpenThread defined error value otherwise
+     *
+     */
+    ClientError GetNat64ErrorCounters(Nat64ErrorCounters &aCounters);
+
+    /**
+     * This method gets the telemetry data proto serialized byte data.
+     *
+     * @param[out] aTelemetryData  The telemetry data proto serialized
+     *                             byte data (see proto/thread_telemetry.proto)
+     *
+     * @retval ERROR_NONE  Successfully performed the dbus function call
+     * @retval ERROR_DBUS  dbus encode/decode error
+     * @retval ...         OpenThread defined error value otherwise
+     *
+     */
+    ClientError GetTelemetryData(std::vector<uint8_t> &aTelemetryData);
+
 private:
     ClientError CallDBusMethodSync(const std::string &aMethodName);
     ClientError CallDBusMethodAsync(const std::string &aMethodName, DBusPendingCallNotifyFunction aFunction);
@@ -803,8 +876,8 @@ private:
     template <typename ArgType> ClientError CallDBusMethodSync(const std::string &aMethodName, const ArgType &aArgs);
 
     template <typename ArgType>
-    ClientError CallDBusMethodAsync(const std::string &           aMethodName,
-                                    const ArgType &               aArgs,
+    ClientError CallDBusMethodAsync(const std::string            &aMethodName,
+                                    const ArgType                &aArgs,
                                     DBusPendingCallNotifyFunction aFunction);
 
     template <typename ValType> ClientError SetProperty(const std::string &aPropertyName, const ValType &aValue);
@@ -826,7 +899,9 @@ private:
     void        ScanPendingCallHandler(DBusPendingCall *aPending);
     void        EnergyScanPendingCallHandler(DBusPendingCall *aPending);
 
-    static void EmptyFree(void *) {}
+    static void EmptyFree(void *)
+    {
+    }
 
     std::string mInterfaceName;
 

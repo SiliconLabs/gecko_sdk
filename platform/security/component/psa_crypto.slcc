@@ -46,6 +46,7 @@ provides:
     condition: [psa_crypto]
 
 requires:
+  - name: device
   - name: mbedtls_core
   - name: psa_crypto_config
   - name: psa_crypto_source
@@ -94,19 +95,13 @@ requires:
 
 include:
   - path: sl_component/sl_mbedtls_support/inc
-    condition: [trustzone_unaware]
     file_list:
-      - path: sli_psa_crypto.h
-  - path: sl_component/sl_mbedtls_support/inc
-    condition: [trustzone_nonsecure]
-    file_list:
+      - path: sl_psa_crypto.h
       - path: sli_psa_crypto.h
 
 source:
+  - path: sl_component/sl_mbedtls_support/src/sl_psa_crypto.c
   - path: sl_component/sl_mbedtls_support/src/sli_psa_crypto.c
-    condition: [trustzone_unaware]
-  - path: sl_component/sl_mbedtls_support/src/sli_psa_crypto.c
-    condition: [trustzone_nonsecure]
 
 recommends:
   # Assume that projects are TZ unaware unless a state is explicitly included.
@@ -127,7 +122,7 @@ template_contribution:
       handler: psa_crypto_init
     priority: 1
     condition: [trustzone_unaware, psa_crypto_trng]
-    unless: [device_sdid_89, zigbee_classic_key_storage]
+    unless: [device_sdid_89, zigbee_classic_key_storage, native]
   - name: event_handler
     value:
       event: service_init
@@ -135,7 +130,7 @@ template_contribution:
       handler: psa_crypto_init
     priority: 1
     condition: [trustzone_unaware, mbedtls_entropy_adc]
-    unless: [rail_lib, zigbee_classic_key_storage]
+    unless: [rail_lib, zigbee_classic_key_storage, native]
   - name: event_handler
     value:
       event: service_init
@@ -143,7 +138,7 @@ template_contribution:
       handler: psa_crypto_init
     priority: 1
     condition: [trustzone_unaware, mbedtls_entropy_nvseed]
-    unless: [rail_lib, zigbee_classic_key_storage]
+    unless: [rail_lib, zigbee_classic_key_storage, native]
 
   - name: mbedtls_config
     value: MBEDTLS_PSA_CRYPTO_C

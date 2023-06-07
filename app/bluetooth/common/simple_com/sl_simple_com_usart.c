@@ -127,13 +127,13 @@ void sl_simple_com_step(void)
       tx_cb_signal.timeout++;
       sl_simple_com_os_task_proceed();
     } else {
-      // Call public callback API
-      sl_simple_com_transmit_cb(ECODE_EMDRV_UARTDRV_OK == tx_cb_signal.status
-                                ? SL_STATUS_OK : SL_STATUS_FAIL);
       // Clear TX buffer
       memset(tx_buf, 0, sizeof(tx_buf));
       tx_cb_signal.timeout = 0;
       tx_cb_signal.finished = false;
+      // Call public callback API
+      sl_simple_com_transmit_cb(ECODE_EMDRV_UARTDRV_OK == tx_cb_signal.status
+                                ? SL_STATUS_OK : SL_STATUS_FAIL);
     }
   }
 }

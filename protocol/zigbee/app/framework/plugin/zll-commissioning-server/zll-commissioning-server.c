@@ -22,8 +22,9 @@
 #include "app/framework/plugin/zll-commissioning-common/zll-commissioning.h"
 #include  "mac-phy.h"
 
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #ifdef SL_CATALOG_ZIGBEE_ZLL_COMMISSIONING_CLIENT_PRESENT
 #define ZLL_COMMISSIONING_CLIENT_PRESENT
 #endif
@@ -37,20 +38,6 @@
 #if (EMBER_AF_PLUGIN_ZLL_COMMISSIONING_SERVER_REMOTE_RESET_ALLOWED == 1)
 #define REMOTE_RESET_ALLOWED
 #endif
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_ZLL_COMMISSIONING_CLIENT
-#define ZLL_COMMISSIONING_CLIENT_PRESENT
-#endif
-#ifdef EMBER_AF_PLUGIN_ZLL_COMMISSIONING_SERVER_RX_ALWAYS_ON
-#define RX_ALWAYS_ON
-#endif
-#ifdef EMBER_AF_PLUGIN_ZLL_COMMISSIONING_SERVER_STEALING_ALLOWED
-#define STEALING_ALLOWED
-#endif
-#ifdef EMBER_AF_PLUGIN_ZLL_COMMISSIONING_SERVER_REMOTE_RESET_ALLOWED
-#define REMOTE_RESET_ALLOWED
-#endif
-#endif // UC_BUILD
 
 // The code below assumes that there is exactly one network and that it is
 // ZigBee PRO.
@@ -78,8 +65,8 @@ static const bool stealingAllowed = STEALING_ALLOWED_BOOL;
 static const bool remoteResetAllowed = REMOTE_RESET_ALLOWED_BOOL;
 
 #ifdef PLUGIN_DEBUG
-static const uint8_t emAfZllCommissioningPluginName[] = "ZLL Commissioning Server";
-#define PLUGIN_NAME emAfZllCommissioningPluginName
+static const uint8_t sli_zigbee_af_zll_commissioning_plugin_name[] = "ZLL Commissioning Server";
+#define PLUGIN_NAME sli_zigbee_af_zll_commissioning_plugin_name
 #endif
 
 #ifdef RX_ALWAYS_ON
@@ -90,12 +77,12 @@ static const uint8_t emAfZllCommissioningPluginName[] = "ZLL Commissioning Serve
 
 // The target network - used here for the deviceInformationRequestHandler to
 // determine if the request was from a legacy device.
-extern EmberZllNetwork emAfZllNetwork;
+extern EmberZllNetwork sli_zigbee_af_zll_network;
 
 // Private ZLL commissioning functions
-bool emAfZllAmFactoryNew(void);
-EmberNodeType emAfZllGetLogicalNodeType(void);
-EmberZllPolicy emAfZllGetPolicy(void);
+bool sli_zigbee_af_zll_am_factory_new(void);
+EmberNodeType sli_zigbee_af_zll_get_logical_node_type(void);
+EmberZllPolicy sli_zigbee_af_zll_get_policy(void);
 
 //------------------------------------------------------------------------------
 // Module private functions
@@ -104,8 +91,8 @@ static void identifyRequestHandler(const EmberEUI64 source,
                                    uint32_t transaction,
                                    uint16_t identifyDurationS)
 {
-  if ((emAfZllGetPolicy() & EMBER_ZLL_POLICY_STEALING_ENABLED)
-      || emAfZllAmFactoryNew()) {
+  if ((sli_zigbee_af_zll_get_policy() & EMBER_ZLL_POLICY_STEALING_ENABLED)
+      || sli_zigbee_af_zll_am_factory_new()) {
     emberAfZllCommissioningClusterPrintln("RX: IdentifyRequest 0x%4x, 0x%2x",
                                           transaction,
                                           identifyDurationS);
@@ -120,14 +107,14 @@ static void resetToFactoryNewRequestHandler(const EmberEUI64 source,
 {
   emberAfZllCommissioningClusterPrintln("RX: ResetToFactoryNewRequest 0x%4x",
                                         transaction);
-  if (!emAfZllAmFactoryNew()) {
+  if (!sli_zigbee_af_zll_am_factory_new()) {
     EmberCurrentSecurityState securityState;
 
     // Remote reset may be disabled, but only for a device on a centralized network.
     if (emberGetCurrentSecurityState(&securityState) != EMBER_SUCCESS  // not joined
         || (securityState.bitmask & EMBER_DISTRIBUTED_TRUST_CENTER_MODE)
-        || (emAfZllGetPolicy() & EMBER_ZLL_POLICY_REMOTE_RESET_ENABLED)) {
-      emAfZllFlags = TOUCH_LINK_TARGET;  // note reset via interpan
+        || (sli_zigbee_af_zll_get_policy() & EMBER_ZLL_POLICY_REMOTE_RESET_ENABLED)) {
+      sli_zigbee_af_zll_flags = TOUCH_LINK_TARGET;  // note reset via interpan
       emberAfZllResetToFactoryNew();
     }
   }
@@ -136,17 +123,17 @@ static void resetToFactoryNewRequestHandler(const EmberEUI64 source,
 //------------------------------------------------------------------------------
 // ZLL commissioning private functions
 
-bool emAfZllStealingAllowed(void)
+bool sli_zigbee_af_zll_stealing_allowed(void)
 {
   return stealingAllowed;
 }
 
-bool emAfZllRemoteResetAllowed(void)
+bool sli_zigbee_af_zll_remote_reset_allowed(void)
 {
   return remoteResetAllowed;
 }
 
-void emAfZllInitializeRadio(void)
+void sli_zigbee_af_zll_initialize_radio(void)
 {
   // Turn the receiver on for a user-specified period, in order to allow incoming.
   // scan requests, but cancel any outstanding rx on period first, in case we've
@@ -165,9 +152,9 @@ void emAfZllInitializeRadio(void)
   emberAfAppPrintln("Setting default channel to %d", EMBER_AF_PLUGIN_ZLL_COMMISSIONING_SERVER_DEFAULT_RADIO_CHANNEL);
 }
 
-bool emAfPluginZllCommissioningServerInterpanPreMessageReceivedCallback(const EmberAfInterpanHeader *header,
-                                                                        uint8_t msgLen,
-                                                                        uint8_t *message)
+bool sli_zigbee_af_zll_commissioning_server_interpan_pre_message_received_callback(const EmberAfInterpanHeader *header,
+                                                                                   uint8_t msgLen,
+                                                                                   uint8_t *message)
 {
   uint32_t transaction;
   uint8_t frameControl, commandId, msgIndex;
@@ -216,7 +203,7 @@ bool emAfPluginZllCommissioningServerInterpanPreMessageReceivedCallback(const Em
     case ZCL_RESET_TO_FACTORY_NEW_REQUEST_COMMAND_ID:
     {
       // Ignore reset request if we are a co-ordinator
-      if (emAfZllGetLogicalNodeType() != EMBER_COORDINATOR) {
+      if (sli_zigbee_af_zll_get_logical_node_type() != EMBER_COORDINATOR) {
         resetToFactoryNewRequestHandler(header->longAddress, transaction);
       }
       return true;
@@ -233,7 +220,7 @@ bool emAfPluginZllCommissioningServerInterpanPreMessageReceivedCallback(const Em
 EmberStatus emberAfZllNoTouchlinkForNFN(void)
 {
   // Note, to reenable stealing, it is necessary to call emberAfZllEnable().
-  EmberZllPolicy policy = emAfZllGetPolicy();
+  EmberZllPolicy policy = sli_zigbee_af_zll_get_policy();
   EmberStatus status;
 #ifndef EZSP_HOST
   status = emberZllSetPolicy(policy & ~EMBER_ZLL_POLICY_STEALING_ENABLED);
@@ -251,7 +238,7 @@ EmberStatus emberAfZllNoResetForNFN(void)
   // Note, to reenable remote reset, it is necessary to call emberAfZllEnable().
   // Note also that the policy is only honoured if the device is on a centralized
   // security network.
-  EmberZllPolicy policy = emAfZllGetPolicy();
+  EmberZllPolicy policy = sli_zigbee_af_zll_get_policy();
   EmberStatus status;
 #ifndef EZSP_HOST
   status = emberZllSetPolicy(policy & ~EMBER_ZLL_POLICY_REMOTE_RESET_ENABLED);
@@ -264,34 +251,12 @@ EmberStatus emberAfZllNoResetForNFN(void)
   return status;
 }
 
-#ifdef UC_BUILD
-void emAfZllTouchLinkTargetCallback(EmberZllNetwork *networkInfo)
+void sli_zigbee_af_zll_touch_link_target_callback(EmberZllNetwork *networkInfo)
 {
   debugPrintln("%s: touchlink target handler", PLUGIN_NAME);
-  MEMMOVE(&emAfZllNetwork, networkInfo, sizeof(EmberZllNetwork));
+  MEMMOVE(&sli_zigbee_af_zll_network, networkInfo, sizeof(EmberZllNetwork));
 #ifdef ZLL_COMMISSIONING_CLIENT_PRESENT
-  emAfZllSubDeviceCount = 0;
+  sli_zigbee_af_zll_sub_device_count = 0;
 #endif
-  emAfZllFlags = TOUCH_LINK_TARGET;
+  sli_zigbee_af_zll_flags = TOUCH_LINK_TARGET;
 }
-#else // !UC_BUILD
-void ezspZllTouchLinkTargetHandler(EmberZllNetwork *networkInfo)
-{
-  debugPrintln("%p: touchlink target handler", PLUGIN_NAME);
-  MEMMOVE(&emAfZllNetwork, networkInfo, sizeof(EmberZllNetwork));
-#ifdef ZLL_COMMISSIONING_CLIENT_PRESENT
-  emAfZllSubDeviceCount = 0;
-#endif
-  emAfZllFlags = TOUCH_LINK_TARGET;
-}
-
-void emberZllTouchLinkTargetHandler(const EmberZllNetwork *networkInfo)
-{
-  debugPrintln("%p: touchlink target handler", PLUGIN_NAME);
-  MEMMOVE(&emAfZllNetwork, networkInfo, sizeof(EmberZllNetwork));
-#ifdef ZLL_COMMISSIONING_CLIENT_PRESENT
-  emAfZllSubDeviceCount = 0;
-#endif
-  emAfZllFlags = TOUCH_LINK_TARGET;
-}
-#endif // UC_BUILD

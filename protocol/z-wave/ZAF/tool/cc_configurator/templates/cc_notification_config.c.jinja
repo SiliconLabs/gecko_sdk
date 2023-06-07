@@ -5,14 +5,28 @@
  * @copyright 2022 Silicon Laboratories Inc.
  */
 
-#include <stdint.h>
-#include <stdbool.h>
-#include <notification.h>
-#include <CC_Notification.h>
-#include <cc_notification_config.h>
 #include <cc_notification_config_api.h>
+#include <CC_Notification.h>
+#include "cc_notification_events.h"
 #include <SizeOf.h>
 #include <Assert.h>
+
+{# Namespace storing endpoint value. #}
+{% set ns_endpoint = namespace(endpoint = 0) -%}
+
+{# Generate group names and array of commands for each endpoint. #}
+{% for notification in notifications %}
+  {% if 'endpoint' in notification %}
+    {% set ns_endpoint.endpoint = notification['endpoint'] %}
+  {% else %}
+    {% set ns_endpoint.endpoint = 0 %}
+  {% endif %}
+static const notification_event_state STATES_EVENTS_EP{{ ns_endpoint.endpoint }}_{{ notification.type }}[] = {
+  {% for st_ev in notification['state_events'] %}
+  {{ st_ev }},
+  {% endfor %}
+};
+{% endfor %}
 
 static cc_notification_t notifications[] = {
 {% for notification in notifications %}
@@ -20,8 +34,10 @@ static cc_notification_t notifications[] = {
     .type = {{notification['type']}},
     {% if 'endpoint' in notification %}
     .endpoint = {{notification['endpoint']}},
+    {% set ns_endpoint.endpoint = notification['endpoint'] %}
     {% else %}
     .endpoint = 0,
+    {% set ns_endpoint.endpoint = '0' %}
     {% endif %}
     {# agi_profile #}
     {% for agi in notification['agi_profile'] %}
@@ -32,9 +48,8 @@ static cc_notification_t notifications[] = {
       {% endif %}
     {% endfor %}
     {# states/events #}
-    {% for st in notification['state_events'] %}
-    .events[{{ loop.index -1}}] = {{st['state_event']}},
-    {% endfor %}
+    .events = STATES_EVENTS_EP{{ ns_endpoint.endpoint }}_{{ notification.type }},
+    .event_count = sizeof_array(STATES_EVENTS_EP{{ ns_endpoint.endpoint }}_{{ notification.type }}),
     .current_event = NOTIFICATION_EVENT_NO_EVENT,
     .status        = NOTIFICATION_STATUS_UNSOLICIT_ACTIVATED,
   },
@@ -49,18 +64,6 @@ cc_notification_t * cc_notification_get_config(void) {
 
 uint8_t cc_notification_get_config_length(void) {
   return sizeof_array(notifications);
-}
-
-uint8_t cc_notification_get_supported_events_length(void) {
-  // find the max length of events list in notifications array
-  uint8_t len = 0;
-  for (uint8_t i = 0; i {{'<'}} sizeof_array(notifications); i++) {
-    uint8_t temp_len = sizeof_array(notifications[i].events);
-    if (temp_len {{'>'}} len) {
-      len = temp_len;
-    }
-  }
-  return len;
 }
 
 cc_notification_t* cc_notification_get(uint8_t index) {
@@ -110,12 +113,18 @@ bool cc_notification_is_type_supported(notification_type_t type) {
 
 int8_t cc_notification_find_event(uint8_t event, uint8_t index)
 {
-  for (uint8_t i = 0; i {{'<'}} sizeof_array(notifications[index].events); i++) {
+  for (uint8_t i = 0; i {{'<'}} notifications[index].event_count; i++) {
     if (event == notifications[index].events[i]) {
       return (int8_t)i;
     }
   }
   return -1;
+}
+
+uint8_t cc_notification_config_get_number_of_events(uint8_t index)
+{
+  ASSERT(index < sizeof_array(notifications));
+  return notifications[index].event_count;
 }
 
 {% for _ in notifications %}

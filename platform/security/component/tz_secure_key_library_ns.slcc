@@ -46,7 +46,7 @@ define:
   # Use Silabs Secure Library configuration of TF-M (interface).
   - name: TFM_CONFIG_SL_SECURE_LIBRARY
   # We do not want to enable alt-plugins on the NS side of the application.
-  - name: SL_MBEDTLS_NO_CRYPTO_ACCELERATION
+  - name: NO_CRYPTO_ACCELERATION
 
 template_contribution:
   - name: component_catalog

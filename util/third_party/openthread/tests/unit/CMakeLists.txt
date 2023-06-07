@@ -30,7 +30,11 @@ set(COMMON_INCLUDES
     ${PROJECT_SOURCE_DIR}/include
     ${PROJECT_SOURCE_DIR}/src
     ${PROJECT_SOURCE_DIR}/src/core
-    ${PROJECT_SOURCE_DIR}/examples/platforms/simulation
+)
+
+set(COMMON_INCLUDES_RCP
+    ${COMMON_INCLUDES}
+    ${PROJECT_SOURCE_DIR}/src/core/radio
 )
 
 set(COMMON_COMPILE_OPTIONS
@@ -38,34 +42,70 @@ set(COMMON_COMPILE_OPTIONS
     -DOPENTHREAD_SPINEL_CONFIG_OPENTHREAD_MESSAGE_ENABLE=1
 )
 
-add_library(ot-test-platform
+set(COMMON_COMPILE_OPTIONS_RCP
+    -DOPENTHREAD_RADIO=1
+    -DOPENTHREAD_SPINEL_CONFIG_OPENTHREAD_MESSAGE_ENABLE=1
+    -DOPENTHREAD_CONFIG_PLATFORM_UDP_ENABLE=0
+)
+
+add_library(ot-test-platform-ftd
     test_platform.cpp
     test_util.cpp
 )
 
-target_include_directories(ot-test-platform
+add_library(ot-test-platform-rcp
+    test_platform.cpp
+    test_util.cpp
+)
+
+target_include_directories(ot-test-platform-ftd
     PRIVATE
         ${COMMON_INCLUDES}
 )
 
-target_compile_options(ot-test-platform
+target_include_directories(ot-test-platform-rcp
+    PRIVATE
+	${COMMON_INCLUDES}
+)
+
+target_compile_options(ot-test-platform-ftd
     PRIVATE
         ${COMMON_COMPILE_OPTIONS}
 )
 
-target_link_libraries(ot-test-platform
+target_compile_options(ot-test-platform-rcp
+    PRIVATE
+        ${COMMON_COMPILE_OPTIONS_RCP}
+)
+
+target_link_libraries(ot-test-platform-ftd
+    PRIVATE
+        ot-config
+        ${OT_MBEDTLS}
+)
+
+target_link_libraries(ot-test-platform-rcp
     PRIVATE
         ot-config
         ${OT_MBEDTLS}
 )
 
 set(COMMON_LIBS
-    ot-test-platform
+    openthread-spinel-ncp
+    openthread-hdlc
+    ot-test-platform-ftd
     openthread-ftd
-    ot-test-platform
+    ot-test-platform-ftd
     ${OT_MBEDTLS}
     ot-config
     openthread-ftd
+)
+
+set(COMMON_LIBS_RCP
+    ot-test-platform-rcp
+    openthread-rcp
+    ${OT_MBEDTLS}
+    ot-config
 )
 
 add_executable(ot-test-aes
@@ -255,6 +295,27 @@ target_link_libraries(ot-test-dns
 )
 
 add_test(NAME ot-test-dns COMMAND ot-test-dns)
+
+add_executable(ot-test-dns-client
+    test_dns_client.cpp
+)
+
+target_include_directories(ot-test-dns-client
+    PRIVATE
+        ${COMMON_INCLUDES}
+)
+
+target_compile_options(ot-test-dns-client
+    PRIVATE
+        ${COMMON_COMPILE_OPTIONS}
+)
+
+target_link_libraries(ot-test-dns-client
+    PRIVATE
+        ${COMMON_LIBS}
+)
+
+add_test(NAME ot-test-dns-client COMMAND ot-test-dns-client)
 
 add_executable(ot-test-dso
     test_dso.cpp
@@ -663,6 +724,27 @@ target_link_libraries(ot-test-message-queue
 
 add_test(NAME ot-test-message-queue COMMAND ot-test-message-queue)
 
+add_executable(ot-test-mle
+    test_mle.cpp
+)
+
+target_include_directories(ot-test-mle
+    PRIVATE
+        ${COMMON_INCLUDES}
+)
+
+target_compile_options(ot-test-mle
+    PRIVATE
+        ${COMMON_COMPILE_OPTIONS}
+)
+
+target_link_libraries(ot-test-mle
+    PRIVATE
+        ${COMMON_LIBS}
+)
+
+add_test(NAME ot-test-mle COMMAND ot-test-mle)
+
 add_executable(ot-test-multicast-listeners-table
     test_multicast_listeners_table.cpp
 )
@@ -683,6 +765,36 @@ target_link_libraries(ot-test-multicast-listeners-table
 )
 
 add_test(NAME ot-test-multicast-listeners-table COMMAND ot-test-multicast-listeners-table)
+
+if(OT_RCP)
+    add_executable(ot-test-multipan-rcp-pending-queue
+        test_multipan_rcp_pending_queue.cpp
+    )
+
+    target_include_directories(ot-test-multipan-rcp-pending-queue
+        PRIVATE
+            ${COMMON_INCLUDES_RCP}
+    )
+
+    target_compile_options(ot-test-multipan-rcp-pending-queue
+        PRIVATE
+            ${COMMON_COMPILE_OPTIONS_RCP}
+    )
+
+    if(OT_MULTIPAN_RCP)
+        target_compile_definitions(ot-test-multipan-rcp-pending-queue
+            PRIVATE
+                "OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE=1"
+        )
+    endif()
+
+    target_link_libraries(ot-test-multipan-rcp-pending-queue
+        PRIVATE
+            ${COMMON_LIBS_RCP}
+    )
+
+    add_test(NAME ot-test-multipan-rcp-pending-queue COMMAND ot-test-multipan-rcp-pending-queue)
+ endif()
 
 add_test(NAME ot-test-nat64 COMMAND ot-test-nat64)
 
@@ -811,6 +923,27 @@ target_link_libraries(ot-test-pool
 )
 
 add_test(NAME ot-test-pool COMMAND ot-test-pool)
+
+add_executable(ot-test-power-calibration
+    test_power_calibration.cpp
+)
+
+target_include_directories(ot-test-power-calibration
+    PRIVATE
+        ${COMMON_INCLUDES}
+)
+
+target_compile_options(ot-test-power-calibration
+    PRIVATE
+        ${COMMON_COMPILE_OPTIONS}
+)
+
+target_link_libraries(ot-test-power-calibration
+    PRIVATE
+        ${COMMON_LIBS}
+)
+
+add_test(NAME ot-test-power-calibration COMMAND ot-test-power-calibration)
 
 add_executable(ot-test-priority-queue
     test_priority_queue.cpp
@@ -985,6 +1118,22 @@ add_executable(ot-test-timer
     test_timer.cpp
 )
 
+add_executable(ot-test-toolchain
+    test_toolchain.cpp test_toolchain_c.c
+)
+
+target_include_directories(ot-test-toolchain
+    PRIVATE
+        ${COMMON_INCLUDES}
+)
+
+target_link_libraries(ot-test-toolchain
+    PRIVATE
+        ${COMMON_LIBS}
+)
+
+add_test(NAME ot-test-toolchain COMMAND ot-test-toolchain)
+
 target_include_directories(ot-test-timer
     PRIVATE
         ${COMMON_INCLUDES}
@@ -1001,3 +1150,109 @@ target_link_libraries(ot-test-timer
 )
 
 add_test(NAME ot-test-timer COMMAND ot-test-timer)
+
+add_executable(ot-test-tlv
+    test_tlv.cpp
+)
+
+target_include_directories(ot-test-tlv
+    PRIVATE
+        ${COMMON_INCLUDES}
+)
+
+target_compile_options(ot-test-tlv
+    PRIVATE
+        ${COMMON_COMPILE_OPTIONS}
+)
+
+target_link_libraries(ot-test-tlv
+    PRIVATE
+        ${COMMON_LIBS}
+)
+
+add_test(NAME ot-test-tlv COMMAND ot-test-tlv)
+
+add_executable(ot-test-hdlc
+    test_hdlc.cpp
+)
+target_include_directories(ot-test-hdlc
+    PRIVATE
+        ${COMMON_INCLUDES}
+)
+target_compile_options(ot-test-hdlc
+    PRIVATE
+        ${COMMON_COMPILE_OPTIONS}
+)
+target_link_libraries(ot-test-hdlc
+    PRIVATE
+        ${COMMON_LIBS}
+)
+add_test(NAME ot-test-hdlc COMMAND ot-test-hdlc)
+
+add_executable(ot-test-spinel-buffer
+    test_spinel_buffer.cpp
+)
+target_include_directories(ot-test-spinel-buffer
+    PRIVATE
+        ${COMMON_INCLUDES}
+)
+target_compile_options(ot-test-spinel-buffer
+    PRIVATE
+        ${COMMON_COMPILE_OPTIONS}
+)
+target_link_libraries(ot-test-spinel-buffer
+    PRIVATE
+        ${COMMON_LIBS}
+)
+add_test(NAME ot-test-spinel-buffer COMMAND ot-test-spinel-buffer)
+
+add_executable(ot-test-spinel-decoder
+    test_spinel_decoder.cpp
+)
+target_include_directories(ot-test-spinel-decoder
+    PRIVATE
+        ${COMMON_INCLUDES}
+)
+target_compile_options(ot-test-spinel-decoder
+    PRIVATE
+        ${COMMON_COMPILE_OPTIONS}
+)
+target_link_libraries(ot-test-spinel-decoder
+    PRIVATE
+        ${COMMON_LIBS}
+)
+add_test(NAME ot-test-spinel-decoder COMMAND ot-test-spinel-decoder)
+
+add_executable(ot-test-spinel-encoder
+    test_spinel_encoder.cpp
+)
+target_include_directories(ot-test-spinel-encoder
+    PRIVATE
+        ${COMMON_INCLUDES}
+)
+target_compile_options(ot-test-spinel-encoder
+    PRIVATE
+        ${COMMON_COMPILE_OPTIONS}
+)
+target_link_libraries(ot-test-spinel-encoder
+    PRIVATE
+        ${COMMON_LIBS}
+)
+add_test(NAME ot-test-spinel-encoder COMMAND ot-test-spinel-encoder)
+
+add_executable(ot-test-address-sanitizer
+    test_address_sanitizer.cpp
+)
+target_include_directories(ot-test-address-sanitizer
+    PRIVATE
+        ${COMMON_INCLUDES}
+)
+target_compile_options(ot-test-address-sanitizer
+    PRIVATE
+        ${COMMON_COMPILE_OPTIONS}
+)
+target_link_libraries(ot-test-address-sanitizer
+    PRIVATE
+        ${COMMON_LIBS}
+)
+add_test(NAME ot-test-address-sanitizer COMMAND ot-test-address-sanitizer)

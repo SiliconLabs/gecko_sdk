@@ -216,8 +216,9 @@ EmberStatus emberSetReplyBinding(uint8_t index, EmberBindingTableEntry *entry);
 EmberStatus emberNoteSendersBinding(uint8_t index);
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-// This is defined in config/ember-configuration.c.
-extern uint8_t emberBindingTableSize;
+// Set or get the binding table size
+sl_status_t sl_zigbee_set_binding_table_size(uint8_t size);
+uint8_t sl_zigbee_get_binding_table_size(void);
 #endif
 
 /** @} END addtogroup */

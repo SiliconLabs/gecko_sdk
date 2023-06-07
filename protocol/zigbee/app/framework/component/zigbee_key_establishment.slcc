@@ -56,7 +56,7 @@ template_contribution:
   - name: zigbee_af_callback
     value:
       callback_type: event_init
-      function_name: emAfPluginKeyEstablishmentInitCallback
+      function_name: sli_zigbee_af_key_establishment_init_callback
   - name: cli_group
     value:
       group: plugin
@@ -66,7 +66,7 @@ template_contribution:
     value:
       group: key-establishment
       name: start
-      handler: emAfKeyEstablishmentStartCommand
+      handler: sli_zigbee_af_key_establishment_start_command
       help: Initiates key establishment with the target node ID.
       argument:
       - type: uint16
@@ -77,7 +77,7 @@ template_contribution:
     value:
       group: key-establishment
       name: interpan
-      handler: emAfKeyEstablishmentInterpanCommand
+      handler: sli_zigbee_af_key_establishment_interpan_command
       help: Initiates key establishment with the target device over inter-PAN.
       argument:
       - type: uint16
@@ -147,19 +147,19 @@ template_contribution:
   - name: zigbee_stack_callback
     value:
       callback_type: generate_cbke_keys
-      function_name: emAfGenerateCbkeKeysCallback
+      function_name: sli_zigbee_af_generate_cbke_keys_callback
   - name: zigbee_stack_callback
     value:
       callback_type: calculate_smacs
-      function_name: emAfCalculateSmacsCallback
+      function_name: sli_zigbee_af_calculate_smacs_callback
   - name: zigbee_stack_callback
     value:
       callback_type: generate_cbke_keys_handler283k1
-      function_name: emAfGenerateCbkeKeysCallback283k1
+      function_name: sli_zigbee_af_generate_cbke_keys_callback_283k1
   - name: zigbee_stack_callback
     value:
       callback_type: calculate_smacs_handler283k1
-      function_name: emAfCalculateSmacsCallback283k1
+      function_name: sli_zigbee_af_calculate_smacs_callback_283k1
 
 documentation:
   docset: zigbee

@@ -1,0 +1,81 @@
+project_name: bt_abr_soc_initiator
+package: Bluetooth
+label: Bluetooth - SoC ABR initiator
+description: >
+  ABR initiator for Bluetooth. The example connects to an ABR reflector and starts distance measurement.
+  Results are printed on the display of the WSTK.
+category: Bluetooth Examples
+quality: experimental
+
+component:
+  - id: toolchain_gcc
+  - id: bluetooth_stack
+  - id: bluetooth_feature_connection
+  - id: bluetooth_feature_sm
+  - id: bluetooth_feature_system
+  - id: bluetooth_feature_scanner
+  - id: app_assert
+  - id: app_log
+  - id: iostream_recommended_stream
+  - id: simple_button
+    instance:
+      - btn0
+  - id: component_catalog
+  - id: abr_initiator
+  - id: mpu
+  - id: "glib"
+  - id: "dmd_memlcd"
+  - id: "ls013b7dh03"
+  - id: in_place_ota_dfu
+
+source:
+  - path: main.c
+  - path: app.c
+  - path: abr_ui.c
+
+include:
+  - path: .
+    file_list:
+      - path: app.h
+      - path: abr_ui.h
+      - path: abr_ui_types.h
+
+readme:
+  - path: readme.md
+
+config_file:
+  - path: config/initiator_config.h
+
+other_file:
+  - path: ../../script/create_bl_files.bat
+  - path: ../../script/create_bl_files.sh
+  - path: image/abr_lcd.jpg
+
+configuration:
+  - name: SL_STACK_SIZE
+    value: "10000"
+  - name: SL_HEAP_SIZE
+    value: "10000"
+  - name: SL_PSA_KEY_USER_SLOT_COUNT
+    value: "0"
+    condition:
+      - psa_crypto
+  - name: SL_DEVICE_INIT_HFXO_FREQ
+    value: 40000000
+  - name: SL_BOARD_ENABLE_DISPLAY
+    value: "1"
+  - name: SL_BOARD_ENABLE_VCOM
+    value : 1
+
+tag:
+  - prebuilt_demo
+  - hardware:rf:band:2400
+
+ui_hints:
+  highlight:
+    - path: config/btconf/gatt_configuration.btconf
+    - path: readme.md
+      focus: true
+
+library:
+  - system: stdc++

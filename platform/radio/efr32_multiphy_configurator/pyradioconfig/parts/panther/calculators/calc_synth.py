@@ -27,14 +27,15 @@ class CALC_Synth_panther(CALC_Synth_nixi):
 
         lo_injection_side = model.vars.lo_injection_side.value
 
+
+        """Low-side injection is handled by inputting negative DIGMIXFREQ (See https://jira.silabs.com/browse/MCUW_RADIO_CFG-1906)"""
+        digiqswapen = 1
+        mixerconj = 0
+
         if lo_injection_side == model.vars.lo_injection_side.var_enum.HIGH_SIDE:
             loside = 1
-            digiqswapen = 1
-            mixerconj = 0
         else:
             loside = 0
-            digiqswapen = 0
-            mixerconj = 1
 
         #Write the registers
         self._reg_write(model.vars.SYNTH_IFFREQ_LOSIDE, loside)

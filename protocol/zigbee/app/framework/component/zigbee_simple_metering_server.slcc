@@ -42,7 +42,7 @@ template_contribution:
     value:
       group: simple-metering-server
       name: configure-mirror
-      handler: emAfPluginSimpleMeteringServerCliConfigureMirror
+      handler: sli_zigbee_af_simple_metering_server_cli_configure_mirror
       help: Sends the configure mirror command to the Metering client.
       argument:
       - type: uint16
@@ -63,7 +63,7 @@ template_contribution:
     value:
       group: simple-metering-server
       name: toggle-fast-poll-mode
-      handler: emAfPluginSimpleMeteringCliDisableFastPolling
+      handler: sli_zigbee_af_simple_metering_cli_disable_fast_polling
       help: Disables fast polling mode for testing.
       argument:
       - type: uint8

@@ -49,7 +49,7 @@ sl_status_t sl_sensor_pressure_init(void)
   sl_i2cspm_t *pressure_sensor = sl_sensor_select(SL_BOARD_SENSOR_PRESSURE);
   sc = sl_board_enable_sensor(SL_BOARD_SENSOR_RHT);
   app_assert((SL_STATUS_OK == sc) && (NULL != pressure_sensor),
-             "[E: %#04x] Pressure sensor not available\n",
+             "[E: %#04lx] Pressure sensor not available" APP_LOG_NL,
              sc);
   sc = sl_pressure_init(pressure_sensor);
   if (SL_STATUS_OK == sc) {
@@ -70,9 +70,11 @@ sl_status_t sl_sensor_pressure_get(float *pressure)
 {
   sl_status_t sc;
 
-  if (initialized) {
+  if (initialized && pressure != NULL) {
     sl_i2cspm_t *pressure_sensor = sl_sensor_select(SL_BOARD_SENSOR_PRESSURE);
-    sc = sl_pressure_measure_temperature(pressure_sensor, pressure);
+    sc = sl_pressure_measure_pressure(pressure_sensor, pressure);
+    // Convert from Pa to mbar (hPa)
+    *pressure = *pressure / 100;
   } else {
     sc = SL_STATUS_NOT_INITIALIZED;
   }

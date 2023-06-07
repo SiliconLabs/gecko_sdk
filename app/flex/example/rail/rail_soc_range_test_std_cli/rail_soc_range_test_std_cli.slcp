@@ -22,6 +22,7 @@ component:
   - id: sl_system
   - id: device_init
   - id: sl_simple_rail_stub
+  - id: sl_flex_rail_config
   - id: rail_lib_multiprotocol
   - id: app_log
   - id: app_assert
@@ -102,6 +103,11 @@ configuration:
     value: "0"
   - name: SL_CLI_EXAMPLE_TASK_PRIORITY
     value: "48"
+#------------- RAIL init, Configuration --------------
+  - name: SL_FLEX_RAIL_TX_FIFO_SIZE
+    value: "128"
+  - name: SL_FLEX_RAIL_RX_FIFO_SIZE
+    value: "256"
 #------------- RAIL init, Project --------------------
   - name: SL_RAIL_UTIL_INIT_INIT_COMPLETE_CALLBACK_INST0_ENABLE
     value: "1"

@@ -23,7 +23,9 @@
 #include "sl_bluetooth.h"
 #include "sl_bluetooth_advertiser_config.h"
 #include "sl_bluetooth_connection_config.h"
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #ifdef SL_CATALOG_ZIGBEE_DISPLAY_PRESENT
 #include "sl_dmp_ui.h"
 #else
@@ -38,7 +40,7 @@
 
 sl_zigbee_event_t               attr_write_event;
 #define attrWriteEvent          (&attr_write_event)
-static void attrWriteEventHandler(SLXU_UC_EVENT);
+static void attrWriteEventHandler(sl_zigbee_event_t * event);
 
 void enableBleAdvertisements(void);
 void BeaconAdvertisements(uint16_t devId);
@@ -373,7 +375,7 @@ void zb_ble_dmp_write_light_state(uint8_t connection, uint8array *writeValue)
   sl_dmp_ui_set_light_direction(DMP_UI_DIRECTION_BLUETOOTH);
   ble_lightState = writeValue->data[0];
 
-  slxu_zigbee_event_set_active(attrWriteEvent);
+  sl_zigbee_event_set_active(attrWriteEvent);
   sl_zigbee_common_rtos_wakeup_stack_task();
 
   sl_status_t status = sl_bt_gatt_server_send_user_write_response(connection,
@@ -843,7 +845,7 @@ void sli_ble_application_init(uint8_t init_level)
   switch (init_level) {
     case SL_ZIGBEE_INIT_LEVEL_EVENT:
     {
-      slxu_zigbee_event_init(attrWriteEvent, attrWriteEventHandler);
+      sl_zigbee_event_init(attrWriteEvent, attrWriteEventHandler);
       break;
     }
 
@@ -855,9 +857,9 @@ void sli_ble_application_init(uint8_t init_level)
   }
 }
 
-void attrWriteEventHandler(SLXU_UC_EVENT)
+void attrWriteEventHandler(sl_zigbee_event_t * event)
 {
-  slxu_zigbee_event_set_inactive(attrWriteEvent);
+  sl_zigbee_event_set_inactive(attrWriteEvent);
 
   (void) emberAfWriteAttribute(emberAfPrimaryEndpoint(),
                                ZCL_ON_OFF_CLUSTER_ID,

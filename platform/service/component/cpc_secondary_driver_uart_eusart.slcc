@@ -11,7 +11,7 @@ config_file:
   - path: config/s2/sl_cpc_drv_secondary_uart_eusart_{{instance}}_config.h
     file_id: cpc_drv_secondary_uart_eusart_config
 source:
-  - path: src/sl_cpc_drv_secondary_uart_eusart.c
+  - path: src/sl_cpc_drv_secondary_uart.c
 provides:
   - name: cpc_driver
   - name: cpc_secondary_driver_uart_eusart_interface

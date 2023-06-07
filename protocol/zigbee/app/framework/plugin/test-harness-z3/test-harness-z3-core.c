@@ -18,28 +18,16 @@
 #include "app/framework/include/af.h"
 #include "app/framework/security/af-security.h"
 #include "app/framework/util/attribute-storage.h" // emberAfResetAttributes()
-#include "app/framework/util/af-main.h" // emAfCliVersionCommand()
+#include "app/framework/util/af-main.h" // sli_zigbee_af_cli_version_command()
 #include "app/framework/security/security-config.h" // key definitions
 
 #include "app/util/zigbee-framework/zigbee-device-common.h"
 
-#ifdef UC_BUILD
 #include "zll-commissioning.h"
 #include "network-steering.h"
-#else // !UC_BUILD
-#ifdef EMBER_AF_API_ZLL_PROFILE
-  #include EMBER_AF_API_ZLL_PROFILE // emberAfZllResetToFactoryNew()
-#elif defined(EMBER_SCRIPTED_TEST)
-  #include "../zll-commissioning-common/zll-commissioning.h"
-#endif
-#ifdef EMBER_AF_API_NETWORK_STEERING
-  #include EMBER_AF_API_NETWORK_STEERING
-#elif defined(EMBER_SCRIPTED_TEST)
-  #include "../network-steering/network-steering.h"
-#endif
-#endif // UC_BUILD
 
 #include "stack/include/network-formation.h"
+#include "stack/include/zigbee-security-manager.h"
 
 #include "test-harness-z3-core.h"
 #include "test-harness-z3-nwk.h"
@@ -53,27 +41,22 @@
 // -----------------------------------------------------------------------------
 // Extern functions
 
-void emAfZllSetPanId(EmberPanId panId);
+void sli_zigbee_af_zll_set_pan_id(EmberPanId panId);
 
 // -----------------------------------------------------------------------------
 // Globals
 
-EmAfPluginTestHarnessZ3DeviceMode emAfPluginTestHarnessZ3DeviceMode;
+sli_zigbee_af_test_harness_z3_device_mode_type sli_zigbee_af_test_harness_z3_device_mode;
 
-#ifdef UC_BUILD
 sl_zigbee_event_t emberAfPluginTestHarnessZ3OpenNetworkEvent;
 #define z3OpenNetworkEventControl (&emberAfPluginTestHarnessZ3OpenNetworkEvent)
-void emberAfPluginTestHarnessZ3OpenNetworkEventHandler(SLXU_UC_EVENT);
+void emberAfPluginTestHarnessZ3OpenNetworkEventHandler(sl_zigbee_event_t * event);
 extern sl_zigbee_event_t emberAfPluginTestHarnessZ3ResetKeyEvent;
 extern sl_zigbee_event_t emberAfPluginTestHarnessZ3BeaconSendEvent;
 extern sl_zigbee_event_t emberAfPluginTestHarnessZ3ZllStuffEvent;
 extern sl_zigbee_event_t emberAfPluginTestHarnessZ3ZdoSendEventControl;
-#else // !UC_BUILD
-EmberEventControl emberAfPluginTestHarnessZ3OpenNetworkEventControl;
-#define z3OpenNetworkEventControl emberAfPluginTestHarnessZ3OpenNetworkEventControl
-#endif // UC_BUILD
 
-uint16_t emAfPluginTestHarnessZ3TouchlinkProfileId = EMBER_ZLL_PROFILE_ID;
+uint16_t sli_zigbee_af_test_harness_z3_touchlink_profile_id = EMBER_ZLL_PROFILE_ID;
 
 EmberKeyData preProgrammedNwkKey = {
   .contents = {
@@ -82,38 +65,28 @@ EmberKeyData preProgrammedNwkKey = {
   }
 };
 
-#ifdef UC_BUILD
 //-------internal callbacks
-void emAfPluginTestHarnessZ3InitCallback(SLXU_INIT_ARG)
+void sli_zigbee_af_test_harness_z3_init_callback(uint8_t init_level)
 {
-  SLXU_INIT_UNUSED_ARG;
+  (void)init_level;
 
-  slxu_zigbee_event_init(&emberAfPluginTestHarnessZ3OpenNetworkEvent,
-                         emberAfPluginTestHarnessZ3OpenNetworkEventHandler);
-  slxu_zigbee_event_init(&emberAfPluginTestHarnessZ3ResetKeyEvent,
-                         emberAfPluginTestHarnessZ3ResetKeyEventHandler);
-  slxu_zigbee_event_init(&emberAfPluginTestHarnessZ3BeaconSendEvent,
-                         emberAfPluginTestHarnessZ3BeaconSendEventHandler);
-  slxu_zigbee_event_init(&emberAfPluginTestHarnessZ3ZllStuffEvent,
-                         emberAfPluginTestHarnessZ3ZllStuffEventHandler);
-  slxu_zigbee_event_init(&emberAfPluginTestHarnessZ3ZdoSendEventControl,
-                         emberAfPluginTestHarnessZ3ZdoSendEventHandler);
+  sl_zigbee_event_init(&emberAfPluginTestHarnessZ3OpenNetworkEvent,
+                       emberAfPluginTestHarnessZ3OpenNetworkEventHandler);
+  sl_zigbee_event_init(&emberAfPluginTestHarnessZ3ResetKeyEvent,
+                       emberAfPluginTestHarnessZ3ResetKeyEventHandler);
+  sl_zigbee_event_init(&emberAfPluginTestHarnessZ3BeaconSendEvent,
+                       emberAfPluginTestHarnessZ3BeaconSendEventHandler);
+  sl_zigbee_event_init(&emberAfPluginTestHarnessZ3ZllStuffEvent,
+                       emberAfPluginTestHarnessZ3ZllStuffEventHandler);
+  sl_zigbee_event_init(&emberAfPluginTestHarnessZ3ZdoSendEventControl,
+                       emberAfPluginTestHarnessZ3ZdoSendEventHandler);
 }
-#endif
 // -----------------------------------------------------------------------------
 // Util
 
-#ifdef UC_BUILD
-uint32_t emAfPluginTestHarnessZ3GetSignificantBit(SL_CLI_COMMAND_ARG, uint8_t commandIndex)
-#else
-uint32_t emAfPluginTestHarnessZ3GetSignificantBit(uint8_t commandIndex)
-#endif //UC_BUILD
+uint32_t sli_zigbee_af_test_harness_z3_get_significant_bit(SL_CLI_COMMAND_ARG, uint8_t commandIndex)
 {
-#ifdef UC_BUILD
   uint32_t mask = sl_cli_get_argument_uint32(arguments, commandIndex);
-#else
-  uint32_t mask = emberUnsignedCommandArgument(commandIndex);
-#endif //UC_BUILD
   uint32_t significantBit = (1UL << 31);
   while (!(significantBit & mask) && significantBit) {
     significantBit >>= 1;
@@ -202,7 +175,7 @@ EmberPacketAction emberAfIncomingPacketFilterCallback(EmberZigbeePacketType pack
         emberAfCorePrintln("]");
       }
       if (commandId == NWK_LEAVE_COMMAND
-          && emAfPluginTestHarnessZ3IgnoreLeaveCommands) {
+          && sli_zigbee_af_test_harness_z3_ignore_leave_commands) {
         // Ignore the leave by turning off the request bit in the options.
         uint8_t newOptions = packetData[1] & ~BIT(6);
         packetData[1] = newOptions;
@@ -235,9 +208,9 @@ EmberPacketAction emberAfIncomingPacketFilterCallback(EmberZigbeePacketType pack
                                true); // spaces?
         emberAfCorePrintln("]");
       }
-      status = emAfPluginTestHarnessZ3ZdoCommandResponseHandler(packetData,
-                                                                packetLength,
-                                                                apsFrame);
+      status = sli_zigbee_af_test_harness_z3_zdo_command_response_handler(packetData,
+                                                                          packetLength,
+                                                                          apsFrame);
       if (status != EMBER_INVALID_CALL) {
         emberAfCorePrintln("%p: %p: cluster: 0x%02X status: 0x%X",
                            TEST_HARNESS_Z3_PRINT_NAME,
@@ -260,8 +233,8 @@ EmberPacketAction emberAfIncomingPacketFilterCallback(EmberZigbeePacketType pack
                                packetLength - 3,
                                true); // spaces?
         emberAfCorePrintln("]");
-        act = emAfPluginTestHarnessZ3ZllCommandCallback(packetData,
-                                                        data); // source eui64
+        act = sli_zigbee_af_test_harness_z3_zll_command_callback(packetData,
+                                                                 data);        // source eui64
       }
       break;
 
@@ -294,8 +267,8 @@ EmberPacketAction emberAfOutgoingPacketFilterCallback(EmberZigbeePacketType pack
     case EMBER_ZIGBEE_PACKET_TYPE_BEACON: {
       emberAfDebugPrintln("emberOutgoingPH - sending a beacon");
       uint8_t payloadLength = BEACON_PAYLOAD_SIZE;
-      act = emAfPluginTestHarnessZ3ModifyBeaconPayload(packetData + MAC_BEACON_SIZE,
-                                                       &payloadLength);
+      act = sli_zigbee_af_test_harness_z3_modify_beacon_payload(packetData + MAC_BEACON_SIZE,
+                                                                &payloadLength);
       if (payloadLength != BEACON_PAYLOAD_SIZE) {
         emberAfDebugPrintln("Old buffer length = %d", packetLength);
         *size_p = packetLength - BEACON_PAYLOAD_SIZE + payloadLength;
@@ -318,8 +291,8 @@ EmberPacketAction emberAfOutgoingPacketFilterCallback(EmberZigbeePacketType pack
       // look at the APS header to see if we have an interpan msg.
       if (packetData[macHeaderLength + 2] == 0x03) {
         emberAfDebugPrintln("emberOutgoingPH - sending interpan msg");
-        act = emAfPluginTestHarnessZ3ZllModifyInterpanCommand(packetData,
-                                                              macHeaderLength);
+        act = sli_zigbee_af_test_harness_z3_zll_modify_interpan_command(packetData,
+                                                                        macHeaderLength);
       }
       break;
     }
@@ -336,12 +309,12 @@ EmberPacketAction emberAfOutgoingPacketFilterCallback(EmberZigbeePacketType pack
 // -----------------------------------------------------------------------------
 // Printing
 
-void emAfPluginTestHarnessZ3PrintingCommand(SL_CLI_COMMAND_ARG)
+void sli_zigbee_af_test_harness_z3_printing_command(SL_CLI_COMMAND_ARG)
 {
-  bool enabled = (emberStringCommandArgument(-1, NULL)[0] == 'e');
+  bool enabled = (sl_zigbee_cli_get_argument_string_and_length(arguments, -1, NULL)[0] == 'e');
   uint8_t mask;
 
-  switch (emberStringCommandArgument(-2, NULL)[0]) {
+  switch (sl_zigbee_cli_get_argument_string_and_length(arguments, -2, NULL)[0]) {
     case 'b':
       mask = PRINTING_MASK_BEACONS;
       break;
@@ -382,22 +355,22 @@ void emberAfPluginTestHarnessZ3StackStatusCallback(EmberStatus status)
     // Force the network open for joining if we are the trust center.
     // This is terrible security, but this plugin is for a terrible test
     // harness app, so I feel like it lines up.
-    slxu_zigbee_event_set_active(z3OpenNetworkEventControl);
+    sl_zigbee_event_set_active(z3OpenNetworkEventControl);
   }
 }
 
-void emberAfPluginTestHarnessZ3OpenNetworkEventHandler(SLXU_UC_EVENT)
+void emberAfPluginTestHarnessZ3OpenNetworkEventHandler(sl_zigbee_event_t * event)
 {
-  slxu_zigbee_event_set_inactive(z3OpenNetworkEventControl);
+  sl_zigbee_event_set_inactive(z3OpenNetworkEventControl);
 
   if (emberAfGetNodeId() == EMBER_TRUST_CENTER_NODE_ID) {
     EmberEUI64 wildcardEui64 = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, };
-    EmberKeyData centralizedKey = ZIGBEE_PROFILE_INTEROPERABILITY_LINK_KEY;
+    sl_zb_sec_man_key_t centralizedKey = ZIGBEE_PROFILE_INTEROPERABILITY_LINK_KEY;
     uint16_t transientKeyTimeoutS;
 
     // Make sure the trust center lets everyone on the network and
     // allows key requests.
-    emberAddTransientLinkKey(wildcardEui64, &centralizedKey);
+    (void) sl_zb_sec_man_import_transient_key(wildcardEui64, &centralizedKey);
 #ifdef EZSP_HOST
     ezspSetPolicy(EZSP_TC_KEY_REQUEST_POLICY, EMBER_ALLOW_TC_LINK_KEY_REQUEST_AND_SEND_CURRENT_KEY);
     ezspGetConfigurationValue(EZSP_CONFIG_TRANSIENT_KEY_TIMEOUT_S,
@@ -409,9 +382,9 @@ void emberAfPluginTestHarnessZ3OpenNetworkEventHandler(SLXU_UC_EVENT)
 
     // Make sure we reopen the network before the transient key disappears.
     // Add in a timing slop of a second to prevent any race conditions.
-    slxu_zigbee_event_set_delay_ms(z3OpenNetworkEventControl,
-                                   ((transientKeyTimeoutS * MILLISECOND_TICKS_PER_SECOND)
-                                    - MILLISECOND_TICKS_PER_SECOND));
+    sl_zigbee_event_set_delay_ms(z3OpenNetworkEventControl,
+                                 ((transientKeyTimeoutS * MILLISECOND_TICKS_PER_SECOND)
+                                  - MILLISECOND_TICKS_PER_SECOND));
   }
 }
 
@@ -419,7 +392,7 @@ void emberAfPluginTestHarnessZ3OpenNetworkEventHandler(SLXU_UC_EVENT)
 // Core CLI commands
 
 // plugin test-harness z3 reset
-void emAfPluginTestHarnessZ3ResetCommand(SL_CLI_COMMAND_ARG)
+void sli_zigbee_af_test_harness_z3_reset_command(SL_CLI_COMMAND_ARG)
 {
   emberAfZllResetToFactoryNew();
 
@@ -430,14 +403,15 @@ void emAfPluginTestHarnessZ3ResetCommand(SL_CLI_COMMAND_ARG)
 }
 
 // plugin test-harness z3 set-device-mode <mode:1>
-void emAfPluginTestHarnessZ3SetDeviceModeCommand(SL_CLI_COMMAND_ARG)
+void sli_zigbee_af_test_harness_z3_set_device_mode_command(SL_CLI_COMMAND_ARG)
 {
   EmberStatus status = EMBER_BAD_ARGUMENT;
-  EmAfPluginTestHarnessZ3DeviceMode mode
-    = (EmAfPluginTestHarnessZ3DeviceMode)emberUnsignedCommandArgument(0);
+
+  sli_zigbee_af_test_harness_z3_device_mode_type mode
+    = sl_cli_get_argument_uint8(arguments, 0);
 
   if (mode <= EM_AF_PLUGIN_TEST_HARNESS_Z3_DEVICE_MODE_MAX) {
-    emAfPluginTestHarnessZ3DeviceMode = mode;
+    sli_zigbee_af_test_harness_z3_device_mode = mode;
     status = EMBER_SUCCESS;
   }
 
@@ -448,7 +422,7 @@ void emAfPluginTestHarnessZ3SetDeviceModeCommand(SL_CLI_COMMAND_ARG)
 }
 
 // plugin test-harness z3 set-short-address
-void emAfPluginTestHarnessZ3SetShortAddressCommand(SL_CLI_COMMAND_ARG)
+void sli_zigbee_af_test_harness_z3_set_short_address_command(SL_CLI_COMMAND_ARG)
 {
   emberAfCorePrintln("%s: %s: 0x%X",
                      TEST_HARNESS_Z3_PRINT_NAME,
@@ -457,35 +431,35 @@ void emAfPluginTestHarnessZ3SetShortAddressCommand(SL_CLI_COMMAND_ARG)
 }
 
 // plugin test-harness z3 legacy-profile-id
-void emAfPluginTestHarnessZ3LegacyProfileCommand(SL_CLI_COMMAND_ARG)
+void sli_zigbee_af_test_harness_z3_legacy_profile_command(SL_CLI_COMMAND_ARG)
 {
-  emAfPluginTestHarnessZ3TouchlinkProfileId = (emberStringCommandArgument(-1, NULL)[0] == 'e')
-                                              ? EMBER_ZLL_PROFILE_ID
-                                              : HA_PROFILE_ID;
+  sli_zigbee_af_test_harness_z3_touchlink_profile_id = (sl_zigbee_cli_get_argument_string_and_length(arguments, -1, NULL)[0] == 'e')
+                                                       ? EMBER_ZLL_PROFILE_ID
+                                                       : HA_PROFILE_ID;
 }
 
 // plugin test-harness z3 set-pan-id
-void emAfPluginTestHarnessSetNetworkCreatorPanId(SL_CLI_COMMAND_ARG)
+void sli_zigbee_af_test_harness_set_network_creator_pan_id(SL_CLI_COMMAND_ARG)
 {
-  EmberPanId panId = (EmberPanId)emberUnsignedCommandArgument(0);
-  emAfZllSetPanId(panId);
+  EmberPanId panId = sl_cli_get_argument_uint16(arguments, 0);
+  sli_zigbee_af_zll_set_pan_id(panId);
 
   emberAfCorePrintln("Network Creator PAN ID = 0x%2X", panId);
 }
 
 // plugin test-harness z3 platform
-void emAfPluginTestHarnessZ3PlatformCommand(SL_CLI_COMMAND_ARG)
+void sli_zigbee_af_test_harness_z3_platform_command(SL_CLI_COMMAND_ARG)
 {
   emberAfCorePrintln("Platform: Silicon Labs");
   emberAfCorePrint("EmberZNet ");
-  emAfCliVersionCommand();
+  sli_zigbee_af_cli_version_command();
 }
 
 // plugin test-harness z3 install-code clear
 // plugin test-harness z3 install-code set <code>
-void emAfPluginTestHarnessZ3InstallCodeClearOrSetCommand(SL_CLI_COMMAND_ARG)
+void sli_zigbee_af_test_harness_z3_install_code_clear_or_set_command(SL_CLI_COMMAND_ARG)
 {
-  bool doClear = (emberStringCommandArgument(-1, NULL)[0] == 'c');
+  bool doClear = (sl_zigbee_cli_get_argument_string_and_length(arguments, -1, NULL)[0] == 'c');
 
 #ifndef EZSP_HOST
 #if !defined(EMBER_AF_HAS_SECURITY_PROFILE_NONE)
@@ -496,10 +470,10 @@ void emAfPluginTestHarnessZ3InstallCodeClearOrSetCommand(SL_CLI_COMMAND_ARG)
     uint8_t code[16 + 2]; // 6, 8, 12, or 16 bytes plus two-byte CRC
     uint8_t length;
 
-    length = emberCopyStringArgument(0, code, sizeof(code), false);
+    length = sl_zigbee_copy_hex_arg(arguments, 0, code, sizeof(code), false);
 
     // Convert the install code to a key
-    status = emAfInstallCodeToKey(code, length, &key);
+    status = sli_zigbee_af_install_code_to_key(code, length, &key);
 
     if (EMBER_SUCCESS != status) {
       if (EMBER_SECURITY_DATA_INVALID == status) {
@@ -514,8 +488,9 @@ void emAfPluginTestHarnessZ3InstallCodeClearOrSetCommand(SL_CLI_COMMAND_ARG)
     }
 
     // Add the key to transient key.
-    status = emberAddTransientLinkKey(eui64, &key);
-    emberAfAppDebugExec(emAfPrintStatus("Set joining link key", status));
+    sl_status_t key_status = sl_zb_sec_man_import_transient_key(eui64, (sl_zb_sec_man_key_t*)&key);
+    status = ((key_status == SL_STATUS_OK) ? EMBER_SUCCESS : EMBER_NO_BUFFERS);
+    emberAfAppDebugExec(sli_zigbee_af_print_status("Set joining link key", status));
     emberAfAppPrintln("");
     emberAfAppFlush();
   } else {

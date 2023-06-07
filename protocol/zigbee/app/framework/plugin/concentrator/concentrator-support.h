@@ -32,19 +32,14 @@
  * @{
  */
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-extern uint8_t emAfRouteErrorCount;
-extern uint8_t emAfDeliveryFailureCount;
-#endif
-
 extern EmberEventControl emberAfPluginConcentratorUpdateEventControl;
 
 #define LOW_RAM_CONCENTRATOR  EMBER_LOW_RAM_CONCENTRATOR
 #define HIGH_RAM_CONCENTRATOR EMBER_HIGH_RAM_CONCENTRATOR
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-#define emAfConcentratorStartDiscovery emberAfPluginConcentratorQueueDiscovery
-void emAfConcentratorStopDiscovery(void);
+#define sli_zigbee_af_concentrator_start_discovery emberAfPluginConcentratorQueueDiscovery
+void sli_zigbee_af_concentrator_stop_discovery(void);
 #endif
 
 /**
@@ -87,13 +82,13 @@ enum
 };
 typedef uint8_t EmberAfPluginConcentratorRouterBehavior;
 
-extern EmberAfPluginConcentratorRouterBehavior emAfPluginConcentratorRouterBehaviors[];
+extern EmberAfPluginConcentratorRouterBehavior sli_zigbee_af_concentrator_router_behaviors[];
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-#define emAfPluginConcentratorRouterBehavior emAfPluginConcentratorRouterBehaviors[emberGetCurrentNetwork()]
+#define sli_zigbee_af_concentrator_router_behavior sli_zigbee_af_concentrator_router_behaviors[emberGetCurrentNetwork()]
 #endif
 #define emberAfPluginConcentratorGetRouterBehavior() \
-  (emAfPluginConcentratorRouterBehavior)
+  (sli_zigbee_af_concentrator_router_behavior)
 #define emberAfPluginConcentratorSetRouterBehavior(behavior) \
-  do { emAfPluginConcentratorRouterBehavior = behavior; } while (0);
+  do { sli_zigbee_af_concentrator_router_behavior = behavior; } while (0);
 
 /** @} */ // end of concentrator

@@ -16,7 +16,9 @@
  ******************************************************************************/
 
 #include "app/framework/include/af.h"
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 
 #ifdef SL_CATALOG_ZIGBEE_NETWORK_TEST_PRESENT
 #include "network_test_config.h"
@@ -24,8 +26,10 @@
 
 #if (LARGE_NETWORK_TESTING == 0)
 #ifndef EZSP_HOST
-#include "config/zigbee_sleep_config.h"
-#endif // EZSP_HOST
+
+#include "zigbee_sleep_config.h"
+#endif
+
 #include "network-creator.h"
 #include "network-creator-security.h"
 #include "network-steering.h"

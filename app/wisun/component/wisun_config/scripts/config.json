@@ -1,0 +1,25 @@
+{
+  "application": [
+    "networkName",
+    "networkSize",
+    "deviceType",
+    "deviceProfile",
+    "macAddress",
+    "dwellInterval",
+    "txOutputPower",
+    "broadcastRetries",
+    "macList",
+    "isDenyList"
+  ],
+  "security": [
+    "devicePrivateKey",
+    "deviceCertificate",
+    "caCertificate"
+  ],
+  "radio": [
+    "radioConfPath",
+    "allowedChannels",
+    "defaultPhy",
+    "modeSwitchPhys"
+  ]
+}

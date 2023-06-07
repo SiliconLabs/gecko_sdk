@@ -27,14 +27,23 @@ provides:
 requires:
   - name: emlib_cmu
   - name: emlib_emu
+  - name: emlib_core
   - name: sl_assert
   - name: status
   - name: slist
   - name: atomic
   - name: enum
   - name: sleeptimer
-  - name: hfxo_manager
-    condition: [device_series_2]
+  - name: power_manager_energy_mode_impl
+recommends:
+  - id: power_manager_deepsleep
+    condition: [device_series_0]
+  - id: power_manager_deepsleep
+    condition: [device_series_1]    
+  - id: power_manager_deepsleep
+    condition: [device_series_2, device_has_sysrtc]
+  - id: power_manager_deepsleep_blocking_hfxo_restore
+    condition: [device_series_2, device_has_rtcc]    
 template_contribution:
   - name: event_handler
     value:

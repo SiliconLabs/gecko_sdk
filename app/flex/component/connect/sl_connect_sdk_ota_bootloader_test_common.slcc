@@ -17,6 +17,8 @@ include:
   - path: "."  
     file_list:
       - path: "sl_connect_sdk_ota_bootloader_test_common.h"
+config_file:
+  - path: "config/bootloader_test_common_config.h"
 #-------------- Template Contribution ----------------
 template_contribution:
 #---------------- Component Catalog ------------------

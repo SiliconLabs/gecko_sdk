@@ -27,14 +27,13 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
-#include "em_device.h"
-
-#if defined(SEMAILBOX_PRESENT)
 
 #include "sl_se_manager.h"
+
+#if defined(SLI_MAILBOX_COMMAND_SUPPORTED)
+
 #include "sli_se_manager_internal.h"
 #include "em_se.h"
-#include "em_system.h"
 #include <string.h>
 
 /***************************************************************************//**
@@ -46,27 +45,18 @@
 // Defines
 
 #define KEYSPEC_DH_RESERVED                 0x00000780U
-
-#if defined(SEMAILBOX_PRESENT)
-
 // Constant from RFC 4492.
 #define SL_SE_ECP_TLS_NAMED_CURVE   3   ///< ECCurveType's named_curve
 #define SL_SE_TLSID_ECC_P256        23  ///< Named curve value for SECP256R1
 
-#endif // defined(SEMAILBOX_PRESENT)
-
 // -----------------------------------------------------------------------------
 // Locals
-
-#if defined(SEMAILBOX_PRESENT)
 
 // ECJPAKE role
 static const char * const ecjpake_id[] = {
   "client",
   "server"
 };
-
-#endif // defined(SEMAILBOX_PRESENT)
 
 // -----------------------------------------------------------------------------
 // Global Functions
@@ -1052,8 +1042,7 @@ sl_status_t sl_se_derive_key_pbkdf2(sl_se_command_context_t *cmd_ctx,
                      | SLI_SE_COMMAND_OPTION_HASH_SHA512;
       break;
 
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG) \
-      && (_SILICON_LABS_32B_SERIES_2_CONFIG >= 3)
+#if defined(SLI_SE_COMMAND_DERIVE_KEY_PBKDF2_CMAC_AVAILABLE)
     // PBKDF2 with CMAC as the PRF was first supported on EFR32xG23.
     case SL_SE_PRF_AES_CMAC_128:
       command_word = SLI_SE_COMMAND_DERIVE_KEY_PBKDF2_CMAC;
@@ -1092,4 +1081,4 @@ sl_status_t sl_se_derive_key_pbkdf2(sl_se_command_context_t *cmd_ctx,
 
 /** @} (end addtogroup sl_se) */
 
-#endif // defined(SEMAILBOX_PRESENT)
+#endif // defined(SLI_MAILBOX_COMMAND_SUPPORTED)

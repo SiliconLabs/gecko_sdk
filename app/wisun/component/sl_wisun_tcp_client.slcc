@@ -12,9 +12,6 @@ provides:
 
 source:
   - path: "sl_wisun_tcp_client.c"
-  - path: "sl_wisun_tcp_client_cli.c"
-    condition:
-      - "sl_wisun_app_cli"
 
 include:
   - path: "."
@@ -30,67 +27,5 @@ ui_hints:
 #-------------- Template Contribution ----------------
 template_contribution:
 #---------------- Component Catalog ------------------
-
-  - name: "cli_group"
-    value:
-      name: "wisun"
-      help: "Wi-SUN commands"
-      shortcuts:
-        - name: "w"
-
-  - name: "cli_command"
-    value:
-      group: "wisun"
-      name: "tcp_client"
-      handler: "app_tcp_client"
-      help: "Open a TCP client socket"
-      shortcuts:
-        - name: "tc"
-      argument:
-        - type: string
-          help: "Remote address"
-        - type: uint16
-          help: "Remote port"
-
-  - name: "cli_command"
-    value:
-      group: "wisun"
-      name: "socket_close"
-      handler: "app_socket_close"
-      help: "Close a socket"
-      shortcuts:
-        - name: "sc"
-      argument:
-        - type: uint32
-          help: "Socket Id"
-
-  - name: "cli_command"
-    value:
-      group: "wisun"
-      name: "socket_write"
-      handler: "app_socket_write"
-      help: "Write to a socket"
-      shortcuts:
-        - name: "sw"
-      argument:
-        - type: uint32
-          help: "Socket Id"
-        - type: string
-          help: "Data to write"
-
-  - name: "cli_command"
-    value:
-      group: "wisun"
-      name: "socket_read"
-      handler: "app_socket_read"
-      help: "Read from a socket"
-      shortcuts:
-        - name: "sr"
-      argument:
-        - type: uint32
-          help: "Socket Id"
-        - type: uint16
-          help: "Amount of bytes to read"
-
   - name: component_catalog
     value: wisun_tcp_client

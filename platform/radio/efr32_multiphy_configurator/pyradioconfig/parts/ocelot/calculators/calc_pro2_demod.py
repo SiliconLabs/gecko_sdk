@@ -116,23 +116,80 @@ class CALC_Pro2_Demod_Ocelot(ICalculator):
             self.write_unused_pro2_dsa_regs(model)
             self.write_unused_bcr_regs(model)
 
+
     def _map_pro2_dsa_outputs(self, model, pro2_calculator_obj):
         antdivmode = model.vars.antdivmode.value
+        directmode_rx = model.vars.directmode_rx.value
+        mod_type = model.vars.modulation_type.value
 
-        # : check
         phspike_det_thd = pro2_calculator_obj.demodulator.fields.spike_det_thd
+        signal_dsa_mode = pro2_calculator_obj.demodulator.fields.signal_dsa_mode
+        dis_midpt = pro2_calculator_obj.demodulator.fields.dis_midpt
+        crfast = pro2_calculator_obj.demodulator.fields.crfast
+        bcr_align_en = pro2_calculator_obj.demodulator.fields.bcr_align_en
+        schprd_h = pro2_calculator_obj.demodulator.fields.schprd_h
+        schprd_low = pro2_calculator_obj.demodulator.fields.schprd_low
+        afc_est_en = pro2_calculator_obj.demodulator.fields.afc_est_en
+        preath = pro2_calculator_obj.demodulator.fields.preath
+        skipsyn = pro2_calculator_obj.demodulator.fields.skipsyn
 
         # : If antenna diversity is enabled, scale up the detection threshold
         scale = 1.5 # TODO REVERT 1.5
         if antdivmode != model.vars.antdivmode.var_enum.DISABLE:
             phspike_det_thd = scale * phspike_det_thd
 
-        #Always set ENCFEQUAL to 0 for OOK, otherwise use signal_dsa_mode
-        self._reg_write(model.vars.MODEM_BCRDEMODARR1_ENCFEQUAL,
-                        pro2_calculator_obj.demodulator.fields.signal_dsa_mode if pro2_calculator_obj.inputs.API_modulation_type != 1 else 0)
-        self._reg_write(model.vars.MODEM_BCRDEMODARR0_ARRDETEN, pro2_calculator_obj.demodulator.fields.signal_dsa_mode)
+        """Potential to refactor this portion to another function, since we are not just adjusting DSA registers"""
+        if directmode_rx != model.vars.directmode_rx.var_enum.DISABLED:
+            en_cfe_qual = 0        # For direct mode packets, we rely on DSA from asynchronous detector instead. So we turn off CFE DSA
+            dis_midpt = 1        # Disable mid-point phase correction since preamble is not 1010
+            afc_est_en = 0          # Disable AFC, especially for FSK where LO leakage can cause detector lockup
+            if mod_type == model.vars.modulation_type.var_enum.FSK2:
+                preath = 0     # Minimize expected preamble length
+                bcr_align_en = 0    # Use post-dsa edges for FSK direct rx
+                skipsyn = 1         # Prevent sync timeout-related issues for accidental syncword detect
+                if directmode_rx == model.vars.directmode_rx.var_enum.ASYNC:
+                    # Output is RAW_DATA, which requires quick slicing upon DSA and first symbol transition
+                    schprd_h = 0
+                    schprd_low = 7
+                elif directmode_rx == model.vars.directmode_rx.var_enum.SYNC:
+                    # Output is DMOD_OUT, which benefits from large search period window since it's synced to bit clock
+                    schprd_h = 7
+                    schprd_low = 7       # Ignore gear-switching events for direct mode (e.g. accidental preammble detection)
+
+            elif mod_type == model.vars.modulation_type.var_enum.OOK:
+                bcr_align_en = 1     # Use pre-dsa edges for BCR since we are disabling DSA for OOK direct rx
+        else:
+            # Always set ENCFEQUAL to 0 for OOK, otherwise use signal_dsa_mode
+            if mod_type == model.vars.modulation_type.var_enum.OOK:
+                en_cfe_qual = 0
+            else:
+                en_cfe_qual = signal_dsa_mode
+
+        self._map_directmode_crslow(model, pro2_calculator_obj)
+        self._reg_write(model.vars.MODEM_BCRDEMODARR1_ENCFEQUAL, en_cfe_qual)
+        self._reg_write(model.vars.MODEM_BCRDEMODARR0_ARRDETEN, signal_dsa_mode)
         self._reg_write(model.vars.MODEM_BCRDEMODCTRL_NONSTDPK, pro2_calculator_obj.demodulator.fields.nonstdpk_final)
         self._reg_write(model.vars.MODEM_BCRDEMODARR0_PHSPIKETHD, int(phspike_det_thd))
+        self._reg_write(model.vars.MODEM_BCRCTRL1_DISMIDPT, dis_midpt)
+        self._reg_write(model.vars.MODEM_BCRCTRL0_CRFAST, crfast)
+        self._reg_write(model.vars.MODEM_BCRCTRL0_BCRALIGN, bcr_align_en)
+        self._reg_write(model.vars.MODEM_BCRDEMODARR0_SCHPRDLO, schprd_low)
+        self._reg_write(model.vars.MODEM_BCRDEMODARR0_SCHPRDHI, schprd_h)
+        self._reg_write(model.vars.MODEM_BCRDEMODAFC1_ENAFC, afc_est_en)
+        self._reg_write(model.vars.MODEM_BCRDEMODCTRL_PREATH, preath)
+        self._reg_write(model.vars.MODEM_BCRDEMODCTRL_SKIPSYN, skipsyn)
+
+    def _map_directmode_crslow(self, model, pro2_calculator_obj):
+        directmode_rx = model.vars.directmode_rx.value
+        mod_type = model.vars.modulation_type.value
+
+        crslow = pro2_calculator_obj.demodulator.fields.crslow
+
+        if directmode_rx != model.vars.directmode_rx.var_enum.DISABLED and \
+                mod_type == model.vars.modulation_type.var_enum.FSK2:
+            crslow = 0     # Maximize clock recovery loop speed as there is no packet structure
+
+        self._reg_write(model.vars.MODEM_BCRCTRL0_CRSLOW, crslow)
 
     def write_unused_pro2_dsa_regs(self, model):
         self._reg_write(model.vars.MODEM_BCRDEMODARR1_ENCFEQUAL, 0)
@@ -150,8 +207,6 @@ class CALC_Pro2_Demod_Ocelot(ICalculator):
         self._reg_write(model.vars.MODEM_BCRDEMODCTRL_RAWFASTMA, pro2_calculator_obj.demodulator.fields.fast_ma)
         self._reg_write(model.vars.MODEM_BCRDEMODCTRL_SPIKEREMOV, pro2_calculator_obj.demodulator.fields.spike_rm_en)
         self._reg_write(model.vars.MODEM_BCRDEMODCTRL_RAWFLTSEL, pro2_calculator_obj.demodulator.fields.rawflt_sel)
-        self._reg_write(model.vars.MODEM_BCRDEMODCTRL_PREATH, pro2_calculator_obj.demodulator.fields.preath)
-        self._reg_write(model.vars.MODEM_BCRDEMODCTRL_SKIPSYN, pro2_calculator_obj.demodulator.fields.skipsyn)
         self._reg_write(model.vars.MODEM_BCRDEMODCTRL_PMPATTERN, pro2_calculator_obj.demodulator.fields.pm_pattern)
         self._reg_write(model.vars.MODEM_BCRDEMODCTRL_SLICERFAST, pro2_calculator_obj.demodulator.fields.slicer_fast)
         self._reg_write(model.vars.MODEM_BCRDEMODCTRL_DETECTORSEL, pro2_calculator_obj.demodulator.fields.detector)
@@ -159,7 +214,7 @@ class CALC_Pro2_Demod_Ocelot(ICalculator):
         self._reg_write(model.vars.MODEM_BCRDEMODCTRL_CONSCHKBYP, 0)
         self._reg_write(model.vars.MODEM_BCRDEMODCTRL_PULCORRBYP, 0)
         self._reg_write(model.vars.MODEM_BCRDEMODCTRL_MANCHDLY, 0)
-        
+
         # Write BCRDEMODOOK
         self._reg_write(model.vars.MODEM_BCRDEMODOOK_OOKFRZEN, pro2_calculator_obj.demodulator.fields.ookfrz_en)
         self._reg_write(model.vars.MODEM_BCRDEMODOOK_RAWGAIN, int(pro2_calculator_obj.demodulator.fields.rawgain))
@@ -176,10 +231,7 @@ class CALC_Pro2_Demod_Ocelot(ICalculator):
 
         #Write BCRCTRL0
         self._reg_write(model.vars.MODEM_BCRCTRL0_BCRNCOFF, int(pro2_calculator_obj.demodulator.fields.ncoff))
-        self._reg_write(model.vars.MODEM_BCRCTRL0_BCRALIGN, pro2_calculator_obj.demodulator.fields.bcr_align_en)
         self._reg_write(model.vars.MODEM_BCRCTRL0_DISTOGG, pro2_calculator_obj.demodulator.fields.distogg)
-        self._reg_write(model.vars.MODEM_BCRCTRL0_CRSLOW, pro2_calculator_obj.demodulator.fields.crslow)
-        self._reg_write(model.vars.MODEM_BCRCTRL0_CRFAST, pro2_calculator_obj.demodulator.fields.crfast)
         self._reg_write(model.vars.MODEM_BCRCTRL0_BCRERRRSTEN, 1)
         self._reg_write(model.vars.MODEM_BCRCTRL0_BCRFBBYP, pro2_calculator_obj.demodulator.fields.bcrfbbyp)
 
@@ -189,7 +241,6 @@ class CALC_Pro2_Demod_Ocelot(ICalculator):
         self._reg_write(model.vars.MODEM_BCRCTRL1_RXNCOCOMP, pro2_calculator_obj.demodulator.fields.rxncocomp)
         self._reg_write(model.vars.MODEM_BCRCTRL1_RXCOMPLAT, pro2_calculator_obj.demodulator.fields.rxcomp_lat)
         self._reg_write(model.vars.MODEM_BCRCTRL1_ESCMIDPT, pro2_calculator_obj.demodulator.fields.esc_midpt)
-        self._reg_write(model.vars.MODEM_BCRCTRL1_DISMIDPT, pro2_calculator_obj.demodulator.fields.dis_midpt)
         self._reg_write(model.vars.MODEM_BCRCTRL1_BCROSR, int(pro2_calculator_obj.demodulator.fields.OSR_rx_BCR))
         self._reg_write(model.vars.MODEM_BCRCTRL1_ESTOSREN, pro2_calculator_obj.demodulator.fields.est_osr_en)
         self._reg_write(model.vars.MODEM_BCRCTRL1_BCRSWSYCW, pro2_calculator_obj.demodulator.fields.bcr_sw_sycw)
@@ -213,7 +264,6 @@ class CALC_Pro2_Demod_Ocelot(ICalculator):
         self._reg_write(model.vars.MODEM_BCRDEMODAFC1_ONESHOTAFCEN,pro2_calculator_obj.demodulator.fields.oneshot_afc)
         self._reg_write(model.vars.MODEM_BCRDEMODAFC1_SKIPPMDET, pro2_calculator_obj.demodulator.fields.skip_pm_det)
         self._reg_write(model.vars.MODEM_BCRDEMODAFC1_ENAFCFRZ, pro2_calculator_obj.demodulator.fields.afc_freez_en)
-        self._reg_write(model.vars.MODEM_BCRDEMODAFC1_ENAFC, pro2_calculator_obj.demodulator.fields.afc_est_en)
         self._reg_write(model.vars.MODEM_BCRDEMODAFC1_ENFBPLL, int(pro2_calculator_obj.demodulator.fields.afc_fb_pll))
         self._reg_write(model.vars.MODEM_BCRDEMODAFC1_HALFPHCOMP, 0)
         self._reg_write(model.vars.MODEM_BCRDEMODAFC1_PMRSTEN, 0)
@@ -249,8 +299,6 @@ class CALC_Pro2_Demod_Ocelot(ICalculator):
         self._reg_write(model.vars.MODEM_BCRDEMODRSSI_PRWOFFSET, 0)
 
         #Write BCRDEMODARR0
-        self._reg_write(model.vars.MODEM_BCRDEMODARR0_SCHPRDLO, pro2_calculator_obj.demodulator.fields.schprd_low)
-        self._reg_write(model.vars.MODEM_BCRDEMODARR0_SCHPRDHI, pro2_calculator_obj.demodulator.fields.schprd_h)
         self._reg_write(model.vars.MODEM_BCRDEMODARR0_ARRRSTEN, pro2_calculator_obj.demodulator.fields.arr_rst_en)
         self._reg_write(model.vars.MODEM_BCRDEMODARR0_ARRTOLER, pro2_calculator_obj.demodulator.fields.arr_toler)
         self._reg_write(model.vars.MODEM_BCRDEMODARR0_DIFF0RSTEN, pro2_calculator_obj.demodulator.fields.diff0rst_en)
@@ -449,7 +497,11 @@ class CALC_Pro2_Demod_Ocelot(ICalculator):
         antdivmode = model.vars.antdivmode.value
         ber_force_fdm0 = model.vars.ber_force_fdm0.value
 
-        if not ber_force_fdm0:
+        directmode_rx = model.vars.directmode_rx.value
+
+        if directmode_rx != model.vars.directmode_rx.var_enum.DISABLED and mod_type==1:     # Disable DSA for OOK
+            pro2_dsa_mode = 0
+        elif not ber_force_fdm0:
             if antdivmode == model.vars.antdivmode.var_enum.PHDEMODANTDIV \
                     or antdivmode == model.vars.antdivmode.var_enum.ANTENNA1:
                 pro2_dsa_mode = 1  # : always enable dsa mode for antenna diversity
@@ -541,8 +593,12 @@ class CALC_Pro2_Demod_Ocelot(ICalculator):
         preamble_pattern = model.vars.preamble_pattern.value
         preamble_pattern_len_actual = model.vars.preamble_pattern_len_actual.value
         ber_force_fdm0 = model.vars.ber_force_fdm0.value
+        directmode_rx = model.vars.directmode_rx.value
 
-        if (preamble_detection_length >= 32) and not ber_force_fdm0:
+        if directmode_rx != model.vars.directmode_rx.var_enum.DISABLED:
+            pro2_pm_pattern = 1000      # Direct mode
+
+        elif (preamble_detection_length >= 32) and not ber_force_fdm0:
             if ((preamble_pattern == 1) or (preamble_pattern==2)) and (preamble_pattern_len_actual == 2):
                 # 1010 or 0101 repeating
                 pro2_pm_pattern = 0
@@ -625,10 +681,10 @@ class CALC_Pro2_Demod_Ocelot(ICalculator):
     def calc_bcr_invrxbit(self,model):
         # Reading variables from model variables
         fskmap = model.vars.MODEM_CTRL0_MAPFSK.value
-        mod_type = model.vars.modulation_type.value
+        demod_select = model.vars.demod_select.value
 
-        #Assigning INVRXBIT the appropiate value based on existing FSKMAP variable
-        if (mod_type == model.vars.modulation_type.var_enum.FSK2):
+        # Always read the FSKMAP and use it to invert RX bits (this is also used for OOK)
+        if demod_select == model.vars.demod_select.var_enum.BCR:
             invrxbit = fskmap
         else:
             invrxbit = 0

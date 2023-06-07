@@ -4,15 +4,16 @@
  * 
  * @copyright 2021 Silicon Laboratories Inc.
  */
-#include <LEDBulb_hw.h>
+#include <app_hw.h>
 #include <ZAF_Actuator.h>
-#include <cc_multilevel_switch_support_config_api.h>
+#include "CC_ColorSwitch.h"
+#include <CC_MultilevelSwitch_Support.h>
 #include <sl_simple_rgb_pwm_led.h>
 #include <sl_simple_rgb_pwm_led_instances.h>
 #include <ev_man.h>
 #include <events.h>
 #include <board.h>
-#include <zaf_event_helper.h>
+#include <zaf_event_distributor_soc.h>
 //#define DEBUGPRINT
 #include "DebugPrint.h"
 
@@ -54,16 +55,16 @@ static void button_handler(BUTTON_EVENT event, bool is_called_from_isr)
   {
     if (is_called_from_isr)
     {
-      ZAF_EventHelperEventEnqueueFromISR(app_event);
+      zaf_event_distributor_enqueue_app_event_from_isr(app_event);
     }
     else
     {
-      ZAF_EventHelperEventEnqueue(app_event);
+      zaf_event_distributor_enqueue_app_event(app_event);
     }
   }
 }
 
-void LEDBulb_hw_init(void)
+void app_hw_init(void)
 {
   DPRINT("--------------------------------\n");
   DPRINTF("%s: Toggle learn mode\n", Board_GetButtonLabel(APP_BUTTON_LEARN_RESET));

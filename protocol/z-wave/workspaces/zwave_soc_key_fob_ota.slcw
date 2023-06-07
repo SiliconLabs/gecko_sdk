@@ -1,0 +1,18 @@
+label: ZWave_SoC_KeyFob_Solution
+description: >
+  Demonstrates Key Fob application combined with OTA bootloader.
+  The Key Fob application is capable of including and excluding end devices, and controlling them
+  through the BASIC Command Class. Whenever a command is processed, the Key Fob will enter EM4
+  power mode and can only be woken up from EM4 through either a reset or a button press on either
+  BTN1 or BTN2.
+quality: production
+project:
+  - path: ../NonCertifiableApps/zwave_soc_key_fob/zwave_soc_key_fob.slcp
+    id: application
+    output: app
+  - path: ../UCBootLoader/bootloader-storage-internal-single-512k_ota.slcp
+    id: bootloader
+    output: boot
+    
+post_build:
+  profile: zwave_soc_key_fob_ws_postbuild

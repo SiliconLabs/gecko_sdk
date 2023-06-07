@@ -12,7 +12,7 @@
 #include PLATFORM_HEADER
 #include CONFIGURATION_HEADER
 #include "stack/include/ember-types.h"
-#include "event_control/event.h"
+#include "event_queue/event-queue.h"
 #include EMBER_AF_API_GENERIC_INTERRUPT_CONTROL
 #include "hal/hal.h"
 #include "hal/micro/micro-common.h"
@@ -57,7 +57,7 @@ static void genericIsr(uint8_t pin)
 
   // Activate the user specified event
   if (irqConfigs[pin].irqEventHandler != NULL) {
-    emberEventControlSetActive(*(irqConfigs[pin].irqEventHandler));
+    emberEventSetActive(*(irqConfigs[pin].irqEventHandler));
   }
 }
 
@@ -165,7 +165,7 @@ void halGenericInterruptControlIrqIsrRemoveFxn(
 
 void halGenericInterruptControlIrqEventRegister(
   HalGenericInterruptControlIrqCfg *config,
-  EmberEventControl                *event)
+  EmberEvent                *event)
 {
   config->irqEventHandler = event;
 }

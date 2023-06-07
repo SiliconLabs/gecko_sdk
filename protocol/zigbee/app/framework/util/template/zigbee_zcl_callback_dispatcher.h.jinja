@@ -23,7 +23,7 @@
 
 {# RESET_ATTRIBUTES -#}
 // Reset Attributes
-void emAfResetAttributes(uint8_t endpointId);
+void sli_zigbee_af_reset_attributes(uint8_t endpointId);
 {% for cb in zigbee_af_callback -%}
 {% if cb['callback_type'] == "reset_attributes" -%}
 void {{ cb['function_name'] }}(uint8_t endpointId);
@@ -32,7 +32,7 @@ void {{ cb['function_name'] }}(uint8_t endpointId);
 
 {# PRE_COMMAND_RECEIVED #}
 // Pre command received
-bool emAfPreCommandReceived(EmberAfClusterCommand* cmd);
+bool sli_zigbee_af_pre_command_received(EmberAfClusterCommand* cmd);
 bool emberAfPreCommandReceivedCallback(EmberAfClusterCommand* cmd);
 {% for cb in zigbee_af_callback -%}
 {% if cb['callback_type'] == "pre_command_received" -%}
@@ -42,7 +42,7 @@ bool {{ cb['function_name'] }}(EmberAfClusterCommand* cmd);
 
 {# PRE_ZDO_MESSAGE_RECEIVED #}
 // Pre ZDO message received
-bool emAfPreZDOMessageReceived(EmberNodeId nodeId, EmberApsFrame* apsFrame, uint8_t* message, uint16_t length);
+bool sli_zigbee_af_pre_zdo_message_received(EmberNodeId nodeId, EmberApsFrame* apsFrame, uint8_t* message, uint16_t length);
 bool emberAfPreZDOMessageReceivedCallback(EmberNodeId nodeId, EmberApsFrame* apsFrame, uint8_t* message, uint16_t length);
 {% for cb in zigbee_af_callback -%}
 {% if cb['callback_type'] == "pre_zdo_message_received" -%}
@@ -52,7 +52,7 @@ bool {{ cb['function_name'] }}(EmberNodeId nodeId, EmberApsFrame* apsFrame, uint
 
 {# ZDO_MESSAGE_RECEIVED #}
 // ZDO message received
-void emAfZDOMessageReceived(EmberNodeId sender, EmberApsFrame* apsFrame, uint8_t* message, uint16_t length);
+void sli_zigbee_af_zdo_message_received(EmberNodeId sender, EmberApsFrame* apsFrame, uint8_t* message, uint16_t length);
 {% for cb in zigbee_af_callback -%}
 {% if cb['callback_type'] == "zdo_message_received" -%}
 void {{ cb['function_name'] }}(EmberNodeId sender, EmberApsFrame* apsFrame, uint8_t* message, uint16_t length);
@@ -61,7 +61,7 @@ void {{ cb['function_name'] }}(EmberNodeId sender, EmberApsFrame* apsFrame, uint
 
 {# RETRIEVE_ATTRIBUTE_AND_CRAFT_RESPONSE #}
 // Retrieve attribute and craft response
-bool emAfRetrieveAttributeAndCraftResponse(uint8_t endpoint, EmberAfClusterId clusterId, EmberAfAttributeId attrId, uint8_t mask, uint16_t maunfacturerCode, uint16_t readLength);
+bool sli_zigbee_af_retrieve_attribute_and_craft_response(uint8_t endpoint, EmberAfClusterId clusterId, EmberAfAttributeId attrId, uint8_t mask, uint16_t maunfacturerCode, uint16_t readLength);
 {% for cb in zigbee_af_callback -%}
 {% if cb['callback_type'] == "retrieve_attribute_and_craft_response" -%}
 bool {{ cb['function_name'] }}(uint8_t endpoint, EmberAfClusterId clusterId, EmberAfAttributeId attrId, uint8_t mask, uint16_t maunfacturerCode, uint16_t readLength);
@@ -69,7 +69,7 @@ bool {{ cb['function_name'] }}(uint8_t endpoint, EmberAfClusterId clusterId, Emb
 {% endfor -%}
 
 {# READ_ATTRIBUTES_RESPONSE #}
-bool emAfReadAttributesResponse(EmberAfClusterId clusterId, uint8_t* buffer, uint16_t bufLen);
+bool sli_zigbee_af_read_attributes_response(EmberAfClusterId clusterId, uint8_t* buffer, uint16_t bufLen);
 // Read attributes response
 bool emberAfReadAttributesResponseCallback(EmberAfClusterId clusterId, uint8_t* buffer, uint16_t bufLen);
 {% for cb in zigbee_af_callback -%}
@@ -80,7 +80,7 @@ bool {{ cb['function_name'] }}(EmberAfClusterId clusterId, uint8_t* buffer, uint
 
 {# REPORT_ATTRIBUTES #}
 // Report attributes
-bool emAfReportAttributes(EmberAfClusterId clusterId, uint8_t * buffer, uint16_t bufLen);
+bool sli_zigbee_af_report_attributes(EmberAfClusterId clusterId, uint8_t * buffer, uint16_t bufLen);
 bool emberAfReportAttributesCallback(EmberAfClusterId clusterId, uint8_t * buffer, uint16_t bufLen);
 {% for cb in zigbee_af_callback -%}
 {% if cb['callback_type'] == "report_attributes" -%}

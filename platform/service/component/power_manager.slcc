@@ -19,8 +19,6 @@ requires:
   - name: power_manager_handler
 recommends:
   - id: power_manager_handler_implementation
-validation_helper:
-  - path: platform/service/power_manager/power_manager_validation.lua
 documentation:
   docset: gecko-platform
   document: service/power_manager/overview

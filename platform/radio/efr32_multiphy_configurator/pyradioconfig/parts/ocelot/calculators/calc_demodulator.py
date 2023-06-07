@@ -74,6 +74,33 @@ class CALC_Demodulator_ocelot(ICalculator):
                                desc='Number of preamble bits to use for timing detection')
         self._addModelActual(model, 'log2x4', int, ModelVariableFormat.DECIMAL, desc='Actual log2x4 for FEFILT in use')
 
+        self._add_demod_select_variable(model)
+
+        self._addModelVariable(model, 'min_bwsel', float, ModelVariableFormat.DECIMAL)
+        self._addModelVariable(model, 'max_bwsel', float, ModelVariableFormat.DECIMAL)
+        self._addModelVariable(model, 'target_bwsel', float, ModelVariableFormat.DECIMAL)
+        self._addModelVariable(model, 'min_src2', float, ModelVariableFormat.DECIMAL)
+        self._addModelVariable(model, 'max_src2', float, ModelVariableFormat.DECIMAL)
+        self._addModelVariable(model, 'bandwidth_tol', float, ModelVariableFormat.DECIMAL)
+        self._addModelVariable(model, 'phscale_derate_factor', int, ModelVariableFormat.DECIMAL)
+
+        var = self._addModelVariable(model, 'directmode_rx', Enum,      ModelVariableFormat.DECIMAL, desc='Direct RX modes')
+        member_data = [
+            ['DISABLED', 0, 'Direct Mode Disabled'],
+            ['SYNC', 1, 'Configure modem to output demod data directly to GPIO or RAM buffer (2FSK or OOK). Data is synchronized to a recovered bit clock.'],
+            ['ASYNC', 2, 'Configure modem to output raw demod data directly to GPIO or RAM buffer (2FSK or OOK) at the rate of the demodulator clock.'],
+        ]
+        var.var_enum = CreateModelVariableEnum(
+            'DirectModeEnum',
+            'List of supported direct modes',
+            member_data)
+
+        self._add_demod_rate_variable(model)
+
+    def _add_demod_rate_variable(self, model):
+        self._addModelActual(model, 'demod_rate', int, ModelVariableFormat.DECIMAL)
+
+    def _add_demod_select_variable(self, model):
         model.vars.demod_select.var_enum = CreateModelVariableEnum(
             enum_name='DemodSelectEnum',
             enum_desc='Demod Selection',
@@ -83,19 +110,8 @@ class CALC_Demodulator_ocelot(ICalculator):
                 ['TRECS_VITERBI', 2, 'TRecS + Viterbi Demod'],
                 ['TRECS_SLICER', 3, 'TRecS + HD Demod'],
                 ['BCR', 4, 'PRO2 BCR Demod'],
-                ['LONGRANGE', 5, 'BLE Long Range Demod']
+                ['LONGRANGE', 5, 'BLE Long Range Demod'],
             ])
-        self._addModelVariable(model, 'min_bwsel', float, ModelVariableFormat.DECIMAL)
-        self._addModelVariable(model, 'max_bwsel', float, ModelVariableFormat.DECIMAL)
-        self._addModelVariable(model, 'min_src2', float, ModelVariableFormat.DECIMAL)
-        self._addModelVariable(model, 'max_src2', float, ModelVariableFormat.DECIMAL)
-        self._addModelVariable(model, 'bandwidth_tol', float, ModelVariableFormat.DECIMAL)
-        self._addModelVariable(model, 'phscale_derate_factor', int, ModelVariableFormat.DECIMAL)
-
-        self._add_demod_rate_variable(model)
-
-    def _add_demod_rate_variable(self, model):
-        self._addModelActual(model, 'demod_rate', int, ModelVariableFormat.DECIMAL)
 
     def return_solution(self, model, demod_select):
 
@@ -137,6 +153,7 @@ class CALC_Demodulator_ocelot(ICalculator):
         tol = model.vars.baudrate_tol_ppm.value
         mi = model.vars.modulation_index.value
         antdivmode = model.vars.antdivmode.value
+        directmode_rx = model.vars.directmode_rx.value
 
         if hasattr(model.profiles, 'Long_Range'):
             is_long_range = model.profile == model.profiles.Long_Range
@@ -146,6 +163,14 @@ class CALC_Demodulator_ocelot(ICalculator):
         if model.vars.demod_select._value_forced != None:
             demod_select = model.vars.demod_select._value_forced
             [target_osr, dec0, dec1, min_osr, max_osr] = self.return_solution(model, demod_select)
+
+        elif directmode_rx != model.vars.directmode_rx.var_enum.DISABLED:     # Have to use BCR if using direct mode. See https://jira.silabs.com/browse/MCUW_RADIO_CFG-1515
+            if modtype not in [model.vars.modulation_type.var_enum.OOK,
+                               model.vars.modulation_type.var_enum.FSK2]:
+                raise CalculationException("Direct Mode RX is only supported for OOK and 2FSK")
+
+            demod_select = model.vars.demod_select.var_enum.BCR
+            [target_osr, dec0, dec1, min_osr, max_osr] = self.return_osr_dec0_dec1(model, demod_select)
 
         else:
             # choose demod_select based on modulation and demod priority
@@ -680,12 +705,15 @@ class CALC_Demodulator_ocelot(ICalculator):
         subfrac_actual = model.vars.subfrac_actual.value
         rxbrfrac_actual = model.vars.rxbrfrac_actual.value
         dec = model.vars.MODEM_BCRDEMODOOK_RAWNDEC.value
+        bcr_demod_en = model.vars.bcr_demod_en.value
         bcr_demod_en_forced = (model.vars.bcr_demod_en.value_forced is not None)  # This is currently only done for conc PHYs
         agc_subperiod_actual = model.vars.AGC_CTRL7_SUBPERIOD.value
 
-        if (subfrac_actual > 0) and (disable_subfrac_divider == False):
+        if bcr_demod_en and (subfrac_actual > 0) and (disable_subfrac_divider == False):
+            # The BCR demod uses the AGC subperiod settings for baudrate division
             frac = subfrac_actual * pow(2, dec)
         else:
+            # For other demods use the standard RX baudrate divider settings
             frac = rxbrfrac_actual
 
         #Calculate actual baudrate once the ADC, decimator, SRC, and rxbr settings are known
@@ -895,12 +923,11 @@ class CALC_Demodulator_ocelot(ICalculator):
         model.vars.tx_xtal_error_ppm.value = tx_ppm
 
 
-    def get_alpha(self, model):
+    def get_alpha(self, model, modulation_index, shaping_filter, shaping_filter_param):
         # Bandwidth adjustment based on mi and bt
         # the thresholds were derived based simulating bandwidth of modulated signal with 98% of the energy
-        mi = model.vars.modulation_index.value
-
-        sf = model.vars.shaping_filter.value
+        mi = modulation_index
+        sf = shaping_filter
 
         if sf == model.vars.shaping_filter.var_enum.NONE.value:
             if mi < 0.75:
@@ -913,7 +940,7 @@ class CALC_Demodulator_ocelot(ICalculator):
                 alpha = -0.2
         elif sf == model.vars.shaping_filter.var_enum.Gaussian.value:
 
-            bt = model.vars.shaping_filter_param.value # BT might not be defined if not Gaussian shaping so read it here
+            bt = shaping_filter_param # BT might not be defined if not Gaussian shaping so read it here
 
             if bt < 0.75:
                 if mi < 0.95:
@@ -964,8 +991,11 @@ class CALC_Demodulator_ocelot(ICalculator):
         #bw_acq combines bw_demod and frequency shift
         if (mod_type == model.vars.modulation_type.var_enum.FSK2) or \
                 (mod_type == model.vars.modulation_type.var_enum.MSK):
-            alpha = self.get_alpha(model)
-            bw_acq = bw_carson + 2 * max( 0.0, freq_offset_hz - alpha * bw_carson )
+            modulation_index = model.vars.modulation_index.value
+            shaping_filter = model.vars.shaping_filter.value
+            shaping_filter_param = model.vars.shaping_filter_param.value
+            alpha = self.get_alpha(model, modulation_index, shaping_filter, shaping_filter_param)
+            bw_acq = self.get_target_2fsk_bandwidth(bw_carson, freq_offset_hz, alpha)
 
         elif (mod_type == model.vars.modulation_type.var_enum.FSK4):
             bw_acq = bw_carson + 2.0 * freq_offset_hz
@@ -994,6 +1024,9 @@ class CALC_Demodulator_ocelot(ICalculator):
         #Load local variables back into model variables
         model.vars.bandwidth_hz.value = int(bw_acq)
 
+    def get_target_2fsk_bandwidth(self, bw_carson, freq_offset_hz, alpha):
+        bw_acq = bw_carson + 2 * max(0.0, freq_offset_hz - alpha * bw_carson)
+        return bw_acq
 
     def calc_lock_bandwidth(self, model, softmodem_narrowing=False):
         #Load model variables into local variables
@@ -2540,9 +2573,14 @@ class CALC_Demodulator_ocelot(ICalculator):
         #This method calculates a defualt value for preamble_detection_length
 
         preamble_length = model.vars.preamble_length.value
+        directmode_rx = model.vars.directmode_rx.value
 
-        #Set the preamble detection length to the preamble length (TX) by default
-        model.vars.preamble_detection_length.value = preamble_length
+        if directmode_rx != model.vars.directmode_rx.var_enum.DISABLED:
+            # No preamble is expected in direct mode, so any DSA configuration should bypass preamble search
+            model.vars.preamble_detection_length.value = 0
+        else:
+            # Set the preamble detection length to the preamble length (TX) by default
+            model.vars.preamble_detection_length.value = preamble_length
 
     def calc_detdis_reg(self, model):
         #This method calculates the MODEM_CTRL0_DETDIS field
@@ -2689,3 +2727,20 @@ class CALC_Demodulator_ocelot(ICalculator):
 
         # Write the model var
         model.vars.log2x4_actual.value = log2x4_actual
+
+    def calc_directmode_regs(self, model):
+        # Populate directmode default variables
+        model.vars.directmode_rx.value = model.vars.directmode_rx.var_enum.DISABLED
+
+        ### select asynchronous direct mode
+        directmode_rx = model.vars.directmode_rx.value
+
+        if directmode_rx == model.vars.directmode_rx.var_enum.ASYNC:
+            asynchronous_rx_enable = True
+            directmode_reg = 1
+        else:
+            asynchronous_rx_enable = False
+            directmode_reg = 0
+
+        model.vars.asynchronous_rx_enable.value = asynchronous_rx_enable
+        self._reg_write(model.vars.MODEM_BCRDEMODCTRL_DIRECTMODE, directmode_reg)

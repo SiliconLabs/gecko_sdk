@@ -40,6 +40,7 @@
 
 #include <openthread/platform/crypto.h>
 
+#include "common/callback.hpp"
 #include "common/locator.hpp"
 #include "common/non_copyable.hpp"
 #include "common/timer.hpp"
@@ -165,7 +166,7 @@ public:
          *
          */
         void RecordFrameTransmitStatus(const TxFrame &aFrame,
-                                       const RxFrame *aAckFrame,
+                                       RxFrame       *aAckFrame,
                                        Error          aError,
                                        uint8_t        aRetryCount,
                                        bool           aWillRetx);
@@ -276,7 +277,10 @@ public:
      * @param[in]  aCallbackContext  A pointer to application-specific context.
      *
      */
-    void SetPcapCallback(otLinkPcapCallback aPcapCallback, void *aCallbackContext);
+    void SetPcapCallback(otLinkPcapCallback aPcapCallback, void *aCallbackContext)
+    {
+        mPcapCallback.Set(aPcapCallback, aCallbackContext);
+    }
 
     /**
      * This method indicates whether radio should stay in Receive or Sleep during CSMA backoff.
@@ -484,7 +488,7 @@ public:
      * This method clears the stored MAC keys.
      *
      */
-    void DeleteMacKeys(void)
+    void ClearMacKeys(void)
     {
         mPrevKey.Clear();
         mCurrKey.Clear();
@@ -503,9 +507,11 @@ public:
      * This method sets the current MAC Frame Counter value.
      *
      * @param[in] aFrameCounter  The MAC Frame Counter value.
+     * @param[in] aSetIfLarger   If `true`, set only if the new value @p aFrameCounter is larger than the current value.
+     *                           If `false`, set the new value independent of the current value.
      *
      */
-    void SetFrameCounter(uint32_t aFrameCounter);
+    void SetFrameCounter(uint32_t aFrameCounter, bool aSetIfLarger);
 
 #if OPENTHREAD_CONFIG_MAC_FILTER_ENABLE
     /**
@@ -583,6 +589,13 @@ private:
     static constexpr uint32_t kCslReceiveTimeAhead = OPENTHREAD_CONFIG_CSL_RECEIVE_TIME_AHEAD;
 #endif
 
+#if OPENTHREAD_CONFIG_MAC_CSL_TRANSMITTER_ENABLE
+    // CSL transmitter would schedule delayed transmission `kCslTransmitTimeAhead` earlier
+    // than expected delayed transmit time. The value is in usec.
+    // Only for radios not supporting OT_RADIO_CAPS_TRANSMIT_TIMING.
+    static constexpr uint32_t kCslTransmitTimeAhead = OPENTHREAD_CONFIG_CSL_TRANSMIT_TIME_AHEAD;
+#endif
+
     /**
      * This method initializes the states of the sub-MAC layer.
      *
@@ -609,7 +622,7 @@ private:
     bool ShouldHandleTransmitTargetTime(void) const;
 
     void ProcessTransmitSecurity(void);
-    void SignalFrameCounterUsed(uint32_t aFrameCounter);
+    void SignalFrameCounterUsed(uint32_t aFrameCounter, uint8_t aKeyId);
     void StartCsmaBackoff(void);
     void StartTimerForBackoff(uint8_t aBackoffExponent);
     void BeginTransmit(void);
@@ -642,17 +655,16 @@ private:
 #if OPENTHREAD_CONFIG_MAC_FILTER_ENABLE
     bool mRadioFilterEnabled : 1;
 #endif
-    int8_t             mEnergyScanMaxRssi;
-    TimeMilli          mEnergyScanEndTime;
-    TxFrame &          mTransmitFrame;
-    Callbacks          mCallbacks;
-    otLinkPcapCallback mPcapCallback;
-    void *             mPcapCallbackContext;
-    KeyMaterial        mPrevKey;
-    KeyMaterial        mCurrKey;
-    KeyMaterial        mNextKey;
-    uint32_t           mFrameCounter;
-    uint8_t            mKeyId;
+    int8_t                       mEnergyScanMaxRssi;
+    TimeMilli                    mEnergyScanEndTime;
+    TxFrame                     &mTransmitFrame;
+    Callbacks                    mCallbacks;
+    Callback<otLinkPcapCallback> mPcapCallback;
+    KeyMaterial                  mPrevKey;
+    KeyMaterial                  mCurrKey;
+    KeyMaterial                  mNextKey;
+    uint32_t                     mFrameCounter;
+    uint8_t                      mKeyId;
 #if OPENTHREAD_CONFIG_MAC_ADD_DELAY_ON_NO_ACK_ERROR_BEFORE_RETRY
     uint8_t mRetxDelayBackOffExponent;
 #endif

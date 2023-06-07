@@ -86,7 +86,7 @@ void Manager::HandleNotifierEvents(Events aEvents)
 
     if (aEvents.Contains(kEventThreadBackboneRouterStateChanged))
     {
-        if (Get<Local>().GetState() == OT_BACKBONE_ROUTER_STATE_DISABLED)
+        if (!Get<Local>().IsEnabled())
         {
 #if OPENTHREAD_CONFIG_BACKBONE_ROUTER_MULTICAST_ROUTING_ENABLE
             mMulticastListenersTable.Clear();
@@ -134,7 +134,7 @@ void Manager::HandleTimer(void)
 #if OPENTHREAD_CONFIG_BACKBONE_ROUTER_MULTICAST_ROUTING_ENABLE
 template <> void Manager::HandleTmf<kUriMlr>(Coap::Message &aMessage, const Ip6::MessageInfo &aMessageInfo)
 {
-    VerifyOrExit(Get<Local>().GetState() != OT_BACKBONE_ROUTER_STATE_DISABLED);
+    VerifyOrExit(Get<Local>().IsEnabled());
     HandleMulticastListenerRegistration(aMessage, aMessageInfo);
 
 exit:
@@ -146,7 +146,7 @@ void Manager::HandleMulticastListenerRegistration(const Coap::Message &aMessage,
     Error                      error     = kErrorNone;
     bool                       isPrimary = Get<Local>().IsPrimary();
     ThreadStatusTlv::MlrStatus status    = ThreadStatusTlv::kMlrSuccess;
-    BackboneRouterConfig       config;
+    Config                     config;
 
     uint16_t     addressesOffset, addressesLength;
     Ip6::Address address;
@@ -281,10 +281,10 @@ exit:
     }
 }
 
-void Manager::SendMulticastListenerRegistrationResponse(const Coap::Message &      aMessage,
-                                                        const Ip6::MessageInfo &   aMessageInfo,
+void Manager::SendMulticastListenerRegistrationResponse(const Coap::Message       &aMessage,
+                                                        const Ip6::MessageInfo    &aMessageInfo,
                                                         ThreadStatusTlv::MlrStatus aStatus,
-                                                        Ip6::Address *             aFailedAddresses,
+                                                        Ip6::Address              *aFailedAddresses,
                                                         uint8_t                    aFailedAddressNum)
 {
     Error          error = kErrorNone;
@@ -321,7 +321,7 @@ void Manager::SendBackboneMulticastListenerRegistration(const Ip6::Address *aAdd
                                                         uint32_t            aTimeout)
 {
     Error             error   = kErrorNone;
-    Coap::Message *   message = nullptr;
+    Coap::Message    *message = nullptr;
     Ip6::MessageInfo  messageInfo;
     Ip6AddressesTlv   addressesTlv;
     BackboneTmfAgent &backboneTmf = Get<BackboneRouter::BackboneTmfAgent>();
@@ -357,7 +357,7 @@ exit:
 template <>
 void Manager::HandleTmf<kUriDuaRegistrationRequest>(Coap::Message &aMessage, const Ip6::MessageInfo &aMessageInfo)
 {
-    VerifyOrExit(Get<Local>().GetState() != OT_BACKBONE_ROUTER_STATE_DISABLED);
+    VerifyOrExit(Get<Local>().IsEnabled());
     HandleDuaRegistration(aMessage, aMessageInfo);
 
 exit:
@@ -441,9 +441,9 @@ exit:
     }
 }
 
-void Manager::SendDuaRegistrationResponse(const Coap::Message &      aMessage,
-                                          const Ip6::MessageInfo &   aMessageInfo,
-                                          const Ip6::Address &       aTarget,
+void Manager::SendDuaRegistrationResponse(const Coap::Message       &aMessage,
+                                          const Ip6::MessageInfo    &aMessageInfo,
+                                          const Ip6::Address        &aTarget,
                                           ThreadStatusTlv::DuaStatus aStatus)
 {
     Error          error = kErrorNone;
@@ -492,10 +492,7 @@ void Manager::ConfigNextMulticastListenerRegistrationResponse(ThreadStatusTlv::M
 #endif
 
 #if OPENTHREAD_CONFIG_BACKBONE_ROUTER_DUA_NDPROXYING_ENABLE
-NdProxyTable &Manager::GetNdProxyTable(void)
-{
-    return mNdProxyTable;
-}
+NdProxyTable &Manager::GetNdProxyTable(void) { return mNdProxyTable; }
 
 bool Manager::ShouldForwardDuaToBackbone(const Ip6::Address &aAddress)
 {
@@ -520,7 +517,7 @@ exit:
 Error Manager::SendBackboneQuery(const Ip6::Address &aDua, uint16_t aRloc16)
 {
     Error            error   = kErrorNone;
-    Coap::Message *  message = nullptr;
+    Coap::Message   *message = nullptr;
     Ip6::MessageInfo messageInfo;
 
     VerifyOrExit(Get<Local>().IsPrimary(), error = kErrorInvalidState);
@@ -624,7 +621,7 @@ exit:
     LogInfo("HandleBackboneAnswer: %s", ErrorToString(error));
 }
 
-Error Manager::SendProactiveBackboneNotification(const Ip6::Address &            aDua,
+Error Manager::SendProactiveBackboneNotification(const Ip6::Address             &aDua,
                                                  const Ip6::InterfaceIdentifier &aMeshLocalIid,
                                                  uint32_t                        aTimeSinceLastTransaction)
 {
@@ -632,8 +629,8 @@ Error Manager::SendProactiveBackboneNotification(const Ip6::Address &           
                               aTimeSinceLastTransaction, Mac::kShortAddrInvalid);
 }
 
-Error Manager::SendBackboneAnswer(const Ip6::MessageInfo &     aQueryMessageInfo,
-                                  const Ip6::Address &         aDua,
+Error Manager::SendBackboneAnswer(const Ip6::MessageInfo      &aQueryMessageInfo,
+                                  const Ip6::Address          &aDua,
                                   uint16_t                     aSrcRloc16,
                                   const NdProxyTable::NdProxy &aNdProxy)
 {
@@ -641,14 +638,14 @@ Error Manager::SendBackboneAnswer(const Ip6::MessageInfo &     aQueryMessageInfo
                               aNdProxy.GetTimeSinceLastTransaction(), aSrcRloc16);
 }
 
-Error Manager::SendBackboneAnswer(const Ip6::Address &            aDstAddr,
-                                  const Ip6::Address &            aDua,
+Error Manager::SendBackboneAnswer(const Ip6::Address             &aDstAddr,
+                                  const Ip6::Address             &aDua,
                                   const Ip6::InterfaceIdentifier &aMeshLocalIid,
                                   uint32_t                        aTimeSinceLastTransaction,
                                   uint16_t                        aSrcRloc16)
 {
     Error            error   = kErrorNone;
-    Coap::Message *  message = nullptr;
+    Coap::Message   *message = nullptr;
     Ip6::MessageInfo messageInfo;
     bool             proactive = aDstAddr.IsMulticast();
 
@@ -664,11 +661,8 @@ Error Manager::SendBackboneAnswer(const Ip6::Address &            aDstAddr,
 
     SuccessOrExit(error = Tlv::Append<ThreadLastTransactionTimeTlv>(*message, aTimeSinceLastTransaction));
 
-    {
-        const MeshCoP::NameData nameData = Get<MeshCoP::NetworkNameManager>().GetNetworkName().GetAsData();
-
-        SuccessOrExit(error = Tlv::Append<ThreadNetworkNameTlv>(*message, nameData.GetBuffer(), nameData.GetLength()));
-    }
+    SuccessOrExit(error = Tlv::Append<ThreadNetworkNameTlv>(
+                      *message, Get<MeshCoP::NetworkNameManager>().GetNetworkName().GetAsCString()));
 
     if (aSrcRloc16 != Mac::kShortAddrInvalid)
     {
@@ -718,7 +712,7 @@ exit:
             aDua.ToString().AsCString(), aMeshLocalIid.ToString().AsCString(), duplicate ? "Y" : "N");
 }
 
-void Manager::HandleExtendedBackboneAnswer(const Ip6::Address &            aDua,
+void Manager::HandleExtendedBackboneAnswer(const Ip6::Address             &aDua,
                                            const Ip6::InterfaceIdentifier &aMeshLocalIid,
                                            uint32_t                        aTimeSinceLastTransaction,
                                            uint16_t                        aSrcRloc16)
@@ -732,7 +726,7 @@ void Manager::HandleExtendedBackboneAnswer(const Ip6::Address &            aDua,
             aMeshLocalIid.ToString().AsCString(), ToUlong(aTimeSinceLastTransaction), aSrcRloc16);
 }
 
-void Manager::HandleProactiveBackboneNotification(const Ip6::Address &            aDua,
+void Manager::HandleProactiveBackboneNotification(const Ip6::Address             &aDua,
                                                   const Ip6::InterfaceIdentifier &aMeshLocalIid,
                                                   uint32_t                        aTimeSinceLastTransaction)
 {

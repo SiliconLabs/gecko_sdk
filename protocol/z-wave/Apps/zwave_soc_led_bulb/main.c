@@ -17,16 +17,12 @@
 #include "sl_component_catalog.h"
 #include "sl_system_init.h"
 #include "sl_system_kernel.h"
-#include "app.h"
 
 int main(void)
 {
   // Initialize Silicon Labs device, system, service(s) and protocol stack(s).
   // Note that processing task(s) will be created by this call.
   sl_system_init();
-
-  // Initialize the application. For example, create periodic timer(s) or task(s)
-  app_init();
 
   // Start the kernel. Task(s) created in app_init() will start running.
   sl_system_kernel_start();

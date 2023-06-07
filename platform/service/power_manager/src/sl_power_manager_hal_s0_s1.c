@@ -109,7 +109,7 @@
  ***************************  LOCAL VARIABLES   ********************************
  ******************************************************************************/
 
-#if (SL_POWER_MANAGER_LOWEST_EM_ALLOWED != 1)
+#if !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT)
 // Time in ticks required for HFXO start-up after wake-up from sleep.
 static uint32_t hfxo_wakeup_time_tick = 0;
 static bool is_hf_x_oscillator_used = false;
@@ -136,7 +136,7 @@ static uint32_t cmu_status;
  ******************************************************************************/
 void sli_power_manager_init_hardware(void)
 {
-#if (SL_POWER_MANAGER_LOWEST_EM_ALLOWED != 1)
+#if !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT)
   // Validate that HFXO auto-start and auto-select feature is disabled
   // since they are not compatible with Power Manager
 #if defined(_CMU_HFXOCTRL_AUTOSTARTEM0EM1_MASK)
@@ -153,7 +153,7 @@ void sli_power_manager_init_hardware(void)
 
   EMU_EM01Init(&em01_init);
 
-#if (SL_POWER_MANAGER_LOWEST_EM_ALLOWED != 1)
+#if !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT)
 #if defined(SL_POWER_MANAGER_CONFIG_VOLTAGE_SCALING_FAST_WAKEUP)
 #if (SL_POWER_MANAGER_CONFIG_VOLTAGE_SCALING_FAST_WAKEUP == 0)
   sli_power_manager_em23_voltage_scaling_enable_fast_wakeup(false);
@@ -166,7 +166,7 @@ void sli_power_manager_init_hardware(void)
 #endif
 #endif
 
-#if (SL_POWER_MANAGER_LOWEST_EM_ALLOWED != 1)
+#if !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT)
   is_hf_x_oscillator_used = (CMU->STATUS & _CMU_STATUS_HFXOENS_MASK) == _CMU_STATUS_HFXOENS_MASK;
 #if defined(_CMU_DPLLCTRL_MASK)
   is_dpll_used = (CMU->STATUS & CMU_STATUS_DPLLENS) == CMU_STATUS_DPLLENS;
@@ -197,13 +197,13 @@ void sli_power_manager_init_hardware(void)
 #endif
 }
 
-#if (SL_POWER_MANAGER_LOWEST_EM_ALLOWED != 1)
-#if defined(EMU_VSCALE_PRESENT)
 /***************************************************************************//**
  * Enable or disable fast wake-up in EM2 and EM3.
  ******************************************************************************/
 void sli_power_manager_em23_voltage_scaling_enable_fast_wakeup(bool enable)
 {
+#if (defined(EMU_VSCALE_PRESENT) && !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT))
+
   if (enable == is_fast_wakeup_enabled) {
     return;
   }
@@ -229,11 +229,12 @@ void sli_power_manager_em23_voltage_scaling_enable_fast_wakeup(bool enable)
   }
 
   is_fast_wakeup_enabled = enable;
+#else
+  (void)enable;
+#endif
 }
-#endif
-#endif
 
-#if (SL_POWER_MANAGER_LOWEST_EM_ALLOWED != 1)
+#if !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT)
 /***************************************************************************//**
  * Save the CMU HF clock select state, oscillator enable, and voltage scaling.
  ******************************************************************************/
@@ -243,7 +244,7 @@ void sli_power_manager_save_states(void)
 }
 #endif
 
-#if (SL_POWER_MANAGER_LOWEST_EM_ALLOWED != 1)
+#if !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT)
 /***************************************************************************//**
  * Handle post-sleep operations. The idea is to start HFXO ASAP when we know we
  * will need it.
@@ -263,7 +264,7 @@ void EMU_EM23PostsleepHook(void)
 }
 #endif
 
-#if (SL_POWER_MANAGER_LOWEST_EM_ALLOWED != 1)
+#if !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT)
 /***************************************************************************//**
  * Handle pre-deepsleep operations if any are necessary, like manually disabling
  * oscillators, change clock settings, etc.
@@ -273,7 +274,7 @@ void sli_power_manager_handle_pre_deepsleep_operations(void)
 }
 #endif
 
-#if (SL_POWER_MANAGER_LOWEST_EM_ALLOWED != 1)
+#if !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT)
 /***************************************************************************//**
  * Handle post-sleep operations if any are necessary, like manually enabling
  * oscillators, change clock settings, etc.
@@ -283,7 +284,7 @@ void sli_power_manager_restore_high_freq_accuracy_clk(void)
 }
 #endif
 
-#if (SL_POWER_MANAGER_LOWEST_EM_ALLOWED != 1)
+#if !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT)
 /***************************************************************************//**
  * Checks if HF accuracy clocks is fully restored and, if needed, waits for it.
  *
@@ -301,7 +302,7 @@ bool sli_power_manager_is_high_freq_accuracy_clk_ready(bool wait)
 }
 #endif
 
-#if (SL_POWER_MANAGER_LOWEST_EM_ALLOWED != 1)
+#if !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT)
 /***************************************************************************//**
  * Restore CMU HF clock select state, oscillator enable, and voltage scaling.
  *
@@ -384,7 +385,7 @@ void sli_power_manager_apply_em(sl_power_manager_em_t em)
   }
 }
 
-#if (SL_POWER_MANAGER_LOWEST_EM_ALLOWED != 1)
+#if !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT)
 /*******************************************************************************
  * Returns the default minimum offtime for HFXO.
  ******************************************************************************/
@@ -401,7 +402,7 @@ uint32_t sli_power_manager_get_default_high_frequency_minimum_offtime(void)
  ******************************************************************************/
 uint32_t sli_power_manager_get_wakeup_process_time_overhead(void)
 {
-#if (SL_POWER_MANAGER_LOWEST_EM_ALLOWED != 1)
+#if !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT)
   uint32_t delay = 0;
   uint32_t delay_temp = 0;
 
@@ -421,7 +422,7 @@ uint32_t sli_power_manager_get_wakeup_process_time_overhead(void)
 #endif
 }
 
-#if (SL_POWER_MANAGER_LOWEST_EM_ALLOWED != 1)
+#if !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT)
 /*******************************************************************************
  * Restores the Low Frequency clocks according to which LF oscillators are used.
  ******************************************************************************/
@@ -452,6 +453,17 @@ void sli_power_manager_low_frequency_restore(void)
   if (cmu_locked != 0U) {
     CMU_Lock();
   }
+}
+
+/***************************************************************************//**
+ * Informs the power manager if the high accuracy/high frequency clock
+ * is used, prior to scheduling an early clock restore.
+ *
+ * @return true if HFXO is used, else false.
+ ******************************************************************************/
+bool sli_power_manager_is_high_freq_accuracy_clk_used(void)
+{
+  return is_hf_x_oscillator_used;
 }
 #endif
 #endif

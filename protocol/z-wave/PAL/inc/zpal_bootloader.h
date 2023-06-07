@@ -159,6 +159,12 @@ zpal_status_t zpal_bootloader_write_data(uint32_t offset, uint8_t * data, uint16
 bool zpal_bootloader_is_first_boot(bool *updated_successfully);
 
 /**
+ * @brief Resets the bootloader page counters.
+ * Used when initiating an upgrade to jump back to the start of the storage slot.
+ */
+void zpal_bootloader_reset_page_counters(void);
+
+/**
  * @} //zpal-bootloader
  * @} //zpal
  */

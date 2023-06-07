@@ -34,7 +34,6 @@
 
 #include <string.h>
 #include <stdio.h>
-#include "socket_hnd.h"
 #include "socket.h"
 #include "sl_wisun_tcp_client.h"
 
@@ -83,14 +82,14 @@ void sl_wisun_tcp_client_create(const char *ip_address, uint16_t port)
   server_addr.sin6_family = AF_WISUN;
   server_addr.sin6_port = port;
   if (inet_pton(AF_WISUN, ip_address,
-                &server_addr.sin6_addr) == RETVAL_ERROR) {
+                &server_addr.sin6_addr) == SOCKET_RETVAL_ERROR) {
     printf("[Invalid IP address: %s]\n", ip_address);
     return;
   }
 
   // connect to the server
   if (connect(sockid, (const struct sockaddr *)&server_addr,
-              sizeof(server_addr)) == RETVAL_ERROR) {
+              sizeof(server_addr)) == SOCKET_RETVAL_ERROR) {
     printf("[Failed to connect to the server: %s]\n", ip_address);
     return;
   }
@@ -99,7 +98,7 @@ void sl_wisun_tcp_client_create(const char *ip_address, uint16_t port)
 /* close tcp client socket */
 void sl_wisun_tcp_client_close(const int32_t sockid)
 {
-  if (close(sockid) == RETVAL_ERROR) {
+  if (close(sockid) == SOCKET_RETVAL_ERROR) {
     printf("[Failed to close socket: %ld]\n", sockid);
   }
 }
@@ -113,7 +112,7 @@ void sl_wisun_tcp_client_write(const int32_t sockid, const char *str)
     return;
   }
   res = send(sockid, str, strlen(str), 0);
-  if (res == RETVAL_ERROR) {
+  if (res == SOCKET_RETVAL_ERROR) {
     printf("[Failed to send on socket: %ld]\n", sockid);
   }
 }
@@ -125,7 +124,7 @@ void sl_wisun_tcp_client_read(const int32_t sockid, const uint16_t size)
   int32_t res;
   for (uint16_t i = 0; i < size; ++i) {
     res = recv(sockid, &c, 1, 0);
-    if (res == RETVAL_ERROR || !res) {
+    if (res == SOCKET_RETVAL_ERROR || !res) {
       break;
     }
     printf("%c", c);

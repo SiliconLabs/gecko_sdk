@@ -52,6 +52,20 @@
   - condition:
     - brd4001a
     override:
+      component: cpc_gpio_expander_gpio_instance
+      file_id: cpc_gpio_expander_gpio_config
+      instance: btn0
+    path: brd4262b_brd4001a/sl_cpc_gpio_expander_gpio_btn0_config.h
+  - condition:
+    - brd4001a
+    override:
+      component: cpc_gpio_expander_gpio_instance
+      file_id: cpc_gpio_expander_gpio_config
+      instance: btn1
+    path: brd4262b_brd4001a/sl_cpc_gpio_expander_gpio_btn1_config.h
+  - condition:
+    - brd4001a
+    override:
       component: cpc_secondary_driver_uart_usart
       file_id: cpc_drv_secondary_uart_usart_config
       instance: vcom
@@ -305,6 +319,20 @@
       component: bootloader_uart_driver
       file_id: btl_uart_driver_cfg
     path: brd4262b_brd4002a/btl_uart_driver_cfg.h
+  - condition:
+    - brd4002a
+    override:
+      component: cpc_gpio_expander_gpio_instance
+      file_id: cpc_gpio_expander_gpio_config
+      instance: btn0
+    path: brd4262b_brd4002a/sl_cpc_gpio_expander_gpio_btn0_config.h
+  - condition:
+    - brd4002a
+    override:
+      component: cpc_gpio_expander_gpio_instance
+      file_id: cpc_gpio_expander_gpio_config
+      instance: btn1
+    path: brd4262b_brd4002a/sl_cpc_gpio_expander_gpio_btn1_config.h
   - condition:
     - brd4002a
     override:

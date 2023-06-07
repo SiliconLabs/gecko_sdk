@@ -121,7 +121,7 @@ void sl_mempool_free(sl_mempool_t * const memp, const void * const addr);
  * @return false Address is not in the buffer
  *****************************************************************************/
 __STATIC_INLINE bool sl_mempool_is_addr_in_buff(const sl_mempool_t * const memp,
-                                              const void * const addr)
+                                                const void * const addr)
 {
   return (const uint8_t *)addr >= (const uint8_t *)memp->buff
          && (const uint8_t *)addr < ((const uint8_t *)memp->buff + memp->buff_size) ? true : false;

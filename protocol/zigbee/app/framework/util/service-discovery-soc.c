@@ -20,12 +20,12 @@
 
 //------------------------------------------------------------------------------
 
-EmberStatus emAfSendMatchDescriptor(EmberNodeId target,
-                                    EmberAfProfileId profileId,
-                                    EmberAfClusterId clusterId,
-                                    bool serverCluster)
+EmberStatus sli_zigbee_af_send_match_descriptor(EmberNodeId target,
+                                                EmberAfProfileId profileId,
+                                                EmberAfClusterId clusterId,
+                                                bool serverCluster)
 {
-  EmberMessageBuffer clusterList = emAllocateBuffer(1 * 32);
+  EmberMessageBuffer clusterList = sli_legacy_buffer_manager_allocate_buffer(1 * 32);
   EmberMessageBuffer inClusters = EMBER_NULL_MESSAGE_BUFFER;
   EmberMessageBuffer outClusters = EMBER_NULL_MESSAGE_BUFFER;
   EmberStatus status = EMBER_NO_BUFFERS;

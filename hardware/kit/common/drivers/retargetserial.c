@@ -3,7 +3,7 @@
  * @brief Provide stdio retargeting to USART/UART or LEUART.
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -37,7 +37,11 @@
 #include "em_device.h"
 #include "em_cmu.h"
 #include "em_core.h"
+#if defined(_SILICON_LABS_32B_SERIES_3)
+#include "sl_peripheral_gpio.h"
+#else
 #include "em_gpio.h"
+#endif
 #include "retargetserial.h"
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
 #include "sl_power_manager.h"
@@ -60,7 +64,11 @@
  ******************************************************************************/
 
 #if defined(RETARGET_EUSART)
+#if defined(_SILICON_LABS_32B_SERIES_3)
+#include "sl_peripheral_eusart.h"
+#else
 #include "em_eusart.h"
+#endif
 #endif
 
 #if defined(RETARGET_USART)
@@ -90,7 +98,9 @@ static bool             em1HasBeenRequired = false; /**< EM1 requirement indicat
  *****************************************************************************/
 static void disableRxInterrupt()
 {
-#if defined(RETARGET_EUSART)
+#if defined(_SILICON_LABS_32B_SERIES_3)
+  sl_eusart_disable_interrupts(RETARGET_UART, EUSART_IF_RXFL);
+#elif defined(RETARGET_EUSART)
   EUSART_IntDisable(RETARGET_UART, EUSART_IF_RXFL);
 #elif defined(RETARGET_USART)
   USART_IntDisable(RETARGET_UART, USART_IF_RXDATAV);
@@ -104,7 +114,9 @@ static void disableRxInterrupt()
  *****************************************************************************/
 static void enableRxInterrupt()
 {
-#if defined(RETARGET_EUSART)
+#if defined(_SILICON_LABS_32B_SERIES_3)
+  sl_eusart_enable_interrupts(RETARGET_UART, EUSART_IF_RXFL);
+#elif defined(RETARGET_EUSART)
   EUSART_IntEnable(RETARGET_UART, EUSART_IF_RXFL);
 #elif defined(RETARGET_USART)
   USART_IntEnable(RETARGET_UART, USART_IF_RXDATAV);
@@ -171,11 +183,54 @@ void RETARGET_SerialInit(void)
 #endif
   /* Configure GPIO pins */
   CMU_ClockEnable(cmuClock_GPIO, true);
+
+#if defined(_SILICON_LABS_32B_SERIES_3)
+  /* To avoid false start, configure output as high */
+  sl_gpio_set_pin_mode(RETARGET_TXPORT, RETARGET_TXPIN, SL_GPIO_MODE_PUSH_PULL, 1);
+  sl_gpio_set_pin_mode(RETARGET_RXPORT, RETARGET_RXPIN, SL_GPIO_MODE_INPUT_PULL, 1);
+
+  EUSART_TypeDef *  eusart = RETARGET_UART;
+  sl_eusart_uart_config_t  init    = SL_EUSART_UART_INIT_DEFAULT_HF;
+
+  /* Enable DK RS232/UART switch */
+  RETARGET_PERIPHERAL_ENABLE();
+
+  CMU_ClockEnable(RETARGET_CLK, true);
+  CMU_ClockSelectSet(RETARGET_CLK, cmuSelect_EM01GRPACLK);
+
+  /* Configure USART for basic async operation */
+  uint32_t ref_freq = CMU_ClockFreqGet(RETARGET_CLK);
+  init.clock_div = sl_eusart_uart_get_clock_div(ref_freq, 115200, init.oversampling);
+  sl_eusart_init_uart_hf(eusart, &init);
+  sl_eusart_disable(eusart);
+  sl_eusart_wait_ready(eusart);
+
+  /* Enable pins at correct UART/USART location. */
+  GPIO->EUSARTROUTE[RETARGET_UART_INDEX].ROUTEEN = GPIO_EUSART_ROUTEEN_TXPEN
+                                                   | GPIO_EUSART_ROUTEEN_RXPEN;
+  GPIO->EUSARTROUTE[RETARGET_UART_INDEX].TXROUTE = (RETARGET_TXPORT << _GPIO_EUSART_TXROUTE_PORT_SHIFT)
+                                                   | (RETARGET_TXPIN << _GPIO_EUSART_TXROUTE_PIN_SHIFT);
+  GPIO->EUSARTROUTE[RETARGET_UART_INDEX].RXROUTE = (RETARGET_RXPORT << _GPIO_EUSART_RXROUTE_PORT_SHIFT)
+                                                   | (RETARGET_RXPIN << _GPIO_EUSART_RXROUTE_PIN_SHIFT);
+
+  /* Clear previous RX interrupts */
+  sl_eusart_clear_interrupts(RETARGET_UART, EUSART_IF_RXFL);
+  NVIC_ClearPendingIRQ(RETARGET_IRQn);
+
+  /* Enable RX interrupts */
+  sl_eusart_enable_interrupts(RETARGET_UART, EUSART_IF_RXFL);
+  NVIC_EnableIRQ(RETARGET_IRQn);
+
+  /* Finally enable it */
+  sl_eusart_enable(RETARGET_UART);
+  sl_eusart_enable_rx(RETARGET_UART);
+  sl_eusart_enable_tx(RETARGET_UART);
+  sl_eusart_wait_sync(RETARGET_UART, _EUSART_SYNCBUSY_MASK);
+#elif defined(RETARGET_EUSART)
   /* To avoid false start, configure output as high */
   GPIO_PinModeSet(RETARGET_TXPORT, RETARGET_TXPIN, gpioModePushPull, 1);
   GPIO_PinModeSet(RETARGET_RXPORT, RETARGET_RXPIN, gpioModeInputPull, 1);
 
-#if defined(RETARGET_EUSART)
   EUSART_TypeDef *  eusart = RETARGET_UART;
   EUSART_UartInit_TypeDef  init    = EUSART_UART_INIT_DEFAULT_HF;
 
@@ -209,6 +264,10 @@ void RETARGET_SerialInit(void)
   EUSART_Enable(eusart, eusartEnable);
 
 #elif defined(RETARGET_USART)
+  /* To avoid false start, configure output as high */
+  GPIO_PinModeSet(RETARGET_TXPORT, RETARGET_TXPIN, gpioModePushPull, 1);
+  GPIO_PinModeSet(RETARGET_RXPORT, RETARGET_RXPIN, gpioModeInputPull, 1);
+
   USART_TypeDef           *usart = RETARGET_UART;
   USART_InitAsync_TypeDef init   = USART_INITASYNC_DEFAULT;
 

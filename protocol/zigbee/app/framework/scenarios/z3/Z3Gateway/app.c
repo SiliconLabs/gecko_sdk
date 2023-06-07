@@ -22,6 +22,7 @@
 #include "stack/include/trust-center.h"
 #include "zap-cluster-command-parser.h"
 #include <stdlib.h>
+#include "stack/include/zigbee-security-manager.h"
 
 // The number of tokens that can be written using ezspSetToken and read using
 // ezspGetToken.
@@ -242,16 +243,21 @@ void printNextKeyCommand(sl_cli_command_arg_t *arguments)
 {
   (void)arguments;
 
-  EmberKeyStruct nextNwkKey;
-  EmberStatus status;
+  sl_status_t status;
+  sl_zb_sec_man_context_t context;
+  sl_zb_sec_man_key_t plaintext_key;
 
-  status = emberGetKey(EMBER_NEXT_NETWORK_KEY,
-                       &nextNwkKey);
+  sl_zb_sec_man_init_context(&context);
 
-  if (status != EMBER_SUCCESS) {
+  context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_NETWORK;
+  context.key_index = 1;
+
+  status = sl_zb_sec_man_export_key(&context, &plaintext_key);
+
+  if (status != SL_STATUS_OK) {
     sl_zigbee_app_debug_println("Error getting key");
   } else {
-    dcPrintKey(1, nextNwkKey.key.contents);
+    dcPrintKey(1, plaintext_key.key);
   }
 }
 
@@ -277,3 +283,20 @@ void setTxPowerCommand(sl_cli_command_arg_t *arguments)
 }
 
 #endif
+
+#ifdef SL_CATALOG_ZIGBEE_AF_SUPPORT_PRESENT
+bool emberAfGetEndpointInfoCallback(int8u endpoint,
+                                    int8u* returnNetworkIndex,
+                                    EmberAfEndpointInfoStruct* returnEndpointInfo)
+{
+  // In case GP endpoint is located on the NCP, the host has no way
+  // to know what networkIndex and profileId that endpoint is configured.
+  // User has to manually provide that data.
+  if (endpoint == 242) {
+    *returnNetworkIndex = 0;
+    returnEndpointInfo->profileId = 0xA1E0;
+    return true;
+  }
+  return false;
+}
+#endif // SL_CATALOG_ZIGBEE_AF_SUPPORT_PRESENT

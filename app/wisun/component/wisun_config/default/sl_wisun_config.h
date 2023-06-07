@@ -3,7 +3,7 @@
  * @brief
  *******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -31,6 +31,7 @@
 #define __SL_WISUN_CONFIG_H__
 
 #include <stddef.h>
+
 #include "sl_wisun_types.h"
 
 //! Wi-SUN network name
@@ -39,8 +40,12 @@
 //! Wi-SUN network size
 #define WISUN_CONFIG_NETWORK_SIZE               SL_WISUN_NETWORK_SIZE_SMALL
 
+//! Wi-SUN allowed channels
+#define WISUN_CONFIG_ALLOWED_CHANNELS
+extern const sl_wisun_channel_mask_t wisun_config_allowed_channels_mask;
+
 //! Wi-SUN default PHY - FAN1.1 profile
-#define WISUN_CONFIG_DEFAULT_PHY_FAN11          SL_WISUN_PHY_CONFIG_FAN11
+#define WISUN_CONFIG_DEFAULT_PHY_FAN11          1
 
 //! Wi-SUN default PHY - Regulatory domain
 #define WISUN_CONFIG_REGULATORY_DOMAIN          1
@@ -51,6 +56,8 @@
 //! Wi-SUN default PHY - PHY Mode ID
 #define WISUN_CONFIG_PHY_MODE_ID                2
 
+//! Wi-SUN Broadcast retries
+#define WISUN_CONFIG_BROADCAST_RETRIES          2
 
 //! Wi-SUN Device private key
 extern const uint8_t wisun_config_device_private_key[];

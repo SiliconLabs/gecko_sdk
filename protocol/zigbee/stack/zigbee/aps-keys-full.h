@@ -21,7 +21,7 @@
 
 #include "include/ember.h"
 
-extern const EmberLibraryStatus emSecurityLinkKeysLibraryStatus;
+extern const EmberLibraryStatus sli_zigbee_security_link_keys_library_status;
 
 // These are the bitmask definitions for the token
 #define KEY_TABLE_TYPE_LINK_KEY   0x1
@@ -31,11 +31,11 @@ extern const EmberLibraryStatus emSecurityLinkKeysLibraryStatus;
 #define KEY_TABLE_AUTHORIZED_KEY_MASK       (BIT(1))
 
 #if !defined(EMBER_MULTI_NETWORK_STRIPPED)
-#define emGetKeyEntryNetworkIndex(flags)         \
-  (((flags) & KEY_TABLE_TYPE_NETWORK_INDEX_MASK) \
+#define sli_zigbee_get_key_entry_network_index(flags) \
+  (((flags) & KEY_TABLE_TYPE_NETWORK_INDEX_MASK)      \
    >>  KEY_TABLE_TYPE_NETWORK_INDEX_OFFSET)
 #else
-#define emGetKeyEntryNetworkIndex(flags) (0)
+#define sli_zigbee_get_key_entry_network_index(flags) (0)
 #endif // !defined(EMBER_MULTI_NETWORK_STRIPPED)
 
 // We use negative logic since the token bits are zero by default, and we
@@ -59,52 +59,37 @@ extern const EmberLibraryStatus emSecurityLinkKeysLibraryStatus;
 // byte order
 #define KEY_TABLE_ENTRY_HAS_PSA_ID          (BIT(6))
 
-#define emHaveFreeKeyEntry() \
-  (0xFF != emberFindKeyTableEntry(NULL, true))
+// This bit indicates if entry in the key table is a Symmetric Passphrase
+#define KEY_TABLE_SYMMETRIC_PASSPHRASE      (BIT(7))
 
-void emApsSecurityReadFrameCounters(void);
+void sli_zigbee_aps_security_read_frame_counters(void);
 
-bool emProcessApplicationLinkKey(EmberEUI64 partnerEui64,
-                                 bool amInitiator,
-                                 EmberKeyData* keyData);
+bool sli_zigbee_process_application_link_key(EmberEUI64 partnerEui64,
+                                             bool amInitiator,
+                                             EmberKeyData* keyData);
 
-#define emFindLinkKeyEntry(address) \
-  emberFindKeyTableEntry((address), true)
+EmberStatus sli_zigbee_update_key_state(uint8_t index,
+                                        uint8_t setFlags,
+                                        uint8_t clearFlags);
 
-#define emAddOrUpdateLinkKeyEntry(address, keyData) \
-  emberAddOrUpdateKeyTableEntry((address), true, (keyData))
+#define sli_zigbee_update_key_authorization(index, keyIsAuthorized)      \
+  sli_zigbee_update_key_state((index),                                   \
+                              ((keyIsAuthorized)        /* set flags */  \
+                               ? 0                                       \
+                               : KEY_TABLE_UNAUTHORIZED_KEY),            \
+                              ((keyIsAuthorized)       /* clear flags */ \
+                               ? KEY_TABLE_UNAUTHORIZED_KEY              \
+                               : 0))
 
-#define emSetLinkKeyEntry(index, address, keyData) \
-  emberSetKeyTableEntry((index), (address), true, (keyData))
+#define sli_zigbee_update_key_note_end_device(index, sleepy) \
+  sli_zigbee_update_key_state((index),                       \
+                              ((sleepy) /* set flags */      \
+                               ? KEY_TABLE_SLEEPY_END_DEVICE \
+                               : 0),                         \
+                              ((sleepy) /* clear flags */    \
+                               ? 0                           \
+                               : KEY_TABLE_SLEEPY_END_DEVICE))
 
-#define emSetMasterKeyEntry(index, address, keyData) \
-  emberSetKeyTableEntry((index), (address), true, (keyData))
-
-#define emFindMasterKeyEntry(address) \
-  emberFindKeyTableEntry((address), false)
-
-EmberStatus emUpdateKeyState(uint8_t index,
-                             uint8_t setFlags,
-                             uint8_t clearFlags);
-
-#define emUpdateKeyAuthorization(index, keyIsAuthorized)                 \
-  emUpdateKeyState((index),                                              \
-                   ((keyIsAuthorized)                   /* set flags */  \
-                    ? 0                                                  \
-                    : KEY_TABLE_UNAUTHORIZED_KEY),                       \
-                   ((keyIsAuthorized)                  /* clear flags */ \
-                    ? KEY_TABLE_UNAUTHORIZED_KEY                         \
-                    : 0))
-
-#define emUpdateKeyNoteEndDevice(index, sleepy)           \
-  emUpdateKeyState((index),                               \
-                   ((sleepy)            /* set flags */   \
-                    ? KEY_TABLE_SLEEPY_END_DEVICE         \
-                    : 0),                                 \
-                   ((sleepy)            /* clear flags */ \
-                    ? 0                                   \
-                    : KEY_TABLE_SLEEPY_END_DEVICE))
-
-void emNoteSleepyDeviceInKeyTable(EmberEUI64 eui64, bool sleepy);
+void sli_zigbee_note_sleepy_device_in_key_table(EmberEUI64 eui64, bool sleepy);
 
 #endif // SILABS_APS_KEYS_FULL_H

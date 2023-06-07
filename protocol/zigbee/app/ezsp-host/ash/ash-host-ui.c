@@ -52,7 +52,7 @@
 #define rxControl (rxBuffer[0])
 
 static const char options[] = "b:f:hv::i:n:o:p:r:s:t:x:d:";
-bool checkSerialPort(const char* portString);
+extern bool checkSerialPort(const char* portString, bool silent);
 
 extern int optind, opterr, optopt;
 extern char *optarg;
@@ -179,7 +179,7 @@ bool ezspInternalProcessCommandOptions(int argc, char *argv[], char *errStr)
           }
           strncpy(ashHostConfig.serialPort, devport, ASH_PORT_LEN - 1);
           ashHostConfig.serialPort[ASH_PORT_LEN - 1] = '\0';
-          if (!checkSerialPort(ashHostConfig.serialPort)) {
+          if (!checkSerialPort(ashHostConfig.serialPort, false)) {
             return false;
           }
         }

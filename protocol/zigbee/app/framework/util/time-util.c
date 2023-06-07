@@ -255,7 +255,7 @@ void emberAfPrintDateln(const EmberAfDate * date)
 void emberAfSetTime(uint32_t utcTime)
 {
 #if (defined EMBER_AF_PLUGIN_TIME_SERVER)  || (defined  SL_CATALOG_ZIGBEE_TIME_SERVER_PRESENT)
-  emAfTimeClusterServerSetCurrentTime(utcTime);
+  sli_zigbee_af_time_cluster_server_set_current_time(utcTime);
 #endif //EMBER_AF_PLUGIN_TIME_SERVER
   emberAfSetTimeCallback(utcTime);
 }
@@ -263,7 +263,7 @@ void emberAfSetTime(uint32_t utcTime)
 uint32_t emberAfGetCurrentTime(void)
 {
 #if (defined EMBER_AF_PLUGIN_TIME_SERVER)  || (defined  SL_CATALOG_ZIGBEE_TIME_SERVER_PRESENT)
-  return emAfTimeClusterServerGetCurrentTime();
+  return sli_zigbee_af_time_cluster_server_get_current_time();
 #else
   return emberAfGetCurrentTimeCallback();
 #endif

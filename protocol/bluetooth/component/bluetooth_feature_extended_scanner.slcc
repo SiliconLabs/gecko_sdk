@@ -14,7 +14,7 @@ description: >
 
   If the application only needs to scan for advertisements that use legacy advertising
   PDUs, the application should use the component <bluetooth_feature_legacy_scanner>.
-category: "Bluetooth|Feature"
+category: Bluetooth|Bluetooth LE Controller (Link Layer)|Features with Commands and Events
 quality: "production"
 root_path: "protocol/bluetooth"
 requires:

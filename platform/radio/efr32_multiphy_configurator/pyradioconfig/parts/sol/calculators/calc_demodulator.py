@@ -147,8 +147,10 @@ class Calc_Demodulator_Sol(CALC_Demodulator_ocelot):
 
         softmodem_modulation_type = model.vars.softmodem_modulation_type.value
         dual_fefilt = model.vars.dual_fefilt.value
+        conc_ofdm_option = model.vars.conc_ofdm_option.value
 
-        soft_modem_used = softmodem_modulation_type != model.vars.softmodem_modulation_type.var_enum.NONE
+        soft_modem_used = (softmodem_modulation_type != model.vars.softmodem_modulation_type.var_enum.NONE) or \
+                          (conc_ofdm_option != model.vars.conc_ofdm_option.var_enum.NONE)
 
         if (not soft_modem_used) or (soft_modem_used and dual_fefilt):
             #Hardmodem non-concurrent or concurrent hard/soft modem
@@ -1135,9 +1137,16 @@ class Calc_Demodulator_Sol(CALC_Demodulator_ocelot):
         model.vars.interpolation_gain_actual.value = float(interpolation_gain)
 
     def calc_dual_fefilt(self, model):
-        #Set to False by default
+        #Set to False by default, but True for Wi-SUN Concurrent PHYs
 
-        model.vars.dual_fefilt.value = False
+        conc_ofdm_option = model.vars.conc_ofdm_option.value
+
+        if conc_ofdm_option == model.vars.conc_ofdm_option.var_enum.NONE:
+            dual_fefilt = False
+        else:
+            dual_fefilt = True
+
+        model.vars.dual_fefilt.value = dual_fefilt
 
     def calc_fefilt_dont_cares(self, model):
         #This method reads all of the variables related to the unused FEFILT, and sets them to do not care

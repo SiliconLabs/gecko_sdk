@@ -47,6 +47,8 @@ extern "C" {
   #include "sl_component_catalog.h"
 #endif
 
+#include "nvm3.h"
+
 //------------------------------------------------------------------------------
 // Defines and macros
 
@@ -60,27 +62,27 @@ extern "C" {
 //------------------------------------------------------------------------------
 // Function declarations
 
-psa_status_t tfm_nvm3_init_default(sli_tz_invec *in_vec, size_t in_len, sli_tz_outvec *out_vec, size_t out_len);
-psa_status_t tfm_nvm3_deinit_default(sli_tz_invec *in_vec, size_t in_len, sli_tz_outvec *out_vec, size_t out_len);
+Ecode_t sli_tz_nvm3_init_default(sli_tz_invec *in_vec, size_t in_len, sli_tz_outvec *out_vec, size_t out_len);
+Ecode_t sli_tz_nvm3_deinit_default(sli_tz_invec *in_vec, size_t in_len, sli_tz_outvec *out_vec, size_t out_len);
 #if defined(TZ_SERVICE_NVM3_PRESENT)
-psa_status_t tfm_nvm3_read_partial_data(sli_tz_invec *in_vec, size_t in_len, sli_tz_outvec *out_vec, size_t out_len);
-psa_status_t tfm_nvm3_read_data(sli_tz_invec *in_vec, size_t in_len, sli_tz_outvec *out_vec, size_t out_len);
-psa_status_t tfm_nvm3_write_data(sli_tz_invec *in_vec, size_t in_len, sli_tz_outvec *out_vec, size_t out_len);
-psa_status_t tfm_nvm3_delete_object(sli_tz_invec *in_vec, size_t in_len, sli_tz_outvec *out_vec, size_t out_len);
-psa_status_t tfm_nvm3_open(sli_tz_invec *in_vec, size_t in_len, sli_tz_outvec *out_vec, size_t out_len);
-psa_status_t tfm_nvm3_close(sli_tz_invec *in_vec, size_t in_len, sli_tz_outvec *out_vec, size_t out_len);
-psa_status_t tfm_nvm3_get_object_info(sli_tz_invec *in_vec, size_t in_len, sli_tz_outvec *out_vec, size_t out_len);
-psa_status_t tfm_nvm3_write_counter(sli_tz_invec *in_vec, size_t in_len, sli_tz_outvec *out_vec, size_t out_len);
-psa_status_t tfm_nvm3_read_counter(sli_tz_invec *in_vec, size_t in_len, sli_tz_outvec *out_vec, size_t out_len);
-psa_status_t tfm_nvm3_increment_counter(sli_tz_invec *in_vec, size_t in_len, sli_tz_outvec *out_vec, size_t out_len);
-psa_status_t tfm_nvm3_erase_all(sli_tz_invec *in_vec, size_t in_len, sli_tz_outvec *out_vec, size_t out_len);
-psa_status_t tfm_nvm3_get_erase_count(sli_tz_invec *in_vec, size_t in_len, sli_tz_outvec *out_vec, size_t out_len);
-psa_status_t tfm_nvm3_set_erase_count(sli_tz_invec *in_vec, size_t in_len, sli_tz_outvec *out_vec, size_t out_len);
-psa_status_t tfm_nvm3_repack(sli_tz_invec *in_vec, size_t in_len, sli_tz_outvec *out_vec, size_t out_len);
-psa_status_t tfm_nvm3_repack_needed(sli_tz_invec *in_vec, size_t in_len, sli_tz_outvec *out_vec, size_t out_len);
-psa_status_t tfm_nvm3_resize(sli_tz_invec *in_vec, size_t in_len, sli_tz_outvec *out_vec, size_t out_len);
-psa_status_t tfm_nvm3_enum_objects(sli_tz_invec *in_vec, size_t in_len, sli_tz_outvec *out_vec, size_t out_len);
-psa_status_t tfm_nvm3_enum_deleted_objects(sli_tz_invec *in_vec, size_t in_len, sli_tz_outvec *out_vec, size_t out_len);
+Ecode_t sli_tz_nvm3_read_partial_data(sli_tz_invec *in_vec, size_t in_len, sli_tz_outvec *out_vec, size_t out_len);
+Ecode_t sli_tz_nvm3_read_data(sli_tz_invec *in_vec, size_t in_len, sli_tz_outvec *out_vec, size_t out_len);
+Ecode_t sli_tz_nvm3_write_data(sli_tz_invec *in_vec, size_t in_len, sli_tz_outvec *out_vec, size_t out_len);
+Ecode_t sli_tz_nvm3_delete_object(sli_tz_invec *in_vec, size_t in_len, sli_tz_outvec *out_vec, size_t out_len);
+Ecode_t sli_tz_nvm3_open(sli_tz_invec *in_vec, size_t in_len, sli_tz_outvec *out_vec, size_t out_len);
+Ecode_t sli_tz_nvm3_close(sli_tz_invec *in_vec, size_t in_len, sli_tz_outvec *out_vec, size_t out_len);
+Ecode_t sli_tz_nvm3_get_object_info(sli_tz_invec *in_vec, size_t in_len, sli_tz_outvec *out_vec, size_t out_len);
+Ecode_t sli_tz_nvm3_write_counter(sli_tz_invec *in_vec, size_t in_len, sli_tz_outvec *out_vec, size_t out_len);
+Ecode_t sli_tz_nvm3_read_counter(sli_tz_invec *in_vec, size_t in_len, sli_tz_outvec *out_vec, size_t out_len);
+Ecode_t sli_tz_nvm3_increment_counter(sli_tz_invec *in_vec, size_t in_len, sli_tz_outvec *out_vec, size_t out_len);
+Ecode_t sli_tz_nvm3_erase_all(sli_tz_invec *in_vec, size_t in_len, sli_tz_outvec *out_vec, size_t out_len);
+Ecode_t sli_tz_nvm3_get_erase_count(sli_tz_invec *in_vec, size_t in_len, sli_tz_outvec *out_vec, size_t out_len);
+Ecode_t sli_tz_nvm3_set_erase_count(sli_tz_invec *in_vec, size_t in_len, sli_tz_outvec *out_vec, size_t out_len);
+Ecode_t sli_tz_nvm3_repack(sli_tz_invec *in_vec, size_t in_len, sli_tz_outvec *out_vec, size_t out_len);
+Ecode_t sli_tz_nvm3_repack_needed(sli_tz_invec *in_vec, size_t in_len, sli_tz_outvec *out_vec, size_t out_len);
+Ecode_t sli_tz_nvm3_resize(sli_tz_invec *in_vec, size_t in_len, sli_tz_outvec *out_vec, size_t out_len);
+Ecode_t sli_tz_nvm3_enum_objects(sli_tz_invec *in_vec, size_t in_len, sli_tz_outvec *out_vec, size_t out_len);
+Ecode_t sli_tz_nvm3_enum_deleted_objects(sli_tz_invec *in_vec, size_t in_len, sli_tz_outvec *out_vec, size_t out_len);
 #endif // defined(TZ_SERVICE_NVM3_PRESENT)
 
 #ifdef __cplusplus

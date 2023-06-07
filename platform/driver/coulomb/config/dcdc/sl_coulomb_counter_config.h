@@ -60,4 +60,3 @@
 // <<< end of configuration section >>>
 
 #endif /* SL_COULOMB_COUNTER_CONFIG_H */
-

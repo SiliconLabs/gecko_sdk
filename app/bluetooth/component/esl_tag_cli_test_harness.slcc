@@ -1,0 +1,195 @@
+id: esl_tag_cli_test_harness
+package: Bluetooth
+label: CLI Test Harness for ESL Tag application
+description: >
+  CLI Test Harness is an optional component for the ESL Tag example application,
+  providing a set of commands to control and observe the ESL Tag internal
+  behavior directly via a serial terminal.
+
+  This is a No-Code component, however only meaningful in ESL context.
+category: Bluetooth|Application|Test
+quality: production
+root_path: app/bluetooth/common/esl_tag_cli_test_harness
+tag:
+  - No-Code
+
+config_file:
+  - path: config/esl_log_config.h
+    file_id: esl_log_config
+    
+include:
+  - path: .
+    file_list:
+      - path: esl_tag_cli_test_harness.h
+
+source:
+  - path: esl_tag_cli_test_harness.c
+
+provides:
+  - name: esl_tag_cli_test_harness
+
+requires:
+  - name: esl_tag_core
+  - name: app_log
+  - name: iostream
+  - name: cli
+  - name: board_control
+
+recommends:
+  - id: iostream_usart
+    instance:
+      - vcom
+  - id: cli
+    instance:
+      - example
+
+template_contribution:
+  - name: event_handler
+    value:
+      event: internal_app_init
+      include: esl_tag_cli_test_harness.h
+      handler: esl_tag_cli_test_harness_init
+    priority: 9
+  - name: component_catalog
+    value: esl_tag_cli_test_harness
+  - name: cli_group
+    value:
+      name: esl_tag_cli_test_harness
+      help: "CLI Test Harness for ESL Tag application"
+      shortcuts:
+        - name: esl
+  - name: cli_group
+    value:
+      group: esl_tag_cli_test_harness
+      name: get
+      help: "Getter commands"
+      shortcuts:
+        - name: g
+  - name: cli_group
+    value:
+      group: esl_tag_cli_test_harness
+      name: set
+      help: "Setter commands"
+      shortcuts:
+        - name: s
+  - name: cli_command
+    value:
+      group: get
+      name: address
+      handler: cli_esl_tag_address_get
+      shortcuts:
+        - name: a
+      help: "Read ESL Address value"
+  - name: cli_command
+    value:
+      group: get
+      name: ap_key
+      handler: cli_esl_tag_ap_key_get
+      shortcuts:
+        - name: ak
+      help: "Read ESL Access Point Key value"
+  - name: cli_command
+    value:
+      group: get
+      name: response_key
+      handler: cli_esl_tag_response_key_get
+      shortcuts:
+        - name: rk
+      help: "Read Response Key value"
+  - name: cli_command
+    value:
+      group: get
+      name: absolute_time
+      handler: cli_esl_tag_absolute_time_get
+      shortcuts:
+        - name: t
+      help: "Read Absolute Time value"
+  - name: cli_command
+    value:
+      group: get
+      name: led_info
+      handler: cli_esl_tag_led_info_get
+      shortcuts:
+        - name: l
+      help: "Read LED Information"
+  - name: cli_command
+    value:
+      group: get
+      name: display_info
+      handler: cli_esl_tag_display_info_get
+      shortcuts:
+        - name: d
+      help: "Read Display Information"
+  - name: cli_command
+    value:
+      group: get
+      name: image_info
+      handler: cli_esl_tag_image_info_get
+      shortcuts:
+        - name: i
+      help: "Read Image Information"
+  - name: cli_command
+    value:
+      group: get
+      name: sensor_info
+      handler: cli_esl_tag_sensor_info_get
+      shortcuts:
+        - name: s
+      help: "Read Sensor Information"
+  - name: cli_command
+    value:
+      group: get
+      name: status
+      handler: cli_esl_tag_status_get
+      shortcuts:
+        - name: sm
+      help: "Read ESL State Machine status"
+  - name: cli_command
+    value:
+      group: get
+      name: basic_state
+      handler: cli_esl_tag_basic_state_get
+      shortcuts:
+        - name: b
+      help: "Read Basic State"
+  - name: cli_command
+    value:
+      group: set
+      name: service_needed
+      handler: cli_esl_tag_service_needed_set
+      shortcuts:
+        - name: sn
+      argument:
+        - type: uint8
+          help: "0: clear flag, 1: set flag"
+      help: "Write Basic State - Servicie Needed flag"
+  - name: cli_command
+    value:
+      group: set
+      name: advertising
+      handler: cli_esl_tag_advertising_set
+      shortcuts:
+        - name: adv
+      help: "Start ESL Tag advertising"
+  - name: cli_command
+    value:
+      group: set
+      name: image
+      handler: cli_esl_tag_image_set
+      shortcuts:
+        - name: im
+      argument:
+        - type: uint8
+          help: "Image index"
+      help: "Set static image data for selected image"
+  - name: cli_command
+    value:
+      group: esl_tag_cli_test_harness
+      name: restart
+      handler: cli_esl_tag_restart
+      shortcuts:
+        - name: r
+      argument:
+        - type: uint8
+          help: "1: MCU reset, 2: MCU and factory reset"
+      help: "Restarts the ESL Tag if the proper parameter is given"

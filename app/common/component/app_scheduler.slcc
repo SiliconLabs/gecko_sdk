@@ -9,19 +9,19 @@ description: >
   The component enables pausing and resuming the execution. It also uses Power Manager to prevent
   sleep when there is a triggered task to be executed.
 package: platform
-quality: experimental
+quality: evaluation
 
 provides:
   - name: app_scheduler
 
 requires:
-  - name: simple_timer
+  - name: app_timer
   - name: app_scheduler_memory
   - name: slist
 
 recommends:
   - id: app_scheduler_memory_static
-  - id: simple_timer
+  - id: app_timer
 
 root_path: app/common/util/app_scheduler
 

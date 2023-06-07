@@ -12,8 +12,8 @@
 #include <ZW_transport_api.h>
 #include <ZAF_Common_helper.h>
 #include <ZAF_Common_interface.h>
-#include <ZAF_tx_mutex.h>
 #include <zaf_cc_list_generator.h>
+#include <ZW_TransportEndpoint.h>
 
 //#define DEBUGPRINT
 #include "DebugPrint.h"
@@ -50,10 +50,6 @@ uint8_t
 Transport_OnApplicationInitSW(void)
 {
   DPRINT("SecAppInit\r\n");
-
-#ifndef SERIAL_API_APP
-  mutex_init();
-#endif
 
   return true;
 }

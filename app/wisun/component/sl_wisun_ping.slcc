@@ -17,9 +17,6 @@ provides:
   - name: sl_wisun_ping
 source:
   - path: "sl_wisun_ping.c"
-  - path: "sl_wisun_ping_cli.c"
-    condition:
-      - "sl_wisun_app_cli"
 
 include:
   - path: "."
@@ -40,25 +37,6 @@ template_contribution:
       event: "internal_app_init"
       include: "sl_wisun_ping.h"
       handler: "sl_wisun_ping_init"
-
-  - name: "cli_group"
-    value:
-      name: "wisun"
-      help: "Wi-SUN commands"
-      shortcuts:
-        - name: "w"
-
-  - name: "cli_command"
-    value:
-      group: "wisun"
-      name: "ping"
-      handler: "app_ping"
-      help: "Ping a remote host"
-      shortcuts:
-        - name: "p"
-      argument:
-        - type: string
-          help: "Remote address"
 
   - name: component_catalog
     value: wisun_ping

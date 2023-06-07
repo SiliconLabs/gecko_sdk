@@ -13,14 +13,17 @@ include:
   - path: "inc"
     file_list:
     - path: "em_core.h"
-      unless: [device_host]
+    - path: "em_core_generic.h"
+    unless: [device_host]
   - path: "host/inc"
     condition: [device_host]
     file_list:
     - path: "em_core.h"
+    - path: "em_core_generic.h"
       condition: [device_host]
 config_file:
   - path: "config/emlib_core_debug_config.h"
+    file_id: emlib_core_debug_config
 validation_helper:
   - path: emlib_core_validation.lua
 provides:
@@ -76,3 +79,7 @@ documentation:
       condition: [device_sdid_215]
     - page: emlib/api/efr32xg25/group-core
       condition: [device_sdid_220]
+    - page: emlib/api/efr32xg27/group-core
+      condition: [device_sdid_230]
+    - page: emlib/api/efr32xg28/group-core
+      condition: [device_sdid_235]

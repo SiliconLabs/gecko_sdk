@@ -66,6 +66,8 @@ typedef enum {
 #define THROUGHPUT_UI_STATE_SUBSCRIBED_TEXT      "ST: Subscribed"
 #define THROUGHPUT_UI_STATE_TEST_TEXT            "ST: Testing"
 #define THROUGHPUT_UI_STATE_UNKNOWN_TEXT         "ST: Unknown"
+#define THROUGHPUT_UI_STATE_UNINITIALIZED_TEXT   "ST: Uninited"
+#define THROUGHPUT_UI_STATE_UNINITIALIZING_TEXT  "ST: Uninit"
 
 #define THROUGHPUT_UI_TX_POWER_FORMAT    "TX: %+4d dBm"
 #define THROUGHPUT_UI_RSSI_FORMAT                "RSSI: %+4d dBm"

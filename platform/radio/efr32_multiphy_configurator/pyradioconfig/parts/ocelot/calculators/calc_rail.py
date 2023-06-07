@@ -8,8 +8,7 @@ class CalcRailOcelot(CalcRailLynx):
             model (ModelRoot) : Data model to read and write variables from
         """
         # Ocelot+ has a built-in RX chain delay value
-        baud_delay = model.vars.delay_adc_to_demod_symbols.value \
-                     * model.vars.baud_per_symbol_actual.value
+        baud_delay = model.vars.delay_adc_to_demod_symbols.value #This is actually in terms of bauds in the DSP path
         rx_delay_ns = int((baud_delay * 1e9) / model.vars.baudrate.value)
         sync_delay_ns = int((model.vars.MODEM_CTRL0_FRAMEDETDEL.value * 8 * 1e9) \
                             / model.vars.baudrate.value)

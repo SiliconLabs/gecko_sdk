@@ -14,30 +14,20 @@
  * sections of the MSLA applicable to Source Code.
  *
  ******************************************************************************/
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #ifdef SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
 #include "app/framework/include/af.h"
 #include "app/framework/util/common.h"
 #else // !SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
 #include "green-power-adapter.h"
 #endif //SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
-#else //!UC_BUILD
-#include "app/framework/include/af.h"
-#include "app/framework/util/common.h"
-#endif //UC_BUILD
 
-#ifndef EZSP_HOST
 #include "stack/include/zigbee-security-manager.h"
-#else // EZSP_HOST
-//CCM* will be provided by Zigbee Security Manager,
-//which isn't currently supported by host apps
-//(like Z3GatewayGPCombo)
-#include "stack/include/ccm-star.h"
-#endif // EZSP_HOST
 
-extern void emLoadKeyIntoCore(const uint8_t* key);
-extern void emGetKeyFromCore(const uint8_t* key);
+extern void sli_util_load_key_into_core(const uint8_t* key);
+extern void sli_zigbee_get_key_from_core(const uint8_t* key);
 
 #define EMBER_GP_SECURITY_MIC_LENGTH 4
 #define SECURITY_BLOCK_SIZE 16
@@ -70,17 +60,10 @@ typedef enum {
   DIRECTION_GPP_TO_GPD = 0x01
 } EmberGpdfDirection;
 
-#ifndef EZSP_HOST
 extern void emberHmacAesHash(const uint8_t *key,
                              const uint8_t *data,
                              uint8_t dataLength,
                              uint8_t *result);
-#else
-#define emberHmacAesHash(key,        \
-                         data,       \
-                         dataLength, \
-                         result)
-#endif
 
 EmberAfStatus emberAfGreenPowerServerDeriveSharedKeyFromSinkAttribute(uint8_t * gpsSecurityKeyTypeAtrribute,
                                                                       EmberKeyData * gpSharedKeyAttribute,
@@ -181,14 +164,14 @@ static uint8_t appendPayload(uint8_t * dst,
 //   securedOutgoingGpdf          : Memory pointer to collect the secured GPDF
 // Returns :
 //   totalLength                  : Length of the secured GPDF
-uint8_t emGpOutgoingCommandEncrypt(EmberGpAddress * gpdAddr,
-                                   uint32_t gpdSecurityFrameCounter,
-                                   uint8_t keyType,
-                                   uint8_t securityLevel,
-                                   uint8_t gpdCommandId,
-                                   uint8_t * gpdCommandPayload,
-                                   uint8_t * securedOutgoingGpdf,
-                                   uint8_t securedOutgoingGpdfMaxLength)
+uint8_t sli_zigbee_af_gp_outgoing_command_encrypt(EmberGpAddress * gpdAddr,
+                                                  uint32_t gpdSecurityFrameCounter,
+                                                  uint8_t keyType,
+                                                  uint8_t securityLevel,
+                                                  uint8_t gpdCommandId,
+                                                  uint8_t * gpdCommandPayload,
+                                                  uint8_t * securedOutgoingGpdf,
+                                                  uint8_t securedOutgoingGpdfMaxLength)
 {
   if (securedOutgoingGpdf == NULL) {
     return 0;
@@ -239,64 +222,47 @@ uint8_t emGpOutgoingCommandEncrypt(EmberGpAddress * gpdAddr,
     }
     // Calculate the MIC of unencrypted payload.
     // A key needs to be loaded into core first.
-    #ifdef EZSP_HOST
-    emberCcmCalculateAndEncryptMic(nonce,
-                                   securedOutgoingGpdf + authenticationStartIndex,
-                                   authenticationLength,
-                                   securedOutgoingGpdf + encryptionStartIndex,
-                                   totalLength - authenticationLength,
-                                   &temp[totalLength]);
-    #else
     sl_zb_sec_man_aes_ccm(nonce,
                           true,
                           securedOutgoingGpdf + authenticationStartIndex,
                           authenticationLength,
                           totalLength,
                           temp);
-    #endif
     MEMMOVE(&securedOutgoingGpdf[totalLength], &temp[totalLength], EMBER_GP_SECURITY_MIC_LENGTH);
     totalLength += 4;
     if (securityLevel == EMBER_GP_SECURITY_LEVEL_FC_MIC_ENCRYPTED) {
-      #ifdef EZSP_HOST
-      emberCcmEncryptBytes(&securedOutgoingGpdf[encryptionStartIndex], payloadLength, nonce);
-      #else
       // Include encrypted payload in GPDF
       MEMMOVE(&securedOutgoingGpdf[encryptionStartIndex], &temp[encryptionStartIndex], payloadLength);
-      #endif
     }
   }
   return totalLength;
 }
 
-bool emGpCalculateIncomingCommandDecrypt(EmberGpAddress * gpdAddr,
-                                         uint32_t gpdSecurityFrameCounter,
-                                         uint8_t payloadLength,
-                                         uint8_t * payload)
+bool sli_zigbee_af_gp_calculate_incoming_command_decrypt(EmberGpAddress * gpdAddr,
+                                                         uint32_t gpdSecurityFrameCounter,
+                                                         uint8_t payloadLength,
+                                                         uint8_t * payload)
 {
   uint8_t nonce[SECURITY_BLOCK_SIZE] = { 0 };
   initializeNonce(true,
                   nonce,
                   gpdAddr,
                   gpdSecurityFrameCounter);
-  #ifdef EZSP_HOST
-  emberCcmEncryptBytes(payload, payloadLength, nonce);
-  #else
   uint8_t temp[MAX_PAYLOAD_LENGTH + EMBER_GP_SECURITY_MIC_LENGTH];
   sl_zb_sec_man_aes_ccm(nonce, false, payload, 0, payloadLength, temp);
   MEMMOVE(payload, &temp, payloadLength);
-  #endif
   return true;
 }
 
-bool emGpCalculateIncomingCommandMic(EmberGpAddress * gpdAddr,
-                                     bool rxAfterTx,
-                                     uint8_t keyType,
-                                     uint8_t securityLevel,
-                                     uint32_t gpdSecurityFrameCounter,
-                                     uint8_t gpdCommandId,
-                                     uint8_t * gpdCommandPayload,
-                                     bool encryptedPayload,
-                                     uint8_t mic[4])
+bool sli_zigbee_af_gp_calculate_incoming_command_mic(EmberGpAddress * gpdAddr,
+                                                     bool rxAfterTx,
+                                                     uint8_t keyType,
+                                                     uint8_t securityLevel,
+                                                     uint32_t gpdSecurityFrameCounter,
+                                                     uint8_t gpdCommandId,
+                                                     uint8_t * gpdCommandPayload,
+                                                     bool encryptedPayload,
+                                                     uint8_t mic[4])
 {
   uint8_t nonce[SECURITY_BLOCK_SIZE] = { 0 };
   uint8_t temp[MAX_PAYLOAD_LENGTH + EMBER_GP_SECURITY_MIC_LENGTH];
@@ -332,12 +298,6 @@ bool emGpCalculateIncomingCommandMic(EmberGpAddress * gpdAddr,
   }
   emberAfGreenPowerClusterPrintln("Calculating MIC (%s) : ", __FUNCTION__);
 
-  #ifdef EZSP_HOST
-  EmberKeyData key;
-  //key is now loaded into core in caller at same place non-host code loads it
-  //via security manager; retrieve it here for the purpose of printing it
-  emGetKeyFromCore(key.contents);
-  #else
   sl_zb_sec_man_key_t key;
   sl_zb_sec_man_context_t context;
   sl_zb_sec_man_init_context(&context);
@@ -346,15 +306,10 @@ bool emGpCalculateIncomingCommandMic(EmberGpAddress * gpdAddr,
   //keys live somewhere else in storage)
   context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_INTERNAL;
   sl_zb_sec_man_export_key(&context, &key);
-  #endif
 
   emberAfGreenPowerClusterPrint("Using KeyType = %d fc = %4x Key :[", keyType, gpdSecurityFrameCounter);
   for (int i = 0; i < 16; i++) {
-    #ifdef EZSP_HOST
-    emberAfGreenPowerClusterPrint("%x ", key.contents[i]);
-    #else
     emberAfGreenPowerClusterPrint("%x ", key.key[i]);
-    #endif
   }
   emberAfGreenPowerClusterPrint("]\n");
   emberAfGreenPowerClusterPrint("Prepared Nonce :[");
@@ -373,33 +328,20 @@ bool emGpCalculateIncomingCommandMic(EmberGpAddress * gpdAddr,
                                   payloadLength);
   if (securityLevel == EMBER_GP_SECURITY_LEVEL_FC_MIC_ENCRYPTED && encryptedPayload) {
     // Decrypt and then calculate the MIC
-    #ifdef EZSP_HOST
-    emberCcmEncryptBytes(&payload[encryptionStartIndex], payloadLength, nonce);
-    #else
     sl_zb_sec_man_aes_ccm(nonce, true, &payload[encryptionStartIndex], 0, payloadLength, temp);
     MEMMOVE(&payload[encryptionStartIndex], &temp, payloadLength);
-    #endif
     //emberAfGreenPowerClusterPrint("Decrypted (same as one more encryption) Payload :[");
     //for (int i = 0; i < payloadLength; i++) {
     // emberAfGreenPowerClusterPrint("%x ",payload[encryptionStartIndex + i]);
     //}
     //emberAfGreenPowerClusterPrint("]\n");
   }
-  #ifdef EZSP_HOST
-  emberCcmCalculateAndEncryptMic(nonce,
-                                 payload + authenticationStartIndex,
-                                 authenticationLength,
-                                 payload + encryptionStartIndex,
-                                 encryptionLength,
-                                 &temp[totalLength]);
-  #else
   sl_zb_sec_man_aes_ccm(nonce,
                         true,
                         payload + authenticationStartIndex,
                         authenticationLength,
                         authenticationLength + encryptionLength,
                         temp);
-  #endif
   MEMMOVE(mic, &temp[totalLength], 4);
   return true;
 }
@@ -444,11 +386,11 @@ static void initialiseKeyDerivationNonce(uint8_t * nonce,
   }
 }
 // Key Derivation for OOB Commissioing GPDF - incomming(decryption) and outgoing(encryption)
-bool emGpKeyTcLkDerivation(EmberGpAddress * gpdAddr,
-                           uint32_t gpdSecurityFrameCounter,
-                           uint8_t mic[4],
-                           EmberKeyData * key,
-                           bool directionIncoming)
+bool sli_zigbee_af_gp_key_tc_lk_derivation(EmberGpAddress * gpdAddr,
+                                           uint32_t gpdSecurityFrameCounter,
+                                           uint8_t mic[4],
+                                           EmberKeyData * key,
+                                           bool directionIncoming)
 {
   uint8_t nonce[SECURITY_BLOCK_SIZE] = { 0 };
   initialiseKeyDerivationNonce(nonce,
@@ -466,34 +408,21 @@ bool emGpKeyTcLkDerivation(EmberGpAddress * gpdAddr,
   }
   if (directionIncoming) {
     // Decrypt the incoming Key first then calculate the MIC
-    #ifdef EZSP_HOST
-    emberCcmEncryptBytes(key->contents, EMBER_ENCRYPTION_KEY_SIZE, nonce);
-    MEMCOPY(payload + 4, key->contents, EMBER_ENCRYPTION_KEY_SIZE);
-    #else
     sl_zb_sec_man_aes_ccm(nonce, true, key->contents, 0, EMBER_ENCRYPTION_KEY_SIZE, temp);
     MEMCOPY(payload + 4, temp, EMBER_ENCRYPTION_KEY_SIZE);
     MEMCOPY(key->contents, temp, EMBER_ENCRYPTION_KEY_SIZE);
-    #endif
   } else {
     // Take the Key in payload for MIC calculation first then encrypt the keys
     MEMCOPY(payload + 4, key->contents, EMBER_ENCRYPTION_KEY_SIZE);
-    #ifdef EZSP_HOST
-    emberCcmEncryptBytes(key->contents, EMBER_ENCRYPTION_KEY_SIZE, nonce);
-    #else
     sl_zb_sec_man_aes_ccm(nonce, true, key->contents, 0, EMBER_ENCRYPTION_KEY_SIZE, temp);
     MEMCOPY(key->contents, temp, EMBER_ENCRYPTION_KEY_SIZE);
-    #endif
   }
-  #ifdef EZSP_HOST
-  emberCcmCalculateAndEncryptMic(nonce, payload, 4, payload + 4, 16, &temp[20]);
-  #else
   sl_zb_sec_man_aes_ccm(nonce, true, payload, 4, 20, temp);
-  #endif
   MEMCOPY(mic, &temp[20], 4);
   return true;
 }
 
-void emGpTestSecurity(void)
+void sli_zigbee_af_gp_test_security(void)
 {
   EmberKeyData tcLk    = { { 0x5A, 0x69, 0x67, 0x42, 0x65, 0x65, 0x41, 0x6C, 0x6C, 0x69, 0x61, 0x6E, 0x63, 0x65, 0x30, 0x39 } };
   uint8_t mic[4] = { 0 };
@@ -515,25 +444,21 @@ void emGpTestSecurity(void)
   uint8_t gpdCommandPayload[2] = { 1, 0 }; //Format to specefy payload = [payloadlength, <payload bytes>]
   uint8_t securedOutgoingGpdf[100] = { 0 };
 
-  #ifdef EZSP_HOST
-  emLoadKeyIntoCore(testKey5.contents);
-  #else
   sl_zb_sec_man_context_t context;
   sl_zb_sec_man_init_context(&context);
   context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_INTERNAL;
   sl_zb_sec_man_import_key(&context, (sl_zb_sec_man_key_t *)&testKey5);
   //loads key into encryption core
   sl_zb_sec_man_load_key_context(&context);
-  #endif
 
-  uint8_t securedGpdfFrameLength = emGpOutgoingCommandEncrypt(&gpdAddr,
-                                                              fc,
-                                                              0, // Key type : Shared Key = 0, Individual Key = 1
-                                                              2, // Security Level : Encrypted = 3, MIC only = 2
-                                                              gpdCommandId,
-                                                              gpdCommandPayload, // format [payloadlength, <payload bytes>]
-                                                              securedOutgoingGpdf, // Collector for the secured frame
-                                                              100);
+  uint8_t securedGpdfFrameLength = sli_zigbee_af_gp_outgoing_command_encrypt(&gpdAddr,
+                                                                             fc,
+                                                                             0, // Key type : Shared Key = 0, Individual Key = 1
+                                                                             2, // Security Level : Encrypted = 3, MIC only = 2
+                                                                             gpdCommandId,
+                                                                             gpdCommandPayload, // format [payloadlength, <payload bytes>]
+                                                                             securedOutgoingGpdf, // Collector for the secured frame
+                                                                             100);
 
   emberAfGreenPowerClusterPrint("Secured Frame  :");
   for (int i = 0; i < securedGpdfFrameLength; i++) {
@@ -546,14 +471,14 @@ void emGpTestSecurity(void)
   //A.1.5.6.2.2 SecurityLevel = 0b11
   //Outgoing
   emberAfGreenPowerClusterPrintln("\nTest Vector (A.1.5.6.2.2) Secured outGoing GPDF command id = 0xF3 Payload={0} SharedKey, seclevel = 0b11 Application Id 0");
-  securedGpdfFrameLength = emGpOutgoingCommandEncrypt(&gpdAddr,
-                                                      fc,
-                                                      0, // Key type : Shared Key = 0, Individual Key = 1
-                                                      3, // Security Level : Encrypted = 3, MIC only = 2
-                                                      gpdCommandId,
-                                                      gpdCommandPayload, // format [payloadlength, <payload bytes>]
-                                                      securedOutgoingGpdf, // Collector for the secured frame
-                                                      100);
+  securedGpdfFrameLength = sli_zigbee_af_gp_outgoing_command_encrypt(&gpdAddr,
+                                                                     fc,
+                                                                     0, // Key type : Shared Key = 0, Individual Key = 1
+                                                                     3, // Security Level : Encrypted = 3, MIC only = 2
+                                                                     gpdCommandId,
+                                                                     gpdCommandPayload, // format [payloadlength, <payload bytes>]
+                                                                     securedOutgoingGpdf, // Collector for the secured frame
+                                                                     100);
 
   emberAfGreenPowerClusterPrint("Secured Frame  :");
   for (int i = 0; i < securedGpdfFrameLength; i++) {
@@ -569,19 +494,15 @@ void emGpTestSecurity(void)
   emberAfGreenPowerClusterPrintln("Incoming decrypted key for App Id = %d GpdId= 0x%4X", gpdAddr.applicationId, gpdAddr.id.sourceId);
   EmberKeyData incomingEncryptedKey1 = { { 0x7D, 0x17, 0x7B, 0xD2, 0x9E, 0xA0, 0xFD, 0xA6, 0xB0, 0x17, 0x03, 0x65, 0x87, 0xDC, 0x26, 0x00 } };
 
-  #ifdef EZSP_HOST
-  emLoadKeyIntoCore(tcLk.contents);
-  #else
   sl_zb_sec_man_import_key(&context, (sl_zb_sec_man_key_t *)&tcLk);
   //loads tcLk into encryption core
   sl_zb_sec_man_load_key_context(&context);
-  #endif
 
-  emGpKeyTcLkDerivation(&gpdAddr,
-                        0,
-                        mic,
-                        &incomingEncryptedKey1,
-                        true);
+  sli_zigbee_af_gp_key_tc_lk_derivation(&gpdAddr,
+                                        0,
+                                        mic,
+                                        &incomingEncryptedKey1,
+                                        true);
   emberAfGreenPowerClusterPrint("Decrypted Key :");
   for (int i = 0; i < EMBER_ENCRYPTION_KEY_SIZE; i++) {
     emberAfCorePrint("%x ", incomingEncryptedKey1.contents[i]);
@@ -600,11 +521,11 @@ void emGpTestSecurity(void)
   gpdAddr.applicationId = 2;
   EmberKeyData incomingEncryptedKey11 = { { 0x2D, 0xF0, 0x67, 0xAF, 0xCD, 0x4D, 0x8C, 0xF0, 0xF5, 0x2E, 0x6C, 0x85, 0x8F, 0x31, 0x4E, 0x22 } };
 
-  emGpKeyTcLkDerivation(&gpdAddr,
-                        0,
-                        mic,
-                        &incomingEncryptedKey11,
-                        true);
+  sli_zigbee_af_gp_key_tc_lk_derivation(&gpdAddr,
+                                        0,
+                                        mic,
+                                        &incomingEncryptedKey11,
+                                        true);
   emberAfGreenPowerClusterPrint("Decrypted Key :");
   for (int i = 0; i < EMBER_ENCRYPTION_KEY_SIZE; i++) {
     emberAfCorePrint("%x ", incomingEncryptedKey11.contents[i]);
@@ -623,11 +544,11 @@ void emGpTestSecurity(void)
   gpdAddr.id.sourceId = 0x12345678;
   gpdAddr.applicationId = 0;
   fc = 4;
-  emGpKeyTcLkDerivation(&gpdAddr,
-                        fc,
-                        mic,
-                        &testKey,
-                        false);
+  sli_zigbee_af_gp_key_tc_lk_derivation(&gpdAddr,
+                                        fc,
+                                        mic,
+                                        &testKey,
+                                        false);
   emberAfGreenPowerClusterPrint("Encrypted Key :");
   for (int i = 0; i < EMBER_ENCRYPTION_KEY_SIZE; i++) {
     emberAfCorePrint("%x ", testKey.contents[i]);
@@ -648,11 +569,11 @@ void emGpTestSecurity(void)
   gpdAddr.applicationId = 2;
   fc = 3;
 
-  emGpKeyTcLkDerivation(&gpdAddr,
-                        fc,
-                        mic,
-                        &testKey11,
-                        false);
+  sli_zigbee_af_gp_key_tc_lk_derivation(&gpdAddr,
+                                        fc,
+                                        mic,
+                                        &testKey11,
+                                        false);
   emberAfGreenPowerClusterPrint("Encrypted Key :");
   for (int i = 0; i < EMBER_ENCRYPTION_KEY_SIZE; i++) {
     emberAfCorePrint("%x ", testKey11.contents[i]);
@@ -671,23 +592,19 @@ void emGpTestSecurity(void)
   gpdAddr.applicationId = 0;
   fc = 2;
 
-  #ifdef EZSP_HOST
-  emLoadKeyIntoCore(testKey1.contents);
-  #else
   sl_zb_sec_man_import_key(&context, (sl_zb_sec_man_key_t *)&testKey1);
   //loading new key into core
   sl_zb_sec_man_load_key_context(&context);
-  #endif
 
-  emGpCalculateIncomingCommandMic(&gpdAddr,
-                                  false,
-                                  0,//EMBER_AF_GREEN_POWER_GP_SHARED_KEY,
-                                  2,
-                                  fc,
-                                  0x20,
-                                  NULL,
-                                  false,
-                                  mic);
+  sli_zigbee_af_gp_calculate_incoming_command_mic(&gpdAddr,
+                                                  false,
+                                                  0,//EMBER_AF_GREEN_POWER_GP_SHARED_KEY,
+                                                  2,
+                                                  fc,
+                                                  0x20,
+                                                  NULL,
+                                                  false,
+                                                  mic);
 
   emberAfGreenPowerClusterPrint("Generated MIC:");
   for (int i = 0; i < 4; i++) {
@@ -703,22 +620,18 @@ void emGpTestSecurity(void)
   gpdAddr.applicationId = 0;
   fc = 2;
 
-  #ifdef EZSP_HOST
-  emLoadKeyIntoCore(testKey3.contents);
-  #else
   sl_zb_sec_man_import_key(&context, (sl_zb_sec_man_key_t *)&testKey3);
   sl_zb_sec_man_load_key_context(&context);
-  #endif
 
-  emGpCalculateIncomingCommandMic(&gpdAddr,
-                                  false,
-                                  0,//EMBER_AF_GREEN_POWER_GP_INDIVIDUAL_KEY,
-                                  3,
-                                  fc,
-                                  0x20,
-                                  NULL,
-                                  false,
-                                  mic);
+  sli_zigbee_af_gp_calculate_incoming_command_mic(&gpdAddr,
+                                                  false,
+                                                  0,//EMBER_AF_GREEN_POWER_GP_INDIVIDUAL_KEY,
+                                                  3,
+                                                  fc,
+                                                  0x20,
+                                                  NULL,
+                                                  false,
+                                                  mic);
   emberAfGreenPowerClusterPrint("Generated MIC:");
   for (int i = 0; i < 4; i++) {
     emberAfGreenPowerClusterPrint("%x ", mic[i]);
@@ -732,22 +645,18 @@ void emGpTestSecurity(void)
   gpdAddr.applicationId = 0;
   fc = 2;
 
-  #ifdef EZSP_HOST
-  emLoadKeyIntoCore(testKey1552.contents);
-  #else
   sl_zb_sec_man_import_key(&context, (sl_zb_sec_man_key_t *)&testKey1552);
   sl_zb_sec_man_load_key_context(&context);
-  #endif
 
-  emGpCalculateIncomingCommandMic(&gpdAddr,
-                                  false,
-                                  1,//EMBER_AF_GREEN_POWER_GP_INDIVIDUAL_KEY,
-                                  2,
-                                  fc,
-                                  0x20,
-                                  NULL,
-                                  false,
-                                  mic);
+  sli_zigbee_af_gp_calculate_incoming_command_mic(&gpdAddr,
+                                                  false,
+                                                  1,//EMBER_AF_GREEN_POWER_GP_INDIVIDUAL_KEY,
+                                                  2,
+                                                  fc,
+                                                  0x20,
+                                                  NULL,
+                                                  false,
+                                                  mic);
 
   emberAfGreenPowerClusterPrint("Generated MIC:");
   for (int i = 0; i < 4; i++) {
@@ -763,22 +672,18 @@ void emGpTestSecurity(void)
   gpdAddr.applicationId = 0;
   fc = 2;
 
-  #ifdef EZSP_HOST
-  emLoadKeyIntoCore(testKey1553.contents);
-  #else
   sl_zb_sec_man_import_key(&context, (sl_zb_sec_man_key_t *)&testKey1553);
   sl_zb_sec_man_load_key_context(&context);
-  #endif
 
-  emGpCalculateIncomingCommandMic(&gpdAddr,
-                                  false,
-                                  1,//EMBER_AF_GREEN_POWER_GP_SHARED_KEY,
-                                  3,
-                                  fc,
-                                  0x20,
-                                  NULL,
-                                  false,
-                                  mic);
+  sli_zigbee_af_gp_calculate_incoming_command_mic(&gpdAddr,
+                                                  false,
+                                                  1,//EMBER_AF_GREEN_POWER_GP_SHARED_KEY,
+                                                  3,
+                                                  fc,
+                                                  0x20,
+                                                  NULL,
+                                                  false,
+                                                  mic);
   emberAfGreenPowerClusterPrint("Generated MIC:");
   for (int i = 0; i < 4; i++) {
     emberAfGreenPowerClusterPrint("%x ", mic[i]);
@@ -793,22 +698,18 @@ void emGpTestSecurity(void)
   gpdAddr.applicationId = 2;
   fc = 2;
 
-  #ifdef EZSP_HOST
-  emLoadKeyIntoCore(testKey2.contents);
-  #else
   sl_zb_sec_man_import_key(&context, (sl_zb_sec_man_key_t *)&testKey2);
   sl_zb_sec_man_load_key_context(&context);
-  #endif
 
-  emGpCalculateIncomingCommandMic(&gpdAddr,
-                                  false,
-                                  0,//EMBER_AF_GREEN_POWER_GP_SHARED_KEY,
-                                  2,
-                                  fc,
-                                  0x20,
-                                  NULL,
-                                  false,
-                                  mic);
+  sli_zigbee_af_gp_calculate_incoming_command_mic(&gpdAddr,
+                                                  false,
+                                                  0,//EMBER_AF_GREEN_POWER_GP_SHARED_KEY,
+                                                  2,
+                                                  fc,
+                                                  0x20,
+                                                  NULL,
+                                                  false,
+                                                  mic);
   emberAfGreenPowerClusterPrint("Generated MIC:");
   for (int i = 0; i < 4; i++) {
     emberAfGreenPowerClusterPrint("%x ", mic[i]);
@@ -822,23 +723,19 @@ void emGpTestSecurity(void)
   gpdAddr.applicationId = 2;
   fc = 2;
 
-  #ifdef EZSP_HOST
-  emLoadKeyIntoCore(testKey4.contents);
-  #else
   sl_zb_sec_man_import_key(&context, (sl_zb_sec_man_key_t *)&testKey4);
   //loading new key into core
   sl_zb_sec_man_load_key_context(&context);
-  #endif
 
-  emGpCalculateIncomingCommandMic(&gpdAddr,
-                                  false,
-                                  0,//EMBER_AF_GREEN_POWER_GP_SHARED_KEY,
-                                  3,
-                                  fc,
-                                  0x20,
-                                  NULL,
-                                  false,
-                                  mic);
+  sli_zigbee_af_gp_calculate_incoming_command_mic(&gpdAddr,
+                                                  false,
+                                                  0,//EMBER_AF_GREEN_POWER_GP_SHARED_KEY,
+                                                  3,
+                                                  fc,
+                                                  0x20,
+                                                  NULL,
+                                                  false,
+                                                  mic);
   emberAfGreenPowerClusterPrint("Generated MIC:");
   for (int i = 0; i < 4; i++) {
     emberAfGreenPowerClusterPrint("%x ", mic[i]);
@@ -851,13 +748,6 @@ void emGpTestSecurity(void)
   // Hash it with 'ZGP'
   uint8_t result[EMBER_ENCRYPTION_KEY_SIZE] = { 0 };
 
-  //Not using ZB sec man APIs on host
-  #ifdef EZSP_HOST
-  emberHmacAesHash(nwkKey,
-                   (uint8_t *)"ZGP",
-                   3,
-                   result);
-  #else
   sl_zb_sec_man_context_t context2;
   sl_zb_sec_man_init_context(&context2);
   //Using internal key type to avoid touching NWK key token - unsure if there's supposed
@@ -868,7 +758,6 @@ void emGpTestSecurity(void)
   sl_zb_sec_man_hmac_aes_mmo((uint8_t *)"ZGP",
                              3,
                              result);
-  #endif
 
   emberAfGreenPowerClusterPrint("Network Derived Group Key:");
   for (int i = 0; i < 16; i++) {
@@ -878,7 +767,7 @@ void emGpTestSecurity(void)
   emberAfGreenPowerClusterPrintln(" ");
 
   EmberKeyData groupKey = { { 0xc0, 0xc1, 0xc2, 0xc3, 0xc4, 0xc5, 0xc6, 0xc7, 0xc8, 0xc9, 0xca, 0xcb, 0xcc, 0xcd, 0xce, 0xcf } };
-  (void) emberAfWriteAttribute(242,//GP_ENDPOINT,
+  (void) emberAfWriteAttribute(EMBER_GP_ENDPOINT,
                                ZCL_GREEN_POWER_CLUSTER_ID,
                                ZCL_GP_SERVER_GP_SHARED_SECURITY_KEY_ATTRIBUTE_ID,
                                CLUSTER_MASK_SERVER,
@@ -888,7 +777,7 @@ void emGpTestSecurity(void)
   uint8_t gpsSecurityKeyTypeAtrribute;
   EmberKeyData gpSharedKeyAttribute;
   uint8_t keyType = 1;
-  (void) emberAfWriteAttribute(242,//GP_ENDPOINT,
+  (void) emberAfWriteAttribute(EMBER_GP_ENDPOINT,
                                ZCL_GREEN_POWER_CLUSTER_ID,
                                ZCL_GP_SERVER_GP_SHARED_SECURITY_KEY_TYPE_ATTRIBUTE_ID,
                                CLUSTER_MASK_SERVER,
@@ -906,7 +795,7 @@ void emGpTestSecurity(void)
   emberAfGreenPowerClusterPrintln(" ");
 
   keyType = 2;
-  (void) emberAfWriteAttribute(242,//GP_ENDPOINT,
+  (void) emberAfWriteAttribute(EMBER_GP_ENDPOINT,
                                ZCL_GREEN_POWER_CLUSTER_ID,
                                ZCL_GP_SERVER_GP_SHARED_SECURITY_KEY_TYPE_ATTRIBUTE_ID,
                                CLUSTER_MASK_SERVER,
@@ -924,7 +813,7 @@ void emGpTestSecurity(void)
   emberAfGreenPowerClusterPrintln(" ");
 
   keyType = 3;
-  (void) emberAfWriteAttribute(242,//GP_ENDPOINT,
+  (void) emberAfWriteAttribute(EMBER_GP_ENDPOINT,
                                ZCL_GREEN_POWER_CLUSTER_ID,
                                ZCL_GP_SERVER_GP_SHARED_SECURITY_KEY_TYPE_ATTRIBUTE_ID,
                                CLUSTER_MASK_SERVER,
@@ -941,7 +830,7 @@ void emGpTestSecurity(void)
   emberAfGreenPowerClusterPrintln(" ");
 
   keyType = 7;
-  (void) emberAfWriteAttribute(242,//GP_ENDPOINT,
+  (void) emberAfWriteAttribute(EMBER_GP_ENDPOINT,
                                ZCL_GREEN_POWER_CLUSTER_ID,
                                ZCL_GP_SERVER_GP_SHARED_SECURITY_KEY_TYPE_ATTRIBUTE_ID,
                                CLUSTER_MASK_SERVER,

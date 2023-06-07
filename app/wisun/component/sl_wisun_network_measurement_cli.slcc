@@ -1,0 +1,45 @@
+id: "sl_wisun_network_measurement_cli"
+label: "Wi-SUN Network Measurement CLI module"
+package: "wisun"
+description: "CLI implementation for Wi-SUN Network Measurement."
+category: "Wi-SUN|Application"
+quality: "production"
+root_path: "app/wisun/component/network_measurement_cli"
+provides:
+  - name: sl_wisun_network_measurement_cli
+
+source:
+  - path: "sl_wisun_network_measurement_cli.c"
+
+ui_hints:
+  visibility: never
+
+#-------------- Template Contribution ----------------
+template_contribution:
+#---------------- Component Catalog ------------------
+  - name: "cli_group"
+    value:
+      name: "wisun"
+      help: "Wi-SUN commands"
+      shortcuts:
+        - name: "w"
+
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "measure"
+      handler: "app_measure"
+      help: "Measure a remote host or quick measurement"
+      shortcuts:
+        - name: "m"
+      argument:
+        - type: string
+          help: "Remote address or 'all' or 'parent' or 'br'"
+        - type: uint16
+          help: "Count of measurement packets"
+        - type: uint16
+          help: "Measurement packet length"
+
+#---------------- Component Catalog ------------------
+  - name: component_catalog
+    value: wisun_network_measurement_cli

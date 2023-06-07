@@ -23,12 +23,12 @@ void emberAfPluginMpsiInitCallback(void)
 {
 }
 
-bool emIsCustomMpsiMessage(uint16_t messageId)
+bool sli_mpsi_is_custom_mpsi_message(uint16_t messageId)
 {
   return (messageId & MPSI_CUSTOM_MESSAGE_BIT);
 }
 
-uint8_t emAfPluginMpsiMessageIdSupportedByLocalStack(uint16_t messageId)
+uint8_t sli_mpsi_message_id_supported_by_local_stack(uint16_t messageId)
 {
   uint8_t messageIndex;
   const uint16_t numMessages = sizeof(gMpsiMessageHandlerMap)
@@ -64,7 +64,7 @@ uint8_t emberAfPluginMpsiReceiveMessage(MpsiMessage_t* mpsiMessage)
     // If we are the BLE app and we received a message meant for the Mobile App,
     // forward it now
     if (MPSI_APP_ID_MOBILE_APP == mpsiMessage->destinationAppId) {
-      return emBleSendMpsiMessageToMobileApp(mpsiMessage);
+      return sli_mpsi_ble_send_mpsi_message_to_mobile_app(mpsiMessage);
     }
 #endif // (MPSI_APP_ID_BLE == MPSI_APP_ID)
     return MPSI_WRONG_APP;
@@ -77,7 +77,7 @@ uint8_t emberAfPluginMpsiReceiveMessage(MpsiMessage_t* mpsiMessage)
 
 #if !defined(BLE_NCP_MOBILE_APP)
       // If an error was encountered, send an error response to the Mobile App
-      emAfPluginMpsiProcessStatus(mpsiMessage, status);
+      sli_mpsi_process_status(mpsiMessage, status);
 #endif // BLE_NCP_MOBILE_APP
 
       return status;
@@ -103,7 +103,7 @@ uint8_t emberAfPluginMpsiSendMessage(MpsiMessage_t* mpsiMessage)
     // If we are the BLE app and we're sending a message meant for the Mobile
     // App, forward it now
     if (MPSI_APP_ID_MOBILE_APP == mpsiMessage->destinationAppId) {
-      return emBleSendMpsiMessageToMobileApp(mpsiMessage);
+      return sli_mpsi_ble_send_mpsi_message_to_mobile_app(mpsiMessage);
     }
 #endif // (MPSI_APP_ID_BLE == MPSI_APP_ID)
     // Send the MPSI message to the right stack using either the MPSI Storage
@@ -118,7 +118,7 @@ uint8_t emberAfPluginMpsiSendMessage(MpsiMessage_t* mpsiMessage)
   return retVal;
 }
 
-void emAfPluginMpsiProcessStatus(MpsiMessage_t* mpsiMessage, uint8_t status)
+void sli_mpsi_process_status(MpsiMessage_t* mpsiMessage, uint8_t status)
 {
 // Only a host app or BLE app can send an error message back to the Mobile App
 #if defined(EZSP_HOST) || defined(EMBER_STACK_BLE)
@@ -139,7 +139,7 @@ void emAfPluginMpsiProcessStatus(MpsiMessage_t* mpsiMessage, uint8_t status)
   responseMessage.messageId = MPSI_MESSAGE_ID_ERROR;
   responseMessage.payloadLength = sizeof(errorMessage);
 
-  bytesSerialized = emAfPluginMpsiSerializeSpecificMessage(
+  bytesSerialized = sli_mpsi_serialize_specific_message(
     &errorMessage,
     responseMessage.messageId,
     responseMessage.payload);

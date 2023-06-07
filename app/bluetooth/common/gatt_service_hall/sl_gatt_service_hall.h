@@ -31,6 +31,11 @@
 #ifndef SL_GATT_SERVICE_HALL_H
 #define SL_GATT_SERVICE_HALL_H
 
+/***********************************************************************************************//**
+ * @addtogroup gatt_service_hall
+ * @{
+ **************************************************************************************************/
+
 #include "sl_bt_api.h"
 
 /**************************************************************************//**
@@ -49,4 +54,5 @@ void sl_gatt_service_hall_on_event(sl_bt_msg_t *evt);
  *****************************************************************************/
 sl_status_t sl_gatt_service_hall_get(float *field_strength, bool *alert, bool *tamper);
 
+/** @} (end addtogroup gatt_service_hall) */
 #endif // SL_GATT_SERVICE_HALL_H

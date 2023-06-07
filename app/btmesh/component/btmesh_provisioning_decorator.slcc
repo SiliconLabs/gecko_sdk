@@ -7,6 +7,8 @@ description: >
   initialization phase, for starting and successful finishing or for failed
   provisioning. A general callback for handling Provisioning Decorator events is
   also available.
+
+  This is a No-Code component.
 category: "Bluetooth Mesh|Utility"
 quality: "production"
 root_path: "app/btmesh/common/btmesh_provisioning_decorator"
@@ -25,9 +27,9 @@ requires:
   - name: "app_btmesh_util"
   - name: "bluetooth_feature_system"
   - name: "btmesh_stack"
-  - name: "simple_timer"
+  - name: "app_timer"
 recommends:
-  - id: "simple_timer"
+  - id: "app_timer"
 
 template_contribution:
   - name: "btmesh_on_event"
@@ -35,3 +37,5 @@ template_contribution:
       include: "sl_btmesh_provisioning_decorator.h"
       function: "sl_btmesh_handle_provisioning_decorator_event"
     priority: -8000
+  - name: component_catalog
+    value: "btmesh_provisioning_decorator"

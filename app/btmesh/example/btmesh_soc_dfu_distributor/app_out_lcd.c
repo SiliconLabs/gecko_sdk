@@ -41,8 +41,15 @@
 #include "sl_btmesh_api.h"
 
 #include "sl_btmesh_wstk_lcd.h"
+
+#ifdef SL_CATALOG_BTMESH_FACTORY_RESET_PRESENT
 #include "sl_btmesh_factory_reset.h"
+#endif // SL_CATALOG_BTMESH_FACTORY_RESET_PRESENT
+
+#ifdef SL_CATALOG_BTMESH_PROVISIONING_DECORATOR_PRESENT
 #include "sl_btmesh_provisioning_decorator.h"
+#endif // SL_CATALOG_BTMESH_PROVISIONING_DECORATOR_PRESENT
+
 #include "sl_btmesh_fw_distribution_server.h"
 
 struct dist_status {

@@ -27,14 +27,18 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
-#include "em_device.h"
+
+#include "em_se.h"
+
+#if defined(SLI_EM_SE_HOST) || defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT)
 
 #if defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT)
 
-#include "em_se.h"
 #include "em_core.h"
 #include "sl_assert.h"
 #include "em_system.h"
+
+#endif
 
 /***************************************************************************//**
  * @addtogroup se
@@ -251,6 +255,7 @@ void SE_addParameter(SE_Command_t *command, uint32_t parameter)
   command->num_parameters += 1;
 }
 
+#if !defined(SLI_EM_SE_HOST)
 /***************************************************************************//**
  * @brief
  *   Execute the passed command
@@ -367,8 +372,9 @@ void SE_executeCommand(SE_Command_t *command)
 #endif // #if defined(SEMAILBOX_PRESENT)
 }
 
-#if defined(CRYPTOACC_PRESENT)
+#endif // #if !defined(SLI_EM_SE_HOST)
 
+#if defined(CRYPTOACC_PRESENT)
 /***************************************************************************//**
  * @brief
  *   Check whether the VSE Output Mailbox is valid.
@@ -754,6 +760,7 @@ SE_Response_t SE_ackCommand(SE_Command_t *command)
 *  manager.
 *******************************************************************************/
 
+#if !defined(SLI_EM_SE_HOST)
 /***************************************************************************//**
  * @brief
  *
@@ -795,7 +802,7 @@ SE_Response_t SE_ackCommand(SE_Command_t *command)
  ******************************************************************************/
 SE_Response_t SE_initPubkey(uint32_t key_type, void *pubkey, uint32_t numBytes, bool signature)
 {
-  uint32_t commandWord;
+  uint32_t commandWord = SE_COMMAND_INIT_PUBKEY;
   SE_Response_t res = SE_RESPONSE_INVALID_COMMAND;
 
   EFM_ASSERT((key_type == SE_KEY_TYPE_BOOT)
@@ -816,7 +823,6 @@ SE_Response_t SE_initPubkey(uint32_t key_type, void *pubkey, uint32_t numBytes, 
     (signature) ? SE_COMMAND_INIT_PUBKEY_SIGNATURE : SE_COMMAND_INIT_PUBKEY;
 #elif defined(CRYPTOACC_PRESENT)
   (void)signature;
-  commandWord = SE_COMMAND_INIT_PUBKEY;
 #endif
   SE_Command_t command = SE_COMMAND_DEFAULT(commandWord | key_type);
 
@@ -947,6 +953,9 @@ SE_Response_t SE_initOTP(SE_OTPInit_t *otp_init)
   SE_addDataInput(&command, &mcuSettingsFlagsData);
 
   SE_executeCommand(&command);
+#else
+  (void)command;
+  (void)parameters;
 #endif
 
   return res;
@@ -1346,6 +1355,7 @@ SE_Response_t SE_deviceEraseDisable(void)
 }
 
 #endif // #if defined(SEMAILBOX_PRESENT)
+#endif // #if !defined(SLI_EM_SE_HOST)
 
 /** @} (end addtogroup deprecated_se) */
 /** @} (end addtogroup se) */

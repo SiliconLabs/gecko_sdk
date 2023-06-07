@@ -28,6 +28,7 @@ component:
   - id: "restrictions_profile_wisun_fan_1_0"
   - id: "restrictions_profile_wisun_fan_1_1"
 # SDK components
+  - id: "sl_wisun_lfn_device_support"
   - id: "sl_wisun_trace_util"
   - id: "sl_wisun_empty"
 
@@ -37,8 +38,6 @@ requires:
     condition: [freertos]
   - name: "rail_util_eff"
     condition: [hardware_board_has_eff]
-  - name: "sl_wisun_app_cli"
-    condition: [sl_wisun_app_setting]
 source:
   - path: "app.c"
   - path: "app_init.c"
@@ -73,7 +72,7 @@ configuration:
     value: "1"
     condition: [micriumos_kernel]
   - name: SL_RAIL_UTIL_PA_SELECTION_SUBGHZ
-    value: "RAIL_TX_POWER_MODE_SUBGIG_EFF_20DBM"
+    value: "RAIL_TX_POWER_MODE_SUBGIG_EFF_POWERSETTING_TABLE"
     condition: [hardware_board_has_eff]
   - name: RAIL_UTIL_EFF_MAX_TX_CONTINUOUS_POWER_DBM
     value: 20

@@ -61,6 +61,9 @@
 static const char kSyslogIdent[]          = "otbr-agent";
 static const char kDefaultInterfaceName[] = "wpan0";
 
+// Port number used by Rest server.
+static const uint32_t kPortNumber = 8081;
+
 enum
 {
     OTBR_OPT_BACKBONE_INTERFACE_NAME = 'B',
@@ -72,6 +75,8 @@ enum
     OTBR_OPT_SHORTMAX                = 128,
     OTBR_OPT_RADIO_VERSION,
     OTBR_OPT_AUTO_ATTACH,
+    OTBR_OPT_REST_LISTEN_ADDR,
+    OTBR_OPT_REST_LISTEN_PORT,
 };
 
 static jmp_buf            sResetJump;
@@ -87,6 +92,8 @@ static const struct option kOptions[] = {
     {"version", no_argument, nullptr, OTBR_OPT_VERSION},
     {"radio-version", no_argument, nullptr, OTBR_OPT_RADIO_VERSION},
     {"auto-attach", optional_argument, nullptr, OTBR_OPT_AUTO_ATTACH},
+    {"rest-listen-address", required_argument, nullptr, OTBR_OPT_REST_LISTEN_ADDR},
+    {"rest-listen-port", required_argument, nullptr, OTBR_OPT_REST_LISTEN_PORT},
     {0, 0, 0, 0}};
 
 static bool ParseInteger(const char *aStr, long &aOutResult)
@@ -167,7 +174,7 @@ static void PrintRadioVersionAndExit(const std::vector<const char *> &aRadioUrls
 {
     otbr::Ncp::ControllerOpenThread ncpOpenThread{/* aInterfaceName */ "", aRadioUrls, /* aBackboneInterfaceName */ "",
                                                   /* aDryRun */ true, /* aEnableAutoAttach */ false};
-    const char *                    radioVersion;
+    const char                     *radioVersion;
 
     ncpOpenThread.Init();
 
@@ -185,10 +192,12 @@ static int realmain(int argc, char *argv[])
     otbrLogLevel              logLevel = GetDefaultLogLevel();
     int                       opt;
     int                       ret               = EXIT_SUCCESS;
-    const char *              interfaceName     = kDefaultInterfaceName;
+    const char               *interfaceName     = kDefaultInterfaceName;
     bool                      verbose           = false;
     bool                      printRadioVersion = false;
     bool                      enableAutoAttach  = true;
+    const char               *restListenAddress = "";
+    int                       restListenPort    = kPortNumber;
     std::vector<const char *> radioUrls;
     std::vector<const char *> backboneInterfaceNames;
     long                      parseResult;
@@ -243,6 +252,14 @@ static int realmain(int argc, char *argv[])
                 enableAutoAttach = parseResult;
             }
             break;
+        case OTBR_OPT_REST_LISTEN_ADDR:
+            restListenAddress = optarg;
+            break;
+
+        case OTBR_OPT_REST_LISTEN_PORT:
+            VerifyOrExit(ParseInteger(optarg, parseResult), ret = EXIT_FAILURE);
+            restListenPort = parseResult;
+            break;
 
         default:
             PrintHelp(argv[0]);
@@ -274,7 +291,8 @@ static int realmain(int argc, char *argv[])
     }
 
     {
-        otbr::Application app(interfaceName, backboneInterfaceNames, radioUrls, enableAutoAttach);
+        otbr::Application app(interfaceName, backboneInterfaceNames, radioUrls, enableAutoAttach, restListenAddress,
+                              restListenPort);
 
         gApp = &app;
         app.Init();

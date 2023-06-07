@@ -4,13 +4,13 @@
  * 
  * @copyright 2021 Silicon Laboratories Inc.
  */
-#include <SwitchOnOff_hw.h>
+#include <app_hw.h>
 #include <board.h>
 #include <Assert.h>
 #include <events.h>
 #include <board.h>
-#include <zaf_event_helper.h>
-#include "cc_binary_switch_config_api.h"
+#include <zaf_event_distributor_soc.h>
+#include "CC_BinarySwitch.h"
 
 //#define DEBUGPRINT
 #include "DebugPrint.h"
@@ -54,27 +54,27 @@ static void button_handler(BUTTON_EVENT event, bool is_called_from_isr)
   }
   else if (BTN_EVENT_SHORT_PRESS(SWITCH_TOGGLE_BTN) == event)
   {
-    app_event = EVENT_APP_BUTTON_TOGGLE_SHORT_PRESS;
+    app_event = EVENT_APP_TOGGLE_LED;
   }
   else if (BTN_EVENT_HOLD(SWITCH_TOGGLE_BTN) == event)
   {
-    app_event = EVENT_APP_BUTTON_TOGGLE_HOLD;
+    app_event = EVENT_APP_SEND_NIF;
   }
 
   if (app_event != EVENT_EMPTY)
   {
     if (is_called_from_isr)
     {
-      ZAF_EventHelperEventEnqueueFromISR(app_event);
+      zaf_event_distributor_enqueue_app_event_from_isr(app_event);
     }
     else
     {
-      ZAF_EventHelperEventEnqueue(app_event);
+      zaf_event_distributor_enqueue_app_event(app_event);
     }
   }
 }
 
-void SwitchOnOff_hw_init(void)
+void app_hw_init(void)
 {
   DPRINT("--------------------------------\n");
   DPRINTF("%s: Toggle switch on/off\n", Board_GetButtonLabel(SWITCH_TOGGLE_BTN));

@@ -23,6 +23,7 @@ limitations under the License.
 #include "tensorflow/lite/kernels/kernel_util.h"
 #include "tensorflow/lite/kernels/op_macros.h"
 #include "tensorflow/lite/micro/kernels/kernel_util.h"
+#include "tensorflow/lite/micro/micro_log.h"
 
 namespace tflite {
 namespace ops {
@@ -183,9 +184,16 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
           tflite::micro::GetTensorShape(output),
           tflite::micro::GetTensorData<int32_t>(output));
       break;
+    case kTfLiteBool:
+      reference_ops::StridedSlice(op_params,
+                                  tflite::micro::GetTensorShape(input),
+                                  tflite::micro::GetTensorData<bool>(input),
+                                  tflite::micro::GetTensorShape(output),
+                                  tflite::micro::GetTensorData<bool>(output));
+      break;
     default:
-      TF_LITE_KERNEL_LOG(context, "Type %s (%d) not supported.",
-                         TfLiteTypeGetName(input->type), input->type);
+      MicroPrintf("Type %s (%d) not supported.", TfLiteTypeGetName(input->type),
+                  input->type);
       return kTfLiteError;
   }
   return kTfLiteOk;
@@ -193,14 +201,8 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
 }  // namespace strided_slice
 
 TfLiteRegistration Register_STRIDED_SLICE() {
-  return {/*init=*/strided_slice::Init,
-          /*free=*/nullptr,
-          /*prepare=*/strided_slice::Prepare,
-          /*invoke=*/strided_slice::Eval,
-          /*profiling_string=*/nullptr,
-          /*builtin_code=*/0,
-          /*custom_name=*/nullptr,
-          /*version=*/0};
+  return tflite::micro::RegisterOp(strided_slice::Init, strided_slice::Prepare,
+                                   strided_slice::Eval);
 }
 
 }  // namespace micro

@@ -1,8 +1,9 @@
 id: mx25_flash_shutdown_eusart
 package: platform
-label: MX25 Flash Shutdown with eusart 
+label: MX25 Flash Shutdown with eusart
 description: >
   Provides a function to put the MX25 SPI flash into deep power down mode in order to reduce power consumption using the EUSART SPI.
+  Note that in case of a custom board (not a Silicon Labs radio board), the sl_mx25_flash_shutdown() function call should be manually added in the application.
 category: Platform|Board Drivers
 quality: production
 root_path: hardware/driver/mx25_flash_shutdown

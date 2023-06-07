@@ -38,7 +38,6 @@
 #include "sl_wisun_ping.h"
 #include "cmsis_os2.h"
 #include "sl_cmsis_os2_common.h"
-#include "socket_hnd.h"
 #include "sl_sleeptimer.h"
 #include "sl_wisun_trace_util.h"
 
@@ -63,23 +62,22 @@
 
 /// Ping Start format string
 #define SL_WISUN_PING_START_FORMAT_STR \
-"PING %s: %u data bytes\n"
+  "PING %s: %u data bytes\n"
 
 /// Ping Destination unreachable format string
 #define SL_WISUN_PING_DEST_UNREACHABLE_STR \
-"[Destination is unreachable]\n"
+  "[Destination is unreachable]\n"
 
 /// Ping one line statistic format string
 #define SL_WISUN_PING_ONE_LINE_STAT_FORMAT_STR \
-"[%u bytes from %s: seq=%u time=%lu ms]\n"
+  "[%u bytes from %s: seq=%u time=%lu ms]\n"
 
 /// Ping full statistic format string
-#define SL_WISUN_PING_FULL_STAT_FORMAT_STR                         \
-"\nPing statistics for %s:\n"                                      \
-"  Packets: Sent = %lu, Received = %lu, Lost = %u, (%lu%% loss)\n" \
-"Approximate round trip times in milli-seconds:\n"                 \
-"  Minimum = %lums, Maximum = %lums, Average = %lums\n\n"
-
+#define SL_WISUN_PING_FULL_STAT_FORMAT_STR                           \
+  "\nPing statistics for %s:\n"                                      \
+  "  Packets: Sent = %lu, Received = %lu, Lost = %u, (%lu%% loss)\n" \
+  "Approximate round trip times in milli-seconds:\n"                 \
+  "  Minimum = %lums, Maximum = %lums, Average = %lums\n\n"
 
 // -----------------------------------------------------------------------------
 //                          Static Function Declarations
@@ -101,7 +99,7 @@ __STATIC_INLINE void _fill_payload(sl_wisun_ping_echo_request_t * const icmp_req
  * @return false Comparision failed
  *****************************************************************************/
 __STATIC_INLINE bool _compare_req_resp(const sl_wisun_ping_echo_request_t * const req,
-                                     const sl_wisun_ping_echo_response_t * const resp);
+                                       const sl_wisun_ping_echo_response_t * const resp);
 
 /**************************************************************************//**
  * @brief Get milisec value of time spent from start time stamp.
@@ -253,7 +251,10 @@ sl_status_t sl_wisun_ping(const wisun_addr_t *const remote_addr,
   }
 
   // Clear all event flags
-  (void) osEventFlagsClear(_ping_evt, 0xFFFFFFFFUL);
+  (void) osEventFlagsClear(_ping_evt, 0x00FFFFFFUL);
+
+  // Clear response message queue
+  (void) osMessageQueueReset(_ping_resp_msg_queue);
 
   req = (sl_wisun_ping_info_t *) app_wisun_malloc(sizeof(sl_wisun_ping_info_t));
   resp = (sl_wisun_ping_info_t *) app_wisun_malloc(sizeof(sl_wisun_ping_info_t));
@@ -295,15 +296,15 @@ sl_status_t sl_wisun_ping(const wisun_addr_t *const remote_addr,
                              | SL_WISUN_PING_STATUS_ABORT_REQUESTED,
                              osFlagsWaitAny, SL_WISUN_PING_TIMEOUT_MS);
 
-    if ((!_is_ping_evt_error(flags)) && 
-        (flags & SL_WISUN_PING_STATUS_ABORT_REQUESTED)) {
+    if ((!_is_ping_evt_error(flags))
+        && (flags & SL_WISUN_PING_STATUS_ABORT_REQUESTED)) {
       return SL_STATUS_ABORT;
     }
 
     // Get count of queued messages
     resp_cnt = osMessageQueueGetCount(_ping_resp_msg_queue);
 
-     // if there isn't any response, but it should be
+    // if there isn't any response, but it should be
     if (!resp_cnt) {
       printf(SL_WISUN_PING_DEST_UNREACHABLE_STR);
       ++stat->lost;
@@ -363,13 +364,13 @@ sl_status_t sl_wisun_ping(const wisun_addr_t *const remote_addr,
 
   rem_ip_str = app_wisun_trace_util_get_ip_str(&req->remote_addr.sin6_addr);
   if (stat_hnd == NULL) {
-    printf(SL_WISUN_PING_FULL_STAT_FORMAT_STR, 
-           rem_ip_str, 
-           sum_resp_pkt, sum_resp_pkt - stat->lost, 
-           stat->lost, 
+    printf(SL_WISUN_PING_FULL_STAT_FORMAT_STR,
+           rem_ip_str,
+           sum_resp_pkt, sum_resp_pkt - stat->lost,
+           stat->lost,
            (stat->lost * 100U) / sum_resp_pkt,
-           stat->min_time_ms, 
-           stat->max_time_ms, 
+           stat->min_time_ms,
+           stat->max_time_ms,
            stat->avg_time_ms);
   } else {
     stat_hnd(stat);
@@ -406,7 +407,7 @@ static void _ping_task_fnc(void *args)
   int32_t sockid                                 = SOCKET_INVALID_ID;
   osStatus_t stat                                = osError;
   socklen_t len                                  = sizeof(wisun_addr_t);
-  int32_t r                                      = RETVAL_ERROR;
+  int32_t r                                      = SOCKET_RETVAL_ERROR;
   uint32_t time_cnt                              = 0UL;
   uint8_t msg_prio                               = 0U;
   uint32_t status                                = 0UL;
@@ -456,7 +457,7 @@ static void _ping_task_fnc(void *args)
     // send request
     r = sendto(sockid, (const void *) &icmp_req, req.packet_length, 0,
                (const struct sockaddr *)&req.remote_addr, sizeof(wisun_addr_t));
-    if (r == RETVAL_ERROR) {
+    if (r == SOCKET_RETVAL_ERROR) {
       _prepare_and_push_failed_response(&resp, SL_WISUN_PING_STATUS_SEND_ERROR);
       close(sockid);
       continue;

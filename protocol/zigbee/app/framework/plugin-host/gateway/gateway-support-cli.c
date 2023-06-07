@@ -32,8 +32,6 @@
 // and the Unix Epoch: January 1st 1970.
 #define UNIX_ZIGBEE_EPOCH_DELTA (uint32_t)946684800UL
 
-#ifdef UC_BUILD
-
 void emberAfPluginGatewaySupportTimeSyncLocal(sl_cli_command_arg_t *arguments)
 {
   time_t unixTime = time(NULL);
@@ -41,29 +39,3 @@ void emberAfPluginGatewaySupportTimeSyncLocal(sl_cli_command_arg_t *arguments)
   emberAfSetTime(unixTime);
   emberAfPrintTime(emberAfGetCurrentTime());
 }
-
-#else
-
-#if !defined(EMBER_AF_GENERATE_CLI)
-
-EmberCommandEntry emberAfPluginGatewayCommands[] = {
-  emberCommandEntryAction("time-sync-local",
-                          emberAfPluginGatewaySupportTimeSyncLocal,
-                          "",
-                          "This command retrieves the local unix time and syncs the Time Server attribute to it."),
-  emberCommandEntryTerminator(),
-};
-
-#endif
-
-//------------------------------------------------------------------------------
-// Functions
-
-void emberAfPluginGatewaySupportTimeSyncLocal(void)
-{
-  time_t unixTime = time(NULL);
-  unixTime -= UNIX_ZIGBEE_EPOCH_DELTA;
-  emberAfSetTime(unixTime);
-  emberAfPrintTime(emberAfGetCurrentTime());
-}
-#endif

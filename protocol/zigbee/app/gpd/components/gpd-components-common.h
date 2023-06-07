@@ -19,25 +19,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifndef UC_BUILD
-#include PLATFORM_HEADER
-#include CONFIGURATION_HEADER
-#else
 #include "gpd-apps-config.h"
-#endif
 #include "rail.h"
 #include "rail_types.h"
 #include "em_chip.h"
 #include "em_cmu.h"
 #include "em_gpio.h"
 #include "em_emu.h"
-#ifndef UC_BUILD
-#include "bsp.h"
-#include "gpiointerrupt.h"
-
-//power management
-#include  "sleep.h"
-#endif
 //rail ieee 802.15.4
 #include  "rail_ieee802154.h"
 

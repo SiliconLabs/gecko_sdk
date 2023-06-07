@@ -8,12 +8,13 @@
 #include <Assert.h>
 #include <board.h>
 #include <events.h>
-#include <zaf_event_helper.h>
+#include <zaf_event_distributor_soc.h>
 //#define DEBUGPRINT
 #include <DebugPrint.h>
 #include <CC_Battery.h>
 #include <ADC.h>
-#include <cc_battery_config_api.h>
+#include <CC_Battery.h>
+#include <ZW_system_startup_api.h>
 
 #define MY_BATTERY_SPEC_LEVEL_FULL         3000  // My battery's 100% level (millivolts)
 #define MY_BATTERY_SPEC_LEVEL_EMPTY        2400  // My battery's 0% level (millivolts)
@@ -46,63 +47,67 @@ static void button_handler(BUTTON_EVENT event, bool is_called_from_isr)
 
   if (BTN_EVENT_LONG_PRESS(BUTTON_NETWORK_ADD_REMOVE) == event)
   {
-    app_event = EVENT_SYSTEM_RESET;
+    app_event = EVENT_APP_RESET;
   }
   if (BTN_EVENT_HOLD(BUTTON_NETWORK_ADD_REMOVE) == event)
   {
-    app_event = EVENT_APP_BUTTON_EXCLUDE_DEVICE;
+    app_event = EVENT_APP_EXCLUDE_DEVICE;
   }
   else if (BTN_EVENT_SHORT_PRESS(BUTTON_NETWORK_ADD_REMOVE) == event)
   {
-    app_event = EVENT_APP_BUTTON_INCLUDE_DEVICE;
+    app_event = EVENT_APP_INCLUDE_DEVICE;
   }
   if (BTN_EVENT_HOLD(BUTTON_BASIC_SET_ON) == event)
   {
-    app_event = EVENT_APP_BUTTON_ASSOCIATION_GROUP_ADD;
+    app_event = EVENT_APP_ASSOCIATION_GROUP_ADD;
   }
   if (BTN_EVENT_UP(BUTTON_BASIC_SET_ON) == event)
   {
-    app_event = EVENT_APP_BUTTON_UP_ASSOCIATION_GROUP_ADD;
+    app_event = EVENT_APP_ASSOCIATION_GROUP_ADD_START;
   }
   else if (BTN_EVENT_SHORT_PRESS(BUTTON_BASIC_SET_ON) == event)
   {
-    app_event = EVENT_APP_BUTTON_BASIC_ON;
+    app_event = EVENT_APP_BASIC_ON;
   }
   if (BTN_EVENT_HOLD(BUTTON_BASIC_SET_OFF) == event)
   {
-    app_event = EVENT_APP_BUTTON_ASSOCIATION_GROUP_REMOVE;
+    app_event = EVENT_APP_ASSOCIATION_GROUP_REMOVE;
   }
   if (BTN_EVENT_UP(BUTTON_BASIC_SET_OFF) == event)
   {
-    app_event = EVENT_APP_BUTTON_UP_ASSOCIATION_GROUP_REMOVE;
+    app_event = EVENT_APP_ASSOCIATION_GROUP_REMOVE_START;
   }
   else if (BTN_EVENT_SHORT_PRESS(BUTTON_BASIC_SET_OFF) == event)
   {
-    app_event = EVENT_APP_BUTTON_BASIC_OFF;
+    app_event = EVENT_APP_BASIC_OFF;
   }
   if (BTN_EVENT_HOLD(BUTTON_NETWORK_LEARNMODE) == event)
   {
-    app_event = EVENT_APP_BUTTON_NETWORK_LEARNMODE_NWE;
+    app_event = EVENT_APP_NETWORK_LEARNMODE_NWE;
   }
   else if (BTN_EVENT_SHORT_PRESS(BUTTON_NETWORK_LEARNMODE) == event)
   {
-    app_event = EVENT_APP_BUTTON_NETWORK_LEARNMODE_NWI;
+    app_event = EVENT_APP_NETWORK_LEARNMODE_NWI;
   }
   if (app_event != EVENT_EMPTY)
   {
     if (is_called_from_isr)
     {
-      ZAF_EventHelperEventEnqueueFromISR(app_event);
+      zaf_event_distributor_enqueue_app_event_from_isr(app_event);
     }
     else
     {
-      ZAF_EventHelperEventEnqueue(app_event);
+      zaf_event_distributor_enqueue_app_event(app_event);
     }
   }
 }
 
-void KeyFob_hw_init(EResetReason_t reset_reason)
+void app_hw_init()
 {
+  EResetReason_t reset_reason;
+
+  reset_reason = GetResetReason();
+
   Board_SetButtonCallback(button_handler);
   Board_EnableButton(BUTTON_NETWORK_ADD_REMOVE);
   Board_EnableButton(BUTTON_BASIC_SET_ON);
@@ -200,16 +205,6 @@ CC_Battery_BatteryGet_handler(uint8_t endpoint)
     }
   }
   return roundedLevel;
-}
-
-void KeyFob_hw_deep_sleep_wakeup_handler(void)
-{
-  uint32_t em4_wakeup_flags = Board_GetGpioEm4Flags();
-
-  if (0 != em4_wakeup_flags)
-  {
-    Board_ProcessEm4PinWakeupFlags(em4_wakeup_flags);
-  }
 }
 
 void KeyFob_basic_on_Led_handler(bool ledOn)

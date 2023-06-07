@@ -22,10 +22,8 @@ EmberStatus emberAfEzspZllNetworkOpsCommandCallback(EmberZllNetwork* networkInfo
                                                     EzspZllNetworkOperation op,
                                                     int8_t radioTxPower);
 
-#ifndef UC_BUILD
 void emberAfPluginEzspZllPolicyCommandCallback(EmberAfPluginEzspPolicyCommandContext* context);
 void emberAfPluginEzspZllConfigurationValueCommandCallback(EmberAfPluginEzspConfigurationValueCommandContext* context);
-#endif  // UC_BUILD
 
 // #ezsp command-handler genearted does  not pick up these exceptions
 #define emberZllGetTokens emberZllGetTokensStackZll

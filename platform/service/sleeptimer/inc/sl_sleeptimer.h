@@ -39,9 +39,8 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
-#include "sl_sleeptimer_config.h"
-#include "em_device.h"
 #include "sl_status.h"
+#include "sl_common.h"
 
 /// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
 #define SL_SLEEPTIMER_NO_HIGH_PRECISION_HF_CLOCKS_REQUIRED_FLAG 0x01
@@ -299,7 +298,6 @@ uint64_t sl_sleeptimer_get_tick_count64(void);
  ******************************************************************************/
 uint32_t sl_sleeptimer_get_timer_frequency(void);
 
-#if SL_SLEEPTIMER_WALLCLOCK_CONFIG
 /***************************************************************************//**
  * Converts a Unix timestamp into a date.
  *
@@ -308,6 +306,9 @@ uint32_t sl_sleeptimer_get_timer_frequency(void);
  * @param date Pointer to converted date.
  *
  * @note Time is in Standard Time.
+ *
+ * @note Function definition is accessible only when
+ *       SL_SLEEPTIMER_WALLCLOCK_CONFIG is set to 1.
  *
  * @return 0 if successful. Error code otherwise.
  ******************************************************************************/
@@ -323,6 +324,9 @@ sl_status_t sl_sleeptimer_convert_time_to_date(sl_sleeptimer_timestamp_t time,
  * @param date Pointer to converted date.
  *
  * @note Time is in Standard Time.
+ *
+ * @note Function definition is accessible only when
+ *       SL_SLEEPTIMER_WALLCLOCK_CONFIG is set to 1.
  *
  * @return 0 if successful. Error code otherwise.
  ******************************************************************************/
@@ -341,6 +345,9 @@ sl_status_t sl_sleeptimer_convert_time_to_date_64(sl_sleeptimer_timestamp_64_t t
  * @note Dates are based on the Unix time representation.
  *       Range of dates supported :
  *          - January 1, 1970, 00:00:00 to January 19, 2038, 03:14:00
+ *
+ * @note Function definition is accessible only when
+ *       SL_SLEEPTIMER_WALLCLOCK_CONFIG is set to 1.
  ******************************************************************************/
 sl_status_t sl_sleeptimer_convert_date_to_time(sl_sleeptimer_date_t *date,
                                                sl_sleeptimer_timestamp_t *time);
@@ -356,6 +363,9 @@ sl_status_t sl_sleeptimer_convert_date_to_time(sl_sleeptimer_date_t *date,
  * @note Dates are based on the 64 bit Unix time representation.
  *       Range of dates supported :
  *          - January 1, 1900, 00:00:00 to  December 31, 11899 23:59:59.
+ *
+ * @note Function definition is accessible only when
+ *       SL_SLEEPTIMER_WALLCLOCK_CONFIG is set to 1.
  ******************************************************************************/
 sl_status_t sl_sleeptimer_convert_date_to_time_64(sl_sleeptimer_date_t *date,
                                                   sl_sleeptimer_timestamp_64_t *time);
@@ -372,6 +382,9 @@ sl_status_t sl_sleeptimer_convert_date_to_time_64(sl_sleeptimer_date_t *date,
  *
  * @note Refer strftime() from UNIX.
  *       http://man7.org/linux/man-pages/man3/strftime.3.html
+ *
+ * @note Function definition is accessible only when
+ *       SL_SLEEPTIMER_WALLCLOCK_CONFIG is set to 1.
  ******************************************************************************/
 uint32_t sl_sleeptimer_convert_date_to_str(char *str,
                                            size_t size,
@@ -382,6 +395,10 @@ uint32_t sl_sleeptimer_convert_date_to_str(char *str,
  * Sets time zone offset.
  *
  * @param  offset  Time zone offset, in seconds.
+ *
+ * @note Function definition is accessible only when
+ *       SL_SLEEPTIMER_WALLCLOCK_CONFIG is set to 1.
+ *
  ******************************************************************************/
 void sl_sleeptimer_set_tz(sl_sleeptimer_time_zone_offset_t offset);
 
@@ -395,12 +412,18 @@ sl_sleeptimer_time_zone_offset_t sl_sleeptimer_get_tz(void);
 /***************************************************************************//**
  * Retrieves current 32 bit time.
  *
+ * @note Function definition is accessible only when
+ *       SL_SLEEPTIMER_WALLCLOCK_CONFIG is set to 1.
+ *
  * @return Current timestamps in Unix format.
  ******************************************************************************/
 sl_sleeptimer_timestamp_t sl_sleeptimer_get_time(void);
 
 /***************************************************************************//**
  * Retrieves current 64 bit time.
+ *
+ * @note Function definition is accessible only when
+ *       SL_SLEEPTIMER_WALLCLOCK_CONFIG is set to 1.
  *
  * @return Current timestamps in Unix format.
  ******************************************************************************/
@@ -411,6 +434,9 @@ sl_sleeptimer_timestamp_64_t sl_sleeptimer_get_time_64(void);
  *
  * @param 32 bit time to set.
  *
+ * @note Function definition is accessible only when
+ *       SL_SLEEPTIMER_WALLCLOCK_CONFIG is set to 1.
+ *
  * @return 0 if successful. Error code otherwise.
  ******************************************************************************/
 sl_status_t sl_sleeptimer_set_time(sl_sleeptimer_timestamp_t time);
@@ -419,6 +445,9 @@ sl_status_t sl_sleeptimer_set_time(sl_sleeptimer_timestamp_t time);
  * Sets current time.
  *
  * @param 64 bit time to set.
+ *
+ * @note Function definition is accessible only when
+ *       SL_SLEEPTIMER_WALLCLOCK_CONFIG is set to 1.
  *
  * @return 0 if successful. Error code otherwise.
  ******************************************************************************/
@@ -431,6 +460,9 @@ sl_status_t sl_sleeptimer_set_time_64(sl_sleeptimer_timestamp_64_t time);
  *
  * @note Time is in Standard Time.
  *
+ * @note Function definition is accessible only when
+ *       SL_SLEEPTIMER_WALLCLOCK_CONFIG is set to 1.
+ *
  * @return 0 if successful. Error code otherwise.
  ******************************************************************************/
 sl_status_t sl_sleeptimer_get_datetime(sl_sleeptimer_date_t *date);
@@ -439,6 +471,9 @@ sl_status_t sl_sleeptimer_get_datetime(sl_sleeptimer_date_t *date);
  * Sets current time, in date format.
  *
  * @param date Pointer to current date.
+ *
+ * @note Function definition is accessible only when
+ *       SL_SLEEPTIMER_WALLCLOCK_CONFIG is set to 1.
  *
  * @return 0 if successful. Error code otherwise.
  ******************************************************************************/
@@ -456,6 +491,9 @@ sl_status_t sl_sleeptimer_set_datetime(sl_sleeptimer_date_t *date);
  * @param min Minutes after the hour. Expected value: 0-59.
  * @param sec Seconds after the minute. Expected value: 0-59.
  * @param tzOffset Offset, in seconds, from UTC.
+ *
+ * @note Function definition is accessible only when
+ *       SL_SLEEPTIMER_WALLCLOCK_CONFIG is set to 1.
  *
  * @return 0 if successful. Error code otherwise.
  ******************************************************************************/
@@ -483,6 +521,9 @@ sl_status_t sl_sleeptimer_build_datetime(sl_sleeptimer_date_t *date,
  *
  * @note Resulting date structure's year will be based on 1900 epoch
  *
+ * @note Function definition is accessible only when
+ *       SL_SLEEPTIMER_WALLCLOCK_CONFIG is set to 1.
+ *
  * @return 0 if successful. Error code otherwise.
  ******************************************************************************/
 sl_status_t sl_sleeptimer_build_datetime_64(sl_sleeptimer_date_t *date,
@@ -503,6 +544,9 @@ sl_status_t sl_sleeptimer_build_datetime_64(sl_sleeptimer_date_t *date,
  * @note Unix timestamp range supported : 0x0 to 0x7C55 817F
  *       ie. January 1, 1970, 00:00:00 to February 07, 2036, 06:28:15
  *
+ * @note Function definition is accessible only when
+ *       SL_SLEEPTIMER_WALLCLOCK_CONFIG is set to 1.
+ *
  * @return 0 if successful. Error code otherwise.
  ******************************************************************************/
 sl_status_t sl_sleeptimer_convert_unix_time_to_ntp(sl_sleeptimer_timestamp_t time,
@@ -516,6 +560,9 @@ sl_status_t sl_sleeptimer_convert_unix_time_to_ntp(sl_sleeptimer_timestamp_t tim
  *
  * @note NTP timestamp range supported : 0x83AA 7E80 to 0xFFFF FFFF
  *       ie. January 1, 1970, 00:00:00 to February 07, 2036, 06:28:15
+ *
+ * @note Function definition is accessible only when
+ *       SL_SLEEPTIMER_WALLCLOCK_CONFIG is set to 1.
  *
  * @return 0 if successful. Error code otherwise.
  ******************************************************************************/
@@ -532,6 +579,9 @@ sl_status_t sl_sleeptimer_convert_ntp_time_to_unix(uint32_t ntp_time,
  * @note Unix timestamp range supported : 0x386D 4380 to 0x7FFF FFFF
  *       ie. January 1, 2000, 00:00:0 to January 19, 2038, 03:14:00
  *
+ * @note Function definition is accessible only when
+ *       SL_SLEEPTIMER_WALLCLOCK_CONFIG is set to 1.
+ *
  * @return 0 if successful. Error code otherwise.
  ******************************************************************************/
 sl_status_t sl_sleeptimer_convert_unix_time_to_zigbee(sl_sleeptimer_timestamp_t time,
@@ -545,6 +595,9 @@ sl_status_t sl_sleeptimer_convert_unix_time_to_zigbee(sl_sleeptimer_timestamp_t 
  *
  * @note ZIGBEE timestamp range supported : 0x0 to 0x4792 BC7F
  *        ie. January 1, 2000, 00:00:00 to January 19, 2038, 03:14:00
+ *
+ * @note Function definition is accessible only when
+ *       SL_SLEEPTIMER_WALLCLOCK_CONFIG is set to 1.
  *
  * @return 0 if successful. Error code otherwise.
  ******************************************************************************/
@@ -576,9 +629,8 @@ __STATIC_INLINE sl_sleeptimer_time_zone_offset_t sl_sleeptimer_set_tz_ahead_utc(
 __STATIC_INLINE sl_sleeptimer_time_zone_offset_t sl_sleeptimer_set_tz_behind_utc(uint8_t hours,
                                                                                  uint8_t minutes)
 {
-  return -((hours * 3600u) + (minutes * 60u));
+  return -(sl_sleeptimer_time_zone_offset_t)((hours * 3600u) + (minutes * 60u));
 }
-#endif
 
 /***************************************************************************//**
  * Active delay.
@@ -842,13 +894,6 @@ uint16_t sl_sleeptimer_get_clock_accuracy(void);
 ///   The sleeptimer.c and sleeptimer.h source files for the SLEEPTIMER device driver library are in the
 ///   service/sleeptimer folder.
 ///
-///   @li @ref sleeptimer_intro
-///   @li @ref sleeptimer_functionalities_overview
-///   @li @ref sleeptimer_getting_started
-///   @li @ref sleeptimer_conf
-///   @li @ref sleeptimer_api
-///   @li @ref sleeptimer_example
-///
 ///   @n @section sleeptimer_intro Introduction
 ///
 ///   The Sleeptimer driver provides software timers, delays, timekeeping and date functionalities using a low-frequency real-time clock peripheral.
@@ -996,30 +1041,30 @@ uint16_t sl_sleeptimer_get_clock_accuracy(void);
 ///
 ///   @ref sl_sleeptimer_init() @n
 ///    These functions initialize the sleeptimer driver. Typically,
-///    @htmlonly sl_sleeptimer_init() @endhtmlonly is called once in the startup code.
+///     sl_sleeptimer_init() is called once in the startup code.
 ///
 ///   @ref sl_sleeptimer_start_timer() @n
 ///    Start a one shot 32 bits timer. When a timer expires, a user-supplied callback function
 ///    is called. A pointer to this function is passed to
-///    @htmlonly sl_sleeptimer_start_timer()@endhtmlonly. See @ref callback for
+///     sl_sleeptimer_start_timer(). See @ref callback for
 ///    details of the callback prototype.
 ///
 ///   @ref sl_sleeptimer_restart_timer() @n
 ///    Restart a one shot 32 bits timer. When a timer expires, a user-supplied callback function
 ///    is called. A pointer to this function is passed to
-///    @htmlonly sl_sleeptimer_start_timer()@endhtmlonly. See @ref callback for
+///     sl_sleeptimer_start_timer(). See @ref callback for
 ///    details of the callback prototype.
 ///
 ///   @ref sl_sleeptimer_start_periodic_timer() @n
 ///    Start a periodic 32 bits timer. When a timer expires, a user-supplied callback function
 ///    is called. A pointer to this function is passed to
-///    @htmlonly sl_sleeptimer_start_timer()@endhtmlonly. See @ref callback for
+///     sl_sleeptimer_start_timer(). See @ref callback for
 ///    details of the callback prototype.
 ///
 ///   @ref sl_sleeptimer_restart_periodic_timer() @n
 ///    Restart a periodic 32 bits timer. When a timer expires, a user-supplied callback function
 ///    is called. A pointer to this function is passed to
-///    @htmlonly sl_sleeptimer_start_timer()@endhtmlonly. See @ref callback for
+///     sl_sleeptimer_start_timer(). See @ref callback for
 ///    details of the callback prototype.
 ///
 ///   @ref sl_sleeptimer_stop_timer() @n
@@ -1045,7 +1090,7 @@ uint16_t sl_sleeptimer_get_clock_accuracy(void);
 ///   @n @anchor callback <b>The timer expiry callback function:</b> @n
 ///   The callback function, prototyped as @ref sl_sleeptimer_timer_callback_t(), is called from
 ///   within the RTC peripheral interrupt handler on timer expiration.
-///   @htmlonly sl_sleeptimer_timer_callback_t(sl_sleeptimer_timer_handle_t *handle, void *data)@endhtmlonly
+///    sl_sleeptimer_timer_callback_t(sl_sleeptimer_timer_handle_t *handle, void *data)
 ///
 ///   @n @section sleeptimer_example Example
 ///   @code{.c}

@@ -14,7 +14,9 @@
  *
  ******************************************************************************/
 
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #include PLATFORM_HEADER
 
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_CATALOG_ZIGBEE_PRO_COMPLIANCE_PRESENT)
@@ -26,8 +28,8 @@
 #include "sl_zigbee_debug_print.h"
 #endif // SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT
 
-extern bool emAfStayAwakeWhenNotJoined;
-extern bool emAfForceEndDeviceToStayAwake;
+extern bool sli_zigbee_af_stay_awake_when_not_joined;
+extern bool sli_zigbee_af_force_end_device_to_stay_awake;
 extern void emberAfForceEndDeviceToStayAwake(bool stayAwake);
 
 void emberAfPluginIdleSleepStatusCommand(sl_cli_command_arg_t *arguments)
@@ -35,9 +37,9 @@ void emberAfPluginIdleSleepStatusCommand(sl_cli_command_arg_t *arguments)
   (void)arguments;
 
   sl_zigbee_core_debug_println("Stay awake when not joined: %s",
-                               (emAfStayAwakeWhenNotJoined ? "yes" : "no"));
+                               (sli_zigbee_af_stay_awake_when_not_joined ? "yes" : "no"));
   sl_zigbee_core_debug_println("Forced stay awake:          %s",
-                               (emAfForceEndDeviceToStayAwake ? "yes" : "no"));
+                               (sli_zigbee_af_force_end_device_to_stay_awake ? "yes" : "no"));
 }
 
 void emberAfPluginIdleSleepStayAwakeCommand(sl_cli_command_arg_t *arguments)
@@ -53,7 +55,7 @@ void emberAfPluginIdleSleepStayAwakeCommand(sl_cli_command_arg_t *arguments)
 
 void emberAfPluginIdleSleepAwakeWhenNotJoinedCommand(sl_cli_command_arg_t *arguments)
 {
-  emAfStayAwakeWhenNotJoined = (bool)sl_cli_get_argument_uint8(arguments, 0);
+  sli_zigbee_af_stay_awake_when_not_joined = (bool)sl_cli_get_argument_uint8(arguments, 0);
 }
 
 #endif //#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_CATALOG_ZIGBEE_PRO_COMPLIANCE_PRESENT)

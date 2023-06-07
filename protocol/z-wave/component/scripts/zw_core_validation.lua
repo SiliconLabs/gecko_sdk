@@ -15,7 +15,7 @@
 -- 4. sl_sleeptimer required settings
 --  1. SL_SLEEPTIMER_PERIPHERAL must be set to SL_SLEEPTIMER_PERIPHERAL_BURTC in Z_Wave applications for Series 2
 -- 5. sl_power_manager
---  1. SL_POWER_MANAGER_LOWEST_EM_ALLOWED must be set to 3 in Z_Wave applications
+--  1. power_manager_deepsleep component must be added to Z_Wave applications to support the lowest energy mode EM3
 local device_sdid_95 = slc.is_provided("device_sdid_95")
 local device_series_1 = slc.is_provided("device_series_1")
 local device_series_2 = slc.is_provided("device_series_2")
@@ -75,7 +75,9 @@ if device_series_2 then
 end
 
 -- sl_board
-validate_config_component("SL_POWER_MANAGER_LOWEST_EM_ALLOWED", "3")
+if not slc.is_selected("power_manager_deepsleep") then
+    validation.error('Z-Wave requires power_manager_deepsleep to support the lowest energy mode being EM3', validation.target_for_project())
+end
 
 --
 -- EOF

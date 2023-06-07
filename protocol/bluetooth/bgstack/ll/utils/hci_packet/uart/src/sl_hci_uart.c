@@ -43,6 +43,15 @@ static void start_rx(UARTDRV_Handle_t handle);
 static void tx_callback(UARTDRV_Handle_t handle, Ecode_t status, uint8_t *buffer, UARTDRV_Count_t count);
 static void enable_usart_irq(void);
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+bool sl_hci_uart_is_ok_to_sleep(void)
+{
+  if (sl_hci_uart_rx_buffered_length() > 0 || sleep_disabled) {
+    return false;
+  } else {
+    return true;
+  }
+}
+
 static void energy_mode_transition_cb(sl_power_manager_em_t from,
                                       sl_power_manager_em_t to)
 {

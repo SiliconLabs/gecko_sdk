@@ -750,7 +750,7 @@ __STATIC_INLINE uint8_t* get_write_ptr(const sl_iostream_uart_context_t * uart_c
   EFM_ASSERT(ecode == ECODE_OK);
 
   DMA_DESCRIPTOR_TypeDef* desc = ((DMA_DESCRIPTOR_TypeDef *)(DMA->CTRLBASE)) + uart_context->dma.channel;
-  dst = (uint8_t*)desc->DSTEND - remaining;
+  dst = ((uint8_t*)desc->DSTEND + 1) - remaining;
 
   #elif defined(LDMA_PRESENT)
   dst = (uint8_t *)LDMA->CH[uart_context->dma.channel].DST;

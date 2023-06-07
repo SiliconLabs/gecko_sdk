@@ -275,20 +275,6 @@ sl_status_t sl_usbd_cdc_acm_write(uint8_t  subclass_nbr,
                                   uint16_t timeout,
                                   uint32_t *p_xfer_len);
 
-#if 0
-sl_status_t USBD_ACM_SerialRxAsync(uint8_t               subclass_nbr,
-                                   uint8_t               *p_buf,
-                                   uint32_t              buf_len,
-                                   USBD_ACM_SERIAL_ASYNC async,
-                                   void                  *p_async_arg);
-
-sl_status_t USBD_ACM_SerialTxAsync(uint8_t               subclass_nbr,
-                                   uint8_t               *p_buf,
-                                   uint32_t              buf_len,
-                                   USBD_ACM_SERIAL_ASYNC async,
-                                   void                  *p_async_arg);
-#endif
-
 /****************************************************************************************************//**
  * @brief    Return the state of control lines.
  *

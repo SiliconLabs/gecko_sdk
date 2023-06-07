@@ -31,6 +31,7 @@
 #include "sl_status.h"
 #include "sl_bt_api.h"
 #include "sl_btmesh_api.h"
+#include "sl_btmesh.h"
 #include "em_common.h"
 #include "sl_cli.h"
 
@@ -103,7 +104,7 @@ void sl_btmesh_self_provisioning_from_cli(sl_cli_command_arg_t *arguments)
   uint8_t *input_arguments;
   aes_key_128 network_key;
   aes_key_128 device_key;
-  uint16_t primary_address;
+  uint16_t primary_address = 0;
 
   // Get the first argument - device key
   input_arguments = sl_cli_get_argument_hex(arguments, 0, &arg_length);
@@ -127,7 +128,7 @@ void sl_btmesh_self_provisioning_from_cli(sl_cli_command_arg_t *arguments)
     log_warning("Wrong primary element address length: %u, should be %d"NL, arg_length, ADDRESS_LENGTH);
     return;
   }
-  memcpy(&primary_address, input_arguments, arg_length);
+  primary_address = ((uint16_t)input_arguments[0] << 8) | input_arguments[1];
 
   sl_btmesh_self_provisioning(device_key, network_key, primary_address);
 }
@@ -165,6 +166,7 @@ void sl_btmesh_self_provisioning(aes_key_128 dev_key,
 {
   sl_status_t sc;
   uint32_t key_count;
+  sl_btmesh_msg_t evt;
 
   log_info("Self provisioning started"NL);
 
@@ -203,6 +205,12 @@ void sl_btmesh_self_provisioning(aes_key_128 dev_key,
 
   log_info("Self provisioning successful" NL);
 
+  // Node provisioned event processed
+  evt.header = sl_btmesh_evt_node_provisioned_id;
+  evt.data.evt_node_provisioned.address = address;
+  evt.data.evt_node_provisioned.iv_index = IV_INDEX;
+  sl_btmesh_process_event(&evt);
+
   // The device must be reset after saving provisioning data.
   sl_bt_system_reset(0);
 }
@@ -210,9 +218,6 @@ void sl_btmesh_self_provisioning(aes_key_128 dev_key,
 void sl_btmesh_add_app_key(aes_key_128 app_key)
 {
   sl_status_t sc;
-  aes_key_128 app_key_check;
-  uint16_t id;
-  uint16_t netkey_index;
 
   // Add application key
   sc = sl_btmesh_test_add_local_key(sl_btmesh_test_key_type_app,
@@ -224,23 +229,7 @@ void sl_btmesh_add_app_key(aes_key_128 app_key)
     return;
   }
 
-  // Get the application key
-  sc = sl_btmesh_node_get_key(sl_btmesh_test_key_type_app,
-                              KEY_INDEX,
-                              CURRENT_KEY_DATA,
-                              &id,
-                              &netkey_index,
-                              &app_key_check);
-  if (sc != SL_STATUS_OK) {
-    log_status_warning_f(sc, "Failed to get app key" NL);
-    return;
-  }
-
-  log_info("Application key added: ");
-  for (size_t count = 0; count < KEY_LENGTH; count++) {
-    log_append_info("%02x", app_key_check.data[count]);
-  }
-  log_nl();
+  log_info("Application key added"NL);
 }
 
 /** @} (end addtogroup SelfProvisioning) */

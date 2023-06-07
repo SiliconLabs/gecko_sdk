@@ -111,6 +111,8 @@ void sl_btctrl_hci_parser_init_phy(void);
 
 void sl_btctrl_hci_parser_init_past(void);
 
+void sl_btctrl_hci_parser_init_privacy(void);
+
 void sl_btctrl_hci_parser_init_default(void);
 
 /**

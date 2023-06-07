@@ -1,7 +1,7 @@
 id: mbedtls_pkcs12
 package: platform
 quality: production
-label: PKCS #12
+label: PKCS#12
 description: >-
   This component enables the implementation of Password-Based Encryption (PBE)
   and derivation algorithms from RSA Labratories' PKCS #12 specification.

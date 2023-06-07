@@ -52,6 +52,11 @@ otError otBorderRoutingSetEnabled(otInstance *aInstance, bool aEnabled)
     return AsCoreType(aInstance).Get<BorderRouter::RoutingManager>().SetEnabled(aEnabled);
 }
 
+otBorderRoutingState otBorderRoutingGetState(otInstance *aInstance)
+{
+    return MapEnum(AsCoreType(aInstance).Get<BorderRouter::RoutingManager>().GetState());
+}
+
 otRoutePreference otBorderRoutingGetRouteInfoOptionPreference(otInstance *aInstance)
 {
     return static_cast<otRoutePreference>(
@@ -62,6 +67,11 @@ void otBorderRoutingSetRouteInfoOptionPreference(otInstance *aInstance, otRouteP
 {
     AsCoreType(aInstance).Get<BorderRouter::RoutingManager>().SetRouteInfoOptionPreference(
         static_cast<NetworkData::RoutePreference>(aPreference));
+}
+
+void otBorderRoutingClearRouteInfoOptionPreference(otInstance *aInstance)
+{
+    AsCoreType(aInstance).Get<BorderRouter::RoutingManager>().ClearRouteInfoOptionPreference();
 }
 
 otError otBorderRoutingGetOmrPrefix(otInstance *aInstance, otIp6Prefix *aPrefix)
@@ -89,14 +99,19 @@ otError otBorderRoutingGetOnLinkPrefix(otInstance *aInstance, otIp6Prefix *aPref
     return AsCoreType(aInstance).Get<BorderRouter::RoutingManager>().GetOnLinkPrefix(AsCoreType(aPrefix));
 }
 
+otError otBorderRoutingGetFavoredOnLinkPrefix(otInstance *aInstance, otIp6Prefix *aPrefix)
+{
+    return AsCoreType(aInstance).Get<BorderRouter::RoutingManager>().GetFavoredOnLinkPrefix(AsCoreType(aPrefix));
+}
+
 #if OPENTHREAD_CONFIG_NAT64_BORDER_ROUTING_ENABLE
 otError otBorderRoutingGetNat64Prefix(otInstance *aInstance, otIp6Prefix *aPrefix)
 {
     return AsCoreType(aInstance).Get<BorderRouter::RoutingManager>().GetNat64Prefix(AsCoreType(aPrefix));
 }
 
-otError otBorderRoutingGetFavoredNat64Prefix(otInstance *       aInstance,
-                                             otIp6Prefix *      aPrefix,
+otError otBorderRoutingGetFavoredNat64Prefix(otInstance        *aInstance,
+                                             otIp6Prefix       *aPrefix,
                                              otRoutePreference *aPreference)
 {
     otError                                       error;
@@ -120,9 +135,9 @@ void otBorderRoutingPrefixTableInitIterator(otInstance *aInstance, otBorderRouti
     AsCoreType(aInstance).Get<BorderRouter::RoutingManager>().InitPrefixTableIterator(*aIterator);
 }
 
-otError otBorderRoutingGetNextPrefixTableEntry(otInstance *                        aInstance,
+otError otBorderRoutingGetNextPrefixTableEntry(otInstance                         *aInstance,
                                                otBorderRoutingPrefixTableIterator *aIterator,
-                                               otBorderRoutingPrefixTableEntry *   aEntry)
+                                               otBorderRoutingPrefixTableEntry    *aEntry)
 {
     AssertPointerIsNotNull(aIterator);
     AssertPointerIsNotNull(aEntry);

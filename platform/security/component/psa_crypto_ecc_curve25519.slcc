@@ -21,13 +21,13 @@ requires:
 template_contribution:
   - name: psa_crypto_config
     value: PSA_WANT_ECC_MONTGOMERY_255
-  - name: psa_crypto_config
+  - name: psa_crypto_builtin_config
     value: "MBEDTLS_PSA_BUILTIN_ECC_MONTGOMERY_255 1"
     condition: [mbedtls_ecc_curve25519]
-  - name: psa_crypto_config
+  - name: psa_crypto_builtin_config
     value: "MBEDTLS_PSA_BUILTIN_KEY_TYPE_ECC_KEY_PAIR 1"
     condition: [mbedtls_ecc_curve25519]
-  - name: psa_crypto_config
+  - name: psa_crypto_builtin_config
     value: "MBEDTLS_PSA_BUILTIN_KEY_TYPE_ECC_PUBLIC_KEY 1"
     condition: [mbedtls_ecc_curve25519]
   - name: mbedtls_config

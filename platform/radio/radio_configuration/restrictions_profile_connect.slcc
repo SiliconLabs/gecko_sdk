@@ -23,6 +23,10 @@ config_file:
     unless:
       - device_sdid_200
       - device_is_module
+  - path: profile_connect.restriction
+    directory: rail
+    condition:
+      - "device_family_fgm23"
 
 #-------- Hides Component for user in Studio ---------
 ui_hints:

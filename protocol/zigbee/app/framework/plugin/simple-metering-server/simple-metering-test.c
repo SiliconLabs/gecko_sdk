@@ -19,9 +19,6 @@
 #include "../../util/common.h"
 #include "../../util/af-main.h"
 #include "../../util/client-api.h"
-#ifndef UC_BUILD
-#include "enums.h"
-#endif  // UC_BUILD
 #include "simple-metering-server.h"
 #include "simple-metering-test.h"
 
@@ -40,7 +37,7 @@ uint16_t batteryRate = 1;
 uint32_t nextGetProfileInterval;
 static uint32_t hourCounterTable[EMBER_AF_SIMPLE_METERING_CLUSTER_SERVER_ENDPOINT_COUNT];
 
-#define emAfContainsSimpleMeterServerAttribute(endpoint, attribute) \
+#define sli_zigbee_af_contains_simple_meter_server_attribute(endpoint, attribute) \
   emberAfContainsAttribute((endpoint), ZCL_SIMPLE_METERING_CLUSTER_ID, (attribute), CLUSTER_MASK_SERVER, EMBER_AF_NULL_MANUFACTURER_CODE)
 
 static void hourCounterTableInit(void);
@@ -275,7 +272,7 @@ void afTestMeterEnableProfiles(uint8_t enable)
 
 #endif // EMBER_AF_PLUGIN_SIMPLE_METERING_SERVER_TEST_METER_PROFILES != 0
 
-void emAfTestMeterInit(uint8_t endpoint)
+void sli_zigbee_af_test_meter_init(uint8_t endpoint)
 {
   MEMSET(testMeterProfiles,
          0,
@@ -284,8 +281,8 @@ void emAfTestMeterInit(uint8_t endpoint)
          0,
          (EMBER_AF_PLUGIN_SIMPLE_METERING_SERVER_TEST_METER_PROFILES) * 4);
   // battery life remaining (0x0201), begin at 255, and decrement every minute. INT8U.
-  if ( emAfContainsSimpleMeterServerAttribute(endpoint,
-                                              ZCL_REMAINING_BATTERY_LIFE_ATTRIBUTE_ID) ) {
+  if ( sli_zigbee_af_contains_simple_meter_server_attribute(endpoint,
+                                                            ZCL_REMAINING_BATTERY_LIFE_ATTRIBUTE_ID) ) {
     uint8_t batteryLife = 100; // 100% to begin. 0xff is reserved.
     (void) emberAfWriteAttribute(endpoint,
                                  ZCL_SIMPLE_METERING_CLUSTER_ID,
@@ -322,7 +319,7 @@ void emAfTestMeterInit(uint8_t endpoint)
 //        CurrentMaxDelivered was read
 //   - CurrentMaxDemandReceivedTime must be set to UTC time of when the
 //        CurrentMaxDemandReceived was read
-void emAfTestMeterTick(uint8_t endpoint)
+void sli_zigbee_af_test_meter_tick(uint8_t endpoint)
 {
   uint32_t *hourCounter;
   uint32_t diff, currentTime;
@@ -513,8 +510,8 @@ void emAfTestMeterTick(uint8_t endpoint)
   // adjust the optional attributes, if they were selected in the cluster configuration window
   // current tier 1 summation delivered (0x0100), increment with same values from current summation
   // delivered. Type is INT48U so same as current samation delivered.
-  if ( emAfContainsSimpleMeterServerAttribute(endpoint,
-                                              ZCL_CURRENT_TIER1_SUMMATION_DELIVERED_ATTRIBUTE_ID) ) {
+  if ( sli_zigbee_af_contains_simple_meter_server_attribute(endpoint,
+                                                            ZCL_CURRENT_TIER1_SUMMATION_DELIVERED_ATTRIBUTE_ID) ) {
     (void) emberAfWriteAttribute(endpoint,
                                  ZCL_SIMPLE_METERING_CLUSTER_ID,
                                  ZCL_CURRENT_TIER1_SUMMATION_DELIVERED_ATTRIBUTE_ID,
@@ -528,8 +525,8 @@ void emAfTestMeterTick(uint8_t endpoint)
   }
 
   // battery life remaining (0x0201), begin at 255, and decrement every minute. INT8U.
-  if ( emAfContainsSimpleMeterServerAttribute(endpoint,
-                                              ZCL_REMAINING_BATTERY_LIFE_ATTRIBUTE_ID) ) {
+  if ( sli_zigbee_af_contains_simple_meter_server_attribute(endpoint,
+                                                            ZCL_REMAINING_BATTERY_LIFE_ATTRIBUTE_ID) ) {
     if ((*hourCounter) && ((*hourCounter % (60 * batteryRate)) == 0) ) { // every minute
       uint8_t batteryLife;
       status = emberAfReadAttribute(endpoint,
@@ -558,8 +555,8 @@ void emAfTestMeterTick(uint8_t endpoint)
   } // end if contains attribute battery life
 
   // hours in operation (0x0202), increment every 60 minutes. INT24U.
-  if ( emAfContainsSimpleMeterServerAttribute(endpoint,
-                                              ZCL_HOURS_IN_OPERATION_ATTRIBUTE_ID) ) {
+  if ( sli_zigbee_af_contains_simple_meter_server_attribute(endpoint,
+                                                            ZCL_HOURS_IN_OPERATION_ATTRIBUTE_ID) ) {
     if ((*hourCounter) && ((*hourCounter % 3600) == 0)) {  // every hour, but skip 0
       uint8_t hoursInOperation[] = { 0, 0, 0 };
       status = emberAfReadAttribute(endpoint,
@@ -595,8 +592,8 @@ void emAfTestMeterTick(uint8_t endpoint)
   // instantaneous demand (0x0400), increment with same values from current summation
   // delivered, namely the difference from the last second (the rate +/- the variance
   // applied this current second. this is a INT24S.
-  if ( emAfContainsSimpleMeterServerAttribute(endpoint,
-                                              ZCL_INSTANTANEOUS_DEMAND_ATTRIBUTE_ID) ) {
+  if ( sli_zigbee_af_contains_simple_meter_server_attribute(endpoint,
+                                                            ZCL_INSTANTANEOUS_DEMAND_ATTRIBUTE_ID) ) {
     // how do you do signed intergers? I think ZCL uses two's complement, but
     // I can't find this in the document anywhere. In this implementation,
     // the demand will always be positive, so note that this code will not
@@ -625,9 +622,9 @@ void emAfTestMeterTick(uint8_t endpoint)
   (*hourCounter)++; // this function called every second
 }
 
-bool emAfTestMeterGetProfiles(uint8_t intervalChannel,
-                              uint32_t endTime,
-                              uint8_t numberOfPeriods)
+bool sli_zigbee_af_test_meter_get_profiles(uint8_t intervalChannel,
+                                           uint32_t endTime,
+                                           uint8_t numberOfPeriods)
 {
 #if (EMBER_AF_PLUGIN_SIMPLE_METERING_SERVER_TEST_METER_PROFILES != 0)
   // Get the current time
@@ -749,16 +746,18 @@ bool emAfTestMeterGetProfiles(uint8_t intervalChannel,
 }
 
 #else
+
 //TODO: Clean this else block while removing "#ifndef UC_BUILD"
-void emAfTestMeterInit(uint8_t endpoint)
+void sli_zigbee_af_test_meter_init(uint8_t endpoint)
+
 {
 }
-void emAfTestMeterTick(uint8_t endpoint)
+void sli_zigbee_af_test_meter_tick(uint8_t endpoint)
 {
 }
-bool emAfTestMeterGetProfiles(uint8_t intervalChannel,
-                              uint32_t endTime,
-                              uint8_t numberOfPeriods)
+bool sli_zigbee_af_test_meter_get_profiles(uint8_t intervalChannel,
+                                           uint32_t endTime,
+                                           uint8_t numberOfPeriods)
 {
   return false;
 }

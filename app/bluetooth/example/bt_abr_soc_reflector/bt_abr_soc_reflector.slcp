@@ -1,0 +1,75 @@
+project_name: bt_abr_soc_reflector
+package: Bluetooth
+label: Bluetooth - SoC ABR reflector
+description: >
+  ABR reflector for Bluetooth. The example sends measurement results to the initiator via GATT.
+  The application starts advertising after boot and restarts advertising after a connection is closed.
+  It also supports Over-the-Air Device Firmware Upgrade (OTA DFU).
+category: Bluetooth Examples
+quality: experimental
+
+component:
+  - id: toolchain_gcc
+  - id: bluetooth_stack
+  - id: gatt_configuration
+  - id: bluetooth_feature_legacy_advertiser
+  - id: bluetooth_feature_connection
+  - id: bluetooth_feature_gatt
+  - id: bluetooth_feature_gatt_server
+  - id: bluetooth_feature_scanner
+  - id: bluetooth_feature_sm
+  - id: bluetooth_feature_system
+  - id: app_assert
+  - id: app_log
+  - id: iostream_usart
+    instance:
+      - vcom
+  - id: component_catalog
+  - id: abr_reflector
+  - id: mpu
+  - id: in_place_ota_dfu
+
+source:
+  - path: main.c
+  - path: app.c
+
+include:
+  - path: .
+    file_list:
+      - path: app.h
+
+config_file:
+  - override:
+      component: gatt_configuration
+      file_id: gatt_configuration_file_id
+    path: gatt_configuration.btconf
+    directory: btconf
+
+readme:
+  - path: readme.md
+
+other_file:
+  - path: ../../script/create_bl_files.bat
+  - path: ../../script/create_bl_files.sh
+
+configuration:
+  - name: SL_STACK_SIZE
+    value: "2752"
+  - name: SL_HEAP_SIZE
+    value: "10000"
+  - name: SL_PSA_KEY_USER_SLOT_COUNT
+    value: "0"
+    condition:
+      - psa_crypto
+  - name: SL_DEVICE_INIT_HFXO_FREQ
+    value: 40000000
+
+tag:
+  - hardware:rf:band:2400
+  - prebuilt_demo
+
+ui_hints:
+  highlight:
+    - path: config/btconf/gatt_configuration.btconf
+    - path: readme.md
+      focus: true

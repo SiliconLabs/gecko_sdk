@@ -18,6 +18,7 @@
 
 WEAK(uint16_t emberAfPrintActiveArea) = 0;
 
+#if (EMBER_AF_PLUGIN_GREEN_POWER_ADAPTER_USE_CUSTOM_ATTRIBUTE_SYSTEM == 1)
 WEAK(EmberAfStatus emberAfReadAttributeWrapper(uint8_t endpoint,
                                                EmberAfClusterId cluster,
                                                EmberAfAttributeId attributeID,
@@ -48,11 +49,23 @@ WEAK(EmberAfStatus emberAfWriteClientAttributeWrapper(uint8_t endpoint,
   return 0xff;
 }
 
+WEAK(bool emberAfContainsServerWrapper(uint8_t endpoint, EmberAfClusterId clusterId))
+{
+  return false;
+}
+
+WEAK(bool emberAfContainsClientWrapper(uint8_t endpoint, EmberAfClusterId clusterId))
+{
+  return false;
+}
+#endif // (EMBER_AF_PLUGIN_GREEN_POWER_ADAPTER_USE_CUSTOM_ATTRIBUTE_SYSTEM == 1)
+
 WEAK(uint8_t emberAfGetRadioChannelWrapper(void))
 {
   return emberGetRadioChannel();
 }
 
+#if (EMBER_AF_PLUGIN_GREEN_POWER_ADAPTER_USE_CUSTOM_AF_INTERFACE == 1)
 WEAK(EmberApsFrame *emberAfGetCommandApsFrameWrapper(void))
 {
   return NULL;
@@ -84,6 +97,7 @@ WEAK(uint16_t emberAfFillExternalBufferWrapper(uint8_t frameControl,
 {
   return 0xff;
 }
+#endif // (EMBER_AF_PLUGIN_GREEN_POWER_ADAPTER_USE_CUSTOM_AF_INTERFACE == 1)
 
 WEAK(void emberAfCopyInt16u(uint8_t *data, uint16_t index, uint16_t x))
 {
@@ -286,10 +300,10 @@ WEAK(uint8_t emberAfGetOpenNetworkDurationSec(void))
   return 0;
 }
 
-WEAK(bool emAfServiceDiscoveryIncoming(EmberNodeId sender,
-                                       EmberApsFrame *apsFrame,
-                                       const uint8_t *message,
-                                       uint16_t length))
+WEAK(bool sli_zigbee_af_service_discovery_incoming(EmberNodeId sender,
+                                                   EmberApsFrame *apsFrame,
+                                                   const uint8_t *message,
+                                                   uint16_t length))
 {
   return false;
 }
@@ -324,14 +338,14 @@ WEAK(EmberStatus emberSendZigDevRequest(EmberNodeId destination,
   return 0;
 }
 
-WEAK(EmberStatus emAfSend(EmberOutgoingMessageType type,
-                          uint16_t indexOrDestination,
-                          EmberApsFrame *apsFrame,
-                          uint8_t messageLength,
-                          uint8_t *message,
-                          uint16_t *messageTag,
-                          EmberNodeId alias,
-                          uint8_t sequence))
+WEAK(EmberStatus sli_zigbee_af_send(EmberOutgoingMessageType type,
+                                    uint16_t indexOrDestination,
+                                    EmberApsFrame *apsFrame,
+                                    uint8_t messageLength,
+                                    uint8_t *message,
+                                    uint16_t *messageTag,
+                                    EmberNodeId alias,
+                                    uint8_t sequence))
 {
   return 0;
 }

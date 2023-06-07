@@ -34,6 +34,16 @@
       file_id: btl_uart_driver_cfg
     path: brd2207a/btl_uart_driver_cfg.h
   - override:
+      component: cpc_gpio_expander_gpio_instance
+      file_id: cpc_gpio_expander_gpio_config
+      instance: btn0
+    path: brd2207a/sl_cpc_gpio_expander_gpio_btn0_config.h
+  - override:
+      component: cpc_gpio_expander_gpio_instance
+      file_id: cpc_gpio_expander_gpio_config
+      instance: btn1
+    path: brd2207a/sl_cpc_gpio_expander_gpio_btn1_config.h
+  - override:
       component: cpc_secondary_driver_spi_usart
       file_id: cpc_drv_secondary_spi_usart_config
       instance: exp

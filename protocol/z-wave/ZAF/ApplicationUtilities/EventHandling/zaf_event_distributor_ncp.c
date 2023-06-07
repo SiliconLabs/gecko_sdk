@@ -12,8 +12,6 @@
 #include <ZAF_Common_helper.h>
 #include <ZAF_Common_interface.h>
 #include <zaf_event_distributor_ncp.h>
-#include <zaf_event_helper.h>
-#include <zaf_job_helper.h>
 #include <ZW_TransportSecProtocol.h>
 
 //#define DEBUGPRINT

@@ -21,8 +21,9 @@
 #include "app/framework/util/af-main.h"
 #include "app/framework/util/attribute-storage.h"
 
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #ifdef SL_CATALOG_ZIGBEE_DELAYED_JOIN_PRESENT
 #define DELAYED_JOIN_PRESENT
 #endif
@@ -32,14 +33,6 @@
 #define NETWORK_CREATOR_SECURITY_BDB_JOIN_USES_INSTALL_CODE_KEY
 #endif
 #endif
-#else // UC_BUILD
-#ifdef EMBER_AF_PLUGIN_DELAYED_JOIN
-#define DELAYED_JOIN_PRESENT
-#endif
-#ifdef EMBER_AF_PLUGIN_NETWORK_CREATOR_SECURITY_BDB_JOIN_USES_INSTALL_CODE_KEY
-#define NETWORK_CREATOR_SECURITY_BDB_JOIN_USES_INSTALL_CODE_KEY
-#endif
-#endif // UC_BUILD
 
 //------------------------------------------------------------------------------
 // Globals
@@ -107,7 +100,7 @@ EmberStatus zaTrustCenterSecurityInit(bool centralizedNetwork)
   EmberInitialSecurityState state;
   EmberExtendedSecurityBitmask extended;
   EmberStatus status;
-  const EmberAfSecurityProfileData *data = emAfGetCurrentSecurityProfileData();
+  const EmberAfSecurityProfileData *data = sli_zigbee_af_get_current_security_profile_data();
 
   if (data == NULL) {
     return EMBER_ERR_FATAL;
@@ -157,7 +150,7 @@ EmberStatus zaTrustCenterSecurityInit(bool centralizedNetwork)
     return status;
   }
 
-  emAfClearLinkKeyTable();
+  sli_zigbee_af_clear_link_key_table();
 
   return EMBER_SUCCESS;
 }
@@ -175,19 +168,16 @@ static void securityJoinNotify(EmberNodeId newNodeId,
                                  status,
                                  decision);
 
-#if defined(EMBER_AF_PRINT_SECURITY) || defined(UC_BUILD)
-
   emberAfSecurityPrintln("Trust Center Join Handler: status = %p, decision = %p (%x), shortid 0x%2x",
                          deviceUpdateText[status],
                          joinDecisionText[decision],
                          decision,
                          newNodeId);
   emberAfSecurityFlush();
-#endif
 }
 
-EmberStatus emAfInstallCodeToKey(uint8_t* installCode, uint8_t length,
-                                 EmberKeyData *key)
+EmberStatus sli_zigbee_af_install_code_to_key(uint8_t* installCode, uint8_t length,
+                                              EmberKeyData *key)
 {
   EmberStatus status;
   uint8_t index;
@@ -241,19 +231,11 @@ static const char * ezspJoinPolicyText[] = {
   "Allow rejoins only",
 };
 
-#ifdef UC_BUILD
-void emAfTrustCenterJoinCallback(EmberNodeId newNodeId,
-                                 EmberEUI64 newNodeEui64,
-                                 EmberDeviceUpdate status,
-                                 EmberJoinDecision policyDecision,
-                                 EmberNodeId parentOfNewNode)
-#else
-void ezspTrustCenterJoinHandler(EmberNodeId newNodeId,
-                                EmberEUI64 newNodeEui64,
-                                EmberDeviceUpdate status,
-                                EmberJoinDecision policyDecision,
-                                EmberNodeId parentOfNewNode)
-#endif
+void sli_zigbee_af_trust_center_join_callback(EmberNodeId newNodeId,
+                                              EmberEUI64 newNodeEui64,
+                                              EmberDeviceUpdate status,
+                                              EmberJoinDecision policyDecision,
+                                              EmberNodeId parentOfNewNode)
 {
   (void) emberAfPushCallbackNetworkIndex();
 #if defined(DELAYED_JOIN_PRESENT)
@@ -294,7 +276,7 @@ static EmberStatus setJoinPolicy(EmberJoinDecision decision)
 
 static EmberStatus permitRequestingTrustCenterLinkKey(void)
 {
-  const EmberAfSecurityProfileData *data = emAfGetCurrentSecurityProfileData();
+  const EmberAfSecurityProfileData *data = sli_zigbee_af_get_current_security_profile_data();
   if (data == NULL) {
     return EMBER_ERR_FATAL;
   }
@@ -310,7 +292,7 @@ static EmberStatus permitRequestingTrustCenterLinkKey(void)
 
 static EmberStatus permitRequestingApplicationLinkKey(void)
 {
-  const EmberAfSecurityProfileData *data = emAfGetCurrentSecurityProfileData();
+  const EmberAfSecurityProfileData *data = sli_zigbee_af_get_current_security_profile_data();
   if (data == NULL) {
     return EMBER_ERR_FATAL;
   }
@@ -329,17 +311,10 @@ static EmberStatus permitRequestingApplicationLinkKey(void)
 #else
 
 static EmberJoinDecision defaultDecision = EMBER_USE_PRECONFIGURED_KEY;
-#ifdef UC_BUILD
-EmberJoinDecision emAfTrustCenterJoinCallback(EmberNodeId newNodeId,
-                                              EmberEUI64 newNodeEui64,
-                                              EmberDeviceUpdate status,
-                                              EmberNodeId parentOfNewNode)
-#else
-EmberJoinDecision emberTrustCenterJoinHandler(EmberNodeId newNodeId,
-                                              EmberEUI64 newNodeEui64,
-                                              EmberDeviceUpdate status,
-                                              EmberNodeId parentOfNewNode)
-#endif
+EmberJoinDecision sli_zigbee_af_trust_center_join_callback(EmberNodeId newNodeId,
+                                                           EmberEUI64 newNodeEui64,
+                                                           EmberDeviceUpdate status,
+                                                           EmberNodeId parentOfNewNode)
 {
   (void) emberAfPushCallbackNetworkIndex();
   EmberJoinDecision joinDecision = defaultDecision;
@@ -356,11 +331,15 @@ EmberJoinDecision emberTrustCenterJoinHandler(EmberNodeId newNodeId,
   }
 #ifdef NETWORK_CREATOR_SECURITY_BDB_JOIN_USES_INSTALL_CODE_KEY
   else {
-    EmberTransientKeyData transientKeyData;
+    sl_zb_sec_man_context_t context;
+    sl_zb_sec_man_aps_key_metadata_t key_info;
+    context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_TC_LINK_WITH_TIMEOUT;
+    context.eui64 = newNodeEui64;
+    context.flags |= ZB_SEC_MAN_FLAG_EUI_IS_VALID;
     // Check in transient key table
     if ((EMBER_STANDARD_SECURITY_UNSECURED_JOIN == status)
-        && (EMBER_SUCCESS != emberGetTransientLinkKey(newNodeEui64,
-                                                      &transientKeyData))) {
+        && (SL_STATUS_OK != sl_zb_sec_man_get_aps_key_info(&context,
+                                                           &key_info))) {
       joinDecision = EMBER_DENY_JOIN;
     }
   }
@@ -398,7 +377,7 @@ static EmberStatus setJoinPolicy(EmberJoinDecision decision)
 
 static EmberStatus permitRequestingTrustCenterLinkKey(void)
 {
-  const EmberAfSecurityProfileData *data = emAfGetCurrentSecurityProfileData();
+  const EmberAfSecurityProfileData *data = sli_zigbee_af_get_current_security_profile_data();
   if (data == NULL) {
     return EMBER_ERR_FATAL;
   }
@@ -409,7 +388,7 @@ static EmberStatus permitRequestingTrustCenterLinkKey(void)
 
 static EmberStatus permitRequestingApplicationLinkKey(void)
 {
-  const EmberAfSecurityProfileData *data = emAfGetCurrentSecurityProfileData();
+  const EmberAfSecurityProfileData *data = sli_zigbee_af_get_current_security_profile_data();
   if (data == NULL) {
     return EMBER_ERR_FATAL;
   }

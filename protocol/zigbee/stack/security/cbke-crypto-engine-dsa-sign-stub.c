@@ -20,7 +20,7 @@
 #include "stack/include/ember-types.h"
 #include "stack/include/library.h"
 
-const EmberLibraryStatus emCbkeDsaLibraryStatus = EMBER_LIBRARY_IS_STUB;
+const EmberLibraryStatus sli_zigbee_cbke_dsa_library_status = EMBER_LIBRARY_IS_STUB;
 
 EmberStatus emberDsaSign(EmberMessageBuffer buffer)
 {
@@ -28,11 +28,11 @@ EmberStatus emberDsaSign(EmberMessageBuffer buffer)
   return EMBER_LIBRARY_NOT_PRESENT;
 }
 
-EmberStatus emDsaSignAndSendMessage(uint8_t mode,
-                                    uint16_t indexOrDestination,
-                                    EmberApsFrame *apsStruct,
-                                    uint8_t radius,
-                                    EmberMessageBuffer message)
+EmberStatus sli_zigbee_dsa_sign_and_send_message(uint8_t mode,
+                                                 uint16_t indexOrDestination,
+                                                 EmberApsFrame *apsStruct,
+                                                 uint8_t radius,
+                                                 EmberMessageBuffer message)
 {
   (void)mode;
   (void)indexOrDestination;
@@ -42,6 +42,6 @@ EmberStatus emDsaSignAndSendMessage(uint8_t mode,
   return EMBER_LIBRARY_NOT_PRESENT;
 }
 
-void emDsaSign(void)
+void sli_zigbee_dsa_sign(void)
 {
 }

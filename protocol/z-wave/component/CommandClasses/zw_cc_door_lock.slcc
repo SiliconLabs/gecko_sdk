@@ -13,13 +13,15 @@ description: >
 package: Z-Wave
 quality: production
 source:
-  - path: protocol/z-wave/ZAF/CommandClasses/DoorLock/cc_door_lock_config_api.c
-  - path: protocol/z-wave/ZAF/CommandClasses/DoorLock/cc_door_lock_io_weak.c
-  - path: protocol/z-wave/ZAF/CommandClasses/DoorLock/CC_DoorLock.c
+  - path: protocol/z-wave/ZAF/CommandClasses/DoorLock/src/cc_door_lock_config_api.c
+  - path: protocol/z-wave/ZAF/CommandClasses/DoorLock/src/cc_door_lock_io_weak.c
+  - path: protocol/z-wave/ZAF/CommandClasses/DoorLock/src/CC_DoorLock.c
 include:
-  - path: protocol/z-wave/ZAF/CommandClasses/DoorLock/
+  - path: protocol/z-wave/ZAF/CommandClasses/DoorLock/inc
     file_list:
      - path: CC_DoorLock.h
+  - path: protocol/z-wave/ZAF/CommandClasses/DoorLock/src
+    file_list:
      - path: cc_door_lock_config_api.h
      - path: cc_door_lock_io.h
 provides:

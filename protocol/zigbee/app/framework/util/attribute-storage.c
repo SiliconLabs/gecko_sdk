@@ -18,21 +18,19 @@
 #include "app/framework/include/af.h"
 #include "attribute-storage.h"
 #include "common.h"
-
-#ifndef UC_BUILD
-#include "znet-bookkeeping.h"
-#endif
-
-#ifdef UC_BUILD
+#ifndef EMBER_SCRIPTED_TEST
 #include "zigbee_zcl_callback_dispatcher.h"
 #include "zigbee_af_cluster_functions.h"
+#else
+extern void sli_zigbee_af_reset_attributes(uint8_t endpointId);
+#undef FIXED_ENDPOINT_COUNT
+#define FIXED_ENDPOINT_COUNT (10)
 #endif
-
 //------------------------------------------------------------------------------
 // Globals
 // This is not declared CONST in order to handle dynamic endpoint information
 // retrieved from tokens.
-EmberAfDefinedEndpoint emAfEndpoints[MAX_ENDPOINT_COUNT];
+EmberAfDefinedEndpoint sli_zigbee_af_endpoints[MAX_ENDPOINT_COUNT];
 
 #if (ATTRIBUTE_MAX_SIZE == 0)
 #define ACTUAL_ATTRIBUTE_SIZE 1
@@ -50,19 +48,23 @@ uint8_t attributeData[ACTUAL_ATTRIBUTE_SIZE];
 #endif
 uint8_t singletonAttributeData[ACTUAL_SINGLETONS_SIZE];
 
-#ifdef UC_BUILD
 #ifdef SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
 uint8_t emberEndpointCount = 0;
 #else // !SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
+#if defined(EMBER_AF_NCP) && defined(SL_CATALOG_ZIGBEE_AF_SUPPORT_PRESENT)
+extern uint8_t emberNcpEndpointCount;
+#ifdef emberEndpointCount
+#undef emberEndpointCount
+#endif // emberEndpointCount
+#define emberEndpointCount emberNcpEndpointCount
+#else // !(defined(EMBER_AF_NCP) && defined(SL_CATALOG_ZIGBEE_AF_SUPPORT_PRESENT))
 extern uint8_t emberEndpointCount;
+#endif // defined(EMBER_AF_NCP) && defined(SL_CATALOG_ZIGBEE_AF_SUPPORT_PRESENT)
 #endif //SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
-#else // !UC_BUILD
-uint8_t emberEndpointCount = 0;
-#endif // UC_BUILD
 
 // If we have attributes that are more than 2 bytes, then
 // we need this data block for the defaults
-#if (defined(UC_BUILD) && GENERATED_DEFAULTS_COUNT > 0) || (!defined(UC_BUILD) && defined(GENERATED_DEFAULTS))
+#if (GENERATED_DEFAULTS_COUNT > 0)
 const uint8_t generatedDefaults[]               = GENERATED_DEFAULTS;
 #endif // GENERATED_DEFAULTS
 
@@ -75,19 +77,18 @@ const EmberAfAttributeMinMaxValue minMaxDefaults[]          = GENERATED_MIN_MAX_
 #endif // !GENERATED_MIN_MAX_DEFAULTS || GENERATED_MIN_MAX_DEFAULTS > 0
 #endif // GENERATED_MIN_MAX_DEFAULTS
 
-#ifdef UC_BUILD
+#ifndef EMBER_SCRIPTED_TEST
 const emberClusterFunctionStructure generatedClusterFunctions[] = GENERATED_FUNCTION_STRUCTURES_ARRAY;
 #else
-#ifdef GENERATED_FUNCTION_ARRAYS
-GENERATED_FUNCTION_ARRAYS
+//unused?
+const emberClusterFunctionStructure generatedClusterFunctions[1];
 #endif
-#endif // UC_BUILD
 
 #ifdef EMBER_AF_SUPPORT_COMMAND_DISCOVERY
-#if (defined(UC_BUILD) && EMBER_AF_GENERATED_COMMAND_COUNT > 0) || !defined(UC_BUILD)
+#if (EMBER_AF_GENERATED_COMMAND_COUNT > 0)
 const EmberAfCommandMetadata generatedCommands[] = GENERATED_COMMANDS;
 #endif // EMBER_AF_GENERATED_COMMAND_COUNT
-#if (defined(UC_BUILD) && GENERATED_COMMAND_MANUFACTURER_CODE_COUNT > 0) || !defined(UC_BUILD)
+#if (GENERATED_COMMAND_MANUFACTURER_CODE_COUNT > 0)
 const EmberAfManufacturerCodeEntry commandManufacturerCodes[] = GENERATED_COMMAND_MANUFACTURER_CODES;
 const uint16_t commandManufacturerCodeCount = GENERATED_COMMAND_MANUFACTURER_CODE_COUNT;
 #endif // GENERATED_COMMAND_MANUFACTURER_CODE_COUNT
@@ -97,22 +98,22 @@ const EmberAfAttributeMetadata generatedAttributes[] = GENERATED_ATTRIBUTES;
 const EmberAfCluster generatedClusters[]          = GENERATED_CLUSTERS;
 const EmberAfEndpointType generatedEmberAfEndpointTypes[]   = GENERATED_ENDPOINT_TYPES;
 
-#ifdef UC_BUILD
+#ifndef EMBER_SCRIPTED_TEST
 #ifdef SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
 #if (EMBER_SUPPORTED_NETWORKS == 1)
-const EmAfZigbeeProNetwork emAfZigbeeProNetworks[] =
+const sli_zigbee_af_zigbee_pro_network sli_zigbee_af_zigbee_pro_networks[] =
 { { SLI_ZIGBEE_PRIMARY_NETWORK_DEVICE_TYPE, SLI_ZIGBEE_PRIMARY_NETWORK_SECURITY_TYPE } };
 #elif (EMBER_SUPPORTED_NETWORKS == 2)
-const EmAfZigbeeProNetwork emAfZigbeeProNetworks[] =
+const sli_zigbee_af_zigbee_pro_network sli_zigbee_af_zigbee_pro_networks[] =
 { { SLI_ZIGBEE_PRIMARY_NETWORK_DEVICE_TYPE, SLI_ZIGBEE_PRIMARY_NETWORK_SECURITY_TYPE },
   { SLI_ZIGBEE_SECONDARY_NETWORK_DEVICE_TYPE, SLI_ZIGBEE_SECONDARY_NETWORK_SECURITY_TYPE } };
 #else
   #error "wrong network count"
 #endif
 #endif // SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
-#else // !UC_BUILD
-const EmAfZigbeeProNetwork emAfZigbeeProNetworks[] = EM_AF_GENERATED_ZIGBEE_PRO_NETWORKS;
-#endif // UC_BUILD
+#else
+const sli_zigbee_af_zigbee_pro_network sli_zigbee_af_zigbee_pro_networks[] = { EMBER_COORDINATOR, EMBER_AF_SECURITY_PROFILE_HA };
+#endif
 
 const EmberAfManufacturerCodeEntry clusterManufacturerCodes[] = GENERATED_CLUSTER_MANUFACTURER_CODES;
 const uint16_t clusterManufacturerCodeCount = GENERATED_CLUSTER_MANUFACTURER_CODE_COUNT;
@@ -137,6 +138,15 @@ static uint8_t clusterExtendedData[COUNTOF(generatedClusters)];
 // Added 'Macro' to silence MISRA warning about conflict with synonymous vars.
 #define endpointTypeMacro(x)     (EmberAfEndpointType*)&(generatedEmberAfEndpointTypes[fixedEmberAfEndpointTypes[x]])
 #define endpointNetworkIndex(x)  fixedNetworks[x]
+#else
+#if !defined (__ATTRIBUTE_STORAGE_TEST__)
+#define endpointNumber(index) (50 + index)
+#define endpointTypeMacro(index) ((EmberAfEndpointType*)&(generatedEmberAfEndpointTypes[0]))
+#define endpointNetworkIndex(index) (0)
+#define endpointProfileId(index) (0xABBA)
+#define endpointDeviceId(index) (0xBEEF)
+#define endpointDeviceVersion(index) (0xBA)
+#endif
 #endif
 
 //------------------------------------------------------------------------------
@@ -167,15 +177,15 @@ void emberAfEndpointConfigure(void)
   uint8_t fixedNetworks[] = FIXED_NETWORKS;
 #endif
 
-  emberEndpointCount = FIXED_ENDPOINT_COUNT;
+  emberEndpointCount = MAX_ENDPOINT_COUNT;
   for ( ep = 0; ep < emberEndpointCount; ep++ ) {
-    emAfEndpoints[ep].endpoint      = endpointNumber(ep);
-    emAfEndpoints[ep].profileId     = endpointProfileId(ep);
-    emAfEndpoints[ep].deviceId      = endpointDeviceId(ep);
-    emAfEndpoints[ep].deviceVersion = endpointDeviceVersion(ep);
-    emAfEndpoints[ep].endpointType  = endpointTypeMacro(ep);
-    emAfEndpoints[ep].networkIndex  = endpointNetworkIndex(ep);
-    emAfEndpoints[ep].bitmask = EMBER_AF_ENDPOINT_ENABLED;
+    sli_zigbee_af_endpoints[ep].endpoint      = endpointNumber(ep);
+    sli_zigbee_af_endpoints[ep].profileId     = endpointProfileId(ep);
+    sli_zigbee_af_endpoints[ep].deviceId      = endpointDeviceId(ep);
+    sli_zigbee_af_endpoints[ep].deviceVersion = endpointDeviceVersion(ep);
+    sli_zigbee_af_endpoints[ep].endpointType  = endpointTypeMacro(ep);
+    sli_zigbee_af_endpoints[ep].networkIndex  = endpointNetworkIndex(ep);
+    sli_zigbee_af_endpoints[ep].bitmask = EMBER_AF_ENDPOINT_ENABLED;
   }
 }
 
@@ -196,7 +206,7 @@ uint8_t emberAfEndpointCount(void)
 
 bool emberAfEndpointIndexIsEnabled(uint8_t index)
 {
-  return (emAfEndpoints[index].bitmask & EMBER_AF_ENDPOINT_ENABLED);
+  return (sli_zigbee_af_endpoints[index].bitmask & EMBER_AF_ENDPOINT_ENABLED);
 }
 
 // some data types (like strings) are sent OTA in human readable order
@@ -318,11 +328,11 @@ void emberAfClusterMessageSentCallback(EmberOutgoingMessageType type,
 }
 
 // This function is used to call the per-cluster attribute changed callback
-void emAfClusterAttributeChangedCallback(uint8_t endpoint,
-                                         EmberAfClusterId clusterId,
-                                         EmberAfAttributeId attributeId,
-                                         uint8_t clientServerMask,
-                                         uint16_t manufacturerCode)
+void sli_zigbee_af_cluster_attribute_changed_callback(uint8_t endpoint,
+                                                      EmberAfClusterId clusterId,
+                                                      EmberAfAttributeId attributeId,
+                                                      uint8_t clientServerMask,
+                                                      uint16_t manufacturerCode)
 {
   EmberAfCluster *cluster = emberAfFindClusterWithMfgCode(endpoint,
                                                           clusterId,
@@ -354,14 +364,14 @@ void emAfClusterAttributeChangedCallback(uint8_t endpoint,
 }
 
 // This function is used to call the per-cluster pre-attribute changed callback
-EmberAfStatus emAfClusterPreAttributeChangedCallback(uint8_t endpoint,
-                                                     EmberAfClusterId clusterId,
-                                                     EmberAfAttributeId attributeId,
-                                                     uint8_t clientServerMask,
-                                                     uint16_t manufacturerCode,
-                                                     EmberAfAttributeType attributeType,
-                                                     uint8_t size,
-                                                     uint8_t* value)
+EmberAfStatus sli_zigbee_af_cluster_pre_attribute_changed_callback(uint8_t endpoint,
+                                                                   EmberAfClusterId clusterId,
+                                                                   EmberAfAttributeId attributeId,
+                                                                   uint8_t clientServerMask,
+                                                                   uint16_t manufacturerCode,
+                                                                   EmberAfAttributeType attributeType,
+                                                                   uint8_t size,
+                                                                   uint8_t* value)
 {
   EmberAfCluster *cluster = emberAfFindClusterWithMfgCode(endpoint,
                                                           clusterId,
@@ -409,12 +419,12 @@ static void initializeEndpoint(EmberAfDefinedEndpoint* definedEndpoint)
 }
 
 // Calls the init functions.
-void emAfCallInits(void)
+void sli_zigbee_af_call_inits(void)
 {
   uint8_t index;
   for ( index = 0; index < emberAfEndpointCount(); index++ ) {
     if (emberAfEndpointIndexIsEnabled(index)) {
-      initializeEndpoint(&(emAfEndpoints[index]));
+      initializeEndpoint(&(sli_zigbee_af_endpoints[index]));
     }
   }
 }
@@ -433,11 +443,11 @@ EmberAfAttributeMetadata *emberAfLocateAttributeMetadata(uint8_t endpoint,
   record.clusterMask = mask;
   record.attributeId = attributeId;
   record.manufacturerCode = manufacturerCode;
-  emAfReadOrWriteAttribute(&record,
-                           &metadata,
-                           NULL,   // buffer
-                           0,      // buffer size
-                           false); // write?
+  sli_zigbee_af_read_or_write_attribute(&record,
+                                        &metadata,
+                                        NULL, // buffer
+                                        0, // buffer size
+                                        false); // write?
   return metadata;
 }
 
@@ -510,15 +520,15 @@ uint16_t emberAfGetMfgCode(EmberAfAttributeMetadata *metadata)
                              (metadata - generatedAttributes));
 }
 
-uint16_t emAfGetManufacturerCodeForAttribute(EmberAfCluster *cluster,
-                                             EmberAfAttributeMetadata *attMetaData)
+uint16_t sli_zigbee_af_get_manufacturer_code_for_attribute(EmberAfCluster *cluster,
+                                                           EmberAfAttributeMetadata *attMetaData)
 {
   return (emberAfClusterIsManufacturerSpecific(cluster)
-          ? emAfGetManufacturerCodeForCluster(cluster)
+          ? sli_zigbee_af_get_manufacturer_code_for_cluster(cluster)
           : emberAfGetMfgCode(attMetaData));
 }
 
-uint16_t emAfGetManufacturerCodeForCluster(EmberAfCluster *cluster)
+uint16_t sli_zigbee_af_get_manufacturer_code_for_cluster(EmberAfCluster *cluster)
 {
   return getManufacturerCode((EmberAfManufacturerCodeEntry *)clusterManufacturerCodes,
                              clusterManufacturerCodeCount,
@@ -536,13 +546,13 @@ uint16_t emAfGetManufacturerCodeForCluster(EmberAfCluster *cluster)
  *        and attRecord->clusterMask AND
  *   3. If the clusters are mf specific, their mfg codes match.
  */
-bool emAfMatchCluster(EmberAfCluster *cluster,
-                      EmberAfAttributeSearchRecord *attRecord)
+bool sli_zigbee_af_match_cluster(EmberAfCluster *cluster,
+                                 EmberAfAttributeSearchRecord *attRecord)
 {
   return (cluster->clusterId == attRecord->clusterId
           && cluster->mask & attRecord->clusterMask
           && (!emberAfClusterIsManufacturerSpecific(cluster)
-              || (emAfGetManufacturerCodeForCluster(cluster)
+              || (sli_zigbee_af_get_manufacturer_code_for_cluster(cluster)
                   == attRecord->manufacturerCode)));
 }
 
@@ -561,13 +571,13 @@ bool emAfMatchCluster(EmberAfCluster *cluster,
  *      b. both stored and saught attributes are NOT mf specific OR
  *      c. stored att IS mf specific AND mfg codes match.
  */
-bool emAfMatchAttribute(EmberAfCluster *cluster,
-                        EmberAfAttributeMetadata *am,
-                        EmberAfAttributeSearchRecord *attRecord)
+bool sli_zigbee_af_match_attribute(EmberAfCluster *cluster,
+                                   EmberAfAttributeMetadata *am,
+                                   EmberAfAttributeSearchRecord *attRecord)
 {
   return (am->attributeId == attRecord->attributeId
           && (emberAfClusterIsManufacturerSpecific(cluster)
-              || (emAfGetManufacturerCodeForAttribute(cluster, am)
+              || (sli_zigbee_af_get_manufacturer_code_for_attribute(cluster, am)
                   == attRecord->manufacturerCode)));
 }
 
@@ -584,18 +594,18 @@ bool emAfMatchAttribute(EmberAfCluster *cluster,
 // type.  For strings, the function will copy as many bytes as will fit in the
 // attribute.  This means the resulting string may be truncated.  The length
 // byte(s) in the resulting string will reflect any truncated.
-EmberAfStatus emAfReadOrWriteAttribute(EmberAfAttributeSearchRecord *attRecord,
-                                       EmberAfAttributeMetadata **metadata,
-                                       uint8_t *buffer,
-                                       uint16_t readLength,
-                                       bool write)
+EmberAfStatus sli_zigbee_af_read_or_write_attribute(EmberAfAttributeSearchRecord *attRecord,
+                                                    EmberAfAttributeMetadata **metadata,
+                                                    uint8_t *buffer,
+                                                    uint16_t readLength,
+                                                    bool write)
 {
   uint8_t i;
   uint16_t attributeOffsetIndex = 0;
 
   for (i = 0; i < emberAfEndpointCount(); i++) {
-    if (emAfEndpoints[i].endpoint == attRecord->endpoint) {
-      EmberAfEndpointType *endpointType = emAfEndpoints[i].endpointType;
+    if (sli_zigbee_af_endpoints[i].endpoint == attRecord->endpoint) {
+      EmberAfEndpointType *endpointType = sli_zigbee_af_endpoints[i].endpointType;
       uint8_t clusterIndex;
       if (!emberAfEndpointIndexIsEnabled(i)) {
         continue;
@@ -604,15 +614,15 @@ EmberAfStatus emAfReadOrWriteAttribute(EmberAfAttributeSearchRecord *attRecord,
            clusterIndex < endpointType->clusterCount;
            clusterIndex++) {
         EmberAfCluster *cluster = &(endpointType->cluster[clusterIndex]);
-        if (emAfMatchCluster(cluster, attRecord)) { // Got the cluster
+        if (sli_zigbee_af_match_cluster(cluster, attRecord)) { // Got the cluster
           uint16_t attrIndex;
           for (attrIndex = 0;
                attrIndex < cluster->attributeCount;
                attrIndex++) {
             EmberAfAttributeMetadata *am = &(cluster->attributes[attrIndex]);
-            if (emAfMatchAttribute(cluster,
-                                   am,
-                                   attRecord)) { // Got the attribute
+            if (sli_zigbee_af_match_attribute(cluster,
+                                              am,
+                                              attRecord)) { // Got the attribute
               // If passed metadata location is not null, populate
               if (metadata != NULL) {
                 *metadata = am;
@@ -628,7 +638,7 @@ EmberAfStatus emAfReadOrWriteAttribute(EmberAfAttributeSearchRecord *attRecord,
                   dst = attributeLocation;
                   if (!emberAfAttributeWriteAccessCallback(attRecord->endpoint,
                                                            attRecord->clusterId,
-                                                           emAfGetManufacturerCodeForAttribute(cluster, am),
+                                                           sli_zigbee_af_get_manufacturer_code_for_attribute(cluster, am),
                                                            am->attributeId)) {
                     return EMBER_ZCL_STATUS_NOT_AUTHORIZED;
                   }
@@ -641,7 +651,7 @@ EmberAfStatus emAfReadOrWriteAttribute(EmberAfAttributeSearchRecord *attRecord,
                   dst = buffer;
                   if (!emberAfAttributeReadAccessCallback(attRecord->endpoint,
                                                           attRecord->clusterId,
-                                                          emAfGetManufacturerCodeForAttribute(cluster, am),
+                                                          sli_zigbee_af_get_manufacturer_code_for_attribute(cluster, am),
                                                           am->attributeId)) {
                     return EMBER_ZCL_STATUS_NOT_AUTHORIZED;
                   }
@@ -652,12 +662,12 @@ EmberAfStatus emAfReadOrWriteAttribute(EmberAfAttributeSearchRecord *attRecord,
                         ? emberAfExternalAttributeWriteCallback(attRecord->endpoint,
                                                                 attRecord->clusterId,
                                                                 am,
-                                                                emAfGetManufacturerCodeForAttribute(cluster, am),
+                                                                sli_zigbee_af_get_manufacturer_code_for_attribute(cluster, am),
                                                                 buffer)
                         : emberAfExternalAttributeReadCallback(attRecord->endpoint,
                                                                attRecord->clusterId,
                                                                am,
-                                                               emAfGetManufacturerCodeForAttribute(cluster, am),
+                                                               sli_zigbee_af_get_manufacturer_code_for_attribute(cluster, am),
                                                                buffer,
                                                                emberAfAttributeSize(am))
                         : typeSensitiveMemCopy(dst,
@@ -679,7 +689,7 @@ EmberAfStatus emAfReadOrWriteAttribute(EmberAfAttributeSearchRecord *attRecord,
         }
       }
     } else { // Not the endpoint we are looking for
-      attributeOffsetIndex += emAfEndpoints[i].endpointType->endpointSize;
+      attributeOffsetIndex += sli_zigbee_af_endpoints[i].endpointType->endpointSize;
     }
   }
   return EMBER_ZCL_STATUS_UNSUPPORTED_ATTRIBUTE; // Sorry, attribute was not found.
@@ -725,7 +735,7 @@ static EmberAfCluster *findClusterInTypeWithMfgCode(EmberAfEndpointType *endpoin
             || (mask == CLUSTER_MASK_CLIENT && emberAfClusterIsClient(cluster))
             || (mask == CLUSTER_MASK_SERVER && emberAfClusterIsServer(cluster)))
         && (!emberAfClusterIsManufacturerSpecific(cluster)
-            || (emAfGetManufacturerCodeForCluster(cluster)
+            || (sli_zigbee_af_get_manufacturer_code_for_cluster(cluster)
                 == manufacturerCode)
             // For compatibility with older stack api, we ignore manufacturer code here
             // if the manufacturerCode == EMBER_AF_NULL_MANUFACTURER_CODE
@@ -775,10 +785,10 @@ uint8_t emberAfClusterIndex(uint8_t endpoint,
   uint8_t ep;
   uint8_t index = 0xFF;
   for ( ep = 0; ep < emberAfEndpointCount(); ep++ ) {
-    EmberAfEndpointType *endpointType = emAfEndpoints[ep].endpointType;
+    EmberAfEndpointType *endpointType = sli_zigbee_af_endpoints[ep].endpointType;
     if ( emberAfFindClusterInTypeWithMfgCode(endpointType, clusterId, mask, EMBER_AF_NULL_MANUFACTURER_CODE) != NULL ) {
       index++;
-      if ( emAfEndpoints[ep].endpoint == endpoint ) {
+      if ( sli_zigbee_af_endpoints[ep].endpoint == endpoint ) {
         return index;
       }
     }
@@ -835,7 +845,7 @@ EmberAfCluster *emberAfFindClusterWithMfgCode(uint8_t endpoint,
   if ((ep >= FIXED_ENDPOINT_COUNT) || ep == 0xFF ) {
     return NULL;
   } else {
-    return emberAfFindClusterInTypeWithMfgCode(emAfEndpoints[ep].endpointType, clusterId, mask, manufacturerCode);
+    return emberAfFindClusterInTypeWithMfgCode(sli_zigbee_af_endpoints[ep].endpointType, clusterId, mask, manufacturerCode);
   }
 }
 
@@ -865,7 +875,7 @@ EmberAfCluster *emberAfFindClusterIncludingDisabledEndpointsWithMfgCode(uint8_t 
 #endif //EMBER_SCRIPTED_TEST
 #endif //EMBER_AF_PLUGIN_ZCL_CLUSTER_ENABLE_DISABLE_RUN_TIME
   if (ep < MAX_ENDPOINT_COUNT) {
-    return emberAfFindClusterInTypeWithMfgCode(emAfEndpoints[ep].endpointType, clusterId, mask, manufacturerCode);
+    return emberAfFindClusterInTypeWithMfgCode(sli_zigbee_af_endpoints[ep].endpointType, clusterId, mask, manufacturerCode);
   }
 #endif // (MAX_ENDPOINT_COUNT > 0)
   return NULL;
@@ -916,10 +926,10 @@ static uint8_t findClusterEndpointIndex(uint8_t endpoint, EmberAfClusterId clust
   }
 
   for (i = 0; i < emberAfEndpointCount(); i++) {
-    if (emAfEndpoints[i].endpoint == endpoint) {
+    if (sli_zigbee_af_endpoints[i].endpoint == endpoint) {
       break;
     }
-    epi += (emberAfFindClusterIncludingDisabledEndpointsWithMfgCode(emAfEndpoints[i].endpoint, clusterId, mask, manufacturerCode) != NULL) ? 1 : 0;
+    epi += (emberAfFindClusterIncludingDisabledEndpointsWithMfgCode(sli_zigbee_af_endpoints[i].endpoint, clusterId, mask, manufacturerCode) != NULL) ? 1 : 0;
   }
 
   return epi;
@@ -951,7 +961,7 @@ static uint8_t findClusterIdxInGeneratedListByEndpoint(uint8_t endpoint, EmberAf
   uint8_t epi = emberAfIndexFromEndpoint(endpoint);
   bool clusterFound;
   if ( epi != 0xFF ) {
-    EmberAfEndpointType *endpointType = emAfEndpoints[epi].endpointType;
+    EmberAfEndpointType *endpointType = sli_zigbee_af_endpoints[epi].endpointType;
     uint8_t clusterCount = endpointType->clusterCount;
     EmberAfCluster *cluster = NULL;
     clusterFound = false;
@@ -964,7 +974,7 @@ static uint8_t findClusterIdxInGeneratedListByEndpoint(uint8_t endpoint, EmberAf
               || (mask == CLUSTER_MASK_CLIENT && emberAfClusterIsClient(cluster))
               || (mask == CLUSTER_MASK_SERVER && emberAfClusterIsServer(cluster)))
           && (!emberAfClusterIsManufacturerSpecific(cluster)
-              || (emAfGetManufacturerCodeForCluster(cluster)
+              || (sli_zigbee_af_get_manufacturer_code_for_cluster(cluster)
                   == manufacturerCode)
               // For compatibility with older stack api, we ignore manufacturer code here
               // if the manufacturerCode == EMBER_AF_NULL_MANUFACTURER_CODE
@@ -989,9 +999,9 @@ static uint8_t findIndexFromEndpoint(uint8_t endpoint, bool ignoreDisabledEndpoi
 {
   uint8_t epi;
   for (epi = 0; epi < emberAfEndpointCount(); epi++) {
-    if (emAfEndpoints[epi].endpoint == endpoint
+    if (sli_zigbee_af_endpoints[epi].endpoint == endpoint
         && (!ignoreDisabledEndpoints
-            || emAfEndpoints[epi].bitmask & EMBER_AF_ENDPOINT_ENABLED)) {
+            || sli_zigbee_af_endpoints[epi].bitmask & EMBER_AF_ENDPOINT_ENABLED)) {
       return epi;
     }
   }
@@ -1022,12 +1032,12 @@ bool emberAfEndpointEnableDisable(uint8_t endpoint, bool enable)
     return false;
   }
 
-  currentlyEnabled = emAfEndpoints[index].bitmask & EMBER_AF_ENDPOINT_ENABLED;
+  currentlyEnabled = sli_zigbee_af_endpoints[index].bitmask & EMBER_AF_ENDPOINT_ENABLED;
 
   if (enable) {
-    emAfEndpoints[index].bitmask |= EMBER_AF_ENDPOINT_ENABLED;
+    sli_zigbee_af_endpoints[index].bitmask |= EMBER_AF_ENDPOINT_ENABLED;
   } else {
-    emAfEndpoints[index].bitmask &= EMBER_AF_ENDPOINT_DISABLED;
+    sli_zigbee_af_endpoints[index].bitmask &= EMBER_AF_ENDPOINT_DISABLED;
   }
 
 #if defined(EZSP_HOST)
@@ -1039,11 +1049,11 @@ bool emberAfEndpointEnableDisable(uint8_t endpoint, bool enable)
 
   if (currentlyEnabled != enable) {
     if (enable) {
-      initializeEndpoint(&(emAfEndpoints[index]));
+      initializeEndpoint(&(sli_zigbee_af_endpoints[index]));
     } else {
       uint8_t i;
-      for (i = 0; i < emAfEndpoints[index].endpointType->clusterCount; i++) {
-        EmberAfCluster* cluster = &((emAfEndpoints[index].endpointType->cluster)[i]);
+      for (i = 0; i < sli_zigbee_af_endpoints[index].endpointType->clusterCount; i++) {
+        EmberAfCluster* cluster = &((sli_zigbee_af_endpoints[index].endpointType->cluster)[i]);
 //        emberAfCorePrintln("Disabling cluster tick for ep:%d, cluster:0x%2X, %p",
 //                           endpoint,
 //                           cluster->clusterId,
@@ -1051,19 +1061,11 @@ bool emberAfEndpointEnableDisable(uint8_t endpoint, bool enable)
 //                            ? "client"
 //                            : "server"));
 //        emberAfCoreFlush();
-#ifdef UC_BUILD
         sl_zigbee_zcl_deactivate_cluster_tick(endpoint,
                                               cluster->clusterId,
                                               (cluster->mask & CLUSTER_MASK_CLIENT
                                                ? EMBER_AF_CLIENT_CLUSTER_TICK
                                                : EMBER_AF_SERVER_CLUSTER_TICK));
-#else
-        emberAfDeactivateClusterTick(endpoint,
-                                     cluster->clusterId,
-                                     (cluster->mask & CLUSTER_MASK_CLIENT
-                                      ? EMBER_AF_CLIENT_CLUSTER_TICK
-                                      : EMBER_AF_SERVER_CLUSTER_TICK));
-#endif // UC_BUILD
       }
     }
   }
@@ -1105,19 +1107,11 @@ bool emberAfClusterEnableDisable(uint8_t endpoint,
       }
     } else {
       clusterData |= CLUSTER_MASK_DISABLED;
-#ifdef UC_BUILD
       sl_zigbee_zcl_deactivate_cluster_tick(endpoint,
                                             cluster->clusterId,
                                             (cluster->mask & CLUSTER_MASK_CLIENT
                                              ? EMBER_AF_CLIENT_CLUSTER_TICK
                                              : EMBER_AF_SERVER_CLUSTER_TICK));
-#else
-      emberAfDeactivateClusterTick(endpoint,
-                                   cluster->clusterId,
-                                   (cluster->mask & CLUSTER_MASK_CLIENT
-                                    ? EMBER_AF_CLIENT_CLUSTER_TICK
-                                    : EMBER_AF_SERVER_CLUSTER_TICK));
-#endif // UC_BUILD
     }
     clusterExtendedData[clusterIdx] = clusterData;
   }
@@ -1158,7 +1152,7 @@ uint8_t emberAfIndexFromEndpointIncludingDisabledEndpoints(uint8_t endpoint)
 
 uint8_t emberAfEndpointFromIndex(uint8_t index)
 {
-  return emAfEndpoints[index].endpoint;
+  return sli_zigbee_af_endpoints[index].endpoint;
 }
 
 // If server == true, returns the number of server clusters,
@@ -1178,7 +1172,7 @@ uint8_t emberAfClusterCount(uint8_t endpoint, bool server)
   if ( index == 0xFF || (index >= MAX_ENDPOINT_COUNT)) {
     return 0;
   }
-  de = &(emAfEndpoints[index]);
+  de = &(sli_zigbee_af_endpoints[index]);
   if ( de->endpointType == NULL) {
     return 0;
   }
@@ -1215,7 +1209,7 @@ uint8_t emberAfGetClusterCountForEndpoint(uint8_t endpoint)
   if ( index == 0xFF || (index >= MAX_ENDPOINT_COUNT)) {
     return 0;
   }
-  return emAfEndpoints[index].endpointType->clusterCount;
+  return sli_zigbee_af_endpoints[index].endpointType->clusterCount;
 }
 
 // Note the difference in implementation from emberAfGetNthCluster().
@@ -1235,7 +1229,7 @@ EmberAfCluster* emberAfGetClusterByIndex(uint8_t endpoint, uint8_t clusterIndex)
   if (endpointIndex == 0xFF || (endpointIndex >= MAX_ENDPOINT_COUNT)) {
     return NULL;
   }
-  definedEndpoint = &(emAfEndpoints[endpointIndex]);
+  definedEndpoint = &(sli_zigbee_af_endpoints[endpointIndex]);
 
   if (clusterIndex >= definedEndpoint->endpointType->clusterCount) {
     return NULL;
@@ -1249,7 +1243,7 @@ EmberAfProfileId emberAfGetProfileIdForEndpoint(uint8_t endpoint)
   if (endpointIndex == 0xFF || (endpointIndex >= MAX_ENDPOINT_COUNT)) {
     return EMBER_AF_INVALID_PROFILE_ID;
   }
-  return emAfEndpoints[endpointIndex].profileId;
+  return sli_zigbee_af_endpoints[endpointIndex].profileId;
 }
 
 uint16_t emberAfGetDeviceIdForEndpoint(uint8_t endpoint)
@@ -1258,7 +1252,7 @@ uint16_t emberAfGetDeviceIdForEndpoint(uint8_t endpoint)
   if (endpointIndex == 0xFF || (endpointIndex >= MAX_ENDPOINT_COUNT)) {
     return EMBER_AF_INVALID_PROFILE_ID;
   }
-  return emAfEndpoints[endpointIndex].deviceId;
+  return sli_zigbee_af_endpoints[endpointIndex].deviceId;
 }
 
 // Returns the cluster of Nth server or client cluster,
@@ -1279,7 +1273,7 @@ EmberAfCluster *emberAfGetNthCluster(uint8_t endpoint, uint8_t n, bool server)
   if ( index == 0xFF || (index >= MAX_ENDPOINT_COUNT)) {
     return NULL;
   }
-  de = &(emAfEndpoints[index]);
+  de = &(sli_zigbee_af_endpoints[index]);
 
   for ( i = 0; i < de->endpointType->clusterCount; i++ ) {
     cluster = &(de->endpointType->cluster[i]);
@@ -1329,16 +1323,16 @@ uint8_t emberAfGetClustersFromEndpoint(uint8_t endpoint, EmberAfClusterId *clust
 
 void emberAfInitializeAttributes(uint8_t endpoint)
 {
-  emAfLoadAttributeDefaults(endpoint, false);
+  sli_zigbee_af_load_attribute_defaults(endpoint, false);
 }
 
 void emberAfResetAttributes(uint8_t endpoint)
 {
-  emAfLoadAttributeDefaults(endpoint, true);
-  emAfResetAttributes(endpoint);
+  sli_zigbee_af_load_attribute_defaults(endpoint, true);
+  sli_zigbee_af_reset_attributes(endpoint);
 }
 
-void emAfLoadAttributeDefaults(uint8_t endpoint, bool writeTokens)
+void sli_zigbee_af_load_attribute_defaults(uint8_t endpoint, bool writeTokens)
 {
   uint8_t ep, clusterI, curNetwork = emberGetCurrentNetwork();
   uint16_t attr;
@@ -1353,7 +1347,7 @@ void emAfLoadAttributeDefaults(uint8_t endpoint, bool writeTokens)
         return;
       }
     }
-    de = &(emAfEndpoints[ep]);
+    de = &(sli_zigbee_af_endpoints[ep]);
 
     // Ensure that the endpoint is on the current network
     if (endpoint == EMBER_BROADCAST_ENDPOINT
@@ -1380,8 +1374,8 @@ void emAfLoadAttributeDefaults(uint8_t endpoint, bool writeTokens)
                                 ? CLUSTER_MASK_CLIENT
                                 : CLUSTER_MASK_SERVER);
           record.attributeId = am->attributeId;
-          record.manufacturerCode = emAfGetManufacturerCodeForAttribute(cluster,
-                                                                        am);
+          record.manufacturerCode = sli_zigbee_af_get_manufacturer_code_for_attribute(cluster,
+                                                                                      am);
           if ((am->mask & ATTRIBUTE_MASK_MIN_MAX) != 0U) {
             if ( emberAfAttributeSize(am) <= 2 ) {
               ptr = (uint8_t*)&(am->defaultValue.ptrToMinMaxValue->defaultValue.defaultValue);
@@ -1407,13 +1401,13 @@ void emAfLoadAttributeDefaults(uint8_t endpoint, bool writeTokens)
             ptr++;
           }
 #endif //BIGENDIAN_CPU
-          emAfReadOrWriteAttribute(&record,
-                                   NULL,  // metadata - unused
-                                   ptr,
-                                   0,     // buffer size - unused
-                                   true); // write?
+          sli_zigbee_af_read_or_write_attribute(&record,
+                                                NULL, // metadata - unused
+                                                ptr,
+                                                0, // buffer size - unused
+                                                true); // write?
           if (writeTokens) {
-            emAfSaveAttributeToToken(ptr, de->endpoint, record.clusterId, am);
+            sli_zigbee_af_save_attribute_to_token(ptr, de->endpoint, record.clusterId, am);
           }
         }
       }
@@ -1424,11 +1418,11 @@ void emAfLoadAttributeDefaults(uint8_t endpoint, bool writeTokens)
   }
 
   if (!writeTokens) {
-    emAfLoadAttributesFromTokens(endpoint);
+    sli_zigbee_af_load_attributes_from_tokens(endpoint);
   }
 }
 
-void emAfLoadAttributesFromTokens(uint8_t endpoint)
+void sli_zigbee_af_load_attributes_from_tokens(uint8_t endpoint)
 {
   // On EZSP host we currently do not support this. We need to come up with some
   // callbacks.
@@ -1442,10 +1436,10 @@ void emAfLoadAttributesFromTokens(uint8_t endpoint)
 // 'data' argument may be null, since we changed the ptrToDefaultValue
 // to be null instead of pointing to all zeroes.
 // This function has to be able to deal with that.
-void emAfSaveAttributeToToken(uint8_t *data,
-                              uint8_t endpoint,
-                              EmberAfClusterId clusterId,
-                              EmberAfAttributeMetadata *metadata)
+void sli_zigbee_af_save_attribute_to_token(uint8_t *data,
+                                           uint8_t endpoint,
+                                           EmberAfClusterId clusterId,
+                                           EmberAfAttributeMetadata *metadata)
 {
   // Get out of here if this attribute doesn't have a token.
   if ( !emberAfAttributeIsTokenized(metadata)) {
@@ -1469,8 +1463,8 @@ void emAfSaveAttributeToToken(uint8_t *data,
 EmberAfGenericClusterFunction
 emberAfFindClusterFunction(EmberAfCluster *cluster,
                            EmberAfClusterMask functionMask)
-#ifdef UC_BUILD
 {
+  #ifndef EMBER_SCRIPTED_TEST
   const emberClusterFunctionStructure *funcStruct = &generatedClusterFunctions[0];
 
   for (int i = 0; i < (int)(sizeof(generatedClusterFunctions) / sizeof(emberClusterFunctionStructure)); i++) {
@@ -1483,31 +1477,29 @@ emberAfFindClusterFunction(EmberAfCluster *cluster,
   }
 
   return NULL;
-}
-#else // UC_BUILD
-{
+  #else
+  //For unit tests where generatedClusterFunctions is not populated
   EmberAfClusterMask mask = 0x01;
   uint8_t functionIndex = 0;
-
-  if ( (cluster->mask & functionMask) == 0 ) {
+  if ((cluster->mask & functionMask) == 0) {
     return NULL;
   }
 
-  while ( mask < functionMask ) {
-    if ( (cluster->mask & mask) != 0 ) {
+  while (mask < functionMask) {
+    if ((cluster->mask & mask) != 0) {
       functionIndex++;
     }
     mask <<= 1;
   }
   return cluster->functions[functionIndex];
+  #endif
 }
-#endif // UC_BUILD
 
 #ifdef EMBER_AF_SUPPORT_COMMAND_DISCOVERY
 
-uint16_t emAfGetManufacturerCodeForCommand(EmberAfCommandMetadata *command)
+uint16_t sli_zigbee_af_get_manufacturer_code_for_command(EmberAfCommandMetadata *command)
 {
-#if (defined(UC_BUILD) && GENERATED_COMMAND_MANUFACTURER_CODE_COUNT > 0) || !defined(UC_BUILD)
+#if (GENERATED_COMMAND_MANUFACTURER_CODE_COUNT > 0)
   return getManufacturerCode((EmberAfManufacturerCodeEntry *)commandManufacturerCodes,
                              commandManufacturerCodeCount,
                              (command - generatedCommands));
@@ -1522,13 +1514,13 @@ uint16_t emAfGetManufacturerCodeForCommand(EmberAfCommandMetadata *command)
 // through all commands to choose the smallest mfg code if the command is
 // overloaded by more than one mfg-specific implementation of that command ID.
 // If no valid mfg code is resolved, return 0xFFFF.
-uint16_t emAfResolveMfgCodeForDiscoverCommand(bool outgoing,
-                                              EmberAfClusterCommand *cmd,
-                                              uint16_t clusterId,
-                                              uint8_t startId)
+uint16_t sli_zigbee_af_resolve_mfg_code_for_discover_command(bool outgoing,
+                                                             EmberAfClusterCommand *cmd,
+                                                             uint16_t clusterId,
+                                                             uint8_t startId)
 {
   uint16_t commandMfgCode = 0xFFFF;
-#if (defined(UC_BUILD) && EMBER_AF_GENERATED_COMMAND_COUNT > 0) || !defined(UC_BUILD)
+#if (EMBER_AF_GENERATED_COMMAND_COUNT > 0)
   bool foundFirst = false;
   uint8_t foundCmdId = 0;
   uint8_t cmdDirMask = 0;
@@ -1573,7 +1565,7 @@ uint16_t emAfResolveMfgCodeForDiscoverCommand(bool outgoing,
     // else, this cmdId equals prior, prefer this cmd's lower mfg-code.
     if ( generatedCommands[i].mask & COMMAND_MASK_MANUFACTURER_SPECIFIC ) {
       uint16_t candidateMfgCode
-        = emAfGetManufacturerCodeForCommand( (EmberAfCommandMetadata*) &(generatedCommands[i]));
+        = sli_zigbee_af_get_manufacturer_code_for_command( (EmberAfCommandMetadata*) &(generatedCommands[i]));
       if (!foundFirst
           || generatedCommands[i].commandId < foundCmdId
           || candidateMfgCode < commandMfgCode) {
@@ -1605,7 +1597,7 @@ bool emberAfExtractCommandIds(bool outgoing,
                               uint8_t maxIdCount)
 {
   bool returnValue = true;
-#if (defined(UC_BUILD) && EMBER_AF_GENERATED_COMMAND_COUNT > 0) || !defined(UC_BUILD)
+#if (EMBER_AF_GENERATED_COMMAND_COUNT > 0)
   uint16_t i, count = 0;
   uint8_t cmdDirMask = 0;
   // determine the appropriate mask to match the request
@@ -1643,7 +1635,7 @@ bool emberAfExtractCommandIds(bool outgoing,
       if ( !cmd->mfgSpecific ) {
         continue;                        // ignore if asking for not mfg specific
       }
-      if ( cmd->mfgCode != emAfGetManufacturerCodeForCommand( (EmberAfCommandMetadata*) &(generatedCommands[i]))) {
+      if ( cmd->mfgCode != sli_zigbee_af_get_manufacturer_code_for_command( (EmberAfCommandMetadata*) &(generatedCommands[i]))) {
         continue;                        // Ignore if mfg code doesn't match the commands
       }
     } else {

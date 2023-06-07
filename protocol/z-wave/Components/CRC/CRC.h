@@ -37,7 +37,7 @@
  */
 uint16_t CRC_CheckCrc16(
   uint16_t crc,
-  uint8_t *pDataAddr,
+  const uint8_t *pDataAddr,
   uint16_t bDataLen
 );
 

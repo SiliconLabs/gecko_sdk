@@ -8,13 +8,12 @@ description: >
 package: Z-Wave
 quality: production
 source:
-  - path: protocol/z-wave/ZAF/CommandClasses/WakeUp/CC_WakeUp.c
-  - path: protocol/z-wave/ZAF/CommandClasses/WakeUp/cc_wake_up_config_api.c
+  - path: protocol/z-wave/ZAF/CommandClasses/WakeUp/src/CC_WakeUp.c
+  - path: protocol/z-wave/ZAF/CommandClasses/WakeUp/src/cc_wake_up_config_api.c
 include:
-  - path: protocol/z-wave/ZAF/CommandClasses/WakeUp/
+  - path: protocol/z-wave/ZAF/CommandClasses/WakeUp/inc
     file_list:
      - path: CC_WakeUp.h
-     - path: cc_wake_up_config_api.h
 config_file:
   - path: protocol/z-wave/platform/SiliconLabs/PAL/config/cc_wake_up/cc_wake_up_config.h
     file_id: cc_wake_up_config

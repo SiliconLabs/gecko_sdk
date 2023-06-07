@@ -40,8 +40,8 @@
 #include "app/framework/util/util.h"
 #include <stdlib.h>
 
-void emAfDeviceTableSave(void);
-void emAfDeviceTableLoad(void);
+void sli_zigbee_af_device_table_save(void);
+void sli_zigbee_af_device_table_load(void);
 
 // Framework message send global data
 extern uint8_t appZclBuffer[];
@@ -49,16 +49,18 @@ extern uint16_t appZclBufferLen;
 extern bool zclCmdIsBuilt;
 extern EmberApsFrame globalApsFrame;
 
-extern void emAfApsFrameEndpointSetup(uint8_t srcEndpoint,
-                                      uint8_t dstEndpoint);
+extern void sli_zigbee_af_aps_frame_endpoint_setup(uint8_t srcEndpoint,
+                                                   uint8_t dstEndpoint);
+extern void emberAfPluginDeviceTableInitialized(void);
 
+extern void emberAfPluginDeviceTableIndexRemovedCallback(uint16_t index);
 static EmberAfPluginDeviceTableEntry deviceTable[EMBER_AF_PLUGIN_DEVICE_TABLE_DEVICE_TABLE_SIZE];
 
 EmberStatus emberAfGetChildData(uint8_t index,
                                 EmberChildData *childData);
 
 // Device discovery global declarations
-void emAfDeviceTableInitiateRouteRepair(EmberNodeId nodeId);
+void sli_zigbee_af_device_table_initiate_route_repair(EmberNodeId nodeId);
 static void clearDeviceTableIndex(uint16_t index);
 
 EmberAfPluginDeviceTableEntry* emberAfDeviceTablePointer(void)
@@ -73,7 +75,7 @@ uint16_t emberAfDeviceTableGetNodeIdFromIndex(uint16_t index)
   return deviceTable[index].nodeId;
 }
 
-uint8_t emAfDeviceTableGetFirstEndpointFromIndex(uint16_t index)
+uint8_t sli_zigbee_af_device_table_get_first_endpoint_from_index(uint16_t index)
 {
   assert(index < EMBER_AF_PLUGIN_DEVICE_TABLE_DEVICE_TABLE_SIZE);
   return deviceTable[index].endpoint;
@@ -92,9 +94,9 @@ static void matchReverseEui64(EmberEUI64 eui64a, EmberEUI64 eui64b)
   emberAfCorePrintln("MATCH_EUI:  EUI matches backwards");
 
   emberAfCorePrint("A:");
-  emAfDeviceTablePrintEUI64(eui64a);
+  sli_zigbee_af_device_table_print_eui64(eui64a);
   emberAfCorePrint(" B:");
-  emAfDeviceTablePrintEUI64(eui64b);
+  sli_zigbee_af_device_table_print_eui64(eui64b);
   emberAfCorePrintln("");
 }
 
@@ -154,7 +156,7 @@ static void clearDeviceTableIndex(uint16_t index)
   deviceTable[index].clusterOutStartPosition = 0;
 }
 
-void emAfPluginDeviceTableDeleteEntry(uint16_t index)
+void sli_zigbee_af_device_table_delete_entry(uint16_t index)
 {
   uint16_t currentIndex;
 
@@ -163,14 +165,14 @@ void emAfPluginDeviceTableDeleteEntry(uint16_t index)
 
     // Need to compute the next index before deleting the current one.  Or else
     // the call to next endpoint will yield a bogus result.
-    index = emAfDeviceTableFindNextEndpoint(index);
+    index = sli_zigbee_af_device_table_find_next_endpoint(index);
 
     clearDeviceTableIndex(currentIndex);
     emberAfPluginDeviceTableIndexRemovedCallback(currentIndex);
   }
 }
 
-void emAfDeviceTableInit(void)
+void sli_zigbee_af_device_table_init(void)
 {
   uint16_t i;
   for (i = 0; i < EMBER_AF_PLUGIN_DEVICE_TABLE_DEVICE_TABLE_SIZE; i++) {
@@ -180,8 +182,8 @@ void emAfDeviceTableInit(void)
 
 void emberAfDeviceTableClear(void)
 {
-  emAfDeviceTableInit();
-  emAfDeviceTableSave();
+  sli_zigbee_af_device_table_init();
+  sli_zigbee_af_device_table_save();
   emberAfPluginDeviceTableClearedCallback();
 }
 
@@ -232,7 +234,7 @@ uint16_t emberAfDeviceTableGetIndexFromNodeId(EmberNodeId emberNodeId)
   return EMBER_AF_PLUGIN_DEVICE_TABLE_NULL_INDEX;
 }
 
-uint16_t emAfDeviceTableFindFreeDeviceTableIndex(void)
+uint16_t sli_zigbee_af_device_table_find_free_device_table_index(void)
 {
   uint16_t i;
   for (i = 0; i < EMBER_AF_PLUGIN_DEVICE_TABLE_DEVICE_TABLE_SIZE; i++) {
@@ -256,7 +258,7 @@ uint16_t emberAfDeviceTableGetEndpointFromNodeIdAndEndpoint(EmberNodeId emberNod
   return EMBER_AF_PLUGIN_DEVICE_TABLE_NULL_INDEX;
 }
 
-void emAfDeviceTableCopyDeviceTableEntry(uint16_t fromIndex, uint16_t toIndex)
+void sli_zigbee_af_device_table_copy_device_table_entry(uint16_t fromIndex, uint16_t toIndex)
 {
   EmberAfPluginDeviceTableEntry* from = &(deviceTable[fromIndex]);
   EmberAfPluginDeviceTableEntry* to = &(deviceTable[toIndex]);
@@ -274,7 +276,7 @@ void emAfDeviceTableCopyDeviceTableEntry(uint16_t fromIndex, uint16_t toIndex)
   MEMCOPY(to, from, sizeof(EmberAfPluginDeviceTableEntry));
 }
 
-uint8_t emAfDeviceTableNumberOfEndpointsFromIndex(uint16_t index)
+uint8_t sli_zigbee_af_device_table_number_of_endpoints_from_index(uint16_t index)
 {
   uint8_t count = 0;
   uint16_t currentNodeId = emberAfDeviceTableGetNodeIdFromIndex(index);
@@ -310,44 +312,44 @@ static uint16_t findIndexFromEui64AndIndex(EmberEUI64 eui64, uint16_t index)
   return EMBER_AF_PLUGIN_DEVICE_TABLE_NULL_INDEX;
 }
 
-uint16_t emAfDeviceTableFindFirstEndpointNodeId(uint16_t nodeId)
+uint16_t sli_zigbee_af_device_table_find_first_endpoint_node_id(uint16_t nodeId)
 {
   return findIndexFromNodeIdAndIndex(nodeId, 0);
 }
 
-uint16_t emAfDeviceTableFindNextEndpoint(uint16_t index)
+uint16_t sli_zigbee_af_device_table_find_next_endpoint(uint16_t index)
 {
   return findIndexFromEui64AndIndex(deviceTable[index].eui64,
                                     index + 1);
 }
 
-uint16_t emAfDeviceTableFindFirstEndpointIeee(EmberEUI64 eui64)
+uint16_t sli_zigbee_af_device_table_find_first_endpoint_ieee(EmberEUI64 eui64)
 {
   return findIndexFromEui64AndIndex(eui64, 0);
 }
 
 uint16_t emberAfDeviceTableGetFirstIndexFromEui64(EmberEUI64 eui64)
 {
-  return emAfDeviceTableFindFirstEndpointIeee(eui64);
+  return sli_zigbee_af_device_table_find_first_endpoint_ieee(eui64);
 }
 
-EmberAfStatus emAfDeviceTableAddNewEndpoint(uint16_t index, uint8_t newEndpoint)
+EmberAfStatus sli_zigbee_af_device_table_add_new_endpoint(uint16_t index, uint8_t newEndpoint)
 {
-  uint16_t newIndex = emAfDeviceTableFindFreeDeviceTableIndex();
+  uint16_t newIndex = sli_zigbee_af_device_table_find_free_device_table_index();
 
   if (newIndex == EMBER_AF_PLUGIN_DEVICE_TABLE_NULL_INDEX) {
     return EMBER_ZCL_STATUS_FAILURE;
   }
 
-  emAfDeviceTableCopyDeviceTableEntry(index, newIndex);
+  sli_zigbee_af_device_table_copy_device_table_entry(index, newIndex);
 
   deviceTable[newIndex].endpoint = newEndpoint;
 
   return EMBER_ZCL_STATUS_SUCCESS;
 }
 
-uint16_t emAfDeviceTableFindIndexNodeIdEndpoint(uint16_t nodeId,
-                                                uint8_t endpoint)
+uint16_t sli_zigbee_af_device_table_find_index_node_id_endpoint(uint16_t nodeId,
+                                                                uint8_t endpoint)
 {
   uint16_t i;
   for (i = 0; i < EMBER_AF_PLUGIN_DEVICE_TABLE_DEVICE_TABLE_SIZE; i++) {
@@ -366,23 +368,23 @@ EmberAfPluginDeviceTableEntry *emberAfDeviceTableFindDeviceTableEntry(uint16_t i
   return &(deviceTable[index]);
 }
 
-void emAfDeviceTableUpdateNodeId(uint16_t currentNodeId, uint16_t newNodeId)
+void sli_zigbee_af_device_table_update_node_id(uint16_t currentNodeId, uint16_t newNodeId)
 {
-  uint16_t index = emAfDeviceTableFindFirstEndpointNodeId(currentNodeId);
+  uint16_t index = sli_zigbee_af_device_table_find_first_endpoint_node_id(currentNodeId);
 
   while (index != EMBER_AF_PLUGIN_DEVICE_TABLE_NULL_INDEX) {
     deviceTable[index].nodeId = newNodeId;
 
-    index = emAfDeviceTableFindNextEndpoint(index);
+    index = sli_zigbee_af_device_table_find_next_endpoint(index);
   }
 }
 
-void emAfDeviceTableUpdateDeviceState(uint16_t index, uint8_t newState)
+void sli_zigbee_af_device_table_update_device_state(uint16_t index, uint8_t newState)
 {
   while (index != EMBER_AF_PLUGIN_DEVICE_TABLE_NULL_INDEX) {
     deviceTable[index].state = newState;
 
-    index = emAfDeviceTableFindNextEndpoint(index);
+    index = sli_zigbee_af_device_table_find_next_endpoint(index);
   }
 }
 
@@ -396,29 +398,25 @@ uint32_t emberAfDeviceTableTimeSinceLastMessage(uint16_t index)
   return timeSinceLastMessage;
 }
 
-#ifdef UC_BUILD
 extern sl_zigbee_event_t emberAfPluginDeviceTableNewDeviceEvent;
-extern void emberAfPluginDeviceTableNewDeviceEventHandler(SLXU_UC_EVENT);
-#endif
+extern void emberAfPluginDeviceTableNewDeviceEventHandler(sl_zigbee_event_t * event);
 
 // AF Framework callbacks.  This is where the plugin implements the callbacks.
-
-#ifdef UC_BUILD
 
 void emberAfPluginDeviceTableInitCallback(uint8_t init_level)
 {
   switch (init_level) {
     case SL_ZIGBEE_INIT_LEVEL_EVENT:
     {
-      slxu_zigbee_event_init(&emberAfPluginDeviceTableNewDeviceEvent,
-                             emberAfPluginDeviceTableNewDeviceEventHandler);
+      sl_zigbee_event_init(&emberAfPluginDeviceTableNewDeviceEvent,
+                           emberAfPluginDeviceTableNewDeviceEventHandler);
       break;
     }
 
     case SL_ZIGBEE_INIT_LEVEL_LOCAL_DATA:
     {
-      emAfDeviceTableInit();
-      emAfDeviceTableLoad();
+      sli_zigbee_af_device_table_init();
+      sli_zigbee_af_device_table_load();
       break;
     }
 
@@ -429,23 +427,6 @@ void emberAfPluginDeviceTableInitCallback(uint8_t init_level)
     }
   }
 }
-
-#else // !UC_BUILD
-
-void emberAfPluginDeviceTableInitCallback(void)
-{
-  emAfDeviceTableInit();
-
-  // Load on Init
-  emAfDeviceTableLoad();
-
-  emberAfPluginDeviceTableInitialized();
-
-  slxu_zigbee_event_init(&emberAfPluginDeviceTableNewDeviceEvent,
-                         emberAfPluginDeviceTableNewDeviceEventHandler);
-}
-
-#endif // UC_BUILD
 
 void emberAfPluginDeviceTableStackStatusCallback(EmberStatus status)
 {
@@ -464,7 +445,7 @@ void emberAfPluginDeviceTableStackStatusCallback(EmberStatus status)
 
 // --------------------------------
 // Save/Load the devices
-void emAfDeviceTableSave(void)
+void sli_zigbee_af_device_table_save(void)
 {
 #if defined(EZSP_HOST) && !defined(EMBER_TEST)
   FILE *fp;
@@ -501,7 +482,7 @@ void emAfDeviceTableSave(void)
 #endif // defined(EZSP_HOST) && !defined(EMBER_TEST)
 }
 
-void emAfDeviceTableLoad(void)
+void sli_zigbee_af_device_table_load(void)
 {
 #if defined(EZSP_HOST) && !defined(EMBER_TEST)
   uint16_t i;
@@ -555,7 +536,7 @@ void emAfDeviceTableLoad(void)
 // --------------------------------
 // Message send section
 // Command to send the CIE IEEE address to the IAS Zone cluster
-void emAfDeviceTableSendCieAddressWrite(EmberNodeId nodeId, uint8_t endpoint)
+void sli_zigbee_af_device_table_send_cie_address_write(EmberNodeId nodeId, uint8_t endpoint)
 {
   EmberEUI64 eui64;
   uint8_t outgoingBuffer[15];
@@ -592,7 +573,7 @@ void emberAfDeviceTableCliIndexSendWithEndpoint(uint16_t index,
   EmberNodeId nodeId;
 
   nodeId = emberAfDeviceTableGetNodeIdFromIndex(index);
-  emAfApsFrameEndpointSetup(emberAfPrimaryEndpoint(), endpoint);
+  sli_zigbee_af_aps_frame_endpoint_setup(emberAfPrimaryEndpoint(), endpoint);
   (void)emberAfSendUnicast(EMBER_OUTGOING_DIRECT,
                            nodeId,
                            &globalApsFrame,
@@ -604,7 +585,7 @@ void emberAfDeviceTableCliIndexSendWithEndpoint(uint16_t index,
 
 void emberAfDeviceTableCliIndexSend(uint16_t index)
 {
-  uint8_t endpoint = emAfDeviceTableGetFirstEndpointFromIndex(index);
+  uint8_t endpoint = sli_zigbee_af_device_table_get_first_endpoint_from_index(index);
   emberAfDeviceTableCliIndexSendWithEndpoint(index, endpoint);
 }
 
@@ -625,12 +606,12 @@ void emberAfDeviceTableCommandIndexSendWithEndpoint(uint16_t index,
   nodeId = emberAfDeviceTableGetNodeIdFromIndex(index);
 
   if (emberAfCurrentCommand() == NULL) {
-    emAfCommandApsFrame->sourceEndpoint = emberAfPrimaryEndpoint();
+    sli_zigbee_af_command_aps_frame->sourceEndpoint = emberAfPrimaryEndpoint();
   } else {
-    emAfCommandApsFrame->sourceEndpoint = emberAfCurrentEndpoint();
+    sli_zigbee_af_command_aps_frame->sourceEndpoint = emberAfCurrentEndpoint();
   }
 
-  emAfCommandApsFrame->destinationEndpoint = endpoint;
+  sli_zigbee_af_command_aps_frame->destinationEndpoint = endpoint;
   emberAfCorePrintln("device table send with ep: 0x%2X, %d",
                      nodeId,
                      endpoint);
@@ -641,7 +622,7 @@ void emberAfDeviceTableCommandIndexSendWithEndpoint(uint16_t index,
 
 void emberAfDeviceTableCommandIndexSend(uint16_t index)
 {
-  uint8_t endpoint = emAfDeviceTableGetFirstEndpointFromIndex(index);
+  uint8_t endpoint = sli_zigbee_af_device_table_get_first_endpoint_from_index(index);
   emberAfDeviceTableCommandIndexSendWithEndpoint(index, endpoint);
 }
 

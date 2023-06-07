@@ -24,18 +24,18 @@
 
 // plugin test-harness z3 read <cluster:2> <attribute:2> <dstShort:2>
 // <srcEndpoint:1> <dstEndpoint:1> <profileId:2>
-void emAfPluginTestHarnessZ3ZclReadCommand(SL_CLI_COMMAND_ARG)
+void sli_zigbee_af_test_harness_z3_zcl_read_command(SL_CLI_COMMAND_ARG)
 {
   EmberStatus status = EMBER_INVALID_CALL;
 
 #ifndef EZSP_HOST
 
-  uint16_t clusterId      = (uint16_t)emberUnsignedCommandArgument(0);
-  uint16_t attributeId    = (uint16_t)emberUnsignedCommandArgument(1);
-  EmberNodeId destination = (EmberNodeId)emberUnsignedCommandArgument(2);
-  uint8_t srcEndpoint     = (uint8_t)emberUnsignedCommandArgument(3);
-  uint8_t dstEndpoint     = (uint8_t)emberUnsignedCommandArgument(4);
-  uint16_t profileId      = (uint16_t)emberUnsignedCommandArgument(5);
+  uint16_t clusterId      = sl_cli_get_argument_uint16(arguments, 0);
+  uint16_t attributeId    = sl_cli_get_argument_uint16(arguments, 1);
+  EmberNodeId destination = sl_cli_get_argument_uint16(arguments, 2);
+  uint8_t srcEndpoint     = sl_cli_get_argument_uint8(arguments, 3);
+  uint8_t dstEndpoint     = sl_cli_get_argument_uint8(arguments, 4);
+  uint16_t profileId      = sl_cli_get_argument_uint16(arguments, 5);
   uint8_t frame[5];
   EmberMessageBuffer message;
   EmberApsFrame apsFrame;

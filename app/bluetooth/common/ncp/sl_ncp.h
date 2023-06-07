@@ -31,6 +31,11 @@
 #ifndef SL_NCP_H
 #define SL_NCP_H
 
+/***********************************************************************************************//**
+ * @addtogroup ncp
+ * @{
+ **************************************************************************************************/
+
 #include <stdbool.h>
 #include <stdint.h>
 #include "sl_status.h"
@@ -105,4 +110,5 @@ void sl_ncp_os_task_init(void);
  *****************************************************************************/
 void sl_ncp_os_task_proceed(void);
 
+/** @} (end addtogroup ncp) */
 #endif // SL_NCP_H

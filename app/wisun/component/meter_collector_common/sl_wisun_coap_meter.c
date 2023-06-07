@@ -37,6 +37,7 @@
 #include "sl_wisun_coap_meter.h"
 #include "sl_component_catalog.h"
 #include "sl_string.h"
+#include "sl_wisun_app_core.h"
 
 #if defined(SL_CATALOG_TEMP_SENSOR_PRESENT)
   #include "sl_wisun_rht_measurement.h"
@@ -47,10 +48,13 @@
 // -----------------------------------------------------------------------------
 
 /// JSON formated measurement data maximum size
-#define JSON_MEASUREMENT_DATA_SIZE                (100U)
+#define JSON_MEASUREMENT_DATA_SIZE                (150U)
 
 /// Measurement plain text buffer size
 #define RHT_AND_LIGHT_MEAS_PLAIN_TXT_DATA_SIZE    (32U)
+
+/// Token maximum length for scheduling
+#define MAX_TOKEN_LENGTH                          (16U)
 
 /// Measurement type enumeration
 typedef enum measurement_type {
@@ -72,9 +76,12 @@ typedef enum measurement_type {
  * @brief Create formated json string from measurement packet
  * @details Use snprintf to static buffer
  * @param[in] packet packet
+ * @param[in] schedule schedule
+ * @param[in] ip_str_global node global ipv6 address
  * @return const char* pointer to the static buff
  *****************************************************************************/
-static const char *_meter_packet2json(const sl_wisun_meter_packet_t *packet);
+static const char *_meter_packet2json(const sl_wisun_meter_packet_t *packet, uint32_t schedule,
+                                      const char* ip_str_global);
 
 /**************************************************************************//**
  * @brief Prepare measurement by measurement type
@@ -116,21 +123,19 @@ static void _prepare_measurement_resp(const sl_wisun_coap_packet_t * const req_p
                                       sl_wisun_coap_packet_t * const resp_packet,
                                       measurement_type_t measurement)
 {
+  static current_addr_t addresses    = { 0U };
+  const char *ip_str_global          = NULL;
   sl_wisun_meter_packet_t packet     = { 0U }; // static packet
   char *content                      = NULL;   // Json content
-  sl_wisun_coap_packet_t *tmp        = NULL;
   size_t max_content_size            = 0;
   sn_coap_content_format_e ct_format = COAP_CT_JSON;
+  uint32_t schedule                  = SL_WISUN_METER_DEFAULT_PERIOD_MS;
+#if defined(SL_CATALOG_WISUN_LFN_DEVICE_SUPPORT_PRESENT)
+  const sl_wisun_lfn_params_t *lfn_param = NULL;
+#endif
 
   // Init packet
-  tmp = sl_wisun_coap_build_response(req_packet, COAP_MSG_CODE_RESPONSE_BAD_REQUEST);
-  if (tmp == NULL) {
-    printf("[Failure: build response]\n");
-    return;
-  }
-  memcpy(resp_packet, tmp, sizeof(sl_wisun_coap_packet_t));
-  sl_wisun_coap_destroy_packet(tmp);
-
+  memcpy(resp_packet, req_packet, sizeof(sl_wisun_coap_packet_t));
   if (req_packet->msg_code != COAP_MSG_CODE_REQUEST_GET) {
     printf("[Not valid measurement request]\n");
     return;
@@ -139,6 +144,10 @@ static void _prepare_measurement_resp(const sl_wisun_coap_packet_t * const req_p
   if (measurement == COAP_METER_MEASUREMENT_ALL) {
     ct_format = COAP_CT_JSON;
     max_content_size = JSON_MEASUREMENT_DATA_SIZE;
+
+    // getting IP address
+    app_wisun_get_current_addresses(&addresses);
+    ip_str_global = app_wisun_trace_util_get_ip_str(&addresses.global);
   } else {
     ct_format = COAP_CT_TEXT_PLAIN;
     max_content_size = RHT_AND_LIGHT_MEAS_PLAIN_TXT_DATA_SIZE;
@@ -146,13 +155,20 @@ static void _prepare_measurement_resp(const sl_wisun_coap_packet_t * const req_p
     content = sl_wisun_coap_malloc(RHT_AND_LIGHT_MEAS_PLAIN_TXT_DATA_SIZE);
   }
 
+#if defined(SL_CATALOG_WISUN_LFN_DEVICE_SUPPORT_PRESENT)
+  lfn_param = app_wisun_get_lfn_params();
+  if (lfn_param != NULL) {
+    schedule = lfn_param->data_layer.unicast_interval_ms;
+  }
+#endif
+
   // Measure all parameters
   if (measurement == COAP_METER_MEASUREMENT_ALL) {
     sl_wisun_meter_gen_packet_id(&packet);
     sl_wisun_meter_get_temperature(&packet);
     sl_wisun_meter_get_humidity(&packet);
     sl_wisun_meter_get_light(&packet);
-    content = (char *)_meter_packet2json(&packet);
+    content = (char *)_meter_packet2json(&packet, schedule, ip_str_global);
 
     // Temperature measurement
   } else if (measurement == COAP_METER_MEASUREMENT_TEMPERATURE) {
@@ -180,6 +196,7 @@ static void _prepare_measurement_resp(const sl_wisun_coap_packet_t * const req_p
 
   resp_packet->msg_code         = COAP_MSG_CODE_RESPONSE_CONTENT;
   resp_packet->content_format   = ct_format;
+
   resp_packet->payload_ptr      = (uint8_t *) content;
   resp_packet->payload_len      = (uint16_t) sl_strnlen(content, max_content_size);
 }
@@ -248,11 +265,13 @@ sl_wisun_led_id_t sl_wisun_coap_meter_convert_led_id(const uint8_t led_id)
 //                          Static Function Definitions
 // -----------------------------------------------------------------------------
 
-static const char *_meter_packet2json(const sl_wisun_meter_packet_t *packet)
+static const char *_meter_packet2json(const sl_wisun_meter_packet_t *packet, uint32_t schedule, const char* ip_str_global)
 {
   static char buff[JSON_MEASUREMENT_DATA_SIZE] = { 0 };
   snprintf(buff, JSON_MEASUREMENT_DATA_SIZE,
-           "  {\n    \"id\": %u,\n    \"temp\": %lu.%lu,\n    \"hum\": %lu.%lu,\n    \"lx\": %u\n  }\n",
+           "{\"%s - %ld\" : {\n    \"id\": %u,\n    \"temp\": %lu.%lu,\n    \"hum\": %lu.%lu,\n    \"lx\": %u\n  }\n}",
+           ip_str_global,
+           schedule,
            packet->id,
            packet->temperature / 1000,
            (packet->temperature % 1000) / 10,

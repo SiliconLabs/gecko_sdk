@@ -38,7 +38,7 @@
 #include "sl_sleeptimer.h"
 #include "throughput_peripheral_config.h"
 #include "throughput_peripheral.h"
-#include "sl_simple_timer.h"
+#include "app_timer.h"
 #include "throughput_ui.h"
 #include "sl_component_catalog.h"
 #ifdef SL_CATALOG_CLI_PRESENT
@@ -99,7 +99,7 @@ const uint8_t peripheral_transmission_characteristic_uuid[] = { 0x18, 0x77, 0xc6
 static throughput_t peripheral_state;
 
 /// Connection handle
-static uint8_t connection = 0;
+static uint8_t connection_handle_peripheral = SL_BT_INVALID_CONNECTION_HANDLE;
 
 /// Indication state for result
 static throughput_notification_t result_indicated = sl_bt_gatt_disable;
@@ -108,7 +108,7 @@ static throughput_notification_t result_indicated = sl_bt_gatt_disable;
 static throughput_notification_t transmission_indicated = sl_bt_gatt_disable;
 
 /// Advertising set handle
-static uint8_t advertising_set_handle  = 0xff;
+static uint8_t advertising_set_handle  = SL_BT_INVALID_ADVERTISING_SET_HANDLE;
 
 #ifdef SL_CATALOG_BLUETOOTH_FEATURE_EXTENDED_ADVERTISER_PRESENT
 /// Advertising set handle on coded PHY
@@ -137,13 +137,13 @@ static uint8_t notification_data[THROUGHPUT_TX_DATA_SIZE] = { 0 };
 static uint8_t indication_data[THROUGHPUT_TX_DATA_SIZE] = { 0 };
 
 /// RSSI refresh timer
-static sl_simple_timer_t refresh_timer;
+static app_timer_t refresh_timer;
 
 /// Send timer
-static sl_simple_timer_t send_timer;
+static app_timer_t send_timer;
 
 /// Indication timer
-static sl_simple_timer_t indication_timer;
+static app_timer_t indication_timer;
 
 /// Time storage variable
 static throughput_count_t time_start = 0;
@@ -225,11 +225,12 @@ static void throughput_peripheral_generate_notifications_data(void);
 static void throughput_peripheral_calculate_data_size(void);
 static void throughput_peripheral_advertising_start(void);
 static void throughput_peripheral_refresh_connected_state(void);
-static void throughput_peripheral_on_refresh_timer_rise(sl_simple_timer_t *timer,
+static void throughput_peripheral_reset(void);
+static void throughput_peripheral_on_refresh_timer_rise(app_timer_t *timer,
                                                         void *data);
-static void throughput_peripheral_on_send_timer_rise(sl_simple_timer_t *timer,
+static void throughput_peripheral_on_send_timer_rise(app_timer_t *timer,
                                                      void *data);
-static void throughput_peripheral_on_indication_timer_rise(sl_simple_timer_t *timer,
+static void throughput_peripheral_on_indication_timer_rise(app_timer_t *timer,
                                                            void *data);
 static void handle_throughput_peripheral_stop(bool send_transmission_on);
 static void handle_throughput_peripheral_start(bool send_transmission_on);
@@ -503,14 +504,14 @@ static void throughput_peripheral_refresh_connected_state(void)
 /**************************************************************************//**
  * Refresh RSSI timer callback.
  *****************************************************************************/
-static void throughput_peripheral_on_refresh_timer_rise(sl_simple_timer_t *timer,
+static void throughput_peripheral_on_refresh_timer_rise(app_timer_t *timer,
                                                         void *data)
 {
   (void) data;
   (void) timer;
   sl_status_t sc;
-  if (connection && peripheral_state.state != THROUGHPUT_STATE_TEST) {
-    sc = sl_bt_connection_get_rssi(connection);
+  if (connection_handle_peripheral && peripheral_state.state != THROUGHPUT_STATE_TEST) {
+    sc = sl_bt_connection_get_rssi(connection_handle_peripheral);
     app_assert_status(sc);
   }
 }
@@ -518,7 +519,7 @@ static void throughput_peripheral_on_refresh_timer_rise(sl_simple_timer_t *timer
 /**************************************************************************//**
  * Send timer callback.
  *****************************************************************************/
-static void throughput_peripheral_on_send_timer_rise(sl_simple_timer_t *timer,
+static void throughput_peripheral_on_send_timer_rise(app_timer_t *timer,
                                                      void *data)
 {
   (void) data;
@@ -529,7 +530,7 @@ static void throughput_peripheral_on_send_timer_rise(sl_simple_timer_t *timer,
 /**************************************************************************//**
  * Indication timer callback.
  *****************************************************************************/
-static void throughput_peripheral_on_indication_timer_rise(sl_simple_timer_t *timer,
+static void throughput_peripheral_on_indication_timer_rise(app_timer_t *timer,
                                                            void *data)
 {
   (void) data;
@@ -552,7 +553,7 @@ static void handle_throughput_peripheral_stop(bool send_transmission_on)
     peripheral_state.test_type = sl_bt_gatt_disable;
 
     // stop timer
-    sl_simple_timer_stop(&indication_timer);
+    app_timer_stop(&indication_timer);
 
     send_transmission_state = send_transmission_on;
 
@@ -566,7 +567,7 @@ static void handle_throughput_peripheral_stop(bool send_transmission_on)
   }
   if (send_transmission_on && !notification_sent) {
     // Send out notification
-    sc = sl_bt_gatt_server_send_notification(connection,
+    sc = sl_bt_gatt_server_send_notification(connection_handle_peripheral,
                                              gattdb_transmission_on,
                                              1,
                                              &TRANSMISSION_OFF);
@@ -592,17 +593,17 @@ static void handle_throughput_peripheral_stop(bool send_transmission_on)
       indication_confirmed = false;
       indication_timer_rised = false;
 
-      sc = sl_bt_gatt_server_send_indication(connection,
+      sc = sl_bt_gatt_server_send_indication(connection_handle_peripheral,
                                              gattdb_throughput_result,
                                              sizeof(peripheral_state.throughput),
                                              (uint8_t *) &(peripheral_state.throughput));
       if (sc == SL_STATUS_OK) {
         indication_sent = true;
-        sc = sl_simple_timer_start(&indication_timer,
-                                   THROUGHPUT_TX_INDICATION_TIMEOUT,
-                                   throughput_peripheral_on_indication_timer_rise,
-                                   NULL,
-                                   false);
+        sc = app_timer_start(&indication_timer,
+                             THROUGHPUT_TX_INDICATION_TIMEOUT,
+                             throughput_peripheral_on_indication_timer_rise,
+                             NULL,
+                             false);
         app_assert_status(sc);
       }
     } else {
@@ -621,11 +622,11 @@ static void handle_throughput_peripheral_stop(bool send_transmission_on)
         indication_timer_rised = false;
 
         // Start refresh timer
-        sl_simple_timer_start(&refresh_timer,
-                              THROUGHPUT_TX_REFRESH_TIMER_PERIOD,
-                              throughput_peripheral_on_refresh_timer_rise,
-                              NULL,
-                              true);
+        app_timer_start(&refresh_timer,
+                        THROUGHPUT_TX_REFRESH_TIMER_PERIOD,
+                        throughput_peripheral_on_refresh_timer_rise,
+                        NULL,
+                        true);
 
         // Indicate the state change
         if (central_test) {
@@ -671,9 +672,9 @@ static void handle_throughput_peripheral_start(bool send_transmission_on)
   send_timer_rised = false;
 
   // Stop timers
-  sl_simple_timer_stop(&indication_timer);
-  sl_simple_timer_stop(&send_timer);
-  sl_simple_timer_stop(&refresh_timer);
+  app_timer_stop(&indication_timer);
+  app_timer_stop(&send_timer);
+  app_timer_stop(&refresh_timer);
 
   // Generate data to send
   if (peripheral_state.test_type & sl_bt_gatt_notification) {
@@ -683,7 +684,7 @@ static void handle_throughput_peripheral_start(bool send_transmission_on)
     throughput_peripheral_generate_indications_data();
   }
   if (send_transmission_on) {
-    sc = sl_bt_gatt_server_send_notification(connection,
+    sc = sl_bt_gatt_server_send_notification(connection_handle_peripheral,
                                              gattdb_transmission_on,
                                              1,
                                              &TRANSMISSION_ON);
@@ -691,11 +692,11 @@ static void handle_throughput_peripheral_start(bool send_transmission_on)
   }
 
   if (peripheral_state.mode == THROUGHPUT_MODE_FIXED_TIME) {
-    sc = sl_simple_timer_start(&send_timer,
-                               fixed_time,
-                               throughput_peripheral_on_send_timer_rise,
-                               NULL,
-                               false);
+    sc = app_timer_start(&send_timer,
+                         fixed_time,
+                         throughput_peripheral_on_send_timer_rise,
+                         NULL,
+                         false);
     app_assert_status(sc);
   }
   if (!deep_sleep_enabled) {
@@ -724,7 +725,7 @@ static void throughput_peripheral_send_notification(void)
       send_timer_rised = false;
       handle_throughput_peripheral_stop(true);
     } else {
-      sc = sl_bt_gatt_server_send_notification(connection,
+      sc = sl_bt_gatt_server_send_notification(connection_handle_peripheral,
                                                gattdb_throughput_notifications,
                                                notification_data_size,
                                                notification_data);
@@ -762,7 +763,7 @@ static void throughput_peripheral_send_indication(void)
       bytes_sent += (indication_data_size);
       operation_count++;
 
-      sl_simple_timer_stop(&indication_timer);
+      app_timer_stop(&indication_timer);
 
       indication_sent = false;
       indication_confirmed = false;
@@ -788,19 +789,19 @@ static void throughput_peripheral_send_indication(void)
 
       indication_confirmed = false;
 
-      sl_simple_timer_stop(&indication_timer);
+      app_timer_stop(&indication_timer);
 
-      sc = sl_bt_gatt_server_send_indication(connection,
+      sc = sl_bt_gatt_server_send_indication(connection_handle_peripheral,
                                              gattdb_throughput_indications,
                                              indication_data_size,
                                              indication_data);
       (void) sc;
       indication_sent = true;
-      sc = sl_simple_timer_start(&indication_timer,
-                                 THROUGHPUT_TX_INDICATION_TIMEOUT,
-                                 throughput_peripheral_on_indication_timer_rise,
-                                 NULL,
-                                 false);
+      sc = app_timer_start(&indication_timer,
+                           THROUGHPUT_TX_INDICATION_TIMEOUT,
+                           throughput_peripheral_on_indication_timer_rise,
+                           NULL,
+                           false);
       app_assert_status(sc);
     }
   }
@@ -813,6 +814,97 @@ static void throughput_peripheral_send_indication(void)
 /**************************************************************************//**
  * Enables the transmission.
  *****************************************************************************/
+static void process_procedure_complete_event(sl_bt_msg_t *evt)
+{
+  uint16_t procedure_result =  evt->data.evt_gatt_procedure_completed.result;
+  sl_status_t sc;
+
+  switch (action) {
+    case act_discover_service:
+      action = act_none;
+      app_assert_status(procedure_result);
+      if (!procedure_result) {
+        // Discover successful, start characteristic discovery.
+        sc = sl_bt_gatt_discover_characteristics(connection_handle_peripheral, service_handle);
+        app_assert_status(sc);
+        action = act_discover_characteristics;
+      }
+      break;
+    case act_discover_characteristics:
+      action = act_none;
+      app_assert_status(procedure_result);
+      if (!procedure_result) {
+        if (characteristic_found.all == THROUGHPUT_PERIPHERAL_CHARACTERISTICS_ALL) {
+          sc = sl_bt_gatt_set_characteristic_notification(connection_handle_peripheral, notifications_handle, sl_bt_gatt_notification);
+          app_assert_status(sc);
+          action = act_enable_notification;
+        }
+      }
+      break;
+    case act_enable_notification:
+      action = act_none;
+      app_assert_status(procedure_result);
+      if (!procedure_result) {
+        sl_bt_gatt_set_characteristic_notification(connection_handle_peripheral, indications_handle, sl_bt_gatt_indication);
+        action = act_enable_indication;
+      }
+      break;
+    case act_enable_indication:
+      action = act_enable_indication;
+      app_assert_status(procedure_result);
+      if (!procedure_result) {
+        sc = sl_bt_gatt_set_characteristic_notification(connection_handle_peripheral, transmission_handle, sl_bt_gatt_notification);
+        app_assert_status(sc);
+        // Clear the display
+        throughput_ui_set_throughput(0);
+        throughput_ui_set_count(0);
+        throughput_ui_update();
+        action = act_none;
+      }
+      break;
+    case act_none:
+      break;
+    default:
+      break;
+  }
+}
+
+static void check_characteristic_uuid(sl_bt_msg_t *evt)
+{
+  if (evt->data.evt_gatt_characteristic.uuid.len == UUID_LEN) {
+    if (memcmp(peripheral_notifications_characteristic_uuid, evt->data.evt_gatt_characteristic.uuid.data, UUID_LEN) == 0) {
+      notifications_handle = evt->data.evt_gatt_characteristic.characteristic;
+      characteristic_found.characteristic.notification = true;
+    } else if (memcmp(peripheral_indications_characteristic_uuid, evt->data.evt_gatt_characteristic.uuid.data, UUID_LEN) == 0) {
+      indications_handle = evt->data.evt_gatt_characteristic.characteristic;
+      characteristic_found.characteristic.indication = true;
+    } else if (memcmp(peripheral_transmission_characteristic_uuid, evt->data.evt_gatt_characteristic.uuid.data, UUID_LEN) == 0) {
+      transmission_handle = evt->data.evt_gatt_characteristic.characteristic;
+      characteristic_found.characteristic.transmission_on = true;
+    }
+  }
+}
+
+/**************************************************************************//**
+ * Reset peripheral configuration
+ *****************************************************************************/
+static void throughput_peripheral_reset(void)
+{
+  // Delete the connection, reset variables and start advertising
+  connection_handle_peripheral = SL_BT_INVALID_CONNECTION_HANDLE;
+
+  app_timer_stop(&refresh_timer);
+  app_timer_stop(&send_timer);
+
+  peripheral_state.notifications = sl_bt_gatt_disable;
+  peripheral_state.indications = sl_bt_gatt_disable;
+  result_indicated = sl_bt_gatt_disable;
+  transmission_indicated = sl_bt_gatt_disable;
+}
+
+/*******************************************************************************
+ **************************   GLOBAL FUNCTIONS   *******************************
+ ******************************************************************************/
 void throughput_peripheral_enable(void)
 {
   sl_status_t sc;
@@ -867,6 +959,38 @@ void throughput_peripheral_enable(void)
 
   throughput_ui_set_all(peripheral_state);
   central_test = false;
+}
+
+/**************************************************************************//**
+ * Disables the transmission.
+ *****************************************************************************/
+sl_status_t throughput_peripheral_disable(void)
+{
+  sl_status_t sc = SL_STATUS_OK;
+
+  if (peripheral_state.state == THROUGHPUT_STATE_TEST) {
+    return SL_STATUS_INVALID_STATE;
+  }
+
+  if (advertising_set_handle != SL_BT_INVALID_CONNECTION_HANDLE) {
+    sc = sl_bt_advertiser_stop(advertising_set_handle);
+  }
+
+  if (sc != SL_STATUS_OK) {
+    return sc;
+  }
+
+  if (peripheral_state.state != THROUGHPUT_STATE_DISCONNECTED) {
+    sc = sl_bt_connection_close(connection_handle_peripheral);
+    peripheral_state.state = THROUGHPUT_STATE_UNINITALIZING;
+  } else {
+    peripheral_state.state = THROUGHPUT_STATE_UNINITALIZED;
+    enabled = false;
+    throughput_peripheral_reset();
+  }
+
+  throughput_peripheral_on_state_change(peripheral_state.state);
+  return sc;
 }
 
 /**************************************************************************//**
@@ -942,7 +1066,7 @@ void throughput_peripheral_on_bt_event(sl_bt_msg_t *evt)
             response = true;
           }
         }
-        sl_bt_gatt_server_send_user_write_response(connection,
+        sl_bt_gatt_server_send_user_write_response(connection_handle_peripheral,
                                                    gattdb_transmission_on,
                                                    response);
       }
@@ -1066,23 +1190,26 @@ void throughput_peripheral_on_bt_event(sl_bt_msg_t *evt)
       break;
 
     case sl_bt_evt_connection_closed_id:
-      connection = 0;
-      // Delete the connection, reset variables and start advertising
-      peripheral_state.state = THROUGHPUT_STATE_DISCONNECTED;
-      sl_simple_timer_stop(&refresh_timer);
-      sl_simple_timer_stop(&send_timer);
-      peripheral_state.notifications = sl_bt_gatt_disable;
-      peripheral_state.indications = sl_bt_gatt_disable;
-      result_indicated = sl_bt_gatt_disable;
-      transmission_indicated = sl_bt_gatt_disable;
+      if (peripheral_state.state == THROUGHPUT_STATE_UNINITALIZING) {
+        enabled = false;
+        // Delete the connection, reset variables
+        throughput_peripheral_reset();
+
+        peripheral_state.state = THROUGHPUT_STATE_UNINITALIZED;
+      } else {
+        peripheral_state.state = THROUGHPUT_STATE_DISCONNECTED;
+        // Delete the connection, reset variables and start advertising
+        throughput_peripheral_reset();
+        throughput_peripheral_advertising_start();
+      }
+
       throughput_peripheral_on_state_change(peripheral_state.state);
-      throughput_peripheral_advertising_start();
       break;
 
     case sl_bt_evt_connection_opened_id:
       if (peripheral_state.state == THROUGHPUT_STATE_DISCONNECTED) {
         // Store the connection and disable advertising
-        connection = evt->data.evt_connection_opened.connection;
+        connection_handle_peripheral = evt->data.evt_connection_opened.connection;
         sc = sl_bt_advertiser_stop(advertising_set_handle);
         app_assert_status(sc);
 
@@ -1093,19 +1220,19 @@ void throughput_peripheral_on_bt_event(sl_bt_msg_t *evt)
 
         peripheral_state.state = THROUGHPUT_STATE_CONNECTED;
         throughput_peripheral_refresh_connected_state();
-        sl_simple_timer_start(&refresh_timer,
-                              THROUGHPUT_TX_REFRESH_TIMER_PERIOD,
-                              throughput_peripheral_on_refresh_timer_rise,
-                              NULL,
-                              true);
+        app_timer_start(&refresh_timer,
+                        THROUGHPUT_TX_REFRESH_TIMER_PERIOD,
+                        throughput_peripheral_on_refresh_timer_rise,
+                        NULL,
+                        true);
 
         // Set remote connection power reporting - needed for Power Control
-        sc = sl_bt_connection_set_remote_power_reporting(connection,
+        sc = sl_bt_connection_set_remote_power_reporting(connection_handle_peripheral,
                                                          power_control_enabled);
         app_assert_status(sc);
 
         // Subscribe to service provided by the mobile app
-        sc = sl_bt_gatt_discover_primary_services_by_uuid(connection,
+        sc = sl_bt_gatt_discover_primary_services_by_uuid(connection_handle_peripheral,
                                                           UUID_LEN,
                                                           peripheral_service_uuid);
         app_assert_status(sc);
@@ -1191,78 +1318,7 @@ void throughput_peripheral_on_bt_event(sl_bt_msg_t *evt)
 
 // Helper function to make the discovery and subscribing flow correct.
 // Action enum values indicate which procedure was completed.
-static void process_procedure_complete_event(sl_bt_msg_t *evt)
-{
-  uint16_t procedure_result =  evt->data.evt_gatt_procedure_completed.result;
-  sl_status_t sc;
-
-  switch (action) {
-    case act_discover_service:
-      action = act_none;
-      app_assert_status(procedure_result);
-      if (!procedure_result) {
-        // Discover successful, start characteristic discovery.
-        sc = sl_bt_gatt_discover_characteristics(connection, service_handle);
-        app_assert_status(sc);
-        action = act_discover_characteristics;
-      }
-      break;
-    case act_discover_characteristics:
-      action = act_none;
-      app_assert_status(procedure_result);
-      if (!procedure_result) {
-        if (characteristic_found.all == THROUGHPUT_PERIPHERAL_CHARACTERISTICS_ALL) {
-          sc = sl_bt_gatt_set_characteristic_notification(connection, notifications_handle, sl_bt_gatt_notification);
-          app_assert_status(sc);
-          action = act_enable_notification;
-        }
-      }
-      break;
-    case act_enable_notification:
-      action = act_none;
-      app_assert_status(procedure_result);
-      if (!procedure_result) {
-        sl_bt_gatt_set_characteristic_notification(connection, indications_handle, sl_bt_gatt_indication);
-        action = act_enable_indication;
-      }
-      break;
-    case act_enable_indication:
-      action = act_enable_indication;
-      app_assert_status(procedure_result);
-      if (!procedure_result) {
-        sc = sl_bt_gatt_set_characteristic_notification(connection, transmission_handle, sl_bt_gatt_notification);
-        app_assert_status(sc);
-        // Clear the display
-        throughput_ui_set_throughput(0);
-        throughput_ui_set_count(0);
-        throughput_ui_update();
-        action = act_none;
-      }
-      break;
-    case act_none:
-      break;
-    default:
-      break;
-  }
-}
-
 // Check if found characteristic matches the UUIDs that we are searching for.
-static void check_characteristic_uuid(sl_bt_msg_t *evt)
-{
-  if (evt->data.evt_gatt_characteristic.uuid.len == UUID_LEN) {
-    if (memcmp(peripheral_notifications_characteristic_uuid, evt->data.evt_gatt_characteristic.uuid.data, UUID_LEN) == 0) {
-      notifications_handle = evt->data.evt_gatt_characteristic.characteristic;
-      characteristic_found.characteristic.notification = true;
-    } else if (memcmp(peripheral_indications_characteristic_uuid, evt->data.evt_gatt_characteristic.uuid.data, UUID_LEN) == 0) {
-      indications_handle = evt->data.evt_gatt_characteristic.characteristic;
-      characteristic_found.characteristic.indication = true;
-    } else if (memcmp(peripheral_transmission_characteristic_uuid, evt->data.evt_gatt_characteristic.uuid.data, UUID_LEN) == 0) {
-      transmission_handle = evt->data.evt_gatt_characteristic.characteristic;
-      characteristic_found.characteristic.transmission_on = true;
-    }
-  }
-}
-
 /**************************************************************************//**
  * Sets the the transmission power.
  *****************************************************************************/
@@ -1284,7 +1340,7 @@ sl_status_t throughput_peripheral_set_tx_power(throughput_tx_power_t tx_power,
     // Reconnect if required
     if (peripheral_state.state != THROUGHPUT_STATE_DISCONNECTED) {
       // Close connection and apply power
-      res = sl_bt_connection_close(connection);
+      res = sl_bt_connection_close(connection_handle_peripheral);
     } else {
       // Restart advertising and apply power
       throughput_peripheral_advertising_start();
@@ -1317,7 +1373,7 @@ sl_status_t throughput_peripheral_set_data_size(uint8_t mtu,
                                                           peripheral_state.data_size);
       // Reconnect if required
       if (peripheral_state.state != THROUGHPUT_STATE_DISCONNECTED) {
-        sl_bt_connection_close(connection);
+        sl_bt_connection_close(connection_handle_peripheral);
       }
     }
   } else {

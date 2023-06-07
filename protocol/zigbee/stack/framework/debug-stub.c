@@ -21,7 +21,7 @@
 //------------------------------------------------------------------------------
 #ifndef DEBUG_STRIPPED // TODO: EMZIGBEE-6992 for cleanup
 
-void emDebugReceiveTick(void)
+void sli_zigbee_debug_receive_tick(void)
 {
 }
 
@@ -42,23 +42,23 @@ void emberDebugMemoryDump(uint8_t *start, uint8_t *end)
   (void)end;
 }
 
-void emDebugBinaryFormat(uint16_t debugType, const char * formatString, ...)
+void sli_zigbee_debug_binary_format(uint16_t debugType, const char * formatString, ...)
 {
   (void)debugType;
   (void)formatString;
 }
 
-void emDebugSendVuartMessage(uint8_t *buff, uint8_t len)
+void sli_util_debug_send_vuart_message(uint8_t *buff, uint8_t len)
 {
   (void)buff;
   (void)len;
 }
 
-void emDebugResetInfo(void)
+void sli_zigbee_debug_reset_info(void)
 {
 }
 
-void emDebugProcessIncoming(uint16_t debugType, uint8_t *data, uint8_t length)
+void sli_zigbee_debug_process_incoming(uint16_t debugType, uint8_t *data, uint8_t length)
 {
   (void)debugType;
   (void)data;

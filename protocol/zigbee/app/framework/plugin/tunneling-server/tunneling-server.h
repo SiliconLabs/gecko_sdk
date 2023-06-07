@@ -15,9 +15,7 @@
  *
  ******************************************************************************/
 
-#ifdef UC_BUILD
 #include "tunneling-server-config.h"
-#endif // UC_BUILD
 
 /**
  * @defgroup tunneling-server Tunneling Server
@@ -191,4 +189,4 @@ void emberAfPluginTunnelingServerTunnelClosedCallback(uint16_t tunnelIndex,
 /** @} */ // end of name Callbacks
 /** @} */ // end of tunneling-server
 
-void emAfPluginTunnelingServerPrint(void);
+void sli_zigbee_af_tunneling_server_print(void);

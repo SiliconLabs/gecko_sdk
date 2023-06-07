@@ -73,7 +73,7 @@ static inline int psa_key_id_is_volatile( psa_key_id_t key_id )
  * \param[out] p_slot   On success, `*p_slot` contains a pointer to the
  *                      key slot containing the description of the key
  *                      identified by \p key.
- *
+ * \param[in] intent    Reason for locking the key.
  * \retval #PSA_SUCCESS
  *         \p *p_slot contains a pointer to the key slot containing the
  *         description of the key identified by \p key.
@@ -93,7 +93,8 @@ static inline int psa_key_id_is_volatile( psa_key_id_t key_id )
  * \retval #PSA_ERROR_DATA_CORRUPT
  */
 psa_status_t psa_get_and_lock_key_slot( mbedtls_svc_key_id_t key,
-                                        psa_key_slot_t **p_slot );
+                                        psa_key_slot_t **p_slot,
+                                        psa_slot_locking_intent_t intent );
 
 /** Initialize the key slot structures.
  *
@@ -114,6 +115,9 @@ void psa_wipe_all_key_slots( void );
  * the responsibility of the caller to unlock the key slot when it does not
  * access it anymore.
  *
+ * Please note that, if MBEDTLS_THREADING_C is enabled, this function should
+ * be called with locked mbedtls_psa_slots_mutex.
+ *
  * \param[out] volatile_key_id   On success, volatile key identifier
  *                               associated to the returned slot.
  * \param[out] p_slot            On success, a pointer to the slot.
@@ -125,31 +129,13 @@ void psa_wipe_all_key_slots( void );
 psa_status_t psa_get_empty_key_slot( psa_key_id_t *volatile_key_id,
                                      psa_key_slot_t **p_slot );
 
-/** Lock a key slot.
- *
- * This function increments the key slot lock counter by one.
- *
- * \param[in] slot  The key slot.
- *
- * \retval #PSA_SUCCESS
-               The key slot lock counter was incremented.
- * \retval #PSA_ERROR_CORRUPTION_DETECTED
- *             The lock counter already reached its maximum value and was not
- *             increased.
- */
-static inline psa_status_t psa_lock_key_slot( psa_key_slot_t *slot )
-{
-    if( slot->lock_count >= SIZE_MAX )
-        return( PSA_ERROR_CORRUPTION_DETECTED );
-
-    slot->lock_count++;
-
-    return( PSA_SUCCESS );
-}
-
-/** Unlock a key slot.
+/** Unlock a key slot and, if possible, perform any delayed destruction
+ *  or purging.
  *
  * This function decrements the key slot lock counter by one.
+ * If there was a key destruction or purging requested while the key was
+ * still in use, and this caller is the last user of it, the delayed
+ * operation will be applied.
  *
  * \note To ease the handling of errors in retrieving a key slot
  *       a NULL input pointer is valid, and the function returns
@@ -161,7 +147,8 @@ static inline psa_status_t psa_lock_key_slot( psa_key_slot_t *slot )
  *             decremented successfully.
  * \retval #PSA_ERROR_CORRUPTION_DETECTED
  *             The lock counter was equal to 0.
- *
+ * \retval #PSA_ERROR_BAD_STATE
+ *             This slot is not in a state that enables any active reader.
  */
 psa_status_t psa_unlock_key_slot( psa_key_slot_t *slot );
 

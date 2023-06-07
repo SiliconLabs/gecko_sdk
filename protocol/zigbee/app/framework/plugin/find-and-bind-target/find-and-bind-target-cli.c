@@ -21,7 +21,6 @@
 
 // -----------------------------------------------------------------------------
 // CLI Command Definitions
-#ifdef UC_BUILD
 
 #include "sl_cli.h"
 
@@ -31,14 +30,3 @@ void emberAfPluginFindAndBindTargetStartCommand(sl_cli_command_arg_t *arguments)
 
   emberAfPluginFindAndBindTargetStart(endpoint);
 }
-
-#else // !UC_BUILD
-
-void emberAfPluginFindAndBindTargetStartCommand(void)
-{
-  uint8_t endpoint = (uint8_t)emberUnsignedCommandArgument(0);
-
-  emberAfPluginFindAndBindTargetStart(endpoint);
-}
-
-#endif // UC_BUILD

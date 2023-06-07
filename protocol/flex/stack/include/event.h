@@ -214,14 +214,14 @@
  * @param[in] control Control of the event to set active.
  */
 #define emberEventControlSetActive(control) \
-  do { emEventControlSetActive(&(control)); } while (0)
+  do { sli_event_control_set_active(&(control)); } while (0)
 
 /**
  * @copybrief emberEventControlSetActive
  * @param[in] event Pointer to the control of the event to set active
  * @warning Applications should use @ref emberEventControlSetActive() instead.
  */
-void emEventControlSetActive(EmberEventControl *event);
+void sli_event_control_set_active(EmberEventControl *event);
 
 /**
  * @brief The maximum delay that may be passed to

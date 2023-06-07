@@ -59,6 +59,12 @@
 #elif defined(EFR32MG24A010F1536IM48)
 #include "efr32mg24a010f1536im48.h"
 
+#elif defined(EFR32MG24A010F768IM40)
+#include "efr32mg24a010f768im40.h"
+
+#elif defined(EFR32MG24A010F768IM48)
+#include "efr32mg24a010f768im48.h"
+
 #elif defined(EFR32MG24A020F1024IM40)
 #include "efr32mg24a020f1024im40.h"
 
@@ -76,6 +82,9 @@
 
 #elif defined(EFR32MG24A020F1536IM48)
 #include "efr32mg24a020f1536im48.h"
+
+#elif defined(EFR32MG24A020F768IM40)
+#include "efr32mg24a020f768im40.h"
 
 #elif defined(EFR32MG24A021F1024IM40)
 #include "efr32mg24a021f1024im40.h"
@@ -139,6 +148,9 @@
 
 #elif defined(EFR32MG24B120F1536IM48)
 #include "efr32mg24b120f1536im48.h"
+
+#elif defined(EFR32MG24B210F1536IM40)
+#include "efr32mg24b210f1536im40.h"
 
 #elif defined(EFR32MG24B210F1536IM48)
 #include "efr32mg24b210f1536im48.h"

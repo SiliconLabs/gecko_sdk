@@ -83,4 +83,6 @@ class RM_Peripheral_SYNTH_S(Base_RM_Peripheral):
         self.zz_rdict['SEQIF'] = self.SEQIF
         self.SEQIEN = RM_Register_SYNTH_S_SEQIEN(self.zz_rmio, self.zz_label)
         self.zz_rdict['SEQIEN'] = self.SEQIEN
+        self.FREQ1 = RM_Register_SYNTH_S_FREQ1(self.zz_rmio, self.zz_label)
+        self.zz_rdict['FREQ1'] = self.FREQ1
         self.__dict__['zz_frozen'] = True

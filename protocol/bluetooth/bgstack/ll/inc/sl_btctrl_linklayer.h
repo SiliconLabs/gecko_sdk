@@ -95,17 +95,50 @@ void sl_btctrl_init_periodic_adv();
 void sl_btctrl_init_periodic_scan();
 
 /**
- * @brief Enable and initialize support for the PAWR advertiser.
- * @param[in] num_adv Number of advertising sets supporting PAWR.
- *       If set to zero, previously allocated PAWR sets are only freed.
- * @return SL_STATUS_OK, or an appropriate error code.
+ * Configuration for Periodic Advertising with Responses.
  */
-sl_status_t sl_btctrl_pawr_advertiser_configure(uint8_t max_pawr_sets);
+struct sl_btctrl_pawr_advertiser_config {
+  /**
+   * Number of advertising sets supporting PAwR.
+   * If set to zero, previously allocated PAwR sets are only freed. */
+  uint8_t max_pawr_sets;
+  /**
+   * Hint to the controller what will be the maximum advertised data length.
+   * The value does not prevent using longer advertising data. Value zero means
+   * that maximum data length can expected to be up to the length of Periodic
+   * Advertising Delay. */
+  uint8_t max_advertised_data_length_hint;
+  /**
+   * The number of subevent advertising packets requested from the host
+   * at once. */
+  uint8_t subevent_data_request_count;
+  /**
+   * How many subevents before airing a subevent its data is requested from
+   * the host. */
+  uint8_t subevent_data_request_advance;
+};
 
 /**
- * @brief Enable and initialize support for PAWR sync/receiver.
+ * Configuration of synchronizer for Periodic Advertising with Responses.
+ */
+struct sl_btctrl_pawr_synchronizer_config {
+  /**
+   * Number of advertising sets supporting PArR.
+   * If set to zero, previously allocated PArR sets are only freed. */
+  uint8_t max_pawr_sets;
+};
+
+/**
+ * @brief Enable and initialize support for the PAwR advertiser.
+ * @param[in] pawr_adv_config PAwR advertiser configuration.
  * @return SL_STATUS_OK, or an appropriate error code. */
-sl_status_t sl_btctrl_pawr_synchronizer_configure(void);
+sl_status_t sl_btctrl_pawr_advertiser_configure(struct sl_btctrl_pawr_advertiser_config *pawr_adv_config);
+
+/**
+ * @brief Enable and initialize support for PAwR sync/receiver.
+ * @param[in] pawr_sync_config PAwR synchronizer configuration.
+ * @return SL_STATUS_OK, or an appropriate error code. */
+sl_status_t sl_btctrl_pawr_synchronizer_configure(struct sl_btctrl_pawr_synchronizer_config *pawr_sync_config);
 
 /**
  * @brief Allocate memory for synchronized scanners
@@ -127,6 +160,18 @@ sl_status_t sl_btctrl_alloc_periodic_adv(uint8_t num_adv);
  * This function should be called before link layer initialization.
  */
 void sl_btctrl_enable_even_connsch();
+
+/**
+ * Call to enable the PAwR aware connection scheduling algorithm.
+ * This function should be called before link layer initialization.
+ */
+void sl_btctrl_enable_pawr_connsch();
+
+/**
+ * Call to enable the legacy connection scheduling algorithm.
+ * This function should be called before link layer initialization.
+ */
+void sl_btctrl_enable_legacy_connsch();
 
 /**
  * Call to initialize multiprotocol
@@ -159,6 +204,12 @@ sl_status_t sl_btctrl_init_cte_transmitter();
 sl_status_t sl_btctrl_init_cte();
 
 /**
+ * Initialize Accurate Bluetooth Ranging initiator and reflector
+ */
+sl_status_t sl_btctrl_init_cs_initiator();
+sl_status_t sl_btctrl_init_cs_reflector();
+
+/**
  * Check if event bitmap indicates pending events
  * @return bool pending events
  */
@@ -184,6 +235,10 @@ void sl_btctrl_init_conn(void);
 void sl_btctrl_init_phy(void);
 
 void sl_btctrl_init_adv_ext(void);
+
+void sl_btctrl_init_privacy(void);
+
+sl_status_t sl_btctrl_allocate_resolving_list_memory(uint8_t resolvingListSize);
 
 /**
  * @brief Initialize extended scanner state

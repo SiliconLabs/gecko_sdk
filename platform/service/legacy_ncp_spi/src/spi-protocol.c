@@ -517,6 +517,7 @@ static void nSSEL_ISR(uint8_t pin)
     // receive that's already progress. We do, however, still need to get the
     // status of the previous transfer so we can detect aborted transactions.
     if (spipNcpState.state < spipNcpDone) {
+      SET_nHOST_INT();
       SPIDRV_AbortTransfer(spiHandle);
       SPIDRV_GetTransferStatus(spiHandle, &itemsTransferred, &itemsRemaining);
 

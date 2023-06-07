@@ -33,6 +33,7 @@
 // -----------------------------------------------------------------------------
 #include <assert.h>
 #include <string.h>
+#include <stdlib.h>
 #include "sl_wisun_trace_util.h"
 #include "sl_wisun_types.h"
 #include "rail_config.h"
@@ -110,6 +111,16 @@ typedef enum phy_type {
   PHY_TYPE_OFDM4,
 } phy_type_t;
 
+/// RAIL to Wi-SUN OFDM PHY mode ID map element
+typedef struct rail_ofdm_phy_mode_id {
+  /// RAIL PHY mode ID
+  uint8_t rail_phy_mode_id;
+  /// Wi-SUN PHY mode ID min
+  uint8_t wisun_phy_mode_id_min;
+  /// Wi-SUN PHY mode ID max
+  uint8_t wisun_phy_mode_id_max;
+} rail_ofdm_phy_mode_id_t;
+
 // -----------------------------------------------------------------------------
 //                          Static Function Declarations
 // -----------------------------------------------------------------------------
@@ -181,6 +192,15 @@ __STATIC_INLINE bool _is_ofdm(const uint8_t phy_mode_id);
  * @return bool true ift it's valid value, otherwise false
  *****************************************************************************/
 __STATIC_INLINE bool _check_phy_mode(const uint8_t phy_mode);
+
+/**************************************************************************//**
+ * @brief Get PHY options (Only for FAN1.1 OFDM)
+ * @details Helper function. FAN1.1 PHY mode value will be replaced with
+ *          Wi-SUN specific value for first option
+ * @param[in,out] phy_cfg PHY mode ID
+ * @return count onf options for FAN 1.1 OFDM PHYs, otherwise 1
+ *****************************************************************************/
+static uint8_t _get_phy_options(sl_wisun_phy_config_t * const phy_cfg);
 
 // -----------------------------------------------------------------------------
 //                                Global Variables
@@ -254,6 +274,21 @@ const app_enum_t app_wisun_phy_channel_spacing_enum[] = {
   { NULL, 0 }
 };
 
+const app_enum_t app_wisun_device_type_enum[] =
+{
+  { "FFN", SL_WISUN_ROUTER },
+  { "LFN", SL_WISUN_LFN },
+  { NULL, 0 }
+};
+
+const app_enum_t app_wisun_lfn_profile_enum[] =
+{
+  { "test", SL_WISUN_LFN_PROFILE_TEST },
+  { "balanced", SL_WISUN_LFN_PROFILE_BALANCED },
+  { "eco", SL_WISUN_LFN_PROFILE_ECO },
+  { NULL, 0 }
+};
+
 // -----------------------------------------------------------------------------
 //                                Static Variables
 // -----------------------------------------------------------------------------
@@ -261,6 +296,30 @@ const app_enum_t app_wisun_phy_channel_spacing_enum[] = {
 /// FSK phy mode ID to operation mode table
 static const uint8_t _fsk_phy_mode_to_op_mode[FSK_PHY_MODE_TO_OPM_TABLE_SIZE] = {
   0xFF, 0x1a, 0x1b, 0x2a, 0x2b, 0x3, 0x4a, 0x4b, 0x5
+};
+
+/// Wi-SUN OFDM PHY mode ID map
+static const rail_ofdm_phy_mode_id_t _ofdm_phy_map[] = {
+  {
+    .rail_phy_mode_id = 32,
+    .wisun_phy_mode_id_min = 34,
+    .wisun_phy_mode_id_max = 39
+  },
+  {
+    .rail_phy_mode_id = 48,
+    .wisun_phy_mode_id_min = 51,
+    .wisun_phy_mode_id_max = 55
+  },
+  {
+    .rail_phy_mode_id = 64,
+    .wisun_phy_mode_id_min = 68,
+    .wisun_phy_mode_id_max = 71
+  },
+  {
+    .rail_phy_mode_id = 80,
+    .wisun_phy_mode_id_min = 84,
+    .wisun_phy_mode_id_max = 87
+  }
 };
 
 // -----------------------------------------------------------------------------
@@ -340,14 +399,25 @@ const char * app_wisun_trace_util_profile_to_str(const uint32_t val)
   return _get_str_key_by_val_from_enum(app_wisun_phy_config_type_enum, val);
 }
 
+const char * app_wisun_trace_util_device_type_to_str(const uint32_t val)
+{
+  return _get_str_key_by_val_from_enum(app_wisun_device_type_enum, val);
+}
+
+const char * app_wisun_trace_util_lfn_profile_to_str(const uint32_t val)
+{
+  return _get_str_key_by_val_from_enum(app_wisun_lfn_profile_enum, val);
+}
+
 app_wisun_phy_list_t *app_wisun_get_phy_list(app_wisun_phy_filter_t filter)
 {
-  sl_wisun_phy_config_t phy_cfg = { 0U };
+  static sl_wisun_phy_config_t phy_cfg = { 0U };
   app_wisun_phy_list_t *head    = NULL;
   app_wisun_phy_list_t *tail    = NULL;
   app_wisun_phy_list_t *p       = NULL;
   sl_status_t status            = SL_STATUS_OK;
   bool filter_res               = false;
+  uint8_t phy_option_cnt        = 0U;
 
   // Iterate channel configs
   for (uint16_t idx = 0U; channelConfigs[idx] != NULL; ++idx) {
@@ -359,28 +429,37 @@ app_wisun_phy_list_t *app_wisun_get_phy_list(app_wisun_phy_filter_t filter)
         continue;
       }
 
-      if (filter != NULL) {
-        filter_res = filter(&phy_cfg);
-        if (!filter_res) {
+      // Get count of PHY options. Only FAN1.1 OFDM PHYs has more options
+      phy_option_cnt = _get_phy_options(&phy_cfg);
+      for (uint8_t opt = 0U; opt < phy_option_cnt; ++opt) {
+        if (filter != NULL) {
+          filter_res = filter(&phy_cfg);
+          if (!filter_res) {
+            continue;
+          }
+        }
+
+        // first element in the list
+        if (head == NULL) {
+          __alloc_phy_list_element_and_check(head, &phy_cfg);
           continue;
         }
-      }
 
-      // first element in the list
-      if (head == NULL) {
-        __alloc_phy_list_element_and_check(head, &phy_cfg);
-        continue;
-      }
+        // allocate new element
+        __alloc_phy_list_element_and_check(p, &phy_cfg);
 
-      // allocate new element
-      __alloc_phy_list_element_and_check(p, &phy_cfg);
+        // move tail to end of the list
+        tail = head;
+        while (tail->next != NULL) {
+          tail = tail->next;
+        }
+        tail->next = p;
 
-      // move tail to end of the list
-      tail = head;
-      while (tail->next != NULL) {
-        tail = tail->next;
+        // increment PHY mode id for FAN11 OFDM PHYs
+        if (phy_cfg.type == SL_WISUN_PHY_CONFIG_FAN11) {
+          ++phy_cfg.config.fan11.phy_mode_id;
+        }
       }
-      tail->next = p;
     }
   }
 
@@ -453,8 +532,8 @@ const char *app_wisun_phy_to_str(sl_wisun_phy_config_t *phy_cfg)
   } else if (phy_cfg->type == SL_WISUN_PHY_CONFIG_FAN11) {
     snprintf(str, PHY_STR_MAX_LENGTH, FAN11_FORMAT_STR,
              app_wisun_trace_util_reg_domain_to_str(phy_cfg->config.fan11.reg_domain),
-             phy_cfg->config.fan11.phy_mode_id,
              phy_cfg->config.fan11.chan_plan_id,
+             phy_cfg->config.fan11.phy_mode_id,
              FAN_1_1_STR);
   } else {
     app_wisun_free(str);
@@ -466,19 +545,19 @@ const char *app_wisun_phy_to_str(sl_wisun_phy_config_t *phy_cfg)
 #if !defined(SL_CATALOG_WISUN_NCP_PRESENT)
 const sl_wisun_connection_params_t *sl_wisun_get_conn_param_by_nw_size(const sl_wisun_network_size_t nw_size)
 {
-  switch(nw_size) {
-    // Small  
+  switch (nw_size) {
+    // Small
     case SL_WISUN_NETWORK_SIZE_SMALL:
       return &SL_WISUN_PARAMS_PROFILE_SMALL;
-    
+
     // Medium
     case SL_WISUN_NETWORK_SIZE_MEDIUM:
       return &SL_WISUN_PARAMS_PROFILE_MEDIUM;
-    
-    // Large 
+
+    // Large
     case SL_WISUN_NETWORK_SIZE_LARGE:
       return &SL_WISUN_PARAMS_PROFILE_LARGE;
-    
+
     // Test
     case SL_WISUN_NETWORK_SIZE_TEST:
       return &SL_WISUN_PARAMS_PROFILE_TEST;
@@ -517,6 +596,7 @@ static app_wisun_phy_list_t *_alloc_phy_list_element(sl_wisun_phy_config_t *phy_
   if (p == NULL) {
     return NULL;
   }
+
   p->name = app_wisun_phy_to_str(phy_cfg);
   memcpy(&p->phy_cfg, phy_cfg, sizeof(sl_wisun_phy_config_t));
   p->next = NULL;
@@ -537,10 +617,6 @@ static sl_status_t _get_phy_cfg_from_ch_cfg_entry(const RAIL_ChannelConfigEntry_
   stack_info = ch_config_entry->stackInfo;
   if (stack_info[0] != RAIL_PTI_PROTOCOL_WISUN) {
     // Not a Wi-SUN configuration
-    return SL_STATUS_FAIL;
-  }
-  if (stack_info[1] & 0xE0) {
-    // Not a valid PHY Type
     return SL_STATUS_FAIL;
   }
 
@@ -600,4 +676,23 @@ __STATIC_INLINE bool _is_ofdm(const uint8_t phy_mode_id)
 __STATIC_INLINE bool _check_phy_mode(const uint8_t phy_mode)
 {
   return (bool)(phy_mode >= PHY_MODE_MIN_VAL && phy_mode <= PHY_MODE_MAX_VAL);
+}
+
+static uint8_t _get_phy_options(sl_wisun_phy_config_t * const phy_cfg)
+{
+  uint8_t phy_option_cnt = 1U;
+
+  if (phy_cfg->type != SL_WISUN_PHY_CONFIG_FAN11) {
+    return phy_option_cnt;
+  }
+
+  for (uint32_t map_idx = 0; map_idx < (sizeof(_ofdm_phy_map) / sizeof(rail_ofdm_phy_mode_id_t)); ++map_idx) {
+    if (phy_cfg->config.fan11.phy_mode_id == _ofdm_phy_map[map_idx].rail_phy_mode_id) {
+      // Corrigate first PHY mode ID
+      phy_cfg->config.fan11.phy_mode_id = _ofdm_phy_map[map_idx].wisun_phy_mode_id_min;
+      return _ofdm_phy_map[map_idx].wisun_phy_mode_id_max - _ofdm_phy_map[map_idx].wisun_phy_mode_id_min + 1U;
+    }
+  }
+
+  return phy_option_cnt;
 }

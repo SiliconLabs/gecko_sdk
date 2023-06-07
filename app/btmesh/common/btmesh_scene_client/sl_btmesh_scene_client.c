@@ -36,7 +36,7 @@
 #include "sl_btmesh_dcd.h"
 
 #include "app_assert.h"
-#include "sl_simple_timer.h"
+#include "app_timer.h"
 
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
@@ -83,10 +83,10 @@ static uint8_t scene_request_count;
 static uint8_t scene_trid = 0;
 
 /// periodic timer handle
-static sl_simple_timer_t app_scene_retransmission_timer;
+static app_timer_t app_scene_retransmission_timer;
 
 /// periodic timer callback
-static void scene_retransmission_timer_cb(sl_simple_timer_t *handle,
+static void scene_retransmission_timer_cb(app_timer_t *handle,
                                           void *data);
 
 /***************************************************************************//**
@@ -159,11 +159,11 @@ void sl_btmesh_select_scene(uint8_t scene_to_recall)
   // If there are more requests to send, start a repeating soft timer
   // to trigger retransmission of the request after 50 ms delay
   if (scene_request_count > 0) {
-    sl_status_t sc = sl_simple_timer_start(&app_scene_retransmission_timer,
-                                           SL_BTMESH_SCENE_CLIENT_RETRANSMISSION_TIMEOUT_CFG_VAL,
-                                           scene_retransmission_timer_cb,
-                                           NO_CALLBACK_DATA,
-                                           true);
+    sl_status_t sc = app_timer_start(&app_scene_retransmission_timer,
+                                     SL_BTMESH_SCENE_CLIENT_RETRANSMISSION_TIMEOUT_CFG_VAL,
+                                     scene_retransmission_timer_cb,
+                                     NO_CALLBACK_DATA,
+                                     true);
     app_assert_status_f(sc, "Failed to start periodic timer");
   }
 }
@@ -192,7 +192,7 @@ void sl_btmesh_handle_scene_client_on_event(sl_btmesh_msg_t *evt)
  * @param[in] handle pointer to handle instance
  * @param[in] data pointer to input data
  *****************************************************************************/
-static void  scene_retransmission_timer_cb(sl_simple_timer_t *handle,
+static void  scene_retransmission_timer_cb(app_timer_t *handle,
                                            void *data)
 {
   (void)data;
@@ -201,7 +201,7 @@ static void  scene_retransmission_timer_cb(sl_simple_timer_t *handle,
   send_scene_recall_request(1);   // Retransmit scene message
   // Stop retransmission timer if it was the last attempt
   if (scene_request_count == 0) {
-    sl_status_t sc = sl_simple_timer_stop(&app_scene_retransmission_timer);
+    sl_status_t sc = app_timer_stop(&app_scene_retransmission_timer);
     app_assert_status_f(sc, "Failed to stop periodic timer");
   }
 }

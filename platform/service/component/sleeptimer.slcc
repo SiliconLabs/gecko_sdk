@@ -43,9 +43,12 @@ requires:
   - name: emlib_cmu
   - name: emlib_common
   - name: emlib_core
+  - name: emlib_prs
+    condition: [device_has_sysrtc]
   - name: atomic
   - name: status
   - name: sl_assert
+  - name: sl_common
   - name: emlib_rtcc
     condition: [device_has_rtcc]
   - name: emlib_rtc

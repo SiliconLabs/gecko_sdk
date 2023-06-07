@@ -166,14 +166,16 @@ void emberAfPluginCoexistenceSetPtaOptions(sl_cli_command_arg_t *arguments)
                       (uint8_t*)&ptaOptions,
                       "pta options");
 #else //!EZSP_HOST
-  sl_status_t status = sl_rail_util_coex_set_options(ptaOptions);
+  sl_status_t status = sl_rail_util_coex_set_options((sl_rail_util_coex_options_t)ptaOptions);
   if (status == SL_STATUS_INVALID_PARAMETER) {
     uint32_t constant_options = sl_rail_util_coex_get_constant_options();
     uint32_t current_options = sl_rail_util_coex_get_options();
-    sl_zigbee_app_debug_print("Error: SL_STATUS_INVALID_PARAMETER");
-    sl_zigbee_app_debug_print("Constant options: 0x%08x", constant_options);
-    sl_zigbee_app_debug_print("Desired  options: 0x%08x", ptaOptions);
-    sl_zigbee_app_debug_print("Invalid  options: 0x%08x", ((current_options & constant_options) ^ (ptaOptions & constant_options)));
+    sl_zigbee_app_debug_print("Error: SL_STATUS_INVALID_PARAMETER\n");
+    sl_zigbee_app_debug_print("Constant options: 0x%08x\n", constant_options);
+    sl_zigbee_app_debug_print("Desired  options: 0x%08x\n", ptaOptions);
+    sl_zigbee_app_debug_print("Invalid  options: 0x%08x\n", ((current_options & constant_options) ^ (ptaOptions & constant_options)));
+  } else {
+    sl_zigbee_app_debug_print("Status: 0x%x\n", status);
   }
 #endif //EZSP_HOST
   emberAfPluginCoexistenceGetPtaOptions(arguments);

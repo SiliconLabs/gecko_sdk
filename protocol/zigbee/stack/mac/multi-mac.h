@@ -22,7 +22,7 @@
 #define MAC_DUAL_PRESENT
 #endif  //defined(PHY_SIMULATION_DUAL) || defined(PHY_DUAL)
 
-#if defined(MAC_DUAL_PRESENT) || defined(ALT_MAC)
+#if defined(MAC_DUAL_PRESENT) || defined(ALT_MAC) || defined(NON_DEFAULT_MAC_INTERFACE)
 #define MULTI_MAC_PRESENT
 #define MAC_INDEX_PARAMETER_SOLO uint8_t mac_index
 #define MAC_INDEX_PARAMETER uint8_t mac_index,
@@ -33,14 +33,14 @@
 // Few mac certification test cases require association on subghz interface
 // on dual phy. It is under MAC_TEST_COMMANDS_SUPPORT since it is not real
 // customer usecase.
-extern uint8_t emAssociationMacIndex; // defined in app/test/mac-test-commands.c
-#define MAC_INDEX_ARGUMENT_TEST emAssociationMacIndex,
-#define MAC_INDEX_ARGUMENT_TEST_SOLO emAssociationMacIndex
+extern uint8_t sli_zigbee_association_mac_index; // defined in app/test/mac-test-commands.c
+#define MAC_INDEX_ARGUMENT_TEST sli_zigbee_association_mac_index,
+#define MAC_INDEX_ARGUMENT_TEST_SOLO sli_zigbee_association_mac_index
 #else // !MAC_TEST_COMMANDS_SUPPORT
 #define MAC_INDEX_ARGUMENT_TEST 0,
 #define MAC_INDEX_ARGUMENT_TEST_SOLO 0
 #endif  //MAC_TEST_COMMANDS_SUPPORT
-#else // !(defined(MAC_DUAL_PRESENT) || defined(ALT_MAC))
+#else // !(defined(MAC_DUAL_PRESENT) || defined(ALT_MAC) || defined(NON_DEFAULT_MAC_INTERFACE)
 #define MAC_INDEX_PARAMETER_SOLO void
 #define MAC_INDEX_PARAMETER
 #define MAC_INDEX_ARGUMENT
@@ -48,7 +48,7 @@ extern uint8_t emAssociationMacIndex; // defined in app/test/mac-test-commands.c
 #define MAC_INDEX_ARGUMENT_SOLO
 #define MAC_INDEX_ARGUMENT_TEST
 #define MAC_INDEX_ARGUMENT_TEST_SOLO
-#endif  // defined(MAC_DUAL_PRESENT) || defined(ALT_MAC)
+#endif  // defined(MAC_DUAL_PRESENT) || defined(ALT_MAC) || defined(NON_DEFAULT_MAC_INTERFACE)
 
 #if (PHY_PRO2PLUS || PHY_EFR32GB || PHY_RAILGB \
      || defined(PHY_TRANSCEIVER_SIM) || defined(PHY_SIMULATION_GB))

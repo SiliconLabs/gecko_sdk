@@ -18,6 +18,7 @@ limitations under the License.
 #include "tensorflow/lite/kernels/internal/tensor_ctypes.h"
 #include "tensorflow/lite/kernels/kernel_util.h"
 #include "tensorflow/lite/micro/kernels/kernel_util.h"
+#include "tensorflow/lite/micro/micro_log.h"
 
 namespace tflite {
 namespace ops {
@@ -91,8 +92,8 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
       return UnpackImpl<int8_t>(context, node, input, data->num, data->axis);
     }
     default: {
-      TF_LITE_KERNEL_LOG(context, "Type '%s' is not supported by unpack.",
-                         TfLiteTypeGetName(input->type));
+      MicroPrintf("Type '%s' is not supported by unpack.",
+                  TfLiteTypeGetName(input->type));
       return kTfLiteError;
     }
   }
@@ -103,14 +104,7 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
 }  // namespace unpack
 
 TfLiteRegistration Register_UNPACK() {
-  return {/*init=*/nullptr,
-          /*free=*/nullptr,
-          /*prepare=*/nullptr,
-          /*invoke=*/unpack::Eval,
-          /*profiling_string=*/nullptr,
-          /*builtin_code=*/0,
-          /*custom_name=*/nullptr,
-          /*version=*/0};
+  return tflite::micro::RegisterOp(nullptr, nullptr, unpack::Eval);
 }
 
 }  // namespace micro

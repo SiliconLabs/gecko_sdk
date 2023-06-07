@@ -36,6 +36,7 @@
 
 #include "openthread-core-config.h"
 
+#include "common/callback.hpp"
 #include "common/locator.hpp"
 #include "common/non_copyable.hpp"
 #include "common/tasklet.hpp"
@@ -127,9 +128,9 @@ public:
                    Mac::PanId              aPanId,
                    bool                    aJoiner,
                    bool                    aEnableFiltering,
-                   const FilterIndexes *   aFilterIndexes,
+                   const FilterIndexes    *aFilterIndexes,
                    Handler                 aCallback,
-                   void *                  aContext);
+                   void                   *aContext);
 
     /**
      * This method indicates whether or not an MLE Thread Discovery Scan is currently in progress.
@@ -177,19 +178,18 @@ private:
     using ScanTimer    = TimerMilliIn<DiscoverScanner, &DiscoverScanner::HandleTimer>;
     using ScanDoneTask = TaskletIn<DiscoverScanner, &DiscoverScanner::HandleScanDoneTask>;
 
-    Handler          mHandler;
-    void *           mHandlerContext;
-    ScanDoneTask     mScanDoneTask;
-    ScanTimer        mTimer;
-    FilterIndexes    mFilterIndexes;
-    Mac::ChannelMask mScanChannels;
-    State            mState;
-    uint32_t         mOui;
-    uint8_t          mScanChannel;
-    uint8_t          mAdvDataLength;
-    uint8_t          mAdvData[MeshCoP::JoinerAdvertisementTlv::kAdvDataMaxLength];
-    bool             mEnableFiltering : 1;
-    bool             mShouldRestorePanId : 1;
+    Callback<Handler> mCallback;
+    ScanDoneTask      mScanDoneTask;
+    ScanTimer         mTimer;
+    FilterIndexes     mFilterIndexes;
+    Mac::ChannelMask  mScanChannels;
+    State             mState;
+    uint32_t          mOui;
+    uint8_t           mScanChannel;
+    uint8_t           mAdvDataLength;
+    uint8_t           mAdvData[MeshCoP::JoinerAdvertisementTlv::kAdvDataMaxLength];
+    bool              mEnableFiltering : 1;
+    bool              mShouldRestorePanId : 1;
 };
 
 } // namespace Mle

@@ -38,11 +38,22 @@
 
 #include "sl_bt_api.h"
 #include "sl_btmesh_api.h"
+
+#ifdef SL_CATALOG_BTMESH_FRIEND_PRESENT
 #include "sl_btmesh_friend.h"
+#endif // SL_CATALOG_BTMESH_FRIEND_PRESENT
+
 #include "sl_btmesh_ctl_server.h"
 #include "sl_btmesh_lighting_server.h"
+
+#ifdef SL_CATALOG_BTMESH_PROVISIONING_DECORATOR_PRESENT
 #include "sl_btmesh_provisioning_decorator.h"
+#endif // SL_CATALOG_BTMESH_PROVISIONING_DECORATOR_PRESENT
+
+#ifdef SL_CATALOG_BTMESH_FACTORY_RESET_PRESENT
 #include "sl_btmesh_factory_reset.h"
+#endif // SL_CATALOG_BTMESH_FACTORY_RESET_PRESENT
+
 #include "sl_btmesh_wstk_lcd.h"
 
 // -----------------------------------------------------------------------------

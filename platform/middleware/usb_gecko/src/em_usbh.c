@@ -6,12 +6,25 @@
  * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
- * The licensor of this software is Silicon Laboratories Inc.  Your use of this
- * software is governed by the terms of Silicon Labs Master Software License
- * Agreement (MSLA) available at
- * www.silabs.com/about-us/legal/master-software-license-agreement.  This
- * software is distributed to you in Source Code format and is governed by the
- * sections of the MSLA applicable to Source Code.
+ * SPDX-License-Identifier: Zlib
+ *
+ * The licensor of this software is Silicon Laboratories Inc.
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty. In no event will the authors be held liable for any damages
+ * arising from the use of this software.
+ *
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
+ *
+ * 1. The origin of this software must not be misrepresented; you must not
+ *    claim that you wrote the original software. If you use this software
+ *    in a product, an acknowledgment in the product documentation would be
+ *    appreciated but is not required.
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.
+ * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
 
@@ -2471,11 +2484,6 @@ int USBH_WriteB(USBH_Ep_TypeDef *ep, void *data, int byteCount, int timeout)
  The source files for the USB host stack resides in the usb directory
  and follows the naming convention: em_usbh<em>nnn</em>.c/h.
 
- @li @ref usb_host_intro
- @li @ref usb_host_getting_started
- @li @ref usb_host_api
- @li @ref usb_host_conf
-
 @n @section usb_host_intro Introduction
 
  The USB host protocol stack provides an API which makes it possible to
@@ -2493,8 +2501,6 @@ int USBH_WriteB(USBH_Ep_TypeDef *ep, void *data, int byteCount, int timeout)
 @n @section usb_host_getting_started Getting started
 
  To use an USB device, its pratical to divide the initial steps needed into :
- @li @ref usb_device_connection
- @li @ref usb_device_enumeration
 
  @n @subsection usb_device_connection Device connection
 
@@ -2558,14 +2564,6 @@ for (;;)
   }@endverbatim
 
 @n @section usb_host_api The host stack API
-
- @li @ref usb_host_apiintro
- @li @ref usb_host_init
- @li @ref usb_host_transfer
- @li @ref usb_host_ch9
- @li @ref usb_host_port
- @li @ref usb_host_enum
- @li @ref usb_host_print
 
  @n @subsection usb_host_apiintro Introduction
   This section contains brief descriptions of all functions in the API. You will
@@ -2675,35 +2673,34 @@ for (;;)
    of sufficent size to hold the data. This data buffer can later be
    used by all USBH_Q<em>xxx</em> functions to retrieve pointers to
    any descriptor within any configuration descriptor. Data retrieved
-   by this function must also be passed to @htmlonly USBH_InitDeviceData()
-   @endhtmlonly before normal device communication can start.
+   by this function must also be passed to USBH_InitDeviceData()
+    before normal device communication can start.
    Ref. section @ref usb_device_enumeration.
 
   @ref USBH_QGetConfigurationDescriptor() @n
    Get a pointer to a given configuration descriptor. Parses through a
    data buffer which must have been previously populated by a call to
-   @htmlonly USBH_QueryDeviceB(). @endhtmlonly
+    USBH_QueryDeviceB().
 
   @ref USBH_QGetDeviceDescriptor() @n
    Get a pointer to the device descriptor. Parses through a data buffer
-   which must have been previously populated by a call to @htmlonly
-   USBH_QueryDeviceB(). @endhtmlonly
+   which must have been previously populated by a call to
+   USBH_QueryDeviceB().
 
   @ref USBH_QGetEndpointDescriptor() @n
    Get a pointer to a given endpoint descriptor within a given interface
    within a given configuration. Parses through a data buffer which must
-   have been previously populated by a call to @htmlonly USBH_QueryDeviceB().
-   @endhtmlonly
+   have been previously populated by a call to  USBH_QueryDeviceB().
 
   @ref USBH_QGetInterfaceDescriptor() @n
    Get a pointer to an interface descriptor within a given configuration.
    Parses through a data buffer which must have been previously populated
-   by a call to @htmlonly USBH_QueryDeviceB(). @endhtmlonly
+   by a call to  USBH_QueryDeviceB().
 
   @ref USBH_InitDeviceData() @n
    Populates device and endpoint data structures with data which must
    have been retrieved from a device by a call to
-   @htmlonly USBH_QueryDeviceB() @endhtmlonly.
+    USBH_QueryDeviceB() .
    The application must allocate and provide device and endpoint data
    structures to the host stack.
    After this function is called the device and endpoint data structures
@@ -2739,8 +2736,8 @@ for (;;)
   USBTIMER_DelayUs() @n Active wait microsecond delay function. Can also be
   used inside interrupt handlers.
 
-  USBTIMER_Init() @n Initialize the timer system. Called by @htmlonly
-  USBH_Init(), @endhtmlonly but your application must call it again to
+  USBTIMER_Init() @n Initialize the timer system. Called by
+  USBH_Init(),  but your application must call it again to
   reinitialize whenever you change the HFPERCLK frequency.
 
   USBTIMER_Start() @n Start a timer. You can configure the USB device stack

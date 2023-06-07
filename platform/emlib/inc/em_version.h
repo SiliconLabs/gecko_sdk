@@ -46,23 +46,6 @@ extern "C" {
  ******************************************************************************/
 
 /* *INDENT-OFF* */
-/** @deprecated Version number of EMLIB peripheral API. */
-#define _EMLIB_VERSION 6.4.0
-/* *INDENT-ON* */
-
-/** @deprecated Major version of EMLIB. This is the 32-bit MCU SDK version.
-    A new version system for EMLIB will be provided in a later release. */
-#define _EMLIB_VERSION_MAJOR 6
-
-/** @deprecated Minor version of EMLIB. This is the 32-bit MCU SDK version.
-    A new version system for EMLIB will be provided in a later release. */
-#define _EMLIB_VERSION_MINOR 4
-
-/** @deprecated Patch revision of EMLIB. This is the 32-bit MCU SDK version.
-    A new version system for EMLIB will be provided in a later release. */
-#define _EMLIB_VERSION_PATCH 0
-
-/* *INDENT-OFF* */
 /** Version number of targeted CMSIS package. */
 #define _CMSIS_VERSION 5.8.0
 /* *INDENT-ON* */

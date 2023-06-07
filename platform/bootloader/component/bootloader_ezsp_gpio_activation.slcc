@@ -2,8 +2,9 @@ id: bootloader_ezsp_gpio_activation
 label: EZSP GPIO activation
 package: bootloader
 description: >
-  The Bootloader EZSP GPIO activation component provides entry to bootloader firmware upgrade mode if
-  GPIO pin has a given state at reset. GPIO pin state and GPIO states can be configured.
+  The Bootloader EZSP GPIO activation component provides entry to bootloader firmware upgrade 
+  using EZSP protocol over SPI mode if GPIO pin has a given state at reset. GPIO pin state 
+  and GPIO states can be configured by SL_EZSPSPI_HOST_INT and SL_EZSPSPI_WAKE_INT. 
 category: Platform|Bootloader|Utils
 quality: production
 source:

@@ -96,6 +96,23 @@ void setChannel(sl_cli_command_arg_t *args)
   getChannel(args);
 }
 
+void setPktOffsetInTxFifo(sl_cli_command_arg_t *args)
+{
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
+  if (sl_cli_get_argument_count(args) == 1) {
+    uint16_t proposedOffset = sl_cli_get_argument_uint16(args, 0);
+
+    // Make sure this is a valid Offset
+    if (proposedOffset < SL_RAIL_TEST_TX_BUFFER_SIZE) {
+      offsetInTxFifo = proposedOffset;
+    } else {
+      responsePrintError(sl_cli_get_command_string(args, 0), 0x11, "Invalid Offset '%d', must be strictly less than %d", proposedOffset, SL_RAIL_TEST_TX_BUFFER_SIZE);
+      return;
+    }
+  }
+  responsePrint(sl_cli_get_command_string(args, 0), "Tx data Offset in Tx Fifo:%d", offsetInTxFifo);
+}
+
 void setFreqOffset(sl_cli_command_arg_t *args)
 {
   CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
@@ -365,52 +382,10 @@ void sweepTxPower(sl_cli_command_arg_t *args)
       end = RAIL_TX_POWER_LEVEL_SUBGIG_MAX;
       break;
 #endif
-#ifdef RAIL_TX_POWER_MODE_SUBGIG_EFF_30DBM
-    case RAIL_TX_POWER_MODE_SUBGIG_EFF_30DBM:
-      start = RAIL_TX_POWER_LEVEL_SUBGIG_EFF_30DBM_MIN;
-      end = RAIL_TX_POWER_LEVEL_SUBGIG_EFF_30DBM_MAX;
-      break;
-#endif
-#ifdef RAIL_TX_POWER_MODE_SUBGIG_EFF_25DBM
-    case RAIL_TX_POWER_MODE_SUBGIG_EFF_25DBM:
-      start = RAIL_TX_POWER_LEVEL_SUBGIG_EFF_25DBM_MIN;
-      end = RAIL_TX_POWER_LEVEL_SUBGIG_EFF_25DBM_MAX;
-      break;
-#endif
-#ifdef RAIL_TX_POWER_MODE_SUBGIG_EFF_20DBM
-    case RAIL_TX_POWER_MODE_SUBGIG_EFF_20DBM:
-      start = RAIL_TX_POWER_LEVEL_SUBGIG_EFF_20DBM_MIN;
-      end = RAIL_TX_POWER_LEVEL_SUBGIG_EFF_20DBM_MAX;
-      break;
-#endif
 #ifdef RAIL_TX_POWER_MODE_OFDM_PA
     case RAIL_TX_POWER_MODE_OFDM_PA:
       start = RAIL_TX_POWER_LEVEL_OFDM_PA_MIN;
       end = RAIL_TX_POWER_LEVEL_OFDM_PA_MAX;
-      break;
-#endif
-#ifdef RAIL_TX_POWER_MODE_OFDM_PA_EFF_30DBM
-    case RAIL_TX_POWER_MODE_OFDM_PA_EFF_30DBM:
-      start = RAIL_TX_POWER_LEVEL_OFDM_PA_EFF_30DBM_MIN;
-      end = RAIL_TX_POWER_LEVEL_OFDM_PA_EFF_30DBM_MAX;
-      break;
-#endif
-#ifdef RAIL_TX_POWER_MODE_OFDM_PA_EFF_25DBM
-    case RAIL_TX_POWER_MODE_OFDM_PA_EFF_25DBM:
-      start = RAIL_TX_POWER_LEVEL_OFDM_PA_EFF_25DBM_MIN;
-      end = RAIL_TX_POWER_LEVEL_OFDM_PA_EFF_25DBM_MAX;
-      break;
-#endif
-#ifdef RAIL_TX_POWER_MODE_OFDM_PA_EFF_20DBM
-    case RAIL_TX_POWER_MODE_OFDM_PA_EFF_20DBM:
-      start = RAIL_TX_POWER_LEVEL_OFDM_PA_EFF_20DBM_MIN;
-      end = RAIL_TX_POWER_LEVEL_OFDM_PA_EFF_20DBM_MAX;
-      break;
-#endif
-#ifdef RAIL_TX_POWER_MODE_OFDM_PA_EFF_MAXDBM
-    case RAIL_TX_POWER_MODE_OFDM_PA_EFF_MAXDBM:
-      start = RAIL_TX_POWER_LEVEL_OFDM_PA_EFF_MAXDBM_MIN;
-      end = RAIL_TX_POWER_LEVEL_OFDM_PA_EFF_MAXDBM_MAX;
       break;
 #endif
     default:

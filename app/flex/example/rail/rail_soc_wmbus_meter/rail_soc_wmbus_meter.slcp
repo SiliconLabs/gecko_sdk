@@ -33,6 +33,8 @@ requires:
   - name: a_radio_config
     condition:
       - device_is_module
+  - name: sl_flex_rail_config
+  - name: sl_flex_rail_channel_selector
   - name: sl_simple_rail_os
     condition:
       - "kernel"
@@ -103,9 +105,9 @@ configuration:
 #------------- Sleeptimer configs --------------------
   - name: SL_SLEEPTIMER_WALLCLOCK_CONFIG
     value: "1"
-#------------- POWER Settings ----------------
-  - name: SL_POWER_MANAGER_LOWEST_EM_ALLOWED
-    value: "2"
+#------------- RAIL init, Configuration --------------
+  - name: SL_FLEX_RAIL_TX_FIFO_SIZE
+    value: "512"
 #------------- RAIL init, Project --------------------
   - name: SL_RAIL_UTIL_INIT_INIT_COMPLETE_CALLBACK_INST0_ENABLE
     value: "1"

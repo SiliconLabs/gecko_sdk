@@ -45,14 +45,14 @@
  */
 
 #include "app/framework/include/af.h"
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #ifdef SL_CATALOG_ZIGBEE_KEY_ESTABLISHMENT_PRESENT
 #include "network-find-config-se.h"
 #else // !SL_CATALOG_ZIGBEE_KEY_ESTABLISHMENT_PRESENT
 #include "network-find-config.h"
 #endif // SL_CATALOG_ZIGBEE_KEY_ESTABLISHMENT_PRESENT
-#endif  // UC_BUILD
 
 /**
  * @name API
@@ -183,19 +183,19 @@ bool emberAfPluginNetworkFindGetEnableScanningAllChannelsCallback(void);
  *         all channels.
  * @return True if yes, false if the current scan is on preferred channels only.
  */
-bool emAfIsCurrentSearchForUnusedNetworkScanningAllChannels(void);
+bool sli_zigbee_af_is_current_search_for_unused_network_scanning_all_channels(void);
 
 /** @brief Return the channel mask for the current scan.
  * Similar to emberAfGetFormAndJoinChannelMask(), but may return the configured
  * channel mask or all channels mask, depending on the current scan state.
  */
-uint32_t emAfGetSearchForUnusedNetworkChannelMask(uint8_t page);
+uint32_t sli_zigbee_af_get_unused_network_channel_mask(uint8_t page);
 
 /** @brief Secondary interface formed callback.
  * Called after forming the network to notify the plugin that the secondary
  * interface (in case of a dual-PHY implementation) has been formed. It is used
  * by the plugin to reset its internal state. Strictly for internal use only.
  */
-void emAfSecondaryInterfaceFormedCallback(EmberStatus status);
+void sli_zigbee_af_secondary_interface_formed_callback(EmberStatus status);
 
 #endif // NETWORK_FIND_DOT_H_INCLUDED

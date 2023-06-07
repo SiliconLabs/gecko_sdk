@@ -165,6 +165,16 @@
 #endif
 
 /**
+ * @def OPENTHREAD_CONFIG_UPTIME_ENABLE
+ *
+ * (For FTDs only) Define to 1 to enable tracking the uptime of OpenThread instance.
+ *
+ */
+#ifndef OPENTHREAD_CONFIG_UPTIME_ENABLE
+#define OPENTHREAD_CONFIG_UPTIME_ENABLE OPENTHREAD_FTD
+#endif
+
+/**
  * @def OPENTHREAD_CONFIG_MAC_CSL_REQUEST_AHEAD_US
  *
  * Define how many microseconds ahead should MAC deliver CSL frame to SubMac.
@@ -237,7 +247,7 @@
  *
  */
 #ifndef OPENTHREAD_CONFIG_MAC_SOFTWARE_TX_TIMING_ENABLE
-#define OPENTHREAD_CONFIG_MAC_SOFTWARE_TX_TIMING_ENABLE (OPENTHREAD_RADIO && (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2))
+#define OPENTHREAD_CONFIG_MAC_SOFTWARE_TX_TIMING_ENABLE 0
 #endif
 
 /**
@@ -400,7 +410,7 @@
 /**
  * @def SL_OPENTHREAD_RADIO_RX_BUFFER_COUNT
  *
- * Max number of RX buffers to use in the rdio driver
+ * Max number of RX buffers to use in the radio driver
  *
  */
 #ifndef SL_OPENTHREAD_RADIO_RX_BUFFER_COUNT
@@ -408,13 +418,13 @@
 #endif
 
 /**
- * @def SL_ENABLE_MULTI_RX_BUFFER_SUPPORT
+ * @def SL_OPENTHREAD_ECDSA_PRIVATE_KEY_SIZE
  *
- * Enable Multi buffer Rx feature (experimental)
+ * Max Private key size supported by ECDSA Crypto handler.
  *
  */
-#ifndef SL_ENABLE_MULTI_RX_BUFFER_SUPPORT
-#define SL_ENABLE_MULTI_RX_BUFFER_SUPPORT 0
+#ifndef SL_OPENTHREAD_ECDSA_PRIVATE_KEY_SIZE
+#define SL_OPENTHREAD_ECDSA_PRIVATE_KEY_SIZE  32
 #endif
 
 #endif // OPENTHREAD_CORE_EFR32_CONFIG_H_

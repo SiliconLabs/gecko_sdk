@@ -27,24 +27,25 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
-#include "em_device.h"
-
-#if defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT)
 
 #include "sl_se_manager.h"
 
+#if defined(SLI_MAILBOX_COMMAND_SUPPORTED) || defined(SLI_VSE_MAILBOX_COMMAND_SUPPORTED)
 #if !defined(SL_CATALOG_TZ_SECURE_KEY_LIBRARY_NS_PRESENT)
 
 #include "sli_se_manager_internal.h"
-#include "sli_se_manager_osal.h"
 #include "em_se.h"
 #include "sl_assert.h"
 #if defined(_CMU_CLKEN1_SEMAILBOXHOST_MASK)
 #include "em_bus.h"
 #endif
+#if !defined(SLI_SE_MANAGER_HOST_SYSTEM)
+#include "sli_se_manager_osal.h"
+#endif
+
 #include <string.h>
 
-/// @addtogroup sl_se_manager
+/// @addtogroup sl_se_managers
 /// @{
 
 // -----------------------------------------------------------------------------
@@ -230,7 +231,7 @@ sl_status_t sli_se_to_sl_status(SE_Response_t res)
       return SL_STATUS_INITIALIZATION;
     case SLI_SE_RESPONSE_NOT_INITIALIZED:
       return SL_STATUS_NOT_INITIALIZED;
-#if defined(CRYPTOACC_PRESENT)
+#if defined(SLI_VSE_MAILBOX_COMMAND_SUPPORTED)
     case SLI_SE_RESPONSE_MAILBOX_INVALID:
       return SL_STATUS_COMMAND_IS_INVALID;
 #endif
@@ -329,7 +330,7 @@ sl_status_t sl_se_set_yield(sl_se_command_context_t *cmd_ctx,
  * @return
  *   Status code, @ref sl_status.h.
  ******************************************************************************/
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MAILBOX_COMMAND_SUPPORTED) && !defined(SLI_SE_MANAGER_HOST_SYSTEM)
 sl_status_t sli_se_execute_and_wait(sl_se_command_context_t *cmd_ctx)
 {
   sl_status_t status;
@@ -392,7 +393,7 @@ sl_status_t sli_se_execute_and_wait(sl_se_command_context_t *cmd_ctx)
   }
 }
 
-#elif defined(CRYPTOACC_PRESENT) // SEMAILBOX_PRESENT
+#elif defined(SLI_VSE_MAILBOX_COMMAND_SUPPORTED) // SLI_MAILBOX_COMMAND_SUPPORTED
 
 sl_status_t sli_se_execute_and_wait(sl_se_command_context_t *cmd_ctx)
 {
@@ -479,7 +480,7 @@ sl_status_t sl_se_ack_command(sl_se_command_context_t *cmd_ctx)
   }
 }
 
-#endif // CRYPTOACC_PRESENT
+#endif // SLI_VSE_MAILBOX_COMMAND_SUPPORTED
 
 #endif // !SL_CATALOG_TZ_SECURE_KEY_LIBRARY_NS_PRESENT
 
@@ -512,4 +513,4 @@ sl_status_t sl_se_deinit_command_context(sl_se_command_context_t *cmd_ctx)
 
 /** @} (end addtogroup sl_se) */
 
-#endif // defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT)
+#endif // defined(SLI_MAILBOX_COMMAND_SUPPORTED) || defined(SLI_VSE_MAILBOX_COMMAND_SUPPORTED)

@@ -75,8 +75,12 @@ void sl_rail_util_ieee801254_on_rail_event(RAIL_Handle_t railHandle, RAIL_Events
                                              : SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_ENDED), 0U);
   }
   if (events & RAIL_EVENT_RX_PACKET_RECEIVED) {
-    (void) sl_rail_util_ieee802154_on_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_ENDED,
-                                            (uint32_t) isReceivingFrame(railHandle));
+    if (ack_waiting
+        || !RAIL_IsAutoAckEnabled(railHandle)
+        || RAIL_IsRxAutoAckPaused(railHandle)) {
+      (void) sl_rail_util_ieee802154_on_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_ENDED,
+                                              (uint32_t) isReceivingFrame(railHandle));
+    }
     if (ack_waiting) {
       ack_waiting = false;
       (void) sl_rail_util_ieee802154_on_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_ACK_RECEIVED, 0U);

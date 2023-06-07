@@ -37,7 +37,7 @@ component:
   - id: simple_led
     instance:
       - led0
-  - id: simple_timer
+  - id: app_timer
   - id: cbap
   - id: trustzone_nonsecure
   - id: tz_secure_key_library

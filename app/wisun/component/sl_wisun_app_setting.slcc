@@ -21,6 +21,8 @@ requires:
   - name: "sl_wisun_trace_util"
   - name: "wisun_config"
   - name: "sl_wisun_full_config"
+    condition:
+      - "sl_wisun_empty"
 
 #-------------- Template Contribution ----------------
 template_contribution:
@@ -30,8 +32,6 @@ template_contribution:
       event: "internal_app_init"
       include: "sl_wisun_app_setting.h"
       handler: "app_wisun_setting_init"
-    unless: 
-      - "wisun_cli"
 
   - name: component_catalog
     value: wisun_app_setting

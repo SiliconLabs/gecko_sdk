@@ -37,7 +37,7 @@ template_contribution:
   - name: zigbee_af_callback
     value:
       callback_type: event_init
-      function_name: emAfPluginOtaStorageSimpleEepromInitCallback    
+      function_name: sli_zigbee_af_ota_storage_simple_eeprom_init_callback    
   - name: cli_group
     value:
       group: plugin
@@ -47,7 +47,7 @@ template_contribution:
     value:
       group: ota-storage-eeprom
       name: wipe
-      handler: emAfOtaWipeStorageDeviceCommand
+      handler: sli_zigbee_af_ota_wipe_storage_device_command
       help: Wipes all data in the storage device.
 documentation:
   docset: zigbee

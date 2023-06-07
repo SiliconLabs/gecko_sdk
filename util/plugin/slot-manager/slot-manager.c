@@ -58,7 +58,7 @@ void emberAfPluginSlotManagerPrintExternalFlashInfo(void)
 
   bootloader_getStorageInfo(&storageInfo);
   printf("Version     : %d\n", storageInfo.info->version);
-  printf("Part        : %s\n", storageInfo.info->partDescription);
+  printf("Part        : %s\n", ((storageInfo.info->partDescription != NULL) ? storageInfo.info->partDescription : "NA"));
   printf("Capabilities: 0x%x\n", storageInfo.info->capabilitiesMask);
   printf("Part size   : %d B\n", storageInfo.info->partSize);
   printf("Page size   : %d B\n", storageInfo.info->pageSize);

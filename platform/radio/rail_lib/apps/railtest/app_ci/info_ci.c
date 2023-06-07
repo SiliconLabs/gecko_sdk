@@ -699,54 +699,6 @@ void printChipFeatures(sl_cli_command_arg_t *args)
   responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
                      "RAIL_TX_POWER_MODE_SUBGIG", "N/A", "N/A");
  #endif//RAIL_TX_POWER_MODE_SUBGIG
- #ifdef RAIL_TX_POWER_MODE_SUBGIG_EFF_30DBM
-  if (RAIL_SupportsTxPowerMode(railHandle,
-                               RAIL_TX_POWER_MODE_SUBGIG_EFF_30DBM,
-                               &maxPowerLevel)
-      && (maxPowerLevel != RAIL_TX_POWER_LEVEL_INVALID)) {
-    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%u",
-                       "RAIL_TX_POWER_MODE_SUBGIG_EFF_30DBM", "Yes",
-                       maxPowerLevel);
-  } else {
-    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
-                       "RAIL_TX_POWER_MODE_SUBGIG_EFF_30DBM", "Yes", "No");
-  }
- #else
-  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
-                     "RAIL_TX_POWER_MODE_SUBGIG_EFF_30DBM", "N/A", "N/A");
- #endif//RAIL_TX_POWER_MODE_SUBGIG_EFF_30DBM
- #ifdef RAIL_TX_POWER_MODE_SUBGIG_EFF_25DBM
-  if (RAIL_SupportsTxPowerMode(railHandle,
-                               RAIL_TX_POWER_MODE_SUBGIG_EFF_25DBM,
-                               &maxPowerLevel)
-      && (maxPowerLevel != RAIL_TX_POWER_LEVEL_INVALID)) {
-    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%u",
-                       "RAIL_TX_POWER_MODE_SUBGIG_EFF_25DBM", "Yes",
-                       maxPowerLevel);
-  } else {
-    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
-                       "RAIL_TX_POWER_MODE_SUBGIG_EFF_25DBM", "Yes", "No");
-  }
- #else
-  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
-                     "RAIL_TX_POWER_MODE_SUBGIG_EFF_25DBM", "N/A", "N/A");
- #endif//RAIL_TX_POWER_MODE_SUBGIG_EFF_25DBM
- #ifdef RAIL_TX_POWER_MODE_SUBGIG_EFF_20DBM
-  if (RAIL_SupportsTxPowerMode(railHandle,
-                               RAIL_TX_POWER_MODE_SUBGIG_EFF_20DBM,
-                               &maxPowerLevel)
-      && (maxPowerLevel != RAIL_TX_POWER_LEVEL_INVALID)) {
-    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%u",
-                       "RAIL_TX_POWER_MODE_SUBGIG_EFF_20DBM", "Yes",
-                       maxPowerLevel);
-  } else {
-    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
-                       "RAIL_TX_POWER_MODE_SUBGIG_EFF_20DBM", "Yes", "No");
-  }
- #else
-  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
-                     "RAIL_TX_POWER_MODE_SUBGIG_EFF_20DBM", "N/A", "N/A");
- #endif//RAIL_TX_POWER_MODE_SUBGIG_EFF_20DBM
  #ifdef RAIL_TX_POWER_MODE_OFDM_PA
   if (RAIL_SupportsTxPowerMode(railHandle,
                                RAIL_TX_POWER_MODE_OFDM_PA,
@@ -763,70 +715,6 @@ void printChipFeatures(sl_cli_command_arg_t *args)
   responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
                      "RAIL_TX_POWER_MODE_OFDM_PA", "N/A", "N/A");
  #endif//RAIL_TX_POWER_MODE_OFDM_PA
- #ifdef RAIL_TX_POWER_MODE_OFDM_PA_EFF_30DBM
-  if (RAIL_SupportsTxPowerMode(railHandle,
-                               RAIL_TX_POWER_MODE_OFDM_PA_EFF_30DBM,
-                               &maxPowerLevel)
-      && (maxPowerLevel != RAIL_TX_POWER_LEVEL_INVALID)) {
-    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%u",
-                       "RAIL_TX_POWER_MODE_OFDM_PA_EFF_30DBM", "Yes",
-                       maxPowerLevel);
-  } else {
-    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
-                       "RAIL_TX_POWER_MODE_OFDM_PA_EFF_30DBM", "Yes", "No");
-  }
- #else
-  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
-                     "RAIL_TX_POWER_MODE_OFDM_PA_EFF_30DBM", "N/A", "N/A");
- #endif//RAIL_TX_POWER_MODE_OFDM_PA_EFF_30DBM
- #ifdef RAIL_TX_POWER_MODE_OFDM_PA_EFF_25DBM
-  if (RAIL_SupportsTxPowerMode(railHandle,
-                               RAIL_TX_POWER_MODE_OFDM_PA_EFF_25DBM,
-                               &maxPowerLevel)
-      && (maxPowerLevel != RAIL_TX_POWER_LEVEL_INVALID)) {
-    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%u",
-                       "RAIL_TX_POWER_MODE_OFDM_PA_EFF_25DBM", "Yes",
-                       maxPowerLevel);
-  } else {
-    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
-                       "RAIL_TX_POWER_MODE_OFDM_PA_EFF_25DBM", "Yes", "No");
-  }
- #else
-  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
-                     "RAIL_TX_POWER_MODE_OFDM_PA_EFF_25DBM", "N/A", "N/A");
- #endif//RAIL_TX_POWER_MODE_OFDM_PA_EFF_25DBM
- #ifdef RAIL_TX_POWER_MODE_OFDM_PA_EFF_20DBM
-  if (RAIL_SupportsTxPowerMode(railHandle,
-                               RAIL_TX_POWER_MODE_OFDM_PA_EFF_20DBM,
-                               &maxPowerLevel)
-      && (maxPowerLevel != RAIL_TX_POWER_LEVEL_INVALID)) {
-    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%u",
-                       "RAIL_TX_POWER_MODE_OFDM_PA_EFF_20DBM", "Yes",
-                       maxPowerLevel);
-  } else {
-    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
-                       "RAIL_TX_POWER_MODE_OFDM_PA_EFF_20DBM", "Yes", "No");
-  }
- #else
-  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
-                     "RAIL_TX_POWER_MODE_OFDM_PA_EFF_20DBM", "N/A", "N/A");
- #endif//RAIL_TX_POWER_MODE_OFDM_PA_EFF_20DBM
- #ifdef RAIL_TX_POWER_MODE_OFDM_PA_EFF_MAXDBM
-  if (RAIL_SupportsTxPowerMode(railHandle,
-                               RAIL_TX_POWER_MODE_OFDM_PA_EFF_MAXDBM,
-                               &maxPowerLevel)
-      && (maxPowerLevel != RAIL_TX_POWER_LEVEL_INVALID)) {
-    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%u",
-                       "RAIL_TX_POWER_MODE_OFDM_PA_EFF_MAXDBM", "Yes",
-                       maxPowerLevel);
-  } else {
-    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
-                       "RAIL_TX_POWER_MODE_OFDM_PA_EFF_MAXDBM", "Yes", "No");
-  }
- #else
-  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
-                     "RAIL_TX_POWER_MODE_OFDM_PA_EFF_MAXDBM", "N/A", "N/A");
- #endif//RAIL_TX_POWER_MODE_OFDM_PA_EFF_MAXDBM
   responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
                      "RAIL_SUPPORTS_PROTOCOL_BLE",
                      RAIL_SUPPORTS_PROTOCOL_BLE ? "Yes" : "No",
@@ -943,6 +831,10 @@ void printChipFeatures(sl_cli_command_arg_t *args)
                      "RAIL_IEEE802154_SUPPORTS_RX_CHANNEL_SWITCHING",
                      RAIL_IEEE802154_SUPPORTS_RX_CHANNEL_SWITCHING ? "Yes" : "No",
                      RAIL_IEEE802154_SupportsRxChannelSwitching(railHandle) ? "Yes" : "No");
+  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
+                     "RAIL_IEEE802154_SUPPORTS_2MBPS_PHY",
+                     RAIL_IEEE802154_SUPPORTS_2MBPS_PHY ? "Yes" : "No",
+                     RAIL_IEEE802154_Supports2MbpsPhy(railHandle) ? "Yes" : "No");
   responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
                      "RAIL_SUPPORTS_PROTOCOL_ZWAVE",
                      RAIL_SUPPORTS_PROTOCOL_ZWAVE ? "Yes" : "No",

@@ -43,7 +43,7 @@ class CALC_Firmware(ICalculator):
         Args:
             model (ModelRoot) : Data model to read and write variables from
         """
-        if model.part_family.lower() in ["dumbo", "jumbo", "nerio", "nixi"]:
+        if model.part_family.lower() in ["dumbo", "jumbo", "nerio", "nixi", "unit_test_part"]:
             # skip this for Panther as the preference was to manually re-write the reset values         
             # MCUW_RADIO_CFG-734 Panther: PHY/MAC Design requests more registers added (all MODEM, AGC, etc.) with re-writes of reset values
             model.vars.MODEM_RAMPLEV_RAMPLEV0.value = None

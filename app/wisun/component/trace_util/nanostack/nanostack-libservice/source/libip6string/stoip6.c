@@ -34,8 +34,10 @@ static bool is_hex(char c);
 bool stoip6(const char *ip6addr, size_t len, void *dest)
 {
   uint8_t *addr;
-  const char *p, *q;
-  int_fast8_t field_no, coloncolon = -1;
+  const char *p;
+  const char *q;
+  int_fast8_t field_no;
+  int_fast8_t coloncolon = -1;
 
   addr = dest;
 
@@ -111,7 +113,8 @@ unsigned char sipv6_prefixlength(const char *ip6addr)
 
 int stoip6_prefix(const char *ip6addr, void *dest, int_fast16_t *prefix_len_out)
 {
-  size_t addr_len, total_len;
+  size_t addr_len;
+  size_t total_len;
   int_fast16_t prefix_length;
 
   if (prefix_len_out) {

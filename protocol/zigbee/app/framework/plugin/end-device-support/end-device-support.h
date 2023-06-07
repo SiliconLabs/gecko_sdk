@@ -35,32 +35,31 @@
  * @{
  */
 
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
+#include "sl_component_catalog.h"
+#endif
+#ifdef SL_CATALOG_ZIGBEE_END_DEVICE_SUPPORT_PRESENT
 #include "end-device-support-config.h"
+#else
+#include "config/end-device-support-config.h"
+#endif
+
 #if (EMBER_AF_PLUGIN_END_DEVICE_SUPPORT_ENABLE_POLL_COMPLETED_CALLBACK == 1)
 #define ENABLE_POLL_COMPLETED_CALLBACK
 #endif
 #if (EMBER_AF_PLUGIN_END_DEVICE_SUPPORT_ALLOW_REJOINS_WITH_WELL_KNOWN_LINK_KEY == 1)
 #define ALLOW_REJOINS_WITH_WELL_KNOWN_LINK_KEY
 #endif
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_END_DEVICE_SUPPORT_ENABLE_POLL_COMPLETED_CALLBACK
-#define ENABLE_POLL_COMPLETED_CALLBACK
-#endif
-#ifdef EMBER_AF_PLUGIN_END_DEVICE_SUPPORT_ALLOW_REJOINS_WITH_WELL_KNOWN_LINK_KEY
-#define ALLOW_REJOINS_WITH_WELL_KNOWN_LINK_KEY
-#endif
-#endif // UC_BUILD
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-extern bool emAfEnablePollCompletedCallback;
+extern bool sli_zigbee_af_enable_poll_completed_callback;
 
 typedef struct {
   uint32_t pollIntervalMs;
   uint8_t numPollsFailing;
-} EmAfPollingState;
+} sli_zigbee_af_polling_state;
 
-extern EmAfPollingState emAfPollingStates[];
+extern sli_zigbee_af_polling_state sli_zigbee_af_polling_states[];
 #endif //DOXYGEN_SHOULD_SKIP_THIS
 
 /**
@@ -68,7 +67,7 @@ extern EmAfPollingState emAfPollingStates[];
  * @{
  */
 
-void emberAfPluginEndDeviceSupportMoveNetworkEventHandler(SLXU_UC_EVENT);
+void emberAfPluginEndDeviceSupportMoveNetworkEventHandler(sl_zigbee_event_t * event);
 
 /** @} */ // end of name Handlers
 
@@ -131,8 +130,8 @@ bool emberAfPluginEndDeviceSupportPreNetworkMoveCallback(void);
 /** @} */ // end of name Callbacks
 /** @} */ // end of end-device-support
 
-void emAfPollCompleteHandler(EmberStatus status, uint8_t limit);
-void emAfPluginEndDeviceSupportMoveInit(void);
-void emAfPluginEndDeviceSupportPollingInit(void);
+void sli_zigbee_af_poll_complete_handler(EmberStatus status, uint8_t limit);
+void sli_zigbee_af_end_device_support_move_init(void);
+void sli_zigbee_af_end_device_support_polling_init(void);
 
 #endif // SL_ZIGBEE_END_DEVICE_SUPPORT_H

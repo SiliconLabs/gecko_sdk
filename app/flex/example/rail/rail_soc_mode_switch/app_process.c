@@ -44,6 +44,7 @@
 #include "rail_types.h"
 #include "cmsis_compiler.h"
 #include "sl_flex_mode_switch.h"
+#include "sl_flex_rail_config.h"
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)
 #include "app_task_init.h"
@@ -52,8 +53,6 @@
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
-/// Size of RAIL RX/TX FIFO
-#define RAIL_FIFO_SIZE (256U)
 /// Transmit data length
 #define TX_PAYLOAD_LENGTH (16U)
 /// Indicator of a mode switch end packet
@@ -158,9 +157,9 @@ static volatile uint64_t error_code = 0;
 static volatile RAIL_Status_t calibration_status = 0;
 
 /// Receive and Send FIFO
-static __ALIGNED(RAIL_FIFO_ALIGNMENT) uint8_t rx_fifo[RAIL_FIFO_SIZE];
+static __ALIGNED(RAIL_FIFO_ALIGNMENT) uint8_t rx_fifo[SL_FLEX_RAIL_RX_FIFO_SIZE];
 
-static __ALIGNED(RAIL_FIFO_ALIGNMENT) uint8_t tx_fifo[RAIL_FIFO_SIZE];
+static __ALIGNED(RAIL_FIFO_ALIGNMENT) uint8_t tx_fifo[SL_FLEX_RAIL_TX_FIFO_SIZE];
 
 /// Transmit packet
 static uint8_t out_packet[TX_PAYLOAD_LENGTH] = {
@@ -313,12 +312,12 @@ void set_up_tx_fifo(RAIL_Handle_t rail_handle)
   allocated_tx_fifo_size = RAIL_SetTxFifo(rail_handle,
                                           tx_fifo,
                                           0,
-                                          RAIL_FIFO_SIZE);
-  app_assert(allocated_tx_fifo_size == RAIL_FIFO_SIZE,
+                                          SL_FLEX_RAIL_TX_FIFO_SIZE);
+  app_assert(allocated_tx_fifo_size == SL_FLEX_RAIL_TX_FIFO_SIZE,
              "RAIL_SetTxFifo() failed to allocate a large enough fifo"
              "(%d bytes instead of %d bytes)\n",
              allocated_tx_fifo_size,
-             RAIL_FIFO_SIZE);
+             SL_FLEX_RAIL_TX_FIFO_SIZE);
 }
 
 /******************************************************************************
@@ -581,10 +580,10 @@ static void handle_state_idle(RAIL_Handle_t rail_handle)
       app_log_warning("ERROR RAIL_StartTx() result: %d", rail_status);
     }
     tx_requested = false;
-  }
 #if defined(SL_CATALOG_KERNEL_PRESENT)
-  app_task_notify();
+    app_task_notify();
 #endif
+  }
 }
 
 /******************************************************************************

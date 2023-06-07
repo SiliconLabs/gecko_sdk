@@ -26,7 +26,7 @@
 uint8_t *emWriteHexInternal(uint8_t *charBuffer, uint16_t value, uint8_t charCount);
 
 /** @brief Typedefine to cast a function into the appropriate format
- * to be used inside the \c emPrintfInternal function below, for performing the
+ * to be used inside the \c sli_util_printf_internal function below, for performing the
  * actual flushing of a formatted string to a destination such as a serial port.
  *
  * @param flushVar: The destination of the flush, most commonly a serial port
@@ -47,7 +47,7 @@ typedef Ecode_t (emPrintfFlushHandler)(COM_Port_t flushVar,
  *
  * @param flushHandler: The name of an internal function, which has
  * parameters matching the function \c emPrintfFlushHandler above, responsible
- * for flushing a string formatted by this function, \c emPrintfInternal, to
+ * for flushing a string formatted by this function, \c sli_util_printf_internal, to
  * the appropriate buffer or function that performs the actual transmission.
  *
  * @param port  The destination of the flush performed above, most commonly
@@ -59,10 +59,10 @@ typedef Ecode_t (emPrintfFlushHandler)(COM_Port_t flushVar,
  *
  * @return The number of characters written.
  */
-uint8_t emPrintfInternal(emPrintfFlushHandler flushHandler,
-                         COM_Port_t port,
-                         PGM_P string,
-                         va_list args);
+uint8_t sli_util_printf_internal(emPrintfFlushHandler flushHandler,
+                                 COM_Port_t port,
+                                 PGM_P string,
+                                 va_list args);
 
 /** @} END Printf Prototypes */
 

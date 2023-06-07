@@ -31,6 +31,11 @@
 #ifndef SL_GATT_SERVICE_RHT_H
 #define SL_GATT_SERVICE_RHT_H
 
+/***********************************************************************************************//**
+ * @addtogroup gatt_service_rht
+ * @{
+ **************************************************************************************************/
+
 #include "sl_bt_api.h"
 
 /**************************************************************************//**
@@ -48,4 +53,5 @@ void sl_gatt_service_rht_on_event(sl_bt_msg_t *evt);
  *****************************************************************************/
 sl_status_t sl_gatt_service_rht_get(uint32_t *rh, int32_t *t);
 
+/** @} (end addtogroup gatt_service_rht) */
 #endif // SL_GATT_SERVICE_RHT_H

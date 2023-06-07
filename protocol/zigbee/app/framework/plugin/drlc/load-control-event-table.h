@@ -79,15 +79,15 @@ void afLoadControlEventTableInit(uint8_t endpoint);
  * A call to this function always generates an event response over the air.
  *
  */
-void emAfScheduleLoadControlEvent(uint8_t endpoint,
-                                  EmberAfLoadControlEvent *event);
+void sli_zigbee_af_schedule_load_control_event(uint8_t endpoint,
+                                               EmberAfLoadControlEvent *event);
 
 /**
  * @brief Tells the event table when a tick has taken place.
  * This function should be called by the cluster that uses the
  * event table.
  **/
-void emAfLoadControlEventTableTick(uint8_t endpoint);
+void sli_zigbee_af_load_control_event_table_tick(uint8_t endpoint);
 
 /**
  * @brief Cancels all events in the event table.
@@ -95,18 +95,18 @@ void emAfLoadControlEventTableTick(uint8_t endpoint);
  * @return A bool value indicating that a response was
  * generated for this action.
  **/
-bool emAfCancelAllLoadControlEvents(uint8_t endpoint,
-                                    uint8_t cancelControl);
+bool sli_zigbee_af_cancel_all_load_control_events(uint8_t endpoint,
+                                                  uint8_t cancelControl);
 
 /**
  * @brief Cancels an event in the event table.
  *
  * A call to this function always generates an event response over the air.
  **/
-void emAfCancelLoadControlEvent(uint8_t endpoint,
-                                uint32_t eventId,
-                                uint8_t cancelControl,
-                                uint32_t effectiveTime);
+void sli_zigbee_af_cancel_load_control_event(uint8_t endpoint,
+                                             uint32_t eventId,
+                                             uint8_t cancelControl,
+                                             uint32_t effectiveTime);
 
 /**
  * @brief Schedules a call to cancel an event.
@@ -138,9 +138,9 @@ void afScheduleCancelEvent(EmberAfLoadControlEvent *e);
 /**
  * An interface for opting in and out of an event.
  */
-void emAfLoadControlEventOptInOrOut(uint8_t endpoint,
-                                    uint32_t eventId,
-                                    bool optIn);
+void sli_zigbee_af_load_control_event_opt_in_or_out(uint8_t endpoint,
+                                                    uint32_t eventId,
+                                                    bool optIn);
 
 // The module using this table is responsible for providing the following
 // functions.
@@ -160,20 +160,20 @@ void emberAfEventAction(EmberAfLoadControlEvent *event,
  *  an attempt to append a signature to the event status message
  *  has failed.
  **/
-void emAfNoteSignatureFailure(void);
+void sli_zigbee_af_note_signature_failure(void);
 
 /** @brief Prints the load control event table.
 **/
-void emAfLoadControlEventTablePrint(uint8_t endpoint);
+void sli_zigbee_af_load_control_event_table_print(uint8_t endpoint);
 
 /**
  * @brief Initializes the load control event table.
  */
-void emAfLoadControlEventTableInit(uint8_t endpoint);
+void sli_zigbee_af_load_control_event_table_init(uint8_t endpoint);
 
 /*
  * @brief Clears the load control event table.
  */
-void emAfLoadControlEventTableClear(uint8_t endpoint);
+void sli_zigbee_af_load_control_event_table_clear(uint8_t endpoint);
 
 #endif //__LOAD_CONTROL_EVENT_TABLE_H__

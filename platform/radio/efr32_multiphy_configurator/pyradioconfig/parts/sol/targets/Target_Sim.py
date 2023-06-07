@@ -18,10 +18,16 @@ class Target_Sim_Sol(ITarget):
         #Configure FCD1,3 (needs to be studied further)
         self.FRC_FCD_DISABLE(model)
 
+        #Make sure the PHY has a name, since we use this for special cases in the profile logic
+        try:
+            phy_name = getattr(model.phy,'name')
+        except:
+            phy_name = "None"
+
         #Force adc frequency to be multiple of Fxo (no frequency planning for Sim PHYs)
         #except for PHY_Internal_Test_Max_Sampling
-        if model.phy.name != 'PHY_Internal_Test_Max_Sampling' and model.phy.name != 'PHY_Internal_Freq_Plan_Test' and \
-                model.phy.name != 'PHY_Internal_Freq_Plan_Test_Max_Interp' and model.phy.name != 'PHY_Internal_Freq_Plan_Test_OFDM':
+        if phy_name != 'PHY_Internal_Test_Max_Sampling' and phy_name != 'PHY_Internal_Freq_Plan_Test' and \
+                phy_name != 'PHY_Internal_Freq_Plan_Test_Max_Interp' and phy_name != 'PHY_Internal_Freq_Plan_Test_OFDM':
             model.vars.fpll_divx.value_forced = 5
             model.vars.fpll_divy.value_forced = 16
             model.vars.fpll_divn.value_forced = 80
@@ -35,64 +41,56 @@ class Target_Sim_Sol(ITarget):
         self.FORCE_LNAMIXRFATT_TABLE(model)
 
         #PHY-specific rules (to be replaced globally once we figure out how calculate where they need to apply)
-        if model.phy.name == 'PHY_Bluetooth_LE_1M_Viterbi_917M_noDSA':
+        if phy_name == 'PHY_Bluetooth_LE_1M_Viterbi_917M_noDSA':
 
             # template - put correct calls here
             self.FRC_DFLCTRL_DISABLE(model)
             self.FRC_FCD_DISABLE(model)
             self.MODEM_SHAPING_OVERRIDE(model)
 
-        elif model.phy.name == 'PHY_Bluetooth_LE_2M_Viterbi_noDSA_fullrate':
+        elif phy_name == 'PHY_Bluetooth_LE_2M_Viterbi_noDSA_fullrate':
 
             # template - put correct calls here
             self.FRC_DFLCTRL_DISABLE(model)
             self.FRC_FCD_DISABLE(model)
             self.MODEM_SHAPING_OVERRIDE(model)
 
-        elif model.phy.name == 'PHY_Bluetooth_LE_2M_Viterbi':
+        elif phy_name == 'PHY_Bluetooth_LE_2M_Viterbi':
 
             # template - put correct calls here
             self.FRC_DFLCTRL_DISABLE(model)
             self.FRC_FCD_DISABLE(model)
             self.MODEM_SHAPING_OVERRIDE(model)
 
-        elif model.phy.name == 'PHY_Bluetooth_LE':
+        elif phy_name == 'PHY_Bluetooth_LE':
 
             # template - put correct calls here
             self.FRC_DFLCTRL_DISABLE(model)
             self.FRC_FCD_DISABLE(model)
             self.MODEM_SHAPING_OVERRIDE(model)
 
-        elif model.phy.name == 'PHY_Bluetooth_LE_Viterbi_noDSA_fullrate':
+        elif phy_name == 'PHY_Bluetooth_LE_Viterbi_noDSA_fullrate':
 
             # template - put correct calls here
             self.FRC_DFLCTRL_DISABLE(model)
             self.FRC_FCD_DISABLE(model)
             self.MODEM_SHAPING_OVERRIDE(model)
 
-        elif model.phy.name == 'PHY_Bluetooth_LE_Viterbi_noDSA':
+        elif phy_name == 'PHY_Bluetooth_LE_Viterbi_noDSA':
 
             # template - put correct calls here
             self.FRC_DFLCTRL_DISABLE(model)
             self.FRC_FCD_DISABLE(model)
             self.MODEM_SHAPING_OVERRIDE(model)
 
-        elif model.phy.name == 'PHY_Bluetooth_LE_Viterbi':
+        elif phy_name == 'PHY_Bluetooth_LE_Viterbi':
 
             # template - put correct calls here
             self.FRC_DFLCTRL_DISABLE(model)
             self.FRC_FCD_DISABLE(model)
             self.MODEM_SHAPING_OVERRIDE(model)
 
-        elif model.phy.name == 'PHY_Bluetooth_LongRange_dsa_125kbps':
-
-            # template - put correct calls here
-            self.FRC_DFLCTRL_DISABLE(model)
-            self.FRC_FCD_DISABLE(model)
-            self.MODEM_SHAPING_OVERRIDE(model)
-            self.FRC_LONGRANGE_OVERRIDE(model)
-
-        elif model.phy.name == 'PHY_Bluetooth_LongRange_dsa_500kbps':
+        elif phy_name == 'PHY_Bluetooth_LongRange_dsa_125kbps':
 
             # template - put correct calls here
             self.FRC_DFLCTRL_DISABLE(model)
@@ -100,7 +98,7 @@ class Target_Sim_Sol(ITarget):
             self.MODEM_SHAPING_OVERRIDE(model)
             self.FRC_LONGRANGE_OVERRIDE(model)
 
-        elif model.phy.name == 'PHY_Bluetooth_LongRange_NOdsa_125kbps':
+        elif phy_name == 'PHY_Bluetooth_LongRange_dsa_500kbps':
 
             # template - put correct calls here
             self.FRC_DFLCTRL_DISABLE(model)
@@ -108,7 +106,7 @@ class Target_Sim_Sol(ITarget):
             self.MODEM_SHAPING_OVERRIDE(model)
             self.FRC_LONGRANGE_OVERRIDE(model)
 
-        elif model.phy.name == 'PHY_Bluetooth_LongRange_NOdsa_500kbps':
+        elif phy_name == 'PHY_Bluetooth_LongRange_NOdsa_125kbps':
 
             # template - put correct calls here
             self.FRC_DFLCTRL_DISABLE(model)
@@ -116,35 +114,43 @@ class Target_Sim_Sol(ITarget):
             self.MODEM_SHAPING_OVERRIDE(model)
             self.FRC_LONGRANGE_OVERRIDE(model)
 
-        elif model.phy.name == 'PHY_IEEE802154_2p4GHz_cohdsa_diversity':
+        elif phy_name == 'PHY_Bluetooth_LongRange_NOdsa_500kbps':
+
+            # template - put correct calls here
+            self.FRC_DFLCTRL_DISABLE(model)
+            self.FRC_FCD_DISABLE(model)
+            self.MODEM_SHAPING_OVERRIDE(model)
+            self.FRC_LONGRANGE_OVERRIDE(model)
+
+        elif phy_name == 'PHY_IEEE802154_2p4GHz_cohdsa_diversity':
 
             # template - put correct calls here
             self.FRC_DFLCTRL_DISABLE(model)
             self.FRC_FCD_DISABLE(model)
             # self.MODEM_SHAPING_OVERRIDE(model)
 
-        elif model.phy.name == 'PHY_IEEE802154_2p4GHz_cohdsa':
+        elif phy_name == 'PHY_IEEE802154_2p4GHz_cohdsa':
 
             # template - put correct calls here
             self.FRC_DFLCTRL_DISABLE(model)
             self.FRC_FCD_DISABLE(model)
             # self.MODEM_SHAPING_OVERRIDE(model)
 
-        elif model.phy.name == 'PHY_IEEE802154_2p4GHz_diversity':
+        elif phy_name == 'PHY_IEEE802154_2p4GHz_diversity':
 
             # template - put correct calls here
             self.FRC_DFLCTRL_DISABLE(model)
             self.FRC_FCD_DISABLE(model)
             # self.MODEM_SHAPING_OVERRIDE(model)
 
-        elif model.phy.name == 'PHY_IEEE802154_2p4GHz':
+        elif phy_name == 'PHY_IEEE802154_2p4GHz':
 
             # template - put correct calls here
             self.FRC_DFLCTRL_DISABLE(model)
             self.FRC_FCD_DISABLE(model)
             # self.MODEM_SHAPING_OVERRIDE(model)
 
-        elif model.phy.name == 'PHY_ZWave_100kbps_916MHz' or model.phy.name == 'PHY_ZWave_100kbps_916MHz_viterbi':
+        elif phy_name == 'PHY_ZWave_100kbps_916MHz' or phy_name == 'PHY_ZWave_100kbps_916MHz_viterbi':
             # avoid nyquist issue in srw_rf_model
             model.vars.base_frequency_hz.value_forced = 915000000
             # template - put correct calls here
@@ -152,7 +158,7 @@ class Target_Sim_Sol(ITarget):
             self.FRC_FCD_DISABLE(model)
             # self.MODEM_SHAPING_OVERRIDE(model)
 
-        elif model.phy.name == 'PHY_IEEE802154_WISUN_920MHz_2GFSK_100kbps_2b_JP':
+        elif phy_name == 'PHY_IEEE802154_WISUN_920MHz_2GFSK_100kbps_2b_JP':
 
             # template - put correct calls here
             self.FRC_DFLCTRL_DISABLE(model)
@@ -160,7 +166,7 @@ class Target_Sim_Sol(ITarget):
             # self.MODEM_SHAPING_OVERRIDE(model)
             model.vars.base_frequency_hz.value_forced = 935789847
 
-        elif model.phy.name == 'PHY_IEEE802154_WISUN_920MHz_2GFSK_100kbps_2b_JP_ANTDIV':
+        elif phy_name == 'PHY_IEEE802154_WISUN_920MHz_2GFSK_100kbps_2b_JP_ANTDIV':
 
             # template - put correct calls here
             self.FRC_DFLCTRL_DISABLE(model)
@@ -168,7 +174,7 @@ class Target_Sim_Sol(ITarget):
             # self.MODEM_SHAPING_OVERRIDE(model)
             model.vars.base_frequency_hz.value_forced = 935789847
 
-        elif model.phy.name == 'PHY_Datasheet_Connect_920MHz_2GFSK_100kbps_trecs_ANTDIV':
+        elif phy_name == 'PHY_Datasheet_Connect_920MHz_2GFSK_100kbps_trecs_ANTDIV':
 
             # template - put correct calls here
             self.FRC_DFLCTRL_DISABLE(model)
@@ -176,7 +182,7 @@ class Target_Sim_Sol(ITarget):
             # self.MODEM_SHAPING_OVERRIDE(model)
             model.vars.base_frequency_hz.value_forced = 935789847
 
-        elif model.phy.name == 'PHY_IEEE802154_WISUN_920MHz_2GFSK_200kbps_4b_JP':
+        elif phy_name == 'PHY_IEEE802154_WISUN_920MHz_2GFSK_200kbps_4b_JP':
 
             # template - put correct calls here
             self.FRC_DFLCTRL_DISABLE(model)
@@ -184,7 +190,7 @@ class Target_Sim_Sol(ITarget):
             # self.MODEM_SHAPING_OVERRIDE(model)
             model.vars.base_frequency_hz.value_forced = 935669837
 
-        elif model.phy.name == 'PHY_IEEE802154_WISUN_920MHz_2GFSK_50kbps_1b_JP':
+        elif phy_name == 'PHY_IEEE802154_WISUN_920MHz_2GFSK_50kbps_1b_JP':
 
             # template - put correct calls here
             self.FRC_DFLCTRL_DISABLE(model)
@@ -192,7 +198,7 @@ class Target_Sim_Sol(ITarget):
             # self.MODEM_SHAPING_OVERRIDE(model)
             model.vars.base_frequency_hz.value_forced = 935849852
 
-        elif model.phy.name == 'PHY_IEEE802154_WISUN_915MHz_2GFSK_150kbps_3_NA':
+        elif phy_name == 'PHY_IEEE802154_WISUN_915MHz_2GFSK_150kbps_3_NA':
 
             # template - put correct calls here
             self.FRC_DFLCTRL_DISABLE(model)
@@ -200,7 +206,7 @@ class Target_Sim_Sol(ITarget):
             # self.MODEM_SHAPING_OVERRIDE(model)
             model.vars.base_frequency_hz.value_forced = 935820593
 
-        elif model.phy.name == 'PHY_IEEE802154_WISUN_915MHz_2GFSK_200kbps_4a_NA':
+        elif phy_name == 'PHY_IEEE802154_WISUN_915MHz_2GFSK_200kbps_4a_NA':
 
             # template - put correct calls here
             self.FRC_DFLCTRL_DISABLE(model)
@@ -208,7 +214,7 @@ class Target_Sim_Sol(ITarget):
             # self.MODEM_SHAPING_OVERRIDE(model)
             model.vars.base_frequency_hz.value_forced = 935790591
 
-        elif model.phy.name == 'PHY_IEEE802154_WISUN_915MHz_2GFSK_300kbps_5_NA':
+        elif phy_name == 'PHY_IEEE802154_WISUN_915MHz_2GFSK_300kbps_5_NA':
 
             # template - put correct calls here
             self.FRC_DFLCTRL_DISABLE(model)
@@ -216,7 +222,7 @@ class Target_Sim_Sol(ITarget):
             # self.MODEM_SHAPING_OVERRIDE(model)
             model.vars.base_frequency_hz.value_forced = 935721684
 
-        elif model.phy.name == 'PHY_IEEE802154_WISUN_915MHz_2GFSK_50kbps_1b_NA':
+        elif phy_name == 'PHY_IEEE802154_WISUN_915MHz_2GFSK_50kbps_1b_NA':
 
             # template - put correct calls here
             self.FRC_DFLCTRL_DISABLE(model)
@@ -225,7 +231,7 @@ class Target_Sim_Sol(ITarget):
             model.vars.base_frequency_hz.value_forced = 935850596
 
 
-        elif model.phy.name == 'PHY_IEEE802154_WISUN_868MHz_2GFSK_100kbps_2a_EU':
+        elif phy_name == 'PHY_IEEE802154_WISUN_868MHz_2GFSK_100kbps_2a_EU':
 
             # template - put correct calls here
             self.FRC_DFLCTRL_DISABLE(model)
@@ -233,7 +239,7 @@ class Target_Sim_Sol(ITarget):
             # self.MODEM_SHAPING_OVERRIDE(model)
             model.vars.base_frequency_hz.value_forced = 831852158
 
-        elif model.phy.name == 'PHY_IEEE802154_WISUN_868MHz_2GFSK_50kbps_1a_EU':
+        elif phy_name == 'PHY_IEEE802154_WISUN_868MHz_2GFSK_50kbps_1a_EU':
 
             # template - put correct calls here
             self.FRC_DFLCTRL_DISABLE(model)
@@ -241,7 +247,7 @@ class Target_Sim_Sol(ITarget):
             # self.MODEM_SHAPING_OVERRIDE(model)
             model.vars.base_frequency_hz.value_forced = 831888828
 
-        elif model.phy.name == 'PHY_Studio_Connect_915MHz_2GFSK_500kbps':
+        elif phy_name == 'PHY_Studio_Connect_915MHz_2GFSK_500kbps':
 
             # template - put correct calls here
             self.FRC_DFLCTRL_DISABLE(model)
@@ -249,7 +255,7 @@ class Target_Sim_Sol(ITarget):
             # self.MODEM_SHAPING_OVERRIDE(model)
             model.vars.base_frequency_hz.value_forced = 935521683
 
-        elif model.phy.name == 'PHY_Studio_Connect_920MHz_2GFSK_100kbps':
+        elif phy_name == 'PHY_Studio_Connect_920MHz_2GFSK_100kbps':
 
             # template - put correct calls here
             self.FRC_DFLCTRL_DISABLE(model)
@@ -257,7 +263,7 @@ class Target_Sim_Sol(ITarget):
             # self.MODEM_SHAPING_OVERRIDE(model)
             model.vars.base_frequency_hz.value_forced = 935846678
 
-        elif model.phy.name == 'PHY_Datasheet_915M_2GFSK_600bps_300':
+        elif phy_name == 'PHY_Datasheet_915M_2GFSK_600bps_300':
 
             # template - put correct calls here
             self.FRC_DFLCTRL_DISABLE(model)
@@ -265,7 +271,7 @@ class Target_Sim_Sol(ITarget):
             # self.MODEM_SHAPING_OVERRIDE(model)
             model.vars.base_frequency_hz.value_forced = 935916676
 
-        elif model.phy.name == 'PHY_IEEE802154_915MHz_OQPSK_coh':
+        elif phy_name == 'PHY_IEEE802154_915MHz_OQPSK_coh':
 
             # template - put correct calls here
             self.FRC_DFLCTRL_DISABLE(model)
@@ -273,7 +279,7 @@ class Target_Sim_Sol(ITarget):
             # self.MODEM_SHAPING_OVERRIDE(model)
             model.vars.base_frequency_hz.value_forced = 935265471
 
-        elif model.phy.name == 'PHY_IEEE802154_SUN_FSK_920MHz_4FSK_400kbps':
+        elif phy_name == 'PHY_IEEE802154_SUN_FSK_920MHz_4FSK_400kbps':
 
             # template - put correct calls here
             self.FRC_DFLCTRL_DISABLE(model)
@@ -281,7 +287,7 @@ class Target_Sim_Sol(ITarget):
             # self.MODEM_SHAPING_OVERRIDE(model)
             model.vars.base_frequency_hz.value_forced = 935673010
 
-        elif model.phy.name == 'PHY_Datasheet_915M_4GFSK_400Kbps_33p3K':
+        elif phy_name == 'PHY_Datasheet_915M_4GFSK_400Kbps_33p3K':
 
             # template - put correct calls here
             self.FRC_DFLCTRL_DISABLE(model)
@@ -289,7 +295,7 @@ class Target_Sim_Sol(ITarget):
             # self.MODEM_SHAPING_OVERRIDE(model)
             model.vars.base_frequency_hz.value_forced = 935916676
 
-        elif model.phy.name == 'PHY_Internal_SUN_OFDM_FSK_Concurrent':
+        elif phy_name == 'PHY_Internal_SUN_OFDM_FSK_Concurrent':
 
             # template - put correct calls here
             self.FRC_DFLCTRL_DISABLE(model)
@@ -297,7 +303,7 @@ class Target_Sim_Sol(ITarget):
             # self.MODEM_SHAPING_OVERRIDE(model)
             model.vars.base_frequency_hz.value_forced = 832003333
 
-        elif model.phy.name == 'PHY_IEEE802154_SUN_OFDM_OPT1':
+        elif phy_name == 'PHY_IEEE802154_SUN_OFDM_OPT1':
 
             # template - put correct calls here
             self.FRC_DFLCTRL_DISABLE(model)
@@ -305,7 +311,7 @@ class Target_Sim_Sol(ITarget):
             # self.MODEM_SHAPING_OVERRIDE(model)
             model.vars.base_frequency_hz.value_forced = 832003333
 
-        elif model.phy.name == 'PHY_IEEE802154_SUN_OFDM_OPT4':
+        elif phy_name == 'PHY_IEEE802154_SUN_OFDM_OPT4':
 
             # # template - put correct calls here
             # self.FRC_DFLCTRL_DISABLE(model)
@@ -316,7 +322,7 @@ class Target_Sim_Sol(ITarget):
             model.vars.FEFILT1_CF_DEC1.value_forced           = 9
             model.vars.FEFILT1_SRC_SRCRATIO.value_forced      = 766771
 
-        elif model.phy.name == 'PHY_Internal_WISUN_868MHz_2GFSK_50kbps_1a_EU':
+        elif phy_name == 'PHY_Internal_WISUN_868MHz_2GFSK_50kbps_1a_EU':
 
             # template - put correct calls here
             self.FRC_DFLCTRL_DISABLE(model)

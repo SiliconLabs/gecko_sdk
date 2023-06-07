@@ -20,7 +20,7 @@
 #include PLATFORM_HEADER
 #include "hal.h"
 #include "ember.h"
-#include "af.h" // includes sl_component_catalog.h
+#include "sl_component_catalog.h"
 #include "sl_cli.h"
 #ifdef SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT
 #include "sl_zigbee_debug_print.h"
@@ -33,6 +33,7 @@
 #endif //SL_CATALOG_ZIGBEE_DEBUG_BASIC_PRESENT
 #include "network_test_config.h"
 
+#include "zigbee_app_framework_common.h"
 //------------------------------------------------------------------------------
 // Defines and variables.
 #define MAX_ZIGBEE_TX_TEST_MESSAGE_LENGTH   70
@@ -71,14 +72,14 @@ void zigbee_large_network_event_handler(sl_zigbee_event_t *event);
 //------------------------------------------------------------------------------
 // Extern and Forward declarations
 
-extern EmberStatus emAfSend(EmberOutgoingMessageType type,
-                            uint16_t indexOrDestination,
-                            EmberApsFrame *aps_frame,
-                            uint8_t messageLength,
-                            uint8_t *message,
-                            uint16_t *messageTag,
-                            EmberNodeId alias,
-                            uint8_t sequence);
+extern EmberStatus sli_zigbee_af_send(EmberOutgoingMessageType type,
+                                      uint16_t indexOrDestination,
+                                      EmberApsFrame *aps_frame,
+                                      uint8_t messageLength,
+                                      uint8_t *message,
+                                      uint16_t *messageTag,
+                                      EmberNodeId alias,
+                                      uint8_t sequence);
 static void print_zigbee_tx_test_stats(void);
 void zigbee_tx_test_event_handler(sl_zigbee_event_t *event);
 
@@ -245,7 +246,7 @@ void zigbee_large_network_event_handler(sl_zigbee_event_t *event)
   EmberApsFrame apsf;
   apsf.sourceEndpoint = 0x01;
   apsf.destinationEndpoint = 0x01;
-  apsf.options = EMBER_AF_DEFAULT_APS_OPTIONS;
+  apsf.options = (EMBER_APS_OPTION_RETRY | EMBER_APS_OPTION_ENABLE_ADDRESS_DISCOVERY);
   apsf.clusterId = 0x0042; // counted packets cluster
   apsf.sequence = 0x00;
 
@@ -259,12 +260,11 @@ void zigbee_large_network_event_handler(sl_zigbee_event_t *event)
   // fourth and fifth bytes are sequence counters
   zigbee_tx_test_info.message_payload[3] = (sequence_counter >> 8);
   zigbee_tx_test_info.message_payload[4] = (sequence_counter);
-
-  if (EMBER_SUCCESS == emberAfSendUnicast(EMBER_OUTGOING_DIRECT,
-                                          zigbee_tx_test_info.destination,
-                                          &apsf,
-                                          zigbee_tx_test_info.message_length,
-                                          zigbee_tx_test_info.message_payload)) {
+  EmberMessageBuffer payload = emberFillLinkedBuffers(zigbee_tx_test_info.message_payload, zigbee_tx_test_info.message_length);
+  if (EMBER_SUCCESS == emberSendUnicast(EMBER_OUTGOING_DIRECT,
+                                        zigbee_tx_test_info.destination,
+                                        &apsf,
+                                        payload)) {
     zigbee_tx_test_info.message_running_count++;
     zigbee_tx_test_info.current_in_flight++;
     sequence_counter++;
@@ -293,7 +293,6 @@ void zigbee_tx_test_event_handler(sl_zigbee_event_t *event)
   (void)event;
 
   EmberApsFrame aps_frame;
-  uint16_t message_tag;
   uint8_t i;
 
   if (zigbee_tx_test_info.max_in_flight > 0
@@ -321,14 +320,13 @@ void zigbee_tx_test_event_handler(sl_zigbee_event_t *event)
   zigbee_tx_test_info.message_payload[4] = (sequence_counter);
 
   uint8_t outgoing_type =  (zigbee_tx_test_info.destination == 0xFFFF) ? EMBER_OUTGOING_BROADCAST : EMBER_OUTGOING_DIRECT;
-  if (emAfSend(outgoing_type,
-               zigbee_tx_test_info.destination,
-               &aps_frame,
-               zigbee_tx_test_info.message_length,
-               zigbee_tx_test_info.message_payload,
-               &message_tag,
-               0xFFFF,
-               0) == EMBER_SUCCESS) {
+
+  EmberMessageBuffer payload = emberFillLinkedBuffers(zigbee_tx_test_info.message_payload, zigbee_tx_test_info.message_length);
+
+  if (EMBER_SUCCESS == emberSendUnicast(outgoing_type,
+                                        zigbee_tx_test_info.destination,
+                                        &aps_frame,
+                                        payload)) {
     zigbee_tx_test_info.message_running_count++;
     zigbee_tx_test_info.current_in_flight++;
     sequence_counter++;
@@ -448,7 +446,7 @@ void zigbee_set_passive_ack_config(sl_cli_command_arg_t *arguments)
 #if (LARGE_NETWORK_TESTING == 1)
 
 #include "sl_zigbee_pro_stack_config.h"
-extern uint8_t emNewBroadcastEntryThreshold;
+extern uint8_t sli_zigbee_new_broadcast_entry_threshold;
 
 // raw 0x0042 { FA DE FE 00 01}
 // send 0xffff 1 1
@@ -462,11 +460,11 @@ bool emberAfPreCommandReceivedCallback(EmberAfClusterCommand* cmd)
   if (cmd->apsFrame->clusterId == 0x0042) {
     uint8_t *msg_contents = cmd->buffer;
     if (msg_contents[0] == 0xFA && msg_contents[1] == 0xDE ) {
-      emDebugBinaryFormat(EM_DEBUG_LATENCY, "BBBB",
-                          0x00, // frame control, top bit is start/stop
-                          2, //2 byte sequence number
-                          msg_contents[3],
-                          msg_contents[4]);
+      sli_zigbee_debug_binary_format(EM_DEBUG_LATENCY, "BBBB",
+                                     0x00, // frame control, top bit is start/stop
+                                     2, //2 byte sequence number
+                                     msg_contents[3],
+                                     msg_contents[4]);
       return true;
     }
   } else if (cmd->apsFrame->clusterId == 0x0043) {
@@ -500,11 +498,11 @@ bool emberAfPreMessageSendCallback(EmberAfMessageStruct* messageStruct,
   if (messageStruct->apsFrame->clusterId == 0x0042) {
     uint8_t *msg_contents = messageStruct->message;
     if (msg_contents[0] == 0xFA && msg_contents[1] == 0xDE ) {
-      emDebugBinaryFormat(EM_DEBUG_LATENCY, "BBBB",
-                          0x80, // frame control, top bit is start/stop
-                          2, //2 byte sequence number
-                          msg_contents[3],
-                          msg_contents[4]);
+      sli_zigbee_debug_binary_format(EM_DEBUG_LATENCY, "BBBB",
+                                     0x80, // frame control, top bit is start/stop
+                                     2, //2 byte sequence number
+                                     msg_contents[3],
+                                     msg_contents[4]);
       *status = EMBER_SUCCESS;
     }
   }
@@ -513,6 +511,6 @@ bool emberAfPreMessageSendCallback(EmberAfMessageStruct* messageStruct,
 
 void emberAfMainInitCallback(void)
 {
-  emNewBroadcastEntryThreshold = EMBER_BROADCAST_TABLE_SIZE;
+  sli_zigbee_new_broadcast_entry_threshold = EMBER_BROADCAST_TABLE_SIZE;
 }
 #endif // #if (LARGE_NETWORK_TESTING == 1)

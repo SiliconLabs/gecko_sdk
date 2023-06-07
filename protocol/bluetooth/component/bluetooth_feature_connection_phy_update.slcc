@@ -5,7 +5,7 @@ description: >
   This component is used to enable configuring the connection phy to a value other than the default 1M.
   For example, use this component to change the preferred phy to 2M or coded.
 
-category: "Bluetooth|Feature"
+category: Bluetooth|Bluetooth LE Controller (Link Layer)|Additional Features
 quality: "production"
 root_path: "protocol/bluetooth"
 provides:

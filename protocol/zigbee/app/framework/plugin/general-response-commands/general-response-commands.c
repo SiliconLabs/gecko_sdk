@@ -18,17 +18,10 @@
 #include "../../include/af.h"
 #include "../../util/util.h"
 
-#ifdef UC_BUILD
-bool emAfPluginGeneralResponseCommandsReadAttributesResponseCallback(EmberAfClusterId clusterId,
-                                                                     uint8_t *buffer,
-                                                                     uint16_t bufLen)
-#else // UC_BUILD
-bool emberAfReadAttributesResponseCallback(EmberAfClusterId clusterId,
-                                           uint8_t *buffer,
-                                           uint16_t bufLen)
-#endif
+bool sli_zigbee_af_general_response_commands_read_attributes_response_callback(EmberAfClusterId clusterId,
+                                                                               uint8_t *buffer,
+                                                                               uint16_t bufLen)
 {
-#if ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_DEBUG)) || defined(UC_BUILD))
   uint16_t bufIndex = 0;
   emberAfDebugPrint("%p_RESP: ", "READ_ATTR");
   emberAfDebugDebugExec(emberAfDecodeAndPrintClusterWithMfgCode(clusterId, emberAfGetMfgCodeFromCurrentCommand()));
@@ -83,7 +76,6 @@ bool emberAfReadAttributesResponseCallback(EmberAfClusterId clusterId,
       }
     }
   }
-#endif //EMBER_AF_PRINT_ENABLE && EMBER_AF_PRINT_DEBUG
   emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
   return true;
 }
@@ -92,7 +84,6 @@ bool emberAfWriteAttributesResponseCallback(EmberAfClusterId clusterId,
                                             uint8_t *buffer,
                                             uint16_t bufLen)
 {
-#if ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_DEBUG)) || defined(UC_BUILD))
   uint16_t bufIndex = 0;
   emberAfDebugPrint("%p_RESP: ", "WRITE_ATTR");
   emberAfDebugDebugExec(emberAfDecodeAndPrintClusterWithMfgCode(clusterId, emberAfGetMfgCodeFromCurrentCommand()));
@@ -120,7 +111,6 @@ bool emberAfWriteAttributesResponseCallback(EmberAfClusterId clusterId,
     }
     emberAfDebugFlush();
   }
-#endif //EMBER_AF_PRINT_ENABLE && EMBER_AF_PRINT_DEBUG
   emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
   return true;
 }
@@ -129,7 +119,6 @@ bool emberAfConfigureReportingResponseCallback(EmberAfClusterId clusterId,
                                                uint8_t *buffer,
                                                uint16_t bufLen)
 {
-#if ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_REPORTING)) || defined(UC_BUILD))
   uint16_t bufIndex = 0;
   emberAfReportingPrint("%p_RESP: ", "CFG_RPT");
   emberAfReportingDebugExec(emberAfDecodeAndPrintClusterWithMfgCode(clusterId, emberAfGetMfgCodeFromCurrentCommand()));
@@ -162,7 +151,6 @@ bool emberAfConfigureReportingResponseCallback(EmberAfClusterId clusterId,
     }
     emberAfReportingFlush();
   }
-#endif //EMBER_AF_PRINT_ENABLE && EMBER_AF_PRINT_REPORTING
   emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
   return true;
 }
@@ -171,7 +159,6 @@ bool emberAfReadReportingConfigurationResponseCallback(EmberAfClusterId clusterI
                                                        uint8_t *buffer,
                                                        uint16_t bufLen)
 {
-#if ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_REPORTING)) || defined(UC_BUILD))
   uint16_t bufIndex = 0;
   emberAfReportingPrint("%p_RESP: ", "READ_RPT_CFG");
   emberAfReportingDebugExec(emberAfDecodeAndPrintClusterWithMfgCode(clusterId, emberAfGetMfgCodeFromCurrentCommand()));
@@ -245,22 +232,14 @@ bool emberAfReadReportingConfigurationResponseCallback(EmberAfClusterId clusterI
     }
     emberAfReportingFlush();
   }
-#endif //EMBER_AF_PRINT_ENABLE && EMBER_AF_PRINT_REPORTING
   emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
   return true;
 }
 
-#ifdef UC_BUILD
-bool emAfPluginGeneralResponseCommandsReportAttributesCallback(EmberAfClusterId clusterId,
-                                                               uint8_t *buffer,
-                                                               uint16_t bufLen)
-#else // !UC_BUILD
-bool emberAfReportAttributesCallback(EmberAfClusterId clusterId,
-                                     uint8_t *buffer,
-                                     uint16_t bufLen)
-#endif // UC_BUILD
+bool sli_zigbee_af_general_response_commands_report_attributes_callback(EmberAfClusterId clusterId,
+                                                                        uint8_t *buffer,
+                                                                        uint16_t bufLen)
 {
-#if ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_REPORTING)) || defined(UC_BUILD))
   uint16_t bufIndex = 0;
 
   emberAfReportingPrint("RPT_ATTR: ");
@@ -290,11 +269,7 @@ bool emberAfReportAttributesCallback(EmberAfClusterId clusterId,
       if (emberAfIsStringAttributeType(dataType)) {
         emberAfReportingPrintString(buffer + bufIndex);
       } else if (emberAfIsLongStringAttributeType(dataType)) {
-#ifdef UC_BUILD
         emberAfReportingDebugExec(emberAfPrintLongString(EMBER_AF_PRINT_GENERIC, buffer + bufIndex));
-#else // UC_BUILD
-        emberAfReportingDebugExec(emberAfPrintLongString(EMBER_AF_PRINT_REPORTING, buffer + bufIndex));
-#endif // UC_BUILD
       } else {
         emberAfReportingPrintBuffer(buffer + bufIndex, dataSize, false);
       }
@@ -308,7 +283,6 @@ bool emberAfReportAttributesCallback(EmberAfClusterId clusterId,
       break; // while
     }
   }
-#endif //EMBER_AF_PRINT_ENABLE && EMBER_AF_PRINT_REPORTING
   emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
   return true;
 }
@@ -317,12 +291,10 @@ bool emberAfDefaultResponseCallback(EmberAfClusterId clusterId,
                                     uint8_t commandId,
                                     EmberAfStatus status)
 {
-#if ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_DEBUG)) || defined(UC_BUILD))
   emberAfDebugPrint("%p_RESP: ", "DEFAULT");
   emberAfDebugDebugExec(emberAfDecodeAndPrintClusterWithMfgCode(clusterId, emberAfGetMfgCodeFromCurrentCommand()));
   emberAfDebugPrintln(" cmd %x status %x", commandId, status);
   emberAfDebugFlush();
-#endif //EMBER_AF_PRINT_ENABLE && EMBER_AF_PRINT_DEBUG
   return true;
 }
 
@@ -332,7 +304,6 @@ bool emberAfDiscoverAttributesResponseCallback(EmberAfClusterId clusterId,
                                                uint16_t bufLen,
                                                bool extended)
 {
-#if ((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_DEBUG)) || defined(UC_BUILD))
   uint16_t bufIndex = 0;
 
   emberAfDebugPrint("%p%p_RESP: ", "DISC_ATTR", (extended ? "_EXT" : ""));
@@ -366,7 +337,6 @@ bool emberAfDiscoverAttributesResponseCallback(EmberAfClusterId clusterId,
     }
     emberAfDebugFlush();
   }
-#endif //EMBER_AF_PRINT_ENABLE && EMBER_AF_PRINT_DEBUG
   emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
   return true;
 }

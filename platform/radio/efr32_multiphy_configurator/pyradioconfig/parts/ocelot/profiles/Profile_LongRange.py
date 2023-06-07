@@ -19,10 +19,14 @@ class Profile_Long_Range_Ocelot(Profile_Long_Range_Nixi):
                                      value_limit_max=40000000, units_multiplier=UnitsMultiplier.MEGA)
 
     def build_optional_profile_inputs(self, model, profile):
+        self.make_optional_input(profile, model.vars.preamble_length, "preamble",
+                                     readable_name="Preamble Length Total", value_limit_min=0, value_limit_max=2097151, default=40)
         pass
 
     def build_advanced_profile_inputs(self, model, profile):
         self.make_linked_io(profile, model.vars.fec_en, 'Channel_Coding', readable_name="FEC Algorithm")
+        self.make_linked_io(profile, model.vars.fast_detect_enable, 'Advanced',
+                                   readable_name="Fast preamble detect")
 
     def build_hidden_profile_inputs(self, model, profile):
         # Hidden inputs to allow for fixed frame length testing
@@ -41,9 +45,9 @@ class Profile_Long_Range_Ocelot(Profile_Long_Range_Nixi):
 
     def build_register_profile_outputs(self, model, profile):
         family = self._family
-        build_modem_regs_ocelot(model, profile, family)
-        buildFrameOutputs(model, profile, family)
-        buildCrcOutputs(model, profile, family)
+        build_modem_regs_ocelot(model, profile)
+        buildFrameOutputs(model, profile)
+        buildCrcOutputs(model, profile)
         buildWhiteOutputs(model, profile)
         buildFecOutputs(model, profile)
 
@@ -152,12 +156,22 @@ class Profile_Long_Range_Ocelot(Profile_Long_Range_Nixi):
         #Read the mode and fec_en from the profile inputs (not yet written to model vars)
         longrange_mode = model.profile.inputs.longrange_mode.var_value
         fec_en = model.profile.inputs.fec_en.var_value
+        fast_detect_mode_en = (model.profile.inputs.fast_detect_enable.var_value == model.vars.fast_detect_enable.var_enum.ENABLED)
 
         # We need to modify the net bitrate (data rate) based on whether FEC is enabled or not
         if fec_en is not None and fec_en != model.vars.fec_en.var_enum.NONE:
             fec_factor=2
         else:
             fec_factor=1
+
+        # check if fast detect mode is enabled
+        if fast_detect_mode_en :
+            # Hardcoded values selected from emperical data
+            model.vars.MODEM_SQ_SQTIMOUT.value_forced = int(model.vars.dsss_len.value * 8)
+            model.vars.MODEM_SQEXT_SQSTG2TIMOUT.value_forced = int(model.vars.dsss_len.value * 1.5)
+
+            if model.profile.inputs.base_frequency_hz.var_value <= 500e6:
+                model.vars.MODEM_SQ_SQTIMOUT.value_forced = int(model.vars.dsss_len.value * 9)
 
         if longrange_mode == model.vars.longrange_mode.var_enum.LR_1p2k:
             model.vars.bitrate.value_forced = 1200//fec_factor

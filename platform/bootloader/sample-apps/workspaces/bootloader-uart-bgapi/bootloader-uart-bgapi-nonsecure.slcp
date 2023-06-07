@@ -1,6 +1,6 @@
 project_name: bootloader-uart-bgapi-nonsecure
 package: bootloader
-quality: evaluation
+quality: production
 label: Bootloader - NCP BGAPI UART DFU Non-Secure part of Bootloader using TrustZone
 description: >
   TrustZone is used to split into a Secure and Non-Secure bootloader. This is the non-secure part of the bootloader. The secure part of the bootloader, which contains the core functionalities needs to be built separately and used together with the non-secure part of the bootloader.

@@ -20,9 +20,12 @@
 #include "zigbee_app_framework_common.h"
 #include "zigbee_app_framework_callback.h"
 
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 
-#if (defined(SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT) || (defined(EMBER_SCRIPTED_TEST)))
+#if (defined(SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT) || (defined(EMBER_SCRIPTED_TEST))) \
+  || (defined(EMBER_AF_NCP) && defined(SL_CATALOG_ZIGBEE_AF_SUPPORT_PRESENT))
 extern EmberStatus emberAfPushNetworkIndex(uint8_t networkIndex);
 extern EmberStatus emberAfPushEndpointNetworkIndex(uint8_t endpoint);
 extern EmberStatus emberAfPopNetworkIndex(void);
@@ -37,7 +40,7 @@ extern uint8_t emberAfIndexFromEndpoint(uint8_t endpoint);
 extern void emberAfMainInitCallback(void);
 extern void emberAfMainTickCallback(void);
 
-EmberEventQueue emAppEventQueue;
+EmberEventQueue sli_zigbee_af_app_event_queue;
 
 //------------------------------------------------------------------------------
 // Init and tick callbacks
@@ -54,22 +57,22 @@ void sli_zigbee_stack_init_callback(void)
 }
 #endif // EZSP_HOST
 
-extern void emAfEventInit(void);
-extern void emAfLocalDataInit(void);
-extern void emAfInitDone(void);
+extern void sli_zigbee_af_event_init(void);
+extern void sli_zigbee_af_local_data_init(void);
+extern void sli_zigbee_af_initDone(void);
 
 void sli_zigbee_app_framework_init_callback(void)
 {
   // Init the event queue.
-  emInitializeEventQueue(&emAppEventQueue);
+  sli_zigbee_initialize_event_queue(&sli_zigbee_af_app_event_queue);
 
   // Call the application init callback.
   emberAfMainInitCallback();
 
   // Call the generated init callbacks.
-  emAfEventInit();
-  emAfLocalDataInit();
-  emAfInitDone();
+  sli_zigbee_af_event_init();
+  sli_zigbee_af_local_data_init();
+  sli_zigbee_af_initDone();
 }
 
 #ifndef EZSP_HOST
@@ -82,7 +85,7 @@ void sli_zigbee_stack_tick_callback(void)
 }
 #endif // EZSP_HOST
 
-extern void emAfTick(void);
+extern void sli_zigbee_af_tick(void);
 
 void sli_zigbee_app_framework_tick_callback(void)
 {
@@ -93,10 +96,10 @@ void sli_zigbee_app_framework_tick_callback(void)
   emberAfMainTickCallback();
 
   // Call the generated tick callback (tick the components that subscribed to it).
-  emAfTick();
+  sli_zigbee_af_tick();
 
   // Run the application event queue.
-  emberRunEventQueue(&emAppEventQueue);
+  emberRunEventQueue(&sli_zigbee_af_app_event_queue);
 }
 
 //------------------------------------------------------------------------------
@@ -144,7 +147,7 @@ void sli_zigbee_event_init(sl_zigbee_event_t *event,
   assert(!(network_index < 0xFF && endpoint < 0xFF));
 
   event->next = NULL;
-  event->actions.queue = &emAppEventQueue;
+  event->actions.queue = &sli_zigbee_af_app_event_queue;
   event->actions.handler = sli_zigbee_event_common_handler;
   event->actions.marker = NULL;
   event->dataPtr = handler;

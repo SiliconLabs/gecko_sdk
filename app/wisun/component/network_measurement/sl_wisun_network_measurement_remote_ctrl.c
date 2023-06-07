@@ -45,7 +45,6 @@
 #include "sl_iperf.h"
 #include "sl_iperf_util.h"
 #include "socket.h"
-#include "socket_hnd.h"
 #include "cmsis_os2.h"
 #include "sl_cmsis_os2_common.h"
 #include "sl_sleeptimer.h"
@@ -313,7 +312,7 @@ void sl_wisun_coap_remote_cli_iperf_cb(const sl_wisun_coap_packet_t * const req_
                                        sl_wisun_coap_packet_t * const resp_packet)
 {
   sl_status_t stat = SL_STATUS_FAIL;
-  _parse_iperf(req_packet, resp_packet);
+  stat = _parse_iperf(req_packet, resp_packet);
   printf("[COAP CLI iPerf transaction %s]\n", stat == SL_STATUS_OK ? "succeed" : "failed");
 }
 
@@ -321,7 +320,7 @@ void sl_wisun_coap_remote_cli_nbr_cb(const sl_wisun_coap_packet_t * const req_pa
                                      sl_wisun_coap_packet_t * const resp_packet)
 {
   sl_status_t stat = SL_STATUS_FAIL;
-  _get_nbr(req_packet, resp_packet);
+  stat = _get_nbr(req_packet, resp_packet);
   printf("[COAP CLI NeighborInfo transaction %s]\n", stat == SL_STATUS_OK ? "succeed" : "failed");
 }
 
@@ -415,7 +414,7 @@ static sl_status_t _parse_ping(const sl_wisun_coap_packet_t * const req_packet,
     sl_wisun_nwm_quick_measure(SL_WISUN_NWM_TARGET_TYPE_BORDER_ROUTER, packet_count, packet_size);
     print_target = BUFFER_TYPE_BORDER_ROUTER;
   } else {
-    if (ping_cmd.arg3 != NULL && inet_pton(AF_WISUN, ping_cmd.arg3, &remote_addr.sin6_addr) == RETVAL_ERROR) {
+    if (ping_cmd.arg3 != NULL && inet_pton(AF_WISUN, ping_cmd.arg3, &remote_addr.sin6_addr) == SOCKET_RETVAL_ERROR) {
       _build_response_packet("[IP address is not set or not valid]", req_packet, resp_packet);
       sl_wisun_coap_destroy_payload_str(req_payload);
       return SL_STATUS_FAIL;
@@ -429,7 +428,7 @@ static sl_status_t _parse_ping(const sl_wisun_coap_packet_t * const req_packet,
 
   // Build response packet.
   res = _build_send_output(req_packet, resp_packet, print_target);
-  if(res != SL_STATUS_OK){
+  if (res != SL_STATUS_OK) {
     _build_response_packet("[Buffer error]", req_packet, resp_packet);
   }
 
@@ -491,7 +490,7 @@ static sl_status_t _parse_iperf(const sl_wisun_coap_packet_t * const req_packet,
     if (!strncmp(iperf_cmd.arg2, "result", SL_WISUN_COAP_NWM_REMOTE_CLI_MAX_ARG_STRING_LENGTH)) {
       sl_iperf_test_get(&_last_test);
       res = _build_send_output(req_packet, resp_packet, BUFFER_TYPE_IPERF);
-      if(res != SL_STATUS_OK){
+      if (res != SL_STATUS_OK) {
         _build_response_packet("[Buffer error]", req_packet, resp_packet);
       }
     } else {
@@ -582,8 +581,8 @@ static sl_status_t _start_iperf_client(const sl_wisun_coap_packet_t * const req_
   }
 
   // Build response packet.
-  res= _build_send_output(req_packet, resp_packet, BUFFER_TYPE_IPERF);
-  if(res != SL_STATUS_OK){
+  res = _build_send_output(req_packet, resp_packet, BUFFER_TYPE_IPERF);
+  if (res != SL_STATUS_OK) {
     _build_response_packet("[Buffer error]", req_packet, resp_packet);
   }
 
@@ -658,7 +657,7 @@ static sl_status_t _build_send_output(const sl_wisun_coap_packet_t * const req_p
   // Build payload from stat.
   retval = _build_payload(target);
 
-  if (retval != SL_STATUS_OK){
+  if (retval != SL_STATUS_OK) {
     return retval;
   }
 

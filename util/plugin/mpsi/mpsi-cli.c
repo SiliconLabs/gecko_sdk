@@ -21,21 +21,21 @@ EmberCommandEntry emberAfPluginMpsiCommands[] = { MPSI_COMMAND_LIST };
 
 #include "mpsi.h"
 
-void emAfPluginMpsiCliReceiveMessage(CLI_HANDLER_PARAM_LIST)
+void sli_mpsi_cli_receive_message(CLI_HANDLER_PARAM_LIST)
 {
   MpsiMessage_t mpsiMessage;
   uint8_t status;
 
   mpsiMessage.destinationAppId =
-    (uint8_t)emAfPluginMpsiCliUnsignedCommandArgument(0);
+    (uint8_t)sli_mpsi_cli_unsigned_command_argument(0);
   mpsiMessage.messageId =
-    (uint16_t)emAfPluginMpsiCliUnsignedCommandArgument(1);
+    (uint16_t)sli_mpsi_cli_unsigned_command_argument(1);
   mpsiMessage.payloadLength =
-    (uint8_t)emAfPluginMpsiCliUnsignedCommandArgument(2);
-  (void)emAfPluginMpsiCliCopyStringArgument(3,
-                                            mpsiMessage.payload,
-                                            mpsiMessage.payloadLength,
-                                            false);
+    (uint8_t)sli_mpsi_cli_unsigned_command_argument(2);
+  (void)sli_mpsi_cli_copy_string_argument(3,
+                                          mpsiMessage.payload,
+                                          mpsiMessage.payloadLength,
+                                          false);
 
   status = emberAfPluginMpsiReceiveMessage(&mpsiMessage);
 
@@ -50,21 +50,21 @@ void emAfPluginMpsiCliReceiveMessage(CLI_HANDLER_PARAM_LIST)
   }
 }
 
-void emAfPluginMpsiCliSendMessage(CLI_HANDLER_PARAM_LIST)
+void sli_mpsi_cli_send_message(CLI_HANDLER_PARAM_LIST)
 {
   MpsiMessage_t mpsiMessage;
   uint8_t status;
 
   mpsiMessage.destinationAppId =
-    (uint8_t)emAfPluginMpsiCliUnsignedCommandArgument(0);
+    (uint8_t)sli_mpsi_cli_unsigned_command_argument(0);
   mpsiMessage.messageId =
-    (uint16_t)emAfPluginMpsiCliUnsignedCommandArgument(1);
+    (uint16_t)sli_mpsi_cli_unsigned_command_argument(1);
   mpsiMessage.payloadLength =
-    (uint8_t)emAfPluginMpsiCliUnsignedCommandArgument(2);
-  (void)emAfPluginMpsiCliCopyStringArgument(3,
-                                            mpsiMessage.payload,
-                                            mpsiMessage.payloadLength,
-                                            false);
+    (uint8_t)sli_mpsi_cli_unsigned_command_argument(2);
+  (void)sli_mpsi_cli_copy_string_argument(3,
+                                          mpsiMessage.payload,
+                                          mpsiMessage.payloadLength,
+                                          false);
 
   status = emberAfPluginMpsiSendMessage(&mpsiMessage);
 

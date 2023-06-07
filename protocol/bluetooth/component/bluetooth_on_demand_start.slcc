@@ -9,7 +9,7 @@ description: >
   See the Bluetooth API reference manual section "System", commands
   sl_bt_system_start_bluetooth() and sl_bt_system_stop_bluetooth() for more
   details.
-category: "Bluetooth|Stack"
+category: Bluetooth|Bluetooth Host (Stack)|Additional Features
 quality: "production"
 root_path: "protocol/bluetooth"
 requires:

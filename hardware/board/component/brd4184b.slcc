@@ -76,4 +76,4 @@
   - hardware:has:exp_header:spi
   - hardware:has:exp_header:uart
   - hardware:has:exp_header:i2c
-  - hardware:has:imu
+  - hardware:has:imu:icm-20648

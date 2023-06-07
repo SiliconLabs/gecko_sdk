@@ -44,10 +44,16 @@
 #include "app_button_press.h"
 #include "sl_simple_button_instances.h"
 #include "sl_simple_led_instances.h"
-#include "sl_simple_timer.h"
+#include "app_timer.h"
 #include "sl_btmesh_blob_storage.h"
+
+#ifdef SL_CATALOG_BTMESH_FACTORY_RESET_PRESENT
 #include "sl_btmesh_factory_reset.h"
+#endif // SL_CATALOG_BTMESH_FACTORY_RESET_PRESENT
+
+#ifdef SL_CATALOG_BTMESH_PROVISIONING_DECORATOR_PRESENT
 #include "sl_btmesh_provisioning_decorator.h"
+#endif // SL_CATALOG_BTMESH_PROVISIONING_DECORATOR_PRESENT
 
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
@@ -80,10 +86,10 @@
 #endif // SL_CATALOG_BTMESH_WSTK_LCD_PRESENT
 
 /// periodic timer handle
-static sl_simple_timer_t app_led_blinking_timer;
+static app_timer_t app_led_blinking_timer;
 
 /// periodic timer callback
-static void app_led_blinking_timer_cb(sl_simple_timer_t *handle, void *data);
+static void app_led_blinking_timer_cb(app_timer_t *handle, void *data);
 // Handles button press and does a factory reset
 static bool handle_reset_conditions(void);
 // Set device name in the GATT database
@@ -108,10 +114,10 @@ void change_buttons_to_leds(void)
   sl_simple_button_disable(&sl_button_btn0);
   sl_simple_led_init(sl_led_led0.context);
   // Disable button and enable led
-#ifndef SINGLE_BUTTON
+#if SL_SIMPLE_BUTTON_COUNT >= 2
   sl_simple_button_disable(&sl_button_btn1);
-#endif // SINGLE_BUTTON
-#ifndef SINGLE_LED
+#endif
+#if SL_SIMPLE_LED_COUNT >= 2
   sl_simple_led_init(sl_led_led1.context);
 #endif //SINGLE_LED
 }
@@ -124,9 +130,9 @@ void change_leds_to_buttons(void)
 {
   // Enable buttons
   sl_simple_button_enable(&sl_button_btn0);
-#ifndef SINGLE_BUTTON
+#if SL_SIMPLE_BUTTON_COUNT >= 2
   sl_simple_button_enable(&sl_button_btn1);
-#endif // SINGLE_BUTTON
+#endif
   // Wait
   sl_sleeptimer_delay_millisecond(1);
   // Enable button presses
@@ -243,6 +249,7 @@ static void set_sar_config(void)
  ******************************************************************************/
 static bool handle_reset_conditions(void)
 {
+#ifdef SL_CATALOG_BTMESH_FACTORY_RESET_PRESENT
   // If PB0 is held down then do full factory reset
   if (sl_simple_button_get_state(&sl_button_btn0) == SL_SIMPLE_BUTTON_PRESSED) {
     // Disable button presses
@@ -252,7 +259,7 @@ static bool handle_reset_conditions(void)
     return false;
   }
 
-#ifndef SINGLE_BUTTON
+#if SL_SIMPLE_BUTTON_COUNT >= 2
   // If PB1 is held down then do node factory reset
   if (sl_simple_button_get_state(&sl_button_btn1) == SL_SIMPLE_BUTTON_PRESSED) {
     // Disable button presses
@@ -261,7 +268,8 @@ static bool handle_reset_conditions(void)
     sl_btmesh_initiate_node_reset();
     return false;
   }
-#endif // SL_CATALOG_BTN1_PRESENT
+#endif
+#endif // SL_CATALOG_BTMESH_FACTORY_RESET_PRESENT
   return true;
 }
 
@@ -349,11 +357,11 @@ void sl_btmesh_on_node_provisioning_started(uint16_t result)
   // Change buttons to LEDs in case of shared pin
   change_buttons_to_leds();
 
-  sl_status_t sc = sl_simple_timer_start(&app_led_blinking_timer,
-                                         APP_LED_BLINKING_TIMEOUT,
-                                         app_led_blinking_timer_cb,
-                                         NO_CALLBACK_DATA,
-                                         true);
+  sl_status_t sc = app_timer_start(&app_led_blinking_timer,
+                                   APP_LED_BLINKING_TIMEOUT,
+                                   app_led_blinking_timer_cb,
+                                   NO_CALLBACK_DATA,
+                                   true);
 
   app_assert_status_f(sc, "Failed to start periodic timer");
 
@@ -364,14 +372,14 @@ void sl_btmesh_on_node_provisioning_started(uint16_t result)
 void sl_btmesh_on_node_provisioned(uint16_t address,
                                    uint32_t iv_index)
 {
-  sl_status_t sc = sl_simple_timer_stop(&app_led_blinking_timer);
+  sl_status_t sc = app_timer_stop(&app_led_blinking_timer);
   app_assert_status_f(sc, "Failed to stop periodic timer");
   // Turn off LED
   init_done = true;
   sl_led_led0.turn_off(sl_led_led0.context);
-#ifndef SINGLE_LED
+#if SL_SIMPLE_LED_COUNT >= 2
   sl_led_led1.turn_off(sl_led_led1.context);
-#endif // SINGLE_LED
+#endif
   // Change LEDs to buttons in case of shared pin
   change_leds_to_buttons();
 
@@ -381,7 +389,7 @@ void sl_btmesh_on_node_provisioned(uint16_t address,
 /***************************************************************************//**
  * Timer Callbacks
  ******************************************************************************/
-static void app_led_blinking_timer_cb(sl_simple_timer_t *handle,
+static void app_led_blinking_timer_cb(app_timer_t *handle,
                                       void *data)
 {
   (void)data;
@@ -389,9 +397,9 @@ static void app_led_blinking_timer_cb(sl_simple_timer_t *handle,
   if (!init_done) {
     // Toggle LEDs
     sl_led_led0.toggle(sl_led_led0.context);
-#ifndef SINGLE_LED
+#if SL_SIMPLE_LED_COUNT >= 2
     sl_led_led1.toggle(sl_led_led1.context);
-#endif // SINGLE_LED
+#endif
   }
 }
 

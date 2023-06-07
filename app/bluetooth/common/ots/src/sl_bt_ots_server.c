@@ -1550,9 +1550,10 @@ static sl_status_t send_indication(uint8_t       connection,
   item.gattdb_handle = characteristic;
   item.data_length = value_len;
   memcpy(item.data, value, value_len);
-  sc = sli_bt_ots_server_adaptation_indication_queue_add(client_index(connection),
-                                                         &item);
 
+  uint8_t index = client_index(connection);
+  sc = sli_bt_ots_server_adaptation_indication_queue_add(index,
+                                                         &item);
   return sc;
 }
 
@@ -1732,10 +1733,11 @@ static uint8_t handle_olcp_write(sl_bt_ots_server_t *server,
   olcp_response_msg->opcode = olcp_msg->opcode;
   olcp_response_msg->response = response_code;
 
+  (void)sl_bt_gatt_server_send_user_write_response(write_request->connection,
+                                                   write_request->characteristic,
+                                                   sc);
+
   if (sc == ATT_ERR_SUCCESS) {
-    (void)sl_bt_gatt_server_send_user_write_response(write_request->connection,
-                                                     write_request->characteristic,
-                                                     sc);
     send_indication(client->connection_handle,
                     server->gattdb_handles->characteristics.handles.object_list_control_point,
                     response_code_len,

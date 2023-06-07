@@ -31,7 +31,7 @@ template_contribution:
   - name: zigbee_af_callback
     value:
       callback_type: init_done
-      function_name: emAfPluginOtaStoragePosixFilesystemInitCallback    
+      function_name: sli_zigbee_af_ota_storage_posix_filesystsli_zigbee_init_callback    
     unless:
       - zigbee_host_simulation
 documentation:

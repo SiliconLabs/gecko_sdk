@@ -20,17 +20,10 @@
 #include "../../util/common.h"
 #include "scenes.h"
 
-#ifdef UC_BUILD
 #include "zap-cluster-command-parser.h"
 #ifdef SL_CATALOG_ZIGBEE_ZLL_SCENES_SERVER_PRESENT
 #include "zll-scenes-server.h"
 #endif
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_ZLL_SCENES_SERVER
-#include "../zll-scenes-server/zll-scenes-server.h"
-#define SL_CATALOG_ZIGBEE_ZLL_SCENES_SERVER_PRESENT
-#endif
-#endif // UC_BUILD
 
 uint8_t emberAfPluginScenesServerEntriesInUse = 0;
 #if (EMBER_AF_PLUGIN_SCENES_USE_TOKENS == 0) || defined(EZSP_HOST)
@@ -200,10 +193,10 @@ EmberAfStatus emberAfScenesClusterMakeInvalidCallback(uint8_t endpoint)
                               ZCL_BOOLEAN_ATTRIBUTE_TYPE);
 }
 
-#if defined(UC_BUILD) && defined(SL_CATALOG_CLI_PRESENT)
+#if defined(SL_CATALOG_CLI_PRESENT)
 void sli_plugin_scenes_server_print_info(sl_cli_command_arg_t *arguments)
 #else
-void emAfPluginScenesServerPrintInfo(void)
+void sli_zigbee_af_scenes_server_print_info(void)
 #endif
 {
   uint8_t i;
@@ -263,8 +256,6 @@ void emAfPluginScenesServerPrintInfo(void)
     emberAfCorePrintln("");
   }
 }
-
-#ifdef UC_BUILD
 
 bool emberAfScenesClusterAddSceneCallback(EmberAfClusterCommand *cmd)
 {
@@ -553,258 +544,6 @@ bool emberAfScenesClusterGetSceneMembershipCallback(EmberAfClusterCommand *cmd)
   }
   return true;
 }
-
-#else // !UC_BUILD
-
-bool emberAfScenesClusterAddSceneCallback(uint16_t groupId,
-                                          uint8_t sceneId,
-                                          uint16_t transitionTime,
-                                          uint8_t *sceneName,
-                                          uint8_t *extensionFieldSets)
-{
-  return emberAfPluginScenesServerParseAddScene(emberAfCurrentCommand(),
-                                                groupId,
-                                                sceneId,
-                                                transitionTime,
-                                                sceneName,
-                                                extensionFieldSets);
-}
-
-bool emberAfScenesClusterViewSceneCallback(uint16_t groupId, uint8_t sceneId)
-{
-  return emberAfPluginScenesServerParseViewScene(emberAfCurrentCommand(),
-                                                 groupId,
-                                                 sceneId);
-}
-
-bool emberAfScenesClusterRemoveSceneCallback(uint16_t groupId, uint8_t sceneId)
-{
-  EmberAfStatus status = EMBER_ZCL_STATUS_NOT_FOUND;
-  EmberStatus sendStatus;
-
-  emberAfScenesClusterPrintln("RX: RemoveScene 0x%2x, 0x%x", groupId, sceneId);
-
-  // If a group id is specified but this endpoint isn't in it, take no action.
-  if (groupId != ZCL_SCENES_GLOBAL_SCENE_GROUP_ID
-      && !emberAfGroupsClusterEndpointInGroupCallback(emberAfCurrentEndpoint(),
-                                                      groupId)) {
-    status = EMBER_ZCL_STATUS_INVALID_FIELD;
-  } else {
-    uint8_t i;
-    for (i = 0; i < EMBER_AF_PLUGIN_SCENES_TABLE_SIZE; i++) {
-      EmberAfSceneTableEntry entry;
-      emberAfPluginScenesServerRetrieveSceneEntry(entry, i);
-      if (entry.endpoint == emberAfCurrentEndpoint()
-          && entry.groupId == groupId
-          && entry.sceneId == sceneId) {
-        entry.endpoint = EMBER_AF_SCENE_TABLE_UNUSED_ENDPOINT_ID;
-        emberAfPluginScenesServerSaveSceneEntry(entry, i);
-        emberAfPluginScenesServerDecrNumSceneEntriesInUse();
-        emberAfScenesSetSceneCountAttribute(emberAfCurrentEndpoint(),
-                                            emberAfPluginScenesServerNumSceneEntriesInUse());
-        status = EMBER_ZCL_STATUS_SUCCESS;
-        break;
-      }
-    }
-  }
-
-  // Remove Scene commands are only responded to when they are addressed to a
-  // single device.
-  if (emberAfCurrentCommand()->type == EMBER_INCOMING_UNICAST
-      || emberAfCurrentCommand()->type == EMBER_INCOMING_UNICAST_REPLY) {
-    emberAfFillCommandScenesClusterRemoveSceneResponse(status,
-                                                       groupId,
-                                                       sceneId);
-    sendStatus = emberAfSendResponse();
-    if (EMBER_SUCCESS != sendStatus) {
-      emberAfScenesClusterPrintln("Scenes: failed to send %s response: 0x%x",
-                                  "remove_scene",
-                                  sendStatus);
-    }
-  }
-  return true;
-}
-
-bool emberAfScenesClusterRemoveAllScenesCallback(uint16_t groupId)
-{
-  EmberAfStatus status = EMBER_ZCL_STATUS_INVALID_FIELD;
-  EmberStatus sendStatus;
-
-  emberAfScenesClusterPrintln("RX: RemoveAllScenes 0x%2x", groupId);
-
-  if (groupId == ZCL_SCENES_GLOBAL_SCENE_GROUP_ID
-      || emberAfGroupsClusterEndpointInGroupCallback(emberAfCurrentEndpoint(),
-                                                     groupId)) {
-    uint8_t i;
-    status = EMBER_ZCL_STATUS_SUCCESS;
-    for (i = 0; i < EMBER_AF_PLUGIN_SCENES_TABLE_SIZE; i++) {
-      EmberAfSceneTableEntry entry;
-      emberAfPluginScenesServerRetrieveSceneEntry(entry, i);
-      if (entry.endpoint == emberAfCurrentEndpoint()
-          && entry.groupId == groupId) {
-        entry.endpoint = EMBER_AF_SCENE_TABLE_UNUSED_ENDPOINT_ID;
-        emberAfPluginScenesServerSaveSceneEntry(entry, i);
-        emberAfPluginScenesServerDecrNumSceneEntriesInUse();
-      }
-    }
-    emberAfScenesSetSceneCountAttribute(emberAfCurrentEndpoint(),
-                                        emberAfPluginScenesServerNumSceneEntriesInUse());
-  }
-
-  // Remove All Scenes commands are only responded to when they are addressed
-  // to a single device.
-  if (emberAfCurrentCommand()->type == EMBER_INCOMING_UNICAST
-      || emberAfCurrentCommand()->type == EMBER_INCOMING_UNICAST_REPLY) {
-    emberAfFillCommandScenesClusterRemoveAllScenesResponse(status, groupId);
-    sendStatus = emberAfSendResponse();
-    if (EMBER_SUCCESS != sendStatus) {
-      emberAfScenesClusterPrintln("Scenes: failed to send %s response: 0x%x",
-                                  "remove_all_scenes",
-                                  sendStatus);
-    }
-  }
-  return true;
-}
-
-bool emberAfScenesClusterStoreSceneCallback(uint16_t groupId, uint8_t sceneId)
-{
-  EmberAfStatus status;
-  EmberStatus sendStatus;
-  emberAfScenesClusterPrintln("RX: StoreScene 0x%2x, 0x%x", groupId, sceneId);
-  status = emberAfScenesClusterStoreCurrentSceneCallback(emberAfCurrentEndpoint(),
-                                                         groupId,
-                                                         sceneId);
-
-  // Store Scene commands are only responded to when they are addressed to a
-  // single device.
-  if (emberAfCurrentCommand()->type == EMBER_INCOMING_UNICAST
-      || emberAfCurrentCommand()->type == EMBER_INCOMING_UNICAST_REPLY) {
-    emberAfFillCommandScenesClusterStoreSceneResponse(status, groupId, sceneId);
-    sendStatus = emberAfSendResponse();
-    if (EMBER_SUCCESS != sendStatus) {
-      emberAfScenesClusterPrintln("Scenes: failed to send %s response: 0x%x",
-                                  "store_scene",
-                                  sendStatus);
-    }
-  }
-  return true;
-}
-
-bool emberAfScenesClusterRecallSceneCallback(uint16_t groupId,
-                                             uint8_t sceneId,
-                                             uint16_t transitionTime)
-{
-  // NOTE: TransitionTime field in the RecallScene command is currently
-  // ignored. Per Zigbee Alliance ZCL 7 (07-5123-07):
-  //
-  // "The transition time determines how long the tranition takes from the
-  // old cluster state to the new cluster state. It is recommended that, where
-  // possible (e.g., it is not possible for attributes with Boolean type),
-  // a gradual transition SHOULD take place from the old to the new state
-  // over this time. However, the exact transition is manufacturer dependent."
-  //
-  // The default manufacturer-dependent implementation provided here immediately
-  // sets all attributes to their scene-specified values, without regard to the
-  // value of TransitionTime. This default treatment is applied if the call
-  // to emberAfPluginScenesServerCustomRecallSceneCallback() returns false,
-  // indicating that no overriding customization is implemented.
-  //
-  // A product manufacturer can contribute a different (TransitionTime-aware)
-  // implementation of emberAfPluginScenesServerCustomRecallSceneCallback()
-  // to customize the behavior of scene transition when the RecallScene
-
-  emberAfScenesClusterPrintln("RX: RecallScene 0x%2x, 0x%x, 0x%2x",
-                              groupId,
-                              sceneId,
-                              transitionTime);
-  EmberAfSceneTableEntry sceneEntry;
-  EmberAfStatus status
-    = findScene(emberAfCurrentEndpoint(), groupId, sceneId, &sceneEntry);
-  if (status == EMBER_ZCL_STATUS_SUCCESS) {
-    // Valid scene, try custom callback
-    status = EMBER_ZCL_STATUS_FAILURE;
-    if (!emberAfPluginScenesServerCustomRecallSceneCallback(&sceneEntry,
-                                                            transitionTime,
-                                                            &status)) {
-      // No custom callback, apply default handling
-      status = emberAfScenesClusterRecallSavedSceneCallback(emberAfCurrentEndpoint(),
-                                                            groupId,
-                                                            sceneId);
-    }
-  }
-#ifdef SL_CATALOG_ZIGBEE_ZLL_SCENES_SERVER_PRESENT
-  if (status == EMBER_ZCL_STATUS_SUCCESS) {
-    emberAfPluginZllScenesServerRecallSceneZllExtensions(emberAfCurrentEndpoint());
-  }
-#endif
-  EmberStatus sendStatus = emberAfSendImmediateDefaultResponse(status);
-  if (EMBER_SUCCESS != sendStatus) {
-    emberAfScenesClusterPrintln("Scenes: failed to send %s: 0x%x",
-                                "default_response",
-                                sendStatus);
-  }
-  return true;
-}
-
-bool emberAfScenesClusterGetSceneMembershipCallback(uint16_t groupId)
-{
-  EmberAfStatus status = EMBER_ZCL_STATUS_SUCCESS;
-  EmberStatus sendStatus;
-  uint8_t sceneCount = 0;
-
-  emberAfScenesClusterPrintln("RX: GetSceneMembership 0x%2x", groupId);
-
-  if (groupId != ZCL_SCENES_GLOBAL_SCENE_GROUP_ID
-      && !emberAfGroupsClusterEndpointInGroupCallback(emberAfCurrentEndpoint(),
-                                                      groupId)) {
-    status = EMBER_ZCL_STATUS_INVALID_FIELD;
-  }
-
-  // The status, capacity, and group id are always included in the response, but
-  // the scene count and scene list are only included if the group id matched.
-  (void) emberAfFillExternalBuffer((ZCL_CLUSTER_SPECIFIC_COMMAND
-                                    | ZCL_FRAME_CONTROL_SERVER_TO_CLIENT
-                                    | EMBER_AF_DEFAULT_RESPONSE_POLICY_RESPONSES),
-                                   ZCL_SCENES_CLUSTER_ID,
-                                   ZCL_GET_SCENE_MEMBERSHIP_RESPONSE_COMMAND_ID,
-                                   "uuv",
-                                   status,
-                                   (EMBER_AF_PLUGIN_SCENES_TABLE_SIZE
-                                    - emberAfPluginScenesServerNumSceneEntriesInUse()), // capacity
-                                   groupId);
-  if (status == EMBER_ZCL_STATUS_SUCCESS) {
-    uint8_t i, sceneList[EMBER_AF_PLUGIN_SCENES_TABLE_SIZE];
-    for (i = 0; i < EMBER_AF_PLUGIN_SCENES_TABLE_SIZE; i++) {
-      EmberAfSceneTableEntry entry;
-      emberAfPluginScenesServerRetrieveSceneEntry(entry, i);
-      if (entry.endpoint == emberAfCurrentEndpoint()
-          && entry.groupId == groupId) {
-        sceneList[sceneCount] = entry.sceneId;
-        sceneCount++;
-      }
-    }
-    (void) emberAfPutInt8uInResp(sceneCount);
-    for (i = 0; i < sceneCount; i++) {
-      (void) emberAfPutInt8uInResp(sceneList[i]);
-    }
-  }
-
-  // Get Scene Membership commands are only responded to when they are
-  // addressed to a single device or when an entry in the table matches.
-  if (emberAfCurrentCommand()->type == EMBER_INCOMING_UNICAST
-      || emberAfCurrentCommand()->type == EMBER_INCOMING_UNICAST_REPLY
-      || sceneCount != 0) {
-    sendStatus = emberAfSendResponse();
-    if (EMBER_SUCCESS != sendStatus) {
-      emberAfScenesClusterPrintln("Scenes: failed to send %s response: 0x%x",
-                                  "get_scene_membership",
-                                  sendStatus);
-    }
-  }
-  return true;
-}
-
-#endif // UC_BUILD
 
 void emberAfScenesClusterClearSceneTableCallback(uint8_t endpoint)
 {
@@ -1711,8 +1450,6 @@ EmberAfStatus emberAfScenesClusterRecallSavedSceneCallback(uint8_t endpoint,
   return EMBER_ZCL_STATUS_NOT_FOUND;
 }
 
-#ifdef UC_BUILD
-
 uint32_t emberAfScenesClusterServerCommandParse(sl_service_opcode_t opcode,
                                                 sl_service_function_context_t *context)
 {
@@ -1765,5 +1502,3 @@ uint32_t emberAfScenesClusterServerCommandParse(sl_service_opcode_t opcode,
           ? EMBER_ZCL_STATUS_SUCCESS
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
-
-#endif // UC_BUILD

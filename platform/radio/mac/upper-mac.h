@@ -218,7 +218,7 @@ typedef enum {
   MAC_TX_MODE_GRANT,
   MAC_TX_MODE_MAC_HO,   // complete mac hold off
   // Add more options here.
-} EmMacTxMode;
+} sli_802154mac_tx_mode;
 
 uint8_t sl_mac_get_current_radio_network_index(uint8_t mac_index);
 bool sl_mac_upper_mac_is_empty(uint8_t mac_index);

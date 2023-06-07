@@ -36,11 +36,10 @@
 // -----------------------------------------------------------------------------
 
 #include <inttypes.h>
-#include "socket_hnd.h"
 #include "socket.h"
 #include "sli_wisun_meter_collector.h"
 #include "sl_wisun_meter_collector_config.h"
-
+#include "sl_component_catalog.h"
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
@@ -87,24 +86,11 @@ void sl_wisun_meter_get_humidity(sl_wisun_meter_packet_t *packet);
  *****************************************************************************/
 void sl_wisun_meter_get_light(sl_wisun_meter_packet_t *packet);
 
+#if !defined(SL_CATALOG_WISUN_COAP_PRESENT)
 /**************************************************************************//**
- * @brief Measure parameters and send to the Collector (client).
- * @details Generate packet id, measure temperature, humidity and light
- * @param[in] sockd_meter socket id of meter (UDP server)
- * @param[in] collector_addr Collector address structure
- * @return true On success
- * @return false On error
+ * @brief Meter functional process
+ * @details It processes the functionality of meter application.
  *****************************************************************************/
-bool sl_wisun_meter_meas_params_and_send(const int32_t sockd_meter, const sockaddr_in6_t *collector_addr);
-
-/**************************************************************************//**
- * @brief Compare token with arrived bytes in buffer.
- * @details If the token matched, the meter send the measurement packet
- * @param[in] token arrived bytes
- * @param[in] token_size arrived bytes
- * @return true On success
- * @return false On error
- *****************************************************************************/
-bool sl_wisun_mc_compare_token(const uint8_t *token, const uint16_t token_size);
-
+void sl_wisun_meter_process(void);
+#endif
 #endif

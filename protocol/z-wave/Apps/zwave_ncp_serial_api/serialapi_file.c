@@ -28,12 +28,13 @@
 #include "SyncEvent.h"
 #include <ZW_system_startup_api.h>
 #include <ZW_application_transport_interface.h>
-#include <serialappl.h>
+#include <app.h>
 #include <ZAF_file_ids.h>
 #include <zpal_nvm.h>
 #include <zpal_misc.h>
 #include <ZAF_nvm_app.h>
 #include <ZAF_nvm.h>
+#include "zw_version_config.h"
 
 #define APPLICATIONSIZE (4*1024)
 

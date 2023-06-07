@@ -44,7 +44,7 @@
     instance:
     - btn0
     - btn1
-  - id: mx25_flash_shutdown_eusart
+  - id: mx25_flash_shutdown_usart
   - id: bootloader_spi_controller_usart_driver
   - id: bootloader_spi_peripheral_usart_driver
 - template_contribution:

@@ -15,7 +15,7 @@ description: >
   Linux Host with a Multiprotocol Co-processor* for more information on running
   the multiprotocol RCP with different host applications.
 category: OpenThread Examples
-quality: evaluation
+quality: production
 
 component:
   - id: ot_stack_rcp
@@ -74,16 +74,25 @@ configuration:
     value: "0"
     condition:
       - psa_crypto
-
   - name: OPENTHREAD_CONFIG_HEAP_EXTERNAL_ENABLE
     value: 0
   - name: OPENTHREAD_CONFIG_LOG_OUTPUT
-    value: OPENTHREAD_CONFIG_LOG_OUTPUT_PLATFORM_DEFINED
+    value: OPENTHREAD_CONFIG_LOG_OUTPUT_NONE
   - name: OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE
     value: 1
   - name: OPENTHREAD_CONFIG_DIAG_ENABLE
     value: 1  
   - name: OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE
+    value: 0
+  - name: OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
+    value: 0
+  - name: OPENTHREAD_CONFIG_MAC_CSL_AUTO_SYNC_ENABLE
+    value: 0
+  - name: SL_CPC_RX_BUFFER_MAX_COUNT
+    value: 15
+  - name: SL_CPC_TX_QUEUE_ITEM_MAX_COUNT
+    value: 15
+  - name: SL_CPC_USER_ENDPOINT_MAX_COUNT
     value: 0
 
 define:

@@ -1,6 +1,6 @@
 # Multilevel Sensor
 
-Shows the ability to advertise numerical sensor readings, such as temperature, and humidity. Multiple parameters can be set for the minimum and maximum values, and a basic set will be send if the measured temperature value is out of the range.
+Shows the ability to advertise numerical sensor readings, such as temperature, and humidity. Multiple parameters can be set for the minimum and maximum values.
 
 The Multilevel Sensor application is based on:
 
@@ -63,18 +63,12 @@ The following table shows the available association groups.
         <p>Supports the following command classes:</p>
         <ul>
             <li>Device Reset Locally: triggered upon reset.</li>
-            <li>Basic Set On/Off: triggered upon a movement detection (simulated by button BTN2).</li>
             <li>Indicator Report: Triggered when LED1 changes state.</li>
             <li>Configuring parameters: Minimum and maximum temperature levels can be set, errors can be detected if measured temperature is out of range</li>
             <li>Environmental measurements: Temperature and humidity values
 can be read, triggered from other Z-Wave devices</li>
         </ul>
     </td>
-</tr><tr>
-    <td>2</td>
-    <td>Basic Set</td>
-    <td>5</td>
-    <td>Upon a movement detection (simulated by button BTN2), nodes associated in this group will first receive a Basic Set with 0xFF (turn on) and after a while receive a Basic Set with 0x00 (turn off).</td>
 </tr>
 </table>
 
@@ -92,15 +86,11 @@ The following LEDs and buttons shown in the next table below are used.
     <td>Press</td>
     <td>
       Resets the firmware of an application (like losing power). All volatile memory will be cleared.<br>
-      Sends Wake Up Basic set.
     </td>
 </tr><tr>
-    <td rowspan="2">BTN0</td>
+    <td>BTN0</td>
     <td>Press</td>
     <td>Sends Battery Report, temperature, and humidity data (only if the device is not sleeping)</td>
-</tr><tr>
-    <td>Hold for at least 1 second and release</td>
-    <td>Simulates a "Basic On/Off"</td>
 </tr><tr>
     <td rowspan="2">BTN1</td>
     <td>Press</td>

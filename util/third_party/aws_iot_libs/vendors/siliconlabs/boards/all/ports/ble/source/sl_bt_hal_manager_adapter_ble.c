@@ -30,34 +30,6 @@
 #include "sl_bluetooth_config.h"
 #include "sl_malloc.h"
 
-/* Values used for @p phys parameter of @ref sl_bt_scanner_set_timing, @p phys
- * parameter of @ref sl_bt_scanner_set_mode, and @p scanning_phy parameter of
- * @ref sl_bt_scanner_start */
-#define SCANNER_PHYS_1M            ((uint8_t) 0x01)
-#define SCANNER_PHYS_CODED         ((uint8_t) 0x04)
-#define SCANNER_PHYS_1M_AND_CODED  ((uint8_t) 0x05)
-
-/* Values used for @p scan_mode param of @ref sl_bt_scanner_set_mode */
-#define SCANNER_MODE_PASSIVE  ((uint8_t) 0x00)
-#define SCANNER_MODE_ACTIVE   ((uint8_t) 0x01)
-
-/* Scan report packet type mask and values */
-#define SCAN_REPORT_PACKET_TYPE_MASK                           ((uint8_t) 0x07)
-#define SCAN_REPORT_TYPE_CONNECTABLE_SCANNABLE_UNDIRECTED_ADV  ((uint8_t) 0x00)
-#define SCAN_REPORT_TYPE_CONNECTABLE_UNDIRECTED_ADV            ((uint8_t) 0x01)
-#define SCAN_REPORT_TYPE_SCANNABLE_UNDIRECTED_ADV              ((uint8_t) 0x02)
-#define SCAN_REPORT_TYPE_UNDIRECTED_ADV                        ((uint8_t) 0x03)
-#define SCAN_REPORT_TYPE_SCAN_RESPONSE                         ((uint8_t) 0x04)
-
-/* Scan report packet type mask and values to indicate completeness */
-#define SCAN_REPORT_COMPLETENESS_MASK   ((uint8_t) 0x60)
-#define SCAN_REPORT_COMPLETE            ((uint8_t) 0x00)
-#define SCAN_REPORT_INCOMPLETE_MORE     ((uint8_t) 0x20)
-#define SCAN_REPORT_INCOMPLETE_NO_MORE  ((uint8_t) 0x40)
-
-/* Scan report packet type flag that indicates extended advertising */
-#define SCAN_REPORT_EXTENDED_PDUS_FLAG  ((uint8_t) 0x80)
-
 /** @brief Maximum length of legacy advertisement data */
 #define MAX_LEGACY_ADV_DATA_LEN 31
 
@@ -77,7 +49,6 @@
  */
 typedef struct
 {
-  uint8_t ucScanMode;   /**< SL BT API scanning mode */
   BTBdaddr_t xAddress;  /**< Address of the advertiser that sent the stored data */
   int8_t cRssi;         /**< Signal strength indicator (RSSI) in the received data */
   uint8_t ucDataLength; /**< Length of the data stored or 0 if the context is empty */
@@ -181,8 +152,8 @@ typedef struct
   uint32_t ulMaxInterval;
   uint16_t usTimeout;
   int16_t  usRequestedPower;
-  uint8_t  ucPrimaryPhy;   /* Uses values of enum gap_phy_type_t */
-  uint8_t  ucSecondaryPhy; /* Uses values of enum gap_phy_type_t */
+  uint8_t  ucPrimaryPhy;   /* Uses values of enum sl_bt_gap_phy_t */
+  uint8_t  ucSecondaryPhy; /* Uses values of enum sl_bt_gap_phy_t */
   uint8_t  ucChannelMap;
   uint8_t  ucAddressType;  /* Uses values of enum gap_address_type_t */
 } SlBtAdvParams_t;
@@ -420,26 +391,26 @@ static BTStatus_t prvGetAdapterIfWithAdvSet( uint8_t ucAdapterIf,
 #define ADVERTISEMENT_PHY_CODED ((uint8_t) 0x03)
 
 /**
- * @brief Map a BLE Adapter API phy type to a gap_phy_type_t
+ * @brief Map a BLE Adapter API phy type to a sl_bt_gap_phy_t
  *
  * @param[in] ucPhy Phy selection of BLE Adapter API
  *
- * @return Corresponding gap_phy_type_t value
+ * @return Corresponding sl_bt_gap_phy_t value
  */
-static gap_phy_type_t prvBlePhyToSlGapPhyType( uint8_t ucPhy )
+static sl_bt_gap_phy_t prvBlePhyToSlGapPhyType( uint8_t ucPhy )
 {
   /* Amazon FreeRTOS Bluetooth API does not specify the values used for the phy
    * selection, but seems to use value 0 in tests. We must assume that 0 means
    * default and any concrete values are the values used in the HCI standard
    * (Bluetooth Core Specification version 5.2, Volume 4, Part E, Section
    * 7.8.53). */
-  gap_phy_type_t gapPhy = gap_1m_phy;
+  sl_bt_gap_phy_t gapPhy = sl_bt_gap_phy_1m;
   switch( ucPhy )
   {
-    case ADVERTISEMENT_PHY_1M:    gapPhy = gap_1m_phy;    break;
-    case ADVERTISEMENT_PHY_2M:    gapPhy = gap_2m_phy;    break;
-    case ADVERTISEMENT_PHY_CODED: gapPhy = gap_coded_phy; break;
-    default:                      gapPhy = gap_1m_phy;    break;
+    case ADVERTISEMENT_PHY_1M:    gapPhy = sl_bt_gap_phy_1m;    break;
+    case ADVERTISEMENT_PHY_2M:    gapPhy = sl_bt_gap_phy_2m;    break;
+    case ADVERTISEMENT_PHY_CODED: gapPhy = sl_bt_gap_phy_coded; break;
+    default:                      gapPhy = sl_bt_gap_phy_1m;    break;
   }
 
   return gapPhy;
@@ -451,7 +422,7 @@ static gap_phy_type_t prvBlePhyToSlGapPhyType( uint8_t ucPhy )
  *
  * @param[in] ucPhy Phy selection of BLE Adapter API
  *
- * @return Corresponding gap_phy_type_t value
+ * @return Corresponding sl_bt_gap_phy_t value
  */
 static BTStatus_t prvAdvEventPropsToSlAdvConnectableMode(
   BTAdvProperties_t usAdvEventProps,
@@ -720,21 +691,12 @@ static BTStatus_t prvScan( bool bStart )
       memset( pxScanContext, 0, sizeof( *pxScanContext ) );
     }
 
-    /* The BLE HAL API does not provide a method for choosing the scanning mode.
-    We use active scanning always. */
-    pxScanContext->ucScanMode = SCANNER_MODE_ACTIVE;
-
-    /* Set the scanning mode and start scanning */
-    sl_status = sl_bt_scanner_set_mode( SCANNER_PHYS_1M, pxScanContext->ucScanMode );
-    if( sl_status == SL_STATUS_OK )
-    {
-      sl_status = sl_bt_scanner_start( SCANNER_PHYS_1M,
-                                       sl_bt_scanner_discover_observation );
-    }
-
-    /* If we failed to start, free the scanning context */
+    /* Start scanning */
+    sl_status = sl_bt_scanner_start( sl_bt_scanner_scan_phy_1m,
+                                     sl_bt_scanner_discover_observation );
     if( sl_status != SL_STATUS_OK )
     {
+      /* We failed to start. Free the scanning context. */
       sl_free( pxScanContext );
       pxScanContext = NULL;
       SILABS_BLE_LOG_FUNC_EXIT_ERROR( "failed to start, sl_status=0x%"PRIx32, sl_status );
@@ -835,9 +797,8 @@ static BTStatus_t prvStartAdv( uint8_t ucAdapterIf )
   }
 
   /* Start advertising with user-defined data */
-  sl_status_t sl_status = sl_bt_advertiser_start( pxAdapterIf->ucAdvSetHandle,
-                                                  sl_bt_advertiser_user_data,
-                                                  pxAdapterIf->ucAdvConnectableMode );
+  sl_status_t sl_status = sl_bt_legacy_advertiser_start( pxAdapterIf->ucAdvSetHandle,
+                                                         pxAdapterIf->ucAdvConnectableMode );
   if( sl_status != SL_STATUS_OK )
   {
     status = prvSlStatusToBTStatus( sl_status );
@@ -993,7 +954,7 @@ static void prvOnAdvertiserTimeout( sl_bt_evt_advertiser_timeout_t * pxEvent )
  * @param[in] pxScanReport Scan report to read data from
  */
 static void prvAppendScanReportData( SlBtScanContext_t * pxScanContext,
-                                     sl_bt_evt_scanner_scan_report_t * pxScanReport )
+                                     sl_bt_evt_scanner_legacy_advertisement_report_t * pxScanReport )
 {
   /* Make sure we never overflow the buffer */
   size_t xSpaceRemaining = 0;
@@ -1050,7 +1011,7 @@ static void prvSendAndClearScanReportData( SlBtScanContext_t * pxScanContext )
 /**
  * @brief Triggered when a scan report event is received
  */
-static void prvOnScanReportEvent( sl_bt_evt_scanner_scan_report_t * pxScanReport )
+static void prvOnScanReportEvent( sl_bt_evt_scanner_legacy_advertisement_report_t * pxScanReport )
 {
   /* If the application has no callback or is not actively scanning, we can
   ignore the event */
@@ -1060,56 +1021,46 @@ static void prvOnScanReportEvent( sl_bt_evt_scanner_scan_report_t * pxScanReport
   {
     return;
   }
-
-  /* The BLE HAL API is only prepared for legacy advertising. We ignore extended
-  advertising or data that is too long or incomplete. */
-  if( ( pxScanReport->packet_type & SCAN_REPORT_EXTENDED_PDUS_FLAG ) ||
-      ( pxScanReport->data.len > MAX_LEGACY_ADV_DATA_LEN ) ||
-      ( ( pxScanReport->packet_type & SCAN_REPORT_COMPLETENESS_MASK ) != SCAN_REPORT_COMPLETE ) )
+  /* The BLE HAL API is only prepared for legacy advertising. We ignore the data that is too long */
+  if( pxScanReport->data.len > MAX_LEGACY_ADV_DATA_LEN )
   {
     return;
   }
 
-  /* If active scanning is being used, we need to evaluate whether to store
-  or forward the data immediately */
-  if( pxScanContext->ucScanMode == SCANNER_MODE_ACTIVE )
+  /* Evaluate whether to store or forward the data immediately.
+  See if the scan report we have is a scan response for the same device
+  that we already have advertisement data from */
+  if( ( pxScanReport->event_flags & SL_BT_SCANNER_EVENT_FLAG_SCAN_RESPONSE ) &&
+      ( pxScanContext->ucDataLength > 0 ) &&
+      ( memcmp( pxScanContext->xAddress.ucAddress,
+                pxScanReport->address.addr,
+                sizeof( pxScanContext->xAddress.ucAddress ) ) == 0 ) )
   {
-    /* See if the scan report we have is a scan response for the same device
-    that we already have advertisement data from */
-    uint8_t ucPacketType = pxScanReport->packet_type & SCAN_REPORT_PACKET_TYPE_MASK;
-    if( ( ucPacketType == SCAN_REPORT_TYPE_SCAN_RESPONSE ) &&
-        ( pxScanContext->ucDataLength > 0 ) &&
-        ( memcmp( pxScanContext->xAddress.ucAddress,
-                  pxScanReport->address.addr,
-                  sizeof( pxScanContext->xAddress.ucAddress ) ) == 0 ) )
-    {
-      /* Append and send to the app */
-      prvAppendScanReportData( pxScanContext, pxScanReport );
-      prvSendAndClearScanReportData( pxScanContext );
-      return;
-    }
-
-    /* Data was not appended, so this is not continuation of previous data.
-    If we already have previously received data, send and clear that. */
-    if( pxScanContext->ucDataLength > 0 )
-    {
-      prvSendAndClearScanReportData( pxScanContext );
-    }
-
-    /* If the scan report is scannable advertisement, the Bluetooth stack
-    will send a scan request and we may later receive a scan response that
-    we need to append to the advertisement data. */
-    if( ( ucPacketType == SCAN_REPORT_TYPE_CONNECTABLE_SCANNABLE_UNDIRECTED_ADV ) ||
-        ( ucPacketType == SCAN_REPORT_TYPE_SCANNABLE_UNDIRECTED_ADV ) )
-    {
-      /* Advertisement is scannable. Store the advertisement data. */
-      prvAppendScanReportData( pxScanContext, pxScanReport );
-      return;
-    }
-
-    /* The event is one that should be reported immediately. Continue to
-    reporting it below. */
+    /* Append and send to the app */
+    prvAppendScanReportData( pxScanContext, pxScanReport );
+    prvSendAndClearScanReportData( pxScanContext );
+    return;
   }
+
+  /* Data was not appended, so this is not continuation of previous data.
+  If we already have previously received data, send and clear that. */
+  if( pxScanContext->ucDataLength > 0 )
+  {
+    prvSendAndClearScanReportData( pxScanContext );
+  }
+
+  /* If the scan report is scannable advertisement, the Bluetooth stack
+  will send a scan request and we may later receive a scan response that
+  we need to append to the advertisement data. */
+  if( pxScanReport->event_flags & SL_BT_SCANNER_EVENT_FLAG_SCANNABLE )
+  {
+    /* Advertisement is scannable. Store the advertisement data. */
+    prvAppendScanReportData( pxScanContext, pxScanReport );
+    return;
+  }
+
+  /* The event is one that should be reported immediately. Continue to
+  reporting it below. */
 
   /* The BLE HAL API does not take the length of the advertisement data. It
   seems to assume that the data ends with an item that is 0 bytes long, i.e.
@@ -1590,9 +1541,15 @@ static BTStatus_t prvConvertAdvParams( BTGattAdvertismentParams_t * pxParams,
     pxSlBtAdvParams->ucChannelMap = pxParams->ucChannelMap;
   }
 
-  /* Convert the PHY selection */
-  pxSlBtAdvParams->ucPrimaryPhy = prvBlePhyToSlGapPhyType(pxParams->ucPrimaryAdvertisingPhy);
-  pxSlBtAdvParams->ucSecondaryPhy = prvBlePhyToSlGapPhyType(pxParams->ucSecondaryAdvertisingPhy);
+  /* Verify if PHY selection is 1M and convert the PHY */
+  pxSlBtAdvParams->ucPrimaryPhy = prvBlePhyToSlGapPhyType( pxParams->ucPrimaryAdvertisingPhy );
+  pxSlBtAdvParams->ucSecondaryPhy = prvBlePhyToSlGapPhyType( pxParams->ucSecondaryAdvertisingPhy );
+  if ( ( pxSlBtAdvParams->ucPrimaryPhy != sl_bt_gap_phy_1m ) ||
+       ( pxSlBtAdvParams->ucSecondaryPhy != sl_bt_gap_phy_1m ) )
+  {
+    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "invalid legacy advertising PHY, primary=%u, secondary=%u", pxParams->ucPrimaryAdvertisingPhy, pxParams->ucSecondaryAdvertisingPhy );
+    return eBTStatusParamInvalid;
+  }
 
   /* Convert the power level */
   BTStatus_t status = prvTxPowerIndexToSlBtPower( pxParams->ucTxPower,
@@ -1799,17 +1756,6 @@ static sl_status_t prvSlBtSetAdvParams( uint8_t ucAdvSetHandle,
     return sl_status;
   }
 
-  /* Set the advertising phy */
-  sl_status = sl_bt_advertiser_set_phy( ucAdvSetHandle,
-                                        pxSlBtAdvParams->ucPrimaryPhy,
-                                        pxSlBtAdvParams->ucSecondaryPhy );
-  if( sl_status != SL_STATUS_OK )
-  {
-    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "sl_bt_advertiser_set_phy() failed, sl_status=0x%"PRIx32,
-                                    sl_status );
-    return sl_status;
-  }
-
   /* Set the channel map */
   sl_status = sl_bt_advertiser_set_channel_map( ucAdvSetHandle,
                                                 pxSlBtAdvParams->ucChannelMap );
@@ -1866,10 +1812,6 @@ static sl_status_t prvSlBtSetAdvParams( uint8_t ucAdvSetHandle,
     (ptr)[0] = (uint8_t) (_value & 0xFF);   \
     (ptr)[1] = (uint8_t) (_value >> 8);     \
   } while( 0 )
-
-/* Packet type values for @ref sl_bt_advertiser_set_data() */
-#define ADV_PACKET_TYPE_ADVERTISEMENT ((uint8_t) 0) /* Advertising packets */
-#define ADV_PACKET_TYPE_SCAN_RESPONSE ((uint8_t) 1) /* Scan response packets */
 
 /**
  * @brief Append advertisement data to a buffer
@@ -2230,11 +2172,11 @@ static BTStatus_t prvSetAdvertisementData( uint8_t ucAdvSetHandle,
 
   /* Set the user data to the Bluetooth stack */
   uint8_t ucPacketType = pxParams->bSetScanRsp ?
-    ADV_PACKET_TYPE_SCAN_RESPONSE : ADV_PACKET_TYPE_ADVERTISEMENT;
-  sl_status_t sl_status = sl_bt_advertiser_set_data( ucAdvSetHandle, ucPacketType, advDataLen, advBuf );
+    sl_bt_advertiser_scan_response_packet : sl_bt_advertiser_advertising_data_packet;
+  sl_status_t sl_status = sl_bt_legacy_advertiser_set_data( ucAdvSetHandle, ucPacketType, advDataLen, advBuf );
   if( sl_status != SL_STATUS_OK )
   {
-    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "sl_bt_advertiser_set_data() failed, sl_status=0x%"PRIx32, sl_status );
+    SILABS_BLE_LOG_FUNC_EXIT_ERROR( "sl_bt_legacy_advertiser_set_data() failed, sl_status=0x%"PRIx32, sl_status );
     return prvSlStatusToBTStatus( sl_status );
   }
 
@@ -2434,9 +2376,9 @@ static BTStatus_t prvSetScanParameters( uint8_t ucAdapterIf,
   /* The stack function uses the same units and has the same behaviour as
    * expected of the BLE HAL, i.e. the parameter change takes effect the next
    * time scanning is started. */
-  sl_status_t sl_status = sl_bt_scanner_set_timing( SCANNER_PHYS_1M,
-                                                    (uint16_t) ulScanInterval,
-                                                    (uint16_t) ulScanWindow );
+  sl_status_t sl_status = sl_bt_scanner_set_parameters( sl_bt_scanner_scan_mode_active,
+                                                        (uint16_t) ulScanInterval,
+                                                        (uint16_t) ulScanWindow );
   if( sl_status != SL_STATUS_OK )
   {
     SILABS_BLE_LOG_FUNC_EXIT_ERROR( "failed to set timing, sl_status=0x%"PRIx32, sl_status);
@@ -2587,9 +2529,9 @@ static BTStatus_t prvMultiAdvSetInstRawData( uint8_t ucAdapterIf,
 
   /* Set the user data to the Bluetooth stack */
   uint8_t ucPacketType = bSetScanRsp ?
-    ADV_PACKET_TYPE_SCAN_RESPONSE : ADV_PACKET_TYPE_ADVERTISEMENT;
-  sl_status_t sl_status = sl_bt_advertiser_set_data( pxAdapterIf->ucAdvSetHandle,
-                                                     ucPacketType, xDataLen, pucData );
+    sl_bt_advertiser_scan_response_packet : sl_bt_advertiser_advertising_data_packet;
+  sl_status_t sl_status = sl_bt_legacy_advertiser_set_data( pxAdapterIf->ucAdvSetHandle,
+                                                            ucPacketType, xDataLen, pucData );
   if( sl_status != SL_STATUS_OK )
   {
     SILABS_BLE_LOG_FUNC_EXIT_ERROR( "failed to set data, sl_status=0x%"PRIx32, sl_status );
@@ -2604,9 +2546,8 @@ static BTStatus_t prvMultiAdvSetInstRawData( uint8_t ucAdapterIf,
   if( bSetScanRsp || ( !bIsScannable ) )
   {
     /* Start advertising with user-defined data */
-    sl_status = sl_bt_advertiser_start( pxAdapterIf->ucAdvSetHandle,
-                                        sl_bt_advertiser_user_data,
-                                        pxAdapterIf->ucAdvConnectableMode );
+    sl_status = sl_bt_legacy_advertiser_start( pxAdapterIf->ucAdvSetHandle,
+                                               pxAdapterIf->ucAdvConnectableMode );
     if( sl_status != SL_STATUS_OK )
     {
       SILABS_BLE_LOG_FUNC_EXIT_ERROR( "failed to start advertising, sl_status=0x%"PRIx32,
@@ -2987,8 +2928,8 @@ void prvBleAdapterOnSlBtEvent( sl_bt_msg_t* evt )
       prvOnConnectionClosed( &evt->data.evt_connection_closed );
       break;
 
-    case sl_bt_evt_scanner_scan_report_id:
-      prvOnScanReportEvent( &evt->data.evt_scanner_scan_report );
+    case sl_bt_evt_scanner_legacy_advertisement_report_id:
+      prvOnScanReportEvent( &evt->data.evt_scanner_legacy_advertisement_report );
       break;
 
     case sl_bt_evt_sm_bonded_id:

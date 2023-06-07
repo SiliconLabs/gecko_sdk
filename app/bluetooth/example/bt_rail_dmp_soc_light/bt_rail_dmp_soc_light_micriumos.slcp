@@ -59,7 +59,7 @@ component:
     instance:
       - btn0
       - btn1
-  - id: simple_timer_micriumos
+  - id: app_timer_micriumos
   - id: bt_rail_compatibility_fix
   - id: bt_post_build
 # ------------------ Require list ----------------------

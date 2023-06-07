@@ -24,105 +24,105 @@ extern "C" {
 
 //#include "gp-proxy-table.h"
 
-extern uint8_t emGpIncomingFCInSinkTokenTableSize;
-extern uint8_t emGpIncomingFCInSinkTokenTimeout;
+extern uint8_t sli_zigbee_gp_incoming_fc_in_sink_token_table_size;
+extern uint8_t sli_zigbee_gp_incoming_fc_in_sink_token_timeout;
 
 //these are declared in the config/ember-configuration.c
-extern uint8_t emGpSinkTableSize;
-extern EmberGpSinkTableEntry emGpSinkTable[];
+extern uint8_t sli_zigbee_gp_sink_table_size;
+extern EmberGpSinkTableEntry sli_zigbee_gp_sink_table[];
 
 #define EMBER_GP_SINK_TABLE_SECURITY_MASK 0x1F
 
-void emGpWriteIncomingFCInSinkToToken(uint8_t index);
+void sli_zigbee_gp_write_incoming_fc_in_sink_to_token(uint8_t index);
 
 void emberGpSinkTableClearAll(void);
 
-#define emGpSinkTableEntryUnused(index)         \
-  ((emGpSinkTable[(index)].status               \
-    == EMBER_GP_SINK_TABLE_ENTRY_STATUS_UNUSED) \
-   || (emGpSinkTable[(index)].status == 0))
+#define sli_zigbee_gp_sink_table_entry_unused(index) \
+  ((sli_zigbee_gp_sink_table[(index)].status         \
+    == EMBER_GP_SINK_TABLE_ENTRY_STATUS_UNUSED)      \
+   || (sli_zigbee_gp_sink_table[(index)].status == 0))
 
-#define emGpSinkTableEntryActive(index) \
-  (emGpSinkTable[(index)].status        \
+#define sli_zigbee_gp_sink_table_entry_active(index) \
+  (sli_zigbee_gp_sink_table[(index)].status          \
    == EMBER_GP_SINK_TABLE_ENTRY_STATUS_ACTIVE)
 
-#define  emGpSinkTableGetAddr(index) \
-  (&(emGpSinkTable[(index)].gpd))
+#define  sli_zigbee_gp_sink_table_get_addr(index) \
+  (&(sli_zigbee_gp_sink_table[(index)].gpd))
 
-#define emGpSinkTableSetSecurityFrameCounter(index, sfc) \
-  (emGpSinkTable[(index)].gpdSecurityFrameCounter = (sfc))
+#define sli_zigbee_gp_sink_table_set_security_frame_counter(index, sfc) \
+  (sli_zigbee_gp_sink_table[(index)].gpdSecurityFrameCounter = (sfc))
 
-#define emGpSinkTableGetSecurityFrameCounter(index) \
-  (emGpSinkTable[(index)].gpdSecurityFrameCounter)
+#define sli_zigbee_gp_sink_table_get_security_frame_counter(index) \
+  (sli_zigbee_gp_sink_table[(index)].gpdSecurityFrameCounter)
 
-#define emGpSinkTableGetOptions(index) \
-  (emGpSinkTable[(index)].options)
+#define sli_zigbee_gp_sink_table_get_options(index) \
+  (sli_zigbee_gp_sink_table[(index)].options)
 
-#define emGpSinkTableSetOptions(index, o) \
-  (emGpSinkTable[(index)].options = o)
+#define sli_zigbee_gp_sink_table_set_options(index, o) \
+  (sli_zigbee_gp_sink_table[(index)].options = o)
 
-#define emGpSinkTableHasSecurity(index) \
-  (emGpSinkTable[(index)].options & EMBER_AF_GP_SINK_TABLE_ENTRY_OPTIONS_SECURITY_USE)
+#define sli_zigbee_gp_sink_table_has_security(index) \
+  (sli_zigbee_gp_sink_table[(index)].options & EMBER_AF_GP_SINK_TABLE_ENTRY_OPTIONS_SECURITY_USE)
 
-#define emGpSinkTableGetSecurityOptions(index) \
-  (emGpSinkTable[(index)].securityOptions)
+#define sli_zigbee_gp_sink_table_get_security_options(index) \
+  (sli_zigbee_gp_sink_table[(index)].securityOptions)
 
-#define emGpSinkTableSetSecurityOptions(index, o) \
-  ((emGpSinkTable[(index)].securityOptions = o))
+#define sli_zigbee_gp_sink_table_set_security_options(index, o) \
+  ((sli_zigbee_gp_sink_table[(index)].securityOptions = o))
 
-#define emGpSinkTableGetSinkList(index) \
-  (emGpSinkTable[(index)].sinkList)
+#define sli_zigbee_gp_sink_table_get_sink_list(index) \
+  (sli_zigbee_gp_sink_table[(index)].sinkList)
 
-#define emGpSinkTableEntryHasLinkKey(index) \
-  (((emGpSinkTable[(index)].securityOptions) & EMBER_GP_SINK_TABLE_SECURITY_MASK))
+#define sli_zigbee_gp_sink_table_entry_has_link_key(index) \
+  (((sli_zigbee_gp_sink_table[(index)].securityOptions) & EMBER_GP_SINK_TABLE_SECURITY_MASK))
 
-#define emGpSinkTableGetSecurityKey(index) \
-  (emGpSinkTable[(index)].gpdKey)
+#define sli_zigbee_gp_sink_table_get_security_key(index) \
+  (sli_zigbee_gp_sink_table[(index)].gpdKey)
 
-#define emGpSinkTableSetStatus(index, s) \
-  (emGpSinkTable[(index)].status = (s))
+#define sli_zigbee_gp_sink_table_set_status(index, s) \
+  (sli_zigbee_gp_sink_table[(index)].status = (s))
 
-#define emGpSinkTableGetStatus(index) \
-  (emGpSinkTable[(index)].status)
+#define sli_zigbee_gp_sink_table_get_status(index) \
+  (sli_zigbee_gp_sink_table[(index)].status)
 
-#define emGpSinkTableSetInRange(index) \
-  (emGpSinkTable[(index)].options |= GP_SINK_TABLE_OPTIONS_IN_RANGE)
+#define sli_zigbee_gp_sink_table_set_in_range(index) \
+  (sli_zigbee_gp_sink_table[(index)].options |= GP_SINK_TABLE_OPTIONS_IN_RANGE)
 
-#define emGpSinkTableSetAssignedAlias(index, s) \
-  (emGpSinkTable[(index)].assignedAlias = (s))
+#define sli_zigbee_gp_sink_table_set_assigned_alias(index, s) \
+  (sli_zigbee_gp_sink_table[(index)].assignedAlias = (s))
 
-#define emGpSinkTableGetAssignedAlias(index) \
-  (emGpSinkTable[(index)].assignedAlias)
+#define sli_zigbee_gp_sink_table_get_assigned_alias(index) \
+  (sli_zigbee_gp_sink_table[(index)].assignedAlias)
 
-#define emGpSinkTableSetDeviceId(index, s) \
-  (emGpSinkTable[(index)].deviceId = (s))
+#define sli_zigbee_gp_sink_table_set_device_id(index, s) \
+  (sli_zigbee_gp_sink_table[(index)].deviceId = (s))
 
-#define emGpSinkTableGetDeviceId(index) \
-  (emGpSinkTable[(index)].deviceId)
+#define sli_zigbee_gp_sink_table_get_device_id(index) \
+  (sli_zigbee_gp_sink_table[(index)].deviceId)
 
-#define emGpSinkTableSetGroupcastRadius(index, s) \
-  (emGpSinkTable[(index)].groupcastRadius = (s))
+#define sli_zigbee_gp_sink_table_set_groupcast_radius(index, s) \
+  (sli_zigbee_gp_sink_table[(index)].groupcastRadius = (s))
 
-#define emGpSinkTableGetGroupcastRadius(index) \
-  (emGpSinkTable[(index)].groupcastRadius)
+#define sli_zigbee_gp_sink_table_get_groupcast_radius(index) \
+  (sli_zigbee_gp_sink_table[(index)].groupcastRadius)
 
-bool emGpAddressMatch(const EmberGpAddress *a1, const EmberGpAddress *a2);
+bool sli_zigbee_af_gp_address_match(const EmberGpAddress *a1, const EmberGpAddress *a2);
 void emberGpSinkTableInit(void);
 EmberStatus emberGpSinkTableSetEntry(uint8_t sinkTableIndex,
                                      EmberGpSinkTableEntry *entry);
 EmberStatus emberGpSinkTableGetEntry(uint8_t sinkTableIndex,
                                      EmberGpSinkTableEntry *entry);
 uint8_t emberGpSinkTableEntryInUse(uint8_t sinkTableIndex);
-uint8_t emGpSinkTableGetFreeEntryIndex(void);
+uint8_t sli_zigbee_af_gp_sink_table_get_free_entry_index(void);
 
 uint8_t emberGpSinkTableFindOrAllocateEntry(EmberGpAddress *addr);
 
-void emGpSinkTableAddGroup(uint8_t index,
-                           uint16_t sinkGroupId,
-                           uint16_t alias);
-bool emGpSinkTableRemoveGroup(uint8_t index,
-                              uint16_t sinkGroupId,
-                              uint16_t assignedAlias);
+void sli_zigbee_af_gp_sink_table_add_group(uint8_t index,
+                                           uint16_t sinkGroupId,
+                                           uint16_t alias);
+bool sli_zigbee_af_gp_sink_table_remove_group(uint8_t index,
+                                              uint16_t sinkGroupId,
+                                              uint16_t assignedAlias);
 uint8_t emberGpSinkTableLookup(EmberGpAddress *addr);
 void emberGpSinkTableRemoveEntry(uint8_t index);
 void emberGpSinkTableSetSecurityFrameCounter(uint8_t index,

@@ -29,16 +29,13 @@
  ******************************************************************************/
 
 #include "em_device.h"
-
-#if defined(CRYPTOACC_PRESENT) && defined(SEPUF_PRESENT)
-
+#include "sl_psa_values.h"
 #include <psa/crypto.h>
 #include "mbedtls/platform.h"
 #include "sli_cryptoacc_opaque_types.h"
-
 #include <string.h>
 
-#if defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS)
+#if defined(SLI_PSA_DRIVER_FEATURE_PUF_KEY) && defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS)
 
 psa_status_t sli_cryptoacc_opaque_get_builtin_key(psa_drv_slot_number_t slot_number,
                                                   psa_key_attributes_t *attributes,
@@ -53,8 +50,14 @@ psa_status_t sli_cryptoacc_opaque_get_builtin_key(psa_drv_slot_number_t slot_num
     case SLI_CRYPTOACC_BUILTIN_KEY_PUF_SLOT:
       psa_set_key_bits(attributes, 256);
       psa_set_key_type(attributes, PSA_KEY_TYPE_AES);
-      psa_set_key_usage_flags(attributes, PSA_KEY_USAGE_SIGN_MESSAGE);
-      psa_set_key_algorithm(attributes, PSA_ALG_CMAC);
+      if (PSA_ALG_IS_KEY_DERIVATION(SL_CRYPTOACC_BUILTIN_KEY_PUF_ALG)) {
+        psa_set_key_usage_flags(attributes, PSA_KEY_USAGE_DERIVE);
+      } else if (PSA_ALG_IS_MAC(SL_CRYPTOACC_BUILTIN_KEY_PUF_ALG)) {
+        psa_set_key_usage_flags(attributes, (PSA_KEY_USAGE_SIGN_MESSAGE | PSA_KEY_USAGE_VERIFY_MESSAGE));
+      } else {
+        return PSA_ERROR_NOT_SUPPORTED;
+      }
+      psa_set_key_algorithm(attributes, SL_CRYPTOACC_BUILTIN_KEY_PUF_ALG);
       break;
     default:
       return PSA_ERROR_DOES_NOT_EXIST;
@@ -109,6 +112,4 @@ psa_status_t mbedtls_psa_platform_get_builtin_key(
 
 #endif // !PSA_CRYPTO_DRIVER_TEST
 
-#endif // MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS
-
-#endif // defined(CRYPTOACC_PRESENT) && defined(SEPUF_PRESENT)
+#endif // SLI_PSA_DRIVER_FEATURE_PUF_KEY && MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS

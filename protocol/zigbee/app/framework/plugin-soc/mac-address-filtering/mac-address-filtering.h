@@ -34,6 +34,7 @@
  *
  */
 
+#include "sl_cli_types.h"
 /**
  * @addtogroup mac-address-filtering
  * @{
@@ -46,115 +47,115 @@
 
 /** @brief Print configuration command.
  *
- * @param SL_CLI_COMMAND_ARG Ver.: always
+ * @param sl_cli_command_arg_t * arguments Ver.: always
  *
  */
-void emberAfPluginMacAddressFilteringPrintConfigCommand(SL_CLI_COMMAND_ARG);
+void emberAfPluginMacAddressFilteringPrintConfigCommand(sl_cli_command_arg_t * arguments);
 
 /** @brief Filter out the no address command.
  *
- * @param SL_CLI_COMMAND_ARG Ver.: always
+ * @param sl_cli_command_arg_t * arguments Ver.: always
  *
  */
-void emberAfPluginMacAddressFilteringFilterNoAddressCommand(SL_CLI_COMMAND_ARG);
+void emberAfPluginMacAddressFilteringFilterNoAddressCommand(sl_cli_command_arg_t * arguments);
 
 /** @brief Add the short address command.
  *
- * @param SL_CLI_COMMAND_ARG Ver.: always
+ * @param sl_cli_command_arg_t * arguments Ver.: always
  *
  */
-void emberAfPluginMacAddressFilteringAddShortAddressCommand(SL_CLI_COMMAND_ARG);
+void emberAfPluginMacAddressFilteringAddShortAddressCommand(sl_cli_command_arg_t * arguments);
 
 /** @brief Set the short address list type.
  *
- * @param SL_CLI_COMMAND_ARG Ver.: always
+ * @param sl_cli_command_arg_t * arguments Ver.: always
  *
  */
-void emberAfPluginMacAddressFilteringSetShortAddressListType(SL_CLI_COMMAND_ARG);
+void emberAfPluginMacAddressFilteringSetShortAddressListType(sl_cli_command_arg_t * arguments);
 
 /** @brief Set the long address list type.
  *
- * @param SL_CLI_COMMAND_ARG Ver.: always
+ * @param sl_cli_command_arg_t * arguments Ver.: always
  *
  */
-void emberAfPluginMacAddressFilteringSetLongAddressListType(SL_CLI_COMMAND_ARG);
+void emberAfPluginMacAddressFilteringSetLongAddressListType(sl_cli_command_arg_t * arguments);
 
 /** @brief Add long address.
  *
- * @param SL_CLI_COMMAND_ARG Ver.: always
+ * @param sl_cli_command_arg_t * arguments Ver.: always
  *
  */
-void emberAfPluginMacAddressFilteringAddLongAddressCommand(SL_CLI_COMMAND_ARG);
+void emberAfPluginMacAddressFilteringAddLongAddressCommand(sl_cli_command_arg_t * arguments);
 
 /** @brief Clear the short address list.
  *
- * @param SL_CLI_COMMAND_ARG Ver.: always
+ * @param sl_cli_command_arg_t * arguments Ver.: always
  *
  */
-void emberAfPluginMacAddressFilteringClearShortAddressList(SL_CLI_COMMAND_ARG);
+void emberAfPluginMacAddressFilteringClearShortAddressList(sl_cli_command_arg_t * arguments);
 
 /** @brief Clear the long address list.
  *
- * @param SL_CLI_COMMAND_ARG Ver.: always
+ * @param sl_cli_command_arg_t * arguments Ver.: always
  *
  */
-void emberAfPluginMacAddressFilteringClearLongAddressList(SL_CLI_COMMAND_ARG);
+void emberAfPluginMacAddressFilteringClearLongAddressList(sl_cli_command_arg_t * arguments);
 
 /** @brief Add panID.
  *
- * @param SL_CLI_COMMAND_ARG Ver.: always
+ * @param sl_cli_command_arg_t * arguments Ver.: always
  *
  */
-void emberAfPluginMacAddressFilteringAddPanIdCommand(SL_CLI_COMMAND_ARG);
+void emberAfPluginMacAddressFilteringAddPanIdCommand(sl_cli_command_arg_t * arguments);
 
 /** @brief Delete a panID entry.
  *
- * @param SL_CLI_COMMAND_ARG Ver.: always
+ * @param sl_cli_command_arg_t * arguments Ver.: always
  *
  */
-void emberAfPluginMacAddressFilteringPanIdDeleteEntry(SL_CLI_COMMAND_ARG);
+void emberAfPluginMacAddressFilteringPanIdDeleteEntry(sl_cli_command_arg_t * arguments);
 
 /** @brief Clear the panID list.
  *
- * @param SL_CLI_COMMAND_ARG Ver.: always
+ * @param sl_cli_command_arg_t * arguments Ver.: always
  *
  */
-void emberAfPluginMacAddressFilteringClearPanIdList(SL_CLI_COMMAND_ARG);
+void emberAfPluginMacAddressFilteringClearPanIdList(sl_cli_command_arg_t * arguments);
 
 /** @brief Set the list type for panID list.
  *
- * @param SL_CLI_COMMAND_ARG Ver.: always
+ * @param sl_cli_command_arg_t * arguments Ver.: always
  *
  */
-void emberAfPluginMacAddressFilteringSetPanIdListType(SL_CLI_COMMAND_ARG);
+void emberAfPluginMacAddressFilteringSetPanIdListType(sl_cli_command_arg_t * arguments);
 
 /** @brief MAC address filtering reset.
  *
- * @param SL_CLI_COMMAND_ARG Ver.: always
+ * @param sl_cli_command_arg_t * arguments Ver.: always
  *
  */
-void emberAfPluginMacAddressFilteringReset(SL_CLI_COMMAND_ARG);
+void emberAfPluginMacAddressFilteringReset(sl_cli_command_arg_t * arguments);
 
 /** @brief Clear all lists for MAC address filtering.
  *
- * @param SL_CLI_COMMAND_ARG Ver.: always
+ * @param sl_cli_command_arg_t * arguments Ver.: always
  *
  */
 void emberAfPluginMacAddressFilteringClearAll(void);
 
 /** @brief Delete an entry from short address list.
  *
- * @param SL_CLI_COMMAND_ARG Ver.: always
+ * @param sl_cli_command_arg_t * arguments Ver.: always
  *
  */
-void emberAfPluginMacAddressFilteringShortAddressDeleteEntry(SL_CLI_COMMAND_ARG);
+void emberAfPluginMacAddressFilteringShortAddressDeleteEntry(sl_cli_command_arg_t * arguments);
 
 /** @brief Delete an entry from long address list.
  *
- * @param SL_CLI_COMMAND_ARG Ver.: always
+ * @param sl_cli_command_arg_t * arguments Ver.: always
  *
  */
-void emberAfPluginMacAddressFilteringLongAddressDeleteEntry(SL_CLI_COMMAND_ARG);
+void emberAfPluginMacAddressFilteringLongAddressDeleteEntry(sl_cli_command_arg_t * arguments);
 
 /** @brief Get stats for a short address.
  *
@@ -200,10 +201,10 @@ void emberAfPluginMacAddressFilteringGetStats(bool shortMode,
 
 /** @brief Callback for MAC address filtering initialization.
  *
- * @param SLXU_INIT_ARG Ver.: always
+ * @param uint8_t init_level Ver.: always
  *
  */
-void emberAfPluginMacAddressFilteringInitCallback(SLXU_INIT_ARG);
+void emberAfPluginMacAddressFilteringInitCallback(uint8_t init_level);
 
 /** @} */ // end of mac_address_filtering_cb
 /** @} */ // end of name Callbacks

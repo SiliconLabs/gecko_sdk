@@ -15,7 +15,9 @@
  *
  ******************************************************************************/
 
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 
 // Plugin inclusion macros (AppBuilder-generated) are mapped to the UC component presense macros
 // Commented out lines correspond to plugins present in the AppBuilder-generared files for the

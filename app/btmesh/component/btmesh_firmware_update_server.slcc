@@ -32,12 +32,12 @@ requires:
   - name: btmesh_blob_transfer_server
   - name: btmesh_stack_fw_update_server
   - name: power_manager
-  - name: simple_timer
+  - name: app_timer
   - name: silabs_core_sl_malloc
 provides:
   - name: btmesh_firmware_update_server
 recommends:
-  - id: simple_timer
+  - id: app_timer
 
 template_contribution:
   - name: btmesh_on_event

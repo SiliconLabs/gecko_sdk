@@ -29,6 +29,7 @@
 #include <stdlib.h>
 #include "stack/include/ember-types.h"
 #include "app/util/ezsp/ezsp-protocol.h"
+// TODO: try to remove once EMZIGBEE-11229 is complete
 #ifndef UC_BUILD
 #include "hal/micro/generic/em2xx-reset-defs.h"
 #include "hal/micro/system-timer.h"

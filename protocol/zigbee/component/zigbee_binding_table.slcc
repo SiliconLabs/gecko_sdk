@@ -57,7 +57,7 @@ template_contribution:
   - name: zigbee_ncp_callback
     value:
       callback_type: modify_memory_allocation
-      function_name: emInitializeBindingTable
+      function_name: sli_zigbee_initialize_binding_table
   
   - name: zigbee_ncp_callback
     value:

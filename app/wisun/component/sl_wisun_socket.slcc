@@ -17,34 +17,35 @@ provides:
   - name: sl_wisun_socket
 
 source:
-  - path: "external_socket.c"
+  - path: "sli_socket_external.c"
   - path: "socket.c"
-  - path: "socket_event.c"
-  - path: "socket_hnd.c"
+  - path: "sli_socket_event.c"
+  - path: "sli_socket_hnd.c"
 
 include:
   - path: "."
     file_list:
-    - "path": "external_socket.h"
+    - "path": "sli_socket_external.h"
     - "path": "socket.h"
-    - "path": "socket_hnd.h"
+    - "path": "sli_socket_hnd.h"
 
 requires:
   - name: "errno"
+  - name: "sl_mempool"
   - name: "sl_wisun_event_mgr"    # for handling socket events
 
 config_file:
-  - path: "config/socket_config.h"
+  - path: "config/sl_socket_config.h"
 
 
 #-------------- Template Contribution ----------------
 template_contribution:
-#---------------- Component Catalog ------------------ socket_handler_init
+#---------------- Component Catalog ------------------
   - name: "event_handler"
     value:
       event: "internal_app_init"
-      include: "socket_hnd.h"
-      handler: "socket_handler_init"
+      include: "sli_socket_hnd.h"
+      handler: "sli_socket_hnd_init"
 
   - name: component_catalog
     value: wisun_socket

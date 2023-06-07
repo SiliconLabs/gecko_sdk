@@ -31,6 +31,11 @@
 #ifndef SL_GATT_SERVICE_SOUND_CONFIG_H
 #define SL_GATT_SERVICE_SOUND_CONFIG_H
 
+/***********************************************************************************************//**
+ * @addtogroup gatt_service_sound
+ * @{
+ **************************************************************************************************/
+
 // <<< Use Configuration Wizard in Context Menu >>>
 
 // <o SL_GATT_SERVICE_SOUND_INVALID> Dummy Sound Level measurement results for uninitialized sensors. <0-0x7FFF>
@@ -38,4 +43,5 @@
 #define SL_GATT_SERVICE_SOUND_INVALID  0x7FFF
 // <<< end of configuration section >>>
 
+/** @} (end addtogroup gatt_service_sound) */
 #endif // SL_GATT_SERVICE_SOUND_CONFIG_H

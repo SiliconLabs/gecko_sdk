@@ -87,14 +87,14 @@ extern "C" {
  * @brief The EFR32XG12 series size needed for
  *   \ref RAIL_StateBufferEntry_t::bufferBytes.
  */
-#define RAIL_EFR32XG12_STATE_BUFFER_BYTES 480
+#define RAIL_EFR32XG12_STATE_BUFFER_BYTES 488
 
 /**
  * @def RAIL_EFR32XG13_STATE_BUFFER_BYTES
  * @brief The EFR32XG13 series size needed for
  *   \ref RAIL_StateBufferEntry_t::bufferBytes.
  */
-#define RAIL_EFR32XG13_STATE_BUFFER_BYTES 488
+#define RAIL_EFR32XG13_STATE_BUFFER_BYTES 496
 
 /**
  * @def RAIL_EFR32XG14_STATE_BUFFER_BYTES
@@ -167,6 +167,32 @@ typedef struct RAIL_Config {
 } RAIL_Config_t;
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
+/**
+ * @def RAIL_SEQ_IMAGE_1
+ * @brief A macro for the first sequencer image.
+ */
+#define RAIL_SEQ_IMAGE_1                  1
+
+/**
+ * @def RAIL_SEQ_IMAGE_2
+ * @brief A macro for the second sequencer image.
+ */
+#define RAIL_SEQ_IMAGE_2                  2
+
+/**
+ * @def RAIL_SEQ_IMAGE_DEFAULT
+ * @brief A chip-specific macro for the default sequencer image on platforms
+ *   that support only one sequencer image.
+ */
+#define RAIL_SEQ_IMAGE_DEFAULT            RAIL_SEQ_IMAGE_1
+
+/**
+ * @def RAIL_SEQ_IMAGE_COUNT
+ * @brief A macro for the total number of sequencer images supported on the
+ *   platform.
+ */
+#define RAIL_SEQ_IMAGE_COUNT              1
+
 /**
  * @enum RAIL_RadioStateEfr32_t
  * @brief Radio state machine statuses.
@@ -566,7 +592,7 @@ RAIL_Status_t RAIL_CalibrateTemp(RAIL_Handle_t railHandle);
  * Compute the PPM correction using the thermistor value available when
  * \ref RAIL_EVENT_THERMISTOR_DONE occurs, after
  * \ref RAIL_StartThermistorMeasurement() call.
- * Then correct the RF frequency as well as Tx and Rx sampling.
+ * Then correct the RF frequency as well as TX and RX sampling.
  *
  * This function calls the following RAIL functions in sequence saving having
  * to call them individually:
@@ -728,7 +754,7 @@ typedef uint8_t RAIL_TxPowerLevel_t;
 typedef uint32_t RAIL_PaPowerSetting_t;
 
 /**
- * Returned by \ref RAIL_SetPaPowerSetting when the current PA does
+ * Returned by \ref RAIL_GetPaPowerSetting when the device does
  * not support the dBm to power setting mapping table.
  */
 #define RAIL_TX_PA_POWER_SETTING_UNSUPPORTED     (0U)
@@ -1036,7 +1062,7 @@ RAIL_Status_t RAIL_ChangedDcdc(void);
 
 /// The static amount of memory needed per channel for channel hopping, measured
 /// in 32 bit words, regardless of the size of radio configuration structures.
-#define RAIL_CHANNEL_HOPPING_BUFFER_SIZE_PER_CHANNEL (53U)
+#define RAIL_CHANNEL_HOPPING_BUFFER_SIZE_PER_CHANNEL (55U)
 
 /** @} */  // end of group Rx_Channel_Hopping
 

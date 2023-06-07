@@ -91,21 +91,25 @@ typedef struct {
 
 /* Include the context structures for all declared hardware drivers */
 #if defined(MBEDTLS_PSA_CRYPTO_DRIVERS)
-#include "em_device.h"
-#if defined(SEMAILBOX_PRESENT)
-#include "sli_se_transparent_types.h"
-#endif /* SEMAILBOX_PRESENT */
-#if defined(SEMAILBOX_PRESENT) && \
-  ( (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || \
-    defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS) )
-#include "sli_se_opaque_types.h"
-#endif /* SEMAILBOX_PRESENT  && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) */
-#if defined(CRYPTOACC_PRESENT)
-#include "sli_cryptoacc_transparent_types.h"
-#endif /* CRYPTOACC_PRESENT */
-#if defined(CRYPTO_PRESENT)
-#include "sli_crypto_transparent_types.h"
-#endif /* CRYPTO_PRESENT */
+
+#include "sli_psa_driver_features.h"
+
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
+  #include "sli_se_transparent_types.h"
+
+  #if defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
+    #include "sli_se_opaque_types.h"
+  #endif
+#endif
+
+#if defined(SLI_MBEDTLS_DEVICE_VSE)
+  #include "sli_cryptoacc_transparent_types.h"
+#endif
+
+#if defined(SLI_MBEDTLS_DEVICE_S1)
+  #include "sli_crypto_transparent_types.h"
+#endif
+
 #endif /* MBEDTLS_PSA_CRYPTO_DRIVERS */
 
 /* Define the context to be used for an operation that is executed through the
@@ -122,15 +126,15 @@ typedef union {
     mbedtls_transparent_test_driver_hash_operation_t test_driver_ctx;
 #endif
 #if defined(MBEDTLS_PSA_CRYPTO_DRIVERS)
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
     sli_se_transparent_hash_operation_t sli_se_transparent_ctx;
-#endif /* SEMAILBOX_PRESENT */
-#if defined(CRYPTOACC_PRESENT)
+#endif /* SLI_MBEDTLS_DEVICE_HSE */
+#if defined(SLI_MBEDTLS_DEVICE_VSE)
     sli_cryptoacc_transparent_hash_operation_t sli_cryptoacc_transparent_ctx;
-#endif /* CRYPTOACC_PRESENT */
-#if defined(CRYPTO_PRESENT)
+#endif /* SLI_MBEDTLS_DEVICE_VSE */
+#if defined(SLI_MBEDTLS_DEVICE_S1)
     sli_crypto_transparent_hash_operation_t sli_crypto_transparent_ctx;
-#endif /* CRYPTO_PRESENT */
+#endif /* SLI_MBEDTLS_DEVICE_S1 */
 #endif
 } psa_driver_hash_context_t;
 
@@ -142,20 +146,18 @@ typedef union {
     mbedtls_opaque_test_driver_cipher_operation_t opaque_test_driver_ctx;
 #endif
 #if defined(MBEDTLS_PSA_CRYPTO_DRIVERS)
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
     sli_se_transparent_cipher_operation_t sli_se_transparent_ctx;
-#if defined(SEMAILBOX_PRESENT) && \
-  ( (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || \
-    defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS) )
+#if defined(SLI_MBEDTLS_DEVICE_HSE) && defined(SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS)
     sli_se_opaque_cipher_operation_t sli_se_opaque_ctx;
-#endif /* SEMAILBOX_PRESENT  && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) */
-#endif /* SEMAILBOX_PRESENT */
-#if defined(CRYPTOACC_PRESENT)
+#endif /* SLI_MBEDTLS_DEVICE_HSE  && SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS */
+#endif /* SLI_MBEDTLS_DEVICE_HSE */
+#if defined(SLI_MBEDTLS_DEVICE_VSE)
     sli_cryptoacc_transparent_cipher_operation_t sli_cryptoacc_transparent_ctx;
-#endif /* CRYPTOACC_PRESENT */
-#if defined(CRYPTO_PRESENT)
+#endif /* SLI_MBEDTLS_DEVICE_VSE */
+#if defined(SLI_MBEDTLS_DEVICE_S1)
     sli_crypto_transparent_cipher_operation_t sli_crypto_transparent_ctx;
-#endif /* CRYPTO_PRESENT */
+#endif /* SLI_MBEDTLS_DEVICE_S1 */
 #endif
 } psa_driver_cipher_context_t;
 

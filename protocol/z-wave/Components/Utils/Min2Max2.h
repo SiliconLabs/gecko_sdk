@@ -1,5 +1,5 @@
 /**
- * @file Min2Max2.h
+ * @file
  * @brief Min2Max2 header file
  * @copyright 2022 Silicon Laboratories Inc.
  */

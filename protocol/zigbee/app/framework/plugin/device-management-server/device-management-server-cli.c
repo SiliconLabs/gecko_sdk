@@ -22,14 +22,12 @@
   #error The Device Management Server plugin is not compatible with the legacy CLI.
 #endif
 
-#ifdef UC_BUILD
-
-void emAfDeviceManagementServerCliPrint(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_device_management_server_cli_print(sl_cli_command_arg_t *arguments)
 {
   emberAfDeviceManagementServerPrint();
 }
 
-void emAfDeviceManagementServerCliTenancy(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_device_management_server_cli_tenancy(sl_cli_command_arg_t *arguments)
 {
   EmberAfDeviceManagementTenancy tenancy;
   tenancy.implementationDateTime = sl_cli_get_argument_uint32(arguments, 0);
@@ -39,25 +37,25 @@ void emAfDeviceManagementServerCliTenancy(sl_cli_command_arg_t *arguments)
                                           false);
 }
 
-void emAfDeviceManagementServerCliProviderId(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_device_management_server_cli_provider_id(sl_cli_command_arg_t *arguments)
 {
   uint32_t providerId = sl_cli_get_argument_uint32(arguments, 0);
   emberAfPluginDeviceManagementSetProviderId(providerId);
 }
 
-void emAfDeviceManagementServerCliIssuerEventId(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_device_management_server_cli_issuer_event_id(sl_cli_command_arg_t *arguments)
 {
   uint32_t issuerEventId = sl_cli_get_argument_uint32(arguments, 0);
   emberAfPluginDeviceManagementSetIssuerEventId(issuerEventId);
 }
 
-void emAfDeviceManagementServerCliTariffType(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_device_management_server_cli_tariff_type(sl_cli_command_arg_t *arguments)
 {
   EmberAfTariffType tariffType = (EmberAfTariffType) sl_cli_get_argument_uint8(arguments, 0);
   emberAfPluginDeviceManagementSetTariffType(tariffType);
 }
 
-void emAfDeviceManagementServerCliSupplier(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_device_management_server_cli_supplier(sl_cli_command_arg_t *arguments)
 {
   uint8_t length;
   EmberAfDeviceManagementSupplier supplier;
@@ -77,7 +75,7 @@ void emAfDeviceManagementServerCliSupplier(sl_cli_command_arg_t *arguments)
   emberAfPluginDeviceManagementSetSupplier(endpoint, &supplier);
 }
 
-void emAfDeviceManagementServerCliSiteId(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_device_management_server_cli_site_id(sl_cli_command_arg_t *arguments)
 {
   uint8_t length;
   EmberAfDeviceManagementSiteId siteId;
@@ -91,7 +89,7 @@ void emAfDeviceManagementServerCliSiteId(sl_cli_command_arg_t *arguments)
   emberAfPluginDeviceManagementSetSiteId(&siteId);
 }
 
-void emAfDeviceManagementServerCliCIN(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_device_management_server_cli_cin(sl_cli_command_arg_t *arguments)
 {
   uint8_t length;
   EmberAfDeviceManagementCIN cin;
@@ -105,7 +103,7 @@ void emAfDeviceManagementServerCliCIN(sl_cli_command_arg_t *arguments)
   emberAfPluginDeviceManagementSetCIN(&cin);
 }
 
-void emAfDeviceManagementServerCliPassword(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_device_management_server_cli_password(sl_cli_command_arg_t *arguments)
 {
   uint8_t length;
   EmberAfDeviceManagementPassword password;
@@ -122,7 +120,7 @@ void emAfDeviceManagementServerCliPassword(sl_cli_command_arg_t *arguments)
 }
 
 // plugin device-management-server pub-chg-of-tenancy <dst:2> <src endpoint:1>  <dst endpoint:1>
-void emAfDeviceManagementServerCliPublishChangeOfTenancy(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_device_management_server_cli_publish_change_of_tenancy(sl_cli_command_arg_t *arguments)
 {
   EmberNodeId dstAddr = (EmberNodeId) sl_cli_get_argument_uint16(arguments, 0);
   uint8_t srcEndpoint =  sl_cli_get_argument_uint8(arguments, 1);
@@ -131,7 +129,7 @@ void emAfDeviceManagementServerCliPublishChangeOfTenancy(sl_cli_command_arg_t *a
 }
 
 // plugin device-management-server pub-chg-of-tenancy <dst:2> <src endpoint:1>  <dst endpoint:1>
-void emAfDeviceManagementServerCliPublishChangeOfSupplier(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_device_management_server_cli_publish_change_of_supplier(sl_cli_command_arg_t *arguments)
 {
   EmberNodeId dstAddr = (EmberNodeId)sl_cli_get_argument_uint16(arguments, 0);
   uint8_t srcEndpoint =  sl_cli_get_argument_uint8(arguments, 1);
@@ -140,7 +138,7 @@ void emAfDeviceManagementServerCliPublishChangeOfSupplier(sl_cli_command_arg_t *
 }
 
 // plugin device-management-server update-site-id <dst:2> <src endpoint:1>  <dst endpoint:1>
-void emAfDeviceManagementServerCliUpdateSiteId(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_device_management_server_cli_update_site_id(sl_cli_command_arg_t *arguments)
 {
   EmberNodeId dstAddr = (EmberNodeId)sl_cli_get_argument_uint16(arguments, 0);
   uint8_t srcEndpoint =  sl_cli_get_argument_uint8(arguments, 1);
@@ -149,7 +147,7 @@ void emAfDeviceManagementServerCliUpdateSiteId(sl_cli_command_arg_t *arguments)
 }
 
 // plugin device-management-server update-cin <dst:2> <src endpoint:1>  <dst endpoint:1>
-void emAfDeviceManagementServerCliUpdateCIN(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_device_management_server_cli_update_cin(sl_cli_command_arg_t *arguments)
 {
   EmberNodeId dstAddr = (EmberNodeId)sl_cli_get_argument_uint16(arguments, 0);
   uint8_t srcEndpoint =  sl_cli_get_argument_uint8(arguments, 1);
@@ -158,13 +156,13 @@ void emAfDeviceManagementServerCliUpdateCIN(sl_cli_command_arg_t *arguments)
 }
 
 // plugin device-management-server pendingUpdatesMask <pendingUpdatesMask:1>
-void emAfDeviceManagementServerCliPendingUpdates(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_device_management_server_cli_pending_updates(sl_cli_command_arg_t *arguments)
 {
   EmberAfDeviceManagementChangePendingFlags pendingUpdatesMask = sl_cli_get_argument_uint8(arguments, 0);
   emberAfDeviceManagementClusterSetPendingUpdates(pendingUpdatesMask);
 }
 
-void emAfDeviceManagementServerCliSendRequestNewPasswordResponse(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_device_management_server_cli_send_request_new_password_response(sl_cli_command_arg_t *arguments)
 {
   uint8_t passwordType = sl_cli_get_argument_uint8(arguments, 0);
   EmberNodeId dstAddr = (EmberNodeId)sl_cli_get_argument_uint16(arguments, 1);
@@ -175,172 +173,3 @@ void emAfDeviceManagementServerCliSendRequestNewPasswordResponse(sl_cli_command_
                                                                srcEndpoint,
                                                                dstEndpoint);
 }
-
-#else //UC_BUILD
-
-void emAfDeviceManagementServerCliIssuerEventId(void);
-void emAfDeviceManagementServerCliPassword(void);
-void emAfDeviceManagementServerCliPrint(void);
-void emAfDeviceManagementServerCliProviderId(void);
-void emAfDeviceManagementServerCliSiteId(void);
-void emAfDeviceManagementServerCliSupplier(void);
-void emAfDeviceManagementServerCliTariffType(void);
-void emAfDeviceManagementServerCliTenancy(void);
-
-void emAfDeviceManagementServerCliPrint(void)
-{
-  emberAfDeviceManagementServerPrint();
-}
-
-void emAfDeviceManagementServerCliTenancy(void)
-{
-  EmberAfDeviceManagementTenancy tenancy;
-  tenancy.implementationDateTime = (uint32_t) emberUnsignedCommandArgument(0);
-  tenancy.tenancy = (uint32_t) emberUnsignedCommandArgument(1);
-
-  emberAfPluginDeviceManagementSetTenancy(&tenancy,
-                                          false);
-}
-
-void emAfDeviceManagementServerCliProviderId(void)
-{
-  uint32_t providerId = (uint32_t) emberUnsignedCommandArgument(0);
-  emberAfPluginDeviceManagementSetProviderId(providerId);
-}
-
-void emAfDeviceManagementServerCliIssuerEventId(void)
-{
-  uint32_t issuerEventId = (uint32_t) emberUnsignedCommandArgument(0);
-  emberAfPluginDeviceManagementSetIssuerEventId(issuerEventId);
-}
-
-void emAfDeviceManagementServerCliTariffType(void)
-{
-  EmberAfTariffType tariffType = (EmberAfTariffType) emberUnsignedCommandArgument(0);
-  emberAfPluginDeviceManagementSetTariffType(tariffType);
-}
-
-void emAfDeviceManagementServerCliSupplier(void)
-{
-  uint8_t length;
-  EmberAfDeviceManagementSupplier supplier;
-
-  uint8_t endpoint = (uint32_t) emberUnsignedCommandArgument(0);
-  supplier.proposedProviderId = (uint32_t) emberUnsignedCommandArgument(1);
-  supplier.implementationDateTime = (uint32_t) emberUnsignedCommandArgument(2);
-  supplier.providerChangeControl = (uint32_t) emberUnsignedCommandArgument(3);
-  length = emberCopyStringArgument(4,
-                                   supplier.proposedProviderName + 1,
-                                   EMBER_AF_DEVICE_MANAGEMENT_MAXIMUM_PROPOSED_PROVIDER_NAME_LENGTH,
-                                   false);
-  supplier.proposedProviderName[0] = length;
-  length = emberCopyStringArgument(5,
-                                   supplier.proposedProviderContactDetails + 1,
-                                   EMBER_AF_DEVICE_MANAGEMENT_MAXIMUM_PROPOSED_PROVIDER_CONTACT_DETAILS_LENGTH,
-                                   false);
-  supplier.proposedProviderContactDetails[0] = length;
-  emberAfPluginDeviceManagementSetSupplier(endpoint, &supplier);
-}
-
-void emAfDeviceManagementServerCliSiteId(void)
-{
-  uint8_t length;
-  EmberAfDeviceManagementSiteId siteId;
-
-  length = emberCopyStringArgument(0,
-                                   siteId.siteId + 1,
-                                   EMBER_AF_DEVICE_MANAGEMENT_MAXIMUM_SITE_ID_LENGTH,
-                                   false);
-  siteId.siteId[0] = length;
-  siteId.implementationDateTime = (uint32_t) emberUnsignedCommandArgument(1);
-
-  emberAfPluginDeviceManagementSetSiteId(&siteId);
-}
-
-void emAfDeviceManagementServerCliCIN(void)
-{
-  uint8_t length;
-  EmberAfDeviceManagementCIN cin;
-
-  length = emberCopyStringArgument(0,
-                                   cin.cin + 1,
-                                   EMBER_AF_DEVICE_MANAGEMENT_MAXIMUM_CIN_LENGTH,
-                                   false);
-  cin.cin[0] = length;
-  cin.implementationDateTime = (uint32_t) emberUnsignedCommandArgument(1);
-
-  emberAfPluginDeviceManagementSetCIN(&cin);
-}
-
-void emAfDeviceManagementServerCliPassword(void)
-{
-  uint8_t length;
-  EmberAfDeviceManagementPassword password;
-
-  length = emberCopyStringArgument(0,
-                                   password.password + 1,
-                                   EMBER_AF_DEVICE_MANAGEMENT_MAXIMUM_PASSWORD_LENGTH,
-                                   false);
-  password.password[0] = length;
-  password.implementationDateTime = (uint32_t) emberUnsignedCommandArgument(1);
-  password.durationInMinutes = (uint16_t) emberUnsignedCommandArgument(2);
-  password.passwordType = (uint8_t) emberUnsignedCommandArgument(3);
-
-  emberAfPluginDeviceManagementSetPassword(&password);
-}
-
-// plugin device-management-server pub-chg-of-tenancy <dst:2> <src endpoint:1>  <dst endpoint:1>
-void emAfDeviceManagementServerCliPublishChangeOfTenancy(void)
-{
-  EmberNodeId dstAddr = (EmberNodeId)emberUnsignedCommandArgument(0);
-  uint8_t srcEndpoint =  (uint8_t)emberUnsignedCommandArgument(1);
-  uint8_t dstEndpoint =  (uint8_t)emberUnsignedCommandArgument(2);
-  emberAfDeviceManagementClusterPublishChangeOfTenancy(dstAddr, srcEndpoint, dstEndpoint);
-}
-
-// plugin device-management-server pub-chg-of-tenancy <dst:2> <src endpoint:1>  <dst endpoint:1>
-void emAfDeviceManagementServerCliPublishChangeOfSupplier(void)
-{
-  EmberNodeId dstAddr = (EmberNodeId)emberUnsignedCommandArgument(0);
-  uint8_t srcEndpoint =  (uint8_t)emberUnsignedCommandArgument(1);
-  uint8_t dstEndpoint =  (uint8_t)emberUnsignedCommandArgument(2);
-  emberAfDeviceManagementClusterPublishChangeOfSupplier(dstAddr, srcEndpoint, dstEndpoint);
-}
-
-// plugin device-management-server update-site-id <dst:2> <src endpoint:1>  <dst endpoint:1>
-void emAfDeviceManagementServerCliUpdateSiteId(void)
-{
-  EmberNodeId dstAddr = (EmberNodeId)emberUnsignedCommandArgument(0);
-  uint8_t srcEndpoint =  (uint8_t)emberUnsignedCommandArgument(1);
-  uint8_t dstEndpoint =  (uint8_t)emberUnsignedCommandArgument(2);
-  emberAfDeviceManagementClusterUpdateSiteId(dstAddr, srcEndpoint, dstEndpoint);
-}
-
-// plugin device-management-server update-cin <dst:2> <src endpoint:1>  <dst endpoint:1>
-void emAfDeviceManagementServerCliUpdateCIN(void)
-{
-  EmberNodeId dstAddr = (EmberNodeId)emberUnsignedCommandArgument(0);
-  uint8_t srcEndpoint =  (uint8_t)emberUnsignedCommandArgument(1);
-  uint8_t dstEndpoint =  (uint8_t)emberUnsignedCommandArgument(2);
-  emberAfDeviceManagementClusterUpdateCIN(dstAddr, srcEndpoint, dstEndpoint);
-}
-
-// plugin device-management-server pendingUpdatesMask <pendingUpdatesMask:1>
-void emAfDeviceManagementServerCliPendingUpdates(void)
-{
-  EmberAfDeviceManagementChangePendingFlags pendingUpdatesMask = (uint8_t)emberUnsignedCommandArgument(0);
-  emberAfDeviceManagementClusterSetPendingUpdates(pendingUpdatesMask);
-}
-
-void emAfDeviceManagementServerCliSendRequestNewPasswordResponse(void)
-{
-  uint8_t passwordType = (uint8_t)emberUnsignedCommandArgument(0);
-  EmberNodeId dstAddr = (EmberNodeId)emberUnsignedCommandArgument(1);
-  uint8_t srcEndpoint =  (uint8_t)emberUnsignedCommandArgument(2);
-  uint8_t dstEndpoint =  (uint8_t)emberUnsignedCommandArgument(3);
-  emberAfDeviceManagementClusterSendRequestNewPasswordResponse(passwordType,
-                                                               dstAddr,
-                                                               srcEndpoint,
-                                                               dstEndpoint);
-}
-#endif

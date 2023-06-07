@@ -634,7 +634,7 @@ public:
     void SetBlockWiseBlockNumber(uint32_t aBlockNumber) { GetHelpData().mBlockWiseData.mBlockNumber = aBlockNumber; }
 
     /**
-     * This method sets the More Blocks falg in the message HelpData.
+     * This method sets the More Blocks flag in the message HelpData.
      *
      * @param[in]   aMoreBlocks    TRUE or FALSE.
      *
@@ -945,7 +945,7 @@ private:
         Message *operator->(void) { return static_cast<Message *>(ot::Message::Iterator::operator->()); }
     };
 
-    static_assert(sizeof(HelpData) <= sizeof(Ip6::Header) + sizeof(Ip6::HopByHopHeader) + sizeof(Ip6::OptionMpl) +
+    static_assert(sizeof(HelpData) <= sizeof(Ip6::Header) + sizeof(Ip6::HopByHopHeader) + sizeof(Ip6::MplOption) +
                                           sizeof(Ip6::Udp::Header),
                   "HelpData size exceeds the size of the reserved region in the message");
 
@@ -1241,10 +1241,7 @@ DefineMapEnum(otCoapCode, Coap::Code);
  * @returns A reference to `Coap::Message` matching @p aMessage.
  *
  */
-inline Coap::Message &AsCoapMessage(otMessage *aMessage)
-{
-    return *static_cast<Coap::Message *>(aMessage);
-}
+inline Coap::Message &AsCoapMessage(otMessage *aMessage) { return *static_cast<Coap::Message *>(aMessage); }
 
 /**
  * This method casts an `otMessage` pointer to a `Coap::Message` reference.
@@ -1254,10 +1251,7 @@ inline Coap::Message &AsCoapMessage(otMessage *aMessage)
  * @returns A reference to `Coap::Message` matching @p aMessage.
  *
  */
-inline Coap::Message *AsCoapMessagePtr(otMessage *aMessage)
-{
-    return static_cast<Coap::Message *>(aMessage);
-}
+inline Coap::Message *AsCoapMessagePtr(otMessage *aMessage) { return static_cast<Coap::Message *>(aMessage); }
 
 /**
  * This method casts an `otMessage` pointer to a `Coap::Message` pointer.

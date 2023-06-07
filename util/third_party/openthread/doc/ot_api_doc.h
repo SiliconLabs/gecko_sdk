@@ -53,7 +53,7 @@
  * @defgroup api-net                  IPv6 Networking
  * @{
  *
- * @defgroup api-dns                  DNSv6
+ * @defgroup api-dns                  DNS
  * @defgroup api-dnssd-server         DNS-SD Server
  * @defgroup api-icmp6                ICMPv6
  * @defgroup api-ip6                  IPv6
@@ -133,13 +133,13 @@
  * @}
  *
  * @defgroup api-cli                  Command Line Interface
- * @defgroup api-coprocessor-rpc      Co-processor Remote Procedure Call
  * @defgroup api-crypto               Crypto - Thread Stack
  * @defgroup api-factory-diagnostics  Factory Diagnostics - Thread Stack
  * @defgroup api-heap                 Heap
  * @defgroup api-history-tracker      History Tracker
  * @defgroup api-jam-detection        Jam Detection
  * @defgroup api-logging              Logging - Thread Stack
+ * @defgroup api-mesh-diag            Mesh Diagnostics
  * @defgroup api-ncp                  Network Co-Processor
  * @defgroup api-network-time         Network Time Synchronization
  * @defgroup api-random-group         Random Number Generator
@@ -168,6 +168,7 @@
  *
  * @defgroup plat-alarm               Alarm
  * @defgroup plat-crypto              Crypto - Platform
+ * @defgroup plat-dns                 DNS - Platform
  * @defgroup plat-entropy             Entropy
  * @defgroup plat-factory-diagnostics Factory Diagnostics - Platform
  * @defgroup plat-logging             Logging - Platform

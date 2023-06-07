@@ -1,0 +1,44 @@
+id: abr_initiator
+package: Bluetooth
+label: ABR initiator
+description: >
+  ABR reflector (Peripheral) Role API acts as a server and accepts connection from
+  ABR initiator (Central) Role clients.
+  It sends ABR reflector side measurement data via indications to a registered initiator node.
+category: Bluetooth|Application|Miscellaneous
+quality: experimental
+root_path: app/bluetooth/common/abr_initiator
+include:
+  - path: .
+    file_list:
+      - path: abr_initiator.h
+      - path: abr_initiator_interface.h
+      - path: abr_initiator_config.h
+source:
+  - path: abr_initiator.c
+  - path: abr_initiator_platform.c
+  - path: abr_initiator_config.c
+requires:
+  - name: app_log
+  - name: app_assert
+  - name: gatt_configuration
+  - name: bluetooth_stack
+  - name: bluetooth_feature_power_control
+  - name: bluetooth_feature_connection
+  - name: bluetooth_feature_scanner
+  - name: bluetooth_feature_gatt
+  - name: power_manager
+  - name: bluetooth_feature_cs
+  - name: bluetooth_feature_cs_test
+  - name: rtllib
+  - name: abr_cs_parser
+
+
+provides:
+  - name: abr_initiator
+template_contribution:
+  - name: bluetooth_on_event
+    value:
+      include: abr_initiator.h
+      function: bt_on_event_initiator
+    priority: 0

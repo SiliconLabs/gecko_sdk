@@ -11,7 +11,7 @@ class Target_Sim_Viper(Target_Sim_Bobcat):
 
     def MODEM_SHAPING_OVERRIDE(self, model):
         # always overwrite the calculator shaping for BLE PHYs
-        model.vars.MODEM_CTRL0_SHAPING.value_forced = 3
+        model.vars.MODEM_CTRL0_SHAPING.value_forced = 2
 
         model.vars.MODEM_SHAPING0_COEFF0.value_forced = 6
         model.vars.MODEM_SHAPING0_COEFF1.value_forced = 15
@@ -23,15 +23,6 @@ class Target_Sim_Viper(Target_Sim_Bobcat):
         model.vars.MODEM_SHAPING1_COEFF6.value_forced = 112
         model.vars.MODEM_SHAPING1_COEFF7.value_forced = 120
 
-        model.vars.MODEM_SHAPING2_COEFF8.value_forced = 120
-        model.vars.MODEM_SHAPING2_COEFF9.value_forced = 112
-        model.vars.MODEM_SHAPING2_COEFF10.value_forced = 97
-        model.vars.MODEM_SHAPING2_COEFF11.value_forced = 76
-
-        model.vars.MODEM_SHAPING3_COEFF12.value_forced = 52
-        model.vars.MODEM_SHAPING3_COEFF13.value_forced = 30
-        model.vars.MODEM_SHAPING3_COEFF14.value_forced = 15
-        model.vars.MODEM_SHAPING3_COEFF15.value_forced = 6
 
     def target_calculate(self, model):
 
@@ -60,9 +51,11 @@ class Target_Sim_Viper(Target_Sim_Bobcat):
         # : Bluetooth PHY Specific overrides
         if model.phy.name == 'PHY_Bluetooth_LE_1M_Viterbi_917M_noDSA' or \
                         model.phy.name == 'PHY_Bluetooth_LE_2M_Viterbi_noDSA_fullrate' or \
+                        model.phy.name == 'PHY_Bluetooth_LE_2M_Viterbi_noDSA_fullrate_phmod' or \
                         model.phy.name == 'PHY_Bluetooth_LE_2M_Viterbi' or \
                         model.phy.name == 'PHY_Bluetooth_LE' or \
                         model.phy.name == 'PHY_Bluetooth_LE_Viterbi_noDSA_fullrate' or \
+                        model.phy.name == 'PHY_Bluetooth_LE_Viterbi_noDSA_fullrate_phmod' or \
                         model.phy.name == 'PHY_Bluetooth_LE_Viterbi_noDSA' or \
                         model.phy.name == 'PHY_Bluetooth_LE_Viterbi' or \
                         model.phy.name == 'PHY_Bluetooth_1M_prod' or \
@@ -75,6 +68,8 @@ class Target_Sim_Viper(Target_Sim_Bobcat):
                         model.phy.name == 'PHY_Bluetooth_LongRange_dsa_500kbps' or \
                         model.phy.name == 'PHY_Bluetooth_LongRange_NOdsa_125kbps' or \
                         model.phy.name == 'PHY_Bluetooth_LongRange_NOdsa_500kbps' or \
+                        model.phy.name == 'PHY_Bluetooth_LongRange_NOdsa_125kbps_phmod' or \
+                        model.phy.name == 'PHY_Bluetooth_LongRange_NOdsa_500kbps_phmod' or \
                         model.phy.name == 'PHY_Bluetooth_LR_125k_prod' or \
                         model.phy.name == 'PHY_Bluetooth_LR_500k_prod' or \
                         model.phy.name == 'PHY_Bluetooth_1M_Concurrent':
@@ -113,4 +108,6 @@ class Target_Sim_Viper(Target_Sim_Bobcat):
                         model.phy.name == 'PHY_IEEE802154_2p4GHz_coh_sensitivity_diversity' or \
                         model.phy.name == 'PHY_IEEE802154_2p4GHz_coh_interference_diversity' or \
                         model.phy.name == 'PHY_IEEE802154_2p4GHz_cohdsa_diversity':
-            model.vars.MODEM_TXBR_TXBRNUM.value_forced = 53773
+            pass
+
+

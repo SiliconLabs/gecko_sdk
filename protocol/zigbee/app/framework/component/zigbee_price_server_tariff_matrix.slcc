@@ -31,7 +31,7 @@ template_contribution:
     value:
       group: tariff
       name: print
-      handler: emAfPriceServerCliTPrint
+      handler: sli_zigbee_af_price_server_cli_t_print
       help: Prints the tariff table for the provided endpoint.
       argument:
       - type: uint8
@@ -40,7 +40,7 @@ template_contribution:
     value:
       group: tariff
       name: clear
-      handler: emAfPriceServerCliTClear
+      handler: sli_zigbee_af_price_server_cli_t_clear
       help: Clears out the currently set tariff for the supplied endpoint.
       argument:
       - type: uint8
@@ -49,7 +49,7 @@ template_contribution:
     value:
       group: tariff
       name: who
-      handler: emAfPriceServerCliTWho
+      handler: sli_zigbee_af_price_server_cli_t_who
       help: Sets identifying information about the tariff.
       argument:
       - type: uint32
@@ -64,7 +64,7 @@ template_contribution:
     value:
       group: tariff
       name: what
-      handler: emAfPriceServerCliTWhat
+      handler: sli_zigbee_af_price_server_cli_t_what
       help: Indicates what units the tariff is presented in.
       argument:
       - type: uint8
@@ -85,7 +85,7 @@ template_contribution:
     value:
       group: tariff
       name: when
-      handler: emAfPriceServerCliTWhen
+      handler: sli_zigbee_af_price_server_cli_t_when
       help: Sets start time for the tariff.
       argument:
       - type: uint32
@@ -94,7 +94,7 @@ template_contribution:
     value:
       group: tariff
       name: set
-      handler: emAfPriceServerCliTariff
+      handler: sli_zigbee_af_price_server_cli_tariff
       help: Sets the single tariff held within the price plugin server.
       argument:
       - type: uint32
@@ -107,7 +107,7 @@ template_contribution:
     value:
       group: tariff
       name: invalid
-      handler: emAfPriceServerCliValid
+      handler: sli_zigbee_af_price_server_cli_valid
       help: Makes a tariff at a given index invalid.
       argument:
       - type: uint8
@@ -118,7 +118,7 @@ template_contribution:
     value:
       group: tariff
       name: add
-      handler: emAfPriceServerCliTAdd
+      handler: sli_zigbee_af_price_server_cli_t_add
       help: Adds currently configured tariff to table. Status - (0 for current, 1 for future).
       argument:
       - type: uint8
@@ -129,7 +129,7 @@ template_contribution:
     value:
       group: tariff
       name: update
-      handler: emAfPriceServerCliTSet
+      handler: sli_zigbee_af_price_server_cli_t_set
       help: Updates the specified tariff information entry.
       argument:
       - type: uint8
@@ -142,7 +142,7 @@ template_contribution:
     value:
       group: tariff
       name: get
-      handler: emAfPriceServerCliTGet
+      handler: sli_zigbee_af_price_server_cli_t_get
       help: Retrieves a price from a given index in to the tariff buffer for editing.
       argument:
       - type: uint8
@@ -153,7 +153,7 @@ template_contribution:
     value:
       group: tariff
       name: sprint
-      handler: emAfPriceServerCliTSPrint
+      handler: sli_zigbee_af_price_server_cli_ts_print
       help: Prints the contents of the tariff buffer.
   - name: cli_group
     value:
@@ -164,7 +164,7 @@ template_contribution:
     value:
       group: pm
       name: print
-      handler: emAfPriceServerCliPmPrint
+      handler: sli_zigbee_af_price_server_cli_pm_print
       help: Prints the price matrix table for the provided endpoint.
       argument:
       - type: uint8
@@ -173,7 +173,7 @@ template_contribution:
     value:
       group: pm
       name: clear
-      handler: emAfPriceServerCliPmClear
+      handler: sli_zigbee_af_price_server_cli_pm_clear
       help: Clears out the price matrix table for the supplied endpoint.
       argument:
       - type: uint8
@@ -182,7 +182,7 @@ template_contribution:
     value:
       group: pm
       name: set-metadata
-      handler: emAfPriceServerCliPmSetMetadata
+      handler: sli_zigbee_af_price_server_cli_pm_set_metadata
       help: Sets the metadata (wholesale) associated with the price matrix in the edit buffer. NOTE the issuer tariff ID MUST correspond to a valid tariff in the tariff table.
       argument:
       - type: uint8
@@ -201,7 +201,7 @@ template_contribution:
     value:
       group: pm
       name: set-provider
-      handler: emAfPriceServerCliPmSetProvider
+      handler: sli_zigbee_af_price_server_cli_pm_set_provider
       help: Sets the provider ID associated with the price matrix in the edit buffer.
       argument:
       - type: uint32
@@ -210,7 +210,7 @@ template_contribution:
     value:
       group: pm
       name: set-event
-      handler: emAfPriceServerCliPmSetEvent
+      handler: sli_zigbee_af_price_server_cli_pm_set_event
       help: Sets the issuer event ID associated with the price matrix in the edit buffer.
       argument:
       - type: uint32
@@ -219,7 +219,7 @@ template_contribution:
     value:
       group: pm
       name: set-tariff
-      handler: emAfPriceServerCliPmSetTariff
+      handler: sli_zigbee_af_price_server_cli_pm_set_tariff
       help: Sets the issuer tariff ID associated with the price matrix in the edit buffer.
       argument:
       - type: uint32
@@ -228,7 +228,7 @@ template_contribution:
     value:
       group: pm
       name: set-time
-      handler: emAfPriceServerCliPmSetTime
+      handler: sli_zigbee_af_price_server_cli_pm_set_time
       help: Sets the start time associated with the price matrix in the edit buffer.
       argument:
       - type: uint32
@@ -237,7 +237,7 @@ template_contribution:
     value:
       group: pm
       name: set-status
-      handler: emAfPriceServerCliPmSetStatus
+      handler: sli_zigbee_af_price_server_cli_pm_set_status
       help: Sets the status of the price matrix in the edit buffer (1 for current, 2 for future).
       argument:
       - type: uint8
@@ -246,7 +246,7 @@ template_contribution:
     value:
       group: pm
       name: get
-      handler: emAfPriceServerCliPmGet
+      handler: sli_zigbee_af_price_server_cli_pm_get
       help: Retrieves an entry from the price matrix table and places it in the edit buffer.
       argument:
       - type: uint8
@@ -257,7 +257,7 @@ template_contribution:
     value:
       group: pm
       name: add
-      handler: emAfPriceServerCliPmAdd
+      handler: sli_zigbee_af_price_server_cli_pm_add
       help: Adds the pre-configured price matrix information as an entry to the price matrix table.
       argument:
       - type: uint8
@@ -266,7 +266,7 @@ template_contribution:
     value:
       group: pm
       name: put
-      handler: emAfPriceServerCliPmPut
+      handler: sli_zigbee_af_price_server_cli_pm_put
       help: Populates an individual element of the price matrix with the provided price. The issuer tariff ID MUST be set and must correspond to a valid tariff in the tariff table before this command is invoked. If the charging type of the associated tariff is TOU only, or Block only, the second index is unused. If an out-of-bounds index is provided, the index will be clamped to the maximum index.
       argument:
       - type: uint8
@@ -281,7 +281,7 @@ template_contribution:
     value:
       group: pm
       name: fill-tier
-      handler: emAfPriceServerCliPmFillTier
+      handler: sli_zigbee_af_price_server_cli_pm_fill_tier
       help: Convenience method to fill an entire tier with a given price.
       argument:
       - type: uint8
@@ -294,7 +294,7 @@ template_contribution:
     value:
       group: pm
       name: fill-block
-      handler: emAfPriceServerCliPmFillBlock
+      handler: sli_zigbee_af_price_server_cli_pm_fill_block
       help: Convenience method to fill a specified block within each tier with a given price.
       argument:
       - type: uint8
@@ -312,7 +312,7 @@ template_contribution:
     value:
       group: bt
       name: print
-      handler: emAfPriceServerCliBtPrint
+      handler: sli_zigbee_af_price_server_cli_bt_print
       help: Prints the block thresholds for the provided endpoint.
       argument:
       - type: uint8
@@ -321,7 +321,7 @@ template_contribution:
     value:
       group: bt
       name: clear
-      handler: emAfPriceServerCliBtClear
+      handler: sli_zigbee_af_price_server_cli_bt_clear
       help: Clears out the block thresholds for the supplied endpoint.
       argument:
       - type: uint8
@@ -330,7 +330,7 @@ template_contribution:
     value:
       group: bt
       name: set-metadata
-      handler: emAfPriceServerCliBtSetMetadata
+      handler: sli_zigbee_af_price_server_cli_bt_setMetadata
       help: Sets the metadata (wholesale) associated with the block thresholds in the edit buffer. NOTE the issuer tariff ID MUST correspond to a valid tariff in the tariff table.
       argument:
       - type: uint8
@@ -349,7 +349,7 @@ template_contribution:
     value:
       group: bt
       name: set-provider
-      handler: emAfPriceServerCliBtSetProvider
+      handler: sli_zigbee_af_price_server_cli_bt_setProvider
       help: Sets the provider ID associated with the block thresholds in the edit buffer.
       argument:
       - type: uint32
@@ -358,7 +358,7 @@ template_contribution:
     value:
       group: bt
       name: set-event
-      handler: emAfPriceServerCliBtSetEvent
+      handler: sli_zigbee_af_price_server_cli_bt_setEvent
       help: Sets the issuer event ID associated with the block thresholds in the edit buffer.
       argument:
       - type: uint32
@@ -367,7 +367,7 @@ template_contribution:
     value:
       group: bt
       name: set-tariff
-      handler: emAfPriceServerCliBtSetTariff
+      handler: sli_zigbee_af_price_server_cli_bt_setTariff
       help: Sets the issuer tariff ID associated with the block thresholds in the edit buffer.
       argument:
       - type: uint32
@@ -376,7 +376,7 @@ template_contribution:
     value:
       group: bt
       name: set-time
-      handler: emAfPriceServerCliBtSetTime
+      handler: sli_zigbee_af_price_server_cli_bt_setTime
       help: Sets the start time associated with the block thresholds in the edit buffer.
       argument:
       - type: uint32
@@ -385,7 +385,7 @@ template_contribution:
     value:
       group: bt
       name: set-status
-      handler: emAfPriceServerCliBtSetStatus
+      handler: sli_zigbee_af_price_server_cli_bt_setStatus
       help: Sets the status of the block thresholds in the edit buffer (1 for current, 2 for future).
       argument:
       - type: uint8
@@ -394,7 +394,7 @@ template_contribution:
     value:
       group: bt
       name: get
-      handler: emAfPriceServerCliBtGet
+      handler: sli_zigbee_af_price_server_cli_bt_get
       help: Retrieves an entry from the block thresholds table and places it in the edit buffer.
       argument:
       - type: uint8
@@ -405,7 +405,7 @@ template_contribution:
     value:
       group: bt
       name: set
-      handler: emAfPriceServerCliBtSet
+      handler: sli_zigbee_af_price_server_cli_bt_set
       help: Publishes the block thresholds buffer to the specified entry in the block thresholds table.
       argument:
       - type: uint8
@@ -416,7 +416,7 @@ template_contribution:
     value:
       group: bt
       name: put
-      handler: emAfPriceServerCliBtPut
+      handler: sli_zigbee_af_price_server_cli_bt_put
       help: Populates an individual entry in the block thresholds table with the provided threshold. The issuer tariff ID MUST be set and must correspond to a valid tariff in the tariff table before this command is invoked. If the tier block mode of the associated tariff is ActiveBlock (0x00) or ActiveBlockPriceTier (0x01), the first index is unused. If an out-of-bounds index is provided, the index will be clamped to the maximum index.
       argument:
       - type: uint8

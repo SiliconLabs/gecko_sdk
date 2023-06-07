@@ -151,20 +151,19 @@ uint16_t emberAfFillBuffer(uint8_t *buffer,
 
 #if !defined(DOXYGEN_SHOULD_SKIP_THIS)
 // The buffer used for filling ZCL Messages.
-extern uint8_t *emAfZclBuffer;
+extern uint8_t *sli_zigbee_af_zcl_buffer;
 // Max length of the buffer.
-extern uint16_t emAfZclBufferLen;
+extern uint16_t sli_zigbee_af_zcl_bufferLen;
 // Pointer to where this API should put the length.
-extern uint16_t *emAfResponseLengthPtr;
+extern uint16_t *sli_zigbee_af_response_length_ptr;
 // The APS frame accompanying the ZCL message.
-extern EmberApsFrame *emAfCommandApsFrame;
+extern EmberApsFrame *sli_zigbee_af_command_aps_frame;
 #endif
 
 // Generated macros.
-#ifdef UC_BUILD
+
+#ifdef SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
 #include "zap-command.h"
-#else
-#include "client-command-macro.h"
 #endif
 
 #define emberAfAppendToExternalBuffer(...) emberAfPutBlockInResp(__VA_ARGS__)

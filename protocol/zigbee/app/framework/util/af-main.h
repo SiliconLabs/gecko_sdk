@@ -32,10 +32,10 @@ typedef struct {
 #if defined(EZSP_HOST)
 bool emberAfMemoryByteCompare(const uint8_t* pointer, uint8_t count, uint8_t byteValue);
 #else
-bool emMemoryByteCompare(const uint8_t *bytes, uint8_t count, uint8_t target);
+bool sli_zigbee_af_memory_byte_compare(const uint8_t *bytes, uint8_t count, uint8_t target);
 
 #define emberAfMemoryByteCompare(pointer, count, byteValue) \
-  emMemoryByteCompare((pointer), (count), (byteValue))
+  sli_zigbee_af_memory_byte_compare((pointer), (count), (byteValue))
 #endif
 
 // returnData must be MFG_STRING_MAX_LENGTH in length and
@@ -43,18 +43,18 @@ bool emMemoryByteCompare(const uint8_t *bytes, uint8_t count, uint8_t target);
 void emberAfGetMfgString(uint8_t* returnData);
 
 // Functions common to both SOC and Host versions of the application.
-void emAfInitializeMessageSentCallbackArray(void);
+void sli_zigbee_af_initialize_message_sent_callback_array(void);
 uint8_t sli_zigbee_get_permit_joining_remaining_duration_sec(void);
 
 EmberAfCbkeKeyEstablishmentSuite emberAfIsFullSmartEnergySecurityPresent(void);
 
 #if defined(EZSP_HOST)
-void emAfClearNetworkCache(uint8_t networkIndex);
+void sli_zigbee_af_clear_network_cache(uint8_t networkIndex);
 #else
-  #define emAfClearNetworkCache(index)
-uint8_t emAfCopyMessageIntoRamBuffer(EmberMessageBuffer message,
-                                     uint8_t *buffer,
-                                     uint16_t bufLen);
+  #define sli_zigbee_af_clear_network_cache(index)
+uint8_t sli_zigbee_af_copy_message_into_ram_buffer(EmberMessageBuffer message,
+                                                   uint8_t *buffer,
+                                                   uint16_t bufLen);
 #endif
 
 #if defined EZSP_HOST
@@ -79,8 +79,8 @@ bool emberAfNcpNeedsReset(void);
 
 #endif // EZSP_HOST
 
-void emAfPrintStatus(const char * task,
-                     EmberStatus status);
+void sli_zigbee_af_print_status(const char * task,
+                                EmberStatus status);
 
 uint8_t emberAfGetSecurityLevel(void);
 uint8_t emberAfGetKeyTableSize(void);
@@ -92,8 +92,8 @@ uint8_t emberAfGetNeighborTableSize(void);
 uint8_t emberAfGetStackProfile(void);
 uint8_t emberAfGetSleepyMulticastConfig(void);
 
-uint8_t emAfGetPacketBufferFreeCount(void);
-uint8_t emAfGetPacketBufferTotalCount(void);
+uint8_t sli_zigbee_af_get_packet_buffer_free_count(void);
+uint8_t sli_zigbee_af_get_packet_buffer_total_count(void);
 uint8_t emberAfGetOpenNetworkDurationSec(void);
 
 EmberStatus emberAfGetSourceRouteTableEntry(
@@ -107,46 +107,45 @@ uint8_t emberAfGetSourceRouteTableFilledSize(void);
 EmberStatus emberAfGetChildData(uint8_t index,
                                 EmberChildData* childData);
 
-void emAfCliVersionCommand(void);
+void sli_zigbee_af_cli_version_command(void);
 
-EmberStatus emAfPermitJoin(uint8_t duration,
-                           bool broadcastMgmtPermitJoin);
-void emAfStopSmartEnergyStartup(void);
+EmberStatus sli_zigbee_af_permit_join(uint8_t duration,
+                                      bool broadcastMgmtPermitJoin);
+void sli_zigbee_af_stop_smart_energy_startup(void);
 
-bool emAfProcessZdo(EmberNodeId sender,
-                    EmberApsFrame* apsFrame,
-                    uint8_t* message,
-                    uint16_t length);
+bool sli_zigbee_af_process_zdo(EmberNodeId sender,
+                               EmberApsFrame* apsFrame,
+                               uint8_t* message,
+                               uint16_t length);
 
-void emAfIncomingMessageHandler(EmberIncomingMessageType type,
-                                EmberApsFrame *apsFrame,
-                                uint8_t lastHopLqi,
-                                int8_t lastHopRssi,
-                                uint16_t messageLength,
-                                uint8_t *messageContents);
-EmberStatus emAfSend(EmberOutgoingMessageType type,
-                     uint16_t indexOrDestination,
-                     EmberApsFrame *apsFrame,
-                     uint8_t messageLength,
-                     uint8_t *message,
-                     uint16_t *messageTag,
-                     EmberNodeId alias,
-                     uint8_t sequence);
-void emAfMessageSentHandler(EmberOutgoingMessageType type,
-                            uint16_t indexOrDestination,
-                            EmberApsFrame *apsFrame,
-                            EmberStatus status,
-                            uint16_t messageLength,
-                            uint8_t *messageContents,
-                            uint16_t messageTag);
+void sli_zigbee_af_incoming_message_handler(EmberIncomingMessageType type,
+                                            EmberApsFrame *apsFrame,
+                                            uint8_t lastHopLqi,
+                                            int8_t lastHopRssi,
+                                            uint16_t messageLength,
+                                            uint8_t *messageContents);
+EmberStatus sli_zigbee_af_send(EmberOutgoingMessageType type,
+                               uint16_t indexOrDestination,
+                               EmberApsFrame *apsFrame,
+                               uint8_t messageLength,
+                               uint8_t *message,
+                               uint16_t *messageTag,
+                               EmberNodeId alias,
+                               uint8_t sequence);
+void sli_zigbee_af_message_sent_handler(EmberOutgoingMessageType type,
+                                        uint16_t indexOrDestination,
+                                        EmberApsFrame *apsFrame,
+                                        EmberStatus status,
+                                        uint16_t messageLength,
+                                        uint8_t *messageContents,
+                                        uint16_t messageTag);
 
-void emAfStackStatusHandler(EmberStatus status);
+void sli_zigbee_af_stack_status_handler(EmberStatus status);
 
-void emAfNetworkSecurityInit(void);
-void emAfNetworkInit(SLXU_INIT_ARG);
+void sli_zigbee_af_network_security_init(void);
+void sli_zigbee_af_network_init(uint8_t init_level);
 
-#define emberAfCopyBigEndianEui64Argument emberCopyBigEndianEui64Argument
-void emAfScheduleFindAndRejoinEvent(void);
+void sli_zigbee_af_schedule_find_and_rejoin_event(void);
 
 extern const EmberEUI64 emberAfNullEui64;
 
@@ -154,8 +153,17 @@ void emberAfFormatMfgString(uint8_t* mfgString);
 
 extern bool emberAfPrintReceivedMessages;
 
-void emAfParseAndPrintVersion(EmberVersion versionStruct);
-void emAfPrintEzspEndpointFlags(uint8_t endpoint);
+void sli_zigbee_af_parse_and_print_version(EmberVersion versionStruct);
+void sli_zigbee_af_print_ezsp_endpoint_flags(uint8_t endpoint);
+
+uint16_t sli_zigbee_af_calculate_message_tag_hash(uint8_t *messageContents,
+                                                  uint8_t messageLength);
+bool sli_zigbee_af_get_endpoint_description(uint8_t endpoint,
+                                            EmberEndpointDescription *result);
+uint16_t sli_zigbee_af_get_endpoint_cluster(uint8_t endpoint,
+                                            EmberClusterListId listId,
+                                            uint8_t listIndex);
+uint8_t sli_zigbee_af_get_endpoint(uint8_t index);
 
 // Old names
 #define emberAfMoveInProgress() emberAfMoveInProgressCallback()

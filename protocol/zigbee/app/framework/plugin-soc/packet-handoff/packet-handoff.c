@@ -31,7 +31,6 @@
   #define PACKET_HANDOFF_BUFFER_SIZE 256
 #endif
 
-#ifdef UC_BUILD
 #include "packet-handoff-config.h"
 #if (EMBER_AF_PLUGIN_PACKET_HANDOFF_ALLOW_ALL_PACKETS == 1)
 #define ALLOW_ALL_PACKETS
@@ -63,40 +62,8 @@
 #if (EMBER_AF_PLUGIN_PACKET_HANDOFF_ALLOW_BEACON == 1)
 #define ALLOW_BEACON
 #endif
-#define emberPacketHandoffIncomingHandler emAfPacketHandoffIncomingCallback
-#define emberPacketHandoffOutgoingHandler emAfPacketHandoffOutgoingCallback
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_PACKET_HANDOFF_ALLOW_ALL_PACKETS
-#define ALLOW_ALL_PACKETS
-#endif
-#ifdef EMBER_AF_PLUGIN_PACKET_HANDOFF_ALLOW_RAW_MAC
-#define ALLOW_RAW_MAC
-#endif
-#ifdef EMBER_AF_PLUGIN_PACKET_HANDOFF_ALLOW_MAC_COMMAND
-#define ALLOW_MAC_COMMAND
-#endif
-#ifdef EMBER_AF_PLUGIN_PACKET_HANDOFF_ALLOW_NETWORK_DATA
-#define ALLOW_NETWORK_DATA
-#endif
-#ifdef EMBER_AF_PLUGIN_PACKET_HANDOFF_ALLOW_NETWORK_COMMAND
-#define ALLOW_NETWORK_COMMAND
-#endif
-#ifdef EMBER_AF_PLUGIN_PACKET_HANDOFF_ALLOW_APS_DATA
-#define ALLOW_APS_DATA
-#endif
-#ifdef EMBER_AF_PLUGIN_PACKET_HANDOFF_ALLOW_APS_COMMAND
-#define ALLOW_APS_COMMAND
-#endif
-#ifdef EMBER_AF_PLUGIN_PACKET_HANDOFF_ALLOW_ZDO
-#define ALLOW_ZDO
-#endif
-#ifdef EMBER_AF_PLUGIN_PACKET_HANDOFF_ALLOW_ZCL
-#define ALLOW_ZCL
-#endif
-#ifdef EMBER_AF_PLUGIN_PACKET_HANDOFF_ALLOW_BEACON
-#define ALLOW_BEACON
-#endif
-#endif // UC_BUILD
+#define emberPacketHandoffIncomingHandler sli_zigbee_af_packet_handoff_incoming_callback
+#define emberPacketHandoffOutgoingHandler sli_zigbee_af_packet_handoff_outgoing_callback
 
 // Callbacks
 EmberPacketAction emberAfIncomingPacketFilterCallback(EmberZigbeePacketType packetType,
@@ -290,8 +257,8 @@ EmberPacketAction emberPacketHandoffOutgoingHandler(EmberZigbeePacketType packet
                                  index,
                                  flatPacket,
                                  packetLength);
-      if (emPacketHeaderPayload(packetBuffer) != EMBER_NULL_MESSAGE_BUFFER) {
-        EmberMessageBuffer payload = emPacketHeaderPayload(packetBuffer);
+      if (sli_legacy_packet_buffer_packet_header_payload(packetBuffer) != EMBER_NULL_MESSAGE_BUFFER) {
+        EmberMessageBuffer payload = sli_legacy_packet_buffer_packet_header_payload(packetBuffer);
         uint8_t payloadLength = emberMessageBufferLength(payload);
         emberCopyFromLinkedBuffers(payload,
                                    0,
@@ -312,9 +279,9 @@ EmberPacketAction emberPacketHandoffOutgoingHandler(EmberZigbeePacketType packet
                                    packetBuffer,
                                    index,
                                    packetLength);
-          if (emPacketHeaderPayload(packetBuffer) != EMBER_NULL_MESSAGE_BUFFER) {
+          if (sli_legacy_packet_buffer_packet_header_payload(packetBuffer) != EMBER_NULL_MESSAGE_BUFFER) {
             // The payload is now appended to the end of the packet
-            emSetPacketHeaderPayload(packetBuffer, EMBER_NULL_MESSAGE_BUFFER);
+            sli_legacy_packet_buffer_set_packet_header_payload(packetBuffer, EMBER_NULL_MESSAGE_BUFFER);
           }
         }
       }

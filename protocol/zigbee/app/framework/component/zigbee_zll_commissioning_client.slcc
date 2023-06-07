@@ -26,19 +26,19 @@ template_contribution:
   - name: zigbee_af_callback
     value:
       callback_type: event_init
-      function_name: emAfPluginZllCommissioningClientInitCallback
+      function_name: sli_zigbee_af_zll_commissioning_client_init_callback
   - name: zigbee_stack_callback
     value: 
       callback_type: zll_address_assignment
-      function_name: emAfZllAddressAssignmentCallback
+      function_name: sli_zigbee_af_zll_address_assignment_callback
   - name: zigbee_stack_callback
     value: 
       callback_type: zll_network_found
-      function_name: emAfZllNetworkFoundCallback
+      function_name: sli_zigbee_af_zll_network_found_callback
   - name: zigbee_stack_callback
     value: 
       callback_type: zll_scan_complete
-      function_name: emAfZllScanCompleteCallback
+      function_name: sli_zigbee_af_zll_scan_complete_callback
 documentation:
   docset: zigbee
   document: zigbee-af-api/zll-commissioning-client

@@ -24,6 +24,7 @@ limitations under the License.
 #include "tensorflow/lite/kernels/kernel_util.h"
 #include "tensorflow/lite/kernels/op_macros.h"
 #include "tensorflow/lite/micro/kernels/kernel_util.h"
+#include "tensorflow/lite/micro/micro_log.h"
 #include "tensorflow/lite/micro/micro_utils.h"
 
 namespace tflite {
@@ -185,9 +186,9 @@ TfLiteStatus TanhEval(TfLiteContext* context, TfLiteNode* node) {
       return kTfLiteOk;
     } break;
     default:
-      TF_LITE_KERNEL_LOG(context, "Input %s, output %s not supported.",
-                         TfLiteTypeGetName(input->type),
-                         TfLiteTypeGetName(output->type));
+      MicroPrintf("Input %s, output %s not supported.",
+                  TfLiteTypeGetName(input->type),
+                  TfLiteTypeGetName(output->type), context);
       return kTfLiteError;
   }
 }
@@ -195,14 +196,8 @@ TfLiteStatus TanhEval(TfLiteContext* context, TfLiteNode* node) {
 }  // namespace activations
 
 TfLiteRegistration Register_TANH() {
-  return {/*init=*/activations::TanhInit,
-          /*free=*/nullptr,
-          /*prepare=*/activations::TanhPrepare,
-          /*invoke=*/activations::TanhEval,
-          /*profiling_string=*/nullptr,
-          /*builtin_code=*/0,
-          /*custom_name=*/nullptr,
-          /*version=*/0};
+  return tflite::micro::RegisterOp(
+      activations::TanhInit, activations::TanhPrepare, activations::TanhEval);
 }
 }  // namespace micro
 }  // namespace ops

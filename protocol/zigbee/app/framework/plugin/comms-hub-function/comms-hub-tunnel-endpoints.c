@@ -19,10 +19,8 @@
 #include "app/framework/util/af-main.h"
 #include "app/framework/util/common.h"
 #include "comms-hub-tunnel-endpoints.h"
-#ifdef UC_BUILD
 #include "comms-hub-function-config.h"
 #include "gbcs-device-log-config.h"
-#endif // UC_BUILD
 
 #define MAX_NUMBER_DEVICES            EMBER_AF_PLUGIN_GBCS_DEVICE_LOG_DEVICE_LOG_SIZE
 #define MAX_DEVICE_TUNNEL_ENDPOINTS   3
@@ -30,16 +28,16 @@
 typedef struct {
   uint16_t nodeId;
   uint8_t endpoint;
-} EmAfTunnelEndpointMap;
+} sli_zigbee_af_tunnel_endpoint_map;
 
-static EmAfTunnelEndpointMap endpointMap[MAX_NUMBER_DEVICES];
+static sli_zigbee_af_tunnel_endpoint_map endpointMap[MAX_NUMBER_DEVICES];
 
 #define DEFAULT_ADDRESS  0xFFFE
 
 // Templated to local_data_init context.
-void emberAfPluginTunnelingEndpointInit(SLXU_INIT_ARG)
+void emberAfPluginTunnelingEndpointInit(uint8_t init_level)
 {
-  SLXU_INIT_UNUSED_ARG;
+  (void)init_level;
 
   uint8_t i;
   for ( i = 0; i < MAX_NUMBER_DEVICES; i++ ) {

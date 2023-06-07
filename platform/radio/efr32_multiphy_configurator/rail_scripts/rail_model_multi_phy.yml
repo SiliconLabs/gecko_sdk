@@ -85,6 +85,8 @@ RAILModel:
                                   name: stackInfo
                               - RAILModelInfo:
                                   name: bchLut
+                              - RAILModelInfo:
+                                  name: alternatePhy
 
                   - RAILModelObjectArray:
                       name: channelConfigEntries
@@ -122,6 +124,9 @@ RAILModel:
                               - name: stackInfo
                                 dataType: FieldDataType.UINT8_T
                                 isPtr: True
+                              - name: alternatePhy
+                                dataType: FieldDataType.UINT32_T
+                                isPtr: False
 
                   - RAILModelStruct:
                       name: channelConfig
@@ -139,6 +144,9 @@ RAILModel:
                           dataType: FieldDataType.UINT32_T
                           isPtr: False
                         - name: signature
+                          dataType: FieldDataType.UINT32_T
+                          isPtr: False
+                        - name: xtalFrequency
                           dataType: FieldDataType.UINT32_T
                           isPtr: False
 
@@ -406,3 +414,38 @@ RAILModel:
                   - RAILModelSimpleArray:
                       name: stackInfo
                       dataType: FieldDataType.UINT8_T
+
+            - RAILModelObjectCollection:
+                name: stackInfoProtocolTableEntries
+                _elements:
+                  - RAILModelStruct:
+                      name: RAIL_StackInfoWisun
+                      _fields:
+                        - name: enable
+                          dataType: FieldDataType.BOOL
+                          value: False
+                        - name: version
+                          dataType: FieldDataType.UINT8_T
+                        - name: wisunChannelParam
+                          dataType: FieldDataType.UINT8_T
+                        - name: wisunRegDomain
+                          dataType: FieldDataType.UINT8_T
+
+            - RAILModelObjectArray:
+                name: railAlternatePhyEntries
+                _elements:
+                  - RAILModelStruct:
+                      name: railAlternatePhy
+                      _fields:
+                        - name: baseFrequency
+                          dataType: FieldDataType.UINT32_T
+                        - name: channelSpacing
+                          dataType: FieldDataType.UINT32_T
+                        - name: numberOfChannels
+                          dataType: FieldDataType.UINT16_T
+                        - name: minIf_kHz
+                          dataType: FieldDataType.UINT16_T
+                        - name: minBaseIf_kHz
+                          dataType: FieldDataType.UINT16_T
+                        - name: isOfdmModem
+                          dataType: FieldDataType.BOOL

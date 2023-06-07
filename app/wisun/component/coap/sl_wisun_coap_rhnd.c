@@ -41,15 +41,23 @@
 #include "cmsis_os2.h"
 #include "sl_cmsis_os2_common.h"
 #include "sl_status.h"
-#include "socket.h"
-#include "socket_hnd.h"
 #include "sl_mempool.h"
 #include "sl_wisun_app_core_util.h"
 #include "sli_wisun_coap_rd.h"
 
+#if SL_WISUN_COAP_RESOURCE_HND_SERVICE_ENABLE
+#include "socket.h"
+#endif
+
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
+/// Default Resource Discovery port (RFC7252)
+#define SL_WISUN_COAP_RESOURCE_DISCOVERY_DEFAULT_PORT   5683U
+
+/// Is separated Resource Discovery Socket required
+#define SL_WISUN_COAP_RD_SOCKET_REQUIRED \
+  (SL_WISUN_COAP_RESOURCE_HND_SERVICE_PORT != SL_WISUN_COAP_RESOURCE_DISCOVERY_DEFAULT_PORT)
 
 /// Unlock the CoAP resource mutex and return.
 #define _coap_resource_mutex_release_and_return_val(__val) \
@@ -462,12 +470,17 @@ static void _rhnd_thr_fnc(void * args)
   const char *uri_path                            = NULL;
   char *discovery_payload                         = NULL;
   int32_t sockid                                  = SOCKET_INVALID_ID;
+  int32_t sockid_active                           = SOCKET_INVALID_ID;
   int32_t r                                       = SOCKET_INVALID_ID;
   socklen_t sock_len                              = 0UL;
   size_t resp_len                                 = 0UL;
   uint16_t discovery_paylod_len                   = 0U;
-  wisun_addr_t srv_addr                           = { 0U };
-  wisun_addr_t clnt_addr                          = { 0U };
+  static wisun_addr_t srv_addr                    = { 0U };
+  static wisun_addr_t clnt_addr                   = { 0U };
+#if SL_WISUN_COAP_RD_SOCKET_REQUIRED
+  int32_t sockid_rd                               = SOCKET_INVALID_ID;
+  static wisun_addr_t srv_addr_rd                 = { 0U };
+#endif
 
 // Clean-up code
 #define __cleanup_service()                 \
@@ -499,7 +512,21 @@ static void _rhnd_thr_fnc(void * args)
 
     // bind address to the socket
     r = bind(sockid, (const struct sockaddr *) &srv_addr, sock_len);
-    assert(r != RETVAL_ERROR);
+    assert(r != SOCKET_RETVAL_ERROR);
+
+#if SL_WISUN_COAP_RD_SOCKET_REQUIRED
+    sockid_rd = socket(AF_WISUN, SOCK_DGRAM, IPPROTO_UDP);
+    assert(sockid_rd != SOCKET_INVALID_ID);
+
+    srv_addr_rd.sin6_family = AF_WISUN;
+    srv_addr_rd.sin6_addr = in6addr_any;
+    srv_addr_rd.sin6_port = htons(SL_WISUN_COAP_RESOURCE_DISCOVERY_DEFAULT_PORT);
+
+    // bind address to the socket
+    r = bind(sockid_rd, (const struct sockaddr *) &srv_addr_rd, sock_len);
+    assert(r != SOCKET_RETVAL_ERROR);
+
+#endif
 
     // Receiver loop
     while (1) {
@@ -507,9 +534,21 @@ static void _rhnd_thr_fnc(void * args)
       osDelay(1UL);
 
       // Receive UDP packets
-      r = recvfrom(sockid, _rhnd_sock_buff,
+      sockid_active = sockid;
+      r = recvfrom(sockid_active, _rhnd_sock_buff,
                    SL_WISUN_COAP_RESOURCE_HND_SOCK_BUFF_SIZE, 0L,
                    (struct sockaddr *) &clnt_addr, &sock_len);
+
+#if SL_WISUN_COAP_RD_SOCKET_REQUIRED
+      // Check resource discovery socket
+      if (r <= 0L) {
+        sockid_active = sockid_rd;
+        r = recvfrom(sockid_active, _rhnd_sock_buff,
+                     SL_WISUN_COAP_RESOURCE_HND_SOCK_BUFF_SIZE, 0L,
+                     (struct sockaddr *) &clnt_addr, &sock_len);
+      }
+#endif
+
       if (r > 0L) {
         // Parse packet
         req_pkt = sl_wisun_coap_parser((uint16_t) r, _rhnd_sock_buff);
@@ -586,22 +625,24 @@ static void _rhnd_thr_fnc(void * args)
         sl_wisun_coap_print_packet(resp_pkt, false);
 
         // Send response
-        if (sendto(sockid, _rhnd_sock_buff, resp_len, 0L,
-                   (const struct sockaddr *) &clnt_addr, sock_len) == RETVAL_ERROR) {
+        if (sendto(sockid_active, _rhnd_sock_buff, resp_len, 0L,
+                   (const struct sockaddr *) &clnt_addr, sock_len) == SOCKET_RETVAL_ERROR) {
           sl_wisun_coap_rhnd_service_resp_send_error_hnd(req_pkt, resp_pkt);
         }
-
         // Free packets
         __cleanup_service();
 
         // Check network connection after a session
-      } else if (r == RETVAL_ERROR && !app_wisun_network_is_connected()) {
+      } else if (r == SOCKET_RETVAL_ERROR && !app_wisun_network_is_connected()) {
         close(sockid);
+#if SL_WISUN_COAP_RD_SOCKET_REQUIRED
+        close(sockid_rd);
+#endif
         osDelay(1000UL);
 
         // Free packets
         __cleanup_service();
-        
+
         break;
       }
     }

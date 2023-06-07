@@ -48,14 +48,9 @@
 #define BEACON_RADIO_OFF_DELAY_MS 1000
 
 static uint32_t beaconConfigNegativeBehaviorMask = 0;
-#ifdef UC_BUILD
 sl_zigbee_event_t emberAfPluginTestHarnessZ3BeaconSendEvent;
 #define z3BeaconSendEventControl (&emberAfPluginTestHarnessZ3BeaconSendEvent)
-void emberAfPluginTestHarnessZ3BeaconSendEventHandler(SLXU_UC_EVENT);
-#else
-EmberEventControl emberAfPluginTestHarnessZ3BeaconSendEventControl;
-#define z3BeaconSendEventControl emberAfPluginTestHarnessZ3BeaconSendEventControl
-#endif
+void emberAfPluginTestHarnessZ3BeaconSendEventHandler(sl_zigbee_event_t * event);
 
 // -----------------------------------------------------------------------------
 // Beacon CLI Commands
@@ -78,7 +73,7 @@ static void radioControl(bool state)
 }
 
 // plugin test-harness z3 beacon beacon-req
-void emAfPluginTestHarnessZ3BeaconBeaconReqCommand(SL_CLI_COMMAND_ARG)
+void sli_zigbee_af_test_harness_z3_beacon_beacon_req_command(SL_CLI_COMMAND_ARG)
 {
   EmberNetworkParameters networkParameters;
   EmberStatus status;
@@ -96,9 +91,9 @@ void emAfPluginTestHarnessZ3BeaconBeaconReqCommand(SL_CLI_COMMAND_ARG)
   } else {
     // We probably are not on a network, so try to use the network-steering
     // channels.
-    extern uint32_t emAfPluginNetworkSteeringPrimaryChannelMask;
+    extern uint32_t sli_zigbee_af_network_steering_primary_channel_mask;
     status = emberStartScan(EMBER_ACTIVE_SCAN,
-                            emAfPluginNetworkSteeringPrimaryChannelMask,
+                            sli_zigbee_af_network_steering_primary_channel_mask,
                             2); // scan duration, whatever
   }
 
@@ -109,13 +104,13 @@ void emAfPluginTestHarnessZ3BeaconBeaconReqCommand(SL_CLI_COMMAND_ARG)
 }
 
 // plugin test-harness z3 beacon beacons-config <options:4>
-void emAfPluginTestHarnessZ3BeaconBeaconsConfigCommand(SL_CLI_COMMAND_ARG)
+void sli_zigbee_af_test_harness_z3_beacon_beacons_config_command(SL_CLI_COMMAND_ARG)
 {
   EmberStatus status = EMBER_INVALID_CALL;
 
 #ifndef EZSP_HOST
 
-  uint32_t options = emberUnsignedCommandArgument(0);
+  uint32_t options = sl_cli_get_argument_uint32(arguments, 0);
 
   beaconConfigNegativeBehaviorMask = 0;
 
@@ -164,16 +159,16 @@ void emAfPluginTestHarnessZ3BeaconBeaconsConfigCommand(SL_CLI_COMMAND_ARG)
                      status);
 }
 
-void emberAfPluginTestHarnessZ3BeaconSendEventHandler(SLXU_UC_EVENT)
+void emberAfPluginTestHarnessZ3BeaconSendEventHandler(sl_zigbee_event_t * event)
 {
-  slxu_zigbee_event_set_inactive(z3BeaconSendEventControl);
+  sl_zigbee_event_set_inactive(z3BeaconSendEventControl);
   emberAfDebugPrintln("SendEventHandler - Switching radio off");
   radioControl(false); // switch radio off
 }
 
 // Allow the framework to modify the beacon, for negative conformance test cases.
 // The function is called from our implementation of emberAfOutgoingPacketFilterCallback.
-EmberPacketAction emAfPluginTestHarnessZ3ModifyBeaconPayload(uint8_t *beaconPayload, uint8_t *payloadLength)
+EmberPacketAction sli_zigbee_af_test_harness_z3_modify_beacon_payload(uint8_t *beaconPayload, uint8_t *payloadLength)
 {
   if (beaconConfigNegativeBehaviorMask) {
     emberAfDebugPrintln("Modifying beacon, mask = %4X", beaconConfigNegativeBehaviorMask);
@@ -212,8 +207,8 @@ EmberPacketAction emAfPluginTestHarnessZ3ModifyBeaconPayload(uint8_t *beaconPayl
     }
     if (beaconConfigNegativeBehaviorMask & NEGATIVE_BEHAVIOR_SWITCH_OFF_RADIO) {
       emberAfDebugPrintln("Setting Send event active");
-      slxu_zigbee_event_set_delay_ms(z3BeaconSendEventControl,
-                                     BEACON_RADIO_OFF_DELAY_MS);
+      sl_zigbee_event_set_delay_ms(z3BeaconSendEventControl,
+                                   BEACON_RADIO_OFF_DELAY_MS);
     }
     return EMBER_MANGLE_PACKET;
   } else {

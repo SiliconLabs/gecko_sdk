@@ -14,6 +14,7 @@
 #include "ZAF_CC_Invoker.h"
 #include "AppTimer.h"
 #include "board_init.h"
+#include "board_indicator.h"
 #include <ZAF_nvm_app.h>
 #include <ZAF_nvm.h>
 #include "zpal_nvm.h"
@@ -21,7 +22,10 @@
 #include "zaf_config_api.h"
 #include <zaf_cc_list_generator.h>
 #include <ZW_system_startup_api.h>
-#include <ZAF_tx_mutex.h>
+#include "zaf_event_distributor.h"
+#include "zaf_protocol_config.h"
+#include "zaf_transport_tx.h"
+#include "ZAF_AppName.h"
 
 //#define DEBUGPRINT
 #include "DebugPrint.h"
@@ -50,15 +54,15 @@ static bool invoke_init(CC_handler_map_latest_t const * const p_cc_entry, zaf_cc
   return false;
 }
 
-void ZAF_Init(SProtocolConfig_t const * const pAppProtocolConfig, TaskHandle_t AppTaskHandle, SApplicationHandles *pAppHandles)
+void ZAF_Init(TaskHandle_t AppTaskHandle, SApplicationHandles *pAppHandles)
 {
   zaf_cc_list_t *unsecure_included_cc;
   zaf_cc_list_t *secure_included_unsecure_cc;
   zaf_cc_list_t *secure_included_secure_cc;
 
   DPRINT("* ZAF_Init *\r\n");
+
   // Set ZAF variables as soon as possible
-  ZAF_setAppProtocolConfig(pAppProtocolConfig);
   ZAF_setAppHandle(pAppHandles);
   m_AppTaskHandle = AppTaskHandle;
 
@@ -79,14 +83,22 @@ void ZAF_Init(SProtocolConfig_t const * const pAppProtocolConfig, TaskHandle_t A
 
   ZW_system_startup_SetCCSet(&m_CCSet);
 
+  zaf_transport_init();
+
   AppTimerInit(EAPPLICATIONEVENT_TIMER, AppTaskHandle);
 
   /* hardware initialization */
   Board_Init();
 
+  /* board led initialiaztion */
+  Board_IndicatorInit();
+
   // Init file system
   ZAF_nvm_app_init();
   ZAF_nvm_init();
+
+  // Store the application's name in NVM if the feature is enabled
+  ZAF_AppName_Write();
 
   ZW_TransportEndpoint_Init();
 
@@ -134,6 +146,10 @@ void ZAF_Init(SProtocolConfig_t const * const pAppProtocolConfig, TaskHandle_t A
   }
 
   Transport_OnApplicationInitSW();
+
+  ZW_TransportMulticast_init();
+
+  zaf_event_distributor_init();
 }
 
 static bool invoke_reset(CC_handler_map_latest_t const * const p_cc_entry, zaf_cc_context_t context)
@@ -182,8 +198,8 @@ void zaf_stay_awake(void) {
   }
 }
 
-void ZAF_bootloader_reboot_and_install(void) {
-  SZwaveCommandPackage Command;
-  Command.eCommandType = EZWAVECOMMANDTYPE_BOOTLOADER_REBOOT;
-  QueueNotifyingSendToBack(ZAF_getAppHandle()->pZwCommandQueue, (uint8_t *)&Command, 0);
+ZW_WEAK void
+zaf_learn_mode_finished(void)
+{
+
 }

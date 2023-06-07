@@ -50,19 +50,19 @@ class Profile_Sigfox_TX(IProfile):
         buildRailOutputs(model, profile)
 
         # Output fields
-        buildFrameOutputs(model, profile, family=family)
-        buildCrcOutputs(model, profile, family)
+        buildFrameOutputs(model, profile)
+        buildCrcOutputs(model, profile)
         buildWhiteOutputs(model, profile)
         buildFecOutputs(model, profile)
 
-        if family == "dumbo":
-            build_modem_regs_dumbo(model, profile, family = family)   # Clean this up as a next step...
+        if family in ["dumbo","unit_test_part"]:
+            build_modem_regs_dumbo(model, profile)   # Clean this up as a next step...
         elif family == "jumbo":
-            build_modem_regs_jumbo(model, profile, family = family)   # Clean this up as a next step...
+            build_modem_regs_jumbo(model, profile)   # Clean this up as a next step...
         elif family == "nerio":
-            build_modem_regs_jumbo(model, profile, family = family)   # Clean this up as a next step...
+            build_modem_regs_jumbo(model, profile)   # Clean this up as a next step...
         elif family == "nixi":
-            build_modem_regs_nixi(model, profile, family = family)    # Clean this up as a next step...
+            build_modem_regs_nixi(model, profile)    # Clean this up as a next step...
 
         if family == 'nerio' or family == "nixi":
             buildLongRangeOutputs(model, profile)
@@ -173,7 +173,7 @@ class Profile_Sigfox_TX(IProfile):
                                      readable_name="Reconfigure for BER testing")
 
     def build_frame_configuration_inputs(self, model, profile):
-        buildFrameInputs(model, profile, family=self._family)
+        buildFrameInputs(model, profile)
         buildCrcInputs(model, profile)
         buildWhiteInputs(model, profile)
         buildFecInputs(model, profile)

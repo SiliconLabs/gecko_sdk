@@ -1,4 +1,3 @@
-#!c:\Python27\python.exe
 """
 Synopsis:
     Generate Python classes from XML Schema definition.
@@ -110,8 +109,7 @@ creates sample_lib.py superclass and sample_app1.py subclass modules;
 also generates member specifications in each class (in a dictionary).
 
 """
-
-
+import io
 ## LICENSE
 
 ## Copyright (c) 2003 Dave Kuhlman
@@ -136,16 +134,17 @@ also generates member specifications in each class (in a dictionary).
 ## SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-import sys
 import os.path
-import time
+# import time
 import getopt
-import urllib2
+# import urllib2
 import imp
+import time
+from sys import argv, getdefaultencoding
 from xml.sax import handler, make_parser
 import logging
 import keyword
-import StringIO
+# import StringIO
 import textwrap
 
 # Default logger configuration
@@ -199,7 +198,7 @@ NoQuestions = False
 NoDates = False
 NoVersion = False
 Dirpath = []
-ExternalEncoding = sys.getdefaultencoding()
+ExternalEncoding = 'ascii'
 Namespacedef = ''
 
 NamespacesDict = {}
@@ -1116,7 +1115,7 @@ class XschemaElement(XschemaElementBase):
                 self.optional = True
         except ValueError:
             err_msg('*** %s  minOccurs must be integer.\n' % self.getName())
-            sys.exit(1)
+            exit(1)
         try:
             if maxOccurs == 'unbounded':
                 maxOccurs = 99999
@@ -1125,7 +1124,7 @@ class XschemaElement(XschemaElementBase):
         except ValueError:
             err_msg('*** %s  maxOccurs must be integer or "unbounded".\n' % (
                 self.getName(), ))
-            sys.exit(1)
+            exit(1)
         self.minOccurs = minOccurs
         self.maxOccurs = maxOccurs
 
@@ -1635,7 +1634,7 @@ class XschemaHandler(handler.ContentHandler):
                 if element is None:
                     err_msg('Cannot find element to attach '
                             'enumeration: %s\n' % (attrs['value']), )
-                    sys.exit(1)
+                    exit(1)
                 element.values.append(attrs['value'])
             elif self.inSimpleType >= 1 and 'value' in attrs:
                 # We've been defined as a simpleType on our own.
@@ -1748,7 +1747,7 @@ class XschemaHandler(handler.ContentHandler):
                 # fixlist
                 err_msg('*** error stack.  len(self.stack): %d\n' % (
                     len(self.stack), ))
-                sys.exit(1)
+                exit(1)
             if self.root:       # change made to avoide logging error
                 logging.debug("Previous root: %s" % (self.root.name))
             else:
@@ -4229,7 +4228,7 @@ def generateClasses(wrt, prefix, element, delayed, nameSpacesDef=''):
     # If this element has documentation, generate a doc-string.
     if element.documentation:
         s2 = ' '.join(element.documentation.strip().split())
-        s2 = s2.encode('utf-8')
+        # s2 = s2.encode('utf-8')
         s2 = textwrap.fill(s2, width=68, subsequent_indent='    ')
         if s2[0] == '"' or s2[-1] == '"':
             s2 = '    """ %s """\n' % (s2, )
@@ -4913,7 +4912,7 @@ def _cast(typ, value):
 def format_options_args(options, args):
     options1 = '\n'.join(['#   %s' % (item, ) for item in options])
     args1 = '\n'.join(['#   %s' % (item, ) for item in args])
-    program = sys.argv[0]
+    program = argv[0]
     options2 = ''
     for name, value in options:
         if value:
@@ -5626,7 +5625,7 @@ def generateSubclasses(root, subclassFilename, behaviorFilename,
             try:
                 # Add the currect working directory to the path so that
                 #   we use the user/developers local copy.
-                sys.path.insert(0, '.')
+                path.insert(0, '.')
                 import xmlbehavior_sub as xmlbehavior
             except ImportError:
                 err_msg('*** You have requested generation of '
@@ -5829,17 +5828,17 @@ def makeFile(outFileName):
     outFile = None
     if (not Force) and os.path.exists(outFileName):
         if NoQuestions:
-            sys.stderr.write(
+            stderr.write(
                 'File %s exists.  Change output file or use -f (force).\n' %
                 outFileName)
-            sys.exit(1)
+            exit(1)
         else:
             reply = raw_input(
                 'File %s exists.  Overwrite? (y/n): ' % outFileName)
             if reply == 'y':
-                outFile = file(outFileName, 'w')
+                outFile = open(outFileName, 'w')
     else:
-        outFile = file(outFileName, 'w')
+        outFile = open(outFileName, 'w')
     return outFile
 
 
@@ -5923,7 +5922,7 @@ def parseAndGenerate(
         UserMethodsModule = imp.load_module(mod_name, *module_spec)
 ##    parser = saxexts.make_parser("xml.sax.drivers2.drv_pyexpat")
     if xschemaFileName == '-':
-        infile = sys.stdin
+        infile = stdin
     else:
         infile = open(xschemaFileName, 'r')
     if SingleFileOutput:
@@ -5933,7 +5932,7 @@ def parseAndGenerate(
         parser.setContentHandler(dh)
         if processIncludes:
             import process_includes
-            outfile = StringIO.StringIO()
+            outfile = io.StringIO()
             process_includes.process_include_files(
                 infile, outfile,
                 inpath=xschemaFileName,
@@ -5977,7 +5976,7 @@ def parseAndGenerate(
                     urlfile = urllib2.urlopen(path)
                     content = urlfile.read()
                     urlfile.close()
-                    rootFile = StringIO.StringIO()
+                    rootFile = io.StringIO()
                     rootFile.write(content)
                     rootFile.seek(0)
                 except urllib2.HTTPError:
@@ -6113,7 +6112,7 @@ def fixSilence(txt, silent):
 
 
 def err_msg(msg):
-    sys.stderr.write(msg)
+    stderr.write(msg)
 
 
 USAGE_TEXT = __doc__
@@ -6121,7 +6120,7 @@ USAGE_TEXT = __doc__
 
 def usage():
     print(USAGE_TEXT)
-    sys.exit(1)
+    exit(1)
 
 
 def main():
@@ -6135,7 +6134,7 @@ def main():
         FixTypeNames, SingleFileOutput, OutputDirectory, \
         ModuleSuffix
     outputText = True
-    args = sys.argv[1:]
+    args = argv[1:]
     try:
         options, args = getopt.getopt(
             args, 'hfyo:s:p:a:b:c:mu:q',
@@ -6161,7 +6160,7 @@ def main():
     superModule = '???'
     processIncludes = 1
     namespacedef = ''
-    ExternalEncoding = sys.getdefaultencoding()
+    ExternalEncoding = getdefaultencoding()
     NoDates = False
     NoVersion = False
     NoQuestions = False
@@ -6208,7 +6207,7 @@ def main():
                 if not os.path.isdir(ValidatorBodiesBasePath):
                     err_msg('*** Option validator-bodies must specify '
                             'an existing path.\n')
-                    sys.exit(1)
+                    exit(1)
             if sessionObj.get_user_methods():
                 UserMethodsPath = sessionObj.get_user_methods()
             if sessionObj.get_no_dates():
@@ -6260,14 +6259,14 @@ def main():
             if not os.path.isdir(ValidatorBodiesBasePath):
                 err_msg('*** Option validator-bodies must specify an '
                         'existing path.\n')
-                sys.exit(1)
+                exit(1)
         elif option[0] == '--use-getter-setter':
             if option[1] in ('old', 'new', 'none'):
                 UseGetterSetter = option[1]
             else:
                 err_msg('*** Option use-getter-setter must '
                         '"old" or "new" or "none".\n')
-                sys.exit(1)
+                exit(1)
         elif option[0] in ('-u', '--user-methods'):
             UserMethodsPath = option[1]
         elif option[0] == '--no-process-includes':
@@ -6308,7 +6307,7 @@ def main():
             ModuleSuffix = option[1]
     if showVersion:
         print('generateDS.py version %s' % VERSION)
-        sys.exit(0)
+        exit(0)
     XsdNameSpace = nameSpace
     Namespacedef = namespacedef
     set_type_constants(nameSpace)
@@ -6331,27 +6330,20 @@ def main():
 
 
 if __name__ == '__main__':
-    #logging.basicConfig(level=logging.DEBUG,)
-    #import pdb; pdb.set_trace()
-    #import ipdb; ipdb.set_trace()
-    # use the following to debug after an exception (post mortem debbing).
-    #try:
-    #    main()
-    #except:
-    #    import pdb; pdb.post_mortem()
-
-    #"-o ..\multi_phy_configuration_model\Bindings.py --super=Bindings -s ..\multi_phy_configuration_model\Template.py --subclass-suffix="" --member-specs=list -m -f --silence .\multi_phy_configuration_model.xsd"
-    # current_dir = os.path.dirname(__file__)
-    # binding_path = os.path.realpath( os.path.join(current_dir, '..', 'multi_phy_configuration_model/Bindings.py') )
-    # sys.argv.append('-o')
-    # sys.argv.append('../multi_phy_configuration_model/Bindings.py')
-    # sys.argv.append('--super=Bindings')
-    # sys.argv.append('-s')
-    # sys.argv.append('../multi_phy_configuration_model/Template.py')
-    # sys.argv.append('--subclass-suffix=""')
-    # sys.argv.append('-m')
-    # sys.argv.append('-f')
-    # sys.argv.append('--silence')
-    # sys.argv.append('./multi_phy_configuration_model.xsd')
+    #"-o ..\Bindings.py --super=Bindings -s ..\Template.py --subclass-suffix="" --member-specs=list -m -f --silence .\multi_phy_configuration_model.xsd"
+    current_dir = os.path.dirname(__file__)
+    binding_path = os.path.realpath( os.path.join(current_dir, '..', '/Bindings.py') )
+    argv.append('-o')
+    argv.append('../Bindings.py')
+    argv.append('--super=Bindings')
+    argv.append('-s')
+    argv.append('../Template.py')
+    argv.append('--subclass-suffix=')
+    argv.append('--member-specs=list')
+    argv.append(r'--external-encoding=ascii')
+    argv.append('-m')
+    argv.append('-f')
+    argv.append('--silence')
+    argv.append('./multi_phy_configuration_model.xsd')
 
     main()

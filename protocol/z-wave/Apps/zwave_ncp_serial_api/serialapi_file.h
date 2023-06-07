@@ -1,5 +1,5 @@
 /**
- * @file serialapi_file.h
+ * @file
  * @copyright 2022 Silicon Laboratories Inc.
  * @brief module that handle SerialAPI application data
  * @details This module implement SerialAPI filesystem functions

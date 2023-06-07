@@ -21,7 +21,7 @@ requires:
 template_contribution:
   - name: psa_crypto_config
     value: PSA_WANT_ECC_SECP_R1_224
-  - name: psa_crypto_config
+  - name: psa_crypto_builtin_config
     value: "MBEDTLS_PSA_BUILTIN_ECC_SECP_R1_224 1"
     condition: [mbedtls_ecc_secp224r1]
   - name: mbedtls_config

@@ -95,37 +95,15 @@ void otCryptoHmacSha256(const otCryptoKey *aKey, const uint8_t *aBuf, uint16_t a
  */
 void otCryptoAesCcm(const otCryptoKey *aKey,
                     uint8_t            aTagLength,
-                    const void *       aNonce,
+                    const void        *aNonce,
                     uint8_t            aNonceLength,
-                    const void *       aHeader,
+                    const void        *aHeader,
                     uint32_t           aHeaderLength,
-                    void *             aPlainText,
-                    void *             aCipherText,
+                    void              *aPlainText,
+                    void              *aCipherText,
                     uint32_t           aLength,
                     bool               aEncrypt,
-                    void *             aTag);
-
-/**
- * This method creates ECDSA sign.
- *
- * @param[out]     aOutput            An output buffer where ECDSA sign should be stored.
- * @param[in,out]  aOutputLength      The length of the @p aOutput buffer.
- * @param[in]      aInputHash         An input hash.
- * @param[in]      aInputHashLength   The length of the @p aInputHash buffer.
- * @param[in]      aPrivateKey        A private key in PEM format.
- * @param[in]      aPrivateKeyLength  The length of the @p aPrivateKey buffer.
- *
- * @retval  OT_ERROR_NONE         ECDSA sign has been created successfully.
- * @retval  OT_ERROR_NO_BUFS      Output buffer is too small.
- * @retval  OT_ERROR_INVALID_ARGS Private key is not valid EC Private Key.
- * @retval  OT_ERROR_FAILED       Error during signing.
- */
-otError otCryptoEcdsaSign(uint8_t *      aOutput,
-                          uint16_t *     aOutputLength,
-                          const uint8_t *aInputHash,
-                          uint16_t       aInputHashLength,
-                          const uint8_t *aPrivateKey,
-                          uint16_t       aPrivateKeyLength);
+                    void              *aTag);
 
 /**
  * @}

@@ -28,9 +28,9 @@
  *
  ******************************************************************************/
 
-#include "em_device.h"
+#include "sli_psa_driver_features.h"
 
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
 
 #include "sli_psa_driver_common.h"  // sli_psa_zeroize()
 #include "sli_se_opaque_functions.h"
@@ -47,10 +47,9 @@
 #include <string.h>
 
 // -----------------------------------------------------------------------------
-// Function Definitions
+// Custom SL PSA driver entry points
 
-#if defined(PSA_WANT_ALG_HKDF) \
-  && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+#if defined(SLI_PSA_DRIVER_FEATURE_HKDF)
 
 psa_status_t sli_se_driver_single_shot_hkdf(
   psa_algorithm_t alg,
@@ -158,10 +157,9 @@ psa_status_t sli_se_driver_single_shot_hkdf(
   return psa_status;
 }
 
-#endif // PSA_WANT_ALG_HKDF && VAULT
+#endif // SLI_PSA_DRIVER_FEATURE_HKDF
 
-#if (defined(PSA_WANT_ALG_PBKDF2_AES_CMAC_PRF_128) || defined(PSA_WANT_ALG_PBKDF2_HMAC)) \
-  && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+#if defined(SLI_PSA_DRIVER_FEATURE_PBKDF2)
 
 psa_status_t sli_se_driver_single_shot_pbkdf2(
   psa_algorithm_t alg,
@@ -285,7 +283,10 @@ psa_status_t sli_se_driver_single_shot_pbkdf2(
   return psa_status;
 }
 
-#endif // (PSA_WANT_ALG_PBKDF2_AES_CMAC_PRF_128 || PSA_WANT_ALG_PBKDF2_HMAC) && VAULT
+#endif // SLI_PSA_DRIVER_FEATURE_PBKDF2
+
+// -----------------------------------------------------------------------------
+// Driver entry points
 
 psa_status_t sli_se_driver_key_agreement(psa_algorithm_t alg,
                                          const psa_key_attributes_t *attributes,
@@ -297,7 +298,7 @@ psa_status_t sli_se_driver_key_agreement(psa_algorithm_t alg,
                                          size_t output_size,
                                          size_t *output_length)
 {
-#if defined(SLI_PSA_WANT_ALG_ECDH)
+  #if defined(SLI_PSA_DRIVER_FEATURE_ECDH)
 
   sl_se_key_descriptor_t priv_desc = { 0 };
   sl_se_key_descriptor_t pub_desc = { 0 };
@@ -307,13 +308,11 @@ psa_status_t sli_se_driver_key_agreement(psa_algorithm_t alg,
   psa_status_t psa_status = PSA_ERROR_CORRUPTION_DETECTED;
 
   #if defined(SLI_SE_KEY_PADDING_REQUIRED)
-  #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
   size_t padding_bytes = 0;
-  #endif // Vault High
   uint8_t tmp_output_buf[SLI_SE_MAX_PADDED_ECP_PUBLIC_KEY_SIZE] = { 0 };
   #else
   uint8_t tmp_output_buf[SLI_SE_MAX_ECP_PUBLIC_KEY_SIZE] = { 0 };
-  #endif // defined(SLI_SE_KEY_PADDING_REQUIRED)
+  #endif // SLI_SE_KEY_PADDING_REQUIRED
 
   // Argument check.
   if (attributes == NULL
@@ -361,9 +360,9 @@ psa_status_t sli_se_driver_key_agreement(psa_algorithm_t alg,
 
   // External public key validation is required for older versions of SE FW.
   if (SLI_SE_VERSION_PUBKEY_VALIDATION_REQUIRED(se_version)) {
-      #if defined(MBEDTLS_ECP_C)     \
+    #if defined(MBEDTLS_ECP_C)       \
     && defined(MBEDTLS_PSA_CRYPTO_C) \
-    && defined(SL_SE_SUPPORT_FW_PRIOR_TO_1_2_2)
+    && SL_SE_SUPPORT_FW_PRIOR_TO_1_2_2
     psa_status = sli_se_driver_validate_pubkey_with_fallback(key_type,
                                                              key_bits,
                                                              peer_key,
@@ -371,62 +370,59 @@ psa_status_t sli_se_driver_key_agreement(psa_algorithm_t alg,
     if (psa_status != PSA_SUCCESS) {
       return psa_status;
     }
-      #else
+    #else
     // No fallback code is compiled in, cannot do public key validation.
     return PSA_ERROR_NOT_SUPPORTED;
-      #endif
+    #endif
   }
-  #endif // SLI_SE_VERSION_ECDH_PUBKEY_VALIDATION_UNCERTAIN
+  #endif   // SLI_SE_VERSION_ECDH_PUBKEY_VALIDATION_UNCERTAIN
 
   switch (key_type) {
-    #if defined(SLI_PSA_WANT_ECC_SECP)
+    #if defined(SLI_PSA_DRIVER_FEATURE_SECPR1)
     case PSA_KEY_TYPE_ECC_KEY_PAIR(PSA_ECC_FAMILY_SECP_R1):
       switch (key_bits) {
-        #if defined(PSA_WANT_ECC_SECP_R1_192)
+        #if defined(SLI_PSA_DRIVER_FEATURE_P192R1)
         case 192:
           pub_desc.type = SL_SE_KEY_TYPE_ECC_P192;
           break;
-        #endif // PSA_WANT_ECC_SECP_R1_192
-        #if defined(PSA_WANT_ECC_SECP_R1_224)
+        #endif     // SLI_PSA_DRIVER_FEATURE_P192R1
+
+        #if defined(SLI_PSA_DRIVER_FEATURE_P224R1)
         case 224:
-          #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
-          // Series-2-config-1 devices do not support SECP224R1.
-          return PSA_ERROR_NOT_SUPPORTED;
-          #else
           pub_desc.type = SL_SE_KEY_TYPE_ECC_P224;
-          #endif
           break;
-        #endif // PSA_WANT_ECC_SECP_R1_224
-        #if defined(PSA_WANT_ECC_SECP_R1_256)
+        #endif     // SLI_PSA_DRIVER_FEATURE_P224R1
+
+        #if defined(SLI_PSA_DRIVER_FEATURE_P256R1)
         case 256:
           pub_desc.type = SL_SE_KEY_TYPE_ECC_P256;
           break;
-        #endif // PSA_WANT_ECC_SECP_R1_256
+        #endif     // SLI_PSA_DRIVER_FEATURE_P256R1
 
-        #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
-        #if defined(PSA_WANT_ECC_SECP_R1_384)
+        #if defined(SLI_PSA_DRIVER_FEATURE_P384R1)
         case 384:
           pub_desc.type = SL_SE_KEY_TYPE_ECC_P384;
           break;
-        #endif // PSA_WANT_ECC_SECP_R1_384
-        #if defined(PSA_WANT_ECC_SECP_R1_521)
+        #endif     // SLI_PSA_DRIVER_FEATURE_P384R1
+
+        #if defined(SLI_PSA_DRIVER_FEATURE_P521R1)
         case 521:
           pub_desc.type = SL_SE_KEY_TYPE_ECC_P521;
           #if defined(SLI_SE_KEY_PADDING_REQUIRED)
           padding_bytes = SLI_SE_P521_PADDING_BYTES;
           #endif
           break;
-        #endif // PSA_WANT_ECC_SECP_R1_521
-        #endif // (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+        #endif     // SLI_PSA_DRIVER_FEATURE_P521R1
+
         default:
           return PSA_ERROR_NOT_SUPPORTED;
       }
+
       // Set key descriptor attributes.
-      // If padding is required, the descriptor will be set later as part of the padding.
-      // If padding is not required, set the descriptor here.
+      // If padding is required, the descriptor will be set later as part of
+      // the padding. If padding is not required, set the descriptor here.
       if (pub_desc.type != 0
-          #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) \
-          && defined(SLI_SE_KEY_PADDING_REQUIRED)
+          #if defined(SLI_SE_KEY_PADDING_REQUIRED)
           && padding_bytes == 0
           #endif
           ) {
@@ -439,8 +435,9 @@ psa_status_t sli_se_driver_key_agreement(psa_algorithm_t alg,
         shared_desc.size = PSA_BITS_TO_BYTES(key_bits) * 2;
       }
       break;
-    #endif // SLI_PSA_WANT_ECC_SECP
-    #if defined(SLI_PSA_WANT_ECC_MONTGOMERY)
+    #endif   // SLI_PSA_DRIVER_FEATURE_SECPR1
+
+    #if defined(SLI_PSA_DRIVER_FEATURE_MONTGOMERY)
     case PSA_KEY_TYPE_ECC_KEY_PAIR(PSA_ECC_FAMILY_MONTGOMERY):
 
       // Check peer_key is of sufficient size.
@@ -449,16 +446,18 @@ psa_status_t sli_se_driver_key_agreement(psa_algorithm_t alg,
       }
 
       switch (key_bits) {
-        #if defined(SLI_PSA_WANT_ECC_MONTGOMERY_255)
+        #if defined(SLI_PSA_DRIVER_FEATURE_CURVE25519)
         case 255:
           pub_desc.type = SL_SE_KEY_TYPE_ECC_X25519;
           break;
-        #endif // SLI_PSA_WANT_ECC_MONTGOMERY_255
-        #if defined(SLI_PSA_WANT_ECC_MONTGOMERY_448)
+        #endif     // SLI_PSA_DRIVER_FEATURE_CURVE25519
+
+        #if defined(SLI_PSA_DRIVER_FEATURE_CURVE448)
         case 448:
           pub_desc.type = SL_SE_KEY_TYPE_ECC_X448;
           break;
-        #endif // SLI_PSA_WANT_ECC_MONTGOMERY_448
+        #endif     // SLI_PSA_DRIVER_FEATURE_CURVE448
+
         default:
           return PSA_ERROR_NOT_SUPPORTED;
       }
@@ -472,12 +471,12 @@ psa_status_t sli_se_driver_key_agreement(psa_algorithm_t alg,
                                           output_size);
       shared_desc.size = PSA_BITS_TO_BYTES(key_bits);
       break;
-    #endif // SLI_PSA_WANT_ECC_MONTGOMERY
+    #endif   // SLI_PSA_DRIVER_FEATURE_MONTGOMERY
+
     default:
       return PSA_ERROR_NOT_SUPPORTED;
   }
 
-  #if defined(SLI_PSA_WANT_ECC_SECP) || defined(SLI_PSA_WANT_ECC_MONTGOMERY)
   // Generate a key descriptor for private key.
   psa_status = sli_se_key_desc_from_input(attributes,
                                           key_buffer,
@@ -489,8 +488,7 @@ psa_status_t sli_se_driver_key_agreement(psa_algorithm_t alg,
 
   // Panther crypto engine requires alignment on word boundries instead of byte
   // boundaries which is used in the PSA crypto API.
-  #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) \
-  && defined(SLI_SE_KEY_PADDING_REQUIRED)
+  #if defined(SLI_SE_KEY_PADDING_REQUIRED)
   uint8_t tmp_priv_padded_buf[SLI_SE_MAX_PADDED_ECP_PRIVATE_KEY_SIZE] = { 0 };
   uint8_t tmp_pub_padded_buf[SLI_SE_MAX_PADDED_ECP_PUBLIC_KEY_SIZE] = { 0 };
 
@@ -522,7 +520,7 @@ psa_status_t sli_se_driver_key_agreement(psa_algorithm_t alg,
                                         sizeof(tmp_output_buf));
     shared_desc.size = (PSA_BITS_TO_BYTES(key_bits) + padding_bytes) * 2;
   }
-  #endif // VAULT padding
+  #endif   // SLI_SE_KEY_PADDING_REQUIRED
 
   // Set key descriptor attributes that are common to all supported curves.
   pub_desc.flags |= SL_SE_KEY_FLAG_ASYMMETRIC_BUFFER_HAS_PUBLIC_KEY;
@@ -551,8 +549,7 @@ psa_status_t sli_se_driver_key_agreement(psa_algorithm_t alg,
     }
   }
 
-  #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) \
-  && defined(SLI_SE_KEY_PADDING_REQUIRED)
+  #if defined(SLI_SE_KEY_PADDING_REQUIRED)
   // Remove padding bytes and clean up temporary key storage.
   if (padding_bytes > 0) {
     sli_se_unpad_curve_point(tmp_output_buf,
@@ -560,7 +557,7 @@ psa_status_t sli_se_driver_key_agreement(psa_algorithm_t alg,
                              PSA_BITS_TO_BYTES(key_bits));
     sli_psa_zeroize(tmp_priv_padded_buf, sizeof(tmp_priv_padded_buf));
   }
-  #endif // VAULT padding
+  #endif // SLI_SE_KEY_PADDING_REQUIRED
 
   // Montgomery curve computations do not require the temporary buffer to store the y-coord.
   if (key_type == PSA_KEY_TYPE_ECC_KEY_PAIR(PSA_ECC_FAMILY_SECP_R1)) {
@@ -571,8 +568,8 @@ psa_status_t sli_se_driver_key_agreement(psa_algorithm_t alg,
   *output_length = PSA_BITS_TO_BYTES(key_bits);
 
   return PSA_SUCCESS;
-  #endif // SLI_PSA_WANT_ECC_SECP || SLI_PSA_WANT_ECC_MONTGOMERY
-#else // SLI_PSA_WANT_ALG_ECDH
+
+  #else // SLI_PSA_DRIVER_FEATURE_ECDH
 
   (void) attributes;
   (void) key_buffer;
@@ -586,7 +583,7 @@ psa_status_t sli_se_driver_key_agreement(psa_algorithm_t alg,
 
   return PSA_ERROR_NOT_SUPPORTED;
 
-#endif // SLI_PSA_WANT_ALG_ECDH
+  #endif // SLI_PSA_DRIVER_FEATURE_ECDH
 }
 
-#endif // SEMAILBOX_PRESENT
+#endif // SLI_MBEDTLS_DEVICE_HSE

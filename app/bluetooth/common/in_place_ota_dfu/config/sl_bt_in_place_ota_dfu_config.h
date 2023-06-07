@@ -31,6 +31,11 @@
 #ifndef SL_BT_IN_PLACE_OTA_DFU_CONFIG_H
 #define SL_BT_IN_PLACE_OTA_DFU_CONFIG_H
 
+/***********************************************************************************************//**
+ * @addtogroup in_place_ota_dfu
+ * @{
+ **************************************************************************************************/
+
 // <<< Use Configuration Wizard in Context Menu >>>
 
 // <h> In-Place OTA DFU Security Configuration
@@ -48,4 +53,5 @@
 
 // <<< end of configuration section >>>
 
+/** @} (end addtogroup in_place_ota_dfu) */
 #endif // SL_BT_IN_PLACE_OTA_DFU_CONFIG_H

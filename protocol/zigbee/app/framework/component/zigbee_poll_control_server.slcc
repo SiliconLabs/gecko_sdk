@@ -35,11 +35,11 @@ template_contribution:
   - name: zigbee_af_callback
     value:
       callback_type: event_init
-      function_name: emAfPluginPollControlServerInitCallback
+      function_name: sli_zigbee_af_poll_control_server_init_callback
   - name: zigbee_af_callback
     value:
       callback_type: reset_attributes
-      function_name: emAfPluginPollControlServerResetAttributesCallback  
+      function_name: sli_zigbee_af_poll_control_server_reset_attributes_callback  
   - name: zigbee_stack_callback
     value:
       callback_type: stack_status

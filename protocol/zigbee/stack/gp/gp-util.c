@@ -23,7 +23,7 @@
 #include "stack/include/gp-types.h"
 //#include "gp.h"
 
-bool emGpAddressMatch(const EmberGpAddress *a1, const EmberGpAddress *a2)
+bool sli_zigbee_af_gp_address_match(const EmberGpAddress *a1, const EmberGpAddress *a2)
 {
   if (a1->applicationId == EMBER_GP_APPLICATION_SOURCE_ID
       && a2->applicationId == EMBER_GP_APPLICATION_SOURCE_ID) {
@@ -45,7 +45,7 @@ bool emGpAddressMatch(const EmberGpAddress *a1, const EmberGpAddress *a2)
   return false;
 }
 
-EmberNodeId emGpdAlias(EmberGpAddress *addr)
+EmberNodeId sli_zigbee_af_gpd_alias(EmberGpAddress *addr)
 {
   EmberNodeId alias;
   //The alias algorithm is the same for both sourceID and IEEE GPDS

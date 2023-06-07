@@ -19,10 +19,8 @@
 #include "../../util/common.h"
 #include "demand-response-load-control.h"
 
-#ifdef UC_BUILD
 #include "drlc-config.h"
 #include "zap-cluster-command-parser.h"
-#endif // UC_BUILD
 
 #include "app/framework/plugin/esi-management/esi-management.h"
 
@@ -191,23 +189,21 @@ void emberAfDemandResponseLoadControlClusterClientInitCallback(uint8_t endpoint)
                                (uint8_t*)(&deviceClass),
                                ZCL_INT16U_ATTRIBUTE_TYPE);
 
-  emAfLoadControlEventTableInit(endpoint);
+  sli_zigbee_af_load_control_event_table_init(endpoint);
 
   // Start tick
-  slxu_zigbee_zcl_schedule_client_tick(endpoint,
-                                       ZCL_DEMAND_RESPONSE_LOAD_CONTROL_CLUSTER_ID,
-                                       MILLISECOND_TICKS_PER_SECOND);
+  sl_zigbee_zcl_schedule_client_tick(endpoint,
+                                     ZCL_DEMAND_RESPONSE_LOAD_CONTROL_CLUSTER_ID,
+                                     MILLISECOND_TICKS_PER_SECOND);
 }
 
 void emberAfDemandResponseLoadControlClusterClientTickCallback(uint8_t endpoint)
 {
-  emAfLoadControlEventTableTick(endpoint);
-  slxu_zigbee_zcl_schedule_client_tick(endpoint,
-                                       ZCL_DEMAND_RESPONSE_LOAD_CONTROL_CLUSTER_ID,
-                                       MILLISECOND_TICKS_PER_SECOND);
+  sli_zigbee_af_load_control_event_table_tick(endpoint);
+  sl_zigbee_zcl_schedule_client_tick(endpoint,
+                                     ZCL_DEMAND_RESPONSE_LOAD_CONTROL_CLUSTER_ID,
+                                     MILLISECOND_TICKS_PER_SECOND);
 }
-
-#ifdef UC_BUILD
 
 bool emberAfDemandResponseLoadControlClusterLoadControlEventCallback(EmberAfClusterCommand *cmd)
 {
@@ -303,7 +299,7 @@ bool emberAfDemandResponseLoadControlClusterLoadControlEventCallback(EmberAfClus
     e.startRand,
     e.durationRand);
 
-  emAfScheduleLoadControlEvent(emberAfCurrentEndpoint(), &e);
+  sli_zigbee_af_schedule_load_control_event(emberAfCurrentEndpoint(), &e);
   return true;
 }
 
@@ -325,10 +321,10 @@ bool emberAfDemandResponseLoadControlClusterCancelLoadControlEventCallback(Ember
     //emberAfSendDefaultResponse(emberAfCurrentCommand(), EMBER_ZCL_STATUS_NOT_FOUND);
     return true;
   }
-  emAfCancelLoadControlEvent(emberAfCurrentEndpoint(),
-                             cmd_data.issuerEventId,
-                             cmd_data.cancelControl,
-                             cmd_data.effectiveTime);
+  sli_zigbee_af_cancel_load_control_event(emberAfCurrentEndpoint(),
+                                          cmd_data.issuerEventId,
+                                          cmd_data.cancelControl,
+                                          cmd_data.effectiveTime);
   return true;
 }
 
@@ -341,156 +337,13 @@ bool emberAfDemandResponseLoadControlClusterCancelAllLoadControlEventsCallback(E
     return false;
   }
 
-  if (!emAfCancelAllLoadControlEvents(emberAfCurrentEndpoint(), cmd_data.cancelControl)) {
+  if (!sli_zigbee_af_cancel_all_load_control_events(emberAfCurrentEndpoint(), cmd_data.cancelControl)) {
     // We didn't find any events to cancel but we were still successful in trying
     // So we return a default response of success.
     emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
   }
   return true;
 }
-
-#else // !UC_BUILD
-
-bool emberAfDemandResponseLoadControlClusterLoadControlEventCallback(uint32_t eventId,
-                                                                     uint16_t deviceClass,
-                                                                     uint8_t utilityEnrollmentGroup,
-                                                                     uint32_t startTime,
-                                                                     uint16_t duration,
-                                                                     uint8_t criticalityLevel,
-                                                                     uint8_t coolingTempOffset,
-                                                                     uint8_t heatingTempOffset,
-                                                                     int16_t coolingTempSetPoint,
-                                                                     int16_t heatingTempSetPoint,
-                                                                     int8_t averageLoadAdjustPercent,
-                                                                     uint8_t dutyCycle,
-                                                                     uint8_t eventControl)
-{
-  EmberAfLoadControlEvent e;
-  EmberAfClusterCommand *cc = emberAfCurrentCommand();
-
-  emberAfDemandResponseLoadControlClusterPrintln("= RX Load Control Event =");
-  emberAfDemandResponseLoadControlClusterPrintln("  eid: %4x", eventId);
-  emberAfDemandResponseLoadControlClusterPrintln(" dc/g: %2x / %x",
-                                                 deviceClass,
-                                                 utilityEnrollmentGroup);
-  emberAfDemandResponseLoadControlClusterPrintln("   st: T%4x", startTime);
-  emberAfDemandResponseLoadControlClusterFlush();
-  emberAfDemandResponseLoadControlClusterPrintln("  dur: %2x", duration);
-  emberAfDemandResponseLoadControlClusterPrintln("  cla: %x", criticalityLevel);
-  emberAfDemandResponseLoadControlClusterPrintln("co/ho: %x / %x",
-                                                 coolingTempOffset,
-                                                 heatingTempOffset);
-  emberAfDemandResponseLoadControlClusterFlush();
-  emberAfDemandResponseLoadControlClusterPrintln("ctspa: %2x (%d)",
-                                                 coolingTempSetPoint,
-                                                 coolingTempSetPoint);
-  emberAfDemandResponseLoadControlClusterPrintln("htspa: %2x (%d)",
-                                                 heatingTempSetPoint,
-                                                 heatingTempSetPoint);
-  emberAfDemandResponseLoadControlClusterFlush();
-  emberAfDemandResponseLoadControlClusterPrintln("  avg: %x",
-                                                 averageLoadAdjustPercent);
-  emberAfDemandResponseLoadControlClusterPrintln("   dc: %x", dutyCycle);
-  emberAfDemandResponseLoadControlClusterPrintln("   ec: %x", eventControl);
-  emberAfDemandResponseLoadControlClusterFlush();
-
-  if (!afMatchUegOrDeviceClass(emberAfCurrentEndpoint(),
-                               utilityEnrollmentGroup,
-                               deviceClass)) {
-    emberAfDemandResponseLoadControlClusterPrintln(
-      "Neither UEG nor Device class matched.  Ignoring.");
-
-    // CCB 1380: Device must send back a default response of success, or do
-    // nothing. We choose to do nothing.
-    //emberAfSendDefaultResponse(emberAfCurrentCommand(),
-    //                           EMBER_ZCL_STATUS_NOT_FOUND);
-    return true;
-  }
-
-  // Reserved criticality level
-  if (criticalityLevel == EMBER_ZCL_AMI_CRITICALITY_LEVEL_RESERVED
-      || criticalityLevel > EMBER_ZCL_AMI_CRITICALITY_LEVEL_UTILITY_DEFINED6) {
-    emberAfDemandResponseLoadControlClusterPrintln(
-      "Reserved criticality level.  Ignoring.");
-    return true;
-  }
-
-  e.destinationEndpoint = cc->apsFrame->destinationEndpoint;
-
-  e.eventId = eventId;
-  e.deviceClass = deviceClass;
-  e.utilityEnrollmentGroup = utilityEnrollmentGroup;
-  if (startTime == 0) {
-    e.startTime = emberAfGetCurrentTime();
-  } else {
-    e.startTime = startTime;
-  }
-  e.duration = duration;
-  e.criticalityLevel = criticalityLevel;
-  e.coolingTempOffset = coolingTempOffset;
-  e.heatingTempOffset = heatingTempOffset;
-  e.coolingTempSetPoint = coolingTempSetPoint;
-  e.heatingTempSetPoint = heatingTempSetPoint;
-  e.avgLoadPercentage = averageLoadAdjustPercent;
-  e.dutyCycle = dutyCycle;
-  e.eventControl = eventControl;
-  e.optionControl = EVENT_OPT_IN_DEFAULT;
-  e.startRand = 0;
-  e.durationRand = 0;
-  e.esiBitmask = 0;
-
-  if (eventControl & RANDOMIZE_START_TIME_FLAG) {
-    e.startRand = afGetRandomizationTime(emberAfCurrentEndpoint(), true);
-  }
-  if (eventControl & RANDOMIZE_DURATION_TIME_FLAG) {
-    e.durationRand = afGetRandomizationTime(emberAfCurrentEndpoint(), false);
-  }
-
-  emberAfDemandResponseLoadControlClusterPrintln(
-    "schedule -- start: %4x, start-random: %2x duration-random: %2x",
-    e.startTime,
-    e.startRand,
-    e.durationRand);
-
-  emAfScheduleLoadControlEvent(emberAfCurrentEndpoint(), &e);
-  return true;
-}
-
-bool emberAfDemandResponseLoadControlClusterCancelLoadControlEventCallback(
-  uint32_t eventId,
-  uint16_t deviceClass,
-  uint8_t utilityEnrollmentGroup,
-  uint8_t cancelControl,
-  uint32_t effectiveTime)
-{
-  // FILTER ON DEVICE CLASS AND UTILITY ENROLLMENT GROUP
-  if (!afMatchUegOrDeviceClass(emberAfCurrentEndpoint(),
-                               utilityEnrollmentGroup,
-                               deviceClass)) {
-    // CCB 1380: Device must send back a default response of success, or do
-    // nothing. We choose to do nothing.
-    //emberAfSendDefaultResponse(emberAfCurrentCommand(), EMBER_ZCL_STATUS_NOT_FOUND);
-    return true;
-  }
-  emAfCancelLoadControlEvent(emberAfCurrentEndpoint(),
-                             eventId,
-                             cancelControl,
-                             effectiveTime);
-  return true;
-}
-
-bool emberAfDemandResponseLoadControlClusterCancelAllLoadControlEventsCallback(
-  uint8_t cancelControl)
-{
-  if (!emAfCancelAllLoadControlEvents(emberAfCurrentEndpoint(), cancelControl)) {
-    // We didn't find any events to cancel but we were still successful in trying
-    // So we return a default response of success.
-    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
-  }
-  return true;
-}
-
-#endif // UC_BUILD
 
 void emberAfEventAction(EmberAfLoadControlEvent *event,
                         uint8_t eventStatus,
@@ -551,8 +404,6 @@ void emberAfEventAction(EmberAfLoadControlEvent *event,
   }
 }
 
-#ifdef UC_BUILD
-
 uint32_t emberAfDemandResponseLoadControlClusterClientCommandParse(sl_service_opcode_t opcode,
                                                                    sl_service_function_context_t *context)
 {
@@ -585,5 +436,3 @@ uint32_t emberAfDemandResponseLoadControlClusterClientCommandParse(sl_service_op
           ? EMBER_ZCL_STATUS_SUCCESS
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
-
-#endif // UC_BUILD

@@ -22,9 +22,7 @@
 #include "prepayment-debt-schedule.h"
 #include "prepayment-tick.h"
 
-#ifdef UC_BUILD
 #include "prepayment-server-config.h"
-#endif // UC_BUILD
 
 void debtScheduleSetNextCollectionTimeSec(uint8_t debtType);
 
@@ -44,7 +42,7 @@ enum {
   COLLECTION_FREQUENCY_INVALID     = 0xFF
 };
 
-emDebtScheduleEntry DebtSchedule[DEBT_SCHEDULE_TABLE_SIZE];
+sli_zigbee_af_debt_schedule_entry DebtSchedule[DEBT_SCHEDULE_TABLE_SIZE];
 
 void emberAfPluginPrepaymentServerInitDebtSchedule(void)
 {

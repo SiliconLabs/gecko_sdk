@@ -32,7 +32,7 @@
 #include "em_core.h"
 #include "em_common.h"
 #include "sl_status.h"
-#include "sl_simple_timer.h"
+#include "app_timer.h"
 #include "gatt_db.h"
 #include "app_assert.h"
 #include "sl_gatt_service_hall.h"
@@ -56,7 +56,7 @@
 // -----------------------------------------------------------------------------
 // Private variables
 
-static sl_simple_timer_t hall_timer;
+static app_timer_t hall_timer;
 static uint8_t hall_connection = 0;
 
 // Field strength characteristic variables
@@ -74,7 +74,7 @@ static bool hall_tamper_latch = false;
 static void hall_update(void);
 static void hall_field_strength_notify(void);
 static void hall_state_notify(void);
-static void hall_timer_cb(sl_simple_timer_t *timer, void *data);
+static void hall_timer_cb(app_timer_t *timer, void *data);
 static void hall_connection_closed_cb(sl_bt_evt_connection_closed_t *data);
 static void hall_char_read_cb(sl_bt_evt_gatt_server_user_read_request_t *data);
 static void hall_char_config_changed_cb(sl_bt_evt_gatt_server_characteristic_status_t *data);
@@ -139,7 +139,7 @@ static void hall_state_notify(void)
   app_assert_status(sc);
 }
 
-static void hall_timer_cb(sl_simple_timer_t * timer, void *data)
+static void hall_timer_cb(app_timer_t * timer, void *data)
 {
   (void)data;
   (void)timer;
@@ -160,7 +160,7 @@ static void hall_connection_closed_cb(sl_bt_evt_connection_closed_t * data)
   (void)data;
   sl_status_t sc;
   // stop periodic timer
-  sc = sl_simple_timer_stop(&hall_timer);
+  sc = app_timer_stop(&hall_timer);
   app_assert_status(sc);
   // reset notification flags
   hall_field_strength_notification = false;
@@ -229,14 +229,14 @@ static void hall_char_config_changed_cb(sl_bt_evt_gatt_server_characteristic_sta
 
   // start periodic timer if any of the notifications are enabled
   if (hall_field_strength_notification || hall_state_notification) {
-    sc = sl_simple_timer_start(&hall_timer,
-                               HALL_MEASUREMENT_INTERVAL_MS,
-                               hall_timer_cb,
-                               NULL,
-                               true);
+    sc = app_timer_start(&hall_timer,
+                         HALL_MEASUREMENT_INTERVAL_MS,
+                         hall_timer_cb,
+                         NULL,
+                         true);
     app_assert_status(sc);
   } else {
-    sc = sl_simple_timer_stop(&hall_timer);
+    sc = app_timer_stop(&hall_timer);
     app_assert_status(sc);
   }
 }

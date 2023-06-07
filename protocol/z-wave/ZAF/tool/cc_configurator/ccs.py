@@ -20,15 +20,20 @@ class cc_multilevel_sensor(cc_validate):
     # #define SENSOR_SCALE_WATT           0x00
     # #define SENSOR_SCALE_BTU_H          0x01 /*Btu/h*/
     # #define SENSOR_SCALE_ABSOLUTE_HUMIDITY  0x01 /*g/m3*/
+    # #define SENSOR_SCALE_METER_SQUARE_SECOND 0x00 /*m/s^2*/
+
     # /**
     #  * Defined possible sensor types
     #  */
     # typedef enum sensor_name{
-    #   SENSOR_NAME_AIR_TEMPERATURE,
+    #   SENSOR_NAME_AIR_TEMPERATURE = 0x00,
     #   SENSOR_NAME_GENERAL_PURPOSE,
     #   SENSOR_NAME_ILLUMINANCE,
     #   SENSOR_NAME_POWER,
     #   SENSOR_NAME_HUMIDITY,
+    #   SENSOR_NAME_ACCELERATION_X,
+    #   SENSOR_NAME_ACCELERATION_Y,
+    #   SENSOR_NAME_ACCELERATION_Z,
     #   SENSOR_NAME_MAX_COUNT
     # }sensor_name_t;
 
@@ -38,6 +43,9 @@ class cc_multilevel_sensor(cc_validate):
         'SENSOR_NAME_ILLUMINANCE',
         'SENSOR_NAME_POWER',
         'SENSOR_NAME_HUMIDITY',
+        'SENSOR_NAME_ACCELERATION_X',
+        'SENSOR_NAME_ACCELERATION_Y',
+        'SENSOR_NAME_ACCELERATION_Z',
         'SENSOR_NAME_MAX_COUNT'
     ]
 
@@ -50,7 +58,8 @@ class cc_multilevel_sensor(cc_validate):
         'SENSOR_SCALE_LUX',
         'SENSOR_SCALE_WATT',
         'SENSOR_SCALE_BTU_H',
-        'SENSOR_SCALE_ABSOLUTE_HUMIDITY'
+        'SENSOR_SCALE_ABSOLUTE_HUMIDITY',
+        'SENSOR_SCALE_METER_SQUARE_SECOND'
     ]
 
     def __init__(self) -> None:

@@ -31,6 +31,11 @@
 #ifndef SL_GATT_SERVICE_IMU_CONFIG_H
 #define SL_GATT_SERVICE_IMU_CONFIG_H
 
+/***********************************************************************************************//**
+ * @addtogroup gatt_service_imu
+ * @{
+ **************************************************************************************************/
+
 // <<< Use Configuration Wizard in Context Menu >>>
 
 // <o SL_GATT_SERVICE_IMU_OVEC_INVALID> Dummy three dimensional orientation vector measurement results for uninitialized sensors. <0-0x7FFF>
@@ -42,4 +47,5 @@
 #define SL_GATT_SERVICE_IMU_AVEC_INVALID  0x7FFF
 // <<< end of configuration section >>>
 
+/** @} (end addtogroup gatt_service_imu) */
 #endif // SL_GATT_SERVICE_IMU_CONFIG_H

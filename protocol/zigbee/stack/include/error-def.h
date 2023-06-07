@@ -80,12 +80,6 @@ enum
   EMBER_EEPROM_MFG_STACK_VERSION_MISMATCH = 0x04,
 
 /**
- * @brief The static memory definitions in ember-static-memory.h
- * are incompatible with this stack version.
- */
-  EMBER_INCOMPATIBLE_STATIC_MEMORY_DEFINITIONS = 0x05,
-
-/**
  * @brief The manufacturing token format in non-volatile memory is
  * different than what the stack expects (returned at initialization).
  */

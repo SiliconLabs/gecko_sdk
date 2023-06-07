@@ -114,6 +114,13 @@ define block CSTACK with alignment = 8
   section .stack
 };
 
+define block RAMFUNCS with alignment = 8
+{
+{%- for entry in common_code_classes %}
+  section text_{{entry['component']}}_*{{entry['class']}}*,
+{%- endfor %}
+};
+
 {%-   if trustzone_secure %}
 define block STACKSEAL with size = STACK_SEAL_SIZE
 {
@@ -236,5 +243,12 @@ place at end of MAIN_FLASH_region {
 {%- endif %}
 };
 
+"ramfuncs":
+place at start of RAM_region { 
+  block RAMFUNCS,
+};
+
 "application_ram":
-place at start of RAM_region { block application_ram };
+place in RAM_region {
+  block application_ram,
+};

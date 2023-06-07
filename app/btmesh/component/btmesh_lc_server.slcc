@@ -7,9 +7,15 @@ description: >
   occupancy and ambient light level sensors and adjust the dim level of a light.
   LC Server extends Lightness Server model and Generic OnOff Server. It also has
   a corresponding LC Setup Server model which is present in the same element.
+
+  This is a No-Code component when added to an existing project using Light
+  Lightness Server.
 category: "Bluetooth Mesh|Models|Lighting"
 quality: "production"
 root_path: "app/btmesh/common/btmesh_lc_server"
+tag:
+  - No-Code
+
 config_file:
   - path: "config/sl_btmesh_lc_server_config.h"
   - path: btmesh_lc_server.dcd
@@ -33,9 +39,9 @@ requires:
   - name: "btmesh_generic_server"
   - name: "btmesh_lighting_server"
   - name: "btmesh_stack"
-  - name: "simple_timer"
+  - name: "app_timer"
 recommends:
-  - id: "simple_timer"
+  - id: "app_timer"
 
 template_contribution:
   - name: "btmesh_on_event"

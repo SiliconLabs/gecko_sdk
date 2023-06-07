@@ -60,6 +60,7 @@
  * \{
  ******************************************************************************/
 
+#include <stdbool.h>
 #include "mbedtls/threading.h"
 
 #if defined(MBEDTLS_THREADING_ALT) && defined(MBEDTLS_THREADING_C)

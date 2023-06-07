@@ -33,21 +33,24 @@
 
 // <<< Use Configuration Wizard in Context Menu >>>
 
-// <o SL_BTMESH_BLOB_TRANSFER_SERVER_MIN_BLOCK_SIZE_LOG_CFG_VAL> Min Block Size Log <0x6-0x20>
+// <o SL_BTMESH_BLOB_TRANSFER_SERVER_MIN_BLOCK_SIZE_LOG_CFG_VAL> Min Block Size Log <0x6-0x20> <f.h>
 // <i> Please note, that decreasing the minimum block size will result in increased heap usage.
 // <i> Block states need to be monitored. The smaller the blocks, the bigger the state storage.
 // <i> Change this value with care.
+// <d> 0x9
 #define SL_BTMESH_BLOB_TRANSFER_SERVER_MIN_BLOCK_SIZE_LOG_CFG_VAL 0x9
 
-// <o SL_BTMESH_BLOB_TRANSFER_SERVER_MAX_BLOCK_SIZE_LOG_CFG_VAL> Max Block Size Log <0x6-0x20>
+// <o SL_BTMESH_BLOB_TRANSFER_SERVER_MAX_BLOCK_SIZE_LOG_CFG_VAL> Max Block Size Log <0x6-0x20> <f.h>
 // <i> Please note, that increasing the maximum block size will result in increased heap usage.
 // <i> Blocks are cached on heap before being written into NVM.
 // <i> Change this value with care.
 // <i> The maximum block size shall be less than or equal to the product of max chunks per block and chunk size.
+// <d> 0x9
 #define SL_BTMESH_BLOB_TRANSFER_SERVER_MAX_BLOCK_SIZE_LOG_CFG_VAL 0x9
 
 // <o SL_BTMESH_BLOB_TRANSFER_SERVER_MAX_CHUNKS_PER_BLOCK_CFG_VAL> Maximum of number of chunks per block <8-64:8>
-#define SL_BTMESH_BLOB_TRANSFER_SERVER_MAX_CHUNKS_PER_BLOCK_CFG_VAL 16
+// <d> 40
+#define SL_BTMESH_BLOB_TRANSFER_SERVER_MAX_CHUNKS_PER_BLOCK_CFG_VAL 40
 
 // <o SL_BTMESH_BLOB_TRANSFER_SERVER_MAX_CHUNK_SIZE_CFG_VAL> Maximum chunk size <8-241:1>
 // <i> If the max chunk size is 8 then the chunk data fits into a single BT Mesh advertisement message.
@@ -55,48 +58,60 @@
 // <i> The advantage of higher chunk size is the higher throughput in low noise environment.
 // <i> The advantage of lower chunk size is that fewer messages are retransmitted in high noise environment due to lost chunk messages.
 // <i> LPN only: the number of chunk messages (segments) multiplied by requested chunk count in partial block report shall fit into the friend queue.
+// <d> 241
 #define SL_BTMESH_BLOB_TRANSFER_SERVER_MAX_CHUNK_SIZE_CFG_VAL 241
 
 // <q SL_BTMESH_BLOB_TRANSFER_SERVER_LOGGING_CFG_VAL> Logging
+// <d> 1
 #define SL_BTMESH_BLOB_TRANSFER_SERVER_LOGGING_CFG_VAL 1
 
 // <q SL_BTMESH_BLOB_TRANSFER_START_CALLBACK_CFG_VAL> Transfer Start user callback
 // <i> Enable/disable callback function when BLOB transfer starts.
+// <d> 1
 #define SL_BTMESH_BLOB_TRANSFER_START_CALLBACK_CFG_VAL 1
 
 // <q SL_BTMESH_BLOB_TRANSFER_PROGRESS_CALLBACK_CFG_VAL> Transfer Progress user callback
 // <i> Enable/disable callback function when block transfer is finished.
+// <d> 1
 #define SL_BTMESH_BLOB_TRANSFER_PROGRESS_CALLBACK_CFG_VAL 1
 
 // <q SL_BTMESH_BLOB_TRANSFER_SERVER_TRANSFER_DONE_CALLBACK_CFG_VAL> Transfer Done user callback
 // <i> Enable/disable callback function when BLOB transfer is finished.
+// <d> 1
 #define SL_BTMESH_BLOB_TRANSFER_SERVER_TRANSFER_DONE_CALLBACK_CFG_VAL 1
 
 // <h> Supported Transfer Modes
 
 // <e SL_BTMESH_BLOB_TRANSFER_SERVER_PUSH_MODE_CFG_VAL> Push Mode
+// <d> 1
 #define SL_BTMESH_BLOB_TRANSFER_SERVER_PUSH_MODE_CFG_VAL 1
 
 // </e>
 
 // <e SL_BTMESH_BLOB_TRANSFER_SERVER_PULL_MODE_CFG_VAL> Pull Mode
+// <d> 1
 #define SL_BTMESH_BLOB_TRANSFER_SERVER_PULL_MODE_CFG_VAL 1
 
 // <o SL_BTMESH_BLOB_TRANSFER_SERVER_PULL_CHUNK_REQUEST_CNT_CFG_VAL> Number of chunks requested in Block Status or Partial Block Report <1-32>
+// <d> 4
 #define SL_BTMESH_BLOB_TRANSFER_SERVER_PULL_CHUNK_REQUEST_CNT_CFG_VAL 4
 
 // <o SL_BTMESH_BLOB_TRANSFER_SERVER_PULL_RETRY_INTERVAL_MS_CFG_VAL> Interval, in milliseconds, between Partial Block Reports, if nothing is received <1000-30000:100>
+// <d> 1000
 #define SL_BTMESH_BLOB_TRANSFER_SERVER_PULL_RETRY_INTERVAL_MS_CFG_VAL 1000
 
 // <o SL_BTMESH_BLOB_TRANSFER_SERVER_PULL_RETRY_CNT_CFG_VAL> Number of retries sending the same Partial Block Report, before giving up <1-10>
+// <d> 8
 #define SL_BTMESH_BLOB_TRANSFER_SERVER_PULL_RETRY_CNT_CFG_VAL 8
 
 // <e SL_BTMESH_BLOB_TRANSFER_SERVER_LPN_MODE_CFG_VAL> LPN Mode
 // <i> Only pull transfer mode can be used on LPN nodes.
+// <d> 0
 #define SL_BTMESH_BLOB_TRANSFER_SERVER_LPN_MODE_CFG_VAL 0
 
 // <e SL_BTMESH_BLOB_TRANSFER_SERVER_LPN_HIGH_THROUGHPUT_MODE_CFG_VAL> LPN high throughput mode
 // <i> In high throughput mode the LPN node polls the friend node more frequently to increase the throughput at the expense of power consumption.
+// <d> 1
 #define SL_BTMESH_BLOB_TRANSFER_SERVER_LPN_HIGH_THROUGHPUT_MODE_CFG_VAL 1
 
 // <o SL_BTMESH_BLOB_TRANSFER_SERVER_LPN_POLL_DELAY_MS_CFG_VAL> LPN poll delay in milliseconds <100-30000:100>
@@ -105,9 +120,11 @@
 // <i> The maximum number of messages can be transferred per polling equals to friend queue size during BLOB transfer to LPN.
 // <i> This poll delay configuration parameter value makes the polling more frequent when BLOB Transfer messages are expected to increase the throughput.
 // <i> The LPN poll delay shall be less than SL_BTMESH_LPN_POLL_TIMEOUT_CFG_VAL in sl_btmesh_lpn_config.h file.
+// <d> 500
 #define SL_BTMESH_BLOB_TRANSFER_SERVER_LPN_POLL_DELAY_MS_CFG_VAL 500
 
 // <q SL_BTMESH_BLOB_TRANSFER_SERVER_LPN_POLL_LOGGING_CFG_VAL> LPN poll logging
+// <d> 0
 #define SL_BTMESH_BLOB_TRANSFER_SERVER_LPN_POLL_LOGGING_CFG_VAL 0
 
 // </e>

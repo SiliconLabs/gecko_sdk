@@ -1,7 +1,7 @@
 upgrade:
   - sdk:
       id: gecko_sdk
-      version: "4.2.0"
+      version: "4.2.1"
     configuration:
       - script: platform/security/component/scripts/upgrade.lua
     component:

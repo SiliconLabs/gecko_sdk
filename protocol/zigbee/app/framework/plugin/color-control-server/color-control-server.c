@@ -44,7 +44,6 @@ enum {
   TEMPERATURE_TO_TEMPERATURE = 0x22
 };
 
-#ifdef UC_BUILD
 #include "zap-cluster-command-parser.h"
 #include "color-control-server-config.h"
 #if (EMBER_AF_PLUGIN_COLOR_CONTROL_SERVER_XY == 1)
@@ -64,27 +63,9 @@ sl_zigbee_event_t emberAfPluginColorControlServerHueSatTransitionEvent;
 #define COLOR_XY_CONTROL   (&emberAfPluginColorControlServerXyTransitionEvent)
 #define COLOR_HSV_CONTROL  (&emberAfPluginColorControlServerHueSatTransitionEvent)
 
-void emberAfPluginColorControlServerTempTransitionEventHandler(SLXU_UC_EVENT);
-void emberAfPluginColorControlServerXyTransitionEventHandler(SLXU_UC_EVENT);
-void emberAfPluginColorControlServerHueSatTransitionEventHandler(SLXU_UC_EVENT);
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_COLOR_CONTROL_SERVER_XY
-#define SUPPORT_CIE_1931
-#endif
-#ifdef EMBER_AF_PLUGIN_COLOR_CONTROL_SERVER_TEMP
-#define SUPPORT_COLOR_TEMPERATURE
-#endif
-#ifdef EMBER_AF_PLUGIN_COLOR_CONTROL_SERVER_HSV
-#define SUPPORT_HUE_SATURATION
-#endif
-EmberEventControl emberAfPluginColorControlServerTempTransitionEventControl;
-EmberEventControl emberAfPluginColorControlServerXyTransitionEventControl;
-EmberEventControl emberAfPluginColorControlServerHueSatTransitionEventControl;
-
-#define COLOR_TEMP_CONTROL emberAfPluginColorControlServerTempTransitionEventControl
-#define COLOR_XY_CONTROL   emberAfPluginColorControlServerXyTransitionEventControl
-#define COLOR_HSV_CONTROL  emberAfPluginColorControlServerHueSatTransitionEventControl
-#endif // UC_BUILD
+void emberAfPluginColorControlServerTempTransitionEventHandler(sl_zigbee_event_t * event);
+void emberAfPluginColorControlServerXyTransitionEventHandler(sl_zigbee_event_t * event);
+void emberAfPluginColorControlServerHueSatTransitionEventHandler(sl_zigbee_event_t * event);
 
 #define UPDATE_TIME_MS 100
 #define TRANSITION_TIME_1S 10
@@ -350,35 +331,26 @@ static void writeColorTemperature(uint8_t endpoint, uint16_t colorTemperature)
 // ****** callback section *******
 
 // Templated to the event_init context.
-void emAfPluginColorControlServerInitCallback(SLXU_INIT_ARG)
+void sli_zigbee_af_color_control_server_init_callback(uint8_t init_level)
 {
-  SLXU_INIT_UNUSED_ARG;
+  (void)init_level;
 
-  slxu_zigbee_event_init(&emberAfPluginColorControlServerTempTransitionEvent,
-                         emberAfPluginColorControlServerTempTransitionEventHandler);
-  slxu_zigbee_event_init(&emberAfPluginColorControlServerXyTransitionEvent,
-                         emberAfPluginColorControlServerXyTransitionEventHandler);
-  slxu_zigbee_event_init(&emberAfPluginColorControlServerHueSatTransitionEvent,
-                         emberAfPluginColorControlServerHueSatTransitionEventHandler);
+  sl_zigbee_event_init(&emberAfPluginColorControlServerTempTransitionEvent,
+                       emberAfPluginColorControlServerTempTransitionEventHandler);
+  sl_zigbee_event_init(&emberAfPluginColorControlServerXyTransitionEvent,
+                       emberAfPluginColorControlServerXyTransitionEventHandler);
+  sl_zigbee_event_init(&emberAfPluginColorControlServerHueSatTransitionEvent,
+                       emberAfPluginColorControlServerHueSatTransitionEventHandler);
 }
 
 #ifdef SUPPORT_HUE_SATURATION
 
-#ifdef UC_BUILD
 bool emberAfColorControlClusterMoveToHueAndSaturationCallback(EmberAfClusterCommand *cmd)
-#else // !UC_BUILD
-bool emberAfColorControlClusterMoveToHueAndSaturationCallback(uint8_t hue,
-                                                              uint8_t saturation,
-                                                              uint16_t transitionTime,
-                                                              uint8_t optionsMask,
-                                                              uint8_t optionsOverride)
-#endif // UC_BUILD
 {
   uint8_t endpoint = emberAfCurrentEndpoint();
   uint8_t currentHue = readHue(endpoint);
   bool moveUp;
 
-#ifdef UC_BUILD
   sl_zcl_color_control_cluster_move_to_hue_and_saturation_command_t cmd_data;
   uint8_t hue;
   uint8_t saturation;
@@ -397,7 +369,6 @@ bool emberAfColorControlClusterMoveToHueAndSaturationCallback(uint8_t hue,
   transitionTime = cmd_data.transitionTime;
   optionsMask = cmd_data.optionsMask;
   optionsOverride = cmd_data.optionsOverride;
-#endif // UC_BUILD
 
   if (transitionTime == 0) {
     transitionTime++;
@@ -452,23 +423,15 @@ bool emberAfColorControlClusterMoveToHueAndSaturationCallback(uint8_t hue,
   writeRemainingTime(endpoint, transitionTime);
 
   // kick off the state machine:
-  slxu_zigbee_event_set_delay_ms(COLOR_HSV_CONTROL, UPDATE_TIME_MS);
+  sl_zigbee_event_set_delay_ms(COLOR_HSV_CONTROL, UPDATE_TIME_MS);
 
   emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
   return true;
 }
 
-#ifdef UC_BUILD
 bool emberAfColorControlClusterMoveHueCallback(EmberAfClusterCommand *cmd)
-#else // !UC_BUILD
-bool emberAfColorControlClusterMoveHueCallback(uint8_t moveMode,
-                                               uint8_t rate,
-                                               uint8_t optionsMask,
-                                               uint8_t optionsOverride)
-#endif // UC_BUILD
 {
   uint8_t endpoint = emberAfCurrentEndpoint();
-#ifdef UC_BUILD
   sl_zcl_color_control_cluster_move_hue_command_t cmd_data;
   uint8_t moveMode;
   uint8_t rate;
@@ -485,7 +448,6 @@ bool emberAfColorControlClusterMoveHueCallback(uint8_t moveMode,
   rate = cmd_data.rate;
   optionsMask = cmd_data.optionsMask;
   optionsOverride = cmd_data.optionsOverride;
-#endif // UC_BUILD
 
 #ifdef EMBER_TEST
   emberAfColorControlClusterPrintln("ColorControl: MoveHue (%x, %x)",
@@ -537,23 +499,15 @@ bool emberAfColorControlClusterMoveHueCallback(uint8_t moveMode,
   colorSaturationTransitionState.stepsRemaining = 0;
 
   // kick off the state machine:
-  slxu_zigbee_event_set_delay_ms(COLOR_HSV_CONTROL, UPDATE_TIME_MS);
+  sl_zigbee_event_set_delay_ms(COLOR_HSV_CONTROL, UPDATE_TIME_MS);
 
   emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
   return true;
 }
 
-#ifdef UC_BUILD
 bool emberAfColorControlClusterMoveSaturationCallback(EmberAfClusterCommand *cmd)
-#else // !UC_BUILD
-bool emberAfColorControlClusterMoveSaturationCallback(uint8_t moveMode,
-                                                      uint8_t rate,
-                                                      uint8_t optionsMask,
-                                                      uint8_t optionsOverride)
-#endif // UC_BUILD
 {
   uint8_t endpoint = emberAfCurrentEndpoint();
-#ifdef UC_BUILD
   sl_zcl_color_control_cluster_move_saturation_command_t cmd_data;
   uint8_t moveMode;
   uint8_t rate;
@@ -570,7 +524,6 @@ bool emberAfColorControlClusterMoveSaturationCallback(uint8_t moveMode,
   rate = cmd_data.rate;
   optionsMask = cmd_data.optionsMask;
   optionsOverride = cmd_data.optionsOverride;
-#endif // UC_BUILD
 
   if (!shouldExecuteIfOff(endpoint, optionsMask, optionsOverride)) {
     emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
@@ -617,24 +570,15 @@ bool emberAfColorControlClusterMoveSaturationCallback(uint8_t moveMode,
   writeRemainingTime(endpoint, transitionTime);
 
   // kick off the state machine:
-  slxu_zigbee_event_set_delay_ms(COLOR_HSV_CONTROL, UPDATE_TIME_MS);
+  sl_zigbee_event_set_delay_ms(COLOR_HSV_CONTROL, UPDATE_TIME_MS);
 
   emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
   return true;
 }
 
-#ifdef UC_BUILD
 bool emberAfColorControlClusterMoveToHueCallback(EmberAfClusterCommand *cmd)
-#else // !UC_BUILD
-bool emberAfColorControlClusterMoveToHueCallback(uint8_t hue,
-                                                 uint8_t hueMoveMode,
-                                                 uint16_t transitionTime,
-                                                 uint8_t optionsMask,
-                                                 uint8_t optionsOverride)
-#endif // UC_BUILD
 {
   uint8_t endpoint = emberAfCurrentEndpoint();
-#ifdef UC_BUILD
   sl_zcl_color_control_cluster_move_to_hue_command_t cmd_data;
   uint8_t hue;
   uint8_t hueMoveMode;
@@ -653,7 +597,6 @@ bool emberAfColorControlClusterMoveToHueCallback(uint8_t hue,
   transitionTime = cmd_data.transitionTime;
   optionsMask = cmd_data.optionsMask;
   optionsOverride = cmd_data.optionsOverride;
-#endif // UC_BUILD
 
   if (!shouldExecuteIfOff(endpoint, optionsMask, optionsOverride)) {
     emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
@@ -727,23 +670,15 @@ bool emberAfColorControlClusterMoveToHueCallback(uint8_t hue,
   writeRemainingTime(endpoint, transitionTime);
 
   // kick off the state machine:
-  slxu_zigbee_event_set_delay_ms(COLOR_HSV_CONTROL, UPDATE_TIME_MS);
+  sl_zigbee_event_set_delay_ms(COLOR_HSV_CONTROL, UPDATE_TIME_MS);
 
   emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
   return true;
 }
 
-#ifdef UC_BUILD
 bool emberAfColorControlClusterMoveToSaturationCallback(EmberAfClusterCommand *cmd)
-#else // !UC_BUILD
-bool emberAfColorControlClusterMoveToSaturationCallback(uint8_t saturation,
-                                                        uint16_t transitionTime,
-                                                        uint8_t optionsMask,
-                                                        uint8_t optionsOverride)
-#endif // UC_BUILD
 {
   uint8_t endpoint = emberAfCurrentEndpoint();
-#ifdef UC_BUILD
   sl_zcl_color_control_cluster_move_to_saturation_command_t cmd_data;
   uint8_t saturation;
   uint16_t transitionTime;
@@ -760,7 +695,6 @@ bool emberAfColorControlClusterMoveToSaturationCallback(uint8_t saturation,
   transitionTime = cmd_data.transitionTime;
   optionsMask = cmd_data.optionsMask;
   optionsOverride = cmd_data.optionsOverride;
-#endif // UC_BUILD
 
   if (!shouldExecuteIfOff(endpoint, optionsMask, optionsOverride)) {
     emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
@@ -801,24 +735,15 @@ bool emberAfColorControlClusterMoveToSaturationCallback(uint8_t saturation,
   writeRemainingTime(endpoint, transitionTime);
 
   // kick off the state machine:
-  slxu_zigbee_event_set_delay_ms(COLOR_HSV_CONTROL, UPDATE_TIME_MS);
+  sl_zigbee_event_set_delay_ms(COLOR_HSV_CONTROL, UPDATE_TIME_MS);
 
   emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
   return true;
 }
 
-#ifdef UC_BUILD
 bool emberAfColorControlClusterStepHueCallback(EmberAfClusterCommand *cmd)
-#else // !UC_BUILD
-bool emberAfColorControlClusterStepHueCallback(uint8_t stepMode,
-                                               uint8_t stepSize,
-                                               uint8_t transitionTime,
-                                               uint8_t optionsMask,
-                                               uint8_t optionsOverride)
-#endif // UC_BUILD
 {
   uint8_t endpoint = emberAfCurrentEndpoint();
-#ifdef UC_BUILD
   sl_zcl_color_control_cluster_step_hue_command_t cmd_data;
   uint8_t stepMode;
   uint8_t stepSize;
@@ -837,7 +762,6 @@ bool emberAfColorControlClusterStepHueCallback(uint8_t stepMode,
   transitionTime = cmd_data.transitionTime;
   optionsMask = cmd_data.optionsMask;
   optionsOverride = cmd_data.optionsOverride;
-#endif // UC_BUILD
 
   if (!shouldExecuteIfOff(endpoint, optionsMask, optionsOverride)) {
     emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
@@ -884,24 +808,15 @@ bool emberAfColorControlClusterStepHueCallback(uint8_t stepMode,
   writeRemainingTime(endpoint, transitionTime);
 
   // kick off the state machine:
-  slxu_zigbee_event_set_delay_ms(COLOR_HSV_CONTROL, UPDATE_TIME_MS);
+  sl_zigbee_event_set_delay_ms(COLOR_HSV_CONTROL, UPDATE_TIME_MS);
 
   emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
   return true;
 }
 
-#ifdef UC_BUILD
 bool emberAfColorControlClusterStepSaturationCallback(EmberAfClusterCommand *cmd)
-#else // !UC_BUILD
-bool emberAfColorControlClusterStepSaturationCallback(uint8_t stepMode,
-                                                      uint8_t stepSize,
-                                                      uint8_t transitionTime,
-                                                      uint8_t optionsMask,
-                                                      uint8_t optionsOverride)
-#endif // UC_BUILD
 {
   uint8_t endpoint = emberAfCurrentEndpoint();
-#ifdef UC_BUILD
   sl_zcl_color_control_cluster_step_saturation_command_t cmd_data;
   uint8_t stepMode;
   uint8_t stepSize;
@@ -920,7 +835,6 @@ bool emberAfColorControlClusterStepSaturationCallback(uint8_t stepMode,
   transitionTime = cmd_data.transitionTime;
   optionsMask = cmd_data.transitionTime;
   optionsOverride = cmd_data.optionsOverride;
-#endif // UC_BUILD
 
   if (!shouldExecuteIfOff(endpoint, optionsMask, optionsOverride)) {
     emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
@@ -969,7 +883,7 @@ bool emberAfColorControlClusterStepSaturationCallback(uint8_t stepMode,
   writeRemainingTime(endpoint, transitionTime);
 
   // kick off the state machine:
-  slxu_zigbee_event_set_delay_ms(COLOR_HSV_CONTROL, UPDATE_TIME_MS);
+  sl_zigbee_event_set_delay_ms(COLOR_HSV_CONTROL, UPDATE_TIME_MS);
 
   emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
   return true;
@@ -1044,18 +958,9 @@ static uint8_t readSaturation(uint8_t endpoint)
 
 #ifdef SUPPORT_CIE_1931
 
-#ifdef UC_BUILD
 bool emberAfColorControlClusterMoveToColorCallback(EmberAfClusterCommand *cmd)
-#else // !UC_BUILD
-bool emberAfColorControlClusterMoveToColorCallback(uint16_t colorX,
-                                                   uint16_t colorY,
-                                                   uint16_t transitionTime,
-                                                   uint8_t optionsMask,
-                                                   uint8_t optionsOverride)
-#endif // UC_BUILD
 {
   uint8_t endpoint = emberAfCurrentEndpoint();
-#ifdef UC_BUILD
   sl_zcl_color_control_cluster_move_to_color_command_t cmd_data;
   uint16_t colorX;
   uint16_t colorY;
@@ -1074,7 +979,6 @@ bool emberAfColorControlClusterMoveToColorCallback(uint16_t colorX,
   transitionTime = cmd_data.transitionTime;
   optionsMask = cmd_data.optionsMask;
   optionsOverride = cmd_data.optionsOverride;
-#endif // UC_BUILD
 
   if (!shouldExecuteIfOff(endpoint, optionsMask, optionsOverride)) {
     emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
@@ -1113,23 +1017,15 @@ bool emberAfColorControlClusterMoveToColorCallback(uint16_t colorX,
   writeRemainingTime(endpoint, transitionTime);
 
   // kick off the state machine:
-  slxu_zigbee_event_set_delay_ms(COLOR_XY_CONTROL, UPDATE_TIME_MS);
+  sl_zigbee_event_set_delay_ms(COLOR_XY_CONTROL, UPDATE_TIME_MS);
 
   emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
   return true;
 }
 
-#ifdef UC_BUILD
 bool emberAfColorControlClusterMoveColorCallback(EmberAfClusterCommand *cmd)
-#else // !UC_BUILD
-bool emberAfColorControlClusterMoveColorCallback(int16_t rateX,
-                                                 int16_t rateY,
-                                                 uint8_t optionsMask,
-                                                 uint8_t optionsOverride)
-#endif // UC_BUILD
 {
   uint8_t endpoint = emberAfCurrentEndpoint();
-#ifdef UC_BUILD
   sl_zcl_color_control_cluster_move_color_command_t cmd_data;
   uint16_t rateX;
   uint16_t rateY;
@@ -1146,7 +1042,6 @@ bool emberAfColorControlClusterMoveColorCallback(int16_t rateX,
   rateY = cmd_data.rateY;
   optionsMask = cmd_data.optionsMask;
   optionsOverride = cmd_data.optionsOverride;
-#endif // UC_BUILD
 
   if (!shouldExecuteIfOff(endpoint, optionsMask, optionsOverride)) {
     emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
@@ -1211,24 +1106,15 @@ bool emberAfColorControlClusterMoveColorCallback(int16_t rateX,
   }
 
   // kick off the state machine:
-  slxu_zigbee_event_set_delay_ms(COLOR_XY_CONTROL, UPDATE_TIME_MS);
+  sl_zigbee_event_set_delay_ms(COLOR_XY_CONTROL, UPDATE_TIME_MS);
 
   emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
   return true;
 }
 
-#ifdef UC_BUILD
 bool emberAfColorControlClusterStepColorCallback(EmberAfClusterCommand *cmd)
-#else // !UC_BUILD
-bool emberAfColorControlClusterStepColorCallback(int16_t stepX,
-                                                 int16_t stepY,
-                                                 uint16_t transitionTime,
-                                                 uint8_t optionsMask,
-                                                 uint8_t optionsOverride)
-#endif // UC_BUILD
 {
   uint8_t endpoint = emberAfCurrentEndpoint();
-#ifdef UC_BUILD
   sl_zcl_color_control_cluster_step_color_command_t cmd_data;
   uint16_t stepX;
   uint16_t stepY;
@@ -1247,7 +1133,6 @@ bool emberAfColorControlClusterStepColorCallback(int16_t stepX,
   transitionTime = cmd_data.transitionTime;
   optionsMask = cmd_data.optionsMask;
   optionsOverride = cmd_data.optionsOverride;
-#endif // UC_BUILD
 
   if (!shouldExecuteIfOff(endpoint, optionsMask, optionsOverride)) {
     emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
@@ -1291,7 +1176,7 @@ bool emberAfColorControlClusterStepColorCallback(int16_t stepX,
   writeRemainingTime(endpoint, transitionTime);
 
   // kick off the state machine:
-  slxu_zigbee_event_set_delay_ms(COLOR_XY_CONTROL, UPDATE_TIME_MS);
+  sl_zigbee_event_set_delay_ms(COLOR_XY_CONTROL, UPDATE_TIME_MS);
 
   emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
   return true;
@@ -1383,20 +1268,12 @@ static void moveToColorTemp(uint8_t endpoint,
   colorTempTransitionState.highLimit = temperatureMax;
 
   // kick off the state machine:
-  slxu_zigbee_event_set_delay_ms(COLOR_TEMP_CONTROL, UPDATE_TIME_MS);
+  sl_zigbee_event_set_delay_ms(COLOR_TEMP_CONTROL, UPDATE_TIME_MS);
 }
 
-#ifdef UC_BUILD
 bool emberAfColorControlClusterMoveToColorTemperatureCallback(EmberAfClusterCommand *cmd)
-#else // !UC_BUILD
-bool emberAfColorControlClusterMoveToColorTemperatureCallback(uint16_t colorTemperature,
-                                                              uint16_t transitionTime,
-                                                              uint8_t optionsMask,
-                                                              uint8_t optionsOverride)
-#endif // UC_BUILD
 {
   uint8_t endpoint = emberAfCurrentEndpoint();
-#ifdef UC_BUILD
   sl_zcl_color_control_cluster_move_to_color_temperature_command_t cmd_data;
   uint16_t colorTemperature;
   uint16_t transitionTime;
@@ -1413,7 +1290,6 @@ bool emberAfColorControlClusterMoveToColorTemperatureCallback(uint16_t colorTemp
   transitionTime = cmd_data.transitionTime;
   optionsMask = cmd_data.optionsMask;
   optionsOverride = cmd_data.optionsOverride;
-#endif // UC_BUILD
 
   if (!shouldExecuteIfOff(endpoint, optionsMask, optionsOverride)) {
     emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
@@ -1426,19 +1302,9 @@ bool emberAfColorControlClusterMoveToColorTemperatureCallback(uint16_t colorTemp
   return true;
 }
 
-#ifdef UC_BUILD
 bool emberAfColorControlClusterMoveColorTemperatureCallback(EmberAfClusterCommand *cmd)
-#else // UC_BUILD
-bool emberAfColorControlClusterMoveColorTemperatureCallback(uint8_t moveMode,
-                                                            uint16_t rate,
-                                                            uint16_t colorTemperatureMinimum,
-                                                            uint16_t colorTemperatureMaximum,
-                                                            uint8_t optionsMask,
-                                                            uint8_t optionsOverride)
-#endif // UC_BUILD
 {
   uint8_t endpoint = emberAfCurrentEndpoint();
-#ifdef UC_BUILD
   sl_zcl_color_control_cluster_move_color_temperature_command_t cmd_data;
   uint8_t moveMode;
   uint16_t rate;
@@ -1459,7 +1325,6 @@ bool emberAfColorControlClusterMoveColorTemperatureCallback(uint8_t moveMode,
   colorTemperatureMaximum = cmd_data.colorTemperatureMaximum;
   optionsMask = cmd_data.optionsMask;
   optionsOverride = cmd_data.optionsOverride;
-#endif // UC_BUILD
 
   if (!shouldExecuteIfOff(endpoint, optionsMask, optionsOverride)) {
     emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
@@ -1521,26 +1386,15 @@ bool emberAfColorControlClusterMoveColorTemperatureCallback(uint8_t moveMode,
   writeRemainingTime(endpoint, transitionTime);
 
   // kick off the state machine:
-  slxu_zigbee_event_set_delay_ms(COLOR_TEMP_CONTROL, UPDATE_TIME_MS);
+  sl_zigbee_event_set_delay_ms(COLOR_TEMP_CONTROL, UPDATE_TIME_MS);
 
   emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
   return true;
 }
 
-#ifdef UC_BUILD
 bool emberAfColorControlClusterStepColorTemperatureCallback(EmberAfClusterCommand *cmd)
-#else // !UC_BUILD
-bool emberAfColorControlClusterStepColorTemperatureCallback(uint8_t stepMode,
-                                                            uint16_t stepSize,
-                                                            uint16_t transitionTime,
-                                                            uint16_t colorTemperatureMinimum,
-                                                            uint16_t colorTemperatureMaximum,
-                                                            uint8_t optionsMask,
-                                                            uint8_t optionsOverride)
-#endif // UC_BUILD
 {
   uint8_t endpoint = emberAfCurrentEndpoint();
-#ifdef UC_BUILD
   sl_zcl_color_control_cluster_step_color_temperature_command_t cmd_data;
   uint8_t stepMode;
   uint16_t stepSize;
@@ -1563,7 +1417,6 @@ bool emberAfColorControlClusterStepColorTemperatureCallback(uint8_t stepMode,
   colorTemperatureMaximum = cmd_data.colorTemperatureMaximum;
   optionsMask = cmd_data.optionsMask;
   optionsOverride = cmd_data.optionsOverride;
-#endif // UC_BUILD
 
   if (!shouldExecuteIfOff(endpoint, optionsMask, optionsOverride)) {
     emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
@@ -1614,7 +1467,7 @@ bool emberAfColorControlClusterStepColorTemperatureCallback(uint8_t stepMode,
   writeRemainingTime(endpoint, transitionTime);
 
   // kick off the state machine:
-  slxu_zigbee_event_set_delay_ms(COLOR_TEMP_CONTROL, UPDATE_TIME_MS);
+  sl_zigbee_event_set_delay_ms(COLOR_TEMP_CONTROL, UPDATE_TIME_MS);
 
   emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
   return true;
@@ -1702,9 +1555,9 @@ bool emberAfColorControlClusterStopMoveStepCallback(uint8_t optionsMask,
 
 static void stopAllColorTransitions(void)
 {
-  slxu_zigbee_event_set_inactive(COLOR_TEMP_CONTROL);
-  slxu_zigbee_event_set_inactive(COLOR_XY_CONTROL);
-  slxu_zigbee_event_set_inactive(COLOR_HSV_CONTROL);
+  sl_zigbee_event_set_inactive(COLOR_TEMP_CONTROL);
+  sl_zigbee_event_set_inactive(COLOR_XY_CONTROL);
+  sl_zigbee_event_set_inactive(COLOR_HSV_CONTROL);
 }
 
 void emberAfPluginColorControlServerStopTransition(void)
@@ -1850,7 +1703,7 @@ static bool computeNewHueValue(ColorHueTransitionState *p)
   return false;
 }
 
-void emberAfPluginColorControlServerHueSatTransitionEventHandler(SLXU_UC_EVENT)
+void emberAfPluginColorControlServerHueSatTransitionEventHandler(sl_zigbee_event_t * event)
 {
   uint8_t endpoint = colorHueTransitionState.endpoint;
   bool limitReached1, limitReached2;
@@ -1861,7 +1714,7 @@ void emberAfPluginColorControlServerHueSatTransitionEventHandler(SLXU_UC_EVENT)
   if (limitReached1 || limitReached2) {
     stopAllColorTransitions();
   } else {
-    slxu_zigbee_event_set_delay_ms(COLOR_HSV_CONTROL, UPDATE_TIME_MS);
+    sl_zigbee_event_set_delay_ms(COLOR_HSV_CONTROL, UPDATE_TIME_MS);
   }
 
   writeHue(colorHueTransitionState.endpoint,
@@ -1942,7 +1795,7 @@ static uint16_t computeTransitionTimeFromStateAndRate(Color16uTransitionState *p
   return (uint16_t) transitionTime;
 }
 
-void emberAfPluginColorControlServerXyTransitionEventHandler(SLXU_UC_EVENT)
+void emberAfPluginColorControlServerXyTransitionEventHandler(sl_zigbee_event_t * event)
 {
   uint8_t endpoint = colorXTransitionState.endpoint;
   bool limitReachedX, limitReachedY;
@@ -1955,7 +1808,7 @@ void emberAfPluginColorControlServerXyTransitionEventHandler(SLXU_UC_EVENT)
   if (limitReachedX || limitReachedY) {
     stopAllColorTransitions();
   } else {
-    slxu_zigbee_event_set_delay_ms(COLOR_XY_CONTROL, UPDATE_TIME_MS);
+    sl_zigbee_event_set_delay_ms(COLOR_XY_CONTROL, UPDATE_TIME_MS);
   }
 
   // update the attributes
@@ -1971,7 +1824,7 @@ void emberAfPluginColorControlServerXyTransitionEventHandler(SLXU_UC_EVENT)
   emberAfPluginColorControlServerComputePwmFromXyCallback(endpoint);
 }
 
-void emberAfPluginColorControlServerTempTransitionEventHandler(SLXU_UC_EVENT)
+void emberAfPluginColorControlServerTempTransitionEventHandler(sl_zigbee_event_t * event)
 {
   uint8_t endpoint = colorTempTransitionState.endpoint;
   bool limitReached;
@@ -1981,7 +1834,7 @@ void emberAfPluginColorControlServerTempTransitionEventHandler(SLXU_UC_EVENT)
   if (limitReached) {
     stopAllColorTransitions();
   } else {
-    slxu_zigbee_event_set_delay_ms(COLOR_TEMP_CONTROL, UPDATE_TIME_MS);
+    sl_zigbee_event_set_delay_ms(COLOR_TEMP_CONTROL, UPDATE_TIME_MS);
   }
 
   writeColorTemperature(colorTempTransitionState.endpoint,
@@ -2140,8 +1993,6 @@ void emberAfColorControlClusterServerInitCallback(uint8_t endpoint)
 #endif
 }
 
-#ifdef UC_BUILD
-
 uint32_t emberAfColorControlClusterServerCommandParse(sl_service_opcode_t opcode,
                                                       sl_service_function_context_t *context)
 {
@@ -2230,5 +2081,3 @@ uint32_t emberAfColorControlClusterServerCommandParse(sl_service_opcode_t opcode
           ? EMBER_ZCL_STATUS_SUCCESS
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
-
-#endif // UC_BUILD

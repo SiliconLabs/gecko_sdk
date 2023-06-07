@@ -14,15 +14,15 @@
  * sections of the MSLA applicable to Source Code.
  *
  ******************************************************************************/
-#ifdef UC_BUILD
 
 #include "app/framework/include/af.h"
 #include "network-creator-security.h"
 #include "app/util/serial/sl_zigbee_command_interpreter.h"
 #include "network-creator-security-config.h"
+#include "stack/include/zigbee-security-manager.h"
 
 // plugin network_creator_security [open|close]
-void emAfPluginNetworkCreatorSecurityOpenOrCloseNetworkCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_network_creator_security_open_or_close_network_command(sl_cli_command_arg_t *arguments)
 {
   EmberStatus status;
   uint8_t position = sl_cli_get_command_count(arguments) - 1;
@@ -40,19 +40,20 @@ void emAfPluginNetworkCreatorSecurityOpenOrCloseNetworkCommand(sl_cli_command_ar
 
 extern EmberKeyData distributedKey;
 
-void emAfPluginNetworkCreatorSecuritySetJoiningLinkKeyCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_network_creator_security_set_joining_link_key_command(sl_cli_command_arg_t *arguments)
 {
   EmberEUI64 eui64;
-  EmberKeyData keyData;
-  EmberStatus status;
+  sl_zb_sec_man_key_t keyData;
+  sl_status_t status;
   size_t len = 16;
   sl_zigbee_copy_eui64_arg(arguments, 0, eui64, true);
   //emberCopyKeyArgument(1, &keyData);
   uint8_t *ptr_string = sl_cli_get_argument_hex(arguments, 1, &len);
-  MEMSET(keyData.contents, 0, EMBER_ENCRYPTION_KEY_SIZE);
-  MEMMOVE(keyData.contents, ptr_string, EMBER_ENCRYPTION_KEY_SIZE); // Is the padding correct?
+  MEMSET(keyData.key, 0, EMBER_ENCRYPTION_KEY_SIZE);
+  MEMMOVE(keyData.key, ptr_string, EMBER_ENCRYPTION_KEY_SIZE); // Is the padding correct?
 
-  status = emberAddTransientLinkKey(eui64, &keyData);
+  status = sl_zb_sec_man_import_transient_key(eui64,
+                                              &keyData);
 
   emberAfCorePrintln("%s: %s: 0x%X",
                      EMBER_AF_PLUGIN_NETWORK_CREATOR_SECURITY_PLUGIN_NAME,
@@ -60,7 +61,7 @@ void emAfPluginNetworkCreatorSecuritySetJoiningLinkKeyCommand(sl_cli_command_arg
                      status);
 }
 
-void emAfPluginNetworkCreatorSecurityClearJoiningLinkKeyCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_network_creator_security_clear_joining_link_key_command(sl_cli_command_arg_t *arguments)
 {
   emberClearTransientLinkKeys();
 
@@ -70,7 +71,7 @@ void emAfPluginNetworkCreatorSecurityClearJoiningLinkKeyCommand(sl_cli_command_a
                      EMBER_SUCCESS);
 }
 
-void emAfPluginNetworkCreatorSecurityOpenNetworkWithKeyCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_network_creator_security_open_network_with_key_command(sl_cli_command_arg_t *arguments)
 {
   EmberEUI64 eui64;
   EmberKeyData keyData;
@@ -89,82 +90,10 @@ void emAfPluginNetworkCreatorSecurityOpenNetworkWithKeyCommand(sl_cli_command_ar
                      status);
 }
 
-void emAfPluginNetworkCreatorSecurityConfigureDistributedKey(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_network_creator_security_configure_distributed_key(sl_cli_command_arg_t *arguments)
 {
   size_t len = 16;
   uint8_t *ptr_string = sl_cli_get_argument_hex(arguments, 0, &len);
   MEMSET(distributedKey.contents, 0, EMBER_ENCRYPTION_KEY_SIZE);
   MEMMOVE(distributedKey.contents, ptr_string, EMBER_ENCRYPTION_KEY_SIZE); // Is the padding correct?
 }
-
-#else // !UC_BUILD
-
-#include "app/framework/include/af.h"
-
-#include "network-creator-security.h"
-
-extern EmberKeyData distributedKey;
-
-void emAfPluginNetworkCreatorSecuritySetJoiningLinkKeyCommand(void)
-{
-  EmberEUI64 eui64;
-  EmberKeyData keyData;
-  EmberStatus status;
-
-  emberCopyBigEndianEui64Argument(0, eui64);
-  emberCopyKeyArgument(1, &keyData);
-
-  status = emberAddTransientLinkKey(eui64, &keyData);
-
-  emberAfCorePrintln("%p: %p: 0x%X",
-                     EMBER_AF_PLUGIN_NETWORK_CREATOR_SECURITY_PLUGIN_NAME,
-                     "Set joining link key",
-                     status);
-}
-
-void emAfPluginNetworkCreatorSecurityClearJoiningLinkKeyCommand(void)
-{
-  emberClearTransientLinkKeys();
-
-  emberAfCorePrintln("%p: %p: 0x%X",
-                     EMBER_AF_PLUGIN_NETWORK_CREATOR_SECURITY_PLUGIN_NAME,
-                     "Clear joining link keys",
-                     EMBER_SUCCESS);
-}
-
-void emAfPluginNetworkCreatorSecurityOpenOrCloseNetworkCommand(void)
-{
-  EmberStatus status;
-  bool open = (emberStringCommandArgument(-1, NULL)[0] == 'o');
-
-  status = (open
-            ? emberAfPluginNetworkCreatorSecurityOpenNetwork()
-            : emberAfPluginNetworkCreatorSecurityCloseNetwork());
-
-  emberAfCorePrintln("%p: %p network: 0x%X",
-                     EMBER_AF_PLUGIN_NETWORK_CREATOR_SECURITY_PLUGIN_NAME,
-                     (open ? "Open" : "Close"),
-                     status);
-}
-
-void emAfPluginNetworkCreatorSecurityOpenNetworkWithKeyCommand(void)
-{
-  EmberEUI64 eui64;
-  EmberKeyData keyData;
-  EmberStatus status;
-
-  emberCopyBigEndianEui64Argument(0, eui64);
-  emberCopyKeyArgument(1, &keyData);
-  status = emberAfPluginNetworkCreatorSecurityOpenNetworkWithKeyPair(eui64, keyData);
-
-  emberAfCorePrintln("%p: Open network: 0x%X",
-                     EMBER_AF_PLUGIN_NETWORK_CREATOR_SECURITY_PLUGIN_NAME,
-                     status);
-}
-
-void emAfPluginNetworkCreatorSecurityConfigureDistributedKey(void)
-{
-  emberCopyKeyArgument(0, &distributedKey);
-}
-
-#endif // !UC_BUILD

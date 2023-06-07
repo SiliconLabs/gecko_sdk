@@ -24,6 +24,9 @@
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
 
+// The oldest supported HSE/VSE firmware versions for get_tamper_reset_cause
+#define OLDEST_SUPPORTED_SE_FW_VERSION (0x0020201)
+
 // -----------------------------------------------------------------------------
 //                          Static Function Declarations
 // -----------------------------------------------------------------------------
@@ -79,70 +82,75 @@ static uint8_t example_string[] = "SE Manager Tamper Example";
 static const char *tamper_source[SL_SE_TAMPER_SIGNAL_NUM_SIGNALS] = {
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
   NULL,
-  "Filter counter         : ",
-  "SE watchdog            : ",
+  "Filter counter         ",
+  "SE watchdog            ",
   NULL,
-  "SE RAM CRC             : ",
-  "SE hard fault          : ",
+  "SE RAM CRC             ",
+  "SE hard fault          ",
   NULL,
-  "SE software assertion  : ",
-  "SE secure boot         : ",
-  "User secure boot       : ",
-  "Mailbox authorization  : ",
-  "DCI authorization      : ",
-  "OTP read               : ",
+  "SE software assertion  ",
+  "SE secure boot         ",
+  "User secure boot       ",
+  "Mailbox authorization  ",
+  "DCI authorization      ",
+  "OTP read               ",
   NULL,
-  "Self test              : ",
-  "TRNG monitor           : ",
-  "PRS0                   : ",
-  "PRS1                   : ",
-  "PRS2                   : ",
-  "PRS3                   : ",
-  "PRS4                   : ",
-  "PRS5                   : ",
-  "PRS6                   : ",
-  "PRS7                   : ",
-  "Decouple BOD           : ",
-  "Temperature sensor     : ",
-  "Voltage glitch falling : ",
-  "Voltage glitch rising  : ",
-  "Secure lock            : ",
-  "SE debug               : ",
-  "Digital glitch         : ",
-  "SE ICACHE              : "
+  "Self test              ",
+  "TRNG monitor           ",
+  "PRS0                   ",
+  "PRS1                   ",
+  "PRS2                   ",
+  "PRS3                   ",
+  "PRS4                   ",
+  "PRS5                   ",
+  "PRS6                   ",
+  "PRS7                   ",
+  "Decouple BOD           ",
+  "Temperature sensor     ",
+  "Voltage glitch falling ",
+  "Voltage glitch rising  ",
+  "Secure lock            ",
+  "SE debug               ",
+  "Digital glitch         ",
+  "SE ICACHE              "
 #else
   NULL,
-  "Filter counter        : ",
-  "SE watchdog           : ",
+  "Filter counter        ",
+  "SE watchdog           ",
   NULL,
-  "SE RAM ECC 2          : ",
-  "SE hard fault         : ",
+  "SE RAM ECC 2          ",
+  "SE hard fault         ",
   NULL,
-  "SE software assertion : ",
-  "SE secure boot        : ",
-  "User secure boot      : ",
-  "Mailbox authorization : ",
-  "DCI authorization     : ",
-  "OTP Read              : ",
+  "SE software assertion ",
+  "SE secure boot        ",
+  "User secure boot      ",
+  "Mailbox authorization ",
+  "DCI authorization     ",
+  "OTP Read              ",
   NULL,
-  "Self test             : ",
-  "TRNG monitor          : ",
-  "Secure lock           : ",
-  "Digital glitch        : ",
-  "Voltage glitch        : ",
-  "SE ICACHE             : ",
-  "SE RAM ECC 1          : ",
-  "BOD                   : ",
-  "Temperature sensor    : ",
-  "DPLL lock fail low    : ",
-  "DPLL lock fail high   : ",
-  "PRS0                  : ",
-  "PRS1                  : ",
-  "PRS2                  : ",
-  "PRS3                  : ",
-  "PRS4                  : ",
-  "PRS5                  : ",
-  "PRS6                  : "
+  "Self test             ",
+  "TRNG monitor          ",
+  "Secure lock           ",
+  "Digital glitch        ",
+  "Voltage glitch        ",
+  "SE ICACHE             ",
+  "SE RAM ECC 1          ",
+  "BOD                   ",
+  "Temperature sensor    ",
+  "DPLL lock fail low    ",
+  "DPLL lock fail high   ",
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)
+  "ETAMPDET              ",
+#endif
+  "PRS0                  ",
+  "PRS1                  ",
+  "PRS2                  ",
+  "PRS3                  ",
+  "PRS4                  ",
+  "PRS5                  "
+#if !defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)
+  "PRS6                  "
+#endif
 #endif
 };
 
@@ -175,6 +183,28 @@ void app_process_action(void)
 
     case READ_RST_CAUSE:
       app_state = SE_MANAGER_EXIT;
+#if defined (SLI_SE_COMMAND_READ_TAMPER_RESET_CAUSE_AVAILABLE)
+      printf("\n  . Read SE FW version... ");
+      if (get_se_version() == SL_STATUS_OK) {
+        printf("  + SE FW version (MSB..LSB): ");
+        printf("%08lX\n", get_version());
+        if (get_version() >= OLDEST_SUPPORTED_SE_FW_VERSION) {
+          printf("  + SE FW supports get_tamper_reset_cause\n");
+          printf("\n  . Read tamper reset cause... ");
+          if (get_tamper_reset_cause() == SL_STATUS_OK) {
+            if (get_was_tamper_reset()) {
+              printf("  + Tamper reset cause register (MSB..LSB): ");
+              printf("%08lX\n", *get_tmp_rst_cause_buf_ptr());
+              printf("  + Tamper reset cause source: %s\n",
+                     tamper_source[*get_tmp_rst_cause_buf_ptr()]);
+            } else {
+              printf("  + Reset cause was not tamper.\n");
+            }
+            app_state = GET_OTP_CONFIG;
+          }
+        } else {
+          printf("  + The SE FW should be upgraded to access get_tamper_reset_cause\n");
+#endif
       printf("\n  . Read EMU RSTCAUSE register... ");
       if (get_reset_cause() == SL_STATUS_OK) {
 #if !defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
@@ -187,6 +217,10 @@ void app_process_action(void)
         }
         app_state = GET_OTP_CONFIG;
       }
+#if defined (SLI_SE_COMMAND_READ_TAMPER_RESET_CAUSE_AVAILABLE)
+  }
+}
+#endif
       break;
 
     case GET_OTP_CONFIG:
@@ -484,7 +518,7 @@ static void print_tamper_conf(void)
   printf("  + Tamper source level\n");
   for (i = 0; i < SL_SE_TAMPER_SIGNAL_NUM_SIGNALS; i++) {
     if (tamper_source[i] != NULL) {
-      printf("    %s %d\n", tamper_source[i], conf->tamper_levels[i]);
+      printf("    %s:  %d\n", tamper_source[i], conf->tamper_levels[i]);
     }
   }
 

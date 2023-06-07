@@ -21,8 +21,8 @@ template_contribution:
   - name: zigbee_af_callback
     value:
       callback_type: event_init
-      function_name: emAfPluginHeartbeatInitCallback
+      function_name: sli_zigbee_af_heartbeat_init_callback
   - name: zigbee_af_callback
     value:
       callback_type: init_done
-      function_name: emAfPluginHeartbeatInitCallback
+      function_name: sli_zigbee_af_heartbeat_init_callback

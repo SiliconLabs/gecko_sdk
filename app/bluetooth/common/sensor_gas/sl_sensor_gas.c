@@ -55,7 +55,7 @@ sl_status_t sl_sensor_gas_init(void)
   sl_i2cspm_t *gas_sensor = sl_sensor_select(SL_BOARD_SENSOR_GAS);
   sc = sl_board_enable_sensor(SL_BOARD_SENSOR_GAS);
   app_assert((SL_STATUS_OK == sc) && (NULL != gas_sensor),
-             "[E: %#04x] Gas sensor not available\n",
+             "[E: %#04lx] Gas sensor not available" APP_LOG_NL,
              sc);
   sc = sl_ccs811_init(gas_sensor);
   if (sc == SL_STATUS_OK) {

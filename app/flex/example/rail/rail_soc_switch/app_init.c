@@ -40,6 +40,7 @@
 #include "app_process.h"
 #include "sl_simple_led_instances.h"
 #include "app_log.h"
+#include "sl_flex_rail_channel_selector.h"
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)
 #include "app_task_init.h"
@@ -92,7 +93,7 @@ RAIL_Handle_t app_init(void)
   print_sample_app_name("Switch");
 
   // Start reception
-  RAIL_Status_t status = RAIL_StartRx(rail_handle, CHANNEL, NULL);
+  RAIL_Status_t status = RAIL_StartRx(rail_handle, get_selected_channel(), NULL);
   if (status != RAIL_STATUS_NO_ERROR) {
     app_log_warning("After initialization RAIL_StartRx() result:%d ", status);
   }

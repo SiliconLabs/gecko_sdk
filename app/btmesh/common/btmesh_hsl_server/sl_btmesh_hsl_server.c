@@ -43,7 +43,7 @@
 #include "sl_btmesh_lib.h"
 
 #include "app_assert.h"
-#include "sl_simple_timer.h"
+#include "app_timer.h"
 
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
@@ -137,46 +137,46 @@ static uint32_t move_saturation_level_trans = 0;
 static int16_t move_saturation_level_delta = 0;
 
 // Timer handles
-static sl_simple_timer_t hsl_transition_complete_timer;
-static sl_simple_timer_t hsl_delayed_hsl_request_timer;
-static sl_simple_timer_t hsl_hue_transition_complete_timer;
-static sl_simple_timer_t hsl_delayed_hsl_hue_timer;
-static sl_simple_timer_t hsl_hue_level_move_timer;
-static sl_simple_timer_t hsl_hue_level_transition_complete_timer;
-static sl_simple_timer_t hsl_delayed_hue_level_timer;
-static sl_simple_timer_t hsl_saturation_transition_complete_timer;
-static sl_simple_timer_t hsl_delayed_hsl_saturation_timer;
-static sl_simple_timer_t hsl_saturation_level_move_timer;
-static sl_simple_timer_t hsl_saturation_level_transition_complete_timer;
-static sl_simple_timer_t hsl_delayed_saturation_level_timer;
-static sl_simple_timer_t hsl_state_store_timer;
+static app_timer_t hsl_transition_complete_timer;
+static app_timer_t hsl_delayed_hsl_request_timer;
+static app_timer_t hsl_hue_transition_complete_timer;
+static app_timer_t hsl_delayed_hsl_hue_timer;
+static app_timer_t hsl_hue_level_move_timer;
+static app_timer_t hsl_hue_level_transition_complete_timer;
+static app_timer_t hsl_delayed_hue_level_timer;
+static app_timer_t hsl_saturation_transition_complete_timer;
+static app_timer_t hsl_delayed_hsl_saturation_timer;
+static app_timer_t hsl_saturation_level_move_timer;
+static app_timer_t hsl_saturation_level_transition_complete_timer;
+static app_timer_t hsl_delayed_saturation_level_timer;
+static app_timer_t hsl_state_store_timer;
 
 // Timer callbacks
-static void hsl_transition_complete_timer_cb(sl_simple_timer_t *handle,
+static void hsl_transition_complete_timer_cb(app_timer_t *handle,
                                              void *data);
-static void hsl_delayed_hsl_request_timer_cb(sl_simple_timer_t *handle,
+static void hsl_delayed_hsl_request_timer_cb(app_timer_t *handle,
                                              void *data);
-static void hsl_hue_transition_complete_timer_cb(sl_simple_timer_t *handle,
+static void hsl_hue_transition_complete_timer_cb(app_timer_t *handle,
                                                  void *data);
-static void hsl_delayed_hsl_hue_timer_cb(sl_simple_timer_t *handle,
+static void hsl_delayed_hsl_hue_timer_cb(app_timer_t *handle,
                                          void *data);
-static void hsl_hue_level_move_timer_cb(sl_simple_timer_t *handle,
+static void hsl_hue_level_move_timer_cb(app_timer_t *handle,
                                         void *data);
-static void hsl_hue_level_transition_complete_timer_cb(sl_simple_timer_t *handle,
+static void hsl_hue_level_transition_complete_timer_cb(app_timer_t *handle,
                                                        void *data);
-static void hsl_delayed_hue_level_timer_cb(sl_simple_timer_t *handle,
+static void hsl_delayed_hue_level_timer_cb(app_timer_t *handle,
                                            void *data);
-static void hsl_saturation_transition_complete_timer_cb(sl_simple_timer_t *handle,
+static void hsl_saturation_transition_complete_timer_cb(app_timer_t *handle,
                                                         void *data);
-static void hsl_delayed_hsl_saturation_timer_cb(sl_simple_timer_t *handle,
+static void hsl_delayed_hsl_saturation_timer_cb(app_timer_t *handle,
                                                 void *data);
-static void hsl_saturation_level_move_timer_cb(sl_simple_timer_t *handle,
+static void hsl_saturation_level_move_timer_cb(app_timer_t *handle,
                                                void *data);
-static void hsl_saturation_level_transition_complete_timer_cb(sl_simple_timer_t *handle,
+static void hsl_saturation_level_transition_complete_timer_cb(app_timer_t *handle,
                                                               void *data);
-static void hsl_delayed_saturation_level_timer_cb(sl_simple_timer_t *handle,
+static void hsl_delayed_saturation_level_timer_cb(app_timer_t *handle,
                                                   void *data);
-static void hsl_state_store_timer_cb(sl_simple_timer_t *handle,
+static void hsl_state_store_timer_cb(app_timer_t *handle,
                                      void *data);
 
 /***************************************************************************//**
@@ -446,11 +446,11 @@ static void hsl_request(uint16_t model_id,
       sl_btmesh_set_lightness_target(request->hsl.lightness);
       lightbulb_state.hue_target = request->hsl.hue;
       lightbulb_state.saturation_target = request->hsl.saturation;
-      sl_status_t sc = sl_simple_timer_start(&hsl_delayed_hsl_request_timer,
-                                             delay_ms,
-                                             hsl_delayed_hsl_request_timer_cb,
-                                             NO_CALLBACK_DATA,
-                                             false);
+      sl_status_t sc = app_timer_start(&hsl_delayed_hsl_request_timer,
+                                       delay_ms,
+                                       hsl_delayed_hsl_request_timer_cb,
+                                       NO_CALLBACK_DATA,
+                                       false);
       app_assert_status_f(sc, "Failed to start Delayed HSL Request timer");
       // store transition parameter for later use
       delayed_hsl_trans = transition_ms;
@@ -468,11 +468,11 @@ static void hsl_request(uint16_t model_id,
                                          transition_ms);
 
       // lightbulb current state will be updated when transition is complete
-      sl_status_t sc = sl_simple_timer_start(&hsl_transition_complete_timer,
-                                             transition_ms,
-                                             hsl_transition_complete_timer_cb,
-                                             NO_CALLBACK_DATA,
-                                             false);
+      sl_status_t sc = app_timer_start(&hsl_transition_complete_timer,
+                                       transition_ms,
+                                       hsl_transition_complete_timer_cb,
+                                       NO_CALLBACK_DATA,
+                                       false);
       app_assert_status_f(sc, "Failed to start HSL Transition Complete timer");
     }
     lightbulb_state_changed();
@@ -622,11 +622,11 @@ static void hsl_recall(uint16_t model_id,
       lightbulb_state.saturation_current = current->hsl.saturation;
     } else {
       // lightbulb current state will be updated when transition is complete
-      sl_status_t sc = sl_simple_timer_start(&hsl_transition_complete_timer,
-                                             transition_ms,
-                                             hsl_transition_complete_timer_cb,
-                                             NO_CALLBACK_DATA,
-                                             false);
+      sl_status_t sc = app_timer_start(&hsl_transition_complete_timer,
+                                       transition_ms,
+                                       hsl_transition_complete_timer_cb,
+                                       NO_CALLBACK_DATA,
+                                       false);
       app_assert_status_f(sc, "Failed to start HSL Transition Complete timer");
     }
     lightbulb_state_changed();
@@ -698,11 +698,11 @@ static void delayed_hsl_request(void)
     hsl_update_and_publish(BTMESH_HSL_SERVER_MAIN, delayed_hsl_trans);
   } else {
     // state is updated when transition is complete
-    sl_status_t sc = sl_simple_timer_start(&hsl_transition_complete_timer,
-                                           delayed_hsl_trans,
-                                           hsl_transition_complete_timer_cb,
-                                           NO_CALLBACK_DATA,
-                                           false);
+    sl_status_t sc = app_timer_start(&hsl_transition_complete_timer,
+                                     delayed_hsl_trans,
+                                     hsl_transition_complete_timer_cb,
+                                     NO_CALLBACK_DATA,
+                                     false);
     app_assert_status_f(sc, "Failed to start HSL Transition Complete timer");
   }
 }
@@ -1172,11 +1172,11 @@ static void hsl_hue_request(uint16_t model_id,
       // that will trigger the change after the given delay
       // Current state remains as is for now
       lightbulb_state.hue_target = request->hsl_hue;
-      sl_status_t sc = sl_simple_timer_start(&hsl_delayed_hsl_hue_timer,
-                                             delay_ms,
-                                             hsl_delayed_hsl_hue_timer_cb,
-                                             NO_CALLBACK_DATA,
-                                             false);
+      sl_status_t sc = app_timer_start(&hsl_delayed_hsl_hue_timer,
+                                       delay_ms,
+                                       hsl_delayed_hsl_hue_timer_cb,
+                                       NO_CALLBACK_DATA,
+                                       false);
       app_assert_status_f(sc, "Failed to start Delayed Hue timer");
       // store transition parameter for later use
       delayed_hsl_hue_trans = transition_ms;
@@ -1188,11 +1188,11 @@ static void hsl_hue_request(uint16_t model_id,
                                   transition_ms);
 
       // lightbulb current state will be updated when transition is complete
-      sl_status_t sc = sl_simple_timer_start(&hsl_hue_transition_complete_timer,
-                                             transition_ms,
-                                             hsl_hue_transition_complete_timer_cb,
-                                             NO_CALLBACK_DATA,
-                                             false);
+      sl_status_t sc = app_timer_start(&hsl_hue_transition_complete_timer,
+                                       transition_ms,
+                                       hsl_hue_transition_complete_timer_cb,
+                                       NO_CALLBACK_DATA,
+                                       false);
       app_assert_status_f(sc, "Failed to start Hue Transition Complete timer");
     }
     lightbulb_state_changed();
@@ -1288,11 +1288,11 @@ static void hsl_hue_recall(uint16_t model_id,
       lightbulb_state.hue_current = current->hsl_hue.hue;
     } else {
       // lightbulb current state will be updated when transition is complete
-      sl_status_t sc = sl_simple_timer_start(&hsl_hue_transition_complete_timer,
-                                             transition_ms,
-                                             hsl_hue_transition_complete_timer_cb,
-                                             NO_CALLBACK_DATA,
-                                             false);
+      sl_status_t sc = app_timer_start(&hsl_hue_transition_complete_timer,
+                                       transition_ms,
+                                       hsl_hue_transition_complete_timer_cb,
+                                       NO_CALLBACK_DATA,
+                                       false);
       app_assert_status_f(sc, "Failed to start Hue Transition Complete timer");
     }
     lightbulb_state_changed();
@@ -1338,11 +1338,11 @@ static void delayed_hsl_hue_request(void)
                                delayed_hsl_hue_trans);
   } else {
     // state is updated when transition is complete
-    sl_status_t sc = sl_simple_timer_start(&hsl_hue_transition_complete_timer,
-                                           delayed_hsl_hue_trans,
-                                           hsl_hue_transition_complete_timer_cb,
-                                           NO_CALLBACK_DATA,
-                                           false);
+    sl_status_t sc = app_timer_start(&hsl_hue_transition_complete_timer,
+                                     delayed_hsl_hue_trans,
+                                     hsl_hue_transition_complete_timer_cb,
+                                     NO_CALLBACK_DATA,
+                                     false);
     app_assert_status_f(sc, "Failed to start Hue Transition Complete timer");
   }
 }
@@ -1473,11 +1473,11 @@ static void hue_level_move_schedule_next_request(int32_t remaining_delta)
     sl_btmesh_hsl_set_hue_level(lightbulb_state.hue_current + move_hue_level_delta,
                                 move_hue_level_trans);
   }
-  sl_status_t sc = sl_simple_timer_start(&hsl_hue_level_move_timer,
-                                         transition_ms,
-                                         hsl_hue_level_move_timer_cb,
-                                         NO_CALLBACK_DATA,
-                                         false);
+  sl_status_t sc = app_timer_start(&hsl_hue_level_move_timer,
+                                   transition_ms,
+                                   hsl_hue_level_move_timer_cb,
+                                   NO_CALLBACK_DATA,
+                                   false);
   app_assert_status_f(sc, "Failed to start Hue Generic Level Move timer");
 }
 
@@ -1518,9 +1518,9 @@ static void hue_level_move_request(void)
 static void hue_level_move_stop(void)
 {
   // Cancel timers
-  sl_status_t sc = sl_simple_timer_stop(&hsl_delayed_hue_level_timer);
+  sl_status_t sc = app_timer_stop(&hsl_delayed_hue_level_timer);
   app_assert_status_f(sc, "Failed to stop Delayed Hue Generic Level timer");
-  sc = sl_simple_timer_stop(&hsl_hue_level_move_timer);
+  sc = app_timer_stop(&hsl_hue_level_move_timer);
   app_assert_status_f(sc, "Failed to stop Hue Generic Level Move timer");
   //Reset move parameters
   move_hue_level_delta = 0;
@@ -1589,11 +1589,11 @@ static void hue_level_request(uint16_t model_id,
           lightbulb_state.hue_level_target = request->level;
           lightbulb_state.hue_target = hue;
           hue_level_request_kind = mesh_generic_request_level;
-          sl_status_t sc = sl_simple_timer_start(&hsl_delayed_hue_level_timer,
-                                                 delay_ms,
-                                                 hsl_delayed_hue_level_timer_cb,
-                                                 NO_CALLBACK_DATA,
-                                                 false);
+          sl_status_t sc = app_timer_start(&hsl_delayed_hue_level_timer,
+                                           delay_ms,
+                                           hsl_delayed_hue_level_timer_cb,
+                                           NO_CALLBACK_DATA,
+                                           false);
           app_assert_status_f(sc, "Failed to start Delayed Hue Generic Level timer");
           // store transition parameter for later use
           delayed_hue_level_trans = transition_ms;
@@ -1604,11 +1604,11 @@ static void hue_level_request(uint16_t model_id,
           sl_btmesh_hsl_set_hue_level(hue, transition_ms);
 
           // lightbulb current state will be updated when transition is complete
-          sl_status_t sc = sl_simple_timer_start(&hsl_hue_level_transition_complete_timer,
-                                                 delayed_hue_level_trans,
-                                                 hsl_hue_level_transition_complete_timer_cb,
-                                                 NO_CALLBACK_DATA,
-                                                 false);
+          sl_status_t sc = app_timer_start(&hsl_hue_level_transition_complete_timer,
+                                           delayed_hue_level_trans,
+                                           hsl_hue_level_transition_complete_timer_cb,
+                                           NO_CALLBACK_DATA,
+                                           false);
           app_assert_status_f(sc, "Failed to start Hue Generic Level Transition Complete timer");
         }
 
@@ -1649,11 +1649,11 @@ static void hue_level_request(uint16_t model_id,
           lightbulb_state.hue_level_target = requested_level;
           lightbulb_state.hue_target = hue;
           hue_level_request_kind = mesh_generic_request_level_move;
-          sl_status_t sc = sl_simple_timer_start(&hsl_delayed_hue_level_timer,
-                                                 delay_ms,
-                                                 hsl_delayed_hue_level_timer_cb,
-                                                 NO_CALLBACK_DATA,
-                                                 false);
+          sl_status_t sc = app_timer_start(&hsl_delayed_hue_level_timer,
+                                           delay_ms,
+                                           hsl_delayed_hue_level_timer_cb,
+                                           NO_CALLBACK_DATA,
+                                           false);
           app_assert_status_f(sc, "Failed to start Delayed Hue Generic Level timer");
         } else {
           // no delay so start move
@@ -1686,11 +1686,11 @@ static void hue_level_request(uint16_t model_id,
         // Current state remains as is for now
         remaining_ms = delay_ms;
         hue_level_request_kind = mesh_generic_request_level_halt;
-        sl_status_t sc = sl_simple_timer_start(&hsl_delayed_hue_level_timer,
-                                               delay_ms,
-                                               hsl_delayed_hue_level_timer_cb,
-                                               NO_CALLBACK_DATA,
-                                               false);
+        sl_status_t sc = app_timer_start(&hsl_delayed_hue_level_timer,
+                                         delay_ms,
+                                         hsl_delayed_hue_level_timer_cb,
+                                         NO_CALLBACK_DATA,
+                                         false);
         app_assert_status_f(sc, "Failed to start Delayed Hue Generic Level timer");
       } else {
         hue_level_move_stop();
@@ -1786,11 +1786,11 @@ static void hue_level_recall(uint16_t model_id,
       lightbulb_state.hue_level_current = current->level.level;
     } else {
       // lightbulb current state will be updated when transition is complete
-      sl_status_t sc = sl_simple_timer_start(&hsl_hue_level_transition_complete_timer,
-                                             transition_ms,
-                                             hsl_hue_level_transition_complete_timer_cb,
-                                             NO_CALLBACK_DATA,
-                                             false);
+      sl_status_t sc = app_timer_start(&hsl_hue_level_transition_complete_timer,
+                                       transition_ms,
+                                       hsl_hue_level_transition_complete_timer_cb,
+                                       NO_CALLBACK_DATA,
+                                       false);
       app_assert_status_f(sc, "Failed to start Hue Generic Level Transition Complete timer");
     }
     lightbulb_state_changed();
@@ -1840,11 +1840,11 @@ static void delayed_hue_level_request(void)
                                      delayed_hue_level_trans);
       } else {
         // state is updated when transition is complete
-        sl_status_t sc = sl_simple_timer_start(&hsl_hue_level_transition_complete_timer,
-                                               delayed_hue_level_trans,
-                                               hsl_hue_level_transition_complete_timer_cb,
-                                               NO_CALLBACK_DATA,
-                                               false);
+        sl_status_t sc = app_timer_start(&hsl_hue_level_transition_complete_timer,
+                                         delayed_hue_level_trans,
+                                         hsl_hue_level_transition_complete_timer_cb,
+                                         NO_CALLBACK_DATA,
+                                         false);
         app_assert_status_f(sc, "Failed to start Hue Generic Level Transition Complete timer");
       }
       break;
@@ -2024,11 +2024,11 @@ static void hsl_saturation_request(uint16_t model_id,
       // that will trigger the change after the given delay
       // Current state remains as is for now
       lightbulb_state.saturation_target = request->hsl_saturation;
-      sl_status_t sc = sl_simple_timer_start(&hsl_delayed_hsl_saturation_timer,
-                                             delay_ms,
-                                             hsl_delayed_hsl_saturation_timer_cb,
-                                             NO_CALLBACK_DATA,
-                                             false);
+      sl_status_t sc = app_timer_start(&hsl_delayed_hsl_saturation_timer,
+                                       delay_ms,
+                                       hsl_delayed_hsl_saturation_timer_cb,
+                                       NO_CALLBACK_DATA,
+                                       false);
       app_assert_status_f(sc, "Failed to start Delayed Saturation timer");
       // store transition parameter for later use
       delayed_hsl_saturation_trans = transition_ms;
@@ -2040,11 +2040,11 @@ static void hsl_saturation_request(uint16_t model_id,
                                          transition_ms);
 
       // lightbulb current state will be updated when transition is complete
-      sl_status_t sc = sl_simple_timer_start(&hsl_saturation_transition_complete_timer,
-                                             transition_ms,
-                                             hsl_saturation_transition_complete_timer_cb,
-                                             NO_CALLBACK_DATA,
-                                             false);
+      sl_status_t sc = app_timer_start(&hsl_saturation_transition_complete_timer,
+                                       transition_ms,
+                                       hsl_saturation_transition_complete_timer_cb,
+                                       NO_CALLBACK_DATA,
+                                       false);
       app_assert_status_f(sc, "Failed to start Saturation Transition Complete timer");
     }
     lightbulb_state_changed();
@@ -2140,11 +2140,11 @@ static void hsl_saturation_recall(uint16_t model_id,
       lightbulb_state.saturation_current = current->hsl_saturation.saturation;
     } else {
       // lightbulb current state will be updated when transition is complete
-      sl_status_t sc = sl_simple_timer_start(&hsl_saturation_transition_complete_timer,
-                                             transition_ms,
-                                             hsl_saturation_transition_complete_timer_cb,
-                                             NO_CALLBACK_DATA,
-                                             false);
+      sl_status_t sc = app_timer_start(&hsl_saturation_transition_complete_timer,
+                                       transition_ms,
+                                       hsl_saturation_transition_complete_timer_cb,
+                                       NO_CALLBACK_DATA,
+                                       false);
       app_assert_status_f(sc, "Failed to start Saturation Transition Complete timer");
     }
     lightbulb_state_changed();
@@ -2191,11 +2191,11 @@ static void delayed_hsl_saturation_request(void)
                                       delayed_hsl_saturation_trans);
   } else {
     // state is updated when transition is complete
-    sl_status_t sc = sl_simple_timer_start(&hsl_saturation_transition_complete_timer,
-                                           delayed_hsl_saturation_trans,
-                                           hsl_saturation_transition_complete_timer_cb,
-                                           NO_CALLBACK_DATA,
-                                           false);
+    sl_status_t sc = app_timer_start(&hsl_saturation_transition_complete_timer,
+                                     delayed_hsl_saturation_trans,
+                                     hsl_saturation_transition_complete_timer_cb,
+                                     NO_CALLBACK_DATA,
+                                     false);
     app_assert_status_f(sc, "Failed to start Saturation Transition Complete timer");
   }
 }
@@ -2327,11 +2327,11 @@ static void saturation_level_move_schedule_next_request(int32_t remaining_delta)
     sl_btmesh_hsl_set_saturation_level(lightbulb_state.saturation_current + move_saturation_level_delta,
                                        move_saturation_level_trans);
   }
-  sl_status_t sc = sl_simple_timer_start(&hsl_saturation_level_move_timer,
-                                         transition_ms,
-                                         hsl_saturation_level_move_timer_cb,
-                                         NO_CALLBACK_DATA,
-                                         false);
+  sl_status_t sc = app_timer_start(&hsl_saturation_level_move_timer,
+                                   transition_ms,
+                                   hsl_saturation_level_move_timer_cb,
+                                   NO_CALLBACK_DATA,
+                                   false);
   app_assert_status_f(sc, "Failed to start Saturation Generic Level Move timer");
 }
 
@@ -2373,9 +2373,9 @@ static void saturation_level_move_request(void)
 static void saturation_level_move_stop(void)
 {
   // Cancel timers
-  sl_status_t sc = sl_simple_timer_stop(&hsl_delayed_saturation_level_timer);
+  sl_status_t sc = app_timer_stop(&hsl_delayed_saturation_level_timer);
   app_assert_status_f(sc, "Failed to stop Delayed Saturation Generic Level timer");
-  sc = sl_simple_timer_stop(&hsl_saturation_level_move_timer);
+  sc = app_timer_stop(&hsl_saturation_level_move_timer);
   app_assert_status_f(sc, "Failed to stop Saturation Generic Level Move timer");
   //Reset move parameters
   move_saturation_level_delta = 0;
@@ -2444,11 +2444,11 @@ static void saturation_level_request(uint16_t model_id,
           lightbulb_state.saturation_level_target = request->level;
           lightbulb_state.saturation_target = saturation;
           saturation_level_request_kind = mesh_generic_request_level;
-          sl_status_t sc = sl_simple_timer_start(&hsl_delayed_saturation_level_timer,
-                                                 delay_ms,
-                                                 hsl_delayed_saturation_level_timer_cb,
-                                                 NO_CALLBACK_DATA,
-                                                 false);
+          sl_status_t sc = app_timer_start(&hsl_delayed_saturation_level_timer,
+                                           delay_ms,
+                                           hsl_delayed_saturation_level_timer_cb,
+                                           NO_CALLBACK_DATA,
+                                           false);
           app_assert_status_f(sc, "Failed to start Delayed Saturation Generic Level timer");
           // store transition parameter for later use
           delayed_saturation_level_trans = transition_ms;
@@ -2459,11 +2459,11 @@ static void saturation_level_request(uint16_t model_id,
           sl_btmesh_hsl_set_saturation_level(saturation, transition_ms);
 
           // lightbulb current state will be updated when transition is complete
-          sl_status_t sc = sl_simple_timer_start(&hsl_saturation_level_transition_complete_timer,
-                                                 delayed_saturation_level_trans,
-                                                 hsl_saturation_level_transition_complete_timer_cb,
-                                                 NO_CALLBACK_DATA,
-                                                 false);
+          sl_status_t sc = app_timer_start(&hsl_saturation_level_transition_complete_timer,
+                                           delayed_saturation_level_trans,
+                                           hsl_saturation_level_transition_complete_timer_cb,
+                                           NO_CALLBACK_DATA,
+                                           false);
           app_assert_status_f(sc, "Failed to start Saturation Generic Level Transition Complete timer");
         }
 
@@ -2504,11 +2504,11 @@ static void saturation_level_request(uint16_t model_id,
           lightbulb_state.saturation_level_target = requested_level;
           lightbulb_state.saturation_target = saturation;
           saturation_level_request_kind = mesh_generic_request_level_move;
-          sl_status_t sc = sl_simple_timer_start(&hsl_delayed_saturation_level_timer,
-                                                 delay_ms,
-                                                 hsl_delayed_saturation_level_timer_cb,
-                                                 NO_CALLBACK_DATA,
-                                                 false);
+          sl_status_t sc = app_timer_start(&hsl_delayed_saturation_level_timer,
+                                           delay_ms,
+                                           hsl_delayed_saturation_level_timer_cb,
+                                           NO_CALLBACK_DATA,
+                                           false);
           app_assert_status_f(sc, "Failed to start Delayed Saturation Generic Level timer");
         } else {
           // no delay so start move
@@ -2541,11 +2541,11 @@ static void saturation_level_request(uint16_t model_id,
         // Current state remains as is for now
         remaining_ms = delay_ms;
         saturation_level_request_kind = mesh_generic_request_level_halt;
-        sl_status_t sc = sl_simple_timer_start(&hsl_delayed_saturation_level_timer,
-                                               delay_ms,
-                                               hsl_delayed_saturation_level_timer_cb,
-                                               NO_CALLBACK_DATA,
-                                               false);
+        sl_status_t sc = app_timer_start(&hsl_delayed_saturation_level_timer,
+                                         delay_ms,
+                                         hsl_delayed_saturation_level_timer_cb,
+                                         NO_CALLBACK_DATA,
+                                         false);
         app_assert_status_f(sc, "Failed to start Delayed Saturation Generic Level timer");
       } else {
         saturation_level_move_stop();
@@ -2645,11 +2645,11 @@ static void saturation_level_recall(uint16_t model_id,
       lightbulb_state.saturation_level_current = current->level.level;
     } else {
       // lightbulb current state will be updated when transition is complete
-      sl_status_t sc = sl_simple_timer_start(&hsl_saturation_level_transition_complete_timer,
-                                             transition_ms,
-                                             hsl_saturation_level_transition_complete_timer_cb,
-                                             NO_CALLBACK_DATA,
-                                             false);
+      sl_status_t sc = app_timer_start(&hsl_saturation_level_transition_complete_timer,
+                                       transition_ms,
+                                       hsl_saturation_level_transition_complete_timer_cb,
+                                       NO_CALLBACK_DATA,
+                                       false);
       app_assert_status_f(sc, "Failed to start Saturation Generic Level Transition Complete timer");
     }
     lightbulb_state_changed();
@@ -2699,11 +2699,11 @@ static void delayed_saturation_level_request(void)
                                             delayed_saturation_level_trans);
       } else {
         // state is updated when transition is complete
-        sl_status_t sc = sl_simple_timer_start(&hsl_saturation_level_transition_complete_timer,
-                                               delayed_saturation_level_trans,
-                                               hsl_saturation_level_transition_complete_timer_cb,
-                                               NO_CALLBACK_DATA,
-                                               false);
+        sl_status_t sc = app_timer_start(&hsl_saturation_level_transition_complete_timer,
+                                         delayed_saturation_level_trans,
+                                         hsl_saturation_level_transition_complete_timer_cb,
+                                         NO_CALLBACK_DATA,
+                                         false);
         app_assert_status_f(sc, "Failed to start Saturation Generic Level Transition Complete timer");
       }
       break;
@@ -2858,11 +2858,11 @@ static sl_status_t lightbulb_state_store(void)
  ******************************************************************************/
 static void lightbulb_state_changed(void)
 {
-  sl_status_t sc = sl_simple_timer_start(&hsl_state_store_timer,
-                                         SL_BTMESH_HSL_SERVER_NVM_SAVE_TIME_CFG_VAL,
-                                         hsl_state_store_timer_cb,
-                                         NO_CALLBACK_DATA,
-                                         false);
+  sl_status_t sc = app_timer_start(&hsl_state_store_timer,
+                                   SL_BTMESH_HSL_SERVER_NVM_SAVE_TIME_CFG_VAL,
+                                   hsl_state_store_timer_cb,
+                                   NO_CALLBACK_DATA,
+                                   false);
   app_assert_status_f(sc, "Failed to start State Store timer");
 }
 
@@ -2947,11 +2947,11 @@ void sl_btmesh_hsl_server_init(void)
           && lightbulb_state.hue_target != lightbulb_state.hue_default) {
         lightbulb_state.hue_current = lightbulb_state.hue_default;
         sl_btmesh_hsl_set_hue_level(lightbulb_state.hue_current, IMMEDIATE);
-        sl_status_t sc = sl_simple_timer_start(&hsl_hue_transition_complete_timer,
-                                               transition_ms,
-                                               hsl_hue_transition_complete_timer_cb,
-                                               NO_CALLBACK_DATA,
-                                               false);
+        sl_status_t sc = app_timer_start(&hsl_hue_transition_complete_timer,
+                                         transition_ms,
+                                         hsl_hue_transition_complete_timer_cb,
+                                         NO_CALLBACK_DATA,
+                                         false);
         app_assert_status_f(sc, "Failed to start Hue Transition Complete timer");
         sl_btmesh_hsl_set_hue_level(lightbulb_state.hue_target,
                                     transition_ms);
@@ -2965,11 +2965,11 @@ void sl_btmesh_hsl_server_init(void)
         lightbulb_state.saturation_current = lightbulb_state.saturation_default;
         sl_btmesh_hsl_set_saturation_level(lightbulb_state.saturation_current,
                                            IMMEDIATE);
-        sl_status_t sc = sl_simple_timer_start(&hsl_saturation_transition_complete_timer,
-                                               transition_ms,
-                                               hsl_saturation_transition_complete_timer_cb,
-                                               NO_CALLBACK_DATA,
-                                               false);
+        sl_status_t sc = app_timer_start(&hsl_saturation_transition_complete_timer,
+                                         transition_ms,
+                                         hsl_saturation_transition_complete_timer_cb,
+                                         NO_CALLBACK_DATA,
+                                         false);
         app_assert_status_f(sc, "Failed to start Saturation Transition Complete timer");
         sl_btmesh_hsl_set_saturation_level(lightbulb_state.saturation_target,
                                            transition_ms);
@@ -3149,7 +3149,7 @@ static void scene_server_reset_register_impl(uint16_t elem_index)
 /***************************************************************************//**
  * Timer Callbacks
  ******************************************************************************/
-static void hsl_hue_level_move_timer_cb(sl_simple_timer_t *handle,
+static void hsl_hue_level_move_timer_cb(app_timer_t *handle,
                                         void *data)
 {
   (void)data;
@@ -3158,7 +3158,7 @@ static void hsl_hue_level_move_timer_cb(sl_simple_timer_t *handle,
   hue_level_move_request();
 }
 
-static void hsl_hue_level_transition_complete_timer_cb(sl_simple_timer_t *handle,
+static void hsl_hue_level_transition_complete_timer_cb(app_timer_t *handle,
                                                        void *data)
 {
   (void)data;
@@ -3168,7 +3168,7 @@ static void hsl_hue_level_transition_complete_timer_cb(sl_simple_timer_t *handle
   hue_level_transition_complete();
 }
 
-static void hsl_hue_transition_complete_timer_cb(sl_simple_timer_t *handle,
+static void hsl_hue_transition_complete_timer_cb(app_timer_t *handle,
                                                  void *data)
 {
   (void)data;
@@ -3177,7 +3177,7 @@ static void hsl_hue_transition_complete_timer_cb(sl_simple_timer_t *handle,
   // update the lightbulb state
   hsl_hue_transition_complete();
 }
-static void hsl_saturation_level_move_timer_cb(sl_simple_timer_t *handle,
+static void hsl_saturation_level_move_timer_cb(app_timer_t *handle,
                                                void *data)
 {
   (void)data;
@@ -3186,7 +3186,7 @@ static void hsl_saturation_level_move_timer_cb(sl_simple_timer_t *handle,
   saturation_level_move_request();
 }
 
-static void hsl_saturation_level_transition_complete_timer_cb(sl_simple_timer_t *handle,
+static void hsl_saturation_level_transition_complete_timer_cb(app_timer_t *handle,
                                                               void *data)
 {
   (void)data;
@@ -3196,7 +3196,7 @@ static void hsl_saturation_level_transition_complete_timer_cb(sl_simple_timer_t 
   saturation_level_transition_complete();
 }
 
-static void hsl_saturation_transition_complete_timer_cb(sl_simple_timer_t *handle,
+static void hsl_saturation_transition_complete_timer_cb(app_timer_t *handle,
                                                         void *data)
 {
   (void)data;
@@ -3206,7 +3206,7 @@ static void hsl_saturation_transition_complete_timer_cb(sl_simple_timer_t *handl
   hsl_saturation_transition_complete();
 }
 
-static void hsl_transition_complete_timer_cb(sl_simple_timer_t *handle,
+static void hsl_transition_complete_timer_cb(app_timer_t *handle,
                                              void *data)
 {
   (void)data;
@@ -3215,7 +3215,7 @@ static void hsl_transition_complete_timer_cb(sl_simple_timer_t *handle,
   hsl_transition_complete();
 }
 
-static void hsl_delayed_hue_level_timer_cb(sl_simple_timer_t *handle,
+static void hsl_delayed_hue_level_timer_cb(app_timer_t *handle,
                                            void *data)
 {
   (void)data;
@@ -3225,7 +3225,7 @@ static void hsl_delayed_hue_level_timer_cb(sl_simple_timer_t *handle,
   delayed_hue_level_request();
 }
 
-static void hsl_delayed_hsl_hue_timer_cb(sl_simple_timer_t *handle,
+static void hsl_delayed_hsl_hue_timer_cb(app_timer_t *handle,
                                          void *data)
 {
   (void)data;
@@ -3234,7 +3234,7 @@ static void hsl_delayed_hsl_hue_timer_cb(sl_simple_timer_t *handle,
   delayed_hsl_hue_request();
 }
 
-static void hsl_delayed_saturation_level_timer_cb(sl_simple_timer_t *handle,
+static void hsl_delayed_saturation_level_timer_cb(app_timer_t *handle,
                                                   void *data)
 {
   (void)data;
@@ -3244,7 +3244,7 @@ static void hsl_delayed_saturation_level_timer_cb(sl_simple_timer_t *handle,
   delayed_saturation_level_request();
 }
 
-static void hsl_delayed_hsl_saturation_timer_cb(sl_simple_timer_t *handle,
+static void hsl_delayed_hsl_saturation_timer_cb(app_timer_t *handle,
                                                 void *data)
 {
   (void)data;
@@ -3253,7 +3253,7 @@ static void hsl_delayed_hsl_saturation_timer_cb(sl_simple_timer_t *handle,
   delayed_hsl_saturation_request();
 }
 
-static void hsl_delayed_hsl_request_timer_cb(sl_simple_timer_t *handle,
+static void hsl_delayed_hsl_request_timer_cb(app_timer_t *handle,
                                              void *data)
 {
   (void)data;
@@ -3262,7 +3262,7 @@ static void hsl_delayed_hsl_request_timer_cb(sl_simple_timer_t *handle,
   delayed_hsl_request();
 }
 
-static void hsl_state_store_timer_cb(sl_simple_timer_t *handle,
+static void hsl_state_store_timer_cb(app_timer_t *handle,
                                      void *data)
 {
   (void)data;

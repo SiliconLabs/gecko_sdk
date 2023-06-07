@@ -20,9 +20,9 @@
 #include "stack/include/ember-types-internal.h"
 #include "stack/include/library.h"
 
-const EmberLibraryStatus emPacketValidateLibrary = EMBER_LIBRARY_IS_STUB;
+const EmberLibraryStatus sli_zigbee_packet_validate_library = EMBER_LIBRARY_IS_STUB;
 
-uint8_t emPacketValidateLibraryInfo(void)
+uint8_t sli_zigbee_packet_validate_library_info(void)
 {
   return EMBER_PACKET_VALIDATE_LIBRARY_DISABLED;
 }
@@ -32,7 +32,7 @@ EmberStatus emberSetPacketValidateLibraryState(uint16_t state)
   return EMBER_LIBRARY_NOT_PRESENT;
 }
 
-bool emPacketValidateCheck(PacketValidateType type, PacketHeader header)
+bool sli_zigbee_packet_validate_check(PacketValidateType type, PacketHeader header)
 {
   return true;
 }

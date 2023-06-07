@@ -43,10 +43,10 @@ include:
       - path: iot_flash_desc.h
       - path: iot_flash_drv_msc.h
       - path: iot_flash_drv_spi.h
-      - path: iot_flash_drv.h
 
 template_file:
   - path: vendors/siliconlabs/boards/all/ports/common_io/iot_flash/template/iot_flash_desc.c.jinja
+  - path: vendors/siliconlabs/boards/all/ports/common_io/iot_flash/template/iot_flash_drv.h.jinja
 template_contribution:
   - name: iot_flash_instances
     value: "{{instance}}"

@@ -53,6 +53,7 @@
 #include "pa_curve_types_efr32.h"
 #include "pa_conversions_efr32.h"
 #include "printf.h"
+#include "sl_flex_rail_config.h"
 
 #if defined(SL_CATALOG_RADIO_CONFIG_SIMPLE_RAIL_SINGLEPHY_PRESENT)
 #include "rail_config.h"
@@ -89,10 +90,6 @@
 
 /// Time between send in microseconds
 #define RANGE_TEST_SEND_TIME ((uint32_t) 100000)
-
-/// RAIL buffer sizes
-#define RAIL_TX_BUFFER_SIZE         (128U)
-#define RAIL_RX_BUFFER_SIZE         (256U)
 
 /// structre to keep the error flags in a small variable
 typedef struct error_flags_t {
@@ -197,10 +194,10 @@ static RAIL_ScheduleTxConfig_t schedule = {
 };
 
 /// Memory allocation for RAIL TX FIFO
-static __ALIGNED(RAIL_FIFO_ALIGNMENT) uint8_t tx_buffer[RAIL_TX_BUFFER_SIZE] = { 0x00 };
+static __ALIGNED(RAIL_FIFO_ALIGNMENT) uint8_t tx_buffer[SL_FLEX_RAIL_TX_FIFO_SIZE] = { 0x00 };
 
 /// Receive FIFO
-static __ALIGNED(RAIL_FIFO_ALIGNMENT) uint8_t rx_fifo[RAIL_RX_BUFFER_SIZE] = { 0x00 };
+static __ALIGNED(RAIL_FIFO_ALIGNMENT) uint8_t rx_fifo[SL_FLEX_RAIL_RX_FIFO_SIZE] = { 0x00 };
 
 /// Flag for TX, shows if the sending was successful and happened
 static volatile bool schedule_is_ready = false;
@@ -694,7 +691,7 @@ void range_test_init(void)
   }
 
   if (range_test_settings.radio_mode == RADIO_MODE_TX) {
-    RAIL_SetTxFifo(rail_handle, tx_buffer, 0, RAIL_TX_BUFFER_SIZE);
+    RAIL_SetTxFifo(rail_handle, tx_buffer, 0, SL_FLEX_RAIL_TX_FIFO_SIZE);
   }
 }
 
@@ -1169,7 +1166,7 @@ static void send_packet(uint16_t packet_number)
   RAIL_Status_t rail_status;
   RAIL_Handle_t rail_handle = get_current_rail_handler();
   bool set_tx_failed = false;
-  __ALIGNED(RAIL_FIFO_ALIGNMENT) uint8_t send_buffer[RAIL_TX_BUFFER_SIZE] = { 0 };
+  __ALIGNED(RAIL_FIFO_ALIGNMENT) uint8_t send_buffer[SL_FLEX_RAIL_TX_FIFO_SIZE] = { 0 };
   uint16_t tx_length = 0;
 
   if (is_current_phy_standard()) {

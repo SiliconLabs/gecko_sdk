@@ -7,7 +7,7 @@ include $(SDK_DIR)/app/bluetooth/component_host/app_assert.mk
 include $(SDK_DIR)/app/btmesh/component_host/btmesh_prov.mk
 include $(SDK_DIR)/app/btmesh/component_host/btmesh_conf.mk
 include $(SDK_DIR)/app/btmesh/component_host/btmesh_key_export.mk
-include $(SDK_DIR)/app/bluetooth/component_host/simple_timer.mk
+include $(SDK_DIR)/app/bluetooth/component_host/app_timer.mk
 
 # SL_CATALOG_APP_PROV_PRESENT flag indicates host provisioner application component present
 override CFLAGS += -D SL_CATALOG_APP_PROV_PRESENT

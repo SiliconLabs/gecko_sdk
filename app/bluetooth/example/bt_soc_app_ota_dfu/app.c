@@ -41,7 +41,7 @@
 #endif // SL_COMPONENT_CATALOG_PRESENT
 #include "app.h"
 #include "sl_bt_app_ota_dfu.h"
-#include "sl_simple_timer.h"
+#include "app_timer.h"
 
 // Bootloader information
 static uint8_t btl_type;
@@ -63,7 +63,7 @@ static uint16_t datablock_idx = 0u;
 static uint32_t write_position = 0u;
 static uint32_t verif_position = 0u;
 
-sl_simple_timer_t progress_timer;
+app_timer_t progress_timer;
 
 // The advertising set handle allocated from Bluetooth stack.
 static uint8_t advertising_set_handle = 0xffu;
@@ -334,7 +334,7 @@ void sl_button_on_change(const sl_button_t *handle)
 /**************************************************************************//**
  * Timer callback function.
  *****************************************************************************/
-static void app_ota_dfu_progress_timer_cb(sl_simple_timer_t *timer, void *dat)
+static void app_ota_dfu_progress_timer_cb(app_timer_t *timer, void *dat)
 {
   (void) timer;
   *(uint16_t *)dat += 1u;
@@ -386,16 +386,16 @@ static void app_ota_dfu_on_status_change(sl_bt_app_ota_dfu_status_t curr_sts,
       datablock_idx = 0;
       time_elapsed = 0;
       app_log_info("Download started." APP_LOG_NL);
-      sc = sl_simple_timer_start(&progress_timer,
-                                 DOWNLOAD_TIMER_CYCLE,
-                                 app_ota_dfu_progress_timer_cb,
-                                 (void *)&time_elapsed,
-                                 true);
+      sc = app_timer_start(&progress_timer,
+                           DOWNLOAD_TIMER_CYCLE,
+                           app_ota_dfu_progress_timer_cb,
+                           (void *)&time_elapsed,
+                           true);
       app_assert_status(sc);
       break;
 
     case SL_BT_APP_OTA_DFU_DOWNLOAD_END:
-      sc = sl_simple_timer_stop(&progress_timer);
+      sc = app_timer_stop(&progress_timer);
       time_elapsed = 0;
       app_assert_status(sc);
       app_log_info("Download finished. Received %lu bytes." APP_LOG_NL,
@@ -407,15 +407,15 @@ static void app_ota_dfu_on_status_change(sl_bt_app_ota_dfu_status_t curr_sts,
       datablock_idx = 0u;
       app_log_info("Connection closed." APP_LOG_NL);
       app_log_info("Verify downloaded image..." APP_LOG_NL);
-      sc = sl_simple_timer_start(&progress_timer,
-                                 VERIFICATION_TIMER_CYCLE,
-                                 app_ota_dfu_progress_timer_cb,
-                                 (void *)&time_elapsed,
-                                 true);
+      sc = app_timer_start(&progress_timer,
+                           VERIFICATION_TIMER_CYCLE,
+                           app_ota_dfu_progress_timer_cb,
+                           (void *)&time_elapsed,
+                           true);
       break;
 
     case SL_BT_APP_OTA_DFU_FINALIZE:
-      sc = sl_simple_timer_stop(&progress_timer);
+      sc = app_timer_stop(&progress_timer);
       app_log_info("Verified %u%% of the new image." APP_LOG_NL,
                    GET_DATA_PERCENTAGE(write_position, verif_position));
       app_log_info("Set image to bootload." APP_LOG_NL);
@@ -428,7 +428,7 @@ static void app_ota_dfu_on_status_change(sl_bt_app_ota_dfu_status_t curr_sts,
 
     case SL_BT_APP_OTA_DFU_ERROR:
       //In case the error handler reached, progress timer has to be stopped.
-      sc = sl_simple_timer_stop(&progress_timer);
+      sc = app_timer_stop(&progress_timer);
       time_elapsed = 0;
       app_ota_dfu_error_handler(prev_sts, app_ota_dfu_error_code, boot_api_err_code);
       app_log_error("Press button 0 to reinitialize progress, without reboot." \

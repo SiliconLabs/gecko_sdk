@@ -1,0 +1,23 @@
+id: "bluetooth_feature_resolving_list"
+label: "Address resolving with Bluetooth controller's Resolving List"
+package: "Bluetooth"
+description: >
+  Provides support for the Resolving List in controller-based privacy. Adding a
+  peer device to the Resolving List allows the Bluetooth controller to resolve
+  the address when the peer device is using privacy and is transmitting with a
+  Resolvable Private Address (RPA). It also allows the application to use the
+  peer device's identity address when connecting or scanning for periodic
+  synchronization.
+category: Bluetooth|Bluetooth LE Controller (Link Layer)|Additional Features
+quality: "production"
+root_path: "protocol/bluetooth"
+config_file:
+  - path: "config/sl_bt_resolving_list_config.h"
+provides:
+  - name: "bluetooth_feature_resolving_list"
+template_contribution:
+  - name: component_catalog
+    value: bluetooth_feature_resolving_list
+define:
+  - name: RADIOAES_BLE_RPA_MAX_KEYS
+    value: 8

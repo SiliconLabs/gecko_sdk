@@ -130,14 +130,13 @@ EmberStatus emberAfEzspSetConcentratorCommandCallback(bool on,
 
 EmberStatus emberAfEzspGetCurrentDutyCycleCommandCallback(uint8_t maxDevices, uint8_t* perDeviceDutyCycles);
 
-#ifndef UC_BUILD
 void emberAfPluginEzspZigbeeProGetValueCommandCallback(EmberAfPluginEzspValueCommandContext* context);
 void emberAfPluginEzspZigbeeProGetExtendedValueCommandCallback(EmberAfPluginEzspValueCommandContext* context);
 void emberAfPluginEzspZigbeeProSetValueCommandCallback(EmberAfPluginEzspValueCommandContext* context);
 void emberAfPluginEzspZigbeeProPolicyCommandCallback(EmberAfPluginEzspPolicyCommandContext* context);
 void emberAfPluginEzspZigbeeProGetConfigurationValueCommandCallback(EmberAfPluginEzspConfigurationValueCommandContext* context);
 void emberAfPluginEzspZigbeeProSetConfigurationValueCommandCallback(EmberAfPluginEzspConfigurationValueCommandContext* context);
-#endif  // UC_BUILD
+
 EmberStatus emberAfEzspSetBrokenRouteErrorCodeCommandCallback(uint8_t errorCode);
 
 //ezsp command processing picks the wrong name

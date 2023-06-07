@@ -23,14 +23,14 @@
 #ifndef SILABS_EZSP_PROTOCOL_H
 #define SILABS_EZSP_PROTOCOL_H
 
-#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
 #endif
 
 //------------------------------------------------------------------------------
 // Protocol Definitions
 
-#define EZSP_PROTOCOL_VERSION     0x0B
+#define EZSP_PROTOCOL_VERSION     0x0C
 
 // EZSP max length + Frame Control extra byte +
 // Secure EZSP autentication header + Frame ID extra byte + Secure EZSP MIC
@@ -58,11 +58,11 @@
 
 //------------------------------------------------------------------------------
 // EZSP Frame Utils
-#define emEzspGetFrameControl() (serialGetResponseByte(EZSP_EXTENDED_FRAME_CONTROL_HB_INDEX) << 8 \
-                                 | serialGetResponseByte(EZSP_EXTENDED_FRAME_CONTROL_LB_INDEX))
+#define sli_zigbee_ezsp_get_frame_control() (serialGetResponseByte(EZSP_EXTENDED_FRAME_CONTROL_HB_INDEX) << 8 \
+                                             | serialGetResponseByte(EZSP_EXTENDED_FRAME_CONTROL_LB_INDEX))
 
-#define emEzspGetFrameId() (serialGetResponseByte(EZSP_EXTENDED_FRAME_ID_HB_INDEX) << 8 \
-                            | serialGetResponseByte(EZSP_EXTENDED_FRAME_ID_LB_INDEX))
+#define sli_zigbee_ezsp_get_frame_id() (serialGetResponseByte(EZSP_EXTENDED_FRAME_ID_HB_INDEX) << 8 \
+                                        | serialGetResponseByte(EZSP_EXTENDED_FRAME_ID_LB_INDEX))
 
 #include "ezsp-enum.h"
 #include "secure-ezsp-protocol.h"

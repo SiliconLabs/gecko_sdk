@@ -15,8 +15,6 @@
  *
  ******************************************************************************/
 
-
-#ifdef UC_BUILD
 #include "zap-event.h"
 
 #ifdef SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
@@ -46,4 +44,3 @@ WEAK(void {{optionCode}}EndpointEventHandler(uint8_t endpoint))
 {{/all_user_clusters}}
 
 #endif // SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
-#endif // UC_BUILD

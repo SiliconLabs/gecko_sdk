@@ -2,7 +2,7 @@ project_name: "zigbee_ncp-ble_ncp-uart"
 label: "Zigbee - NCP + Bluetooth - NCP zigbee_ncp-ble_ncp-uart"
 package: "Zigbee"
 category: "Zigbee + Bluetooth NCP Application"
-quality: "production"
+quality: "experimental"
 
 description: >
   This dynamic multiprotocol (DMP) application runs the Zigbee NCP
@@ -41,7 +41,6 @@ component:
   - id: "bluetooth_feature_extended_advertiser"
   - id: "bluetooth_feature_periodic_advertiser"
   - id: "bluetooth_feature_connection"
-  - id: "bluetooth_feature_dfu"
   - id: "bluetooth_feature_gap"
   - id: "bluetooth_feature_gatt"
   - id: "bluetooth_feature_gatt_server"

@@ -44,25 +44,22 @@
  * \{
  ******************************************************************************/
 
-#include "em_device.h"
+#include "sli_psa_driver_features.h"
 
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
 
 #include "sl_se_manager.h"
 #include "sl_se_manager_defines.h"
+
 // Replace inclusion of crypto_driver_common.h with the new psa driver interface
 // header file when it becomes available.
 #include "psa/crypto_driver_common.h"
 #include "psa/crypto_platform.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 // -----------------------------------------------------------------------------
 // Structs and typedefs
 
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE_VAULT_HIGH)
   #define SLI_SE_MAX_ECP_PRIVATE_KEY_SIZE (PSA_BITS_TO_BYTES(521))
 #else
   #define SLI_SE_MAX_ECP_PRIVATE_KEY_SIZE (PSA_BITS_TO_BYTES(256))
@@ -79,6 +76,10 @@ extern "C" {
 // -----------------------------------------------------------------------------
 // Function declarations
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 psa_status_t sli_se_driver_key_agreement(
   psa_algorithm_t alg,
   const psa_key_attributes_t *attributes,
@@ -94,7 +95,7 @@ psa_status_t sli_se_driver_key_agreement(
 }
 #endif
 
-#endif // SEMAILBOX_PRESENT
+#endif // SLI_MBEDTLS_DEVICE_HSE
 
 /** \} (end addtogroup sl_psa_drivers_se) */
 /** \} (end addtogroup sl_psa_drivers) */

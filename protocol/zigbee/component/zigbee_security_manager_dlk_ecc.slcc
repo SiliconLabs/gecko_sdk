@@ -1,0 +1,43 @@
+id: zigbee_security_manager_dlk_ecc
+package: Zigbee
+label: Zigbee Security Manager Dynamic Link Key support
+description: |-
+  The Zigbee Security Manager utility handles Zigbee-specific security functions.
+  This optional component includes the necessary crypto operations needed to perform
+  ECDHE and SPEKE key negotiation procedures for Dynamic Link Key Negotiation
+category: Zigbee
+quality: production
+
+provides:
+  - name: zigbee_security_manager_dlk_ecc
+  # TODO move this piece out to a different component
+  - name: zigbee_security_manager_hmac_sha_256
+
+requires:
+   - name: "mbedtls_ecc"
+   - name: "mbedtls_ecc_curve25519"
+   - name: "mbedtls_ecc_secp256r1"
+   - name: "mbedtls_sha256"
+   - name: "mbedtls_ecdh"
+   - name: "mbedtls_aes"
+   - name: "mbedtls_mpi"
+   - name: "mbedtls_core"
+
+source:
+  - path: protocol/zigbee/stack/security/sl_zigbee_security_manager_dlk_ecc.c
+
+include:
+  - path: protocol/zigbee/stack/include
+    file_list:
+      - path: sl_zigbee_security_manager_dlk_ecc.h
+      - path: sl_zigbee_security_manager_dlk_ecc_test_vectors.h
+
+# TODO add stack/config/component_config/ configuration header to toggle support for specific negotiation configs
+
+template_contribution:
+  - name: component_catalog
+    value: zigbee_security_manager_dlk_ecc
+
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/zigbee-security-manager-ecc

@@ -33,15 +33,11 @@
 #define SERVER_MASK_HIGH (0x2C)  // r22
 // -----------------------------------------------------------------------------
 // extern functions
-extern bool emAmNetworkManager(void);
+extern bool sli_zigbee_am_network_manager(void);
 
 // -----------------------------------------------------------------------------
 // Globals
-#ifdef UC_BUILD
 sl_zigbee_event_t emberAfPluginTestHarnessZ3ZdoSendEventControl;
-#else
-EmberEventControl emberAfPluginTestHarnessZ3ZdoSendEventControl;
-#endif //UC_BUILD
 
 #define NULL_CURRENT_ZDO_NEGATIVE_COMMAND_CLUSTER (0x00FF)
 static EmberNodeId currentZdoNegativeCommandDestination = EMBER_NULL_NODE_ID;
@@ -49,19 +45,19 @@ static uint16_t currentZdoNegativeCommandCluster = NULL_CURRENT_ZDO_NEGATIVE_COM
 static uint8_t currentZdoNegativeCommandFrame[32];
 static uint8_t currentZdoNegativeCommandFrameLength;
 
-uint8_t emAfPluginTestHarnessZ3ServerMaskHigh = SERVER_MASK_HIGH;
+uint8_t sli_zigbee_af_test_harness_z3_server_mask_high = SERVER_MASK_HIGH;
 
 // Internal stack API.
-uint8_t emGetNwkUpdateId(void);
+uint8_t sli_zigbee_get_nwk_update_id(void);
 
 // -----------------------------------------------------------------------------
 // ZDO Commands
 
 // Declared in zdo-cli.c. Used here so CLI commands can be reused.
-extern uint16_t emAfCliZdoInClusters[];
-extern uint16_t emAfCliZdoOutClusters[];
-extern uint8_t emAfCliInClCount;
-extern uint8_t emAfCliOutClCount;
+extern uint16_t sli_zigbee_af_cli_zdo_in_clusters[];
+extern uint16_t sli_zigbee_af_cli_zdo_out_clusters[];
+extern uint8_t sli_zigbee_af_cli_in_cl_count;
+extern uint8_t sli_zigbee_af_cli_out_cl_count;
 
 static uint32_t negativeZdoCommandFlags = 0;
 #define NEGATIVE_ZDO_COMMAND_FLAGS_OUR_NWK_ADDRESS        BIT32(0)
@@ -87,7 +83,7 @@ static EmberStatus sendZdoCommand(EmberNodeId destination,
 
 #else
 
-extern EmberNodeId emCurrentSender;
+extern EmberNodeId sli_zigbee_af_current_sender;
 
 static EmberStatus sendZdoCommand(EmberNodeId destination,
                                   uint16_t clusterId,
@@ -130,17 +126,13 @@ static EmberStatus sendZdoCommand(EmberNodeId destination,
 }
 
 #endif /* EZSP_HOST */
-#ifdef  UC_BUILD
 // plugin test-harness z3 mgmt permit-joining-req <timeS:2> <dstShort:2> <options:4>
-void emAfPluginTestHarnessZ3MgmtPermitJoiningReqCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_test_harness_z3_mgmt_permit_joining_req_command(sl_cli_command_arg_t *arguments)
 {
-  uint16_t permitDurationS = (uint16_t)emberUnsignedCommandArgument(0);
-  EmberNodeId destination  = (EmberNodeId)emberUnsignedCommandArgument(1);
-#ifdef UC_BUILD
-  uint32_t options      = emAfPluginTestHarnessZ3GetSignificantBit(arguments, 2);
-#else
-  uint32_t options      = emAfPluginTestHarnessZ3GetSignificantBit(2);
-#endif //UC_BUILD
+  uint16_t permitDurationS = sl_cli_get_argument_uint16(arguments, 0);
+  EmberNodeId destination  = sl_cli_get_argument_uint16(arguments, 1);
+  uint32_t options      = sli_zigbee_af_test_harness_z3_get_significant_bit(arguments, 2);
+
   EmberStatus status;
 
   status = emberPermitJoiningRequest(destination,
@@ -156,19 +148,17 @@ void emAfPluginTestHarnessZ3MgmtPermitJoiningReqCommand(sl_cli_command_arg_t *ar
 
 // plugin test-harness z3 mgmt leave <dstShort:2> <removeChildren:1>
 // <rejoin:1> <optionBitmask:4>
-void emAfPluginTestHarnessZ3MgmtLeaveCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_test_harness_z3_mgmt_leave_command(sl_cli_command_arg_t *arguments)
 {
-  EmberNodeId destination = (EmberNodeId)emberUnsignedCommandArgument(0);
+  EmberNodeId destination = sl_cli_get_argument_uint16(arguments, 0);
   // CCB 2047
   // - CCB makes the first step to depracate the 'leave and remove children' functionality.
   // - We were proactive here and deprecated it right away.
   // bool removeChildren     = (bool)emberUnsignedCommandArgument(1);
-  bool rejoin             = (bool)emberUnsignedCommandArgument(2);
-#ifdef UC_BUILD
-  uint32_t options      = emAfPluginTestHarnessZ3GetSignificantBit(arguments, 3);
-#else
-  uint32_t options      = emAfPluginTestHarnessZ3GetSignificantBit(3);
-#endif //UC_BUILD
+
+  bool rejoin             = (bool)sl_cli_get_argument_uint32(arguments, 2);
+  uint32_t options      = sli_zigbee_af_test_harness_z3_get_significant_bit(arguments, 3);
+
   EmberStatus status = EMBER_INVALID_CALL;
   uint8_t frame[10];
   uint8_t *finger = &frame[1];
@@ -202,17 +192,14 @@ void emAfPluginTestHarnessZ3MgmtLeaveCommand(sl_cli_command_arg_t *arguments)
 
 // plugin test-harness z3 mgmt nwk-update-request <scanChannel:2> <scanDuration:2>
 // <scanCount:1> <dstShort:2> <option:4>
-void emAfPluginTestHarnessZ3MgmtNwkUpdateRequestCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_test_harness_z3_mgmt_nwk_update_request_command(sl_cli_command_arg_t *arguments)
 {
-  uint16_t scanChannel    = (uint16_t)emberUnsignedCommandArgument(0);
-  uint16_t scanDuration   = (uint16_t)emberUnsignedCommandArgument(1);
-  uint8_t scanCount       = (uint8_t)emberUnsignedCommandArgument(2);
-  EmberNodeId destination = (EmberNodeId)emberUnsignedCommandArgument(3);
-#ifdef UC_BUILD
-  uint32_t options      = emAfPluginTestHarnessZ3GetSignificantBit(arguments, 4);
-#else
-  uint32_t options      = emAfPluginTestHarnessZ3GetSignificantBit(4);
-#endif //UC_BUILD
+  uint16_t scanChannel    = sl_cli_get_argument_uint16(arguments, 0);
+  uint16_t scanDuration   = sl_cli_get_argument_uint16(arguments, 1);
+  uint8_t scanCount       = sl_cli_get_argument_uint8(arguments, 2);
+  EmberNodeId destination = sl_cli_get_argument_uint16(arguments, 3);
+  uint32_t options      = sli_zigbee_af_test_harness_z3_get_significant_bit(arguments, 4);
+
   EmberStatus status;
   uint8_t frame[9];
   uint8_t *finger = &frame[1];
@@ -269,7 +256,7 @@ void emAfPluginTestHarnessZ3MgmtNwkUpdateRequestCommand(sl_cli_command_arg_t *ar
 }
 
 // plugin test-harness z3 zdo zdo-reset
-void emAfPluginTestHarnessZ3ZdoZdoResetCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_test_harness_z3_zdo_zdo_reset_command(sl_cli_command_arg_t *arguments)
 {
   currentZdoNegativeCommandCluster = NULL_CURRENT_ZDO_NEGATIVE_COMMAND_CLUSTER;
   negativeZdoCommandFlags = 0;
@@ -281,9 +268,9 @@ void emAfPluginTestHarnessZ3ZdoZdoResetCommand(sl_cli_command_arg_t *arguments)
 }
 
 // plugin test-harness z3 zdo node-desc-req <dstShort:2>
-void emAfPluginTestHarnessZ3ZdoNodeDescReqCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_test_harness_z3_zdo_node_desc_req_command(sl_cli_command_arg_t *arguments)
 {
-  EmberNodeId destination       = (EmberNodeId)emberUnsignedCommandArgument(0);
+  EmberNodeId destination       = sl_cli_get_argument_uint16(arguments, 0);
   EmberStatus status;
   uint8_t frame[1];
 
@@ -299,17 +286,13 @@ void emAfPluginTestHarnessZ3ZdoNodeDescReqCommand(sl_cli_command_arg_t *argument
 }
 
 // plugin test-harness z3 zdo zdo-node-desc-rsp-config <options:4>
-void emAfPluginTestHarnessZ3ZdoZdoNodeDescRspConfigCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_test_harness_z3_zdo_zdo_node_desc_rsp_config_command(sl_cli_command_arg_t *arguments)
 {
   EmberStatus status = EMBER_INVALID_CALL;
 
 #ifndef EZSP_HOST
 
-#ifdef UC_BUILD
-  uint32_t options      = emAfPluginTestHarnessZ3GetSignificantBit(arguments, 0);
-#else
-  uint32_t options      = emAfPluginTestHarnessZ3GetSignificantBit(0);
-#endif //UC_BUILD
+  uint32_t options      = sli_zigbee_af_test_harness_z3_get_significant_bit(arguments, 0);
   currentZdoNegativeCommandCluster = NODE_DESCRIPTOR_RESPONSE;
 
   if (options == BIT(0)) {
@@ -329,15 +312,12 @@ void emAfPluginTestHarnessZ3ZdoZdoNodeDescRspConfigCommand(sl_cli_command_arg_t 
 
 // plugin test-harness z3 zdo active-endpoint-request <dstShort:2>
 // <nwkAddrOfInterest:2> <options:4>
-void emAfPluginTestHarnessZ3ZdoActiveEndpointRequestCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_test_harness_z3_zdo_active_endpoint_request_command(sl_cli_command_arg_t *arguments)
 {
-  EmberNodeId destination       = (EmberNodeId)emberUnsignedCommandArgument(0);
-  EmberNodeId nwkAddrOfInterest = (EmberNodeId)emberUnsignedCommandArgument(1);
-#ifdef UC_BUILD
-  uint32_t options      = emAfPluginTestHarnessZ3GetSignificantBit(arguments, 2);
-#else
-  uint32_t options      = emAfPluginTestHarnessZ3GetSignificantBit(2);
-#endif //UC_BUILD
+  EmberNodeId destination       = sl_cli_get_argument_uint16(arguments, 0);
+  EmberNodeId nwkAddrOfInterest = sl_cli_get_argument_uint16(arguments, 1);
+  uint32_t options      = sli_zigbee_af_test_harness_z3_get_significant_bit(arguments, 2);
+
   EmberStatus status;
   uint8_t frame[3], frameLength = 1;
 
@@ -360,16 +340,13 @@ void emAfPluginTestHarnessZ3ZdoActiveEndpointRequestCommand(sl_cli_command_arg_t
 
 // plugin test-harness z3 zdo match-desc-req <dstShort:2>
 // <nwkAddrOfInterest:2> <profileId:4> <options:4>
-void emAfPluginTestHarnessZ3ZdoMatchDescReqCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_test_harness_z3_zdo_match_desc_req_command(sl_cli_command_arg_t *arguments)
 {
-  EmberNodeId destination       = (EmberNodeId)emberUnsignedCommandArgument(0);
-  EmberNodeId nwkAddrOfInterest = (EmberNodeId)emberUnsignedCommandArgument(1);
-  uint16_t profileId            = (uint16_t)emberUnsignedCommandArgument(2);
-#ifdef UC_BUILD
-  uint32_t options      = emAfPluginTestHarnessZ3GetSignificantBit(arguments, 3);
-#else
-  uint32_t options      = emAfPluginTestHarnessZ3GetSignificantBit(3);
-#endif //UC_BUILD
+  EmberNodeId destination       = sl_cli_get_argument_uint16(arguments, 0);
+  EmberNodeId nwkAddrOfInterest = sl_cli_get_argument_uint16(arguments, 1);
+  uint16_t profileId            = sl_cli_get_argument_uint16(arguments, 2);
+  uint32_t options      = sli_zigbee_af_test_harness_z3_get_significant_bit(arguments, 3);
+
   EmberStatus status;
   uint8_t frame[32];
   uint8_t *finger = &frame[1];
@@ -386,26 +363,26 @@ void emAfPluginTestHarnessZ3ZdoMatchDescReqCommand(sl_cli_command_arg_t *argumen
 
   if (options != BIT(1)) {
     uint8_t reallyInClustersCount
-      = (options == BIT(2) ? 1 : emAfCliInClCount);
+      = (options == BIT(2) ? 1 : sli_zigbee_af_cli_in_cl_count);
     uint8_t reallyOutClustersCount
-      = (options == BIT(3) ? 1 : emAfCliOutClCount);
+      = (options == BIT(3) ? 1 : sli_zigbee_af_cli_out_cl_count);
 
     // In clusters.
-    *finger++ = emAfCliInClCount;
+    *finger++ = sli_zigbee_af_cli_in_cl_count;
     MEMMOVE(finger,
-            emAfCliZdoInClusters,
+            sli_zigbee_af_cli_zdo_in_clusters,
             reallyInClustersCount * sizeof(uint16_t));
     finger += (reallyInClustersCount * sizeof(uint16_t));
 
     // Out clusters.
-    *finger++ = emAfCliOutClCount;
+    *finger++ = sli_zigbee_af_cli_out_cl_count;
     MEMMOVE(finger,
-            emAfCliZdoOutClusters,
+            sli_zigbee_af_cli_zdo_out_clusters,
             reallyOutClustersCount * sizeof(uint16_t));
     finger += (reallyOutClustersCount * sizeof(uint16_t));
   } else {
-    *finger++ = emAfCliInClCount;  // In clusters.
-    *finger++ = emAfCliOutClCount; // Out clusters.
+    *finger++ = sli_zigbee_af_cli_in_cl_count;  // In clusters.
+    *finger++ = sli_zigbee_af_cli_out_cl_count; // Out clusters.
   }
 
   status = sendZdoCommand(destination,
@@ -421,15 +398,12 @@ void emAfPluginTestHarnessZ3ZdoMatchDescReqCommand(sl_cli_command_arg_t *argumen
 
 // plugin test-harness z3 zdo match-desc-rsp-config <nwkAddrOfInterest:2>
 // <status:1> <options:4>
-void emAfPluginTestHarnessZ3ZdoMatchDescRspConfigCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_test_harness_z3_zdo_match_desc_rsp_config_command(sl_cli_command_arg_t *arguments)
 {
-  EmberNodeId nwkAddrOfInterest = (EmberNodeId)emberUnsignedCommandArgument(0);
-  uint8_t zdoStatus             = (uint8_t)emberUnsignedCommandArgument(1);
-#ifdef UC_BUILD
-  uint32_t options      = emAfPluginTestHarnessZ3GetSignificantBit(arguments, 2);
-#else
-  uint32_t options      = emAfPluginTestHarnessZ3GetSignificantBit(2);
-#endif //UC_BUILD
+  EmberNodeId nwkAddrOfInterest = sl_cli_get_argument_uint16(arguments, 0);
+  uint8_t zdoStatus             = sl_cli_get_argument_uint8(arguments, 1);
+  uint32_t options      = sli_zigbee_af_test_harness_z3_get_significant_bit(arguments, 2);
+
   EmberStatus status = EMBER_SUCCESS;
 
   // Global state.
@@ -474,16 +448,13 @@ void emAfPluginTestHarnessZ3ZdoMatchDescRspConfigCommand(sl_cli_command_arg_t *a
 
 // plugin test-harness z3 zdo simple-desc-req <dstShort:2> <dstEndpoint:1>
 // <nwkAddrOfInterest:2> <options:4>
-void emAfPluginTestHarnessZ3ZdoSimpleDescReqCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_test_harness_z3_zdo_simple_desc_req_command(sl_cli_command_arg_t *arguments)
 {
-  EmberNodeId destination       = (EmberNodeId)emberUnsignedCommandArgument(0);
-  uint8_t endpoint              = (uint8_t)emberUnsignedCommandArgument(1);
-  EmberNodeId nwkAddrOfInterest = (EmberNodeId)emberUnsignedCommandArgument(2);
-#ifdef UC_BUILD
-  uint32_t options      = emAfPluginTestHarnessZ3GetSignificantBit(arguments, 3);
-#else
-  uint32_t options      = emAfPluginTestHarnessZ3GetSignificantBit(3);
-#endif //UC_BUILD
+  EmberNodeId destination       = sl_cli_get_argument_uint16(arguments, 0);
+  uint8_t endpoint              = sl_cli_get_argument_uint8(arguments, 1);
+  EmberNodeId nwkAddrOfInterest = sl_cli_get_argument_uint16(arguments, 2);
+  uint32_t options      = sli_zigbee_af_test_harness_z3_get_significant_bit(arguments, 3);
+
   EmberStatus status;
   uint8_t frame[4];
   uint8_t *finger = &frame[1];
@@ -512,16 +483,12 @@ void emAfPluginTestHarnessZ3ZdoSimpleDescReqCommand(sl_cli_command_arg_t *argume
 
 // plugin test-harness z3 simple-desc-rsp-config <nwkAddrOfInterest:2>
 // <status:1> <length:1> <options:4>
-void emAfPluginTestHarnessZ3ZdoSimpleDescRspConfigCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_test_harness_z3_zdo_simple_desc_rsp_config_command(sl_cli_command_arg_t *arguments)
 {
-  EmberNodeId nwkAddrOfInterest = (EmberNodeId)emberUnsignedCommandArgument(0);
-  uint8_t zdoStatus             = (uint8_t)emberUnsignedCommandArgument(1);
-  uint8_t length                = (uint8_t)emberUnsignedCommandArgument(2);
-  #ifdef UC_BUILD
-  uint32_t options              = emAfPluginTestHarnessZ3GetSignificantBit(arguments, 3);
-#else
-  uint32_t options              = emAfPluginTestHarnessZ3GetSignificantBit(3);
-#endif //UC_BUILD
+  EmberNodeId nwkAddrOfInterest = sl_cli_get_argument_uint16(arguments, 0);
+  uint8_t zdoStatus             = sl_cli_get_argument_uint8(arguments, 1);
+  uint8_t length                = sl_cli_get_argument_uint8(arguments, 2);
+  uint32_t options              = sli_zigbee_af_test_harness_z3_get_significant_bit(arguments, 3);
 
   EmberStatus status = EMBER_SUCCESS;
 
@@ -584,13 +551,13 @@ void emAfPluginTestHarnessZ3ZdoSimpleDescRspConfigCommand(sl_cli_command_arg_t *
 
 // plugin test-harness z3 zdo bind-group <shortAddress:2> <srcEndpoint:1>
 // <dstEndpoint:1> <dstAddress:2> <cluster:2> <srcIeee:8>
-void emAfPluginTestHarnessZ3ZdoBindGroupCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_test_harness_z3_zdo_bind_group_command(sl_cli_command_arg_t *arguments)
 {
-  EmberNodeId shortAddress = (EmberNodeId)emberUnsignedCommandArgument(0);
-  uint8_t srcEndpoint      = (uint8_t)emberUnsignedCommandArgument(1);
-  uint8_t dstEndpoint      = (uint8_t)emberUnsignedCommandArgument(2);
-  uint16_t groupId         = (uint16_t)emberUnsignedCommandArgument(3);
-  EmberAfClusterId cluster = (EmberAfClusterId)emberUnsignedCommandArgument(4);
+  EmberNodeId shortAddress = sl_cli_get_argument_uint16(arguments, 0);
+  uint8_t srcEndpoint      = sl_cli_get_argument_uint8(arguments, 1);
+  uint8_t dstEndpoint      = sl_cli_get_argument_uint8(arguments, 2);
+  uint16_t groupId         = sl_cli_get_argument_uint16(arguments, 3);
+  EmberAfClusterId cluster = sl_cli_get_argument_uint16(arguments, 4);
   EmberStatus status;
   uint8_t frame[16];
   uint8_t *finger = &frame[1];
@@ -599,7 +566,7 @@ void emAfPluginTestHarnessZ3ZdoBindGroupCommand(sl_cli_command_arg_t *arguments)
   (void)dstEndpoint;
 
   // SrcAddress
-  finger += emberCopyBigEndianEui64Argument(5, finger);
+  finger += sl_zigbee_copy_eui64_arg(arguments, 5, finger, true);
 
   // SrcEndp
   *finger++ = srcEndpoint;
@@ -628,23 +595,20 @@ void emAfPluginTestHarnessZ3ZdoBindGroupCommand(sl_cli_command_arg_t *arguments)
 
 // plugin test-harness z3 zdo nwk-addr-req <ieee:8> <requestType:1>
 // <startIndex:1> <dstShort:2> <options:4>
-void emAfPluginTestHarnessZ3ZdoNwkAddrReqCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_test_harness_z3_zdo_nwk_addr_req_command(sl_cli_command_arg_t *arguments)
 {
-  uint8_t requestType          = (uint8_t)emberUnsignedCommandArgument(1);
-  uint8_t startIndex           = (uint8_t)emberUnsignedCommandArgument(2);
-  EmberNodeId destinationShort = (EmberNodeId)emberUnsignedCommandArgument(3);
-#ifdef UC_BUILD
-  uint32_t options      = emAfPluginTestHarnessZ3GetSignificantBit(arguments, 4);
-#else
-  uint32_t options      = emAfPluginTestHarnessZ3GetSignificantBit(4);
-#endif //UC_BUILD
+  uint8_t requestType          = sl_cli_get_argument_uint8(arguments, 1);
+  uint8_t startIndex           = sl_cli_get_argument_uint8(arguments, 2);
+  EmberNodeId destinationShort = sl_cli_get_argument_uint16(arguments, 3);
+  uint32_t options      = sli_zigbee_af_test_harness_z3_get_significant_bit(arguments, 4);
+
   EmberStatus status;
   uint8_t frame[11];
   uint8_t *finger = &frame[1];
 
   if (options != BIT(0)) {
     // IEEE address.
-    emberCopyBigEndianEui64Argument(0, finger);
+    sl_zigbee_copy_eui64_arg(arguments, 0, finger, true);
     finger += EUI64_SIZE;
 
     // Request type.
@@ -667,17 +631,14 @@ void emAfPluginTestHarnessZ3ZdoNwkAddrReqCommand(sl_cli_command_arg_t *arguments
 
 // plugin test-harness z3 zdo ieee-addr-req <nwkAddrOfInterest:2>
 // <requestType:1> <startIndex:1> <dstShort:2> <options:4>
-void emAfPluginTestHarnessZ3ZdoIeeeAddrReqCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_test_harness_z3_zdo_ieee_addr_req_command(sl_cli_command_arg_t *arguments)
 {
-  EmberNodeId nwkAddrOfInterest = (EmberNodeId)emberUnsignedCommandArgument(0);
-  uint8_t requestType           = (uint8_t)emberUnsignedCommandArgument(1);
-  uint8_t startIndex            = (uint8_t)emberUnsignedCommandArgument(2);
-  EmberNodeId destination       = (EmberNodeId)emberUnsignedCommandArgument(3);
-#ifdef UC_BUILD
-  uint32_t options      = emAfPluginTestHarnessZ3GetSignificantBit(arguments, 4);
-#else
-  uint32_t options      = emAfPluginTestHarnessZ3GetSignificantBit(4);
-#endif //UC_BUILD
+  EmberNodeId nwkAddrOfInterest = sl_cli_get_argument_uint16(arguments, 0);
+  uint8_t requestType           = sl_cli_get_argument_uint8(arguments, 1);
+  uint8_t startIndex            = sl_cli_get_argument_uint8(arguments, 2);
+  EmberNodeId destination       = sl_cli_get_argument_uint16(arguments, 3);
+  uint32_t options      = sli_zigbee_af_test_harness_z3_get_significant_bit(arguments, 4);
+
   EmberStatus status;
   uint8_t frame[5];
   uint8_t *finger = &frame[1];
@@ -708,14 +669,10 @@ void emAfPluginTestHarnessZ3ZdoIeeeAddrReqCommand(sl_cli_command_arg_t *argument
 // plugin test-harness z3 nwk ieee-addr-rsp-config reset
 // plugin test-harness z3 nwk ieee-addr-rsp-config issuer-nwk-address-remote-dev
 // plugin test-harness z3 nwk ieee-addr-rsp-config status-device-not-found
-void emAfPluginTestHarnessZ3ZdoIeeeAddrRspConfigCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_test_harness_z3_zdo_ieee_addr_rsp_config_command(sl_cli_command_arg_t *arguments)
 {
   EmberStatus status = EMBER_SUCCESS;
-  #ifdef UC_BUILD
   char firstChar = sl_cli_get_command_string(arguments, 5)[0];
-  #else
-  char firstChar = emberStringCommandArgument(-1, NULL)[0];
-  #endif
 
   // Global state.
   currentZdoNegativeCommandCluster = IEEE_ADDRESS_RESPONSE;
@@ -750,14 +707,14 @@ void emAfPluginTestHarnessZ3ZdoIeeeAddrRspConfigCommand(sl_cli_command_arg_t *ar
 }
 
 // plugin test-harness z3 zdo bc-device-announce <shortAddress:2> <ieeeAddress:8>
-void emAfPluginTestHarnessZ3ZdoBcDeviceAnnounceCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_test_harness_z3_zdo_bc_device_announce_command(sl_cli_command_arg_t *arguments)
 {
-  EmberNodeId shortAddress = (EmberNodeId)emberUnsignedCommandArgument(0);
+  EmberNodeId shortAddress = sl_cli_get_argument_uint16(arguments, 0);
   EmberEUI64 eui64;
   uint8_t frame[12];
   EmberStatus status;
 
-  emberCopyBigEndianEui64Argument(1, eui64);
+  sl_zigbee_copy_eui64_arg(arguments, 1, eui64, true);
 
   emberAfCopyInt16u(frame, 1, shortAddress);
   MEMMOVE(frame + 3, eui64, EUI64_SIZE);
@@ -773,605 +730,11 @@ void emAfPluginTestHarnessZ3ZdoBcDeviceAnnounceCommand(sl_cli_command_arg_t *arg
                      "Broadcast device announce",
                      status);
 }
-#else //UC_BUILD
-// plugin test-harness z3 mgmt permit-joining-req <timeS:2> <dstShort:2> <options:4>
-void emAfPluginTestHarnessZ3MgmtPermitJoiningReqCommand(void)
-{
-  uint16_t permitDurationS = (uint16_t)emberUnsignedCommandArgument(0);
-  EmberNodeId destination  = (EmberNodeId)emberUnsignedCommandArgument(1);
-  uint32_t options         = emAfPluginTestHarnessZ3GetSignificantBit(2);
-  EmberStatus status;
-
-  status = emberPermitJoiningRequest(destination,
-                                     permitDurationS,
-                                     (options == BIT32(0) ? false : true),
-                                     (EMBER_APS_OPTION_RETRY));
-
-  emberAfCorePrintln("%p: %p: 0x%X",
-                     TEST_HARNESS_Z3_PRINT_NAME,
-                     "Permit joining request",
-                     status);
-}
-
-// plugin test-harness z3 mgmt leave <dstShort:2> <removeChildren:1>
-// <rejoin:1> <optionBitmask:4>
-void emAfPluginTestHarnessZ3MgmtLeaveCommand(void)
-{
-  EmberNodeId destination = (EmberNodeId)emberUnsignedCommandArgument(0);
-  // CCB 2047
-  // - CCB makes the first step to depracate the 'leave and remove children' functionality.
-  // - We were proactive here and deprecated it right away.
-  // bool removeChildren     = (bool)emberUnsignedCommandArgument(1);
-  bool rejoin             = (bool)emberUnsignedCommandArgument(2);
-  uint32_t options        = emAfPluginTestHarnessZ3GetSignificantBit(3);
-  EmberStatus status = EMBER_INVALID_CALL;
-  uint8_t frame[10];
-  uint8_t *finger = &frame[1];
-
-  // Long address of destination. Bit 0 means don't put it in payload.
-  if (options != BIT(0)) {
-    status = emberLookupEui64ByNodeId(destination, finger);
-    if (status != EMBER_SUCCESS) {
-      goto done;
-    }
-    finger += EUI64_SIZE;
-  }
-
-  // Options.
-  if (options != BIT(1)) {
-    *finger = 0;
-    if (rejoin) {
-      *finger |= BIT(7);
-    }
-    finger++;
-  }
-
-  status = sendZdoCommand(destination, LEAVE_REQUEST, frame, finger - &frame[0]);
-
-  done:
-  emberAfCorePrintln("%p: %p: 0x%X",
-                     TEST_HARNESS_Z3_PRINT_NAME,
-                     "Mgmt leave",
-                     status);
-}
-
-// plugin test-harness z3 mgmt nwk-update-request <scanChannel:2> <scanDuration:2>
-// <scanCount:1> <dstShort:2> <option:4>
-void emAfPluginTestHarnessZ3MgmtNwkUpdateRequestCommand(void)
-{
-  uint16_t scanChannel    = (uint16_t)emberUnsignedCommandArgument(0);
-  uint16_t scanDuration   = (uint16_t)emberUnsignedCommandArgument(1);
-  uint8_t scanCount       = (uint8_t)emberUnsignedCommandArgument(2);
-  EmberNodeId destination = (EmberNodeId)emberUnsignedCommandArgument(3);
-  uint32_t options        = emAfPluginTestHarnessZ3GetSignificantBit(4);
-  EmberStatus status;
-  uint8_t frame[9];
-  uint8_t *finger = &frame[1];
-  EmberNetworkParameters networkParameters;
-  EmberNodeType nodeType;
-
-  status = emberAfGetNetworkParameters(&nodeType, &networkParameters);
-  if (status != EMBER_SUCCESS) {
-    goto done;
-  }
-
-  // Scan channel.
-  emberAfCopyInt32u(finger, 0, BIT32(scanChannel));
-  finger += sizeof(uint32_t);
-  // Scan duration.
-  *finger++ = (uint8_t)(0xFF & scanDuration); // ANDREW: Q3.
-  // Scan count (table 2.90):
-  // "This field shall be present only if the ScanDuration is within the
-  // range of 0x00 to 0x05."
-  if (scanDuration <= 5) {
-    *finger++ = scanCount;
-  }
-  // Network update id (table 2.90):
-  // "This field shall only be present of the ScanDuration is 0xfe or 0xff.
-  // If the ScanDuration is 0xff, then the value in the nwkUpdateID shall
-  // be ignored."
-
-  if (scanDuration == 0xFF || scanDuration == 0xFE) {
-    *finger++ = options == BIT(1)
-                ? 0x55
-                : networkParameters.nwkUpdateId - (options == BIT(0)
-                                                   ? 1
-                                                   : 0);
-  }
-  // Network manager id (table 2.90):
-  // "This field shall be present only if the ScanDuration is set to 0xff,
-  // and, where present, indicates the NWK address for the device with the
-  // Network Manager bit set in its Node Descriptor."
-  if (scanDuration == 0xFF) {
-    emberAfCopyInt16u(finger, 0, networkParameters.nwkManagerId);
-    finger += sizeof(uint16_t);
-  }
-
-  status = sendZdoCommand(destination,
-                          ZDO_NETWORK_UPDATE_REQUEST,
-                          frame,
-                          finger - &frame[0]);
-
-  done:
-  emberAfCorePrintln("%p: %p: 0x%X",
-                     TEST_HARNESS_Z3_PRINT_NAME,
-                     "Network update request",
-                     status);
-}
-
-// plugin test-harness z3 zdo zdo-reset
-void emAfPluginTestHarnessZ3ZdoZdoResetCommand(void)
-{
-  currentZdoNegativeCommandCluster = NULL_CURRENT_ZDO_NEGATIVE_COMMAND_CLUSTER;
-  negativeZdoCommandFlags = 0;
-
-  emberAfCorePrintln("%p: %p: 0x%X",
-                     TEST_HARNESS_Z3_PRINT_NAME,
-                     "ZDO reset",
-                     EMBER_SUCCESS);
-}
-
-// plugin test-harness z3 zdo node-desc-req <dstShort:2>
-void emAfPluginTestHarnessZ3ZdoNodeDescReqCommand(void)
-{
-  EmberNodeId destination       = (EmberNodeId)emberUnsignedCommandArgument(0);
-  EmberStatus status;
-  uint8_t frame[1];
-
-  status = sendZdoCommand(destination,
-                          NODE_DESCRIPTOR_REQUEST,
-                          frame,
-                          1);
-
-  emberAfCorePrintln("%p: %p: 0x%X",
-                     TEST_HARNESS_Z3_PRINT_NAME,
-                     "Node descriptor request",
-                     status);
-}
-
-// plugin test-harness z3 zdo zdo-node-desc-rsp-config <options:4>
-void emAfPluginTestHarnessZ3ZdoZdoNodeDescRspConfigCommand(void)
-{
-  EmberStatus status = EMBER_INVALID_CALL;
 
 #ifndef EZSP_HOST
-  uint32_t options   = emAfPluginTestHarnessZ3GetSignificantBit(0);
-  currentZdoNegativeCommandCluster = NODE_DESCRIPTOR_RESPONSE;
-
-  if (options == BIT(0)) {
-    negativeZdoCommandFlags = 0;  // negative response only!
-    status = EMBER_SUCCESS;
-  } else {
-    status = EMBER_BAD_ARGUMENT;
-  }
-
-#endif /* EZSP_HOST */
-
-  emberAfCorePrintln("%p: %p: 0x%X",
-                     TEST_HARNESS_Z3_PRINT_NAME,
-                     "Node descriptor response config",
-                     status);
-}
-
-// plugin test-harness z3 zdo active-endpoint-request <dstShort:2>
-// <nwkAddrOfInterest:2> <options:4>
-void emAfPluginTestHarnessZ3ZdoActiveEndpointRequestCommand(void)
-{
-  EmberNodeId destination       = (EmberNodeId)emberUnsignedCommandArgument(0);
-  EmberNodeId nwkAddrOfInterest = (EmberNodeId)emberUnsignedCommandArgument(1);
-  uint32_t options              = emAfPluginTestHarnessZ3GetSignificantBit(2);
-  EmberStatus status;
-  uint8_t frame[3], frameLength = 1;
-
-  if (options != BIT(0)) {
-    frame[1] = LOW_BYTE(nwkAddrOfInterest);
-    frame[2] = HIGH_BYTE(nwkAddrOfInterest);
-    frameLength += 2;
-  }
-
-  status = sendZdoCommand(destination,
-                          ACTIVE_ENDPOINTS_REQUEST,
-                          frame,
-                          frameLength);
-
-  emberAfCorePrintln("%p: %p: 0x%X",
-                     TEST_HARNESS_Z3_PRINT_NAME,
-                     "Active endpoint request",
-                     status);
-}
-
-// plugin test-harness z3 zdo match-desc-req <dstShort:2>
-// <nwkAddrOfInterest:2> <profileId:4> <options:4>
-void emAfPluginTestHarnessZ3ZdoMatchDescReqCommand(void)
-{
-  EmberNodeId destination       = (EmberNodeId)emberUnsignedCommandArgument(0);
-  EmberNodeId nwkAddrOfInterest = (EmberNodeId)emberUnsignedCommandArgument(1);
-  uint16_t profileId            = (uint16_t)emberUnsignedCommandArgument(2);
-  uint32_t options              = emAfPluginTestHarnessZ3GetSignificantBit(3);
-  EmberStatus status;
-  uint8_t frame[32];
-  uint8_t *finger = &frame[1];
-
-  if (options != BIT(0)) {
-    // Network address of interest.
-    emberAfCopyInt16u(finger, 0, nwkAddrOfInterest);
-    finger += sizeof(uint16_t);
-  }
-
-  // Profile id.
-  emberAfCopyInt16u(finger, 0, profileId);
-  finger += sizeof(uint16_t);
-
-  if (options != BIT(1)) {
-    uint8_t reallyInClustersCount
-      = (options == BIT(2) ? 1 : emAfCliInClCount);
-    uint8_t reallyOutClustersCount
-      = (options == BIT(3) ? 1 : emAfCliOutClCount);
-
-    // In clusters.
-    *finger++ = emAfCliInClCount;
-    MEMMOVE(finger,
-            emAfCliZdoInClusters,
-            reallyInClustersCount * sizeof(uint16_t));
-    finger += (reallyInClustersCount * sizeof(uint16_t));
-
-    // Out clusters.
-    *finger++ = emAfCliOutClCount;
-    MEMMOVE(finger,
-            emAfCliZdoOutClusters,
-            reallyOutClustersCount * sizeof(uint16_t));
-    finger += (reallyOutClustersCount * sizeof(uint16_t));
-  } else {
-    *finger++ = emAfCliInClCount;  // In clusters.
-    *finger++ = emAfCliOutClCount; // Out clusters.
-  }
-
-  status = sendZdoCommand(destination,
-                          MATCH_DESCRIPTORS_REQUEST,
-                          frame,
-                          finger - &frame[0]);
-
-  emberAfCorePrintln("%p: %p: 0x%X",
-                     TEST_HARNESS_Z3_PRINT_NAME,
-                     "Match descriptor request",
-                     status);
-}
-
-// plugin test-harness z3 zdo match-desc-rsp-config <nwkAddrOfInterest:2>
-// <status:1> <options:4>
-void emAfPluginTestHarnessZ3ZdoMatchDescRspConfigCommand(void)
-{
-  EmberNodeId nwkAddrOfInterest = (EmberNodeId)emberUnsignedCommandArgument(0);
-  uint8_t zdoStatus             = (uint8_t)emberUnsignedCommandArgument(1);
-  uint32_t options              = emAfPluginTestHarnessZ3GetSignificantBit(2);
-  EmberStatus status = EMBER_SUCCESS;
-
-  // Global state.
-  currentZdoNegativeCommandCluster = MATCH_DESCRIPTORS_RESPONSE;
-  currentZdoNegativeCommandFrameLength = 5;
-
-  // Positive behavior.
-  currentZdoNegativeCommandFrame[1] = zdoStatus;
-  currentZdoNegativeCommandFrame[2] = LOW_BYTE(nwkAddrOfInterest);
-  currentZdoNegativeCommandFrame[3] = HIGH_BYTE(nwkAddrOfInterest);
-
-  switch (options) {
-    case BIT(0):
-      // match list absent
-      negativeZdoCommandFlags
-        = (NEGATIVE_ZDO_COMMAND_FLAGS_MATCH_LIST_ABSENT);
-      break;
-    case BIT(1):
-      // second response device not found
-      negativeZdoCommandFlags
-        = (NEGATIVE_ZDO_COMMAND_FLAGS_MATCH_LIST_ABSENT
-           | NEGATIVE_ZDO_COMMAND_FLAGS_SEND_POSITIVE_RESPONSE);
-      currentZdoNegativeCommandFrame[1] = EMBER_ZDP_DEVICE_NOT_FOUND;
-      break;
-    case BIT(2):
-      // second response no descriptor
-      negativeZdoCommandFlags
-        = (NEGATIVE_ZDO_COMMAND_FLAGS_MATCH_LIST_ABSENT
-           | NEGATIVE_ZDO_COMMAND_FLAGS_SEND_POSITIVE_RESPONSE);
-      currentZdoNegativeCommandFrame[1] = EMBER_ZDP_NO_DESCRIPTOR;
-      break;
-    default:
-      status = EMBER_BAD_ARGUMENT;
-      break;
-  }
-
-  emberAfCorePrintln("%p: %p: 0x%X",
-                     TEST_HARNESS_Z3_PRINT_NAME,
-                     "Match descriptor response config",
-                     status);
-}
-
-// plugin test-harness z3 zdo simple-desc-req <dstShort:2> <dstEndpoint:1>
-// <nwkAddrOfInterest:2> <options:4>
-void emAfPluginTestHarnessZ3ZdoSimpleDescReqCommand(void)
-{
-  EmberNodeId destination       = (EmberNodeId)emberUnsignedCommandArgument(0);
-  uint8_t endpoint              = (uint8_t)emberUnsignedCommandArgument(1);
-  EmberNodeId nwkAddrOfInterest = (EmberNodeId)emberUnsignedCommandArgument(2);
-  uint32_t options              = emAfPluginTestHarnessZ3GetSignificantBit(3);
-  EmberStatus status;
-  uint8_t frame[4];
-  uint8_t *finger = &frame[1];
-
-  // Network address of interest.
-  if (options != BIT(0)) {
-    emberAfCopyInt16u(finger, 0, nwkAddrOfInterest);
-    finger += sizeof(uint16_t);
-  }
-
-  // Endpoint.
-  if (options != BIT(1)) {
-    *finger++ = endpoint;
-  }
-
-  status = sendZdoCommand(destination,
-                          SIMPLE_DESCRIPTOR_REQUEST,
-                          frame,
-                          finger - &frame[0]);
-
-  emberAfCorePrintln("%p: %p: 0x%X",
-                     TEST_HARNESS_Z3_PRINT_NAME,
-                     "Simple descriptor request",
-                     status);
-}
-
-// plugin test-harness z3 simple-desc-rsp-config <nwkAddrOfInterest:2>
-// <status:1> <length:1> <options:4>
-void emAfPluginTestHarnessZ3ZdoSimpleDescRspConfigCommand(void)
-{
-  EmberNodeId nwkAddrOfInterest = (EmberNodeId)emberUnsignedCommandArgument(0);
-  uint8_t zdoStatus             = (uint8_t)emberUnsignedCommandArgument(1);
-  uint8_t length                = (uint8_t)emberUnsignedCommandArgument(2);
-  uint32_t options              = emAfPluginTestHarnessZ3GetSignificantBit(3);
-  EmberStatus status = EMBER_SUCCESS;
-
-  // Global state.
-  currentZdoNegativeCommandCluster = SIMPLE_DESCRIPTOR_RESPONSE;
-  currentZdoNegativeCommandFrameLength = 5;
-
-  // Positive behavior.
-  currentZdoNegativeCommandFrame[1] = zdoStatus;
-  emberAfCopyInt16u(currentZdoNegativeCommandFrame, 2, nwkAddrOfInterest);
-  currentZdoNegativeCommandFrame[4] = length;
-
-  // Negative behavior.
-  switch (options) {
-    case BIT(0):
-      // simple descriptor field absent
-      negativeZdoCommandFlags = (NEGATIVE_ZDO_COMMAND_FLAGS_NO_SIMPLE_DESCRIPTOR);
-      break;
-    case BIT(1):
-      // do not forward to the nwk addr of interest
-      break;
-    case BIT(2):
-      // cluster list key establishment
-      negativeZdoCommandFlags = (NEGATIVE_ZDO_COMMAND_FLAGS_CLUSTER_LIST_KE);
-      break;
-    case BIT(3):
-      // swap support for client/server clusters
-      negativeZdoCommandFlags = (NEGATIVE_ZDO_COMMAND_FLAGS_CLUSTER_LIST_SWAP);
-      break;
-    case BIT(4):
-      // do not send any cluster lists
-      negativeZdoCommandFlags = (NEGATIVE_ZDO_COMMAND_FLAGS_CLUSTER_LIST_ABSENT);
-      break;
-    case BIT(5):
-      // send a positive command alongside a negative command
-      negativeZdoCommandFlags
-        = (NEGATIVE_ZDO_COMMAND_FLAGS_SEND_POSITIVE_RESPONSE
-           | NEGATIVE_ZDO_COMMAND_FLAGS_NO_SIMPLE_DESCRIPTOR);
-      currentZdoNegativeCommandFrame[1] = EMBER_ZDP_DEVICE_NOT_FOUND;
-      currentZdoNegativeCommandFrame[4] = 0; // length
-      break;
-    case BIT(6):
-      // do not include endpoints fields in the variable payload
-      negativeZdoCommandFlags = (NEGATIVE_ZDO_COMMAND_FLAGS_NO_ENDPOINT_FIELDS);
-      break;
-    case BIT(7):
-      // do not include the network address of interest
-      negativeZdoCommandFlags = (NEGATIVE_ZDO_COMMAND_FLAGS_NO_NWK_ADDR);
-      currentZdoNegativeCommandFrameLength -= 2;
-      break;
-    default:
-      ; // options of 0x00 is ok
-  }
-
-  emberAfCorePrintln("%p: %p: 0x%X",
-                     TEST_HARNESS_Z3_PRINT_NAME,
-                     "Simple descriptor response config",
-                     status);
-}
-
-// plugin test-harness z3 zdo bind-group <shortAddress:2> <srcEndpoint:1>
-// <dstEndpoint:1> <dstAddress:2> <cluster:2> <srcIeee:8>
-void emAfPluginTestHarnessZ3ZdoBindGroupCommand(void)
-{
-  EmberNodeId shortAddress = (EmberNodeId)emberUnsignedCommandArgument(0);
-  uint8_t srcEndpoint      = (uint8_t)emberUnsignedCommandArgument(1);
-  uint8_t dstEndpoint      = (uint8_t)emberUnsignedCommandArgument(2);
-  uint16_t groupId         = (uint16_t)emberUnsignedCommandArgument(3);
-  EmberAfClusterId cluster = (EmberAfClusterId)emberUnsignedCommandArgument(4);
-  EmberStatus status;
-  uint8_t frame[16];
-  uint8_t *finger = &frame[1];
-
-  // Not currently used.
-  (void)dstEndpoint;
-
-  // SrcAddress
-  finger += emberCopyBigEndianEui64Argument(5, finger);
-
-  // SrcEndp
-  *finger++ = srcEndpoint;
-
-  // ClusterID
-  emberAfCopyInt16u(finger, 0, cluster);
-  finger += sizeof(cluster);
-
-  // DstAddrMode
-  *finger++ = 0x01; // multicast
-
-  // DstAddress
-  emberAfCopyInt16u(finger, 0, groupId);
-  finger += sizeof(groupId);
-
-  status = sendZdoCommand(shortAddress,
-                          BIND_REQUEST,
-                          frame,
-                          finger - &frame[0]);
-
-  emberAfCorePrintln("%p: %p: 0x%X",
-                     TEST_HARNESS_Z3_PRINT_NAME,
-                     "ZDO bind group",
-                     status);
-}
-
-// plugin test-harness z3 zdo nwk-addr-req <ieee:8> <requestType:1>
-// <startIndex:1> <dstShort:2> <options:4>
-void emAfPluginTestHarnessZ3ZdoNwkAddrReqCommand(void)
-{
-  uint8_t requestType          = (uint8_t)emberUnsignedCommandArgument(1);
-  uint8_t startIndex           = (uint8_t)emberUnsignedCommandArgument(2);
-  EmberNodeId destinationShort = (EmberNodeId)emberUnsignedCommandArgument(3);
-  uint32_t options             = emAfPluginTestHarnessZ3GetSignificantBit(4);
-  EmberStatus status;
-  uint8_t frame[11];
-  uint8_t *finger = &frame[1];
-
-  if (options != BIT(0)) {
-    // IEEE address.
-    emberCopyBigEndianEui64Argument(0, finger);
-    finger += EUI64_SIZE;
-
-    // Request type.
-    *finger++ = requestType;
-
-    // Start index.
-    *finger++ = startIndex;
-  }
-
-  status = sendZdoCommand(destinationShort,
-                          NETWORK_ADDRESS_REQUEST,
-                          frame,
-                          finger - &frame[0]);
-
-  emberAfCorePrintln("%p: %p: 0x%X",
-                     TEST_HARNESS_Z3_PRINT_NAME,
-                     "Network address request",
-                     status);
-}
-
-// plugin test-harness z3 zdo ieee-addr-req <nwkAddrOfInterest:2>
-// <requestType:1> <startIndex:1> <dstShort:2> <options:4>
-void emAfPluginTestHarnessZ3ZdoIeeeAddrReqCommand(void)
-{
-  EmberNodeId nwkAddrOfInterest = (EmberNodeId)emberUnsignedCommandArgument(0);
-  uint8_t requestType           = (uint8_t)emberUnsignedCommandArgument(1);
-  uint8_t startIndex            = (uint8_t)emberUnsignedCommandArgument(2);
-  EmberNodeId destination       = (EmberNodeId)emberUnsignedCommandArgument(3);
-  uint32_t options              = emAfPluginTestHarnessZ3GetSignificantBit(4);
-  EmberStatus status;
-  uint8_t frame[5];
-  uint8_t *finger = &frame[1];
-
-  if (options != BIT(0)) {
-    // Network address of interest.
-    emberAfCopyInt16u(finger, 0, nwkAddrOfInterest);
-    finger += sizeof(uint16_t);
-
-    // Request type.
-    *finger++ = requestType;
-
-    // Start index.
-    *finger++ = startIndex;
-  }
-
-  status = sendZdoCommand(destination,
-                          IEEE_ADDRESS_REQUEST,
-                          frame,
-                          finger - &frame[0]);
-
-  emberAfCorePrintln("%p: %p: 0x%X",
-                     TEST_HARNESS_Z3_PRINT_NAME,
-                     "IEEE address request",
-                     status);
-}
-
-// plugin test-harness z3 nwk ieee-addr-rsp-config reset
-// plugin test-harness z3 nwk ieee-addr-rsp-config issuer-nwk-address-remote-dev
-// plugin test-harness z3 nwk ieee-addr-rsp-config status-device-not-found
-void emAfPluginTestHarnessZ3ZdoIeeeAddrRspConfigCommand(void)
-{
-  EmberStatus status = EMBER_SUCCESS;
-  char firstChar = emberStringCommandArgument(-1, NULL)[0];
-
-  // Global state.
-  currentZdoNegativeCommandCluster = IEEE_ADDRESS_RESPONSE;
-  currentZdoNegativeCommandFrameLength = 12;
-
-  // Positive behavior.
-  currentZdoNegativeCommandFrame[1] = EMBER_ZDP_SUCCESS;
-
-  // Negative behavior.
-  switch (firstChar) {
-    case 'r':
-      // reset
-      negativeZdoCommandFlags = 0;
-      currentZdoNegativeCommandCluster = NULL_CURRENT_ZDO_NEGATIVE_COMMAND_CLUSTER;
-      break;
-    case 'i':
-      // issuer-nwk-address-remote-dev
-      negativeZdoCommandFlags |= NEGATIVE_ZDO_COMMAND_FLAGS_OUR_NWK_ADDRESS;
-      break;
-    case 's':
-      // status-device-not-found
-      currentZdoNegativeCommandFrame[1] = EMBER_ZDP_DEVICE_NOT_FOUND;
-      break;
-    default:
-      status = EMBER_BAD_ARGUMENT;
-  }
-
-  emberAfCorePrintln("%p: %p: 0x%X",
-                     TEST_HARNESS_Z3_PRINT_NAME,
-                     "IEEE address response config",
-                     status);
-}
-
-// plugin test-harness z3 zdo bc-device-announce <shortAddress:2> <ieeeAddress:8>
-void emAfPluginTestHarnessZ3ZdoBcDeviceAnnounceCommand(void)
-{
-  EmberNodeId shortAddress = (EmberNodeId)emberUnsignedCommandArgument(0);
-  EmberEUI64 eui64;
-  uint8_t frame[12];
-  EmberStatus status;
-
-  emberCopyBigEndianEui64Argument(1, eui64);
-
-  emberAfCopyInt16u(frame, 1, shortAddress);
-  MEMMOVE(frame + 3, eui64, EUI64_SIZE);
-  frame[11] = 0xE0; // capability: fake like we are a router
-
-  status = sendZdoCommand(EMBER_RX_ON_WHEN_IDLE_BROADCAST_ADDRESS,
-                          END_DEVICE_ANNOUNCE,
-                          frame,
-                          sizeof(frame));
-
-  emberAfCorePrintln("%p: %p: 0x%X",
-                     TEST_HARNESS_Z3_PRINT_NAME,
-                     "Broadcast device announce",
-                     status);
-}
-#endif //UC_BUILD
-
-#ifndef EZSP_HOST
-EmberStatus emAfPluginTestHarnessZ3ZdoCommandResponseHandler(uint8_t *requestBuffer,
-                                                             uint8_t length,
-                                                             EmberApsFrame *apsFrame)
+EmberStatus sli_zigbee_af_test_harness_z3_zdo_command_response_handler(uint8_t *requestBuffer,
+                                                                       uint8_t length,
+                                                                       EmberApsFrame *apsFrame)
 {
   EmberStatus status = EMBER_SUCCESS;
   uint16_t clusterId = apsFrame->clusterId;
@@ -1413,28 +776,28 @@ EmberStatus emAfPluginTestHarnessZ3ZdoCommandResponseHandler(uint8_t *requestBuf
     currentZdoNegativeCommandFrame[3] = HIGH_BYTE(emberAfGetNodeId());
     currentZdoNegativeCommandFrame[4] = nodetype;
     currentZdoNegativeCommandFrame[5] = ZDO_NODE_DESCRIPTOR_BAND_2400_MHZ;
-    currentZdoNegativeCommandFrame[6] = emDescriptorCapability;
-    currentZdoNegativeCommandFrame[7] = LOW_BYTE(emManufacturerCode);
-    currentZdoNegativeCommandFrame[8] = HIGH_BYTE(emManufacturerCode);
+    currentZdoNegativeCommandFrame[6] = sli_zigbee_descriptor_capability;
+    currentZdoNegativeCommandFrame[7] = LOW_BYTE(sli_zigbee_manufacturer_code);
+    currentZdoNegativeCommandFrame[8] = HIGH_BYTE(sli_zigbee_manufacturer_code);
     currentZdoNegativeCommandFrame[9] = emberMaximumApsPayloadLength();
-    currentZdoNegativeCommandFrame[10] = LOW_BYTE(emMaximumIncomingTransferSize);
-    currentZdoNegativeCommandFrame[11] = HIGH_BYTE(emMaximumIncomingTransferSize);
+    currentZdoNegativeCommandFrame[10] = LOW_BYTE(sli_zigbee_maximum_incoming_transfer_size);
+    currentZdoNegativeCommandFrame[11] = HIGH_BYTE(sli_zigbee_maximum_incoming_transfer_size);
 
     uint8_t mask_lowbyte = 0;
     if (emberGetNodeId() == 0) {
       mask_lowbyte |= 0x01;
     }
-    if (emAmNetworkManager()) {
+    if (sli_zigbee_am_network_manager()) {
       mask_lowbyte |= 0x40;
     }
     currentZdoNegativeCommandFrame[12] = mask_lowbyte;
     currentZdoNegativeCommandFrame[13] = 0x00;
 
     // Set a global for the Network Creator Security key establishment callback
-    emAfPluginTestHarnessZ3ServerMaskHigh = 0;
+    sli_zigbee_af_test_harness_z3_server_mask_high = 0;
 
-    currentZdoNegativeCommandFrame[14] = LOW_BYTE(emMaximumOutgoingTransferSize);
-    currentZdoNegativeCommandFrame[15] = HIGH_BYTE(emMaximumOutgoingTransferSize);
+    currentZdoNegativeCommandFrame[14] = LOW_BYTE(sli_zigbee_maximum_outgoing_transfer_size);
+    currentZdoNegativeCommandFrame[15] = HIGH_BYTE(sli_zigbee_maximum_outgoing_transfer_size);
     currentZdoNegativeCommandFrame[16] = 0x00;
     currentZdoNegativeCommandFrameLength = 17;
   } else if (clusterId == MATCH_DESCRIPTORS_REQUEST) {
@@ -1562,12 +925,8 @@ EmberStatus emAfPluginTestHarnessZ3ZdoCommandResponseHandler(uint8_t *requestBuf
   if (status == EMBER_SUCCESS) {
     // We use an event for this command so that the positive stuff will go
     // out of the radio first.
-    currentZdoNegativeCommandDestination = emCurrentSender;
-#ifdef UC_BUILD
+    currentZdoNegativeCommandDestination = sli_zigbee_af_current_sender;
     sl_zigbee_event_set_active(&emberAfPluginTestHarnessZ3ZdoSendEventControl);
-#else
-    emberEventControlSetActive(emberAfPluginTestHarnessZ3ZdoSendEventControl);
-#endif // UC_BUILD
   }
 
   // Maybe change the cluster id to an invalid cluster so we don't process the
@@ -1581,13 +940,9 @@ EmberStatus emAfPluginTestHarnessZ3ZdoCommandResponseHandler(uint8_t *requestBuf
 }
 #endif /* EZSP_HOST */
 
-void emberAfPluginTestHarnessZ3ZdoSendEventHandler(SLXU_UC_EVENT)
+void emberAfPluginTestHarnessZ3ZdoSendEventHandler(sl_zigbee_event_t * event)
 {
-#ifdef UC_BUILD
   sl_zigbee_event_set_inactive(&emberAfPluginTestHarnessZ3ZdoSendEventControl);
-#else
-  emberEventControlSetInactive(emberAfPluginTestHarnessZ3ZdoSendEventControl);
-#endif // UC_BUILD
 
   if (!(negativeZdoCommandFlags
         & NEGATIVE_ZDO_COMMAND_FLAGS_NO_NEGATIVE_RESPONSE)) {

@@ -6,21 +6,24 @@ description: >
   OTS Object Server implemented using static GATT.
 
   This component is instantiable, meaning that several named instances can be
-  created. For each instance, a configuration header, an instance header and a 
-  source file is generated to encapsulate functionalities and initialize and 
+  created. For each instance, a configuration header, an instance header and a
+  source file is generated to encapsulate functionalities and initialize and
   manage the instance.
-  
+
   These instance variables are available in a generated header file,
   sl_bt_ots_server_instances.h.
 
   The instances are initialized automatically after the boot event of the Bluetooth
   stack.
 
-  Selecting this component will include the Object Transfer Service (OTS) Object 
+  Selecting this component will include the Object Transfer Service (OTS) Object
   Server Core component, which is the implementation of the OTS Object Server API.
-category: Bluetooth|Middleware|OTS
-quality: experimental
+category: Bluetooth|Application|GATT Services
+quality: evaluation
 root_path: app/bluetooth/common/ots
+tag:
+  - Low-Code
+
 instantiable:
   prefix: inst
 config_file:

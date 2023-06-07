@@ -6,9 +6,14 @@ description: >
   Silabs Configuration Client can setup other nodes with Silabs Configuration Server Feature enabled (e.g. by the
   Advertisement Extension Server component).
   This is a proprietary feature which breaks compliance with AE in BT Mesh 1.1 specification.
+
+  This is a No-Code component.
 category: "Bluetooth Mesh|Models|Proprietary"
 quality: "production"
 root_path: "app/btmesh/common/btmesh_ae_client"
+tag:
+  - No-Code
+
 config_file:
   - path: btmesh_ae_client.dcd
     directory: btmeshconf
@@ -22,6 +27,7 @@ provides:
   - name: "btmesh_ae_client"
 requires:
   - name: "app_assert"
+  - name: "btmesh_provisionee"
   - name: "btmesh_stack_advertiser_extended"
   - name: "btmesh_stack_silabs_config_client"
   

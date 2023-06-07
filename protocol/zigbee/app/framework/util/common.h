@@ -25,9 +25,7 @@
 #include "app/framework/util/time-util.h"
 #include "app/framework/util/attribute-table.h"
 #include "app/framework/util/attribute-storage.h"
-#ifdef UC_BUILD
 #include "sl_endianness.h"
-#endif // UC_BUILD
 
 // the variables used to setup and send responses to cluster messages
 extern EmberApsFrame emberAfResponseApsFrame;

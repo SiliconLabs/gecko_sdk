@@ -28,18 +28,19 @@
  *
  ******************************************************************************/
 
-#include "em_device.h"
+#include "sli_psa_driver_features.h"
 
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
 
 #include "psa/crypto.h"
+
 #include "sli_se_version_dependencies.h"
 #include "sli_se_driver_key_management.h"
 
 #include "sl_se_manager_util.h"
 
 // -----------------------------------------------------------------------------
-// Global Functions
+// Global functions
 
 #if defined(SLI_SE_VERSION_ED25519_ERRATA_CHECK_REQUIRED)
 
@@ -68,4 +69,4 @@ psa_status_t sli_se_check_eddsa_errata(const psa_key_attributes_t* attributes,
 
 #endif // SLI_SE_VERSION_ED25519_ERRATA_CHECK_REQUIRED
 
-#endif // defined(SEMAILBOX_PRESENT)
+#endif // SLI_MBEDTLS_DEVICE_HSE

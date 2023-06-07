@@ -35,8 +35,8 @@
 #define OTBR_REST_RESPONSE_HPP_
 
 #include <chrono>
+#include <map>
 #include <string>
-#include <vector>
 
 #include "rest/types.hpp"
 
@@ -85,6 +85,14 @@ public:
      *
      */
     void SetResponsCode(std::string &aCode);
+
+    /**
+     * This method sets the content type.
+     *
+     * @param[in] aCode  A string representing response content type such as text/plain.
+     *
+     */
+    void SetContentType(const std::string &aContentType);
 
     /**
      * This method labels the response as need callback.
@@ -136,14 +144,13 @@ public:
     std::string Serialize(void) const;
 
 private:
-    bool                     mCallback;
-    std::vector<std::string> mHeaderField;
-    std::vector<std::string> mHeaderValue;
-    std::string              mCode;
-    std::string              mProtocol;
-    std::string              mBody;
-    bool                     mComplete;
-    steady_clock::time_point mStartTime;
+    bool                               mCallback;
+    std::map<std::string, std::string> mHeaders;
+    std::string                        mCode;
+    std::string                        mProtocol;
+    std::string                        mBody;
+    bool                               mComplete;
+    steady_clock::time_point           mStartTime;
 };
 
 } // namespace rest

@@ -66,6 +66,7 @@ include:
   - path: "platform/emdrv/nvm3/inc"
     file_list:
       - path: "nvm3.h"
+      - path: "nvm3_generic.h"
       - path: "nvm3_hal.h"
       - path: "nvm3_hal_flash.h"
       - path: "nvm3_lock.h"

@@ -70,9 +70,11 @@ typedef struct {
   uint32_t       RESERVED8[4U];                 /**< Reserved for future use                            */
   uint32_t       RESERVED9[12U];                /**< Reserved for future use                            */
   uint32_t       RESERVED10[1U];                /**< Reserved for future use                            */
-  uint32_t       RESERVED11[919U];              /**< Reserved for future use                            */
-  __IM uint32_t  IPVERSION_SET;                 /**< IP version ID                                      */
+  uint32_t       RESERVED11[11U];               /**< Reserved for future use                            */
   uint32_t       RESERVED12[1U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED13[907U];              /**< Reserved for future use                            */
+  __IM uint32_t  IPVERSION_SET;                 /**< IP version ID                                      */
+  uint32_t       RESERVED14[1U];                /**< Reserved for future use                            */
   __IOM uint32_t READCTRL_SET;                  /**< Read Control Register                              */
   __IOM uint32_t WRITECTRL_SET;                 /**< Write Control Register                             */
   __IOM uint32_t WRITECMD_SET;                  /**< Write Command Register                             */
@@ -81,26 +83,28 @@ typedef struct {
   __IM uint32_t  STATUS_SET;                    /**< Status Register                                    */
   __IOM uint32_t IF_SET;                        /**< Interrupt Flag Register                            */
   __IOM uint32_t IEN_SET;                       /**< Interrupt Enable Register                          */
-  uint32_t       RESERVED13[3U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED15[3U];                /**< Reserved for future use                            */
   __IM uint32_t  USERDATASIZE_SET;              /**< User Data Region Size Register                     */
   __IOM uint32_t CMD_SET;                       /**< Command Register                                   */
   __IOM uint32_t LOCK_SET;                      /**< Configuration Lock Register                        */
   __IOM uint32_t MISCLOCKWORD_SET;              /**< Mass erase and User data page lock word            */
-  uint32_t       RESERVED14[3U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED16[3U];                /**< Reserved for future use                            */
   __IOM uint32_t PWRCTRL_SET;                   /**< Power control register                             */
-  uint32_t       RESERVED15[51U];               /**< Reserved for future use                            */
+  uint32_t       RESERVED17[51U];               /**< Reserved for future use                            */
   __IOM uint32_t PAGELOCK0_SET;                 /**< Main space page 0-31 lock word                     */
   __IOM uint32_t PAGELOCK1_SET;                 /**< Main space page 32-63 lock word                    */
-  uint32_t       RESERVED16[2U];                /**< Reserved for future use                            */
-  uint32_t       RESERVED17[4U];                /**< Reserved for future use                            */
-  uint32_t       RESERVED18[4U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED18[2U];                /**< Reserved for future use                            */
   uint32_t       RESERVED19[4U];                /**< Reserved for future use                            */
   uint32_t       RESERVED20[4U];                /**< Reserved for future use                            */
-  uint32_t       RESERVED21[12U];               /**< Reserved for future use                            */
-  uint32_t       RESERVED22[1U];                /**< Reserved for future use                            */
-  uint32_t       RESERVED23[919U];              /**< Reserved for future use                            */
-  __IM uint32_t  IPVERSION_CLR;                 /**< IP version ID                                      */
+  uint32_t       RESERVED21[4U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED22[4U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED23[12U];               /**< Reserved for future use                            */
   uint32_t       RESERVED24[1U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED25[11U];               /**< Reserved for future use                            */
+  uint32_t       RESERVED26[1U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED27[907U];              /**< Reserved for future use                            */
+  __IM uint32_t  IPVERSION_CLR;                 /**< IP version ID                                      */
+  uint32_t       RESERVED28[1U];                /**< Reserved for future use                            */
   __IOM uint32_t READCTRL_CLR;                  /**< Read Control Register                              */
   __IOM uint32_t WRITECTRL_CLR;                 /**< Write Control Register                             */
   __IOM uint32_t WRITECMD_CLR;                  /**< Write Command Register                             */
@@ -109,26 +113,28 @@ typedef struct {
   __IM uint32_t  STATUS_CLR;                    /**< Status Register                                    */
   __IOM uint32_t IF_CLR;                        /**< Interrupt Flag Register                            */
   __IOM uint32_t IEN_CLR;                       /**< Interrupt Enable Register                          */
-  uint32_t       RESERVED25[3U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED29[3U];                /**< Reserved for future use                            */
   __IM uint32_t  USERDATASIZE_CLR;              /**< User Data Region Size Register                     */
   __IOM uint32_t CMD_CLR;                       /**< Command Register                                   */
   __IOM uint32_t LOCK_CLR;                      /**< Configuration Lock Register                        */
   __IOM uint32_t MISCLOCKWORD_CLR;              /**< Mass erase and User data page lock word            */
-  uint32_t       RESERVED26[3U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED30[3U];                /**< Reserved for future use                            */
   __IOM uint32_t PWRCTRL_CLR;                   /**< Power control register                             */
-  uint32_t       RESERVED27[51U];               /**< Reserved for future use                            */
+  uint32_t       RESERVED31[51U];               /**< Reserved for future use                            */
   __IOM uint32_t PAGELOCK0_CLR;                 /**< Main space page 0-31 lock word                     */
   __IOM uint32_t PAGELOCK1_CLR;                 /**< Main space page 32-63 lock word                    */
-  uint32_t       RESERVED28[2U];                /**< Reserved for future use                            */
-  uint32_t       RESERVED29[4U];                /**< Reserved for future use                            */
-  uint32_t       RESERVED30[4U];                /**< Reserved for future use                            */
-  uint32_t       RESERVED31[4U];                /**< Reserved for future use                            */
-  uint32_t       RESERVED32[4U];                /**< Reserved for future use                            */
-  uint32_t       RESERVED33[12U];               /**< Reserved for future use                            */
-  uint32_t       RESERVED34[1U];                /**< Reserved for future use                            */
-  uint32_t       RESERVED35[919U];              /**< Reserved for future use                            */
+  uint32_t       RESERVED32[2U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED33[4U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED34[4U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED35[4U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED36[4U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED37[12U];               /**< Reserved for future use                            */
+  uint32_t       RESERVED38[1U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED39[11U];               /**< Reserved for future use                            */
+  uint32_t       RESERVED40[1U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED41[907U];              /**< Reserved for future use                            */
   __IM uint32_t  IPVERSION_TGL;                 /**< IP version ID                                      */
-  uint32_t       RESERVED36[1U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED42[1U];                /**< Reserved for future use                            */
   __IOM uint32_t READCTRL_TGL;                  /**< Read Control Register                              */
   __IOM uint32_t WRITECTRL_TGL;                 /**< Write Control Register                             */
   __IOM uint32_t WRITECMD_TGL;                  /**< Write Command Register                             */
@@ -137,23 +143,25 @@ typedef struct {
   __IM uint32_t  STATUS_TGL;                    /**< Status Register                                    */
   __IOM uint32_t IF_TGL;                        /**< Interrupt Flag Register                            */
   __IOM uint32_t IEN_TGL;                       /**< Interrupt Enable Register                          */
-  uint32_t       RESERVED37[3U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED43[3U];                /**< Reserved for future use                            */
   __IM uint32_t  USERDATASIZE_TGL;              /**< User Data Region Size Register                     */
   __IOM uint32_t CMD_TGL;                       /**< Command Register                                   */
   __IOM uint32_t LOCK_TGL;                      /**< Configuration Lock Register                        */
   __IOM uint32_t MISCLOCKWORD_TGL;              /**< Mass erase and User data page lock word            */
-  uint32_t       RESERVED38[3U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED44[3U];                /**< Reserved for future use                            */
   __IOM uint32_t PWRCTRL_TGL;                   /**< Power control register                             */
-  uint32_t       RESERVED39[51U];               /**< Reserved for future use                            */
+  uint32_t       RESERVED45[51U];               /**< Reserved for future use                            */
   __IOM uint32_t PAGELOCK0_TGL;                 /**< Main space page 0-31 lock word                     */
   __IOM uint32_t PAGELOCK1_TGL;                 /**< Main space page 32-63 lock word                    */
-  uint32_t       RESERVED40[2U];                /**< Reserved for future use                            */
-  uint32_t       RESERVED41[4U];                /**< Reserved for future use                            */
-  uint32_t       RESERVED42[4U];                /**< Reserved for future use                            */
-  uint32_t       RESERVED43[4U];                /**< Reserved for future use                            */
-  uint32_t       RESERVED44[4U];                /**< Reserved for future use                            */
-  uint32_t       RESERVED45[12U];               /**< Reserved for future use                            */
-  uint32_t       RESERVED46[1U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED46[2U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED47[4U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED48[4U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED49[4U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED50[4U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED51[12U];               /**< Reserved for future use                            */
+  uint32_t       RESERVED52[1U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED53[11U];               /**< Reserved for future use                            */
+  uint32_t       RESERVED54[1U];                /**< Reserved for future use                            */
 } MSC_TypeDef;
 /** @} End of group EFR32BG22_MSC */
 
@@ -165,11 +173,11 @@ typedef struct {
  *****************************************************************************/
 
 /* Bit fields for MSC IPVERSION */
-#define _MSC_IPVERSION_RESETVALUE                 0x00000001UL                            /**< Default value for MSC_IPVERSION             */
+#define _MSC_IPVERSION_RESETVALUE                 0x00000008UL                            /**< Default value for MSC_IPVERSION             */
 #define _MSC_IPVERSION_MASK                       0xFFFFFFFFUL                            /**< Mask for MSC_IPVERSION                      */
 #define _MSC_IPVERSION_IPVERSION_SHIFT            0                                       /**< Shift value for MSC_IPVERSION               */
 #define _MSC_IPVERSION_IPVERSION_MASK             0xFFFFFFFFUL                            /**< Bit mask for MSC_IPVERSION                  */
-#define _MSC_IPVERSION_IPVERSION_DEFAULT          0x00000001UL                            /**< Mode DEFAULT for MSC_IPVERSION              */
+#define _MSC_IPVERSION_IPVERSION_DEFAULT          0x00000008UL                            /**< Mode DEFAULT for MSC_IPVERSION              */
 #define MSC_IPVERSION_IPVERSION_DEFAULT           (_MSC_IPVERSION_IPVERSION_DEFAULT << 0) /**< Shifted mode DEFAULT for MSC_IPVERSION      */
 
 /* Bit fields for MSC READCTRL */

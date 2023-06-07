@@ -47,6 +47,11 @@
 #include "sl_flex_mode_switch.h"
 #include "pa_conversions_efr32.h"
 #include "sl_status.h"
+#include "sl_flex_rail_config.h"
+
+#if defined(SL_CATALOG_KERNEL_PRESENT)
+#include "app_task_init.h"
+#endif
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -102,7 +107,7 @@ static volatile uint16_t current_channel = 0U;
 /// The channel the device returns to from mode switch
 static volatile uint16_t base_channel = 0U;
 /// Buffer of the packet to be sent
-static uint8_t tx_frame_buffer[128];
+static uint8_t tx_frame_buffer[SL_FLEX_RAIL_TX_FIFO_SIZE];
 /// The time in seconds that the device is in the new phy during mode switch
 static volatile uint32_t ms_duration = 0U;
 /// Timer for the mode switch process
@@ -650,6 +655,10 @@ sl_status_t trig_mode_switch_tx(RAIL_Handle_t rail_handle)
     ms_state = MS_IDLE;
   }
 
+#if defined(SL_CATALOG_KERNEL_PRESENT)
+  app_task_notify();
+#endif
+
   return status;
 }
 
@@ -1002,4 +1011,8 @@ static void ms_timer_callback(sl_sleeptimer_timer_handle_t *handle,
   (void) handle;
 
   ms_state = MS_RETURN_TO_BASE_PHY;
+
+#if defined(SL_CATALOG_KERNEL_PRESENT)
+  app_task_notify();
+#endif
 }

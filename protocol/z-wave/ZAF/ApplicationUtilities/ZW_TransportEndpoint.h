@@ -21,11 +21,9 @@
  * @{
  */
 
-#define RES_ZERO 0
-
 /**
-* Defines return values for Transport_SendResponseEP and Transport_SendRequestEP
-* methods. They match the enum values defined in EQueueNotifyingStatus (i.e., 
+* Defines return values for ZAF_Transmit.
+* They match the enum values defined in EQueueNotifyingStatus (i.e.,
 * EQUEUENOTIFYING_STATUS_SUCCESS and EQUEUENOTIFYING_STATUS_TIMEOUT, respectively).
 */
 typedef enum
@@ -104,142 +102,9 @@ typedef enum _ENDPOINT_
 } ENDPOINT;
 
 /**
- * Struct for an Endpoint DEVICE_CLASS.
- */
-typedef struct _DEVICE_CLASS_
-{
-  uint8_t genericDeviceClass;
-  uint8_t specificDeviceClass;
-} DEVICE_CLASS;
-
-/**
- * Struct for an Endpoint NIF.
- */
-typedef struct _EP_NIF_
-{
-  uint8_t genericDeviceClass;
-  uint8_t specificDeviceClass;
-} EP_NIF;
-
-/**
- * Struct for setting up aggregation endpoint group bit-mask.
- */
-typedef struct _AGGREGATED_GROUP_BIT_MASK_
-{
-  uint8_t aggregatedEndpoint;
-  uint8_t len;
-  uint8_t* pBitMask;
-} AGGREGATED_GROUP_BIT_MASK;
-
-
-/**
- * This bit MUST be set to 1 if all End Points advertise the same generic and specific
-   device class and support the same optional command classes. The bit MUST be set to 0 if
-   End Points do not advertise the same device class and command class information.
- */
-typedef enum _ENDPOINT_IDENTICAL_DEVICE_CLASS_
-{
-  ENDPOINT_IDENTICAL_DEVICE_CLASS_NO = 0,
-  ENDPOINT_IDENTICAL_DEVICE_CLASS_YES = 1
-}ENDPOINT_IDENTICAL_DEVICE_CLASS;
-
-
-/**
- * This field is used to advertise if the node implements a dynamic number of End Points.
- * The value 1 MUST be used to indicate that the number of End Points is dynamic. The value
- * 0 MUST be used to indicate that the number of End Points is static.
- */
-typedef enum _ENDPOINT_DYNAMIC_
-{
-  ENDPOINT_DYNAMIC_NO = 0,
-  ENDPOINT_DYNAMIC_YES = 1
-} ENDPOINT_DYNAMIC;
-
-
-/**
- * The Multi Channel End Point functionality is used to advertise the number
- * of End Points implemented by the node. See description of doc. SDS12657
- * chapter Multi Channel End Point Report Command
- */
-struct _EP_FUNCTIONALITY_
-{
-  uint8_t nbrIndividualEndpoints : 7;  /**< B0, Number of End Points implemented by the node. The value MUST be in the range 1..127 */
-  uint8_t resIndZeorBit   : 1;  /**< B0, This field MUST be set to 0*/
-  uint8_t nbrAggregatedEndpoints : 7;  /**< B0, Number of End Points implemented by the node. The value MUST be in the range 1..127 */
-  uint8_t resAggZeorBit   : 1;  /**< B0, This field MUST be set to 0*/
-  uint8_t resZero      : 6;  /**< B1, This field MUST be set to 0*/
-  ENDPOINT_IDENTICAL_DEVICE_CLASS identical : 1; /**< B1, of enum type ENDPOINT_IDENTICAL_DEVICE_CLASS*/
-  ENDPOINT_DYNAMIC dynamic: 1;  /**< B1, of enum type ENDPOINT_DYNAMIC*/
-};
-
-/**
- * The Multi Channel End Point functionality encpsulation
- */
-typedef union _EP_FUNCTIONALITY_DATA_
-{
-  struct _EP_FUNCTIONALITY_ bits;
-  uint8_t   bDdata[3];
-} EP_FUNCTIONALITY_DATA;
-
-
-/**
  * Initializes the ZAF Transport Layer.
  */
 void ZW_TransportEndpoint_Init(void);
-
-/**
- * @brief Initialization of endpoint NIF's. Each endpoint  have only one command class list
- * that is present for device security level. Framework will add non secure command class list
- * if device is secure include. Dependent ofr secure level contains the list CC security and security 2.
- * This function must be called after Transport_OnApplicationInitSW.
- * @param[in] pFunctionality of type EP_FUNCTIONALITY_DATA
- * @param[in] pList is a pointer of type EP_LIST to all endpoints NIF's.
- * @param[in] sizeList is number of endpoints NIF's pList points to.
- */
-//@ [Transport_AddEndpointSupport]
-void Transport_AddEndpointSupport(
-    EP_FUNCTIONALITY_DATA* pFunctionality,
-    EP_NIF* pList,
-    uint8_t sizeList);
-//@ [Transport_AddEndpointSupport]
-
-
-/**
- * @brief Setup aggregation groups
- * Example including two aggregation endpoints:
- * NUMBER_OF_AGGREGATED_ENDPOINTS = 2;
- * uint8_t ep4_AGG_Group[2] = {0x03};      //bit mask for endpoints: 1 and 2
- * uint8_t ep5_AGG_Group = 0x07;           //bit mask for endpoint 1, 2 and 3
- * AGGREGATED_GROUP_BIT_MASK maskarray[NUMBER_OF_AGGREGATED_ENDPOINTS] =
- * {
- *  {ENDPOINT_4, sizeof(ep4_AGG_Group), &ep4_AGG_Group },
- *  {ENDPOINT_5, sizeof(ep5_AGG_Group), &ep5_AGG_Group }
- * };
- * Transport_SetupAggregationGroups( aggGroup, NUMBER_OF_AGGREGATED_ENDPOINTS);
- *
- * @param pMaskArray pointer to array of type AGGREGATED_GROUP_BIT_MASK
- * @param sizeArray size of array
- */
-void
-Transport_SetupAggregationGroups(AGGREGATED_GROUP_BIT_MASK* pMaskArray, uint8_t sizeArray);
-
-
-/**
- * @brief Read Node endpoint functionality
- * @param pFunc pointer of type EP_FUNCTIONALITY.
- */
-void
-GetMultiChannelEndPointFunctionality(EP_FUNCTIONALITY_DATA* pFunc);
-
-
-/**
- * @brief Return endpoint device class.
- * @param[in] endpoint parameter
- * @return pointer of type DEVICE_CLASS!
- */
-DEVICE_CLASS*
-GetEndpointDeviceClass( uint8_t endpoint);
-
 
 /**
  * @brief Get endpoint non-secure or secure command class list.
@@ -251,47 +116,22 @@ zaf_cc_list_t*
 GetEndpointcmdClassList( bool secList, uint8_t endpoint);
 
 /**
- * @brief Search for next specified set of generic and specific
- * device class in End Points.
- * @param[in] genDeviceClass generic device class parameter
- * @param[in] specDeviceClass specific device class parameter
- * @param[out] pEp endpoint list pointer
- * @return endpoint. 0 if no endpoint.
- */
-uint8_t FindEndPoints( uint8_t genDeviceClass, uint8_t specDeviceClass, uint8_t* pEp);
-
-
-/**
- * @brief Send data request call. Encapsulate data for endpoint support and call protocol ZW_SendDataEx.
+ * @brief Send data. This function is used both as response to a command and for sending unsolicited frames
+ * Encapsulate data for endpoint support and call protocol ZW_SendDataEx.
+ *
  * @param[in] pData IN Data buffer pointer.
  * @param[in] dataLength IN Data buffer length.
  * @param[in] pTxOptionsEx transmit options pointer.
- * @param[out] pCallback is a callback function-pointer returning result of the job.
+ * @param[out] pCallback is a callback function-pointer returning result of the job. Please note that both
+ *             bStatus TRANSMIT_COMPLETE_OK and TRANSMIT_COMPLETE_VERIFIED indicates successful transmission.
  * @return status of enum type EZAF_EnqueueStatus_t
  */
 EZAF_EnqueueStatus_t
-Transport_SendRequestEP(
+ZAF_Transmit(
   uint8_t *pData,
   size_t   dataLength,
   TRANSMIT_OPTIONS_TYPE_SINGLE_EX *pTxOptionsEx,
-  void (*pCallback)(TRANSMISSION_RESULT * pTransmissionResult));
-
-
-/**
- * @brief Send data response call. Encapsulate data for endpoint support and call protocol ZW_SendDataEx.
- * @param[in] pData IN Data buffer pointer.
- * @param[in] dataLength IN Data buffer length.
- * @param[in] pTxOptionsEx transmit options pointer.
- * @param[out] pCallback is a callback function-pointer returning result of the job. Please note that both 
- *             bStatus TRANSMIT_COMPLETE_OK and TRANSMIT_COMPLETE_VERIFIED indicates succesful transmission.
- * @return status of enum type EZAF_EnqueueStatus_t
- */
-EZAF_EnqueueStatus_t
-Transport_SendResponseEP(
-  uint8_t *pData,
-  size_t   dataLength,
-  TRANSMIT_OPTIONS_TYPE_SINGLE_EX *pTxOptionsEx,
-  void (*pCallback)(uint8_t bStatus));
+  ZAF_TX_Callback_t pCallback);
 
 /**
  * Invokes a command class handler based on the first byte in the frame.
@@ -343,15 +183,6 @@ Check_not_legal_response_job(RECEIVE_OPTIONS_TYPE_EX *rxOpt);
  * @return Boolean true if use bit-addressing else false
  */
 bool is_multicast(RECEIVE_OPTIONS_TYPE_EX *rxOpt);
-
-/**
- * @brief Read members of an aggregated endpoint
- * @param[in] aggregatedEndpoint endpoint number
- * @param[out] pAggBitMask pointer to bitmask
- * @return number of Aggregated Members Bit Mask bytes
- */
-uint8_t
-ReadAggregatedEndpointGroup( uint8_t aggregatedEndpoint, uint8_t* pAggBitMask);
 
 /**
  * @brief Set supervision-encapsulated-frame flag. The Command class call Check_not_legal_response_job()

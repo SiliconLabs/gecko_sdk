@@ -85,16 +85,16 @@ public:
     void      Stop(void) override;
 
 protected:
-    void      PublishServiceImpl(const std::string &aHostName,
+    otbrError PublishServiceImpl(const std::string &aHostName,
                                  const std::string &aName,
                                  const std::string &aType,
                                  const SubTypeList &aSubTypeList,
                                  uint16_t           aPort,
-                                 const TxtList &    aTxtList,
-                                 ResultCallback &&  aCallback) override;
-    void      PublishHostImpl(const std::string &            aName,
+                                 const TxtList     &aTxtList,
+                                 ResultCallback   &&aCallback) override;
+    otbrError PublishHostImpl(const std::string             &aName,
                               const std::vector<Ip6Address> &aAddresses,
-                              ResultCallback &&              aCallback) override;
+                              ResultCallback               &&aCallback) override;
     void      OnServiceResolveFailedImpl(const std::string &aType,
                                          const std::string &aInstanceName,
                                          int32_t            aErrorCode) override;
@@ -113,10 +113,10 @@ private:
                                  const std::string &aType,
                                  const SubTypeList &aSubTypeList,
                                  uint16_t           aPort,
-                                 const TxtList &    aTxtList,
-                                 ResultCallback &&  aCallback,
-                                 AvahiEntryGroup *  aEntryGroup,
-                                 PublisherAvahi *   aPublisher)
+                                 const TxtList     &aTxtList,
+                                 ResultCallback   &&aCallback,
+                                 AvahiEntryGroup   *aEntryGroup,
+                                 PublisherAvahi    *aPublisher)
             : ServiceRegistration(aHostName,
                                   aName,
                                   aType,
@@ -139,11 +139,11 @@ private:
     class AvahiHostRegistration : public HostRegistration
     {
     public:
-        AvahiHostRegistration(const std::string &            aName,
+        AvahiHostRegistration(const std::string             &aName,
                               const std::vector<Ip6Address> &aAddresses,
-                              ResultCallback &&              aCallback,
-                              AvahiEntryGroup *              aEntryGroup,
-                              PublisherAvahi *               aPublisher)
+                              ResultCallback               &&aCallback,
+                              AvahiEntryGroup               *aEntryGroup,
+                              PublisherAvahi                *aPublisher)
             : HostRegistration(aName, aAddresses, std::move(aCallback), aPublisher)
             , mEntryGroup(aEntryGroup)
         {
@@ -184,59 +184,61 @@ private:
                      AvahiProtocol      aProtocol,
                      const std::string &aInstanceName,
                      const std::string &aType);
-        void AddServiceResolver(AvahiServiceResolver *aServiceResolver);
-        void RemoveServiceResolver(AvahiServiceResolver *aServiceResolver);
+        void AddServiceResolver(const std::string &aInstanceName, AvahiServiceResolver *aServiceResolver);
+        void RemoveServiceResolver(const std::string &aInstanceName);
 
-        static void HandleBrowseResult(AvahiServiceBrowser *  aServiceBrowser,
+        static void HandleBrowseResult(AvahiServiceBrowser   *aServiceBrowser,
                                        AvahiIfIndex           aInterfaceIndex,
                                        AvahiProtocol          aProtocol,
                                        AvahiBrowserEvent      aEvent,
-                                       const char *           aName,
-                                       const char *           aType,
-                                       const char *           aDomain,
+                                       const char            *aName,
+                                       const char            *aType,
+                                       const char            *aDomain,
                                        AvahiLookupResultFlags aFlags,
-                                       void *                 aContext);
+                                       void                  *aContext);
 
-        void HandleBrowseResult(AvahiServiceBrowser *  aServiceBrowser,
+        void HandleBrowseResult(AvahiServiceBrowser   *aServiceBrowser,
                                 AvahiIfIndex           aInterfaceIndex,
                                 AvahiProtocol          aProtocol,
                                 AvahiBrowserEvent      aEvent,
-                                const char *           aName,
-                                const char *           aType,
-                                const char *           aDomain,
+                                const char            *aName,
+                                const char            *aType,
+                                const char            *aDomain,
                                 AvahiLookupResultFlags aFlags);
 
-        static void HandleResolveResult(AvahiServiceResolver * aServiceResolver,
+        static void HandleResolveResult(AvahiServiceResolver  *aServiceResolver,
                                         AvahiIfIndex           aInterfaceIndex,
                                         AvahiProtocol          Protocol,
                                         AvahiResolverEvent     aEvent,
-                                        const char *           aName,
-                                        const char *           aType,
-                                        const char *           aDomain,
-                                        const char *           aHostName,
-                                        const AvahiAddress *   aAddress,
+                                        const char            *aName,
+                                        const char            *aType,
+                                        const char            *aDomain,
+                                        const char            *aHostName,
+                                        const AvahiAddress    *aAddress,
                                         uint16_t               aPort,
-                                        AvahiStringList *      aTxt,
+                                        AvahiStringList       *aTxt,
                                         AvahiLookupResultFlags aFlags,
-                                        void *                 aContext);
+                                        void                  *aContext);
 
-        void HandleResolveResult(AvahiServiceResolver * aServiceResolver,
+        void HandleResolveResult(AvahiServiceResolver  *aServiceResolver,
                                  AvahiIfIndex           aInterfaceIndex,
                                  AvahiProtocol          Protocol,
                                  AvahiResolverEvent     aEvent,
-                                 const char *           aName,
-                                 const char *           aType,
-                                 const char *           aDomain,
-                                 const char *           aHostName,
-                                 const AvahiAddress *   aAddress,
+                                 const char            *aName,
+                                 const char            *aType,
+                                 const char            *aDomain,
+                                 const char            *aHostName,
+                                 const AvahiAddress    *aAddress,
                                  uint16_t               aPort,
-                                 AvahiStringList *      aTxt,
+                                 AvahiStringList       *aTxt,
                                  AvahiLookupResultFlags aFlags);
 
-        std::string                      mType;
-        std::string                      mInstanceName;
-        AvahiServiceBrowser *            mServiceBrowser;
-        std::set<AvahiServiceResolver *> mServiceResolvers;
+        std::string          mType;
+        std::string          mInstanceName;
+        AvahiServiceBrowser *mServiceBrowser;
+
+        using ServiceResolversMap = std::map<std::string, std::set<AvahiServiceResolver *>>;
+        ServiceResolversMap mServiceResolvers;
     };
 
     struct HostSubscription : public Subscription
@@ -252,26 +254,26 @@ private:
 
         void        Release(void);
         void        Resolve(void);
-        static void HandleResolveResult(AvahiRecordBrowser *   aRecordBrowser,
+        static void HandleResolveResult(AvahiRecordBrowser    *aRecordBrowser,
                                         AvahiIfIndex           aInterfaceIndex,
                                         AvahiProtocol          aProtocol,
                                         AvahiBrowserEvent      aEvent,
-                                        const char *           aName,
+                                        const char            *aName,
                                         uint16_t               aClazz,
                                         uint16_t               aType,
-                                        const void *           aRdata,
+                                        const void            *aRdata,
                                         size_t                 aSize,
                                         AvahiLookupResultFlags aFlags,
-                                        void *                 aContext);
+                                        void                  *aContext);
 
-        void HandleResolveResult(AvahiRecordBrowser *   aRecordBrowser,
+        void HandleResolveResult(AvahiRecordBrowser    *aRecordBrowser,
                                  AvahiIfIndex           aInterfaceIndex,
                                  AvahiProtocol          aProtocol,
                                  AvahiBrowserEvent      aEvent,
-                                 const char *           aName,
+                                 const char            *aName,
                                  uint16_t               aClazz,
                                  uint16_t               aType,
-                                 const void *           aRdata,
+                                 const void            *aRdata,
                                  size_t                 aSize,
                                  AvahiLookupResultFlags aFlags);
 
@@ -293,15 +295,15 @@ private:
     void        HandleGroupState(AvahiEntryGroup *aGroup, AvahiEntryGroupState aState);
     void        CallHostOrServiceCallback(AvahiEntryGroup *aGroup, otbrError aError);
 
-    static otbrError TxtListToAvahiStringList(const TxtList &   aTxtList,
-                                              AvahiStringList * aBuffer,
+    static otbrError TxtListToAvahiStringList(const TxtList    &aTxtList,
+                                              AvahiStringList  *aBuffer,
                                               size_t            aBufferSize,
                                               AvahiStringList *&aHead);
 
     ServiceRegistration *FindServiceRegistration(const AvahiEntryGroup *aEntryGroup);
-    HostRegistration *   FindHostRegistration(const AvahiEntryGroup *aEntryGroup);
+    HostRegistration    *FindHostRegistration(const AvahiEntryGroup *aEntryGroup);
 
-    AvahiClient *                mClient;
+    AvahiClient                 *mClient;
     std::unique_ptr<AvahiPoller> mPoller;
     State                        mState;
     StateCallback                mStateCallback;

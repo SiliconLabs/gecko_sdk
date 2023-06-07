@@ -41,6 +41,7 @@ class CALC_Frame_Detect(ICalculator):
         self._addModelActual(model,    'syncword_0'     ,  long,         ModelVariableFormat.HEX, ) #  desc='Syncword 0 extracted from the register )
         self._addModelActual(model,    'syncword_1'     ,  long,         ModelVariableFormat.HEX, ) #  desc='Syncword 1 extracted from the register )
 
+        # FIXME: MW: Need to resolve after RTL fixed
         self._addModelRegister(model, 'MODEM.CTRL1.DUALSYNC'           , int, ModelVariableFormat.HEX )
         self._addModelRegister(model, 'MODEM.CTRL0.FDM0DIFFDIS'        , int, ModelVariableFormat.HEX )
         
@@ -114,7 +115,8 @@ class CALC_Frame_Detect(ICalculator):
             model (ModelRoot) : Data model to read and write variables from
         """
 
-        assert(model.vars.syncword_length.value > 0)
+        if model.vars.syncword_length.value < 2:
+            LogMgr.Error("Syncword length must be at least 2")
         
         if model.vars.ber_force_sync.value == True:
             syncword_length = 32

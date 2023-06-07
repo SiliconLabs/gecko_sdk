@@ -161,7 +161,7 @@ enum {
   // Center (insecure) rejoin for a device that is using the well-known link
   // key. This timeout takes effect once rejoins using the well-known key has
   // been allowed. This command updates the
-  // emAllowTcRejoinsUsingWellKnownKeyTimeoutSec value.
+  // sli_zigbee_allow_tc_rejoins_using_well_known_key_timeout_sec value.
   EZSP_CONFIG_TC_REJOINS_USING_WELL_KNOWN_KEY_TIMEOUT_S = 0x38,
   // Valid range of a CTUNE value is 0x0000-0x01FF. Higher order bits (0xFE00)
   // of the 16-bit value are ignored.
@@ -340,9 +340,13 @@ enum {
   // Timeout in milliseconds to store entries in the transient device table. If
   // the devices are not authenticated before the timeout, the entry shall be
   // purged
-  EZSP_VALUE_TRANSIENT_DEVICE_TIMEOUT           = 0x43
+  EZSP_VALUE_TRANSIENT_DEVICE_TIMEOUT           = 0x43,
+  // Return information about the key storage on an NCP.  Returns 0 if keys are
+  // in classic key storage, and 1 if they are located in PSA key storage. Read
+  // only.
+  EZSP_VALUE_KEY_STORAGE_VERSION                = 0x44
 };
-#define EZSP_VALUE_ID_MAX  0x43
+#define EZSP_VALUE_ID_MAX  0x44
 
 //------------------------------------------------------------------------------
 // Identifies a value based on specified characteristics. Each set of
@@ -407,7 +411,7 @@ enum {
   // Controls whether Trust Center (insecure) rejoins for devices using the
   // well-known link key are accepted. If rejoining using the well-known key is
   // allowed, it is disabled again after
-  // emAllowTcRejoinsUsingWellKnownKeyTimeoutSec seconds.
+  // sli_zigbee_allow_tc_rejoins_using_well_known_key_timeout_sec seconds.
   EZSP_TC_REJOINS_USING_WELL_KNOWN_KEY_POLICY   = 0x09
 };
 #define EZSP_POLICY_ID_MAX  0x09
@@ -754,6 +758,8 @@ enum {
   EZSP_VERSION                                  = 0x0000,
   EZSP_GET_CONFIGURATION_VALUE                  = 0x0052,
   EZSP_SET_CONFIGURATION_VALUE                  = 0x0053,
+  EZSP_READ_ATTRIBUTE                           = 0x0108,
+  EZSP_WRITE_ATTRIBUTE                          = 0x0109,
   EZSP_ADD_ENDPOINT                             = 0x0002,
   EZSP_SET_POLICY                               = 0x0055,
   EZSP_GET_POLICY                               = 0x0056,
@@ -912,6 +918,8 @@ enum {
   EZSP_SET_INITIAL_SECURITY_STATE               = 0x0068,
   EZSP_GET_CURRENT_SECURITY_STATE               = 0x0069,
   EZSP_GET_KEY                                  = 0x006a,
+  EZSP_EXPORT_KEY                               = 0x0114,
+  EZSP_IMPORT_KEY                               = 0x0115,
   EZSP_SWITCH_NETWORK_KEY_HANDLER               = 0x006e,
   EZSP_GET_KEY_TABLE_ENTRY                      = 0x0071,
   EZSP_SET_KEY_TABLE_ENTRY                      = 0x0072,
@@ -927,12 +935,20 @@ enum {
   EZSP_CLEAR_TRANSIENT_LINK_KEYS                = 0x006B,
   EZSP_GET_TRANSIENT_LINK_KEY                   = 0x00CE,
   EZSP_GET_TRANSIENT_KEY_TABLE_ENTRY            = 0x006D,
+  EZSP_GET_NETWORK_KEY_INFO                     = 0x0116,
+  EZSP_GET_APS_KEY_INFO                         = 0x010C,
+  EZSP_IMPORT_LINK_KEY                          = 0x010E,
+  EZSP_EXPORT_LINK_KEY_BY_INDEX                 = 0x010F,
+  EZSP_EXPORT_LINK_KEY_BY_EUI                   = 0x010D,
+  EZSP_CHECK_KEY_CONTEXT                        = 0x0110,
+  EZSP_IMPORT_TRANSIENT_KEY                     = 0x0111,
+  EZSP_EXPORT_TRANSIENT_KEY_BY_INDEX            = 0x0112,
+  EZSP_EXPORT_TRANSIENT_KEY_BY_EUI              = 0x0113,
 
 // Trust Center Frames
   EZSP_TRUST_CENTER_JOIN_HANDLER                = 0x0024,
   EZSP_BROADCAST_NEXT_NETWORK_KEY               = 0x0073,
   EZSP_BROADCAST_NETWORK_KEY_SWITCH             = 0x0074,
-  EZSP_BECOME_TRUST_CENTER                      = 0x0077,
   EZSP_AES_MMO_HASH                             = 0x006F,
   EZSP_REMOVE_DEVICE                            = 0x00A8,
   EZSP_UNICAST_NWK_KEY_UPDATE                   = 0x00A9,
@@ -1030,6 +1046,8 @@ enum {
   EZSP_GP_SINK_TABLE_CLEAR_ALL                  = 0x00E2,
   EZSP_GP_SINK_TABLE_INIT                       = 0x0070,
   EZSP_GP_SINK_TABLE_SET_SECURITY_FRAME_COUNTER = 0x00F5,
+  EZSP_GP_SINK_COMMISSION                       = 0x010A,
+  EZSP_GP_TRANSLATION_TABLE_CLEAR               = 0x010B,
 
 // Secure EZSP Frames
   EZSP_SET_SECURITY_KEY                         = 0x00CA,

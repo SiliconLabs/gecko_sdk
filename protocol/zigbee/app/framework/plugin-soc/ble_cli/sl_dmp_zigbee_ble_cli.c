@@ -18,26 +18,26 @@
 #include PLATFORM_HEADER
 #include "hal.h"
 #include "ember.h"
-#include "af.h"
 #include "sl_cli.h"
 #include "sl_bluetooth.h"
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
+#ifdef SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
+#include "af.h"
+#endif //SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
+
 #ifdef SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT
 #include "sl_zigbee_debug_print.h"
 #endif // SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT
 #include "sl_bt_rtos_adaptation.h"
 #include "sl_bluetooth_advertiser_config.h"
 #include "sl_bluetooth_connection_config.h"
+#ifdef SL_CATALOG_ZIGBEE_BLE_EVENT_HANDLER_PRESENT
 #include "sl_ble_event_handler.h"
-
+#endif //SL_CATALOG_ZIGBEE_BLE_EVENT_HANDLER_PRESENT
 #define MAX_CHAR_SIZE                   252
 
-/* Write response codes*/
-#define ES_WRITE_OK                         0
-#define ES_READ_OK                          0
-#define ES_ERR_CCCD_CONF                    0x81
-#define ES_ERR_PROC_IN_PROGRESS             0x80
-#define ES_NO_CONNECTION                    0xFF
 // Advertisement data
 #define UINT16_TO_BYTES(n)        ((uint8_t) (n)), ((uint8_t)((n) >> 8))
 #define UINT16_TO_BYTE0(n)        ((uint8_t) (n))
@@ -66,6 +66,7 @@ static sl_status_t bleGenerateAdvertisingData(uint8_t adv_handle,
     // advertising data.
     discoverable_mode = advertiser_non_discoverable;
   }
+
   sl_status_t status = sl_bt_legacy_advertiser_generate_data(adv_handle, discoverable_mode);
   if (status != SL_STATUS_OK) {
     sl_zigbee_app_debug_print("Generate ble advertising data error: 0x%2x\n", status);
@@ -110,7 +111,9 @@ void emberAfPluginBleGetAddressCommand(sl_cli_command_arg_t *arguments)
 
   (void)sl_bt_system_get_identity_address(&ble_address, &type);
 
-  zb_ble_dmp_print_ble_address((uint8_t *)&ble_address);
+  sl_zigbee_app_debug_print("\nBLE address: [%02X %02X %02X %02X %02X %02X]\n",
+                            ble_address.addr[5], ble_address.addr[4], ble_address.addr[3],
+                            ble_address.addr[2], ble_address.addr[1], ble_address.addr[0]);
 }
 
 void emberAfPluginBleSetAdvertisementParamsCommand(sl_cli_command_arg_t *arguments)
@@ -374,7 +377,9 @@ void emberAfPluginBleSecurityManagerListAllBondingsCommand(sl_cli_command_arg_t 
 
     if (status == SL_STATUS_OK) {
       sl_zigbee_app_debug_print("bonding handle %d", i);
-      zb_ble_dmp_print_ble_address(address.addr);
+      sl_zigbee_app_debug_print("\nBLE address: [%02X %02X %02X %02X %02X %02X]\n",
+                                address.addr[5], address.addr[4], address.addr[3],
+                                address.addr[2], address.addr[1], address.addr[0]);
       sl_zigbee_app_debug_print(" 0x%x 0x%x 0x%x \n", address_type, security_mode, key_size);
     }
   }
@@ -558,5 +563,7 @@ void emberAfPluginBleSetTxPowerCommand(sl_cli_command_arg_t *arguments)
 void sl_dmp_print_connections(sl_cli_command_arg_t *arguments)
 {
   (void)arguments;
+  #ifdef SL_CATALOG_ZIGBEE_BLE_EVENT_HANDLER_PRESENT
   zb_ble_dmp_print_ble_connections();
+  #endif //SL_CATALOG_ZIGBEE_BLE_EVENT_HANDLER_PRESENT
 }

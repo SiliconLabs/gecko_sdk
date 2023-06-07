@@ -21,9 +21,10 @@
 #include "app/framework/util/common.h"
 #include  "mac-phy.h"
 
-#ifdef UC_BUILD
 #include "sl_signature_decode.h"
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #include "zll-commissioning.h"
 #include "zll-commissioning-client-config.h"
 #ifdef SL_CATALOG_ZIGBEE_NETWORK_CREATOR_PRESENT
@@ -34,17 +35,6 @@
 #include "test-harness-z3-zll.h"
 #define TEST_HARNESS_Z3_PRESENT
 #endif
-#else // !UC_BUILD
-#include "app/framework/plugin/zll-commissioning-common/zll-commissioning.h"
-#ifdef EMBER_AF_PLUGIN_NETWORK_CREATOR
-#include EMBER_AF_API_NETWORK_CREATOR
-#define NETWORK_CREATOR_PRESENT
-#endif
-#ifdef EMBER_AF_PLUGIN_TEST_HARNESS_Z3
-#include "app/framework/plugin/test-harness-z3/test-harness-z3-zll.h"
-#define TEST_HARNESS_Z3_PRESENT
-#endif
-#endif // UC_BUILD
 
 // The code below assumes that there is exactly one network and that it is
 // ZigBee PRO.
@@ -61,22 +51,17 @@
 
 static bool radioOnForRequestOnly = false;
 
-#ifdef UC_BUILD
-sl_zigbee_event_t emAfPluginZllCommissioningClientTouchLinkEvent;
-#define touchLinkEvent &emAfPluginZllCommissioningClientTouchLinkEvent
-#else // !UC_BUILD
-EmberEventControl emberAfPluginZllCommissioningClientTouchLinkEventControl;
-#define touchLinkEvent emberAfPluginZllCommissioningClientTouchLinkEventControl
-#endif // UC_BUILD
+sl_zigbee_event_t sli_zigbee_af_zll_commissioning_client_touch_link_event;
+#define touchLinkEvent &sli_zigbee_af_zll_commissioning_client_touch_link_event
 
 static uint8_t currentChannel;
 static int8_t rssi;
 
-uint16_t emAfZllIdentifyDurationSec = EMBER_AF_PLUGIN_ZLL_COMMISSIONING_CLIENT_IDENTIFY_DURATION;
+uint16_t sli_zigbee_af_zll_identify_duration_sec = EMBER_AF_PLUGIN_ZLL_COMMISSIONING_CLIENT_IDENTIFY_DURATION;
 
 #ifdef PLUGIN_DEBUG
-static const uint8_t emAfZllCommissioningPluginName[] = "ZLL Commissioning Client";
-#define PLUGIN_NAME emAfZllCommissioningPluginName
+static const uint8_t sli_zigbee_af_zll_commissioning_plugin_name[] = "ZLL Commissioning Client";
+#define PLUGIN_NAME sli_zigbee_af_zll_commissioning_plugin_name
 #endif
 
 static bool scanningPrimaryChannels = false;
@@ -114,12 +99,12 @@ static int8_t networkCreatorRadioPower = EMBER_AF_PLUGIN_ZLL_COMMISSIONING_COMMO
 // networks during standard touchlink commissioning (even if the client wants otherwise.)
 
 // Private ZLL commissioning functions
-bool emAfZllAmFactoryNew(void);
-EmberNodeType emAfZllGetLogicalNodeType(void);
-void emAfZllTouchLinkComplete(void);
+bool sli_zigbee_af_zll_am_factory_new(void);
+EmberNodeType sli_zigbee_af_zll_get_logical_node_type(void);
+void sli_zigbee_af_zll_touch_link_complete(void);
 
 // Forward references
-void emAfZllAbortTouchLink(EmberAfZllCommissioningStatus reason);
+void sli_zigbee_af_zll_abort_touch_link(EmberAfZllCommissioningStatus reason);
 
 //------------------------------------------------------------------------------
 // Module private functions
@@ -147,17 +132,17 @@ static EmberStatus sendDeviceInformationRequest(uint8_t startIndex)
                                    ZCL_ZLL_COMMISSIONING_CLUSTER_ID,
                                    ZCL_DEVICE_INFORMATION_REQUEST_COMMAND_ID,
                                    "wu",
-                                   emAfZllNetwork.securityAlgorithm.transactionId,
+                                   sli_zigbee_af_zll_network.securityAlgorithm.transactionId,
                                    startIndex);
   status = emberAfSendCommandInterPan(0xFFFF,                // destination pan id
-                                      emAfZllNetwork.eui64,
+                                      sli_zigbee_af_zll_network.eui64,
                                       EMBER_NULL_NODE_ID,    // node id - ignored
                                       0x0000,                // group id - ignored
                                       EMBER_ZLL_PROFILE_ID);
   if (status == EMBER_SUCCESS) {
     moduleState = CLIENT_AWAITING_RESPONSE;
-    slxu_zigbee_event_set_delay_ms(touchLinkEvent,
-                                   EMBER_AF_PLUGIN_ZLL_COMMISSIONING_TOUCH_LINK_MILLISECONDS_DELAY);
+    sl_zigbee_event_set_delay_ms(touchLinkEvent,
+                                 EMBER_AF_PLUGIN_ZLL_COMMISSIONING_TOUCH_LINK_MILLISECONDS_DELAY);
   } else {
     emberAfAppPrintln("%p%p failed 0x%x",
                       "Error: ",
@@ -176,10 +161,10 @@ static EmberStatus sendIdentifyRequest(uint16_t identifyDuration)
                                    ZCL_ZLL_COMMISSIONING_CLUSTER_ID,
                                    ZCL_IDENTIFY_REQUEST_COMMAND_ID,
                                    "wv",
-                                   emAfZllNetwork.securityAlgorithm.transactionId,
+                                   sli_zigbee_af_zll_network.securityAlgorithm.transactionId,
                                    identifyDuration);
   status = emberAfSendCommandInterPan(0xFFFF,                // destination pan id
-                                      emAfZllNetwork.eui64,
+                                      sli_zigbee_af_zll_network.eui64,
                                       EMBER_NULL_NODE_ID,    // node id - ignored
                                       0x0000,                // group id - ignored
                                       EMBER_ZLL_PROFILE_ID);
@@ -201,9 +186,9 @@ static EmberStatus sendResetToFactoryNewRequest(void)
                                    ZCL_ZLL_COMMISSIONING_CLUSTER_ID,
                                    ZCL_RESET_TO_FACTORY_NEW_REQUEST_COMMAND_ID,
                                    "w",
-                                   emAfZllNetwork.securityAlgorithm.transactionId);
+                                   sli_zigbee_af_zll_network.securityAlgorithm.transactionId);
   status = emberAfSendCommandInterPan(0xFFFF,                // destination pan id
-                                      emAfZllNetwork.eui64,
+                                      sli_zigbee_af_zll_network.eui64,
                                       EMBER_NULL_NODE_ID,    // node id - ignored
                                       0x0000,                // group id - ignored
                                       EMBER_ZLL_PROFILE_ID);
@@ -216,100 +201,6 @@ static EmberStatus sendResetToFactoryNewRequest(void)
   return status;
 }
 
-#ifndef UC_BUILD
-
-static void deviceInformationResponseHandler(const EmberEUI64 source,
-                                             uint32_t transaction,
-                                             uint8_t numberOfSubDevices,
-                                             uint8_t startIndex,
-                                             uint8_t deviceInformationRecordCount,
-                                             uint8_t *deviceInformationRecordList)
-{
-  slxu_zigbee_event_set_inactive(touchLinkEvent);
-
-  uint16_t deviceInformationRecordListLen = (deviceInformationRecordCount
-                                             * ZLL_DEVICE_INFORMATION_RECORD_SIZE);
-  uint16_t deviceInformationRecordListIndex = 0;
-  uint8_t i;
-  bool validResponse = ((emAfZllNetwork.securityAlgorithm.transactionId == transaction)
-                        && MEMCOMPARE(emAfZllNetwork.eui64, source, EUI64_SIZE) == 0);
-
-  emberAfZllCommissioningClusterFlush();
-  emberAfZllCommissioningClusterPrint("RX: DeviceInformationResponse 0x%4x, 0x%x, 0x%x, 0x%x,",
-                                      transaction,
-                                      numberOfSubDevices,
-                                      startIndex,
-                                      deviceInformationRecordCount);
-  emberAfZllCommissioningClusterFlush();
-  for (i = 0; i < deviceInformationRecordCount; i++) {
-    uint8_t *ieeeAddress;
-    uint8_t endpointId;
-    uint16_t profileId;
-    uint16_t deviceId;
-    uint8_t version;
-    uint8_t groupIdCount;
-    uint8_t sort;
-    ieeeAddress = &deviceInformationRecordList[deviceInformationRecordListIndex];
-    deviceInformationRecordListIndex += EUI64_SIZE;
-    endpointId = emberAfGetInt8u(deviceInformationRecordList, deviceInformationRecordListIndex, deviceInformationRecordListLen);
-    deviceInformationRecordListIndex++;
-    profileId = emberAfGetInt16u(deviceInformationRecordList, deviceInformationRecordListIndex, deviceInformationRecordListLen);
-    deviceInformationRecordListIndex += 2;
-    deviceId = emberAfGetInt16u(deviceInformationRecordList, deviceInformationRecordListIndex, deviceInformationRecordListLen);
-    deviceInformationRecordListIndex += 2;
-    version = emberAfGetInt8u(deviceInformationRecordList, deviceInformationRecordListIndex, deviceInformationRecordListLen);
-    deviceInformationRecordListIndex++;
-    groupIdCount = emberAfGetInt8u(deviceInformationRecordList, deviceInformationRecordListIndex, deviceInformationRecordListLen);
-    deviceInformationRecordListIndex++;
-    sort = emberAfGetInt8u(deviceInformationRecordList, deviceInformationRecordListIndex, deviceInformationRecordListLen);
-    deviceInformationRecordListIndex++;
-    emberAfZllCommissioningClusterPrint(" [");
-    emberAfZllCommissioningClusterDebugExec(emberAfPrintBigEndianEui64(ieeeAddress));
-    emberAfZllCommissioningClusterPrint(" 0x%x 0x%2x 0x%2x 0x%x 0x%x 0x%x",
-                                        endpointId,
-                                        profileId,
-                                        deviceId,
-                                        version,
-                                        groupIdCount,
-                                        sort);
-    emberAfZllCommissioningClusterFlush();
-
-    if (validResponse
-        && (emAfZllSubDeviceCount
-            < EMBER_AF_PLUGIN_ZLL_COMMISSIONING_CLIENT_SUB_DEVICE_TABLE_SIZE)) {
-      MEMMOVE(emAfZllSubDevices[emAfZllSubDeviceCount].ieeeAddress, ieeeAddress, EUI64_SIZE);
-      emAfZllSubDevices[emAfZllSubDeviceCount].endpointId = endpointId;
-      emAfZllSubDevices[emAfZllSubDeviceCount].profileId = profileId;
-      emAfZllSubDevices[emAfZllSubDeviceCount].deviceId = deviceId;
-      emAfZllSubDevices[emAfZllSubDeviceCount].version = version;
-      emAfZllSubDevices[emAfZllSubDeviceCount].groupIdCount = groupIdCount;
-      emAfZllSubDeviceCount++;
-    } else {
-      emberAfZllCommissioningClusterPrint(" (ignored)");
-    }
-    emberAfZllCommissioningClusterPrint("]");
-    emberAfZllCommissioningClusterFlush();
-  }
-  emberAfZllCommissioningClusterPrintln("");
-
-  if (validResponse
-      && (emAfZllSubDeviceCount
-          < EMBER_AF_PLUGIN_ZLL_COMMISSIONING_CLIENT_SUB_DEVICE_TABLE_SIZE)
-      && emAfZllSubDeviceCount < numberOfSubDevices) {
-    nextSubDeviceIndex = startIndex + deviceInformationRecordCount;
-    moduleState = CLIENT_REQUESTING_INFO;
-  } else {
-    moduleState = CLIENT_REQUESTING_IDENTITY;
-
-    if (radioOnForRequestOnly) {
-      emberZllSetRadioIdleMode(EMBER_RADIO_POWER_MODE_OFF);
-      radioOnForRequestOnly = false;
-    }
-  }
-  slxu_zigbee_event_set_active(touchLinkEvent);
-}
-
-#else
 static const sl_signature_t sl_zll_device_info_record_signature = {
   6,
   SL_SIGNATURE_FIELD_MASK_BLOB | EUI64_SIZE, offsetof(EmberZllDeviceInfoRecord, ieeeAddress),
@@ -326,13 +217,13 @@ static void deviceInformationResponseHandler(const EmberEUI64 source,
                                              uint8_t deviceInformationRecordCount,
                                              uint8_t *deviceInformationRecordList)
 {
-  slxu_zigbee_event_set_inactive(touchLinkEvent);
+  sl_zigbee_event_set_inactive(touchLinkEvent);
 
   uint16_t deviceInformationRecordListLen = (deviceInformationRecordCount
                                              * ZLL_DEVICE_INFORMATION_RECORD_SIZE);
   uint8_t i;
-  bool validResponse = ((emAfZllNetwork.securityAlgorithm.transactionId == transaction)
-                        && MEMCOMPARE(emAfZllNetwork.eui64, source, EUI64_SIZE) == 0);
+  bool validResponse = ((sli_zigbee_af_zll_network.securityAlgorithm.transactionId == transaction)
+                        && MEMCOMPARE(sli_zigbee_af_zll_network.eui64, source, EUI64_SIZE) == 0);
 
   emberAfZllCommissioningClusterFlush();
   emberAfZllCommissioningClusterPrint("RX: DeviceInformationResponse 0x%4x, 0x%x, 0x%x, 0x%x,",
@@ -362,10 +253,10 @@ static void deviceInformationResponseHandler(const EmberEUI64 source,
     emberAfZllCommissioningClusterFlush();
 
     if (validResponse
-        && (emAfZllSubDeviceCount
+        && (sli_zigbee_af_zll_sub_device_count
             < EMBER_AF_PLUGIN_ZLL_COMMISSIONING_CLIENT_SUB_DEVICE_TABLE_SIZE)) {
-      memcpy(&(emAfZllSubDevices[emAfZllSubDeviceCount]), &tempDeviceInfoRecord, sizeof(EmberZllDeviceInfoRecord));
-      emAfZllSubDeviceCount++;
+      memcpy(&(sli_zigbee_af_zll_sub_devices[sli_zigbee_af_zll_sub_device_count]), &tempDeviceInfoRecord, sizeof(EmberZllDeviceInfoRecord));
+      sli_zigbee_af_zll_sub_device_count++;
     } else {
       emberAfZllCommissioningClusterPrint(" (ignored)");
     }
@@ -375,9 +266,9 @@ static void deviceInformationResponseHandler(const EmberEUI64 source,
   emberAfZllCommissioningClusterPrintln("");
 
   if (validResponse
-      && (emAfZllSubDeviceCount
+      && (sli_zigbee_af_zll_sub_device_count
           < EMBER_AF_PLUGIN_ZLL_COMMISSIONING_CLIENT_SUB_DEVICE_TABLE_SIZE)
-      && emAfZllSubDeviceCount < numberOfSubDevices) {
+      && sli_zigbee_af_zll_sub_device_count < numberOfSubDevices) {
     nextSubDeviceIndex = startIndex + deviceInformationRecordCount;
     moduleState = CLIENT_REQUESTING_INFO;
   } else {
@@ -388,9 +279,8 @@ static void deviceInformationResponseHandler(const EmberEUI64 source,
       radioOnForRequestOnly = false;
     }
   }
-  slxu_zigbee_event_set_active(touchLinkEvent);
+  sl_zigbee_event_set_active(touchLinkEvent);
 }
-#endif
 
 static bool amInitiator(void)
 {
@@ -411,7 +301,7 @@ static EmberStatus startScan(uint8_t purpose)
 
     // Use the Ember API, not the framework API, otherwise host-side returns zero if network down
     currentChannel = emberGetRadioChannel();
-    debugPrintln("startScan: purpose = %X, flags = %2X, current channel = %d", purpose, emAfZllFlags, currentChannel);
+    debugPrintln("startScan: purpose = %X, flags = %2X, current channel = %d", purpose, sli_zigbee_af_zll_flags, currentChannel);
 
     scanningPrimaryChannels = true;
     uint32_t channelMask = getChannelMask();
@@ -424,9 +314,9 @@ static EmberStatus startScan(uint8_t purpose)
     if (channelMask != 0) {
       status = emberZllStartScan(channelMask,
                                  EMBER_AF_PLUGIN_ZLL_COMMISSIONING_CLIENT_SCAN_POWER_LEVEL,
-                                 emAfZllGetLogicalNodeType());
+                                 sli_zigbee_af_zll_get_logical_node_type());
       if (status == EMBER_SUCCESS) {
-        emAfZllFlags = purpose;
+        sli_zigbee_af_zll_flags = purpose;
         moduleState = CLIENT_SCANNING;
       } else {
         emberAfAppPrintln("%p%p%p0x%x",
@@ -489,7 +379,7 @@ static bool isTouchlinkPermitted(const EmberZllNetwork *networkInfo)
       // We're either joined or orphaned and not attempting to rejoin; in
       // either case we can proceed with the next stage of validation.
       debugPrintln("isTouchlinkPermitted: security bitmask = %2X,flags = %2X",
-                   securityState.bitmask, emAfZllFlags);
+                   securityState.bitmask, sli_zigbee_af_zll_flags);
     }
   } else {
     networkUp = false;
@@ -513,9 +403,9 @@ static bool isTouchlinkPermitted(const EmberZllNetwork *networkInfo)
     // either initiator or target must be able to form a network. If centralized
     // network touchlink initiating is supported, the initiating device must
     // be coordinator-capable.
-    if (emAfZllGetLogicalNodeType() != EMBER_ROUTER && networkInfo->nodeType != EMBER_ROUTER) {
+    if (sli_zigbee_af_zll_get_logical_node_type() != EMBER_ROUTER && networkInfo->nodeType != EMBER_ROUTER) {
       debugPrintln("isTouchlinkPermitted: Error - Neither end can form a network");
-      debugPrintln("our type = %d, their type = %d", emAfZllGetLogicalNodeType(), networkInfo->nodeType);
+      debugPrintln("our type = %d, their type = %d", sli_zigbee_af_zll_get_logical_node_type(), networkInfo->nodeType);
       return false;
     }
   }
@@ -566,7 +456,7 @@ static void processScanComplete(EmberStatus scanStatus)
                       scanStatus);
 
     // Factory new initiator preempted by an NFN initiator.
-    emAfZllAbortTouchLink(EMBER_AF_ZLL_PREEMPTED_BY_STACK);
+    sli_zigbee_af_zll_abort_touch_link(EMBER_AF_ZLL_PREEMPTED_BY_STACK);
 
     if (emberZllGetRadioIdleMode() == EMBER_RADIO_POWER_MODE_OFF) {
       // Start a short rx-on period to cover an incoming network request.
@@ -574,7 +464,7 @@ static void processScanComplete(EmberStatus scanStatus)
     }
   } else if (abortingTouchLink()) {
     debugPrintln("processScanComplete: aborted by application");
-    emAfZllAbortTouchLink(EMBER_AF_ZLL_ABORTED_BY_APPLICATION);
+    sli_zigbee_af_zll_abort_touch_link(EMBER_AF_ZLL_ABORTED_BY_APPLICATION);
   }
 
   if (touchLinkInProgress()) {
@@ -585,7 +475,7 @@ static void processScanComplete(EmberStatus scanStatus)
       if (channelMask != 0) {
         status = emberZllStartScan(channelMask,
                                    EMBER_AF_PLUGIN_ZLL_COMMISSIONING_CLIENT_SCAN_POWER_LEVEL,
-                                   emAfZllGetLogicalNodeType());
+                                   sli_zigbee_af_zll_get_logical_node_type());
         if (status == EMBER_SUCCESS) {
           // We will continue on the second scan complete callback.
           return;
@@ -598,20 +488,20 @@ static void processScanComplete(EmberStatus scanStatus)
       debugPrintln("processScanComplete: no secondary channels, dropping thru");
     }
 #endif // SCAN_SECONDARY_CHANNELS
-    emAfZllFlags |= SCAN_COMPLETE;
+    sli_zigbee_af_zll_flags |= SCAN_COMPLETE;
 
     // Inform the API that scanning is complete for this transaction.
     emberZllScanningComplete();
 
     if (targetNetworkFound()) {
-      status = emberSetLogicalAndRadioChannel(emAfZllNetwork.zigbeeNetwork.channel);
+      status = emberSetLogicalAndRadioChannel(sli_zigbee_af_zll_network.zigbeeNetwork.channel);
       if (status != EMBER_SUCCESS) {
         emberAfAppPrintln("%p%p%p0x%x",
                           "Error: ",
                           "Touch linking failed: ",
                           "could not change channel: ",
                           status);
-        emAfZllAbortTouchLink(EMBER_AF_ZLL_CHANNEL_CHANGE_FAILED);
+        sli_zigbee_af_zll_abort_touch_link(EMBER_AF_ZLL_CHANNEL_CHANGE_FAILED);
         return;
       }
 
@@ -621,13 +511,13 @@ static void processScanComplete(EmberStatus scanStatus)
       // first request.  If the target only has one sub device, its data will
       // have already been received in the ScanRequest.
       if ((scanForTouchLink() || scanForDeviceInformation())
-          && emAfZllNetwork.numberSubDevices != 1) {
+          && sli_zigbee_af_zll_network.numberSubDevices != 1) {
         debugPrintln("processScanComplete: sending first device info request");
 
         // Turn receiver on if it is currently off so we can receive
         // the Device Info Response.
         if (emberZllGetRadioIdleMode() == EMBER_RADIO_POWER_MODE_OFF) {
-          if (emAfZllAmFactoryNew()) {
+          if (sli_zigbee_af_zll_am_factory_new()) {
             // If we're factory new, start a short rx-on period to cover the request.
             emberZllSetRxOnWhenIdle(JOIN_RESPONSE_TIMEOUT_QS * 250);
           } else {
@@ -642,13 +532,13 @@ static void processScanComplete(EmberStatus scanStatus)
       } else {
         moduleState = CLIENT_REQUESTING_IDENTITY;
       }
-      slxu_zigbee_event_set_active(touchLinkEvent);
+      sl_zigbee_event_set_active(touchLinkEvent);
     } else {
       emberAfAppPrintln("%p%p%p",
                         "Error: ",
                         "Touch linking failed: ",
                         "no networks were found");
-      emAfZllAbortTouchLink(EMBER_AF_ZLL_NO_NETWORKS_FOUND);
+      sli_zigbee_af_zll_abort_touch_link(EMBER_AF_ZLL_NO_NETWORKS_FOUND);
     }
   } else {
     debugPrintln("processScanComplete: no touchlink in progress");
@@ -658,13 +548,13 @@ static void processScanComplete(EmberStatus scanStatus)
 //------------------------------------------------------------------------------
 // ZLL commissioning private functions
 
-void emAfZllAbortTouchLink(EmberAfZllCommissioningStatus reason)
+void sli_zigbee_af_zll_abort_touch_link(EmberAfZllCommissioningStatus reason)
 {
-  emAfZllFlags = INITIAL;
+  sli_zigbee_af_zll_flags = INITIAL;
   moduleState = CLIENT_INITIAL;
-  debugPrintln("emAfZllAbortTouchLink: reason = %d", reason);
-  if (slxu_zigbee_event_is_active(touchLinkEvent)) {
-    slxu_zigbee_event_set_inactive(touchLinkEvent);
+  debugPrintln("sli_zigbee_af_zll_abort_touch_link: reason = %d", reason);
+  if (sl_zigbee_event_is_scheduled(touchLinkEvent)) {
+    sl_zigbee_event_set_inactive(touchLinkEvent);
     if (radioOnForRequestOnly) {
       emberZllSetRadioIdleMode(EMBER_RADIO_POWER_MODE_OFF);
       radioOnForRequestOnly = false;
@@ -686,7 +576,7 @@ void emAfZllAbortTouchLink(EmberAfZllCommissioningStatus reason)
                       currentChannel);
   }
   if (reason == EMBER_AF_ZLL_NETWORK_UPDATE_OPERATION) {
-    emAfZllTouchLinkComplete();
+    sli_zigbee_af_zll_touch_link_complete();
   } else {
     emberAfPluginZllCommissioningTouchLinkFailedCallback(reason);
   }
@@ -696,7 +586,7 @@ void emAfZllAbortTouchLink(EmberAfZllCommissioningStatus reason)
 }
 
 #ifdef NETWORK_CREATOR_PRESENT
-void emAfZllFinishNetworkFormationForRouter(EmberStatus status)
+void sli_zigbee_af_zll_finish_network_formation_for_router(EmberStatus status)
 {
   if (status == EMBER_NETWORK_UP) {
     // Make ourselves not factory new, and reset the ZLL address and group space
@@ -720,19 +610,19 @@ void emAfZllFinishNetworkFormationForRouter(EmberStatus status)
 
       // Switch back to the target's current channel to send the network request,
       // in case we formed on a different one.
-      emberSetLogicalAndRadioChannel(emAfZllNetwork.zigbeeNetwork.channel);
+      emberSetLogicalAndRadioChannel(sli_zigbee_af_zll_network.zigbeeNetwork.channel);
 
       // Set the target's new channel to our current channel.
-      emAfZllNetwork.zigbeeNetwork.channel = currentChannel;
+      sli_zigbee_af_zll_network.zigbeeNetwork.channel = currentChannel;
 
-      debugPrintln("Zll Comm stack status: our chan = %d, target chan = %d", currentChannel, emAfZllNetwork.zigbeeNetwork.channel);
+      debugPrintln("Zll Comm stack status: our chan = %d, target chan = %d", currentChannel, sli_zigbee_af_zll_network.zigbeeNetwork.channel);
 
       // Kick the client touchlinking event.
 #ifdef EMBER_TEST
       // Short delay to prevent beacon collision.
-      slxu_zigbee_event_set_delay_ms(touchLinkEvent, 100);
+      sl_zigbee_event_set_delay_ms(touchLinkEvent, 100);
 #else
-      slxu_zigbee_event_set_active(touchLinkEvent);
+      sl_zigbee_event_set_active(touchLinkEvent);
 #endif // EMBER_TEST
     }
   } else if (touchLinkInProgress()) {
@@ -741,35 +631,35 @@ void emAfZllFinishNetworkFormationForRouter(EmberStatus status)
                       "Touch linking failed: ",
                       "could not form network: ",
                       status);
-    emAfZllAbortTouchLink(EMBER_AF_ZLL_NETWORK_FORMATION_FAILED);
+    sli_zigbee_af_zll_abort_touch_link(EMBER_AF_ZLL_NETWORK_FORMATION_FAILED);
   }
-  emAfZllFlags &= ~FORMING_NETWORK;
+  sli_zigbee_af_zll_flags &= ~FORMING_NETWORK;
 }
 
-extern uint32_t emAfPluginNetworkCreatorPrimaryChannelMask;
-extern uint32_t emAfPluginNetworkCreatorSecondaryChannelMask;
-EmberStatus emAfZllFormNetworkForRouterInitiator(uint8_t channel, int8_t radioPower, EmberPanId panId)
+extern uint32_t sli_zigbee_af_network_creator_primary_channel_mask;
+extern uint32_t sli_zigbee_af_network_creator_secondary_channel_mask;
+EmberStatus sli_zigbee_af_zll_form_networkForRouterInitiator(uint8_t channel, int8_t radioPower, EmberPanId panId)
 {
   EmberStatus status;
 
   // Initialize ZLL security.
   status = emberAfZllSetInitialSecurityState();
   if (status != EMBER_SUCCESS) {
-    debugPrintln("emAfZllFormNetworkForRouterInitiator: unable to initialize security, status = %X", status);
+    debugPrintln("sli_zigbee_af_zll_form_networkForRouterInitiator: unable to initialize security, status = %X", status);
     return status;
   }
 
   // Form network with a random extended PAN ID, if no channel is specified, otherwise
-  // assume the caller has set the extended PAN ID. (The emAfExtendedPanId value
+  // assume the caller has set the extended PAN ID. (The sli_zigbee_af_extended_pan_id value
   // is global to the framework and used in the network-creator plugin.)
   if (channel == 0) {
-    MEMSET(emAfExtendedPanId, 0xFF, EXTENDED_PAN_ID_SIZE);
+    MEMSET(sli_zigbee_af_extended_pan_id, 0xFF, EXTENDED_PAN_ID_SIZE);
   }
 
   // Per the BDB spec, we scan on the ZLL primary channels, unless a channel
   // has been specified (e.g. for a 'plugin test-harness z3 start-as-router')
-  emAfPluginNetworkCreatorPrimaryChannelMask = channel ? (uint32_t) (1 << channel) : emberGetZllPrimaryChannelMask();
-  emAfPluginNetworkCreatorSecondaryChannelMask = 0;
+  sli_zigbee_af_network_creator_primary_channel_mask = channel ? (uint32_t) (1 << channel) : emberGetZllPrimaryChannelMask();
+  sli_zigbee_af_network_creator_secondary_channel_mask = 0;
 
   // Set node id for emberFormNetwork, to override random id generation.
   emberSetNodeId(EMBER_ZLL_MIN_NODE_ID);  // our node id = 0x0001
@@ -778,12 +668,12 @@ EmberStatus emAfZllFormNetworkForRouterInitiator(uint8_t channel, int8_t radioPo
   networkCreatorRadioPower = radioPower;
   networkCreatorPanId = panId;
 
-  debugPrintln("emAfZllFormNetworkForRouterInitiator: chan mask = %4X", emAfPluginNetworkCreatorPrimaryChannelMask);
+  debugPrintln("sli_zigbee_af_zll_form_networkForRouterInitiator: chan mask = %4X", sli_zigbee_af_network_creator_primary_channel_mask);
 
   status = emberAfPluginNetworkCreatorStart(false); // distributed network
 
   if (status == EMBER_SUCCESS) {
-    emAfZllFlags |= FORMING_NETWORK;
+    sli_zigbee_af_zll_flags |= FORMING_NETWORK;
   }
   return status;
 }
@@ -792,14 +682,14 @@ EmberStatus emAfZllFormNetworkForRouterInitiator(uint8_t channel, int8_t radioPo
 // This function is required to support the following CLI commands:
 //   plugin test-harness z3 set-pan-id
 //   plugin test-harness z3 start-as-router
-void emAfZllSetPanId(EmberPanId panId)
+void sli_zigbee_af_zll_set_pan_id(EmberPanId panId)
 {
   networkCreatorPanId = panId;
 }
 
-bool emAfPluginZllCommissioningClientInterpanPreMessageReceivedCallback(const EmberAfInterpanHeader *header,
-                                                                        uint8_t msgLen,
-                                                                        uint8_t *message)
+bool sli_zigbee_af_zll_commissioning_client_interpan_pre_message_received_callback(const EmberAfInterpanHeader *header,
+                                                                                   uint8_t msgLen,
+                                                                                   uint8_t *message)
 {
   uint32_t transaction;
   uint8_t frameControl, commandId, msgIndex;
@@ -896,72 +786,61 @@ void emberAfZllAbortTouchLink(void)
                       "Touch linking failed: ",
                       "aborted by application");
     if (scanComplete()) {
-      emAfZllAbortTouchLink(EMBER_AF_ZLL_ABORTED_BY_APPLICATION);
+      sli_zigbee_af_zll_abort_touch_link(EMBER_AF_ZLL_ABORTED_BY_APPLICATION);
     } else {
-      emAfZllFlags |= ABORTING_TOUCH_LINK;
+      sli_zigbee_af_zll_flags |= ABORTING_TOUCH_LINK;
       emberStopScan();
     }
   }
 }
 
 #ifdef EZSP_HOST
-#ifdef UC_BUILD
-void emAfZllNetworkFoundCallback(EmberZllNetwork *networkInfo,
-                                 bool isDeviceInfoNull,
-                                 EmberZllDeviceInfoRecord *deviceInfo,
-                                 uint8_t lastHopLqi,
-                                 int8_t lastHopRssi)
-#else // !UC_BUILD
-void ezspZllNetworkFoundHandler(EmberZllNetwork *networkInfo,
-                                bool isDeviceInfoNull,
-                                EmberZllDeviceInfoRecord *deviceInfo,
-                                uint8_t lastHopLqi,
-                                int8_t lastHopRssi)
-#endif // UC_BUILD
+void sli_zigbee_af_zll_network_found_callback(EmberZllNetwork *networkInfo,
+                                              bool isDeviceInfoNull,
+                                              EmberZllDeviceInfoRecord *deviceInfo,
+                                              uint8_t lastHopLqi,
+                                              int8_t lastHopRssi)
 {
-  debugPrintln("ezspZllNwkFound: node type = %d, flags = %0x2X", networkInfo->nodeType, emAfZllFlags);
+  debugPrintln("ezspZllNwkFound: node type = %d, flags = %0x2X", networkInfo->nodeType, sli_zigbee_af_zll_flags);
   if (touchLinkInProgress()) {
     if (isTouchlinkPermitted(networkInfo)) {
       if (!targetNetworkFound()
-          || 0 < targetCompare(networkInfo, lastHopRssi, &emAfZllNetwork, rssi)) {
-        MEMMOVE(&emAfZllNetwork, networkInfo, sizeof(EmberZllNetwork));
-        emAfZllSubDeviceCount = 0;
+          || 0 < targetCompare(networkInfo, lastHopRssi, &sli_zigbee_af_zll_network, rssi)) {
+        MEMMOVE(&sli_zigbee_af_zll_network, networkInfo, sizeof(EmberZllNetwork));
+        sli_zigbee_af_zll_sub_device_count = 0;
         if (!isDeviceInfoNull) {
-          MEMMOVE(&emAfZllSubDevices[0], deviceInfo, sizeof(EmberZllDeviceInfoRecord));
-          emAfZllSubDeviceCount++;
+          MEMMOVE(&sli_zigbee_af_zll_sub_devices[0], deviceInfo, sizeof(EmberZllDeviceInfoRecord));
+          sli_zigbee_af_zll_sub_device_count++;
         }
         rssi = lastHopRssi;
-        emAfZllFlags |= TARGET_NETWORK_FOUND;
+        sli_zigbee_af_zll_flags |= TARGET_NETWORK_FOUND;
       }
     } else {
       debugPrintln("ezspZllNwkFound: touchlink is not permitted");
     }
   }
 }
+
 #else // !EZSP_HOST
-#ifdef UC_BUILD
-void emAfZllNetworkFoundCallback(const EmberZllNetwork *networkInfo,
-                                 const EmberZllDeviceInfoRecord *deviceInfo)
-#else
-void emberZllNetworkFoundHandler(const EmberZllNetwork *networkInfo,
-                                 const EmberZllDeviceInfoRecord *deviceInfo)
-#endif
+
+void sli_zigbee_af_zll_network_found_callback(const EmberZllNetwork *networkInfo,
+                                              const EmberZllDeviceInfoRecord *deviceInfo)
 {
-  debugPrintln("emberZllNwkFound: chan = %d, node type = %d, flags = %02X", networkInfo->zigbeeNetwork.channel, networkInfo->nodeType, emAfZllFlags);
+  debugPrintln("emberZllNwkFound: chan = %d, node type = %d, flags = %02X", networkInfo->zigbeeNetwork.channel, networkInfo->nodeType, sli_zigbee_af_zll_flags);
   if (touchLinkInProgress()) {
     if (isTouchlinkPermitted(networkInfo)) {
       int8_t lastHopRssi;
       emberGetLastHopRssi(&lastHopRssi);
       if (!targetNetworkFound()
-          || 0 < targetCompare(networkInfo, lastHopRssi, &emAfZllNetwork, rssi)) {
-        MEMMOVE(&emAfZllNetwork, networkInfo, sizeof(EmberZllNetwork));
-        emAfZllSubDeviceCount = 0;
+          || 0 < targetCompare(networkInfo, lastHopRssi, &sli_zigbee_af_zll_network, rssi)) {
+        MEMMOVE(&sli_zigbee_af_zll_network, networkInfo, sizeof(EmberZllNetwork));
+        sli_zigbee_af_zll_sub_device_count = 0;
         if (deviceInfo != NULL) {
-          MEMMOVE(&emAfZllSubDevices[0], deviceInfo, sizeof(EmberZllDeviceInfoRecord));
-          emAfZllSubDeviceCount++;
+          MEMMOVE(&sli_zigbee_af_zll_sub_devices[0], deviceInfo, sizeof(EmberZllDeviceInfoRecord));
+          sli_zigbee_af_zll_sub_device_count++;
         }
         rssi = lastHopRssi;
-        emAfZllFlags |= TARGET_NETWORK_FOUND;
+        sli_zigbee_af_zll_flags |= TARGET_NETWORK_FOUND;
       }
     } else {
       debugPrintln("emberZllNwkFound: touchlink is not permitted");
@@ -969,71 +848,48 @@ void emberZllNetworkFoundHandler(const EmberZllNetwork *networkInfo,
   }
 
 #ifdef TEST_HARNESS_Z3_PRESENT
-  emAfPluginTestHarnessZ3ZllNetworkFoundCallback(networkInfo);
+  sli_zigbee_af_test_harness_z3_zll_network_found_callback(networkInfo);
 #endif
 }
 #endif // EZSP_HOST
 
-#ifdef EZSP_HOST
-#ifdef UC_BUILD
-void emAfZllScanCompleteCallback(EmberStatus scanStatus)
-#else // !UC_BUILD
-void ezspZllScanCompleteHandler(EmberStatus scanStatus)
-#endif // UC_BUILD
-{
-  debugPrintln("%p: scan complete", PLUGIN_NAME);
-  processScanComplete(scanStatus);
-}
-#else // !EZSP_HOST
-#ifdef UC_BUILD
-void emAfZllScanCompleteCallback(EmberStatus scanStatus)
-#else // !UC_BUILD
-void emberZllScanCompleteHandler(EmberStatus scanStatus)
-#endif // UC_BUILD
+void sli_zigbee_af_zll_scan_complete_callback(EmberStatus scanStatus)
 {
   debugPrintln("%p: scan complete", PLUGIN_NAME);
   processScanComplete(scanStatus);
 
 #ifdef TEST_HARNESS_Z3_PRESENT
-  emAfPluginTestHarnessZ3ZllScanCompleteCallback(scanStatus);
+  sli_zigbee_af_test_harness_z3_zll_scan_complete_callback(scanStatus);
 #endif
 }
-#endif // EZSP_HOST
 
 #ifdef EZSP_HOST
-#ifdef UC_BUILD
-void emAfZllAddressAssignmentCallback(EmberZllAddressAssignment *addressInfo,
-                                      uint8_t lastHopLqi,
-                                      int8_t lastHopRssi)
-#else // !UC_BUILD
-void ezspZllAddressAssignmentHandler(EmberZllAddressAssignment *addressInfo,
-                                     uint8_t lastHopLqi,
-                                     int8_t lastHopRssi)
-#endif // UC_BUILD
+
+void sli_zigbee_af_zll_address_assignment_callback(EmberZllAddressAssignment *addressInfo,
+                                                   uint8_t lastHopLqi,
+                                                   int8_t lastHopRssi)
 {
   if (touchLinkInProgress()) {
-    emAfZllNetwork.nodeId = addressInfo->nodeId;
+    sli_zigbee_af_zll_network.nodeId = addressInfo->nodeId;
   }
 }
+
 #else // !EZSP_HOST
-#ifdef UC_BUILD
-void emAfZllAddressAssignmentCallback(const EmberZllAddressAssignment *addressInfo)
-#else
-void emberZllAddressAssignmentHandler(const EmberZllAddressAssignment *addressInfo)
-#endif
+
+void sli_zigbee_af_zll_address_assignment_callback(const EmberZllAddressAssignment *addressInfo)
 {
   if (touchLinkInProgress()) {
     debugPrintln("emberZllAddressAssignmentHandler: node id = %2X", addressInfo->nodeId);
-    emAfZllNetwork.nodeId = addressInfo->nodeId;
+    sli_zigbee_af_zll_network.nodeId = addressInfo->nodeId;
   }
 }
 #endif // EZSP_HOST
 
-void emberAfPluginZllCommissioningClientTouchLinkEventHandler(SLXU_UC_EVENT)
+void emberAfPluginZllCommissioningClientTouchLinkEventHandler(sl_zigbee_event_t * event)
 {
   EmberStatus status = EMBER_SUCCESS;
-  slxu_zigbee_event_set_inactive(touchLinkEvent);
-  debugPrintln("TouchlinkEventHandler: flags = %X", emAfZllFlags);
+  sl_zigbee_event_set_inactive(touchLinkEvent);
+  debugPrintln("TouchlinkEventHandler: flags = %X", sli_zigbee_af_zll_flags);
 
   if (!touchLinkInProgress()) {
     return;
@@ -1049,7 +905,7 @@ void emberAfPluginZllCommissioningClientTouchLinkEventHandler(SLXU_UC_EVENT)
                           "Touch linking failed: ",
                           "could not send device information request: ",
                           status);
-        emAfZllAbortTouchLink(EMBER_AF_ZLL_SENDING_DEVICE_INFORMATION_REQUEST_FAILED);
+        sli_zigbee_af_zll_abort_touch_link(EMBER_AF_ZLL_SENDING_DEVICE_INFORMATION_REQUEST_FAILED);
       }
       break;
 
@@ -1060,23 +916,23 @@ void emberAfPluginZllCommissioningClientTouchLinkEventHandler(SLXU_UC_EVENT)
                         "Touch linking failed: ",
                         "no reply to device information request: ",
                         status);
-      emAfZllAbortTouchLink(EMBER_AF_ZLL_SENDING_DEVICE_INFORMATION_REQUEST_FAILED);
+      sli_zigbee_af_zll_abort_touch_link(EMBER_AF_ZLL_SENDING_DEVICE_INFORMATION_REQUEST_FAILED);
       break;
 
     case CLIENT_REQUESTING_IDENTITY:
       debugPrintln("EH - Sending identify request");
-      status = sendIdentifyRequest(emAfZllIdentifyDurationSec);
+      status = sendIdentifyRequest(sli_zigbee_af_zll_identify_duration_sec);
       if (status == EMBER_SUCCESS) {
         moduleState = CLIENT_TOUCHLINKING;
-        slxu_zigbee_event_set_delay_ms(touchLinkEvent,
-                                       EMBER_AF_PLUGIN_ZLL_COMMISSIONING_TOUCH_LINK_MILLISECONDS_DELAY);
+        sl_zigbee_event_set_delay_ms(touchLinkEvent,
+                                     EMBER_AF_PLUGIN_ZLL_COMMISSIONING_TOUCH_LINK_MILLISECONDS_DELAY);
       } else {
         emberAfAppPrintln("%p%p%p0x%x",
                           "Error: ",
                           "Touch linking failed: ",
                           "could not send identify request: ",
                           status);
-        emAfZllAbortTouchLink(EMBER_AF_ZLL_SENDING_IDENTIFY_REQUEST_FAILED);
+        sli_zigbee_af_zll_abort_touch_link(EMBER_AF_ZLL_SENDING_IDENTIFY_REQUEST_FAILED);
       }
       break;
 
@@ -1089,25 +945,25 @@ void emberAfPluginZllCommissioningClientTouchLinkEventHandler(SLXU_UC_EVENT)
         // our original channel, or the channel we formed on, if we are (were)
         // a factory-new router initiator.
         // Otherwise, we'll use whatever channel the target is on presently.
-        if (!emAfZllAmFactoryNew()) {
-          emAfZllNetwork.zigbeeNetwork.channel = currentChannel;
+        if (!sli_zigbee_af_zll_am_factory_new()) {
+          sli_zigbee_af_zll_network.zigbeeNetwork.channel = currentChannel;
         }
 #ifdef NETWORK_CREATOR_PRESENT
-        else if (emAfCurrentZigbeeProNetwork != NULL
-                 && emAfCurrentZigbeeProNetwork->nodeType <= EMBER_ROUTER) {
+        else if (sli_zigbee_af_current_zigbee_pro_network != NULL
+                 && sli_zigbee_af_current_zigbee_pro_network->nodeType <= EMBER_ROUTER) {
           // If we are factory new and a router, then we need to form a network
           // to become non-factory new. See the BDB spec's touchlink procedure
           // for an initiator, steps 13, 21 and 22.
-          status = emAfZllFormNetworkForRouterInitiator(0,
-                                                        EMBER_AF_PLUGIN_ZLL_COMMISSIONING_COMMON_RADIO_TX_POWER,
-                                                        0xffff);
+          status = sli_zigbee_af_zll_form_networkForRouterInitiator(0,
+                                                                    EMBER_AF_PLUGIN_ZLL_COMMISSIONING_COMMON_RADIO_TX_POWER,
+                                                                    0xffff);
           if (status != EMBER_SUCCESS) {
             emberAfAppPrintln("%p%p%p0x%x",
                               "Error: ",
                               "Touch linking failed: ",
                               "could not start network formation: ",
                               status);
-            emAfZllAbortTouchLink(EMBER_AF_ZLL_NETWORK_FORMATION_FAILED);
+            sli_zigbee_af_zll_abort_touch_link(EMBER_AF_ZLL_NETWORK_FORMATION_FAILED);
           }
           return;
         }
@@ -1115,15 +971,15 @@ void emberAfPluginZllCommissioningClientTouchLinkEventHandler(SLXU_UC_EVENT)
         else {
           // If we are a factory new (end device) initiator, then let the
           // target chose the channel.
-          emAfZllNetwork.zigbeeNetwork.channel = 0;
+          sli_zigbee_af_zll_network.zigbeeNetwork.channel = 0;
         }
         emberAfZllSetInitialSecurityState();
         emberAfAppPrintln("%p%p%p",
                           "Sending ",
-                          emAfZllAmFactoryNew() ? "start" : "join",
+                          sli_zigbee_af_zll_am_factory_new() ? "start" : "join",
                           " request to target");
-        emAfInitiatorRejoinRetryCount = 0;
-        status = emberZllJoinTarget(&emAfZllNetwork);
+        sli_zigbee_af_initiatorRejoinRetryCount = 0;
+        status = emberZllJoinTarget(&sli_zigbee_af_zll_network);
         if (status == EMBER_SUCCESS) {
           // We're finished here; the touchlink completion is handled by
           // the stack status handler in zll-commissioning-common.c
@@ -1133,14 +989,14 @@ void emberAfPluginZllCommissioningClientTouchLinkEventHandler(SLXU_UC_EVENT)
           // emberZllJoinTarget() is sending a network update.
           if (status == EMBER_OPERATION_IN_PROGRESS) {
             // Abort, but report touchlink complete to application.
-            emAfZllAbortTouchLink(EMBER_AF_ZLL_NETWORK_UPDATE_OPERATION);
+            sli_zigbee_af_zll_abort_touch_link(EMBER_AF_ZLL_NETWORK_UPDATE_OPERATION);
           } else {
             emberAfAppPrintln("%p%p%p0x%x",
                               "Error: ",
                               "Touch linking failed: ",
                               "could not send start/join: ",
                               status);
-            emAfZllAbortTouchLink(EMBER_AF_ZLL_SENDING_START_JOIN_FAILED);
+            sli_zigbee_af_zll_abort_touch_link(EMBER_AF_ZLL_SENDING_START_JOIN_FAILED);
           }
         }
       } else {
@@ -1152,14 +1008,14 @@ void emberAfPluginZllCommissioningClientTouchLinkEventHandler(SLXU_UC_EVENT)
                               "Touch linking failed: ",
                               "could not send reset: ",
                               status);
-            emAfZllAbortTouchLink(EMBER_AF_ZLL_SENDING_RESET_TO_FACTORY_NEW_REQUEST_FAILED);
+            sli_zigbee_af_zll_abort_touch_link(EMBER_AF_ZLL_SENDING_RESET_TO_FACTORY_NEW_REQUEST_FAILED);
           }
         }
 
         // For all non-link scan types.
         if (status == EMBER_SUCCESS) {
           emberSetRadioChannel(currentChannel);
-          emAfZllTouchLinkComplete();
+          sli_zigbee_af_zll_touch_link_complete();
           moduleState = CLIENT_INITIAL;
         }
       }
@@ -1170,12 +1026,12 @@ void emberAfPluginZllCommissioningClientTouchLinkEventHandler(SLXU_UC_EVENT)
   }
 }
 
-void emAfPluginZllCommissioningClientInitCallback(SLXU_INIT_ARG)
+void sli_zigbee_af_zll_commissioning_client_init_callback(uint8_t init_level)
 {
-  SLXU_INIT_UNUSED_ARG;
+  (void)init_level;
 
-  slxu_zigbee_event_init(touchLinkEvent,
-                         emberAfPluginZllCommissioningClientTouchLinkEventHandler);
+  sl_zigbee_event_init(touchLinkEvent,
+                       emberAfPluginZllCommissioningClientTouchLinkEventHandler);
 }
 
 /** @brief Get Pan Id

@@ -17,77 +17,71 @@
 
 #include "app/framework/plugin/network-steering/network-steering.h"
 
-extern const char * emAfPluginNetworkSteeringStateNames[];
-extern uint8_t emAfPluginNetworkSteeringTotalBeacons;
-extern uint8_t emAfPluginNetworkSteeringJoinAttempts;
+extern const char * sli_zigbee_af_network_steering_stateNames[];
+extern uint8_t sli_zigbee_af_network_steering_total_beacons;
+extern uint8_t sli_zigbee_af_network_steering_join_attempts;
 
-#ifdef UC_BUILD
 #if (EMBER_AF_PLUGIN_NETWORK_STEERING_OPTIMIZE_SCANS != 1)
-extern uint8_t emAfPluginNetworkSteeringPanIdIndex;
+extern uint8_t sli_zigbee_af_network_steering_pan_id_index;
 #endif // # EMBER_AF_PLUGIN_NETWORK_STEERING_OPTIMIZE_SCANS
-#else // UC_BUILD
-#ifndef EMBER_AF_PLUGIN_NETWORK_STEERING_OPTIMIZE_SCANS
-extern uint8_t emAfPluginNetworkSteeringPanIdIndex;
-#endif // # EMBER_AF_PLUGIN_NETWORK_STEERING_OPTIMIZE_SCANS
-#endif // UC_BUILD
 
-uint8_t emAfPluginNetworkSteeringGetMaxPossiblePanIds(void);
-void emAfPluginNetworkSteeringClearStoredPanIds(void);
-uint16_t* emAfPluginNetworkSteeringGetStoredPanIdPointer(uint8_t index);
+uint8_t sli_zigbee_af_network_steering_get_max_possible_pan_ids(void);
+void sli_zigbee_af_network_steering_clear_stored_pan_ids(void);
+uint16_t* sli_zigbee_af_network_steering_get_stored_pan_id_pointer(uint8_t index);
 
 void emberAfPluginNetworkSteeringCompleteCallback(EmberStatus status,
                                                   uint8_t totalBeacons,
                                                   uint8_t joinAttempts,
                                                   uint8_t finalState);
-uint8_t emAfPluginNetworkSteeringGetCurrentChannel();
+uint8_t sli_zigbee_af_network_steering_get_current_channel();
 
-extern EmberAfPluginNetworkSteeringJoiningState emAfPluginNetworkSteeringState;
+extern EmberAfPluginNetworkSteeringJoiningState sli_zigbee_af_network_steering_state;
 
 #ifdef TRY_ALL_KEYS
   #define TRYING_ALL_KEYS                                                \
-  (((emAfPluginNetworkSteeringState)                                     \
+  (((sli_zigbee_af_network_steering_state)                               \
     == EMBER_AF_PLUGIN_NETWORK_STEERING_STATE_SCAN_PRIMARY_USE_ALL_KEYS) \
-   || ((emAfPluginNetworkSteeringState)                                  \
+   || ((sli_zigbee_af_network_steering_state)                            \
        == EMBER_AF_PLUGIN_NETWORK_STEERING_STATE_SCAN_SECONDARY_USE_ALL_KEYS))
 #else // TRY_ALL_KEYS
     #define TRYING_ALL_KEYS         false
 #endif // TRY_ALL_KEYS
 
-#define emAfPluginNetworkSteeringStateUsesInstallCodes()                      \
-  (((emAfPluginNetworkSteeringState)                                          \
+#define sli_zigbee_af_network_steering_state_uses_install_codes()             \
+  (((sli_zigbee_af_network_steering_state)                                    \
     == EMBER_AF_PLUGIN_NETWORK_STEERING_STATE_SCAN_PRIMARY_INSTALL_CODE)      \
-   || ((emAfPluginNetworkSteeringState)                                       \
+   || ((sli_zigbee_af_network_steering_state)                                 \
        == EMBER_AF_PLUGIN_NETWORK_STEERING_STATE_SCAN_SECONDARY_INSTALL_CODE) \
    || TRYING_ALL_KEYS)
 
-#define emAfPluginNetworkSteeringStateUsesCentralizedKey()              \
-  (((emAfPluginNetworkSteeringState)                                    \
+#define sli_zigbee_af_network_steering_state_uses_centralized_key()     \
+  (((sli_zigbee_af_network_steering_state)                              \
     == EMBER_AF_PLUGIN_NETWORK_STEERING_STATE_SCAN_PRIMARY_CENTRALIZED) \
-   || ((emAfPluginNetworkSteeringState)                                 \
+   || ((sli_zigbee_af_network_steering_state)                           \
        == EMBER_AF_PLUGIN_NETWORK_STEERING_STATE_SCAN_SECONDARY_CENTRALIZED))
 
-#define emAfPluginNetworkSteeringStateUsesDistributedKey()              \
-  (((emAfPluginNetworkSteeringState)                                    \
+#define sli_zigbee_af_network_steering_state_uses_distributed_key()     \
+  (((sli_zigbee_af_network_steering_state)                              \
     == EMBER_AF_PLUGIN_NETWORK_STEERING_STATE_SCAN_PRIMARY_DISTRIBUTED) \
-   || ((emAfPluginNetworkSteeringState)                                 \
+   || ((sli_zigbee_af_network_steering_state)                           \
        == EMBER_AF_PLUGIN_NETWORK_STEERING_STATE_SCAN_SECONDARY_DISTRIBUTED))
 
-#define emAfPluginNetworkSteeringStateSetUpdateTclk() \
-  ((emAfPluginNetworkSteeringState)                   \
+#define sli_zigbee_af_network_steering_state_set_update_tclk() \
+  ((sli_zigbee_af_network_steering_state)                      \
      |= EMBER_AF_PLUGIN_NETWORK_STEERING_STATE_UPDATE_TCLK)
-#define emAfPluginNetworkSteeringStateUpdateTclk() \
-  ((emAfPluginNetworkSteeringState)                \
+#define sli_zigbee_af_network_steering_state_update_tclk() \
+  ((sli_zigbee_af_network_steering_state)                  \
    & EMBER_AF_PLUGIN_NETWORK_STEERING_STATE_UPDATE_TCLK)
-#define emAfPluginNetworkSteeringStateClearUpdateTclk() \
-  ((emAfPluginNetworkSteeringState)                     \
+#define sli_zigbee_af_network_steering_state_clear_update_tclk() \
+  ((sli_zigbee_af_network_steering_state)                        \
      &= ~EMBER_AF_PLUGIN_NETWORK_STEERING_STATE_UPDATE_TCLK)
 
-#define emAfPluginNetworkSteeringStateSetVerifyTclk() \
-  ((emAfPluginNetworkSteeringState)                   \
+#define sli_zigbee_af_network_steering_state_set_verify_tclk() \
+  ((sli_zigbee_af_network_steering_state)                      \
      |= EMBER_AF_PLUGIN_NETWORK_STEERING_STATE_VERIFY_TCLK)
-#define emAfPluginNetworkSteeringStateVerifyTclk() \
-  ((emAfPluginNetworkSteeringState)                \
+#define sli_zigbee_af_network_steering_state_verify_tclk() \
+  ((sli_zigbee_af_network_steering_state)                  \
    & EMBER_AF_PLUGIN_NETWORK_STEERING_STATE_VERIFY_TCLK)
-#define emAfPluginNetworkSteeringStateClearVerifyTclk() \
-  ((emAfPluginNetworkSteeringState)                     \
+#define sli_zigbee_af_network_steering_state_clear_verify_tclk() \
+  ((sli_zigbee_af_network_steering_state)                        \
      &= ~EMBER_AF_PLUGIN_NETWORK_STEERING_STATE_VERIFY_TCLK)

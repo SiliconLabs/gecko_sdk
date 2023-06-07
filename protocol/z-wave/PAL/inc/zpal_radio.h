@@ -364,13 +364,13 @@ typedef enum
  */
 typedef struct
 {
-  zpal_radio_speed_t speed; ///< Channel Speed to use when transmitting a frame.
-  uint8_t channel_id;       ///< Channel id to use when transmitting a frame.
-  zpal_radio_crc_t crc;     ///< CRC Type to use. XOR is used in 2 channel at 9600 and 40k baud rate. CRC CCITT is used in 100k frames.
-  uint8_t preamble;         ///< The byte value used for the preamble sequence.
-  uint8_t preamble_length;  ///< Length of the preamble. Minimum preamble length is specified in ITU G.9959-2015.
-  uint8_t start_of_frame;   ///< The start of frame byte used to indicate the end of preamble and the start of frame.
-  uint8_t repeats;          ///< Number of repetitions for the frame. This is used for wakeup beams where the beam is to be repeated for 250 or 1000 ms.
+  zpal_radio_speed_t speed;              ///< Channel Speed to use when transmitting a frame.
+  zpal_radio_zwave_channel_t channel_id; ///< Channel id to use when transmitting a frame.
+  zpal_radio_crc_t crc;                  ///< CRC Type to use. XOR is used in 2 channel at 9600 and 40k baud rate. CRC CCITT is used in 100k frames.
+  uint8_t preamble;                      ///< The byte value used for the preamble sequence.
+  uint8_t preamble_length;               ///< Length of the preamble. Minimum preamble length is specified in ITU G.9959-2015.
+  uint8_t start_of_frame;                ///< The start of frame byte used to indicate the end of preamble and the start of frame.
+  uint8_t repeats;                       ///< Number of repetitions for the frame. This is used for wakeup beams where the beam is to be repeated for 250 or 1000 ms.
 } zpal_radio_transmit_parameter_t;
 
 /**
@@ -390,7 +390,7 @@ typedef enum
 typedef struct
 {
   zpal_radio_speed_t speed;                       ///< Speed for the frame received.
-  uint8_t channel_id;                             ///< Channel id on which the frame was received.
+  zpal_radio_zwave_channel_t channel_id;          ///< Channel id on which the frame was received.
   zpal_radio_header_type_t channel_header_format; ///< Z-Wave Header format used in channel frame was received on.
   int8_t rssi;                                    ///< Rssi value.
 } zpal_radio_rx_parameters_t;
@@ -594,7 +594,7 @@ zpal_radio_protocol_mode_t zpal_radio_get_protocol_mode(void);
  *
  * @return Last beam channel.
  */
-uint8_t zpal_radio_get_last_beam_channel(void);
+zpal_radio_zwave_channel_t zpal_radio_get_last_beam_channel(void);
 
 /**
  * @brief Get last beam RSSI.
@@ -608,7 +608,7 @@ int8_t zpal_radio_get_last_beam_rssi(void);
  * @brief Function for setting the LBT RSSI level.
  *
  * @param[in] channel  uint8_t channel to set LBT threshold for.
- * @param[in] level    int8_t LBT RSSI level in dBm.
+ * @param[in] level         int8_t LBT RSSI level in dBm.
  */
 void zpal_radio_set_lbt_level(uint8_t channel, int8_t level);
 
@@ -736,6 +736,12 @@ bool zpal_radio_is_flirs_enabled(void);
 void zpal_radio_start_receive_after_power_down(bool wait_for_beam);
 
 /**
+ * @brief Turn radio off without changing configuration.
+ *
+ */
+void zpal_radio_abort(void);
+
+/**
  * @brief Resets the radio configuration to receive mode after having received a beam.
  *
  * @param[in] start_receiver If set to true, the receiver will start listening. Otherwise, it will
@@ -770,6 +776,14 @@ void zpal_radio_calibrate(void);
  * @return True if LBT is enabled, false otherwise.
  */
 bool zpal_radio_is_lbt_enabled(void);
+
+/**
+ * @brief Returns the time it takes to start transmission of wake up beams. Includes
+ * time spent on LBT.
+ *
+ * @return startup time in milli seconds.
+ */
+uint16_t zpal_radio_get_beam_startup_time(void);
 
 /**
  * @brief Returns the node ID associated with most recently received beam frame.

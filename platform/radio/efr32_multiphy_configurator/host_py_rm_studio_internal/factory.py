@@ -7,6 +7,7 @@ _PKG_PATH = os.path.dirname(os.path.realpath(__file__))
 
 __all__ = ['RM_Factory', 'RM_GetInfo',
            'RM_S1_PART_FAMILY_NAMES', 'RM_S2_PART_FAMILY_NAMES',
+           'RM_S3_PART_FAMILY_NAMES',
            'RM_ALL_PART_FAMILY_NAMES', 'rm_dynamic_import']
 
 _RM_PART_FAMILY_MAP = {
@@ -19,9 +20,13 @@ _RM_PART_FAMILY_MAP = {
     'OCELOT':  'efr32xg23',
     'BOBCAT':  'efr32xg24',
     'SOL':     'efr32xg25',
+    'CARACAL': 'efr32xg26',
     'LEOPARD': 'efr32xg27',
     'MARGAY':  'efr32xg28',
     'VIPER':   'efr32xg31',
+    'LPW300':  'sixg300xil300',
+    'RAINIER': 'sixg301',
+    'CHEETAH': 'efr32xg20',
 }
 
 RM_S1_PART_FAMILY_NAMES = [
@@ -39,7 +44,14 @@ RM_S2_PART_FAMILY_NAMES = [
     'SOL',
     'LEOPARD',
     'MARGAY',
+    'CARACAL',
     'VIPER',
+    'CHEETAH',
+]
+
+RM_S3_PART_FAMILY_NAMES = [
+    'LPW300',
+    'RAINIER',
 ]
 
 RM_ALL_PART_FAMILY_NAMES = sorted(_RM_PART_FAMILY_MAP.keys())

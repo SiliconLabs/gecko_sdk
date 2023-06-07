@@ -55,8 +55,8 @@
  * @param[in] size Size of buffer
  *****************************************************************************/
 __STATIC_INLINE void _set_log_buff(sl_iperf_log_t * const log,
-                                 char * const buff,
-                                 const size_t size);
+                                   char * const buff,
+                                   const size_t size);
 
 /**************************************************************************//**
  * @brief Default log printer

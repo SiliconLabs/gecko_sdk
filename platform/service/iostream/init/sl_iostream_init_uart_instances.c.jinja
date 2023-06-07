@@ -8,6 +8,10 @@
 #include "sl_iostream.h"
 #include "sl_iostream_uart.h"
 #include "sl_iostream_usart.h"
+{% if "vcom" in iostream_uart_instances and enable_config_over_swo %}
+#include "sl_cos.h"
+{% endif %}
+
 // Include instance config {# Include instance config #}
 {% for instance in iostream_uart_instances %} #include "sl_iostream_uart_{{ instance }}_config.h"
 {% endfor %}
@@ -114,6 +118,42 @@ sl_status_t sl_iostream_uart_init_{{ instance }}(void)
                                   &config_{{ instance }},
                                   &context_{{ instance }});
   EFM_ASSERT(status == SL_STATUS_OK);
+
+  {% if "vcom" in iostream_uart_instances and enable_config_over_swo %}
+  // Send VCOM config to WSTK
+  uint8_t flow_control = COS_CONFIG_FLOWCONTROL_NONE;
+  // Series 0 boards don't have HWFC.
+  #if !defined(_SILICON_LABS_32B_SERIES_0)
+  if (!uart_config_{{ instance }}.sw_flow_control) {
+    #if defined(SL_IOSTREAM_UART_{{ instance | upper }}_FLOW_CONTROL_TYPE)  
+    switch (SL_IOSTREAM_UART_{{ instance | upper }}_FLOW_CONTROL_TYPE)
+    #elif defined(SL_IOSTREAM_USART_{{ instance | upper }}_FLOW_CONTROL_TYPE)
+    switch (SL_IOSTREAM_USART_{{ instance | upper }}_FLOW_CONTROL_TYPE)
+    #else 
+    #error "Invalid Flow Control Type configuration."
+    #endif
+    {
+      case usartHwFlowControlNone:
+        flow_control = COS_CONFIG_FLOWCONTROL_NONE;
+        break
+      case usartHwFlowControlCts:
+        flow_control = COS_CONFIG_FLOWCONTROL_CTS;
+        break;
+      case usartHwFlowControlRts:
+        flow_control = COS_CONFIG_FLOWCONTROL_RTS;
+        break;
+      case usartHwFlowControlCtsAndRts:
+        flow_control = COS_CONFIG_FLOWCONTROL_CTS_RTS;
+        break;
+      default:
+        // Invalid flow control type
+        EFM_ASSERT(0);
+        break;
+    }
+  }
+  #endif // _SILICON_LABS_32B_SERIES_0
+  sl_cos_config_vcom((uint32_t) SL_IOSTREAM_UART_{{ instance | upper }}_BAUDRATE, flow_control);
+  {% endif %}
 
   return status;
 }

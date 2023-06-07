@@ -1,0 +1,32 @@
+id: "connect_ncp"
+label: "Connect NCP"
+package: "Flex"
+category: "Connect"
+quality: "production"
+ui_hints:
+  visibility: never
+description: "This plugin contains defines, source files, and include paths to use the NCP feature on the SoC."
+
+requires:
+  - name: "connect_cpc"
+  - name: "connect_csp"
+  - name: "psa_crypto"
+
+provides:
+  - name: "connect_ncp"
+
+include:
+  - path: "protocol/flex/stack/framework"
+    file_list:
+      - path: "event-queue.h"
+  - path: "protocol/flex/csp"
+    file_list:
+      - path: "csp-ncp-utilities.h"
+
+source:
+  - path: "protocol/flex/ncp/ncp-common.c"
+  - path: "protocol/flex/ncp/ncp-security.c"
+  - path: "protocol/flex/stack/framework/event-queue.c"
+
+define:
+  - name: "CONNECT_NCP"

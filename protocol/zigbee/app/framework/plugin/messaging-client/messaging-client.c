@@ -20,13 +20,9 @@
 #include "../../util/common.h"
 #include "messaging-client.h"
 
-#ifdef UC_BUILD
 #include "messaging-client-config.h"
 #include "zap-cluster-command-parser.h"
 #include "esi-management.h"
-#else // !UC_BUILD
-#include "app/framework/plugin/esi-management/esi-management.h"
-#endif // UC_BUILD
 
 static EmberAfPluginMessagingClientMessage messageTable[EMBER_AF_MESSAGING_CLUSTER_CLIENT_ENDPOINT_COUNT];
 
@@ -45,12 +41,12 @@ static void esiDeletionCallback(uint8_t esiIndex)
 
 void emberAfMessagingClusterClientInitCallback(uint8_t endpoint)
 {
-  emAfPluginMessagingClientClearMessage(endpoint);
+  sli_zigbee_af_messaging_client_clear_message(endpoint);
   // Subscribing for ESI Management plugin deletion announcements.
   emberAfPluginEsiManagementSubscribeToDeletionAnnouncements(esiDeletionCallback);
 }
 
-void emAfPluginMessagingClientClearMessage(uint8_t endpoint)
+void sli_zigbee_af_messaging_client_clear_message(uint8_t endpoint)
 {
   uint8_t ep = emberAfFindClusterClientEndpointIndex(endpoint, ZCL_MESSAGING_CLUSTER_ID);
   if ( ep != 0xFF ) {
@@ -92,18 +88,16 @@ void emberAfMessagingClusterClientTickCallback(uint8_t endpoint)
   if (messageTable[ep].active
       && (messageTable[ep].durationInMinutes
           != ZCL_MESSAGING_CLUSTER_DURATION_UNTIL_CHANGED)) {
-    slxu_zigbee_zcl_schedule_client_tick(endpoint,
-                                         ZCL_MESSAGING_CLUSTER_ID,
-                                         ((messageTable[ep].endTime
-                                           - messageTable[ep].startTime)
-                                          * MILLISECOND_TICKS_PER_SECOND));
+    sl_zigbee_zcl_schedule_client_tick(endpoint,
+                                       ZCL_MESSAGING_CLUSTER_ID,
+                                       ((messageTable[ep].endTime
+                                         - messageTable[ep].startTime)
+                                        * MILLISECOND_TICKS_PER_SECOND));
   }
 }
 
 //-----------------------
 // ZCL commands callbacks
-
-#ifdef UC_BUILD
 
 bool emberAfMessagingClusterDisplayMessageCallback(EmberAfClusterCommand *cmd)
 {
@@ -162,8 +156,8 @@ bool emberAfMessagingClusterDisplayMessageCallback(EmberAfClusterCommand *cmd)
       // should no longer display it.
       messageTable[ep].active = false;
       emberAfPluginMessagingClientCancelMessageCallback(&messageTable[ep]);
-      slxu_zigbee_zcl_deactivate_client_tick(emberAfCurrentEndpoint(),
-                                             ZCL_MESSAGING_CLUSTER_ID);
+      sl_zigbee_zcl_deactivate_client_tick(emberAfCurrentEndpoint(),
+                                           ZCL_MESSAGING_CLUSTER_ID);
     }
   }
 
@@ -198,10 +192,10 @@ bool emberAfMessagingClusterDisplayMessageCallback(EmberAfClusterCommand *cmd)
       // the duration to wake us up and mark the message as inactive.
       messageTable[ep].active = true;
       emberAfPluginMessagingClientDisplayMessageCallback(&messageTable[ep]);
-      slxu_zigbee_zcl_schedule_client_tick(emberAfCurrentEndpoint(),
-                                           ZCL_MESSAGING_CLUSTER_ID,
-                                           ((messageTable[ep].endTime - now)
-                                            * MILLISECOND_TICKS_PER_SECOND));
+      sl_zigbee_zcl_schedule_client_tick(emberAfCurrentEndpoint(),
+                                         ZCL_MESSAGING_CLUSTER_ID,
+                                         ((messageTable[ep].endTime - now)
+                                          * MILLISECOND_TICKS_PER_SECOND));
     } else {
       // Finally, if a message starts in the past and the duration has elapsed,
       // it gets marked as inactive and no tick is scheduled because no further
@@ -212,10 +206,10 @@ bool emberAfMessagingClusterDisplayMessageCallback(EmberAfClusterCommand *cmd)
     // If a message starts in the future, it gets marked as inactive and a tick
     // is scheduled to wake us up at startTime to mark the message as active.
     messageTable[ep].active = false;
-    slxu_zigbee_zcl_schedule_client_tick(emberAfCurrentEndpoint(),
-                                         ZCL_MESSAGING_CLUSTER_ID,
-                                         ((messageTable[ep].startTime - now)
-                                          * MILLISECOND_TICKS_PER_SECOND));
+    sl_zigbee_zcl_schedule_client_tick(emberAfCurrentEndpoint(),
+                                       ZCL_MESSAGING_CLUSTER_ID,
+                                       ((messageTable[ep].startTime - now)
+                                        * MILLISECOND_TICKS_PER_SECOND));
   }
 
   // Once we receive a message, the data in the structure becomes valid and
@@ -250,8 +244,8 @@ bool emberAfMessagingClusterCancelMessageCallback(EmberAfClusterCommand *cmd)
     messageTable[ep].active = false;
     messageTable[ep].messageControl = cmd_data.messageControl;
     emberAfPluginMessagingClientCancelMessageCallback(&messageTable[ep]);
-    slxu_zigbee_zcl_deactivate_client_tick(emberAfCurrentEndpoint(),
-                                           ZCL_MESSAGING_CLUSTER_ID);
+    sl_zigbee_zcl_deactivate_client_tick(emberAfCurrentEndpoint(),
+                                         ZCL_MESSAGING_CLUSTER_ID);
     status = EMBER_ZCL_STATUS_SUCCESS;
   } else {
     status = EMBER_ZCL_STATUS_NOT_FOUND;
@@ -261,165 +255,7 @@ bool emberAfMessagingClusterCancelMessageCallback(EmberAfClusterCommand *cmd)
   return true;
 }
 
-#else // !UC_BUILD
-
-bool emberAfMessagingClusterDisplayMessageCallback(uint32_t messageId,
-                                                   uint8_t messageControl,
-                                                   uint32_t startTime,
-                                                   uint16_t durationInMinutes,
-                                                   uint8_t* msg,
-                                                   uint8_t optionalExtendedMessageControl)
-{
-  uint8_t endpoint = emberAfCurrentEndpoint();
-  uint8_t ep = emberAfFindClusterClientEndpointIndex(endpoint, ZCL_MESSAGING_CLUSTER_ID);
-  uint32_t now = emberAfGetCurrentTime();
-  uint8_t esiIndex =
-    emberAfPluginEsiManagementUpdateEsiAndGetIndex(emberAfCurrentCommand());
-
-  emberAfMessagingClusterPrint("RX: DisplayMessage"
-                               " 0x%4x, 0x%x, 0x%4x, 0x%2x, \"",
-                               messageId,
-                               messageControl,
-                               startTime,
-                               durationInMinutes);
-  emberAfMessagingClusterPrintString(msg);
-  emberAfMessagingClusterPrintln("\"");
-
-  if (emberAfPluginMessagingClientPreDisplayMessageCallback(messageId,
-                                                            messageControl,
-                                                            startTime,
-                                                            durationInMinutes,
-                                                            msg,
-                                                            optionalExtendedMessageControl)) {
-    goto kickout;
-  }
-
-  if (ep == 0xFF) {
-    return false;
-  }
-
-  // Use of Inter-PAN transmission is deprecated.
-  if ((messageControl & 0x03) == MESSAGE_CONTROL_INTER_PAN_TRANSMISSION_ONLY) {
-    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_INVALID_FIELD);
-    return true;
-  }
-
-  if (messageTable[ep].active) {
-    // First check whether it is a duplicate message
-    if (messageId == messageTable[ep].messageId) {
-      //Duplicate message from a different ESI, add the ESI to the bitmask
-      if (esiIndex < EMBER_AF_PLUGIN_ESI_MANAGEMENT_ESI_TABLE_SIZE
-          && (messageTable[ep].esiBitmask & BIT(esiIndex)) == 0) {
-        messageTable[ep].esiBitmask |= BIT(esiIndex);
-      }
-      // Either way, we send back a default response.
-      emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
-      return true;
-    } else {
-      // If we already have another message, notify the application that it
-      // should no longer display it.
-      messageTable[ep].active = false;
-      emberAfPluginMessagingClientCancelMessageCallback(&messageTable[ep]);
-      slxu_zigbee_zcl_deactivate_client_tick(emberAfCurrentEndpoint(),
-                                             ZCL_MESSAGING_CLUSTER_ID);
-    }
-  }
-
-  if (esiIndex < EMBER_AF_PLUGIN_ESI_MANAGEMENT_ESI_TABLE_SIZE) {
-    messageTable[ep].esiBitmask = BIT(esiIndex);
-  }
-
-  messageTable[ep].clientEndpoint =
-    emberAfCurrentCommand()->apsFrame->destinationEndpoint;
-  messageTable[ep].messageId         = messageId;
-  messageTable[ep].messageControl    = messageControl;
-  messageTable[ep].startTime         = (startTime == ZCL_MESSAGING_CLUSTER_START_TIME_NOW
-                                        ? now
-                                        : startTime);
-  messageTable[ep].endTime           = (durationInMinutes == ZCL_MESSAGING_CLUSTER_DURATION_UNTIL_CHANGED
-                                        ? ZCL_MESSAGING_CLUSTER_END_TIME_NEVER
-                                        : messageTable[ep].startTime + durationInMinutes * 60);
-  messageTable[ep].durationInMinutes = durationInMinutes;
-  emberAfCopyString(messageTable[ep].message, msg, EMBER_AF_PLUGIN_MESSAGING_CLIENT_MESSAGE_SIZE);
-
-  if (messageTable[ep].startTime <= now) {
-    if (messageTable[ep].durationInMinutes
-        == ZCL_MESSAGING_CLUSTER_DURATION_UNTIL_CHANGED) {
-      // If a message starts in the past and the duration is "until changed," it
-      // gets marked as active and no tick is scheduled becaues the message will
-      // live until we receive a new message or a cancel command.
-      messageTable[ep].active = true;
-      emberAfPluginMessagingClientDisplayMessageCallback(&messageTable[ep]);
-    } else if (messageTable[ep].endTime > now) {
-      // If a message starts in the past and the duration has not elapsed, it
-      // gets marked as active and a tick is scheduled for the time remaining in
-      // the duration to wake us up and mark the message as inactive.
-      messageTable[ep].active = true;
-      emberAfPluginMessagingClientDisplayMessageCallback(&messageTable[ep]);
-      slxu_zigbee_zcl_schedule_client_tick(emberAfCurrentEndpoint(),
-                                           ZCL_MESSAGING_CLUSTER_ID,
-                                           ((messageTable[ep].endTime - now)
-                                            * MILLISECOND_TICKS_PER_SECOND));
-    } else {
-      // Finally, if a message starts in the past and the duration has elapsed,
-      // it gets marked as inactive and no tick is scheduled because no further
-      // processing is needed.
-      messageTable[ep].active = false;
-    }
-  } else {
-    // If a message starts in the future, it gets marked as inactive and a tick
-    // is scheduled to wake us up at startTime to mark the message as active.
-    messageTable[ep].active = false;
-    slxu_zigbee_zcl_schedule_client_tick(emberAfCurrentEndpoint(),
-                                         ZCL_MESSAGING_CLUSTER_ID,
-                                         ((messageTable[ep].startTime - now)
-                                          * MILLISECOND_TICKS_PER_SECOND));
-  }
-
-  // Once we receive a message, the data in the structure becomes valid and
-  // remains valid forever.  When the message expires or is canceled, it gets
-  // marked as inactive, but stays valid.  This allows the application to
-  // display or confirm old messages.
-  messageTable[ep].valid = true;
-
-  emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
-  kickout:
-  return true;
-}
-
-bool emberAfMessagingClusterCancelMessageCallback(uint32_t messageId,
-                                                  uint8_t messageControl)
-{
-  uint8_t endpoint = emberAfCurrentEndpoint();
-  uint8_t ep = emberAfFindClusterClientEndpointIndex(endpoint, ZCL_MESSAGING_CLUSTER_ID);
-  EmberAfStatus status;
-
-  if (ep == 0xFF) {
-    return false;
-  }
-
-  emberAfMessagingClusterPrintln("RX: CancelMessage 0x%4x, 0x%x",
-                                 messageId,
-                                 messageControl);
-
-  if (messageTable[ep].active && messageTable[ep].messageId == messageId) {
-    messageTable[ep].active = false;
-    messageTable[ep].messageControl = messageControl;
-    emberAfPluginMessagingClientCancelMessageCallback(&messageTable[ep]);
-    slxu_zigbee_zcl_deactivate_client_tick(emberAfCurrentEndpoint(),
-                                           ZCL_MESSAGING_CLUSTER_ID);
-    status = EMBER_ZCL_STATUS_SUCCESS;
-  } else {
-    status = EMBER_ZCL_STATUS_NOT_FOUND;
-  }
-
-  emberAfSendImmediateDefaultResponse(status);
-  return true;
-}
-
-#endif // UC_BUILD
-
-void emAfPluginMessagingClientPrintInfo(uint8_t endpoint)
+void sli_zigbee_af_messaging_client_print_info(uint8_t endpoint)
 {
   uint8_t ep = emberAfFindClusterClientEndpointIndex(endpoint, ZCL_MESSAGING_CLUSTER_ID);
 
@@ -482,8 +318,6 @@ EmberAfStatus emberAfPluginMessagingClientConfirmMessage(uint8_t endpoint)
   return status;
 }
 
-#ifdef UC_BUILD
-
 uint32_t emberAfMessagingClusterClientCommandParse(sl_service_opcode_t opcode,
                                                    sl_service_function_context_t *context)
 {
@@ -511,5 +345,3 @@ uint32_t emberAfMessagingClusterClientCommandParse(sl_service_opcode_t opcode,
           ? EMBER_ZCL_STATUS_SUCCESS
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
-
-#endif // UC_BUILD

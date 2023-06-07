@@ -36,6 +36,7 @@
 #include <openthread/srp_client.h>
 
 #include "common/as_core_type.hpp"
+#include "common/callback.hpp"
 #include "common/clearable.hpp"
 #include "common/linked_list.hpp"
 #include "common/locator.hpp"
@@ -97,7 +98,7 @@ public:
      * Please see `otSrpClientCallback` for more details.
      *
      */
-    typedef otSrpClientCallback Callback;
+    typedef otSrpClientCallback ClientCallback;
 
     /**
      * This type represents an SRP client host info.
@@ -461,7 +462,7 @@ public:
      * @param[in] aContext         An arbitrary context used with @p aCallback.
      *
      */
-    void SetCallback(Callback aCallback, void *aContext);
+    void SetCallback(ClientCallback aCallback, void *aContext) { mCallback.Set(aCallback, aContext); }
 
     /**
      * This method gets the TTL used in SRP update requests.
@@ -765,11 +766,37 @@ public:
      *
      */
     bool IsServiceKeyRecordEnabled(void) const { return mServiceKeyRecordEnabled; }
+
+    /**
+     * This method enables/disables "use short Update Lease Option" behavior.
+     *
+     * When enabled, the SRP client will use the short variant format of Update Lease Option in its message. The short
+     * format only includes the lease interval.
+     *
+     * This method is added under `REFERENCE_DEVICE` config and is intended to override the default behavior for
+     * testing only.
+     *
+     * @param[in] aUseShort    TRUE to enable, FALSE to disable the "use short Update Lease Option" mode.
+     *
+     */
+    void SetUseShortLeaseOption(bool aUseShort) { mUseShortLeaseOption = aUseShort; }
+
+    /**
+     * This method gets the current "use short Update Lease Option" mode.
+     *
+     * @returns TRUE if "use short Update Lease Option" mode is enabled, FALSE otherwise.
+     *
+     */
+    bool GetUseShortLeaseOption(void) const { return mUseShortLeaseOption; }
 #endif // OPENTHREAD_CONFIG_REFERENCE_DEVICE_ENABLE
 
 private:
     // Number of fast data polls after SRP Update tx (11x 188ms = ~2 seconds)
     static constexpr uint8_t kFastPollsAfterUpdateTx = 11;
+
+#if OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE
+    static constexpr uint32_t kSrpEcdsaKeyRef = Crypto::Storage::kEcdsaRef;
+#endif
 
 #if OPENTHREAD_CONFIG_SRP_CLIENT_SWITCH_SERVER_ON_FAILURE
     static constexpr uint8_t kMaxTimeoutFailuresToSwitchServer =
@@ -925,17 +952,17 @@ private:
         void    SetState(State aState);
         uint8_t GetAnycastSeqNum(void) const { return mAnycastSeqNum; }
         void    SetAnycastSeqNum(uint8_t aAnycastSeqNum) { mAnycastSeqNum = aAnycastSeqNum; }
-        void    SetCallback(AutoStartCallback aCallback, void *aContext);
+        void    SetCallback(AutoStartCallback aCallback, void *aContext) { mCallback.Set(aCallback, aContext); }
         void    InvokeCallback(const Ip6::SockAddr *aServerSockAddr) const;
 
 #if OPENTHREAD_CONFIG_SRP_CLIENT_SWITCH_SERVER_ON_FAILURE
-        uint8_t GetTimoutFailureCount(void) const { return mTimoutFailureCount; }
-        void    ResetTimoutFailureCount(void) { mTimoutFailureCount = 0; }
-        void    IncrementTimoutFailureCount(void)
+        uint8_t GetTimeoutFailureCount(void) const { return mTimeoutFailureCount; }
+        void    ResetTimeoutFailureCount(void) { mTimeoutFailureCount = 0; }
+        void    IncrementTimeoutFailureCount(void)
         {
-            if (mTimoutFailureCount < NumericLimits<uint8_t>::kMax)
+            if (mTimeoutFailureCount < NumericLimits<uint8_t>::kMax)
             {
-                mTimoutFailureCount++;
+                mTimeoutFailureCount++;
             }
         }
 #endif
@@ -945,12 +972,11 @@ private:
 
         static const char *StateToString(State aState);
 
-        AutoStartCallback mCallback;
-        void *            mContext;
-        State             mState;
-        uint8_t           mAnycastSeqNum;
+        Callback<AutoStartCallback> mCallback;
+        State                       mState;
+        uint8_t                     mAnycastSeqNum;
 #if OPENTHREAD_CONFIG_SRP_CLIENT_SWITCH_SERVER_ON_FAILURE
-        uint8_t mTimoutFailureCount; // Number of no-response timeout failures with the currently selected server.
+        uint8_t mTimeoutFailureCount; // Number of no-response timeout failures with the currently selected server.
 #endif
     };
 #endif // OPENTHREAD_CONFIG_SRP_CLIENT_AUTO_START_API_ENABLE
@@ -959,29 +985,37 @@ private:
     {
         static constexpr uint16_t kUnknownOffset = 0; // Unknown offset value (used when offset is not yet set).
 
-        uint16_t                     mDomainNameOffset; // Offset of domain name serialization
-        uint16_t                     mHostNameOffset;   // Offset of host name serialization.
-        uint16_t                     mRecordCount;      // Number of resource records in Update section.
-        Crypto::Ecdsa::P256::KeyPair mKeyPair;          // The ECDSA key pair.
+        uint16_t mDomainNameOffset; // Offset of domain name serialization
+        uint16_t mHostNameOffset;   // Offset of host name serialization.
+        uint16_t mRecordCount;      // Number of resource records in Update section.
+#if OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE
+        Crypto::Ecdsa::P256::KeyPairAsRef mKeyRef; // The ECDSA key ref for key-pair.
+#else
+        Crypto::Ecdsa::P256::KeyPair mKeyPair; // The ECDSA key pair.
+#endif
     };
 
-    Error        Start(const Ip6::SockAddr &aServerSockAddr, Requester aRequester);
-    void         Stop(Requester aRequester, StopMode aMode);
-    void         Resume(void);
-    void         Pause(void);
-    void         HandleNotifierEvents(Events aEvents);
-    void         HandleRoleChanged(void);
-    Error        UpdateHostInfoStateOnAddressChange(void);
-    void         UpdateServiceStateToRemove(Service &aService);
-    State        GetState(void) const { return mState; }
-    void         SetState(State aState);
-    void         ChangeHostAndServiceStates(const ItemState *aNewStates, ServiceStateChangeMode aMode);
-    void         InvokeCallback(Error aError) const;
-    void         InvokeCallback(Error aError, const HostInfo &aHostInfo, const Service *aRemovedServices) const;
-    void         HandleHostInfoOrServiceChange(void);
-    void         SendUpdate(void);
-    Error        PrepareUpdateMessage(Message &aMessage);
-    Error        ReadOrGenerateKey(Crypto::Ecdsa::P256::KeyPair &aKeyPair);
+    Error Start(const Ip6::SockAddr &aServerSockAddr, Requester aRequester);
+    void  Stop(Requester aRequester, StopMode aMode);
+    void  Resume(void);
+    void  Pause(void);
+    void  HandleNotifierEvents(Events aEvents);
+    void  HandleRoleChanged(void);
+    Error UpdateHostInfoStateOnAddressChange(void);
+    void  UpdateServiceStateToRemove(Service &aService);
+    State GetState(void) const { return mState; }
+    void  SetState(State aState);
+    void  ChangeHostAndServiceStates(const ItemState *aNewStates, ServiceStateChangeMode aMode);
+    void  InvokeCallback(Error aError) const;
+    void  InvokeCallback(Error aError, const HostInfo &aHostInfo, const Service *aRemovedServices) const;
+    void  HandleHostInfoOrServiceChange(void);
+    void  SendUpdate(void);
+    Error PrepareUpdateMessage(Message &aMessage);
+#if OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE
+    Error ReadOrGenerateKey(Crypto::Ecdsa::P256::KeyPairAsRef &aKeyRef);
+#else
+    Error ReadOrGenerateKey(Crypto::Ecdsa::P256::KeyPair &aKeyPair);
+#endif
     Error        AppendServiceInstructions(Message &aMessage, Info &aInfo);
     bool         CanAppendService(const Service &aService);
     Error        AppendServiceInstruction(Service &aService, Message &aMessage, Info &aInfo);
@@ -1035,6 +1069,7 @@ private:
     bool    mSingleServiceMode : 1;
 #if OPENTHREAD_CONFIG_REFERENCE_DEVICE_ENABLE
     bool mServiceKeyRecordEnabled : 1;
+    bool mUseShortLeaseOption : 1;
 #endif
 
     uint16_t mUpdateMessageId;
@@ -1049,12 +1084,11 @@ private:
 
     Ip6::Udp::Socket mSocket;
 
-    Callback            mCallback;
-    void *              mCallbackContext;
-    const char *        mDomainName;
-    HostInfo            mHostInfo;
-    LinkedList<Service> mServices;
-    DelayTimer          mTimer;
+    Callback<ClientCallback> mCallback;
+    const char              *mDomainName;
+    HostInfo                 mHostInfo;
+    LinkedList<Service>      mServices;
+    DelayTimer               mTimer;
 #if OPENTHREAD_CONFIG_SRP_CLIENT_AUTO_START_API_ENABLE
     AutoStart mAutoStart;
 #endif

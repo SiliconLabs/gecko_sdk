@@ -17,19 +17,11 @@
 
 #ifndef SILABS_PLUGIN_COUNTERS_CLI_H
 #define SILABS_PLUGIN_COUNTERS_CLI_H
-#ifdef UC_BUILD
 void emberAfPluginCountersPrintCommand(sl_cli_command_arg_t *args);
 void emberAfPluginCountersSimplePrintCommand(sl_cli_command_arg_t *args);
 void emberAfPluginCountersPrintThresholdsCommand(sl_cli_command_arg_t *args);
 void emberAfPluginCountersSetThresholdCommand(sl_cli_command_arg_t *args);
 void emberAfPluginCountersSendRequestCommand(sl_cli_command_arg_t *args);
-#else
-void emberAfPluginCountersPrintCommand(void);
-void emberAfPluginCountersSimplePrintCommand(void);
-void emberAfPluginCountersPrintThresholdsCommand(void);
-void emberAfPluginCountersSetThresholdCommand(void);
-void emberAfPluginCountersSendRequestCommand(void);
-#endif
 
 void emberAfPluginCounterPrintCountersResponse(EmberMessageBuffer message);
 

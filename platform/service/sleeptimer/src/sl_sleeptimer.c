@@ -31,11 +31,11 @@
 #include <stdlib.h>
 
 #include "em_device.h"
-#include "sl_common.h"
-#include "em_core.h"
+#include "em_core_generic.h"
 #include "sl_sleeptimer.h"
 #include "sli_sleeptimer_hal.h"
 #include "sl_atomic.h"
+#include "sl_sleeptimer_config.h"
 
 #if defined(SL_COMPONENT_CATALOG_PRESENT)
 #include "sl_component_catalog.h"
@@ -1260,6 +1260,7 @@ void process_timer_irq(uint8_t local_flag)
 
   if (local_flag & SLEEPTIMER_EVENT_COMP) {
     sl_sleeptimer_timer_handle_t *current = NULL;
+
     uint32_t nb_timer_expire = 0u;
     uint16_t option_flags = 0;
 
@@ -1347,7 +1348,7 @@ void process_timer_irq(uint8_t local_flag)
     // from the Sleeptimer perspective, the system can go back to sleep after the ISR handling.
     sleep_on_isr_exit = false;
     if (nb_timer_expire == 1u) {
-      if (option_flags == SLI_SLEEPTIMER_POWER_MANAGER_EARLY_WAKEUP_TIMER_FLAG) {
+      if (option_flags & SLI_SLEEPTIMER_POWER_MANAGER_EARLY_WAKEUP_TIMER_FLAG) {
         sleep_on_isr_exit = true;
       }
     }
@@ -1567,6 +1568,14 @@ static sl_status_t create_timer(sl_sleeptimer_timer_handle_t *handle,
       return SL_STATUS_OK;
     }
   }
+
+#if SL_SLEEPTIMER_PERIPHERAL == SL_SLEEPTIMER_PERIPHERAL_SYSRTC
+  if (option_flags == (SLI_SLEEPTIMER_POWER_MANAGER_EARLY_WAKEUP_TIMER_FLAG | SLI_SLEEPTIMER_POWER_MANAGER_HF_ACCURACY_CLK_FLAG)) {
+    HFXO0->CTRL |= HFXO_CTRL_EM23ONDEMAND;
+    sleeptimer_hal_set_compare_prs_hfxo_startup(timeout_initial);
+    return SL_STATUS_OK;
+  }
+#endif
 
   CORE_ENTER_CRITICAL();
   update_delta_list();
@@ -1891,4 +1900,15 @@ static bool is_valid_date_64(sl_sleeptimer_date_t *date)
 uint16_t sl_sleeptimer_get_clock_accuracy(void)
 {
   return sleeptimer_hal_get_clock_accuracy();
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Update sleep_on_isr_exit flag.
+ *
+ * @param flag Value update_sleep_on_isr_exit will be set to.
+ ******************************************************************************/
+void sli_sleeptimer_update_sleep_on_isr_exit(bool flag)
+{
+  sleep_on_isr_exit = flag;
 }

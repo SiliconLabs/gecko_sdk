@@ -4,9 +4,15 @@ package: Bluetooth
 description: >
   Component that provides simple communication interface using UART.
   This component is mainly used in NCP communication cases.
+
+  This is a No-Code component if used together with NCP Interface or
+  NCP Host Communication Interface components.
 category: Application|Utility
 quality: production
 root_path: app/bluetooth/common/simple_com
+tag:
+  - No-Code
+
 config_file:
   - path: config/sl_simple_com_config.h
   - path: config/sl_simple_com_freertos_config.h

@@ -20,79 +20,31 @@
 
 #include "app/framework/plugin/mn-price-passthrough/mn-price-passthrough.h"
 #include "app/framework/plugin/price-common/price-common.h"
-#ifdef UC_BUILD
 // plugin mn-price-passthrough start
-void emAfPluginMnPriceStartCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_mn_price_start_command(sl_cli_command_arg_t *arguments)
 {
-  emAfPluginMnPricePassthroughStartPollAndForward();
+  sli_zigbee_af_mn_price_passthrough_start_poll_and_forward();
 }
 
 // plugin mn-price-passthrough start
-void emAfPluginMnPriceStopCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_mn_price_stop_command(sl_cli_command_arg_t *arguments)
 {
-  emAfPluginMnPricePassthroughStopPollAndForward();
+  sli_zigbee_af_mn_price_passthrough_stop_poll_and_forward();
 }
 
 // plugin mn-price-passthrough setRouting <forwardingId:2> <forwardingEndpoint:1> <proxyEsiEndpoint:1>
-void emAfPluginMnPriceSetRoutingCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_mn_price_set_routing_command(sl_cli_command_arg_t *arguments)
 {
   EmberNodeId fwdId = (EmberNodeId)sl_cli_get_argument_uint16(arguments, 0);
   uint8_t fwdEndpoint = sl_cli_get_argument_uint8(arguments, 1);
   uint8_t esiEndpoint = sl_cli_get_argument_uint8(arguments, 2);
-  emAfPluginMnPricePassthroughRoutingSetup(fwdId,
-                                           fwdEndpoint,
-                                           esiEndpoint);
+  sli_zigbee_af_mn_price_passthrough_routing_setup(fwdId,
+                                                   fwdEndpoint,
+                                                   esiEndpoint);
 }
 
 // plugin mn-price-passthrough print
-void emAfPluginMnPricePrintCommand(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_mn_price_print_command(sl_cli_command_arg_t *arguments)
 {
-  emAfPluginMnPricePassthroughPrintCurrentPrice();
+  sli_zigbee_af_mn_price_passthrough_print_current_price();
 }
-
-#else
-#include "app/util/serial/sl_zigbee_command_interpreter.h"
-void start(void);
-void stop(void);
-void setRouting(void);
-void print(void);
-
-#ifndef EMBER_AF_GENERATE_CLI
-EmberCommandEntry emberAfPluginMnPricePassthroughCommands[] = {
-  emberCommandEntryAction("start", start, "", ""),
-  emberCommandEntryAction("stop", stop, "", ""),
-  emberCommandEntryAction("set-routing", setRouting, "vuu", ""),
-  emberCommandEntryAction("print", print, "", ""),
-  emberCommandEntryTerminator(),
-};
-#endif // EMBER_AF_GENERATE_CLI
-
-// plugin mn-price-passthrough start
-void start(void)
-{
-  emAfPluginMnPricePassthroughStartPollAndForward();
-}
-
-// plugin mn-price-passthrough start
-void stop(void)
-{
-  emAfPluginMnPricePassthroughStopPollAndForward();
-}
-
-// plugin mn-price-passthrough setRouting <forwardingId:2> <forwardingEndpoint:1> <proxyEsiEndpoint:1>
-void setRouting(void)
-{
-  EmberNodeId fwdId = (EmberNodeId)emberUnsignedCommandArgument(0);
-  uint8_t fwdEndpoint = (uint8_t)emberUnsignedCommandArgument(1);
-  uint8_t esiEndpoint = (uint8_t)emberUnsignedCommandArgument(2);
-  emAfPluginMnPricePassthroughRoutingSetup(fwdId,
-                                           fwdEndpoint,
-                                           esiEndpoint);
-}
-
-// plugin mn-price-passthrough print
-void print(void)
-{
-  emAfPluginMnPricePassthroughPrintCurrentPrice();
-}
-#endif

@@ -23,12 +23,13 @@
 #include "em_device.h"
 #include "sl_malloc.h"
 #include "sl_cli.h"
-#include "sl_wisun_br_api.h"
+#include "border_router/sl_wisun_br_api.h"
+#include "sl_wisun_api.h"
+#include "sl_wisun_trace_api.h"
 #include "app_settings.h"
 #include "sl_wisun_cli_core.h"
 #include "sl_wisun_cli_util.h"
 #include "app_certificate_store.h"
-#include "borderrouter_tasklet.h"
 #include "sl_wisun_version.h"
 #include "rail_features.h"
 
@@ -38,6 +39,10 @@
 #if defined(SL_CATALOG_FREERTOS_KERNEL_PRESENT)
 #include "FreeRTOS.h"
 #include "task.h"
+#endif
+
+#ifdef WISUN_FAN_CERTIFICATION
+#include "sl_wisun_alliance_certificates.h"
 #endif
 
 #define APP_TASK_PRIORITY 11
@@ -69,18 +74,40 @@ static const app_enum_t app_certificate_index_enum[] =
 
 static void app_start(sl_wisun_phy_config_type_t phy_config_type)
 {
+#ifndef WISUN_FAN_CERTIFICATION
   app_certificate_t *cert;
   app_certicate_info_t info;
-  sl_status_t ret;
   uint16_t option = SL_WISUN_CERTIFICATE_OPTION_NONE;
   int i;
+#endif
   sl_wisun_channel_mask_t channel_mask;
   sl_wisun_phy_config_t phy_config;
   sl_wisun_br_connection_params_t params;
+  sl_wisun_br_lfn_params_t lfn_params;
+  sl_status_t ret;
+  uint16_t key_index;
+  uint8_t phy_mode_id_count, is_mdr_command_capable;
+  uint8_t phy_mode_id[SL_WISUN_MAX_PHY_MODE_ID_COUNT];
+  uint8_t *phy_mode_id_p, *phy_mode_id_count_p;
 
   app_wisun_cli_mutex_lock();
 
-  if (sl_wisun_br_set_tx_power(app_settings_wisun.tx_power) != SL_STATUS_OK) {
+  for (key_index = 0; key_index < 4; key_index++) {
+    if (app_settings_wisun.gtk_set & (1 << key_index)) {
+      if (sl_wisun_br_set_gtk(app_settings_wisun.gtk[key_index], key_index) != SL_STATUS_OK) {
+        printf("[Failed to set GTK%hu]\r\n", key_index + 1);
+        goto cleanup;
+      }
+    }
+  }
+
+  ret = sl_wisun_set_device_type((sl_wisun_device_type_t)app_settings_wisun.device_type);
+  if (ret != SL_STATUS_OK) {
+    printf("[Failed: unable to set device type: %lu]\r\n", ret);
+    goto cleanup;
+  }
+
+  if (sl_wisun_set_tx_power(app_settings_wisun.tx_power) != SL_STATUS_OK) {
     printf("Fail to set Tx power!\r\n");
     goto cleanup;
   }
@@ -103,7 +130,27 @@ static void app_start(sl_wisun_phy_config_type_t phy_config_type)
       goto cleanup;
   }
   if (sl_wisun_br_set_connection_parameters(&params) != SL_STATUS_OK) {
-    printf("[Failed to set network size!]\r\n");
+    printf("[Failed to set network size]\r\n");
+    goto cleanup;
+  }
+
+  switch (app_settings_wisun.lfn_profile) {
+    case SL_WISUN_LFN_PROFILE_TEST:
+      lfn_params = SL_WISUN_BR_PARAMS_LFN_TEST;
+      break;
+    case SL_WISUN_LFN_PROFILE_BALANCED:
+      lfn_params = SL_WISUN_BR_PARAMS_LFN_BALANCED;
+      break;
+    case SL_WISUN_LFN_PROFILE_ECO:
+      lfn_params = SL_WISUN_BR_PARAMS_LFN_ECO;
+      break;
+    default:
+      printf("[Failed: unsupported LFN profile]\r\n");
+      goto cleanup;
+  }
+  ret = sl_wisun_br_set_lfn_parameters(&lfn_params);
+  if (ret != SL_STATUS_OK) {
+    printf("[Failed: unable to set LFN parameters: %lu]\r\n", ret);
     goto cleanup;
   }
 
@@ -112,29 +159,52 @@ static void app_start(sl_wisun_phy_config_type_t phy_config_type)
     goto cleanup;
   }
 
-  if (sl_wisun_br_set_channel_mask(&channel_mask) != SL_STATUS_OK) {
+  if (sl_wisun_set_channel_mask(&channel_mask) != SL_STATUS_OK) {
     printf("Failed to set channel mask!\r\n");
     goto cleanup;
   }
 
-  if (sl_wisun_br_set_unicast_settings(app_settings_wisun.uc_dwell_interval_ms) != SL_STATUS_OK) {
+  if (sl_wisun_set_unicast_settings(app_settings_wisun.uc_dwell_interval_ms) != SL_STATUS_OK) {
     printf("Failed to set unicast settings!\r\n");
     goto cleanup;
   }
 
   if (sl_wisun_br_set_broadcast_settings(app_settings_wisun.bc_interval_ms,
                                          app_settings_wisun.bc_dwell_interval_ms) != SL_STATUS_OK) {
-    printf("Failed to set broadcast settings!\r\n");
+    printf("[Failed to set broadcast settings]\r\n");
     goto cleanup;
   }
 
+#ifdef WISUN_FAN_CERTIFICATION
+  ret = sl_wisun_br_set_trusted_certificate(SL_WISUN_CERTIFICATE_OPTION_NONE,
+                                            sizeof(WISUN_ALLIANCE_ROOT_CERTIFICATE),
+                                            WISUN_ALLIANCE_ROOT_CERTIFICATE);
+  if (ret != SL_STATUS_OK) {
+    printf("[Failed: unable to set trusted certificate: %lu]\r\n", ret);
+    goto cleanup;
+  }
+  ret = sl_wisun_set_br_device_certificate(SL_WISUN_CERTIFICATE_OPTION_HAS_KEY,
+                                           sizeof(WISUN_ALLIANCE_SERVER_CERTIFICATE),
+                                           WISUN_ALLIANCE_SERVER_CERTIFICATE);
+  if (ret != SL_STATUS_OK) {
+    printf("[Failed: unable to set device certificate: %lu]\r\n", ret);
+    goto cleanup;
+  }
+  ret = sl_wisun_set_br_device_private_key(SL_WISUN_CERTIFICATE_OPTION_NONE,
+                                           sizeof(WISUN_ALLIANCE_SERVER_KEY),
+                                           WISUN_ALLIANCE_SERVER_KEY);
+  if (ret != SL_STATUS_OK) {
+    printf("[Failed: unable to set device private key: %lu]\r\n", ret);
+    goto cleanup;
+  }
+#else
   for (i = 0; i < APP_CERTIFICATE_STORE_MAX_INDEX; ++i) {
     cert =  app_certificate_store_get(i);
     if (cert) {
       ret = app_certificate_parse(cert, &info);
       if (ret == SL_STATUS_OK) {
         if (info.type == app_certificate_type_trusted) {
-          ret = sl_wisun_br_set_trusted_certificate(option,
+          ret = sl_wisun_set_trusted_certificate(option,
                                                     cert->data_length,
                                                     cert->data);
           // There are potentially multiple trusted certificates,
@@ -145,7 +215,7 @@ static void app_start(sl_wisun_phy_config_type_t phy_config_type)
                                                    cert->data_length,
                                                    cert->data);
         } else if (info.type == app_certificate_type_device_pk) {
-          ret = sl_wisun_set_br_device_private_key(SL_WISUN_CERTIFICATE_OPTION_NONE,
+          ret = sl_wisun_set_device_private_key(SL_WISUN_CERTIFICATE_OPTION_NONE,
                                                    cert->data_length,
                                                    cert->data);
         }
@@ -159,8 +229,9 @@ static void app_start(sl_wisun_phy_config_type_t phy_config_type)
       }
     }
   }
+#endif
 
-  ret = sl_wisun_br_set_regulation(app_settings_wisun.regulation);
+  ret = sl_wisun_set_regulation((sl_wisun_regulation_t)app_settings_wisun.regulation);
   if (ret != SL_STATUS_OK) {
     printf("[Failed: unable to set regional regulation: %lu]\r\n", ret);
     goto cleanup;
@@ -185,8 +256,9 @@ static void app_start(sl_wisun_phy_config_type_t phy_config_type)
         phy_config.config.explicit.phy_mode_id = app_settings_wisun.phy_mode_id;
         break;
       case SL_WISUN_PHY_CONFIG_IDS:
-        phy_config.config.ids.protocol_id = app_settings_wisun.protocol_id;
-        phy_config.config.ids.channel_id  = app_settings_wisun.channel_id;
+        phy_config.config.ids.protocol_id  = app_settings_wisun.protocol_id;
+        phy_config.config.ids.channel_id   = app_settings_wisun.channel_id;
+        phy_config.config.ids.phy_mode_id  = app_settings_wisun.phy_mode_id;
         break;
       default:
         printf("[Failed: unsupported PHY configuration type: %u]\r\n", phy_config_type);
@@ -195,23 +267,52 @@ static void app_start(sl_wisun_phy_config_type_t phy_config_type)
 
   app_settings_wisun.phy_config_type = phy_config.type = phy_config_type;
 
+  ret = sl_wisun_set_pti_state(app_settings_app.pti_state);
+  if (ret != SL_STATUS_OK) {
+    printf("[Failed to set PTI state]\r\n");
+    goto cleanup;
+  }
+
+  ret = sl_wisun_br_start((const uint8_t *)app_settings_wisun.network_name, &phy_config);
+  if (ret == SL_STATUS_OK) {
+    printf("[Border router started]\r\n");
+  } else {
+    printf("[Failed to start border router]\r\n");
+    goto cleanup;
+  }
+
 #if RAIL_IEEE802154_SUPPORTS_G_MODESWITCH
-  if (app_settings_wisun.rx_phy_mode_ids_count) {
-    ret = sl_wisun_br_set_pom_ie(app_settings_wisun.rx_phy_mode_ids_count,
-                                 app_settings_wisun.rx_phy_mode_ids,
-                                 0);
-    if (ret != SL_STATUS_OK) {
-      printf("[Failed: unable to RX PhyModeId list: %lu]\r\n", ret);
+  // Configure POM-IE
+  // If PhyModeIds are set by user, send them to the stack, otherwise
+  // retrieve the default PhyModeIds from the stack first
+  if (app_settings_wisun.rx_phy_mode_ids_count == 0) {
+    // Check if default PhyList can be retrieved from device
+    if (sl_wisun_get_pom_ie(&phy_mode_id_count, phy_mode_id, &is_mdr_command_capable) == SL_STATUS_OK) {
+      phy_mode_id_p = phy_mode_id;
+      phy_mode_id_count_p = &phy_mode_id_count;
+    } else {
+      // POM-IE not available
       goto cleanup;
     }
-  }
-#endif
-
-  if (sl_wisun_br_start((const uint8_t *)app_settings_wisun.network_name, &phy_config)  == SL_STATUS_OK) {
-    printf("Border router started\r\n");
   } else {
-    printf("Failed to start border router\r\n");
+    phy_mode_id_p = app_settings_wisun.rx_phy_mode_ids;
+    phy_mode_id_count_p = &app_settings_wisun.rx_phy_mode_ids_count;
   }
+
+  ret = sl_wisun_set_pom_ie(*phy_mode_id_count_p,
+                            phy_mode_id_p,
+                            app_settings_wisun.rx_mdr_capable);
+  if (ret != SL_STATUS_OK) {
+    printf("[Failed: unable to RX PhyModeId list: %lu]\r\n", ret);
+    goto cleanup;
+  }
+#else
+  (void)phy_mode_id_count;
+  (void)is_mdr_command_capable;
+  (void)phy_mode_id;
+  (void)phy_mode_id_p;
+  (void)phy_mode_id_count_p;
+#endif
 
 cleanup:
   app_wisun_cli_mutex_unlock();
@@ -485,7 +586,7 @@ void app_set_trace_level(sl_cli_command_arg_t *arguments)
     trace_config_string = strtok(NULL, ";");
   }
 
-  ret = sl_wisun_br_set_trace_level(group_count, trace_config);
+  ret = sl_wisun_set_trace_level(group_count, trace_config);
   if (ret != SL_STATUS_OK) {
     goto cleanup;
   }
@@ -510,7 +611,7 @@ void app_set_unicast_tx_mode(sl_cli_command_arg_t *arguments)
 
   mode = sl_cli_get_argument_uint8(arguments, 0);
 
-  ret = sl_wisun_br_set_unicast_tx_mode(mode);
+  ret = sl_wisun_set_unicast_tx_mode(mode);
 
   if (ret == SL_STATUS_OK) {
     printf("[Unicast Tx mode set to %hu suceeded]\r\n", mode);
@@ -528,27 +629,27 @@ void app_reset_statistics(sl_cli_command_arg_t *arguments)
 
   app_wisun_cli_mutex_lock();
 
-  ret = sl_wisun_br_reset_statistics(SL_WISUN_STATISTICS_TYPE_PHY);
+  ret = sl_wisun_reset_statistics(SL_WISUN_STATISTICS_TYPE_PHY);
   if (ret != SL_STATUS_OK) {
     goto cleanup;
   }
 
-  ret = sl_wisun_br_reset_statistics(SL_WISUN_STATISTICS_TYPE_MAC);
+  ret = sl_wisun_reset_statistics(SL_WISUN_STATISTICS_TYPE_MAC);
   if (ret != SL_STATUS_OK) {
     goto cleanup;
   }
 
-  ret = sl_wisun_br_reset_statistics(SL_WISUN_STATISTICS_TYPE_FHSS);
+  ret = sl_wisun_reset_statistics(SL_WISUN_STATISTICS_TYPE_FHSS);
   if (ret != SL_STATUS_OK) {
     goto cleanup;
   }
 
-  ret = sl_wisun_br_reset_statistics(SL_WISUN_STATISTICS_TYPE_WISUN);
+  ret = sl_wisun_reset_statistics(SL_WISUN_STATISTICS_TYPE_WISUN);
   if (ret != SL_STATUS_OK) {
     goto cleanup;
   }
 
-  ret = sl_wisun_br_reset_statistics(SL_WISUN_STATISTICS_TYPE_NETWORK);
+  ret = sl_wisun_reset_statistics(SL_WISUN_STATISTICS_TYPE_NETWORK);
   if (ret != SL_STATUS_OK) {
     goto cleanup;
   }
@@ -562,6 +663,63 @@ cleanup:
   }
 
   app_wisun_cli_mutex_unlock();
+}
+
+void app_set_lfn_support(sl_cli_command_arg_t *arguments)
+{
+  sl_status_t ret;
+  uint8_t lfn_limit;
+  bool lfn_support_pan;
+
+  app_wisun_cli_mutex_lock();
+
+  lfn_limit = sl_cli_get_argument_uint8(arguments, 0);
+  lfn_support_pan = (bool)sl_cli_get_argument_uint8(arguments, 1);
+
+  ret = sl_wisun_br_set_lfn_support(lfn_limit, lfn_support_pan);
+  if (ret != SL_STATUS_OK) {
+    printf("[Failed: unable to set LFN support: %lu]\r\n", ret);
+  }
+
+  app_wisun_cli_mutex_unlock();
+}
+
+/* CLI app PHY mode switch */
+void app_mode_switch(sl_cli_command_arg_t *arguments)
+{
+  sl_status_t res;
+  sl_wisun_mac_address_t address;
+  uint8_t mode = sl_cli_get_argument_uint8(arguments, 0);
+  uint8_t phy_mode_id = sl_cli_get_argument_uint8(arguments, 1);
+  char *address_str = "ff:ff:ff:ff:ff:ff:ff:ff";
+
+  if (sl_cli_get_argument_count(arguments) > 2) {
+    // to get the third argument that is the specified address
+    address_str = sl_cli_get_argument_string(arguments, 2);
+    if (address_str == NULL) {
+      printf("[Failed: invalid address string argument]\r\n");
+      return;
+    }
+  }
+
+  // Attempt to convert the MAC address string
+  res = app_util_get_mac_address(&address, address_str);
+  if (res != SL_STATUS_OK) {
+    printf("[Failed: unable to parse the MAC address: %lu]\r\n", res);
+    return;
+  }
+
+  res = sl_wisun_set_mode_switch(mode, phy_mode_id, &address);
+  switch (res) {
+    case SL_STATUS_OK:
+      printf("[Mode switch succeeded]\r\n");
+      break;
+    case SL_STATUS_NOT_SUPPORTED:
+      printf("[Mode switch feature not supported on this chip]\r\n");
+      break;
+    default:
+      printf("[Mode switch failed]\r\n");
+  }
 }
 
 void app_certificate_list(sl_cli_command_arg_t *arguments)
@@ -580,10 +738,6 @@ static void app_task(void *argument)
   (void)argument;
 
   printf("Wi-SUN Border Router CLI Application\r\n");
-
-  sl_wisun_br_set_pti(app_settings_app.pti_state);
-
-  border_router_init();
 
   if (app_settings_app.autostart) {
     app_start(app_settings_wisun.phy_config_type);

@@ -170,7 +170,7 @@ int mbedtls_internal_sha512_process(mbedtls_sha512_context *ctx, const unsigned 
   return psa_status_to_mbedtls(HASH_UPDATE_FCT(ctx, data, 128), PSA_ALG_SHA_512);
 }
 
-int mbedtls_sha512_finish(mbedtls_sha512_context *ctx, unsigned char output[64])
+int mbedtls_sha512_finish(mbedtls_sha512_context *ctx, unsigned char *output)
 {
   size_t out_length = 0;
   return psa_status_to_mbedtls(HASH_FINISH_FCT(ctx, output, 64, &out_length), PSA_ALG_SHA_512);

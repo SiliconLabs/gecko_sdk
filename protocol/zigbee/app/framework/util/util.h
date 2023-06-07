@@ -25,8 +25,6 @@
 #ifndef __AF_UTIL_H__
 #define __AF_UTIL_H__
 
-#include "app/util/common/uc-temp-macros.h"
-
 // User asserts can override SLAB_ASSERT and should be defined as follows:
 // void userAssert (int file, int line);                   // declaration
 // #define USER_ASSERT(file, line) userAssert(file, line)  // definition
@@ -49,6 +47,27 @@
 #define ZCL_UTIL_RESP_NORMAL   0u
 #define ZCL_UTIL_RESP_NONE     1u
 #define ZCL_UTIL_RESP_INTERPAN 2u
+
+// Write response codes for Zigbee BLE DMP
+#define ES_WRITE_OK                 0
+#define ES_READ_OK                  0
+#define ES_ERR_CCCD_CONF            0x81
+#define ES_ERR_APPLICATION_SPECIFIC 0x80
+#define ES_NO_CONNECTION            0xFF
+
+// Well-known key for distributed network
+#define ZIGBEE_3_DISTRIBUTED_SECURITY_LINK_KEY         \
+  {                                                    \
+    { 0xD0, 0xD1, 0xD2, 0xD3, 0xD4, 0xD5, 0xD6, 0xD7,  \
+      0xD8, 0xD9, 0xDA, 0xDB, 0xDC, 0xDD, 0xDE, 0xDF } \
+  }
+
+// Well-known key for centralized network
+#define ZIGBEE_3_CENTRALIZED_SECURITY_LINK_KEY         \
+  {                                                    \
+    { 0x5A, 0x69, 0x67, 0x42, 0x65, 0x65, 0x41, 0x6C,  \
+      0x6C, 0x69, 0x61, 0x6E, 0x63, 0x65, 0x30, 0x39 } \
+  }
 
 // Cluster name structure
 typedef struct {
@@ -85,7 +104,7 @@ EmberAfRetryOverride emberAfGetRetryOverride(void);
 // This function applies the curent override value to the APS options.
 // It is called internally by the framework in the final stages of filling the
 // message buffer.
-void emAfApplyRetryOverride(EmberApsOption *options);
+void sli_zigbee_af_apply_retry_override(EmberApsOption *options);
 
 // Override Disable Default Response flag in the ZCL Frame Control
 typedef enum {
@@ -106,7 +125,7 @@ EmberAfDisableDefaultResponse emberAfGetDisableDefaultResponse(void);
 // This function applies the curent override value to the ZCL Frame Control.
 // It is called internally by the framework in the final stages of filling the
 // message buffer.
-void emAfApplyDisableDefaultResponse(uint8_t *frame_control);
+void sli_zigbee_af_apply_disable_default_response(uint8_t *frame_control);
 
 // Returns a mfg code from current command.
 // This should only be used within the command parsing context.
@@ -118,7 +137,7 @@ uint16_t emberAfGetMfgCodeFromCurrentCommand(void);
 // EMBER_AF_MAXIMUM_SEND_PAYLOAD_LENGTH is defined in config.h
 #define EMBER_AF_RESPONSE_BUFFER_LEN EMBER_AF_MAXIMUM_SEND_PAYLOAD_LENGTH
 
-void emberAfInit(SLXU_INIT_ARG);
+void emberAfInit(uint8_t init_level);
 void emberAfTick(void);
 uint16_t emberAfFindClusterNameIndex(uint16_t cluster);
 uint16_t emberAfFindClusterNameIndexWithMfgCode(uint16_t cluster, uint16_t mfgCode);
@@ -195,7 +214,7 @@ enum {
   APS_TEST_SECURITY_DISABLED = 1,
   APS_TEST_SECURITY_DEFAULT = 2,
 };
-extern uint8_t emAfTestApsSecurityOverride;
+extern uint8_t sli_zigbee_af_test_aps_security_override;
 
 #ifdef EZSP_HOST
 // the EM260 host application is expected to provide these functions if using
@@ -227,8 +246,8 @@ bool emberAfDetermineIfLinkSecurityIsRequired(uint8_t commandId,
 #define isThisDataTypeSentLittleEndianOTA(dataType) \
   (!(emberAfIsThisDataTypeAStringType(dataType)))
 
-bool emAfProcessGlobalCommand(EmberAfClusterCommand *cmd);
-bool emAfProcessClusterSpecificCommand(EmberAfClusterCommand *cmd);
+bool sli_zigbee_af_process_global_command(EmberAfClusterCommand *cmd);
+bool sli_zigbee_af_process_cluster_specific_command(EmberAfClusterCommand *cmd);
 
 extern uint8_t emberAfResponseType;
 
@@ -252,9 +271,9 @@ uint8_t emberAfAppendCharacters(uint8_t * zclString,
                                 const uint8_t * appendingChars,
                                 uint8_t appendingCharsLen);
 
-extern uint8_t emAfExtendedPanId[];
+extern uint8_t sli_zigbee_af_extended_pan_id[];
 
-EmberStatus emAfValidateChannelPages(uint8_t page, uint8_t channel);
+EmberStatus sli_zigbee_af_validate_channel_pages(uint8_t page, uint8_t channel);
 
 /* @brief A Silicon Labs assert function
  *

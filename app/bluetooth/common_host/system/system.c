@@ -3,7 +3,7 @@
  * @brief
  *******************************************************************************
  * # License
- * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -34,9 +34,9 @@
 #ifdef BTMESH
 #include "sl_btmesh.h"
 #endif // BTMESH
-#ifdef SL_CATALOG_SIMPLE_TIMER_PRESENT
-#include "sl_simple_timer.h"
-#endif // SL_CATALOG_SIMPLE_TIMER_PRESENT
+#ifdef SL_CATALOG_APP_TIMER_PRESENT
+#include "app_timer.h"
+#endif // SL_CATALOG_APP_TIMER_PRESENT
 #ifdef SL_CATALOG_BTMESH_CONF_PRESENT
 #include "btmesh_conf.h"
 #endif // SL_CATALOG_BTMESH_CONF_PRESENT
@@ -73,9 +73,9 @@ void sl_system_init(void)
 #ifdef BTMESH
   sl_btmesh_init();
 #endif // BTMESH
-#ifdef SL_CATALOG_SIMPLE_TIMER_PRESENT
-  sl_simple_timer_init();
-#endif // SL_CATALOG_SIMPLE_TIMER_PRESENT
+#ifdef SL_CATALOG_APP_TIMER_PRESENT
+  app_timer_init();
+#endif // SL_CATALOG_APP_TIMER_PRESENT
 }
 
 void sl_system_process_action(void)
@@ -84,9 +84,9 @@ void sl_system_process_action(void)
 #ifdef BTMESH
   sl_btmesh_step();
 #endif // BTMESH
-#ifdef SL_CATALOG_SIMPLE_TIMER_PRESENT
-  sli_simple_timer_step();
-#endif // SL_CATALOG_SIMPLE_TIMER_PRESENT
+#ifdef SL_CATALOG_APP_TIMER_PRESENT
+  sli_app_timer_step();
+#endif // SL_CATALOG_APP_TIMER_PRESENT
 #ifdef SL_CATALOG_BTMESH_CONF_PRESENT
   // BT Mesh Host Configurator component cyclic function
   btmesh_conf_step();

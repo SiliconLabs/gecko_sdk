@@ -131,17 +131,19 @@ psa_status_t compute_msg_hash(void);
 psa_status_t compare_msg_hash(void);
 
 /***************************************************************************//**
- * Process an authenticated encryption.
- *
- * @returns Returns PSA error code, @ref crypto_values.h.
+ * Process an authenticated encryption using singlepart API.
  ******************************************************************************/
 psa_status_t encrypt_aead(void);
 
 /***************************************************************************//**
- * Process an authenticated decryption.
- *
- * @returns Returns PSA error code, @ref crypto_values.h.
+ * Process an authenticated decryption using singlepart API.
  ******************************************************************************/
 psa_status_t decrypt_aead(void);
+
+/***************************************************************************//**
+ * Process aead operation using multipart API.
+ * @param is_encrypt - set to 'true' for encryption, false for decryption
+ ******************************************************************************/
+psa_status_t multipart_aead(bool is_encrypt);
 
 #endif  // APP_PSA_CRYPTO_AEAD_H

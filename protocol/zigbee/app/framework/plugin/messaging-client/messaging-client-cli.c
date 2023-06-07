@@ -19,9 +19,8 @@
 #include "app/framework/plugin/messaging-client/messaging-client.h"
 #include "app/util/serial/sl_zigbee_command_interpreter.h"
 
-#ifdef UC_BUILD
 // plugin messaging-client confirm <endpoint:1>
-void emAfMessagingClientCliConfirm(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_messaging_client_cli_confirm(sl_cli_command_arg_t *arguments)
 {
   uint8_t endpoint = sl_cli_get_argument_uint8(arguments, 0);
   EmberAfStatus status = emberAfPluginMessagingClientConfirmMessage(endpoint);
@@ -29,54 +28,15 @@ void emAfMessagingClientCliConfirm(sl_cli_command_arg_t *arguments)
 }
 
 // plugin messaging-client print <endpoint:1>
-void emAfMessagingClientCliPrint(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_messaging_client_cli_print(sl_cli_command_arg_t *arguments)
 {
   uint8_t endpoint = sl_cli_get_argument_uint8(arguments, 0);
-  emAfPluginMessagingClientPrintInfo(endpoint);
+  sli_zigbee_af_messaging_client_print_info(endpoint);
 }
 
 // plugin messaging-client clear <endpoint:1>
-void emAfMessagingClientCliClear(sl_cli_command_arg_t *arguments)
+void sli_zigbee_af_messaging_client_cli_clear(sl_cli_command_arg_t *arguments)
 {
   uint8_t endpoint = sl_cli_get_argument_uint8(arguments, 0);
-  emAfPluginMessagingClientClearMessage(endpoint);
+  sli_zigbee_af_messaging_client_clear_message(endpoint);
 }
-
-#else
-
-#include "app/util/serial/sl_zigbee_command_interpreter.h"
-
-void emAfMessagingClientCliConfirm(void);
-void emAfMessagingClientCliPrint(void);
-
-#if !defined(EMBER_AF_GENERATE_CLI)
-EmberCommandEntry emberAfPluginMessagingClientCommands[] = {
-  emberCommandEntryAction("confirm", emAfMessagingClientCliConfirm, "u", ""),
-  emberCommandEntryAction("print", emAfMessagingClientCliPrint, "u", ""),
-  emberCommandEntryTerminator(),
-};
-#endif // EMBER_AF_GENERATE_CLI
-
-// plugin messaging-client confirm <endpoint:1>
-void emAfMessagingClientCliConfirm(void)
-{
-  uint8_t endpoint = (uint8_t)emberUnsignedCommandArgument(0);
-  EmberAfStatus status = emberAfPluginMessagingClientConfirmMessage(endpoint);
-  emberAfMessagingClusterPrintln("%p 0x%x", "confirm", status);
-}
-
-// plugin messaging-client print <endpoint:1>
-void emAfMessagingClientCliPrint(void)
-{
-  uint8_t endpoint = (uint8_t)emberUnsignedCommandArgument(0);
-  emAfPluginMessagingClientPrintInfo(endpoint);
-}
-
-// plugin messaging-client clear <endpoint:1>
-void emAfMessagingClientCliClear(void)
-{
-  uint8_t endpoint = (uint8_t)emberUnsignedCommandArgument(0);
-  emAfPluginMessagingClientClearMessage(endpoint);
-}
-
-#endif

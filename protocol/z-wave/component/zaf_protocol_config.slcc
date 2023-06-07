@@ -1,0 +1,19 @@
+id: zaf_protocol_config
+label: ZAF Protocol Configuration Component
+category: Z-Wave|ZAF|Protocol Config
+description: >
+  This component contains the functionality to generate based on the configurations
+  provided in the application the Application Node Info, Radio Configuration and
+  Protocol Configuration.
+  This component can be used by NCP and SOC applications and it is mandatory for
+  all applications.
+package: Z-Wave
+quality: production
+include:
+  - path: "protocol/z-wave/ZAF/ProtocolConfig/inc"
+    file_list:
+      - path: "zaf_protocol_config.h"
+source:
+  - path: "protocol/z-wave/ZAF/ProtocolConfig/src/zaf_protocol_config.c"
+provides:
+  - name: zaf_protocol_config

@@ -18,26 +18,6 @@ SCommandClassSet_t CommandClasses = {
   .SecureIncludedSecureCC.pCommandClasses = aAppNodeInfoCCSecureIncludedSecure
 };
 
-// Setup defaults
-SAppNodeInfo_t AppNodeInfo =
-{
-#ifdef ZW_CONTROLLER
-#ifdef ZW_CONTROLLER_STATIC
-        .NodeType.generic = GENERIC_TYPE_STATIC_CONTROLLER,
-        .NodeType.specific = SPECIFIC_TYPE_PC_CONTROLLER,
-        .DeviceOptionsMask = APPLICATION_NODEINFO_LISTENING
-#else  // ifdef ZW_CONTROLLER_STATIC
-        .NodeType.generic = GENERIC_TYPE_GENERIC_CONTROLLER,
-        .NodeType.specific = SPECIFIC_TYPE_PORTABLE_REMOTE_CONTROLLER,
-        .DeviceOptionsMask = APPLICATION_NODEINFO_NOT_LISTENING
-#endif // ifdef ZW_CONTROLLER_STATIC
-#else  // #ifdef ZW_CONTROLLER
-        .NodeType.generic = GENERIC_TYPE_SWITCH_MULTILEVEL,
-        .NodeType.specific = SPECIFIC_TYPE_NOT_USED,
-        .DeviceOptionsMask = APPLICATION_NODEINFO_LISTENING
-#endif // #ifdef ZW_CONTROLLER
-};
-
 const uint8_t CCListSizes[3] =
 {
   sizeof(aAppNodeInfoCCUnSecureIncluded),

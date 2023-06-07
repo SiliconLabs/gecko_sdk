@@ -18,28 +18,28 @@
 
 #include "app/framework/include/af.h"
 
-#include "app/framework/security/af-security.h" // emAfClearLinkKeyTable()
+#include "app/framework/security/af-security.h" // sli_zigbee_af_clear_link_key_table()
 #include "network-steering.h"
 #include "network-steering-internal.h"
 #include "stack/include/network-formation.h"
+#include "stack/include/zigbee-security-manager.h"
 
 #ifdef OPTIMIZE_SCANS
 
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
+#include "sl_component_catalog.h"
+#endif
+#ifdef SL_CATALOG_ZIGBEE_SCAN_DISPATCH_PRESENT
 #include "scan-dispatch.h"
+#else
+#include "app/framework/plugin/scan-dispatch/scan-dispatch.h"
+#endif
+
+#ifdef SL_CATALOG_ZIGBEE_UPDATE_TC_LINK_KEY_PRESENT
 #include "update-tc-link-key.h"
-#else // !UC_BUILD
-#if defined(EMBER_AF_API_SCAN_DISPATCH)
-  #include EMBER_AF_API_SCAN_DISPATCH
-#elif defined(EMBER_TEST)
-  #include "../scan-dispatch/scan-dispatch.h"
+#else
+#include "app/framework/plugin/update-tc-link-key/update-tc-link-key.h"
 #endif
-#if defined(EMBER_AF_API_UPDATE_TC_LINK_KEY)
-  #include EMBER_AF_API_UPDATE_TC_LINK_KEY
-#elif defined(EMBER_TEST)
-  #include "../update-tc-link-key/update-tc-link-key.h"
-#endif
-#endif // UC_BUILD
 
 #ifdef EMBER_TEST
   #define HIDDEN
@@ -68,9 +68,9 @@
   #define GET_RADIO_TX_POWER(channel) emberAfPluginNetworkSteeringGetPowerForRadioChannelCallback(channel)
 #else
   #define GET_RADIO_TX_POWER(channel) EMBER_AF_PLUGIN_NETWORK_STEERING_RADIO_TX_POWER
-#endif // UC_BUILD
+#endif
 
-const char * emAfPluginNetworkSteeringStateNames[] = {
+const char * sli_zigbee_af_network_steering_stateNames[] = {
   "None",
   "Scan Primary Channels and use Install Code",
   "Scan Primary Channels and Use Centralized Key",
@@ -84,11 +84,11 @@ const char * emAfPluginNetworkSteeringStateNames[] = {
   "Scan Secondary Channels and Use All Keys (install code, centralized, distributed)",
 };
 
-EmberAfPluginNetworkSteeringJoiningState emAfPluginNetworkSteeringState
+EmberAfPluginNetworkSteeringJoiningState sli_zigbee_af_network_steering_state
   = EMBER_AF_PLUGIN_NETWORK_STEERING_STATE_NONE;
 
-const uint8_t emAfNetworkSteeringPluginName[] = "NWK Steering";
-#define PLUGIN_NAME emAfNetworkSteeringPluginName
+const uint8_t sli_zigbee_af_network_steering_plugin_name[] = "NWK Steering";
+#define PLUGIN_NAME sli_zigbee_af_network_steering_plugin_name
 
 // #define PLUGIN_DEBUG
 #if defined(PLUGIN_DEBUG)
@@ -126,13 +126,13 @@ bool emberStackIsUp(void);
 
 // We make these into variables so that they can be changed at run time.
 // This is very useful for unit and interop tests.
-uint32_t emAfPluginNetworkSteeringPrimaryChannelMask
+uint32_t sli_zigbee_af_network_steering_primary_channel_mask
   = EMBER_AF_PLUGIN_NETWORK_STEERING_CHANNEL_MASK;
-uint32_t emAfPluginNetworkSteeringSecondaryChannelMask
+uint32_t sli_zigbee_af_network_steering_secondary_channel_mask
   = SECONDARY_CHANNEL_MASK;
 
-uint8_t emAfPluginNetworkSteeringTotalBeacons = 0;
-uint8_t emAfPluginNetworkSteeringJoinAttempts = 0;
+uint8_t sli_zigbee_af_network_steering_total_beacons = 0;
+uint8_t sli_zigbee_af_network_steering_join_attempts = 0;
 EmberKeyData emberPluginNetworkSteeringDistributedKey;
 
 NetworkSteeringState steeringState = { 0 };
@@ -140,13 +140,8 @@ NetworkSteeringState steeringState = { 0 };
 #define BEACON_ITERATOR         steeringState.beaconIterator
 #define CURRENT_CHANNEL_MASK    steeringState.currentChannelMask
 
-#if UC_BUILD
 sl_zigbee_event_t emberAfPluginNetworkSteeringFinishSteeringEvent;
 #define finishSteeringEvent (&emberAfPluginNetworkSteeringFinishSteeringEvent)
-#else
-EmberEventControl emberAfPluginNetworkSteeringFinishSteeringEventControl;
-#define finishSteeringEvent (emberAfPluginNetworkSteeringFinishSteeringEventControl)
-#endif // UC_BUILD
 
 // TODO: good value for this?
 // Let's try jittering our TCLK update and permit join broadcast to cut down
@@ -163,7 +158,7 @@ EmberEventControl emberAfPluginNetworkSteeringFinishSteeringEventControl;
 // This is an attribute specified in the BDB.
 #define VERIFY_KEY_TIMEOUT_MS (5 * MILLISECOND_TICKS_PER_SECOND)
 
-EmberAfPluginNetworkSteeringOptions emAfPluginNetworkSteeringOptionsMask
+EmberAfPluginNetworkSteeringOptions sli_zigbee_af_network_steering_options_mask
   = EMBER_AF_PLUGIN_NETWORK_STEERING_OPTIONS_NONE;
 
 #ifdef TRY_ALL_KEYS
@@ -196,7 +191,7 @@ static EmberStatus goToNextState(void);
 static EmberStatus setupSecurity(void);
 static uint32_t jitterTimeDelayMs();
 HIDDEN void scanResultsHandler(EmberAfPluginScanDispatchScanResults *results);
-bool emIsWellKnownKey(EmberKeyData key);
+bool sli_zigbee_af_is_well_known_key(sl_zb_sec_man_key_t key);
 static EmberStatus scheduleScan(uint32_t channelMask);
 
 // Callback declarations for the sake of the compiler during unit tests.
@@ -204,19 +199,17 @@ int8_t emberAfPluginNetworkSteeringGetPowerForRadioChannelCallback(uint8_t chann
 bool emberAfPluginNetworkSteeringGetDistributedKeyCallback(EmberKeyData * key);
 EmberNodeType emberAfPluginNetworkSteeringGetNodeTypeCallback(EmberAfPluginNetworkSteeringJoiningState state);
 
-#ifdef UC_BUILD
-void emberAfPluginNetworkSteeringFinishSteeringEventHandler(SLXU_UC_EVENT);
-#endif // UC_BUILD
+void emberAfPluginNetworkSteeringFinishSteeringEventHandler(sl_zigbee_event_t * event);
 
 //============================================================================
 // Internal callbacks
 
-void emAfPluginNetworkSteeringInitCallback(SLXU_INIT_ARG)
+void sli_zigbee_af_network_steering_init_callback(uint8_t init_level)
 {
-  SLXU_INIT_UNUSED_ARG;
+  (void)init_level;
 
-  slxu_zigbee_event_init(finishSteeringEvent,
-                         emberAfPluginNetworkSteeringFinishSteeringEventHandler);
+  sl_zigbee_event_init(finishSteeringEvent,
+                       emberAfPluginNetworkSteeringFinishSteeringEventHandler);
 }
 
 //============================================================================
@@ -283,13 +276,13 @@ void tryToJoinNetwork()
                      BEACON_ITERATOR.beacon.panId,
                      BEACON_ITERATOR.beacon.channel);
 
-  nodeType = emberAfPluginNetworkSteeringGetNodeTypeCallback(emAfPluginNetworkSteeringState);
+  nodeType = emberAfPluginNetworkSteeringGetNodeTypeCallback(sli_zigbee_af_network_steering_state);
   radioTxPower = GET_RADIO_TX_POWER(BEACON_ITERATOR.beacon.channel);
   status = emberJoinNetworkDirectly(nodeType,
                                     &BEACON_ITERATOR.beacon,
                                     radioTxPower,
                                     true);  // clearBeaconsAfterNetworkUp
-  emAfPluginNetworkSteeringJoinAttempts++;
+  sli_zigbee_af_network_steering_join_attempts++;
   if (EMBER_SUCCESS != status) {
     emberAfCorePrintln("Error: %p could not attempt join: 0x%X",
                        PLUGIN_NAME,
@@ -316,35 +309,36 @@ bool joinedToDistributedNetwork(void)
   return false;
 }
 
-#ifdef UC_BUILD
-void emAfPluginNetworkSteeringStackStatusCallback(EmberStatus status)
-#else
-void emberAfPluginNetworkSteeringStackStatusCallback(EmberStatus status)
-#endif
+void sli_zigbee_af_network_steering_stack_status_callback(EmberStatus status)
 {
   emberAfCorePrintln("%p stack status 0x%X", PLUGIN_NAME, status);
 
-  if (emAfPluginNetworkSteeringState
+  if (sli_zigbee_af_network_steering_state
       == EMBER_AF_PLUGIN_NETWORK_STEERING_STATE_NONE) {
-    EmberKeyStruct entry;
-    EmberStatus keystatus = emberGetKey(EMBER_TRUST_CENTER_LINK_KEY, &entry);
-    if (keystatus == EMBER_SUCCESS && emIsWellKnownKey(entry.key) && status == EMBER_NETWORK_UP) {
+    sl_zb_sec_man_context_t context;
+    sl_zb_sec_man_key_t plaintext_key;
+    sl_zb_sec_man_init_context(&context);
+
+    context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_TC_LINK;
+
+    sl_status_t keystatus = sl_zb_sec_man_export_key(&context, &plaintext_key);
+    if (keystatus == SL_STATUS_OK && sli_zigbee_af_is_well_known_key(plaintext_key) && status == EMBER_NETWORK_UP) {
       emberAfPluginUpdateTcLinkKeySetDelay(jitterTimeDelayMs());
     } else if (status == EMBER_NETWORK_DOWN) {
       emberAfPluginUpdateTcLinkKeySetInactive();
     }
   } else if (status == EMBER_NETWORK_UP) {
     emberAfCorePrintln("%p network joined.", PLUGIN_NAME);
-    if (!emAfPluginNetworkSteeringStateUsesDistributedKey()
-        && !(emAfPluginNetworkSteeringOptionsMask
+    if (!sli_zigbee_af_network_steering_state_uses_distributed_key()
+        && !(sli_zigbee_af_network_steering_options_mask
              & EMBER_AF_PLUGIN_NETWORK_STEERING_OPTIONS_NO_TCLK_UPDATE)
         && !joinedToDistributedNetwork()) {
-      emAfPluginNetworkSteeringStateSetUpdateTclk();
+      sli_zigbee_af_network_steering_state_set_update_tclk();
     }
-    slxu_zigbee_event_set_delay_ms(finishSteeringEvent, randomJitterMS());
+    sl_zigbee_event_set_delay_ms(finishSteeringEvent, randomJitterMS());
   } else if (!emberStackIsUp()) {
-    if (emAfPluginNetworkSteeringState > EMBER_AF_PLUGIN_NETWORK_STEERING_STATE_NONE
-        && emAfPluginNetworkSteeringState < EMBER_AF_PLUGIN_NETWORK_STEERING_STATE_SCAN_FINISHED) {
+    if (sli_zigbee_af_network_steering_state > EMBER_AF_PLUGIN_NETWORK_STEERING_STATE_NONE
+        && sli_zigbee_af_network_steering_state < EMBER_AF_PLUGIN_NETWORK_STEERING_STATE_SCAN_FINISHED) {
       emberAfCorePrintln("%p trying next network.", PLUGIN_NAME);
 
       status = emberGetNextBeacon(&(BEACON_ITERATOR.beacon));
@@ -369,10 +363,10 @@ void emberAfPluginNetworkSteeringStackStatusCallback(EmberStatus status)
 }
 
 // Returns true if the key value is equal to defaultLinkKey
-bool emIsWellKnownKey(EmberKeyData key)
+bool sli_zigbee_af_is_well_known_key(sl_zb_sec_man_key_t key)
 {
   for (uint8_t i = 0; i < EMBER_ENCRYPTION_KEY_SIZE; i++) {
-    if (key.contents[i] != defaultLinkKey.contents[i]) {
+    if (key.key[i] != defaultLinkKey.contents[i]) {
       return false;
     }
   }
@@ -391,7 +385,7 @@ static EmberStatus scheduleScan(uint32_t channelMask)
 
   MEMSET(&steeringState, 0, sizeof(steeringState));
 
-  nodeType = emberAfPluginNetworkSteeringGetNodeTypeCallback(emAfPluginNetworkSteeringState);
+  nodeType = emberAfPluginNetworkSteeringGetNodeTypeCallback(sli_zigbee_af_network_steering_state);
 
   // If the local nodeType is a router, ensure that a router scan is initated
   // This will enable the beacon-handling code will properly filter for
@@ -412,7 +406,7 @@ static EmberStatus scheduleScan(uint32_t channelMask)
   status = emberAfPluginScanDispatchScheduleScan(&scanData);
   emberAfCorePrintln("%s: issuing scan on %s channels (mask 0x%4X)",
                      PLUGIN_NAME,
-                     channelMask == emAfPluginNetworkSteeringPrimaryChannelMask
+                     channelMask == sli_zigbee_af_network_steering_primary_channel_mask
                      ? "primary"
                      : "secondary",
                      channelMask);
@@ -424,7 +418,7 @@ HIDDEN void scanResultsHandler(EmberAfPluginScanDispatchScanResults *results)
 {
   // If steering-stop was issued using a CLI command, ignore the results of the previously
   // started scan
-  if (emAfPluginNetworkSteeringState == EMBER_AF_PLUGIN_NETWORK_STEERING_STATE_NONE) {
+  if (sli_zigbee_af_network_steering_state == EMBER_AF_PLUGIN_NETWORK_STEERING_STATE_NONE) {
     return;
   }
 
@@ -435,16 +429,16 @@ HIDDEN void scanResultsHandler(EmberAfPluginScanDispatchScanResults *results)
                          results->status);
       return;
     }
-    emAfPluginNetworkSteeringTotalBeacons = emberGetNumStoredBeacons();
+    sli_zigbee_af_network_steering_total_beacons = emberGetNumStoredBeacons();
 
     emberAfCorePrintln("%s scan complete. Beacons heard: %d",
                        PLUGIN_NAME,
-                       emAfPluginNetworkSteeringTotalBeacons);
+                       sli_zigbee_af_network_steering_total_beacons);
 
-    if (emAfPluginNetworkSteeringTotalBeacons) {
+    if (sli_zigbee_af_network_steering_total_beacons) {
       stateMachineRun();
     } else {
-      switch (emAfPluginNetworkSteeringState) {
+      switch (sli_zigbee_af_network_steering_state) {
         case EMBER_AF_PLUGIN_NETWORK_STEERING_STATE_SCAN_SECONDARY_INSTALL_CODE:
         case EMBER_AF_PLUGIN_NETWORK_STEERING_STATE_SCAN_SECONDARY_CENTRALIZED:
         case EMBER_AF_PLUGIN_NETWORK_STEERING_STATE_SCAN_SECONDARY_DISTRIBUTED:
@@ -456,9 +450,9 @@ HIDDEN void scanResultsHandler(EmberAfPluginScanDispatchScanResults *results)
           break;
       }
 
-      emAfPluginNetworkSteeringState = FIRST_SECONDARY_STATE;
+      sli_zigbee_af_network_steering_state = FIRST_SECONDARY_STATE;
 
-      (void)scheduleScan(emAfPluginNetworkSteeringSecondaryChannelMask);
+      (void)scheduleScan(sli_zigbee_af_network_steering_secondary_channel_mask);
 
       return;
     }
@@ -467,12 +461,12 @@ HIDDEN void scanResultsHandler(EmberAfPluginScanDispatchScanResults *results)
 
 static EmberStatus goToNextState(void)
 {
-  emAfPluginNetworkSteeringState++;
+  sli_zigbee_af_network_steering_state++;
 
   // If there are no more states, return error
-  if ((emAfPluginNetworkSteeringState
+  if ((sli_zigbee_af_network_steering_state
        == EMBER_AF_PLUGIN_NETWORK_STEERING_STATE_SCAN_PRIMARY_USE_ALL_KEYS)
-      || (emAfPluginNetworkSteeringState
+      || (sli_zigbee_af_network_steering_state
           == EMBER_AF_PLUGIN_NETWORK_STEERING_STATE_SCAN_FINISHED)) {
     cleanupAndStop(EMBER_JOIN_FAILED);
     return EMBER_JOIN_FAILED;
@@ -480,19 +474,19 @@ static EmberStatus goToNextState(void)
 
   // When we're on the final scan-primary-channels state,
   // EMBER_AF_PLUGIN_NETWORK_STEERING_STATE_SCAN_PRIMARY_DISTRIBUTED,
-  // goToNextState simply increments emAfPluginNetworkSteeringState and then we
+  // goToNextState simply increments sli_zigbee_af_network_steering_state and then we
   // call stateMachineRun. We take this opportunity to check if we need to scan
   // the secondary mask now
-  if ((emAfPluginNetworkSteeringState
+  if ((sli_zigbee_af_network_steering_state
        == EMBER_AF_PLUGIN_NETWORK_STEERING_STATE_SCAN_SECONDARY_INSTALL_CODE)
-      || (emAfPluginNetworkSteeringState
+      || (sli_zigbee_af_network_steering_state
           == EMBER_AF_PLUGIN_NETWORK_STEERING_STATE_SCAN_SECONDARY_USE_ALL_KEYS)) {
-    if (emAfPluginNetworkSteeringSecondaryChannelMask == 0) {
+    if (sli_zigbee_af_network_steering_secondary_channel_mask == 0) {
       cleanupAndStop(EMBER_JOIN_FAILED);
       return EMBER_JOIN_FAILED;
     }
 
-    (void)scheduleScan(emAfPluginNetworkSteeringSecondaryChannelMask);
+    (void)scheduleScan(sli_zigbee_af_network_steering_secondary_channel_mask);
 
     // We need to return any error code, so that the code that called this
     // function doesn't continue doing its routine
@@ -506,13 +500,13 @@ static void cleanupAndStop(EmberStatus status)
 {
   emberAfCorePrintln("%p Stop.  Cleaning up.", PLUGIN_NAME);
   emberAfPluginNetworkSteeringCompleteCallback(status,
-                                               emAfPluginNetworkSteeringTotalBeacons,
-                                               emAfPluginNetworkSteeringJoinAttempts,
-                                               emAfPluginNetworkSteeringState);
-  emAfPluginNetworkSteeringState = EMBER_AF_PLUGIN_NETWORK_STEERING_STATE_NONE;
-  emAfPluginNetworkSteeringJoinAttempts = 0;
-  emAfPluginNetworkSteeringTotalBeacons = 0;
-  slxu_zigbee_event_set_inactive(finishSteeringEvent);
+                                               sli_zigbee_af_network_steering_total_beacons,
+                                               sli_zigbee_af_network_steering_join_attempts,
+                                               sli_zigbee_af_network_steering_state);
+  sli_zigbee_af_network_steering_state = EMBER_AF_PLUGIN_NETWORK_STEERING_STATE_NONE;
+  sli_zigbee_af_network_steering_join_attempts = 0;
+  sli_zigbee_af_network_steering_total_beacons = 0;
+  sl_zigbee_event_set_inactive(finishSteeringEvent);
 }
 
 // This function is called only on state transitions. This function sets up
@@ -523,7 +517,7 @@ static void stateMachineRun(void)
   EmberStatus status;
   emberAfCorePrintln("%p State: %p",
                      PLUGIN_NAME,
-                     emAfPluginNetworkSteeringStateNames[emAfPluginNetworkSteeringState]);
+                     sli_zigbee_af_network_steering_stateNames[sli_zigbee_af_network_steering_state]);
 
   status = setupSecurity();
 
@@ -542,15 +536,15 @@ static void stateMachineRun(void)
 
   // Set CURRENT_CHANNEL_MASK properly so that we can iterate over beacons
   // correctly
-  switch (emAfPluginNetworkSteeringState) {
+  switch (sli_zigbee_af_network_steering_state) {
     case EMBER_AF_PLUGIN_NETWORK_STEERING_STATE_SCAN_PRIMARY_INSTALL_CODE:
     case EMBER_AF_PLUGIN_NETWORK_STEERING_STATE_SCAN_PRIMARY_CENTRALIZED:
     case EMBER_AF_PLUGIN_NETWORK_STEERING_STATE_SCAN_PRIMARY_DISTRIBUTED:
     case EMBER_AF_PLUGIN_NETWORK_STEERING_STATE_SCAN_PRIMARY_USE_ALL_KEYS:
-      CURRENT_CHANNEL_MASK = emAfPluginNetworkSteeringPrimaryChannelMask;
+      CURRENT_CHANNEL_MASK = sli_zigbee_af_network_steering_primary_channel_mask;
       break;
     default:
-      CURRENT_CHANNEL_MASK = emAfPluginNetworkSteeringSecondaryChannelMask;
+      CURRENT_CHANNEL_MASK = sli_zigbee_af_network_steering_secondary_channel_mask;
       break;
   }
 
@@ -570,19 +564,19 @@ static EmberStatus setupSecurity(void)
   EmberStatus status;
   EmberInitialSecurityState state;
   EmberExtendedSecurityBitmask extended;
-  bool tryAllKeys = ((emAfPluginNetworkSteeringState
+  bool tryAllKeys = ((sli_zigbee_af_network_steering_state
                       == EMBER_AF_PLUGIN_NETWORK_STEERING_STATE_SCAN_PRIMARY_USE_ALL_KEYS)
-                     || (emAfPluginNetworkSteeringState
+                     || (sli_zigbee_af_network_steering_state
                          == EMBER_AF_PLUGIN_NETWORK_STEERING_STATE_SCAN_SECONDARY_USE_ALL_KEYS));
 
   state.bitmask = (EMBER_TRUST_CENTER_GLOBAL_LINK_KEY
                    | EMBER_HAVE_PRECONFIGURED_KEY
                    | EMBER_REQUIRE_ENCRYPTED_KEY
                    | EMBER_NO_FRAME_COUNTER_RESET
-                   | (emAfPluginNetworkSteeringStateUsesInstallCodes()
+                   | (sli_zigbee_af_network_steering_state_uses_install_codes()
                       ? EMBER_GET_PRECONFIGURED_KEY_FROM_INSTALL_CODE
                       : 0)
-                   | (emAfPluginNetworkSteeringStateUsesDistributedKey()
+                   | (sli_zigbee_af_network_steering_state_uses_distributed_key()
                       ? EMBER_DISTRIBUTED_TRUST_CENTER_MODE
                       : 0)
                    );
@@ -593,7 +587,7 @@ static EmberStatus setupSecurity(void)
             EMBER_ENCRYPTION_KEY_SIZE);
   }
   MEMMOVE(emberKeyContents(&(state.preconfiguredKey)),
-          (emAfPluginNetworkSteeringStateUsesDistributedKey()
+          (sli_zigbee_af_network_steering_state_uses_distributed_key()
            ? emberKeyContents(&emberPluginNetworkSteeringDistributedKey)
            : emberKeyContents(&defaultLinkKey)),
           EMBER_ENCRYPTION_KEY_SIZE);
@@ -607,11 +601,11 @@ static EmberStatus setupSecurity(void)
     if (tryAllKeys) {
       emberAfCorePrintln("%s: WARNING: emberSetInitialSecurityState failed. "
                          "Continuing without install code.",
-                         emAfNetworkSteeringPluginName);
+                         sli_zigbee_af_network_steering_plugin_name);
       state.bitmask &= ((uint16_t) ~((uint16_t)EMBER_GET_PRECONFIGURED_KEY_FROM_INSTALL_CODE));
       status = emberSetInitialSecurityState(&state);
     } else {
-      if (emAfPluginNetworkSteeringStateUsesInstallCodes()) {
+      if (sli_zigbee_af_network_steering_state_uses_install_codes()) {
         emberAfCorePrintln("Error: install code setup failed. Is an install "
                            "code flashed onto the device?");
       }
@@ -629,7 +623,7 @@ static EmberStatus setupSecurity(void)
     goto done;
   }
 
-  emAfClearLinkKeyTable();
+  sli_zigbee_af_clear_link_key_table();
 
   if (tryAllKeys) {
     EmberEUI64 wildcardEui = WILDCARD_EUI;
@@ -637,12 +631,14 @@ static EmberStatus setupSecurity(void)
     // The install code derived key is handled by setting the
     // EMBER_GET_PRECONFIGURED_KEY_FROM_INSTALL_CODE bit above
     // Add the centralized and distributed keys into the transient key table
-    status = emberAddTransientLinkKey(wildcardEui,
-                                      (EmberKeyData*)&defaultLinkKey);
-    if (status == EMBER_SUCCESS) {
-      status = emberAddTransientLinkKey(wildcardEui,
-                                        (EmberKeyData*)&distributedTestKey);
+    sl_status_t import_status;
+    import_status = sl_zb_sec_man_import_transient_key(wildcardEui,
+                                                       (sl_zb_sec_man_key_t*)&defaultLinkKey);
+    if (import_status == SL_STATUS_OK) {
+      import_status = sl_zb_sec_man_import_transient_key(wildcardEui,
+                                                         (sl_zb_sec_man_key_t*)&emberPluginNetworkSteeringDistributedKey);
     }
+    status = ((import_status == SL_STATUS_OK) ? EMBER_SUCCESS : EMBER_NO_BUFFERS);
   }
 
   done:
@@ -654,22 +650,22 @@ EmberStatus emberAfPluginNetworkSteeringStart(void)
   EmberStatus status = EMBER_INVALID_CALL;
   uint32_t channelsToScan;
 
-  if ((0 == emAfPluginNetworkSteeringPrimaryChannelMask)
-      && (0 == emAfPluginNetworkSteeringSecondaryChannelMask)) {
+  if ((0 == sli_zigbee_af_network_steering_primary_channel_mask)
+      && (0 == sli_zigbee_af_network_steering_secondary_channel_mask)) {
     return EMBER_INVALID_CALL;
   }
 
-  if (emAfProIsCurrentNetwork()
-      && (emAfPluginNetworkSteeringState
+  if (sli_zigbee_af_pro_is_current_network()
+      && (sli_zigbee_af_network_steering_state
           == EMBER_AF_PLUGIN_NETWORK_STEERING_STATE_NONE)) {
     if (emberAfNetworkState() == EMBER_NO_NETWORK) {
       emberAfAddToCurrentAppTasksCallback(EMBER_AF_WAITING_FOR_TC_KEY_UPDATE);
-      if (emAfPluginNetworkSteeringPrimaryChannelMask) {
-        emAfPluginNetworkSteeringState = FIRST_PRIMARY_STATE;
-        channelsToScan = emAfPluginNetworkSteeringPrimaryChannelMask;
+      if (sli_zigbee_af_network_steering_primary_channel_mask) {
+        sli_zigbee_af_network_steering_state = FIRST_PRIMARY_STATE;
+        channelsToScan = sli_zigbee_af_network_steering_primary_channel_mask;
       } else {
-        emAfPluginNetworkSteeringState = FIRST_SECONDARY_STATE;
-        channelsToScan = emAfPluginNetworkSteeringSecondaryChannelMask;
+        sli_zigbee_af_network_steering_state = FIRST_SECONDARY_STATE;
+        channelsToScan = sli_zigbee_af_network_steering_secondary_channel_mask;
       }
 
       // Stop any previous trust center link key update.
@@ -683,7 +679,7 @@ EmberStatus emberAfPluginNetworkSteeringStart(void)
   }
 
   emberAfCorePrintln("%p: %p: 0x%X",
-                     emAfNetworkSteeringPluginName,
+                     sli_zigbee_af_network_steering_plugin_name,
                      "Start",
                      status);
 
@@ -692,7 +688,7 @@ EmberStatus emberAfPluginNetworkSteeringStart(void)
 
 EmberStatus emberAfPluginNetworkSteeringStop(void)
 {
-  if (emAfPluginNetworkSteeringState
+  if (sli_zigbee_af_network_steering_state
       == EMBER_AF_PLUGIN_NETWORK_STEERING_STATE_NONE) {
     return EMBER_INVALID_CALL;
   }
@@ -709,12 +705,12 @@ EmberStatus emberAfPluginNetworkSteeringStop(void)
 // we send our device announce and possibly our network timeout request if we
 // are an end device.
 
-void emberAfPluginNetworkSteeringFinishSteeringEventHandler(SLXU_UC_EVENT)
+void emberAfPluginNetworkSteeringFinishSteeringEventHandler(sl_zigbee_event_t * event)
 {
   EmberStatus status;
-  slxu_zigbee_event_set_inactive(finishSteeringEvent);
+  sl_zigbee_event_set_inactive(finishSteeringEvent);
 
-  if (emAfPluginNetworkSteeringStateVerifyTclk()) {
+  if (sli_zigbee_af_network_steering_state_verify_tclk()) {
     // If we get here, then we have failed to verify the TCLK. Therefore,
     // we leave the network.
     emberAfPluginUpdateTcLinkKeyStop();
@@ -724,7 +720,7 @@ void emberAfPluginNetworkSteeringFinishSteeringEventHandler(SLXU_UC_EVENT)
                        "Key verification failed. Leaving network");
     cleanupAndStop(EMBER_ERR_FATAL);
     emberAfRemoveFromCurrentAppTasks(EMBER_AF_WAITING_FOR_TC_KEY_UPDATE);
-  } else if (emAfPluginNetworkSteeringStateUpdateTclk()) {
+  } else if (sli_zigbee_af_network_steering_state_update_tclk()) {
     // Start the process to update the TC link key. We will set another event
     // for the broadcast permit join.
     // Attempt a TC link key update now.
@@ -745,7 +741,7 @@ void emberAfPluginNetworkSteeringFinishSteeringEventHandler(SLXU_UC_EVENT)
 
 void emberAfPluginUpdateTcLinkKeyStatusCallback(EmberKeyStatus keyStatus)
 {
-  if (emAfPluginNetworkSteeringStateUpdateTclk()) {
+  if (sli_zigbee_af_network_steering_state_update_tclk()) {
     emberAfCorePrintln("%p: %p: 0x%X",
                        PLUGIN_NAME,
                        "Trust center link key update status",
@@ -753,8 +749,8 @@ void emberAfPluginUpdateTcLinkKeyStatusCallback(EmberKeyStatus keyStatus)
     switch (keyStatus) {
       case EMBER_TRUST_CENTER_LINK_KEY_ESTABLISHED:
         // Success! But we should still wait to make sure we verify the key.
-        emAfPluginNetworkSteeringStateSetVerifyTclk();
-        slxu_zigbee_event_set_delay_ms(finishSteeringEvent, VERIFY_KEY_TIMEOUT_MS);
+        sli_zigbee_af_network_steering_state_set_verify_tclk();
+        sl_zigbee_event_set_delay_ms(finishSteeringEvent, VERIFY_KEY_TIMEOUT_MS);
         return;
       case EMBER_TRUST_CENTER_IS_PRE_R21:
       case EMBER_VERIFY_LINK_KEY_SUCCESS:
@@ -762,9 +758,9 @@ void emberAfPluginUpdateTcLinkKeyStatusCallback(EmberKeyStatus keyStatus)
         // If the trust center is pre-r21, then we don't update the link key.
         // If the key status is that the link key has been verified, then we
         // have successfully updated our trust center link key and we are done!
-        emAfPluginNetworkSteeringStateClearVerifyTclk();
+        sli_zigbee_af_network_steering_state_clear_verify_tclk();
         uint32_t ms = randomJitterMS();
-        slxu_zigbee_event_set_delay_ms(finishSteeringEvent, ms);
+        sl_zigbee_event_set_delay_ms(finishSteeringEvent, ms);
         break;
       }
       default:
@@ -772,23 +768,23 @@ void emberAfPluginUpdateTcLinkKeyStatusCallback(EmberKeyStatus keyStatus)
         emberLeaveNetwork();
         cleanupAndStop(EMBER_NO_LINK_KEY_RECEIVED);
     }
-    emAfPluginNetworkSteeringStateClearUpdateTclk();
+    sli_zigbee_af_network_steering_state_clear_update_tclk();
   }
 
   return;
 }
 
-void emAfPluginNetworkSteeringSetChannelMask(uint32_t mask, bool secondaryMask)
+void sli_zigbee_af_network_steering_set_channel_mask(uint32_t mask, bool secondaryMask)
 {
   if (secondaryMask) {
-    emAfPluginNetworkSteeringSecondaryChannelMask = mask;
+    sli_zigbee_af_network_steering_secondary_channel_mask = mask;
   } else {
-    emAfPluginNetworkSteeringPrimaryChannelMask = mask;
+    sli_zigbee_af_network_steering_primary_channel_mask = mask;
   }
 }
 
-void emAfPluginNetworkSteeringSetExtendedPanIdFilter(uint8_t* extendedPanId,
-                                                     bool turnFilterOn)
+void sli_zigbee_af_network_steering_set_extended_pan_id_filter(uint8_t* extendedPanId,
+                                                               bool turnFilterOn)
 {
   if (!extendedPanId) {
     return;
@@ -799,12 +795,12 @@ void emAfPluginNetworkSteeringSetExtendedPanIdFilter(uint8_t* extendedPanId,
   gFilterByExtendedPanId = turnFilterOn;
 }
 
-void emAfPluginNetworkSteeringCleanup(EmberStatus status)
+void sli_zigbee_af_network_steering_cleanup(EmberStatus status)
 {
   cleanupAndStop(status);
 }
 
-uint8_t emAfPluginNetworkSteeringGetCurrentChannel()
+uint8_t sli_zigbee_af_network_steering_get_current_channel()
 {
   return BEACON_ITERATOR.beacon.channel;
 }
@@ -821,7 +817,7 @@ WEAK(bool emberAfPluginNetworkSteeringGetDistributedKeyCallback(EmberKeyData * k
 
 WEAK(EmberNodeType emberAfPluginNetworkSteeringGetNodeTypeCallback(EmberAfPluginNetworkSteeringJoiningState state))
 {
-  return ((emAfCurrentZigbeeProNetwork->nodeType == EMBER_COORDINATOR)
+  return ((sli_zigbee_af_current_zigbee_pro_network->nodeType == EMBER_COORDINATOR)
           ? EMBER_ROUTER
-          : emAfCurrentZigbeeProNetwork->nodeType);
+          : sli_zigbee_af_current_zigbee_pro_network->nodeType);
 }

@@ -92,6 +92,7 @@ typedef struct  {
   uint8_t ack;
   uint8_t configured_tx_window_size;
   uint8_t current_tx_window_space;
+  bool uframe_tx_complete_pending;
   uint8_t frames_count_re_transmit_queue;
   uint8_t packet_re_transmit_count;
   uint32_t re_transmit_timeout;
@@ -113,7 +114,8 @@ typedef struct  {
   sl_slist_node_t *iframe_receive_queue;
   sl_slist_node_t *uframe_receive_queue;
   sl_slist_node_t *re_transmit_queue;
-  sl_slist_node_t *holding_list;
+  sl_slist_node_t *iframe_holding_list;
+  sl_slist_node_t *uframe_holding_list;
 #if (SL_CPC_DEBUG_ENDPOINT_EVENT_COUNTERS == 1)
   sl_cpc_endpoint_debug_counters_t debug_counters;
 #endif

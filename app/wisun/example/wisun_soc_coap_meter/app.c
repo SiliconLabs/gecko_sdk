@@ -36,7 +36,6 @@
 #include <string.h>
 #include "app.h"
 #include "sl_wisun_app_core_util.h"
-#include "socket_hnd.h"
 #include "socket.h"
 #include "sl_wisun_coap_meter.h"
 #include "sl_wisun_led_driver.h"
@@ -68,8 +67,6 @@
 void app_task(void *args)
 {
   (void) args;
-
-  assert(sl_wisun_coap_init_default() != false);
 
   // connect to the wisun network
   app_wisun_connect_and_wait();

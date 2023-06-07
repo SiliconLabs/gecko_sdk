@@ -20,10 +20,10 @@
 
 //------------------------------------------------------------------------------
 
-EmberStatus emAfSendMatchDescriptor(EmberNodeId target,
-                                    EmberAfProfileId profileId,
-                                    EmberAfClusterId clusterId,
-                                    bool serverCluster)
+EmberStatus sli_zigbee_af_send_match_descriptor(EmberNodeId target,
+                                                EmberAfProfileId profileId,
+                                                EmberAfClusterId clusterId,
+                                                bool serverCluster)
 {
   uint8_t inCount = 0;
   uint8_t outCount = 0;

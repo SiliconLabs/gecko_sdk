@@ -73,9 +73,9 @@ class ProfileWisunFan1v1Ocelot(ProfileWisunFan1v1Jumbo):
     def build_register_profile_outputs(self, model, profile):
         # Overriding this method to include modem regs for Ocelot
         family = self._family
-        build_modem_regs_ocelot(model, profile, family)
-        buildFrameOutputs(model, profile, family)
-        buildCrcOutputs(model, profile, family)
+        build_modem_regs_ocelot(model, profile)
+        buildFrameOutputs(model, profile)
+        buildCrcOutputs(model, profile)
         buildWhiteOutputs(model, profile)
         buildFecOutputs(model, profile)
 

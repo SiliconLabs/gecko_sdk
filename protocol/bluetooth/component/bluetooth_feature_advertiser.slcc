@@ -17,7 +17,7 @@ description: >
   are no longer supported. See the Bluetooth API reference for more details. When none
   of the three components is included, all commands of the "advertiser" class are
   functional for providing the backwards compatibility.
-category: "Bluetooth|Feature"
+category: Bluetooth|Bluetooth LE Controller (Link Layer)|Features with Commands and Events
 quality: "production"
 root_path: "protocol/bluetooth"
 config_file:

@@ -19,8 +19,6 @@
 #include "../../include/af.h"
 #include "scenes-client.h"
 
-#ifdef UC_BUILD
-
 #include "zap-cluster-command-parser.h"
 
 bool emberAfScenesClusterAddSceneResponseCallback(EmberAfClusterCommand *cmd)
@@ -135,96 +133,6 @@ bool emberAfScenesClusterGetSceneMembershipResponseCallback(EmberAfClusterComman
   return true;
 }
 
-#else // !UC_BUILD
-
-bool emberAfScenesClusterAddSceneResponseCallback(uint8_t status,
-                                                  uint16_t groupId,
-                                                  uint8_t sceneId)
-{
-  return emberAfPluginScenesClientParseAddSceneResponse(emberAfCurrentCommand(),
-                                                        status,
-                                                        groupId,
-                                                        sceneId);
-}
-
-bool emberAfScenesClusterViewSceneResponseCallback(uint8_t status,
-                                                   uint16_t groupId,
-                                                   uint8_t sceneId,
-                                                   uint16_t transitionTime,
-                                                   uint8_t *sceneName,
-                                                   uint8_t *extensionFieldSets)
-{
-  return emberAfPluginScenesClientParseViewSceneResponse(emberAfCurrentCommand(),
-                                                         status,
-                                                         groupId,
-                                                         sceneId,
-                                                         transitionTime,
-                                                         sceneName,
-                                                         extensionFieldSets);
-}
-
-bool emberAfScenesClusterRemoveSceneResponseCallback(uint8_t status,
-                                                     uint16_t groupId,
-                                                     uint8_t sceneId)
-{
-  emberAfScenesClusterPrintln("RX: RemoveSceneResponse 0x%x, 0x%2x, 0x%x",
-                              status,
-                              groupId,
-                              sceneId);
-  emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
-  return true;
-}
-
-bool emberAfScenesClusterRemoveAllScenesResponseCallback(uint8_t status,
-                                                         uint16_t groupId)
-{
-  emberAfScenesClusterPrintln("RX: RemoveAllScenesResponse 0x%x, 0x%2x",
-                              status,
-                              groupId);
-  emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
-  return true;
-}
-
-bool emberAfScenesClusterStoreSceneResponseCallback(uint8_t status,
-                                                    uint16_t groupId,
-                                                    uint8_t sceneId)
-{
-  emberAfScenesClusterPrintln("RX: StoreSceneResponse 0x%x, 0x%2x, 0x%x",
-                              status,
-                              groupId,
-                              sceneId);
-  emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
-  return true;
-}
-
-bool emberAfScenesClusterGetSceneMembershipResponseCallback(uint8_t status,
-                                                            uint8_t capacity,
-                                                            uint16_t groupId,
-                                                            uint8_t sceneCount,
-                                                            uint8_t *sceneList)
-{
-  emberAfScenesClusterPrint("RX: GetSceneMembershipResponse 0x%x, 0x%x, 0x%2x",
-                            status,
-                            capacity,
-                            groupId);
-
-  // Scene count and the scene list only appear in the payload if the status is
-  // SUCCESS.
-  if (status == EMBER_ZCL_STATUS_SUCCESS) {
-    uint8_t i;
-    emberAfScenesClusterPrint(", 0x%x,", sceneCount);
-    for (i = 0; i < sceneCount; i++) {
-      emberAfScenesClusterPrint(" [0x%x]", sceneList[i]);
-    }
-  }
-
-  emberAfScenesClusterPrintln("");
-  emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
-  return true;
-}
-
-#endif // UC_BUILD
-
 bool emberAfPluginScenesClientParseAddSceneResponse(const EmberAfClusterCommand *cmd,
                                                     uint8_t status,
                                                     uint16_t groupId,
@@ -296,8 +204,6 @@ bool emberAfPluginScenesClientParseViewSceneResponse(const EmberAfClusterCommand
   return true;
 }
 
-#ifdef UC_BUILD
-
 uint32_t emberAfScenesClusterClientCommandParse(sl_service_opcode_t opcode,
                                                 sl_service_function_context_t *context)
 {
@@ -345,5 +251,3 @@ uint32_t emberAfScenesClusterClientCommandParse(sl_service_opcode_t opcode,
           ? EMBER_ZCL_STATUS_SUCCESS
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
-
-#endif // UC_BUILD

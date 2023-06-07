@@ -105,7 +105,10 @@ extern "C" {
 typedef uint32_t UARTDRV_Count_t;     ///< A UART transfer count
 typedef uint32_t UARTDRV_Status_t;    ///< A UART status return type. Bitfield of UARTDRV_STATUS_* values.
 
-/// Flow Control method
+/**
+ * @enum UARTDRV_FlowControlType_t
+ * @brief UARTDRV Flow Control method.
+ */
 SL_ENUM(UARTDRV_FlowControlType_t) {
   uartdrvFlowControlNone   = 0,   ///< None
   uartdrvFlowControlSw     = 1,   ///< Software XON/XOFF
@@ -205,11 +208,15 @@ typedef struct {
   }
 
 #if (defined(UART_COUNT) && (UART_COUNT > 0)) || (defined(USART_COUNT) && (USART_COUNT > 0))
-/// A UART driver instance initialization structure.
-/// Contains a number of UARTDRV configuration options.
-/// It is required for driver instance initialization.
-/// This structure is passed to @ref UARTDRV_Init() when initializing a UARTDRV
-/// instance.
+/**
+ * @struct UARTDRV_InitUart_t
+ * @brief A UART driver instance initialization structure.
+ *   LEUART driver instance initialization structure.
+ *   Contains a number of UARTDRV configuration options.
+ *   It is required for driver instance initialization.
+ *   This structure is passed to @ref UARTDRV_Init() when initializing a UARTDRV
+ *   instance.
+ */
 typedef struct {
   USART_TypeDef              *port;             ///< The peripheral used for UART
   uint32_t                   baudRate;          ///< UART baud rate
@@ -252,11 +259,15 @@ typedef UARTDRV_InitUart_t UARTDRV_Init_t SL_DEPRECATED_API_SDK_4_1;
 #endif
 
 #if defined(LEUART_COUNT) && (LEUART_COUNT > 0) && !defined(_SILICON_LABS_32B_SERIES_2)
-/// LEUART driver instance initialization structure.
-/// Contains a number of UARTDRV configuration options.
-/// It is required to initialize a driver instance.
-/// This structure is passed to @ref UARTDRV_InitLeuart() when initializing a UARTDRV
-/// instance.
+/**
+ * @struct UARTDRV_InitLeuart_t
+ * @brief LEUART driver instance initialization structure.
+ *   LEUART driver instance initialization structure.
+ *   Contains a number of UARTDRV configuration options.
+ *   It is required to initialize a driver instance.
+ *   This structure is passed to @ref UARTDRV_InitLeuart() when initializing a UARTDRV
+ *   instance.
+ */
 typedef struct {
   LEUART_TypeDef             *port;             ///< The peripheral used for LEUART
   uint32_t                   baudRate;          ///< UART baud rate

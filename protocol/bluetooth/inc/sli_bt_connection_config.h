@@ -25,6 +25,7 @@
  */
 typedef struct {
   uint8_t max_connections; ///< Set to value of SL_BT_CONFIG_MAX_CONNECTIONS_SUM
+  uint16_t data_len; ///< Set to value of SL_BT_CONFIG_CONNECTION_DATA_LENGTH
 } sli_bt_connection_config_t;
 
 #endif // SLI_BT_CONNECTION_CONFIG_H

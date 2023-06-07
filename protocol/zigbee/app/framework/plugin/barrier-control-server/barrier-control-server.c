@@ -17,8 +17,10 @@
 
 #include "af.h"
 #include "barrier-control-server.h"
-
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
+#include "sl_component_catalog.h"
+#endif
+#ifdef SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
 #include "zap-cluster-command-parser.h"
 #endif
 
@@ -45,16 +47,10 @@ static State state;
 // -----------------------------------------------------------------------------
 // Framework initialization
 
-#ifndef UC_BUILD
-void emberAfPluginBarrierControlServerInitCallback(void)
-{
-}
-#endif
-
 // -----------------------------------------------------------------------------
 // Accessing attributes
 
-uint8_t emAfPluginBarrierControlServerGetBarrierPosition(uint8_t endpoint)
+uint8_t sli_zigbee_af_barrier_control_server_get_barrier_position(uint8_t endpoint)
 {
   uint8_t position;
   EmberAfStatus status = emberAfReadServerAttribute(endpoint,
@@ -66,8 +62,8 @@ uint8_t emAfPluginBarrierControlServerGetBarrierPosition(uint8_t endpoint)
   return position;
 }
 
-void emAfPluginBarrierControlServerSetBarrierPosition(uint8_t endpoint,
-                                                      uint8_t position)
+void sli_zigbee_af_barrier_control_server_set_barrier_position(uint8_t endpoint,
+                                                               uint8_t position)
 {
   EmberAfStatus status
     = emberAfWriteServerAttribute(endpoint,
@@ -78,7 +74,7 @@ void emAfPluginBarrierControlServerSetBarrierPosition(uint8_t endpoint,
   assert(status == EMBER_ZCL_STATUS_SUCCESS);
 }
 
-bool emAfPluginBarrierControlServerIsPartialBarrierSupported(uint8_t endpoint)
+bool sli_zigbee_af_barrier_control_server_is_partial_barrier_supported(uint8_t endpoint)
 {
   uint8_t bitmap;
   EmberAfStatus status
@@ -130,7 +126,7 @@ static void setMovingState(uint8_t endpoint, uint8_t state)
   assert(status == EMBER_ZCL_STATUS_SUCCESS);
 }
 
-uint16_t emAfPluginBarrierControlServerGetSafetyStatus(uint8_t endpoint)
+uint16_t sli_zigbee_af_barrier_control_server_get_safety_status(uint8_t endpoint)
 {
   uint16_t safetyStatus;
   EmberAfStatus status
@@ -146,14 +142,14 @@ uint16_t emAfPluginBarrierControlServerGetSafetyStatus(uint8_t endpoint)
 static bool isRemoteLockoutOn(uint8_t endpoint)
 {
   uint16_t safetyStatus
-    = emAfPluginBarrierControlServerGetSafetyStatus(endpoint);
+    = sli_zigbee_af_barrier_control_server_get_safety_status(endpoint);
   return READBITS(safetyStatus,
                   EMBER_AF_BARRIER_CONTROL_SAFETY_STATUS_REMOTE_LOCKOUT);
 }
 
-void emAfPluginBarrierControlServerIncrementEvents(uint8_t endpoint,
-                                                   bool open,
-                                                   bool command)
+void sli_zigbee_af_barrier_control_server_increment_events(uint8_t endpoint,
+                                                           bool open,
+                                                           bool command)
 {
   uint8_t mask = (0
 #if defined(ZCL_USING_BARRIER_CONTROL_CLUSTER_BARRIER_OPEN_EVENTS_ATTRIBUTE)
@@ -217,7 +213,7 @@ static uint8_t getCurrentPosition(uint8_t endpoint)
   // way of knowing the position of the barrier. Let's guess that the barrier is
   // open so that we don't leave the barrier open when it should be closed.
   uint8_t currentPositionFromAttribute
-    = emAfPluginBarrierControlServerGetBarrierPosition(endpoint);
+    = sli_zigbee_af_barrier_control_server_get_barrier_position(endpoint);
   return ((currentPositionFromAttribute
            == EMBER_ZCL_BARRIER_CONTROL_BARRIER_POSITION_UNKNOWN)
           ? EMBER_ZCL_BARRIER_CONTROL_BARRIER_POSITION_OPEN
@@ -229,7 +225,7 @@ static uint32_t calculateDelayMs(uint8_t endpoint,
                                  bool *opening)
 {
   uint8_t currentPosition
-    = emAfPluginBarrierControlServerGetBarrierPosition(endpoint);
+    = sli_zigbee_af_barrier_control_server_get_barrier_position(endpoint);
   *opening = targetPosition > currentPosition;
   uint8_t positionDelta = (*opening
                            ? targetPosition - currentPosition
@@ -253,30 +249,30 @@ static uint32_t calculateDelayMs(uint8_t endpoint,
 void emberAfBarrierControlClusterServerTickCallback(uint8_t endpoint)
 {
   if (state.currentPosition == state.targetPosition) {
-    emAfPluginBarrierControlServerSetBarrierPosition(endpoint, state.currentPosition);
+    sli_zigbee_af_barrier_control_server_set_barrier_position(endpoint, state.currentPosition);
     setMovingState(endpoint, EMBER_ZCL_BARRIER_CONTROL_MOVING_STATE_STOPPED);
-    slxu_zigbee_zcl_deactivate_server_tick(endpoint, ZCL_BARRIER_CONTROL_CLUSTER_ID);
+    sl_zigbee_zcl_deactivate_server_tick(endpoint, ZCL_BARRIER_CONTROL_CLUSTER_ID);
   } else {
     if (state.increasing) {
       if (++state.currentPosition == 1) {
         // Zero -> nonzero: open event
-        emAfPluginBarrierControlServerIncrementEvents(endpoint, true, false);
+        sli_zigbee_af_barrier_control_server_increment_events(endpoint, true, false);
       }
     } else {
       if (--state.currentPosition == 0) {
         // Nonzero -> zero: close event
-        emAfPluginBarrierControlServerIncrementEvents(endpoint, false, false);
+        sli_zigbee_af_barrier_control_server_increment_events(endpoint, false, false);
       }
     }
-    emAfPluginBarrierControlServerSetBarrierPosition(endpoint,
-                                                     (emAfPluginBarrierControlServerIsPartialBarrierSupported(endpoint)
-                                                      ? state.currentPosition
-                                                      : EMBER_ZCL_BARRIER_CONTROL_BARRIER_POSITION_UNKNOWN));
+    sli_zigbee_af_barrier_control_server_set_barrier_position(endpoint,
+                                                              (sli_zigbee_af_barrier_control_server_is_partial_barrier_supported(endpoint)
+                                                               ? state.currentPosition
+                                                               : EMBER_ZCL_BARRIER_CONTROL_BARRIER_POSITION_UNKNOWN));
     setMovingState(endpoint,
                    (state.increasing
                     ? EMBER_ZCL_BARRIER_CONTROL_MOVING_STATE_OPENING
                     : EMBER_ZCL_BARRIER_CONTROL_MOVING_STATE_CLOSING));
-    slxu_zigbee_zcl_schedule_server_tick(endpoint, ZCL_BARRIER_CONTROL_CLUSTER_ID, state.delayMs);
+    sl_zigbee_zcl_schedule_server_tick(endpoint, ZCL_BARRIER_CONTROL_CLUSTER_ID, state.delayMs);
   }
 }
 
@@ -289,8 +285,6 @@ static void sendDefaultResponse(EmberAfStatus status)
     emberAfBarrierControlClusterPrintln("Failed to send default response");
   }
 }
-
-#ifdef UC_BUILD
 
 bool emberAfBarrierControlClusterBarrierControlGoToPercentCallback(EmberAfClusterCommand *cmd)
 {
@@ -308,7 +302,7 @@ bool emberAfBarrierControlClusterBarrierControlGoToPercentCallback(EmberAfCluste
   if (isRemoteLockoutOn(endpoint)) {
     status = EMBER_ZCL_STATUS_FAILURE;
   } else if (cmd_data.percentOpen > 100 // "100" means "100%", so greater than that is invalid
-             || (!emAfPluginBarrierControlServerIsPartialBarrierSupported(endpoint)
+             || (!sli_zigbee_af_barrier_control_server_is_partial_barrier_supported(endpoint)
                  && cmd_data.percentOpen != EMBER_ZCL_BARRIER_CONTROL_BARRIER_POSITION_CLOSED
                  && cmd_data.percentOpen != EMBER_ZCL_BARRIER_CONTROL_BARRIER_POSITION_OPEN)) {
     status = EMBER_ZCL_STATUS_INVALID_VALUE;
@@ -322,12 +316,12 @@ bool emberAfBarrierControlClusterBarrierControlGoToPercentCallback(EmberAfCluste
                                         state.currentPosition,
                                         state.targetPosition,
                                         state.delayMs);
-    slxu_zigbee_zcl_schedule_server_tick(endpoint, ZCL_BARRIER_CONTROL_CLUSTER_ID, state.delayMs);
+    sl_zigbee_zcl_schedule_server_tick(endpoint, ZCL_BARRIER_CONTROL_CLUSTER_ID, state.delayMs);
 
     if (state.currentPosition < state.targetPosition) {
-      emAfPluginBarrierControlServerIncrementEvents(endpoint, true, true);
+      sli_zigbee_af_barrier_control_server_increment_events(endpoint, true, true);
     } else if (state.currentPosition > state.targetPosition) {
-      emAfPluginBarrierControlServerIncrementEvents(endpoint, false, true);
+      sli_zigbee_af_barrier_control_server_increment_events(endpoint, false, true);
     }
   }
 
@@ -335,59 +329,15 @@ bool emberAfBarrierControlClusterBarrierControlGoToPercentCallback(EmberAfCluste
 
   return true;
 }
-
-#else // !UC_BUILD
-
-bool emberAfBarrierControlClusterBarrierControlGoToPercentCallback(uint8_t percentOpen)
-{
-  uint8_t endpoint = emberAfCurrentCommand()->apsFrame->destinationEndpoint;
-  EmberAfStatus status = EMBER_ZCL_STATUS_SUCCESS;
-
-  emberAfBarrierControlClusterPrintln("RX: GoToPercentCallback p=%d", percentOpen);
-
-  if (isRemoteLockoutOn(endpoint)) {
-    status = EMBER_ZCL_STATUS_FAILURE;
-  } else if (percentOpen > 100 // "100" means "100%", so greater than that is invalid
-             || (!emAfPluginBarrierControlServerIsPartialBarrierSupported(endpoint)
-                 && percentOpen != EMBER_ZCL_BARRIER_CONTROL_BARRIER_POSITION_CLOSED
-                 && percentOpen != EMBER_ZCL_BARRIER_CONTROL_BARRIER_POSITION_OPEN)) {
-    status = EMBER_ZCL_STATUS_INVALID_VALUE;
-  } else {
-    state.currentPosition = getCurrentPosition(endpoint);
-    state.targetPosition = percentOpen;
-    state.delayMs = calculateDelayMs(endpoint,
-                                     state.targetPosition,
-                                     &state.increasing);
-    emberAfBarrierControlClusterPrintln("Scheduling barrier move from %d to %d with %dms delay",
-                                        state.currentPosition,
-                                        state.targetPosition,
-                                        state.delayMs);
-    slxu_zigbee_zcl_schedule_server_tick(endpoint, ZCL_BARRIER_CONTROL_CLUSTER_ID, state.delayMs);
-
-    if (state.currentPosition < state.targetPosition) {
-      emAfPluginBarrierControlServerIncrementEvents(endpoint, true, true);
-    } else if (state.currentPosition > state.targetPosition) {
-      emAfPluginBarrierControlServerIncrementEvents(endpoint, false, true);
-    }
-  }
-
-  sendDefaultResponse(status);
-
-  return true;
-}
-
-#endif // UC_BUILD
 
 bool emberAfBarrierControlClusterBarrierControlStopCallback(void)
 {
   uint8_t endpoint = emberAfCurrentCommand()->apsFrame->destinationEndpoint;
-  slxu_zigbee_zcl_deactivate_server_tick(endpoint, ZCL_BARRIER_CONTROL_CLUSTER_ID);
+  sl_zigbee_zcl_deactivate_server_tick(endpoint, ZCL_BARRIER_CONTROL_CLUSTER_ID);
   setMovingState(endpoint, EMBER_ZCL_BARRIER_CONTROL_MOVING_STATE_STOPPED);
   sendDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
   return true;
 }
-
-#ifdef UC_BUILD
 
 uint32_t emberAfBarrierControlClusterServerCommandParse(sl_service_opcode_t opcode,
                                                         sl_service_function_context_t *context)
@@ -416,5 +366,3 @@ uint32_t emberAfBarrierControlClusterServerCommandParse(sl_service_opcode_t opco
           ? EMBER_ZCL_STATUS_SUCCESS
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
-
-#endif // UC_BUILD

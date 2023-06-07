@@ -31,6 +31,11 @@
 #ifndef SL_GATT_SERVICE_LIGHT_CONFIG_H
 #define SL_GATT_SERVICE_LIGHT_CONFIG_H
 
+/***********************************************************************************************//**
+ * @addtogroup gatt_service_light
+ * @{
+ **************************************************************************************************/
+
 // <<< Use Configuration Wizard in Context Menu >>>
 
 // <o SL_GATT_SERVICE_LIGHT_LUX_INVALID> Dummy LUX measurement results for uninitialized sensors. <0-0xFFFFFFFF>
@@ -42,4 +47,5 @@
 #define SL_GATT_SERVICE_LIGHT_UVI_INVALID  0xFF
 // <<< end of configuration section >>>
 
+/** @} (end addtogroup gatt_service_light) */
 #endif // SL_GATT_SERVICE_LIGHT_CONFIG_H

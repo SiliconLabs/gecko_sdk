@@ -8,9 +8,27 @@ description: >
   This component integrates the Generic OnOff Client functionality, for ease of
   use. It provides functions to change the dim value by, or set the dim value to
   a certain percentage, and a function for getting the current lightness level.
+
+  This is a Low-Code component. For example, toggling all Light Lightness Servers
+  in the network can be achieved by adding an event handler for mesh events and
+  calling the following code:
+
+  #include "sl_btmesh_lighting_client.h"
+
+  void event_handler(sl_btmesh_msg_t *evt)
+  {
+    case sl_btmesh_evt_node_initialized_id:
+      if (evt->data.evt_node_initialized.provisioned) {
+        sl_btmesh_change_switch_position(SL_BTMESH_LIGHTING_CLIENT_TOGGLE);
+      }
+    break;
+  }
 category: "Bluetooth Mesh|Models|Lighting"
 quality: "production"
 root_path: "app/btmesh/common/btmesh_lighting_client"
+tag:
+  - Low-Code
+
 config_file:
   - path: btmesh_lighting_client.dcd
     directory: btmeshconf
@@ -30,9 +48,9 @@ requires:
   - name: "btmesh_stack_node"
   - name: "btmesh_generic_client"
   - name: "btmesh_stack"
-  - name: "simple_timer"
+  - name: "app_timer"
 recommends:
-  - id: "simple_timer"
+  - id: "app_timer"
 
 template_contribution:
   - name: component_catalog

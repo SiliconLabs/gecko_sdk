@@ -96,7 +96,7 @@ void emberDebugBinaryPrintf(const char * formatString, ...);
  *
  * @param len The length of the data to send.
  */
-void emDebugSendVuartMessage(uint8_t *buff, uint8_t len);
+void sli_util_debug_send_vuart_message(uint8_t *buff, uint8_t len);
 
 //#if (DEBUG_LEVEL == FULL_DEBUG) || defined(DOXYGEN_SHOULD_SKIP_THIS)
 /** @brief Print an ::EmberStatus return code to the serial port.
@@ -141,7 +141,7 @@ void emberDebugPrintf(const char * formatString, ...);
   #define emberDebugAssert(filename, linenumber) do {} while (false)
   #define emberDebugMemoryDump(start, end) do {} while (false)
   #define emberDebugBinaryPrintf(formatstring, ...) do {} while (false)
-  #define emDebugSendVuartMessage(buff, len) do {} while (false)
+  #define sli_util_debug_send_vuart_message(buff, len) do {} while (false)
   #define emberDebugError(code) do {} while (false)
 // Note the following doesn't have a do{}while(false)
 //   because it has a return value

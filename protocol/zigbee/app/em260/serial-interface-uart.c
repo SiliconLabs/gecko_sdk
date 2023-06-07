@@ -22,7 +22,7 @@
 #include "stack/include/error.h"
 
 #include "hal/hal.h"
-#if (defined(UC_BUILD) && !defined(ZIGBEE_STACK_ON_HOST) && !defined(EMBER_TEST))
+#if !defined(ZIGBEE_STACK_ON_HOST) && !defined(EMBER_TEST)
 #include "stack/framework/zigbee_debug_channel.h"
 #elif !defined(ZIGBEE_STACK_ON_HOST)
 #include "stack/framework/debug.h"
@@ -33,14 +33,9 @@
 #include "serial/serial.h"
 #include "serial-interface.h"
 
-#ifndef UC_BUILD
-#include "hal/micro/generic/ash-protocol.h"
-#include "hal/micro/generic/ash-ncp.h"
-#include "stack/include/mfglib.h"
-#include "serial-interface-uart-config.h"
-const uint8_t ashPort = ASH_PORT;
-#else
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #if defined(EMBER_TEST) && !defined(ZIGBEE_STACK_ON_HOST)
 //trying to not use legacy_hal as its not supported for simulation and hence the redundant code.
 #include "hal/micro/generic/ash-protocol.h"
@@ -53,7 +48,6 @@ const uint8_t ashPort = ASH_PORT;
 // Under UC, the serial port is provided by the Legacy NCP ASH component
 extern const uint8_t ashPort;
 #endif //EMBER_TEST
-#endif // UC_BUILD
 
 //------------------------------------------------------------------------------
 // Global Variables
@@ -79,23 +73,6 @@ void serialInit(EmberEvent* event)
 {
   (void)event;
 
-#ifndef UC_BUILD
-  EmberStatus status;
-  SerialBaudRate baud;
-  baud = ashReadConfigOrDefault(baudRate, ASH_BAUD_RATE);
-#ifndef EMBER_TEST
-  COM_Init_t initData = (COM_Init_t) ASH_COM_INIT;
-  #ifdef ASH_USART
-  initData.uartdrvinit.uartinit.baudRate = baud;
-  #elif defined (ASH_LEUART)
-  initData.uartdrvinit.leuartinit.baudRate = baud;
-  #endif
-  status = COM_Init((COM_Port_t) ashPort, &initData);
-#else
-  status = emberSerialInit(ashPort, baud, PARITY_NONE, 1);
-#endif
-  assert(status == EMBER_SUCCESS);
-#endif
   ashStart();
 }
 
@@ -144,7 +121,7 @@ void serialDebugTrace(void)
 {
   if (ezspBuffer != EMBER_NULL_MESSAGE_BUFFER) {
 #ifndef ZIGBEE_STACK_ON_HOST
-    emDebugBinaryFormat(EM_DEBUG_EZSP, "b", ezspBuffer);
+    sli_zigbee_debug_binary_format(EM_DEBUG_EZSP, "b", ezspBuffer);
 #endif
   }
 }
@@ -178,12 +155,12 @@ void serialSetResponseLength(uint8_t data)
 
 bool serialCallbackResponse(void)
 {
-  Buffer callback = emBufferQueueRemoveHead(&callbackQueue);
+  Buffer callback = sli_legacy_buffer_manager_buffer_queue_remove_head(&callbackQueue);
   uint8_t callbackLength = emberMessageBufferLength(callback);
 
   ezspBuffer = callback;
 
-  if (emSecureEzspIsOn()) {
+  if (sli_zigbee_secure_ezsp_is_on()) {
     emberSetLinkedBuffersLength(ezspBuffer,
                                 emberMessageBufferLength(ezspBuffer)
                                 + SECURE_EZSP_OVERHEAD_LENGTH);

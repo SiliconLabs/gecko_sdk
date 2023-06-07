@@ -9,9 +9,12 @@ description: >
   This component includes only the core functionality. To configure and create
   instances of OTS Object Server, add one of the Object Server components to
   the project: Dynamic, Static or Single.
-category: Bluetooth|Middleware|OTS
-quality: experimental
+category: Bluetooth|Application|GATT Services
+quality: evaluation
 root_path:  app/bluetooth/common/ots
+tag:
+  - Low-Code
+
 source:
   - path: src/sl_bt_ots_server.c
   - path: src/sl_bt_ots_common.c
@@ -43,7 +46,7 @@ provides:
   - name: ots_server_core
 requires:
   - name: power_manager
-  - name: simple_timer
+  - name: app_timer
   - name: bluetooth_stack
   - name: bluetooth_feature_gatt_server
   - name: bluetooth_feature_connection
@@ -53,7 +56,7 @@ requires:
   - name: app_queue
 recommends:
   - id: ots_server_single
-  - id: simple_timer
+  - id: app_timer
 template_file:
   - path: inst/sl_bt_ots_server_instances.c.jinja
   - path: inst/sl_bt_ots_server_instances.h.jinja

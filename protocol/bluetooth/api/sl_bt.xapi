@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<api device_id="4" device_name="bt" version="5.1.2">
+<api device_id="4" device_name="bt" version="6.0.0">
     <datatypes>
         <datatype base="uint16" name="errorcode" length="2"/>
         <datatype base="int16" name="int16" length="2"/>
@@ -26,7 +26,7 @@
         <datatype base="uint8" name="att_opcode" length="1"/>
         <datatype base="uuid_128" name="uuid_128" length="16"/>
         <datatype base="aes_key_128" name="aes_key_128" length="16"/>
-        <datatype base="byte_array" name="cs_sync_random" length="16"/>
+        <datatype base="byte_array" name="cs_subevent_length" length="3"/>
         <datatype base="byte_array" name="drbg_key" length="16"/>
         <datatype base="byte_array" name="cs_channel_map" length="10"/>
         <datatype base="sl_bt_uuid_16_t" name="uuid_16" length="2"/>
@@ -271,6 +271,59 @@
             <enum name="linklayer_config_key_set_report_all_scan_rsps" value="0x14"/>
         </enums>
     </class>
+    <class index="95" name="resource">
+        <command index="0" name="get_status" >
+            <params/>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+                <param datatype="uint32" name="total_bytes" type="uint32"/>
+                <param datatype="uint32" name="free_bytes" type="uint32"/>
+            </returns>
+        </command>
+        <command index="1" name="set_report_threshold" >
+            <params>
+                <param datatype="uint32" name="low" type="uint32"/>
+                <param datatype="uint32" name="high" type="uint32"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="2" name="enable_connection_tx_report" >
+            <params>
+                <param datatype="uint16" name="packet_count" type="uint16"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="3" name="get_connection_tx_status" >
+            <params>
+                <param datatype="connection" name="connection" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+                <param datatype="uint16" name="flags" type="uint16"/>
+                <param datatype="uint16" name="packet_count" type="uint16"/>
+                <param datatype="uint32" name="data_len" type="uint32"/>
+            </returns>
+        </command>
+        <command index="4" name="disable_connection_tx_report" >
+            <params/>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <event index="0" name="status">
+            <params>
+                <param datatype="uint32" name="free_bytes" type="uint32"/>
+            </params>
+        </event>
+        <defines name="connection_tx_flags">
+            <define name="connection_tx_flags_error_packet_overflow" value="0x1"/>
+            <define name="connection_tx_flags_error_corrupt" value="0x2"/>
+        </defines>
+    </class>
     <class index="2" name="gap">
         <command index="1" name="set_privacy_mode" >
             <params>
@@ -311,6 +364,9 @@
             <enum name="static_address" value="0x1"/>
             <enum name="random_resolvable_address" value="0x2"/>
             <enum name="random_nonresolvable_address" value="0x3"/>
+            <enum name="public_address_resolved_from_rpa" value="0x4"/>
+            <enum name="static_address_resolved_from_rpa" value="0x5"/>
+            <enum name="anonymous_address" value="0xff"/>
         </enums>
         <enums name="phy">
             <enum name="phy_1m" value="0x1"/>
@@ -530,6 +586,8 @@
         <defines name="flags">
             <define name="use_nonresolvable_address" value="0x4"/>
             <define name="use_device_identity_in_privacy" value="0x10"/>
+            <define name="use_filter_for_scan_requests" value="0x20"/>
+            <define name="use_filter_for_connection_requests" value="0x40"/>
         </defines>
     </class>
     <class index="86" name="legacy_advertiser">
@@ -710,6 +768,18 @@
                 <param datatype="errorcode" name="result" type="uint16"/>
             </returns>
         </command>
+        <command index="7" name="set_parameters_and_filter" >
+            <params>
+                <param datatype="uint8" name="mode" type="uint8"/>
+                <param datatype="uint16" name="interval" type="uint16"/>
+                <param datatype="uint16" name="window" type="uint16"/>
+                <param datatype="uint32" name="flags" type="uint32"/>
+                <param datatype="uint8" name="filter_policy" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
         <command index="5" name="stop" >
             <params/>
             <returns>
@@ -812,6 +882,12 @@
             <enum name="data_status_incomplete_more" value="0x1"/>
             <enum name="data_status_incomplete_nomore" value="0x2"/>
         </enums>
+        <enums name="filter_policy">
+            <enum name="filter_policy_basic_unfiltered" value="0x0"/>
+            <enum name="filter_policy_basic_filtered" value="0x1"/>
+            <enum name="filter_policy_extended_unfiltered" value="0x2"/>
+            <enum name="filter_policy_extended_filtered" value="0x3"/>
+        </enums>
         <defines name="event_flag">
             <define name="event_flag_connectable" value="0x1"/>
             <define name="event_flag_scannable" value="0x2"/>
@@ -845,6 +921,16 @@
             <params>
                 <param datatype="uint16" name="sync" type="uint16"/>
                 <param datatype="uint8" name="reporting_mode" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="4" name="update_sync_parameters" >
+            <params>
+                <param datatype="uint16" name="sync" type="uint16"/>
+                <param datatype="uint16" name="skip" type="uint16"/>
+                <param datatype="uint16" name="timeout" type="uint16"/>
             </params>
             <returns>
                 <param datatype="errorcode" name="result" type="uint16"/>
@@ -915,6 +1001,29 @@
             <enum name="clock_accuracy_20" value="0x14"/>
         </enums>
     </class>
+    <class index="80" name="sync_scanner">
+        <command index="0" name="set_sync_parameters" >
+            <params>
+                <param datatype="uint16" name="skip" type="uint16"/>
+                <param datatype="uint16" name="timeout" type="uint16"/>
+                <param datatype="uint8" name="reporting_mode" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="1" name="open" >
+            <params>
+                <param datatype="bd_addr" name="address" type="bd_addr"/>
+                <param datatype="uint8" name="address_type" type="uint8"/>
+                <param datatype="uint8" name="adv_sid" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+                <param datatype="uint16" name="sync" type="uint16"/>
+            </returns>
+        </command>
+    </class>
     <class index="81" name="past_receiver">
         <command index="0" name="set_default_sync_receive_parameters" >
             <params>
@@ -968,6 +1077,194 @@
             </returns>
         </command>
     </class>
+    <class index="83" name="periodic_sync">
+        <event index="0" name="opened">
+            <params>
+                <param datatype="uint16" name="sync" type="uint16"/>
+                <param datatype="uint8" name="adv_sid" type="uint8"/>
+                <param datatype="bd_addr" name="address" type="bd_addr"/>
+                <param datatype="uint8" name="address_type" type="uint8"/>
+                <param datatype="uint8" name="adv_phy" type="uint8"/>
+                <param datatype="uint16" name="adv_interval" type="uint16"/>
+                <param datatype="uint16" name="clock_accuracy" type="uint16"/>
+                <param datatype="uint8" name="bonding" type="uint8"/>
+            </params>
+        </event>
+        <event index="1" name="transfer_received">
+            <params>
+                <param datatype="errorcode" name="status" type="uint16"/>
+                <param datatype="uint16" name="sync" type="uint16"/>
+                <param datatype="uint16" name="service_data" type="uint16"/>
+                <param datatype="uint8" name="connection" type="uint8"/>
+                <param datatype="uint8" name="adv_sid" type="uint8"/>
+                <param datatype="bd_addr" name="address" type="bd_addr"/>
+                <param datatype="uint8" name="address_type" type="uint8"/>
+                <param datatype="uint8" name="adv_phy" type="uint8"/>
+                <param datatype="uint16" name="adv_interval" type="uint16"/>
+                <param datatype="uint16" name="clock_accuracy" type="uint16"/>
+                <param datatype="uint8" name="bonding" type="uint8"/>
+            </params>
+        </event>
+        <event index="2" name="report">
+            <params>
+                <param datatype="uint16" name="sync" type="uint16"/>
+                <param datatype="int8" name="tx_power" type="int8"/>
+                <param datatype="dbm" name="rssi" type="int8"/>
+                <param datatype="uint8" name="cte_type" type="uint8"/>
+                <param datatype="uint8" name="data_status" type="uint8"/>
+                <param datatype="uint8" name="counter" type="uint8"/>
+                <param datatype="uint8array" name="data" type="uint8array"/>
+            </params>
+        </event>
+    </class>
+    <class index="84" name="pawr_sync">
+        <command index="2" name="set_sync_subevents" >
+            <params>
+                <param datatype="uint16" name="sync" type="uint16"/>
+                <param datatype="uint8array" name="subevents" type="uint8array"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="3" name="set_response_data" >
+            <params>
+                <param datatype="uint16" name="sync" type="uint16"/>
+                <param datatype="uint16" name="request_event" type="uint16"/>
+                <param datatype="uint8" name="request_subevent" type="uint8"/>
+                <param datatype="uint8" name="response_subevent" type="uint8"/>
+                <param datatype="uint8" name="response_slot" type="uint8"/>
+                <param datatype="uint8array" name="response_data" type="uint8array"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <event index="0" name="opened">
+            <params>
+                <param datatype="uint16" name="sync" type="uint16"/>
+                <param datatype="uint8" name="adv_sid" type="uint8"/>
+                <param datatype="bd_addr" name="address" type="bd_addr"/>
+                <param datatype="uint8" name="address_type" type="uint8"/>
+                <param datatype="uint8" name="adv_phy" type="uint8"/>
+                <param datatype="uint16" name="adv_interval" type="uint16"/>
+                <param datatype="uint16" name="clock_accuracy" type="uint16"/>
+                <param datatype="uint8" name="num_subevents" type="uint8"/>
+                <param datatype="uint8" name="subevent_interval" type="uint8"/>
+                <param datatype="uint8" name="response_slot_delay" type="uint8"/>
+                <param datatype="uint8" name="response_slot_spacing" type="uint8"/>
+                <param datatype="uint8" name="bonding" type="uint8"/>
+            </params>
+        </event>
+        <event index="1" name="transfer_received">
+            <params>
+                <param datatype="errorcode" name="status" type="uint16"/>
+                <param datatype="uint16" name="sync" type="uint16"/>
+                <param datatype="uint16" name="service_data" type="uint16"/>
+                <param datatype="uint8" name="connection" type="uint8"/>
+                <param datatype="uint8" name="adv_sid" type="uint8"/>
+                <param datatype="bd_addr" name="address" type="bd_addr"/>
+                <param datatype="uint8" name="address_type" type="uint8"/>
+                <param datatype="uint8" name="adv_phy" type="uint8"/>
+                <param datatype="uint16" name="adv_interval" type="uint16"/>
+                <param datatype="uint16" name="clock_accuracy" type="uint16"/>
+                <param datatype="uint8" name="num_subevents" type="uint8"/>
+                <param datatype="uint8" name="subevent_interval" type="uint8"/>
+                <param datatype="uint8" name="response_slot_delay" type="uint8"/>
+                <param datatype="uint8" name="response_slot_spacing" type="uint8"/>
+                <param datatype="uint8" name="bonding" type="uint8"/>
+            </params>
+        </event>
+        <event index="2" name="subevent_report">
+            <params>
+                <param datatype="uint16" name="sync" type="uint16"/>
+                <param datatype="int8" name="tx_power" type="int8"/>
+                <param datatype="dbm" name="rssi" type="int8"/>
+                <param datatype="uint8" name="cte_type" type="uint8"/>
+                <param datatype="uint16" name="event_counter" type="uint16"/>
+                <param datatype="uint8" name="subevent" type="uint8"/>
+                <param datatype="uint8" name="data_status" type="uint8"/>
+                <param datatype="uint8" name="counter" type="uint8"/>
+                <param datatype="uint8array" name="data" type="uint8array"/>
+            </params>
+        </event>
+    </class>
+    <class index="85" name="pawr_advertiser">
+        <command index="0" name="start" >
+            <params>
+                <param datatype="uint8" name="advertising_set" type="uint8"/>
+                <param datatype="uint16" name="interval_min" type="uint16"/>
+                <param datatype="uint16" name="interval_max" type="uint16"/>
+                <param datatype="uint32" name="flags" type="uint32"/>
+                <param datatype="uint8" name="num_subevents" type="uint8"/>
+                <param datatype="uint8" name="subevent_interval" type="uint8"/>
+                <param datatype="uint8" name="response_slot_delay" type="uint8"/>
+                <param datatype="uint8" name="response_slot_spacing" type="uint8"/>
+                <param datatype="uint8" name="response_slots" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="1" name="set_subevent_data" >
+            <params>
+                <param datatype="uint8" name="advertising_set" type="uint8"/>
+                <param datatype="uint8" name="subevent" type="uint8"/>
+                <param datatype="uint8" name="response_slot_start" type="uint8"/>
+                <param datatype="uint8" name="response_slot_count" type="uint8"/>
+                <param datatype="uint8array" name="adv_data" type="uint8array"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="2" name="create_connection" >
+            <params>
+                <param datatype="uint8" name="advertising_set" type="uint8"/>
+                <param datatype="uint8" name="subevent" type="uint8"/>
+                <param datatype="bd_addr" name="address" type="bd_addr"/>
+                <param datatype="uint8" name="address_type" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+                <param datatype="connection" name="connection" type="uint8"/>
+            </returns>
+        </command>
+        <command index="3" name="stop" >
+            <params>
+                <param datatype="uint8" name="advertising_set" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <event index="0" name="subevent_data_request">
+            <params>
+                <param datatype="uint8" name="advertising_set" type="uint8"/>
+                <param datatype="uint8" name="subevent_start" type="uint8"/>
+                <param datatype="uint8" name="subevent_data_count" type="uint8"/>
+            </params>
+        </event>
+        <event index="2" name="subevent_tx_failed">
+            <params>
+                <param datatype="uint8" name="advertising_set" type="uint8"/>
+                <param datatype="uint8" name="subevent" type="uint8"/>
+            </params>
+        </event>
+        <event index="1" name="response_report">
+            <params>
+                <param datatype="uint8" name="advertising_set" type="uint8"/>
+                <param datatype="uint8" name="subevent" type="uint8"/>
+                <param datatype="int8" name="tx_power" type="int8"/>
+                <param datatype="dbm" name="rssi" type="int8"/>
+                <param datatype="uint8" name="cte_type" type="uint8"/>
+                <param datatype="uint8" name="response_slot" type="uint8"/>
+                <param datatype="uint8" name="data_status" type="uint8"/>
+                <param datatype="uint8" name="counter" type="uint8"/>
+                <param datatype="uint8array" name="data" type="uint8array"/>
+            </params>
+        </event>
+    </class>
     <class index="6" name="connection">
         <command index="0" name="set_default_parameters" >
             <params>
@@ -986,6 +1283,14 @@
             <params>
                 <param datatype="uint8" name="preferred_phy" type="uint8"/>
                 <param datatype="uint8" name="accepted_phy" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="16" name="set_default_data_length" >
+            <params>
+                <param datatype="uint16" name="tx_data_len" type="uint16"/>
             </params>
             <returns>
                 <param datatype="errorcode" name="result" type="uint16"/>
@@ -1090,14 +1395,6 @@
                 <param datatype="errorcode" name="result" type="uint16"/>
             </returns>
         </command>
-        <command index="5" name="close" >
-            <params>
-                <param datatype="uint8" name="connection" type="uint8"/>
-            </params>
-            <returns>
-                <param datatype="errorcode" name="result" type="uint16"/>
-            </returns>
-        </command>
         <command index="13" name="read_remote_used_features" >
             <params>
                 <param datatype="uint8" name="connection" type="uint8"/>
@@ -1117,6 +1414,32 @@
                 <param datatype="uint8" name="bonding_handle" type="uint8"/>
             </returns>
         </command>
+        <command index="17" name="set_data_length" >
+            <params>
+                <param datatype="uint8" name="connection" type="uint8"/>
+                <param datatype="uint16" name="tx_data_len" type="uint16"/>
+                <param datatype="uint16" name="tx_time_us" type="uint16"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="5" name="close" >
+            <params>
+                <param datatype="uint8" name="connection" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="15" name="forcefully_close" >
+            <params>
+                <param datatype="uint8" name="connection" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
         <event index="0" name="opened">
             <params>
                 <param datatype="bd_addr" name="address" type="bd_addr"/>
@@ -1125,6 +1448,7 @@
                 <param datatype="uint8" name="connection" type="uint8"/>
                 <param datatype="uint8" name="bonding" type="uint8"/>
                 <param datatype="uint8" name="advertiser" type="uint8"/>
+                <param datatype="uint16" name="sync" type="uint16"/>
             </params>
         </event>
         <event index="2" name="parameters">
@@ -1178,16 +1502,25 @@
                 <param datatype="int8" name="delta" type="int8"/>
             </params>
         </event>
-        <event index="1" name="closed">
-            <params>
-                <param datatype="errorcode" name="reason" type="uint16"/>
-                <param datatype="uint8" name="connection" type="uint8"/>
-            </params>
-        </event>
         <event index="8" name="remote_used_features">
             <params>
                 <param datatype="uint8" name="connection" type="uint8"/>
                 <param datatype="uint8array" name="features" type="uint8array"/>
+            </params>
+        </event>
+        <event index="9" name="data_length">
+            <params>
+                <param datatype="uint8" name="connection" type="uint8"/>
+                <param datatype="uint16" name="tx_data_len" type="uint16"/>
+                <param datatype="uint16" name="tx_time_us" type="uint16"/>
+                <param datatype="uint16" name="rx_data_len" type="uint16"/>
+                <param datatype="uint16" name="rx_time_us" type="uint16"/>
+            </params>
+        </event>
+        <event index="1" name="closed">
+            <params>
+                <param datatype="errorcode" name="reason" type="uint16"/>
+                <param datatype="uint8" name="connection" type="uint8"/>
             </params>
         </event>
         <enums name="security">
@@ -1270,6 +1603,16 @@
             <params>
                 <param datatype="connection" name="connection" type="uint8"/>
                 <param datatype="characteristic" name="characteristic" type="uint16"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="20" name="discover_characteristic_descriptors" >
+            <params>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="characteristic" name="start" type="uint16"/>
+                <param datatype="characteristic" name="end" type="uint16"/>
             </params>
             <returns>
                 <param datatype="errorcode" name="result" type="uint16"/>
@@ -1740,17 +2083,6 @@
                 <param datatype="characteristic" name="attribute" type="uint16"/>
             </returns>
         </command>
-        <command index="9" name="find_primary_service" >
-            <params>
-                <param datatype="uint16" name="start" type="uint16"/>
-                <param datatype="uint8array" name="uuid" type="uint8array"/>
-            </params>
-            <returns>
-                <param datatype="errorcode" name="result" type="uint16"/>
-                <param datatype="uint16" name="start_out" type="uint16"/>
-                <param datatype="uint16" name="end_out" type="uint16"/>
-            </returns>
-        </command>
         <command index="0" name="read_attribute_value" >
             <params>
                 <param datatype="characteristic" name="attribute" type="uint16"/>
@@ -1940,6 +2272,12 @@
                 <param datatype="connection" name="connection" type="uint8"/>
             </params>
         </event>
+        <event index="6" name="notification_tx_completed">
+            <params>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="uint8" name="count" type="uint8"/>
+            </params>
+        </event>
         <enums name="client_configuration">
             <enum name="disable" value="0x0"/>
             <enum name="notification" value="0x1"/>
@@ -2027,35 +2365,10 @@
                 <param datatype="errorcode" name="result" type="uint16"/>
             </returns>
         </command>
-        <command index="7" name="debug_command" >
-            <params>
-                <param datatype="uint8" name="id" type="uint8"/>
-                <param datatype="uint8array" name="debugdata" type="uint8array"/>
-            </params>
-            <returns>
-                <param datatype="errorcode" name="result" type="uint16"/>
-                <param datatype="uint8" name="id_out" type="uint8"/>
-                <param datatype="uint8array" name="debugdata_out" type="uint8array"/>
-            </returns>
-        </command>
-        <command index="12" name="debug_counter" >
-            <params>
-                <param datatype="uint32" name="id" type="uint32"/>
-            </params>
-            <returns>
-                <param datatype="errorcode" name="result" type="uint16"/>
-                <param datatype="uint32" name="value" type="uint32"/>
-            </returns>
-        </command>
         <event index="0" name="dtm_completed">
             <params>
                 <param datatype="errorcode" name="result" type="uint16"/>
                 <param datatype="uint16" name="number_of_packets" type="uint16"/>
-            </params>
-        </event>
-        <event index="1" name="debug_event">
-            <params>
-                <param datatype="uint8array" name="data" type="uint8array"/>
             </params>
         </event>
         <enums name="packet_type">
@@ -2333,6 +2646,7 @@
             <define name="configuration_connections_from_bonded_devices_only" value="0x10"/>
             <define name="configuration_prefer_mitm" value="0x20"/>
             <define name="configuration_oob_from_both_devices_required" value="0x40"/>
+            <define name="configuration_reject_debug_keys" value="0x80"/>
         </defines>
     </class>
     <class index="92" name="external_bondingdb">
@@ -2377,6 +2691,97 @@
             <enum name="data_gatt_client_features" value="0x9"/>
             <enum name="data_gatt_db_hash" value="0xa"/>
         </enums>
+    </class>
+    <class index="93" name="resolving_list">
+        <command index="0" name="add_device_by_bonding" >
+            <params>
+                <param datatype="uint32" name="bonding" type="uint32"/>
+                <param datatype="uint8" name="privacy_mode" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="1" name="add_device_by_address" >
+            <params>
+                <param datatype="bd_addr" name="address" type="bd_addr"/>
+                <param datatype="uint8" name="address_type" type="uint8"/>
+                <param datatype="aes_key_128" name="key" type="aes_key_128"/>
+                <param datatype="uint8" name="privacy_mode" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="2" name="remove_device_by_bonding" >
+            <params>
+                <param datatype="uint32" name="bonding" type="uint32"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="3" name="remove_device_by_address" >
+            <params>
+                <param datatype="bd_addr" name="address" type="bd_addr"/>
+                <param datatype="uint8" name="address_type" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="4" name="remove_all_devices" >
+            <params/>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <enums name="privacy_mode">
+            <enum name="privacy_mode_network" value="0x0"/>
+            <enum name="privacy_mode_device" value="0x1"/>
+        </enums>
+    </class>
+    <class index="94" name="accept_list">
+        <command index="0" name="add_device_by_bonding" >
+            <params>
+                <param datatype="uint32" name="bonding" type="uint32"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="1" name="add_device_by_address" >
+            <params>
+                <param datatype="bd_addr" name="address" type="bd_addr"/>
+                <param datatype="uint8" name="address_type" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="2" name="remove_device_by_bonding" >
+            <params>
+                <param datatype="uint32" name="bonding" type="uint32"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="3" name="remove_device_by_address" >
+            <params>
+                <param datatype="bd_addr" name="address" type="bd_addr"/>
+                <param datatype="uint8" name="address_type" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="4" name="remove_all_devices" >
+            <params/>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
     </class>
     <class index="16" name="ota">
         <command index="1" name="set_device_name" >
@@ -2468,6 +2873,261 @@
             <enum name="option_high_priority" value="0x800"/>
         </enums>
     </class>
+    <class index="89" name="cs">
+        <command index="0" name="security_enable" >
+            <params>
+                <param datatype="connection" name="connection" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="1" name="set_default_settings" >
+            <params>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="uint8" name="initiator_status" type="uint8"/>
+                <param datatype="uint8" name="reflector_status" type="uint8"/>
+                <param datatype="uint8" name="antenna_identifier" type="uint8"/>
+                <param datatype="int8" name="max_tx_power" type="int8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="2" name="create_config" >
+            <params>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="uint8" name="config_id" type="uint8"/>
+                <param datatype="uint8" name="create_context" type="uint8"/>
+                <param datatype="uint8" name="main_mode_type" type="uint8"/>
+                <param datatype="uint8" name="sub_mode_type" type="uint8"/>
+                <param datatype="uint8" name="min_main_mode_steps" type="uint8"/>
+                <param datatype="uint8" name="max_main_mode_steps" type="uint8"/>
+                <param datatype="uint8" name="main_mode_repetition" type="uint8"/>
+                <param datatype="uint8" name="mode_calibration_steps" type="uint8"/>
+                <param datatype="uint8" name="role" type="uint8"/>
+                <param datatype="uint8" name="rtt_type" type="uint8"/>
+                <param datatype="uint8" name="cs_sync_phy" type="uint8"/>
+                <param datatype="cs_channel_map" name="channel_map" type="byte_array"/>
+                <param datatype="uint8" name="channel_map_repetition" type="uint8"/>
+                <param datatype="uint8" name="channel_selection_type" type="uint8"/>
+                <param datatype="uint8" name="ch3c_shape" type="uint8"/>
+                <param datatype="uint8" name="ch3c_jump" type="uint8"/>
+                <param datatype="uint8" name="companion_signal_state" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="3" name="remove_config" >
+            <params>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="uint8" name="config_id" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="4" name="set_channel_classification" >
+            <params>
+                <param datatype="cs_channel_map" name="channel_map" type="byte_array"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="5" name="set_procedure_parameters" >
+            <params>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="uint8" name="config_id" type="uint8"/>
+                <param datatype="uint16" name="max_procedure_len" type="uint16"/>
+                <param datatype="uint16" name="min_procedure_interval" type="uint16"/>
+                <param datatype="uint16" name="max_procedure_interval" type="uint16"/>
+                <param datatype="uint16" name="max_procedure_count" type="uint16"/>
+                <param datatype="uint32" name="min_subevent_len" type="uint32"/>
+                <param datatype="uint32" name="max_subevent_len" type="uint32"/>
+                <param datatype="uint8" name="tone_antenna_config_selection" type="uint8"/>
+                <param datatype="uint8" name="phy" type="uint8"/>
+                <param datatype="int8" name="tx_pwr_delta" type="int8"/>
+                <param datatype="uint8" name="preferred_peer_antenna" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="6" name="procedure_enable" >
+            <params>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="uint8" name="enable" type="uint8"/>
+                <param datatype="uint8" name="config_id" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="7" name="set_antenna_configuration" >
+            <params>
+                <param datatype="uint8array" name="antenna_element_offset" type="uint8array"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <event index="0" name="security_enable_complete">
+            <params>
+                <param datatype="connection" name="connection" type="uint8"/>
+            </params>
+        </event>
+        <event index="1" name="config_complete">
+            <params>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="uint8" name="config_id" type="uint8"/>
+                <param datatype="errorcode" name="status" type="uint16"/>
+                <param datatype="uint8" name="config_state" type="uint8"/>
+                <param datatype="uint8" name="main_mode_type" type="uint8"/>
+                <param datatype="uint8" name="sub_mode_type" type="uint8"/>
+                <param datatype="uint8" name="min_main_mode_steps" type="uint8"/>
+                <param datatype="uint8" name="max_main_mode_steps" type="uint8"/>
+                <param datatype="uint8" name="main_mode_repetition" type="uint8"/>
+                <param datatype="uint8" name="mode_calibration_steps" type="uint8"/>
+                <param datatype="uint8" name="role" type="uint8"/>
+                <param datatype="uint8" name="rtt_type" type="uint8"/>
+                <param datatype="uint8" name="cs_sync_phy" type="uint8"/>
+                <param datatype="cs_channel_map" name="channel_map" type="byte_array"/>
+                <param datatype="uint8" name="channel_map_repetition" type="uint8"/>
+                <param datatype="uint8" name="channel_selection_type" type="uint8"/>
+                <param datatype="uint8" name="ch3c_shape" type="uint8"/>
+                <param datatype="uint8" name="ch3c_jump" type="uint8"/>
+                <param datatype="uint8" name="companion_signal_enable" type="uint8"/>
+            </params>
+        </event>
+        <event index="2" name="procedure_enable_complete">
+            <params>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="uint8" name="config_id" type="uint8"/>
+                <param datatype="errorcode" name="status" type="uint16"/>
+                <param datatype="uint8" name="state" type="uint8"/>
+                <param datatype="uint8" name="antenna_config" type="uint8"/>
+                <param datatype="int8" name="tx_power" type="int8"/>
+                <param datatype="uint32" name="subevent_len" type="uint32"/>
+                <param datatype="uint8" name="subevents_per_interval" type="uint8"/>
+                <param datatype="uint16" name="subevent_interval" type="uint16"/>
+                <param datatype="uint16" name="event_interval" type="uint16"/>
+                <param datatype="uint16" name="procedure_interval" type="uint16"/>
+                <param datatype="uint16" name="procedure_count" type="uint16"/>
+            </params>
+        </event>
+        <event index="3" name="result">
+            <params>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="uint8" name="config_id" type="uint8"/>
+                <param datatype="uint16" name="start_acl_conn_event" type="uint16"/>
+                <param datatype="uint16" name="procedure_counter" type="uint16"/>
+                <param datatype="int16" name="frequency_compensation" type="int16"/>
+                <param datatype="uint8" name="procedure_done_status" type="uint8"/>
+                <param datatype="uint8" name="subevent_done_status" type="uint8"/>
+                <param datatype="uint8" name="abort_reason" type="uint8"/>
+                <param datatype="int8" name="reference_power_level" type="int8"/>
+                <param datatype="uint8" name="num_antenna_paths" type="uint8"/>
+                <param datatype="uint8" name="num_steps" type="uint8"/>
+                <param datatype="uint8array" name="data" type="uint8array"/>
+            </params>
+        </event>
+        <enums name="role">
+            <enum name="role_initiator" value="0x0"/>
+            <enum name="role_reflector" value="0x1"/>
+        </enums>
+        <enums name="role_status">
+            <enum name="role_status_disable" value="0x0"/>
+            <enum name="role_status_enable" value="0x1"/>
+        </enums>
+        <enums name="companion_signal_status">
+            <enum name="companion_signal_status_disable" value="0x0"/>
+            <enum name="companion_signal_status_enable" value="0x1"/>
+        </enums>
+        <enums name="procedure_state">
+            <enum name="procedure_state_disabled" value="0x0"/>
+            <enum name="procedure_state_enabled" value="0x1"/>
+        </enums>
+        <enums name="mode">
+            <enum name="mode_calibration" value="0x0"/>
+            <enum name="mode_rtt" value="0x1"/>
+            <enum name="mode_pbr" value="0x2"/>
+            <enum name="mode_pbr_and_rtt" value="0x3"/>
+        </enums>
+        <enums name="rtt_type">
+            <enum name="rtt_type_coarse" value="0x0"/>
+            <enum name="rtt_type_fractional_96_bit_sounding" value="0x2"/>
+        </enums>
+        <enums name="channel_selection_algorithm">
+            <enum name="channel_selection_algorithm_3b" value="0x0"/>
+            <enum name="channel_selection_algorithm_3c" value="0x1"/>
+            <enum name="channel_selection_algorithm_user_shape_interleaved" value="0x2"/>
+        </enums>
+        <enums name="ch3c_shape">
+            <enum name="ch3c_shape_hat" value="0x0"/>
+            <enum name="chc3_shape_interleaved" value="0x1"/>
+        </enums>
+        <enums name="done_status">
+            <enum name="done_status_complete" value="0x0"/>
+            <enum name="done_status_partial_results_continue" value="0x1"/>
+            <enum name="done_status_current_aborted" value="0xfe"/>
+            <enum name="done_status_all_aborted" value="0xff"/>
+        </enums>
+        <enums name="abort_reason">
+            <enum name="abort_reason_no_abort" value="0x0"/>
+            <enum name="abort_reason_host_request" value="0x1"/>
+            <enum name="abort_reason_insufficient_channels" value="0x2"/>
+            <enum name="abort_reason_no_map_update" value="0x3"/>
+            <enum name="abort_reason_unspecified" value="0xf"/>
+        </enums>
+        <enums name="config_state">
+            <enum name="config_state_removed" value="0x0"/>
+            <enum name="config_state_created" value="0x1"/>
+        </enums>
+    </class>
+    <class index="90" name="cs_test">
+        <command index="0" name="start" >
+            <params>
+                <param datatype="uint8" name="main_mode_type" type="uint8"/>
+                <param datatype="uint8" name="sub_mode_type" type="uint8"/>
+                <param datatype="uint8" name="main_mode_repetition" type="uint8"/>
+                <param datatype="uint8" name="mode_calibration_steps" type="uint8"/>
+                <param datatype="uint8" name="role" type="uint8"/>
+                <param datatype="uint8" name="rtt_type" type="uint8"/>
+                <param datatype="uint8" name="cs_sync_phy" type="uint8"/>
+                <param datatype="uint8" name="antenna_selection" type="uint8"/>
+                <param datatype="cs_subevent_length" name="subevent_len" type="byte_array"/>
+                <param datatype="uint16" name="subevent_interval" type="uint16"/>
+                <param datatype="int8" name="tx_power" type="int8"/>
+                <param datatype="uint8" name="t_ip1_time" type="uint8"/>
+                <param datatype="uint8" name="t_ip2_time" type="uint8"/>
+                <param datatype="uint8" name="t_fcs_time" type="uint8"/>
+                <param datatype="uint8" name="t_pm_time" type="uint8"/>
+                <param datatype="uint8" name="t_sw_time" type="uint8"/>
+                <param datatype="uint8" name="tone_antenna_config" type="uint8"/>
+                <param datatype="uint8" name="companion_signal_state" type="uint8"/>
+                <param datatype="uint16" name="drbg_nonce" type="uint16"/>
+                <param datatype="uint16" name="override_config" type="uint16"/>
+                <param datatype="uint8array" name="override_parameters" type="uint8array"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <enums name="tone_extension">
+            <enum name="tone_extension_both_without" value="0x0"/>
+            <enum name="tone_extension_reflector_without" value="0x1"/>
+            <enum name="tone_extension_initiator_without" value="0x2"/>
+            <enum name="tone_extension_both_with" value="0x3"/>
+            <enum name="tone_extension_round_robin" value="0x4"/>
+        </enums>
+        <enums name="sounding_sequence_marker">
+            <enum name="sounding_sequence_marker_1" value="0x0"/>
+            <enum name="sounding_sequence_marker_2" value="0x1"/>
+            <enum name="sounding_sequence_marker_round_robin" value="0x2"/>
+        </enums>
+    </class>
     <class index="67" name="l2cap">
         <command index="1" name="open_le_channel" >
             <params>
@@ -2532,6 +3192,7 @@
                 <param datatype="uint16" name="max_sdu" type="uint16"/>
                 <param datatype="uint16" name="max_pdu" type="uint16"/>
                 <param datatype="uint16" name="credit" type="uint16"/>
+                <param datatype="uint16" name="remote_cid" type="uint16"/>
             </params>
         </event>
         <event index="2" name="le_channel_open_response">
@@ -2542,6 +3203,7 @@
                 <param datatype="uint16" name="max_pdu" type="uint16"/>
                 <param datatype="uint16" name="credit" type="uint16"/>
                 <param datatype="uint16" name="errorcode" type="uint16"/>
+                <param datatype="uint16" name="remote_cid" type="uint16"/>
             </params>
         </event>
         <event index="3" name="channel_data">

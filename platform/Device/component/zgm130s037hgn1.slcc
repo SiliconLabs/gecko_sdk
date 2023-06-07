@@ -9,10 +9,10 @@
     unless:
     - device_content_override
 - source:
-  - path: platform/Device/SiliconLabs/ZGM13/Source/system_zgm13.c
+  - path: platform/Device/SiliconLabs/ZGM13/Source/startup_zgm13.c
     unless:
     - device_content_override
-  - path: platform/Device/SiliconLabs/ZGM13/Source/startup_zgm13.c
+  - path: platform/Device/SiliconLabs/ZGM13/Source/system_zgm13.c
     unless:
     - device_content_override
 - include:

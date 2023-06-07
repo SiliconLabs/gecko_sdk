@@ -58,7 +58,7 @@ enum {
  * @param[in]   debugType       the debug message type
  * @param[in]   formatString    SL-style format string
  */
-void emDebugBinaryFormat(sl_iostream_swo_itm_8_msg_type_t debugType, const char *formatString, ...);
+void sli_zigbee_debug_binary_format(sl_iostream_swo_itm_8_msg_type_t debugType, const char *formatString, ...);
 
 /**
  * @brief Wrapper for sl_iostream_printf using the debug handle
@@ -74,7 +74,7 @@ void sl_debug_printf(const char *formatString, ...);
  *
  * @param[in]
  */
-void emDebugResetInfo(void);
+void sli_zigbee_debug_reset_info(void);
 
 /**
  * @brief Reads flash memory and prints memory dump on the debug channel
@@ -83,9 +83,9 @@ void emDebugResetInfo(void);
  * @param[in]   start           Memory start address rounded down to nearest 64 byte boundary
  * @param[in]   end             Memory end address
  */
-void emDebugMemoryDump(uint16_t debugType, uint8_t *start, uint8_t *end);
+void sli_zigbee_debug_memory_dump(uint16_t debugType, uint8_t *start, uint8_t *end);
 
-void emDebugApiTrace(uint16_t debugType, const char * formatString, ...);
+void sli_zigbee_debug_api_trace(uint16_t debugType, const char * formatString, ...);
 
 /**
  * @}
@@ -96,9 +96,9 @@ void emDebugApiTrace(uint16_t debugType, const char * formatString, ...);
 void        sli_debug_start_message(sl_iostream_swo_itm_8_msg_type_t debugType, uint8_t *buffer, size_t bufferSize);
 sl_status_t sli_debug_put_bytes(uint8_t unusedFlushVar, uint8_t *bytes, size_t count);
 sl_status_t sli_debug_end_message(void);
-void        emDebugInternalBinaryPrintf(sl_iostream_swo_itm_8_msg_type_t debugType,
-                                        const char *                     formatString,
-                                        va_list                          args);
+void        sli_zigbee_debug_internal_binary_printf(sl_iostream_swo_itm_8_msg_type_t debugType,
+                                                    const char *                     formatString,
+                                                    va_list                          args);
 
 enum {
   EM_DEBUG_SET_BINDING = 0x00,   // Set binding function call.
@@ -140,492 +140,492 @@ enum {
 
 #define EXEC_AND_ASSERT_IF_DEBUG(foo) assert(foo)
 
-#define API_TRACE_SET_BINDING(index)    \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,   \
-                  "BB",                 \
-                  EM_DEBUG_SET_BINDING, \
-                  (index)               \
-                  )
-#define API_TRACE_DELETE_BINDING(index)    \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,      \
-                  "BB",                    \
-                  EM_DEBUG_DELETE_BINDING, \
-                  (index)                  \
-                  )
-#define API_TRACE_CLEAR_BINDING_TABLE( )       \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,          \
-                  "B",                         \
-                  EM_DEBUG_CLEAR_BINDING_TABLE \
-                  )
+#define API_TRACE_SET_BINDING(index)               \
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,   \
+                             "BB",                 \
+                             EM_DEBUG_SET_BINDING, \
+                             (index)               \
+                             )
+#define API_TRACE_DELETE_BINDING(index)               \
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,      \
+                             "BB",                    \
+                             EM_DEBUG_DELETE_BINDING, \
+                             (index)                  \
+                             )
+#define API_TRACE_CLEAR_BINDING_TABLE( )                  \
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,          \
+                             "B",                         \
+                             EM_DEBUG_CLEAR_BINDING_TABLE \
+                             )
 #define API_TRACE_SEND_LIMITED_MULTICAST(groupId, profileId, clusterId, sourceEndpoint, destinationEndpoint, options, radius, nonmemberRadius) \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,                                                                                                          \
-                  "BWWBBBWBB",                                                                                                                 \
-                  EM_DEBUG_SEND_LIMITED_MULTICAST,                                                                                             \
-                  (groupId),                                                                                                                   \
-                  (profileId),                                                                                                                 \
-                  (clusterId),                                                                                                                 \
-                  (sourceEndpoint),                                                                                                            \
-                  (destinationEndpoint),                                                                                                       \
-                  (options),                                                                                                                   \
-                  (radius),                                                                                                                    \
-                  (nonmemberRadius)                                                                                                            \
-                  )
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,                                                                                               \
+                             "BWWBBBWBB",                                                                                                      \
+                             EM_DEBUG_SEND_LIMITED_MULTICAST,                                                                                  \
+                             (groupId),                                                                                                        \
+                             (profileId),                                                                                                      \
+                             (clusterId),                                                                                                      \
+                             (sourceEndpoint),                                                                                                 \
+                             (destinationEndpoint),                                                                                            \
+                             (options),                                                                                                        \
+                             (radius),                                                                                                         \
+                             (nonmemberRadius)                                                                                                 \
+                             )
 #define API_TRACE_SEND_UNICAST(indexOrDestination, profileId, clusterId, sourceEndpoint, destinationEndpoint, options) \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,                                                                                  \
-                  "BWWWBBW",                                                                                           \
-                  EM_DEBUG_SEND_UNICAST,                                                                               \
-                  (indexOrDestination),                                                                                \
-                  (profileId),                                                                                         \
-                  (clusterId),                                                                                         \
-                  (sourceEndpoint),                                                                                    \
-                  (destinationEndpoint),                                                                               \
-                  (options)                                                                                            \
-                  )
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,                                                                       \
+                             "BWWWBBW",                                                                                \
+                             EM_DEBUG_SEND_UNICAST,                                                                    \
+                             (indexOrDestination),                                                                     \
+                             (profileId),                                                                              \
+                             (clusterId),                                                                              \
+                             (sourceEndpoint),                                                                         \
+                             (destinationEndpoint),                                                                    \
+                             (options)                                                                                 \
+                             )
 #define API_TRACE_SEND_BROADCAST(destination, profileId, clusterId, sourceEndpoint, destinationEndpoint, options, radius) \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,                                                                                     \
-                  "BWWWBBWB",                                                                                             \
-                  EM_DEBUG_SEND_BROADCAST,                                                                                \
-                  (destination),                                                                                          \
-                  (profileId),                                                                                            \
-                  (clusterId),                                                                                            \
-                  (sourceEndpoint),                                                                                       \
-                  (destinationEndpoint),                                                                                  \
-                  (options),                                                                                              \
-                  (radius)                                                                                                \
-                  )
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,                                                                          \
+                             "BWWWBBWB",                                                                                  \
+                             EM_DEBUG_SEND_BROADCAST,                                                                     \
+                             (destination),                                                                               \
+                             (profileId),                                                                                 \
+                             (clusterId),                                                                                 \
+                             (sourceEndpoint),                                                                            \
+                             (destinationEndpoint),                                                                       \
+                             (options),                                                                                   \
+                             (radius)                                                                                     \
+                             )
 #define API_TRACE_PROXY_BROADCAST(source, destination, sequence, profileId, clusterId, sourceEndpoint, destinationEndpoint, options, radius) \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,                                                                                                        \
-                  "BWWBWWBBWB",                                                                                                              \
-                  EM_DEBUG_PROXY_BROADCAST,                                                                                                  \
-                  (source),                                                                                                                  \
-                  (destination),                                                                                                             \
-                  (sequence),                                                                                                                \
-                  (profileId),                                                                                                               \
-                  (clusterId),                                                                                                               \
-                  (sourceEndpoint),                                                                                                          \
-                  (destinationEndpoint),                                                                                                     \
-                  (options),                                                                                                                 \
-                  (radius)                                                                                                                   \
-                  )
-#define API_TRACE_CANCEL_MESSAGE(message)  \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,      \
-                  "BB",                    \
-                  EM_DEBUG_CANCEL_MESSAGE, \
-                  (message)                \
-                  )
-#define API_TRACE_SEND_REPLY(clusterId, reply) \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,          \
-                  "BWB",                       \
-                  EM_DEBUG_SEND_REPLY,         \
-                  (clusterId),                 \
-                  (reply)                      \
-                  )
-#define API_TRACE_SET_REPLY_BINDING(index)    \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,         \
-                  "BB",                       \
-                  EM_DEBUG_SET_REPLY_BINDING, \
-                  (index)                     \
-                  )
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,                                                                                             \
+                             "BWWBWWBBWB",                                                                                                   \
+                             EM_DEBUG_PROXY_BROADCAST,                                                                                       \
+                             (source),                                                                                                       \
+                             (destination),                                                                                                  \
+                             (sequence),                                                                                                     \
+                             (profileId),                                                                                                    \
+                             (clusterId),                                                                                                    \
+                             (sourceEndpoint),                                                                                               \
+                             (destinationEndpoint),                                                                                          \
+                             (options),                                                                                                      \
+                             (radius)                                                                                                        \
+                             )
+#define API_TRACE_CANCEL_MESSAGE(message)             \
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,      \
+                             "BB",                    \
+                             EM_DEBUG_CANCEL_MESSAGE, \
+                             (message)                \
+                             )
+#define API_TRACE_SEND_REPLY(clusterId, reply)    \
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,  \
+                             "BWB",               \
+                             EM_DEBUG_SEND_REPLY, \
+                             (clusterId),         \
+                             (reply)              \
+                             )
+#define API_TRACE_SET_REPLY_BINDING(index)               \
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,         \
+                             "BB",                       \
+                             EM_DEBUG_SET_REPLY_BINDING, \
+                             (index)                     \
+                             )
 #define API_TRACE_MESSAGE_SENT(mode, destination, profileId, clusterId, sourceEndpoint, destinationEndpoint, options, status) \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,                                                                                         \
-                  "BBWWWBBWB",                                                                                                \
-                  EM_DEBUG_MESSAGE_SENT,                                                                                      \
-                  (mode),                                                                                                     \
-                  (destination),                                                                                              \
-                  (profileId),                                                                                                \
-                  (clusterId),                                                                                                \
-                  (sourceEndpoint),                                                                                           \
-                  (destinationEndpoint),                                                                                      \
-                  (options),                                                                                                  \
-                  (status)                                                                                                    \
-                  )
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,                                                                              \
+                             "BBWWWBBWB",                                                                                     \
+                             EM_DEBUG_MESSAGE_SENT,                                                                           \
+                             (mode),                                                                                          \
+                             (destination),                                                                                   \
+                             (profileId),                                                                                     \
+                             (clusterId),                                                                                     \
+                             (sourceEndpoint),                                                                                \
+                             (destinationEndpoint),                                                                           \
+                             (options),                                                                                       \
+                             (status)                                                                                         \
+                             )
 #define API_TRACE_INCOMING_MESSAGE_HANDLER(type, profileId, clusterId, sourceEndpoint, destinationEndpoint, options) \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,                                                                                \
-                  "BBWWBBW",                                                                                         \
-                  EM_DEBUG_INCOMING_MESSAGE_HANDLER,                                                                 \
-                  (type),                                                                                            \
-                  (profileId),                                                                                       \
-                  (clusterId),                                                                                       \
-                  (sourceEndpoint),                                                                                  \
-                  (destinationEndpoint),                                                                             \
-                  (options)                                                                                          \
-                  )
-#define API_TRACE_STACK_STATUS_HANDLER(stackStatus) \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,               \
-                  "BB",                             \
-                  EM_DEBUG_STACK_STATUS_HANDLER,    \
-                  (stackStatus)                     \
-                  )
-#define API_TRACE_NETWORK_INIT(nodeType) \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,    \
-                  "BB",                  \
-                  EM_DEBUG_NETWORK_INIT, \
-                  (nodeType)             \
-                  )
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,                                                                     \
+                             "BBWWBBW",                                                                              \
+                             EM_DEBUG_INCOMING_MESSAGE_HANDLER,                                                      \
+                             (type),                                                                                 \
+                             (profileId),                                                                            \
+                             (clusterId),                                                                            \
+                             (sourceEndpoint),                                                                       \
+                             (destinationEndpoint),                                                                  \
+                             (options)                                                                               \
+                             )
+#define API_TRACE_STACK_STATUS_HANDLER(stackStatus)         \
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,            \
+                             "BB",                          \
+                             EM_DEBUG_STACK_STATUS_HANDLER, \
+                             (stackStatus)                  \
+                             )
+#define API_TRACE_NETWORK_INIT(nodeType)            \
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,    \
+                             "BB",                  \
+                             EM_DEBUG_NETWORK_INIT, \
+                             (nodeType)             \
+                             )
 #define API_TRACE_FORM_NETWORK(extendedPanId, panId, radioTxPower, radioChannel) \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,                                            \
-                  "B8pWBB",                                                      \
-                  EM_DEBUG_FORM_NETWORK,                                         \
-                  (extendedPanId),                                               \
-                  (panId),                                                       \
-                  (radioTxPower),                                                \
-                  (radioChannel)                                                 \
-                  )
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,                                 \
+                             "B8pWBB",                                           \
+                             EM_DEBUG_FORM_NETWORK,                              \
+                             (extendedPanId),                                    \
+                             (panId),                                            \
+                             (radioTxPower),                                     \
+                             (radioChannel)                                      \
+                             )
 #define API_TRACE_JOIN_NETWORK(nodeType, extendedPanId, panId, radioTxPower, radioChannel, joinMethod, nwkManagerId, nwkUpdateId, channels) \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,                                                                                                       \
-                  "BB8pWBBBWBD",                                                                                                            \
-                  EM_DEBUG_JOIN_NETWORK,                                                                                                    \
-                  (nodeType),                                                                                                               \
-                  (extendedPanId),                                                                                                          \
-                  (panId),                                                                                                                  \
-                  (radioTxPower),                                                                                                           \
-                  (radioChannel),                                                                                                           \
-                  (joinMethod),                                                                                                             \
-                  (nwkManagerId),                                                                                                           \
-                  (nwkUpdateId),                                                                                                            \
-                  (channels)                                                                                                                \
-                  )
-#define API_TRACE_LEAVE_NETWORK( )       \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,    \
-                  "B",                   \
-                  EM_DEBUG_LEAVE_NETWORK \
-                  )
-#define API_TRACE_PERMIT_JOINING(duration) \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,      \
-                  "BB",                    \
-                  EM_DEBUG_PERMIT_JOINING, \
-                  (duration)               \
-                  )
-#define API_TRACE_POLL_FOR_DATA( )       \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,    \
-                  "B",                   \
-                  EM_DEBUG_POLL_FOR_DATA \
-                  )
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,                                                                                            \
+                             "BB8pWBBBWBD",                                                                                                 \
+                             EM_DEBUG_JOIN_NETWORK,                                                                                         \
+                             (nodeType),                                                                                                    \
+                             (extendedPanId),                                                                                               \
+                             (panId),                                                                                                       \
+                             (radioTxPower),                                                                                                \
+                             (radioChannel),                                                                                                \
+                             (joinMethod),                                                                                                  \
+                             (nwkManagerId),                                                                                                \
+                             (nwkUpdateId),                                                                                                 \
+                             (channels)                                                                                                     \
+                             )
+#define API_TRACE_LEAVE_NETWORK( )                  \
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,    \
+                             "B",                   \
+                             EM_DEBUG_LEAVE_NETWORK \
+                             )
+#define API_TRACE_PERMIT_JOINING(duration)            \
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,      \
+                             "BB",                    \
+                             EM_DEBUG_PERMIT_JOINING, \
+                             (duration)               \
+                             )
+#define API_TRACE_POLL_FOR_DATA( )                  \
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,    \
+                             "B",                   \
+                             EM_DEBUG_POLL_FOR_DATA \
+                             )
 #define API_TRACE_POLL_HANDLER(id, sendAppJitMessage) \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,                 \
-                  "BWB",                              \
-                  EM_DEBUG_POLL_HANDLER,              \
-                  (id),                               \
-                  (sendAppJitMessage)                 \
-                  )
-#define API_TRACE_TRUST_CENTER_JOIN_HANDLER(status, decision) \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,                         \
-                  "BBB",                                      \
-                  EM_DEBUG_TRUST_CENTER_JOIN_HANDLER,         \
-                  (status),                                   \
-                  (decision)                                  \
-                  )
-#define API_TRACE_SET_MESSAGE_FLAG(childId)  \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,        \
-                  "BW",                      \
-                  EM_DEBUG_SET_MESSAGE_FLAG, \
-                  (childId)                  \
-                  )
-#define API_TRACE_CLEAR_MESSAGE_FLAG(childId)  \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,          \
-                  "BW",                        \
-                  EM_DEBUG_CLEAR_MESSAGE_FLAG, \
-                  (childId)                    \
-                  )
-#define API_TRACE_POLL_COMPLETE_HANDLER(status)   \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,             \
-                  "BB",                           \
-                  EM_DEBUG_POLL_COMPLETE_HANDLER, \
-                  (status)                        \
-                  )
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,      \
+                             "BWB",                   \
+                             EM_DEBUG_POLL_HANDLER,   \
+                             (id),                    \
+                             (sendAppJitMessage)      \
+                             )
+#define API_TRACE_TRUST_CENTER_JOIN_HANDLER(status, decision)    \
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,                 \
+                             "BBB",                              \
+                             EM_DEBUG_TRUST_CENTER_JOIN_HANDLER, \
+                             (status),                           \
+                             (decision)                          \
+                             )
+#define API_TRACE_SET_MESSAGE_FLAG(childId)             \
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,        \
+                             "BW",                      \
+                             EM_DEBUG_SET_MESSAGE_FLAG, \
+                             (childId)                  \
+                             )
+#define API_TRACE_CLEAR_MESSAGE_FLAG(childId)             \
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,          \
+                             "BW",                        \
+                             EM_DEBUG_CLEAR_MESSAGE_FLAG, \
+                             (childId)                    \
+                             )
+#define API_TRACE_POLL_COMPLETE_HANDLER(status)              \
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,             \
+                             "BB",                           \
+                             EM_DEBUG_POLL_COMPLETE_HANDLER, \
+                             (status)                        \
+                             )
 #define API_TRACE_CHILD_JOIN_HANDLER(childIndex, joining) \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,                     \
-                  "BBB",                                  \
-                  EM_DEBUG_CHILD_JOIN_HANDLER,            \
-                  (childIndex),                           \
-                  (joining)                               \
-                  )
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,          \
+                             "BBB",                       \
+                             EM_DEBUG_CHILD_JOIN_HANDLER, \
+                             (childIndex),                \
+                             (joining)                    \
+                             )
 #define API_TRACE_START_SCAN(scanType, channelMask, duration) \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,                         \
-                  "BBDB",                                     \
-                  EM_DEBUG_START_SCAN,                        \
-                  (scanType),                                 \
-                  (channelMask),                              \
-                  (duration)                                  \
-                  )
-#define API_TRACE_STOP_SCAN( )        \
-  emDebugApiTrace(EM_DEBUG_API_TRACE, \
-                  "B",                \
-                  EM_DEBUG_STOP_SCAN  \
-                  )
-#define API_TRACE_SCAN_COMPLETE_HANDLER(data, status) \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,                 \
-                  "BBB",                              \
-                  EM_DEBUG_SCAN_COMPLETE_HANDLER,     \
-                  (data),                             \
-                  (status)                            \
-                  )
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,              \
+                             "BBDB",                          \
+                             EM_DEBUG_START_SCAN,             \
+                             (scanType),                      \
+                             (channelMask),                   \
+                             (duration)                       \
+                             )
+#define API_TRACE_STOP_SCAN( )                   \
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE, \
+                             "B",                \
+                             EM_DEBUG_STOP_SCAN  \
+                             )
+#define API_TRACE_SCAN_COMPLETE_HANDLER(data, status)        \
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,             \
+                             "BBB",                          \
+                             EM_DEBUG_SCAN_COMPLETE_HANDLER, \
+                             (data),                         \
+                             (status)                        \
+                             )
 #define API_TRACE_NETWORK_FOUND_HANDLER(panId, permitJoin, stackProfile) \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,                                    \
-                  "BWBB",                                                \
-                  EM_DEBUG_NETWORK_FOUND_HANDLER,                        \
-                  (panId),                                               \
-                  (permitJoin),                                          \
-                  (stackProfile)                                         \
-                  )
-#define API_TRACE_ENERGY_SCAN_RESULT_HANDLER(channel, rssi) \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,                       \
-                  "BBB",                                    \
-                  EM_DEBUG_ENERGY_SCAN_RESULT_HANDLER,      \
-                  (channel),                                \
-                  (rssi)                                    \
-                  )
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,                         \
+                             "BWBB",                                     \
+                             EM_DEBUG_NETWORK_FOUND_HANDLER,             \
+                             (panId),                                    \
+                             (permitJoin),                               \
+                             (stackProfile)                              \
+                             )
+#define API_TRACE_ENERGY_SCAN_RESULT_HANDLER(channel, rssi)       \
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,                  \
+                             "BBB",                               \
+                             EM_DEBUG_ENERGY_SCAN_RESULT_HANDLER, \
+                             (channel),                           \
+                             (rssi)                               \
+                             )
 #define API_TRACE_SET_INITIAL_SECURITY_STATE(mask, preconfiguredKey, networkKey, keySequence) \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,                                                         \
-                  "BW16p16pB",                                                                \
-                  EM_DEBUG_SET_INITIAL_SECURITY_STATE,                                        \
-                  (mask),                                                                     \
-                  (preconfiguredKey),                                                         \
-                  (networkKey),                                                               \
-                  (keySequence)                                                               \
-                  )
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,                                              \
+                             "BW16p16pB",                                                     \
+                             EM_DEBUG_SET_INITIAL_SECURITY_STATE,                             \
+                             (mask),                                                          \
+                             (preconfiguredKey),                                              \
+                             (networkKey),                                                    \
+                             (keySequence)                                                    \
+                             )
 #define API_TRACE_REJOIN_NETWORK(haveKey, channelMask, status) \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,                          \
-                  "BBDB",                                      \
-                  EM_DEBUG_REJOIN_NETWORK,                     \
-                  (haveKey),                                   \
-                  (channelMask),                               \
-                  (status)                                     \
-                  )
-#define API_TRACE_STACK_POWER_DOWN( )       \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,       \
-                  "B",                      \
-                  EM_DEBUG_STACK_POWER_DOWN \
-                  )
-#define API_TRACE_STACK_POWER_UP( )       \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,     \
-                  "B",                    \
-                  EM_DEBUG_STACK_POWER_UP \
-                  )
-#define API_TRACE_SET_EXTENDED_SECURITY_BITMASK(mask)     \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,                     \
-                  "BW",                                   \
-                  EM_DEBUG_SET_EXTENDED_SECURITY_BITMASK, \
-                  (mask)                                  \
-                  )
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,               \
+                             "BBDB",                           \
+                             EM_DEBUG_REJOIN_NETWORK,          \
+                             (haveKey),                        \
+                             (channelMask),                    \
+                             (status)                          \
+                             )
+#define API_TRACE_STACK_POWER_DOWN( )                  \
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,       \
+                             "B",                      \
+                             EM_DEBUG_STACK_POWER_DOWN \
+                             )
+#define API_TRACE_STACK_POWER_UP( )                  \
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,     \
+                             "B",                    \
+                             EM_DEBUG_STACK_POWER_UP \
+                             )
+#define API_TRACE_SET_EXTENDED_SECURITY_BITMASK(mask)                \
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,                     \
+                             "BW",                                   \
+                             EM_DEBUG_SET_EXTENDED_SECURITY_BITMASK, \
+                             (mask)                                  \
+                             )
 #define API_TRACE_RF4CE_SET_PAIRING_TABLE_ENTRY(pairingIndex, securityLinkKey, destLongId, frameCounter, sourceNodeId, destPanId, destNodeId, destVendorId, destProfileIdListLength, info, channel, capabilities, lastSeqn) \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,                                                                                                                                                                                       \
-                  "BB16p8pDWWWWBBBBB",                                                                                                                                                                                      \
-                  EM_DEBUG_RF4CE_SET_PAIRING_TABLE_ENTRY,                                                                                                                                                                   \
-                  (pairingIndex),                                                                                                                                                                                           \
-                  (securityLinkKey),                                                                                                                                                                                        \
-                  (destLongId),                                                                                                                                                                                             \
-                  (frameCounter),                                                                                                                                                                                           \
-                  (sourceNodeId),                                                                                                                                                                                           \
-                  (destPanId),                                                                                                                                                                                              \
-                  (destNodeId),                                                                                                                                                                                             \
-                  (destVendorId),                                                                                                                                                                                           \
-                  (destProfileIdListLength),                                                                                                                                                                                \
-                  (info),                                                                                                                                                                                                   \
-                  (channel),                                                                                                                                                                                                \
-                  (capabilities),                                                                                                                                                                                           \
-                  (lastSeqn)                                                                                                                                                                                                \
-                  )
-#define API_TRACE_RF4CE_GET_PAIRING_TABLE_ENTRY(pairingIndex) \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,                         \
-                  "BB",                                       \
-                  EM_DEBUG_RF4CE_GET_PAIRING_TABLE_ENTRY,     \
-                  (pairingIndex)                              \
-                  )
-#define API_TRACE_RF4CE_DELETE_PAIRING_TABLE_ENTRY(pairingIndex) \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,                            \
-                  "BB",                                          \
-                  EM_DEBUG_RF4CE_DELETE_PAIRING_TABLE_ENTRY,     \
-                  (pairingIndex)                                 \
-                  )
-#define API_TRACE_RF4CE_SET_APPLICATION_INFO(capabilities) \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,                      \
-                  "BB",                                    \
-                  EM_DEBUG_RF4CE_SET_APPLICATION_INFO,     \
-                  (capabilities)                           \
-                  )
-#define API_TRACE_RF4CE_GET_APPLICATION_INFO( )       \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,                 \
-                  "B",                                \
-                  EM_DEBUG_RF4CE_GET_APPLICATION_INFO \
-                  )
-#define API_TRACE_RF4CE_KEY_UPDATE(pairingIndex, key) \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,                 \
-                  "BB16p",                            \
-                  EM_DEBUG_RF4CE_KEY_UPDATE,          \
-                  (pairingIndex),                     \
-                  (key)                               \
-                  )
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,                                                                                                                                                                            \
+                             "BB16p8pDWWWWBBBBB",                                                                                                                                                                           \
+                             EM_DEBUG_RF4CE_SET_PAIRING_TABLE_ENTRY,                                                                                                                                                        \
+                             (pairingIndex),                                                                                                                                                                                \
+                             (securityLinkKey),                                                                                                                                                                             \
+                             (destLongId),                                                                                                                                                                                  \
+                             (frameCounter),                                                                                                                                                                                \
+                             (sourceNodeId),                                                                                                                                                                                \
+                             (destPanId),                                                                                                                                                                                   \
+                             (destNodeId),                                                                                                                                                                                  \
+                             (destVendorId),                                                                                                                                                                                \
+                             (destProfileIdListLength),                                                                                                                                                                     \
+                             (info),                                                                                                                                                                                        \
+                             (channel),                                                                                                                                                                                     \
+                             (capabilities),                                                                                                                                                                                \
+                             (lastSeqn)                                                                                                                                                                                     \
+                             )
+#define API_TRACE_RF4CE_GET_PAIRING_TABLE_ENTRY(pairingIndex)        \
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,                     \
+                             "BB",                                   \
+                             EM_DEBUG_RF4CE_GET_PAIRING_TABLE_ENTRY, \
+                             (pairingIndex)                          \
+                             )
+#define API_TRACE_RF4CE_DELETE_PAIRING_TABLE_ENTRY(pairingIndex)        \
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,                        \
+                             "BB",                                      \
+                             EM_DEBUG_RF4CE_DELETE_PAIRING_TABLE_ENTRY, \
+                             (pairingIndex)                             \
+                             )
+#define API_TRACE_RF4CE_SET_APPLICATION_INFO(capabilities)        \
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,                  \
+                             "BB",                                \
+                             EM_DEBUG_RF4CE_SET_APPLICATION_INFO, \
+                             (capabilities)                       \
+                             )
+#define API_TRACE_RF4CE_GET_APPLICATION_INFO( )                  \
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,                 \
+                             "B",                                \
+                             EM_DEBUG_RF4CE_GET_APPLICATION_INFO \
+                             )
+#define API_TRACE_RF4CE_KEY_UPDATE(pairingIndex, key)   \
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,        \
+                             "BB16p",                   \
+                             EM_DEBUG_RF4CE_KEY_UPDATE, \
+                             (pairingIndex),            \
+                             (key)                      \
+                             )
 #define API_TRACE_RF4CE_SEND(pairingIndex, profileId, vendorId, txOptions, messageTag) \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,                                                  \
-                  "BBBWBB",                                                            \
-                  EM_DEBUG_RF4CE_SEND,                                                 \
-                  (pairingIndex),                                                      \
-                  (profileId),                                                         \
-                  (vendorId),                                                          \
-                  (txOptions),                                                         \
-                  (messageTag)                                                         \
-                  )
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,                                       \
+                             "BBBWBB",                                                 \
+                             EM_DEBUG_RF4CE_SEND,                                      \
+                             (pairingIndex),                                           \
+                             (profileId),                                              \
+                             (vendorId),                                               \
+                             (txOptions),                                              \
+                             (messageTag)                                              \
+                             )
 #define API_TRACE_RF4CE_MESSAGE_SENT_HANDLER(status, pairingIndex, txOptions, profileId, vendorId, messageTag) \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,                                                                          \
-                  "BBBBBWB",                                                                                   \
-                  EM_DEBUG_RF4CE_MESSAGE_SENT_HANDLER,                                                         \
-                  (status),                                                                                    \
-                  (pairingIndex),                                                                              \
-                  (txOptions),                                                                                 \
-                  (profileId),                                                                                 \
-                  (vendorId),                                                                                  \
-                  (messageTag)                                                                                 \
-                  )
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,                                                               \
+                             "BBBBBWB",                                                                        \
+                             EM_DEBUG_RF4CE_MESSAGE_SENT_HANDLER,                                              \
+                             (status),                                                                         \
+                             (pairingIndex),                                                                   \
+                             (txOptions),                                                                      \
+                             (profileId),                                                                      \
+                             (vendorId),                                                                       \
+                             (messageTag)                                                                      \
+                             )
 #define API_TRACE_RF4CE_INCOMING_MESSAGE_HANDLER(pairingIndex, profileId, vendorId, txOptions) \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,                                                          \
-                  "BBBWB",                                                                     \
-                  EM_DEBUG_RF4CE_INCOMING_MESSAGE_HANDLER,                                     \
-                  (pairingIndex),                                                              \
-                  (profileId),                                                                 \
-                  (vendorId),                                                                  \
-                  (txOptions)                                                                  \
-                  )
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,                                               \
+                             "BBBWB",                                                          \
+                             EM_DEBUG_RF4CE_INCOMING_MESSAGE_HANDLER,                          \
+                             (pairingIndex),                                                   \
+                             (profileId),                                                      \
+                             (vendorId),                                                       \
+                             (txOptions)                                                       \
+                             )
 #define API_TRACE_RF4CE_START(nodeCapabilities, vendorId, power) \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,                            \
-                  "BBWB",                                        \
-                  EM_DEBUG_RF4CE_START,                          \
-                  (nodeCapabilities),                            \
-                  (vendorId),                                    \
-                  (power)                                        \
-                  )
-#define API_TRACE_RF4CE_STOP( )       \
-  emDebugApiTrace(EM_DEBUG_API_TRACE, \
-                  "B",                \
-                  EM_DEBUG_RF4CE_STOP \
-                  )
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,                 \
+                             "BBWB",                             \
+                             EM_DEBUG_RF4CE_START,               \
+                             (nodeCapabilities),                 \
+                             (vendorId),                         \
+                             (power)                             \
+                             )
+#define API_TRACE_RF4CE_STOP( )                  \
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE, \
+                             "B",                \
+                             EM_DEBUG_RF4CE_STOP \
+                             )
 #define API_TRACE_RF4CE_DISCOVERY(panId, nodeId, searchDevType, discDuration, maxDiscRepetitions) \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,                                                             \
-                  "BWWBWB",                                                                       \
-                  EM_DEBUG_RF4CE_DISCOVERY,                                                       \
-                  (panId),                                                                        \
-                  (nodeId),                                                                       \
-                  (searchDevType),                                                                \
-                  (discDuration),                                                                 \
-                  (maxDiscRepetitions)                                                            \
-                  )
-#define API_TRACE_RF4CE_DISCOVERY_COMPLETE_HANDLER(status)   \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,                        \
-                  "BB",                                      \
-                  EM_DEBUG_RF4CE_DISCOVERY_COMPLETE_HANDLER, \
-                  (status)                                   \
-                  )
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,                                                  \
+                             "BWWBWB",                                                            \
+                             EM_DEBUG_RF4CE_DISCOVERY,                                            \
+                             (panId),                                                             \
+                             (nodeId),                                                            \
+                             (searchDevType),                                                     \
+                             (discDuration),                                                      \
+                             (maxDiscRepetitions)                                                 \
+                             )
+#define API_TRACE_RF4CE_DISCOVERY_COMPLETE_HANDLER(status)              \
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,                        \
+                             "BB",                                      \
+                             EM_DEBUG_RF4CE_DISCOVERY_COMPLETE_HANDLER, \
+                             (status)                                   \
+                             )
 #define API_TRACE_RF4CE_DISCOVERY_REQUEST_HANDLER(srcIeeeAddr, nodeCapabilities, vendorId, appCapabilities, searchDevType, rxLinkQuality) \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,                                                                                                     \
-                  "B8pBWBBB",                                                                                                             \
-                  EM_DEBUG_RF4CE_DISCOVERY_REQUEST_HANDLER,                                                                               \
-                  (srcIeeeAddr),                                                                                                          \
-                  (nodeCapabilities),                                                                                                     \
-                  (vendorId),                                                                                                             \
-                  (appCapabilities),                                                                                                      \
-                  (searchDevType),                                                                                                        \
-                  (rxLinkQuality)                                                                                                         \
-                  )
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,                                                                                          \
+                             "B8pBWBBB",                                                                                                  \
+                             EM_DEBUG_RF4CE_DISCOVERY_REQUEST_HANDLER,                                                                    \
+                             (srcIeeeAddr),                                                                                               \
+                             (nodeCapabilities),                                                                                          \
+                             (vendorId),                                                                                                  \
+                             (appCapabilities),                                                                                           \
+                             (searchDevType),                                                                                             \
+                             (rxLinkQuality)                                                                                              \
+                             )
 #define API_TRACE_RF4CE_DISCOVERY_RESPONSE_HANDLER(atCapacity, channel, panId, srcIeeeAddr, nodeCapabilities, vendorId, appCapabilities, rxLinkQuality, discRequestLqi) \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,                                                                                                                                   \
-                  "BBBW8pBWBBB",                                                                                                                                        \
-                  EM_DEBUG_RF4CE_DISCOVERY_RESPONSE_HANDLER,                                                                                                            \
-                  (atCapacity),                                                                                                                                         \
-                  (channel),                                                                                                                                            \
-                  (panId),                                                                                                                                              \
-                  (srcIeeeAddr),                                                                                                                                        \
-                  (nodeCapabilities),                                                                                                                                   \
-                  (vendorId),                                                                                                                                           \
-                  (appCapabilities),                                                                                                                                    \
-                  (rxLinkQuality),                                                                                                                                      \
-                  (discRequestLqi)                                                                                                                                      \
-                  )
-#define API_TRACE_RF4CE_ENABLE_AUTO_DISCOVERY_RESPONSE(duration) \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,                            \
-                  "BW",                                          \
-                  EM_DEBUG_RF4CE_ENABLE_AUTO_DISCOVERY_RESPONSE, \
-                  (duration)                                     \
-                  )
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,                                                                                                                        \
+                             "BBBW8pBWBBB",                                                                                                                             \
+                             EM_DEBUG_RF4CE_DISCOVERY_RESPONSE_HANDLER,                                                                                                 \
+                             (atCapacity),                                                                                                                              \
+                             (channel),                                                                                                                                 \
+                             (panId),                                                                                                                                   \
+                             (srcIeeeAddr),                                                                                                                             \
+                             (nodeCapabilities),                                                                                                                        \
+                             (vendorId),                                                                                                                                \
+                             (appCapabilities),                                                                                                                         \
+                             (rxLinkQuality),                                                                                                                           \
+                             (discRequestLqi)                                                                                                                           \
+                             )
+#define API_TRACE_RF4CE_ENABLE_AUTO_DISCOVERY_RESPONSE(duration)            \
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,                            \
+                             "BW",                                          \
+                             EM_DEBUG_RF4CE_ENABLE_AUTO_DISCOVERY_RESPONSE, \
+                             (duration)                                     \
+                             )
 #define API_TRACE_RF4CE_AUTO_DISCOVERY_RESPONSE_COMPLETE_HANDLER(status, srcIeeeAddr, nodeCapabilities, vendorId, appCapabilities, searchDevType) \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,                                                                                                             \
-                  "BB8pBWBB",                                                                                                                     \
-                  EM_DEBUG_RF4CE_AUTO_DISCOVERY_RESPONSE_COMPLETE_HANDLER,                                                                        \
-                  (status),                                                                                                                       \
-                  (srcIeeeAddr),                                                                                                                  \
-                  (nodeCapabilities),                                                                                                             \
-                  (vendorId),                                                                                                                     \
-                  (appCapabilities),                                                                                                              \
-                  (searchDevType)                                                                                                                 \
-                  )
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,                                                                                                  \
+                             "BB8pBWBB",                                                                                                          \
+                             EM_DEBUG_RF4CE_AUTO_DISCOVERY_RESPONSE_COMPLETE_HANDLER,                                                             \
+                             (status),                                                                                                            \
+                             (srcIeeeAddr),                                                                                                       \
+                             (nodeCapabilities),                                                                                                  \
+                             (vendorId),                                                                                                          \
+                             (appCapabilities),                                                                                                   \
+                             (searchDevType)                                                                                                      \
+                             )
 #define API_TRACE_RF4CE_PAIR(channel, panId, ieeeAddr, keyExchangeTransferCount) \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,                                            \
-                  "BBW8pB",                                                      \
-                  EM_DEBUG_RF4CE_PAIR,                                           \
-                  (channel),                                                     \
-                  (panId),                                                       \
-                  (ieeeAddr),                                                    \
-                  (keyExchangeTransferCount)                                     \
-                  )
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,                                 \
+                             "BBW8pB",                                           \
+                             EM_DEBUG_RF4CE_PAIR,                                \
+                             (channel),                                          \
+                             (panId),                                            \
+                             (ieeeAddr),                                         \
+                             (keyExchangeTransferCount)                          \
+                             )
 #define API_TRACE_RF4CE_PAIR_COMPLETE_HANDLER(status, pairingIndex, vendorId, appCapabilities) \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,                                                          \
-                  "BBBWB",                                                                     \
-                  EM_DEBUG_RF4CE_PAIR_COMPLETE_HANDLER,                                        \
-                  (status),                                                                    \
-                  (pairingIndex),                                                              \
-                  (vendorId),                                                                  \
-                  (appCapabilities)                                                            \
-                  )
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,                                               \
+                             "BBBWB",                                                          \
+                             EM_DEBUG_RF4CE_PAIR_COMPLETE_HANDLER,                             \
+                             (status),                                                         \
+                             (pairingIndex),                                                   \
+                             (vendorId),                                                       \
+                             (appCapabilities)                                                 \
+                             )
 #define API_TRACE_RF4CE_PAIR_REQUEST_HANDLER(status, pairingIndex, srcIeeeAddr, nodeCapabilities, vendorId, appCapabilities, keyExchangeTransferCount) \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,                                                                                                                  \
-                  "BBB8pBWBB",                                                                                                                         \
-                  EM_DEBUG_RF4CE_PAIR_REQUEST_HANDLER,                                                                                                 \
-                  (status),                                                                                                                            \
-                  (pairingIndex),                                                                                                                      \
-                  (srcIeeeAddr),                                                                                                                       \
-                  (nodeCapabilities),                                                                                                                  \
-                  (vendorId),                                                                                                                          \
-                  (appCapabilities),                                                                                                                   \
-                  (keyExchangeTransferCount)                                                                                                           \
-                  )
-#define API_TRACE_RF4CE_UNPAIR(pairingIndex) \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,        \
-                  "BB",                      \
-                  EM_DEBUG_RF4CE_UNPAIR,     \
-                  (pairingIndex)             \
-                  )
-#define API_TRACE_RF4CE_UNPAIR_HANDLER(pairingIndex) \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,                \
-                  "BB",                              \
-                  EM_DEBUG_RF4CE_UNPAIR_HANDLER,     \
-                  (pairingIndex)                     \
-                  )
-#define API_TRACE_RF4CE_UNPAIR_COMPLETE_HANDLER(pairingIndex) \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,                         \
-                  "BB",                                       \
-                  EM_DEBUG_RF4CE_UNPAIR_COMPLETE_HANDLER,     \
-                  (pairingIndex)                              \
-                  )
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,                                                                                                       \
+                             "BBB8pBWBB",                                                                                                              \
+                             EM_DEBUG_RF4CE_PAIR_REQUEST_HANDLER,                                                                                      \
+                             (status),                                                                                                                 \
+                             (pairingIndex),                                                                                                           \
+                             (srcIeeeAddr),                                                                                                            \
+                             (nodeCapabilities),                                                                                                       \
+                             (vendorId),                                                                                                               \
+                             (appCapabilities),                                                                                                        \
+                             (keyExchangeTransferCount)                                                                                                \
+                             )
+#define API_TRACE_RF4CE_UNPAIR(pairingIndex)        \
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,    \
+                             "BB",                  \
+                             EM_DEBUG_RF4CE_UNPAIR, \
+                             (pairingIndex)         \
+                             )
+#define API_TRACE_RF4CE_UNPAIR_HANDLER(pairingIndex)        \
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,            \
+                             "BB",                          \
+                             EM_DEBUG_RF4CE_UNPAIR_HANDLER, \
+                             (pairingIndex)                 \
+                             )
+#define API_TRACE_RF4CE_UNPAIR_COMPLETE_HANDLER(pairingIndex)        \
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,                     \
+                             "BB",                                   \
+                             EM_DEBUG_RF4CE_UNPAIR_COMPLETE_HANDLER, \
+                             (pairingIndex)                          \
+                             )
 #define API_TRACE_RF4CE_SET_POWER_SAVING_PARAMETERS(dutyCycle, activePeriod) \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,                                        \
-                  "BDD",                                                     \
-                  EM_DEBUG_RF4CE_SET_POWER_SAVING_PARAMETERS,                \
-                  (dutyCycle),                                               \
-                  (activePeriod)                                             \
-                  )
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,                             \
+                             "BDD",                                          \
+                             EM_DEBUG_RF4CE_SET_POWER_SAVING_PARAMETERS,     \
+                             (dutyCycle),                                    \
+                             (activePeriod)                                  \
+                             )
 #define API_TRACE_RF4CE_SET_FREQUENCY_AGILITY_PARAMETERS(rssiWindowSize, channelChangeReads, rssiThreshold, readInterval, readDuration) \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,                                                                                                   \
-                  "BBBBWB",                                                                                                             \
-                  EM_DEBUG_RF4CE_SET_FREQUENCY_AGILITY_PARAMETERS,                                                                      \
-                  (rssiWindowSize),                                                                                                     \
-                  (channelChangeReads),                                                                                                 \
-                  (rssiThreshold),                                                                                                      \
-                  (readInterval),                                                                                                       \
-                  (readDuration)                                                                                                        \
-                  )
-#define API_TRACE_RF4CE_SET_DISCOVERY_LQI_THRESHOLD(threshold) \
-  emDebugApiTrace(EM_DEBUG_API_TRACE,                          \
-                  "BB",                                        \
-                  EM_DEBUG_RF4CE_SET_DISCOVERY_LQI_THRESHOLD,  \
-                  (threshold)                                  \
-                  )
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,                                                                                        \
+                             "BBBBWB",                                                                                                  \
+                             EM_DEBUG_RF4CE_SET_FREQUENCY_AGILITY_PARAMETERS,                                                           \
+                             (rssiWindowSize),                                                                                          \
+                             (channelChangeReads),                                                                                      \
+                             (rssiThreshold),                                                                                           \
+                             (readInterval),                                                                                            \
+                             (readDuration)                                                                                             \
+                             )
+#define API_TRACE_RF4CE_SET_DISCOVERY_LQI_THRESHOLD(threshold)           \
+  sli_zigbee_debug_api_trace(EM_DEBUG_API_TRACE,                         \
+                             "BB",                                       \
+                             EM_DEBUG_RF4CE_SET_DISCOVERY_LQI_THRESHOLD, \
+                             (threshold)                                 \
+                             )
 #endif // SILABS_ZIGBEE_DEBUG_CHANNEL_H

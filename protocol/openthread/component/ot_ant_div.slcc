@@ -7,12 +7,16 @@ description: This component provides support for Antenna Diversity with OpenThre
 provides:
   - name: ot_ant_div
 requires:
-  - name: ot_platform_abstraction_efr32
+  - name: ot_platform_abstraction
   - name: rail_util_ant_div
   - name: rail_util_ieee802154_stack_event
   - name: rail_util_ieee802154_phy_select
   - name: sl_ot_custom_cli
     condition: [ot_cli]
+  - name: ot_ncp_vendor_extension
+    condition: [ot_ncp]
+recommends:
+  - id: ot_platform_abstraction
 config_file:
   - path: protocol/openthread/config/sl_openthread_ant_div_cli_config.h
     condition: [ot_cli]
@@ -34,11 +38,19 @@ template_contribution:
       name: "antenna"
       handler: "antennaCommand"
       macro: "SL_OPENTHREAD_ANT_DIV_CLI_ENABLE"
-
+    condition: [sl_ot_custom_cli]
+  - name: component_catalog
+    value: openthread_ant_div
 include:
   - path: protocol/openthread/include
     file_list:
       - path: sl_ot_phy_select.h
+  - path: protocol/openthread/platform-abstraction/ncp/
+    condition: [ot_ncp]
+    file_list:
+      - path: ncp_ant_div.hpp
 source:
   - path: protocol/openthread/src/cli/antenna_diversity_cli.c
-    condition: [ot_cli]
+    unless: [ot_ncp]
+  - path: protocol/openthread/platform-abstraction/ncp/ncp_ant_div.cpp
+    condition: [ot_ncp]

@@ -39,7 +39,7 @@ template_contribution:
     value:
       group: eeprom
       name: data-print
-      handler: emAfEepromDataPrintCommand
+      handler: sli_eeprom_data_print_command
       argument:
       - type: uint32
         help: offset
@@ -47,9 +47,9 @@ template_contribution:
     value:
       group: eeprom
       name: status
-      handler: emAfEepromStatusCommand
+      handler: sli_eeprom_status_command
   - name: cli_command
     value:
       group: eeprom
       name: info
-      handler: emAfEepromInfoCommand
+      handler: sli_eeprom_info_command

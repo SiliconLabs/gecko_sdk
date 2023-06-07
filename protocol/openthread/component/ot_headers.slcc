@@ -26,7 +26,6 @@ include:
       - path: coap.h
       - path: commissioner.h
       - path: config.h
-      - path: coprocessor_rpc.h
       - path: crypto.h
       - path: dataset.h
       - path: dataset_ftd.h
@@ -47,6 +46,7 @@ include:
       - path: link_metrics.h
       - path: link_raw.h
       - path: logging.h
+      - path: mesh_diag.h
       - path: message.h
       - path: multi_radio.h
       - path: nat64.h
@@ -74,6 +74,7 @@ include:
       - path: platform/alarm-milli.h
       - path: platform/crypto.h
       - path: platform/diag.h
+      - path: platform/dns.h
       - path: platform/dso_transport.h
       - path: platform/entropy.h
       - path: platform/flash.h
@@ -111,6 +112,7 @@ include:
       - path: common/as_core_type.hpp
       - path: common/binary_search.hpp
       - path: common/bit_vector.hpp
+      - path: common/callback.hpp
       - path: common/clearable.hpp
       - path: common/code_utils.hpp
       - path: common/const_cast.hpp
@@ -144,6 +146,7 @@ include:
       - path: common/owned_ptr.hpp
       - path: common/owning_list.hpp
       - path: common/pool.hpp
+      - path: common/preference.hpp
       - path: common/ptr_wrapper.hpp
       - path: common/random.hpp
       - path: common/retain_ptr.hpp
@@ -169,7 +172,6 @@ include:
       - path: config/child_supervision.h
       - path: config/coap.h
       - path: config/commissioner.h
-      - path: config/coprocessor_rpc.h
       - path: config/crypto.h
       - path: config/dataset_updater.h
       - path: config/dhcp6_client.h
@@ -186,21 +188,23 @@ include:
       - path: config/link_raw.h
       - path: config/logging.h
       - path: config/mac.h
+      - path: config/mesh_diag.h
       - path: config/misc.h
       - path: config/mle.h
       - path: config/nat64.h
       - path: config/netdata_publisher.h
+      - path: config/network_diagnostic.h
       - path: config/openthread-core-config-check.h
       - path: config/parent_search.h
       - path: config/ping_sender.h
       - path: config/platform.h
+      - path: config/power_calibration.h
       - path: config/sntp_client.h
       - path: config/srp_client.h
       - path: config/srp_server.h
       - path: config/radio_link.h
       - path: config/time_sync.h
       - path: config/tmf.h
-      - path: coprocessor/rpc.hpp
       - path: crypto/aes_ccm.hpp
       - path: crypto/aes_ecb.hpp
       - path: crypto/context_size.hpp
@@ -208,7 +212,6 @@ include:
       - path: crypto/hkdf_sha256.hpp
       - path: crypto/hmac_sha256.hpp
       - path: crypto/mbedtls.hpp
-      - path: crypto/pbkdf2_cmac.hpp
       - path: crypto/sha256.hpp
       - path: crypto/storage.hpp
       - path: diags/factory_diags.hpp
@@ -276,6 +279,7 @@ include:
       - path: thread/announce_sender.hpp
       - path: thread/anycast_locator.hpp
       - path: thread/child_mask.hpp
+      - path: thread/child_supervision.hpp
       - path: thread/child_table.hpp
       - path: thread/csl_tx_scheduler.hpp
       - path: thread/discover_scanner.hpp
@@ -321,14 +325,15 @@ include:
       - path: thread/version.hpp
       - path: utils/channel_manager.hpp
       - path: utils/channel_monitor.hpp
-      - path: utils/child_supervision.hpp
       - path: utils/flash.hpp
       - path: utils/heap.hpp
       - path: utils/history_tracker.hpp
       - path: utils/jam_detector.hpp
+      - path: utils/mesh_diag.hpp
       - path: utils/otns.hpp
       - path: utils/parse_cmdline.hpp
       - path: utils/ping_sender.hpp
+      - path: utils/power_calibration.hpp
       - path: utils/slaac_address.hpp
       - path: utils/srp_client_buffers.hpp
   - path: ../../third_party/tcplp

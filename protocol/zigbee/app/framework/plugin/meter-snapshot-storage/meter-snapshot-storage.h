@@ -16,9 +16,7 @@
  *
  ******************************************************************************/
 
-#ifdef UC_BUILD
 #include "meter-snapshot-storage-config.h"
-#endif // UC_BUILD
 
 /**
  * @defgroup meter-snapshot-storage  Meter Snapshot Storage

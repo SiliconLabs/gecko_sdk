@@ -21,6 +21,7 @@
 
 #include "app/framework/util/af-main.h"
 #include "app/framework/security/af-security.h"
+#include "stack/include/zigbee-security-manager.h"
 
 // *****************************************************************************
 // Globals
@@ -50,19 +51,23 @@ EmberStatus emberTrustCenterExportBackupData(EmberAfTrustCenterBackupData* backu
           params.extendedPanId,
           EUI64_SIZE);
 
+  sl_zb_sec_man_context_t context;
+  sl_zb_sec_man_key_t plaintext_key;
+  sl_zb_sec_man_aps_key_metadata_t key_data;
+
   for (i = 0; i < keyTableSize; i++) {
-    EmberKeyStruct keyStruct;
-    EmberStatus status = emberGetKeyTableEntry(i, &keyStruct);
-    if (status == EMBER_SUCCESS) {
+    context.key_index = i;
+    sl_status_t status = sl_zb_sec_man_export_link_key_by_index(i, &context, &plaintext_key, &key_data);
+    if (status == SL_STATUS_OK) {
       MEMMOVE(backup->keyList[backup->keyListLength].deviceId,
-              keyStruct.partnerEUI64,
+              context.eui64,
               EUI64_SIZE);
       // Rather than give the real link key, the backup
       // contains a hashed version of the key.  This is done
       // to prevent a compromise of the backup data from compromising
       // the current link keys.  This is per the Smart Energy spec.
       emberAesHashSimple(EMBER_ENCRYPTION_KEY_SIZE,
-                         emberKeyContents(&(keyStruct.key)),
+                         (uint8_t*) &(plaintext_key.key),
                          emberKeyContents(&(backup->keyList[backup->keyListLength].key)));
       backup->keyListLength++;
     }
@@ -105,10 +110,10 @@ EmberStatus emberTrustCenterImportBackupAndStartNetwork(const EmberAfTrustCenter
               emberKeyContents(&(backup->keyList[i].key)),
               EMBER_ENCRYPTION_KEY_SIZE);
 
-      status = emberSetKeyTableEntry(i,
-                                     backup->keyList[i].deviceId,
-                                     true,  // link key?
-                                     &key);
+      sl_status_t import_status = sl_zb_sec_man_import_link_key(i,
+                                                                backup->keyList[i].deviceId,
+                                                                (sl_zb_sec_man_key_t*)&key);
+      status = ((import_status == SL_STATUS_OK) ? EMBER_SUCCESS : EMBER_KEY_TABLE_INVALID_ADDRESS);
     }
 
     if (status != EMBER_SUCCESS) {

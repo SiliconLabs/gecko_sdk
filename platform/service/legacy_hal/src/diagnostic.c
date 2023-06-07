@@ -48,7 +48,7 @@ NO_INIT(HalCrashInfoType halCrashInfo);
 #endif
 
 // Forward Declarations
-extern void emRadioSleep(void);
+extern void sli_802154phy_radio_sleep(void);
 
 //------------------------------------------------------------------------------
 // Local Variables
@@ -790,7 +790,7 @@ void halPrintCrashData(uint8_t port)
   uint8_t i = 0;
 
   while (*name != '\0') {
-    sl_iostream_printf(SL_IOSTREAM_STDOUT, "%s = %4x", name, *data++);
+    sl_iostream_printf(SL_IOSTREAM_STDOUT, "%s = %4lx", name, (unsigned long)*data++);
     // increment pointer to end of name
     while (*name != '\0') {
       name++;
@@ -823,11 +823,11 @@ void halPrintCrashDetails(uint8_t port)
       break;
     case RESET_WATCHDOG_CAUGHT:
       sl_iostream_printf(SL_IOSTREAM_STDOUT, "Reset cause: Watchdog caught with enhanced info\n");
-      sl_iostream_printf(SL_IOSTREAM_STDOUT, "Instruction address: %4x\n", c->PC);
+      sl_iostream_printf(SL_IOSTREAM_STDOUT, "Instruction address: %4lx\n", (unsigned long)c->PC);
       break;
     case RESET_CRASH_ASSERT:
-      sl_iostream_printf(SL_IOSTREAM_STDOUT, "Reset cause: Assert %s:%d\n",
-                         c->data.assertInfo.file, c->data.assertInfo.line);
+      sl_iostream_printf(SL_IOSTREAM_STDOUT, "Reset cause: Assert %s:%ld\n",
+                         c->data.assertInfo.file, (long)c->data.assertInfo.line);
       break;
     case RESET_FAULT_HARD:
       sl_iostream_printf(SL_IOSTREAM_STDOUT, "Reset cause: Hard Fault\n");
@@ -847,10 +847,10 @@ void halPrintCrashDetails(uint8_t port)
     case RESET_FAULT_MEM:
       sl_iostream_printf(SL_IOSTREAM_STDOUT, "Reset cause: Memory Management Fault\n");
       if (c->cfsr.bits.DACCVIOL || c->cfsr.bits.IACCVIOL) {
-        sl_iostream_printf(SL_IOSTREAM_STDOUT, "Instruction address: %4x\n", c->PC);
+        sl_iostream_printf(SL_IOSTREAM_STDOUT, "Instruction address: %4lx\n", (unsigned long)c->PC);
       }
       if (c->cfsr.bits.MMARVALID) {
-        sl_iostream_printf(SL_IOSTREAM_STDOUT, "Illegal access address: %4x\n", c->faultAddress);
+        sl_iostream_printf(SL_IOSTREAM_STDOUT, "Illegal access address: %4lx\n", (unsigned long)c->faultAddress);
       }
       for (bit = SCB_CFSR_MEMFAULTSR_Pos; bit < (SCB_CFSR_MEMFAULTSR_Pos + 8); bit++) {
         if ((c->cfsr.word & (1 << bit)) && (*cfsrBits[bit] != '\0')) {
@@ -860,14 +860,14 @@ void halPrintCrashDetails(uint8_t port)
       break;
     case RESET_FAULT_BUS:
       sl_iostream_printf(SL_IOSTREAM_STDOUT, "Reset cause: Bus Fault\n");
-      sl_iostream_printf(SL_IOSTREAM_STDOUT, "Instruction address: %4x\n", c->PC);
+      sl_iostream_printf(SL_IOSTREAM_STDOUT, "Instruction address: %4lx\n", (unsigned long)c->PC);
       if (c->cfsr.bits.IMPRECISERR) {
         sl_iostream_printf(SL_IOSTREAM_STDOUT,
                            "Address is of an instruction after bus fault occurred, not the cause.\n");
       }
       if (c->cfsr.bits.BFARVALID) {
-        sl_iostream_printf(SL_IOSTREAM_STDOUT, "Illegal access address: %4x\n",
-                           c->faultAddress);
+        sl_iostream_printf(SL_IOSTREAM_STDOUT, "Illegal access address: %4lx\n",
+                           (unsigned long)c->faultAddress);
       }
       for (bit = SCB_CFSR_BUSFAULTSR_Pos; bit < SCB_CFSR_USGFAULTSR_Pos; bit++) {
         if (((c->cfsr.word >> bit) & 1U) && (*cfsrBits[bit] != '\0')) {
@@ -880,7 +880,7 @@ void halPrintCrashDetails(uint8_t port)
       break;
     case RESET_FAULT_USAGE:
       sl_iostream_printf(SL_IOSTREAM_STDOUT, "Reset cause: Usage Fault\n");
-      sl_iostream_printf(SL_IOSTREAM_STDOUT, "Instruction address: %4x\n", c->PC);
+      sl_iostream_printf(SL_IOSTREAM_STDOUT, "Instruction address: %4lx\n", (unsigned long)c->PC);
       for (bit = SCB_CFSR_USGFAULTSR_Pos;
            (bit < numFaults) && (bit < (sizeof(c->cfsr.word) * 8));
            bit++) {
@@ -891,7 +891,7 @@ void halPrintCrashDetails(uint8_t port)
       break;
     case RESET_FAULT_DBGMON:
       sl_iostream_printf(SL_IOSTREAM_STDOUT, "Reset cause: Debug Monitor Fault\n");
-      sl_iostream_printf(SL_IOSTREAM_STDOUT, "Instruction address: %4x\n", c->PC);
+      sl_iostream_printf(SL_IOSTREAM_STDOUT, "Instruction address: %4lx\n", (unsigned long)c->PC);
       break;
     default:
       break;
@@ -926,8 +926,8 @@ void halPrintCrashSummary(uint8_t port)
   mode = (uint8_t *)((c->LR & 8) ? "Thread" : "Handler");
   size = stackEnd - stackBegin;
   pct = size ? (uint16_t)(((100 * used) + (size / 2)) / size) : 0;
-  sl_iostream_printf(SL_IOSTREAM_STDOUT, "%s mode using %s stack (%4x to %4x), SP = %4x\n",
-                     mode, stack, stackBegin, stackEnd, sp);
+  sl_iostream_printf(SL_IOSTREAM_STDOUT, "%s mode using %s stack (%4lx to %4lx), SP = %4lx\n",
+                     mode, stack, (unsigned long)stackBegin, (unsigned long)stackEnd, (unsigned long)sp);
   sl_iostream_printf(SL_IOSTREAM_STDOUT, "%u bytes used (%u%%) in %s stack (out of %u bytes total)\n",
                      (uint16_t)used, pct, stack, (uint16_t)size);
 
@@ -1232,7 +1232,7 @@ static void halInternalAssertFault(const char * filename, int linenumber)
 void halInternalAssertFailed(const char * filename, int linenumber)
 {
 #if !defined (_SILICON_LABS_32B_SERIES_2)
-  emRadioSleep();
+  sli_802154phy_radio_sleep();
 #endif
 
   halResetWatchdog();              // In case we're close to running out.

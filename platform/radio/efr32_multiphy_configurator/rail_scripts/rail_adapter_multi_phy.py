@@ -918,6 +918,72 @@ class RAILAdapter_MultiPhy(RAILAdapter):
           # Store that config in the linked phyConfigEntry
           phyConfigEntry.stackInfo.value = newStackInfoConfigEntry
 
+          # Configure structure settings for rail_config.h formatting.
+          # Only structure having the field enabled to True will be printed in the header.
+          # If enabled, all fields in structure under stackInfoProtocolTableEntries in yaml file
+          # except "enable" will be printed.
+          # If new structs were to be added, the field "enable" must be present in each one of it.
+          if newStackInfo[0] == model.vars.protocol_id.var_enum.WiSUN:
+            # Enable WiSUN protocol struct printing in header
+            commonStructures.stackInfoProtocolTableEntries.RAIL_StackInfoWisun.enable.value = True
+
+  def _generateAlternatePhy(self, phyConfigEntry, model, channelConfigEntry):
+    base_frequency = channelConfigEntry.alternate_phy.base_frequency
+    channel_spacing = channelConfigEntry.alternate_phy.channel_spacing
+    number_of_channels = channelConfigEntry.alternate_phy.number_of_channels
+    alt_min_if_var = getattr(model.profile.outputs, "alt_min_if_hz", None)
+    base_min_if_var = getattr(model.profile.outputs, "min_if_hz", None)
+    alt_softmodem_used_var = getattr(model.profile.outputs, "alt_softmodem_used", None)
+
+    try:
+      alt_min_if_hz = alt_min_if_var.var_value
+      base_min_if_hz = base_min_if_var.var_value
+      alt_softmodem_used = alt_softmodem_used_var.var_value
+
+      # Convert unit Hz ==> kHz
+      alt_min_if_kHz = int(alt_min_if_hz / 1000)
+      base_min_if_kHz = int(base_min_if_hz / 1000)
+
+      newAlternatePhy = True
+      commonStructures = self.railModel.multiPhyConfig.commonStructures
+
+      newAlternatePhyValues = [base_frequency,
+                               channel_spacing,
+                               number_of_channels,
+                               alt_min_if_kHz,
+                               base_min_if_kHz,
+                               alt_softmodem_used]
+
+      for i, alternatePhyEntry in enumerate(commonStructures.railAlternatePhyEntries._elements):
+        alternatePhyValues = [alternatePhyEntry.baseFrequency.value,
+                              alternatePhyEntry.channelSpacing.value,
+                              alternatePhyEntry.numberOfChannels.value,
+                              alternatePhyEntry.minIf_kHz.value,
+                              alternatePhyEntry.minBaseIf_kHz.value,
+                              alternatePhyEntry.isOfdmModem.value]
+        if alternatePhyValues == newAlternatePhyValues:
+          phyConfigEntry.alternatePhy.value = alternatePhyEntry
+          newAlternatePhy = False
+          break
+
+      if newAlternatePhy:
+        length = 0
+        if commonStructures.railAlternatePhyEntries.lastElement is not None:
+          length = len(commonStructures.railAlternatePhyEntries._elements)
+
+        newAlternatePhyEntry = commonStructures.railAlternatePhyEntries.addNewElement("alternatePhy_%s" % length)
+        newAlternatePhyEntry.baseFrequency.value = base_frequency
+        newAlternatePhyEntry.channelSpacing.value = channel_spacing
+        newAlternatePhyEntry.numberOfChannels.value = number_of_channels
+        newAlternatePhyEntry.minIf_kHz.value = alt_min_if_kHz
+        newAlternatePhyEntry.minBaseIf_kHz.value = base_min_if_kHz
+        newAlternatePhyEntry.isOfdmModem.value = alt_softmodem_used
+        phyConfigEntry.alternatePhy.value = newAlternatePhyEntry
+    except:
+      # At least one of variables below is None
+      # [base_frequency, channel_spacing, number_of_channels, base_min_if, alt_min_if, alt_softmodem_used]
+      return
+
 
   def _generateDcdcRetimingStructure(self, phyConfigEntry, model):
     if (self.partFamily in ["ocelot", "sol", "margay"]):
@@ -1148,6 +1214,7 @@ class RAILAdapter_MultiPhy(RAILAdapter):
     newChannelConfigEntry.attr.value = phyConfigEntry.channelConfigEntryAttr.value
     newChannelConfigEntry.entryType.value = phyConfigEntry.entryType.value
     newChannelConfigEntry.stackInfo.value = phyConfigEntry.stackInfo.value #Not serialized in multiphy XML
+    newChannelConfigEntry.alternatePhy.value = phyConfigEntry.alternatePhy.value
 
     # Traverse existing channelConfigEntries and check for duplicates
     entryFound = False
@@ -1170,6 +1237,7 @@ class RAILAdapter_MultiPhy(RAILAdapter):
       channelConfig.channelConfigEntries.value = multiPhyConfigEntry.channelConfigEntries
       channelConfig.length.value = len(multiPhyConfigEntry.channelConfigEntries._elements)
       channelConfig.signature.value = 0
+      channelConfig.xtalFrequency.value = multiPhyConfigEntry.phyConfigEntries._elements[0].xtalFrequency.value
 
   def _orderChannelConfigEntries(self, railModel):
 
@@ -1487,6 +1555,9 @@ class RAILAdapter_MultiPhy(RAILAdapter):
           phyConfigEntry.convDecodeBufferSize.value = radioConfigModel.profile.outputs.get_output('frc_conv_decoder_buffer_size').var_value
 
           self._generateStackInfo(phyConfigEntry, radioConfigModel)
+
+          # Handle alternate phy for Concurrent mode
+          self._generateAlternatePhy(phyConfigEntry, radioConfigModel, channelConfigEntry)
 
           # Populate modeSwitchPhyModeIds
           self._genModeSwitchPhrs(radioConfigModel, phyConfigEntry)

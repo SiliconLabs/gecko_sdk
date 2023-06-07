@@ -31,7 +31,7 @@
 #include "app_scheduler.h"
 #include "app_scheduler_config.h"
 #include "app_scheduler_memory.h"
-#include "sl_simple_timer.h"
+#include "app_timer.h"
 #include "sl_slist.h"
 #include "em_core.h"
 #include "app_scheduler_internal.h"
@@ -64,7 +64,7 @@ static sl_slist_node_t *queue = NULL;
 // Function declarations
 
 static app_scheduler_entry_t *next_active_task(void);
-static void timer_callback(sl_simple_timer_t *handle,
+static void timer_callback(app_timer_t *handle,
                            void *data);
 
 // -----------------------------------------------------------------------------
@@ -94,7 +94,7 @@ static app_scheduler_entry_t *next_active_task(void)
 /***************************************************************************//**
  * Timer callback for the scheduler
  ******************************************************************************/
-static void timer_callback(sl_simple_timer_t *handle,
+static void timer_callback(app_timer_t *handle,
                            void *data)
 {
   (void)handle;
@@ -124,7 +124,7 @@ sl_status_t app_scheduler_remove(app_scheduler_task_handle_t handle)
   SL_SLIST_FOR_EACH_ENTRY(queue, task, app_scheduler_entry_t, node) {
     if (((app_scheduler_entry_t *)handle) == task) {
       // Stop timer
-      sl_simple_timer_stop(&task->timer_handle);
+      app_timer_stop(&task->timer_handle);
 
       // Remove from list
       sl_slist_remove(&queue, &task->node);
@@ -157,14 +157,14 @@ sl_status_t app_scheduler_reschedule(app_scheduler_task_handle_t handle,
   SL_SLIST_FOR_EACH_ENTRY(queue, task, app_scheduler_entry_t, node) {
     if (((app_scheduler_entry_t *)handle) == task) {
       // Stop timer
-      sl_simple_timer_stop(&task->timer_handle);
+      app_timer_stop(&task->timer_handle);
 
       // Start with the new timer
-      sc = sl_simple_timer_start(&task->timer_handle,
-                                 delay_ms,
-                                 timer_callback,
-                                 (void*)task,
-                                 task->periodic);
+      sc = app_timer_start(&task->timer_handle,
+                           delay_ms,
+                           timer_callback,
+                           (void*)task,
+                           task->periodic);
       // Quit the loop
       break;
     }
@@ -173,6 +173,37 @@ sl_status_t app_scheduler_reschedule(app_scheduler_task_handle_t handle,
 
   return sc;
 }
+
+/***************************************************************************//**
+ * Get the reamining time in ms for a given, scheduled task
+ ******************************************************************************/
+sl_status_t app_scheduler_get_remaining_time_ms(app_scheduler_task_handle_t handle,
+                                                uint32_t *time_ms)
+{
+  sl_status_t sc = SL_STATUS_NOT_FOUND;
+  uint32_t time_tick;
+
+  CORE_DECLARE_IRQ_STATE;
+  app_scheduler_entry_t *entry = NULL;
+
+  CORE_ENTER_CRITICAL();
+  // Linear search in the queue for the task
+  SL_SLIST_FOR_EACH_ENTRY(queue, entry, app_scheduler_entry_t, node) {
+    if (((app_scheduler_entry_t *)handle) == entry) {
+      sc = sl_sleeptimer_get_timer_time_remaining(&entry->timer_handle.sleeptimer_handle, &time_tick);
+      break;
+    }
+  }
+
+  CORE_EXIT_CRITICAL();
+
+  if (sc == SL_STATUS_OK) {
+    *time_ms = sl_sleeptimer_tick_to_ms(time_tick);
+  }
+
+  return sc;
+}
+
 /***************************************************************************//**
  * Get the delay or period in ms for a given, scheduled task
  ******************************************************************************/
@@ -243,11 +274,11 @@ sl_status_t app_scheduler_add_periodic(app_scheduler_task_t task,
       // Make untriggered
       entry->triggered = false;
       // Start periodic timer
-      sc = sl_simple_timer_start(&entry->timer_handle,
-                                 period_ms,
-                                 timer_callback,
-                                 (void*)entry,
-                                 true);
+      sc = app_timer_start(&entry->timer_handle,
+                           period_ms,
+                           timer_callback,
+                           (void*)entry,
+                           true);
       if (handle != NULL) {
         *handle = (app_scheduler_task_handle_t)entry;
       }
@@ -305,11 +336,11 @@ sl_status_t app_scheduler_add_delayed(app_scheduler_task_t task,
         // Make untriggered
         entry->triggered = false;
         // Start timer
-        sc = sl_simple_timer_start(&entry->timer_handle,
-                                   delay_ms,
-                                   timer_callback,
-                                   (void*)entry,
-                                   false);
+        sc = app_timer_start(&entry->timer_handle,
+                             delay_ms,
+                             timer_callback,
+                             (void*)entry,
+                             false);
         if (handle != NULL) {
           *handle = (app_scheduler_task_handle_t)entry;
         }

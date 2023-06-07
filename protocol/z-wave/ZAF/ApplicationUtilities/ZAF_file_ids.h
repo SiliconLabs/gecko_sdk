@@ -35,6 +35,7 @@
 #define ZAF_FILE_ID_CC_DOOR_LOCK                (9)
 #define ZAF_FILE_ID_BASIC_SET                   (10)
 #define ZAF_FILE_ID_CENTRAL_SCENE_CONFIG        (11)
+#define ZAF_FILE_ID_APP_NAME                    (12)
 //Add file IDs for single files here.
 
 

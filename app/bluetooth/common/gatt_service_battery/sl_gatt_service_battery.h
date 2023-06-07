@@ -31,6 +31,11 @@
 #ifndef SL_GATT_SERVICE_BATTERY_H
 #define SL_GATT_SERVICE_BATTERY_H
 
+/***********************************************************************************************//**
+ * @addtogroup gatt_service_battery
+ * @{
+ **************************************************************************************************/
+
 #include "sl_bt_api.h"
 
 /**************************************************************************//**
@@ -53,4 +58,5 @@ uint8_t sl_gatt_service_battery_get_level(void);
  *****************************************************************************/
 uint8_t sl_gatt_service_battery_get_type(void);
 
+/** @} (end addtogroup gatt_service_battery) */
 #endif // SL_GATT_SERVICE_BATTERY_H

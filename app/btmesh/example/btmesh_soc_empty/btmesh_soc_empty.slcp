@@ -59,6 +59,8 @@ other_file:
   - path: ../../documentation/example/btmesh_soc_empty/readme_img5.png
 
 configuration:
+  - name: NVM3_DEFAULT_NVM_SIZE
+    value: "0x6000"
   - name: SL_BTMESH_CONFIG_MAX_PROV_BEARERS
     value: "3"
   - name: SL_HEAP_SIZE

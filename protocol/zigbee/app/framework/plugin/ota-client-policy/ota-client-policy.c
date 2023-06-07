@@ -27,11 +27,12 @@
 #endif
 #include "ota-client-policy.h"
 
-#ifdef UC_BUILD
  #if !defined(EMBER_TEST)
   #include "bootloader-interface-app.h"
   #endif
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #if (EMBER_AF_PLUGIN_OTA_CLIENT_POLICY_EBL_VERIFICATION == 1)
 #define EBL_VERIFICATION
 #endif
@@ -41,21 +42,6 @@
 #if (EMBER_AF_PLUGIN_OTA_CLIENT_POLICY_DELETE_FAILED_DOWNLOADS == 1)
 #define DELETE_FAILED_DOWNLOADS
 #endif
-#else // !UC_BUILD
-#include "callback.h"
-#ifdef EMBER_AF_PLUGIN_SLOT_MANAGER
-#define SL_CATALOG_SLOT_MANAGER_PRESENT
-#endif
-#ifdef EMBER_AF_PLUGIN_OTA_CLIENT_POLICY_EBL_VERIFICATION
-#define EBL_VERIFICATION
-#endif
-#ifdef EMBER_AF_PLUGIN_OTA_CLIENT_POLICY_INCLUDE_HARDWARE_VERSION
-#define INCLUDE_HARDWARE_VERSION
-#endif
-#ifdef EMBER_AF_PLUGIN_OTA_CLIENT_POLICY_DELETE_FAILED_DOWNLOADS
-#define DELETE_FAILED_DOWNLOADS
-#endif
-#endif // UC_BUILD
 
 #ifdef SL_CATALOG_SLOT_MANAGER_PRESENT
  #include "slot-manager.h"
@@ -135,7 +121,7 @@ EmberAfImageVerifyStatus emberAfOtaClientCustomVerifyCallback(bool newVerificati
   uint32_t slot;
 
   // If we're using slots, we'll need to call a different set of APIs
-  slot = emAfOtaStorageGetSlot();
+  slot = sli_zigbee_af_ota_storage_get_slot();
 
   // For sleepies, we must re-initalize the EEPROM / bootloader
   // after each nap/hibernate.  This call will only re-initalize the EEPROM
@@ -213,10 +199,10 @@ void emberAfOtaClientBootloadCallback(const EmberAfOtaImageId* id)
   uint32_t slot;
 
   if (EMBER_AF_OTA_STORAGE_SUCCESS
-      != emAfOtaStorageGetTagOffsetAndSize(id,
-                                           OTA_TAG_UPGRADE_IMAGE,
-                                           &offset,
-                                           &endOffset)) {
+      != sli_zigbee_af_ota_storage_get_tag_offset_and_size(id,
+                                                           OTA_TAG_UPGRADE_IMAGE,
+                                                           &offset,
+                                                           &endOffset)) {
     emberAfCoreFlush();
     otaPrintln("Image does not contain an Upgrade Image Tag (0x%2X). Skipping "
                "upgrade.", OTA_TAG_UPGRADE_IMAGE);
@@ -227,7 +213,7 @@ void emberAfOtaClientBootloadCallback(const EmberAfOtaImageId* id)
   (void) emberSerialWaitSend(APP_SERIAL);
 
   // If we're using slots, we'll need to use a different set of APIs
-  slot = emAfOtaStorageGetSlot();
+  slot = sli_zigbee_af_ota_storage_get_slot();
 
   // These routines will NOT return unless we failed to launch the bootloader.
   if (INVALID_SLOT != slot) {

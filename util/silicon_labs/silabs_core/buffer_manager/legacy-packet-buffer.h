@@ -72,39 +72,39 @@ emberFillStackBuffer(unsigned int count, ...);
 //----------------------------------------------------------------
 // Macros for the MessageBuffer interface.
 
-#define emberMessageBufferContents emGetBufferPointer
-#define emberMessageBufferLength emGetBufferLength
+#define emberMessageBufferContents sli_legacy_buffer_manager_get_buffer_pointer
+#define emberMessageBufferLength sli_legacy_buffer_manager_get_buffer_length
 
-#define emPacketHeaderPayload(header) emGetPayloadLink(header)
+#define sli_legacy_packet_buffer_packet_header_payload(header) sli_legacy_buffer_manager_get_payload_link(header)
 
-#define emSetPacketHeaderPayload(header, payload) \
-  emSetPayloadLink((header), (payload))
+#define sli_legacy_packet_buffer_set_packet_header_payload(header, payload) \
+  sli_legacy_buffer_manager_set_payload_link((header), (payload))
 
 #define emberFillLinkedBuffers(contents, length) \
-  emReallyFillBuffer((contents), (length), false)
+  sli_legacy_buffer_manager_really_fill_buffer((contents), (length), false)
 
  #define emberFillLinkedAsyncBuffers(contents, length) \
-  emReallyFillBuffer((contents), (length), true)
+  sli_legacy_buffer_manager_really_fill_buffer((contents), (length), true)
 
-#define emMessageBufferQueueAdd emBufferQueueAdd
-#define emMessageBufferQueueRemoveHead emBufferQueueRemoveHead
-#define emMessageBufferQueueRemove emBufferQueueRemove
-#define emMessageBufferQueueIsEmpty emBufferQueueIsEmpty
+#define sli_legacy_packet_buffer_queue_add sli_legacy_buffer_manager_buffer_queue_add
+#define sli_legacy_packet_buffer_queue_remove_head sli_legacy_buffer_manager_buffer_queue_remove_head
+#define sli_legacy_packet_buffer_queue_remove sli_legacy_buffer_manager_buffer_queue_remove
+#define sli_legacy_packet_buffer_queue_is_empty sli_legacy_buffer_manager_buffer_queue_is_empty
 
 #undef EMBER_NULL_MESSAGE_BUFFER
 #define EMBER_NULL_MESSAGE_BUFFER NULL_BUFFER
 
 #define emberCopyFromLinkedBuffers(buffer, startIndex, contents, length) \
-  emReallyCopyToLinkedBuffers((const uint8_t *) (contents), (buffer), (startIndex), (length), 0)
+  sli_legacy_packet_buffer_really_copy_to_linked_buffers((const uint8_t *) (contents), (buffer), (startIndex), (length), 0)
 
 #define emberCopyToLinkedBuffers(contents, buffer, startIndex, length) \
-  emReallyCopyToLinkedBuffers((const uint8_t *) (contents), (buffer), (startIndex), (length), 1)
+  sli_legacy_packet_buffer_really_copy_to_linked_buffers((const uint8_t *) (contents), (buffer), (startIndex), (length), 1)
 
-#define emCopyFromLinkedBuffers(contents, buffer, length) \
-  emReallyCopyToLinkedBuffers((const uint8_t *) (contents), (buffer), (0), (length), 0)
+#define sli_legacy_buffer_manager_copy_from_linked_buffers(contents, buffer, length) \
+  sli_legacy_packet_buffer_really_copy_to_linked_buffers((const uint8_t *) (contents), (buffer), (0), (length), 0)
 
 #define emberAllocateStackBuffer() \
-  emReallyAllocateBuffer(0, false)
+  sli_legacy_buffer_manager_really_allocate_buffer(0, false)
 
 #define PACKET_BUFFER_SIZE 32
 

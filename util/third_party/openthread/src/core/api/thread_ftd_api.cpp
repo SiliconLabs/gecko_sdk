@@ -79,6 +79,16 @@ otError otThreadSetPreferredRouterId(otInstance *aInstance, uint8_t aRouterId)
     return AsCoreType(aInstance).Get<Mle::MleRouter>().SetPreferredRouterId(aRouterId);
 }
 
+const otDeviceProperties *otThreadGetDeviceProperties(otInstance *aInstance)
+{
+    return &AsCoreType(aInstance).Get<Mle::MleRouter>().GetDeviceProperties();
+}
+
+void otThreadSetDeviceProperties(otInstance *aInstance, const otDeviceProperties *aDeviceProperties)
+{
+    AsCoreType(aInstance).Get<Mle::MleRouter>().SetDeviceProperties(AsCoreType(aDeviceProperties));
+}
+
 uint8_t otThreadGetLocalLeaderWeight(otInstance *aInstance)
 {
     return AsCoreType(aInstance).Get<Mle::MleRouter>().GetLeaderWeight();
@@ -141,6 +151,16 @@ uint8_t otThreadGetRouterUpgradeThreshold(otInstance *aInstance)
 void otThreadSetRouterUpgradeThreshold(otInstance *aInstance, uint8_t aThreshold)
 {
     AsCoreType(aInstance).Get<Mle::MleRouter>().SetRouterUpgradeThreshold(aThreshold);
+}
+
+uint8_t otThreadGetChildRouterLinks(otInstance *aInstance)
+{
+    return AsCoreType(aInstance).Get<Mle::MleRouter>().GetChildRouterLinks();
+}
+
+otError otThreadSetChildRouterLinks(otInstance *aInstance, uint8_t aChildRouterLinks)
+{
+    return AsCoreType(aInstance).Get<Mle::MleRouter>().SetChildRouterLinks(aChildRouterLinks);
 }
 
 otError otThreadReleaseRouterId(otInstance *aInstance, uint8_t aRouterId)
@@ -213,10 +233,10 @@ otError otThreadGetChildInfoByIndex(otInstance *aInstance, uint16_t aChildIndex,
     return AsCoreType(aInstance).Get<ChildTable>().GetChildInfoByIndex(aChildIndex, AsCoreType(aChildInfo));
 }
 
-otError otThreadGetChildNextIp6Address(otInstance *               aInstance,
+otError otThreadGetChildNextIp6Address(otInstance                *aInstance,
                                        uint16_t                   aChildIndex,
                                        otChildIp6AddressIterator *aIterator,
-                                       otIp6Address *             aAddress)
+                                       otIp6Address              *aAddress)
 {
     Error        error = kErrorNone;
     const Child *child;
@@ -277,10 +297,7 @@ void otThreadGetPskc(otInstance *aInstance, otPskc *aPskc)
 }
 
 #if OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE
-otPskcRef otThreadGetPskcRef(otInstance *aInstance)
-{
-    return AsCoreType(aInstance).Get<KeyManager>().GetPskcRef();
-}
+otPskcRef otThreadGetPskcRef(otInstance *aInstance) { return AsCoreType(aInstance).Get<KeyManager>().GetPskcRef(); }
 #endif
 
 otError otThreadSetPskc(otInstance *aInstance, const otPskc *aPskc)
@@ -330,17 +347,17 @@ void otThreadRegisterNeighborTableCallback(otInstance *aInstance, otNeighborTabl
     AsCoreType(aInstance).Get<NeighborTable>().RegisterCallback(aCallback);
 }
 
-void otThreadSetDiscoveryRequestCallback(otInstance *                     aInstance,
+void otThreadSetDiscoveryRequestCallback(otInstance                      *aInstance,
                                          otThreadDiscoveryRequestCallback aCallback,
-                                         void *                           aContext)
+                                         void                            *aContext)
 {
     AsCoreType(aInstance).Get<Mle::MleRouter>().SetDiscoveryRequestCallback(aCallback, aContext);
 }
 
 #if OPENTHREAD_CONFIG_REFERENCE_DEVICE_ENABLE
-void otThreadSendAddressNotification(otInstance *              aInstance,
-                                     otIp6Address *            aDestination,
-                                     otIp6Address *            aTarget,
+void otThreadSendAddressNotification(otInstance               *aInstance,
+                                     otIp6Address             *aDestination,
+                                     otIp6Address             *aTarget,
                                      otIp6InterfaceIdentifier *aMlIid)
 {
     AsCoreType(aInstance).Get<AddressResolver>().SendAddressQueryResponse(AsCoreType(aTarget), AsCoreType(aMlIid),
@@ -348,8 +365,8 @@ void otThreadSendAddressNotification(otInstance *              aInstance,
 }
 
 #if OPENTHREAD_CONFIG_BACKBONE_ROUTER_DUA_NDPROXYING_ENABLE
-otError otThreadSendProactiveBackboneNotification(otInstance *              aInstance,
-                                                  otIp6Address *            aTarget,
+otError otThreadSendProactiveBackboneNotification(otInstance               *aInstance,
+                                                  otIp6Address             *aTarget,
                                                   otIp6InterfaceIdentifier *aMlIid,
                                                   uint32_t                  aTimeSinceLastTransaction)
 {
@@ -372,6 +389,9 @@ void otThreadSetThreadVersionCheckEnabled(otInstance *aInstance, bool aEnabled)
 #if OPENTHREAD_CONFIG_REFERENCE_DEVICE_ENABLE
 void otThreadGetRouterIdRange(otInstance *aInstance, uint8_t *aMinRouterId, uint8_t *aMaxRouterId)
 {
+    AssertPointerIsNotNull(aMinRouterId);
+    AssertPointerIsNotNull(aMaxRouterId);
+
     AsCoreType(aInstance).Get<RouterTable>().GetRouterIdRange(*aMinRouterId, *aMaxRouterId);
 }
 
@@ -380,5 +400,23 @@ otError otThreadSetRouterIdRange(otInstance *aInstance, uint8_t aMinRouterId, ui
     return AsCoreType(aInstance).Get<RouterTable>().SetRouterIdRange(aMinRouterId, aMaxRouterId);
 }
 #endif
+
+bool otThreadIsRouterIdAllocated(otInstance *aInstance, uint8_t aRouterId)
+{
+    return AsCoreType(aInstance).Get<RouterTable>().IsAllocated(aRouterId);
+}
+
+void otThreadGetNextHopAndPathCost(otInstance *aInstance,
+                                   uint16_t    aDestRloc16,
+                                   uint16_t   *aNextHopRloc16,
+                                   uint8_t    *aPathCost)
+{
+    uint8_t  pathcost;
+    uint16_t nextHopRloc16;
+
+    AsCoreType(aInstance).Get<RouterTable>().GetNextHopAndPathCost(
+        aDestRloc16, (aNextHopRloc16 != nullptr) ? *aNextHopRloc16 : nextHopRloc16,
+        (aPathCost != nullptr) ? *aPathCost : pathcost);
+}
 
 #endif // OPENTHREAD_FTD

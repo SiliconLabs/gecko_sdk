@@ -38,4 +38,4 @@ ui_hints:
   highlight: readme.md
 tag:
   - hardware:component:led:1+
-  - hardware:device:ram:8
+  - hardware:device:ram:20

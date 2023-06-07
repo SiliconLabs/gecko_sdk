@@ -48,6 +48,11 @@
 // <i> Default: 1
 #define  SL_STATUS_STRING_ENABLE_WIFI                                1
 
+// <q SL_STATUS_STRING_ENABLE_COMPUTE> Enable Compute (MVP Driver & MVP Math) string components
+// <i> Enable (1) or disable (0) MVP Driver/MVP Math string components.
+// <i> Default: 0
+#define  SL_STATUS_STRING_ENABLE_COMPUTE                             1
+
 // </h>
 
 #endif // End of status_string_config module include.

@@ -19,7 +19,7 @@ template_contribution:
   - name: zigbee_af_callback
     value:
       callback_type: event_init
-      function_name: emAfPluginXmodemSenderInitCallback  
+      function_name: sli_zigbee_af_xmodsli_zigbee_sender_init_callback  
 documentation:
   docset: zigbee
   document: zigbee-af-api/xmodem-sender

@@ -21,13 +21,16 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 import dataclasses
+import enum
 import operator
-from typing import Callable, ClassVar, Dict, List, Mapping, Optional, Union
+from typing import (Callable, ClassVar, Dict, Iterator, List, Mapping,
+                    Optional, Union)
 
 from . import util
 from .event import LocalEvent
 from .mdl import NamedModelID
 from .statedict import StateDictObject
+from .util import ConnectionParams
 
 
 class Network(StateDictObject):
@@ -263,13 +266,97 @@ class ModelID(StateDictObject):
         return f"0x{self.vendor_id:04X}:0x{self.model_id:04X}"
 
 
+class GapAddrType(util.BtmeshIntEnum):
+    PUBLIC_ADDRESS = 0x0
+    STATIC_ADDRESS = 0x1
+    RANDOM_RESOLVABLE_ADDRESS = 0x2
+    RANDOM_NONRESOLVABLE_ADDRESS = 0x3
+    PUBLIC_ADDRESS_RESOLVED_FROM_RPA = 0x4
+    STATIC_ADDRESS_RESOLVED_FROM_RPA = 0x5
+    ANONYMOUS_ADDRESS = 0xFF
+    UNKNOWN_VALUE = util.ENUM_UNKNOWN_VALUE
+
+
+class GapPhy(util.BtmeshIntEnum):
+    LE_1M = 0x01
+    LE_2M = 0x02
+    LE_CODED = 0x04
+    LE_ANY = 0xFF
+    UNKNOWN_VALUE = util.ENUM_UNKNOWN_VALUE
+
+
+class GapPhyCoding(util.BtmeshIntEnum):
+    LE_1M_UNCODED = 0x01
+    LE_2M_UNCODED = 0x02
+    LE_125K_CODED = 0x04
+    LE_500K_CODED = 0x08
+    UNKNOWN_VALUE = util.ENUM_UNKNOWN_VALUE
+
+
+class ConnectionStep(util.BtmeshIntEnum):
+    INACTIVE = enum.auto()
+    OPENING = enum.auto()
+    ACTIVE = enum.auto()
+    CLOSING = enum.auto()
+    UNKNOWN_VALUE = util.ENUM_UNKNOWN_VALUE
+
+
+class ProxyStep(util.BtmeshIntEnum):
+    INACTIVE = enum.auto()
+    CONNECTING = enum.auto()
+    ACTIVE = enum.auto()
+    DISCONNECTING = enum.auto()
+    UNKNOWN_VALUE = util.ENUM_UNKNOWN_VALUE
+
+
+@dataclasses.dataclass
+class ConnectionInfo(StateDictObject):
+    conn_handle: int
+    bd_addr: str
+    bd_addr_type: GapAddrType
+    ini_phy: GapPhy
+    timeout_ms: int
+    mtu: int
+    step: ConnectionStep = ConnectionStep.INACTIVE
+    conn_params: Optional[ConnectionParams] = None
+
+    def __post_init__(self):
+        if not isinstance(self.bd_addr_type, GapAddrType):
+            self.bd_addr_type = GapAddrType.from_int(self.bd_addr_type)
+        if not isinstance(self.ini_phy, GapPhy):
+            self.ini_phy = GapPhy.from_int(self.ini_phy)
+        if not isinstance(self.step, ConnectionStep):
+            self.step = ConnectionStep.from_int(self.step)
+        if not self.conn_params:
+            self.conn_params = None
+        elif isinstance(self.conn_params, Mapping):
+            self.conn_params = ConnectionParams.create_from_dict(self.conn_params)
+        elif not isinstance(self.conn_params, ConnectionParams):
+            self.raise_construction_error(
+                "conn_params", self.conn_params, type_error=True
+            )
+
+
+@dataclasses.dataclass
+class ProxyInfo(StateDictObject):
+    proxy_handle: int
+    conn_handle: int
+    node_uuid: bytes
+    step: ProxyStep = ProxyStep.INACTIVE
+
+    def __post_init__(self):
+        self.node_uuid = self.to_bytes(self.node_uuid)
+        if not isinstance(self.step, ProxyStep):
+            self.step = ProxyStep.from_int(self.step)
+
+
 @dataclasses.dataclass
 class BtmeshDbClearedEvent(LocalEvent):
     name: ClassVar[str] = "btmesh_levt_db_cleared"
 
 
 @dataclasses.dataclass
-class BtmeshDbNodeRemoved(LocalEvent):
+class BtmeshDbNodeRemovedEvent(LocalEvent):
     name: ClassVar[str] = "btmesh_levt_db_node_removed"
     node: Node
     node_memento: Dict[str, object] = dataclasses.field(
@@ -283,6 +370,8 @@ class BtmeshDatabase(StateDictObject):
         networks=[],
         nodes=[],
         prov_uuid=None,
+        bt_conn_info_dict={},
+        proxy_info_dict={},
         emit: Optional[Callable[[LocalEvent], None]] = None,
     ):
         self.networks = [nw for nw in networks]
@@ -295,6 +384,23 @@ class BtmeshDatabase(StateDictObject):
                 self.nodes.append(node)
             else:
                 self.raise_construction_error("node", node, type_error=True)
+        self.bt_conn_info_dict: Dict[int, ConnectionInfo] = {}
+        for conn_info in bt_conn_info_dict.values():
+            if isinstance(conn_info, Mapping):
+                self.add_bt_conn_info(ConnectionInfo.create_from_dict(conn_info))
+            elif isinstance(conn_info, ConnectionInfo):
+                self.add_bt_conn_info(conn_info)
+            else:
+                self.raise_construction_error("conn_info", conn_info, type_error=True)
+        self.proxy_info_dict: Dict[int, ProxyInfo] = {}
+        for proxy_info in proxy_info_dict.values():
+            if isinstance(proxy_info, Mapping):
+                self.add_proxy_info(ProxyInfo.create_from_dict(proxy_info))
+            elif isinstance(proxy_info, ProxyInfo):
+                self.add_proxy_info(proxy_info)
+            else:
+                self.raise_construction_error("proxy_info", proxy_info, type_error=True)
+
         if emit is None:
             self.emit = self.null_emitter
         else:
@@ -380,7 +486,7 @@ class BtmeshDatabase(StateDictObject):
         self, node: Node, node_memento: Optional[Dict[str, object]] = None
     ) -> Node:
         self.nodes.remove(node)
-        self.emit(BtmeshDbNodeRemoved(node, node_memento))
+        self.emit(BtmeshDbNodeRemovedEvent(node, node_memento))
         return node
 
     def remove_node_by_name(
@@ -437,6 +543,107 @@ class BtmeshDatabase(StateDictObject):
         if reverse:
             elem_addrs.reverse()
         return elem_addrs
+
+    @property
+    def bt_conns(self) -> Iterator[ConnectionInfo]:
+        for bt_conn_info in self.bt_conn_info_dict.values():
+            yield bt_conn_info
+
+    @property
+    def proxy_conns(self) -> Iterator[ProxyInfo]:
+        for proxy_info in self.proxy_info_dict.values():
+            yield proxy_info
+
+    def add_bt_conn_info(self, conn_info: ConnectionInfo) -> None:
+        self.bt_conn_info_dict[conn_info.conn_handle] = conn_info
+
+    def add_proxy_info(self, proxy_info: ProxyInfo) -> None:
+        self.proxy_info_dict[proxy_info.proxy_handle] = proxy_info
+
+    def remove_bt_conn_handle(self, conn_handle: int) -> None:
+        self.bt_conn_info_dict.pop(conn_handle, None)
+
+    def remove_proxy_handle(self, proxy_handle: int) -> None:
+        self.proxy_info_dict.pop(proxy_handle, None)
+
+    def clear_all_conns(self) -> None:
+        self.bt_conn_info_dict.clear()
+        self.proxy_info_dict.clear()
+
+    def get_bt_conn_count(self) -> int:
+        return len(self.bt_conn_info_dict)
+
+    def get_proxy_count(self) -> int:
+        return len(self.proxy_info_dict)
+
+    def get_bt_conn_info_by_conn_handle(
+        self, conn_handle: int
+    ) -> Optional[ConnectionInfo]:
+        if conn_handle in self.bt_conn_info_dict:
+            return self.bt_conn_info_dict[conn_handle]
+        else:
+            return None
+
+    def get_proxy_info_by_proxy_handle(self, proxy_handle: int) -> Optional[ProxyInfo]:
+        if proxy_handle in self.proxy_info_dict:
+            return self.proxy_info_dict[proxy_handle]
+        else:
+            return None
+
+    def get_proxy_info_by_node(self, node: Node) -> Optional[ProxyInfo]:
+        return next(
+            (
+                proxy_info
+                for proxy_info in self.proxy_info_dict.values()
+                if proxy_info.node_uuid == node.uuid
+            ),
+            None,
+        )
+
+    def get_proxy_info_by_bt_conn_handle(self, conn_handle: int):
+        return next(
+            (
+                proxy_info
+                for proxy_info in self.proxy_info_dict.values()
+                if proxy_info.conn_handle == conn_handle
+            ),
+            None,
+        )
+
+    def get_bt_conn_handle_by_bd_addr(self, bd_addr: str) -> int:
+        return next(
+            (
+                conn_handle
+                for conn_handle, conn_info in self.bt_conn_info_dict.items()
+                if conn_info.bd_addr == bd_addr
+            ),
+            None,
+        )
+
+    def is_bt_conn_exists(self, conn_handle: int) -> bool:
+        return conn_handle in self.bt_conn_info_dict
+
+    def is_proxy_conn_exists(self, node: Node) -> bool:
+        proxy_info = next(
+            (
+                proxy_info
+                for proxy_info in self.proxy_info_dict.values()
+                if proxy_info.node_uuid == node.uuid
+            ),
+            None,
+        )
+        return proxy_info is not None
+
+    def is_proxy_conn_with_conn_handle_exists(self, conn_handle: int) -> bool:
+        proxy_info = next(
+            (
+                proxy_info
+                for proxy_info in self.proxy_info_dict.values()
+                if proxy_info.conn_handle == conn_handle
+            ),
+            None,
+        )
+        return proxy_info is not None
 
 
 class FWID(StateDictObject):

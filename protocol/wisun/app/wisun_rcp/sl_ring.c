@@ -37,7 +37,7 @@ int ring_push(struct ring *ring, uint8_t data)
     return 0;
 }
 
-int ring_push_buf(struct ring *ring, uint8_t *data, size_t len)
+int ring_push_buf(struct ring *ring, const uint8_t *data, size_t len)
 {
     size_t remaining;
     unsigned int count_wr;

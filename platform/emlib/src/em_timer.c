@@ -193,11 +193,7 @@ void TIMER_Init(TIMER_TypeDef *timer, const TIMER_Init_TypeDef *init)
   /* Reset the counter. */
   timer->CNT = _TIMER_CNT_RESETVALUE;
 
-#if defined(_SILICON_LABS_32B_SERIES_2)
-  ctrlRegVal = ((uint32_t)init->fallAction   << _TIMER_CTRL_FALLA_SHIFT)
-               | ((uint32_t)init->riseAction << _TIMER_CTRL_RISEA_SHIFT)
-               | (init->count2x              ?   TIMER_CTRL_X2CNT     : 0);
-#else
+#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
   ctrlRegVal = ((uint32_t)init->prescale     << _TIMER_CTRL_PRESC_SHIFT)
                | ((uint32_t)init->clkSel     << _TIMER_CTRL_CLKSEL_SHIFT)
                | ((uint32_t)init->fallAction << _TIMER_CTRL_FALLA_SHIFT)
@@ -216,6 +212,11 @@ void TIMER_Init(TIMER_TypeDef *timer, const TIMER_Init_TypeDef *init)
   ctrlRegVal |= (init->count2x              ?   TIMER_CTRL_X2CNT     : 0)
                 | (init->ati                ?   TIMER_CTRL_ATI       : 0);
 #endif
+
+#else
+  ctrlRegVal = ((uint32_t)init->fallAction   << _TIMER_CTRL_FALLA_SHIFT)
+               | ((uint32_t)init->riseAction << _TIMER_CTRL_RISEA_SHIFT)
+               | (init->count2x              ?   TIMER_CTRL_X2CNT     : 0);
 #endif
 
   timer->CTRL = ctrlRegVal;

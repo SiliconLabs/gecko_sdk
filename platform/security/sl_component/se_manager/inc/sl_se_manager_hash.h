@@ -30,9 +30,9 @@
 #ifndef SL_SE_MANAGER_HASH_H
 #define SL_SE_MANAGER_HASH_H
 
-#include "em_device.h"
+#include "sli_se_manager_features.h"
 
-#if defined(SEMAILBOX_PRESENT) || defined(DOXYGEN)
+#if defined(SLI_MAILBOX_COMMAND_SUPPORTED)
 
 /// @addtogroup sl_se_manager
 /// @{
@@ -166,7 +166,7 @@ sl_status_t sl_se_hash_sha224_multipart_starts(sl_se_sha224_multipart_context_t 
 sl_status_t sl_se_hash_sha256_multipart_starts(sl_se_sha256_multipart_context_t *sha256_ctx,
                                                sl_se_command_context_t *cmd_ctx);
 
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || defined(DOXYGEN)
+#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
 /***************************************************************************//**
  * @brief
  *   Prepare a SHA384 streaming command context object.
@@ -303,6 +303,6 @@ sl_status_t sl_se_hash_multipart_finish(void *hash_type_ctx,
 /// @} (end addtogroup sl_se_manager_hash)
 /// @} (end addtogroup sl_se_manager)
 
-#endif // defined(SEMAILBOX_PRESENT)
+#endif // defined(SLI_MAILBOX_COMMAND_SUPPORTED)
 
 #endif // SL_SE_MANAGER_HASH_H

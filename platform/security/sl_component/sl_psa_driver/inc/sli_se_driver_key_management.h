@@ -44,91 +44,42 @@
  * \{
  ******************************************************************************/
 
-#include "em_device.h"
+#include "sli_psa_driver_features.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
 
 #include "sli_se_opaque_types.h"
 #include "sli_se_version_dependencies.h"
+
 #include "sl_se_manager.h"
+
 // Replace inclusion of crypto_driver_common.h with the new psa driver interface
 // header file when it becomes available.
 #include "psa/crypto_driver_common.h"
+
 #include <string.h>
 
-/*******************************************************************************
- * Defines *
- ******************************************************************************/
-
 // -----------------------------------------------------------------------------
-// Macros
+// Defines and macros
 
-#if (defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR)                                   \
-  || defined(PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY))                                \
-  && (defined(PSA_WANT_ECC_SECP_R1_192)                                        \
-  || (defined(PSA_WANT_ECC_SECP_R1_224)                                        \
-  && !defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1))                            \
-  || defined(PSA_WANT_ECC_SECP_R1_256))                                        \
-  || ((_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) \
-  &&  (defined(PSA_WANT_ECC_SECP_R1_384)                                       \
-  || defined(PSA_WANT_ECC_SECP_R1_521)))
-  #define SLI_PSA_WANT_ECC_SECP
-#endif
-#if (defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR)    \
-  || defined(PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY)) \
-  && defined(PSA_WANT_ECC_MONTGOMERY_255)
-  #define SLI_PSA_WANT_ECC_MONTGOMERY
-  #define SLI_PSA_WANT_ECC_MONTGOMERY_255
-#endif
-#if (defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR)    \
-  || defined(PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY)) \
-  &&  defined(PSA_WANT_ECC_MONTGOMERY_448)      \
-  && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
-  #define SLI_PSA_WANT_ECC_MONTGOMERY
-  #define SLI_PSA_WANT_ECC_MONTGOMERY_448
-#endif
-#if (defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR)    \
-  || defined(PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY)) \
-  && defined(PSA_WANT_ECC_TWISTED_EDWARDS_255)
-  #define SLI_PSA_WANT_ECC_TWISTED_EDWARDS
-#endif
-
-#if defined(SLI_PSA_WANT_ECC_SECP)        \
-  || defined(SLI_PSA_WANT_ECC_MONTGOMERY) \
-  || defined(SLI_PSA_WANT_ECC_TWISTED_EDWARDS)
-  #define SLI_PSA_WANT_ECC
-#endif
-
-#if defined(SLI_PSA_WANT_ECC) && defined(PSA_WANT_ALG_ECDH) && defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR)
-  #define SLI_PSA_WANT_ALG_ECDH
-#endif
-
-#if defined(PSA_WANT_ALG_ECDSA) && defined(SLI_PSA_WANT_ECC_SECP)
-  #define SLI_PSA_WANT_ALG_ECDSA
-#endif
-#if defined(PSA_WANT_ALG_EDDSA) && defined(SLI_PSA_WANT_ECC_TWISTED_EDWARDS)
-  #define SLI_PSA_WANT_ALG_EDDSA
-#endif
-
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+#if defined(SLI_MBEDTLS_DEVICE_HSE_VAULT_HIGH)
 /// Max available curve size
   #define SLI_SE_MAX_CURVE_SIZE   (521)
 #else
 /// Max available curve size
   #define SLI_SE_MAX_CURVE_SIZE   (256)
 #endif
+
 /// Byte size of maximum available ECC private key padded to word-alignment
 #define SLI_SE_MAX_PADDED_KEY_PAIR_SIZE     \
   (PSA_BITS_TO_BYTES(SLI_SE_MAX_CURVE_SIZE) \
    + sli_se_get_padding(PSA_BITS_TO_BYTES(SLI_SE_MAX_CURVE_SIZE)))
+
 /// Byte size of maximum available ECDSA signature padded to word-alignment
 #define SLI_SE_MAX_PADDED_SIGNATURE_SIZE           \
   (PSA_ECDSA_SIGNATURE_SIZE(SLI_SE_MAX_CURVE_SIZE) \
    + 2 * sli_se_get_padding(PSA_BITS_TO_BYTES(SLI_SE_MAX_CURVE_SIZE)))
+
 /// Byte size of maximum available ECC public key padded to word-alignment
 #define SLI_SE_MAX_PADDED_PUBLIC_KEY_SIZE (SLI_SE_MAX_PADDED_SIGNATURE_SIZE)
 
@@ -146,9 +97,8 @@ extern "C" {
  */
 #define sli_se_word_align(size)   ((size + 3) & ~3)
 
-/*******************************************************************************
- * Static inlines *
- ******************************************************************************/
+// -----------------------------------------------------------------------------
+// Static inline functions
 
 /**
  * @brief
@@ -162,9 +112,9 @@ extern "C" {
  * @note
  *   Buffer sizes must be pre-validated.
  */
-__STATIC_INLINE void sli_se_pad_big_endian(uint8_t *tmp_buffer,
-                                           const uint8_t *buffer,
-                                           size_t  buffer_size)
+static inline void sli_se_pad_big_endian(uint8_t *tmp_buffer,
+                                         const uint8_t *buffer,
+                                         size_t  buffer_size)
 {
   size_t padding = sli_se_get_padding(buffer_size);
   memset(tmp_buffer, 0, padding); // Set the preceeding 0s
@@ -183,9 +133,9 @@ __STATIC_INLINE void sli_se_pad_big_endian(uint8_t *tmp_buffer,
  * @note
  *   Buffer sizes must be pre-validated.
  */
-__STATIC_INLINE void sli_se_unpad_big_endian(const uint8_t *tmp_buffer,
-                                             uint8_t *buffer,
-                                             size_t buffer_size)
+static inline void sli_se_unpad_big_endian(const uint8_t *tmp_buffer,
+                                           uint8_t *buffer,
+                                           size_t buffer_size)
 {
   size_t padding = sli_se_get_padding(buffer_size);
   memcpy(buffer, tmp_buffer + padding, buffer_size);
@@ -203,9 +153,9 @@ __STATIC_INLINE void sli_se_unpad_big_endian(const uint8_t *tmp_buffer,
  * @note
  *   Buffer sizes must be pre-validated.
  */
-__STATIC_INLINE void sli_se_pad_curve_point(uint8_t *tmp_buffer,
-                                            const uint8_t *buffer,
-                                            size_t coord_size)
+static inline void sli_se_pad_curve_point(uint8_t *tmp_buffer,
+                                          const uint8_t *buffer,
+                                          size_t coord_size)
 {
   size_t padding = sli_se_get_padding(coord_size);
   sli_se_pad_big_endian(tmp_buffer, buffer, coord_size);
@@ -226,9 +176,9 @@ __STATIC_INLINE void sli_se_pad_curve_point(uint8_t *tmp_buffer,
  * @note
  *   Buffer sizes must be pre-validated.
  */
-__STATIC_INLINE void sli_se_unpad_curve_point(const uint8_t *tmp_buffer,
-                                              uint8_t *buffer,
-                                              size_t coord_size)
+static inline void sli_se_unpad_curve_point(const uint8_t *tmp_buffer,
+                                            uint8_t *buffer,
+                                            size_t coord_size)
 {
   size_t padding = sli_se_get_padding(coord_size);
   sli_se_unpad_big_endian(tmp_buffer, buffer, coord_size);
@@ -247,7 +197,7 @@ __STATIC_INLINE void sli_se_unpad_curve_point(const uint8_t *tmp_buffer,
  * @param[in] data_length
  *   Length of the buffer
  */
-__STATIC_INLINE
+static inline
 void sli_se_key_descriptor_set_plaintext(sl_se_key_descriptor_t *key_desc,
                                          const uint8_t *data,
                                          size_t data_length)
@@ -267,7 +217,7 @@ void sli_se_key_descriptor_set_plaintext(sl_se_key_descriptor_t *key_desc,
  *   1 if the key type requires a format byte,
  *   0 otherwise
  */
-__STATIC_INLINE uint32_t sli_se_has_format_byte(psa_key_type_t key_type)
+static inline uint32_t sli_se_has_format_byte(psa_key_type_t key_type)
 {
   if (PSA_KEY_TYPE_IS_ECC_PUBLIC_KEY(key_type)) {
     if ((PSA_KEY_TYPE_ECC_GET_FAMILY(key_type) != PSA_ECC_FAMILY_MONTGOMERY)
@@ -278,27 +228,12 @@ __STATIC_INLINE uint32_t sli_se_has_format_byte(psa_key_type_t key_type)
   return 0U;
 }
 
-/*******************************************************************************
- * Function declarations *
- ******************************************************************************/
+// -----------------------------------------------------------------------------
+// Function declarations
 
-/**
- * @brief
- *   Get the length of the key buffer required for storing the given key
- *
- * @param[in] attributes
- *   PSA key attributes representing the key
- * @param[in] key_desc
- *   SL key descriptor representing the same key
- * @param[out] key_buffer_length
- *   Variable to populate with size
- * @returns
- *   PSA_SUSCCESS on success
- */
-psa_status_t
-sli_se_get_key_buffer_length(const psa_key_attributes_t *attributes,
-                             sl_se_key_descriptor_t *key_desc,
-                             size_t *key_buffer_length);
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * @brief
@@ -315,10 +250,9 @@ sli_se_get_key_buffer_length(const psa_key_attributes_t *attributes,
  *   PSA_SUCCESS stored key desc in context
  *   PSA_ERROR_BUFFER_TOO_SMALL output buffer is too small to hold an opaque key context
  */
-psa_status_t
-store_key_desc_in_context(sl_se_key_descriptor_t *key_desc,
-                          uint8_t *key_buffer,
-                          size_t key_buffer_size);
+psa_status_t store_key_desc_in_context(sl_se_key_descriptor_t *key_desc,
+                                       uint8_t *key_buffer,
+                                       size_t key_buffer_size);
 
 /**
  * @brief
@@ -340,11 +274,10 @@ store_key_desc_in_context(sl_se_key_descriptor_t *key_desc,
  *   array remains in scope. In practice, this is only guaranteed throughout a
  *   single driver function.
  */
-psa_status_t
-sli_se_key_desc_from_input(const psa_key_attributes_t* attributes,
-                           const uint8_t *key_buffer,
-                           size_t key_buffer_size,
-                           sl_se_key_descriptor_t *key_desc);
+psa_status_t sli_se_key_desc_from_input(const psa_key_attributes_t* attributes,
+                                        const uint8_t *key_buffer,
+                                        size_t key_buffer_size,
+                                        sl_se_key_descriptor_t *key_desc);
 
 /**
  * @brief
@@ -360,10 +293,9 @@ sli_se_key_desc_from_input(const psa_key_attributes_t* attributes,
  *   PSA_SUCCESS on success
  *   PSA_ERROR_INVALID_ARGUMENT on invalid attributes
  */
-psa_status_t
-sli_se_key_desc_from_psa_attributes(const psa_key_attributes_t *attributes,
-                                    size_t key_size,
-                                    sl_se_key_descriptor_t *key_desc);
+psa_status_t sli_se_key_desc_from_psa_attributes(const psa_key_attributes_t *attributes,
+                                                 size_t key_size,
+                                                 sl_se_key_descriptor_t *key_desc);
 
 /**
  * @brief
@@ -383,12 +315,11 @@ sli_se_key_desc_from_psa_attributes(const psa_key_attributes_t *attributes,
  *   PSA_SUCCESS if everything is OK
  *   PSA_ERROR_INVALID_ARGUMENT if key buffer does not mach a valid key context
  */
-psa_status_t
-sli_se_set_key_desc_output(const psa_key_attributes_t* attributes,
-                           uint8_t *key_buffer,
-                           size_t key_buffer_size,
-                           size_t key_size,
-                           sl_se_key_descriptor_t *key_desc);
+psa_status_t sli_se_set_key_desc_output(const psa_key_attributes_t* attributes,
+                                        uint8_t *key_buffer,
+                                        size_t key_buffer_size,
+                                        size_t key_size,
+                                        sl_se_key_descriptor_t *key_desc);
 
 // psa_generate_key entry point for both opaque and transparent drivers
 psa_status_t sli_se_driver_generate_key(const psa_key_attributes_t *attributes,
@@ -396,26 +327,21 @@ psa_status_t sli_se_driver_generate_key(const psa_key_attributes_t *attributes,
                                         size_t key_buffer_size,
                                         size_t *output_length);
 
-psa_status_t sli_se_driver_validate_key(const psa_key_attributes_t *attributes,
-                                        const uint8_t *data,
-                                        size_t data_length,
-                                        size_t *bits);
-
 #if defined(SLI_SE_VERSION_ECDH_PUBKEY_VALIDATION_UNCERTAIN) \
   && defined(MBEDTLS_ECP_C)                                  \
   && defined(MBEDTLS_PSA_CRYPTO_C)                           \
-  && defined(SL_SE_SUPPORT_FW_PRIOR_TO_1_2_2)
+  && SL_SE_SUPPORT_FW_PRIOR_TO_1_2_2
 psa_status_t sli_se_driver_validate_pubkey_with_fallback(psa_key_type_t key_type,
                                                          size_t key_bits,
                                                          const uint8_t *data,
                                                          size_t data_length);
 #endif // Software fallback for SE < 1.2.2
 
-#endif // SEMAILBOX_PRESENT
-
 #ifdef __cplusplus
 }
 #endif
+
+#endif // SLI_MBEDTLS_DEVICE_HSE
 
 /** \} (end addtogroup sl_psa_drivers_se) */
 /** \} (end addtogroup sl_psa_drivers) */

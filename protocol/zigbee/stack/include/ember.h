@@ -72,9 +72,6 @@
 #include "binding-table.h"
 #include "bootload.h"
 #include "zigbee-device-stack.h"
-#ifndef UC_BUILD
-#include "event_control/event.h"
-#endif
 #include "event_queue/event-queue.h"
 #include "ember-debug.h"
 #include "library.h"

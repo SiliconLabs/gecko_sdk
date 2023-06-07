@@ -30,9 +30,9 @@ typedef uint32_t PrepaySnapshotPayloadCause;
 typedef uint8_t  PrepaySnapshotPayloadType;
 typedef uint8_t  FriendlyCredit;
 
-void emAfPrepaymentClientCliChangePaymentMode(SL_CLI_COMMAND_ARG);
+void sli_zigbee_af_prepayment_client_cli_change_payment_mode(SL_CLI_COMMAND_ARG);
 
-void emAfPrepaymentClientCliChangePaymentMode(SL_CLI_COMMAND_ARG)
+void sli_zigbee_af_prepayment_client_cli_change_payment_mode(SL_CLI_COMMAND_ARG)
 {
   EmberNodeId nodeId;
   uint8_t srcEndpoint, dstEndpoint;
@@ -41,15 +41,15 @@ void emAfPrepaymentClientCliChangePaymentMode(SL_CLI_COMMAND_ARG)
   PaymentControlConfiguration proposedPaymentControlConfiguration;
   uint32_t cutOffValue;
 
-  nodeId = (EmberNodeId)emberUnsignedCommandArgument(0);
-  srcEndpoint = (uint8_t)emberUnsignedCommandArgument(1);
-  dstEndpoint = (uint8_t)emberUnsignedCommandArgument(2);
-  providerId = (uint32_t)emberUnsignedCommandArgument(3);
-  issuerEventId = (uint32_t)emberUnsignedCommandArgument(4);
+  nodeId = sl_cli_get_argument_uint16(arguments, 0);
+  srcEndpoint = sl_cli_get_argument_uint8(arguments, 1);
+  dstEndpoint = sl_cli_get_argument_uint8(arguments, 2);
+  providerId = sl_cli_get_argument_uint32(arguments, 3);
+  issuerEventId = sl_cli_get_argument_uint32(arguments, 4);
 
-  implementationDateTime = (uint32_t)emberUnsignedCommandArgument(5);
-  proposedPaymentControlConfiguration = (PaymentControlConfiguration)emberUnsignedCommandArgument(6);
-  cutOffValue = (uint32_t)emberUnsignedCommandArgument(7);
+  implementationDateTime = sl_cli_get_argument_uint32(arguments, 5);
+  proposedPaymentControlConfiguration = sl_cli_get_argument_uint16(arguments, 6);
+  cutOffValue = sl_cli_get_argument_uint32(arguments, 7);
 
   //emberAfAppPrintln("RX Publish Prepay Snapshot Cmd, varLen=%d", i );
   emberAfAppPrintln("Change Payment Mode, srcEp=%d, dstEp=%d, addr=%2x", srcEndpoint, dstEndpoint, nodeId);

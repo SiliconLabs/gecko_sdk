@@ -14,8 +14,9 @@
  * sections of the MSLA applicable to Source Code.
  *
  ******************************************************************************/
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #ifdef SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
 #include "app/framework/include/af.h"
 #include "app/framework/util/af-main.h"
@@ -24,11 +25,6 @@
 #else // !SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
 #include "green-power-adapter.h"
 #endif //SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
-#else //!UC_BUILD
-#include "app/framework/include/af.h"
-#include "app/framework/util/af-main.h"
-#include "app/framework/util/common.h"
-#endif //UC_BUILD
 
 #include "green-power-client.h"
 #include "stack/include/gp-types.h"
@@ -54,33 +50,23 @@
 #define isNodeIdValid(nodeId) ((nodeId) < EMBER_DISCOVERY_ACTIVE_NODE_ID)
 
 #ifdef EZSP_HOST
-#define emSetAddDelay(delay) (void)0
+#define sli_zigbee_af_set_add_delay(delay) (void)0
 #else
-void emSetAddDelay(uint16_t delay);
+void sli_zigbee_af_set_add_delay(uint16_t delay);
 #endif // EZSP_HOST
 
 static EmberAfGreenPowerClientCommissioningState commissioningState;
 static EmberAfGreenPowerDuplicateFilter duplicateFilter;
 
-#ifdef UC_BUILD
 sl_zigbee_event_t emberAfPluginGreenPowerClientExitCommissioningEvent;
 sl_zigbee_event_t emberAfPluginGreenPowerClientChannelEvent;
 #define exitEvent (&emberAfPluginGreenPowerClientExitCommissioningEvent)
 #define channelEvent (&emberAfPluginGreenPowerClientChannelEvent)
-void emberAfPluginGreenPowerClientChannelEventHandler(SLXU_UC_EVENT);
-void emberAfPluginGreenPowerClientExitCommissioningEventHandler(SLXU_UC_EVENT);
+void emberAfPluginGreenPowerClientChannelEventHandler(sl_zigbee_event_t * event);
+void emberAfPluginGreenPowerClientExitCommissioningEventHandler(sl_zigbee_event_t * event);
 #if (EMBER_AF_PLUGIN_GREEN_POWER_CLIENT_ENABLE_BIDIRECTIONAL_OPERATION == 1)
 #define ENABLE_BIDIRECTIONAL_OPERATION
 #endif
-#else // !UC_BUILD
-EmberEventControl emberAfPluginGreenPowerClientExitCommissioningEventControl;
-EmberEventControl emberAfPluginGreenPowerClientChannelEventControl;
-#define exitEvent emberAfPluginGreenPowerClientExitCommissioningEventControl
-#define channelEvent emberAfPluginGreenPowerClientChannelEventControl
-#ifdef EMBER_AF_PLUGIN_GREEN_POWER_CLIENT_ENABLE_BIDIRECTIONAL_OPERATION
-#define ENABLE_BIDIRECTIONAL_OPERATION
-#endif
-#endif // UC_BUILD
 
 static void flushGpTxQueue(void)
 {
@@ -108,17 +94,15 @@ static void sendChannelConfigToGpStub(void)
                0); //entryLifetimeMs
 }
 
-#ifdef UC_BUILD
-
 void emberAfPluginGreenPowerClientInitCallback(uint8_t init_level)
 {
   switch (init_level) {
     case SL_ZIGBEE_INIT_LEVEL_EVENT:
     {
-      slxu_zigbee_event_init(exitEvent,
-                             emberAfPluginGreenPowerClientExitCommissioningEventHandler);
-      slxu_zigbee_event_init(channelEvent,
-                             emberAfPluginGreenPowerClientChannelEventHandler);
+      sl_zigbee_event_init(exitEvent,
+                           emberAfPluginGreenPowerClientExitCommissioningEventHandler);
+      sl_zigbee_event_init(channelEvent,
+                           emberAfPluginGreenPowerClientChannelEventHandler);
       break;
     }
 
@@ -138,7 +122,7 @@ void emberAfPluginGreenPowerClientInitCallback(uint8_t init_level)
       // way to configure it at compile time.
       uint8_t proxyTableSize = EMBER_GP_PROXY_TABLE_SIZE;
       EmberAfStatus UNUSED status
-        = emberAfWriteClientAttribute(GP_ENDPOINT,
+        = emberAfWriteClientAttribute(EMBER_GP_ENDPOINT,
                                       ZCL_GREEN_POWER_CLUSTER_ID,
                                       ZCL_GP_CLIENT_GPP_MAX_PROXY_TABLE_ENTRIES_ATTRIBUTE_ID,
                                       &proxyTableSize,
@@ -148,30 +132,6 @@ void emberAfPluginGreenPowerClientInitCallback(uint8_t init_level)
   }
 }
 
-#else // !UC_BUILD
-
-void emberAfPluginGreenPowerClientInitCallback(void)
-{
-  MEMSET(&commissioningState,
-         0x00,
-         sizeof(EmberAfGreenPowerClientCommissioningState));
-  MEMSET(&duplicateFilter, 0x00, sizeof(EmberAfGreenPowerDuplicateFilter));
-
-  commissioningState.gppCommissioningWindow = EMBER_AF_PLUGIN_GREEN_POWER_CLIENT_GPP_COMMISSIONING_WINDOW;
-
-  // Write the max proxy table entries attribute, since we currently have no way
-  // to configure it at compile time.
-  uint8_t proxyTableSize = EMBER_GP_PROXY_TABLE_SIZE;
-  EmberAfStatus UNUSED status
-    = emberAfWriteClientAttribute(GP_ENDPOINT,
-                                  ZCL_GREEN_POWER_CLUSTER_ID,
-                                  ZCL_GP_CLIENT_GPP_MAX_PROXY_TABLE_ENTRIES_ATTRIBUTE_ID,
-                                  &proxyTableSize,
-                                  ZCL_INT8U_ATTRIBUTE_TYPE);
-}
-
-#endif // UC_BUILD
-
 void emberAfGreenPowerClusterExitCommissioningMode(void)
 {
   commissioningState.inCommissioningMode = false;
@@ -180,7 +140,7 @@ void emberAfGreenPowerClusterExitCommissioningMode(void)
   flushGpTxQueue();
 }
 
-void emberAfPluginGreenPowerClientChannelEventHandler(SLXU_UC_EVENT)
+void emberAfPluginGreenPowerClientChannelEventHandler(sl_zigbee_event_t * event)
 {
   if (commissioningState.channelStatus & GP_CLIENT_ON_TRANSMIT_CHANNEL_MASK) {
     if (commissioningState.channelStatus & GP_CLIENT_ADDITIONAL_CHANNEL_REQUEST_PENDING) {
@@ -194,14 +154,14 @@ void emberAfPluginGreenPowerClientChannelEventHandler(SLXU_UC_EVENT)
     flushGpTxQueue();
   }
 
-  slxu_zigbee_event_set_inactive(channelEvent);
+  sl_zigbee_event_set_inactive(channelEvent);
 }
 
-void emberAfPluginGreenPowerClientExitCommissioningEventHandler(SLXU_UC_EVENT)
+void emberAfPluginGreenPowerClientExitCommissioningEventHandler(sl_zigbee_event_t * event)
 {
   emberAfGreenPowerClusterExitCommissioningMode();
 
-  slxu_zigbee_event_set_inactive(exitEvent);
+  sl_zigbee_event_set_inactive(exitEvent);
 }
 
 uint16_t emberAfGreenPowerClientStoreProxyTableEntry(EmberGpProxyTableEntry *entry,
@@ -329,10 +289,10 @@ uint16_t emberAfGreenPowerClientStoreProxyTableEntry(EmberGpProxyTableEntry *ent
 //---------------------------
 // Command callbacks
 
-bool emAfPluginGreenPowerClientGpProxyCommissioningModeCommandHandler(uint8_t options,
-                                                                      uint16_t commissioningWindow,
-                                                                      uint8_t channel,
-                                                                      bool localCommandLoopback)
+bool sli_zigbee_af_green_power_client_gp_proxy_commissioning_mode_command_handler(uint8_t options,
+                                                                                  uint16_t commissioningWindow,
+                                                                                  uint8_t channel,
+                                                                                  bool localCommandLoopback)
 {
   bool enterCommissioningMode = (options
                                  & EMBER_AF_GP_PROXY_COMMISSIONING_MODE_OPTION_ACTION);
@@ -348,7 +308,7 @@ bool emAfPluginGreenPowerClientGpProxyCommissioningModeCommandHandler(uint8_t op
   bool unicastCommunication = (options
                                & EMBER_AF_GP_PROXY_COMMISSIONING_MODE_OPTION_UNICAST_COMMUNICATION);
 
-  if (!localCommandLoopback && emberAfCurrentEndpoint() != GP_ENDPOINT) {
+  if (!localCommandLoopback && emberAfCurrentEndpoint() != EMBER_GP_ENDPOINT) {
   } else if (!localCommandLoopback
              && commissioningState.inCommissioningMode
              && (emberGetSender() != commissioningState.commissioningSink)) {
@@ -365,11 +325,11 @@ bool emAfPluginGreenPowerClientGpProxyCommissioningModeCommandHandler(uint8_t op
     if (commissioningState.exitMode & EMBER_AF_GPC_COMMISSIONING_EXIT_ON_COMMISSIONING_WINDOW_EXP) {
       // store the new commissioning window value and update our local default
       // one.
-      slxu_zigbee_event_set_delay_ms(exitEvent,
-                                     (commissioningWindow * MILLISECOND_TICKS_PER_SECOND));
+      sl_zigbee_event_set_delay_ms(exitEvent,
+                                   (commissioningWindow * MILLISECOND_TICKS_PER_SECOND));
     } else {
-      slxu_zigbee_event_set_delay_ms(exitEvent,
-                                     (EMBER_AF_PLUGIN_GREEN_POWER_CLIENT_GPP_COMMISSIONING_WINDOW * MILLISECOND_TICKS_PER_SECOND));
+      sl_zigbee_event_set_delay_ms(exitEvent,
+                                   (EMBER_AF_PLUGIN_GREEN_POWER_CLIENT_GPP_COMMISSIONING_WINDOW * MILLISECOND_TICKS_PER_SECOND));
     }
     if (chanPresent) {
       commissioningState.channel = channel;
@@ -384,8 +344,6 @@ bool emAfPluginGreenPowerClientGpProxyCommissioningModeCommandHandler(uint8_t op
   return true;
 }
 
-#ifdef UC_BUILD
-
 /*
  * Disable default response bit should be set per GP Spec 14-0563-08
  */
@@ -398,10 +356,10 @@ bool emberAfGreenPowerClusterGpProxyCommissioningModeCallback(EmberAfClusterComm
     return false;
   }
 
-  return emAfPluginGreenPowerClientGpProxyCommissioningModeCommandHandler(cmd_data.options,
-                                                                          cmd_data.commissioningWindow,
-                                                                          cmd_data.channel,
-                                                                          false);
+  return sli_zigbee_af_green_power_client_gp_proxy_commissioning_mode_command_handler(cmd_data.options,
+                                                                                      cmd_data.commissioningWindow,
+                                                                                      cmd_data.channel,
+                                                                                      false);
 }
 
 /*
@@ -440,11 +398,11 @@ bool emberAfGreenPowerClusterGpPairingCallback(EmberAfClusterCommand *cmd)
     broadcast = true;
   }
   EmberGpApplicationId appId = (cmd_data.options & EMBER_AF_GP_PAIRING_OPTION_APPLICATION_ID);
-  if (!emGpMakeAddr(&addr,
-                    appId,
-                    cmd_data.gpdSrcId,
-                    cmd_data.gpdIeee,
-                    cmd_data.endpoint)
+  if (!sli_zigbee_af_gp_make_addr(&addr,
+                                  appId,
+                                  cmd_data.gpdSrcId,
+                                  cmd_data.gpdIeee,
+                                  cmd_data.endpoint)
       || IS_GPD_SRC_ID_ZERO(appId, cmd_data.gpdSrcId)) {
     // GPD Address or App Id are invalid, so drop the command
     return true;
@@ -453,7 +411,7 @@ bool emberAfGreenPowerClusterGpPairingCallback(EmberAfClusterCommand *cmd)
   emberAfCorePrint("GP Pairing\n");
 
   // Commissioning: Step 21a: Proxy finalizes commissioning
-  if (emberAfCurrentEndpoint() != GP_ENDPOINT) {
+  if (emberAfCurrentEndpoint() != EMBER_GP_ENDPOINT) {
   } else if (securityLevel == EMBER_GP_SECURITY_LEVEL_RESERVED) {
   } else if ((cmd_data.options & EMBER_AF_GP_PAIRING_OPTION_ADD_SINK)
              && (cmd_data.options & EMBER_AF_GP_PAIRING_OPTION_REMOVE_GPD)) {
@@ -493,7 +451,7 @@ bool emberAfGreenPowerClusterGpPairingCallback(EmberAfClusterCommand *cmd)
       emberAfGreenPowerClusterExitCommissioningMode();
     } else if ((cmd_data.options & EMBER_AF_GP_PAIRING_OPTION_ADD_SINK) && !createdPairing) {
 #ifndef EZSP_HOST
-      uint8_t index = emGpProxyTableGetFreeEntryIndex();  //emGpProxyTableFindOrAllocateEntry(&addr);   //checking if pairing failed because of no
+      uint8_t index = sli_zigbee_af_gp_proxy_table_get_free_entry_index();  //sli_zigbee_af_gp_proxy_table_find_or_allocate_entry(&addr);   //checking if pairing failed because of no
       // space
       if (index == 0xFF) {
         emberAfGreenPowerClusterPrintln("ERR PROXY TABLE FULL");
@@ -535,18 +493,18 @@ bool emberAfGreenPowerClusterGpResponseCallback(EmberAfClusterCommand *cmd)
     return false;
   }
 
-  if (emberAfCurrentEndpoint() != GP_ENDPOINT) {
+  if (emberAfCurrentEndpoint() != EMBER_GP_ENDPOINT) {
     goto kickout;
   }
   emberAfGreenPowerClusterPrintln("GpResponse cmd: %1x", cmd_data.gpdCommandId);
 
   EmberGpApplicationId appId = (cmd_data.options & EMBER_AF_GP_RESPONSE_OPTION_APPLICATION_ID);
   EmberGpAddress addr;
-  if (!emGpMakeAddr(&addr,
-                    appId,
-                    cmd_data.gpdSrcId,
-                    cmd_data.gpdIeee,
-                    cmd_data.endpoint)
+  if (!sli_zigbee_af_gp_make_addr(&addr,
+                                  appId,
+                                  cmd_data.gpdSrcId,
+                                  cmd_data.gpdIeee,
+                                  cmd_data.endpoint)
       || (IS_GPD_SRC_ID_ZERO(appId, cmd_data.gpdSrcId)
           && cmd_data.gpdCommandId != EMBER_ZCL_GP_GPDF_CHANNEL_CONFIGURATION)
       || (!IS_GPD_SRC_ID_ZERO(appId, cmd_data.gpdSrcId)
@@ -560,7 +518,7 @@ bool emberAfGreenPowerClusterGpResponseCallback(EmberAfClusterCommand *cmd)
     case EMBER_ZCL_GP_GPDF_CHANNEL_CONFIGURATION:
     {
       if (cmd_data.tempMasterShortAddress == emberGetNodeId()) {
-        if (!slxu_zigbee_event_is_active(channelEvent)
+        if (!sl_zigbee_event_is_scheduled(channelEvent)
             || (commissioningState.channelStatus & GP_CLIENT_TRANSMIT_SAME_AS_OPERATIONAL_CHANNEL_MASK)) {
           sendChannelConfigToGpStub();
           commissioningState.channelStatus |= GP_CLIENT_ON_TRANSMIT_CHANNEL_MASK;
@@ -578,8 +536,8 @@ bool emberAfGreenPowerClusterGpResponseCallback(EmberAfClusterCommand *cmd)
           }
           // Stared timeout to clear the Tx Queue if the packet is not delivered,
 
-          slxu_zigbee_event_set_delay_ms(channelEvent,
-                                         GP_CHANNEL_EVENT_TIMEOUT_IN_MSEC);
+          sl_zigbee_event_set_delay_ms(channelEvent,
+                                       GP_CHANNEL_EVENT_TIMEOUT_IN_MSEC);
           return true;
         } else {
           return false;
@@ -669,7 +627,7 @@ bool emberAfGreenPowerClusterGpProxyTableRequestCallback(EmberAfClusterCommand *
     goto kickout;
   }
 
-  if (emberAfCurrentEndpoint() != GP_ENDPOINT) {
+  if (emberAfCurrentEndpoint() != EMBER_GP_ENDPOINT) {
     return false;
   }
 
@@ -685,11 +643,11 @@ bool emberAfGreenPowerClusterGpProxyTableRequestCallback(EmberAfClusterCommand *
 
   if (requestType == EMBER_ZCL_GP_PROXY_TABLE_REQUEST_OPTIONS_REQUEST_TYPE_BY_GPD_ID) {
     EmberGpAddress addr;
-    if (!emGpMakeAddr(&addr,
-                      appId,
-                      cmd_data.gpdSrcId,
-                      cmd_data.gpdIeee,
-                      cmd_data.endpoint)
+    if (!sli_zigbee_af_gp_make_addr(&addr,
+                                    appId,
+                                    cmd_data.gpdSrcId,
+                                    cmd_data.gpdIeee,
+                                    cmd_data.endpoint)
         || IS_GPD_SRC_ID_ZERO(appId, cmd_data.gpdSrcId)) {
       // Invalid app Id or reserved address, just respond back as not found.
       emberAfFillCommandGreenPowerClusterGpProxyTableResponseSmart(EMBER_ZCL_GP_PROXY_TABLE_RESPONSE_STATUS_NOT_FOUND,
@@ -784,468 +742,12 @@ bool emberAfGreenPowerClusterGpProxyTableRequestCallback(EmberAfClusterCommand *
   kickout:  return true;
 }
 
-#else // !UC_BUILD
-
-/*
- * Disable default response bit should be set per GP Spec 14-0563-08
- */
-bool emberAfGreenPowerClusterGpProxyCommissioningModeCallback(uint8_t options,
-                                                              uint16_t commissioningWindow,
-                                                              uint8_t channel)
-{
-  return emAfPluginGreenPowerClientGpProxyCommissioningModeCommandHandler(options,
-                                                                          commissioningWindow,
-                                                                          channel,
-                                                                          false);
-}
-
-bool emberAfGreenPowerClusterGpNotificationResponseCallback(uint8_t options,
-                                                            uint32_t gpdSrcId,
-                                                            uint8_t* gpdIeee,
-                                                            uint8_t endpoint,
-                                                            uint32_t gpdSecurityFrameCounter)
-{
-  return false;
-}
-
-/*
- * Disable default response should be enabled in the sending message.
- */
-bool emberAfGreenPowerClusterGpPairingCallback(uint32_t options, // actually a int24u.
-                                               uint32_t gpdSrcId,
-                                               uint8_t* gpdIeee,
-                                               uint8_t endpoint,
-                                               uint8_t* sinkIeeeAddress,
-                                               uint16_t sinkNwkAddress,
-                                               uint16_t sinkGroupId,
-                                               uint8_t deviceId,
-                                               uint32_t gpdSecurityFrameCounter,
-                                               uint8_t* gpdKey,
-                                               uint16_t assignedAlias,
-                                               uint8_t groupcastRadius)
-{
-  uint8_t allZeroesIeeeAddress[17] = { 0 };
-  uint8_t securityLevel = (options & EMBER_AF_GP_PAIRING_OPTION_SECURITY_LEVEL)
-                          >> EMBER_AF_GP_PAIRING_OPTION_SECURITY_LEVEL_OFFSET;
-  uint8_t commMode = ((options & EMBER_AF_GP_PAIRING_OPTION_COMMUNICATION_MODE)
-                      >> EMBER_AF_GP_PAIRING_OPTION_COMMUNICATION_MODE_OFFSET);
-  uint8_t securityKeyType = ((options & EMBER_AF_GP_PAIRING_OPTION_SECURITY_KEY_TYPE)
-                             >> EMBER_AF_GP_PAIRING_OPTION_SECURITY_KEY_TYPE_OFFSET);
-  EmberGpAddress addr;
-  bool createdPairing = false;
-  bool broadcast = false;
-  // If "option & addSinkBit(3) == 1" AND "groupcastRadiusBit(17)==0"
-  // then groupcastRadius = 0 not 0xFF that was passed by call-command-handler
-  if ((options & EMBER_AF_GP_PAIRING_OPTION_ADD_SINK)
-      && !(options & EMBER_AF_GP_PAIRING_OPTION_GROUPCAST_RADIUS_PRESENT)) {
-    groupcastRadius = 0;
-  }
-
-  EmberAfClusterCommand *cmd =  emberAfCurrentCommand();
-  if (cmd->type == EMBER_INCOMING_BROADCAST) {
-    broadcast = true;
-  }
-
-  //handle null args for EZSP
-  if (gpdIeee  == NULL) {
-    gpdIeee = allZeroesIeeeAddress;
-  }
-  if (sinkIeeeAddress  == NULL) {
-    sinkIeeeAddress = allZeroesIeeeAddress;
-  }
-  if (gpdKey  == NULL) {
-    gpdKey = allZeroesIeeeAddress;
-  }
-
-  if (!emGpMakeAddr(&addr,
-                    options & EMBER_AF_GP_PAIRING_OPTION_APPLICATION_ID,
-                    gpdSrcId,
-                    gpdIeee,
-                    endpoint)) {
-    // GPD Address is invalid, so drop the command
-    return true;
-  }
-
-  emberAfCorePrint("GP Pairing\n");
-
-  // Commissioning: Step 21a: Proxy finalizes commissioning
-  if (emberAfCurrentEndpoint() != GP_ENDPOINT) {
-  } else if (securityLevel == EMBER_GP_SECURITY_LEVEL_RESERVED) {
-  } else if ((addr.applicationId != EMBER_GP_APPLICATION_SOURCE_ID)
-             && (addr.applicationId != EMBER_GP_APPLICATION_IEEE_ADDRESS)) {
-  } else if ((addr.applicationId == EMBER_GP_APPLICATION_SOURCE_ID)
-             && ((addr.id.sourceId == GP_GPD_SRC_ID_RESERVED_0)
-                 || ((addr.id.sourceId >= GP_GPD_SRC_ID_RESERVED_FFFFFF9)
-                     && (addr.id.sourceId <= GP_GPD_SRC_ID_RESERVED_FFFFFFE)))) {
-  } else if ((addr.applicationId == EMBER_GP_APPLICATION_IEEE_ADDRESS)
-             && ((emberAfMemoryByteCompare(addr.id.gpdIeeeAddress, EUI64_SIZE, 0)))) {
-  } else if ((options & EMBER_AF_GP_PAIRING_OPTION_ADD_SINK)
-             && (options & EMBER_AF_GP_PAIRING_OPTION_REMOVE_GPD)) {
-  } else if ((securityKeyType > EMBER_GP_SECURITY_KEY_GPD_OOB)
-             &&  (securityKeyType < EMBER_GP_SECURITY_KEY_GPD_DERIVED)) {
-  } else if ((commMode == EMBER_ZCL_GP_PAIRING_OPTIONS_COMMUNICATION_MODE_FULL_UNICAST_FORWARDING)
-             && (!(options & EMBER_AF_GP_PAIRING_OPTION_REMOVE_GPD))) {
-    // CCB #2278 -In case of unicast GP Pairing, the proxy SHALL respond with ZCL Default
-    //  Response with relevant error code: INVALID_FIELD for Full unicast;
-    //  -In case of broadcast GP Pairing, the proxy SHALL silently drop the frame.
-    //  If RemoveGPD options bit is set the comms mode is not valid so ignore this test
-    if (broadcast == true) {
-      // Silently drop it as its a broadcast
-    } else {
-      //send default response for unicast pairing
-      emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_INVALID_FIELD);
-    }
-  } else {
-    // Step b:
-
-    emberAfGreenPowerClusterPrintln("GP Pairing SRCID = %4x, Opt= %u Sink = %2x", addr.id.sourceId, options, sinkNwkAddress);
-
-    createdPairing = emberGpProxyTableProcessGpPairing(options,
-                                                       &addr,
-                                                       commMode,
-                                                       sinkNwkAddress,
-                                                       sinkGroupId,
-                                                       assignedAlias,
-                                                       sinkIeeeAddress,
-                                                       (EmberKeyData *) gpdKey,
-                                                       gpdSecurityFrameCounter,
-                                                       groupcastRadius);
-
-    // step c: optionally, exit commissioning mode
-    if (createdPairing
-        && (commissioningState.exitMode & EMBER_AF_GPC_COMMISSIONING_EXIT_ON_FIRST_PAIRING_SUCCESS)) {
-      emberAfGreenPowerClusterExitCommissioningMode();
-    } else if ((options & EMBER_AF_GP_PAIRING_OPTION_ADD_SINK) && !createdPairing) {
-#ifndef EZSP_HOST
-      uint8_t index = emGpProxyTableGetFreeEntryIndex();  //emGpProxyTableFindOrAllocateEntry(&addr);   //checking if pairing failed because of no
-      // space
-      if (index == 0xFF) {
-        emberAfGreenPowerClusterPrintln("ERR PROXY TABLE FULL");
-        if (broadcast != true) {
-          // CCB # 2279 - only send default response if not broadcast - broadcasts are dropped
-          emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_INSUFFICIENT_SPACE);
-        }
-      }
-    }
-#else
-      // Checking if the proxy table is full is more of a pain on Host
-      // We have to search through the whole table.
-      // Because of this, we only do it for the non-broadcast case
-      // Next time we bump the EZSP version, we should change the
-      // return of Process GP Pairing to a status instead of a bool
-      if (!broadcast) {
-        EmberGpProxyTableEntry entry;
-        for (uint8_t entryIndex = 0; entryIndex < EMBER_GP_PROXY_TABLE_SIZE; entryIndex++) {
-          emberGpProxyTableGetEntry(entryIndex, &entry);
-          if (entry.status == EMBER_GP_PROXY_TABLE_ENTRY_STATUS_UNUSED) {
-            return true; // We have an unused entry so we don't need to send a DR for full
-          }
-        }
-        emberAfGreenPowerClusterPrintln("ERR PROXY TABLE FULL");
-        emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_INSUFFICIENT_SPACE);
-      }
-    }
-#endif
-  }
-  return true;
-}
-
-bool emberAfGreenPowerClusterGpResponseCallback(uint8_t options,
-                                                uint16_t tempMasterShortAddress,
-                                                uint8_t tempMasterTxChannel,
-                                                uint32_t gpdSrcId,
-                                                uint8_t* gpdIeee,
-                                                uint8_t endpoint,
-                                                uint8_t gpdCommandId,
-                                                uint8_t* gpdCommandPayload)
-{
-  EmberGpAddress addr;
-  uint8_t allZeroesIeeeAddress[17] = { 0 };
-
-  //handle null args for EZSP
-  if (gpdIeee  == NULL) {
-    gpdIeee = allZeroesIeeeAddress;
-  }
-
-  if (emberAfCurrentEndpoint() != GP_ENDPOINT) {
-    goto kickout;
-  }
-  emberAfGreenPowerClusterPrintln("GpResponse cmd: %1x", gpdCommandId);
-
-  switch (gpdCommandId) {
-    case EMBER_ZCL_GP_GPDF_CHANNEL_CONFIGURATION:
-      addr.applicationId = EMBER_GP_APPLICATION_SOURCE_ID;
-      addr.id.sourceId = 0x00000000;
-      if (gpdSrcId != 0x00000000) {
-        return true;
-      }
-
-      if (tempMasterShortAddress == emberGetNodeId()) {
-        if (!slxu_zigbee_event_is_active(channelEvent)
-            || (commissioningState.channelStatus & GP_CLIENT_TRANSMIT_SAME_AS_OPERATIONAL_CHANNEL_MASK)) {
-          //Look at me, I'm the tempMaster now
-          //TODO set firstToForward
-
-          uint8_t payload = (emberAfGetRadioChannel() - 11) //channel ID
-                            | 0x10;//basic
-          emberDGpSend(true, //add
-                       false,//no CCA
-                       &addr,
-                       EMBER_ZCL_GP_GPDF_CHANNEL_CONFIGURATION,
-                       1, //length
-                       &(payload),
-                       0, //gpepHandle
-                       0); //entryLifetimeMs
-          commissioningState.channelStatus = GP_CLIENT_ON_TRANSMIT_CHANNEL_MASK;
-          // based on figure 88 of GP proxy basic spec V1.0 page 191
-          // the following condition seems neccessary
-          if (emberAfGetRadioChannel() != (tempMasterTxChannel + 11) ) {
-            emberAfGreenPowerClusterPrintln("GP switch to chan %d", tempMasterTxChannel + 11);
-            emberStartScan(EMBER_STACK_GP_CHANNEL_DELIVERY_SCAN, (1 << (tempMasterTxChannel + 11)), 0 /*duration*/);
-            commissioningState.channelStatus &= ~GP_CLIENT_TRANSMIT_SAME_AS_OPERATIONAL_CHANNEL_MASK;
-          } else {
-            commissioningState.channelStatus |= GP_CLIENT_TRANSMIT_SAME_AS_OPERATIONAL_CHANNEL_MASK;
-          }
-          // Stared timeout to clear the Tx Queue if the packet is not delivered,
-
-          slxu_zigbee_event_set_delay_ms(channelEvent,
-                                         GP_CHANNEL_EVENT_TIMEOUT_IN_MSEC);
-          return true;
-        } else {
-          return false;
-        }
-      } else {
-        //TODO clear firstToForward
-        emberAfPluginGreenPowerClientChannelEventHandler();
-        //emberDGpSend(false, false, &addr, 0, 0, NULL, 0, 0);
-      }
-      break;
-    case EMBER_ZCL_GP_GPDF_COMMISSIONING_REPLY:
-      //TODO IEEE GPD
-    {
-      EmberStatus result;
-      EmberGpAddress addr;
-      addr.applicationId = options & EMBER_AF_GP_RESPONSE_OPTION_APPLICATION_ID;
-      if (addr.applicationId == EMBER_GP_APPLICATION_SOURCE_ID) {
-        addr.id.sourceId = gpdSrcId;
-      } else {
-        addr.applicationId = EMBER_GP_APPLICATION_IEEE_ADDRESS;
-        addr.endpoint = endpoint;
-        // addr.id is a union so it is fine to dereference it in this was
-        MEMCOPY(addr.id.gpdIeeeAddress, gpdIeee, 8);
-      }
-      if (tempMasterShortAddress == emberGetNodeId()) {
-        emberAfGreenPowerClusterPrintln("dgpsend comm reply %s", "A");
-        result = emberDGpSend(true, //add
-                              false, //skip cca
-                              &addr,
-                              EMBER_ZCL_GP_GPDF_COMMISSIONING_REPLY,
-                              gpdCommandPayload[0],
-                              gpdCommandPayload + 1,
-                              0, 0
-                              );
-        if (result == EMBER_SUCCESS) {
-          emberAfGreenPowerClusterPrintln("success");
-        } else {
-          emberAfGreenPowerClusterPrintln("fail %02x", result);
-        }
-      } else {
-        emberAfGreenPowerClusterPrintln("Flush GP TX");
-        emberDGpSend(false, false, &addr, 0, 0, NULL, 0, 0);
-      }
-    }
-
-    break;
-    default:
-      if ((gpdCommandId >= EMBER_ZCL_GP_GPDF_RESERVED_MIN) //and implicitly check gpdCommandId <= EMBER_ZCL_GP_GPDF_RESERVED_MAX
-          || (gpdCommandId >= EMBER_ZCL_GP_GPDF_MFR_DEF_GPD_CMD0
-              && gpdCommandId <= EMBER_ZCL_GP_GPDF_MFR_DEF_GPD_CMD_F)) {
-        EmberStatus result;
-        EmberGpAddress addr;
-        addr.applicationId = options & EMBER_GP_APPLICATION_ID_MASK;
-        if (addr.applicationId == EMBER_GP_APPLICATION_SOURCE_ID) {
-          addr.id.sourceId = gpdSrcId;
-        } else {
-          addr.applicationId = EMBER_GP_APPLICATION_IEEE_ADDRESS;
-          addr.endpoint = endpoint;
-          MEMCOPY(addr.id.gpdIeeeAddress, gpdIeee, 8);
-        }
-
-        emberAfGreenPowerClusterPrintln("dgpsend comm reply %s", "B");
-        result = emberDGpSend(true,   //add
-                              false,   //skip cca
-                              &addr,
-                              gpdCommandId,
-                              gpdCommandPayload[0],
-                              gpdCommandPayload + 1,
-                              0, 0
-                              );
-        if (result == EMBER_SUCCESS) {
-          emberAfGreenPowerClusterPrintln("success");
-        } else {
-          emberAfGreenPowerClusterPrintln("fail %02x", result);
-        }
-      }
-      break;
-  }
-  kickout: return false;
-}
-
-bool emberAfGreenPowerClusterGpSinkTableResponseCallback(uint8_t status,
-                                                         uint8_t totalNumberofNonEmptySinkTableEntries,
-                                                         uint8_t startIndex,
-                                                         uint8_t entriesCount,
-                                                         uint8_t* sinkTableEntry)
-{
-  return false;
-}
-
-bool emberAfGreenPowerClusterGpProxyTableRequestCallback(uint8_t options,
-                                                         uint32_t gpdSrcId,
-                                                         uint8_t* gpdIeee,
-                                                         uint8_t endpoint,
-                                                         uint8_t index)
-{
-  uint8_t validEntriesCount = 0;
-  uint8_t entryIndex = 0;
-  uint8_t appId = options & EMBER_AF_GP_PROXY_TABLE_REQUEST_OPTIONS_APPLICATION_ID;
-  uint8_t requestType = (options & EMBER_AF_GP_PROXY_TABLE_REQUEST_OPTIONS_REQUEST_TYPE)
-                        >> EMBER_AF_GP_PROXY_TABLE_REQUEST_OPTIONS_REQUEST_TYPE_OFFSET;
-  EmberGpProxyTableEntry entry;
-  uint8_t allZeroesIeeeAddress[17] = { 0 };
-
-  //handle null args for EZSP
-  if (gpdIeee  == NULL) {
-    gpdIeee = allZeroesIeeeAddress;
-  }
-
-  // only respond to unicast messages.
-  if (emberAfCurrentCommand()->type != EMBER_INCOMING_UNICAST) {
-    goto kickout;
-  }
-
-  if (EMBER_GP_PROXY_TABLE_SIZE == 0) {
-    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_UNSUP_COMMAND);
-    goto kickout;
-  }
-
-  if (emberAfCurrentEndpoint() != GP_ENDPOINT) {
-    return false;
-  }
-
-  for (entryIndex = 0; entryIndex < EMBER_GP_PROXY_TABLE_SIZE; entryIndex++) {
-    if (emberGpProxyTableGetEntry(entryIndex, &entry) != EMBER_SUCCESS) {
-      return false;
-    }
-
-    if (entry.status != EMBER_GP_PROXY_TABLE_ENTRY_STATUS_UNUSED) {
-      validEntriesCount++;
-    }
-  }
-
-  if (requestType == EMBER_ZCL_GP_PROXY_TABLE_REQUEST_OPTIONS_REQUEST_TYPE_BY_GPD_ID) {
-    EmberGpAddress addr;
-    if (!emGpMakeAddr(&addr,
-                      appId,
-                      gpdSrcId,
-                      gpdIeee,
-                      endpoint)) {
-      // Malformed GPD address
-      goto kickout;
-    }
-    entryIndex = emberGpProxyTableLookup(&addr);
-    if (entryIndex == 0xFF) {
-      emberAfFillCommandGreenPowerClusterGpProxyTableResponseSmart(EMBER_ZCL_GP_PROXY_TABLE_RESPONSE_STATUS_NOT_FOUND,
-                                                                   validEntriesCount,
-                                                                   index,
-                                                                   0);
-      emberAfSendResponse();
-      goto kickout;
-    } else {
-      emberAfFillCommandGreenPowerClusterGpProxyTableResponseSmart(EMBER_ZCL_GP_PROXY_TABLE_RESPONSE_STATUS_SUCCESS,
-                                                                   validEntriesCount,
-                                                                   0xff,
-                                                                   1);
-      if (emberGpProxyTableGetEntry(entryIndex, &entry) != EMBER_SUCCESS) {
-        return false;
-      }
-
-      appResponseLength
-        += emberAfGreenPowerClientStoreProxyTableEntry(&entry,
-                                                       appResponseData + appResponseLength);
-      emberAfSendResponse();
-      goto kickout;
-    }
-  } else if (requestType == EMBER_ZCL_GP_PROXY_TABLE_REQUEST_OPTIONS_REQUEST_TYPE_BY_INDEX) {
-    if (index >= validEntriesCount) {
-      //Nothing to send
-      emberAfFillCommandGreenPowerClusterGpProxyTableResponseSmart(EMBER_ZCL_GP_PROXY_TABLE_RESPONSE_STATUS_NOT_FOUND,
-                                                                   validEntriesCount,
-                                                                   index,
-                                                                   0);
-      emberAfSendResponse();
-      goto kickout;
-    } else {
-      emberAfFillCommandGreenPowerClusterGpProxyTableResponseSmart(EMBER_ZCL_GP_PROXY_TABLE_RESPONSE_STATUS_SUCCESS,
-                                                                   validEntriesCount,
-                                                                   index,
-                                                                   0xff);
-
-      validEntriesCount = 0;
-      uint16_t entriesCount = 0;
-      for (entryIndex = 0; entryIndex < EMBER_GP_PROXY_TABLE_SIZE; entryIndex++) {
-        if (emberGpProxyTableGetEntry(entryIndex, &entry) != EMBER_SUCCESS) {
-          return false;
-        }
-
-        uint8_t  tempDatabuffer[EMBER_AF_RESPONSE_BUFFER_LEN];
-        uint16_t tempDataLength = 0;
-
-        if (entry.status != EMBER_GP_PROXY_TABLE_ENTRY_STATUS_UNUSED) {
-          validEntriesCount++;
-          if (validEntriesCount > index) {
-            // Copy to a temp buffer and add if there is spoce
-            tempDataLength = emberAfGreenPowerClientStoreProxyTableEntry(&entry, tempDatabuffer);
-
-            // If space add to buffer
-            if ( sizeof(appResponseData) > (appResponseLength + tempDataLength)) {
-              MEMMOVE(&appResponseData[appResponseLength], tempDatabuffer, tempDataLength);
-              appResponseLength +=  tempDataLength;
-              entriesCount++;
-            } else {
-              break;
-            }
-          }
-        }
-      }
-
-      //Insert the number of entries actually included
-      appResponseData[GP_PROXY_TABLE_RESPONSE_ENTRIES_OFFSET + GP_NON_MANUFACTURER_ZCL_HEADER_LENGTH] = entriesCount;
-
-      EmberStatus status = emberAfSendResponse();
-
-      if (status == EMBER_MESSAGE_TOO_LONG) {
-        emberAfFillCommandGreenPowerClusterGpProxyTableResponseSmart(EMBER_ZCL_GP_PROXY_TABLE_RESPONSE_STATUS_SUCCESS,
-                                                                     validEntriesCount,
-                                                                     index,
-                                                                     0);
-        emberAfSendResponse();
-      }
-      goto kickout;
-    }
-  }
-
-  kickout:  return true;
-}
-
-#endif // UC_BUILD
-
-bool emAfPluginGreenPowerClientRetrieveAttributeAndCraftResponse(uint8_t endpoint,
-                                                                 EmberAfClusterId clusterId,
-                                                                 EmberAfAttributeId attrId,
-                                                                 uint8_t mask,
-                                                                 uint16_t manufacturerCode,
-                                                                 uint16_t readLength)
+bool sli_zigbee_af_green_power_client_retrieve_attribute_and_craft_response(uint8_t endpoint,
+                                                                            EmberAfClusterId clusterId,
+                                                                            EmberAfAttributeId attrId,
+                                                                            uint8_t mask,
+                                                                            uint16_t manufacturerCode,
+                                                                            uint16_t readLength)
 {
   uint8_t proxyTableEntryAppResponseData[EMBER_AF_RESPONSE_BUFFER_LEN];
   uint8_t zclStatus = EMBER_ZCL_STATUS_SUCCESS;
@@ -1253,7 +755,7 @@ bool emAfPluginGreenPowerClientRetrieveAttributeAndCraftResponse(uint8_t endpoin
   uint16_t stringLength = 0;
   bool    status = false;
 
-  if (endpoint != GP_ENDPOINT
+  if (endpoint != EMBER_GP_ENDPOINT
       || clusterId != ZCL_GREEN_POWER_CLUSTER_ID
       || attrId != ZCL_GP_CLIENT_PROXY_TABLE_ATTRIBUTE_ID
       || mask != CLUSTER_MASK_CLIENT
@@ -1337,7 +839,7 @@ bool emberAfGreenPowerClusterAutoCommissioningCallback(GP_PARAMS)
      proxyIndex = emberGpProxyTableLookup(addr);
      if (proxyIndex != 0xFF) {
      //we have a proxy table entry for this GPD
-     emGpProxyTableSetInRange(proxyIndex);
+     sli_zigbee_gp_proxy_table_set_in_range(proxyIndex);
      } else {
      //we don't have a proxy table entry
      //optionally create an active invalid entry here
@@ -1370,9 +872,9 @@ bool emberAfGreenPowerClusterAutoCommissioningCallback(GP_PARAMS)
                                                                       gpdLink,
                                                                       mic);
   apsFrame = emberAfGetCommandApsFrame();
-  apsFrame->sourceEndpoint = GP_ENDPOINT; //emberAfCurrentEndpoint();
-  apsFrame->destinationEndpoint = GP_ENDPOINT; //emberAfCurrentEndpoint();
-  emSetAddDelay(GP_DMIN_U);
+  apsFrame->sourceEndpoint = EMBER_GP_ENDPOINT; //emberAfCurrentEndpoint();
+  apsFrame->destinationEndpoint = EMBER_GP_ENDPOINT; //emberAfCurrentEndpoint();
+  sli_zigbee_af_set_add_delay(GP_DMIN_U);
   if (commissioningState.unicastCommunication) {
     emberAfSendCommandUnicast(EMBER_OUTGOING_DIRECT,
                               commissioningState.commissioningSink);
@@ -1380,10 +882,10 @@ bool emberAfGreenPowerClusterAutoCommissioningCallback(GP_PARAMS)
     apsFrame->sequence = sequenceNumber - EMBER_GP_COMMISSIONING_NOTIFICATION_SEQUENCE_NUMBER_OFFSET;
     apsFrame->options |= EMBER_APS_OPTION_USE_ALIAS_SEQUENCE_NUMBER;
     emberAfSendCommandBroadcastWithAlias(EMBER_RX_ON_WHEN_IDLE_BROADCAST_ADDRESS,
-                                         emGpdAlias(addr),
+                                         sli_zigbee_af_gpd_alias(addr),
                                          sequenceNumber - EMBER_GP_COMMISSIONING_NOTIFICATION_SEQUENCE_NUMBER_OFFSET);
   }
-  emSetAddDelay(0);
+  sli_zigbee_af_set_add_delay(0);
   return true;
 }
 
@@ -1401,11 +903,11 @@ bool emberAfGreenPowerClusterCommissioningGpdfCallback(GP_PARAMS)
   // Commissioning: Step 12a: Proxy receives commissioning command
   // If applicationId == 0b0000 and srcId == 0 or reserved range 0xfffffff9 - 0xffffffffe
   // OR applicationId == 0b0010 and srcId == 0, drop frame.
-  if (!emGpMakeAddr(addr,
-                    addr->applicationId,
-                    addr->id.sourceId,
-                    addr->id.gpdIeeeAddress,
-                    addr->endpoint)
+  if (!sli_zigbee_af_gp_make_addr(addr,
+                                  addr->applicationId,
+                                  addr->id.sourceId,
+                                  addr->id.gpdIeeeAddress,
+                                  addr->endpoint)
       || IS_GPD_SRC_ID_ZERO(addr->applicationId, addr->id.sourceId)) {
     // GPD Address or App Id are invalid, so drop the command
     goto kickout;
@@ -1448,7 +950,7 @@ bool emberAfGreenPowerClusterCommissioningGpdfCallback(GP_PARAMS)
      {
      uint8_t gpProxyTableIndex = emberGpProxyTableLookup(addr);
      if (gpProxyTableIndex != 0xFF) {
-      emGpProxyTableSetInRange(gpProxyTableIndex);
+      sli_zigbee_gp_proxy_table_set_in_range(gpProxyTableIndex);
      } else {
        //basic proxy doesn't have to do anything in this situation
      }
@@ -1492,16 +994,16 @@ bool emberAfGreenPowerClusterCommissioningGpdfCallback(GP_PARAMS)
                                                                           gpdLink,
                                                                           mic);
       if (bidirectionalInfo & EMBER_GP_BIDIRECTION_INFO_RX_AFTER_TX_MASK) {
-        emSetAddDelay(GP_DMIN_B);
+        sli_zigbee_af_set_add_delay(GP_DMIN_B);
       } else {
-        emSetAddDelay(GP_DMIN_U);
+        sli_zigbee_af_set_add_delay(GP_DMIN_U);
       }
       apsFrame = emberAfGetCommandApsFrame();
-      apsFrame->sourceEndpoint = GP_ENDPOINT;  //emberAfCurrentEndpoint();
-      apsFrame->destinationEndpoint = GP_ENDPOINT; //emberAfCurrentEndpoint();
+      apsFrame->sourceEndpoint = EMBER_GP_ENDPOINT;  //emberAfCurrentEndpoint();
+      apsFrame->destinationEndpoint = EMBER_GP_ENDPOINT; //emberAfCurrentEndpoint();
       UNUSED EmberStatus retval = emberAfSendCommandUnicast(EMBER_OUTGOING_DIRECT,
                                                             commissioningState.commissioningSink);
-      emSetAddDelay(0);
+      sli_zigbee_af_set_add_delay(0);
     } else {
       emberAfFillCommandGreenPowerClusterGpCommissioningNotificationSmart(options,
                                                                           addr->id.sourceId,
@@ -1517,20 +1019,20 @@ bool emberAfGreenPowerClusterCommissioningGpdfCallback(GP_PARAMS)
                                                                           gpdLink,
                                                                           mic);
       apsFrame = emberAfGetCommandApsFrame();
-      apsFrame->sourceEndpoint = GP_ENDPOINT;  //emberAfCurrentEndpoint();
-      apsFrame->destinationEndpoint = GP_ENDPOINT; //emberAfCurrentEndpoint();
+      apsFrame->sourceEndpoint = EMBER_GP_ENDPOINT;  //emberAfCurrentEndpoint();
+      apsFrame->destinationEndpoint = EMBER_GP_ENDPOINT; //emberAfCurrentEndpoint();
       apsFrame->sequence = sequenceNumber - EMBER_GP_COMMISSIONING_NOTIFICATION_SEQUENCE_NUMBER_OFFSET;
       apsFrame->options |= EMBER_APS_OPTION_USE_ALIAS_SEQUENCE_NUMBER;
       if (bidirectionalInfo & EMBER_GP_BIDIRECTION_INFO_RX_AFTER_TX_MASK) {
-        emSetAddDelay(GP_DMIN_B + qualityBasedDelay(gpdLink));
+        sli_zigbee_af_set_add_delay(GP_DMIN_B + qualityBasedDelay(gpdLink));
       } else {
-        emSetAddDelay(GP_DMIN_U);
+        sli_zigbee_af_set_add_delay(GP_DMIN_U);
       }
 
       UNUSED EmberStatus retval = emberAfSendCommandBroadcastWithAlias(EMBER_RX_ON_WHEN_IDLE_BROADCAST_ADDRESS,
-                                                                       emGpdAlias(addr),
+                                                                       sli_zigbee_af_gpd_alias(addr),
                                                                        sequenceNumber - EMBER_GP_COMMISSIONING_NOTIFICATION_SEQUENCE_NUMBER_OFFSET);
-      emSetAddDelay(0);
+      sli_zigbee_af_set_add_delay(0);
     }
   }
 
@@ -1596,12 +1098,12 @@ bool emberAfGreenPowerClusterChannelRequestGpdfCallback(GP_PARAMS)
                                                                           gpdLink,
                                                                           mic);
       apsFrame = emberAfGetCommandApsFrame();
-      apsFrame->sourceEndpoint = GP_ENDPOINT;  //emberAfCurrentEndpoint();
-      apsFrame->destinationEndpoint = GP_ENDPOINT; //emberAfCurrentEndpoint();
-      emSetAddDelay(GP_DMIN_B);
+      apsFrame->sourceEndpoint = EMBER_GP_ENDPOINT;  //emberAfCurrentEndpoint();
+      apsFrame->destinationEndpoint = EMBER_GP_ENDPOINT; //emberAfCurrentEndpoint();
+      sli_zigbee_af_set_add_delay(GP_DMIN_B);
       UNUSED EmberStatus retval = emberAfSendCommandUnicast(EMBER_OUTGOING_DIRECT,
                                                             commissioningState.commissioningSink);
-      emSetAddDelay(0);
+      sli_zigbee_af_set_add_delay(0);
     } else {
       emberAfFillCommandGreenPowerClusterGpCommissioningNotificationSmart(options,
                                                                           0x00000000, //addr.id.sourceId,
@@ -1617,15 +1119,15 @@ bool emberAfGreenPowerClusterChannelRequestGpdfCallback(GP_PARAMS)
                                                                           gpdLink,
                                                                           mic);
       apsFrame = emberAfGetCommandApsFrame();
-      apsFrame->sourceEndpoint = GP_ENDPOINT;  //emberAfCurrentEndpoint();
-      apsFrame->destinationEndpoint = GP_ENDPOINT; //emberAfCurrentEndpoint();
+      apsFrame->sourceEndpoint = EMBER_GP_ENDPOINT;  //emberAfCurrentEndpoint();
+      apsFrame->destinationEndpoint = EMBER_GP_ENDPOINT; //emberAfCurrentEndpoint();
       apsFrame->sequence = sequenceNumber - EMBER_GP_COMMISSIONING_NOTIFICATION_SEQUENCE_NUMBER_OFFSET;
       apsFrame->options |= EMBER_APS_OPTION_USE_ALIAS_SEQUENCE_NUMBER;
-      emSetAddDelay(GP_DMIN_B + qualityBasedDelay(gpdLink));
+      sli_zigbee_af_set_add_delay(GP_DMIN_B + qualityBasedDelay(gpdLink));
       UNUSED EmberStatus retval = emberAfSendCommandBroadcastWithAlias(EMBER_RX_ON_WHEN_IDLE_BROADCAST_ADDRESS,
-                                                                       emGpdAlias(addr),
+                                                                       sli_zigbee_af_gpd_alias(addr),
                                                                        sequenceNumber - EMBER_GP_COMMISSIONING_NOTIFICATION_SEQUENCE_NUMBER_OFFSET);
-      emSetAddDelay(0);
+      sli_zigbee_af_set_add_delay(0);
     }
   }
 
@@ -1646,8 +1148,8 @@ bool emberAfGreenPowerClusterGpdfForwardCallback(GP_PARAMS)
   if (proxyTableIndex != 0xFF) {
 #ifndef EZSP_HOST
     //TODO, we need to decide how to do this for host
-    emGpProxyTableSetFirstToForward(proxyTableIndex);
-    emGpProxyTableSetInRange(proxyTableIndex);    //TODO is this the right place for this?
+    sli_zigbee_gp_proxy_table_set_first_to_forward(proxyTableIndex);
+    sli_zigbee_gp_proxy_table_set_in_range(proxyTableIndex);    //TODO is this the right place for this?
 #endif
     if (emberGpProxyTableGetEntry(proxyTableIndex, &entry) != EMBER_SUCCESS) {
       return true;
@@ -1710,17 +1212,26 @@ bool emberAfGreenPowerClusterGpdfForwardCallback(GP_PARAMS)
                                                          gpdCommandPayload,
                                                          emberGetNodeId(),
                                                          gpdLink);
+  // The Proxy table gets populated from the Gp Pairing message that does not have capability to accept the
+  // sink group list. But in a combo application, that has both sink and proxy, the sink list can be supplied
+  // using the Gp Pairing Configuration command from a commissioning tool and the sink table holds those
+  // in its entry. And the expected outcome from the combo basic is that it should be able to forward
+  // the messages to the sink table based groupcast. The following callback is used to get an updated sink
+  // list entry from user. If the green power server is present it implements this callback.
+  emberAfGreenPowerClientGpdfSinkTableBasedForwardCallback(addr,
+                                                           entry.sinkList,
+                                                           GP_SINK_LIST_ENTRIES);
 
   for (i = 0; i < GP_SINK_LIST_ENTRIES; i++) {
     if (entry.sinkList[i].type == EMBER_GP_SINK_TYPE_FULL_UNICAST
         || entry.sinkList[i].type == EMBER_GP_SINK_TYPE_LW_UNICAST) {
       apsFrame = emberAfGetCommandApsFrame();
-      apsFrame->sourceEndpoint = GP_ENDPOINT;  //emberAfCurrentEndpoint();
-      apsFrame->destinationEndpoint = GP_ENDPOINT;  //emberAfCurrentEndpoint();
+      apsFrame->sourceEndpoint = EMBER_GP_ENDPOINT;  //emberAfCurrentEndpoint();
+      apsFrame->destinationEndpoint = EMBER_GP_ENDPOINT;  //emberAfCurrentEndpoint();
       if (bidirectionalInfo & EMBER_GP_BIDIRECTION_INFO_RX_AFTER_TX_MASK) {
-        emSetAddDelay(GP_DMIN_B);
+        sli_zigbee_af_set_add_delay(GP_DMIN_B);
       } else {
-        emSetAddDelay(GP_DMIN_U);
+        sli_zigbee_af_set_add_delay(GP_DMIN_U);
       }
       // The sinkNodeId is optimised to not be in the proxy table token structure because it can be looked up.
       // Incase the proxy table is updated witha valid address earlier it needs to use that.
@@ -1734,51 +1245,51 @@ bool emberAfGreenPowerClusterGpdfForwardCallback(GP_PARAMS)
 
       UNUSED EmberStatus retval = emberAfSendCommandUnicast(EMBER_OUTGOING_DIRECT,
                                                             entry.sinkList[i].target.unicast.sinkNodeId);
-      emSetAddDelay(0);
+      sli_zigbee_af_set_add_delay(0);
     } else if (entry.sinkList[i].type == EMBER_GP_SINK_TYPE_GROUPCAST) {
       apsFrame = emberAfGetCommandApsFrame();
-      apsFrame->sourceEndpoint = GP_ENDPOINT;  //emberAfCurrentEndpoint();
-      apsFrame->destinationEndpoint = GP_ENDPOINT;  //emberAfCurrentEndpoint();
+      apsFrame->sourceEndpoint = EMBER_GP_ENDPOINT;  //emberAfCurrentEndpoint();
+      apsFrame->destinationEndpoint = EMBER_GP_ENDPOINT;  //emberAfCurrentEndpoint();
       apsFrame->sequence = sequenceNumber - EMBER_GP_NOTIFICATION_COMMISSIONED_GROUPCAST_SEQUENCE_NUMBER_OFFSET;
       apsFrame->options |= EMBER_APS_OPTION_USE_ALIAS_SEQUENCE_NUMBER;
       apsFrame->radius = entry.groupcastRadius;
       if (bidirectionalInfo & EMBER_GP_BIDIRECTION_INFO_RX_AFTER_TX_MASK) {
-        emSetAddDelay(GP_DMIN_B + qualityBasedDelay(gpdLink));
+        sli_zigbee_af_set_add_delay(GP_DMIN_B + qualityBasedDelay(gpdLink));
       } else {
-        emSetAddDelay(GP_DMIN_U);
+        sli_zigbee_af_set_add_delay(GP_DMIN_U);
       }
       UNUSED EmberStatus retval = emberAfSendCommandMulticastWithAlias(entry.sinkList[i].target.groupcast.groupID,
                                                                        (entry.sinkList[i].target.groupcast.alias == 0xFFFF)
-                                                                       ? emGpdAlias(addr)
+                                                                       ? sli_zigbee_af_gpd_alias(addr)
                                                                        : entry.sinkList[i].target.groupcast.alias,
                                                                        sequenceNumber - EMBER_GP_NOTIFICATION_COMMISSIONED_GROUPCAST_SEQUENCE_NUMBER_OFFSET);
-      emSetAddDelay(0);
+      sli_zigbee_af_set_add_delay(0);
     }
   }
   if (entry.options & EMBER_AF_GP_PROXY_TABLE_ENTRY_OPTIONS_DERIVED_GROUP_GPS) {
     apsFrame = emberAfGetCommandApsFrame();
-    apsFrame->sourceEndpoint = GP_ENDPOINT;  //emberAfCurrentEndpoint();
-    apsFrame->destinationEndpoint = GP_ENDPOINT;  //emberAfCurrentEndpoint();
+    apsFrame->sourceEndpoint = EMBER_GP_ENDPOINT;  //emberAfCurrentEndpoint();
+    apsFrame->destinationEndpoint = EMBER_GP_ENDPOINT;  //emberAfCurrentEndpoint();
     apsFrame->sequence = sequenceNumber;
     apsFrame->options |= EMBER_APS_OPTION_USE_ALIAS_SEQUENCE_NUMBER;
     apsFrame->radius = entry.groupcastRadius;
     if (bidirectionalInfo & EMBER_GP_BIDIRECTION_INFO_RX_AFTER_TX_MASK) {
-      emSetAddDelay(GP_DMIN_B + qualityBasedDelay(gpdLink));
+      sli_zigbee_af_set_add_delay(GP_DMIN_B + qualityBasedDelay(gpdLink));
     } else {
-      emSetAddDelay(GP_DMIN_U);
+      sli_zigbee_af_set_add_delay(GP_DMIN_U);
     }
 
     //get derived alias for address alias and group ID alias
     if (entry.options & EMBER_AF_GP_PROXY_TABLE_ENTRY_OPTIONS_ASSIGNED_ALIAS) {
       alias = entry.assignedAlias;
     } else {
-      alias = emGpdAlias(addr);
+      alias = sli_zigbee_af_gpd_alias(addr);
     }
 
-    UNUSED EmberStatus retval = emberAfSendCommandMulticastWithAlias((EmberMulticastId)emGpdAlias(addr),
+    UNUSED EmberStatus retval = emberAfSendCommandMulticastWithAlias((EmberMulticastId)sli_zigbee_af_gpd_alias(addr),
                                                                      (EmberNodeId)alias,
                                                                      sequenceNumber);
-    emSetAddDelay(0);
+    sli_zigbee_af_set_add_delay(0);
   }
   return true;
 }
@@ -1787,8 +1298,8 @@ bool emberAfGreenPowerClusterGpdfForwardCallback(GP_PARAMS)
  * Check if a EmberGpAddress entry is being used by checking each elemental
  * sequence number's corresponding expiration time field.
  */
-bool emAfGreenPowerIsGpAddrUsed(EmberAfGreenPowerDuplicateFilter * filter,
-                                uint8_t index)
+bool sli_zigbee_af_green_power_is_gp_addr_used(EmberAfGreenPowerDuplicateFilter * filter,
+                                               uint8_t index)
 {
   uint32_t * expirationTimes;
   uint8_t i;
@@ -1810,7 +1321,7 @@ bool emAfGreenPowerIsGpAddrUsed(EmberAfGreenPowerDuplicateFilter * filter,
   return false;
 }
 
-uint32_t emAfGreenPowerFindNextExpirationTime(EmberAfGreenPowerDuplicateFilter * filter)
+uint32_t sli_zigbee_af_green_power_find_next_expiration_time(EmberAfGreenPowerDuplicateFilter * filter)
 {
   uint32_t expirationTime = MAX_INT32U_VALUE;
   uint8_t addrIndex;
@@ -1837,8 +1348,8 @@ uint32_t emAfGreenPowerFindNextExpirationTime(EmberAfGreenPowerDuplicateFilter *
 /*
  * return index to the entry with the smallest expiration date.
  */
-uint8_t emAfGreenPowerFindEarliestExpirationTimeInAddr(EmberAfGreenPowerDuplicateFilter * filter,
-                                                       uint8_t addrIndex)
+uint8_t sli_zigbee_af_green_power_find_earliest_expiration_time_in_addr(EmberAfGreenPowerDuplicateFilter * filter,
+                                                                        uint8_t addrIndex)
 {
   // addrIndex must be less than EMBER_AF_PLUGIN_GREEN_POWER_CLIENT_MAX_SEQ_NUM_ENTRIES_PER_ADDR
   // so we dont need to check it here. It is done in preceding function calls.
@@ -1859,9 +1370,9 @@ uint8_t emAfGreenPowerFindEarliestExpirationTimeInAddr(EmberAfGreenPowerDuplicat
   return earliestTimeIndex;
 }
 
-bool emAfGreenPowerAddRandomMacSeqNum(EmberAfGreenPowerDuplicateFilter * filter,
-                                      uint8_t addrIndex,
-                                      uint8_t randomSeqNum)
+bool sli_zigbee_af_green_power_add_random_mac_seq_num(EmberAfGreenPowerDuplicateFilter * filter,
+                                                      uint8_t addrIndex,
+                                                      uint8_t randomSeqNum)
 {
   uint8_t * seqNumList = NULL;
   uint32_t * expirationTimeList = NULL;
@@ -1883,8 +1394,8 @@ bool emAfGreenPowerAddRandomMacSeqNum(EmberAfGreenPowerDuplicateFilter * filter,
     }
   }
 
-  entryIndex = emAfGreenPowerFindEarliestExpirationTimeInAddr(filter,
-                                                              addrIndex);
+  entryIndex = sli_zigbee_af_green_power_find_earliest_expiration_time_in_addr(filter,
+                                                                               addrIndex);
 
   seqNumList[entryIndex] = randomSeqNum;
   expirationTimeList[entryIndex] = curTime + (2 * MILLISECOND_TICKS_PER_MINUTE);
@@ -1893,13 +1404,13 @@ bool emAfGreenPowerAddRandomMacSeqNum(EmberAfGreenPowerDuplicateFilter * filter,
 }
 
 /* Helper function for handling duplicateFilter */
-uint8_t emAfGreenPowerFindGpAddrIndex(EmberGpAddress * addr,
-                                      EmberGpAddress * addrList,
-                                      uint8_t sizeOfList)
+uint8_t sli_zigbee_af_green_power_find_gp_addr_index(EmberGpAddress * addr,
+                                                     EmberGpAddress * addrList,
+                                                     uint8_t sizeOfList)
 {
   uint8_t index = 0;
   for (index = 0; index < sizeOfList; index++) {
-    if (emGpAddressMatch(addr, &addrList[index])) {
+    if (sli_zigbee_af_gp_address_match(addr, &addrList[index])) {
       return index;
     }
   }
@@ -1907,15 +1418,15 @@ uint8_t emAfGreenPowerFindGpAddrIndex(EmberGpAddress * addr,
   return 0xFF;
 }
 
-uint8_t emAfGreenPowerAddGpAddr(EmberAfGreenPowerDuplicateFilter * filter,
-                                EmberGpAddress * addr)
+uint8_t sli_zigbee_af_green_power_add_gp_addr(EmberAfGreenPowerDuplicateFilter * filter,
+                                              EmberGpAddress * addr)
 {
   uint8_t addrIndex;
 
   for (addrIndex = 0;
        addrIndex < EMBER_AF_PLUGIN_GREEN_POWER_CLIENT_MAX_ADDR_ENTRIES;
        addrIndex++) {
-    if (!emAfGreenPowerIsGpAddrUsed(&duplicateFilter, addrIndex)) {
+    if (!sli_zigbee_af_green_power_is_gp_addr_used(&duplicateFilter, addrIndex)) {
       MEMCOPY(&filter->addrs[addrIndex], addr, sizeof(EmberGpAddress));
       return addrIndex;
     }
@@ -1936,24 +1447,24 @@ uint8_t emAfGreenPowerAddGpAddr(EmberAfGreenPowerDuplicateFilter * filter,
  * number and return false to accept the message.
  *
  */
-bool emAfGreenPowerFindDuplicateMacSeqNum(EmberGpAddress * addr,
-                                          uint8_t randomSeqNum)
+bool sli_zigbee_af_green_power_find_duplicate_mac_seq_num(EmberGpAddress * addr,
+                                                          uint8_t randomSeqNum)
 {
   bool added = false;
-  uint8_t addrIndex = emAfGreenPowerFindGpAddrIndex(addr,
-                                                    duplicateFilter.addrs,
-                                                    EMBER_AF_PLUGIN_GREEN_POWER_CLIENT_MAX_ADDR_ENTRIES);
+  uint8_t addrIndex = sli_zigbee_af_green_power_find_gp_addr_index(addr,
+                                                                   duplicateFilter.addrs,
+                                                                   EMBER_AF_PLUGIN_GREEN_POWER_CLIENT_MAX_ADDR_ENTRIES);
   if (addrIndex == 0xFF) {
-    addrIndex = emAfGreenPowerAddGpAddr(&duplicateFilter, addr);
+    addrIndex = sli_zigbee_af_green_power_add_gp_addr(&duplicateFilter, addr);
   }
 
   if (addrIndex == 0xFF) {
     return false;
   }
 
-  added = emAfGreenPowerAddRandomMacSeqNum(&duplicateFilter,
-                                           addrIndex,
-                                           randomSeqNum);
+  added = sli_zigbee_af_green_power_add_random_mac_seq_num(&duplicateFilter,
+                                                           addrIndex,
+                                                           randomSeqNum);
   return !added;
 }
 
@@ -1964,7 +1475,7 @@ bool emAfGreenPowerFindDuplicateMacSeqNum(EmberGpAddress * addr,
  * @return true if given sequenceNumber is valid and message should be
  *         accepted, false otherwise.
  */
-bool emGpMessageChecking(EmberGpAddress *gpAddr, uint8_t sequenceNumber)
+bool sli_zigbee_af_gp_message_checking(EmberGpAddress *gpAddr, uint8_t sequenceNumber)
 {
   /*
      uint8_t proxyTableIndex = emberGpProxyTableLookup(gpAddr);
@@ -1990,7 +1501,7 @@ bool emGpMessageChecking(EmberGpAddress *gpAddr, uint8_t sequenceNumber)
         return false;
       }
      } else { // EMBER_GP_GPD_MAC_SEQ_NUM_CAP_RANDOM
-      if (emAfGreenPowerFindDuplicateMacSeqNum(gpAddr, sequenceNumber)) {
+      if (sli_zigbee_af_green_power_find_duplicate_mac_seq_num(gpAddr, sequenceNumber)) {
         emberAfGreenPowerClusterPrintln("Drop frame due to duplicate sequence number: 0x%4X", sequenceNumber);
         return false;
       }
@@ -2007,11 +1518,7 @@ bool emGpMessageChecking(EmberGpAddress *gpAddr, uint8_t sequenceNumber)
 }
 
 //GP-DATA.indication
-#ifdef UC_BUILD
-void emAfPluginGreenPowerClientGpepIncomingMessageCallback(GP_PARAMS)
-#else
-void emberGpepIncomingMessageHandler(GP_PARAMS)
-#endif // UC_BUILD
+void sli_zigbee_af_green_power_client_gpep_incoming_message_callback(GP_PARAMS)
 {
   //emberAfGreenPowerClusterPrintln("Gpep cmd %x status %x SFC %4x", gpdCommandId, status, gpdSecurityFrameCounter);
   if ((commissioningState.channelStatus & GP_CLIENT_ON_TRANSMIT_CHANNEL_MASK)
@@ -2053,7 +1560,7 @@ void emberGpepIncomingMessageHandler(GP_PARAMS)
       || (status == EMBER_UNPROCESSED && commissioningState.inCommissioningMode)
       || (status == EMBER_AUTH_FAILURE  && commissioningState.inCommissioningMode)) {
     // duplicate filter
-    if (emGpMessageChecking(addr, sequenceNumber)) {
+    if (sli_zigbee_af_gp_message_checking(addr, sequenceNumber)) {
       if (commissioningState.inCommissioningMode) {
         if (autoCommissioning) {
           emberAfGreenPowerClusterAutoCommissioningCallback(GP_ARGS);
@@ -2114,7 +1621,7 @@ void emberGpepIncomingMessageHandler(GP_PARAMS)
 void emberAfPluginGreenPowerClientClearProxyTable(void)
 {
 #ifndef EZSP_HOST
-  emGpClearProxyTable();
+  sli_zigbee_gp_clear_proxy_table();
 #else
   EmberGpProxyTableEntry entry;
   uint8_t entryIndex;
@@ -2139,30 +1646,18 @@ void emberAfPluginGreenPowerClientClearProxyTable(void)
 #endif
 }
 
-#ifdef UC_BUILD
-void emAfPluginGreenPowerClientDGpSentCallback(EmberStatus status, uint8_t gpepHandle)
-#else
-void emberDGpSentHandler(EmberStatus status, uint8_t gpepHandle)
-#endif
+void sli_zigbee_af_green_power_client_d_gp_sent_callback(EmberStatus status, uint8_t gpepHandle)
 {
   emberAfGreenPowerClusterPrintln("emberDGpSentHandler Status = %x", status);
   if (status == EMBER_SUCCESS
       && (commissioningState.channelStatus & GP_CLIENT_ON_TRANSMIT_CHANNEL_MASK)) {
     // Here, the sent event is for channel configuration delivery.
     // Clear the 5 sec timer that started while submitted a packet to TxQueue - call handler
-#ifdef UC_BUILD
     emberAfPluginGreenPowerClientChannelEventHandler(channelEvent);
-#else
-    emberAfPluginGreenPowerClientChannelEventHandler();
-#endif
   }
 }
 
-#ifdef UC_BUILD
-void emAfPluginGreenPowerClientStackStatusCallback(EmberStatus status)
-#else
-void emberAfPluginGreenPowerClientStackStatusCallback(EmberStatus status)
-#endif
+void sli_zigbee_af_green_power_client_stack_status_callback(EmberStatus status)
 {
   if (status == EMBER_NETWORK_DOWN
       && emberStackIsPerformingRejoin() == FALSE) {
@@ -2171,7 +1666,6 @@ void emberAfPluginGreenPowerClientStackStatusCallback(EmberStatus status)
   }
 }
 
-#ifdef UC_BUILD
 uint32_t emberAfGreenPowerClusterClientCommandParse(sl_service_opcode_t opcode,
                                                     sl_service_function_context_t *context)
 {
@@ -2209,4 +1703,9 @@ uint32_t emberAfGreenPowerClusterClientCommandParse(sl_service_opcode_t opcode,
           ? EMBER_ZCL_STATUS_SUCCESS
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
-#endif // UC_BUILD
+
+WEAK(void emberAfGreenPowerClientGpdfSinkTableBasedForwardCallback(EmberGpAddress *addr,
+                                                                   EmberGpSinkListEntry *sinkList,
+                                                                   uint8_t maxNumberEntries))
+{
+}

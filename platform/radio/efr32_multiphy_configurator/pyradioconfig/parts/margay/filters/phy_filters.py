@@ -30,7 +30,7 @@ class PhyFilters(IPhyFilter):
     simplicity_studio_phy_groups = [
                             'Phys_Studio_Base',
                             'Phys_Studio_Base_Standard_SUNFSK',
-                            'Phys_Studio_Base_Sidewalk',
+                            'Phys_Studio_Sidewalk',
                             'Phys_Studio_Connect',
                             'Phys_Studio_LongRange',
                             'Phys_Studio_MBus',

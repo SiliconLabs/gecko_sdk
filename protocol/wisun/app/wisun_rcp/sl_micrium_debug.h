@@ -14,6 +14,12 @@
 #ifndef SL_MICRIUM_DEBUG_H
 #define SL_MICRIUM_DEBUG_H
 
+#include "sl_component_catalog.h"
+
+#if defined(SL_CATALOG_MICRIUMOS_KERNEL_PRESENT)
 void export_debugger_data();
+#else
+static inline void export_debugger_data() { };
+#endif
 
 #endif

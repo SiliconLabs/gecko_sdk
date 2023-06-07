@@ -3,7 +3,7 @@
  * @brief Board support package API implementation for BRD3201.
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -32,14 +32,24 @@
 #include <stddef.h>
 #include "em_cmu.h"
 #include "em_ebi.h"
+#if defined(_SILICON_LABS_32B_SERIES_3)
+#include "sl_peripheral_gpio.h"
+#include "sl_peripheral_eusart.h"
+#elif defined(USART_PRESENT)
 #include "em_gpio.h"
-#if defined(USART_PRESENT)
 #include "em_usart.h"
 #elif defined(EUSART_PRESENT)
+#include "em_gpio.h"
 #include "em_eusart.h"
 #endif
 #include "bsp_dk_bcreg_3201.h"
 #include "bsp.h"
+
+#if defined(HAL_CONFIG)
+#include "retargetserialhalconfig.h"
+#else
+#include "retargetserialconfig.h"
+#endif
 
 #if defined(BSP_DK_BRD3201)
 /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
@@ -216,38 +226,65 @@ int BSP_BusControlModeSet(BSP_BusControl_TypeDef mode)
 
   switch (mode) {
     case BSP_BusControl_OFF:
+#if defined(_SILICON_LABS_32B_SERIES_3)
+      /* Configure board for OFF mode on PB15 MCU_EBI_CONNECT */
+      sl_gpio_set_pin_mode(SL_GPIO_PORT_B, 15, SL_GPIO_MODE_PUSH_PULL, 1);
+      /* Configure board for OFF mode on PD13 MCU_SPI_CONNECT */
+      sl_gpio_set_pin_mode(SL_GPIO_PORT_D, 13, SL_GPIO_MODE_PUSH_PULL, 1);
+#else
       /* Configure board for OFF mode on PB15 MCU_EBI_CONNECT */
       GPIO_PinModeSet(gpioPortB, 15, gpioModePushPull, 1);
       /* Configure board for OFF mode on PD13 MCU_SPI_CONNECT */
       GPIO_PinModeSet(gpioPortD, 13, gpioModePushPull, 1);
+#endif
       break;
 
     case BSP_BusControl_DIRECT:
+#if defined(_SILICON_LABS_32B_SERIES_3)
+      /* Configure board for DIRECT on PB15 MCU_EBI_CONNECT */
+      sl_gpio_set_pin_mode(SL_GPIO_PORT_B, 15, SL_GPIO_MODE_PUSH_PULL, 0);
+      /* Configure board for DIRECT on PD13 MCU_EBI_CONNECT */
+      sl_gpio_set_pin_mode(SL_GPIO_PORT_D, 13, SL_GPIO_MODE_PUSH_PULL, 0);
+#else
       /* Configure board for DIRECT on PB15 MCU_EBI_CONNECT */
       GPIO_PinModeSet(gpioPortB, 15, gpioModePushPull, 0);
-      /* Configure board for DIRECT on PD13 MCU_SPI_CONNECT */
+      /* Configure board for DIRECT on PD13 MCU_EBI_CONNECT */
       GPIO_PinModeSet(gpioPortD, 13, gpioModePushPull, 0);
+#endif
       break;
 
     case BSP_BusControl_SPI:
-      #if !defined(BSP_MCUBOARD_BRD1004A) && !defined(BSP_MCUBOARD_BRD1011A)
+#if !defined(BSP_MCUBOARD_BRD1004A) && !defined(BSP_MCUBOARD_BRD1011A)
+#if defined(_SILICON_LABS_32B_SERIES_3)
+      /* Configure board for SPI mode on PB15 MCU_EBI_CONNECT */
+      sl_gpio_set_pin_mode(SL_GPIO_PORT_B, 15, SL_GPIO_MODE_PUSH_PULL, 1);
+      /* Configure board for SPI mode on PD13 MCU_EBI_CONNECT */
+      sl_gpio_set_pin_mode(SL_GPIO_PORT_D, 13, SL_GPIO_MODE_PUSH_PULL, 0);
+#else
       /* Configure board for SPI mode on PB15 MCU_EBI_CONNECT */
       GPIO_PinModeSet(gpioPortB, 15, gpioModePushPull, 1);
-      /* Configure board for SPI mode on PD13 MCU_SPI_CONNECT */
+      /* Configure board for SPI mode on PD13 MCU_EBI_CONNECT */
       GPIO_PinModeSet(gpioPortD, 13, gpioModePushPull, 0);
-      #else
+#endif
+#else
+#if defined(_SILICON_LABS_32B_SERIES_3)
+      /* Configure board for SPI mode on PB0 MCU_SPI_CONNECT */
+      sl_gpio_set_pin_mode(SL_GPIO_PORT_B, 0, SL_GPIO_MODE_PUSH_PULL, 0);
+#else
       /* Configure board for SPI mode on PB0 MCU_SPI_CONNECT */
       GPIO_PinModeSet(gpioPortB, 0, gpioModePushPull, 0);
-      #endif
+#endif
+#endif
       break;
 
+#if defined(EBI_PRESENT)
     case BSP_BusControl_EBI:
       /* Configure board for EBI mode on PB15 MCU_EBI_CONNECT */
       GPIO_PinModeSet(gpioPortB, 15, gpioModePushPull, 0);
-      /* Configure board for EBI mode on PD13 MCU_SPI_CONNECT */
+      /* Configure board for EBI mode on PD13 MCU_EBI_CONNECT */
       GPIO_PinModeSet(gpioPortD, 13, gpioModePushPull, 1);
       break;
-
+#endif
     default:
       retVal = BSP_STATUS_ILLEGAL_PARAM;
       break;
@@ -725,7 +762,7 @@ int BSP_RegisterWrite(volatile uint16_t *addr, uint16_t data)
 
 static void EbiDisable(void)
 {
-#if !defined(_SILICON_LABS_32B_SERIES_2)
+#if (_SILICON_LABS_32B_SERIES < 2)
 #if defined(_EFM32_GECKO_FAMILY)
 
   /* Configure GPIO pins as disabled */
@@ -832,7 +869,7 @@ static void EbiDisable(void)
  *****************************************************************************/
 static bool EbiInit(void)
 {
-#if !defined(_SILICON_LABS_32B_SERIES_2)
+#if (_SILICON_LABS_32B_SERIES < 2)
   EBI_Init_TypeDef ebiConfig = EBI_INIT_DEFAULT;
 
   /* Enable clocks */
@@ -1127,10 +1164,29 @@ static uint16_t SpiBcAccess(uint8_t addr, uint8_t rw, uint16_t data)
 {
   uint16_t tmp;
 
+#if defined(_SILICON_LABS_32B_SERIES_3)
+  /* Enable CS */
+  sl_gpio_clear_pin_output(BSP_PORT_SPI_CS, BSP_PIN_SPI_CS);
+
+  /* 1-byte Header */
+  sl_eusart_tx(BSP_SPI_USART_USED, (addr & 0x3) | rw << 3);
+  /* Just ignore data read back */
+  (void)sl_eusart_rx(BSP_SPI_USART_USED);
+
+  /* SPI data LSB */
+  sl_eusart_tx(BSP_SPI_USART_USED, data & 0xFF);
+  tmp = (uint16_t) sl_eusart_rx(BSP_SPI_USART_USED);
+
+  /* SPI data MSB */
+  sl_eusart_tx(BSP_SPI_USART_USED, data >> 8);
+  tmp |= (uint16_t) sl_eusart_rx(BSP_SPI_USART_USED) << 8;
+
+  /* Disable CS */
+  sl_gpio_set_pin_output(BSP_PORT_SPI_CS, BSP_PIN_SPI_CS);
+#elif defined(USART_PRESENT)
   /* Enable CS */
   GPIO_PinOutClear(BSP_PORT_SPI_CS, BSP_PIN_SPI_CS);
 
-#if defined(USART_PRESENT)
   /* Write SPI address MSB */
   USART_Tx(BSP_SPI_USART_USED, (addr & 0x3) | rw << 3);
   /* Just ignore data read back */
@@ -1145,7 +1201,12 @@ static uint16_t SpiBcAccess(uint8_t addr, uint8_t rw, uint16_t data)
   USART_Tx(BSP_SPI_USART_USED, data >> 8);
   tmp |= (uint16_t) USART_Rx(BSP_SPI_USART_USED) << 8;
 
+  /* Disable CS */
+  GPIO_PinOutSet(BSP_PORT_SPI_CS, BSP_PIN_SPI_CS);
 #elif defined(EUSART_PRESENT)
+  /* Enable CS */
+  GPIO_PinOutClear(BSP_PORT_SPI_CS, BSP_PIN_SPI_CS);
+
   /* 1-byte Header */
   EUSART_Tx(BSP_SPI_USART_USED, (addr & 0x3) | rw << 3);
   /* Just ignore data read back */
@@ -1158,10 +1219,10 @@ static uint16_t SpiBcAccess(uint8_t addr, uint8_t rw, uint16_t data)
   /* SPI data MSB */
   EUSART_Tx(BSP_SPI_USART_USED, data >> 8);
   tmp |= (uint16_t) EUSART_Rx(BSP_SPI_USART_USED) << 8;
-#endif
 
   /* Disable CS */
   GPIO_PinOutSet(BSP_PORT_SPI_CS, BSP_PIN_SPI_CS);
+#endif
 
   return (tmp);
 }
@@ -1169,17 +1230,27 @@ static uint16_t SpiBcAccess(uint8_t addr, uint8_t rw, uint16_t data)
 static void SpiBcDisable(void)
 {
   /* Restore and disable USART */
-#if defined(USART_PRESENT)
+#if defined(_SILICON_LABS_32B_SERIES_3)
+  sl_eusart_reset(BSP_SPI_USART_USED);
+#elif defined(USART_PRESENT)
   USART_Reset(BSP_SPI_USART_USED);
 #elif defined(EUSART_PRESENT)
   EUSART_Reset(BSP_SPI_USART_USED);
 #endif
+
+#if defined(_SILICON_LABS_32B_SERIES_3)
+  sl_gpio_set_pin_mode(BSP_PORT_SPI_TX, BSP_PIN_SPI_TX, SL_GPIO_MODE_DISABLED, 0);
+  sl_gpio_set_pin_mode(BSP_PORT_SPI_RX, BSP_PIN_SPI_RX, SL_GPIO_MODE_DISABLED, 0);
+  sl_gpio_set_pin_mode(BSP_PORT_SPI_CLK, BSP_PIN_SPI_CLK, SL_GPIO_MODE_DISABLED, 0);
+  sl_gpio_set_pin_mode(BSP_PORT_SPI_CS, BSP_PIN_SPI_CS, SL_GPIO_MODE_DISABLED, 0);
+#else
   GPIO_PinModeSet(BSP_PORT_SPI_TX, BSP_PIN_SPI_TX, gpioModeDisabled, 0);
   GPIO_PinModeSet(BSP_PORT_SPI_RX, BSP_PIN_SPI_RX, gpioModeDisabled, 0);
   GPIO_PinModeSet(BSP_PORT_SPI_CLK, BSP_PIN_SPI_CLK, gpioModeDisabled, 0);
   GPIO_PinModeSet(BSP_PORT_SPI_CS, BSP_PIN_SPI_CS, gpioModeDisabled, 0);
+#endif
 
-#if !defined(_SILICON_LABS_32B_SERIES_2)
+#if (_SILICON_LABS_32B_SERIES < 2)
   /* Disable USART clock - we can't disable GPIO or HFPER as we don't know who else
    * might be using it */
   CMU_ClockEnable(BSP_SPI_USART_CLK, false);
@@ -1188,7 +1259,9 @@ static void SpiBcDisable(void)
 
 static void SpiBcInit(void)
 {
-#if defined(USART_PRESENT)
+#if defined(_SILICON_LABS_32B_SERIES_3)
+  sl_eusart_spi_config_t bcinit = SL_EUSART_SPI_MASTER_INIT_DEFAULT_HF;
+#elif defined(USART_PRESENT)
   USART_InitSync_TypeDef bcinit = USART_INITSYNC_DEFAULT;
 #elif defined(EUSART_PRESENT)
   EUSART_SpiInit_TypeDef bcinit = EUSART_SPI_MASTER_INIT_DEFAULT_HF;
@@ -1197,34 +1270,47 @@ static void SpiBcInit(void)
   /* Enable module clocks */
   CMU_ClockEnable(BSP_SPI_USART_CLK, true);
 
+#if defined(_SILICON_LABS_32B_SERIES_3)
+  /* Configure SPI pins */
+  sl_gpio_set_pin_mode(BSP_PORT_SPI_TX, BSP_PIN_SPI_TX, SL_GPIO_MODE_PUSH_PULL, 0);
+  sl_gpio_set_pin_mode(BSP_PORT_SPI_RX, BSP_PIN_SPI_RX, SL_GPIO_MODE_INPUT, 0);
+  sl_gpio_set_pin_mode(BSP_PORT_SPI_CLK, BSP_PIN_SPI_CLK, SL_GPIO_MODE_PUSH_PULL, 0);
+  /* Keep CS high to not activate slave */
+  sl_gpio_set_pin_mode(BSP_PORT_SPI_CS, BSP_PIN_SPI_CS, SL_GPIO_MODE_PUSH_PULL, 1);
+#else
   /* Configure SPI pins */
   GPIO_PinModeSet(BSP_PORT_SPI_TX, BSP_PIN_SPI_TX, gpioModePushPull, 0);
   GPIO_PinModeSet(BSP_PORT_SPI_RX, BSP_PIN_SPI_RX, gpioModeInput, 0);
   GPIO_PinModeSet(BSP_PORT_SPI_CLK, BSP_PIN_SPI_CLK, gpioModePushPull, 0);
-
   /* Keep CS high to not activate slave */
   GPIO_PinModeSet(BSP_PORT_SPI_CS, BSP_PIN_SPI_CS, gpioModePushPull, 1);
+#endif
 
   /* Configure to use SPI master with manual CS */
   /* For now, configure SPI for worst case 48/32MHz clock in order to work */
   /* for all configurations. */
-
-  #if defined(_EFM32_GECKO_FAMILY)
+#if defined(_SILICON_LABS_32B_SERIES_3)
+  uint32_t ref_freq = CMU_ClockFreqGet(RETARGET_CLK);
+#elif defined(_EFM32_GECKO_FAMILY)
   bcinit.refFreq  = 32000000;
-  #elif defined(BSP_MCUBOARD_BRD1004A) || defined(BSP_MCUBOARD_BRD1011A)
+#elif defined(BSP_MCUBOARD_BRD1004A) || defined(BSP_MCUBOARD_BRD1011A)
   bcinit.refFreq  = 0; /* Use default USART or EUSART clock of FPGA. */
-  #else
+#else
   bcinit.refFreq  = 48000000;
-  #endif
+#endif
 
-#if defined(USART_PRESENT)
+#if defined(_SILICON_LABS_32B_SERIES_3)
+  bcinit.clock_div = sl_eusart_spi_get_clock_div(ref_freq, 2000000);
+  sl_eusart_init_spi(BSP_SPI_USART_USED, &bcinit);
+  sl_eusart_enable_rx(BSP_SPI_USART_USED);
+  sl_eusart_enable_tx(BSP_SPI_USART_USED);
+  sl_eusart_wait_sync(BSP_SPI_USART_USED, _EUSART_SYNCBUSY_MASK);
+#elif defined(USART_PRESENT)
   bcinit.baudrate = 7000000;
-
   /* Initialize USART */
   USART_InitSync(BSP_SPI_USART_USED, &bcinit);
 #elif defined(EUSART_PRESENT)
   bcinit.bitRate = 2000000;
-
   /* Initialize EUSART */
   EUSART_SpiInit(BSP_SPI_USART_USED, &bcinit);
 #endif
@@ -1277,7 +1363,9 @@ static void SpiControl(BSP_SpiControl_TypeDef device)
       break;
 
     case BSP_SPI_OFF:
-#if defined(USART_PRESENT)
+#if defined(_SILICON_LABS_32B_SERIES_3)
+      sl_eusart_reset(BSP_SPI_USART_USED);
+#elif defined(USART_PRESENT)
       USART_Reset(BSP_SPI_USART_USED);
 #elif defined(EUSART_PRESENT)
       EUSART_Reset(BSP_SPI_USART_USED);
@@ -1291,7 +1379,7 @@ static bool SpiInit(void)
 {
   uint16_t bcMagic;
 
-#if !defined(_SILICON_LABS_32B_SERIES_2)
+#if (_SILICON_LABS_32B_SERIES < 2)
   /* Enable HF and GPIO clocks */
   CMU_ClockEnable(cmuClock_HFPER, true);
   CMU_ClockEnable(cmuClock_GPIO, true);

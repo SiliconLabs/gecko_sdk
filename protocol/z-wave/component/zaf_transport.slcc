@@ -1,0 +1,24 @@
+id: zaf_transport
+label: ZAF Transport Component
+category: Z-Wave|ZAF|Transport
+description: >
+  This component contains the functionality to send frames from the application
+  to the protocol. It has a FIFO to ensure determinism in the process.
+  The queue size is configurable since it is heavily dependent on the use case
+  of the application.
+  The default size is set to 2 since this is the minimum for our sample 
+  applications. The user must configure it for optimal memory usage.
+package: Z-Wave
+quality: production
+config_file:
+  - path: protocol/z-wave/platform/SiliconLabs/PAL/config/zaf_transport/zaf_transport_config.h
+    file_id: zaf_transport_config
+include:
+  - path: "protocol/z-wave/ZAF/TransportLayer/inc"
+    file_list:
+      - path: "zaf_transport_tx.h"
+source:
+  - path: "protocol/z-wave/ZAF/TransportLayer/src/zaf_transport_tx.c"
+provides:
+  - name: zaf_transport
+

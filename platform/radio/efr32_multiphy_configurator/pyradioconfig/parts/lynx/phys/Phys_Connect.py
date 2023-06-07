@@ -9,3 +9,5 @@ class PHYS_connect_Lynx(IPhy):
     def PHY_Connect_2_4GHz_OQPSK_2Mcps_250kbps(self, model):
         phy = PHYS_connect_Nixi().PHY_Connect_2_4GHz_OQPSK_2Mcps_250kbps(model)
 
+        return phy
+

@@ -4,7 +4,7 @@ package: Btmesh
 description: >
   Provides BT Mesh BLOB (binary large object) Transfer Client functionality,
   defined in mesh specification.
-  
+
   The BLOB Transfer Client model is used by a higher-layer application to
   transfer a BLOB to one or more BLOB Transfer Servers. The higher-layer
   application provides the inputs to the procedures executed by the client.
@@ -28,12 +28,13 @@ requires:
   - name: app_btmesh_util
   - name: btmesh_blob_storage
   - name: btmesh_core
+  - name: btmesh_provisionee
   - name: btmesh_stack_mbt_client
   - name: btmesh_stack
-  - name: simple_timer
+  - name: app_timer
 recommends:
-  - id: simple_timer
-  
+  - id: app_timer
+
 template_contribution:
   - name: btmesh_on_event
     value:

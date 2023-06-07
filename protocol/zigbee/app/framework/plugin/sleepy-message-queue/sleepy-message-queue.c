@@ -18,29 +18,20 @@
 #include "app/framework/include/af.h"
 #include "sleepy-message-queue.h"
 
-#ifdef UC_BUILD
 #include "sleepy-message-queue-config.h"
-#endif
 
 //------------------------------------------------------------------------------
 // Forward Declaration
-#ifdef UC_BUILD
 sl_zigbee_event_t emberAfPluginSleepyMessageQueueTimeoutEvent;
 #define msgTimeoutEvent (&emberAfPluginSleepyMessageQueueTimeoutEvent)
-void emberAfPluginSleepyMessageQueueTimeoutEventHandler(SLXU_UC_EVENT);
-#else
-EmberEventControl emberAfPluginSleepyMessageQueueTimeoutEventControl;
-
-// Use a shorter name to make the code more readable
-#define msgTimeoutEvent emberAfPluginSleepyMessageQueueTimeoutEventControl
-#endif
+void emberAfPluginSleepyMessageQueueTimeoutEventHandler(sl_zigbee_event_t * event);
 //------------------------------------------------------------------------------
 // Internal Prototypes & Structure Definitions
 
 // Internal supporting functions
-static void  emSleepyMessageQueueInitEntry(uint8_t index);
-static void  emRestartMessageTimer(void);
-static uint8_t emGetFirstUnusedQueueIndex(void);
+static void  sli_zigbee_af_sleepy_messageQueueInitEntry(uint8_t index);
+static void  sli_zigbee_af_restart_message_timer(void);
+static uint8_t sli_zigbee_af_get_first_unused_queue_index(void);
 
 //static void emRefreshMessageTimeouts( void );
 
@@ -48,12 +39,12 @@ typedef struct {
   EmberAfSleepyMessage sleepyMsg;
   uint8_t  status;
   uint32_t timeoutMSec;
-} emSleepyMessage;
+} sli_zigbee_af_sleepy_message;
 
 #define SLEEPY_MSG_QUEUE_NUM_ENTRIES  EMBER_AF_PLUGIN_SLEEPY_MESSAGE_QUEUE_SLEEPY_QUEUE_SIZE
 #define MAX_MESSAGE_TIMEOUT_SEC  (0x7fffffff >> 10)
 
-emSleepyMessage SleepyMessageQueue[SLEEPY_MSG_QUEUE_NUM_ENTRIES];
+sli_zigbee_af_sleepy_message SleepyMessageQueue[SLEEPY_MSG_QUEUE_NUM_ENTRIES];
 
 enum {
   SLEEPY_MSG_QUEUE_STATUS_UNUSED = 0x00,
@@ -62,14 +53,13 @@ enum {
 
 //------------------------------------------------------------------------------
 
-#ifdef UC_BUILD
 void emberAfPluginSleepyMessageQueueInitCallback(uint8_t init_level)
 {
   switch (init_level) {
     case SL_ZIGBEE_INIT_LEVEL_EVENT:
     {
-      slxu_zigbee_event_init(&emberAfPluginSleepyMessageQueueTimeoutEvent,
-                             emberAfPluginSleepyMessageQueueTimeoutEventHandler);
+      sl_zigbee_event_init(&emberAfPluginSleepyMessageQueueTimeoutEvent,
+                           emberAfPluginSleepyMessageQueueTimeoutEventHandler);
       break;
     }
     case SL_ZIGBEE_INIT_LEVEL_LOCAL_DATA:
@@ -77,28 +67,15 @@ void emberAfPluginSleepyMessageQueueInitCallback(uint8_t init_level)
       // Initialize sleepy buffer plugin.
       uint8_t x;
       for ( x = 0; x < SLEEPY_MSG_QUEUE_NUM_ENTRIES; x++ ) {
-        emSleepyMessageQueueInitEntry(x);
+        sli_zigbee_af_sleepy_messageQueueInitEntry(x);
       }
       emberAfAppPrintln("Initialized Sleepy Message Queue");
       break;
     }
   }
 }
-#else // !UC_BUILD
-void emberAfPluginSleepyMessageQueueInitCallback(void)
-{
-  slxu_zigbee_event_init(msgTimeoutEvent,
-                         emberAfPluginSleepyMessageQueueTimeoutEventHandler);
-  // Initialize sleepy buffer plugin.
-  uint8_t x;
-  for ( x = 0; x < SLEEPY_MSG_QUEUE_NUM_ENTRIES; x++ ) {
-    emSleepyMessageQueueInitEntry(x);
-  }
-  emberAfAppPrintln("Initialized Sleepy Message Queue");
-}
-#endif  // UC_BUILD
 
-static void emSleepyMessageQueueInitEntry(uint8_t x)
+static void sli_zigbee_af_sleepy_messageQueueInitEntry(uint8_t x)
 {
   if ( x < SLEEPY_MSG_QUEUE_NUM_ENTRIES ) {
     SleepyMessageQueue[x].sleepyMsg.payload = NULL;
@@ -122,7 +99,7 @@ uint8_t emberAfPluginSleepyMessageQueueGetNumUnusedEntries()
   return cnt;
 }
 
-static uint8_t emGetFirstUnusedQueueIndex()
+static uint8_t sli_zigbee_af_get_first_unused_queue_index()
 {
   uint8_t x;
   for ( x = 0; x < SLEEPY_MSG_QUEUE_NUM_ENTRIES; x++ ) {
@@ -138,7 +115,7 @@ static uint8_t emGetFirstUnusedQueueIndex()
 
 #define MAX_DELAY_QS  0x7FFF
 #define MAX_DELAY_MS  0x7FFF
-static void emRestartMessageTimer()
+static void sli_zigbee_af_restart_message_timer()
 {
   uint32_t smallestTimeoutIndex = SLEEPY_MSG_QUEUE_NUM_ENTRIES;
   uint32_t smallestTimeoutMSec = 0xFFFFFFFF;
@@ -175,7 +152,7 @@ static void emRestartMessageTimer()
       delayQs = MAX_DELAY_QS;
     }
 
-    slxu_zigbee_event_set_delay_qs(msgTimeoutEvent, delayQs);
+    sl_zigbee_event_set_delay_qs(msgTimeoutEvent, delayQs);
     emberAfAppPrintln("Restarting sleepy message timer for %d Qsec.", delayQs);
   }
 }
@@ -185,14 +162,14 @@ EmberAfSleepyMessageId emberAfPluginSleepyMessageQueueStoreMessage(EmberAfSleepy
   uint8_t x;
 
   if ( timeoutSec <= MAX_MESSAGE_TIMEOUT_SEC ) {
-    x = emGetFirstUnusedQueueIndex();
+    x = sli_zigbee_af_get_first_unused_queue_index();
     if ( x < SLEEPY_MSG_QUEUE_NUM_ENTRIES ) {
       MEMCOPY( (uint8_t *)&SleepyMessageQueue[x].sleepyMsg, (uint8_t *)pmsg, sizeof(EmberAfSleepyMessage) );
       SleepyMessageQueue[x].status = SLEEPY_MSG_QUEUE_STATUS_USED;
       SleepyMessageQueue[x].timeoutMSec = (timeoutSec << 10) + halCommonGetInt32uMillisecondTick();
 
       // Reschedule timer after adding the new message since new message could have the shortest timeout.
-      emRestartMessageTimer();
+      sli_zigbee_af_restart_message_timer();
     }
     return x;
   }
@@ -235,7 +212,7 @@ EmberAfSleepyMessageId emberAfPluginSleepyMessageQueueGetPendingMessageId(EmberE
   return smallestTimeoutIndex;
 }
 
-uint32_t emMessageMSecRemaining(EmberAfSleepyMessageId sleepyMsgId)
+uint32_t sli_zigbee_af_message_m_sec_remaining(EmberAfSleepyMessageId sleepyMsgId)
 {
   uint32_t remainingMs = 0xFFFFFFFF;
   uint32_t timeNowMs = halCommonGetInt32uMillisecondTick();
@@ -288,8 +265,8 @@ uint8_t emberAfPluginSleepyMessageQueueGetNumMessages(EmberEUI64 dstEui64)
 bool emberAfPluginSleepyMessageQueueRemoveMessage(EmberAfSleepyMessageId  sleepyMsgId)
 {
   if ( sleepyMsgId < SLEEPY_MSG_QUEUE_NUM_ENTRIES ) {
-    emSleepyMessageQueueInitEntry(sleepyMsgId);
-    emRestartMessageTimer();    // Restart the message timer
+    sli_zigbee_af_sleepy_messageQueueInitEntry(sleepyMsgId);
+    sli_zigbee_af_restart_message_timer();    // Restart the message timer
     return true;
   }
   return false;
@@ -305,23 +282,23 @@ void emberAfPluginSleepyMessageQueueRemoveAllMessages(EmberEUI64 dstEui64)
     if ( SleepyMessageQueue[x].status == SLEEPY_MSG_QUEUE_STATUS_USED ) {
       stat = MEMCOMPARE(SleepyMessageQueue[x].sleepyMsg.dstEui64, dstEui64, EUI64_SIZE);
       if ( !stat ) {
-        emSleepyMessageQueueInitEntry(x);
+        sli_zigbee_af_sleepy_messageQueueInitEntry(x);
         matchCnt++;
       }
     }
   }
   if ( matchCnt ) {
     // At least one entry was removed.  Restart the message timer.
-    emRestartMessageTimer();
+    sli_zigbee_af_restart_message_timer();
   }
 }
 
-void emberAfPluginSleepyMessageQueueTimeoutEventHandler(SLXU_UC_EVENT)
+void emberAfPluginSleepyMessageQueueTimeoutEventHandler(sl_zigbee_event_t * event)
 {
   uint32_t timeNowMs;
   uint8_t x;
 
-  slxu_zigbee_event_set_inactive(msgTimeoutEvent);
+  sl_zigbee_event_set_inactive(msgTimeoutEvent);
   timeNowMs = halCommonGetInt32uMillisecondTick();
 
   for ( x = 0; x < SLEEPY_MSG_QUEUE_NUM_ENTRIES; x++ ) {
@@ -334,11 +311,11 @@ void emberAfPluginSleepyMessageQueueTimeoutEventHandler(SLXU_UC_EVENT)
         emberAfPluginSleepyMessageQueueMessageTimedOutCallback(x);
 
         // After timeout callback completes, mark event as unused.
-        emSleepyMessageQueueInitEntry(x);
+        sli_zigbee_af_sleepy_messageQueueInitEntry(x);
       }
     }
   }
 
   // Restart timer if another message is buffered.
-  emRestartMessageTimer();
+  sli_zigbee_af_restart_message_timer();
 }

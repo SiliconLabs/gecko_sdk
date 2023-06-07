@@ -27,7 +27,6 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
-
 #include "sl_iostream.h"
 #include "sl_iostream_swo.h"
 #include "sl_status.h"
@@ -36,6 +35,7 @@
 
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
 #include "sl_power_manager.h"
+#include "em_device.h"
 #endif
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)

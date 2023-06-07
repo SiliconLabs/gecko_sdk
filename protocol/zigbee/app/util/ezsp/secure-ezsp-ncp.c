@@ -25,41 +25,41 @@
 //------------------------------------------------------------------------------
 // Internal functions and handlers.
 
-EzspStatus emSecureEzspInit(void)
+EzspStatus sli_zigbee_secure_ezsp_init(void)
 {
-  if (emSecureEzspIsSecurityKeySet()) {
-    emSecureEzspSetSecurityType(SECURE_EZSP_SECURITY_TYPE_TEMPORARY);
+  if (sli_zigbee_secure_ezsp_is_security_key_set()) {
+    sli_zigbee_secure_ezsp_set_security_type(SECURE_EZSP_SECURITY_TYPE_TEMPORARY);
 
     sl_zb_sec_man_context_t context;
     sl_zb_sec_man_init_context(&context);
     context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_SECURE_EZSP_KEY;
     //TODO: Remove the call to export_key here, replace RAM storage of secure EZSP key with
     //pre-loading a key held by security manager
-    sl_zb_sec_man_export_key(&context, (sl_zb_sec_man_key_t *)emSecureEzspGetSecurityKey());
+    sl_zb_sec_man_export_key(&context, (sl_zb_sec_man_key_t *)sli_zigbee_secure_ezsp_get_security_key());
     sl_zb_sec_man_load_key_context(&context);
-    emSecureEzspSetState(SECURE_EZSP_STATE_PARAMETERS_PENDING);
+    sli_zigbee_secure_ezsp_set_state(SECURE_EZSP_STATE_PARAMETERS_PENDING);
   }
   return EZSP_SUCCESS;
 }
 
-EzspStatus emSecureEzspSetSecurityKey(EmberKeyData *securityKey)
+EzspStatus sli_zigbee_secure_ezsp_set_security_key(EmberKeyData *securityKey)
 {
-  if (emSecureEzspIsSecurityKeySet()) {
+  if (sli_zigbee_secure_ezsp_is_security_key_set()) {
     return EZSP_ERROR_SECURITY_KEY_ALREADY_SET;
   }
   sl_zb_sec_man_context_t context;
   sl_zb_sec_man_init_context(&context);
   context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_SECURE_EZSP_KEY;
   sl_zb_sec_man_import_key(&context, (sl_zb_sec_man_key_t *)securityKey);
-  emSecureEzspSetState(SECURE_EZSP_STATE_PARAMETERS_PENDING);
+  sli_zigbee_secure_ezsp_set_state(SECURE_EZSP_STATE_PARAMETERS_PENDING);
 
-  MEMMOVE(emberKeyContents(emSecureEzspGetSecurityKey()),
+  MEMMOVE(emberKeyContents(sli_zigbee_secure_ezsp_get_security_key()),
           emberKeyContents(securityKey),
           EMBER_ENCRYPTION_KEY_SIZE);
   return EZSP_SUCCESS;
 }
 
-EzspStatus emSecureEzspReset(void)
+EzspStatus sli_zigbee_secure_ezsp_reset(void)
 {
   // Reset temporary token
   sl_zb_sec_man_context_t context;
@@ -71,7 +71,7 @@ EzspStatus emSecureEzspReset(void)
   emberLeaveNetwork();
 
   // Deinit secure EZSP parameters
-  emSecureEzspDeInit();
+  sli_zigbee_secure_ezsp_de_init();
 
   return EZSP_SUCCESS;
 }

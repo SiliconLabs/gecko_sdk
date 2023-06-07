@@ -36,6 +36,8 @@
 #include "em_device.h"
 #include "sl_wisun_meter.h"
 #include "sl_component_catalog.h"
+#include "sl_wisun_app_core_util.h"
+#include "sl_wisun_trace_util.h"
 #if defined(SL_CATALOG_TEMP_SENSOR_PRESENT)
   #include "sl_wisun_rht_measurement.h"
 #endif
@@ -48,6 +50,20 @@
 //                          Static Function Declarations
 // -----------------------------------------------------------------------------
 
+#if !defined(SL_CATALOG_WISUN_COAP_PRESENT)
+/**************************************************************************//**
+ * @brief Measure parameters and send to the Collector (client).
+ * @details Generate packet id, measure temperature, humidity and light
+ * @param[in] sockd_meter socket id of meter (UDP server)
+ * @param[in] collector_addr Collector address structure
+ * @param[in] schedule request period in ms
+ * @return true On success
+ * @return false On error
+ *****************************************************************************/
+static bool sl_wisun_meter_meas_params_and_send(const int32_t sockd_meter,
+                                                const sockaddr_in6_t *collector_addr,
+                                                uint16_t schedule);
+#endif
 // -----------------------------------------------------------------------------
 //                                Global Variables
 // -----------------------------------------------------------------------------
@@ -94,7 +110,7 @@ SL_WEAK void sl_wisun_meter_get_temperature(sl_wisun_meter_packet_t *packet)
 
   stat = sl_wisun_rht_get(&dummy, &packet->temperature);
   if (stat != SL_STATUS_OK) {
-    printf("[Si70xx Temperature measurement error]");
+    printf("[Si70xx Temperature measurement error]\n");
   }
 #endif
 }
@@ -114,7 +130,7 @@ SL_WEAK void sl_wisun_meter_get_humidity(sl_wisun_meter_packet_t *packet)
   stat = sl_wisun_rht_get(&packet->humidity, &dummy);
 
   if (stat != SL_STATUS_OK) {
-    printf("[Si70xx Humidity measurement error]");
+    printf("[Si70xx Humidity measurement error]\n");
   }
 #endif
 }
@@ -134,18 +150,103 @@ SL_WEAK void sl_wisun_meter_get_light(sl_wisun_meter_packet_t *packet)
   packet->light = dummy_lux[cnt++];
 }
 
+#if !defined(SL_CATALOG_WISUN_COAP_PRESENT)
+void sl_wisun_meter_process(void)
+{
+  static uint8_t received_token[SL_WISUN_METER_COLLECTOR_TOKEN_MAX_SIZE] = { 0U };
+  static wisun_addr_t meter_addr                           = { 0U };
+  static wisun_addr_t collector_addr                       = { 0U };
+  const char *collector_ip                                 = NULL;
+  int32_t sockd_meter                                      = SOCKET_INVALID_ID;
+  int32_t r                                                = SOCKET_RETVAL_ERROR;
+  socklen_t len                                            = 0UL;
+  uint16_t token_len                                       = 0U;
+  uint16_t meter_schedule                                  = SL_WISUN_METER_DEFAULT_PERIOD_MS;
+#if defined(SL_CATALOG_WISUN_LFN_DEVICE_SUPPORT_PRESENT)
+  const sl_wisun_lfn_params_t *lfn_params                  = NULL;
+#endif
+
+  // init reference token
+  sl_wisun_mc_init_token(SL_WISUN_METER_COLLECTOR_TOKEN);
+  token_len = sl_wisun_mc_get_token_size();
+
+  // getting the device schedule
+#if defined(SL_CATALOG_WISUN_LFN_DEVICE_SUPPORT_PRESENT)
+  lfn_params = app_wisun_get_lfn_params();
+  if (lfn_params != NULL) {
+    meter_schedule = lfn_params->data_layer.unicast_interval_ms;
+  }
+#endif
+
+  // creating socket
+  sockd_meter = socket(AF_WISUN, SOCK_DGRAM, IPPROTO_UDP);
+  assert_res(sockd_meter, "Wi-SUN Meter socket()");
+
+  // fill the server address structure
+  meter_addr.sin6_family = AF_WISUN;
+  meter_addr.sin6_addr = in6addr_any;
+  meter_addr.sin6_port = htons(SL_WISUN_METER_PORT);
+
+  // bind address to the socket
+  r = bind(sockd_meter, (const struct sockaddr *) &meter_addr, sizeof(struct sockaddr_in6));
+  assert_res(r, "Wi-SUN Meter bind()");
+
+  len = sizeof(collector_addr);
+  // receiver loop
+  SL_WISUN_THREAD_LOOP {
+    // receive token
+    r = recvfrom(sockd_meter, received_token, token_len, 0,
+                 (struct sockaddr *) &collector_addr, &len);
+
+    if (r > 0) {
+      // not valid address
+      if (!memcmp(&collector_addr.sin6_addr, &in6addr_any, sizeof(in6addr_any))) {
+        printf("[Not valid address received]\n");
+        msleep(1);
+        continue;
+      }
+
+      // compare token
+      if (!sl_wisun_mc_compare_token(received_token, r)) {
+        msleep(1);
+        continue;
+      }
+
+      // if token matched, send measurement packet
+      collector_ip = app_wisun_trace_util_get_ip_str(&collector_addr.sin6_addr);
+      if (!sl_wisun_meter_meas_params_and_send(sockd_meter, &collector_addr, meter_schedule)) {
+        printf("[%s: Measurement has NOT been sent]\n", collector_ip);
+      } else {
+        printf("[%s: Measurement packet has been sent (%d bytes)]\n",
+               collector_ip, sizeof(sl_wisun_meter_packet_t));
+      }
+      app_wisun_trace_util_destroy_ip_str(collector_ip);
+    }
+
+    // dispatch thread
+    msleep(1);
+  }
+}
+#endif
+// -----------------------------------------------------------------------------
+//                          Static Function Definitions
+// -----------------------------------------------------------------------------
+
+#if !defined(SL_CATALOG_WISUN_COAP_PRESENT)
 /* measure and send packet */
-bool sl_wisun_meter_meas_params_and_send(const int32_t sockd_meter, const sockaddr_in6_t *collector_addr)
+static bool sl_wisun_meter_meas_params_and_send(const int32_t sockd_meter,
+                                                const sockaddr_in6_t *collector_addr,
+                                                uint16_t schedule)
 {
   sl_wisun_meter_packet_t packet;
   sl_wisun_meter_packet_packed_t packed_packet;
   socklen_t len = sizeof(sockaddr_in6_t);
   wisun_addr_t dest = { 0 };
   bool res = true;
-
   sl_wisun_mc_mutex_acquire(_meter_hnd);
   // fill packet
   sl_wisun_meter_gen_packet_id(&packet);
+  packet.schedule = schedule;
   sl_wisun_meter_get_temperature(&packet);
   sl_wisun_meter_get_humidity(&packet);
   sl_wisun_meter_get_light(&packet);
@@ -162,7 +263,4 @@ bool sl_wisun_meter_meas_params_and_send(const int32_t sockd_meter, const sockad
   sl_wisun_mc_mutex_release(_meter_hnd);
   return res;
 }
-
-// -----------------------------------------------------------------------------
-//                          Static Function Definitions
-// -----------------------------------------------------------------------------
+#endif

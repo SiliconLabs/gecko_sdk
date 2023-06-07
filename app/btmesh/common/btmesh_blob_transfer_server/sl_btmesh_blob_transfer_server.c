@@ -46,13 +46,13 @@
 #include "app_log.h"
 #endif // SL_CATALOG_APP_LOG_PRESENT
 
-#include "sl_simple_timer.h"
+#include "app_timer.h"
 
 #include "sl_btmesh_blob_storage.h"
 
-#ifdef SL_CATALOG_BTMESH_STACK_LPN_PRESENT
+#ifdef SL_CATALOG_BTMESH_LPN_PRESENT
 #include "sl_btmesh_lpn.h"
-#endif // SL_CATALOG_BTMESH_STACK_LPN_PRESENT
+#endif // SL_CATALOG_BTMESH_LPN_PRESENT
 
 #include "sl_btmesh_blob_transfer_server.h"
 #include "sl_btmesh_blob_transfer_server_api.h"
@@ -67,12 +67,16 @@
  * @{
  ******************************************************************************/
 
-/// In high throughput mode the LPN node polls the friend node more frequently
-/// to increase the throughput at the expense of power consumption
-/// @note LPN high throughput mode can be active only in LPN mode
-#define LPN_HIGH_THROUGHPUT_MODE_ACTIVE           \
-  SL_BTMESH_BLOB_TRANSFER_SERVER_LPN_MODE_CFG_VAL \
-  && SL_BTMESH_BLOB_TRANSFER_SERVER_LPN_HIGH_THROUGHPUT_MODE_CFG_VAL
+// In high throughput mode the LPN node polls the friend node more frequently
+// to increase the throughput at the expense of power consumption
+// Note: LPN high throughput mode can be active only in LPN mode
+#if defined(SL_CATALOG_BTMESH_LPN_PRESENT)             \
+  && (SL_BTMESH_BLOB_TRANSFER_SERVER_LPN_MODE_CFG_VAL) \
+  && (SL_BTMESH_BLOB_TRANSFER_SERVER_LPN_HIGH_THROUGHPUT_MODE_CFG_VAL)
+#define LPN_HIGH_THROUGHPUT_MODE_ACTIVE   1
+#else
+#define LPN_HIGH_THROUGHPUT_MODE_ACTIVE   0
+#endif
 
 // Returns the string representation of BLOB ID in a compound literal.
 // WARNING! This macro shall be used as a parameter of log calls only due to the

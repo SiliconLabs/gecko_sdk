@@ -27,15 +27,18 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
-#include "em_device.h"
-
-#if defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT)
 
 #include "sl_se_manager_util.h"
+
+#if defined(SLI_MAILBOX_COMMAND_SUPPORTED) || defined(SLI_VSE_MAILBOX_COMMAND_SUPPORTED)
+
 #include "sli_se_manager_internal.h"
 #include "em_se.h"
 #include "sl_assert.h"
-#include "em_system.h"
+
+#if defined(SLI_SE_MAJOR_VERSION_ONE)
+  #include "em_system.h"
+#endif
 
 /// @addtogroup sl_se_manager
 /// @{
@@ -59,7 +62,7 @@
  *
  * @return N/A
  ******************************************************************************/
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MAILBOX_COMMAND_SUPPORTED)
 static void decode_debug_status(sl_se_debug_status_t *debug_status,
                                 uint32_t status_word)
 {
@@ -84,7 +87,7 @@ static void decode_debug_status(sl_se_debug_status_t *debug_status,
   debug_status->options_config.secure_non_invasive_debug =
     (status_word & (1 << 13)) == 0;
 }
-#elif defined(CRYPTOACC_PRESENT)
+#elif defined(SLI_VSE_MAILBOX_COMMAND_SUPPORTED)
 static void decode_debug_status(sl_se_debug_status_t *debug_status,
                                 uint32_t status_word)
 {
@@ -93,7 +96,7 @@ static void decode_debug_status(sl_se_debug_status_t *debug_status,
   debug_status->secure_debug_enabled = status_word & (1 << 12);
   debug_status->debug_port_lock_state = status_word & (1 << 15);
 }
-#endif // defined(SEMAILBOX_PRESENT)
+#endif // defined(SLI_MAILBOX_COMMAND_SUPPORTED)
 
 // -----------------------------------------------------------------------------
 // Global Functions
@@ -251,7 +254,7 @@ sl_status_t sl_se_init_otp_key(sl_se_command_context_t *cmd_ctx,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  #if defined(SEMAILBOX_PRESENT)
+  #if defined(SLI_MAILBOX_COMMAND_SUPPORTED)
   if (key_type == SL_SE_KEY_TYPE_IMMUTABLE_AES_128) {
     if (num_bytes != 16UL) {
       return SL_STATUS_INVALID_PARAMETER;
@@ -261,7 +264,7 @@ sl_status_t sl_se_init_otp_key(sl_se_command_context_t *cmd_ctx,
       return SL_STATUS_INVALID_PARAMETER;
     }
   }
-  #elif defined(CRYPTOACC_PRESENT)
+  #elif defined(SLI_VSE_MAILBOX_COMMAND_SUPPORTED)
   if (num_bytes != 64UL) {
     return SL_STATUS_INVALID_PARAMETER;
   }
@@ -280,11 +283,11 @@ sl_status_t sl_se_init_otp_key(sl_se_command_context_t *cmd_ctx,
       se_key_type = SLI_SE_KEY_TYPE_AUTH;
       break;
 
-    #if defined(SEMAILBOX_PRESENT)
+    #if defined(SLI_MAILBOX_COMMAND_SUPPORTED)
     case SL_SE_KEY_TYPE_IMMUTABLE_AES_128:
       se_key_type = SLI_SE_IMMUTABLE_KEY_TYPE_AES_128;
       break;
-    #endif // SEMAILBOX_PRESENT
+    #endif // SLI_MAILBOX_COMMAND_SUPPORTED
 
     default:
       return SL_STATUS_INVALID_PARAMETER;
@@ -298,10 +301,10 @@ sl_status_t sl_se_init_otp_key(sl_se_command_context_t *cmd_ctx,
   }
 
   // SE command structures
-  #if defined(SEMAILBOX_PRESENT)
+  #if defined(SLI_MAILBOX_COMMAND_SUPPORTED)
   command_word = key_type == SL_SE_KEY_TYPE_IMMUTABLE_AES_128
                  ? SLI_SE_COMMAND_INIT_AES_128_KEY : SLI_SE_COMMAND_INIT_PUBKEY;
-  #elif defined(CRYPTOACC_PRESENT)
+  #elif defined(SLI_VSE_MAILBOX_COMMAND_SUPPORTED)
   command_word = SLI_SE_COMMAND_INIT_PUBKEY;
   #endif
 
@@ -339,7 +342,7 @@ sl_status_t sl_se_read_pubkey(sl_se_command_context_t *cmd_ctx,
     case SL_SE_KEY_TYPE_IMMUTABLE_AUTH:
       se_key_type = SLI_SE_KEY_TYPE_AUTH;
       break;
-    #if defined(SEMAILBOX_PRESENT) && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+    #if defined(SLI_MAILBOX_COMMAND_SUPPORTED) && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
     case SL_SE_KEY_TYPE_IMMUTABLE_SE_ATTESTATION:
       command_word = command_word & ~0x1;
     // Intentional fallthrough
@@ -372,7 +375,7 @@ sl_status_t sl_se_get_se_version(sl_se_command_context_t *cmd_ctx,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  #if defined(SEMAILBOX_PRESENT)
+  #if defined(SLI_MAILBOX_COMMAND_SUPPORTED)
 
   // SE command structures
   SE_Command_t *se_cmd = &cmd_ctx->command;
@@ -383,7 +386,7 @@ sl_status_t sl_se_get_se_version(sl_se_command_context_t *cmd_ctx,
 
   return sli_se_execute_and_wait(cmd_ctx);
 
-  #elif defined(CRYPTOACC_PRESENT)
+  #elif defined(SLI_VSE_MAILBOX_COMMAND_SUPPORTED)
 
   sl_status_t status = SL_STATUS_OK;
   SE_Response_t command_response;
@@ -435,7 +438,7 @@ sl_status_t sl_se_get_debug_lock_status(sl_se_command_context_t *cmd_ctx,
   if (cmd_ctx == NULL || debug_status == NULL) {
     return SL_STATUS_INVALID_PARAMETER;
   }
-  #if defined(SEMAILBOX_PRESENT)
+  #if defined(SLI_MAILBOX_COMMAND_SUPPORTED)
   SE_Command_t *se_cmd = &cmd_ctx->command;
   volatile uint32_t status_word = 0;
   SE_DataTransfer_t out_data = SE_DATATRANSFER_DEFAULT(&status_word, 4);
@@ -451,7 +454,7 @@ sl_status_t sl_se_get_debug_lock_status(sl_se_command_context_t *cmd_ctx,
   }
 
   return ret;
-  #elif defined(CRYPTOACC_PRESENT)
+  #elif defined(SLI_VSE_MAILBOX_COMMAND_SUPPORTED)
   uint32_t vse_version = 0;
   uint32_t debug_lock_flags = 0;
 
@@ -486,7 +489,7 @@ sl_status_t sl_se_get_debug_lock_status(sl_se_command_context_t *cmd_ctx,
   #endif
 }
 
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MAILBOX_COMMAND_SUPPORTED)
 
 /***************************************************************************//**
  * Initialize SE OTP configuration.
@@ -520,7 +523,7 @@ sl_status_t sl_se_init_otp(sl_se_command_context_t *cmd_ctx,
   }
   if (otp_init->enable_anti_rollback) {
     // Verify firmware compatibility before enabling anti-rollback
-    #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
+    #if defined(SLI_SE_MAJOR_VERSION_ONE)
     uint16_t part_number = SYSTEM_GetPartNumber();
     if (part_number == 1010 || part_number == 1020) {
       if (SYSTEM_GetProdRev() < 16) {
@@ -587,6 +590,12 @@ sl_status_t sl_se_init_otp(sl_se_command_context_t *cmd_ctx,
   otp_tamper_settings.period = otp_init->tamper_filter_period & 0x1f;
   otp_tamper_settings.threshold = otp_init->tamper_filter_threshold & 0x7;
 
+  #if !defined(SLI_SE_TAMPER_FLAG_KEEP_TAMPER_ALIVE_AVAILABLE)
+  if ((otp_init->tamper_flags & SL_SE_TAMPER_FLAG_KEEP_TAMPER_ALIVE_DURING_SLEEP)
+      == SL_SE_TAMPER_FLAG_KEEP_TAMPER_ALIVE_DURING_SLEEP) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+  #endif
   otp_tamper_settings.flags = otp_init->tamper_flags;
   otp_tamper_settings.reset_threshold = otp_init->tamper_reset_threshold;
   #else
@@ -707,7 +716,7 @@ sl_status_t sl_se_read_otp(sl_se_command_context_t *cmd_ctx,
   return SL_STATUS_OK;
 }
 
-#elif defined(CRYPTOACC_PRESENT)
+#elif defined(SLI_VSE_MAILBOX_COMMAND_SUPPORTED)
 
 sl_status_t sl_se_init_otp(sl_se_command_context_t *cmd_ctx,
                            sl_se_otp_init_t *otp_init)
@@ -831,7 +840,7 @@ sl_status_t sl_se_read_otp(sl_se_command_context_t *cmd_ctx,
 }
 #endif
 
-#if defined(SEMAILBOX_PRESENT)
+#if defined(SLI_MAILBOX_COMMAND_SUPPORTED)
 
 /***************************************************************************//**
  * Writes data to User Data section in MTP. Write data must be aligned to
@@ -965,7 +974,7 @@ sl_status_t sl_se_get_otp_version(sl_se_command_context_t *cmd_ctx,
   return sli_se_execute_and_wait(cmd_ctx);
 }
 
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
+#if defined(SLI_SE_COMMAND_STATUS_READ_RSTCAUSE_AVAILABLE)
 /***************************************************************************//**
  * Read the EMU->RSTCAUSE after a tamper reset. This function should be called
  * if EMU->RSTCAUSE has been cleared upon boot.
@@ -985,11 +994,9 @@ sl_status_t sl_se_get_reset_cause(sl_se_command_context_t *cmd_ctx,
   SE_addDataOutput(se_cmd, &out_data);
   return sli_se_execute_and_wait(cmd_ctx);
 }
-#endif // _SILICON_LABS_32B_SERIES_2_CONFIG_1
+#endif // SLI_SE_COMMAND_STATUS_READ_RSTCAUSE_AVAILABLE
 
-#if (defined(_SILICON_LABS_SECURITY_FEATURE)                                  \
-  && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) \
-  && (_SILICON_LABS_32B_SERIES_2_CONFIG >= 3))
+#if defined(SLI_SE_COMMAND_READ_TAMPER_RESET_CAUSE_AVAILABLE)
 /***************************************************************************//**
  * Read the cached value of the EMU->TAMPERRSTCAUSE register after a tamper
  * reset. This function should be called if EMU->TAMPERRSTCAUSE has been cleared
@@ -1032,9 +1039,7 @@ sl_status_t sl_se_get_tamper_reset_cause(sl_se_command_context_t *cmd_ctx,
   *reset_cause = set_bit_position;
   return status;
 }
-#endif /* #if (defined(_SILICON_LABS_SECURITY_FEATURE) \
-          && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) \
-          && (_SILICON_LABS_32B_SERIES_2_CONFIG >= 3))*/
+#endif // SLI_SE_COMMAND_READ_TAMPER_RESET_CAUSE_AVAILABLE
 
 /***************************************************************************//**
  * Enables the secure debug functionality.
@@ -1272,10 +1277,10 @@ sl_status_t sl_se_read_cert(sl_se_command_context_t *cmd_ctx,
   // SE command structures
   sli_se_command_init(cmd_ctx, SLI_SE_COMMAND_READ_USER_CERT | se_cert_type);
 
-#if  _SILICON_LABS_32B_SERIES_2_CONFIG > 2
+#if SLI_MINIMUM_REQUIRED_NUMBER_PARAMS == 1
   // One parameter is required, but has no effect
   SE_addParameter(se_cmd, 0);
-#endif //
+#endif
 
   SE_DataTransfer_t out_data = SE_DATATRANSFER_DEFAULT(cert, num_bytes);
   SE_addDataOutput(se_cmd, &out_data);
@@ -1283,8 +1288,8 @@ sl_status_t sl_se_read_cert(sl_se_command_context_t *cmd_ctx,
   return sli_se_execute_and_wait(cmd_ctx);
 }
 
-#endif // defined(SEMAILBOX_PRESENT)
+#endif // defined(SLI_MAILBOX_COMMAND_SUPPORTED)
 
 /// @} (end addtogroup sl_se)
 
-#endif // defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT)
+#endif // defined(SLI_MAILBOX_COMMAND_SUPPORTED) || defined(SLI_VSE_MAILBOX_COMMAND_SUPPORTED)

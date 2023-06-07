@@ -468,6 +468,7 @@ int32_t bootloader_setImageToBootload(int32_t slotId);
  *       @ref bootloader_continueVerifyImage in a loop.
  *
  * @note The context pointer must point to memory allocated by the caller.
+ *       The caller must ensure that the context pointer is 32 bit aligned.
  *       The required size of this context may depend on the version
  *       of the bootloader. The required size for the bootloader associated with
  *       this version of the application interface is given by the define

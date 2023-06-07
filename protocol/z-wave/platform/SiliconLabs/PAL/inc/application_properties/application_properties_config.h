@@ -6,9 +6,10 @@
 #define APPLICATION_PROPERTIES_CONFIG_H_
 
 #include "application_properties.h"
-#include "config_app.h"
+#include "ZW_classcmd.h"
 #include "zaf_config.h"
 #include "zaf_config_security.h"
+#include "zw_version_config.h"
 
 #define SL_APPLICATION_SIGNATURE               APPLICATION_SIGNATURE_NONE
 #define SL_APPLICATION_SIGNATURE_LOCATION      0x0

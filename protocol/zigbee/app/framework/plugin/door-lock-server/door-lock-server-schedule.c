@@ -18,9 +18,7 @@
 #include "af.h"
 #include "door-lock-server.h"
 
-#ifdef UC_BUILD
 #include "zap-cluster-command-parser.h"
-#endif
 
 static EmberAfPluginDoorLockServerWeekdayScheduleEntry weekdayScheduleTable[EMBER_AF_PLUGIN_DOOR_LOCK_SERVER_WEEKDAY_SCHEDULE_TABLE_SIZE];
 static EmberAfPluginDoorLockServerYeardayScheduleEntry yeardayScheduleTable[EMBER_AF_PLUGIN_DOOR_LOCK_SERVER_YEARDAY_SCHEDULE_TABLE_SIZE];
@@ -81,7 +79,7 @@ static void clearDisposableScheduleTable(void)
   }
 }
 
-void emAfPluginDoorLockServerInitSchedule(void)
+void sli_zigbee_af_door_lock_server_init_schedule(void)
 {
   clearWeekdayScheduleTable();
   clearYeardayScheduleTable();
@@ -91,7 +89,7 @@ void emAfPluginDoorLockServerInitSchedule(void)
 #if defined(ZCL_USING_DOOR_LOCK_CLUSTER_NUM_WEEKDAY_SCHEDULES_SUPPORTED_PER_USER_ATTRIBUTE)  \
   || defined(ZCL_USING_DOOR_LOCK_CLUSTER_NUM_YEARDAY_SCHEDULES_SUPPORTED_PER_USER_ATTRIBUTE) \
   || defined(ZCL_USING_DOOR_LOCK_CLUSTER_NUM_HOLIDAY_SCHEDULES_SUPPORTED_PER_USER_ATTRIBUTE)
-  const EmAfPluginDoorLockServerAttributeData data[] = {
+  const sli_zigbee_af_door_lock_server_attribute_data data[] = {
 #ifdef ZCL_USING_DOOR_LOCK_CLUSTER_NUM_WEEKDAY_SCHEDULES_SUPPORTED_PER_USER_ATTRIBUTE
     { ZCL_NUM_WEEKDAY_SCHEDULES_SUPPORTED_PER_USER_ATTRIBUTE_ID,
       EMBER_AF_PLUGIN_DOOR_LOCK_SERVER_WEEKDAY_SCHEDULE_TABLE_SIZE },
@@ -107,7 +105,7 @@ void emAfPluginDoorLockServerInitSchedule(void)
       EMBER_AF_PLUGIN_DOOR_LOCK_SERVER_HOLIDAY_SCHEDULE_TABLE_SIZE },
 #endif
   };
-  emAfPluginDoorLockServerWriteAttributes(data, COUNTOF(data), "schedule table");
+  sli_zigbee_af_door_lock_server_write_attributes(data, COUNTOF(data), "schedule table");
 #endif
 }
 
@@ -121,8 +119,6 @@ static void sendResponse(const char *responseName)
   }
 }
 
-#ifdef UC_BUILD
-
 bool emberAfDoorLockClusterSetWeekdayScheduleCallback(EmberAfClusterCommand *cmd)
 {
   sl_zcl_door_lock_cluster_set_weekday_schedule_command_t cmd_data;
@@ -135,10 +131,10 @@ bool emberAfDoorLockClusterSetWeekdayScheduleCallback(EmberAfClusterCommand *cmd
     return false;
   }
 
-  if (!emAfPluginDoorLockServerCheckForSufficientSpace(cmd_data.scheduleId,
-                                                       EMBER_AF_PLUGIN_DOOR_LOCK_SERVER_WEEKDAY_SCHEDULE_TABLE_SIZE)
-      || !emAfPluginDoorLockServerCheckForSufficientSpace(cmd_data.userId,
-                                                          EMBER_AF_PLUGIN_DOOR_LOCK_SERVER_PIN_USER_TABLE_SIZE)) {
+  if (!sli_zigbee_af_door_lock_server_check_for_sufficient_space(cmd_data.scheduleId,
+                                                                 EMBER_AF_PLUGIN_DOOR_LOCK_SERVER_WEEKDAY_SCHEDULE_TABLE_SIZE)
+      || !sli_zigbee_af_door_lock_server_check_for_sufficient_space(cmd_data.userId,
+                                                                    EMBER_AF_PLUGIN_DOOR_LOCK_SERVER_PIN_USER_TABLE_SIZE)) {
     status = 0x01;
   }
   if (!status) {
@@ -237,8 +233,8 @@ bool emberAfDoorLockClusterClearWeekdayScheduleCallback(EmberAfClusterCommand *c
                : EMBER_ZCL_STATUS_SUCCESS);
   if (zclStatus == EMBER_ZCL_STATUS_SUCCESS) {
     weekdayScheduleTable[cmd_data.scheduleId].inUse = false;
-    emAfPluginDoorLockServerSetPinUserType(cmd_data.userId,
-                                           EMBER_ZCL_DOOR_LOCK_USER_TYPE_UNRESTRICTED);
+    sli_zigbee_af_door_lock_server_set_pin_user_type(cmd_data.userId,
+                                                     EMBER_ZCL_DOOR_LOCK_USER_TYPE_UNRESTRICTED);
   }
 
   emberAfFillCommandDoorLockClusterClearWeekdayScheduleResponse(zclStatus);
@@ -335,8 +331,8 @@ bool emberAfDoorLockClusterClearYeardayScheduleCallback(EmberAfClusterCommand *c
     status = 0x01; // failure (per 7.3.2.17.17)
   } else {
     yeardayScheduleTable[cmd_data.scheduleId].inUse = false;
-    emAfPluginDoorLockServerSetPinUserType(cmd_data.userId,
-                                           EMBER_ZCL_DOOR_LOCK_USER_TYPE_UNRESTRICTED);
+    sli_zigbee_af_door_lock_server_set_pin_user_type(cmd_data.userId,
+                                                     EMBER_ZCL_DOOR_LOCK_USER_TYPE_UNRESTRICTED);
     status = 0x00; // success (per 7.3.2.17.17)
   }
   emberAfFillCommandDoorLockClusterClearYeardayScheduleResponse(status);
@@ -539,8 +535,8 @@ bool emberAfDoorLockClusterClearDisposableScheduleCallback(EmberAfClusterCommand
     status = 0x01;
   } else {
     disposableScheduleTable[cmd_data.userId].inUse = false;
-    emAfPluginDoorLockServerSetPinUserType(cmd_data.userId,
-                                           EMBER_ZCL_DOOR_LOCK_USER_TYPE_UNRESTRICTED);
+    sli_zigbee_af_door_lock_server_set_pin_user_type(cmd_data.userId,
+                                                     EMBER_ZCL_DOOR_LOCK_USER_TYPE_UNRESTRICTED);
     status = 0x00;
   }
 
@@ -550,379 +546,3 @@ bool emberAfDoorLockClusterClearDisposableScheduleCallback(EmberAfClusterCommand
 
   return true;
 }
-
-#else // !UC_BUILD
-
-bool emberAfDoorLockClusterSetWeekdayScheduleCallback(uint8_t scheduleId,
-                                                      uint16_t userId,
-                                                      uint8_t daysMask,
-                                                      uint8_t startHour,
-                                                      uint8_t startMinute,
-                                                      uint8_t stopHour,
-                                                      uint8_t stopMinute)
-{
-  uint8_t status = 0x00;
-  uint8_t userPin = 0x00;
-  uint16_t rfProgrammingEventMask = 0xffff; //event sent by default
-  if (!emAfPluginDoorLockServerCheckForSufficientSpace(scheduleId,
-                                                       EMBER_AF_PLUGIN_DOOR_LOCK_SERVER_WEEKDAY_SCHEDULE_TABLE_SIZE)
-      || !emAfPluginDoorLockServerCheckForSufficientSpace(userId,
-                                                          EMBER_AF_PLUGIN_DOOR_LOCK_SERVER_PIN_USER_TABLE_SIZE)) {
-    status = 0x01;
-  }
-  if (!status) {
-    EmberAfDoorLockScheduleEntry *entry = &weekdayScheduleTable[scheduleId];
-    entry->inUse = true;
-    entry->userId = userId;
-    entry->daysMask = daysMask;
-    entry->startHour = startHour;
-    entry->startMinute = startMinute;
-    entry->stopHour = stopHour;
-    entry->stopMinute = stopMinute;
-    emberAfDoorLockClusterPrintln("***RX SET WEEKDAY SCHEDULE***");
-    printWeekdayScheduleTable();
-  }
-  emberAfFillCommandDoorLockClusterSetWeekdayScheduleResponse(status);
-  emberAfSendResponse();
-
-  //get bitmask so we can check if we should send event notification
-  emberAfReadServerAttribute(DOOR_LOCK_SERVER_ENDPOINT,
-                             ZCL_DOOR_LOCK_CLUSTER_ID,
-                             ZCL_RF_PROGRAMMING_EVENT_MASK_ATTRIBUTE_ID,
-                             (uint8_t*)&rfProgrammingEventMask,
-                             sizeof(rfProgrammingEventMask));
-
-  if (rfProgrammingEventMask & BIT(0)) {
-    emberAfFillCommandDoorLockClusterProgrammingEventNotification(0x01, 0x00, userId, &userPin, 0x00, 0x00, 0x00, &userPin);
-    SEND_COMMAND_UNICAST_TO_BINDINGS();
-  }
-
-  return true;
-}
-
-bool emberAfDoorLockClusterGetWeekdayScheduleCallback(uint8_t scheduleId,
-                                                      uint16_t userId)
-{
-  EmberAfStatus zclStatus
-    = ((scheduleId
-        > EMBER_AF_PLUGIN_DOOR_LOCK_SERVER_WEEKDAY_SCHEDULE_TABLE_SIZE)
-       ? EMBER_ZCL_STATUS_INVALID_FIELD
-       : EMBER_ZCL_STATUS_SUCCESS);
-  EmberAfDoorLockScheduleEntry *entry = &weekdayScheduleTable[0];
-  if (zclStatus == EMBER_ZCL_STATUS_SUCCESS) {
-    entry = &weekdayScheduleTable[scheduleId];
-    zclStatus = (!entry->inUse
-                 ? EMBER_ZCL_STATUS_NOT_FOUND
-                 : (entry->userId != userId
-                    ? EMBER_ZCL_STATUS_NOT_FOUND
-                    : EMBER_ZCL_STATUS_SUCCESS));
-  }
-
-  if (zclStatus == EMBER_ZCL_STATUS_SUCCESS) {
-    emberAfFillCommandDoorLockClusterGetWeekdayScheduleResponse(scheduleId,
-                                                                userId,
-                                                                zclStatus,
-                                                                entry->daysMask,
-                                                                entry->startHour,
-                                                                entry->startMinute,
-                                                                entry->stopHour,
-                                                                entry->stopMinute);
-  } else {
-    // For error status, the schedule detail fields are omitted from the response.
-    emberAfFillExternalBuffer((ZCL_CLUSTER_SPECIFIC_COMMAND
-                               | ZCL_FRAME_CONTROL_SERVER_TO_CLIENT
-                               | ZCL_DISABLE_DEFAULT_RESPONSE_MASK),
-                              ZCL_DOOR_LOCK_CLUSTER_ID,
-                              ZCL_GET_WEEKDAY_SCHEDULE_RESPONSE_COMMAND_ID,
-                              "uvu",
-                              scheduleId,
-                              userId,
-                              zclStatus);
-  }
-
-  sendResponse("GetWeekdayScheduleResponse");
-
-  return true;
-}
-
-bool emberAfDoorLockClusterClearWeekdayScheduleCallback(uint8_t scheduleId,
-                                                        uint16_t userId)
-{
-  EmberAfStatus zclStatus
-    = ((scheduleId
-        > EMBER_AF_PLUGIN_DOOR_LOCK_SERVER_WEEKDAY_SCHEDULE_TABLE_SIZE)
-       ? EMBER_ZCL_STATUS_INVALID_FIELD
-       : EMBER_ZCL_STATUS_SUCCESS);
-  if (zclStatus == EMBER_ZCL_STATUS_SUCCESS) {
-    weekdayScheduleTable[scheduleId].inUse = false;
-    emAfPluginDoorLockServerSetPinUserType(userId,
-                                           EMBER_ZCL_DOOR_LOCK_USER_TYPE_UNRESTRICTED);
-  }
-
-  emberAfFillCommandDoorLockClusterClearWeekdayScheduleResponse(zclStatus);
-
-  sendResponse("ClearWeekdayScheduleResponse");
-
-  return true;
-}
-
-bool emberAfDoorLockClusterSetYeardayScheduleCallback(uint8_t scheduleId,
-                                                      uint16_t userId,
-                                                      uint32_t localStartTime,
-                                                      uint32_t localEndTime)
-{
-  uint8_t status;
-  if (scheduleId
-      >= EMBER_AF_PLUGIN_DOOR_LOCK_SERVER_YEARDAY_SCHEDULE_TABLE_SIZE) {
-    status = 0x01; // failure (per 7.3.2.17.15)
-  } else {
-    yeardayScheduleTable[scheduleId].userId = userId;
-    yeardayScheduleTable[scheduleId].localStartTime = localStartTime;
-    yeardayScheduleTable[scheduleId].localEndTime = localEndTime;
-    yeardayScheduleTable[scheduleId].inUse = true;
-    status = 0x00; // success (per 7.3.2.17.15)
-  }
-  emberAfFillCommandDoorLockClusterSetYeardayScheduleResponse(status);
-
-  sendResponse("SetYeardayScheduleResponse");
-
-  return true;
-}
-
-bool emberAfDoorLockClusterGetYeardayScheduleCallback(uint8_t scheduleId,
-                                                      uint16_t userId)
-{
-  EmberAfPluginDoorLockServerYeardayScheduleEntry *entry
-    = &yeardayScheduleTable[0];
-  EmberAfStatus zclStatus;
-  if (scheduleId >= EMBER_AF_PLUGIN_DOOR_LOCK_SERVER_YEARDAY_SCHEDULE_TABLE_SIZE
-      || userId >= EMBER_AF_PLUGIN_DOOR_LOCK_SERVER_PIN_USER_TABLE_SIZE) {
-    zclStatus = EMBER_ZCL_STATUS_INVALID_FIELD;
-  } else {
-    entry = &yeardayScheduleTable[scheduleId];
-    if (!entry->inUse || entry->userId != userId) {
-      zclStatus = EMBER_ZCL_STATUS_NOT_FOUND;
-    } else {
-      zclStatus = EMBER_ZCL_STATUS_SUCCESS;
-    }
-  }
-
-  if (zclStatus == EMBER_ZCL_STATUS_SUCCESS) {
-    emberAfFillCommandDoorLockClusterGetYeardayScheduleResponse(scheduleId,
-                                                                userId,
-                                                                zclStatus,
-                                                                entry->localStartTime,
-                                                                entry->localEndTime);
-  } else {
-    // For error status, the schedule detail fields are omitted from the response.
-    emberAfFillExternalBuffer((ZCL_CLUSTER_SPECIFIC_COMMAND
-                               | ZCL_FRAME_CONTROL_SERVER_TO_CLIENT
-                               | ZCL_DISABLE_DEFAULT_RESPONSE_MASK),
-                              ZCL_DOOR_LOCK_CLUSTER_ID,
-                              ZCL_GET_YEARDAY_SCHEDULE_RESPONSE_COMMAND_ID,
-                              "uvu",
-                              scheduleId,
-                              userId,
-                              zclStatus);
-  }
-
-  sendResponse("GetYeardayScheduleResponse");
-
-  return true;
-}
-
-bool emberAfDoorLockClusterClearYeardayScheduleCallback(uint8_t scheduleId,
-                                                        uint16_t userId)
-{
-  uint8_t status;
-  if (scheduleId
-      >= EMBER_AF_PLUGIN_DOOR_LOCK_SERVER_YEARDAY_SCHEDULE_TABLE_SIZE) {
-    status = 0x01; // failure (per 7.3.2.17.17)
-  } else {
-    yeardayScheduleTable[scheduleId].inUse = false;
-    emAfPluginDoorLockServerSetPinUserType(userId,
-                                           EMBER_ZCL_DOOR_LOCK_USER_TYPE_UNRESTRICTED);
-    status = 0x00; // success (per 7.3.2.17.17)
-  }
-  emberAfFillCommandDoorLockClusterClearYeardayScheduleResponse(status);
-
-  sendResponse("ClearYeardayScheduleResponse");
-
-  return true;
-}
-
-bool emberAfDoorLockClusterSetHolidayScheduleCallback(uint8_t holidayScheduleId,
-                                                      uint32_t localStartTime,
-                                                      uint32_t localEndTime,
-                                                      uint8_t operatingModeDuringHoliday)
-{
-  uint8_t status;
-  if (holidayScheduleId
-      >= EMBER_AF_PLUGIN_DOOR_LOCK_SERVER_HOLIDAY_SCHEDULE_TABLE_SIZE) {
-    status = 0x01; // failure (per 7.3.2.17.18)
-  } else {
-    holidayScheduleTable[holidayScheduleId].localStartTime
-      = localStartTime;
-    holidayScheduleTable[holidayScheduleId].localEndTime
-      = localEndTime;
-    holidayScheduleTable[holidayScheduleId].operatingModeDuringHoliday
-      = operatingModeDuringHoliday;
-    holidayScheduleTable[holidayScheduleId].inUse
-      = true;
-    status = 0x00; // success (per 7.3.2.17.18)
-  }
-  emberAfFillCommandDoorLockClusterSetHolidayScheduleResponse(status);
-
-  sendResponse("SetHolidayScheduleResponse");
-
-  return true;
-}
-
-bool emberAfDoorLockClusterGetHolidayScheduleCallback(uint8_t holidayScheduleId)
-{
-  EmberAfPluginDoorLockServerHolidayScheduleEntry *entry
-    = &holidayScheduleTable[0];
-  EmberAfStatus zclStatus;
-  if (holidayScheduleId
-      >= EMBER_AF_PLUGIN_DOOR_LOCK_SERVER_HOLIDAY_SCHEDULE_TABLE_SIZE) {
-    zclStatus = EMBER_ZCL_STATUS_INVALID_FIELD;
-  } else {
-    entry = &holidayScheduleTable[holidayScheduleId];
-    if (!entry->inUse) {
-      zclStatus = EMBER_ZCL_STATUS_NOT_FOUND;
-    } else {
-      zclStatus = EMBER_ZCL_STATUS_SUCCESS;
-    }
-  }
-
-  if (zclStatus == EMBER_ZCL_STATUS_SUCCESS) {
-    emberAfFillCommandDoorLockClusterGetHolidayScheduleResponse(holidayScheduleId,
-                                                                zclStatus,
-                                                                entry->localStartTime,
-                                                                entry->localEndTime,
-                                                                entry->operatingModeDuringHoliday);
-  } else {
-    // For error status, the schedule detail fields are omitted from the response.
-    emberAfFillExternalBuffer((ZCL_CLUSTER_SPECIFIC_COMMAND
-                               | ZCL_FRAME_CONTROL_SERVER_TO_CLIENT
-                               | ZCL_DISABLE_DEFAULT_RESPONSE_MASK),
-                              ZCL_DOOR_LOCK_CLUSTER_ID,
-                              ZCL_GET_HOLIDAY_SCHEDULE_RESPONSE_COMMAND_ID,
-                              "uu",
-                              holidayScheduleId,
-                              zclStatus);
-  }
-
-  sendResponse("GetHolidayScheduleResponse");
-
-  return true;
-}
-
-bool emberAfDoorLockClusterClearHolidayScheduleCallback(uint8_t holidayScheduleId)
-{
-  uint8_t status;
-  if (holidayScheduleId
-      >= EMBER_AF_PLUGIN_DOOR_LOCK_SERVER_YEARDAY_SCHEDULE_TABLE_SIZE) {
-    status = 0x01; // failure (per 7.3.2.17.20)
-  } else {
-    holidayScheduleTable[holidayScheduleId].inUse = false;
-    status = 0x00; // success (per 7.3.2.17.20)
-  }
-  emberAfFillCommandDoorLockClusterClearHolidayScheduleResponse(status);
-
-  sendResponse("ClearYeardayScheduleResponse");
-
-  return true;
-}
-
-bool emberAfDoorLockClusterSetDisposableScheduleCallback(uint16_t userId,
-                                                         uint32_t localStartTime,
-                                                         uint32_t localEndTime)
-{
-  uint8_t status = 0;
-
-  emberAfDoorLockClusterPrintln("Set Disposable Schedule ");
-
-  if (userId >= EMBER_AF_PLUGIN_DOOR_LOCK_SERVER_PIN_USER_TABLE_SIZE) {
-    status = 0x01;
-  } else {
-    disposableScheduleTable[userId].localStartTime = localStartTime;
-    disposableScheduleTable[userId].localEndTime = localEndTime;
-    disposableScheduleTable[userId].inUse = true;
-    status = 0x00;
-  }
-
-  emberAfFillCommandDoorLockClusterSetDisposableScheduleResponse(status);
-
-  EmberStatus emberStatus = emberAfSendResponse();
-  if (emberStatus != EMBER_SUCCESS) {
-    emberAfDoorLockClusterPrintln("Failed to send SetDisposableScheduleResponse: 0x%X",
-                                  emberStatus);
-  }
-
-  return true;
-}
-
-bool emberAfDoorLockClusterGetDisposableScheduleCallback(uint16_t userId)
-{
-  EmberAfPluginDoorLockServerDisposableScheduleEntry *entry = &disposableScheduleTable[0];
-  EmberAfStatus zclStatus;
-
-  emberAfDoorLockClusterPrintln("Get Disposable Schedule ");
-
-  if (userId >= EMBER_AF_PLUGIN_DOOR_LOCK_SERVER_PIN_USER_TABLE_SIZE) {
-    zclStatus = EMBER_ZCL_STATUS_INVALID_FIELD;
-  } else {
-    entry = &disposableScheduleTable[userId];
-    if (!entry->inUse) {
-      zclStatus = EMBER_ZCL_STATUS_NOT_FOUND;
-    } else {
-      zclStatus = EMBER_ZCL_STATUS_SUCCESS;
-    }
-  }
-
-  if (zclStatus == EMBER_ZCL_STATUS_SUCCESS) {
-    emberAfFillCommandDoorLockClusterGetDisposableScheduleResponse(userId,
-                                                                   zclStatus,
-                                                                   entry->localStartTime,
-                                                                   entry->localEndTime);
-  } else {
-    // For error status, the schedule detail fields are omitted from the response.
-    emberAfFillExternalBuffer((ZCL_CLUSTER_SPECIFIC_COMMAND
-                               | ZCL_FRAME_CONTROL_SERVER_TO_CLIENT
-                               | ZCL_DISABLE_DEFAULT_RESPONSE_MASK),
-                              ZCL_DOOR_LOCK_CLUSTER_ID,
-                              ZCL_GET_DISPOSABLE_SCHEDULE_RESPONSE_COMMAND_ID,
-                              "vu",
-                              userId,
-                              zclStatus);
-  }
-
-  sendResponse("GetDisposableScheduleResponse");
-
-  return true;
-}
-
-bool emberAfDoorLockClusterClearDisposableScheduleCallback(uint16_t userId)
-{
-  uint8_t status = 0;
-
-  emberAfDoorLockClusterPrintln("Clear Disposable Schedule ");
-
-  if (userId >= EMBER_AF_PLUGIN_DOOR_LOCK_SERVER_PIN_USER_TABLE_SIZE) {
-    status = 0x01;
-  } else {
-    disposableScheduleTable[userId].inUse = false;
-    emAfPluginDoorLockServerSetPinUserType(userId,
-                                           EMBER_ZCL_DOOR_LOCK_USER_TYPE_UNRESTRICTED);
-    status = 0x00;
-  }
-
-  emberAfFillCommandDoorLockClusterClearDisposableScheduleResponse(status);
-
-  sendResponse("ClearDisposableScheduleResponse");
-
-  return true;
-}
-
-#endif // UC_BUILD

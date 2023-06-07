@@ -22,9 +22,7 @@
 #include "price-client.h"
 #include "../price-common/price-common-time.h"
 
-#ifdef UC_BUILD
 #include "zap-cluster-command-parser.h"
-#endif
 
 //  CONSOLIDATED BILL
 
@@ -103,9 +101,6 @@ void emberAfPriceInitConsolidatedBillsTable(uint8_t endpoint)
    return billIsValid;
    }
  */
-
-#ifdef UC_BUILD
-
 bool emberAfPriceClusterPublishConsolidatedBillCallback(EmberAfClusterCommand *cmd)
 {
   sl_zcl_price_cluster_publish_consolidated_bill_command_t cmd_data;
@@ -200,7 +195,7 @@ bool emberAfPriceClusterPublishConsolidatedBillCallback(EmberAfClusterCommand *c
       ConsolidatedBillsTable[ep][i].currency = cmd_data.currency;
       ConsolidatedBillsTable[ep][i].billTrailingDigit = cmd_data.billTrailingDigit;
       ConsolidatedBillsTable[ep][i].valid = true;
-      emAfPricePrintConsolidatedBillTableIndex(endpoint, i);
+      sli_zigbee_af_price_print_consolidated_bill_table_index(endpoint, i);
     }
   }
   kickout:
@@ -208,117 +203,7 @@ bool emberAfPriceClusterPublishConsolidatedBillCallback(EmberAfClusterCommand *c
   return true;
 }
 
-#else // !UC_BUILD
-
-bool emberAfPriceClusterPublishConsolidatedBillCallback(uint32_t providerId,
-                                                        uint32_t issuerEventId,
-                                                        uint32_t billingPeriodStartTime,
-                                                        uint32_t billingPeriodDuration,
-                                                        uint8_t billingPeriodDurationType,
-                                                        uint8_t tariffType,
-                                                        uint32_t consolidatedBill,
-                                                        uint16_t currency,
-                                                        uint8_t billTrailingDigit)
-{
-  uint32_t adjustedStartTime;
-  uint32_t adjustedDuration = 0;
-  uint8_t  i;
-  // uint8_t  availableIndex;
-  // uint32_t  availableStartTime;
-  uint32_t timeNow = emberAfGetCurrentTime();
-  uint8_t  isValid = 1;
-
-  uint8_t  smallestEventIdIndex;
-  uint32_t smallestEventId = 0xFFFFFFFF;
-
-  uint8_t endpoint = emberAfCurrentEndpoint();
-  uint8_t ep = emberAfFindClusterClientEndpointIndex(endpoint, ZCL_PRICE_CLUSTER_ID);
-  if (ep == 0xFF) {
-    return false;
-  }
-
-  emberAfPriceClusterPrintln("RX: PublishConsolidatedBill eventId=%d,  timeNow=0x%4x", issuerEventId, timeNow);
-
-  if ( billingPeriodStartTime != CANCELLATION_START_TIME ) {
-    if ( billingPeriodStartTime == 0 ) {
-      billingPeriodStartTime = timeNow;
-    }
-    adjustedStartTime = emberAfPluginPriceCommonClusterGetAdjustedStartTime(billingPeriodStartTime, billingPeriodDurationType);
-    adjustedDuration = emberAfPluginPriceCommonClusterConvertDurationToSeconds(billingPeriodStartTime, billingPeriodDuration, billingPeriodDurationType);
-  } else {
-    adjustedStartTime = CANCELLATION_START_TIME;
-  }
-  //isValid = removeOverlappingAndValidateConsolidatedBills( providerId, issuerEventId, adjustedStartTime, adjustedDuration, tariffType );
-
-  if ( isValid ) {
-    // Initialize these.
-    //availableStartTime = 0;
-    //availableIndex = EMBER_AF_PLUGIN_PRICE_CLIENT_CONSOLIDATED_BILL_TABLE_SIZE;
-    smallestEventIdIndex = EMBER_AF_PLUGIN_PRICE_CLIENT_CONSOLIDATED_BILL_TABLE_SIZE;
-
-    // Search table for matching entry, invalid entry, lowestEventId
-    for ( i = 0; i < EMBER_AF_PLUGIN_PRICE_CLIENT_CONSOLIDATED_BILL_TABLE_SIZE; i++ ) {
-      emberAfPriceClusterPrintln(" == i=%d, val=%d, event=%d, start=0x%4x,  timeNow=0x%4x",
-                                 i, ConsolidatedBillsTable[ep][i].valid, ConsolidatedBillsTable[ep][i].issuerEventId,
-                                 ConsolidatedBillsTable[ep][i].billingPeriodStartTime, timeNow);
-      if ( billingPeriodStartTime == CANCELLATION_START_TIME ) {
-        if ( (ConsolidatedBillsTable[ep][i].providerId == providerId)
-             && (ConsolidatedBillsTable[ep][i].issuerEventId == issuerEventId) ) {
-          ConsolidatedBillsTable[ep][i].valid = false;
-          goto kickout;
-        }
-      } else if ( ConsolidatedBillsTable[ep][i].valid
-                  && (ConsolidatedBillsTable[ep][i].issuerEventId == issuerEventId) ) {
-        // Matching entry - reuse index
-        // availableIndex = i;
-        break;  // DONE
-      } else if ( ConsolidatedBillsTable[ep][i].valid == false ) {
-        //else if( (ConsolidatedBillsTable[i].valid == false) ||
-        //  (ConsolidatedBillsTable[i].adjustedEndTimeUtc < timeNow) ){
-        // invalid or expired - mark with very far-out start time
-        //availableIndex = i;
-        //availableStartTime = 0xFFFFFFFF;
-        smallestEventIdIndex = i;
-        smallestEventId = 0;    // Absolutely use this index unless a match is found.
-        emberAfPriceClusterPrintln("    INVALID");
-      }
-      //else if( ConsolidatedBillsTable[i].adjustedStartTimeUtc > availableStartTime ){
-      else if ( ConsolidatedBillsTable[ep][i].issuerEventId < issuerEventId
-                && ConsolidatedBillsTable[ep][i].issuerEventId < smallestEventId ) {
-        //availableIndex = i;
-        //availableStartTime = ConsolidatedBillsTable[i].adjustedStartTimeUtc;
-        smallestEventIdIndex = i;
-        smallestEventId = ConsolidatedBillsTable[ep][i].issuerEventId;
-        emberAfPriceClusterPrintln("    TIME...");
-      }
-    }
-    // Populate the available index fields.
-    i = smallestEventIdIndex;
-    if ( i < EMBER_AF_PLUGIN_PRICE_CLIENT_CONSOLIDATED_BILL_TABLE_SIZE ) {
-      emberAfPriceClusterPrintln("  === DONE, i=%d", i);
-      ConsolidatedBillsTable[ep][i].providerId = providerId;
-      ConsolidatedBillsTable[ep][i].issuerEventId = issuerEventId;
-      ConsolidatedBillsTable[ep][i].adjustedStartTimeUtc = adjustedStartTime;
-      ConsolidatedBillsTable[ep][i].adjustedEndTimeUtc = adjustedStartTime + adjustedDuration;
-      ConsolidatedBillsTable[ep][i].billingPeriodStartTime = billingPeriodStartTime;
-      ConsolidatedBillsTable[ep][i].billingPeriodDuration = billingPeriodDuration;
-      ConsolidatedBillsTable[ep][i].billingPeriodDurationType = billingPeriodDurationType;
-      ConsolidatedBillsTable[ep][i].tariffType = tariffType;
-      ConsolidatedBillsTable[ep][i].consolidatedBill = consolidatedBill;
-      ConsolidatedBillsTable[ep][i].currency = currency;
-      ConsolidatedBillsTable[ep][i].billTrailingDigit = billTrailingDigit;
-      ConsolidatedBillsTable[ep][i].valid = true;
-      emAfPricePrintConsolidatedBillTableIndex(endpoint, i);
-    }
-  }
-  kickout:
-  emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
-  return true;
-}
-
-#endif // UC_BUILD
-
-void emAfPricePrintConsolidatedBillTableIndex(uint8_t endpoint, uint8_t i)
+void sli_zigbee_af_price_print_consolidated_bill_table_index(uint8_t endpoint, uint8_t i)
 {
   uint8_t ep = emberAfFindClusterClientEndpointIndex(endpoint, ZCL_PRICE_CLUSTER_ID);
   if (ep == 0xFF) {
@@ -339,7 +224,7 @@ void emAfPricePrintConsolidatedBillTableIndex(uint8_t endpoint, uint8_t i)
   }
 }
 
-uint8_t emAfPriceConsolidatedBillTableGetIndexWithEventId(uint8_t endpoint, uint32_t issuerEventId)
+uint8_t sli_zigbee_af_price_consolidated_bill_table_get_index_with_event_id(uint8_t endpoint, uint32_t issuerEventId)
 {
   uint8_t i;
   uint8_t ep = emberAfFindClusterClientEndpointIndex(endpoint, ZCL_PRICE_CLUSTER_ID);
@@ -354,7 +239,7 @@ uint8_t emAfPriceConsolidatedBillTableGetIndexWithEventId(uint8_t endpoint, uint
   return i;
 }
 
-uint8_t emAfPriceConsolidatedBillTableGetCurrentIndex(uint8_t endpoint)
+uint8_t sli_zigbee_af_price_consolidated_bill_table_get_current_index(uint8_t endpoint)
 {
   uint32_t currTime = emberAfGetCurrentTime();
   uint32_t largestEventId = 0;

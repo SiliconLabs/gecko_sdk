@@ -37,13 +37,13 @@
 
 #include <math.h>
 
+static const RAIL_HFXOThermistorConfig_t hfxoThermistorConfig = {
+  .port = GPIO_THMSW_EN_PORT,
+  .pin = GPIO_THMSW_EN_PIN
+};
+
 RAIL_Status_t sl_rail_util_thermistor_init(void)
 {
-  const RAIL_HFXOThermistorConfig_t hfxoThermistorConfig = {
-    .port = GPIO_THMSW_EN_PORT,
-    .pin = GPIO_THMSW_EN_PIN
-  };
-
   return RAIL_ConfigHFXOThermistor(RAIL_EFR32_HANDLE, &hfxoThermistorConfig);
 }
 

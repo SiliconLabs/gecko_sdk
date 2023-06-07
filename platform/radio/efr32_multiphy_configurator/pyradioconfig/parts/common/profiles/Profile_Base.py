@@ -31,8 +31,6 @@ class Profile_Base(IProfile):
     """
     def buildProfileModel(self, model):
 
-        family = self._family
-
         # Build profile
         profile = self._makeProfile(model)
 
@@ -46,7 +44,7 @@ class Profile_Base(IProfile):
         IProfile.make_required_input(profile, model.vars.syncword_0,             "syncword", readable_name="Sync Word 0",                value_limit_min=long(0),        value_limit_max=long(0xffffffff))
         IProfile.make_required_input(profile, model.vars.syncword_1,             "syncword", readable_name="Sync Word 1",                value_limit_min=long(0),        value_limit_max=long(0xffffffff))
         IProfile.make_optional_input(profile, model.vars.syncword_tx_skip,       "syncword", readable_name="Sync Word TX Skip",          default=False)
-        IProfile.make_required_input(profile, model.vars.syncword_length,        "syncword", readable_name="Sync Word Length",           value_limit_min=0,         value_limit_max=32)
+        IProfile.make_required_input(profile, model.vars.syncword_length,        "syncword", readable_name="Sync Word Length",           value_limit_min=2,         value_limit_max=32)
 
         IProfile.make_required_input(profile, model.vars.preamble_pattern_len,   "preamble", readable_name="Preamble Pattern Length",    value_limit_min=0,         value_limit_max=4)
         IProfile.make_required_input(profile, model.vars.preamble_length,        "preamble", readable_name="Preamble Length Total",      value_limit_min=0,         value_limit_max=2097151)
@@ -72,7 +70,7 @@ class Profile_Base(IProfile):
 
         IProfile.make_linked_io(profile, model.vars.lo_injection_side,      "Advanced", readable_name="Injection side")
 
-        if family.lower() not in ["dumbo", "jumbo", "nerio", "nixi"]:
+        if model.part_family.lower() not in ["dumbo", "jumbo", "nerio", "nixi", "unit_test_part"]:
             # 40nm Series 2 enable optional input for SRC range minimum
             IProfile.make_hidden_input(profile, model.vars.src1_range_available_minimum, "modem", readable_name="SRC range minimum",      value_limit_min=125,         value_limit_max=155)
 
@@ -83,13 +81,13 @@ class Profile_Base(IProfile):
 
 
         # Frame configuration Inputs
-        buildFrameInputs(model, profile, family=family)
+        buildFrameInputs(model, profile)
         buildCrcInputs(model, profile)
         buildWhiteInputs(model, profile)
         buildFecInputs(model, profile)
 
         # Modem Advanced Inputs
-        buildModemAdvancedInputs(model, profile, family)
+        buildModemAdvancedInputs(model, profile)
 
         # Informational Output
         buildModemInfoOutputs(model, profile)
@@ -98,27 +96,28 @@ class Profile_Base(IProfile):
         buildRailOutputs(model, profile)
 
         # Output fields
-        buildFrameOutputs(model, profile, family=family)
-        buildCrcOutputs(model, profile, family)
+        buildFrameOutputs(model, profile)
+        buildCrcOutputs(model, profile)
         buildWhiteOutputs(model, profile)
         buildFecOutputs(model, profile)
 
-        if family == "dumbo":
-            build_modem_regs_dumbo(model, profile, family = family)   # Clean this up as a next step...
+        family = model.part_family.lower()
+        if family in ["dumbo","unit_test_part"]:
+            build_modem_regs_dumbo(model, profile)   # Clean this up as a next step...
         elif family == "jumbo":
-            build_modem_regs_jumbo(model, profile, family = family)   # Clean this up as a next step...
+            build_modem_regs_jumbo(model, profile)   # Clean this up as a next step...
         elif family == "nerio":
-            build_modem_regs_jumbo(model, profile, family = family)   # Clean this up as a next step...
+            build_modem_regs_jumbo(model, profile)   # Clean this up as a next step...
             buildLongRangeOutputs(model, profile)
         elif family == "nixi":
-            build_modem_regs_nixi(model, profile, family = family)    # Clean this up as a next step...
+            build_modem_regs_nixi(model, profile)    # Clean this up as a next step...
             buildLongRangeOutputs(model, profile)
         elif family == "panther":
-            build_modem_regs_panther(model, profile, family = family)    # Clean this up as a next step...
+            build_modem_regs_panther(model, profile)    # Clean this up as a next step...
             # Already defined elsewhere for Panther
             # buildLongRangeOutputs(model, profile)
         elif family == "lynx":
-            build_modem_regs_lynx(model, profile, family = family)    # Clean this up as a next step...
+            build_modem_regs_lynx(model, profile)    # Clean this up as a next step...
 
         build_ircal_sw_vars(model, profile)
 

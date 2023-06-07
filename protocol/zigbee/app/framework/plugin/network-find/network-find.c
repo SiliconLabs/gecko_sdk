@@ -23,8 +23,9 @@
 
 #include "app/framework/util/util.h"    // emberAfGetPageFrom8bitEncodedChanPg() etc
 
-#ifdef UC_BUILD
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif
 #include "zigbee_stack_callback_dispatcher.h"
 #ifdef SL_CATALOG_ZIGBEE_NETWORK_FIND_SUB_GHZ_PRESENT
 #include "network-find-sub-ghz-config.h"
@@ -35,17 +36,6 @@
 #if (EMBER_AF_PLUGIN_NETWORK_FIND_RADIO_TX_CALLBACK == 1)
 #define RADIO_TX_CALLBACK
 #endif
-#else // !UC_BUILD
-#ifdef EMBER_AF_PLUGIN_NETWORK_FIND_SUB_GHZ
-#define SL_CATALOG_ZIGBEE_NETWORK_FIND_SUB_GHZ_PRESENT
-#endif
-#ifdef EMBER_AF_PLUGIN_NETWORK_FIND_ENABLE_ALL_CHANNELS
-#define ENABLE_ALL_CHANNELS
-#endif
-#ifdef EMBER_AF_PLUGIN_NETWORK_FIND_RADIO_TX_CALLBACK
-#define RADIO_TX_CALLBACK
-#endif
-#endif // UC_BUILD
 
 //------------------------------------------------------------------------------
 // Forward Declaration
@@ -140,25 +130,18 @@ static uint8_t searchMode =
 #endif
 
 static uint8_t extendedPanIds[EMBER_SUPPORTED_NETWORKS][EXTENDED_PAN_ID_SIZE];
-#ifdef UC_BUILD
 sl_zigbee_event_t emberAfPluginNetworkFindTickEvent;
 #define networkFindTickEventControl (&emberAfPluginNetworkFindTickEvent)
-void emberAfPluginNetworkFindTickEventHandler(SLXU_UC_EVENT);
-#else // !UC_BUILD
-EmberEventControl emberAfPluginNetworkFindTickEventControl;
-#define networkFindTickEventControl emberAfPluginNetworkFindTickEventControl
-#endif // UC_BUILD
+void emberAfPluginNetworkFindTickEventHandler(sl_zigbee_event_t * event);
 //------------------------------------------------------------------------------
-
-#ifdef UC_BUILD
 
 void emberAfPluginNetworkFindInitCallback(uint8_t init_level)
 {
   switch (init_level) {
     case SL_ZIGBEE_INIT_LEVEL_EVENT:
     {
-      slxu_zigbee_event_init(networkFindTickEventControl,
-                             emberAfPluginNetworkFindTickEventHandler);
+      sl_zigbee_event_init(networkFindTickEventControl,
+                           emberAfPluginNetworkFindTickEventHandler);
       break;
     }
 
@@ -177,33 +160,12 @@ void emberAfPluginNetworkFindInitCallback(uint8_t init_level)
   }
 }
 
-#else // !UC_BUILD
-
-void emberAfPluginNetworkFindInitCallback(void)
-{
-  uint8_t extendedPanId[EXTENDED_PAN_ID_SIZE] = EMBER_AF_PLUGIN_NETWORK_FIND_EXTENDED_PAN_ID;
-  uint8_t i;
-  for (i = 0; i < EMBER_SUPPORTED_NETWORKS; i++) {
-    MEMMOVE(extendedPanIds[i], extendedPanId, EXTENDED_PAN_ID_SIZE);
-  }
-}
-
-#endif // UC_BUILD
-
 void emberAfPluginFormAndJoinUnusedPanIdFoundCallback(EmberPanId panId, uint8_t channel)
 {
-#ifdef UC_BUILD
-  emAfPluginNetworkFindUnusedPanIdFoundCallback(panId, channel);
-#else
-  emberAfUnusedPanIdFoundCallback(panId, channel);
-#endif // UC_BUILD
+  sli_zigbee_af_network_find_unused_pan_id_found_callback(panId, channel);
 }
 
-#ifdef UC_BUILD
-void emAfPluginNetworkFindUnusedPanIdFoundCallback(EmberPanId panId, uint8_t channel)
-#else
-void emberAfUnusedPanIdFoundCallback(EmberPanId panId, uint8_t channel)
-#endif // UC_BUILD
+void sli_zigbee_af_network_find_unused_pan_id_found_callback(EmberPanId panId, uint8_t channel)
 {
   EmberNetworkParameters networkParams = { 0 };
   EmberStatus status;
@@ -219,11 +181,7 @@ void emberAfUnusedPanIdFoundCallback(EmberPanId panId, uint8_t channel)
                       status,
                       "aborting");
     emberAfAppFlush();
-#ifdef UC_BUILD
-    emAfPluginNetworkFindScanErrorCallback(status);
-#else
-    emberAfScanErrorCallback(status);
-#endif // UC_BUILD
+    sli_zigbee_af_network_find_scan_error_callback(status);
   }
 }
 
@@ -269,7 +227,7 @@ void emberAfJoinableNetworkFoundCallback(EmberZigbeeNetwork *networkFound,
                       status,
                       "aborting");
     emberAfAppFlush();
-    slxu_zigbee_event_set_active(networkFindTickEventControl);
+    sl_zigbee_event_set_active(networkFindTickEventControl);
   }
 }
 
@@ -280,10 +238,10 @@ void emberAfPluginFormAndJoinNetworkFoundCallback(EmberZigbeeNetwork *networkFou
   emberAfJoinableNetworkFoundCallback(networkFound, lqi, rssi);
 }
 
-void emberAfPluginNetworkFindTickEventHandler(SLXU_UC_EVENT)
+void emberAfPluginNetworkFindTickEventHandler(sl_zigbee_event_t * event)
 {
   EmberStatus status = EMBER_SUCCESS;
-  slxu_zigbee_event_set_inactive(networkFindTickEventControl);
+  sl_zigbee_event_set_inactive(networkFindTickEventControl);
   if (state == NETWORK_FIND_JOIN || state == NETWORK_FIND_JOIN_ALL_CHANNELS) {
     // If the tick fires while we're searching for a joinable network, it means
     // we need to keep searching.  This can happen if the join fails or if the
@@ -331,11 +289,7 @@ static void printScanAllChannelsPrompt(void)
   emberAfAppPrintln("Scanning again, using all channels.");
 }
 
-#ifdef UC_BUILD
-void emAfPluginNetworkFindScanErrorCallback(EmberStatus status)
-#else
-void emberAfScanErrorCallback(EmberStatus status)
-#endif // UC_BUILD
+void sli_zigbee_af_network_find_scan_error_callback(EmberStatus status)
 {
   switch (status) {
     case EMBER_NO_BEACONS:
@@ -409,8 +363,9 @@ void emberAfScanErrorCallback(EmberStatus status)
   }
   emberAfCoreFlush();
   state = NETWORK_FIND_NONE;
-  emberAfAppPrintln("%s (scan error).",
-                    "Network find complete");
+  emberAfAppPrintln("%s (scan error) 0x%0x",
+                    "Network find complete",
+                    status);
   emberAfPluginNetworkFindFinishedCallback(status);
 }
 
@@ -520,18 +475,14 @@ void emberAfPluginNetworkFindStackStatusCallback(EmberStatus status)
 #ifdef EMBER_AF_HAS_COORDINATOR_NETWORK
       case NETWORK_FIND_FORM:
       case NETWORK_FIND_FORM_ALL_CHANNELS:
-      #ifdef UC_BUILD
         emberAfPluginNetworkFindTickEventHandler(networkFindTickEventControl);
-      #else // !UC_BUILD
-        emberAfPluginNetworkFindTickEventHandler();
-      #endif // UC_BUILD
         break;
 #endif
       case NETWORK_FIND_JOIN:
       case NETWORK_FIND_JOIN_ALL_CHANNELS:
         state = JOIN_STATE_TO_WAIT_STATE(state);
-        slxu_zigbee_event_set_delay_minutes(networkFindTickEventControl,
-                                            EMBER_AF_PLUGIN_NETWORK_FIND_JOINABLE_SCAN_TIMEOUT_MINUTES);
+        sl_zigbee_event_set_delay_minutes(networkFindTickEventControl,
+                                          EMBER_AF_PLUGIN_NETWORK_FIND_JOINABLE_SCAN_TIMEOUT_MINUTES);
         break;
       default:
         // MISRA requires to have a default case
@@ -549,11 +500,7 @@ void emberAfPluginNetworkFindStackStatusCallback(EmberStatus status)
         SL_FALLTHROUGH
       case NETWORK_FIND_JOIN:
       case NETWORK_FIND_JOIN_ALL_CHANNELS:
-        #ifdef UC_BUILD
         emberAfPluginNetworkFindTickEventHandler(networkFindTickEventControl);
-        #else // !UC_BUILD
-        emberAfPluginNetworkFindTickEventHandler();
-        #endif // UC_BUILD
         break;
       default:
         // MISRA requires a default case
@@ -684,7 +631,7 @@ uint8_t emberAfGetFormAndJoinSearchMode(void)
  *         all channels?
  * @return true if yes, false if the current scan is on preferred channels only
  */
-bool emAfIsCurrentSearchForUnusedNetworkScanningAllChannels(void)
+bool sli_zigbee_af_is_current_search_for_unused_network_scanning_all_channels(void)
 {
 #ifdef EMBER_AF_HAS_COORDINATOR_NETWORK
   #ifdef SL_CATALOG_ZIGBEE_NETWORK_FIND_SUB_GHZ_PRESENT
@@ -702,10 +649,10 @@ bool emAfIsCurrentSearchForUnusedNetworkScanningAllChannels(void)
  * This function  may return the configured
  * channel mask or all channels mask, depending on the current scan state.
  */
-uint32_t emAfGetSearchForUnusedNetworkChannelMask(uint8_t page)
+uint32_t sli_zigbee_af_get_unused_network_channel_mask(uint8_t page)
 {
   bool allChannels = false;
-  if (emAfIsCurrentSearchForUnusedNetworkScanningAllChannels()) {
+  if (sli_zigbee_af_is_current_search_for_unused_network_scanning_all_channels()) {
     allChannels = true;
   }
 
@@ -718,7 +665,7 @@ uint32_t emAfGetSearchForUnusedNetworkChannelMask(uint8_t page)
  * interface (in case of a dual-PHY implementation) has been formed. It is used
  * by the plugin to reset its internal state. Strictly for internal use only.
  */
-void emAfSecondaryInterfaceFormedCallback(EmberStatus status)
+void sli_zigbee_af_secondary_interface_formed_callback(EmberStatus status)
 {
   (void) status;        // unreferenced parameter
   #ifdef EMBER_AF_HAS_COORDINATOR_NETWORK
@@ -726,11 +673,7 @@ void emAfSecondaryInterfaceFormedCallback(EmberStatus status)
     // It should be enough to reset the find status, but we may still have
     // the timer running so let's delegate the job to the tick handler which
     // will also take care of killing the timer.
-    #ifdef UC_BUILD
     emberAfPluginNetworkFindTickEventHandler(networkFindTickEventControl);
-    #else // !UC_BUILD
-    emberAfPluginNetworkFindTickEventHandler();
-    #endif // UC_BUILD
   }
   #endif
 }

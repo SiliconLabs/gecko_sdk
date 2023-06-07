@@ -33,7 +33,9 @@
 #include "sl_btmesh_lighting_server.h"
 #include "sl_btmesh_lighting_server_config.h"
 #include "sl_pwm_init_led0_config.h"
+#ifndef SINGLE_LED
 #include "sl_pwm_init_led1_config.h"
+#endif // SINGLE_LED
 
 #include "sl_pwm.h"
 #include "sl_pwm_instances.h"
@@ -64,7 +66,9 @@ void app_led_set_level(uint16_t level)
     pwm_duty_cycle = PWM_MAX_DUTY_CYCLE;
   }
   sl_pwm_set_duty_cycle(&sl_pwm_led0, pwm_duty_cycle);
+#ifndef SINGLE_LED
   sl_pwm_set_duty_cycle(&sl_pwm_led1, pwm_duty_cycle);
+#endif // SINGLE_LED
 }
 
 /*******************************************************************************
@@ -107,8 +111,10 @@ void app_led_init(void)
 {
   // Enable PWM output
   sl_pwm_start(&sl_pwm_led0);
+#ifndef SINGLE_LED
   // Enable PWM output
   sl_pwm_start(&sl_pwm_led1);
+#endif // SINGLE_LED
 }
 
 /*******************************************************************************
@@ -124,12 +130,17 @@ void app_led_change_buttons_to_leds(void)
   };
   sl_pwm_init(&sl_pwm_led0, &pwm_led0_config);
   sl_pwm_start(&sl_pwm_led0);
-  sl_simple_button_disable(&sl_button_btn1);
 
+#if SL_SIMPLE_BUTTON_COUNT >= 2
+  sl_simple_button_disable(&sl_button_btn1);
+#endif
+
+#ifndef SINGLE_LED
   sl_pwm_config_t pwm_led1_config = {
     .frequency = SL_PWM_LED1_FREQUENCY,
     .polarity = SL_PWM_LED1_POLARITY,
   };
   sl_pwm_init(&sl_pwm_led1, &pwm_led1_config);
   sl_pwm_start(&sl_pwm_led1);
+#endif // SINGLE_LED
 }

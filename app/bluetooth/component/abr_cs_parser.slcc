@@ -1,0 +1,32 @@
+id: abr_cs_parser
+package: Bluetooth
+label: ABR CS parser
+description: >
+  ABR Channel Sounding measurement parser component.
+category: Bluetooth|Application|ABR
+quality: experimental
+root_path: app/bluetooth/common/abr_cs_parser
+
+config_file:
+  - path: config/abr_cs_parser_config.h
+    file_id: abr_cs_parser_config
+
+include:
+  - path: .
+    file_list:
+      - path: abr_cs_parser.h
+      - path: abr_cs_parser_types.h 
+      - path: abr_file_log.h
+source:
+  - path: abr_cs_parser.c
+requires:
+  - name: app_log
+  - name: app_assert
+  - name: bluetooth_stack
+  - name: bluetooth_feature_power_control
+  - name: power_manager
+  - name: bluetooth_feature_cs
+  - name: rtllib
+
+provides:
+  - name: abr_cs_parser

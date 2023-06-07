@@ -30,6 +30,11 @@
 #ifndef THROUGHPUT_CENTRAL_H
 #define THROUGHPUT_CENTRAL_H
 
+/***********************************************************************************************//**
+ * @addtogroup throughput_central
+ * @{
+ **************************************************************************************************/
+
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
 #endif // SL_COMPONENT_CATALOG_PRESENT
@@ -85,6 +90,11 @@ bool throughput_central_allowlist_clear(void);
  * Enable receiver.
  *****************************************************************************/
 void throughput_central_enable(void);
+
+/**************************************************************************//**
+ * Disable receiver.
+ *****************************************************************************/
+sl_status_t throughput_central_disable(void);
 
 /**************************************************************************//**
  * Set receiver mode.
@@ -343,4 +353,5 @@ float throughput_central_calculate(throughput_value_t *throughput);
  *****************************************************************************/
 bool throughput_central_decode_address(char * addess_str, uint8_t *address);
 
+/** @} (end addtogroup throughput_central) */
 #endif // THROUGHPUT_CENTRAL_H

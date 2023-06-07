@@ -20,9 +20,7 @@
 #include "command-relay.h"
 #include "command-relay-local.h"
 
-#ifdef UC_BUILD
 #include "command-relay-config.h"
-#endif
 
 #define NULL_ENTRY 0xffff
 #define EUI64_NULL_TERMINATED_STRING_SIZE 17
@@ -51,9 +49,9 @@ static void printWithEndpoint(char* message,
 static EmberAfPluginCommandRelayEntry relayTable[EMBER_AF_PLUGIN_COMMAND_RELAY_RELAY_TABLE_SIZE];
 
 // Templated to the init_done context.
-void emberAfPluginCommandRelayInitCallback(SLXU_INIT_ARG)
+void emberAfPluginCommandRelayInitCallback(uint8_t init_level)
 {
-  SLXU_INIT_UNUSED_ARG;
+  (void)init_level;
 
   emberAfPluginCommandRelayLoad();
 }
@@ -63,7 +61,7 @@ EmberAfPluginCommandRelayEntry* emberAfPluginCommandRelayTablePointer(void)
   return relayTable;
 }
 
-bool emAfPluginCommandRelayPreCommandReceivedCallback(EmberAfClusterCommand* cmd)
+bool sli_zigbee_af_command_relay_pre_command_received_callback(EmberAfClusterCommand* cmd)
 {
   EmberAfPluginCommandRelayDeviceEndpoint deviceEndpoint;
   deviceEndpoint.endpoint = cmd->apsFrame->sourceEndpoint;
@@ -107,7 +105,7 @@ void emberAfPluginCommandRelayRemove(
   emberAfPluginCommandRelaySave();
 }
 
-void emAfPluginCommandRelayRemoveDeviceByEui64(EmberEUI64 eui64)
+void sli_zigbee_af_command_relay_remove_device_by_eui64(EmberEUI64 eui64)
 {
   uint16_t i;
   for (i = 0; i < EMBER_AF_PLUGIN_COMMAND_RELAY_RELAY_TABLE_SIZE; i++) {
@@ -216,7 +214,7 @@ void emberAfPluginCommandRelayLoad(void)
   emberAfPluginCommandRelayChangedCallback();
 }
 
-void emAfPluginCommandRelayPrint(void)
+void sli_zigbee_af_command_relay_print(void)
 {
   char inEuiStr[EUI64_NULL_TERMINATED_STRING_SIZE] = { 0 };
   char outEuiStr[EUI64_NULL_TERMINATED_STRING_SIZE] = { 0 };
@@ -274,12 +272,12 @@ static void forwardCommand(
   EmberAfClusterCommand* cmd,
   EmberAfPluginCommandRelayDeviceEndpoint* deviceEndpoint)
 {
-  MEMCOPY(emAfZclBuffer, cmd->buffer, cmd->bufLen);
-  emAfZclBuffer[0] |= ZCL_DISABLE_DEFAULT_RESPONSE_MASK;
-  emAfZclBuffer[1] = emberAfNextSequence();
-  *emAfResponseLengthPtr = cmd->bufLen;
-  emAfCommandApsFrame->clusterId = cmd->apsFrame->clusterId;
-  emAfCommandApsFrame->options = EMBER_AF_DEFAULT_APS_OPTIONS;
+  MEMCOPY(sli_zigbee_af_zcl_buffer, cmd->buffer, cmd->bufLen);
+  sli_zigbee_af_zcl_buffer[0] |= ZCL_DISABLE_DEFAULT_RESPONSE_MASK;
+  sli_zigbee_af_zcl_buffer[1] = emberAfNextSequence();
+  *sli_zigbee_af_response_length_ptr = cmd->bufLen;
+  sli_zigbee_af_command_aps_frame->clusterId = cmd->apsFrame->clusterId;
+  sli_zigbee_af_command_aps_frame->options = EMBER_AF_DEFAULT_APS_OPTIONS;
 
   emberAfDeviceTableCommandSendWithEndpoint(deviceEndpoint->eui64,
                                             deviceEndpoint->endpoint);
