@@ -1,2 +1,2 @@
-Zigbee EmberZNet SDK 7.1.4.0
-- Targeted quality improvements and bug fixes
+Zigbee EmberZNet SDK 7.1.5.0
+- Support for EFR32xG21, Revision C and later, plus bug fixes

@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<api device_id="5" device_name="btmesh" version="4.2.2">
+<api device_id="5" device_name="btmesh" version="4.2.3">
     <datatypes>
         <datatype base="uint16" name="errorcode" length="2"/>
         <datatype base="int16" name="int16" length="2"/>
@@ -333,6 +333,14 @@
             <params>
                 <param datatype="uint16" name="adv_interval_min" type="uint16"/>
                 <param datatype="uint16" name="adv_interval_max" type="uint16"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="49" name="set_proxy_service_uuid" >
+            <params>
+                <param datatype="uint16" name="uuid" type="uint16"/>
             </params>
             <returns>
                 <param datatype="errorcode" name="result" type="uint16"/>

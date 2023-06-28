@@ -148,6 +148,7 @@ extern "C" {
 #define sl_btmesh_cmd_node_set_unprov_beaconing_adv_interval_id          0x28140028
 #define sl_btmesh_cmd_node_set_proxy_service_adv_interval_id             0x29140028
 #define sl_btmesh_cmd_node_set_provisioning_service_adv_interval_id      0x30140028
+#define sl_btmesh_cmd_node_set_proxy_service_uuid_id                     0x31140028
 #define sl_btmesh_rsp_node_init_id                                       0x00140028
 #define sl_btmesh_rsp_node_set_exportable_keys_id                        0x24140028
 #define sl_btmesh_rsp_node_start_unprov_beaconing_id                     0x01140028
@@ -186,6 +187,7 @@ extern "C" {
 #define sl_btmesh_rsp_node_set_unprov_beaconing_adv_interval_id          0x28140028
 #define sl_btmesh_rsp_node_set_proxy_service_adv_interval_id             0x29140028
 #define sl_btmesh_rsp_node_set_provisioning_service_adv_interval_id      0x30140028
+#define sl_btmesh_rsp_node_set_proxy_service_uuid_id                     0x31140028
 
 /**
  * @brief Flags for supported OOB authentication methods during provisioning,
@@ -1597,6 +1599,25 @@ sl_status_t sl_btmesh_node_set_proxy_service_adv_interval(uint16_t adv_interval_
  ******************************************************************************/
 sl_status_t sl_btmesh_node_set_provisioning_service_adv_interval(uint16_t adv_interval_min,
                                                                  uint16_t adv_interval_max);
+
+/***************************************************************************//**
+ * @cond RESTRICTED
+ *
+ * Restricted/experimental API. Contact Silicon Labs sales for more information.
+ *
+ * Set Mesh Proxy Service advertisement UUID.
+ *
+ * This command sets the UUID Mesh Proxy Service advertisement and service. This
+ * setting will take effect next time the Mesh Proxy Service advertisement is
+ * started.
+ *
+ * @param[in] uuid A 16bit uuid for gatt proxy service advertisement.
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ * @endcond
+ ******************************************************************************/
+sl_status_t sl_btmesh_node_set_proxy_service_uuid(uint16_t uuid);
 
 /** @} */ // end addtogroup sl_btmesh_node
 

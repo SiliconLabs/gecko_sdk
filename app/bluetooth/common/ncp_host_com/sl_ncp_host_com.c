@@ -83,7 +83,9 @@ void sl_ncp_host_com_write(uint32_t len, uint8_t *data)
   sl_wake_lock_set_remote_req();
   #endif // SL_CATALOG_WAKE_LOCK_PRESENT
   sl_simple_com_transmit(len, data);
-  while (!write_completed) ;
+  while (!write_completed) {
+    sl_simple_com_step();
+  }
   // Start to receive the response as soon as the transmit is completed
   sl_simple_com_receive();
 }

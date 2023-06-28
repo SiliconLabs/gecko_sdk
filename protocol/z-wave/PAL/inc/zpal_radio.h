@@ -34,43 +34,43 @@ extern "C" {
  * of the radio APIs to execute radio related paradigm for instance
  * - zpal_radio_transmit shall be used to transmit a Z-Wave frame on radio
  * - zpal_radio_start_receive shall be used to enable the reception of Z-Wave frame
- * 
- * The radio API assumes that the radio will return to receive mode with channel 
+ *
+ * The radio API assumes that the radio will return to receive mode with channel
  * hopping enabled after transmitting a frame.
- * 
+ *
  * Initialization of the radio
  * ---------------------------
- * 
+ *
  * void
  * RXHandlerFromISR(zpal_radio_event_t rxStatus)
  * {
  *    // Rx handle in ISR context
  * }
- * 
+ *
  * void
  * TXHandlerFromISR(zpal_radio_event_t txStatus)
  * {
  *   // Tx complete handle in ISR context
  * }
- * 
+ *
  * void
  * RegionChangeHandler(zpal_radio_event_t regionChangeStatus)
  * {
  *   // Region changed, make sure region specific data and statistics are cleared
  * }
- * 
+ *
  * void
  * RadioAssertHandler(zpal_radio_event_t assertVal)
  * {
  *   // Radio driver or hardware asserted, handle it
  * }
- * 
+ *
  * initialize_radio()
  * {
  *   static zpal_radio_profile_t RfProfile;
  *   static zpal_radio_network_stats_t sNetworkStatistic = {0};
  *   static uint8_t network_homeid[4] = {0xDE, 0xAD, 0xBE, 0xEF};
- *   
+ *
  *   // Set radio for US always on mode
  *   static zpal_radio_profile_t RfProfile = {.region = REGION_US,
  *                                     .wakeup = ZPAL_RADIO_WAKEUP_ALWAYS_LISTEN,
@@ -86,33 +86,33 @@ extern "C" {
  *                                     .network_stats = &sNetworkStatistic,
  *                                     .radio_debug_enable = false,
  *                                     .primary_lr_channel = ZPAL_RADIO_LR_CHANNEL_A};
- *   
+ *
  *   zpal_radio_init(RfProfile);
  * }
- * 
- * 
+ *
+ *
  * Transmitting a frame
  * --------------------
- * 
+ *
  * #define TX_FAILED          0
  * #define TX_FRAME_SUCCESS   1
  * #define TX_BEAM_SUCCESS    2
- * 
- * static const zpal_radio_transmit_parameter_t TxParameter100kCh1 = {.speed = ZPAL_RADIO_SPEED_100K, 
- *                                                                    .channel_id = 0, 
+ *
+ * static const zpal_radio_transmit_parameter_t TxParameter100kCh1 = {.speed = ZPAL_RADIO_SPEED_100K,
+ *                                                                    .channel_id = 0,
  *                                                                    .crc = ZPAL_RADIO_CRC_16_BIT_CCITT,
- *                                                                    .preamble = 0x55, 
- *                                                                    .preamble_length = 40, 
- *                                                                    .start_of_frame = 0xF0, 
+ *                                                                    .preamble = 0x55,
+ *                                                                    .preamble_length = 40,
+ *                                                                    .start_of_frame = 0xF0,
  *                                                                    .repeats = 0};
- * 
+ *
  * zpal_status_t transmit_frame()
  * {
  *   // Singlecast MAC header from node 1 to node 2
  *   uint8_t header_buffer[9] = {0xDE, 0xAD, 0xBE, 0xEF, 0x01, 0x41, 0x01, 14, 0x02};
  *   // Basic set On frame
  *   uint8_t payload_buffer[3] = {0x20, 0x01, 0xFF};
- *   
+ *
  *   return zpal_radio_transmit(&TxParameter100kCh1,         // use 100kbps FSK profile
  *                              9,
  *                              (uint8_t *)&header_buffer,
@@ -121,7 +121,7 @@ extern "C" {
  *                              true,                        // Do LBT before transmit
  *                              0);                          // Transmit power 0dBm
  * }
- * 
+ *
  * void
  * TXHandlerFromISR(zpal_radio_event_t txStatus)
  * {
@@ -142,7 +142,7 @@ extern "C" {
  *   / Get out of ISR context and handle transmit complete
  *   HandleTransmitComplete(status);
  * }
- * 
+ *
  *
  * Receiving a frame
  * -----------------
@@ -180,10 +180,10 @@ extern "C" {
  *   / Get out of ISR context and handle frame
  *   HandleFrame(status);
  * }
- * 
+ *
  * @{
  */
-   
+
 /**
  * @brief RSSI value is invalid or not measured
  */
@@ -300,18 +300,18 @@ typedef enum
 typedef enum
 {
   TF_REGION_866 = 64,
-  TF_REGION_870, 
-  TF_REGION_906, 
+  TF_REGION_870,
+  TF_REGION_906,
   TF_REGION_910,
   TF_REGION_878,
   TF_REGION_882,
-  TF_REGION_886, 
+  TF_REGION_886,
   TF_REGION_2CH_NUM = (TF_REGION_886 - TF_REGION_866) + 1,
   TF_REGION_932_3CH = 96,
   TF_REGION_940_3CH,
   TF_REGION_835_3CH,
   TF_REGION_840_3CH,
-  TF_REGION_850_3CH, 
+  TF_REGION_850_3CH,
   TF_REGION_3CH_NUM = (TF_REGION_850_3CH - TF_REGION_932_3CH) + 1,
 } zpal_radio_region_tf_t;
 
@@ -383,10 +383,11 @@ typedef enum
   ZPAL_RADIO_EVENT_RX_ABORT,                    ///< Receive was aborted
   ZPAL_RADIO_EVENT_TX_FAIL,                     ///< Transmit failed
   ZPAL_RADIO_EVENT_TX_FAIL_LBT,                 ///< Transmit failed because of an LBT failure
-  ZPAL_RADIO_EVENT_RXTX_CALIBRATE,			    ///< Radio needs calibration 
+  ZPAL_RADIO_EVENT_RXTX_CALIBRATE,			    ///< Radio needs calibration
   ZPAL_RADIO_EVENT_MASK = 0x1F,
   ZPAL_RADIO_EVENT_FLAG_PACKET = 0x20,          ///< The frmae was a normal package
   ZPAL_RADIO_EVENT_FLAG_BEAM = 0x40,            ///< The frame was a wakeup beam
+  ZPAL_RADIO_EVENT_RX_TIMEOUT = 255
 } zpal_radio_event_t;
 
 typedef void (*zpal_radio_callback_t)(zpal_radio_event_t event);
@@ -522,9 +523,10 @@ zpal_status_t zpal_radio_transmit_beam(zpal_radio_transmit_parameter_t const *co
 
 /**
  * @brief Starts the receiver and enables reception of frames.
+ * @param[in]   force_rx  bool will force RAIL to RX mode..
  * If the receiver is already started, nothing will happen.
  */
-void zpal_radio_start_receive(void);
+void zpal_radio_start_receive(bool force_rx);
 
 /**
  * @brief Function to get last received frame.

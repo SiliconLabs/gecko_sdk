@@ -666,6 +666,21 @@ sl_status_t sl_btmesh_node_set_provisioning_service_adv_interval(uint16_t adv_in
 
 }
 
+sl_status_t sl_btmesh_node_set_proxy_service_uuid(uint16_t uuid) {
+    struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
+
+    struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
+
+    cmd->data.cmd_node_set_proxy_service_uuid.uuid=uuid;
+
+    cmd->header=sl_btmesh_cmd_node_set_proxy_service_uuid_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
+
+
+    sl_btmesh_host_handle_command();
+    return rsp->data.rsp_node_set_proxy_service_uuid.result;
+
+}
+
 sl_status_t sl_btmesh_prov_init() {
     struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
 

@@ -33,7 +33,7 @@
 // The 4 digit version: A.B.C.D
 #define EMBER_MAJOR_VERSION  7
 #define EMBER_MINOR_VERSION  1
-#define EMBER_PATCH_VERSION  4
+#define EMBER_PATCH_VERSION  5
 #define EMBER_SPECIAL_VERSION  0
 
 // 2 bytes

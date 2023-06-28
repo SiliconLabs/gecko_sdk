@@ -40,7 +40,7 @@
 #endif
 
 #ifndef SL_WISUN_VERSION_PATCH
-#define SL_WISUN_VERSION_PATCH 2
+#define SL_WISUN_VERSION_PATCH 3
 #endif
 
 #define FORMAT_WISUN_STACK_VERSION(a,b,c) (((a) << 16) + ((b) << 8) +  (c))

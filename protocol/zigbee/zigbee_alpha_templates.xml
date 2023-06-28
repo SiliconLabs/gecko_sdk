@@ -8,7 +8,7 @@
     <properties key="readmeFiles" value="app/framework/scenarios/z3/Z3GatewayCpc/readme.html"/>
     <properties key="boardCompatibility" value="com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*host.*"/>
-    <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="ideCompatibility" value="generic-template makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc"/>
     <properties key="category" value="Zigbee Host Application"/>
     <properties key="quality" value="ALPHA"/>
@@ -21,9 +21,9 @@
     <properties key="solutionReferenceId" value="protocol.zigbee.app.ncp.sample-app.ncp-cmp.zigbee_ncp-ot_rcp-spi.slcp"/>
     <properties key="projectFilePaths" value="app/ncp/sample-app/ncp-cmp/zigbee_ncp-ot_rcp-spi.slcp"/>
     <properties key="readmeFiles" value="app/ncp/sample-app/ncp-cmp/readme-zigbee_ncp-ot_rcp-spi.html"/>
-    <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4166c brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4190a brd4195a brd4196a brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4319a com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4166c brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4190a brd4195a brd4195b brd4196a brd4196b brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4319a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg24.* .*efr32mr21.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm24.*"/>
-    <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="ideCompatibility" value="generic-template makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc"/>
     <properties key="category" value="Zigbee + OpenThread Application"/>
     <properties key="quality" value="ALPHA"/>
@@ -36,9 +36,9 @@
     <properties key="solutionReferenceId" value="protocol.zigbee.app.ncp.sample-app.ncp-cmp.zigbee_ncp-ot_rcp-uart.slcp"/>
     <properties key="projectFilePaths" value="app/ncp/sample-app/ncp-cmp/zigbee_ncp-ot_rcp-uart.slcp"/>
     <properties key="readmeFiles" value="app/ncp/sample-app/ncp-cmp/readme-zigbee_ncp-ot_rcp-uart.html"/>
-    <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4166c brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4190a brd4195a brd4196a brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4319a com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4166c brd4167a brd4168a brd4170a brd4171a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4190a brd4195a brd4195b brd4196a brd4196b brd4304a brd4305d brd4305e brd4306c brd4306d brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4319a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32mg12p.* .*efr32mg13p.* .*efr32mg21.* .*efr32mg24.* .*efr32mr21.* .*mgm12.* .*mgm13.* .*mgm21.* .*mgm24.*"/>
-    <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="ideCompatibility" value="generic-template makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc"/>
     <properties key="category" value="Zigbee + OpenThread Application"/>
     <properties key="quality" value="ALPHA"/>

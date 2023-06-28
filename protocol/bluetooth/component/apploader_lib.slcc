@@ -18,6 +18,7 @@ requires:
   - name: device_supports_bluetooth
   - name: emlib
   - name: rail_lib
+  - name: rail_util_pa
   - name: device_init
   - name: device_init_hfxo
 

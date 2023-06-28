@@ -34,16 +34,18 @@
 #define ADD_NODE_OPTION_NORMAL_POWER         0x80
 #define ADD_NODE_OPTION_NETWORK_WIDE         0x40
 #define ADD_NODE_OPTION_LR                   0x20
+#define ADD_NODE_OPTION_NO_FL_SEARCH         0x10
 
 /* Callback states from ZW_AddNodeToNetwork */
-#define ADD_NODE_STATUS_LEARN_READY          1
-#define ADD_NODE_STATUS_NODE_FOUND           2
-#define ADD_NODE_STATUS_ADDING_SLAVE         3
-#define ADD_NODE_STATUS_ADDING_CONTROLLER    4
-#define ADD_NODE_STATUS_PROTOCOL_DONE        5
-#define ADD_NODE_STATUS_DONE                 6
-#define ADD_NODE_STATUS_FAILED               7
-#define ADD_NODE_STATUS_NOT_PRIMARY          0x23
+#define ADD_NODE_STATUS_LEARN_READY         1
+#define ADD_NODE_STATUS_NODE_FOUND          2
+#define ADD_NODE_STATUS_ADDING_SLAVE        3
+#define ADD_NODE_STATUS_ADDING_CONTROLLER   4
+#define ADD_NODE_STATUS_PROTOCOL_DONE       5
+#define ADD_NODE_STATUS_DONE                6
+#define ADD_NODE_STATUS_FAILED              7
+#define ADD_NODE_STATUS_FIND_NEIGHBORS_DONE 11 // Sent if SFLND == true
+#define ADD_NODE_STATUS_NOT_PRIMARY         0x23
 
 /* Mode parameters to ZW_RemoveNodeFromNetwork/ZW_RemoveNodeIDFromNetwork */
 #define REMOVE_NODE_ANY                     ADD_NODE_ANY
