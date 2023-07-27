@@ -3,7 +3,7 @@
  * @brief BT mesh scene client module
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -171,8 +171,7 @@ void sl_btmesh_select_scene(uint8_t scene_to_recall)
 /**************************************************************************//**
  * Handle Sensor Server events.
  *
- * This function is called automatically by Universal Configurator after
- * enabling the component.
+ * This function is called automatically after enabling the component.
  *
  * @param[in] evt pointer to event descriptor
  *****************************************************************************/

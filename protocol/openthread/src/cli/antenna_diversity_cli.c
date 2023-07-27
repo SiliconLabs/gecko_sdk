@@ -22,7 +22,7 @@
 
 #include <openthread/cli.h>
 #include "common/code_utils.hpp"
-#include "radio_vendor.h"
+#include "radio_extension.h"
 #include "sl_ot_custom_cli.h"
 
 #ifdef SL_COMPONENT_CATALOG_PRESENT
@@ -44,7 +44,7 @@ static otError getAntennaTxModeCommand(void *context, uint8_t argc, char *argv[]
     otError error = OT_ERROR_NONE;
     uint8_t antennaMode;
 
-    SuccessOrExit(error = otPlatRadioVendorGetTxAntennaMode(&antennaMode));
+    SuccessOrExit(error = otPlatRadioExtensionGetTxAntennaMode(&antennaMode));
     otCliOutputFormat("TX antenna mode:%d", antennaMode);
     otCliOutputFormat("\r\n");
 
@@ -65,7 +65,7 @@ static otError setAntennaTxModeCommand(void *context, uint8_t argc, char *argv[]
 
     uint8_t antennaMode = (uint8_t)strtoul(argv[0], NULL, 10);
 
-    SuccessOrExit(error = otPlatRadioVendorSetTxAntennaMode(antennaMode));
+    SuccessOrExit(error = otPlatRadioExtensionSetTxAntennaMode(antennaMode));
     otCliOutputFormat("\r\n");
 
 exit:
@@ -86,7 +86,7 @@ static otError getAntennaRxModeCommand(void *context, uint8_t argc, char *argv[]
     otError error = OT_ERROR_NONE;
     uint8_t antennaMode;
 
-    SuccessOrExit(error = otPlatRadioVendorGetRxAntennaMode(&antennaMode));
+    SuccessOrExit(error = otPlatRadioExtensionGetRxAntennaMode(&antennaMode));
     otCliOutputFormat("RX antenna mode:%d", antennaMode);
     otCliOutputFormat("\r\n");
 
@@ -107,7 +107,7 @@ static otError setAntennaRxModeCommand(void *context, uint8_t argc, char *argv[]
 
     uint8_t antennaMode = (uint8_t)strtoul(argv[0], NULL, 10);
 
-    if (otPlatRadioVendorSetRxAntennaMode(antennaMode) != OT_ERROR_NONE) {
+    if (otPlatRadioExtensionSetRxAntennaMode(antennaMode) != OT_ERROR_NONE) {
         otCliOutputFormat("Requires switching from standard PHY to diversity PHY. Not supported.");
     }
     otCliOutputFormat("\r\n");
@@ -144,7 +144,7 @@ static otError getActivePhyCommand(void *context, uint8_t argc, char *argv[])
     otError error = OT_ERROR_NONE;
     uint8_t activePhy;
 
-    SuccessOrExit(error = otPlatRadioVendorGetActivePhy(&activePhy));
+    SuccessOrExit(error = otPlatRadioExtensionGetActivePhy(&activePhy));
 
     if (activePhy >= PHY_COUNT) {
         activePhy = PHY_COUNT;

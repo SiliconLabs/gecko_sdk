@@ -15,6 +15,8 @@ include:
     - path: "em_eusart_compat.h"
 provides:
   - name: emlib_eusart
+  - name: lld_eusart
+    condition: [device_series_2]
 requires:
   - name: device
   - name: device_has_euart

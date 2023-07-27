@@ -344,33 +344,12 @@ sl_status_t sl_wisun_coap_rhnd_reset_auto_response(const char * uri_path)
   return SL_STATUS_OK;
 }
 
-sl_status_t sl_wisun_coap_rhnd_prepare_auto_response(const char * uri_path,
-                                                     const sl_wisun_coap_packet_t * const req_packet,
-                                                     sl_wisun_coap_packet_t * const resp_packet)
-{
-  sl_wisun_coap_rhnd_resource_t *resource = NULL;
-
-  _coap_resource_mutex_acquire();
-
-  resource = _get_resource(uri_path);
-  if (resource == NULL || resource->auto_response == NULL) {
-    _coap_resource_mutex_release_and_return_val(SL_STATUS_FAIL);
-  }
-
-  // call auto response function to prepare response
-  resource->auto_response(req_packet, resp_packet);
-
-  _coap_resource_mutex_release();
-
-  return SL_STATUS_OK;
-}
 
 #if SL_WISUN_COAP_RESOURCE_HND_SERVICE_ENABLE
-SL_WEAK void sl_wisun_coap_rhnd_service_resp_received_hnd(sl_wisun_coap_packet_t * req_packet,
-                                                          sl_wisun_coap_packet_t * resp_packet)
+SL_WEAK void sl_wisun_coap_rhnd_service_resp_received_hnd(sl_wisun_coap_packet_t * req_packet)
 {
   (void) req_packet;
-  (void) resp_packet;
+
   printf("[CoAP-RHND-Service: Response packet received]\n");
 }
 
@@ -464,22 +443,22 @@ __STATIC_INLINE bool _is_request_packet(const sl_wisun_coap_packet_t * const pac
 
 static void _rhnd_thr_fnc(void * args)
 {
-  sl_wisun_coap_packet_t *req_pkt                 = NULL;
-  sl_wisun_coap_packet_t *resp_pkt                = NULL;
-  const sl_wisun_coap_rhnd_resource_t *resource   = NULL;
-  const char *uri_path                            = NULL;
-  char *discovery_payload                         = NULL;
-  int32_t sockid                                  = SOCKET_INVALID_ID;
-  int32_t sockid_active                           = SOCKET_INVALID_ID;
-  int32_t r                                       = SOCKET_INVALID_ID;
-  socklen_t sock_len                              = 0UL;
-  size_t resp_len                                 = 0UL;
-  uint16_t discovery_paylod_len                   = 0U;
-  static wisun_addr_t srv_addr                    = { 0U };
-  static wisun_addr_t clnt_addr                   = { 0U };
+  sl_wisun_coap_packet_t *req_pkt               = NULL;
+  sl_wisun_coap_packet_t *resp_pkt              = NULL;
+  const sl_wisun_coap_rhnd_resource_t *resource = NULL;
+  const char *uri_path                          = NULL;
+  char *discovery_payload                       = NULL;
+  int32_t sockid                                = SOCKET_INVALID_ID;
+  int32_t sockid_active                         = SOCKET_INVALID_ID;
+  int32_t r                                     = SOCKET_INVALID_ID;
+  socklen_t sock_len                            = 0UL;
+  size_t resp_len                               = 0UL;
+  uint16_t discovery_paylod_len                 = 0U;
+  static wisun_addr_t srv_addr                  = { 0U };
+  static wisun_addr_t clnt_addr                 = { 0U };
 #if SL_WISUN_COAP_RD_SOCKET_REQUIRED
-  int32_t sockid_rd                               = SOCKET_INVALID_ID;
-  static wisun_addr_t srv_addr_rd                 = { 0U };
+  int32_t sockid_rd                             = SOCKET_INVALID_ID;
+  static wisun_addr_t srv_addr_rd               = { 0U };
 #endif
 
 // Clean-up code
@@ -562,7 +541,7 @@ static void _rhnd_thr_fnc(void * args)
 
         // Handling response and empty packets
         if (!_is_request_packet(req_pkt)) {
-          sl_wisun_coap_rhnd_service_resp_received_hnd(req_pkt, resp_pkt);
+          sl_wisun_coap_rhnd_service_resp_received_hnd(req_pkt);
           continue;
         }
 
@@ -574,7 +553,10 @@ static void _rhnd_thr_fnc(void * args)
         if (discovery_payload != NULL) {
           // Build response to resource discovery request
           resp_pkt = sli_wisun_coap_rd_build_response(discovery_payload, discovery_paylod_len, req_pkt);
-
+          if (resp_pkt == NULL) {
+              __cleanup_service();
+              continue;
+          }
           // Resource request handling
         } else {
           // Prepare URI path string
@@ -593,9 +575,10 @@ static void _rhnd_thr_fnc(void * args)
           // Check resource and its auto response callback
           if (resource != NULL && resource->auto_response != NULL) {
             // Create auto-response packet
-            resp_pkt = sl_wisun_coap_malloc(sizeof(sl_wisun_coap_packet_t));
-            if (resp_pkt != NULL) {
-              resource->auto_response(req_pkt, resp_pkt);
+            resp_pkt = resource->auto_response(req_pkt);
+            if (resp_pkt == NULL) {
+              __cleanup_service();
+              continue;
             }
           } else {
             // Create "Not found" packet

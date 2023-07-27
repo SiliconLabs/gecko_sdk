@@ -152,9 +152,8 @@ static void _parse_stat_to_json(char **payload_pos,
  * @param[in] target Measurement print target.
  * @return SL_STATUS_OK on success, otherwise an error code.
  *****************************************************************************/
-static sl_status_t _build_send_output(const sl_wisun_coap_packet_t * const req_packet,
-                                      sl_wisun_coap_packet_t * const resp_packet,
-                                      buffer_target_type_t target);
+static sl_wisun_coap_packet_t *  _build_send_output(const sl_wisun_coap_packet_t * const req_packet,
+                                                    buffer_target_type_t target);
 
 /**************************************************************************//**
  * @brief Build payload for CoAP response packet.
@@ -172,11 +171,10 @@ static sl_status_t _build_payload(buffer_target_type_t target);
  * @param[in] clnt_addr Client address.
  * @param[in] payload_len CoAP packet payload length.
  * @param[in,out] _buff CoAP packet.
- * @return SL_STATUS_OK on success, otherwise an error code.
+ * @return sl_wisun_coap_packet_t * Response packet ptr
  *****************************************************************************/
-static sl_status_t _build_response_packet(char* payload,
-                                          const sl_wisun_coap_packet_t * const req_packet,
-                                          sl_wisun_coap_packet_t * const resp_packet);
+static sl_wisun_coap_packet_t * _build_response_packet(char* payload,
+                                                       const sl_wisun_coap_packet_t * const req_packet);
 
 /**************************************************************************//**
  * @brief Network Measurement custom stat handler.
@@ -189,21 +187,17 @@ static void _sl_wisun_nwm_remote_ctrl_stat_handler(sl_wisun_ping_stat_t *stat);
  * @brief CoAP remote CLI ping request parser.
  * @details Parse incoming request, and build response CoAP packet.
  * @param[in] req_packet Request packet.
- * @param[in,out] resp_packet Response packet.
- * @return SL_STATUS_OK on success, otherwise an error code.
+ * @return sl_wisun_coap_packet_t * Response packet ptr
  *****************************************************************************/
-static sl_status_t _parse_ping(const sl_wisun_coap_packet_t * const req_packet,
-                               sl_wisun_coap_packet_t * const resp_packet);
+static sl_wisun_coap_packet_t * _parse_ping(const sl_wisun_coap_packet_t * const req_packet);
 
 /**************************************************************************//**
  * @brief CoAP remote CLI iPerf request parser.
  * @details Parse incoming request, and build response CoAP packet.
  * @param[in] req_packet Request packet.
- * @param[in,out] resp_packet Response packet.
- * @return SL_STATUS_OK on success, otherwise an error code.
+ * @return sl_wisun_coap_packet_t * Response packet ptr
  *****************************************************************************/
-static sl_status_t _parse_iperf(const sl_wisun_coap_packet_t * const req_packet,
-                                sl_wisun_coap_packet_t * const resp_packet);
+static sl_wisun_coap_packet_t * _parse_iperf(const sl_wisun_coap_packet_t * const req_packet);
 
 /**************************************************************************//**
  * @brief CLI command splitter.
@@ -218,31 +212,25 @@ static void _parse_remote_cmd(char* req_cmd,
  * @brief iPerf server handler.
  * @details Start iPerf server.
  * @param[in] req_packet Request packet.
- * @param[in,out] resp_packet Response packet.
- * @return SL_STATUS_OK on success, otherwise an error code.
+ * @return sl_wisun_coap_packet_t * Response packet ptr
  *****************************************************************************/
-static sl_status_t _start_iperf_server(const sl_wisun_coap_packet_t * const req_packet,
-                                       sl_wisun_coap_packet_t * const resp_packet);
+static sl_wisun_coap_packet_t * _start_iperf_server(const sl_wisun_coap_packet_t * const req_packet);
 
 /**************************************************************************//**
  * @brief iPerf client handler.
  * @details Start iPerf client.
  * @param[in] req_packet Request packet.
- * @param[in,out] resp_packet Response packet.
- * @return SL_STATUS_OK on success, otherwise an error code.
+ * @return sl_wisun_coap_packet_t * Response packet ptr
  *****************************************************************************/
-static sl_status_t _start_iperf_client(const sl_wisun_coap_packet_t * const req_packet,
-                                       sl_wisun_coap_packet_t * const resp_packet);
+static sl_wisun_coap_packet_t * _start_iperf_client(const sl_wisun_coap_packet_t * const req_packet);
 
 /**************************************************************************//**
  * @brief Neighbour info handler.
  * @details Get Neighbour info.
  * @param[in] req_packet Request packet.
- * @param[in,out] resp_packet Response packet.
- * @return SL_STATUS_OK on success, otherwise an error code.
+ * @return sl_wisun_coap_packet_t * Response packet ptr
  *****************************************************************************/
-static sl_status_t _get_nbr(const sl_wisun_coap_packet_t * const req_packet,
-                            sl_wisun_coap_packet_t * const resp_packet);
+static sl_wisun_coap_packet_t * _get_nbr(const sl_wisun_coap_packet_t * const req_packet);
 
 /**************************************************************************//**
  * @brief Parse neighbor statistic to json format
@@ -300,41 +288,39 @@ static char _payload_buff[SL_WISUN_NWM_REMOTE_CTRL_BUFF_SIZE] = { 0 };
 //                          Public Function Definitions
 // -----------------------------------------------------------------------------
 
-void sl_wisun_coap_remote_cli_ping_cb(const sl_wisun_coap_packet_t * const req_packet,
-                                      sl_wisun_coap_packet_t * const resp_packet)
+sl_wisun_coap_packet_t * sl_wisun_coap_remote_cli_ping_cb(const sl_wisun_coap_packet_t * const req_packet)
 {
-  sl_status_t stat = SL_STATUS_FAIL;
-  stat = _parse_ping(req_packet, resp_packet);
-  printf("[COAP CLI Ping transaction %s]\n", stat == SL_STATUS_OK ? "succeed" : "failed");
+  sl_wisun_coap_packet_t * resp_packet = NULL;
+  resp_packet = _parse_ping(req_packet);
+  printf("[COAP CLI Ping transaction %s]\n", resp_packet != NULL ? "succeed" : "failed");
+  return resp_packet;
 }
 
-void sl_wisun_coap_remote_cli_iperf_cb(const sl_wisun_coap_packet_t * const req_packet,
-                                       sl_wisun_coap_packet_t * const resp_packet)
+sl_wisun_coap_packet_t * sl_wisun_coap_remote_cli_iperf_cb(const sl_wisun_coap_packet_t * const req_packet)
 {
-  sl_status_t stat = SL_STATUS_FAIL;
-  stat = _parse_iperf(req_packet, resp_packet);
-  printf("[COAP CLI iPerf transaction %s]\n", stat == SL_STATUS_OK ? "succeed" : "failed");
+  sl_wisun_coap_packet_t * resp_packet = NULL;
+  resp_packet = _parse_iperf(req_packet);
+  printf("[COAP CLI iPerf transaction %s]\n", resp_packet != NULL ? "succeed" : "failed");
+  return resp_packet;
 }
 
-void sl_wisun_coap_remote_cli_nbr_cb(const sl_wisun_coap_packet_t * const req_packet,
-                                     sl_wisun_coap_packet_t * const resp_packet)
+sl_wisun_coap_packet_t * sl_wisun_coap_remote_cli_nbr_cb(const sl_wisun_coap_packet_t * const req_packet)
 {
-  sl_status_t stat = SL_STATUS_FAIL;
-  stat = _get_nbr(req_packet, resp_packet);
-  printf("[COAP CLI NeighborInfo transaction %s]\n", stat == SL_STATUS_OK ? "succeed" : "failed");
+  sl_wisun_coap_packet_t * resp_packet = NULL;
+  resp_packet = _get_nbr(req_packet);
+  printf("[COAP CLI NeighborInfo transaction %s]\n", resp_packet != NULL ? "succeed" : "failed");
+  return resp_packet;
 }
 
 // -----------------------------------------------------------------------------
 //                          Static Function Definitions
 // -----------------------------------------------------------------------------
 
-static sl_status_t _get_nbr(const sl_wisun_coap_packet_t * const req_packet,
-                            sl_wisun_coap_packet_t * const resp_packet)
+static sl_wisun_coap_packet_t * _get_nbr(const sl_wisun_coap_packet_t * const req_packet)
 {
   int16_t free_payload_len  = SL_WISUN_NWM_REMOTE_CTRL_BUFF_SIZE;
   uint8_t children_count    = 0U;
   char *payload_pos         = NULL;
-  sl_status_t stat          = SL_STATUS_FAIL;
 
   payload_pos = _payload_buff;
 
@@ -359,46 +345,39 @@ static sl_status_t _get_nbr(const sl_wisun_coap_packet_t * const req_packet,
     snprintf(*(payload_pos - 2U) == ',' ? payload_pos - 2U : payload_pos, free_payload_len, "\n}");
   }
 
-  stat = _build_response_packet(_payload_buff, req_packet, resp_packet);
-  return stat;
+  return _build_response_packet(_payload_buff, req_packet);
 }
 
-static sl_status_t _parse_ping(const sl_wisun_coap_packet_t * const req_packet,
-                               sl_wisun_coap_packet_t * const resp_packet)
+static sl_wisun_coap_packet_t * _parse_ping(const sl_wisun_coap_packet_t * const req_packet)
 {
-  ctrl_cmd_type_t ping_cmd               = { 0U };
-  wisun_addr_t remote_addr               = { 0U };
-  uint16_t packet_count                  = 0U;
-  uint16_t packet_size                   = 0U;
-  char* req_payload                      = NULL;
-  buffer_target_type_t print_target      = BUFFER_TYPE_NONE;
-  sl_status_t res                        = SL_STATUS_FAIL;
+  ctrl_cmd_type_t ping_cmd          = { 0U };
+  wisun_addr_t remote_addr          = { 0U };
+  uint16_t packet_count             = 0U;
+  uint16_t packet_size              = 0U;
+  char* req_payload                 = NULL;
+  buffer_target_type_t print_target = BUFFER_TYPE_NONE;
 
   // Parsing incoming cli command string.
   req_payload = sl_wisun_coap_get_payload_str(req_packet);
   if (req_payload == NULL) {
-    _build_response_packet("No CoAP payload: -e \"<cli command>\"", req_packet, resp_packet);
-    return SL_STATUS_FAIL;
+    return _build_response_packet("No CoAP payload: -e \"<cli command>\"", req_packet);
   }
   _parse_remote_cmd(req_payload, &ping_cmd);
 
   if (ping_cmd.identifier == NULL || ping_cmd.arg1 == NULL) {
-    _build_response_packet("Not enough argument", req_packet, resp_packet);
     sl_wisun_coap_destroy_payload_str(req_payload);
-    return SL_STATUS_FAIL;
+    return _build_response_packet("Not enough argument", req_packet);
   }
 
   // Handle help request.
   if (!strncmp(ping_cmd.arg1, "help", SL_WISUN_COAP_NWM_REMOTE_CLI_MAX_ARG_STRING_LENGTH)) {
-    _build_response_packet("Ping CLI help: measure <packet_count> <packet_size> <address>", req_packet, resp_packet);
     sl_wisun_coap_destroy_payload_str(req_payload);
-    return SL_STATUS_OK;
+    return _build_response_packet("Ping CLI help: measure <packet_count> <packet_size> <address>", req_packet);
   }
 
   if (ping_cmd.arg2 == NULL) {
     sl_wisun_coap_destroy_payload_str(req_payload);
-    _build_response_packet("Not enough argument", req_packet, resp_packet);
-    return SL_STATUS_FAIL;
+    return _build_response_packet("Not enough argument", req_packet);
   }
   packet_count = atoi(ping_cmd.arg1);
   packet_size = atoi(ping_cmd.arg2);
@@ -415,9 +394,8 @@ static sl_status_t _parse_ping(const sl_wisun_coap_packet_t * const req_packet,
     print_target = BUFFER_TYPE_BORDER_ROUTER;
   } else {
     if (ping_cmd.arg3 != NULL && inet_pton(AF_WISUN, ping_cmd.arg3, &remote_addr.sin6_addr) == SOCKET_RETVAL_ERROR) {
-      _build_response_packet("[IP address is not set or not valid]", req_packet, resp_packet);
       sl_wisun_coap_destroy_payload_str(req_payload);
-      return SL_STATUS_FAIL;
+      return _build_response_packet("[IP address is not set or not valid]", req_packet);
     }
     (void)sl_wisun_ping(&remote_addr, packet_count, packet_size,
                         _sl_wisun_nwm_remote_ctrl_stat_handler, NULL);
@@ -426,116 +404,103 @@ static sl_status_t _parse_ping(const sl_wisun_coap_packet_t * const req_packet,
     print_target = BUFFER_TYPE_SINGLE;
   }
 
-  // Build response packet.
-  res = _build_send_output(req_packet, resp_packet, print_target);
-  if (res != SL_STATUS_OK) {
-    _build_response_packet("[Buffer error]", req_packet, resp_packet);
-  }
-
-  // Clean memory.
   sl_wisun_coap_destroy_payload_str(req_payload);
-  return SL_STATUS_OK;
+
+  // Build response packet
+  return _build_send_output(req_packet, print_target);
 }
 
-static sl_status_t _parse_iperf(const sl_wisun_coap_packet_t * const req_packet,
-                                sl_wisun_coap_packet_t * const resp_packet)
+static sl_wisun_coap_packet_t * _parse_iperf(const sl_wisun_coap_packet_t * const req_packet)
 {
   ctrl_cmd_type_t iperf_cmd = { 0U };
   char* req_payload         = NULL;
-  sl_status_t res           = SL_STATUS_FAIL;
-
+  sl_wisun_coap_packet_t * resp_packet = NULL;
+  
   // Parsing incoming cli command string.
   req_payload = sl_wisun_coap_get_payload_str(req_packet);
   if (req_payload == NULL) {
-    _build_response_packet("No CoAP payload: -e \"<cli command>\"", req_packet, resp_packet);
-    return SL_STATUS_FAIL;
+    return _build_response_packet("No CoAP payload: -e \"<cli command>\"", req_packet);
   }
 
   _parse_remote_cmd(req_payload, &iperf_cmd);
 
   if (iperf_cmd.identifier == NULL || iperf_cmd.arg1 == NULL) {
-    _build_response_packet("Not enough argument", req_packet, resp_packet);
     sl_wisun_coap_destroy_payload_str(req_payload);
-    return SL_STATUS_FAIL;
+    return _build_response_packet("Not enough argument", req_packet);
   }
 
   // Handle help request.
   if (!strncmp(iperf_cmd.arg1, "help", SL_WISUN_COAP_NWM_REMOTE_CLI_MAX_ARG_STRING_LENGTH)) {
-    res = _build_response_packet(SL_WISUN_NWM_REMOTE_CTRL_IPERF_HELP_STRING, req_packet, resp_packet);
-    sl_wisun_coap_destroy_payload_str(req_payload);
-    return res;
+    sl_wisun_coap_destroy_payload_str(req_payload); 
+    return _build_response_packet(SL_WISUN_NWM_REMOTE_CTRL_IPERF_HELP_STRING, req_packet);
   }
 
   // Handle server or client start requests.
   if (!strncmp(iperf_cmd.arg1, "server", SL_WISUN_COAP_NWM_REMOTE_CLI_MAX_ARG_STRING_LENGTH)) {
-    res = _start_iperf_server(req_packet, resp_packet);
     sl_wisun_coap_destroy_payload_str(req_payload);
-    return res;
+    return _start_iperf_server(req_packet);
   }
 
   if (!strncmp(iperf_cmd.arg1, "client", SL_WISUN_COAP_NWM_REMOTE_CLI_MAX_ARG_STRING_LENGTH)) {
-    res = _start_iperf_client(req_packet, resp_packet);
     sl_wisun_coap_destroy_payload_str(req_payload);
-    return res;
+    return _start_iperf_client(req_packet);
   }
 
   if (iperf_cmd.arg2 == NULL) {
-    _build_response_packet("Not enough argument", req_packet, resp_packet);
     sl_wisun_coap_destroy_payload_str(req_payload);
-    return res;
+
+    return _build_response_packet("Not enough argument", req_packet);
   }
 
   // Handle get requests.
   if (!strncmp(iperf_cmd.arg1, "get", SL_WISUN_COAP_NWM_REMOTE_CLI_MAX_ARG_STRING_LENGTH)) {
     if (!strncmp(iperf_cmd.arg2, "result", SL_WISUN_COAP_NWM_REMOTE_CLI_MAX_ARG_STRING_LENGTH)) {
       sl_iperf_test_get(&_last_test);
-      res = _build_send_output(req_packet, resp_packet, BUFFER_TYPE_IPERF);
-      if (res != SL_STATUS_OK) {
-        _build_response_packet("[Buffer error]", req_packet, resp_packet);
+      resp_packet = _build_send_output(req_packet, BUFFER_TYPE_IPERF);
+      if (resp_packet == NULL) {
+        resp_packet = _build_response_packet("[Buffer error]", req_packet);
       }
     } else {
-      res = _build_response_packet("Not found argument.", req_packet, resp_packet);
+      resp_packet = _build_response_packet("Not found argument.", req_packet);
     }
 
     // Clean memory
     sl_wisun_coap_destroy_payload_str(req_payload);
-    return res;
+    return resp_packet;
   }
 
   if (iperf_cmd.arg3 == NULL) {
-    _build_response_packet("Not enough argument", req_packet, resp_packet);
     sl_wisun_coap_destroy_payload_str(req_payload);
-    return res;
+    return _build_response_packet("Not enough argument", req_packet);
   }
 
   // Handle settings requests.
   if (!strncmp(iperf_cmd.arg1, "set", SL_WISUN_COAP_NWM_REMOTE_CLI_MAX_ARG_STRING_LENGTH)) {
     if (!strncmp(iperf_cmd.arg2, "options.bandwidth", SL_WISUN_COAP_NWM_REMOTE_CLI_MAX_ARG_STRING_LENGTH)) {
       _options.bandwidth = atoi(iperf_cmd.arg3);
-      res = _build_response_packet(iperf_cmd.arg3, req_packet, resp_packet);
+      resp_packet = _build_response_packet(iperf_cmd.arg3, req_packet);
     } else if (!strncmp(iperf_cmd.arg2, "options.remote_addr", SL_WISUN_COAP_NWM_REMOTE_CLI_MAX_ARG_STRING_LENGTH)) {
       memcpy(_options.remote_addr, iperf_cmd.arg3, sl_strnlen(iperf_cmd.arg3, SL_WISUN_COAP_NWM_REMOTE_CLI_MAX_QUERY_LENGTH));
-      res = _build_response_packet(iperf_cmd.arg3, req_packet, resp_packet);
+      resp_packet = _build_response_packet(iperf_cmd.arg3, req_packet);
     } else if (!strncmp(iperf_cmd.arg2, "options.duration", SL_WISUN_COAP_NWM_REMOTE_CLI_MAX_ARG_STRING_LENGTH)) {
       _options.duration_ms = atoi(iperf_cmd.arg3);
-      res = _build_response_packet(iperf_cmd.arg3, req_packet, resp_packet);
+      resp_packet = _build_response_packet(iperf_cmd.arg3, req_packet);
     } else if (!strncmp(iperf_cmd.arg2, "options.interval", SL_WISUN_COAP_NWM_REMOTE_CLI_MAX_ARG_STRING_LENGTH)) {
       _options.interval_ms = atoi(iperf_cmd.arg3);
-      res = _build_response_packet(iperf_cmd.arg3, req_packet, resp_packet);
+      resp_packet = _build_response_packet(iperf_cmd.arg3, req_packet);
     } else {
-      res = _build_response_packet("Not found argument.", req_packet, resp_packet);
+      resp_packet = _build_response_packet("Not found argument.", req_packet);
     }
   } else {
-    _build_response_packet("Unknown cli command", req_packet, resp_packet);
+   resp_packet = _build_response_packet("Unknown cli command", req_packet);
   }
 
   // Clean memory
   sl_wisun_coap_destroy_payload_str(req_payload);
-  return res;
+  return resp_packet;
 }
 
-static sl_status_t _start_iperf_server(const sl_wisun_coap_packet_t * const req_packet,
-                                       sl_wisun_coap_packet_t * const resp_packet)
+static  sl_wisun_coap_packet_t * _start_iperf_server(const sl_wisun_coap_packet_t * const req_packet)
 {
   sl_iperf_test_t test = { 0U };
 
@@ -548,21 +513,18 @@ static sl_status_t _start_iperf_server(const sl_wisun_coap_packet_t * const req_
   // Adds the test to the queue
   if (!sl_iperf_test_add(&test)) {
     printf("[Adding test to queue failed]\n");
-    return SL_STATUS_FAIL;
+    return NULL;
   }
 
   // Build response packet.
-  _build_response_packet("[iPerf server started]", req_packet, resp_packet);
-
-  return SL_STATUS_OK;
+  return _build_response_packet("[iPerf server started]", req_packet);
 }
 
-static sl_status_t _start_iperf_client(const sl_wisun_coap_packet_t * const req_packet,
-                                       sl_wisun_coap_packet_t * const resp_packet)
+static sl_wisun_coap_packet_t * _start_iperf_client(const sl_wisun_coap_packet_t * const req_packet)
 {
   sl_iperf_test_t test = { 0U };
-  sl_status_t res = SL_STATUS_FAIL;
-
+  sl_wisun_coap_packet_t * resp_packet = NULL;
+  
   /// 1. Set iPerf client options and init test descriptor.
   _options.mode = SL_IPERF_MODE_CLIENT;
   _options.protocol = SL_IPERF_IPROTOV6_UDP;
@@ -572,21 +534,21 @@ static sl_status_t _start_iperf_client(const sl_wisun_coap_packet_t * const req_
   // Adds the test to the queue.
   if (!sl_iperf_test_add(&test)) {
     printf("[Adding test to queue failed]\n");
-    return SL_STATUS_FAIL;
+    return NULL;
   }
 
   if (!sl_iperf_test_get(&_last_test)) {
     printf("[Getting test to queue failed]\n");
-    return SL_STATUS_FAIL;
+    return NULL;
   }
 
   // Build response packet.
-  res = _build_send_output(req_packet, resp_packet, BUFFER_TYPE_IPERF);
-  if (res != SL_STATUS_OK) {
-    _build_response_packet("[Buffer error]", req_packet, resp_packet);
+  resp_packet = _build_send_output(req_packet, BUFFER_TYPE_IPERF);
+  if (resp_packet == NULL) {
+   resp_packet =  _build_response_packet("[Buffer error]", req_packet);
   }
 
-  return SL_STATUS_OK;
+  return resp_packet;
 }
 
 static void _parse_remote_cmd(char* req_cmd, ctrl_cmd_type_t* cmd)
@@ -650,7 +612,7 @@ static sl_status_t _build_payload(buffer_target_type_t target)
   return SL_STATUS_OK;
 }
 
-static sl_status_t _build_send_output(const sl_wisun_coap_packet_t * const req_packet, sl_wisun_coap_packet_t * const resp_packet, buffer_target_type_t target)
+static sl_wisun_coap_packet_t * _build_send_output(const sl_wisun_coap_packet_t * const req_packet, buffer_target_type_t target)
 {
   sl_status_t retval = SL_STATUS_FAIL; // assume success of operation
 
@@ -658,34 +620,29 @@ static sl_status_t _build_send_output(const sl_wisun_coap_packet_t * const req_p
   retval = _build_payload(target);
 
   if (retval != SL_STATUS_OK) {
-    return retval;
+    return NULL;
   }
 
   // Build response packet from built payload.
-  retval = _build_response_packet(_payload_buff, req_packet, resp_packet);
-
-  return retval;
+  return _build_response_packet(_payload_buff, req_packet);
 }
 
-static sl_status_t _build_response_packet(char* payload,
-                                          const sl_wisun_coap_packet_t * const req_packet,
-                                          sl_wisun_coap_packet_t * const resp_packet)
+static sl_wisun_coap_packet_t * _build_response_packet(char* payload,
+                                                       const sl_wisun_coap_packet_t * const req_packet)
 {
-  sl_wisun_coap_packet_t *tmp = NULL;
+  sl_wisun_coap_packet_t *resp_packet = NULL;
 
-  tmp = sl_wisun_coap_build_response(req_packet, COAP_MSG_CODE_RESPONSE_CONTENT);
-  if (tmp == NULL) {
-    return SL_STATUS_FAIL;
+  resp_packet = sl_wisun_coap_build_response(req_packet, COAP_MSG_CODE_RESPONSE_CONTENT);
+  if (resp_packet == NULL) {
+    return NULL;
   }
-  memcpy(resp_packet, tmp, sizeof(sl_wisun_coap_packet_t));
-  sl_wisun_coap_destroy_packet(tmp);
 
   resp_packet->msg_code       = COAP_MSG_CODE_RESPONSE_CONTENT;
   resp_packet->content_format = COAP_CT_JSON;
   resp_packet->payload_ptr    = (uint8_t *) payload;
   resp_packet->payload_len    = (uint16_t) sl_strnlen(payload, SL_WISUN_NWM_REMOTE_CTRL_BUFF_SIZE);
 
-  return SL_STATUS_OK;
+  return resp_packet;
 }
 
 static void _parse_stat_to_json(char **payload_pos, sl_wisun_nwm_node_stat_t *stat, int16_t *payload_len)

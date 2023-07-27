@@ -47,6 +47,16 @@ namespace ot {
 namespace Spinel {
 
 /**
+ * Maximum number of Spinel Interface IDs.
+ *
+ */
+#ifdef OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE
+static constexpr uint8_t kSpinelHeaderMaxNumIID = 4;
+#else
+static constexpr uint8_t kSpinelHeaderMaxNumIID = 1;
+#endif
+
+/**
  * The class for providing a OpenThread radio interface by talking with a radio-only
  * co-processor(RCP). The InterfaceType template parameter should provide the following
  * methods:
@@ -91,10 +101,9 @@ namespace Spinel {
  *
  *    // This method performs radio driver processing.
  *
- *    // @param[in]   aContext        The context containing fd_sets.
- *    //                              The type is specified by the user in template parameters.
+ *    // @param[in]   aContext  The process context.
  *
- *    void Process(const ProcessContextType &aContext);
+ *    void Process(const void *aContext);
  *
  *
  *    // This method deinitializes the interface to the RCP.
@@ -102,11 +111,11 @@ namespace Spinel {
  *    void Deinit(void);
  * };
  */
-template <typename InterfaceType, typename ProcessContextType> class RadioSpinel
+template <typename InterfaceType> class RadioSpinel
 {
 public:
     /**
-     * This constructor initializes the spinel based OpenThread transceiver.
+     * Initializes the spinel based OpenThread transceiver.
      *
      */
     RadioSpinel(void);
@@ -115,14 +124,13 @@ public:
      * Initialize this radio transceiver.
      *
      * @param[in]  aResetRadio                 TRUE to reset on init, FALSE to not reset on init.
-     * @param[in]  aRestoreDatasetFromNcp      TRUE to restore dataset to host from non-volatile memory
-     *                                         (only used when attempts to upgrade from NCP to RCP mode),
-     *                                         FALSE otherwise.
      * @param[in]  aSkipRcpCompatibilityCheck  TRUE to skip RCP compatibility check, FALSE to perform the check.
-     * @param[in]  aIid                        The IID of the Host Application.
+     * @param[in]  aIidList                    A Pointer to the list of IIDs to receive spinel frame from.
+     *                                         First entry must be the IID of the Host Application.
+     * @param[in]  aIidListLength              The Length of the @p aIidList.
      *
      */
-    void Init(bool aResetRadio, bool aRestoreDataSetFromNcp, bool aSkipRcpCompatibilityCheck, spinel_iid_t aIid);
+    void Init(bool aResetRadio, bool aSkipRcpCompatibilityCheck, spinel_iid_t *aIidList, const uint8_t aIidListLength);
 
     /**
      * Deinitialize this radio transceiver.
@@ -131,7 +139,7 @@ public:
     void Deinit(void);
 
     /**
-     * This method gets the status of promiscuous mode.
+     * Gets the status of promiscuous mode.
      *
      * @retval true   Promiscuous mode is enabled.
      * @retval false  Promiscuous mode is disabled.
@@ -140,7 +148,7 @@ public:
     bool IsPromiscuous(void) const { return mIsPromiscuous; }
 
     /**
-     * This method sets the status of promiscuous mode.
+     * Sets the status of promiscuous mode.
      *
      * @param[in]   aEnable     Whether to enable or disable promiscuous mode.
      *
@@ -152,7 +160,7 @@ public:
     otError SetPromiscuous(bool aEnable);
 
     /**
-     * This method sets the Short Address for address filtering.
+     * Sets the Short Address for address filtering.
      *
      * @param[in] aShortAddress  The IEEE 802.15.4 Short Address.
      *
@@ -164,7 +172,7 @@ public:
     otError SetShortAddress(uint16_t aAddress);
 
     /**
-     * This method gets the factory-assigned IEEE EUI-64 for this transceiver.
+     * Gets the factory-assigned IEEE EUI-64 for this transceiver.
      *
      * @param[in]  aInstance   The OpenThread instance structure.
      * @param[out] aIeeeEui64  A pointer to the factory-assigned IEEE EUI-64.
@@ -177,7 +185,7 @@ public:
     otError GetIeeeEui64(uint8_t *aIeeeEui64);
 
     /**
-     * This method sets the Extended Address for address filtering.
+     * Sets the Extended Address for address filtering.
      *
      * @param[in] aExtAddress  A pointer to the IEEE 802.15.4 Extended Address stored in little-endian byte order.
      *
@@ -189,7 +197,7 @@ public:
     otError SetExtendedAddress(const otExtAddress &aAddress);
 
     /**
-     * This method sets the PAN ID for address filtering.
+     * Sets the PAN ID for address filtering.
      *
      * @param[in]   aPanId  The IEEE 802.15.4 PAN ID.
      *
@@ -201,7 +209,7 @@ public:
     otError SetPanId(uint16_t aPanId);
 
     /**
-     * This method gets the radio's transmit power in dBm.
+     * Gets the radio's transmit power in dBm.
      *
      * @param[out]  aPower    The transmit power in dBm.
      *
@@ -213,7 +221,7 @@ public:
     otError GetTransmitPower(int8_t &aPower);
 
     /**
-     * This method sets the radio's transmit power in dBm.
+     * Sets the radio's transmit power in dBm.
      *
      * @param[in]   aPower     The transmit power in dBm.
      *
@@ -225,7 +233,7 @@ public:
     otError SetTransmitPower(int8_t aPower);
 
     /**
-     * This method gets the radio's CCA ED threshold in dBm.
+     * Gets the radio's CCA ED threshold in dBm.
      *
      * @param[out]  aThreshold    The CCA ED threshold in dBm.
      *
@@ -237,7 +245,7 @@ public:
     otError GetCcaEnergyDetectThreshold(int8_t &aThreshold);
 
     /**
-     * This method sets the radio's CCA ED threshold in dBm.
+     * Sets the radio's CCA ED threshold in dBm.
      *
      * @param[in]   aThreshold     The CCA ED threshold in dBm.
      *
@@ -249,7 +257,7 @@ public:
     otError SetCcaEnergyDetectThreshold(int8_t aThreshold);
 
     /**
-     * This method gets the FEM's Rx LNA gain in dBm.
+     * Gets the FEM's Rx LNA gain in dBm.
      *
      * @param[out]  aGain    The FEM's Rx LNA gain in dBm.
      *
@@ -261,7 +269,7 @@ public:
     otError GetFemLnaGain(int8_t &aGain);
 
     /**
-     * This method sets the FEM's Rx LNA gain in dBm.
+     * Sets the FEM's Rx LNA gain in dBm.
      *
      * @param[in]   aGain     The FEM's Rx LNA gain in dBm.
      *
@@ -273,7 +281,7 @@ public:
     otError SetFemLnaGain(int8_t aGain);
 
     /**
-     * This method returns the radio sw version string.
+     * Returns the radio sw version string.
      *
      * @returns A pointer to the radio version string.
      *
@@ -281,7 +289,7 @@ public:
     const char *GetVersion(void) const { return mVersion; }
 
     /**
-     * This method returns the radio capabilities.
+     * Returns the radio capabilities.
      *
      * @returns The radio capability bit vector.
      *
@@ -289,14 +297,14 @@ public:
     otRadioCaps GetRadioCaps(void) const { return mRadioCaps; }
 
     /**
-     * This method gets the most recent RSSI measurement.
+     * Gets the most recent RSSI measurement.
      *
      * @returns The RSSI in dBm when it is valid.  127 when RSSI is invalid.
      */
     int8_t GetRssi(void);
 
     /**
-     * This method returns the radio receive sensitivity value.
+     * Returns the radio receive sensitivity value.
      *
      * @returns The radio receive sensitivity value in dBm.
      *
@@ -308,7 +316,7 @@ public:
     int8_t GetReceiveSensitivity(void) const { return mRxSensitivity; }
 
     /**
-     * This method gets current state of the radio.
+     * Gets current state of the radio.
      *
      * @return  Current state of the radio.
      *
@@ -316,7 +324,7 @@ public:
     otRadioState GetState(void) const;
 
     /**
-     * This method gets the current receiving channel.
+     * Gets the current receiving channel.
      *
      * @returns Current receiving channel.
      *
@@ -347,7 +355,7 @@ public:
     bool IsCoexEnabled(void);
 
     /**
-     * This method retrieves the radio coexistence metrics.
+     * Retrieves the radio coexistence metrics.
      *
      * @param[out] aCoexMetrics  A reference to the coexistence metrics structure.
      *
@@ -359,7 +367,7 @@ public:
 #endif // OPENTHREAD_CONFIG_PLATFORM_RADIO_COEX_ENABLE
 
     /**
-     * This method returns a reference to the transmit buffer.
+     * Returns a reference to the transmit buffer.
      *
      * The caller forms the IEEE 802.15.4 frame in this buffer then calls otPlatRadioTransmit() to request transmission.
      *
@@ -369,7 +377,7 @@ public:
     otRadioFrame &GetTransmitFrame(void) { return mTxRadioFrame; }
 
     /**
-     * This method enables or disables source address match feature.
+     * Enables or disables source address match feature.
      *
      * @param[in]  aEnable     Enable/disable source address match feature.
      *
@@ -381,7 +389,7 @@ public:
     otError EnableSrcMatch(bool aEnable);
 
     /**
-     * This method adds a short address to the source address match table.
+     * Adds a short address to the source address match table.
      *
      * @param[in]  aInstance      The OpenThread instance structure.
      * @param[in]  aShortAddress  The short address to be added.
@@ -394,7 +402,7 @@ public:
     otError AddSrcMatchShortEntry(uint16_t aShortAddress);
 
     /**
-     * This method removes a short address from the source address match table.
+     * Removes a short address from the source address match table.
      *
      * @param[in]  aInstance      The OpenThread instance structure.
      * @param[in]  aShortAddress  The short address to be removed.
@@ -457,7 +465,7 @@ public:
     otError ClearSrcMatchExtEntries(void);
 
     /**
-     * This method begins the energy scan sequence on the radio.
+     * Begins the energy scan sequence on the radio.
      *
      * @param[in]  aScanChannel     The channel to perform the energy scan on.
      * @param[in]  aScanDuration    The duration, in milliseconds, for the channel to be scanned.
@@ -470,7 +478,7 @@ public:
     otError EnergyScan(uint8_t aScanChannel, uint16_t aScanDuration);
 
     /**
-     * This method switches the radio state from Receive to Transmit.
+     * Switches the radio state from Receive to Transmit.
      *
      * @param[in] aFrame     A reference to the transmitted frame.
      *
@@ -482,7 +490,7 @@ public:
     otError Transmit(otRadioFrame &aFrame);
 
     /**
-     * This method switches the radio state from Sleep to Receive.
+     * Switches the radio state from Sleep to Receive.
      *
      * @param[in]  aChannel   The channel to use for receiving.
      *
@@ -493,7 +501,7 @@ public:
     otError Receive(uint8_t aChannel);
 
     /**
-     * This method switches the radio state from Receive to Sleep.
+     * Switches the radio state from Receive to Sleep.
      *
      * @retval OT_ERROR_NONE          Successfully transitioned to Sleep.
      * @retval OT_ERROR_BUSY          The radio was transmitting
@@ -524,7 +532,7 @@ public:
     otError Disable(void);
 
     /**
-     * This method checks whether radio is enabled or not.
+     * Checks whether radio is enabled or not.
      *
      * @returns TRUE if the radio is enabled, FALSE otherwise.
      *
@@ -532,7 +540,7 @@ public:
     bool IsEnabled(void) const { return mState != kStateDisabled; }
 
     /**
-     * This method indicates whether there is a pending transmission.
+     * Indicates whether there is a pending transmission.
      *
      * @retval TRUE  There is a pending transmission.
      * @retval FALSE There is no pending transmission.
@@ -541,7 +549,7 @@ public:
     bool IsTransmitting(void) const { return mState == kStateTransmitting; }
 
     /**
-     * This method indicates whether a transmit has just finished.
+     * Indicates whether a transmit has just finished.
      *
      * @retval TRUE  The transmission is done.
      * @retval FALSE The transmission is not done.
@@ -550,7 +558,7 @@ public:
     bool IsTransmitDone(void) const { return mState == kStateTransmitDone; }
 
     /**
-     * This method returns the timeout timepoint for the pending transmission.
+     * Returns the timeout timepoint for the pending transmission.
      *
      * @returns The timeout timepoint for the pending transmission.
      *
@@ -558,15 +566,15 @@ public:
     uint64_t GetTxRadioEndUs(void) const { return mTxRadioEndUs; }
 
     /**
-     * This method processes any pending the I/O data.
+     * Processes any pending the I/O data.
      *
      * @param[in]  aContext   The process context.
      *
      */
-    void Process(const ProcessContextType &aContext);
+    void Process(const void *aContext);
 
     /**
-     * This method returns the underlying spinel interface.
+     * Returns the underlying spinel interface.
      *
      * @returns The underlying spinel interface.
      *
@@ -575,7 +583,7 @@ public:
 
 #if OPENTHREAD_CONFIG_DIAG_ENABLE
     /**
-     * This method enables/disables the factory diagnostics mode.
+     * Enables/disables the factory diagnostics mode.
      *
      * @param[in]  aMode  TRUE to enable diagnostics mode, FALSE otherwise.
      *
@@ -583,7 +591,7 @@ public:
     void SetDiagEnabled(bool aMode) { mDiagMode = aMode; }
 
     /**
-     * This method indicates whether or not factory diagnostics mode is enabled.
+     * Indicates whether or not factory diagnostics mode is enabled.
      *
      * @returns TRUE if factory diagnostics mode is enabled, FALSE otherwise.
      *
@@ -591,7 +599,7 @@ public:
     bool IsDiagEnabled(void) const { return mDiagMode; }
 
     /**
-     * This method processes platform diagnostics commands.
+     * Processes platform diagnostics commands.
      *
      * @param[in]   aString         A null-terminated input string.
      * @param[out]  aOutput         The diagnostics execution result.
@@ -606,7 +614,7 @@ public:
 #endif
 
     /**
-     * This method returns the radio channel mask.
+     * Returns the radio channel mask.
      *
      * @param[in]   aPreferred  TRUE to get preferred channel mask, FALSE to get supported channel mask.
      *
@@ -618,7 +626,7 @@ public:
     uint32_t GetRadioChannelMask(bool aPreferred);
 
     /**
-     * This method processes a received Spinel frame.
+     * Processes a received Spinel frame.
      *
      * The newly received frame is available in `RxFrameBuffer` from `SpinelInterface::GetRxFrameBuffer()`.
      *
@@ -626,7 +634,7 @@ public:
     void HandleReceivedFrame(void);
 
     /**
-     * This method sets MAC key and key index to RCP.
+     * Sets MAC key and key index to RCP.
      *
      * @param[in] aKeyIdMode  The key ID mode.
      * @param[in] aKeyId      The key index.
@@ -647,7 +655,7 @@ public:
                       const otMacKeyMaterial *aNextKey);
 
     /**
-     * This method sets the current MAC Frame Counter value.
+     * Sets the current MAC Frame Counter value.
      *
      * @param[in] aMacFrameCounter  The MAC Frame Counter value.
      * @param[in] aSetIfLarger      If `true`, set only if the new value is larger than the current value.
@@ -657,7 +665,7 @@ public:
     otError SetMacFrameCounter(uint32_t aMacFrameCounter, bool aSetIfLarger);
 
     /**
-     * This method sets the radio region code.
+     * Sets the radio region code.
      *
      * @param[in]   aRegionCode  The radio region code.
      *
@@ -668,7 +676,7 @@ public:
     otError SetRadioRegion(uint16_t aRegionCode);
 
     /**
-     * This method gets the radio region code.
+     * Gets the radio region code.
      *
      * @param[out]   aRegionCode  The radio region code.
      *
@@ -728,7 +736,7 @@ public:
 #endif
 
     /**
-     * This method checks whether the spinel interface is radio-only.
+     * Checks whether the spinel interface is radio-only.
      *
      * @param[out] aSupportsRcpApiVersion          A reference to a boolean variable to update whether the list of
      *                                             spinel capabilities includes `SPINEL_CAP_RCP_API_VERSION`.
@@ -742,7 +750,7 @@ public:
     bool IsRcp(bool &aSupportsRcpApiVersion, bool &aSupportsRcpMinHostApiVersion);
 
     /**
-     * This method checks whether there is pending frame in the buffer.
+     * Checks whether there is pending frame in the buffer.
      *
      * @returns Whether there is pending frame in the buffer.
      *
@@ -750,18 +758,7 @@ public:
     bool HasPendingFrame(void) const { return mRxFrameBuffer.HasSavedFrame(); }
 
     /**
-     * This method gets dataset from NCP radio and saves it.
-     *
-     * @retval  OT_ERROR_NONE               Successfully restore dataset.
-     * @retval  OT_ERROR_BUSY               Failed due to another operation is on going.
-     * @retval  OT_ERROR_RESPONSE_TIMEOUT   Failed due to no response received from the radio.
-     * @retval  OT_ERROR_NOT_FOUND          Failed due to spinel property not supported in radio.
-     * @retval  OT_ERROR_FAILED             Failed due to other reasons.
-     */
-    otError RestoreDatasetFromNcp(void);
-
-    /**
-     * This method returns the next timepoint to recalculate RCP time offset.
+     * Returns the next timepoint to recalculate RCP time offset.
      *
      * @returns The timepoint to start the recalculation of RCP time offset.
      *
@@ -769,7 +766,7 @@ public:
     uint64_t GetNextRadioTimeRecalcStart(void) const { return mRadioTimeRecalcStart; }
 
     /**
-     * This method gets the current estimated time on RCP.
+     * Gets the current estimated time on RCP.
      *
      * @returns The current estimated RCP time in microseconds.
      *
@@ -777,7 +774,7 @@ public:
     uint64_t GetNow(void);
 
     /**
-     * This method returns the bus speed between the host and the radio.
+     * Returns the bus speed between the host and the radio.
      *
      * @returns   bus speed in bits/second.
      *
@@ -785,7 +782,7 @@ public:
     uint32_t GetBusSpeed(void) const;
 
     /**
-     * This method sets the max transmit power.
+     * Sets the max transmit power.
      *
      * @param[in] aChannel    The radio channel.
      * @param[in] aPower      The max transmit power in dBm.
@@ -797,7 +794,7 @@ public:
     otError SetChannelMaxTransmitPower(uint8_t aChannel, int8_t aPower);
 
     /**
-     * This method tries to retrieve a spinel property from OpenThread transceiver.
+     * Tries to retrieve a spinel property from OpenThread transceiver.
      *
      * @param[in]   aKey        Spinel property key.
      * @param[in]   aFormat     Spinel formatter to unpack property value.
@@ -811,7 +808,7 @@ public:
     otError Get(spinel_prop_key_t aKey, const char *aFormat, ...);
 
     /**
-     * This method tries to retrieve a spinel property from OpenThread transceiver with parameter appended.
+     * Tries to retrieve a spinel property from OpenThread transceiver with parameter appended.
      *
      * @param[in]   aKey        Spinel property key.
      * @param[in]   aParam      Parameter appended to spinel command.
@@ -831,7 +828,7 @@ public:
                          ...);
 
     /**
-     * This method tries to update a spinel property of OpenThread transceiver.
+     * Tries to update a spinel property of OpenThread transceiver.
      *
      * @param[in]   aKey        Spinel property key.
      * @param[in]   aFormat     Spinel formatter to pack property value.
@@ -845,7 +842,7 @@ public:
     otError Set(spinel_prop_key_t aKey, const char *aFormat, ...);
 
     /**
-     * This method tries to insert a item into a spinel list property of OpenThread transceiver.
+     * Tries to insert a item into a spinel list property of OpenThread transceiver.
      *
      * @param[in]   aKey        Spinel property key.
      * @param[in]   aFormat     Spinel formatter to pack the item.
@@ -859,7 +856,7 @@ public:
     otError Insert(spinel_prop_key_t aKey, const char *aFormat, ...);
 
     /**
-     * This method tries to remove a item from a spinel list property of OpenThread transceiver.
+     * Tries to remove a item from a spinel list property of OpenThread transceiver.
      *
      * @param[in]   aKey        Spinel property key.
      * @param[in]   aFormat     Spinel formatter to pack the item.
@@ -873,7 +870,7 @@ public:
     otError Remove(spinel_prop_key_t aKey, const char *aFormat, ...);
 
     /**
-     * This method tries to reset the co-processor.
+     * Tries to reset the co-processor.
      *
      * @prarm[in] aResetType    The reset type, SPINEL_RESET_PLATFORM or SPINEL_RESET_STACK.
      *
@@ -884,12 +881,34 @@ public:
     otError SendReset(uint8_t aResetType);
 
     /**
-     * This method returns the radio Spinel metrics.
+     * Returns the radio Spinel metrics.
      *
      * @returns The radio Spinel metrics.
      *
      */
     const otRadioSpinelMetrics *GetRadioSpinelMetrics(void) const { return &mRadioSpinelMetrics; }
+
+    /**
+     * Adds a given interface Id to the IID list.
+     *
+     * @param[in] aIid    Spinel Interface ID.
+     *
+     * @retval  OT_ERROR_NONE     Success.
+     * @retval  OT_ERROR_NO_BUFS  No available entry in the IID list.
+     *
+     */
+    otError AddToIidList(spinel_iid_t aIid);
+
+    /**
+     * Checks whether given interface ID is part of list of IIDs to be allowed.
+     *
+     * @param[in] aIid    Spinel Interface ID.
+     *
+     * @retval  TRUE    Given iid present in allow list.
+     * @retval  FALSE   Otherwise.
+     *
+     */
+    inline bool IsFrameForUs(spinel_iid_t aIid);
 
 #if OPENTHREAD_CONFIG_PLATFORM_POWER_CALIBRATION_ENABLE
     /**
@@ -969,13 +988,13 @@ private:
     otError CheckRcpApiVersion(bool aSupportsRcpApiVersion, bool aSupportsMinHostRcpApiVersion);
 
     /**
-     * This method triggers a state transfer of the state machine.
+     * Triggers a state transfer of the state machine.
      *
      */
     void ProcessRadioStateMachine(void);
 
     /**
-     * This method processes the frame queue.
+     * Processes the frame queue.
      *
      */
     void ProcessFrameQueue(void);
@@ -1007,10 +1026,9 @@ private:
                         const char       *aFormat,
                         va_list           aArgs);
     otError ParseRadioFrame(otRadioFrame &aFrame, const uint8_t *aBuffer, uint16_t aLength, spinel_ssize_t &aUnpacked);
-    otError ThreadDatasetHandler(const uint8_t *aBuffer, uint16_t aLength);
 
     /**
-     * This method returns if the property changed event is safe to be handled now.
+     * Returns if the property changed event is safe to be handled now.
      *
      * If a property handler will go up to core stack, it may cause reentrant issue of `Hdlc::Decode()` and
      * `WaitResponse()`.
@@ -1070,6 +1088,8 @@ private:
     uint32_t          mExpectedCommand; ///< Expected response command of current transaction.
     otError           mError;           ///< The result of current transaction.
     spinel_iid_t      mIid;             ///< The spinel interface id used by this process.
+    spinel_iid_t
+        mIidList[Spinel::kSpinelHeaderMaxNumIID]; ///< Array of interface ids to accept the incoming spinel frames.
 
     uint8_t       mRxPsdu[OT_RADIO_FRAME_MAX_SIZE];
     uint8_t       mTxPsdu[OT_RADIO_FRAME_MAX_SIZE];

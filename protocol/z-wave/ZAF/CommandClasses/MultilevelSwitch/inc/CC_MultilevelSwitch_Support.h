@@ -8,8 +8,8 @@
  * @copyright 2018 Silicon Laboratories Inc.
  */
 
-#ifndef _CC_MULTILEVEL_SWITCH_H_
-#define _CC_MULTILEVEL_SWITCH_H_
+#ifndef _CC_MULTILEVEL_SWITCH_SUPPORT_H_
+#define _CC_MULTILEVEL_SWITCH_SUPPORT_H_
 
 /****************************************************************************/
 /*                              INCLUDE FILES                               */

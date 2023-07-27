@@ -88,7 +88,7 @@ static void debug_log_buffer(const char *name, const uint8_t *buf, const ssize_t
  *****************************************************************************/
 int main(int argc, char *argv[])
 {
-  app_log_info("Silicon Labs | CPC-HCI bridge\n");
+  app_log_info("Silicon Labs | CPC-HCI bridge" APP_LOG_NL);
   // Set up custom signal handler for user interrupt and termination request
   signal(SIGINT, signal_handler);
   signal(SIGTERM, signal_handler);
@@ -109,15 +109,15 @@ int main(int argc, char *argv[])
     if (cpc_reset_requested) {
       cpc_reset_requested = false;
       if (cpc_hci_bridge_reset() < 0) {
-        app_log_error("cpc_hci_bridge_reset failed: %s\n", strerror(errno));
+        app_log_error("cpc_hci_bridge_reset failed: %s" APP_LOG_NL, strerror(errno));
         exit(EXIT_FAILURE);
       }
-      app_log_debug("Bridge reset successful\n");
+      app_log_debug("Bridge reset successful" APP_LOG_NL);
       continue;
     }
 
     if (cpc_hci_bridge_loop() < 0) {
-      app_log_error("Runtime error: %s\n", strerror(errno));
+      app_log_error("Runtime error: %s" APP_LOG_NL, strerror(errno));
     }
   }
 }
@@ -157,10 +157,10 @@ int cpc_hci_bridge_init(const char *cpc_instance_name)
   } while (retry < RETRY_COUNT);
 
   if (ret < 0) {
-    app_log_error("cpc_init failed with '%s': %s\n", cpc_instance_name, strerror(errno));
+    app_log_error("cpc_init failed with '%s': %s" APP_LOG_NL, cpc_instance_name, strerror(errno));
     return ret;
   }
-  app_log_info("CPC successfully initialized with '%s'\n", cpc_instance_name);
+  app_log_info("CPC successfully initialized with '%s'" APP_LOG_NL, cpc_instance_name);
 
   // Open the CPC Bluetooth endpoint
   retry = 0;
@@ -178,10 +178,10 @@ int cpc_hci_bridge_init(const char *cpc_instance_name)
   } while (retry < RETRY_COUNT);
 
   if (ret < 0) {
-    app_log_error("cpc_open_endpoint failed: %s\n", strerror(errno));
+    app_log_error("cpc_open_endpoint failed: %s" APP_LOG_NL, strerror(errno));
     return ret;
   }
-  app_log_info("CPC Bluetooth endpoint opened\n");
+  app_log_info("CPC Bluetooth endpoint opened" APP_LOG_NL);
 
   // Open the TTY device file
   ret = openpty(&pty_master_fd, &pty_slave_fd, NULL, NULL, NULL);
@@ -190,10 +190,10 @@ int cpc_hci_bridge_init(const char *cpc_instance_name)
     flags = flags | O_NONBLOCK;
     fcntl(pty_master_fd, F_SETFL, flags);
     char *pName = ttyname(pty_slave_fd);
-    app_log_info("PTY device file opened at '%s'\n", pName);
+    app_log_info("PTY device file opened at '%s'" APP_LOG_NL, pName);
     remove(SYMLINK_PATH);
     if (symlink(pName, SYMLINK_PATH) != 0) {
-      app_log_error("Error creating symlink (%s): %s\n", SYMLINK_PATH, strerror(errno));
+      app_log_error("Error creating symlink (%s): %s" APP_LOG_NL, SYMLINK_PATH, strerror(errno));
     }
   }
 
@@ -218,7 +218,7 @@ int cpc_hci_bridge_reset(void)
   int ret;
   uint8_t retry;
 
-  app_log_debug("Bridge reset requested\n");
+  app_log_debug("Bridge reset requested" APP_LOG_NL);
 
   // Close previously opened Bluetooth endpoint
   if (cpc_sock_fd > 0) {
@@ -226,7 +226,7 @@ int cpc_hci_bridge_reset(void)
     if (ret == 0) {
       cpc_sock_fd = -1;
     } else {
-      app_log_error("cpc_close_endpoint failed: %s\n", strerror(errno));
+      app_log_error("cpc_close_endpoint failed: %s" APP_LOG_NL, strerror(errno));
       return ret;
     }
   }
@@ -243,7 +243,7 @@ int cpc_hci_bridge_reset(void)
   } while (retry < RETRY_COUNT);
 
   if (ret < 0) {
-    app_log_error("cpc_restart failed: %s\n", strerror(errno));
+    app_log_error("cpc_restart failed: %s" APP_LOG_NL, strerror(errno));
     return ret;
   }
 
@@ -263,7 +263,7 @@ int cpc_hci_bridge_reset(void)
   } while (retry < RETRY_COUNT);
 
   if (ret < 0) {
-    app_log_error("cpc_open_endpoint failed: %s\n", strerror(errno));
+    app_log_error("cpc_open_endpoint failed: %s" APP_LOG_NL, strerror(errno));
   }
 
   return ret;
@@ -325,20 +325,20 @@ int transfer_data_from_pty_to_cpc(void)
     // Parse all HCI packets from the buffer and send them separately to CPC
     hci_packet_buf = cpc_tx_buffer;
     do {
-      hci_packet_len = parse_hci_packet(cpc_tx_buffer, size);
+      hci_packet_len = parse_hci_packet(hci_packet_buf, size);
       app_log_debug("cpc_write - ");
       debug_log_buffer("cpc_tx_buffer", cpc_tx_buffer, hci_packet_len);
       // Write data to CPC
       cpc_write_result = cpc_write_endpoint(cpc_endpoint, hci_packet_buf, hci_packet_len, 0);
       if (cpc_write_result < 0) {
-        app_log_error("cpc_write_endpoint failed: %s\n", strerror(errno));
+        app_log_error("cpc_write_endpoint failed: %s" APP_LOG_NL, strerror(errno));
         return FAILURE;
       }
       size -= hci_packet_len;
       hci_packet_buf += hci_packet_len;
-    } while (size >= hci_packet_len);
+    } while (size > 0);
   } else if (errno != EAGAIN && errno != ECONNRESET) {
-    app_log_error("PTY read operation failed: %s\n", strerror(errno));
+    app_log_error("PTY read operation failed: %s" APP_LOG_NL, strerror(errno));
     return FAILURE;
   }
   return SUCCESS;
@@ -363,7 +363,7 @@ int transfer_data_from_cpc_to_pty(void)
     write(pty_master_fd, &cpc_rx_buffer[0], size);
     memset(&cpc_rx_buffer[0], 0, CPC_RX_BUF_SIZE);
   } else if ((int)size != -EAGAIN && (int)size != -ECONNRESET) {
-    app_log_error("PTY write operation failed: %s\n", strerror(errno));
+    app_log_error("PTY write operation failed: %s" APP_LOG_NL, strerror(errno));
     return FAILURE;
   }
   return SUCCESS;
@@ -379,6 +379,10 @@ int transfer_data_from_cpc_to_pty(void)
  *****************************************************************************/
 int parse_hci_packet(const uint8_t *hci_buffer, const ssize_t hci_buffer_len)
 {
+  if (hci_buffer == NULL || hci_buffer_len == 0) {
+    return 0;
+  }
+
   // Treat the buffer as a HCI packet
   hci_packet_t *hci_packet = (hci_packet_t *)hci_buffer;
   ssize_t hci_packet_len = 0;
@@ -401,18 +405,29 @@ int parse_hci_packet(const uint8_t *hci_buffer, const ssize_t hci_buffer_len)
       return hci_buffer_len;
   }
 
-  // If the buffer is too small to contain a whole HCI packet
+  // If the buffer is too small to contain a HCI packet header
   if (hci_buffer_len < hci_packet_type_and_header_size) {
     hci_packet_len = hci_buffer_len;
-    app_log_warning("Warning: possibly malformed HCI packet received\n");
+    app_log_warning("Possibly incomplete or malformed HCI packet received" APP_LOG_NL);
     debug_log_buffer("hci_packet_buf", hci_buffer, hci_packet_len);
     return hci_buffer_len;
   }
 
   // Calculate the actual size of the HCI packet in the buffer
   hci_packet_len = hci_packet_type_and_header_size + payload_packet_len;
-  if (hci_buffer_len != hci_packet_len) {
-    app_log_debug("Parsed packet from multiple in buffer; hci_packet_len='%ld' hci_buffer_len='%ld'\n", (long)hci_packet_len, (long)hci_buffer_len);
+
+  // If the buffer is too small to contain the whole HCI packet
+  if (hci_packet_len > hci_buffer_len) {
+    hci_packet_len = hci_buffer_len;
+    app_log_warning("Possibly incomplete or malformed HCI packet received" APP_LOG_NL);
+    debug_log_buffer("hci_packet_buf", hci_buffer, hci_packet_len);
+    return hci_buffer_len;
+  }
+
+  if (hci_packet_len < hci_buffer_len) {
+    app_log_debug("Parsed packet from multiple in buffer; hci_packet_len='%ld' hci_buffer_len='%ld'" APP_LOG_NL,
+                  (long)hci_packet_len,
+                  (long)hci_buffer_len);
   }
   return hci_packet_len;
 }
@@ -428,5 +443,5 @@ void debug_log_buffer(const char *name, const uint8_t *buf, const ssize_t size)
 {
   app_log_append_debug("size='%02zd' %s=[ ", size, name);
   app_log_hexdump_debug(buf, size);
-  app_log_append_debug(" ]\n");
+  app_log_append_debug(" ]" APP_LOG_NL);
 }

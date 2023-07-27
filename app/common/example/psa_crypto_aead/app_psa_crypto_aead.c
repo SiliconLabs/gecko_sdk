@@ -248,6 +248,7 @@ psa_status_t decrypt_aead(void)
 psa_status_t multipart_aead(bool is_encrypt)
 {
   psa_algorithm_t algo = get_key_algo();
+  psa_status_t ret = PSA_SUCCESS;
 
   if (algo == 0) {
     return(PSA_ERROR_NOT_SUPPORTED);
@@ -348,7 +349,6 @@ psa_status_t multipart_aead(bool is_encrypt)
   // _verify will return PSA_ERROR_INVALID_SIGNATURE
   // if the tag does not match...
   printf("  + Finishing multipart aead...\n");
-  psa_status_t ret = PSA_SUCCESS;
   if (is_encrypt) {
     return_on_error(psa_aead_finish(&op,
                                     cipher_msg_buf + out_total,
@@ -370,7 +370,7 @@ psa_status_t multipart_aead(bool is_encrypt)
     plain_msg_len = out_total + bytes_out;
   }
 
-  return PSA_SUCCESS;
+  return ret;
 }
 
 // -----------------------------------------------------------------------------

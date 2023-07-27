@@ -32,6 +32,8 @@ component:
     instance: [acm0]
 define:
   - name: DEBUG_EFM
+  - name: SL_HEAP_SIZE
+    value: 5120
 readme:
   - path: readme.md
 tag:

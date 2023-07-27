@@ -86,3 +86,8 @@ class calc_demodulator_leopard(CALC_Demodulator_lynx):
         reg = (log2df << 1) | 1
 
         self._reg_write(model.vars.MODEM_BLEIQDSAEXT2_BBSSDEBOUNCETIM, reg)
+
+    def calc_rssi_rf_adjust_db(self, model):
+
+        #Adjustment determined based on char data
+        model.vars.rssi_rf_adjust_db.value = -12.35

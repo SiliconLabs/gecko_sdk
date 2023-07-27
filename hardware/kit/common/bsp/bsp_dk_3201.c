@@ -1300,7 +1300,7 @@ static void SpiBcInit(void)
 #endif
 
 #if defined(_SILICON_LABS_32B_SERIES_3)
-  bcinit.clock_div = sl_eusart_spi_get_clock_div(ref_freq, 2000000);
+  bcinit.clock_div = sl_eusart_spi_calculate_clock_div(ref_freq, 2000000);
   sl_eusart_init_spi(BSP_SPI_USART_USED, &bcinit);
   sl_eusart_enable_rx(BSP_SPI_USART_USED);
   sl_eusart_enable_tx(BSP_SPI_USART_USED);

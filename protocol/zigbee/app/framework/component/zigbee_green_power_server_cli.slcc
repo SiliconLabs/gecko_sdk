@@ -83,4 +83,10 @@ template_contribution:
       name: sink-table-clear
       handler: emberAfPluginGreenPowerServerCliClearSinkTable
       help: Clears sink table.
+  - name: cli_command
+    value:
+      group: green-power-server
+      name: run-test-vectors
+      handler: emberAfPluginGreenPowerServerCliRunTestVectors
+      help: Run security test vectors
 

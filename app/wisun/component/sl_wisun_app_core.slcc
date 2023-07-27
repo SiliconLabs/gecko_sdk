@@ -15,6 +15,7 @@ quality: "production"
 root_path: "app/wisun/component/app_core"
 provides:
   - name: sl_wisun_app_core
+      
 source:
   - path: "sl_wisun_app_core.c"
   - path: "sl_wisun_app_core_util.c"
@@ -27,6 +28,7 @@ include:
 
 requires:
   - name: "wisun_config"
+  - name: "sl_wisun_app_brd_feature"
   - name: "sl_wisun_full_config"
   - name: "sl_wisun_event_mgr"
   - name: "sleeptimer"

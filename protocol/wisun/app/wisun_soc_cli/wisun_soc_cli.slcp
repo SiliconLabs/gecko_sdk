@@ -28,8 +28,7 @@ component:
   - id: "silabs_core_sl_malloc"
   - id: "sl_wisun_app_cli"
   - id: "cli"
-    instance: 
-      - vcom
+    instance: [vcom]
   - id: "sl_wisun_cli_util"
   - id: "rail_util_pa"
 
@@ -53,6 +52,8 @@ include:
 define:
   - name: "DEBUG_EFM_USER"
   - name: "WISUN_CLI_SAMPLE_APP"
+  - name: "DEFAULT_DEVICE_TYPE"
+    value: "SL_WISUN_ROUTER"
 
 configuration:
   - name: "SL_BOARD_ENABLE_VCOM"
@@ -63,11 +64,20 @@ configuration:
   - name: "SL_IOSTREAM_USART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF"
     value: "1"
     condition: [iostream_usart]
+  - name: SL_IOSTREAM_EUSART_INSTANCE_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
+    value: 0
+    condition: [iostream_eusart, wisun_low_power]
+  - name: SL_IOSTREAM_EUSART_VCOM_BAUDRATE
+    value: 9600
+    condition: [iostream_eusart, wisun_low_power]
+  - name: SL_IOSTREAM_EUSART_VCOM_ENABLE_HIGH_FREQUENCY
+    value: 0
+    condition: [iostream_eusart, wisun_low_power]
   - name: SL_IOSTREAM_EUSART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
     value: "true"
     condition: [iostream_eusart]
   - name: SL_IOSTREAM_EUSART_VCOM_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
-    value: "false" # Disable this so that the chip can enter EM2/3/4
+    value: 0       # Disable this so that the chip can enter EM2/3/4
                    # and be woken by other wake sources, setting this
                    # to true adds an EM1 requirement to the Power Manager.
     condition: [iostream_eusart]
@@ -79,6 +89,17 @@ configuration:
   - name: SL_IOSTREAM_EUSART_VCOM_FLOW_CONTROL_TYPE
     value: "eusartHwFlowControlNone"
     condition: [iostream_eusart]
+  - name: SL_IOSTREAM_LEUART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
+    value: "1"
+    condition: [iostream_leuart]
+  - name: SL_IOSTREAM_LEUART_VCOM_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
+    value: 0
+    condition: [iostream_leuart]
+  - name: SL_IOSTREAM_LEUART_VCOM_RX_BUFFER_SIZE
+    value: "128" # Increase from default 32 to account for automated command
+                 # storage entry and for when long command strings are
+                 # interrupted by chip interrupts.
+    condition: [iostream_leuart]
   - name: CPU_CFG_TS_32_EN
     value: "1"
   - name: OS_CFG_DBG_EN
@@ -87,10 +108,13 @@ configuration:
     value: "1"
   - name: OS_CFG_SCHED_ROUND_ROBIN_EN
     value: "1"
+    unless: [wisun_low_power]
   - name: OS_CFG_STAT_TASK_EN
     value: "1"
+    unless: [wisun_low_power]
   - name: OS_CFG_TASK_PROFILE_EN
     value: "1"
+    unless: [wisun_low_power]
   - name: "OS_CFG_APP_HOOKS_EN"
     value: "1"
     condition: [micriumos_kernel]

@@ -343,7 +343,7 @@ float sli_coulomb_counter_hal_compute_cpp(sli_coulomb_counter_handle_t *handle);
  *   Value read in CCC_MSBY and CCC_LSBY.
  *
  * @return
- *   Maximun number of PFM pulses (nreq) that is guaranteed to not generate an overflow.
+ *   Maximum number of PFM pulses (nreq) that is guaranteed to not generate an overflow.
  *
  * @note
  *   CCC_MSBY:CCC_LSBY 16-bit register pair is retasked to store the number

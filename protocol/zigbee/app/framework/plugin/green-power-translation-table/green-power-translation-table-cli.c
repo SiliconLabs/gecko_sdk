@@ -28,7 +28,7 @@
 
 #define  GREEN_POWER_SERVER_TRANSLATION_TABLE_ENTRY_ADDITIONAL_INFO_LEN  36
 
-void sli_zigbee_af_gp_print_additional_info_block(uint8_t gpdCommand, uint8_t addInfoOffset)
+static void print_additional_info_block(uint8_t gpdCommand, uint8_t addInfoOffset)
 {
   EmberGpTranslationTableAdditionalInfoBlockField *additionalInfoTable = sli_zigbee_af_gp_get_additional_info_table();
   EmberGpTranslationTableAdditionalInfoBlockOptionRecordField * addInfo = &(additionalInfoTable->additionalInfoBlock[addInfoOffset]);
@@ -265,7 +265,7 @@ void emberAfPluginGreenPowerServerCliAdditionalInfoBlockTablePrint(SL_CLI_COMMAN
     if (addInfoTable->additionalInfoBlock[i].totalLengthOfAddInfoBlock > 3) {
       gpdCommandId = EMBER_ZCL_GP_GPDF_COMPACT_ATTRIBUTE_REPORTING;
     }
-    sli_zigbee_af_gp_print_additional_info_block(gpdCommandId, i);
+    print_additional_info_block(gpdCommandId, i);
   }
 }
 void emberAfPluginGreenPowerServerCliCustomizedTablePrint(SL_CLI_COMMAND_ARG)
@@ -302,38 +302,38 @@ void emberAfPluginGreenPowerServerCliTranslationTablePrint(SL_CLI_COMMAND_ARG)
 {
   uint8_t status;
   EmberAfGreenPowerServerGpdSubTranslationTableEntry TranslationTableEntry;
-  sli_zigbee_af_gp_command_translation_table * emGptranslationtable = sli_zigbee_af_gp_trans_table_get_translation_table();
-  if (!(emGptranslationtable->totalNoOfEntries)) {
+  sli_zigbee_af_gp_command_translation_table * sli_zigbee_gp_translation_table = sli_zigbee_af_gp_trans_table_get_translation_table();
+  if (!(sli_zigbee_gp_translation_table->totalNoOfEntries)) {
     emberAfCorePrintln("translation table is Empty");
   } else {
     emberAfCorePrintln("\nIndex Valid AppId Ieee                Ep gpdSrc   gdpCmd zEp zProf zCluster zCmd EType Info ");
     for (uint8_t entryIndex = 0; entryIndex < EMBER_AF_PLUGIN_GREEN_POWER_TRANSLATION_TABLE_TRANSLATION_TABLE_SIZE; entryIndex++ ) {
-      if (emGptranslationtable->TableEntry[entryIndex].entry == NO_ENTRY) {
+      if (sli_zigbee_gp_translation_table->TableEntry[entryIndex].entry == NO_ENTRY) {
         continue;
       }
       status = sli_zigbee_af_gp_trans_table_get_translation_table_entry(entryIndex, &TranslationTableEntry);
       if (status == GP_TRANSLATION_TABLE_STATUS_SUCCESS) {
         emberAfCorePrint("%x    ", entryIndex);
         emberAfCorePrint("%x    ", TranslationTableEntry.validEntry);
-        emberAfCorePrint("%x    ", emGptranslationtable->TableEntry[entryIndex].gpAddr.applicationId);
-        if ((emGptranslationtable->TableEntry[entryIndex].gpAddr.applicationId & EMBER_AF_GP_NOTIFICATION_OPTION_APPLICATION_ID) == EMBER_GP_APPLICATION_IEEE_ADDRESS) {
-          emberAfPrintBigEndianEui64(emGptranslationtable->TableEntry[entryIndex].gpAddr.id.gpdIeeeAddress);
+        emberAfCorePrint("%x    ", sli_zigbee_gp_translation_table->TableEntry[entryIndex].gpAddr.applicationId);
+        if ((sli_zigbee_gp_translation_table->TableEntry[entryIndex].gpAddr.applicationId & EMBER_AF_GP_NOTIFICATION_OPTION_APPLICATION_ID) == EMBER_GP_APPLICATION_IEEE_ADDRESS) {
+          emberAfPrintBigEndianEui64(sli_zigbee_gp_translation_table->TableEntry[entryIndex].gpAddr.id.gpdIeeeAddress);
           emberAfCorePrint(" ");
-          emberAfCorePrint("%x ", emGptranslationtable->TableEntry[entryIndex].gpAddr.endpoint);
+          emberAfCorePrint("%x ", sli_zigbee_gp_translation_table->TableEntry[entryIndex].gpAddr.endpoint);
           emberAfCorePrint("         ");
         } else {
           emberAfCorePrint("                       ");
-          emberAfCorePrint("%4x ", emGptranslationtable->TableEntry[entryIndex].gpAddr.id.sourceId);
+          emberAfCorePrint("%4x ", sli_zigbee_gp_translation_table->TableEntry[entryIndex].gpAddr.id.sourceId);
         }
         emberAfCorePrint("%x     ", TranslationTableEntry.gpdCommand);
         emberAfCorePrint("%x  ", TranslationTableEntry.endpoint);
         emberAfCorePrint("%2x  ", TranslationTableEntry.zigbeeProfile);
         emberAfCorePrint("%2x     ", TranslationTableEntry.zigbeeCluster);
         emberAfCorePrint("%x   ", TranslationTableEntry.zigbeeCommandId);
-        emberAfCorePrint("%x    ", emGptranslationtable->TableEntry[entryIndex].entry);
-        emberAfCorePrint("%x   ", emGptranslationtable->TableEntry[entryIndex].infoBlockPresent);
-        if (emGptranslationtable->TableEntry[entryIndex].infoBlockPresent == true) {
-          sli_zigbee_af_gp_print_additional_info_block(TranslationTableEntry.gpdCommand, emGptranslationtable->TableEntry[entryIndex].additionalInfoOffset);
+        emberAfCorePrint("%x    ", sli_zigbee_gp_translation_table->TableEntry[entryIndex].entry);
+        emberAfCorePrint("%x   ", sli_zigbee_gp_translation_table->TableEntry[entryIndex].infoBlockPresent);
+        if (sli_zigbee_gp_translation_table->TableEntry[entryIndex].infoBlockPresent == true) {
+          print_additional_info_block(TranslationTableEntry.gpdCommand, sli_zigbee_gp_translation_table->TableEntry[entryIndex].additionalInfoOffset);
         }
         emberAfCorePrint("\n");
       } else {

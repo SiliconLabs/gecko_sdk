@@ -96,6 +96,15 @@ const char *app_statistics_domain_str[] =
   NULL,
 };
 
+static const app_settings_ping_t app_settings_ping_default = {
+  .identifier = 1,
+  .sequence_number = 1,
+  .packet_interval = 1000,
+  .packet_length = 40,
+  .pattern_length = 10,
+  .pattern = "0123456789"
+};
+
 static const app_settings_wisun_t app_settings_wisun_default = {
   .network_name = APP_SETTINGS_WISUN_DEFAULT_NETWORK_NAME,
   .regulatory_domain = APP_SETTINGS_WISUN_DEFAULT_REGULATORY_DOMAIN,
@@ -135,6 +144,7 @@ static const app_settings_app_t app_settings_app_default = {
 };
 
 app_settings_wisun_t app_settings_wisun;
+app_settings_ping_t app_settings_ping;
 app_settings_app_t app_settings_app;
 
 //static sl_wisun_statistics_t app_statistics;
@@ -145,6 +155,12 @@ const app_saving_item_t app_saving_item_wisun = {
   .default_val = &app_settings_wisun_default
 };
 
+const app_saving_item_t app_saving_item_ping = {
+  .data = &app_settings_ping,
+  .data_size = sizeof(app_settings_ping),
+  .default_val = &app_settings_ping_default
+};
+
 const app_saving_item_t app_saving_item_app = {
   .data = &app_settings_app,
   .data_size = sizeof(app_settings_app),
@@ -153,6 +169,7 @@ const app_saving_item_t app_saving_item_app = {
 
 const app_saving_item_t *saving_settings[] = {
   &app_saving_item_wisun,
+  &app_saving_item_ping,
   &app_saving_item_app,
   NULL
 };

@@ -66,6 +66,8 @@ extern EmberEvent sli_zigbee_allow_tc_rejoins_using_well_known_key_events[];
 extern void sli_zigbee_allow_tc_rejoins_using_well_known_key_event_handler(EmberEvent *event);
 #endif
 
+extern uint8_t sli_zigbee_supported_networks;
+
 static void initializeForkedEvents(void)
 {
   for (uint8_t j = 0; j < sli_zigbee_num_multi_pan_forks; j++) {
@@ -94,12 +96,6 @@ static void initializeForkedEvents(void)
     sli_zigbee_neighbor_exchange_events[j].actions.name =  EVENT_NAME("Neighbor exg");
     sli_zigbee_neighbor_exchange_events[j].next = NULL;
 #endif
-
-    sli_zigbee_request_key_events[j].actions.queue = &sli_zigbee_stack_event_queue;
-    sli_zigbee_request_key_events[j].actions.handler = sli_zigbee_request_key_event_handler;
-    sli_zigbee_request_key_events[j].actions.marker = NULL;
-    sli_zigbee_request_key_events[j].actions.name =  EVENT_NAME("Req key");
-    sli_zigbee_request_key_events[j].next = NULL;
 
 #if !defined(SL_ZIGBEE_LEAF_STACK) || defined(CSL_SUPPORT)
     sli_zigbee_send_parent_announce_events[j].actions.queue = &sli_zigbee_stack_event_queue;
@@ -134,6 +130,14 @@ static void initializeForkedEvents(void)
     sli_zigbee_allow_tc_rejoins_using_well_known_key_events[j].actions.name =  EVENT_NAME("Allow TC rejoin");
     sli_zigbee_allow_tc_rejoins_using_well_known_key_events[j].next = NULL;
 #endif
+  }
+
+  for (uint8_t j = 0; j < sli_zigbee_supported_networks; j++) {
+    sli_zigbee_request_key_events[j].actions.queue = &sli_zigbee_stack_event_queue;
+    sli_zigbee_request_key_events[j].actions.handler = sli_zigbee_request_key_event_handler;
+    sli_zigbee_request_key_events[j].actions.marker = NULL;
+    sli_zigbee_request_key_events[j].actions.name =  EVENT_NAME("Req key");
+    sli_zigbee_request_key_events[j].next = NULL;
   }
 }
 

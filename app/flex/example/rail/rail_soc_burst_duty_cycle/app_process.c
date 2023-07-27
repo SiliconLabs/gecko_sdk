@@ -461,10 +461,10 @@ static void handle_send_state(RAIL_Handle_t rail_handle)
     packet_transmitted++;
     refresh_display = true;
 #if defined(SL_CATALOG_APP_LOG_PRESENT)
-    app_log_info("Burst of %u packets sent.\n", master_burst_packets_count);
+    app_log_info("Burst of %lu packets sent.\n", master_burst_packets_count);
     // Run-time check if the listener had no chance to receive the burst
     if ((BURST_TIME / master_burst_packets_count) > DUTY_CYCLE_ON_TIME) {
-      app_log_info("WARNING! Packet time of %u is longer than the ON time of %u!\n",
+      app_log_info("WARNING! Packet time of %lu is longer than the ON time of %lu!\n",
                    (BURST_TIME / master_burst_packets_count),
                    (uint32_t)DUTY_CYCLE_ON_TIME);
     }

@@ -611,7 +611,7 @@ static uint8_t responseReceived(void)
       status = EZSP_ERROR_TRUNCATED;
     }
     if ((responseFrameControl & EZSP_FRAME_CONTROL_OVERFLOW_MASK)
-        == EZSP_FRAME_CONTROL_OVERFLOW_MASK) {
+        == EZSP_FRAME_CONTROL_OVERFLOW) {
       status = EZSP_ERROR_OVERFLOW;
     }
     if ((responseFrameControl & EZSP_FRAME_CONTROL_PENDING_CB_MASK)
@@ -633,6 +633,14 @@ static uint8_t responseReceived(void)
   }
 
   ezspReadPointer = ezspFrameContents + parametersIndex;
+
+  // An overflow does not indicate a comms failure;
+  // The system can still communicate but buffers are running critically low.
+  // This is almost always due to network congestion and goes away
+  // when the network becomes quieter.
+  if (status == EZSP_ERROR_OVERFLOW) {
+    return RESPONSE_SUCCESS;
+  }
   return status;
 }
 

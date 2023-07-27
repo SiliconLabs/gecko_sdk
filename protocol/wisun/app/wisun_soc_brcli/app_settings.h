@@ -22,6 +22,8 @@
 #include "sl_status.h"
 #include "sl_wisun_cli_settings.h"
 
+#define SL_WISUN_PING_PATTERN_SIZE 16
+
 typedef struct {
   char network_name[SL_WISUN_NETWORK_NAME_SIZE+1];
   uint8_t regulatory_domain;
@@ -57,6 +59,15 @@ typedef struct {
 } app_settings_wisun_t;
 
 typedef struct {
+  uint16_t identifier;
+  uint16_t sequence_number;
+  uint16_t packet_interval;
+  uint16_t packet_length;
+  uint16_t pattern_length;
+  uint8_t pattern[SL_WISUN_PING_PATTERN_SIZE];
+} app_settings_ping_t;
+
+typedef struct {
   uint8_t printable_data_as_hex;
   uint8_t printable_data_length;
   uint8_t autostart;
@@ -64,6 +75,7 @@ typedef struct {
 } app_settings_app_t;
 
 extern app_settings_wisun_t app_settings_wisun;
+extern app_settings_ping_t app_settings_ping;
 extern app_settings_app_t app_settings_app;
 
 sl_status_t app_settings_get_channel_mask(const char *str, sl_wisun_channel_mask_t *channel_mask);

@@ -34,6 +34,7 @@ include:
     file_list:
       - path: sl_zigbee_dlk_negotiation.h
       - path: sl_zigbee_zdo_dlk_negotiation.h
+      - path: sl_zigbee_dynamic_commissioning.h
 
 template_contribution:
   - name: component_catalog

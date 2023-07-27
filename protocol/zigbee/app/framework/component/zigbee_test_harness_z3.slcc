@@ -276,15 +276,6 @@ template_contribution:
   - name: cli_command
     value:
       group: aps
-      name: aps-remove-device-config
-      handler: sli_zigbee_af_test_harness_z3_aps_aps_remove_device_config
-      help: Configures the APS remove device command handling.
-      argument:
-      - type: uint32
-        help: The negative behavior options for this command
-  - name: cli_command
-    value:
-      group: aps
       name: aps-request-key
       handler: sli_zigbee_af_test_harness_z3_aps_aps_request_key_command
       help: Sends an APS request key command.

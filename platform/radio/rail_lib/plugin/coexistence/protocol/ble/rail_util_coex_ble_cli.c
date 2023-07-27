@@ -31,8 +31,36 @@
 #include "response_print.h"
 #include "coexistence-ble.h"
 #include "coexistence-ble-ll.h"
+#include "coexistence-hal.h"
+#include "rail_ble.h"
+#include "rail.h"
 
 extern const char * titleStrings[];
+extern RAIL_Handle_t railHandle;
+
+static uint16_t fastRandom(void)
+{
+  return COEX_HAL_GetPseudoRandom(0, 0xFFFF);
+}
+
+static void abortTxCallback(void)
+{
+  (void)RAIL_StopTx(railHandle, RAIL_STOP_MODE_ACTIVE);
+}
+
+void cli_coex_ble_init(sl_cli_command_arg_t *args)
+{
+  bool bleEnabled = RAIL_BLE_IsEnabled(railHandle);
+  if (bleEnabled) {
+    sl_bt_ll_coex_set_context(railHandle,
+                              &abortTxCallback,
+                              &fastRandom);
+    sl_bt_init_coex_hal();
+  }
+  responsePrint(sl_cli_get_command_string(args, 0),
+                "Init:%s",
+                bleEnabled ? "True" : "False");
+}
 
 void cli_coex_ble_print_counters(sl_cli_command_arg_t *args)
 {

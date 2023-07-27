@@ -10,13 +10,13 @@
 
 // <h> Command Class Firmware Update - Bootloader update
 
-// <o> The bootloader target id <1..255:1> <f.d>
+// <o ZAF_CONFIG_BOOTLOADER_TARGET_ID> The bootloader target id <1..255:1> <f.d>
 // <i> If the bootloader update is enabled
 // <i> This determines which target id should be used by the bootloader firmware
 // <i> Default: 1
 #define ZAF_CONFIG_BOOTLOADER_TARGET_ID  1
 
-// <q> Indicates if the bootloader can be updated
+// <q ZAF_CONFIG_BOOTLOADER_UPGRADABLE> Indicates if the bootloader can be updated
 // <i> Includes the bootloader as a target
 // <i> Default: 1
 #define ZAF_CONFIG_BOOTLOADER_UPGRADABLE  1
@@ -24,7 +24,7 @@
 // </h>
 // <h> Command Class Firmware Update - Firmware targets
 
-// <o> Number of firmware targets <0..10:1> <f.d>
+// <o ZAF_CONFIG_FIRMWARE_TARGET_COUNT> Number of firmware targets <0..10:1> <f.d>
 // <i> Defines the number of supported firmware targets. Setting this number to more than 1 requires
 // <i> the application to implement CC_Version_GetFirmwareVersion_handler(). The default value is 1
 // <i> because firmware target 0 is the Z-Wave application firmware (including Z-Wave stack).
@@ -34,7 +34,7 @@
 // </h>
 // <h> Command Class ZwavePlusInfo Configuration
 
-// <o> User Icon Type
+// <o ZAF_CONFIG_USER_ICON_TYPE> User Icon Type
 // <i> User Icon Type reported in Z-Wave Plus Info Report Command
 // <ICON_TYPE_GENERIC_BARRIER=> GENERIC_BARRIER
 // <ICON_TYPE_GENERIC_CENTRAL_CONTROLLER=> GENERIC_CENTRAL_CONTROLLER
@@ -154,7 +154,7 @@
 // <i> Default: ICON_TYPE_GENERIC_ON_OFF_POWER_SWITCH
 #define ZAF_CONFIG_USER_ICON_TYPE  ICON_TYPE_GENERIC_ON_OFF_POWER_SWITCH
 
-// <o> Installer Icon Type
+// <o ZAF_CONFIG_INSTALLER_ICON_TYPE> Installer Icon Type
 // <i> Installer Icon Type reported in Z-Wave Plus Info Report Command
 // <ICON_TYPE_GENERIC_BARRIER=> GENERIC_BARRIER
 // <ICON_TYPE_GENERIC_CENTRAL_CONTROLLER=> GENERIC_CENTRAL_CONTROLLER
@@ -277,7 +277,7 @@
 // </h>
 // <h> Version Configuration
 
-// <o> Hardware version <0..255:1> <f.d>
+// <o ZAF_CONFIG_HARDWARE_VERSION> Hardware version <0..255:1> <f.d>
 // <i> The Hardware Version field MUST report a value which is unique to this particular
 // <i> version of the product. It MUST be possible to uniquely determine the hardware
 // <i> characteristics from the Hardware Version field in combination with the Manufacturer
@@ -293,19 +293,19 @@
 // </h>
 // <h> Command Class Manufacturer Specific
 
-// <o> Manufacturer ID <0x0000..0xFFFF:0x1> <f.h>
+// <o ZAF_CONFIG_MANUFACTURER_ID> Manufacturer ID <0x0000..0xFFFF:0x1> <f.h>
 // <i> The default value is set to 0x0000 which is Silicon Labs.
 // <i> The value must be updated according to the official list of manufacturers in the Z-Wave Alliance.
 // <i> Default: 0x0000
 #define ZAF_CONFIG_MANUFACTURER_ID  0x0000
 
-// <o> Product Type ID <0x0000..0xFFFF:0x1> <f.h>
+// <o ZAF_CONFIG_PRODUCT_TYPE_ID> Product Type ID <0x0000..0xFFFF:0x1> <f.h>
 // <i> Default is 4 which is a value chosen by Silabs.
 // <i> Silabs consider this to indicate that the device is a Z-Wave Plus Version 2 device.
 // <i> Default: 0x0004
 #define ZAF_CONFIG_PRODUCT_TYPE_ID  0x0004
 
-// <o> Product ID <0x0000..0xFFFF:0x1> <f.h>
+// <o ZAF_CONFIG_PRODUCT_ID> Product ID <0x0000..0xFFFF:0x1> <f.h>
 // <i> Default is 0 which is invalid in the context of Silicon Labs Z-Wave apps. According to CC
 // <i> Manufacturer Specific specification, zero is a valid value and can be used as a product ID.
 // <i> Default: 0x0000
@@ -314,7 +314,7 @@
 // </h>
 // <h> Device type
 
-// <o> The generic type of a device.
+// <o ZAF_CONFIG_GENERIC_TYPE> The generic type of a device.
 // <i> The generic type of a device. A certain device type requires a generic type, e.g., the Lock device type requires the generic type to be Entry Control.
 // <i> Find more info in the Z-Wave Plus v2 Device Type specification.
 // <GENERIC_TYPE_AV_CONTROL_POINT=> AV Control Point
@@ -331,7 +331,7 @@
 // <i> Default: 0
 #define ZAF_CONFIG_GENERIC_TYPE  0
 
-// <o> The specific type of a device.
+// <o ZAF_CONFIG_SPECIFIC_TYPE> The specific type of a device.
 // <i> The specific type of a device. A certain device type requires a specific type, e.g., the Lock device type requires the specific type to be Door Lock.
 // <i> Find more info in the Z-Wave Plus v2 Device Type specification.
 // <SPECIFIC_TYPE_NOT_USED=> Specific type not used
@@ -357,30 +357,30 @@
 // </h>
 // <h> Multi Channel Configuration
 
-// <o> Number of end points <0..255:1> <f.d>
+// <o ZAF_CONFIG_NUMBER_OF_END_POINTS> Number of end points <0..255:1> <f.d>
 // <i> Default: 0
 #define ZAF_CONFIG_NUMBER_OF_END_POINTS  0
 
 // </h>
 // <h> Security Configuration
 
-// <q> Request S0 network key
+// <q ZAF_CONFIG_REQUEST_KEY_S0> Request S0 network key
 // <i> Default: 0
 #define ZAF_CONFIG_REQUEST_KEY_S0  0
 
-// <q> Request S2 Unauthenticated network key
+// <q ZAF_CONFIG_REQUEST_KEY_S2_UNAUTHENTICATED> Request S2 Unauthenticated network key
 // <i> Default: 0
 #define ZAF_CONFIG_REQUEST_KEY_S2_UNAUTHENTICATED  0
 
-// <q> Request S2 Authenticated network key
+// <q ZAF_CONFIG_REQUEST_KEY_S2_AUTHENTICATED> Request S2 Authenticated network key
 // <i> Default: 0
 #define ZAF_CONFIG_REQUEST_KEY_S2_AUTHENTICATED  0
 
-// <q> Request S2 Access network key
+// <q ZAF_CONFIG_REQUEST_KEY_S2_ACCESS> Request S2 Access network key
 // <i> Default: 0
 #define ZAF_CONFIG_REQUEST_KEY_S2_ACCESS  0
 
-// <q> Application can only be controlled when included securely
+// <q ZAF_CONFIG_SECURE_ONLY> Application can only be controlled when included securely
 // <i> Default: 0
 #define ZAF_CONFIG_SECURE_ONLY  0
 

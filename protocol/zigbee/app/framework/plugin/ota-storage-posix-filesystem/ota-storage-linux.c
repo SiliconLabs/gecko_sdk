@@ -105,7 +105,7 @@ typedef struct {
 
 // This global is used to define what is in the OTA header and help map that
 // to the 'EmberAfOtaHeader' data structure. Must use
-// sli_zigbee_af_get_ota_header_field_definition() to get the field definitions. Do not use this
+// get_ota_header_field_definition() to get the field definitions. Do not use this
 // array directly.
 static const EmberAfOtaHeaderFieldDefinition otaHeaderFieldDefinitions[] = {
   { "Magic Number", INTEGER_FIELD, 4, ALWAYS_PRESENT_MASK },
@@ -207,8 +207,8 @@ static uint16_t calculateOtaFileHeaderLength(EmberAfOtaHeader* header);
 static uint8_t* writeHeaderDataToBuffer(EmberAfOtaBootloadFileHeaderFieldIndex_t fieldIndex,
                                         uint16_t headerVersion,
                                         uint8_t* bufferPtr);
-const EmberAfOtaHeaderFieldDefinition *sli_zigbee_af_get_ota_header_field_definition(uint16_t headerVersion,
-                                                                                     EmberAfOtaBootloadFileHeaderFieldIndex_t headerIndex);
+static const EmberAfOtaHeaderFieldDefinition *get_ota_header_field_definition(uint16_t headerVersion,
+                                                                              EmberAfOtaBootloadFileHeaderFieldIndex_t headerIndex);
 static EmberAfOtaHeader* readImageHeader(const char* filename);
 static OtaImage* imageSearchInternal(const EmberAfOtaImageId* id);
 static EmberAfOtaImageId getIteratorImageId(void);
@@ -260,7 +260,7 @@ EmberAfOtaStorageStatus sli_zigbee_af_ota_set_storage_device(const void* device)
   // Add 1 for '\0' and 1 for '/'.  This may or may not be necessary
   // because the path already has it or it is only a file.
   storageDevice = myMalloc(length + 2,
-                           "emAfSetStorageDevice(): storageDevice");
+                           "sli_zigbee_af_ota_set_storage_device(): storageDevice");
   if (storageDevice == NULL) {
     error("Could not allocate %d bytes!\n", length);
     return EMBER_AF_OTA_STORAGE_ERROR;
@@ -504,7 +504,7 @@ EmberAfOtaStorageStatus sli_zigbee_af_ota_storage_create_image(EmberAfOtaHeader*
 
   EmberAfOtaBootloadFileHeaderFieldIndex_t fieldIndex = HEADER_LENGTH_INDEX;
   while (fieldIndex < FIELD_INDEX_MAX) {
-    const EmberAfOtaHeaderFieldDefinition *definition = sli_zigbee_af_get_ota_header_field_definition(header->headerVersion, fieldIndex);
+    const EmberAfOtaHeaderFieldDefinition *definition = get_ota_header_field_definition(header->headerVersion, fieldIndex);
     debug(config.memoryDebug,
           "Writing Header Field: %s, bufferPtr: %p\n",
           definition->name, bufferPtr);
@@ -954,7 +954,7 @@ static OtaImage* addImageFileToList(const char* filename,
                newImage->filenameStart,
                newImage->header->firmwareVersion);
           uint8_t *finger = (uint8_t *)&newImage->header->upgradeFileDestination;
-          for (int i = sli_zigbee_af_get_ota_header_field_definition(newImage->header->headerVersion, UPGRADE_FILE_DESTINATION_INDEX)->length; i; i--) {
+          for (int i = get_ota_header_field_definition(newImage->header->headerVersion, UPGRADE_FILE_DESTINATION_INDEX)->length; i; i--) {
             note("%02X", finger[i - 1]);
           }
           note(") as an existing one\n");
@@ -1137,7 +1137,7 @@ static void freeOtaImage(OtaImage* image)
   myFree(image);
 }
 
-const EmberAfOtaHeaderFieldDefinition *sli_zigbee_af_get_ota_header_field_definition(uint16_t headerVersion, EmberAfOtaBootloadFileHeaderFieldIndex_t headerIndex)
+static const EmberAfOtaHeaderFieldDefinition *get_ota_header_field_definition(uint16_t headerVersion, EmberAfOtaBootloadFileHeaderFieldIndex_t headerIndex)
 {
   if ((!isValidHeaderVersion(headerVersion)) && (headerIndex != MAGIC_NUMBER_INDEX) && (headerIndex != HEADER_VERSION_INDEX)) {
     return &otaHeaderFieldDefinitions[INVALID_FIELD_INDEX];
@@ -1189,7 +1189,7 @@ static EmberAfOtaHeader* readImageHeader(const char* filename)
   // Read the Version and length first so we can use those to validate the rest
   // of the image.
   EmberAfOtaStorageStatus status;
-  uint16_t headerVersionLength = sli_zigbee_af_get_ota_header_field_definition(0, HEADER_VERSION_INDEX)->length;
+  uint16_t headerVersionLength = get_ota_header_field_definition(0, HEADER_VERSION_INDEX)->length;
   status = readHeaderDataFromBuffer(HEADER_VERSION_INDEX,
                                     0, // we don't know the version yet
                                     bufferPtr,
@@ -1203,7 +1203,7 @@ static EmberAfOtaHeader* readImageHeader(const char* filename)
     goto imageReadError;
   }
   bufferPtr += 2;  // header version field length
-  uint16_t headerLengthLength = sli_zigbee_af_get_ota_header_field_definition(header->headerVersion, HEADER_LENGTH_INDEX)->length;
+  uint16_t headerLengthLength = get_ota_header_field_definition(header->headerVersion, HEADER_LENGTH_INDEX)->length;
   status = readHeaderDataFromBuffer(HEADER_LENGTH_INDEX,
                                     header->headerVersion,
                                     bufferPtr,
@@ -1229,7 +1229,7 @@ static EmberAfOtaHeader* readImageHeader(const char* filename)
       goto imageReadError;
     }
     if (otaHeaderFieldLocations[fieldIndex].found == true) {
-      uint16_t fieldLength = sli_zigbee_af_get_ota_header_field_definition(header->headerVersion, fieldIndex)->length;
+      uint16_t fieldLength = get_ota_header_field_definition(header->headerVersion, fieldIndex)->length;
       lengthRemaining -= fieldLength;
       bufferPtr += fieldLength;
       dataRead -= fieldLength;
@@ -1242,7 +1242,7 @@ static EmberAfOtaHeader* readImageHeader(const char* filename)
 
   fieldIndex = HEADER_VERSION_INDEX;
   while (fieldIndex < FIELD_INDEX_MAX) {
-    const EmberAfOtaHeaderFieldDefinition *fieldPtr = sli_zigbee_af_get_ota_header_field_definition(header->headerVersion, fieldIndex);
+    const EmberAfOtaHeaderFieldDefinition *fieldPtr = get_ota_header_field_definition(header->headerVersion, fieldIndex);
     if (fieldPtr->maskForOptionalField == ALWAYS_PRESENT_MASK
         && !otaHeaderFieldLocations[fieldIndex].found) {
       error("Missing field '%s' from OTA header.\n", fieldPtr->name);
@@ -1271,7 +1271,7 @@ static EmberAfOtaStorageStatus readHeaderDataFromBuffer(EmberAfOtaBootloadFileHe
                                                         int32_t headerLengthRemaining,
                                                         int32_t actualBufferDataRemaining)
 {
-  const EmberAfOtaHeaderFieldDefinition *definition = sli_zigbee_af_get_ota_header_field_definition(headerVersion, fieldIndex);
+  const EmberAfOtaHeaderFieldDefinition *definition = get_ota_header_field_definition(headerVersion, fieldIndex);
   if (definition->maskForOptionalField != ALWAYS_PRESENT_MASK) {
     uint16_t fieldControl = *(uint16_t*)(otaHeaderFieldLocations[FIELD_CONTROL_INDEX].location);
     if (!(fieldControl & definition->maskForOptionalField)) {
@@ -1373,7 +1373,7 @@ static uint8_t* writeHeaderDataToBuffer(EmberAfOtaBootloadFileHeaderFieldIndex_t
                                         uint16_t headerVersion,
                                         uint8_t* bufferPtr)
 {
-  const EmberAfOtaHeaderFieldDefinition *definition = sli_zigbee_af_get_ota_header_field_definition(headerVersion, fieldIndex);
+  const EmberAfOtaHeaderFieldDefinition *definition = get_ota_header_field_definition(headerVersion, fieldIndex);
   if (definition->maskForOptionalField != ALWAYS_PRESENT_MASK) {
     uint16_t fieldControl = *(uint16_t*)(otaHeaderFieldLocations[FIELD_CONTROL_INDEX].location);
     if (!(fieldControl & definition->maskForOptionalField)) {
@@ -1419,7 +1419,7 @@ static uint16_t calculateOtaFileHeaderLength(EmberAfOtaHeader* header)
   uint16_t length = 4; // the size of the magic number
   int fieldIndex = HEADER_VERSION_INDEX;
   while (fieldIndex < FIELD_INDEX_MAX) {
-    const EmberAfOtaHeaderFieldDefinition *definition = sli_zigbee_af_get_ota_header_field_definition(header->headerVersion, fieldIndex);
+    const EmberAfOtaHeaderFieldDefinition *definition = get_ota_header_field_definition(header->headerVersion, fieldIndex);
     if (definition->maskForOptionalField == ALWAYS_PRESENT_MASK
         || (header->fieldControl & definition->maskForOptionalField)) {
       length += definition->length;

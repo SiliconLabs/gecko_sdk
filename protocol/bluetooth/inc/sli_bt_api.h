@@ -161,6 +161,7 @@ enum sli_bt_command_id
     sli_bt_connection_set_remote_power_reporting_command_id = 0x0a,
     sli_bt_connection_get_tx_power_command_id = 0x0b,
     sli_bt_connection_get_remote_tx_power_command_id = 0x0c,
+    sli_bt_connection_set_tx_power_command_id = 0x12,
     sli_bt_connection_read_remote_used_features_command_id = 0x0d,
     sli_bt_connection_get_security_status_command_id = 0x0e,
     sli_bt_connection_set_data_length_command_id = 0x11,
@@ -408,6 +409,7 @@ enum sli_bt_response_id
     sli_bt_connection_set_remote_power_reporting_response_id = 0x0a,
     sli_bt_connection_get_tx_power_response_id = 0x0b,
     sli_bt_connection_get_remote_tx_power_response_id = 0x0c,
+    sli_bt_connection_set_tx_power_response_id = 0x12,
     sli_bt_connection_read_remote_used_features_response_id = 0x0d,
     sli_bt_connection_get_security_status_response_id = 0x0e,
     sli_bt_connection_set_data_length_response_id = 0x11,
@@ -1442,6 +1444,15 @@ PACKSTRUCT( struct sl_bt_cmd_connection_get_remote_tx_power_s
 });
 
 typedef struct sl_bt_cmd_connection_get_remote_tx_power_s sl_bt_cmd_connection_get_remote_tx_power_t;
+
+
+PACKSTRUCT( struct sl_bt_cmd_connection_set_tx_power_s
+{
+    uint8_t connection;
+    int16_t tx_power;
+});
+
+typedef struct sl_bt_cmd_connection_set_tx_power_s sl_bt_cmd_connection_set_tx_power_t;
 
 
 PACKSTRUCT( struct sl_bt_cmd_connection_read_remote_used_features_s
@@ -3549,6 +3560,15 @@ PACKSTRUCT( struct sl_bt_rsp_connection_get_remote_tx_power_s
 typedef struct sl_bt_rsp_connection_get_remote_tx_power_s sl_bt_rsp_connection_get_remote_tx_power_t;
 
 
+PACKSTRUCT( struct sl_bt_rsp_connection_set_tx_power_s
+{
+    uint16_t result;
+    int16_t tx_power_out;
+});
+
+typedef struct sl_bt_rsp_connection_set_tx_power_s sl_bt_rsp_connection_set_tx_power_t;
+
+
 PACKSTRUCT( struct sl_bt_rsp_connection_read_remote_used_features_s
 {
     uint16_t result;
@@ -4849,6 +4869,7 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_cmd_connection_set_remote_power_reporting_t            cmd_connection_set_remote_power_reporting;
     sl_bt_cmd_connection_get_tx_power_t                          cmd_connection_get_tx_power;
     sl_bt_cmd_connection_get_remote_tx_power_t                   cmd_connection_get_remote_tx_power;
+    sl_bt_cmd_connection_set_tx_power_t                          cmd_connection_set_tx_power;
     sl_bt_cmd_connection_read_remote_used_features_t             cmd_connection_read_remote_used_features;
     sl_bt_cmd_connection_get_security_status_t                   cmd_connection_get_security_status;
     sl_bt_cmd_connection_set_data_length_t                       cmd_connection_set_data_length;
@@ -5078,6 +5099,7 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_rsp_connection_set_remote_power_reporting_t            rsp_connection_set_remote_power_reporting;
     sl_bt_rsp_connection_get_tx_power_t                          rsp_connection_get_tx_power;
     sl_bt_rsp_connection_get_remote_tx_power_t                   rsp_connection_get_remote_tx_power;
+    sl_bt_rsp_connection_set_tx_power_t                          rsp_connection_set_tx_power;
     sl_bt_rsp_connection_read_remote_used_features_t             rsp_connection_read_remote_used_features;
     sl_bt_rsp_connection_get_security_status_t                   rsp_connection_get_security_status;
     sl_bt_rsp_connection_set_data_length_t                       rsp_connection_set_data_length;

@@ -3,7 +3,7 @@
  * @brief Bt Mesh LC Server module
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -1120,8 +1120,7 @@ static void handle_lc_setup_server_set_property(
 /*******************************************************************************
  * Handle LC Server events.
  *
- * This function is called automatically by Universal Configurator after
- * enabling the component.
+ * This function is called automatically after enabling the component.
  *
  * @param[in] evt  Pointer to incoming event.
  ******************************************************************************/
@@ -1153,6 +1152,7 @@ void sl_btmesh_lc_server_on_event(sl_btmesh_msg_t *evt)
         &(evt->data.evt_lc_setup_server_set_property));
       break;
 
+    case sl_btmesh_evt_prov_initialized_id:
     case sl_btmesh_evt_node_provisioned_id:
       sl_btmesh_lc_init();
       break;
@@ -1164,13 +1164,23 @@ void sl_btmesh_lc_server_on_event(sl_btmesh_msg_t *evt)
       break;
 
     case sl_btmesh_evt_node_reset_id:
-      sl_bt_nvm_erase(SL_BTMESH_LC_SERVER_PS_KEY_CFG_VAL);
-      sl_bt_nvm_erase(SL_BTMESH_LC_SERVER_PROPERTY_PS_KEY_CFG_VAL);
+      sl_btmesh_lc_server_on_node_reset();
       break;
 
     default:
       break;
   }
+}
+
+/*******************************************************************************
+ * Component node reset handler.
+ * Clearing component specific nvm content during node reset.
+ *
+ ******************************************************************************/
+void sl_btmesh_lc_server_on_node_reset(void)
+{
+  sl_bt_nvm_erase(SL_BTMESH_LC_SERVER_PS_KEY_CFG_VAL);
+  sl_bt_nvm_erase(SL_BTMESH_LC_SERVER_PROPERTY_PS_KEY_CFG_VAL);
 }
 
 /***************************************************************************//**

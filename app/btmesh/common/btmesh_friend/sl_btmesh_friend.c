@@ -3,7 +3,7 @@
  * @brief Friend implementation
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -94,6 +94,7 @@ void sl_btmesh_friend_on_event(sl_btmesh_msg_t *evt)
         evt->data.evt_friend_friendship_terminated.reason);
       break;
 
+    case sl_btmesh_evt_prov_initialized_id:
     case sl_btmesh_evt_node_provisioned_id:
       sl_btmesh_friend_feature_init();
       break;

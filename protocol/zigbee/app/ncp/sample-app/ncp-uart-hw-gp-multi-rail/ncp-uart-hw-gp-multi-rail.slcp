@@ -84,7 +84,7 @@ configuration:
   - name: SL_PSA_ITS_SUPPORT_V3_DRIVER
     value: 1
   - name: NVM3_DEFAULT_CACHE_SIZE
-    value: 1000
+    value: 300
 
 source:
   - path: "main.c"

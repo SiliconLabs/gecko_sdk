@@ -56,12 +56,12 @@ static bool useMulticastBinding = false;
 static uint8_t zcl_global_direction = ZCL_FRAME_CONTROL_CLIENT_TO_SERVER;
 
 // Forward declarations
-void sli_zigbee_zcl_global_setup(uint8_t commandId, sl_cli_command_arg_t *arguments);
+static void zcl_global_setup(uint8_t commandId, sl_cli_command_arg_t *arguments);
 
 void sli_zigbee_af_aps_frame_endpoint_setup(uint8_t srcEndpoint,
                                             uint8_t dstEndpoint);
 
-void sli_zigbee_af_aps_frame_cluster_id_setup(uint16_t clusterId)
+static void af_aps_frame_cluster_id_setup(uint16_t clusterId)
 {
   // setup the global options and cluster ID
   // send command will setup profile ID and endpoints.
@@ -110,7 +110,7 @@ void keysClearCommand(void)
 #endif
 }
 
-void cliBufferPrint(void)
+static void cliBufferPrint(void)
 {
   uint8_t cmdIndex = (appZclBuffer[0] & ZCL_MANUFACTURER_SPECIFIC_MASK) ? 4 : 2;
   zclCmdIsBuilt = true;
@@ -123,10 +123,10 @@ void cliBufferPrint(void)
   sl_zigbee_core_debug_println("");
 }
 
-void zclBufferSetup(uint8_t frameType, uint16_t clusterId, uint8_t commandId)
+static void zclBufferSetup(uint8_t frameType, uint16_t clusterId, uint8_t commandId)
 {
   uint8_t index = 0;
-  sli_zigbee_af_aps_frame_cluster_id_setup(clusterId);
+  af_aps_frame_cluster_id_setup(clusterId);
   appZclBuffer[index++] = (frameType
                            | ZCL_FRAME_CONTROL_CLIENT_TO_SERVER
                            | (mfgSpecificId != EMBER_AF_NULL_MANUFACTURER_CODE
@@ -383,45 +383,33 @@ void sli_zigbee_zcl_write_cli_command(sl_cli_command_arg_t *arguments)
   sl_zigbee_core_debug_println("");
 }
 
-void sli_zigbee_zcl_buffer_add_byte(uint8_t byte)
+static void zcl_buffer_add_byte(uint8_t byte)
 {
   appZclBuffer[appZclBufferLen] = byte;
   appZclBufferLen += 1;
 }
 
-void sli_zigbee_zcl_buffer_add_word(uint16_t word)
+static void zcl_buffer_add_word(uint16_t word)
 {
-  sli_zigbee_zcl_buffer_add_byte(LOW_BYTE(word));
-  sli_zigbee_zcl_buffer_add_byte(HIGH_BYTE(word));
+  zcl_buffer_add_byte(LOW_BYTE(word));
+  zcl_buffer_add_byte(HIGH_BYTE(word));
 }
 
-void sli_zigbee_zcl_buffer_add_int32(uint32_t value)
+static void zcl_buffer_add_int32(uint32_t value)
 {
   uint8_t i;
   for (i = 0; i < 4; i++) {
-    sli_zigbee_zcl_buffer_add_byte(LOW_BYTE(value));
+    zcl_buffer_add_byte(LOW_BYTE(value));
     value = value >> 8;
   }
-}
-
-void sli_zigbee_zcl_buffer_add_buffer(const uint8_t *buffer, uint8_t length)
-{
-  MEMMOVE(appZclBuffer + appZclBufferLen, buffer, length);
-  appZclBufferLen += length;
-}
-
-// Made non-to remove warnings
-void sli_zigbee_zcl_buffer_add_string(const uint8_t *buffer)
-{
-  sli_zigbee_zcl_buffer_add_buffer(buffer, emberAfStringLength(buffer) + 1);
 }
 
 // Writes the length and contents of the string found at argIndex
 // into the zcl buffer. Takes into account whether string is non-LONG
 // (1-byte length prefix) or LONG (2-byte length prefix).
-void sli_zigbee_zcl_buffer_add_length_and_string(sl_cli_command_arg_t *arguments,
-                                                 uint8_t argIndex,
-                                                 bool isLongStringType)
+static void zcl_buffer_add_length_and_string(sl_cli_command_arg_t *arguments,
+                                             uint8_t argIndex,
+                                             bool isLongStringType)
 {
   uint8_t prefixSize = (isLongStringType ? 2 : 1);
   // We protect against copying outside of the appZclBuffer
@@ -473,7 +461,7 @@ static void add_bytes_to_zcl_buffer(uint32_t val, uint8_t noOfBytes)
 {
   for (uint8_t i = 0; i < noOfBytes; i++) {
     uint8_t byteN = (uint8_t)(val >> (8u * i));
-    sli_zigbee_zcl_buffer_add_byte(byteN);
+    zcl_buffer_add_byte(byteN);
   }
 }
 
@@ -522,11 +510,11 @@ void sli_zigbee_zcl_simple_command(uint8_t frameControl,
     switch (type) {
       case SL_ZCL_CLI_ARG_UINT8:
       case SL_ZCL_CLI_ARG_UINT8OPT:
-        sli_zigbee_zcl_buffer_add_byte((uint8_t)sl_cli_get_argument_uint8(arguments, argumentIndex));
+        zcl_buffer_add_byte((uint8_t)sl_cli_get_argument_uint8(arguments, argumentIndex));
         break;
       case SL_ZCL_CLI_ARG_UINT16:
       case SL_ZCL_CLI_ARG_UINT16OPT:
-        sli_zigbee_zcl_buffer_add_word(sl_cli_get_argument_uint16(arguments, argumentIndex));
+        zcl_buffer_add_word(sl_cli_get_argument_uint16(arguments, argumentIndex));
         break;
       case SL_ZCL_CLI_ARG_UINT24:
       case SL_ZCL_CLI_ARG_UINT24OPT:
@@ -539,15 +527,15 @@ void sli_zigbee_zcl_simple_command(uint8_t frameControl,
         break;
       case SL_ZCL_CLI_ARG_UINT32:
       case SL_ZCL_CLI_ARG_UINT32OPT:
-        sli_zigbee_zcl_buffer_add_int32(sl_cli_get_argument_uint32(arguments, argumentIndex));
+        zcl_buffer_add_int32(sl_cli_get_argument_uint32(arguments, argumentIndex));
         break;
       case SL_ZCL_CLI_ARG_INT8:
       case SL_ZCL_CLI_ARG_INT8OPT:
-        sli_zigbee_zcl_buffer_add_byte((uint8_t)sl_cli_get_argument_int8(arguments, argumentIndex));
+        zcl_buffer_add_byte((uint8_t)sl_cli_get_argument_int8(arguments, argumentIndex));
         break;
       case SL_ZCL_CLI_ARG_INT16:
       case SL_ZCL_CLI_ARG_INT16OPT:
-        sli_zigbee_zcl_buffer_add_word(sl_cli_get_argument_int16(arguments, argumentIndex));
+        zcl_buffer_add_word(sl_cli_get_argument_int16(arguments, argumentIndex));
         break;
       case SL_ZCL_CLI_ARG_INT24:
       case SL_ZCL_CLI_ARG_INT24OPT:
@@ -560,7 +548,7 @@ void sli_zigbee_zcl_simple_command(uint8_t frameControl,
         break;
       case SL_ZCL_CLI_ARG_INT32:
       case SL_ZCL_CLI_ARG_INT32OPT:
-        sli_zigbee_zcl_buffer_add_int32(sl_cli_get_argument_int32(arguments, argumentIndex));
+        zcl_buffer_add_int32(sl_cli_get_argument_int32(arguments, argumentIndex));
         break;
       case SL_ZCL_CLI_ARG_HEX:
       case SL_ZCL_CLI_ARG_HEXOPT:
@@ -572,7 +560,7 @@ void sli_zigbee_zcl_simple_command(uint8_t frameControl,
         break;
       case SL_ZCL_CLI_ARG_STRING:
       case SL_ZCL_CLI_ARG_STRINGOPT:
-        sli_zigbee_zcl_buffer_add_length_and_string(arguments, argumentIndex, false);
+        zcl_buffer_add_length_and_string(arguments, argumentIndex, false);
         break;
       default:
         goto kickout;
@@ -666,19 +654,19 @@ void sli_zigbee_cli_zcl_drlc_load_control_event_command(sl_cli_command_arg_t *ar
                  | ZCL_FRAME_CONTROL_SERVER_TO_CLIENT,
                  ZCL_DEMAND_RESPONSE_LOAD_CONTROL_CLUSTER_ID,
                  ZCL_LOAD_CONTROL_EVENT_COMMAND_ID);
-  sli_zigbee_zcl_buffer_add_int32(sl_cli_get_argument_uint32(arguments, 0));  // event id
-  sli_zigbee_zcl_buffer_add_word(0x0fff);          // all device classes
-  sli_zigbee_zcl_buffer_add_byte((uint8_t)sl_cli_get_argument_uint8(arguments, 1)); // UEG
-  sli_zigbee_zcl_buffer_add_int32(sl_cli_get_argument_uint32(arguments, 2));  // start
-  sli_zigbee_zcl_buffer_add_word(sl_cli_get_argument_uint16(arguments, 3)); // duration
-  sli_zigbee_zcl_buffer_add_byte(1);               // criticality level, normal
-  sli_zigbee_zcl_buffer_add_byte(0);               // 1.1c cooling temp offset
-  sli_zigbee_zcl_buffer_add_byte(0);               // 1.1c heating temp offset
-  sli_zigbee_zcl_buffer_add_word(0x1a09);          // cool temp set point 23.3c
-  sli_zigbee_zcl_buffer_add_word(0x1a09);          // heat temp set point
-  sli_zigbee_zcl_buffer_add_byte(0x0a);            // -10% avg load percent
-  sli_zigbee_zcl_buffer_add_byte(0);               // duty cycle
-  sli_zigbee_zcl_buffer_add_byte((uint8_t)sl_cli_get_argument_uint8(arguments, 4));   // event control
+  zcl_buffer_add_int32(sl_cli_get_argument_uint32(arguments, 0));  // event id
+  zcl_buffer_add_word(0x0fff);          // all device classes
+  zcl_buffer_add_byte((uint8_t)sl_cli_get_argument_uint8(arguments, 1)); // UEG
+  zcl_buffer_add_int32(sl_cli_get_argument_uint32(arguments, 2));  // start
+  zcl_buffer_add_word(sl_cli_get_argument_uint16(arguments, 3)); // duration
+  zcl_buffer_add_byte(1);               // criticality level, normal
+  zcl_buffer_add_byte(0);               // 1.1c cooling temp offset
+  zcl_buffer_add_byte(0);               // 1.1c heating temp offset
+  zcl_buffer_add_word(0x1a09);          // cool temp set point 23.3c
+  zcl_buffer_add_word(0x1a09);          // heat temp set point
+  zcl_buffer_add_byte(0x0a);            // -10% avg load percent
+  zcl_buffer_add_byte(0);               // duty cycle
+  zcl_buffer_add_byte((uint8_t)sl_cli_get_argument_uint8(arguments, 4));   // event control
   globalApsFrame.options |= EMBER_APS_OPTION_SOURCE_EUI64;
   cliBufferPrint();
 }
@@ -693,8 +681,8 @@ void sli_zigbee_cli_zcl_bacnet_transfer_whois_command(sl_cli_command_arg_t *argu
                  ZCL_BACNET_PROTOCOL_TUNNEL_CLUSTER_ID,
                  ZCL_TRANSFER_NPDU_COMMAND_ID);
   //zclBufferAddByte(0);            // what is this?
-  sli_zigbee_zcl_buffer_add_int32(0xFFFF2001);
-  sli_zigbee_zcl_buffer_add_int32(0x0810FF00);
+  zcl_buffer_add_int32(0xFFFF2001);
+  zcl_buffer_add_int32(0x0810FF00);
   cliBufferPrint();
 }
 #endif
@@ -708,7 +696,7 @@ void sli_zigbee_cli_zcl_tunneling_random_to_server_command(sl_cli_command_arg_t 
                  | ZCL_FRAME_CONTROL_CLIENT_TO_SERVER,
                  ZCL_TUNNELING_CLUSTER_ID,
                  ZCL_TRANSFER_DATA_CLIENT_TO_SERVER_COMMAND_ID);
-  sli_zigbee_zcl_buffer_add_word(sl_cli_get_argument_uint16(arguments, 0)); // tunnel id
+  zcl_buffer_add_word(sl_cli_get_argument_uint16(arguments, 0)); // tunnel id
   appZclBufferLen = (appZclBufferLen + length < APP_ZCL_BUFFER_SIZE
                      ? appZclBufferLen + length
                      : APP_ZCL_BUFFER_SIZE);
@@ -723,7 +711,7 @@ void sli_zigbee_cli_zcl_tunneling_transfer_to_server_command(sl_cli_command_arg_
                  | ZCL_FRAME_CONTROL_CLIENT_TO_SERVER,
                  ZCL_TUNNELING_CLUSTER_ID,
                  ZCL_TRANSFER_DATA_CLIENT_TO_SERVER_COMMAND_ID);
-  sli_zigbee_zcl_buffer_add_word(sl_cli_get_argument_uint16(arguments, 0));              // tunnel id
+  zcl_buffer_add_word(sl_cli_get_argument_uint16(arguments, 0));              // tunnel id
   appZclBufferLen += sl_zigbee_copy_hex_arg(arguments,
                                             1,    // data
                                             appZclBuffer + appZclBufferLen,
@@ -740,7 +728,7 @@ void sli_zigbee_cli_zcl_tunneling_transfer_to_client_command(sl_cli_command_arg_
                  | ZCL_FRAME_CONTROL_SERVER_TO_CLIENT,
                  ZCL_TUNNELING_CLUSTER_ID,
                  ZCL_TRANSFER_DATA_SERVER_TO_CLIENT_COMMAND_ID);
-  sli_zigbee_zcl_buffer_add_word(sl_cli_get_argument_uint16(arguments, 0));              // tunnel id
+  zcl_buffer_add_word(sl_cli_get_argument_uint16(arguments, 0));              // tunnel id
   appZclBufferLen += sl_zigbee_copy_hex_arg(arguments,
                                             1,    // data
                                             appZclBuffer + appZclBufferLen,
@@ -758,7 +746,7 @@ void sli_zigbee_cli_zcl_tunneling_random_to_client_command(sl_cli_command_arg_t 
                  | ZCL_FRAME_CONTROL_SERVER_TO_CLIENT,
                  ZCL_TUNNELING_CLUSTER_ID,
                  ZCL_TRANSFER_DATA_SERVER_TO_CLIENT_COMMAND_ID);
-  sli_zigbee_zcl_buffer_add_word(sl_cli_get_argument_uint16(arguments, 0)); // tunnel id
+  zcl_buffer_add_word(sl_cli_get_argument_uint16(arguments, 0)); // tunnel id
   appZclBufferLen = (appZclBufferLen + length < APP_ZCL_BUFFER_SIZE
                      ? appZclBufferLen + length
                      : APP_ZCL_BUFFER_SIZE);
@@ -773,8 +761,8 @@ void sli_zigbee_cli_zcl_global_command_discovery_generated_command(sl_cli_comman
   zclBufferSetup(ZCL_GLOBAL_COMMAND | zcl_global_direction,
                  (EmberAfClusterId)sl_cli_get_argument_uint16(arguments, 0),   // cluster id
                  ZCL_DISCOVER_COMMANDS_GENERATED_COMMAND_ID);
-  sli_zigbee_zcl_buffer_add_byte((uint8_t)sl_cli_get_argument_uint8(arguments, 1)); // start command id
-  sli_zigbee_zcl_buffer_add_byte((uint8_t)sl_cli_get_argument_uint8(arguments, 2)); // max command ids
+  zcl_buffer_add_byte((uint8_t)sl_cli_get_argument_uint8(arguments, 1)); // start command id
+  zcl_buffer_add_byte((uint8_t)sl_cli_get_argument_uint8(arguments, 2)); // max command ids
   cliBufferPrint();
 }
 
@@ -784,8 +772,8 @@ void sli_zigbee_cli_zcl_global_command_discovery_received_command(sl_cli_command
   zclBufferSetup(ZCL_GLOBAL_COMMAND | zcl_global_direction,
                  (EmberAfClusterId)sl_cli_get_argument_uint16(arguments, 0),   // cluster id
                  ZCL_DISCOVER_COMMANDS_RECEIVED_COMMAND_ID);
-  sli_zigbee_zcl_buffer_add_byte((uint8_t)sl_cli_get_argument_uint8(arguments, 1)); // start command id
-  sli_zigbee_zcl_buffer_add_byte((uint8_t)sl_cli_get_argument_uint8(arguments, 2)); // max command ids
+  zcl_buffer_add_byte((uint8_t)sl_cli_get_argument_uint8(arguments, 1)); // start command id
+  zcl_buffer_add_byte((uint8_t)sl_cli_get_argument_uint8(arguments, 2)); // max command ids
   cliBufferPrint();
 }
 
@@ -804,9 +792,9 @@ void sli_zigbee_cli_zcl_global_expect_report_from_me_command(sl_cli_command_arg_
   zclBufferSetup(ZCL_GLOBAL_COMMAND | zcl_global_direction,
                  (EmberAfClusterId)sl_cli_get_argument_uint16(arguments, 0), // cluster id
                  ZCL_CONFIGURE_REPORTING_COMMAND_ID);
-  sli_zigbee_zcl_buffer_add_byte(EMBER_ZCL_REPORTING_DIRECTION_RECEIVED);
-  sli_zigbee_zcl_buffer_add_word(sl_cli_get_argument_uint16(arguments, 1)); // attribute id
-  sli_zigbee_zcl_buffer_add_word(sl_cli_get_argument_uint16(arguments, 2)); // timeout
+  zcl_buffer_add_byte(EMBER_ZCL_REPORTING_DIRECTION_RECEIVED);
+  zcl_buffer_add_word(sl_cli_get_argument_uint16(arguments, 1)); // attribute id
+  zcl_buffer_add_word(sl_cli_get_argument_uint16(arguments, 2)); // timeout
   cliBufferPrint();
 }
 
@@ -815,7 +803,7 @@ static void zigbee_zcl_global_write_command_common(sl_cli_command_arg_t *argumen
 {
   uint8_t type = sl_cli_get_argument_uint8(arguments, 2);
   uint8_t commandId = type_of_write;
-  sli_zigbee_zcl_global_setup(commandId, arguments);
+  zcl_global_setup(commandId, arguments);
 
   if (emberAfIsThisDataTypeAStringType(type)) {
     uint8_t bytes_reserved_for_string_length = emberAfIsLongStringAttributeType(type) ? 2 : 1;
@@ -872,14 +860,14 @@ void sli_zigbee_cli_zcl_global_nwrite_command(sl_cli_command_arg_t *arguments)
 // zcl global discover <cluster> <attrID:2> <max # to report:1>
 void sli_zigbee_cli_zcl_global_discover_command(sl_cli_command_arg_t *arguments)
 {
-  sli_zigbee_zcl_global_setup(ZCL_DISCOVER_ATTRIBUTES_COMMAND_ID, arguments);
+  zcl_global_setup(ZCL_DISCOVER_ATTRIBUTES_COMMAND_ID, arguments);
   cliBufferPrint();
 }
 
 // zcl global read <cluster:2> <attribute:2>
 void sli_zigbee_cli_zcl_global_read_command(sl_cli_command_arg_t *arguments)
 {
-  sli_zigbee_zcl_global_setup(ZCL_READ_ATTRIBUTES_COMMAND_ID, arguments);
+  zcl_global_setup(ZCL_READ_ATTRIBUTES_COMMAND_ID, arguments);
   cliBufferPrint();
 }
 
@@ -914,8 +902,8 @@ void sli_zigbee_cli_zcl_global_report_command(sl_cli_command_arg_t *arguments)
                     : ZCL_FRAME_CONTROL_SERVER_TO_CLIENT),
                  clusterId,
                  ZCL_REPORT_ATTRIBUTES_COMMAND_ID);
-  sli_zigbee_zcl_buffer_add_word(attributeId);
-  sli_zigbee_zcl_buffer_add_byte(type);
+  zcl_buffer_add_word(attributeId);
+  zcl_buffer_add_byte(type);
 
   size = emberAfAttributeValueSize(type, data, sizeof(data));
   if (size == 0 || size > (APP_ZCL_BUFFER_SIZE - appZclBufferLen)) {
@@ -942,8 +930,8 @@ void sli_zigbee_cli_zcl_global_report_read_command(sl_cli_command_arg_t *argumen
   zclBufferSetup(ZCL_GLOBAL_COMMAND | zcl_global_direction,
                  (EmberAfClusterId)sl_cli_get_argument_uint16(arguments, 0), // cluster id
                  ZCL_READ_REPORTING_CONFIGURATION_COMMAND_ID);
-  sli_zigbee_zcl_buffer_add_byte(sl_cli_get_argument_uint8(arguments, 2)); // direction
-  sli_zigbee_zcl_buffer_add_word(sl_cli_get_argument_uint16(arguments, 1)); // attribute id
+  zcl_buffer_add_byte(sl_cli_get_argument_uint8(arguments, 2)); // direction
+  zcl_buffer_add_word(sl_cli_get_argument_uint16(arguments, 1)); // attribute id
   cliBufferPrint();
 }
 
@@ -956,11 +944,11 @@ void sli_zigbee_cli_zcl_global_send_me_a_report_command(sl_cli_command_arg_t *ar
   zclBufferSetup(ZCL_GLOBAL_COMMAND | zcl_global_direction,
                  (EmberAfClusterId)sl_cli_get_argument_uint16(arguments, 0), // cluster id
                  ZCL_CONFIGURE_REPORTING_COMMAND_ID);
-  sli_zigbee_zcl_buffer_add_byte(EMBER_ZCL_REPORTING_DIRECTION_REPORTED);
-  sli_zigbee_zcl_buffer_add_word(attributeId);
-  sli_zigbee_zcl_buffer_add_byte(type);           // type
-  sli_zigbee_zcl_buffer_add_word(sl_cli_get_argument_uint16(arguments, 3));  // minimum reporting interval
-  sli_zigbee_zcl_buffer_add_word(sl_cli_get_argument_uint16(arguments, 4));  // maximum reporting interval
+  zcl_buffer_add_byte(EMBER_ZCL_REPORTING_DIRECTION_REPORTED);
+  zcl_buffer_add_word(attributeId);
+  zcl_buffer_add_byte(type);           // type
+  zcl_buffer_add_word(sl_cli_get_argument_uint16(arguments, 3));  // minimum reporting interval
+  zcl_buffer_add_word(sl_cli_get_argument_uint16(arguments, 4));  // maximum reporting interval
 
   // If the data type is analog, then the reportable change field is the same
   // size as the data type.  Otherwise, it is omitted.
@@ -984,15 +972,15 @@ void sli_zigbee_cli_zcl_global_send_me_a_report_command(sl_cli_command_arg_t *ar
   cliBufferPrint();
 }
 
-void sli_zigbee_zcl_global_setup(uint8_t commandId, sl_cli_command_arg_t *arguments)
+static void zcl_global_setup(uint8_t commandId, sl_cli_command_arg_t *arguments)
 {
   uint16_t clusterId = (uint16_t)sl_cli_get_argument_uint16(arguments, 0);
   zclBufferSetup(ZCL_GLOBAL_COMMAND | zcl_global_direction,
                  clusterId,
                  commandId);
-  sli_zigbee_zcl_buffer_add_word(sl_cli_get_argument_uint16(arguments, 1));  // attr id
+  zcl_buffer_add_word(sl_cli_get_argument_uint16(arguments, 1));  // attr id
   if (commandId != ZCL_READ_ATTRIBUTES_COMMAND_ID) {
-    sli_zigbee_zcl_buffer_add_byte((uint8_t)sl_cli_get_argument_uint8(arguments, 2));
+    zcl_buffer_add_byte((uint8_t)sl_cli_get_argument_uint8(arguments, 2));
   }
 }
 
@@ -1004,7 +992,7 @@ void sli_zigbee_af_cli_raw_command(sl_cli_command_arg_t *arguments)
 {
   uint8_t seqNumIndex;
   uint8_t length;
-  sli_zigbee_af_aps_frame_cluster_id_setup(sl_cli_get_argument_uint16(arguments, 0));
+  af_aps_frame_cluster_id_setup(sl_cli_get_argument_uint16(arguments, 0));
   length = sl_zigbee_copy_hex_arg(arguments, 1, appZclBuffer, APP_ZCL_BUFFER_SIZE_CLI, false);
   seqNumIndex = (appZclBuffer[0] & ZCL_MANUFACTURER_SPECIFIC_MASK) ? 3 : 1;
   if (useNextSequence) {
@@ -1029,7 +1017,7 @@ void sli_zigbee_af_cli_timesync_command(sl_cli_command_arg_t *arguments)
   zclBufferSetup(ZCL_GLOBAL_COMMAND | ZCL_FRAME_CONTROL_CLIENT_TO_SERVER,
                  ZCL_TIME_CLUSTER_ID,
                  ZCL_READ_ATTRIBUTES_COMMAND_ID);
-  sli_zigbee_zcl_buffer_add_word(ZCL_TIME_ATTRIBUTE_ID);
+  zcl_buffer_add_word(ZCL_TIME_ATTRIBUTE_ID);
   sli_zigbee_af_syncing_time = true;
   cliBufferPrint();
   sli_zigbee_cli_send_command(arguments);

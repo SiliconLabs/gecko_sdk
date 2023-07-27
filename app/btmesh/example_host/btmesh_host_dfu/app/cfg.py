@@ -272,6 +272,46 @@ silabs_retry_interval_lpn_default = 5.0
 # feature is performed through Silabs Config messages. (see conf ae command)
 silabs_retry_multicast_threshold_default = 2
 
+# If DCD Query Auto Configuration option is true then the DCD is queried from
+# each node immediately upon their provisioning into the network.
+auto_conf_dcd_query = true
+
+# If Default TTL Auto Configuration is true then the Default TTL state is
+# configured on each node immediately upon their provisioning into the network.
+auto_conf_default_ttl = true
+
+# Default value of Default TTL determines TTL value used when sending messages.
+# The Default TTL is applied by the access layer or by the upper transport layer
+# unless the application or functionality specifies a TTL.
+# Valid value range is from 2 to 127 for relayed PDUs, and 0 for non-relayed PDUs.
+default_ttl_default = 5
+
+# Default relay retransmit count controls the number of retransmissions of
+# Network PDUs relayed by the node.
+# Valid values range from 0 to 7.
+relay_retx_count_default = 2
+
+# Default relay retransmit interval in milliseconds controls the interval
+# between retransmissions of Network PDUs relayed by the node.
+# Valid values range from 10 ms to 320 ms, with a resolution of 10 ms.
+relay_retx_interval_ms_default = 10
+
+# If Network Transmit Auto Configuration is true then the Network Transmit state
+# is configured on each node immediately upon their provisioning into the network.
+# Network Transmit is a composite state that controls the number and timing of
+# the transmissions of Network PDUs originating from a node.
+auto_conf_network_tx = true
+
+# Default network transmit count controls the number of transmissions of Network
+# PDUs that originate from the node.
+# Valid values range from 1 to 8.
+network_tx_count_default = 2
+
+# Default interval in milliseconds between network PDU transmissions which
+# originates from the same nodes.
+# Valid values range from 10 ms to 320 ms, with a resolution of 10 ms.
+network_tx_interval_ms_default = 10
+
 
 [dist_clt]
 # Element index of the FW Distribution Client model on NCP node.
@@ -958,9 +998,7 @@ class BtmeshDfuCommonCfg:
             "retry_multicast_threshold_default"
         )
         # retry_auto_unicast_default
-        self._retry_auto_unicast_default = sect.getboolean(
-            "retry_auto_unicast_default"
-        )
+        self._retry_auto_unicast_default = sect.getboolean("retry_auto_unicast_default")
         # Log common configuration
         sectname = sect.name
         api_xmls_default_str = ", ".join(str(path) for path in self.api_xmls_default)
@@ -1092,6 +1130,26 @@ class BtmeshDfuAppConfCfg:
         self._silabs_retry_multicast_threshold_default = sect.getint(
             "silabs_retry_multicast_threshold_default"
         )
+        # auto_conf_dcd_query
+        self._auto_conf_dcd_query = sect.getboolean("auto_conf_dcd_query")
+        # auto_conf_default_ttl
+        self._auto_conf_default_ttl = sect.getboolean("auto_conf_default_ttl")
+        # default_ttl_default
+        self._default_ttl_default = sect.getint("default_ttl_default")
+        # relay_retx_count_default
+        self._relay_retx_count_default = sect.getint("relay_retx_count_default")
+        # relay_retx_interval_ms_default
+        self._relay_retx_interval_ms_default = sect.getint(
+            "relay_retx_interval_ms_default"
+        )
+        # auto_conf_network_tx
+        self._auto_conf_network_tx = sect.getboolean("auto_conf_network_tx")
+        # network_tx_count_default
+        self._network_tx_count_default = sect.getint("network_tx_count_default")
+        # network_tx_interval_ms_default
+        self._network_tx_interval_ms_default = sect.getint(
+            "network_tx_interval_ms_default"
+        )
         # Log conf configuration
         sectname = sect.name
         logger.debug(
@@ -1135,6 +1193,30 @@ class BtmeshDfuAppConfCfg:
         logger.debug(
             f"{sectname}:silabs_retry_multicast_threshold_default: "
             f"{self.silabs_retry_multicast_threshold_default}"
+        )
+        logger.debug(
+            f"{sectname}:auto_conf_dcd_query: " f"{self.auto_conf_dcd_query}"
+        )
+        logger.debug(
+            f"{sectname}:auto_conf_default_ttl: " f"{self.auto_conf_default_ttl}"
+        )
+        logger.debug(f"{sectname}:default_ttl_default: " f"{self.default_ttl_default}")
+        logger.debug(
+            f"{sectname}:relay_retx_count_default: " f"{self.relay_retx_count_default}"
+        )
+        logger.debug(
+            f"{sectname}:relay_retx_interval_ms_default: "
+            f"{self.relay_retx_interval_ms_default}"
+        )
+        logger.debug(
+            f"{sectname}:auto_conf_network_tx: " f"{self.auto_conf_network_tx}"
+        )
+        logger.debug(
+            f"{sectname}:network_tx_count_default: " f"{self.network_tx_count_default}"
+        )
+        logger.debug(
+            f"{sectname}:network_tx_interval_ms_default: "
+            f"{self.network_tx_interval_ms_default}"
         )
 
     @property
@@ -1180,6 +1262,38 @@ class BtmeshDfuAppConfCfg:
     @property
     def silabs_retry_multicast_threshold_default(self):
         return self._silabs_retry_multicast_threshold_default
+
+    @property
+    def auto_conf_dcd_query(self):
+        return self._auto_conf_dcd_query
+
+    @property
+    def auto_conf_default_ttl(self):
+        return self._auto_conf_default_ttl
+
+    @property
+    def default_ttl_default(self):
+        return self._default_ttl_default
+
+    @property
+    def relay_retx_count_default(self):
+        return self._relay_retx_count_default
+
+    @property
+    def relay_retx_interval_ms_default(self):
+        return self._relay_retx_interval_ms_default
+
+    @property
+    def auto_conf_network_tx(self):
+        return self._auto_conf_network_tx
+
+    @property
+    def network_tx_count_default(self):
+        return self._network_tx_count_default
+
+    @property
+    def network_tx_interval_ms_default(self):
+        return self._network_tx_interval_ms_default
 
 
 class BtmeshDfuAppFwDistClientCfg:

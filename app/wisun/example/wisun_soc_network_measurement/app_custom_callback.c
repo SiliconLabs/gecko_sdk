@@ -33,15 +33,19 @@
 // -----------------------------------------------------------------------------
 #include <stdio.h>
 #include <assert.h>
+#include "sl_component_catalog.h"
 #include "sl_status.h"
 #include "sl_wisun_types.h"
 #include "app_custom_callback.h"
 #include "sl_wisun_app_core.h"
 #include "sl_wisun_app_setting.h"
+#include "sl_wisun_cli_util.h"
+
+#if defined(SL_CATALOG_GUI_PRESENT)
 #include "sl_wisun_network_measurement_gui.h"
 #include "sl_display.h"
 #include "sl_gui.h"
-#include "sl_wisun_cli_util.h"
+#endif
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -91,6 +95,7 @@ void app_custom_socket_data_sent_callback(sl_wisun_evt_t *evt)
 
 void app_custom_join_state_callback(sl_wisun_evt_t *evt)
 {
+#if defined(SL_CATALOG_GUI_PRESENT)
   static char nw_name[MAX_SIZE_OF_NETWORK_NAME] = { 0 };
   static char join_state_str[20U] = { 0 };
   static sl_wisun_nwm_logo_form_args_t args = { 0 };
@@ -119,6 +124,9 @@ void app_custom_join_state_callback(sl_wisun_evt_t *evt)
   } else {
     sl_display_renderer(sli_wisun_nwm_logo_form, (void *)&args, 0);
   }
+#else
+  (void) evt;
+#endif
 }
 
 void app_custom_regulation_tx_level_callback(sl_wisun_evt_t *evt)

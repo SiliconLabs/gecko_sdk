@@ -54,3 +54,8 @@ WEAK(EmberStatus emberSetTokenData(uint32_t token,
   (void) tokenData;
   return EMBER_LIBRARY_NOT_PRESENT;
 }
+WEAK(void sl_zigbee_token_factory_reset(bool exclude_outgoing_fc, bool exclude_boot_counter))
+{
+  (void)exclude_outgoing_fc;
+  (void)exclude_boot_counter;
+}

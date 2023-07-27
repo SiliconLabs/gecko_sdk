@@ -73,7 +73,7 @@ uint8_t emberAfPluginCalendarCommonGetCalendarById(uint32_t calendarId,
   return EMBER_AF_PLUGIN_CALENDAR_COMMON_INVALID_INDEX;
 }
 
-EmberAfCalendarStruct * findCalendarByCalId(uint32_t issuerCalendarId)
+static EmberAfCalendarStruct * findCalendarByCalId(uint32_t issuerCalendarId)
 {
   uint8_t i;
   for (i = 0; i < EMBER_AF_PLUGIN_CALENDAR_COMMON_TOTAL_CALENDARS; i++) {

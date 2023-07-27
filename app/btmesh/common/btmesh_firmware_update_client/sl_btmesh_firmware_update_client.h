@@ -3,7 +3,7 @@
  * @brief BT Mesh Firmware Update Client
  *******************************************************************************
  * # License
- * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -43,8 +43,7 @@ extern "C" {
 /***************************************************************************//**
  * Handle Firmware Update Client events.
  *
- * This function is called automatically by Universal Configurator after
- * enabling the component.
+ * This function is called automatically after enabling the component.
  *
  * @param[in] evt  Pointer to incoming event.
  *

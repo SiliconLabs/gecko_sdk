@@ -67,7 +67,7 @@ static uint32_t customEventHandlerDelayMS = MILLISECOND_TICKS_PER_SECOND;
 // -----------------------------------------------------------------------------
 // Custom event
 extern EmberEventQueue sli_zigbee_af_app_event_queue;
-void customEventHandler(EmberEvent *event);
+static void customEventHandler(EmberEvent *event);
 static EmberEvent customEvent = {
   {
     &sli_zigbee_af_app_event_queue,
@@ -79,7 +79,7 @@ static EmberEvent customEvent = {
 };
 
 // Custom event handler.
-void customEventHandler(EmberEvent *event)
+static void customEventHandler(EmberEvent *event)
 {
   switch (customState) {
     default:

@@ -7,7 +7,7 @@ description: >
   1) Defining SL_DEBUG_ASSERT enables assertions on compile-time configurable parameters
   2) Defining SL_DEBUG_PRINT enables debug prints at strategic points in the code
 category: Platform|Bootloader|TrustZone NonSecure|Utils
-quality: evaluation
+quality: production
 source:
   - path: platform/bootloader/debug/btl_debug_ns.c
 include:

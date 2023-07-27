@@ -66,15 +66,21 @@ static void sli_zigbee_direct_form_network_write(uint8_t connection, uint8array 
 static void sli_zigbee_direct_identify_write(uint8_t connection, uint8array *writeValue);
 static void sli_zigbee_direct_manage_joiners_write(uint8_t connection, uint8array *writeValue);
 static void sli_zigbee_direct_finding_binding_write(uint8_t connection, uint8array *writeValue);
+
+#ifdef SL_CATALOG_ZIGBEE_DIRECT_SECURITY_P256_PRESENT
 static void sli_zigbee_direct_authenticate_write_p256(uint8_t connection, uint8array *writeValue);
+#endif // SL_CATALOG_ZIGBEE_DIRECT_SECURITY_P256_PRESENT
+
+#ifdef SL_CATALOG_ZIGBEE_DIRECT_SECURITY_CURVE25519_PRESENT
 static void sli_zigbee_direct_authenticate_write_25519(uint8_t connection, uint8array *writeValue);
+#endif // SL_CATALOG_ZIGBEE_DIRECT_SECURITY_CURVE25519_PRESENT
 
 static void sli_zigbee_direct_send_status_via_commissioning_status_notification(uint8_t connection, uint8_t status_domain, uint8_t status_code);
 static EmberStatus sli_zigbee_direct_oob_join(void);
 static uint8_t sli_channel_masks_first_channel(uint32_t sl_channel_mask);
 static void sli_zigbee_direct_extract_data_from_tlvs_buf(Buffer my_Buffer, uint8_t len);
 static uint8_t sli_zigbee_direct_form_network(sl_zigbee_tlv_tag_list* tlvs_for_forming);
-static void sli_zigbee_direct_send_network_status_notification(uint8_t connection);
+static void send_network_status_notification(uint8_t connection);
 
 //globals
 EmberNetworkParameters sl_zigbee_direct_network_params;
@@ -106,7 +112,7 @@ static uint8_t zigbee_direct_mac_assoc_excl_tags[] = {
   SL_ZIGBEE_DIRECT_TLV_NETWORK_UPDATE_ID_TAG_ID,
   SL_ZIGBEE_DIRECT_TLV_NETWORK_ACTIVE_KEY_SEQ_NUMBER_TAG_ID,
 };
-sl_zigbee_tlv_tag_list zigbee_direct_mac_assoc_excl_tag_list = { sizeof(zigbee_direct_mac_assoc_excl_tags), zigbee_direct_mac_assoc_excl_tags };
+static sl_zigbee_tlv_tag_list zigbee_direct_mac_assoc_excl_tag_list = { sizeof(zigbee_direct_mac_assoc_excl_tags), zigbee_direct_mac_assoc_excl_tags };
 
 static uint8_t zigbee_direct_nwk_rejoin_excl_tags[] = {
   SL_ZIGBEE_DIRECT_TLV_NETWORK_KEY_TAG_ID,
@@ -118,14 +124,14 @@ static uint8_t zigbee_direct_nwk_rejoin_excl_tags[] = {
   SL_ZIGBEE_DIRECT_TLV_NETWORK_UPDATE_ID_TAG_ID,
   SL_ZIGBEE_DIRECT_TLV_NETWORK_ACTIVE_KEY_SEQ_NUMBER_TAG_ID
 };
-sl_zigbee_tlv_tag_list zigbee_direct_nwk_rejoin_excl_tag_list = { sizeof(zigbee_direct_nwk_rejoin_excl_tags), zigbee_direct_nwk_rejoin_excl_tags };
+static sl_zigbee_tlv_tag_list zigbee_direct_nwk_rejoin_excl_tag_list = { sizeof(zigbee_direct_nwk_rejoin_excl_tags), zigbee_direct_nwk_rejoin_excl_tags };
 
 static uint8_t zigbee_direct_nwk_oob_excl_tags[] = {
   SL_ZIGBEE_DIRECT_TLV_DEVICE_TYPE_TAG_ID,
   SL_ZIGBEE_DIRECT_TLV_IEEE_ADDRESS_TAG_ID,
   SL_ZIGBEE_DIRECT_TLV_NETWORK_STATUS_MAP_TAG_ID
 };
-sl_zigbee_tlv_tag_list zigbee_direct_nwk_oob_excl_tag_list = { sizeof(zigbee_direct_nwk_oob_excl_tags), zigbee_direct_nwk_oob_excl_tags };
+static sl_zigbee_tlv_tag_list zigbee_direct_nwk_oob_excl_tag_list = { sizeof(zigbee_direct_nwk_oob_excl_tags), zigbee_direct_nwk_oob_excl_tags };
 
 static uint8_t zigbee_direct_nwk_oob_incl_tags[] = {
   SL_ZIGBEE_DIRECT_TLV_EXTENDED_PAN_ID_TAG_ID,
@@ -133,7 +139,7 @@ static uint8_t zigbee_direct_nwk_oob_incl_tags[] = {
   SL_ZIGBEE_DIRECT_TLV_NETWORK_CHANNEL_MASK_TAG_ID,
   SL_ZIGBEE_DIRECT_TLV_NETWORK_KEY_TAG_ID
 };
-sl_zigbee_tlv_tag_list zigbee_direct_nwk_oob_incl_tag_list = { sizeof(zigbee_direct_nwk_oob_incl_tags), zigbee_direct_nwk_oob_incl_tags };
+static sl_zigbee_tlv_tag_list zigbee_direct_nwk_oob_incl_tag_list = { sizeof(zigbee_direct_nwk_oob_incl_tags), zigbee_direct_nwk_oob_incl_tags };
 
 static uint8_t zigbee_direct_nwk_form_excl_tags[] = {
   SL_ZIGBEE_DIRECT_TLV_DEVICE_TYPE_TAG_ID,
@@ -141,7 +147,7 @@ static uint8_t zigbee_direct_nwk_form_excl_tags[] = {
   SL_ZIGBEE_DIRECT_TLV_IEEE_ADDRESS_TAG_ID,
   SL_ZIGBEE_DIRECT_TLV_NETWORK_STATUS_MAP_TAG_ID
 };
-sl_zigbee_tlv_tag_list zigbee_direct_nwk_form_excl_tag_list = { sizeof(zigbee_direct_nwk_form_excl_tags), zigbee_direct_nwk_form_excl_tags };
+static sl_zigbee_tlv_tag_list zigbee_direct_nwk_form_excl_tag_list = { sizeof(zigbee_direct_nwk_form_excl_tags), zigbee_direct_nwk_form_excl_tags };
 
 // ZigBee Direct TLV env
 sl_zigbee_tlv_tag_min_length_t zigbee_direct_tlv_env[] =
@@ -181,10 +187,14 @@ sl_zigbee_tlv_tag_min_length_t zigbee_direct_tlv_env[] =
     .min_length = SL_ZIGBEE_DIRECT_TUNNELING_TLV_NPDU_REQUEST_MIN_LEN, },
   { .tag_id = SL_ZIGBEE_DIRECT_SECURITY_TLV_SELECTED_KEY_NEGOTIATION_METHOD_TAG_ID,
     .min_length = SL_ZIGBEE_DIRECT_SECURITY_TLV_SELECTED_KEY_NEGOTIATION_METHOD_MIN_LEN, },
+#ifdef SL_CATALOG_ZIGBEE_DIRECT_SECURITY_P256_PRESENT
   { .tag_id = SL_ZIGBEE_DIRECT_SECURITY_TLV_P256_PUBLIC_POINT_TAG_ID,
     .min_length = SL_ZIGBEE_DIRECT_SECURITY_TLV_P256_PUBLIC_POINT_MIN_LEN, },
+#endif // SL_CATALOG_ZIGBEE_DIRECT_SECURITY_P256_PRESENT
+#ifdef SL_CATALOG_ZIGBEE_DIRECT_SECURITY_CURVE25519_PRESENT
   { .tag_id = SL_ZIGBEE_DIRECT_SECURITY_TLV_C25519_PUBLIC_POINT_TAG_ID,
     .min_length = SL_ZIGBEE_DIRECT_SECURITY_TLV_C25519_PUBLIC_POINT_MIN_LEN, },
+#endif // SL_CATALOG_ZIGBEE_DIRECT_SECURITY_CURVE25519_PRESENT
   { .tag_id = SL_ZIGBEE_DIRECT_SECURITY_TLV_KEY_SEQUENCE_NUMBER_TAG_ID,
     .min_length = SL_ZIGBEE_DIRECT_SECURITY_TLV_KEY_SEQUENCE_NUMBER_MIN_LEN, },
   { .tag_id = SL_ZIGBEE_DIRECT_SECURITY_TLV_MAC_TAG_TAG_ID,
@@ -226,8 +236,12 @@ static const AppCfgGattServerUserWriteRequest_t appCfgGattServerUserWriteRequest
 #ifdef SL_CATALOG_ZIGBEE_DIRECT_TUNNELING_PRESENT
   { gattdb_zigbee_tunnel_2, sl_zigbee_direct_tunnel_write },
 #endif //SL_CATALOG_ZIGBEE_DIRECT_TUNNELING_PRESENT
+#ifdef SL_CATALOG_ZIGBEE_DIRECT_SECURITY_P256_PRESENT
   { gattdb_authenticate_p256, sli_zigbee_direct_authenticate_write_p256 },
+#endif // SL_CATALOG_ZIGBEE_DIRECT_SECURITY_P256_PRESENT
+#ifdef SL_CATALOG_ZIGBEE_DIRECT_SECURITY_CURVE25519_PRESENT
   { gattdb_authenticate_25519, sli_zigbee_direct_authenticate_write_25519 },
+#endif // SL_CATALOG_ZIGBEE_DIRECT_SECURITY_CURVE25519_PRESENT
   { 0, NULL }
 };
 
@@ -793,10 +807,6 @@ void zdd_state_machine()
   sl_zigbee_tlv_tag_list sl_tlv_chain1 = { current_writeValue->len, current_writeValue->data };
 
   switch (current_state) {
-    case P256_WRITE:
-      sl_zigbee_direct_handle_authenticate_write(current_connection, current_writeValue, gattdb_authenticate_p256);
-      current_state = START_STATE;
-      break;
     case LEAVE_WRITE:
       sl_zigbee_app_debug_println("Requeste to leave the PAN with payload: %X %X", current_writeValue->data[0], current_writeValue->data[1]);
       status = emberGetNodeType(&NodeType);
@@ -838,11 +848,11 @@ void zdd_state_machine()
           //send status in case we are modifying join time without opening/closing
           if (emberGetPermitJoining()) {
             if (current_writeValue->data[0] != 0x00) {
-              sli_zigbee_direct_send_network_status_notification(0xFF); //send to all connected devices?
+              send_network_status_notification(0xFF); //send to all connected devices?
             }
           } else {
             if (current_writeValue->data[0] == 0x00) {
-              sli_zigbee_direct_send_network_status_notification(0xFF); //send to all connected devices?
+              send_network_status_notification(0xFF); //send to all connected devices?
             }
           }
         }
@@ -921,10 +931,18 @@ void zdd_state_machine()
       }
       current_state = START_STATE;
       break;
+#ifdef SL_CATALOG_ZIGBEE_DIRECT_SECURITY_P256_PRESENT
+    case P256_WRITE:
+      sl_zigbee_direct_handle_authenticate_write(current_connection, current_writeValue, gattdb_authenticate_p256);
+      current_state = START_STATE;
+      break;
+#endif // SL_CATALOG_ZIGBEE_DIRECT_SECURITY_P256_PRESENT
+#ifdef SL_CATALOG_ZIGBEE_DIRECT_SECURITY_CURVE25519_PRESENT
     case C25519_WRITE:
       sl_zigbee_direct_handle_authenticate_write(current_connection, current_writeValue, gattdb_authenticate_25519);
       current_state = START_STATE;
       break;
+#endif // SL_CATALOG_ZIGBEE_DIRECT_SECURITY_CURVE25519_PRESENT
     default:
       break;
   }
@@ -1166,7 +1184,7 @@ static void sli_zigbee_direct_identify_read(uint8_t connection)
                                             &sent_length);
 }
 
-void sli_zigbee_direct_send_network_status_notification(uint8_t connection)
+static void send_network_status_notification(uint8_t connection)
 {
   uint8_t sl_response[SL_ZIGBEE_DIRECT_RESPONSE_MAX_LENGTH];
   uint8_t sl_length_of_network_status = sl_generate_commissioning_status(&sl_response[4]);
@@ -1654,6 +1672,7 @@ static void sli_zigbee_direct_finding_binding_write(uint8_t connection, uint8arr
   }
 }
 
+#ifdef SL_CATALOG_ZIGBEE_DIRECT_SECURITY_CURVE25519_PRESENT
 static void sli_zigbee_direct_authenticate_write_25519(uint8_t connection, uint8array *writeValue)
 {
   sl_bt_gatt_server_send_user_write_response(connection, gattdb_authenticate_25519, ES_WRITE_OK);
@@ -1663,7 +1682,9 @@ static void sli_zigbee_direct_authenticate_write_25519(uint8_t connection, uint8
   ATOMIC(sl_zigbee_event_set_delay_ms(&zb_stack_event, 10); );
   sl_zigbee_common_rtos_wakeup_stack_task();
 }
+#endif // SL_CATALOG_ZIGBEE_DIRECT_SECURITY_CURVE25519_PRESENT
 
+#ifdef SL_CATALOG_ZIGBEE_DIRECT_SECURITY_P256_PRESENT
 static void sli_zigbee_direct_authenticate_write_p256(uint8_t connection, uint8array *writeValue)
 {
   sl_bt_gatt_server_send_user_write_response(connection, gattdb_authenticate_p256, ES_WRITE_OK);
@@ -1673,6 +1694,7 @@ static void sli_zigbee_direct_authenticate_write_p256(uint8_t connection, uint8a
   ATOMIC(sl_zigbee_event_set_delay_ms(&zb_stack_event, 10); );
   sl_zigbee_common_rtos_wakeup_stack_task();
 }
+#endif // SL_CATALOG_ZIGBEE_DIRECT_SECURITY_P256_PRESENT
 
 static void sli_zigbee_store_int24u(bool lowHigh, uint8_t* contents, uint32_t value)
 {
@@ -1941,7 +1963,7 @@ void sli_zigbee_af_plugin_zdd_stack_status_callback(sl_status_t status)
                                    0,  //advertising packets
                                    sizeof(sli_zigbee_direct_ad_data),
                                    (uint8_t*) &sli_zigbee_direct_ad_data);
-  sli_zigbee_direct_send_network_status_notification(0xFF); //send to all connected devices
+  send_network_status_notification(0xFF); //send to all connected devices
 
   sl_zigbee_app_debug_println("Un-Setting Form in Process");
   form_in_process = false;

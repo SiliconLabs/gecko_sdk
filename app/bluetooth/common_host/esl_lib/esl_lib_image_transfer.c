@@ -879,6 +879,10 @@ static void ots_init(sl_bt_ots_client_handle_t  client,
                            image_transfer->image_transfer_handle,
                            result);
       remove_transfer(image_transfer, result, false);
+      set_state(image_transfer,
+                ESL_LIB_IMAGE_TRANSFER_REMOVED,
+                result,
+                NULL);
     }
   }
 }
@@ -1213,6 +1217,10 @@ static void init_timeout(app_timer_t *timer,
   esl_lib_log_it_error(IT_FMT "OTS init timeout" APP_LOG_NL,
                        image_transfer->image_transfer_handle);
   // Remove transfer that could not be initialized
+  set_state(image_transfer,
+            ESL_LIB_IMAGE_TRANSFER_REMOVED,
+            SL_STATUS_TIMEOUT,
+            NULL);
   remove_transfer(image_transfer, SL_STATUS_TIMEOUT, false);
 }
 

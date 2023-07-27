@@ -57,8 +57,7 @@
 // -----------------------------------------------------------------------------
 // Globals
 
-sl_zigbee_event_t emberAfPluginFindAndBindInitiatorCheckTargetResponsesEvent;
-#define checkTargetResponsesEventControl (&emberAfPluginFindAndBindInitiatorCheckTargetResponsesEvent)
+static sl_zigbee_event_t checkTargetResponsesEvent;
 
 typedef struct {
   EmberNodeId nodeId;
@@ -134,7 +133,7 @@ EmberStatus emberAfPluginFindAndBindInitiatorStart(uint8_t endpoint)
 
   status = broadcastIdentifyQuery();
   if (status == EMBER_SUCCESS) {
-    sl_zigbee_event_set_delay_ms(checkTargetResponsesEventControl,
+    sl_zigbee_event_set_delay_ms(&checkTargetResponsesEvent,
                                  EMBER_AF_PLUGIN_FIND_AND_BIND_INITIATOR_TARGET_RESPONSES_DELAY_MS);
     state = FIND_TARGETS;
   } else {
@@ -144,12 +143,12 @@ EmberStatus emberAfPluginFindAndBindInitiatorStart(uint8_t endpoint)
   return status;
 }
 
-void emberAfPluginFindAndBindInitiatorCheckTargetResponsesEventHandler(sl_zigbee_event_t * event)
+static void checkTargetResponsesEventHandler(sl_zigbee_event_t * event)
 {
   EmberStatus status = EMBER_SUCCESS;
   bool finished = false;
 
-  sl_zigbee_event_set_inactive(checkTargetResponsesEventControl);
+  sl_zigbee_event_set_inactive(&checkTargetResponsesEvent);
 
   switch (state) {
     case FIND_TARGETS:
@@ -242,8 +241,8 @@ void sli_zigbee_af_find_and_bind_initiator_init_callback(uint8_t init_level)
 {
   (void)init_level;
 
-  sl_zigbee_event_init(checkTargetResponsesEventControl,
-                       emberAfPluginFindAndBindInitiatorCheckTargetResponsesEventHandler);
+  sl_zigbee_event_init(&checkTargetResponsesEvent,
+                       checkTargetResponsesEventHandler);
 }
 
 // -----------------------------------------------------------------------------
@@ -323,7 +322,7 @@ static void handleIeeeAddrResponse(const EmberAfServiceDiscoveryResult *result)
           result->responseData,
           EUI64_SIZE);
 
-  sl_zigbee_event_set_active(checkTargetResponsesEventControl);
+  sl_zigbee_event_set_active(&checkTargetResponsesEvent);
 }
 
 static EmberStatus sendSimpleDescriptorRequest()
@@ -369,7 +368,7 @@ static void handleSimpleDescriptorResponse(const EmberAfServiceDiscoveryResult *
                      clusterList->outClusterList,
                      &status);
 
-  sl_zigbee_event_set_active(checkTargetResponsesEventControl);
+  sl_zigbee_event_set_active(&checkTargetResponsesEvent);
 }
 
 static void processClusterList(bool clientList,

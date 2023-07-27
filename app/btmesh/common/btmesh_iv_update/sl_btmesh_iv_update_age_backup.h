@@ -3,7 +3,7 @@
  * @brief IV Update age backup header
  *******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -43,6 +43,14 @@
  *  @param[in] evt  Pointer to incoming event.
  ******************************************************************************/
 void sl_btmesh_iv_update_age_backup_on_event(sl_btmesh_msg_t *evt);
+
+/*******************************************************************************
+ * Component node reset handler.
+ * Clearing component specific nvm content during node reset.
+ * This function is called automatically by Universal Configurator after
+ * enabling the component.
+ ******************************************************************************/
+void sl_btmesh_iv_update_on_node_reset(void);
 
 /** @} (end addtogroup iv_update) */
 

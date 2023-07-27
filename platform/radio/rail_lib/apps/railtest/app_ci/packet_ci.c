@@ -197,6 +197,27 @@ void printAckPacket(sl_cli_command_arg_t *args)
               NULL);
 }
 
+static void updateAckPayload(sl_cli_command_arg_t *args)
+{
+  uint8_t *pPkt = ackData;
+  RAIL_Status_t status;
+  if (txAckDirect) {
+    status = RAIL_GetAutoAckFifo(railHandle, &pPkt, NULL);
+    if (status != RAIL_STATUS_NO_ERROR) {
+      responsePrintError(sl_cli_get_command_string(args, 0), status, "RAIL_GetAutoAckFifo failed: %d", status);
+      return;
+    }
+    (void) memcpy(pPkt, ackData, ackDataLen);
+    pPkt = NULL; // Not strictly necessary
+  }
+  status = RAIL_WriteAutoAckFifo(railHandle, pPkt, ackDataLen);
+  if (status != RAIL_STATUS_NO_ERROR) {
+    responsePrintError(sl_cli_get_command_string(args, 0), status, "RAIL_WriteAutoAckFifo failed: %d", status);
+    return;
+  }
+  printAckPacket(args);
+}
+
 void setAckPayload(sl_cli_command_arg_t *args)
 {
   uint16_t offset = sl_cli_get_argument_uint16(args, 0);
@@ -213,10 +234,7 @@ void setAckPayload(sl_cli_command_arg_t *args)
     }
     ackData[index] = value;
   }
-
-  RAIL_WriteAutoAckFifo(railHandle, ackData, ackDataLen);
-  args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
-  printAckPacket(args);
+  updateAckPayload(args);
 }
 
 void setAckLength(sl_cli_command_arg_t *args)
@@ -230,8 +248,7 @@ void setAckLength(sl_cli_command_arg_t *args)
 
   // Make sure we're using the txData array and set the length
   ackDataLen = length;
-  RAIL_WriteAutoAckFifo(railHandle, ackData, ackDataLen);
-  responsePrint(sl_cli_get_command_string(args, 0), "TxLength:%d", ackDataLen);
+  updateAckPayload(args);
 }
 
 void setFixedLength(sl_cli_command_arg_t *args)

@@ -200,7 +200,7 @@ void RETARGET_SerialInit(void)
 
   /* Configure USART for basic async operation */
   uint32_t ref_freq = CMU_ClockFreqGet(RETARGET_CLK);
-  init.clock_div = sl_eusart_uart_get_clock_div(ref_freq, 115200, init.oversampling);
+  init.clock_div = sl_eusart_uart_calculate_clock_div(ref_freq, 115200, init.oversampling);
   sl_eusart_init_uart_hf(eusart, &init);
   sl_eusart_disable(eusart);
   sl_eusart_wait_ready(eusart);

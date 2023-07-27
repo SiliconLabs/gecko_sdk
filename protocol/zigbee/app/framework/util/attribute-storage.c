@@ -891,13 +891,13 @@ EmberAfCluster *emberAfFindClusterIncludingDisabledEndpoints(uint8_t endpoint,
 }
 
 // Server wrapper for findClusterEndpointIndex.
-uint8_t emberAfFindClusterServerEndpointIndexWithMfgCode(uint8_t endpoint, EmberAfClusterId clusterId, uint16_t manufacturerCode)
+static uint8_t emberAfFindClusterServerEndpointIndexWithMfgCode(uint8_t endpoint, EmberAfClusterId clusterId, uint16_t manufacturerCode)
 {
   return findClusterEndpointIndex(endpoint, clusterId, CLUSTER_MASK_SERVER, manufacturerCode);
 }
 
 // Client wrapper for findClusterEndpointIndex.
-uint8_t emberAfFindClusterClientEndpointIndexWithMfgCode(uint8_t endpoint, EmberAfClusterId clusterId, uint16_t manufacturerCode)
+static uint8_t emberAfFindClusterClientEndpointIndexWithMfgCode(uint8_t endpoint, EmberAfClusterId clusterId, uint16_t manufacturerCode)
 {
   return findClusterEndpointIndex(endpoint, clusterId, CLUSTER_MASK_CLIENT, manufacturerCode);
 }
@@ -1497,7 +1497,7 @@ emberAfFindClusterFunction(EmberAfCluster *cluster,
 
 #ifdef EMBER_AF_SUPPORT_COMMAND_DISCOVERY
 
-uint16_t sli_zigbee_af_get_manufacturer_code_for_command(EmberAfCommandMetadata *command)
+static UNUSED uint16_t get_manufacturer_code_for_command(EmberAfCommandMetadata *command)
 {
 #if (GENERATED_COMMAND_MANUFACTURER_CODE_COUNT > 0)
   return getManufacturerCode((EmberAfManufacturerCodeEntry *)commandManufacturerCodes,
@@ -1565,7 +1565,7 @@ uint16_t sli_zigbee_af_resolve_mfg_code_for_discover_command(bool outgoing,
     // else, this cmdId equals prior, prefer this cmd's lower mfg-code.
     if ( generatedCommands[i].mask & COMMAND_MASK_MANUFACTURER_SPECIFIC ) {
       uint16_t candidateMfgCode
-        = sli_zigbee_af_get_manufacturer_code_for_command( (EmberAfCommandMetadata*) &(generatedCommands[i]));
+        = get_manufacturer_code_for_command( (EmberAfCommandMetadata*) &(generatedCommands[i]));
       if (!foundFirst
           || generatedCommands[i].commandId < foundCmdId
           || candidateMfgCode < commandMfgCode) {
@@ -1635,7 +1635,7 @@ bool emberAfExtractCommandIds(bool outgoing,
       if ( !cmd->mfgSpecific ) {
         continue;                        // ignore if asking for not mfg specific
       }
-      if ( cmd->mfgCode != sli_zigbee_af_get_manufacturer_code_for_command( (EmberAfCommandMetadata*) &(generatedCommands[i]))) {
+      if ( cmd->mfgCode != get_manufacturer_code_for_command( (EmberAfCommandMetadata*) &(generatedCommands[i]))) {
         continue;                        // Ignore if mfg code doesn't match the commands
       }
     } else {

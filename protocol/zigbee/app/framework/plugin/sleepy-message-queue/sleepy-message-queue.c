@@ -22,9 +22,8 @@
 
 //------------------------------------------------------------------------------
 // Forward Declaration
-sl_zigbee_event_t emberAfPluginSleepyMessageQueueTimeoutEvent;
-#define msgTimeoutEvent (&emberAfPluginSleepyMessageQueueTimeoutEvent)
-void emberAfPluginSleepyMessageQueueTimeoutEventHandler(sl_zigbee_event_t * event);
+static sl_zigbee_event_t timeoutEvent;
+static void timeoutEventHandler(sl_zigbee_event_t * event);
 //------------------------------------------------------------------------------
 // Internal Prototypes & Structure Definitions
 
@@ -58,8 +57,8 @@ void emberAfPluginSleepyMessageQueueInitCallback(uint8_t init_level)
   switch (init_level) {
     case SL_ZIGBEE_INIT_LEVEL_EVENT:
     {
-      sl_zigbee_event_init(&emberAfPluginSleepyMessageQueueTimeoutEvent,
-                           emberAfPluginSleepyMessageQueueTimeoutEventHandler);
+      sl_zigbee_event_init(&timeoutEvent,
+                           timeoutEventHandler);
       break;
     }
     case SL_ZIGBEE_INIT_LEVEL_LOCAL_DATA:
@@ -152,7 +151,7 @@ static void sli_zigbee_af_restart_message_timer()
       delayQs = MAX_DELAY_QS;
     }
 
-    sl_zigbee_event_set_delay_qs(msgTimeoutEvent, delayQs);
+    sl_zigbee_event_set_delay_qs(&timeoutEvent, delayQs);
     emberAfAppPrintln("Restarting sleepy message timer for %d Qsec.", delayQs);
   }
 }
@@ -293,12 +292,12 @@ void emberAfPluginSleepyMessageQueueRemoveAllMessages(EmberEUI64 dstEui64)
   }
 }
 
-void emberAfPluginSleepyMessageQueueTimeoutEventHandler(sl_zigbee_event_t * event)
+static void timeoutEventHandler(sl_zigbee_event_t * event)
 {
   uint32_t timeNowMs;
   uint8_t x;
 
-  sl_zigbee_event_set_inactive(msgTimeoutEvent);
+  sl_zigbee_event_set_inactive(&timeoutEvent);
   timeNowMs = halCommonGetInt32uMillisecondTick();
 
   for ( x = 0; x < SLEEPY_MSG_QUEUE_NUM_ENTRIES; x++ ) {

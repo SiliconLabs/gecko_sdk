@@ -1,5 +1,5 @@
 id: "wisun_stack_library"
-label: "Wi-SUN Stack  (Library)"
+label: "Wi-SUN Stack (Library)"
 package: "wisun"
 category: "Wi-SUN"
 quality: "production"
@@ -14,6 +14,7 @@ requires:
 
 provides:
   - name: "wisun_implementation"
+  - name: "wisun_stack_library"
 
 library:
   - path: "libwisun_router_core_efr32xg1x_micriumos_gcc_debug.a"

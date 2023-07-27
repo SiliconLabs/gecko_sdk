@@ -67,7 +67,7 @@ static sl_zigbee_event_t zigbee_tx_test_event;
 static uint16_t sequence_counter;
 
 static sl_zigbee_event_t zigbee_large_network_event;
-void zigbee_large_network_event_handler(sl_zigbee_event_t *event);
+static void zigbee_large_network_event_handler(sl_zigbee_event_t *event);
 
 //------------------------------------------------------------------------------
 // Extern and Forward declarations
@@ -81,7 +81,7 @@ extern EmberStatus sli_zigbee_af_send(EmberOutgoingMessageType type,
                                       EmberNodeId alias,
                                       uint8_t sequence);
 static void print_zigbee_tx_test_stats(void);
-void zigbee_tx_test_event_handler(sl_zigbee_event_t *event);
+static void zigbee_tx_test_event_handler(sl_zigbee_event_t *event);
 
 //------------------------------------------------------------------------------
 // ZigBee callbacks and event handlers
@@ -241,7 +241,7 @@ void zigbee_tx_test_start_random(sl_cli_command_arg_t *arguments)
   sl_zigbee_event_set_active(&zigbee_large_network_event);
 }
 
-void zigbee_large_network_event_handler(sl_zigbee_event_t *event)
+static void zigbee_large_network_event_handler(sl_zigbee_event_t *event)
 {
   EmberApsFrame apsf;
   apsf.sourceEndpoint = 0x01;
@@ -288,7 +288,7 @@ void zigbee_large_network_event_handler(sl_zigbee_event_t *event)
   }
 }
 
-void zigbee_tx_test_event_handler(sl_zigbee_event_t *event)
+static void zigbee_tx_test_event_handler(sl_zigbee_event_t *event)
 {
   (void)event;
 

@@ -4,7 +4,7 @@ description: >
    The Bootloader TrustZone Non-Secure component sets up the bootloader configuration to create TrustZone Non-Secure bootloader.
 package: platform
 category: Platform|Bootloader|TrustZone NonSecure
-quality: evaluation
+quality: production
 define:
   - name: BOOTLOADER_NONSECURE
     value: 1

@@ -35,7 +35,6 @@
 #include "sli_wisun_coap_mem.h"
 #include "sl_wisun_types.h"
 #include <assert.h>
-
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
@@ -115,31 +114,17 @@ static _coap_mem_t _mem[WISUN_COAP_MEMORY_OPTION_COUNT] = {
   }
 };
 
-/* Init Static memory pool */
-void _wisun_coap_mem_init(void)
-{
-  for (uint8_t i = 0; i < WISUN_COAP_MEMORY_OPTION_COUNT; ++i) {
-    // create memory pool
-    assert(sl_mempool_create(&_mem[i].mempool,
-                             _mem[i].block_count,
-                             _mem[i].block_size,
-                             _mem[i].buff,
-                             _mem[i].block_count * _mem[i].block_size) == SL_STATUS_OK);
-  }
-}
-
-void *sl_mempool_not_enough_runtime_block_handler(sl_mempool_t *memp)
-{
-  (void) memp;
-  assert("[Not enough runtime memorypool handler]" == NULL);
-  return NULL;
-}
 #else
 
+#include "sl_memory.h"
 // -----------------------------------------------------------------------------
 //                          Static Function Declarations
 // -----------------------------------------------------------------------------
 
+static sl_memory_region_t _heap_region = { 
+  .addr = 0U,
+  .size = 0U
+ };
 /* Using dynamic memory allocation which provided by OS */
 /**************************************************************************//**
  * @brief OS malloc
@@ -175,6 +160,10 @@ __STATIC_INLINE void* __os_malloc(size_t size)
 /* os free */
 __STATIC_INLINE void __os_free(void *addr)
 {
+  if (addr < _heap_region.addr || 
+      addr >= (void *)((uint32_t)_heap_region.addr + _heap_region.size)) {
+    return;
+  }
 #if defined(SL_CATALOG_FREERTOS_KERNEL_PRESENT)
   // FreeRTOS
   vPortFree(addr);
@@ -189,8 +178,25 @@ __STATIC_INLINE void __os_free(void *addr)
 //                          Public Function Definitions
 // -----------------------------------------------------------------------------
 
+/* Init Static memory pool */
+void sli_wisun_coap_mem_init(void)
+{
+#if SL_WISUN_COAP_MEM_USE_STATIC_MEMORY_POOL
+  for (uint8_t i = 0; i < WISUN_COAP_MEMORY_OPTION_COUNT; ++i) {
+    // create memory pool
+    assert(sl_mempool_create(&_mem[i].mempool,
+                             _mem[i].block_count,
+                             _mem[i].block_size,
+                             _mem[i].buff,
+                             _mem[i].block_count * _mem[i].block_size) == SL_STATUS_OK);
+  }
+#else
+  _heap_region = sl_memory_get_heap_region();
+#endif
+}
+
 /* Wi-SUN Coap malloc */
-void *_wisun_coap_mem_malloc(size_t size)
+void *sli_wisun_coap_mem_malloc(size_t size)
 {
   void *p = NULL;
   if (!size) {
@@ -217,7 +223,7 @@ void *_wisun_coap_mem_malloc(size_t size)
 }
 
 /* Wi-SUN Coap free */
-void _wisun_coap_mem_free(void *addr)
+void sli_wisun_coap_mem_free(void *addr)
 {
   if (addr == NULL) {
     return;

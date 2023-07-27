@@ -151,8 +151,8 @@ EmberKeyData emberPluginNetworkSteeringDistributedKey;
 
 static uint32_t currentChannelMask = 0;
 
-sl_zigbee_event_t emberAfPluginNetworkSteeringFinishSteeringEvent;
-#define finishSteeringEvent (&emberAfPluginNetworkSteeringFinishSteeringEvent)
+sl_zigbee_event_t emberAfPluginNetworkSteeringFinishSteeringEvent[EMBER_SUPPORTED_NETWORKS];
+#define finishSteeringEvent (emberAfPluginNetworkSteeringFinishSteeringEvent)
 void emberAfPluginNetworkSteeringFinishSteeringEventHandler(sl_zigbee_event_t * event);
 
 // TODO: good value for this?
@@ -198,8 +198,8 @@ void sli_zigbee_af_network_steering_init_callback(uint8_t init_level)
 {
   (void)init_level;
 
-  sl_zigbee_event_init(finishSteeringEvent,
-                       emberAfPluginNetworkSteeringFinishSteeringEventHandler);
+  sl_zigbee_network_event_init(finishSteeringEvent,
+                               emberAfPluginNetworkSteeringFinishSteeringEventHandler);
 }
 
 //============================================================================
@@ -257,7 +257,7 @@ static uint16_t getNextCandidate(void)
   return *pointer;
 }
 
-void gotoNextChannel(void)
+static void gotoNextChannel(void)
 {
   EmberAfPluginScanDispatchScanData scanData;
   EmberStatus status;
@@ -587,6 +587,9 @@ EmberStatus emberAfPluginNetworkSteeringStart(void)
       status = emberAfPermitJoin(EMBER_AF_PLUGIN_NETWORK_STEERING_COMMISSIONING_TIME_S,
                                  true);     // Broadcast permit join?
     }
+  } else {
+    emberAfCorePrintln("%s is already in progress",
+                       sli_zigbee_af_network_steering_plugin_name);
   }
 
   emberAfCorePrintln("%p: %p: 0x%X",

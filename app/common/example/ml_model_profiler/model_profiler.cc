@@ -297,52 +297,26 @@ bool model_profiler_init(void)
 
   tflite::MicroOpResolver &resolver = sl_tflite_micro_opcode_resolver();
 
-  // Start a new block, interpreter will be destroyed on block exit.
-  {
-    // Figure out how much memory we need for the TensorArena.
-    sl_memory_region_t heap = sl_memory_get_heap_region();
-
-    arena = reinterpret_cast<uint8_t*>(malloc(heap.size - 2000));
-    if (arena == nullptr) {
-      printf("Memory allocation failed !");
-      return false;
-    }
-    // Align to 16 byte boundary.
-    uint32_t tmp = reinterpret_cast<uint32_t>(arena);
-    tmp = (tmp + 0xF) & 0xFFFFFFF0UL;
-
-    SLMicroInterpreter interpreter(model, resolver,
-                                   reinterpret_cast<uint8_t*>(tmp),
-                                   heap.size - 2000);
-
-    if (interpreter.AllocateTensors() != kTfLiteOk) {
-      printf("Model tensor allocation failed !");
-      return false;
-    }
-    arena_size = interpreter.arena_used_bytes();
-    sli_print_ui32("\nTFLM model arena size: ", arena_size, "\n");
-  }
-
-  free(arena);
-  // Add bytes because the arena size reported by interpreter is too small.
-  arena_size += 1000;
-  uint32_t arena_begin = reinterpret_cast<uint32_t>(malloc(arena_size));
-  uint32_t arena_end = arena_begin + arena_size;
-
-  if (arena_begin == 0U) {
-    printf("Memory allocation failed !");
+  // Figure out how much memory we need for the TensorArena.
+  if (!sl_tflite_micro_estimate_arena_size(model, resolver, &arena_size)) {
+    printf("Could not estimate arena size!");
     return false;
   }
-  // Align to 16 byte boundary.
-  arena_begin = (arena_begin + 0xF) & 0xFFFFFFF0UL;
-  arena_size = arena_end - arena_begin;
-  arena = reinterpret_cast<uint8_t*>(arena_begin);
+
+  sli_print_ui32("\nTFLM model arena size: ", arena_size, "\n");
+
+  // Allocate tensor arena, discard the return value as it is not used for freeing in this application.
+  uint8_t* arena_base = sl_tflite_micro_allocate_tensor_arena(arena_size, &arena);
+  if (arena_base == nullptr) {
+    printf("Could not allocate arena!\n");
+    return false;
+  }
 
   // Build an interpreter to run the model with.
   static SLMicroInterpreter static_interpreter(
-                                model, resolver, arena,
-                                arena_size,
-                                nullptr, &profiler);
+    model, resolver, arena,
+    arena_size,
+    nullptr, &profiler);
   interpreter = &static_interpreter;
 
   // Allocate memory from the tensor_arena for the model's tensors.

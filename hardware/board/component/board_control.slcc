@@ -10,12 +10,17 @@ provides:
   - name: board_control
 requires:
   - name: emlib_cmu
-  - name: emlib_gpio
+  - name: lld_gpio
   - name: enum
   - name: status
   - name: component_catalog
   - name: mx25_flash_shutdown_driver
     condition:
+      - device_series_2
+      - hardware_board_has_spiflash
+  - name: mx25_flash_shutdown_driver
+    condition:
+      - device_series_1
       - hardware_board_has_spiflash
   - name : configuration_over_swo
     condition:

@@ -23,27 +23,24 @@
  * @brief Network Measurement Remote Control CoAP CLI ping measurement callback.
  * @details Handle incoming CLI command from CoAP message.
  * @param[in] req_packet Request packet.
- * @param[in,out] resp_packet Response packet.
+ * @return sl_wisun_coap_packet_t * Response packet ptr
  *****************************************************************************/
-void sl_wisun_coap_remote_cli_ping_cb(const sl_wisun_coap_packet_t * const req_packet,
-                                      sl_wisun_coap_packet_t * const resp_packet);
+sl_wisun_coap_packet_t * sl_wisun_coap_remote_cli_ping_cb(const sl_wisun_coap_packet_t * const req_packet);
 
 /**************************************************************************//**
  * @brief Network Measurement Remote Control CoAP CLI iPerf measurement callback.
  * @details Handle incoming CLI command from CoAP message.
  * @param[in] req_packet Request packet.
- * @param[in,out] resp_packet Response packet.
+ * @return sl_wisun_coap_packet_t * Response packet ptr
  *****************************************************************************/
-void sl_wisun_coap_remote_cli_iperf_cb(const sl_wisun_coap_packet_t * const req_packet,
-                                       sl_wisun_coap_packet_t * const resp_packet);
+sl_wisun_coap_packet_t * sl_wisun_coap_remote_cli_iperf_cb(const sl_wisun_coap_packet_t * const req_packet);
 
 /**************************************************************************//**
  * @brief Network Measurement Remote Control CoAP CLI neighbour callback.
  * @details Handle incoming CLI command from CoAP message.
  * @param[in] req_packet Request packet.
- * @param[in,out] resp_packet Response packet.
+ * @return sl_wisun_coap_packet_t * Response packet ptr
  *****************************************************************************/
-void sl_wisun_coap_remote_cli_nbr_cb(const sl_wisun_coap_packet_t * const req_packet,
-                                     sl_wisun_coap_packet_t * const resp_packet);
+sl_wisun_coap_packet_t * sl_wisun_coap_remote_cli_nbr_cb(const sl_wisun_coap_packet_t * const req_packet);
 
 #endif

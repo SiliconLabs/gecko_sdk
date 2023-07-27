@@ -31,9 +31,7 @@
 // -------------------------------------
 // Includes
 
-#if defined(MBEDTLS_CONFIG_FILE)
-  #include MBEDTLS_CONFIG_FILE
-#endif
+#include <mbedtls/build_info.h>
 
 #if defined(MBEDTLS_PSA_CRYPTO_STORAGE_C) && !defined(MBEDTLS_PSA_ITS_FILE_C)
 
@@ -137,18 +135,6 @@ void sli_its_release_mutex(void)
 // Defines
 
 #if (!SL_PSA_ITS_SUPPORT_V3_DRIVER)
-
-#define SLI_PSA_ITS_META_MAGIC_V1             (0x05E175D1UL)
-#define SLI_PSA_ITS_META_MAGIC_V2             (0x5E175D10UL)
-
-/* Allocated range of NVM3 IDs for PSA ITS usage */
-#define SLI_PSA_ITS_NVM3_RANGE_BASE  (0x83100UL)
-#define SLI_PSA_ITS_NVM3_RANGE_SIZE  (0x00400UL)
-
-#ifndef SL_PSA_ITS_MAX_FILES
-#define SL_PSA_ITS_MAX_FILES    SLI_PSA_ITS_NVM3_RANGE_SIZE
-#endif
-
 #define SLI_PSA_ITS_NVM3_RANGE_START SLI_PSA_ITS_NVM3_RANGE_BASE
 #define SLI_PSA_ITS_NVM3_RANGE_END   SLI_PSA_ITS_NVM3_RANGE_START + SL_PSA_ITS_MAX_FILES
 
@@ -359,7 +345,7 @@ static void init_cache(void)
                                                    keys_referenced_by_nvm3,
                                                    sizeof(keys_referenced_by_nvm3) / sizeof(nvm3_ObjectKey_t),
                                                    range_start,
-                                                   range_end);
+                                                   range_end - 1);
 
     for (size_t i = 0; i < num_keys_referenced_by_nvm3; i++) {
       cache_set(keys_referenced_by_nvm3[i]);

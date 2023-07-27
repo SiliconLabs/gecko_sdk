@@ -1,0 +1,20 @@
+id: rail_util_ieee802154_fast_channel_switching
+label: RAIL Utility, IEEE802.15.4 Fast Channel Switching Configuration
+description: Utility to aid with IEEE802.15.4 Fast Channel Switching Configuration
+package: platform
+category: Platform|Radio
+quality: evaluation
+requires:
+  - name: rail_util_ieee802154_phy_select
+provides:
+  - name: rail_util_ieee802154_fast_channel_switching
+config_file:
+  - path: platform/radio/rail_lib/plugin/rail_util_ieee802154/config/sl_rail_util_ieee802154_fast_channel_switching_config.h
+    file_id: sl_rail_util_ieee802154_fast_channel_switching_config
+template_contribution:
+  - name: rail_util_ieee802154_phy_select_callbacks
+    value:
+      include: sl_rail_util_ieee802154_fast_channel_switching_config.h
+    priority: -9010
+  - name: component_catalog
+    value: rail_util_ieee802154_fast_channel_switching

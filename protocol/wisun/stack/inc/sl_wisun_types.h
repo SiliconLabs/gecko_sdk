@@ -140,7 +140,13 @@ typedef enum {
   /// Option for multicast group
   SL_WISUN_SOCKET_OPTION_MULTICAST_GROUP = 1,
   /// Option for send buffer limit
-  SL_WISUN_SOCKET_OPTION_SEND_BUFFER_LIMIT = 2
+  SL_WISUN_SOCKET_OPTION_SEND_BUFFER_LIMIT = 2,
+  /// Option to enable/disable Extended Directed Frame Exchange mode
+  SL_WISUN_SOCKET_OPTION_EDFE_MODE = 3,
+  /// Option to set socket unicast hop limit
+  SL_WISUN_SOCKET_OPTION_UNICAST_HOP_LIMIT = 4,
+  /// Option to set socket multicast hop limit
+  SL_WISUN_SOCKET_OPTION_MULTICAST_HOP_LIMIT = 5
 } sl_wisun_socket_option_t;
 
 /// Enumerations for statistics type
@@ -309,9 +315,13 @@ typedef enum {
 
 /// Enumerations for channel plan
 typedef enum {
+  /// FAN1.0 configuration
   SL_WISUN_PHY_CONFIG_FAN10    = 0,
+  /// FAN1.1 configuration
   SL_WISUN_PHY_CONFIG_FAN11    = 1,
+  /// Explicit configuration
   SL_WISUN_PHY_CONFIG_EXPLICIT = 2,
+  /// Specific RAIL channel configuration
   SL_WISUN_PHY_CONFIG_IDS      = 3
 } sl_wisun_phy_config_type_t;
 
@@ -503,7 +513,7 @@ typedef struct {
   uint32_t type;
   /// Configuration
   union {
-    /// FAN1.0 configuration
+    /// Configuration for #SL_WISUN_PHY_CONFIG_FAN10 type
     struct {
       /// Regulatory domain (#sl_wisun_regulatory_domain_t)
       uint8_t reg_domain;
@@ -514,7 +524,7 @@ typedef struct {
       /// 1 if FEC is enabled, 0 if not
       uint8_t fec;
     } fan10;
-    /// FAN1.1 configuration
+    /// Configuration for #SL_WISUN_PHY_CONFIG_FAN11 type
     struct {
       /// Regulatory domain (#sl_wisun_regulatory_domain_t)
       uint8_t reg_domain;
@@ -523,7 +533,7 @@ typedef struct {
       /// PHY mode ID
       uint8_t phy_mode_id;
     } fan11;
-    /// Explicit configuration
+    /// Configuration for #SL_WISUN_PHY_CONFIG_EXPLICIT type
     struct {
       /// Ch0 center frequency in kHz
       uint32_t ch0_frequency_khz;
@@ -534,7 +544,7 @@ typedef struct {
       /// PHY mode ID
       uint8_t phy_mode_id;
     } explicit;
-    /// Use direct IDs to point a specific RAIL configuration
+    /// Configuration for #SL_WISUN_PHY_CONFIG_IDS type
     struct {
       /// Protocol ID
       uint16_t protocol_id;
@@ -602,6 +612,28 @@ typedef struct {
   uint32_t limit;
 } sl_wisun_socket_option_send_buffer_limit_t;
 
+/// Socket option for EDFE mode
+typedef struct {
+  /// Socket EDFE mode (1 to enable, 0 to disable)
+  uint32_t mode;
+} sl_wisun_socket_option_edfe_mode_t;
+
+/// Socket option for socket unicast hop limit
+typedef struct {
+  /// Socket unicast hop limit (0 to 255 hops, -1 to use default)
+  int16_t hop_limit;
+  /// Reserved, set to 0
+  uint16_t reserved;
+} sl_wisun_socket_option_unicast_hop_limit;
+
+/// Socket option for socket multicast hop limit
+typedef struct {
+  /// Socket multicast hop limit (0 to 255 hops, -1 to use default)
+  int16_t hop_limit;
+  /// Reserved, set to 0
+  uint16_t reserved;
+} sl_wisun_socket_option_multicast_hop_limit;
+
 /// Socket option data
 SL_PACK_START(1)
 typedef union {
@@ -611,6 +643,12 @@ typedef union {
   sl_wisun_socket_option_multicast_group_t multicast_group;
   /// Socket send buffer limit
   sl_wisun_socket_option_send_buffer_limit_t send_buffer_limit;
+  /// Socket EDFE mode
+  sl_wisun_socket_option_edfe_mode_t edfe_mode;
+  /// Socket unicast hop limit
+  sl_wisun_socket_option_unicast_hop_limit unicast_hop_limit;
+  /// Socket multicast hop limit
+  sl_wisun_socket_option_multicast_hop_limit multicast_hop_limit;
 } SL_ATTRIBUTE_PACKED sl_wisun_socket_option_data_t;
 SL_PACK_END()
 
@@ -653,12 +691,18 @@ typedef struct {
   uint16_t rpl_rank;
   /// Measured ETX value if known (0xffff if unknown)
   uint16_t etx;
+  /// ETX to Border Router
+  uint16_t routing_cost;
+  /// Number devices connected to Border Router
+  uint16_t pan_size;
   /// Parent RSSI Out measured RSSI value (0xff if unknown)
   /// Calculated using EWMA specified by Wi-SUN from range of -174 (0) to +80 (254) dBm.
   uint8_t rsl_out;
   /// Parent RSSI In measured RSSI value (0xff if unknown)
   /// Calculated using EWMA specified by Wi-SUN from range of -174 (0) to +80 (254) dBm.
   uint8_t rsl_in;
+  /// RSSI of the last received packet in integer dBm. */
+  int8_t rssi;
   /// Indicate if the device is an LFN. 1 = LFN, 0 = FFN
   uint8_t is_lfn;
 } SL_ATTRIBUTE_PACKED sl_wisun_neighbor_info_t;
@@ -666,44 +710,45 @@ SL_PACK_END()
 
 /// Enumeration for trace group
 typedef enum {
-  SL_WISUN_TRACE_GROUP_MAC     = 0,     /// Mac
-  SL_WISUN_TRACE_GROUP_NW      = 1,     /// Network
-  SL_WISUN_TRACE_GROUP_LLC     = 2,     /// LLC
-  SL_WISUN_TRACE_GROUP_6LO     = 3,     /// 6lowpan
-  SL_WISUN_TRACE_GROUP_IPV6    = 4,     /// IPV6
-  SL_WISUN_TRACE_GROUP_TCP     = 5,     /// TCP
-  SL_WISUN_TRACE_GROUP_UDP     = 6,     /// UDP
-  SL_WISUN_TRACE_GROUP_ICMP    = 7,     /// ICMP
-  SL_WISUN_TRACE_GROUP_DHCP    = 8,     /// DHCP
-  SL_WISUN_TRACE_GROUP_MPL     = 9,     /// MPL
-  SL_WISUN_TRACE_GROUP_DNS     = 10,    /// DNS
-  SL_WISUN_TRACE_GROUP_RPL     = 11,    /// RPL
-  SL_WISUN_TRACE_GROUP_TRIC    = 12,    /// Trickle
-  SL_WISUN_TRACE_GROUP_WS      = 15,    /// Wi-SUN Stack
-  SL_WISUN_TRACE_GROUP_BOOT    = 16,    /// Wi-SUN Bootstrap
-  SL_WISUN_TRACE_GROUP_WSR     = 17,    /// Wi-SUN Router
-  SL_WISUN_TRACE_GROUP_WSBR    = 18,    /// Border router
-  SL_WISUN_TRACE_GROUP_SEC     = 19,    /// Security
-  SL_WISUN_TRACE_GROUP_TIME    = 20,    /// Time and timers
-  SL_WISUN_TRACE_GROUP_NEIGH   = 21,    /// Neighbor
-  SL_WISUN_TRACE_GROUP_STAT    = 22,    /// Statistics
-  SL_WISUN_TRACE_GROUP_BUFF    = 23,    /// Dynamic Buffer
-  SL_WISUN_TRACE_GROUP_ADDR    = 24,    /// Address Manipulation
-  SL_WISUN_TRACE_GROUP_MON     = 25,    /// Monitoring
-  SL_WISUN_TRACE_GROUP_SOCK    = 26,    /// Socket
-  SL_WISUN_TRACE_GROUP_DENY    = 27,    /// Deny list
-  SL_WISUN_TRACE_GROUP_ETX     = 28,    /// ETX
-  SL_WISUN_TRACE_GROUP_FHSS    = 29,    /// FHSS
-  SL_WISUN_TRACE_GROUP_ROUT    = 30,    /// Routing table
-  SL_WISUN_TRACE_GROUP_EVLP    = 31,    /// Event loop
-  SL_WISUN_TRACE_GROUP_NVM     = 32,    /// NVM
-  SL_WISUN_TRACE_GROUP_CRYPTO  = 33,    /// Crypto
-  SL_WISUN_TRACE_GROUP_RF      = 34,    /// Wi-SUN RF Driver
-  Sl_WISUN_TRACE_GROUP_WSIE    = 35,    /// Wi-SUN IE
-  SL_WISUN_TRACE_GROUP_CONFIG  = 36,    /// Configuration
+  SL_WISUN_TRACE_GROUP_MAC     = 0,     ///< Mac
+  SL_WISUN_TRACE_GROUP_NW      = 1,     ///< Network
+  SL_WISUN_TRACE_GROUP_LLC     = 2,     ///< LLC
+  SL_WISUN_TRACE_GROUP_6LO     = 3,     ///< 6lowpan
+  SL_WISUN_TRACE_GROUP_IPV6    = 4,     ///< IPV6
+  SL_WISUN_TRACE_GROUP_TCP     = 5,     ///< TCP
+  SL_WISUN_TRACE_GROUP_UDP     = 6,     ///< UDP
+  SL_WISUN_TRACE_GROUP_ICMP    = 7,     ///< ICMP
+  SL_WISUN_TRACE_GROUP_DHCP    = 8,     ///< DHCP
+  SL_WISUN_TRACE_GROUP_MPL     = 9,     ///< MPL
+  SL_WISUN_TRACE_GROUP_DNS     = 10,    ///< DNS
+  SL_WISUN_TRACE_GROUP_RPL     = 11,    ///< RPL
+  SL_WISUN_TRACE_GROUP_TRIC    = 12,    ///< Trickle
+  SL_WISUN_TRACE_GROUP_WS      = 15,    ///< Wi-SUN Stack
+  SL_WISUN_TRACE_GROUP_BOOT    = 16,    ///< Wi-SUN Bootstrap
+  SL_WISUN_TRACE_GROUP_WSR     = 17,    ///< Wi-SUN Router
+  SL_WISUN_TRACE_GROUP_WSBR    = 18,    ///< Border router
+  SL_WISUN_TRACE_GROUP_SEC     = 19,    ///< Security
+  SL_WISUN_TRACE_GROUP_TIME    = 20,    ///< Time and timers
+  SL_WISUN_TRACE_GROUP_NEIGH   = 21,    ///< Neighbor
+  SL_WISUN_TRACE_GROUP_STAT    = 22,    ///< Statistics
+  SL_WISUN_TRACE_GROUP_BUFF    = 23,    ///< Dynamic Buffer
+  SL_WISUN_TRACE_GROUP_ADDR    = 24,    ///< Address Manipulation
+  SL_WISUN_TRACE_GROUP_MON     = 25,    ///< Monitoring
+  SL_WISUN_TRACE_GROUP_SOCK    = 26,    ///< Socket
+  SL_WISUN_TRACE_GROUP_DENY    = 27,    ///< Deny list
+  SL_WISUN_TRACE_GROUP_ETX     = 28,    ///< ETX
+  SL_WISUN_TRACE_GROUP_FHSS    = 29,    ///< FHSS
+  SL_WISUN_TRACE_GROUP_ROUT    = 30,    ///< Routing table
+  SL_WISUN_TRACE_GROUP_EVLP    = 31,    ///< Event loop
+  SL_WISUN_TRACE_GROUP_NVM     = 32,    ///< NVM
+  SL_WISUN_TRACE_GROUP_CRYPTO  = 33,    ///< Crypto
+  SL_WISUN_TRACE_GROUP_RF      = 34,    ///< Wi-SUN RF Driver
+  Sl_WISUN_TRACE_GROUP_WSIE    = 35,    ///< Wi-SUN IE
+  SL_WISUN_TRACE_GROUP_CONFIG  = 36,    ///< Configuration
+  SL_WISUN_TRACE_GROUP_TIM_SRV = 37,    ///< Timer service
   // 36 to 63 reserved for future used
-  SL_WISUN_TRACE_GROUP_INT     = 63,    /// Internal usage
-  SL_WISUN_TRACE_GROUP_COUNT   = 64     /// Max number of trace group in this enum
+  SL_WISUN_TRACE_GROUP_INT     = 63,    ///< Internal usage
+  SL_WISUN_TRACE_GROUP_COUNT   = 64     ///< Max number of trace group in this enum
 } sl_wisun_trace_group_t;
 
 /// Enumerations for trace level
@@ -774,6 +819,15 @@ typedef enum {
 
 /// Broadcast MAC address
 extern const sl_wisun_mac_address_t sl_wisun_broadcast_mac;
+
+/// Enumeration for channel exlusion modes.
+typedef enum {
+  /// Channels are excluded by range if possible (3 ranges maximum),
+  /// otherwise channels will be excluded by mask
+  SL_WISUN_CHANNEL_EXCLUSION_MODE_BY_RANGE = 1,
+  /// Channels are excluded by mask
+  SL_WISUN_CHANNEL_EXCLUSION_MODE_BY_MASK = 2
+} sl_wisun_channel_exclusion_mode_t;
 
 /** @} (end SL_WISUN_TYPES) */
 

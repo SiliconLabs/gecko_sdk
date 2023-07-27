@@ -140,28 +140,6 @@ bool emberAfPluginDeviceManagementGetSupplier(EmberAfDeviceManagementSupplier *s
   return true;
 }
 
-bool emberAfPluginDeviceManagementSetSupply(EmberAfDeviceManagementSupply *supply)
-{
-  if (supply == NULL) {
-    MEMSET(&(pmInfo.supply), 0, sizeof(EmberAfDeviceManagementSupply));
-  } else {
-    MEMMOVE(&(pmInfo.supply), supply, sizeof(EmberAfDeviceManagementSupply));
-  }
-
-  return true;
-}
-
-bool emberAfPluginDeviceManagementGetSupply(EmberAfDeviceManagementSupply *supply)
-{
-  if (supply == NULL) {
-    return false;
-  }
-
-  MEMMOVE(supply, &(pmInfo.supply), sizeof(EmberAfDeviceManagementSupply));
-
-  return true;
-}
-
 bool emberAfPluginDeviceManagementSetSiteId(EmberAfDeviceManagementSiteId *siteId)
 {
   if (siteId == NULL) {

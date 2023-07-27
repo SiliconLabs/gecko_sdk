@@ -39,15 +39,11 @@ static bool initPending = true;
 #endif  // EZSP_HOST
 
 #ifdef EZSP_HOST
-void emberAfPluginAddressTableNcpInitCallback(bool memoryAllocation)
+void emberAfPluginAddressTableNcpInitCallback(void)
 {
   uint8_t index;
   EmberEUI64 freeEui = FREE_EUI64;
   uint16_t addressTableSize;
-
-  if (memoryAllocation) {
-    return;
-  }
 
   // If the host and the ncp disagree on the address table size, explode.
   ezspGetConfigurationValue(EZSP_CONFIG_ADDRESS_TABLE_SIZE, &addressTableSize);

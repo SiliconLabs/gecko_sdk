@@ -15,6 +15,7 @@ include:
 provides:
   - name: emlib_emu
 requires:
+  - name: status
   - name: device
   - name: device_has_emu
   - name: emlib_common

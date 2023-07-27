@@ -266,29 +266,6 @@ uint32_t halInternalGetHeapBottom(void)
   return (uint32_t)(uint8_t *)heapMemory;
 }
 
-WEAK(void halRadioPowerUpHandler(void))
-{
-  // Intentionally empty.
-  // This function is implemented here weakly as a fallback when it is not
-  // overridden. It is called below by halStackRadioPowerMainControl.
-}
-
-WEAK(void halRadioPowerDownHandler(void))
-{
-  // Intentionally empty.
-  // This function is implemented here weakly as a fallback when it is not
-  // overridden. It is called below by halStackRadioPowerMainControl.
-}
-
-void halStackRadioPowerMainControl(bool powerUp)
-{
-  if (powerUp) {
-    halRadioPowerUpHandler();
-  } else {
-    halRadioPowerDownHandler();
-  }
-}
-
 void halStackRadioPowerUpBoard(void)
 {
   // Intentionally empty.

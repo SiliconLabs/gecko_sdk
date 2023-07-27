@@ -38,6 +38,7 @@
 #include "sli_tz_service_nvm3.h"
 #include "nvm3.h"
 #include "nvm3_default_config.h"
+#include "sl_mpu.h"
 
 // The default handles are located in S together with the rest of the NVM3 code.
 // However, the NVM3 API requires the handle pointer to be sent in explicitly,
@@ -81,6 +82,7 @@ nvm3_Init_t *nvm3_defaultInit = &nvm3_defaultInitData;
 
 Ecode_t nvm3_initDefault(void)
 {
+  Ecode_t nvm3_status;
   sli_tz_fn_id fn_id = SLI_TZ_SERVICE_NVM3_INITDEFAULT_SID;
 
   sli_tz_invec in_vec[] = {
@@ -90,9 +92,23 @@ Ecode_t nvm3_initDefault(void)
     { nvm3_defaultInit, sizeof(nvm3_defaultInitData) },
   };
 
-  return tfm_ns_interface_dispatch((veneer_fn)sli_tz_s_interface_dispatch_nvm3,
-                                   (uint32_t)in_vec, IOVEC_LEN(in_vec),
-                                   (uint32_t)NULL, 0);
+  nvm3_status = tfm_ns_interface_dispatch((veneer_fn)sli_tz_s_interface_dispatch_nvm3,
+                                          (uint32_t)in_vec, IOVEC_LEN(in_vec),
+                                          (uint32_t)NULL, 0);
+  if (nvm3_status != ECODE_NVM3_OK) {
+    return nvm3_status;
+  }
+
+  sl_status_t sl_status = sl_mpu_disable_execute((uint32_t)
+                                                 (nvm3_defaultInit->nvmAdr),
+                                                 (uint32_t)
+                                                 (nvm3_defaultInit->nvmAdr)
+                                                 + nvm3_defaultInit->nvmSize - 1u,
+                                                 nvm3_defaultInit->nvmSize);
+  if (sl_status != SL_STATUS_OK) {
+    nvm3_status = ECODE_NVM3_ERR_INT_ADDR_INVALID;
+  }
+  return nvm3_status;
 }
 
 Ecode_t nvm3_deinitDefault(void)
@@ -196,9 +212,20 @@ Ecode_t nvm3_open(nvm3_Handle_t *h, const nvm3_Init_t *i)
     { h, sizeof(nvm3_Handle_t) },
   };
 
-  return tfm_ns_interface_dispatch((veneer_fn)sli_tz_s_interface_dispatch_nvm3,
-                                   (uint32_t)in_vec, IOVEC_LEN(in_vec),
-                                   (uint32_t)out_vec, IOVEC_LEN(out_vec));
+  Ecode_t nvm3_status =
+    tfm_ns_interface_dispatch((veneer_fn)sli_tz_s_interface_dispatch_nvm3,
+                              (uint32_t)in_vec, IOVEC_LEN(in_vec),
+                              (uint32_t)out_vec, IOVEC_LEN(out_vec));
+
+  sl_status_t sl_status = sl_mpu_disable_execute((uint32_t)(i->nvmAdr),
+                                                 (uint32_t)(i->nvmAdr)
+                                                 + i->nvmSize - 1u,
+                                                 i->nvmSize);
+  if (sl_status != SL_STATUS_OK) {
+    nvm3_status = ECODE_NVM3_ERR_INT_ADDR_INVALID;
+  }
+
+  return nvm3_status;
 }
 
 Ecode_t nvm3_close(nvm3_Handle_t *h)

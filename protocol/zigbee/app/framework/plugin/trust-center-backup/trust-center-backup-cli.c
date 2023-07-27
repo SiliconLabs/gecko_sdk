@@ -52,7 +52,7 @@ static EmberAfTrustCenterBackupData importData = {
 // *****************************************************************************
 // Functions
 
-void printBackup(const EmberAfTrustCenterBackupData* backup)
+static UNUSED void printBackup(const EmberAfTrustCenterBackupData* backup)
 {
   uint8_t i = 0;
 

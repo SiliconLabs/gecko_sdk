@@ -39,6 +39,8 @@
     - path: efr32sg23_iadc.h
     - path: efr32sg23_icache.h
     - path: efr32sg23_keyscan.h
+    - path: efr32sg23_lcd.h
+    - path: efr32sg23_lcdrf.h
     - path: efr32sg23_ldma.h
     - path: efr32sg23_ldmaxbar.h
     - path: efr32sg23_ldmaxbar_defines.h
@@ -159,6 +161,7 @@
   - name: device_has_mpu
   - name: device_has_radio
   - name: device_has_radio_subghz
+  - name: device_compute_basic
 - recommends:
   - id: trustzone_unaware
 - requires:

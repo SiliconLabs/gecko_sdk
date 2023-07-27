@@ -106,20 +106,25 @@ The following LEDs and buttons shown in the table below are used.
 
 <table>
 <tr>
-    <th>LED</th>
-    <th>Description</th>
+    <th rowspan="2">LED</th>
+    <th colspan="2">Description</th>
 </tr><tr>
-    <td>LED0</td>
+    <th>Boards with an RGB LED</th>
+    <th>BRD2705A</th>
+</tr><tr>
+    <td>LED1</td>
     <td>
         Blinks with 1 Hz when learn mode is active.<br>
         Used for Indicator Command Class.
     </td>
+    <td>
+        Controlled by CC Color Switch and CC Multilevel Switch
+        (monochrome, brightness only)
+    </td>
 </tr><tr>
-    <td>LED1</td>
-    <td>LED On -> Multilevel Switch On / Led Off -> Multilevel Switch Off</td>
-</tr><tr>
-    <td>RGB (on ZGM130 module)</td>
+    <td>RGB</td>
     <td>Controlled by CC Color Switch (colors) and CC Multilevel Switch (brightness)</td>
+    <td></td>
 </tr>
 </table>
 

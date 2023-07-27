@@ -8,6 +8,7 @@ description: >
   The BLOB Transfer Client model is used by a higher-layer application to
   transfer a BLOB to one or more BLOB Transfer Servers. The higher-layer
   application provides the inputs to the procedures executed by the client.
+  This component is prepared for integration into SOC applications.
 category: "Bluetooth Mesh|Models|Transport"
 quality: production
 root_path: app/btmesh/common/btmesh_blob_transfer_client
@@ -43,3 +44,6 @@ template_contribution:
     priority: -1004
   - name: component_catalog
     value: btmesh_blob_transfer_client
+
+validation_helper:
+  - path: "../../script/validation/soc_ncp_compatibility.lua"

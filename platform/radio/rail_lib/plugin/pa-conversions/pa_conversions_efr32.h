@@ -165,6 +165,14 @@ RAIL_TxPowerConfig_t *sl_rail_util_pa_get_tx_power_config_2p4ghz(void);
 RAIL_TxPowerConfig_t *sl_rail_util_pa_get_tx_power_config_subghz(void);
 
 /**
+ * Get a pointer to the TX Power Config OFDM structure.
+ *
+ * @return a pointer to the TX Power Config stucture.
+ *
+ */
+RAIL_TxPowerConfig_t *sl_rail_util_pa_get_tx_power_config_ofdm(void);
+
+/**
  * Provide a channel config change callback capable of configuring the PA
  * correctly.
  *

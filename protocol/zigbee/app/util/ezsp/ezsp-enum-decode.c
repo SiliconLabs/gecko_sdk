@@ -634,6 +634,8 @@ const char *decodeFrameId(uint16_t value)
     case EZSP_GET_TOKEN_DATA: return "EZSP_GET_TOKEN_DATA";
     case EZSP_SET_TOKEN_DATA: return "EZSP_SET_TOKEN_DATA";
     case EZSP_RESET_NODE: return "EZSP_RESET_NODE";
+    case EZSP_GP_SECURITY_TEST_VECTORS: return "EZSP_GP_SECURITY_TEST_VECTORS";
+    case EZSP_TOKEN_FACTORY_RESET: return "EZSP_TOKEN_FACTORY_RESET";
   }
   return "*** Not enumerated. ***";
 }

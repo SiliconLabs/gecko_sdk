@@ -1,4 +1,4 @@
-/* Copyright 2021 The TensorFlow Authors. All Rights Reserved.
+/* Copyright 2023 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -31,103 +31,112 @@ namespace tflite {
 // (https://abseil.io/tips/130). Any new ops (or cleanup of existing ops should
 // have their Register function declarations in the tflite namespace.
 
-TfLiteRegistration Register_ADD();
-TfLiteRegistration Register_ADD_N();
-TfLiteRegistration Register_ARG_MAX();
-TfLiteRegistration Register_ARG_MIN();
-TfLiteRegistration Register_ASSIGN_VARIABLE();
-TfLiteRegistration Register_AVERAGE_POOL_2D();
-TfLiteRegistration Register_BATCH_TO_SPACE_ND();
-TfLiteRegistration Register_BROADCAST_ARGS();
-TfLiteRegistration Register_BROADCAST_TO();
-TfLiteRegistration Register_CALL_ONCE();
-TfLiteRegistration Register_CAST();
+TFLMRegistration Register_ABS();
+TFLMRegistration Register_ADD();
+TFLMRegistration Register_ADD_N();
+TFLMRegistration Register_ARG_MAX();
+TFLMRegistration Register_ARG_MIN();
+TFLMRegistration Register_ASSIGN_VARIABLE();
+TFLMRegistration Register_AVERAGE_POOL_2D();
+TFLMRegistration Register_BATCH_TO_SPACE_ND();
+TFLMRegistration Register_BROADCAST_ARGS();
+TFLMRegistration Register_BROADCAST_TO();
+TFLMRegistration Register_CALL_ONCE();
+TFLMRegistration Register_CAST();
+TFLMRegistration Register_CEIL();
 // TODO(b/160234179): Change custom OPs to also return by value.
-TfLiteRegistration* Register_CIRCULAR_BUFFER();
-TfLiteRegistration Register_CUMSUM();
-TfLiteRegistration Register_DEPTH_TO_SPACE();
-TfLiteRegistration Register_DEPTHWISE_CONV_2D();
-TfLiteRegistration Register_DEQUANTIZE();
-TfLiteRegistration Register_DIV();
-TfLiteRegistration Register_ELU();
-TfLiteRegistration Register_EXP();
-TfLiteRegistration Register_EXPAND_DIMS();
-TfLiteRegistration Register_FILL();
-TfLiteRegistration Register_FLOOR_DIV();
-TfLiteRegistration Register_FLOOR_MOD();
-TfLiteRegistration Register_GATHER();
-TfLiteRegistration Register_GATHER_ND();
-TfLiteRegistration Register_HARD_SWISH();
-TfLiteRegistration Register_IF();
-TfLiteRegistration Register_L2_POOL_2D();
-TfLiteRegistration Register_LEAKY_RELU();
-TfLiteRegistration Register_LOG_SOFTMAX();
-TfLiteRegistration Register_LOGICAL_AND();
-TfLiteRegistration Register_LOGICAL_OR();
-TfLiteRegistration Register_LOGISTIC();
-TfLiteRegistration Register_MAX_POOL_2D();
-TfLiteRegistration Register_MIRROR_PAD();
-TfLiteRegistration Register_PRELU();
-TfLiteRegistration Register_MUL();
-TfLiteRegistration Register_PAD();
-TfLiteRegistration Register_PADV2();
-TfLiteRegistration Register_QUANTIZE();
-TfLiteRegistration Register_READ_VARIABLE();
-TfLiteRegistration Register_RELU();
-TfLiteRegistration Register_RELU6();
-TfLiteRegistration Register_RESIZE_BILINEAR();
-TfLiteRegistration Register_SELECT_V2();
-TfLiteRegistration Register_SHAPE();
-TfLiteRegistration Register_SLICE();
-TfLiteRegistration Register_SPACE_TO_BATCH_ND();
-TfLiteRegistration Register_SPACE_TO_DEPTH();
-TfLiteRegistration Register_SQUARED_DIFFERENCE();
-TfLiteRegistration Register_SQUEEZE();
-TfLiteRegistration Register_SUB();
-TfLiteRegistration Register_SUM();
-TfLiteRegistration Register_SVDF();
-TfLiteRegistration Register_TRANSPOSE();
-TfLiteRegistration Register_TRANSPOSE_CONV();
+TFLMRegistration* Register_CIRCULAR_BUFFER();
+TFLMRegistration Register_CONCATENATION();
+TFLMRegistration Register_CONV_2D();
+TFLMRegistration Register_COS();
+TFLMRegistration Register_CUMSUM();
+TFLMRegistration Register_DEPTH_TO_SPACE();
+TFLMRegistration Register_DEPTHWISE_CONV_2D();
+TFLMRegistration Register_DEQUANTIZE();
+TFLMRegistration Register_DIV();
+TFLMRegistration Register_ELU();
+TFLMRegistration Register_EMBEDDING_LOOKUP();
+TFLMRegistration Register_EQUAL();
+TFLMRegistration* Register_ETHOSU();
+TFLMRegistration Register_EXP();
+TFLMRegistration Register_EXPAND_DIMS();
+TFLMRegistration Register_FILL();
+TFLMRegistration Register_FLOOR();
+TFLMRegistration Register_FLOOR_DIV();
+TFLMRegistration Register_FLOOR_MOD();
+TFLMRegistration Register_FULLY_CONNECTED();
+TFLMRegistration Register_GATHER();
+TFLMRegistration Register_GATHER_ND();
+TFLMRegistration Register_GREATER();
+TFLMRegistration Register_GREATER_EQUAL();
+TFLMRegistration Register_HARD_SWISH();
+TFLMRegistration Register_IF();
+TFLMRegistration Register_L2_NORMALIZATION();
+TFLMRegistration Register_L2_POOL_2D();
+TFLMRegistration Register_LEAKY_RELU();
+TFLMRegistration Register_LESS();
+TFLMRegistration Register_LESS_EQUAL();
+TFLMRegistration Register_LOG();
+TFLMRegistration Register_LOG_SOFTMAX();
+TFLMRegistration Register_LOGICAL_AND();
+TFLMRegistration Register_LOGICAL_NOT();
+TFLMRegistration Register_LOGICAL_OR();
+TFLMRegistration Register_LOGISTIC();
+TFLMRegistration Register_MAX_POOL_2D();
+TFLMRegistration Register_MAXIMUM();
+TFLMRegistration Register_MEAN();
+TFLMRegistration Register_MINIMUM();
+TFLMRegistration Register_MIRROR_PAD();
+TFLMRegistration Register_MUL();
+TFLMRegistration Register_NEG();
+TFLMRegistration Register_NOT_EQUAL();
+TFLMRegistration Register_PACK();
+TFLMRegistration Register_PAD();
+TFLMRegistration Register_PADV2();
+TFLMRegistration Register_PRELU();
+TFLMRegistration Register_QUANTIZE();
+TFLMRegistration Register_READ_VARIABLE();
+TFLMRegistration Register_REDUCE_MAX();
+TFLMRegistration Register_RELU();
+TFLMRegistration Register_RELU6();
+TFLMRegistration Register_RESIZE_BILINEAR();
+TFLMRegistration Register_RESIZE_NEAREST_NEIGHBOR();
+TFLMRegistration Register_RSQRT();
+TFLMRegistration Register_SELECT_V2();
+TFLMRegistration Register_SHAPE();
+TFLMRegistration Register_SIN();
+TFLMRegistration Register_SLICE();
+TFLMRegistration Register_SOFTMAX();
+TFLMRegistration Register_SPACE_TO_BATCH_ND();
+TFLMRegistration Register_SPACE_TO_DEPTH();
+TFLMRegistration Register_SPLIT();
+TFLMRegistration Register_SPLIT_V();
+TFLMRegistration Register_SQRT();
+TFLMRegistration Register_SQUARE();
+TFLMRegistration Register_SQUARED_DIFFERENCE();
+TFLMRegistration Register_SQUEEZE();
+TFLMRegistration Register_STRIDED_SLICE();
+TFLMRegistration Register_SUB();
+TFLMRegistration Register_SUM();
+TFLMRegistration Register_SVDF();
+TFLMRegistration Register_TANH();
+TFLMRegistration Register_TRANSPOSE();
+TFLMRegistration Register_TRANSPOSE_CONV();
 // TODO(b/230666079): resolve conflict with xtensa implementation
-TfLiteRegistration Register_UNIDIRECTIONAL_SEQUENCE_LSTM();
-TfLiteRegistration Register_VAR_HANDLE();
-TfLiteRegistration Register_WHILE();
-TfLiteRegistration Register_ZEROS_LIKE();
+TFLMRegistration Register_UNIDIRECTIONAL_SEQUENCE_LSTM();
+TFLMRegistration Register_UNPACK();
+TFLMRegistration Register_VAR_HANDLE();
+TFLMRegistration Register_WHILE();
+// TODO(b/160234179): Change custom OPs to also return by value.
+namespace tflm_signal {
+TFLMRegistration* Register_WINDOW();
+}
+TFLMRegistration Register_ZEROS_LIKE();
 
 namespace ops {
 namespace micro {
-
-TfLiteRegistration Register_ABS();
-TfLiteRegistration Register_CEIL();
-TfLiteRegistration Register_CONCATENATION();
-TfLiteRegistration Register_COS();
-TfLiteRegistration Register_EQUAL();
-TfLiteRegistration Register_FLOOR();
-TfLiteRegistration Register_GREATER();
-TfLiteRegistration Register_GREATER_EQUAL();
-TfLiteRegistration Register_LESS();
-TfLiteRegistration Register_LESS_EQUAL();
-TfLiteRegistration Register_LOG();
-TfLiteRegistration Register_LOGICAL_NOT();
-TfLiteRegistration Register_MAXIMUM();
-TfLiteRegistration Register_MINIMUM();
-TfLiteRegistration Register_NEG();
-TfLiteRegistration Register_NOT_EQUAL();
-TfLiteRegistration Register_PACK();
-TfLiteRegistration Register_RESHAPE();
-TfLiteRegistration Register_RESIZE_NEAREST_NEIGHBOR();
-TfLiteRegistration Register_ROUND();
-TfLiteRegistration Register_RSQRT();
-TfLiteRegistration Register_SIN();
-TfLiteRegistration Register_SPLIT();
-TfLiteRegistration Register_SPLIT_V();
-TfLiteRegistration Register_SQRT();
-TfLiteRegistration Register_SQUARE();
-TfLiteRegistration Register_STRIDED_SLICE();
-TfLiteRegistration Register_UNPACK();
-TfLiteRegistration Register_L2_NORMALIZATION();
-TfLiteRegistration Register_TANH();
-
+TFLMRegistration Register_RESHAPE();
+TFLMRegistration Register_ROUND();
 }  // namespace micro
 }  // namespace ops
 }  // namespace tflite

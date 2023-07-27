@@ -337,13 +337,6 @@ void zdoPowerDescriptorRequestCommand(sl_cli_command_arg_t *args)
   emberAfAppPrintln("Power Descriptor %p0x%X", "Request: ", status);
 }
 
-void zdoEndDeviceBindRequestCommand(sl_cli_command_arg_t *args)
-{
-  uint8_t endpoint = sl_cli_get_argument_uint8(args, 0);
-  EmberStatus status = emberAfSendEndDeviceBind(endpoint);
-  emberAfAppPrintln("End Device Bind %p0x%X", "Request: ", status);
-}
-
 static void unbindRequest(sl_cli_command_arg_t *args,
                           bool isGroupAddress,
                           void* destination,

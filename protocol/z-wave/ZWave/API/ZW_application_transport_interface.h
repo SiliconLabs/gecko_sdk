@@ -1678,8 +1678,8 @@ SIncludedNodeInfo;
 
 typedef struct STest
 {
-  void (*Handle)(uint8_t, TX_STATUS_TYPE*); // Will be returned with transmit status
-                                            // Allows application to recognize frames
+  void (*Handle)(void *);      // Will be returned with transmit status
+                               // Allows application to recognize frames
   node_id_t DestNodeId;
   uint8_t PowerLevel;
 } STest;

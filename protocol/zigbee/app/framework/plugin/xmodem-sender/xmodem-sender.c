@@ -51,9 +51,8 @@ static uint8_t maxBlockSize;
 // keep track of the fact that upon successful ACK we move on to
 // the EOT state.
 static bool lastBlock;
-sl_zigbee_event_t emberAfPluginXmodemSenderMyEventEvent;
-void emberAfPluginXmodemSenderMyEventEventHandler(sl_zigbee_event_t * event);
-#define myEvent (&emberAfPluginXmodemSenderMyEventEvent)
+static sl_zigbee_event_t myEvent;
+static void myEventEventHandler(sl_zigbee_event_t * event);
 #define ACK_TIMEOUT_SECONDS 2
 #define READY_TIMEOUT_SECONDS 10
 
@@ -84,8 +83,8 @@ void sli_zigbee_af_xmodsli_zigbee_sender_init_callback(uint8_t init_level)
 {
   (void)init_level;
 
-  sl_zigbee_network_event_init(myEvent,
-                               emberAfPluginXmodemSenderMyEventEventHandler);
+  sl_zigbee_network_event_init(&myEvent,
+                               myEventEventHandler);
 }
 
 //------------------------------------------------------------------------------
@@ -163,7 +162,7 @@ static EmberStatus sendNextBlock(bool success)
     resetState(false);
   }
 
-  sl_zigbee_event_set_delay_qs(myEvent,
+  sl_zigbee_event_set_delay_qs(&myEvent,
                                ACK_TIMEOUT_SECONDS << 2);
   xmodemSendState = (sendEot
                      ? XMODEM_SEND_STATE_WAITING_EOT_ACK
@@ -234,9 +233,9 @@ void emberAfPluginXmodemSenderIncomingBlock(uint8_t* data,
   }
 }
 
-void emberAfPluginXmodemSenderMyEventEventHandler(sl_zigbee_event_t * event)
+void myEventEventHandler(sl_zigbee_event_t * event)
 {
-  sl_zigbee_event_set_inactive(myEvent);
+  sl_zigbee_event_set_inactive(&myEvent);
 
   switch (xmodemSendState) {
     case XMODEM_SEND_STATE_WAITING_DATA_ACK:
@@ -281,7 +280,7 @@ EmberStatus emberAfPluginXmodemSenderStart(EmberAfXmodemSenderTransmitFunction* 
   maxBlockSize = maxSizeOfBlock;
 
   if (waitForReady) {
-    sl_zigbee_event_set_delay_qs(myEvent,
+    sl_zigbee_event_set_delay_qs(&myEvent,
                                  READY_TIMEOUT_SECONDS << 2);
     xmodemSendState = XMODEM_SEND_STATE_WAITING_READY;
     return EMBER_SUCCESS;

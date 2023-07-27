@@ -5,9 +5,10 @@ description: >
   Used to support the reporting functionality of a node with a set of sensors
   whose data is available on the network. It also has a corresponding Sensor
   Setup Server model which is present on the same element.
-  
+
   This component implements temperature, people count, and illuminance measurements.
   It provides callback functions for each property.
+  This component is prepared for integration into SOC applications.
 
   This is a No-Code component if using a Silicon Labs device and the relevant
   components for their respective hardware.
@@ -35,15 +36,20 @@ provides:
 requires:
   - name: "app_assert"
   - name: "app_btmesh_util"
-  - name: "btmesh_provisionee"
+  - name: "btmesh_role_init"
   - name: "btmesh_stack_node"
   - name: "btmesh_stack_sensor_server"
   - name: "btmesh_stack_sensor_setup_server"
   - name: "btmesh_stack"
   - name: "app_timer"
+recommends:
+  - id: "btmesh_provisionee"
 
 template_contribution:
   - name: "btmesh_on_event"
     value:
       include: "sl_btmesh_sensor_server.h"
       function: "sl_btmesh_handle_sensor_server_events"
+
+validation_helper:
+  - path: "../../script/validation/soc_ncp_compatibility.lua"

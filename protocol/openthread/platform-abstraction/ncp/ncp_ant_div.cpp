@@ -33,7 +33,7 @@
 
 #include "ncp_ant_div.hpp"
 #include "vendor_spinel.hpp"
-#include "radio_vendor.h"
+#include "radio_extension.h"
 
 #include "common/code_utils.hpp"
 
@@ -99,7 +99,7 @@ otError getTxAntennaMode(Spinel::Encoder &aEncoder)
 {
     uint8_t mode = 0;
 
-    IgnoreError(otPlatRadioVendorGetTxAntennaMode(&mode));
+    IgnoreError(otPlatRadioExtensionGetTxAntennaMode(&mode));
 
     return (aEncoder.WriteUint8(mode));
 }
@@ -111,7 +111,7 @@ otError setTxAntennaMode(Spinel::Decoder &aDecoder)
 
     SuccessOrExit(error = aDecoder.ReadUint8(mode));
     
-    error = otPlatRadioVendorSetTxAntennaMode(mode);
+    error = otPlatRadioExtensionSetTxAntennaMode(mode);
 
 exit:
     return error;
@@ -121,7 +121,7 @@ otError getRxAntennaMode(Spinel::Encoder &aEncoder)
 {
     uint8_t mode = 0;
 
-    IgnoreError(otPlatRadioVendorGetRxAntennaMode(&mode));
+    IgnoreError(otPlatRadioExtensionGetRxAntennaMode(&mode));
 
     return (aEncoder.WriteUint8(mode));
 }
@@ -133,7 +133,7 @@ otError setRxAntennaMode(Spinel::Decoder &aDecoder)
 
     SuccessOrExit(error = aDecoder.ReadUint8(mode));
     
-    error = otPlatRadioVendorSetRxAntennaMode(mode);
+    error = otPlatRadioExtensionSetRxAntennaMode(mode);
 
 exit:
     return error;
@@ -143,7 +143,7 @@ otError getActivePhy(Spinel::Encoder &aEncoder)
 {
     uint8_t activePhy = 0;
 
-    IgnoreError(otPlatRadioVendorGetActivePhy(&activePhy));
+    IgnoreError(otPlatRadioExtensionGetActivePhy(&activePhy));
 
     return (aEncoder.WriteUint8(activePhy));
 }

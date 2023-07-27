@@ -868,6 +868,16 @@ enum
  */
   EMBER_TRUST_CENTER_EUI_HAS_CHANGED = 0xBC,
 
+/**
+ * @brief Trust center swapped out. The EUI has changed.
+ */
+  EMBER_TRUST_CENTER_SWAPPED_OUT_EUI_HAS_CHANGED = EMBER_TRUST_CENTER_EUI_HAS_CHANGED,
+
+/**
+ * @brief Trust center swapped out. The EUI has not changed.
+ */
+  EMBER_TRUST_CENTER_SWAPPED_OUT_EUI_HAS_NOT_CHANGED = 0xBF,
+
 //@}
 
 /**

@@ -317,8 +317,4 @@ void sl_btmesh_lighting_color_pwm_cb(uint16_t color)
 void sl_btmesh_factory_reset_on_node_reset(void)
 {
   app_show_btmesh_node_reset();
-  sl_bt_nvm_erase(SL_BTMESH_LIGHTING_SERVER_PS_KEY_CFG_VAL);
-  sl_bt_nvm_erase(SL_BTMESH_CTL_SERVER_PS_KEY_CFG_VAL);
-  sl_bt_nvm_erase(SL_BTMESH_LC_SERVER_PS_KEY_CFG_VAL);
-  sl_bt_nvm_erase(SL_BTMESH_LC_SERVER_PROPERTY_PS_KEY_CFG_VAL);
 }

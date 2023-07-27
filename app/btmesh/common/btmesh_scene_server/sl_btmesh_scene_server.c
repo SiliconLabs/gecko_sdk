@@ -3,7 +3,7 @@
  * @brief BT mesh scene server module
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -68,13 +68,14 @@ uint16_t sl_btmesh_scenes_init(void)
 /*******************************************************************************
  * Handling of mesh scene events.
  *
- * It is called automatically by the Universal Configurator Framework
+ * This function is called automatically after enabling the component.
  *
  * @param[in] evt  Pointer to incoming scene server event.
  ******************************************************************************/
 void sl_btmesh_scene_server_on_event(sl_btmesh_msg_t *evt)
 {
   switch (SL_BT_MSG_ID(evt->header)) {
+    case sl_btmesh_evt_prov_initialized_id:
     case sl_btmesh_evt_node_provisioned_id:
       sl_btmesh_scenes_init();
       break;

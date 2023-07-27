@@ -3,7 +3,7 @@
  * @brief btmesh_event_log.h
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -31,6 +31,9 @@
 #ifndef SL_BTMESH_EVENT_LOG
 #define SL_BTMESH_EVENT_LOG
 
+#include "sl_btmesh_api.h"
+#include "sl_bt_api.h"
+
 /*******************************************************************************
  * Log Bluetooth mesh events
  * @param[in] evt     Pointer to incoming event
@@ -42,5 +45,10 @@ void sl_btmesh_log_btmesh_events(sl_btmesh_msg_t *evt);
  * @param[in] evt     Pointer to incoming event
  ******************************************************************************/
 void sl_btmesh_log_bt_connection_events(sl_bt_msg_t *evt);
+
+/*******************************************************************************
+ * Component node reset handler.
+ ******************************************************************************/
+void sl_btmesh_log_on_node_reset(void);
 
 #endif // SL_BTMESH_EVENT_LOG

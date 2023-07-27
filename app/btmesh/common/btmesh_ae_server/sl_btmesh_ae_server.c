@@ -3,7 +3,7 @@
  * @brief BT Mesh Advertisement Extension Server
  *******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -44,6 +44,7 @@ void sl_btmesh_ae_server_on_event(const sl_btmesh_msg_t *const evt)
 {
   sl_status_t sc;
   switch (SL_BT_MSG_ID(evt->header)) {
+    case sl_btmesh_evt_prov_initialized_id:
     case sl_btmesh_evt_node_provisioned_id: {
       sc = sl_btmesh_silabs_config_server_init();
       app_assert_status_f(sc, "Failed to init AE server");

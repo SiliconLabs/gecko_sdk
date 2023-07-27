@@ -1,17 +1,3 @@
-Zigbee EmberZNet SDK 7.3.0.0
-- Zigbee
-  - Zigbee R23 compliance, with these Security enhancements among others:
-    - Dynamic link key negotiation
-    - Device interview to query devices before they are allowed to join
-    - Trust Center Swap Out to replace an existing Trust Center with a new one
-    - Frame Counter Synchronization 
-  - Zigbee Direct Device (ZDD) support for:
-    - Onboarding/commissioning
-    - Communication to all Zigbee devices without a hub (Alpha), using Bluetooth LE
-  - Zigbee Smart Energy 1.4a compliance (Alpha)
-  - Enhancements to Zigbee GP APIs
-  - New Zigbee Security upgrade component for moving encryption keys from cleartext NVM3 tokens into secure storage
-Multiprotocol
-  - Zigbee/OpenThread Concurrent Multiprotocol SoC sample app
-  - CPC GPIO expander module
-  - Zigbeed enhancements
+Zigbee EmberZNet SDK 7.3.1.0
+- Targeted quality improvements and bug fixes
+  

@@ -31,6 +31,8 @@
 #include "stack/routing/zigbee/management.h" // for pan id conflict counts
 #include "stack/routing/zigbee/association.h" // forjoin methods
 #include "stack/zigbee/zigbee-device.h" // forjoin methods
+#include "stack/zigbee/sli_zigbee_zdo_extension.h"
+
 // Defines
 #define IS_END_ENV(elem) ((elem).isEnd)
 ///
@@ -86,16 +88,6 @@ sl_zigbee_tlv_tag_min_length_t global_tlv_env[] =
 uint8_t sl_zigbee_encap_tlv_global_tag_ids[] =
 { SL_ZIGBEE_GLOBAL_TLV_JOINER_ENCAP_TAG_ID,
   SL_ZIGBEE_GLOBAL_TLV_BEACON_APPENDIX_ENCAP_TAG_ID, };
-
-// TODO remove dependency on the TLV flag byte
-
-WEAK(sl_status_t sli_zigbee_get_device_capability_extension_data(bool* attach_tlv, uint16_t* bitmask))
-{
-  (void)attach_tlv;
-  (void)bitmask;
-
-  return SL_STATUS_FAIL;
-}
 
 // TODO EMZIGBEE-6553 fill in remaining tlv config getters
 static GlobalTlvResult_t get_global_tlv_config(uint8_t tag_id)

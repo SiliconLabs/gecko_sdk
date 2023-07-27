@@ -589,10 +589,10 @@ DEFINE_INDEXED_TOKEN(STACK_ADDITIONAL_CHILD_DATA,
 #endif  // SMART_ENERGY_STACK_TOKENS
 
 #ifndef EMBER_SCRIPTED_TEST
- #ifdef SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
+ #if (defined(SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT) \
+  || (defined(SL_CATALOG_ZIGBEE_GREEN_POWER_ADAPTER_PRESENT)))
    #include "app/framework/util/af-token.h"
- #endif
- #ifdef SL_CATALOG_ZIGBEE_NCP_FRAMEWORK_PRESENT
+ # elif defined(SL_CATALOG_ZIGBEE_NCP_FRAMEWORK_PRESENT)
    #include "app/framework/util/af-ncp-token.h"
  #endif
 #else // EMBER_SCRIPTED_TEST
@@ -640,10 +640,10 @@ DEFINE_INDEXED_TOKEN(STACK_ADDITIONAL_CHILD_DATA,
 //The Simulated EEPROM and NVM3 unit tests define their tokens via the
 //APPLICATION_TOKEN_HEADER macro.
 #ifndef EMBER_SCRIPTED_TEST
- #ifdef SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
+ #if (defined(SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT) \
+  || (defined(SL_CATALOG_ZIGBEE_GREEN_POWER_ADAPTER_PRESENT)))
    #include "app/framework/util/af-token.h"
- #endif
- #ifdef SL_CATALOG_ZIGBEE_NCP_FRAMEWORK_PRESENT
+ # elif defined(SL_CATALOG_ZIGBEE_NCP_FRAMEWORK_PRESENT)
    #include "app/framework/util/af-ncp-token.h"
  #endif
 #else // EMBER_SCRIPTED_TEST

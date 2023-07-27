@@ -24,7 +24,6 @@
 #include "stack/core/ember-multi-network.h"
 #include "stack/include/ember-types-internal.h"
 #include "hal.h" // for TOKEN_resolution
-
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
 #endif

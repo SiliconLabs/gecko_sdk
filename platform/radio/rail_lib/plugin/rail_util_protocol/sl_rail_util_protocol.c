@@ -36,6 +36,7 @@
 #include "rail_ble.h"
 #include "rail_ieee802154.h"
 #include "rail_zwave.h"
+#include "rail_sidewalk.h"
 
 #include "sl_rail_util_protocol.h"
 
@@ -346,6 +347,23 @@ static RAIL_Status_t sl_rail_util_protocol_config_zwave(RAIL_Handle_t handle,
 }
 #endif // RAIL_FEAT_SUBGIG_RADIO
 
+#if RAIL_SUPPORTS_PROTOCOL_SIDEWALK && SL_RAIL_UTIL_PROTOCOL_SIDEWALK_ENABLE
+static RAIL_Status_t sl_rail_util_protocol_config_sidewalk(RAIL_Handle_t handle,
+                                                           sl_rail_util_protocol_type_t protocol)
+{
+  RAIL_Status_t status;
+  switch (protocol) {
+    case SL_RAIL_UTIL_PROTOCOL_SIDEWALK_2GFSK_50KBPS:
+      status = RAIL_Sidewalk_ConfigPhy2GFSK50kbps(handle);
+      break;
+    default:
+      status = RAIL_STATUS_INVALID_PARAMETER;
+      break;
+  }
+  return status;
+}
+#endif // RAIL_SUPPORTS_PROTOCOL_SIDEWALK && SL_RAIL_UTIL_PROTOCOL_SIDEWALK_ENABLE
+
 RAIL_Status_t sl_rail_util_protocol_config(RAIL_Handle_t handle,
                                            sl_rail_util_protocol_type_t protocol)
 {
@@ -388,6 +406,10 @@ RAIL_Status_t sl_rail_util_protocol_config(RAIL_Handle_t handle,
     case SL_RAIL_UTIL_PROTOCOL_ZWAVE_US_LR2: // United States, Long Range 2
     case SL_RAIL_UTIL_PROTOCOL_ZWAVE_US_LR_END_DEVICE: // US, LR End Device
       return sl_rail_util_protocol_config_zwave(handle, protocol);
+#endif
+#if RAIL_SUPPORTS_PROTOCOL_SIDEWALK && SL_RAIL_UTIL_PROTOCOL_SIDEWALK_ENABLE
+    case SL_RAIL_UTIL_PROTOCOL_SIDEWALK_2GFSK_50KBPS:
+      return sl_rail_util_protocol_config_sidewalk(handle, protocol);
 #endif
     default:
       return RAIL_STATUS_INVALID_PARAMETER;

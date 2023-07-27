@@ -67,7 +67,6 @@ bool ezspInternalProcessCommandOptions(int argc, char *argv[], char *errStr)
 {
   int c;
   uint8_t trace;
-  int optionCount = 0;
 
   while (true) {
     c = getopt(argc, argv, options);
@@ -77,8 +76,6 @@ bool ezspInternalProcessCommandOptions(int argc, char *argv[], char *errStr)
       }
       break;
     }
-
-    optionCount++;
 
     switch (c) {
       case 'h':

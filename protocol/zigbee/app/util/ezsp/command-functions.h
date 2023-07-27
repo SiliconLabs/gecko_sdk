@@ -3659,6 +3659,31 @@ void ezspResetNode(void)
   }
 }
 
+EmberStatus ezspGpSecurityTestVectors(void)
+{
+  EmberStatus status;
+  startCommand(EZSP_GP_SECURITY_TEST_VECTORS);
+  EzspStatus sendStatus = sendCommand();
+  if (sendStatus == EZSP_SUCCESS) {
+    status = fetchInt8u();
+    return status;
+  }
+  return sendStatus;
+}
+
+void ezspTokenFactoryReset(
+  bool excludeOutgoingFC,
+  bool excludeBootCounter)
+{
+  startCommand(EZSP_TOKEN_FACTORY_RESET);
+  appendInt8u(excludeOutgoingFC);
+  appendInt8u(excludeBootCounter);
+  EzspStatus sendStatus = sendCommand();
+  if (sendStatus == EZSP_SUCCESS) {
+    EZSP_ASH_TRACE("%s(): sendCommand() error: 0x%x", __func__, sendStatus);
+  }
+}
+
 static void callbackDispatch(void)
 {
   callbackPointerInit();

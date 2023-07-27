@@ -11,19 +11,6 @@ quality: production
 root_path: "app/wisun/component/wisun_config"
 provides:
 - name: wisun_config
-# default wisun configuration for wisun_empty application that uses extra wisun components.
-source:
-  - path: "default/sl_wisun_config.c"
-    condition:
-      - "sl_wisun_full_config"
-      - "sl_wisun_empty"
-include:
-  - path: "default"
-    file_list:
-    - "path": "sl_wisun_config.h"
-    condition:
-      - "sl_wisun_full_config"
-      - "sl_wisun_empty"
 
 config_file:
 #------------------------------------------------ restriction files with conditions
@@ -34,16 +21,12 @@ config_file:
     - "sl_wisun_lfn_device_support"
     - "wisun_cli"
 # tabs' restriction files
-- path: config/restrictions/only_radio.restriction  # other applications that are not empty
+- path: config/restrictions/only_radio.restriction  # other applications
   directory: wisun
   unless:
     - "sl_wisun_full_config"
-    - "sl_wisun_empty"
     - "wisun_cli"
-- path: config/restrictions/only_radio.restriction  # for empty app
-  directory: wisun
-  condition:
-    - "sl_wisun_empty"
+
 - path: config/restrictions/only_radio.restriction  # for wisun_cli app
   directory: wisun
   condition:
@@ -117,6 +100,10 @@ config_file:
   directory: wisun
   condition:
     - brd4401c
+- path: config/NA_1_1b/wisun_settings.wisunconf
+  directory: wisun
+  condition:
+    - brd2705a
 
 # CN_1_1b
 - path: config/CN_1_1b/wisun_settings.wisunconf

@@ -942,7 +942,7 @@ static int16_t popFromBuffer(IasZoneStatusQueue *ring,
   return retVal;
 }
 
-uint16_t computeElapsedTimeQs(IasZoneStatusQueueEntry *entry)
+static uint16_t computeElapsedTimeQs(IasZoneStatusQueueEntry *entry)
 {
   uint32_t currentTimeMs = halCommonGetInt32uMillisecondTick();
   int64_t deltaTimeMs = currentTimeMs - entry->eventTimeMs;

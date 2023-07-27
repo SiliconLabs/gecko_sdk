@@ -541,6 +541,9 @@ static void save_received_packet(RAIL_Handle_t rail_handle)
     app_log_error("RAIL_GetRxPacketInfo() error: RAIL_RX_PACKET_HANDLE_INVALID\n");
   }
   uint16_t packet_size = unpack_packet(rx_fifo, &packet_info, &start_of_packet);
+  if (packet_size == 0) {
+    app_log_warning("Received packet size is :%d", packet_size);
+  }
   rail_status = RAIL_ReleaseRxPacket(rail_handle, RAIL_RX_PACKET_HANDLE_OLDEST_COMPLETE);
   if (rail_status != RAIL_STATUS_NO_ERROR) {
     app_log_warning("RAIL_ReleaseRxPacket() result:%d", rail_status);

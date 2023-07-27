@@ -22,7 +22,7 @@
 #include "network-creator-security.h"
 #include "stack/include/zigbee-security-manager.h"
 
-#include "app/framework/security/af-security.h" // emAfAllowTrustCenterRejoins
+#include "app/framework/security/af-security.h"
 #include "app/util/zigbee-framework/zigbee-device-common.h" // emberLeaveRequest
 
 #include "network-creator-security-config.h"
@@ -90,9 +90,8 @@ extern void sli_zigbee_zdd_update_keys(EmberInitialSecurityState *state);
 // -----------------------------------------------------------------------------
 // Internal Declarations
 
-void emberAfPluginNetworkCreatorSecurityOpenNetworkNetworkEventHandler(sl_zigbee_event_t * event);
-sl_zigbee_event_t emberAfPluginNetworkCreatorSecurityOpenNetworkNetworkEvents[EMBER_SUPPORTED_NETWORKS];
-#define openNetworkEventControl (emberAfPluginNetworkCreatorSecurityOpenNetworkNetworkEvents)
+static void openNetworkNetworkEventHandler(sl_zigbee_event_t * event);
+static sl_zigbee_event_t openNetworkNetworkEvents[EMBER_SUPPORTED_NETWORKS];
 
 static uint16_t openNetworkTimeRemainingS;
 
@@ -117,8 +116,8 @@ void emberAfPluginNetworkCreatorSecurityInitCallback(uint8_t init_level)
   }
 #endif // EZSP_HOST && BDB_JOIN_USES_INSTALL_CODE_KEY
 
-  sl_zigbee_network_event_init(openNetworkEventControl,
-                               emberAfPluginNetworkCreatorSecurityOpenNetworkNetworkEventHandler);
+  sl_zigbee_network_event_init(openNetworkNetworkEvents,
+                               openNetworkNetworkEventHandler);
 }
 
 // TODO: renamed for naming consistency purposes
@@ -316,7 +315,7 @@ EmberStatus emberAfPluginNetworkCreatorSecurityOpenNetwork(void)
 
   if (status == SL_STATUS_OK) {
     openNetworkTimeRemainingS = NETWORK_OPEN_TIME_S;
-    sl_zigbee_event_set_active(openNetworkEventControl);
+    sl_zigbee_event_set_active(openNetworkNetworkEvents);
   }
 
   return ((status == SL_STATUS_OK) ? EMBER_SUCCESS : EMBER_NO_BUFFERS);
@@ -328,7 +327,7 @@ EmberStatus emberAfPluginNetworkCreatorSecurityCloseNetwork(void)
 
   if (emberAfNetworkState() == EMBER_JOINED_NETWORK) {
     emberClearTransientLinkKeys();
-    sl_zigbee_event_set_inactive(openNetworkEventControl);
+    sl_zigbee_event_set_inactive(openNetworkNetworkEvents);
     zaTrustCenterSetJoinPolicy(EMBER_ALLOW_REJOINS_ONLY);
     status = emberAfPermitJoin(0, true); // broadcast
   }
@@ -358,7 +357,7 @@ EmberStatus emberAfPluginNetworkCreatorSecurityOpenNetworkWithKeyPair(EmberEUI64
 
   if (status == EMBER_SUCCESS) {
     openNetworkTimeRemainingS = NETWORK_OPEN_TIME_S;
-    sl_zigbee_event_set_active(openNetworkEventControl);
+    sl_zigbee_event_set_active(openNetworkNetworkEvents);
   }
 
   return status;
@@ -367,12 +366,12 @@ EmberStatus emberAfPluginNetworkCreatorSecurityOpenNetworkWithKeyPair(EmberEUI64
 // -----------------------------------------------------------------------------
 // Internal Definitions
 
-void emberAfPluginNetworkCreatorSecurityOpenNetworkNetworkEventHandler(sl_zigbee_event_t * event)
+static void openNetworkNetworkEventHandler(sl_zigbee_event_t * event)
 {
   sl_status_t status = SL_STATUS_OK;
   uint8_t permitJoinTime;
 
-  sl_zigbee_event_set_inactive(openNetworkEventControl);
+  sl_zigbee_event_set_inactive(openNetworkNetworkEvents);
 
   // If we have left the network, then we don't need to proceed further.
   if (emberAfNetworkState() != EMBER_JOINED_NETWORK) {
@@ -382,7 +381,7 @@ void emberAfPluginNetworkCreatorSecurityOpenNetworkNetworkEventHandler(sl_zigbee
   if (openNetworkTimeRemainingS > EMBER_AF_PERMIT_JOIN_MAX_TIMEOUT) {
     permitJoinTime = EMBER_AF_PERMIT_JOIN_MAX_TIMEOUT;
     openNetworkTimeRemainingS -= EMBER_AF_PERMIT_JOIN_MAX_TIMEOUT;
-    sl_zigbee_event_set_delay_qs(openNetworkEventControl,
+    sl_zigbee_event_set_delay_qs(openNetworkNetworkEvents,
                                  (EMBER_AF_PERMIT_JOIN_MAX_TIMEOUT << 2));
   } else {
     permitJoinTime = openNetworkTimeRemainingS;

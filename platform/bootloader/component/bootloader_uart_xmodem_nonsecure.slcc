@@ -6,7 +6,7 @@ description: >
   file transfer protocol. This configurable component makes the bootloader compatible with the legacy serial UART
   bootloader that was released with the wireless stacks.
 category: Platform|Bootloader|TrustZone NonSecure|Communication
-quality: evaluation
+quality: production
 source:
   - path: platform/bootloader/communication/xmodem-uart/btl_comm_xmodem_ns.c
   - path: platform/bootloader/communication/xmodem-uart/btl_comm_xmodem_common.c

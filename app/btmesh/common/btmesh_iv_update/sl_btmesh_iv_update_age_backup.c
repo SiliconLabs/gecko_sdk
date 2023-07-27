@@ -3,7 +3,7 @@
  * @brief IV Update age backup implementation
  *******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -45,6 +45,7 @@
 #endif // SL_CATALOG_APP_LOG_PRESENT
 
 #include "sl_btmesh_iv_update_config.h"
+#include "sl_btmesh_iv_update_age_backup.h"
 
 // Warning! The app_btmesh_util shall be included after the component configuration
 // header file in order to provide the component specific logging macro.
@@ -78,15 +79,32 @@ void sl_btmesh_iv_update_age_backup_on_event(sl_btmesh_msg_t* evt)
         age_backup_timer_start();
       }
       break;
+    case sl_btmesh_evt_prov_initialized_id:
+      restore_age();
+      age_backup_timer_start();
+      break;
     case sl_btmesh_evt_node_provisioned_id:
     case sl_btmesh_evt_node_changed_ivupdate_state_id:
       age = 0;
       backup_age();
       age_backup_timer_start();
       break;
+    case sl_btmesh_evt_node_reset_id:
+      sl_btmesh_iv_update_on_node_reset();
+      break;
     default:
       break;
   }
+}
+
+/*******************************************************************************
+ * Component node reset handler.
+ ******************************************************************************/
+void sl_btmesh_iv_update_on_node_reset(void)
+{
+#if SL_BTMESH_IV_UPDATE_AGE_BACKUP_ENABLE
+  sl_bt_nvm_erase(SL_BTMESH_IV_UPDATE_AGE_NVM_KEY_CFG_VAL);
+#endif
 }
 
 /***************************************************************************//**
@@ -94,10 +112,10 @@ void sl_btmesh_iv_update_age_backup_on_event(sl_btmesh_msg_t* evt)
  ******************************************************************************/
 static void restore_age(void)
 {
-  size_t age_len = sizeof(age);
-  sl_status_t sc = app_btmesh_nvm_read(SL_BTMESH_IV_UPDATE_AGE_NVM_KEY_CFG_VAL,
-                                       &age,
-                                       &age_len);
+  sl_status_t sc = sl_bt_nvm_load(SL_BTMESH_IV_UPDATE_AGE_NVM_KEY_CFG_VAL,
+                                  sizeof(age),
+                                  NULL,
+                                  (uint8_t *)&age);
   log_status_error_f(sc, "Failed to read from nvm" NL);
   if (sc == SL_STATUS_OK) {
     sc = sl_btmesh_node_set_iv_update_age(age);
@@ -110,9 +128,9 @@ static void restore_age(void)
  ******************************************************************************/
 static void backup_age(void)
 {
-  sl_status_t sc = app_btmesh_nvm_write(SL_BTMESH_IV_UPDATE_AGE_NVM_KEY_CFG_VAL,
-                                        &age,
-                                        sizeof(age));
+  sl_status_t sc = sl_bt_nvm_save(SL_BTMESH_IV_UPDATE_AGE_NVM_KEY_CFG_VAL,
+                                  sizeof(age),
+                                  (uint8_t *)&age);
   log_status_error_f(sc, "Failed to backup IV Update age" NL);
 }
 

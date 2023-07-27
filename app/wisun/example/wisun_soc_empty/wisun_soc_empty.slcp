@@ -30,7 +30,7 @@ component:
 # SDK components
   - id: "sl_wisun_lfn_device_support"
   - id: "sl_wisun_trace_util"
-  - id: "sl_wisun_empty"
+  - id: "sl_wisun_app_core"
 
 requires:
   - name: "cmsis_rtos2"
@@ -93,6 +93,10 @@ configuration:
 #--------------------- SDK memory configuration ------------------------
   - name: "SL_HEAP_SIZE"
     value: "0xD400"
+  - name: "SL_SOCKET_BUFFER_SIZE"
+    value: "532"
+    condition:
+      - "sl_wisun_ota_dfu"
 
 readme:
   - path: ../../documentation/example/wisun_soc_empty/readme.md

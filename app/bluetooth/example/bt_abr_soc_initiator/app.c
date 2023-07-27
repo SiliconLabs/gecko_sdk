@@ -63,6 +63,9 @@ SL_WEAK void app_init(void)
   abr_initiator_config_set_default(&initiator_config);
   abr_ui_init();
 
+  // Configured parameters
+  initiator_config.rssi_measurement_enabled = ABR_RSSI_MEASUREMENT_ENABLED;
+
   if (SL_SIMPLE_BUTTON_COUNT >= 1) {
     button_pressed = sl_button_get_state(PB0);
   }

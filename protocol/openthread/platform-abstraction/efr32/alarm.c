@@ -49,11 +49,6 @@
 #include "rail.h"
 #include "sl_sleeptimer.h"
 
-// According to EFR datasheets, HFXO is ± 40 ppm and LFXO (at least for MG12) is
-// -8 to +40 ppm.
-#define HFXO_ACCURACY 80
-#define LFXO_ACCURACY 48
-
 // millisecond timer (sleeptimer)
 static sl_sleeptimer_timer_handle_t sl_handle;
 static uint32_t                     sMsAlarm     = 0;
@@ -108,10 +103,10 @@ uint32_t otPlatTimeGetXtalAccuracy(void)
     // for the worst case.
     if (efr32AllowSleepCallback())
     {
-        return HFXO_ACCURACY + LFXO_ACCURACY;
+        return SL_OPENTHREAD_HFXO_ACCURACY + SL_OPENTHREAD_LFXO_ACCURACY;
     }
 #endif
-    return HFXO_ACCURACY;
+    return SL_OPENTHREAD_HFXO_ACCURACY;
 }
 
 void otPlatAlarmMilliStartAt(otInstance *aInstance, uint32_t aT0, uint32_t aDt)

@@ -65,9 +65,8 @@ static BootloadServerState serverBootloadState = SERVER_BOOTLOAD_STATE_NONE;
 #define DELAY_BEFORE_CHECKING_IF_BOOTLOADER_ACTIVE_SECONDS 2
 #define DELAY_BEFORE_SENDING_BOOTLOAD_DATA_SECONDS 2
 
-sl_zigbee_event_t emberAfPluginStandaloneBootloaderServerMyEventEventControl;
-#define myEvent (&emberAfPluginStandaloneBootloaderServerMyEventEventControl)
-void emberAfPluginStandaloneBootloaderServerMyEventEventHandler(sl_zigbee_event_t * event);
+sl_zigbee_event_t myEvent;
+static void myEventHandler(sl_zigbee_event_t * event);
 
 // We remember the last target client as an optimization.
 // This way a CLI user can broadcast the query and then simply bootload the
@@ -105,7 +104,7 @@ static void resetServerState(bool success)
   // We don't clear the targetClient struct so it can potentially be re-used
   // in a subsequent bootload.
   serverBootloadState = SERVER_BOOTLOAD_STATE_NONE;
-  sl_zigbee_event_set_inactive(myEvent);
+  sl_zigbee_event_set_inactive(&myEvent);
 }
 
 static bool isTargetClientDataValid(void)
@@ -118,8 +117,8 @@ void emberAfPluginStandaloneBootloaderServerInitCallback(uint8_t init_level)
   switch (init_level) {
     case SL_ZIGBEE_INIT_LEVEL_EVENT:
     {
-      sl_zigbee_event_init(myEvent,
-                           emberAfPluginStandaloneBootloaderServerMyEventEventHandler);
+      sl_zigbee_event_init(&myEvent,
+                           myEventHandler);
       break;
     }
 
@@ -255,7 +254,7 @@ static void sendLaunchRequest(void)
                                                               outgoingBlock);
   if (status == EMBER_SUCCESS) {
     serverBootloadState = SERVER_BOOTLOAD_STATE_LAUNCH_REQUEST_SENT;
-    sl_zigbee_event_set_delay_qs(myEvent,
+    sl_zigbee_event_set_delay_qs(&myEvent,
                                  LAUNCH_REQUEST_TIMEOUT_SECONDS << 2);
   } else {
     resetServerState(false);
@@ -323,7 +322,7 @@ static void xmodemComplete(bool success)
 
 static void startSendingXmodemData(void)
 {
-  sl_zigbee_event_set_inactive(myEvent);
+  sl_zigbee_event_set_inactive(&myEvent);
   serverBootloadState = SERVER_BOOTLOAD_STATE_SENDING_DATA;
   if (EMBER_SUCCESS != emberAfPluginXmodemSenderStart(xmodemSendRoutine,
                                                       getNextBootloaderBlock,
@@ -406,7 +405,7 @@ static void processChallenge(EmberEUI64 longId,
                                                               outgoingBlock);
   if (status == EMBER_SUCCESS) {
     serverBootloadState = SERVER_BOOTLOAD_STATE_DELAY_BEFORE_CHECK_IF_BOOTLOADER_ACTIVE;
-    sl_zigbee_event_set_delay_qs(myEvent,
+    sl_zigbee_event_set_delay_qs(&myEvent,
                                  DELAY_BEFORE_SENDING_BOOTLOAD_DATA_SECONDS << 2);
   } else {
     resetServerState(false);
@@ -457,7 +456,7 @@ EmberStatus emberAfPluginStandaloneBootloaderServerStartClientBootload(EmberEUI6
   status = sendQuery(longId);
   if (status == EMBER_SUCCESS) {
     serverBootloadState = SERVER_BOOTLOAD_STATE_UNICAST_QUERY_SENT;
-    sl_zigbee_event_set_delay_qs(myEvent,
+    sl_zigbee_event_set_delay_qs(&myEvent,
                                  QUERY_TIMEOUT_SECONDS << 2);
   } else {
     resetServerState(false);
@@ -465,16 +464,16 @@ EmberStatus emberAfPluginStandaloneBootloaderServerStartClientBootload(EmberEUI6
   return status;
 }
 
-void emberAfPluginStandaloneBootloaderServerMyEventEventHandler(sl_zigbee_event_t * event)
+static void myEventHandler(sl_zigbee_event_t * event)
 {
-  sl_zigbee_event_set_inactive(myEvent);
+  sl_zigbee_event_set_inactive(&myEvent);
   if (serverBootloadState == SERVER_BOOTLOAD_STATE_UNICAST_QUERY_SENT) {
     bootloadPrint("Error: Timed out waiting for device to respond to bootloader query");
   } else if (serverBootloadState == SERVER_BOOTLOAD_STATE_DELAY_BEFORE_CHECK_IF_BOOTLOADER_ACTIVE) {
     bootloadPrintln("Checking if bootloader is now active on client");
     if (EMBER_SUCCESS == sendQuery(targetClient.eui64)) {
       serverBootloadState = SERVER_BOOTLOAD_STATE_CHECK_IF_BOOTLOADER_ACTIVE_SENT;
-      sl_zigbee_event_set_delay_qs(myEvent,
+      sl_zigbee_event_set_delay_qs(&myEvent,
                                    QUERY_TIMEOUT_SECONDS << 2);
     } else {
       bootloadPrintln("Error: Giving up bootload of client");

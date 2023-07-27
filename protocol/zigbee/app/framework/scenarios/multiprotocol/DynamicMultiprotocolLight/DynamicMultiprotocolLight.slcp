@@ -7,6 +7,7 @@ quality: "production"
 description: >
   This is a sample application demonstrating a light application using dynamic
   multiprotocol (Zigbee + Bluetooth LE) and NVM3 for persistent storage.
+  We recommend the use of Micrium Kernel for this sample application.
 author: "Silicon Laboratories, Inc." 
 
 component:

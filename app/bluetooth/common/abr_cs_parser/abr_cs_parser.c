@@ -996,47 +996,17 @@ static sl_status_t add_calibration_data_to_measurement(cs_measurement_t  *meas,
  * @param[out] index Pointer to calculated index.
  *
  * Note:
- * If connection is not stored yet and there is an empty slot left,
- * then the function stores the connection handle.
- * The connection slot number is configurable and equals to the number of
- * supported reflector connections.
- * For more information see 'NUM_OF_REFLECTORS' configuration parameter.
+ * Currently one reflector connection is supported and this function
+ * always returns with index 0.
  * @return Status code.
  ******************************************************************************/
 static sl_status_t get_measurement_index_from_connection(uint8_t connection,
                                                          uint8_t *index)
 {
-  sl_status_t ret = SL_STATUS_FAIL;
-  bool found = false;
-
-  if ((connection != SL_BT_INVALID_CONNECTION_HANDLE)
-      && (index != NULL)) {
-    for (uint8_t idx = 0; idx < NUM_OF_REFLECTORS; idx++) {
-      if (cs_parser.measurements[idx].connection == connection) {
-        *index = idx;
-        found = true;
-        ret = SL_STATUS_OK;
-        break;
-      }
-    }
-    if (!found) {
-      uint8_t empty_slots = 0;
-      // Calculate empty slots
-      for (uint8_t idx = 0; idx < NUM_OF_REFLECTORS; idx++) {
-        if (cs_parser.measurements[idx].connection
-            == SL_BT_INVALID_CONNECTION_HANDLE) {
-          empty_slots++;
-        }
-      }
-      if (empty_slots != 0) {
-        // Occupy empty slot
-        *index = NUM_OF_REFLECTORS - empty_slots;
-        cs_parser.measurements[*index].connection = connection;
-        ret = SL_STATUS_OK;
-      }
-    }
-  }
-  return ret;
+  // Only one reflector connection is supported with measurement index 0
+  (void)connection;
+  *index = 0;
+  return SL_STATUS_OK;
 }
 
 /***************************************************************************//**

@@ -31,11 +31,7 @@
 // -------------------------------------
 // Includes
 
-#if !defined(MBEDTLS_CONFIG_FILE)
-#include "mbedtls/config.h"
-#else
-#include MBEDTLS_CONFIG_FILE
-#endif
+#include <mbedtls/build_info.h>
 
 #if defined(MBEDTLS_ENTROPY_C) && defined(MBEDTLS_ENTROPY_ADC_C)
 

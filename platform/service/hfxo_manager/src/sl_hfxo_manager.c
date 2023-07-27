@@ -35,9 +35,6 @@
 #include "sl_sleeptimer.h"
 #include "sl_assert.h"
 #include "sl_status.h"
-#if defined(_SILICON_LABS_32B_SERIES_2) && defined(SYSRTC_PRESENT)
-#include "peripheral_sysrtc.h"
-#endif
 #include <stdbool.h>
 
 /*******************************************************************************
@@ -47,11 +44,7 @@
 #define HFXO_STARTUP_TIME_TABLE_SIZE  10
 
 // Default time value in microseconds required to wake-up the hfxo oscillator.
-#if defined(_SILICON_LABS_32B_SERIES_2) && defined(SYSRTC_PRESENT)
-#define HFXO_STARTUP_TIME_DEFAULT_VALUE_US  (300u)
-#else
 #define HFXO_STARTUP_TIME_DEFAULT_VALUE_US  (600u)
-#endif
 
 /*******************************************************************************
  *****************************   DATA TYPES   **********************************

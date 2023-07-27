@@ -20,7 +20,7 @@
 
 #include PLATFORM_HEADER
 #include "../include/af.h"
-#if defined(SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT) || (defined(EMBER_AF_NCP) && defined(SL_CATALOG_ZIGBEE_AF_SUPPORT_PRESENT))
+#if defined(SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT) || defined(SL_CATALOG_ZIGBEE_GREEN_POWER_ADAPTER_PRESENT)
 #include "zap-config.h"
 #endif
 // If we have fixed number of endpoints, then max is the same.

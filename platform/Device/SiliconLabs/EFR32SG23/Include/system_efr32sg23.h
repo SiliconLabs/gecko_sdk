@@ -168,6 +168,7 @@ void SEMBTX_IRQHandler(void);            /**< SEMBTX IRQ Handler */
 void LESENSE_IRQHandler(void);           /**< LESENSE IRQ Handler */
 void SYSRTC_APP_IRQHandler(void);        /**< SYSRTC_APP IRQ Handler */
 void SYSRTC_SEQ_IRQHandler(void);        /**< SYSRTC_SEQ IRQ Handler */
+void LCD_IRQHandler(void);               /**< LCD IRQ Handler */
 void KEYSCAN_IRQHandler(void);           /**< KEYSCAN IRQ Handler */
 void RFECA0_IRQHandler(void);            /**< RFECA0 IRQ Handler */
 void RFECA1_IRQHandler(void);            /**< RFECA1 IRQ Handler */

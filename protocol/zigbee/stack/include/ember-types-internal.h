@@ -128,7 +128,7 @@ typedef uint8_t PacketValidateType;
 // without this bit set.
 #define KEY_IS_NOT_AUTHORIZED (1UL << 16) // RAM bitmask value (private)
 #define TC_EUI64_HAS_CHANGED_BITMASK (1UL << 28) // RAM bitmask value (private)
-
+#define TCSO_EUI64_HAS_OCCURRED_BITMASK (1UL << 29) // RAM bitmask value (private)
 // management code
 //----------------------------------------------------------------
 // PAN ID state
@@ -174,5 +174,23 @@ enum {
 
   NETWORK_LEAVING                     = EMBER_LEAVING_NETWORK,
 };
+
+// NOTE from association.h
+typedef struct {
+  // Configured values for joining or rejoining
+  EmberJoinMethod joinMethod;
+  EmberPanId      panIdToJoinTo;
+  uint8_t         extendedPanIdToJoinTo[EXTENDED_PAN_ID_SIZE];
+
+  // Internal state variables
+  bool            beaconReceived;
+  bool            scanComplete;
+  EmberStatus     rejoinReason;
+  EmberStatus     reasonForFailure;
+  uint8_t         pollAttemptsRemaining;
+} JoinState;
+
+// NOTE from sl_zigbee_network_commissioning.h
+typedef PacketHeader (*sli_zigbee_network_request_t)(EmberNodeId destination, EmberJoinMethod join_method);
 
 #endif // SILABS_EMBER_TYPES_INTERNAL_H

@@ -547,8 +547,16 @@ bool sli_zigbee_af_gp_calculate_incoming_command_decrypt(EmberGpAddress * gpdAdd
                                                          uint32_t gpdSecurityFrameCounter,
                                                          uint8_t payloadLength,
                                                          uint8_t * payload);
+uint8_t sli_zigbee_af_gp_outgoing_command_encrypt(EmberGpAddress * gpdAddr,
+                                                  uint32_t gpdSecurityFrameCounter,
+                                                  uint8_t keyType,
+                                                  uint8_t securityLevel,
+                                                  uint8_t gpdCommandId,
+                                                  uint8_t * gpdCommandPayload,
+                                                  uint8_t * securedOutgoingGpdf,
+                                                  uint8_t securedOutgoingGpdfMaxLength);
 // gp security test function
-void sli_zigbee_af_gp_test_security(void);
+EmberStatus sli_zigbee_af_gp_test_security(void);
 
 EmberAfStatus sli_zigbee_af_gp_add_to_aps_group(uint8_t endpoint, uint16_t groupId);
 // GP helper functions

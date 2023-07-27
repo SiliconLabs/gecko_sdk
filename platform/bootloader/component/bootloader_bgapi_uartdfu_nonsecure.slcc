@@ -8,7 +8,7 @@ description: >
   storage area needs to be configured. During UART DFU upgrade the bootloader writes the new firmware image
   directly on top of the old firmware image and therefore no temporary download area is needed.
 category: Platform|Bootloader|TrustZone NonSecure|Communication
-quality: evaluation
+quality: production
 source:
   - path: platform/bootloader/communication/bgapi-uart-dfu/btl_comm_bgapi_ns.c
   - path: platform/bootloader/communication/bgapi-uart-dfu/btl_comm_bgapi_common.c

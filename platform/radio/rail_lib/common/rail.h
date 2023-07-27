@@ -223,6 +223,76 @@ RAIL_Status_t RAIL_LoadSequencerImage2(RAIL_Handle_t genericRailHandle);
  *   unsupported by the platform, an assert will occur.
  */
 RAIL_Status_t RAILCb_RadioSequencerImageLoad(void);
+
+/**
+ * Load the FSK, OFDM and OQPSK image into the software modem (SFM) sequencer
+ * during RAIL initialization.
+ *
+ * @param[in] genericRailHandle A generic RAIL instance handle.
+ * @return Status code indicating success of the function call.
+ *
+ * This function must only be called from within the RAIL callback context of
+ * \ref RAILCb_LoadSfmSequencer. Otherwise, the function returns \ref
+ * RAIL_STATUS_INVALID_STATE.
+ */
+RAIL_Status_t RAIL_LoadSfmSunFskOfdmOqpsk(RAIL_Handle_t genericRailHandle);
+
+/**
+ * Load the OFDM and OQPSK image into the software modem (SFM) sequencer during
+ * RAIL initialization.
+ *
+ * @param[in] genericRailHandle A generic RAIL instance handle.
+ * @return Status code indicating success of the function call.
+ *
+ * This function must only be called from within the RAIL callback context of
+ * \ref RAILCb_LoadSfmSequencer. Otherwise, the function returns \ref
+ * RAIL_STATUS_INVALID_STATE.
+ */
+RAIL_Status_t RAIL_LoadSfmSunOfdmOqpsk(RAIL_Handle_t genericRailHandle);
+
+/**
+ * Load the OFDM image into the software modem (SFM) sequencer during
+ * RAIL initialization.
+ *
+ * @param[in] genericRailHandle A generic RAIL instance handle.
+ * @return Status code indicating success of the function call.
+ *
+ * This function must only be called from within the RAIL callback context of
+ * \ref RAILCb_LoadSfmSequencer. Otherwise, the function returns \ref
+ * RAIL_STATUS_INVALID_STATE.
+ */
+RAIL_Status_t RAIL_LoadSfmSunOfdm(RAIL_Handle_t genericRailHandle);
+
+/**
+ * Load the empty image into the software modem (SFM) sequencer during
+ * RAIL initialization.
+ *
+ * @param[in] genericRailHandle A generic RAIL instance handle.
+ * @return Status code indicating success of the function call.
+ *
+ * This function must only be called from within the RAIL callback context of
+ * \ref RAILCb_LoadSfmSequencer. Otherwise, the function returns \ref
+ * RAIL_STATUS_INVALID_STATE.
+ */
+RAIL_Status_t RAIL_LoadSfmEmpty(RAIL_Handle_t genericRailHandle);
+
+/**
+ * Callback used to load the software modem (SFM) sequencer image during RAIL
+ * initialization. This function is optional to implement.
+ *
+ * @return Status code indicating success of the function call.
+ *
+ * This callback is used by RAIL to load a software modem sequencer image during \ref
+ * RAIL_Init via an API such as \ref RAIL_LoadSfmSunFskOfdmOqpsk. If this
+ * function is not implemented, a default image including FSK, OFDM andd OQPSK
+ * modulations will be loaded.
+ *
+ * @note If this function is implemented without a call to an image loading API
+ *   such as \ref RAIL_LoadSfmSunFskOfdmOqpsk, an assert will occur during
+ *   RAIL initialization. Similiarly, if an image is loaded that is
+ *   unsupported by the platform, an assert will occur.
+ */
+RAIL_Status_t RAILCb_LoadSfmSequencer(void);
 #endif //DOXYGEN_SHOULD_SKIP_THIS
 
 /**
@@ -2015,13 +2085,21 @@ uint16_t RAIL_SetTxFifoThreshold(RAIL_Handle_t railHandle,
  * @return Configured receive FIFO threshold value.
  *
  * This function configures the threshold for the receive FIFO. When the
- * number of bytes of packet data in the receive FIFO exceeds the configured
- * threshold, \ref RAIL_Config_t::eventsCallback will fire with \ref
- * RAIL_EVENT_RX_FIFO_ALMOST_FULL set.
- * The rxThreshold value should be smaller than the receive FIFO size;
- * anything else, including a
- * value of \ref RAIL_FIFO_THRESHOLD_DISABLED, will disable the threshold,
+ * number of bytes of packet data in the receive FIFO exceeds the
+ * configured threshold, \ref RAIL_Config_t::eventsCallback will keep
+ * firing with \ref RAIL_EVENT_RX_FIFO_ALMOST_FULL set as long as the
+ * number of bytes in the receive FIFO exceeds the configured threshold
+ * value. The rxThreshold value should be smaller than the receive FIFO
+ * size; anything else, including a value of
+ * \ref RAIL_FIFO_THRESHOLD_DISABLED, will disable the threshold,
  * returning \ref RAIL_FIFO_THRESHOLD_DISABLED.
+ *
+ * @note To avoid sticking in the event handler (even in idle state):
+ * 1. Disable the event (via the config events API or the
+ *    \ref RAIL_FIFO_THRESHOLD_DISABLED parameter)
+ * 2. Increase FIFO threshold
+ * 3. Read the FIFO (that's not an option in
+ *    \ref RAIL_DataMethod_t::PACKET_MODE) in the event handler
  */
 uint16_t RAIL_SetRxFifoThreshold(RAIL_Handle_t railHandle,
                                  uint16_t rxThreshold);
@@ -3462,6 +3540,10 @@ bool RAIL_IsTxHoldOffEnabled(RAIL_Handle_t railHandle);
  * @param[in] length The desired preamble length, in bits.
  * @return Status code indicating success of the function call.
  *
+ * To cause a transmission to use this alternate preamble length,
+ * specify \ref RAIL_TX_OPTION_ALT_PREAMBLE_LEN in the txOptions
+ * parameter passed to the respective RAIL transmit API.
+ *
  * @note Attempting to set a preamble length of 0xFFFF bits will result in
  * \ref RAIL_STATUS_INVALID_PARAMETER.
  **/
@@ -4625,14 +4707,43 @@ bool RAIL_IsAutoAckEnabled(RAIL_Handle_t railHandle);
  *
  * @param[in] railHandle A RAIL instance handle.
  * @param[in] ackData A pointer to ACK data to transmit.
+ *   This may be NULL, in which case it's assumed the data has already
+ *   been emplaced into the ACK buffer and RAIL just needs to be told
+ *   how many bytes are there.  Use \ref RAIL_GetAutoAckFifo() to get
+ *   the address of RAIL's AutoACK buffer in RAM and its size.
  * @param[in] ackDataLen The number of bytes in ACK data.
  * @return Status code indicating success of the function call.
  *
  * If the ACK buffer is available for updates, load the ACK buffer with data.
+ * If it is not available, \ref RAIL_STATUS_INVALID_STATE is returned.
+ * If ackDataLen exceeds \ref RAIL_AUTOACK_MAX_LENGTH then
+ * \ref RAIL_STATUS_INVALID_PARAMETER will be returned and nothing is
+ * written to the ACK buffer (unless ackData is NULL in which case this
+ * indicates the application has already likely corrupted RAM).
  */
 RAIL_Status_t RAIL_WriteAutoAckFifo(RAIL_Handle_t railHandle,
                                     const uint8_t *ackData,
                                     uint8_t ackDataLen);
+
+/**
+ * Get the address and size of the auto-ACK buffer for direct access.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[in,out] ackBuffer A pointer to a uint8_t pointer that will be
+ *    updated to the RAM base address of the TXACK buffer.
+ * @param[in,out] ackBufferBytes A pointer to a uint16_t that will be
+ *    updated to the size of the TXACK buffer, in bytes, which is
+ *    currently \ref RAIL_AUTOACK_MAX_LENGTH.
+ * @return Status code indicating success of the function call.
+ *
+ * Applications can use this to more flexibly write AutoAck data into
+ * the buffer directly and in pieces, passing NULL ackData parameter to
+ * \ref RAIL_WriteAutoAckFifo() or \ref RAIL_IEEE802154_WriteEnhAck()
+ * to inform RAIL of its final length.
+ */
+RAIL_Status_t RAIL_GetAutoAckFifo(RAIL_Handle_t railHandle,
+                                  uint8_t **ackBuffer,
+                                  uint16_t *ackBufferBytes);
 
 /**
  * Pause/resume RX auto-ACK functionality.
@@ -7162,6 +7273,16 @@ bool RAIL_IEEE802154_SupportsSignalIdentifier(RAIL_Handle_t railHandle);
  * Runtime refinement of compile-time \ref RAIL_SUPPORTS_FAST_RX2RX.
  */
 bool RAIL_SupportsFastRx2Rx(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports Sidewalk protocol.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if Sidewalk protocol is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_SUPPORTS_PROTOCOL_SIDEWALK.
+ */
+bool RAIL_SupportsProtocolSidewalk(RAIL_Handle_t railHandle);
 
 /** @} */ // end of group Features
 

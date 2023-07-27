@@ -159,34 +159,183 @@ template_contribution:
   - name: "cli_command"
     value:
       group: "wisun"
-      name: "certificate_store"
-      handler: "app_certificate_store"
-      help: "Store a certificate: w cs"
+      name: "ping"
+      handler: "app_ping"
+      help: "Ping a remote host: w p"
       shortcuts:
-        - name: "cs"
+        - name: "p"
       argument:
-        - type: uint8
-          help: "Certificate index"
+        - type: string
+          help: "Remote address"
+        - type: uint16opt
+          help: "packet size in byte"
 
   - name: "cli_command"
     value:
       group: "wisun"
-      name: "certificate_remove"
-      handler: "app_certificate_remove"
-      help: "Remove a certificate: w cr"
+      name: "tcp_client"
+      handler: "app_tcp_client"
+      help: "Open a TCP client socket: w tc"
       shortcuts:
-        - name: "cr"
+        - name: "tc"
       argument:
         - type: string
-          help: "Certificate index"
+          help: "Remote address"
+        - type: uint16
+          help: "Remote port"
   - name: "cli_command"
     value:
       group: "wisun"
-      name: "certificate_list"
-      handler: "app_certificate_list"
-      help: "List installed certificates: w cl"
+      name: "tcp_server"
+      handler: "app_tcp_server"
+      help: "Open a TCP server socket: w ts"
       shortcuts:
-        - name: "cl"
+        - name: "ts"
+      argument:
+        - type: uint16
+          help: "Local port"
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "udp_client"
+      handler: "app_udp_client"
+      help: "Open a UDP client socket: w uc"
+      shortcuts:
+        - name: "uc"
+      argument:
+        - type: string
+          help: "Remote address"
+        - type: uint16
+          help: "Remote port"
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "udp_server"
+      handler: "app_udp_server"
+      help: "Open a UDP server socket: w us"
+      shortcuts:
+        - name: "us"
+      argument:
+        - type: uint16
+          help: "Local port"
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "socket_close"
+      handler: "app_socket_close"
+      help: "Close a socket: w sc"
+      shortcuts:
+        - name: "sc"
+      argument:
+        - type: uint32
+          help: "Socket Id"
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "socket_read"
+      handler: "app_socket_read"
+      help: "Read from a socket: w sr"
+      shortcuts:
+        - name: "sr"
+      argument:
+        - type: uint32
+          help: "Socket Id"
+        - type: uint16
+          help: "Amount of bytes to read"
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "socket_write"
+      handler: "app_socket_write"
+      help: "Write to a socket: w sw"
+      shortcuts:
+        - name: "sw"
+      argument:
+        - type: uint32
+          help: "Socket Id"
+        - type: string
+          help: "Data to write"
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "socket_writeto"
+      handler: "app_socket_writeto"
+      help: "Write to a socket to a specific host: w swt"
+      shortcuts:
+        - name: "swt"
+      argument:
+        - type: uint32
+          help: "Socket Id"
+        - type: string
+          help: "Remote address"
+        - type: uint16
+          help: "Remote port"
+        - type: string
+          help: "Data to write"
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "socket_list"
+      handler: "app_socket_list"
+      help: "List open sockets: w sl"
+      shortcuts:
+        - name: "sl"
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "socket_set_option"
+      handler: "app_socket_set_option"
+      help: "Set a socket option: w ss"
+      shortcuts:
+        - name: "ss"
+      argument:
+        - type: uint32
+          help: "Socket Id"
+        - type: string
+          help: "Option"
+        - type: string
+          help: "Option data"
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "mac_allow"
+      handler: "app_mac_allow"
+      help: "Add a MAC address to the list of allowed addresses, (FF:FF:FF:FF:FF:FF:FF:FF) clears the whitelist: w ma"
+      shortcuts:
+        - name: "ma"
+      argument:
+        - type: string
+          help: "MAC address"
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "mac_deny"
+      handler: "app_mac_deny"
+      help: "Add a MAC address to the list of denied addresses: w md"
+      shortcuts:
+        - name: "md"
+      argument:
+        - type: string
+          help: "MAC address"
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "socket_get_option"
+      handler: "app_socket_get_option"
+      help: "Get a socket option: w sg"
+      shortcuts:
+        - name: "sg"
+      argument:
+        - type: wildcard
+          help: empty | [uint32] Socket Id [string] Option
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "reset_statistics"
+      handler: "app_reset_statistics"
+      help: "Reset the statistics: w rs"
+      shortcuts:
+        - name: "rs"
   - name: "cli_command"
     value:
       group: "wisun"
@@ -198,15 +347,6 @@ template_contribution:
       argument:
         - type: string
           help: "List of ID,level; such as 1,none;4,info to configure group ID 1 with no log and group ID 4 with INFO level. Can also use all,info to set all group to INFO level"
-
-  - name: "cli_command"
-    value:
-      group: "wisun"
-      name: "reset_statistics"
-      handler: "app_reset_statistics"
-      help: "Reset the statistics: w rs"
-      shortcuts:
-        - name: "rs"
   - name: "cli_command"
     value:
       group: "wisun"
@@ -242,6 +382,36 @@ template_contribution:
           help: "PhyModeId"
         - type: stringopt
           help: "neighbor MAC address (optional)"
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "certificate_store"
+      handler: "app_certificate_store"
+      help: "Store a certificate: w cs"
+      shortcuts:
+        - name: "cs"
+      argument:
+        - type: uint8
+          help: "Certificate index"
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "certificate_remove"
+      handler: "app_certificate_remove"
+      help: "Remove a certificate: w cr"
+      shortcuts:
+        - name: "cr"
+      argument:
+        - type: string
+          help: "Certificate index"
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "certificate_list"
+      handler: "app_certificate_list"
+      help: "List installed certificates: w cl"
+      shortcuts:
+        - name: "cl"
 
 readme:
   - path: ../../../../app/wisun/documentation/example/wisun_br/readme.md

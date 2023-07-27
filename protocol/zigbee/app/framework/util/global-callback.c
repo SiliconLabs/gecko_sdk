@@ -908,20 +908,15 @@ WEAK(void emberAfMainTickCallback(void))
 
 /** @brief Ncp Init
  *
- * This function is called when the network coprocessor is being initialized,
- * either at startup or upon reset.  It provides applications on opportunity to
- * perform additional configuration of the NCP.  The function is always called
- * twice when the NCP is initialized.  In the first invocation, memoryAllocation
- * will be true and the application should only issue EZSP commands that affect
- * memory allocation on the NCP.  For example, tables on the NCP can be resized
- * in the first call.  In the second invocation, memoryAllocation will be false
- * and the application should only issue EZSP commands that do not affect memory
- * allocation.  For example, tables on the NCP can be populated in the second
- * call.  This callback is not called on SoCs.
+ * This function is always called when the network coprocessor is being
+ * initialized, either at startup or upon reset.  It provides applications
+ * an opportunity to perform additional configuration of the NCP. For
+ * example, tables on the NCP can be resized and populated. This callback
+ * issue EZSP commands to configure memory layout on the ncp and is not
+ * called on SoCs.
  *
- * @param memoryAllocation   Ver.: always
  */
-WEAK(void emberAfNcpInitCallback(bool memoryAllocation))
+WEAK(void emberAfNcpInitCallback(void))
 {
 }
 

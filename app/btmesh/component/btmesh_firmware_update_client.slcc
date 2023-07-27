@@ -6,6 +6,7 @@ description: >
   specification.
 
   The Firmware Update Client model is used by the Distributor and Initiator.
+  This component is prepared for integration into SOC applications.
 
   The Initiator uses this model to retrieve the information about the firmware
   subsystems installed on the Updating node, and to get the location of the new
@@ -47,3 +48,6 @@ template_contribution:
     priority: -1002
   - name: component_catalog
     value: btmesh_firmware_update_client
+
+validation_helper:
+  - path: "../../script/validation/soc_ncp_compatibility.lua"

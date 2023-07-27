@@ -1,0 +1,22 @@
+id: psa_crypto_rsa_sign_legacy
+package: platform
+label: Legacy RSA Signatures
+description: >-
+  This component adds support for signatures using the legacy RSA scheme as
+  specified in RSA Labratories' PKCS #1 specification v1.5. If possible, it's
+  recommended to use RSA-PSS.
+category: Platform|Security|PSA Crypto|Signatures
+quality: evaluation
+
+provides:
+  - name: psa_crypto_rsa_sign_legacy
+  - name: psa_crypto_rsa_sign
+    allow_multiple: true
+
+requires:
+  - name: psa_crypto_rsa
+  - name: mbedtls_pkcs1_v15
+
+template_contribution:
+  - name: psa_crypto_config
+    value: PSA_WANT_ALG_RSA_PKCS1V15_SIGN

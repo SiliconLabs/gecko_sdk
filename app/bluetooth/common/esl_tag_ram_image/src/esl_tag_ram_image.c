@@ -67,6 +67,7 @@ void esl_image_receive_finished(void)
 }
 
 sl_status_t esl_image_chunk_received(uint8_t const *data,
+                                     uint32_t offset,
                                      uint16_t length)
 {
   sl_status_t result  = SL_STATUS_INVALID_INDEX;
@@ -77,6 +78,13 @@ sl_status_t esl_image_chunk_received(uint8_t const *data,
 
   // if there's a valid image object selected
   if (active_image != NULL) {
+    // check if it is the start from the beginning
+    if (offset == 0) {
+      // there's no temporary storage -> initiating image transfer on current
+      // object at offset 0 it will destroy the previous image content (if any)
+      active_image->size = 0;
+    }
+
     // check for overflow condition
     if ((active_image->size + length) > active_image->max_size) {
       sl_bt_esl_log(ESL_LOG_COMPONENT_RAM_IMAGE,
@@ -123,9 +131,6 @@ sl_status_t esl_image_select_object(void const *data, uint16_t length)
     } else {
       // select active image storage for the upcoming data transfer
       image_registry.active_image = &image_object[*(uint8_t *)data];
-      // there's no temporary storage -> initiating image transfer by this
-      // selection it will destroy the previous image content (if any)
-      image_registry.active_image->size = 0;
       result = SL_STATUS_OK;
     }
   }

@@ -57,9 +57,8 @@ static struct {
 
 #include "sl_cli.h"
 //stack events and handlers
-sl_zigbee_event_t emberAfPluginThroughputPacketSendEvent;
-#define throughputPacketSendEventControl (&emberAfPluginThroughputPacketSendEvent)
-void emberAfPluginThroughputPacketSendEventHandler(sl_zigbee_event_t * event);
+static sl_zigbee_event_t packetSendEvent;
+static void packetSendEventHandler(sl_zigbee_event_t * event);
 
 //Other declarations
 static uint8_t isRunning = 0;
@@ -91,8 +90,8 @@ void sli_zigbee_af_throughput_init_callback(uint8_t init_level)
 {
   (void)init_level;
 
-  sl_zigbee_event_init(throughputPacketSendEventControl,
-                       emberAfPluginThroughputPacketSendEventHandler);
+  sl_zigbee_event_init(&packetSendEvent,
+                       packetSendEventHandler);
 }
 
 //-------------------------------------------------
@@ -226,12 +225,12 @@ static void startTest(void)
   }
   clearCounters();
   emberAfCorePrintln("Starting Test");
-  emberAfPluginThroughputPacketSendEventHandler(throughputPacketSendEventControl);
+  packetSendEventHandler(&packetSendEvent);
 }
 
 static void stopTest(void)
 {
-  sl_zigbee_event_set_inactive(throughputPacketSendEventControl);
+  sl_zigbee_event_set_inactive(&packetSendEvent);
   testParams.messageTotalCount = 0;
   isRunning = 0;
   emberAfCorePrintln("Test Aborted");
@@ -348,7 +347,7 @@ static void printCounter(uint8_t id)
 {
   emberAfCorePrintln("%p: %u ", titleStrings[id], emberCounters[id]);
 }
-void emberAfPluginThroughputPacketSendEventHandler(sl_zigbee_event_t * event)
+static void packetSendEventHandler(sl_zigbee_event_t * event)
 {
   EmberApsFrame apsFrame;
   uint8_t messagePayload[EMBER_AF_MAXIMUM_APS_PAYLOAD_LENGTH];
@@ -373,7 +372,7 @@ void emberAfPluginThroughputPacketSendEventHandler(sl_zigbee_event_t * event)
   }
   if (testParams.maxInFlight > 0
       && testParams.currentInFlight >= testParams.maxInFlight) {
-    sl_zigbee_event_set_delay_ms(throughputPacketSendEventControl, 1);
+    sl_zigbee_event_set_delay_ms(&packetSendEvent, 1);
     return;
   }
   apsFrame.sourceEndpoint = 0xFF;
@@ -407,7 +406,7 @@ void emberAfPluginThroughputPacketSendEventHandler(sl_zigbee_event_t * event)
 
   if (testParams.messageRunningCount
       >= testParams.messageTotalCount) {
-    sl_zigbee_event_set_inactive(throughputPacketSendEventControl);
+    sl_zigbee_event_set_inactive(&packetSendEvent);
     isRunning = 0;
   } else {
     // txIntervalAdjustment subtracts out time spent in this function from the send loop timer,
@@ -418,7 +417,7 @@ void emberAfPluginThroughputPacketSendEventHandler(sl_zigbee_event_t * event)
     } else {
       adjustedTxIntervalMs = testParams.txIntervalMs - txIntervalAdjustmentMs;
     }
-    sl_zigbee_event_set_delay_ms(throughputPacketSendEventControl,
+    sl_zigbee_event_set_delay_ms(&packetSendEvent,
                                  adjustedTxIntervalMs);
   }
 }

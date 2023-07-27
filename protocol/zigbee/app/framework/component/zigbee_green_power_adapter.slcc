@@ -14,13 +14,6 @@ requires:
 config_file:
   - path: protocol/zigbee/app/framework/plugin/green-power-adapter/config/green-power-adapter-config.h
 source:
-  - path: protocol/zigbee/app/framework/plugin/green-power-adapter/zigbee_zcl_callback_dispatcher.c
-    unless:
-    - zigbee_zcl_framework_core
-  - path: protocol/zigbee/app/framework/plugin/green-power-adapter/generated/zap-cluster-command-parser.c
-    unless:
-    - zigbee_zcl_framework_core
-    - zigbee_af_support
   - path: protocol/zigbee/app/framework/plugin/green-power-adapter/green-power-af-wrapper.c
     unless:
     - zigbee_zcl_framework_core
@@ -61,62 +54,6 @@ include:
       - path: green-power-print-wrapper.h
       - path: green-power-token-wrapper.h
       - path: green-power-event-wrapper.h
-      - path: zigbee_zcl_callback_dispatcher.h
-        unless:
-         - zigbee_zcl_framework_core
-         - zigbee_af_support
-      - path: zigbee_af_cluster_functions.h
-        unless:
-         - zigbee_zcl_framework_core
-         - zigbee_af_support
-  - path: protocol/zigbee/app/framework/plugin/green-power-adapter
-    file_list:
-      - path: generated/zap-cluster-command-parser.h
-        unless:
-         - zigbee_zcl_framework_core
-         - zigbee_af_support
-      - path: generated/zap-command-structs.h
-        unless:
-         - zigbee_zcl_framework_core
-         - zigbee_af_support
-      - path: generated/zap-command.h
-        unless:
-         - zigbee_zcl_framework_core
-         - zigbee_af_support
-      - path: generated/zap-config.h
-        unless:
-         - zigbee_zcl_framework_core
-         - zigbee_af_support
-      - path: generated/zap-enabled-incoming-commands.h
-        unless:
-         - zigbee_zcl_framework_core
-         - zigbee_af_support
-      - path: generated/zap-event.h
-        unless:
-         - zigbee_zcl_framework_core
-         - zigbee_af_support
-      - path: generated/zap-id.h
-        unless:
-         - zigbee_zcl_framework_core
-         - zigbee_af_support
-      - path: generated/zap-print.h
-        unless:
-         - zigbee_zcl_framework_core
-         - zigbee_af_support
-      - path: generated/zap-tokens.h
-        unless:
-         - zigbee_zcl_framework_core
-      - path: generated/zap-type.h
-        unless:
-         - zigbee_zcl_framework_core
-         - zigbee_af_support
-  - path: protocol/zigbee/app/framework/plugin/green-power-adapter
-    unless:
-      - zigbee_zcl_framework_core
-  - path: protocol/zigbee/app/framework/plugin/green-power-adapter/generated
-    unless:
-      - zigbee_zcl_framework_core
-      - zigbee_af_support
   - path: protocol/zigbee/app/framework/include
     file_list:
       - path: af.h
@@ -142,13 +79,35 @@ include:
       - path: zcl-debug-print.h
   - path: protocol/zigbee/app/framework/security
     file_list:
+      - path: af-security.h
       - path: crypto-state.h
+      - path: security-config.h
   - path: protocol/zigbee/app/framework/service-function
     file_list:
       - path: sl_service_function.h
   - path: protocol/zigbee/app/framework/signature-decode
     file_list:
       - path: sl_signature_decode.h
+  - path: protocol/zigbee/app/util/zigbee-framework
+    file_list:
+      - path: zigbee-device-common.h
+  - path: protocol/zigbee/app/util/serial
+    file_list:
+      - path: sl_zigbee_command_interpreter.h  
+
+template_file:
+  - path: protocol/zigbee/app/framework/util/template/zigbee_zcl_callback_dispatcher.h.jinja
+    unless:
+      - zigbee_zcl_framework_core
+  - path: protocol/zigbee/app/framework/util/template/zigbee_zcl_callback_dispatcher.c.jinja
+    unless:
+      - zigbee_zcl_framework_core
+  - path: protocol/zigbee/app/framework/util/template/zigbee_af_cluster_functions.h.jinja
+    unless:
+      - zigbee_zcl_framework_core
+  - path: protocol/zigbee/app/framework/util/template/zigbee_af_token_headers.h.jinja
+    unless:
+      - zigbee_zcl_framework_core
 
 template_contribution:
   - name: component_catalog

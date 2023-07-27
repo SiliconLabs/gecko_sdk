@@ -32,7 +32,11 @@
 #include <stdio.h>
 
 #include "sl_status.h"
+
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif // SL_COMPONENT_CATALOG_PRESENT
+
 #include "sl_system_init.h"
 
 #include "app_assert.h"

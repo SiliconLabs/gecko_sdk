@@ -680,6 +680,20 @@ uint8_t emberStackProfile(void);
  */
 uint8_t emberSecurityLevel(void);
 
+/// named constants for supported stack revisions
+
+#define R21_COMPLIANCE_REVISION       21
+#define R22_COMPLIANCE_REVISION       22
+#define R23_COMPLIANCE_REVISION       23
+#define PRE_R21_COMPLIANCE_REVISION   0
+
+/**
+ * @brief return the value of the stack compliance revision,
+ *        as is reflected in the node descriptor
+ * @return integer value of the compliance revision
+ */
+uint8_t sl_zigbee_get_stack_compliance_revision(void);
+
 #ifdef DOXYGEN_SHOULD_SKIP_THIS
 /** @brief Return the depth of the node in the network.
  *
@@ -977,6 +991,14 @@ EmberStatus emberSetTokenData(uint32_t token,
  *
  */
 void emberUpdateMultiMacRejoinChannelMaskForSelectionOrJoiningDevice(uint32_t *rejoinChannelMask);
+
+/**
+ * @brief Factory reset all configured zigbee tokens
+ * @param exclude_outgoing_fc Exclude network and APS outgoing frame counter tokens
+ * @param exclude_boot_counter Exclude stack boot counter token
+ *
+ */
+void sl_zigbee_token_factory_reset(bool exclude_outgoing_fc, bool exclude_boot_counter);
 
 /** @} END addtogroup */
 

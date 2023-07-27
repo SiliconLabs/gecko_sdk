@@ -116,6 +116,7 @@
 #define emberGetTokenData                   ezspGetTokenData
 #define emberSetTokenData                   ezspSetTokenData
 #define emberResetNode                      ezspResetNode
+#define sl_zigbee_token_factory_reset       ezspTokenFactoryReset
 
 //Security Frames
 #define emberSetInitialSecurityState        ezspSetInitialSecurityState

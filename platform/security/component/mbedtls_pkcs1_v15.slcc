@@ -1,0 +1,18 @@
+id: mbedtls_pkcs1_v15
+package: platform
+label: PKCS#1 v1.5
+description: >-
+  This component adds support for the RSA-OAEP and RSA-PSS schemes as specified
+  in RSA Labratories' PKCS #1 specification v1.5.
+category: Platform|Security|Mbed TLS|RSA
+quality: evaluation
+
+provides:
+  - name: mbedtls_pkcs1_v15
+
+requires:
+  - name: mbedtls_rsa
+
+template_contribution:
+  - name: mbedtls_config
+    value: MBEDTLS_PKCS1_V15

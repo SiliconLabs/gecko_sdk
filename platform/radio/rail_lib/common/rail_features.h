@@ -826,6 +826,15 @@ extern "C" {
   #define RAIL_SUPPORTS_FAST_RX2RX  (0U)
 #endif
 
+/// Boolean to indicate whether the selected chip supports Sidewalk protocol.
+/// See also runtime refinement \ref RAIL_SupportsProtocolSidewalk().
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 3) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8)
+  #define RAIL_SUPPORTS_PROTOCOL_SIDEWALK (1U)
+#else
+  #define RAIL_SUPPORTS_PROTOCOL_SIDEWALK (0U)
+#endif
+
 /** @} */ // end of group Features
 
 /** @} */ // end of group RAIL_API

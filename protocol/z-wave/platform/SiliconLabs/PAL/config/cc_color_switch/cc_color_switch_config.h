@@ -10,7 +10,7 @@
 
 // <h> Command Class Color Switch Configuration
 
-// <o> Factory default duration in seconds <1..255:1> <f.d>
+// <o CC_COLOR_SWITCH_CONFIG_DEFAULT_DURATION_SEC> Factory default duration in seconds <1..255:1> <f.d>
 // <i> Factory default duration in seconds
 // <i> Default: 2
 #define CC_COLOR_SWITCH_CONFIG_DEFAULT_DURATION_SEC  2

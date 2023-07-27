@@ -64,16 +64,33 @@ if ($null -eq $PSScriptRoot) {
     $PSScriptRoot = Split-Path -Parent -Path $MyInvocation.MyCommand.Definition
 }
 
+Write-Output "**********************************************************************"
+Write-Output "This script produce the GBL images from the already built project" 
+Write-Output "artifacts that are necessary for the IOP testing:"
+Write-Output "[1.] Executes the GBL generator script to generate the original app" 
+Write-Output "[2.] Modifies the device name in the .out file"
+Write-Output "[3.] Executes the GBL generator again to make the updated app"
+Write-Output "This way the tester can easily check that the application update has"
+Write-Output "been successful or not."
+Write-Output "**********************************************************************"
+
 $PathGbl = Join-Path $PSScriptRoot 'output_gbl'
 
 # Locate the out file
 $PathOut = (Get-ChildItem -Path $PSScriptRoot -Include ('*.axf', '*.out') -Recurse | ForEach-Object { $_.FullName })
 if ($null -eq $PathOut) {
-    Write-Output 'Error: neither .axf nor .out file was found.'
-    Write-Output 'Was the project compiled and linked successfully?'
-    Write-Output 'Press any key to continue...'
+    Write-Output "Error: neither .axf nor .out file was found."
+    Write-Output "Was the project compiled and linked successfully?"
+    Write-Output "Press any key to continue..."
     [void][Console]::ReadKey()
     Exit(1)
+}
+
+if($PathOut -is [array]) {
+  Write-Output "Multiple build artifacts found!"
+  Write-Output "Getting the first element as the target that is:"
+  Write-Output $PathOut[0] 
+  $PathOut = $PathOut[0]
 }
 
 # Locate the create_bl_files.bat script
@@ -81,7 +98,7 @@ $CreateBlFiles = Join-Path $PSScriptRoot 'create_bl_files.bat'
 if (-not (Test-Path -Path $CreateBlFiles)) {
     Write-Output "Error: $CreateBlFiles was not found."
     Write-Output "Was the project generated with the copy option?"
-    Write-Output 'Press any key to continue...'
+    Write-Output "Press any key to continue..."
     [void][Console]::ReadKey()
     Exit(1)
 }
@@ -102,8 +119,19 @@ Write-Output "Generating gbl file for the updated application."
 Write-Output "**********************************************************************"
 Write-Output ""
 
-# Make a copy of the out file
-Copy-Item -Path $PathOut -Destination ($PathOut + "_backup")
+# Make a copy of the out file if its not empty
+$OutFileName = Split-Path -Path $PathOut -Leaf
+if ((Get-Item $PathOut).Length -gt 0) { 
+  Write-Output ("Make backup from: " + $OutFileName + " -> " + $OutFileName + "_backup")
+  Copy-Item -Path $PathOut -Destination ($PathOut + "_backup")
+} else {
+  Write-Output "Error: $OutFileName exists but it is empty."
+  Write-Output "Rebuild the project, and run this script again!"
+  Write-Output "Press any key to continue..."
+  [void][Console]::ReadKey()
+  Exit(1)
+}
+
 
 # Change the device name by manipulating the out file
 if ($PSVersionTable.PSVersion.Major -ge 6) {

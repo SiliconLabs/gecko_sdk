@@ -78,8 +78,8 @@ public:
      *
      */
     explicit CpcInterfaceImpl(SpinelInterface::ReceiveFrameCallback aCallback,
-                             void                                  *aCallbackContext,
-                             SpinelInterface::RxFrameBuffer        &aFrameBuffer);
+                              void                                  *aCallbackContext,
+                              SpinelInterface::RxFrameBuffer        &aFrameBuffer);
 
     /**
      * This destructor deinitializes the object.
@@ -135,21 +135,18 @@ public:
     /**
      * This method updates the file descriptor sets with file descriptors used by the radio driver.
      *
-     * @param[in,out] aReadFdSet   A reference to the read file descriptors.
-     * @param[in,out] aWriteFdSet  A reference to the write file descriptors.
-     * @param[in,out] aMaxFd       A reference to the max file descriptor.
-     * @param[in,out] aTimeout     A reference to the timeout.
+     * @param[in,out] aMainloopContext  A pointer to the mainloop context.
      *
      */
-    void UpdateFdSet(fd_set &aReadFdSet, fd_set &aWriteFdSet, int &aMaxFd, struct timeval &aTimeout);
+    void UpdateFdSet(void *aMainloopContext);
 
     /**
      * This method performs radio driver processing.
      *
-     * @param[in] aContext  The context containing fd_sets.
+     * @param[in] aMainloopContext  A pointer to the mainloop context.
      *
      */
-    void Process(const RadioProcessContext &aContext);
+    void Process(const void *aMainloopContext);
 
     /**
      * This method returns the bus speed between the host and the radio.
@@ -260,6 +257,36 @@ private:
     // Non-copyable, intentionally not implemented.
     CpcInterfaceImpl(const CpcInterfaceImpl &);
     CpcInterfaceImpl &operator=(const CpcInterfaceImpl &);
+
+protected:
+    /**
+     * Indicates whether or not the frame is the Spinel SPINEL_CMD_RESET frame.
+     *
+     * @param[in] aFrame   A pointer to buffer containing the spinel frame.
+     * @param[in] aLength  The length (number of bytes) in the frame.
+     *
+     * @retval true  If the frame is a Spinel SPINEL_CMD_RESET frame.
+     * @retval false If the frame is not a Spinel SPINEL_CMD_RESET frame.
+     *
+     */
+    bool IsSpinelResetCommand(const uint8_t *aFrame, uint16_t aLength)
+    {
+        const uint8_t kSpinelResetCommandLength = 2;
+
+        if (aLength >= kSpinelResetCommandLength)
+        {
+            // Validate the header flag by masking out the iid bits as it is validated above.
+            VerifyOrExit(((aFrame[0] & ~SPINEL_HEADER_IID_MASK) == SPINEL_HEADER_FLAG));
+
+            // Validate the reset command.
+            VerifyOrExit(aFrame[1] == SPINEL_CMD_RESET);
+
+            return true;
+        }
+
+    exit:
+        return false;
+    }
 };
 
 } // namespace Posix

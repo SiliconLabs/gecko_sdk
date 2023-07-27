@@ -34,14 +34,6 @@ void emberAfPluginFormAndJoinCleanupEventHandler(sl_zigbee_event_t * event);
 
 // ****************************************************************************
 
-void emberAfUnusedPanIdFoundHandler(EmberPanId panId, uint8_t channel)
-{
-  // It is not necessary to wrap these in push/pop calls because they
-  // are executing in the context of a stack callback, which already has done
-  // a push.
-  emberAfPluginFormAndJoinUnusedPanIdFoundCallback(panId, channel);
-}
-
 void emberJoinableNetworkFoundHandler(EmberZigbeeNetwork *networkFound,
                                       uint8_t lqi,
                                       int8_t rssi)

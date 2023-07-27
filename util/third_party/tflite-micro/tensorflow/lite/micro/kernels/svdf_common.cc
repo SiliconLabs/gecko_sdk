@@ -1,4 +1,4 @@
-/* Copyright 2020 The TensorFlow Authors. All Rights Reserved.
+/* Copyright 2023 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -303,6 +303,7 @@ void EvalFloatSvdfReference(
       tflite::micro::GetTensorData<float>(weights_feature);
   const float* weights_time_ptr =
       tflite::micro::GetTensorData<float>(weights_time);
+  // TODO(#1751): account for optional bias tensor
   const float* bias_ptr = tflite::micro::GetTensorData<float>(bias);
   const float* input_ptr = tflite::micro::GetTensorData<float>(input);
 
@@ -451,21 +452,20 @@ TfLiteStatus PrepareSvdf(TfLiteContext* context, TfLiteNode* node) {
 
     TF_LITE_ENSURE_TYPES_EQ(context, output->type, kTfLiteInt8);
 
-    const double effective_scale_1 =
-        static_cast<double>(input->params.scale) *
-        static_cast<double>(weights_feature->params.scale) /
-        static_cast<double>(activation_state->params.scale);
+    const double effective_scale_1 = static_cast<double>(
+        input->params.scale * weights_feature->params.scale /
+        activation_state->params.scale);
     const double effective_scale_2 =
-        static_cast<double>(activation_state->params.scale) *
-        static_cast<double>(weights_time->params.scale) /
-        static_cast<double>(output->params.scale);
+        static_cast<double>(activation_state->params.scale *
+                            weights_time->params.scale / output->params.scale);
 
     // TODO(b/162018098): Use TF_LITE_ENSURE_NEAR when it is ready.
+    // TODO(#1751): account for optional bias tensor
     TF_LITE_ENSURE(
         context,
         std::abs(static_cast<double>(bias->params.scale) -
-                 (static_cast<double>(activation_state->params.scale) *
-                  static_cast<double>(weights_time->params.scale))) < 1e-5);
+                 static_cast<double>(activation_state->params.scale *
+                                     weights_time->params.scale)) < 1e-5);
 
     QuantizeMultiplier(effective_scale_1, &(data->effective_scale_1_a),
                        &(data->effective_scale_1_b));
@@ -509,6 +509,7 @@ TfLiteStatus PrepareSvdf(TfLiteContext* context, TfLiteNode* node) {
   micro_context->DeallocateTempTfLiteTensor(weights_time);
   micro_context->DeallocateTempTfLiteTensor(activation_state);
   micro_context->DeallocateTempTfLiteTensor(output);
+  // TODO(#1751): account for optional bias tensor
   micro_context->DeallocateTempTfLiteTensor(bias);
   return kTfLiteOk;
 }

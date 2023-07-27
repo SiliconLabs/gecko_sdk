@@ -34,5 +34,9 @@ WEAK(bool sl_zigbee_event_is_active_wrapper(sl_zigbee_event_wrapper_t *event))
 {
   return false;
 }
+WEAK(bool sl_zigbee_event_is_scheduled_wrapper(sl_zigbee_event_wrapper_t *event))
+{
+  return false;
+}
 
 #endif // (EMBER_AF_PLUGIN_GREEN_POWER_ADAPTER_USE_CUSTOM_EVENT_SYSTEM == 1)

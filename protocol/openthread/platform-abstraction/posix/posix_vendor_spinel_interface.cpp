@@ -42,19 +42,12 @@
 #include "hdlc_interface.hpp"
 using InterfaceType = ot::Posix::HdlcInterface;
 
-#if OPENTHREAD_POSIX_VIRTUAL_TIME
-using ProcessContextType = VirtualTimeEvent;
-#else
-using ProcessContextType = RadioProcessContext;
-#endif // OPENTHREAD_POSIX_VIRTUAL_TIME
 #elif OPENTHREAD_POSIX_CONFIG_RCP_BUS == OT_POSIX_RCP_BUS_SPI
 #include "spi_interface.hpp"
 using InterfaceType = ot::Posix::SpiInterface;
-using ProcessContextType = RadioProcessContext;
 #elif OPENTHREAD_POSIX_CONFIG_RCP_BUS == OT_POSIX_RCP_BUS_VENDOR
 #include "vendor_interface.hpp"
 using InterfaceType = ot::Posix::VendorInterface;
-using ProcessContextType = RadioProcessContext;
 #else
 #error "OPENTHREAD_POSIX_CONFIG_RCP_BUS only allows OT_POSIX_RCP_BUS_UART, OT_POSIX_RCP_BUS_SPI and " \
     "OT_POSIX_RCP_BUS_VENDOR!"
@@ -64,14 +57,15 @@ namespace VendorCmd     = ot::Vendor;
 namespace AntennaCmd    = VendorCmd::Antenna;
 namespace CoexCmd       = VendorCmd::Coex;
 namespace TestCmd       = VendorCmd::Test;
+namespace Efr32Cmd      = VendorCmd::Efr32;
 
 namespace ot {
 namespace Spinel {
 namespace Vendor {
 
-RadioSpinel<InterfaceType, ProcessContextType> *GetSpinelInterface()
+RadioSpinel<InterfaceType> *GetSpinelInterface()
 {
-    return ((RadioSpinel<InterfaceType,ProcessContextType>*)Posix::Radio::GetSpinelInstance());
+    return ((RadioSpinel<InterfaceType>*)Posix::Radio::GetSpinelInstance());
 }
 
 namespace Antenna {
@@ -231,22 +225,22 @@ otError setEnable(bool ptaState)
     return error;
 }
 
-otError getRequestPwmArgs(uint8_t &pwmComposite, uint8_t &pwmPulseDc, uint8_t &pwmPeriodHalfMs)
+otError getRequestPwmArgs(uint8_t &pwmReq, uint8_t &pwmDutyCycle, uint8_t &pwmPeriodHalfMs)
 {
     static const uint8_t command = CoexCmd::COEX_PWM_STATE_COMMAND;
     otError error = GetSpinelInterface()->GetWithParam(SPINEL_PROP_VENDOR_COEX,
     &command, sizeof(command), SPINEL_DATATYPE_UINT8_S SPINEL_DATATYPE_UINT8_S SPINEL_DATATYPE_UINT8_S,
-    &pwmComposite, &pwmPulseDc, &pwmPeriodHalfMs);
+    &pwmReq, &pwmDutyCycle, &pwmPeriodHalfMs);
     LogIfFail("Get Request PWM Args failed", error);
     return error;
 }
 
-otError setRequestPwmArgs(uint8_t pwmComposite, uint8_t pwmPulseDc, uint8_t pwmPeriodHalfMs)
+otError setRequestPwmArgs(uint8_t pwmReq, uint8_t pwmDutyCycle, uint8_t pwmPeriodHalfMs)
 {
     static const uint8_t command = CoexCmd::COEX_PWM_STATE_COMMAND;
     otError error = GetSpinelInterface()->Set(SPINEL_PROP_VENDOR_COEX,
     SPINEL_DATATYPE_UINT8_S SPINEL_DATATYPE_UINT8_S SPINEL_DATATYPE_UINT8_S SPINEL_DATATYPE_UINT8_S,
-    command, pwmComposite, pwmPulseDc, pwmPeriodHalfMs);
+    command, pwmReq, pwmDutyCycle, pwmPeriodHalfMs);
     LogIfFail("Set Request PWM Args failed", error);
     return error;
 }
@@ -302,6 +296,27 @@ otError setCcaMode(uint8_t aMode)
     return error;
 }
 } // namespace Test
+
+namespace Efr32 {
+otError getRadioCounters(efr32RadioCounters &aCounters)
+{
+    static const uint8_t command = Efr32Cmd::EFR32_RADIO_COUNTERS_COMMAND;
+    size_t read_data_len = sizeof(efr32RadioCounters);
+    otError error = GetSpinelInterface()->GetWithParam(SPINEL_PROP_VENDOR_EFR32,
+    &command, sizeof(command), SPINEL_DATATYPE_DATA_WLEN_S, &aCounters, &read_data_len);
+    LogIfFail("Get Radio Counters failed", error);
+    return error;
+} 
+
+otError clearRadioCounters(void)
+{
+    static const uint8_t command = Efr32Cmd::EFR32_RADIO_COUNTERS_COMMAND;
+    otError error = GetSpinelInterface()->Set(SPINEL_PROP_VENDOR_EFR32,
+    SPINEL_DATATYPE_UINT8_S, command);
+    LogIfFail("Clear Radio Counters failed", error);
+    return error;
+}
+} // namespace Efr32
 
 } // namespace Vendor
 } // namespace Spinel

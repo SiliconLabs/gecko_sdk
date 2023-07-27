@@ -190,10 +190,9 @@ static void _tftp_data_hnd(sl_tftp_clnt_t * const clnt,
  * @brief OTA DFU CoAP callback.
  * @details Handle incoming firmware update request from CoAP message.
  * @param[in] req_packet Request packet.
- * @param[in,out] resp_packet Response packet.
+ * * @return sl_wisun_coap_packet_t * Response packet ptr
  *****************************************************************************/
-static void _ota_dfu_coap_response_cb(const sl_wisun_coap_packet_t * const req_packet,
-                                  sl_wisun_coap_packet_t * const resp_packet);
+static sl_wisun_coap_packet_t * _ota_dfu_coap_response_cb(const sl_wisun_coap_packet_t * const req_packet);
 
 /**************************************************************************//**
  * @brief Thread function of OTA DFU Service
@@ -305,7 +304,6 @@ void sl_wisun_ota_dfu_init(void)
 
   _ota_dfu_thr = osThreadNew(_ota_dfu_thr_fnc, NULL, &_ota_dfu_thr_attr);
   assert(_ota_dfu_thr != NULL);
-
   assert(sl_wisun_coap_rhnd_resource_add(&_ota_dfu_resource) == SL_STATUS_OK);
 }
 
@@ -455,26 +453,21 @@ static const char *_get_status_json_string(void)
   return (const char *)str;
 }
 
-static void _ota_dfu_coap_response_cb(const sl_wisun_coap_packet_t * const req_packet,
-                                  sl_wisun_coap_packet_t * const resp_packet)
+static sl_wisun_coap_packet_t * _ota_dfu_coap_response_cb(const sl_wisun_coap_packet_t * const req_packet)
 {
-  sl_wisun_coap_packet_t *tmp_pkt = NULL;
+  sl_wisun_coap_packet_t *resp_packet = NULL;
 
-  tmp_pkt = sl_wisun_coap_build_response(req_packet, COAP_MSG_CODE_RESPONSE_NOT_ACCEPTABLE);
+  resp_packet = sl_wisun_coap_build_response(req_packet, COAP_MSG_CODE_RESPONSE_NOT_ACCEPTABLE);
 
   // packet cannot be allocated
-  if (tmp_pkt == NULL) {
-    return;
+  if (resp_packet == NULL) {
+    return NULL;
   }
-
-  // Set resp packet and destroy tmp
-  memcpy(resp_packet, tmp_pkt, sizeof(sl_wisun_coap_packet_t));
-  sl_wisun_coap_destroy_packet(tmp_pkt);
 
   // Check request type, only post or get allowed
   if (!(req_packet->msg_code == COAP_MSG_CODE_REQUEST_POST
         || req_packet->msg_code == COAP_MSG_CODE_REQUEST_GET)) {
-    return;
+    return NULL;
   }
 
   resp_packet->msg_code = COAP_MSG_CODE_RESPONSE_CREATED;
@@ -500,6 +493,7 @@ static void _ota_dfu_coap_response_cb(const sl_wisun_coap_packet_t * const req_p
   resp_packet->payload_ptr = (uint8_t *) _get_status_json_string();
   resp_packet->payload_len = sl_strnlen((char *) resp_packet->payload_ptr,
                                         SL_WISUN_OTA_DFU_STATUS_JSON_STR_MAX_LEN);
+  return resp_packet;
 }
 
 static void _tftp_data_hnd(sl_tftp_clnt_t * const clnt,

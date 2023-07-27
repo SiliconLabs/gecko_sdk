@@ -3,7 +3,7 @@
  * @brief Application interface provided to main().
  *******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -30,27 +30,6 @@
 
 #ifndef APP_H
 #define APP_H
-
-#include "sl_bt_api.h"
-
-// Example: user command 1.
-#define USER_CMD_1_ID    0x01
-typedef uint8_t cmd_1_t[16];
-
-// Example: user command 2.
-#define USER_CMD_2_ID    0x02
-typedef uint8_t cmd_2_t[8];
-
-PACKSTRUCT(struct user_cmd {
-  uint8_t hdr;
-  // Example: union of user commands.
-  union {
-    cmd_1_t cmd_1;
-    cmd_2_t cmd_2;
-  } data;
-});
-
-typedef struct user_cmd user_cmd_t;
 
 /**************************************************************************//**
  * Application Init.

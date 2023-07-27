@@ -22,12 +22,17 @@
 
 import enum
 
+from bgapi.bglib import BGEvent
+
 
 @enum.unique
 class BtmeshErrorCode(enum.IntEnum):
     PROV_INIT_FAILED = enum.auto()
     PROVISIONING_FAILED = enum.auto()
     CONFIG_FAILED = enum.auto()
+    CONFIG_GATT_PROXY_FAILED = enum.auto()
+    CONFIG_RELAY_FAILED = enum.auto()
+    CONFIG_FRIEND_FAILED = enum.auto()
     CONFIG_RESET_PROV_FORBIDDEN = enum.auto()
     INVALID_DCD = enum.auto()
     MBT_TRANSFER_MODE_INVALID = enum.auto()
@@ -59,8 +64,11 @@ class BtmeshErrorCode(enum.IntEnum):
 class BtmeshException(Exception):
     """Base Exception class of BT Mesh exceptions"""
 
+
 class BtmeshError(BtmeshException):
-    def __init__(self, err, message, *args, event=None, **kwargs):
+    def __init__(
+        self, err: BtmeshErrorCode, message: str, *args, event: BGEvent = None, **kwargs
+    ):
         self.err = err
         self.message = message
         self.event = event

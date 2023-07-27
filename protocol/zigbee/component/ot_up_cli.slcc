@@ -1,0 +1,121 @@
+id: "ot_up_cli"
+label: "OpenThread CLI using Silabs unified platform and CMSIS RTOS2"
+package: "Zigbee"
+category: "Zigbee|Zigbee 3.0"
+quality: "production"
+
+description: "OpenThread CLI using Silabs unified platform and CMSIS RTOS2"
+provides:
+  - name: "ot_up_cli"
+requires:
+  - name: "zigbee_app_framework_common"
+  - name: "ot_stack_ftd"
+  - name: "cmsis_rtos2"
+
+source:  
+  - path: "protocol/zigbee/app/framework/common/ot_up_cli.c"
+    condition: 
+      - "cli"
+
+template_contribution:
+  - name: component_catalog
+    value: ot_up_cli
+
+  - name: cli_command
+    value:
+      name: dataset_new
+      handler: dataset_init_new
+      help: thread dataset init new
+
+  - name: cli_command
+    value:
+      name: factory_reset
+      handler: factory_reset
+      help: thread factory reset
+
+  - name: cli_command
+    value:
+      name: dataset_get_active
+      handler: dataset_get_active
+      help: get current dataset
+
+  - name: cli_command
+    value:
+      name: dataset_commit_active
+      handler: dataset_commit_active
+      help: thread dataset commit active
+
+  - name: cli_command
+    value:
+      name: dataset_networkkey
+      handler: dataset_networkkey
+      argument:
+      - type: hex
+        help: "Network key"
+      help: thread dataset networkkey
+
+  - name: cli_command
+    value:
+      name: dataset_channel
+      handler: dataset_channel
+      argument:
+      - type: uint8
+        help: "Radio channel"
+      help: thread dataset channel
+
+  - name: cli_command
+    value:
+      name: dataset_pan_id
+      handler: dataset_pan_id
+      argument:
+      - type: uint16
+        help: "Pan ID"
+      help: thread dataset panID
+
+  - name: cli_command
+    value:
+      name: dataset_extended_pan_id
+      handler: dataset_extended_pan_id
+      argument:
+      - type: hex
+        help: "Extended PANID"
+      help: thread dataset ext PANID
+
+  - name: cli_command
+    value:
+      name: dataset
+      handler: dataset_print
+      help: thread dataset
+
+  - name: cli_command
+    value:
+      name: ifconfig_up
+      handler: ifconfig_up
+      help: thread ifconfig up
+
+  - name: cli_command
+    value:
+      name: thread_start
+      handler: thread_start
+      help: start thread network
+
+  - name: cli_command
+    value:
+      name: thread_state
+      handler: thread_state
+      help: print thread state
+
+  - name: cli_command
+    value:
+      name: thread_ipaddr
+      handler: thread_ipaddr
+      help: print ip address
+
+  - name: cli_command
+    value:
+      name: ping_ipaddr
+      handler: thread_ping_ipaddr
+      help: ping ip address
+      argument:
+      - type: string
+        help: destination IPV6 address

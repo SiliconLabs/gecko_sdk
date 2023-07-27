@@ -1852,6 +1852,11 @@ static bool gpCommissioningNotificationCommissioningGpdf(uint16_t commNotificati
                        sizeof(uint8_t),
                        &type);
 
+  // No assigned alias as the Gpdf has no option to provide one, then call the user to get one.
+  commissioningGpd->useGivenAssignedAlias =
+    emberAfPluginGreenPowerServerUpdateAliasCallback(gpdAddr,
+                                                     &(commissioningGpd->givenAlias));
+
   if ((appInfoStruct.applInfoBitmap & EMBER_AF_GP_APPLICATION_INFORMATION_SWITCH_INFORMATION_PRESENT)
       && (appInfoStruct.deviceId == EMBER_GP_DEVICE_ID_GPD_GENERIC_SWITCH
           || genericCmdPresent == true)) {
@@ -2394,17 +2399,10 @@ void emberAfPluginGreenPowerServerInitCallback(uint8_t init_level)
       break;
     }
 
-    case SL_ZIGBEE_INIT_LEVEL_LOCAL_DATA:
+    case SL_ZIGBEE_INIT_LEVEL_DONE:
     {
-      #ifndef EZSP_HOST
-      // Bring up the Sink table here in case of SoC, for NCP-Host
-      // the same must be called after the NCP is initialised and the configured.
+      // Init GP Sink Table
       emberAfGreenPowerServerSinkTableInit();
-      #endif
-      // A test to see the security upon reset
-      // uncomment the assert to just run the security test
-      //sli_zigbee_af_gp_test_security();
-      //assert(false);
       break;
     }
   }
@@ -3441,15 +3439,6 @@ void emberAfGreenPowerClusterGpSinkCommissioningWindowExtend(uint16_t commission
   }
 }
 
-void emberAfGreenPowerClusterGpSinkCommissioningUnicastMode(bool unicastCommunication)
-{
-  commissioningState.unicastCommunication = unicastCommunication;
-}
-
-void emberAfGreenPowerClusterGpSinkGpPairingUnicastMode(bool sendGpPairingInUnicastMode)
-{
-  commissioningState.sendGpPairingInUnicastMode = sendGpPairingInUnicastMode;
-}
 // Returns the commissioning state of the sink.
 EmberAfGreenPowerServerCommissioningState *emberAfGreenPowerClusterGetServerCommissioningSate(void)
 {

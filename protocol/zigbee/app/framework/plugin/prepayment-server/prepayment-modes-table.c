@@ -41,7 +41,7 @@ typedef struct {
 
 static sli_zigbee_af_pending_payment_mode PendingPaymentModes[MAX_NUM_PENDING_PAYMENT_MODES];
 
-void initPrepaymentModesTableIndex(uint8_t x);
+static void initPrepaymentModesTableIndex(uint8_t x);
 void updatePaymentControlConfiguration(uint8_t endpoint, uint16_t paymentControlConfig);
 uint16_t sli_zigbee_af_prepayment_modes_get_current_mode(void);
 void scheduleNextMode(uint8_t endpoint);
@@ -54,7 +54,7 @@ void sli_zigbee_af_init_prepayment_modes_table()
   }
 }
 
-void initPrepaymentModesTableIndex(uint8_t x)
+static void initPrepaymentModesTableIndex(uint8_t x)
 {
   if ( x < MAX_NUM_PENDING_PAYMENT_MODES ) {
     PendingPaymentModes[x].providerId = 0;

@@ -263,7 +263,7 @@ bool ezspQueueIsEmpty(EzspQueue *queue)
 
 #ifdef EZSP_QUEUE_TEST
 
-void ezspQueueTest(void)
+static void ezspQueueTest(void)
 {
   static bool alreadyRan = false;
   uint32_t status;

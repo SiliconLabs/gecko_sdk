@@ -31,11 +31,7 @@
 // -------------------------------------
 // Includes
 
-#if !defined(MBEDTLS_CONFIG_FILE)
-#include "config.h"
-#else
-#include MBEDTLS_CONFIG_FILE
-#endif
+#include <mbedtls/build_info.h>
 
 #if defined(MBEDTLS_ENTROPY_HARDWARE_ALT)
 #include "entropy_poll.h"

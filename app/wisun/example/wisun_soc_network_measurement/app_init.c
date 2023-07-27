@@ -32,6 +32,7 @@
 //                                   Includes
 // -----------------------------------------------------------------------------
 #include <assert.h>
+#include "sl_component_catalog.h"
 #include "app_init.h"
 #include "cmsis_os2.h"
 #include "sl_cmsis_os2_common.h"
@@ -41,11 +42,15 @@
 #include "sl_wisun_network_measurement.h"
 #include "sl_wisun_network_measurement_remote_ctrl.h"
 #include "sl_wisun_network_measurement_stat.h"
-#include "sl_gui.h"
 #include "sl_wisun_event_mgr.h"
 #include "app.h"
 #include "app_custom_callback.h"
 #include "sl_wisun_coap_rhnd.h"
+
+
+#if defined(SL_CATALOG_GUI_PRESENT)
+#include "sl_gui.h"
+#endif
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -94,11 +99,13 @@ void app_init(void)
   // Init project info
   app_wisun_project_info_init("Wi-SUN Network Measurement Application");
 
+#if defined(SL_CATALOG_GUI_PRESENT)
   // Init display
   sl_display_init();
 
   // Init GUI
   sl_gui_init();
+#endif
 
   // Init cli ping resource
   coap_resource.data.uri_path          = SL_WISUN_COAP_REMOTE_CTRL_PING_URI_PATH;

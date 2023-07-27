@@ -28,11 +28,9 @@ from collections import namedtuple
 from datetime import datetime as dt
 from ap_constants import *
 from ap_config import IOP_TEST
+from ap_logger import getLogger
 from ap_sensor import SENSOR_INFO_LENGTH_SHORT, SENSOR_INFO_LENGTH_LONG, SENSOR_TYPES
 import esl_lib_wrapper as elw
-
-TAG_INFO_JUSTIFY_COLUMN = 23
-TAG_MIN_JUSTIFY_COLUMN = 4
 
 PNP_VENDOR_ID_SOURCE_SIG = 1
 DISPLAY_INFO_STRUCT_SIZE = 5
@@ -40,7 +38,8 @@ DISPLAY_INFO_STRUCT_SIZE = 5
 class Tag():
     """ ESL Tag """
     _counter = 0
-    def __init__(self, logger, address, dummy=False):
+
+    def __init__(self, address, dummy=False):
         self.id = type(self)._counter
         if not dummy:
             type(self)._counter +=1
@@ -53,14 +52,13 @@ class Tag():
         self.last_resp_timestamp = dt.now().timestamp()
         self.unresp_command_number = 0
         self.basic_state_flags = 0
-        self.logger = logger
+        self.logger = getLogger()
         self.gatt_values = {}
         self.gatt_write_values = {}
         self.gattdb_handles = None
         self.auto_image_count = 0
-        self.skip_get_info = False
 
-    def get_value_as_bytes(self, key):
+    def get_value_as_bytes(self, key) -> bytes:
         try:
             return self.gatt_values[key]
         except KeyError:
@@ -76,6 +74,11 @@ class Tag():
     def provisioned(self):
         """ Tell if the tag is provisioned """
         return self.esl_address is not None and self.response_key is not None and self.ap_sync_key is not None and self.time is not None
+
+    @property
+    def skip_get_info(self):
+        """ Tell if getting tag info can be skipped during connecting """
+        return elw.ESL_LIB_DATA_TYPE_GATT_CONTROL_POINT in self.gatt_values
 
     @property
     def esl_address(self):
@@ -202,17 +205,24 @@ class Tag():
     def serial_number(self):
         return self.get_value_as_bytes(elw.ESL_LIB_DATA_TYPE_GATT_SERIAL_NUMBER)
 
+    def set_valid(self):
+        """ Set object as a real/valid ESL (as opposed to a virtual ones used for simulation, or those unassociated yet) """
+        self.gatt_values[elw.ESL_LIB_DATA_TYPE_GATT_CONTROL_POINT] = True # ESL Control Point is a mandatory characteristic
+
     def reset(self):
         """ Reset object states """
-        self.gattdb_handles = None
-        self.skip_get_info = False
-        keys = [elw.ESL_LIB_DATA_TYPE_GATT_ESL_ADDRESS,
-                elw.ESL_LIB_DATA_TYPE_GATT_AP_SYNC_KEY,
+        keys = [elw.ESL_LIB_DATA_TYPE_GATT_AP_SYNC_KEY,
                 elw.ESL_LIB_DATA_TYPE_GATT_RESPONSE_KEY,
-                elw.ESL_LIB_DATA_TYPE_GATT_CURRENT_TIME]
-        for key in keys:
-            if key in self.gatt_values:
-                del self.gatt_values[key]
+                elw.ESL_LIB_DATA_TYPE_GATT_CURRENT_TIME,
+                elw.ESL_LIB_DATA_TYPE_GATT_ESL_ADDRESS]
+        self.gattdb_handles = None
+        self.pending_unassociate = False
+        self.update_timestamps()
+        self.state = ST_UNSYNCHRONIZED
+        self.update_flags(BASIC_STATE_FLAG_SYNCHRONIZED,False)
+        self.gatt_write_values = {key: value for key, value in self.gatt_values.items() if key in keys}
+        # keep ESL Address if exists, delete the rest - also make the ESL object invalid for possible future re-discovery
+        self.gatt_values = {key: value for key, value in self.gatt_values.items() if key == elw.ESL_LIB_DATA_TYPE_GATT_ESL_ADDRESS}
 
     def update_state(self, data, state=ST_SYNCHRONIZED):
         """ Update tag state """
@@ -276,113 +286,90 @@ class Tag():
             if flags & BASIC_STATE_FLAG_SERVICE_NEEDED:
                 self.logger.warning("ESL ID %d in group %d needs attention, Service Needed flag is active!", self.esl_id, self.group_id)
 
-    def log_basic_state_flags(self):
-        """ Print detailed information about basic state flag status """
+    def get_info(self):
+        """ Get tag information """
+        justify_column = 17
+        info = f"{'BLE Address:':{justify_column}}{self.ble_address}"
+        info += f"\n{'ESL Address:':{justify_column}}"
+        if self.esl_address is not None:
+            info += f"{self.esl_address} ({self.esl_address:#06x})"
+            info += f"\n{'ESL ID:':{justify_column}}{self.esl_id}"
+            info += f"\n{'Group ID:':{justify_column}}{self.group_id}"
+        else:
+            info += "Not configured"
+        info += f"\n{'AP sync key:':{justify_column}}"
+        if self.ap_sync_key is not None:
+            info += "**** (Set)" if not IOP_TEST else "0x" + self.ap_sync_key.hex()
+        else:
+            info += "Not set"
+        info += f"\n{'Response key:':{justify_column}}"
+        if self.response_key is not None:
+            info += "**** (Set)" if not IOP_TEST else "0x" + self.response_key.hex()
+        else:
+            info += "Not set"
+        info += f"\n{'Absolute Time:':{justify_column}}"
+        if self.time is not None:
+            info += f"Last time set to {self.time}"
+        else:
+            info += "Out of sync"
+
+        info += f"\n{'Display:':{justify_column}}"
+        if self.display_info is not None:
+            items = []
+            for i, display in enumerate(self.display_info):
+                items.append(f"[{i}] width: {display.width} height: {display.height} type: {display.type}")
+            info += ("\n" + " " * justify_column).join(items)
+        else:
+            info += "Not present"
+
+        if self.max_image_index is not None:
+            info += f"\n{'Max image index:':{justify_column}}" + str(self.max_image_index)
+        else:
+            info += "\n" + "No image support."
+
+        info += f"\n{'Sensors:':{justify_column}}"
+        if len(self.sensor_info) > 0:
+            items = []
+            for i, sensor in enumerate(self.sensor_info):
+                items.append(f"[{i}] {SENSOR_TYPES[sensor].desc if sensor in SENSOR_TYPES else hex(sensor)}")
+            info += ("\n" + " " * justify_column).join(items)
+        else:
+            info += "Not supported"
+
+        info += f"\n{'LED Info:':{justify_column}}"
+        if self.led_type is not None:
+            items = []
+            for i, b in enumerate(self.led_type):
+                bin_num = bin(b)[2:].zfill(8)
+                R, G, B = int(bin_num[2:4], 2), int(bin_num[4:6], 2), int(bin_num[6:8], 2)
+                if bin_num[0:2] == "00":
+                    items.append(f"[{i}] Colored, current color: RGB({R}{G}{B})")
+                elif bin_num[0:2] == "01":
+                    items.append(f"[{i}] Monochrome, current color: RGB({R}{G}{B})")
+                else:
+                    items.append(f"[{i}] RFU")
+            info += ("\n" + " " * justify_column).join(items)
+        else:
+            info += "Not available"
+
+        info += f"\n{'PnP Info:':{justify_column}}"
+        if self.pnp_vendor_id is not None:
+            if self.pnp_vendor_id in VENDOR_ID_STRINGS:
+                info += f"Vendor: {VENDOR_ID_STRINGS[self.pnp_vendor_id]}"
+            else:
+                info += f"Vendor_ID: {self.pnp_vendor_id:#x}"
+            info += f" Product_ID: {self.pnp_product_id:#x} Product_version: {self.pnp_product_version:#x}"
+        else:
+            info += "Not available"
+
+        info += f"\n{'Last status:':{justify_column}}"
         bs_string = ", ".join([value for key, value in BASIC_STATE_STRINGS.items() if self.basic_state_flags & key])
         if len(bs_string) == 0:
             bs_string = "No Basic State flag is set"
-        self.logger.print("[TAG] Last status:".ljust(TAG_INFO_JUSTIFY_COLUMN), end ='')
-        self.logger.print_append(bs_string + " (0x{:04x})".format(self.basic_state_flags))
+        info += f"{bs_string} ({self.basic_state_flags:#06x})"
+        return info
 
-    def log(self, verbose=True):
-        """ Print tag information """
-        if verbose:
-            printer = {0 : self.logger.print_append, TAG_INFO_JUSTIFY_COLUMN : self.logger.print}
-            self.logger.print("[TAG] BLE Address:".ljust(TAG_INFO_JUSTIFY_COLUMN) + str(self.ble_address))
-            if self.esl_address is not None:
-                self.logger.print("[TAG] ESL Adress:".ljust(TAG_INFO_JUSTIFY_COLUMN) + str(self.esl_address)
-                    + " (" + "{0:#0{1}x}".format(self.esl_address, 6) + ")")
-                self.logger.print("[TAG] ESL ID:".ljust(TAG_INFO_JUSTIFY_COLUMN) + str(self.esl_id))
-                self.logger.print("[TAG] Group ID:".ljust(TAG_INFO_JUSTIFY_COLUMN) + str(self.group_id))
-            else:
-                self.logger.print("[TAG] ESL Adress:".ljust(TAG_INFO_JUSTIFY_COLUMN) + "Not configured")
-
-            if self.ap_sync_key is not None:
-                self.logger.print("[TAG] AP sync key:".ljust(TAG_INFO_JUSTIFY_COLUMN) + ("**** (Set)" if not IOP_TEST else "0x" + str(self.ap_sync_key.hex())))
-            else:
-                self.logger.print("[TAG] AP sync key:".ljust(TAG_INFO_JUSTIFY_COLUMN) + "Not set")
-
-            if self.response_key is not None:
-                self.logger.print("[TAG] Response key:".ljust(TAG_INFO_JUSTIFY_COLUMN) + ("**** (Set)" if not IOP_TEST else "0x" + str(self.response_key.hex())))
-            else:
-                self.logger.print("[TAG] Response key:".ljust(TAG_INFO_JUSTIFY_COLUMN) + "Not set")
-
-            if self.time is not None:
-                self.logger.print("[TAG] Absolute Time:".ljust(TAG_INFO_JUSTIFY_COLUMN) + "Last time set to " + str(self.time))
-            else:
-                self.logger.print("[TAG] Absolute Time:".ljust(TAG_INFO_JUSTIFY_COLUMN) + "Out of sync")
-
-            if self.display_info is not None:
-                just = 0
-                i = 0
-                self.logger.print("[TAG] Display:".ljust(TAG_INFO_JUSTIFY_COLUMN), end ='')
-                for display in self.display_info:
-                    printer[just]("".ljust(just) + "[" + str(i) + "] "  + "width: " + str(display.width) + " height: "
-                                  + str(display.height) + " type: " + str(display.type))
-                    i += 1
-                    just = TAG_INFO_JUSTIFY_COLUMN
-                self.logger.print("")
-            else:
-                self.logger.print("[TAG] Display not present.")
-
-            if self.max_image_index is not None:
-                self.logger.print("[TAG] Max image index:".ljust(TAG_INFO_JUSTIFY_COLUMN) + str(self.max_image_index))
-            else:
-                self.logger.print("[TAG] No image support.")
-
-            if len(self.sensor_info) > 0:
-                self.logger.print("[TAG] Sensors:".ljust(TAG_INFO_JUSTIFY_COLUMN), end ='')
-                just = 0
-                ind = 0
-                for x in self.sensor_info:
-                    if x in SENSOR_TYPES:
-                        printer[just]("".ljust(just) + "[" + str(ind) + "] " + SENSOR_TYPES[x].desc)
-                    else:
-                        printer[just]("".ljust(just) + "[" + str(ind) + "] " + str(hex(x)))
-                    just = TAG_INFO_JUSTIFY_COLUMN
-                    ind += 1
-                self.logger.print("")
-
-            else:
-                self.logger.print("[TAG] Sensors:".ljust(TAG_INFO_JUSTIFY_COLUMN) + "Not supported")
-            if self.led_type is not None:
-                self.logger.print("[TAG] LED Info:".ljust(TAG_INFO_JUSTIFY_COLUMN), end='')
-                ind = 0
-                just = 0
-                for b in self.led_type:
-                    bin_num = bin(b)[2:].zfill(8)
-                    if bin_num[0:2] == "00":
-                        R, G, B = str(int(bin_num[2:4],2)), str(int(bin_num[4:6], 2)), str(int(bin_num[6:8],2))
-                        printer[just]("".ljust(just) + "[" + str(ind) + "] " + "Colored, current color: RGB(" + R + G + B + ")")
-                    elif bin_num[0:2] == "01":
-                        R, G, B = str(int(bin_num[2:4],2)), str(int(bin_num[4:6], 2)), str(int(bin_num[6:8],2))
-                        printer[just]("".ljust(just) + "[" + str(ind) + "] " + "Monochrome, current color: RGB(" + R + G + B + ")")
-                    else:
-                        b = "RFU"
-                        printer[just]("".ljust(just) + "[" + str(ind) + "] " + b)
-                    ind += 1
-                    just = TAG_INFO_JUSTIFY_COLUMN
-                self.logger.print("")
-            else:
-                self.logger.print("[TAG] No LED available.")
-
-            if self.pnp_vendor_id is not None:
-                if self.pnp_vendor_id == SIG_VENDOR_ID_SILABS:
-                    vendor_id = "Vendor: Silabs"
-                else:
-                    vendor_id = "Vendor_ID: " + str(hex(self.pnp_vendor_id))
-                product_id = " Product_ID: " + str(hex(self.pnp_product_id))
-                product_version = " Product_version: "  + str(hex(self.pnp_product_version))
-            else:
-                vendor_id = "Not available"
-                product_id = ""
-                product_version = ""
-            self.logger.print("[TAG] PnP Info:".ljust(TAG_INFO_JUSTIFY_COLUMN) + vendor_id \
-                + product_id + product_version)
-
-            self.log_basic_state_flags()
-            self.logger.print("\n------------------------------------")
-        elif self.esl_address is not None:
-            self.logger.print("[TAG] BLE Address:".ljust(TAG_MIN_JUSTIFY_COLUMN), self.ble_address, "ESL ID", self.esl_id, "in group", self.group_id, "(" + hex(self.esl_address) + ")")
-        else:
-            self.logger.print("[TAG] BLE Address:".ljust(TAG_MIN_JUSTIFY_COLUMN), self.ble_address, "Unassociated")
+    def __str__(self):
+        if self.esl_address is None:
+            return f"BLE Address: {self.ble_address}, Unassociated"
+        return f"BLE Address: {self.ble_address}, ESL ID {self.esl_id} in group {self.group_id} ({self.esl_address:#06x})"

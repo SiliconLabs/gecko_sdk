@@ -41,7 +41,9 @@ provides:
   - name: sleeptimer
 requires:
   - name: emlib_cmu
+    condition: [device]
   - name: emlib_common
+    condition: [device]
   - name: emlib_core
   - name: emlib_prs
     condition: [device_has_sysrtc]

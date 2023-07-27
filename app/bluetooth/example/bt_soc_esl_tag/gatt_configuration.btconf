@@ -5,7 +5,7 @@
       <informativeText>Abstract: The generic_access service contains generic information about the device. All available Characteristics are readonly. </informativeText>
       <characteristic const="true" id="device_name" name="Device Name" sourceId="org.bluetooth.characteristic.gap.device_name" uuid="2A00">
         <informativeText/>
-        <value length="9" type="utf-8" variable_length="false">ESL Alpha</value>
+        <value length="10" type="utf-8" variable_length="false">Silabs ESL</value>
         <properties read="true" read_requirement="optional"/>
       </characteristic>
       <characteristic name="Appearance" sourceId="org.bluetooth.characteristic.gap.appearance" uuid="2A01">
@@ -35,7 +35,7 @@
       </characteristic>
       <characteristic id="firmware_revision_string" name="Firmware Revision String" sourceId="org.bluetooth.characteristic.firmware_revision_string" uuid="2A26">
         <informativeText>Summary: The value of this characteristic is a UTF-8 string representing the firmware revision for the firmware within the device.</informativeText>
-        <value length="8" type="utf-8" variable_length="false">0.10.0.0</value>
+        <value length="7" type="utf-8" variable_length="false">1.0.0.0</value>
         <properties read="true" read_requirement="mandatory"/>
       </characteristic>
       <characteristic const="false" id="system_id" name="System ID" sourceId="org.bluetooth.characteristic.system_id" uuid="2A23">

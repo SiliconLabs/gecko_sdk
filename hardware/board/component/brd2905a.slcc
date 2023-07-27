@@ -1,0 +1,50 @@
+!!omap
+- id: brd2905a
+- label: BRD2905A
+- package: platform
+- description: Board support for BRD2905A.
+- category: Platform|Board|Starter Kit
+- quality: production
+- requires:
+  - name: bgm240sb22vna
+  - name: brd2905a_config
+- provides:
+  - name: brd2905a
+  - name: hardware_board
+  - name: hardware_board_stk
+  - name: hardware_board_from_stk
+  - name: hardware_board_has_vcom
+  - name: hardware_board_has_lfxo
+  - name: hardware_board_supports_rf_band_2400
+  - name: hardware_board_supports_1_rf_band
+  - name: hardware_board_default_rf_band
+  - name: hardware_board_default_rf_band_2400
+- recommends:
+  - id: iostream_eusart
+    instance:
+    - vcom
+  - id: bootloader_uart_driver
+  - id: simple_led
+    instance:
+    - led0
+  - id: simple_button
+    instance:
+    - btn0
+- template_contribution: []
+- define:
+  - name: SL_BOARD_NAME
+    value: '"BRD2905A"'
+  - name: SL_BOARD_REV
+    value: '"A00"'
+  - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_2400
+  - name: HARDWARE_BOARD_SUPPORTS_1_RF_BAND
+  - name: HARDWARE_BOARD_DEFAULT_RF_BAND_2400
+- tag:
+  - board:pn:BRD2905
+  - board:variant:A
+  - board:revision:A00
+  - board:device:bgm240sb22vna
+  - hardware:has:vcom
+  - hardware:has:pti
+  - hardware:has:led:1
+  - hardware:has:button:1

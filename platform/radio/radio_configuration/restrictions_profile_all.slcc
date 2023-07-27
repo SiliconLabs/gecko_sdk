@@ -18,6 +18,7 @@ requires:
   - name: restrictions_profile_wisun_ofdm
   - name: restrictions_profile_wmbus
   - name: restrictions_profile_sigfox
+  - name: restrictions_profile_sidewalk
 
 
 

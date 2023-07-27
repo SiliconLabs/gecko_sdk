@@ -367,7 +367,7 @@ typedef struct RAIL_PacketTimeStamp {
    */
   RAIL_PacketTimePosition_t timePosition;
   /**
-   * In RX and OFDM for EFR32xG25 only  :
+   * In RX for EFR32xG25 only  :
    * A value specifying the on-air duration of the data packet,
    * starting with the first bit of the PHR (i.e. end of sync word).
    * Preamble and sync word duration are hence excluded.
@@ -902,12 +902,19 @@ RAIL_ENUM_GENERIC(RAIL_Events_t, uint64_t) {
 #define RAIL_EVENT_RX_ACK_TIMEOUT (1ULL << RAIL_EVENT_RX_ACK_TIMEOUT_SHIFT)
 
 /**
- * Occurs when the number of bytes in the receive FIFO exceeds the configured
- * threshold value.
+ * Keeps occurring as long as the number of bytes in the receive FIFO
+ * exceeds the configured threshold value.
  *
  * Call RAIL_GetRxFifoBytesAvailable() to get the number of
  * bytes available. When using this event, the threshold should be set via
  * RAIL_SetRxFifoThreshold().
+ *
+ * How to avoid sticking in the event handler (even in idle state):
+ * 1. Disable the event (via the config events API or the
+ *    \ref RAIL_FIFO_THRESHOLD_DISABLED parameter)
+ * 2. Increase FIFO threshold
+ * 3. Read the FIFO (that's not an option in
+ *    \ref RAIL_DataMethod_t::PACKET_MODE) in the event handler
  */
 #define RAIL_EVENT_RX_FIFO_ALMOST_FULL (1ULL << RAIL_EVENT_RX_FIFO_ALMOST_FULL_SHIFT)
 
@@ -1716,6 +1723,7 @@ typedef struct RAIL_AlternatePhy {
   uint16_t minIf_kHz; /**< minimum IF for the alternate PHY in kHz. */
   uint16_t minBaseIf_kHz; /**< minimum IF for the base PHY in kHz. */
   bool isOfdmModem; /**< Indicates that OFDM modem is used by this alternate PHY. */
+  uint32_t rateInfo; /**< rate Info of the alternate PHY. */
 } RAIL_AlternatePhy_t;
 
 /**
@@ -2027,17 +2035,19 @@ RAIL_ENUM(RAIL_PtiProtocol_t) {
   RAIL_PTI_PROTOCOL_ZWAVE = 6, /**< PTI output for the Z-Wave protocol. */
   RAIL_PTI_PROTOCOL_WISUN = 7, /**< PTI output for the Wi-SUN protocol. */
   RAIL_PTI_PROTOCOL_802154 = 8, /**< PTI output for a custom protocol using a built-in 802.15.4 radio config. */
+  RAIL_PTI_PROTOCOL_SIDEWALK = 9, /** < PTI output for Sidewalk protocol. */
 };
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 // Self-referencing defines minimize compiler complaints when using RAIL_ENUM
-#define RAIL_PTI_PROTOCOL_CUSTOM  ((RAIL_PtiProtocol_t) RAIL_PTI_PROTOCOL_CUSTOM)
-#define RAIL_PTI_PROTOCOL_THREAD  ((RAIL_PtiProtocol_t) RAIL_PTI_PROTOCOL_THREAD)
-#define RAIL_PTI_PROTOCOL_BLE     ((RAIL_PtiProtocol_t) RAIL_PTI_PROTOCOL_BLE)
-#define RAIL_PTI_PROTOCOL_CONNECT ((RAIL_PtiProtocol_t) RAIL_PTI_PROTOCOL_CONNECT)
-#define RAIL_PTI_PROTOCOL_ZIGBEE  ((RAIL_PtiProtocol_t) RAIL_PTI_PROTOCOL_ZIGBEE)
-#define RAIL_PTI_PROTOCOL_ZWAVE   ((RAIL_PtiProtocol_t) RAIL_PTI_PROTOCOL_ZWAVE)
-#define RAIL_PTI_PROTOCOL_802154  ((RAIL_PtiProtocol_t) RAIL_PTI_PROTOCOL_802154)
+#define RAIL_PTI_PROTOCOL_CUSTOM    ((RAIL_PtiProtocol_t) RAIL_PTI_PROTOCOL_CUSTOM)
+#define RAIL_PTI_PROTOCOL_THREAD    ((RAIL_PtiProtocol_t) RAIL_PTI_PROTOCOL_THREAD)
+#define RAIL_PTI_PROTOCOL_BLE       ((RAIL_PtiProtocol_t) RAIL_PTI_PROTOCOL_BLE)
+#define RAIL_PTI_PROTOCOL_CONNECT   ((RAIL_PtiProtocol_t) RAIL_PTI_PROTOCOL_CONNECT)
+#define RAIL_PTI_PROTOCOL_ZIGBEE    ((RAIL_PtiProtocol_t) RAIL_PTI_PROTOCOL_ZIGBEE)
+#define RAIL_PTI_PROTOCOL_ZWAVE     ((RAIL_PtiProtocol_t) RAIL_PTI_PROTOCOL_ZWAVE)
+#define RAIL_PTI_PROTOCOL_802154    ((RAIL_PtiProtocol_t) RAIL_PTI_PROTOCOL_802154)
+#define RAIL_PTI_PROTOCOL_SIDEWALK  ((RAIL_PtiProtocol_t) RAIL_PTI_PROTOCOL_SIDEWALK)
 #endif//DOXYGEN_SHOULD_SKIP_THIS
 
 /** @} */ // end of group PTI
@@ -2102,7 +2112,9 @@ RAIL_ENUM(RAIL_RxDataSource_t) {
                                          rate (bcr_dmod_bitclk_ext trigger).
                                          Only supported if
                                          \ref RAIL_SUPPORTS_RX_DIRECT_MODE_DATA_TO_FIFO
-                                         is true. */
+                                         is true.
+                                         Only efr32xg23, efr32xg25, or efr32xg28
+                                         have this mode.*/
   /** A count of the choices in this enumeration. */
   RAIL_RX_DATA_SOURCE_COUNT // Must be last
 };
@@ -2523,9 +2535,9 @@ RAIL_ENUM_GENERIC(RAIL_TxOptions_t, uint32_t) {
  */
 #define RAIL_TX_OPTION_ANTENNA1 (1UL << RAIL_TX_OPTION_ANTENNA1_SHIFT)
 /**
- * An option to dynamically set an alternate preamble length for the
- * transmission. If this option is not set, the pre-configured
- * channel preamble length will be used.
+ * An option to use the alternate preamble length established
+ * by \ref RAIL_SetTxAltPreambleLength() for the transmission.
+ * When not set, the PHY configuration's preamble length is used.
  */
 #define RAIL_TX_OPTION_ALT_PREAMBLE_LEN (1UL << RAIL_TX_OPTION_ALT_PREAMBLE_LEN_SHIFT)
 /**

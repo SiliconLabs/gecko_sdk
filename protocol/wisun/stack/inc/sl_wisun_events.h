@@ -69,7 +69,9 @@ typedef enum {
   /// This event is sent when regional regulation transmission level changes.
   SL_WISUN_MSG_REGULATION_TX_LEVEL_IND_ID         = 0x8D,
   /// This event is sent when the mode switch is disabled
-  SL_WISUN_MSG_MODE_SWITCH_FALLBACK_IND_ID        = 0x8E
+  SL_WISUN_MSG_MODE_SWITCH_FALLBACK_IND_ID        = 0x8E,
+  /// This event is sent on frame receptions.
+  SL_WISUN_MSG_RX_FRAME_IND_ID                    = 0x8F,
 } sl_wisun_msg_ind_id_t;
 
 /**************************************************************************//**
@@ -463,6 +465,37 @@ SL_PACK_END()
 
 /** @} (end SL_WISUN_MODE_SWITCH_FALLBACK_IND) */
 
+/**************************************************************************//**
+ * @defgroup SL_WISUN_MSG_RX_FRAME_IND sl_wisun_msg_rx_frame_ind
+ * @{
+ ******************************************************************************/
+
+/// Indication message body
+SL_PACK_START(1)
+typedef struct {
+  /// Status of the indication
+  uint32_t status;
+  /// Timestamp in microseconds
+  uint64_t timestamp_us;
+  /// Frame length in bytes
+  uint16_t length;
+  /// Received frame
+  uint8_t frame[];
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_rx_frame_ind_body_t;
+SL_PACK_END()
+
+/// Indication message
+SL_PACK_START(1)
+typedef struct {
+  /// Common message header
+  sl_wisun_msg_header_t header;
+  /// Indication message body
+  sl_wisun_msg_rx_frame_ind_body_t body;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_rx_frame_ind_t;
+SL_PACK_END()
+
+/** @} (end SL_WISUN_MSG_RX_FRAME_IND) */
+
 /// @brief Wi-SUN event definitions
 /// @details This structure contains a Wi-SUN API event and its associated data.
 SL_PACK_START(1)
@@ -504,6 +537,8 @@ typedef struct {
     sl_wisun_msg_regulation_tx_level_ind_body_t regulation_tx_level;
     /// #SL_WISUN_MSG_MODE_SWITCH_FALLBACK_IND_ID event data
     sl_wisun_msg_mode_switch_fallback_ind_body_t mode_switch_fallback;
+    /// #SL_WISUN_MSG_RX_FRAME_IND_ID event data
+    sl_wisun_msg_rx_frame_ind_body_t rx_frame;
   } evt;
 } SL_ATTRIBUTE_PACKED sl_wisun_evt_t;
 SL_PACK_END()

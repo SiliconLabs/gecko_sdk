@@ -62,12 +62,15 @@ sl_status_t esl_image_select_object(void const *data, uint16_t length);
  * Current implementation utilizes the RAM as storage target. This function is
  * called by ESL OTS Server subcomponent on receiving partial image data.
  *
- * @param[in] uint8_t const *data pointer to incoming data (e.g. to be put to
+ * @param[in] uint8_t  const *data pointer to incoming data (e.g. to be put to
  *                                its final storage place by copy)
+ * @param[in] uint32_t offset Offset within the image
  * @param[in] uint16_t length Image chunk length in bytes
  * @return sl_status_t
  *****************************************************************************/
-sl_status_t esl_image_chunk_received(uint8_t const *data, uint16_t length);
+sl_status_t esl_image_chunk_received(uint8_t const *data,
+                                     uint32_t offset,
+                                     uint16_t length);
 
 /**************************************************************************//**
  * User callback called automatically after an image fully received.

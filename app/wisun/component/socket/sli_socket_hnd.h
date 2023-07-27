@@ -91,8 +91,6 @@ extern "C" {
 typedef enum sli_socket_hnd_state_id {
   /// Socket State Connection available ID
   SOCKET_STATE_CONNECTION_AVAILABLE = 0,
-  /// Socket State Event handler in progress
-  SOCKET_STATE_DATA_EVT_HND,
   /// Socket State FIFO underflow ID
   SOCKET_FIFO_UNDERFLOW,
   /// Socket State FIFO overflow ID
@@ -357,14 +355,7 @@ int32_t sli_socket_hnd_read_remote_addr(const sli_socket_hnd_t *hnd,
                                         void *data,
                                         const uint8_t size,
                                         const uint8_t offset);
-/**************************************************************************//**
- * @brief Wait for data event termination
- * @details Check handler status and wait for data event handler termination
- * @param[in] hnd Socket handler
- * @param[in] timeout_ms Timeout ms
- *****************************************************************************/
-void sli_socket_hnd_wait_for_data_evt_finish(const sli_socket_hnd_t *hnd, const uint32_t timeout_ms);
-
+                                        
 /**************************************************************************//**
  * @brief Wait for connection available event
  * @details Check handler status and wait for data event handler termination

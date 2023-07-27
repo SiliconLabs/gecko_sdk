@@ -3,7 +3,7 @@
  * @brief
  *******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -215,8 +215,7 @@ void sl_btmesh_provisionee_on_init(sl_status_t result);
 /***************************************************************************//**
  * Handle BT Mesh events for the provisionee.
  *
- * This function is called automatically by Universal Configurator after
- * enabling the component.
+ * This function is called automatically after enabling the component.
  *
  * @param[in] evt  Pointer to incoming event.
  ******************************************************************************/
@@ -225,8 +224,7 @@ void sl_btmesh_provisionee_on_event(sl_btmesh_msg_t *evt);
 /***************************************************************************//**
  * Handle BLE events for the provisionee.
  *
- * This function is called automatically by Universal Configurator after
- * enabling the component.
+ * This function is called automatically after enabling the component.
  *
  * @param[in] evt  Pointer to incoming event.
  ******************************************************************************/

@@ -87,15 +87,11 @@ typedef struct {
 
 #if defined(EUART_COUNT) && (EUART_COUNT > 0)
 #define SL_CPC_UART_CLOCK(periph)                  SL_CPC_PERIPH_CLOCK(cmuClock_EUART, periph)
-#define SL_CPC_RX_IRQn(periph_nbr)                 SL_CPC_CONCAT_PASTER(EUART, periph_nbr, _RX_IRQn)
 #define SL_CPC_TX_IRQn(periph_nbr)                 SL_CPC_CONCAT_PASTER(EUART, periph_nbr, _TX_IRQn)
-#define SL_CPC_ISR_RX_HANDLER(periph_nbr)          SL_CPC_CONCAT_PASTER(EUART, periph_nbr, _RX_IRQHandler)
 #define SL_CPC_ISR_TX_HANDLER(periph_nbr)          SL_CPC_CONCAT_PASTER(EUART, periph_nbr, _TX_IRQHandler)
 #else
 #define SL_CPC_UART_CLOCK(periph)                  SL_CPC_PERIPH_CLOCK(cmuClock_EUSART, periph)
-#define SL_CPC_RX_IRQn(periph_nbr)                 SL_CPC_CONCAT_PASTER(EUSART, periph_nbr, _RX_IRQn)
 #define SL_CPC_TX_IRQn(periph_nbr)                 SL_CPC_CONCAT_PASTER(EUSART, periph_nbr, _TX_IRQn)
-#define SL_CPC_ISR_RX_HANDLER(periph_nbr)          SL_CPC_CONCAT_PASTER(EUSART, periph_nbr, _RX_IRQHandler)
 #define SL_CPC_ISR_TX_HANDLER(periph_nbr)          SL_CPC_CONCAT_PASTER(EUSART, periph_nbr, _TX_IRQHandler)
 #endif
 
@@ -112,9 +108,7 @@ typedef struct {
 #define WITHOUT_HWFC usartHwFlowControlNone_D
 
 #define SL_CPC_USART_CLOCK(periph)                 SL_CPC_PERIPH_CLOCK(cmuClock_USART, periph)
-#define SL_CPC_RX_IRQn(periph_nbr)                 SL_CPC_CONCAT_PASTER(USART, periph_nbr, _RX_IRQn)
 #define SL_CPC_TX_IRQn(periph_nbr)                 SL_CPC_CONCAT_PASTER(USART, periph_nbr, _TX_IRQn)
-#define SL_CPC_ISR_RX_HANDLER(periph_nbr)          SL_CPC_CONCAT_PASTER(USART, periph_nbr, _RX_IRQHandler)
 #define SL_CPC_ISR_TX_HANDLER(periph_nbr)          SL_CPC_CONCAT_PASTER(USART, periph_nbr, _TX_IRQHandler)
 
 #define SL_CPC_LDMA_RX_PERIPH_TRIGGER(periph_nbr)   SL_CPC_CONCAT_PASTER(ldmaPeripheralSignal_USART, periph_nbr, _RXDATAV)
@@ -275,7 +269,6 @@ sl_status_t sli_cpc_drv_init(void)
 #endif
 
   NVIC_EnableIRQ(SL_CPC_TX_IRQn(SL_CPC_DRV_UART_PERIPHERAL_NO));
-  NVIC_EnableIRQ(SL_CPC_RX_IRQn(SL_CPC_DRV_UART_PERIPHERAL_NO));
 
   sl_slist_init(&rx_free_list_head);
   sl_slist_init(&rx_free_no_buffer_handle_list_head);
@@ -379,8 +372,6 @@ sl_status_t sli_cpc_drv_init(void)
   SL_CPC_DRV_UART_PERIPHERAL->CMD_SET = EUSART_CMD_CLEARTX;
 
   NVIC_EnableIRQ(SL_CPC_TX_IRQn(SL_CPC_DRV_UART_PERIPHERAL_NO));
-  NVIC_EnableIRQ(SL_CPC_RX_IRQn(SL_CPC_DRV_UART_PERIPHERAL_NO));
-
 #else
 
   // Initialize an UART driver instance.
@@ -718,9 +709,8 @@ static sl_status_t prepare_next_tx(void)
       SLI_CPC_HDLC_HEADER_RAW_SIZE);
   }
 
-  /* Set doneIfs only on the last used descriptor */
-  tx_descriptor[idx].xfer.doneIfs = 1u;
-  for (uint8_t doneIfIndex = 0; doneIfIndex < idx; doneIfIndex++) {
+  /* Clear doneIfs */
+  for (uint8_t doneIfIndex = 0; doneIfIndex <= idx; doneIfIndex++) {
     tx_descriptor[doneIfIndex].xfer.doneIfs = 0u;
   }
 

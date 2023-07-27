@@ -9,7 +9,7 @@ description: >
   the calculation is repeated and, in the event the check values do not match, corrective action can be
   taken against data corruption.
 category: Platform|Bootloader|TrustZone NonSecure|Utils
-quality: evaluation
+quality: production
 source:
   - path: platform/bootloader/security/btl_crc16_ns.c
   - path: platform/bootloader/security/btl_crc32_ns.c

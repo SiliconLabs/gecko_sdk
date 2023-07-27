@@ -82,3 +82,18 @@ void emberAfPluginGreenPowerServerCliSinkTablePrint(SL_CLI_COMMAND_ARG)
     emberAfCorePrintln("\n\rSink Table Empty");
   }
 }
+
+void emberAfPluginGreenPowerServerCliRunTestVectors(SL_CLI_COMMAND_ARG)
+{
+#if (EMBER_AF_PLUGIN_GREEN_POWER_SERVER_SECURITY_TEST_VECTORS == 1)
+  // A test to run the security test vectors upon reset
+  EmberStatus status = sli_zigbee_af_gp_test_security();
+  if (status == EMBER_SUCCESS) {
+    emberAfGreenPowerClusterPrintln("~~ gp-test-vectors PASS ~~");
+  } else {
+    emberAfGreenPowerClusterPrintln("~~ gp-test-vectors FAIL ~~");
+  }
+#else // (EMBER_AF_PLUGIN_GREEN_POWER_SERVER_SECURITY_TEST_VECTORS == 0)
+  emberAfCorePrintln("Command is not supported");
+#endif // (EMBER_AF_PLUGIN_GREEN_POWER_SERVER_SECURITY_TEST_VECTORS == 1)
+}

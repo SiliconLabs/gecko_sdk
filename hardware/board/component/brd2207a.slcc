@@ -15,6 +15,7 @@
   - name: hardware_board_from_stk
   - name: hardware_board_from_sltb009a
   - name: hardware_board_has_vcom
+  - name: hardware_board_has_hfxo_freq_50mhz
   - name: hardware_board_has_hfxo
   - name: hardware_board_has_lfxo
 - recommends:

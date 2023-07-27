@@ -1,6 +1,3 @@
-
-
-
 # ESL Access Point
 ----
 This Python example implements the functionality of an Access Point as specified by the Bluetooth Electronic Shelf Label Profile specification using an NCP ESL AP target. The following features are offered by this example application:
@@ -10,11 +7,52 @@ This Python example implements the functionality of an Access Point as specified
 - Transfer images to Tags via Object Transfer Service (OTS)
 - Sending commands to Tags either via Periodic Advertisements with Responses or to the ESL Control Point
 
+Table of content:
+- [ESL Access Point](#esl-access-point)
+  - [Limitations, known issues](#limitations-known-issues)
+  - [Project structure](#project-structure)
+  - [Getting started](#getting-started)
+    - [Pre-steps before building](#pre-steps-before-building)
+    - [Building the shared libraries](#building-the-shared-libraries)
+    - [Pre-steps before building](#pre-steps-before-building-1)
+    - [Building the shared libraries](#building-the-shared-libraries-1)
+    - [Starting AP application](#starting-ap-application)
+  - [Runtime commands](#runtime-commands)
+    - [ESL Tag commands](#esl-tag-commands)
+      - [ping](#ping)
+      - [config](#config)
+      - [connect](#connect)
+      - [delete\_timed](#delete_timed)
+      - [disconnect](#disconnect)
+      - [display\_image](#display_image)
+      - [image\_update](#image_update)
+      - [led](#led)
+      - [refresh\_display](#refresh_display)
+      - [update\_complete](#update_complete)
+      - [unassociate](#unassociate)
+      - [factory\_reset](#factory_reset)
+      - [service\_reset](#service_reset)
+      - [read\_sensor](#read_sensor)
+      - [vendor\_opcode](#vendor_opcode)
+    - [Access Point control commands](#access-point-control-commands)
+      - [demo](#demo)
+      - [help](#help)
+      - [mode](#mode)
+      - [scan](#scan)
+      - [set\_rssi\_threshold](#set_rssi_threshold)
+      - [list](#list)
+      - [sync](#sync)
+      - [script](#script)
+      - [exit](#exit)
+
+
 ## Limitations, known issues
 ---
 - Only one BLE connection is handled at a time. This may affect the system scalability performance.
 - In some cases, especially when there are many BLE devices advertising nearby while the AP is scanning for longer periods, the AP script may become unresponsive. In such a case, it may help to limit the period of scanning or to reduce the number of nearby advertising devices. If neither of these are possible, you may want to increase the throughput of the NCP VCOM according to [this article](https://community.silabs.com/s/article/wstk-virtual-com-port-baudrate-setting?language=en_US). After changing the WSTK VCOM speed as described, do not forget to update the VCOM Baud rate configuration of the ESL AP NCP example also accordingly, then re-build and re-flash the target with the new firmware.
-
+- On Windows, there is also a known issue when running the AP where the debugging trace and command line input can interfere with each other on some terminals if python pyreadline3 is installed, so it is strongly recommended to uninstall it using the command `pip uninstall pyreadline3` before running the AP. To find out if it is installed or not, the command `pip freeze` can be used.
+- MSYS2 MinGW bash is not recommended for use with ESL Access Point Python example application due to various compatibility issues between the native Windows Python environment and that of MSYS2.
+ 
 ## Project structure
 ---
 The Access Point Python application consists of the following files:
@@ -42,7 +80,7 @@ The application has three operation mode: automated and a (semi-) manual mode. T
 it starts advertising the ESL AP GATT Service with two characteristic. The advertising stops if a remote device (e.g mobile phone) established a connection with the AP as peripheral.
 If the connection is closed the ESL AP will start the advertising again.
 
-In general, in any mode one can control the application via CLI - but it is encouraged to change to manual mode via the `mode` [command](#mode) before typing in any ESL control commands. For details of the possible commands, see the help of the ap\_cli.py file. (Type: `help` command in the CLI)
+In general, in any mode one can control the application via CLI - but it is encouraged to change to manual mode via the [`mode`](#mode) command before typing in any ESL control commands. For details of the possible commands, see the help of the ap\_cli.py file. (Type: [`help`](#help) command in the CLI)
 
 In automated mode the script executes the following functionality:
 
@@ -54,20 +92,53 @@ _Note: Shall any unsolicited error occur during the automated process, the autom
 
 ## Getting started
 ---
-One should just run pip install -r requirements.txt before running make
-The NCP Host side application requires Python v3. Run *pip install -r requirements.txt* to install all other requirements for the application. Make sure to run this command before running *make*.
+The NCP Host side application requires Python v3. Run `pip install -r requirements.txt` to install all other requirements for the application. Make sure to run this command before running `make`.
 
-On the target side an EFR device is needed, programmed with the *Bluetooth - NCP ESL Access Point* sample application along with an appropriate NCP BGAPI UART DFU bootloader. The bootloader example can be built from a standard, released Gecko SDK.
+On the target side an EFR device is needed, programmed with the *Bluetooth - NCP ESL Access Point* sample application along with an appropriate bootloader project called *Bootloader - NCP BGAPI UART DFU*.
 
-### Building the library
+To run the ESL AP Python host example, a preliminary step is required to build the necessary ESL shared libraries which are written in C. As for the build environment and build process, three main operating systems are supported: Windows, Linux and macOS, all of which can be used on any machine architecture.
 
-Run the *make* command in the project's root folder (*example\_host/bt\_host\_esl\_ap*). It will generate the *esl\_lib\_wrapper.py* and the *esl\_key\_lib\_wrapper.py*. These files are responsible for the transfer between the Python script and the C library.
+### Pre-steps before building
+For Windows only, the first thing we need is a UNIX-like utility environment, for which we have MSYS2 as a regular tool at Silabs. After downloading and installing MSYS2, we also need to download make utility and the appropriate Minimalist GNU for Windows GCC compiler: to choose the right architecture, we need to know which Python architecture we have, as it needs to compile slightly differently for 64-bit and 32-bit versions.
+
+As for the Python version, version 3.9 is recommended - but later versions may work as well. On Windows, it is also recommended to install it into a custom directory to avoid unexpected errors later. It is essential that the installed executable environment is not placed in the read-only '*Program Files*' folders, and that the installer is allowed to set the necessary PATH variables. Furtunatelly, no such complications are known to exist with Linux and macOS.
+
+Some possible pitfalls of a Windows installation may happen: the MSYS2 MinGW environment can have a built-in Python interpreter installed in the */usr/bin* or */mingw/bin* folder (`which Python` can be used to find out). Although advanced users will be definitely able to compile with this Python if they know how to fix various errors that may come during the build execution, it is strongly discouraged due to the many potential sources of trouble.
+In addition, as it was mentioned earlier, if the native Windows Python is located in Program Files, advanced manual configuration of the PATH environment variable may be also required, without which the build process can stall at the final stage. That's why it's heavily recommended to install it in location that isn't write-protected, as shown in the image below.
+
+![](images/python_install_windows.png)
+
+Installing the proper GCC version is also essential. For example, if our Python is 32-bit, but the ESL key library and ESL C library are compiled with GCC for MinGW64, the import will fail and the AP example code will not start. This means either issuing `pacman -S make mingw-w64-x86_64-gcc`, or `pacman -S make mingw-w64-i686-gcc` in the MinGW32 or MinGW64 bash terminal, depending on Python interpreter architecture.
+
+Finally, as we're about to use the systems' native Python environment, the MSYS2 MinGW environment should be started with the `-use-full-path` option. Without this, the compilation will fail as well. That is, start either with `msys2_shell.cmd -mingw32 -use-full-path` or `msys2_shell.cmd –mingw64 -use-full-path` depending on Python.
+
+### Building the shared libraries
+
+### Pre-steps before building
+For Windows only, the first thing we need is a UNIX-like utility environment, for which we have MSYS2 as a regular tool at Silabs. After downloading and installing MSYS2, we also need to download make utility and the appropriate Minimalist GNU for Windows GCC compiler: to choose the right architecture, we need to know which Python architecture we have, as it needs to compile slightly differently for 64-bit and 32-bit versions.
+
+As for the Python version, version 3.9 is recommended - but later versions may work as well. On Windows, it is also recommended to install it into a custom directory to avoid unexpected errors later. It is essential that the installed executable environment is not placed in the read-only `Program Files` folders, and that the installer is allowed to set the necessary PATH variables. Furtunatelly, no such complications are known to exist with Linux and macOS.
+
+Some possible pitfalls of a Windows installation may happen: the MSYS2 MinGW environment can have a built-in Python interpreter installed in the */usr/bin* or */mingw/bin* folder (`which Python` can be used to find out). Although advanced users will be definitely able to compile with this Python if they know how to fix various errors that may come during the build execution, it is strongly discouraged due to the many potential sources of trouble.
+In addition, as it was mentioned earlier, if the native Windows Python is located in Program Files, advanced manual configuration of the PATH environment variable may be also required, without which the build process can stall at the final stage. That's why it's heavily recommended to install it in location that isn't write-protected, as shown in the image below.
+
+![](images/python_install_windows.png)
+
+Installing the proper GCC version is also essential. For example, if our Python is 32-bit, but the ESL key library and ESL C library are compiled with GCC for MinGW64, the import will fail and the AP example code will not start. This means either issuing `pacman -S make mingw-w64-x86_64-gcc`, or `pacman -S make mingw-w64-i686-gcc` in the MinGW32 or MinGW64 bash terminal, depending on Python interpreter architecture.
+
+Finally, as we're about to use the systems' native Python environment, the MSYS2 MinGW environment should be started with the `-use-full-path` option. Without this, the compilation will fail as well. That is, start either with `msys2_shell.cmd -mingw32 -use-full-path` or `msys2_shell.cmd mingw64 -use-full-path` depending on Python.
+
+### Building the shared libraries
+
+Run the `make` command in the project's root folder (*example\_host/bt\_host\_esl\_ap*). It will generate the *esl\_lib\_wrapper.py* and the *esl\_key\_lib\_wrapper.py*. These files are responsible for the transfer between the Python script and the C library.
 
 ### Starting AP application
 
+On Windows, the PowerShell is the preferred running environment, but it can also run under the basic command line. However, using the MSYS2 MinGW bash is not recommended for this purpose due to known compatibility issues between the native Windows Python running environment and that of MSYS2. On other systems like Linux and macOS any terminal can be used. 
+ 
 AP can be run in manual, demo or automatic mode. Without using the `--cmd` or the `--demo` command line parameter, automatic mode is started.
 
-For example to start AP on Windows system where an NCP is connected to COM4, type `python .\app.py COM4` in terminal. If the AP is the only Silabs board connected to the PC via USB there is no need to specify the COM port. Mode can also be set later runtime using the `mode` command.
+For example to start AP on Windows system where an NCP is connected to COM4, type `python .\app.py COM4` in terminal. If the AP is the only Silabs board connected to the PC via USB there is no need to specify the COM port. Mode can also be set later runtime using the [`mode`](#mode) command.
 
 ![](images/ap_start.png)
 
@@ -85,143 +156,167 @@ Assuming the automated mode startup above, the already running AP script will fi
 ---
 
 #### ping
-    Send ESL ping command.
+    Get the Basic State response of the addressed ESL.
 
-Usage: `ping <esl_id | all> [g=<group_id>]`
+Usage: `ping [-h] [--group_id <u7>] esl_id`
 
 Parameters:
-- `<esl_id>`:   ESL ID of the Tag. _Note: `all` also can be used as a broadcast address (0xff) if IOP_TEST config True. (Although it still makes no sense as broadcast messages doesn't solicit any response by the spec.)_
-- `[g=<group_id>]`: ESL group ID (optional, default is group 0)
+- `esl_id`:                 ESL ID of the Tag. _Note: `all` also can be used as a broadcast address (0xff) if `IOP_TEST` config is set to `True`. (Although it still makes no sense as broadcast messages doesn't solicit any response by the spec.)_
+- `[--group_id, -g <u7>]`:  ESL group ID (optional, default is group 0)
 
 #### config
     Configure the writable mandatory GATT characteristics of the ESL tag.
 
-Usage: `config [full] [esl_id=<ui8>] [g=<ui7>] [sync_key] [response_key] [time | absolute=<ui32>]`
+Usage: `config [-h] [--full] [--esl_id <u8>] [--group_id <u7>] [--sync_key] [--response_key] [--time] [--absolute <u32>] [device]`
+
+Positional argument:
+- `device`:                       Bluetooth address of the target device (e.g. `AA:BB:CC:DD:EE:22`) in case insensitive format
 
 Parameters:
-- `full`:           Configure everything in one step.
-- `esl_id=<u8>`:    New ESL ID of the connected tag.
-- `group_id=<u7>`:  New ESL group ID (optional, default is group 0).
-- `sync_key`:       Set current Access Point Sync Key Material.
-- `response_key`:   Generate then set new Response Key Material.
-- `time`:           Set current Absolute Time of the ESL Access Point.
-- `absolute=<u32>`: Set custom Absolute Time value. Mutually exclusive with the 'time' parameter.
+- `[--full]`:                     Configure everything in one step.
+- `[--esl_id, -i <esl_id_type>]`: New ESL ID of the connected tag.
+- `[--group_id, -g <u7>]`:        New ESL group ID (optional, default is group 0).
+- `[--sync_key, -sk]`:            Set current Access Point Sync Key Material.
+- `[--response_key, -rk]`:        Generate then set new Response Key Material.
+- `[--time, -t]`:                 Set current Absolute Time of the ESL Access Point.
+- `[--absolute, -a <u32>]`:       Set custom Absolute Time epoch value - use with care! Mutually exclusive with the `--time` parameter.
 
-_Note:_
-- _Either the keyword 'all' or at least one of the optional parameters shall be given. The following shortcuts can also be used as keyword replacement: 'i' for 'esl_id', 'g' for 'group', 'sk' for 'sync_key', 'rk' for 'response_key', 't' for 'time', 'a' for 'absolute'._
+_Notes:_
+- _Either the option `--full` or at least one of the optional parameters shall be given._
+
+Examples:
+-  `config --full --absolute 0`
+    Will configure everything plus overrides the ESL Absolute Time epoch value for the given tag (e.g. for testing purposes)
+-  `config -i 2 -g 3`
+   (Re-)configure only ESL ID and group ID - please note that the other ESL Characteristics e.g. Key Materials and Absolute Time will remain unchanged this way, including their unconfigured states if that's the case.
+-  `config -i 1 AA:BB:CC:DD:EE:22`
+   (Re-)configure only ESL ID while group ID remains unchanged (0 by default if not given before). Bluetooth address shall be given if there are more active connection opened.
 
 #### connect
     Connect to an ESL device with the specified address.
 
-Usage: `connect <bt_addr> | <esl_id> [g=<group_id>] [address_type]`
+Usage: `connect [-h] [--group_id <u7>] [--addr_type, -t] address`
 
 Parameters:
-- `<bt_addr>`:        Bluetooth address (e.g., 'AA:BB:CC:DD:EE:22') in case insensitive format.
-- `<esl_id>`:         ESL ID of the Tag.
-- `[g=<group_id>]`:   ESL group ID (optional, default is group 0).
-- `[address_type]`:   ESL address type (optional), possible values:
-  - `  public`:       Public device address (default).
-  - `  static`:       Static device address.
-  - `  rand_res`:     Resolvable private random address.
-  - `  rand_nonres`:  Non-resolvable private random address.
+- `address`:                Bluetooth address (e.g., `AA:BB:CC:DD:EE:22`) in case insensitive format or ESL ID of the Tag.
+- `[--group_id, -g <u7>]`:  ESL group ID (optional, default is group 0).
+- `[--addr_type, -t]`:      ESL address type (optional), possible values:
+    - `public`:             Public device address (default).
+    - `static`:             Static device address.
+    - `rand_res`:           Resolvable private random address.
+    - `rand_nonres`:        Non-resolvable private random address.
 
 _Notes:_
 - _`<esl_id>` and `<group_id>` can be used instead of `<bt_addr>` if ESL is already configured._
 - _`<address_type>` will be taken into account only if the given `<bt_addr>` is unknown - otherwise the proper type reported by the remote device will be used_
 - _If the group ID is not given after the ESL ID then the default value group zero is used. This applies to many commands expecting the group ID as optional parameter._
-- _The auto-configuring uses the following schema for ESL addressing: `(16 * number_of_already_synchronized_tags) + 1`_
 
-Example: `connect bc:33:ac:fa:57:d0`
+Example:
+- `connect bc:33:ac:fa:57:d0`
+
+#### delete\_timed
+    Delete a delayed command of an ESL Tag peripheral with the selected index.
+
+Usage:  delete_timed [-h] [--group_id <u7>] {led,display} esl_id index
+
+Parameters:
+- `{led,display}`: Delete timed led or display_image command.
+- `esl_id`:        ESL ID of the Tag.
+- `index`:         Index of the LED or the display.
+- `[--group_id, -g <u7>]`:  ESL group ID (optional, default is group 0).
 
 #### disconnect
     Initiate the Periodic Advertisement Sync Transfer process then 
     disconnect from an ESL device with the specified address.
 
-Usage: `disconnect [bt_addr | esl_id [g=<group_id>]]`
+Usage: `disconnect [-h] [--address <addr>] [--group_id <u7>]`
 
 Parameters:
-- `[bt_addr]`:      Bluetooth address (e.g., 'AA:BB:CC:DD:EE:22') in case insensitive format.
-- `[esl_id]`:       ESL ID of the Tag.
-- `[g=<group_id>]`: ESL group ID (optional, default is group 0).
+- `[--address <addr>]`:     Bluetooth address (e.g., `AA:BB:CC:DD:EE:22`) in case insensitive format or ESL ID of the Tag.
+- `[--group_id, -g <u7>]`:  ESL group ID (optional, default is group 0).
 
 _Note:_
 - _Should no address be given, then the default active connection will be closed if any._
 
-Examples: `disconnect bc:33:ac:fa:57:d0` or simply `disconnect`
+Examples: 
+- `disconnect bc:33:ac:fa:57:d0` 
+- or simply `disconnect`
 
 #### display\_image
     Display desired image on target ESL.
 
-Usage: `usage: display_image <esl_id | all> <image_index> <display_idx> [g=<group_id>] [[time=<hh:mm:ss>] [date=<DD-MM-YYYY>] [delay=<delay_ms>] | [absolute=<abs_time>]]`
+Usage: `display_image [-h] [--group_id <u7>] [--time <hh:mm:ss> | --absolute <u32>] [--delay <u32>] [--date <YYYY-MM-DD>] esl_id image_index display_index`
 
 Parameters:
-- `<esl_id>`:              ESL ID of the Tag. 
-                           _Note: `all` also can be used as a broadcast address (0xff)._
-- `<image_index>`:         Image index.
-- `<display_idx>`:         Display index.
-- `[g=<group_id>]`:        ESL group ID (optional, default is group 0).
-- `[time=<hh:mm:ss>]`:     Execution time of the command in hour:min:sec format. (optional) 
-                           _Note: If <delay_ms> is specified then it is also added to the calculated value as an additional delay._
-- `[date=<DD-MM-YYYY>]`:   Execution date of the command in day-month-year numeric format (optional to time, only).
-- `[delay=<delay_ms>]`:    Delay in milliseconds (optional).
-- `[absolute=<abs_time>]`: absolute=<uint32_t>: Execution time of the command in ESL Absolute Time epoch value.
+- `esl_id`:                    ESL ID of the Tag. 
+                               _Note: `all` also can be used as a broadcast address (0xff)._
+- `image_index`:               Image index.
+- `display_idx`:               Display index.
+- `[--group_id, -g <u7>]`:     ESL group ID (optional, default is group 0).
+- `[--time, -t <hh:mm:ss>]`:   Execution time of the command in hour:min:sec format. (optional) 
+                               _Note: If <--delay> is specified then it is also added to the calculated value as an additional delay._
+- `[--absolute, -a <u32>]`:    Execution time of the command in ESL Absolute Time epoch value. Mutually exclusive with timed delay.
+- `[--date, -d <YYYY-MM-DD>]`: Execution date of the command in ISO-8601 format (optional to time, only).
+- `[--delay, -dy <u32>]`:      Delay in milliseconds (optional).
 
 _Note:_ 
-- _The following shortcuts can also be used as keyword replacement:_
-- _'t' for 'time', 'd' for date, 'dy' for 'delay' and 'a' for 'absolute'._
 - _Timed display commands with a delay shorter than the actual periodic advertisement interval may be rejected on receive by Implausible Absolute Time (0x0C) ESL error response._
 
-Example: `display_image 17 1 0 delay=5000`
+Example: 
+- `display_image 17 1 0 delay=5000`
 
 ![](images/03_imageupdate.png)
 
 #### image\_update
     Update single image on the connected Tag.
 
-Usage: `image_update <image_index> <imagefile_path> [raw | display_index=<index>] [label=<text>] [cw | ccw | flip]`
+Usage: `image_update [-h] [--raw] [--display_index <u8>] [--label <str>] [--cw] [--ccw] [--flip] [--cropfit] image_index imagefile_path`
 
 Parameters:
-- `<image_index>`:        Image index to update.
-- `<imagefile_path>`:     Relative path of the image file.
-- `[raw]`:                Upload raw image file without any conversion.
-- `[display_index=<u8>]`: Try auto-conversion image for this display.
-- `[label=<char>]`:       Label to be upload.
-- `[cw]`:                 Clockwise rotation.
-- `[ccw]`:                Counter clockwise rotation.
-- `[flip]`:               Horizontal flip of the image.
-- `[cropfit]`:            Crop the image for the given display.
+- `image_index`:                Image index to update.
+- `imagefile_path`:             Relative path of the image file.
+- `[--address , -a]`:           Bluetooth address of the target device or ESL ID if there are more ESLs connected
+- `[--group_id <u7>, -g <u7>]`: ESL group ID (optional, default is group 0)
+- `[--raw, -r]`:                Upload raw image file without any conversion.
+- `[--display_index, -d <u8>]`: Try auto-conversion image for this display.
+- `[--label, -l <str>]`:        Text label overlay to be written on the image.
+- `[--cw, -rr]`:                Clockwise (right) rotation.
+- `[--ccw, -rl]`:               Counter clockwise (left) rotation.
+- `[--flip, -f]`:               Turn the image upside down
+                                _Note: cw, ccw and flip are mutually exclusive_
+- `[--cropfit, -c]`:            Fit the image to the display proportions by cropping.
 
-_Note:_ 
+_Notes:_ 
 - _ESL Tag must be connected to the AP before running this command._
 - _The ESL won't display any change after the image upload is complete unless a `display image` command is also sent with the same image index - or a `refresh display` command to a display already showing the same image that has changed. Please refer to the `display_image` and `refresh_display` commands' examples._
 
-Example: `image_update 1 image/croissant.png`
+Example:
+- `image_update 1 image/croissant.png`
 
 
 #### led
     Turn on / off or flash an LED utilizing the LED control command.
 
-Usage: `led <on | off | flash> <esl_id | all> [g=<group_id>] [default] [pattern=<bits>] [on_period=<int>] [off_period=<int>] [brightness=<int>] [color=<#RGB>] [repeats=<times>] | [duration=<sec>] [index=<index>] [[time=<hh:mm:ss>] [date=<DD-MM-YYYY>] [delay=<delay_ms>] | [absolute=<abs_time>]]`
+Usage: `led [-h] [--group_id <u7>] [--default] [--pattern <bits>] [--on_period <int[0,3]>] [--off_period <int[0,3]>] [--brightness <int[0,3]>] [--color <int[0,3]>] [--repeats <u15> | --duration <u15>] [--index <u8>] [--time <hh:mm:ss> | --absolute <u32>] [--delay <u32>] [--date YYYY-MM-DD] {on,off,flash} esl_id`
 
 Parameters:
-- `on`:                    Turn ON LED.
-- `off`:                   Turn OFF LED.
-- `flash`:                 Flash led based on a bit pattern.
-- `<esl_id>`:              ESL ID of the Tag. _Note: `all` also can be used as a broadcast address (0xff)._
-- `[g=<group_id>]`:        ESL group ID (optional, default is group 0).
-- `[default]`:             Restore the default flashing pattern built-in with AP.
-- `[pattern=<bits>]`:      A string containing either '1's or '0's, max length: 40.
-- `[on_period=<int>]`:     Integer value from 1 to 255, meaning 'delay *2ms' for on state bits of the pattern. '0' is prohibited.
-- `[off_period=<int>]`:    Integer value from 1 to 255, meaning 'delay *2ms' for off state bits of the pattern. '0' is prohibited.
-- `[brightness=<int>]`:    4 step brightness from 0 to 3.
-- `[color=<RGB>]`:         Red, green and blue values - only applies to LED with sRGB type.
-- `[repeats=<times>]`:     How many times the pattern shall be repeated. Mutually exclusive with `duration=` parameter. Value set is [1-32767].
-- `[duration=<sec>]`:      How many seconds the pattern shall be repeated. Mutually exclusive with `repeats=` parameter. Value set is [1-32767].
-- `[index=<index>]`:       Index of the LED (optional, default 0).
-- `[time=<hh:mm:ss>]`:     Execution time of the command in hour:min:sec format. (optional) _Note: If `<delay_ms>` is specified then it is also added to the calculated value as an additional delay._
-- `[date=<DD-MM-YYYY>]`:   Execution date of the command in day-month-year numeric format (optional to time, only).
-- `[delay=<delay_ms>]`:    Delay in milliseconds (optional).
-- `[absolute=<abs_time>]`: Execution time of the command in ESL. Absolute Time epoch value. Mutually exclusive with other delays.
+- `{on,off,flash}`:                 Turn ON/OFF LED or flash LED based on a bit pattern.
+- `esl_id`:                         ESL ID of the Tag. _Note: `all` also can be used as a broadcast address (0xff)._
+- `[--group_id, -g <u7>]`:          ESL group ID (optional, default is group 0).
+- `[--default, -d]`:                Restore the default flashing pattern built-in with AP.
+- `[--pattern, -p <bits>]`:         A string containing either `1`s or `0`s, max length: 40.
+- `[--on_period, -on <int[0,3]>]`:  Integer value from 1 to 255, meaning `delay *2ms` for on state bits of the pattern. `0` is prohibited.
+- `[--off_period, -of <int[0,3]>]`: Integer value from 1 to 255, meaning `delay *2ms` for off state bits of the pattern. `0` is prohibited.
+- `[--brightness, -b <int[0,3]>]`:  4 step brightness from 0 to 3.
+- `[--color, -c <int[0,3]>]`:       Red, green and blue values - only applies to LED with sRGB type.
+- `[--repeats, -r <u15>]`:          How many times the pattern shall be repeated. Mutually exclusive with `--duration` parameter. Value set is [1-32767].
+- `[--duration, -dn <u15>]`:        How many seconds the pattern shall be repeated. Mutually exclusive with `--repeats` parameter. Value set is [1-32767].
+- `[--index, -i <u8>]`:             Index of the LED (optional, default 0).
+- `[--time, -t <hh:mm:ss>]`:        Execution time of the command in hour:min:sec format. (optional)
+                                    _Note: If `<--delay>` is specified then it is also added to the calculated value as an additional delay._
+- `[--absolute, -a <u32>]`:         Execution time of the command in ESL Absolute Time epoch value. Mutually exclusive with timed delay.
+- `[--date, -dt YYYY-MM-DD]`:       Execution date of the command in ISO-8601 format (optional to time, only).
+- `[--delay, -dy <u32>]`:           Delay in milliseconds (optional).
 
 Example: `led flash 17 index=1 pattern=101100111000 time=16:18:00`
 
@@ -229,32 +324,38 @@ Example: `led flash 17 index=1 pattern=101100111000 time=16:18:00`
 
 _Notes:_
 - _Timed LED commands with a delay shorter than the actual periodic advertisement interval may be rejected on receive by Implausible Absolute Time (0x0C) ESL error response. Please refer the ESL specification on timed commands._
-- _If the delay is given in the human readable form (using `time=`) then the LED will either turn on on the same day at the specified time or the next day - the latter if the given time has passed already on your local computer's clock!_
+- _If the delay is given in the human readable form (using `--time`) then the LED will either turn on on the same day at the specified time or the next day - the latter if the given time has passed already on your local computer's clock!_
 - _In the SoC ESL Tag example the LED at index 0 is used for special purposes, that is it can't be controlled directly as opposed to LED 1 on the WSTK. Rather, LED 0 is used as optical feedback only for various internal states of the ESL Tag. Nevertheless, the special function for LED 0 can be still switched on and off via the `led` command._
 - _Almost all of the optional led control parameters are "sticky", meaning that the last values are preserved by the AP internally and will be re-used next time, if the given parameter is omitted in the argument list. This doesn't apply on the delay, time and absolute parameters, though._
-- _The following shortcuts can also be used as keyword replacement: 'd' for default, 'p' for 'pattern', 'on' for 'on_period', 'of' for 'off_period', 'b' for 'brightness', 'c' for 'color', 'r' for 'repeat', 'dn' for 'duration', 'i' for 'index', 't' for 'time', 'd' for date, 'dy' for 'delay' and 'a' for 'absolute'._
 
 #### refresh\_display
     Refresh ESL Tag display.
 
-Usage: `refresh_display <esl_id | all> <display_id> [g=<group_id>]`
+Usage: `refresh_display [-h] [--group_id <u7>] esl_id display_index`
 
 Parameters:
-- `<esl_id>`:       ESL ID of the Tag. _Note: `all` also can be used as a broadcast address (0xff)._
-- `<display_id>`:   Display index.
-- `[g=<group_id>]`: ESL group ID (optional, default is group 0).
+- `esl_id`:                 ESL ID of the Tag. _Note: `all` also can be used as a broadcast address (0xff)._
+- `display_id`:             Display index.
+- `[--group_id, -g <u7>]`:  ESL group ID (optional, default is group 0).
 
+#### update\_complete
+    Send update complete command.
+Usage: `update_complete [-h] [--group_id <u7>] [address]`
+
+Parameters:
+- `[address]`:                Bluetooth address (e.g. 'AA:BB:CC:DD:EE:22') in case insensitive format or ESL ID of the tag.
+- `[--group_id, -g <u7>]`:  ESL group ID (optional, default is group 0).
+
+_Note: Warning! The `update_complete` command works only in IOP test mode!_
 #### unassociate
     Unassociate Tag from AP.
 
-Usage: `unassociate <bt_addr | <esl_id | all [g=<group_id>]`
+Usage: `unassociate [-h] [--group_id <u7>] address`
 
 Parameters:
-- `<bt_addr>`:      Bluetooth address in case insensitive format.
-- `<esl_id>`:       ESL ID of the Tag. _Note: `all` also can be used as a broadcast address (0xff)._
-- `[g=<group_id>]`: ESL group ID (optional, default is group 0).
-
-_Note: the keyword `all` can be used as a substitute for the ESL broadcast address (0xff)._
+- `address`:                Bluetooth address in case insensitive format or ESL ID of the Tag.
+                            _Note: `all` also can be used as a broadcast address (0xff)._
+- `[--group_id, -g <u7>]`:  ESL group ID (optional, default is group 0).
 
 Example: `unassociate 17 2`
 
@@ -262,100 +363,130 @@ Example: `unassociate 17 2`
     Reset ESL to a state when it was not associated with the AP. 
     It means ESL deletes all configuration value set by the AP including image data.
 
-Usage: `factory_reset <bt_addr | <esl_id | all [g=<group_id>]> [pawr]`
+Usage: `factory_reset [-h] [--group_id <u7>] [--pawr] address`
 
 Parameters:
-- `<bt_addr>`:      Bluetooth address in case insensitive format.
-- `<esl_id>`:       ESL ID of the Tag. _Note: `all` also can be used as a broadcast address (0xff)._
-- `[g=<group_id>]`: ESL group ID (optional, default is group 0).
-- `[pawr]`:         Force command through PAwR sync train even if the addressed ESL is currently connected.
+- `address`:                Bluetooth address in case insensitive format or ESL ID of the Tag. 
+                            _Note: `all` also can be used as a broadcast address (0xff)._
+- `[--group_id, -g <u7>]`:  ESL group ID (optional, default is group 0).
+- `[--pawr]`:               Force command through PAwR sync train even if the addressed ESL is currently connected.
 
 #### service\_reset
     Send Service Reset command.
 
-Usage: `service_reset <esl_id | all> [g=<group_id>]`
+Usage: `service_reset [-h] [--group_id <u7>] esl_id`
 
 Parameters:
-- `<esl_id>`:       ESL ID of the tag. _Note: `all` also can be used as a broadcast address (0xff)._
-- `[g=<group_id>]`: ESL group ID (optional, default is group 0).
+- `esl_id`:                 ESL ID of the tag. _Note: `all` also can be used as a broadcast address (0xff)._
+- `[--group_id, -g <u7>]`:  ESL group ID (optional, default is group 0).
 
 #### read\_sensor
     Read sensor information.
 
-Usage: `read_sensor <esl_id> <sensor_index> [g=<group_id>]`
+Usage: ` read_sensor [-h] [--group_id <u7>] esl_id sensor_index`
 
 Parameters:
-- `<esl_id>`:       ESL ID of the tag.
-- `<sensor_index>`: Sensor index.
-- `[g=<group_id>]`: ESL group ID (optional, default is group 0).
+- `esl_id`:                 ESL ID of the tag.
+- `sensor_index`:           Sensor index.
+- `[--group_id, -g <u7>]`:  ESL group ID (optional, default is group 0).
+
+#### vendor\_opcode
+    Send generic ESL vendor specific command.
+
+Usage: `vendor_opcode [-h] [--group_id <u7>] [--data <hex>] esl_id`
+
+Parameters:
+- `esl_id`:                ESL ID of the tag.
+- `[--data, -d <hex>]`:    ASCII hexadecimal data stream up to 16 bytes overall - an appropriate TLV to the given length will be built automatically.
+- `[--group_id, -g <u7>]`: ESL group ID (optional, default is group 0).
+
+Example:
+- `vendor_opcode 0 -g 1`
+  there will be no extra payload, the resulting ESL TLV is 0F00 for group 1
+- `vendor_opcode 3 --data 0x0004`
+  2 bytes payload, the resulting ESL TLV is 2F030004 for default group 0
+- `vendor_opcode 1 --data 12233` 
+  3 bytes payload, the resulting ESL TLV is 3F01012233
+- `vendor_opcode 5 -d 0012233`
+  4 bytes payload, the resulting ESL TLV is 4F0500012233
 
 ### Access Point control commands
 ---
+#### demo
+    Start or stop advertising Dynamic GATT.
+
+Usage:  `demo [-h] {on,off}`
+
+Parameters:
+- `{on,off}`: Turn AP advertising on or off for ESL Demo in EFR Connect mobile app.
+
 #### help
     Help utility.
 
 Usage: `help <command>`
 
 Examples:
+- `help`
+Display available commands:
+- `help list`
+Display help message of a specific (in this case `list`) command:
 
-- Display available commands:
-
-    `help`
-
-- Display help message of a specific (in this case `list`) command:
-
-    `help list`
 
 ![](images/terminal_help.png)
 
 #### mode
     Changes ESL Access Point operation mode.
 
-Usage: `mode <auto> | <manual>`
+Usage: mode [-h] [{auto,manual}]
 
 Parameters:
-- `<auto>`:   Switch to automatic mode.
-- `<manual>`: Switch to manual mode.
+- `{auto,manual}`:   Switch to automatic or manual mode.
 
-Example: `mode manual`
+Example:
+- `mode manual`
+  Change mode to manual mode.
+- `mode`
+  Ask current mode.
 
 #### scan
     Start or stop scanning for advertising ESL devices.
 
-Usage: `scan <start [active] | stop>`
+Usage: `scan [-h] [--active, -a] {start,stop}`
 
 Parameters:
-- `<start>`:  Start scanning for advertising ESL devices.
-- `<stop>`:   Stop scanning for advertising ESL devices.
-- `[active]`: Start active scan instead of default passive.
+- `{start, stop}`: Start/stop scanning for advertising ESL devices.
+- `[--active]`:    Start active scan instead of default passive.
 
-_Note: Scanning starts automatically after AP script is started in auto mode to provide continuous Tag discovery._
+_Note: Scanning starts automatically when AP script is started in auto mode to provide continuous Tag discovery._
 
 #### set\_rssi\_threshold
     Set RSSI filter threshold value. Below this value the device will be ignored during scanning.
 
-Usage: `set_rssi_threshold <rssi_value>`
+Usage: ` set_rssi_threshold [-h] rssi`
 
 Parameters:
-- `<rssi_value>`: RSSI value.
+- `rssi`: RSSI value.
 
 _Note: Negative values are accepted, only!_
 
 #### list
     List ESL Tag information.
 
-Usage: `list <advertising, a> | list <blocked, b> | <synchronized, s> | <usynchronized, u> | <connected, c> [verbose, v] [g=<group_id>]`
+Usage: `list [-h] [--verbose] [--group_id <u7>] state [state ...]`
 
 Parameters:
-- `<advertising, a>`:    List advertising Tag information.
-- `<blocked, b>`:        List blocked (advertising) tag information.
-- `<connected, c>`:      List connected Tag information.
-- `<synchronized, s>`:   List synchronized Tag information.
-- `<unsynchronized, u>`: List unsynchronized Tag information.
-- `[verbose, v]`:        List more detailed information (optional).
-- `[g=<group_id>]`:      ESL group ID filter (optional - default: all group).
+- `state`:                   {advertising, a, blocked, b, connected, c, synchronized, s, unsynchronized, u} 
+    - `[advertising, a]`:    List advertising Tag information.
+    - `[blocked, b]`:        List blocked (advertising) tag information.
+    - `[connected, c]`:      List connected Tag information.
+    - `[synchronized, s]`:   List synchronized Tag information.
+    - `[unsynchronized, u]`: List unsynchronized Tag information.
+- `[--verbose, -v]`:         List more detailed information (optional).
+- `[--group_id, -g <u7>]`:   ESL group ID filter (optional - default: all group).
 
-Example: `list synchronized v`
+Examples:
+- `list synchronized -v`
+- `list a c`
 
 _Note: To reset the list of advertising and blocked lists you may want to issue a `scan start` command at any time._
 
@@ -363,51 +494,58 @@ _Note: To reset the list of advertising and blocked lists you may want to issue 
      Start / stop sending synchronization packets.
 
 Usage:
-  - `sync start [interval_min_ms] [interval_max_ms]`
-  - `sync stop`
-  - `sync config [ms] [<interval_min> <interval_max> <subevent_count> <subevent_interval> <response_slot_delay> <response_slot_spacing> <response_slot_count>]`
+  - `sync [-h] [--millis] [--in_max <int>] [--in_min <int>] [--se_count <int>] [--se_interval <int>] [--rs_delay <int>] [--rs_spacing <int>] [--rs_count <int>] {start,stop,config}`
 
 Parameters:
-- `<start>`:                 Start sending periodic synchronization packets.
-- `<stop>`:                  Stop sending periodic synchronization packets.
-- `<config>`:                Set PAWR parameters.
-- `[interval_min_ms]`:       Minimum periodic advertising interval in ms.
-                             _Note: convenience option for 'start' command only!_
-- `[interval_max_ms]`:       Maximum periodic advertising interval in ms.
-                             _Note: convenience option for 'start' command only!_
-- `<interval_min>`:          Minimum advertising interval in units of 1.25ms.
-- `<interval_max>`:          Maximum advertising interval in units of 1.25ms.
-- `<subevent_count>`:        Number of subevents.
-- `<subevent_interval>`:     Subevent interval in units of 1.25ms.
-- `<response_slot_delay>`:   Response slot delay in units of 1.25ms.
-- `<response_slot_spacing>`: Response slot spacing in units of 0.125ms.
-- `<response_slot_count>`:   Response slot count.
+- `{start,stop,config}`:              Start/Stop sending periodic synchronization packets or set PAWR parameters.
+- `[--millis, -ms]`:                  Specify timing parameters in milliseconds.
+- `[--in_max <int>, -max <int>]`:     Maximum periodic advertising interval in ms if -ms was given, otherwise in units of 1.25ms.
+- `[--in_min <int>, -min <int>]`:     Minimum periodic advertising interval in ms if -ms was given, otherwise in units of 1.25ms.
+- `[--se_count <int>, -sc <int>]`:    Number of subevents.
+- `[--se_interval <int>, -si <int>]`: Subevent interval in ms if -ms was given, otherwise in units of 1.25ms.
+- `[--rs_delay <int>, -rd <int>]`:    Response slot delay in ms if -ms was given, otherwise in units of 1.25ms.
+- `[--rs_spacing <int>, -rs <int>]`:  Response slot spacing in ms if -ms was given, otherwise in units of 0.125ms.
+- `[--rs_count <int>, -rc <int>]`:    Response slot count.
 
 _Notes:_
-- _Either only `<interval_min>` or `<interval_min>` and `<interval_max>` together can be used as an optional parameter in case of start._
 - _After changing the PAwR sync configuration by `sync config` the sync train needs to be restarted by issuing a simple `sync start` command. The new config will take place until exiting the script._
 - _Issuing `sync config` without any further parameter will display the current sync train configuration._
-- _Using the optional 'ms' argument in the 'config' command allows you to specify timing parameters in milliseconds instead of their natural units, but this may introduce rounding errors. Please also note that with this option the fractional milliseconds can't be specified precisely._
+- _Using the optional `-ms` argument with the 'config' subcommand allows you to specify timing parameters in milliseconds instead of their natural units, but this may introduce rounding errors. Please also note that with this option the fractional milliseconds can't be specified precisely._
 
-Examples: `sync start 2000` or `sync config 1500 2500 3 250 170 3 24`
+Examples:
+- `sync start`
+  Start sync with current PAwR parameters.
+- `sync config -min 1500 -max 2500 -sc 3 -si 250 -rd 170 -rs 3 -rc 24`
+  Configure PAwR train with given parameters - please note that the new config will be active after sync is re-started.
+- `sync config`
+  Get current config and doesn't change any sync status. That is, the PAwR train will continue running if it was already enabled.  
+- `sync start [-min 2000] -max 2100`
+  Start sync with current PAwR parameters but override interval temporarily to value between 2.0 and 2.1 sec. Please note that this short form is for convenience only to change the interval quickly, but its effect on current configuration is not permanent and the value is always interpreted in milliseconds.
 
 #### script
      Record or execute commands from an input file.
 
-Usage: `script <record> <filename> | <run> <filename> | <wait> <seconds>`
+Usage: `script [-h] {record,run,wait} file_or_sec`
 
 Parameters:
-- `<record>`:   Record commands to an output file <filename>. _Note: If `stop` given as a filename then recording of commands will stop._
-- `<run>`:      Run commands from an input file <filename>.
-- `<filename>`: Filename to write / read AP commands.
-- `<wait>`:     Wait before running the next command.
-- `<seconds>`:  Wait interval in seconds.
+- `{record,run,wait}`: Record commands to an output file <filename> or
+                       run commands from an input file <filename> or
+                       wait interval in seconds <seconds>.
+- `file_or_sec`: Filename to write / read AP commands (in case of record/run)
+                 or wait interval in seconds (in case of wait)
 
 _Notes:_
+- _Note: If `stop` given as a filename then recording of commands will stop._
 - _Scripting is an experimental feature, only - it is lack of advanced features like programmed reactions to events or configuration dependent and / or conditional execution, etc.._
-- _Recorded script files may contain script commands also, recursively. However, it is strongly advised to keep the recursion level low as possible. Use with care._
+- _Recorded script files may run other scripts also, but never use it recursively! That is, avoid running the script from within itself or the AP script will crash. However, it is strongly advised to keep the scripting level low as possible. Use with care!_
 
-Examples: `script record myscript.esl`, `script record stop`, `script run myscript.esl`
+Examples:
+ - `script record myscript.esl`
+   Start recording to local file `myscript.esl`.
+ - `script record stop`
+   Stop current recording (issue after steps to be recorded were executed manually).
+ - `script run myscript.esl`
+   Repeat steps (commands) that were previously recorded to local file `myscript.esl`.
 
 #### exit
     Terminate AP application.

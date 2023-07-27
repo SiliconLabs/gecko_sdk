@@ -39,11 +39,7 @@
  * by Silicon Labs. For details on these drivers, see \ref sl_psa_drivers.
  */
 
-#if !defined(MBEDTLS_CONFIG_FILE)
-#include "mbedtls/config.h"
-#else
-#include MBEDTLS_CONFIG_FILE
-#endif
+#include <mbedtls/build_info.h>
 
 #if defined(MBEDTLS_ECP_C)
 

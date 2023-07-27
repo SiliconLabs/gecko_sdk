@@ -27,11 +27,6 @@
 bool sl_zigbee_zdo_dlk_enabled(void);
 
 /**
- * @brief toggle to allow for dlk to be enabled/disabled
- */
-void slx_zigbee_gu_zdo_toggle_dlk(bool do_dlk);
-
-/**
  * @brief callback to override values of the supported key negotiation bitmask
  */
 extern void slx_zigbee_gu_zdo_dlk_override_supported_params(sl_zigbee_dlk_supported_negotiation_method *method_mask,
@@ -107,29 +102,5 @@ sl_status_t sl_zigbee_zdo_dlk_start_key_update(sl_zigbee_address_info *target,
 sl_status_t sl_zigbee_zdo_dlk_start_key_negotiation(sl_zigbee_address_info *partner,
                                                     sl_zigbee_dlk_negotiation_method selected_method,
                                                     sl_zigbee_dlk_negotiation_shared_secret_source selected_secret);
-
-// internal apis, no state checks, generates and handles zdo frames
-// ZDO start key update service handlers
-sl_status_t sli_zigbee_zdo_dlk_generate_start_key_update_req(sl_zigbee_address_info *target,
-                                                             sl_zigbee_dlk_negotiation_method selected_method,
-                                                             sl_zigbee_dlk_negotiation_shared_secret_source selected_secret);
-sl_status_t sli_zigbee_zdo_dlk_handle_start_key_update_req(Buffer request,
-                                                           uint8_t payload_index,
-                                                           EmberNodeId source,
-                                                           uint8_t sequence);
-sl_status_t sli_zigbee_zdo_dlk_handle_start_key_update_rsp(Buffer response,
-                                                           uint8_t payload_index,
-                                                           EmberNodeId source);
-// ZDO start key negotiation service handlers
-sl_status_t sli_zigbee_zdo_dlk_generate_start_key_negotiation_req(EmberNodeId target,
-                                                                  EmberApsOption send_options,
-                                                                  sl_zigbee_tlv_chain *tlv_payload);
-sl_status_t sli_zigbee_zdo_dlk_handle_start_key_negotiation_req(Buffer request,
-                                                                uint8_t payload_index,
-                                                                EmberNodeId source,
-                                                                uint8_t sequence);
-sl_status_t sli_zigbee_zdo_dlk_handle_start_key_negotiation_rsp(Buffer response,
-                                                                uint8_t payload_index,
-                                                                EmberNodeId source);
 
 #endif // SL_ZIGBEE_ZDO_DLK_NEGOTIATION_H

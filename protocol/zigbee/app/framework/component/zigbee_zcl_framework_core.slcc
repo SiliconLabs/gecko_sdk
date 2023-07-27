@@ -67,7 +67,6 @@ include:
   - path: protocol/zigbee/app/util/zigbee-framework
     file_list:
       - path: ami-inter-pan.h
-      - path: fragment.h
       - path: zigbee-device-common.h
       - path: zigbee-device-library.h
   - path: protocol/zigbee/app/util/counters

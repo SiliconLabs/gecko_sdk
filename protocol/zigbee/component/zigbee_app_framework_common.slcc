@@ -64,6 +64,9 @@ source:
   # Unique file present in SoC, Host and NCP apps, hence added it here.
   # For host app, this will be included from zigbee_zcl_framework_core component.
   - path: protocol/zigbee/app/util/security/security-address-cache.c
+  # This will be included from security-address-cache.c with root path from protocol/zigbee/
+  # There are more than one security.h, hence adding here as resource instead of include file_list.
+  - path: protocol/zigbee/app/util/security/security.h
   - path: protocol/zigbee/app/framework/common/zigbee_app_framework_common_rtos.c
     condition:
       - cmsis_rtos2

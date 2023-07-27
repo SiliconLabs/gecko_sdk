@@ -419,6 +419,9 @@ sl_status_t sl_wisun_get_statistics(sl_wisun_statistics_type_t statistics_type,
  *   - #SL_WISUN_SOCKET_OPTION_EVENT_MODE: Event mode
  *   - #SL_WISUN_SOCKET_OPTION_MULTICAST_GROUP: Multicast group
  *   - #SL_WISUN_SOCKET_OPTION_SEND_BUFFER_LIMIT: Tx buffer limit
+ *   - #SL_WISUN_SOCKET_OPTION_EDFE_MODE: Enable/disable EDFE mode
+ *   - #SL_WISUN_SOCKET_OPTION_UNICAST_HOP_LIMIT: Socket unicast hop limit
+ *   - #SL_WISUN_SOCKET_OPTION_MULTICAST_HOP_LIMIT: Socket multicast hop limit
  * @param[in] option_data Socket option specific data
  * @return SL_STATUS_OK if successful, an error code otherwise
  *****************************************************************************/

@@ -10,7 +10,7 @@
 
 // <h> Command Class Notification- notifications configuration
 
-// <o> Max number of notifications <1..255:1> <f.d>
+// <o CC_NOTIFICATION_MAX_NOTIFICATIONS> Max number of notifications <1..255:1> <f.d>
 // <i> Maximum number of notifications supported by application.
 // <i> Default: 1
 #define CC_NOTIFICATION_MAX_NOTIFICATIONS  1

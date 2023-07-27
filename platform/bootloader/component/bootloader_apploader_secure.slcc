@@ -6,7 +6,7 @@ description: >
   (DFU) protocol for applications. Before doing an update it checks for the current version of the bootloader.
   If the current version is not the latest, then only the bootloader is upgraded.
 category: Platform|Bootloader|TrustZone Secure|Communication
-quality: evaluation
+quality: production
 define:
   - name: BOOTLOADER_SUPPORT_COMMUNICATION
     value: 1

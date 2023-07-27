@@ -8,6 +8,7 @@ description: >
   This component integrates the Generic OnOff Client functionality, for ease of
   use. It provides functions to change the dim value by, or set the dim value to
   a certain percentage, and a function for getting the current lightness level.
+  This component is prepared for integration into SOC applications.
 
   This is a Low-Code component. For example, toggling all Light Lightness Servers
   in the network can be achieved by adding an event handler for mesh events and
@@ -55,3 +56,6 @@ recommends:
 template_contribution:
   - name: component_catalog
     value: btmesh_lighting_client
+
+validation_helper:
+  - path: "../../script/validation/soc_ncp_compatibility.lua"

@@ -4,7 +4,7 @@ description: >
    The Bootloader TrustZone Secure component sets up the bootloader configuration to create TrustZone Secure bootloader.
 package: platform
 category: Platform|Bootloader|TrustZone Secure
-quality: evaluation
+quality: production
 define:
   - name: BOOTLOADER_SECURE
     value: 1

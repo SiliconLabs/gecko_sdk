@@ -6,8 +6,23 @@
     <properties key="solutionReferenceId" value="protocol.wisun.app.wisun_soc_cli.wisun_soc_cli.slcp"/>
     <properties key="projectFilePaths" value="../../protocol/wisun/app/wisun_soc_cli/wisun_soc_cli.slcp"/>
     <properties key="readmeFiles" value="documentation/example/wisun_cli/readme.md"/>
-    <properties key="boardCompatibility" value="brd4163a brd4164a brd4170a brd4172a brd4253a brd4254a brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2705a brd4163a brd4164a brd4170a brd4172a brd4253a brd4254a brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32fg12.* .*efr32mg12.* .*efr32fg25.* .*efr32fg28.* .*efr32zg28.*"/>
+    <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
+    <properties key="toolchainCompatibility" value="gcc iar segger"/>
+    <properties key="category" value="Wi-SUN Examples"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN"/>
+  </descriptors>
+    <descriptors name="wisun_soc_lfn_cli" label="Wi-SUN - LFN CLI example" description="The Wi-SUN CLI (Command-Line Interface) sample application allows developers to easily evaluate the Wi-SUN stack APIs. The Wi-SUN command line interface provides a serial interface to a number of the Wi-SUN stack functions. For example, it can be used to connect the Wi-SUN device to a Wi-SUN border router and exchange IP packets.">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="protocol.wisun.app.wisun_soc_cli.wisun_soc_lfn_cli.slcp"/>
+    <properties key="projectFilePaths" value="../../protocol/wisun/app/wisun_soc_cli/wisun_soc_lfn_cli.slcp"/>
+    <properties key="readmeFiles" value="documentation/example/wisun_cli/readme.md"/>
+    <properties key="boardCompatibility" value="brd2705a brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32fg25.* .*efr32fg28.* .*efr32zg28.*"/>
     <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Wi-SUN Examples"/>
@@ -21,7 +36,7 @@
     <properties key="solutionReferenceId" value="protocol.wisun.app.wisun_rcp.wisun_rcp.slcp"/>
     <properties key="projectFilePaths" value="../../protocol/wisun/app/wisun_rcp/wisun_rcp.slcp"/>
     <properties key="readmeFiles" value="documentation/example/wisun_rcp/readme.md"/>
-    <properties key="boardCompatibility" value="brd4163a brd4164a brd4170a brd4172a brd4253a brd4254a brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2705a brd4163a brd4164a brd4170a brd4172a brd4253a brd4254a brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32fg12.* .*efr32mg12.* .*efr32fg25.* .*efr32fg28.* .*efr32zg28.*"/>
     <properties key="ideCompatibility" value="makefile-ide segger-embedded-studio simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
@@ -36,7 +51,7 @@
     <properties key="solutionReferenceId" value="app.wisun.example.wisun_soc_empty.wisun_soc_empty.slcp"/>
     <properties key="projectFilePaths" value="example/wisun_soc_empty/wisun_soc_empty.slcp"/>
     <properties key="readmeFiles" value="documentation/example/wisun_soc_empty/readme.md"/>
-    <properties key="boardCompatibility" value="brd4163a brd4164a brd4170a brd4172a brd4253a brd4254a brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2705a brd4163a brd4164a brd4170a brd4172a brd4253a brd4254a brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32fg12.* .*efr32mg12.* .*efr32fg25.* .*efr32fg28.* .*efr32zg28.*"/>
     <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
@@ -51,7 +66,7 @@
     <properties key="solutionReferenceId" value="app.wisun.example.wisun_soc_ping.wisun_soc_ping.slcp"/>
     <properties key="projectFilePaths" value="example/wisun_soc_ping/wisun_soc_ping.slcp"/>
     <properties key="readmeFiles" value="documentation/example/wisun_soc_ping/readme.md"/>
-    <properties key="boardCompatibility" value="brd4163a brd4164a brd4170a brd4172a brd4253a brd4254a brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2705a brd4163a brd4164a brd4170a brd4172a brd4253a brd4254a brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32fg12.* .*efr32mg12.* .*efr32fg25.* .*efr32fg28.* .*efr32zg28.*"/>
     <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
@@ -66,7 +81,7 @@
     <properties key="solutionReferenceId" value="app.wisun.example.wisun_soc_udp_server.wisun_soc_udp_server.slcp"/>
     <properties key="projectFilePaths" value="example/wisun_soc_udp_server/wisun_soc_udp_server.slcp"/>
     <properties key="readmeFiles" value="documentation/example/wisun_soc_udp_server/readme.md"/>
-    <properties key="boardCompatibility" value="brd4163a brd4164a brd4170a brd4172a brd4253a brd4254a brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2705a brd4163a brd4164a brd4170a brd4172a brd4253a brd4254a brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32fg12.* .*efr32mg12.* .*efr32fg25.* .*efr32fg28.* .*efr32zg28.*"/>
     <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
@@ -81,7 +96,7 @@
     <properties key="solutionReferenceId" value="app.wisun.example.wisun_soc_udp_client.wisun_soc_udp_client.slcp"/>
     <properties key="projectFilePaths" value="example/wisun_soc_udp_client/wisun_soc_udp_client.slcp"/>
     <properties key="readmeFiles" value="documentation/example/wisun_soc_udp_client/readme.md"/>
-    <properties key="boardCompatibility" value="brd4163a brd4164a brd4170a brd4172a brd4253a brd4254a brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2705a brd4163a brd4164a brd4170a brd4172a brd4253a brd4254a brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32fg12.* .*efr32mg12.* .*efr32fg25.* .*efr32fg28.* .*efr32zg28.*"/>
     <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
@@ -96,7 +111,7 @@
     <properties key="solutionReferenceId" value="app.wisun.example.wisun_soc_tcp_server.wisun_soc_tcp_server.slcp"/>
     <properties key="projectFilePaths" value="example/wisun_soc_tcp_server/wisun_soc_tcp_server.slcp"/>
     <properties key="readmeFiles" value="documentation/example/wisun_soc_tcp_server/readme.md"/>
-    <properties key="boardCompatibility" value="brd4163a brd4164a brd4170a brd4172a brd4253a brd4254a brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2705a brd4163a brd4164a brd4170a brd4172a brd4253a brd4254a brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32fg12.* .*efr32mg12.* .*efr32fg25.* .*efr32fg28.* .*efr32zg28.*"/>
     <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
@@ -111,7 +126,7 @@
     <properties key="solutionReferenceId" value="app.wisun.example.wisun_soc_tcp_client.wisun_soc_tcp_client.slcp"/>
     <properties key="projectFilePaths" value="example/wisun_soc_tcp_client/wisun_soc_tcp_client.slcp"/>
     <properties key="readmeFiles" value="documentation/example/wisun_soc_tcp_client/readme.md"/>
-    <properties key="boardCompatibility" value="brd4163a brd4164a brd4170a brd4172a brd4253a brd4254a brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2705a brd4163a brd4164a brd4170a brd4172a brd4253a brd4254a brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32fg12.* .*efr32mg12.* .*efr32fg25.* .*efr32fg28.* .*efr32zg28.*"/>
     <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
@@ -126,7 +141,7 @@
     <properties key="solutionReferenceId" value="app.wisun.example.wisun_soc_meter.wisun_soc_meter.slcp"/>
     <properties key="projectFilePaths" value="example/wisun_soc_meter/wisun_soc_meter.slcp"/>
     <properties key="readmeFiles" value="documentation/example/wisun_soc_meter/readme.md"/>
-    <properties key="boardCompatibility" value="brd4163a brd4164a brd4170a brd4172a brd4253a brd4254a brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2705a brd4163a brd4164a brd4170a brd4172a brd4253a brd4254a brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32fg12.* .*efr32mg12.* .*efr32fg25.* .*efr32fg28.* .*efr32zg28.*"/>
     <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
@@ -141,7 +156,7 @@
     <properties key="solutionReferenceId" value="app.wisun.example.wisun_soc_collector.wisun_soc_collector.slcp"/>
     <properties key="projectFilePaths" value="example/wisun_soc_collector/wisun_soc_collector.slcp"/>
     <properties key="readmeFiles" value="documentation/example/wisun_soc_collector/readme.md"/>
-    <properties key="boardCompatibility" value="brd4163a brd4164a brd4170a brd4172a brd4253a brd4254a brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2705a brd4163a brd4164a brd4170a brd4172a brd4253a brd4254a brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32fg12.* .*efr32mg12.* .*efr32fg25.* .*efr32fg28.* .*efr32zg28.*"/>
     <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
@@ -156,7 +171,7 @@
     <properties key="solutionReferenceId" value="app.wisun.example.wisun_soc_coap_meter.wisun_soc_coap_meter.slcp"/>
     <properties key="projectFilePaths" value="example/wisun_soc_coap_meter/wisun_soc_coap_meter.slcp"/>
     <properties key="readmeFiles" value="documentation/example/wisun_soc_coap_meter/readme.md"/>
-    <properties key="boardCompatibility" value="brd4163a brd4164a brd4170a brd4172a brd4253a brd4254a brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2705a brd4163a brd4164a brd4170a brd4172a brd4253a brd4254a brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32fg12.* .*efr32mg12.* .*efr32fg25.* .*efr32fg28.* .*efr32zg28.*"/>
     <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
@@ -171,7 +186,7 @@
     <properties key="solutionReferenceId" value="app.wisun.example.wisun_soc_coap_collector.wisun_soc_coap_collector.slcp"/>
     <properties key="projectFilePaths" value="example/wisun_soc_coap_collector/wisun_soc_coap_collector.slcp"/>
     <properties key="readmeFiles" value="documentation/example/wisun_soc_coap_collector/readme.md"/>
-    <properties key="boardCompatibility" value="brd4163a brd4164a brd4170a brd4172a brd4253a brd4254a brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2705a brd4163a brd4164a brd4170a brd4172a brd4253a brd4254a brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32fg12.* .*efr32mg12.* .*efr32fg25.* .*efr32fg28.* .*efr32zg28.*"/>
     <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
@@ -186,7 +201,7 @@
     <properties key="solutionReferenceId" value="app.wisun.example.wisun_soc_network_measurement.wisun_soc_network_measurement.slcp"/>
     <properties key="projectFilePaths" value="example/wisun_soc_network_measurement/wisun_soc_network_measurement.slcp"/>
     <properties key="readmeFiles" value="documentation/example/wisun_soc_network_measurement/readme.md"/>
-    <properties key="boardCompatibility" value="brd4163a brd4164a brd4170a brd4172a brd4253a brd4254a brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2705a brd4163a brd4164a brd4170a brd4172a brd4253a brd4254a brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32fg12.* .*efr32mg12.* .*efr32fg25.* .*efr32fg28.* .*efr32zg28.*"/>
     <properties key="ideCompatibility" value="iar-embedded-workbench makefile-ide segger-embedded-studio simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>

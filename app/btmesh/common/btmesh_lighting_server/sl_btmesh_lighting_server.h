@@ -3,7 +3,7 @@
  * @brief btmesh_lighting_server.h
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -31,13 +31,14 @@
 #ifndef SL_BTMESH_LIGHTING_SERVER_H
 #define SL_BTMESH_LIGHTING_SERVER_H
 
+#include "sl_btmesh_api.h"
 #include "sl_btmesh_lighting_level_transition_handler.h"
 
 /***************************************************************************//**
  * Lighting Server initialization.
  * This should be called at each boot if provisioning is already done.
  * Otherwise this function should be called after provisioning is completed.
- * It is called automatically by the Universal Configurator Framework
+ * This function is called automatically after enabling the component.
  *
  * @return Status of the initialization operation.
  *         Returns bg_err_success (0) if succeed, non-zero otherwise.
@@ -47,12 +48,21 @@ void sl_btmesh_lighting_server_init(void);
 /***************************************************************************//**
  * Handling of mesh lighting server events.
  *
- * This function is called automatically by Universal Configurator after
- * enabling the component.
+ * This function is called automatically after enabling the component.
  *
  * @param[in] evt  Pointer to incoming event.
  ******************************************************************************/
 void sl_btmesh_lighting_server_on_event(sl_btmesh_msg_t *evt);
+
+/*******************************************************************************
+ * Handle node reset.
+ *
+ * Function for clearing component specific nvm content during node reset.
+ * This function is called automatically by Universal Configurator after
+ * enabling the component.
+ *
+ ******************************************************************************/
+void sl_btmesh_lighting_server_on_node_reset(void);
 
 /***************************************************************************//**
  * Get current lightness value

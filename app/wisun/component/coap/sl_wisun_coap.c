@@ -153,10 +153,9 @@ void sl_wisun_coap_init(const sl_wisun_coap_tx_callback tx_callback,
 
   _wisun_coap_mutex_acquire();
 
-#if SL_WISUN_COAP_MEM_USE_STATIC_MEMORY_POOL
   // init memory
-  _wisun_coap_mem_init();
-#endif
+  sli_wisun_coap_mem_init();
+
   // init handler
   _coap.malloc      = sl_wisun_coap_malloc;                       // malloc
   _coap.free        = sl_wisun_coap_free;                         // free
@@ -182,7 +181,7 @@ void *sl_wisun_coap_malloc(uint16_t size)
 {
   void *p_mem;
   _wisun_coap_mutex_acquire();
-  p_mem = _wisun_coap_mem_malloc(size);
+  p_mem = sli_wisun_coap_mem_malloc(size);
   _wisun_coap_mutex_release();
   return p_mem;
 }
@@ -191,7 +190,7 @@ void *sl_wisun_coap_malloc(uint16_t size)
 void sl_wisun_coap_free(void *addr)
 {
   _wisun_coap_mutex_acquire();
-  _wisun_coap_mem_free(addr);
+  sli_wisun_coap_mem_free(addr);
   _wisun_coap_mutex_release();
 }
 
@@ -330,6 +329,9 @@ char * sl_wisun_coap_get_uri_path_str(const sl_wisun_coap_packet_t * const packe
 /* Wi-SUN CoAP destroy packet */
 void sl_wisun_coap_destroy_packet(sl_wisun_coap_packet_t *packet)
 {
+  if (packet != NULL && packet->payload_ptr != NULL) {
+    sl_wisun_coap_free(packet->payload_ptr);
+  }
   sn_coap_parser_release_allocated_coap_msg_mem(_coap.handler, packet);
 }
 

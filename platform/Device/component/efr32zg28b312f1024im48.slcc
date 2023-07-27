@@ -169,7 +169,6 @@
   - name: device_supports_rail
   - name: device_supports_rail_stack
   - name: device_supports_bluetooth
-  - name: device_supports_bluetooth_coded_phy
   - name: device_supports_connect
   - name: device_supports_zwave
   - name: device_supports_zwave_end_device

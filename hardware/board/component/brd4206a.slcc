@@ -16,6 +16,7 @@
   - name: hardware_board_from_stk
   - name: hardware_board_from_slwrb4206a
   - name: hardware_board_has_vcom
+  - name: hardware_board_has_hfxo_freq_39mhz
   - name: hardware_board_has_hfxo
   - name: hardware_board_supports_rf_band_868
   - name: hardware_board_supports_rf_band_914

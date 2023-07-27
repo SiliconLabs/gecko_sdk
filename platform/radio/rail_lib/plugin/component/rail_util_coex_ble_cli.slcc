@@ -15,6 +15,11 @@ source:
 template_contribution:
   - name: cli_command
     value:
+      name: coex_ble_init
+      handler: cli_coex_ble_init
+      help: " Initialize BLE coexistence"
+  - name: cli_command
+    value:
       name: coex_ble_set_request
       handler: cli_coex_ble_set_request
       help: " Set BLE coexistence request"

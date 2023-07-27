@@ -59,6 +59,7 @@ component:
   - id: "zigbee_packet_validate"
   - id: "zigbee_security_link_keys"
   - id: zigbee_direct_zdd
+  - id: zigbee_direct_security_p256
   - id: zigbee_direct_tunneling
   - id: zigbee_direct_cli
   - id: simple_led

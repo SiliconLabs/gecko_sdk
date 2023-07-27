@@ -31,7 +31,9 @@
 #include "test_platform.h"
 #include "test_util.hpp"
 
+#include <openthread/dataset_ftd.h>
 #include <openthread/thread.h>
+#include <openthread/platform/border_routing.h>
 
 #include "border_router/routing_manager.hpp"
 #include "common/arg_macros.hpp"
@@ -58,6 +60,56 @@ static constexpr uint32_t kPreferredLifetime = 1800;
 
 static constexpr uint16_t kMaxRaSize              = 800;
 static constexpr uint16_t kMaxDeprecatingPrefixes = 16;
+
+static constexpr otOperationalDataset kDataset = {
+    .mActiveTimestamp =
+        {
+            .mSeconds       = 1,
+            .mTicks         = 0,
+            .mAuthoritative = false,
+        },
+    .mNetworkKey =
+        {
+            .m8 = {0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff},
+        },
+    .mNetworkName = {"OpenThread"},
+    .mExtendedPanId =
+        {
+            .m8 = {0xde, 0xad, 0x00, 0xbe, 0xef, 0x00, 0xca, 0xfe},
+        },
+    .mMeshLocalPrefix =
+        {
+            .m8 = {0xfd, 0x00, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff},
+        },
+    .mPanId   = 0x1234,
+    .mChannel = 11,
+    .mPskc =
+        {
+            .m8 = {0xc2, 0x3a, 0x76, 0xe9, 0x8f, 0x1a, 0x64, 0x83, 0x63, 0x9b, 0x1a, 0xc1, 0x27, 0x1e, 0x2e, 0x27},
+        },
+    .mSecurityPolicy =
+        {
+            .mRotationTime                 = 672,
+            .mObtainNetworkKeyEnabled      = true,
+            .mNativeCommissioningEnabled   = true,
+            .mRoutersEnabled               = true,
+            .mExternalCommissioningEnabled = true,
+        },
+    .mChannelMask = 0x07fff800,
+    .mComponents =
+        {
+            .mIsActiveTimestampPresent = true,
+            .mIsNetworkKeyPresent      = true,
+            .mIsNetworkNamePresent     = true,
+            .mIsExtendedPanIdPresent   = true,
+            .mIsMeshLocalPrefixPresent = true,
+            .mIsPanIdPresent           = true,
+            .mIsChannelPresent         = true,
+            .mIsPskcPresent            = true,
+            .mIsSecurityPolicyPresent  = true,
+            .mIsChannelMaskPresent     = true,
+        },
+};
 
 static ot::Instance *sInstance;
 
@@ -180,6 +232,8 @@ void otPlatLog(otLogLevel aLogLevel, otLogRegion aLogRegion, const char *aFormat
 // `otPlatRadio
 
 extern "C" {
+
+otRadioCaps otPlatRadioGetCaps(otInstance *) { return OT_RADIO_CAPS_ACK_TIMEOUT | OT_RADIO_CAPS_CSMA_BACKOFF; }
 
 otError otPlatRadioTransmit(otInstance *, otRadioFrame *)
 {
@@ -466,6 +520,13 @@ void LogRouterAdvert(const Icmp6Packet &aPacket)
     }
 }
 
+void LogRouterAdvert(const uint8_t *aBuffer, size_t aLength)
+{
+    Icmp6Packet packet;
+    packet.Init(aBuffer, aLength);
+    LogRouterAdvert(packet);
+}
+
 const char *PreferenceToString(int8_t aPreference)
 {
     const char *str = "";
@@ -491,9 +552,14 @@ const char *PreferenceToString(int8_t aPreference)
     return str;
 }
 
+void SendRouterAdvert(const Ip6::Address &aAddress, const uint8_t *aBuffer, uint16_t aLength)
+{
+    otPlatInfraIfRecvIcmp6Nd(sInstance, kInfraIfIndex, &aAddress, aBuffer, aLength);
+}
+
 void SendRouterAdvert(const Ip6::Address &aAddress, const Icmp6Packet &aPacket)
 {
-    otPlatInfraIfRecvIcmp6Nd(sInstance, kInfraIfIndex, &aAddress, aPacket.GetBytes(), aPacket.GetLength());
+    SendRouterAdvert(aAddress, aPacket.GetBytes(), aPacket.GetLength());
 }
 
 void SendNeighborAdvert(const Ip6::Address &aAddress, const Ip6::Nd::NeighborAdvertMessage &aNaMessage)
@@ -662,21 +728,22 @@ struct DefaultRoute
     RoutePreference mPreference;
 };
 
-void SendRouterAdvert(const Ip6::Address &aRouterAddress,
-                      const Pio          *aPios,
-                      uint16_t            aNumPios,
-                      const Rio          *aRios,
-                      uint16_t            aNumRios,
-                      const DefaultRoute &aDefaultRoute)
+template <size_t N>
+uint16_t BuildRouterAdvert(uint8_t (&aBuffer)[N],
+                           const Pio          *aPios,
+                           uint16_t            aNumPios,
+                           const Rio          *aRios,
+                           uint16_t            aNumRios,
+                           const DefaultRoute &aDefaultRoute)
 {
     Ip6::Nd::RouterAdvertMessage::Header header;
-    uint8_t                              buffer[kMaxRaSize];
+    uint16_t                             length;
 
     header.SetRouterLifetime(aDefaultRoute.mLifetime);
     header.SetDefaultRouterPreference(aDefaultRoute.mPreference);
 
     {
-        Ip6::Nd::RouterAdvertMessage raMsg(header, buffer);
+        Ip6::Nd::RouterAdvertMessage raMsg(header, aBuffer);
 
         for (; aNumPios > 0; aPios++, aNumPios--)
         {
@@ -689,10 +756,25 @@ void SendRouterAdvert(const Ip6::Address &aRouterAddress,
             SuccessOrQuit(raMsg.AppendRouteInfoOption(aRios->mPrefix, aRios->mValidLifetime, aRios->mPreference));
         }
 
-        SendRouterAdvert(aRouterAddress, raMsg.GetAsPacket());
-        Log("Sending RA from router %s", aRouterAddress.ToString().AsCString());
-        LogRouterAdvert(raMsg.GetAsPacket());
+        length = raMsg.GetAsPacket().GetLength();
     }
+
+    return length;
+}
+
+void SendRouterAdvert(const Ip6::Address &aRouterAddress,
+                      const Pio          *aPios,
+                      uint16_t            aNumPios,
+                      const Rio          *aRios,
+                      uint16_t            aNumRios,
+                      const DefaultRoute &aDefaultRoute)
+{
+    uint8_t  buffer[kMaxRaSize];
+    uint16_t length = BuildRouterAdvert(buffer, aPios, aNumPios, aRios, aNumRios, aDefaultRoute);
+
+    SendRouterAdvert(aRouterAddress, buffer, length);
+    Log("Sending RA from router %s", aRouterAddress.ToString().AsCString());
+    LogRouterAdvert(buffer, length);
 }
 
 template <uint16_t kNumPios, uint16_t kNumRios>
@@ -723,6 +805,17 @@ void SendRouterAdvert(const Ip6::Address &aRouterAddress,
 void SendRouterAdvert(const Ip6::Address &aRouterAddress, const DefaultRoute &aDefaultRoute)
 {
     SendRouterAdvert(aRouterAddress, nullptr, 0, nullptr, 0, aDefaultRoute);
+}
+
+template <uint16_t kNumPios> void SendRouterAdvertToBorderRoutingProcessIcmp6Ra(const Pio (&aPios)[kNumPios])
+{
+    uint8_t  buffer[kMaxRaSize];
+    uint16_t length =
+        BuildRouterAdvert(buffer, aPios, kNumPios, nullptr, 0, DefaultRoute(0, NetworkData::kRoutePreferenceMedium));
+
+    otPlatBorderRoutingProcessIcmp6Ra(sInstance, buffer, length);
+    Log("Passing RA to otPlatBorderRoutingProcessIcmp6Ra");
+    LogRouterAdvert(buffer, length);
 }
 
 struct OnLinkPrefix : public Pio
@@ -845,13 +938,15 @@ void VerifyPrefixTableIsEmpty(void) { VerifyPrefixTable(nullptr, 0, nullptr, 0);
 
 void InitTest(bool aEnablBorderRouting = false, bool aAfterReset = false)
 {
+    uint32_t delay = 10000;
+
     //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     // Initialize OT instance.
 
     sNow      = 0;
+    sAlarmOn  = false;
     sInstance = static_cast<Instance *>(testInitInstance());
 
-    uint32_t delay = 10000;
     if (aAfterReset)
     {
         delay += 26000; // leader reset sync delay
@@ -859,6 +954,7 @@ void InitTest(bool aEnablBorderRouting = false, bool aAfterReset = false)
 
     memset(&sRadioTxFrame, 0, sizeof(sRadioTxFrame));
     sRadioTxFrame.mPsdu = sRadioTxFramePsdu;
+    sRadioTxOngoing     = false;
 
     SuccessOrQuit(sInfraIfAddress.FromString(kInfraIfAddress));
 
@@ -867,7 +963,11 @@ void InitTest(bool aEnablBorderRouting = false, bool aAfterReset = false)
 
     SuccessOrQuit(otBorderRoutingInit(sInstance, kInfraIfIndex, /* aInfraIfIsRunning */ true));
 
-    SuccessOrQuit(otLinkSetPanId(sInstance, 0x1234));
+    otOperationalDatasetTlvs datasetTlvs;
+
+    SuccessOrQuit(otDatasetConvertToTlvs(&kDataset, &datasetTlvs));
+    SuccessOrQuit(otDatasetSetActiveTlvs(sInstance, &datasetTlvs));
+
     SuccessOrQuit(otIp6SetEnabled(sInstance, true));
     SuccessOrQuit(otThreadSetEnabled(sInstance, true));
     SuccessOrQuit(otBorderRoutingSetEnabled(sInstance, aEnablBorderRouting));
@@ -3118,6 +3218,216 @@ void TestNat64PrefixSelection(void)
 }
 #endif // OPENTHREAD_CONFIG_NAT64_BORDER_ROUTING_ENABLE
 
+#if OPENTHREAD_CONFIG_BORDER_ROUTING_DHCP6_PD_ENABLE
+void VerifyPdOmrPrefix(const Ip6::Prefix &aPrefix)
+{
+    otBorderRoutingPrefixTableEntry platformPrefixInfo;
+
+    VerifyOrQuit(otBorderRoutingGetPdOmrPrefix(sInstance, &platformPrefixInfo) == OT_ERROR_NONE);
+    VerifyOrQuit(AsCoreType(&platformPrefixInfo.mPrefix) == aPrefix);
+}
+
+void VerifyNoPdOmrPrefix()
+{
+    otBorderRoutingPrefixTableEntry platformPrefixInfo;
+
+    VerifyOrQuit(otBorderRoutingGetPdOmrPrefix(sInstance, &platformPrefixInfo) == OT_ERROR_NOT_FOUND);
+}
+
+void TestBorderRoutingProcessPlatfromGeneratedNd(void)
+{
+    Ip6::Prefix localOmr;
+
+    Log("--------------------------------------------------------------------------------------------");
+    Log("TestBorderRoutingProcessPlatfromGeneratedNd");
+
+    InitTest(/* aEnableBorderRouting */ true);
+
+    otBorderRoutingDhcp6PdSetEnabled(sInstance, true);
+
+    {
+        SuccessOrQuit(sInstance->Get<BorderRouter::RoutingManager>().GetOmrPrefix(localOmr));
+    }
+
+    // 0. Reject invalid RA.
+    Log("0. Invalid RA message.");
+    {
+        {
+            const uint8_t testInvalidRaMessage[] = {
+                0x86, 0x00, 0x00, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            };
+
+            otPlatBorderRoutingProcessIcmp6Ra(sInstance, testInvalidRaMessage, sizeof(testInvalidRaMessage));
+            VerifyNoPdOmrPrefix();
+        }
+
+        {
+            const uint8_t testInvalidRaMessage[] = {
+                0x87, 0x00, 0x00, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            };
+
+            otPlatBorderRoutingProcessIcmp6Ra(sInstance, testInvalidRaMessage, sizeof(testInvalidRaMessage));
+            VerifyNoPdOmrPrefix();
+        }
+
+        {
+            const uint8_t testRaMessageWithInvalidPrefix[] = {
+                0x86, 0x00, 0x00, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x03, 0x04, 0x41, 0xc0, 0x00, 0x00, 0x10, 0xe1, 0x00, 0x00, 0x04, 0xd2, 0x00, 0x00, 0x00, 0x00,
+                0x20, 0x01, 0x0d, 0xb8, 0x00, 0x01, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            };
+
+            otPlatBorderRoutingProcessIcmp6Ra(sInstance, testRaMessageWithInvalidPrefix,
+                                              sizeof(testRaMessageWithInvalidPrefix));
+            VerifyNoPdOmrPrefix();
+        }
+    }
+
+    // 1. Publish a prefix, and wait until it expired.
+    Log("1. Simple RA message.");
+    {
+        Ip6::Prefix raPrefix = PrefixFromString("2001:db8:dead:beef::", 64);
+
+        SendRouterAdvertToBorderRoutingProcessIcmp6Ra({Pio(raPrefix, kValidLitime, kPreferredLifetime)});
+
+        sExpectedRios.Add(raPrefix);
+        AdvanceTime(10000);
+
+        VerifyPdOmrPrefix(raPrefix);
+        VerifyOrQuit(sExpectedRios.SawAll());
+        VerifyOmrPrefixInNetData(raPrefix, /* aDefaultRoute */ false);
+
+        AdvanceTime(1500000);
+        sExpectedRios.Clear();
+        VerifyPdOmrPrefix(raPrefix);
+        VerifyOmrPrefixInNetData(raPrefix, /* aDefaultRoute */ false);
+
+        AdvanceTime(400000);
+        // Deprecated prefixes will be removed.
+        VerifyNoPdOmrPrefix();
+        VerifyOmrPrefixInNetData(localOmr, /* aDefaultRoute */ false);
+    }
+
+    // 1.1. Publish a prefix, and wait until it expired.
+    //      Multiple prefixes are advertised, only the smallest one will be used.
+    Log("1.1. RA message with multiple prefixes.");
+    {
+        Ip6::Prefix raPrefix    = PrefixFromString("2001:db8:dead:beef::", 64);
+        Ip6::Prefix ulaRaPrefix = PrefixFromString("fd01:db8:deaf:beef::", 64);
+
+        SendRouterAdvertToBorderRoutingProcessIcmp6Ra({Pio(ulaRaPrefix, kValidLitime * 2, kPreferredLifetime * 2),
+                                                       Pio(raPrefix, kValidLitime, kPreferredLifetime)});
+
+        sExpectedRios.Add(raPrefix);
+        AdvanceTime(10000);
+
+        VerifyPdOmrPrefix(raPrefix);
+        VerifyOrQuit(sExpectedRios.SawAll());
+        VerifyOmrPrefixInNetData(raPrefix, /* aDefaultRoute */ false);
+
+        AdvanceTime(1500000);
+        sExpectedRios.Clear();
+        VerifyPdOmrPrefix(raPrefix);
+        VerifyOmrPrefixInNetData(raPrefix, /* aDefaultRoute */ false);
+
+        AdvanceTime(400000);
+        // Deprecated prefixes will be removed.
+        VerifyNoPdOmrPrefix();
+        VerifyOmrPrefixInNetData(localOmr, /* aDefaultRoute */ false);
+    }
+
+    // 2. Publish a prefix, and renew it before it expired.
+    Log("2. Renew prefix lifetime.");
+    {
+        Ip6::Prefix raPrefix = PrefixFromString("2001:db8:1:2::", 64);
+
+        SendRouterAdvertToBorderRoutingProcessIcmp6Ra({Pio(raPrefix, kValidLitime, kPreferredLifetime)});
+
+        sExpectedRios.Add(raPrefix);
+        AdvanceTime(10000);
+
+        VerifyPdOmrPrefix(raPrefix);
+        VerifyOrQuit(sExpectedRios.SawAll());
+        VerifyOmrPrefixInNetData(raPrefix, /* aDefaultRoute */ false);
+
+        AdvanceTime(1500000);
+        sExpectedRios.Clear();
+        VerifyPdOmrPrefix(raPrefix);
+        VerifyOmrPrefixInNetData(raPrefix, /* aDefaultRoute */ false);
+
+        SendRouterAdvertToBorderRoutingProcessIcmp6Ra({Pio(raPrefix, kValidLitime, kPreferredLifetime)});
+
+        AdvanceTime(400000);
+        VerifyPdOmrPrefix(raPrefix);
+        VerifyOmrPrefixInNetData(raPrefix, /* aDefaultRoute */ false);
+
+        AdvanceTime(1500000);
+        VerifyNoPdOmrPrefix();
+        VerifyOmrPrefixInNetData(localOmr, /* aDefaultRoute */ false);
+    }
+
+    // 3. Publish a prefix, and publish another prefix to replace it (with goodbye ra).
+    Log("3. Update prefix.");
+    {
+        Ip6::Prefix raPrefix    = PrefixFromString("2001:db8:1:2::", 64);
+        Ip6::Prefix newRaPrefix = PrefixFromString("2001:db8:3:4::", 64);
+
+        SendRouterAdvertToBorderRoutingProcessIcmp6Ra({Pio(raPrefix, kValidLitime, kPreferredLifetime)});
+
+        sExpectedRios.Add(raPrefix);
+        sExpectedRios.Clear();
+        AdvanceTime(10000);
+
+        VerifyPdOmrPrefix(raPrefix);
+        VerifyOmrPrefixInNetData(raPrefix, /* aDefaultRoute */ false);
+
+        AdvanceTime(1000000);
+        VerifyPdOmrPrefix(raPrefix);
+
+        SendRouterAdvertToBorderRoutingProcessIcmp6Ra(
+            {Pio(raPrefix, 0, 0), Pio(newRaPrefix, kValidLitime, kPreferredLifetime)});
+        sExpectedRios.Add(newRaPrefix);
+
+        AdvanceTime(1000000);
+        VerifyOrQuit(sExpectedRios.SawAll());
+        VerifyPdOmrPrefix(newRaPrefix);
+
+        AdvanceTime(1000000);
+        VerifyNoPdOmrPrefix();
+        VerifyOmrPrefixInNetData(localOmr, /* aDefaultRoute */ false);
+    }
+
+    // 4. Short prefix will be extended to /64.
+    Log("Short prefix");
+    {
+        // The prefix will be padded to a /64 prefix.
+        Ip6::Prefix raPrefix = PrefixFromString("2001:db8:cafe:0::", 64);
+        Ip6::Prefix realRaPrefix;
+
+        realRaPrefix.Set(raPrefix.GetBytes(), 48);
+        SendRouterAdvertToBorderRoutingProcessIcmp6Ra({Pio(realRaPrefix, kValidLitime, kPreferredLifetime)});
+
+        sExpectedRios.Add(raPrefix);
+        AdvanceTime(10000);
+
+        VerifyPdOmrPrefix(raPrefix);
+        VerifyOrQuit(sExpectedRios.SawAll());
+        VerifyOmrPrefixInNetData(raPrefix, /* aDefaultRoute */ false);
+
+        AdvanceTime(1500000);
+        sExpectedRios.Clear();
+        VerifyPdOmrPrefix(raPrefix);
+        VerifyOmrPrefixInNetData(raPrefix, /* aDefaultRoute */ false);
+
+        AdvanceTime(400000);
+        // Deprecated prefixes will be removed.
+        VerifyNoPdOmrPrefix();
+        VerifyOmrPrefixInNetData(localOmr, /* aDefaultRoute */ false);
+    }
+    Log("End of TestBorderRoutingProcessPlatfromGeneratedNd");
+}
+#endif // OPENTHREAD_CONFIG_BORDER_ROUTING_DHCP6_PD_ENABLE
+
 #endif // OPENTHREAD_CONFIG_BORDER_ROUTING_ENABLE
 
 int main(void)
@@ -3143,6 +3453,9 @@ int main(void)
 #if OPENTHREAD_CONFIG_NAT64_BORDER_ROUTING_ENABLE
     TestNat64PrefixSelection();
 #endif
+#if OPENTHREAD_CONFIG_BORDER_ROUTING_DHCP6_PD_ENABLE
+    TestBorderRoutingProcessPlatfromGeneratedNd();
+#endif // OPENTHREAD_CONFIG_BORDER_ROUTING_DHCP6_PD_ENABLE
 
     printf("All tests passed\n");
 #else

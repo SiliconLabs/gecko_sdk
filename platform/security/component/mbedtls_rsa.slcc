@@ -22,19 +22,11 @@ requires:
   - name: mbedtls_rsa_size
   - name: mbedtls_x509
   - name: mbedtls_oid
+  # Kept for backwards compatibility after 'Use PSA' enablement of TLS/X.509.
+  - name: psa_crypto_rsa
+    condition: [psa_crypto]
 template_contribution:
   - name: mbedtls_config
     value: MBEDTLS_RSA_C
-
-  # Temporary solution for build errors until the upper layer Mbed TLS
-  # components have been redesigned. For backwards-compatibility reasons, this
-  # component should probably result in these defines being set in order to not
-  # break now that PSA Crypto APIs are used under hood in TLS/X.509. Should
-  # probably be set in a new component for PSA Crypto, however.
-  - name: psa_crypto_config
-    value: PSA_WANT_KEY_TYPE_RSA_PUBLIC_KEY
-  - name: psa_crypto_config
-    value: PSA_WANT_KEY_TYPE_RSA_KEY_PAIR
-
 recommends:
   - id: mbedtls_rsa_2048

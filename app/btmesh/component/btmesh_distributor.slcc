@@ -3,8 +3,12 @@ label: DFU distributor
 package: Btmesh
 description: >
   Wrapper software component for DFU distributor role in Bluetooth Mesh applications.
+  This component is prepared for integration into SOC applications.
 category: "Bluetooth Mesh|DFU Roles"
 quality: production
 root_path: app/bluetooth
 requires:
   - name: btmesh_fw_distribution_server
+
+validation_helper:
+  - path: "../btmesh/script/validation/soc_ncp_compatibility.lua"

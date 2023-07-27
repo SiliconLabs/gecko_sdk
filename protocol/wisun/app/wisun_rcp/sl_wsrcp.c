@@ -27,7 +27,6 @@
 // See warning in sl_wsrcp.h
 struct sl_wsrcp_app g_rcp_ctxt = { 0 };
 
-
 /* CPC and UART does not handle reset sequence in the same way:
  *
  *                       |       CPC        |      UART
@@ -65,6 +64,7 @@ static void wisun_rcp_init_bus(struct sl_wsrcp_app *rcp_app)
 {
     cpc_init(&rcp_app->cpc_ep);
     rcp_app->rcp_mac = wsmac_register(cpc_tx, cpc_rx, &rcp_app->cpc_ep);
+    wsmac_init_timers(rcp_app->rcp_mac, &rcp_app->rcp_timer_context);
 }
 
 #elif defined SL_CATALOG_IOSTREAM_UART_COMMON_PRESENT
@@ -106,6 +106,7 @@ static void wisun_rcp_init_bus(struct sl_wsrcp_app *rcp_app)
 {
     uart_plt_init(&rcp_app->uart_plt);
     rcp_app->rcp_mac = wsmac_register(wisun_rcp_uart_plt_tx, wisun_rcp_uart_plt_rx, &rcp_app->uart_plt);
+    wsmac_init_timers(rcp_app->rcp_mac, &rcp_app->rcp_timer_context);
     wsmac_send_reset_ind(rcp_app->rcp_mac);
 }
 
@@ -148,24 +149,35 @@ static void wisun_rcp_init_bus(struct sl_wsrcp_app *rcp_app)
 {
     uart_init(&rcp_app->uart);
     rcp_app->rcp_mac = wsmac_register(wisun_rcp_uart_tx, wisun_rcp_uart_rx, &rcp_app->uart);
+    wsmac_init_timers(rcp_app->rcp_mac, &rcp_app->rcp_timer_context);
     wsmac_send_reset_ind(rcp_app->rcp_mac);
 }
 
 #endif
+
+static void wisun_rcp_on_phy_timer_expiration(sli_wisun_timer_context_t *ctxt)
+{
+  struct sl_wsrcp_app *rcp_app = container_of((sli_wisun_timer_context_t *)ctxt, struct sl_wsrcp_app, rcp_timer_context);
+  osEventFlagsSet(rcp_app->main_events, TIMER_EXPIRED);
+}
 
 void wisun_rcp_main(void *arg)
 {
     struct sl_wsrcp_app *rcp_app = arg;
     uint32_t flags;
 
+    sli_wisun_timer_context_setup(&rcp_app->rcp_timer_context, wisun_rcp_on_phy_timer_expiration, "wisun_rcp");
     wisun_rcp_init_bus(rcp_app);
     for (;;) {
-        flags = osEventFlagsWait(rcp_app->main_events, RX_UART, osFlagsWaitAny, osWaitForever);
+        flags = osEventFlagsWait(rcp_app->main_events, RX_UART | TIMER_EXPIRED, osFlagsWaitAny, osWaitForever);
         if (flags & 0x10000000)
             WARN("Error: %08" PRIu32, flags);
         if (flags & RX_UART) {
             while (wsmac_rx_host(rcp_app->rcp_mac))
                 /* empty */;
+        }
+        if (flags & TIMER_EXPIRED) {
+            sli_wisun_timer_context_dispatcher(&rcp_app->rcp_timer_context);
         }
     }
 

@@ -6,7 +6,7 @@
     <properties key="solutionReferenceId" value="protocol.z-wave.workspaces.zwave_ncp_serial_api_controller_otw.slcw"/>
     <properties key="projectFilePaths" value="workspaces/zwave_ncp_serial_api_controller_otw.slcw"/>
     <properties key="readmeFiles" value="Apps/zwave_ncp_serial_api/README.md"/>
-    <properties key="boardCompatibility" value="brd2603a brd4200a brd4201a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4206a brd4207a brd4208a brd4210a brd4400b brd4401b com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2603a brd2705a brd4200a brd4201a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4206a brd4207a brd4208a brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
     <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
@@ -22,7 +22,7 @@
     <properties key="solutionReferenceId" value="protocol.z-wave.workspaces.zwave_ncp_serial_api_end_device_otw.slcw"/>
     <properties key="projectFilePaths" value="workspaces/zwave_ncp_serial_api_end_device_otw.slcw"/>
     <properties key="readmeFiles" value=""/>
-    <properties key="boardCompatibility" value="brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a brd4400b brd4401b com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
     <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
@@ -38,7 +38,7 @@
     <properties key="solutionReferenceId" value="protocol.z-wave.workspaces.zwave_soc_door_lock_keypad_ota.slcw"/>
     <properties key="projectFilePaths" value="workspaces/zwave_soc_door_lock_keypad_ota.slcw"/>
     <properties key="readmeFiles" value="Apps/zwave_soc_door_lock_keypad/README.md"/>
-    <properties key="boardCompatibility" value="brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a brd4400b brd4401b com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
     <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
@@ -64,6 +64,22 @@
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Z-Wave"/>
     <properties key="solutionProjects" value="protocol.z-wave.NonCertifiableApps.zwave_soc_key_fob.zwave_soc_key_fob.slcp protocol.z-wave.UCBootLoader.bootloader-storage-internal-single-512k_ota.slcp"/>
   </descriptors>
+  <descriptors name="ZWave_SoC_LEDBulb_Solution" label="ZWave_SoC_LEDBulb_Solution" description="Demonstrates LED Bulb application combined with OTA bootloader.  The Z-Wave certified LED Bulb application shows an implementation  of a remotely controlled color switch. An example is an LED bulb  or any other color-capable device. The app supports dimming of an RGB LED.&#xA;This is the EFR32xG28 Explorer Kit specific version of the application.&#xA;">
+    <properties key="namespace" value="template.solution.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="protocol.z-wave.workspaces.zwave_soc_led_bulb_explorer_kit_ota.slcw"/>
+    <properties key="projectFilePaths" value="workspaces/zwave_soc_led_bulb_explorer_kit_ota.slcw"/>
+    <properties key="readmeFiles" value="Apps/zwave_soc_led_bulb/README.md"/>
+    <properties key="boardCompatibility" value="brd2705a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar segger"/>
+    <properties key="category" value="Z-Wave|Apps"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
+    <properties key="solutionProjects" value="protocol.z-wave.Apps.zwave_soc_led_bulb.zwave_soc_led_bulb_explorer_kit.slcp protocol.z-wave.UCBootLoader.bootloader-storage-internal-single-512k_ota.slcp"/>
+  </descriptors>
   <descriptors name="ZWave_SoC_LEDBulb_Solution" label="ZWave_SoC_LEDBulb_Solution" description="Demonstrates LED Bulb application combined with OTA bootloader.  The Z-Wave certified LED Bulb application shows an implementation  of a remotely controlled color switch. An example is an LED bulb  or any other color-capable device. The app supports dimming of an RGB LED.&#xA;">
     <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
@@ -86,7 +102,7 @@
     <properties key="solutionReferenceId" value="protocol.z-wave.workspaces.zwave_soc_multilevel_sensor_ota.slcw"/>
     <properties key="projectFilePaths" value="workspaces/zwave_soc_multilevel_sensor_ota.slcw"/>
     <properties key="readmeFiles" value="NonCertifiableApps/zwave_soc_multilevel_sensor/README.md"/>
-    <properties key="boardCompatibility" value="brd2603a brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a brd4400b brd4401b com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2603a brd2705a brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
     <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
@@ -95,6 +111,22 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <properties key="solutionProjects" value="protocol.z-wave.NonCertifiableApps.zwave_soc_multilevel_sensor.zwave_soc_multilevel_sensor.slcp protocol.z-wave.UCBootLoader.bootloader-storage-internal-single-512k_ota.slcp"/>
+  </descriptors>
+  <descriptors name="ZWave_SoC_PowerStrip_Solution" label="ZWave_SoC_PowerStrip_Solution" description="Demonstrates Power Strip application combined with OTA bootloader.  The Z-Wave certified Power Strip application shows an extension  block implementation used to turn on several devices that are connected  to power. Examples include lights, appliances, etc.&#xA;This is the EFR32xG28 Explorer Kit specific version of the application.&#xA;">
+    <properties key="namespace" value="template.solution.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="protocol.z-wave.workspaces.zwave_soc_power_strip_explorer_kit_ota.slcw"/>
+    <properties key="projectFilePaths" value="workspaces/zwave_soc_power_strip_explorer_kit_ota.slcw"/>
+    <properties key="readmeFiles" value="Apps/zwave_soc_power_strip/README.md"/>
+    <properties key="boardCompatibility" value="brd2705a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar segger"/>
+    <properties key="category" value="Z-Wave|Apps"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
+    <properties key="solutionProjects" value="protocol.z-wave.Apps.zwave_soc_power_strip.zwave_soc_power_strip_explorer_kit.slcp protocol.z-wave.UCBootLoader.bootloader-storage-internal-single-512k_ota.slcp"/>
   </descriptors>
   <descriptors name="ZWave_SoC_PowerStrip_Solution" label="ZWave_SoC_PowerStrip_Solution" description="Demonstrates Power Strip application combined with OTA bootloader.  The Z-Wave certified Power Strip application shows an extension  block implementation used to turn on several devices that are connected  to power. Examples include lights, appliances, etc.&#xA;">
     <properties key="namespace" value="template.solution.uc"/>
@@ -118,7 +150,7 @@
     <properties key="solutionReferenceId" value="protocol.z-wave.workspaces.zwave_soc_sensor_pir_ota.slcw"/>
     <properties key="projectFilePaths" value="workspaces/zwave_soc_sensor_pir_ota.slcw"/>
     <properties key="readmeFiles" value="Apps/zwave_soc_sensor_pir/README.md"/>
-    <properties key="boardCompatibility" value="brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a brd4400b brd4401b com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2603a brd2705a brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
     <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
@@ -134,7 +166,7 @@
     <properties key="solutionReferenceId" value="protocol.z-wave.workspaces.zwave_soc_switch_on_off_ota.slcw"/>
     <properties key="projectFilePaths" value="workspaces/zwave_soc_switch_on_off_ota.slcw"/>
     <properties key="readmeFiles" value="Apps/zwave_soc_switch_on_off/README.md"/>
-    <properties key="boardCompatibility" value="brd2603a brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a brd4400b brd4401b com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2603a brd2705a brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
     <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
@@ -150,7 +182,7 @@
     <properties key="solutionReferenceId" value="protocol.z-wave.workspaces.zwave_soc_wall_controller_ota.slcw"/>
     <properties key="projectFilePaths" value="workspaces/zwave_soc_wall_controller_ota.slcw"/>
     <properties key="readmeFiles" value="Apps/zwave_soc_wall_controller/README.md"/>
-    <properties key="boardCompatibility" value="brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a brd4400b brd4401b com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2705a brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
     <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
@@ -166,7 +198,7 @@
     <properties key="solutionReferenceId" value="protocol.z-wave.Apps.zwave_ncp_serial_api.zwave_ncp_serial_api_controller.slcp"/>
     <properties key="projectFilePaths" value="Apps/zwave_ncp_serial_api/zwave_ncp_serial_api_controller.slcp"/>
     <properties key="readmeFiles" value="Apps/zwave_ncp_serial_api/README.md"/>
-    <properties key="boardCompatibility" value="brd2603a brd4200a brd4201a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4206a brd4207a brd4208a brd4210a brd4400b brd4401b com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2603a brd2705a brd4200a brd4201a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4206a brd4207a brd4208a brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
     <properties key="ideCompatibility" value="makefile-ide simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc"/>
@@ -181,7 +213,7 @@
     <properties key="solutionReferenceId" value="protocol.z-wave.Apps.zwave_ncp_serial_api.zwave_ncp_serial_api_end_device.slcp"/>
     <properties key="projectFilePaths" value="Apps/zwave_ncp_serial_api/zwave_ncp_serial_api_end_device.slcp"/>
     <properties key="readmeFiles" value=""/>
-    <properties key="boardCompatibility" value="brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a brd4400b brd4401b com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
     <properties key="ideCompatibility" value="makefile-ide simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc"/>
@@ -196,7 +228,7 @@
     <properties key="solutionReferenceId" value="protocol.z-wave.Apps.zwave_soc_door_lock_keypad.zwave_soc_door_lock_keypad.slcp"/>
     <properties key="projectFilePaths" value="Apps/zwave_soc_door_lock_keypad/zwave_soc_door_lock_keypad.slcp"/>
     <properties key="readmeFiles" value="Apps/zwave_soc_door_lock_keypad/README.md"/>
-    <properties key="boardCompatibility" value="brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a brd4400b brd4401b com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
     <properties key="ideCompatibility" value="makefile-ide simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc"/>
@@ -220,6 +252,21 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
   </descriptors>
+  <descriptors name="zwave_soc_led_bulb" label="Z-Wave - SoC LED Bulb" description="The Z-Wave certified LED Bulb application shows an implementation of a remotely controlled color switch. An example is an LED bulb or any other color-capable device. The app supports dimming of an RGB LED.&#xA;This is the EFR32xG28 Explorer Kit specific version of the application.&#xA;">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="protocol.z-wave.Apps.zwave_soc_led_bulb.zwave_soc_led_bulb_explorer_kit.slcp"/>
+    <properties key="projectFilePaths" value="Apps/zwave_soc_led_bulb/zwave_soc_led_bulb_explorer_kit.slcp"/>
+    <properties key="readmeFiles" value="Apps/zwave_soc_led_bulb/README.md"/>
+    <properties key="boardCompatibility" value="brd2705a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
+    <properties key="ideCompatibility" value="makefile-ide simplicity-ide"/>
+    <properties key="toolchainCompatibility" value="gcc"/>
+    <properties key="category" value="Z-Wave|Apps"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
+  </descriptors>
   <descriptors name="zwave_soc_power_strip" label="Z-Wave - SoC Power Strip" description="The Z-Wave certified Power Strip application shows an extension block implementation used to turn on several devices that are connected to power. Examples include lights, appliances, etc.&#xA;Endpoint 1 device type - generic type switch binary and specific type on/off power switch.&#xA;Endpoint 2 device type - generic type light dimmer switch and specific type light dimmer switch.&#xA;">
     <properties key="namespace" value="template.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
@@ -235,13 +282,28 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
   </descriptors>
+  <descriptors name="zwave_soc_power_strip" label="Z-Wave - SoC Power Strip" description="The Z-Wave certified Power Strip application shows an extension block implementation used to turn on several devices that are connected to power. Examples include lights, appliances, etc.&#xA;Endpoint 1 device type - generic type switch binary and specific type on/off power switch.&#xA;Endpoint 2 device type - generic type light dimmer switch and specific type light dimmer switch.&#xA;This is the EFR32xG28 Explorer Kit specific version of the application.&#xA;">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="protocol.z-wave.Apps.zwave_soc_power_strip.zwave_soc_power_strip_explorer_kit.slcp"/>
+    <properties key="projectFilePaths" value="Apps/zwave_soc_power_strip/zwave_soc_power_strip_explorer_kit.slcp"/>
+    <properties key="readmeFiles" value="Apps/zwave_soc_power_strip/README.md"/>
+    <properties key="boardCompatibility" value="brd2705a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
+    <properties key="ideCompatibility" value="makefile-ide simplicity-ide"/>
+    <properties key="toolchainCompatibility" value="gcc"/>
+    <properties key="category" value="Z-Wave|Apps"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
+  </descriptors>
   <descriptors name="zwave_soc_sensor_pir" label="Z-Wave - SoC Sensor PIR" description="The Z-Wave certified passive infrared (PIR) sensor application shows a presence/movement detector implementation for controlling other devices and for sending notifications.&#xA;">
     <properties key="namespace" value="template.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="protocol.z-wave.Apps.zwave_soc_sensor_pir.zwave_soc_sensor_pir.slcp"/>
     <properties key="projectFilePaths" value="Apps/zwave_soc_sensor_pir/zwave_soc_sensor_pir.slcp"/>
     <properties key="readmeFiles" value="Apps/zwave_soc_sensor_pir/README.md"/>
-    <properties key="boardCompatibility" value="brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a brd4400b brd4401b com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2603a brd2705a brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
     <properties key="ideCompatibility" value="makefile-ide simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc"/>
@@ -256,7 +318,7 @@
     <properties key="solutionReferenceId" value="protocol.z-wave.Apps.zwave_soc_switch_on_off.zwave_soc_switch_on_off.slcp"/>
     <properties key="projectFilePaths" value="Apps/zwave_soc_switch_on_off/zwave_soc_switch_on_off.slcp"/>
     <properties key="readmeFiles" value="Apps/zwave_soc_switch_on_off/README.md"/>
-    <properties key="boardCompatibility" value="brd2603a brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a brd4400b brd4401b com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2603a brd2705a brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
     <properties key="ideCompatibility" value="makefile-ide simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc"/>
@@ -271,7 +333,7 @@
     <properties key="solutionReferenceId" value="protocol.z-wave.Apps.zwave_soc_wall_controller.zwave_soc_wall_controller.slcp"/>
     <properties key="projectFilePaths" value="Apps/zwave_soc_wall_controller/zwave_soc_wall_controller.slcp"/>
     <properties key="readmeFiles" value="Apps/zwave_soc_wall_controller/README.md"/>
-    <properties key="boardCompatibility" value="brd2603a brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a brd4400b brd4401b com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2603a brd2705a brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
     <properties key="ideCompatibility" value="makefile-ide simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc"/>
@@ -301,7 +363,7 @@
     <properties key="solutionReferenceId" value="protocol.z-wave.NonCertifiableApps.zwave_soc_multilevel_sensor.zwave_soc_multilevel_sensor.slcp"/>
     <properties key="projectFilePaths" value="NonCertifiableApps/zwave_soc_multilevel_sensor/zwave_soc_multilevel_sensor.slcp"/>
     <properties key="readmeFiles" value="NonCertifiableApps/zwave_soc_multilevel_sensor/README.md"/>
-    <properties key="boardCompatibility" value="brd2603a brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a brd4400b brd4401b com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2603a brd2705a brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
     <properties key="ideCompatibility" value="makefile-ide simplicity-ide"/>
     <properties key="toolchainCompatibility" value="gcc"/>
@@ -316,7 +378,7 @@
     <properties key="solutionReferenceId" value="protocol.z-wave.UCBootLoader.bootloader-storage-internal-single-512k_ota.slcp"/>
     <properties key="projectFilePaths" value="UCBootLoader/bootloader-storage-internal-single-512k_ota.slcp"/>
     <properties key="readmeFiles" value=""/>
-    <properties key="boardCompatibility" value="brd2603a brd4200a brd4201a brd4201c brd4201d brd4202a brd4203a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4206a brd4207a brd4208a brd4209a brd4210a brd4400b brd4401b com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2603a brd2705a brd4200a brd4201a brd4201c brd4201d brd4202a brd4203a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4206a brd4207a brd4208a brd4209a brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
     <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
@@ -331,7 +393,7 @@
     <properties key="solutionReferenceId" value="protocol.z-wave.UCBootLoader.bootloader-uart-xmodem_otw.slcp"/>
     <properties key="projectFilePaths" value="UCBootLoader/bootloader-uart-xmodem_otw.slcp"/>
     <properties key="readmeFiles" value=""/>
-    <properties key="boardCompatibility" value="brd2603a brd4200a brd4201a brd4201c brd4201d brd4202a brd4203a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4206a brd4207a brd4208a brd4209a brd4210a brd4400b brd4401b com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2603a brd2705a brd4200a brd4201a brd4201c brd4201d brd4202a brd4203a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4206a brd4207a brd4208a brd4209a brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
     <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>

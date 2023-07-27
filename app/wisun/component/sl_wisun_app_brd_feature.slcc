@@ -1,0 +1,73 @@
+id: "sl_wisun_app_brd_feature"
+label: "Wi-SUN Application and supported board features"
+package: "wisun"
+description: > 
+    List of provided features for Wi-SUN applications and supported boards
+category: "Wi-SUN|Wi-SUN Services"
+quality: "production"
+
+ui_hints:
+  visibility: never
+
+provides:
+  - name: sl_wisun_app_brd_feature
+  - name: sl_wisun_app_support_display
+    condition:
+      - brd4163a
+  - name: sl_wisun_app_support_display
+    condition:
+      - brd4164a
+  - name: sl_wisun_app_support_display
+    condition:
+      - brd4170a
+  - name: sl_wisun_app_support_display
+    condition:
+      - brd4172a
+  - name: sl_wisun_app_support_display
+    condition:
+      - brd4253a
+  - name: sl_wisun_app_support_display
+    condition:
+      - brd4254a
+  - name: sl_wisun_app_support_display
+    condition:
+      - brd4270a
+  - name: sl_wisun_app_support_display
+    condition:
+      - brd4270b
+  - name: sl_wisun_app_support_display
+    condition:
+      - brd4271a
+  - name: sl_wisun_app_support_display
+    condition:
+      - brd4272a
+  - name: sl_wisun_app_support_display
+    condition:
+      - brd4273a
+  - name: sl_wisun_app_support_display
+    condition:
+      - brd4274a
+  - name: sl_wisun_app_support_display
+    condition:
+      - brd4400a
+  - name: sl_wisun_app_support_display
+    condition:
+      - brd4400b
+  - name: sl_wisun_app_support_display
+    condition:
+      - brd4400c
+  - name: sl_wisun_app_support_display
+    condition:
+      - brd4401a
+  - name: sl_wisun_app_support_display
+    condition:
+      - brd4401b
+  - name: sl_wisun_app_support_display
+    condition:
+      - brd4401c
+      
+
+#-------------- Template Contribution ----------------
+template_contribution:
+  - name: component_catalog
+    value: wisun_app_brd_feature

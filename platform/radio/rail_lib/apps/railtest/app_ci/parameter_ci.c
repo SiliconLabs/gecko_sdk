@@ -794,10 +794,10 @@ void setRetimeOption(sl_cli_command_arg_t *args)
                           &finalRetimeOption);
     responsePrint(sl_cli_get_command_string(args, 0),
 #ifdef _SILICON_LABS_32B_SERIES_2
-                  "LCD: %s, HFXO: %s, HFRCO: %s, DCDC: %s",
+                  "LCD:%s,HFXO:%s,HFRCO:%s,DCDC:%s",
                   ((finalRetimeOption & RAIL_RETIME_OPTION_LCD) != 0U) ? "Enabled" : "Disabled",
 #else
-                  "HFXO: %s, HFRCO: %s, DCDC: %s",
+                  "HFXO:%s,HFRCO:%s,DCDC: %s",
 #endif
                   ((finalRetimeOption & RAIL_RETIME_OPTION_HFXO) != 0U) ? "Enabled" : "Disabled",
                   ((finalRetimeOption & RAIL_RETIME_OPTION_HFRCO) != 0U) ? "Enabled" : "Disabled",

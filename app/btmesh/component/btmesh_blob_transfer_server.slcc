@@ -8,6 +8,7 @@ description: >
   The BLOB Transfer Server model is used to receive a BLOB from a BLOB Transfer
   Client. The BLOB is delivered to a higher-layer application for further
   processing once the transfer is complete.
+  This component is prepared for integration into SOC applications.
 category: "Bluetooth Mesh|Models|Transport"
 quality: production
 root_path: app/btmesh/common/btmesh_blob_transfer_server
@@ -52,3 +53,4 @@ validation_library:
     name: autonumber_common
 validation_helper:
   - path: btmesh_blob_transfer_server_validation.lua
+  - path: "../../script/validation/soc_ncp_compatibility.lua"

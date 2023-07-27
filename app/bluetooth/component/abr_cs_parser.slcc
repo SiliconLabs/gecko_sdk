@@ -15,13 +15,14 @@ include:
   - path: .
     file_list:
       - path: abr_cs_parser.h
-      - path: abr_cs_parser_types.h 
+      - path: abr_cs_parser_types.h
       - path: abr_file_log.h
 source:
   - path: abr_cs_parser.c
 requires:
   - name: app_log
   - name: app_assert
+  - name: silabs_core_sl_malloc
   - name: bluetooth_stack
   - name: bluetooth_feature_power_control
   - name: power_manager

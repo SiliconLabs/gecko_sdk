@@ -764,7 +764,9 @@ void aoa_loc_angle_init(aoa_asset_tag_t *tag, uint32_t locator_count)
   for (uint32_t i = 0; i < locator_count; i++) {
     sc = aoa_loc_get_locator_by_index(i, &locator);
     app_assert_status(sc);
-    ec = aoa_init_rtl((aoa_state_t *)tag->aoa_state + i, locator->id);
+    ec = aoa_init_rtl((aoa_state_t *)tag->aoa_state + i,
+                      locator->id,
+                      app_log_check_level(APP_LOG_LEVEL_DEBUG));
     app_assert(ec == SL_RTL_ERROR_SUCCESS,
                "[E: %d] Failed to init angle calculation." APP_LOG_NL,
                ec);

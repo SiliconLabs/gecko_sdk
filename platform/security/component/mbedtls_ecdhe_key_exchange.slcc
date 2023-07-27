@@ -6,30 +6,38 @@ description: >-
   TLS implementation based on ephemeral ECDH keys. It will turn on all ECDHE key
   exchange methods available with the currently configured components.
   If a smaller selection of key exchange mechanisms is preferable, then please
-  do not enable this component, but rather define the relevant
-  'MBEDTLS_KEY_EXCHANGE_xxx' macros manually.
+  do not enable this component, but rather set the relevant
+  'SL_MBEDTLS_KEY_EXCHANGE_xxx' configuration options manually.
 category: Platform|Security|Mbed TLS|Upper Layer
 quality: evaluation
+
 provides:
   - name: mbedtls_ecdhe_key_exchange
+
 requires:
   - name: mbedtls_tls
-# This component will not become compatible with the SiliconLabs TrustZone Secure
-# Key Library until the upper layer TLS code fully supports use of PSA APIs. For
-# more details, please refer to the documentation of MBEDTLS_USE_PSA_CRYPTO in
-# mbedtls/include/mbedtls/mbedtls_config.h.
+  - name: psa_crypto_ecdh
+
+  # Added for backwards compatibility. There didn't use to exist any
+  # distinction between signatures and encryption for the RSA component.
+  - name: psa_crypto_rsa_sign_pss
+    condition: [psa_crypto_rsa]
+  - name: psa_crypto_rsa_sign_legacy
+    condition: [psa_crypto_rsa]
+
 conflicts:
+  # This component will not become compatible with the SiliconLabs TrustZone Secure
+  # Key Library until the upper layer TLS code fully supports use of PSA APIs. For
+  # more details, please refer to the documentation of MBEDTLS_USE_PSA_CRYPTO in
+  # mbedtls/include/mbedtls/mbedtls_config.h.
   - name: tz_secure_key_library_ns
+
 template_contribution:
   - name: mbedtls_config
     value: MBEDTLS_KEY_EXCHANGE_ECDHE_PSK_ENABLED
-    condition: [mbedtls_ecdh]
   - name: mbedtls_config
     value: MBEDTLS_KEY_EXCHANGE_ECDHE_RSA_ENABLED
-    condition: [mbedtls_ecdh, mbedtls_rsa]
-  - name: mbedtls_config
-    value: MBEDTLS_PKCS1_V15
-    condition: [mbedtls_ecdh, mbedtls_rsa]
+    condition: [psa_crypto_rsa_sign]
   - name: mbedtls_config
     value: MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED
-    condition: [mbedtls_ecdh, mbedtls_ecdsa]
+    condition: [psa_crypto_ecdsa]

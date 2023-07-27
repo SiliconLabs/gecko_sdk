@@ -6,7 +6,7 @@
     <property key="demos.blurb" value="Zigbee - NCP ncp-spi"/>
     <property key="core.partCompatibility" value=".*efr32mg13p733f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4158a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.0/protocol/zigbee/demos/ncp-spi/ncp-spi-brd4158a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.1/protocol/zigbee/demos/ncp-spi/ncp-spi-brd4158a.s37"/>
     <property key="core.readmeFiles" value="app/ncp/sample-app/ncp-spi/readme.html"/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -17,7 +17,7 @@
     <property key="demos.blurb" value="Zigbee - NCP ncp-spi"/>
     <property key="core.partCompatibility" value=".*efr32mg12p432f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4161a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.0/protocol/zigbee/demos/ncp-spi/ncp-spi-brd4161a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.1/protocol/zigbee/demos/ncp-spi/ncp-spi-brd4161a.s37"/>
     <property key="core.readmeFiles" value="app/ncp/sample-app/ncp-spi/readme.html"/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -28,7 +28,7 @@
     <property key="demos.blurb" value="Zigbee - NCP ncp-spi"/>
     <property key="core.partCompatibility" value=".*efr32mg12p332f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4162a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.0/protocol/zigbee/demos/ncp-spi/ncp-spi-brd4162a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.1/protocol/zigbee/demos/ncp-spi/ncp-spi-brd4162a.s37"/>
     <property key="core.readmeFiles" value="app/ncp/sample-app/ncp-spi/readme.html"/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -39,7 +39,7 @@
     <property key="demos.blurb" value="Zigbee - NCP ncp-spi"/>
     <property key="core.partCompatibility" value=".*efr32mg12p433f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4163a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.0/protocol/zigbee/demos/ncp-spi/ncp-spi-brd4163a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.1/protocol/zigbee/demos/ncp-spi/ncp-spi-brd4163a.s37"/>
     <property key="core.readmeFiles" value="app/ncp/sample-app/ncp-spi/readme.html"/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -50,7 +50,7 @@
     <property key="demos.blurb" value="Zigbee - NCP ncp-spi"/>
     <property key="core.partCompatibility" value=".*efr32mg12p433f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4164a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.0/protocol/zigbee/demos/ncp-spi/ncp-spi-brd4164a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.1/protocol/zigbee/demos/ncp-spi/ncp-spi-brd4164a.s37"/>
     <property key="core.readmeFiles" value="app/ncp/sample-app/ncp-spi/readme.html"/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -61,7 +61,7 @@
     <property key="demos.blurb" value="Zigbee - NCP ncp-spi"/>
     <property key="core.partCompatibility" value=".*efr32mg12p433f1024gm68.*"/>
     <property key="core.boardCompatibility" value="brd4170a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.0/protocol/zigbee/demos/ncp-spi/ncp-spi-brd4170a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.1/protocol/zigbee/demos/ncp-spi/ncp-spi-brd4170a.s37"/>
     <property key="core.readmeFiles" value="app/ncp/sample-app/ncp-spi/readme.html"/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -72,7 +72,7 @@
     <property key="demos.blurb" value="Zigbee - NCP ncp-spi"/>
     <property key="core.partCompatibility" value=".*efr32mg21a020f1024im32.*"/>
     <property key="core.boardCompatibility" value="brd4180a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.0/protocol/zigbee/demos/ncp-spi/ncp-spi-brd4180a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.1/protocol/zigbee/demos/ncp-spi/ncp-spi-brd4180a.s37"/>
     <property key="core.readmeFiles" value="app/ncp/sample-app/ncp-spi/readme.html"/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -84,7 +84,7 @@ Steps to create a ECC enabled application for Smart Energy Profile application: 
     <property key="demos.blurb" value="Zigbee - NCP ncp-uart-hw"/>
     <property key="core.partCompatibility" value=".*efr32mg13p733f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4158a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.0/protocol/zigbee/demos/ncp-uart-hw/ncp-uart-hw-brd4158a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.1/protocol/zigbee/demos/ncp-uart-hw/ncp-uart-hw-brd4158a.s37"/>
     <property key="core.readmeFiles" value="app/ncp/sample-app/ncp-uart-hw/readme.html"/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -96,7 +96,7 @@ Steps to create a ECC enabled application for Smart Energy Profile application: 
     <property key="demos.blurb" value="Zigbee - NCP ncp-uart-hw"/>
     <property key="core.partCompatibility" value=".*efr32mg12p432f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4161a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.0/protocol/zigbee/demos/ncp-uart-hw/ncp-uart-hw-brd4161a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.1/protocol/zigbee/demos/ncp-uart-hw/ncp-uart-hw-brd4161a.s37"/>
     <property key="core.readmeFiles" value="app/ncp/sample-app/ncp-uart-hw/readme.html"/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -108,7 +108,7 @@ Steps to create a ECC enabled application for Smart Energy Profile application: 
     <property key="demos.blurb" value="Zigbee - NCP ncp-uart-hw"/>
     <property key="core.partCompatibility" value=".*efr32mg12p332f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4162a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.0/protocol/zigbee/demos/ncp-uart-hw/ncp-uart-hw-brd4162a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.1/protocol/zigbee/demos/ncp-uart-hw/ncp-uart-hw-brd4162a.s37"/>
     <property key="core.readmeFiles" value="app/ncp/sample-app/ncp-uart-hw/readme.html"/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -120,7 +120,7 @@ Steps to create a ECC enabled application for Smart Energy Profile application: 
     <property key="demos.blurb" value="Zigbee - NCP ncp-uart-hw"/>
     <property key="core.partCompatibility" value=".*efr32mg12p433f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4163a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.0/protocol/zigbee/demos/ncp-uart-hw/ncp-uart-hw-brd4163a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.1/protocol/zigbee/demos/ncp-uart-hw/ncp-uart-hw-brd4163a.s37"/>
     <property key="core.readmeFiles" value="app/ncp/sample-app/ncp-uart-hw/readme.html"/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -132,7 +132,7 @@ Steps to create a ECC enabled application for Smart Energy Profile application: 
     <property key="demos.blurb" value="Zigbee - NCP ncp-uart-hw"/>
     <property key="core.partCompatibility" value=".*efr32mg12p433f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4164a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.0/protocol/zigbee/demos/ncp-uart-hw/ncp-uart-hw-brd4164a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.1/protocol/zigbee/demos/ncp-uart-hw/ncp-uart-hw-brd4164a.s37"/>
     <property key="core.readmeFiles" value="app/ncp/sample-app/ncp-uart-hw/readme.html"/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -144,7 +144,7 @@ Steps to create a ECC enabled application for Smart Energy Profile application: 
     <property key="demos.blurb" value="Zigbee - NCP ncp-uart-hw"/>
     <property key="core.partCompatibility" value=".*efr32mg12p433f1024gm68.*"/>
     <property key="core.boardCompatibility" value="brd4170a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.0/protocol/zigbee/demos/ncp-uart-hw/ncp-uart-hw-brd4170a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.1/protocol/zigbee/demos/ncp-uart-hw/ncp-uart-hw-brd4170a.s37"/>
     <property key="core.readmeFiles" value="app/ncp/sample-app/ncp-uart-hw/readme.html"/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -156,51 +156,51 @@ Steps to create a ECC enabled application for Smart Energy Profile application: 
     <property key="demos.blurb" value="Zigbee - NCP ncp-uart-hw"/>
     <property key="core.partCompatibility" value=".*efr32mg21a020f1024im32.*"/>
     <property key="core.boardCompatibility" value="brd4180a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.0/protocol/zigbee/demos/ncp-uart-hw/ncp-uart-hw-brd4180a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.1/protocol/zigbee/demos/ncp-uart-hw/ncp-uart-hw-brd4180a.s37"/>
     <property key="core.readmeFiles" value="app/ncp/sample-app/ncp-uart-hw/readme.html"/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
   <demo name="brd4161a.demo.DynamicMultiprotocolLightSed" label="Zigbee - SoC DynamicMultiprotocolLightSed">
-    <model:description>This is a sample application demonstrating a sleepy light application using dynamic multiprotocol (Zigbee + Bluetooth LE) and NVM3 for persistent storage.
+    <model:description>This is a sample application demonstrating a sleepy light application using dynamic multiprotocol (Zigbee + Bluetooth LE) and NVM3 for persistent storage. We recommend the use of Micrium Kernel for this sample application.
 </model:description>
     <property key="demos.blurb" value="Zigbee - SoC DynamicMultiprotocolLightSed"/>
     <property key="core.partCompatibility" value=".*efr32mg12p432f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4161a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.0/protocol/zigbee/demos/DynamicMultiprotocolLightSed/DynamicMultiprotocolLightSed-brd4161a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.1/protocol/zigbee/demos/DynamicMultiprotocolLightSed/DynamicMultiprotocolLightSed-brd4161a.s37"/>
     <property key="core.readmeFiles" value="app/framework/scenarios/multiprotocol/DynamicMultiprotocolLightSed/readme.html"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
   <demo name="brd4162a.demo.DynamicMultiprotocolLightSed" label="Zigbee - SoC DynamicMultiprotocolLightSed">
-    <model:description>This is a sample application demonstrating a sleepy light application using dynamic multiprotocol (Zigbee + Bluetooth LE) and NVM3 for persistent storage.
+    <model:description>This is a sample application demonstrating a sleepy light application using dynamic multiprotocol (Zigbee + Bluetooth LE) and NVM3 for persistent storage. We recommend the use of Micrium Kernel for this sample application.
 </model:description>
     <property key="demos.blurb" value="Zigbee - SoC DynamicMultiprotocolLightSed"/>
     <property key="core.partCompatibility" value=".*efr32mg12p332f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4162a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.0/protocol/zigbee/demos/DynamicMultiprotocolLightSed/DynamicMultiprotocolLightSed-brd4162a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.1/protocol/zigbee/demos/DynamicMultiprotocolLightSed/DynamicMultiprotocolLightSed-brd4162a.s37"/>
     <property key="core.readmeFiles" value="app/framework/scenarios/multiprotocol/DynamicMultiprotocolLightSed/readme.html"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
   <demo name="brd4161a.demo.DynamicMultiprotocolLight" label="Zigbee - SoC DynamicMultiprotocolLight">
-    <model:description>This is a sample application demonstrating a light application using dynamic multiprotocol (Zigbee + Bluetooth LE) and NVM3 for persistent storage.
+    <model:description>This is a sample application demonstrating a light application using dynamic multiprotocol (Zigbee + Bluetooth LE) and NVM3 for persistent storage. We recommend the use of Micrium Kernel for this sample application.
 </model:description>
     <property key="demos.blurb" value="Zigbee - SoC DynamicMultiprotocolLight"/>
     <property key="core.partCompatibility" value=".*efr32mg12p432f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4161a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.0/protocol/zigbee/demos/DynamicMultiprotocolLight/DynamicMultiprotocolLight-brd4161a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.1/protocol/zigbee/demos/DynamicMultiprotocolLight/DynamicMultiprotocolLight-brd4161a.s37"/>
     <property key="core.readmeFiles" value="app/framework/scenarios/multiprotocol/DynamicMultiprotocolLight/readme.html"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="PRODUCTION"/>
   </demo>
   <demo name="brd4162a.demo.DynamicMultiprotocolLight" label="Zigbee - SoC DynamicMultiprotocolLight">
-    <model:description>This is a sample application demonstrating a light application using dynamic multiprotocol (Zigbee + Bluetooth LE) and NVM3 for persistent storage.
+    <model:description>This is a sample application demonstrating a light application using dynamic multiprotocol (Zigbee + Bluetooth LE) and NVM3 for persistent storage. We recommend the use of Micrium Kernel for this sample application.
 </model:description>
     <property key="demos.blurb" value="Zigbee - SoC DynamicMultiprotocolLight"/>
     <property key="core.partCompatibility" value=".*efr32mg12p332f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4162a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.0/protocol/zigbee/demos/DynamicMultiprotocolLight/DynamicMultiprotocolLight-brd4162a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.1/protocol/zigbee/demos/DynamicMultiprotocolLight/DynamicMultiprotocolLight-brd4162a.s37"/>
     <property key="core.readmeFiles" value="app/framework/scenarios/multiprotocol/DynamicMultiprotocolLight/readme.html"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -211,7 +211,7 @@ Steps to create a ECC enabled application for Smart Energy Profile application: 
     <property key="demos.blurb" value="Zigbee - SoC Light"/>
     <property key="core.partCompatibility" value=".*efr32mg12p432f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4161a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.0/protocol/zigbee/demos/Z3Light/Z3Light-brd4161a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.1/protocol/zigbee/demos/Z3Light/Z3Light-brd4161a.s37"/>
     <property key="core.readmeFiles" value="app/framework/scenarios/z3/Z3Light/readme.html"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -222,7 +222,7 @@ Steps to create a ECC enabled application for Smart Energy Profile application: 
     <property key="demos.blurb" value="Zigbee - SoC Light"/>
     <property key="core.partCompatibility" value=".*efr32mg12p332f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4162a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.0/protocol/zigbee/demos/Z3Light/Z3Light-brd4162a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.1/protocol/zigbee/demos/Z3Light/Z3Light-brd4162a.s37"/>
     <property key="core.readmeFiles" value="app/framework/scenarios/z3/Z3Light/readme.html"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -233,7 +233,7 @@ Steps to create a ECC enabled application for Smart Energy Profile application: 
     <property key="demos.blurb" value="Zigbee - SoC Light"/>
     <property key="core.partCompatibility" value=".*efr32mg21a020f1024im32.*"/>
     <property key="core.boardCompatibility" value="brd4180a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.0/protocol/zigbee/demos/Z3Light/Z3Light-brd4180a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.1/protocol/zigbee/demos/Z3Light/Z3Light-brd4180a.s37"/>
     <property key="core.readmeFiles" value="app/framework/scenarios/z3/Z3Light/readme.html"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -244,7 +244,7 @@ Steps to create a ECC enabled application for Smart Energy Profile application: 
     <property key="demos.blurb" value="Zigbee - SoC SwitchWithVoice"/>
     <property key="core.partCompatibility" value=".*efr32mg24b310f1536im48.*"/>
     <property key="core.boardCompatibility" value="brd2601b"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.0/protocol/zigbee/demos/Z3SwitchWithVoice/Z3SwitchWithVoice-brd2601b.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.1/protocol/zigbee/demos/Z3SwitchWithVoice/Z3SwitchWithVoice-brd2601b.s37"/>
     <property key="core.readmeFiles" value="app/framework/scenarios/z3/Z3SwitchWithVoice/readme.html"/>
     <property key="filters" value="Capability|Machine\ Learning Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -255,7 +255,7 @@ Steps to create a ECC enabled application for Smart Energy Profile application: 
     <property key="demos.blurb" value="Zigbee - SoC Switch"/>
     <property key="core.partCompatibility" value=".*efr32mg12p432f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4161a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.0/protocol/zigbee/demos/Z3Switch/Z3Switch-brd4161a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.1/protocol/zigbee/demos/Z3Switch/Z3Switch-brd4161a.s37"/>
     <property key="core.readmeFiles" value="app/framework/scenarios/z3/Z3Switch/readme.html"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -266,7 +266,7 @@ Steps to create a ECC enabled application for Smart Energy Profile application: 
     <property key="demos.blurb" value="Zigbee - SoC Switch"/>
     <property key="core.partCompatibility" value=".*efr32mg12p332f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4162a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.0/protocol/zigbee/demos/Z3Switch/Z3Switch-brd4162a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.1/protocol/zigbee/demos/Z3Switch/Z3Switch-brd4162a.s37"/>
     <property key="core.readmeFiles" value="app/framework/scenarios/z3/Z3Switch/readme.html"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -277,7 +277,7 @@ Steps to create a ECC enabled application for Smart Energy Profile application: 
     <property key="demos.blurb" value="Zigbee - SoC Switch"/>
     <property key="core.partCompatibility" value=".*efr32mg21a020f1024im32.*"/>
     <property key="core.boardCompatibility" value="brd4180a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.0/protocol/zigbee/demos/Z3Switch/Z3Switch-brd4180a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.1/protocol/zigbee/demos/Z3Switch/Z3Switch-brd4180a.s37"/>
     <property key="core.readmeFiles" value="app/framework/scenarios/z3/Z3Switch/readme.html"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -288,7 +288,7 @@ Steps to create a ECC enabled application for Smart Energy Profile application: 
     <property key="demos.blurb" value="Zigbee - SoC ZigbeeDirectDeviceLight"/>
     <property key="core.partCompatibility" value=".*efr32mg12p432f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4161a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.0/protocol/zigbee/demos/ZigbeeDirectDeviceLight/ZigbeeDirectDeviceLight-brd4161a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.1/protocol/zigbee/demos/ZigbeeDirectDeviceLight/ZigbeeDirectDeviceLight-brd4161a.s37"/>
     <property key="core.readmeFiles" value="app/framework/scenarios/multiprotocol/ZigbeeDirectDeviceLight/readme.html"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -299,7 +299,7 @@ Steps to create a ECC enabled application for Smart Energy Profile application: 
     <property key="demos.blurb" value="Zigbee - SoC ZigbeeDirectDeviceLight"/>
     <property key="core.partCompatibility" value=".*efr32mg12p332f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4162a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.0/protocol/zigbee/demos/ZigbeeDirectDeviceLight/ZigbeeDirectDeviceLight-brd4162a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.1/protocol/zigbee/demos/ZigbeeDirectDeviceLight/ZigbeeDirectDeviceLight-brd4162a.s37"/>
     <property key="core.readmeFiles" value="app/framework/scenarios/multiprotocol/ZigbeeDirectDeviceLight/readme.html"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -310,7 +310,7 @@ Steps to create a ECC enabled application for Smart Energy Profile application: 
     <property key="demos.blurb" value="Zigbee - SoC ZigbeeDirectDeviceLight"/>
     <property key="core.partCompatibility" value=".*efr32mg21a020f1024im32.*"/>
     <property key="core.boardCompatibility" value="brd4180a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.0/protocol/zigbee/demos/ZigbeeDirectDeviceLight/ZigbeeDirectDeviceLight-brd4180a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.1/protocol/zigbee/demos/ZigbeeDirectDeviceLight/ZigbeeDirectDeviceLight-brd4180a.s37"/>
     <property key="core.readmeFiles" value="app/framework/scenarios/multiprotocol/ZigbeeDirectDeviceLight/readme.html"/>
     <property key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Zigbee"/>
     <property key="core.quality" value="PRODUCTION"/>

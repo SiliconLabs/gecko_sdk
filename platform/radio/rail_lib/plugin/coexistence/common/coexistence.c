@@ -36,6 +36,7 @@ static const COEX_HalCallbacks_t *coexHalCallbacks;
 static COEX_RadioCallback_t coexRadioCallback;
 static COEX_RandomDelayCallback_t coexRandomDelayCallback;
 static void coexNotifyRadio(void);
+static void coexNotifyRadioNoGrantSample(bool gnt);
 __STATIC_INLINE void coexUpdateReqIsr(void);
 
 /** PTA radio hold off GPIO configuration */
@@ -75,6 +76,12 @@ typedef struct COEX_Cfg {
   volatile bool updateGrantInProgress : 1;
   volatile COEX_Options_t options;
 } COEX_Cfg_t;
+
+typedef struct COEX_GrantArgs {
+  bool defaultValue;
+  bool gntChanged;
+  bool gntAsserted;
+} COEX_GrantArgs_t;
 
 static void COEX_REQ_ISR(void);
 static void COEX_GNT_ISR(void);
@@ -251,6 +258,25 @@ static void coexEventCallback(COEX_Events_t events)
   }
 }
 
+static void isGrantSetAtomic(COEX_GrantArgs_t *args)
+{
+  args->gntAsserted = isGpioInSet(gntHandle, args->defaultValue);
+  args->gntChanged = (args->gntAsserted != gntWasAsserted);
+  gntWasAsserted = args->gntAsserted;
+}
+
+static bool isGrantSet(bool defaultValue, bool *gntChanged)
+{
+  COEX_GrantArgs_t args = {
+    .defaultValue = defaultValue,
+  };
+  COEX_HAL_CallAtomic((COEX_AtomicCallback_t)isGrantSetAtomic, &args);
+  if (gntChanged != NULL) {
+    *gntChanged = args.gntChanged;
+  }
+  return args.gntAsserted;
+}
+
 #ifdef COEX_PULSE_REQ_ON_RHO_RELEASE_SUPPORT
 static void toggleCoexReq(void)
 {
@@ -258,7 +284,7 @@ static void toggleCoexReq(void)
          & COEX_OPTION_PULSE_REQ_ON_RHO_RELEASE) != 0U) // Pulse request on RHO release selected
        && getGpioOut(reqHandle, false)          // REQUESTing and
        && !isGpioInSet(rhoHandle, false)          // RHO not asserted and
-       && !isGpioInSet(gntHandle, true)) {        // GRANT not asserted
+       && !isGrantSet(true, NULL)) {        // GRANT not asserted
     setGpio(reqHandle, false);
     setGpio(reqHandle, true);
   }
@@ -278,10 +304,10 @@ void COEX_UpdateGrant(void)
     coexCfg.updateGrantInProgress = true;
   }
   if (getGpioOut(reqHandle, false)) {    // GRANT phase
-    bool newGnt = isGpioInSet(gntHandle, false);   // Sample GPIO once, now
-    if (newGnt != gntWasAsserted) {
-      gntWasAsserted = newGnt;
-      coexNotifyRadio();
+    bool gntChanged = false;
+    bool newGnt = isGrantSet(false, &gntChanged);
+    if (gntChanged) {
+      coexNotifyRadioNoGrantSample(newGnt);
       // Issue callbacks on GRANT assert or negate
       // These are not one-shot callbacks
       COEX_ReqState_t* reqPtr;
@@ -480,7 +506,14 @@ static bool coexHoldOffActive(void)
 {
   return ((coexCfg.options & COEX_OPTION_COEX_ENABLED) != 0U)
          && ((!getGpioOut(reqHandle, true)       // not REQUESTing or
-              || !isGpioInSet(gntHandle, true) ) );    // REQUEST not GRANTed
+              || !isGrantSet(true, NULL) ) );    // REQUEST not GRANTed
+}
+
+static bool coexHoldOffActiveNoGrantSample(bool gnt)
+{
+  return ((coexCfg.options & COEX_OPTION_COEX_ENABLED) != 0U)
+         && ((!getGpioOut(reqHandle, true)       // not REQUESTing or
+              || !((gntHandle != NULL) ? gnt : true) ) );    // REQUEST not GRANTed
 }
 
 static bool radioHoldOffActive(void)
@@ -489,14 +522,27 @@ static bool radioHoldOffActive(void)
          && isGpioInSet(rhoHandle, false);
 }
 
-static void coexNotifyRadio(void)
+static void coexNotifyRadioCore(bool sampleGnt, bool gnt)
 {
-  bool coexRho = coexHoldOffActive() || radioHoldOffActive();
+  bool gntHoldoff = sampleGnt
+                    ? coexHoldOffActive()
+                    : coexHoldOffActiveNoGrantSample(gnt);
+  bool coexRho = gntHoldoff || radioHoldOffActive();
   if (!coexRho) {
     coexCfg.requestDenied = false;
   }
   setCoexOption(COEX_OPTION_HOLDOFF_ACTIVE, coexRho);
   coexEventCallback(COEX_EVENT_HOLDOFF_CHANGED);
+}
+
+static void coexNotifyRadio(void)
+{
+  coexNotifyRadioCore(true, false);
+}
+
+static void coexNotifyRadioNoGrantSample(bool gnt)
+{
+  coexNotifyRadioCore(false, gnt);
 }
 
 bool COEX_IsEnabled(void)

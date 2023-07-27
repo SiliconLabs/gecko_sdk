@@ -1,6 +1,11 @@
 #ifndef THROUGHPUT_CENTRAL_CONFIG_H
 #define THROUGHPUT_CENTRAL_CONFIG_H
 
+/***********************************************************************************************//**
+ * @addtogroup throughput_central
+ * @{
+ **************************************************************************************************/
+
 #include "throughput_types.h"
 
 // <<< Use Configuration Wizard in Context Menu >>>
@@ -136,4 +141,5 @@
 
 // <<< end of configuration section >>>
 
+/** @} (end addtogroup throughput_central) */
 #endif // THROUGHPUT_CENTRAL_CONFIG_H

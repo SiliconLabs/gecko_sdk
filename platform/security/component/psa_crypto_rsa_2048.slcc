@@ -1,0 +1,14 @@
+id: psa_crypto_rsa_2048
+package: platform
+label: RSA-2048
+description: >-
+  This component adds support for 2048-bit RSA operations.
+category: Platform|Security|PSA Crypto|RSA
+quality: evaluation
+provides:
+  - name: psa_crypto_rsa_2048
+  - name: psa_crypto_rsa_size
+    allow_multiple: true
+requires:
+  - name: psa_crypto_rsa
+  - name: mbedtls_rsa_2048

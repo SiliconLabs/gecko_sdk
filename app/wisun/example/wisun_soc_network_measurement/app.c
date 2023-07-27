@@ -32,15 +32,18 @@
 // -----------------------------------------------------------------------------
 #include <stdio.h>
 #include <assert.h>
+#include "sl_component_catalog.h"
 #include "app.h"
-#include "sl_wisun_network_measurement_gui.h"
 #include "sl_wisun_network_measurement.h"
-#include "sl_display.h"
-#include "sl_gui.h"
 #include "sl_iperf.h"
 #include "sl_iperf_util.h"
 #include "sl_wisun_coap_rhnd.h"
 
+#if defined(SL_CATALOG_GUI_PRESENT)
+#include "sl_wisun_network_measurement_gui.h"
+#include "sl_display.h"
+#include "sl_gui.h"
+#endif
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
@@ -68,7 +71,10 @@ void app_task(void *args)
   // connect to the wisun network
   app_wisun_connect_and_wait();
 
+#if defined(SL_CATALOG_GUI_PRESENT)
   sl_display_renderer(sl_wisun_nwm_main_form, NULL, 0);
+#endif
+
   while (1) {
     // User code here
     msleep(1);

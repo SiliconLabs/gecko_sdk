@@ -19,6 +19,7 @@ requires:
   - name: zigbee_r23_support_library
     condition:
       - zigbee_force_libraries
+  - name: zigbee_zdo_cluster_filter
 
 recommends:
   - id: zigbee_r23_support_source

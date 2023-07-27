@@ -164,6 +164,8 @@
   - name: device_has_radio_2g4hz
   - name: device_has_radio_dualband
   - name: device_has_radio_subghz
+  - name: device_supports_bluetooth
+  - name: device_compute_basic
 - recommends:
   - id: trustzone_unaware
 - requires:

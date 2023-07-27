@@ -34,6 +34,8 @@
 #ifndef OTBR_THREAD_API_DBUS_HPP_
 #define OTBR_THREAD_API_DBUS_HPP_
 
+#include "openthread-br/config.h"
+
 #include <functional>
 
 #include <dbus/dbus.h>
@@ -868,6 +870,19 @@ public:
      *
      */
     ClientError GetTelemetryData(std::vector<uint8_t> &aTelemetryData);
+
+    /**
+     * This method gets the capabilities data proto serialized byte data.
+     *
+     * @param[out] aCapabilities The capabilities proto serialized byte data
+     *                           (see proto/capabilities.proto)
+     *
+     * @retval ERROR_NONE  Successfully performed the dbus function call
+     * @retval ERROR_DBUS  dbus encode/decode error
+     * @retval ...         OpenThread defined error value otherwise
+     *
+     */
+    ClientError GetCapabilities(std::vector<uint8_t> &aCapabilities);
 
 private:
     ClientError CallDBusMethodSync(const std::string &aMethodName);

@@ -27,6 +27,7 @@ ESL Encrypted Advertising Data Module.
 import secrets
 from cryptography.hazmat.primitives.ciphers.aead import AESCCM
 from ap_constants import *
+from ap_logger import getLogger
 
 ### Configuration values
 
@@ -42,8 +43,8 @@ class KeyMaterial():
 
 class EAD():
     """ Encrypted Advertising Data handling class """
-    def __init__(self, logger):
-        self.log = logger
+    def __init__(self):
+        self.log = getLogger()
 
     def encrypt(self, data, key_material, random=None):
         """ Encrypt PA data and assemble the ESL payload """

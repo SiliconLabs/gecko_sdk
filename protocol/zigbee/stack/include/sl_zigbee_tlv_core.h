@@ -26,18 +26,6 @@
 
 #define MAX_TLV_LENGTH 256
 
-// tlv linked list
-typedef uint8_t* tlv_link_t;
-
-// maybe move these internal to the source code
-#define TLV_LINK_TAG_ID(t) ((t)[0])
-#define TLV_LINK_LENGTH(t) ((t)[1])
-#define TLV_LINK_DATA(t) ((t) + TLV_HEADER_LENGTH)
-// the length of the data is encoded as L - 1
-#define TLV_LINK_DATA_SIZE(t) (TLV_LINK_LENGTH(t) + 1)
-
-#define TLV_LINK_TOTAL_LENGTH(t) (TLV_HEADER_LENGTH + TLV_LINK_DATA_SIZE(t))
-
 /**
  * ==== TLV Data Model ====
  * as a way simplifying the handling of TLV Data, we are using
@@ -340,5 +328,30 @@ sl_status_t sli_tlv_chain_is_valid_with_local_env(sl_zigbee_tlv_chain *tlvs,
  * @return the count of valid TLVs in the given chain
  */
 uint8_t sl_zigbee_tlv_chain_get_tlv_count(sl_zigbee_tlv_chain *chain);
+
+/**
+ * @brief treat tlv chain as a one-way iterator, moving the head forward and returning
+ * the next tlv
+ * @param tlvs the tlv chain
+ * @param next output parameter, contains the next tlv if it exists
+ * @return SL_STATUS_EMPTY when there are no more tlvs in the chain
+ *         SL_STATUS_WOULD_OVERFLOW if traversing the next in chain would overrun the chain
+ *         SL_STATUS_OK otherwise
+ */
+sl_status_t sl_zigbee_tlv_chain_next_tlv(sl_zigbee_tlv_chain *tlvs,
+                                         sl_zigbee_tlv_t **next);
+
+// tlvs as a flat array
+// NOTE these are mostly only used in tests and a couple of internal functions
+// please avoid referring to these symbols directly in favor of the apis above
+typedef uint8_t* tlv_link_t;
+
+#define TLV_LINK_TAG_ID(t) ((t)[0])
+#define TLV_LINK_LENGTH(t) ((t)[1])
+#define TLV_LINK_DATA(t) ((t) + TLV_HEADER_LENGTH)
+// the length of the data is encoded as L - 1
+#define TLV_LINK_DATA_SIZE(t) (TLV_LINK_LENGTH(t) + 1)
+
+#define TLV_LINK_TOTAL_LENGTH(t) (TLV_HEADER_LENGTH + TLV_LINK_DATA_SIZE(t))
 
 #endif /* SL_ZIGBEE_TLV_CORE_H */

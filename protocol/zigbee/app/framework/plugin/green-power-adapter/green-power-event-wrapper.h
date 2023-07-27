@@ -45,6 +45,7 @@ void sl_zigbee_event_init_wrapper(sl_zigbee_event_wrapper_t *event, pluginGPAdat
 void sl_zigbee_event_set_delay_ms_wrapper(sl_zigbee_event_wrapper_t *event, uint32_t delayMs);
 void sl_zigbee_event_set_inactive_wrapper(sl_zigbee_event_wrapper_t *event);
 bool sl_zigbee_event_is_active_wrapper(sl_zigbee_event_wrapper_t *event);
+bool sl_zigbee_event_is_scheduled_wrapper(sl_zigbee_event_wrapper_t *event);
 
 #ifdef sl_zigbee_event_t
 #undef sl_zigbee_event_t
@@ -69,7 +70,12 @@ bool sl_zigbee_event_is_active_wrapper(sl_zigbee_event_wrapper_t *event);
 #ifdef sl_zigbee_event_is_active
 #undef sl_zigbee_event_is_active
 #endif
-#define sl_zigbee_event_is_scheduled(...) sl_zigbee_event_is_active_wrapper(__VA_ARGS__)
+#define sl_zigbee_event_is_active(...) sl_zigbee_event_is_active_wrapper(__VA_ARGS__)
+
+#ifdef sl_zigbee_event_is_scheduled
+#undef sl_zigbee_event_is_scheduled
+#endif
+#define sl_zigbee_event_is_scheduled(...) sl_zigbee_event_is_scheduled_wrapper(__VA_ARGS__)
 
 #endif // (EMBER_AF_PLUGIN_GREEN_POWER_ADAPTER_USE_CUSTOM_EVENT_SYSTEM == 1)
 

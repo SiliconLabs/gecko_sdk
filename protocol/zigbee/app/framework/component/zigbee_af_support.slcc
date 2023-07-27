@@ -49,7 +49,15 @@ include:
       - path: af-support-host.h
         condition:
           - zigbee_ezsp
-
+  - path: protocol/zigbee/app/framework/plugin/groups-server
+    file_list:
+      - path: groups-server-common.h
+template_file:
+  - path: protocol/zigbee/app/framework/util/template/zigbee_zcl_callback_dispatcher.h.jinja
+  - path: protocol/zigbee/app/framework/util/template/zigbee_zcl_callback_dispatcher.c.jinja
+  - path: protocol/zigbee/app/framework/util/template/zigbee_af_cluster_functions.h.jinja
+  - path: protocol/zigbee/app/framework/util/template/zigbee_af_token_headers.h.jinja
+  
 template_contribution:
   - name: component_catalog
     value: zigbee_af_support

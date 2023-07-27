@@ -37,10 +37,6 @@
 #include "app/framework/plugin/fragmentation/fragmentation.h"
 #endif // SL_CATALOG_ZIGBEE_FRAGMENTATION_PRESENT
 
-#ifdef SL_CATALOG_ZIGBEE_GREEN_POWER_SERVER_PRESENT
-#include "app/framework/plugin/green-power-server/green-power-server.h"
-#endif // SL_CATALOG_ZIGBEE_GREEN_POWER_SERVER_PRESENT
-
 #define MAX_CLUSTER (SECURE_EZSP_MAX_FRAME_LENGTH - 12) / 2 //currently == 94
 #define UNKNOWN_NETWORK_STATE 0xFF
 
@@ -80,9 +76,8 @@ static NetworkCache networkCache[EMBER_SUPPORTED_NETWORKS];
 //------------------------------------------------------------------------------
 // Forward declarations
 void sli_zigbee_af_reset_and_init_ncp(void);
-uint8_t emberAfGetNcpConfigItem(EzspConfigId id);
+static uint8_t getNcpConfigItem(EzspConfigId id);
 static void createEndpoint(uint8_t endpointIndex);
-static void setPacketBufferCount(void);
 static uint8_t ezspNextSequence(void);
 
 //------------------------------------------------------------------------------
@@ -120,7 +115,7 @@ uint8_t emberAfGetAddressIndex(void)
 
 uint8_t emberAfGetAddressTableSize(void)
 {
-  return emberAfGetNcpConfigItem(EZSP_CONFIG_ADDRESS_TABLE_SIZE);
+  return getNcpConfigItem(EZSP_CONFIG_ADDRESS_TABLE_SIZE);
 }
 
 uint8_t emberAfGetBindingIndex(void)
@@ -130,7 +125,7 @@ uint8_t emberAfGetBindingIndex(void)
 
 uint8_t emberAfGetBindingTableSize(void)
 {
-  return emberAfGetNcpConfigItem(EZSP_CONFIG_BINDING_TABLE_SIZE);
+  return getNcpConfigItem(EZSP_CONFIG_BINDING_TABLE_SIZE);
 }
 
 EmberStatus emberAfGetChildData(uint8_t index,
@@ -141,7 +136,7 @@ EmberStatus emberAfGetChildData(uint8_t index,
 
 uint8_t emberAfGetChildTableSize(void)
 {
-  return emberAfGetNcpConfigItem(EZSP_CONFIG_MAX_END_DEVICE_CHILDREN);
+  return getNcpConfigItem(EZSP_CONFIG_MAX_END_DEVICE_CHILDREN);
 }
 
 void emberAfGetMfgString(uint8_t* returnData)
@@ -165,12 +160,12 @@ void emberAfGetEui64(EmberEUI64 returnEui64)
 
 uint8_t emberAfGetKeyTableSize(void)
 {
-  return emberAfGetNcpConfigItem(EZSP_CONFIG_KEY_TABLE_SIZE);
+  return getNcpConfigItem(EZSP_CONFIG_KEY_TABLE_SIZE);
 }
 
 uint8_t emberAfGetNeighborTableSize(void)
 {
-  return emberAfGetNcpConfigItem(EZSP_CONFIG_NEIGHBOR_TABLE_SIZE);
+  return getNcpConfigItem(EZSP_CONFIG_NEIGHBOR_TABLE_SIZE);
 }
 
 EmberStatus emberAfGetNetworkParameters(EmberNodeType* nodeType,
@@ -232,17 +227,17 @@ uint8_t emberAfGetRadioChannel(void)
 
 uint8_t emberAfGetRouteTableSize(void)
 {
-  return emberAfGetNcpConfigItem(EZSP_CONFIG_ROUTE_TABLE_SIZE);
+  return getNcpConfigItem(EZSP_CONFIG_ROUTE_TABLE_SIZE);
 }
 
 uint8_t emberAfGetSecurityLevel(void)
 {
-  return emberAfGetNcpConfigItem(EZSP_CONFIG_SECURITY_LEVEL);
+  return getNcpConfigItem(EZSP_CONFIG_SECURITY_LEVEL);
 }
 
 uint8_t emberAfGetSleepyMulticastConfig(void)
 {
-  return emberAfGetNcpConfigItem(EZSP_CONFIG_SEND_MULTICASTS_TO_SLEEPY_ADDRESS);
+  return getNcpConfigItem(EZSP_CONFIG_SEND_MULTICASTS_TO_SLEEPY_ADDRESS);
 }
 
 EmberStatus emberAfGetSourceRouteTableEntry(uint8_t index,
@@ -266,7 +261,7 @@ uint8_t emberAfGetSourceRouteTableTotalSize(void)
 
 uint8_t emberAfGetStackProfile(void)
 {
-  return emberAfGetNcpConfigItem(EZSP_CONFIG_STACK_PROFILE);
+  return getNcpConfigItem(EZSP_CONFIG_STACK_PROFILE);
 }
 
 bool emberAfMemoryByteCompare(const uint8_t* pointer,
@@ -455,7 +450,7 @@ EzspStatus emberAfSetEzspValue(EzspValueId valueId,
 
 // This will cache all config items to make sure
 // repeated calls do not go all the way to the NCP.
-uint8_t emberAfGetNcpConfigItem(EzspConfigId id)
+static uint8_t getNcpConfigItem(EzspConfigId id)
 {
   // In case we can't cache config items yet, we need a temp
   // variable to store the retrieved EZSP config ID.
@@ -507,7 +502,6 @@ void sli_zigbee_af_reset_and_init_ncp(void)
 {
   uint8_t ep;
   EzspStatus ezspStatus;
-  bool memoryAllocation;
   uint16_t seed0, seed1;
 
   emberAfPreNcpResetCallback();
@@ -605,19 +599,8 @@ void sli_zigbee_af_reset_and_init_ncp(void)
   // Ember's ID is 0x1002 and is the default, but this can be overridden in App Builder.
   emberSetManufacturerCode(EMBER_AF_MANUFACTURER_CODE);
 
-  // Call the plugin and user-specific NCP inits.  This is when configuration
-  // that affects table sizes should occur, which means it must happen before
-  // setPacketBufferCount.
-  memoryAllocation = true;
-  sli_zb_af_ncp_init(memoryAllocation);
-  emberAfNcpInitCallback(memoryAllocation);
-  setPacketBufferCount();
-
-  // Call the plugin and user-specific NCP inits again.  This is where non-
-  // sizing configuration should occur.
-  memoryAllocation = false;
-  sli_zb_af_ncp_init(memoryAllocation);
-  emberAfNcpInitCallback(memoryAllocation);
+  sli_zb_af_ncp_init();
+  emberAfNcpInitCallback();
 
 #ifdef EMBER_AF_MAX_TOTAL_CLUSTER_COUNT
 #if EMBER_AF_MAX_TOTAL_CLUSTER_COUNT > MAX_CLUSTER
@@ -647,11 +630,6 @@ void sli_zigbee_af_reset_and_init_ncp(void)
 
   // Initialize messageSentCallbacks table
   sli_zigbee_af_initialize_message_sent_callback_array();
-
-#ifdef SL_CATALOG_ZIGBEE_GREEN_POWER_SERVER_PRESENT
-  // Initialize the GP Sink Table.
-  emberAfGreenPowerServerSinkTableInit();
-#endif // SL_CATALOG_ZIGBEE_GREEN_POWER_SERVER_PRESENT
 }
 #ifdef EZSP_CPC
 extern bool in_ncp_reset(void);
@@ -694,8 +672,19 @@ void sli_zigbee_af_clear_network_cache(uint8_t networkIndex)
 
 void sli_zigbee_af_cli_version_command(void)
 {
-  // Note that NCP == Network Co-Processor
+  // If there was an ezsp error prior to this function call that leads to bad information
+  // being read from the NCP, the host asserts (ncp stack type is not mesh, ezsp version mismatch, etc)
 
+  // This is especially important for info command where there is a ton of information that is read and
+  // while the ezsp error handler fires, the main loop needs to run again before the cause of the error handler
+  // is actually addressed. However, the info command will finish executing and the host will assert before
+  // the error handler fires, causing the host to crash
+
+  if (ncpNeedsResetAndInit) {
+    return;
+  }
+
+  // Note that NCP == Network Co-Processor
   EmberVersion versionStruct;
 
   // the EZSP protocol version that the NCP is using
@@ -930,43 +919,6 @@ static void createEndpoint(uint8_t endpointIndex)
   (void) emberAfPopNetworkIndex();
 }
 
-// Some NCP's support a 'maximize packet buffer' call.  If that doesn't
-// work, slowly ratchet up the packet buffer count.
-static void setPacketBufferCount(void)
-{
-  uint16_t value;
-  EzspStatus ezspStatus;
-  EzspStatus maxOutBufferStatus;
-
-  maxOutBufferStatus
-    = ezspSetConfigurationValue(EZSP_CONFIG_PACKET_BUFFER_COUNT,
-                                EZSP_MAXIMIZE_PACKET_BUFFER_COUNT);
-
-  // We start from the default used by the NCP and increase up from there
-  // rather than use a hard coded default in the code.
-  // This is more portable to different NCP hardware (i.e. 357 vs. 260).
-  ezspStatus = ezspGetConfigurationValue(EZSP_CONFIG_PACKET_BUFFER_COUNT,
-                                         &value);
-
-  if (maxOutBufferStatus == EZSP_SUCCESS) {
-    emberAfAppPrintln("NCP supports maxing out packet buffers");
-    goto setPacketBufferCountDone;
-  }
-
-  while (ezspStatus == EZSP_SUCCESS) {
-    value++;
-    ezspStatus = ezspSetConfigurationValue(EZSP_CONFIG_PACKET_BUFFER_COUNT,
-                                           value);
-  }
-
-  setPacketBufferCountDone:
-  emberAfAppPrintln("Ezsp Config: set packet buffers to %d",
-                    (maxOutBufferStatus == EZSP_SUCCESS
-                     ? value
-                     : value - 1));
-  emberAfAppFlush();
-}
-
 static uint8_t ezspNextSequence(void)
 {
   return ((++ezspSequenceNumber) & EMBER_AF_MESSAGE_TAG_MASK);
@@ -985,7 +937,7 @@ void ezspErrorHandler(EzspStatus status)
   }
   emberAfCoreFlush();
 
-  ncpNeedsResetAndInit = emberAfPluginZclFrameworkCoreEzspErrorCallback(status);
+  ncpNeedsResetAndInit |= emberAfPluginZclFrameworkCoreEzspErrorCallback(status);
 }
 
 // This is not called if the incoming message

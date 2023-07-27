@@ -66,7 +66,7 @@
  *        - <i></i>
  *
  */
-void otaStartStopClientCommand(bool starting)
+static void otaStartStopClientCommand(bool starting)
 {
   emberAfCorePrintln("%p" "ing OTA client state machine",
                      starting ? "start" : "stopp");

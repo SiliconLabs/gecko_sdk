@@ -30,6 +30,8 @@ requires:
   - name: rail_util_features
   - name: rail_util_power_manager_init
     condition: [power_manager]
+  - name: rail_util_sfm_sequencer
+    condition: [device_sdid_220]
 
   # Note: In the future, this rail_util_rf_path dependency needs to be required by a more generic component.
   - name: rail_util_rf_path
@@ -83,6 +85,9 @@ include:
       - path: rail_chip_specific.h
     condition:
       - device_series_2
+  - path: platform/radio/rail_lib/protocol/sidewalk
+    file_list:
+      - path: rail_sidewalk.h
 template_contribution:
   - name: component_catalog
     value: rail_lib

@@ -294,7 +294,9 @@ void esl_security_timeout(sl_sleeptimer_timer_handle_t *timer, void *data)
 
     EMU_EM4Init(&em4init);
     CORE_CRITICAL_SECTION(
+#if defined(_SILICON_LABS_32B_SERIES_2)
       GPIO_IntClear(GPIO_IntGet());
+#endif // defined(_SILICON_LABS_32B_SERIES_2)
       EMU_EnterEM4S();
       );
     NVIC_SystemReset(); // just in case, we should never get here, anyway.

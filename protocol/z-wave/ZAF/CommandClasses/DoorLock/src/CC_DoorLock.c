@@ -58,6 +58,9 @@ static cc_door_lock_data_t door_lock_data = { 0 };
 /// Last used RX options. Used by TSE and supervision.
 static RECEIVE_OPTIONS_TYPE_EX door_lock_rx_option;
 
+// Remaining duration from the lock change.
+static uint8_t remaining_duration = 0;
+
 /****************************************************************************/
 /*                              EXPORTED DATA                               */
 /****************************************************************************/
@@ -210,8 +213,10 @@ static received_frame_status_t CC_DoorLock_handler(
         // Already at requested mode, nothing to change. Just exit with default return value
         break;
       }
-      output->duration = cc_door_lock_mode_hw_change(
-          input->frame->ZW_DoorLockOperationSetV2Frame.doorLockMode);
+
+      remaining_duration = cc_door_lock_mode_hw_change(
+          input->frame->ZW_DoorLockOperationSetV2Frame.doorLockMode); 
+      output->duration = remaining_duration;
 
       /* If the change was made, save rx options for later use */
       door_lock_rx_option = *(input->rx_options);
@@ -361,7 +366,7 @@ static void prepare_operation_report(ZW_APPLICATION_TX_BUFFER *pTxBuffer)
   frame->lockTimeoutMinutes = DOOR_LOCK_OPERATION_SET_TIMEOUT_NOT_SUPPORTED;;
   frame->lockTimeoutSeconds = DOOR_LOCK_OPERATION_SET_TIMEOUT_NOT_SUPPORTED;
   frame->targetDoorLockMode = frame->currentDoorLockMode; // Assuming instantaneous lock state change, target and current mode always equal
-  frame->duration =  0; // Duration is always 0 with instantaneous lock state change
+  frame->duration = remaining_duration; // How much time is left until state change (in seconds)
 }
 
 /**
@@ -495,6 +500,8 @@ static void
 cc_door_lock_operation_set_done()
 {
   SaveStatus();
+
+  remaining_duration = 0;
 
   ZAF_TSE_Trigger(
       CC_DoorLock_operation_report_stx,

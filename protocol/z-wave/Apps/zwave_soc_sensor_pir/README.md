@@ -90,34 +90,42 @@ Y: For Z-Wave node count is equal to 5 and for Z-Wave Long Range it is 0.
 
 <table>
 <tr>
-    <th>Button</th>
-    <th>Action</th>
-    <th>Description</th>
+    <th rowspan="2">Button</th>
+    <th rowspan="2">Action</th>
+    <th colspan="2">Description</th>
+</tr><tr>
+    <th>Radio Board <sup>1</sup></th>
+    <th>Thunderboard <sup>1</sup></th>
 </tr><tr>
     <td>RST</td>
     <td>Press</td>
-    <td>
+    <td colspan="2">
         Resets the firmware of an application (like losing power). All volatile memory will be cleared.<br>
         Sends Wake Up Notification.
     </td>
 </tr><tr>
     <td>BTN0</td>
     <td>Press</td>
-    <td>Sends Battery Report (only if the device is not sleeping)</td>
+    <td colspan="2">Sends Battery Report (only if the device is not sleeping)</td>
 </tr><tr>
-    <td rowspan="2">BTN1</td>
+    <td rowspan="3">BTN1</td>
     <td>Press</td>
-    <td>
+    <td colspan="2">
         Enter "learn mode" (sending node info frame) to add/remove the device.<br>
         Removing the device from a network will reset it.
     </td>
 </tr><tr>
+    <td>Hold for at least 1 second and release</td>
+    <td></td>
+    <td>Simulates a "Motion detected" event.</td>
+</tr><tr>
     <td>Hold for at least 5 seconds and release</td>
-    <td>Perform a reset to factory default operation of the device, and a Device Reset Locally Notification Command is sent via Lifeline.</td>
+    <td colspan="2">Perform a reset to factory default operation of the device, and a Device Reset Locally Notification Command is sent via Lifeline.</td>
 </tr><tr>
     <td>BTN2</td>
     <td>Hold for at least 1 second and release</td>
-    <td>Simulates a "Motion detected."</td>
+    <td>Simulates a "Motion detected" event.</td>
+    <td></td>
 </tr>
 </table>
 
@@ -133,6 +141,9 @@ Y: For Z-Wave node count is equal to 5 and for Z-Wave Long Range it is 0.
     </td>
 </tr>
 </table>
+
+<sup>1</sup>: A Radio Board is plug-in board for the Wireless Pro Kit Mainboard.
+A Thunderboard is a stand-alone kit with a direct USB Type-C connection.
 
 Note : BTN0 press works only on the 800 series and has no effect on the 700 series. This is due to the differences in the silicon. The BTN0 press is able to wake up the 800 series from EM4 mode where as this is not possible for the 700 series.
 

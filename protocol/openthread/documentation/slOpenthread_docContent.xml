@@ -47,9 +47,9 @@
 " itemURI="file:an1271-efr32-secure-key-storage.pdf" label="AN1271:  Secure Key Storage" priority="50">
 		<property key="sdkAndProtocolTags" value="Bluetooth Bluetooth\ Mesh Zigbee Proprietary Thread HomeKit"/>
 	</contentItemData>
-	<contentItemData category="Application Notes" description="Describes how to lock and unlock the debug access of EFR32 Gecko Series 2  devices. Many aspects of the debug access, including the secure debug unlock are described. The Debug  Challenge Interface (DCI) and Secure Engine (SE) Mailbox Interface for locking and unlocking debug  access are also included.
-" itemURI="file:an1190-efr32-secure-debug.pdf" label="AN1190:  Series 2 Secure Debug" priority="50">
-		<property key="sdkAndProtocolTags" value="Bluetooth Bluetooth\ Mesh Zigbee Proprietary Thread HomeKit"/>
+	<contentItemData category="Application Notes" description="Describes how to run a combination of Zigbee and OpenThread networking stacks and the Zigbee application layer on a System-on-Chip (SoC). 
+" itemURI="file:an1418-concurrent-mp-soc.pdf" label="AN1418: Running Zigbee and OpenThread Concurrently on a System-on-Chip" priority="25">
+		<property key="sdkAndProtocolTags" value="Zigbee Thread"/>
 	</contentItemData>
 	<contentItemData category="Quick Start Guides" description="Provides basic information on configuring, building, and installing applications using the Silicon Labs OpenThread stack.
 " itemURI="file:qsg170-openthread-sdk-quick-start-guide.pdf" label="QSG170: Silicon Labs OpenThread Quick Start Guide" priority="1"/>
@@ -97,6 +97,10 @@
 	<contentItemData category="User's Guides" description="Introduces the security concepts that must be considered when implementing an Internet of Things (IoT)  system. Using the ioXt Alliance's eight security principles as a structure, it clearly delineates  the solutions Silicon Labs provides to support endpoint security and what you must do outside of  the Silicon Labs framework. 
 " itemURI="file:ug103-05-fundamentals-security.pdf" label="UG103.05: IoT Endpoint Security Fundamentals" priority="50">
 		<property key="sdkAndProtocolTags" value="Bluetooth Bluetooth\ Mesh Zigbee Proprietary Thread Z-Wave HomeKit Wi-SUN"/>
+	</contentItemData>
+	<contentItemData category="Application Notes" description="Describes how to lock and unlock the debug access of EFR32 Gecko Series 2  devices. Many aspects of the debug access, including the secure debug unlock are described. The Debug  Challenge Interface (DCI) and Secure Engine (SE) Mailbox Interface for locking and unlocking debug  access are also included.
+" itemURI="file:an1190-efr32-secure-debug.pdf" label="AN1190:  Series 2 Secure Debug" priority="50">
+		<property key="sdkAndProtocolTags" value="Bluetooth Bluetooth\ Mesh Zigbee Proprietary Thread HomeKit"/>
 	</contentItemData>
 	<contentItemData category="Application Notes" description="How to authenticate an EFR32 Series 2 device with Secure Vault, using secure device certificates  and signatures.
 " itemURI="file:an1268-efr32-secure-identity.pdf" label="AN1268:  Authenticating Silicon Labs Devices using Device Certificates" priority="50">

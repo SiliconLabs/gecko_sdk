@@ -3,7 +3,7 @@
  * @brief Automatic IV Update by age implementation
  *******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -67,6 +67,7 @@ static void on_age_timer(app_timer_t *handle, void *data);
 
 static void age_timer_start(uint32_t timeout_s);
 static void age_timer_stop(void);
+static void handle_iv_update_age(void);
 
 /***************************************************************************//**
  *  Handling of mesh iv_update_by_age related events.
@@ -74,38 +75,40 @@ static void age_timer_stop(void);
  ******************************************************************************/
 void sl_btmesh_iv_update_by_age_on_event(sl_btmesh_msg_t* evt)
 {
-  uint8_t iv_update_state;
-  uint32_t iv_index;
-
   switch (SL_BT_MSG_ID(evt->header)) {
     case sl_btmesh_evt_node_initialized_id:
       if (evt->data.evt_node_initialized.provisioned) {
-        sl_btmesh_node_get_ivupdate_state(&iv_index, &iv_update_state);
-        if (iv_update_state == NORMAL_OPERATION) {
-          uint32_t age = get_iv_update_age();
-          if (age < SL_BTMESH_IV_UPDATE_FIX_TIMEOUT_S) {
-            age_timer_start(SL_BTMESH_IV_UPDATE_FIX_TIMEOUT_S - age);
-          } else {
-            age_timer_start(0);
-          }
-        }
+        handle_iv_update_age();
       }
       break;
+    case sl_btmesh_evt_prov_initialized_id:
     case sl_btmesh_evt_node_provisioned_id:
-      sl_btmesh_node_get_ivupdate_state(&iv_index, &iv_update_state);
-      if (iv_update_state == NORMAL_OPERATION) {
-        age_timer_start(SL_BTMESH_IV_UPDATE_FIX_TIMEOUT_S);
-      }
-      break;
     case sl_btmesh_evt_node_changed_ivupdate_state_id:
-      if (evt->data.evt_node_changed_ivupdate_state.state == NORMAL_OPERATION) {
-        age_timer_start(SL_BTMESH_IV_UPDATE_FIX_TIMEOUT_S);
-      } else {
-        age_timer_stop();
-      }
+      handle_iv_update_age();
       break;
     default:
       break;
+  }
+}
+
+/***************************************************************************//**
+ *  Start or stop automatic IV update timer based on IV update state
+ ******************************************************************************/
+static void handle_iv_update_age(void)
+{
+  uint8_t iv_update_state;
+  uint32_t iv_index;
+  sl_status_t sc = sl_btmesh_node_get_ivupdate_state(&iv_index, &iv_update_state);
+  log_status_error_f(sc, "Can't get IV update state");
+  if (iv_update_state == NORMAL_OPERATION) {
+    uint32_t age = get_iv_update_age();
+    if (age < SL_BTMESH_IV_UPDATE_FIX_TIMEOUT_S) {
+      age_timer_start(SL_BTMESH_IV_UPDATE_FIX_TIMEOUT_S - age);
+    } else {
+      age_timer_start(0);
+    }
+  } else {
+    age_timer_stop();
   }
 }
 

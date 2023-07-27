@@ -29,6 +29,7 @@
 #include <map>
 #include <string.h>
 
+#include "common/api_strings.hpp"
 #include "common/code_utils.hpp"
 #include "dbus/client/client_error.hpp"
 #include "dbus/client/thread_api_dbus.hpp"
@@ -688,6 +689,11 @@ ClientError ThreadApiDBus::GetDnssdCounters(DnssdCounters &aDnssdCounters)
 ClientError ThreadApiDBus::GetTelemetryData(std::vector<uint8_t> &aTelemetryData)
 {
     return GetProperty(OTBR_DBUS_PROPERTY_TELEMETRY_DATA, aTelemetryData);
+}
+
+ClientError ThreadApiDBus::GetCapabilities(std::vector<uint8_t> &aCapabilities)
+{
+    return GetProperty(OTBR_DBUS_PROPERTY_CAPABILITIES, aCapabilities);
 }
 
 std::string ThreadApiDBus::GetInterfaceName(void)

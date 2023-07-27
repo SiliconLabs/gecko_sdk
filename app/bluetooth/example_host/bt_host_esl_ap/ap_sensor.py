@@ -28,6 +28,7 @@ from collections import namedtuple
 from datetime import datetime as dt
 from datetime import timedelta
 from ap_constants import TLV_RESPONSE_READ_SENSOR
+from ap_logger import getLogger, log
 
 SENSOR_INFO_LENGTH_SHORT = 3
 SENSOR_INFO_LENGTH_LONG = 5
@@ -165,15 +166,15 @@ SENSOR_TYPES = {
                                           "Silabs button")
 }
 
-def process_sensor_data_response(data: bytes, sensor_info, logging):
+def process_sensor_data_response(data: bytes, sensor_info):
     """ Process and display ESL sensor data
         input:
             - data: Event data contains sensor information
             - sensor_info: ESL tag sensor information
-            - logging: AP logging component
     """
     resp_code = data[0] & 0x0F
     resp_length = data[0] & 0xF0
+    logging = getLogger()
 
     if resp_code == TLV_RESPONSE_READ_SENSOR:
         logging.info("Sensor data received: " + data.hex())
@@ -183,12 +184,11 @@ def process_sensor_data_response(data: bytes, sensor_info, logging):
             sensor_type = sensor_info[data[1]]
             if resp_length > 1:
                 if sensor_type in SENSOR_TYPES:
-                    from esl_tag import TAG_MIN_JUSTIFY_COLUMN
-                    logging.print("Sensor type: " + SENSOR_TYPES[sensor_type].desc)
+                    log("Sensor type: " + SENSOR_TYPES[sensor_type].desc)
                     value = SENSOR_TYPES[sensor_type].from_bytes(data[2:])
-                    logging.print("".ljust(TAG_MIN_JUSTIFY_COLUMN) + str(value))
+                    log("             " + str(value))
                 else:
-                    logging.print("Sensor type " + str(sensor_type) +  " not supported")
+                    log(f"Sensor type {sensor_type} not supported")
             else:
                 logging.info("No sensor data")
         else:

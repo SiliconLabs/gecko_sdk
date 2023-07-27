@@ -3,7 +3,7 @@
  * @brief BT Mesh Firmware Distribution Server
  *******************************************************************************
  * # License
- * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -3373,6 +3373,7 @@ void sl_btmesh_fw_distribution_server_delete_step_handle(void)
 void sl_btmesh_fw_distribution_server_on_event(const sl_btmesh_msg_t *const evt)
 {
   switch (SL_BT_MSG_ID(evt->header)) {
+    case sl_btmesh_evt_prov_initialized_id:
     case sl_btmesh_evt_node_provisioned_id: {
       sl_btmesh_fw_distribution_server_init();
       break;

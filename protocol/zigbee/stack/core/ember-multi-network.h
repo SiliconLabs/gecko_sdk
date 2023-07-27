@@ -293,6 +293,20 @@ EmberPacketAction sli_zigbee_call_packet_handoff_incoming_handler(
   void *data);
 #endif // defined(EMBER_MULTI_NETWORK_STRIPPED)
 
+//------------------------------------------------------------------------------
+// Multi network events
+//------------------------------------------------------------------------------
+#if defined(EMBER_MULTI_NETWORK_STRIPPED)
+// This code is for no multi-network at all
+#define sli_zigbee_get_multi_network_forked_event(x)  (x)
+#define sli_zigbee_get_network_index_from_multi_network_event(event, list) EMBER_NULL_NETWORK_INDEX
+#else // !EMBER_MULTI_NETWORK_STRIPPED
+// this code is multi-network and maybe multi-PAN
+EmberEvent* sli_zigbee_get_multi_network_forked_event(EmberEvent *list);
+uint8_t sli_zigbee_get_network_index_from_multi_network_event(EmberEvent *event,
+                                                              EmberEvent *list);
+#endif // EMBER_MULTI_NETWORK_STRIPPED
+
 // This is called also from the HAL so we need to provide an implementation
 // for both stripped and unstripped versions of the stack.
 /*

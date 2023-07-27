@@ -48,7 +48,10 @@ extern "C" {
 
 /** Number of decoder states supported by current device. */
 #define LESENSE_NUM_DECODER_STATES   (_LESENSE_DECSTATE_DECSTATE_MASK + 1)
-
+#if defined(_SILICON_LABS_32B_SERIES_2)
+/** Number of ARCs supported by current device. Number of ARCS is the number of states times 2 */
+#define LESENSE_NUM_ARCS   (LESENSE_NUM_DECODER_STATES << 1)
+#endif
 /** Number of LESENSE channels. */
 #define LESENSE_NUM_CHANNELS         16
 
@@ -1369,8 +1372,13 @@ typedef LESENSE_DecStCond_TypeDef LESENSE_DecStDesc_TypeDef;
 
 /** Configuration structure for decoder. */
 typedef struct {
+#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
   /** Descriptor of the 16 or 32 decoder states depending on the device. */
   LESENSE_DecStDesc_TypeDef St[LESENSE_NUM_DECODER_STATES];
+#else
+  /** Descriptor of the 64 Arcs on series 2 devices. */
+  LESENSE_DecStDesc_TypeDef St[LESENSE_NUM_ARCS];
+#endif
 } LESENSE_DecStAll_TypeDef;
 
 /** Default configuration for all decoder states. */

@@ -3,7 +3,7 @@
  * @brief Automatic IV Update by sequence number implementation
  *******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -68,39 +68,40 @@ static void on_seq_num_testing_timer(app_timer_t *handle, void *data);
 static void seq_num_testing_start(void);
 static void seq_num_testing_stop(void);
 
+static void handle_seq_num_testing(void);
+
 /***************************************************************************//**
  *  Handling of mesh iv_update related events.
  *  @param[in] evt  Pointer to incoming event.
  ******************************************************************************/
 void sl_btmesh_iv_update_by_seq_num_on_event(sl_btmesh_msg_t* evt)
 {
-  uint8_t iv_update_state;
-  uint32_t iv_index;
-
   switch (SL_BT_MSG_ID(evt->header)) {
     case sl_btmesh_evt_node_initialized_id:
       if (evt->data.evt_node_initialized.provisioned) {
-        sl_btmesh_node_get_ivupdate_state(&iv_index, &iv_update_state);
-        if (iv_update_state == NORMAL_OPERATION) {
-          seq_num_testing_start();
-        }
+        handle_seq_num_testing();
       }
       break;
+    case sl_btmesh_evt_prov_initialized_id:
     case sl_btmesh_evt_node_provisioned_id:
-      sl_btmesh_node_get_ivupdate_state(&iv_index, &iv_update_state);
-      if (iv_update_state == NORMAL_OPERATION) {
-        seq_num_testing_start();
-      }
-      break;
     case sl_btmesh_evt_node_changed_ivupdate_state_id:
-      if (evt->data.evt_node_changed_ivupdate_state.state == NORMAL_OPERATION) {
-        seq_num_testing_start();
-      } else {
-        seq_num_testing_stop();
-      }
+      handle_seq_num_testing();
       break;
     default:
       break;
+  }
+}
+
+static void handle_seq_num_testing(void)
+{
+  uint8_t iv_update_state;
+  uint32_t iv_index;
+  sl_status_t sc = sl_btmesh_node_get_ivupdate_state(&iv_index, &iv_update_state);
+  log_status_error_f(sc, "Can't get IV update state");
+  if (iv_update_state == NORMAL_OPERATION) {
+    seq_num_testing_start();
+  } else {
+    seq_num_testing_stop();
   }
 }
 

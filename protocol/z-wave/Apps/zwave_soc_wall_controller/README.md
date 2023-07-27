@@ -105,46 +105,45 @@ The following buttons and LEDs are used.
 
 <table>
 <tr>
-    <th>Button</th>
-    <th>Action</th>
-    <th>Description</th>
+    <th rowspan="2">Button</th>
+    <th rowspan="2">Action</th>
+    <th colspan="2">Description</th>
 </tr><tr>
-    <th>WSTK</th>
-    <th>800 Dev Kit</th>
+    <th>Radio Board <sup>1</sup></th>
+    <th>Thunderboard <sup>1</sup></th>
 </tr><tr>
     <td>RST</td>
     <td>Press</td>
-    <td>Resets the firmware of an application (like losing power). All volatile memory will be cleared.</td>
+    <td colspan="2">Resets the firmware of an application (like losing power). All volatile memory will be cleared.</td>
 </tr><tr>
     <td rowspan="3">BTN0</td>
     <td>Press</td>
-    <td><ul>
+    <td colspan="2"><ul>
         <li>Lifeline with Central Scene Key Attribute "Key Pressed 1 Time"</li>
         <li>Trigger association group 2: Basic Set</li>
     </ul></td>
 </tr><tr>
     <td>Hold start</td>
-    <td><ul>
+    <td colspan="2"><ul>
         <li>Lifeline with Central Scene Key Attribute "Key Held Down"</li>
         <li>Trigger association group 3: Multilevel Switch Start Level Change</li>
     </ul></td>
 </tr><tr>
     <td>Hold release</td>
-    <td><ul>
+    <td colspan="2"><ul>
         <li>Lifeline with Central Scene Key Attribute "Key Released"</li>
         <li>Trigger association group 3: Multilevel Switch Stop Level Change</li>
     </ul></td>
 </tr><tr>
     <td rowspan="2">BTN1</td>
     <td>Press</td>
-    <td>
+    <td colspan="2">
         Enter "learn mode" (sending node info frame) to add/remove the device.<br>
         Removing the device from a network will reset it.
     </td>
 </tr><tr>
     <td>Hold for at least 5 seconds and release</td>
-    <td>Perform a reset to factory default operation of the device, and a Device Reset Locally Notification Command is sent via Lifeline.</td>
-    <td></td>
+    <td colspan="2">Perform a reset to factory default operation of the device, and a Device Reset Locally Notification Command is sent via Lifeline.</td>
 </tr><tr>
     <td rowspan="3">BTN2</td>
     <td>Press</td>
@@ -199,6 +198,9 @@ The following buttons and LEDs are used.
     </td>
 </tr>
 </table>
+
+<sup>1</sup>: A Radio Board is plug-in board for the Wireless Pro Kit Mainboard.
+A Thunderboard is a stand-alone kit with a direct USB Type-C connection.
 
 ## Firmware Update
 

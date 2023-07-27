@@ -29,7 +29,11 @@
  ******************************************************************************/
 #include "em_common.h"
 #include "sl_ncp.h"
+
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
+#endif // SL_COMPONENT_CATALOG_PRESENT
+
 #include "app.h"
 
 #ifdef SL_CATALOG_BTMESH_STACK_FW_UPDATE_SERVER_PRESENT

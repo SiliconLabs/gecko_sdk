@@ -9,6 +9,7 @@ description: >
   temperature by, or to change the temperature to a certain percentage.
 
   For more details about lighting please see Lighting Client.
+  This component is prepared for integration into SOC applications.
 
   This is a Low-Code component. For example, changing all CTL Server nodes' color
   temperature by 1 percent can be achieved by adding an event handler for mesh
@@ -57,3 +58,6 @@ recommends:
 template_contribution:
   - name: component_catalog
     value: btmesh_ctl_client
+
+validation_helper:
+  - path: "../../script/validation/soc_ncp_compatibility.lua"

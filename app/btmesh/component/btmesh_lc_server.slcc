@@ -7,6 +7,7 @@ description: >
   occupancy and ambient light level sensors and adjust the dim level of a light.
   LC Server extends Lightness Server model and Generic OnOff Server. It also has
   a corresponding LC Setup Server model which is present in the same element.
+  This component is prepared for integration into SOC applications.
 
   This is a No-Code component when added to an existing project using Light
   Lightness Server.
@@ -53,3 +54,11 @@ template_contribution:
     value:
       name: lc_server
       count: 1
+  - name: "btmesh_app_node_reset"
+    value:
+      include: "sl_btmesh_lc_server.h"
+      function: "sl_btmesh_lc_server_on_node_reset"
+    priority: -5
+
+validation_helper:
+  - path: "../../script/validation/soc_ncp_compatibility.lua"

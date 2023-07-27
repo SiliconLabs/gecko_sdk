@@ -278,7 +278,7 @@ void sli_zigbee_af_device_table_print_buffer(uint8_t *buffer, uint16_t bufLen)
 
 // --------------------------------
 // CLI section
-void deviceTabeCliServiceDiscoveryCallback(const EmberAfServiceDiscoveryResult* result)
+static void deviceTabeCliServiceDiscoveryCallback(const EmberAfServiceDiscoveryResult* result)
 {
   if (result->zdoRequestClusterId == IEEE_ADDRESS_REQUEST) {
     if (result->status == EMBER_AF_UNICAST_SERVICE_DISCOVERY_TIMEOUT) {

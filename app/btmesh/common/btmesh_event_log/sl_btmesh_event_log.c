@@ -186,8 +186,7 @@ void sl_btmesh_log_btmesh_events(sl_btmesh_msg_t *evt)
       app_log_append(" )" NL);
     } break;
     case sl_btmesh_evt_node_reset_id: {
-      app_log(PREFIX "node_reset(");
-      app_log_append(" )" NL);
+      sl_btmesh_log_on_node_reset();
     } break;
     case sl_btmesh_evt_node_ivrecovery_needed_id: {
       app_log(PREFIX "node_ivrecovery_needed(");
@@ -2711,6 +2710,15 @@ void sl_btmesh_log_btmesh_events(sl_btmesh_msg_t *evt)
       #endif // SL_BTMESH_EVENT_LOG_ENABLE_UNKNOWN_CFG_VAL
       break;
   }
+}
+
+/*******************************************************************************
+ * Component node reset handler.
+ ******************************************************************************/
+void sl_btmesh_log_on_node_reset(void)
+{
+  app_log(PREFIX "node_reset(");
+  app_log_append(" )" NL);
 }
 
 /*******************************************************************************

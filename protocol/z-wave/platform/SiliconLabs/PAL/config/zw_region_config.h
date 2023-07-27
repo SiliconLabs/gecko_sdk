@@ -10,7 +10,7 @@
 
 // <h> Z-Wave Radio Configuration
 
-// <o> The supported region of the device. Used only if region value is not previously written in MFG_ZWAVE_COUNTRY_FREQ token. To delete value from MFG token, run: commander flash --tokengroup znet --token MFG_ZWAVE_COUNTRY_FREQ:0xFF
+// <o ZW_REGION> The supported region of the device. Used only if region value is not previously written in MFG_ZWAVE_COUNTRY_FREQ token. To delete value from MFG token, run: commander flash --tokengroup znet --token MFG_ZWAVE_COUNTRY_FREQ:0xFF
 // <i> The supported region of the device. Used only if region value is not previously written in MFG_ZWAVE_COUNTRY_FREQ token. To delete value from MFG token, run: commander flash --tokengroup znet --token MFG_ZWAVE_COUNTRY_FREQ:0xFF
 // <REGION_DEFAULT=> Default (Europe)
 // <REGION_ANZ=> Australia / New Zealand

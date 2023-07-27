@@ -2341,7 +2341,7 @@ psa_status_t sli_crypto_transparent_aead_finish(sli_crypto_transparent_aead_oper
       sli_gcm_finish(operation,
                      NULL,
                      tag,
-                     tag_size);
+                     tag_len);
 
       break;
     }
@@ -2365,7 +2365,7 @@ psa_status_t sli_crypto_transparent_aead_finish(sli_crypto_transparent_aead_oper
       sli_ccm_finish(operation,
                      NULL,
                      tag,
-                     tag_size);
+                     tag_len);
       break;
     }
 #endif
@@ -2375,7 +2375,7 @@ psa_status_t sli_crypto_transparent_aead_finish(sli_crypto_transparent_aead_oper
 
   sli_psa_zeroize(operation, sizeof(*operation));
 
-  *tag_length = tag_size;
+  *tag_length = tag_len;
 
   return PSA_SUCCESS;
 #else// PSA_WANT_ALG_GCM || PSA_WANT_ALG_CCM

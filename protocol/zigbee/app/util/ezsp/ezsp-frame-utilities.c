@@ -268,7 +268,7 @@ void fetchEmberNetworkInitStruct(EmberNetworkInitStruct* networkInitStruct)
   networkInitStruct->bitmask = fetchInt16u();
 }
 
-void appendEmberVersionStruct(const EmberVersion* versionStruct)
+static UNUSED void appendEmberVersionStruct(const EmberVersion* versionStruct)
 {
   appendInt16u(versionStruct->build);
   appendInt8u(versionStruct->major);
@@ -425,7 +425,7 @@ void fetchEmberGpSinkList(EmberGpSinkListEntry *value)
   }
 }
 
-void appendEmberGpSinkList(EmberGpSinkListEntry *value)
+static void appendEmberGpSinkList(EmberGpSinkListEntry *value)
 {
   for (uint8_t i = 0; i < 2; i++) {
     appendInt8u(value->type);

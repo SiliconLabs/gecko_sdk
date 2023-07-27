@@ -4,8 +4,9 @@ package: "Btmesh"
 description: >
   Used to support the functionality of a node that can configure scenes on a
   network and trigger a state transition to a scene on another node.
-  
+
   This component provides a function to recall a scene identified by its number.
+  This component is prepared for integration into SOC applications.
 
   This is a No-Code component.
 category: "Bluetooth Mesh|Models|Time and Scenes"
@@ -29,15 +30,21 @@ provides:
 requires:
   - name: "app_assert"
   - name: "app_btmesh_util"
-  - name: "btmesh_provisionee"
+  - name: "btmesh_role_init"
   - name: "btmesh_stack_scene_client"
   - name: "btmesh_stack"
   - name: "app_timer"
 recommends:
   - id: "app_timer"
+  - id: "btmesh_provisionee"
 
 template_contribution:
   - name: "btmesh_on_event"
     value:
       include: "sl_btmesh_scene_client.h"
       function: "sl_btmesh_handle_scene_client_on_event"
+  - name: component_catalog
+    value: "btmesh_scene_client"
+
+validation_helper:
+  - path: "../../script/validation/soc_ncp_compatibility.lua"

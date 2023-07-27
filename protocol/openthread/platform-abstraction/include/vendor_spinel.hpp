@@ -45,6 +45,7 @@ enum
     SPINEL_PROP_VENDOR_ANTENNA = (SPINEL_PROP_VENDOR__BEGIN + 0),
     SPINEL_PROP_VENDOR_COEX    = (SPINEL_PROP_VENDOR__BEGIN + 1),
     SPINEL_PROP_VENDOR_TEST    = (SPINEL_PROP_VENDOR__BEGIN + 2),
+    SPINEL_PROP_VENDOR_EFR32   = (SPINEL_PROP_VENDOR__BEGIN + 3),
 };
 } // namespace Vendor
 } // namespace Spinel
@@ -85,6 +86,14 @@ enum
 };
 
 } // namespace Test
+
+namespace Efr32 {
+enum
+{
+    EFR32_RADIO_COUNTERS_COMMAND,
+};
+
+} // namespace Efr32
 } // namespace Vendor
 } // namespace ot
 #endif // _NCP_SPINEL_HPP

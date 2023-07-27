@@ -364,7 +364,7 @@ void NcpBase::HandleReceive(const uint8_t *aBuf, uint16_t aBufLength)
 
     mCurCommandIID = SPINEL_HEADER_GET_IID(header);
 
-    if (mCurCommandIID > SPINEL_HEADER_IID_MAX)
+    if (mCurCommandIID >= kSpinelHeaderMaxNumIID)
     {
         IgnoreError(WriteLastStatusFrame(header, SPINEL_STATUS_INVALID_INTERFACE));
         ExitNow();
@@ -2776,7 +2776,7 @@ void otNcpRegisterPeekPoke(otNcpDelegateAllowPeekPoke aAllowPeekDelegate, otNcpD
 
     if (ncp != nullptr)
     {
-        ncp->RegisterPeekPoke(aAllowPeekDelegate, aAllowPokeDelegate);
+        ncp->RegisterPeekPokeDelegates(aAllowPeekDelegate, aAllowPokeDelegate);
     }
 }
 #endif // OPENTHREAD_CONFIG_NCP_ENABLE_PEEK_POKE

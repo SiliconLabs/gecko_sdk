@@ -60,25 +60,5 @@
       <properties write="true" write_requirement="mandatory"/>
     </characteristic>
   </service>
-    
-	 <!--Security Service-->
-  <service advertise="false" id="security_service" name="Zigbee Direct Security Service" requirement="mandatory" sourceId="com.lighting.service.security_service" type="primary" uuid="29144af4-0000-4481-bfe9-6d0299b429e3">
-    <informativeText>Abstract:</informativeText>
-	
-    <!--Authenticate_25519-->
-    <characteristic id="authenticate_25519" name="Authenticate_25519" sourceId="com.lighting.characteristic.authenticate_25519" uuid="29144af4-0001-4481-bfe9-6d0299b429e3">
-      <informativeText/>
-      <value length="1" type="user" variable_length="true">0</value>
-      <properties indicate="true" indicate_requirement="mandatory" write="true" write_requirement="mandatory"/>
-    </characteristic>
 
-        
-    <!--Authenticate_p256-->
-    <characteristic id="authenticate_p256" name="Authenticate_p256" sourceId="com.lighting.characteristic.authenticate_p256" uuid="29144af4-0003-4481-bfe9-6d0299b429e3">
-      <informativeText/>
-      <value length="1" type="user" variable_length="true">0</value>
-      <properties indicate="true" indicate_requirement="mandatory" write="true" write_requirement="mandatory"/>
-    </characteristic>
-    </service> 
-	
 </gatt>

@@ -23,7 +23,7 @@
 
 #include <openthread/cli.h>
 #include "common/code_utils.hpp"
-#include "radio_vendor.h"
+#include "radio_extension.h"
 #include "sl_ot_custom_cli.h"
 
 static otError helpCommand(void *context, uint8_t argc, char *argv[]);
@@ -43,7 +43,7 @@ static otError getDpStateCommand(void *context, uint8_t argc, char *argv[])
     // 1. Enabled = pulse-width!=0, Disabled = pulse-width==0
     // 2. Pulse-width is adjustable in us resolution (1-255)
     uint8_t dpPulse = 0U;
-    SuccessOrExit(error = otPlatRadioVendorGetDpState(&dpPulse));
+    SuccessOrExit(error = otPlatRadioExtensionGetDpState(&dpPulse));
     otCliOutputFormat("Directional PRIORITY: %s, %u (us)",
                       (dpPulse > 0u) ? "ENABLED" : "DISABLED",
                       dpPulse);
@@ -67,7 +67,7 @@ static otError setDpStateCommand(void *context, uint8_t argc, char *argv[])
     // 1. Enabled = pulse-width!=0, Disabled = pulse-width==0
     // 2. Pulse-width is adjustable in us resolution (1-255)
     uint8_t dpPulse = (uint8_t)strtoul(argv[0], NULL, 10);
-    SuccessOrExit(error = otPlatRadioVendorSetDpState(dpPulse));
+    SuccessOrExit(error = otPlatRadioExtensionSetDpState(dpPulse));
     otCliOutputFormat("\r\n");
 
 exit:
@@ -98,7 +98,7 @@ static otError getGpioInputOverrideCommand(void *context, uint8_t argc, char *ar
         ExitNow(error = OT_ERROR_INVALID_ARGS);
     }
     bool enabled;
-    SuccessOrExit(error = otPlatRadioVendorGetGpioInputOverride(gpioIndex, &enabled));
+    SuccessOrExit(error = otPlatRadioExtensionGetGpioInputOverride(gpioIndex, &enabled));
     otCliOutputFormat("%s GPIO: %s", gpioNames[gpioIndex], enabled ? "ENABLED" : "DISABLED");
     otCliOutputFormat("\r\n");
 
@@ -122,7 +122,7 @@ static otError setGpioInputOverrideCommand(void *context, uint8_t argc, char *ar
         otCliOutputFormat("GPIO index is out of range.\r\n");
         ExitNow(error = OT_ERROR_INVALID_ARGS);
     }
-    SuccessOrExit(error = otPlatRadioVendorSetGpioInputOverride(gpioIndex, enabled));
+    SuccessOrExit(error = otPlatRadioExtensionSetGpioInputOverride(gpioIndex, enabled));
     otCliOutputFormat("\r\n");
 
 exit:
@@ -159,14 +159,14 @@ static otError getPhyStateCommand(void *context, uint8_t argc, char *argv[])
     uint8_t activePhy;
     uint8_t timeout;
 
-    SuccessOrExit(error = otPlatRadioVendorGetActiveRadio(&activePhy));
+    SuccessOrExit(error = otPlatRadioExtensionGetActiveRadio(&activePhy));
     if (activePhy >= PHY_COUNT) {
         activePhy = PHY_COUNT;
     }
     otCliOutputFormat("Active Radio PHY:%s", phyNames[activePhy]);
     otCliOutputFormat("\r\n");
 
-    SuccessOrExit(error = otPlatRadioVendorGetPhySelectTimeout(&timeout));
+    SuccessOrExit(error = otPlatRadioExtensionGetPhySelectTimeout(&timeout));
     otCliOutputFormat("PHY Select: %s, %u (ms)",
                       (timeout > 0u) ? "ENABLED" : "DISABLED",
                       timeout);
@@ -193,7 +193,7 @@ static otError setPhyStateCommand(void *context, uint8_t argc, char *argv[])
     // case 2. 0 < timeoutMs < PTA_PHY_SELECT_TIMEOUT_MAX -> disable COEX optimized PHY
     //   if there is no WiFi activity for timeoutMs
     // case 3. timeoutMs == PTA_PHY_SELECT_TIMEOUT_MAX -> enable COEX optimize PHY
-    if ((error = otPlatRadioVendorSetPhySelectTimeout(timeout)) != OT_ERROR_NONE) {
+    if ((error = otPlatRadioExtensionSetPhySelectTimeout(timeout)) != OT_ERROR_NONE) {
         otCliOutputFormat("Error switching between default and coexistence PHY.");
     }
     otCliOutputFormat("\r\n");
@@ -246,7 +246,7 @@ static otError getPtaOptionsCommand(void *context, uint8_t argc, char *argv[])
     uint8_t i;
     uint32_t value;
 
-    SuccessOrExit(error = otPlatRadioVendorGetCoexOptions(&ptaOptions));
+    SuccessOrExit(error = otPlatRadioExtensionGetCoexOptions(&ptaOptions));
     otCliOutputFormat("PTA Configuration Option: 0x%04x\r\n", ptaOptions);
     otCliOutputFormat("%s\r\n", ptaHelp[0]);
     for (i = 0; i < PTA_OPTION_FIELDS; i++) {
@@ -275,12 +275,12 @@ static otError setPtaOptionsCommand(void *context, uint8_t argc, char *argv[])
     VerifyOrExit(argc == 1, error = OT_ERROR_INVALID_ARGS);
     uint32_t ptaOptions = (uint32_t)strtoul(argv[0], NULL, 16);
 
-    if ((error = otPlatRadioVendorSetCoexOptions(ptaOptions)) == OT_ERROR_INVALID_ARGS)
+    if ((error = otPlatRadioExtensionSetCoexOptions(ptaOptions)) == OT_ERROR_INVALID_ARGS)
     {
         uint32_t constant_options;
         uint32_t current_options;
-        SuccessOrExit(error = otPlatRadioVendorGetCoexConstantOptions(&constant_options));
-        SuccessOrExit(error = otPlatRadioVendorGetCoexOptions(&current_options));
+        SuccessOrExit(error = otPlatRadioExtensionGetCoexConstantOptions(&constant_options));
+        SuccessOrExit(error = otPlatRadioExtensionGetCoexOptions(&current_options));
         otCliOutputFormat("Error: OT_ERROR_INVALID_ARGS\r\n");
         otCliOutputFormat("Constant options: 0x%08x\r\n", constant_options);
         otCliOutputFormat("Desired  options: 0x%08x\r\n", ptaOptions);
@@ -304,7 +304,7 @@ static otError getPtaStateCommand(void *context, uint8_t argc, char *argv[])
     otError error = OT_ERROR_NONE;
     bool ptaState;
 
-    SuccessOrExit(error = otPlatRadioVendorIsCoexEnabled(&ptaState));
+    SuccessOrExit(error = otPlatRadioExtensionIsCoexEnabled(&ptaState));
     otCliOutputFormat("PTA is %s", (ptaState  ? "ENABLED" : "DISABLED"));
     otCliOutputFormat("\r\n");
 
@@ -324,7 +324,7 @@ static otError setPtaStateCommand(void *context, uint8_t argc, char *argv[])
     VerifyOrExit(argc == 1, error = OT_ERROR_INVALID_ARGS);
     bool ptaState = (bool)strtoul(argv[0], NULL, 10);
 
-    SuccessOrExit(error = otPlatRadioVendorSetCoexEnable(ptaState));
+    SuccessOrExit(error = otPlatRadioExtensionSetCoexEnable(ptaState));
     otCliOutputFormat("\r\n");
 
 exit:
@@ -343,16 +343,16 @@ static otError getPwmStateCommand(void *context, uint8_t argc, char *argv[])
     OT_UNUSED_VARIABLE(argv);
 
     otError error = OT_ERROR_NONE;
-    uint8_t pwmComposite;
-    uint8_t pwmPulseDc;
+    uint8_t pwmReq;
+    uint8_t pwmDutyCycle;
     uint8_t pwmPeriodHalfMs;
     bool pwmPriority;
 
-    SuccessOrExit(error = otPlatRadioVendorGetRequestPwmArgs(&pwmComposite, &pwmPulseDc, &pwmPeriodHalfMs));
+    SuccessOrExit(error = otPlatRadioExtensionGetRequestPwmArgs(&pwmReq, &pwmDutyCycle, &pwmPeriodHalfMs));
 
-    switch (pwmComposite) {
+    switch (pwmReq) {
         case 0x00:
-            pwmPulseDc = 0;
+            pwmDutyCycle = 0;
             pwmPriority = false;
             break;
 
@@ -365,14 +365,14 @@ static otError getPwmStateCommand(void *context, uint8_t argc, char *argv[])
             break;
 
         default:
-            otCliOutputFormat("Invalid PWM state variable: %u\n", pwmComposite);
+            otCliOutputFormat("Invalid PWM state variable: %u\n", pwmReq);
             ExitNow(error = OT_ERROR_NONE);
     }
 
     otCliOutputFormat("PTA PWM (%s): %u (PERIOD in 0.5ms), %u (%%DC), %u (%s PRIORITY)",
-                      ((pwmPulseDc > 0u) ? "ENABLED" : "DISABLED"),
+                      ((pwmDutyCycle > 0u) ? "ENABLED" : "DISABLED"),
                       pwmPeriodHalfMs,
-                      pwmPulseDc,
+                      pwmDutyCycle,
                       pwmPriority,
                       (pwmPriority ? "HIGH" : "LOW"));
     otCliOutputFormat("\r\n");
@@ -394,11 +394,11 @@ static otError setPwmStateCommand(void *context, uint8_t argc, char *argv[])
     VerifyOrExit(argc == 3, error = OT_ERROR_INVALID_ARGS);
 
     uint8_t pwmPeriodHalfMs = (uint8_t)strtoul(argv[0], NULL, 10);
-    uint8_t pwmPulseDc = (uint8_t)strtoul(argv[1], NULL, 10);
+    uint8_t pwmDutyCycle = (uint8_t)strtoul(argv[1], NULL, 10);
     uint8_t pwmPriority = (bool)strtoul(argv[2], NULL, 10);
-    uint8_t pwmComposite = (pwmPulseDc > 0u) ? (pwmPriority ? 0x82 : 0x80) : 0x00;
+    uint8_t pwmReq = (pwmDutyCycle > 0u) ? (pwmPriority ? 0x82 : 0x80) : 0x00;
 
-    SuccessOrExit(error = otPlatRadioVendorSetRequestPwmArgs(pwmComposite, pwmPulseDc, pwmPeriodHalfMs));
+    SuccessOrExit(error = otPlatRadioExtensionSetRequestPwmArgs(pwmReq, pwmDutyCycle, pwmPeriodHalfMs));
     otCliOutputFormat("\r\n");
 
 exit:
@@ -417,7 +417,7 @@ static otError clearCountersCommand(void *context, uint8_t argc, char *argv[])
 
     otError error = OT_ERROR_NONE;
 
-    SuccessOrExit(error = otPlatRadioVendorClearCoexCounters());
+    SuccessOrExit(error = otPlatRadioExtensionClearCoexCounters());
     otCliOutputFormat("coex counters cleared");
     otCliOutputFormat("\r\n");
 
@@ -444,14 +444,14 @@ static otError getCountersCommand(void *context, uint8_t argc, char *argv[])
     OT_UNUSED_VARIABLE(argv);
 
     otError error = OT_ERROR_NONE;
-    uint32_t coexCounters[OT_PLAT_RADIO_VENDOR_COEX_EVENT_COUNT] = {0};
-    SuccessOrExit(error = otPlatRadioVendorGetCoexCounters(OT_PLAT_RADIO_VENDOR_COEX_EVENT_COUNT, coexCounters));
-    otCliOutputFormat("COEX %s: %lu\r\n", "Lo Pri Req",     coexCounters[OT_PLAT_RADIO_VENDOR_COEX_EVENT_LO_PRI_REQUESTED]);
-    otCliOutputFormat("COEX %s: %lu\r\n", "Hi Pri Req",     coexCounters[OT_PLAT_RADIO_VENDOR_COEX_EVENT_HI_PRI_REQUESTED]);
-    otCliOutputFormat("COEX %s: %lu\r\n", "Lo Pri Denied",  coexCounters[OT_PLAT_RADIO_VENDOR_COEX_EVENT_LO_PRI_DENIED]);
-    otCliOutputFormat("COEX %s: %lu\r\n", "Hi Pri Denied",  coexCounters[OT_PLAT_RADIO_VENDOR_COEX_EVENT_HI_PRI_DENIED]);
-    otCliOutputFormat("COEX %s: %lu\r\n", "Lo Pri Tx Abrt", coexCounters[OT_PLAT_RADIO_VENDOR_COEX_EVENT_LO_PRI_TX_ABORTED]);
-    otCliOutputFormat("COEX %s: %lu\r\n", "Hi Pri Tx Abrt", coexCounters[OT_PLAT_RADIO_VENDOR_COEX_EVENT_HI_PRI_TX_ABORTED]);
+    uint32_t coexCounters[OT_PLAT_RADIO_EXTENSION_COEX_EVENT_COUNT] = {0};
+    SuccessOrExit(error = otPlatRadioExtensionGetCoexCounters(OT_PLAT_RADIO_EXTENSION_COEX_EVENT_COUNT, coexCounters));
+    otCliOutputFormat("COEX %s: %lu\r\n", "Lo Pri Req",     coexCounters[OT_PLAT_RADIO_EXTENSION_COEX_EVENT_LO_PRI_REQUESTED]);
+    otCliOutputFormat("COEX %s: %lu\r\n", "Hi Pri Req",     coexCounters[OT_PLAT_RADIO_EXTENSION_COEX_EVENT_HI_PRI_REQUESTED]);
+    otCliOutputFormat("COEX %s: %lu\r\n", "Lo Pri Denied",  coexCounters[OT_PLAT_RADIO_EXTENSION_COEX_EVENT_LO_PRI_DENIED]);
+    otCliOutputFormat("COEX %s: %lu\r\n", "Hi Pri Denied",  coexCounters[OT_PLAT_RADIO_EXTENSION_COEX_EVENT_HI_PRI_DENIED]);
+    otCliOutputFormat("COEX %s: %lu\r\n", "Lo Pri Tx Abrt", coexCounters[OT_PLAT_RADIO_EXTENSION_COEX_EVENT_LO_PRI_TX_ABORTED]);
+    otCliOutputFormat("COEX %s: %lu\r\n", "Hi Pri Tx Abrt", coexCounters[OT_PLAT_RADIO_EXTENSION_COEX_EVENT_HI_PRI_TX_ABORTED]);
 
 exit:
     return error;

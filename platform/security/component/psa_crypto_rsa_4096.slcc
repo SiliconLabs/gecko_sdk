@@ -1,0 +1,14 @@
+id: psa_crypto_rsa_4096
+package: platform
+label: RSA-4096
+description: >-
+  This component adds support for 4096-bit RSA operations.
+category: Platform|Security|PSA Crypto|RSA
+quality: evaluation
+provides:
+  - name: psa_crypto_rsa_4096
+  - name: psa_crypto_rsa_size
+    allow_multiple: true
+requires:
+  - name: psa_crypto_rsa
+  - name: mbedtls_rsa_4096

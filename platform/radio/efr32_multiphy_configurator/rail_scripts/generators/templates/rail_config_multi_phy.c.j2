@@ -204,8 +204,8 @@ static const uint32_t {{phyInfoEntryName}}[] = {
   (uint32_t) NULL,
 {%- endif %}
   {{"0x{:08X}".format(phyInfoEntry.phyInfoData.antDivRxAutoConfig)}}UL,
-  {{phyInfoEntry.phyInfoData.src1Denominator}}UL,
-  {{phyInfoEntry.phyInfoData.src2Denominator}}UL,
+  {{phyInfoEntry.phyInfoData.src1CalcHelper}}UL,
+  {{phyInfoEntry.phyInfoData.src2CalcHelper}}UL,
   {{phyInfoEntry.phyInfoData.txBaudRate|int}}UL,
   {{"0x{:08X}".format(phyInfoEntry.phyInfoData.rateInfo)}}UL,
   {{"0x{:08X}".format(phyInfoEntry.phyInfoData.synthCache)}}UL,
@@ -332,6 +332,7 @@ static const RAIL_AlternatePhy_t {{entryName}} = {
   .minIf_kHz = {{entry.minIf_kHz}}U,
   .minBaseIf_kHz = {{entry.minBaseIf_kHz}}U,
   .isOfdmModem = {{"true" if entry.isOfdmModem else "false"}},
+  .rateInfo = {{"0x{:08X}".format(entry.rateInfo)}}UL,
 };
 {% endfor %}
 {%- for multiPhyConfigEntryName, multiPhyConfigEntry in multiPhyConfig.multiPhyConfigEntries.items() %}

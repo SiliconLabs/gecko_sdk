@@ -51,7 +51,7 @@ static bool findIeeeAddress(EmberNodeId server);
 static void ieeeAddressCallback(const EmberAfServiceDiscoveryResult *result);
 static bool createAddressTableEntry(sli_zigbee_af_tunneling_client_tunnel *tunnel,
                                     EmberEUI64 eui64);
-bool haveLinkKey(const sli_zigbee_af_tunneling_client_tunnel *tunnel);
+static bool haveLinkKey(const sli_zigbee_af_tunneling_client_tunnel *tunnel);
 static bool partnerLinkKeyExchange(const sli_zigbee_af_tunneling_client_tunnel *tunnel);
 static void partnerLinkKeyExchangeCallback(bool success);
 static bool sendRequestTunnel(const sli_zigbee_af_tunneling_client_tunnel *tunnel);
@@ -236,7 +236,7 @@ static void transferDataMessageSentCallback(EmberOutgoingMessageType type,
   }
 }
 
-bool haveLinkKey(const sli_zigbee_af_tunneling_client_tunnel *tunnel)
+static bool haveLinkKey(const sli_zigbee_af_tunneling_client_tunnel *tunnel)
 {
   // We assume we always have a link with the server if one of us is the trust
   // center.  We may already have a link key with other nodes, but we don't

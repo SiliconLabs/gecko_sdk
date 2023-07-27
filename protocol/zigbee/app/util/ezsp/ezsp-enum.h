@@ -14,11 +14,9 @@
 typedef uint8_t EzspConfigId;
 
 enum {
-  // The number of packet buffers available to the stack. When set to the
-  // special value 0xFF, the NCP will allocate all remaining configuration RAM
-  // towards packet buffers, such that the resulting count will be the largest
-  // whole number of packet buffers that can fit into the available memory. Must
-  // be set as part of stack init.
+  // The NCP no longer supports configuration of packet buffer count at runtime
+  // using this parameter. Packet buffers must be configured using the
+  // EMBER_PACKET_BUFFER_COUNT macro when building the NCP project.
   EZSP_CONFIG_PACKET_BUFFER_COUNT               = 0x01,
   // The maximum number of router neighbors the stack can keep track of. A
   // neighbor is a node within radio range.
@@ -1060,7 +1058,9 @@ enum {
   EZSP_GET_TOKEN_INFO                           = 0x0101,
   EZSP_GET_TOKEN_DATA                           = 0x0102,
   EZSP_SET_TOKEN_DATA                           = 0x0103,
-  EZSP_RESET_NODE                               = 0x0104
+  EZSP_RESET_NODE                               = 0x0104,
+  EZSP_GP_SECURITY_TEST_VECTORS                 = 0x0117,
+  EZSP_TOKEN_FACTORY_RESET                      = 0x0077
 };
 
 #endif // __EZSP_ENUM_H__

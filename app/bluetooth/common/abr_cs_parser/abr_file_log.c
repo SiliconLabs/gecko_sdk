@@ -37,7 +37,7 @@
 #include "cJSON.h"
 #include "abr_file_log.h"
 #include "abr_file_log_config.h"
-
+#include "sl_malloc.h"
 #include "sl_status.h"
 #include "app_log.h"
 #include "abr_cs_parser_types.h"
@@ -279,9 +279,10 @@ sl_status_t abr_file_log_append_header_section(const uint8_t *ch_data,
         app_log_debug("Appended header, closing file..." APP_LOG_NL);
       }
       fclose(jsonl_file);
-      // free() is a necessary step here because of cJSON_Print()
+      // sl_free() is a necessary step here because of cJSON_Print()
       // usage above
-      free(header_string);
+      sl_free(header_string);
+      header_string = NULL;
     } else {
       app_log_error("Cannot open file %s!" APP_LOG_NL, jsonl_filename);
       sc = SL_STATUS_NULL_POINTER;
@@ -687,7 +688,7 @@ static sl_status_t append_channel_map(cJSON * const jsonl,
   if ((string_memsize > 0) && (string_memsize < UINT32_MAX)) {
     app_log_debug("Allocate %d bytes for the channel map." APP_LOG_NL, string_memsize);
     // Avoiding resonance cascase λ
-    channel_map_string = calloc(string_memsize, sizeof(char));
+    channel_map_string = sl_calloc(string_memsize, sizeof(char));
     if (channel_map_string != NULL) {
       app_log_debug("Allocated %d bytes of heap." APP_LOG_NL, string_memsize);
       // Copy channel map to the string
@@ -697,7 +698,8 @@ static sl_status_t append_channel_map(cJSON * const jsonl,
       }
       cJSON_AddStringToObject(jsonl, HDR_CH_MAP, channel_map_string);
       // Free memory only if allocated before
-      free(channel_map_string);
+      sl_free(channel_map_string);
+      channel_map_string = NULL;
     } else {
       app_log_critical("Memory allocation failed! Cannot proceed!" APP_LOG_NL);
       sc = SL_STATUS_ALLOCATION_FAILED;

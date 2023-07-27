@@ -175,3 +175,13 @@ void setTxAckOptions(sl_cli_command_arg_t *args)
                 afterRxCancelAck ? "True" : "False",
                 afterRxUseTxBufferForAck ? "True" : "False");
 }
+
+bool txAckDirect;
+
+void setTxAckDirect(sl_cli_command_arg_t *args)
+{
+  txAckDirect = (bool) sl_cli_get_argument_uint8(args, 0);
+  responsePrint(sl_cli_get_command_string(args, 0),
+                "TxAckDirect:%s",
+                txAckDirect ? "Enabled" : "Disabled");
+}

@@ -1,6 +1,11 @@
 #ifndef THROUGHPUT_UI_CONFIG_H
 #define THROUGHPUT_UI_CONFIG_H
 
+/***********************************************************************************************//**
+ * @addtogroup throughput_ui
+ * @{
+ **************************************************************************************************/
+
 // <<< Use Configuration Wizard in Context Menu >>>
 
 // <o THROUGHPUT_UI_LOG_ENABLE> Enable logging
@@ -15,4 +20,5 @@
 
 // <<< end of configuration section >>>
 
+/** @} (end addtogroup throughput_ui) */
 #endif // THROUGHPUT_UI_CONFIG_H

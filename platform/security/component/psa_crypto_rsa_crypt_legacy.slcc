@@ -1,0 +1,22 @@
+id: psa_crypto_rsa_crypt_legacy
+package: platform
+label: Legacy RSA Encryption
+description: >-
+  This component adds support for asymmetric encryption using the legacy RSA
+  scheme as specified in RSA Labratories' PKCS #1 specification v1.5. If
+  possible, it's recommended to use PSA-OAEP.
+category: Platform|Security|PSA Crypto|Asymmetric Encryption
+quality: evaluation
+
+provides:
+  - name: psa_crypto_rsa_crypt_legacy
+  - name: psa_crypto_rsa_crypt
+    allow_multiple: true
+
+requires:
+  - name: psa_crypto_rsa
+  - name: mbedtls_pkcs1_v15
+
+template_contribution:
+  - name: psa_crypto_config
+    value: PSA_WANT_ALG_RSA_PKCS1V15_CRYPT

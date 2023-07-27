@@ -466,6 +466,7 @@ void setTxStream(sl_cli_command_arg_t *args)
       antOptions = RAIL_TX_OPTION_ANTENNA0;
     }
   }
+  concPhyIdOptions = txOptions & RAIL_TX_OPTION_CONCURRENT_PHY_ID;
   if (sl_cli_get_argument_count(args) >= 2) {
     stream = (RAIL_StreamMode_t) sl_cli_get_argument_uint32(args, 1);
     if (stream >= RAIL_STREAM_MODES_COUNT) {

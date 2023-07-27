@@ -1,0 +1,20 @@
+id: iostream_uart_si91x
+label: "IO Stream: Si91x UART"
+package: platform
+description: >
+  Instantiate the driver for using IO Stream over the Universal
+  Asynchronous Receiver Transceiver (UART) peripheral.
+category: Services|IO Stream|Driver
+quality: production
+instantiable:
+  prefix: inst
+provides:
+  - name: iostream_uart_si91x
+    allow_multiple: true
+  - name: iostream_transport
+    allow_multiple: true
+requires:
+  - name: iostream_uart_core_si91x
+template_contribution:
+  - name: iostream_uart_instances_si91x
+    value: "{{instance}}"

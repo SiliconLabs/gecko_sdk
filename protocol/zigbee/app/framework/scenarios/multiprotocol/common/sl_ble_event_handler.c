@@ -857,7 +857,7 @@ void sli_ble_application_init(uint8_t init_level)
   }
 }
 
-void attrWriteEventHandler(sl_zigbee_event_t * event)
+static void attrWriteEventHandler(sl_zigbee_event_t * event)
 {
   sl_zigbee_event_set_inactive(attrWriteEvent);
 

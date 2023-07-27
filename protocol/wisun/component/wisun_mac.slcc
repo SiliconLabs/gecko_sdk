@@ -21,6 +21,7 @@ requires:
   - name: "rail_util_pti"
   - name: "wisun_mac_implementation"
   - name: "wisun_crypto"
+  - name: "sleeptimer"
 recommends:
   - id: "wisun_mac_sources"
 
@@ -38,4 +39,6 @@ define:
 include:
   - path: "inc"
     file_list:
-        - path: "sl_wisun_types.h"
+      - path: "sl_wisun_types.h"
+      - path: "sli_wisun_timer_service.h"
+      - path: "sl_wisun_common.h"

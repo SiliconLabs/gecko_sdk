@@ -53,6 +53,7 @@ source:
       - path: api/netdiag_api.cpp
       - path: api/network_time_api.cpp
       - path: api/ping_sender_api.cpp
+      - path: api/radio_stats_api.cpp
       - path: api/random_crypto_api.cpp
       - path: api/random_noncrypto_api.cpp
       - path: api/server_api.cpp
@@ -208,6 +209,7 @@ source:
       - path: thread/network_data_tlvs.cpp
       - path: thread/network_data_types.cpp
       - path: thread/network_diagnostic.cpp
+      - path: thread/network_diagnostic_tlvs.cpp
       - path: thread/panid_query_server.cpp
       - path: thread/radio_selector.cpp
       - path: thread/router_table.cpp

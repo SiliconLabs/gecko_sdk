@@ -11,7 +11,7 @@ from enum import IntEnum
 import itertools
 
 # Update kRAILVersion to be used in phyInfoData.
-kRAILVersion = 15
+kRAILVersion = 16
 
 class ConcPhyEnum(IntEnum):
   CONC_PHY_NONE = 0
@@ -543,8 +543,14 @@ class RAILAdapter_MultiPhy(RAILAdapter):
       rssiAdjustDb = 0
 
     data.antDivRxAutoConfig.value = antDivConfiguration
-    data.src1Denominator.value = int(outputs.get_output('src1_calcDenominator').var_value or 0)
-    data.src2Denominator.value = int(outputs.get_output('src2_calcDenominator').var_value or 0)
+    if self.partFamily.lower() in [ "ocelot", "margay" ]:
+      # The ADCDIV will take the place of the deprecated SRC1 field for Ocelot and Margay to resolve
+      # the bug causing RAIL_LIB-9898.
+      adcDiv = model.vars.adc_vco_div_actual.value
+      data.src1CalcHelper.value = int(adcDiv)
+    else:
+      data.src1CalcHelper.value = int(outputs.get_output('src1_calcDenominator').var_value or 0)
+    data.src2CalcHelper.value = int(outputs.get_output('src2_calcDenominator').var_value or 0)
 
     modType = model.vars.modulation_type.value
     if hasattr(model.vars.modulation_type.var_enum, 'OFDM') and modType == model.vars.modulation_type.var_enum.OFDM:
@@ -934,15 +940,19 @@ class RAILAdapter_MultiPhy(RAILAdapter):
     alt_min_if_var = getattr(model.profile.outputs, "alt_min_if_hz", None)
     base_min_if_var = getattr(model.profile.outputs, "min_if_hz", None)
     alt_softmodem_used_var = getattr(model.profile.outputs, "alt_softmodem_used", None)
+    alt_rssi_adjust_db_var = getattr(model.profile.outputs, "alt_rssi_adjust_db", None)
 
     try:
       alt_min_if_hz = alt_min_if_var.var_value
       base_min_if_hz = base_min_if_var.var_value
       alt_softmodem_used = alt_softmodem_used_var.var_value
+      alt_rssi_adjust_db = alt_rssi_adjust_db_var.var_value
 
       # Convert unit Hz ==> kHz
       alt_min_if_kHz = int(alt_min_if_hz / 1000)
       base_min_if_kHz = int(base_min_if_hz / 1000)
+
+      alt_rateInfo = (int(alt_rssi_adjust_db) & 0xFF) << 16
 
       newAlternatePhy = True
       commonStructures = self.railModel.multiPhyConfig.commonStructures
@@ -952,7 +962,8 @@ class RAILAdapter_MultiPhy(RAILAdapter):
                                number_of_channels,
                                alt_min_if_kHz,
                                base_min_if_kHz,
-                               alt_softmodem_used]
+                               alt_softmodem_used,
+                               alt_rateInfo]
 
       for i, alternatePhyEntry in enumerate(commonStructures.railAlternatePhyEntries._elements):
         alternatePhyValues = [alternatePhyEntry.baseFrequency.value,
@@ -960,7 +971,8 @@ class RAILAdapter_MultiPhy(RAILAdapter):
                               alternatePhyEntry.numberOfChannels.value,
                               alternatePhyEntry.minIf_kHz.value,
                               alternatePhyEntry.minBaseIf_kHz.value,
-                              alternatePhyEntry.isOfdmModem.value]
+                              alternatePhyEntry.isOfdmModem.value,
+                              alternatePhyEntry.rateInfo.value,]
         if alternatePhyValues == newAlternatePhyValues:
           phyConfigEntry.alternatePhy.value = alternatePhyEntry
           newAlternatePhy = False
@@ -978,10 +990,11 @@ class RAILAdapter_MultiPhy(RAILAdapter):
         newAlternatePhyEntry.minIf_kHz.value = alt_min_if_kHz
         newAlternatePhyEntry.minBaseIf_kHz.value = base_min_if_kHz
         newAlternatePhyEntry.isOfdmModem.value = alt_softmodem_used
+        newAlternatePhyEntry.rateInfo.value = alt_rateInfo
         phyConfigEntry.alternatePhy.value = newAlternatePhyEntry
     except:
       # At least one of variables below is None
-      # [base_frequency, channel_spacing, number_of_channels, base_min_if, alt_min_if, alt_softmodem_used]
+      # [base_frequency, channel_spacing, number_of_channels, base_min_if, alt_min_if, alt_softmodem_used, alt_rssi_adjust_db_var]
       return
 
 

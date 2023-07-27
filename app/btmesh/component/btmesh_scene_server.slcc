@@ -4,6 +4,7 @@ package: "Btmesh"
 description: >
   Used to support the control and reporting functionality of a node that can
   participate in a scene.
+  This component is prepared for integration into SOC applications.
 
   This is a No-Code component.
 category: "Bluetooth Mesh|Models|Time and Scenes"
@@ -22,18 +23,23 @@ provides:
   - name: "btmesh_scene_server"
 requires:
   - name: "app_assert"
-  - name: "btmesh_provisionee"
+  - name: "btmesh_role_init"
   - name: "btmesh_stack_scene_server"
   - name: "btmesh_stack_scene_setup_server"
   - name: "btmesh_stack"
 config_file:
   - path: btmesh_scene_server.dcd
     directory: btmeshconf
+recommends:
+  - id: "btmesh_provisionee"
 
 template_contribution:
   - name: "btmesh_on_event"
     value:
-      include: "sl_btmesh_scene_server.h"  
+      include: "sl_btmesh_scene_server.h"
       function: "sl_btmesh_scene_server_on_event"
   - name: component_catalog
     value: "btmesh_scene_server"
+
+validation_helper:
+  - path: "../../script/validation/soc_ncp_compatibility.lua"

@@ -53,7 +53,7 @@ configuration:
   - name: APP_REVISION
     value: 20
   - name: APP_PATCH
-    value: 0
+    value: 1
   - name: ZAF_CONFIG_REQUEST_KEY_S0
     value: 1
   - name: ZAF_CONFIG_REQUEST_KEY_S2_UNAUTHENTICATED
@@ -135,6 +135,8 @@ configuration:
     value: 1
   - name: ZAF_APP_NAME
     value: '"wall_controller"'
+  - name: SL_RAIL_UTIL_RAIL_POWER_MANAGER_INIT
+    value: 0
 
 config_file:
   - path: WallController.cc_config

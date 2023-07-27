@@ -3,7 +3,7 @@
  * @brief Bt Mesh HSL Server module
  *******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -3002,6 +3002,7 @@ void sl_btmesh_hsl_server_init(void)
 void sl_btmesh_hsl_server_on_event(sl_btmesh_msg_t *evt)
 {
   switch (SL_BT_MSG_ID(evt->header)) {
+    case sl_btmesh_evt_prov_initialized_id:
     case sl_btmesh_evt_node_provisioned_id:
       sl_btmesh_hsl_server_init();
       break;
@@ -3012,9 +3013,23 @@ void sl_btmesh_hsl_server_on_event(sl_btmesh_msg_t *evt)
       }
       break;
 
+    case sl_btmesh_evt_node_reset_id:
+      sl_btmesh_hsl_server_on_node_reset();
+      break;
+
     default:
       break;
   }
+}
+
+/*******************************************************************************
+ * Component node reset handler.
+ * Clearing component specific nvm content during node reset.
+ *
+ ******************************************************************************/
+void sl_btmesh_hsl_server_on_node_reset(void)
+{
+  sl_bt_nvm_erase(SL_BTMESH_HSL_SERVER_PS_KEY_CFG_VAL);
 }
 
 /***************************************************************************//**

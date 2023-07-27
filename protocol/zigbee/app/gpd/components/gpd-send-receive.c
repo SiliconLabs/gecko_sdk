@@ -27,10 +27,10 @@ uint8_t * emberGpdGetRxMpdu(void)
 // Starts to receive for receiveWindowInUs duration after waiting for
 // startDelayInUs. During the startDelayInUs the GPD can sleep to an appropriate
 // and possible sleep mode to conserve energy.
-int8_t emberAfGpdScheduledReceive(uint32_t startDelayInUs,
-                                  uint32_t receiveWindowInUs,
-                                  uint8_t channel,
-                                  bool sleepInDelay)
+static void gpdScheduledReceive(uint32_t startDelayInUs,
+                                uint32_t receiveWindowInUs,
+                                uint8_t channel,
+                                bool sleepInDelay)
 {
   // Start LE timer with startDelay
   // Put the micro to low power sleep with above wake up configured
@@ -55,7 +55,6 @@ int8_t emberAfGpdScheduledReceive(uint32_t startDelayInUs,
 
   //Code blocker for the entire time of receive window
   while (emberGpdLeTimerRunning()) ;
-  return SUCCESS;
 }
 
 int8_t emberAfGpdfSend(uint8_t frameType,
@@ -105,10 +104,10 @@ int8_t emberAfGpdfSend(uint8_t frameType,
     //
     if (gpd->rxAfterTx) {
       uint32_t txRailDurationUs = RAIL_GetTime() - preTxRailTime;
-      emberAfGpdScheduledReceive((((uint32_t)gpd->rxOffset * 1000) - txRailDurationUs),
-                                 (uint32_t)(gpd->minRxWindow) * 1000,
-                                 gpd->channel,
-                                 true);
+      gpdScheduledReceive((((uint32_t)gpd->rxOffset * 1000) - txRailDurationUs),
+                          (uint32_t)(gpd->minRxWindow) * 1000,
+                          gpd->channel,
+                          true);
       emberGpdRailIdleWrapper();
     }
     repeat++;

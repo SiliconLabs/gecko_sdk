@@ -3,7 +3,7 @@
  * @brief Factory Reset module
  *******************************************************************************
  * # License
- * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -33,7 +33,6 @@
 #include "sl_btmesh_api.h"
 #include "em_common.h"
 #include "app_assert.h"
-#include "app_timer.h"
 
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
@@ -44,22 +43,12 @@
 #endif // SL_CATALOG_CLI_PRESENT
 
 #include "sl_btmesh_factory_reset.h"
+#include "sl_btmesh_node_reset_handler.h"
 
 /***************************************************************************//**
  * @addtogroup FactoryReset
  * @{
  ******************************************************************************/
-
-/// Callback has no parameters
-#define NO_CALLBACK_DATA               (void *)NULL
-/// timeout for factory init
-#define FACTORY_RESET_TIMEOUT          2000
-
-/// timer callback
-static app_timer_t factory_reset_timer;
-
-///timer callback prototype
-static void factory_reset_timer_cb(app_timer_t *handle, void *data);
 
 /*******************************************************************************
  * This function is called to initiate node reset.
@@ -75,13 +64,11 @@ void sl_btmesh_initiate_node_reset()
   // Application callback on node reset
   sl_btmesh_factory_reset_on_node_reset();
 
-  // Reboot after a small delay
-  sc = app_timer_start(&factory_reset_timer,
-                       FACTORY_RESET_TIMEOUT,
-                       factory_reset_timer_cb,
-                       NO_CALLBACK_DATA,
-                       false);
-  app_assert_status_f(sc, "Failed to start Factory reset timer");
+  // Application components node reset handler
+  sl_btmesh_app_node_reset_handler();
+
+  // Reboot
+  sl_bt_system_reset(0);
 }
 
 /*******************************************************************************
@@ -101,49 +88,7 @@ void sl_btmesh_initiate_full_reset()
   // Application callback on full reset
   sl_btmesh_factory_reset_on_full_reset();
 
-  // Reboot after a small delay
-  sc = app_timer_start(&factory_reset_timer,
-                       FACTORY_RESET_TIMEOUT,
-                       factory_reset_timer_cb,
-                       NO_CALLBACK_DATA,
-                       false);
-  app_assert_status_f(sc, "Failed to start Factory reset timer");
-}
-
-/*******************************************************************************
- * Handling of node reset event.
- *
- * @param[in] evt   Pointer to incoming time event.
- ******************************************************************************/
-void sl_btmesh_factory_reset_on_event(sl_btmesh_msg_t *evt)
-{
-  sl_status_t sc = SL_STATUS_OK;
-  switch (SL_BT_MSG_ID(evt->header)) {
-    case sl_btmesh_evt_node_reset_id:
-      // Application callback on node reset
-      sl_btmesh_factory_reset_on_node_reset();
-
-      // Reboot after a small delay
-      sc = app_timer_start(&factory_reset_timer,
-                           FACTORY_RESET_TIMEOUT,
-                           factory_reset_timer_cb,
-                           NO_CALLBACK_DATA,
-                           false);
-      app_assert_status_f(sc, "Failed to start Factory reset timer");
-      break;
-
-    default:
-      break;
-  }
-}
-
-/***************************************************************************//**
- * Timer Callback
- ******************************************************************************/
-static void factory_reset_timer_cb(app_timer_t *handle, void *data)
-{
-  (void)data;
-  (void)handle;
+  // Reboot
   sl_bt_system_reset(0);
 }
 

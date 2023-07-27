@@ -3,7 +3,7 @@
  * @brief BT Mesh Time Server module
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -205,6 +205,7 @@ void sl_btmesh_time_server_on_event(sl_btmesh_msg_t *evt)
       }
       break;
 
+    case sl_btmesh_evt_prov_initialized_id:
     case sl_btmesh_evt_node_provisioned_id:
       sl_btmesh_time_init();
       break;

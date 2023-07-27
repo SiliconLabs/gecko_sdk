@@ -76,23 +76,6 @@ void emberAfPluginTestHarnessZ3ResetKeyEventHandler(sl_zigbee_event_t * event);
 
 static uint8_t mostRecentKeyIndex = 0xFF;
 
-static uint32_t configApsRemoveDeviceConfigOptions = 0;
-
-uint32_t emberGetTestHarnessConfigurationOptions(uint8_t commandType,
-                                                 uint8_t commandId)
-{
-  switch (commandType) {
-    case EMBER_ZIGBEE_COMMAND_TYPE_APS:
-      if (commandId == APS_REQUEST_REMOVE_DEVICE) {
-        return configApsRemoveDeviceConfigOptions;
-      }
-      break;
-    default:
-      break;
-  }
-  return 0;
-}
-
 void emberAfPluginTestHarnessZ3ResetKeyEventHandler(sl_zigbee_event_t * event)
 {
   EmberStatus status;
@@ -189,15 +172,6 @@ void sli_zigbee_af_test_harness_z3_aps_aps_remove_device(SL_CLI_COMMAND_ARG)
                      TEST_HARNESS_Z3_PRINT_NAME,
                      "Remove device",
                      status);
-}
-
-void sli_zigbee_af_test_harness_z3_aps_aps_remove_device_config(SL_CLI_COMMAND_ARG)
-{
-  configApsRemoveDeviceConfigOptions = sli_zigbee_af_test_harness_z3_get_significant_bit(arguments, 0);
-  emberAfCorePrintln("%p: %p: 0x%X",
-                     TEST_HARNESS_Z3_PRINT_NAME,
-                     "Remove device configuration",
-                     0);
 }
 
 // plugin test-harness z3 aps aps-request-key <dstShort:2> <keyType:1>

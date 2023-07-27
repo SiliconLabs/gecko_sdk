@@ -308,8 +308,4 @@ void sl_btmesh_hsl_saturation_cb(uint16_t saturation)
 void sl_btmesh_factory_reset_on_node_reset(void)
 {
   app_show_btmesh_node_reset();
-  sl_bt_nvm_erase(SL_BTMESH_LIGHTING_SERVER_PS_KEY_CFG_VAL);
-  sl_bt_nvm_erase(SL_BTMESH_HSL_SERVER_PS_KEY_CFG_VAL);
-  sl_bt_nvm_erase(SL_BTMESH_LC_SERVER_PS_KEY_CFG_VAL);
-  sl_bt_nvm_erase(SL_BTMESH_LC_SERVER_PROPERTY_PS_KEY_CFG_VAL);
 }

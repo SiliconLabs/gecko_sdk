@@ -39,6 +39,16 @@
 #include "em_core.h"
 #include "em_system.h"
 #include "em_ramfunc.h"
+
+#if defined(SL_CATALOG_METRIC_EM23_WAKE_PRESENT)
+#include "sli_metric_em23_wake.h"
+#include "sli_metric_em23_wake_config.h"
+#endif
+
+#if defined(SL_CATALOG_METRIC_EM4_WAKE_PRESENT)
+#include "sli_metric_em4_wake.h"
+#endif
+
 #if defined(SYSCFG_PRESENT)
 #include "em_syscfg.h"
 #endif
@@ -274,6 +284,11 @@ static errataFixDcdcHs_TypeDef errataFixDcdcHsState = errataFixDcdcHsInit;
 #define DCDC_TRIM_MODES ((uint8_t)dcdcTrimMode_LN + 1)
 #endif
 
+#if defined(EMU_SERIES2_DCDC_BUCK_PRESENT) \
+  || defined(EMU_SERIES2_DCDC_BOOST_PRESENT)
+/* EMU DCDC MODE set timeout. */
+#define EMU_DCDC_MODE_SET_TIMEOUT           1000000
+#endif
 #if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_80)
 #define EMU_TESTLOCK         (*(volatile uint32_t *) (EMU_BASE + 0x190))
 #define EMU_BIASCONF         (*(volatile uint32_t *) (EMU_BASE + 0x164))
@@ -913,6 +928,10 @@ SL_WEAK void EMU_EFPEM23PostsleepHook(void)
  ******************************************************************************/
 void EMU_EnterEM2(bool restore)
 {
+#if defined(SLI_METRIC_EM2_HOOK)
+  sli_metric_em23_wake_init(SLI_INIT_EM2_WAKE);
+#endif
+
 #if defined(ERRATA_FIX_EMU_E107_ENABLE)
   bool errataFixEmuE107En;
   uint32_t nonWicIntEn[2];
@@ -1091,6 +1110,10 @@ void EMU_EnterEM2(bool restore)
  ******************************************************************************/
 void EMU_EnterEM3(bool restore)
 {
+#if defined(SLI_METRIC_EM3_HOOK)
+  sli_metric_em23_wake_init(SLI_INIT_EM3_WAKE);
+#endif
+
 #if defined(ERRATA_FIX_EMU_E107_ENABLE)
   bool errataFixEmuE107En;
   uint32_t nonWicIntEn[2];
@@ -1367,6 +1390,9 @@ SL_WEAK void EMU_EFPEM4PresleepHook(void)
  ******************************************************************************/
 void EMU_EnterEM4(void)
 {
+#if defined(SL_CATALOG_METRIC_EM4_WAKE_PRESENT)
+  sli_metric_em4_wake_init();
+#endif
   int i;
 
 #if defined(_EMU_EM4CTRL_EM4ENTRY_SHIFT)
@@ -3339,18 +3365,17 @@ SL_WEAK void EMU_DCDCUpdatedHook(void)
  * @param[in] dcdcMode
  *   DCDC mode.
  * @return
- *   Returns the status of the DCDC mode set operation, @ref EMU_DcdcModeSetStatus_TypeDef
+ *   Returns the status of the DCDC mode set operation.
  * @verbatim
- *   emuDcdcSetModeOk - Operation completed successfully.
- *   emuDcdcSetModeBypassTimeOut - Operation EMU DCDC set mode bypass error.
- *   emuDcdcSetModeRegulationTimeOut - EMU DCDC set mode regulation error.
+ *   SL_STATUS_OK - Operation completed successfully.
+ *   SL_STATUS_TIMEOUT - Operation EMU DCDC set mode timeout.
  * @endverbatim
  ******************************************************************************/
-EMU_DcdcModeSetStatus_TypeDef EMU_DCDCModeSet(EMU_DcdcMode_TypeDef dcdcMode)
+sl_status_t EMU_DCDCModeSet(EMU_DcdcMode_TypeDef dcdcMode)
 {
   bool dcdcLocked;
   uint32_t currentDcdcMode;
-  EMU_DcdcModeSetStatus_TypeDef error = emuDcdcSetModeOk;
+  sl_status_t error = SL_STATUS_OK;
   uint32_t timeout = 0;
   CMU->CLKEN0_SET = CMU_CLKEN0_DCDC;
 #if defined(_DCDC_EN_EN_MASK)
@@ -3377,7 +3402,7 @@ EMU_DcdcModeSetStatus_TypeDef EMU_DCDCModeSet(EMU_DcdcMode_TypeDef dcdcMode)
         timeout++;
       }
       if (timeout >= EMU_DCDC_MODE_SET_TIMEOUT) {
-        error = emuDcdcSetModeBypassTimeOut;
+        error = SL_STATUS_TIMEOUT;
       }
     }
 #if defined(_DCDC_EN_EN_MASK)
@@ -3389,7 +3414,7 @@ EMU_DcdcModeSetStatus_TypeDef EMU_DCDCModeSet(EMU_DcdcMode_TypeDef dcdcMode)
       timeout++;
     }
     if (timeout >= EMU_DCDC_MODE_SET_TIMEOUT) {
-      error = emuDcdcSetModeRegulationTimeOut;
+      error = SL_STATUS_TIMEOUT;
     } else {
       DCDC->IF_CLR = DCDC_IF_REGULATION;
       DCDC->CTRL_SET = DCDC_CTRL_MODE;
@@ -3399,7 +3424,7 @@ EMU_DcdcModeSetStatus_TypeDef EMU_DCDCModeSet(EMU_DcdcMode_TypeDef dcdcMode)
         timeout++;
       }
       if (timeout >= EMU_DCDC_MODE_SET_TIMEOUT) {
-        error = emuDcdcSetModeRegulationTimeOut;
+        error = SL_STATUS_TIMEOUT;
       }
     }
   }

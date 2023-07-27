@@ -232,7 +232,7 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
         (uint8_t *)buf);
 
       if (bt_status != SL_STATUS_OK) {
-        app_log_error("sl_bt_gatt_server_write_attribute_value failed with %#X\n", bt_status);
+        app_log_error("sl_bt_gatt_server_write_attribute_value failed with %#lX\n", bt_status);
       }
 
       update_phy_channel_range();
@@ -296,7 +296,7 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
             gattdb_phy,
             0);
           if (bt_status != SL_STATUS_OK) {
-            app_log_error("sl_bt_gatt_server_send_user_write_response failed with %#X\n", bt_status);
+            app_log_error("sl_bt_gatt_server_send_user_write_response failed with %#lX\n", bt_status);
           }
           update_needed = true;
           apply_new_phy(false);
@@ -309,7 +309,7 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
             gattdb_phy,
             0xFF);
           if (bt_status != SL_STATUS_OK) {
-            app_log_error("sl_bt_gatt_server_send_user_write_response failed with %#X\n", bt_status);
+            app_log_error("sl_bt_gatt_server_send_user_write_response failed with %#lX\n", bt_status);
           }
         }
       } else if (gattdb_radioMode == evt->data.evt_gatt_server_user_write_request.characteristic) {
@@ -472,7 +472,7 @@ void deactivate_bluetooth(void)
   // close connection
   if (connection_handler != 0xFF) {
     bt_status = sl_bt_connection_close(connection_handler);
-    app_assert_status_f(bt_status, "sl_bt_connection_close failed with %#X\n", bt_status);
+    app_assert_status_f(bt_status, "sl_bt_connection_close failed with %#lX\n", bt_status);
     connection_closed_reason = deactivated;
   }
   // stop advertisement
@@ -520,7 +520,7 @@ void advertise_received_data(int8_t rssi, uint16_t packet_count, uint16_t receiv
   buf[i++] = (uint8_t)((received_packets >> 8) & 0x00FF);   // Number of received packets
 
   bt_status = sl_bt_legacy_advertiser_set_data(advertising_set_handle, sl_bt_advertiser_advertising_data_packet, i, buf);
-  app_assert_status_f(bt_status, "sl_bt_legacy_advertiser_set_data failed with %#X\n", bt_status);
+  app_assert_status_f(bt_status, "sl_bt_legacy_advertiser_set_data failed with %#lX\n", bt_status);
 
   // Configure advertising to send out only 1 packet.
   bt_status = sl_bt_advertiser_set_timing(
@@ -529,13 +529,13 @@ void advertise_received_data(int8_t rssi, uint16_t packet_count, uint16_t receiv
     32,           // max. adv. interval (milliseconds * 1.6)
     0,             // adv. duration
     1);            // max. num. adv. events
-  app_assert_status_f(bt_status, "sl_bt_advertiser_set_timing failed with %#X\n", bt_status);
+  app_assert_status_f(bt_status, "sl_bt_advertiser_set_timing failed with %#lX\n", bt_status);
 
   // Start advertising.
   bt_status = sl_bt_legacy_advertiser_start(
     advertising_set_handle,                    // advertising set handle
     sl_bt_legacy_advertiser_non_connectable);     // connectable mode
-  app_assert_status_f(bt_status, "sl_bt_legacy_advertiser_start failed with %#X\n", bt_status);
+  app_assert_status_f(bt_status, "sl_bt_legacy_advertiser_start failed with %#lX\n", bt_status);
 //  APP_LOG("[info] [B] Advertise RSSI\n");
 }
 
@@ -585,7 +585,7 @@ void send_bluetooth_indications(void)
             uint16_t per = (uint16_t)(range_test_measurement.PER * 10);
             bt_status = sl_bt_gatt_server_send_indication(connection_handler, characteristic, 2, (uint8_t*)&per);
             if (bt_status != SL_STATUS_OK) {
-              app_log_error("sl_bt_gatt_server_send_indication failed with 0x%04X\n", bt_status);
+              app_log_error("sl_bt_gatt_server_send_indication failed with 0x%04lX\n", bt_status);
             }
             indication_is_under_way = true;
           }
@@ -595,7 +595,7 @@ void send_bluetooth_indications(void)
             uint16_t moving_average = (uint16_t)(range_test_measurement.moving_average * 10);
             bt_status = sl_bt_gatt_server_send_indication(connection_handler, characteristic, 2, (uint8_t*)&moving_average);
             if (bt_status != SL_STATUS_OK) {
-              app_log_error("sl_bt_gatt_server_send_indication failed with 0x%04X\n", bt_status);
+              app_log_error("sl_bt_gatt_server_send_indication failed with 0x%04lX\n", bt_status);
             }
             indication_is_under_way = true;
           }
@@ -603,42 +603,42 @@ void send_bluetooth_indications(void)
           case gattdb_pktsSent:
             bt_status = sl_bt_gatt_server_send_indication(connection_handler, characteristic, 2, (uint8_t*)&range_test_measurement.packets_sent);
             if (bt_status != SL_STATUS_OK) {
-              app_log_error("sl_bt_gatt_server_send_indication failed with 0x%04X\n", bt_status);
+              app_log_error("sl_bt_gatt_server_send_indication failed with 0x%04lX\n", bt_status);
             }
             indication_is_under_way = true;
             break;
           case gattdb_pktsCnt:
             bt_status = sl_bt_gatt_server_send_indication(connection_handler, characteristic, 2, (uint8_t*)&range_test_measurement.packets_received_counter);
             if (bt_status != SL_STATUS_OK) {
-              app_log_error("sl_bt_gatt_server_send_indication failed with 0x%04X\n", bt_status);
+              app_log_error("sl_bt_gatt_server_send_indication failed with 0x%04lX\n", bt_status);
             }
             indication_is_under_way = true;
             break;
           case gattdb_pktsRcvd:
             bt_status = sl_bt_gatt_server_send_indication(connection_handler, characteristic, 2, (uint8_t*)&range_test_measurement.packets_received_correctly);
             if (bt_status != SL_STATUS_OK) {
-              app_log_error("sl_bt_gatt_server_send_indication failed with 0x%04X\n", bt_status);
+              app_log_error("sl_bt_gatt_server_send_indication failed with 0x%04lX\n", bt_status);
             }
             indication_is_under_way = true;
             break;
           case gattdb_pktsReq:
             bt_status = sl_bt_gatt_server_send_indication(connection_handler, characteristic, 2, (uint8_t*)&range_test_settings.packets_repeat_number);
             if (bt_status != SL_STATUS_OK) {
-              app_log_error("sl_bt_gatt_server_send_indication failed with 0x%04X\n", bt_status);
+              app_log_error("sl_bt_gatt_server_send_indication failed with 0x%04lX\n", bt_status);
             }
             indication_is_under_way = true;
             break;
           case gattdb_channel:
             bt_status = sl_bt_gatt_server_send_indication(connection_handler, characteristic, 2, (uint8_t*)&range_test_settings.channel);
             if (bt_status != SL_STATUS_OK) {
-              app_log_error("sl_bt_gatt_server_send_indication failed with 0x%04X\n", bt_status);
+              app_log_error("sl_bt_gatt_server_send_indication failed with 0x%04lX\n", bt_status);
             }
             indication_is_under_way = true;
             break;
           case gattdb_phy:
             bt_status = sl_bt_gatt_server_send_indication(connection_handler, characteristic, 1, (uint8_t*)&range_test_settings.current_phy);
             if (bt_status != SL_STATUS_OK) {
-              app_log_error("sl_bt_gatt_server_send_indication failed with 0x%04X\n", bt_status);
+              app_log_error("sl_bt_gatt_server_send_indication failed with 0x%04lX\n", bt_status);
             }
             indication_is_under_way = true;
             update_phy_channel_range();
@@ -648,56 +648,56 @@ void send_bluetooth_indications(void)
           case gattdb_radioMode:
             bt_status = sl_bt_gatt_server_send_indication(connection_handler, characteristic, 1, (uint8_t*)&range_test_settings.radio_mode);
             if (bt_status != SL_STATUS_OK) {
-              app_log_error("sl_bt_gatt_server_send_indication failed with 0x%04X\n", bt_status);
+              app_log_error("sl_bt_gatt_server_send_indication failed with 0x%04lX\n", bt_status);
             }
             indication_is_under_way = true;
             break;
           case gattdb_txPower:
             bt_status = sl_bt_gatt_server_send_indication(connection_handler, characteristic, 2, (uint8_t*)&range_test_settings.tx_power);
             if (bt_status != SL_STATUS_OK) {
-              app_log_error("sl_bt_gatt_server_send_indication failed with 0x%04X\n", bt_status);
+              app_log_error("sl_bt_gatt_server_send_indication failed with 0x%04lX\n", bt_status);
             }
             indication_is_under_way = true;
             break;
           case gattdb_destID:
             bt_status = sl_bt_gatt_server_send_indication(connection_handler, characteristic, 1, (uint8_t*)&range_test_settings.destination_id);
             if (bt_status != SL_STATUS_OK) {
-              app_log_error("sl_bt_gatt_server_send_indication failed with 0x%04X\n", bt_status);
+              app_log_error("sl_bt_gatt_server_send_indication failed with 0x%04lX\n", bt_status);
             }
             indication_is_under_way = true;
             break;
           case gattdb_srcID:
             bt_status = sl_bt_gatt_server_send_indication(connection_handler, characteristic, 1, (uint8_t*)&range_test_settings.source_id);
             if (bt_status != SL_STATUS_OK) {
-              app_log_error("sl_bt_gatt_server_send_indication failed with 0x%04X\n", bt_status);
+              app_log_error("sl_bt_gatt_server_send_indication failed with 0x%04lX\n", bt_status);
             }
             indication_is_under_way = true;
             break;
           case gattdb_payload:
             bt_status = sl_bt_gatt_server_send_indication(connection_handler, characteristic, 1, (uint8_t*)&range_test_settings.payload_length);
             if (bt_status != SL_STATUS_OK) {
-              app_log_error("sl_bt_gatt_server_send_indication failed with 0x%04X\n", bt_status);
+              app_log_error("sl_bt_gatt_server_send_indication failed with 0x%04lX\n", bt_status);
             }
             indication_is_under_way = true;
             break;
           case gattdb_maSize:
             bt_status = sl_bt_gatt_server_send_indication(connection_handler, characteristic, 1, (uint8_t*)&range_test_settings.moving_average_window_size);
             if (bt_status != SL_STATUS_OK) {
-              app_log_error("sl_bt_gatt_server_send_indication failed with 0x%04X\n", bt_status);
+              app_log_error("sl_bt_gatt_server_send_indication failed with 0x%04lX\n", bt_status);
             }
             indication_is_under_way = true;
             break;
           case gattdb_log:
             bt_status = sl_bt_gatt_server_send_indication(connection_handler, characteristic, 1, (uint8_t*)&range_test_settings.usart_log_enable);
             if (bt_status != SL_STATUS_OK) {
-              app_log_error("sl_bt_gatt_server_send_indication failed with 0x%04X\n", bt_status);
+              app_log_error("sl_bt_gatt_server_send_indication failed with 0x%04lX\n", bt_status);
             }
             indication_is_under_way = true;
             break;
           case gattdb_isRunning:
             bt_status = sl_bt_gatt_server_send_indication(connection_handler, characteristic, 1, (uint8_t*)&range_test_measurement.tx_is_running);
             if (bt_status != SL_STATUS_OK) {
-              app_log_error("sl_bt_gatt_server_send_indication failed with 0x%04X\n", bt_status);
+              app_log_error("sl_bt_gatt_server_send_indication failed with 0x%04lX\n", bt_status);
             }
             indication_is_under_way = true;
             break;
@@ -831,7 +831,7 @@ static bool answer_read_request(uint8_t* answer_value, uint8_t value_length, sl_
     answer_value,
     &sent_len);
   if (bt_status != SL_STATUS_OK) {
-    app_log_error("sl_bt_gatt_server_send_user_read_response failed with 0x%04X\n", bt_status);
+    app_log_error("sl_bt_gatt_server_send_user_read_response failed with 0x%04lX\n", bt_status);
   }
   if (bt_status == SL_STATUS_OK) {
     return true;
@@ -859,7 +859,7 @@ static bool check_and_write_uint8_value(uint8_t *update_value_byte, uint16_t ran
 
   bt_status = sl_bt_gatt_server_read_attribute_value(range_attribute, 0, range_max_size, &read_length, range_buff);
   if (bt_status != SL_STATUS_OK) {
-    app_log_error("sl_bt_gatt_server_read_attribute_value failed with 0x%04X\n", bt_status);
+    app_log_error("sl_bt_gatt_server_read_attribute_value failed with 0x%04lX\n", bt_status);
   }
 
   min_range = range_buff[0];
@@ -873,7 +873,7 @@ static bool check_and_write_uint8_value(uint8_t *update_value_byte, uint16_t ran
       evt->data.evt_gatt_server_user_write_request.characteristic,
       0);
     if (bt_status != SL_STATUS_OK) {
-      app_log_error("sl_bt_gatt_server_send_user_write_response failed with 0x%04X\n", bt_status);
+      app_log_error("sl_bt_gatt_server_send_user_write_response failed with 0x%04lX\n", bt_status);
     }
     success = true;
   } else {
@@ -882,7 +882,7 @@ static bool check_and_write_uint8_value(uint8_t *update_value_byte, uint16_t ran
       evt->data.evt_gatt_server_user_write_request.characteristic,
       0xFF);
     if (bt_status != SL_STATUS_OK) {
-      app_log_warning("sl_bt_gatt_server_send_user_write_response failed with 0x%04X\n", bt_status);
+      app_log_warning("sl_bt_gatt_server_send_user_write_response failed with 0x%04lX\n", bt_status);
     }
   }
   return success;
@@ -907,7 +907,7 @@ static bool check_and_write_uint16_value(uint16_t *update_value_byte, uint16_t r
 
   bt_status = sl_bt_gatt_server_read_attribute_value(range_attribute, 0, range_max_size, &read_length, range_buff);
   if (bt_status != SL_STATUS_OK) {
-    app_log_error("sl_bt_gatt_server_read_attribute_value failed with 0x%04X\n", bt_status);
+    app_log_error("sl_bt_gatt_server_read_attribute_value failed with 0x%04lX\n", bt_status);
   }
 
   min_range = *(uint16_t*)&range_buff[0];
@@ -921,7 +921,7 @@ static bool check_and_write_uint16_value(uint16_t *update_value_byte, uint16_t r
       evt->data.evt_gatt_server_user_write_request.characteristic,
       0);
     if (bt_status != SL_STATUS_OK) {
-      app_log_error("sl_bt_gatt_server_send_user_write_response failed with 0x%04X\n", bt_status);
+      app_log_error("sl_bt_gatt_server_send_user_write_response failed with 0x%04lX\n", bt_status);
     }
     success = true;
   } else {
@@ -930,7 +930,7 @@ static bool check_and_write_uint16_value(uint16_t *update_value_byte, uint16_t r
       evt->data.evt_gatt_server_user_write_request.characteristic,
       0xFF);
     if (bt_status != SL_STATUS_OK) {
-      app_log_error("sl_bt_gatt_server_send_user_write_response failed with 0x%04X\n", bt_status);
+      app_log_error("sl_bt_gatt_server_send_user_write_response failed with 0x%04lX\n", bt_status);
     }
   }
   return success;
@@ -956,7 +956,7 @@ static bool check_and_write_int16_value(int16_t *update_value_byte, uint16_t ran
 
   bt_status = sl_bt_gatt_server_read_attribute_value(range_attribute, 0, range_max_size, &read_length, range_buff);
   if (bt_status != SL_STATUS_OK) {
-    app_log_error("sl_bt_gatt_server_read_attribute_value failed with 0x%04X\n", bt_status);
+    app_log_error("sl_bt_gatt_server_read_attribute_value failed with 0x%04lX\n", bt_status);
   }
 
   min_range = *(int16_t*)&range_buff[0];
@@ -970,7 +970,7 @@ static bool check_and_write_int16_value(int16_t *update_value_byte, uint16_t ran
       evt->data.evt_gatt_server_user_write_request.characteristic,
       0);
     if (bt_status != SL_STATUS_OK) {
-      app_log_error("sl_bt_gatt_server_send_user_write_response failed with 0x%04X\n", bt_status);
+      app_log_error("sl_bt_gatt_server_send_user_write_response failed with 0x%04lX\n", bt_status);
     }
     success = true;
   } else {
@@ -979,7 +979,7 @@ static bool check_and_write_int16_value(int16_t *update_value_byte, uint16_t ran
       evt->data.evt_gatt_server_user_write_request.characteristic,
       0xFF);
     if (bt_status != SL_STATUS_OK) {
-      app_log_error("sl_bt_gatt_server_send_user_write_response failed with 0x%04X\n", bt_status);
+      app_log_error("sl_bt_gatt_server_send_user_write_response failed with 0x%04lX\n", bt_status);
     }
   }
   return success;
@@ -1090,7 +1090,7 @@ static void update_phy_channel_range(void)
   bt_status = sl_bt_gatt_server_write_attribute_value(gattdb_channel_valid_range, 0, 4, (uint8_t*)buf);
 
   if (bt_status != SL_STATUS_OK) {
-    app_log_error("sl_bt_gatt_server_write_attribute_value failed with %#X\n", bt_status);
+    app_log_error("sl_bt_gatt_server_write_attribute_value failed with %#lX\n", bt_status);
   }
 }
 
@@ -1114,7 +1114,7 @@ static void update_phy_payload_range(void)
   bt_status = sl_bt_gatt_server_write_attribute_value(gattdb_payload_valid_range, 0, 2, (uint8_t*)buf);
 
   if (bt_status != SL_STATUS_OK) {
-    app_log_error("sl_bt_gatt_server_write_attribute_value failed with %#X\n", bt_status);
+    app_log_error("sl_bt_gatt_server_write_attribute_value failed with %#lX\n", bt_status);
   }
 }
 
@@ -1141,7 +1141,7 @@ static void update_phy_power_range(void)
   bt_status = sl_bt_gatt_server_write_attribute_value(gattdb_txPower_valid_range, 0, 4, (uint8_t*)buf);
 
   if (bt_status != SL_STATUS_OK) {
-    app_log_error("sl_bt_gatt_server_write_attribute_value failed with %#X\n", bt_status);
+    app_log_error("sl_bt_gatt_server_write_attribute_value failed with %#lX\n", bt_status);
   }
 }
 

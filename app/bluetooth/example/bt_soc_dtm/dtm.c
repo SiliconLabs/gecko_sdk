@@ -3,7 +3,7 @@
  * @brief Direct Test Mode core logic.
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -31,6 +31,7 @@
 #include "dtm.h"
 #include "rail_features.h"
 #include "sl_bt_api.h"
+#include "sl_malloc.h"
 #include "app_assert.h"
 #include "dtm_config.h"
 
@@ -561,8 +562,9 @@ static void process_setup_command(setup_cmd_packet_t *cmd)
       break;
 
     case SETUP_CMD_SWITCHING_PATERN:
-      if (setup.ant_array != 0) {
-        free(setup.ant_array);
+      if (setup.ant_array != NULL) {
+        sl_free(setup.ant_array);
+        setup.ant_array = NULL;
       }
 
       setup.num_ant = (cmd->parameter & 0x3F);
@@ -573,8 +575,8 @@ static void process_setup_command(setup_cmd_packet_t *cmd)
       } else {
         if (setup.switch_pat) {
           setup.ant_array_length = (setup.num_ant * 2) - 1;
-          setup.ant_array = (uint8_t *)calloc(setup.ant_array_length,
-                                              sizeof(uint8_t));
+          setup.ant_array = (uint8_t *)sl_calloc(setup.ant_array_length,
+                                                 sizeof(uint8_t));
 
           for (i = 0; i < setup.num_ant; i++) {
             setup.ant_array[i] = i;
@@ -584,8 +586,8 @@ static void process_setup_command(setup_cmd_packet_t *cmd)
           }
         } else {
           setup.ant_array_length = setup.num_ant;
-          setup.ant_array = (uint8_t *)calloc(setup.ant_array_length,
-                                              sizeof(uint8_t));
+          setup.ant_array = (uint8_t *)sl_calloc(setup.ant_array_length,
+                                                 sizeof(uint8_t));
 
           for (i = 0; i < n; i++) {
             setup.ant_array[i] = i;

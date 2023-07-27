@@ -88,3 +88,7 @@ template_contribution:
     value: "BRD4401C"
     condition:
     - "brd4401c"
+  - name: component_catalog
+    value: "BRD2705A"
+    condition:
+    - "brd2705a"

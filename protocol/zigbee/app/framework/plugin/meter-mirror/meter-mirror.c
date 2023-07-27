@@ -101,10 +101,6 @@ static void updatePhysicalEnvironment(void)
   }
 }
 
-void sli_zigbee_af_clear_mirror_by_endpoint(uint8_t endpoint)
-{
-}
-
 static uint8_t getIndexFromEndpoint(uint8_t endpoint)
 {
   if (endpoint < EMBER_AF_PLUGIN_METER_MIRROR_ENDPOINT_START

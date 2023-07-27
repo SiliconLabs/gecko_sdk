@@ -64,6 +64,10 @@
       file_id: device_init_dcdc_config
     path: brd2903a/sl_device_init_dcdc_config.h
   - override:
+      component: device_init_lfxo
+      file_id: device_init_lfxo_config
+    path: brd2903a/sl_device_init_lfxo_config.h
+  - override:
       component: i2cspm
       file_id: i2cspm_config
       instance: mikroe
@@ -153,6 +157,10 @@
       file_id: pwm_config
       instance: mikroe
     path: brd2903a/sl_pwm_init_mikroe_config.h
+  - override:
+      component: rail_util_pti
+      file_id: rail_util_pti_config
+    path: brd2903a/sl_rail_util_pti_config.h
   - override:
       component: simple_button
       file_id: simple_button_config

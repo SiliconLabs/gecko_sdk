@@ -17,11 +17,14 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "sli_wisun_timer_service.h"
+
 struct sl_wsrcp_mac;
 
 struct sl_wsrcp_mac *wsmac_register(int (*host_tx)(void *host_ctxt, const void *buf, int buf_len),
                                     int (*host_rx)(void *host_ctxt, void *buf, int buf_len),
                                     void *host_ctxt);
+void wsmac_init_timers(struct sl_wsrcp_mac *rcp_mac, sli_wisun_timer_context_t *context);
 bool wsmac_rx_host(struct sl_wsrcp_mac *rcp_mac);
 void wsmac_report_rx_crc_error(struct sl_wsrcp_mac *rcp_mac, uint16_t crc, int frame_len, uint8_t header, uint8_t irq_err_counter);
 void wsmac_send_reset_ind(struct sl_wsrcp_mac *rcp_mac);

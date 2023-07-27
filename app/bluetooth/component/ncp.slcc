@@ -1,7 +1,9 @@
 id: ncp
 label: NCP Interface
 package: Bluetooth
-description: Component that provides the Bluetooth Network Co-Processor (NCP) communication interface.
+description: >
+  Component that provides the Bluetooth Network Co-Processor (NCP) communication
+  interface.
 
   This is a No-Code component.
 category: Bluetooth|NCP Interface
@@ -14,10 +16,10 @@ config_file:
   - path: config/sl_ncp_config.h
   - path: config/sl_ncp_freertos_config.h
     condition:
-     - freertos
+      - freertos
   - path: config/sl_ncp_micriumos_config.h
     condition:
-     - micriumos_kernel
+      - micriumos_kernel
 source:
   - path: sl_ncp.c
   - path: sl_ncp_freertos.c

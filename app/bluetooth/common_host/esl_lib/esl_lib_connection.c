@@ -328,7 +328,7 @@ sl_status_t esl_lib_connection_open(esl_lib_command_list_cmd_t *cmd,
                                            i,
                                            conn->gattdb_handles.esl_characteristics[i]);
             }
-            for (uint8_t i = 0; i < sizeof(conn->gattdb_handles.esl_characteristics) / sizeof(uint16_t); i++) {
+            for (uint8_t i = 0; i < sizeof(conn->gattdb_handles.dis_characteristics) / sizeof(uint16_t); i++) {
               esl_lib_log_connection_debug(CONN_FMT "DIS %u characteristic handle = 0x%x" APP_LOG_NL,
                                            conn,
                                            i,
@@ -677,9 +677,16 @@ void esl_lib_connection_on_bt_event(sl_bt_msg_t *evt)
             esl_lib_log_connection_debug(CONN_FMT "Connection retry scheduled, connection handle = %u" APP_LOG_NL,
                                          conn,
                                          conn->connection_handle);
+            uint32_t timeout = RECONNECT_TIMEOUT_MS;
+            // Check for PAwR connect request to set correct timeout
+            if (find_tlv(conn->command, ESL_LIB_CONNECT_DATA_TYPE_PAWR, &tlv)) {
+              esl_lib_pawr_subevent_t *pawr_sub = (esl_lib_pawr_subevent_t *)tlv->data.data;
+              esl_lib_pawr_t *pawr = (esl_lib_pawr_t *)pawr_sub->handle;
+              timeout = pawr->config.adv_interval.max * 1.5f;
+            }
             // Schedule a reconnection to let tag process previous operation
             sc = app_timer_start(&conn->timer,
-                                 RECONNECT_TIMEOUT_MS,
+                                 timeout,
                                  reconnect_timeout,
                                  conn,
                                  false);
@@ -1314,12 +1321,16 @@ static void run_command(esl_lib_command_list_cmd_t *cmd)
                                    conn,
                                    conn->connection_handle);
       if (esl_lib_connection_contains(conn)) {
-        close_connection(conn);
+        sc = close_connection(conn);
       } else {
         sc         = SL_STATUS_NOT_FOUND;
         lib_status = ESL_LIB_STATUS_CONN_FAILED;
         conn->command_complete = true;
       }
+      esl_lib_log_connection_debug(CONN_FMT "After Close connection command, connection handle = %u , sc = 0x%04x" APP_LOG_NL,
+                                   conn,
+                                   conn->connection_handle,
+                                   sc);
       break;
     case ESL_LIB_CMD_GET_TAG_INFO:
       conn = (esl_lib_connection_t *)cmd->data.cmd_write_image.connection_handle;
@@ -1716,6 +1727,7 @@ static sl_status_t send_connection_error(esl_lib_connection_t        *conn,
            conn->address.addr,
            sizeof(conn->address.addr));
   }
+
   sc = esl_lib_event_push_error(lib_status,
                                 &node_id,
                                 status,
@@ -1746,7 +1758,7 @@ static void connection_complete(esl_lib_connection_t *conn)
 static bool check_image_transfer(esl_lib_connection_t *conn)
 {
   switch (conn->state) {
-    // Not connected in connecting phases
+    case ESL_LIB_CONNECTION_STATE_OTS_INIT:
     case ESL_LIB_CONNECTION_STATE_OTS_GET_TYPE:
     case ESL_LIB_CONNECTION_STATE_OTS_IMAGE_TRANSFER:
       return true;
@@ -1805,6 +1817,7 @@ static void on_image_transfer_status(esl_lib_image_transfer_handle_t handle,
                                   ESL_LIB_STATUS_OTS_INIT_FAILED,
                                   result,
                                   conn->state);
+      esl_lib_connection_remove_ptr(conn);
       conn->command_complete = true;
     }
   }
@@ -1986,10 +1999,13 @@ static void connection_timeout(app_timer_t *timer,
       // Send error for closing
       status = ESL_LIB_STATUS_CONN_CLOSE_FAILED;
     }
+
     (void)send_connection_error(conn,
                                 status,
                                 SL_STATUS_TIMEOUT,
                                 conn->state);
+    // Remove connection
+    (void)esl_lib_connection_remove_ptr(conn);
   } else {
     esl_lib_log_connection_warning(CONN_FMT "Connection timeout for unknown connection" APP_LOG_NL,
                                    conn);

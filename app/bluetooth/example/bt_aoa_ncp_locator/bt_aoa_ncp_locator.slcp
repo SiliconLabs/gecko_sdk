@@ -33,6 +33,7 @@ component:
   - id: bluetooth_feature_system
   - id: bluetooth_feature_aoa_receiver
   - id: ncp
+  - id: ncp_user_cmd
   - id: uartdrv_usart
     instance:
       - vcom

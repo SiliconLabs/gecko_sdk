@@ -21,6 +21,7 @@
 #include "app/framework/util/af-main.h"
 #include "app/framework/security/af-security.h"
 #include "stack/include/zigbee-security-manager.h"
+#include "stack/include/zigbee-device-stack.h"
 
 void sli_zigbee_af_cli_service_discovery_callback(const EmberAfServiceDiscoveryResult* result)
 {
@@ -290,45 +291,3 @@ void optionBindingTableSetCommand(sl_cli_command_arg_t *arguments)
   }
   emberAfAppPrintln("set bind %d: 0x%x", index, status);
 }
-
-#ifdef DEBUG_PRINT_FOR_ROUTING_TABLE
-void optionPrintRouteCommand(sl_cli_command_arg_t *arguments)
-{
-  const char * statusText[] = {
-    "active",
-    "discov",
-    "??    ",
-    "unused",
-  };
-
-  const char * concentratorText[] = {
-    "- ",
-    "lo",
-    "hi",
-  };
-
-  const char * routeRecordStateText[] = {
-    "none",
-    "sent",
-    "need",
-  };
-  uint8_t i;
-
-  emberAfAppPrintln("Routing Table\n-----------------");
-
-  for (i = 0; i < EMBER_ROUTE_TABLE_SIZE; i++) {
-    EmberRouteTableEntry entry;
-    if (emberGetRouteTableEntry(i, &entry) == EMBER_SUCCESS) {
-      emberAfAppPrintln("%d: dest:0x%2X next:0x%2X status:%p age:%d conc:%p rr-state:%p",
-                        i,
-                        entry.destination,
-                        entry.nextHop,
-                        statusText[entry.status],
-                        entry.age,
-                        concentratorText[entry.concentratorType],
-                        routeRecordStateText[entry.routeRecordState]);
-    }
-    emberAfAppFlush();
-  }
-}
-#endif // DEBUG_PRINT_FOR_ROUTING_TABLE

@@ -36,6 +36,7 @@ extern "C" {
 #endif
 
 #include <stdint.h>
+#include <stdbool.h>
 #include "aoa_types.h"
 #include "sl_rtl_clib_api.h"
 #include "sl_status.h"
@@ -50,6 +51,7 @@ typedef struct aoa_state_s {
   sl_rtl_aox_libitem libitem;
   sl_rtl_util_libitem util_libitem;
   uint8_t correction_timeout;
+  bool qa_enable;
 } aoa_state_t;
 
 /// Elevation or azimuth mask min/max values.
@@ -165,11 +167,13 @@ sl_status_t aoa_angle_finalize_config(aoa_id_t id);
  *
  * @param[in] aoa_state Angle calculation handler
  * @param[in] config config entry id
+ * @param[in] qa_enable IQ sample quality analysis
  *
  * @return Status returned by the RTL library
  ******************************************************************************/
 enum sl_rtl_error_code aoa_init_rtl(aoa_state_t *aoa_state,
-                                    aoa_id_t config_id);
+                                    aoa_id_t config_id,
+                                    bool qa_enable);
 
 /***************************************************************************//**
  * Estimate angle data from IQ samples.

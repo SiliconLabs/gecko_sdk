@@ -74,20 +74,24 @@ static sl_status_t _coap_collector_send_request(const int32_t sockid,
 static sl_wisun_meter_entry_t * _coap_collector_recv_response(int32_t sockid);
 
 /**************************************************************************//**
- * @brief CoAP Collector update meter status
- * @details Update meter fields from received packet
- * @param[in,out] meter meter
- * @param[in] parsed received parsed packet
- *****************************************************************************/
-static void _update_meter_status(sl_wisun_meter_entry_t *meter, sl_wisun_coap_packet_t* parsed);
-
-/**************************************************************************//**
  * @brief CoAP Collector get schedule from payload
  * @details Get schedule value from json payload.
- * @param[in] payload_ptr payload_ptr
+ * @param[in] payload_ptr Payload
+ * @param[in] payload_len Length of payload
  * @return Schedule value.
  *****************************************************************************/
-static uint32_t _get_schedule_from_payload(uint8_t *payload_ptr);
+static uint32_t _get_schedule_from_payload(const uint8_t *payload_ptr, const uint16_t payload_len);
+
+/**************************************************************************//**
+ * @brief Move to next char in the buffer
+ * @details Helper function
+ * @param[in] buff Buffer
+ * @param[in] buff_size Buffer size
+ * @param[in,out] ptr Pointer address to move
+ * @param[in] c Char to find first occurance 
+ *****************************************************************************/
+static void _move_to_next_char(const uint8_t * buff, const uint16_t buff_size, 
+                               uint8_t ** ptr, const char c);
 
 // -----------------------------------------------------------------------------
 //                                Global Variables
@@ -314,10 +318,14 @@ static sl_wisun_meter_entry_t * _coap_collector_recv_response(int32_t sockid)
     printf("[CoAP Parser failure]\n");
     return NULL;
   }
+  if (parsed->payload_ptr != NULL && parsed->payload_len) {
+    meter->schedule = _get_schedule_from_payload(parsed->payload_ptr, parsed->payload_len);
+    if (!meter->schedule) {
+      meter->schedule = SL_WISUN_METER_DEFAULT_PERIOD_MS;
+    }
+  }
+  printf("[%s - %lu]\n", ip_addr, meter->schedule);
 
-  _update_meter_status(meter, parsed);
-
-  printf("[%s]\n", ip_addr);
   sl_wisun_coap_print_packet(parsed, false);
   sl_wisun_coap_destroy_packet(parsed);
   app_wisun_trace_util_destroy_ip_str(ip_addr);
@@ -325,38 +333,57 @@ static sl_wisun_meter_entry_t * _coap_collector_recv_response(int32_t sockid)
   return meter;
 }
 
-static void _update_meter_status(sl_wisun_meter_entry_t *meter, sl_wisun_coap_packet_t* parsed)
+static void _move_to_next_char(const uint8_t * buff, const uint16_t buff_size, 
+                               uint8_t ** ptr, const char c)
 {
-  if (parsed->payload_ptr != NULL) {
-    meter->schedule = _get_schedule_from_payload(parsed->payload_ptr);
+  const uint8_t *end_ptr = buff + buff_size;
+
+  if (buff == NULL || ptr == NULL || *ptr < buff) {
+    return;
+  }
+
+  while (*ptr < end_ptr) {
+    if (**ptr == c) {
+      return;
+    }
+    ++*ptr;
   }
 }
-
-static uint32_t _get_schedule_from_payload(uint8_t *payload_ptr)
+static uint32_t _get_schedule_from_payload(const uint8_t *payload_ptr, const uint16_t payload_len)
 {
-  char *scedule_value;
-  uint32_t scedule_value_uint32   = SL_WISUN_METER_DEFAULT_PERIOD_MS;
-  char *scedule_value_start_ptr   = strchr((const char*)payload_ptr, '-') + 1;
-  char *scedule_value_end_ptr     = strchr((const char*)scedule_value_start_ptr, '"');
-  size_t schedule_value_length    = scedule_value_end_ptr - scedule_value_start_ptr;
-
-  scedule_value = (char*)app_wisun_malloc(schedule_value_length);
-  if (scedule_value == NULL) {
-    printf("[Payload parse failure: could not allocate buffer]\n");
-    return scedule_value_uint32;
+  uint8_t *str_val = NULL;
+  uint8_t *start_ptr = (uint8_t *) payload_ptr;
+  uint16_t str_val_len = 0U;
+  uint8_t *end_ptr = NULL;
+  uint32_t ret_val = 0UL;
+  
+  _move_to_next_char(payload_ptr, payload_len, &start_ptr, '-');
+  if (start_ptr != NULL && start_ptr < (payload_ptr + payload_len - 1U)) {
+    start_ptr += 2U;
+  } else {
+    return ret_val;
   }
 
-  strncpy(scedule_value, scedule_value_start_ptr, schedule_value_length);
-  scedule_value_uint32 = atoi(scedule_value);
-
-  if (scedule_value_uint32 == 0) {
-    printf("[Payload parse failure: schedule value could not represen as int]\n");
-    scedule_value_uint32 = SL_WISUN_METER_DEFAULT_PERIOD_MS;
+  end_ptr = start_ptr;
+  _move_to_next_char(payload_ptr, payload_len, &end_ptr, '"');
+  if (end_ptr >= (payload_ptr + payload_len)) {
+    return ret_val;
+  }
+  str_val_len = (uint16_t) (end_ptr - start_ptr + 1UL);
+  
+  str_val = (uint8_t *) app_wisun_malloc(str_val_len);
+  if (str_val == NULL) {
+    return ret_val;
   }
 
-  app_wisun_free(scedule_value);
+  memcpy(str_val, start_ptr, str_val_len);
+  str_val[str_val_len - 1] = 0;
 
-  return scedule_value_uint32;
+  ret_val = (uint32_t) atoll((char *) str_val);
+
+  app_wisun_free(str_val);
+
+  return ret_val;
 }
 
 #undef __cleanup_and_return_val

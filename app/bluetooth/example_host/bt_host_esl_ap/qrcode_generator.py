@@ -26,15 +26,16 @@ QR code generator for ESL demo
 # 3. This notice may not be removed or altered from any source distribution.
 
 from image_converter import XbmConverter, Image
-from ap_logger import Logger
 from intelhex import IntelHex
 import subprocess
 import argparse
 import logging
 import qrcode
+import bincopy
 import sys
 import os
 import re
+import io
 
 QR_CODE_VERSION = 3 # 29x29 matrix
 QR_CODE_BORDER = 4 # default is 4, which is the minimum in the specification
@@ -122,38 +123,30 @@ def generate_qrcode(data, height, width):
     result = Image.new('RGB', (width, height), XbmConverter.xbm_white)
     result.paste(img, (left_border, top_border))
     # Create bytes from image
-    log = logging.Logger
-    logger = Logger(log)
-    img_xbm = XbmConverter(logger, result)
+    img_xbm = XbmConverter(result)
     xbm = img_xbm.convert()
     return xbm
 
-def merge_qr_hex(qrcode, hex_file_in, sa, hex_file_out="merged.hex"):
-    ih = IntelHex()
-    o = IntelHex(hex_file_in)
-    ih.puts(sa, qrcode)
-    o.merge(ih, overlap='replace')
-    o.write_hex_file(hex_file_out)
+def merge_qr_hex(qrcode, ihex, sa, hex_file_out="merged.hex"):
+    qrhex = IntelHex()
+    qrhex.puts(sa, qrcode)
+    ihex.merge(qrhex, overlap='replace')
+    ihex.write_hex_file(hex_file_out)
     print(f"Created new hex file: {hex_file_out}")
     return hex_file_out
 
-def find_magic_in_hex(hexo):
-    try:
-        o = IntelHex(hexo)
-    except FileNotFoundError as err:
-        print(f'{err.strerror}: {err.filename}')
-        sys.exit(1)
-    found = o.find(MAGIC_CONST)
+def find_magic_in_hex(ihex):
+    found = ihex.find(MAGIC_CONST)
     offset = found+len(MAGIC_CONST)
-    size = o[offset]+o[offset+1]*256
-    addr = o[(offset+2)]+o[(offset+3)]*256+o[(offset+4)]*(256**2)+o[(offset+5)]*(256**3)
-    print("size of original picture data: ", size)
-    print("start address: ", hex(addr))
+    size = ihex[offset]+ihex[offset+1]*256
+    addr = ihex[(offset+2)]+ihex[(offset+3)]*256+ihex[(offset+4)]*(256**2)+ihex[(offset+5)]*(256**3)
+    print("Size of original picture data: ", size)
+    print("Start address: ", hex(addr))
     return addr, size
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("hex", help="The .hex output file of the project")
+    parser.add_argument("hex", help="The output file of the ESL Tag project or pre-built demo in Intel HEX (.hex) or Motorola S-Records (.s37) format.")
     parser.add_argument("-s", "--serialno", help="J-Link serial number of the WSTK")
     parser.add_argument("--ip", help="IP address of the WSTK")
     parser.add_argument("-w", "--width", type=int, help="width of the desired image in pixel", default=WSTK_DISPLAY_W)
@@ -162,24 +155,42 @@ def main():
 
     commander = Commander(args.serialno, args.ip)
 
-    #1) Read MAC address and create QR code data
+    # 1) Check if file is in a known format: Intel HEX (.hex), or Motorola S-Records (.s37) 
+    ihex = None
+    try:
+        f = bincopy.BinFile(args.hex)
+    except IOError as e:
+        print(e)
+        sys.exit(e.errno)
+    except bincopy.UnsupportedFileFormatError:
+        print("Can't open file:", args.hex, "due to unknown format.")
+        sys.exit(1)
+    else:
+        try:
+            ihex = IntelHex(io.StringIO(f.as_ihex()))
+        except:
+            print("IntelHex import error.")
+            sys.exit(1)
+
+    # 2) Read MAC address and create QR code data
     uid = commander.get_board_uid()
     print('UID: ' + uid)
     data = "connect " + uid
 
-    #2) Generate QR code: the generated data should be a binary which can be flashed to NVM
+    # 3) Generate QR code: the generated data should be a binary which can be flashed to NVM
     bin_image = generate_qrcode(data, args.height, args.width)
 
-    # 3) Find the magic constant with commander in the given hex file
-    start_addr, size = find_magic_in_hex(args.hex)
+    # 4) Find the magic constant with commander in the given hex file
+    start_addr, size = find_magic_in_hex(ihex)
 
-    # 4) Check if the space is enough for the QR code
+    # 5) Check if the space is enough for the QR code
     if size < len(bin_image):
         print("There is not enough memory to flash the QR code")
         sys.exit(1)
 
-    # 5) Create the new hex file and flash it on the device
-    merged_hex = merge_qr_hex(bin_image, args.hex, start_addr)
+    # 6) Create the new hex file and flash it on the device
+ 
+    merged_hex = merge_qr_hex(bin_image, ihex, start_addr)
     commander.flash_board(merged_hex)
 
 if __name__ == "__main__":

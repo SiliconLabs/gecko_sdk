@@ -27,6 +27,7 @@ Image converter.
 
 import numpy as np
 from operator import mul
+from ap_logger import getLogger
 from PIL import Image, ImageOps, ImageDraw, ImageFont
 import io
 
@@ -52,9 +53,9 @@ class XbmConverter():
     xbm_rose25 = (220,170,172)
     xbm_yellow = (200,200,0)
 
-    def __init__(self, logger, image=None):
+    def __init__(self, image=None):
         self.image = image
-        self.logger = logger
+        self.logger = getLogger()
         self.DISPLAY_WSTK_PALETTE = (XbmConverter.xbm_white + XbmConverter.xbm_black)
         self.DISPLAY_EPD_PALETTE = (XbmConverter.xbm_white + XbmConverter.xbm_black + XbmConverter.xbm_red)
 
@@ -79,7 +80,7 @@ class XbmConverter():
         try:
             self.image.convert('1').save(out, format='xbm')
         except AttributeError:
-            self.logger.print("File conversion failed!")
+            self.logger.error("File conversion failed!")
 
     def reverse_bits(self, x):
       """ Reversing MSB->LSB bit order of a bytes class object """

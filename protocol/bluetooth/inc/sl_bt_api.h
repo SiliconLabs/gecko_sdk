@@ -6282,6 +6282,7 @@ sl_status_t sl_bt_pawr_advertiser_stop(uint8_t advertising_set);
 #define sl_bt_cmd_connection_set_remote_power_reporting_id           0x0a060020
 #define sl_bt_cmd_connection_get_tx_power_id                         0x0b060020
 #define sl_bt_cmd_connection_get_remote_tx_power_id                  0x0c060020
+#define sl_bt_cmd_connection_set_tx_power_id                         0x12060020
 #define sl_bt_cmd_connection_read_remote_used_features_id            0x0d060020
 #define sl_bt_cmd_connection_get_security_status_id                  0x0e060020
 #define sl_bt_cmd_connection_set_data_length_id                      0x11060020
@@ -6300,6 +6301,7 @@ sl_status_t sl_bt_pawr_advertiser_stop(uint8_t advertising_set);
 #define sl_bt_rsp_connection_set_remote_power_reporting_id           0x0a060020
 #define sl_bt_rsp_connection_get_tx_power_id                         0x0b060020
 #define sl_bt_rsp_connection_get_remote_tx_power_id                  0x0c060020
+#define sl_bt_rsp_connection_set_tx_power_id                         0x12060020
 #define sl_bt_rsp_connection_read_remote_used_features_id            0x0d060020
 #define sl_bt_rsp_connection_get_security_status_id                  0x0e060020
 #define sl_bt_rsp_connection_set_data_length_id                      0x11060020
@@ -6669,11 +6671,11 @@ typedef struct sl_bt_evt_connection_tx_power_s sl_bt_evt_connection_tx_power_t;
 /**
  * @addtogroup sl_bt_evt_connection_remote_tx_power sl_bt_evt_connection_remote_tx_power
  * @{
- * @brief Reports a transmit power change on the remote device of a connection
- * if transmit power reporting has been enabled
+ * @brief Reports a transmit power change of the connection on the remote device
+ * that supports the LE Power Control for the connection
  *
- * Enable or disable transmit power reporting using @ref
- * sl_bt_connection_set_power_reporting command.
+ * This event is enabled if reporting the remote transmit power change has been
+ * enabled with the @ref sl_bt_connection_set_remote_power_reporting command.
  */
 
 /** @brief Identifier of the remote_tx_power event */
@@ -7265,7 +7267,9 @@ sl_status_t sl_bt_connection_read_channel_map(uint8_t connection,
  * sl_bt_evt_connection_tx_power is generated when transmit power on the local
  * device changes.
  *
- * By default, power reporting for local device is enabled.
+ * The command is a built-in feature in the stack and is supported regardless of
+ * whether the LE Power Control feature is used. By default, power reporting for
+ * local device is enabled.
  *
  * @param[in] connection Handle of the connection
  * @param[in] mode Enum @ref sl_bt_connection_power_reporting_mode_t. Transmit
@@ -7286,8 +7290,11 @@ sl_status_t sl_bt_connection_set_power_reporting(uint8_t connection,
 
 /***************************************************************************//**
  *
- * Enable or disable the transmit power reporting for the remote device on a
- * connection. When transmit power reporting is enabled, event @ref
+ * Enable or disable reporting the transmit power change on the remote device.
+ * The application must include the LE Power Control feature
+ * (bluetooth_feature_power_control) in order to use this command.
+ *
+ * When the remote transmit power reporting is enabled, event @ref
  * sl_bt_evt_connection_remote_tx_power is generated when transmit power on the
  * remote device changes.
  *
@@ -7313,6 +7320,8 @@ sl_status_t sl_bt_connection_set_remote_power_reporting(uint8_t connection,
 /***************************************************************************//**
  *
  * Get the transmit power of the local device on the given connection and PHY.
+ * The application must include the LE Power Control feature
+ * (bluetooth_feature_power_control) in order to use this command.
  *
  * @param[in] connection Handle of the connection
  * @param[in] phy Enum @ref sl_bt_gap_phy_coding_t. The PHY. Values:
@@ -7339,7 +7348,9 @@ sl_status_t sl_bt_connection_get_tx_power(uint8_t connection,
 /***************************************************************************//**
  *
  * Get the transmit power of the remote device on the given connection and PHY.
- * Transmit power levels are returned in event @ref
+ * The application must include the LE Power Control feature
+ * (bluetooth_feature_power_control) in order to use this command. Transmit
+ * power levels are returned in event @ref
  * sl_bt_evt_connection_get_remote_tx_power_completed after the operation
  * completed.
  *
@@ -7358,6 +7369,30 @@ sl_status_t sl_bt_connection_get_tx_power(uint8_t connection,
  ******************************************************************************/
 sl_status_t sl_bt_connection_get_remote_tx_power(uint8_t connection,
                                                  uint8_t phy);
+
+/***************************************************************************//**
+ *
+ * Set the transmit power of a connection. The application must include
+ * component bluetooth_feature_user_power_control in order to use this command
+ * for controlling the transmit power of the connection at application level.
+ * This command is unavailable if the standard Bluetooth feature LE power
+ * control (component bluetooth_feature_power_control) is used by the
+ * application.
+ *
+ * The actual selected power level is returned from this command. The value may
+ * be different than the requested one because of Bluetooth feature restrictions
+ * or radio characteristics.
+ *
+ * @param[in] connection The connection handle
+ * @param[in] tx_power The requested TX power. Unit: 0.1 dBm
+ * @param[out] tx_power_out The selected TX power. Unit: 0.1 dBm
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_connection_set_tx_power(uint8_t connection,
+                                          int16_t tx_power,
+                                          int16_t *tx_power_out);
 
 /***************************************************************************//**
  *
@@ -13297,8 +13332,12 @@ typedef struct sl_bt_evt_l2cap_le_channel_open_request_s sl_bt_evt_l2cap_le_chan
  *
  * Result code @ref sl_bt_l2cap_connection_result_successful in @p errorcode
  * implies that the logical channel is established and data can be sent or
- * received on the channel. Ignore other fields if @p errorcode indicates that
- * the connection request was rejected.
+ * received on the channel.
+ *
+ * If the connection request was rejected by the peer, indicated by @p
+ * errorcode, the stack automatically closes the local channel and the user
+ * application should clean up the resources associated to the channel
+ * identifier.
  */
 
 /** @brief Identifier of the le_channel_open_response event */
@@ -13440,6 +13479,7 @@ PACKSTRUCT( struct sl_bt_evt_l2cap_command_rejected_s
                             rejected command */
   uint16_t reason;     /**< Enum @ref sl_bt_l2cap_command_reject_reason_t. The
                             rejection reason */
+  uint16_t cid;        /**< The channel identifier */
 });
 
 typedef struct sl_bt_evt_l2cap_command_rejected_s sl_bt_evt_l2cap_command_rejected_t;
@@ -13450,8 +13490,9 @@ typedef struct sl_bt_evt_l2cap_command_rejected_s sl_bt_evt_l2cap_command_reject
  *
  * Create and configure an L2CAP channel on a Bluetooth connection using the LE
  * credit based connection request packet. Event @ref
- * sl_bt_evt_l2cap_le_channel_open_response will be received after the peer
- * device responded to the request.
+ * sl_bt_evt_l2cap_le_channel_open_response or @ref
+ * sl_bt_evt_l2cap_command_rejected will be received after the peer device
+ * responded to the request.
  *
  * @param[in] connection The connection handle
  * @param[in] spsm The protocol/services implemented by the local channel
@@ -13464,7 +13505,7 @@ typedef struct sl_bt_evt_l2cap_command_rejected_s sl_bt_evt_l2cap_command_reject
  * @param[in] max_pdu @parblock
  *   The maximum PDU payload size the local channel endpoint can accept
  *
- *   Range:23 to 252.
+ *   Range: 23 to 252.
  *   @endparblock
  * @param[in] credit The initial credit value of the local channel endpoint,
  *   i.e., number of PDUs the peer channel endpoint can send
@@ -13473,9 +13514,19 @@ typedef struct sl_bt_evt_l2cap_command_rejected_s sl_bt_evt_l2cap_command_reject
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
  * @b Events
+ *   - @ref sl_bt_evt_l2cap_command_rejected - Triggered when the peer device
+ *     rejected the connection request. Typically a legacy peer device that does
+ *     not support the feature could send this response. When this event is
+ *     received under the context of opening a channel using this command, the
+ *     stack automatically closes the local channel and the user application
+ *     should clean up the resources associated to the channel identifier.
  *   - @ref sl_bt_evt_l2cap_le_channel_open_response - Triggered when an LE
  *     credit-based connection response has been received in response to this
- *     command.
+ *     command. If the result code in @p errorcode of the event is not equal to
+ *     @ref sl_bt_l2cap_connection_result_successful, it means that connection
+ *     request was rejected by the peer device. In this case, the stack
+ *     automatically closes the local channel and the user application should
+ *     clean up the resources associated to the channel identifier.
  *   - @ref sl_bt_evt_l2cap_channel_closed - Triggered when an LE credit-based
  *     connection response has not been received within 30 seconds after this
  *     command has been issued.
@@ -13494,8 +13545,13 @@ sl_status_t sl_bt_l2cap_open_le_channel(uint8_t connection,
  * request received in the @ref sl_bt_evt_l2cap_le_channel_open_request event.
  * Result code @ref sl_bt_l2cap_connection_result_successful in @p errorcode
  * implies that the logical channel is established and data can be sent or
- * received on the channel. Other parameters in this command are ignored if @p
- * errorcode indicates that the request was rejected.
+ * received on the channel.
+ *
+ * To reject the connection request, use a result code other than
+ * sl_bt_l2cap_connection_result_successful in @p errorcode. Other parameters in
+ * this command are ignored in this case. The stack automatically closes the
+ * local channel and the user application should clean up the resources
+ * associated to the channel identifier.
  *
  * @param[in] connection The connection handle
  * @param[in] cid The channel identifier
@@ -13511,11 +13567,8 @@ sl_status_t sl_bt_l2cap_open_le_channel(uint8_t connection,
  *   @endparblock
  * @param[in] credit The initial credit value of the local channel endpoint,
  *   i.e., number of PDUs that the peer channel endpoint can send
- * @param[in] errorcode @parblock
- *   Enum @ref sl_bt_l2cap_connection_result_t.
- *
- *   An L2CAP error code as the outcome of the connection request
- *   @endparblock
+ * @param[in] errorcode Enum @ref sl_bt_l2cap_connection_result_t. An L2CAP
+ *   error code as the outcome of the connection request
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *

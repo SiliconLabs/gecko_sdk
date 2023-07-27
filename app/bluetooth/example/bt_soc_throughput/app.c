@@ -192,27 +192,8 @@ uint8_t app_check_buttons()
 void sl_button_on_change(const sl_button_t *handle)
 {
   (void) handle;
-
   // Check states
   button_current = app_check_buttons();
-
-  // Mask first button release
-  if (mask_release && button_change && !button_current) {
-    button_change = 0;
-    mask_release = false;
-  }
-
-  // Identify button change
-  button_change = (button_current ^ button_previous);
-
-  // There is a button change
-  if (button_change) {
-    // Handle button press during operation
-    app_handle_button_press();
-  }
-
-  // Save current button states
-  button_previous = button_current;
 }
 
 /**************************************************************************//**
@@ -349,6 +330,24 @@ SL_WEAK void app_init(void)
  *****************************************************************************/
 SL_WEAK void app_process_action(void)
 {
+  // Mask first button release
+  if (mask_release && button_change && !button_current) {
+    button_change = 0;
+    mask_release = false;
+  }
+
+  // Identify button change
+  button_change = (button_current ^ button_previous);
+
+  // There is a button change
+  if (button_change) {
+    // Handle button press during operation
+    app_handle_button_press();
+  }
+
+  // Save current button states
+  button_previous = button_current;
+
   /////////////////////////////////////////////////////////////////////////////
   // Put your additional application code here!                              //
   // This is called infinitely.                                              //

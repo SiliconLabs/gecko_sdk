@@ -14,12 +14,16 @@
  * sections of the MSLA applicable to Source Code.
  *
  ******************************************************************************/
-
-#include "app/framework/include/af.h"
-#include "fragmentation.h"
-
+#ifdef SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
+    #include "app/framework/include/af.h"
+#else
+    #include "sl_cli.h"
+    #include "ember-types.h"
+    #include "app/framework/common/zigbee_app_framework_common.h"
+#endif //SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
 #include "app/util/serial/sl_zigbee_command_interpreter.h"
 
+#include "fragmentation.h"
 //------------------------------------------------------------------------------
 // CLI stuff
 
@@ -33,9 +37,8 @@ void sli_zigbee_af_reset_and_init_ncp(void);
 void sli_zigbee_af_fragmentation_set_window_size_command(sl_cli_command_arg_t *args)
 {
   emberFragmentWindowSize = sl_cli_get_argument_uint8(args, 0);
-  emberAfAppPrintln("Fragmentation RX window size set to %d",
-                    emberFragmentWindowSize);
-
+  sl_zigbee_core_debug_println("Fragmentation RX window size set to %d",
+                               emberFragmentWindowSize);
 #ifdef EZSP_HOST
   sli_zigbee_af_reset_and_init_ncp();
 #endif //EZSP_HOST
@@ -43,7 +46,7 @@ void sli_zigbee_af_fragmentation_set_window_size_command(sl_cli_command_arg_t *a
 
 void sli_zigbee_af_fragmentation_artificial_block_drop_command(sl_cli_command_arg_t *args)
 {
-#if defined(EMBER_TEST)
+#if defined(EMBER_TEST) || defined(EMBER_GOLDEN_UNIT)
   sli_zigbee_af_fragmentation_artificially_drop_block_number = sl_cli_get_argument_uint8(args, 0);
 #endif
 }

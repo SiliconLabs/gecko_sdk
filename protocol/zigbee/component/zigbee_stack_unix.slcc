@@ -163,7 +163,7 @@ include:
     - path: posix/platform/infra_if.hpp
     - path: posix/platform/udp.hpp
     - path: lib/spinel/radio_spinel.hpp
-    - path: lib/spinel/radio_spinel.hpp
+    - path: lib/spinel/multi_frame_buffer.hpp
     - path: lib/spinel/openthread-spinel-config.h
     - path: lib/spinel/radio_spinel_impl.hpp
     - path: lib/spinel/spinel_decoder.hpp

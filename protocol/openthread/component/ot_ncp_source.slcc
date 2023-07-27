@@ -22,9 +22,11 @@ include:
       - path: ncp_spi.hpp
   - path: lib/spinel
     file_list:
+      - path: multi_frame_buffer.hpp
       - path: radio_spinel.hpp
       - path: radio_spinel_impl.hpp
       - path: radio_spinel_metrics.h
+      - path: spi_frame.hpp
       - path: spinel.h
       - path: spinel_buffer.hpp
       - path: spinel_decoder.hpp

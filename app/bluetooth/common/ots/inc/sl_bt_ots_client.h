@@ -306,6 +306,7 @@ typedef struct sl_bt_ots_client {
   uint32_t                        active_transfer_offset; ///< Offset of the current L2CAP transfer
   uint16_t                        active_transfer_sdu;    ///< SDU of the current L2CAP transfer
   uint16_t                        active_transfer_pdu;    ///< PDU of the current L2CAP transfer
+  sl_bt_l2cap_transfer_transfer_t prior_channel;          ///< Prior L2CAP transfer storage
   uint8_t                         received_buffer[SL_BT_OTS_CLIENT_CONFIG_WRITE_REQUEST_DATA_SIZE];
 } sl_bt_ots_client_t;
 

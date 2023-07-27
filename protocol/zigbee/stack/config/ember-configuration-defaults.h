@@ -98,6 +98,10 @@
 #include "sl_zigbee_pro_stack_alt_mac_config.h"
 #endif
 
+#if defined(SL_CATALOG_ZIGBEE_PRO_STACK_NON_DEFAULT_MAC_PRESENT)
+#include "sl_zigbee_pro_stack_non_default_mac_config.h"
+#endif
+
 #if defined(SL_CATALOG_ZIGBEE_LIGHT_LINK_PRESENT)
 #include "sl_zigbee_light_link_config.h"
 #endif
@@ -145,6 +149,10 @@
 #ifndef EMBER_MIN_ROUTE_TABLE_SIZE // this value is set to zero on leaf stack
 #define EMBER_MIN_ROUTE_TABLE_SIZE       10
 #endif
+#endif
+
+#ifndef SL_ZIGBEE_STACK_COMPLIANCE_REVISION
+  #define SL_ZIGBEE_STACK_COMPLIANCE_REVISION 22
 #endif
 
 #ifndef EMBER_MAX_END_DEVICE_CHILDREN

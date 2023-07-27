@@ -280,4 +280,13 @@ int16_t get_min_tx_power_deci_dbm(void);
  ******************************************************************************/
 int16_t get_max_tx_power_deci_dbm(void);
 
+/*******************************************************************************
+ * @brief  Function that returns the safe size of the string
+ *
+ * @param  src: pointer to the string
+ *
+ * @return Size of the string
+ ******************************************************************************/
+uint8_t safe_strlen(char *src);
+
 #endif  // APP_MEASUREMENT_H

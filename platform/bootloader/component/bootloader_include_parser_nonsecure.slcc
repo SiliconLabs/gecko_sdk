@@ -4,7 +4,7 @@ package: bootloader
 description: >
    The Bootloader Include Parser (Non-Secure) component provides image parser header files.
 category: Platform|Bootloader|TrustZone NonSecure|Core
-quality: evaluation
+quality: production
 include:
   - path: platform/bootloader
   - path: platform/bootloader/parser

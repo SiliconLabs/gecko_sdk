@@ -3,7 +3,7 @@
  * @brief sl_btmesh_sensor_server.h
  *******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -39,8 +39,7 @@
 /**************************************************************************//**
  * Initialize Sensor Server.
  *
- * This function is called automatically by Universal Configurator after
- * enabling the component.
+ * This function is called automatically after enabling the component.
  *
  *****************************************************************************/
 void sl_btmesh_sensor_server_node_init(void);
@@ -48,8 +47,7 @@ void sl_btmesh_sensor_server_node_init(void);
 /**************************************************************************//**
  * Handle Sensor Server events.
  *
- * This function is called automatically by Universal Configurator after
- * enabling the component.
+ * This function is called automatically after enabling the component.
  *
  *****************************************************************************/
 void sl_btmesh_handle_sensor_server_events(sl_btmesh_msg_t* pEvt);

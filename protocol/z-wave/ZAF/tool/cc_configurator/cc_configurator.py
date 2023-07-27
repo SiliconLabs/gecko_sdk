@@ -136,7 +136,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description='Z-Wave Command Class configuration to C converter.')
     parser.add_argument('-i', required=True,
-                        help='Input directory containing .zw_cc_conf files')
+                        help='Input directory containing .cc_config files')
     parser.add_argument(
         '-o', required=True, help='Output directory to populate with serialized content.')
 

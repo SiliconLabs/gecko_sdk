@@ -148,7 +148,7 @@ void app_certificate_store_list()
 {
   int i;
   sl_status_t ret;
-  const app_enum_t* type_enum;
+  const app_enum_t *type_enum;
   app_certificate_t *cert;
   app_certicate_info_t info;
 

@@ -1424,10 +1424,8 @@ cc_configuration_set(uint16_t parameter_number,  cc_config_parameter_value_t* ne
             io_transaction_result = cc_configuration_io_write( configuration_pool->parameters[parameter_ix].file_id,
                                                             (const uint8_t*)&parameter_buffer.data_buffer,
                                                             sizeof(cc_config_parameter_value_t));
-           
-          
-
-          
+        } else {
+          return_value = CC_CONFIG_RETURN_CODE_IO_FAIL;
         }
         if(io_transaction_result == false)
         {

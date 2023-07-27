@@ -31,7 +31,8 @@ include:
       - path: soft_source_match_table.h
   - path: protocol/openthread/platform-abstraction/include
     file_list:
-      - path: radio_vendor.h
+      - path: radio_counters.h
+      - path: radio_extension.h
 source:
       - path: util/third_party/openthread/examples/platforms/utils/debug_uart.c
       - path: util/third_party/openthread/examples/platforms/utils/link_metrics.cpp
@@ -51,6 +52,6 @@ source:
       - path: protocol/openthread/platform-abstraction/efr32/crypto.c
       - path: protocol/openthread/platform-abstraction/efr32/ieee802154-packet-utils.cpp
       - path: protocol/openthread/platform-abstraction/efr32/radio.c
-      - path: protocol/openthread/platform-abstraction/efr32/radio_vendor.c
+      - path: protocol/openthread/platform-abstraction/efr32/radio_extension.c
       - path: protocol/openthread/platform-abstraction/efr32/startup-gcc.c
       - path: protocol/openthread/platform-abstraction/efr32/system.c

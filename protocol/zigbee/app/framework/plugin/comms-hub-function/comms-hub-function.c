@@ -56,7 +56,7 @@ static uint8_t tunnelTargetAttempts = 0;
 
 sl_zigbee_event_t emberAfPluginCommsHubFunctionTunnelCheckEvent;
 #define tunnelCheckEventControl (&emberAfPluginCommsHubFunctionTunnelCheckEvent)
-void emberAfPluginCommsHubFunctionTunnelCheckEventHandler(sl_zigbee_event_t * event);
+static void tunnelCheckEventHandler(sl_zigbee_event_t * event);
 
 #define PLUGIN_DEBUG
 #if defined(PLUGIN_DEBUG)
@@ -95,7 +95,7 @@ void emberAfPluginCommsHubFunctionInitCallback(uint8_t init_level)
     case SL_ZIGBEE_INIT_LEVEL_EVENT:
     {
       sl_zigbee_network_event_init(&emberAfPluginCommsHubFunctionTunnelCheckEvent,
-                                   emberAfPluginCommsHubFunctionTunnelCheckEventHandler);
+                                   tunnelCheckEventHandler);
       break;
     }
 
@@ -389,7 +389,7 @@ static void tunnelDiscoveryCallback(const EmberAfServiceDiscoveryResult *result)
 /*
  * @brief Logging timed out message to CHF Event Log.
  */
-void sli_zigbee_af_comms_hub_function_log_timed_out_message_event(EmberAfSleepyMessage * sleepyMessage)
+static void log_timed_out_message_event(EmberAfSleepyMessage * sleepyMessage)
 {
 #if defined(ZCL_USING_EVENTS_CLUSTER_SERVER)
   EmberAfEvent event;
@@ -419,7 +419,7 @@ void emberAfPluginSleepyMessageQueueMessageTimedOutCallback(EmberAfSleepyMessage
 
   if (emberAfPluginSleepyMessageQueueGetPendingMessage(sleepyMessageId, &sleepyMessage)) {
     emberAfPluginSleepyMessageQueueRemoveMessage(sleepyMessageId);
-    sli_zigbee_af_comms_hub_function_log_timed_out_message_event(&sleepyMessage);
+    log_timed_out_message_event(&sleepyMessage);
     emberAfPluginCommsHubFunctionSendCallback(EMBER_AF_CHF_STATUS_SEND_TIMEOUT,
                                               sleepyMessage.dstEui64,
                                               sleepyMessage.length,
@@ -648,7 +648,7 @@ static EmberAfPluginCommsHubFunctionStatus clearTunnelMessagePending(EmberEUI64 
                                                                      0);
 }
 
-void emberAfPluginCommsHubFunctionTunnelCheckEventHandler(sl_zigbee_event_t * event)
+static void tunnelCheckEventHandler(sl_zigbee_event_t * event)
 {
   uint32_t delay = (EMBER_AF_PLUGIN_COMMS_HUB_FUNCTION_TUNNEL_CHECK_PERIOD_SECONDS
                     * MILLISECOND_TICKS_PER_SECOND);

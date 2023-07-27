@@ -43,7 +43,7 @@ static uint8_t cipher_message_buffer[ESL_PAYLOAD_MAX_LENGTH
                                      + SL_BT_EAD_PACKET_OVERHEAD
                                      + ESL_PAYLOAD_OVERHEAD];
 
-// ESL Tag dummy encrypt function
+// ESL Tag encrypt function
 void* esl_core_encrypt_message(void *msg, uint8_t *len)
 {
   void* ret_val = NULL;
@@ -84,7 +84,7 @@ void* esl_core_encrypt_message(void *msg, uint8_t *len)
   return ret_val;
 }
 
-// ESL Tag dummy decrypt function
+// ESL Tag decrypt function
 void* esl_core_decrypt_message(void *msg, uint8_t *len)
 {
   void* ret_val = NULL;
@@ -107,13 +107,14 @@ void* esl_core_decrypt_message(void *msg, uint8_t *len)
 }
 
 #else // ENCRYPTION_ENABLED
+// ESL Tag dummy encrypt function
 SL_WEAK void* esl_core_encrypt_message(void *msg, uint8_t* len)
 {
   (void)len;
 
   return msg;
 }
-
+// ESL Tag dummy decrypt function
 SL_WEAK void* esl_core_decrypt_message(void *msg, uint8_t* len)
 {
   (void)len;

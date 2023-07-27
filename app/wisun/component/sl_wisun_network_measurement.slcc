@@ -11,26 +11,46 @@ source:
   - path: "sl_wisun_network_measurement.c"
   - path: "sl_wisun_network_measurement_stat.c"
   - path: "sl_wisun_network_measurement_gui.c"
+    condition:
+      - "sl_wisun_app_support_display"
   - path: "sli_wisun_network_measurement_iperf_gui.c"
+    condition:
+      - "sl_wisun_app_support_display"
   - path: "sli_wisun_network_measurement_ping_gui.c"
+    condition:
+      - "sl_wisun_app_support_display"
   - path: "sli_wisun_network_measurement_settings_gui.c"
+    condition:
+      - "sl_wisun_app_support_display"
+  - path: "silabs_wisun_logo.c"
+    condition:
+      - "sl_wisun_app_support_display"
   - path: "sl_wisun_network_measurement_remote_ctrl.c"
     condition:
       - "sl_wisun_coap"
-  - path: "silabs_wisun_logo.c"
 include:
   - path: "."
     file_list:
     - "path": "sl_wisun_network_measurement.h"
     - "path": "sl_wisun_network_measurement_stat.h"
     - "path": "sl_wisun_network_measurement_gui.h"
+      condition:
+        - "sl_wisun_app_support_display"
     - "path": "sli_wisun_network_measurement_iperf_gui.h"
+      condition:
+        - "sl_wisun_app_support_display"
     - "path": "sli_wisun_network_measurement_ping_gui.h"
+      condition:
+        - "sl_wisun_app_support_display"
     - "path": "sli_wisun_network_measurement_settings_gui.h"
+      condition:
+        - "sl_wisun_app_support_display"
+    - "path": "silabs_wisun_logo.h"
+      condition:
+        - "sl_wisun_app_support_display"
     - "path": "sl_wisun_network_measurement_remote_ctrl.h"
       condition:
-      - "sl_wisun_coap"
-    - "path": "silabs_wisun_logo.h"
+        - "sl_wisun_coap"
 config_file:
   - path: "config/sl_wisun_network_measurement_config.h"
   
@@ -39,6 +59,8 @@ requires:
   - name: "sl_wisun_ping"
   - name: "sl_wisun_app_setting"
   - name: "sl_gui"
+    condition:
+      - "sl_wisun_app_support_display"
 
 ui_hints:
   visibility: never

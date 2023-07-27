@@ -1299,6 +1299,10 @@ static int32_t parser_parseApplicationInfo(ParserContext_t   *parserContext,
   volatile int32_t retval;
   uint8_t tagBuffer[GBL_PARSER_BUFFER_SIZE];
 
+  if (parserContext->lengthOfTag != sizeof(ApplicationData_t)) {
+    return BOOTLOADER_ERROR_PARSER_UNEXPECTED;
+  }
+
   while (parserContext->offsetInTag < parserContext->lengthOfTag) {
     // Get data
     retval = gbl_getData(parserContext,

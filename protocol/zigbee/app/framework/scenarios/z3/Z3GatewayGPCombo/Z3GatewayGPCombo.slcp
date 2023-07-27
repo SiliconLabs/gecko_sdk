@@ -101,6 +101,11 @@ source:
 
 config_file:
   - path: "config/zcl/zcl_config.zap"
+    unless:
+      - zigbee_af_support
+  - path: "config/zcl/zcl_config_without_gp.zap"
+    condition:
+      - zigbee_af_support
 
 # Custom CLI for this application
 template_contribution:
@@ -212,6 +217,17 @@ template_contribution:
         help: Delay in milliseconds
       - type: hex
         help: MPDU
+  - name: cli_command
+    value:
+      group: custom
+      name: factory-reset
+      handler: sl_zigbee_reset_zigbee_token
+      help: Factory reset all zigbee tokens
+      argument:
+      - type: uint8
+        help: Boolean value, excluding (1) or not excluding (0) network and APS frame counter tokens.
+      - type: uint8
+        help: Boolean value, excluding (1) or not excluding (0) stack boot counter tokens.
 
 readme:
   - path: ./readme.html

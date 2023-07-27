@@ -349,9 +349,7 @@ static sl_bt_ots_l2cap_credit_t ots_data(sl_bt_ots_server_handle_t server,
 
   if (sc == SL_STATUS_OK
       && memcmp(object, &current_object, SL_BT_OTS_OBJECT_ID_SIZE) == 0) {
-    // ESL doesn't need the offset information
-    (void)current_offset;
-    sc = esl_image_chunk_received(data, size);
+    sc = esl_image_chunk_received(data, current_offset, size);
     if (sc == SL_STATUS_OK) {
       credit++;
     } else {

@@ -61,7 +61,8 @@ sl_status_t sli_tlv_chain_is_valid_with_local_env(sl_zigbee_tlv_chain *tlvs,
   }
   while (status == SL_STATUS_OK) {
     uint8_t tag = TLV_LINK_TAG_ID(finger.head);
-    uint16_t len = TLV_LINK_LENGTH(finger.head);
+    // NOTE TLV_LINK_LENGTH is the raw length byte
+    uint16_t len = TLV_LINK_LENGTH(finger.head) + 1;
     status = sli_tlv_chain_get_next_tlv_link(&finger);
     if (status != SL_STATUS_INVALID_INDEX) {
       if (sli_tlv_chain_count_tag_occurrences(tlvs, tag) > 1
@@ -147,10 +148,6 @@ sl_status_t sli_tlv_chain_get_next_tlv_link(sl_zigbee_tlv_chain *chain)
   }
 }
 
-// Data Model APIs
-
-// maybe move sl_zigbee public apis to a different source file
-// zigbee-stack-tlvs.c maybe
 uint16_t sl_zigbee_tlv_serial_length(const sl_zigbee_tlv_t *tlv)
 {
   return TLV_HEADER_LENGTH + sl_zigbee_tlv_get_length(tlv);
@@ -175,8 +172,8 @@ sl_status_t sli_zigbee_tlv_deserialize_tlv(uint8_t *tlv_link,
   return SL_STATUS_OK;
 }
 
-void sli_zigbee_tlv_serialize_tlv(uint8_t *tlv_start,
-                                  sl_zigbee_tlv_t *tlv_struct)
+static void serialize_tlv(uint8_t *tlv_start,
+                          sl_zigbee_tlv_t *tlv_struct)
 {
   TLV_LINK_TAG_ID(tlv_start) = sl_zigbee_tlv_get_tag(tlv_struct);
   TLV_LINK_LENGTH(tlv_start) = sli_zigbee_tlv_get_length_raw(tlv_struct);
@@ -194,7 +191,7 @@ sl_status_t sl_zigbee_tlv_check_general_format_env(Buffer buff,
   sl_status_t status = SL_STATUS_FAIL;
   uint16_t total_length = sli_legacy_buffer_manager_get_buffer_length(buff);
   if (total_length >= index) {
-    sl_zigbee_tlv_chain chain;
+    sl_zigbee_tlv_chain chain = { .rem = 0 };
     chain.head = sli_legacy_buffer_manager_get_buffer_pointer(buff) + index;
     chain.length = total_length - index;
     status = sli_tlv_chain_is_valid_with_local_env(&chain, env, false);
@@ -217,13 +214,13 @@ sl_status_t sl_zigbee_tlv_concat_to_buffer(Buffer *buffer_handle,
   Buffer buff = *buffer_handle;
   uint16_t buffer_len = sli_legacy_buffer_manager_get_buffer_length(buff);
   if (buffer_len < index) {
-    return SL_STATUS_INVALID_HANDLE;
+    return SL_STATUS_WOULD_OVERFLOW;
   }
   //   method 1
   // serialize the tlv
   uint8_t scratch[TLV_HEADER_LENGTH + MAX_TLV_LENGTH];
   uint16_t tlv_length = sl_zigbee_tlv_serial_length(tlv);
-  sli_zigbee_tlv_serialize_tlv(scratch, tlv);
+  serialize_tlv(scratch, tlv);
   // append to buffer
   EmberStatus status = emberAppendToLinkedBuffers(buff, scratch, tlv_length);
   // return success
@@ -300,7 +297,7 @@ sl_status_t sl_zigbee_encap_tlv_add_tlv(sl_zigbee_tlv_t *encap_tlv,
     return SL_STATUS_FAIL;
   } else {
     // add the tlv to the end of the chain
-    sli_zigbee_tlv_serialize_tlv(sl_zigbee_tlv_get_value_ptr(encap_tlv) + current_idx, tlv);
+    serialize_tlv(sl_zigbee_tlv_get_value_ptr(encap_tlv) + current_idx, tlv);
     sl_zigbee_tlv_set_length(encap_tlv, current_idx + added_len);
     return SL_STATUS_OK;
   }
@@ -341,7 +338,7 @@ bool sli_zigbee_encap_tlv_check_format(sl_zigbee_tlv_t *encap_tlv)
 
 #define TLV_DBG_PRINTF(...) printf(__VA_ARGS__)
 
-uint16_t tlv_dbg_count(sl_zigbee_tlv_chain t)
+static uint16_t tlv_dbg_count(sl_zigbee_tlv_chain t)
 {
   uint16_t count = 0;
   sl_status_t status = SL_STATUS_OK;
@@ -352,7 +349,7 @@ uint16_t tlv_dbg_count(sl_zigbee_tlv_chain t)
   return count;
 }
 
-uint8_t * tlv_dbg_get_tlv_index(sl_zigbee_tlv_chain chain, uint16_t i)
+static uint8_t * tlv_dbg_get_tlv_index(sl_zigbee_tlv_chain chain, uint16_t i)
 {
   uint16_t count = tlv_dbg_count(chain);
   if (i >= count) {
@@ -365,7 +362,7 @@ uint8_t * tlv_dbg_get_tlv_index(sl_zigbee_tlv_chain chain, uint16_t i)
   }
 }
 
-void tlv_dbg_print(uint8_t *tlvs, size_t length)
+UNUSED static void tlv_dbg_print(uint8_t *tlvs, size_t length)
 {
   sl_zigbee_tlv_chain chain;
   chain.head = tlvs;
@@ -556,4 +553,26 @@ uint8_t sl_zigbee_tlv_chain_get_tlv_count(sl_zigbee_tlv_chain *chain)
   } while (status != SL_STATUS_EMPTY);
 
   return count--;
+}
+
+sl_status_t sl_zigbee_tlv_chain_next_tlv(sl_zigbee_tlv_chain *tlvs,
+                                         sl_zigbee_tlv_t **next)
+{
+  if (tlvs == NULL) {
+    return SL_STATUS_NULL_POINTER;
+  } else if (tlvs->length == 0) {
+    return SL_STATUS_EMPTY;
+  } else {
+    sl_zigbee_tlv_t *first = (sl_zigbee_tlv_t *) tlvs->head;
+    uint16_t skip = sl_zigbee_tlv_serial_length(first);
+    if (skip > tlvs->length) {
+      return SL_STATUS_WOULD_OVERFLOW;
+    }
+    tlvs->head += skip;
+    tlvs->length -= skip;
+    if (next != NULL) {
+      *next = first;
+    }
+    return SL_STATUS_OK;
+  }
 }

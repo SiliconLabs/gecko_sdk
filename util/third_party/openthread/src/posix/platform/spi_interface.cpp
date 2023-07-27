@@ -59,14 +59,10 @@
 #include <linux/ioctl.h>
 #include <linux/spi/spidev.h>
 
-using ot::Spinel::SpinelInterface;
-
 namespace ot {
 namespace Posix {
 
-SpiInterface::SpiInterface(SpinelInterface::ReceiveFrameCallback aCallback,
-                           void                                 *aCallbackContext,
-                           SpinelInterface::RxFrameBuffer       &aFrameBuffer)
+SpiInterface::SpiInterface(ReceiveFrameCallback aCallback, void *aCallbackContext, RxFrameBuffer &aFrameBuffer)
     : mReceiveFrameCallback(aCallback)
     , mReceiveFrameContext(aCallbackContext)
     , mRxFrameBuffer(aFrameBuffer)
@@ -104,7 +100,7 @@ otError SpiInterface::HardwareReset(void)
 
     // If the `INT` pin is set to low during the restart of the RCP chip, which triggers continuous invalid SPI
     // transactions by the host, it will cause the function `PushPullSpi()` to output lots of invalid warn log
-    // messages. Adding the delay here is used to wait for the RCP chip starts up to avoid outputing invalid
+    // messages. Adding the delay here is used to wait for the RCP chip starts up to avoid outputting invalid
     // log messages.
     usleep(static_cast<useconds_t>(mSpiResetDelay) * kUsecPerMsec);
 
@@ -406,16 +402,16 @@ otError SpiInterface::DoSpiTransfer(uint8_t *aSpiRxFrameBuffer, uint32_t aTransf
 
 otError SpiInterface::PushPullSpi(void)
 {
-    otError       error               = OT_ERROR_FAILED;
-    uint16_t      spiTransferBytes    = 0;
-    uint8_t       successfulExchanges = 0;
-    bool          discardRxFrame      = true;
-    uint8_t      *spiRxFrameBuffer;
-    uint8_t      *spiRxFrame;
-    uint8_t       slaveHeader;
-    uint16_t      slaveAcceptLen;
-    Ncp::SpiFrame txFrame(mSpiTxFrameBuffer);
-    uint16_t      skipAlignAllowanceLength;
+    otError          error               = OT_ERROR_FAILED;
+    uint16_t         spiTransferBytes    = 0;
+    uint8_t          successfulExchanges = 0;
+    bool             discardRxFrame      = true;
+    uint8_t         *spiRxFrameBuffer;
+    uint8_t         *spiRxFrame;
+    uint8_t          slaveHeader;
+    uint16_t         slaveAcceptLen;
+    Spinel::SpiFrame txFrame(mSpiTxFrameBuffer);
+    uint16_t         skipAlignAllowanceLength;
 
     if (mInterfaceMetrics.mTransferredValidFrameCount == 0)
     {
@@ -493,7 +489,7 @@ otError SpiInterface::PushPullSpi(void)
     spiRxFrame = GetRealRxFrameStart(spiRxFrameBuffer, mSpiAlignAllowance, skipAlignAllowanceLength);
 
     {
-        Ncp::SpiFrame rxFrame(spiRxFrame);
+        Spinel::SpiFrame rxFrame(spiRxFrame);
 
         otLogDebgPlat("spi_transfer TX: H:%02X ACCEPT:%" PRIu16 " DATA:%" PRIu16, txFrame.GetHeaderFlagByte(),
                       txFrame.GetHeaderAcceptLen(), txFrame.GetHeaderDataLen());
@@ -629,12 +625,13 @@ bool SpiInterface::CheckInterrupt(void)
     return (mIntGpioValueFd >= 0) ? (GetGpioValue(mIntGpioValueFd) == kGpioIntAssertState) : true;
 }
 
-void SpiInterface::UpdateFdSet(fd_set &aReadFdSet, fd_set &aWriteFdSet, int &aMaxFd, struct timeval &aTimeout)
+void SpiInterface::UpdateFdSet(void *aMainloopContext)
 {
-    struct timeval timeout        = {kSecPerDay, 0};
-    struct timeval pollingTimeout = {0, kSpiPollPeriodUs};
+    struct timeval        timeout        = {kSecPerDay, 0};
+    struct timeval        pollingTimeout = {0, kSpiPollPeriodUs};
+    otSysMainloopContext *context        = reinterpret_cast<otSysMainloopContext *>(aMainloopContext);
 
-    OT_UNUSED_VARIABLE(aWriteFdSet);
+    assert(context != nullptr);
 
     if (mSpiTxIsReady)
     {
@@ -645,9 +642,9 @@ void SpiInterface::UpdateFdSet(fd_set &aReadFdSet, fd_set &aWriteFdSet, int &aMa
 
     if (mIntGpioValueFd >= 0)
     {
-        if (aMaxFd < mIntGpioValueFd)
+        if (context->mMaxFd < mIntGpioValueFd)
         {
-            aMaxFd = mIntGpioValueFd;
+            context->mMaxFd = mIntGpioValueFd;
         }
 
         if (CheckInterrupt())
@@ -661,7 +658,7 @@ void SpiInterface::UpdateFdSet(fd_set &aReadFdSet, fd_set &aWriteFdSet, int &aMa
         {
             // The interrupt pin was not asserted, so we wait for the interrupt pin to be asserted by adding it to the
             // read set.
-            FD_SET(mIntGpioValueFd, &aReadFdSet);
+            FD_SET(mIntGpioValueFd, &context->mReadFdSet);
         }
     }
     else if (timercmp(&pollingTimeout, &timeout, <))
@@ -721,19 +718,19 @@ void SpiInterface::UpdateFdSet(fd_set &aReadFdSet, fd_set &aWriteFdSet, int &aMa
         mDidPrintRateLimitLog = false;
     }
 
-    if (timercmp(&timeout, &aTimeout, <))
+    if (timercmp(&timeout, &context->mTimeout, <))
     {
-        aTimeout = timeout;
+        context->mTimeout = timeout;
     }
 }
 
-void SpiInterface::Process(const RadioProcessContext &aContext) { Process(aContext.mReadFdSet, aContext.mWriteFdSet); }
-
-void SpiInterface::Process(const fd_set *aReadFdSet, const fd_set *aWriteFdSet)
+void SpiInterface::Process(const void *aMainloopContext)
 {
-    OT_UNUSED_VARIABLE(aWriteFdSet);
+    const otSysMainloopContext *context = reinterpret_cast<const otSysMainloopContext *>(aMainloopContext);
 
-    if (FD_ISSET(mIntGpioValueFd, aReadFdSet))
+    assert(context != nullptr);
+
+    if (FD_ISSET(mIntGpioValueFd, &context->mReadFdSet))
     {
         struct gpioevent_data event;
 
@@ -761,25 +758,23 @@ otError SpiInterface::WaitForFrame(uint64_t aTimeoutUs)
 
     while (now < end)
     {
-        fd_set         readFdSet;
-        fd_set         writeFdSet;
-        int            maxFds = -1;
-        struct timeval timeout;
-        int            ret;
+        otSysMainloopContext context;
+        int                  ret;
 
-        timeout.tv_sec  = static_cast<time_t>((end - now) / US_PER_S);
-        timeout.tv_usec = static_cast<suseconds_t>((end - now) % US_PER_S);
+        context.mMaxFd           = -1;
+        context.mTimeout.tv_sec  = static_cast<time_t>((end - now) / US_PER_S);
+        context.mTimeout.tv_usec = static_cast<suseconds_t>((end - now) % US_PER_S);
 
-        FD_ZERO(&readFdSet);
-        FD_ZERO(&writeFdSet);
+        FD_ZERO(&context.mReadFdSet);
+        FD_ZERO(&context.mWriteFdSet);
 
-        UpdateFdSet(readFdSet, writeFdSet, maxFds, timeout);
+        UpdateFdSet(&context);
 
-        ret = select(maxFds + 1, &readFdSet, &writeFdSet, nullptr, &timeout);
+        ret = select(context.mMaxFd + 1, &context.mReadFdSet, &context.mWriteFdSet, nullptr, &context.mTimeout);
 
         if (ret >= 0)
         {
-            Process(&readFdSet, &writeFdSet);
+            Process(&context);
 
             if (mDidRxFrame)
             {
@@ -806,7 +801,7 @@ otError SpiInterface::SendFrame(const uint8_t *aFrame, uint16_t aLength)
 
     VerifyOrExit(aLength < (kMaxFrameSize - kSpiFrameHeaderSize), error = OT_ERROR_NO_BUFS);
 
-    if (ot::Spinel::SpinelInterface::IsSpinelResetCommand(aFrame, aLength))
+    if (IsSpinelResetCommand(aFrame, aLength))
     {
         ResetStates();
     }

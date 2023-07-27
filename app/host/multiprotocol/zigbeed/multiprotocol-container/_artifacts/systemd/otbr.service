@@ -6,7 +6,7 @@ After=cpcd.service
 [Service]
 Type=oneshot
 User=root
-ExecStart=/app/etc/docker/docker_entrypoint.sh --radio-url spinel+cpc://cpcd_0?iid=2
+ExecStart=/app/etc/docker/docker_entrypoint.sh --radio-url spinel+cpc://cpcd_0?iid=2&iid-list=0
 # This service shall be considered active after start
 RemainAfterExit=yes
 StandardOutput=syslog

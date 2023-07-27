@@ -28,6 +28,10 @@ class CALC_WiSUN_Sol(CALC_WiSUN_Ocelot):
                                desc='WiSUN Mode Switch PHR for alternate PHY', is_array=True)
         self._addModelVariable(model, 'alt_wisun_phy_mode_id', int, ModelVariableFormat.ASCII,
                                desc='WiSUN PhyModeID for alternate PHY', is_array=True)
+        self._addModelVariable(model, 'ofdm_stf_length', int, ModelVariableFormat.DECIMAL,
+                               desc='OFDM STF length (1 unit = 120us)')
+        self._addModelVariable(model, 'alt_rssi_adjust_db', float, ModelVariableFormat.DECIMAL,
+                               desc='RSSI compensation value for alternate PHY')
 
     def calc_wisun_phy_mode_id(self, model):
         # This function calculates the PhyModeID for Wi-SUN OFDM and Wi-SUN FSK PHYs
@@ -64,3 +68,19 @@ class CALC_WiSUN_Sol(CALC_WiSUN_Ocelot):
     def calc_conc_ofdm_option(self, model):
         #By default set this model variable to NONE
         model.vars.conc_ofdm_option.value = model.vars.conc_ofdm_option.var_enum.NONE
+
+    def calc_ofdm_stf_length(self, model):
+        #By default set this model variable to 4
+        modulation_type = model.vars.modulation_type.value
+        antdivmode = model.vars.antdivmode.value
+
+        # Note that ofdm_stf_length is only set and used for OFDM PHYs (avoid clutter)
+        if modulation_type == model.vars.modulation_type.var_enum.OFDM:
+            if antdivmode == model.vars.antdivmode.var_enum.DISABLE:
+                # 4 * 120 us symbol
+                ofdm_stf_length = 4
+            else:
+                # Antenna diversity mode need longer STF length
+                ofdm_stf_length = 10
+
+            model.vars.ofdm_stf_length.value = ofdm_stf_length

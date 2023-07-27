@@ -334,7 +334,7 @@ EmberJoinDecision sli_zigbee_af_trust_center_join_callback(EmberNodeId newNodeId
     sl_zb_sec_man_context_t context;
     sl_zb_sec_man_aps_key_metadata_t key_info;
     context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_TC_LINK_WITH_TIMEOUT;
-    context.eui64 = newNodeEui64;
+    MEMMOVE(context.eui64, newNodeEui64, EUI64_SIZE);
     context.flags |= ZB_SEC_MAN_FLAG_EUI_IS_VALID;
     // Check in transient key table
     if ((EMBER_STANDARD_SECURITY_UNSECURED_JOIN == status)

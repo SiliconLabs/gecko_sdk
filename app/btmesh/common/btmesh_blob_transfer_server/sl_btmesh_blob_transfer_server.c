@@ -3,7 +3,7 @@
  * @brief BLOB Transfer Server application level functionality
  *******************************************************************************
  * # License
- * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -208,6 +208,7 @@ sl_status_t sl_btmesh_blob_transfer_server_set_pull_mode_parameters(uint16_t pul
 void sl_btmesh_blob_transfer_server_on_event(sl_btmesh_msg_t const *evt)
 {
   switch (SL_BT_MSG_ID(evt->header)) {
+    case sl_btmesh_evt_prov_initialized_id:
     case sl_btmesh_evt_node_provisioned_id:
       sl_btmesh_blob_transfer_server_init();
       break;

@@ -45,7 +45,7 @@ static EmberStatus startSearchForUnusedNetwork(bool allChannels);
 #endif
 static EmberStatus startSearchForJoinableNetwork(uint32_t channelMask,
                                                  bool allChannels);
-EmberStatus emberAfStartSearchForJoinableNetworkAllChannels(void);
+static EmberStatus startSearchForJoinableNetworkAllChannels(void);
 
 //------------------------------------------------------------------------------
 // Globals
@@ -321,7 +321,7 @@ void sli_zigbee_af_network_find_scan_error_callback(EmberStatus status)
           && emberAfPluginNetworkFindGetEnableScanningAllChannelsCallback()) {
         printScanAllChannelsPrompt();
         state = NETWORK_FIND_NONE;        // have to reset state before calling the fn
-        status = emberAfStartSearchForJoinableNetworkAllChannels();
+        status = startSearchForJoinableNetworkAllChannels();
         if (status == EMBER_SUCCESS) {
           return;       // not 'break', we want to bail out immediately
         }
@@ -543,7 +543,7 @@ EmberStatus emberAfStartSearchForJoinableNetworkCallback(void)
   return startSearchForJoinableNetworkCallbackCommon(false);
 }
 
-EmberStatus emberAfStartSearchForJoinableNetworkAllChannels(void)
+static EmberStatus startSearchForJoinableNetworkAllChannels(void)
 {
   return startSearchForJoinableNetworkCallbackCommon(true);
 }

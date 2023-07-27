@@ -43,8 +43,7 @@ void sli_zigbee_af_zll_identify_server_okay_effect(uint8_t endpoint);
 
 void sli_zigbee_af_zll_identify_server_channel_change_effect(uint8_t endpoint);
 
-sl_zigbee_event_t emberAfPluginZllIdentifyServerTriggerEffectEndpointEvents[FIXED_ENDPOINT_COUNT];
-#define endpointEvent emberAfPluginZllIdentifyServerTriggerEffectEndpointEvents
+static sl_zigbee_event_t triggerEffectEndpointEvents[FIXED_ENDPOINT_COUNT];
 
 static sli_zigbee_af_zll_identify_state stateTable[EMBER_AF_IDENTIFY_CLUSTER_SERVER_ENDPOINT_COUNT];
 
@@ -67,10 +66,10 @@ static void deactivateZllIdentify(sli_zigbee_af_zll_identify_state *state, uint8
   state->active = false;
   state->cancel = false;
 
-  sl_zigbee_endpoint_event_set_inactive(endpointEvent, endpoint);
+  sl_zigbee_endpoint_event_set_inactive(triggerEffectEndpointEvents, endpoint);
 }
 
-void emberAfPluginZllIdentifyServerTriggerEffectEndpointEventHandler(uint8_t endpoint)
+static void triggerEffectEndpointEventHandler(uint8_t endpoint)
 {
   sli_zigbee_af_zll_identify_state *state = getZllIdentifyState(endpoint);
 
@@ -103,7 +102,7 @@ void emberAfPluginZllIdentifyServerTriggerEffectEndpointEventHandler(uint8_t end
   }
 
   if (state->active) {
-    sl_zigbee_endpoint_event_set_delay_ms(endpointEvent,
+    sl_zigbee_endpoint_event_set_delay_ms(triggerEffectEndpointEvents,
                                           endpoint,
                                           state->eventDelay);
   }
@@ -117,8 +116,8 @@ void sli_zigbee_af_zll_identify_server_init_callback(uint8_t init_level)
   uint8_t i;
 
   for (i = 0; i < FIXED_ENDPOINT_COUNT; i++) {
-    sl_zigbee_endpoint_event_init(&emberAfPluginZllIdentifyServerTriggerEffectEndpointEvents[i],
-                                  emberAfPluginZllIdentifyServerTriggerEffectEndpointEventHandler,
+    sl_zigbee_endpoint_event_init(&triggerEffectEndpointEvents[i],
+                                  triggerEffectEndpointEventHandler,
                                   endpoint_array[i]);
   }
 }
@@ -183,7 +182,7 @@ bool emberAfIdentifyClusterTriggerEffectCallback(EmberAfClusterCommand *cmd)
     state->effectId = (EmberAfIdentifyEffectIdentifier)cmd_data.effectId;
     state->commandVariant = (EmberAfIdentifyEffectVariant)cmd_data.effectVariant;
     state->eventDelay = EMBER_AF_PLUGIN_ZLL_IDENTIFY_SERVER_EVENT_DELAY;
-    sl_zigbee_endpoint_event_set_delay_ms(endpointEvent,
+    sl_zigbee_endpoint_event_set_delay_ms(triggerEffectEndpointEvents,
                                           endpoint,
                                           state->eventDelay);
     status = EMBER_ZCL_STATUS_SUCCESS;

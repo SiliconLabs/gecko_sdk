@@ -60,6 +60,7 @@ $(SDK_DIR)/app/bluetooth/common_host/aoa_parse \
 $(SDK_DIR)/app/bluetooth/common_host/aoa_util \
 $(SDK_DIR)/app/bluetooth/common_host/aoa_db \
 $(SDK_DIR)/app/bluetooth/common_host/system \
+$(SDK_DIR)/app/bluetooth/common/ncp_user_cmd \
 $(SDK_DIR)/platform/common/inc \
 $(SDK_DIR)/protocol/bluetooth/inc
 

@@ -6,8 +6,10 @@
  */
 #include <app_hw.h>
 #include <ZAF_Actuator.h>
+#if !defined(RADIO_BOARD_BRD2705A)
 #include <sl_simple_rgb_pwm_led.h>
 #include <sl_simple_rgb_pwm_led_instances.h>
+#endif
 #include <sl_pwm.h>
 #include <sl_pwm_instances.h>
 #include <Assert.h>
@@ -103,7 +105,7 @@ void app_hw_init(void)
   Board_EnableButton(OUTLET1_TOGGLE_BTN);
   Board_EnableButton(OUTLET2_DIMMER_BTN);
   Board_EnableButton(NOTIFICATION_TOGGLE_BTN);
-  #if defined(RADIO_BOARD_BRD2603A)
+  #if defined(THUNDERBOARD)
   sl_pwm_init_instances();
   sl_pwm_start(&sl_pwm_led1);
   #endif
@@ -118,7 +120,7 @@ void cc_binary_switch_handler(cc_binary_switch_t * p_switch)
 void cc_multilevel_switch_support_cb(cc_multilevel_switch_t * p_switch)
 {
   const uint8_t level = ZAF_Actuator_GetCurrentValue(&p_switch->actuator);
-  #ifndef RADIO_BOARD_BRD2603A_H
+  #if !defined(THUNDERBOARD)
   sl_led_set_rgb_color(&sl_simple_rgb_pwm_led_led, (uint16_t)level, (uint16_t)level, (uint16_t)level);
   #else
   sl_pwm_set_duty_cycle(&sl_pwm_led1, (uint8_t)level);

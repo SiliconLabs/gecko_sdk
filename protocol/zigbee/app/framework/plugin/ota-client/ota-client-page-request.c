@@ -139,11 +139,6 @@ void sli_zigbee_af_page_request_timer_expired(void)
   }
 }
 
-uint32_t sli_zigbee_af_get_page_size(void)
-{
-  return PAGE_SIZE;
-}
-
 uint32_t sli_zigbee_af_get_page_request_missed_packet_delay_ms(void)
 {
   return PAGE_REQUEST_MISSED_PACKET_DELAY_MS;

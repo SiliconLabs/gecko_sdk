@@ -27,7 +27,6 @@ ESL AP Core.
 import string
 import threading
 import secrets
-import ap_logger
 import re
 import os
 import queue
@@ -37,6 +36,7 @@ import traceback
 from ap_config import *
 from ap_constants import *
 from ap_sensor import *
+from ap_logger import getLogger, log
 from image_converter import XbmConverter
 from ap_response_parser import parse_response_data
 from esl_tag import Tag
@@ -54,7 +54,7 @@ class AccessPoint():
     """ Access Point """
     def __init__(self, config, cmd_mode=False, demo_mode=False):
         # Logger
-        self.log = ap_logger.getLogger("AP ")
+        self.log = getLogger()
 
         self.scan_runs = False
         self.pawr_active = False
@@ -69,7 +69,7 @@ class AccessPoint():
         self.past_initiated = False
         # some PAwR stuff
         self.cli_queue = None
-        self.ead = EAD(self.log)
+        self.ead = EAD()
         self.lib = esl_lib.Lib(config)
 
         self.rssi_threshold = RSSI_THRESHOLD
@@ -80,7 +80,7 @@ class AccessPoint():
         self.ap_key = self.generate_key_material()
         self.ble_addresses = []
         self.blocked_list = []
-        self.xbm_converter = XbmConverter(self.log)
+        self.xbm_converter = XbmConverter()
 
         self.image_path = 'image/'
         self.image_files = [f for f in os.listdir(self.image_path) if os.path.isfile(os.path.join(self.image_path, f))]
@@ -102,8 +102,9 @@ class AccessPoint():
         self.shutdown_timer = threading.Timer(3.0, self.shutdown_cli)
         self.shutdown_timer.daemon = True
         self.shutdown_timer.start()
-
+        # ESL Demo controller related attributes
         self.controller_command = None
+        self.demo_auto_reconfigure = False
         self.image_from_controller = b""
         self.controller_image_index = None
         self.image_data_offset = bytearray(4)
@@ -167,6 +168,10 @@ class AccessPoint():
             - bt_addr:  Bluetooth address
             - group_id: ESL group ID
         """
+        if self.active_address is not None:
+            self.log.warning(f"Already connected to {self.active_address}, request ignored.")
+            return
+
         if esl_id is not None:
             address = self.bt_addr_from_esl(esl_id, group_id)
             if address is None:
@@ -208,8 +213,8 @@ class AccessPoint():
             else:
                 address = self.address_auto_type(bt_addr)
                 esl_id, group_id = self.esl_addr_from_bt(address)
-                if bt_addr in self.tags:
-                    do_past = self.tags[bt_addr].provisioned
+                if address in self.tags:
+                    do_past = self.tags[address].provisioned
         elif self.active_address in self.tags:
             address = self.active_address
             esl_id, group_id = self.esl_addr_from_bt(address)
@@ -317,8 +322,8 @@ class AccessPoint():
             return
 
         if raw:
+            self.log.info("Raw image file opened: %s", file)
             #nothing to do with raw files except upload!
-            pass
         else:
             # Open and convert image file, otherwise
             ots_object_type = None
@@ -350,6 +355,8 @@ class AccessPoint():
                 self.log.info("Display type matches object type")
                 if type(file) == str:
                     self.xbm_converter.open(file)
+                    if self.xbm_converter.image is not None:
+                        self.log.info("Image file opened: %s", file)
                 elif type(file) == bytes:
                     self.xbm_converter.open_frombytes(file)
                 if ots_object_type == ESL_WSTK_DISPLAY_TYPE:
@@ -360,7 +367,8 @@ class AccessPoint():
                     self.raw_image = b""
                     self.log.error("Unknown OTS object type, automatic conversion can't be done. Please upload raw image data.")
             else:
-                self.notify_controller(CCMD_IMAGE_UPDATE, CONTROLLER_COMMAND_FAIL)
+                if self.controller_command == CCMD_IMAGE_UPDATE:
+                    self.notify_controller(CCMD_IMAGE_UPDATE, CONTROLLER_COMMAND_FAIL)
                 self.log.error("Cannot upload file: display type is not the same as object type!")
 
         # Send file if raw input or converted result seems OK
@@ -370,7 +378,8 @@ class AccessPoint():
             self.update_image(image_index)
         else:
             self.log.error("Cannot upload file: image conversion failed!")
-            self.notify_controller(CCMD_IMAGE_UPDATE, CONTROLLER_COMMAND_FAIL)
+            if self.controller_command == CCMD_IMAGE_UPDATE:
+                self.notify_controller(CCMD_IMAGE_UPDATE, CONTROLLER_COMMAND_FAIL)
 
     def ap_unassociate(self, address, group_id):
         """
@@ -389,9 +398,10 @@ class AccessPoint():
                 if self.controller_command == CCMD_UNASSOCIATE:
                     self.notify_controller(CCMD_UNASSOCIATE, CONTROLLER_COMMAND_SUCCESS, esl_id)
             else:
-                self.tags[self.bt_addr_from_esl(esl_id, group_id)].pending_unassociate = True
+                tag = self.tags[self.bt_addr_from_esl(esl_id, group_id)]
+                if tag.state not in [ST_UNASSOCIATED, ST_UNSYNCHRONIZED]:
+                    tag.pending_unassociate = True
             data[0:2] = tlv, esl_id
-            self.route_command(esl_id, group_id, data)
             # Handle the connected ESL tag separately, if any
             if esl_id == BROADCAST_ADDRESS and self.active_address in self.tags:
                 eid, gid = self.esl_addr_from_bt(self.active_address)
@@ -399,6 +409,8 @@ class AccessPoint():
                     # broadcast addresses are otherwise routed over periodic advertisement, always!
                     self.route_command(eid, gid, data) # therefore the eid needs to be overridden for connected tags
                     self.log.warning("Unassociate connected ESL Tag results in disconnection!")
+            else:
+                self.route_command(esl_id, group_id, data)
         elif IOP_TEST and re.fullmatch(VALID_ESL_ID_NUMBER_REGEX, address) is not None:
             data[0:2] = tlv, int(address)
             self.queue_pawr_command(group_id, data)
@@ -434,67 +446,80 @@ class AccessPoint():
                 count = len(self.ble_addresses)
                 for tag_addr in self.ble_addresses:
                     if tag_addr in self.tags:
-                        self.tags[tag_addr].log(False)
+                        log(self.tags[tag_addr])
                     else:
-                        self.log.print("    BLE Address:", tag_addr)
+                        log(f"BLE Address: {tag_addr}")
                 if count == 0:
-                    self.log.print("There's no advertising tag.")
+                    log("There's no advertising tag.")
                 elif count == 1:
-                    self.log.print("There's one advertising tag.")
+                    log("There's one advertising tag.")
                 else:
-                    self.log.print("There are {0} advertising tags.".format(count))
+                    log(f"There are {count} advertising tags.")
             # Synchronized
             elif param == "synchronized":
-                for key in self.tags:
-                    tag = self.tags[key]
+                for key, tag in self.tags.items():
                     if tag.state == ST_SYNCHRONIZED and (group_id is None or group_id == tag.group_id):
-                        tag.log(verbose)
+                        if verbose:
+                            log(tag.get_info())
+                            log("-" * 36)
+                        else:
+                            log(tag)
                         count = count + 1
                         list_of_tags.append(tag.ble_address)
                 if count == 0:
-                    self.log.print("There's no synchronized tag.")
+                    log("There's no synchronized tag.")
                 elif count == 1:
-                    self.log.print("There's one synchronized tag.")
+                    log("There's one synchronized tag.")
                 else:
-                    self.log.print("There are {0} synchronized tags.".format(count))
+                    log(f"There are {count} synchronized tags.")
             # Unsynchronized
             elif param == "unsynchronized":
-                for key in self.tags:
-                    tag = self.tags[key]
+                for key, tag in self.tags.items():
+                    if key == self.active_address:
+                        continue
                     if tag.state == ST_UNSYNCHRONIZED and (group_id is None or group_id == tag.group_id):
-                        tag.log(verbose)
+                        if verbose:
+                            log(tag.get_info())
+                            log("-" * 36)
+                        else:
+                            log(tag)
                         count = count + 1
                 if count == 0:
-                    self.log.print("There's no unsynchronized tag.")
+                    log("There's no unsynchronized tag.")
                 elif count == 1:
-                    self.log.print("There's one unsynchronized tag.")
+                    log("There's one unsynchronized tag.")
                 else:
-                    self.log.print("There are {0} unsynchronized tags.".format(count))
+                    log(f"There are {count} unsynchronized tags.")
             # Connected
             elif param == "connected":
-               if self.active_address in self.tags:
-                    self.tags[self.active_address].log(verbose)
+                if self.active_address in self.tags:
+                    tag = self.tags[self.active_address]
+                    if verbose:
+                        log(tag.get_info())
+                        log("-" * 36)
+                    else:
+                        log(tag)
                     count = count + 1
-               if count == 0:
-                    self.log.print("There's no connected tag.")
-               elif count == 1:
-                    self.log.print("There's one connected tag.")
-               else:
-                    self.log.print("There are {0} connected tags.".format(count))
+                if count == 0:
+                    log("There's no connected tag.")
+                elif count == 1:
+                    log("There's one connected tag.")
+                else:
+                    log(f"There are {count} connected tags.")
             # Blocked
             elif param == "blocked":
                 count = len(self.blocked_list)
                 for tag_addr in self.blocked_list:
                     if tag_addr in self.tags:
-                        self.tags[tag_addr].log(False)
+                        log(self.tags[tag_addr])
                     else:
-                        self.log.print("    BLE Address:", tag_addr)
+                        log(f"BLE Address: {tag_addr}")
                 if count == 0:
-                    self.log.print("There's no blocked tag.")
+                    log("There's no blocked tag.")
                 elif count == 1:
-                    self.log.print("There's one blocked tag.")
+                    log("There's one blocked tag.")
                 else:
-                    self.log.print("There are {0} blocked tags that may or may not advertising.".format(count))
+                    log(f"There are {count} blocked tags that may or may not advertising.")
 
         if self.controller_command == CCMD_LIST:
             if len(list_of_tags) != 0:
@@ -825,7 +850,7 @@ class AccessPoint():
             self.auto_override = False
             self.log.info("Operation mode: manual")
         else:
-            self.log.print("  Current mode: {0}".format("manual" if self.cmd_mode else "automated"))
+            log("  Current mode: {0}".format("manual" if self.cmd_mode else "automated"))
         self.set_mode_handlers()
 
     def ap_set_rssi_threshold(self, rssi_tresh):
@@ -1120,7 +1145,7 @@ class AccessPoint():
                 self.shutdown_cli()
 
     # ----------------------------------------------------------------------------------------------
-    # Common ESL event handler methods
+    # Common ESL event handler methods for all modes (auto/command line/demo)
 
     def esl_event_system_boot(self, evt: esl_lib.EventSystemBoot):
         """ ESL event handler """
@@ -1131,7 +1156,6 @@ class AccessPoint():
     def esl_event_tag_found(self, evt: esl_lib.EventTagFound):
         """ ESL event handler """
         if evt.rssi > self.rssi_threshold and evt.address not in self.ble_addresses:
-            self.ble_addresses.append(evt.address)
             if evt.address in self.tags:
                 self.tags[evt.address].reset()
                 if self.tags[evt.address].state == ST_SYNCHRONIZED:
@@ -1145,20 +1169,23 @@ class AccessPoint():
         """ ESL event handler """
         self.connection_dict[evt.connection_handle] = evt.address
         self.active_address = evt.address
+        if evt.address in self.ble_addresses:
+            self.ble_addresses.remove(evt.address) # remove the device from the unprovisioned/advertising list
         self.init_tag(evt.address, evt.gattdb_handles)
         if not self.tags[evt.address].skip_get_info:
             # read device info
             self.lib.get_tag_info(evt.connection_handle)
+            self.update_state(READING_VALUES)
         else:
             self.log.info("Tag info already available, skipping discovery.")
-        self.update_state(READING_VALUES)
+            self.update_state(CONNECTED)
 
     def esl_event_tag_info(self, evt: esl_lib.EventTagInfo):
         """ ESL event handler """
         self.update_state(CONNECTED)
         tag = self.get_tag(evt.connection_handle)
         tag.gatt_values.update(evt.tlv_data)
-        tag.skip_get_info = True
+        tag.set_valid() # make ESL tag valid from this point on
         if elw.ESL_LIB_DATA_TYPE_GATT_PNP_ID in evt.tlv_data:
             if tag.pnp_vendor_id == None:
                 self.log.error("PnP characteristic not found - vendor opcodes support disabled")
@@ -1168,6 +1195,9 @@ class AccessPoint():
                 self.log.info(f"PnP characteristic found: {tag.pnp_vendor_id:#x}")
         if elw.ESL_LIB_DATA_TYPE_GATT_SERIAL_NUMBER in evt.tlv_data:
             self.log.info("Serial Number String found: " + str(tag.serial_number))
+        values = tag.gatt_write_values
+        if len(values) and not tag.provisioned:
+            self.write_values(tag, values) # auto-refresh existing tag config
 
     def esl_event_pawr_status(self, evt: esl_lib.EventPawrStatus):
         """ ESL event handler """
@@ -1206,8 +1236,6 @@ class AccessPoint():
                                            len(tag.display_info),
                                            struct.pack('<H', S_ID_PRESENT_INPUT_VOLTAGE) if S_ID_PRESENT_INPUT_VOLTAGE in tag.sensor_info else struct.pack('<H', 0x0000),
                                            struct.pack('<H', S_ID_PRESENT_DEVICE_OPERATING_TEMPERATURE) if S_ID_PRESENT_DEVICE_OPERATING_TEMPERATURE in tag.sensor_info else struct.pack('<H', 0x0000))
-                if tag.ble_address in self.ble_addresses:
-                    self.ble_addresses.remove(tag.ble_address) # remove the device from the unprovisioned list
 
     def esl_event_control_point_response(self, evt: esl_lib.EventControlPointResponse):
         """ ESL event handler """
@@ -1230,7 +1258,7 @@ class AccessPoint():
             tag = self.tags[evt.address]
         except KeyError:
             # Create dummy tag object
-            tag = Tag(self.log, evt.address, dummy=True)
+            tag = Tag(evt.address, dummy=True)
         self.past_initiated = False
         if evt.reason == elw.SL_STATUS_BT_CTRL_REMOTE_USER_TERMINATED:
             if tag.esl_address is not None and not tag.pending_unassociate:
@@ -1244,7 +1272,7 @@ class AccessPoint():
             tag.state = ST_UNSYNCHRONIZED
             tag.update_flags(BASIC_STATE_FLAG_SYNCHRONIZED, False)
         if tag.esl_address is not None:
-            tag.log()
+            log(tag.get_info())
         elif not tag.provisioned:
             self.key_db.delete_ltk(tag.ble_address)
         self.active_address = None
@@ -1258,7 +1286,7 @@ class AccessPoint():
         if tag is None:
             return
         tag.update_state(evt.data, ST_UPDATING if tag.provisioned else ST_CONFIGURING)
-        parse_response_data(evt.data, tag.sensor_info, self.log)
+        parse_response_data(evt.data, tag.sensor_info)
         if evt.data[0] == TLV_RESPONSE_BASIC_STATE:
             tag.basic_state_flags = int.from_bytes(evt.data[1:2], 'little')
             if tag.pending_unassociate:
@@ -1293,12 +1321,16 @@ class AccessPoint():
                     self.key_db.delete_ltk(tag.ble_address)
                 self.active_address = None
                 self.update_state(IDLE)
-        elif evt.lib_status in [elw.ESL_LIB_STATUS_CONN_FAILED, elw.ESL_LIB_STATUS_CONN_CLOSE_FAILED]:
+        elif evt.lib_status in [elw.ESL_LIB_STATUS_CONN_FAILED, elw.ESL_LIB_STATUS_CONN_CLOSE_FAILED, elw.ESL_LIB_STATUS_CONN_TIMEOUT]:
             self.past_initiated = False
-            # remove node from self.connection_dict
-            self.connection_dict = {node:address for node, address in self.connection_dict.items() if address != self.active_address}
-            self.active_address = None
-            self.update_state(IDLE)
+            if evt.lib_status != elw.ESL_LIB_STATUS_CONN_CLOSE_FAILED:
+                if self.active_address in self.ble_addresses:
+                    self.ble_addresses.remove(self.active_address) # remove the device from the unprovisioned/advertising list
+            if evt.sl_status != elw.SL_STATUS_ALREADY_EXISTS:
+                # remove node from self.connection_dict
+                self.connection_dict = {node:address for node, address in self.connection_dict.items() if address != self.active_address}
+                self.active_address = None
+                self.update_state(IDLE)
         elif evt.lib_status == elw.ESL_LIB_STATUS_GATT_TIMEOUT:
             tag = self.get_tag(evt.node_id)
             if tag is not None:
@@ -1329,12 +1361,12 @@ class AccessPoint():
         self.key_db.add_ltk(evt.address, evt.ltk)
 
     # ----------------------------------------------------------------------------------------------
-    # ESL event handler methods in CLI mode
+    # ESL event handler method extensions in CLI mode
 
     def cli_esl_event_error(self, evt: esl_lib.EventError):
         if evt.lib_status == elw.ESL_LIB_STATUS_CONN_FAILED:
-            if evt.sl_status == elw.SL_STATUS_ABORT and evt.address not in self.blocked_list: # handle advertisers bonded to different AP
-                self.log.info("ESL at address %s refused connection attempts - probably bonded to other AP", evt.address)
+            if evt.sl_status == elw.SL_STATUS_ABORT and evt.node_id not in self.blocked_list: # handle advertisers bonded to different AP
+                self.log.info("ESL at address %s refused connection attempts - probably bonded to other AP", evt.node_id)
 
     def cli_esl_event_system_boot(self, evt: esl_lib.EventSystemBoot):
         """ ESL event handler in CLI mode """
@@ -1343,9 +1375,13 @@ class AccessPoint():
 
     def cli_esl_event_tag_found(self, evt: esl_lib.EventTagFound):
         """ ESL event handler in CLI mode """
-        if not self.pawr_active and evt.address not in self.ble_addresses:
-            self.log.warning("ESL Tag cannot be synchronized because PAwR is not started.")
-            self.log.info("Please start PAwR with command: 'sync start' before configuring.")
+        if evt.rssi > self.rssi_threshold:
+            if evt.address not in self.ble_addresses:
+                if not self.pawr_active:
+                    self.log.warning("ESL Tag cannot be synchronized because PAwR is not started.")
+                    self.log.info("Please start PAwR with command: 'sync start' before configuring.")
+                self.ble_addresses.append(evt.address)
+
 
     def cli_esl_event_connection_closed(self, evt: esl_lib.EventConnectionClosed):
         """ ESL event handler in CLI mode """
@@ -1356,7 +1392,7 @@ class AccessPoint():
             self.set_mode_handlers()
 
     # ----------------------------------------------------------------------------------------------
-    # ESL event handler methods in auto mode
+    # ESL event handler method extensions in auto mode
 
     def auto_esl_event_system_boot(self, evt: esl_lib.EventSystemBoot):
         """ ESL event handler in auto mode """
@@ -1365,13 +1401,18 @@ class AccessPoint():
 
     def auto_esl_event_tag_found(self, evt: esl_lib.EventTagFound):
         """ ESL event handler in auto mode """
-        if self.pawr_active:
-            if evt.address not in self.blocked_list:
-                if evt.address in self.ble_addresses and self.state == IDLE:
-                    self.connect(evt.address)
-        elif evt.address not in self.ble_addresses:
-            self.log.error("ESL Tag cannot be synchronized because PAwR is not started!")
-            self.log.info("Please re-start auto mode with command: 'mode auto' to recover.")
+        if evt.rssi > self.rssi_threshold:
+            if self.pawr_active:
+                if evt.address not in self.blocked_list:
+                    if evt.address in self.ble_addresses and self.state == IDLE:
+                        self.connect(evt.address)
+            elif evt.address not in self.ble_addresses:
+                self.log.error("ESL Tag cannot be synchronized because PAwR is not started!")
+                self.log.info("Please re-start auto mode with command: 'mode auto' to recover.")
+            if evt.address not in self.ble_addresses:
+                self.ble_addresses.append(evt.address)
+                if self.state == IDLE:
+                    self.check_address_list()
 
     def auto_esl_event_error(self, evt: esl_lib.EventError):
         """ ESL event handler in auto mode """
@@ -1388,7 +1429,7 @@ class AccessPoint():
         elif evt.lib_status == elw.ESL_LIB_STATUS_OTS_GOTO_FAILED:
             if evt.sl_status == elw.SL_STATUS_NOT_FOUND:
                 self.upload_next_image(tag)
-        elif evt.lib_status in [elw.ESL_LIB_STATUS_CONN_FAILED, elw.ESL_LIB_STATUS_CONN_CLOSE_FAILED]:
+        elif evt.lib_status in [elw.ESL_LIB_STATUS_CONN_FAILED, elw.ESL_LIB_STATUS_CONN_CLOSE_FAILED, elw.ESL_LIB_STATUS_CONN_TIMEOUT]:
             if evt.sl_status == elw.SL_STATUS_ABORT and evt.node_id not in self.blocked_list: # handle advertisers bonded to different AP
                 self.blocked_list.append(evt.node_id)
                 self.log.warning("ESL at address %s has been blocked due to too many failed connection attempts", evt.node_id)
@@ -1409,7 +1450,8 @@ class AccessPoint():
         if not self.auto_override:
             tag = self.get_tag(evt.connection_handle)
             values = self.configure(tag)
-            self.write_values(tag, values)
+            if self.state == CONNECTED:
+                self.write_values(tag, values) # auto-refreshing the existing tag config may already doing this
 
     def auto_esl_event_control_point_response(self, evt: esl_lib.EventControlPointResponse):
         """ ESL event handler in auto mode """
@@ -1442,7 +1484,7 @@ class AccessPoint():
         self.check_address_list()
 
     # ----------------------------------------------------------------------------------------------
-    # ESL event handler methods in demo mode
+    # ESL event handler method extensions in demo mode
 
     def demo_esl_event_system_boot(self, evt: esl_lib.EventSystemBoot):
         """ ESL event handler in demo mode """
@@ -1492,6 +1534,10 @@ class AccessPoint():
         try:
             self.controller_command = DEMO_COMMAND_DICT[command]
             if self.cli_queue is not None:
+                if mcommand.find("full") != -1:
+                    mcommand = mcommand.replace("full", "--full")
+                elif mcommand.find("index=0") != -1:
+                    mcommand = mcommand.replace("index=", "--index ")
                 self.cli_queue.put(mcommand)
         except KeyError:
             self.log.error("Not a valid command")
@@ -1530,11 +1576,27 @@ class AccessPoint():
 
     def demo_esl_event_connection_opened(self, evt: esl_lib.EventConnectionOpened):
         """ ESL event handler in demo mode """
-        if self.controller_command != None:
+        if self.controller_command != None and not self.demo_auto_reconfigure:
             self.notify_controller(self.controller_command,CONTROLLER_COMMAND_SUCCESS)
+
+    def demo_esl_event_tag_found(self, evt: esl_lib.EventTagFound):
+        """ ESL event handler in demo mode """
+        if self.pawr_active and evt.address in self.tags and self.state == IDLE:
+            self.connect(evt.address)
+            self.demo_auto_reconfigure = True
+
+    def demo_esl_event_configure_tag_response(self, evt: esl_lib.EventConfigureTagResponse):
+        """ ESL demo event handler """
+        self.update_state(CONNECTED)
+        if evt.status == elw.SL_STATUS_OK:
+            tag = self.get_tag(evt.connection_handle)
+            tag.gatt_values[evt.type] = tag.gatt_write_values[evt.type]
+            if tag.provisioned and self.demo_auto_reconfigure:
+                self.ap_update_complete(tag.esl_id, tag.group_id)
 
     def demo_esl_event_connection_closed(self, evt: esl_lib.EventConnectionClosed):
         """ ESL event handler in demo mode """
+        self.demo_auto_reconfigure = False
         if self.controller_command == CCMD_DISCONNECT:
             self.notify_controller(self.controller_command, CONTROLLER_COMMAND_SUCCESS)
         elif self.controller_command != None:
@@ -1549,21 +1611,28 @@ class AccessPoint():
         elif evt.lib_status == elw.ESL_LIB_STATUS_OTS_ERROR:
             if self.controller_command == CCMD_REQUEST_DATA:
                 self.notify_controller(CCMD_IMAGE_UPDATE, CONTROLLER_COMMAND_FAIL)
+        elif evt.lib_status in [elw.ESL_LIB_STATUS_OTS_INIT_FAILED, elw.ESL_LIB_STATUS_OTS_META_READ_FAILED]:
+            self.disconnect()
 
     def check_address_list(self):
         """ Check address list """
-        self.log.info("Checking for next tag")
         next_addr = list(set(self.ble_addresses) - set(self.blocked_list))
+        self.log.info("Checking for next tag in list")
         if next_addr:
             if self.state == IDLE:
                 self.log.debug(f"Address list: {str(next_addr)}")
-                self.active_address = next_addr[0]
-                self.connect(self.active_address)
+                try:
+                    self.connect(next_addr[0])
+                    self.active_address = next_addr[0]
+                except:
+                    self.update_state(IDLE)
+                    pass
             else:
                 self.log.warning("Access point should be idle - auto provisioning may stop!")
         else:
-            if not self.scan_runs:
-                self.start_scan()
+            self.log.info("Advertising list is empty")
+            if not self.scan_runs and not self.cmd_mode:
+                self.log.warning("Scaning is disabled in auto mode.")
 
     def get_pawr_params(self):
         """ Get periodic advertisement current parameter set """
@@ -1665,7 +1734,7 @@ class AccessPoint():
             esl_id = cmds[i][1]
             # Broadcast address does not need response
             if esl_id != BROADCAST_ADDRESS:
-                new_command = ESLCommand(cmds[i], gid, last_slotnum[esl_id], self.log)
+                new_command = ESLCommand(cmds[i], gid, last_slotnum[esl_id])
                 if new_command.response_opcode is not None:
                     self.esl_pending_commands[gid].insert(0,new_command)
         self.esl_pending_commands_lock.release()
@@ -1790,17 +1859,19 @@ class AccessPoint():
         """ Stop scanning """
         if self.scan_runs:
             self.lib.scan_enable(False)
+            self.ble_addresses.clear()
         else:
             self.log.info("Scanning is not running.")
 
     def init_tag(self, address, gattdb_handles=None):
         """ Tag initialization """
         if address not in self.tags:
-            self.tags[address] = Tag(self.log, address)
+            self.tags[address] = Tag(address)
             self.tags[address].state = ST_CONFIGURING
             self.log.info("Registering ESL Tag at BLE address: "  + str(address))
         if gattdb_handles is not None:
             self.tags[address].gattdb_handles = gattdb_handles
+        self.tags[address].pending_unassociate = False
         if self.tags[address].provisioned:
             self.log.info("Already known Tag at BLE address: "  + str(address))
             self.tags[address].state = ST_UPDATING
@@ -1808,8 +1879,6 @@ class AccessPoint():
             if cmd is not None:
                 self.log.debug("Unresponded command removed from PAwR queue!")
                 self.remove_esl_pending_command(cmd)
-            if address in self.ble_addresses:
-                self.ble_addresses.remove(address)
 
     def configure(self, tag: Tag):
         """ Configure tag
@@ -1846,6 +1915,7 @@ class AccessPoint():
         gattdb_handles = None
         if address in self.tags:
             gattdb_handles = self.tags[address].gattdb_handles
+        self.log.info(f"Request connecting to: {address}")
         self.lib.connect(address, pawr, key_type=key_type, key=ltk, gattdb=gattdb_handles)
 
     def disconnect(self, address=None):
@@ -2157,8 +2227,8 @@ class AccessPoint():
                 break;
 
             if last_data <= len(data):
-                parse_response_data(response_data, sensor_info, self.log)
-                if self.controller_command != None:
+                parse_response_data(response_data, sensor_info)
+                if self.controller_command is not None:
                     if address != "":
                         esl_id, group_id = self.esl_addr_from_bt(address)
                     self.notify_controller(self.controller_command, CONTROLLER_COMMAND_SUCCESS, esl_id, group_id, response_data)

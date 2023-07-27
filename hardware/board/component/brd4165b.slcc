@@ -18,6 +18,7 @@
   - name: hardware_board_has_si70xx
   - name: hardware_board_has_tempsensor
   - name: hardware_board_has_vcom
+  - name: hardware_board_has_hfxo_freq_38.4mhz
   - name: hardware_board_has_hfxo
   - name: hardware_board_has_lfxo
   - name: hardware_board_supports_rf_band_2400

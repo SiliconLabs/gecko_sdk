@@ -94,7 +94,12 @@ MleRouter::MleRouter(Instance &aInstance)
 #endif
 {
     mDeviceMode.Set(mDeviceMode.Get() | DeviceMode::kModeFullThreadDevice | DeviceMode::kModeFullNetworkData);
+
+#if (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_3_1)
     mLeaderWeight = mDeviceProperties.CalculateLeaderWeight();
+#else
+    mLeaderWeight = kDefaultLeaderWeight;
+#endif
 
     SetRouterId(kInvalidRouterId);
 
@@ -183,12 +188,38 @@ exit:
     return error;
 }
 
+void MleRouter::HandleSecurityPolicyChanged(void)
+{
+    // If we are currently router or leader and no longer eligible to
+    // be a router (due to security policy change), we start jitter
+    // timeout to downgrade.
+
+    VerifyOrExit(IsRouterOrLeader() && !IsRouterEligible());
+
+    // `mRouterSelectionJitterTimeout` is non-zero if we are already
+    // waiting to downgrade.
+
+    VerifyOrExit(mRouterSelectionJitterTimeout == 0);
+
+    mRouterSelectionJitterTimeout = 1 + Random::NonCrypto::GetUint8InRange(0, mRouterSelectionJitter);
+
+    if (IsLeader())
+    {
+        mRouterSelectionJitterTimeout += kLeaderDowngradeExtraDelay;
+    }
+
+exit:
+    return;
+}
+
+#if (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_3_1)
 void MleRouter::SetDeviceProperties(const DeviceProperties &aDeviceProperties)
 {
     mDeviceProperties = aDeviceProperties;
     mDeviceProperties.ClampWeightAdjustment();
     SetLeaderWeight(mDeviceProperties.CalculateLeaderWeight());
 }
+#endif
 
 Error MleRouter::BecomeRouter(ThreadStatusTlv::Status aStatus)
 {
@@ -239,7 +270,11 @@ Error MleRouter::BecomeLeader(void)
     uint32_t partitionId;
     uint8_t  leaderId;
 
+#if OPENTHREAD_CONFIG_OPERATIONAL_DATASET_AUTO_INIT
     VerifyOrExit(!Get<MeshCoP::ActiveDatasetManager>().IsPartiallyComplete(), error = kErrorInvalidState);
+#else
+    VerifyOrExit(Get<MeshCoP::ActiveDatasetManager>().IsComplete(), error = kErrorInvalidState);
+#endif
     VerifyOrExit(!IsDisabled(), error = kErrorInvalidState);
     VerifyOrExit(!IsLeader(), error = kErrorNone);
     VerifyOrExit(IsRouterEligible(), error = kErrorNotCapable);
@@ -1581,9 +1616,15 @@ void MleRouter::HandleTimeTick(void)
             Attach(kDowngradeToReed);
         }
 
-        break;
+        OT_FALL_THROUGH;
 
     case kRoleLeader:
+        if (routerStateUpdate && !IsRouterEligible())
+        {
+            LogInfo("No longer router eligible");
+            IgnoreError(BecomeDetached());
+        }
+
         break;
 
     case kRoleDisabled:
@@ -1792,28 +1833,30 @@ Error MleRouter::ProcessAddressRegistrationTlv(RxInfo &aRxInfo, Child &aChild)
 {
     Error    error;
     uint16_t offset;
-    uint16_t length;
     uint16_t endOffset;
     uint8_t  count       = 0;
     uint8_t  storedCount = 0;
 #if OPENTHREAD_CONFIG_TMF_PROXY_DUA_ENABLE
-    Ip6::Address        oldDua;
-    const Ip6::Address *oldDuaPtr = nullptr;
-    bool                hasDua    = false;
+    bool         hasOldDua = false;
+    bool         hasNewDua = false;
+    Ip6::Address oldDua;
 #endif
 #if OPENTHREAD_CONFIG_TMF_PROXY_MLR_ENABLE
-    Ip6::Address oldMlrRegisteredAddresses[kMaxChildIpAddresses - 1];
-    uint16_t     oldMlrRegisteredAddressNum = 0;
+    MlrManager::MlrAddressArray oldMlrRegisteredAddresses;
 #endif
 
-    SuccessOrExit(error = Tlv::FindTlvValueOffset(aRxInfo.mMessage, Tlv::kAddressRegistration, offset, length));
-
-    endOffset = offset + length;
+    SuccessOrExit(error =
+                      Tlv::FindTlvValueStartEndOffsets(aRxInfo.mMessage, Tlv::kAddressRegistration, offset, endOffset));
 
 #if OPENTHREAD_CONFIG_TMF_PROXY_DUA_ENABLE
-    if ((oldDuaPtr = aChild.GetDomainUnicastAddress()) != nullptr)
     {
-        oldDua = *oldDuaPtr;
+        const Ip6::Address *duaAddress = aChild.GetDomainUnicastAddress();
+
+        if (duaAddress != nullptr)
+        {
+            oldDua    = *duaAddress;
+            hasOldDua = true;
+        }
     }
 #endif
 
@@ -1828,7 +1871,7 @@ Error MleRouter::ProcessAddressRegistrationTlv(RxInfo &aRxInfo, Child &aChild)
         {
             if (aChild.GetAddressMlrState(childAddress) == kMlrStateRegistered)
             {
-                oldMlrRegisteredAddresses[oldMlrRegisteredAddressNum++] = childAddress;
+                IgnoreError(oldMlrRegisteredAddresses.PushBack(childAddress));
             }
         }
     }
@@ -1897,40 +1940,42 @@ Error MleRouter::ProcessAddressRegistrationTlv(RxInfo &aRxInfo, Child &aChild)
         if (error == kErrorNone)
         {
             storedCount++;
-
-#if OPENTHREAD_CONFIG_TMF_PROXY_DUA_ENABLE
-            if (Get<BackboneRouter::Leader>().IsDomainUnicast(address))
-            {
-                hasDua = true;
-
-                if (oldDuaPtr != nullptr)
-                {
-                    Get<DuaManager>().UpdateChildDomainUnicastAddress(
-                        aChild, oldDua != address ? ChildDuaState::kChanged : ChildDuaState::kUnchanged);
-                }
-                else
-                {
-                    Get<DuaManager>().UpdateChildDomainUnicastAddress(aChild, ChildDuaState::kAdded);
-                }
-            }
-#endif
-
             LogInfo("Child 0x%04x IPv6 address[%u]=%s", aChild.GetRloc16(), storedCount,
                     address.ToString().AsCString());
         }
         else
         {
-#if OPENTHREAD_CONFIG_TMF_PROXY_DUA_ENABLE
-            if (Get<BackboneRouter::Leader>().IsDomainUnicast(address))
-            {
-                // if not able to store DUA, then assume child does not have one
-                hasDua = false;
-            }
-#endif
-
             LogWarn("Error %s adding IPv6 address %s to child 0x%04x", ErrorToString(error),
                     address.ToString().AsCString(), aChild.GetRloc16());
         }
+
+#if OPENTHREAD_CONFIG_TMF_PROXY_DUA_ENABLE
+        if (Get<BackboneRouter::Leader>().IsDomainUnicast(address))
+        {
+            if (error == kErrorNone)
+            {
+                DuaManager::ChildDuaAddressEvent event;
+
+                hasNewDua = true;
+
+                if (hasOldDua)
+                {
+                    event = (oldDua != address) ? DuaManager::kAddressChanged : DuaManager::kAddressUnchanged;
+                }
+                else
+                {
+                    event = DuaManager::kAddressAdded;
+                }
+
+                Get<DuaManager>().HandleChildDuaAddressEvent(aChild, event);
+            }
+            else
+            {
+                // if not able to store DUA, then assume child does not have one
+                hasNewDua = false;
+            }
+        }
+#endif
 
         if (address.IsMulticast())
         {
@@ -1961,15 +2006,14 @@ Error MleRouter::ProcessAddressRegistrationTlv(RxInfo &aRxInfo, Child &aChild)
         Get<AddressResolver>().RemoveEntryForAddress(address);
     }
 #if OPENTHREAD_CONFIG_TMF_PROXY_DUA_ENABLE
-    // Dua is removed
-    if (oldDuaPtr != nullptr && !hasDua)
+    if (hasOldDua && !hasNewDua)
     {
-        Get<DuaManager>().UpdateChildDomainUnicastAddress(aChild, ChildDuaState::kRemoved);
+        Get<DuaManager>().HandleChildDuaAddressEvent(aChild, DuaManager::kAddressRemoved);
     }
 #endif
 
 #if OPENTHREAD_CONFIG_TMF_PROXY_MLR_ENABLE
-    Get<MlrManager>().UpdateProxiedSubscriptions(aChild, oldMlrRegisteredAddresses, oldMlrRegisteredAddressNum);
+    Get<MlrManager>().UpdateProxiedSubscriptions(aChild, oldMlrRegisteredAddresses);
 #endif
 
     if (count == 0)
@@ -2712,7 +2756,6 @@ void MleRouter::HandleDiscoveryRequest(RxInfo &aRxInfo)
     MeshCoP::DiscoveryRequestTlv discoveryRequestTlv;
     MeshCoP::ExtendedPanId       extPanId;
     uint16_t                     offset;
-    uint16_t                     length;
     uint16_t                     end;
 
     Log(kMessageReceive, kTypeDiscoveryRequest, aRxInfo.mMessageInfo.GetPeerAddr());
@@ -2722,8 +2765,7 @@ void MleRouter::HandleDiscoveryRequest(RxInfo &aRxInfo)
     // only Routers and REEDs respond
     VerifyOrExit(IsRouterEligible(), error = kErrorInvalidState);
 
-    SuccessOrExit(error = Tlv::FindTlvValueOffset(aRxInfo.mMessage, Tlv::kDiscovery, offset, length));
-    end = offset + length;
+    SuccessOrExit(error = Tlv::FindTlvValueStartEndOffsets(aRxInfo.mMessage, Tlv::kDiscovery, offset, end));
 
     while (offset < end)
     {
@@ -3534,6 +3576,16 @@ void MleRouter::HandleAddressSolicitResponse(Coap::Message          *aMessage,
         leader->SetNextHopAndCost(RouterIdFromRloc16(mParent.GetRloc16()), mParent.GetLeaderCost());
     }
 
+    // We send a unicast Link Request to our former parent if its
+    // version is earlier than 1.3. This is to address a potential
+    // compatibility issue with some non-OpenThread stacks which may
+    // ignore MLE Advertisements from a former/existing child.
+
+    if (mParent.GetVersion() < kThreadVersion1p3)
+    {
+        IgnoreError(SendLinkRequest(&mParent));
+    }
+
     // We send an Advertisement to inform our former parent of our
     // newly allocated Router ID. This will cause the parent to
     // reset its advertisement trickle timer which can help speed
@@ -3936,7 +3988,7 @@ void MleRouter::SetChildStateToValid(Child &aChild)
     IgnoreError(mChildTable.StoreChild(aChild));
 
 #if OPENTHREAD_CONFIG_TMF_PROXY_MLR_ENABLE
-    Get<MlrManager>().UpdateProxiedSubscriptions(aChild, nullptr, 0);
+    Get<MlrManager>().UpdateProxiedSubscriptions(aChild, MlrManager::MlrAddressArray());
 #endif
 
     mNeighborTable.Signal(NeighborTable::kChildAdded, aChild);

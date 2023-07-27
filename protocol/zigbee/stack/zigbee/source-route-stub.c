@@ -31,13 +31,6 @@ void sli_zigbee_source_route_update_event_handler(void)
 {
 }
 
-void sli_zigbee_concentrator_support_route_error_handler(EmberStatus status,
-                                                         EmberNodeId nodeId)
-{
-  (void)status;
-  (void)nodeId;
-}
-
 //source route table related functions
 uint8_t sli_zigbee_source_route_find_index(EmberNodeId id)
 {

@@ -10,7 +10,7 @@
 
 // <h> Command Class Multilevel Switch Configuration
 
-// <o> Factory default duration in seconds <1..255:1> <f.d>
+// <o CC_MULTILEVEL_SWITCH_CONFIG_DEFAULT_DURATION_SEC> Factory default duration in seconds <1..255:1> <f.d>
 // <i> Default: 1
 #define CC_MULTILEVEL_SWITCH_CONFIG_DEFAULT_DURATION_SEC  1
 

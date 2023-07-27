@@ -10,7 +10,7 @@
 
 // <h> Command Class Battery Configuration
 
-// <o> Battery reporting decrements <1..255:1> <f.d>
+// <o CC_BATTERY_REPORTING_DECREMENTS> Battery reporting decrements <1..255:1> <f.d>
 // <i> Default: 10
 #define CC_BATTERY_REPORTING_DECREMENTS  10
 

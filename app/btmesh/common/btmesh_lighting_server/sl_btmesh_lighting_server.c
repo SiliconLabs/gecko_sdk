@@ -3,7 +3,7 @@
  * @brief Lighting Server module
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -313,14 +313,14 @@ static void server_state_changed(sl_btmesh_evt_generic_server_state_changed_t *e
 /*******************************************************************************
  * Handle ligthing server events.
  *
- * This function is called automatically by Universal Configurator after
- * enabling the component.
+ * This function is called automatically after enabling the component.
  *
  * @param[in] evt  Pointer to incoming event.
  ******************************************************************************/
 void sl_btmesh_lighting_server_on_event(sl_btmesh_msg_t *evt)
 {
   switch (SL_BT_MSG_ID(evt->header)) {
+    case sl_btmesh_evt_prov_initialized_id:
     case sl_btmesh_evt_node_provisioned_id:
       sl_btmesh_lighting_server_init();
       break;
@@ -330,7 +330,7 @@ void sl_btmesh_lighting_server_on_event(sl_btmesh_msg_t *evt)
       }
       break;
     case sl_btmesh_evt_node_reset_id:
-      sl_bt_nvm_erase(SL_BTMESH_LIGHTING_SERVER_PS_KEY_CFG_VAL);
+      sl_btmesh_lighting_server_on_node_reset();
       break;
     case sl_btmesh_evt_generic_server_state_changed_id:
 #if defined(SL_BTMESH_LIGHTING_SERVER_DEBUG_PRINTS_FOR_STATE_CHANGE_EVENTS_CFG_VAL) \
@@ -339,6 +339,16 @@ void sl_btmesh_lighting_server_on_event(sl_btmesh_msg_t *evt)
 #endif // LOG_ENABLE
       break;
   }
+}
+
+/*******************************************************************************
+ * Component node reset handler.
+ * Clearing component specific nvm content during node reset.
+ *
+ ******************************************************************************/
+void sl_btmesh_lighting_server_on_node_reset(void)
+{
+  sl_bt_nvm_erase(SL_BTMESH_LIGHTING_SERVER_PS_KEY_CFG_VAL);
 }
 
 /***************************************************************************//**

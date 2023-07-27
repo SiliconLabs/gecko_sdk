@@ -15,10 +15,19 @@
  *
  ******************************************************************************/
 
-#include "app/framework/include/af.h"
-#include "app/framework/util/af-main.h"
-#include "fragmentation.h"
+#ifdef SL_COMPONENT_CATALOG_PRESENT
+#include "sl_component_catalog.h"
+#endif
+#ifdef SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
+    #include "app/framework/include/af.h"
+    #include "app/framework/util/af-main.h"
+#else
+    #include "ember-stack.h"
+    #include "ember-types.h"
+    #include "message.h"
+#endif // SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
 
+#include "fragmentation.h"
 //-----------------------------------------------------------------------------
 // Globals
 

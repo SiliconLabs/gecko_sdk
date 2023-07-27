@@ -439,13 +439,19 @@ static void sli_zigbee_direct_send_mac_tag(uint8_t connection, uint16_t characte
   EmberStatus status;
   uint8_t sl_response[35];
   uint8_t hash_output[32];
-  uint8_t point_offset;
+  uint8_t point_offset = 0;
 
+#ifdef SL_CATALOG_ZIGBEE_DIRECT_SECURITY_P256_PRESENT
   if (characteristic == gattdb_authenticate_p256) {
     point_offset = 16;
-  } else {
+  }
+#endif // SL_CATALOG_ZIGBEE_DIRECT_SECURITY_P256_PRESENT
+
+#ifdef SL_CATALOG_ZIGBEE_DIRECT_SECURITY_CURVE25519_PRESENT
+  if (characteristic == gattdb_authenticate_25519) {
     point_offset = 0;
   }
+#endif // SL_CATALOG_ZIGBEE_DIRECT_SECURITY_CURVE25519_PRESENT
 
   sl_response[0] = SESSION_ESTABLISHMENT_MSG_4;
   sl_response[1] = SL_ZIGBEE_DIRECT_SECURITY_TLV_MAC_TAG_TAG_ID;

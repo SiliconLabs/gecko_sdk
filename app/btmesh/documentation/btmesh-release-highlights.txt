@@ -1,8 +1,5 @@
-Bluetooth Mesh SDK 5.0.0.0
-- Support for Mesh Protocol 1.1
-- Support for Mesh Model 1.1
-- Support for Mesh Binary Large Object Transfer
-- Support for Mesh Device Firmware Update 
+Bluetooth Mesh SDK 5.0.1.0
+- Added support for BRD4194A and BRD4187C radio boards for BT Mesh IOP Test Demos
 
 
 

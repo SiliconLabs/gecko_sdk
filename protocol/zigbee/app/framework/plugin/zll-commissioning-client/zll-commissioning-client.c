@@ -51,8 +51,7 @@
 
 static bool radioOnForRequestOnly = false;
 
-sl_zigbee_event_t sli_zigbee_af_zll_commissioning_client_touch_link_event;
-#define touchLinkEvent &sli_zigbee_af_zll_commissioning_client_touch_link_event
+static sl_zigbee_event_t touchLinkEvent;
 
 static uint8_t currentChannel;
 static int8_t rssi;
@@ -141,7 +140,7 @@ static EmberStatus sendDeviceInformationRequest(uint8_t startIndex)
                                       EMBER_ZLL_PROFILE_ID);
   if (status == EMBER_SUCCESS) {
     moduleState = CLIENT_AWAITING_RESPONSE;
-    sl_zigbee_event_set_delay_ms(touchLinkEvent,
+    sl_zigbee_event_set_delay_ms(&touchLinkEvent,
                                  EMBER_AF_PLUGIN_ZLL_COMMISSIONING_TOUCH_LINK_MILLISECONDS_DELAY);
   } else {
     emberAfAppPrintln("%p%p failed 0x%x",
@@ -217,7 +216,7 @@ static void deviceInformationResponseHandler(const EmberEUI64 source,
                                              uint8_t deviceInformationRecordCount,
                                              uint8_t *deviceInformationRecordList)
 {
-  sl_zigbee_event_set_inactive(touchLinkEvent);
+  sl_zigbee_event_set_inactive(&touchLinkEvent);
 
   uint16_t deviceInformationRecordListLen = (deviceInformationRecordCount
                                              * ZLL_DEVICE_INFORMATION_RECORD_SIZE);
@@ -279,7 +278,7 @@ static void deviceInformationResponseHandler(const EmberEUI64 source,
       radioOnForRequestOnly = false;
     }
   }
-  sl_zigbee_event_set_active(touchLinkEvent);
+  sl_zigbee_event_set_active(&touchLinkEvent);
 }
 
 static bool amInitiator(void)
@@ -532,7 +531,7 @@ static void processScanComplete(EmberStatus scanStatus)
       } else {
         moduleState = CLIENT_REQUESTING_IDENTITY;
       }
-      sl_zigbee_event_set_active(touchLinkEvent);
+      sl_zigbee_event_set_active(&touchLinkEvent);
     } else {
       emberAfAppPrintln("%p%p%p",
                         "Error: ",
@@ -553,8 +552,8 @@ void sli_zigbee_af_zll_abort_touch_link(EmberAfZllCommissioningStatus reason)
   sli_zigbee_af_zll_flags = INITIAL;
   moduleState = CLIENT_INITIAL;
   debugPrintln("sli_zigbee_af_zll_abort_touch_link: reason = %d", reason);
-  if (sl_zigbee_event_is_scheduled(touchLinkEvent)) {
-    sl_zigbee_event_set_inactive(touchLinkEvent);
+  if (sl_zigbee_event_is_scheduled(&touchLinkEvent)) {
+    sl_zigbee_event_set_inactive(&touchLinkEvent);
     if (radioOnForRequestOnly) {
       emberZllSetRadioIdleMode(EMBER_RADIO_POWER_MODE_OFF);
       radioOnForRequestOnly = false;
@@ -620,9 +619,9 @@ void sli_zigbee_af_zll_finish_network_formation_for_router(EmberStatus status)
       // Kick the client touchlinking event.
 #ifdef EMBER_TEST
       // Short delay to prevent beacon collision.
-      sl_zigbee_event_set_delay_ms(touchLinkEvent, 100);
+      sl_zigbee_event_set_delay_ms(&touchLinkEvent, 100);
 #else
-      sl_zigbee_event_set_active(touchLinkEvent);
+      sl_zigbee_event_set_active(&touchLinkEvent);
 #endif // EMBER_TEST
     }
   } else if (touchLinkInProgress()) {
@@ -885,11 +884,11 @@ void sli_zigbee_af_zll_address_assignment_callback(const EmberZllAddressAssignme
 }
 #endif // EZSP_HOST
 
-void emberAfPluginZllCommissioningClientTouchLinkEventHandler(sl_zigbee_event_t * event)
+void touchLinkEventHandler(sl_zigbee_event_t * event)
 {
   EmberStatus status = EMBER_SUCCESS;
-  sl_zigbee_event_set_inactive(touchLinkEvent);
-  debugPrintln("TouchlinkEventHandler: flags = %X", sli_zigbee_af_zll_flags);
+  sl_zigbee_event_set_inactive(&touchLinkEvent);
+  debugPrintln("touchlinkEventHandler: flags = %X", sli_zigbee_af_zll_flags);
 
   if (!touchLinkInProgress()) {
     return;
@@ -924,7 +923,7 @@ void emberAfPluginZllCommissioningClientTouchLinkEventHandler(sl_zigbee_event_t 
       status = sendIdentifyRequest(sli_zigbee_af_zll_identify_duration_sec);
       if (status == EMBER_SUCCESS) {
         moduleState = CLIENT_TOUCHLINKING;
-        sl_zigbee_event_set_delay_ms(touchLinkEvent,
+        sl_zigbee_event_set_delay_ms(&touchLinkEvent,
                                      EMBER_AF_PLUGIN_ZLL_COMMISSIONING_TOUCH_LINK_MILLISECONDS_DELAY);
       } else {
         emberAfAppPrintln("%p%p%p0x%x",
@@ -1030,8 +1029,8 @@ void sli_zigbee_af_zll_commissioning_client_init_callback(uint8_t init_level)
 {
   (void)init_level;
 
-  sl_zigbee_event_init(touchLinkEvent,
-                       emberAfPluginZllCommissioningClientTouchLinkEventHandler);
+  sl_zigbee_event_init(&touchLinkEvent,
+                       touchLinkEventHandler);
 }
 
 /** @brief Get Pan Id

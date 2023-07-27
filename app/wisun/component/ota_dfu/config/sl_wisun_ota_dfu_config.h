@@ -45,8 +45,8 @@
 #define SL_WISUN_OTA_DFU_VERBOSE_MODE_ENABLED       0U
 
 // <o SL_WISUN_OTA_DFU_STACK_SIZE_WORD> OTA DFU service stack size in CPU word
-// <i> Default: 256
-#define SL_WISUN_OTA_DFU_STACK_SIZE_WORD            256UL
+// <i> Default: 360
+#define SL_WISUN_OTA_DFU_STACK_SIZE_WORD            360UL
 
 // <o SL_WISUN_OTA_DFU_TFTP_PORT> TFTP service listener port
 // <i> Default: 69
@@ -74,7 +74,7 @@
 // <s SL_WISUN_OTA_DFU_NOTIFY_URI_PATH> OTA DFU notification resource URI path
 #define SL_WISUN_OTA_DFU_NOTIFY_URI_PATH            "/ota/dfu_notify"
 
-// <o SL_WISUN_OTA_DFU_NOTIFY_DOWNLOAD_CHUNK_CNT> Count of receveid chunk to notify in download task
+// <o SL_WISUN_OTA_DFU_NOTIFY_DOWNLOAD_CHUNK_CNT> Count of received chunk to notify in download task
 // <i> Default value: 10
 #define SL_WISUN_OTA_DFU_NOTIFY_DOWNLOAD_CHUNK_CNT  10U
 

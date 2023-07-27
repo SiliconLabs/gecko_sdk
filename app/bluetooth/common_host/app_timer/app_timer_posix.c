@@ -65,7 +65,7 @@ static sl_status_t delete_timer(timer_t *timer_id);
 /***************************************************************************//**
  * Find timer
  *
- * @param[in] Pointer to the ID of the timer
+ * @param[in] timer_id Pointer to the ID of the timer
  *
  * @returns Timer present in linked list
  * @retval Return timer pointer. If NULL, timer was not found with the ID
@@ -73,6 +73,15 @@ static sl_status_t delete_timer(timer_t *timer_id);
  * Find timer based on ID
  ******************************************************************************/
 static app_timer_t* find_timer(timer_t *timer_id);
+
+/***************************************************************************//**
+ * Check if timer is in the list
+ *
+ * @param[in] timer app_timer reference
+ *
+ * @returns true if the timer is in the list, flase if not
+ ******************************************************************************/
+static bool contains_app_timer(app_timer_t *timer);
 
 /***************************************************************************//**
  * Common timer callback
@@ -182,11 +191,16 @@ sl_status_t app_timer_start(app_timer_t *timer,
     return SL_STATUS_NULL_POINTER;
   }
 
+  if (contains_app_timer(timer)) {
+    return SL_STATUS_ALREADY_EXISTS;
+  }
+
   // Check if timer was already used
   while ((timer != tmp_timer_ptr) && (NULL != tmp_timer_ptr)) {
     tmp_timer_ptr = tmp_timer_ptr->next;
   }
   if (timer != tmp_timer_ptr) {
+    timer->app_timer_handle.triggered                           = false;
     timer->callback                                             = callback;
     timer->callback_data                                        = callback_data;
     timer->periodic                                             = is_periodic;
@@ -249,21 +263,23 @@ sl_status_t app_timer_stop(app_timer_t *timer)
   if (NULL == timer) {
     return SL_STATUS_NULL_POINTER;
   }
-  tmp_timer_ptr = find_timer(&(timer->app_timer_handle.timer_id));
-  if (NULL != tmp_timer_ptr) {
-    status = timer_settime(timer->app_timer_handle.timer_id, 0, &ts, NULL);
-    errsv = errno;
-    if (0 != status) {
-      app_log_error("Failed to stop timer with error %d." APP_LOG_NL,
-                    errsv);
+  if (contains_app_timer(timer)) {
+    tmp_timer_ptr = find_timer(&(timer->app_timer_handle.timer_id));
+    if (NULL != tmp_timer_ptr) {
+      status = timer_settime(timer->app_timer_handle.timer_id, 0, &ts, NULL);
+      errsv = errno;
+      if (0 != status) {
+        app_log_error("Failed to stop timer with error %d." APP_LOG_NL,
+                      errsv);
+        return SL_STATUS_FAIL;
+      }
+    } else {
+      return SL_STATUS_NOT_FOUND;
+    }
+    if (SL_STATUS_OK != delete_timer(&(timer->app_timer_handle.timer_id))) {
+      app_log_error("Failed to delete timer after stopping it" APP_LOG_NL);
       return SL_STATUS_FAIL;
     }
-  } else {
-    return SL_STATUS_NOT_FOUND;
-  }
-  if (SL_STATUS_OK != delete_timer(&(timer->app_timer_handle.timer_id))) {
-    app_log_error("Failed to delete timer after stopping it" APP_LOG_NL);
-    return SL_STATUS_FAIL;
   }
   return SL_STATUS_OK;
 }
@@ -324,6 +340,22 @@ static app_timer_t *find_timer(timer_t *timer_id)
     local_timer = local_timer->next;
   }
   return local_timer;
+}
+
+/***************************************************************************//**
+ * Check if app timer is in the list
+ ******************************************************************************/
+static bool contains_app_timer(app_timer_t *timer)
+{
+  app_timer_t *local_timer = app_timer_head;
+
+  while (NULL != local_timer) {
+    if (timer == local_timer) {
+      return true;
+    }
+    local_timer = local_timer->next;
+  }
+  return false;
 }
 
 /***************************************************************************//**

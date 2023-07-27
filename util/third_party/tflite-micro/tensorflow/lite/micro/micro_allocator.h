@@ -1,4 +1,4 @@
-/* Copyright 2020 The TensorFlow Authors. All Rights Reserved.
+/* Copyright 2023 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,11 +18,11 @@ limitations under the License.
 #include <cstddef>
 #include <cstdint>
 
-#include "tensorflow/lite/c/common.h"
 #include "tensorflow/lite/micro/arena_allocator/single_arena_buffer_allocator.h"
 #include "tensorflow/lite/micro/compatibility.h"
 #include "tensorflow/lite/micro/flatbuffer_utils.h"
 #include "tensorflow/lite/micro/memory_planner/micro_memory_planner.h"
+#include "tensorflow/lite/micro/micro_common.h"
 #include "tensorflow/lite/micro/tflite_bridge/flatbuffer_conversions_bridge.h"
 #include "tensorflow/lite/schema/schema_generated.h"
 
@@ -68,7 +68,7 @@ struct ScratchBufferRequest {
 
 struct NodeAndRegistration {
   TfLiteNode node;
-  const TfLiteRegistration* registration;
+  const TFLMRegistration* registration;
 };
 
 // Holds a pointer to a buffer for a scratch buffer requested by a kernel during
@@ -185,7 +185,7 @@ class MicroAllocator {
   // Allocates a TfLiteTensor struct and populates the returned value with
   // properties from the model flatbuffer. This struct is allocated from
   // temporary arena memory is only guaranteed until a call is made to
-  // ResetTempAllocations(). Subgraph_allocaitons contains the array of
+  // ResetTempAllocations(). Subgraph_allocations contains the array of
   // TfLiteEvalTensors. If the newly allocated temp at the specified subgraph
   // and tensor index is already present int the TfLiteEvalTensor array, its
   // data buffer will be re-used.
@@ -194,6 +194,13 @@ class MicroAllocator {
       int tensor_index, int subgraph_index);
 
   virtual void DeallocateTempTfLiteTensor(TfLiteTensor*);
+
+  // Returns a pointer to a buffer from the temporary arena memory and is only
+  // guaranteed until a call is made to ResetTempAllocations().
+  virtual uint8_t* AllocateTempBuffer(size_t size, size_t alignment);
+
+  // Signals that the temporary buffer no longer needed.
+  virtual void DeallocateTempBuffer(uint8_t* buffer);
 
   // Resets all temporary allocations. This method should be called after a
   // chain of temp allocations (e.g. chain of TfLiteTensor objects via
@@ -247,9 +254,13 @@ class MicroAllocator {
   // for all tensor buffers.
   virtual TfLiteStatus AllocateTfLiteEvalTensors(
       const Model* model, SubgraphAllocations* subgraph_allocations);
+
   // Allocates persistent tensor buffers for variable tensors in the subgraph.
-  virtual TfLiteStatus AllocateVariables(const SubGraph* subgraph,
-                                         TfLiteEvalTensor* eval_tensors);
+  // Online and offline variable tensors are handled differently hence the
+  // offline_planner_offsets parameter is needed.
+  virtual TfLiteStatus AllocateVariables(
+      const SubGraph* subgraph, TfLiteEvalTensor* eval_tensors,
+      const int32_t* offline_planner_offsets);
 
   // Allocate and return a persistent TfLiteTensor.
   // TODO(b/162311891): Drop this method when the interpreter has an API for

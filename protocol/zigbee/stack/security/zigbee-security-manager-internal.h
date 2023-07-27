@@ -35,14 +35,13 @@
 // zigbeed does not have access to psa/crypto.h, and some unit tests without it
 // will compile this file as well.
 #ifndef SL_CATALOG_ZIGBEE_STACK_UNIX_PRESENT
-#ifdef PSA_CRYPTO_H
-
-//We're using some PSA APIs for all parts in zigbee-security-manager
-#include "psa/crypto.h"
 
 //taken from ccm-star so these function calls are defined
 #if defined(MBEDTLS_PSA_ACCEL_KEY_TYPE_AES) && defined(MBEDTLS_PSA_ACCEL_ALG_CCM) && defined(PSA_WANT_ALG_CCM) && defined(MBEDTLS_PSA_CRYPTO_DRIVERS)
 #include "em_device.h"
+
+//We're using some PSA APIs for all parts in zigbee-security-manager
+#include "psa/crypto.h"
 
 #if defined(SEMAILBOX_PRESENT)
 #include "sli_se_transparent_functions.h"
@@ -68,11 +67,11 @@
 
 #endif // if defined(MBEDTLS_PSA_ACCEL_KEY_TYPE_AES) && defined(MBEDTLS_PSA_ACCEL_ALG_CCM) && defined(PSA_WANT_ALG_CCM) && defined(MBEDTLS_PSA_CRYPTO_DRIVERS)
 
-#endif // PSA_CRYPTO_H
 #endif // !SL_CATALOG_ZIGBEE_STACK_UNIX_PRESENT
 
 sl_status_t zb_sec_man_check_key_context(sl_zb_sec_man_context_t* context);
 sl_status_t zb_sec_man_delete_key_by_psa_id(uint32_t psa_id);
+void zb_sec_man_delete_all_keys(void);
 sl_status_t zb_sec_man_derive_key(sl_zb_sec_man_key_t* core_key,
                                   const sl_zb_sec_man_context_t* context,
                                   sl_zb_sec_man_key_t* derived_key);

@@ -1,0 +1,40 @@
+id: ot_platform_ext
+label: EFR32 Platform Extension
+package: OpenThread
+category: OpenThread
+quality: production
+description: This component provides extensions to the efr32 OpenThread platform.
+provides:
+  - name: ot_platform_ext
+requires:
+  - name: ot_platform_abstraction
+  - name: sl_ot_custom_cli
+    condition: [ot_cli]
+  - name: ot_ncp_vendor_extension
+    condition: [ot_ncp]
+template_contribution:
+  - name: sl_ot_cli_command
+    value:
+      name: "efr32"
+      handler: "efr32Command"
+      macro: "SL_OPENTHREAD_EFR32_CLI_ENABLE"
+    condition: [sl_ot_custom_cli]
+  - name: component_catalog
+    value: openthread_efr32_ext
+include:
+  - path: protocol/openthread/include/util
+    unless: [ot_ncp]
+  - path: protocol/openthread/platform-abstraction/ncp
+    condition: [ot_ncp]
+    file_list:
+      - path: ncp_efr32.hpp
+source:
+  - path: protocol/openthread/src/cli/efr32_cli.c
+    unless: [ot_ncp]
+  - path: protocol/openthread/platform-abstraction/ncp/ncp_efr32.cpp
+    condition: [ot_ncp]
+define:
+  - name: SL_OPENTHREAD_EFR32_CLI_ENABLE
+    value: 1
+  - name: RADIO_CONFIG_DEBUG_COUNTERS_SUPPORT
+    value: 1

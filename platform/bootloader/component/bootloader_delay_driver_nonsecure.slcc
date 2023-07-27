@@ -4,7 +4,7 @@ package: bootloader
 description: >
   The Bootloader Delay Driver (Non-Secure) component provides micro- and millisecond delays.
 category: Platform|Bootloader|TrustZone NonSecure|Drivers
-quality: evaluation
+quality: production
 source:
   - path: platform/bootloader/driver/btl_driver_delay_ns.c
 include:

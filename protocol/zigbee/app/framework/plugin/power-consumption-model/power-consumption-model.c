@@ -92,9 +92,8 @@ static void lightbulbInit(void);
 ///////////////////////////////////////////////////////////////////////////////
 // Plugin event handlers
 // Event variable to create an event
-sl_zigbee_event_t emberAfPluginPowerConsumptionModelReadEvent;
-#define powerConsumptionModelRead (&emberAfPluginPowerConsumptionModelReadEvent)
-void emberAfPluginPowerConsumptionModelReadEventHandler(sl_zigbee_event_t * event);
+static sl_zigbee_event_t readEvent;
+static void readEventHandler(sl_zigbee_event_t * event);
 
 //-----------------------------------------------------------------------------
 // This function reads on_off and level control cluster and returns 0 when
@@ -334,8 +333,8 @@ void emberAfPluginPowerConsumptionModelInitCallback(uint8_t init_level)
   switch (init_level) {
     case SL_ZIGBEE_INIT_LEVEL_EVENT:
     {
-      sl_zigbee_event_init(powerConsumptionModelRead,
-                           emberAfPluginPowerConsumptionModelReadEventHandler);
+      sl_zigbee_event_init(&readEvent,
+                           readEventHandler);
       break;
     }
 
@@ -348,16 +347,16 @@ void emberAfPluginPowerConsumptionModelInitCallback(uint8_t init_level)
     case SL_ZIGBEE_INIT_LEVEL_DONE:
     {
       simpleMeteringClusterSetup();
-      sl_zigbee_event_set_active(powerConsumptionModelRead);
+      sl_zigbee_event_set_active(&readEvent);
       break;
     }
   }
 }
 
 // After event triggered, this function is called
-void emberAfPluginPowerConsumptionModelReadEventHandler(sl_zigbee_event_t * event)
+static void readEventHandler(sl_zigbee_event_t * event)
 {
-  sl_zigbee_event_set_delay_ms(powerConsumptionModelRead,
+  sl_zigbee_event_set_delay_ms(&readEvent,
                                SAMPLE_PERIOD_MILLI_SECOND);
   refreshingEnergyConsumptionData();
 }

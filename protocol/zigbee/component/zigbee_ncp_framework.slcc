@@ -16,6 +16,7 @@ requires:
   - name: legacy_bootloader_interface
     condition:
       - device_cortexm
+  - name: zigbee_zdo_cluster_filter
 
 include:
   - path: protocol/zigbee/app/em260

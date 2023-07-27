@@ -71,7 +71,10 @@
 
 #include "sl_btmesh_lighting_client.h"
 #include "sl_btmesh_ctl_client.h"
+
+#ifdef SL_CATALOG_BTMESH_SCENE_CLIENT_PRESENT
 #include "sl_btmesh_scene_client.h"
+#endif // SL_CATALOG_BTMESH_SCENE_CLIENT_PRESENT
 
 #ifdef SL_CATALOG_BTMESH_PROVISIONING_DECORATOR_PRESENT
 #include "sl_btmesh_provisioning_decorator.h"
@@ -392,10 +395,12 @@ void app_button_press_cb(uint8_t button, uint8_t duration)
       case APP_BUTTON_PRESS_DURATION_LONG: {
         sl_btmesh_change_switch_position(SL_BTMESH_LIGHTING_CLIENT_TOGGLE);
       } break;
+#ifdef SL_CATALOG_BTMESH_SCENE_CLIENT_PRESENT
       // Handling of button press greater than 5s
       case APP_BUTTON_PRESS_DURATION_VERYLONG: {
         sl_btmesh_select_scene(1);
       } break;
+#endif // SL_CATALOG_BTMESH_SCENE_CLIENT_PRESENT
       default:
         break;
     }
@@ -426,6 +431,7 @@ void app_button_press_cb(uint8_t button, uint8_t duration)
         sl_btmesh_change_switch_position(SL_BTMESH_LIGHTING_CLIENT_ON);
       }
     } break;
+#ifdef SL_CATALOG_BTMESH_SCENE_CLIENT_PRESENT
     // Handling of button press greater than 5s
     case APP_BUTTON_PRESS_DURATION_VERYLONG: {
       if (button == BUTTON_PRESS_BUTTON_0) {
@@ -434,6 +440,7 @@ void app_button_press_cb(uint8_t button, uint8_t duration)
         sl_btmesh_select_scene(2);
       }
     } break;
+#endif // SL_CATALOG_BTMESH_SCENE_CLIENT_PRESENT
     default:
       break;
   }

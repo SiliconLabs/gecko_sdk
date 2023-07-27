@@ -138,6 +138,7 @@ static void init_and_reset(bool force_write)
     // Set the rxStatus to Multicast to prevent True Status
     mp_switches[i].rxOpt.rxStatus = RECEIVE_STATUS_TYPE_MULTI;
     ZAF_Actuator_Init(&(mp_switches[i].actuator), min_value, max_value, 20, default_duration, actuator_callback);
+    ZAF_Actuator_Set(&(mp_switches[i].actuator), max_value, 0);
     if(force_write || !cc_multilevel_switch_read(i, &mp_switches[i])) {
       cc_multilevel_switch_write((uint8_t) i, &mp_switches[i]);
     }

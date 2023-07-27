@@ -21,6 +21,10 @@
 #include "sl_component_catalog.h"
 #endif
 
+#ifdef SL_CATALOG_ZIGBEE_SECURE_KEY_STORAGE_PRESENT
+extern void zb_sec_man_delete_all_keys(void);
+#endif
+
 #if (defined(SL_CATALOG_TOKEN_MANAGER_PRESENT))
 
 #include "sl_token_api.h"
@@ -33,6 +37,53 @@
 
 #if (defined(USE_NVM3))
 // The following implementation is based on NVM3 tokens.
+
+// This function check if a token is excluded and should not be reset to default value
+static bool is_token_excluded(bool exclude_outgoing_fc, bool exclude_boot_counter, uint32_t nvm3_key)
+{
+  bool ret = false;
+  if (exclude_outgoing_fc) {
+    uint32_t excluded_nvm3_outgoing_fc[] = { NVM3KEY_STACK_NONCE_COUNTER, NVM3KEY_STACK_APS_FRAME_COUNTER };
+    for (uint8_t i = 0; i < (sizeof(excluded_nvm3_outgoing_fc) / sizeof(uint32_t)); i++) {
+      if (excluded_nvm3_outgoing_fc[i] == nvm3_key) {
+        ret = true;
+        break;
+      }
+    }
+  }
+  if (exclude_boot_counter && (NVM3KEY_STACK_BOOT_COUNTER == nvm3_key)) {
+    ret = true;
+  }
+  return ret;
+}
+
+void sl_zigbee_token_factory_reset(bool exclude_outgoing_fc, bool exclude_boot_counter)
+{
+  uint8_t num_of_tokens = emberGetTokenCount();
+  for (uint8_t token_idx = 0; token_idx < num_of_tokens; token_idx++) {
+    EmberTokenInfo token_info;
+    EmberStatus status = emberGetTokenInfo(token_idx, &token_info);
+    if (status == EMBER_SUCCESS) {
+      if (!is_token_excluded(exclude_outgoing_fc, exclude_boot_counter, token_info.nvm3Key)) {
+        for (uint8_t arrayIndex = 0; arrayIndex < token_info.arraySize; arrayIndex++) {
+          EmberTokenData token_data;
+          token_data.size = token_info.size;
+          token_data.data = (void*) tokenDefaults[token_idx];
+          // restore to default token value
+          emberSetTokenData(token_info.nvm3Key,
+                            arrayIndex,
+                            &token_data);
+        }
+        halResetWatchdog();
+      }
+    }
+  }
+#ifdef SL_CATALOG_ZIGBEE_SECURE_KEY_STORAGE_PRESENT
+  // delete all zigbee managed psa keys
+  zb_sec_man_delete_all_keys();
+#endif // SL_CATALOG_ZIGBEE_SECURE_KEY_STORAGE_PRESENT
+}
+
 uint8_t emberGetTokenCount(void)
 {
   return (TOKEN_COUNT);

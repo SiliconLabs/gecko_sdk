@@ -16,6 +16,7 @@ limitations under the License.
 #include "tensorflow/lite/micro/kernels/kernel_util.h"
 
 #include "tensorflow/lite/c/common.h"
+#include "tensorflow/lite/kernels/internal/portable_tensor_utils.h"
 #include "tensorflow/lite/micro/memory_helpers.h"
 #include "tensorflow/lite/micro/micro_log.h"
 
@@ -37,20 +38,19 @@ int ValidateTensorIndexing(const TfLiteContext* context, int index,
 
 }  // namespace
 
-TfLiteRegistration RegisterOp(
+TFLMRegistration RegisterOp(
     void* (*init)(TfLiteContext* context, const char* buffer, size_t length),
     TfLiteStatus (*prepare)(TfLiteContext* context, TfLiteNode* node),
     TfLiteStatus (*invoke)(TfLiteContext* context, TfLiteNode* node),
-    void (*free)(TfLiteContext* context, void* buffer)) {
+    void (*free)(TfLiteContext* context, void* buffer),
+    void (*reset)(TfLiteContext* context, void* buffer)) {
   return {/*init=*/init,
           /*free=*/free,
           /*prepare=*/prepare,
           /*invoke=*/invoke,
-          /*profiling_string=*/nullptr,
+          /*reset*/ reset,
           /*builtin_code=*/0,
-          /*custom_name=*/nullptr,
-          /*version=*/0,
-          /*registration_external=*/nullptr};
+          /*custom_name=*/nullptr};
 }
 
 // Returns a mutable tensor for a given input index. is_variable must be checked
@@ -172,7 +172,7 @@ TfLiteStatus CopyOpInputsToOpOutputs(TfLiteContext* context, TfLiteNode* node) {
 //    3. prefix - optional message you'd like to print before printing bytes
 //
 //  Purpose:
-//    Function takes in paramaters above and prints n_bytes bytes from the
+//    Function takes in parameters above and prints n_bytes bytes from the
 //  tensor_data buffer. This can be use to debug  the output of a model and it's
 //  op.
 
@@ -254,6 +254,25 @@ TfLiteStatus CopySubgraphOutputsToOpOutputs(TfLiteContext* context,
     memcpy(output->data.raw, subgraph_output->data.raw, bytes);
   }
   return kTfLiteOk;
+}
+
+TfLiteEvalTensor MakeUnpackedInt4Tensor(TfLiteContext* context,
+                                        int scratch_buffer_index,
+                                        const TfLiteEvalTensor* tensor) {
+  if (tensor->type != kTfLiteInt4) {
+    return *tensor;
+  }
+
+  TfLiteEvalTensor new_tensor;
+  new_tensor.data.data = static_cast<int8_t*>(
+      context->GetScratchBuffer(context, scratch_buffer_index));
+  new_tensor.dims = tensor->dims;
+  new_tensor.type = kTfLiteInt8;
+  tflite::tensor_utils::UnpackDenseInt4IntoInt8(
+      tflite::micro::GetTensorData<int8_t>(tensor),
+      tflite::micro::GetTensorShape(tensor).FlatSize(),
+      tflite::micro::GetTensorData<int8_t>(&new_tensor));
+  return new_tensor;
 }
 
 }  // namespace micro

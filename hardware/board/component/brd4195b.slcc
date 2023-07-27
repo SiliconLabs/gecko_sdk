@@ -17,6 +17,7 @@
   - name: hardware_board_from_xg21-pk6026a
   - name: hardware_board_from_xg21-rb4195b
   - name: hardware_board_has_vcom
+  - name: hardware_board_has_hfxo_freq_38.4mhz
   - name: hardware_board_has_hfxo
   - name: hardware_board_has_lfxo
   - name: hardware_board_supports_rf_band_2400

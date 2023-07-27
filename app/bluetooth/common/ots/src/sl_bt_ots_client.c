@@ -191,8 +191,6 @@ static sl_bt_l2cap_transfer_callbacks_t l2cap_transfer_callbacks = {
   .on_finish   = l2cap_transfer_transfer_finished
 };
 
-static sl_bt_l2cap_transfer_transfer_t prior_transfer;
-
 // Start of the linked list which contains the queue
 static sl_slist_node_t *client_list = NULL;
 
@@ -1662,7 +1660,6 @@ static void client_initialized(uint8_t connection)
     uint8_t index = client_index(client->connection);
     if (index != INVALID_INDEX) {
       active_client[index] = NULL;
-
       if (client->status == CLIENT_STATUS_ERROR) {
         // Remove client from the list
         sl_slist_remove(&client_list, &client->node);
@@ -1679,8 +1676,6 @@ static void client_initialized(uint8_t connection)
 // L2CAP transfer callback for channel open
 static void l2cap_transfer_channel_opened(sl_bt_l2cap_transfer_transfer_handle_t transfer_object)
 {
-  (void)transfer_object;
-
   uint8_t index = client_index(transfer_object->connection);
   if (index != INVALID_INDEX && active_client[index] != NULL) {
     if (active_client[index]->status == CLIENT_STATUS_PRIOR_CHANNEL) {
@@ -1876,24 +1871,30 @@ static sl_bt_ots_client_status_t finish_init(sl_bt_ots_client_t *client,
                                              sl_status_t error)
 {
   sl_status_t sc;
+  // Check for client
+  if (client == NULL) {
+    return CLIENT_STATUS_ERROR;
+  }
   // Save the error
   client->error = error;
   if (error == SL_STATUS_OK) {
-    memset(&prior_transfer, 0, sizeof(prior_transfer));
-    prior_transfer.callbacks = &l2cap_transfer_callbacks;
-    prior_transfer.connection = client->connection;
-    prior_transfer.spsm = OTS_SPSM;
-    prior_transfer.max_pdu = PRIOR_CHANNEL_PDU;
-    prior_transfer.max_sdu = PRIOR_CHANNEL_SDU;
+    memset(&client->prior_channel, 0, sizeof(client->prior_channel));
+    client->prior_channel.callbacks = &l2cap_transfer_callbacks;
+    client->prior_channel.connection = client->connection;
+    client->prior_channel.spsm = OTS_SPSM;
+    client->prior_channel.max_pdu = PRIOR_CHANNEL_PDU;
+    client->prior_channel.max_sdu = PRIOR_CHANNEL_SDU;
 
     // Try to open the prior channel
-    sc = sl_bt_l2cap_transfer_open_prior_channel(&prior_transfer);
+    sc = sl_bt_l2cap_transfer_open_prior_channel(&client->prior_channel);
 
-    if (sc == SL_STATUS_NOT_SUPPORTED) {
+    if (sc == SL_STATUS_NOT_SUPPORTED || sc == SL_STATUS_NO_MORE_RESOURCE) {
+      // Finish init if not supported or no suitable channel found
       client->status = CLIENT_STATUS_INITIALIZED;
       client_initialized(client->connection);
     } else if (sc != SL_STATUS_OK) {
       client->status = CLIENT_STATUS_ERROR;
+      client_initialized(client->connection);
     } else {
       client->status = CLIENT_STATUS_PRIOR_CHANNEL;
     }

@@ -79,31 +79,51 @@ static psa_status_t validate_key_type(const sl_se_key_descriptor_t *key_desc)
 }
 
 // Validate combination of key and algorithm
-static psa_status_t validate_key_algorithm_match(psa_algorithm_t alg,
-                                                 const psa_key_attributes_t *attributes)
+static psa_status_t validate_key_algorithm_match(
+  psa_algorithm_t alg,
+  const psa_key_attributes_t *attributes)
 {
   switch (alg) {
+    #if defined(SLI_PSA_DRIVER_FEATURE_BLOCK_CIPHER)
+    #if defined(SLI_PSA_DRIVER_FEATURE_AES_ECB)
     case PSA_ALG_ECB_NO_PADDING:
+    #endif
+    #if defined(SLI_PSA_DRIVER_FEATURE_AES_CTR)
     case PSA_ALG_CTR:
+    #endif
+    #if defined(SLI_PSA_DRIVER_FEATURE_AES_CFB)
     case PSA_ALG_CFB:
+    #endif
+    #if defined(SLI_PSA_DRIVER_FEATURE_AES_OFB)
     case PSA_ALG_OFB:
+    #endif
+    #if defined(SLI_PSA_DRIVER_FEATURE_AES_CCM_STAR_NO_TAG)
     case PSA_ALG_CCM_STAR_NO_TAG:
+    #endif
+    #if defined(SLI_PSA_DRIVER_FEATURE_AES_CBC_NO_PADDING)
     case PSA_ALG_CBC_NO_PADDING:
+    #endif
+    #if defined(SLI_PSA_DRIVER_FEATURE_AES_CBC_PKCS7)
     case PSA_ALG_CBC_PKCS7:
-      if (psa_get_key_type(attributes) != PSA_KEY_TYPE_AES) {
-        return PSA_ERROR_NOT_SUPPORTED;
-      }
-      break;
-      #if defined(SLI_PSA_DRIVER_FEATURE_CHACHA20)
+    #endif
+    if (psa_get_key_type(attributes) != PSA_KEY_TYPE_AES) {
+      return PSA_ERROR_NOT_SUPPORTED;
+    }
+    break;
+    #endif // SLI_PSA_DRIVER_FEATURE_BLOCK_CIPHER
+
+    #if defined(SLI_PSA_DRIVER_FEATURE_CHACHA20)
     case PSA_ALG_STREAM_CIPHER:
       if (psa_get_key_type(attributes) != PSA_KEY_TYPE_CHACHA20) {
         return PSA_ERROR_NOT_SUPPORTED;
       }
       break;
-      #endif
+    #endif
+
     default:
       return PSA_ERROR_NOT_SUPPORTED;
   }
+
   return PSA_SUCCESS;
 }
 

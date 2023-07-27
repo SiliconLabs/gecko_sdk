@@ -2997,3 +2997,14 @@ EmberStatus ezspSetTokenData(
 
 // Reset the node by calling halReboot.
 void ezspResetNode(void);
+
+// Run GP security test vectors.
+// Return: An EmberStatus value indicating success or the reason for failure.
+EmberStatus ezspGpSecurityTestVectors(void);
+
+// Factory reset all configured zigbee tokens
+void ezspTokenFactoryReset(
+  // Exclude network and APS outgoing frame counter tokens.
+  bool excludeOutgoingFC,
+  // Exclude stack boot counter token.
+  bool excludeBootCounter);

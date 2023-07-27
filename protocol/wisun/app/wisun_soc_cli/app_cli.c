@@ -61,7 +61,7 @@
 #include "task.h"
 #endif
 
-#define APP_TASK_PRIORITY (osPriority_t)35
+#define APP_TASK_PRIORITY osPriorityLow3 // Lowest priority in the system for all CLI related task
 #define APP_TASK_STACK_SIZE 500 // in units of CPU_INT32U
 
 #define APP_ICMPV6_TYPE_ECHO_REQUEST 128
@@ -454,7 +454,7 @@ static void app_handle_socket_data_available_ind(sl_wisun_evt_t *evt)
 
 static void app_handle_socket_connected_ind(sl_wisun_evt_t *evt)
 {
-  app_socket_entry_t* entry;
+  app_socket_entry_t *entry;
 
   entry = app_socket_entry(evt->evt.socket_connected.socket_id);
   if (!entry) {
@@ -476,7 +476,7 @@ static void app_handle_socket_connected_ind(sl_wisun_evt_t *evt)
 static void app_handle_socket_connection_available_ind(sl_wisun_evt_t *evt)
 {
   sl_status_t ret;
-  app_socket_entry_t* entry;
+  app_socket_entry_t *entry;
 
   printf("[Socket connection available: %lu]\r\n",
          evt->evt.socket_connection_available.socket_id);
@@ -509,7 +509,7 @@ static void app_handle_socket_connection_available_ind(sl_wisun_evt_t *evt)
 
 static void app_handle_socket_closing_ind(sl_wisun_evt_t *evt)
 {
-  app_socket_entry_t* entry;
+  app_socket_entry_t *entry;
 
   entry = app_socket_entry(evt->evt.socket_closing.socket_id);
   if (!entry) {
@@ -543,7 +543,7 @@ static void app_handle_connection_lost_ind(sl_wisun_evt_t *evt)
 
 static void app_handle_socket_data_sent(sl_wisun_evt_t *evt)
 {
-  app_socket_entry_t* entry;
+  app_socket_entry_t *entry;
 
   entry = app_socket_entry(evt->evt.socket_data_sent.socket_id);
   if (!entry) {
@@ -699,9 +699,6 @@ static void app_join(sl_wisun_phy_config_type_t phy_config_type)
 
   app_settings_wisun.phy_config_type = phy_config.type = phy_config_type;
 
-  if (app_settings_wisun.device_type == SL_WISUN_LFN) {
-    printf("[LFN is Alpha quality with no power save capability. Refer to the documentation.]\r\n");
-  }
   ret = sl_wisun_set_device_type((sl_wisun_device_type_t)app_settings_wisun.device_type);
   if (ret != SL_STATUS_OK) {
     printf("[Failed: unable to set device type: %lu]\r\n", ret);
@@ -710,7 +707,9 @@ static void app_join(sl_wisun_phy_config_type_t phy_config_type)
 
 #ifdef WISUN_FAN_CERTIFICATION
   (void)params;
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
   ret = sl_wisun_set_network_size((sl_wisun_network_size_t)app_settings_wisun.network_size);
+#pragma GCC diagnostic pop
 #else
   switch (app_settings_wisun.network_size) {
     case SL_WISUN_NETWORK_SIZE_SMALL:
@@ -1031,7 +1030,7 @@ cleanup:
 void app_tcp_client(sl_cli_command_arg_t *arguments)
 {
   sl_status_t ret;
-  app_socket_entry_t* entry;
+  app_socket_entry_t *entry;
   char *arg_remote_address;
   sl_wisun_ip_address_t remote_address;
   uint16_t remote_port;
@@ -1097,7 +1096,7 @@ cleanup:
 void app_tcp_server(sl_cli_command_arg_t *arguments)
 {
   sl_status_t ret;
-  app_socket_entry_t* entry;
+  app_socket_entry_t *entry;
   uint16_t local_port;
 
   app_wisun_cli_mutex_lock();
@@ -1158,7 +1157,7 @@ cleanup:
 void app_udp_client(sl_cli_command_arg_t *arguments)
 {
   sl_status_t ret;
-  app_socket_entry_t* entry;
+  app_socket_entry_t *entry;
   char *arg_remote_address;
   sl_wisun_ip_address_t remote_address;
   uint16_t remote_port;
@@ -1223,7 +1222,7 @@ cleanup:
 void app_udp_server(sl_cli_command_arg_t *arguments)
 {
   sl_status_t ret;
-  app_socket_entry_t* entry;
+  app_socket_entry_t *entry;
   uint16_t local_port;
 
   app_wisun_cli_mutex_lock();
@@ -1278,7 +1277,7 @@ cleanup:
 void app_socket_close(sl_cli_command_arg_t *arguments)
 {
   sl_status_t ret;
-  app_socket_entry_t* entry;
+  app_socket_entry_t *entry;
   sl_wisun_socket_id_t socket_id;
 
   app_wisun_cli_mutex_lock();
@@ -1310,7 +1309,7 @@ cleanup:
 void app_socket_read(sl_cli_command_arg_t *arguments)
 {
   sl_status_t ret;
-  app_socket_entry_t* entry;
+  app_socket_entry_t *entry;
   sl_wisun_ip_address_t remote_address;
   uint16_t remote_port;
   uint16_t data_length;
@@ -1371,7 +1370,7 @@ cleanup:
 void app_socket_write(sl_cli_command_arg_t *arguments)
 {
   sl_status_t ret;
-  app_socket_entry_t* entry;
+  app_socket_entry_t *entry;
   const char *data;
   sl_wisun_socket_id_t socket_id;
 
@@ -1418,7 +1417,7 @@ cleanup:
 void app_socket_writeto(sl_cli_command_arg_t *arguments)
 {
   sl_status_t ret;
-  app_socket_entry_t* entry;
+  app_socket_entry_t *entry;
   char *arg_remote_address;
   sl_wisun_ip_address_t remote_address;
   uint16_t remote_port;
@@ -1497,7 +1496,7 @@ void app_socket_list(sl_cli_command_arg_t *arguments)
 void app_socket_set_option(sl_cli_command_arg_t *arguments)
 {
   sl_status_t ret = SL_STATUS_OK;
-  app_socket_entry_t* entry;
+  app_socket_entry_t *entry;
   sl_wisun_socket_id_t socket_id;
   char *arg_option;
   char *arg_option_data;
@@ -1645,7 +1644,7 @@ static sl_status_t app_socket_leave_multicast_group_handler(sl_wisun_socket_opti
 static sl_status_t app_get_ip_address(sl_wisun_ip_address_t *value,
                                       const char *value_str)
 {
-  const app_enum_t* value_enum;
+  const app_enum_t *value_enum;
 
   if (!value_str) {
     return SL_STATUS_FAIL;
@@ -1679,7 +1678,7 @@ void app_mac_allow(sl_cli_command_arg_t *arguments)
   sl_status_t ret;
   char *address_str = NULL;
   sl_wisun_mac_address_t address;
-  const app_enum_t* value_enum;
+  const app_enum_t *value_enum;
 
   app_wisun_cli_mutex_lock();
 
@@ -1716,7 +1715,7 @@ void app_mac_deny(sl_cli_command_arg_t *arguments)
   sl_status_t ret;
   char *address_str = NULL;
   sl_wisun_mac_address_t address;
-  const app_enum_t* value_enum;
+  const app_enum_t *value_enum;
 
   app_wisun_cli_mutex_lock();
 
@@ -1751,7 +1750,7 @@ cleanup:
 void app_socket_get_option(sl_cli_command_arg_t *arguments)
 {
   sl_status_t ret = SL_STATUS_OK;
-  app_socket_entry_t* entry;
+  app_socket_entry_t *entry;
   sl_wisun_socket_id_t socket_id;
   char *arg_option;
   const app_socket_option_t *iter;

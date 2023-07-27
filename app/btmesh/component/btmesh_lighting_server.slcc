@@ -9,6 +9,7 @@ description: >
   
   The component provides the reporting functions, and the possibility to set current,
   default, and last values of the lightness value.
+  This component is prepared for integration into SOC applications.
 
   This is a Low-Code component. The following weak callback is available to
   implement the relevant light source handling:
@@ -52,9 +53,17 @@ template_contribution:
       include: "sl_btmesh_lighting_server.h"
       function: "sl_btmesh_lighting_server_on_event"
     priority: -10
+  - name: "btmesh_app_node_reset"
+    value:
+      include: "sl_btmesh_lighting_server.h"
+      function: "sl_btmesh_lighting_server_on_node_reset"
+    priority: -10
   - name: btmesh_generic_handler
     value:
       name: lighting_server
       count: 6
   - name: component_catalog
     value: btmesh_lighting_server
+
+validation_helper:
+  - path: "../../script/validation/soc_ncp_compatibility.lua"

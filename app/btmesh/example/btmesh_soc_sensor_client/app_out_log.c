@@ -32,6 +32,10 @@
 #include "em_common.h"
 #include "sl_status.h"
 
+#ifdef SL_COMPONENT_CATALOG_PRESENT
+#include "sl_component_catalog.h"
+#endif // SL_COMPONENT_CATALOG_PRESENT
+
 #include "app.h"
 #include "app_log.h"
 

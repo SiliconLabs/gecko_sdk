@@ -5,7 +5,7 @@
 # Add to include path
 override INCLUDEPATHS += \
 $(SDK_DIR)/app/bluetooth/common/l2cap_transfer/inc \
-$(SDK_DIR)/app/bluetooth/common/l2cap_transfer/config \
+$(SDK_DIR)/app/bluetooth/common_host/l2cap_transfer/config \
 $(SDK_DIR)/app/bluetooth/common_host/em_core_mock
 
 # Attach sources

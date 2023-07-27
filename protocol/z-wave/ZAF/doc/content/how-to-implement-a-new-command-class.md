@@ -14,10 +14,10 @@ supporting implementation in two different source files like it's done for CC Ba
 Most command classes require two basic things for the supporting implementation:
 
 1. Define a command handler that parses incoming frames
-2. Use a REGISTER_CC() macro to register the command handler and the CC version.
+2. Use REGISTER_CC_V5() to register the command handler and the CC version.
 
-Please see ZAF_types.h for descriptions of the different versions of REGISTER_CC() macros and the
-corresponding type definition of the command handler.
+Please see ZAF_types.h for descriptions REGISTER_CC_V5() and the corresponding type definition of
+the command handler.
 
 ### Association Group Information
 
@@ -26,7 +26,7 @@ pairs that MUST be listed for the Lifeline association group. The Z-Wave Control
 for the list using the Association Group Command List Get command.
 
 ZAF will propagate this list automatically, but it requires each command class in the above registry
-to register the relevant commands. REGISTER_CC_V4() or higher must be used for this.
+to register the relevant commands. Use REGISTER_CC_V5() for this.
 
 The following shows an example of how it's done for CC Door Lock. CC Door Lock must register two
 different commands which is why the function returns 2. Other command classes register only one
@@ -43,7 +43,7 @@ static uint8_t lifeline_reporting(ccc_pair_t * p_ccc_pair)
   return 2;
 }
 
-REGISTER_CC_V4(..., lifeline_reporting, ...);
+REGISTER_CC_V5(..., lifeline_reporting, ...);
 ```
 
 ### Basic Mapping
@@ -67,7 +67,7 @@ static void basic_set_mapper(ZW_APPLICATION_TX_BUFFER* pFrame)
   pFrame->ZW_DoorLockOperationSetV4Frame.cmd      = DOOR_LOCK_OPERATION_SET;
 }
 
-REGISTER_CC_V4(..., basic_set_mapper, ...);
+REGISTER_CC_V5(..., basic_set_mapper, ...);
 ```
 
 #### Basic Get Mapping
@@ -85,8 +85,32 @@ static void basic_get_mapper(uint8_t endpoint, uint8_t * p_current_value, uint8_
   *p_duration      = cc_multilevel_switch_get_duration_handler(endpoint);
 }
 
-REGISTER_CC_V4(..., basic_get_mapper, ...);
+REGISTER_CC_V5(..., basic_get_mapper, ...);
 ```
+
+### Parsing incoming frames
+
+Example:
+```c
+static received_frame_status_t CC_MultilevelSwitch_handler(
+    cc_handler_input_t * input,
+    cc_handler_output_t * output)
+{
+  switch (input->frame->ZW_Common.cmd)
+  {
+    case SWITCH_MULTILEVEL_GET:
+      // Parse SWITCH_MULTILEVEL_GET
+      break;
+    default:
+      // Unknown command
+      return RECEIVED_FRAME_STATUS_NO_SUPPORT;
+  }
+  return RECEIVED_FRAME_STATUS_SUCCESS;
+}
+
+REGISTER_CC_V5(COMMAND_CLASS_SWITCH_MULTILEVEL, SWITCH_MULTILEVEL_VERSION_V4, CC_MultilevelSwitch_handler, ...);
+```
+
 
 ## Implementation of controlling part
 
@@ -168,7 +192,7 @@ Each Command Class should have following folders:
 - `src` for private headers and source files.
 
 ## Version
-The command class version must be set using a REGISTER_CC macro.
+The command class version must be set using REGISTER_CC_V5().
 
 Example:
 ```c

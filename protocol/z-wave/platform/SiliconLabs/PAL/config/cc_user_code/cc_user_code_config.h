@@ -10,7 +10,7 @@
 
 // <h> Command Class User Code Configuration
 
-// <o> Max number of user Code ID's and USER CODES <1..255:1> <f.d>
+// <o CC_USER_CODE_MAX_IDS> Max number of user Code ID's and USER CODES <1..255:1> <f.d>
 // <i> Default: 1
 #define CC_USER_CODE_MAX_IDS  1
 

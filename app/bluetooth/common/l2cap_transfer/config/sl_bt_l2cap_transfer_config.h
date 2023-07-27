@@ -1,9 +1,9 @@
 /***************************************************************************//**
  * @file
- * @brief L2CAP transfer configuration file
+ * @brief L2CAP transfer - SoC configuration file
  *******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -31,6 +31,8 @@
 #ifndef SL_BT_L2CAP_TRANSFER_CONFIG_H
 #define SL_BT_L2CAP_TRANSFER_CONFIG_H
 
+#include "sl_bluetooth_connection_config.h"
+
 // <<< Use Configuration Wizard in Context Menu >>>
 
 // <q SL_BT_L2CAP_TRANSFER_CONFIG_ACCEPT_PRIOR_CHANNELS> Enable prior channels
@@ -38,5 +40,7 @@
 #define SL_BT_L2CAP_TRANSFER_CONFIG_ACCEPT_PRIOR_CHANNELS         1
 
 // <<< end of configuration section >>>
+
+#define SL_BT_L2CAP_TRANSFER_CONFIG_PRIOR_CHANNEL_COUNT           SL_BT_CONFIG_MAX_CONNECTIONS
 
 #endif // SL_BT_L2CAP_TRANSFER_CONFIG_H

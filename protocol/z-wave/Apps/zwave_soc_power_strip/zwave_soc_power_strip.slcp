@@ -34,7 +34,6 @@ component:
   - id: zw_cc_multi_channel_control
   - id: zw_cc_multi_channel_support
   - id: zw_cc_manufacturerspecific  
-  - id: zw_cc_multilevelswitchcontrol
   - id: zw_cc_multilevel_switch_support
   - id: zw_cc_multilevel_switch_support_nvm
   - id: zw_cc_notification
@@ -64,7 +63,7 @@ configuration:
   - name: APP_REVISION
     value: 20
   - name: APP_PATCH
-    value: 0
+    value: 1
   - name: CC_MULTI_CHANNEL_IDENTICAL_ENDPOINTS
     value: 0
   - name: ZAF_CONFIG_REQUEST_KEY_S0
@@ -151,6 +150,8 @@ configuration:
     condition: [brd2603a]
   - name: ZAF_APP_NAME
     value: '"power_strip"'
+  - name: SL_RAIL_UTIL_RAIL_POWER_MANAGER_INIT
+    value: 0
 
 define:
   - name: APP_PROPERTIES_CONFIG_FILE

@@ -105,7 +105,7 @@ void sli_zigbee_app_framework_tick_callback(void)
 //------------------------------------------------------------------------------
 // Event System
 
-void sli_zigbee_event_common_handler(sl_zigbee_event_t *event)
+static void event_common_handler(sl_zigbee_event_t *event)
 {
   bool is_network_event = sli_zigbee_event_is_network_event(event);
   bool is_endpoint_event = sli_zigbee_event_is_endpoint_event(event);
@@ -148,7 +148,7 @@ void sli_zigbee_event_init(sl_zigbee_event_t *event,
 
   event->next = NULL;
   event->actions.queue = &sli_zigbee_af_app_event_queue;
-  event->actions.handler = sli_zigbee_event_common_handler;
+  event->actions.handler = event_common_handler;
   event->actions.marker = NULL;
   event->dataPtr = handler;
   event->data = 0;

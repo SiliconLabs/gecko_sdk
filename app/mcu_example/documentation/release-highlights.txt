@@ -1,2 +1,2 @@
-32-Bit MCU SDK 6.5.0.0
-- Added support for new OPNs
+32-Bit MCU SDK 6.5.1.0
+- Underlying platform changes only

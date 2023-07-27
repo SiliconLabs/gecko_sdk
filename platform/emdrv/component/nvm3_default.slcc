@@ -37,6 +37,7 @@ template_contribution:
       event: platform_init
       include: nvm3_default.h
       handler: nvm3_initDefault
+    condition: [device]
     unless: [trustzone_secure]
 documentation:
     docset: gecko-platform

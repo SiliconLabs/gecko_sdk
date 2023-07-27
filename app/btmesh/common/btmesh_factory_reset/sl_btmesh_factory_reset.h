@@ -42,13 +42,6 @@ void sl_btmesh_initiate_node_reset(void);
 void sl_btmesh_initiate_full_reset(void);
 
 /***************************************************************************//**
- * Handling of node reset event.
- *
- * @param[in] evt   Pointer to incoming time event.
- ******************************************************************************/
-void sl_btmesh_factory_reset_on_event(sl_btmesh_msg_t *evt);
-
-/***************************************************************************//**
  * Called during the factory reset of the node.
  * @note If no implementation is provided in the application then a default weak
  *       implementation if provided which is a no-operation. (empty function)

@@ -9,7 +9,7 @@ description: >
  all NVM data as well. Callback is available for both reset types. After callback
  execution the node reboots itself. After reboot in both reset cases the node
  enters to unprovisioned state. These interface functions are available also
- for CLI calls.
+ for CLI calls. This component is prepared for integration into SOC applications.
 
  This is a No-Code component.
 category: "Bluetooth Mesh|Utility"
@@ -21,6 +21,11 @@ include:
   - path: ""
     file_list:
       - path: "sl_btmesh_factory_reset.h"
+      - path: "sl_btmesh_node_reset_handler.h"
+
+template_file:
+  - path: "sl_btmesh_node_reset_handler.c.jinja"
+
 provides:
   - name: "btmesh_factory_reset"
 requires:
@@ -34,11 +39,6 @@ recommends:
   - id: "app_timer"
 
 template_contribution: 
-  - name: "btmesh_on_event"
-    value:
-      include: "sl_btmesh_factory_reset.h"
-      function: "sl_btmesh_factory_reset_on_event"
-
   - name: cli_command
     value:
       group: factory
@@ -72,3 +72,6 @@ template_contribution:
 
   - name: component_catalog
     value: "btmesh_factory_reset"
+
+validation_helper:
+  - path: "../../script/validation/soc_ncp_compatibility.lua"

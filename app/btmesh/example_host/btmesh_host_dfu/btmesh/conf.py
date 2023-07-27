@@ -26,9 +26,7 @@ import enum
 from typing import Iterable, List, Optional, Union
 
 from bgapi.bglib import BGEvent, CommandError, CommandFailedError
-
-from bgapix.bglibx import (BGLibExtRetryParams, BGLibExtWaitEventError,
-                           EventParamValues)
+from bgapix.bglibx import BGLibExtRetryParams
 from bgapix.slstatus import SlStatus
 
 from . import util
@@ -39,8 +37,38 @@ from .errors import BtmeshError, BtmeshErrorCode
 from .util import BtmeshMulticastRetryParams, BtmeshRetryParams
 
 
+class BtmeshConfigError(BtmeshError):
+    def __init__(
+        self,
+        err: BtmeshErrorCode,
+        message: str,
+        result: SlStatus,
+        *args,
+        event: BGEvent = None,
+        **kwargs,
+    ):
+        super().__init__(err, message, *args, event=event, **kwargs)
+        self.result = result
+
+
+@enum.unique
+class RelayState(util.BtmeshIntEnum):
+    DISABLED = 0
+    ENABLED = 1
+    UNSUPPORTED = 2
+    UNKNOWN_VALUE = util.ENUM_UNKNOWN_VALUE
+
+
 @enum.unique
 class GattProxyState(util.BtmeshIntEnum):
+    DISABLED = 0
+    ENABLED = 1
+    UNSUPPORTED = 2
+    UNKNOWN_VALUE = util.ENUM_UNKNOWN_VALUE
+
+
+@enum.unique
+class FriendState(util.BtmeshIntEnum):
     DISABLED = 0
     ENABLED = 1
     UNSUPPORTED = 2
@@ -60,8 +88,35 @@ class ConfigStatus:
     node: Node
 
     @classmethod
-    def from_event(cls, node: Node, events: Iterable[BGEvent]):
+    def create_from_events(cls, node: Node, events: Iterable[BGEvent]):
         raise NotImplementedError(f"The {cls.__name__} can't be instantiated.")
+
+
+@dataclasses.dataclass
+class DefaultTTLStatus(ConfigStatus):
+    ttl: int
+
+    @classmethod
+    def create_from_events(cls, node: Node, events: Iterable[BGEvent]):
+        evt = events[0]
+        return DefaultTTLStatus(node=node, ttl=evt.value)
+
+
+@dataclasses.dataclass
+class RelayStatus(ConfigStatus):
+    state: RelayState
+    retransmit_count: int
+    retransmit_interval_ms: int
+
+    @classmethod
+    def create_from_events(cls, node: Node, events: Iterable[BGEvent]):
+        evt = events[0]
+        return RelayStatus(
+            node=node,
+            state=RelayState.from_int(evt.relay),
+            retransmit_count=evt.retransmit_count,
+            retransmit_interval_ms=evt.retransmit_interval_ms,
+        )
 
 
 @dataclasses.dataclass
@@ -69,9 +124,19 @@ class GattProxyStatus(ConfigStatus):
     state: GattProxyState
 
     @classmethod
-    def from_event(cls, node: Node, events: Iterable[BGEvent]):
-        event = events[0]
-        return GattProxyStatus(node=node, state=GattProxyState.from_int(event.value))
+    def create_from_events(cls, node: Node, events: Iterable[BGEvent]):
+        evt = events[0]
+        return GattProxyStatus(node=node, state=GattProxyState.from_int(evt.value))
+
+
+@dataclasses.dataclass
+class FriendStatus(ConfigStatus):
+    state: FriendState
+
+    @classmethod
+    def create_from_events(cls, node: Node, events: Iterable[BGEvent]):
+        evt = events[0]
+        return FriendStatus(node=node, state=FriendState.from_int(evt.value))
 
 
 @dataclasses.dataclass
@@ -79,10 +144,25 @@ class NodeIdentityStatus(ConfigStatus):
     state: NodeIdentityState
 
     @classmethod
-    def from_event(cls, node: Node, events: Iterable[BGEvent]):
-        event = events[0]
+    def create_from_events(cls, node: Node, events: Iterable[BGEvent]):
+        evt = events[0]
         return NodeIdentityStatus(
-            node=node, state=NodeIdentityState.from_int(event.value)
+            node=node, state=NodeIdentityState.from_int(evt.value)
+        )
+
+
+@dataclasses.dataclass
+class NetworkTransmitStatus(ConfigStatus):
+    transmit_count: int
+    transmit_interval_ms: int
+
+    @classmethod
+    def create_from_events(cls, node: Node, events: Iterable[BGEvent]):
+        evt = events[0]
+        return NetworkTransmitStatus(
+            node=node,
+            transmit_count=evt.transmit_count,
+            transmit_interval_ms=evt.transmit_interval_ms,
         )
 
 
@@ -279,7 +359,7 @@ class Configurator(BtmeshComponent):
                 }
         event_selector[final_event_name] = {"handle": "$handle"}
         retry_event_selector[final_event_name] = {
-            "result": SlStatus.TIMEOUT,
+            "result": SlStatus.TIMEOUT.value,
             "handle": "$handle",
         }
         rsp = self.lib.btmesh.config_client.get_default_timeout()
@@ -327,13 +407,88 @@ class Configurator(BtmeshComponent):
         if final_evt.result != SlStatus.OK:
             result_value = final_evt.result
             result_name = SlStatus.get_name(final_evt.result)
-            raise BtmeshError(
+            raise BtmeshConfigError(
                 BtmeshErrorCode.CONFIG_FAILED,
                 f"{proc_name.capitalize()} procedure failed. "
                 f"(0x{result_value:04X}-{result_name})",
+                result=final_evt.result,
                 event=final_evt,
             )
         return [evt for evt in events if evt in output_event_names]
+
+    def set_default_ttl(
+        self,
+        node: Node,
+        ttl: int,
+        retry_params: BtmeshRetryParams = None,
+    ) -> None:
+        self.config_procedure(
+            "Set Default TTL state",
+            self.lib.btmesh.config_client.set_default_ttl,
+            node,
+            ttl,
+            final_event_name="btmesh_evt_config_client_default_ttl_status",
+            retry_params=retry_params,
+        )
+
+    def get_default_ttl(
+        self,
+        node: Node,
+        retry_params: BtmeshRetryParams = None,
+    ) -> DefaultTTLStatus:
+        events = self.config_procedure(
+            "Get Default TTL state",
+            self.lib.btmesh.config_client.get_default_ttl,
+            node,
+            final_event_name="btmesh_evt_config_client_default_ttl_status",
+            retry_params=retry_params,
+        )
+        return DefaultTTLStatus.create_from_events(node, events)
+
+    def set_relay(
+        self,
+        node: Node,
+        state: RelayState,
+        retransmit_count: int,
+        retransmit_interval_ms: int,
+        retry_params: BtmeshRetryParams = None,
+    ) -> None:
+        proc_name = "Set Relay state"
+        events = self.config_procedure(
+            proc_name,
+            self.lib.btmesh.config_client.set_relay,
+            node,
+            state.value,
+            retransmit_count,
+            retransmit_interval_ms,
+            final_event_name="btmesh_evt_config_client_relay_status",
+            retry_params=retry_params,
+        )
+        relay_status = RelayStatus.create_from_events(node, events)
+        if relay_status.state not in (RelayState.ENABLED, RelayState.DISABLED):
+            final_evt = events[0]
+            result = SlStatus.NOT_SUPPORTED
+            raise BtmeshConfigError(
+                BtmeshErrorCode.CONFIG_RELAY_FAILED,
+                f"{proc_name.capitalize()} procedure failed. "
+                f"(0x{result.value:04X}-{result.name})",
+                result=result,
+                event=final_evt,
+            )
+
+    def get_relay(
+        self,
+        node: Node,
+        retry_params: BtmeshRetryParams = None,
+    ) -> RelayStatus:
+        events = self.config_procedure(
+            "Get Relay state",
+            self.lib.btmesh.config_client.get_relay,
+            node,
+            final_event_name="btmesh_evt_config_client_relay_status",
+            retry_params=retry_params,
+        )
+        return RelayStatus.create_from_events(node, events)
 
     def set_gatt_proxy(
         self,
@@ -341,14 +496,29 @@ class Configurator(BtmeshComponent):
         state: GattProxyState,
         retry_params: BtmeshRetryParams = None,
     ) -> None:
-        self.config_procedure(
-            "Set GATT Proxy state",
+        proc_name = "Set GATT Proxy state"
+        events = self.config_procedure(
+            proc_name,
             self.lib.btmesh.config_client.set_gatt_proxy,
             node,
             state.value,
             final_event_name="btmesh_evt_config_client_gatt_proxy_status",
             retry_params=retry_params,
         )
+        gatt_proxy_status = GattProxyStatus.create_from_events(node, events)
+        if gatt_proxy_status.state not in (
+            GattProxyState.ENABLED,
+            GattProxyState.DISABLED,
+        ):
+            final_evt = events[0]
+            result = SlStatus.NOT_SUPPORTED
+            raise BtmeshConfigError(
+                BtmeshErrorCode.CONFIG_GATT_PROXY_FAILED,
+                f"{proc_name.capitalize()} procedure failed. "
+                f"(0x{result.value:04X}-{result.name})",
+                result=result,
+                event=final_evt,
+            )
 
     def get_gatt_proxy(
         self,
@@ -362,7 +532,48 @@ class Configurator(BtmeshComponent):
             final_event_name="btmesh_evt_config_client_gatt_proxy_status",
             retry_params=retry_params,
         )
-        return GattProxyStatus.from_event(events)
+        return GattProxyStatus.create_from_events(node, events)
+
+    def set_friend(
+        self,
+        node: Node,
+        state: FriendState,
+        retry_params: BtmeshRetryParams = None,
+    ) -> None:
+        proc_name = "Set Friend state"
+        events = self.config_procedure(
+            proc_name,
+            self.lib.btmesh.config_client.set_friend,
+            node,
+            state.value,
+            final_event_name="btmesh_evt_config_client_friend_status",
+            retry_params=retry_params,
+        )
+        friend_status = FriendStatus.create_from_events(node, events)
+        if friend_status.state not in (FriendState.ENABLED, FriendState.DISABLED):
+            final_evt = events[0]
+            result = SlStatus.NOT_SUPPORTED
+            raise BtmeshConfigError(
+                BtmeshErrorCode.CONFIG_FRIEND_FAILED,
+                f"{proc_name.capitalize()} procedure failed. "
+                f"(0x{result.value:04X}-{result.name})",
+                result=result,
+                event=final_evt,
+            )
+
+    def get_friend(
+        self,
+        node: Node,
+        retry_params: BtmeshRetryParams = None,
+    ) -> FriendStatus:
+        events = self.config_procedure(
+            "Get Friend state",
+            self.lib.btmesh.config_client.get_friend,
+            node,
+            final_event_name="btmesh_evt_config_client_friend_status",
+            retry_params=retry_params,
+        )
+        return FriendStatus.create_from_events(node, events)
 
     def set_node_identity(
         self,
@@ -395,7 +606,38 @@ class Configurator(BtmeshComponent):
             final_event_name="btmesh_evt_config_client_identity_status",
             retry_params=retry_params,
         )
-        return NodeIdentityStatus.from_event(events)
+        return NodeIdentityStatus.create_from_events(node, events)
+
+    def set_network_transmit(
+        self,
+        node: Node,
+        transmit_count: int,
+        transmit_interval_ms: int,
+        retry_params: BtmeshRetryParams = None,
+    ) -> None:
+        self.config_procedure(
+            "Set Network Transmit state",
+            self.lib.btmesh.config_client.set_network_transmit,
+            node,
+            transmit_count,
+            transmit_interval_ms,
+            final_event_name="btmesh_evt_config_client_network_transmit_status",
+            retry_params=retry_params,
+        )
+
+    def get_network_transmit(
+        self,
+        node: Node,
+        retry_params: BtmeshRetryParams = None,
+    ) -> NetworkTransmitStatus:
+        events = self.config_procedure(
+            "Get Network Transmit state",
+            self.lib.btmesh.config_client.get_network_transmit,
+            node,
+            final_event_name="btmesh_evt_config_client_network_transmit_status",
+            retry_params=retry_params,
+        )
+        return NetworkTransmitStatus.create_from_events(node, events)
 
     def concat_config_event_bytes(self, attr, events, event_filter=lambda e: True):
         barr = bytearray()
@@ -427,10 +669,11 @@ class Configurator(BtmeshComponent):
             if get_local_dcd_result != SlStatus.OK:
                 result_value = get_local_dcd_result
                 result_name = SlStatus.get_name(result_value)
-                raise BtmeshError(
+                raise BtmeshConfigError(
                     BtmeshErrorCode.CONFIG_FAILED,
                     f"DCD Local Get procedure failed. "
                     f"(0x{result_value:04X}-{result_name})",
+                    result=get_local_dcd_result,
                     event=local_dcd_data_end_evt,
                 )
             events = events[:-1]
@@ -743,12 +986,13 @@ class Configurator(BtmeshComponent):
                 uuid=node.uuid,
             )
             if evt.result != SlStatus.OK:
-                raise BtmeshError(
+                raise BtmeshConfigError(
                     err=BtmeshErrorCode.CONFIG_FAILED,
                     message=f"Failed to delete ddb entry with {node.uuid.hex()} "
                     f"uuid from device database due to "
                     f'"{SlStatus.get_name(evt.result)}" error.',
                     result=evt.result,
+                    event=evt,
                 )
         except CommandFailedError as e:
             if e.errorcode != SlStatus.BT_MESH_DOES_NOT_EXIST:

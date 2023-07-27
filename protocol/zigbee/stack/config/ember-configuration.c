@@ -83,7 +83,7 @@ EmberEvent sli_zigbee_beacon_events[NUM_MULTI_PAN_FORKS];
 EmberEvent sli_zigbee_permit_joiningEvents[NUM_MULTI_PAN_FORKS];
 EmberEvent sli_zigbee_network_management_events[NUM_MULTI_PAN_FORKS];
 EmberEvent sli_zigbee_neighbor_exchange_events[NUM_MULTI_PAN_FORKS];
-EmberEvent sli_zigbee_request_key_events[NUM_MULTI_PAN_FORKS];
+EmberEvent sli_zigbee_request_key_events[EMBER_SUPPORTED_NETWORKS];
 
 #if !defined(SL_ZIGBEE_LEAF_STACK) || defined (CSL_SUPPORT)
 EmberEvent sli_zigbee_send_parent_announce_events[NUM_MULTI_PAN_FORKS];
@@ -397,6 +397,8 @@ uint16_t heapMemory[EMBER_PACKET_BUFFER_COUNT * 16] __attribute__ ((aligned(4)))
 // *****************************************
 
 const uint8_t emberStackProfileId[8] = { 0, };
+
+uint8_t sli_zigbee_stack_compliance_revision = SL_ZIGBEE_STACK_COMPLIANCE_REVISION;
 
 uint8_t sli_zigbee_default_stack_profile = EMBER_STACK_PROFILE;
 uint8_t sli_zigbee_default_security_level = EMBER_SECURITY_LEVEL;

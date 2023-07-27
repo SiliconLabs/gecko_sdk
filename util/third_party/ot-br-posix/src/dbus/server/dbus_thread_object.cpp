@@ -44,6 +44,7 @@
 #include <openthread/thread_ftd.h>
 #include <openthread/platform/radio.h>
 
+#include "common/api_strings.hpp"
 #include "common/byteswap.hpp"
 #include "dbus/common/constants.hpp"
 #include "dbus/server/dbus_agent.hpp"
@@ -54,35 +55,10 @@
 #if OTBR_ENABLE_TELEMETRY_DATA_API
 #include "proto/thread_telemetry.pb.h"
 #endif
+#include "proto/capabilities.pb.h"
 
 using std::placeholders::_1;
 using std::placeholders::_2;
-
-static std::string GetDeviceRoleName(otDeviceRole aRole)
-{
-    std::string roleName;
-
-    switch (aRole)
-    {
-    case OT_DEVICE_ROLE_DISABLED:
-        roleName = OTBR_ROLE_NAME_DISABLED;
-        break;
-    case OT_DEVICE_ROLE_DETACHED:
-        roleName = OTBR_ROLE_NAME_DETACHED;
-        break;
-    case OT_DEVICE_ROLE_CHILD:
-        roleName = OTBR_ROLE_NAME_CHILD;
-        break;
-    case OT_DEVICE_ROLE_ROUTER:
-        roleName = OTBR_ROLE_NAME_ROUTER;
-        break;
-    case OT_DEVICE_ROLE_LEADER:
-        roleName = OTBR_ROLE_NAME_LEADER;
-        break;
-    }
-
-    return roleName;
-}
 
 #if OTBR_ENABLE_NAT64
 static std::string GetNat64StateName(otNat64State aState)
@@ -237,6 +213,8 @@ otbrError DBusThreadObject::Init(void)
                                std::bind(&DBusThreadObject::SetRadioRegionHandler, this, _1));
     RegisterSetPropertyHandler(OTBR_DBUS_THREAD_INTERFACE, OTBR_DBUS_PROPERTY_DNS_UPSTREAM_QUERY_STATE,
                                std::bind(&DBusThreadObject::SetDnsUpstreamQueryState, this, _1));
+    RegisterSetPropertyHandler(OTBR_DBUS_THREAD_INTERFACE, OTBR_DBUS_PROPERTY_NAT64_CIDR,
+                               std::bind(&DBusThreadObject::SetNat64Cidr, this, _1));
 
     RegisterGetPropertyHandler(OTBR_DBUS_THREAD_INTERFACE, OTBR_DBUS_PROPERTY_LINK_MODE,
                                std::bind(&DBusThreadObject::GetLinkModeHandler, this, _1));
@@ -335,12 +313,16 @@ otbrError DBusThreadObject::Init(void)
                                std::bind(&DBusThreadObject::GetNat64ProtocolCounters, this, _1));
     RegisterGetPropertyHandler(OTBR_DBUS_THREAD_INTERFACE, OTBR_DBUS_PROPERTY_NAT64_ERROR_COUNTERS,
                                std::bind(&DBusThreadObject::GetNat64ErrorCounters, this, _1));
+    RegisterGetPropertyHandler(OTBR_DBUS_THREAD_INTERFACE, OTBR_DBUS_PROPERTY_NAT64_CIDR,
+                               std::bind(&DBusThreadObject::GetNat64Cidr, this, _1));
     RegisterGetPropertyHandler(OTBR_DBUS_THREAD_INTERFACE, OTBR_DBUS_PROPERTY_INFRA_LINK_INFO,
                                std::bind(&DBusThreadObject::GetInfraLinkInfo, this, _1));
     RegisterGetPropertyHandler(OTBR_DBUS_THREAD_INTERFACE, OTBR_DBUS_PROPERTY_DNS_UPSTREAM_QUERY_STATE,
                                std::bind(&DBusThreadObject::GetDnsUpstreamQueryState, this, _1));
     RegisterGetPropertyHandler(OTBR_DBUS_THREAD_INTERFACE, OTBR_DBUS_PROPERTY_TELEMETRY_DATA,
                                std::bind(&DBusThreadObject::GetTelemetryDataHandler, this, _1));
+    RegisterGetPropertyHandler(OTBR_DBUS_THREAD_INTERFACE, OTBR_DBUS_PROPERTY_CAPABILITIES,
+                               std::bind(&DBusThreadObject::GetCapabilitiesHandler, this, _1));
 
     SuccessOrExit(error = Signal(OTBR_DBUS_THREAD_INTERFACE, OTBR_DBUS_SIGNAL_READY, std::make_tuple()));
 
@@ -1548,6 +1530,24 @@ exit:
 #endif
 }
 
+otError DBusThreadObject::GetCapabilitiesHandler(DBusMessageIter &aIter)
+{
+    otError            error = OT_ERROR_NONE;
+    otbr::Capabilities capabilities;
+
+    capabilities.set_nat64(OTBR_ENABLE_NAT64);
+
+    {
+        const std::string    dataBytes = capabilities.SerializeAsString();
+        std::vector<uint8_t> data(dataBytes.begin(), dataBytes.end());
+
+        VerifyOrExit(DBusMessageEncodeToVariant(&aIter, data) == OTBR_ERROR_NONE, error = OT_ERROR_INVALID_ARGS);
+    }
+
+exit:
+    return error;
+}
+
 void DBusThreadObject::GetPropertiesHandler(DBusRequest &aRequest)
 {
     UniqueDBusMessage        reply(dbus_message_new_method_return(aRequest.GetMessage()));
@@ -1925,6 +1925,36 @@ exit:
     return error;
 }
 
+otError DBusThreadObject::GetNat64Cidr(DBusMessageIter &aIter)
+{
+    otError error = OT_ERROR_NONE;
+
+    otIp4Cidr cidr;
+    char      cidrString[OT_IP4_CIDR_STRING_SIZE];
+
+    otNat64GetCidr(mNcp->GetThreadHelper()->GetInstance(), &cidr);
+    otIp4CidrToString(&cidr, cidrString, sizeof(cidrString));
+
+    VerifyOrExit(DBusMessageEncodeToVariant(&aIter, std::string(cidrString)) == OTBR_ERROR_NONE,
+                 error = OT_ERROR_INVALID_ARGS);
+
+exit:
+    return error;
+}
+
+otError DBusThreadObject::SetNat64Cidr(DBusMessageIter &aIter)
+{
+    otError     error = OT_ERROR_NONE;
+    std::string cidrString;
+    otIp4Cidr   cidr;
+
+    VerifyOrExit(DBusMessageExtractFromVariant(&aIter, cidrString) == OTBR_ERROR_NONE, error = OT_ERROR_INVALID_ARGS);
+    otIp4CidrFromString(cidrString.c_str(), &cidr);
+    SuccessOrExit(error = otNat64SetIp4Cidr(mNcp->GetThreadHelper()->GetInstance(), &cidr));
+
+exit:
+    return error;
+}
 #else  // OTBR_ENABLE_NAT64
 void DBusThreadObject::SetNat64Enabled(DBusRequest &aRequest)
 {
@@ -1951,6 +1981,18 @@ otError DBusThreadObject::GetNat64ProtocolCounters(DBusMessageIter &aIter)
 }
 
 otError DBusThreadObject::GetNat64ErrorCounters(DBusMessageIter &aIter)
+{
+    OTBR_UNUSED_VARIABLE(aIter);
+    return OT_ERROR_NOT_IMPLEMENTED;
+}
+
+otError DBusThreadObject::GetNat64Cidr(DBusMessageIter &aIter)
+{
+    OTBR_UNUSED_VARIABLE(aIter);
+    return OT_ERROR_NOT_IMPLEMENTED;
+}
+
+otError DBusThreadObject::SetNat64Cidr(DBusMessageIter &aIter)
 {
     OTBR_UNUSED_VARIABLE(aIter);
     return OT_ERROR_NOT_IMPLEMENTED;

@@ -23,7 +23,7 @@
 #include "sl_status.h"
 #include "stack/include/ember-types.h"
 #include "stack/include/zigbee-security-manager-types.h"
-
+#include "stack/include/zigbee-device-stack.h"
 /**
  * @addtogroup zigbee_security_manager
  *
@@ -126,6 +126,10 @@ sl_status_t sl_zb_sec_man_export_link_key_by_eui(EmberEUI64 eui,
 
 /** @brief Return true if a link key is available for securing messages
  * sent to the remote device.
+ * This function simply checks for the existence of a key, it doesn't care if the key is authorized or not.
+ * This function searches in a few different places, and it may always return true if certain bits/policies are set.
+ * E.g: On trust center, this function always returns true if hashed link keys are used
+ *      or if EMBER_TRUST_CENTER_GLOBAL_LINK_KEY is set
  *
  * @param remoteDevice The long address of a some other device in the network.
  * @return bool Returns true if a link key is available.

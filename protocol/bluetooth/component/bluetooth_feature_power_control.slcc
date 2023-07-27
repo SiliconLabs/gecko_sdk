@@ -16,6 +16,8 @@ source:
       - "bluetooth_stack"
 requires:
   - name: "bluetooth_feature_connection"
+conflicts:
+  - name: "bluetooth_feature_user_power_control"
 provides:
   - name: "bluetooth_feature_power_control"
 template_contribution:

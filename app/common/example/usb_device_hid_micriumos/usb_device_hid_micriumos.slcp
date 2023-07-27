@@ -34,7 +34,7 @@ define:
   - name: DEBUG_EFM
 configuration:
   - name: SL_HEAP_SIZE
-    value: 4096
+    value: 10240
 readme:
   - path: readme.md
 tag:

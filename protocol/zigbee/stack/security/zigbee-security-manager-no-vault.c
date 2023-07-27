@@ -18,7 +18,6 @@
  ******************************************************************************/
 
 #include "stack/include/zigbee-security-manager.h"
-#include "stack/security/zigbee-security-manager-internal.h"
 #include "hal.h" // for TOKEN_resolution
 #include "stack/include/security.h"
 #include "stack/config/token-stack.h"
@@ -26,9 +25,10 @@
 #include "stack/include/stack-info.h"
 #include "stack/include/aes-mmo.h"
 
- #ifdef SL_COMPONENT_CATALOG_PRESENT
+#ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
 #endif
+#include "stack/security/zigbee-security-manager-internal.h"
 
 // Externs
 extern void sli_zigbee_get_key_from_core(uint8_t* key);
@@ -205,7 +205,9 @@ sl_status_t zb_sec_man_fetch_transient_key(sl_zb_sec_man_context_t* context,
     if (context->flags & ZB_SEC_MAN_FLAG_AUTHENTICATED_DYNAMIC_LINK_KEY) {
       bitmask |= EMBER_DLK_DERIVED_KEY;
     }
-    bool found = findTransientLinkKey(context->eui64, &transientKeyData, &bitmask);
+    bool found = findTransientLinkKey(context->eui64,
+                                      &transientKeyData,
+                                      bitmask != 0 ? &bitmask : NULL);
     status = found ? EMBER_SUCCESS : EMBER_NOT_FOUND;
   }
 
@@ -498,13 +500,14 @@ void sl_zb_sec_man_hmac_aes_mmo(const uint8_t* input,
   }
 }
 
-#if defined(MBEDTLS_PSA_ACCEL_KEY_TYPE_AES) && defined(MBEDTLS_PSA_ACCEL_ALG_CCM) && defined(PSA_WANT_ALG_CCM) && defined(MBEDTLS_PSA_CRYPTO_DRIVERS) && defined(PSA_CRYPTO_H)
-sl_status_t sl_zb_sec_man_aes_ccm(uint8_t* nonce,
-                                  bool encrypt,
-                                  const uint8_t* input,
-                                  uint8_t encryption_start_index,
-                                  uint8_t length,
-                                  uint8_t* output)
+#if defined(MBEDTLS_PSA_ACCEL_KEY_TYPE_AES) && defined(MBEDTLS_PSA_ACCEL_ALG_CCM) && defined(PSA_WANT_ALG_CCM) && defined(MBEDTLS_PSA_CRYPTO_DRIVERS)
+sl_status_t sl_zb_sec_man_aes_ccm_extended(uint8_t* nonce,
+                                           bool encrypt,
+                                           const uint8_t* input,
+                                           uint8_t encryption_start_index,
+                                           uint8_t length,
+                                           uint8_t mic_length,
+                                           uint8_t* output)
 {
   stored_mic_length = mic_length;
   //Ported over from the PSA implementations inside ccm-star.c

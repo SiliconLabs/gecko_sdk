@@ -10,6 +10,7 @@ description: >
   firmware image to transfer. This model uses the Firmware Update Client model
   and the BLOB Transfer Client model to manage the firmware update. The Firmware
   Distribution Server can transfer one firmware image at a time.
+  This component is prepared for integration into SOC applications.
 category: "Bluetooth Mesh|Models|Firmware Update"
 quality: production
 root_path: app/btmesh/common/btmesh_fw_distribution_server
@@ -55,3 +56,6 @@ template_contribution:
       handler: sl_btmesh_fw_distribution_server_delete_step_handle
   - name: component_catalog
     value: btmesh_fw_distribution_server
+
+validation_helper:
+  - path: "../../script/validation/soc_ncp_compatibility.lua"

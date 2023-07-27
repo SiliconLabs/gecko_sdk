@@ -85,7 +85,7 @@ typedef struct COEX_CLI_config {
 static COEX_CLI_config_t coex_gpios[] = {
 #ifdef SL_RAIL_UTIL_COEX_REQ_PORT
   {
-    .name = "Request",
+    .name = "request",
     .config = &sli_coex_ptaReqCfg,
     .handler = &COEX_HAL_ConfigRequest,
     .index = COEX_CLI_GPIO_INDEX_REQ
@@ -93,7 +93,7 @@ static COEX_CLI_config_t coex_gpios[] = {
 #endif //SL_RAIL_UTIL_COEX_REQ_PORT
 #ifdef SL_RAIL_UTIL_COEX_PRI_PORT
   {
-    .name = "Priority",
+    .name = "priority",
     .config = &sli_coex_ptaPriCfg,
     .handler = &COEX_HAL_ConfigPriority,
     .index = COEX_CLI_GPIO_INDEX_PRI
@@ -101,7 +101,7 @@ static COEX_CLI_config_t coex_gpios[] = {
 #endif //SL_RAIL_UTIL_COEX_PRI_PORT
 #ifdef SL_RAIL_UTIL_COEX_PWM_REQ_PORT
   {
-    .name = "PWM Request",
+    .name = "PWMRequest",
     .config = &sli_coex_ptaPwmReqCfg,
     .handler = &COEX_HAL_ConfigPwmRequest,
     .index = COEX_CLI_GPIO_INDEX_PWM_REQ
@@ -109,7 +109,7 @@ static COEX_CLI_config_t coex_gpios[] = {
 #endif //SL_RAIL_UTIL_COEX_PWM_REQ_PORT
 #ifdef SL_RAIL_UTIL_COEX_GNT_PORT
   {
-    .name = "Grant",
+    .name = "grant",
     .config = &sli_coex_ptaGntCfg,
     .handler = &COEX_HAL_ConfigGrant,
     .index = COEX_CLI_GPIO_INDEX_GNT
@@ -117,7 +117,7 @@ static COEX_CLI_config_t coex_gpios[] = {
 #endif //SL_RAIL_UTIL_COEX_GNT_PORT
 #ifdef SL_RAIL_UTIL_COEX_RHO_PORT
   {
-    .name = "Radio Hold Off",
+    .name = "radioHoldOff",
     .config = &sli_coex_rhoCfg,
     .handler = &COEX_HAL_ConfigRadioHoldOff,
     .index = COEX_CLI_GPIO_INDEX_RHO
@@ -125,7 +125,7 @@ static COEX_CLI_config_t coex_gpios[] = {
 #endif //SL_RAIL_UTIL_COEX_RHO_PORT
 #ifdef SL_RAIL_UTIL_COEX_PHY_SELECT_PORT
   {
-    .name = "PHY Select",
+    .name = "PHYSelect",
     .config = &sli_coex_phySelectCfg,
     .handler = &COEX_HAL_ConfigPhySelect,
     .index = COEX_CLI_GPIO_INDEX_PHY_SELECT
@@ -133,7 +133,7 @@ static COEX_CLI_config_t coex_gpios[] = {
 #endif //SL_RAIL_UTIL_COEX_PHY_ENABLE_PORT
 #ifdef SL_RAIL_UTIL_COEX_WIFI_TX_PORT
   {
-    .name = "WiFi TX",
+    .name = "WiFiTX",
     .config = &sli_coex_wifiTxCfg,
     .handler = &COEX_HAL_ConfigWifiTx,
     .index = COEX_CLI_GPIO_INDEX_WIFI_TX
@@ -205,22 +205,20 @@ void cli_coex_get_gpio_config(sl_cli_command_arg_t *args)
        i < (NUMOF_ARRAY_ELEMENTS(coex_gpios) - 1);
        ++i) {
     responsePrintContinue(
-      "Coexistence %s port:%d,"
-      "pin:%d,"
-      "polarity:%d,",
-      coex_gpios[i].name,
-      coex_gpios[i].config->port,
-      coex_gpios[i].config->pin,
-      coex_gpios[i].config->polarity);
+      "%sPort:%d,"
+      "%sPin:%d,"
+      "%sPolarity:%d",
+      coex_gpios[i].name, coex_gpios[i].config->port,
+      coex_gpios[i].name, coex_gpios[i].config->pin,
+      coex_gpios[i].name, coex_gpios[i].config->polarity);
   }
   responsePrintEnd(
-    "Coexistence %s port:%d,"
-    "pin:%d,"
-    "polarity:%d,",
-    coex_gpios[i].name,
-    coex_gpios[i].config->port,
-    coex_gpios[i].config->pin,
-    coex_gpios[i].config->polarity);
+    "%sPort:%d,"
+    "%sPin:%d,"
+    "%sPolarity:%d",
+    coex_gpios[i].name, coex_gpios[i].config->port,
+    coex_gpios[i].name, coex_gpios[i].config->pin,
+    coex_gpios[i].name, coex_gpios[i].config->polarity);
 #else
   responsePrint(sl_cli_get_command_string(args, 0),
                 "No coexistence GPIOs configured."
@@ -243,14 +241,13 @@ void cli_coex_set_gpio_config(sl_cli_command_arg_t *args)
   halConfig->pin = sl_cli_get_argument_uint8(args, 2);
   halConfig->polarity = !!sl_cli_get_argument_uint8(args, 3);
   responsePrint(sl_cli_get_command_string(args, 0),
-                "Coexistence %s port:%d,"
-                "pin:%d,"
-                "polarity:%d,"
+                "%sPort:%d,"
+                "%sPin:%d,"
+                "%sPolarity:%d,"
                 "Status:%s",
-                gpioConfig->name,
-                halConfig->port,
-                halConfig->pin,
-                halConfig->polarity,
+                gpioConfig->name, halConfig->port,
+                gpioConfig->name, halConfig->pin,
+                gpioConfig->name, halConfig->polarity,
                 gpioConfig->handler(halConfig) ? "Success" : "Fail");
 }
 

@@ -32,6 +32,7 @@
 #define EM_EMU_H
 
 #include "em_device.h"
+#include "sl_status.h"
 #if defined(EMU_PRESENT)
 
 #include <stdbool.h>
@@ -330,14 +331,6 @@ typedef enum {
 
 #if defined(EMU_SERIES2_DCDC_BUCK_PRESENT) \
   || defined(EMU_SERIES2_DCDC_BOOST_PRESENT)
-/** Return codes for EMU DCDC set mode. */
-typedef enum {
-  emuDcdcSetModeOk                        =  0, /** EMU DCDC MODE set success. */
-  emuDcdcSetModeBypassTimeOut             = -1, /** EMU DCDC MODE set bypass error. */
-  emuDcdcSetModeRegulationTimeOut         = -2, /** EMU DCDC MODE set regulation error. */
-} EMU_DcdcModeSetStatus_TypeDef;
-
-#define EMU_DCDC_MODE_SET_TIMEOUT           1000000   /** EMU DCDC MODE set timeout. */
 
 /** DCDC mode. */
 typedef enum {
@@ -1183,7 +1176,7 @@ void EMU_DCDCModeSet(EMU_DcdcMode_TypeDef dcdcMode);
 
 #if (defined(EMU_SERIES2_DCDC_BUCK_PRESENT) \
   || defined(EMU_SERIES2_DCDC_BOOST_PRESENT))
-EMU_DcdcModeSetStatus_TypeDef EMU_DCDCModeSet(EMU_DcdcMode_TypeDef dcdcMode);
+sl_status_t EMU_DCDCModeSet(EMU_DcdcMode_TypeDef dcdcMode);
 #endif
 
 #if defined(EMU_SERIES2_DCDC_BUCK_PRESENT) \

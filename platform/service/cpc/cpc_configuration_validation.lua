@@ -13,3 +13,11 @@ elseif config_dbg_endpoint.value == "1" and not slc.is_provided("segger_systemvi
   nil,
   nil)
 end
+
+if slc.config("SL_BOARD_ENABLE_VCOM").value ~= "1" and slc.is_provided("cpc_config_vcom") then
+  validation.error(
+  "CPC uses VCOM instance but VCOM is not enabled.",
+  validation.target_for_defines({"SL_BOARD_ENABLE_VCOM"}),
+  "Please enable VCOM in the Board Control component, or add \"--configuration SL_BOARD_ENABLE_VCOM:1\" to your project generation command.",
+  nil)
+end

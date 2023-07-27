@@ -335,12 +335,6 @@ void emberAfPluginGbzMessageControllerNextCommand(EmberAfGbzMessageParserState *
 void emberAfPluginGbzMessageControllerPrintCommandInfo(EmberAfGbzZclCommand  * gbzZclCommand);
 
 /**
- * @brief Get the length of the overall GBZ message.
- */
-uint16_t sli_zigbee_af_gbz_message_controller_get_length(EmberAfGbzZclCommand * cmd,
-                                                         EmberAfGbzMessageData * msg);
-
-/**
  * @brief Indicate whether the ZCL payload will be encrypted.
  */
 bool emberAfPluginGbzMessageControllerGetEncryptPayloadFlag(EmberAfGbzMessageCreatorState * state,

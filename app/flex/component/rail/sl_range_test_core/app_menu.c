@@ -319,7 +319,7 @@ char* menu_print_aligned(char* item, char* value, uint8_t col)
     ii++;
   }
 
-  while (ii < (col - strlen(value))) {
+  while (ii < (col - safe_strlen(value))) {
     print_aligned_buffer[ii] = ' ';
     ii++;
   }
@@ -640,7 +640,7 @@ static menu_item_icon_t menu_set_rf_pa_display(char *buff[])
   RAIL_Handle_t rail_handle = get_current_rail_handler();
   // Enough to hold a sign and two digits,
   // one decimal point and one decimal digist and dBm */
-  char pVal[15U];
+  char pVal[35U];
   // Temporary power variable for actual RAIL output power.
   int16_t power;
   // Temporary power variable for the requested power.
@@ -722,6 +722,9 @@ static menu_item_icon_t menu_set_rf_frequency_display(char *buff[])
  ******************************************************************************/
 static bool menu_set_channel(bool init)
 {
+#if !defined(SL_CATALOG_RADIO_CONFIG_SIMPLE_RAIL_SINGLEPHY_PRESENT)
+  (void)init;
+#endif
   if (!is_current_phy_standard()) {
     range_test_settings.channel++;
 #if defined(SL_CATALOG_RADIO_CONFIG_SIMPLE_RAIL_SINGLEPHY_PRESENT)
@@ -754,7 +757,7 @@ static bool menu_set_channel(bool init)
  ******************************************************************************/
 static menu_item_icon_t menu_set_channel_display(char *buff[])
 {
-  char pVal[4U];
+  char pVal[10U];
 
   if (buff) {
     snprintf(pVal, sizeof(pVal), "%u", range_test_settings.channel);
@@ -804,7 +807,7 @@ static bool menu_set_packets_length(bool init)
  ******************************************************************************/
 static menu_item_icon_t menu_set_packets_length_Display(char *buff[])
 {
-  char pVal[3U];
+  char pVal[4U];
 
   if (buff) {
     snprintf(pVal, sizeof(pVal), "%u", range_test_settings.payload_length);

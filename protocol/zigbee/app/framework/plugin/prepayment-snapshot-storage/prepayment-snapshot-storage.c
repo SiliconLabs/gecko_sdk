@@ -41,7 +41,7 @@ static EmberAfPrepaymentSnapshotPayload *findSnapshot(uint32_t startTime,
                                                       uint8_t snapshotOffset,
                                                       uint32_t snapshotCause,
                                                       uint8_t *totalMatchesFound);
-void emberAfPluginPrepaymentSnapshotPrintInfo(EmberAfPrepaymentSnapshotPayload *snapshot);
+static void snapshotPrintInfo(EmberAfPrepaymentSnapshotPayload *snapshot);
 
 static EmberAfPrepaymentSnapshotPayload snapshots[EMBER_AF_PLUGIN_PREPAYMENT_SNAPSHOT_STORAGE_SNAPSHOT_CAPACITY];
 static EmberAfPrepaymentSnapshotSchedulePayload schedules[EMBER_AF_PLUGIN_PREPAYMENT_SNAPSHOT_STORAGE_SCHEDULE_CAPACITY];
@@ -194,7 +194,7 @@ EmberStatus emberAfPluginPrepaymentSnapshotStoragePublishSnapshot(EmberNodeId no
     return EMBER_ERR_FATAL;
   }
 
-  emberAfPluginPrepaymentSnapshotPrintInfo(snapshot);
+  snapshotPrintInfo(snapshot);
   uint16_t payloadSize = fillSnapshotPayloadBuffer(snapshotPayload, snapshot);
 
   emberAfFillCommandPrepaymentClusterPublishPrepaySnapshot(snapshot->snapshotId,
@@ -236,7 +236,7 @@ uint8_t emberAfPluginPrepaymentServerGetSnapshotCallback(EmberNodeId nodeId,
                       snapshot->snapshotType,
                       snapshot->snapshotTime);
 
-    emberAfPluginPrepaymentSnapshotPrintInfo(snapshot);
+    snapshotPrintInfo(snapshot);
 
     emberAfFillCommandPrepaymentClusterPublishPrepaySnapshot(snapshot->snapshotId,
                                                              snapshot->snapshotTime,
@@ -257,7 +257,7 @@ uint8_t emberAfPluginPrepaymentServerGetSnapshotCallback(EmberNodeId nodeId,
   return payloadSize;
 }
 
-void emberAfPluginPrepaymentSnapshotPrintInfo(EmberAfPrepaymentSnapshotPayload *snapshot)
+static void snapshotPrintInfo(EmberAfPrepaymentSnapshotPayload *snapshot)
 {
   emberAfAppPrintln("= Prepayment Snapshot =");
   emberAfAppPrintln(" id=%d", snapshot->snapshotId);

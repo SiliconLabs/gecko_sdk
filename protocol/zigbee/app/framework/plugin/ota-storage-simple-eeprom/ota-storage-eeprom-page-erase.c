@@ -394,44 +394,6 @@ EmberAfOtaStorageStatus emberAfOtaStorageDriverPrepareToResumeDownloadCallback(v
           : EMBER_AF_OTA_STORAGE_ERROR);
 }
 
-#if defined(DEBUG_PRINT)
-void sli_zigbee_af_eeprom_test(void)
-{
-  // This function works only for blocking IO calls
-
-  uint16_t page = 0;
-  uint8_t writeBuffer[16];
-  uint16_t i;
-  uint8_t status;
-
-  uint16_t writes = emberAfPluginEepromInfo()->pageSize / 16;
-
-  status = emberAfPluginEepromErase(page * emberAfPluginEepromInfo()->pageSize,
-                                    emberAfPluginEepromInfo()->pageSize);
-  if (status != 0) {
-    debugPrint("Failed to erase page %d, status: 0x%X", page, status);
-    return;
-  }
-
-  debugPrint("Number of writes: %d", writes);
-
-  for (i = 0; i < writes; i++) {
-    MEMSET(writeBuffer, i, 16);
-    status = emberAfPluginEepromWrite(page + (i * 16),
-                                      writeBuffer,
-                                      16);
-    debugPrint("Write address 0x%4X, length %d, status: 0x%X",
-               page + i,
-               16,
-               status);
-    if (status != 0) {
-      return;
-    }
-  }
-  debugPrint("All data written successfully.");
-}
-#endif
-
 #endif // !READ_MODIFY_WRITE_SUPPORT
 
 #ifdef SL_COMPONENT_CATALOG_PRESENT

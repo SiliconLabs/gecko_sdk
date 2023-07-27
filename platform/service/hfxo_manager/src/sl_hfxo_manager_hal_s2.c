@@ -38,7 +38,9 @@
 #if defined(SL_COMPONENT_CATALOG_PRESENT)
 #include "sl_component_catalog.h"
 #endif
-#if defined(SYSRTC_PRESENT)
+#if defined(SL_CATALOG_SLEEPTIMER_PRESENT) && defined(SYSRTC_PRESENT) \
+  && (SL_SLEEPTIMER_PERIPHERAL == SL_SLEEPTIMER_PERIPHERAL_SYSRTC)
+#define HFXO_MANAGER_SLEEPTIMER_SYSRTC_INTEGRATION_ON
 #include "peripheral_sysrtc.h"
 #endif
 
@@ -148,12 +150,12 @@ void sli_hfxo_manager_init_hardware(void)
 #endif
 
   HFXO0->IEN_CLR = HFXO_IEN_RDY | HFXO_IEN_DNSERR | HFXO_IEN_COREBIASOPTERR;
-#if defined(SYSRTC_PRESENT)
+#if defined(HFXO_MANAGER_SLEEPTIMER_SYSRTC_INTEGRATION_ON)
   HFXO0->IEN_CLR = HFXO_IEN_PRSRDY;
 #endif
 
   HFXO0->IF_CLR = HFXO_IF_RDY | HFXO_IF_DNSERR | HFXO_IEN_COREBIASOPTERR;
-#if defined(SYSRTC_PRESENT)
+#if defined(HFXO_MANAGER_SLEEPTIMER_SYSRTC_INTEGRATION_ON)
   HFXO0->IF_CLR = HFXO_IF_PRSRDY;
 #endif
 
@@ -162,7 +164,7 @@ void sli_hfxo_manager_init_hardware(void)
 
   HFXO0->IEN_SET = HFXO_IEN_RDY | HFXO_IEN_DNSERR | HFXO_IEN_COREBIASOPTERR;
 
-#if defined(SYSRTC_PRESENT)
+#if defined(HFXO_MANAGER_SLEEPTIMER_SYSRTC_INTEGRATION_ON)
   HFXO0->IEN_SET = HFXO_IEN_PRSRDY;
   HFXO0->CTRL &= ~(_HFXO_CTRL_DISONDEMANDPRS_MASK & HFXO_CTRL_DISONDEMANDPRS_DEFAULT);
   HFXO0->CTRL |= HFXO_CTRL_PRSSTATUSSEL0_PRSHWREQ;
@@ -200,7 +202,7 @@ bool sli_hfxo_manager_is_hfxo_ready(bool wait)
   bool ready = false;
 
   do {
-#if defined(SYSRTC_PRESENT)
+#if defined(HFXO_MANAGER_SLEEPTIMER_SYSRTC_INTEGRATION_ON)
     ready = (((HFXO0->STATUS & (HFXO_STATUS_RDY | HFXO_STATUS_PRSRDY)) != 0) && !error_flag) ? true : false;
 #else
     ready = (((HFXO0->STATUS & HFXO_STATUS_RDY) != 0) && !error_flag) ? true : false;
@@ -235,7 +237,7 @@ void sl_hfxo_manager_irq_handler(void)
   bool forceen = (HFXO0->CTRL & _HFXO_CTRL_FORCEEN_MASK) ? true : false;
 #endif
 
-#if defined(SYSRTC_PRESENT)
+#if defined(HFXO_MANAGER_SLEEPTIMER_SYSRTC_INTEGRATION_ON)
   if (irq_flag & HFXO_IF_PRSRDY) {
     // Clear PRS RDY flag and EM23ONDEMAND
     HFXO0->IF_CLR = irq_flag & HFXO_IF_PRSRDY;

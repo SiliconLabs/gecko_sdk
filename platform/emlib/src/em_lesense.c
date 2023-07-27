@@ -1338,22 +1338,32 @@ void LESENSE_StepSizeSet(uint32_t stepSize)
  *   See the configuration parameter type definition
  *   (LESENSE_DecStAll_TypeDef) for more details.
  *
+ * @param[in] confDecStAll
+ *   A configuration structure for all (16 or 32) LESENSE decoder states.
+ *
  * @note
  *   Decoder states can be configured individually using
  *   LESENSE_DecoderStateConfig() function.
- *
- * @param[in] confDecStAll
- *   A configuration structure for all (16 or 32) LESENSE decoder states.
+ *   Starting from Series 2 Config 3 (xG23 and higher), this function configures
+ *   a transition ARC instead of a decoder state.
  ******************************************************************************/
 void LESENSE_DecoderStateAllConfig(const LESENSE_DecStAll_TypeDef * confDecStAll)
 {
   uint32_t i;
 
+#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
   /* Iterate through all 16 or 32 decoder states. */
   for (i = 0U; i < LESENSE_NUM_DECODER_STATES; ++i) {
-    /* A configure decoder state i. */
+    /* A configure decoder for state i. */
     LESENSE_DecoderStateConfig(&confDecStAll->St[i], i);
   }
+#else
+  /* Iterate through all 64 transition arcs. */
+  for (i = 0U; i < LESENSE_NUM_ARCS; ++i) {
+    /* A configure decoder for arc i. */
+    LESENSE_DecoderStateConfig(&confDecStAll->St[i], i);
+  }
+#endif
 }
 
 /***************************************************************************//**
@@ -1370,6 +1380,10 @@ void LESENSE_DecoderStateAllConfig(const LESENSE_DecStAll_TypeDef * confDecStAll
  *
  * @param[in] decSt
  *   A decoder state index to configure (0-15) or (0-31) depending on the device.
+ *
+ * @note
+ *   Starting from Series 2 Config 3 (xG23 and higher), this function configures
+ *   a transition ARC instead of a decoder state.
  ******************************************************************************/
 void LESENSE_DecoderStateConfig(const LESENSE_DecStDesc_TypeDef * confDecSt,
                                 uint32_t decSt)
@@ -1409,7 +1423,7 @@ void LESENSE_DecoderStateConfig(const LESENSE_DecStDesc_TypeDef * confDecSt,
   bool enabled = false;
 
   /* Sanity check of configuration parameters */
-  EFM_ASSERT(decSt < LESENSE_NUM_DECODER_STATES);
+  EFM_ASSERT(decSt < LESENSE_NUM_ARCS);
   EFM_ASSERT((uint32_t)confDecSt->compMask < 16U);
   EFM_ASSERT((uint32_t)confDecSt->compVal < 16U);
   EFM_ASSERT((uint32_t)confDecSt->curState < LESENSE_NUM_DECODER_STATES);

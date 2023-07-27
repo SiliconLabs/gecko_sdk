@@ -37,10 +37,10 @@ provides:
 requires:
   - name: bluetooth_stack
   - name: bluetooth_feature_l2cap
+  - name: bluetooth_feature_connection
   - name: component_catalog
   - name: power_manager
   - name: slist
-  - name: app_assert
 
 template_contribution:
   - name: bluetooth_on_event

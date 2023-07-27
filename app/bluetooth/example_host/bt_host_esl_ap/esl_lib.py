@@ -25,7 +25,8 @@ ESL Library
 # 3. This notice may not be removed or altered from any source distribution.
 
 import ctypes
-import multiprocessing as mp
+# True multiprocessing is temporarily disabled.
+import multiprocessing.dummy as mp
 from multiprocessing.connection import Connection
 import os
 import sys
@@ -285,7 +286,7 @@ class EventConnectionOpened():
     def __init__(self, evt_data: elw.esl_lib_evt_data_t):
         self.connection_handle = evt_data.evt_connection_opened.connection_handle
         self.address = Address.from_ctype(evt_data.evt_connection_opened.address)
-        self.gattdb_handles = evt_data.evt_connection_opened.gattdb_handles
+        self.gattdb_handles = elw.esl_lib_gattdb_handles_t.from_buffer_copy(evt_data.evt_connection_opened.gattdb_handles)
 
     def __repr__(self) -> str:
         gattdb_str = f'[{self.gattdb_handles.services.esl}, {self.gattdb_handles.services.ots}, {self.gattdb_handles.services.dis}]'
@@ -425,7 +426,8 @@ class Lib():
         self.event_queue = mp.Queue()
         self._command_lock = mp.Lock()
         self._conn, conn = mp.Pipe()
-        self._process = mp.Process(target=self._process_run, daemon=True, args=(conn, ap_logger.stdout, ap_logger.level))
+        self._process = mp.Process(target=self._process_run, args=(conn, ap_logger.stdout, ap_logger.level))
+        self._process.daemon = True
         self._process.start()
 
     def _on_event(self, evt_code: elw.esl_lib_evt_type_t, evt_data: ctypes.POINTER(elw.esl_lib_evt_data_t)):

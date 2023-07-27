@@ -28,6 +28,7 @@ include:
       - path: lib/url/url.hpp
       - path: lib/spinel/spinel_interface.hpp
       - path: lib/hdlc/hdlc.hpp
+      - path: lib/spinel/multi_frame_buffer.hpp
       - path: lib/spinel/radio_spinel_metrics.h
       - path: lib/spinel/spinel.h
       - path: lib/spinel/spinel_platform.h
@@ -43,7 +44,7 @@ include:
       - path: vendor_interface.hpp
   - path: "protocol/openthread/platform-abstraction/include"
     file_list:
-      - path: radio_vendor.h
+      - path: radio_extension.h
       - path: vendor_spinel.hpp
   - path: "protocol/openthread/platform-abstraction/posix"
     file_list:

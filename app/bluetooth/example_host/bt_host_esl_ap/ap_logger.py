@@ -47,13 +47,12 @@ COLORS = {'DEBUG': 'light_black',
 stdout = False
 level = logging.INFO
 
-class Logger(logging.Logger):
-    def print(self, *args, **kwargs):
-        print("\r\t", end='', file=sys.stdout if stdout else sys.stderr)
-        self.print_append(*args, **kwargs)
+_logger_list = {}
 
-    def print_append(self, *args, **kwargs):
-        print(*args, file=sys.stdout if stdout else sys.stderr, **kwargs)
+def log(*args, **kwargs):
+    ''' Print with 1 tab + 1 whitespace indentation '''
+    args = [arg.replace('\n', '\n\t ') if isinstance(arg, str) else arg for arg in args]
+    print('\t', *args, file=sys.stdout if stdout else sys.stderr, **kwargs)
 
 class StreamHandler(logging.StreamHandler):
     def __init__(self):
@@ -68,10 +67,13 @@ class StreamHandler(logging.StreamHandler):
         self.setFormatter(self.formatter)
         self.setLevel(logging.NOTSET)
 
-def getLogger(name):
-    logger = Logger(name)
+def getLogger(name="AP "):
+    if name in _logger_list:
+        return _logger_list[name]
+    logger = logging.Logger(name)
     c_handler = StreamHandler()
     logger.propagate = False
     logger.addHandler(c_handler)
     logger.setLevel(level)
+    _logger_list[name] = logger
     return logger

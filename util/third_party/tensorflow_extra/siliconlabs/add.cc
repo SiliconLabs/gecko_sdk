@@ -228,17 +228,8 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
 }  // namespace add
 }  // namespace sl
 
-TfLiteRegistration Register_ADD() {
-  return {/*init=*/sl::add::Init,
-          /*free=*/nullptr,
-          /*prepare=*/sl::add::Prepare,
-          /*invoke=*/sl::add::Eval,
-          /*profiling_string=*/nullptr,
-          /*builtin_code=*/0,
-          /*custom_name=*/nullptr,
-          /*version=*/0,
-          /*registration_external=*/nullptr
-  };
+TFLMRegistration Register_ADD() {
+  return tflite::micro::RegisterOp(sl::add::Init, sl::add::Prepare, sl::add::Eval);
 }
 
 }  // namespace tflite

@@ -37,7 +37,7 @@ extern uint16_t sli_zigbee_allow_tc_rejoins_using_well_known_key_timeout_sec;
 EmberKeyData cliPreconfiguredLinkKey = DUMMY_KEY;
 EmberKeyData cliNetworkKey           = DUMMY_KEY;
 
-uint32_t getOutgoingApsFrameCounter(void)
+static uint32_t getOutgoingApsFrameCounter(void)
 {
   sl_zb_sec_man_context_t context;
   sl_zb_sec_man_aps_key_metadata_t key_data;

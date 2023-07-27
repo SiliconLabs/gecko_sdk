@@ -87,7 +87,7 @@ sl_zigbee_event_t change_advertisement_event;
 uint32_t emberAfZigbeeDirectClusterServerCommandParse(sl_service_opcode_t opcode,
                                                       sl_service_function_context_t *context);
 
-void change_advertisement_event_handler(sl_zigbee_event_t *event)
+static void change_advertisement_event_handler(sl_zigbee_event_t *event)
 {
   sl_bt_legacy_advertiser_set_data(adv_handle[HANDLE_ZIGBEE_DIRECT],
                                    0,  //advertising packets

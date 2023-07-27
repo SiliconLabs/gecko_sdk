@@ -39,7 +39,7 @@
 #include "sl_component_catalog.h"
 #endif
 
-#if (defined(SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT) || defined(SL_CATALOG_ZIGBEE_AF_SUPPORT_PRESENT))
+#if (defined(SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT) || defined(SL_CATALOG_ZIGBEE_GREEN_POWER_ADAPTER_PRESENT))
 #include "af.h"
 #include "zap-command-structs.h"
 

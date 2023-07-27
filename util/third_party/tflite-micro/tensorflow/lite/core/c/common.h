@@ -38,10 +38,12 @@ limitations under the License.
 /// "third_party/tensorflow/lite/c/common.h".
 /// Only the TensorFlow Lite implementation itself should include this
 /// file directly.
+// IWYU pragma: private, include "third_party/tensorflow/lite/c/common.h"
 
 #ifndef TENSORFLOW_LITE_CORE_C_COMMON_H_
 #define TENSORFLOW_LITE_CORE_C_COMMON_H_
 
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -155,6 +157,10 @@ int TfLiteFloatArrayGetSizeInBytes(int size);
 // Create a array of a given `size` (uninitialized entries).
 // This returns a pointer, that you must free using TfLiteFloatArrayFree().
 TfLiteFloatArray* TfLiteFloatArrayCreate(int size);
+
+// Create a copy of an array passed as `src`.
+// You are expected to free memory with TfLiteFloatArrayFree.
+TfLiteFloatArray* TfLiteFloatArrayCopy(const TfLiteFloatArray* src);
 
 // Free memory of array `a`.
 void TfLiteFloatArrayFree(TfLiteFloatArray* a);
@@ -344,6 +350,8 @@ typedef union TfLitePtrUnion {
 //        as constant inputs for downstream ops (also in prepare).
 //  * kTfLiteCustom: Custom memory allocation provided by the user. See
 //        TfLiteCustomAllocation below.
+// * kTfLiteVariantObject: Allocation is an arbitrary type-erased C++ object.
+//        Allocation and deallocation are done through `new` and `delete`.
 typedef enum TfLiteAllocationType {
   kTfLiteMemNone = 0,
   kTfLiteMmapRo,
@@ -352,6 +360,7 @@ typedef enum TfLiteAllocationType {
   kTfLiteDynamic,
   kTfLitePersistentRo,
   kTfLiteCustom,
+  kTfLiteVariantObject,
 } TfLiteAllocationType;
 
 // The delegates should use zero or positive integers to represent handles.
@@ -468,8 +477,9 @@ typedef struct TfLiteTensor {
   // Optional. Encodes shapes with unknown dimensions with -1. This field is
   // only populated when unknown dimensions exist in a read-write tensor (i.e.
   // an input or output tensor). (e.g.  `dims` contains [1, 1, 1, 3] and
-  // `dims_signature` contains [1, -1, -1, 3]). Note that this field only
-  // exists when TF_LITE_STATIC_MEMORY is not defined.
+  // `dims_signature` contains [1, -1, -1, 3]).  If no unknown dimensions exist
+  // then `dims_signature` is either null, or set to an empty array.  Note that
+  // this field only exists when TF_LITE_STATIC_MEMORY is not defined.
   const TfLiteIntArray* dims_signature;
 } TfLiteTensor;
 
@@ -647,23 +657,26 @@ void TfLiteTensorReset(TfLiteType type, const char* name, TfLiteIntArray* dims,
 TfLiteStatus TfLiteTensorCopy(const TfLiteTensor* src, TfLiteTensor* dst);
 
 // Change the size of the memory block owned by `tensor` to `num_bytes`.
-// Tensors with allocation types other than kTfLiteDynamic will be ignored.
+// Tensors with allocation types other than `kTfLiteDynamic` will be ignored and
+// a kTfLiteOk will be returned.
 // `tensor`'s internal data buffer will be assigned a pointer
 // which can safely be passed to free or realloc if `num_bytes` is zero.
-// Behaviour is undefined if `tensor` is NULL.
 // If `preserve_data` is true, tensor data will be unchanged in the range from
-// the start of the region up to the minimum of the old and new sizes.
-void TfLiteTensorResizeMaybeCopy(size_t num_bytes, TfLiteTensor* tensor,
-                                 bool preserve_data);
+// the start of the region up to the minimum of the old and new sizes. In the
+// case of NULL tensor, or an error allocating new memory, returns
+// `kTfLiteError`.
+TfLiteStatus TfLiteTensorResizeMaybeCopy(size_t num_bytes, TfLiteTensor* tensor,
+                                         bool preserve_data);
 
 // Change the size of the memory block owned by `tensor` to `num_bytes`.
-// Tensors with allocation types other than kTfLiteDynamic will be ignored.
+// Tensors with allocation types other than kTfLiteDynamic will be ignored and
+// a kTfLiteOk will be returned.
 // `tensor`'s internal data buffer will be assigned a pointer
 // which can safely be passed to free or realloc if `num_bytes` is zero.
-// Behaviour is undefined if `tensor` is NULL.
 // Tensor data will be unchanged in the range from the start of the region up to
-// the minimum of the old and new sizes.
-void TfLiteTensorRealloc(size_t num_bytes, TfLiteTensor* tensor);
+// the minimum of the old and new sizes. In the case
+// of NULL tensor, or an error allocating new memory, returns `kTfLiteError`.
+TfLiteStatus TfLiteTensorRealloc(size_t num_bytes, TfLiteTensor* tensor);
 #endif  // TF_LITE_STATIC_MEMORY
 
 // WARNING: This is an experimental interface that is subject to change.
@@ -878,6 +891,27 @@ typedef struct TfLiteContext {
   TfLiteStatus (*GetModelMetadata)(const struct TfLiteContext* context,
                                    const char* name, const char** ptr,
                                    size_t* bytes);
+
+  // Retrieves the corresponding TfLiteContext of a subgraph that the given
+  // subgraph_index points to and switches to the delegate context for that
+  // subgraph. If an invalid subgraph index is given, returns kTfLiteError.
+  // NOTE: This function is expected to be paired with ReleaseSubgraphContext()
+  // once the delegate preparation is done and/or the delegate context functions
+  // are no longer needed.
+  //
+  // WARNING: This is an experimental interface that is subject to change.
+  TfLiteStatus (*AcquireSubgraphContext)(
+      struct TfLiteContext* context, int subgraph_index,
+      struct TfLiteContext** acquired_context);
+  // Releases the subgraph context by switching back to the TFLite kernel
+  // context for the subgraph that the given subgraph_index points to.
+  // NOTE: This function is expected to be used after AcquireSubgraphContext()
+  // once the delegate preparation is done and/or the delegate context functions
+  // are no longer needed.
+  //
+  // WARNING: This is an experimental interface that is subject to change.
+  TfLiteStatus (*ReleaseSubgraphContext)(struct TfLiteContext* context,
+                                         int subgraph_index);
 } TfLiteContext;
 
 // `TfLiteRegistrationExternal` is an external version of `TfLiteRegistration`
@@ -954,12 +988,53 @@ typedef struct TfLiteRegistration {
   // ops. We keep it inside of `TfLiteRegistration` and use it to route
   // callbacks properly.
   TfLiteRegistrationExternal* registration_external;
+
+  // Retrieves asynchronous kernel.
+  //
+  // If the `async_kernel` field is nullptr, it means the operation described by
+  // this TfLiteRegistration object does not support asynchronous execution.
+  // Otherwise, the function that the field points to should only be called for
+  // delegate kernel nodes, i.e. `node` should be a delegate kernel node created
+  // by applying a delegate.
+  // If the function returns nullptr, that means that the underlying delegate
+  // does not support asynchronous execution for this `node`.
+  struct TfLiteAsyncKernel* (*async_kernel)(TfLiteContext* context,
+                                            TfLiteNode* node);
 } TfLiteRegistration;
 
+/// \private
 // Old version of `TfLiteRegistration` to maintain binary backward
 // compatibility.
-// WARNING: This structure is deprecated / not an official part of the API.
-// It should be only used for binary backward compatibility.
+// The legacy registration type must be a POD struct type whose field types must
+// be a prefix of the field types in TfLiteRegistration, and offset of the first
+// field in TfLiteRegistration that is not present in the legacy registration
+// type must be greater than or equal to the size of the legacy registration
+// type.
+// WARNING: This structure is deprecated / not an official part of the
+// API. It should be only used for binary backward compatibility.
+typedef struct TfLiteRegistration_V2 {
+  void* (*init)(TfLiteContext* context, const char* buffer, size_t length);
+  void (*free)(TfLiteContext* context, void* buffer);
+  TfLiteStatus (*prepare)(TfLiteContext* context, TfLiteNode* node);
+  TfLiteStatus (*invoke)(TfLiteContext* context, TfLiteNode* node);
+  const char* (*profiling_string)(const TfLiteContext* context,
+                                  const TfLiteNode* node);
+  int32_t builtin_code;
+  const char* custom_name;
+  int version;
+  TfLiteRegistrationExternal* registration_external;
+} TfLiteRegistration_V2;
+
+/// \private
+// Old version of `TfLiteRegistration` to maintain binary backward
+// compatibility.
+// The legacy registration type must be a POD struct type whose field types must
+// be a prefix of the field types in TfLiteRegistration, and offset of the first
+// field in TfLiteRegistration that is not present in the legacy registration
+// type must be greater than or equal to the size of the legacy registration
+// type.
+// WARNING: This structure is deprecated / not an official part of the
+// API. It should be only used for binary backward compatibility.
 typedef struct TfLiteRegistration_V1 {
   void* (*init)(TfLiteContext* context, const char* buffer, size_t length);
   void (*free)(TfLiteContext* context, void* buffer);
@@ -1134,7 +1209,150 @@ TfLiteOpaqueDelegate* TfLiteOpaqueDelegateCreate(
 // 'delegate' is a null pointer.
 void TfLiteOpaqueDelegateDelete(TfLiteOpaqueDelegate* delegate);
 
+// Returns a pointer to the data associated with the provided opaque 'delegate'.
+//
+// A null pointer will be returned when:
+// - The 'delegate' is null.
+// - The 'data' field of the 'TfLiteOpaqueDelegateBuilder' used to construct the
+//   'delegate' was null.
+// - Or in case of any other error.
+// - The 'delegate' has been constructed via a 'TfLiteOpaqueDelegateBuilder',
+//   but the 'data' field of the 'TfLiteOpaqueDelegateBuilder' is null.
+//
+//  The data_ field of 'delegate' will be returned if the
+//  'opaque_delegate_builder' field is null.
+void* TfLiteOpaqueDelegateGetData(const TfLiteOpaqueDelegate* delegate);
+
 #ifdef __cplusplus
 }  // extern "C"
+
+#include <utility>
+
+// --- TFLITE VARIANT TENSORS ----
+// Programming languges usually define "variant" as a type that can hold an
+// unbounded set of types. See std::any
+// (https://en.cppreference.com/w/cpp/utility/any) for a related standard
+// library construct. In tensorflow, variant tensors have a data member which is
+// an Object that is destructible and copy constructible.
+//   Variant tensors are commonly used to represent non trivial data
+// semantics that don't fit into simple primitives, such as lists of tensors and
+// datasets. Additionally, they can facilitate containers for optimizing
+// memory movement of tensor data.
+//
+// The following set of classes define the variant tensor member for tflite.
+// They implement a type-erased container intended to be used behind the
+// `data.data : void*` member of `TfLiteTensor`s. Runtime functions interact
+// the variant member at the level of a `VariantData`, whereas kernels
+// operate with the full knowledge of the un-erased type. The `VariantData`
+// class provides abstract methods for destroying and copying `VariantData`.
+// Invoking these methods will dispatch to the erased type opaquely.
+//    The contents of any object of type derived from `AbstractVariant` can be
+// written to `TfLiteTensor::data::data : void*` from kernels. If the runtime
+// were to copy such a tensor through `TfLiteTensorCopy`, the destination data
+// member will contain the result of invoking the erased type's copy
+// constructor. Similar for the runtime releasing tensors from memory, the
+// erased type's destructor will be invoked. There are a few caveats to consider
+// to use these safely, which we discuss below.
+//
+// EXAMPLE: READING VARIANT TENSORS
+//   ```
+//   // retrieve input with `type == kTfLiteVariant`
+//   TfLiteTensor* input = ...
+//   // must first static cast to `VariantData`, more on this below.
+//   VariantData* vd_input = static_cast<VariantData*>(t->data.data);
+//   CustomType* typed_input =
+//   static_cast<CustomType*>(vd_input);
+//   // do custom work on `typed_input`...
+//   ```
+//
+// EXAMPLE: WRITING VARIANT TENSORS
+//   ```
+//   TfLiteTensor* output = ...
+//   // construct a new variant object behind the target tensor
+//   TfLiteVariantRealloc<DerivedType, DerivedArgs...>(output, args...);
+//   // again must static cast to `VariantData*` before writing to `void*`.
+//   output->data.data = static_cast<VariantData*>(typed_output);
+//   ```
+//
+// WHY STATIC CAST TO `VariantData*`
+//    The Standard defines a `reinterpret_cast` from a derived type to its
+// parents as undefined behavior when the parent is a non-standard layout.
+// https://en.cppreference.com/w/cpp/language/reinterpret_cast (see bullet 5).
+// Due to the `VariantData` having virtual members it is indeed non-standard
+// layout, and any type derived from `VariantData` fails to be
+// "transparently-replaceable". I.e. implicit cast from derived to base in this
+// case may adjust the pointer and by definition `reinterpret_cast` will not
+// the adjust the pointer.
+//    Thus, dereferencing a pointer of type `VariantData` which addresses
+// the first byte of an object of said derived type is UB unless it was first
+// implicitly or statically casted to a `VariantData`. Writing the object of
+// derived type directly to `void*` which is dereferenced as a `VariantData` is
+// then UB, and so the intermediate cast through `VariantData` must be enforced.
+//    A good example of this issue is ellucidate in the bottom code snippet
+// here: https://en.cppreference.com/w/cpp/utility/launder.
+class VariantData {
+ public:
+  // All variant objects must be able to be destroyed and copied.
+  virtual ~VariantData() = default;
+  // A "virtual copy-constructor". Often the destination tensor of a variant
+  // copy may have been previously allocated in a prior call to inference. We
+  // allow the copy to target the destinations buffer (`maybe_alloc`),
+  // for potential reuse and optimizations. `maybe_alloc` must be of the same
+  // underlying derived type. References to whatever object is at
+  // `maybe_alloc` may be invalidated.
+  virtual VariantData* CloneTo(VariantData* maybe_alloc) const = 0;
+};
+
+// Concrete implementations extend `AbstractVariantData` with CRPT.
+template <typename ErasedDerived>
+class AbstractVariantData : public VariantData {
+ public:
+  VariantData* CloneTo(VariantData* maybe_alloc) const override {
+    if (maybe_alloc != nullptr) {
+      // If the output is still allocated, then its object may still be
+      // in its life time and the destructor must be called before re-using the
+      // buffer.
+      //     This may actual have a non-negligle effect on perfomance if the
+      // destructor is complex. A future iteration may
+      // introduce copy or move asignment semantics, allowing for the
+      // underlying implementation to optimize for this case.
+      auto* derived = static_cast<ErasedDerived*>(maybe_alloc);
+      derived->~ErasedDerived();
+      return new (derived)
+          ErasedDerived(static_cast<ErasedDerived const&>(*this));
+    }
+    return new ErasedDerived(static_cast<ErasedDerived const&>(*this));
+  }
+
+ protected:
+  AbstractVariantData() = default;
+  AbstractVariantData(const AbstractVariantData&) = default;
+  AbstractVariantData(AbstractVariantData&&) = delete;
+};
+
+// Analogous to `TfLiteTensorRealloc` for allocation of tensors whose
+// data member points to an arbitrary C++ object. `VariantType` refers
+// to the erased type of said object and `VariantArgs` refers to
+// a list of argument types with which to construct a new `VariantType`.
+// `VariantArgs` must match a constructor of `VariantType`.
+template <class VariantType, class... VariantArgs>
+TfLiteStatus TfLiteTensorVariantRealloc(TfLiteTensor* t,
+                                        VariantArgs&&... args) {
+  if (t->type != kTfLiteVariant) return kTfLiteError;
+  VariantType* new_vd;
+  if (t->data.raw != nullptr) {
+    auto* target_vd = static_cast<VariantData*>(t->data.data);
+    target_vd->~VariantData();
+    // As above, we assume if `t` is already allocated then it was allocated
+    // with the same `VariantType` as templated.
+    new_vd = new (t->data.raw) VariantType(std::forward<VariantArgs>(args)...);
+  } else {
+    new_vd = new VariantType(std::forward<VariantArgs>(args)...);
+  }
+  t->data.data = static_cast<VariantData*>(new_vd);
+  t->allocation_type = kTfLiteVariantObject;
+  return kTfLiteOk;
+}
+
 #endif  // __cplusplus
 #endif  // TENSORFLOW_LITE_CORE_C_COMMON_H_

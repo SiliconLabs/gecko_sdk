@@ -6,7 +6,7 @@ description: >
   that ensures callbacks at main provisioning process steps. There are callbacks for
   initialization phase, for starting and successful finishing or for failed
   provisioning. A general callback for handling Provisioning Decorator events is
-  also available.
+  also available. This component is prepared for integration into SOC applications.
 
   This is a No-Code component.
 category: "Bluetooth Mesh|Utility"
@@ -39,3 +39,6 @@ template_contribution:
     priority: -8000
   - name: component_catalog
     value: "btmesh_provisioning_decorator"
+
+validation_helper:
+  - path: "../../script/validation/soc_ncp_compatibility.lua"

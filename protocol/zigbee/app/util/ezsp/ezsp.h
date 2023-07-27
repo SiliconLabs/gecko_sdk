@@ -122,7 +122,6 @@ uint8_t getSourceRouteOverhead(uint8_t messageLength);
 EmberStatus emberSetPreinstalledCbkeData283k1(EmberPublicKey283k1Data *caPublic,
                                               EmberCertificate283k1Data *myCert,
                                               EmberPrivateKey283k1Data *myKey);
-#define EZSP_MAXIMIZE_PACKET_BUFFER_COUNT 0xFF
 
 //----------------------------------------------------------------
 // ZLL methods

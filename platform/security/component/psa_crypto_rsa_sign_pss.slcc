@@ -1,0 +1,21 @@
+id: psa_crypto_rsa_sign_pss
+package: platform
+label: RSA-PSS
+description: >-
+  This component adds support for signatures using the RSA-PSS scheme as
+  specified in RSA Labratories' PKCS #1 specification v2.1.
+category: Platform|Security|PSA Crypto|Signatures
+quality: evaluation
+
+provides:
+  - name: psa_crypto_rsa_sign_pss
+  - name: psa_crypto_rsa_sign
+    allow_multiple: true
+
+requires:
+  - name: psa_crypto_rsa
+  - name: mbedtls_pkcs1_v21
+
+template_contribution:
+  - name: psa_crypto_config
+    value: PSA_WANT_ALG_RSA_PSS

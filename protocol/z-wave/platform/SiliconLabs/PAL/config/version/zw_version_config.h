@@ -10,15 +10,15 @@
 
 // <h> Application Version Configuration
 
-// <o> Application Major Version <1..255:1> <f.d>
+// <o APP_VERSION> Application Major Version <1..255:1> <f.d>
 // <i> Default: 1
 #define APP_VERSION  1
 
-// <o> Application Minor Version <1..255:1> <f.d>
+// <o APP_REVISION> Application Minor Version <1..255:1> <f.d>
 // <i> Default: 0
 #define APP_REVISION  0
 
-// <o> Application Patch Version <1..255:1> <f.d>
+// <o APP_PATCH> Application Patch Version <1..255:1> <f.d>
 // <i> Default: 0
 #define APP_PATCH  0
 

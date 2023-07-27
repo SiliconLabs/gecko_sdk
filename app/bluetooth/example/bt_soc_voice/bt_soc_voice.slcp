@@ -30,6 +30,7 @@ component:
   - id: rail_util_pti
   - id: app_log
   - id: app_assert
+  - id: silabs_core_sl_malloc
   - id: component_catalog
   - id: iostream_usart
     instance:

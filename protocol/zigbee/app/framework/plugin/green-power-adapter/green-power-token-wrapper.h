@@ -18,6 +18,7 @@
 #ifndef _SILABS_GREEN_POWER_TOKEN_WRAPPER_H_
 #define _SILABS_GREEN_POWER_TOKEN_WRAPPER_H_
 #include PLATFORM_HEADER
+#include "green-power-adapter-config.h"
 /***************************************************************************
 * Token stub functions
 * Customer should define these in their own application code

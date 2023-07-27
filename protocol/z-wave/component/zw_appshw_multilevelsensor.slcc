@@ -9,13 +9,17 @@ ui_hints:
 source:
   - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/src/MultilevelSensor/MultilevelSensor_hw.c"
   - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/src/MultilevelSensor/MultilevelSensor_interface_sensor.c"
+    unless: [brd2705a]
   - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/src/MultilevelSensor/MultilevelSensor_interface_icm20689.c"
     condition: [brd2603a]
+  - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/src/MultilevelSensor/MultilevelSensor_interface_nosensor.c"
+    condition: [brd2705a]
 provides:
   - name: zw_appshw_multilevelsensor
 requires:
   - name: zw_appshw
   - name: si70xx_driver
+    condition: [hardware_board_has_si70xx]
   - name: veml6035_driver
   - name: imu_driver
     condition: [brd2603a]

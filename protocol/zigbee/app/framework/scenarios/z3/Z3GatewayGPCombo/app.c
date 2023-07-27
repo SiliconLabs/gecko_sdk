@@ -505,3 +505,28 @@ void gpAppGpSendGpRaw(sl_cli_command_arg_t *arguments)
                         idx,
                         false);
 }
+
+#ifdef SL_CATALOG_ZIGBEE_AF_SUPPORT_PRESENT
+bool emberAfGetEndpointInfoCallback(int8u endpoint,
+                                    int8u* returnNetworkIndex,
+                                    EmberAfEndpointInfoStruct* returnEndpointInfo)
+{
+  // In case GP endpoint is located on the NCP, the host has no way
+  // to know what networkIndex and profileId that endpoint is configured.
+  // User has to manually provide that data.
+  if (endpoint == 242) {
+    *returnNetworkIndex = 0;
+    returnEndpointInfo->profileId = 0xA1E0;
+    return true;
+  }
+  return false;
+}
+#endif // SL_CATALOG_ZIGBEE_AF_SUPPORT_PRESENT
+
+void sl_zigbee_reset_zigbee_token(sl_cli_command_arg_t *arguments)
+{
+  bool exclude_outgoing_fc = sl_cli_get_argument_uint8(arguments, 0) != 0 ? true : false;
+  bool exclude_boot_counter = sl_cli_get_argument_uint8(arguments, 1) != 0 ? true : false;
+  sl_zigbee_token_factory_reset(exclude_outgoing_fc, exclude_boot_counter);
+  sl_zigbee_app_debug_println("Done");
+}

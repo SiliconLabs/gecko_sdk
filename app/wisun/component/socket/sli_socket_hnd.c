@@ -557,22 +557,6 @@ void sli_socket_hnd_set_sockaddr(sli_socket_hnd_t *handler, const void *sockaddr
   handler->socket_addr_len = socket_addr_len;           // length of complete structure size with domain
 }
 
-void sli_socket_hnd_wait_for_data_evt_finish(const sli_socket_hnd_t *hnd, const uint32_t timeout_ms)
-{
-  uint32_t t_cnt = 0UL;
-  uint32_t flags = 0UL;
-
-  while (t_cnt < timeout_ms) {
-    flags = osEventFlagsGet(hnd->state);
-    if ((flags & SOCKET_HND_STATUS_EVT_ERROR_MSK)
-        || !(flags & (1 << SOCKET_STATE_DATA_EVT_HND))) {
-      break;
-    }
-    t_cnt += 1UL;
-    osDelay(1UL);
-  }
-}
-
 void sli_socket_hnd_wait_for_conn_available_evt(const sli_socket_hnd_t *hnd)
 {
   (void) osEventFlagsWait(hnd->state, (1UL << SOCKET_STATE_CONNECTION_AVAILABLE), osFlagsWaitAny, osWaitForever);

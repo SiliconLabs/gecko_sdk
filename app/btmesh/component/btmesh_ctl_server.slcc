@@ -10,6 +10,7 @@ description: >
   on lighting server, and also provides callbacks on lighting related events.
 
   For more details about lighting, please see Lighting Server.
+  This component is prepared for integration into SOC applications.
 
   This is a Low-Code component. The following weak callbacks are available to
   implement the relevant light source handling:
@@ -61,3 +62,11 @@ template_contribution:
       count: 4
   - name: component_catalog
     value: "btmesh_ctl_server"
+  - name: "btmesh_app_node_reset"
+    value:
+      include: "sl_btmesh_ctl_server.h"
+      function: "sl_btmesh_ctl_server_on_node_reset"
+    priority: -9
+
+validation_helper:
+  - path: "../../script/validation/soc_ncp_compatibility.lua"

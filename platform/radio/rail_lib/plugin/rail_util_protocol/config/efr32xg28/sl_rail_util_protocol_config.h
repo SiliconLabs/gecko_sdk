@@ -247,6 +247,14 @@
 // </h>
 // </h>
 
+// <h> Sidewalk Settings
+// <h> Sidewalk: Configuration Options
+// <q SL_RAIL_UTIL_PROTOCOL_SIDEWALK_ENABLE> Enable/Disable Sidewalk
+// <i> Default: 0
+#define SL_RAIL_UTIL_PROTOCOL_SIDEWALK_ENABLE 0
+// </h>
+// </h>
+
 // <<< end of configuration section >>>
 
 #endif // SL_RAIL_UTIL_PROTOCOL_CONFIG_H

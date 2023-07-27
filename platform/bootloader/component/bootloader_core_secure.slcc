@@ -6,7 +6,7 @@ description: >
   core functions such as bootloader initialization and de-initialization, setting a reset reason, reset methods,
   initialization of the image parser, and others.
 category: Platform|Bootloader|TrustZone Secure|Core
-quality: evaluation
+quality: production
 source:
   - path: platform/bootloader/driver/btl_driver_util.c
   - path: platform/bootloader/core/btl_bootload.c

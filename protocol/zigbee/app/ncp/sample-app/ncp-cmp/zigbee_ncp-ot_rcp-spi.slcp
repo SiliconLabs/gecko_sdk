@@ -49,7 +49,13 @@ configuration:
   - name: EMBER_MAX_END_DEVICE_CHILDREN
     value: 32
   - name: EMBER_PACKET_BUFFER_COUNT
+    value: 75
+    condition:
+      - device_family_efr32mg13
+  - name: EMBER_PACKET_BUFFER_COUNT
     value: 255
+    unless:
+      - device_family_efr32mg13
   - name: EMBER_AF_PLUGIN_ZIGBEE_PRO_STACK_CHILD_TABLE_SIZE
     value: 32
   - name:  EMBER_KEY_TABLE_SIZE

@@ -159,14 +159,14 @@ void sli_zigbee_af_door_lock_server_open_or_close_command(sl_cli_command_arg_t *
 // plugin door-lock-server apply-rfid <rfid:?>
 void sli_zigbee_af_door_lock_server_apply_code_command(sl_cli_command_arg_t *arguments)
 {
+  uint8_t length;
   bool isPin = memcmp(arguments->argv[arguments->arg_ofs - 1], "apply-pin", strlen("apply-pin")) == 0;
 
-  uint8_t *code = (uint8_t*)sl_cli_get_argument_string(arguments, 0);
-  uint8_t codeLength = emberAfStringLength(code);
+  uint8_t *code = sl_zigbee_cli_get_argument_string_and_length(arguments, 0, &length);
 
   EmberAfStatus status
     = (isPin
-       ? emberAfPluginDoorLockServerApplyPin(code, codeLength)
-       : emberAfPluginDoorLockServerApplyRfid(code, codeLength));
+       ? emberAfPluginDoorLockServerApplyPin(code, length)
+       : emberAfPluginDoorLockServerApplyRfid(code, length));
   emberAfAppPrintln("Apply %s: 0x%X", (isPin ? "PIN" : "RFID"), status);
 }

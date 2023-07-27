@@ -1381,7 +1381,13 @@ RAIL_Status_t RAIL_IEEE802154_GetAddress(RAIL_Handle_t railHandle,
  *
  * @param[in] railHandle A handle of RAIL instance.
  * @param[in] ackData Pointer to ACK data to transmit
- * @param[in] ackDataLen Length of ACK data, in bytes
+ *   This may be NULL, in which case it's assumed the data has already
+ *   been emplaced into the ACK buffer and RAIL just needs to be told
+ *   how many bytes are there.  Use \ref RAIL_GetAutoAckFifo() to get
+ *   the address of RAIL's AutoACK buffer in RAM and its size.
+ * @param[in] ackDataLen Length of ACK data, in bytes.
+ *   If this exceeds \ref RAIL_AUTOACK_MAX_LENGTH the function
+ *   will return \ref RAIL_STATUS_INVALID_PARAMETER.
  * @return A status code indicating success of the function call.
  *
  * This function sets the AutoACK data to use in acknowledging the frame

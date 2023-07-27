@@ -32,6 +32,7 @@
 //                                   Includes
 // -----------------------------------------------------------------------------
 #include <string.h>
+#include "sl_component_catalog.h"
 #include "sl_cli.h"
 #include "sl_wisun_app_core.h"
 #include "sl_wisun_ping.h"
@@ -96,7 +97,11 @@ void app_measure(sl_cli_command_arg_t *arguments)
       printf("[IP address is not set]\n");
       return;
     }
+#if defined(SL_CATALOG_GUI_PRESENT)
     sl_wisun_nwm_measure(&remote_addr, meas_count, meas_packet_length, false);
+#else
+    sl_wisun_nwm_measure(&remote_addr, meas_count, meas_packet_length);
+#endif
   }
 }
 

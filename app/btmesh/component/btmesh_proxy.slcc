@@ -6,6 +6,7 @@ description: >
   Proxy nodes send their messages over GATT and ADV bearers (GATT and Advertisement packages),
   which is mandatory if the provisioner is a mobile phone. Proxy functionality can be enabled
   or disabled during runtime via node configuration.
+  This component is suitable for use in both NCP and SOC applications.
 
   This is a No-Code component.
 category: "Bluetooth Mesh|Features"

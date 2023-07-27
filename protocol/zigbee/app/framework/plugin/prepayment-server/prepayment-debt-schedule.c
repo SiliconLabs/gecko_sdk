@@ -24,7 +24,7 @@
 
 #include "prepayment-server-config.h"
 
-void debtScheduleSetNextCollectionTimeSec(uint8_t debtType);
+static void debtScheduleSetNextCollectionTimeSec(uint8_t debtType);
 
 // 3 Debt collections may be scheduled - #1, #2, and #3.
 #define DEBT_SCHEDULE_TABLE_SIZE    3
@@ -146,7 +146,7 @@ void emberAfPrepaymentServerSetDebtMode(uint8_t endpoint, uint32_t timeNowUtc)
 // This function calcuates the next time in the future when the particular debt should be collected.
 // It does this by adding the debt collection rate (per hour, per day, per month, etc) to the
 // last time debt was collected, until it finds a time in the future when debt should be collected.
-void debtScheduleSetNextCollectionTimeSec(uint8_t debtType)
+static void debtScheduleSetNextCollectionTimeSec(uint8_t debtType)
 {
   EmberAfTimeStruct afTime;
   uint8_t collectionFrequency;

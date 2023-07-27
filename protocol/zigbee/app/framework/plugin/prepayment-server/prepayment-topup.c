@@ -27,7 +27,7 @@
 //extern bool emberAfPluginPrepaymentServerConsumerTopUpCallback(uint8_t originatingDevice, uint8_t* topUpCode);
 
 bool consumerTopUpIsValid(uint8_t *topUpCode);
-void sli_zigbee_af_print_publish_top_up_payload(TopUpPayload *ptopUpPayload, uint8_t index);
+static void print_publish_top_up_payload(TopUpPayload *ptopUpPayload, uint8_t index);
 
 #define UTRN_HIGH_WORD_BASE_VALUE  0x669D529B
 #define UTRN_LOW_WORD_BASE_VALUE   0x714A0000
@@ -279,7 +279,7 @@ void emberAfPluginSendPublishTopUpLog(EmberNodeId nodeId, uint8_t srcEndpoint, u
   }
 }
 
-void sli_zigbee_af_print_publish_top_up_payload(TopUpPayload *ptopUpPayload, uint8_t index)
+static void print_publish_top_up_payload(TopUpPayload *ptopUpPayload, uint8_t index)
 {
   emberAfPrepaymentClusterPrintln("= Top Up Payload %d", index);
   emberAfPrepaymentClusterPrintln("  Code=%s", ptopUpPayload->topUpCode);
@@ -310,7 +310,7 @@ void emberAfPluginPrepaymentServerPublishTopUpLog(EmberNodeId nodeId, uint8_t sr
     (void) emberAfPutStringInResp(topUpPayload[i].topUpCode);
     (void) emberAfPutInt32uInResp(topUpPayload[i].topUpAmount);
     (void) emberAfPutInt32uInResp(topUpPayload[i].topUpTime);
-    sli_zigbee_af_print_publish_top_up_payload(&topUpPayload[i], i);
+    print_publish_top_up_payload(&topUpPayload[i], i);
   }
 
   emberAfGetCommandApsFrame()->options |= EMBER_APS_OPTION_SOURCE_EUI64;

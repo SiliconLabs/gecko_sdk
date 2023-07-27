@@ -87,7 +87,6 @@ void halCommonDelayMicroseconds(uint16_t us);
 void halCommonDelayMilliseconds(uint16_t ms);
 EmberStatus halCommonIdleForMilliseconds(uint32_t *duration);
 void halStackSymbolDelayAIsr(void);
-void halStackRadioPowerMainControl(bool powerUp);
 void halStackRadioPowerUpBoard(void);
 void halStackRadioPowerDownBoard(void);
 void halStackProcessBootCount(void);

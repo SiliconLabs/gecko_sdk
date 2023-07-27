@@ -11,6 +11,7 @@
 #include <ZAF_Common_interface.h>
 #include "ZAF_CC_Invoker.h"
 #include "zaf_config_api.h"
+#include "zaf_protocol_config.h"
 #include "cc_multi_channel_config_api.h"
 
 //#define DEBUGPRINT
@@ -27,6 +28,8 @@ static received_frame_status_t CC_MultiChannel_handler(
     cc_handler_input_t * input,
     cc_handler_output_t * output)
 {
+  const uint8_t END_POINT_MASK = MULTI_CHANNEL_CAPABILITY_GET_PROPERTIES1_END_POINT_MASK_V4;
+
   switch(input->frame->ZW_Common.cmd)
   {
     case MULTI_CHANNEL_END_POINT_GET_V4:
@@ -38,10 +41,11 @@ static received_frame_status_t CC_MultiChannel_handler(
 
       output->frame->ZW_MultiChannelEndPointReportV4Frame.cmdClass      = COMMAND_CLASS_MULTI_CHANNEL_V4;
       output->frame->ZW_MultiChannelEndPointReportV4Frame.cmd           = MULTI_CHANNEL_END_POINT_REPORT_V4;
-      output->frame->ZW_MultiChannelEndPointReportV4Frame.properties1 = (cc_multi_channel_are_endpoints_identical() == true) ? 0x40 : 0x00;
+      output->frame->ZW_MultiChannelEndPointReportV4Frame.properties1 = (cc_multi_channel_are_endpoints_identical() == true) ?
+        MULTI_CHANNEL_END_POINT_REPORT_PROPERTIES1_IDENTICAL_BIT_MASK_V4 : 0x00;
 
       // Fill out individual endpoints.
-      output->frame->ZW_MultiChannelEndPointReportV4Frame.properties2 = 0x7F & zaf_config_get_number_of_endpoints();
+      output->frame->ZW_MultiChannelEndPointReportV4Frame.properties2 = END_POINT_MASK & zaf_config_get_number_of_endpoints();
 
       // Hardcode to zero as aggregated endpoints are deprecated.
       output->frame->ZW_MultiChannelEndPointReportV4Frame.properties3 = 0;
@@ -57,18 +61,53 @@ static received_frame_status_t CC_MultiChannel_handler(
         return RECEIVED_FRAME_STATUS_FAIL;
       }
 
-      if ((0 == (input->frame->ZW_MultiChannelCapabilityGetV4Frame.properties1 & 0x7F)) ||
-          (zaf_config_get_number_of_endpoints() < (input->frame->ZW_MultiChannelCapabilityGetV4Frame.properties1 & 0x7F)))
+      uint8_t endpoint = input->frame->ZW_MultiChannelCapabilityGetV4Frame.properties1 & END_POINT_MASK;
+      if (endpoint == 0 || zaf_config_get_number_of_endpoints() < endpoint)
       {
         return RECEIVED_FRAME_STATUS_FAIL;
       }
 
       {
         ZW_MULTI_CHANNEL_CAPABILITY_GET_V4_FRAME * pCmdCap = (ZW_MULTI_CHANNEL_CAPABILITY_GET_V4_FRAME *)input->frame;
-        cc_multi_channel_config_t const * const p_config = cc_multi_channel_get_config_endpoint(pCmdCap->properties1 & 0x7F);
-        zaf_cc_list_t* pCmdClassList = GetCommandClassList((0 != ZAF_GetNodeID()), SECURITY_KEY_NONE, (pCmdCap->properties1 & 0x7F));
+        cc_multi_channel_config_t const * const p_config = cc_multi_channel_get_config_endpoint(pCmdCap->properties1 & END_POINT_MASK);
+        zaf_cc_list_t* pCmdClassList = GetCommandClassList((0 != ZAF_GetNodeID()), SECURITY_KEY_NONE, pCmdCap->properties1 & END_POINT_MASK);
 
-        if (IS_NULL(pCmdClassList) || IS_NULL(pCmdClassList->cc_list) || (0 == pCmdClassList->list_size) || IS_NULL(p_config) || (0 == (pCmdCap->properties1 & 0x7f)))
+        // Do not advertise certain Command Classes
+        {
+          zpal_radio_region_t region = zpal_radio_get_region();
+          uint8_t command_classes_to_skip = 0;
+          uint8_t* cc_list = pCmdClassList->cc_list;
+
+          /*
+           * List of Command classes to omit:
+           * - Transport Service CC must not be returned (CC:0055.02.00.21.004)
+           * - Security 0 CC is not applicable in Long Range networks
+           */
+          for (uint8_t i = 0; i < pCmdClassList->list_size; ++i) {
+            if (
+              cc_list[i] == COMMAND_CLASS_TRANSPORT_SERVICE_V2 ||
+              (cc_list[i] == COMMAND_CLASS_SECURITY && (
+                region == REGION_US_LR || region == REGION_US_LR_BACKUP ||
+                region == REGION_US_LR_END_DEVICE)
+              )
+            ) {
+              ++command_classes_to_skip;
+            }
+            /* 
+             * If a forbidden CC was found in the list, remove it by skipping it
+             * and overwriting every subsequent element in the list with the
+             * next available entry, shrinking the list by 1 element.
+             */
+            if (command_classes_to_skip > 0 && i + command_classes_to_skip < pCmdClassList->list_size) {
+              cc_list[i] = cc_list[i + command_classes_to_skip];
+            }
+          }
+          if (command_classes_to_skip > 0) {
+            pCmdClassList->list_size -= command_classes_to_skip;
+          }
+        }
+
+        if (IS_NULL(pCmdClassList) || IS_NULL(pCmdClassList->cc_list) || (0 == pCmdClassList->list_size) || IS_NULL(p_config))
         {
           return RECEIVED_FRAME_STATUS_FAIL;
         }
@@ -76,7 +115,7 @@ static received_frame_status_t CC_MultiChannel_handler(
         {
           output->frame->ZW_MultiChannelCapabilityReport4byteV4Frame.cmdClass    = COMMAND_CLASS_MULTI_CHANNEL_V4;
           output->frame->ZW_MultiChannelCapabilityReport4byteV4Frame.cmd         = MULTI_CHANNEL_CAPABILITY_REPORT_V4;
-          output->frame->ZW_MultiChannelCapabilityReport4byteV4Frame.properties1 = (pCmdCap->properties1 & 0x7f);
+          output->frame->ZW_MultiChannelCapabilityReport4byteV4Frame.properties1 = pCmdCap->properties1 & END_POINT_MASK;
           output->frame->ZW_MultiChannelCapabilityReport4byteV4Frame.genericDeviceClass  = p_config->generic_type;
           output->frame->ZW_MultiChannelCapabilityReport4byteV4Frame.specificDeviceClass = p_config->specific_type;
           memcpy( &(output->frame->ZW_MultiChannelCapabilityReport4byteV4Frame.commandClass1), pCmdClassList->cc_list, pCmdClassList->list_size);
@@ -105,20 +144,19 @@ static received_frame_status_t CC_MultiChannel_handler(
 
         uint8_t * p_frame = (uint8_t *)&output->frame->ZW_MultiChannelEndPointFindReport1byteV4Frame.variantgroup1;
 
-        uint8_t i = 0;
         uint8_t matched_endpoints = 0;
         uint8_t number_of_endpoints = zaf_config_get_number_of_endpoints();
-        for(i = 0; i < number_of_endpoints; i++)
+        for(uint8_t endpoint = 1; endpoint <= number_of_endpoints; endpoint++)
         {
-          cc_multi_channel_config_t const * const p_entry =  cc_multi_channel_get_config_endpoint(i + 1);
+          cc_multi_channel_config_t const * const p_entry =  cc_multi_channel_get_config_endpoint(endpoint);
           if( ((0xFF == pcmdEpfind->genericDeviceClass) && (0xFF == pcmdEpfind->specificDeviceClass) ) ||
               ((pcmdEpfind->genericDeviceClass == p_entry->generic_type) &&
                ((pcmdEpfind->specificDeviceClass == p_entry->specific_type) ||
                (pcmdEpfind->specificDeviceClass == 0xFF)))
             )
           {
-            *(p_frame + i) = i + 1; // Add the current endpoint to the frame.
-            matched_endpoints++;
+            // Increase match counter and add the current endpoint to the frame.
+            *(p_frame + matched_endpoints++) = endpoint;
           }
         }
         /*
@@ -129,11 +167,11 @@ static received_frame_status_t CC_MultiChannel_handler(
          */
         if (0 == matched_endpoints)
         {
-          i = 1;
+          matched_endpoints = 1;
           *p_frame = 0;
         }
 
-        output->length = sizeof(ZW_MULTI_CHANNEL_END_POINT_FIND_REPORT_1BYTE_V4_FRAME) + i - 1;
+        output->length = sizeof(ZW_MULTI_CHANNEL_END_POINT_FIND_REPORT_1BYTE_V4_FRAME) + matched_endpoints - 1;
       }
       return RECEIVED_FRAME_STATUS_SUCCESS;
       break;
@@ -151,7 +189,7 @@ static received_frame_status_t CC_MultiChannel_handler(
         uint8_t aggregated_endpoint = input->frame->ZW_MultiChannelAggregatedMembersGetV4Frame.properties1;
         output->frame->ZW_MultiChannelAggregatedMembersReport1byteV4Frame.cmdClass = COMMAND_CLASS_MULTI_CHANNEL_V4;
         output->frame->ZW_MultiChannelAggregatedMembersReport1byteV4Frame.cmd = MULTI_CHANNEL_AGGREGATED_MEMBERS_REPORT_V4;
-        output->frame->ZW_MultiChannelAggregatedMembersReport1byteV4Frame.properties1 = 0x7F & aggregated_endpoint;
+        output->frame->ZW_MultiChannelAggregatedMembersReport1byteV4Frame.properties1 = END_POINT_MASK & aggregated_endpoint;
 
         // Hardcode number of bit masks to zero as aggregated endpoints are deprecated.
         output->frame->ZW_MultiChannelAggregatedMembersReport1byteV4Frame.numberOfBitMasks = 0;
@@ -179,10 +217,10 @@ static void CmdClassMultiChannelEncapsulateCmd(
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wconversion"
   // Setup source node endpoint
-  input->rx_options->sourceNode.endpoint = pCmd->properties1 & 0x7F;
+  input->rx_options->sourceNode.endpoint = pCmd->properties1 & MULTI_CHANNEL_CMD_ENCAP_PROPERTIES1_SOURCE_END_POINT_MASK_V4;
 #pragma GCC diagnostic pop
 
-  bool treat_as_mask = (pCmd->properties2 & 0x80);
+  bool treat_as_mask = (pCmd->properties2 & MULTI_CHANNEL_CMD_ENCAP_PROPERTIES2_BIT_ADDRESS_BIT_MASK_V4);
 
   if (true == treat_as_mask)
   {
@@ -196,7 +234,7 @@ static void CmdClassMultiChannelEncapsulateCmd(
   // CC:0060.03.0D.11.00E: Bit zero represents endpoint 1, bit one represents endpoint 2, etc.
   uint8_t bit_number = 0;
 
-  uint8_t mask = (pCmd->properties2 & 0x7F);
+  uint8_t mask = (pCmd->properties2 & MULTI_CHANNEL_CMD_ENCAP_PROPERTIES2_DESTINATION_END_POINT_MASK_V4);
 
   /*
    * Always run once as we expect to process at least one endpoint either from a decimal value or

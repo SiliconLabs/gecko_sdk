@@ -9,8 +9,8 @@
  * @copyright 2020 Silicon Laboratories Inc.
  */
 
-#ifndef _CC_MULTILEVEL_SWITCH_H_
-#define _CC_MULTILEVEL_SWITCH_H_
+#ifndef _CC_MULTILEVEL_SWITCH_CONTROL_H_
+#define _CC_MULTILEVEL_SWITCH_CONTROL_H_
 
 /****************************************************************************/
 /*                              INCLUDE FILES                               */

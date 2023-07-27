@@ -36,6 +36,8 @@ define:
 configuration:
   - name: OS_CFG_TASK_Q_EN
     value: 1
+  - name: SL_HEAP_SIZE
+    value: 10240
 readme:
   - path: readme.md
 tag:

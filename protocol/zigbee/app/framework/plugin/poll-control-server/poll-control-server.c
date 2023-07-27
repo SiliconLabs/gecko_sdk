@@ -61,8 +61,7 @@
 #if (EMBER_AF_PLUGIN_POLL_CONTROL_SERVER_ACCEPT_SET_SHORT_POLL_INTERVAL_COMMAND == 1)
 #define ACCEPT_SET_SHORT_POLL_INTERVAL_COMMAND
 #endif
-sl_zigbee_event_t emberAfPluginPollControlServerCheckInEndpointEvents[FIXED_ENDPOINT_COUNT];
-#define endpointEvent emberAfPluginPollControlServerCheckInEndpointEvents
+static sl_zigbee_event_t checkInEndpointEvents[FIXED_ENDPOINT_COUNT];
 typedef struct {
   uint8_t bindingIndex;
   uint16_t fastPollTimeoutQs;
@@ -147,12 +146,12 @@ static void scheduleCheckIn(uint8_t endpoint)
                                (uint8_t *)&checkInIntervalQs,
                                sizeof(checkInIntervalQs));
   if (status == EMBER_ZCL_STATUS_SUCCESS && checkInIntervalQs != 0) {
-    sl_zigbee_endpoint_event_set_delay_ms(endpointEvent,
+    sl_zigbee_endpoint_event_set_delay_ms(checkInEndpointEvents,
                                           endpoint,
                                           (checkInIntervalQs
                                            * MILLISECOND_TICKS_PER_QUARTERSECOND));
   } else {
-    sl_zigbee_endpoint_event_set_inactive(endpointEvent,
+    sl_zigbee_endpoint_event_set_inactive(checkInEndpointEvents,
                                           endpoint);
   }
 }
@@ -505,7 +504,7 @@ void emberAfPollControlClusterServerTickCallback(uint8_t endpoint)
   deactivateServerTick(endpoint);
 }
 
-void emberAfPluginPollControlServerCheckInEndpointEventHandler(uint8_t endpoint)
+static void checkInEndpointEventHandler(uint8_t endpoint)
 {
   uint8_t bindingIndex, clientIndex;
 
@@ -568,8 +567,8 @@ void sli_zigbee_af_poll_control_server_init_callback(uint8_t init_level)
   uint8_t i;
 
   for (i = 0; i < FIXED_ENDPOINT_COUNT; i++) {
-    sl_zigbee_endpoint_event_init(&emberAfPluginPollControlServerCheckInEndpointEvents[i],
-                                  emberAfPluginPollControlServerCheckInEndpointEventHandler,
+    sl_zigbee_endpoint_event_init(&checkInEndpointEvents[i],
+                                  checkInEndpointEventHandler,
                                   endpoint_array[i]);
   }
 }

@@ -37,6 +37,7 @@
 
 #include <openthread/platform/radio.h>
 
+#include "radio_counters.h"
 #include "rail.h"
 #include "rail_config.h"
 #include "rail_ieee802154.h"
@@ -52,34 +53,6 @@
 #define RADIO_TIMING_CSMA_OVERHEAD_US 500
 #define RADIO_TIMING_DEFAULT_BYTETIME_US 32   // only used if RAIL_GetBitRate returns 0
 #define RADIO_TIMING_DEFAULT_SYMBOLTIME_US 16 // only used if RAIL_GetSymbolRate returns 0
-
-typedef struct efr32RadioCounters
-{
-    uint32_t mRailPlatTxTriggered;
-    uint32_t mRailPlatRadioReceiveDoneCbCount;
-    uint32_t mRailPlatRadioReceiveProcessedCount;
-    uint32_t mRailPlatRadioEnergyScanDoneCbCount;
-    uint32_t mRailPlatRadioTxDoneCbCount;
-    uint32_t mRailTxStarted;
-    uint32_t mRailTxStartFailed;
-    uint32_t mRailEventAcksReceived;
-    uint32_t mRailEventConfigScheduled;
-    uint32_t mRailEventConfigUnScheduled;
-    uint32_t mRailEventPacketSent;
-    uint32_t mRailEventChannelBusy;
-    uint32_t mRailEventEnergyScanCompleted;
-    uint32_t mRailEventCalNeeded;
-    uint32_t mRailEventPacketReceived;
-    uint32_t mRailEventNoAck;
-    uint32_t mRailEventTxAbort;
-    uint32_t mRailEventSchedulerStatusError;
-    uint32_t mRailEventsSchedulerStatusTransmitBusy;
-    uint32_t mRailEventsSchedulerStatusLastStatus;
-    uint32_t mRailEventsEnhAckTxFailed;
-    uint32_t mRailEventsScheduledTxTriggeredCount;
-    uint32_t mRailEventsScheduledTxStartedCount;
-} efr32RadioCounters;
-
 
 typedef struct efr32CommonConfig
 {

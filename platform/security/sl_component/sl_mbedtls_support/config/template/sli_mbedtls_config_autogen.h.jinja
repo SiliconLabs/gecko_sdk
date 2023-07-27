@@ -4,23 +4,27 @@
 #define SLI_MBEDTLS_CONFIG_AUTOGEN_H
 
 {% if mbedtls_mpi_max is defined %}
-#define MBEDTLS_MPI_MAX_SIZE    {{mbedtls_mpi_max|max}}
-{% endif  %}
+#define MBEDTLS_MPI_MAX_SIZE  {{mbedtls_mpi_max|max}}
+{% endif %}
 
 {% for c in mbedtls_config -%}
 #define {{c}}
 {% endfor %}
 
+{% if mbedtls_config_trustzone_nonsecure is defined %}
 #if defined(SL_TRUSTZONE_NONSECURE)
 {% for c in mbedtls_config_trustzone_nonsecure -%}
-#define {{c}}
+  #define {{c}}
 {% endfor %}
-#endif // #if defined(SL_TRUSTZONE_NONSECURE)
+#endif // SL_TRUSTZONE_NONSECURE
+{% endif %}
 
+{% if mbedtls_config_trustzone_secure is defined %}
 #if defined(SL_TRUSTZONE_SECURE)
 {% for c in mbedtls_config_trustzone_secure -%}
-#define {{c}}
+  #define {{c}}
 {% endfor %}
-#endif // #if defined(SL_TRUSTZONE_SECURE)
+#endif // SL_TRUSTZONE_SECURE
+{% endif %}
 
 #endif // SLI_MBEDTLS_CONFIG_AUTOGEN_H

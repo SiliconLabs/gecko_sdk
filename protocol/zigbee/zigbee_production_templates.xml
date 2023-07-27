@@ -15,7 +15,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|Host Project\ Difficulty|Advanced Wireless\ Technology|Zigbee"/>
   </descriptors>
-  <descriptors name="DynamicMultiprotocolLight" label="Zigbee - SoC DynamicMultiprotocolLight" description="This is a sample application demonstrating a light application using dynamic multiprotocol (Zigbee + Bluetooth LE) and NVM3 for persistent storage.&#xA;">
+  <descriptors name="DynamicMultiprotocolLight" label="Zigbee - SoC DynamicMultiprotocolLight" description="This is a sample application demonstrating a light application using dynamic multiprotocol (Zigbee + Bluetooth LE) and NVM3 for persistent storage. We recommend the use of Micrium Kernel for this sample application.&#xA;">
     <properties key="namespace" value="template.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="protocol.zigbee.app.framework.scenarios.multiprotocol.DynamicMultiprotocolLight.DynamicMultiprotocolLight.slcp"/>
@@ -30,7 +30,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Zigbee"/>
   </descriptors>
-  <descriptors name="DynamicMultiprotocolLightMinimal" label="Zigbee - SoC DynamicMultiprotocolLightMinimal" description="This is a sample application demonstrating a light application using dynamic multiprotocol (Zigbee + Bluetooth LE) and NVM3 for persistent storage. This application does not use LCD, LED or buttons.&#xA;">
+  <descriptors name="DynamicMultiprotocolLightMinimal" label="Zigbee - SoC DynamicMultiprotocolLightMinimal" description="This is a sample application demonstrating a light application using dynamic multiprotocol (Zigbee + Bluetooth LE) and NVM3 for persistent storage. This application does not use LCD, LED or buttons. We recommend the use of Micrium Kernel for this sample application.&#xA;">
     <properties key="namespace" value="template.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="protocol.zigbee.app.framework.scenarios.multiprotocol.DynamicMultiprotocolLight.DynamicMultiprotocolLightMinimal.slcp"/>
@@ -45,7 +45,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Zigbee"/>
   </descriptors>
-  <descriptors name="DynamicMultiprotocolLightSed" label="Zigbee - SoC DynamicMultiprotocolLightSed" description="This is a sample application demonstrating a sleepy light application using dynamic multiprotocol (Zigbee + Bluetooth LE) and NVM3 for persistent storage.&#xA;">
+  <descriptors name="DynamicMultiprotocolLightSed" label="Zigbee - SoC DynamicMultiprotocolLightSed" description="This is a sample application demonstrating a sleepy light application using dynamic multiprotocol (Zigbee + Bluetooth LE) and NVM3 for persistent storage. We recommend the use of Micrium Kernel for this sample application.&#xA;">
     <properties key="namespace" value="template.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="protocol.zigbee.app.framework.scenarios.multiprotocol.DynamicMultiprotocolLightSed.DynamicMultiprotocolLightSed.slcp"/>
@@ -60,7 +60,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Zigbee"/>
   </descriptors>
-  <descriptors name="DynamicMultiprotocolLightSedMinimal" label="Zigbee - SoC DynamicMultiprotocolLightSedMinimal" description="This is a sample application demonstrating a sleepy light application using dynamic multiprotocol (Zigbee + Bluetooth LE) and NVM3 for persistent storage. This application does not use LCD, LEDs or buttons.&#xA;">
+  <descriptors name="DynamicMultiprotocolLightSedMinimal" label="Zigbee - SoC DynamicMultiprotocolLightSedMinimal" description="This is a sample application demonstrating a sleepy light application using dynamic multiprotocol (Zigbee + Bluetooth LE) and NVM3 for persistent storage. This application does not use LCD, LEDs or buttons. We recommend the use of Micrium Kernel for this sample application.&#xA;">
     <properties key="namespace" value="template.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="protocol.zigbee.app.framework.scenarios.multiprotocol.DynamicMultiprotocolLightSed.DynamicMultiprotocolLightSedMinimal.slcp"/>

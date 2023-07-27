@@ -33,8 +33,7 @@
                14,
                15
             ],
-            "angleFiltering":true,
-            "angleFilteringWeight":0.6,
+            "angleFiltering":false,
             "angleCorrectionTimeout":5,
             "angleCorrectionDelay":3,
             "cteMode":"SILABS",
@@ -110,8 +109,7 @@
                14,
                15
             ],
-            "angleFiltering":true,
-            "angleFilteringWeight":0.6,
+            "angleFiltering":false,
             "angleCorrectionTimeout":5,
             "angleCorrectionDelay":3,
             "cteMode":"SILABS",

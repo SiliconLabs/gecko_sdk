@@ -19,11 +19,11 @@
 #include "zigbee_host_callback_dispatcher.h"
 
 {# NCP INIT #}
-void sli_zb_af_ncp_init(bool memoryAllocation)
+void sli_zb_af_ncp_init(void)
 {
 {%- for cb in zigbee_af_callback %}
 {%- if cb['callback_type'] == "ncp_init" %}
-  {{ cb['function_name'] }}(memoryAllocation);
+  {{ cb['function_name'] }}();
 {%- endif %}
 {%- endfor %}
 }

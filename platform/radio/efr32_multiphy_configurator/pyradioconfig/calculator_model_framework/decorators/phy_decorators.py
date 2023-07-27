@@ -65,6 +65,7 @@ def concurrent_phy(phy_name,reg_field_list,override_dict=None): #decorator maker
             model.vars.alt_wisun_mode_switch_phr.value_forced = concurrent_model.vars.wisun_mode_switch_phr.value
             model.vars.alt_wisun_phy_mode_id.value_forced = concurrent_model.vars.wisun_phy_mode_id.value
             model.vars.alt_stack_info.value_forced = concurrent_model.vars.stack_info.value
+            model.vars.alt_rssi_adjust_db.value_forced = concurrent_model.vars.rssi_adjust_db.value
 
             #Finally loop go through the Profile Outputs for the concurrent PHY and copy them over
             for reg_field in reg_field_list:

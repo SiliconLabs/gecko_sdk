@@ -1,0 +1,60 @@
+id: esl_tag_pd_epd_driver
+package: Bluetooth
+label: ESL Tag e-paper display driver for Pervasive Display
+description: >
+  This component is an example of a low-level driver implementation for the
+  e-paper displays offered by Pervasive Display company. It is intended to be
+  used in conjunction with the ESL Tag Display component. Supports the
+  small-sized monochrome and tricolor EPDs in the vendor's product portfolio.
+
+  After adding this component to a project, it is recommended to replace the ESL
+  Tag RAM Image component with ESL Tag NVM Image due to the possible increased
+  image storage requirements, especially for larger displays with multiple
+  colours. Also consider increasing the number of ESL Tag Display instances and
+  Image objects if necessary.
+category: Bluetooth|Application|Miscellaneous
+quality: experimental
+root_path: app/bluetooth/common/esl_tag_pd_epd_driver
+config_file:
+  - path: config/esl_tag_pd_epd_driver_config.h
+    file_id: esl_tag_pd_epd_driver_config
+  - path: config/sl_spidrv_exp_epd_config.h
+    override:
+      component: spidrv
+      file_id: spidrv_config
+      instance: exp_epd
+    condition:
+      - brd4182a
+
+include:
+  - path: ./inc
+    file_list:
+      - path: esl_tag_pd_epd_interface.h
+      - path: esl_tag_pd_epd_driver.h
+
+source:
+  - path: src/esl_tag_pd_epd_interface.c
+  - path: src/esl_tag_pd_epd_driver.c
+
+provides:
+  - name: esl_tag_pd_epd_driver
+
+requires:
+  - name: tempdrv
+  - name: spidrv
+  - name: esl_tag_display
+  - name: udelay
+
+recommends:
+  - id: spidrv
+    instance:
+      - exp_epd
+
+template_contribution:
+  - name: bluetooth_on_event
+    value:
+      include: esl_tag_pd_epd_driver.h
+      function: esl_pd_epd_bt_on_event
+    priority: -8500
+  - name: component_catalog
+    value: esl_tag_pd_epd_driver

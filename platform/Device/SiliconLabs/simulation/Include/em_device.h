@@ -50,12 +50,16 @@
 #define __CLZ           count_leading_zeros
 #define __RBIT          reverse_bits_in_word
 #define __USED          __attribute__((used))
+#ifndef __NOP
 #define __NOP()         asm("NOP")
+#endif
 #define __isb()
 #define __ISB()
 #define __DMB()
 #define __DSB()
+#ifndef __BKPT
 #define __BKPT(value)
+#endif
 
 typedef enum IRQn{
 /******  Cortex-M3 Processor Exceptions Numbers ***************************************************/

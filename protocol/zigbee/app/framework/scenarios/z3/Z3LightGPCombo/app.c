@@ -94,7 +94,7 @@ extern bool sli_zigbee_af_green_power_server_gp_sink_commissioning_mode_command_
                                                                                         uint8_t sinkEndpoint);
 
 // Enter or exit sink commissioning mode
-void sink_commissioning_mode_event_handler(sl_zigbee_event_t *event)
+static void sink_commissioning_mode_event_handler(sl_zigbee_event_t *event)
 {
   uint8_t options = EMBER_AF_GP_SINK_COMMISSIONING_MODE_OPTIONS_INVOLVE_PROXIES \
                     | ((enterComm) ? EMBER_AF_GP_SINK_COMMISSIONING_MODE_OPTIONS_ACTION : 0);
@@ -560,20 +560,20 @@ static EmberGpTxQueueEntry* get_gp_stub_tx_queue(EmberGpAddress* addr)
 {
   // Steal the GP Queue to send it through the additional RAIL handle
   // Check if RAIL 2 handle available and there is anything in GP Stub queue
-  EmberGpTxQueueEntry emGpTxQueue;
-  MEMCOPY(&emGpTxQueue.addr, addr, sizeof(EmberGpAddress));
+  EmberGpTxQueueEntry sli_zigbee_gp_tx_queue;
+  MEMCOPY(&sli_zigbee_gp_tx_queue.addr, addr, sizeof(EmberGpAddress));
   uint8_t data[128];
   uint16_t dataLength;
   if (emberAfPluginMultirailDemoGetHandle()
-      && emberGpGetTxQueueEntryFromQueue(&emGpTxQueue,
+      && emberGpGetTxQueueEntryFromQueue(&sli_zigbee_gp_tx_queue,
                                          data,
                                          &dataLength,
                                          128) != EMBER_NULL_MESSAGE_BUFFER) {
-    // Allocate a buffer and prepare a outgoing MAC header using gpd address in the emGpTxQueue
-    EmberMessageBuffer header = sli_zigbee_gpdf_make_header(true, NULL, &(emGpTxQueue.addr));
+    // Allocate a buffer and prepare a outgoing MAC header using gpd address in the sli_zigbee_gp_tx_queue
+    EmberMessageBuffer header = sli_zigbee_gpdf_make_header(true, NULL, &(sli_zigbee_gp_tx_queue.addr));
     // Add the command Id from the queue to the buffer
     uint8_t len = emberMessageBufferLength(header) + 1;
-    emberAppendToLinkedBuffers(header, &(emGpTxQueue.gpdCommandId), 1);
+    emberAppendToLinkedBuffers(header, &(sli_zigbee_gp_tx_queue.gpdCommandId), 1);
     // Copy Command Payload from the queue to the buffer and update the length
     emberSetLinkedBuffersLength(header,
                                 emberMessageBufferLength(header)
@@ -584,7 +584,7 @@ static EmberGpTxQueueEntry* get_gp_stub_tx_queue(EmberGpAddress* addr)
                              len,
                              dataLength);
     // Clear the Stub queue because everything is serialised in header
-    emberGpRemoveFromTxQueue(&emGpTxQueue);
+    emberGpRemoveFromTxQueue(&sli_zigbee_gp_tx_queue);
 
     // Prepare a RAIL frame to be transported using the additional handle
     uint8_t outPktLength = emberMessageBufferLength(header);

@@ -13,7 +13,7 @@ provides:
 requires:
   - name: emlib_cmu
   - name: emlib_eusart
-  - name: emlib_gpio
+  - name: lld_gpio
   - name: udelay
   - name: device
   - name: device_has_eusart

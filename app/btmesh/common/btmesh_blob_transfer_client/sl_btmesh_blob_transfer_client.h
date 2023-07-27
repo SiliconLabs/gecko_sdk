@@ -3,7 +3,7 @@
  * @brief BT Mesh BLOB Transfer Client
  *******************************************************************************
  * # License
- * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -371,8 +371,7 @@ sl_status_t sl_btmesh_blob_transfer_client_on_resumed(uint16_t elem_index);
 /***************************************************************************//**
  * Handle BLOB Transfer Client events.
  *
- * This function is called automatically by Universal Configurator after
- * enabling the component.
+ * This function is called automatically after enabling the component.
  *
  * @param[in] evt  Pointer to incoming event.
  *

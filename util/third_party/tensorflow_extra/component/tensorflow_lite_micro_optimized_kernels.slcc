@@ -23,6 +23,7 @@ provides:
   - name: tensorflow_kernel_optimized_pooling
   - name: tensorflow_kernel_optimized_softmax
   - name: tensorflow_kernel_optimized_svdf
+  - name: tensorflow_kernel_optimized_unidirectional_sequence_lstm
 requires:
   - name: tensorflow_dependency_cmsis_nn
   - name: tensorflow_lite_micro_reference_kernels
@@ -48,5 +49,6 @@ source:
       - tensorflow_kernel_accelerated_pooling
   - path: softmax.cc
   - path: svdf.cc
+  - path: unidirectional_sequence_lstm.cc
 define:
   - name: "CMSIS_NN"

@@ -34,11 +34,14 @@
 #ifndef OTBR_REST_RESOURCE_HPP_
 #define OTBR_REST_RESOURCE_HPP_
 
+#include "openthread-br/config.h"
+
 #include <unordered_map>
 
 #include <openthread/border_agent.h>
 #include <openthread/border_router.h>
 
+#include "common/api_strings.hpp"
 #include "ncp/ncp_openthread.hpp"
 #include "openthread/dataset.h"
 #include "openthread/dataset_ftd.h"
@@ -137,6 +140,7 @@ private:
     void GetDataBaId(Response &aResponse) const;
     void GetDataExtendedAddr(Response &aResponse) const;
     void GetDataState(Response &aResponse) const;
+    void SetDataState(const Request &aRequest, Response &aResponse) const;
     void GetDataNetworkName(Response &aResponse) const;
     void GetDataLeaderData(Response &aResponse) const;
     void GetDataNumOfRoute(Response &aResponse) const;

@@ -10,11 +10,11 @@
 
 // <h> Command Class Multilevel Sensor Configuration
 
-// <o> Autoreport period in minutes <1..3600:1> <f.d>
+// <o MULTILEVEL_SENSOR_DEFAULT_AUTOREPORT_PEDIOD_MIN> Autoreport period in minutes <1..3600:1> <f.d>
 // <i> Default: 30
 #define MULTILEVEL_SENSOR_DEFAULT_AUTOREPORT_PEDIOD_MIN  30
 
-// <o> Maximum number of sensors <1..20:1> <f.d>
+// <o MULTILEVEL_SENSOR_REGISTERED_SENSOR_NUMBER_LIMIT> Maximum number of sensors <1..20:1> <f.d>
 // <i> Default: 3
 #define MULTILEVEL_SENSOR_REGISTERED_SENSOR_NUMBER_LIMIT  3
 

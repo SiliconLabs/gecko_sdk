@@ -18,7 +18,7 @@
 #define MY_BATTERY_SPEC_LEVEL_FULL         3000  // My battery's 100% level (millivolts)
 #define MY_BATTERY_SPEC_LEVEL_EMPTY        2400  // My battery's 0% level (millivolts)
 
-#if defined(RADIO_BOARD_EFR32ZG13P32) || defined(RADIO_BOARD_EFR32ZG13S) || defined(RADIO_BOARD_BRD2603A)
+#if defined(RADIO_BOARD_EFR32ZG13P32) || defined(RADIO_BOARD_EFR32ZG13S) || defined(THUNDERBOARD)
   // The EFR32ZG13P32 device has reduced number of GPIO pins and hence less
   // button inputs available for the application to use. Therefore alternative
   // button mapping is required
@@ -65,7 +65,9 @@
                                                   // (i.e. it will generally not work with SensorPIR)
 
 /* Ensure we did not allocate the same physical button to more than one function */
-#if !defined(RADIO_BOARD_EFR32ZG13P32) && !defined(RADIO_BOARD_EFR32ZG13S) && !defined(RADIO_BOARD_BRD2603A) // Skipped for EFR32ZG13P32 where the shortage of GPIOs means we need to assign dual function to buttons
+#if !defined(RADIO_BOARD_EFR32ZG13P32) && !defined(RADIO_BOARD_EFR32ZG13S) \
+  && !defined(RADIO_BOARD_BRD2603A) && !defined(RADIO_BOARD_BRD2705A)
+// Skipped for EFR32ZG13P32 where the shortage of GPIOs means we need to assign dual function to buttons
 STATIC_ASSERT((APP_BUTTON_LEARN_RESET != PIR_EVENT_BTN) &&
               (APP_BUTTON_LEARN_RESET != BATTERY_REPORT_BTN) &&
               (PIR_EVENT_BTN != BATTERY_REPORT_BTN),

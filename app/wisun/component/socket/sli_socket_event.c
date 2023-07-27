@@ -74,8 +74,6 @@ void sl_wisun_socket_data_event_hnd(sl_wisun_evt_t *evt)
     return;
   }
 
-  sli_socket_hnd_set_state(hnd, SOCKET_STATE_DATA_EVT_HND, true);
-
   remote_addr.sin6_family = AF_WISUN;
   memcpy(&remote_addr.sin6_addr.s6_addr, &evt->evt.socket_data.remote_address, sizeof(in6_addr_t));
   remote_addr.sin6_port = evt->evt.socket_data.remote_port;
@@ -90,7 +88,6 @@ void sl_wisun_socket_data_event_hnd(sl_wisun_evt_t *evt)
                                          evt->evt.socket_data.data_length,
                                          evt->evt.socket_data.data + size);
   }
-  sli_socket_hnd_set_state(hnd, SOCKET_STATE_DATA_EVT_HND, false);
   __CHECK_FOR_STATUS(evt->evt.error.status);
 }
 

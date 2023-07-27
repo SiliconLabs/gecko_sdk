@@ -173,7 +173,7 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
 } // namespace mul
 } // namespace sl
 
-TfLiteRegistration Register_MUL() {
+TFLMRegistration Register_MUL() {
   return tflite::micro::RegisterOp(sl::mul::MulInit, sl::mul::MulPrepare, sl::mul::Eval);
 }
 

@@ -9,9 +9,6 @@ provides:
 
 config_file:
   - path: protocol/zigbee/app/framework/plugin/green-power-common/config/zcl/zcl_config_gp_proxy.zap
-    condition:
-      - zigbee_ncp
-      - zigbee_af_support
 
 template_contribution:
   - name: component_catalog

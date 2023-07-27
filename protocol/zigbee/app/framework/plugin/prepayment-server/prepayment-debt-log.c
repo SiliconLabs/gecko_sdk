@@ -56,11 +56,11 @@ static sli_zigbee_af_debt_log_entry DebtLogTable[DEBT_LOG_TABLE_SIZE];
 static uint8_t getNextAvailableDebtLogIndex(void);
 static uint8_t getMostRecentDebtLogEntry(uint8_t debtType);
 static uint8_t getNthMostRecentDebtLogEntry(uint8_t debtType, uint8_t nth, uint8_t mostRecentIndex);
-void emberAfPluginLogDebtCollectionEvent(uint32_t collectionTimeUtc, uint32_t amountCollected, uint32_t outstandingDebt, uint8_t debtType);
+static void logDebtCollectionEvent(uint32_t collectionTimeUtc, uint32_t amountCollected, uint32_t outstandingDebt, uint8_t debtType);
 
-static void emberAfPluginPrepaymentServerPublishDebtLog(EmberNodeId nodeId, uint8_t srcEndpoint, uint8_t dstEndpoint,
-                                                        uint8_t commandIndex, uint8_t totalNumberOfCommands,
-                                                        DebtPayload *debtPayload);
+static void publishDebtLog(EmberNodeId nodeId, uint8_t srcEndpoint, uint8_t dstEndpoint,
+                           uint8_t commandIndex, uint8_t totalNumberOfCommands,
+                           DebtPayload *debtPayload);
 
 // Initialize the contents of the Debt Log
 void emberAfPluginPrepaymentServerInitDebtLog()
@@ -215,14 +215,14 @@ void emberAfPluginUpdateDebtOnCollectionEvent(uint8_t endpoint, uint8_t debtType
           (void) emberAfWriteAttribute(endpoint, ZCL_PREPAYMENT_CLUSTER_ID, attributeId, CLUSTER_MASK_SERVER,
                                        (uint8_t *)&debtAmount, ZCL_INT32U_ATTRIBUTE_TYPE);
           // log the debt transaction to the debt log.
-          emberAfPluginLogDebtCollectionEvent(now, debtRecoveryAmount, debtAmount, debtType);
+          logDebtCollectionEvent(now, debtRecoveryAmount, debtAmount, debtType);
         }
       }
     }
   }
 }
 
-void emberAfPluginLogDebtCollectionEvent(uint32_t collectionTimeUtc, uint32_t amountCollected, uint32_t outstandingDebt, uint8_t debtType)
+static void logDebtCollectionEvent(uint32_t collectionTimeUtc, uint32_t amountCollected, uint32_t outstandingDebt, uint8_t debtType)
 {
   uint8_t i;
   i = getNextAvailableDebtLogIndex();
@@ -269,15 +269,15 @@ void emberAfPluginSendPublishDebtLog(EmberNodeId nodeId, uint8_t srcEndpoint, ui
     // "i" now indicates how many responses were put into debtPayloads[].
     NumDebtPayloads = i;
     emberAfPrepaymentClusterPrintln("Send Publish Debt Log, %d entries", NumDebtPayloads);
-    emberAfPluginPrepaymentServerPublishDebtLog(nodeId, srcEndpoint, dstEndpoint, CMD_INDEX_LAST_CMD, 1, debtPayloads);
+    publishDebtLog(nodeId, srcEndpoint, dstEndpoint, CMD_INDEX_LAST_CMD, 1, debtPayloads);
   }
 }
 
 // Sends the Publish Debt Log command.
 // NOTE:  DebtPayload is a struct type.  See se-meter-gas/gen/simulation/af-structs.h
-static void emberAfPluginPrepaymentServerPublishDebtLog(EmberNodeId nodeId, uint8_t srcEndpoint, uint8_t dstEndpoint,
-                                                        uint8_t commandIndex, uint8_t totalNumberOfCommands,
-                                                        DebtPayload *debtPayload)
+static void publishDebtLog(EmberNodeId nodeId, uint8_t srcEndpoint, uint8_t dstEndpoint,
+                           uint8_t commandIndex, uint8_t totalNumberOfCommands,
+                           DebtPayload *debtPayload)
 {
   EmberStatus status;
   // uint16_t debtPayloadLen=0;

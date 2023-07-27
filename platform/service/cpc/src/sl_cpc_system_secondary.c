@@ -63,6 +63,10 @@
 
 #define CPC_PACKED_ENDPOINT_PRESENT 0   // Not yet implemented
 
+#define SLI_CPC_PROPERTY_LENGTH_MAX   (SLI_CPC_SYSTEM_COMMAND_BUFFER_SIZE    \
+                                       - sizeof(sli_cpc_system_cmd_header_t) \
+                                       - sizeof(sli_cpc_system_property_cmd_t))
+
 /*******************************************************************************
  ***************************  GLOBAL VARIABLES   ********************************
  ******************************************************************************/
@@ -537,13 +541,14 @@ static void on_property_get_secondary_app_version(sli_cpc_system_cmd_t *tx_comma
 {
   sli_cpc_system_property_cmd_t *prop_cmd_buff;
   const char* app_version;
-  uint32_t app_version_len;
+  uint16_t app_version_len;
 
   prop_cmd_buff = (sli_cpc_system_property_cmd_t*) tx_command->payload;
   prop_cmd_buff->property_id = PROP_SECONDARY_APP_VERSION;
   app_version = sl_cpc_secondary_app_version();
   app_version_len = strlen(app_version) + 1;
-  memcpy(prop_cmd_buff->payload, app_version, app_version_len > SL_CPC_RX_PAYLOAD_MAX_LENGTH ? SL_CPC_RX_PAYLOAD_MAX_LENGTH : app_version_len);
+  app_version_len = app_version_len > SLI_CPC_PROPERTY_LENGTH_MAX ? SLI_CPC_PROPERTY_LENGTH_MAX : app_version_len;
+  memcpy(prop_cmd_buff->payload, app_version, app_version_len);
 
   tx_command->header.length = sizeof(sli_cpc_property_id_t) + app_version_len;
 }

@@ -2,9 +2,10 @@ id: "btmesh_remote_provisioning_client"
 label: "Remote Provisioning Client"
 package: "Btmesh"
 description: >
-  Used to support remote provisioning client functionality of 
-  provisioning devices into a mesh network by interacting with a 
+  Used to support remote provisioning client functionality of
+  provisioning devices into a mesh network by interacting with a
   mesh node that supports the Remote Provisioning Server model.
+  This component is prepared for integration into SOC applications.
 
   This is a No-Code component.
 category: "Bluetooth Mesh|Models|Remote Provisioning"
@@ -28,7 +29,7 @@ provides:
 requires:
   - name: "app_assert"
   - name: "app_btmesh_util"
-  - name: "btmesh_provisionee"
+  - name: "btmesh_provisioner"
   - name: "btmesh_stack_provisioner"
   - name: "btmesh_stack_remote_provisioning_client"
   - name: "btmesh_stack"
@@ -38,5 +39,7 @@ template_contribution:
     value:
       include: "sl_btmesh_remote_provisioning_client.h"
       function: "sli_btmesh_handle_remote_provisioning_client_on_event"
+
 validation_helper:
   - path: "../../script/validation/remote_provisioning_validation.lua"
+  - path: "../../script/validation/soc_ncp_compatibility.lua"

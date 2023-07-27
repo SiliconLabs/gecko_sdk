@@ -33,6 +33,8 @@
 
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdlib.h>
+
 #include "app_assert.h"
 #include "app_log.h"
 #include "sl_bt_api.h"

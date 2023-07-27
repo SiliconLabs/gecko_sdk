@@ -59,6 +59,7 @@ include:
       - path: config/token-phy.h
       - path: config/ember-configuration-defaults.h
       - path: zll/zll-token-config.h
+      - path: zigbee/sli_zigbee_zdo_cluster_filter.h
   - path: protocol/zigbee/stack/include/
     file_list:
       - path: ember-types.h
@@ -92,6 +93,9 @@ include:
       - path: zll-api.h
       - path: binding-table.h
       - path: sl_zigbee_address_info.h
+      # NOTE needed for "sl_zigbee_r23_misc_support_stubs"
+      - path: sl_zigbee_tlv_core.h
+      - path: sl_zigbee_dynamic_commissioning.h
   - path: protocol/zigbee/stack/gp/
     file_list:
       - path: gp-token-config.h
@@ -253,14 +257,18 @@ source:
   - path: protocol/zigbee/stack/framework/zigbee-event-logger-stub-gen.c
     unless:
       - zigbee_event_logger
-  - path: protocol/zigbee/stack/zigbee/sl_zigbee_zdo_dlk_negotiation_stubs.c
+  - path: protocol/zigbee/stack/stubs/sl_zigbee_dynamic_commissioning_stubs.c
     unless:
-      # NOTE use both just in case
-      - zigbee_zdo_dlk_negotiation
       - zigbee_dynamic_commissioning
   - path: protocol/zigbee/stack/stubs/sl_zigbee_r23_misc_support_stubs.c
     unless:
       - zigbee_r23_support
+  - path: protocol/zigbee/stack/stubs/sli_zigbee_zdo_cluster_filter_stubs.c
+    unless:
+      - zigbee_zdo_cluster_filter
+  - path: protocol/zigbee/stack/stubs/sl_zigbee_fragmentation_stubs.c
+    unless:
+      - zigbee_fragmentation
 
 validation_helper:
   # NCP doesn't have DEVICE_TYPE before it connects to Host
@@ -277,6 +285,15 @@ define:
   - name: EMBER_MULTI_NETWORK_STRIPPED
     unless:
       - zigbee_multi_network
+  # stack compliance version logic
+  - name: SL_ZIGBEE_STACK_COMPLIANCE_REVISION
+    value: 22
+    unless:
+      - zigbee_r23_support
+  - name: SL_ZIGBEE_STACK_COMPLIANCE_REVISION
+    value: 23
+    condition:
+      - zigbee_r23_support
 
 template_contribution:
   - name: component_catalog

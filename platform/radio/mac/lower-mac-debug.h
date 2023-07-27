@@ -29,7 +29,7 @@
 #define INTERNAL_FLAG_COUNT              16
 
 #define RAIL_RADIO_STATE_COUNT           6
-#define LOWER_MAC_STATE_COUNT            6
+#define LOWER_MAC_STATE_COUNT            12
 
 // #defines below are used to ensure fix-length printing
 // separates flag when printing multiple flags
@@ -128,10 +128,24 @@ const char* internalFlagsPrintTags[16] = {
 const char* lowerMacStatePrintTags[LOWER_MAC_STATE_COUNT] = {
   "IDLE",
   "EXPECTING_DATA",
-  "BUSY",
+  "TX",   // also pro2plus driver
+  "TX_ACK_COMPLETE",
+
+  // These apply to the pro2 driver and the RAIL driver
+  "BUSY", // also scripted tests
   "TX_NO_ACK",
   "TX_WAITING_FOR_ACK",
-  "RADIO_INIT"
+
+  // These states are specific to the pro2 driver
+  "SENDING_ACK",
+  "CCA_FAILED",
+  "BACKOFF",
+
+  // These states are specific to RAIL
+  "RADIO_INIT",
+
+  // These states are specific to the CSL feature within the lower mac
+  "WUF_RX", // a wake up frame has been received and we have scheduled an RX
 };
 
 static uint16_t debugInterruptDisableCounter = 0;

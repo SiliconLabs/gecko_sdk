@@ -40,9 +40,9 @@ extern bool findTransientLinkKey(const EmberEUI64 eui64ToFind,
                                  EmberKeyStructBitmask* bitmask);
 extern bool removeTransientLinkKey(const EmberEUI64 eui64ToFind,
                                    EmberKeyStructBitmask* bitmask);
-sl_status_t find_transient_key(sl_zb_sec_man_context_t* context,
-                               EmberTransientKeyData* transientKey);
-sl_status_t find_link_key_table_key(sl_zb_sec_man_context_t* context);
+static sl_status_t find_transient_key(sl_zb_sec_man_context_t* context,
+                                      EmberTransientKeyData* transientKey);
+static sl_status_t find_link_key_table_key(sl_zb_sec_man_context_t* context);
 extern EmberStatus sli_zigbee_af_set_key_table_entry(bool erase,
                                                      uint8_t index,
                                                      EmberKeyStruct* keyStruct);
@@ -376,10 +376,10 @@ sl_status_t zb_sec_man_fetch_nwk_key(sl_zb_sec_man_context_t* context,
     key_id = ZB_PSA_KEY_ID_ALTERNATE_NWK_KEY;
   }
   size_t    sl_psa_key_len = EMBER_ENCRYPTION_KEY_SIZE;
-  (void)sl_sec_man_export_key(key_id, plaintext_key->key,
-                              EMBER_ENCRYPTION_KEY_SIZE,
-                              &sl_psa_key_len);
-  return SL_STATUS_OK;
+  psa_status_t sec_status = sl_sec_man_export_key(key_id, plaintext_key->key,
+                                                  EMBER_ENCRYPTION_KEY_SIZE,
+                                                  &sl_psa_key_len);
+  return sec_status == PSA_SUCCESS ? SL_STATUS_OK : SL_STATUS_FAIL;
 }
 
 static bool zb_sec_is_key_present(uint32_t key_id)
@@ -476,10 +476,10 @@ sl_status_t zb_sec_man_fetch_zll_key(sl_zb_sec_man_context_t* context,
     key_id = ZB_PSA_KEY_ID_ZLL_PRE_CONFIGURED_KEY;
   }
   size_t    sl_psa_key_len = EMBER_ENCRYPTION_KEY_SIZE;
-  (void)sl_sec_man_export_key(key_id, plaintext_key->key,
-                              EMBER_ENCRYPTION_KEY_SIZE,
-                              &sl_psa_key_len);
-  return SL_STATUS_OK;
+  psa_status_t sec_status = sl_sec_man_export_key(key_id, plaintext_key->key,
+                                                  EMBER_ENCRYPTION_KEY_SIZE,
+                                                  &sl_psa_key_len);
+  return sec_status == PSA_SUCCESS ? SL_STATUS_OK : SL_STATUS_FAIL;
 }
 
 sl_status_t zb_sec_man_store_zll_key(sl_zb_sec_man_context_t* context,
@@ -630,7 +630,7 @@ sl_status_t zb_sec_man_store_in_link_key_table(sl_zb_sec_man_context_t* context,
   return (status == EMBER_SUCCESS) ? SL_STATUS_OK : SL_STATUS_FAIL;
 }
 
-sl_status_t find_link_key_table_key(sl_zb_sec_man_context_t* context)
+static sl_status_t find_link_key_table_key(sl_zb_sec_man_context_t* context)
 {
   EmberStatus status = EMBER_NOT_FOUND;
 
@@ -760,8 +760,8 @@ sl_status_t zb_sec_man_store_transient_key(sl_zb_sec_man_context_t* context,
   return (status == EMBER_SUCCESS) ? SL_STATUS_OK : SL_STATUS_FAIL;
 }
 
-sl_status_t find_transient_key(sl_zb_sec_man_context_t* context,
-                               EmberTransientKeyData* transientKey)
+static sl_status_t find_transient_key(sl_zb_sec_man_context_t* context,
+                                      EmberTransientKeyData* transientKey)
 {
   EmberStatus status = EMBER_ERR_FATAL;
 
@@ -822,7 +822,6 @@ sl_status_t sl_zb_sec_man_delete_transient_key(sl_zb_sec_man_context_t* context)
 {
   EmberTransientKeyData transientKeyData = { 0 };
   EmberKeyStructBitmask bitmask = 0;
-
   if (context->flags & ZB_SEC_MAN_FLAG_UNCONFIRMED_TRANSIENT_KEY) {
     bitmask |= EMBER_UNCONFIRMED_TRANSIENT_KEY;
   }
@@ -1038,4 +1037,12 @@ sl_status_t sl_zb_sec_man_aes_128_crypt_block(bool encrypt,
                                     output);
   }
   return psa_to_sl_status(status);
+}
+
+void zb_sec_man_delete_all_keys(void)
+{
+  uint32_t psa_id;
+  for (psa_id = ZB_PSA_KEY_ID_ACTIVE_NWK_KEY; psa_id < ZB_PSA_KEY_ID_GP_SINK_TABLE_END; psa_id++) {
+    (void)zb_sec_man_delete_key_by_psa_id(psa_id);
+  }
 }

@@ -1,7 +1,4 @@
-Gecko Platform 4.3.0.0
+Gecko Platform 4.3.1.0
+- Targeted quality improvements and bug fixes
 
--Support for EFR32xG27 devices
--Power Manager update for optimized return from EM2
--CPC support for multiple SPI clients
--CPC remote peripheral (GPIO) access
--License change (to open-source zlib) for various platform files
+

@@ -47,6 +47,7 @@ volatile AppMode_t currAppMode = NONE;
 volatile AppMode_t prevAppMode = NONE;
 volatile bool transitionPend = false;
 RAIL_TxOptions_t antOptions = RAIL_TX_OPTIONS_DEFAULT;
+RAIL_TxOptions_t concPhyIdOptions = RAIL_TX_OPTIONS_DEFAULT;
 RAIL_StreamMode_t streamMode = RAIL_STREAM_PN9_STREAM;
 
 AppMode_t currentAppMode(void)
@@ -116,7 +117,7 @@ static void transitionAppMode(AppMode_t nextAppMode)
   }
 
   if (nextAppMode == TX_STREAM) {
-    RAIL_StartTxStreamAlt(railHandle, channel, streamMode, antOptions);
+    RAIL_StartTxStreamAlt(railHandle, channel, streamMode, concPhyIdOptions | antOptions);
   } else if (nextAppMode == DIRECT) {
     RAIL_EnableDirectModeAlt(railHandle, true, true);
   } else if (nextAppMode == TX_CONTINUOUS || nextAppMode == TX_N_PACKETS) {

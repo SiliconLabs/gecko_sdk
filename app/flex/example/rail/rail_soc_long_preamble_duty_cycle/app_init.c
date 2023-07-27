@@ -162,12 +162,12 @@ RAIL_Handle_t app_init(void)
   // CLI info message
   print_sample_app_name("Long Preamble Duty Cycle");
 #if (_SILICON_LABS_32B_SERIES_2_CONFIG != 3) && (_SILICON_LABS_32B_SERIES_2_CONFIG != 4) && (_SILICON_LABS_32B_SERIES_2_CONFIG != 5) && (_SILICON_LABS_32B_SERIES_2_CONFIG != 8)
-  app_log_info("Preamble length %d for bitrate %d b/s with %d us off time\n",
+  app_log_info("Preamble length %d for bitrate %lu b/s with %lu us off time\n",
                preamble_bit_length,
                bit_rate,
                duty_cycle_config.delay);
 #else
-  app_log_info("Bitrate %d b/s with %d us off time. Duty cycling with signal qualifier.\n",
+  app_log_info("Bitrate %lu b/s with %lu us off time. Duty cycling with signal qualifier.\n",
                bit_rate,
                duty_cycle_config.delay);
 #endif

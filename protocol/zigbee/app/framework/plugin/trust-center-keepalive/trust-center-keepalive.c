@@ -138,7 +138,8 @@ void emberAfPluginTrustCenterKeepaliveStackStatusCallback(EmberStatus status)
 
   switch (status) {
     case EMBER_NETWORK_UP:
-    case EMBER_TRUST_CENTER_EUI_HAS_CHANGED:
+    case EMBER_TRUST_CENTER_SWAPPED_OUT_EUI_HAS_CHANGED:
+    case EMBER_TRUST_CENTER_SWAPPED_OUT_EUI_HAS_NOT_CHANGED:
       // If we were searching for a network after a succession of keepalive
       // failures, and now we have found the network, reset the keepalive state
       if (currentStatusStruct->state == STATE_INITIATE_NETWORK_SEARCH) {

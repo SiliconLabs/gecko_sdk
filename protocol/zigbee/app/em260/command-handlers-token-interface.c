@@ -77,6 +77,14 @@ bool sli_zigbee_af_process_ezsp_token_interface_commands(uint16_t commandId)
       emberAfTokenInterfaceSetOrGetEzspHandler(commandId
                                                == EZSP_SET_TOKEN_DATA);
       break;
+    case EZSP_TOKEN_FACTORY_RESET: {
+      bool exclude_outgoing_fc;
+      bool exclude_boot_counter;
+      exclude_outgoing_fc = fetchInt8u();
+      exclude_boot_counter = fetchInt8u();
+      sl_zigbee_token_factory_reset(exclude_outgoing_fc, exclude_boot_counter);
+      break;
+    }
     default:
       return sli_zigbee_af_process_ezsp_command_token_interface(commandId);
       break;

@@ -20,6 +20,7 @@ requires:
   - name: "wisun_crypto"
   - name: "sl_wisun_trace_util"
   - name: "sl_wisun_ns_list"
+  - name: "sleeptimer"
 
 recommends:
   - id: "wisun_stack_library"
@@ -44,6 +45,7 @@ include:
       - path: "sl_wisun_version.h"
       - path: "sl_wisun_common.h"
       - path: "sli_wisun_internal_api.h"
+      - path: "sli_wisun_timer_service.h"
       - path: "sl_wisun_connection_params_api.h"
       - path: "sl_wisun_lfn_params_api.h"
 

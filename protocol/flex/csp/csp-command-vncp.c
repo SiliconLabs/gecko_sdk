@@ -151,6 +151,22 @@ static void setNcpSecurityKeyCommandHandler(uint8_t *apiCommandData)
   sendResponse(apiCommandBuffer, commandLength);
 }
 
+#ifdef SL_CATALOG_CONNECT_AES_SECURITY_PRESENT
+// getKeyId
+static void getKeyIdCommandHandler(uint8_t *apiCommandData)
+{
+  mbedtls_svc_key_id_t key_id = emApiGetKeyId();
+  uint8_t *apiCommandBuffer = getApiCommandPointer();
+  uint16_t commandLength = formatResponseCommand(apiCommandBuffer,
+                                                 MAX_STACK_API_COMMAND_SIZE,
+                                                 EMBER_GET_KEY_ID_IPC_COMMAND_ID,
+                                                 "w",
+                                                 key_id);
+  sendResponse(apiCommandBuffer, commandLength);
+}
+
+#endif
+
 // getCounter
 static void getCounterCommandHandler(uint8_t *apiCommandData)
 {
@@ -1308,6 +1324,12 @@ void handleIncomingApiCommand(uint16_t commandId, uint8_t *apiCommandData)
     case EMBER_SET_NCP_SECURITY_KEY_IPC_COMMAND_ID:
       setNcpSecurityKeyCommandHandler(apiCommandData);
       break;
+
+#ifdef SL_CATALOG_CONNECT_AES_SECURITY_PRESENT
+    case EMBER_GET_KEY_ID_IPC_COMMAND_ID:
+      getKeyIdCommandHandler(apiCommandData);
+      break;
+#endif
     case EMBER_GET_COUNTER_IPC_COMMAND_ID:
       getCounterCommandHandler(apiCommandData);
       break;

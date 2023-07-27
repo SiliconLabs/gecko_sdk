@@ -52,7 +52,7 @@ class ProfileWisunFan1v1Sol(ProfileWisunFan1v1Ocelot):
 
     def build_advanced_profile_inputs(self, model, profile):
         self.make_linked_io(profile, model.vars.base_frequency_hz, "advanced", readable_name="Base Channel Frequency",
-                            value_limit_min=358000000, value_limit_max=956000000, units_multiplier=UnitsMultiplier.MEGA)
+                            value_limit_min=100000000, value_limit_max=956000000, units_multiplier=UnitsMultiplier.MEGA)
         self.make_linked_io(profile, model.vars.channel_spacing_hz, "advanced",
                                 readable_name="Channel Spacing", value_limit_min=0, value_limit_max=10000000,
                                 units_multiplier=UnitsMultiplier.KILO)
@@ -68,6 +68,9 @@ class ProfileWisunFan1v1Sol(ProfileWisunFan1v1Ocelot):
         # Hidden input for dual front-end filter support
         self.make_hidden_input(profile, model.vars.dual_fefilt, "Advanced", readable_name="Dual front-end filter enable")
         self.make_hidden_input(profile, model.vars.antdivmode, "Advanced", readable_name="Antenna diversity mode")
+        self.make_hidden_input(profile, model.vars.ofdm_stf_length, "Advanced",
+                               readable_name="OFDM STF length (1 unit = 120us)",
+                               value_limit_min=4, value_limit_max=25)
 
     def build_variable_profile_outputs(self, model, profile):
         self._sw_profile_outputs_common.build_rail_outputs(model, profile)
@@ -345,6 +348,7 @@ class ProfileWisunFan1v1Sol(ProfileWisunFan1v1Ocelot):
                 model.vars.alt_wisun_mode_switch_phr.value_forced = ofdm_phy_model.vars.wisun_mode_switch_phr.value
                 model.vars.alt_wisun_phy_mode_id.value_forced = ofdm_phy_model.vars.wisun_phy_mode_id.value
                 model.vars.alt_stack_info.value_forced = ofdm_phy_model.vars.stack_info.value
+                model.vars.alt_rssi_adjust_db.value_forced = ofdm_phy_model.vars.rssi_adjust_db.value
 
                 # Finally loop go through the Profile Outputs for the concurrent PHY and copy them over
                 reg_fields_from_ofdm = ['AGC_.*','FEFILT1_*', 'SUNOFDM_*', 'TXFRONT_*', 'RAC_PGACTRL_PGABWMODE']

@@ -21,6 +21,7 @@
 #include <em_ldma.h>
 #include <dmadrv.h>
 #include "sl_component_catalog.h"
+#include "sli_wisun_timer_service.h"
 
 #if defined SL_CATALOG_CPC_SECONDARY_PRESENT
 #include <sl_cpc.h>
@@ -34,6 +35,7 @@ struct ws_mac_ctxt;
 
 enum {
     RX_UART = 1 << 0,
+    TIMER_EXPIRED = 1 << 1,
 };
 
 struct sl_wsrcp_app {
@@ -48,6 +50,7 @@ struct sl_wsrcp_app {
     struct sl_wsrcp_uart uart;
 #endif
     struct sl_wsrcp_mac *rcp_mac;
+    sli_wisun_timer_context_t rcp_timer_context;
 };
 
 // This global variable is necessary for IRQ handling. Beside this use case,

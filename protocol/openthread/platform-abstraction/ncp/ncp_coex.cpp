@@ -33,7 +33,7 @@
 
 #include "ncp_coex.hpp"
 #include "vendor_spinel.hpp"
-#include "radio_vendor.h"
+#include "radio_extension.h"
 
 #include "common/code_utils.hpp"
 
@@ -147,7 +147,7 @@ otError getDpState(Spinel::Encoder &aEncoder)
 {
     uint8_t dpPulse = 0;
 
-    IgnoreError(otPlatRadioVendorGetDpState(&dpPulse));
+    IgnoreError(otPlatRadioExtensionGetDpState(&dpPulse));
 
     return (aEncoder.WriteUint8(dpPulse));
 }
@@ -159,7 +159,7 @@ otError setDpState(Spinel::Decoder &aDecoder)
 
     SuccessOrExit(error = aDecoder.ReadUint8(dpPulse));
     
-    error = otPlatRadioVendorSetDpState(dpPulse);
+    error = otPlatRadioExtensionSetDpState(dpPulse);
 
 exit:
     return error;
@@ -172,7 +172,7 @@ otError getGpioInputOverride(Spinel::Encoder &aEncoder)
     for (uint8_t ind = 0; ind < (sizeof(inputOverrides) * 8); ind++)
     {
         uint8_t enabled = 0;
-        SuccessOrExit(otPlatRadioVendorGetGpioInputOverride(ind, (bool*)&enabled));
+        SuccessOrExit(otPlatRadioExtensionGetGpioInputOverride(ind, (bool*)&enabled));
         inputOverrides |= (((uint8_t)enabled & 0x01) << (uint8_t)ind);
     }
 
@@ -189,7 +189,7 @@ otError setGpioInputOverride(Spinel::Decoder &aDecoder)
     SuccessOrExit(error = aDecoder.ReadUint8(gpioIndex));
     SuccessOrExit(error = aDecoder.ReadBool(enabled));
 
-    error = otPlatRadioVendorSetGpioInputOverride(gpioIndex, enabled);
+    error = otPlatRadioExtensionSetGpioInputOverride(gpioIndex, enabled);
 
 exit:
     return error;
@@ -199,7 +199,7 @@ otError getActiveRadio(Spinel::Encoder &aEncoder)
 {
     uint8_t activePhy = 0;
 
-    IgnoreError(otPlatRadioVendorGetActiveRadio(&activePhy));
+    IgnoreError(otPlatRadioExtensionGetActiveRadio(&activePhy));
 
     return aEncoder.WriteUint8(activePhy);
 }
@@ -208,7 +208,7 @@ otError getPhySelectTimeout(Spinel::Encoder &aEncoder)
 {
     uint8_t timeout = 0;
 
-    IgnoreError(otPlatRadioVendorGetPhySelectTimeout(&timeout));
+    IgnoreError(otPlatRadioExtensionGetPhySelectTimeout(&timeout));
     
     return aEncoder.WriteUint8(timeout);
 }
@@ -220,7 +220,7 @@ otError setPhySelectTimeout(Spinel::Decoder &aDecoder)
 
     SuccessOrExit(error = aDecoder.ReadUint8(timeoutMs));
 
-    error = otPlatRadioVendorSetPhySelectTimeout(timeoutMs);
+    error = otPlatRadioExtensionSetPhySelectTimeout(timeoutMs);
 
 exit:
     return error;
@@ -230,7 +230,7 @@ otError getPtaOptions(Spinel::Encoder &aEncoder)
 {
     uint32_t ptaOptions;
 
-    IgnoreError(otPlatRadioVendorGetCoexOptions(&ptaOptions));
+    IgnoreError(otPlatRadioExtensionGetCoexOptions(&ptaOptions));
 
     return aEncoder.WriteUint32(ptaOptions);
 }
@@ -242,7 +242,7 @@ otError setPtaOptions(Spinel::Decoder &aDecoder)
 
     SuccessOrExit(error = aDecoder.ReadUint32(ptaOptions));
 
-    error = otPlatRadioVendorSetCoexOptions(ptaOptions);
+    error = otPlatRadioExtensionSetCoexOptions(ptaOptions);
 
 exit:
     return error;
@@ -252,7 +252,7 @@ otError getConstantOptions(Spinel::Encoder &aEncoder)
 {
     uint32_t ptaOptions;
 
-    IgnoreError(otPlatRadioVendorGetCoexConstantOptions(&ptaOptions));
+    IgnoreError(otPlatRadioExtensionGetCoexConstantOptions(&ptaOptions));
 
     return aEncoder.WriteUint32(ptaOptions);
 }
@@ -261,7 +261,7 @@ otError getPtaState(Spinel::Encoder &aEncoder)
 {
     bool ptaState;
 
-    IgnoreError(otPlatRadioVendorIsCoexEnabled(&ptaState));
+    IgnoreError(otPlatRadioExtensionIsCoexEnabled(&ptaState));
 
     return aEncoder.WriteBool(ptaState);
 }
@@ -273,7 +273,7 @@ otError setPtaState(Spinel::Decoder &aDecoder)
 
     SuccessOrExit(error = aDecoder.ReadBool(ptaState));
 
-    error = otPlatRadioVendorSetCoexEnable(ptaState);
+    error = otPlatRadioExtensionSetCoexEnable(ptaState);
 
 exit:
     return error;
@@ -284,7 +284,7 @@ otError getPwmState(Spinel::Encoder &aEncoder)
     uint8_t ptaReq, dutyCycle, periodHalfMs;
     otError error = OT_ERROR_FAILED;
 
-    SuccessOrExit(error = otPlatRadioVendorGetRequestPwmArgs(&ptaReq, &dutyCycle, &periodHalfMs));
+    SuccessOrExit(error = otPlatRadioExtensionGetRequestPwmArgs(&ptaReq, &dutyCycle, &periodHalfMs));
 
     SuccessOrExit(error = aEncoder.WriteUint8(ptaReq));
     SuccessOrExit(error = aEncoder.WriteUint8(dutyCycle));
@@ -303,7 +303,7 @@ otError setPwmState(Spinel::Decoder &aDecoder)
     SuccessOrExit(error = aDecoder.ReadUint8(dutyCycle));
     SuccessOrExit(error = aDecoder.ReadUint8(periodHalfMs));
 
-    error = otPlatRadioVendorSetRequestPwmArgs(ptaReq, dutyCycle, periodHalfMs);
+    error = otPlatRadioExtensionSetRequestPwmArgs(ptaReq, dutyCycle, periodHalfMs);
 
 exit:
     return error;
@@ -311,12 +311,12 @@ exit:
 
 otError getCounters(Spinel::Encoder &aEncoder)
 {
-    uint32_t coexCounters[OT_PLAT_RADIO_VENDOR_COEX_EVENT_COUNT] = {0};
+    uint32_t coexCounters[OT_PLAT_RADIO_EXTENSION_COEX_EVENT_COUNT] = {0};
     otError error                                                = OT_ERROR_NONE;
     
-    SuccessOrExit(error = otPlatRadioVendorGetCoexCounters(OT_PLAT_RADIO_VENDOR_COEX_EVENT_COUNT, coexCounters));
+    SuccessOrExit(error = otPlatRadioExtensionGetCoexCounters(OT_PLAT_RADIO_EXTENSION_COEX_EVENT_COUNT, coexCounters));
 
-    for (uint8_t ind = 0; ind < (uint8_t)OT_PLAT_RADIO_VENDOR_COEX_EVENT_COUNT; ind++)
+    for (uint8_t ind = 0; ind < (uint8_t)OT_PLAT_RADIO_EXTENSION_COEX_EVENT_COUNT; ind++)
     {
         SuccessOrExit(error = aEncoder.WriteUint32(coexCounters[ind]));
     }
@@ -327,7 +327,7 @@ exit:
 
 otError resetCounters(void)
 {
-    return otPlatRadioVendorClearCoexCounters();
+    return otPlatRadioExtensionClearCoexCounters();
 }
 
 otError setRadioHoldoff(Spinel::Decoder &aDecoder)
@@ -337,7 +337,7 @@ otError setRadioHoldoff(Spinel::Decoder &aDecoder)
 
     SuccessOrExit(error = aDecoder.ReadBool(enabled));
 
-    error = otPlatRadioVendorSetRadioHoldoff(enabled);
+    error = otPlatRadioExtensionSetRadioHoldoff(enabled);
 
 exit:
     return error;

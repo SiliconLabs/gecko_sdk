@@ -10,7 +10,7 @@
 
 // <h> ZAF Transport Configuration
 
-// <o> Frame queue size <1..255:1> <f.h>
+// <o ZAF_TRANSPORT_CONFIG_QUEUE_SIZE> Frame queue size <1..255:1> <f.h>
 // <i> Default: 2
 #define ZAF_TRANSPORT_CONFIG_QUEUE_SIZE  2
 

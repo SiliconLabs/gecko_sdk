@@ -32,11 +32,6 @@ bool sli_zigbee_use_static_empheral_keys = false;
 const EmberLibraryStatus sli_zigbee_cbke_core_library_status = EMBER_LIBRARY_IS_STUB;
 //------------------------------------------------------------------------------
 
-bool sli_zigbee_is_cbke_enabled(void)
-{
-  return false;
-}
-
 bool sli_zigbee_cbke_is_idle(void)
 {
   return true;

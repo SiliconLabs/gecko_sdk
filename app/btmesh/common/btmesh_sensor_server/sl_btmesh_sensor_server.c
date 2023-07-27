@@ -3,7 +3,7 @@
  * @brief BT Mesh Sensor Server Instances
  *******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -658,6 +658,7 @@ void sl_btmesh_handle_sensor_server_events(sl_btmesh_msg_t* evt)
       }
       break;
 
+    case sl_btmesh_evt_prov_initialized_id:
     case sl_btmesh_evt_node_provisioned_id:
       sl_btmesh_sensor_server_node_init();
       break;

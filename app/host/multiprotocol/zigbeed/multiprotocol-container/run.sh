@@ -62,7 +62,7 @@ while [[ $# -gt 0 ]]; do
             exit
             ;;
         -O|--ot-cli)
-            docker exec -it multiprotocol /usr/local/bin/ot-cli 'spinel+cpc://cpcd_0?iid=2'
+            docker exec -it multiprotocol /usr/local/bin/ot-cli 'spinel+cpc://cpcd_0?iid=2&iid-list=0'
             exit
             ;;
         -T|--ot-ctl)
@@ -117,7 +117,7 @@ while [[ $# -gt 0 ]]; do
             ;;
         -P|--pro-compliance)
             echo "Starting pro-compliance..."
-            docker exec -it multiprotocol /usr/local/bin/pro-compliance-posix '-r spinel+cpc://cpcd_0?iid=1'
+            docker exec -it multiprotocol /usr/local/bin/pro-compliance-posix '-r spinel+cpc://cpcd_0?iid=1&iid-list=0'
             exit
             ;;
         -L|--bluetoothctl)

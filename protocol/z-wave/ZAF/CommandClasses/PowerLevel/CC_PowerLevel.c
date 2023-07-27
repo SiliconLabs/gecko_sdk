@@ -55,7 +55,7 @@ static uint8_t    currentPower = ZPAL_RADIO_TX_POWER_DEFAULT;
 
 static void ZCB_DelayTestFrame(SSwTimer* pTimer);
 static void SendTestReport(void);
-static void ZCB_SendTestDone(uint8_t bStatus, TX_STATUS_TYPE *txStatusReport);
+static void ZCB_SendTestDone(void *callback_param);
 static void ZCB_PowerLevelTimeout(SSwTimer* pTimer);
 static void SetRadioAttenuation(uint8_t adjustTxPower);
 
@@ -101,11 +101,12 @@ SendTestReport(void)
  * @param txStatusReport Status report.
  */
 static void
-ZCB_SendTestDone (
-        uint8_t bStatus,
-        TX_STATUS_TYPE *txStatusReport)
+ZCB_SendTestDone (void *callback_param)
 {
-  UNUSED(txStatusReport);
+
+  transmission_result_t *tmp = callback_param;
+
+  uint8_t bStatus = tmp->status;
 
   if (bStatus == TRANSMIT_COMPLETE_OK)
   {
@@ -178,7 +179,11 @@ ZCB_DelayTestFrame (SSwTimer* pTimer)
   // Put the package on queue (and dont wait for it)
   if (EQUEUENOTIFYING_STATUS_TIMEOUT == QueueNotifyingSendToBack(pTxQueueNotifying, (uint8_t*)&FramePackage, 0))
   {
-    ZCB_SendTestDone(TRANSMIT_COMPLETE_FAIL, NULL);
+      transmission_result_t rs = {
+        .status = TRANSMIT_COMPLETE_FAIL,
+        .isFinished = TRANSMISSION_RESULT_UNKNOWN
+      };
+    ZCB_SendTestDone(&rs);
   }
 }
 

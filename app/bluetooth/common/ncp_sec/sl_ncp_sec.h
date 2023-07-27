@@ -103,4 +103,4 @@ sl_bt_msg_t* sl_ncp_sec_process_response(sl_bt_msg_t* msg,
  ******************************************************************************/
 uint32_t sl_ncp_sec_command_handler(uint8_t* data);
 
-#endif /* NCP_SEC_H_ */
+#endif // NCP_SEC_H

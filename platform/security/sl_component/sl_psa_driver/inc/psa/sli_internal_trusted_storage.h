@@ -60,23 +60,27 @@ psa_status_t sli_psa_its_encrypted(void);
 psa_status_t sli_psa_its_set_root_key(uint8_t *root_key, size_t root_key_size);
 #endif // defined(SLI_PSA_ITS_ENCRYPTED) && !defined(SEMAILBOX_PRESENT)
 
-#if (SL_PSA_ITS_SUPPORT_V3_DRIVER)
-
-#if !defined(SL_PSA_ITS_REMOVE_V1_HEADER_SUPPORT) && SL_PSA_ITS_SUPPORT_V1_DRIVER
-#define SLI_PSA_ITS_SUPPORT_V1_FORMAT_INTERNAL
-#endif
-
 /* Magic values for ITS metadata versions */
 #define SLI_PSA_ITS_META_MAGIC_V1             (0x05E175D1UL)
 #define SLI_PSA_ITS_META_MAGIC_V2             (0x5E175D10UL)
 
 /* Allocated range of NVM3 IDs for PSA ITS usage */
-#define SLI_PSA_ITS_NVM3_RANGE_END   (0x87100UL)
 #define SLI_PSA_ITS_NVM3_RANGE_SIZE  (0x00400UL)
-#define SLI_PSA_ITS_NVM3_RANGE_START  SLI_PSA_ITS_NVM3_RANGE_END - SLI_PSA_ITS_NVM3_RANGE_SIZE
+#if (SL_PSA_ITS_SUPPORT_V3_DRIVER)
+#define SLI_PSA_ITS_NVM3_RANGE_END   (0x87100UL)
+#define SLI_PSA_ITS_NVM3_RANGE_START  (SLI_PSA_ITS_NVM3_RANGE_END - SLI_PSA_ITS_NVM3_RANGE_SIZE)
+#else
+#define SLI_PSA_ITS_NVM3_RANGE_BASE  (0x83100UL)
+#endif
 
 #ifndef SL_PSA_ITS_MAX_FILES
 #define SL_PSA_ITS_MAX_FILES    SLI_PSA_ITS_NVM3_RANGE_SIZE
+#endif
+
+#if (SL_PSA_ITS_SUPPORT_V3_DRIVER)
+
+#if !defined(SL_PSA_ITS_REMOVE_V1_HEADER_SUPPORT) && SL_PSA_ITS_SUPPORT_V1_DRIVER
+#define SLI_PSA_ITS_SUPPORT_V1_FORMAT_INTERNAL
 #endif
 
 #if SL_PSA_ITS_SUPPORT_V2_DRIVER

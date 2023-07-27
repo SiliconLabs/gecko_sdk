@@ -30,6 +30,11 @@
 #ifndef THROUGHPUT_CENTRAL_INTERFACE_H
 #define THROUGHPUT_CENTRAL_INTERFACE_H
 
+/***********************************************************************************************//**
+ * @addtogroup throughput_central
+ * @{
+ **************************************************************************************************/
+
 #include "throughput_types.h"
 
 #define THROUGHPUT_CENTRAL_REFRESH_TIMER_PERIOD       1000
@@ -65,4 +70,5 @@ void timer_refresh_rssi_stop(void);
  *****************************************************************************/
 void timer_on_refresh_rssi(void);
 
-#endif
+/** @} (end addtogroup throughput_central) */
+#endif // THROUGHPUT_CENTRAL_INTERFACE_H

@@ -5,7 +5,8 @@ description: >
   The Event Logging is an application-level software module that
   logs stack events. Its main purpose is to log application related stack events.
   Both Bluetooth LE and Bluetooth mesh events are handled by the Event Logging
-  component.
+  component. This component is suitable for use in both NCP and SOC applications.
+  This is a No-Code component.
 category: "Bluetooth Mesh|Utility"
 quality: "production"
 root_path: "app/btmesh/common/btmesh_event_log"
@@ -34,4 +35,9 @@ template_contribution:
     value:
       include: "sl_btmesh_event_log.h"
       function: "sl_btmesh_log_bt_connection_events"
+    priority: -9000
+  - name: "btmesh_app_node_reset"
+    value:
+      include: "sl_btmesh_event_log.h"
+      function: "sl_btmesh_log_on_node_reset"
     priority: -9000

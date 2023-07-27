@@ -63,15 +63,15 @@
 
 // <o ESL_SENSOR_FW_REVISION_MAJOR> Major <0-99>
 // <i> Semantic firmware versioning: major field.
-#define ESL_SENSOR_FW_REVISION_MAJOR                0
+#define ESL_SENSOR_FW_REVISION_MAJOR                1
 
 // <o ESL_SENSOR_FW_REVISION_MINOR> Minor <0-99>
 // <i> Semantic firmware versioning: minor field.
-#define ESL_SENSOR_FW_REVISION_MINOR                1
+#define ESL_SENSOR_FW_REVISION_MINOR                0
 
 // <o ESL_SENSOR_FW_REVISION_PATCH> Patch <0-99>
 // <i> Semantic firmware versioning: patch field.
-#define ESL_SENSOR_FW_REVISION_PATCH                2
+#define ESL_SENSOR_FW_REVISION_PATCH                0
 // </e>
 
 // <e ESL_SENSOR_MANUFACTURING_DATE_ENABLE> Date of manufacturing

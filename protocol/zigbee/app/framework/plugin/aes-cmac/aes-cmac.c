@@ -26,7 +26,7 @@
 #define HIDDEN static
 #endif
 
-// Software CMAC implementation on top of emStandaloneEncrypt API
+// Software CMAC implementation
 
 // Exclusive-Or operation. For two equal length strings, x and y, x XOR y is
 // their bit-wise exclusive-OR.

@@ -234,6 +234,7 @@ typedef enum {
   systemPartFamilyFlex23 = DEVINFO_PART_FAMILY_FG | (23 << _DEVINFO_PART_FAMILYNUM_SHIFT),       /**< EFR32 Flex Gecko Series 2 Config 3 Value Device Family */
   systemPartFamilyZen23 = DEVINFO_PART_FAMILY_ZG | (23 << _DEVINFO_PART_FAMILYNUM_SHIFT),        /**< EFR32 Zen Gecko Series 2 Config 3 Value Device Family */
   systemPartFamilyEfm32Pearl23 = DEVINFO_PART_FAMILY_PG | (23 << _DEVINFO_PART_FAMILYNUM_SHIFT), /**< EFM32 Pearl Gecko Series 2 Config 3 Value Device Family */
+  systemPartFamilySideWalk23 = DEVINFO_PART_FAMILY_SG | (23 << _DEVINFO_PART_FAMILYNUM_SHIFT),   /**< EFR32 Side Walk Gecko Series 2 Config 3 Value Device Family */
 #endif
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)
   systemPartFamilyMighty24 = DEVINFO_PART_FAMILY_MG | (24 << _DEVINFO_PART_FAMILYNUM_SHIFT), /**< EFR32 Mighty Gecko Series 2 Config 4 Value Device Family */
@@ -250,6 +251,7 @@ typedef enum {
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)
   systemPartFamilyFlex28 = DEVINFO_PART_FAMILY_FG | (28 << _DEVINFO_PART_FAMILYNUM_SHIFT),  /**< EFR32 Flex Gecko Series 2 Config 8 Value Device Family */
   systemPartFamilyZen28 = DEVINFO_PART_FAMILY_ZG | (28 << _DEVINFO_PART_FAMILYNUM_SHIFT),   /**< EFR32 Zen Gecko Series 2 Config 8 Value Device Family */
+  systemPartFamilySideWalk28 = DEVINFO_PART_FAMILY_SG | (28 << _DEVINFO_PART_FAMILYNUM_SHIFT),   /**< EFR32 Side Walk Gecko Series 2 Config 8 Value Device Family */
   systemPartFamilyEfm32Pearl28 = DEVINFO_PART_FAMILY_PG | (28 << _DEVINFO_PART_FAMILYNUM_SHIFT),  /**< EFM32 Pearl Gecko Series 2 Config 8 Value Device Family */
 #endif
 /* Deprecated family #defines */

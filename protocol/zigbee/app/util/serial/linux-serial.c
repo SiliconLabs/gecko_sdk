@@ -150,9 +150,9 @@ static void debugPrint(const char* formatString, ...);
 static void processSerialInput(uint8_t port);
 
 #if READLINE_SUPPORT
-char** commandCompletion(const char *text, int start, int end);
-char* singleCommandCompletion(const char *text, int start);
-char* filenameCompletion(const char* text, int state);
+static char** commandCompletion(const char *text, int start, int end);
+static char* singleCommandCompletion(const char *text, int start);
+static char* filenameCompletion(const char* text, int state);
 static void initializeHistory(void);
 static void writeHistory(void);
 static char* duplicateString(const char* source);
@@ -1048,7 +1048,7 @@ static void setCurrentCommandPtr(const char* nextToken)
   }
 }
 
-char** commandCompletion(const char* text, int start, int end)
+static char** commandCompletion(const char* text, int start, int end)
 {
   char** matches;
 
@@ -1074,7 +1074,7 @@ char** commandCompletion(const char* text, int start, int end)
 // to start from scratch; without any state (i.e. STATE == 0), then we
 // start at the top of the list.
 
-char* singleCommandCompletion(const char *text, int state)
+static char* singleCommandCompletion(const char *text, int state)
 {
   static int listIndex;
   static int length;
@@ -1151,7 +1151,7 @@ char* singleCommandCompletion(const char *text, int state)
   return (char*)NULL;
 }
 
-char* filenameCompletion(const char* text, int state)
+static char* filenameCompletion(const char* text, int state)
 {
   // We don't do filename completion.
 

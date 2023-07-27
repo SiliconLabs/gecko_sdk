@@ -789,6 +789,7 @@ void cli_esl_tag_image_set(sl_cli_command_arg_t *arguments)
 
     if (sc == SL_STATUS_OK) {
       sc = esl_image_chunk_received(images[source_image],
+                                    0,
                                     sizeof(images[source_image]));
     }
 #else

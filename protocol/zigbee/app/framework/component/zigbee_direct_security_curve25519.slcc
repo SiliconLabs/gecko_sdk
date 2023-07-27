@@ -1,0 +1,23 @@
+id: zigbee_direct_security_curve25519
+label: Zigbee Direct Security Curve25519
+package: Zigbee
+category: Zigbee|Zigbee Direct ZDD
+quality: production
+
+description: Zigbee Direct Security using Curve25519
+
+config_file:
+  - path: protocol/zigbee/app/framework/plugin-soc/zigbee_direct_zdd/zigbee_direct_security_curve25519.xml
+    directory: btconf
+
+provides:
+  - name: zigbee_direct_security
+    allow_multiple: true
+  - name: zigbee_direct_security_curve25519
+
+requires:
+  - name: zigbee_direct_zdd
+
+template_contribution:
+  - name: component_catalog
+    value: zigbee_direct_security_curve25519

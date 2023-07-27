@@ -9,7 +9,7 @@
  *
  *******************************************************************************
  * # License
- * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -76,6 +76,7 @@ static void sl_btmesh_firmware_update_client_init(void)
 void sl_btmesh_firmware_update_client_on_event(const sl_btmesh_msg_t *const evt)
 {
   switch (SL_BT_MSG_ID(evt->header)) {
+    case sl_btmesh_evt_prov_initialized_id:
     case sl_btmesh_evt_node_provisioned_id: {
       sl_btmesh_firmware_update_client_init();
       break;

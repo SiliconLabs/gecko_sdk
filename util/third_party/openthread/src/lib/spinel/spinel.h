@@ -89,12 +89,9 @@
  *   receives a frame that matches the IID and TID of the command it sent, it
  *   can easily recognize that frame as the actual response to that command.
  *
- *   The IID and TID value of zero (0) is used for commands to which a
- *   correlated response is not expected or needed, such as for unsolicited
- *   update commands sent to the host from the NCP.
- *
- *   In case of multiple IID support, the co-processor can use the IID value
- *   of zero to broadcast spinel frames to all the hosts.
+ *   The TID value of zero (0) is used for commands to which a correlated
+ *   response is not expected or needed, such as for unsolicited update
+ *   commands sent to the host from the NCP
  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *
@@ -4942,16 +4939,13 @@ typedef uint32_t spinel_prop_key_t;
 #define SPINEL_HEADER_IID_SHIFT 4
 #define SPINEL_HEADER_IID_MASK (3 << SPINEL_HEADER_IID_SHIFT)
 #define SPINEL_HEADER_IID(iid) (static_cast<uint8_t>((iid) << SPINEL_HEADER_IID_SHIFT))
-#if OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE
-#define SPINEL_HEADER_IID_MAX 3
-#else // !OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE
-#define SPINEL_HEADER_IID_MAX 0
-#endif // OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE
 
 #define SPINEL_HEADER_IID_0 SPINEL_HEADER_IID(0)
 #define SPINEL_HEADER_IID_1 SPINEL_HEADER_IID(1)
 #define SPINEL_HEADER_IID_2 SPINEL_HEADER_IID(2)
 #define SPINEL_HEADER_IID_3 SPINEL_HEADER_IID(3)
+
+#define SPINEL_HEADER_INVALID_IID 0xFF
 
 #define SPINEL_HEADER_GET_IID(x) (((x)&SPINEL_HEADER_IID_MASK) >> SPINEL_HEADER_IID_SHIFT)
 #define SPINEL_HEADER_GET_TID(x) (spinel_tid_t)(((x)&SPINEL_HEADER_TID_MASK) >> SPINEL_HEADER_TID_SHIFT)
@@ -5041,9 +5035,9 @@ SPINEL_API_EXTERN spinel_ssize_t spinel_datatype_unpack(const uint8_t *data_in,
                                                         const char    *pack_format,
                                                         ...);
 /**
- * This function parses spinel data similar to sscanf().
+ * Parses spinel data similar to sscanf().
  *
- * This function actually calls spinel_datatype_vunpack_in_place() to parse data.
+ * Actually calls spinel_datatype_vunpack_in_place() to parse data.
  *
  * @param[in]   data_in     A pointer to the data to parse.
  * @param[in]   data_len    The length of @p data_in in bytes.
@@ -5073,7 +5067,7 @@ SPINEL_API_EXTERN spinel_ssize_t spinel_datatype_vunpack(const uint8_t *data_in,
                                                          const char    *pack_format,
                                                          va_list        args);
 /**
- * This function parses spinel data similar to vsscanf().
+ * Parses spinel data similar to vsscanf().
  *
  * @param[in]   data_in     A pointer to the data to parse.
  * @param[in]   data_len    The length of @p data_in in bytes.

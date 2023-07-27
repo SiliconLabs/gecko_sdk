@@ -119,7 +119,6 @@ Mac::Mac(Instance &aInstance)
     ResetCounters();
 
     SetEnabled(true);
-    mLinks.Enable();
 
     Get<KeyManager>().UpdateKeyMaterial();
     SetPanId(mPanId);
@@ -127,6 +126,20 @@ Mac::Mac(Instance &aInstance)
     SetShortAddress(GetShortAddress());
 
     mMode2KeyMaterial.SetFrom(AsCoreType(&sMode2Key));
+}
+
+void Mac::SetEnabled(bool aEnable)
+{
+    mEnabled = aEnable;
+
+    if (aEnable)
+    {
+        mLinks.Enable();
+    }
+    else
+    {
+        mLinks.Disable();
+    }
 }
 
 Error Mac::ActiveScan(uint32_t aScanChannels, uint16_t aScanDuration, ActiveScanHandler aHandler, void *aContext)
@@ -907,7 +920,7 @@ void Mac::ProcessTransmitSecurity(TxFrame &aFrame)
 
 #if OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
     // Transmit security will be processed after time IE content is updated.
-    VerifyOrExit(aFrame.mInfo.mTxInfo.mCslPresent == 0);
+    VerifyOrExit(!aFrame.IsCslIePresent());
 #endif
 
     aFrame.ProcessTransmitAesCcm(*extAddress);
@@ -1129,11 +1142,7 @@ void Mac::RecordCcaStatus(bool aCcaSuccess, uint8_t aChannel)
     }
 }
 
-void Mac::RecordFrameTransmitStatus(const TxFrame &aFrame,
-                                    RxFrame       *aAckFrame,
-                                    Error          aError,
-                                    uint8_t        aRetryCount,
-                                    bool           aWillRetx)
+void Mac::RecordFrameTransmitStatus(const TxFrame &aFrame, Error aError, uint8_t aRetryCount, bool aWillRetx)
 {
     bool      ackRequested = aFrame.GetAckRequest();
     Address   dstAddr;
@@ -1189,32 +1198,6 @@ void Mac::RecordFrameTransmitStatus(const TxFrame &aFrame,
         }
     }
 
-    // Update neighbor's RSSI link info from the received Ack.
-
-    if ((aError == kErrorNone) && ackRequested && (aAckFrame != nullptr) && (neighbor != nullptr))
-    {
-#if OPENTHREAD_CONFIG_MAC_FILTER_ENABLE
-        SuccessOrExit(mFilter.ApplyToRxFrame(*aAckFrame, neighbor->GetExtAddress(), neighbor));
-#endif
-
-        neighbor->GetLinkInfo().AddRss(aAckFrame->GetRssi());
-#if OPENTHREAD_CONFIG_MLE_LINK_METRICS_SUBJECT_ENABLE
-        neighbor->AggregateLinkMetrics(/* aSeriesId */ 0, aAckFrame->GetType(), aAckFrame->GetLqi(),
-                                       aAckFrame->GetRssi());
-#endif
-#if OPENTHREAD_CONFIG_MLE_LINK_METRICS_INITIATOR_ENABLE
-        ProcessEnhAckProbing(*aAckFrame, *neighbor);
-#endif
-#if OPENTHREAD_FTD
-        if (aAckFrame->GetVersion() == Frame::kVersion2015)
-        {
-#if OPENTHREAD_CONFIG_MAC_CSL_TRANSMITTER_ENABLE
-            ProcessCsl(*aAckFrame, dstAddr);
-#endif
-        }
-#endif // OPENTHREAD_FTD
-    }
-
     // Update MAC counters.
 
     mCounters.mTxTotal++;
@@ -1258,6 +1241,8 @@ exit:
 
 void Mac::HandleTransmitDone(TxFrame &aFrame, RxFrame *aAckFrame, Error aError)
 {
+    bool ackRequested = aFrame.GetAckRequest();
+
 #if OPENTHREAD_CONFIG_RADIO_LINK_IEEE_802_15_4_ENABLE
     if (!aFrame.IsEmpty()
 #if OPENTHREAD_CONFIG_MULTI_RADIO
@@ -1267,10 +1252,9 @@ void Mac::HandleTransmitDone(TxFrame &aFrame, RxFrame *aAckFrame, Error aError)
     {
         Address dstAddr;
 
-        // Determine whether to re-transmit a broadcast frame.
-
         IgnoreError(aFrame.GetDstAddr(dstAddr));
 
+        // Determine whether to re-transmit a broadcast frame.
         if (dstAddr.IsBroadcast())
         {
             mBroadcastTransmitCount++;
@@ -1292,16 +1276,40 @@ void Mac::HandleTransmitDone(TxFrame &aFrame, RxFrame *aAckFrame, Error aError)
             mBroadcastTransmitCount = 0;
         }
 
-#if OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2
-        // Verify Enh-ACK integrity by checking its MIC
-        if ((aError == kErrorNone) && (aAckFrame != nullptr) &&
-            (ProcessEnhAckSecurity(aFrame, *aAckFrame) != kErrorNone))
+        if (ackRequested && (aAckFrame != nullptr))
         {
-            aError = kErrorNoAck;
-        }
+            Neighbor *neighbor = Get<NeighborTable>().FindNeighbor(dstAddr);
+
+#if OPENTHREAD_CONFIG_MAC_FILTER_ENABLE
+            if ((aError == kErrorNone) && (neighbor != nullptr) &&
+                (mFilter.ApplyToRxFrame(*aAckFrame, neighbor->GetExtAddress(), neighbor) != kErrorNone))
+            {
+                aError = kErrorNoAck;
+            }
 #endif
+
+#if OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2
+            // Verify Enh-ACK integrity by checking its MIC
+            if ((aError == kErrorNone) && (ProcessEnhAckSecurity(aFrame, *aAckFrame) != kErrorNone))
+            {
+                aError = kErrorNoAck;
+            }
+#endif
+
+            if ((aError == kErrorNone) && (neighbor != nullptr))
+            {
+                UpdateNeighborLinkInfo(*neighbor, *aAckFrame);
+
+#if OPENTHREAD_CONFIG_MLE_LINK_METRICS_INITIATOR_ENABLE
+                ProcessEnhAckProbing(*aAckFrame, *neighbor);
+#endif
+#if OPENTHREAD_FTD && OPENTHREAD_CONFIG_MAC_CSL_TRANSMITTER_ENABLE
+                ProcessCsl(*aAckFrame, dstAddr);
+#endif
+            }
+        }
     }
-#endif // #if OPENTHREAD_CONFIG_RADIO_LINK_IEEE_802_15_4_ENABLE
+#endif // OPENTHREAD_CONFIG_RADIO_LINK_IEEE_802_15_4_ENABLE
 
 #if OPENTHREAD_CONFIG_MULTI_RADIO
     if (!aFrame.IsEmpty())
@@ -1367,7 +1375,7 @@ void Mac::HandleTransmitDone(TxFrame &aFrame, RxFrame *aAckFrame, Error aError)
         break;
 
     case kOperationTransmitPoll:
-        OT_ASSERT(aFrame.IsEmpty() || aFrame.GetAckRequest());
+        OT_ASSERT(aFrame.IsEmpty() || ackRequested);
 
         if ((aError == kErrorNone) && (aAckFrame != nullptr))
         {
@@ -1649,7 +1657,7 @@ Error Mac::ProcessEnhAckSecurity(TxFrame &aTxFrame, RxFrame &aAckFrame)
     VerifyOrExit(securityLevel == Frame::kSecurityEncMic32);
 
     IgnoreError(aAckFrame.GetKeyIdMode(keyIdMode));
-    VerifyOrExit(keyIdMode == Frame::kKeyIdMode1, error = kErrorNone);
+    VerifyOrExit(keyIdMode == Frame::kKeyIdMode1);
 
     IgnoreError(aTxFrame.GetKeyId(txKeyId));
     IgnoreError(aAckFrame.GetKeyId(ackKeyId));
@@ -1845,20 +1853,14 @@ void Mac::HandleReceivedFrame(RxFrame *aFrame, Error aError)
     }
 
 #if OPENTHREAD_FTD && OPENTHREAD_CONFIG_MAC_CSL_TRANSMITTER_ENABLE
-    if (aFrame->GetVersion() == Frame::kVersion2015)
-    {
-        ProcessCsl(*aFrame, srcaddr);
-    }
+    ProcessCsl(*aFrame, srcaddr);
 #endif
 
     Get<DataPollSender>().ProcessRxFrame(*aFrame);
 
     if (neighbor != nullptr)
     {
-        neighbor->GetLinkInfo().AddRss(aFrame->GetRssi());
-#if OPENTHREAD_CONFIG_MLE_LINK_METRICS_SUBJECT_ENABLE
-        neighbor->AggregateLinkMetrics(/* aSeriesId */ 0, aFrame->GetType(), aFrame->GetLqi(), aFrame->GetRssi());
-#endif
+        UpdateNeighborLinkInfo(*neighbor, *aFrame);
 
         if (aFrame->GetSecurityEnabled())
         {
@@ -2020,6 +2022,27 @@ exit:
             break;
         }
     }
+}
+
+void Mac::UpdateNeighborLinkInfo(Neighbor &aNeighbor, const RxFrame &aRxFrame)
+{
+    LinkQuality oldLinkQuality = aNeighbor.GetLinkInfo().GetLinkQuality();
+
+    aNeighbor.GetLinkInfo().AddRss(aRxFrame.GetRssi());
+
+#if OPENTHREAD_CONFIG_MLE_LINK_METRICS_SUBJECT_ENABLE
+    aNeighbor.AggregateLinkMetrics(/* aSeriesId */ 0, aRxFrame.GetType(), aRxFrame.GetLqi(), aRxFrame.GetRssi());
+#endif
+
+    // Signal when `aNeighbor` is the current parent and its link
+    // quality gets changed.
+
+    VerifyOrExit(Get<Mle::Mle>().IsChild() && (&aNeighbor == &Get<Mle::Mle>().GetParent()));
+    VerifyOrExit(aNeighbor.GetLinkInfo().GetLinkQuality() != oldLinkQuality);
+    Get<Notifier>().Signal(kEventParentLinkQualityChanged);
+
+exit:
+    return;
 }
 
 bool Mac::HandleMacCommand(RxFrame &aFrame)
@@ -2281,16 +2304,20 @@ bool Mac::IsCslSupported(void) const
 #if OPENTHREAD_FTD && OPENTHREAD_CONFIG_MAC_CSL_TRANSMITTER_ENABLE
 void Mac::ProcessCsl(const RxFrame &aFrame, const Address &aSrcAddr)
 {
-    const uint8_t *cur   = aFrame.GetHeaderIe(CslIe::kHeaderIeId);
-    Child         *child = Get<ChildTable>().FindChild(aSrcAddr, Child::kInStateAnyExceptInvalid);
+    const uint8_t *cur;
+    Child         *child;
     const CslIe   *csl;
 
-    VerifyOrExit(cur != nullptr && child != nullptr && aFrame.GetSecurityEnabled());
+    VerifyOrExit(aFrame.IsVersion2015() && aFrame.GetSecurityEnabled());
+
+    cur = aFrame.GetHeaderIe(CslIe::kHeaderIeId);
+    VerifyOrExit(cur != nullptr);
+
+    child = Get<ChildTable>().FindChild(aSrcAddr, Child::kInStateAnyExceptInvalid);
+    VerifyOrExit(child != nullptr);
 
     csl = reinterpret_cast<const CslIe *>(cur + sizeof(HeaderIe));
-
     child->SetCslPeriod(csl->GetPeriod());
-    // Use ceiling to ensure the the time diff will be within kUsPerTenSymbols
     child->SetCslPhase(csl->GetPhase());
     child->SetCslSynchronized(true);
     child->SetCslLastHeard(TimerMilli::GetNow());

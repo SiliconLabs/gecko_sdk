@@ -39,7 +39,6 @@
                 .syntax  unified
                 .arch    armv8-m.main
 
-
                 .section    .stack
                 .align      9
                 #ifdef __STACK_SIZE
@@ -72,11 +71,11 @@
  __HeapLimit:
                 .size       __HeapLimit, . - __HeapLimit
 
-                #define __INITIAL_SP     __StackTop
+#define __INITIAL_SP     __StackTop
                 #if defined(SL_TRUSTZONE_SECURE)
-                #define __STACK_LIMIT    __StackLimit
+#define __STACK_LIMIT    __StackLimit
                 #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
-                #define __STACK_SEAL     __StackSeal
+#define __STACK_SEAL     __StackSeal
                 #endif
                 #endif // SL_TRUSTZONE_SECURE
 
@@ -102,7 +101,6 @@ __Vectors:
                 .long    sl_app_properties                  /*     Application properties */
                 .long    PendSV_Handler                     /*  -2 PendSV Handler */
                 .long    SysTick_Handler                    /*  -1 SysTick Handler */
-
 
     /* External interrupts */
                 .long    SMU_SECURE_IRQHandler   /* 0 - SMU_SECURE */
@@ -177,7 +175,7 @@ __Vectors:
                 .long    LESENSE_IRQHandler      /* 69 - LESENSE */
                 .long    SYSRTC_APP_IRQHandler   /* 70 - SYSRTC_APP */
                 .long    SYSRTC_SEQ_IRQHandler   /* 71 - SYSRTC_SEQ */
-                .long    Default_Handler         /* Reserved */
+                .long    LCD_IRQHandler          /* 72 - LCD */
                 .long    KEYSCAN_IRQHandler      /* 73 - KEYSCAN */
                 .long    RFECA0_IRQHandler       /* 74 - RFECA0 */
                 .long    RFECA1_IRQHandler       /* 75 - RFECA1 */
@@ -187,7 +185,6 @@ __Vectors:
 __Vectors_End:
                 .equ     __Vectors_Size, __Vectors_End - __Vectors
                 .size    __Vectors, . - __Vectors
-
 
                 .thumb
                 .section .text
@@ -257,7 +254,7 @@ Reset_Handler:
 .L_loop2_done:
 
                 #ifndef __START
-                #define __START _start
+#define __START _start
                 #endif
                 bl      __START
 
@@ -374,6 +371,7 @@ Default_Handler:
                 Set_Default_Handler  LESENSE_IRQHandler
                 Set_Default_Handler  SYSRTC_APP_IRQHandler
                 Set_Default_Handler  SYSRTC_SEQ_IRQHandler
+                Set_Default_Handler  LCD_IRQHandler
                 Set_Default_Handler  KEYSCAN_IRQHandler
                 Set_Default_Handler  RFECA0_IRQHandler
                 Set_Default_Handler  RFECA1_IRQHandler

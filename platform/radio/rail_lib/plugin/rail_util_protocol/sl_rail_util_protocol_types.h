@@ -62,6 +62,7 @@ typedef enum sl_rail_util_protocol_type{
   SL_RAIL_UTIL_PROTOCOL_ZWAVE_US_LR1,
   SL_RAIL_UTIL_PROTOCOL_ZWAVE_US_LR2,
   SL_RAIL_UTIL_PROTOCOL_ZWAVE_US_LR_END_DEVICE,
+  SL_RAIL_UTIL_PROTOCOL_SIDEWALK_2GFSK_50KBPS,
 } sl_rail_util_protocol_type_t;
 
 #define SL_RAIL_UTIL_PROTOCOL_IS_BLE(x)              \
@@ -95,6 +96,9 @@ typedef enum sl_rail_util_protocol_type{
    || (x == SL_RAIL_UTIL_PROTOCOL_ZWAVE_US_LR1) \
    || (x == SL_RAIL_UTIL_PROTOCOL_ZWAVE_US_LR2) \
    || (x == SL_RAIL_UTIL_PROTOCOL_ZWAVE_US_LR_END_DEVICE))
+
+#define SL_RAIL_UTIL_PROTOCOL_IS_SIDEWALK(x) \
+  ((x == SL_RAIL_UTIL_PROTOCOL_SIDEWALK_2GFSK_50KBPS))
 
 #ifdef __cplusplus
 }

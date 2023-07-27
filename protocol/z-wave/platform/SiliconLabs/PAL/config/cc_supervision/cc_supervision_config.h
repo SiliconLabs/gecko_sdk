@@ -10,7 +10,7 @@
 
 // <h> Command Class Supervision Configuration
 
-// <q> Status updates enabled
+// <q CC_SUPERVISION_CONFIG_DEFAULT_STATUS_UPDATES_ENABLED> Status updates enabled
 // <i> Defines whether Status Updates supported or not
 // <i> Default: 0
 #define CC_SUPERVISION_CONFIG_DEFAULT_STATUS_UPDATES_ENABLED  0

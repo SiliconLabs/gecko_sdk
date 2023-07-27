@@ -56,23 +56,6 @@ void sli_zigbee_c_gp_sent_handler(EmberStatus status, uint8_t gpMpduHandle)
   return;
 }
 
-//dGP-DATA.indication
-void sli_zigbee_d_gp_incoming_message_handler(uint8_t lqi,
-                                              uint8_t sequenceNumber,
-                                              EmberCGpAddress const *src,
-                                              EmberCGpAddress const *dst,
-                                              PacketHeader header)
-//uint8_t gpMpduLength,
-//uint8_t const *gpMpdu);
-{
-  (void)lqi;
-  (void)sequenceNumber;
-  (void)src;
-  (void)dst;
-  (void)header;
-  return;
-}
-
 //GP-DATA.request
 EmberStatus emberDGpSend(bool action,
                          bool useCca,
@@ -92,92 +75,6 @@ EmberStatus emberDGpSend(bool action,
   (void)gpepHandle;
   (void)gpTxQueueEntryLifetimeMs;
   return EMBER_LIBRARY_NOT_PRESENT;
-}
-
-//GP-DATA.indication
-EmberStatus emberGpIncomingMessageHandler(uint8_t lqi,
-                                          uint8_t sequenceNumber,
-                                          EmberCGpAddress const *src,
-                                          //EmberGpApplication const *application,
-                                          EmberGpApplicationId applicationId,
-                                          EmberGpSecurityLevel gpdfSecurityLevel,
-                                          bool autoCommissioning,
-                                          bool rxAfterTx,
-                                          uint32_t srcID,
-                                          uint8_t endpoint,
-                                          uint32_t gpdSecurityFrameCounter,
-                                          uint8_t gpdCommandId,
-                                          uint8_t gpdAsduLength,
-                                          uint8_t const *gpdAsdu,
-                                          uint32_t mic,
-                                          uint8_t const *gpMpdu,
-                                          uint8_t gpepHandle,
-                                          uint16_t gpTxQueueEntryLifetime)
-{
-  (void)lqi;
-  (void)sequenceNumber;
-  (void)src;
-  (void)applicationId;
-  (void)gpdfSecurityLevel;
-  (void)autoCommissioning;
-  (void)rxAfterTx;
-  (void)srcID;
-  (void)endpoint;
-  (void)gpdSecurityFrameCounter;
-  (void)gpdCommandId;
-  (void)gpdAsduLength;
-  (void)gpdAsdu;
-  (void)mic;
-  (void)gpMpdu;
-  (void)gpepHandle;
-  (void)gpTxQueueEntryLifetime;
-  return EMBER_LIBRARY_NOT_PRESENT;
-}
-
-//GP-SEC.request
-void emberGpSecurityRequest(EmberGpApplicationId applicationId,
-                            uint32_t srcId,
-                            EmberEUI64 ieee,
-                            uint8_t endpoint,
-                            EmberGpSecurityLevel gpdfSecurityLevel,
-                            EmberGpKeyType gpdfKeyType,
-                            EmberGpSecurityFrameCounter gpdSecurityFrameCounter,
-                            uint8_t dgpHandle)
-{
-  (void)applicationId;
-  (void)srcId;
-  (void)ieee;
-  (void)endpoint;
-  (void)gpdfSecurityLevel;
-  (void)gpdfKeyType;
-  (void)gpdSecurityFrameCounter;
-  (void)dgpHandle;
-  return;
-}
-
-//GP-SEC.response
-void emberGpSecurityResponse(EmberStatus status,
-                             uint8_t dgpHandle,
-                             EmberGpApplicationId applicationId,
-                             uint32_t srcID,
-                             EmberEUI64 ieee,
-                             uint8_t endpoint,
-                             EmberGpSecurityLevel gpdfSecurityLevel,
-                             EmberGpKeyType gpdf_KeyType,
-                             EmberKeyData gpdKey,
-                             EmberGpSecurityFrameCounter gpdSecurityFrameCounter)
-{
-  (void)status;
-  (void)dgpHandle;
-  (void)applicationId;
-  (void)srcID;
-  (void)ieee;
-  (void)endpoint;
-  (void)gpdfSecurityLevel;
-  (void)gpdf_KeyType;
-  (void)gpdKey;
-  (void)gpdSecurityFrameCounter;
-  return;
 }
 
 void sli_zigbee_read_gp_tokens(void)

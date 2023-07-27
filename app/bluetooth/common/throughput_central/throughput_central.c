@@ -3,7 +3,7 @@
  * @brief Throughput test application - platform interface
  *******************************************************************************
  * # License
- * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -32,6 +32,7 @@
 #include <stdio.h>
 #include "sl_bt_api.h"
 #include "sl_common.h"
+#include "sl_malloc.h"
 #include "app_log.h"
 #include "app_assert.h"
 #include "throughput_central.h"
@@ -693,7 +694,7 @@ bool throughput_central_allowlist_clear(void)
 
   while (current_entry != NULL) {
     entry_cache = current_entry->next;
-    free(current_entry);
+    sl_free(current_entry);
     current_entry = entry_cache;
   }
 
@@ -718,7 +719,7 @@ bool throughput_central_allowlist_add(uint8_t *address)
     }
     if (current_entry->next == NULL) { //This is the last entry in the list
       //Allocate memory for the next one.
-      next_entry = malloc(sizeof(throughput_allowlist_t));
+      next_entry = sl_malloc(sizeof(throughput_allowlist_t));
       if (next_entry == NULL) {
         ret_val = false;
       } else {

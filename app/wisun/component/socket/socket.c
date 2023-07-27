@@ -43,9 +43,6 @@
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
 
-/// Data event handling timeout ms
-#define SOCKET_DATA_EVT_HND_TIMEOUT_MS                 3000UL
-
 // -----------------------------------------------------------------------------
 //                          Static Function Declarations
 // -----------------------------------------------------------------------------
@@ -440,7 +437,6 @@ int32_t recv(int32_t sockid, void *buf, uint32_t len, int32_t flags)
       if (!sli_socket_hnd_is_remote_addr_stored(sockhnd)) {
         sli_socket_hnd_set_errno_ret_error(EINVAL);
       }
-      sli_socket_hnd_wait_for_data_evt_finish(sockhnd, SOCKET_DATA_EVT_HND_TIMEOUT_MS);
 
       sli_socket_hnd_fifo_read(sockhnd, buf, &real_length);
 
@@ -486,7 +482,6 @@ int32_t recvfrom(int32_t sockid, void *buf, uint32_t len, int32_t flags,
           || sli_socket_hnd_read_remote_addr(sockhnd, src_addr, sizeof(wisun_addr_t), 0) == SOCKET_RETVAL_ERROR) {
         sli_socket_hnd_set_errno_ret_error(EINVAL);
       } else {
-        sli_socket_hnd_wait_for_data_evt_finish(sockhnd, SOCKET_DATA_EVT_HND_TIMEOUT_MS);
         sli_socket_hnd_fifo_read(sockhnd, buf, &real_length); // underflow not handled, real_lenght contains the read data
       }
       return real_length;

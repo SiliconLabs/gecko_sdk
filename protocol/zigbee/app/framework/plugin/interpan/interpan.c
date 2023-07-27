@@ -133,12 +133,12 @@ static void printMessage(EmberAfInterpanHeader *headerData);
 #endif
 
 #if defined(ALLOW_FRAGMENTATION)
-EmberStatus interpanFragmentationSendUnicast(EmberAfInterpanHeader* header, uint8_t* message, uint16_t messageLen);
-bool isInterpanFragment(uint8_t* payload, uint8_t payloadLen);
-EmberStatus interpanFragmentationSendIpmf(txFragmentedInterpanPacket* txPacket);
-EmberStatus interpanFragmentationProcessIpmf(EmberAfInterpanHeader header, uint8_t *message, uint8_t messageLen);
-void interpanFragmentationSendIpmfResponse(EmberAfInterpanHeader header, uint8_t fragNum, uint8_t responseStatus);
-void interpanFragmentationProcessIpmfResponse(EmberAfInterpanHeader header, uint8_t* payload, uint8_t payloadLen);
+static EmberStatus interpanFragmentationSendUnicast(EmberAfInterpanHeader* header, uint8_t* message, uint16_t messageLen);
+static bool isInterpanFragment(uint8_t* payload, uint8_t payloadLen);
+static EmberStatus interpanFragmentationSendIpmf(txFragmentedInterpanPacket* txPacket);
+static EmberStatus interpanFragmentationProcessIpmf(EmberAfInterpanHeader header, uint8_t *message, uint8_t messageLen);
+static void interpanFragmentationSendIpmfResponse(EmberAfInterpanHeader header, uint8_t fragNum, uint8_t responseStatus);
+static void interpanFragmentationProcessIpmfResponse(EmberAfInterpanHeader header, uint8_t* payload, uint8_t payloadLen);
 
 static txFragmentedInterpanPacket txPackets[EMBER_AF_PLUGIN_INTERPAN_FRAGMENTATION_MAX_OUTGOING_PACKETS];
 static rxFragmentedInterpanPacket rxPackets[EMBER_AF_PLUGIN_INTERPAN_FRAGMENTATION_MAX_INCOMING_PACKETS];
@@ -932,7 +932,7 @@ EmberStatus emberAfInterpanSendMessageCallback(EmberAfInterpanHeader* header,
 // This function checks if packet is an inter-PAN fragment. It must do length
 // checks as well since ZCL default responses come in with APS payload byte 1
 // 0x00, which is also an inter-PAN IPMF control byte value.
-bool isInterpanFragment(uint8_t* payload, uint8_t payloadLen)
+static bool isInterpanFragment(uint8_t* payload, uint8_t payloadLen)
 {
   if (!payload || (payloadLen < EMBER_APS_INTERPAN_FRAGMENT_MIN_LEN)) {
     return false;
@@ -1065,9 +1065,9 @@ static rxFragmentedInterpanPacket* rxPacketLookUp(EmberEUI64 sourceEui)
 }
 
 // This function sends a whole message. It takes care of the fragmenting.
-EmberStatus interpanFragmentationSendUnicast(EmberAfInterpanHeader* header,
-                                             uint8_t* message,
-                                             uint16_t messageLen)
+static EmberStatus interpanFragmentationSendUnicast(EmberAfInterpanHeader* header,
+                                                    uint8_t* message,
+                                                    uint16_t messageLen)
 {
   txFragmentedInterpanPacket *txPacket;
   EmberStatus status;
@@ -1125,7 +1125,7 @@ EmberStatus interpanFragmentationSendUnicast(EmberAfInterpanHeader* header,
 
 // This function sends an individual fragment. It expects the caller to handle
 // the setting up and handling of txPacket metadata.
-EmberStatus interpanFragmentationSendIpmf(txFragmentedInterpanPacket *txPacket)
+static EmberStatus interpanFragmentationSendIpmf(txFragmentedInterpanPacket *txPacket)
 {
   if (!txPacket || !txPacket->bufLen) {
     return EMBER_BAD_ARGUMENT;
@@ -1174,8 +1174,8 @@ EmberStatus interpanFragmentationSendIpmf(txFragmentedInterpanPacket *txPacket)
 
 // This function reads an IPMF message and stores necessary data. The caller
 // will need to send an IPMF response based on the return from this function.
-EmberStatus interpanFragmentationProcessIpmf(EmberAfInterpanHeader header,
-                                             uint8_t *message, uint8_t messageLen)
+static EmberStatus interpanFragmentationProcessIpmf(EmberAfInterpanHeader header,
+                                                    uint8_t *message, uint8_t messageLen)
 {
   uint8_t* finger;
   uint8_t fragNum, numFrags, fragLen, headerLen = INTERPAN_UNICAST_HEADER_SIZE;
@@ -1287,8 +1287,8 @@ EmberStatus interpanFragmentationProcessIpmf(EmberAfInterpanHeader header,
 }
 
 // This function sends an IPMF response to the sender of the IPMF
-void interpanFragmentationSendIpmfResponse(EmberAfInterpanHeader header,
-                                           uint8_t fragNum, uint8_t response)
+static void interpanFragmentationSendIpmfResponse(EmberAfInterpanHeader header,
+                                                  uint8_t fragNum, uint8_t response)
 {
   EmberStatus status;
   uint8_t message[EMBER_AF_MAXIMUM_INTERPAN_LENGTH];
@@ -1332,9 +1332,9 @@ void interpanFragmentationSendIpmfResponse(EmberAfInterpanHeader header,
 
 // This function processes the IPMF response and either sends the next fragment
 // or finishes the transmission
-void interpanFragmentationProcessIpmfResponse(EmberAfInterpanHeader header,
-                                              uint8_t* payload,
-                                              uint8_t payloadLen)
+static void interpanFragmentationProcessIpmfResponse(EmberAfInterpanHeader header,
+                                                     uint8_t* payload,
+                                                     uint8_t payloadLen)
 {
   if (!payload
       || (EMBER_APS_INTERPAN_FRAGMENTATION_RESPONSE_LEN != payloadLen)) {

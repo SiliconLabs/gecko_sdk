@@ -34,6 +34,13 @@
 #include "sl_component_catalog.h"
 #endif
 
+#ifdef SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
+  #include "app/framework/include/af.h"
+#else
+// Include events because we use the event type in a lot of .h files.
+  #include "app/framework/common/zigbee_app_framework_event.h"
+#endif
+
 #ifdef SL_CATALOG_ZIGBEE_FRAGMENTATION_PRESENT
 #include "fragmentation-config.h"
 #else
@@ -143,7 +150,7 @@ void sli_zigbee_af_fragmentation_send_reply(EmberNodeId sender,
                                             EmberApsFrame* apsFrame,
                                             rxFragmentedPacket* rxPacket);
 
-#if defined(EMBER_TEST)
+#if defined(EMBER_TEST) || defined(EMBER_GOLDEN_UNIT)
 extern uint8_t sli_zigbee_af_fragmentation_artificially_drop_block_number;
 #endif
 

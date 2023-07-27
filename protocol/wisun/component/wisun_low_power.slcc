@@ -1,0 +1,22 @@
+id: "wisun_low_power"
+label: "Wi-SUN Low Power"
+description: "Add low power capability for Wi-SUN LFN sleep"
+package: "wisun"
+category: "Wi-SUN|Wi-SUN Plugin"
+quality: "evaluation"
+root_path: "protocol/wisun"
+
+ui_hints:
+  visibility: never
+
+provides:
+  - name: "wisun_low_power"
+
+requires:
+  - name: "wisun_stack_lfn"
+  - name: "power_manager"
+
+recommends:
+  - id: "iostream_leuart"
+    condition: [device_has_leuart]
+    instance: [vcom]

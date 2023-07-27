@@ -32,7 +32,7 @@ typedef uint32_t PrepaySnapshotPayloadCause;
 typedef uint8_t  PrepaySnapshotPayloadType;
 typedef uint8_t  FriendlyCredit;
 
-void sli_zigbee_af_prepayment_print_af_time(EmberAfTimeStruct *pafTime)
+static void print_af_time(EmberAfTimeStruct *pafTime)
 {
   emberAfPrepaymentClusterPrintln("== AF TIME ==");
   emberAfPrepaymentClusterPrintln("  Year=%d", pafTime->year);
@@ -183,7 +183,7 @@ void sli_zigbee_af_prepayment_check_calendar_cli(sl_cli_command_arg_t *arguments
 
   utcTime = sl_cli_get_argument_uint32(arguments, 0);
   emberAfFillTimeStructFromUtc(utcTime, &afTime);
-  sli_zigbee_af_prepayment_print_af_time(&afTime);
+  print_af_time(&afTime);
 
   calcUtcTime = emberAfGetUtcFromTimeStruct(&afTime);
   if ( calcUtcTime == utcTime ) {

@@ -6,7 +6,7 @@ description: >
   firmware upgrade (DFU) protocol for applications. Before doing an update it checks for the current version 
   of the bootloader. If the current version is not the latest, then only the bootloader is upgraded.
 category: Platform|Bootloader|TrustZone NonSecure|Communication
-quality: evaluation
+quality: production
 source:
   - path: platform/bootloader/communication/apploader/btl_apploader_ns.c
   - path: platform/bootloader/communication/apploader/btl_apploader_common.c

@@ -24,7 +24,7 @@ if slc.config("SL_RAIL_UTIL_PTI_MODE") ~= nil then
                                  "DFRAME is required when PTI is in UART mode, please select pin for DFRAME",
                                  nil)
             end
-            if pti_dclk_port ~= nil then
+            if pti_dclk ~= nil then
                 validation.error("DCLK is defined",
                                  validation.target_for_defines({"SL_RAIL_UTIL_PTI_DCLK_PORT",
                                                                 "SL_RAIL_UTIL_PTI_DCLK_PIN"}),
@@ -40,7 +40,7 @@ if slc.config("SL_RAIL_UTIL_PTI_MODE") ~= nil then
                                  "DFRAME is required when PTI is in SPI mode, please select pin for DFRAME",
                                  nil)
             end
-            if pti_dclk_port == nil then
+            if pti_dclk == nil then
                 validation.error("DCLK is not defined",
                                  validation.target_for_defines({"SL_RAIL_UTIL_PTI_DCLK_PORT",
                                                                 "SL_RAIL_UTIL_PTI_DCLK_PIN"}),
@@ -56,7 +56,7 @@ if slc.config("SL_RAIL_UTIL_PTI_MODE") ~= nil then
                                  "DFRAME is not used when PTI is in UART_ONEWIRE mode, please deselect DFRAME pin",
                                  nil)
             end
-            if pti_dclk_port ~= nil then
+            if pti_dclk ~= nil then
                 validation.error("DCLK is defined",
                                  validation.target_for_defines({"SL_RAIL_UTIL_PTI_DCLK_PORT",
                                                                 "SL_RAIL_UTIL_PTI_DCLK_PIN"}),

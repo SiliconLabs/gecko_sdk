@@ -3,7 +3,7 @@
  * @brief
  *******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -36,6 +36,7 @@
 
 #include <string.h>
 #include "app_assert.h"
+#include "app_timer.h"
 
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
@@ -44,6 +45,10 @@
 #ifdef SL_CATALOG_APP_LOG_PRESENT
 #include "app_log.h"
 #endif // SL_CATALOG_APP_LOG_PRESENT
+
+#ifdef SL_CATALOG_BTMESH_FACTORY_RESET_PRESENT
+#include "sl_btmesh_factory_reset.h"
+#endif // SL_CATALOG_BTMESH_FACTORY_RESET_PRESENT
 
 #include "sl_btmesh_provisionee.h"
 #include "sl_btmesh_provisionee_config.h"
@@ -61,8 +66,15 @@
 #define SL_UNUSED  __attribute__((unused))
 
 #define AUTH_VAL_SIZE_MAX 32
+// Callback has no parameters
+#define NO_CALLBACK_DATA               (void *)NULL
+// Timeout for system reset after node reset event occured
+#define SL_BTMESH_SYSTEM_RESET_TIMEOUT 0
 
 static size_t auth_val_size = AUTH_VAL_SIZE_MAX;
+
+// Timer callback
+static app_timer_t sl_btmesh_system_reset_timer;
 
 // -----------------------------------------------------------------------------
 //                          Static Function Declarations
@@ -93,6 +105,14 @@ SL_UNUSED static void on_output_oob_data(uint8_t output_action, uint8array* data
  ******************************************************************************/
 SL_UNUSED static uint32_t oob_data_to_num(uint8array *data);
 
+/***************************************************************************//**
+ * Timer callback for system reset after node reset event occured
+ *
+ * @param[in] handle timer handler
+ * @param[in] data pointer to callback parameter
+ ******************************************************************************/
+static void on_system_reset_timer(app_timer_t *handle, void *data);
+
 void sl_bt_provisionee_on_event(sl_bt_msg_t* evt)
 {
   sl_status_t sc;
@@ -120,6 +140,7 @@ void sl_bt_provisionee_on_event(sl_bt_msg_t* evt)
 
 void sl_btmesh_provisionee_on_event(sl_btmesh_msg_t* evt)
 {
+  sl_status_t sc;
   switch (SL_BT_MSG_ID(evt->header)) {
     case sl_btmesh_evt_node_initialized_id:
       if (!(evt->data.evt_node_initialized.provisioned)) {
@@ -160,6 +181,21 @@ void sl_btmesh_provisionee_on_event(sl_btmesh_msg_t* evt)
       sl_btmesh_on_static_oob_request(auth_val_size);
       break;
   #endif
+
+    case sl_btmesh_evt_node_reset_id:
+  #ifdef SL_CATALOG_BTMESH_FACTORY_RESET_PRESENT
+      // Application callback on node reset
+      sl_btmesh_factory_reset_on_node_reset();
+  #endif // SL_CATALOG_BTMESH_FACTORY_RESET_PRESENT
+      // Reboot after a small delay
+      sc = app_timer_start(&sl_btmesh_system_reset_timer,
+                           SL_BTMESH_SYSTEM_RESET_TIMEOUT,
+                           on_system_reset_timer,
+                           NO_CALLBACK_DATA,
+                           false);
+      app_assert_status_f(sc, "Failed to start system reset timer after node reset event");
+      break;
+
     default:
       break;
   }
@@ -265,6 +301,17 @@ static void on_output_oob_data(uint8_t output_action, uint8array* data)
     default:
       break;
   }
+}
+
+/***************************************************************************//**
+ * Timer Callback
+ ******************************************************************************/
+static void on_system_reset_timer(app_timer_t *handle, void *data)
+{
+  (void)data;
+  (void)handle;
+  // Reboot
+  sl_bt_system_reset(0);
 }
 
 SL_WEAK void sl_btmesh_provisionee_on_init(sl_status_t result)

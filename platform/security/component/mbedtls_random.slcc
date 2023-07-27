@@ -31,7 +31,6 @@ template_contribution:
     value: MBEDTLS_ENTROPY_FORCE_SHA256
   - name: mbedtls_config
     value: "MBEDTLS_ENTROPY_MAX_SOURCES  2"
-    unless: [test_suite_entropy]
   - name: mbedtls_config
     value: MBEDTLS_NO_PLATFORM_ENTROPY
     condition:

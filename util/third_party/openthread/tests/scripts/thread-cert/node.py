@@ -414,6 +414,19 @@ class OtbrDocker:
         return self.call_dbus_method('io.openthread.BorderRouter', 'SetNat64Enabled', enable)
 
     @property
+    def nat64_cidr(self):
+        self.send_command('nat64 cidr')
+        cidr = self._expect_command_output()[0].strip()
+        return ipaddress.IPv4Network(cidr, strict=False)
+
+    @nat64_cidr.setter
+    def nat64_cidr(self, cidr: ipaddress.IPv4Network):
+        if not isinstance(cidr, ipaddress.IPv4Network):
+            raise ValueError("cidr is expected to be an instance of ipaddress.IPv4Network")
+        self.send_command(f'nat64 cidr {cidr}')
+        self._expect_done()
+
+    @property
     def nat64_state(self):
         state = self.get_dbus_property('Nat64State')
         return {'PrefixManager': state[0], 'Translator': state[1]}
@@ -749,7 +762,6 @@ class NodeImpl:
 
         super().__init__(nodeid, **kwargs)
 
-        self.set_mesh_local_prefix(config.MESH_LOCAL_PREFIX)
         self.set_addr64('%016x' % (thread_cert.EXTENDED_ADDRESS_BASE + nodeid))
 
     def _expect(self, pattern, timeout=-1, *args, **kwargs):
@@ -2535,53 +2547,82 @@ class NodeImpl:
 
     def set_active_dataset(
         self,
-        timestamp,
-        panid=None,
+        timestamp=None,
         channel=None,
         channel_mask=None,
+        extended_panid=None,
+        mesh_local_prefix=None,
         network_key=None,
+        network_name=None,
+        panid=None,
+        pskc=None,
         security_policy=[],
+        updateExisting=False,
     ):
-        self.send_command('dataset clear')
+
+        if updateExisting:
+            self.send_command('dataset init active', go=False)
+        else:
+            self.send_command('dataset clear', go=False)
         self._expect_done()
 
-        cmd = 'dataset activetimestamp %d' % timestamp
-        self.send_command(cmd)
-        self._expect_done()
-
-        if panid is not None:
-            cmd = 'dataset panid %d' % panid
-            self.send_command(cmd)
+        if timestamp is not None:
+            cmd = 'dataset activetimestamp %d' % timestamp
+            self.send_command(cmd, go=False)
             self._expect_done()
 
         if channel is not None:
             cmd = 'dataset channel %d' % channel
-            self.send_command(cmd)
+            self.send_command(cmd, go=False)
             self._expect_done()
 
         if channel_mask is not None:
             cmd = 'dataset channelmask %d' % channel_mask
-            self.send_command(cmd)
+            self.send_command(cmd, go=False)
+            self._expect_done()
+
+        if extended_panid is not None:
+            cmd = 'dataset extpanid %s' % extended_panid
+            self.send_command(cmd, go=False)
+            self._expect_done()
+
+        if mesh_local_prefix is not None:
+            cmd = 'dataset meshlocalprefix %s' % mesh_local_prefix
+            self.send_command(cmd, go=False)
             self._expect_done()
 
         if network_key is not None:
             cmd = 'dataset networkkey %s' % network_key
-            self.send_command(cmd)
+            self.send_command(cmd, go=False)
             self._expect_done()
 
-        if security_policy and len(security_policy) == 2:
-            cmd = 'dataset securitypolicy %s %s' % (
-                str(security_policy[0]),
-                security_policy[1],
-            )
-            self.send_command(cmd)
+        if network_name is not None:
+            cmd = 'dataset networkname %s' % network_name
+            self.send_command(cmd, go=False)
             self._expect_done()
 
-        # Set the meshlocal prefix in config.py
-        self.send_command('dataset meshlocalprefix %s' % config.MESH_LOCAL_PREFIX.split('/')[0])
-        self._expect_done()
+        if panid is not None:
+            cmd = 'dataset panid %d' % panid
+            self.send_command(cmd, go=False)
+            self._expect_done()
 
-        self.send_command('dataset commit active')
+        if pskc is not None:
+            cmd = 'dataset pskc %s' % pskc
+            self.send_command(cmd, go=False)
+            self._expect_done()
+
+        if security_policy is not None:
+            if len(security_policy) >= 2:
+                cmd = 'dataset securitypolicy %s %s' % (
+                    str(security_policy[0]),
+                    security_policy[1],
+                )
+            if len(security_policy) >= 3:
+                cmd += ' %s' % (str(security_policy[2]))
+            self.send_command(cmd, go=False)
+            self._expect_done()
+
+        self.send_command('dataset commit active', go=False)
         self._expect_done()
 
     def set_pending_dataset(self, pendingtimestamp, activetimestamp, panid=None, channel=None, delay=None):
@@ -2685,8 +2726,9 @@ class NodeImpl:
             cmd += 'networkname %s ' % self._escape_escapable(network_name)
 
         if security_policy is not None:
-            rotation, flags = security_policy
-            cmd += 'securitypolicy %d %s ' % (rotation, flags)
+            cmd += 'securitypolicy %d %s ' % (security_policy[0], security_policy[1])
+            if (len(security_policy) >= 3):
+                cmd += '%d ' % (security_policy[2])
 
         if binary is not None:
             cmd += '-x %s ' % binary
@@ -3173,7 +3215,7 @@ class NodeImpl:
     def _parse_linkmetrics_query_result(self, lines):
         """Parse link metrics query result"""
 
-        # Exmaple of command output:
+        # Example of command output:
         # ['Received Link Metrics Report from: fe80:0:0:0:146e:a00:0:1',
         #  '- PDU Counter: 1 (Count/Summation)',
         #  '- LQI: 0 (Exponential Moving Average)',
@@ -3643,6 +3685,30 @@ class LinuxHost():
         self.bash('ip -6 neigh list nud all dev %s | cut -d " " -f1 | sudo xargs -I{} ip -6 neigh delete {} dev %s' %
                   (self.ETH_DEV, self.ETH_DEV))
         self.bash(f'ip -6 neigh list dev {self.ETH_DEV}')
+
+    def publish_mdns_service(self, instance_name, service_type, port, host_name, txt):
+        """Publish an mDNS service on the Ethernet.
+
+        :param instance_name: the service instance name.
+        :param service_type: the service type in format of '<service_type>.<protocol>'.
+        :param port: the port the service is at.
+        :param host_name: the host name this service points to. The domain
+                          should not be included.
+        :param txt: a dictionary containing the key-value pairs of the TXT record.
+        """
+        txt_string = ' '.join([f'{key}={value}' for key, value in txt.items()])
+        self.bash(f'avahi-publish -s {instance_name}  {service_type} {port} -H {host_name}.local {txt_string} &')
+
+    def publish_mdns_host(self, hostname, addresses):
+        """Publish an mDNS host on the Ethernet
+
+        :param host_name: the host name this service points to. The domain
+                          should not be included.
+        :param addresses: a list of strings representing the addresses to
+                          be registered with the host.
+        """
+        for address in addresses:
+            self.bash(f'avahi-publish -a {hostname}.local {address} &')
 
     def browse_mdns_services(self, name, timeout=2):
         """ Browse mDNS services on the ethernet.

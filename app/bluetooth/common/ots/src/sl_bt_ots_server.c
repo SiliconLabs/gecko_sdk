@@ -35,7 +35,6 @@
 #include "sli_bt_ots_datatypes.h"
 #include "sl_status.h"
 #include "sli_bt_ots_server_adaptation.h"
-#include "app_assert.h"
 
 #define OTS_L2CAP_MAX_PDU       250
 #define OTS_L2CAP_MAX_SDU       252
@@ -64,13 +63,6 @@
   }
 
 // Adaptation definitions
-#define ADAPTATION_DECLARE_STATUS sl_status_t adaptation_status
-#define ADAPTATION_TRY_ACQUIRE()                                               \
-  do {                                                                         \
-    adaptation_status = sli_bt_ots_server_adaptation_acquire();                \
-    app_assert_status_f(adaptation_status,                                     \
-                        "Could not access to OTS Server indication service."); \
-  } while (0)
 #define ADAPTATION_RELEASE() sli_bt_ots_server_adaptation_release()
 #define ADAPTATION_PROCEED() sli_bt_ots_server_adaptation_proceed()
 #define ADAPTATION_IF_ACQUIRED() \
@@ -392,39 +384,42 @@ sl_status_t sl_bt_ots_server_increase_credit(sl_bt_ots_server_handle_t server,
 
 void sli_bt_ots_server_on_bt_event(sl_bt_msg_t *evt)
 {
-  ADAPTATION_DECLARE_STATUS;
-
   switch (SL_BT_MSG_ID(evt->header)) {
     case sl_bt_evt_system_boot_id:
       break;
     case sl_bt_evt_connection_opened_id:
       // Connection opened
-      ADAPTATION_TRY_ACQUIRE();
-      client_connected(evt->data.evt_connection_opened.connection);
-      ADAPTATION_RELEASE();
+      ADAPTATION_IF_ACQUIRED() {
+        client_connected(evt->data.evt_connection_opened.connection);
+        ADAPTATION_RELEASE();
+      }
       break;
     case sl_bt_evt_connection_closed_id:
       // Connection closed
-      ADAPTATION_TRY_ACQUIRE();
-      client_disconnected(evt->data.evt_connection_closed.connection);
-      ADAPTATION_RELEASE();
+      ADAPTATION_IF_ACQUIRED() {
+        client_disconnected(evt->data.evt_connection_closed.connection);
+        ADAPTATION_RELEASE();
+      }
       break;
     case sl_bt_evt_gatt_server_user_read_request_id:
       // Handle read requests
-      ADAPTATION_TRY_ACQUIRE();
-      handle_gatt_read(&evt->data.evt_gatt_server_user_read_request);
-      ADAPTATION_RELEASE();
+      ADAPTATION_IF_ACQUIRED() {
+        handle_gatt_read(&evt->data.evt_gatt_server_user_read_request);
+        ADAPTATION_RELEASE();
+      }
       break;
     case sl_bt_evt_gatt_server_user_write_request_id:
       // Handle write requests
-      ADAPTATION_TRY_ACQUIRE();
-      handle_gatt_write(&evt->data.evt_gatt_server_user_write_request);
-      ADAPTATION_RELEASE();
+      ADAPTATION_IF_ACQUIRED() {
+        handle_gatt_write(&evt->data.evt_gatt_server_user_write_request);
+        ADAPTATION_RELEASE();
+      }
       break;
     case sl_bt_evt_gatt_server_characteristic_status_id:
-      ADAPTATION_TRY_ACQUIRE();
-      handle_cccd(&evt->data.evt_gatt_server_characteristic_status);
-      ADAPTATION_RELEASE();
+      ADAPTATION_IF_ACQUIRED() {
+        handle_cccd(&evt->data.evt_gatt_server_characteristic_status);
+        ADAPTATION_RELEASE();
+      }
       break;
     case sl_bt_evt_gatt_server_indication_timeout_id:
       // Indication timed out
@@ -445,30 +440,29 @@ static void l2cap_transfer_data_transmit_server(sl_bt_l2cap_transfer_transfer_ha
   uint8_t index = 0;
   sl_bt_ots_server_t *server = NULL;
   sl_bt_ots_server_client_db_entry_t *client = NULL;
-  ADAPTATION_DECLARE_STATUS;
 
-  ADAPTATION_TRY_ACQUIRE();
+  ADAPTATION_IF_ACQUIRED() {
+    for (index = 0; index < SL_BT_OTS_SERVER_COUNT; index++) {
+      server = (sl_bt_ots_server_t *)sl_bt_ots_server_instances[index];
 
-  for (index = 0; index < SL_BT_OTS_SERVER_COUNT; index++) {
-    server = (sl_bt_ots_server_t *)sl_bt_ots_server_instances[index];
+      client = find_client_by_transfer(server, transfer_object);
 
-    client = find_client_by_transfer(server, transfer_object);
-
-    if (client != NULL) {
-      ADAPTATION_RELEASE();
-      CALL_SAFE(server,
-                on_data_transmit,
-                server,
-                client->connection_handle,
-                &client->object_in_use,
-                offset,
-                size,
-                data,
-                data_size);
-      return;
+      if (client != NULL) {
+        ADAPTATION_RELEASE();
+        CALL_SAFE(server,
+                  on_data_transmit,
+                  server,
+                  client->connection_handle,
+                  &client->object_in_use,
+                  offset,
+                  size,
+                  data,
+                  data_size);
+        return;
+      }
     }
+    ADAPTATION_RELEASE();
   }
-  ADAPTATION_RELEASE();
 }
 
 // L2CAP transfer callback for data reception
@@ -481,83 +475,82 @@ static uint16_t l2cap_transfer_data_received_server(sl_bt_l2cap_transfer_transfe
   sl_bt_ots_server_t *server = NULL;
   sl_bt_ots_server_client_db_entry_t *client = NULL;
   uint16_t credit = 0;
-  ADAPTATION_DECLARE_STATUS;
 
-  ADAPTATION_TRY_ACQUIRE();
+  ADAPTATION_IF_ACQUIRED() {
+    for (index = 0; index < SL_BT_OTS_SERVER_COUNT; index++) {
+      server = (sl_bt_ots_server_t *)sl_bt_ots_server_instances[index];
 
-  for (index = 0; index < SL_BT_OTS_SERVER_COUNT; index++) {
-    server = (sl_bt_ots_server_t *)sl_bt_ots_server_instances[index];
+      client = find_client_by_transfer(server, transfer_object);
 
-    client = find_client_by_transfer(server, transfer_object);
-
-    if (client != NULL
-        && (sl_bt_l2cap_transfer_transfer_t *)transfer_object == &client->l2cap_transfer
-        && server->callbacks->on_data_received != NULL) {
-      ADAPTATION_RELEASE();
-      credit = server->callbacks->on_data_received(server,
-                                                   client->connection_handle,
-                                                   &client->object_in_use,
-                                                   offset,
-                                                   data,
-                                                   length);
-      return credit;
+      if (client != NULL
+          && (sl_bt_l2cap_transfer_transfer_t *)transfer_object == &client->l2cap_transfer
+          && server->callbacks->on_data_received != NULL) {
+        ADAPTATION_RELEASE();
+        credit = server->callbacks->on_data_received(server,
+                                                     client->connection_handle,
+                                                     &client->object_in_use,
+                                                     offset,
+                                                     data,
+                                                     length);
+        return credit;
+      }
     }
-  }
 
-  ADAPTATION_RELEASE();
+    ADAPTATION_RELEASE();
+  }
   return credit;
 }
 
 // L2CAP transfer callback for transfer finish
 static void l2cap_transfer_transfer_finished_server(sl_bt_l2cap_transfer_transfer_handle_t transfer_object,
-                                                    sl_status_t                                   error_code)
+                                                    sl_status_t                            error_code)
 {
   uint8_t index = 0;
   sl_bt_ots_server_t *server = NULL;
   sl_bt_ots_server_client_db_entry_t *client = NULL;
   sl_bt_ots_transfer_result_t result = SL_BT_OTS_TRANSFER_FINISHED_RESPONSE_CODE_SUCCESS;
-  ADAPTATION_DECLARE_STATUS;
 
-  ADAPTATION_TRY_ACQUIRE();
+  ADAPTATION_IF_ACQUIRED() {
+    // Search for owner and call back
+    for (index = 0; index < SL_BT_OTS_SERVER_COUNT; index++) {
+      server = (sl_bt_ots_server_t *)sl_bt_ots_server_instances[index];
+      client = find_client_by_transfer(server, transfer_object);
 
-  // Search for owner and call back
-  for (index = 0; index < SL_BT_OTS_SERVER_COUNT; index++) {
-    server = (sl_bt_ots_server_t *)sl_bt_ots_server_instances[index];
-    client = find_client_by_transfer(server, transfer_object);
+      if (error_code != SL_STATUS_OK) {
+        result = SL_BT_OTS_TRANSFER_FINISHED_RESPONSE_CODE_CHANNEL_ERROR;
+      }
 
-    if (error_code != SL_STATUS_OK) {
-      result = SL_BT_OTS_TRANSFER_FINISHED_RESPONSE_CODE_CHANNEL_ERROR;
-    }
+      if (client != NULL) {
+        ADAPTATION_RELEASE();
 
-    if (client != NULL) {
-      ADAPTATION_RELEASE();
+        // Clear operation that was in progress
+        client->operation_in_progress = SL_BT_OTS_OACP_OPCODE_INVALID;
 
-      // Clear operation that was in progress
-      client->operation_in_progress = SL_BT_OTS_OACP_OPCODE_INVALID;
-
-      CALL_SAFE(server,
-                on_data_transfer_finished,
-                server,
-                client->connection_handle,
-                &client->object_in_use,
-                result);
+        CALL_SAFE(server,
+                  on_data_transfer_finished,
+                  server,
+                  client->connection_handle,
+                  &client->object_in_use,
+                  result);
 
 #if SL_BT_OTS_SERVER_CONFIG_GLOBAL_OBJECT_CHANGED_SUPPORT
-      ADAPTATION_TRY_ACQUIRE();
-      (void)send_object_changed(server,
-                                &client->object_in_use,
-                                SL_BT_OTS_OBJECT_CHANGE_SOURCE_MASK
-                                | SL_BT_OTS_OBJECT_CHANGE_CONTENTS_MASK,
-                                client->connection_handle);
-      ADAPTATION_RELEASE();
+        ADAPTATION_IF_ACQUIRED() {
+          (void)send_object_changed(server,
+                                    &client->object_in_use,
+                                    SL_BT_OTS_OBJECT_CHANGE_SOURCE_MASK
+                                    | SL_BT_OTS_OBJECT_CHANGE_CONTENTS_MASK,
+                                    client->connection_handle);
+          ADAPTATION_RELEASE();
+        }
 #endif // SL_BT_OTS_SERVER_CONFIG_GLOBAL_OBJECT_CHANGED_SUPPORT
 
-      set_object_invalid(&client->object_in_use);
-      return;
+        set_object_invalid(&client->object_in_use);
+        return;
+      }
     }
-  }
 
-  ADAPTATION_RELEASE();
+    ADAPTATION_RELEASE();
+  }
 }
 
 // L2CAP transfer callback for channel open

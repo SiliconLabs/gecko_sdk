@@ -112,13 +112,13 @@ void emberAfPluginGasProxyFunctionInitCallback(uint8_t init_level)
  *  received and Outcomes in the GPF Event Log(4.6.3.8). If the message is
  *  too long, the data will be truncated.
  *  */
-void sli_zigbee_af_gas_proxy_function_log_event(uint8_t * gbzCmd,
-                                                uint16_t  gbzCmdLen,
-                                                uint8_t * gbzResp,
-                                                uint16_t  gbzRespLen,
-                                                uint16_t eventId,
-                                                EmberAfGPFMessageType cmdType,
-                                                uint16_t messageCode)
+static void log_event(uint8_t * gbzCmd,
+                      uint16_t  gbzCmdLen,
+                      uint8_t * gbzResp,
+                      uint16_t  gbzRespLen,
+                      uint16_t eventId,
+                      EmberAfGPFMessageType cmdType,
+                      uint16_t messageCode)
 {
   EmberAfEvent event;
   uint8_t * logMsg = event.eventData;
@@ -369,15 +369,15 @@ EmberStatus emberAfPluginGasProxyFunctionTapOffMessageHandler(uint8_t * gbzComma
   }
 
   // time to log these lovely TOM commands to the Event log.
-  sli_zigbee_af_gas_proxy_function_log_event(gbzCommands,
-                                             gbzCommandsLength,
-                                             gbzCommandsResponse,
-                                             gbzCommandsResponseLength,
-                                             (status == EMBER_SUCCESS)
-                                             ?  GBCS_EVENT_ID_IMM_HAN_CMD_RXED_ACTED
-                                             : GBCS_EVENT_ID_IMM_HAN_CMD_RXED_NOT_ACTED,
-                                             EMBER_AF_GPF_MESSAGE_TYPE_TOM,
-                                             messageCode);
+  log_event(gbzCommands,
+            gbzCommandsLength,
+            gbzCommandsResponse,
+            gbzCommandsResponseLength,
+            (status == EMBER_SUCCESS)
+            ?  GBCS_EVENT_ID_IMM_HAN_CMD_RXED_ACTED
+            : GBCS_EVENT_ID_IMM_HAN_CMD_RXED_NOT_ACTED,
+            EMBER_AF_GPF_MESSAGE_TYPE_TOM,
+            messageCode);
 
   emberAfCurrentCommand() = NULL;
   return status;
@@ -544,13 +544,13 @@ EmberStatus emberAfPluginGasProxyFunctionNonTapOffMessageHandler(uint8_t * gbzCo
     nonTomHandlingActive = false;
 
     // Log Non-Actioned Non-TOM
-    sli_zigbee_af_gas_proxy_function_log_event(gbzCommands,
-                                               gbzCommandsLength,
-                                               NULL,
-                                               0,
-                                               GBCS_EVENT_ID_IMM_HAN_CMD_RXED_NOT_ACTED,
-                                               EMBER_AF_GPF_MESSAGE_TYPE_NON_TOM,
-                                               messageCode);
+    log_event(gbzCommands,
+              gbzCommandsLength,
+              NULL,
+              0,
+              GBCS_EVENT_ID_IMM_HAN_CMD_RXED_NOT_ACTED,
+              EMBER_AF_GPF_MESSAGE_TYPE_NON_TOM,
+              messageCode);
   }
   return status;
 }
@@ -604,13 +604,13 @@ static void captureNonTomZclCmdResp(EmberAfClusterCommand * cmd)
     gbzResponse->freeRequired = false;
 
     // Log Actioned Non TOM
-    sli_zigbee_af_gas_proxy_function_log_event(nonTomGbzRequestParser.command,
-                                               nonTomGbzRequestParser.length,
-                                               gbzResponse->payload,
-                                               gbzResponse->payloadLength,
-                                               GBCS_EVENT_ID_IMM_HAN_CMD_RXED_ACTED,
-                                               EMBER_AF_GPF_MESSAGE_TYPE_NON_TOM,
-                                               nonTomGbzRequestParser.messageCode);
+    log_event(nonTomGbzRequestParser.command,
+              nonTomGbzRequestParser.length,
+              gbzResponse->payload,
+              gbzResponse->payloadLength,
+              GBCS_EVENT_ID_IMM_HAN_CMD_RXED_ACTED,
+              EMBER_AF_GPF_MESSAGE_TYPE_NON_TOM,
+              nonTomGbzRequestParser.messageCode);
 
     emberAfPluginGbzMessageControllerParserCleanup(&nonTomGbzRequestParser);
     emberAfPluginGbzMessageControllerCreatorCleanup(&nonTomGbzResponseCreator);

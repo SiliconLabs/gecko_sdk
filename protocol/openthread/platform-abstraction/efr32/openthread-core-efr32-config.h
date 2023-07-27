@@ -195,16 +195,27 @@
 #endif
 
 /**
- * @def OPENTHREAD_CONFIG_CSL_MIN_RECEIVE_ON
+ * @def OPENTHREAD_CONFIG_MIN_RECEIVE_ON_AHEAD
  *
- * The minimum CSL receive window (in microseconds) required to receive an IEEE 802.15.4 frame.
- * - Maximum frame size with preamble: 6*2+127*2 symbols
- * - AIFS: 12 symbols
- * - Maximum ACK size with preamble: 6*2+33*2 symbols
- * - Additional frame window: 6*2+127*2 symbols
+ * The minimum time (in microseconds) before the MHR start that the radio should be in receive state and ready to
+ * properly receive in order to properly receive any IEEE 802.15.4 frame. Defaults to the duration of SHR + PHR.
+ *
  */
-#ifndef OPENTHREAD_CONFIG_CSL_MIN_RECEIVE_ON
-#define OPENTHREAD_CONFIG_CSL_MIN_RECEIVE_ON 622 * 16
+#ifndef OPENTHREAD_CONFIG_MIN_RECEIVE_ON_AHEAD
+#define OPENTHREAD_CONFIG_MIN_RECEIVE_ON_AHEAD (6 * 32)
+#endif
+
+/**
+ * @def OPENTHREAD_CONFIG_MIN_RECEIVE_ON_AFTER
+ *
+ * The minimum time (in microseconds) after the MHR start that the radio should be in receive state in order
+ * to properly receive any IEEE 802.15.4 frame. Defaults to the duration of a maximum size frame, plus AIFS,
+ * plus the duration of maximum enh-ack frame. Platforms are encouraged to improve this value for energy
+ * efficiency purposes.
+ *
+ */
+#ifndef OPENTHREAD_CONFIG_MIN_RECEIVE_ON_AFTER
+#define OPENTHREAD_CONFIG_MIN_RECEIVE_ON_AFTER ((127 + 6 + 39) * 32)
 #endif
 
 /*
@@ -398,6 +409,46 @@
 #endif
 
 /**
+ * @def SL_OPENTHREAD_CSL_TX_UNCERTAINTY
+ *
+ * Uncertainty of scheduling a CSL transmission, in ±10 us units.
+ *
+ * Note: This value was carefully configured to meet Thread certification
+ * requirements for Silicon Labs devices.
+ *
+ */
+#ifndef SL_OPENTHREAD_CSL_TX_UNCERTAINTY
+#define SL_OPENTHREAD_CSL_TX_UNCERTAINTY 175
+#endif
+
+/**
+ * @def SL_OPENTHREAD_HFXO_ACCURACY
+ *
+ * XTAL accuracy in units of ± ppm. Also used for calculations during CSL operations.
+ *
+ * According to EFR datasheets, HFXO is ± 40 ppm.
+ *
+ * @note Platforms may optimize this value based on operational conditions (i.e.: temperature).
+ *
+ */
+#ifndef SL_OPENTHREAD_HFXO_ACCURACY
+#define SL_OPENTHREAD_HFXO_ACCURACY 80
+#endif
+
+/**
+ * @def SL_OPENTHREAD_LFXO_ACCURACY
+ *
+ * XTAL accuracy in units of ± ppm. Also used for calculations during CSL operations.
+ *
+ * According to EFR datasheets, LFXO (at least for MG12) is -8 to +40 ppm.
+ *
+ * @note Platforms may optimize this value based on operational conditions (i.e.: temperature).
+ */
+#ifndef SL_OPENTHREAD_LFXO_ACCURACY
+#define SL_OPENTHREAD_LFXO_ACCURACY 48
+#endif
+
+/**
  * @def SL_OPENTHREAD_RADIO_CCA_MODE
  *
  * Defines the CCA mode to be used by the platform.
@@ -414,7 +465,7 @@
  *
  */
 #ifndef SL_OPENTHREAD_RADIO_RX_BUFFER_COUNT
-#define SL_OPENTHREAD_RADIO_RX_BUFFER_COUNT 4
+#define SL_OPENTHREAD_RADIO_RX_BUFFER_COUNT 16
 #endif
 
 /**

@@ -18,7 +18,7 @@
 
 #ifndef SILABS_ZIGBEE_DEVICE_COMMON_H
 #define SILABS_ZIGBEE_DEVICE_COMMON_H
-
+#include "stack/include/zigbee-device-stack.h"
 /** @addtogroup util_zdo
  * @{
  */

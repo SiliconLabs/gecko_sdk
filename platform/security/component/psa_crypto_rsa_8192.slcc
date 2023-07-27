@@ -1,0 +1,14 @@
+id: psa_crypto_rsa_8192
+package: platform
+label: RSA-8192
+description: >-
+  This component adds support for 8192-bit RSA operations.
+category: Platform|Security|PSA Crypto|RSA
+quality: evaluation
+provides:
+  - name: psa_crypto_rsa_8192
+  - name: psa_crypto_rsa_size
+    allow_multiple: true
+requires:
+  - name: psa_crypto_rsa
+  - name: mbedtls_rsa_8192

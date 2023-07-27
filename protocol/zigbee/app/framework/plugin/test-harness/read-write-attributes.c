@@ -330,7 +330,7 @@ static void printResults(void)
   }
 }
 
-bool checkTestComplete(void)
+static bool checkTestComplete(void)
 {
   if ((attributeIdStart + currentIndex) > attributeIdEnd) {
     emberAfCorePrintln("Done.\n");

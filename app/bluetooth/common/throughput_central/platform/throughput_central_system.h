@@ -55,4 +55,4 @@ void timer_step_rssi(void);
 
 #endif
 
-#endif
+#endif // THROUGHPUT_CENTRAL_INCLUDE_H

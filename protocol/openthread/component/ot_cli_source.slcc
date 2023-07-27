@@ -18,14 +18,17 @@ include:
   - path: util/third_party/openthread/src/cli
     file_list:
       - path: cli.hpp
+      - path: cli_bbr.hpp
       - path: cli_br.hpp
       - path: cli_coap.hpp
       - path: cli_coap_secure.hpp
       - path: cli_commissioner.hpp
       - path: cli_config.h
       - path: cli_dataset.hpp
+      - path: cli_dns.hpp
       - path: cli_history.hpp
       - path: cli_joiner.hpp
+      - path: cli_mac_filter.hpp
       - path: cli_network_data.hpp
       - path: cli_output.hpp
       - path: cli_srp_client.hpp
@@ -36,13 +39,16 @@ include:
 source:
       - path: util/third_party/openthread/examples/apps/cli/cli_uart.cpp
       - path: util/third_party/openthread/src/cli/cli.cpp
+      - path: util/third_party/openthread/src/cli/cli_bbr.cpp
       - path: util/third_party/openthread/src/cli/cli_br.cpp
       - path: util/third_party/openthread/src/cli/cli_coap.cpp
       - path: util/third_party/openthread/src/cli/cli_coap_secure.cpp
       - path: util/third_party/openthread/src/cli/cli_commissioner.cpp
       - path: util/third_party/openthread/src/cli/cli_dataset.cpp
+      - path: util/third_party/openthread/src/cli/cli_dns.cpp
       - path: util/third_party/openthread/src/cli/cli_history.cpp
       - path: util/third_party/openthread/src/cli/cli_joiner.cpp
+      - path: util/third_party/openthread/src/cli/cli_mac_filter.cpp
       - path: util/third_party/openthread/src/cli/cli_network_data.cpp
       - path: util/third_party/openthread/src/cli/cli_output.cpp
       - path: util/third_party/openthread/src/cli/cli_srp_client.cpp

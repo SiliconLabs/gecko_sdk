@@ -38,7 +38,6 @@ static uint8_t savedPkt[MAX_BUFFER_SIZE];
 static uint16_t mfgCurrentPacketCounter = 0;
 
 static bool inReceivedStream = false;
-
 static bool mfgLibRunning = false;
 static bool mfgToneTestRunning = false;
 static bool mfgStreamTestRunning = false;
@@ -54,13 +53,11 @@ static uint8_t   sendBuff[MAX_BUFFER_SIZE + 1];
 #define MIN_CLI_MESSAGE_SIZE 3
 #define MAX_CLI_MESSAGE_SIZE 16
 
-sl_zigbee_event_t emberAfPluginManufacturingLibraryCliCheckSendCompleteEvent;
-#define checkSendCompleteEventControl (&emberAfPluginManufacturingLibraryCliCheckSendCompleteEvent)
-void emberAfPluginManufacturingLibraryCliCheckSendCompleteEventHandler(sl_zigbee_event_t * event);
+sl_zigbee_event_t emberAfPluginManufacturingLibraryCliCheckReceiveCompleteEvent;
+#define checkReceiveCompleteEventControl (&emberAfPluginManufacturingLibraryCliCheckReceiveCompleteEvent)
+void emberAfPluginManufacturingLibraryCliCheckReceiveCompleteEventHandler(sl_zigbee_event_t * event);
 
-static uint16_t savedPacketCount = 0;
-
-#define CHECK_SEND_COMPLETE_DELAY_QS 2
+#define CHECK_RECEIVE_COMPLETE_DELAY_QS 2
 
 // -----------------------------------------------------------------------------
 // Forward Declarations
@@ -105,36 +102,32 @@ void sli_zigbee_af_manufacturing_library_cli_init_callback(uint8_t init_level)
 {
   (void)init_level;
 
-  sl_zigbee_event_init(checkSendCompleteEventControl,
-                       emberAfPluginManufacturingLibraryCliCheckSendCompleteEventHandler);
+  sl_zigbee_event_init(checkReceiveCompleteEventControl,
+                       emberAfPluginManufacturingLibraryCliCheckReceiveCompleteEventHandler);
 }
 
 // This is unfortunate but there is no callback indicating when sending is complete
 // for all packets.  So we must create a timer that checks whether the packet count
 // has increased within the last second.
 
-void emberAfPluginManufacturingLibraryCliCheckSendCompleteEventHandler(sl_zigbee_event_t * event)
+void emberAfPluginManufacturingLibraryCliCheckReceiveCompleteEventHandler(sl_zigbee_event_t * event)
 {
-  sl_zigbee_event_set_inactive(checkSendCompleteEventControl);
-  if (!inReceivedStream) {
+  if (!inReceivedStream || !mfgLibRunning) {
     return;
   }
 
-  if (savedPacketCount == mfgTotalPacketCounter) {
-    inReceivedStream = false;
-    emberAfCorePrintln("%p Send Complete %d packets",
-                       PLUGIN_NAME,
-                       mfgCurrentPacketCounter);
-    emberAfCorePrintln("First packet: lqi %d, rssi %d, len %d",
-                       savedLinkQuality,
-                       savedRssi,
-                       savedPktLength);
-    mfgCurrentPacketCounter = 0;
-  } else {
-    savedPacketCount = mfgTotalPacketCounter;
-    sl_zigbee_event_set_delay_qs(checkSendCompleteEventControl,
-                                 CHECK_SEND_COMPLETE_DELAY_QS);
-  }
+  emberAfCorePrintln("%p RXed %d packets in the last %d ms",
+                     PLUGIN_NAME,
+                     mfgCurrentPacketCounter,
+                     CHECK_RECEIVE_COMPLETE_DELAY_QS * 250);
+  emberAfCorePrintln("First packet: lqi %d, rssi %d, len %d",
+                     savedLinkQuality,
+                     savedRssi,
+                     savedPktLength);
+  mfgCurrentPacketCounter = 0;
+
+  sl_zigbee_event_set_delay_qs(checkReceiveCompleteEventControl,
+                               CHECK_RECEIVE_COMPLETE_DELAY_QS);
 }
 
 static void fillBuffer(uint8_t* buff, uint8_t length, bool random)
@@ -171,17 +164,17 @@ void ezspMfglibRxHandler(uint8_t linkQuality,
   mfgTotalPacketCounter++;
 
   mfgCurrentPacketCounter++;
-
   // If this is the first packet of a transmit group then save the information
   // of the current packet. Don't do this for every packet, just the first one.
-  if (!inReceivedStream) {
+  if (!inReceivedStream && mfgLibRunning) {
     inReceivedStream = true;
     mfgCurrentPacketCounter = 1;
     savedRssi = rssi;
     savedLinkQuality = linkQuality;
     savedPktLength = packetLength;
     MEMMOVE(savedPkt, packetContents, savedPktLength);
-    sl_zigbee_event_set_active(checkSendCompleteEventControl);
+    sl_zigbee_event_set_delay_qs(checkReceiveCompleteEventControl,
+                                 CHECK_RECEIVE_COMPLETE_DELAY_QS);
   }
 }
 
@@ -220,8 +213,10 @@ void emberAfMfglibStop(void)
                      PLUGIN_NAME,
                      status);
   emberAfCorePrintln("rx %d packets while in mfg mode", mfgTotalPacketCounter);
+
   if (status == EMBER_SUCCESS) {
     mfgLibRunning = false;
+    inReceivedStream = false;
   }
 }
 

@@ -7,6 +7,8 @@ description: >
    - automatic IV Update request, if a sequence number exceeds a threshold.
    - automatic IV Update request, after a configured time in Normal operation.
   Turning on this component may increase power consumption.
+  This component is prepared for integration into SOC applications.
+  This is a No-Code component.
 category: "Bluetooth Mesh"
 quality: "production"
 root_path: "app/btmesh/common/btmesh_iv_update"
@@ -29,14 +31,24 @@ provides:
 requires:
   - name: "app_assert"
   - name: "app_btmesh_util"
+  - name: "btmesh_role_init"
   - name: "btmesh_stack_node"
   - name: "btmesh_stack"
   - name: "app_timer"
 recommends:
   - id: "app_timer"
-  
+
 template_contribution:
   - name: "btmesh_on_event"
     value:
       include: "sl_btmesh_iv_update.h"
       function: "sl_btmesh_iv_update_on_event"
+  - name: "btmesh_app_node_reset"
+    value:
+      include: "sl_btmesh_iv_update_age_backup.h"
+      function: "sl_btmesh_iv_update_on_node_reset"
+  - name: "component_catalog"
+    value: "btmesh_iv_update"
+
+validation_helper:
+  - path: "../../script/validation/soc_ncp_compatibility.lua"

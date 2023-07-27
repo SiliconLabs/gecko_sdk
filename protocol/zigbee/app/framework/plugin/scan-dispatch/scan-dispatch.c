@@ -22,8 +22,8 @@
 // -----------------------------------------------------------------------------
 // Global variables
 
-sl_zigbee_event_t emberAfPluginScanDispatchScanNetworkEvents[EMBER_SUPPORTED_NETWORKS];
-void emberAfPluginScanDispatchScanNetworkEventHandler(sl_zigbee_event_t * event);
+static sl_zigbee_event_t scanNetworkEvents[EMBER_SUPPORTED_NETWORKS];
+static void scanNetworkEventHandler(sl_zigbee_event_t * event);
 
 // -----------------------------------------------------------------------------
 // Internal implementation elements
@@ -79,7 +79,7 @@ EmberStatus emberAfPluginScanDispatchScheduleScan(EmberAfPluginScanDispatchScanD
     tail = handlerQueueNextIndex(tail);
     count++;
     status = EMBER_SUCCESS;
-    sl_zigbee_event_set_active(emberAfPluginScanDispatchScanNetworkEvents);
+    sl_zigbee_event_set_active(scanNetworkEvents);
   }
 
   return status;
@@ -98,15 +98,15 @@ void sli_zigbee_af_scan_dispatch_init_callback(uint8_t init_level)
 {
   (void)init_level;
 
-  sl_zigbee_network_event_init(emberAfPluginScanDispatchScanNetworkEvents,
-                               emberAfPluginScanDispatchScanNetworkEventHandler);
+  sl_zigbee_network_event_init(scanNetworkEvents,
+                               scanNetworkEventHandler);
 }
 
-void emberAfPluginScanDispatchScanNetworkEventHandler(sl_zigbee_event_t * event)
+static void scanNetworkEventHandler(sl_zigbee_event_t * event)
 {
   sl_status_t status;
 
-  sl_zigbee_event_set_inactive(emberAfPluginScanDispatchScanNetworkEvents);
+  sl_zigbee_event_set_inactive(scanNetworkEvents);
 
   // If there is a handler in the queue, start a scan for it.
   // If we are already scanning, we should try again.
@@ -126,7 +126,7 @@ void emberAfPluginScanDispatchScanNetworkEventHandler(sl_zigbee_event_t * event)
                              NULL);     // network
         head = handlerQueueNextIndex(head);
         count--;
-        sl_zigbee_event_set_active(emberAfPluginScanDispatchScanNetworkEvents);
+        sl_zigbee_event_set_active(scanNetworkEvents);
       }
     }
   }
@@ -171,6 +171,6 @@ void sli_zigbee_af_scan_dispatch_scan_complete_callback(uint8_t channel, EmberSt
   if ((status == EMBER_SUCCESS) && !handlerQueueIsEmpty()) {
     head = handlerQueueNextIndex(head);
     count--;
-    sl_zigbee_event_set_active(emberAfPluginScanDispatchScanNetworkEvents);
+    sl_zigbee_event_set_active(scanNetworkEvents);
   }
 }

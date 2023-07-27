@@ -21,6 +21,9 @@ requires:
 recommends:
   - id: zigbee_pro_stack_non_default_mac_source
 
+config_file:
+  - path: protocol/zigbee/stack/config/component_config/sl_zigbee_pro_stack_non_default_mac_config.h
+
 template_contribution:
   - name: component_catalog
     value: zigbee_pro_stack_non_default_mac

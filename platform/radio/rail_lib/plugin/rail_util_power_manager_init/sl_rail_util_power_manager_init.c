@@ -33,7 +33,7 @@
 
 void sl_rail_util_power_manager_init(void)
 {
-#if SL_RAIL_UTIL_ENABLE_POWER_MANAGER_INIT == 1
+#if SL_RAIL_UTIL_RAIL_POWER_MANAGER_INIT == 1
   RAIL_InitPowerManager();
 #endif
 }

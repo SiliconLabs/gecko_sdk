@@ -3,7 +3,7 @@
  * @brief Encrypted Advertisement Data core functions implementation.
  *******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -31,6 +31,7 @@
 #include <string.h>
 #include <assert.h>
 #include "em_common.h"
+#include "sl_malloc.h"
 #include "psa/crypto.h"
 #include "sl_bt_ead_core.h"
 #include "psa/crypto_values.h"
@@ -157,7 +158,7 @@ sl_status_t sl_bt_ead_encrypt(sl_bt_ead_key_material_p key_material,
 
   if (status == PSA_SUCCESS) {
     result = SL_STATUS_ALLOCATION_FAILED;
-    output_data = (uint8_t *)malloc(output_size);
+    output_data = (uint8_t *)sl_malloc(output_size);
 
     if (output_data != NULL) {
       result = SL_STATUS_INVALID_KEY;
@@ -184,7 +185,8 @@ sl_status_t sl_bt_ead_encrypt(sl_bt_ead_key_material_p key_material,
           result = SL_STATUS_OK;
         }
 
-        free(output_data);
+        sl_free(output_data);
+        output_data = NULL;
 
         // Destroy the key
         psa_destroy_key(key_id);
@@ -232,7 +234,7 @@ sl_status_t sl_bt_ead_decrypt(sl_bt_ead_key_material_p key_material,
 
   if (status == PSA_SUCCESS) {
     result = SL_STATUS_ALLOCATION_FAILED;
-    output_data = (uint8_t *)malloc(output_size);
+    output_data = (uint8_t *)sl_malloc(output_size);
 
     if (output_data != NULL) {
       result = SL_STATUS_INVALID_KEY;
@@ -260,7 +262,8 @@ sl_status_t sl_bt_ead_decrypt(sl_bt_ead_key_material_p key_material,
           result = SL_STATUS_OK;
         }
 
-        free(output_data);
+        sl_free(output_data);
+        output_data = NULL;
 
         // Destroy the key
         psa_destroy_key(key_id);

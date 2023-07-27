@@ -98,7 +98,7 @@ void emberAfIncomingMessageCallback(EmberIncomingMessage *message)
     app_log_info("RX: TX test packet from 0x%04X:{", message->source);
     for ( i = 0; i < message->length; i++ ) {
       if ( i == 0) {
-        app_log_info(" %02X", message->payload[i]);
+        app_log_info("%02X", message->payload[i]);
       } else {
         app_log_info(" %02X", message->payload[i]);
       }

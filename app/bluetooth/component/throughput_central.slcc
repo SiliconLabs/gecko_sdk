@@ -30,6 +30,7 @@ source:
 requires:
   - name: "app_log"
   - name: "app_assert"
+  - name: "silabs_core_sl_malloc"
   - name: "bluetooth_stack"
   - name: "bluetooth_feature_system"
   - name: "bluetooth_feature_power_control"

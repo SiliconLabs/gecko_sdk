@@ -48,6 +48,7 @@ component:
   - id: restrictions_profile_wisun_han
   - id: restrictions_profile_wisun_ofdm
   - id: restrictions_profile_sun
+  - id: restrictions_profile_sidewalk
 
 #----------------- Require list ----------------------
 requires:
@@ -76,29 +77,8 @@ requires:
     condition: [device_sdid_230]
   - name: radio_config_simple_rail_singlephy
     condition: [device_sdid_235]
-  - name: radio_config_simple_rail_singlephy
-    condition: 
-      - device_sdid_210
-      - hardware_board_default_rf_band_434
-  - name: radio_config_simple_rail_singlephy
-    condition: 
-      - device_sdid_210
-      - hardware_board_default_rf_band_868
-      - hardware_board_supports_1_rf_band
-  - name: radio_config_simple_rail_singlephy
-    condition: 
-      - device_sdid_210
-      - hardware_board_default_rf_band_915
   - name: radio_config_range_test_sdid_210_868_915_phys
-    condition: 
-      - device_sdid_210
-      - hardware_board_default_rf_band_868
-      - hardware_board_supports_2_rf_bands
-  - name: radio_config_range_test_sdid_210_868_915_phys
-    condition: 
-      - device_sdid_210
-      - hardware_board_default_rf_band_868
-      - hardware_board_supports_3_rf_bands
+    condition: [device_sdid_210]
   - name: radio_config_singlephy_device_family_fgm23
     condition:
       - "device_family_fgm23"

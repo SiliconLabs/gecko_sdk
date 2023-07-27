@@ -44,7 +44,6 @@
 #include "common/locator.hpp"
 #include "common/non_copyable.hpp"
 #include "common/notifier.hpp"
-#include "common/settings.hpp"
 #include "net/udp6.hpp"
 #include "thread/tmf.hpp"
 #include "thread/uri_paths.hpp"
@@ -60,8 +59,10 @@ class BorderAgent : public InstanceLocator, private NonCopyable
     friend class Tmf::SecureAgent;
 
 public:
+    typedef otBorderAgentId Id; ///< Border Agent ID.
+
     /**
-     * This enumeration defines the Border Agent state.
+     * Defines the Border Agent state.
      *
      */
     enum State : uint8_t
@@ -72,7 +73,7 @@ public:
     };
 
     /**
-     * This constructor initializes the `BorderAgent` object.
+     * Initializes the `BorderAgent` object.
      *
      * @param[in]  aInstance     A reference to the OpenThread instance.
      *
@@ -87,19 +88,32 @@ public:
      * be published in the MeshCoP mDNS service as the `id` TXT value for the client to identify this
      * Border Router/Agent device.
      *
-     * @param[out]   aId      A pointer to buffer to receive the ID.
-     * @param[inout] aLength  Specifies the length of `aId` when used as input and receives the length
-     *                        actual ID data copied to `aId` when used as output.
+     * @param[out] aId  Reference to return the Border Agent ID.
      *
-     * @retval OT_ERROR_INVALID_ARGS  If value of `aLength` if smaller than `OT_BORDER_AGENT_ID_LENGTH`.
-     * @retval OT_ERROR_NONE          If successfully retrieved the Border Agent ID.
+     * @retval kErrorNone  If successfully retrieved the Border Agent ID.
+     * @retval ...         If failed to retrieve the Border Agent ID.
      *
      */
-    Error GetId(uint8_t *aId, uint16_t &aLength);
+    Error GetId(Id &aId);
+
+    /**
+     * Sets the Border Agent ID.
+     *
+     * The Border Agent ID will be saved in persistent storage and survive reboots. It's required
+     * to set the ID only once after factory reset. If the ID has never been set by calling this
+     * method, a random ID will be generated and returned when `GetId()` is called.
+     *
+     * @param[out] aId  specifies the Border Agent ID.
+     *
+     * @retval kErrorNone  If successfully set the Border Agent ID.
+     * @retval ...         If failed to set the Border Agent ID.
+     *
+     */
+    Error SetId(const Id &aId);
 #endif
 
     /**
-     * This method gets the UDP port of this service.
+     * Gets the UDP port of this service.
      *
      * @returns  UDP port number.
      *
@@ -107,19 +121,19 @@ public:
     uint16_t GetUdpPort(void) const;
 
     /**
-     * This method starts the Border Agent service.
+     * Starts the Border Agent service.
      *
      */
     void Start(void);
 
     /**
-     * This method stops the Border Agent service.
+     * Stops the Border Agent service.
      *
      */
     void Stop(void);
 
     /**
-     * This method gets the state of the Border Agent service.
+     * Gets the state of the Border Agent service.
      *
      * @returns The state of the Border Agent service.
      *
@@ -127,13 +141,13 @@ public:
     State GetState(void) const { return mState; }
 
     /**
-     * This method applies the Mesh Local Prefix.
+     * Applies the Mesh Local Prefix.
      *
      */
     void ApplyMeshLocalPrefix(void);
 
     /**
-     * This method returns the UDP Proxy port to which the commissioner is currently
+     * Returns the UDP Proxy port to which the commissioner is currently
      * bound.
      *
      * @returns  The current UDP Proxy port or 0 if no Proxy Transmit has been received yet.
@@ -199,8 +213,8 @@ private:
     State        mState;
     uint16_t     mUdpProxyPort;
 #if OPENTHREAD_CONFIG_BORDER_AGENT_ID_ENABLE
-    Settings::BorderAgentId mId;
-    bool                    mIdInitialized;
+    Id   mId;
+    bool mIdInitialized;
 #endif
 };
 
@@ -219,6 +233,7 @@ DeclareTmfHandler(BorderAgent, kUriProxyTx);
 } // namespace MeshCoP
 
 DefineMapEnum(otBorderAgentState, MeshCoP::BorderAgent::State);
+DefineCoreType(otBorderAgentId, MeshCoP::BorderAgent::Id);
 
 } // namespace ot
 

@@ -26,39 +26,39 @@ uint8_t testSharedKey[] = { 0xC0, 0xC1, 0xC2, 0xC3, 0xC4, 0xC5, 0xC6, 0xC7,
 //
 void testSectionA1542(void)
 {
-  emGpd.addr.appId = 0;
-  emGpd.addr.id.srcId = 0x87654321;
-  emGpd.rxAfterTx = 0;
-  emGpd.securityFrameCounter = 1;// That gets incremented before send, Test FC = 2
+  sli_zigbee_gpd.addr.appId = 0;
+  sli_zigbee_gpd.addr.id.srcId = 0x87654321;
+  sli_zigbee_gpd.rxAfterTx = 0;
+  sli_zigbee_gpd.securityFrameCounter = 1;// That gets incremented before send, Test FC = 2
   // copy the test shared key
-  (void) memcpy(emGpd.securityKey, testSharedKey, 16);
-  emGpd.securityKeyType = 3; //Shared Security key type
-  emGpd.securityLevel = 2;
+  (void) memcpy(sli_zigbee_gpd.securityKey, testSharedKey, 16);
+  sli_zigbee_gpd.securityKeyType = 3; //Shared Security key type
+  sli_zigbee_gpd.securityLevel = 2;
 
   uint8_t command[] = { 0x20 };
 
-  emberGpdSecurityInit(&(emGpd.addr),
-                       emGpd.securityKey,
-                       emGpd.securityFrameCounter);
-  emberAfGpdfSend(0, &emGpd, command, 1, 1);
+  emberGpdSecurityInit(&(sli_zigbee_gpd.addr),
+                       sli_zigbee_gpd.securityKey,
+                       sli_zigbee_gpd.securityFrameCounter);
+  emberAfGpdfSend(0, &sli_zigbee_gpd, command, 1, 1);
 }
 
 void testSectionA1543(void)
 {
-  emGpd.addr.appId = 0;
-  emGpd.addr.id.srcId = 0x87654321;
-  emGpd.rxAfterTx = 0;
-  emGpd.securityFrameCounter = 1;// That gets incremented before send, Test FC = 2
+  sli_zigbee_gpd.addr.appId = 0;
+  sli_zigbee_gpd.addr.id.srcId = 0x87654321;
+  sli_zigbee_gpd.rxAfterTx = 0;
+  sli_zigbee_gpd.securityFrameCounter = 1;// That gets incremented before send, Test FC = 2
   // copy th test shared key
-  (void) memcpy(emGpd.securityKey, testSharedKey, 16);
-  emGpd.securityKeyType = 3; //Shared Security key type
-  emGpd.securityLevel = 3;
+  (void) memcpy(sli_zigbee_gpd.securityKey, testSharedKey, 16);
+  sli_zigbee_gpd.securityKeyType = 3; //Shared Security key type
+  sli_zigbee_gpd.securityLevel = 3;
 
   uint8_t command[] = { 0x20 };
-  emberGpdSecurityInit(&(emGpd.addr),
-                       emGpd.securityKey,
-                       emGpd.securityFrameCounter);
-  emberAfGpdfSend(0, &emGpd, command, 1, 1);
+  emberGpdSecurityInit(&(sli_zigbee_gpd.addr),
+                       sli_zigbee_gpd.securityKey,
+                       sli_zigbee_gpd.securityFrameCounter);
+  emberAfGpdfSend(0, &sli_zigbee_gpd, command, 1, 1);
 }
 
 uint8_t receiveMpdu1542[] = {
@@ -75,21 +75,21 @@ uint8_t receiveMpdu1542[] = {
   0xCF, 0x78, 0x7E, 0x72   // Nwk MIC
 };
 uint8_t testSectionA1542ReceiveStatus = 0xFF;
-void testSectionA1542Receive(void)
+static void testSectionA1542Receive(void)
 {
-  emGpd.addr.appId = 0;
-  emGpd.addr.id.srcId = 0x87654321;
-  emGpd.rxAfterTx = 0;
-  emGpd.securityFrameCounter = 2;
+  sli_zigbee_gpd.addr.appId = 0;
+  sli_zigbee_gpd.addr.id.srcId = 0x87654321;
+  sli_zigbee_gpd.rxAfterTx = 0;
+  sli_zigbee_gpd.securityFrameCounter = 2;
   // copy th test shared key
-  (void) memcpy(emGpd.securityKey, testSharedKey, 16);
-  emGpd.securityKeyType = 3; //Shared Security key type
-  emGpd.securityLevel = 3;
+  (void) memcpy(sli_zigbee_gpd.securityKey, testSharedKey, 16);
+  sli_zigbee_gpd.securityKeyType = 3; //Shared Security key type
+  sli_zigbee_gpd.securityLevel = 3;
 
   uint8_t command[] = { 0x20 };
-  emberGpdSecurityInit(&(emGpd.addr),
-                       emGpd.securityKey,
-                       emGpd.securityFrameCounter);
+  emberGpdSecurityInit(&(sli_zigbee_gpd.addr),
+                       sli_zigbee_gpd.securityKey,
+                       sli_zigbee_gpd.securityFrameCounter);
   testSectionA1542ReceiveStatus = emberDecryptRxBuffer(receiveMpdu1542,
                                                        8,
                                                        0,
@@ -105,7 +105,7 @@ fn_t testfn[] = {
 };
 #define TOTAL_TESTS (sizeof(testfn) / sizeof(fn_t))
 uint8_t testNumber = 0;
-void securityTests(void)
+static void securityTests(void)
 {
   if (testNumber >= TOTAL_TESTS) {
     testNumber = 0;

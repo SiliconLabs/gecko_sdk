@@ -31,6 +31,7 @@ component:
   - id: bootloader_interface
   - id: app_log
   - id: app_assert
+  - id: silabs_core_sl_malloc
   - id: component_catalog
   - id: board_control
   - id: iostream_usart

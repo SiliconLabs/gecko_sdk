@@ -653,8 +653,12 @@ typedef struct {
 #define _IADC_CFG_ADCMODE_MASK                          0x3UL                                     /**< Bit mask for IADC_ADCMODE                   */
 #define _IADC_CFG_ADCMODE_DEFAULT                       0x00000000UL                              /**< Mode DEFAULT for IADC_CFG                   */
 #define _IADC_CFG_ADCMODE_NORMAL                        0x00000000UL                              /**< Mode NORMAL for IADC_CFG                    */
+#define _IADC_CFG_ADCMODE_HIGHSPEED                     0x00000001UL                              /**< Mode HIGHSPEED for IADC_CFG                 */
+#define _IADC_CFG_ADCMODE_HIGHACCURACY                  0x00000002UL                              /**< Mode HIGHACCURACY for IADC_CFG              */
 #define IADC_CFG_ADCMODE_DEFAULT                        (_IADC_CFG_ADCMODE_DEFAULT << 0)          /**< Shifted mode DEFAULT for IADC_CFG           */
 #define IADC_CFG_ADCMODE_NORMAL                         (_IADC_CFG_ADCMODE_NORMAL << 0)           /**< Shifted mode NORMAL for IADC_CFG            */
+#define IADC_CFG_ADCMODE_HIGHSPEED                      (_IADC_CFG_ADCMODE_HIGHSPEED << 0)        /**< Shifted mode HIGHSPEED for IADC_CFG         */
+#define IADC_CFG_ADCMODE_HIGHACCURACY                   (_IADC_CFG_ADCMODE_HIGHACCURACY << 0)     /**< Shifted mode HIGHACCURACY for IADC_CFG      */
 #define _IADC_CFG_OSRHS_SHIFT                           2                                         /**< Shift value for IADC_OSRHS                  */
 #define _IADC_CFG_OSRHS_MASK                            0x1CUL                                    /**< Bit mask for IADC_OSRHS                     */
 #define _IADC_CFG_OSRHS_DEFAULT                         0x00000000UL                              /**< Mode DEFAULT for IADC_CFG                   */
@@ -671,6 +675,22 @@ typedef struct {
 #define IADC_CFG_OSRHS_HISPD16                          (_IADC_CFG_OSRHS_HISPD16 << 2)            /**< Shifted mode HISPD16 for IADC_CFG           */
 #define IADC_CFG_OSRHS_HISPD32                          (_IADC_CFG_OSRHS_HISPD32 << 2)            /**< Shifted mode HISPD32 for IADC_CFG           */
 #define IADC_CFG_OSRHS_HISPD64                          (_IADC_CFG_OSRHS_HISPD64 << 2)            /**< Shifted mode HISPD64 for IADC_CFG           */
+#define _IADC_CFG_OSRHA_SHIFT                           5                                         /**< Shift value for IADC_OSRHA                  */
+#define _IADC_CFG_OSRHA_MASK                            0xE0UL                                    /**< Bit mask for IADC_OSRHA                     */
+#define _IADC_CFG_OSRHA_DEFAULT                         0x00000003UL                              /**< Mode DEFAULT for IADC_CFG                   */
+#define _IADC_CFG_OSRHA_HIACC16                         0x00000000UL                              /**< Mode HIACC16 for IADC_CFG                   */
+#define _IADC_CFG_OSRHA_HIACC32                         0x00000001UL                              /**< Mode HIACC32 for IADC_CFG                   */
+#define _IADC_CFG_OSRHA_HIACC64                         0x00000002UL                              /**< Mode HIACC64 for IADC_CFG                   */
+#define _IADC_CFG_OSRHA_HIACC92                         0x00000003UL                              /**< Mode HIACC92 for IADC_CFG                   */
+#define _IADC_CFG_OSRHA_HIACC128                        0x00000004UL                              /**< Mode HIACC128 for IADC_CFG                  */
+#define _IADC_CFG_OSRHA_HIACC256                        0x00000005UL                              /**< Mode HIACC256 for IADC_CFG                  */
+#define IADC_CFG_OSRHA_DEFAULT                          (_IADC_CFG_OSRHA_DEFAULT << 5)            /**< Shifted mode DEFAULT for IADC_CFG           */
+#define IADC_CFG_OSRHA_HIACC16                          (_IADC_CFG_OSRHA_HIACC16 << 5)            /**< Shifted mode HIACC16 for IADC_CFG           */
+#define IADC_CFG_OSRHA_HIACC32                          (_IADC_CFG_OSRHA_HIACC32 << 5)            /**< Shifted mode HIACC32 for IADC_CFG           */
+#define IADC_CFG_OSRHA_HIACC64                          (_IADC_CFG_OSRHA_HIACC64 << 5)            /**< Shifted mode HIACC64 for IADC_CFG           */
+#define IADC_CFG_OSRHA_HIACC92                          (_IADC_CFG_OSRHA_HIACC92 << 5)            /**< Shifted mode HIACC92 for IADC_CFG           */
+#define IADC_CFG_OSRHA_HIACC128                         (_IADC_CFG_OSRHA_HIACC128 << 5)           /**< Shifted mode HIACC128 for IADC_CFG          */
+#define IADC_CFG_OSRHA_HIACC256                         (_IADC_CFG_OSRHA_HIACC256 << 5)           /**< Shifted mode HIACC256 for IADC_CFG          */
 #define _IADC_CFG_ANALOGGAIN_SHIFT                      12                                        /**< Shift value for IADC_ANALOGGAIN             */
 #define _IADC_CFG_ANALOGGAIN_MASK                       0x7000UL                                  /**< Bit mask for IADC_ANALOGGAIN                */
 #define _IADC_CFG_ANALOGGAIN_DEFAULT                    0x00000002UL                              /**< Mode DEFAULT for IADC_CFG                   */
@@ -690,11 +710,13 @@ typedef struct {
 #define _IADC_CFG_REFSEL_DEFAULT                        0x00000000UL                              /**< Mode DEFAULT for IADC_CFG                   */
 #define _IADC_CFG_REFSEL_VBGR                           0x00000000UL                              /**< Mode VBGR for IADC_CFG                      */
 #define _IADC_CFG_REFSEL_VREF                           0x00000001UL                              /**< Mode VREF for IADC_CFG                      */
+#define _IADC_CFG_REFSEL_VREF2P5                        0x00000002UL                              /**< Mode VREF2P5 for IADC_CFG                   */
 #define _IADC_CFG_REFSEL_VDDX                           0x00000003UL                              /**< Mode VDDX for IADC_CFG                      */
 #define _IADC_CFG_REFSEL_VDDX0P8BUF                     0x00000004UL                              /**< Mode VDDX0P8BUF for IADC_CFG                */
 #define IADC_CFG_REFSEL_DEFAULT                         (_IADC_CFG_REFSEL_DEFAULT << 16)          /**< Shifted mode DEFAULT for IADC_CFG           */
 #define IADC_CFG_REFSEL_VBGR                            (_IADC_CFG_REFSEL_VBGR << 16)             /**< Shifted mode VBGR for IADC_CFG              */
 #define IADC_CFG_REFSEL_VREF                            (_IADC_CFG_REFSEL_VREF << 16)             /**< Shifted mode VREF for IADC_CFG              */
+#define IADC_CFG_REFSEL_VREF2P5                         (_IADC_CFG_REFSEL_VREF2P5 << 16)          /**< Shifted mode VREF2P5 for IADC_CFG           */
 #define IADC_CFG_REFSEL_VDDX                            (_IADC_CFG_REFSEL_VDDX << 16)             /**< Shifted mode VDDX for IADC_CFG              */
 #define IADC_CFG_REFSEL_VDDX0P8BUF                      (_IADC_CFG_REFSEL_VDDX0P8BUF << 16)       /**< Shifted mode VDDX0P8BUF for IADC_CFG        */
 #define _IADC_CFG_DIGAVG_SHIFT                          21                                        /**< Shift value for IADC_DIGAVG                 */

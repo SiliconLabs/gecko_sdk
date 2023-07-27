@@ -30,6 +30,11 @@
 #ifndef THROUGHPUT_COMMON_H
 #define THROUGHPUT_COMMON_H
 
+/***********************************************************************************************//**
+ * @addtogroup throughput
+ * @{
+ **************************************************************************************************/
+
 /// Discovering services/characteristics and subscribing raises procedure_complete events
 /// Actions are used to indicate which procedure was completed.
 typedef enum {
@@ -42,4 +47,5 @@ typedef enum {
   act_subscribe_result
 } action_t;
 
-#endif
+/** @} (end addtogroup throughput) */
+#endif // THROUGHPUT_COMMON_H

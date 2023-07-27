@@ -1,0 +1,14 @@
+id: iostream_uart_core_si91x
+package: platform
+label: "IO Stream: SI91x UART Core"
+description: Core of IO Stream SI91X UART
+category: Services|IO Stream
+quality: production
+ui_hints:
+  visibility: never
+provides:
+  - name: iostream_uart_core_si91x
+  - name: iostream_transport_core
+    allow_multiple: true
+requires:
+  - name: iostream

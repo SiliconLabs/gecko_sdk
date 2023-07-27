@@ -96,12 +96,6 @@ extern "C" {
 //                          Public Function Declarations
 // -----------------------------------------------------------------------------
 
-/**************************************************************************//**
- * @brief Initialize static memory pools
- * @details
- *****************************************************************************/
-void _wisun_coap_mem_init(void);
-
 #else
 
 // Choose headers for os provided malloc & free
@@ -118,19 +112,25 @@ void _wisun_coap_mem_init(void);
 // -----------------------------------------------------------------------------
 
 /**************************************************************************//**
+ * @brief Initialize CoAP component memory management
+ * @details
+ *****************************************************************************/
+void sli_wisun_coap_mem_init(void);
+
+/**************************************************************************//**
  * @brief Wi-SUN CoAP malloc for internal usage
  * @details Not thread safe. Only used in sl_wisun_coap.c
  * @param size size to alloc
  * @return void* ptr to the allocated memory, on error NULL
  *****************************************************************************/
-void *_wisun_coap_mem_malloc(size_t size);
+void *sli_wisun_coap_mem_malloc(size_t size);
 
 /**************************************************************************//**
  * @brief Wi-SUN CoAP free memory for internal usage
  * @details Not thread safe. Only used in sl_wisun_coap.c
  * @param addr address
  *****************************************************************************/
-void _wisun_coap_mem_free(void *addr);
+void sli_wisun_coap_mem_free(void *addr);
 
 /** @}*/
 

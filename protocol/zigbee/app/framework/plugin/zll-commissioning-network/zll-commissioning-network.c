@@ -34,9 +34,8 @@ enum {
   WAITING_SECONDARY  = WAITING_BIT | JOINABLE_SECONDARY,
 };
 static uint8_t state = ZLL_NETWORK_INITIAL;
-sl_zigbee_event_t emberAfPluginZllCommissioningNetworkNetworkEvent;
-#define zllCommissioningNetworkEventControl (&emberAfPluginZllCommissioningNetworkNetworkEvent)
-void emberAfPluginZllCommissioningNetworkNetworkEventHandler(sl_zigbee_event_t * event);
+static sl_zigbee_event_t networkEvent;
+static void networkEventHandler(sl_zigbee_event_t * event);
 uint8_t extendedPanId[EXTENDED_PAN_ID_SIZE] = EMBER_AF_PLUGIN_ZLL_COMMISSIONING_NETWORK_EXTENDED_PAN_ID;
 
 // The exponent of the number of scan periods, where a scan period is 960
@@ -53,8 +52,8 @@ void sli_zigbee_af_zll_commissioning_network_init_callback(uint8_t init_level)
 {
   (void)init_level;
 
-  sl_zigbee_event_init(&emberAfPluginZllCommissioningNetworkNetworkEvent,
-                       emberAfPluginZllCommissioningNetworkNetworkEventHandler);
+  sl_zigbee_event_init(&networkEvent,
+                       networkEventHandler);
 }
 //------------------------------------------------------------------------------
 
@@ -119,7 +118,7 @@ void emberAfJoinableNetworkFoundCallback(EmberZigbeeNetwork *networkFound,
   // next tick and restart from there.
   if (status != EMBER_SUCCESS) {
     emberAfAppPrintln("Error: %s: 0x%X", "could not join network", status);
-    sl_zigbee_event_set_active(zllCommissioningNetworkEventControl);
+    sl_zigbee_event_set_active(&networkEvent);
   }
 }
 
@@ -153,7 +152,7 @@ void sli_zigbee_af_zll_commissioning_network_scan_error_callback(EmberStatus sta
       && state == JOINABLE_PRIMARY
       && emberGetZllSecondaryChannelMask() != 0) {
     state = JOINABLE_SECONDARY;
-    sl_zigbee_event_set_active(zllCommissioningNetworkEventControl);
+    sl_zigbee_event_set_active(&networkEvent);
     return;
   }
 #endif
@@ -176,10 +175,10 @@ void emberAfSetFormAndJoinExtendedPanIdCallback(const uint8_t *extPanId)
   MEMMOVE(extendedPanId, extPanId, EXTENDED_PAN_ID_SIZE);
 }
 
-void emberAfPluginZllCommissioningNetworkNetworkEventHandler(sl_zigbee_event_t * event)
+static void networkEventHandler(sl_zigbee_event_t * event)
 {
   EmberStatus status = EMBER_ERR_FATAL;
-  sl_zigbee_event_set_inactive(zllCommissioningNetworkEventControl);
+  sl_zigbee_event_set_inactive(&networkEvent);
   if ((state == JOINABLE_PRIMARY || state == JOINABLE_SECONDARY)
       && emberFormAndJoinCanContinueJoinableNetworkScan()) {
     status = emberScanForNextJoinableNetwork();
@@ -227,9 +226,9 @@ void sli_zigbee_af_zll_commissioning_network_stack_status_callback(EmberStatus s
   }
 
   if (delayMinutes == 0) {
-    emberAfPluginZllCommissioningNetworkNetworkEventHandler(zllCommissioningNetworkEventControl);
+    networkEventHandler(&networkEvent);
   } else if (delayMinutes != MAX_INT8U_VALUE) {
-    sl_zigbee_event_set_delay_minutes(zllCommissioningNetworkEventControl,
+    sl_zigbee_event_set_delay_minutes(&networkEvent,
                                       delayMinutes);
   }
 }

@@ -67,7 +67,7 @@ const char sli_zigbee_af_file_descriptor_dispatch_plugin_name[] = "FD Dispatch";
 //=============================================================================
 // Forward Declarations
 
-LinkListItem* findDispatchByFileDescriptor(int fileDescriptor);
+static LinkListItem* findDispatchByFileDescriptor(int fileDescriptor);
 LinkListItem* addItem(LinkListItem* previous,
                       EmberAfFileDescriptorDispatchStruct* dispatchStruct);
 static void scanForBadFds(void);
@@ -106,7 +106,7 @@ EmberStatus emberAfPluginFileDescriptorDispatchAdd(EmberAfFileDescriptorDispatch
 }
 
 #if defined(DEBUG_ON)
-void debugPrintList(void)
+static void debugPrintList(void)
 {
   LinkListItem* iterator = theList;
   emberAfCorePrint("Current FD List:");
@@ -151,7 +151,7 @@ LinkListItem* addItem(LinkListItem* previous, EmberAfFileDescriptorDispatchStruc
   return new;
 }
 
-LinkListItem* findDispatchByFileDescriptor(int fileDescriptor)
+static LinkListItem* findDispatchByFileDescriptor(int fileDescriptor)
 {
   LinkListItem* iterator = theList;
   while (iterator != NULL) {

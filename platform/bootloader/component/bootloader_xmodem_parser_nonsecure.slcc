@@ -4,7 +4,7 @@ package: bootloader
 description: >
   The Bootloader XMODEM Parser (Non-Secure) component provides XMODEM parser implementation.
 category: Platform|Bootloader|TrustZone NonSecure|Communication
-quality: evaluation
+quality: production
 source:
   - path: platform/bootloader/communication/xmodem-parser/btl_xmodem.c
 include:

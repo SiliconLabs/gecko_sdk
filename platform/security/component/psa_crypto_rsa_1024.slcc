@@ -1,0 +1,14 @@
+id: psa_crypto_rsa_1024
+package: platform
+label: RSA-1024
+description: >-
+  This component adds support for 1024-bit RSA operations.
+category: Platform|Security|PSA Crypto|RSA
+quality: evaluation
+provides:
+  - name: psa_crypto_rsa_1024
+  - name: psa_crypto_rsa_size
+    allow_multiple: true
+requires:
+  - name: psa_crypto_rsa
+  - name: mbedtls_rsa_1024

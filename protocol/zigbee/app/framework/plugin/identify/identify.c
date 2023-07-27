@@ -131,8 +131,8 @@ bool emberAfIdentifyClusterIdentifyQueryCallback(void)
   return true;
 }
 
-EmberAfStatus readIdentifyTime(uint8_t endpoint,
-                               uint16_t *identifyTime)
+static EmberAfStatus readIdentifyTime(uint8_t endpoint,
+                                      uint16_t *identifyTime)
 {
   EmberAfStatus status = emberAfReadAttribute(endpoint,
                                               ZCL_IDENTIFY_CLUSTER_ID,

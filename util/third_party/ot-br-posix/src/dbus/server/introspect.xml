@@ -868,6 +868,11 @@
       <annotation name="org.freedesktop.DBus.Property.EmitsChangedSignal" value="false"/>
     </property>
 
+    <!-- Nat64Cidr: The CIDR used for NAT64 -->
+    <property name="Nat64Cidr" type="s" access="readwrite">
+      <annotation name="org.freedesktop.DBus.Property.EmitsChangedSignal" value="false"/>
+    </property>
+
     <!-- BorderRoutingCounters: The counters for inbound/outbound packets
     <literallayout>
         struct {
@@ -926,6 +931,12 @@
     <!-- TelemetryData: The Thread telemetry data (defined as proto/thread_telemetry.proto)
       in binary form. -->
     <property name="TelemetryData" type="ay" access="read">
+      <annotation name="org.freedesktop.DBus.Property.EmitsChangedSignal" value="false"/>
+    </property>
+
+    <!-- Capabilities: The Thread capabilities data (defined as proto/capabilities.proto)
+      in binary form. -->
+    <property name="Capabilities" type="ay" access="read">
       <annotation name="org.freedesktop.DBus.Property.EmitsChangedSignal" value="false"/>
     </property>
 

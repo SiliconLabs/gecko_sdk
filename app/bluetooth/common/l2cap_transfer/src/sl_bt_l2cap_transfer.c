@@ -33,7 +33,6 @@
 #include "sl_slist.h"
 #include "sl_bt_l2cap_transfer.h"
 #include "sli_bt_l2cap_transfer_adaptation.h"
-#include "app_assert.h"
 #include "sl_bt_l2cap_transfer_config.h"
 
 // -----------------------------------------------------------------------------
@@ -41,15 +40,9 @@
 #define INVALID_CONNECTION_HANDLE 0
 #define INVALID_CID               0
 #define DEFAULT_CREDIT_VALUE      1
-#define L2CAP_SDU_SIZE_LENGTH       sizeof(uint16_t)
+#define L2CAP_SDU_SIZE_LENGTH     sizeof(uint16_t)
 
 // Adaptation definitions
-#define ADAPTATION_DECLARE_STATUS bool status
-#define ADAPTATION_TRY_ACQUIRE()                                       \
-  do {                                                                 \
-    status = sli_bt_l2cap_transfer_adaptation_acquire();               \
-    app_assert(status, "Could not access to L2CAP transfer service."); \
-  } while (0)
 #define ADAPTATION_RELEASE() sli_bt_l2cap_transfer_adaptation_release()
 #define ADAPTATION_PROCEED() sli_bt_l2cap_transfer_adaptation_proceed()
 #define ADAPTATION_IF_ACQUIRED()  if (sli_bt_l2cap_transfer_adaptation_acquire())
@@ -74,17 +67,16 @@ static sl_slist_node_t *request_response_buffer_transfer_list;
 static sl_slist_node_t *receive_active_transfer_list;
 
 #if SL_BT_L2CAP_TRANSFER_CONFIG_ACCEPT_PRIOR_CHANNELS == 1
+// Default of transfer tampletes for prior channels
 static const sl_bt_l2cap_transfer_transfer_t transfer_template_default = {
   .cid = INVALID_CID,
   .connection = INVALID_CONNECTION_HANDLE,
   .credit = DEFAULT_CREDIT_VALUE
 };
 
-static sl_bt_l2cap_transfer_transfer_t transfer_template = {
-  .cid = INVALID_CID,
-  .connection = INVALID_CONNECTION_HANDLE,
-  .credit = DEFAULT_CREDIT_VALUE
-};
+// Transfer template for prior channels
+static sl_bt_l2cap_transfer_transfer_t transfer_template[SL_BT_L2CAP_TRANSFER_CONFIG_PRIOR_CHANNEL_COUNT];
+
 #endif // SL_BT_L2CAP_TRANSFER_CONFIG_ACCEPT_PRIOR_CHANNELS == 1
 
 // -----------------------------------------------------------------------------
@@ -223,8 +215,45 @@ static void close_transfer(uint16_t connection,
 static sl_bt_l2cap_transfer_transfer_t *search_for_transfer(uint16_t connection,
                                                             uint16_t cid);
 
+#if SL_BT_L2CAP_TRANSFER_CONFIG_ACCEPT_PRIOR_CHANNELS == 1
+
+/******************************************************************************
+ * Get template prior channel for a connection handle
+ *
+ * @param[in] connection connection handle
+ *
+ * @return transfer or NULL if not found
+ *****************************************************************************/
+static sl_bt_l2cap_transfer_transfer_t *get_template(uint8_t connection);
+
+/******************************************************************************
+ * Set template prior channel to defaults
+ *
+ * @param[in] template template transfer for the prior channel
+ *****************************************************************************/
+static void set_template_defaults(sl_bt_l2cap_transfer_transfer_t *template);
+
+#endif // SL_BT_L2CAP_TRANSFER_CONFIG_ACCEPT_PRIOR_CHANNELS == 1
 // -----------------------------------------------------------------------------
 // Public functions
+
+/******************************************************************************
+ * Close all transfers for a connection
+ *
+ * @param[in] connection connection handle
+ * @param[in] reason     reason of the close event
+ *****************************************************************************/
+static void close_all_by_connection(uint8_t     connection,
+                                    sl_status_t reason);
+
+/******************************************************************************
+ * Search for transfer by connection
+ *
+ * @param[in] con connection handle
+ *
+ * @return transfer or NULL if not found
+ *****************************************************************************/
+sl_bt_l2cap_transfer_transfer_t *search_for_transfer_by_connection(uint8_t con);
 
 /*******************************************************************************
  * Event handler
@@ -232,58 +261,82 @@ static sl_bt_l2cap_transfer_transfer_t *search_for_transfer(uint16_t connection,
 void sli_bt_l2cap_transfer_on_bt_event(sl_bt_msg_t *evt)
 {
   sl_bt_l2cap_transfer_transfer_t *transfer;
-  ADAPTATION_DECLARE_STATUS;
 
   switch (SL_BT_MSG_ID(evt->header)) {
 #if SL_BT_L2CAP_TRANSFER_CONFIG_ACCEPT_PRIOR_CHANNELS == 1
     case sl_bt_evt_system_boot_id:
-      memcpy(&transfer_template, &transfer_template_default, sizeof(transfer_template));
+      ADAPTATION_IF_ACQUIRED() {
+        // Set defaults for all prior channel transfer template
+        for (uint8_t i = 0; i < SL_BT_L2CAP_TRANSFER_CONFIG_PRIOR_CHANNEL_COUNT; i++) {
+          set_template_defaults(&transfer_template[i]);
+        }
+        ADAPTATION_PROCEED();
+        ADAPTATION_RELEASE();
+      }
       break;
-    case sl_bt_evt_connection_closed_id:
-      if (transfer_template.connection == evt->data.evt_l2cap_channel_closed.connection
-          && transfer_template.cid == evt->data.evt_l2cap_channel_closed.cid) {
-        transfer_template.cid = INVALID_CID;
-        transfer_template.connection = INVALID_CONNECTION_HANDLE;
+    case sl_bt_evt_connection_opened_id:
+      ADAPTATION_IF_ACQUIRED() {
+        // Get empty slot for the connection
+        transfer = get_template(INVALID_CONNECTION_HANDLE);
+        if (transfer != NULL) {
+          // Set the connection for the prior channel template transfer
+          transfer->connection = evt->data.evt_connection_opened.connection;
+        }
+        ADAPTATION_PROCEED();
+        ADAPTATION_RELEASE();
       }
       break;
 #endif // SL_BT_L2CAP_TRANSFER_CONFIG_ACCEPT_PRIOR_CHANNELS == 1
+    case sl_bt_evt_connection_closed_id:
+      ADAPTATION_IF_ACQUIRED() {
+        // Remove conections
+        close_all_by_connection(evt->data.evt_connection_closed.connection,
+                                evt->data.evt_connection_closed.reason);
+        ADAPTATION_PROCEED();
+        ADAPTATION_RELEASE();
+      }
+      break;
     case sl_bt_evt_l2cap_le_channel_open_request_id:
       // Responder
-      ADAPTATION_TRY_ACQUIRE();
-      create_channel_open_response(&evt->data.evt_l2cap_le_channel_open_request);
-      // Move on with the transfer process
-      ADAPTATION_PROCEED();
-      ADAPTATION_RELEASE();
+      ADAPTATION_IF_ACQUIRED() {
+        create_channel_open_response(&evt->data.evt_l2cap_le_channel_open_request);
+        // Move on with the transfer process
+        ADAPTATION_PROCEED();
+        ADAPTATION_RELEASE();
+      }
       break;
 
     case sl_bt_evt_l2cap_le_channel_open_response_id:
       // Initiator
-      ADAPTATION_TRY_ACQUIRE();
-      register_open_response_from_server(&evt->data.evt_l2cap_le_channel_open_response);
-      // Move on with the process
-      ADAPTATION_PROCEED();
-      ADAPTATION_RELEASE();
+      ADAPTATION_IF_ACQUIRED() {
+        register_open_response_from_server(&evt->data.evt_l2cap_le_channel_open_response);
+        // Move on with the process
+        ADAPTATION_PROCEED();
+        ADAPTATION_RELEASE();
+      }
       break;
 
     case sl_bt_evt_l2cap_channel_data_id:
-      ADAPTATION_TRY_ACQUIRE();
-      process_received_data(&evt->data.evt_l2cap_channel_data);
-      // Move on with the process
-      ADAPTATION_PROCEED();
-      ADAPTATION_RELEASE();
+      ADAPTATION_IF_ACQUIRED() {
+        process_received_data(&evt->data.evt_l2cap_channel_data);
+        // Move on with the process
+        ADAPTATION_PROCEED();
+        ADAPTATION_RELEASE();
+      }
       break;
 
     case sl_bt_evt_l2cap_channel_credit_id:
-      ADAPTATION_TRY_ACQUIRE();
-      transfer = select_transfer_by_cid(evt->data.evt_l2cap_channel_credit.connection,
-                                        evt->data.evt_l2cap_channel_credit.cid,
-                                        active_list);
-      if (transfer != NULL) {
-        transfer->credit += evt->data.evt_l2cap_channel_credit.credit;
-        // Move on with the process
-        ADAPTATION_PROCEED();
+      ADAPTATION_IF_ACQUIRED() {
+        transfer = select_transfer_by_cid(evt->data.evt_l2cap_channel_credit.connection,
+                                          evt->data.evt_l2cap_channel_credit.cid,
+                                          active_list);
+        if (transfer != NULL) {
+          transfer->credit += evt->data.evt_l2cap_channel_credit.credit;
+          // Move on with the process
+          ADAPTATION_PROCEED();
+        }
+        ADAPTATION_RELEASE();
       }
-      ADAPTATION_RELEASE();
       break;
 
     case sl_bt_evt_l2cap_command_rejected_id:
@@ -291,20 +344,21 @@ void sli_bt_l2cap_transfer_on_bt_event(sl_bt_msg_t *evt)
       break;
 
     case sl_bt_evt_l2cap_channel_closed_id:
-      ADAPTATION_TRY_ACQUIRE();
-      close_transfer(evt->data.evt_l2cap_channel_closed.connection,
-                     evt->data.evt_l2cap_channel_closed.cid,
-                     evt->data.evt_l2cap_channel_closed.reason);
+      ADAPTATION_IF_ACQUIRED() {
+        close_transfer(evt->data.evt_l2cap_channel_closed.connection,
+                       evt->data.evt_l2cap_channel_closed.cid,
+                       evt->data.evt_l2cap_channel_closed.reason);
 #if SL_BT_L2CAP_TRANSFER_CONFIG_ACCEPT_PRIOR_CHANNELS == 1
-      if (transfer_template.connection == evt->data.evt_l2cap_channel_closed.connection
-          && transfer_template.cid == evt->data.evt_l2cap_channel_closed.cid) {
-        transfer_template.cid = INVALID_CID;
-        transfer_template.connection = INVALID_CONNECTION_HANDLE;
-      }
+        // Get and reset to defaults
+        transfer = get_template(evt->data.evt_l2cap_channel_closed.connection);
+        if (transfer != NULL && transfer->cid == evt->data.evt_l2cap_channel_closed.cid) {
+          set_template_defaults(transfer);
+        }
 #endif // SL_BT_L2CAP_TRANSFER_CONFIG_ACCEPT_PRIOR_CHANNELS == 1
-      // Move on with the process after close
-      ADAPTATION_PROCEED();
-      ADAPTATION_RELEASE();
+        // Move on with the process after close
+        ADAPTATION_PROCEED();
+        ADAPTATION_RELEASE();
+      }
       break;
     default:
       break;
@@ -326,15 +380,14 @@ sl_status_t sl_bt_l2cap_transfer_start_data_transfer(sl_bt_l2cap_transfer_transf
       transfer->sdu_size = 0;
       transfer->cid = INVALID_CID;
 #if SL_BT_L2CAP_TRANSFER_CONFIG_ACCEPT_PRIOR_CHANNELS == 1
-      if (transfer_template.cid != INVALID_CID
-          && transfer_template.connection == transfer->connection) {
+      sl_bt_l2cap_transfer_transfer_t *template;
+      template = get_template(transfer->connection);
+      if (template != NULL && template->cid != INVALID_CID) {
         // Copy template
-        //transfer->connection = transfer_template.connection;
-        // transfer_template.connection = transfer->connection;
-        transfer->cid = transfer_template.cid;
-        transfer->spsm = transfer_template.spsm;
-        transfer->max_sdu = transfer_template.max_sdu;
-        transfer->max_pdu = transfer_template.max_pdu;
+        transfer->cid = template->cid;
+        transfer->spsm = template->spsm;
+        transfer->max_sdu = template->max_sdu;
+        transfer->max_pdu = template->max_pdu;
         if (transfer->mode == SL_BT_L2CAP_TRANSFER_MODE_TRANSMIT) {
           sl_slist_push(&active_list, &transfer->node);
         } else {
@@ -431,20 +484,20 @@ sl_status_t sl_bt_l2cap_transfer_abort_transfer(sl_bt_l2cap_transfer_transfer_t 
 
   if (transfer != NULL) {
     ADAPTATION_IF_ACQUIRED() {
+      transfer->channel_error = SL_STATUS_ABORT;
 #if SL_BT_L2CAP_TRANSFER_CONFIG_ACCEPT_PRIOR_CHANNELS == 1
-      if (transfer->connection == transfer_template.connection
-          && transfer->cid == transfer_template.cid) {
-        remove_transfer_from_everywhere(transfer->connection, transfer->cid);
+      sl_bt_l2cap_transfer_transfer_t *template;
+      template = get_template(transfer->connection);
+      if (template != NULL && transfer->cid == template->cid) {
+        close_transfer(transfer->connection, transfer->cid, transfer->channel_error);
       } else {
-#endif // SL_BT_L2CAP_TRANSFER_CONFIG_ACCEPT_PRIOR_CHANNELS == 1
-      sc = sl_bt_l2cap_close_channel(transfer->connection, transfer->cid);
-      if (sc != SL_STATUS_OK) {
-        remove_transfer_from_everywhere(transfer->connection, transfer->cid);
+        (void)sl_bt_l2cap_close_channel(transfer->connection, transfer->cid);
       }
-      ADAPTATION_RELEASE();
-#if SL_BT_L2CAP_TRANSFER_CONFIG_ACCEPT_PRIOR_CHANNELS == 1
-    }
+#else // SL_BT_L2CAP_TRANSFER_CONFIG_ACCEPT_PRIOR_CHANNELS == 1
+      (void)sl_bt_l2cap_close_channel(transfer->connection, transfer->cid);
 #endif // SL_BT_L2CAP_TRANSFER_CONFIG_ACCEPT_PRIOR_CHANNELS == 1
+      sc = SL_STATUS_OK;
+      ADAPTATION_RELEASE();
     } else {
       sc = SL_STATUS_BUSY;
     }
@@ -478,25 +531,32 @@ sl_status_t sl_bt_l2cap_transfer_check_progress(sl_bt_l2cap_transfer_transfer_t 
 
 sl_status_t sl_bt_l2cap_transfer_open_prior_channel(sl_bt_l2cap_transfer_transfer_t *transfer)
 {
-  #if SL_BT_L2CAP_TRANSFER_CONFIG_ACCEPT_PRIOR_CHANNELS == 1
-  sl_status_t sc = SL_STATUS_INVALID_STATE;
+#if SL_BT_L2CAP_TRANSFER_CONFIG_ACCEPT_PRIOR_CHANNELS == 1
+  sl_status_t sc = SL_STATUS_NO_MORE_RESOURCE;
 
-  if (transfer_template.cid == INVALID_CID) {
+  if (transfer == NULL) {
+    return SL_STATUS_NULL_POINTER;
+  }
+  if (transfer->connection == SL_BT_INVALID_CONNECTION_HANDLE) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  sl_bt_l2cap_transfer_transfer_t *template;
+  template = get_template(transfer->connection);
+  if (template != NULL && template->cid == INVALID_CID) {
     ADAPTATION_IF_ACQUIRED() {
-      memcpy(&transfer_template,
+      memcpy(template,
              transfer,
              sizeof(sl_bt_l2cap_transfer_transfer_t));
-      transfer_template.cid = INVALID_CID;
       // Open channel for the template
-      sl_slist_push_back(&request_transfer_list, &transfer_template.node);
+      sl_slist_push_back(&request_transfer_list, &template->node);
       sc = SL_STATUS_OK;
       ADAPTATION_RELEASE();
     } else {
       sc = SL_STATUS_BUSY;
     }
-    return sc;
   }
-  return SL_STATUS_OK;
+  return sc;
 #else // SL_BT_L2CAP_TRANSFER_CONFIG_ACCEPT_PRIOR_CHANNELS == 1
   (void)transfer;
   return SL_STATUS_NOT_SUPPORTED;
@@ -540,17 +600,24 @@ bool sli_bt_l2cap_transfer_is_ok_to_sleep()
 static sl_status_t create_channel_open_response(sl_bt_evt_l2cap_le_channel_open_request_t *request_event)
 {
   sl_status_t sc = SL_STATUS_FAIL;
-  sl_bt_l2cap_transfer_transfer_t *transfer;
+  sl_bt_l2cap_transfer_transfer_t *transfer = NULL;
 
   transfer = select_transfer_by_connection(request_event->connection,
                                            request_response_transfer_list);
+
 #if SL_BT_L2CAP_TRANSFER_CONFIG_ACCEPT_PRIOR_CHANNELS == 1
-  if (transfer == NULL && transfer_template.cid == INVALID_CID) {
-    transfer = &transfer_template;
-    transfer->max_sdu = request_event->max_sdu;
-    transfer->max_pdu = request_event->max_pdu;
+  sl_bt_l2cap_transfer_transfer_t *template = NULL;
+  if (transfer == NULL) {
+    // Get the template
+    template = get_template(request_event->connection);
+    if (template != NULL && template->cid == INVALID_CID) {
+      transfer = template;
+      transfer->max_sdu = request_event->max_sdu;
+      transfer->max_pdu = request_event->max_pdu;
+    }
   }
 #endif // SL_BT_L2CAP_TRANSFER_CONFIG_ACCEPT_PRIOR_CHANNELS == 1
+
   if (transfer != NULL) {
     transfer->connection = request_event->connection;
     transfer->cid = request_event->cid;
@@ -583,10 +650,9 @@ static sl_status_t create_channel_open_response(sl_bt_evt_l2cap_le_channel_open_
                                                    transfer->credit,
                                                    sl_bt_l2cap_connection_result_successful);
 
-    app_assert_status(sc);
     if (sc == SL_STATUS_OK) {
 #if SL_BT_L2CAP_TRANSFER_CONFIG_ACCEPT_PRIOR_CHANNELS == 1
-      if (transfer != &transfer_template) {
+      if (transfer != template) {
 #endif // SL_BT_L2CAP_TRANSFER_CONFIG_ACCEPT_PRIOR_CHANNELS == 1
       if (transfer->mode == SL_BT_L2CAP_TRANSFER_MODE_TRANSMIT) {
         sl_slist_push(&active_list, &transfer->node);
@@ -617,23 +683,26 @@ static sl_status_t create_channel_open_response(sl_bt_evt_l2cap_le_channel_open_
 
 static void register_open_response_from_server(sl_bt_evt_l2cap_le_channel_open_response_t *response_event)
 {
-  sl_bt_l2cap_transfer_transfer_t *transfer;
+  sl_bt_l2cap_transfer_transfer_t *transfer = NULL;
   uint16_t error_code = response_event->errorcode;
 
   // Check if the response was coming from the right connection
-  transfer = select_transfer_by_connection(response_event->connection,
-                                           request_pending_transfer_list);
+  transfer = select_transfer_by_cid(response_event->connection,
+                                    response_event->cid,
+                                    request_pending_transfer_list);
 
   if (transfer != NULL) {
     transfer->max_pdu = response_event->max_pdu;
     transfer->max_sdu = response_event->max_sdu;
     transfer->credit = response_event->credit;
 
-    sl_slist_remove(&request_pending_transfer_list, &transfer->node);
-
-    if (response_event->errorcode == sl_bt_l2cap_connection_result_successful) {
+    if (error_code == sl_bt_l2cap_connection_result_successful) {
 #if SL_BT_L2CAP_TRANSFER_CONFIG_ACCEPT_PRIOR_CHANNELS == 1
-      if (transfer == &transfer_template) {
+      sl_bt_l2cap_transfer_transfer_t *template = NULL;
+      // Get prior channel transfer template if present
+      template = get_template(transfer->connection);
+      // Check if this channel is the prior channel
+      if (template != NULL && transfer == template) {
         transfer->callbacks->on_open(transfer);
       } else {
 #endif // SL_BT_L2CAP_TRANSFER_CONFIG_ACCEPT_PRIOR_CHANNELS == 1
@@ -652,13 +721,16 @@ static void register_open_response_from_server(sl_bt_evt_l2cap_le_channel_open_r
       transfer->channel_error = error_code;
       close_transfer(transfer->connection, transfer->cid, error_code);
 #if SL_BT_L2CAP_TRANSFER_CONFIG_ACCEPT_PRIOR_CHANNELS == 1
-      if (transfer_template.connection == response_event->connection
-          && transfer_template.cid == response_event->cid) {
-        transfer_template.cid = INVALID_CID;
-        transfer_template.connection = INVALID_CONNECTION_HANDLE;
+      sl_bt_l2cap_transfer_transfer_t *template = NULL;
+      // Reset to defaults if template present
+      template = get_template(transfer->connection);
+      if (template != NULL) {
+        set_template_defaults(template);
       }
 #endif // SL_BT_L2CAP_TRANSFER_CONFIG_ACCEPT_PRIOR_CHANNELS == 1
     }
+    // Remove transfer from the pending list
+    sl_slist_remove(&request_pending_transfer_list, &transfer->node);
   }
 }
 
@@ -733,7 +805,18 @@ static sl_status_t process_received_data(sl_bt_evt_l2cap_channel_data_t *data)
     // Check if the SDU is violated.
     if ((uint32_t)transfer->sdu_pointer + data_len > transfer->sdu_size) {
       transfer->channel_error = SL_STATUS_BT_DATA_CORRUPTED;
+#if SL_BT_L2CAP_TRANSFER_CONFIG_ACCEPT_PRIOR_CHANNELS == 1
+      sl_bt_l2cap_transfer_transfer_t *template;
+      template = get_template(transfer->connection);
+      if (template != NULL && template->cid == transfer->cid) {
+        close_transfer(transfer->connection, transfer->cid, SL_STATUS_OK);
+      } else {
+        (void)sl_bt_l2cap_close_channel(transfer->connection, transfer->cid);
+      }
+#else // SL_BT_L2CAP_TRANSFER_CONFIG_ACCEPT_PRIOR_CHANNELS == 1
       (void)sl_bt_l2cap_close_channel(transfer->connection, transfer->cid);
+#endif // SL_BT_L2CAP_TRANSFER_CONFIG_ACCEPT_PRIOR_CHANNELS == 1
+      return transfer->channel_error;
     }
 
     // If data is received, the offset will be shifted by the data size
@@ -749,8 +832,9 @@ static sl_status_t process_received_data(sl_bt_evt_l2cap_channel_data_t *data)
 
     if (transfer->pointer >= transfer->data_length) {
 #if SL_BT_L2CAP_TRANSFER_CONFIG_ACCEPT_PRIOR_CHANNELS == 1
-      if (transfer_template.connection == transfer->connection
-          && transfer_template.cid == transfer->cid) {
+      sl_bt_l2cap_transfer_transfer_t *template;
+      template = get_template(transfer->connection);
+      if (template != NULL && template->cid == transfer->cid) {
         close_transfer(transfer->connection, transfer->cid, SL_STATUS_OK);
       } else {
         (void)sl_bt_l2cap_close_channel(transfer->connection, transfer->cid);
@@ -793,7 +877,6 @@ static sl_status_t open_channel(void)
                                      &transfer->cid);
     // Try to open the channel only once
     sl_slist_remove(&request_transfer_list, &transfer->node);
-    app_assert_status(sc);
     if (sc == SL_STATUS_OK) {
       sl_slist_push_back(&request_pending_transfer_list, &transfer->node);
     } else {
@@ -875,7 +958,6 @@ static void send_data(sl_bt_l2cap_transfer_transfer_t *transfer)
                                                                           data_len,
                                                                           data_ptr);
     }
-    app_assert_status(sc);
     if (sc == SL_STATUS_NO_MORE_RESOURCE) {
       // Buffer is full, just wait
     } else if (sc != SL_STATUS_OK) {
@@ -967,8 +1049,8 @@ static sl_bt_l2cap_transfer_transfer_t *select_transfer_by_connection(uint8_t   
 static void close_transfer(uint16_t connection, uint16_t cid, sl_status_t error)
 {
   sl_bt_l2cap_transfer_transfer_t *transfer;
-
   sl_status_t sc = error;
+
   bool disconnect_status = false;
 
   if ((sc == SL_STATUS_BT_L2CAP_REMOTE_DISCONNECTED)
@@ -993,14 +1075,31 @@ static void close_transfer(uint16_t connection, uint16_t cid, sl_status_t error)
     }
     remove_transfer_from_everywhere(connection, cid);
   }
+}
+
+static void close_all_by_connection(uint8_t     connection,
+                                    sl_status_t reason)
+{
+  sl_bt_l2cap_transfer_transfer_t *transfer = NULL;
+  // Get first transfer for the connection
+  transfer = search_for_transfer_by_connection(connection);
+  // Close if found and search for additional ones
+  while (transfer != NULL) {
+    close_transfer(transfer->connection,
+                   transfer->cid,
+                   reason);
+    transfer = search_for_transfer_by_connection(connection);
+  }
 #if SL_BT_L2CAP_TRANSFER_CONFIG_ACCEPT_PRIOR_CHANNELS == 1
-  if (transfer == NULL
-      && connection == transfer_template.connection
-      && cid == transfer_template.cid) {
-    if (transfer_template.callbacks && transfer_template.callbacks->on_finish) {
-      transfer_template.callbacks->on_finish(&transfer_template,
-                                             sc);
+  // Get template and reset to defaults
+  transfer = get_template(connection);
+  if (transfer != NULL) {
+    if (transfer->cid != INVALID_CID) {
+      close_transfer(transfer->connection,
+                     transfer->cid,
+                     reason);
     }
+    set_template_defaults(transfer);
   }
 #endif // SL_BT_L2CAP_TRANSFER_CONFIG_ACCEPT_PRIOR_CHANNELS == 1
 }
@@ -1025,6 +1124,34 @@ static void remove_transfer_from_everywhere(uint16_t connection, uint16_t cid)
   remove_transfer(connection,
                   cid,
                   &receive_active_transfer_list);
+}
+
+sl_bt_l2cap_transfer_transfer_t *search_for_transfer_by_connection(uint8_t con)
+{
+  sl_bt_l2cap_transfer_transfer_t *transfer;
+
+  transfer = select_transfer_by_connection(con, request_transfer_list);
+  if (transfer != NULL) {
+    return transfer;
+  }
+  transfer = select_transfer_by_connection(con, request_pending_transfer_list);
+  if (transfer != NULL) {
+    return transfer;
+  }
+  transfer = select_transfer_by_connection(con, active_list);
+  if (transfer != NULL) {
+    return transfer;
+  }
+  transfer = select_transfer_by_connection(con, request_response_transfer_list);
+  if (transfer != NULL) {
+    return transfer;
+  }
+  transfer = select_transfer_by_connection(con, request_response_buffer_transfer_list);
+  if (transfer != NULL) {
+    return transfer;
+  }
+  transfer = select_transfer_by_connection(con, receive_active_transfer_list);
+  return transfer;
 }
 
 static sl_bt_l2cap_transfer_transfer_t *search_for_transfer(uint16_t connection,
@@ -1070,12 +1197,30 @@ static sl_bt_l2cap_transfer_transfer_t *search_for_transfer(uint16_t connection,
   transfer = select_transfer_by_cid(connection,
                                     cid,
                                     receive_active_transfer_list);
-  if (transfer != NULL) {
-    return transfer;
-  }
 
+  return transfer;
+}
+
+#if SL_BT_L2CAP_TRANSFER_CONFIG_ACCEPT_PRIOR_CHANNELS == 1
+
+static sl_bt_l2cap_transfer_transfer_t *get_template(uint8_t connection)
+{
+  for (uint8_t i = 0; i < SL_BT_L2CAP_TRANSFER_CONFIG_PRIOR_CHANNEL_COUNT; i++) {
+    if (transfer_template[i].connection == connection) {
+      return &transfer_template[i];
+    }
+  }
   return NULL;
 }
+
+static void set_template_defaults(sl_bt_l2cap_transfer_transfer_t *template)
+{
+  if (template != NULL) {
+    memcpy(template, &transfer_template_default, sizeof(transfer_template_default));
+  }
+}
+
+#endif // SL_BT_L2CAP_TRANSFER_CONFIG_ACCEPT_PRIOR_CHANNELS == 1
 
 // -----------------------------------------------------------------------------
 // Weak implementation of adaptation functions

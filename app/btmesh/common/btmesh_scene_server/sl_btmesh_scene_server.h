@@ -3,7 +3,7 @@
  * @brief sl_btmesh_scene_server.h
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -35,7 +35,7 @@
  * Scenes initialization.
  * This should be called at each boot if provisioning is already done.
  * Otherwise this function should be called after provisioning is completed.
- * It is called automatically by the Universal Configurator Framework
+ * This function is called automatically after enabling the component.
  *
  * @param[in] element  Index of the element where scenes models are initialized.
  *
@@ -47,7 +47,7 @@ uint16_t sl_btmesh_scenes_init(void);
 /***************************************************************************//**
  * Handling of mesh scene events.
  *
- * It is called automatically by the Universal Configurator Framework
+ * This function is called automatically after enabling the component.
  *
  * @param[in] evt  Pointer to incoming scene server event.
  ******************************************************************************/

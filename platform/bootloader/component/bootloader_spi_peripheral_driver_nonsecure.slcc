@@ -5,7 +5,7 @@ description: >
   The Bootloader SPI Peripheral Driver (Non-Secure) component provides a DMA-driven SPI Peripheral driver.
   This driver will support both blocking and non-blocking operations.
 category: Platform|Bootloader|TrustZone NonSecure|Drivers
-quality: evaluation
+quality: production
 source:
   - path: platform/bootloader/driver/btl_driver_spi_peripheral_ns.c
 include:

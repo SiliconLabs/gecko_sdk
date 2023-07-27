@@ -14,6 +14,12 @@ include:
     - path: "em_gpio.h"
 provides:
   - name: emlib_gpio
+  - name: lld_gpio
+    condition: [device_series_0]
+  - name: lld_gpio
+    condition: [device_series_1]
+  - name: lld_gpio
+    condition: [device_series_2]
 requires:
   - name: device
   - name: device_has_gpio

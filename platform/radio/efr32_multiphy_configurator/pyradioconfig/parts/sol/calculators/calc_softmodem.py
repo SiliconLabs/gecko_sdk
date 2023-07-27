@@ -353,12 +353,13 @@ class calc_softmodem_sol(ICalculator):
 
     def calc_softmodem_sunofdm_cfg2_regs(self, model):
 
-        antdivmode = model.vars.antdivmode.value
+        softmodem_modulation_type = model.vars.softmodem_modulation_type.value
 
-        if antdivmode == model.vars.antdivmode.var_enum.DISABLE:
-            cfg2_nbstf = 10
+        if softmodem_modulation_type == model.vars.softmodem_modulation_type.var_enum.SUN_OFDM:
+            ofdm_stf_length = model.vars.ofdm_stf_length.value
+            cfg2_nbstf = int(ofdm_stf_length * 5 / 2)  # For Melco PHYs longer preamble
         else:
-            cfg2_nbstf = 25
+            cfg2_nbstf = 0
 
         self._reg_write(model.vars.SUNOFDM_CFG2_NBSTF, cfg2_nbstf)
 
@@ -1050,31 +1051,60 @@ class calc_softmodem_sol(ICalculator):
         if softmodem_modulation_type == model.vars.softmodem_modulation_type.var_enum.SUN_OFDM and \
                 antdivmode != model.vars.antdivmode.var_enum.DISABLE:
             ofdm_option = model.vars.ofdm_option.value
+            ofdm_stf_length = model.vars.ofdm_stf_length.value
 
             """Values obtained from designers - to annotate"""
-            if ofdm_option == model.vars.ofdm_option.var_enum.OPT1:
-                agcreldly = 20
-                agcconvdly = 155
-                settlingtime = 45
-                anticpswitch = 0
+            if ofdm_stf_length < 12:
 
-            elif ofdm_option == model.vars.ofdm_option.var_enum.OPT2:
-                agcreldly = 20
-                agcconvdly = 155
-                settlingtime = 24
-                anticpswitch = 11
+                if ofdm_option == model.vars.ofdm_option.var_enum.OPT1:
+                    agcreldly = 20
+                    agcconvdly = 155
+                    settlingtime = 45
+                    anticpswitch = 0
 
-            elif ofdm_option == model.vars.ofdm_option.var_enum.OPT3:
-                agcreldly = 20
-                agcconvdly = 155
-                settlingtime = 14
-                anticpswitch = 19
+                elif ofdm_option == model.vars.ofdm_option.var_enum.OPT2:
+                    agcreldly = 20
+                    agcconvdly = 155
+                    settlingtime = 24
+                    anticpswitch = 11
+
+                elif ofdm_option == model.vars.ofdm_option.var_enum.OPT3:
+                    agcreldly = 20
+                    agcconvdly = 155
+                    settlingtime = 14
+                    anticpswitch = 19
+
+                else:
+                    agcreldly = 20
+                    agcconvdly = 165
+                    settlingtime = 11
+                    anticpswitch = 18
 
             else:
-                agcreldly = 20
-                agcconvdly = 165
-                settlingtime = 11
-                anticpswitch = 18
+
+                if ofdm_option == model.vars.ofdm_option.var_enum.OPT1:
+                    agcreldly = 20
+                    agcconvdly = 190
+                    settlingtime = 24
+                    anticpswitch = 12
+
+                elif ofdm_option == model.vars.ofdm_option.var_enum.OPT2:
+                    agcreldly = 20
+                    agcconvdly = 190
+                    settlingtime = 24
+                    anticpswitch = 12
+
+                elif ofdm_option == model.vars.ofdm_option.var_enum.OPT3:
+                    agcreldly = 20
+                    agcconvdly = 180
+                    settlingtime = 24
+                    anticpswitch = 12
+
+                else:
+                    agcreldly = 20
+                    agcconvdly = 170
+                    settlingtime = 24
+                    anticpswitch = 12
 
 
             self._reg_write(model.vars.SUNOFDM_ANTDIVDLY_AGCRELDLY, agcreldly)

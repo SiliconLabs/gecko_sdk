@@ -9,6 +9,7 @@ description: >
   installed on the node and the location of new firmware images, and to initiate
   a firmware update in order to receive a new firmware. The firmware image will
   be transferred using the BLOB Transfer Server model.
+  This component is prepared for integration into SOC applications.
 category: "Bluetooth Mesh|Models|Firmware Update"
 quality: production
 root_path: app/btmesh/common/btmesh_firmware_update_server
@@ -63,3 +64,4 @@ template_contribution:
       handler: sl_btmesh_firmware_update_server_is_ok_to_sleep
 validation_helper:
   - path: btmesh_firmware_update_server_validation.lua
+  - path: "../../script/validation/soc_ncp_compatibility.lua"

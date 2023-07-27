@@ -190,6 +190,13 @@ EmberStatus emberSetPsaSecurityKey(mbedtls_svc_key_id_t key_id);
  *  removed.
  */
 EmberStatus emberRemovePsaSecurityKey(void);
+
+/**
+ * @brief Returns the current PSA Crypto key identifier if set else 0..
+ *
+ */
+mbedtls_svc_key_id_t emberGetKeyId(void);
+
 #endif
 
 /** @brief Set the channel for sending and receiving messages on the current
@@ -528,12 +535,6 @@ EmberNodeType emberGetNodeType(void);
  * @return The parent's node ID.
  */
 EmberNodeId emberGetParentId(void);
-
-extern EmberNodeId emLocalNodeId;
-extern EmberPanId emLocalPanId;
-extern EmberNodeId emParentId;
-extern EmberNodeType emNodeType;
-extern EmberEUI64 emLocalEui64;
 
 /**
  * @}

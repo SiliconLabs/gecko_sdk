@@ -240,7 +240,7 @@ void prepare_package(RAIL_Handle_t rail_handle, uint8_t *out_data, uint16_t leng
     #endif
   }
 }
-#elif defined(RAIL0_CHANNEL_GROUP_1_PROFILE_BASE) && (defined(RAIL0_CHANNEL_GROUP_1_PHY_SIDEWALK_2GFSK_50KBPS) || defined(RAIL0_CHANNEL_GROUP_1_PHY_SIDEWALK_2GFSK_150KBPS) || defined(RAIL0_CHANNEL_GROUP_1_PHY_SIDEWALK_2GFSK_250KBPS))
+#elif defined(RAIL0_CHANNEL_GROUP_1_PROFILE_BASE) && (defined(RAIL0_CHANNEL_GROUP_1_PHY_SIDEWALK_2GFSK_50KBPS) || defined(RAIL0_CHANNEL_GROUP_1_PHY_SIDEWALK_2GFSK_150KBPS) || defined(RAIL0_CHANNEL_GROUP_1_PHY_SIDEWALK_2GFSK_250KBPS)) || defined(RAIL0_CHANNEL_GROUP_1_PROFILE_SIDEWALK) || defined(RAIL0_CHANNELS_FOR_915_PROFILE_SIDEWALK)
 /******************************************************************************
  * The API helps to unpack the received packet, point to the payload and returns the length.
  *****************************************************************************/

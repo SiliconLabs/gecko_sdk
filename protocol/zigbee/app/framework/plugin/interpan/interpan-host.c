@@ -38,7 +38,7 @@ EmberStatus sli_zigbee_af_interpan_send_raw_message(uint8_t length, uint8_t* mes
   return ezspSendRawMessage(length, message);
 }
 
-void emberAfPluginInterpanNcpInitCallback(bool memoryAllocation)
+void emberAfPluginInterpanNcpInitCallback(void)
 {
   interpanPluginInit(SL_ZIGBEE_INIT_LEVEL_EVENT);
   interpanPluginInit(SL_ZIGBEE_INIT_LEVEL_LOCAL_DATA);
@@ -47,20 +47,17 @@ void emberAfPluginInterpanNcpInitCallback(bool memoryAllocation)
     EMBER_AF_PLUGIN_INTERPAN_FILTER_LIST
   };
   EzspStatus status;
-  if (memoryAllocation) {
-    status = ezspSetConfigurationValue(EZSP_CONFIG_MAC_FILTER_TABLE_SIZE,
-                                       (sizeof(filters)
-                                        / sizeof(EmberMacFilterMatchData)) + 1);
-    if (status != EZSP_SUCCESS) {
-      emberAfAppPrintln("%s%s failed 0x%02X",
-                        "Error: ",
-                        "Sizing MAC filter table",
-                        status);
-      return;
-    }
-  } else {
-    interpanPluginSetMacMatchFilterEnable(true);
+  status = ezspSetConfigurationValue(EZSP_CONFIG_MAC_FILTER_TABLE_SIZE,
+                                     (sizeof(filters)
+                                      / sizeof(EmberMacFilterMatchData)) + 1);
+  if (status != EZSP_SUCCESS) {
+    emberAfAppPrintln("%s%s failed 0x%02X",
+                      "Error: ",
+                      "Sizing MAC filter table",
+                      status);
+    return;
   }
+  interpanPluginSetMacMatchFilterEnable(true);
 }
 
 void interpanPluginSetMacMatchFilterEnable(bool enable)

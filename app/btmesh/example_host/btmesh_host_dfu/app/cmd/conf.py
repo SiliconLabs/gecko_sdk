@@ -20,15 +20,18 @@
 #    misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
+import functools
 from typing import Optional, Tuple
 
 import btmesh.util
 from bgapix.bglibx import CommandFailedError
 from bgapix.slstatus import SlStatus
-from btmesh.conf import (GattProxyState, NodeIdentityState, SilabsConfStatus,
+from btmesh.conf import (BtmeshConfigError, FriendState, GattProxyState,
+                         NodeIdentityState, RelayState, SilabsConfStatus,
                          SilabsConfTxOpt, SilabsConfTxPhy)
-from btmesh.db import ModelID
+from btmesh.db import ModelID, Node
 from btmesh.errors import BtmeshError
+from btmesh.util import BtmeshRetryParams
 
 from ..btmesh import app_btmesh
 from ..cfg import app_cfg
@@ -36,6 +39,25 @@ from ..db import app_db
 from ..ui import app_ui
 from ..util.argparsex import ArgumentParserExt
 from .cmd import BtmeshCmd
+
+
+def conf_set_node_failed_handler(f):
+    @functools.wraps(f)
+    def conf_set_node_wrapper(*args, **kwargs):
+        try:
+            return f(*args, **kwargs)
+        except BtmeshConfigError as e:
+            app_ui.error(str(e))
+            if e.result == SlStatus.TIMEOUT:
+                # If there is a timeout error then all remaining configuration
+                # operations targeting the same node shall be stopped because
+                # it seems the node is not active or unreachable.
+                # Same error is raised so the caller can continue with other nodes.
+                raise
+        except BtmeshError as e:
+            app_ui.error(str(e))
+
+    return conf_set_node_wrapper
 
 
 class BtmeshConfCmd(BtmeshCmd):
@@ -155,19 +177,125 @@ class BtmeshConfCmd(BtmeshCmd):
         self.conf_set_parser: ArgumentParserExt = subparsers.add_parser(
             SUBPARSER_NAME,
             help="Set configuration states on specified nodes.",
-            description="Set configuration states on specified nodes.",
+            description=(
+                "Set configuration states on specified nodes. "
+                "The set subcommand enables the configuration of Configuration "
+                "Server and SAR Configuration Server states on multiple nodes. "
+                "Some configuration messages set multiple related configuration "
+                "states so these states can be set in groups only. "
+                "The set command provides two methods to update these related "
+                "configuration states. "
+                "Each configuration state has default value which is updated "
+                "atomically with others in the same configuration message. "
+                "If some of these states aren't specified then the default "
+                "value is used which can be set in the ini configuration file "
+                "(default behavior). "
+                "If --update option is specified then the set command reads the "
+                "configuration states by the corresponding get messages and "
+                "modifies the specified configuration states only. "
+                "The configuration get operations leads to higher execution time. "
+                "Those subcommand options which refers to configuration states "
+                "that can be updated atomically with other configuration options "
+                'are marked with "Config group: <group_name>" in help text.'
+            ),
             exit_on_error_ext=False,
         )
         self.conf_set_parser.set_defaults(conf_subcmd=self.conf_set_cmd)
+        self.conf_set_parser.add_argument(
+            "--update",
+            "-u",
+            action="store_true",
+            help=(
+                "Some configuration messages set multiple related configuration "
+                "states so these states can be set in groups only. "
+                "The --update option affects configuration states which can be "
+                "set atomically in the same configuration message. "
+                "If --update option is used then the set command reads the "
+                "related configuration states by the corresponding get message "
+                "and it modifies the specified configuration states only."
+            ),
+        )
+        self.conf_set_parser.add_argument(
+            "--ttl",
+            type=int,
+            help=(
+                "Default TTL determines TTL value used when sending messages. "
+                "The Default TTL is applied by the access layer or by the "
+                "upper transport layer unless the application or functionality "
+                "specifies a TTL. "
+                "Valid value range is from 2 to 127 for relayed PDUs, "
+                "and 0 for non-relayed PDUs."
+            ),
+        )
+        self.conf_set_parser.add_argument(
+            "--relay",
+            choices=["on", "off"],
+            help=(
+                "Set relay feature. Config group: RELAY. Other relay group "
+                "options have effect only when the relay feature is turned on."
+            ),
+        )
+        self.conf_set_parser.add_argument(
+            "--relay-retx-cnt",
+            type=int,
+            help=(
+                f"Default relay retransmit count controls the number of "
+                f"retransmissions of Network PDUs relayed by the node. "
+                f"Valid values range from 0 to 7. "
+                f"Config group: RELAY. This option has an effect when relay "
+                f"feature is turned on by --relay option. "
+                f"(default: {app_cfg.conf.relay_retx_count_default})"
+            ),
+        )
+        self.conf_set_parser.add_argument(
+            "--relay-retx-int",
+            type=int,
+            help=(
+                f"Default relay retransmit interval in milliseconds controls "
+                f"the interval between retransmissions of Network PDUs relayed "
+                f"by the node. "
+                f"Valid values range from 10 ms to 320 ms, with a resolution of 10 ms. "
+                f"Config group: RELAY. This option has an effect when relay "
+                f"feature is turned on by --relay option. "
+                f"(default: {app_cfg.conf.relay_retx_interval_ms_default})"
+            ),
+        )
         self.conf_set_parser.add_argument(
             "--proxy",
             choices=["on", "off"],
             help="Set proxy feature.",
         )
         self.conf_set_parser.add_argument(
+            "--friend",
+            choices=["on", "off"],
+            help="Set friend feature.",
+        )
+        self.conf_set_parser.add_argument(
             "--identity",
             choices=["on", "off"],
             help="Set node identity advertising.",
+        )
+        self.conf_set_parser.add_argument(
+            "--nw-tx-cnt",
+            type=int,
+            help=(
+                f"Default network transmit count controls the number of "
+                f"transmissions of Network PDUs that originate from the node. "
+                f"Valid values range from 1 to 8. "
+                f"Config group: NWTX. "
+                f"(default: {app_cfg.conf.network_tx_count_default})"
+            ),
+        )
+        self.conf_set_parser.add_argument(
+            "--nw-tx-int",
+            type=int,
+            help=(
+                f"Default interval in milliseconds between network PDU "
+                f"transmissions which originates from the same nodes. "
+                f"Valid values range from 10 ms to 320 ms, with a resolution of 10 ms. "
+                f"Config group: NWTX. "
+                f"(default: {app_cfg.conf.network_tx_interval_ms_default})"
+            ),
         )
         self.add_btmesh_basic_retry_args(
             self.conf_set_parser,
@@ -412,33 +540,172 @@ class BtmeshConfCmd(BtmeshCmd):
         # other parameters are overwritten by the arguments of conf set command
         retry_params_default = app_cfg.common.btmesh_retry_params_default
         retry_params = self.process_btmesh_retry_params(pargs, retry_params_default)
+        update = pargs.update
         for node in nodes:
-            node_str = app_ui.node_str(node)
-            if pargs.proxy:
-                if pargs.proxy == "on":
-                    proxy_state = GattProxyState.ENABLED
-                else:
-                    proxy_state = GattProxyState.DISABLED
-                app_btmesh.conf.set_gatt_proxy(
-                    node, state=proxy_state, retry_params=retry_params
-                )
-                proxy_state_str = proxy_state.pretty_name
-                app_ui.info(f"Proxy feature is {proxy_state_str} on {node_str} node.")
-            if pargs.identity:
-                if pargs.identity == "on":
-                    node_identity_state = NodeIdentityState.ENABLED
-                else:
-                    node_identity_state = NodeIdentityState.DISABLED
-                app_btmesh.conf.set_node_identity(
-                    node,
-                    netkey_index=self.NETKEY_IDX,
-                    state=node_identity_state,
-                    retry_params=retry_params,
-                )
-                identity_state_str = node_identity_state.pretty_name
-                app_ui.info(
-                    f"Node identity advertising is {identity_state_str} on {node_str} node."
-                )
+            try:
+                self.conf_set_node_default_ttl(node, retry_params, pargs)
+                self.conf_set_node_relay(node, retry_params, update, pargs)
+                self.conf_set_node_proxy(node, retry_params, pargs)
+                self.conf_set_node_friend(node, retry_params, pargs)
+                self.conf_set_node_identity(node, retry_params, pargs)
+                self.conf_set_node_network_transmit(node, retry_params, update, pargs)
+            except BtmeshConfigError as e:
+                # The exception is raised when timeout error occurs in order to
+                # skip further configuration operations targeting the same node.
+                # The underlying assumption is that the node is powered down or
+                # unreachable or removed from the network without the knowledge
+                # of the provisioner etc.
+                # Other non-timeout errors are not raised so those should not
+                # reach this point, and therefore they shall be raised again.
+                if e.result != SlStatus.TIMEOUT:
+                    raise
+
+    @conf_set_node_failed_handler
+    def conf_set_node_default_ttl(
+        self, node: Node, retry_params: BtmeshRetryParams, pargs
+    ):
+        ttl = pargs.ttl
+        if ttl is None:
+            return
+        node_str = app_ui.node_str(node)
+        app_btmesh.conf.set_default_ttl(node, ttl=ttl, retry_params=retry_params)
+        app_ui.info(f"Default TTL is set to {ttl} on {node_str} node.")
+
+    @conf_set_node_failed_handler
+    def conf_set_node_relay(
+        self, node: Node, retry_params: BtmeshRetryParams, update: bool, pargs
+    ):
+        relay_raw_state = pargs.relay
+        if relay_raw_state is None:
+            return
+        node_str = app_ui.node_str(node)
+        if relay_raw_state == "on":
+            relay_state = RelayState.ENABLED
+        else:
+            relay_state = RelayState.DISABLED
+        retransmit_count = pargs.relay_retx_cnt
+        retransmit_interval_ms = pargs.relay_retx_int
+        if update and (retransmit_count is None or retransmit_interval_ms is None):
+            relay_status = app_btmesh.conf.get_relay(node, retry_params=retry_params)
+        if retransmit_count is None:
+            if update:
+                retransmit_count = relay_status.retransmit_count
+            else:
+                retransmit_count = app_cfg.conf.relay_retx_count_default
+        if retransmit_interval_ms is None:
+            if update:
+                retransmit_interval_ms = relay_status.retransmit_interval_ms
+            else:
+                retransmit_interval_ms = app_cfg.conf.relay_retx_interval_ms_default
+        app_btmesh.conf.set_relay(
+            node,
+            state=relay_state,
+            retransmit_count=retransmit_count,
+            retransmit_interval_ms=retransmit_interval_ms,
+        )
+        relay_state_str = relay_state.pretty_name
+        if relay_state == RelayState.ENABLED:
+            app_ui.info(
+                f"Relay feature is {relay_state_str} with "
+                f"{retransmit_count} retransmit count and "
+                f"{retransmit_interval_ms} ms retransmit interval "
+                f"on {node_str} node."
+            )
+        else:
+            app_ui.info(f"Relay feature is {relay_state_str} on {node_str} node.")
+
+    @conf_set_node_failed_handler
+    def conf_set_node_proxy(self, node: Node, retry_params: BtmeshRetryParams, pargs):
+        proxy_raw_state = pargs.proxy
+        if proxy_raw_state is None:
+            return
+        node_str = app_ui.node_str(node)
+        if proxy_raw_state == "on":
+            proxy_state = GattProxyState.ENABLED
+        else:
+            proxy_state = GattProxyState.DISABLED
+        app_btmesh.conf.set_gatt_proxy(
+            node,
+            state=proxy_state,
+            retry_params=retry_params,
+        )
+        proxy_state_str = proxy_state.pretty_name
+        app_ui.info(f"Proxy feature is {proxy_state_str} on {node_str} node.")
+
+    @conf_set_node_failed_handler
+    def conf_set_node_friend(self, node: Node, retry_params: BtmeshRetryParams, pargs):
+        friend_raw_state = pargs.friend
+        if friend_raw_state is None:
+            return
+        node_str = app_ui.node_str(node)
+        if friend_raw_state == "on":
+            friend_state = FriendState.ENABLED
+        else:
+            friend_state = FriendState.DISABLED
+        app_btmesh.conf.set_friend(
+            node,
+            state=friend_state,
+            retry_params=retry_params,
+        )
+        friend_state_str = friend_state.pretty_name
+        app_ui.info(f"Friend feature is {friend_state_str} on {node_str} node.")
+
+    @conf_set_node_failed_handler
+    def conf_set_node_identity(
+        self, node: Node, retry_params: BtmeshRetryParams, pargs
+    ):
+        node_identity_raw_state = pargs.identity
+        if node_identity_raw_state is None:
+            return
+        node_str = app_ui.node_str(node)
+        if node_identity_raw_state == "on":
+            node_identity_state = NodeIdentityState.ENABLED
+        else:
+            node_identity_state = NodeIdentityState.DISABLED
+        app_btmesh.conf.set_node_identity(
+            node,
+            netkey_index=self.NETKEY_IDX,
+            state=node_identity_state,
+            retry_params=retry_params,
+        )
+        identity_state_str = node_identity_state.pretty_name
+        app_ui.info(
+            f"Node identity advertising is {identity_state_str} on {node_str} node."
+        )
+
+    @conf_set_node_failed_handler
+    def conf_set_node_network_transmit(
+        self, node: Node, retry_params: BtmeshRetryParams, update: bool, pargs
+    ):
+        nettx_cnt = pargs.nw_tx_cnt
+        nettx_int = pargs.nw_tx_int
+        if nettx_cnt is None and nettx_int is None:
+            return
+        node_str = app_ui.node_str(node)
+        if update and (nettx_cnt is None or nettx_int is None):
+            nettx_status = app_btmesh.conf.get_network_transmit(
+                node, retry_params=retry_params
+            )
+        if nettx_cnt is None:
+            if update:
+                nettx_cnt = nettx_status.transmit_count
+            else:
+                nettx_cnt = app_cfg.conf.network_tx_count_default
+        if nettx_int is None:
+            if update:
+                nettx_int = nettx_status.transmit_interval_ms
+            else:
+                nettx_int = app_cfg.conf.network_tx_interval_ms_default
+        app_btmesh.conf.set_network_transmit(
+            node,
+            transmit_count=nettx_cnt,
+            transmit_interval_ms=nettx_int,
+            retry_params=retry_params,
+        )
+        app_ui.info(
+            f"Network transmit count is set to {nettx_cnt} and network transmit "
+            f"interval is set to {nettx_int} ms on {node_str} node."
+        )
 
     def conf_ae_cmd(self, pargs):
         appkey_idx = pargs.appkey_idx

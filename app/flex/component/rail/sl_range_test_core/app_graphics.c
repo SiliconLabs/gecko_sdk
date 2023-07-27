@@ -220,7 +220,7 @@ void graphics_draw_init_screen(void)
 {
   // Heights:
   // Logo: 62 + Title: 8 + Card: 8 + Spacing: 2*5 = 88
-  char buff[22U];
+  char buff[32U];
   uint32_t base_frequency = 0;
   uint32_t channel_spacing = 0;
   int16_t power = 0;
@@ -246,7 +246,7 @@ void graphics_draw_init_screen(void)
   }
 
   snprintf(buff, sizeof(buff),
-           "EFR32 %03luMHz %+lidBm",
+           "EFR32 %03luMHz %+idBm",
            (base_frequency / 1000000UL),
            (power / 10));
   GLIB_drawStringOnLine(&glib_context, buff, 10, GLIB_ALIGN_CENTER, 0, 0, false);
@@ -462,7 +462,7 @@ static void graphics_draw_button_icon(const uint8_t location, const uint8_t type
                     icons[type]->img_y,
                     icons[type]->image_bits);
   } else {
-    GLIB_drawString(&glib_context, buff, strlen(buff), x, y, false);
+    GLIB_drawString(&glib_context, buff, safe_strlen(buff), x, y, false);
   }
   // Set font back
   GLIB_setFont(&glib_context, (GLIB_Font_t *) &GLIB_FontNarrow6x8);
@@ -515,7 +515,7 @@ static void graphics_draw_menu_items(uint8_t start_index)
     if (!menu_item_is_hidden(i)) {
       GLIB_drawString(&glib_context,
                       menu_item_str(i),
-                      strlen(menu_item_str(i)),
+                      safe_strlen(menu_item_str(i)),
                       6U,
                       (16U + (i - start_index - hidden_menus_count) * 8U),
                       false);
@@ -584,7 +584,7 @@ static void graphics_draw_item_pointer(uint8_t row)
 static inline uint8_t graphics_draw_constans_info(uint8_t row)
 {
   char *ptr;
-  char buff[21U];
+  char buff[31U];
   uint8_t origRow = row;
 
   uint32_t base_frequency = 0;
@@ -613,17 +613,17 @@ static inline uint8_t graphics_draw_constans_info(uint8_t row)
     }
 
     ptr = menu_print_aligned("Frequency:", buff, 21U);
-    GLIB_drawString(&glib_context, ptr, strlen(ptr), 1U, row, false);
+    GLIB_drawString(&glib_context, ptr, safe_strlen(ptr), 1U, row, false);
     row += GRAPHICS_FONT_HEIGHT;
 
     snprintf(buff, sizeof(buff), "%ukHz", (uint16_t) (channel_spacing / 1000U));
     ptr = menu_print_aligned("Ch. spacing:", buff, 21U);
-    GLIB_drawString(&glib_context, ptr, strlen(ptr), 1U, row, false);
+    GLIB_drawString(&glib_context, ptr, safe_strlen(ptr), 1U, row, false);
     row += GRAPHICS_FONT_HEIGHT;
 
     snprintf(buff, sizeof(buff), "%u", range_test_settings.channel);
     ptr = menu_print_aligned("Ch. number:", buff, 21U);
-    GLIB_drawString(&glib_context, ptr, strlen(ptr), 1U, row, false);
+    GLIB_drawString(&glib_context, ptr, safe_strlen(ptr), 1U, row, false);
     row += GRAPHICS_FONT_HEIGHT;
 
     power = (int16_t) RAIL_GetTxPowerDbm(rail_handle);
@@ -636,17 +636,17 @@ static inline uint8_t graphics_draw_constans_info(uint8_t row)
              (power / 10),
              (((power > 0) ? (power) : (-power)) % 10));
     ptr = menu_print_aligned("Power:", buff, 21U);
-    GLIB_drawString(&glib_context, ptr, strlen(ptr), 1U, row, false);
+    GLIB_drawString(&glib_context, ptr, safe_strlen(ptr), 1U, row, false);
     row += GRAPHICS_FONT_HEIGHT;
 
     snprintf(buff, sizeof(buff), "%u", range_test_settings.source_id);
     ptr = menu_print_aligned("Source ID:", buff, 21U);
-    GLIB_drawString(&glib_context, ptr, strlen(ptr), 1U, row, false);
+    GLIB_drawString(&glib_context, ptr, safe_strlen(ptr), 1U, row, false);
     row += GRAPHICS_FONT_HEIGHT;
 
     snprintf(buff, sizeof(buff), "%u", range_test_settings.destination_id);
     ptr = menu_print_aligned("Remote ID:", buff, 21U);
-    GLIB_drawString(&glib_context, ptr, strlen(ptr), 1U, row, false);
+    GLIB_drawString(&glib_context, ptr, safe_strlen(ptr), 1U, row, false);
     row += GRAPHICS_FONT_HEIGHT;
   } else {
     // Buffering volatile fields
@@ -666,18 +666,18 @@ static inline uint8_t graphics_draw_constans_info(uint8_t row)
                  (uint16_t) (base_frequency / 1000000UL));
       }
 
-      GLIB_drawString(&glib_context, buff, strlen(buff), 1U, row, false);
+      GLIB_drawString(&glib_context, buff, safe_strlen(buff), 1U, row, false);
       row += GRAPHICS_FONT_HEIGHT;
     }
     snprintf(buff, sizeof(buff),
              "Fch:%4ukHz  Ch#: %3u",
              (uint16_t) (channel_spacing / 1000U),
              range_test_settings.channel);
-    GLIB_drawString(&glib_context, buff, strlen(buff), 1U, row, false);
+    GLIB_drawString(&glib_context, buff, safe_strlen(buff), 1U, row, false);
     row += GRAPHICS_FONT_HEIGHT;
 
     snprintf(buff, sizeof(buff), "src: %3u     dst: %3u", srcID, destID);
-    GLIB_drawString(&glib_context, buff, strlen(buff), 1U, row, false);
+    GLIB_drawString(&glib_context, buff, safe_strlen(buff), 1U, row, false);
     row += GRAPHICS_FONT_HEIGHT;
   }
 
@@ -705,7 +705,7 @@ static uint8_t graphics_draw_volatile_info(uint8_t row)
   if (RADIO_MODE_TX == radioMode) {
     snprintf(buff, sizeof(buff), "%5u", pktsSent);
     ptr = menu_print_aligned("Transmitted:", buff, 21U);
-    GLIB_drawString(&glib_context, ptr, strlen(ptr), 1U, row, false);
+    GLIB_drawString(&glib_context, ptr, safe_strlen(ptr), 1U, row, false);
     row += GRAPHICS_FONT_HEIGHT;
   } else { // RADIO_MODE_TX
            //buffering volatile data fields used only here
@@ -721,7 +721,7 @@ static uint8_t graphics_draw_volatile_info(uint8_t row)
       snprintf(buff, sizeof(buff), "% 3d dBm", (int8_t)rssiLatch);
     }
     ptr = menu_print_aligned("RSSI:", buff, 21U);
-    GLIB_drawString(&glib_context, ptr, strlen(ptr), 1U, row, false);
+    GLIB_drawString(&glib_context, ptr, safe_strlen(ptr), 1U, row, false);
     row += GRAPHICS_FONT_HEIGHT;
 
     if (RANGETEST_PACKET_COUNT_INVALID == pktsRcvd) {
@@ -732,7 +732,7 @@ static uint8_t graphics_draw_volatile_info(uint8_t row)
     }
 
     ptr = menu_print_aligned("Rx:", buff, 21U);
-    GLIB_drawString(&glib_context, ptr, strlen(ptr), 1U, row, false);
+    GLIB_drawString(&glib_context, ptr, safe_strlen(ptr), 1U, row, false);
     row += GRAPHICS_FONT_HEIGHT;
 
     if (RANGETEST_PACKET_COUNT_INVALID == pktsRcvd) {
@@ -740,7 +740,7 @@ static uint8_t graphics_draw_volatile_info(uint8_t row)
     } else {
       snprintf(buff, sizeof(buff), "MA:%5.1f%%  PER:%5.1f%%", MA, PER);
     }
-    GLIB_drawString(&glib_context, buff, strlen(buff), 1U, row, false);
+    GLIB_drawString(&glib_context, buff, safe_strlen(buff), 1U, row, false);
     row += GRAPHICS_FONT_HEIGHT;
   }
 
@@ -822,11 +822,11 @@ static uint8_t graphics_draw_rssi_chart_frame(int16_t x, int16_t y)
                  GRAPHICS_MAX_X);
 
   snprintf(buff, sizeof(buff), "% 3d", rssi_chart_axis[0U]);
-  GLIB_drawString(&glib_context, buff, strlen(buff), x, (y + GRAPHICS_CHART_SIG_0_OFFSET - 3U), false);
+  GLIB_drawString(&glib_context, buff, safe_strlen(buff), x, (y + GRAPHICS_CHART_SIG_0_OFFSET - 3U), false);
   snprintf(buff, sizeof(buff), "% 3d", rssi_chart_axis[1U]);
-  GLIB_drawString(&glib_context, buff, strlen(buff), x, (y + GRAPHICS_CHART_SIG_1_OFFSET - 3U), false);
+  GLIB_drawString(&glib_context, buff, safe_strlen(buff), x, (y + GRAPHICS_CHART_SIG_1_OFFSET - 3U), false);
   snprintf(buff, sizeof(buff), "% 3d", rssi_chart_axis[2U]);
-  GLIB_drawString(&glib_context, buff, strlen(buff), x, (y + 3U * GRAPHICS_FONT_HEIGHT), false);
+  GLIB_drawString(&glib_context, buff, safe_strlen(buff), x, (y + 3U * GRAPHICS_FONT_HEIGHT), false);
 
   return (y + GRAPHICS_CHART_HEIGHT); // End row
 }

@@ -146,6 +146,7 @@ extern int
 #include <openthread/message.h>
 #include <openthread/nat64.h>
 #include <openthread/netdata.h>
+#include <openthread/platform/border_routing.h>
 #include <openthread/platform/misc.h>
 
 #include "common/code_utils.hpp"
@@ -156,7 +157,9 @@ extern int
 
 unsigned int gNetifIndex = 0;
 char         gNetifName[IFNAMSIZ];
-otIp4Cidr    gNat64Cidr;
+#if OPENTHREAD_CONFIG_NAT64_TRANSLATOR_ENABLE
+static otIp4Cidr sActiveNat64Cidr;
+#endif
 
 const char *otSysGetThreadNetifName(void) { return gNetifName; }
 
@@ -896,24 +899,55 @@ static void processAddressChange(const otIp6AddressInfo *aAddressInfo, bool aIsA
 }
 
 #if defined(__linux__) && OPENTHREAD_CONFIG_NAT64_TRANSLATOR_ENABLE
-void processNat64StateChange(otNat64State aNewState)
+static bool isSameIp4Cidr(const otIp4Cidr &aCidr1, const otIp4Cidr &aCidr2)
 {
-    // If the interface is not up and we are enabling NAT64, the route will be added when we bring up the route.
-    // Also, the route will be deleted by the kernel when we shutting down the interface.
-    // We should try to add route first, since otNat64SetEnabled never fails.
-    if (otIp6IsEnabled(gInstance))
+    bool res = true;
+
+    VerifyOrExit(aCidr1.mLength == aCidr2.mLength, res = false);
+
+    // The higher (32 - length) bits must be the same, host bits are ignored.
+    VerifyOrExit(((ntohl(aCidr1.mAddress.mFields.m32) ^ ntohl(aCidr2.mAddress.mFields.m32)) >> (32 - aCidr1.mLength)) ==
+                     0,
+                 res = false);
+
+exit:
+    return res;
+}
+
+static void processNat64StateChange(void)
+{
+    otIp4Cidr translatorCidr;
+
+    // Skip if NAT64 translator has not been configured with a CIDR.
+    SuccessOrExit(otNat64GetCidr(gInstance, &translatorCidr));
+
+    if (!isSameIp4Cidr(translatorCidr, sActiveNat64Cidr)) // Someone sets a new CIDR for NAT64.
     {
-        if (aNewState == OT_NAT64_STATE_ACTIVE)
+        char cidrString[OT_IP4_CIDR_STRING_SIZE];
+
+        if (sActiveNat64Cidr.mLength != 0)
         {
-            AddIp4Route(gNat64Cidr, kNat64RoutePriority);
-            otLogInfoPlat("[netif] Adding route for NAT64");
+            DeleteIp4Route(sActiveNat64Cidr);
         }
-        else
-        {
-            DeleteIp4Route(gNat64Cidr);
-            otLogInfoPlat("[netif] Deleting route for NAT64");
-        }
+        sActiveNat64Cidr = translatorCidr;
+
+        otIp4CidrToString(&translatorCidr, cidrString, sizeof(cidrString));
+        otLogInfoPlat("[netif] NAT64 CIDR updated to %s.", cidrString);
     }
+
+    if (otNat64GetTranslatorState(gInstance) == OT_NAT64_STATE_ACTIVE)
+    {
+        AddIp4Route(sActiveNat64Cidr, kNat64RoutePriority);
+        otLogInfoPlat("[netif] Adding route for NAT64");
+    }
+    else if (sActiveNat64Cidr.mLength > 0) // Translator is not active.
+    {
+        DeleteIp4Route(sActiveNat64Cidr);
+        otLogInfoPlat("[netif] Deleting route for NAT64");
+    }
+
+exit:
+    return;
 }
 #endif // defined(__linux__) && OPENTHREAD_CONFIG_NAT64_TRANSLATOR_ENABLE
 
@@ -936,9 +970,9 @@ void platformNetifStateChange(otInstance *aInstance, otChangedFlags aFlags)
 #endif
     }
 #if defined(__linux__) && OPENTHREAD_CONFIG_NAT64_TRANSLATOR_ENABLE
-    if (OT_CHANGED_NAT64_TRANSLATOR_STATE & aFlags)
+    if ((OT_CHANGED_NAT64_TRANSLATOR_STATE | OT_CHANGED_THREAD_NETIF_STATE) & aFlags)
     {
-        processNat64StateChange(otNat64GetTranslatorState(aInstance));
+        processNat64StateChange();
     }
 #endif
 }
@@ -988,6 +1022,71 @@ exit:
     }
 }
 
+#if OPENTHREAD_CONFIG_NAT64_TRANSLATOR_ENABLE || OPENTHREAD_CONFIG_BORDER_ROUTING_DHCP6_PD_ENABLE
+static constexpr uint8_t kIpVersion4 = 4;
+static constexpr uint8_t kIpVersion6 = 6;
+
+static uint8_t getIpVersion(const uint8_t *data)
+{
+    assert(data != nullptr);
+
+    // Mute compiler warnings.
+    OT_UNUSED_VARIABLE(kIpVersion4);
+    OT_UNUSED_VARIABLE(kIpVersion6);
+
+    return (static_cast<uint8_t>(data[0]) >> 4) & 0x0F;
+}
+#endif
+
+#if OPENTHREAD_CONFIG_BORDER_ROUTING_DHCP6_PD_ENABLE
+
+/**
+ * Returns nullptr if data does not point to a valid ICMPv6 RA message.
+ *
+ */
+static const uint8_t *getIcmp6RaMessage(const uint8_t *data, ssize_t length)
+{
+    const uint8_t *ret = nullptr;
+    otIcmp6Header  icmpHeader;
+
+    VerifyOrExit(length >= OT_IP6_HEADER_SIZE + OT_ICMP6_ROUTER_ADVERT_MIN_SIZE);
+    VerifyOrExit(getIpVersion(data) == kIpVersion6);
+    VerifyOrExit(data[OT_IP6_HEADER_PROTO_OFFSET] == OT_IP6_PROTO_ICMP6);
+
+    ret = data + OT_IP6_HEADER_SIZE;
+    memcpy(&icmpHeader, ret, sizeof(icmpHeader));
+    VerifyOrExit(icmpHeader.mType == OT_ICMP6_TYPE_ROUTER_ADVERT, ret = nullptr);
+    VerifyOrExit(icmpHeader.mCode == 0, ret = nullptr);
+
+exit:
+    return ret;
+}
+
+/**
+ * Returns false if the message is not an ICMPv6 RA message.
+ *
+ */
+static otError tryProcessIcmp6RaMessage(otInstance *aInstance, const uint8_t *data, ssize_t length)
+{
+    otError        error = OT_ERROR_NONE;
+    const uint8_t *ra    = getIcmp6RaMessage(data, length);
+    ssize_t        raLength;
+
+    VerifyOrExit(ra != nullptr, error = OT_ERROR_INVALID_ARGS);
+
+#if OPENTHREAD_POSIX_LOG_TUN_PACKETS
+    otLogInfoPlat("[netif] RA to BorderRouting (%hu bytes)", static_cast<uint16_t>(length));
+    otDumpInfoPlat("", data, static_cast<size_t>(length));
+#endif
+
+    raLength = length + (ra - data);
+    otPlatBorderRoutingProcessIcmp6Ra(aInstance, ra, raLength);
+
+exit:
+    return error;
+}
+#endif // OPENTHREAD_CONFIG_BORDER_ROUTING_DHCP6_PD_ENABLE
+
 static void processTransmit(otInstance *aInstance)
 {
     otMessage *message = nullptr;
@@ -1013,13 +1112,20 @@ static void processTransmit(otInstance *aInstance)
     }
 #endif
 
+#if OPENTHREAD_CONFIG_BORDER_ROUTING_DHCP6_PD_ENABLE
+    if (tryProcessIcmp6RaMessage(aInstance, reinterpret_cast<uint8_t *>(&packet[offset]), rval) == OT_ERROR_NONE)
+    {
+        ExitNow();
+    }
+#endif
+
     {
         otMessageSettings settings;
 
         settings.mLinkSecurityEnabled = (otThreadGetDeviceRole(aInstance) != OT_DEVICE_ROLE_DISABLED);
         settings.mPriority            = OT_MESSAGE_PRIORITY_LOW;
 #if OPENTHREAD_CONFIG_NAT64_TRANSLATOR_ENABLE
-        isIp4   = (packet[offset] & 0xf0) == 0x40;
+        isIp4   = (getIpVersion(reinterpret_cast<uint8_t *>(&packet[offset])) == kIpVersion4);
         message = isIp4 ? otIp4NewMessage(aInstance, &settings) : otIp6NewMessage(aInstance, &settings);
 #else
         message = otIp6NewMessage(aInstance, &settings);
@@ -1207,10 +1313,10 @@ static void processNetifLinkEvent(otInstance *aInstance, struct nlmsghdr *aNetli
     }
 
 #if OPENTHREAD_CONFIG_BORDER_ROUTING_ENABLE && OPENTHREAD_CONFIG_NAT64_TRANSLATOR_ENABLE
-    if (isUp && gNat64Cidr.mLength > 0)
+    if (isUp && sActiveNat64Cidr.mLength > 0)
     {
-        SuccessOrExit(error = otNat64SetIp4Cidr(gInstance, &gNat64Cidr));
-        otLogInfoPlat("[netif] Succeeded to enable NAT64");
+        // Recover NAT64 route.
+        AddIp4Route(sActiveNat64Cidr, kNat64RoutePriority);
     }
 #endif
 
@@ -1653,7 +1759,7 @@ static void SetAddrGenModeToNone(void)
         char             buf[512];
     } req;
 
-    const enum in6_addr_gen_mode mode = IN6_ADDR_GEN_MODE_NONE;
+    const uint8_t mode = IN6_ADDR_GEN_MODE_NONE;
 
     memset(&req, 0, sizeof(req));
 
@@ -1886,6 +1992,22 @@ void platformNetifInit(otPlatformConfig *aPlatformConfig)
 #endif
 }
 
+#if OPENTHREAD_CONFIG_NAT64_TRANSLATOR_ENABLE
+void nat64Init(void)
+{
+    otIp4Cidr cidr;
+
+    if (otIp4CidrFromString(OPENTHREAD_POSIX_CONFIG_NAT64_CIDR, &cidr) == OT_ERROR_NONE && cidr.mLength != 0)
+    {
+        otNat64SetIp4Cidr(gInstance, &cidr);
+    }
+    else
+    {
+        otLogInfoPlat("[netif] No default NAT64 CIDR provided.");
+    }
+}
+#endif
+
 void platformNetifSetUp(void)
 {
     OT_ASSERT(gInstance != nullptr);
@@ -1904,6 +2026,9 @@ void platformNetifSetUp(void)
     otIp6SetAddressCallback(gInstance, processAddressChange, gInstance);
 #if OPENTHREAD_POSIX_MULTICAST_PROMISCUOUS_REQUIRED
     otIp6SetMulticastPromiscuousEnabled(aInstance, true);
+#endif
+#if OPENTHREAD_CONFIG_NAT64_TRANSLATOR_ENABLE
+    nat64Init();
 #endif
 #if OPENTHREAD_CONFIG_DNS_UPSTREAM_QUERY_ENABLE
     gResolver.Init();
@@ -1947,93 +2072,92 @@ void platformNetifDeinit(void)
     gNetifIndex = 0;
 }
 
-void platformNetifUpdateFdSet(fd_set *aReadFdSet, fd_set *aWriteFdSet, fd_set *aErrorFdSet, int *aMaxFd)
+void platformNetifUpdateFdSet(otSysMainloopContext *aContext)
 {
-    OT_UNUSED_VARIABLE(aWriteFdSet);
-
     VerifyOrExit(gNetifIndex > 0);
 
+    assert(aContext != nullptr);
     assert(sTunFd >= 0);
     assert(sNetlinkFd >= 0);
     assert(sIpFd >= 0);
 
-    FD_SET(sTunFd, aReadFdSet);
-    FD_SET(sTunFd, aErrorFdSet);
-    FD_SET(sNetlinkFd, aReadFdSet);
-    FD_SET(sNetlinkFd, aErrorFdSet);
+    FD_SET(sTunFd, &aContext->mReadFdSet);
+    FD_SET(sTunFd, &aContext->mErrorFdSet);
+    FD_SET(sNetlinkFd, &aContext->mReadFdSet);
+    FD_SET(sNetlinkFd, &aContext->mErrorFdSet);
 #if OPENTHREAD_POSIX_USE_MLD_MONITOR
-    FD_SET(sMLDMonitorFd, aReadFdSet);
-    FD_SET(sMLDMonitorFd, aErrorFdSet);
+    FD_SET(sMLDMonitorFd, &aContext->mReadFdSet);
+    FD_SET(sMLDMonitorFd, &aContext->mErrorFdSet);
 #endif
 
 #if OPENTHREAD_CONFIG_DNS_UPSTREAM_QUERY_ENABLE
-    gResolver.UpdateFdSet(aReadFdSet, aErrorFdSet, aMaxFd);
+    gResolver.UpdateFdSet(*aContext);
 #endif
 
-    if (sTunFd > *aMaxFd)
+    if (sTunFd > aContext->mMaxFd)
     {
-        *aMaxFd = sTunFd;
+        aContext->mMaxFd = sTunFd;
     }
 
-    if (sNetlinkFd > *aMaxFd)
+    if (sNetlinkFd > aContext->mMaxFd)
     {
-        *aMaxFd = sNetlinkFd;
+        aContext->mMaxFd = sNetlinkFd;
     }
 
 #if OPENTHREAD_POSIX_USE_MLD_MONITOR
-    if (sMLDMonitorFd > *aMaxFd)
+    if (sMLDMonitorFd > aContext->mMaxFd)
     {
-        *aMaxFd = sMLDMonitorFd;
+        aContext->mMaxFd = sMLDMonitorFd;
     }
 #endif
 exit:
     return;
 }
 
-void platformNetifProcess(const fd_set *aReadFdSet, const fd_set *aWriteFdSet, const fd_set *aErrorFdSet)
+void platformNetifProcess(const otSysMainloopContext *aContext)
 {
-    OT_UNUSED_VARIABLE(aWriteFdSet);
+    assert(aContext != nullptr);
     VerifyOrExit(gNetifIndex > 0);
 
-    if (FD_ISSET(sTunFd, aErrorFdSet))
+    if (FD_ISSET(sTunFd, &aContext->mErrorFdSet))
     {
         close(sTunFd);
         DieNow(OT_EXIT_FAILURE);
     }
 
-    if (FD_ISSET(sNetlinkFd, aErrorFdSet))
+    if (FD_ISSET(sNetlinkFd, &aContext->mErrorFdSet))
     {
         close(sNetlinkFd);
         DieNow(OT_EXIT_FAILURE);
     }
 
 #if OPENTHREAD_POSIX_USE_MLD_MONITOR
-    if (FD_ISSET(sMLDMonitorFd, aErrorFdSet))
+    if (FD_ISSET(sMLDMonitorFd, &aContext->mErrorFdSet))
     {
         close(sMLDMonitorFd);
         DieNow(OT_EXIT_FAILURE);
     }
 #endif
 
-    if (FD_ISSET(sTunFd, aReadFdSet))
+    if (FD_ISSET(sTunFd, &aContext->mReadFdSet))
     {
         processTransmit(gInstance);
     }
 
-    if (FD_ISSET(sNetlinkFd, aReadFdSet))
+    if (FD_ISSET(sNetlinkFd, &aContext->mReadFdSet))
     {
         processNetlinkEvent(gInstance);
     }
 
 #if OPENTHREAD_POSIX_USE_MLD_MONITOR
-    if (FD_ISSET(sMLDMonitorFd, aReadFdSet))
+    if (FD_ISSET(sMLDMonitorFd, &aContext->mReadFdSet))
     {
         processMLDEvent(gInstance);
     }
 #endif
 
 #if OPENTHREAD_CONFIG_DNS_UPSTREAM_QUERY_ENABLE
-    gResolver.Process(aReadFdSet, aErrorFdSet);
+    gResolver.Process(*aContext);
 #endif
 
 exit:

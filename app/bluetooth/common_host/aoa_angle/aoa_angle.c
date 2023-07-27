@@ -270,7 +270,9 @@ sl_status_t aoa_angle_finalize_config(aoa_id_t id)
 /***************************************************************************//**
  * Initialize angle calculation libraries
  ******************************************************************************/
-enum sl_rtl_error_code aoa_init_rtl(aoa_state_t *aoa_state, aoa_id_t config_id)
+enum sl_rtl_error_code aoa_init_rtl(aoa_state_t *aoa_state,
+                                    aoa_id_t config_id,
+                                    bool qa_enable)
 {
   sl_status_t sc;
   aoa_angle_config_t *aoa_angle_config = NULL;
@@ -311,9 +313,13 @@ enum sl_rtl_error_code aoa_init_rtl(aoa_state_t *aoa_state, aoa_id_t config_id)
   ec = sl_rtl_aox_set_mode(&aoa_state->libitem,
                            aoa_angle_config->aox_mode);
   CHECK_ERROR(ec);
-  // Enable IQ sample quality analysis processing
-  ec = sl_rtl_aox_iq_sample_qa_configure(&aoa_state->libitem);
-  CHECK_ERROR(ec);
+
+  aoa_state->qa_enable = qa_enable;
+  if (qa_enable) {
+    // Enable IQ sample quality analysis processing
+    ec = sl_rtl_aox_iq_sample_qa_configure(&aoa_state->libitem);
+    CHECK_ERROR(ec);
+  }
 
   // Add azimuth constraints
   while (current_azimuth != NULL) {
@@ -440,16 +446,18 @@ enum sl_rtl_error_code aoa_calculate(aoa_state_t *aoa_state,
   // Copy sequence counter.
   angle->sequence = iq_report->event_counter;
 
-  // Fetch the quality result.
-  quality = sl_rtl_aox_iq_sample_qa_get_results(&aoa_state->libitem);
-  if (quality != 0) {
-    quality_string = sl_rtl_util_iq_sample_qa_code2string(quality_buffer,
-                                                          sizeof(quality_buffer),
-                                                          quality);
-    app_log_debug("%s [%d] quality: %s" APP_LOG_NL,
-                  config_id,
-                  angle->sequence,
-                  quality_string);
+  if (aoa_state->qa_enable) {
+    // Fetch the quality result.
+    quality = sl_rtl_aox_iq_sample_qa_get_results(&aoa_state->libitem);
+    if (quality != 0) {
+      quality_string = sl_rtl_util_iq_sample_qa_code2string(quality_buffer,
+                                                            sizeof(quality_buffer),
+                                                            quality);
+      app_log_debug("%s [%d] quality: %s" APP_LOG_NL,
+                    config_id,
+                    angle->sequence,
+                    quality_string);
+    }
   }
 
   if (aoa_state->correction_timeout > 0) {

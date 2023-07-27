@@ -11,3 +11,7 @@ steps:
   - task: "copy"
     output: "artifact/trustzone_secure_library.o"
     input: "{{build_dir}}/trustzone_secure_library.o"
+  # Print usage data
+  - task: "usage"
+    input: "{{build_dir}}/{{project_name}}.out"
+    map: "{{build_dir}}/{{project_name}}.map"

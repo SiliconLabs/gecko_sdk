@@ -3,7 +3,7 @@
  * @brief BT Mesh Firmware Distribution Server
  *******************************************************************************
  * # License
- * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -113,8 +113,7 @@ sl_status_t sl_btmesh_fw_distribution_server_set_multicast_threshold(uint16_t el
 /***************************************************************************//**
  * Handle Firmware Distribution Server events
  *
- * This function is called automatically by Universal Configurator after
- * enabling the component.
+ * This function is called automatically after enabling the component.
  *
  * @param[in] evt  Pointer to incoming event.
  *

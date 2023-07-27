@@ -182,7 +182,7 @@ void CpcInterfaceImpl::Read(uint64_t aTimeoutUs)
             }
             for (uint16_t i = 0; i < bufferLen; i++)
             {
-                if (mReceiveFrameBuffer.WriteByte(*(ptr++)) != OT_ERROR_NONE)
+                if (!mReceiveFrameBuffer.CanWrite(1) || (mReceiveFrameBuffer.WriteByte(*(ptr++)) != OT_ERROR_NONE))                  
                 {
                     mReceiveFrameBuffer.DiscardFrame();    
                     return;
@@ -217,7 +217,7 @@ otError CpcInterfaceImpl::Write(const uint8_t *aFrame, uint16_t aLength)
 
     // We are catching the SPINEL reset command and returning
     // a SPINEL reset response immediately
-    if (SPINEL_HEADER_GET_TID(*aFrame) == 0 && *(aFrame + 1) == SPINEL_CMD_RESET)
+    if (IsSpinelResetCommand(aFrame, aLength))
     {
         SendResetResponse();
         return error;
@@ -258,22 +258,22 @@ otError CpcInterfaceImpl::WaitForFrame(uint64_t aTimeoutUs)
     return error;
 }
 
-void CpcInterfaceImpl::UpdateFdSet(fd_set &aReadFdSet, fd_set &aWriteFdSet, int &aMaxFd, struct timeval &aTimeout)
+void CpcInterfaceImpl::UpdateFdSet(void *aMainloopContext)
 {
-    OT_UNUSED_VARIABLE(aWriteFdSet);
-    OT_UNUSED_VARIABLE(aTimeout);
+    otSysMainloopContext *context = reinterpret_cast<otSysMainloopContext *>(aMainloopContext);
+    OT_ASSERT(context != nullptr);
 
-    FD_SET(mSockFd, &aReadFdSet);
+    FD_SET(mSockFd, &context->mReadFdSet);
 
-    if (aMaxFd < mSockFd)
+    if (context->mMaxFd < mSockFd)
     {
-        aMaxFd = mSockFd;
+        context->mMaxFd = mSockFd;
     }
 }
 
-void CpcInterfaceImpl::Process(const RadioProcessContext &aContext)
+void CpcInterfaceImpl::Process(const void *aMainloopContext)
 {
-    OT_UNUSED_VARIABLE(aContext);
+    OT_UNUSED_VARIABLE(aMainloopContext);
     CheckAndReInitCpc();
     Read(0);
 }
@@ -398,14 +398,14 @@ otError VendorInterface::WaitForFrame(uint64_t aTimeoutUs)
     return reinterpret_cast<CpcInterfaceImpl*>(&sCpcInterfaceImplRaw)->WaitForFrame(aTimeoutUs);
 }
 
-void VendorInterface::UpdateFdSet(fd_set &aReadFdSet, fd_set &aWriteFdSet, int &aMaxFd, struct timeval &aTimeout)
+void VendorInterface::UpdateFdSet(void *aMainloopContext)
 {
-    reinterpret_cast<CpcInterfaceImpl*>(&sCpcInterfaceImplRaw)->UpdateFdSet(aReadFdSet, aWriteFdSet, aMaxFd, aTimeout);
+    reinterpret_cast<CpcInterfaceImpl*>(&sCpcInterfaceImplRaw)->UpdateFdSet(aMainloopContext);
 }
 
-void VendorInterface::Process(const RadioProcessContext &aContext)
+void VendorInterface::Process(const void *aMainloopContext)
 {
-    reinterpret_cast<CpcInterfaceImpl*>(&sCpcInterfaceImplRaw)->Process(aContext);
+    reinterpret_cast<CpcInterfaceImpl*>(&sCpcInterfaceImplRaw)->Process(aMainloopContext);
 }
 
 otError VendorInterface::HardwareReset(void)
@@ -413,7 +413,7 @@ otError VendorInterface::HardwareReset(void)
     return reinterpret_cast<CpcInterfaceImpl*>(&sCpcInterfaceImplRaw)->HardwareReset();
 }
 
-const otRcpInterfaceMetrics *VendorInterface::GetRcpInterfaceMetrics(void)
+const otRcpInterfaceMetrics *VendorInterface::GetRcpInterfaceMetrics(void) const
 {
     return reinterpret_cast<CpcInterfaceImpl*>(&sCpcInterfaceImplRaw)->GetRcpInterfaceMetrics();
 }

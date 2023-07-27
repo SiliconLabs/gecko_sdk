@@ -37,6 +37,10 @@
 
 #include "sl_btmesh_api.h"
 
+#ifdef SL_COMPONENT_CATALOG_PRESENT
+#include "sl_component_catalog.h"
+#endif // SL_COMPONENT_CATALOG_PRESENT
+
 #ifdef SL_CATALOG_BTMESH_FRIEND_PRESENT
 #include "sl_btmesh_friend.h"
 #endif // SL_CATALOG_BTMESH_FRIEND_PRESENT

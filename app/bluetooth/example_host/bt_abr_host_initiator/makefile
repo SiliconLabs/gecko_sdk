@@ -18,6 +18,7 @@ include $(SDK_DIR)/app/bluetooth/component_host/toolchain.mk
 include $(SDK_DIR)/app/bluetooth/component_host/app_log.mk
 include $(SDK_DIR)/app/bluetooth/component_host/app_assert.mk
 include $(SDK_DIR)/app/bluetooth/component_host/app_signal.mk
+include $(SDK_DIR)/app/bluetooth/component_host/silabs_core_sl_malloc.mk
 include $(SDK_DIR)/app/bluetooth/component_host/ncp_host_nothread.mk
 include $(SDK_DIR)/app/bluetooth/component_host/rtl_lib.mk
 include $(SDK_DIR)/app/bluetooth/component_host/abr_cs_parser.mk

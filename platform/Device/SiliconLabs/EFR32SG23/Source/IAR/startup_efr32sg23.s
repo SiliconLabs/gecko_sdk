@@ -60,7 +60,6 @@
                 #endif // __ARM_FEATURE_CMSE
                 #endif // SL_TRUSTZONE_SECURE
 
-
                 SECTION  .intvec:CODE:NOROOT(9)
 
                 EXTERN   __iar_program_start
@@ -70,11 +69,11 @@
                 PUBLIC   __Vectors
                 PUBLIC   __Vectors_End
                 PUBLIC   __Vectors_Size
-                #define __INITIAL_SP     sfe(CSTACK)
-                #define __STACK_LIMIT    sfb(CSTACK)
+#define __INITIAL_SP     sfe(CSTACK)
+#define __STACK_LIMIT    sfb(CSTACK)
                 #if defined (SL_TRUSTZONE_SECURE)
                 #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
-                #define __STACK_SEAL     sfb(STACKSEAL)
+#define __STACK_SEAL     sfb(STACKSEAL)
                 #endif // __ARM_FEATURE_CMSE
                 #endif // SL_TRUSTZONE_SECURE
 
@@ -172,7 +171,7 @@ __vector_table_0x1c
                 DCD      LESENSE_IRQHandler      ; 69: LESENSE Interrupt
                 DCD      SYSRTC_APP_IRQHandler   ; 70: SYSRTC_APP Interrupt
                 DCD      SYSRTC_SEQ_IRQHandler   ; 71: SYSRTC_SEQ Interrupt
-                DCD      0                       ; Reserved
+                DCD      LCD_IRQHandler          ; 72: LCD Interrupt
                 DCD      KEYSCAN_IRQHandler      ; 73: KEYSCAN Interrupt
                 DCD      RFECA0_IRQHandler       ; 74: RFECA0 Interrupt
                 DCD      RFECA1_IRQHandler       ; 75: RFECA1 Interrupt
@@ -181,7 +180,6 @@ __Vectors_End
 
 __Vectors       EQU      __vector_table
 __Vectors_Size  EQU      __Vectors_End - __Vectors
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -208,7 +206,6 @@ Reset_Handler
                 BLX      R0
                 LDR      R0, =__iar_program_start
                 BX       R0
-
 
                 PUBWEAK NMI_Handler
                 PUBWEAK HardFault_Handler
@@ -364,6 +361,8 @@ Reset_Handler
                 PUBWEAK SYSRTC_APP_IRQHandler
 
                 PUBWEAK SYSRTC_SEQ_IRQHandler
+
+                PUBWEAK LCD_IRQHandler
 
                 PUBWEAK KEYSCAN_IRQHandler
 
@@ -527,6 +526,8 @@ SYSRTC_APP_IRQHandler
 
 SYSRTC_SEQ_IRQHandler
 
+LCD_IRQHandler
+
 KEYSCAN_IRQHandler
 
 RFECA0_IRQHandler
@@ -535,6 +536,5 @@ RFECA1_IRQHandler
 
 Default_Handler
                 B        .
-
 
                 END

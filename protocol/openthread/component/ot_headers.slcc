@@ -56,6 +56,7 @@ include:
       - path: netdiag.h
       - path: network_time.h
       - path: ping_sender.h
+      - path: radio_stats.h
       - path: random_crypto.h
       - path: random_noncrypto.h
       - path: server.h
@@ -72,6 +73,7 @@ include:
       - path: udp.h
       - path: platform/alarm-micro.h
       - path: platform/alarm-milli.h
+      - path: platform/border_routing.h
       - path: platform/crypto.h
       - path: platform/diag.h
       - path: platform/dns.h
@@ -189,6 +191,7 @@ include:
       - path: config/logging.h
       - path: config/mac.h
       - path: config/mesh_diag.h
+      - path: config/mesh_forwarder.h
       - path: config/misc.h
       - path: config/mle.h
       - path: config/nat64.h

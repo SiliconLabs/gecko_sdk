@@ -460,6 +460,7 @@ extern bool rxHeld;
 extern volatile bool rxProcessHeld;
 extern volatile uint32_t packetsHeld;
 extern bool reproFifoAlmostFullBug;
+extern bool txAckDirect;
 
 void setTxRandomHelper(void); // Extern payload randomizer
 
@@ -509,6 +510,9 @@ extern RAIL_TxOptions_t txOptions;
 
 // Structure that holds Antenna Options
 extern RAIL_TxOptions_t antOptions;
+
+// Structure that holds concurrent PHY ID Options
+extern RAIL_TxOptions_t concPhyIdOptions;
 
 // Structure that holds (default) rxOptions
 extern RAIL_RxOptions_t rxOptions;

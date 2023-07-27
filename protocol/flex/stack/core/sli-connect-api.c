@@ -55,6 +55,13 @@ EmberStatus emberRemovePsaSecurityKey(void)
 }
 #endif
 
+#ifdef SL_CATALOG_CONNECT_AES_SECURITY_PRESENT
+mbedtls_svc_key_id_t emberGetKeyId(void)
+{
+  return emApiGetKeyId();
+}
+#endif
+
 EmberStatus emberGetCounter(EmberCounterType counterType,
                             uint32_t* count)
 {

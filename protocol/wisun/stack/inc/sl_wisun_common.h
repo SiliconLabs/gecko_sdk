@@ -31,6 +31,8 @@
 #ifndef SL_WISUN_COMMON_H
 #define SL_WISUN_COMMON_H
 
+#include "ns_types.h"
+
 #ifdef HAVE_SIMULATION
 #define SLI_WISUN_TASK_LOOP 
 #else
@@ -97,6 +99,29 @@ RESTORE_CHECK_LIMITS_WARNING
  */
 #define SLI_WISUN_PARAM_CHECK_LIMITS(PARAM, ...) SLI_WISUN_PARAM_CHECK_LIMITS_HELPER(PARAM, __VA_ARGS__)
 
+int64_t divide_integer(int64_t dividend, int32_t divisor);
+
+// Seconds to milliseconds
+#define S_TO_MS(x) (((int64_t)x)*1000)
+// Milliseconds to seconds
+#define MS_TO_S(x) divide_integer(x, 1000)
+// Seconds to microseconds
+#define S_TO_US(x) (((int64_t)x)*1000000)
+// Microseconds to seconds
+#define US_TO_S(x) divide_integer(x, 1000000)
+// Milliseconds to microseconds
+#define MS_TO_US(x) (((int64_t)x)*1000)
+// Microseconds to milliseconds
+#define US_TO_MS(x) divide_integer(x, 1000)
+// Milliseconds to nanoseconds
+#define MS_TO_NS(x) (((int64_t)x)*1000000)
+// Nanoseconds to milliseconds
+#define NS_TO_MS(x) divide_integer(x, 1000000)
+// Microseconds to nanoseconds
+#define US_TO_NS(x) (((int64_t)x)*1000)
+// Nanoseconds to microseconds
+#define NS_TO_US(x) divide_integer(x, 1000)
+
 /// Convert months to minutes (month of 30 days)
 #define MONTH_TO_MIN(x) ((x) * 30 * 24 * 60)
 
@@ -114,5 +139,7 @@ RESTORE_CHECK_LIMITS_WARNING
 
 /// Convert signal level in dBm to RSL range from -174 (0) to +80 (254) dBm
 #define DBM_TO_RSL_RANGE(x)  (174 + (x))
+
+#define container_of(ptr, type, member)  (type *)((uintptr_t)(ptr) - ((uintptr_t)(&((type *)0)->member)))
 
 #endif

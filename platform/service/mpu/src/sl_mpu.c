@@ -195,17 +195,19 @@ sl_status_t sl_mpu_disable_execute(uint32_t address_begin,
 {
   uint32_t mpu_region_begin = 0u;
   uint32_t mpu_region_end = 0u;
+  sl_status_t status = SL_STATUS_OK;
 
   ARM_MPU_Disable();
 
 #ifdef ARM_MPU_ARMV8_H
   uint32_t rbar;
+  uint8_t index_region = 0u;
+  uint8_t is_overlapping = 0u;
+  uint32_t prev_base_address = 0u;
+  uint32_t prev_limit_address = 0u;
 
   // Size of memory region must be 32 bytes or more.
   if (size >= 32u) {
-    // Device memory type non Gathering, non Re-ordering, Early Write Acknowledgment
-    ARM_MPU_SetMemAttr(1, ARM_MPU_ATTR_DEVICE_nGnRE);
-
     // Round inside the memory region, if address is not align on 32 bytes.
     mpu_region_begin = ((address_begin % 32u) == 0u) ? address_begin
                        : (address_begin + (32u - (address_begin % 32u)));
@@ -214,10 +216,40 @@ sl_status_t sl_mpu_disable_execute(uint32_t address_begin,
     mpu_region_end = ((address_end % 32u) == 0u) ? address_end
                      : (address_end  - (address_end % 32u));
 
-    // A bug exists in some versions of ARM_MPU_RBAR(). Set base addr manually.
-    rbar = ARM_MPU_RBAR(0u, 0u, 0u, 1u, 1u) | (mpu_region_begin & MPU_RBAR_BASE_Msk);
-    ARM_MPU_SetRegion(region_nbr, rbar, ARM_MPU_RLAR(mpu_region_end, 1u));
-    region_nbr++;
+    // The scanning to check the overlapping region
+    for (index_region = 0; index_region < region_nbr; index_region++) {
+      // Set to the previous region number
+      MPU->RNR = index_region;
+
+      // Read the base address that was configured by the region number register before
+      prev_base_address = (MPU->RBAR & MPU_RBAR_BASE_Msk);
+      // Read the limit address that was configured by the region number register before
+      prev_limit_address = (MPU->RLAR & MPU_RLAR_LIMIT_Msk);
+
+      // Check the overlapping region
+      if (((mpu_region_begin == prev_base_address) && (mpu_region_end == prev_limit_address))) {
+        // The new region is the same as the previous region
+        is_overlapping = 1;
+        status = SL_STATUS_OK;
+        break;
+      } else if (!((mpu_region_begin > prev_limit_address) || (mpu_region_end < prev_base_address))) {
+        // The new region is invalid
+        is_overlapping = 1;
+        status = SL_STATUS_INVALID_RANGE;
+        break;
+      }
+      MPU->RNR &= ~MPU_RNR_REGION_Msk;
+    }
+
+    if (!is_overlapping) {
+      // Device memory type non Gathering, non Re-ordering, Early Write Acknowledgment
+      ARM_MPU_SetMemAttr(1, ARM_MPU_ATTR_DEVICE_nGnRE);
+
+      // A bug exists in some versions of ARM_MPU_RBAR(). Set base addr manually.
+      rbar = ARM_MPU_RBAR(0u, 0u, 0u, 1u, 1u) | (mpu_region_begin & MPU_RBAR_BASE_Msk);
+      ARM_MPU_SetRegion(region_nbr, rbar, ARM_MPU_RLAR(mpu_region_end, 1u));
+      region_nbr++;
+    }
   }
 #else
   uint8_t  region_size_encoded;
@@ -266,7 +298,7 @@ sl_status_t sl_mpu_disable_execute(uint32_t address_begin,
   __DSB();
   __ISB();
 
-  return SL_STATUS_OK;
+  return status;
 }
 
 #ifndef ARM_MPU_ARMV8_H

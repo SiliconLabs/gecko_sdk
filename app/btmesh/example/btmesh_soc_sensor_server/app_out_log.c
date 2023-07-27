@@ -32,6 +32,10 @@
 #include "em_common.h"
 #include "sl_status.h"
 
+#ifdef SL_COMPONENT_CATALOG_PRESENT
+#include "sl_component_catalog.h"
+#endif // SL_COMPONENT_CATALOG_PRESENT
+
 #include "app.h"
 #include "app_log.h"
 
@@ -42,8 +46,11 @@
 #endif // SL_CATALOG_BTMESH_FACTORY_RESET_PRESENT
 
 #include "sl_btmesh_sensor_server.h"
+
+#ifdef SL_CATALOG_BTMESH_SENSOR_PEOPLE_COUNT_PRESENT
 #include "sl_btmesh_sensor_people_count.h"
 #include "sl_btmesh_sensor_people_count_config.h"
+#endif // SL_CATALOG_BTMESH_SENSOR_PEOPLE_COUNT_PRESENT
 
 /// Integer part of illuminance
 #define INT_ILLUM(x)  (x / 100)
@@ -107,6 +114,7 @@ void sl_btmesh_sensor_server_on_light_measurement(illuminance_t light)
 /*******************************************************************************
  *  Called when a people count measurement is done
  ******************************************************************************/
+#ifdef SL_CATALOG_BTMESH_SENSOR_PEOPLE_COUNT_PRESENT
 void sl_btmesh_sensor_server_on_people_count_measurement(count16_t people)
 {
   if ((count16_t)SL_BTMESH_SENSOR_PEOPLE_COUNT_VALUE_IS_NOT_KNOWN
@@ -116,6 +124,7 @@ void sl_btmesh_sensor_server_on_people_count_measurement(count16_t people)
     app_log("People count: %5u" APP_LOG_NL, people);
   }
 }
+#endif // SL_CATALOG_BTMESH_SENSOR_PEOPLE_COUNT_PRESENT
 
 // -----------------------------------------------------------------------------
 // Provisioning Decorator Callbacks

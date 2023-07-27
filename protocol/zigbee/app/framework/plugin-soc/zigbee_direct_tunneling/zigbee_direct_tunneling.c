@@ -68,9 +68,7 @@ static uint8_t sl_zigbee_direct_transport_key_type = 0x00;
 static void sli_handle_commissioning_request(uint8array *message, uint8_t tlv_length, uint8_t offset)
 {
   sl_nwk_packet_exchange_t my_nwk_packet;
-  tlv_link_t sl_tlv_pointer;
   EmberStatus status;
-  sl_zigbee_tlv_chain sl_first_tlv_chain = { &message->data[23 + offset], tlv_length };
   commissioning_request_received = TRUE;
   commissioning_request_is_rejoin = TRUE;
 
@@ -90,28 +88,6 @@ static void sli_handle_commissioning_request(uint8array *message, uint8_t tlv_le
     sl_zigbee_app_debug_print(" %X", sl_zvd_eui[i]);
   }
   sl_zigbee_app_debug_println("");
-
-  if (sli_tlv_chain_find_link_tag(&sl_first_tlv_chain, &sl_tlv_pointer, SL_ZIGBEE_GLOBAL_TLV_JOINER_ENCAP_TAG_ID) != SL_STATUS_OK) {
-    sl_zigbee_core_debug_println("ERROR: Joiner Encapsulation TLV not found");
-    return;
-  }
-
-  sl_zigbee_tlv_chain sl_my_tlv_chain = { &message->data[25 + offset], tlv_length - 2 };
-
-  if (sli_tlv_chain_find_link_tag(&sl_my_tlv_chain, &sl_tlv_pointer, SL_ZIGBEE_GLOBAL_TLV_SUPP_KEY_NEGOTIATION_TAG_ID) != SL_STATUS_OK) {
-    sl_zigbee_core_debug_println("ERROR: supported key negotiation TLV not found");
-    return;
-  }
-
-  if (sli_tlv_chain_find_link_tag(&sl_my_tlv_chain, &sl_tlv_pointer, SL_ZIGBEE_GLOBAL_TLV_FRAGMENTATION_PARAM_TAG_ID) != SL_STATUS_OK) {
-    sl_zigbee_core_debug_println("ERROR: Fragmentation parameters TLV not found");
-    return;
-  }
-
-  if (sli_tlv_chain_find_link_tag(&sl_my_tlv_chain, &sl_tlv_pointer, SL_ZIGBEE_GLOBAL_TLV_DEVICE_CAPABILITY_EXTENSION_TAG_ID) != SL_STATUS_OK) {
-    sl_zigbee_core_debug_println("ERROR: Device Capability extension TLV not found");
-    return;
-  }
 
   if (message->data[21 + offset] == 0x01) { // re-join
     commissioning_request_is_rejoin = TRUE;

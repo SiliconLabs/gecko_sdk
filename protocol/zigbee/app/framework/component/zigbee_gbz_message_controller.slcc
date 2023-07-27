@@ -13,9 +13,6 @@ requires:
    - name: "zigbee_gbcs_compatibility"
 source:
   - path: protocol/zigbee/app/framework/plugin/gbz-message-controller/gbz-message-controller.c
-  - path: protocol/zigbee/app/framework/plugin/gbz-message-controller/gbz-message-controller-cli.c
-    condition:
-      - "cli"
   - path: protocol/zigbee/app/framework/plugin/gbz-message-controller/gbz-message-controller-cb.c
 include:
   - path: protocol/zigbee/app/framework/plugin/gbz-message-controller

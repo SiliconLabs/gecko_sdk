@@ -177,12 +177,25 @@ WEAK(void emberAfPluginGreenPowerServerCliClearSinkTable(SL_CLI_COMMAND_ARG))
   ezspGpSinkTableClearAll();
 #endif // SL_CATALOG_ZIGBEE_AF_SUPPORT_PRESENT
 }
+
+WEAK(void emberAfPluginGreenPowerServerCliRunTestVectors(SL_CLI_COMMAND_ARG))
+{
+  // A test to run the security test vectors upon reset
+  EmberStatus status = ezspGpSecurityTestVectors();
+  if (status == EMBER_SUCCESS) {
+    emberAfGreenPowerClusterPrintln("~~ gp-test-vectors PASS ~~");
+  } else if (status == EMBER_LIBRARY_NOT_PRESENT) {
+    emberAfGreenPowerClusterPrintln("Command is not supported");
+  } else {
+    emberAfGreenPowerClusterPrintln("~~ gp-test-vectors FAIL ~~");
+  }
+}
 #endif //SL_CATALOG_ZIGBEE_GREEN_POWER_SERVER_CLI_PRESENT
 
 #ifdef SL_CATALOG_ZIGBEE_GREEN_POWER_TRANSLATION_TABLE_CLI_PRESENT
 // Green Power Translation Table CLIs
 
-WEAK(void emGpPrintAdditionalInfoBlock(uint8_t gpdCommand, uint8_t addInfoOffset))
+WEAK(void sli_zigbee_gp_print_additional_info_block(uint8_t gpdCommand, uint8_t addInfoOffset))
 {
 }
 

@@ -336,9 +336,9 @@ RAILModel:
                                 isPtr: True
                               - name: antDivRxAutoConfig
                                 dataType: FieldDataType.UINT32_T
-                              - name: src1Denominator
+                              - name: src1CalcHelper
                                 dataType: FieldDataType.UINT32_T
-                              - name: src2Denominator
+                              - name: src2CalcHelper
                                 dataType: FieldDataType.UINT32_T
                               - name: txBaudRate
                                 dataType: FieldDataType.UINT32_T
@@ -449,3 +449,5 @@ RAILModel:
                           dataType: FieldDataType.UINT16_T
                         - name: isOfdmModem
                           dataType: FieldDataType.BOOL
+                        - name: rateInfo
+                          dataType: FieldDataType.UINT32_T

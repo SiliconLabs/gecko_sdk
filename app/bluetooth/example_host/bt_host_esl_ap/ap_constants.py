@@ -79,6 +79,10 @@ OTS_FEATURES_REQUIRED_MASK = 0b10100000
 
 SIG_VENDOR_ID_SILABS = 0x02ff
 
+VENDOR_ID_STRINGS = {
+    SIG_VENDOR_ID_SILABS: "Silicon Labs"
+}
+
 # Periodic advertisement field size in bytes
 MAX_ESL_PAYLOAD_SIZE = 48
 

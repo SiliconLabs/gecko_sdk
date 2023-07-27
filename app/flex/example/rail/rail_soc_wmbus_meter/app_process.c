@@ -47,6 +47,7 @@
 #include "rail_types.h"
 #include "cmsis_compiler.h"
 #include "sl_flex_rail_config.h"
+#include "sl_flex_rail_channel_selector.h"
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs

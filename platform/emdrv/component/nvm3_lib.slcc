@@ -18,6 +18,7 @@ category: Services|NVM3
 quality: "production"
 source:
   - path: "platform/emdrv/nvm3/src/nvm3_hal_flash.c"
+    condition: [device]
     unless: [trustzone_nonsecure]
   - path: "platform/emdrv/nvm3/src/nvm3_lock.c"
     unless: [trustzone_nonsecure]
@@ -77,6 +78,7 @@ provides:
   - name: "nvm_system"
 requires:
   - name: "emlib_msc"
+    condition: [device]
   - name: "ecode"
 template_contribution:
   - name: component_catalog

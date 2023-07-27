@@ -251,7 +251,8 @@ WEAK(void sli_zigbee_af_stack_status_callback(EmberStatus status))
 
   switch (status) {
     case EMBER_NETWORK_UP:
-    case EMBER_TRUST_CENTER_EUI_HAS_CHANGED:  // also means NETWORK_UP
+    case EMBER_TRUST_CENTER_SWAPPED_OUT_EUI_HAS_CHANGED:      // also means NETWORK_UP
+    case EMBER_TRUST_CENTER_SWAPPED_OUT_EUI_HAS_NOT_CHANGED:  // also means NETWORK_UP
     {
       // ZigBee 3.0 security configuration is handled in plugins.
 #ifndef EMBER_AF_HAS_SECURITY_PROFILE_Z3
@@ -281,8 +282,11 @@ WEAK(void sli_zigbee_af_stack_status_callback(EmberStatus status))
       simulatedTimePasses();
 #endif
 
-      if (status == EMBER_TRUST_CENTER_EUI_HAS_CHANGED) {
-        emberAfAppPrintln("Trust Center EUI has changed.");
+      if (status == EMBER_NETWORK_UP) {
+        emberStartWritingStackTokens();
+      } else {
+        emberAfAppPrintln("Trust Center EUI has %schanged.",
+                          (status == EMBER_TRUST_CENTER_SWAPPED_OUT_EUI_HAS_CHANGED) ? "" : "not ");
         // We abort registration because we want to clear out any previous
         // state and force it to start anew.  One of two results will occur after
         // we restart registration later.
@@ -293,8 +297,6 @@ WEAK(void sli_zigbee_af_stack_status_callback(EmberStatus status))
         //     network and its settings.
         emberAfRegistrationAbortCallback();
         emberAfRegistrationStartCallback();
-      } else {
-        emberStartWritingStackTokens();
       }
 
       // This kicks off registration for newly joined devices.  If registration
@@ -800,6 +802,9 @@ void sli_zigbee_af_network_security_init(void)
 // If possible, initialize each network.  For ZigBee PRO networks, the node
 // type of the device must match the one used previously, but note that
 // coordinator-capable devices are allowed to initialize as routers.
+// If end-device switches from sleepy to non-sleepy,
+// we also allow to initialize so that end-device can perform rejoining the network
+// Same with non-sleepy end-device that switches to sleepy
 #if (EMBER_AF_TC_SWAP_OUT_TEST == 0)
 void sli_zigbee_af_network_init(uint8_t init_level)
 {
@@ -817,6 +822,8 @@ void sli_zigbee_af_network_init(uint8_t init_level)
       }
       if (emberAfGetNodeType(&nodeType) == EMBER_SUCCESS
           && (nodeType != sli_zigbee_af_current_zigbee_pro_network->nodeType
+              && (nodeType != EMBER_END_DEVICE && sli_zigbee_af_current_zigbee_pro_network->nodeType != EMBER_SLEEPY_END_DEVICE)
+              && (nodeType != EMBER_SLEEPY_END_DEVICE && sli_zigbee_af_current_zigbee_pro_network->nodeType != EMBER_END_DEVICE)
               && (nodeType != EMBER_S2S_INITIATOR_DEVICE)
               && (nodeType != EMBER_S2S_TARGET_DEVICE)
               && (sli_zigbee_af_current_zigbee_pro_network->nodeType != EMBER_COORDINATOR

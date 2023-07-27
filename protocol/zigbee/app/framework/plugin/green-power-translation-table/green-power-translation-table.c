@@ -252,11 +252,11 @@ static uint8_t createTanslationTableAdditionalInfoBlockEntry(uint8_t gpdCommand,
 
 static bool isCustomizedTableEntryReferenced(uint8_t index, uint8_t offset)
 {
-  sli_zigbee_af_gp_command_translation_table *emGptranslationtable = sli_zigbee_af_gp_trans_table_get_translation_table();
-  if ((emGptranslationtable != NULL) && (offset != 0xFF)) {
+  sli_zigbee_af_gp_command_translation_table *sli_zigbee_gp_translation_table = sli_zigbee_af_gp_trans_table_get_translation_table();
+  if ((sli_zigbee_gp_translation_table != NULL) && (offset != 0xFF)) {
     for (uint8_t i = 0; i < EMBER_AF_PLUGIN_GREEN_POWER_TRANSLATION_TABLE_TRANSLATION_TABLE_SIZE; i++) {
-      if ((emGptranslationtable->TableEntry[i].entry == CUSTOMIZED_TABLE_ENTRY)
-          && (emGptranslationtable->TableEntry[i].offset == offset)
+      if ((sli_zigbee_gp_translation_table->TableEntry[i].entry == CUSTOMIZED_TABLE_ENTRY)
+          && (sli_zigbee_gp_translation_table->TableEntry[i].offset == offset)
           && (index != i)) {
         return true;           //do not delete as reference is found for this customized table entry
       }
@@ -292,7 +292,7 @@ static uint8_t addTranslationTableEntryByIndex(uint8_t incomingReqType,
                                                EmberGpTranslationTableAdditionalInfoBlockOptionRecordField *additionalInfoBlock)
 {
   uint8_t ret = GP_TRANSLATION_TABLE_STATUS_FAILED;
-  sli_zigbee_af_gp_command_translation_table *emGptranslationtable = sli_zigbee_af_gp_trans_table_get_translation_table();
+  sli_zigbee_af_gp_command_translation_table *sli_zigbee_gp_translation_table = sli_zigbee_af_gp_trans_table_get_translation_table();
   uint8_t outIndex = 0xFF;
   uint8_t entryType = NO_ENTRY;
   for (entryType = CUSTOMIZED_TABLE_ENTRY; entryType > NO_ENTRY; entryType--) {
@@ -332,41 +332,41 @@ static uint8_t addTranslationTableEntryByIndex(uint8_t incomingReqType,
     }
   }
   if (outIndex != 0xFF) {
-    if (emGptranslationtable->TableEntry[index].entry == NO_ENTRY) {
+    if (sli_zigbee_gp_translation_table->TableEntry[index].entry == NO_ENTRY) {
       //Do not increment total number of entries while replacing Table entry
-      emGptranslationtable->totalNoOfEntries++;
-      MEMSET(&emGptranslationtable->TableEntry[index], 0x00, sizeof(sli_zigbee_af_gp_command_translation_table_entry));
-      emGptranslationtable->TableEntry[index].offset = 0xFF;
-      emGptranslationtable->TableEntry[index].additionalInfoOffset = 0xFF;
+      sli_zigbee_gp_translation_table->totalNoOfEntries++;
+      MEMSET(&sli_zigbee_gp_translation_table->TableEntry[index], 0x00, sizeof(sli_zigbee_af_gp_command_translation_table_entry));
+      sli_zigbee_gp_translation_table->TableEntry[index].offset = 0xFF;
+      sli_zigbee_gp_translation_table->TableEntry[index].additionalInfoOffset = 0xFF;
     }
     if (infoBlockPresent) {
-      uint8_t addInfoOffset = emGptranslationtable->TableEntry[index].additionalInfoOffset;
-      if ((emGptranslationtable->TableEntry[index].entry != NO_ENTRY) && (addInfoOffset != 0xFF)) {
+      uint8_t addInfoOffset = sli_zigbee_gp_translation_table->TableEntry[index].additionalInfoOffset;
+      if ((sli_zigbee_gp_translation_table->TableEntry[index].entry != NO_ENTRY) && (addInfoOffset != 0xFF)) {
         EmberGpTranslationTableAdditionalInfoBlockField *additionalInfoTable = sli_zigbee_af_gp_get_additional_info_table();
         EmberGpTranslationTableAdditionalInfoBlockOptionRecordField *addInfo = &(additionalInfoTable->additionalInfoBlock[addInfoOffset]);
         uint8_t status = deleteTanslationTableAdditionalInfoBlockEntry(gpdCommandId, addInfo);
         if (status != 0xFF) {
-          emGptranslationtable->TableEntry[index].additionalInfoOffset = 0xFF;
+          sli_zigbee_gp_translation_table->TableEntry[index].additionalInfoOffset = 0xFF;
         }
       }
-      emGptranslationtable->TableEntry[index].additionalInfoOffset = createTanslationTableAdditionalInfoBlockEntry(gpdCommandId, additionalInfoBlock);
+      sli_zigbee_gp_translation_table->TableEntry[index].additionalInfoOffset = createTanslationTableAdditionalInfoBlockEntry(gpdCommandId, additionalInfoBlock);
     }
     if ((entryType == CUSTOMIZED_TABLE_ENTRY)
-        && (emGptranslationtable->TableEntry[index].offset != 0xFF)
-        && (emGptranslationtable->TableEntry[index].offset != outIndex)) {
-      if (!isCustomizedTableEntryReferenced(index, emGptranslationtable->TableEntry[index].offset)) {
-        deleteCustomizednTableEntry(emGptranslationtable->TableEntry[index].offset);
-        emGptranslationtable->TableEntry[index].offset = 0xFF;
+        && (sli_zigbee_gp_translation_table->TableEntry[index].offset != 0xFF)
+        && (sli_zigbee_gp_translation_table->TableEntry[index].offset != outIndex)) {
+      if (!isCustomizedTableEntryReferenced(index, sli_zigbee_gp_translation_table->TableEntry[index].offset)) {
+        deleteCustomizednTableEntry(sli_zigbee_gp_translation_table->TableEntry[index].offset);
+        sli_zigbee_gp_translation_table->TableEntry[index].offset = 0xFF;
       }
     }
 
-    emGptranslationtable->TableEntry[index].infoBlockPresent = infoBlockPresent;
-    emGptranslationtable->TableEntry[index].gpApplicationId = gpdAddr->applicationId;
-    MEMCOPY(&(emGptranslationtable->TableEntry[index].gpAddr), gpdAddr, sizeof(EmberGpAddress));
-    emGptranslationtable->TableEntry[index].gpdCommand = gpdCommandId;
-    emGptranslationtable->TableEntry[index].zbEndpoint = zbEndpoint;
-    emGptranslationtable->TableEntry[index].offset = outIndex;
-    emGptranslationtable->TableEntry[index].entry = entryType;
+    sli_zigbee_gp_translation_table->TableEntry[index].infoBlockPresent = infoBlockPresent;
+    sli_zigbee_gp_translation_table->TableEntry[index].gpApplicationId = gpdAddr->applicationId;
+    MEMCOPY(&(sli_zigbee_gp_translation_table->TableEntry[index].gpAddr), gpdAddr, sizeof(EmberGpAddress));
+    sli_zigbee_gp_translation_table->TableEntry[index].gpdCommand = gpdCommandId;
+    sli_zigbee_gp_translation_table->TableEntry[index].zbEndpoint = zbEndpoint;
+    sli_zigbee_gp_translation_table->TableEntry[index].offset = outIndex;
+    sli_zigbee_gp_translation_table->TableEntry[index].entry = entryType;
     sli_zigbee_af_gp_set_translation_table_entry(index);
     ret = GP_TRANSLATION_TABLE_STATUS_SUCCESS;
   }
@@ -390,14 +390,14 @@ static uint8_t addPairedDeviceToTranslationTable(uint8_t incomingReqType,
 {
   int tableIndex;
   uint8_t ret = GP_TRANSLATION_TABLE_STATUS_FAILED;
-  sli_zigbee_af_gp_command_translation_table *emGptranslationtable = sli_zigbee_af_gp_trans_table_get_translation_table();
+  sli_zigbee_af_gp_command_translation_table *sli_zigbee_gp_translation_table = sli_zigbee_af_gp_trans_table_get_translation_table();
 
-  if ((emGptranslationtable->totalNoOfEntries) >= EMBER_AF_PLUGIN_GREEN_POWER_TRANSLATION_TABLE_TRANSLATION_TABLE_SIZE) {
+  if ((sli_zigbee_gp_translation_table->totalNoOfEntries) >= EMBER_AF_PLUGIN_GREEN_POWER_TRANSLATION_TABLE_TRANSLATION_TABLE_SIZE) {
     return GP_TRANSLATION_TABLE_STATUS_FULL;
   }
 
   for (tableIndex = 0; tableIndex < EMBER_AF_PLUGIN_GREEN_POWER_TRANSLATION_TABLE_TRANSLATION_TABLE_SIZE; tableIndex++) {
-    if (emGptranslationtable->TableEntry[tableIndex].entry == NO_ENTRY ) {
+    if (sli_zigbee_gp_translation_table->TableEntry[tableIndex].entry == NO_ENTRY ) {
       break;
     }
   }
@@ -421,10 +421,10 @@ static uint8_t addPairedDeviceToTranslationTable(uint8_t incomingReqType,
                                         additionalInfoLength,
                                         additionalInfoBlock);
   if (ret != GP_TRANSLATION_TABLE_STATUS_SUCCESS) {
-    MEMSET(&emGptranslationtable->TableEntry[tableIndex], 0x00, sizeof(sli_zigbee_af_gp_command_translation_table_entry));
-    emGptranslationtable->TableEntry[tableIndex].offset = 0xFF;
-    emGptranslationtable->TableEntry[tableIndex].additionalInfoOffset = 0xFF;
-    emGptranslationtable->TableEntry[tableIndex].entry = NO_ENTRY;
+    MEMSET(&sli_zigbee_gp_translation_table->TableEntry[tableIndex], 0x00, sizeof(sli_zigbee_af_gp_command_translation_table_entry));
+    sli_zigbee_gp_translation_table->TableEntry[tableIndex].offset = 0xFF;
+    sli_zigbee_gp_translation_table->TableEntry[tableIndex].additionalInfoOffset = 0xFF;
+    sli_zigbee_gp_translation_table->TableEntry[tableIndex].entry = NO_ENTRY;
   } else {
     *outNewTTEntryIndex = tableIndex;
   }
@@ -817,16 +817,16 @@ static uint8_t calculatePairedBits(uint8_t noOfContacts, uint8_t *savedContact)
 
 static void countSwitchEntries(EmberGpAddress *gpdAddr, uint8_t *savedContact)
 {
-  sli_zigbee_af_gp_command_translation_table *emGptranslationtable = sli_zigbee_af_gp_trans_table_get_translation_table();
+  sli_zigbee_af_gp_command_translation_table *sli_zigbee_gp_translation_table = sli_zigbee_af_gp_trans_table_get_translation_table();
   EmberGpTranslationTableAdditionalInfoBlockField *additionalInfoTable = sli_zigbee_af_gp_get_additional_info_table();
   EmberGpTranslationTableAdditionalInfoBlockOptionRecordField *addInfo = NULL;
   for ( uint8_t tableIndex = 0; tableIndex < EMBER_AF_PLUGIN_GREEN_POWER_TRANSLATION_TABLE_TRANSLATION_TABLE_SIZE; tableIndex++) {
-    if (emGptranslationtable->TableEntry[tableIndex].entry == NO_ENTRY) {
+    if (sli_zigbee_gp_translation_table->TableEntry[tableIndex].entry == NO_ENTRY) {
       continue;
     }
-    if (emberAfGreenPowerCommonGpAddrCompare(&emGptranslationtable->TableEntry[tableIndex].gpAddr, gpdAddr)) {
-      if (emGptranslationtable->TableEntry[tableIndex].additionalInfoOffset != 0xFF) {
-        addInfo = &(additionalInfoTable->additionalInfoBlock[emGptranslationtable->TableEntry[tableIndex].additionalInfoOffset]);
+    if (emberAfGreenPowerCommonGpAddrCompare(&sli_zigbee_gp_translation_table->TableEntry[tableIndex].gpAddr, gpdAddr)) {
+      if (sli_zigbee_gp_translation_table->TableEntry[tableIndex].additionalInfoOffset != 0xFF) {
+        addInfo = &(additionalInfoTable->additionalInfoBlock[sli_zigbee_gp_translation_table->TableEntry[tableIndex].additionalInfoOffset]);
         *savedContact |= addInfo->optionData.genericSwitch.contactStatus;
       }
     }
@@ -845,12 +845,12 @@ static uint8_t deleteTranslationTableEntryByIndex(uint8_t index,
                                                   EmberGpTranslationTableAdditionalInfoBlockOptionRecordField *additionalInfoBlock)
 {
   uint8_t ret = GP_TRANSLATION_TABLE_STATUS_FAILED;
-  sli_zigbee_af_gp_command_translation_table *emGptranslationtable = sli_zigbee_af_gp_trans_table_get_translation_table();
+  sli_zigbee_af_gp_command_translation_table *sli_zigbee_gp_translation_table = sli_zigbee_af_gp_trans_table_get_translation_table();
   uint8_t status = 0xFF;
   uint8_t outIndex = 0xFF;
-  ret = sli_zigbee_af_gp_find_matching_generic_translation_table_entry(emGptranslationtable->TableEntry[index].entry,
+  ret = sli_zigbee_af_gp_find_matching_generic_translation_table_entry(sli_zigbee_gp_translation_table->TableEntry[index].entry,
                                                                        DELETE_PAIRED_DEVICE,
-                                                                       emGptranslationtable->TableEntry[index].offset,
+                                                                       sli_zigbee_gp_translation_table->TableEntry[index].offset,
                                                                        infoBlockPresent,
                                                                        gpdCommandId,
                                                                        zigbeeProfile,
@@ -861,23 +861,23 @@ static uint8_t deleteTranslationTableEntryByIndex(uint8_t index,
                                                                        &outIndex);
   if (ret == GP_TRANSLATION_TABLE_STATUS_SUCCESS && outIndex != 0xFF) {
     EmberGpTranslationTableAdditionalInfoBlockField *additionalInfoTable = sli_zigbee_af_gp_get_additional_info_table();
-    uint8_t addInfoOffset = emGptranslationtable->TableEntry[index].additionalInfoOffset;
+    uint8_t addInfoOffset = sli_zigbee_gp_translation_table->TableEntry[index].additionalInfoOffset;
     if (addInfoOffset != 0xFF) {
       status = deleteTanslationTableAdditionalInfoBlockEntry(gpdCommandId, &(additionalInfoTable->additionalInfoBlock[addInfoOffset]));
       if (status != 0xFF) {
-        emGptranslationtable->TableEntry[index].additionalInfoOffset = 0xFF;
+        sli_zigbee_gp_translation_table->TableEntry[index].additionalInfoOffset = 0xFF;
       }
     }
-    if ((emGptranslationtable->TableEntry[index].entry == CUSTOMIZED_TABLE_ENTRY) && (emGptranslationtable->TableEntry[index].offset != 0xFF)) {
-      if (!isCustomizedTableEntryReferenced(index, emGptranslationtable->TableEntry[index].offset)) {
-        deleteCustomizednTableEntry(emGptranslationtable->TableEntry[index].offset);
+    if ((sli_zigbee_gp_translation_table->TableEntry[index].entry == CUSTOMIZED_TABLE_ENTRY) && (sli_zigbee_gp_translation_table->TableEntry[index].offset != 0xFF)) {
+      if (!isCustomizedTableEntryReferenced(index, sli_zigbee_gp_translation_table->TableEntry[index].offset)) {
+        deleteCustomizednTableEntry(sli_zigbee_gp_translation_table->TableEntry[index].offset);
       }
     }
-    MEMSET(&emGptranslationtable->TableEntry[index], 0x00, sizeof(sli_zigbee_af_gp_command_translation_table_entry));
-    emGptranslationtable->TableEntry[index].entry = NO_ENTRY;
-    emGptranslationtable->TableEntry[index].offset = 0xFF;
-    emGptranslationtable->TableEntry[index].additionalInfoOffset = 0xFF;
-    emGptranslationtable->totalNoOfEntries--;
+    MEMSET(&sli_zigbee_gp_translation_table->TableEntry[index], 0x00, sizeof(sli_zigbee_af_gp_command_translation_table_entry));
+    sli_zigbee_gp_translation_table->TableEntry[index].entry = NO_ENTRY;
+    sli_zigbee_gp_translation_table->TableEntry[index].offset = 0xFF;
+    sli_zigbee_gp_translation_table->TableEntry[index].additionalInfoOffset = 0xFF;
+    sli_zigbee_gp_translation_table->totalNoOfEntries--;
     sli_zigbee_af_gp_set_translation_table_entry(index);
     ret = GP_TRANSLATION_TABLE_STATUS_SUCCESS;
   }
@@ -1064,21 +1064,21 @@ static uint16_t copyTranslationTableEntryToBuffer(uint8_t entryIndex,
 {
   uint8_t charCount = 0;
   uint8_t *bufPtr = tempDatabuffer;
-  sli_zigbee_af_gp_command_translation_table *emGptranslationtable = sli_zigbee_af_gp_trans_table_get_translation_table();
+  sli_zigbee_af_gp_command_translation_table *sli_zigbee_gp_translation_table = sli_zigbee_af_gp_trans_table_get_translation_table();
 
   emberAfGreenPowerClusterPrintln("GP SERVER - STORE TRANSLATION TABLE ENTRY into a buffer");
   // no more ID field
 
   // copy 32bit or 64bit address field
-  if (emGptranslationtable->TableEntry[entryIndex].gpAddr.applicationId == EMBER_GP_APPLICATION_SOURCE_ID) {
-    emberAfCopyInt32u(bufPtr, 0, emGptranslationtable->TableEntry[entryIndex].gpAddr.id.sourceId);
+  if (sli_zigbee_gp_translation_table->TableEntry[entryIndex].gpAddr.applicationId == EMBER_GP_APPLICATION_SOURCE_ID) {
+    emberAfCopyInt32u(bufPtr, 0, sli_zigbee_gp_translation_table->TableEntry[entryIndex].gpAddr.id.sourceId);
     bufPtr += sizeof(uint32_t);
-  } else if (emGptranslationtable->TableEntry[entryIndex].gpAddr.applicationId == EMBER_GP_APPLICATION_IEEE_ADDRESS) {
-    MEMMOVE(bufPtr, emGptranslationtable->TableEntry[entryIndex].gpAddr.id.gpdIeeeAddress, EUI64_SIZE);
+  } else if (sli_zigbee_gp_translation_table->TableEntry[entryIndex].gpAddr.applicationId == EMBER_GP_APPLICATION_IEEE_ADDRESS) {
+    MEMMOVE(bufPtr, sli_zigbee_gp_translation_table->TableEntry[entryIndex].gpAddr.id.gpdIeeeAddress, EUI64_SIZE);
     bufPtr += EUI64_SIZE;
 
     // copy ieee endpoint field
-    emberAfCopyInt8u(bufPtr, 0, emGptranslationtable->TableEntry[entryIndex].gpAddr.endpoint);
+    emberAfCopyInt8u(bufPtr, 0, sli_zigbee_gp_translation_table->TableEntry[entryIndex].gpAddr.endpoint);
     bufPtr += sizeof(uint8_t);
   }
 
@@ -1113,9 +1113,9 @@ static uint16_t copyTranslationTableEntryToBuffer(uint8_t entryIndex,
     bufPtr += zclPayloadLen;
   }
 
-  if (emGptranslationtable->TableEntry[entryIndex].infoBlockPresent == TRUE) {
+  if (sli_zigbee_gp_translation_table->TableEntry[entryIndex].infoBlockPresent == TRUE) {
     EmberGpTranslationTableAdditionalInfoBlockField *additionalInfoTable = sli_zigbee_af_gp_get_additional_info_table();
-    uint8_t additionalInfoOffset = emGptranslationtable->TableEntry[entryIndex].additionalInfoOffset;
+    uint8_t additionalInfoOffset = sli_zigbee_gp_translation_table->TableEntry[entryIndex].additionalInfoOffset;
     EmberGpTranslationTableAdditionalInfoBlockOptionRecordField *addInfo = &(additionalInfoTable->additionalInfoBlock[additionalInfoOffset]);
     charCount = sli_zigbee_af_copy_additional_info_block_structure_to_array(translationTableEntry->gpdCommand,
                                                                             addInfo,
@@ -1141,9 +1141,9 @@ uint8_t sli_zigbee_af_gp_trans_table_find_matching_translation_table_entry(uint8
   uint8_t ret = GP_TRANSLATION_TABLE_STATUS_FAILED;
   uint8_t scanLevelMatchFound = 0xFF;
   EmberAfGreenPowerServerGpdSubTranslationTableEntry const *genericTranslationTable = NULL;  //this pointer either point to default table or customied table
-  sli_zigbee_af_gp_command_translation_table *emGptranslationtable = sli_zigbee_af_gp_trans_table_get_translation_table();
+  sli_zigbee_af_gp_command_translation_table *sli_zigbee_gp_translation_table = sli_zigbee_af_gp_trans_table_get_translation_table();
 
-  if (!emGptranslationtable->totalNoOfEntries) {
+  if (!sli_zigbee_gp_translation_table->totalNoOfEntries) {
     return GP_TRANSLATION_TABLE_STATUS_EMPTY;
   }
   if (startIndex >= EMBER_AF_PLUGIN_GREEN_POWER_TRANSLATION_TABLE_TRANSLATION_TABLE_SIZE) {
@@ -1151,32 +1151,32 @@ uint8_t sli_zigbee_af_gp_trans_table_find_matching_translation_table_entry(uint8
   }
   for ( uint8_t tableIndex = startIndex; tableIndex < EMBER_AF_PLUGIN_GREEN_POWER_TRANSLATION_TABLE_TRANSLATION_TABLE_SIZE; tableIndex++) {
     scanLevelMatchFound = 0;
-    if (emGptranslationtable->TableEntry[tableIndex].entry == NO_ENTRY) {
+    if (sli_zigbee_gp_translation_table->TableEntry[tableIndex].entry == NO_ENTRY) {
       continue;
     }
     if (levelOfScan & GP_TRANSLATION_TABLE_SCAN_LEVEL_GPD_ID) {
-      if (emberAfGreenPowerCommonGpAddrCompare(&emGptranslationtable->TableEntry[tableIndex].gpAddr, gpAddr)) {
+      if (emberAfGreenPowerCommonGpAddrCompare(&sli_zigbee_gp_translation_table->TableEntry[tableIndex].gpAddr, gpAddr)) {
         scanLevelMatchFound |= GP_TRANSLATION_TABLE_SCAN_LEVEL_GPD_ID;
       }
     }
     if (levelOfScan & GP_TRANSLATION_TABLE_SCAN_LEVEL_GPD_CMD_ID) {
-      if (emGptranslationtable->TableEntry[tableIndex].gpdCommand == gpdCommandId) {
+      if (sli_zigbee_gp_translation_table->TableEntry[tableIndex].gpdCommand == gpdCommandId) {
         scanLevelMatchFound |= GP_TRANSLATION_TABLE_SCAN_LEVEL_GPD_CMD_ID;
       }
     }
     if (levelOfScan & GP_TRANSLATION_TABLE_SCAN_LEVEL_ZB_ENDPOINT) {
-      if (emGptranslationtable->TableEntry[tableIndex].entry == DEFAULT_TABLE_ENTRY) {
+      if (sli_zigbee_gp_translation_table->TableEntry[tableIndex].entry == DEFAULT_TABLE_ENTRY) {
         EmberAfGreenPowerServerGpdSubTranslationTableEntry const *defaultTable = sli_zigbee_af_gp_get_default_table();
         if (defaultTable == NULL) {
           return GP_TRANSLATION_TABLE_STATUS_FAILED;
         }
-        genericTranslationTable = &(defaultTable[emGptranslationtable->TableEntry[tableIndex].offset]);
-      } else if (emGptranslationtable->TableEntry[tableIndex].entry == CUSTOMIZED_TABLE_ENTRY) {
+        genericTranslationTable = &(defaultTable[sli_zigbee_gp_translation_table->TableEntry[tableIndex].offset]);
+      } else if (sli_zigbee_gp_translation_table->TableEntry[tableIndex].entry == CUSTOMIZED_TABLE_ENTRY) {
         EmberAfGreenPowerServerGpdSubTranslationTableEntry *customizedTable = sli_zigbee_af_gp_get_customized_table();
         if (customizedTable == NULL) {
           return GP_TRANSLATION_TABLE_STATUS_FAILED;
         }
-        genericTranslationTable = &(customizedTable[emGptranslationtable->TableEntry[tableIndex].offset]);
+        genericTranslationTable = &(customizedTable[sli_zigbee_gp_translation_table->TableEntry[tableIndex].offset]);
       }
       if (genericTranslationTable == NULL) {
         return GP_TRANSLATION_TABLE_STATUS_FAILED;
@@ -1184,12 +1184,12 @@ uint8_t sli_zigbee_af_gp_trans_table_find_matching_translation_table_entry(uint8
       if (genericTranslationTable->endpoint == EMBER_AF_GP_TRANSLATION_TABLE_ZB_ENDPOINT_PASS_FRAME_TO_APLLICATION) {
         scanLevelMatchFound |= GP_TRANSLATION_TABLE_SCAN_LEVEL_ZB_ENDPOINT;
       }
-      if (emGptranslationtable->TableEntry[tableIndex].zbEndpoint == zbEndpoint) {
+      if (sli_zigbee_gp_translation_table->TableEntry[tableIndex].zbEndpoint == zbEndpoint) {
         scanLevelMatchFound |= GP_TRANSLATION_TABLE_SCAN_LEVEL_ZB_ENDPOINT;
       }
     }
-    if (emGptranslationtable->TableEntry[tableIndex].infoBlockPresent == true) {
-      uint8_t additionalInfoOffset = emGptranslationtable->TableEntry[tableIndex].additionalInfoOffset;
+    if (sli_zigbee_gp_translation_table->TableEntry[tableIndex].infoBlockPresent == true) {
+      uint8_t additionalInfoOffset = sli_zigbee_gp_translation_table->TableEntry[tableIndex].additionalInfoOffset;
       if (additionalInfoOffset == 0xFF) {
         continue;
       }
@@ -1229,9 +1229,9 @@ uint8_t sli_zigbee_af_gp_trans_table_find_matching_translation_table_entry(uint8
 
 uint8_t sli_zigbee_af_gp_trans_table_delete_paired_devicefrom_translation_table_entry(EmberGpAddress *gpdAddr)
 {
-  sli_zigbee_af_gp_command_translation_table *emGptranslationtable = sli_zigbee_af_gp_trans_table_get_translation_table();
+  sli_zigbee_af_gp_command_translation_table *sli_zigbee_gp_translation_table = sli_zigbee_af_gp_trans_table_get_translation_table();
 
-  if (!emGptranslationtable->totalNoOfEntries) {
+  if (!sli_zigbee_gp_translation_table->totalNoOfEntries) {
     return GP_TRANSLATION_TABLE_STATUS_EMPTY;
   }
   uint8_t entryIndex;
@@ -1249,25 +1249,25 @@ uint8_t sli_zigbee_af_gp_trans_table_delete_paired_devicefrom_translation_table_
     if (status == GP_TRANSLATION_TABLE_STATUS_SUCCESS
         && (entryIndex != 0xFF)) {
       EmberGpTranslationTableAdditionalInfoBlockField *additionalInfoTable = sli_zigbee_af_gp_get_additional_info_table();
-      uint8_t addInfoOffset = emGptranslationtable->TableEntry[entryIndex].additionalInfoOffset;
+      uint8_t addInfoOffset = sli_zigbee_gp_translation_table->TableEntry[entryIndex].additionalInfoOffset;
       EmberGpTranslationTableAdditionalInfoBlockOptionRecordField *addInfo = &(additionalInfoTable->additionalInfoBlock[addInfoOffset]);
       if (addInfoOffset != 0xFF) {
-        status = deleteTanslationTableAdditionalInfoBlockEntry(emGptranslationtable->TableEntry[entryIndex].gpdCommand,
+        status = deleteTanslationTableAdditionalInfoBlockEntry(sli_zigbee_gp_translation_table->TableEntry[entryIndex].gpdCommand,
                                                                addInfo);
         if (status != 0xFF) {
-          emGptranslationtable->TableEntry[entryIndex].additionalInfoOffset = 0xFF;
+          sli_zigbee_gp_translation_table->TableEntry[entryIndex].additionalInfoOffset = 0xFF;
         }
       }
-      if ((emGptranslationtable->TableEntry[entryIndex].entry == CUSTOMIZED_TABLE_ENTRY) && (emGptranslationtable->TableEntry[entryIndex].offset != 0xFF)) {
-        if (!isCustomizedTableEntryReferenced(entryIndex, emGptranslationtable->TableEntry[entryIndex].offset)) {
-          deleteCustomizednTableEntry(emGptranslationtable->TableEntry[entryIndex].offset);
+      if ((sli_zigbee_gp_translation_table->TableEntry[entryIndex].entry == CUSTOMIZED_TABLE_ENTRY) && (sli_zigbee_gp_translation_table->TableEntry[entryIndex].offset != 0xFF)) {
+        if (!isCustomizedTableEntryReferenced(entryIndex, sli_zigbee_gp_translation_table->TableEntry[entryIndex].offset)) {
+          deleteCustomizednTableEntry(sli_zigbee_gp_translation_table->TableEntry[entryIndex].offset);
         }
       }
-      MEMSET(&emGptranslationtable->TableEntry[entryIndex], 0x00, sizeof(sli_zigbee_af_gp_command_translation_table_entry));
-      emGptranslationtable->TableEntry[entryIndex].entry = NO_ENTRY;
-      emGptranslationtable->TableEntry[entryIndex].offset = 0xFF;
-      emGptranslationtable->TableEntry[entryIndex].additionalInfoOffset = 0xFF;
-      emGptranslationtable->totalNoOfEntries--;
+      MEMSET(&sli_zigbee_gp_translation_table->TableEntry[entryIndex], 0x00, sizeof(sli_zigbee_af_gp_command_translation_table_entry));
+      sli_zigbee_gp_translation_table->TableEntry[entryIndex].entry = NO_ENTRY;
+      sli_zigbee_gp_translation_table->TableEntry[entryIndex].offset = 0xFF;
+      sli_zigbee_gp_translation_table->TableEntry[entryIndex].additionalInfoOffset = 0xFF;
+      sli_zigbee_gp_translation_table->totalNoOfEntries--;
       sli_zigbee_af_gp_set_translation_table_entry(entryIndex);
     }
   } while (entryIndex != 0xFF);
@@ -1277,31 +1277,31 @@ uint8_t sli_zigbee_af_gp_trans_table_delete_paired_devicefrom_translation_table_
 uint8_t sli_zigbee_af_gp_trans_table_get_translation_table_entry(uint8_t entryIndex,
                                                                  EmberAfGreenPowerServerGpdSubTranslationTableEntry *TranslationTableEntry)
 {
-  sli_zigbee_af_gp_command_translation_table const *emGptranslationtable = sli_zigbee_af_gp_trans_table_get_translation_table();
+  sli_zigbee_af_gp_command_translation_table const *sli_zigbee_gp_translation_table = sli_zigbee_af_gp_trans_table_get_translation_table();
   EmberAfGreenPowerServerGpdSubTranslationTableEntry const *genericTranslationTable = NULL;
   if (TranslationTableEntry == NULL || (entryIndex >= EMBER_AF_PLUGIN_GREEN_POWER_TRANSLATION_TABLE_TRANSLATION_TABLE_SIZE)) {
     return GP_TRANSLATION_TABLE_STATUS_FAILED;
   }
 
   if (entryIndex != 0xFF ) {
-    if (emGptranslationtable->TableEntry[entryIndex].entry == NO_ENTRY) {
+    if (sli_zigbee_gp_translation_table->TableEntry[entryIndex].entry == NO_ENTRY) {
       return GP_TRANSLATION_TABLE_STATUS_FAILED;
     }
     MEMSET(TranslationTableEntry, 0, sizeof(EmberAfGreenPowerServerGpdSubTranslationTableEntry));
-    TranslationTableEntry->endpoint = emGptranslationtable->TableEntry[entryIndex].zbEndpoint;
-    TranslationTableEntry->gpdCommand = emGptranslationtable->TableEntry[entryIndex].gpdCommand;
-    if (emGptranslationtable->TableEntry[entryIndex].entry == DEFAULT_TABLE_ENTRY) {
+    TranslationTableEntry->endpoint = sli_zigbee_gp_translation_table->TableEntry[entryIndex].zbEndpoint;
+    TranslationTableEntry->gpdCommand = sli_zigbee_gp_translation_table->TableEntry[entryIndex].gpdCommand;
+    if (sli_zigbee_gp_translation_table->TableEntry[entryIndex].entry == DEFAULT_TABLE_ENTRY) {
       EmberAfGreenPowerServerGpdSubTranslationTableEntry const *defaultTable = sli_zigbee_af_gp_get_default_table();
       if (defaultTable == NULL) {
         return EMBER_ERR_FATAL;
       }
-      genericTranslationTable = &(defaultTable[emGptranslationtable->TableEntry[entryIndex].offset]);
-    } else if (emGptranslationtable->TableEntry[entryIndex].entry == CUSTOMIZED_TABLE_ENTRY) {
+      genericTranslationTable = &(defaultTable[sli_zigbee_gp_translation_table->TableEntry[entryIndex].offset]);
+    } else if (sli_zigbee_gp_translation_table->TableEntry[entryIndex].entry == CUSTOMIZED_TABLE_ENTRY) {
       EmberAfGreenPowerServerGpdSubTranslationTableEntry *customizedTable = sli_zigbee_af_gp_get_customized_table();
       if (customizedTable == NULL) {
         return EMBER_ERR_FATAL;
       }
-      genericTranslationTable = &(customizedTable[emGptranslationtable->TableEntry[entryIndex].offset]);
+      genericTranslationTable = &(customizedTable[sli_zigbee_gp_translation_table->TableEntry[entryIndex].offset]);
     }
     if (genericTranslationTable != NULL) {
       TranslationTableEntry->validEntry = genericTranslationTable->validEntry;
@@ -1337,7 +1337,7 @@ uint8_t sli_zigbee_af_gp_trans_table_add_translation_table_entry_update_command(
                                                                                 EmberGpTranslationTableAdditionalInfoBlockOptionRecordField *additionalInfoBlock)
 {
   bool ret = FALSE;
-  sli_zigbee_af_gp_command_translation_table *emGptranslationtable = sli_zigbee_af_gp_trans_table_get_translation_table();
+  sli_zigbee_af_gp_command_translation_table *sli_zigbee_gp_translation_table = sli_zigbee_af_gp_trans_table_get_translation_table();
 
   if (index == 0xFF) {
     //If index is 0xff, the sink SHALL choose any free entry
@@ -1360,7 +1360,7 @@ uint8_t sli_zigbee_af_gp_trans_table_add_translation_table_entry_update_command(
     if (index >= EMBER_AF_PLUGIN_GREEN_POWER_TRANSLATION_TABLE_TRANSLATION_TABLE_SIZE) {
       return GP_TRANSLATION_TABLE_STATUS_FAILED;
     }
-    if (emGptranslationtable->TableEntry[index].entry != NO_ENTRY) {
+    if (sli_zigbee_gp_translation_table->TableEntry[index].entry != NO_ENTRY) {
       return GP_TRANSLATION_TABLE_STATUS_ENTRY_NOT_EMPTY;
     } else {
       ret = addTranslationTableEntryByIndex(TRANSLATION_TABLE_UPDATE,
@@ -1399,12 +1399,12 @@ uint8_t sli_zigbee_af_gp_trans_table_replace_translation_table_entry_update_comm
   uint8_t ret = GP_TRANSLATION_TABLE_STATUS_FAILED;
   bool found = FALSE;
   int tableIndex = 0;
-  sli_zigbee_af_gp_command_translation_table *emGptranslationtable = sli_zigbee_af_gp_trans_table_get_translation_table();
+  sli_zigbee_af_gp_command_translation_table *sli_zigbee_gp_translation_table = sli_zigbee_af_gp_trans_table_get_translation_table();
   if (index != 0xFF ) {
     if (index >= EMBER_AF_PLUGIN_GREEN_POWER_TRANSLATION_TABLE_TRANSLATION_TABLE_SIZE) {
       return GP_TRANSLATION_TABLE_STATUS_FAILED;
     }
-    if (emGptranslationtable->TableEntry[index].entry == NO_ENTRY) {
+    if (sli_zigbee_gp_translation_table->TableEntry[index].entry == NO_ENTRY) {
       return GP_TRANSLATION_TABLE_STATUS_ENTRY_EMPTY;
     }
     ret = addTranslationTableEntryByIndex(TRANSLATION_TABLE_UPDATE,
@@ -1427,21 +1427,21 @@ uint8_t sli_zigbee_af_gp_trans_table_replace_translation_table_entry_update_comm
        (GPD ID, GPD Endpoint, GPD CommandID, EndPoint, Profile, Cluster) quintuple by the supplied number of entries*/
 
     for (tableIndex = 0; tableIndex < EMBER_AF_PLUGIN_GREEN_POWER_TRANSLATION_TABLE_TRANSLATION_TABLE_SIZE; tableIndex++) {
-      if (!emGptranslationtable->TableEntry[tableIndex].entry) {
+      if (!sli_zigbee_gp_translation_table->TableEntry[tableIndex].entry) {
         continue;
       }
-      if (emGptranslationtable->TableEntry[tableIndex].entry == CUSTOMIZED_TABLE_ENTRY) {
+      if (sli_zigbee_gp_translation_table->TableEntry[tableIndex].entry == CUSTOMIZED_TABLE_ENTRY) {
         genericTranslationTable = sli_zigbee_af_gp_get_customized_table();
-      } else if (emGptranslationtable->TableEntry[tableIndex].entry == DEFAULT_TABLE_ENTRY) {
+      } else if (sli_zigbee_gp_translation_table->TableEntry[tableIndex].entry == DEFAULT_TABLE_ENTRY) {
         genericTranslationTable = sli_zigbee_af_gp_get_default_table();
       }
       if (genericTranslationTable == NULL) {
         return GP_TRANSLATION_TABLE_STATUS_FAILED;
       }
-      genericTranslationTable = &genericTranslationTable[emGptranslationtable->TableEntry[tableIndex].offset];
-      if ((emberAfGreenPowerCommonGpAddrCompare(&emGptranslationtable->TableEntry[tableIndex].gpAddr, gpdAddr)
-           && (uint8_t)emGptranslationtable->TableEntry[tableIndex].gpdCommand == (uint8_t)gpdCommandId)
-          && (emGptranslationtable->TableEntry[tableIndex].zbEndpoint == zbEndpoint)
+      genericTranslationTable = &genericTranslationTable[sli_zigbee_gp_translation_table->TableEntry[tableIndex].offset];
+      if ((emberAfGreenPowerCommonGpAddrCompare(&sli_zigbee_gp_translation_table->TableEntry[tableIndex].gpAddr, gpdAddr)
+           && (uint8_t)sli_zigbee_gp_translation_table->TableEntry[tableIndex].gpdCommand == (uint8_t)gpdCommandId)
+          && (sli_zigbee_gp_translation_table->TableEntry[tableIndex].zbEndpoint == zbEndpoint)
           && (genericTranslationTable->zigbeeProfile == zigbeeProfile)
           && (genericTranslationTable->zigbeeCluster == zigbeeCluster)) {
         ret = addTranslationTableEntryByIndex(TRANSLATION_TABLE_UPDATE,
@@ -1465,7 +1465,7 @@ uint8_t sli_zigbee_af_gp_trans_table_replace_translation_table_entry_update_comm
     }
     if (!found) { //If Cannot replace, add new entry to the table
       for (tableIndex = 0; tableIndex < EMBER_AF_PLUGIN_GREEN_POWER_TRANSLATION_TABLE_TRANSLATION_TABLE_SIZE; tableIndex++) {
-        if (emGptranslationtable->TableEntry[tableIndex].entry) {
+        if (sli_zigbee_gp_translation_table->TableEntry[tableIndex].entry) {
           continue;
         }
         ret = addTranslationTableEntryByIndex(TRANSLATION_TABLE_UPDATE,
@@ -1505,13 +1505,13 @@ static uint8_t removeTranslationTableEntryUpdateCommand(uint8_t index,
 {
   uint8_t ret = GP_TRANSLATION_TABLE_STATUS_FAILED;
   int tableIndex = 0;
-  sli_zigbee_af_gp_command_translation_table *emGptranslationtable = sli_zigbee_af_gp_trans_table_get_translation_table();
+  sli_zigbee_af_gp_command_translation_table *sli_zigbee_gp_translation_table = sli_zigbee_af_gp_trans_table_get_translation_table();
 
   if (index != 0xFF ) {
     if (index >= EMBER_AF_PLUGIN_GREEN_POWER_TRANSLATION_TABLE_TRANSLATION_TABLE_SIZE) {
       return GP_TRANSLATION_TABLE_STATUS_FAILED;
     }
-    if (emGptranslationtable->TableEntry[index].entry == NO_ENTRY) {
+    if (sli_zigbee_gp_translation_table->TableEntry[index].entry == NO_ENTRY) {
       return GP_TRANSLATION_TABLE_STATUS_ENTRY_EMPTY;
     }
     ret = deleteTranslationTableEntryByIndex(index,
@@ -1529,21 +1529,21 @@ static uint8_t removeTranslationTableEntryUpdateCommand(uint8_t index,
     // If index is 0xff, the sink removes any number of translation entry(s) for the same
     // (GPD ID, GPD Endpoint, GPD CommandID, EndPoint, Profile, Cluster) quintuple by the supplied number of entries
     for (tableIndex = 0; tableIndex < EMBER_AF_PLUGIN_GREEN_POWER_TRANSLATION_TABLE_TRANSLATION_TABLE_SIZE; tableIndex++) {
-      if (emGptranslationtable->TableEntry[tableIndex].entry == NO_ENTRY ) {
+      if (sli_zigbee_gp_translation_table->TableEntry[tableIndex].entry == NO_ENTRY ) {
         continue;
       }
-      if (emGptranslationtable->TableEntry[tableIndex].entry == CUSTOMIZED_TABLE_ENTRY) {
+      if (sli_zigbee_gp_translation_table->TableEntry[tableIndex].entry == CUSTOMIZED_TABLE_ENTRY) {
         genericTranslationTable = sli_zigbee_af_gp_get_customized_table();
-      } else if (emGptranslationtable->TableEntry[tableIndex].entry == DEFAULT_TABLE_ENTRY) {
+      } else if (sli_zigbee_gp_translation_table->TableEntry[tableIndex].entry == DEFAULT_TABLE_ENTRY) {
         genericTranslationTable = sli_zigbee_af_gp_get_default_table();
       }
       if (genericTranslationTable == NULL) {
         return GP_TRANSLATION_TABLE_STATUS_FAILED;
       }
-      genericTranslationTable = &genericTranslationTable[emGptranslationtable->TableEntry[tableIndex].offset];
-      if (emberAfGreenPowerCommonGpAddrCompare(&emGptranslationtable->TableEntry[tableIndex].gpAddr, gpdAddr)
-          && (emGptranslationtable->TableEntry[tableIndex].gpdCommand == gpdCommandId)
-          && (emGptranslationtable->TableEntry[tableIndex].zbEndpoint == zbEndpoint)
+      genericTranslationTable = &genericTranslationTable[sli_zigbee_gp_translation_table->TableEntry[tableIndex].offset];
+      if (emberAfGreenPowerCommonGpAddrCompare(&sli_zigbee_gp_translation_table->TableEntry[tableIndex].gpAddr, gpdAddr)
+          && (sli_zigbee_gp_translation_table->TableEntry[tableIndex].gpdCommand == gpdCommandId)
+          && (sli_zigbee_gp_translation_table->TableEntry[tableIndex].zbEndpoint == zbEndpoint)
           && (genericTranslationTable->zigbeeProfile == zigbeeProfile)
           && (genericTranslationTable->zigbeeCluster == zigbeeCluster)) {
         ret = deleteTranslationTableEntryByIndex(tableIndex,
@@ -1922,7 +1922,7 @@ bool emberAfGreenPowerClusterGpTranslationTableRequestCallback(EmberAfClusterCom
 {
   sl_zcl_green_power_cluster_gp_translation_table_request_command_t cmd_data;
   uint8_t retval;
-  sli_zigbee_af_gp_command_translation_table *emGptranslationtable = sli_zigbee_af_gp_trans_table_get_translation_table();
+  sli_zigbee_af_gp_command_translation_table *sli_zigbee_gp_translation_table = sli_zigbee_af_gp_trans_table_get_translation_table();
   uint8_t entryIndex = 0;
   uint8_t options = 0;
 
@@ -1931,9 +1931,9 @@ bool emberAfGreenPowerClusterGpTranslationTableRequestCallback(EmberAfClusterCom
     return false;
   }
 
-  emberAfGreenPowerClusterPrintln("Got translation table request with index %x emGptranslationtable->totalNoOfEntries = %d",
+  emberAfGreenPowerClusterPrintln("Got translation table request with index %x sli_zigbee_gp_translation_table->totalNoOfEntries = %d",
                                   cmd_data.startIndex,
-                                  emGptranslationtable->totalNoOfEntries);
+                                  sli_zigbee_gp_translation_table->totalNoOfEntries);
   // only respond to unicast messages.
   if (emberAfCurrentCommand()->type != EMBER_INCOMING_UNICAST) {
     emberAfGreenPowerClusterPrintln("Not unicast");
@@ -1950,13 +1950,13 @@ bool emberAfGreenPowerClusterGpTranslationTableRequestCallback(EmberAfClusterCom
     emberAfGreenPowerClusterPrintln("Drop frame due to unknown endpoint: %X", emberAfCurrentEndpoint());
     return false;
   }
-  if ((emGptranslationtable->totalNoOfEntries == 0)
+  if ((sli_zigbee_gp_translation_table->totalNoOfEntries == 0)
       || (cmd_data.startIndex >= EMBER_AF_PLUGIN_GREEN_POWER_TRANSLATION_TABLE_TRANSLATION_TABLE_SIZE)) {
     // "index" is already 0xFF if search by ID
     // or already set to the value from "SinkTableRequest" triggered frame in case it is search by INDEX
     emberAfFillCommandGreenPowerClusterGpTranslationTableResponseSmart(EMBER_ZCL_GP_TRANSLATION_TABLE_RESPONSE_STATUS_NOT_FOUND,
                                                                        0x00, //options
-                                                                       emGptranslationtable->totalNoOfEntries, //totalNoOfEntries
+                                                                       sli_zigbee_gp_translation_table->totalNoOfEntries, //totalNoOfEntries
                                                                        0x00, //startIndex
                                                                        0x00, //entryCount
                                                                        NULL,
@@ -1965,7 +1965,7 @@ bool emberAfGreenPowerClusterGpTranslationTableRequestCallback(EmberAfClusterCom
     goto kickout;
   } else {
     for (entryIndex = cmd_data.startIndex; entryIndex < EMBER_AF_PLUGIN_GREEN_POWER_TRANSLATION_TABLE_TRANSLATION_TABLE_SIZE; entryIndex++) {
-      if (!emGptranslationtable->TableEntry[entryIndex].entry) {
+      if (!sli_zigbee_gp_translation_table->TableEntry[entryIndex].entry) {
         continue;
       } else {
         break;
@@ -1974,7 +1974,7 @@ bool emberAfGreenPowerClusterGpTranslationTableRequestCallback(EmberAfClusterCom
     if (entryIndex >= EMBER_AF_PLUGIN_GREEN_POWER_TRANSLATION_TABLE_TRANSLATION_TABLE_SIZE) {
       emberAfFillCommandGreenPowerClusterGpTranslationTableResponseSmart(EMBER_ZCL_GP_TRANSLATION_TABLE_RESPONSE_STATUS_NOT_FOUND,
                                                                          0x00, //options
-                                                                         emGptranslationtable->totalNoOfEntries, //totalNoOfEntries
+                                                                         sli_zigbee_gp_translation_table->totalNoOfEntries, //totalNoOfEntries
                                                                          0x00, //startIndex
                                                                          0x00, //entryCount
                                                                          NULL,
@@ -1989,7 +1989,7 @@ bool emberAfGreenPowerClusterGpTranslationTableRequestCallback(EmberAfClusterCom
     EmberAfGreenPowerServerGpdSubTranslationTableEntry TranslationTableEntry = { 0 };
 
     for (entryIndex = cmd_data.startIndex; entryIndex < EMBER_AF_PLUGIN_GREEN_POWER_TRANSLATION_TABLE_TRANSLATION_TABLE_SIZE; entryIndex++) {
-      if (!emGptranslationtable->TableEntry[entryIndex].entry) {
+      if (!sli_zigbee_gp_translation_table->TableEntry[entryIndex].entry) {
         continue;
       }
       emberAfGreenPowerClusterPrintln("Send the response with translation table entries -- entryIndex = %d", entryIndex);
@@ -1997,10 +1997,10 @@ bool emberAfGreenPowerClusterGpTranslationTableRequestCallback(EmberAfClusterCom
       if (retval == GP_TRANSLATION_TABLE_STATUS_SUCCESS) {
         if (!entriesCount) {
           //Fill the options with first translation entry found after startIndex
-          options = (emGptranslationtable->TableEntry[entryIndex].infoBlockPresent << 0x03 | emGptranslationtable->TableEntry[entryIndex].gpAddr.applicationId);
+          options = (sli_zigbee_gp_translation_table->TableEntry[entryIndex].infoBlockPresent << 0x03 | sli_zigbee_gp_translation_table->TableEntry[entryIndex].gpAddr.applicationId);
         }
-        if ( options == ((emGptranslationtable->TableEntry[entryIndex].infoBlockPresent << 0x03)
-                         | (emGptranslationtable->TableEntry[entryIndex].gpAddr.applicationId))) {
+        if ( options == ((sli_zigbee_gp_translation_table->TableEntry[entryIndex].infoBlockPresent << 0x03)
+                         | (sli_zigbee_gp_translation_table->TableEntry[entryIndex].gpAddr.applicationId))) {
           // Copy to a temp buffer and add if there is space
           tempDataLength = copyTranslationTableEntryToBuffer(entryIndex, &TranslationTableEntry, tempDatabuffer, EMBER_AF_RESPONSE_BUFFER_LEN);
           // If space add to buffer
@@ -2008,7 +2008,7 @@ bool emberAfGreenPowerClusterGpTranslationTableRequestCallback(EmberAfClusterCom
             if (!entriesCount) {
               emberAfFillCommandGreenPowerClusterGpTranslationTableResponseSmart(EMBER_ZCL_GP_SINK_TABLE_RESPONSE_STATUS_SUCCESS,
                                                                                  options, //options
-                                                                                 emGptranslationtable->totalNoOfEntries, //totalNoOfEntries
+                                                                                 sli_zigbee_gp_translation_table->totalNoOfEntries, //totalNoOfEntries
                                                                                  cmd_data.startIndex, //startIndex
                                                                                  0x00, //entryCount
                                                                                  NULL,
@@ -2027,7 +2027,7 @@ bool emberAfGreenPowerClusterGpTranslationTableRequestCallback(EmberAfClusterCom
       emberAfGreenPowerClusterPrintln("INSUFFICIENT SPACE"); //send Insufficient space message if not even one entry could fit in the response
       emberAfFillCommandGreenPowerClusterGpTranslationTableResponseSmart(EMBER_ZCL_STATUS_INSUFFICIENT_SPACE,
                                                                          0x00, //options
-                                                                         emGptranslationtable->totalNoOfEntries, //totalNoOfEntries
+                                                                         sli_zigbee_gp_translation_table->totalNoOfEntries, //totalNoOfEntries
                                                                          0x00, //startIndex
                                                                          0x00, //entryCount
                                                                          NULL,
@@ -2041,7 +2041,7 @@ bool emberAfGreenPowerClusterGpTranslationTableRequestCallback(EmberAfClusterCom
       if (status == EMBER_MESSAGE_TOO_LONG) {
         emberAfFillCommandGreenPowerClusterGpTranslationTableResponseSmart(EMBER_ZCL_STATUS_INSUFFICIENT_SPACE,
                                                                            0x00, //options
-                                                                           emGptranslationtable->totalNoOfEntries, //totalNoOfEntries
+                                                                           sli_zigbee_gp_translation_table->totalNoOfEntries, //totalNoOfEntries
                                                                            0x00, //startIndex
                                                                            0x00, //entryCount
                                                                            NULL,

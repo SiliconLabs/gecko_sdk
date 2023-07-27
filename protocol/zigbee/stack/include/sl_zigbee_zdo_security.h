@@ -321,5 +321,7 @@ sl_status_t sli_zigbee_process_security_challenge_request(Buffer request,
 void sli_zigbee_process_security_challenge_response(Buffer response,
                                                     uint16_t index,
                                                     EmberNodeId sourceShort);
-
+sl_status_t sl_zigbee_initiate_security_challenge(EmberNodeId partnerNodeId,
+                                                  EmberEUI64 partnerLong,
+                                                  uint8_t keyIndex);
 #endif // SL_ZIGBEE_ZDO_SECURITY_H

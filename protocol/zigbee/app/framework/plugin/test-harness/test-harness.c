@@ -157,7 +157,7 @@ extern EmberStatus emberAddChild(EmberNodeId shortId,
                                  EmberEUI64 longId,
                                  uint8_t childType);
 #if !defined(EZSP_HOST) && defined(EMBER_TEST)
-extern uint8_t sli_zigbee_test_stack_compliance_revision;
+extern void sli_zigbee_set_stack_compliance_revision(uint8_t revision);
 #endif
 
 static uint8_t certIndexToCorrupt = 0;
@@ -1037,7 +1037,7 @@ void emberAfPluginTestHarnessSetNodeDescriptorComplianceRevision(SL_CLI_COMMAND_
     emberAfCorePrintln("The compliance revision of the device has been changed to R%d (0x%X)", val, status);
   }
 #elif defined(EMBER_TEST)
-  sli_zigbee_test_stack_compliance_revision = val;
+  sli_zigbee_set_stack_compliance_revision(val);
   emberAfCorePrintln("The compliance revision of the device has been changed to R%d", val);
 #else
   (void)val;

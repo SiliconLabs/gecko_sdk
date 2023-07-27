@@ -4,13 +4,15 @@
 #include "psa/crypto.h"
 #include "ncp-security.h"
 
+#define SLI_CONNECT_CRYPTO_INVALID_KEY_ID (0x00000000)
+
 EmberStatus emApiSetNcpSecurityKey(uint8_t *keyContents, uint8_t keyLength)
 {
   EmberStatus emstatus = EMBER_ERR_FATAL;
 
   psa_key_attributes_t key_attr;
   psa_status_t status;
-  psa_key_id_t key_id;
+  psa_key_id_t key_id = emApiGetKeyId();
 
   if (keyLength != EMBER_ENCRYPTION_KEY_SIZE) {
     return EMBER_BAD_ARGUMENT;
@@ -32,6 +34,14 @@ EmberStatus emApiSetNcpSecurityKey(uint8_t *keyContents, uint8_t keyLength)
                          PSA_KEY_LIFETIME_VOLATILE,
                          PSA_KEY_LOCATION_LOCAL_STORAGE));
   #endif
+
+  if (key_id != SLI_CONNECT_CRYPTO_INVALID_KEY_ID) {
+    // Allow persistant key be replaced by deleting the old one
+    status = psa_destroy_key(key_id);
+    if (status != PSA_SUCCESS) {
+      return EMBER_ERR_FATAL;
+    }
+  }
 
   status = psa_import_key(&key_attr,
                           keyContents,

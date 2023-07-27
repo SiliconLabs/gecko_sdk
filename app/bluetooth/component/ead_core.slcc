@@ -35,7 +35,7 @@ provides:
   - name: ead_core
 
 requires:
-  - name: device_has_radioaes
+  - name: silabs_core_sl_malloc
   - name: psa_crypto
   - name: psa_crypto_ccm
   - name: sli_protocol_crypto

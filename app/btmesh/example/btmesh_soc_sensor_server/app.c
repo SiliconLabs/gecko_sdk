@@ -62,7 +62,9 @@
 #include "sl_btmesh_factory_reset.h"
 #endif // SL_CATALOG_BTMESH_FACTORY_RESET_PRESENT
 
+#ifdef SL_CATALOG_BTMESH_SENSOR_PEOPLE_COUNT_PRESENT
 #include "sl_btmesh_sensor_people_count.h"
+#endif // SL_CATALOG_BTMESH_SENSOR_PEOPLE_COUNT_PRESENT
 
 #ifdef SL_CATALOG_BTMESH_PROVISIONING_DECORATOR_PRESENT
 #include "sl_btmesh_provisioning_decorator.h"
@@ -317,6 +319,7 @@ void sl_btmesh_provisionee_on_init(sl_status_t result)
  *                   - APP_BUTTON_PRESS_DURATION_LONG
  *                   - APP_BUTTON_PRESS_DURATION_VERYLONG
  ******************************************************************************/
+#ifdef SL_CATALOG_BTMESH_SENSOR_PEOPLE_COUNT_PRESENT
 void app_button_press_cb(uint8_t button, uint8_t duration)
 {
   (void)duration;
@@ -336,6 +339,7 @@ void app_button_press_cb(uint8_t button, uint8_t duration)
     }
   }
 }
+#endif // SL_CATALOG_BTMESH_SENSOR_PEOPLE_COUNT_PRESENT
 
 /*******************************************************************************
  * Timer Callbacks

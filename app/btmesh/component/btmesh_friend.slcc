@@ -8,6 +8,7 @@ description: >
   Logging for these messages can be enabled as a configuration option in Simplicity Studio.
   Callback functions are provided for friendship establishment and termination.
   Friend functionality can be enabled or disabled during runtime via node configuration.
+  This component is prepared for integration into SOC applications.
 category: "Bluetooth Mesh|Features"
 quality: "production"
 root_path: "app/btmesh/common/btmesh_friend"
@@ -34,3 +35,6 @@ template_contribution:
       function: "sl_btmesh_friend_on_event"
   - name: component_catalog
     value: "btmesh_friend"
+
+validation_helper:
+  - path: "../../script/validation/soc_ncp_compatibility.lua"

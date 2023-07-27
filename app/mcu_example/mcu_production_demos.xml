@@ -5,7 +5,7 @@
     <property key="demos.blurb" value="Platform - Factory Demo"/>
     <property key="core.partCompatibility" value=".*efm32tg11b520f128gm80.*"/>
     <property key="core.boardCompatibility" value="brd2102a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.0/app/mcu_example/demos/factory_demo/factory_demo-brd2102a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.1/app/mcu_example/demos/factory_demo/factory_demo-brd2102a.s37"/>
     <property key="core.readmeFiles" value="factory_demo/brd2102a/readme.md"/>
     <property key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -16,7 +16,7 @@
     <property key="demos.blurb" value="Platform - Factory Demo"/>
     <property key="core.partCompatibility" value=".*efm32gg11b820f2048gl192.*"/>
     <property key="core.boardCompatibility" value="brd2204a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.0/app/mcu_example/demos/factory_demo/factory_demo-brd2204a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.1/app/mcu_example/demos/factory_demo/factory_demo-brd2204a.s37"/>
     <property key="core.readmeFiles" value="factory_demo/brd2204a/readme.md"/>
     <property key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -27,7 +27,7 @@
     <property key="demos.blurb" value="Platform - Factory Demo"/>
     <property key="core.partCompatibility" value=".*efm32gg11b820f2048gl192.*"/>
     <property key="core.boardCompatibility" value="brd2204c"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.0/app/mcu_example/demos/factory_demo/factory_demo-brd2204c.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.1/app/mcu_example/demos/factory_demo/factory_demo-brd2204c.s37"/>
     <property key="core.readmeFiles" value="factory_demo/brd2204a/readme.md"/>
     <property key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -38,7 +38,7 @@
     <property key="demos.blurb" value="Platform - Micrium OS CANopen"/>
     <property key="core.partCompatibility" value=".*efm32gg11b820f2048gl192.*"/>
     <property key="core.boardCompatibility" value="brd2204a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.0/app/mcu_example/demos/micriumos_canopen/micriumos_canopen-brd2204a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.1/app/mcu_example/demos/micriumos_canopen/micriumos_canopen-brd2204a.s37"/>
     <property key="core.readmeFiles" value="micriumos_canopen/readme.md"/>
     <property key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -49,7 +49,7 @@
     <property key="demos.blurb" value="Platform - Micrium OS CANopen"/>
     <property key="core.partCompatibility" value=".*efm32gg11b820f2048gl192.*"/>
     <property key="core.boardCompatibility" value="brd2204c"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.0/app/mcu_example/demos/micriumos_canopen/micriumos_canopen-brd2204c.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.1/app/mcu_example/demos/micriumos_canopen/micriumos_canopen-brd2204c.s37"/>
     <property key="core.readmeFiles" value="micriumos_canopen/readme.md"/>
     <property key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -61,7 +61,7 @@ This example shows how to use the Micrium OS network stack with the ETH  periphe
     <property key="demos.blurb" value="Platform - Micrium OS Network"/>
     <property key="core.partCompatibility" value=".*efm32gg11b820f2048gl192.*"/>
     <property key="core.boardCompatibility" value="brd2204a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.0/app/mcu_example/demos/micriumos_net/micriumos_net-brd2204a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.1/app/mcu_example/demos/micriumos_net/micriumos_net-brd2204a.s37"/>
     <property key="core.readmeFiles" value="micriumos_net/readme.md"/>
     <property key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -73,7 +73,7 @@ This example shows how to use the Micrium OS network stack with the ETH  periphe
     <property key="demos.blurb" value="Platform - Micrium OS Network"/>
     <property key="core.partCompatibility" value=".*efm32gg11b820f2048gl192.*"/>
     <property key="core.boardCompatibility" value="brd2204c"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.0/app/mcu_example/demos/micriumos_net/micriumos_net-brd2204c.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.1/app/mcu_example/demos/micriumos_net/micriumos_net-brd2204c.s37"/>
     <property key="core.readmeFiles" value="micriumos_net/readme.md"/>
     <property key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -84,7 +84,7 @@ You must have the Hall Effect Evaluation kit, Si72xx-WD-Kit, to make use of this
     <property key="demos.blurb" value="Platform - Si72xx Wheeldemo"/>
     <property key="core.partCompatibility" value=".*efm32hg322f64.*"/>
     <property key="core.boardCompatibility" value="brd2012a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.0/app/mcu_example/demos/si72xx_wheeldemo/si72xx_wheeldemo-brd2012a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.1/app/mcu_example/demos/si72xx_wheeldemo/si72xx_wheeldemo-brd2012a.s37"/>
     <property key="core.readmeFiles" value="si72xx_wheeldemo/readme.md"/>
     <property key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
     <property key="core.quality" value="PRODUCTION"/>

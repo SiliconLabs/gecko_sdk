@@ -73,7 +73,7 @@ class ProfileWisunHanJumbo(IProfile):
 
     def build_advanced_profile_inputs(self, model, profile):
         IProfile.make_linked_io(profile, model.vars.base_frequency_hz, "advanced",
-                                     readable_name="Base Channel Frequency", value_limit_min=358000000,
+                                     readable_name="Base Channel Frequency", value_limit_min=100000000,
                                      value_limit_max=956000000, units_multiplier=UnitsMultiplier.MEGA)
 
         IProfile.make_linked_io(profile, model.vars.channel_spacing_hz, "advanced",

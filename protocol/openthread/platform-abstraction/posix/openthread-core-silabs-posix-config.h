@@ -79,6 +79,58 @@
 #endif
 
 /******************************************************************************
+ * Stack / MAC defaults for OTBR
+ *****************************************************************************/
+
+/**
+ * @def OPENTHREAD_CONFIG_MLE_MAX_CHILDREN
+ *
+ * The maximum number of children, set on the OTBR host.
+ *
+ * On the host, the value determines the size of the child table.
+ * On the RCP, this is used for frame pending lookup for indirect messaging.
+ *
+ * If the host value <= RCP value, then the OTBR primarily defaults to the host
+ * value. It won’t allow more than that number of children to join the network.
+ *
+ * If the host value > RCP value, then the OTBR still defaults to the host value
+ * and allows that many children — however, it cannot buffer messages for more
+ * than the RCP number. This is because it cannot do frame pending lookup.
+ *
+ * Note that the default RCP value is 10 (src/core/config/mle.h), so this means:
+ * The OTBR can have 128 children, but cannot simultaneously buffer messages for
+ * more than 10 sleepy children at once.
+ *
+ */
+#undef OPENTHREAD_CONFIG_MLE_MAX_CHILDREN
+#define OPENTHREAD_CONFIG_MLE_MAX_CHILDREN 128
+
+/**
+ * @def OPENTHREAD_CONFIG_MAC_CSL_REQUEST_AHEAD_US
+ *
+ * Define how many microseconds ahead should MAC deliver CSL frame to SubMac.
+ *
+ * This value is a higher on the OTBR than the stack default.
+ *
+ */
+#undef OPENTHREAD_CONFIG_MAC_CSL_REQUEST_AHEAD_US
+#define OPENTHREAD_CONFIG_MAC_CSL_REQUEST_AHEAD_US 5000
+
+/**
+ * @def OPENTHREAD_CONFIG_CSL_TRANSMIT_TIME_AHEAD
+ *
+ * Transmission scheduling and ramp up time needed for the CSL transmitter
+ * to be ready, in units of microseconds. This time must include at least
+ * the radio's turnaround time between end of CCA and start of preamble
+ * transmission. To avoid early CSL transmission it also must not be configured
+ * higher than the actual scheduling and ramp up time.
+ *
+ * Same as stack default, but can change if needed for OTBR as CSL transmitter.
+ */
+#undef OPENTHREAD_CONFIG_CSL_TRANSMIT_TIME_AHEAD
+#define OPENTHREAD_CONFIG_CSL_TRANSMIT_TIME_AHEAD 40
+
+/******************************************************************************
  * MultiPan RCP (CPC) defaults
  *****************************************************************************/
 

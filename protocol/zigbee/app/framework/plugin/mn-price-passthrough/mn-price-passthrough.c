@@ -37,9 +37,8 @@ static EmberNodeId forwardingId;
 static uint8_t forwardingEndpoint, proxyEsiEndpoint;
 static EmberAfScheduledPrice currentPrice;
 
-sl_zigbee_event_t emberAfPluginMnPricePassthroughPollAndForwardEsiEvent;
-#define pollAndForwardEsiEventControl (&emberAfPluginMnPricePassthroughPollAndForwardEsiEvent)
-void emberAfPluginMnPricePassthroughPollAndForwardEsiEventHandler(sl_zigbee_event_t * event);
+static sl_zigbee_event_t pollAndForwardEsiEvent;
+static void pollAndForwardEsiEventHandler(sl_zigbee_event_t * event);
 
 static void fillPublishPriceCommand(EmberAfScheduledPrice price)
 {
@@ -81,7 +80,7 @@ static void fillPublishPriceCommand(EmberAfScheduledPrice price)
                                    0); // ExtendedRegisterTier
 }
 
-void emberAfPluginMnPricePassthroughPollAndForwardEsiEventHandler(sl_zigbee_event_t * event)
+static void pollAndForwardEsiEventHandler(sl_zigbee_event_t * event)
 {
   EmberStatus status;
 
@@ -106,7 +105,7 @@ void emberAfPluginMnPricePassthroughPollAndForwardEsiEventHandler(sl_zigbee_even
 
   reschedule:
   // Reschedule the event
-  sl_zigbee_event_set_delay_minutes(pollAndForwardEsiEventControl,
+  sl_zigbee_event_set_delay_minutes(&pollAndForwardEsiEvent,
                                     EMBER_AF_PLUGIN_MN_PRICE_PASSTHROUGH_POLL_RATE);
 }
 
@@ -115,8 +114,8 @@ void emberAfPluginMnPricePassthroughInitCallback(uint8_t init_level)
   switch (init_level) {
     case SL_ZIGBEE_INIT_LEVEL_EVENT:
     {
-      sl_zigbee_event_init(pollAndForwardEsiEventControl,
-                           emberAfPluginMnPricePassthroughPollAndForwardEsiEventHandler);
+      sl_zigbee_event_init(&pollAndForwardEsiEvent,
+                           pollAndForwardEsiEventHandler);
       break;
     }
 
@@ -227,14 +226,14 @@ void sli_zigbee_af_mn_price_passthrough_routing_setup(EmberNodeId fwdId,
 void sli_zigbee_af_mn_price_passthrough_start_poll_and_forward(void)
 {
   emberAfPriceClusterPrintln("Starting %p", "poll and forward");
-  sl_zigbee_event_set_delay_ms(pollAndForwardEsiEventControl,
+  sl_zigbee_event_set_delay_ms(&pollAndForwardEsiEvent,
                                MILLISECOND_TICKS_PER_SECOND);
 }
 
 void sli_zigbee_af_mn_price_passthrough_stop_poll_and_forward(void)
 {
   emberAfPriceClusterPrintln("Stopping %p", "poll and forward");
-  sl_zigbee_event_set_inactive(pollAndForwardEsiEventControl);
+  sl_zigbee_event_set_inactive(&pollAndForwardEsiEvent);
 }
 
 bool emberAfPriceClusterGetCurrentPriceCallback(uint8_t commandOptions)

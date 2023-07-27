@@ -8,3 +8,7 @@ steps:
     input: "{{build_dir}}/{{project_name}}.s37"
     output: "../artifact/{{project_name}}.s37"
     export: bootloader_nonsecure_app
+  # Print usage data
+  - task: "usage"
+    input: "{{build_dir}}/{{project_name}}.out"
+    map: "{{build_dir}}/{{project_name}}.map"

@@ -35,6 +35,7 @@
 #include <unistd.h>
 #include "sl_bt_api.h"
 #include "ncp_host.h"
+#include "ncp_user_cmd.h"
 #include "app_log.h"
 #include "app_log_cli.h"
 #include "app_assert.h"
@@ -506,20 +507,20 @@ void aoa_cte_on_iq_report(aoa_db_entry_t *tag, aoa_iq_report_t *iq_report)
 static sl_status_t get_board_type(antenna_array_board_t *board_type)
 {
   sl_status_t sc;
-  uint8_t command = BOARD_CMD_ID;
+  uint8_t command = USER_CMD_GET_BOARD_NAME_ID;
   size_t response_len;
-  char board_name[BOARD_RSP_DATA_LEN + 1];
+  char board_name[USER_RSP_GET_BOARD_NAME_LEN + 1];
 
   // Get the name of the NCP target board
   sc = sl_bt_user_message_to_target(sizeof(command),
                                     &command,
-                                    BOARD_RSP_DATA_LEN,
+                                    USER_RSP_GET_BOARD_NAME_LEN,
                                     &response_len,
                                     (uint8_t *)board_name);
   (void)response_len;
 
   if (sc == SL_STATUS_OK) {
-    board_name[BOARD_RSP_DATA_LEN] = '\0'; // Place null character at the end
+    board_name[USER_RSP_GET_BOARD_NAME_LEN] = '\0'; // Place null character at the end
     app_log_info("Detected board: %s." APP_LOG_NL, board_name);
 
     // Convert string to type
@@ -823,7 +824,8 @@ void aoa_db_on_tag_added(aoa_db_entry_t *tag)
              "Failed to allocate memory for aoa state.");
 
   enum sl_rtl_error_code ec = aoa_init_rtl((aoa_state_t *)tag->user_data,
-                                           locator_id);
+                                           locator_id,
+                                           app_log_check_level(APP_LOG_LEVEL_DEBUG));
 
   app_assert(ec == SL_RTL_ERROR_SUCCESS,
              "[E: %d] aoa_init_rtl failed" APP_LOG_NL,

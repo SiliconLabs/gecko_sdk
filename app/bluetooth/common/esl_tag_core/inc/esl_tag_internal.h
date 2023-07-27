@@ -30,10 +30,10 @@
 #ifndef ESL_TAG_INTERNAL_H
 #define ESL_TAG_INTERNAL_H
 
-/***********************************************************************************************//**
+/**************************************************************************//**
  * @addtogroup esl_tag_core
  * @{
- **************************************************************************************************/
+ *****************************************************************************/
 #include <stdint.h>
 #include "sl_status.h"
 #include "esl_tag_display_core.h"
@@ -41,7 +41,7 @@
 /**************************************************************************//**
  * Get a display width based on display index.
  * @param[in]  display_index Selects the display to get width of [pixels].
- * @param[out] width Returns width if given dispay exists.
+ * @param[out] width Returns width if given display exists.
  * @return sl_status_t SL_STATUS_OK if display_index is valid, error otherwise.
  * @note: The function is only defined in esl_tag_display component (if added)
  *****************************************************************************/
@@ -51,7 +51,7 @@ extern sl_status_t esl_display_get_width(uint8_t display_index,
 /**************************************************************************//**
  * Get a display height based on display index.
  * @param[in]  display_index Selects the display to get height of [pixels].
- * @param[out] height Returns height if given dispay exists.
+ * @param[out] height Returns height if given display exists.
  * @return sl_status_t SL_STATUS_OK if display_index is valid, error otherwise.
  * @note: The function is only defined in esl_tag_display component (if added)
  *****************************************************************************/
@@ -61,7 +61,7 @@ extern sl_status_t esl_display_get_height(uint8_t display_index,
 /**************************************************************************//**
  * Get a display type based on display index.
  * @param[in]  display_index The display to get the type of [Assigned Number].
- * @param[out] type Returns type if given dispay exists.
+ * @param[out] type Returns type if given display exists.
  * @return sl_status_t SL_STATUS_OK if display_index is valid, error otherwise.
  * @note: The function is only defined in esl_tag_display component (if added)
  *****************************************************************************/
@@ -81,13 +81,15 @@ extern sl_status_t esl_image_select_object(void const *data,
 /**************************************************************************//**
  * Callback on image chunk received event.
  * @param[in] data Pointer to image chunk data.
- * @param[in] length Actual length of receved chunk.
+ * @param[in] offset Start offset of received chunk.
+ * @param[in] length Actual length of received chunk.
  * @return sl_status_t SL_STATUS_OK if stored successfully, error otherwise.
  * @note: The function is defined in esl_tag_image component (if added), and is
  * used externally only by esl_tag_cli_test_harness to mimic the image transfer
- * during ESL PTS tests where OTS data transfer iself is far out of scope.
+ * during ESL PTS tests where OTS data transfer itself is far out of scope.
  *****************************************************************************/
 extern sl_status_t esl_image_chunk_received(uint8_t const *data,
+                                            uint32_t offset,
                                             uint16_t length);
 
 /**************************************************************************//**

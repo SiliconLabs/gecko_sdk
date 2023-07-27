@@ -49,12 +49,6 @@ EmberStatus backchannelSend(uint8_t port, uint8_t * data, uint8_t length)
   return EMBER_LIBRARY_NOT_PRESENT;
 }
 
-EmberStatus backchannelGetConnection(uint8_t port,
-                                     bool remapStdinStdout)
-{
-  return EMBER_LIBRARY_NOT_PRESENT;
-}
-
 EmberStatus backchannelCloseConnection(uint8_t port)
 {
   return EMBER_LIBRARY_NOT_PRESENT;

@@ -20,6 +20,7 @@
 #include "sl_zigbee_address_info.h"
 #include "sl_zigbee_zdo_management.h"
 #include "sl_zigbee_zdo_security.h"
+#include "sl_zigbee_dynamic_commissioning.h"
 
 WEAK(void slx_zigbee_gu_zdo_dlk_override_supported_params(uint8_t *method_mask,
                                                           uint8_t *secret_mask))
@@ -101,4 +102,16 @@ WEAK(void sl_zigbee_af_zdo_set_configuration_req_callback(uint8_t* message_ptr, 
 WEAK(Buffer slx_gu_fc_challenge_finalize_cb(Buffer tlvs))
 {
   return tlvs;
+}
+
+WEAK(void sl_zigbee_dynamic_commissioning_alert_callback(sl_zigbee_address_info *ids,
+                                                         sl_zigbee_dynamic_commissioning_event_t event))
+{
+  UNUSED_VAR(ids);
+  UNUSED_VAR(event);
+}
+
+WEAK(bool slx_gu_do_relay_dual_submit(void))
+{
+  return false;
 }

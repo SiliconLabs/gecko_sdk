@@ -736,6 +736,11 @@ void OSSched(void)
 #endif
   } else {
     OSTCBHighRdyPtr = DEF_NULL;
+#if (OS_CFG_SCHED_ROUND_ROBIN_EN == DEF_ENABLED)
+    if (OSSchedRoundRobinEn) {
+      sl_sleeptimer_stop_timer(&OSRoundRobinTimer);
+    }
+#endif
   }
 
 #if ((OS_CFG_TASK_PROFILE_EN == DEF_ENABLED) || (OS_CFG_DBG_EN == DEF_ENABLED))

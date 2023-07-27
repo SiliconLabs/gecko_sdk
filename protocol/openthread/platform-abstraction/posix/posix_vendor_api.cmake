@@ -37,7 +37,7 @@ set(UTIL_INC_DIR  ${OT_DIR}/include/util)
 
 add_library(ot-vendor-posix-api
     ${POSIX_SRC_DIR}/posix_vendor_spinel_interface.cpp
-    ${POSIX_SRC_DIR}/radio_vendor.cpp
+    ${POSIX_SRC_DIR}/radio_extension.cpp
 )
 
 target_link_libraries(ot-vendor-posix-api

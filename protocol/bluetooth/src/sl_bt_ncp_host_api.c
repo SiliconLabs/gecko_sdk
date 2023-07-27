@@ -1900,6 +1900,27 @@ sl_status_t sl_bt_connection_get_remote_tx_power(uint8_t connection,
 
 }
 
+sl_status_t sl_bt_connection_set_tx_power(uint8_t connection,
+                                          int16_t tx_power,
+                                          int16_t *tx_power_out) {
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+
+    cmd->data.cmd_connection_set_tx_power.connection=connection;
+    cmd->data.cmd_connection_set_tx_power.tx_power=tx_power;
+
+    cmd->header=sl_bt_cmd_connection_set_tx_power_id+(((3)&0xff)<<8)+(((3)&0x700)>>8);
+
+
+    sl_bt_host_handle_command();
+    if (tx_power_out) {
+        *tx_power_out = rsp->data.rsp_connection_set_tx_power.tx_power_out;
+    }
+    return rsp->data.rsp_connection_set_tx_power.result;
+
+}
+
 sl_status_t sl_bt_connection_read_remote_used_features(uint8_t connection) {
     struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
 

@@ -56,7 +56,7 @@ configuration:
   - name: APP_REVISION
     value: 20
   - name: APP_PATCH
-    value: 0
+    value: 1
   - name: ZAF_CONFIG_REQUEST_KEY_S2_UNAUTHENTICATED
     value: 1
   - name: ZAF_CONFIG_REQUEST_KEY_S2_AUTHENTICATED
@@ -143,6 +143,8 @@ configuration:
     value: 1
   - name: ZAF_APP_NAME
     value: '"multilevel_sensor"'
+  - name: SL_RAIL_UTIL_RAIL_POWER_MANAGER_INIT
+    value: 0
 
 define:
   - name: APP_PROPERTIES_CONFIG_FILE

@@ -100,7 +100,7 @@ static uint32_t gOtaImageInfoStart = EEPROM_START;
 #define EMBER_TEST_EEPROM_WORD_SIZE MAX_WORD_SIZE
 #endif
 
-void sli_zigbee_af_setup_fake_eeprom_for_simulation(void)
+static void setup_fake_eeprom_for_simulation(void)
 {
   setupFakeEeprom(gOtaEepromSize,
                   gOtaStorageStart,    // offset
@@ -167,7 +167,7 @@ static void setEblStartOffset(uint32_t eblStart)
 bool emberAfOtaStorageDriverInitCallback(void)
 {
   #if defined(EMBER_TEST)
-  sli_zigbee_af_setup_fake_eeprom_for_simulation();
+  setup_fake_eeprom_for_simulation();
   #endif
 
   // First, if we're using slots, calculate EEPROM start, end, and length

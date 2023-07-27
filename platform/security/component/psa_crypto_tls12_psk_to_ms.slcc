@@ -5,7 +5,7 @@ description: >-
   This component provides support for the functions specified in TLS 1.2
   for derivation of master secrets from pre-shared keys (PSKs) in PSA Crypto.
   This PSA Crypto functionality uses a Mbed TLS backend.
-category: Platform|Security|PSA Crypto|Upper Layer
+category: Platform|Security|PSA Crypto|Key Derivation
 quality: production
 provides:
   - name: psa_crypto_tls12_psk_to_ms

@@ -34,7 +34,7 @@
 #endif
 
 //---Forward Decleration
-void printChannels(sl_cli_command_arg_t *arguments);
+static void printChannels(sl_cli_command_arg_t *arguments);
 static uint32_t channelMasks[] = {
   0x02108800UL, // standard (11, 15, 20, 25)
   0x04211000UL, // +1 (12, 16, 21, 26)
@@ -355,7 +355,7 @@ void statusCommand(sl_cli_command_arg_t *arguments)
   emberAfAppPrintln("%p %d", "Touchlinking policy:", sli_zigbee_af_zll_get_policy());
 }
 
-void printChannels(sl_cli_command_arg_t *arguments)
+static void printChannels(sl_cli_command_arg_t *arguments)
 {
   emberAfAppPrint("%p channels: ", "Primary");
   emberAfAppDebugExec(emberAfPrintChannelListFromMask(emberGetZllPrimaryChannelMask()));

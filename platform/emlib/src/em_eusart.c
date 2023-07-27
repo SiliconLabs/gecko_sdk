@@ -1021,18 +1021,20 @@ static void EUSART_AsyncInitCommon(EUSART_TypeDef *eusart,
       eusart->DALICFG_SET = EUSART_DALICFG_DALIRXENDT;
     }
 
-    // keep track of the number of 16-bits packet to send
-    if (daliInit->TXdatabits <= eusartDaliTxDataBits16) {
-      dali_tx_nb_packets[EUSART_NUM(eusart)] = 1;
-    } else {
-      dali_tx_nb_packets[EUSART_NUM(eusart)] = 2;
-    }
+    if (EUSART_REF_VALID(eusart)) {
+      // keep track of the number of 16-bits packet to send
+      if (daliInit->TXdatabits <= eusartDaliTxDataBits16) {
+        dali_tx_nb_packets[EUSART_NUM(eusart)] = 1;
+      } else {
+        dali_tx_nb_packets[EUSART_NUM(eusart)] = 2;
+      }
 
-    // keep track of the number of 16-bits packet to receive
-    if (daliInit->RXdatabits <= eusartDaliRxDataBits16) {
-      dali_rx_nb_packets[EUSART_NUM(eusart)] = 1;
-    } else {
-      dali_rx_nb_packets[EUSART_NUM(eusart)] = 2;
+      // keep track of the number of 16-bits packet to receive
+      if (daliInit->RXdatabits <= eusartDaliRxDataBits16) {
+        dali_rx_nb_packets[EUSART_NUM(eusart)] = 1;
+      } else {
+        dali_rx_nb_packets[EUSART_NUM(eusart)] = 2;
+      }
     }
 
     // Configure the numbers of bits per TX and RX frames

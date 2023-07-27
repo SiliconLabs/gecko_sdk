@@ -35,6 +35,7 @@ component:
   - id: bluetooth_feature_dynamic_gattdb
   - id: bluetooth_feature_test
   - id: ncp
+  - id: ncp_user_cmd
   - id: uartdrv_usart
     instance:
       - vcom

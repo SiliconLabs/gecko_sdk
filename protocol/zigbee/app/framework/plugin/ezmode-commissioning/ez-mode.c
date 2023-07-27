@@ -26,15 +26,15 @@
 
 #include "app/framework/include/af.h"
 #include "app/framework/util/af-main.h"
+#include "stack/include/zigbee-device-stack.h"
 #include "ez-mode.h"
 
 //------------------------------------------------------------------------------
 // Forward Declaration
 
 #include "ezmode-commissioning-config.h"
-sl_zigbee_event_t emberAfPluginEzmodeCommissioningStateEvent;
-#define stateEvent (&emberAfPluginEzmodeCommissioningStateEvent)
-void emberAfPluginEzmodeCommissioningStateEventHandler(sl_zigbee_event_t * event);
+static sl_zigbee_event_t stateEvent;
+static void stateEventHandler(sl_zigbee_event_t * event);
 static void serviceDiscoveryCallback(const EmberAfServiceDiscoveryResult *result);
 static void createBinding(uint8_t *address);
 
@@ -86,7 +86,7 @@ static void identifyRequestMessageSentCallback(EmberOutgoingMessageType type,
   if (ezModeState == EZMODE_IDENTIFY ) {
     if (status == EMBER_SUCCESS) {
       ezModeState = EZMODE_IDENTIFY_WAIT;
-      sl_zigbee_event_set_delay_ms(stateEvent,
+      sl_zigbee_event_set_delay_ms(&stateEvent,
                                    (10 * MILLISECOND_TICKS_PER_SECOND));
     } else {
       complete();
@@ -98,10 +98,10 @@ void sli_zigbee_af_ezmode_commissioning_init_callback(uint8_t init_level)
 {
   (void)init_level;
 
-  sl_zigbee_event_init(&emberAfPluginEzmodeCommissioningStateEvent,
-                       emberAfPluginEzmodeCommissioningStateEventHandler);
+  sl_zigbee_event_init(&stateEvent,
+                       stateEventHandler);
 }
-void emberAfPluginEzmodeCommissioningStateEventHandler(sl_zigbee_event_t * event)
+static void stateEventHandler(sl_zigbee_event_t * event)
 {
   EmberStatus status;
   EmberEUI64 add;
@@ -111,13 +111,13 @@ void emberAfPluginEzmodeCommissioningStateEventHandler(sl_zigbee_event_t * event
     return;
   }
 
-  sl_zigbee_event_set_inactive(stateEvent);
+  sl_zigbee_event_set_inactive(&stateEvent);
   switch (ezModeState) {
     case EZMODE_BROAD_PJOIN:
       emberAfCorePrintln("<ezmode bpjoin>");
       sli_zigbee_af_permit_join(180, true); //Send out a broadcast pjoin
       ezModeState = EZMODE_IDENTIFY;
-      sl_zigbee_event_set_delay_ms(stateEvent, MILLISECOND_TICKS_PER_SECOND);
+      sl_zigbee_event_set_delay_ms(&stateEvent, MILLISECOND_TICKS_PER_SECOND);
       break;
     case EZMODE_IDENTIFY:
       emberAfCorePrintln("<ezmode identify>");
@@ -204,7 +204,7 @@ EmberStatus emberAfEzmodeClientCommission(uint8_t endpoint,
   ezmodeClientEndpoint = endpoint;
   ezModeState = EZMODE_BROAD_PJOIN;
   networkIndex = emberGetCurrentNetwork();
-  sl_zigbee_event_set_active(stateEvent);
+  sl_zigbee_event_set_active(&stateEvent);
   return EMBER_SUCCESS;
 }
 
@@ -219,7 +219,7 @@ bool emberAfIdentifyClusterIdentifyQueryResponseCallback(uint16_t timeout)
       currentIdentifyingAddress = emberAfCurrentCommand()->source;
       currentIdentifyingEndpoint = emberAfCurrentCommand()->apsFrame->sourceEndpoint;
       ezModeState = EZMODE_MATCH;
-      sl_zigbee_event_set_active(stateEvent);
+      sl_zigbee_event_set_active(&stateEvent);
     }
     emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
   }
@@ -242,7 +242,7 @@ static void createBinding(uint8_t *address)
         && MEMCOMPARE(candidate.identifier, address, EUI64_SIZE) == 0) {
       bindingIndex = i;
       ezModeState = EZMODE_BOUND;
-      sl_zigbee_event_set_active(stateEvent);
+      sl_zigbee_event_set_active(&stateEvent);
       return;
     }
   }
@@ -259,7 +259,7 @@ static void createBinding(uint8_t *address)
         emberSetBindingRemoteNodeId(i, currentIdentifyingAddress);
         bindingIndex = i;
         ezModeState = EZMODE_BOUND;
-        sl_zigbee_event_set_active(stateEvent);
+        sl_zigbee_event_set_active(&stateEvent);
         return;
       }
     }
@@ -293,7 +293,7 @@ static void serviceDiscoveryCallback(const EmberAfServiceDiscoveryResult *result
           if (cluster == clusterIdsForEzModeMatch[j]) {
             ezmodeClientCluster = cluster;
             ezModeState = EZMODE_BIND;
-            sl_zigbee_event_set_active(stateEvent);
+            sl_zigbee_event_set_active(&stateEvent);
             return;
           }
         }

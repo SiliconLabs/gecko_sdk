@@ -2,7 +2,7 @@
  * @brief RAIL Configuration
  * @details
  *   WARNING: Auto-Generated Radio Config  -  DO NOT EDIT
- *   Radio Configurator Version: 2302.3.1
+ *   Radio Configurator Version: 2302.4.3
  *   RAIL Adapter Version: 2.4.31
  *   RAIL Compatibility: 2.x
  *******************************************************************************
@@ -51,7 +51,7 @@ static const int32_t timingConfig_1[] = {
 };
 
 static const int32_t timingConfig_2[] = {
-  187125, 9000, 875
+  187125, 8100, 400
 };
 
 static const int32_t timingConfig_3[] = {
@@ -109,7 +109,7 @@ static RAIL_ChannelConfigEntryAttr_t channelConfigEntryAttr_1 = {
 };
 
 static const uint32_t phyInfo_0[] = {
-  15UL,
+  16UL,
   0x00924924UL, // 146.28571428571428
   (uint32_t) NULL,
   (uint32_t) irCalConfig_0,
@@ -132,7 +132,7 @@ static const uint32_t phyInfo_0[] = {
 };
 
 static const uint32_t phyInfo_1[] = {
-  15UL,
+  16UL,
   0x00666666UL, // 102.39999999999999
   (uint32_t) NULL,
   (uint32_t) irCalConfig_0,
@@ -155,7 +155,7 @@ static const uint32_t phyInfo_1[] = {
 };
 
 static const uint32_t phyInfo_2[] = {
-  15UL,
+  16UL,
   0x0071C71CUL, // 113.77777777777776
   (uint32_t) NULL,
   (uint32_t) irCalConfig_1,
@@ -178,7 +178,7 @@ static const uint32_t phyInfo_2[] = {
 };
 
 static const uint32_t phyInfo_3[] = {
-  15UL,
+  16UL,
   0x0071C71CUL, // 113.77777777777776
   (uint32_t) NULL,
   (uint32_t) irCalConfig_1,
@@ -201,7 +201,7 @@ static const uint32_t phyInfo_3[] = {
 };
 
 static const uint32_t phyInfo_4[] = {
-  15UL,
+  16UL,
   0x00333333UL, // 51.199999999999996
   (uint32_t) NULL,
   (uint32_t) irCalConfig_0,
@@ -224,7 +224,7 @@ static const uint32_t phyInfo_4[] = {
 };
 
 static const uint32_t phyInfo_5[] = {
-  15UL,
+  16UL,
   0x00555555UL, // 85.33333333333333
   (uint32_t) NULL,
   (uint32_t) irCalConfig_0,
@@ -247,7 +247,7 @@ static const uint32_t phyInfo_5[] = {
 };
 
 static const uint32_t phyInfo_6[] = {
-  15UL,
+  16UL,
   0x0071C71CUL, // 113.77777777777776
   (uint32_t) NULL,
   (uint32_t) irCalConfig_1,

@@ -172,10 +172,13 @@ static void init_and_reset(void)
 
 ZW_WEAK void cc_supervision_get_received_handler(SUPERVISION_GET_RECEIVED_HANDLER_ARGS * pArgs)
 {
-  // The More status updates field should be false by default.
-  // If an application wants to send more status updates, it should set the more status updates field to true.
-  const uint8_t more_status_update_this_is_last = 1;
-  pArgs->properties1 &= ~(CC_SUPERVISION_ADD_MORE_STATUS_UPDATE(more_status_update_this_is_last)); //The 7th bit (more status update) needs to be 0 of the property field
+  // More Status Update bit must be set if StatusUpdate (pArgs) bit is true.
+  // Unless the status is SUCCESS, in which case an update is not necessary.
+  if (pArgs->status == CC_SUPERVISION_STATUS_SUCCESS)
+  {
+    const uint8_t more_status_update_this_is_last = 1;
+    pArgs->properties1 &= ~(CC_SUPERVISION_ADD_MORE_STATUS_UPDATE(more_status_update_this_is_last));
+  }
 }
 
 ZW_WEAK void cc_supervision_report_recived_handler(cc_supervision_status_t status, uint8_t duration)

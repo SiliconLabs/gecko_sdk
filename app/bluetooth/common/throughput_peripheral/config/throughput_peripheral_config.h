@@ -1,6 +1,11 @@
 #ifndef THROUGHPUT_PERIPHERAL_CONFIG_H
 #define THROUGHPUT_PERIPHERAL_CONFIG_H
 
+/***********************************************************************************************//**
+ * @addtogroup throughput_peripheral
+ * @{
+ **************************************************************************************************/
+
 #include "throughput_types.h"
 
 // <<< Use Configuration Wizard in Context Menu >>>
@@ -59,4 +64,5 @@
 
 // <<< end of configuration section >>>
 
+/** @} (end addtogroup throughput_peripheral) */
 #endif // THROUGHPUT_PERIPHERAL_CONFIG_H

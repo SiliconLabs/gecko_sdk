@@ -1,0 +1,21 @@
+id: zigbee_zdo_cluster_filter
+label: ZDO Cluster Command Filter
+package: Zigbee
+category: Zigbee|Stack
+quality: production
+
+description: |-
+  enables stack policies for filtering "restricted" ZDO clusters
+
+provides:
+  - name: zigbee_zdo_cluster_filter
+
+requires:
+  - name: zigbee_stack_common
+
+source:
+  - path: protocol/zigbee/stack/zigbee/sli_zigbee_zdo_cluster_filter.c
+
+template_contribution:
+  - name: component_catalog
+    value: zigbee_zdo_cluster_filter

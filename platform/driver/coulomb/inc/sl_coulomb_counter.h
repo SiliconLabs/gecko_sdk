@@ -381,9 +381,10 @@ sl_coulomb_counter_calibration_status_t sl_coulomb_counter_calibrate(void);
 ///   charge-per-pulse (CPP) must be determined, then the total charge is
 ///   computed like so: total_charge = CPP * Num_pulses.
 ///
-///   Currently, only EFP's DCDC are supported by this driver. The Coulomb
-///   counter driver provides an abstraction on top of the EFP registers to make
-///   the calibration and reading the counters easier.
+///   Currently, EFP's DCDC and internal DCDC Coulomb counter (supported parts
+///   only) are supported by this driver. The Coulomb counter driver provides an
+///   abstraction on top of the Coulomb counter registers to make the calibration
+///   and reading the counters easier.
 ///
 ///   @n @section coulomb_counter_calibration Calibration
 ///

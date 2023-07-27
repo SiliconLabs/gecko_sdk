@@ -346,30 +346,12 @@ TfLiteStatus EvalInt8(TfLiteContext* context, TfLiteNode* node) {
 }  // namespace fully_connected
 }  // namespace sl
 
-TfLiteRegistration Register_FULLY_CONNECTED() {
-  return {/*init*/sl::fully_connected::Init,
-          /*free*/nullptr,
-          /*prepare*/sl::fully_connected::Prepare,
-          /*invoke*/sl::fully_connected::Eval,
-          /*profiling_string*/nullptr,
-          /*builtin_code*/0,
-          /*custom_name*/nullptr,
-          /*version=*/0,
-          /*registration_external=*/nullptr
-  };
+TFLMRegistration Register_FULLY_CONNECTED() {
+  return tflite::micro::RegisterOp(sl::fully_connected::Init, sl::fully_connected::Prepare, sl::fully_connected::Eval);
 }
 
-TfLiteRegistration Register_FULLY_CONNECTED_INT8() {
-  return {/*init*/sl::fully_connected::Init,
-          /*free*/nullptr,
-          /*prepare*/sl::fully_connected::Prepare,
-          /*invoke*/sl::fully_connected::EvalInt8,
-          /*profiling_string*/nullptr,
-          /*builtin_code*/0,
-          /*custom_name*/nullptr,
-          /*version=*/0,
-          /*registration_external=*/nullptr
-  };
+TFLMRegistration Register_FULLY_CONNECTED_INT8() {
+  return tflite::micro::RegisterOp(sl::fully_connected::Init, sl::fully_connected::Prepare, sl::fully_connected::EvalInt8);
 }
 
 }  // namespace tflite

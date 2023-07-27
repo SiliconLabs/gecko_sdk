@@ -537,7 +537,7 @@ void print_standard_name(char *print_buffer)
     range_test_settings.channel = IEEE802154_CHANNEL;
 #endif
   } else if (current_phy_standard_value() == IEEE802154_250KBPS_ANTDIV) {
-    snprintf(print_buffer, 15, "IEEE 802.ANTDIV");
+    snprintf(print_buffer, 16, "IEEE 802.ANTDIV");
     range_test_settings.channel = IEEE802154_CHANNEL;
   } else {
     switch (current_phy_standard_value()) {
@@ -890,7 +890,7 @@ void std_phy_list_generation(uint8_t phy_index, uint8_t *buffer, uint8_t *length
         break;
 #endif
     }
-    *length = strlen((char*)(buffer));
+    *length = safe_strlen((char*)(buffer));
   }
 }
 

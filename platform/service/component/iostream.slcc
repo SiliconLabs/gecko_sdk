@@ -22,6 +22,7 @@ requires:
     condition:
       - kernel
   - name: emlib_common
+    condition: [device]
   - name: emlib_core
   - name: sl_assert
   - name: enum

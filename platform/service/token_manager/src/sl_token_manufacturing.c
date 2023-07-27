@@ -46,6 +46,11 @@
 #if defined(_SILICON_LABS_32B_SERIES_1)
   #define SILABS_DEVINFO_EUI64_LOW   (DEVINFO->UNIQUEL)
   #define SILABS_DEVINFO_EUI64_HIGH  (DEVINFO->UNIQUEH)
+// All Series 1 devices have the same user data space size.
+// All Series 1 devices do not have a USERDATA_END in their header file.
+// The '-1' parameter makes this define match all non-Series 1 defines
+// in that the _END is size-1.
+  #define USERDATA_END (USERDATA_BASE + FLASH_PAGE_SIZE - 1)
 #elif defined(_SILICON_LABS_32B_SERIES_2)
   #include "em_se.h"
   #define SILABS_DEVINFO_EUI64_LOW   (DEVINFO->EUI64L)
@@ -462,7 +467,7 @@ sl_status_t sl_token_set_manufacturing_data(uint32_t token,
   if ((token & 0xF000) == (USERDATA_TOKENS & 0xF000)) {
     realAddress = ((USERDATA_BASE + (token & 0x0FFF)));
     flash = (uint8_t *)realAddress;
-    assert((realAddress >= USERDATA_BASE) && ((realAddress + length - 1) < (USERDATA_BASE + FLASH_PAGE_SIZE)));
+    assert((realAddress >= USERDATA_BASE) && ((realAddress + length - 1) <= USERDATA_END));
   } else if (((token & 0xF000) == (LOCKBITS_TOKENS & 0xF000))
              || ((token & 0xF000) == (LOCKBITSDATA_TOKENS & 0xF000))) {
     realAddress = ((LOCKBITS_BASE + (token & 0x0FFF)));

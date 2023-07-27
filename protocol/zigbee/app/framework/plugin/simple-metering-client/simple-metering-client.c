@@ -63,12 +63,6 @@ static void clusterRequestCommon(uint8_t responseCommandId)
   }
 }
 
-uint32_t sli_zigbee_af_simple_metering_cluster_get_latest_period(void)
-{
-  emberAfSimpleMeteringClusterPrintln("Returning [0x%4x]", profileIntervals[0]);
-  return profileIntervals[0];
-}
-
 //-----------------------
 // ZCL commands callbacks
 

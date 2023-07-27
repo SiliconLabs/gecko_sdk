@@ -63,46 +63,41 @@ void sl_wisun_coap_meter_init(void);
  * @brief Prepare measurement response packet from all sensor values
  * @details Callback for CoAP Resource Handler Service. It should be registered.
  * @param[in] req_packet Request packet
- * @param[out] resp_packet Response packet
+ * @return sl_wisun_coap_packet_t * Response packet ptr
  *****************************************************************************/
-void sl_wisun_coap_meter_measurement_response_cb(const sl_wisun_coap_packet_t * const req_packet,
-                                                 sl_wisun_coap_packet_t * const resp_packet);
+sl_wisun_coap_packet_t * sl_wisun_coap_meter_measurement_response_cb(const sl_wisun_coap_packet_t * const req_packet);
 
 /**************************************************************************//**
  * @brief Prepare Temperature measurement response packet
  * @details Callback for CoAP Resource Handler Service. It should be registered.
  * @param[in] req_packet Request packet
- * @param[out] resp_packet Response packet
+ * @return sl_wisun_coap_packet_t * Response packet ptr
  *****************************************************************************/
-void sl_wisun_coap_meter_temperature_response_cb(const sl_wisun_coap_packet_t * const req_packet,
-                                                 sl_wisun_coap_packet_t * const resp_packet);
+sl_wisun_coap_packet_t * sl_wisun_coap_meter_temperature_response_cb(const sl_wisun_coap_packet_t * const req_packet);
 
 /**************************************************************************//**
  * @brief Prepare Humidity measurement response packet
  * @details Callback for CoAP Resource Handler Service. It should be registered.
  * @param[in] req_packet Request packet
- * @param[out] resp_packet Response packet
+ * @return sl_wisun_coap_packet_t * Response packet ptr
  *****************************************************************************/
-void sl_wisun_coap_meter_humidity_response_cb(const sl_wisun_coap_packet_t * const req_packet,
-                                              sl_wisun_coap_packet_t * const resp_packet);
+sl_wisun_coap_packet_t * sl_wisun_coap_meter_humidity_response_cb(const sl_wisun_coap_packet_t * const req_packet);
 
 /**************************************************************************//**
  * @brief Prepare Light measurement response packet
  * @details Callback for CoAP Resource Handler Service. It should be registered.
  * @param[in] req_packet Request packet
- * @param[out] resp_packet Response packet
+ * @return sl_wisun_coap_packet_t * Response packet ptr
  *****************************************************************************/
-void sl_wisun_coap_meter_light_response_cb(const sl_wisun_coap_packet_t * const req_packet,
-                                           sl_wisun_coap_packet_t * const resp_packet);
+sl_wisun_coap_packet_t * sl_wisun_coap_meter_light_response_cb(const sl_wisun_coap_packet_t * const req_packet);
 
 /**************************************************************************//**
  * @brief Prepare measurement response packet
  * @details Callback for CoAP Resource Handler Service. It should be registered.
  * @param[in] req_packet Request packet
- * @param[out] resp_packet Response packet
+ * @return sl_wisun_coap_packet_t * Response packet ptr
  *****************************************************************************/
-void sl_wisun_coap_meter_led_toggle_response_cb(const sl_wisun_coap_packet_t * const req_packet,
-                                                sl_wisun_coap_packet_t * const resp_packet);
+sl_wisun_coap_packet_t * sl_wisun_coap_meter_led_toggle_response_cb(const sl_wisun_coap_packet_t * const req_packet);
 
 /**************************************************************************//**
  * @brief Convert LED ID.

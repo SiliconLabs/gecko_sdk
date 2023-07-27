@@ -407,17 +407,8 @@ TfLiteStatus Invoke(TfLiteContext* context, TfLiteNode* node)
 }  // namespace conv2d
 }  // namespace sl
 
-TfLiteRegistration Register_CONV_2D() {
-  return {/*init=*/sl::conv2d::Init,
-          /*free=*/nullptr,
-          /*prepare=*/sl::conv2d::Prepare,
-          /*invoke=*/sl::conv2d::Invoke,
-          /*profiling_string=*/nullptr,
-          /*builtin_code=*/0,
-          /*custom_name=*/nullptr,
-          /*version=*/0,
-          /*registration_external=*/nullptr
-  };
+TFLMRegistration Register_CONV_2D() {
+  return tflite::micro::RegisterOp(sl::conv2d::Init, sl::conv2d::Prepare, sl::conv2d::Invoke);
 }
 
 }  // namespace tflite

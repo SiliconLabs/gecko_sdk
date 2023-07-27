@@ -653,7 +653,7 @@ void phy_list_generation(uint8_t *buffer, uint8_t *length)
     } else {
       // *buffer length comes from app_bluetooth.c
       snprintf((char*)(&buffer[*length]), 255, "%u:custom_%u,", phy_index, phy_index);
-      *length = strlen((char*)(buffer));
+      *length = safe_strlen((char*)(buffer));
     }
   }
 }
@@ -687,7 +687,14 @@ void range_test_init(void)
   RAIL_Handle_t rail_handle = get_current_rail_handler();
   range_test_reset_values();
   if (!is_current_phy_standard()) {
-    RAIL_SetFixedLength(rail_handle, range_test_settings.payload_length);
+#if !(defined(RAIL0_CHANNEL_GROUP_1_PROFILE_BASE) && \
+      (defined(RAIL0_CHANNEL_GROUP_1_PHY_SIDEWALK_2GFSK_50KBPS) || \
+      defined(RAIL0_CHANNEL_GROUP_1_PHY_SIDEWALK_2GFSK_150KBPS) || \
+      defined(RAIL0_CHANNEL_GROUP_1_PHY_SIDEWALK_2GFSK_250KBPS)) || \
+      defined(RAIL0_CHANNEL_GROUP_1_PROFILE_SIDEWALK) || \
+      defined(RAIL0_CHANNELS_FOR_915_PROFILE_SIDEWALK))
+    RAIL_SetFixedLength(rail_handle, (range_test_settings.payload_length));
+#endif
   }
 
   if (range_test_settings.radio_mode == RADIO_MODE_TX) {
@@ -1078,6 +1085,21 @@ void print_errors_from_rail_handler(void)
   PRINT_AND_CLEAR_FLAG(error_flags.rx_errors.rx_fifo_overflow);
   PRINT_AND_CLEAR_FLAG(error_flags.rx_errors.rx_address_filtered);
   PRINT_AND_CLEAR_FLAG(error_flags.rx_errors.rx_scheduled_rx_missed);
+}
+
+/*******************************************************************************
+ * @brief  Function that returns the safe size of the string
+ *
+ * @param  src: pointer to the string
+ *
+ * @return Size of the string
+ ******************************************************************************/
+uint8_t safe_strlen(char *src)
+{
+  char dest[256];
+  strncpy(dest, src, sizeof(dest)); // Truncation may happen
+  dest[sizeof(dest) - 1] = 0;
+  return strlen(dest); // Compliant: "dest" is guaranteed to be null-terminated
 }
 
 // -----------------------------------------------------------------------------

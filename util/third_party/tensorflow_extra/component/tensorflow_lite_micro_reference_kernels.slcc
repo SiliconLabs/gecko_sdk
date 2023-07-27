@@ -59,6 +59,7 @@ source:
   - path: tensorflow/lite/micro/kernels/div.cc
   - path: tensorflow/lite/micro/kernels/elementwise.cc
   - path: tensorflow/lite/micro/kernels/elu.cc
+  - path: tensorflow/lite/micro/kernels/embedding_lookup.cc
   - path: tensorflow/lite/micro/kernels/ethosu.cc
   - path: tensorflow/lite/micro/kernels/exp.cc
   - path: tensorflow/lite/micro/kernels/expand_dims.cc
@@ -88,11 +89,13 @@ source:
   - path: tensorflow/lite/micro/kernels/logistic.cc
   - path: tensorflow/lite/micro/kernels/logistic_common.cc
   - path: tensorflow/lite/micro/kernels/lstm_eval.cc
+  - path: tensorflow/lite/micro/kernels/lstm_eval_common.cc
   - path: tensorflow/lite/micro/kernels/maximum_minimum.cc
   - path: tensorflow/lite/micro/kernels/micro_tensor_utils.cc
   - path: tensorflow/lite/micro/kernels/mirror_pad.cc
   - path: tensorflow/lite/micro/kernels/mul.cc
     unless:
+      - tensorflow_kernel_accelerated_mul
       - tensorflow_kernel_optimized_mul
   - path: tensorflow/lite/micro/kernels/mul_common.cc
   - path: tensorflow/lite/micro/kernels/neg.cc
@@ -140,6 +143,8 @@ source:
     unless:
       - tensorflow_kernel_accelerated_transpose_conv
   - path: tensorflow/lite/micro/kernels/unidirectional_sequence_lstm.cc
+    unless:
+      - tensorflow_kernel_optimized_unidirectional_sequence_lstm
   - path: tensorflow/lite/micro/kernels/unpack.cc
   - path: tensorflow/lite/micro/kernels/var_handle.cc
   - path: tensorflow/lite/micro/kernels/while.cc

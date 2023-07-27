@@ -52,7 +52,7 @@
 
 #include "ias-zone-client-config.h"
 #include "zap-cluster-command-parser.h"
-
+#include "stack/include/zigbee-device-stack.h"
 //-----------------------------------------------------------------------------
 // Globals
 
@@ -70,13 +70,12 @@ static IasZoneClientState iasZoneClientState = IAS_ZONE_CLIENT_STATE_NONE;
 static uint8_t currentIndex = NO_INDEX;
 static uint8_t myEndpoint = 0;
 
-sl_zigbee_event_t emberAfPluginIasZoneClientStateMachineEvent;
-#define stateMachineEvent (&emberAfPluginIasZoneClientStateMachineEvent)
-void emberAfPluginIasZoneClientStateMachineEventHandler(sl_zigbee_event_t * event);
+static sl_zigbee_event_t stateMachineEvent;
+static void stateMachineEventHandler(sl_zigbee_event_t * event);
 //-----------------------------------------------------------------------------
 // Forward Declarations
 
-void readIasZoneServerAttributes(EmberNodeId nodeId);
+static void readIasZoneServerAttributes(EmberNodeId nodeId);
 static void iasClientSaveCommand(void);
 static void iasClientLoadCommand(void);
 
@@ -85,8 +84,8 @@ static void iasClientLoadCommand(void);
 
 void emberAfIasZoneClusterClientInitCallback(uint8_t endpoint)
 {
-  sl_zigbee_event_init(stateMachineEvent,
-                       emberAfPluginIasZoneClientStateMachineEventHandler);
+  sl_zigbee_event_init(&stateMachineEvent,
+                       stateMachineEventHandler);
 
   sli_zigbee_af_clear_servers();
   myEndpoint = endpoint;
@@ -334,10 +333,10 @@ bool emberAfIasZoneClusterZoneEnrollRequestCallback(EmberAfClusterCommand *cmd)
   return true;
 }
 
-void emberAfPluginIasZoneClientStateMachineEventHandler(sl_zigbee_event_t * event)
+static void stateMachineEventHandler(sl_zigbee_event_t * event)
 {
   emberAfIasZoneClusterPrintln("IAS Zone Client Timeout waiting for message response.");
-  sl_zigbee_event_set_inactive(stateMachineEvent);
+  sl_zigbee_event_set_inactive(&stateMachineEvent);
   clearState();
 }
 
@@ -463,7 +462,7 @@ void emberAfPluginIasZoneClientZdoMessageReceivedCallback(EmberNodeId emberNodeI
   }
 }
 
-void readIasZoneServerAttributes(EmberNodeId nodeId)
+static void readIasZoneServerAttributes(EmberNodeId nodeId)
 {
   uint8_t iasZoneAttributeIds[] = {
     LOW_BYTE(ZCL_ZONE_STATE_ATTRIBUTE_ID),
@@ -483,7 +482,7 @@ void readIasZoneServerAttributes(EmberNodeId nodeId)
   }
 }
 
-void readIasZoneServerCieAddress(EmberNodeId nodeId)
+static void readIasZoneServerCieAddress(EmberNodeId nodeId)
 {
   uint8_t iasZoneAttributeIds[] = {
     LOW_BYTE(ZCL_IAS_CIE_ADDRESS_ATTRIBUTE_ID),

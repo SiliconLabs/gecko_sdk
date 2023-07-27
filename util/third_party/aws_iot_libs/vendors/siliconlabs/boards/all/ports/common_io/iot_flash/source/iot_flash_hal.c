@@ -382,14 +382,14 @@ int32_t iot_flash_erase_sectors(IotFlashHandle_t const pxFlashHandle,
   if (pxFlashHandle == NULL) {
     return IOT_FLASH_INVALID_VALUE;
   }
-  
+
   /* fetching the base address of flash */
   xSlStatus = iot_flash_drv_get_flash_base(pxFlashHandle, &ulFlashBase);
-  
+
   if (xSlStatus == SL_STATUS_FAIL) {
     lStatus = IOT_FLASH_ERASE_FAILED;
   }
-  
+
   /* fetching the start address starting from where the erase is requested */
   ulStartAddress = ulStartAddress + ulFlashBase;
 
@@ -555,15 +555,15 @@ int32_t iot_flash_write_sync(IotFlashHandle_t const pxFlashHandle,
   if (pxFlashHandle == NULL) {
     return IOT_FLASH_INVALID_VALUE;
   }
-  
+
   /* fetching the base address of flash */
   xSlStatus = iot_flash_drv_get_flash_base(pxFlashHandle, &ulFlashBase);
-  
+
   if (xSlStatus == SL_STATUS_FAIL) {
     lStatus = IOT_FLASH_ERASE_FAILED;
   }
-  
-  
+
+
   /* fetching the start address starting from where the write is requested */
   ulAddress = ulAddress + ulFlashBase;
 
@@ -592,7 +592,7 @@ int32_t iot_flash_write_sync(IotFlashHandle_t const pxFlashHandle,
       lStatus = IOT_FLASH_ERASE_FAILED;
     }
   }
-  
+
   /* make sure ulAddress and read request is within flash range */
   if (lStatus == IOT_FLASH_SUCCESS) {
 	if ((ulAddress < ulFlashBase) || (ulAddress > (ulFlashBase + ulFlashSize)) || (ulAddress + xBytes - 1) > (ulFlashBase + ulFlashSize - 1))
@@ -615,7 +615,7 @@ int32_t iot_flash_write_sync(IotFlashHandle_t const pxFlashHandle,
     /* loop over pages */
     while (lStatus == IOT_FLASH_SUCCESS && ulRemSize > 0) {
       /* check if write is partial or full page write */
-      ulCurSize = ulPageSize - (ulAddress & 0xFF);
+      ulCurSize = ulPageSize - (ulCurAddress & (ulPageSize - 1));
 
       /* buffer is smaller than ulCurSize? */
       if (ulRemSize < ulCurSize) {
@@ -682,16 +682,16 @@ int32_t iot_flash_read_sync(IotFlashHandle_t const pxFlashHandle,
   if (pxFlashHandle == NULL) {
     return IOT_FLASH_INVALID_VALUE;
   }
-  
+
   /* fetching the base address of flash */
   xSlStatus = iot_flash_drv_get_flash_base(pxFlashHandle, &ulFlashBase);
-  
+
   if (xSlStatus == SL_STATUS_FAIL) {
     lStatus = IOT_FLASH_ERASE_FAILED;
   }
-  
+
   /* fetching the start address starting from where the erase is requested */
-  ulAddress = ulAddress + ulFlashBase; 
+  ulAddress = ulAddress + ulFlashBase;
 
   /* pvBuffer can't be null */
   if (pvBuffer == NULL) {

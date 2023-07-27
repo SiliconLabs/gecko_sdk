@@ -34,18 +34,21 @@
 
 #include <assert.h>
 #include <string.h>
+#include "sl_component_catalog.h"
 #include "sl_wisun_network_measurement.h"
-#include "sl_wisun_network_measurement_gui.h"
 #include "cmsis_os2.h"
 #include "sl_cmsis_os2_common.h"
 #include "sl_wisun_app_core.h"
 #include "sl_wisun_ping.h"
 #include "sl_wisun_ping_config.h"
-#include "sl_gui.h"
-#include "sl_display.h"
 #include "cmsis_os2.h"
 #include "socket.h"
 
+#if defined(SL_CATALOG_GUI_PRESENT)
+#include "sl_wisun_network_measurement_gui.h"
+#include "sl_display.h"
+#include "sl_gui.h"
+#endif
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
@@ -62,6 +65,7 @@ typedef struct meas_packet_cnt {
 //                          Static Function Declarations
 // -----------------------------------------------------------------------------
 
+#if defined(SL_CATALOG_GUI_PRESENT)
 /**************************************************************************//**
  * @brief Progressbar updater
  * @details Ping packet request/response sent handler
@@ -76,6 +80,7 @@ static void _progbar_updater(sl_wisun_ping_info_t *req, sl_wisun_ping_info_t *re
  * @param[in] args Arguments
  *****************************************************************************/
 static void _interrupt_ping(void *args);
+#endif
 
 /**************************************************************************//**
  * @brief Is the node measurable
@@ -105,14 +110,16 @@ static uint8_t _init_meas_by_setting_type(const sl_wisun_nwm_target_type_t meas_
 /// Measurable router storage
 static sl_wisun_nwm_measurable_node_t _meas_nodes[SL_WISUN_MAX_NODE_COUNT];
 
+#if defined(SL_CATALOG_GUI_PRESENT)
 /// Measurement packet counter
 static meas_packet_cnt_t _meas_packet_cnt = { 0 };
+#endif
 
 // -----------------------------------------------------------------------------
 //                          Public Function Definitions
 // -----------------------------------------------------------------------------
-
 /* Network quick measurement */
+#if defined(SL_CATALOG_GUI_PRESENT)
 void sl_wisun_nwm_quick_measure(const sl_wisun_nwm_target_type_t meas_type,
                                 const uint16_t meas_count,
                                 const uint16_t meas_packet_length)
@@ -178,7 +185,36 @@ void sl_wisun_nwm_quick_measure(const sl_wisun_nwm_target_type_t meas_type,
   sl_gui_button_update(SL_GUI_BUTTON0);
   sl_display_update();
 }
+#else
+void sl_wisun_nwm_quick_measure(const sl_wisun_nwm_target_type_t meas_type,
+                                const uint16_t meas_count,
+                                const uint16_t meas_packet_length)
+{
+  uint8_t node_count = 0;
+  const char *ip_str = NULL;
 
+  node_count =  sl_wisun_nwm_get_nodes(_meas_nodes, SL_WISUN_MAX_NODE_COUNT);
+  (void) _init_meas_by_setting_type(meas_type, node_count);
+
+  for (uint8_t i = 0; i < node_count; ++i) {
+    if (!_meas_nodes[i].is_requested) {
+      continue;
+    }
+    ip_str = app_wisun_trace_util_get_ip_str(&_meas_nodes[i].addr.sin6_addr);
+    printf("%s[%s]\n",
+           _meas_nodes[i].name,
+           ip_str);
+    app_wisun_trace_util_destroy_ip_str(ip_str);
+
+    // measure (secondary parent should not be measured)
+    if (_meas_nodes[i].type != SL_WISUN_NWM_NODE_TYPE_SECONDARY_PARENT) {
+      sl_wisun_nwm_measure(&_meas_nodes[i].addr, meas_count, meas_packet_length);
+    }
+  }
+}
+#endif
+
+#if defined(SL_CATALOG_GUI_PRESENT)
 /* Network quick measurement */
 void sl_wisun_nwm_measure(const wisun_addr_t * const remote_address,
                           const uint16_t meas_count,
@@ -193,7 +229,6 @@ void sl_wisun_nwm_measure(const wisun_addr_t * const remote_address,
 // -----------------------------------------------------------------------------
 //                          Static Function Definitions
 // -----------------------------------------------------------------------------
-
 static void _progbar_updater(sl_wisun_ping_info_t *req, sl_wisun_ping_info_t *resp)
 {
   (void) req;
@@ -207,13 +242,22 @@ static void _progbar_updater(sl_wisun_ping_info_t *req, sl_wisun_ping_info_t *re
   sl_gui_progressbar_update();
   sl_display_update();
 }
-
 static void _interrupt_ping(void *args)
 {
   (void) args;
   sl_wisun_ping_stop();
   sl_display_renderer(sl_wisun_nwm_main_form, NULL, 0);
 }
+#else 
+void sl_wisun_nwm_measure(const wisun_addr_t * const remote_address,
+                          const uint16_t meas_count,
+                          const uint16_t meas_packet_length)
+{
+  (void) sl_wisun_ping(remote_address, meas_count, meas_packet_length,
+                       sl_wisun_nwm_stat_handler,
+                       NULL);
+}
+#endif
 
 __STATIC_INLINE bool _is_measurable(const sl_wisun_nwm_target_type_t meas_type,
                                     const sl_wisun_nwm_node_type_t node_type)

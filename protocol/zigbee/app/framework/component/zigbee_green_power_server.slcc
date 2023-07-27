@@ -18,6 +18,7 @@ source:
   - path: protocol/zigbee/app/framework/plugin/green-power-server/green-power-server-gpd-cmd-maps.c
   - path: protocol/zigbee/app/framework/plugin/green-power-server/green-power-security.c
   - path: protocol/zigbee/app/framework/plugin/green-power-server/green-power-server-cb.c
+  - path: protocol/zigbee/app/framework/plugin/green-power-server/green-power-security-test-vectors.c
 include:
   - path: protocol/zigbee/app/framework/plugin/green-power-server
     file_list:
@@ -48,7 +49,7 @@ template_contribution:
       function_name: emberAfPluginGreenPowerServerInitCallback
   - name: zigbee_af_callback
     value:
-      callback_type: local_data_init
+      callback_type: init_done
       function_name: emberAfPluginGreenPowerServerInitCallback
   - name: zigbee_af_callback
     value:

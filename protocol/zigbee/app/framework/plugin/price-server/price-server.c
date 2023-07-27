@@ -240,7 +240,7 @@ bool emberAfPriceSetPriceTableEntry(uint8_t endpoint,
 // Returns the index in the price table of the current price.  The first price
 // in the table that starts in the past and ends in the future in considered
 // the current price.
-uint8_t emberAfGetCurrentPriceIndex(uint8_t endpoint)
+static uint8_t getCurrentPriceIndex(uint8_t endpoint)
 {
   uint32_t now = emberAfGetCurrentTime();
   uint8_t ep = emberAfFindClusterServerEndpointIndex(endpoint, ZCL_PRICE_CLUSTER_ID);
@@ -280,7 +280,7 @@ uint8_t emberAfGetCurrentPriceIndex(uint8_t endpoint)
 // Retrieves the current price.  Returns false is there is no current price.
 bool emberAfGetCurrentPrice(uint8_t endpoint, EmberAfScheduledPrice *price)
 {
-  return emberAfPriceGetPriceTableEntry(endpoint, emberAfGetCurrentPriceIndex(endpoint), price);
+  return emberAfPriceGetPriceTableEntry(endpoint, getCurrentPriceIndex(endpoint), price);
 }
 
 void emberAfPricePrint(const EmberAfScheduledPrice *price)
@@ -337,7 +337,7 @@ void emberAfPricePrintPriceTable(uint8_t endpoint)
 {
   uint8_t i;
   uint8_t ep = emberAfFindClusterServerEndpointIndex(endpoint, ZCL_PRICE_CLUSTER_ID);
-  uint8_t currPriceIndex = emberAfGetCurrentPriceIndex(endpoint);
+  uint8_t currPriceIndex = getCurrentPriceIndex(endpoint);
 
   if (ep == ZCL_PRICE_INVALID_ENDPOINT_INDEX || currPriceIndex == 0xFF) {
     return;
@@ -1712,7 +1712,7 @@ void emberAfPluginPriceServerCppEventPub(uint16_t nodeId, uint8_t srcEndpoint, u
   }
 }
 
-void sortCreditPaymentEntries(uint8_t *entries, uint8_t numValidEntries, EmberAfPriceCreditPayment *table)
+static void sortCreditPaymentEntries(uint8_t *entries, uint8_t numValidEntries, EmberAfPriceCreditPayment *table)
 {
   // The valid entries should be sorted from latest "credit payment date" to earliest "credit payment date".
   uint32_t latestPaymentDate = 0xFFFFFFFFU;
@@ -2050,7 +2050,7 @@ void emberAfPluginPriceServerPriceUpdateBindings()
       bool sentMsg = false;
       EmberNodeId nodeId = emberLookupNodeIdByEui64(candidate.identifier);
       if (nodeId != EMBER_NULL_NODE_ID) {
-        uint8_t priceEntryIndex = emberAfGetCurrentPriceIndex(candidate.local);
+        uint8_t priceEntryIndex = getCurrentPriceIndex(candidate.local);
         if (priceEntryIndex != 0xFFu) {
           emberAfPluginPriceServerPublishPriceMessage(nodeId,
                                                       candidate.local,

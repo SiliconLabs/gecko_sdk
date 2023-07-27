@@ -4,6 +4,7 @@ package: Btmesh
 description: >
   Implements the Firmware Update Information Status message assembly, with
   provided interfaces for setting FWIDs and URIs with indexing.
+  This component is prepared for integration into NCP applications.
 category: "Bluetooth Mesh|Utility"
 quality: production
 root_path: app/btmesh/common/ncp_btmesh_dfu
@@ -19,4 +20,6 @@ requires:
   - name: btmesh_core
   - name: btmesh_stack_fw_update_server
   - name: btmesh_stack
-  - name: ncp
+
+validation_helper:
+  - path: "../../script/validation/ncp_soc_compatibility.lua"

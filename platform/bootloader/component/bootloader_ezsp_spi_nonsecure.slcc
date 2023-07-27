@@ -7,7 +7,7 @@ description: >
   Silicon Labs Thread wireless stacks. This component can be used for firmware upgrade over SPI using the EZSP protocol.
   pinout should be configured in the SPI Peripheral component.
 category: Platform|Bootloader|TrustZone NonSecure|Communication
-quality: evaluation
+quality: production
 source:
   - path: platform/bootloader/communication/ezsp-spi/btl_ezsp_spi_ns.c
   - path: platform/bootloader/communication/ezsp-spi/btl_ezsp_spi_common.c

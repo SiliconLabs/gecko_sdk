@@ -34,8 +34,16 @@ cc_multi_channel_config_t const * cc_multi_channel_get_config(void)
 
 cc_multi_channel_config_t const * cc_multi_channel_get_config_endpoint(uint8_t endpoint)
 {
-  ASSERT(endpoint > 0);
+  ASSERT(sizeof_array(endpoints) > 0);
   ASSERT(endpoint <= sizeof_array(endpoints));
-  return &endpoints[endpoint - 1];
+  /*
+   * CC:0060.03.00.21.004: For backwards compatibility, the Root Device MUST
+   * mirror the application functionality of End Point 1.
+   */
+  if (endpoint == 0) {
+    return &endpoints[0];
+  } else {
+    return &endpoints[endpoint - 1];
+  }
 }
 

@@ -3,10 +3,11 @@ label: "Generic Base"
 package: "Btmesh"
 description: >
   This Component initializes the Generic Server and Client Models which are added to the project
-  as components and provides an interface to register handlers for their events. 
-  Note that the Generic Base Component alone does not add support for Generic Models 
-  (e.g. Generic OnOff Server/Client, Generic Level Server/Client, etc), that has to be done from 
+  as components and provides an interface to register handlers for their events.
+  Note that the Generic Base Component alone does not add support for Generic Models
+  (e.g. Generic OnOff Server/Client, Generic Level Server/Client, etc), that has to be done from
   another component or application software.
+  This component is prepared for integration into SOC applications.
 category: "Bluetooth Mesh|Models|Generic"
 quality: "production"
 root_path: "app/btmesh/common/btmesh_generic_base"
@@ -18,7 +19,7 @@ template_file:
   - path: "sl_btmesh_generic_base.h.jinja"
 requires:
   - name: "app_assert"
-  - name: "btmesh_provisionee"
+  - name: "btmesh_role_init"
   - name: "btmesh_stack"
   - name: "btmesh_core"
 provides:
@@ -30,6 +31,8 @@ provides:
       - btmesh_stack_generic_client
   - name: "btmesh_generic_model"
     allow_multiple: true
+recommends:
+  - id: "btmesh_provisionee"
 
 template_contribution:
   - name: "btmesh_stack_init"
@@ -42,3 +45,6 @@ template_contribution:
       include: "sl_btmesh_generic_base.h"
       function: "sl_btmesh_generic_base_on_event"
     priority: -7000
+
+validation_helper:
+  - path: "../../script/validation/soc_ncp_compatibility.lua"

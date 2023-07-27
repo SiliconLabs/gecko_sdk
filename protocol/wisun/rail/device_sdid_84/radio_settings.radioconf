@@ -1,9 +1,345 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <multi_phy_configuration part_family="jumbo" part_revision="A0" rail_adapter_version="rail_api_2.x" status_code="0" xsd_version="0.0.20">
   <base_channel_configurations>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 1" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 1" profile="wisun_fan_1_1">
       <channel_config_entries>
         <channel_config_entry name="WiSunConf Channel Group 1">
+          <channel_number_start>512</channel_number_start>
+          <channel_number_end>640</channel_number_end>
+          <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
+          <max_power>RAIL_TX_POWER_MAX</max_power>
+          <metadata>{}</metadata>
+          <phy_name_override>PHY_WISUN_FAN_1v1_915MHz_Plan1_2FSK_1b_NA</phy_name_override>
+        </channel_config_entry>
+      </channel_config_entries>
+      <metadata>{}</metadata>
+      <phy name="PHY_WISUN_FAN_1v1_915MHz_Plan1_2FSK_1b_NA"/>
+    </base_channel_configuration>
+    <base_channel_configuration name="WiSunConf Protocol Configuration 2" profile="wisun_fan_1_1">
+      <channel_config_entries>
+        <channel_config_entry name="WiSunConf Channel Group 2">
+          <channel_number_start>768</channel_number_start>
+          <channel_number_end>896</channel_number_end>
+          <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
+          <max_power>RAIL_TX_POWER_MAX</max_power>
+          <metadata>{}</metadata>
+          <phy_name_override>PHY_WISUN_FAN_1v1_915MHz_Plan1_2FSK_2a_NA</phy_name_override>
+        </channel_config_entry>
+      </channel_config_entries>
+      <metadata>{}</metadata>
+      <phy name="PHY_WISUN_FAN_1v1_915MHz_Plan1_2FSK_2a_NA"/>
+    </base_channel_configuration>
+    <base_channel_configuration name="WiSunConf Protocol Configuration 3" profile="wisun_fan_1_1">
+      <channel_config_entries>
+        <channel_config_entry name="WiSunConf Channel Group 3">
+          <channel_number_start>1280</channel_number_start>
+          <channel_number_end>1343</channel_number_end>
+          <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
+          <max_power>RAIL_TX_POWER_MAX</max_power>
+          <metadata>{}</metadata>
+          <phy_name_override>PHY_WISUN_FAN_1v1_915MHz_Plan2_2FSK_3_NA</phy_name_override>
+        </channel_config_entry>
+      </channel_config_entries>
+      <metadata>{}</metadata>
+      <phy name="PHY_WISUN_FAN_1v1_915MHz_Plan2_2FSK_3_NA"/>
+    </base_channel_configuration>
+    <base_channel_configuration name="WiSunConf Protocol Configuration 4" profile="wisun_fan_1_1">
+      <channel_config_entries>
+        <channel_config_entry name="WiSunConf Channel Group 4">
+          <channel_number_start>1536</channel_number_start>
+          <channel_number_end>1599</channel_number_end>
+          <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
+          <max_power>RAIL_TX_POWER_MAX</max_power>
+          <metadata>{}</metadata>
+          <phy_name_override>PHY_WISUN_FAN_1v1_915MHz_Plan2_2FSK_4a_NA</phy_name_override>
+        </channel_config_entry>
+      </channel_config_entries>
+      <metadata>{}</metadata>
+      <phy name="PHY_WISUN_FAN_1v1_915MHz_Plan2_2FSK_4a_NA"/>
+    </base_channel_configuration>
+    <base_channel_configuration name="WiSunConf Protocol Configuration 5" profile="wisun_fan_1_1">
+      <channel_config_entries>
+        <channel_config_entry name="WiSunConf Channel Group 5">
+          <channel_number_start>2048</channel_number_start>
+          <channel_number_end>2089</channel_number_end>
+          <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
+          <max_power>RAIL_TX_POWER_MAX</max_power>
+          <metadata>{}</metadata>
+          <phy_name_override>PHY_WISUN_FAN_1v1_915MHz_Plan3_2FSK_5_NA</phy_name_override>
+        </channel_config_entry>
+      </channel_config_entries>
+      <metadata>{}</metadata>
+      <phy name="PHY_WISUN_FAN_1v1_915MHz_Plan3_2FSK_5_NA"/>
+    </base_channel_configuration>
+    <base_channel_configuration name="WiSunConf Protocol Configuration 6" profile="wisun_fan_1_1">
+      <channel_config_entries>
+        <channel_config_entry name="WiSunConf Channel Group 6">
+          <channel_number_start>512</channel_number_start>
+          <channel_number_end>549</channel_number_end>
+          <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
+          <max_power>RAIL_TX_POWER_MAX</max_power>
+          <metadata>{}</metadata>
+          <phy_name_override>PHY_WISUN_FAN_1v1_920MHz_Plan21_2FSK_1b_JP</phy_name_override>
+        </channel_config_entry>
+      </channel_config_entries>
+      <metadata>{}</metadata>
+      <phy name="PHY_WISUN_FAN_1v1_920MHz_Plan21_2FSK_1b_JP"/>
+    </base_channel_configuration>
+    <base_channel_configuration name="WiSunConf Protocol Configuration 7" profile="wisun_fan_1_1">
+      <channel_config_entries>
+        <channel_config_entry name="WiSunConf Channel Group 7">
+          <channel_number_start>1024</channel_number_start>
+          <channel_number_end>1041</channel_number_end>
+          <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
+          <max_power>RAIL_TX_POWER_MAX</max_power>
+          <metadata>{}</metadata>
+          <phy_name_override>PHY_WISUN_FAN_1v1_920MHz_Plan22_2FSK_2b_JP</phy_name_override>
+        </channel_config_entry>
+      </channel_config_entries>
+      <metadata>{}</metadata>
+      <phy name="PHY_WISUN_FAN_1v1_920MHz_Plan22_2FSK_2b_JP"/>
+    </base_channel_configuration>
+    <base_channel_configuration name="WiSunConf Protocol Configuration 8" profile="wisun_fan_1_1">
+      <channel_config_entries>
+        <channel_config_entry name="WiSunConf Channel Group 8">
+          <channel_number_start>1280</channel_number_start>
+          <channel_number_end>1297</channel_number_end>
+          <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
+          <max_power>RAIL_TX_POWER_MAX</max_power>
+          <metadata>{}</metadata>
+          <phy_name_override>PHY_WISUN_FAN_1v1_920MHz_Plan22_2FSK_3_JP</phy_name_override>
+        </channel_config_entry>
+      </channel_config_entries>
+      <metadata>{}</metadata>
+      <phy name="PHY_WISUN_FAN_1v1_920MHz_Plan22_2FSK_3_JP"/>
+    </base_channel_configuration>
+    <base_channel_configuration name="WiSunConf Protocol Configuration 9" profile="wisun_fan_1_1">
+      <channel_config_entries>
+        <channel_config_entry name="WiSunConf Channel Group 9">
+          <channel_number_start>1792</channel_number_start>
+          <channel_number_end>1803</channel_number_end>
+          <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
+          <max_power>RAIL_TX_POWER_MAX</max_power>
+          <metadata>{}</metadata>
+          <phy_name_override>PHY_WISUN_FAN_1v1_920MHz_Plan23_2FSK_4b_JP</phy_name_override>
+        </channel_config_entry>
+      </channel_config_entries>
+      <metadata>{}</metadata>
+      <phy name="PHY_WISUN_FAN_1v1_920MHz_Plan23_2FSK_4b_JP"/>
+    </base_channel_configuration>
+    <base_channel_configuration name="WiSunConf Protocol Configuration 10" profile="wisun_fan_1_1">
+      <channel_config_entries>
+        <channel_config_entry name="WiSunConf Channel Group 10">
+          <channel_number_start>2048</channel_number_start>
+          <channel_number_end>2059</channel_number_end>
+          <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
+          <max_power>RAIL_TX_POWER_MAX</max_power>
+          <metadata>{}</metadata>
+          <phy_name_override>PHY_WISUN_FAN_1v1_920MHz_Plan23_2FSK_5_JP</phy_name_override>
+        </channel_config_entry>
+      </channel_config_entries>
+      <metadata>{}</metadata>
+      <phy name="PHY_WISUN_FAN_1v1_920MHz_Plan23_2FSK_5_JP"/>
+    </base_channel_configuration>
+    <base_channel_configuration name="WiSunConf Protocol Configuration 11" profile="wisun_fan_1_1">
+      <channel_config_entries>
+        <channel_config_entry name="WiSunConf Channel Group 11">
+          <channel_number_start>256</channel_number_start>
+          <channel_number_end>324</channel_number_end>
+          <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
+          <max_power>RAIL_TX_POWER_MAX</max_power>
+          <metadata>{}</metadata>
+          <phy_name_override>PHY_WISUN_FAN_1v1_863MHz_Plan32_2FSK_1a_EU</phy_name_override>
+        </channel_config_entry>
+      </channel_config_entries>
+      <metadata>{}</metadata>
+      <phy name="PHY_WISUN_FAN_1v1_863MHz_Plan32_2FSK_1a_EU"/>
+    </base_channel_configuration>
+    <base_channel_configuration name="WiSunConf Protocol Configuration 12" profile="wisun_fan_1_1">
+      <channel_config_entries>
+        <channel_config_entry name="WiSunConf Channel Group 12">
+          <channel_number_start>768</channel_number_start>
+          <channel_number_end>802</channel_number_end>
+          <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
+          <max_power>RAIL_TX_POWER_MAX</max_power>
+          <metadata>{}</metadata>
+          <phy_name_override>PHY_WISUN_FAN_1v1_863MHz_Plan33_2FSK_2a_EU</phy_name_override>
+        </channel_config_entry>
+      </channel_config_entries>
+      <metadata>{}</metadata>
+      <phy name="PHY_WISUN_FAN_1v1_863MHz_Plan33_2FSK_2a_EU"/>
+    </base_channel_configuration>
+    <base_channel_configuration name="WiSunConf Protocol Configuration 13" profile="wisun_fan_1_1">
+      <channel_config_entries>
+        <channel_config_entry name="WiSunConf Channel Group 13">
+          <channel_number_start>1280</channel_number_start>
+          <channel_number_end>1314</channel_number_end>
+          <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
+          <max_power>RAIL_TX_POWER_MAX</max_power>
+          <metadata>{}</metadata>
+          <phy_name_override>PHY_WISUN_FAN_1v1_863MHz_Plan33_2FSK_3_EU</phy_name_override>
+        </channel_config_entry>
+      </channel_config_entries>
+      <metadata>{}</metadata>
+      <phy name="PHY_WISUN_FAN_1v1_863MHz_Plan33_2FSK_3_EU"/>
+    </base_channel_configuration>
+    <base_channel_configuration name="WiSunConf Protocol Configuration 14" profile="wisun_fan_1_1">
+      <channel_config_entries>
+        <channel_config_entry name="WiSunConf Channel Group 14">
+          <channel_number_start>256</channel_number_start>
+          <channel_number_end>310</channel_number_end>
+          <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
+          <max_power>RAIL_TX_POWER_MAX</max_power>
+          <metadata>{}</metadata>
+          <phy_name_override>PHY_WISUN_FAN_1v1_870MHz_Plan34_2FSK_1a_EU</phy_name_override>
+        </channel_config_entry>
+      </channel_config_entries>
+      <metadata>{}</metadata>
+      <phy name="PHY_WISUN_FAN_1v1_870MHz_Plan34_2FSK_1a_EU"/>
+    </base_channel_configuration>
+    <base_channel_configuration name="WiSunConf Protocol Configuration 15" profile="wisun_fan_1_1">
+      <channel_config_entries>
+        <channel_config_entry name="WiSunConf Channel Group 15">
+          <channel_number_start>768</channel_number_start>
+          <channel_number_end>794</channel_number_end>
+          <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
+          <max_power>RAIL_TX_POWER_MAX</max_power>
+          <metadata>{}</metadata>
+          <phy_name_override>PHY_WISUN_FAN_1v1_870MHz_Plan35_2FSK_2a_EU</phy_name_override>
+        </channel_config_entry>
+      </channel_config_entries>
+      <metadata>{}</metadata>
+      <phy name="PHY_WISUN_FAN_1v1_870MHz_Plan35_2FSK_2a_EU"/>
+    </base_channel_configuration>
+    <base_channel_configuration name="WiSunConf Protocol Configuration 16" profile="wisun_fan_1_1">
+      <channel_config_entries>
+        <channel_config_entry name="WiSunConf Channel Group 16">
+          <channel_number_start>1280</channel_number_start>
+          <channel_number_end>1306</channel_number_end>
+          <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
+          <max_power>RAIL_TX_POWER_MAX</max_power>
+          <metadata>{}</metadata>
+          <phy_name_override>PHY_WISUN_FAN_1v1_870MHz_Plan35_2FSK_3_EU</phy_name_override>
+        </channel_config_entry>
+      </channel_config_entries>
+      <metadata>{}</metadata>
+      <phy name="PHY_WISUN_FAN_1v1_870MHz_Plan35_2FSK_3_EU"/>
+    </base_channel_configuration>
+    <base_channel_configuration name="WiSunConf Protocol Configuration 17" profile="wisun_fan_1_1">
+      <channel_config_entries>
+        <channel_config_entry name="WiSunConf Channel Group 17">
+          <channel_number_start>256</channel_number_start>
+          <channel_number_end>380</channel_number_end>
+          <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
+          <max_power>RAIL_TX_POWER_MAX</max_power>
+          <metadata>{}</metadata>
+          <phy_name_override>PHY_WISUN_FAN_1v1_863MHz_Plan36_2FSK_1a_EU</phy_name_override>
+        </channel_config_entry>
+      </channel_config_entries>
+      <metadata>{}</metadata>
+      <phy name="PHY_WISUN_FAN_1v1_863MHz_Plan36_2FSK_1a_EU"/>
+    </base_channel_configuration>
+    <base_channel_configuration name="WiSunConf Protocol Configuration 18" profile="wisun_fan_1_1">
+      <channel_config_entries>
+        <channel_config_entry name="WiSunConf Channel Group 18">
+          <channel_number_start>768</channel_number_start>
+          <channel_number_end>829</channel_number_end>
+          <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
+          <max_power>RAIL_TX_POWER_MAX</max_power>
+          <metadata>{}</metadata>
+          <phy_name_override>PHY_WISUN_FAN_1v1_863MHz_Plan37_2FSK_2a_EU</phy_name_override>
+        </channel_config_entry>
+      </channel_config_entries>
+      <metadata>{}</metadata>
+      <phy name="PHY_WISUN_FAN_1v1_863MHz_Plan37_2FSK_2a_EU"/>
+    </base_channel_configuration>
+    <base_channel_configuration name="WiSunConf Protocol Configuration 19" profile="wisun_fan_1_1">
+      <channel_config_entries>
+        <channel_config_entry name="WiSunConf Channel Group 19">
+          <channel_number_start>1280</channel_number_start>
+          <channel_number_end>1341</channel_number_end>
+          <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
+          <max_power>RAIL_TX_POWER_MAX</max_power>
+          <metadata>{}</metadata>
+          <phy_name_override>PHY_WISUN_FAN_1v1_863MHz_Plan37_2FSK_3_EU</phy_name_override>
+        </channel_config_entry>
+      </channel_config_entries>
+      <metadata>{}</metadata>
+      <phy name="PHY_WISUN_FAN_1v1_863MHz_Plan37_2FSK_3_EU"/>
+    </base_channel_configuration>
+    <base_channel_configuration name="WiSunConf Protocol Configuration 20" profile="wisun_fan_1_1">
+      <channel_config_entries>
+        <channel_config_entry name="WiSunConf Channel Group 20">
+          <channel_number_start>512</channel_number_start>
+          <channel_number_end>640</channel_number_end>
+          <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
+          <max_power>RAIL_TX_POWER_MAX</max_power>
+          <metadata>{}</metadata>
+          <phy_name_override>PHY_WISUN_FAN_1v1_915MHz_Plan1_2FSK_1b_BZ</phy_name_override>
+        </channel_config_entry>
+      </channel_config_entries>
+      <metadata>{}</metadata>
+      <phy name="PHY_WISUN_FAN_1v1_915MHz_Plan1_2FSK_1b_BZ"/>
+    </base_channel_configuration>
+    <base_channel_configuration name="WiSunConf Protocol Configuration 21" profile="wisun_fan_1_1">
+      <channel_config_entries>
+        <channel_config_entry name="WiSunConf Channel Group 21">
+          <channel_number_start>768</channel_number_start>
+          <channel_number_end>896</channel_number_end>
+          <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
+          <max_power>RAIL_TX_POWER_MAX</max_power>
+          <metadata>{}</metadata>
+          <phy_name_override>PHY_WISUN_FAN_1v1_915MHz_Plan1_2FSK_2a_BZ</phy_name_override>
+        </channel_config_entry>
+      </channel_config_entries>
+      <metadata>{}</metadata>
+      <phy name="PHY_WISUN_FAN_1v1_915MHz_Plan1_2FSK_2a_BZ"/>
+    </base_channel_configuration>
+    <base_channel_configuration name="WiSunConf Protocol Configuration 22" profile="wisun_fan_1_1">
+      <channel_config_entries>
+        <channel_config_entry name="WiSunConf Channel Group 22">
+          <channel_number_start>1280</channel_number_start>
+          <channel_number_end>1343</channel_number_end>
+          <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
+          <max_power>RAIL_TX_POWER_MAX</max_power>
+          <metadata>{}</metadata>
+          <phy_name_override>PHY_WISUN_FAN_1v1_915MHz_Plan2_2FSK_3_BZ</phy_name_override>
+        </channel_config_entry>
+      </channel_config_entries>
+      <metadata>{}</metadata>
+      <phy name="PHY_WISUN_FAN_1v1_915MHz_Plan2_2FSK_3_BZ"/>
+    </base_channel_configuration>
+    <base_channel_configuration name="WiSunConf Protocol Configuration 23" profile="wisun_fan_1_1">
+      <channel_config_entries>
+        <channel_config_entry name="WiSunConf Channel Group 23">
+          <channel_number_start>1536</channel_number_start>
+          <channel_number_end>1599</channel_number_end>
+          <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
+          <max_power>RAIL_TX_POWER_MAX</max_power>
+          <metadata>{}</metadata>
+          <phy_name_override>PHY_WISUN_FAN_1v1_915MHz_Plan2_2FSK_4a_BZ</phy_name_override>
+        </channel_config_entry>
+      </channel_config_entries>
+      <metadata>{}</metadata>
+      <phy name="PHY_WISUN_FAN_1v1_915MHz_Plan2_2FSK_4a_BZ"/>
+    </base_channel_configuration>
+    <base_channel_configuration name="WiSunConf Protocol Configuration 24" profile="wisun_fan_1_1">
+      <channel_config_entries>
+        <channel_config_entry name="WiSunConf Channel Group 24">
+          <channel_number_start>2048</channel_number_start>
+          <channel_number_end>2089</channel_number_end>
+          <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
+          <max_power>RAIL_TX_POWER_MAX</max_power>
+          <metadata>{}</metadata>
+          <phy_name_override>PHY_WISUN_FAN_1v1_915MHz_Plan3_2FSK_5_BZ</phy_name_override>
+        </channel_config_entry>
+      </channel_config_entries>
+      <metadata>{}</metadata>
+      <phy name="PHY_WISUN_FAN_1v1_915MHz_Plan1_2FSK_1b_BZ"/>
+    </base_channel_configuration>
+    <base_channel_configuration name="WiSunConf Protocol Configuration 25" profile="wisun_fan_1_0">
+      <channel_config_entries>
+        <channel_config_entry name="WiSunConf Channel Group 25">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>128</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -15,9 +351,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_915MHz_2GFSK_50kbps_1b_NA"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 2" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 26" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 2">
+        <channel_config_entry name="WiSunConf Channel Group 26">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>128</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -29,9 +365,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_915MHz_2GFSK_100kbps_2a_NA"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 3" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 27" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 3">
+        <channel_config_entry name="WiSunConf Channel Group 27">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>63</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -43,9 +379,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_915MHz_2GFSK_150kbps_3_NA"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 4" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 28" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 4">
+        <channel_config_entry name="WiSunConf Channel Group 28">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>63</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -57,9 +393,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_915MHz_2GFSK_200kbps_4a_NA"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 5" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 29" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 5">
+        <channel_config_entry name="WiSunConf Channel Group 29">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>41</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -71,9 +407,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_915MHz_2GFSK_300kbps_5_NA"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 6" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 30" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 6">
+        <channel_config_entry name="WiSunConf Channel Group 30">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>13</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -85,9 +421,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_915MHz_2GFSK_50kbps_1b_PH"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 7" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 31" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 7">
+        <channel_config_entry name="WiSunConf Channel Group 31">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>13</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -99,9 +435,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_915MHz_2GFSK_100kbps_2a_PH"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 8" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 32" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 8">
+        <channel_config_entry name="WiSunConf Channel Group 32">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>6</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -113,9 +449,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_915MHz_2GFSK_150kbps_3_PH"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 9" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 33" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 9">
+        <channel_config_entry name="WiSunConf Channel Group 33">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>6</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -127,9 +463,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_915MHz_2GFSK_200kbps_4a_PH"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 10" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 34" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 10">
+        <channel_config_entry name="WiSunConf Channel Group 34">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>6</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -141,9 +477,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_915MHz_2GFSK_300kbps_5_PH"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 11" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 35" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 11">
+        <channel_config_entry name="WiSunConf Channel Group 35">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>18</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -155,9 +491,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_919MHz_2GFSK_50kbps_1b_MY"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 12" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 36" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 12">
+        <channel_config_entry name="WiSunConf Channel Group 36">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>18</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -169,9 +505,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_919MHz_2GFSK_100kbps_2a_MY"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 13" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 37" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 13">
+        <channel_config_entry name="WiSunConf Channel Group 37">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>9</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -183,9 +519,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_919MHz_2GFSK_150kbps_3_MY"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 14" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 38" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 14">
+        <channel_config_entry name="WiSunConf Channel Group 38">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>9</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -197,9 +533,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_919MHz_2GFSK_200kbps_4a_MY"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 15" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 39" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 15">
+        <channel_config_entry name="WiSunConf Channel Group 39">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>9</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -211,9 +547,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_919MHz_2GFSK_300kbps_5_MY"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 16" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 40" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 16">
+        <channel_config_entry name="WiSunConf Channel Group 40">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>23</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -225,9 +561,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_920MHz_2GFSK_50kbps_1b_HK"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 17" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 41" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 17">
+        <channel_config_entry name="WiSunConf Channel Group 41">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>23</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -239,9 +575,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_920MHz_2GFSK_100kbps_2a_HK"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 18" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 42" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 18">
+        <channel_config_entry name="WiSunConf Channel Group 42">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>11</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -253,9 +589,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_920MHz_2GFSK_150kbps_3_HK"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 19" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 43" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 19">
+        <channel_config_entry name="WiSunConf Channel Group 43">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>11</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -267,9 +603,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_920MHz_2GFSK_200kbps_4a_HK"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 20" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 44" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 20">
+        <channel_config_entry name="WiSunConf Channel Group 44">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>11</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -281,9 +617,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_920MHz_2GFSK_300kbps_5_HK"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 21" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 45" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 21">
+        <channel_config_entry name="WiSunConf Channel Group 45">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>28</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -295,9 +631,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_867MHz_2GFSK_50kbps_1a_SG"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 22" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 46" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 22">
+        <channel_config_entry name="WiSunConf Channel Group 46">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>14</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -309,9 +645,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_867MHz_2GFSK_100kbps_2a_SG"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 23" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 47" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 23">
+        <channel_config_entry name="WiSunConf Channel Group 47">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>14</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -323,9 +659,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_867MHz_2GFSK_150kbps_3_SG"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 24" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 48" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 24">
+        <channel_config_entry name="WiSunConf Channel Group 48">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>6</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -337,9 +673,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_867MHz_2GFSK_200kbps_4a_SG"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 25" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 49" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 25">
+        <channel_config_entry name="WiSunConf Channel Group 49">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>6</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -351,9 +687,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_867MHz_2GFSK_300kbps_5_SG"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 26" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 50" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 26">
+        <channel_config_entry name="WiSunConf Channel Group 50">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>23</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -365,9 +701,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_920MHz_2GFSK_50kbps_1b_SG"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 27" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 51" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 27">
+        <channel_config_entry name="WiSunConf Channel Group 51">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>23</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -379,9 +715,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_920MHz_2GFSK_100kbps_2a_SG"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 28" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 52" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 28">
+        <channel_config_entry name="WiSunConf Channel Group 52">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>11</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -393,9 +729,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_920MHz_2GFSK_150kbps_3_SG"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 29" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 53" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 29">
+        <channel_config_entry name="WiSunConf Channel Group 53">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>11</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -407,9 +743,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_920MHz_2GFSK_200kbps_4a_SG"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 30" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 54" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 30">
+        <channel_config_entry name="WiSunConf Channel Group 54">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>11</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -421,9 +757,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_920MHz_2GFSK_300kbps_5_SG"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 31" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 55" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 31">
+        <channel_config_entry name="WiSunConf Channel Group 55">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>23</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -435,9 +771,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_920MHz_2GFSK_50kbps_1b_TH"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 32" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 56" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 32">
+        <channel_config_entry name="WiSunConf Channel Group 56">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>23</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -449,9 +785,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_920MHz_2GFSK_100kbps_2a_TH"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 33" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 57" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 33">
+        <channel_config_entry name="WiSunConf Channel Group 57">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>11</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -463,9 +799,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_920MHz_2GFSK_150kbps_3_TH"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 34" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 58" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 34">
+        <channel_config_entry name="WiSunConf Channel Group 58">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>11</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -477,9 +813,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_920MHz_2GFSK_200kbps_4a_TH"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 35" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 59" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 35">
+        <channel_config_entry name="WiSunConf Channel Group 59">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>11</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -491,9 +827,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_920MHz_2GFSK_300kbps_5_TH"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 36" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 60" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 36">
+        <channel_config_entry name="WiSunConf Channel Group 60">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>23</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -505,9 +841,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_920MHz_2GFSK_50kbps_1b_VN"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 37" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 61" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 37">
+        <channel_config_entry name="WiSunConf Channel Group 61">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>23</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -519,9 +855,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_920MHz_2GFSK_100kbps_2a_VN"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 38" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 62" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 38">
+        <channel_config_entry name="WiSunConf Channel Group 62">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>11</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -533,9 +869,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_920MHz_2GFSK_150kbps_3_VN"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 39" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 63" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 39">
+        <channel_config_entry name="WiSunConf Channel Group 63">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>11</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -547,9 +883,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_920MHz_2GFSK_200kbps_4a_VN"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 40" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 64" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 40">
+        <channel_config_entry name="WiSunConf Channel Group 64">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>11</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -561,9 +897,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_920MHz_2GFSK_300kbps_5_VN"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 41" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 65" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 41">
+        <channel_config_entry name="WiSunConf Channel Group 65">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>37</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -575,9 +911,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_920MHz_2GFSK_50kbps_1b_JP"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 42" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 66" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 42">
+        <channel_config_entry name="WiSunConf Channel Group 66">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>17</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -589,9 +925,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_920MHz_2GFSK_100kbps_2b_JP"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 43" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 67" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 43">
+        <channel_config_entry name="WiSunConf Channel Group 67">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>17</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -603,9 +939,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_920MHz_2GFSK_150kbps_3_JP"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 44" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 68" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 44">
+        <channel_config_entry name="WiSunConf Channel Group 68">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>11</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -617,9 +953,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_920MHz_2GFSK_200kbps_4b_JP"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 45" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 69" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 45">
+        <channel_config_entry name="WiSunConf Channel Group 69">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>11</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -631,9 +967,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_920MHz_2GFSK_300kbps_5_JP"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 46" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 70" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 46">
+        <channel_config_entry name="WiSunConf Channel Group 70">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>68</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -645,9 +981,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_868MHz_2GFSK_50kbps_1a_EU"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 47" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 71" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 47">
+        <channel_config_entry name="WiSunConf Channel Group 71">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>34</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -659,9 +995,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_868MHz_2GFSK_100kbps_2a_EU"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 48" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 72" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 48">
+        <channel_config_entry name="WiSunConf Channel Group 72">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>34</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -673,9 +1009,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_868MHz_2GFSK_150kbps_3_EU"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 49" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 73" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 49">
+        <channel_config_entry name="WiSunConf Channel Group 73">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>54</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -687,9 +1023,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_873MHz_2GFSK_50kbps_1a_EU"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 50" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 74" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 50">
+        <channel_config_entry name="WiSunConf Channel Group 74">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>26</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -701,9 +1037,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_873MHz_2GFSK_100kbps_2a_EU"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 51" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 75" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 51">
+        <channel_config_entry name="WiSunConf Channel Group 75">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>26</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -715,9 +1051,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_873MHz_2GFSK_150kbps_3_EU"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 52" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 76" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 52">
+        <channel_config_entry name="WiSunConf Channel Group 76">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>198</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -729,9 +1065,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_470MHz_2GFSK_50kbps_1b_CN"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 53" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 77" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 53">
+        <channel_config_entry name="WiSunConf Channel Group 77">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>198</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -743,9 +1079,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_470MHz_2GFSK_100kbps_2a_CN"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 54" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 78" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 54">
+        <channel_config_entry name="WiSunConf Channel Group 78">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>198</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -757,9 +1093,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_470MHz_2GFSK_150kbps_3_CN"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 55" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 79" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 55">
+        <channel_config_entry name="WiSunConf Channel Group 79">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>38</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -771,9 +1107,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_780MHz_2GFSK_50kbps_1b_CN"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 56" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 80" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 56">
+        <channel_config_entry name="WiSunConf Channel Group 80">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>38</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -785,9 +1121,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_780MHz_2GFSK_100kbps_2a_CN"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 57" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 81" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 57">
+        <channel_config_entry name="WiSunConf Channel Group 81">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>18</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -799,9 +1135,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_780MHz_2GFSK_150kbps_3_CN"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 58" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 82" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 58">
+        <channel_config_entry name="WiSunConf Channel Group 82">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>18</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -813,9 +1149,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_780MHz_2GFSK_200kbps_4a_CN"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 59" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 83" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 59">
+        <channel_config_entry name="WiSunConf Channel Group 83">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>18</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -827,9 +1163,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_780MHz_2GFSK_300kbps_5_CN"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 60" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 84" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 60">
+        <channel_config_entry name="WiSunConf Channel Group 84">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>15</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -841,9 +1177,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_920MHz_2GFSK_50kbps_1b_CN"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 61" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 85" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 61">
+        <channel_config_entry name="WiSunConf Channel Group 85">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>15</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -855,9 +1191,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_920MHz_2GFSK_100kbps_2a_CN"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 62" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 86" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 62">
+        <channel_config_entry name="WiSunConf Channel Group 86">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>15</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -869,9 +1205,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_920MHz_2GFSK_150kbps_3_CN"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 63" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 87" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 63">
+        <channel_config_entry name="WiSunConf Channel Group 87">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>18</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -883,9 +1219,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_866MHz_2GFSK_50kbps_1a_IN"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 64" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 88" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 64">
+        <channel_config_entry name="WiSunConf Channel Group 88">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>9</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -897,9 +1233,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_866MHz_2GFSK_100kbps_2a_IN"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 65" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 89" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 65">
+        <channel_config_entry name="WiSunConf Channel Group 89">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>9</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -911,9 +1247,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_866MHz_2GFSK_150kbps_3_IN"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 66" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 90" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 66">
+        <channel_config_entry name="WiSunConf Channel Group 90">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>128</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -925,9 +1261,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_915MHz_2GFSK_50kbps_1b_MX"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 67" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 91" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 67">
+        <channel_config_entry name="WiSunConf Channel Group 91">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>128</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -939,9 +1275,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_915MHz_2GFSK_100kbps_2a_MX"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 68" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 92" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 68">
+        <channel_config_entry name="WiSunConf Channel Group 92">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>63</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -953,9 +1289,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_915MHz_2GFSK_150kbps_3_MX"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 69" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 93" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 69">
+        <channel_config_entry name="WiSunConf Channel Group 93">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>63</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -967,9 +1303,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_915MHz_2GFSK_200kbps_4a_MX"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 70" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 94" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 70">
+        <channel_config_entry name="WiSunConf Channel Group 94">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>63</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -981,9 +1317,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_915MHz_2GFSK_300kbps_5_MX"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 71" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 95" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 71">
+        <channel_config_entry name="WiSunConf Channel Group 95">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>128</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -995,9 +1331,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_915MHz_2GFSK_50kbps_1b_BZ"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 72" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 96" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 72">
+        <channel_config_entry name="WiSunConf Channel Group 96">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>128</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -1009,9 +1345,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_915MHz_2GFSK_100kbps_2a_BZ"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 73" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 97" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 73">
+        <channel_config_entry name="WiSunConf Channel Group 97">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>63</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -1023,9 +1359,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_915MHz_2GFSK_150kbps_3_BZ"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 74" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 98" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 74">
+        <channel_config_entry name="WiSunConf Channel Group 98">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>63</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -1037,9 +1373,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_915MHz_2GFSK_200kbps_4a_BZ"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 75" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 99" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 75">
+        <channel_config_entry name="WiSunConf Channel Group 99">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>41</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -1051,9 +1387,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_915MHz_2GFSK_300kbps_5_BZ"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 76" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 100" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 76">
+        <channel_config_entry name="WiSunConf Channel Group 100">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>63</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -1065,9 +1401,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_915MHz_2GFSK_50kbps_1b_AZ_NZ"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 77" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 101" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 77">
+        <channel_config_entry name="WiSunConf Channel Group 101">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>63</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -1079,9 +1415,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_915MHz_2GFSK_100kbps_2a_AZ_NZ"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 78" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 102" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 78">
+        <channel_config_entry name="WiSunConf Channel Group 102">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>31</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -1093,9 +1429,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_915MHz_2GFSK_150kbps_3_AZ_NZ"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 79" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 103" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 79">
+        <channel_config_entry name="WiSunConf Channel Group 103">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>31</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -1107,9 +1443,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_915MHz_2GFSK_200kbps_4a_AZ_NZ"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 80" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 104" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 80">
+        <channel_config_entry name="WiSunConf Channel Group 104">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>31</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -1121,9 +1457,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_915MHz_2GFSK_300kbps_5_AZ_NZ"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 81" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 105" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 81">
+        <channel_config_entry name="WiSunConf Channel Group 105">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>31</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -1135,9 +1471,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_917MHz_2GFSK_50kbps_1b_KR"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 82" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 106" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 82">
+        <channel_config_entry name="WiSunConf Channel Group 106">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>31</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -1149,9 +1485,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_917MHz_2GFSK_100kbps_2a_KR"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 83" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 107" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 83">
+        <channel_config_entry name="WiSunConf Channel Group 107">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>15</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -1163,9 +1499,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_917MHz_2GFSK_150kbps_3_KR"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 84" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 108" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 84">
+        <channel_config_entry name="WiSunConf Channel Group 108">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>15</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
@@ -1177,9 +1513,9 @@
       <metadata>{}</metadata>
       <phy name="PHY_IEEE802154_WISUN_917MHz_2GFSK_200kbps_4a_KR"/>
     </base_channel_configuration>
-    <base_channel_configuration name="WiSunConf Protocol Configuration 85" profile="wisun_fan_1_0">
+    <base_channel_configuration name="WiSunConf Protocol Configuration 109" profile="wisun_fan_1_0">
       <channel_config_entries>
-        <channel_config_entry name="WiSunConf Channel Group 85">
+        <channel_config_entry name="WiSunConf Channel Group 109">
           <channel_number_start>0</channel_number_start>
           <channel_number_end>15</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>

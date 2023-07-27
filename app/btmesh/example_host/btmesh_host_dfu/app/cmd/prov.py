@@ -25,7 +25,7 @@ import re
 from typing import Dict, Iterator, List, Optional, Union
 
 import btmesh.util
-from btmesh.db import GapAddrType, GapPhy
+from btmesh.db import GapAddrType, GapPhy, Node
 from btmesh.errors import BtmeshError
 from btmesh.prov import (UnprovDeviceBeacon, UnprovDeviceBeaconAddrType,
                          UnprovDeviceBeaconBearer)
@@ -368,8 +368,9 @@ class BtmeshProvCmd(BtmeshCmd):
             uuids = [uuids]
         for uuid in uuids:
             try:
-                app_btmesh.prov.provision_adv_device(uuid)
+                node = app_btmesh.prov.provision_adv_device(uuid)
                 app_ui.info(f"The device with {uuid.hex()} UUID is provisioned.")
+                self._on_node_provisioned(node)
             except BtmeshError as e:
                 app_ui.error(e.message)
 
@@ -393,7 +394,7 @@ class BtmeshProvCmd(BtmeshCmd):
             )
         for uuid, bd_addr in zip(uuids, bd_addrs):
             try:
-                app_btmesh.prov.provision_gatt_device(
+                node = app_btmesh.prov.provision_gatt_device(
                     uuid=uuid,
                     bd_addr=bd_addr,
                     bd_addr_type=bd_addrs_type,
@@ -402,8 +403,57 @@ class BtmeshProvCmd(BtmeshCmd):
                     conn_params_range=conn_params_range,
                 )
                 app_ui.info(f"The device with {uuid.hex()} UUID is provisioned.")
+                self._on_node_provisioned(node)
             except BtmeshError as e:
                 app_ui.error(e.message)
+
+    def _on_node_provisioned(self, node: Node) -> None:
+        # The app_cfg.common.btmesh_retry_params_default returns a new instance
+        # so it can be modified without modifying the configuration values.
+        retry_params = app_cfg.common.btmesh_retry_params_default
+        retry_params.retry_max = app_cfg.conf.conf_retry_max_default
+        retry_params.retry_interval = app_cfg.conf.conf_retry_interval_default
+        retry_params.retry_interval_lpn = app_cfg.conf.conf_retry_interval_lpn_default
+        # Node DCD auto query
+        if app_cfg.conf.auto_conf_dcd_query:
+            app_btmesh.conf.get_dcd(node, update_db=True, retry_params=retry_params)
+            app_ui.info(
+                f"Node ({node.uuid.hex()}) auto configuration: DCD is queried"
+            )
+        # Node Default TTL auto configuration
+        if app_cfg.conf.auto_conf_default_ttl:
+            ttl = app_cfg.conf.default_ttl_default
+            try:
+                app_btmesh.conf.set_default_ttl(
+                    node, ttl=ttl, retry_params=retry_params
+                )
+                app_ui.info(
+                    f"Node ({node.uuid.hex()}) auto configuration: "
+                    f"Default TTL = {ttl}"
+                )
+            except BtmeshError as e:
+                app_ui.error(str(e))
+        # Node Network Transmit composite state auto configuration
+        if app_cfg.conf.auto_conf_network_tx:
+            nettx_cnt = app_cfg.conf.network_tx_count_default
+            nettx_int = app_cfg.conf.network_tx_interval_ms_default
+            try:
+                app_btmesh.conf.set_network_transmit(
+                    node,
+                    transmit_count=nettx_cnt,
+                    transmit_interval_ms=nettx_int,
+                    retry_params=retry_params,
+                )
+                app_ui.info(
+                    f"Node ({node.uuid.hex()}) auto configuration: "
+                    f"Network Transmit Count = {nettx_cnt}"
+                )
+                app_ui.info(
+                    f"Node ({node.uuid.hex()}) auto configuration: "
+                    f"Network Transmit Interval = {nettx_int} ms"
+                )
+            except BtmeshError as e:
+                app_ui.error(str(e))
 
 
 prov_cmd = BtmeshProvCmd()

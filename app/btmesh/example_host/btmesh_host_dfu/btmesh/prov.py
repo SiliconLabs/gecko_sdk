@@ -25,7 +25,6 @@ import logging
 from typing import Callable, Iterator, List, Optional
 
 from bgapi.bglib import CommandFailedError
-
 from bgapix.slstatus import SlStatus
 
 from . import util
@@ -257,7 +256,7 @@ class Provisioner(BtmeshComponent):
         conn_open_timeout_ms: float = 5_000.0,
         conn_params_range: Optional[ConnectionParamsRange] = None,
         max_time: float = 20.0,
-    ):
+    ) -> Node:
         conn_info = self.proxy.bt_connection_open(
             bd_addr=bd_addr,
             bd_addr_type=bd_addr_type,

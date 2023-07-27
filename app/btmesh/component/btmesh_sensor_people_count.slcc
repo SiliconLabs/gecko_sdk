@@ -6,6 +6,7 @@ description: >
   simulates a people count sensor behavior. Provides interface for 
   setting and getting and also for increasing and decreasing the
   simulated people count value.
+  This component is prepared for integration into SOC applications.
 category: "Bluetooth Mesh|Utility"
 quality: "production"
 root_path: "app/btmesh/common/btmesh_sensor_people_count"
@@ -81,3 +82,6 @@ template_contribution:
 
   - name: component_catalog
     value: "btmesh_sensor_people_count"
+
+validation_helper:
+  - path: "../../script/validation/soc_ncp_compatibility.lua"

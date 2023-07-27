@@ -109,7 +109,7 @@ void setAntDivPin(sl_cli_command_arg_t *args)
     antennaConfig.ant1PinEn = ((sl_cli_get_argument_uint8(args, 5)) ? true : false);
   } else if (sl_cli_get_argument_count(args) == 5) {
     antennaConfig.ant0PinEn = ((sl_cli_get_argument_uint8(args, 4)) ? true : false);
-    antennaConfig.ant1PinEn = ((sl_cli_get_argument_uint8(args, 4)) ? false : true);
+    antennaConfig.ant1PinEn = true;
   } else {
     antennaConfig.ant0PinEn = true;
     antennaConfig.ant1PinEn = true;

@@ -22,6 +22,7 @@
   - name: hardware_board_has_tempsensor
   - name: hardware_board_has_vcom
   - name: hardware_board_has_spiflash
+  - name: hardware_board_has_hfxo_freq_39mhz
   - name: hardware_board_has_hfxo
   - name: hardware_board_has_lfxo
   - name: hardware_board_supports_rf_band_868

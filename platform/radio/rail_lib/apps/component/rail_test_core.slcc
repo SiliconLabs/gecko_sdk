@@ -1750,6 +1750,15 @@ template_contribution:
 
   - name: cli_command
     value:
+      name: setTxAckDirect
+      handler: setTxAckDirect
+      help: "Control direct access to TXACK FIFO (RAIL_GetAutoAckFifo)."
+      argument:
+        - type: uint8
+          help: "0=indirect-access 1=direct-access"
+
+  - name: cli_command
+    value:
       name: ______________________
       handler: cliSeparatorHack
 

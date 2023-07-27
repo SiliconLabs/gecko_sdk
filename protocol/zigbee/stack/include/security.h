@@ -154,6 +154,10 @@ EmberStatus emberGetKey(EmberKeyType type,
 
 /** @brief Return true if a link key is available for securing messages
  * sent to the remote device.
+ * This function simply checks for the existence of a key, it doesn't care if the key is authorized or not.
+ * This function searches in a few different places, and it may always return true if certain bits/policies are set.
+ * E.g: On trust center, this function always returns true if hashed link keys are used
+ *      or if EMBER_TRUST_CENTER_GLOBAL_LINK_KEY is set
  *
  * @param remoteDevice The long address of a some other device in the network.
  * @return bool Returns true if a link key is available.

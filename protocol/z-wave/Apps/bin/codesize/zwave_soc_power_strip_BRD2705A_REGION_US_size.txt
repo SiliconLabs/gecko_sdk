@@ -1,0 +1,44 @@
+
+==========================================================
+The output of the size tool: (e.g. arm-none-ambi-size.exe)
+==========================================================
+
+zwave_soc_power_strip.out  :
+section                                        size         addr
+.text                                       0x32348    0x8006000
+_cc_handlers_v3                               0x2ac    0x8038348
+_zaf_cc_config                                 0x28    0x80385f4
+_zaf_event_distributor_cc_event_handler        0x10    0x803861c
+_zw_protocol_cmd_handlers                      0x70    0x803862c
+_zw_protocol_cmd_handlers_lr                   0x30    0x803869c
+.ARM.exidx                                      0x8    0x80386cc
+.copy.table                                     0xc    0x80386d4
+.zero.table                                     0x0    0x80386e0
+.stack                                       0x1000   0x20000000
+.data                                         0x620   0x20001000
+.bss                                         0xadb4   0x20001620
+.heap                                         0x800   0x2000c3d8
+.internal_storage                           0x30000    0x80386e0
+.zwave_nvm                                      0x0    0x80686e0
+.nvm                                         0x8000    0x80686e0
+.ARM.attributes                                0x36          0x0
+.comment                                       0x49          0x0
+.debug_frame                                 0x72cc          0x0
+.debug_info                                0xe936de          0x0
+.debug_abbrev                               0x177cd          0x0
+.debug_loc                                  0x493b4          0x0
+.debug_aranges                                 0xb8          0x0
+.debug_ranges                                0xbb98          0x0
+.debug_line                                 0x585b0          0x0
+.debug_str                                  0x91194          0x0
+Total                                     0x1067bf2
+
+The calculated FLASH and SRAM usage summary:
+============================================
+FLASH used as program memory:  (Including only the sections: .text, .ARM.exidx, .data, _cc_handlers_v3)
+   208128
+FLASH used for storage: (Including only the sections: .zwavenvm, .simee, .nvm, .zwave_nvm)
+   32768
+SRAM usage:             (Including only the sections: .data, .bss, .heap (limited to 2048 per sl_memory_config.h), .stack_dummy, .reset_info)
+   52180
+

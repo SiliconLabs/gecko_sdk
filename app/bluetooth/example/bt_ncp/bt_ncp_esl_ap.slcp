@@ -77,6 +77,8 @@ configuration:
     value: "12288"
   - name: SL_BT_CONFIG_MAX_CONNECTIONS
     value: "8"
+  - name: SL_BT_CONFIG_USER_L2CAP_COC_CHANNELS
+    value: "8"
   - name: SL_BT_CONFIG_MAX_SOFTWARE_TIMERS
     value: "0"
   - name: SL_BT_CONFIG_BUFFER_SIZE

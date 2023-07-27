@@ -116,7 +116,7 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
   }
 
   if (bt_status != SL_STATUS_OK) {
-    printf("bt_status returned with failer error code: %04X\n", bt_status);
+    printf("bt_status returned with failer error code: %#lX\n", bt_status);
   }
 }
 

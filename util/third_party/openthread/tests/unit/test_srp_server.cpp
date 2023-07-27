@@ -31,6 +31,7 @@
 #include "test_platform.h"
 #include "test_util.hpp"
 
+#include <openthread/dataset_ftd.h>
 #include <openthread/srp_client.h>
 #include <openthread/srp_server.h>
 #include <openthread/thread.h>
@@ -79,6 +80,8 @@ void AdvanceTime(uint32_t aDuration);
 // `otPlatRadio`
 
 extern "C" {
+
+otRadioCaps otPlatRadioGetCaps(otInstance *) { return OT_RADIO_CAPS_ACK_TIMEOUT | OT_RADIO_CAPS_CSMA_BACKOFF; }
 
 otError otPlatRadioTransmit(otInstance *, otRadioFrame *)
 {
@@ -188,15 +191,23 @@ void InitTest(void)
     // Initialize OT instance.
 
     sNow      = 0;
+    sAlarmOn  = false;
     sInstance = static_cast<Instance *>(testInitInstance());
 
     memset(&sRadioTxFrame, 0, sizeof(sRadioTxFrame));
     sRadioTxFrame.mPsdu = sRadioTxFramePsdu;
+    sRadioTxOngoing     = false;
 
     //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     // Initialize Border Router and start Thread operation.
 
-    SuccessOrQuit(otLinkSetPanId(sInstance, 0x1234));
+    otOperationalDataset     dataset;
+    otOperationalDatasetTlvs datasetTlvs;
+
+    SuccessOrQuit(otDatasetCreateNewNetwork(sInstance, &dataset));
+    SuccessOrQuit(otDatasetConvertToTlvs(&dataset, &datasetTlvs));
+    SuccessOrQuit(otDatasetSetActiveTlvs(sInstance, &datasetTlvs));
+
     SuccessOrQuit(otIp6SetEnabled(sInstance, true));
     SuccessOrQuit(otThreadSetEnabled(sInstance, true));
 
@@ -283,7 +294,7 @@ static const char kHostName[] = "myhost";
 void PrepareService1(Srp::Client::Service &aService)
 {
     static const char          kServiceName[]   = "_srv._udp";
-    static const char          kInstanceLabel[] = "srv-instance";
+    static const char          kInstanceLabel[] = "srv.instance";
     static const char          kSub1[]          = "_sub1";
     static const char          kSub2[]          = "_V1234567";
     static const char          kSub3[]          = "_XYZWS";

@@ -96,7 +96,7 @@ sl_status_t abr_initiator_config_set_default(abr_initiator_config_t *config)
   // Value: 0x01. Write ABR configuration in both the local and remote controller using a configuration procedure
   config->create_context =              1;
   // RSSI measurement enabled
-  config->rssi_measurement_enabled =    false;
+  config->rssi_measurement_enabled =    true;
   // Reference RSSI value of the Tx device at 1.0 m distance in dBm
   config->rssi_tx_power =               -40.0F;
   // Peripheral latency, which defines how many connection intervals the peripheral

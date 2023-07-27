@@ -1,4 +1,4 @@
-/* Copyright 2022 The TensorFlow Authors. All Rights Reserved.
+/* Copyright 2023 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -147,34 +147,15 @@ TfLiteStatus QuantizedMeanOrSum(TfLiteContext* context, TfLiteNode* node,
   TfLiteReducerParams* params =
       static_cast<TfLiteReducerParams*>(node->builtin_data);
 
-  bool result = reference_ops::QuantizedMeanOrSum<T, int32_t>(
+  bool result = reference_ops::QuantizedMeanOrSumExtraArgs<T, int32_t>(
       tflite::micro::GetTensorData<T>(input), op_data->input_zp,
       op_data->input_scale, &input->dims->data[0], input->dims->size,
-      tflite::micro::GetTensorData<T>(output), op_data->output_zp,
-      op_data->output_scale, &output->dims->data[0], output->dims->size,
+      tflite::micro::GetTensorData<T>(output), op_data->output_scale,
+      op_data->multiplier, op_data->shift, op_data->output_zp,
+      &output->dims->data[0], output->dims->size,
       tflite::micro::GetTensorData<int>(axis), op_data->num_axis,
       params->keep_dims, temp_index, resolved_axis, temp_sum, compute_sum);
   TF_LITE_ENSURE(context, result);
-
-  return kTfLiteOk;
-}
-
-template <typename T, typename U>
-TfLiteStatus Mean(TfLiteContext* context, TfLiteNode* node,
-                  OpDataReduce* op_data, int* temp_index, int* resolved_axis,
-                  U* temp_sum) {
-  const TfLiteEvalTensor* input = tflite::micro::GetEvalInput(context, node, 0);
-  const TfLiteEvalTensor* axis = tflite::micro::GetEvalInput(context, node, 1);
-  TfLiteEvalTensor* output = tflite::micro::GetEvalOutput(context, node, 0);
-  TfLiteReducerParams* params =
-      static_cast<TfLiteReducerParams*>(node->builtin_data);
-
-  reference_ops::Mean<T, U>(
-      tflite::micro::GetTensorData<T>(input), &input->dims->data[0],
-      input->dims->size, tflite::micro::GetTensorData<T>(output),
-      &output->dims->data[0], output->dims->size,
-      tflite::micro::GetTensorData<int>(axis), op_data->num_axis,
-      params->keep_dims, temp_index, resolved_axis, temp_sum);
 
   return kTfLiteOk;
 }
@@ -186,14 +167,9 @@ TfLiteStatus EvalIntegerMean(TfLiteContext* context, TfLiteNode* node,
   int32_t* temp_sum = static_cast<int32_t*>(
       context->GetScratchBuffer(context, op_data->temp_buffer_idx));
 
-  if (op_data->input_zp == op_data->output_zp &&
-      op_data->input_scale == op_data->output_scale) {
-    Mean<integer_type, int32_t>(context, node, op_data, temp_index,
-                                resolved_axis, temp_sum);
-  } else {
-    QuantizedMeanOrSum<integer_type>(context, node, temp_index, resolved_axis,
-                                     temp_sum, op_data, /*compute_sum=*/false);
-  }
+  QuantizedMeanOrSum<integer_type>(context, node, temp_index, resolved_axis,
+                                   temp_sum, op_data, /*compute_sum=*/false);
+
   return kTfLiteOk;
 }
 

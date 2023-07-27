@@ -1,6 +1,11 @@
 #ifndef SL_BT_HCI_COEX_CONFIG_H
 #define SL_BT_HCI_COEX_CONFIG_H
 
+/***********************************************************************************************//**
+ * @addtogroup hci_coex
+ * @{
+ **************************************************************************************************/
+
 // <<< Use Configuration Wizard in Context Menu >>>
 
 // <h> Bluetooth Coexistence Vendor Specific API Configuration
@@ -53,4 +58,5 @@
 
 // <<< end of configuration section >>>
 
-#endif //SL_BT_HCI_COEX_CONFIG_H
+/** @} (end addtogroup hci_coex) */
+#endif // SL_BT_HCI_COEX_CONFIG_H

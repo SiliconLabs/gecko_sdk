@@ -48,11 +48,7 @@
 
 #if defined(CRYPTOACC_PRESENT)
 
-#if !defined(MBEDTLS_CONFIG_FILE)
-#include "mbedtls/config.h"
-#else
-#include MBEDTLS_CONFIG_FILE
-#endif
+#include <mbedtls/build_info.h>
 
 #if defined(MBEDTLS_GCM_ALT) && defined(MBEDTLS_GCM_C)
 #include "cryptoacc_management.h"

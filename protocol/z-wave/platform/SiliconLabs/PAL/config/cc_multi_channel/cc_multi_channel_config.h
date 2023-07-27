@@ -10,7 +10,7 @@
 
 // <h> Command Class Multi Channel Configuration
 
-// <q> Identical endpoints
+// <q CC_MULTI_CHANNEL_IDENTICAL_ENDPOINTS> Identical endpoints
 // <i> True indicates that all endpoints are identical. False indicates that endpoints are not identical.
 // <i> Default: 1
 #define CC_MULTI_CHANNEL_IDENTICAL_ENDPOINTS  1

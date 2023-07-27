@@ -104,13 +104,13 @@
 #define IOT_UART_CFG_EXP_PERIPHERAL              USART0
 #define IOT_UART_CFG_EXP_PERIPHERAL_NO           0
 
-// USART0 TX on PD01
-#define IOT_UART_CFG_EXP_TX_PORT                 gpioPortD
-#define IOT_UART_CFG_EXP_TX_PIN                  1
+// USART0 TX on PC00
+#define IOT_UART_CFG_EXP_TX_PORT                 gpioPortC
+#define IOT_UART_CFG_EXP_TX_PIN                  0
 
-// USART0 RX on PD00
-#define IOT_UART_CFG_EXP_RX_PORT                 gpioPortD
-#define IOT_UART_CFG_EXP_RX_PIN                  0
+// USART0 RX on PC01
+#define IOT_UART_CFG_EXP_RX_PORT                 gpioPortC
+#define IOT_UART_CFG_EXP_RX_PIN                  1
 
 
 

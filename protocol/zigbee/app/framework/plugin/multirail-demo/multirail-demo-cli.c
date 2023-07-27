@@ -55,8 +55,7 @@ void emberAfPluginMultirailDemoCliSend(sl_cli_command_arg_t *arguments)
 {
   uint8_t dataLength;
   uint8_t channel = sl_cli_get_argument_uint8(arguments, 0);
-  uint8_t *data = (uint8_t*)sl_cli_get_argument_string(arguments, 1);
-  dataLength = emberAfStringLength(data);
+  uint8_t *data = sl_zigbee_cli_get_argument_string_and_length(arguments, 1, &dataLength);
   if (dataLength == 0) {
     // Use a hard-coded, properly formatted GPD packet for demo purposes
     static const uint8_t buff[] = {

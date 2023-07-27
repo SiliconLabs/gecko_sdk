@@ -26,6 +26,7 @@ extern uint8_t emberMulticastTableSize;
 extern uint16_t emberApsAckTimeoutMs;
 extern uint8_t emberBindingTableSize;
 extern uint8_t sli_zigbee_max_end_device_children;
+extern uint8_t sli_zigbee_stack_compliance_revision;
 
 EmberMulticastTableEntry* sl_zigbee_get_multicast_table(void)
 {
@@ -81,4 +82,14 @@ sl_status_t sl_zigbee_set_max_end_device_children(uint8_t max)
 uint8_t sl_zigbee_get_max_end_device_children(void)
 {
   return sli_zigbee_max_end_device_children;
+}
+
+uint8_t sl_zigbee_get_stack_compliance_revision(void)
+{
+  return sli_zigbee_stack_compliance_revision;
+}
+
+void sli_zigbee_set_stack_compliance_revision(uint8_t revision)
+{
+  sli_zigbee_stack_compliance_revision = revision;
 }

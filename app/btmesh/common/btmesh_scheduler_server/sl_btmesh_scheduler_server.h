@@ -3,7 +3,7 @@
  * @brief sl_btmesh_scheduler_server.h
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -35,7 +35,7 @@
  * Scheduler initialization.
  * This should be called at each boot if provisioning is already done.
  * Otherwise this function should be called after provisioning is completed.
- * It is called automatically by the Universal Configurator Framework
+ * This function is called automatically after enabling the component.
  *
  * @return Status of the initialization operation.
  *         Returns bg_err_success (0) if succeed, non-zero otherwise.
@@ -45,7 +45,7 @@ uint16_t sl_btmesh_scheduler_init(void);
 /***************************************************************************//**
  * Handling of mesh scheduler events.
  *
- * It is called automatically by the Universal Configurator Framework
+ * This function is called automatically after enabling the component.
  *
  * @param[in] evt  Pointer to incoming time event.
  ******************************************************************************/

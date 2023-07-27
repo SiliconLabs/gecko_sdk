@@ -20,9 +20,7 @@ requires:
   - name: "sl_wisun_cli_util"
   - name: "sl_wisun_trace_util"
   - name: "wisun_config"
-  - name: "sl_wisun_full_config"
-    condition:
-      - "sl_wisun_empty"
+
 
 #-------------- Template Contribution ----------------
 template_contribution:

@@ -3,6 +3,7 @@ pillow
 cryptography
 colorlog
 intelhex
+bincopy
 qrcode
 ctypesgen
 pyserial

@@ -44,25 +44,25 @@
 // NOTE the below procedures are specific to the underlying key agreement scheme
 // [ECDHE-PSK] Elliptic Curve Diffie-Hellman Ephemeral (with PSK salting)
 
-sl_status_t sli_zb_sec_man_ecdhe_init(sli_zb_sec_man_dlk_ecc_context_t *dlk_ecc_ctx);
+static sl_status_t ecdhe_init(sli_zb_sec_man_dlk_ecc_context_t *dlk_ecc_ctx);
 
-sl_status_t sli_zb_sec_man_ecdhe_generate_keypair(sli_zb_sec_man_dlk_ecc_context_t *dlk_ecc_ctx);
+static sl_status_t ecdhe_generate_keypair(sli_zb_sec_man_dlk_ecc_context_t *dlk_ecc_ctx);
 
-sl_status_t sli_zb_sec_man_ecdhe_expand_shared_secret(sli_zb_sec_man_dlk_ecc_context_t *dlk_ecc_ctx);
+static sl_status_t ecdhe_expand_shared_secret(sli_zb_sec_man_dlk_ecc_context_t *dlk_ecc_ctx);
 
-sl_status_t sli_zb_sec_man_ecdhe_derive_link_key(sli_zb_sec_man_dlk_ecc_context_t *dlk_ecc_ctx);
+static sl_status_t ecdhe_derive_link_key(sli_zb_sec_man_dlk_ecc_context_t *dlk_ecc_ctx);
 
 // [SPEKE] Secure Passphrase Ephemeral Key Exchange
 
-sl_status_t sli_zb_sec_man_speke_init(sli_zb_sec_man_dlk_ecc_context_t *dlk_ecc_ctx);
+static sl_status_t speke_init(sli_zb_sec_man_dlk_ecc_context_t *dlk_ecc_ctx);
 
-sl_status_t sli_zb_sec_man_speke_generate_keypair(sli_zb_sec_man_dlk_ecc_context_t *dlk_ecc_ctx);
+static sl_status_t speke_generate_keypair(sli_zb_sec_man_dlk_ecc_context_t *dlk_ecc_ctx);
 
 sl_status_t sli_zb_sec_man_speke_expand_shared_secret(sli_zb_sec_man_dlk_ecc_context_t *dlk_ecc_ctx,
                                                       uint8_t *our_eui,
                                                       uint8_t *their_eui);
 
-sl_status_t sli_zb_sec_man_speke_derive_link_key(sli_zb_sec_man_dlk_ecc_context_t *dlk_ecc_ctx);
+static sl_status_t speke_derive_link_key(sli_zb_sec_man_dlk_ecc_context_t *dlk_ecc_ctx);
 
 #define HMAC_SHA_256_OUTPUT_SIZE 32
 /**
@@ -153,9 +153,9 @@ sl_status_t sli_zb_sec_man_ecc_init(sli_zb_sec_man_dlk_ecc_context_t *dlk_ecc_ct
   // perform additional steps per key negotiation scheme
   switch (dlk_ecc_ctx->config.operation_id) {
     case DLK_ECC_OPERATION_ECDHE_PSK:
-      return sli_zb_sec_man_ecdhe_init(dlk_ecc_ctx);
+      return ecdhe_init(dlk_ecc_ctx);
     case DLK_ECC_OPERATION_SPEKE:
-      return sli_zb_sec_man_speke_init(dlk_ecc_ctx);
+      return speke_init(dlk_ecc_ctx);
     default:
       // UNREACHABLE
       return SL_STATUS_NOT_SUPPORTED;
@@ -186,10 +186,10 @@ sl_status_t sli_zb_sec_man_ecc_generate_keypair(sli_zb_sec_man_dlk_ecc_context_t
   sl_status_t status;
   switch (dlk_ecc_ctx->config.operation_id) {
     case DLK_ECC_OPERATION_ECDHE_PSK:
-      status = sli_zb_sec_man_ecdhe_generate_keypair(dlk_ecc_ctx);
+      status = ecdhe_generate_keypair(dlk_ecc_ctx);
       break;
     case DLK_ECC_OPERATION_SPEKE:
-      status = sli_zb_sec_man_speke_generate_keypair(dlk_ecc_ctx);
+      status = speke_generate_keypair(dlk_ecc_ctx);
       break;
     default:
       // UNREACHABLE
@@ -235,7 +235,7 @@ sl_status_t sli_zb_sec_man_ecc_expand_shared_secret(
   switch (dlk_ecc_ctx->config.operation_id) {
     case DLK_ECC_OPERATION_ECDHE_PSK:
       // NOTE euis are not needed for ecdhe
-      return sli_zb_sec_man_ecdhe_expand_shared_secret(dlk_ecc_ctx);
+      return ecdhe_expand_shared_secret(dlk_ecc_ctx);
     case DLK_ECC_OPERATION_SPEKE:
       return sli_zb_sec_man_speke_expand_shared_secret(dlk_ecc_ctx, our_eui, their_eui);
     default:
@@ -251,9 +251,9 @@ sl_status_t sli_zb_sec_man_ecc_derive_link_key(sli_zb_sec_man_dlk_ecc_context_t 
   }
   switch (dlk_ecc_ctx->config.operation_id) {
     case DLK_ECC_OPERATION_SPEKE:
-      return sli_zb_sec_man_speke_derive_link_key(dlk_ecc_ctx);
+      return speke_derive_link_key(dlk_ecc_ctx);
     case DLK_ECC_OPERATION_ECDHE_PSK:
-      return sli_zb_sec_man_ecdhe_derive_link_key(dlk_ecc_ctx);
+      return ecdhe_derive_link_key(dlk_ecc_ctx);
     default:
       // UNREACHABLE
       return SL_STATUS_NOT_SUPPORTED;
@@ -343,7 +343,7 @@ sl_status_t sli_zb_sec_man_ecc_export_link_key_result(sli_zb_sec_man_dlk_ecc_con
 // NOTE the below procedures are specific to the underlying key agreement scheme
 // [ECDHE-PSK] Elliptic Curve Diffie-Hellman Ephemeral (with PSK salting)
 
-sl_status_t sli_zb_sec_man_ecdhe_init(sli_zb_sec_man_dlk_ecc_context_t *dlk_ecc_ctx)
+static sl_status_t ecdhe_init(sli_zb_sec_man_dlk_ecc_context_t *dlk_ecc_ctx)
 {
   // NOTE right now only p-256 is supported for ecdhe
   if (dlk_ecc_ctx->config.curve_id != DLK_ECC_CURVE_P256) {
@@ -354,7 +354,7 @@ sl_status_t sli_zb_sec_man_ecdhe_init(sli_zb_sec_man_dlk_ecc_context_t *dlk_ecc_
   return (crypto_ret == 0) ? SL_STATUS_OK : SL_STATUS_FAIL;
 }
 
-sl_status_t sli_zb_sec_man_ecdhe_generate_keypair(sli_zb_sec_man_dlk_ecc_context_t *dlk_ecc_ctx)
+static sl_status_t ecdhe_generate_keypair(sli_zb_sec_man_dlk_ecc_context_t *dlk_ecc_ctx)
 {
   // NOTE we checked the inputs in the calling function?
   int crypto_ret = mbedtls_ecdh_gen_public(&dlk_ecc_ctx->ecc_group,
@@ -365,7 +365,7 @@ sl_status_t sli_zb_sec_man_ecdhe_generate_keypair(sli_zb_sec_man_dlk_ecc_context
   return (crypto_ret == 0) ? SL_STATUS_OK : SL_STATUS_FAIL;
 }
 
-sl_status_t sli_zb_sec_man_ecdhe_expand_shared_secret(sli_zb_sec_man_dlk_ecc_context_t *dlk_ecc_ctx)
+static sl_status_t ecdhe_expand_shared_secret(sli_zb_sec_man_dlk_ecc_context_t *dlk_ecc_ctx)
 {
   // NOTE the context arg should have been checked in the calling function
   uint8_t buffer[DLK_ECC_COORDINATE_SIZE + DLK_KEY_SIZE];
@@ -385,7 +385,7 @@ sl_status_t sli_zb_sec_man_ecdhe_expand_shared_secret(sli_zb_sec_man_dlk_ecc_con
   return (crypto_ret == 0) ? SL_STATUS_OK : SL_STATUS_FAIL;
 }
 
-sl_status_t sli_zb_sec_man_ecdhe_derive_link_key(sli_zb_sec_man_dlk_ecc_context_t *dlk_ecc_ctx)
+static sl_status_t ecdhe_derive_link_key(sli_zb_sec_man_dlk_ecc_context_t *dlk_ecc_ctx)
 {
   uint8_t result[SHA_HASH_DIGEST_LENGTH];
   uint8_t data[1] = { 1 };
@@ -408,10 +408,6 @@ sl_status_t sli_zb_sec_man_ecdhe_derive_link_key(sli_zb_sec_man_dlk_ecc_context_
 #define X25519_BITS 255
 #define X25519_MASK ((1 << (X25519_BITS % 8)) - 1)
 #define X25519_U_DECODE(u) ((u)[31] &= X25519_MASK)
-void x25519_u_decode(uint8_t uBytesLEndian[32])
-{
-  uBytesLEndian[31] &= X25519_MASK;
-}
 
 // NOTE key clamp is required for SPEKE with curve25519
 static void x25519_key_clamp(uint8_t keyBytes[32])
@@ -449,7 +445,7 @@ static inline int speke_test_vector_load_private_key(sli_zb_sec_man_dlk_ecc_cont
 #define speke_test_vector_load_private_key(ctx) ((void) (ctx))
 #endif // SL_CATALOG_ZIGBEE_SECURITY_MANAGER_DLK_ECC_TEST_VECTORS_PRESENT
 
-sl_status_t sli_zb_sec_man_speke_init(sli_zb_sec_man_dlk_ecc_context_t *dlk_ecc_ctx)
+static sl_status_t speke_init(sli_zb_sec_man_dlk_ecc_context_t *dlk_ecc_ctx)
 {
   int crypto_ret = mbedtls_ecp_group_load(&dlk_ecc_ctx->ecc_group, MBEDTLS_ECP_DP_CURVE25519);
   if (crypto_ret != 0) {
@@ -481,7 +477,7 @@ sl_status_t sli_zb_sec_man_speke_init(sli_zb_sec_man_dlk_ecc_context_t *dlk_ecc_
   return (crypto_ret == 0) ? SL_STATUS_OK : SL_STATUS_FAIL;
 }
 
-sl_status_t sli_zb_sec_man_speke_generate_keypair(sli_zb_sec_man_dlk_ecc_context_t *dlk_ecc_ctx)
+static sl_status_t speke_generate_keypair(sli_zb_sec_man_dlk_ecc_context_t *dlk_ecc_ctx)
 {
   (void) x25519_key_clamp;
   int crypto_ret = -1;
@@ -644,7 +640,7 @@ sl_status_t sli_zb_sec_man_speke_expand_shared_secret(sli_zb_sec_man_dlk_ecc_con
   return SL_STATUS_OK;
 }
 
-sl_status_t sli_zb_sec_man_speke_derive_link_key(sli_zb_sec_man_dlk_ecc_context_t *dlk_ecc_ctx)
+static sl_status_t speke_derive_link_key(sli_zb_sec_man_dlk_ecc_context_t *dlk_ecc_ctx)
 {
   // run the secret through KDF with input {1}
   uint8_t data[1] = { 1 };

@@ -25,11 +25,12 @@ ESL Command class.
 #    misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 from ap_constants import *
+from ap_logger import getLogger
 from datetime import datetime as dt
 
 class ESLCommand():
     """ Class that encapsulates synchronization packet commands """
-    def __init__(self, params, group_id, slot_num, logger):
+    def __init__(self, params, group_id, slot_num):
         self.opcode = params[0]
         self.esl_id = params[1]
         self.group_id = group_id
@@ -38,7 +39,7 @@ class ESLCommand():
         self.params = params
         self.response_opcode = []
         self.calculate_expected_response()
-        self.log = logger
+        self.logger = getLogger()
 
     def calculate_expected_response(self):
         """ Calculate possible response opcodes """
@@ -82,16 +83,16 @@ class ESLCommand():
         elif opcode in self.response_opcode:
             valid = True
         if not valid:
-            self.log.warning("Unexpected response received : 0x%02x!", opcode)
+            self.logger.warning("Unexpected response received : 0x%02x!", opcode)
         return valid
 
-    def log(self):
-        """ Print command information """
-        self.log.print("ESL command:")
-        self.log.print("opcode:\t\t", hex(self.opcode))
-        self.log.print("esl_id:\t\t", self.esl_id)
-        self.log.print("group_id:\t", self.group_id)
-        self.log.print("slot_number:\t", self.slot_number)
-        self.log.print("timestamp:\t", self.timestamp)
-        self.log.print("params:\t\t", self.params)
-        self.log.print("------------")
+    def __str__(self):
+        """ Command information """
+        ret = "ESL command:\n"
+        ret += f"opcode:      {self.opcode:#x}\n"
+        ret += f"esl_id:      {self.esl_id}\n"
+        ret += f"group_id:    {self.group_id}\n"
+        ret += f"slot_number: {self.slot_number}\n"
+        ret += f"timestamp:   {self.timestamp}\n"
+        ret += f"params:      {self.params}"
+        return ret

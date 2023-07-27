@@ -60,8 +60,9 @@ extern RAIL_Status_t sl_rail_util_ieee802154_config_radio(RAIL_Handle_t railHand
 
 extern RAIL_LbtConfig_t *lbtConfig;
 extern RAIL_CsmaConfig_t *csmaConfig;
+#ifdef SL_CATALOG_RAIL_UTIL_COEX_PRESENT
 static int8_t ccaThreshold = RAIL_RSSI_INVALID_DBM;
-
+#endif
 void emRadioHoldOffIsr(bool active)
 {
 #ifdef SL_CATALOG_RAIL_UTIL_COEX_PRESENT
@@ -985,7 +986,8 @@ void RAILCb_IEEE802154_DataRequestCommand(RAIL_Handle_t railHandle)
         srcAdr[i] = pkt[pktOffset++];
       }
 
-      // Reuse packet[] buffer for outgoing Enhanced ACK.
+      // Reuse pkt[] buffer for outgoing Enhanced ACK, unless can
+      // write directly to TX ACK FIFO.
       // Phr1 Phr2 FcfL FcfH [Seq#] [DstPan] [DstAdr] [SrcPan] [SrcAdr]
       // Will fill in PHR later.
       // MAC Fcf:
@@ -999,6 +1001,10 @@ void RAILCb_IEEE802154_DataRequestCommand(RAIL_Handle_t railHandle)
       // - DstAdrMode = SrcAdrMode of incoming packet's
       // - Frame Version = 2 (154E)
       // - SrcAdrMode = DstAdrMode of incoming packet's (for convenience)
+      uint8_t *pPkt = pkt;
+      if (txAckDirect) {
+        (void) RAIL_GetAutoAckFifo(railHandle, &pPkt, NULL);
+      }
       uint16_t ackFcf = (MAC_FRAME_TYPE_ACK
                          | (macFcf & MAC_FRAME_FLAG_PANID_COMPRESSION)
                          | (macFcf & MAC_FRAME_FLAG_SEQ_SUPPRESSION)
@@ -1014,11 +1020,11 @@ void RAILCb_IEEE802154_DataRequestCommand(RAIL_Handle_t railHandle)
         ackFcf |= MAC_FRAME_FLAG_FRAME_PENDING;
       }
       pktOffset = ieee802154PhrLen;
-      pkt[pktOffset++] = (uint8_t)ackFcf;
-      pkt[pktOffset++] = (uint8_t)(ackFcf >> 8);
+      pPkt[pktOffset++] = (uint8_t)ackFcf;
+      pPkt[pktOffset++] = (uint8_t)(ackFcf >> 8);
 
       if ((macFcf & MAC_FRAME_FLAG_SEQ_SUPPRESSION) == 0U) {
-        pkt[pktOffset++] = seqNo;
+        pPkt[pktOffset++] = seqNo;
       }
       // Determine outgoing ACK's address field sizes
       index = (((ackFcf & (MAC_FRAME_SOURCE_MODE_MASK | MAC_FRAME_VERSION_2012)) >> 10)
@@ -1034,11 +1040,11 @@ void RAILCb_IEEE802154_DataRequestCommand(RAIL_Handle_t railHandle)
       // DstPan = SrcPan of incoming if avail otherwise DstPan of incoming
       if ((addrSizes & ADDRSIZE_DST_PAN_MASK) != 0U) {
         if (srcPan[0] > 0U) {
-          pkt[pktOffset++] = srcPan[1];
-          pkt[pktOffset++] = srcPan[2];
+          pPkt[pktOffset++] = srcPan[1];
+          pPkt[pktOffset++] = srcPan[2];
         } else if (dstPan[0] > 0U) {
-          pkt[pktOffset++] = dstPan[1];
-          pkt[pktOffset++] = dstPan[2];
+          pPkt[pktOffset++] = dstPan[1];
+          pPkt[pktOffset++] = dstPan[2];
         } else {
           // Uh-oh! Outgoing packet needs a DstPanId but incoming had neither!
           // Possibly a latency-induced issue.
@@ -1049,17 +1055,17 @@ void RAILCb_IEEE802154_DataRequestCommand(RAIL_Handle_t railHandle)
       // DstAdr = SrcAdr of incoming packet -- their sizes should match
       if ((addrSizes & ADDRSIZE_DST_ADR_MASK) != 0U) {
         for (uint8_t i = 1U; i <= srcAdr[0]; i++) {
-          pkt[pktOffset++] = srcAdr[i];
+          pPkt[pktOffset++] = srcAdr[i];
         }
       }
       // SrcPan = DstPan of incoming if avail otherwise SrcPan of incoming
       if ((addrSizes & ADDRSIZE_SRC_PAN_MASK) != 0U) {
         if (dstPan[0] > 0U) {
-          pkt[pktOffset++] = dstPan[1];
-          pkt[pktOffset++] = dstPan[2];
+          pPkt[pktOffset++] = dstPan[1];
+          pPkt[pktOffset++] = dstPan[2];
         } else if (srcPan[0] > 0U) {
-          pkt[pktOffset++] = srcPan[1];
-          pkt[pktOffset++] = srcPan[2];
+          pPkt[pktOffset++] = srcPan[1];
+          pPkt[pktOffset++] = srcPan[2];
         } else {
           // Uh-oh! Outgoing packet needs a SrcPanId but incoming had neither!
           // Possibly a latency-induced issue.
@@ -1070,18 +1076,18 @@ void RAILCb_IEEE802154_DataRequestCommand(RAIL_Handle_t railHandle)
       // SrcAdr = DstAdr of incoming packet -- their sizes should match
       if ((addrSizes & ADDRSIZE_SRC_ADR_MASK) != 0U) {
         for (uint8_t i = 1U; i <= dstAdr[0]; i++) {
-          pkt[pktOffset++] = dstAdr[i];
+          pPkt[pktOffset++] = dstAdr[i];
         }
       }
 
       // Fill in PHR now that we know Enh-ACK's length
       if (ieee802154PhrLen == 2U) {
-        pkt[0] = (0x08U /*FCS=2byte*/ | 0x10U /*Whiten=enabled*/);
-        pkt[1] = (uint8_t)(__RBIT(pktOffset - 2U /*PHRLen*/ + 2U /*FCS*/) >> 24);
+        pPkt[0] = (0x08U /*FCS=2byte*/ | 0x10U /*Whiten=enabled*/);
+        pPkt[1] = (uint8_t)(__RBIT(pktOffset - 2U /*PHRLen*/ + 2U /*FCS*/) >> 24);
       } else {
-        pkt[0] = (pktOffset - 1U /*PHRLen*/ + 2U /*FCS*/);
+        pPkt[0] = (pktOffset - 1U /*PHRLen*/ + 2U /*FCS*/);
       }
-      if (RAIL_IEEE802154_WriteEnhAck(railHandle, pkt, pktOffset)
+      if (RAIL_IEEE802154_WriteEnhAck(railHandle, pPkt, pktOffset)
           == RAIL_STATUS_NO_ERROR) {
         if (setFramePending) {
           counters.ackTxFpSet++;

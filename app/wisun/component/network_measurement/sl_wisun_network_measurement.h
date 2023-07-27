@@ -76,6 +76,7 @@ void sl_wisun_nwm_quick_measure(const sl_wisun_nwm_target_type_t meas_type,
                                 const uint16_t meas_count,
                                 const uint16_t meas_packet_length);
 
+#if defined(SL_CATALOG_GUI_PRESENT)
 /**************************************************************************//**
  * @brief Wi-SUN Network measurement
  * @details Measure custom IP address.
@@ -88,6 +89,19 @@ void sl_wisun_nwm_measure(const wisun_addr_t * const remote_address,
                           const uint16_t meas_count,
                           const uint16_t meas_packet_length,
                           const bool update_gui);
+#else
+/**************************************************************************//**
+ * @brief Wi-SUN Network measurement
+ * @details Measure custom IP address.
+ * @param[in] remote_address Remote IP address to measure
+ * @param[in] meas_count Count of measurement
+ * @param[in] meas_packet_length Size of the measurement packet
+ *****************************************************************************/
+void sl_wisun_nwm_measure(const wisun_addr_t * const remote_address,
+                          const uint16_t meas_count,
+                          const uint16_t meas_packet_length);
+#endif
+
 
 #ifdef __cplusplus
 }

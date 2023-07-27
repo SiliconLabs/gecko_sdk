@@ -3,7 +3,7 @@
  * @brief Sensor client module
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -385,6 +385,7 @@ void sl_btmesh_handle_sensor_client_on_event(sl_btmesh_msg_t *evt)
       }
       break;
 
+    case sl_btmesh_evt_prov_initialized_id:
     case sl_btmesh_evt_node_provisioned_id:
       mesh_sensor_client_init();
       break;

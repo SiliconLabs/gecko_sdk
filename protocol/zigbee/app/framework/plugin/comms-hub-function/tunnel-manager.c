@@ -61,7 +61,7 @@ static sli_zigbee_af_comms_hub_function_tunnel tunnels[EMBER_AF_PLUGIN_COMMS_HUB
  * EMBER_AF_PLUGIN_TUNNELING_CLIENT_BUSY so we only need to keep track of one
  * pending tunnel. Any other tunnel creation attempts which get the BUSY error
  * and will be attempted again when the emberAfPluginCommsHubFunctionTunnelEventControl
- * event fires (see emberAfPluginCommsHubFunctionTunnelEventHandler).
+ * event fires (see tunnelEventHandler).
  */
 static uint8_t responsePendingIndex = EM_AF_PLUGIN_COMMS_HUB_FUNCTION_NULL_TUNNEL_INDEX;
 
@@ -89,7 +89,7 @@ static uint8_t message[1500];
 
 sl_zigbee_event_t emberAfPluginCommsHubFunctionTunnelEvent;
 #define tunnelEventControl (&emberAfPluginCommsHubFunctionTunnelEvent)
-void emberAfPluginCommsHubFunctionTunnelEventHandler(sl_zigbee_event_t * event);
+static void tunnelEventHandler(sl_zigbee_event_t * event);
 
 //------------------------------------------------------------------------------
 // Forward Declarations
@@ -109,7 +109,7 @@ void sli_zigbee_af_comms_hub_function_tunnel_init(uint8_t init_level)
     case SL_ZIGBEE_INIT_LEVEL_EVENT:
     {
       sl_zigbee_event_init(&emberAfPluginCommsHubFunctionTunnelEvent,
-                           emberAfPluginCommsHubFunctionTunnelEventHandler);
+                           tunnelEventHandler);
       emberAfDebugPrintln("CHF: TunnelInit");
       break;
     }
@@ -336,7 +336,7 @@ void sli_zigbee_af_comms_hub_function_print(void)
 // Callbacks
 
 // Tunnel event handler used to retry previously attempted tunnel creations
-void emberAfPluginCommsHubFunctionTunnelEventHandler(sl_zigbee_event_t * event)
+static void tunnelEventHandler(sl_zigbee_event_t * event)
 {
   uint8_t tunnelIndex;
   uint32_t timeNowMs;
@@ -346,7 +346,7 @@ void emberAfPluginCommsHubFunctionTunnelEventHandler(sl_zigbee_event_t * event)
   sl_zigbee_event_set_inactive(tunnelEventControl);
   timeNowMs = halCommonGetInt32uMillisecondTick();
 
-  emberAfPluginCommsHubFunctionPrintln("CHF: emberAfPluginCommsHubFunctionTunnelEventHandler");
+  emberAfPluginCommsHubFunctionPrintln("CHF: tunnelEventHandler");
 
   // If we're no longer waiting for a tunnel to come up then find which tunnel
   // (or tunnels) are ready for another attempt at tunnel creation

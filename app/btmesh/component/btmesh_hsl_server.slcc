@@ -7,8 +7,9 @@ description: >
   whose color can be selected. It extends Lightness Server and corresponds with
   HSL Hue Server and HSL Saturation Server models. It also has a corresponding
   HSL Setup Server model.
-  
+
   This component implements callbacks, control, and report functionality.
+  This component is prepared for integration into SOC applications.
 
   This is a Low-Code component. The following weak callbacks are available to
   implement the relevant light source handling:
@@ -38,7 +39,7 @@ provides:
 requires:
   - name: "app_assert"
   - name: "bluetooth_feature_nvm"
-  - name: "btmesh_provisionee"
+  - name: "btmesh_role_init"
   - name: "btmesh_stack_generic_server"
   - name: "btmesh_stack_node"
   - name: "btmesh_generic_server"
@@ -47,6 +48,7 @@ requires:
   - name: "app_timer"
 recommends:
   - id: "app_timer"
+  - id: "btmesh_provisionee"
 
 template_contribution:
   - name: "btmesh_on_event"
@@ -60,3 +62,11 @@ template_contribution:
     value:
       name: hsl_server
       count: 6
+  - name: "btmesh_app_node_reset"
+    value:
+      include: "sl_btmesh_hsl_server.h"
+      function: "sl_btmesh_hsl_server_on_node_reset"
+    priority: -9
+
+validation_helper:
+  - path: "../../script/validation/soc_ncp_compatibility.lua"

@@ -102,11 +102,15 @@ const char *otSysGetRadioUrlHelpString(void)
            "    enable-coex[=1|0]             If not specified, RCP coex operates with its default configuration.\n"
            "                                  Disable coex with 0, and enable it with other values.\n"
            "    fem-lnagain[=dbm]             Set the Rx LNA gain in dBm of the external FEM.\n"
-           "    ncp-dataset                   Retrieve dataset from ncp.\n"
            "    no-reset                      Do not send Spinel reset command to RCP on initialization.\n"
            "    skip-rcp-compatibility-check  Skip checking RCP API version and capabilities during initialization.\n"
 #if OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE
-           "    iid                           Set the Spinel Interface ID for this process. Valid values are 1-3.\n"
+           "    iid                           Set the Spinel Interface ID for this process. Valid values are 0-3.\n"
+           "    iid-list                      List of IIDs a host can subscribe to receive spinel frames other than \n"
+           "                                  provided in 'iid' argument. If not specified, host will subscribe to \n"
+           "                                  the interface ID provided in 'iid` argument. Valid values are 0-3. \n"
+           "                                  Upto three IIDs can be provided with each IID separated by ',' \n"
+           "                                  e.g. iid-list=1,2,3 \n"
 #endif
         ;
 }

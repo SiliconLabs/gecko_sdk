@@ -65,8 +65,8 @@
 #define SL_WISUN_COAP_METER_COLLECTOR_URI_PATH_MAX_SIZE                 64U
 
 // <o SL_WISUN_COAP_METER_COLLECTOR_RECV_BUFF_SIZE> Allocated received buffer size
-// <i> Default: 128
-#define SL_WISUN_COAP_METER_COLLECTOR_RECV_BUFF_SIZE                    128U
+// <i> Default: 256
+#define SL_WISUN_COAP_METER_COLLECTOR_RECV_BUFF_SIZE                    256U
 
 // <o SL_WISUN_COAP_METER_COLLECTOR_DEFAULT_MESSAGE_ID> Default message ID for coap packets [bytes]
 // <i> Default: 7

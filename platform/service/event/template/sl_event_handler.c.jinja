@@ -19,6 +19,10 @@
 {
 {%- for eh in event_handler %}{% if eh['event'] == e['id'] and eh['handler'] not in event_handler_suppress %}
   {{ eh['handler'] }}();
+  {#- event_handler_lap is contributed by metric_event_handler component -#}
+  {%- for ehl in event_handler_lap %}{% if ehl['event'] == e['id'] and eh['handler'] not in event_handler_suppress %}{% if not eh['handler'] == "sli_metric_event_handler_clock_start" and not eh['handler'] == "sli_metric_em4_wake_process_action" %}
+  {{ ehl['handler'] }}("{{ eh['handler'] }}");
+  {%- endif %}{%- endif %}{% endfor %}
 {%- endif %}{% endfor %}
 }
 

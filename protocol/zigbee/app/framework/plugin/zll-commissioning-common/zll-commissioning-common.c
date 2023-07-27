@@ -87,7 +87,7 @@ bool sli_zigbee_af_zll_remote_reset_allowed(void);
 // Forward references
 bool sli_zigbee_af_zll_am_factory_new(void);
 #ifdef EZSP_HOST
-void emberAfPluginZllCommissioningCommonNcpInitCallback(bool memoryAllocation);
+void emberAfPluginZllCommissioningCommonNcpInitCallback(void);
 #else
 void emberAfPluginZllCommissioningCommonInitCallback(uint8_t init_level);
 #endif
@@ -150,7 +150,7 @@ static void completeResetToFactoryNew(void)
   emberAfScenesClusterClearSceneTableCallback(EMBER_BROADCAST_ENDPOINT);
   emberClearBindingTable();
 #ifdef EZSP_HOST
-  emberAfPluginZllCommissioningCommonNcpInitCallback(false);
+  emberAfPluginZllCommissioningCommonNcpInitCallback();
 #else
   // TODO: fix this once we port the init callback
   emberAfPluginZllCommissioningCommonInitCallback(SL_ZIGBEE_INIT_LEVEL_EVENT);
@@ -283,35 +283,33 @@ void emberAfPluginZllCommissioningCommonInitCallback(uint8_t init_level)
 #endif // #ifndef EZSP_HOST
 }
 
-void emberAfPluginZllCommissioningCommonNcpInitCallback(bool memoryAllocation)
+void emberAfPluginZllCommissioningCommonNcpInitCallback(void)
 {
 #ifdef EZSP_HOST
-  if (!memoryAllocation) {
-    // Set the policy for both server and client.
-    EmberZllPolicy policy = EMBER_ZLL_POLICY_ENABLED;
+  // Set the policy for both server and client.
+  EmberZllPolicy policy = EMBER_ZLL_POLICY_ENABLED;
 #ifdef ZLL_COMMISSIONING_SERVER_PRESENT
-    policy |= EMBER_ZLL_POLICY_TARGET;
-    if (sli_zigbee_af_zll_stealing_allowed()) {
-      policy |= EMBER_ZLL_POLICY_STEALING_ENABLED;
-    }
-    if (sli_zigbee_af_zll_remote_reset_allowed()) {
-      policy |= EMBER_ZLL_POLICY_REMOTE_RESET_ENABLED;
-    }
-#endif
-    emberAfSetEzspPolicy(EZSP_ZLL_POLICY,
-                         policy,
-                         "ZLL policy",
-                         "enable");
-
-    // Set the primary and secondary channel masks for both server and client.
-    emberSetZllPrimaryChannelMask(EMBER_AF_PLUGIN_ZLL_COMMISSIONING_COMMON_PRIMARY_CHANNEL_MASK);
-#ifdef EMBER_AF_PLUGIN_ZLL_COMMISSIONING_COMMON_SECONDARY_CHANNEL_MASK
-    emberSetZllSecondaryChannelMask(EMBER_AF_PLUGIN_ZLL_COMMISSIONING_COMMON_SECONDARY_CHANNEL_MASK);
-#endif
-
-    // Factory new initialization
-    initFactoryNew();
+  policy |= EMBER_ZLL_POLICY_TARGET;
+  if (sli_zigbee_af_zll_stealing_allowed()) {
+    policy |= EMBER_ZLL_POLICY_STEALING_ENABLED;
   }
+  if (sli_zigbee_af_zll_remote_reset_allowed()) {
+    policy |= EMBER_ZLL_POLICY_REMOTE_RESET_ENABLED;
+  }
+#endif
+  emberAfSetEzspPolicy(EZSP_ZLL_POLICY,
+                       policy,
+                       "ZLL policy",
+                       "enable");
+
+  // Set the primary and secondary channel masks for both server and client.
+  emberSetZllPrimaryChannelMask(EMBER_AF_PLUGIN_ZLL_COMMISSIONING_COMMON_PRIMARY_CHANNEL_MASK);
+#ifdef EMBER_AF_PLUGIN_ZLL_COMMISSIONING_COMMON_SECONDARY_CHANNEL_MASK
+  emberSetZllSecondaryChannelMask(EMBER_AF_PLUGIN_ZLL_COMMISSIONING_COMMON_SECONDARY_CHANNEL_MASK);
+#endif
+
+  // Factory new initialization
+  initFactoryNew();
 #endif // #ifdef EZSP_HOST
 }
 

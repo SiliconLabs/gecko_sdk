@@ -129,8 +129,8 @@ static bool loadFileIntoOtaStorage(char* file)
 void sli_zigbee_af_ota_load_file_command(sl_cli_command_arg_t *args)
 {
   char filename[MAX_FILENAME_SIZE];
-  uint8_t *buffer = (uint8_t*)sl_cli_get_argument_string(args, 0);
-  uint8_t length = emberAfStringLength(buffer);// + 1
+  uint8_t length;
+  uint8_t *buffer = sl_zigbee_cli_get_argument_string_and_length(args, 0, &length);
   if (length >= MAX_FILENAME_SIZE) {
     otaPrintln("OTA ERR: filename '%s' is too long (max %d chars)",
                buffer,

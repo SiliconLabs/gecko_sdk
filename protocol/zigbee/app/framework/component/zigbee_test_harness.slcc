@@ -142,7 +142,7 @@ template_contribution:
       group: key-establishment
       name: out-of-sequence
       handler: emberAfPluginTestHarnessKeyEstablishmentSetModeCommand
-      help: All received KE requests will be responded with no resources.
+      help: Sends an out-of-sequence message.
       argument:
       - type: uint8
         help: The out-of-sequence command ID to send

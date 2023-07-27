@@ -8,6 +8,7 @@ description: >
   initialization and a write function. The LCD initialization is executed
   automatically at startup. The write interface is used to write one specified
   line of text to the LCD.
+  This component is prepared for integration into SOC applications.
 category: "Bluetooth Mesh|Utility"
 quality: "production"
 root_path: "app/btmesh/common/btmesh_wstk_lcd"
@@ -38,3 +39,6 @@ template_contribution:
       handler: "sl_btmesh_LCD_init"
   - name: component_catalog
     value: "btmesh_wstk_lcd"
+
+validation_helper:
+  - path: "../../script/validation/soc_ncp_compatibility.lua"

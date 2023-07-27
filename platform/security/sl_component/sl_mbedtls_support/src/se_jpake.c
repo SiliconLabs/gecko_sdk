@@ -34,11 +34,7 @@
  * devices with Secure Engine from Silicon Laboratories.
  */
 
-#if !defined(MBEDTLS_CONFIG_FILE)
-#include "mbedtls/config.h"
-#else
-#include MBEDTLS_CONFIG_FILE
-#endif
+#include <mbedtls/build_info.h>
 
 #if defined(MBEDTLS_ECJPAKE_ALT) && defined(MBEDTLS_ECJPAKE_C)
 

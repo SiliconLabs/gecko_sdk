@@ -71,17 +71,11 @@ sli_zigbee_af_ota_server_downloading_node downloadingNodes[MAX_DOWNLOADS];
 #endif // EMBER_TEST
 
 // -----------------------------------------------------------------------------
-// Forward Declarations
-// -----------------------------------------------------------------------------
-
-uint8_t getIndexForDownloadingNodeId(EmberNodeId nodeId);
-
-// -----------------------------------------------------------------------------
 // APIs
 // -----------------------------------------------------------------------------
 
 // Returns MAX_DOWNLOADS if not found
-uint8_t getIndexForDownloadingNodeId(EmberNodeId nodeId)
+static uint8_t getIndexForDownloadingNodeId(EmberNodeId nodeId)
 {
   uint8_t nodeIndex;
   for (nodeIndex = 0; nodeIndex < MAX_DOWNLOADS; nodeIndex++) {

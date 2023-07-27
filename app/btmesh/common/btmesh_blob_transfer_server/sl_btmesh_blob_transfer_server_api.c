@@ -28,6 +28,7 @@
  *
  ******************************************************************************/
 #include "sl_btmesh.h"
+#include "sl_common.h"
 
 #include "sl_btmesh_blob_transfer_server_api.h"
 #include "sl_btmesh_blob_storage.h"

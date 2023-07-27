@@ -3,7 +3,7 @@ package: Zigbee
 label: Zigbee Secure Key Storage
 description: |-
   This component will store keys in secure storage on the device by calling PSA APIs. This component also provides crypto routines that operate on PSA key identifiers rather than key values.
-  User should note that this component is not backwards compatible at the moment, and is best fitted for new devices not seeking to upgrade their current images. A future component will be made available to upgrade current images wishing to move their security keys into secure storage.
+  For this component to be backwards compatible (current images wishing to move their security keys into secure storage), the Zigbee Secure Key Storage Upgrade component must be included as well (this component does not include it by default).
 category: Zigbee|Utility
 quality: production
 
@@ -15,7 +15,6 @@ provides:
 
 requires:
   - name: security_manager
-  # This is here until we remove CIPHER_SINGLE_SHOT_ENC_FCT from the source file
   - name: psa_crypto_cipher_ecb
     condition:
       - device_cortexm

@@ -7,6 +7,7 @@ description: >
  provide this function for the users who want to run their devices directly in
  a Bluetooth Mesh network without using a provisioner. This component is mainly used
  for development and testing purposes and is not recommended to run on final products. 
+ This component is prepared for integration into SOC applications.
 
  This is a No-Code component.
 category: "Bluetooth Mesh|Utility"
@@ -65,3 +66,6 @@ template_contribution:
           help: "Application key 16 bytes in hex format (e.g. {000102030405060708090A0B0C0D0E0F})"
     condition:
       - "cli"
+
+validation_helper:
+  - path: "../../script/validation/soc_ncp_compatibility.lua"

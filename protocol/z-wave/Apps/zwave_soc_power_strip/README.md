@@ -214,8 +214,8 @@ The following LEDs and buttons shown in the next table below are used.
     <th rowspan="2">Action</th>
     <th colspan="2">Description</th>
 </tr><tr>
-    <th>WSTK</th>
-    <th>800 Dev Kit</th>
+    <th>Radio Board <sup>1</sup></th>
+    <th>Thunderboard <sup>1</sup></th>
 </tr><tr>
     <td>RST</td>
     <td>Press</td>
@@ -269,8 +269,8 @@ The following LEDs and buttons shown in the next table below are used.
     <th rowspan="2">LED</th>
     <th colspan="2">Description</th>
 </tr><tr>
-    <th>WSTK</th>
-    <th>800 Dev Kit</th>
+    <th>Radio Board <sup>1</sup></th>
+    <th>Thunderboard <sup>1</sup></th>
 </tr><tr>
     <td>LED0</td>
     <td colspan="2">Endpoint 1 (switch on/off)</td>
@@ -288,6 +288,9 @@ The following LEDs and buttons shown in the next table below are used.
     </td>
 </tr>
 </table>
+
+<sup>1</sup>: A Radio Board is plug-in board for the Wireless Pro Kit Mainboard.
+A Thunderboard is a stand-alone kit with a direct USB Type-C connection.
 
 ## Firmware Update
 

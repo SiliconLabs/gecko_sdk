@@ -38,6 +38,8 @@
 #include <openthread/error.h>
 #include <cstdint>
 
+#include "radio_counters.h"
+
 namespace ot {
 namespace Spinel {
 namespace Vendor {
@@ -63,8 +65,8 @@ otError setOptions(uint32_t ptaOptions);
 otError getConstantOptions(uint32_t &ptaOptions);
 otError isEnabled(bool &ptaState);
 otError setEnable(bool ptaState);
-otError getRequestPwmArgs(uint8_t &pwmComposite, uint8_t &pwmPulseDc, uint8_t &pwmPeriodHalfMs);
-otError setRequestPwmArgs(uint8_t pwmComposite, uint8_t pwmPulseDc, uint8_t pwmPeriodHalfMs);
+otError getRequestPwmArgs(uint8_t &pwmReq, uint8_t &pwmDutyCycle, uint8_t &pwmPeriodHalfMs);
+otError setRequestPwmArgs(uint8_t pwmReq, uint8_t pwmDutyCycle, uint8_t pwmPeriodHalfMs);
 otError clearCoexCounters();
 otError getCoexCounters(uint32_t coexCounters[]);
 otError setRadioHoldoff(bool enabled);
@@ -73,6 +75,11 @@ otError setRadioHoldoff(bool enabled);
 namespace Test {
 otError getPtiRadioConfig(uint16_t &aRadioConfig);
 otError setCcaMode(uint8_t aMode);
+}
+
+namespace Efr32 {
+otError getRadioCounters(efr32RadioCounters &aCounters);
+otError clearRadioCounters(void);
 }
 
 } // namespace Vendor

@@ -124,7 +124,7 @@ RAIL_Handle_t app_init(void)
 #if defined(SL_CATALOG_APP_LOG_PRESENT)
   // CLI info message
   print_sample_app_name("Burst Duty Cycle");
-  app_log_info("Bitrate is %u b/s with %u us off time and %u us on time\n",
+  app_log_info("Bitrate is %lu b/s with %lu us off time and %lu us on time\n",
                bit_rate,
                duty_cycle_config.delay,
                duty_cycle_config.parameter);

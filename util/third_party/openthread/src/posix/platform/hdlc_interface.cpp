@@ -49,6 +49,7 @@
 #endif
 #include <stdarg.h>
 #include <stdlib.h>
+#include <sys/ioctl.h>
 #include <sys/resource.h>
 #include <sys/stat.h>
 #include <sys/time.h>
@@ -116,18 +117,18 @@
 #define B4000000 4000000
 #endif
 
+#ifndef IOSSIOSPEED
+#define IOSSIOSPEED 0x80045402
+#endif
+
 #endif // __APPLE__
 
 #if OPENTHREAD_POSIX_CONFIG_RCP_BUS == OT_POSIX_RCP_BUS_UART
 
-using ot::Spinel::SpinelInterface;
-
 namespace ot {
 namespace Posix {
 
-HdlcInterface::HdlcInterface(SpinelInterface::ReceiveFrameCallback aCallback,
-                             void                                 *aCallbackContext,
-                             SpinelInterface::RxFrameBuffer       &aFrameBuffer)
+HdlcInterface::HdlcInterface(ReceiveFrameCallback aCallback, void *aCallbackContext, RxFrameBuffer &aFrameBuffer)
     : mReceiveFrameCallback(aCallback)
     , mReceiveFrameContext(aCallbackContext)
     , mReceiveFrameBuffer(aFrameBuffer)
@@ -198,9 +199,9 @@ void HdlcInterface::Decode(const uint8_t *aBuffer, uint16_t aLength) { mHdlcDeco
 
 otError HdlcInterface::SendFrame(const uint8_t *aFrame, uint16_t aLength)
 {
-    otError                          error = OT_ERROR_NONE;
-    Hdlc::FrameBuffer<kMaxFrameSize> encoderBuffer;
-    Hdlc::Encoder                    hdlcEncoder(encoderBuffer);
+    otError                            error = OT_ERROR_NONE;
+    Spinel::FrameBuffer<kMaxFrameSize> encoderBuffer;
+    Hdlc::Encoder                      hdlcEncoder(encoderBuffer);
 
     SuccessOrExit(error = hdlcEncoder.BeginFrame());
     SuccessOrExit(error = hdlcEncoder.Encode(aFrame, aLength));
@@ -209,7 +210,7 @@ otError HdlcInterface::SendFrame(const uint8_t *aFrame, uint16_t aLength)
     error = Write(encoderBuffer.GetFrame(), encoderBuffer.GetLength());
 
 exit:
-    if ((error == OT_ERROR_NONE) && ot::Spinel::SpinelInterface::IsSpinelResetCommand(aFrame, aLength))
+    if ((error == OT_ERROR_NONE) && IsSpinelResetCommand(aFrame, aLength))
     {
         mHdlcDecoder.Reset();
         error = ResetConnection();
@@ -334,25 +335,44 @@ exit:
     return error;
 }
 
-void HdlcInterface::UpdateFdSet(fd_set &aReadFdSet, fd_set &aWriteFdSet, int &aMaxFd, struct timeval &aTimeout)
+void HdlcInterface::UpdateFdSet(void *aMainloopContext)
 {
-    OT_UNUSED_VARIABLE(aWriteFdSet);
-    OT_UNUSED_VARIABLE(aTimeout);
+    otSysMainloopContext *context = reinterpret_cast<otSysMainloopContext *>(aMainloopContext);
 
-    FD_SET(mSockFd, &aReadFdSet);
+    assert(context != nullptr);
 
-    if (aMaxFd < mSockFd)
+    FD_SET(mSockFd, &context->mReadFdSet);
+
+    if (context->mMaxFd < mSockFd)
     {
-        aMaxFd = mSockFd;
+        context->mMaxFd = mSockFd;
     }
 }
 
-void HdlcInterface::Process(const RadioProcessContext &aContext)
+void HdlcInterface::Process(const void *aMainloopContext)
 {
-    if (FD_ISSET(mSockFd, aContext.mReadFdSet))
+#if OPENTHREAD_POSIX_VIRTUAL_TIME
+    /**
+     * Process read data (decode the data).
+     *
+     * Is intended only for virtual time simulation. Its behavior is similar to `Read()` but instead of
+     * reading the data from the radio socket, it uses the given data in @p `event`.
+     */
+    const VirtualTimeEvent *event = reinterpret_cast<const VirtualTimeEvent *>(aMainloopContext);
+
+    assert(event != nullptr);
+
+    Decode(event->mData, event->mDataLength);
+#else
+    const otSysMainloopContext *context = reinterpret_cast<const otSysMainloopContext *>(aMainloopContext);
+
+    assert(context != nullptr);
+
+    if (FD_ISSET(mSockFd, &context->mReadFdSet))
     {
         Read();
     }
+#endif
 }
 
 otError HdlcInterface::WaitForWritable(void)
@@ -577,7 +597,21 @@ int HdlcInterface::OpenFile(const Url::Url &aRadioUrl)
         }
 
         VerifyOrExit((rval = cfsetspeed(&tios, static_cast<speed_t>(speed))) == 0, perror("cfsetspeed"));
-        VerifyOrExit((rval = tcsetattr(fd, TCSANOW, &tios)) == 0, perror("tcsetattr"));
+        rval = tcsetattr(fd, TCSANOW, &tios);
+
+#ifdef __APPLE__
+        if (rval)
+        {
+            struct termios orig_tios;
+            VerifyOrExit((rval = tcgetattr(fd, &orig_tios)) == 0, perror("tcgetattr"));
+            VerifyOrExit((rval = cfsetispeed(&tios, cfgetispeed(&orig_tios))) == 0, perror("cfsetispeed"));
+            VerifyOrExit((rval = cfsetospeed(&tios, cfgetospeed(&orig_tios))) == 0, perror("cfsetospeed"));
+            VerifyOrExit((rval = tcsetattr(fd, TCSANOW, &tios)) == 0, perror("tcsetattr"));
+            VerifyOrExit((rval = ioctl(fd, IOSSIOSPEED, &speed)) == 0, perror("ioctl IOSSIOSPEED"));
+        }
+#else  // __APPLE__
+        VerifyOrExit(rval == 0, perror("tcsetattr"));
+#endif // __APPLE__
         VerifyOrExit((rval = tcflush(fd, TCIOFLUSH)) == 0);
     }
 

@@ -738,7 +738,7 @@ static EmberStatus startScan(EmberNetworkScanType type, uint32_t mask, uint8_t d
   return status;
 }
 
-bool isArrayZero(uint8_t* array, uint8_t size)
+static bool isArrayZero(uint8_t* array, uint8_t size)
 {
   uint8_t i;
   for (i = 0; i < size; i++) {

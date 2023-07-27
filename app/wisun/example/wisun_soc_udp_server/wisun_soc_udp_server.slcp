@@ -111,6 +111,10 @@ configuration:
 #--------------------- SDK memory configuration ------------------------
   - name: "SL_HEAP_SIZE"
     value: "0x13000"
+  - name: "SL_SOCKET_BUFFER_SIZE"
+    value: "532"
+    condition:
+      - "sl_wisun_ota_dfu"
 
 readme:
   - path: ../../documentation/example/wisun_soc_udp_server/readme.md

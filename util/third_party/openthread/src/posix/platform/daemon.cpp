@@ -60,9 +60,10 @@ typedef char(Filename)[sizeof(sockaddr_un::sun_path)];
 
 void GetFilename(Filename &aFilename, const char *aPattern)
 {
-    int rval;
+    int         rval;
+    const char *netIfName = strlen(gNetifName) > 0 ? gNetifName : OPENTHREAD_POSIX_CONFIG_THREAD_NETIF_DEFAULT_NAME;
 
-    rval = snprintf(aFilename, sizeof(aFilename), aPattern, gNetifName);
+    rval = snprintf(aFilename, sizeof(aFilename), aPattern, netIfName);
     if (rval < 0 && static_cast<size_t>(rval) >= sizeof(aFilename))
     {
         DieNow(OT_EXIT_INVALID_ARGUMENTS);
@@ -73,14 +74,21 @@ void GetFilename(Filename &aFilename, const char *aPattern)
 
 int Daemon::OutputFormatV(const char *aFormat, va_list aArguments)
 {
-    char buf[OPENTHREAD_CONFIG_CLI_MAX_LINE_LENGTH + 1];
-    int  rval;
+    static constexpr char truncatedMsg[] = "(truncated ...)";
+    char                  buf[OPENTHREAD_CONFIG_CLI_MAX_LINE_LENGTH];
+    int                   rval;
 
-    buf[OPENTHREAD_CONFIG_CLI_MAX_LINE_LENGTH] = '\0';
+    static_assert(sizeof(truncatedMsg) < OPENTHREAD_CONFIG_CLI_MAX_LINE_LENGTH,
+                  "OPENTHREAD_CONFIG_CLI_MAX_LINE_LENGTH is too short!");
 
-    rval = vsnprintf(buf, sizeof(buf) - 1, aFormat, aArguments);
-
+    rval = vsnprintf(buf, sizeof(buf), aFormat, aArguments);
     VerifyOrExit(rval >= 0, otLogWarnPlat("Failed to format CLI output: %s", strerror(errno)));
+
+    if (rval >= static_cast<int>(sizeof(buf)))
+    {
+        rval = static_cast<int>(sizeof(buf) - 1);
+        memcpy(buf + sizeof(buf) - sizeof(truncatedMsg), truncatedMsg, sizeof(truncatedMsg));
+    }
 
     VerifyOrExit(mSessionSocket != -1);
 

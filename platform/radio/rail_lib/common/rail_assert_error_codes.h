@@ -53,8 +53,8 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
   RAIL_ASSERT_FAILED_APPENDED_INFO_MISSING = 0,
   /** Receive FIFO too small for IR calibration. */
   RAIL_ASSERT_FAILED_RX_FIFO_BYTES = 1,
-  /** Error reading back packet payload. */
-  RAIL_ASSERT_FAILED_RX_FIFO_ZERO_BYTES_READ = 2,
+  /** Invalid assert, no longer used. */
+  RAIL_ASSERT_UNUSED_2 = 2,
   /** Receive FIFO entry has invalid status. */
   RAIL_ASSERT_FAILED_ILLEGAL_RXLEN_ENTRY_STATUS = 3,
   /** Receive FIFO entry bad packet length. */
@@ -69,12 +69,12 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
   RAIL_ASSERT_FAILED_UNEXPECTED_STATE_TX_FIFO = 8,
   /** Reached unexpected state while handling TX ACK FIFO events. */
   RAIL_ASSERT_FAILED_UNEXPECTED_STATE_TXACK_FIFO = 9,
-  /** No memory to store receive packet. */
-  RAIL_ASSERT_FAILED_PBUFFER_NOT_DEFINED = 10,
-  /** Packet length longer than the receive FIFO size. */
-  RAIL_ASSERT_FAILED_INSUFFICIENT_BYTES_IN_RX_PACKET = 11,
-  /** Invalid radio clock prescaler. */
-  RAIL_ASSERT_FAILED_CLOCK_PRESCALER = 12,
+  /** Invalid assert, no longer used. */
+  RAIL_ASSERT_UNUSED_10 = 10,
+  /** Invalid assert, no longer used. */
+  RAIL_ASSERT_UNUSED_11 = 11,
+  /** Invalid assert, no longer used. */
+  RAIL_ASSERT_UNUSED_12 = 12,
   /** Error synchronizing the RAIL timebase after sleep. */
   RAIL_ASSERT_FAILED_RTCC_POST_WAKEUP = 13,
   /** VCO frequency outside supported range. */
@@ -87,62 +87,62 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
   RAIL_ASSERT_FAILED_NESTED_SEQUENCER_LOCK = 17,
   /** RSSI averaging enabled without a valid callback. */
   RAIL_ASSERT_FAILED_RSSI_AVERAGE_DONE = 18,
-  /** Invalid dynamic frame length setting provided (dflBits). */
-  RAIL_ASSERT_FAILED_DFL_BITS_SIZE = 19,
+  /** Invalid assert, no longer used. */
+  RAIL_ASSERT_UNUSED_19 = 19,
   /** Unable to seed radio pseudo random number generator. */
   RAIL_ASSERT_FAILED_PROTIMER_RANDOM_SEED = 20,
   /** Timeout exceeds EFR32XG1 register size. */
   RAIL_ASSERT_FAILED_EFR32XG1_REGISTER_SIZE = 21,
   /** Invalid timer channel specified. */
   RAIL_ASSERT_FAILED_PROTIMER_CHANNEL = 22,
-  /** Timer value larger than RAIL timebase. */
-  RAIL_ASSERT_FAILED_TIMER_REQUIRES_WRAP = 23,
+  /** Invalid assert, no longer used. */
+  RAIL_ASSERT_UNUSED_23 = 23,
   /** LBT config exceeds EFR32XG1 register size. */
   RAIL_ASSERT_FAILED_BASECNTTOP = 24,
-  /** @deprecated CSMA/LBT retry callback unexpectedly called. */
-  RAIL_ASSERT_FAILED_DEPRECATED_LBTRETRY = 25,
+  /** Invalid assert, no longer used. */
+  RAIL_ASSERT_UNUSED_25 = 25,
   /** Could not synchronize RAIL timebase with the RTC. */
   RAIL_ASSERT_FAILED_RTCC_SYNC_MISSED = 26,
   /** Clock source not ready. */
   RAIL_ASSERT_FAILED_CLOCK_SOURCE_NOT_READY = 27,
-  /** Attempted to set RAIL timings to invalid value. */
-  RAIL_ASSERT_FAILED_TIMINGS_INVALID = 28,
+  /** Invalid assert, no longer used. */
+  RAIL_ASSERT_UNUSED_28 = 28,
   /** NULL was supplied as a RAIL_Handle_t argument. */
   RAIL_ASSERT_NULL_HANDLE = 29,
-  /** Scheduled timer not running. */
-  RAIL_ASSERT_FAILED_SCHED_TIMER_NOT_RUNNING = 30,
+  /** Invalid assert, no longer used. */
+  RAIL_ASSERT_UNUSED_30 = 30,
   /** API improperly called while protocol inactive. */
   RAIL_ASSERT_FAILED_NO_ACTIVE_CONFIG = 31,
-  /** No active handle after switch. */
-  RAIL_ASSERT_FAILED_NO_ACTIVE_HANDLE_SWITCH = 32,
-  /** Reserved for future use. */
-  RAIL_ASSERT_FAILED_RESERVED33 = 33,
-  /** No active handle for scheduled rx. */
-  RAIL_ASSERT_FAILED_NO_ACTIVE_HANDLE_SCHEDRX = 34,
-  /** Invalid handle for scheduled tx. */
-  RAIL_ASSERT_FAILED_INVALID_HANDLE_SCHEDTX = 35,
-  /** Inactive handle for scheduled tx. */
-  RAIL_ASSERT_FAILED_INACTIVE_HANDLE_SCHEDTX = 36,
-  /** Invalid config index to switch to. */
-  RAIL_ASSERT_FAILED_CONFIG_INDEX_INVALID = 37,
-  /** No active handle for single protocol. */
-  RAIL_ASSERT_FAILED_NO_ACTIVE_HANDLE_SINGLEPROTOCOL = 38,
+  /** Invalid assert, no longer used. */
+  RAIL_ASSERT_UNUSED_32 = 32,
+  /** Invalid assert, no longer used. */
+  RAIL_ASSERT_UNUSED_33 = 33,
+  /** Invalid assert, no longer used. */
+  RAIL_ASSERT_UNUSED_34 = 34,
+  /** Invalid assert, no longer used. */
+  RAIL_ASSERT_UNUSED_35 = 35,
+  /** Invalid assert, no longer used. */
+  RAIL_ASSERT_UNUSED_36 = 36,
+  /** Invalid assert, no longer used. */
+  RAIL_ASSERT_UNUSED_37 = 37,
+  /** Invalid assert, no longer used. */
+  RAIL_ASSERT_UNUSED_38 = 38,
   /** This function is deprecated and must not be called. */
   RAIL_ASSERT_DEPRECATED_FUNCTION = 39,
   /** Multiprotocol task started with no event to run. */
   RAIL_ASSERT_MULTIPROTOCOL_NO_EVENT = 40,
   /** Invalid interrupt enabled. */
   RAIL_ASSERT_FAILED_INVALID_INTERRUPT_ENABLED = 41,
-  /** Power conversion functions called before curves were initialized. */
-  RAIL_ASSERT_CONVERSION_CURVES_NOT_INITIALIZED = 42,
+  /** Invalid assert, no longer used. */
+  RAIL_ASSERT_UNUSED_42 = 42,
   /** Division by zero. */
   RAIL_ASSERT_DIVISION_BY_ZERO = 43,
   /** Function cannot be called without access to the hardware. */
   RAIL_ASSERT_CANT_USE_HARDWARE = 44,
   /** Pointer parameter was passed as NULL. */
   RAIL_ASSERT_NULL_PARAMETER = 45,
-  /** Invalid task type passed to RAIL_SetTaskPriority. */
-  RAIL_ASSERT_INVALID_TASK_TYPE = 46,
+  /** Invalid assert, no longer used. */
+  RAIL_ASSERT_UNUSED_46 = 46,
   /** Synth radio config buffer for channel hopping too small. */
   RAIL_ASSERT_SMALL_SYNTH_RADIO_CONFIG_BUFFER = 47,
   /** Buffer provided for RX Channel Hopping is too small. */
@@ -155,8 +155,8 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
   RAIL_ASSERT_CHANNEL_CHANGE_FAILED = 51,
   /** Attempted to read invalid register. */
   RAIL_ASSERT_INVALID_REGISTER = 52,
-  /** Can't read register value from NULL state. */
-  RAIL_ASSERT_FAILED_LO_DIV_NULL_STATE = 53,
+  /** Invalid assert, no longer used. */
+  RAIL_ASSERT_UNUSED_53 = 53,
   /** DMP radio config caching failed. */
   RAIL_ASSERT_CACHE_CONFIG_FAILED = 54,
   /** NULL was supplied as a RAIL_StateTransitions_t argument. */
@@ -183,10 +183,10 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
   RAIL_ASSERT_FAILED_INVALID_CHANNEL_CONFIG = 65,
   /** Radio Calculator configuration HFXO frequency mismatch with chip */
   RAIL_ASSERT_INVALID_XTAL_FREQUENCY = 66,
-  /** Failed to enable EM1P energy mode. */
-  RAIL_ASSERT_FAILED_EM1P_ENTRY = 67,
-  /** Failed to disable EM1P energy mode. */
-  RAIL_ASSERT_FAILED_EM1P_EXIT = 68,
+  /** Invalid assert, no longer used. */
+  RAIL_ASSERT_UNUSED_67 = 67,
+  /** Invalid assert, no longer used. */
+  RAIL_ASSERT_UNUSED_68 = 68,
   /** Failed to disable RTCC synchronization. */
   RAIL_ASSERT_FAILED_RTCC_SYNC_STOP = 69,
   /** Multitimer linked list corrupted. */
@@ -219,13 +219,15 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
   RAIL_ASSERT_INVALID_SEQUENCER_IMAGE = 83,
   /** No image selected to be loaded onto the sequencer */
   RAIL_ASSERT_MISSING_SEQUENCER_IMAGE = 84,
+  /** Software modem image invalid or missing */
+  RAIL_ASSERT_INVALID_OR_MISSING_SOFTWARE_MODEM_IMAGE = 85,
 };
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 // Self-referencing defines minimize compiler complaints when using RAIL_ENUM
 #define RAIL_ASSERT_FAILED_APPENDED_INFO_MISSING               ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_APPENDED_INFO_MISSING)
 #define RAIL_ASSERT_FAILED_RX_FIFO_BYTES                       ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_RX_FIFO_BYTES)
-#define RAIL_ASSERT_FAILED_RX_FIFO_ZERO_BYTES_READ             ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_RX_FIFO_ZERO_BYTES_READ)
+#define RAIL_ASSERT_UNUSED_2                                   ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_UNUSED_2)
 #define RAIL_ASSERT_FAILED_ILLEGAL_RXLEN_ENTRY_STATUS          ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_ILLEGAL_RXLEN_ENTRY_STATUS)
 #define RAIL_ASSERT_FAILED_BAD_PACKET_LENGTH                   ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_BAD_PACKET_LENGTH)
 #define RAIL_ASSERT_FAILED_SYNTH_DIVCTRL_ENUM_CONVERSION_ERROR ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_SYNTH_DIVCTRL_ENUM_CONVERSION_ERROR)
@@ -233,50 +235,50 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
 #define RAIL_ASSERT_FAILED_UNEXPECTED_STATE_RXLEN_FIFO         ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_UNEXPECTED_STATE_RXLEN_FIFO)
 #define RAIL_ASSERT_FAILED_UNEXPECTED_STATE_TX_FIFO            ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_UNEXPECTED_STATE_TX_FIFO)
 #define RAIL_ASSERT_FAILED_UNEXPECTED_STATE_TXACK_FIFO         ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_UNEXPECTED_STATE_TXACK_FIFO)
-#define RAIL_ASSERT_FAILED_PBUFFER_NOT_DEFINED                 ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_PBUFFER_NOT_DEFINED)
-#define RAIL_ASSERT_FAILED_INSUFFICIENT_BYTES_IN_RX_PACKET     ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_INSUFFICIENT_BYTES_IN_RX_PACKET)
-#define RAIL_ASSERT_FAILED_CLOCK_PRESCALER                     ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_CLOCK_PRESCALER)
+#define RAIL_ASSERT_UNUSED_10                                  ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_UNUSED_10)
+#define RAIL_ASSERT_UNUSED_11                                  ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_UNUSED_11)
+#define RAIL_ASSERT_UNUSED_12                                  ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_UNUSED_12)
 #define RAIL_ASSERT_FAILED_RTCC_POST_WAKEUP                    ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_RTCC_POST_WAKEUP)
 #define RAIL_ASSERT_FAILED_SYNTH_VCO_FREQUENCY                 ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_SYNTH_VCO_FREQUENCY)
 #define RAIL_ASSERT_FAILED_RAC_STATE                           ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_RAC_STATE)
 #define RAIL_ASSERT_FAILED_SYNTH_INVALID_VCOCTRL               ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_SYNTH_INVALID_VCOCTRL)
 #define RAIL_ASSERT_FAILED_NESTED_SEQUENCER_LOCK               ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_NESTED_SEQUENCER_LOCK)
 #define RAIL_ASSERT_FAILED_RSSI_AVERAGE_DONE                   ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_RSSI_AVERAGE_DONE)
-#define RAIL_ASSERT_FAILED_DFL_BITS_SIZE                       ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_DFL_BITS_SIZE)
+#define RAIL_ASSERT_UNUSED_19                                  ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_UNUSED_19)
 #define RAIL_ASSERT_FAILED_PROTIMER_RANDOM_SEED                ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_PROTIMER_RANDOM_SEED)
 #define RAIL_ASSERT_FAILED_EFR32XG1_REGISTER_SIZE              ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_EFR32XG1_REGISTER_SIZE)
 #define RAIL_ASSERT_FAILED_PROTIMER_CHANNEL                    ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_PROTIMER_CHANNEL)
-#define RAIL_ASSERT_FAILED_TIMER_REQUIRES_WRAP                 ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_TIMER_REQUIRES_WRAP)
+#define RAIL_ASSERT_UNUSED_23                                  ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_UNUSED_23)
 #define RAIL_ASSERT_FAILED_BASECNTTOP                          ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_BASECNTTOP)
-#define RAIL_ASSERT_FAILED_DEPRECATED_LBTRETRY                 ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_DEPRECATED_LBTRETRY)
+#define RAIL_ASSERT_UNUSED_25                                  ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_UNUSED_25)
 #define RAIL_ASSERT_FAILED_RTCC_SYNC_MISSED                    ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_RTCC_SYNC_MISSED)
 #define RAIL_ASSERT_FAILED_CLOCK_SOURCE_NOT_READY              ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_CLOCK_SOURCE_NOT_READY)
-#define RAIL_ASSERT_FAILED_TIMINGS_INVALID                     ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_TIMINGS_INVALID)
+#define RAIL_ASSERT_UNUSED_28                                  ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_UNUSED_28)
 #define RAIL_ASSERT_NULL_HANDLE                                ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_NULL_HANDLE)
-#define RAIL_ASSERT_FAILED_SCHED_TIMER_NOT_RUNNING             ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_SCHED_TIMER_NOT_RUNNING)
+#define RAIL_ASSERT_UNUSED_30                                  ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_UNUSED_30)
 #define RAIL_ASSERT_FAILED_NO_ACTIVE_CONFIG                    ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_NO_ACTIVE_CONFIG)
-#define RAIL_ASSERT_FAILED_NO_ACTIVE_HANDLE_SWITCH             ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_NO_ACTIVE_HANDLE_SWITCH)
-#define RAIL_ASSERT_FAILED_RESERVED33                          ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_RESERVED33)
-#define RAIL_ASSERT_FAILED_NO_ACTIVE_HANDLE_SCHEDRX            ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_NO_ACTIVE_HANDLE_SCHEDRX)
-#define RAIL_ASSERT_FAILED_INVALID_HANDLE_SCHEDTX              ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_INVALID_HANDLE_SCHEDTX)
-#define RAIL_ASSERT_FAILED_INACTIVE_HANDLE_SCHEDTX             ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_INACTIVE_HANDLE_SCHEDTX)
-#define RAIL_ASSERT_FAILED_CONFIG_INDEX_INVALID                ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_CONFIG_INDEX_INVALID)
-#define RAIL_ASSERT_FAILED_NO_ACTIVE_HANDLE_SINGLEPROTOCOL     ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_NO_ACTIVE_HANDLE_SINGLEPROTOCOL)
+#define RAIL_ASSERT_UNUSED_32                                  ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_UNUSED_32)
+#define RAIL_ASSERT_UNUSED_33                                  ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_UNUSED_33)
+#define RAIL_ASSERT_UNUSED_34                                  ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_UNUSED_34)
+#define RAIL_ASSERT_UNUSED_35                                  ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_UNUSED_35)
+#define RAIL_ASSERT_UNUSED_36                                  ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_UNUSED_36)
+#define RAIL_ASSERT_UNUSED_37                                  ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_UNUSED_37)
+#define RAIL_ASSERT_UNUSED_38                                  ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_UNUSED_38)
 #define RAIL_ASSERT_DEPRECATED_FUNCTION                        ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_DEPRECATED_FUNCTION)
 #define RAIL_ASSERT_MULTIPROTOCOL_NO_EVENT                     ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_MULTIPROTOCOL_NO_EVENT)
 #define RAIL_ASSERT_FAILED_INVALID_INTERRUPT_ENABLED           ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_INVALID_INTERRUPT_ENABLED)
-#define RAIL_ASSERT_CONVERSION_CURVES_NOT_INITIALIZED          ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_CONVERSION_CURVES_NOT_INITIALIZED)
+#define RAIL_ASSERT_UNUSED_42                                  ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_UNUSED_42)
 #define RAIL_ASSERT_DIVISION_BY_ZERO                           ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_DIVISION_BY_ZERO)
 #define RAIL_ASSERT_CANT_USE_HARDWARE                          ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_CANT_USE_HARDWARE)
 #define RAIL_ASSERT_NULL_PARAMETER                             ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_NULL_PARAMETER)
-#define RAIL_ASSERT_INVALID_TASK_TYPE                          ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_INVALID_TASK_TYPE)
+#define RAIL_ASSERT_UNUSED_46                                  ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_UNUSED_46)
 #define RAIL_ASSERT_SMALL_SYNTH_RADIO_CONFIG_BUFFER            ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_SMALL_SYNTH_RADIO_CONFIG_BUFFER)
 #define RAIL_ASSERT_CHANNEL_HOPPING_BUFFER_TOO_SHORT           ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_CHANNEL_HOPPING_BUFFER_TOO_SHORT)
 #define RAIL_ASSERT_INVALID_MODULE_ACTION                      ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_INVALID_MODULE_ACTION)
 #define RAIL_ASSERT_CHANNEL_HOPPING_INVALID_RADIO_CONFIG       ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_CHANNEL_HOPPING_INVALID_RADIO_CONFIG)
 #define RAIL_ASSERT_CHANNEL_CHANGE_FAILED                      ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_CHANNEL_CHANGE_FAILED)
 #define RAIL_ASSERT_INVALID_REGISTER                           ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_INVALID_REGISTER)
-#define RAIL_ASSERT_FAILED_LO_DIV_NULL_STATE                   ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_LO_DIV_NULL_STATE)
+#define RAIL_ASSERT_UNUSED_53                                  ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_UNUSED_53)
 #define RAIL_ASSERT_CACHE_CONFIG_FAILED                        ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_CACHE_CONFIG_FAILED)
 #define RAIL_ASSERT_NULL_TRANSITIONS                           ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_NULL_TRANSITIONS)
 #define RAIL_ASSERT_BAD_LDMA_TRANSFER                          ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_BAD_LDMA_TRANSFER)
@@ -290,8 +292,8 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
 #define RAIL_ASSERT_SEQ_INVALID_PA_SELECTED                    ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_SEQ_INVALID_PA_SELECTED)
 #define RAIL_ASSERT_FAILED_INVALID_CHANNEL_CONFIG              ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_INVALID_CHANNEL_CONFIG)
 #define RAIL_ASSERT_INVALID_XTAL_FREQUENCY                     ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_INVALID_XTAL_FREQUENCY)
-#define RAIL_ASSERT_FAILED_EM1P_ENTRY                          ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_EM1P_ENTRY)
-#define RAIL_ASSERT_FAILED_EM1P_EXIT                           ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_EM1P_EXIT)
+#define RAIL_ASSERT_UNUSED_67                                  ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_UNUSED_67)
+#define RAIL_ASSERT_UNUSED_68                                  ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_UNUSED_68)
 #define RAIL_ASSERT_FAILED_RTCC_SYNC_STOP                      ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_RTCC_SYNC_STOP)
 #define RAIL_ASSERT_FAILED_MULTITIMER_CORRUPT                  ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_MULTITIMER_CORRUPT)
 #define RAIL_ASSERT_FAILED_TEMPCAL_ERROR                       ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_TEMPCAL_ERROR)
@@ -308,6 +310,7 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
 #define RAIL_ASSERT_CALCULATOR_NOT_SUPPORTED                   ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_CALCULATOR_NOT_SUPPORTED)
 #define RAIL_ASSERT_INVALID_SEQUENCER_IMAGE                    ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_INVALID_SEQUENCER_IMAGE)
 #define RAIL_ASSERT_MISSING_SEQUENCER_IMAGE                    ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_MISSING_SEQUENCER_IMAGE)
+#define RAIL_ASSERT_INVALID_OR_MISSING_SOFTWARE_MODEM_IMAGE    ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_INVALID_OR_MISSING_SOFTWARE_MODEM_IMAGE)
 #endif//DOXYGEN_SHOULD_SKIP_THIS
 
 /// Use this define to create an array of error messages that map to the codes
@@ -337,7 +340,7 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
 #define RAIL_ASSERT_ERROR_MESSAGES {                                                   \
     /* 0*/ "Appended info missing from RX packet",                                     \
     /* 1*/ "Receive FIFO too small for IR calibration",                                \
-    /* 2*/ "Error reading back packet payload",                                        \
+    /* 2*/ "Invalid assert, no longer used",                                           \
     /* 3*/ "Receive FIFO entry has invalid status",                                    \
     /* 4*/ "Receive FIFO entry bad packet length",                                     \
     /* 5*/ "Unable to configure radio for IR calibration",                             \
@@ -345,50 +348,50 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
     /* 7*/ "Reached unexpected state while handling RXLEN FIFO events",                \
     /* 8*/ "Reached unexpected state while handling TX FIFO events",                   \
     /* 9*/ "Reached unexpected state while handling TX ACK FIFO events",               \
-    /*10*/ "No memory to store receive packet",                                        \
-    /*11*/ "Packet length longer than the receive FIFO size",                          \
-    /*12*/ "Invalid radio clock prescaler",                                            \
+    /*10*/ "Invalid assert, no longer used",                                           \
+    /*11*/ "Invalid assert, no longer used",                                           \
+    /*12*/ "Invalid assert, no longer used",                                           \
     /*13*/ "Error synchronizing the RAIL timebase after sleep",                        \
     /*14*/ "VCO frequency outside supported range",                                    \
     /*15*/ "Radio active while changing channels",                                     \
     /*16*/ "Invalid Synth VCOCTRL field calculation",                                  \
     /*17*/ "Nested attempt to lock the sequencer",                                     \
     /*18*/ "RSSI averaging enabled without a valid callback",                          \
-    /*19*/ "Invalid dynamic frame length setting provided (dflBits)",                  \
+    /*19*/ "Invalid assert, no longer used",                                           \
     /*20*/ "Unable to seed radio pseudo random number generator",                      \
     /*21*/ "Timeout exceeds EFR32XG1 register size",                                   \
     /*22*/ "Invalid timer channel specified",                                          \
-    /*23*/ "Timer value larger than RAIL timebase",                                    \
+    /*23*/ "Invalid assert, no longer used",                                           \
     /*24*/ "LBT config exceeds EFR32XG1 register size",                                \
-    /*25*/ "Deprecated CSMA/LBT retry callback unexpectedly called",                   \
+    /*25*/ "Invalid assert, no longer used",                                           \
     /*26*/ "Could not synchronize RAIL timebase with the RTC",                         \
     /*27*/ "Clock source not ready",                                                   \
-    /*28*/ "Attempted to set RAIL timings to invalid value",                           \
+    /*28*/ "Invalid assert, no longer used",                                           \
     /*29*/ "NULL was supplied as a RAIL_Handle_t argument",                            \
-    /*30*/ "Scheduled timer not running",                                              \
+    /*30*/ "Invalid assert, no longer used",                                           \
     /*31*/ "API improperly called while protocol inactive",                            \
-    /*32*/ "No active handle after switch",                                            \
-    /*33*/ "Reserved for future use",                                                  \
-    /*34*/ "No active handle for scheduled rx",                                        \
-    /*35*/ "Invalid handle for scheduled tx",                                          \
-    /*36*/ "Inactive handle for scheduled tx",                                         \
-    /*37*/ "Invalid config index to switch to",                                        \
-    /*38*/ "No active handle for single protocol",                                     \
+    /*32*/ "Invalid assert, no longer used",                                           \
+    /*33*/ "Invalid assert, no longer used",                                           \
+    /*34*/ "Invalid assert, no longer used",                                           \
+    /*35*/ "Invalid assert, no longer used",                                           \
+    /*36*/ "Invalid assert, no longer used",                                           \
+    /*37*/ "Invalid assert, no longer used",                                           \
+    /*38*/ "Invalid assert, no longer used",                                           \
     /*39*/ "This function is deprecated and must not be called",                       \
     /*40*/ "Multiprotocol task started with no event to run",                          \
     /*41*/ "Invalid interrupt enabled",                                                \
-    /*42*/ "Power conversion functions called before curves were initialized",         \
+    /*42*/ "Invalid assert, no longer used",                                           \
     /*43*/ "Division by zero",                                                         \
     /*44*/ "Function cannot be called without access to the hardware",                 \
     /*45*/ "Pointer parameter was passed as NULL",                                     \
-    /*46*/ "Invalid task type passed to RAIL_SetTaskPriority",                         \
+    /*46*/ "Invalid assert, no longer used",                                           \
     /*47*/ "Synth radio config buffer for channel hopping too small",                  \
     /*48*/ "Buffer provided for RX Channel Hopping is too small",                      \
     /*49*/ "Invalid action was attempted on a module",                                 \
     /*50*/ "The radio config for this channel is not compatible with channel hopping", \
     /*51*/ "Channel change failed",                                                    \
     /*52*/ "Attempted to read invalid register",                                       \
-    /*53*/ "Can't read register value from NULL state",                                \
+    /*53*/ "Invalid assert, no longer used",                                           \
     /*54*/ "DMP radio config caching failed",                                          \
     /*55*/ "NULL was supplied as a RAIL_StateTransitions_t argument",                  \
     /*56*/ "LDMA transfer failed",                                                     \
@@ -402,8 +405,8 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
     /*64*/ "The sequencer selected an invalid PA",                                     \
     /*65*/ "Invalid/unsupported channel config",                                       \
     /*66*/ "Radio Calculator configuration HFXO frequency mismatch with chip",         \
-    /*67*/ "Failed to enable EM1P energy mode",                                        \
-    /*68*/ "Failed to disable EM1P energy mode",                                       \
+    /*67*/ "Invalid assert, no longer used",                                           \
+    /*68*/ "Invalid assert, no longer used",                                           \
     /*69*/ "Failed to disable RTCC synchronization",                                   \
     /*70*/ "Multitimer linked list corrupted",                                         \
     /*71*/ "Unable to configure radio for temperature calibration",                    \
@@ -420,6 +423,7 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
     /*82*/ "RAIL does not support this Radio Calculator configuration",                \
     /*83*/ "Invalid binary image loaded on sequencer",                                 \
     /*84*/ "No image selected to be loaded on sequencer",                              \
+    /*85*/ "Software modem image invalid or missing",                                  \
 }
 
 /**

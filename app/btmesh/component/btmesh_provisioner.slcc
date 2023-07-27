@@ -1,0 +1,42 @@
+id: "btmesh_provisioner"
+label: "Btmesh Provisioner Initializer"
+package: "Btmesh"
+description: >
+  This component automatically initializes the device as a provisioner on boot event.
+
+  This component is prepared for integration into SOC applications.
+
+  This is a No-Code component.
+category: "Bluetooth Mesh"
+quality: "production"
+root_path: "app/btmesh/common/btmesh_provisioner"
+tag:
+  - No-Code
+
+config_file:
+  - path: "config/sl_btmesh_provisioner_config.h"
+source:
+  - path: "sl_btmesh_provisioner.c"
+include:
+  - path: ""
+    file_list:
+      - path: "sl_btmesh_provisioner.h"
+provides:
+  - name: "btmesh_provisioner"
+  - name: "btmesh_role_init"
+requires:
+  - name: "app_assert"
+  - name: "app_btmesh_util"
+  - name: "btmesh_stack_node"
+  - name: "btmesh_stack_provisioner"
+  - name: "btmesh_stack"
+validation_helper:
+  - path: "../../script/validation/soc_ncp_compatibility.lua"
+
+template_contribution:
+  - name: "bluetooth_on_event"
+    value:
+      include: "sl_btmesh_provisioner.h"
+      function: "sl_bt_provisioner_on_event"
+  - name: "component_catalog"
+    value: "btmesh_provisionee"

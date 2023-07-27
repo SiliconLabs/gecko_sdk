@@ -1,0 +1,21 @@
+id: psa_crypto_rsa_crypt_oaep
+package: platform
+label: RSA-OAEP
+description: >-
+  This component adds support for asymmetric encryption using the RSA-OAEP
+  scheme as specified in RSA Labratories' PKCS #1 specification v2.1.
+category: Platform|Security|PSA Crypto|Asymmetric Encryption
+quality: evaluation
+
+provides:
+  - name: psa_crypto_rsa_crypt_oaep
+  - name: psa_crypto_rsa_crypt
+    allow_multiple: true
+
+requires:
+  - name: psa_crypto_rsa
+  - name: mbedtls_pkcs1_v21
+
+template_contribution:
+  - name: psa_crypto_config
+    value: PSA_WANT_ALG_RSA_OEAP

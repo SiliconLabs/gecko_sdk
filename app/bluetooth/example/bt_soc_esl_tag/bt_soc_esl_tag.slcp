@@ -81,6 +81,8 @@ configuration:
     value: "9200"
   - name: SL_BT_EAD_CORE_ACCELERATOR
     value: "SL_BT_EAD_CORE_USE_RADIOAES"
+    condition:
+      - device_series_2
   - name: SL_PSA_KEY_USER_SLOT_COUNT
     value: "1"
     condition:

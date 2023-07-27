@@ -30,6 +30,10 @@ requires:
   - name: zigbee_network_creator_security
   - name: zigbee_find_and_bind_target
   - name: zigbee_find_and_bind_initiator
+  - name: zigbee_direct_security
+
+recommends:
+  - id: zigbee_direct_security_p256
 
 source:  
   - path: protocol/zigbee/app/framework/plugin-soc/zigbee_direct_zdd/zigbee_direct_security.c

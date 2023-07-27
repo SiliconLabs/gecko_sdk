@@ -6,7 +6,7 @@ description: >
   core functions such as bootloader initializing and de-initialization, setting a reset reason, reset methods,
   initialization of the image parser, and others.
 category: Platform|Bootloader|TrustZone NonSecure|Core
-quality: evaluation
+quality: production
 source:
   - path: platform/bootloader/core/btl_main_ns.c
   - path: platform/bootloader/core/btl_reset_ns.c

@@ -158,7 +158,7 @@ int32_t sl_ftp_tcp_socket_recv(int32_t sockid, void *buff, uint32_t len)
 #if SL_FTP_ENABLE_TFTP_PROTOCOL
 
 _Static_assert(SL_SOCKET_BUFFER_SIZE >= (SL_TFTP_DATA_BLOCK_SIZE + sizeof(uint16_t) * 2UL),
-               "TFTP: Not enough socket buffer size");
+               "TFTP: Not enough socket buffer size. SL_SOCKET_BUFFER_SIZE >= (SL_TFTP_DATA_BLOCK_SIZE + 4)");
 
 /***************************************************************************//**
  * @brief TFTP udp socket create

@@ -15,6 +15,7 @@
   - name: hardware_board_rb
   - name: hardware_board_from_stk
   - name: hardware_board_has_vcom
+  - name: hardware_board_has_hfxo_freq_39mhz
   - name: hardware_board_has_hfxo
   - name: hardware_board_supports_rf_band_915
   - name: hardware_board_supports_1_rf_band

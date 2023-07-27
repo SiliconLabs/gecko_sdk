@@ -3,7 +3,7 @@
  * @brief Circular Buffer implementation
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -30,6 +30,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
+#include "sl_malloc.h"
 #include "circular_buff.h"
 
 /***************************************************************************//**
@@ -81,7 +82,7 @@ inline static bool is_full(circular_buffer_t *cb);
  ******************************************************************************/
 cb_err_code_t cb_init(circular_buffer_t *cb, size_t capacity, size_t item_size)
 {
-  cb->buffer = malloc(capacity * item_size);
+  cb->buffer = sl_malloc(capacity * item_size);
   if (cb->buffer == NULL) {
     return cb_err_no_mem;
   }
@@ -165,7 +166,8 @@ cb_err_code_t pop(circular_buffer_t *cb, void *item)
  ******************************************************************************/
 void cb_free(circular_buffer_t *cb)
 {
-  free(cb->buffer);
+  sl_free(cb->buffer);
+  cb->buffer = NULL;
 }
 
 /***************************************************************************//**

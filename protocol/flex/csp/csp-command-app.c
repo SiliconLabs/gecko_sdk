@@ -181,6 +181,28 @@ EmberStatus emberSetNcpSecurityKey(uint8_t *key,
 
 #endif
 
+#ifdef SL_CATALOG_CONNECT_AES_SECURITY_PRESENT
+// getKeyId
+mbedtls_svc_key_id_t emberGetKeyId(void)
+{
+  acquireCommandMutex();
+  uint8_t *apiCommandBuffer = getApiCommandPointer();
+  formatResponseCommand(apiCommandBuffer,
+                        MAX_STACK_API_COMMAND_SIZE,
+                        EMBER_GET_KEY_ID_IPC_COMMAND_ID,
+                        "");
+  uint8_t *apiCommandData = sendBlockingCommand(apiCommandBuffer);
+
+  mbedtls_svc_key_id_t key_id;
+  fetchApiParams(apiCommandData,
+                 "w",
+                 &key_id);
+  releaseCommandMutex();
+  return key_id;
+}
+
+#endif
+
 // getCounter
 EmberStatus emberGetCounter(EmberCounterType counterType,
                             uint32_t* count)

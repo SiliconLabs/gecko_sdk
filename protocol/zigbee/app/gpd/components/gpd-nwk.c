@@ -343,7 +343,7 @@ void emberGpdIncomingMessageHandler(uint8_t * buffer,
 #else
 #error "Application Id not defined"
 #endif
-  // check if the address matches with emGpd device set address
+  // check if the address matches with sli_zigbee_gpd device set address
   if (!(nwkFc & EMBER_GPD_NWK_FC_FRAME_TYPE_MASK) // Data frames , then check address match
       && !emberGpdUtilityAddrMatch(&addr, emberGpdGetAddr())) {
     return; // DROP - Bad address

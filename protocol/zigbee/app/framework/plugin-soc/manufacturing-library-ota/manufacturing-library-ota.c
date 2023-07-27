@@ -49,12 +49,10 @@ enum {
 #define KIKOFF_MFGLIB_ENABLED_WAIT_MS    2000
 #define TIMEOUT_DELAY_MFGLIB_STOP        1000
 
-sl_zigbee_event_t emberAfPluginManufacturingLibraryOtaKickoffEvent;
-#define kickoffControl (&emberAfPluginManufacturingLibraryOtaKickoffEvent)
-void emberAfPluginManufacturingLibraryOtaKickoffEventHandler(sl_zigbee_event_t * event);
-sl_zigbee_event_t emberAfPluginManufacturingLibraryOtaTimeoutEvent;
-#define timeoutControl (&emberAfPluginManufacturingLibraryOtaTimeoutEvent)
-void emberAfPluginManufacturingLibraryOtaTimeoutEventHandler(sl_zigbee_event_t * event);
+static sl_zigbee_event_t kickoffEvent;
+static void kickoffEventHandler(sl_zigbee_event_t * event);
+static sl_zigbee_event_t timeoutEvent;
+static void timeoutEventHandler(sl_zigbee_event_t * event);
 
 static uint8_t currentActiveCommand;
 static uint8_t savedChannel;
@@ -71,10 +69,10 @@ void sli_zigbee_af_mfglib_send_command(void);
 
 void emberAfMfglibClusterServerInitCallback(int8u endpoint)
 {
-  sl_zigbee_event_init(kickoffControl,
-                       emberAfPluginManufacturingLibraryOtaKickoffEventHandler);
-  sl_zigbee_event_init(timeoutControl,
-                       emberAfPluginManufacturingLibraryOtaTimeoutEventHandler);
+  sl_zigbee_event_init(&kickoffEvent,
+                       kickoffEventHandler);
+  sl_zigbee_event_init(&timeoutEvent,
+                       timeoutEventHandler);
 
   currentActiveCommand = ACTIVE_COMMAND_NONE;
 }
@@ -96,7 +94,7 @@ static void saveStateLeaveNetwork(uint8_t channel,
 
   // set up kickoff state machine
   kickoffState = KICKOFF_COMMAND_RECEIVED;
-  sl_zigbee_event_set_delay_ms(kickoffControl,
+  sl_zigbee_event_set_delay_ms(&kickoffEvent,
                                KICKOFF_COMMAND_RECEIVED_WAIT_MS);
 }
 
@@ -164,16 +162,16 @@ void emberAfPluginManufacturingLibraryOtaStackStatusCallback(EmberStatus status)
     return;
   }
 
-  sl_zigbee_event_set_delay_ms(kickoffControl,
+  sl_zigbee_event_set_delay_ms(&kickoffEvent,
                                KICKOFF_LEAVINGNETWORK_WAIT_MS);
 }
 
-void emberAfPluginManufacturingLibraryOtaKickoffEventHandler(sl_zigbee_event_t * event)
+static void kickoffEventHandler(sl_zigbee_event_t * event)
 {
   EmberStatus status;
 
   sl_zigbee_event_set_inactive(
-    kickoffControl);
+    &kickoffEvent);
 
   switch (kickoffState) {
     case KICKOFF_IDLE:
@@ -189,7 +187,7 @@ void emberAfPluginManufacturingLibraryOtaKickoffEventHandler(sl_zigbee_event_t *
 
     case KICKOFF_LEAVING_NETWORK:
       mfglibSetupGeneric();
-      sl_zigbee_event_set_delay_ms(kickoffControl,
+      sl_zigbee_event_set_delay_ms(&kickoffEvent,
                                    KIKOFF_MFGLIB_ENABLED_WAIT_MS);
       kickoffState = KICKOFF_MFGLIB_ENABLED;
 
@@ -217,7 +215,7 @@ void emberAfPluginManufacturingLibraryOtaKickoffEventHandler(sl_zigbee_event_t *
         // if saved time is 0, we want to enter mfglib mode forever.  If not,
         // we have a legit time, in milliseconds, after which we wish to exit.
         sl_zigbee_event_set_delay_ms(
-          timeoutControl,
+          &timeoutEvent,
           savedTime);
       }
 
@@ -262,9 +260,9 @@ static void saveRxStatistics(void)
                                                     ZCL_INT8U_ATTRIBUTE_TYPE);
 }
 
-void emberAfPluginManufacturingLibraryOtaTimeoutEventHandler(sl_zigbee_event_t * event)
+static void timeoutEventHandler(sl_zigbee_event_t * event)
 {
-  sl_zigbee_event_set_inactive(timeoutControl);
+  sl_zigbee_event_set_inactive(&timeoutEvent);
 
   if (currentActiveCommand == ACTIVE_COMMAND_NONE) {
     emberAfMfglibStop();
@@ -275,7 +273,7 @@ void emberAfPluginManufacturingLibraryOtaTimeoutEventHandler(sl_zigbee_event_t *
 
   // Still have an active command.  We need to disable state and kick off a
   // delay to wait for the manufacturing library to stop.
-  sl_zigbee_event_set_delay_ms(timeoutControl, TIMEOUT_DELAY_MFGLIB_STOP);
+  sl_zigbee_event_set_delay_ms(&timeoutEvent, TIMEOUT_DELAY_MFGLIB_STOP);
 
   if (currentActiveCommand == ACTIVE_COMMAND_TONE) {
     mfglibStopTone();

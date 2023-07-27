@@ -426,11 +426,23 @@ SLI_BT_DECLARE_FEATURE_CONFIG(bt, connection);
 #define SLI_BT_BGAPI_CONNECTION
 #endif
 
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_USER_POWER_CONTROL_PRESENT) \
+  && defined(SL_CATALOG_BLUETOOTH_FEATURE_POWER_CONTROL_PRESENT)
+#error bluetooth_feature_power_control and bluetooth_feature_user_power_control cannot coexist.
+#endif
+
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_POWER_CONTROL_PRESENT)
 SLI_BT_DECLARE_FEATURE(bt, power_control);
 #define SLI_BT_FEATURE_POWER_CONTROL SLI_BT_USE_FEATURE(bt, power_control),
 #else
 #define SLI_BT_FEATURE_POWER_CONTROL
+#endif
+
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_USER_POWER_CONTROL_PRESENT)
+SLI_BT_DECLARE_FEATURE(bt, user_power_control);
+#define SLI_BT_FEATURE_USER_POWER_CONTROL SLI_BT_USE_FEATURE(bt, user_power_control),
+#else
+#define SLI_BT_FEATURE_USER_POWER_CONTROL
 #endif
 
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_GATT_PRESENT)
@@ -550,6 +562,7 @@ static const struct sli_bt_feature_use bt_used_features[] =
   SLI_BT_FEATURE_CTE_TRANSMITTER
   SLI_BT_FEATURE_TEST
   SLI_BT_FEATURE_POWER_CONTROL
+  SLI_BT_FEATURE_USER_POWER_CONTROL
   SLI_BT_FEATURE_GATT
   SLI_BT_FEATURE_WHITELISTING
   SLI_BT_FEATURE_ACCURATE_API_ADDRESS_TYPES
@@ -604,6 +617,7 @@ extern void ll_addrEnable();
 extern sl_status_t sl_bt_ll_deinit();
 #include "sl_bt_ll_config.h"
 extern sl_status_t ll_connPowerControlEnable(const sl_bt_ll_power_control_config_t *);
+extern void sl_bt_init_app_controlled_tx_power();
 #if defined(SL_CATALOG_RAIL_UTIL_COEX_PRESENT)
 #include "coexistence-ble.h"
 #endif
@@ -666,6 +680,10 @@ sl_status_t sli_bt_init_controller_features()
   if (status != SL_STATUS_OK) {
     return status;
   }
+#endif
+
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_USER_POWER_CONTROL_PRESENT)
+  sl_bt_init_app_controlled_tx_power();
 #endif
 
 #if defined(SLI_BT_ENABLE_EXTENDED_SCANNER_FEATURE)

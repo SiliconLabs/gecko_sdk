@@ -337,37 +337,12 @@ TfLiteStatus MaxEval(TfLiteContext* context, TfLiteNode* node)
 }  // namespace pooling
 }  // namespace sl
 
-TfLiteRegistration Register_MAX_POOL_2D() {
-  static TfLiteRegistration max_pool_registration = {
-    /*init=*/sl::pooling::Init,
-    /*free=*/nullptr,
-    /*prepare=*/sl::pooling::MaxPrepare,
-    /*invoke=*/sl::pooling::MaxEval,
-    /*profiling_string=*/nullptr,
-    /*builtin_code=*/0,
-    /*custom_name=*/nullptr,
-    /*version=*/0,
-    /*registration_external=*/nullptr
-  };
-
-  return max_pool_registration;
+TFLMRegistration Register_MAX_POOL_2D() {
+  return tflite::micro::RegisterOp(sl::pooling::Init, sl::pooling::MaxPrepare, sl::pooling::MaxEval);
 }
 
-// Just to keep all_ops_resolver() happy during development ...
-TfLiteRegistration Register_AVERAGE_POOL_2D() {
-  static TfLiteRegistration avg_pool_registration = {
-    /*init=*/sl::pooling::Init,
-    /*free=*/nullptr,
-    /*prepare=*/sl::pooling::AveragePrepare,
-    /*invoke=*/sl::pooling::AverageEval,
-    /*profiling_string=*/nullptr,
-    /*builtin_code=*/0,
-    /*custom_name=*/nullptr,
-    /*version=*/0,
-    /*registration_external=*/nullptr
-  };
-
-  return avg_pool_registration;
+TFLMRegistration Register_AVERAGE_POOL_2D() {
+  return tflite::micro::RegisterOp(sl::pooling::Init, sl::pooling::AveragePrepare, sl::pooling::AverageEval);
 }
 
 }  // namespace tflite

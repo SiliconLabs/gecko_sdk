@@ -125,5 +125,7 @@ class sw_profile_outputs_common_sol(sw_profile_outputs_common_ocelot):
                                            readable_name='Min IF frequency for alternate PHY'))
         profile.outputs.append(ModelOutput(model.vars.alt_softmodem_used, '', ModelOutputType.RAIL_CONFIG,
                                            readable_name='Modem used for alternate PHY (1 for SoftModem)'))
+        profile.outputs.append(ModelOutput(model.vars.alt_rssi_adjust_db, '', ModelOutputType.RAIL_CONFIG,
+                                           readable_name='RSSI compensation value for alternate PHY'))
         profile.outputs.append(ModelOutput(model.vars.hardmodem_txbr_compensation, '', ModelOutputType.RAIL_CONFIG,
                                            readable_name='Hard modem tx baudrate compensated value'))

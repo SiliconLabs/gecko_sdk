@@ -3,7 +3,7 @@
  * @brief sl_btmesh_lc_server.h
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -31,6 +31,7 @@
 #ifndef SL_BTMESH_LC_SERVER_H
 #define SL_BTMESH_LC_SERVER_H
 
+#include "sl_btmesh_api.h"
 #include "sl_btmesh_generic_model_capi_types.h"
 
 /***************************************************************************//**
@@ -65,12 +66,19 @@ uint8_t sl_btmesh_lc_get_mode(void);
 /***************************************************************************//**
  * Handle LC Server events.
  *
- * This function is called automatically by Universal Configurator after
- * enabling the component.
+ * This function is called automatically after enabling the component.
  *
  * @param[in] evt  Pointer to incoming event.
  ******************************************************************************/
 void sl_btmesh_lc_server_on_event(sl_btmesh_msg_t *evt);
+
+/*******************************************************************************
+ * Component node reset handler.
+ * Clearing component specific nvm content during node reset.
+ * This function is called automatically by Universal Configurator after
+ * enabling the component.
+ ******************************************************************************/
+void sl_btmesh_lc_server_on_node_reset(void);
 
 /** @} (end addtogroup LC) */
 

@@ -63,9 +63,9 @@ sl_zigbee_event_t emberAfPluginColorControlServerHueSatTransitionEvent;
 #define COLOR_XY_CONTROL   (&emberAfPluginColorControlServerXyTransitionEvent)
 #define COLOR_HSV_CONTROL  (&emberAfPluginColorControlServerHueSatTransitionEvent)
 
-void emberAfPluginColorControlServerTempTransitionEventHandler(sl_zigbee_event_t * event);
-void emberAfPluginColorControlServerXyTransitionEventHandler(sl_zigbee_event_t * event);
-void emberAfPluginColorControlServerHueSatTransitionEventHandler(sl_zigbee_event_t * event);
+static void tempTransitionEventHandler(sl_zigbee_event_t * event);
+static void xyTransitionEventHandler(sl_zigbee_event_t * event);
+static void hueSatTransitionEventHandler(sl_zigbee_event_t * event);
 
 #define UPDATE_TIME_MS 100
 #define TRANSITION_TIME_1S 10
@@ -336,11 +336,11 @@ void sli_zigbee_af_color_control_server_init_callback(uint8_t init_level)
   (void)init_level;
 
   sl_zigbee_event_init(&emberAfPluginColorControlServerTempTransitionEvent,
-                       emberAfPluginColorControlServerTempTransitionEventHandler);
+                       tempTransitionEventHandler);
   sl_zigbee_event_init(&emberAfPluginColorControlServerXyTransitionEvent,
-                       emberAfPluginColorControlServerXyTransitionEventHandler);
+                       xyTransitionEventHandler);
   sl_zigbee_event_init(&emberAfPluginColorControlServerHueSatTransitionEvent,
-                       emberAfPluginColorControlServerHueSatTransitionEventHandler);
+                       hueSatTransitionEventHandler);
 }
 
 #ifdef SUPPORT_HUE_SATURATION
@@ -1560,11 +1560,6 @@ static void stopAllColorTransitions(void)
   sl_zigbee_event_set_inactive(COLOR_HSV_CONTROL);
 }
 
-void emberAfPluginColorControlServerStopTransition(void)
-{
-  stopAllColorTransitions();
-}
-
 // The specification says that if we are transitioning from one color mode
 // into another, we need to compute the new mode's attribute values from the
 // old mode.  However, it also says that if the old mode doesn't translate into
@@ -1703,7 +1698,7 @@ static bool computeNewHueValue(ColorHueTransitionState *p)
   return false;
 }
 
-void emberAfPluginColorControlServerHueSatTransitionEventHandler(sl_zigbee_event_t * event)
+static void hueSatTransitionEventHandler(sl_zigbee_event_t * event)
 {
   uint8_t endpoint = colorHueTransitionState.endpoint;
   bool limitReached1, limitReached2;
@@ -1795,7 +1790,7 @@ static uint16_t computeTransitionTimeFromStateAndRate(Color16uTransitionState *p
   return (uint16_t) transitionTime;
 }
 
-void emberAfPluginColorControlServerXyTransitionEventHandler(sl_zigbee_event_t * event)
+static void xyTransitionEventHandler(sl_zigbee_event_t * event)
 {
   uint8_t endpoint = colorXTransitionState.endpoint;
   bool limitReachedX, limitReachedY;
@@ -1824,7 +1819,7 @@ void emberAfPluginColorControlServerXyTransitionEventHandler(sl_zigbee_event_t *
   emberAfPluginColorControlServerComputePwmFromXyCallback(endpoint);
 }
 
-void emberAfPluginColorControlServerTempTransitionEventHandler(sl_zigbee_event_t * event)
+static void tempTransitionEventHandler(sl_zigbee_event_t * event)
 {
   uint8_t endpoint = colorTempTransitionState.endpoint;
   bool limitReached;

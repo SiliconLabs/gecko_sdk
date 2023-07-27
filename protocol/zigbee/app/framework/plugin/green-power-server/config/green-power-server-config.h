@@ -57,6 +57,11 @@
 // <i> Default: 0
 // <i> In green power server, user can specfy if a default translation table to be used for command forwarding.
 #define EMBER_AF_PLUGIN_GREEN_POWER_SERVER_USER_HAS_DEFAULT_TRANSLATION_TABLE 0
+
+// <q EMBER_AF_PLUGIN_GREEN_POWER_SERVER_SECURITY_TEST_VECTORS> Enable GP security test vectors support
+// <i> Default: 0
+// <i> Enable this option to run standard security test vectors command.  Will print results to cli
+#define EMBER_AF_PLUGIN_GREEN_POWER_SERVER_SECURITY_TEST_VECTORS 0
 // </h>
 
 // <<< end of configuration section >>>

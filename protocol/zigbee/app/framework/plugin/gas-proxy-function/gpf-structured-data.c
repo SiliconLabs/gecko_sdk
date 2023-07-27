@@ -1853,7 +1853,7 @@ static void setDailyConsumptionLogPrevSummation(GpfSampleLog *profileLog,
   dailyLog->prevSummation = dailyLogSummation;
 }
 
-uint8_t getInt48u(uint8_t* message, uint16_t currentIndex, uint16_t msgLen, uint8_t *destination)
+static uint8_t getInt48u(uint8_t* message, uint16_t currentIndex, uint16_t msgLen, uint8_t *destination)
 {
   if ((currentIndex + 6) > msgLen) {
     emberAfPluginGasProxyFunctionPrintln("GetInt48u, %x bytes short", 6);

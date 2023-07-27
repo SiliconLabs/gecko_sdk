@@ -55,9 +55,8 @@ static uint8_t state;
 // This event replaces the use of the emberAfMainTickCallback which should
 // not be used by sleepy devices as it does not properly allow for power
 // management.
-sl_zigbee_event_t emberAfPluginGbcsGasMeterSleepyMeterEvent;
-#define sleepyMeterEventControl (&emberAfPluginGbcsGasMeterSleepyMeterEvent)
-void emberAfPluginGbcsGasMeterSleepyMeterEventHandler(sl_zigbee_event_t * event);
+sl_zigbee_event_t sleepyMeterEvent;
+static void sleepyMeterEventHandler(sl_zigbee_event_t * event);
 
 /*
  * Per section 10.2.2 of the GBCS version 0.8
@@ -339,8 +338,8 @@ void emberAfPluginGbcsGasMeterInitCallback(uint8_t init_level)
   switch (init_level) {
     case SL_ZIGBEE_INIT_LEVEL_EVENT:
     {
-      sl_zigbee_event_init(sleepyMeterEventControl,
-                           emberAfPluginGbcsGasMeterSleepyMeterEventHandler);
+      sl_zigbee_event_init(&sleepyMeterEvent,
+                           sleepyMeterEventHandler);
       break;
     }
 
@@ -382,7 +381,7 @@ void emberAfClusterInitCallback(uint8_t endpointId,
 // *
 // *******************************************************************
 
-void emberAfPluginGbcsGasMeterSleepyMeterEventHandler(sl_zigbee_event_t * event)
+static void sleepyMeterEventHandler(sl_zigbee_event_t * event)
 {
   EmberStatus status;
   EmberNodeId partnerShortId = 0x0000; // Node ID of trust center which is the Comms Hub
@@ -390,7 +389,7 @@ void emberAfPluginGbcsGasMeterSleepyMeterEventHandler(sl_zigbee_event_t * event)
 
   // Polling the network state every tick is ineffecient and does not allow the device
   // to sleep.  So let's create a little delay.
-  sl_zigbee_event_set_delay_ms(sleepyMeterEventControl,
+  sl_zigbee_event_set_delay_ms(&sleepyMeterEvent,
                                2 * MILLISECOND_TICKS_PER_SECOND);
 
   // don't do anything unless we're on the network
@@ -817,16 +816,16 @@ static void setSleepyMeterState(uint8_t newState)
   switch (state) {
     case INITIAL_STATE:
     case REGISTRATION_COMPLETE:
-      sl_zigbee_event_set_delay_qs(sleepyMeterEventControl, (INITIAL_STATE_EVENT_INTERVAL_SECONDS << 2));
+      sl_zigbee_event_set_delay_qs(&sleepyMeterEvent, (INITIAL_STATE_EVENT_INTERVAL_SECONDS << 2));
       break;
     case MIRROR_READY:
-      sl_zigbee_event_set_delay_qs(sleepyMeterEventControl, (MIRROR_UPDATE_INTERVAL_SECONDS << 2));
+      sl_zigbee_event_set_delay_qs(&sleepyMeterEvent, (MIRROR_UPDATE_INTERVAL_SECONDS << 2));
       break;
     case SERVICE_DISCOVERY_STARTED:
     case MIRROR_CONFIGURATION_STARTED:
     case MIRROR_UPDATE_IN_PROGRESS:
     default:
-      sl_zigbee_event_set_delay_qs(sleepyMeterEventControl, MIRROR_UPDATE_IN_PROGRESS_INTERVAL_QUARTER_SECONDS);
+      sl_zigbee_event_set_delay_qs(&sleepyMeterEvent, MIRROR_UPDATE_IN_PROGRESS_INTERVAL_QUARTER_SECONDS);
       break;
   }
 }

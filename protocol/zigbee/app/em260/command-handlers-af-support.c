@@ -28,6 +28,7 @@ extern bool sli_zigbee_af_green_power_server_gp_sink_commissioning_mode_command_
                                                                                         uint16_t gpmAddrForPairing,
                                                                                         uint8_t sinkEndpoint);
 extern void sli_zigbee_af_gp_trans_table_clear_translation_table();
+extern EmberStatus sli_zigbee_af_gp_test_security(void);
 
 static void processReadAttributeCommand()
 {
@@ -135,6 +136,13 @@ bool sli_zigbee_af_process_ezsp_af_support_commands(uint16_t commandId)
       appendInt8u(status);
       break;
     }
+#if (EMBER_AF_PLUGIN_GREEN_POWER_SERVER_SECURITY_TEST_VECTORS == 1)
+    case EZSP_GP_SECURITY_TEST_VECTORS: {
+      EmberStatus status = sli_zigbee_af_gp_test_security();
+      appendInt8u(status);
+      break;
+    }
+#endif // (EMBER_AF_PLUGIN_GREEN_POWER_SERVER_SECURITY_TEST_VECTORS == 1)
 #endif // SL_CATALOG_ZIGBEE_GREEN_POWER_SERVER_PRESENT
 
 #ifdef SL_CATALOG_ZIGBEE_GREEN_POWER_TRANSLATION_TABLE_PRESENT

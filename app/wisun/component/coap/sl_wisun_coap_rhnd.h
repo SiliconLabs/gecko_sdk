@@ -64,8 +64,7 @@ extern "C" {
  *****************************************************************************/
 
 /// Auto-Response callback for resorces
-typedef void (*sl_wisun_coap_rhnd_auto_resp_t)(const sl_wisun_coap_packet_t * const req_packet,
-                                               sl_wisun_coap_packet_t * const resp_packet);
+typedef sl_wisun_coap_packet_t * (*sl_wisun_coap_rhnd_auto_resp_t)(const sl_wisun_coap_packet_t * const req_packet);
 
 /// Resource table data
 typedef struct sl_wisun_coap_rhnd_resource_data {
@@ -140,18 +139,6 @@ sl_status_t sl_wisun_coap_rhnd_set_auto_response(const char*  uri_path,
 sl_status_t sl_wisun_coap_rhnd_reset_auto_response(const char * uri_path);
 
 /**************************************************************************//**
- * @brief Prepare auto-response packet
- * @details Call callback with parameters and prepare response packet
- * @param[in] uri_path URI path
- * @param[in] req_packet Request packet (source)
- * @param[in] resp_packet Response packet (destination)
- * @return sl_status_t SL_STATUS_OK on succes, SL_STATUS_FAIL on error
- *****************************************************************************/
-sl_status_t sl_wisun_coap_rhnd_prepare_auto_response(const char * uri_path,
-                                                     const sl_wisun_coap_packet_t * const req_packet,
-                                                     sl_wisun_coap_packet_t * const resp_packet);
-
-/**************************************************************************//**
  * @brief Print resources
  * @details Print resource URI paths
  *****************************************************************************/
@@ -164,8 +151,7 @@ void sl_wisun_coap_rhnd_print_resources(void);
  * @details Weak function, used in the service
  * @param[in,out] req_packet Request packet
  *****************************************************************************/
-void sl_wisun_coap_rhnd_service_resp_received_hnd(sl_wisun_coap_packet_t * req_packet,
-                                                  sl_wisun_coap_packet_t * resp_packet);
+void sl_wisun_coap_rhnd_service_resp_received_hnd(sl_wisun_coap_packet_t * req_packet);
 
 /**************************************************************************//**
  * @brief URI path string error handler

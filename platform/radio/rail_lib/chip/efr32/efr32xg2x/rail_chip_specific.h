@@ -111,7 +111,7 @@ extern "C" {
  * @brief The EFR32XG25 series size needed for
  *   \ref RAIL_StateBufferEntry_t::bufferBytes.
  */
-#define RAIL_EFR32XG25_STATE_BUFFER_BYTES 616
+#define RAIL_EFR32XG25_STATE_BUFFER_BYTES 592
 
 /**
  * @def RAIL_EFR32XG27_STATE_BUFFER_BYTES
@@ -1806,7 +1806,7 @@ RAIL_Status_t RAIL_ChangedDcdc(void);
 #if _SILICON_LABS_32B_SERIES_2_CONFIG == 8
 /// The static amount of memory needed per channel for channel hopping, measured
 /// in 32 bit words, regardless of the size of radio configuration structures.
-#define RAIL_CHANNEL_HOPPING_BUFFER_SIZE_PER_CHANNEL (63U)
+#define RAIL_CHANNEL_HOPPING_BUFFER_SIZE_PER_CHANNEL (65U)
 #else
 /// The static amount of memory needed per channel for channel hopping, measured
 /// in 32 bit words, regardless of the size of radio configuration structures.

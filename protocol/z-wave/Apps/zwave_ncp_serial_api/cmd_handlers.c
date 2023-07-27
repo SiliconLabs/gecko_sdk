@@ -44,6 +44,8 @@ uint8_t funcID_ComplHandler_ZW_NodeManagement;
 uint8_t nodeManagement_Func_ID;
 #endif
 
+typedef  void (cast_help)(void*);
+
 
 #ifdef ZW_CONTROLLER
 static void SetupNodeManagement(const comm_interface_frame_ptr frame, uint8_t funcID_offet)
@@ -2813,17 +2815,22 @@ uint8_t funcID_ComplHandler_ZW_SendTestFrame;
 **--------------------------------------------------------------------------*/
 static void
 ZCB_ComplHandler_ZW_SendTestFrame(
-  uint8_t txStatus,
-  TX_STATUS_TYPE *txStatusReport)
+    void *callback_param)
 {
-  UNUSED(txStatusReport);
+
+  transmission_result_t *tmp = callback_param;
+
+  uint8_t txStatus = tmp->status;
+
   BYTE_IN_AR(compl_workbuf, 0) = funcID_ComplHandler_ZW_SendTestFrame;
   BYTE_IN_AR(compl_workbuf, 1) = txStatus;
   Request(FUNC_ID_ZW_SEND_TEST_FRAME, compl_workbuf, 2);
 }
 
-static uint8_t SendTestFrame(uint16_t nodeID, uint8_t powerLevel, ZW_TX_Callback_t pCallBack)
+static uint8_t SendTestFrame(uint16_t nodeID, uint8_t powerLevel, cast_help pCallBack)
 {
+
+
   // Create transmit frame package
   SZwaveTransmitPackage FramePackage;
   STest *pTest = &FramePackage.uTransmitParams.Test;

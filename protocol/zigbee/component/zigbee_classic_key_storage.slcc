@@ -21,6 +21,9 @@ requires:
   - name: psa_crypto_aes
     condition:
       - device_cortexm
+  - name: psa_crypto_ccm
+    condition:
+      - device_cortexm
   - name: psa_crypto_cipher_ecb
     condition:
       - device_cortexm

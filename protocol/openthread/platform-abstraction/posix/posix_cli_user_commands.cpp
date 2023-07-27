@@ -47,6 +47,10 @@ extern "C" otError coexCommand(void *aContext, uint8_t aArgsLength, char *aArgs[
 extern "C" otError testCommand(void *aContext, uint8_t aArgsLength, char *aArgs[]);
 #endif
 
+#ifdef SL_OPENTHREAD_EFR32_CLI_ENABLE
+extern "C" otError efr32Command(void *aContext, uint8_t aArgsLength, char *aArgs[]);
+#endif
+
 //-----------------------------------------------------------------------------
 // Extern CLI symbol definitions
 //-----------------------------------------------------------------------------
@@ -59,7 +63,10 @@ extern const otCliCommand sl_ot_custom_commands[] = {
 #endif // SL_OPENTHREAD_COEX_CLI_ENABLE
 #ifdef SL_OPENTHREAD_TEST_CLI_ENABLE
     {"test", testCommand},
-#endif
+#endif // SL_OPENTHREAD_TEST_CLI_ENABLE
+#ifdef SL_OPENTHREAD_EFR32_CLI_ENABLE
+    {"efr32", efr32Command},
+#endif // SL_OPENTHREAD_EFR32_CLI_ENABLE
 };
 
 uint8_t sl_ot_custom_commands_count = OT_ARRAY_LENGTH(sl_ot_custom_commands);

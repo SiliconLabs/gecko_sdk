@@ -7,6 +7,7 @@ description: >
   component supports logging of missing application key binding and missing
   model publication data configuration errors.
   The logging level of these errors are configurable.
+  This component is suitable for use in both NCP and SOC applications.
 category: "Bluetooth Mesh|Utility"
 quality: "production"
 root_path: "app/btmesh/common/app_btmesh_util"
