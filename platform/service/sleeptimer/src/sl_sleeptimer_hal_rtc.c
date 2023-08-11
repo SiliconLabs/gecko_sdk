@@ -327,8 +327,8 @@ void sli_sleeptimer_set_pm_em_requirement(void)
   }
 #else
   switch ((CMU->LFACLKSEL & _CMU_LFACLKSEL_LFA_MASK) >> _CMU_LFACLKSEL_LFA_SHIFT) {
-    case CMU_LFCLKSEL_LFA_LFRCO:
-    case CMU_LFCLKSEL_LFA_LFXO:
+    case CMU_LFACLKSEL_LFA_LFRCO:
+    case CMU_LFACLKSEL_LFA_LFXO:
       sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM2);
       break;
     default:
