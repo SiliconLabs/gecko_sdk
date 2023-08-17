@@ -543,13 +543,12 @@ void RadioSpinel<InterfaceType, ProcessContextType>::HandleNotification(SpinelIn
     }
 
 exit:
-    if (shouldSaveFrame)
-    {
-        aFrameBuffer.SaveFrame();
-    }
-    else
+    if (!shouldSaveFrame || aFrameBuffer.SaveFrame() != OT_ERROR_NONE)
     {
         aFrameBuffer.DiscardFrame();
+        if (shouldSaveFrame) {
+            otLogCritPlat("RX Spinel buffer full, dropped incomming frame");
+        }
     }
 
     UpdateParseErrorCount(error);
@@ -1281,7 +1280,7 @@ otError RadioSpinel<InterfaceType, ProcessContextType>::AddSrcMatchShortEntry(ui
     SuccessOrExit(error = Insert(SPINEL_PROP_MAC_SRC_MATCH_SHORT_ADDRESSES, SPINEL_DATATYPE_UINT16_S, aShortAddress));
 
 #if OPENTHREAD_SPINEL_CONFIG_RCP_RESTORATION_MAX_COUNT > 0
-    assert(mSrcMatchShortEntryCount < OPENTHREAD_CONFIG_MLE_MAX_CHILDREN);
+    VerifyOrExit(mSrcMatchShortEntryCount < OPENTHREAD_CONFIG_MLE_MAX_CHILDREN);
 
     for (int i = 0; i < mSrcMatchShortEntryCount; ++i)
     {
@@ -1307,7 +1306,7 @@ otError RadioSpinel<InterfaceType, ProcessContextType>::AddSrcMatchExtEntry(cons
                       Insert(SPINEL_PROP_MAC_SRC_MATCH_EXTENDED_ADDRESSES, SPINEL_DATATYPE_EUI64_S, aExtAddress.m8));
 
 #if OPENTHREAD_SPINEL_CONFIG_RCP_RESTORATION_MAX_COUNT > 0
-    assert(mSrcMatchExtEntryCount < OPENTHREAD_CONFIG_MLE_MAX_CHILDREN);
+    VerifyOrExit(mSrcMatchExtEntryCount < OPENTHREAD_CONFIG_MLE_MAX_CHILDREN);
 
     for (int i = 0; i < mSrcMatchExtEntryCount; ++i)
     {

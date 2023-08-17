@@ -318,14 +318,21 @@ public:
      *
      * Saved frame can be retrieved later using `GetNextSavedFrame()`.
      *
+     * @retval OT_ERROR_NONE     Successfully saved the buffer and prepared the write pointer for the next frame.
+     * @retval OT_ERROR_NO_BUFS  Insufficient buffer space.
      */
-    void SaveFrame(void)
+    otError SaveFrame(void)
     {
+        // If the next header will overflow the buffer, we can't save the frame.
+        if (mWritePointer + kHeaderSize > GetArrayEnd(mBuffer)) {
+            return OT_ERROR_NO_BUFS;
+        }
         Encoding::LittleEndian::WriteUint16(GetSkipLength() + GetLength(), mWriteFrameStart + kHeaderTotalLengthOffset);
         mWriteFrameStart = mWritePointer;
         IgnoreError(SetSkipLength(0));
         mWritePointer    = GetFrame();
         mRemainingLength = static_cast<uint16_t>(mBuffer + kSize - mWritePointer);
+        return OT_ERROR_NONE;
     }
 
     /**

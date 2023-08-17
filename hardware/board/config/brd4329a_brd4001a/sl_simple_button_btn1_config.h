@@ -35,8 +35,8 @@
 
 // <gpio> SL_SIMPLE_BUTTON_BTN1
 // $[GPIO_SL_SIMPLE_BUTTON_BTN1]
-#define SL_SIMPLE_BUTTON_BTN1_PORT               gpioPortC
-#define SL_SIMPLE_BUTTON_BTN1_PIN                0
+#define SL_SIMPLE_BUTTON_BTN1_PORT               gpioPortD
+#define SL_SIMPLE_BUTTON_BTN1_PIN                1
 
 // [GPIO_SL_SIMPLE_BUTTON_BTN1]$
 

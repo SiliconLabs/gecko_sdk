@@ -12,9 +12,7 @@ component:
   - id: "cli"
     instance:
     - example
-  - id: "iostream_usart"
-    instance:
-      - vcom
+  - id: "iostream_recommended_stream"
   - id: "zigbee_debug_print"
   - id: "zigbee_pro_stack"
   - id: "zigbee_source_route"
@@ -49,7 +47,6 @@ component:
   - id: "zigbee_zll_utility_server"
   - id: "zigbee_scan_dispatch"
   - id: "zigbee_update_tc_link_key"
-  - id: "zigbee_debug_basic"
   # -- LEDs and Buttons GPIO Conflcit Note --
   # Some of the development boards (and modules) have limited GPIO to be used by
   # appplication and share the exact same port/pin definition between leds and
@@ -72,6 +69,12 @@ configuration:
     value: 1
   - name: SL_IOSTREAM_USART_VCOM_FLOW_CONTROL_TYPE
     value: usartHwFlowControlCtsAndRts
+    condition:
+      - "iostream_usart"
+  - name: SL_IOSTREAM_EUSART_VCOM_FLOW_CONTROL_TYPE
+    value: eusartHwFlowControlCtsAndRts
+    condition:
+      - "iostream_eusart"
   - name: SL_CLI_MAX_INPUT_ARGUMENTS
     value: 16
   - name: SLI_ZIGBEE_PRIMARY_NETWORK_DEVICE_TYPE

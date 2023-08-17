@@ -42,8 +42,8 @@
 
 // <gpio> SL_EZSPSPI_WAKE_INT
 // $[GPIO_SL_EZSPSPI_WAKE_INT]
-#define SL_EZSPSPI_WAKE_INT_PORT                 gpioPortC
-#define SL_EZSPSPI_WAKE_INT_PIN                  0
+#define SL_EZSPSPI_WAKE_INT_PORT                 gpioPortD
+#define SL_EZSPSPI_WAKE_INT_PIN                  1
 
 // [GPIO_SL_EZSPSPI_WAKE_INT]$
 

@@ -87,13 +87,13 @@
 #define SL_IOSTREAM_USART_VCOM_PERIPHERAL        USART0
 #define SL_IOSTREAM_USART_VCOM_PERIPHERAL_NO     0
 
-// USART0 TX on PD01
-#define SL_IOSTREAM_USART_VCOM_TX_PORT           gpioPortD
-#define SL_IOSTREAM_USART_VCOM_TX_PIN            1
+// USART0 TX on PC00
+#define SL_IOSTREAM_USART_VCOM_TX_PORT           gpioPortC
+#define SL_IOSTREAM_USART_VCOM_TX_PIN            0
 
-// USART0 RX on PD00
-#define SL_IOSTREAM_USART_VCOM_RX_PORT           gpioPortD
-#define SL_IOSTREAM_USART_VCOM_RX_PIN            0
+// USART0 RX on PC01
+#define SL_IOSTREAM_USART_VCOM_RX_PORT           gpioPortC
+#define SL_IOSTREAM_USART_VCOM_RX_PIN            1
 
 // USART0 CTS on PC03
 #define SL_IOSTREAM_USART_VCOM_CTS_PORT          gpioPortC

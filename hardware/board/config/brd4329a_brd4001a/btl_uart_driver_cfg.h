@@ -55,13 +55,13 @@
 #define SL_SERIAL_UART_PERIPHERAL                USART0
 #define SL_SERIAL_UART_PERIPHERAL_NO             0
 
-// USART0 TX on PD01
-#define SL_SERIAL_UART_TX_PORT                   gpioPortD
-#define SL_SERIAL_UART_TX_PIN                    1
+// USART0 TX on PC00
+#define SL_SERIAL_UART_TX_PORT                   gpioPortC
+#define SL_SERIAL_UART_TX_PIN                    0
 
-// USART0 RX on PD00
-#define SL_SERIAL_UART_RX_PORT                   gpioPortD
-#define SL_SERIAL_UART_RX_PIN                    0
+// USART0 RX on PC01
+#define SL_SERIAL_UART_RX_PORT                   gpioPortC
+#define SL_SERIAL_UART_RX_PIN                    1
 
 // USART0 CTS on PC03
 #define SL_SERIAL_UART_CTS_PORT                  gpioPortC
@@ -76,8 +76,8 @@
 // <gpio optional=true> SL_VCOM_ENABLE
 
 // $[GPIO_SL_VCOM_ENABLE]
-#define SL_VCOM_ENABLE_PORT                      gpioPortC
-#define SL_VCOM_ENABLE_PIN                       1
+#define SL_VCOM_ENABLE_PORT                      gpioPortD
+#define SL_VCOM_ENABLE_PIN                       0
 
 // [GPIO_SL_VCOM_ENABLE]$
 

@@ -13,10 +13,8 @@ component:
   - id: "cli"
     instance:
     - example
-  - id: "iostream_usart"
-    instance:
-      - vcom
   - id: "zigbee_debug_print"      
+  - id: "iostream_recommended_stream"
   - id: "zigbee_pro_stack"
   - id: "zigbee_source_route"
   - id: "zigbee_binding_table"
@@ -58,7 +56,6 @@ component:
   - id: "zigbee_basic"
   - id: "zigbee_zll_utility_server"
   - id: "zigbee_scan_dispatch"
-  - id: "zigbee_debug_basic"
   - id: "zigbee_packet_validate"
   - id: "zigbee_security_link_keys"
   - id: "zigbee_ble_event_handler"
@@ -78,6 +75,12 @@ configuration:
     value: 1
   - name: SL_IOSTREAM_USART_VCOM_FLOW_CONTROL_TYPE
     value: usartHwFlowControlCtsAndRts
+    condition:
+      - "iostream_usart"
+  - name: SL_IOSTREAM_EUSART_VCOM_FLOW_CONTROL_TYPE
+    value: eusartHwFlowControlCtsAndRts
+    condition:
+      - "iostream_eusart"
   - name: SL_CLI_MAX_INPUT_ARGUMENTS
     value: 16
   - name: SLI_ZIGBEE_PRIMARY_NETWORK_DEVICE_TYPE
@@ -86,6 +89,12 @@ configuration:
     value: SLI_ZIGBEE_NETWORK_SECURITY_TYPE_3_0
   - name: SL_IOSTREAM_USART_VCOM_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
     value: 1
+    condition:
+      - "iostream_usart"
+  - name: SL_IOSTREAM_EUSART_VCOM_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
+    value: 1
+    condition:
+      - "iostream_eusart"
   - name: SL_CLI_PROMPT_STRING
     value:  "\"DMPLight>\""
   - name: SL_BT_CONFIG_USER_ADVERTISERS

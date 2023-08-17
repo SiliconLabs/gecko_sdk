@@ -40,3 +40,23 @@ upgrade:
           - zigbee_security_link_keys_library
         add:
           - zigbee_security_link_keys
+  - sdk:
+      id: gecko_sdk
+      version: "4.2.4"
+    component:
+      - trigger: iostream_usart
+        description: >
+          Switch to use default recommended vcom line (USART/EUSART). No action is needed.
+        remove:
+          - iostream_usart
+          - zigbee_debug_basic
+        add:
+          - iostream_recommended_stream
+      - trigger: iostream_eusart
+        description: >
+          Switch to use default recommended vcom line (USART/EUSART). No action is needed.
+        remove:
+          - iostream_eusart
+          - zigbee_debug_basic
+        add:
+          - iostream_recommended_stream

@@ -41,9 +41,7 @@ component:
   instance:
   - gpdCli
 - id: "zigbee_debug_print"
-- id: "iostream_usart"
-  instance:
-  - vcom
+- id: "iostream_recommended_stream"
 #---------------- GPD Componenets --------------------
 - id: "zigbee_gpd_af_cli"
 - id: "zigbee_gpd_application_support"
@@ -72,16 +70,24 @@ configuration:
     value: "1"
   - name: SL_BOARD_ENABLE_VCOM
     value: "1"
-    condition:
-      - iostream_usart
   - name: SL_CLI_LOCAL_ECHO
     value: "true"
   - name: SL_IOSTREAM_USART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
     value: "true"
+    condition:
+      - "iostream_usart"
   - name: SL_IOSTREAM_USART_VCOM_FLOW_CONTROL_TYPE
     value: "usartHwFlowControlNone"
     condition:
       - iostream_usart
+  - name: SL_IOSTREAM_EUSART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
+    value: "true"
+    condition:
+      - "iostream_eusart"
+  - name: SL_IOSTREAM_EUSART_VCOM_FLOW_CONTROL_TYPE
+    value: "eusartHwFlowControlNone"
+    condition:
+      - "iostream_eusart"
   - name: EMBER_AF_PLUGIN_APPS_RX_WINDOW
     value: "8"
   - name: EMBER_AF_PLUGIN_APPS_APP_INFO

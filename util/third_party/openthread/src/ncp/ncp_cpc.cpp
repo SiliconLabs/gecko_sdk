@@ -146,19 +146,34 @@ void NcpCPC::SendToCPC(void)
 {
     Spinel::Buffer &txFrameBuffer = mTxFrameBuffer;
     uint16_t        bufferLen;
+    uint16_t        offset = 0;
 
     VerifyOrExit(mIsReady && !mIsWriting && !txFrameBuffer.IsEmpty());
 
     mIsWriting = true;
-    IgnoreError(txFrameBuffer.OutFrameBegin());
-    bufferLen = txFrameBuffer.OutFrameGetLength();
 
-    txFrameBuffer.OutFrameRead(bufferLen, mCpcTxBuffer);
-    if (sl_cpc_write(&mUserEp, mCpcTxBuffer, bufferLen, 0, NULL) != SL_STATUS_OK)
+    // Concatenate multiple spinel buffers for efficiency over CPC.
+    while (!txFrameBuffer.IsEmpty())
+    {
+        IgnoreError(txFrameBuffer.OutFrameBegin());
+        bufferLen = txFrameBuffer.OutFrameGetLength();
+        if (offset + sizeof(uint16_t) + bufferLen < kCpcTxBufferSize) {
+            Encoding::BigEndian::WriteUint16(bufferLen, mCpcTxBuffer + offset);
+            offset += sizeof(uint16_t);
+            txFrameBuffer.OutFrameRead(bufferLen, mCpcTxBuffer + offset);
+            offset += bufferLen;
+            IgnoreError(txFrameBuffer.OutFrameRemove());
+        }
+        else
+        {
+          break;
+        }
+    }
+
+    if (sl_cpc_write(&mUserEp, mCpcTxBuffer, offset, 0, NULL) != SL_STATUS_OK)
     {
         mIsWriting = false;
     }
-    IgnoreError(txFrameBuffer.OutFrameRemove());
 
 exit:
     // If the CPCd link isn't ready yet, just remove the frame from
