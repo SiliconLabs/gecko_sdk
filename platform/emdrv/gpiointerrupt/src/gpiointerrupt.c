@@ -163,7 +163,7 @@ unsigned int GPIOINT_CallbackRegisterExt(uint8_t pin, GPIOINT_IrqCallbackPtrExt_
   // the first available
   for (uint8_t i = 0; i < 4; i++) {
     intToCheck = intGroupStart + ((pin + i) & 0x3); // modulo 4
-    if (((intsEnabled >> intToCheck) & 0x1) == 0) {
+    if (((intsEnabled >> intToCheck) & 0x1) != 0) {
       intNo = (unsigned int)intToCheck;
       break;
     }
