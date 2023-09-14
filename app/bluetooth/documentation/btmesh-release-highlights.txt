@@ -1,2 +1,2 @@
-Bluetooth Mesh SDK 3.0.5.0
-- Support for EFR32xG21, Revision C and later
+Bluetooth Mesh SDK 3.0.6.0
+- Underlying platform changes only

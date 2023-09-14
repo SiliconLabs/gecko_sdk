@@ -1,2 +1,2 @@
-Zigbee EmberZNet SDK 7.1.5.0
-- Support for EFR32xG21, Revision C and later, plus bug fixes
+Zigbee EmberZNet SDK 7.1.6.0
+- Underlying platform changes only

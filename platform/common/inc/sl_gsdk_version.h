@@ -31,7 +31,7 @@
 
 #define SL_GSDK_MAJOR_VERSION     4
 #define SL_GSDK_MINOR_VERSION     1
-#define SL_GSDK_PATCH_VERSION     5
+#define SL_GSDK_PATCH_VERSION     6
 
 #define SL_GSDK_VERSION      ((SL_GSDK_MAJOR_VERSION <<  8)   \
                               | (SL_GSDK_MINOR_VERSION <<  4) \

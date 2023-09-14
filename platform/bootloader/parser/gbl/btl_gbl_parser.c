@@ -61,10 +61,11 @@ static bool gbl_storeData(ParserContext_t  *context,
                           GblInputBuffer_t *input);
 
 // Get bytes from storage (and input buffer if needed) into local buffer
-static bool gbl_useData(ParserContext_t  *context,
-                        uint8_t          outputBuffer[],
-                        GblInputBuffer_t *input,
-                        size_t           numberOfBytes);
+static int32_t gbl_useData(ParserContext_t  *context,
+                           uint8_t          outputBuffer[],
+                           size_t           outputBufferSize,
+                           GblInputBuffer_t *input,
+                           size_t           numberOfBytes);
 
 // Get amount of bytes available for parsing in this round of parser_parse(..)
 static size_t gbl_getBytesAvailable(ParserContext_t        *context,
@@ -150,6 +151,16 @@ static int32_t parser_finalize(ParserContext_t                   *parserContext,
                                ImageProperties_t                 *imageProperties,
                                const BootloaderParserCallbacks_t *callbacks);
 
+// Get data from storage and internal input buffer. This function advances the
+// parser state.
+static int32_t gbl_getData(ParserContext_t  *context,
+                           GblInputBuffer_t *input,
+                           uint8_t          outputBuffer[],
+                           size_t           outputBufferSize,
+                           size_t           outputLength,
+                           bool             applySHA,
+                           bool             decrypt);
+
 // -----------------------------------------------------------------------------
 // Local functions
 
@@ -195,11 +206,10 @@ static bool gbl_storeData(ParserContext_t  *context,
  *
  * @param context Context variable
  * @param outputBuffer buffer to copy to
+ * @param outputBufferSize size of the outputBuffer
  * @param inputBuffer input buffer to copy from
- * @param inputOffset offset indicating next byte to process in the inputbuffer
- * @param inputLength size of the input buffer in bytes
  * @param numberOfBytes number of bytes requested to be copied
- * @returns True if all bytes got copied, false if not.
+ * @returns Error code.
  *
  * Gets the first n bytes in the input queue and copies them to a specified
  *   temporary buffer. The input queue is the concatenation of the internal
@@ -208,11 +218,15 @@ static bool gbl_storeData(ParserContext_t  *context,
  *   function.
  * This function will also update the context accordingly.
  ******************************************************************************/
-static bool gbl_useData(ParserContext_t  *context,
-                        uint8_t          outputBuffer[],
-                        GblInputBuffer_t *input,
-                        size_t           numberOfBytes)
+static int32_t gbl_useData(ParserContext_t  *context,
+                           uint8_t          outputBuffer[],
+                           size_t           outputBufferSize,
+                           GblInputBuffer_t *input,
+                           size_t           numberOfBytes)
 {
+  if (numberOfBytes > outputBufferSize) {
+    return BOOTLOADER_ERROR_PARSER_UNEXPECTED;
+  }
   size_t bytesProcessed = 0UL;
   // Get data from local buffer first
   while ((context->bytesInInternalBuffer > 0U)
@@ -237,9 +251,9 @@ static bool gbl_useData(ParserContext_t  *context,
   }
 
   if (bytesProcessed == numberOfBytes) {
-    return true;
+    return BOOTLOADER_OK;
   } else {
-    return false;
+    return BOOTLOADER_ERROR_PARSER_BUFFER;
   }
 }
 
@@ -300,6 +314,7 @@ static int32_t gbl_parseHeader(ParserContext_t  *context,
   retval = gbl_getData(context,
                        input,
                        tagBuffer,
+                       8UL,
                        tagSize,
                        false,
                        false);
@@ -351,20 +366,29 @@ static int32_t gbl_parseHeader(ParserContext_t  *context,
   return BOOTLOADER_ERROR_PARSER_PARSED;
 }
 
-// -----------------------------------------------------------------------------
-// Global helper functions
-
 /***************************************************************************//**
  * Get data from combined input buffer + internal buffer, and advance the
  * parser state
+
+ * @param context            GBL parser context
+ * @param input              Input data
+ * @param outputBuffer       Output data
+ * @param outputBufferSize   Size of the outputBuffer
+ * @param outputLength       Output data length
+ * @param applySHA           Update SHA256 in the GBL parser context
+ * @param decrypt            Decrypt the output data
+ *
+ * @return Error code
  ******************************************************************************/
-int32_t gbl_getData(ParserContext_t  *context,
-                    GblInputBuffer_t *input,
-                    uint8_t          outputBuffer[],
-                    size_t           outputLength,
-                    bool             applySHA,
-                    bool             decrypt)
+static int32_t gbl_getData(ParserContext_t  *context,
+                           GblInputBuffer_t *input,
+                           uint8_t          outputBuffer[],
+                           size_t           outputBufferSize,
+                           size_t           outputLength,
+                           bool             applySHA,
+                           bool             decrypt)
 {
+  int32_t retval;
   if (gbl_getBytesAvailable(context, input) < outputLength) {
     if (gbl_storeData(context, input)) {
       return BOOTLOADER_OK;
@@ -373,13 +397,14 @@ int32_t gbl_getData(ParserContext_t  *context,
       return BOOTLOADER_ERROR_PARSER_BUFFER;
     }
   }
-
-  if (!gbl_useData(context,
-                   outputBuffer,
-                   input,
-                   outputLength)) {
+  retval = gbl_useData(context,
+                       outputBuffer,
+                       outputBufferSize,
+                       input,
+                       outputLength);
+  if (retval != BOOTLOADER_OK) {
     context->internalState = GblParserStateError;
-    return BOOTLOADER_ERROR_PARSER_BUFFER;
+    return retval;
   }
 
   // Update checksum
@@ -412,6 +437,9 @@ int32_t gbl_getData(ParserContext_t  *context,
 
   return BOOTLOADER_ERROR_PARSER_PARSED;
 }
+
+// -----------------------------------------------------------------------------
+// Global helper functions
 
 int32_t gbl_writeProgData(ParserContext_t *context,
                           uint8_t buffer[],
@@ -753,6 +781,7 @@ int32_t parser_verifyCertificate(void *context,
     retval = gbl_getData(context,
                          inputBuffer,
                          tagBuffer,
+                         GBL_PARSER_BUFFER_SIZE,
                          4UL,
                          true,
                          false);
@@ -765,6 +794,7 @@ int32_t parser_verifyCertificate(void *context,
     retval = gbl_getData(context,
                          inputBuffer,
                          tagBuffer,
+                         GBL_PARSER_BUFFER_SIZE,
                          64UL,
                          true,
                          false);
@@ -779,6 +809,7 @@ int32_t parser_verifyCertificate(void *context,
     retval = gbl_getData(context,
                          inputBuffer,
                          tagBuffer,
+                         GBL_PARSER_BUFFER_SIZE,
                          4UL,
                          true,
                          false);
@@ -797,6 +828,7 @@ int32_t parser_verifyCertificate(void *context,
     retval = gbl_getData(context,
                          inputBuffer,
                          tagBuffer,
+                         GBL_PARSER_BUFFER_SIZE,
                          64UL,
                          true,
                          false);
@@ -911,6 +943,7 @@ static int32_t parser_parseGblHeader(ParserContext_t  *parserContext,
     retval = gbl_getData(parserContext,
                          input,
                          tagBuffer,
+                         GBL_PARSER_BUFFER_SIZE,
                          8UL,
                          true,
                          false);
@@ -996,6 +1029,7 @@ static int32_t parser_parseVersionDependency(ParserContext_t  *parserContext,
     retval = gbl_getData(parserContext,
                          input,
                          tagBuffer,
+                         GBL_PARSER_BUFFER_SIZE,
                          sizeof(VersionDependency_t),
                          true,
                          false);
@@ -1361,6 +1395,7 @@ static int32_t parser_encryptionInit(ParserContext_t  *parserContext,
     retval = gbl_getData(parserContext,
                          input,
                          tagBuffer,
+                         GBL_PARSER_BUFFER_SIZE,
                          16UL,
                          true,
                          false);
@@ -1399,13 +1434,14 @@ static int32_t parser_parseApplicationInfo(ParserContext_t   *parserContext,
                                            ImageProperties_t *imageProperties)
 {
   volatile int32_t retval;
-  uint8_t tagBuffer[GBL_PARSER_BUFFER_SIZE];
+  uint8_t tagBuffer[GBL_PARSER_BUFFER_SIZE] = { 0 };
 
   while (parserContext->offsetInTag < parserContext->lengthOfTag) {
     // Get data
     retval = gbl_getData(parserContext,
                          input,
                          tagBuffer,
+                         GBL_PARSER_BUFFER_SIZE,
                          parserContext->lengthOfTag,
                          true,
                          true);
@@ -1468,6 +1504,7 @@ static int32_t parser_parseSe(ParserContext_t                   *parserContext,
     retval = gbl_getData(parserContext,
                          input,
                          &tagBuffer[8],
+                         56UL, /* tagBuffer is starting from 8th index */
                          8UL,
                          true, /* Do SHA hashing */
                          true /* Decrypt if necessary */);
@@ -1542,6 +1579,7 @@ static int32_t parser_parseBootloader(ParserContext_t   *parserContext,
     retval = gbl_getData(parserContext,
                          input,
                          tagBuffer,
+                         GBL_PARSER_BUFFER_SIZE,
                          8UL,
                          true, /* Do SHA hashing */
                          true /* Decrypt if necessary */);
@@ -1604,6 +1642,7 @@ static int32_t parser_parseProg(ParserContext_t  *parserContext,
     retval = gbl_getData(parserContext,
                          input,
                          tagBuffer,
+                         GBL_PARSER_BUFFER_SIZE,
                          4UL,
                          true, /* Do SHA hashing */
                          true /* Decrypt if necessary */);
@@ -1683,6 +1722,7 @@ static int32_t parser_parseData(ParserContext_t                   *parserContext
     retval = gbl_getData(parserContext,
                          input,
                          tagBuffer,
+                         GBL_PARSER_BUFFER_SIZE,
                          tmpSize,
                          true,
                          true);
@@ -1838,6 +1878,7 @@ static int32_t parser_parseCustomTag(ParserContext_t                   *parserCo
     retval = gbl_getData(parserContext,
                          input,
                          tagBuffer,
+                         GBL_PARSER_BUFFER_SIZE,
                          tmpSize,
                          true,
                          true);
@@ -1927,6 +1968,7 @@ static int32_t parser_checkSignature(ParserContext_t   *parserContext,
       retval = gbl_getData(parserContext,
                            input,
                            tagBuffer,
+                           GBL_PARSER_BUFFER_SIZE,
                            64UL,
                            false,
                            false);
@@ -2029,6 +2071,7 @@ static int32_t parser_finalize(ParserContext_t                   *parserContext,
   retval = gbl_getData(parserContext,
                        input,
                        tagBuffer,
+                       GBL_PARSER_BUFFER_SIZE,
                        4UL,
                        false,
                        false);

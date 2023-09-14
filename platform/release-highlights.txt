@@ -1,2 +1,2 @@
-Gecko Platform 4.1.4.0
-- RAIL: Fixed one issue
+Gecko Platform 4.1.6.0
+- Bootloader: One update
