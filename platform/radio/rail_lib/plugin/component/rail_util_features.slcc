@@ -133,6 +133,25 @@ provides:
     condition:
       - device_series_2
 
+  - name: rail_supports_tx_repeat_start_to_start
+    condition:
+      - device_sdid_205 
+  - name: rail_supports_tx_repeat_start_to_start
+    condition:
+      - device_sdid_210 
+  - name: rail_supports_tx_repeat_start_to_start
+    condition:
+      - device_sdid_215 
+  - name: rail_supports_tx_repeat_start_to_start
+    condition:
+      - device_sdid_220 
+  - name: rail_supports_tx_repeat_start_to_start
+    condition:
+      - device_sdid_230 
+  - name: rail_supports_tx_repeat_start_to_start
+    condition:
+      - device_sdid_235
+
   - name: rail_supports_dual_sync_words
     condition:
       - device_series_1 

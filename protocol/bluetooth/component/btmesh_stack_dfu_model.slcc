@@ -3,7 +3,7 @@ label: "Bluetooth Mesh DFU Model Library"
 package: "Btmesh"
 description: "This component provides the Bluetooth mesh Device Firmware Upgrade model library. The library is structured so that only the relevant parts will be included in the application binary, depending on which of the models are used by the application."
 category: "Bluetooth Mesh|Stack|DFU"
-quality: "evaluation"
+quality: "production"
 root_path: "protocol/bluetooth"
 include:
   - path: "inc"

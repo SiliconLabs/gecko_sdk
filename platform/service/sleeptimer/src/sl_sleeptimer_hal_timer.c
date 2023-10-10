@@ -327,13 +327,35 @@ uint16_t sleeptimer_hal_get_clock_accuracy(void)
 #endif
 }
 
+/*******************************************************************************
+ * Hardware Abstraction Layer to get the capture channel value.
+ *
+ * @return Capture value.
+ ******************************************************************************/
+uint32_t sleeptimer_hal_get_capture(void)
+{
+  // Invalid for TIMER peripheral
+  EFM_ASSERT(0);
+  return 0;
+}
+
+/*******************************************************************************
+ * Hardware Abstraction Layer to reset PRS signal triggered by the associated
+ * peripheral.
+ ******************************************************************************/
+void sleeptimer_hal_reset_prs_signal(void)
+{
+  // Invalid for TIMER peripheral
+  EFM_ASSERT(0);
+}
+
 /***************************************************************************//**
  * Set lowest energy mode based on a project's configurations and clock source
  *
  * @note Lowest possible energy mode for WTIMER and TIMER peripheral is EM1.
  ******************************************************************************/
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
-void sli_power_manager_set_em_requirement(void)
+void sli_sleeptimer_set_pm_em_requirement(void)
 {
   sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM1);
 }

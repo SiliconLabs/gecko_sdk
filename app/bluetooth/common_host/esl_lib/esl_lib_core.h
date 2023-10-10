@@ -88,6 +88,11 @@ void esl_lib_deinit(void);
  *****************************************************************************/
 sl_status_t esl_lib_core_add_command(esl_lib_command_list_cmd_t *cmd);
 
+/**************************************************************************//**
+ * Connection request complete callback.
+ *****************************************************************************/
+void esl_lib_core_connection_complete(void);
+
 #ifdef __cplusplus
 };
 #endif

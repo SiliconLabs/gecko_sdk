@@ -35,6 +35,14 @@
 #ifndef OPENTHREAD_CORE_EFR32_CONFIG_H_
 #define OPENTHREAD_CORE_EFR32_CONFIG_H_
 
+#include "sl_device_init_hfxo.h"
+#include "sl_device_init_hfxo_config.h"
+
+#if defined(HARDWARE_BOARD_HAS_LFXO)
+#include "sl_device_init_lfxo.h"
+#include "sl_device_init_lfxo_config.h"
+#endif
+
 // Use (user defined) application config file to define OpenThread configurations
 #ifdef   SL_OPENTHREAD_APPLICATION_CONFIG_FILE
 #include SL_OPENTHREAD_APPLICATION_CONFIG_FILE
@@ -200,9 +208,23 @@
  * The minimum time (in microseconds) before the MHR start that the radio should be in receive state and ready to
  * properly receive in order to properly receive any IEEE 802.15.4 frame. Defaults to the duration of SHR + PHR.
  *
+ * 802.15.4 2.4GHz OQPSK:
+ * SHR: 4 bytes of preamble, 1 byte of sync word
+ * PHR: 1 byte
+ * Total (6 * 32) = 192 us.
+ *
+ * Proprietary SubGhz (2GFSK in 915MHz):
+ * SHR: 4 bytes preamble, 2 bytes SFD = 6 bytes
+ * PHR: 2 bytes
+ * Total (8 * 32) = 256 us.
+ *
  */
 #ifndef OPENTHREAD_CONFIG_MIN_RECEIVE_ON_AHEAD
-#define OPENTHREAD_CONFIG_MIN_RECEIVE_ON_AHEAD (6 * 32)
+#if RADIO_CONFIG_SUBGHZ_SUPPORT
+  #define OPENTHREAD_CONFIG_MIN_RECEIVE_ON_AHEAD 256
+#else
+  #define OPENTHREAD_CONFIG_MIN_RECEIVE_ON_AHEAD 192
+#endif
 #endif
 
 /**
@@ -213,9 +235,12 @@
  * plus the duration of maximum enh-ack frame. Platforms are encouraged to improve this value for energy
  * efficiency purposes.
  *
+ * In theory, RAIL should automatically extend the duration of the receive window once the SHR has been
+ * detected, so we should be able to set this to zero.
+ *
  */
 #ifndef OPENTHREAD_CONFIG_MIN_RECEIVE_ON_AFTER
-#define OPENTHREAD_CONFIG_MIN_RECEIVE_ON_AFTER ((127 + 6 + 39) * 32)
+#define OPENTHREAD_CONFIG_MIN_RECEIVE_ON_AFTER 0
 #endif
 
 /*
@@ -418,34 +443,54 @@
  *
  */
 #ifndef SL_OPENTHREAD_CSL_TX_UNCERTAINTY
-#define SL_OPENTHREAD_CSL_TX_UNCERTAINTY 175
+#if OPENTHREAD_RADIO || OPENTHREAD_CONFIG_REFERENCE_DEVICE_ENABLE
+  # define SL_OPENTHREAD_CSL_TX_UNCERTAINTY 175
+#elif OPENTHREAD_FTD
+  // Approx. ~128 us. for single CCA + some additional tx uncertainty in testing
+  #define SL_OPENTHREAD_CSL_TX_UNCERTAINTY 20
+#else
+  // Approx. ~128 us. for single CCA
+  //
+  // Note: Our SSEDs "schedule" transmissions to their parent in order to know
+  // exactly when in the future the data packets go out so they can calculate
+  // the accurate CSL phase to send to their parent.
+  //
+  // The receive windows on the SSEDs scale with this value, so increasing this
+  // uncertainty to account for full CCA/CSMA with 0..7 backoffs
+  // (see RAIL_CSMA_CONFIG_802_15_4_2003_2p4_GHz_OQPSK_CSMA) will mean that the
+  // receive windows can get very long (~ 5ms.)
+  //
+  // We have updated SSEDs to use a single CCA (RAIL_CSMA_CONFIG_SINGLE_CCA)
+  // instead. If they are in very busy channels, CSL won't be reliable anyway.
+  #define SL_OPENTHREAD_CSL_TX_UNCERTAINTY 12
+#endif
 #endif
 
 /**
  * @def SL_OPENTHREAD_HFXO_ACCURACY
  *
- * XTAL accuracy in units of ± ppm. Also used for calculations during CSL operations.
- *
- * According to EFR datasheets, HFXO is ± 40 ppm.
+ * Worst case XTAL accuracy in units of ± ppm. Also used for calculations during CSL operations.
  *
  * @note Platforms may optimize this value based on operational conditions (i.e.: temperature).
  *
  */
 #ifndef SL_OPENTHREAD_HFXO_ACCURACY
-#define SL_OPENTHREAD_HFXO_ACCURACY 80
+  #define SL_OPENTHREAD_HFXO_ACCURACY SL_DEVICE_INIT_HFXO_PRECISION
 #endif
 
 /**
  * @def SL_OPENTHREAD_LFXO_ACCURACY
  *
- * XTAL accuracy in units of ± ppm. Also used for calculations during CSL operations.
- *
- * According to EFR datasheets, LFXO (at least for MG12) is -8 to +40 ppm.
+ * Worst case XTAL accuracy in units of ± ppm. Also used for calculations during CSL operations.
  *
  * @note Platforms may optimize this value based on operational conditions (i.e.: temperature).
  */
 #ifndef SL_OPENTHREAD_LFXO_ACCURACY
-#define SL_OPENTHREAD_LFXO_ACCURACY 48
+  #if defined(HARDWARE_BOARD_HAS_LFXO)
+    #define SL_OPENTHREAD_LFXO_ACCURACY SL_DEVICE_INIT_LFXO_PRECISION
+  #else
+    #define SL_OPENTHREAD_LFXO_ACCURACY 0
+  #endif
 #endif
 
 /**

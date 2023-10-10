@@ -25,9 +25,8 @@ import logging
 import sys
 from typing import Optional
 
-from bgapi.bglib import CommandFailedError
-
 import btmesh.util
+from bgapi.bglib import CommandFailedError
 from bgapix.bglibx import (BGLibExt, BGLibExtSyncSignalException,
                            BGLibExtWaitEventError)
 from bgapix.slstatus import SlStatus
@@ -200,10 +199,19 @@ class BtmeshDfuAppExec(cmd.Cmd):
             app_btmesh.prov.create_network(
                 netkey, appkeys, app_cfg.network._prov_node_name
             )
+            # The Default TTL state is stored in NVM so local configuration
+            # shall be performed once when the network is created.
+            self.local_conf_default_ttl()
+            # The Network Transmit state is stored in NVM so local configuration
+            # shall be performed once when the network is created.
+            self.local_conf_nettx()
         # Configure local BT Mesh models
-        self.dfu_local_conf()
-        self.conf_local_conf()
-        self.sar_local_conf()
+        self.local_conf_dfu()
+        self.local_conf_ae()
+        # The SAR Transmitter and Receiver state isn't saved into the NVM.
+        # If it is fixed in the stack then this local SAR configuration shall
+        # run once at network creation only.
+        self.local_conf_sar()
 
     def dfu_init(self):
         dfu_clt_retry_params = BtmeshMulticastRetryParams(
@@ -233,7 +241,7 @@ class BtmeshDfuAppExec(cmd.Cmd):
         )
         app_btmesh.dfu_clt.init(
             elem_index=app_cfg.dfu_clt.elem_index,
-            max_updating_nodes=app_cfg.dfu_clt.max_updating_nodes,
+            max_target_nodes=app_cfg.dfu_clt.max_target_nodes,
             retry_params_default=dfu_clt_retry_params,
         )
         app_btmesh.dist_clt.init(
@@ -242,6 +250,8 @@ class BtmeshDfuAppExec(cmd.Cmd):
         )
 
     def conf_init(self):
+        app_btmesh.conf.sar_conf_svr_init()
+        app_btmesh.conf.sar_conf_clt_init()
         app_btmesh.conf.silabs_conf_svr_init()
         app_btmesh.conf.silabs_conf_clt_init()
         conf_retry_params = BtmeshRetryParams(
@@ -271,7 +281,7 @@ class BtmeshDfuAppExec(cmd.Cmd):
         app_btmesh.conf.set_silabs_retry_params_default(silabs_conf_retry_params)
         app_btmesh.conf.set_reset_node_retry_params_default(reset_node_retry_params)
 
-    def dfu_local_conf(self):
+    def local_conf_dfu(self):
         # Set appkey bindings to BLOB Transfer Client model
         elem_index = app_cfg.mbt_clt.elem_index
         mdl = ModelID(NamedModelID.BLOB_TRANSFER_CLIENT)
@@ -294,7 +304,7 @@ class BtmeshDfuAppExec(cmd.Cmd):
             for appkey_index in range(app_cfg.network.appkey_cnt):
                 app_btmesh.conf.bind_local_mdl(elem_index, mdl, appkey_index)
 
-    def conf_local_conf(self):
+    def local_conf_ae(self):
         if app_btmesh.conf.silabs_conf_support:
             elem_index = btmesh.util.PRIM_ELEM_INDEX
             mdls = [
@@ -307,77 +317,111 @@ class BtmeshDfuAppExec(cmd.Cmd):
                     for appkey_index in range(app_cfg.network.appkey_cnt):
                         app_btmesh.conf.bind_local_mdl(elem_index, mdl, appkey_index)
 
-    def sar_local_conf(self):
+    def local_conf_default_ttl(self):
+        prov_node = app_db.btmesh_db.get_provisioner()
+        if app_cfg.conf.auto_conf_default_ttl:
+            default_ttl_status = app_btmesh.conf.set_default_ttl(
+                prov_node, app_cfg.conf.default_ttl_default
+            )
+        else:
+            default_ttl_status = app_btmesh.conf.get_default_ttl(prov_node)
+        logger.info(f"Local Default TTL is {default_ttl_status.ttl}.")
+
+    def local_conf_nettx(self):
+        prov_node = app_db.btmesh_db.get_provisioner()
+        if app_cfg.conf.auto_conf_network_tx:
+            nettx_status = app_btmesh.conf.set_network_transmit(
+                prov_node,
+                app_cfg.conf.network_tx_count_default,
+                app_cfg.conf.network_tx_interval_ms_default,
+            )
+        else:
+            nettx_status = app_btmesh.conf.get_network_transmit(prov_node)
+        logger.info(f"Local Network Transmit Count is {nettx_status.transmit_count}.")
+        logger.info(
+            f"Local Network Transmit Interval Step is "
+            f"{nettx_status.transmit_interval_ms} ms."
+        )
+
+    def local_conf_sar(self):
         if hasattr(self.lib.btmesh, "sar_config_server"):
+            prov_node = app_db.btmesh_db.get_provisioner()
             # The SAR transmitter and receiver configuration getter and setter
             # functions don't require initialization call and it is not mandatory
             # to have SAR Configuration Server in the Device Composition Data.
             # These are necessary only to handle SAR Config messages.
-            if app_cfg.network.sar_tx_custom_local_params_enable:
-                self.lib.btmesh.sar_config_server.set_sar_transmitter(
-                    app_cfg.network.sar_tx_segment_interval_step_default,
-                    app_cfg.network.sar_tx_unicast_retrans_count_default,
-                    app_cfg.network.sar_tx_unicast_retrans_wo_progress_count_default,
-                    app_cfg.network.sar_tx_unicast_retrans_interval_step_default,
-                    app_cfg.network.sar_tx_unicast_retrans_interval_increment_default,
-                    app_cfg.network.sar_tx_multicast_retrans_count_default,
-                    app_cfg.network.sar_tx_multicast_retrans_interval_step_default,
+            if app_cfg.conf.auto_conf_sar:
+                sar_tx_status = app_btmesh.conf.set_sar_transmitter(
+                    prov_node,
+                    app_cfg.conf.sar_tx_segment_interval_step_default,
+                    app_cfg.conf.sar_tx_unicast_retrans_count_default,
+                    app_cfg.conf.sar_tx_unicast_retrans_wo_progress_count_default,
+                    app_cfg.conf.sar_tx_unicast_retrans_interval_step_default,
+                    app_cfg.conf.sar_tx_unicast_retrans_interval_increment_default,
+                    app_cfg.conf.sar_tx_multicast_retrans_count_default,
+                    app_cfg.conf.sar_tx_multicast_retrans_interval_step_default,
                 )
-            resp = self.lib.btmesh.sar_config_server.get_sar_transmitter()
-            logger.debug(
+            else:
+                sar_tx_status = app_btmesh.conf.get_sar_transmitter(prov_node)
+            logger.info(
                 f"Local SAR TX Segment Interval Step is "
-                f"{resp.segment_interval_step} ms."
+                f"{sar_tx_status.segment_interval_step} ms."
             )
-            logger.debug(
+            logger.info(
                 f"Local SAR TX Unicast Retransmissions Count is "
-                f"{resp.unicast_retrans_count} retransmissions."
+                f"{sar_tx_status.unicast_retrans_count} retransmissions."
             )
-            logger.debug(
+            logger.info(
                 f"Local SAR TX Unicast Retransmissions Without Progress Count is "
-                f"{resp.unicast_retrans_wo_progress_count} retransmissions."
+                f"{sar_tx_status.unicast_retrans_wo_progress_count} retransmissions."
             )
-            logger.debug(
+            logger.info(
                 f"Local SAR TX Unicast Retransmissions Interval Step is "
-                f"{resp.unicast_retrans_interval_step} ms."
+                f"{sar_tx_status.unicast_retrans_interval_step} ms."
             )
-            logger.debug(
+            logger.info(
                 f"Local SAR TX Unicast Retransmissions Interval Increment is "
-                f"{resp.unicast_retrans_interval_increment} ms."
+                f"{sar_tx_status.unicast_retrans_interval_increment} ms."
             )
-            logger.debug(
+            logger.info(
                 f"Local SAR TX Multicast Retransmissions Count is "
-                f"{resp.multicast_retrans_count} retransmissions."
+                f"{sar_tx_status.multicast_retrans_count} retransmissions."
             )
-            logger.debug(
+            logger.info(
                 f"Local SAR TX Multicast Retransmissions Interval Step is "
-                f"{resp.multicast_retrans_interval_step} ms."
+                f"{sar_tx_status.multicast_retrans_interval_step} ms."
             )
-            if app_cfg.network.sar_rx_custom_local_params_enable:
-                self.lib.btmesh.sar_config_server.set_sar_receiver(
-                    app_cfg.network.sar_rx_segments_threshold_default,
-                    app_cfg.network.sar_rx_ack_delay_increment_default,
-                    app_cfg.network.sar_rx_discard_timeout_default,
-                    app_cfg.network.sar_rx_segment_interval_step_default,
-                    app_cfg.network.sar_rx_ack_retrans_count_default,
+            if app_cfg.conf.auto_conf_sar:
+                sar_rx_status = app_btmesh.conf.set_sar_receiver(
+                    prov_node,
+                    app_cfg.conf.sar_rx_segments_threshold_default,
+                    app_cfg.conf.sar_rx_ack_delay_increment_default,
+                    app_cfg.conf.sar_rx_discard_timeout_default,
+                    app_cfg.conf.sar_rx_segment_interval_step_default,
+                    app_cfg.conf.sar_rx_ack_retrans_count_default,
                 )
-            resp = self.lib.btmesh.sar_config_server.get_sar_receiver()
-            logger.debug(
+            else:
+                sar_rx_status = app_btmesh.conf.get_sar_receiver(prov_node)
+            logger.info(
                 f"Local SAR RX Segments Threshold is "
-                f"{resp.segments_threshold} segments."
+                f"{sar_rx_status.segments_threshold} segments."
             )
-            logger.debug(
+            logger.info(
                 f"Local SAR RX Acknowledgment Delay Increment is "
-                f"{resp.ack_delay_increment} ({resp.ack_delay_increment + 1.5} "
+                f"{sar_rx_status.ack_delay_increment} "
+                f"({sar_rx_status.ack_delay_increment + 1.5} "
                 f"segment transmission interval step)."
             )
-            logger.debug(f"Local SAR RX Discard Timeout is {resp.discard_timeout} ms.")
-            logger.debug(
-                f"Local SAR RX Receiver Segment Interval Step is "
-                f"{resp.segment_interval_step} ms."
+            logger.info(
+                f"Local SAR RX Discard Timeout is {sar_rx_status.discard_timeout} ms."
             )
-            logger.debug(
+            logger.info(
+                f"Local SAR RX Receiver Segment Interval Step is "
+                f"{sar_rx_status.segment_interval_step} ms."
+            )
+            logger.info(
                 f"Local SAR RX Acknowledgment Retransmissions Count is "
-                f"{resp.ack_retrans_count} retransmissions."
+                f"{sar_rx_status.ack_retrans_count} retransmissions."
             )
 
     def close(self):

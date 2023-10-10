@@ -151,7 +151,7 @@ sl_status_t sl_bt_ead_randomizer_set(sl_bt_ead_randomizer_t randomizer,
 
 /**************************************************************************//**
  * (Re)initialize the entire Nonce value with the new key material provided
- * @note According to the Supplement to the Bluetooth Core Specification (d11)
+ * @note According to the Supplement to the Bluetooth Core Specification v11
  *       Part A, Section 1.23.3: the session key shall be set to a value
  *       determined by a higher layer specification or otherwise negotiated
  *       between the devices that are sending and receiving  the encrypted AD
@@ -163,11 +163,12 @@ sl_status_t sl_bt_ead_randomizer_set(sl_bt_ead_randomizer_t randomizer,
  * @param[in] randomizer - Pointer to the desired Randomizer value type or
  *                         NULL. The Nonce will get a new random value during
  *                         the invocation if NULL is passed.
- * @param[out] nonce - Pointer to the complete EAD Nonce structure. Can be
- *                     also omitted by passing NULL, in which case only the
- *                     session key will be prepared. This is useful for in-place
- *                     decryption with @ref sl_bt_ead_unpack_decrypt(), and not
- *                     meant to be used this way, otherwise.
+ * @param[out] nonce - Pointer to the complete EAD Nonce structure. This can be
+ *                     omitted by advanced users by passing it as NULL, in which
+ *                     case only the session key is prepared. Although passing
+ *                     the nonce is the recommended use case, omitting it can
+ *                     still be useful for efficient in-place decryption when
+ *                     used with @ref sl_bt_ead_unpack_decrypt().
  * @return sl_status_t
  *****************************************************************************/
 sl_status_t sl_bt_ead_session_init(sl_bt_ead_key_material_p key_material,

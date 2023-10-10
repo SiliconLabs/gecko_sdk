@@ -28,6 +28,6 @@ template_contribution:
     # SIMEE1's default size is 8k
     value: 8192
     priority: 100
-documentation:
-    docset: gecko-platform
-    document: service/api/group-simeeprom
+#documentation:
+#    docset: gecko-platform
+#    document: platform-service/simeeprom

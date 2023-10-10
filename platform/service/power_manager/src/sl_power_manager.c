@@ -203,6 +203,11 @@ sl_status_t sl_power_manager_init(void)
       CORE_EXIT_CRITICAL();
       return status;
     }
+#if !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT) \
+    && !defined(SL_CATALOG_POWER_MANAGER_DEEPSLEEP_BLOCKING_HFXO_RESTORE_PRESENT)
+    // Additional Sleeptimer HW configuration if the "power_manager_deepsleep" component is used
+    sli_sleeptimer_hal_power_manager_integration_init();
+#endif
 
   #if (SL_POWER_MANAGER_DEBUG == 1)
     sli_power_manager_debug_init();

@@ -10,7 +10,7 @@ provides:
   - name: device_init_core
 requires:
   - name: emlib_chip
-    condition: [device]
+    condition: [device_efx]
 template_contribution:
   - name: event_handler
     value:
@@ -18,7 +18,7 @@ template_contribution:
       include: em_chip.h
       handler: CHIP_Init
     priority: -9999
-    condition: [device]
+    condition: [device_efx]
 documentation:
   docset: gecko-platform
-  document: service/api/group-device-init
+  document: platform-service/device-init

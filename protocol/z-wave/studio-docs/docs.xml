@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <contentItems xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.silabs.com/ss/ContentItem.ecore">
-  <contentItemData name="" label="Setting Tx Power in your final Z-Wave product" itemURI="asset://com.silabs.sdk.stack.super_4.3.1/protocol/z-wave/studio-docs/INS14664.pdf">
+  <contentItemData name="" label="Setting Tx Power in your final Z-Wave product" itemURI="asset://com.silabs.sdk.stack.super_4.3.2/protocol/z-wave/studio-docs/INS14664.pdf">
     <description>This MS Excel file describes how to measure the Tx power of a Z-Wave frame and use this to calibrate the Tx Power of your final Z-Wave product.</description>
     <property key="core.category" value="Application Notes"/>
     <property key="core.priority" value="58"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.* .*efr32zg13p531f512gm32.* .*efr32zg13p531f512gm48.* .*efr32zg13l.* .*efr32zg13s.* .*efr32zg23.* .*zgm230.* .*efr32zg28.*"/>
   </contentItemData>
-  <contentItemData name="" label="How to use Tiny App" itemURI="asset://com.silabs.sdk.stack.super_4.3.1/protocol/z-wave/studio-docs/INS14895.pdf">
+  <contentItemData name="" label="How to use Tiny App" itemURI="asset://com.silabs.sdk.stack.super_4.3.2/protocol/z-wave/studio-docs/INS14895.pdf">
     <description>Describes how to use the Tiny App for upgrading Secure Element firmware.</description>
     <property key="core.category" value="Application Notes"/>
     <property key="core.priority" value="62"/>
@@ -48,37 +48,37 @@
     <property key="core.priority" value="55"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.* .*efr32zg13p531f512gm32.* .*efr32zg13p531f512gm48.* .*efr32zg13l.* .*efr32zg13s.* .*efr32zg23.* .*zgm230.*"/>
   </contentItemData>
-  <contentItemData name="" label="ZGM130S Z-Wave 700 SiP Module Data Sheet" itemURI="asset://com.silabs.sdk.stack.super_4.3.1/protocol/z-wave/studio-docs/DSH14299.pdf">
+  <contentItemData name="" label="ZGM130S Z-Wave 700 SiP Module Data Sheet" itemURI="asset://com.silabs.sdk.stack.super_4.3.2/protocol/z-wave/studio-docs/DSH14299.pdf">
     <description>ZGM130S SIP Module Datasheet</description>
     <property key="core.category" value="Data Sheets"/>
     <property key="core.priority" value="66"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
   </contentItemData>
-  <contentItemData name="" label="EFR32ZG14 Z-Wave 700 Modem SoC Data Sheet" itemURI="asset://com.silabs.sdk.stack.super_4.3.1/protocol/z-wave/studio-docs/DSH14300.pdf">
+  <contentItemData name="" label="EFR32ZG14 Z-Wave 700 Modem SoC Data Sheet" itemURI="asset://com.silabs.sdk.stack.super_4.3.2/protocol/z-wave/studio-docs/DSH14300.pdf">
     <description>EFR32ZG14 Z-Wave 700 Modem SoC Data Sheet</description>
     <property key="core.category" value="Datasheet"/>
     <property key="core.priority" value="67"/>
     <property key="core.partCompatibility" value=".*efr32zg14p.*"/>
   </contentItemData>
-  <contentItemData name="" label="EFR32ZG14 Zen Gecko Z-Wave 700 USB Stick Bridge Module UZB-7 Data Sheet" itemURI="asset://com.silabs.sdk.stack.super_4.3.1/protocol/z-wave/studio-docs/DSH14483.pdf">
+  <contentItemData name="" label="EFR32ZG14 Zen Gecko Z-Wave 700 USB Stick Bridge Module UZB-7 Data Sheet" itemURI="asset://com.silabs.sdk.stack.super_4.3.2/protocol/z-wave/studio-docs/DSH14483.pdf">
     <description>EFR32ZG14 Zen Gecko Z-Wave 700 USB Stick Bridge Module UZB-7 Data Sheet</description>
     <property key="core.category" value="Datasheet"/>
     <property key="core.priority" value="68"/>
     <property key="core.partCompatibility" value=".*efr32zg14p.*"/>
   </contentItemData>
-  <contentItemData name="" label="Z-Wave Zniffer v4.65 Errata Note" itemURI="asset://com.silabs.sdk.stack.super_4.3.1/protocol/z-wave/studio-docs/ERN13236.pdf">
+  <contentItemData name="" label="Z-Wave Zniffer v4.65 Errata Note" itemURI="asset://com.silabs.sdk.stack.super_4.3.2/protocol/z-wave/studio-docs/ERN13236.pdf">
     <description>Describes the Test Observations (TO) that exists on the development and test tool Z-Wave Zniffer.</description>
     <property key="core.category" value="Errata"/>
     <property key="core.priority" value="42"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.* .*efr32zg13p531f512gm32.* .*efr32zg13p531f512gm48.* .*efr32zg13l.* .*efr32zg13s.* .*efr32zg23.* .*zgm230.* .*efr32zg28.*"/>
   </contentItemData>
-  <contentItemData name="" label="Schematic for Z-Wave 700 Long Range radio board with EFR32ZG14, BRD4206A" itemURI="asset://com.silabs.sdk.stack.super_4.3.1/protocol/z-wave/studio-docs/PHD14786.pdf">
+  <contentItemData name="" label="Schematic for Z-Wave 700 Long Range radio board with EFR32ZG14, BRD4206A" itemURI="asset://com.silabs.sdk.stack.super_4.3.2/protocol/z-wave/studio-docs/PHD14786.pdf">
     <description>Schematic for the BRD4206A Z-Wave 700 Long Range radio board with EFR32ZG14.</description>
     <property key="core.category" value="Gateway"/>
     <property key="core.priority" value="81"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.* .*efr32zg14p.*"/>
   </contentItemData>
-  <contentItemData name="" label="Z-Wave 700 ZGM130S Long Range Wireless Starter Kit User's Guide" itemURI="asset://com.silabs.sdk.stack.super_4.3.1/protocol/z-wave/studio-docs/DSH14793.pdf">
+  <contentItemData name="" label="Z-Wave 700 ZGM130S Long Range Wireless Starter Kit User's Guide" itemURI="asset://com.silabs.sdk.stack.super_4.3.2/protocol/z-wave/studio-docs/DSH14793.pdf">
     <description>ZGM130S Long Range Wireless Starter Kit User's Guide</description>
     <property key="core.category" value="Kit Documents"/>
     <property key="core.priority" value="63"/>
@@ -96,37 +96,37 @@
     <property key="core.priority" value="59"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.* .*efr32zg13p531f512gm32.* .*efr32zg13p531f512gm48.* .*efr32zg13l.* .*efr32zg13s.* .*efr32zg23.* .*zgm230.* .*efr32zg28.*"/>
   </contentItemData>
-  <contentItemData name="" label="Zniffer v4.66 Release Note" itemURI="asset://com.silabs.sdk.stack.super_4.3.1/protocol/z-wave/studio-docs/SRN13233.pdf">
+  <contentItemData name="" label="Zniffer v4.66 Release Note" itemURI="asset://com.silabs.sdk.stack.super_4.3.2/protocol/z-wave/studio-docs/SRN13233.pdf">
     <description>Discusses the latest changes to the PC-based Zniffer tool and lists new features.</description>
     <property key="core.category" value="Release Notes"/>
     <property key="core.priority" value="41"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.* .*efr32zg13p531f512gm32.* .*efr32zg13p531f512gm48.* .*efr32zg13l.* .*efr32zg13s.* .*efr32zg23.* .*zgm230.* .*efr32zg28.*"/>
   </contentItemData>
-  <contentItemData name="" label="PC based Controller v5.53 Release Note" itemURI="asset://com.silabs.sdk.stack.super_4.3.1/protocol/z-wave/studio-docs/SRN13757.pdf">
+  <contentItemData name="" label="PC based Controller v5.53 Release Note" itemURI="asset://com.silabs.sdk.stack.super_4.3.2/protocol/z-wave/studio-docs/SRN13757.pdf">
     <description>Discusses the latest changes to the PC-based Controller code and lists new features.</description>
     <property key="core.category" value="Release Notes"/>
     <property key="core.priority" value="40"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.* .*efr32zg13p531f512gm32.* .*efr32zg13p531f512gm48.* .*efr32zg13l.* .*efr32zg13s.* .*efr32zg23.* .*zgm230.*"/>
   </contentItemData>
-  <contentItemData name="" label="Software Release Note: Z-Wave and Z-Wave Long Range 700-800 SDK v7.20.1 Pre-Certified GA" itemURI="asset://com.silabs.sdk.stack.super_4.3.1/protocol/z-wave/studio-docs/SRN14930.pdf">
+  <contentItemData name="" label="Software Release Note: Z-Wave and Z-Wave Long Range 700-800 SDK v7.20.2 GA" itemURI="asset://com.silabs.sdk.stack.super_4.3.2/protocol/z-wave/studio-docs/SRN14930.pdf">
     <description>Lists compatibility requirements and sources for all software components  in the development environment. Discusses the latest changes to the Silicon Labs Z-Wave SDK and associated utilities, including added/deleted/deprecated  features/API, and lists fixed and known issues.</description>
     <property key="core.category" value="Release Notes"/>
     <property key="core.priority" value="22"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.* .*efr32zg13p531f512gm32.* .*efr32zg13p531f512gm48.* .*efr32zg13l.* .*efr32zg13s.* .*efr32zg23.* .*zgm230.* .*efr32zg28.*"/>
   </contentItemData>
-  <contentItemData name="" label="Development Material for UZB-7" itemURI="asset://com.silabs.sdk.stack.super_4.3.1/protocol/z-wave/studio-docs/PHD14501.zip">
+  <contentItemData name="" label="Development Material for UZB-7" itemURI="asset://com.silabs.sdk.stack.super_4.3.2/protocol/z-wave/studio-docs/PHD14501.zip">
     <description>Development Material for UZB-7.</description>
     <property key="core.category" value="Schematic and Layout Files"/>
     <property key="core.priority" value="90"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.* .*efr32zg13p531f512gm32.* .*efr32zg13p531f512gm48.* .*efr32zg13l.* .*efr32zg13s.* .*efr32zg23.* .*zgm230.*"/>
   </contentItemData>
-  <contentItemData name="" label="Schematic for Z-Wave 700 Long Range radio board with ZGM130S. BRD4207A" itemURI="asset://com.silabs.sdk.stack.super_4.3.1/protocol/z-wave/studio-docs/PHD14787.pdf">
+  <contentItemData name="" label="Schematic for Z-Wave 700 Long Range radio board with ZGM130S. BRD4207A" itemURI="asset://com.silabs.sdk.stack.super_4.3.2/protocol/z-wave/studio-docs/PHD14787.pdf">
     <description>Schematic for the BRD4207A Z-Wave 700 Long Range radio board with ZGM130S.</description>
     <property key="core.category" value="Schematic and Layout Files"/>
     <property key="core.priority" value="80"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
   </contentItemData>
-  <contentItemData name="" label="PCB documentation for UZB-7 PCB" itemURI="asset://com.silabs.sdk.stack.super_4.3.1/protocol/z-wave/studio-docs/UZB-7P1.rar">
+  <contentItemData name="" label="PCB documentation for UZB-7 PCB" itemURI="asset://com.silabs.sdk.stack.super_4.3.2/protocol/z-wave/studio-docs/UZB-7P1.rar">
     <description>PCB documentation for UZB-7 PCB.</description>
     <property key="core.category" value="Schematic and Layout Files"/>
     <property key="core.priority" value="91"/>
@@ -138,19 +138,19 @@
     <property key="core.priority" value="21"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.* .*efr32zg13p531f512gm32.* .*efr32zg13p531f512gm48.* .*efr32zg13l.* .*efr32zg13s.* .*efr32zg23.* .*zgm230.* .*efr32zg28.*"/>
   </contentItemData>
-  <contentItemData name="" label="Z-Wave applications signed binaries" itemURI="asset://com.silabs.sdk.stack.super_4.3.1/protocol/z-wave/Apps/bin/gbl">
+  <contentItemData name="" label="Z-Wave applications signed binaries" itemURI="asset://com.silabs.sdk.stack.super_4.3.2/protocol/z-wave/Apps/bin/gbl">
     <description>Z-Wave gbl files</description>
     <property key="core.category" value="Software"/>
     <property key="core.priority" value="100"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.* .*efr32zg13p531f512gm32.* .*efr32zg13p531f512gm48.* .*efr32zg13l.* .*efr32zg13s.* .*efr32zg23.* .*zgm230.* .*efr32zg28.*"/>
   </contentItemData>
-  <contentItemData name="" label="Important Changes" itemURI="asset://com.silabs.sdk.stack.super_4.3.1/protocol/z-wave/studio-docs/important_changes.md">
+  <contentItemData name="" label="Important Changes" itemURI="asset://com.silabs.sdk.stack.super_4.3.2/protocol/z-wave/studio-docs/important_changes.md">
     <description>Important Changes in Z-Wave SDK in latest release</description>
     <property key="core.category" value="Software"/>
     <property key="core.priority" value="1"/>
     <property key="core.partCompatibility" value=".*zgm130.* .*efr32zg13.* .*efr32zg23.* .*zgm230.* .*efr32zg28.*"/>
   </contentItemData>
-  <contentItemData name="" label="Prepare for Z-Wave Certification Tests" itemURI="asset://com.silabs.sdk.stack.super_4.3.1/protocol/z-wave/studio-docs/INS14284.pdf">
+  <contentItemData name="" label="Prepare for Z-Wave Certification Tests" itemURI="asset://com.silabs.sdk.stack.super_4.3.2/protocol/z-wave/studio-docs/INS14284.pdf">
     <description>Describes the Z-Wave Certification process for the Z-Wave 700 products and serves as a guide on where to find additional information.</description>
     <property key="core.category" value="User's Guides"/>
     <property key="core.priority" value="52"/>
@@ -234,7 +234,7 @@
     <property key="core.priority" value="60"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.* .*efr32zg13p531f512gm32.* .*efr32zg13p531f512gm48.* .*efr32zg13l.* .*efr32zg13s.* .*efr32zg23.* .*zgm230.* .*efr32zg28.*"/>
   </contentItemData>
-  <contentItemData name="" label="Z-Wave zipped doxygen documentation" itemURI="asset://com.silabs.sdk.stack.super_4.3.1/protocol/z-wave/studio-docs/z-wave-html-docs.zip">
+  <contentItemData name="" label="Z-Wave zipped doxygen documentation" itemURI="asset://com.silabs.sdk.stack.super_4.3.2/protocol/z-wave/studio-docs/z-wave-html-docs.zip">
     <description>Z-Wave HTML documentation</description>
     <property key="core.category" value="Z-Wave doxygen"/>
     <property key="core.priority" value="7"/>

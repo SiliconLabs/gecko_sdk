@@ -32,4 +32,4 @@ template_contribution:
     value: mx25_flash_shutdown_eusart
 documentation:
     docset: gecko-platform
-    document: hardware-driver/api/group-mx25-flash-shutdown
+    document: platform-hardware-driver/mx25-flash-shutdown

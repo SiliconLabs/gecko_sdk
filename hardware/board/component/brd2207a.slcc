@@ -3,7 +3,7 @@
 - label: BRD2207A
 - package: platform
 - description: Board support for BRD2207A.
-- category: Platform|Board|Starter Kit
+- category: Platform|Board|Thunderboard
 - quality: production
 - requires:
   - name: efm32gg12b810f1024gm64
@@ -11,8 +11,8 @@
 - provides:
   - name: brd2207a
   - name: hardware_board
-  - name: hardware_board_stk
-  - name: hardware_board_from_stk
+  - name: hardware_board_tb
+  - name: hardware_board_from_tb
   - name: hardware_board_from_sltb009a
   - name: hardware_board_has_vcom
   - name: hardware_board_has_hfxo_freq_50mhz

@@ -22,15 +22,15 @@ requires:
 documentation:
   docset: gecko-platform
   document:
-    - page: emlib/api/efm32g/group-vcmp
+    - page: platform-emlib-efm32g/vcmp
       condition: [device_sdid_71]
-    - page: emlib/api/efm32gg/group-vcmp
+    - page: platform-emlib-efm32gg/vcmp
       condition: [device_sdid_72]
-    - page: emlib/api/efm32tg/group-vcmp
+    - page: platform-emlib-efm32tg/vcmp
       condition: [device_sdid_73]
-    - page: emlib/api/efm32lg/group-vcmp
+    - page: platform-emlib-efm32lg/vcmp
       condition: [device_sdid_74]
-    - page: emlib/api/efm32zg/group-vcmp
+    - page: platform-emlib-efm32zg/vcmp
       condition: [device_sdid_76]
-    - page: emlib/api/efm32hg/group-vcmp
+    - page: platform-emlib-efm32hg/vcmp
       condition: [device_sdid_77]

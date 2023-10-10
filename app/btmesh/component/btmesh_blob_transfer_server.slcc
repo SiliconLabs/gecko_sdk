@@ -2,55 +2,49 @@ id: btmesh_blob_transfer_server
 label: BLOB Transfer Server
 package: Btmesh
 description: >
-  Provides BT Mesh BLOB (binary large object) Transfer Server functionality,
+  Provides BT Mesh BLOB (Binary Large OBject) Transfer Server functionality,
   defined in mesh specification.
 
   The BLOB Transfer Server model is used to receive a BLOB from a BLOB Transfer
   Client. The BLOB is delivered to a higher-layer application for further
   processing once the transfer is complete.
+
+  This component is instantiable, meaning that several named instances can be
+  created. For each instance, a configuration header, an instance header and a
+  source file is generated to encapsulate functionalities and initialize and
+  manage the instance.
+  Each BLOB Transfer Server instance shall be assigned to different elements
+  by instance configuration in accordance with mesh specification.
+
+  Selecting this component will also include the BLOB Transfer Server Core
+  component, which is the implementation of the BLOB Transfer Server API.
+
   This component is prepared for integration into SOC applications.
+
+  This is a Low-Code component. For example, the following weak callback
+  function is called when a BLOB transfer is completed:
+  void sl_btmesh_blob_transfer_server_transfer_done(sl_bt_uuid_64_t const *const blob_id)
 category: "Bluetooth Mesh|Models|Transport"
 quality: production
 root_path: app/btmesh/common/btmesh_blob_transfer_server
+tag:
+  - Low-Code
+instantiable:
+  prefix: inst
 config_file:
-  - path: btmesh_blob_transfer_server.dcd
+  - path: btmesh_blob_transfer_server_{{instance}}.dcd
+    file_id: btmesh_blob_transfer_server_dcd
     directory: btmeshconf
-  - path: config/sl_btmesh_blob_transfer_server_config.h
-source:
-  - path: sl_btmesh_blob_transfer_server.c
-  - path: sl_btmesh_blob_transfer_server_api.c
-include:
-  - path: ""
-    file_list:
-      - path: sl_btmesh_blob_transfer_server.h
-      - path: sl_btmesh_blob_transfer_server_api.h
+  - path: config/sl_btmesh_blob_transfer_server_{{instance}}_config.h
+    file_id: btmesh_blob_transfer_server_config
 requires:
-  - name: app_assert
-  - name: app_btmesh_util
-  - name: btmesh_provisionee
-  - name: btmesh_stack
-  - name: btmesh_core
-  - name: btmesh_blob_storage
-  - name: btmesh_stack_mbt_server
-  - name: silabs_core_sl_malloc
+  - name: btmesh_blob_transfer_server_core
 provides:
   - name: btmesh_blob_transfer_server
-
 template_contribution:
-  - name: btmesh_on_event
-    value:
-      include: sl_btmesh_blob_transfer_server.h
-      function: sl_btmesh_blob_transfer_server_on_event
+  - name: btmesh_blob_transfer_server_instance
+    value: "{{instance}}"
   - name: component_catalog
-    value: blob_transfer_server
-  - name: event_handler
-    value:
-      event: internal_app_process_action
-      include: sl_btmesh_blob_transfer_server.h
-      handler: sl_btmesh_blob_transfer_server_step_handle
-validation_library:
-  - path: ../../../common/validation/autonumber_common.lua
-    name: autonumber_common
-validation_helper:
-  - path: btmesh_blob_transfer_server_validation.lua
-  - path: "../../script/validation/soc_ncp_compatibility.lua"
+    value: btmesh_blob_transfer_server
+  - name: component_catalog
+    value: "btmesh_blob_transfer_server_{{instance}}"

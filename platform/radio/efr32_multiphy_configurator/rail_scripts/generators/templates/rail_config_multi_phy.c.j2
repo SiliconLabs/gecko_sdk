@@ -204,8 +204,8 @@ static const uint32_t {{phyInfoEntryName}}[] = {
   (uint32_t) NULL,
 {%- endif %}
   {{"0x{:08X}".format(phyInfoEntry.phyInfoData.antDivRxAutoConfig)}}UL,
-  {{phyInfoEntry.phyInfoData.src1CalcHelper}}UL,
-  {{phyInfoEntry.phyInfoData.src2CalcHelper}}UL,
+  {{phyInfoEntry.phyInfoData.src1Denominator}}UL,
+  {{phyInfoEntry.phyInfoData.src2Denominator}}UL,
   {{phyInfoEntry.phyInfoData.txBaudRate|int}}UL,
   {{"0x{:08X}".format(phyInfoEntry.phyInfoData.rateInfo)}}UL,
   {{"0x{:08X}".format(phyInfoEntry.phyInfoData.synthCache)}}UL,

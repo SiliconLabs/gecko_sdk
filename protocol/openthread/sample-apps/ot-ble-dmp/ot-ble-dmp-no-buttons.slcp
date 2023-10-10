@@ -67,6 +67,8 @@ configuration:
     value: 4608
   - name: OPENTHREAD_CONFIG_TMF_NETDIAG_CLIENT_ENABLE
     value: 0
+  - name: configTIMER_TASK_PRIORITY
+    value: 53
 
 tag:
   - prebuilt_demo

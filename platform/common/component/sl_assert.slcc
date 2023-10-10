@@ -15,4 +15,4 @@ provides:
   - name: sl_assert
 documentation:
   docset: gecko-platform
-  document: common/api/group-assert
+  document: platform-common/assert

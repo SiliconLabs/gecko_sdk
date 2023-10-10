@@ -1,5 +1,5 @@
-Bluetooth Mesh SDK 5.0.1.0
-- Added support for BRD4194A and BRD4187C radio boards for BT Mesh IOP Test Demos
+Bluetooth Mesh SDK 5.0.2.0
+- Targeted quality improvements and bug fixes
 
 
 

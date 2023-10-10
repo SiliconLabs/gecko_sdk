@@ -61,28 +61,27 @@ typedef struct {
 /// Connection list item type
 typedef struct {
   sl_slist_node_t                 node;              ///< List node pointer
-  esl_lib_connection_state_t      state;             ///< State of the connection
   esl_lib_command_list_cmd_t      *command;          ///< Command in progress
-  bool                            command_complete;  ///< Finished command
   sl_slist_node_t                 *command_list;     ///< Command list
+  sl_slist_node_t                 *tag_info_list;    ///< Tag info storage list
+  bool                            command_complete;  ///< Finished command
   uint8_t                         connection_handle; ///< Connection handle
-  esl_lib_image_transfer_handle_t ots_handle;        ///< OTS handle
-  aes_key_128                     ltk;               ///< LTK for the connection
-  bd_addr                         address;           ///< Address
   uint8_t                         address_type;      ///< Address type
   uint8_t                         max_payload;       ///< Max payload
   uint8_t                         security;          ///< Security level
+  uint8_t                         config_index;      ///< Current config index
+  esl_lib_connection_state_t      state;             ///< State of the connection
+  esl_lib_image_transfer_handle_t ots_handle;        ///< OTS handle
+  aes_key_128                     ltk;               ///< LTK for the connection
+  bd_addr                         address;           ///< Address
   app_timer_t                     timer;             ///< Connection timer
   app_timer_t                     gatt_timer;        ///< GATT timer
   sl_status_t                     last_error;        ///< Last error
   esl_lib_bool_t                  gattdb_known;      ///< Predefined GATT database
   esl_lib_gattdb_handles_t        gattdb_handles;    ///< List of UUIDs
-  uint8_t                         retry_count;       ///< Retry count
-  sl_slist_node_t                 *tag_info_list;    ///< Tag info storage list
   esl_lib_data_type_t             tag_info_type;     ///< Current tag info type
   esl_lib_storage_handle_t        tag_info_data;     ///< Current tag info data
   esl_lib_data_type_t             config_type;       ///< Current config type
-  uint8_t                         config_index;      ///< Current config index
 } esl_lib_connection_t;
 
 // -----------------------------------------------------------------------------
@@ -115,16 +114,6 @@ sl_status_t esl_lib_connection_find(uint8_t              conn,
  * @return Status code.
  *****************************************************************************/
 sl_status_t esl_lib_connection_remove_ptr(esl_lib_connection_t *ptr);
-
-/**************************************************************************//**
- * Remove a connection from the list.
- * @param[in]  conn    Connection handle.
- * @param[out] ptr_out Pointer output.
- *
- * @return Status code.
- *****************************************************************************/
-sl_status_t esl_lib_connection_remove_handle(uint8_t              conn,
-                                             esl_lib_connection_t **ptr_out);
 
 /**************************************************************************//**
  * Check connection list for the given item.
@@ -181,8 +170,7 @@ sl_status_t esl_lib_connection_check_gattdb_handles(esl_lib_gattdb_handles_t *ga
  *
  * @return SL_STATUS_OK if the configuration is valid.
  *****************************************************************************/
-sl_status_t esl_lib_connection_open(esl_lib_command_list_cmd_t *cmd,
-                                    esl_lib_connection_t       *handle);
+sl_status_t esl_lib_connection_open(esl_lib_command_list_cmd_t *cmd);
 
 #ifdef __cplusplus
 };

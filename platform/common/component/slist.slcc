@@ -15,6 +15,7 @@ provides:
   - name: slist
 requires:
   - name: emlib_common
+    condition: [device]
 documentation:
   docset: gecko-platform
-  document: common/api/group-slist
+  document: platform-common/slist

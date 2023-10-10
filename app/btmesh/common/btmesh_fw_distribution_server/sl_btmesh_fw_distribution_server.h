@@ -133,7 +133,7 @@ const char* sl_btmesh_fw_distribution_server_distribution_state_to_string(sl_btm
 /***************************************************************************//**
  * Provides string representations of Firmware Update phase
  *
- * @param[in] node_phase Phase of Firmware Update Server on Updating Node
+ * @param[in] node_phase Phase of Firmware Update Server on Target Node
  *
  * @return String representation of node update phase
  * @retval "INVALID" if the node_phase is invalid
@@ -143,7 +143,7 @@ const char* sl_btmesh_fw_distribution_server_node_phase_to_string(sl_btmesh_fw_d
 /***************************************************************************//**
  * Provides string representations of Firmware Update status
  *
- * @param[in] node_status Status of Firmware Update Server on Updating Node
+ * @param[in] node_status Status of Firmware Update Server on Target Node
  *
  * @return String representation of node's firmware update status
  * @retval "INVALID" if the node_status is invalid
@@ -172,7 +172,7 @@ const char* sl_btmesh_fw_distribution_server_firmware_update_status_to_string(sl
 sl_status_t sl_btmesh_fw_distribution_server_generate_blob_id(sl_bt_uuid_64_t *blob_id);
 
 /***************************************************************************//**
- * Called when a receiver updating node is added to the firmware distribution
+ * Called when a receiver target node is added to the firmware distribution
  * list
  *
  * This is a callback which can be implemented in the application
@@ -180,10 +180,10 @@ sl_status_t sl_btmesh_fw_distribution_server_generate_blob_id(sl_bt_uuid_64_t *b
  *       then the default weak implementation will be an empty function.
  *
  * @param[in] elem_index Distribution server model element index
- * @param[in] server_address Unicast address of the added updating node
- * @param[in] update_fw_image_idx Firmware image index on Updating node to be
+ * @param[in] server_address Unicast address of the added target node
+ * @param[in] update_fw_image_idx Firmware image index on target node to be
  *   updated during the distribution
- * @param[in] node_count Total number of updating nodes which participates in
+ * @param[in] node_count Total number of target nodes which participates in
  *   the firmware distribution (including this new one)
  *
  ******************************************************************************/
@@ -193,7 +193,7 @@ void sl_btmesh_fw_distribution_server_on_node_added(uint16_t elem_index,
                                                     uint16_t node_count);
 
 /***************************************************************************//**
- * Called when all receiver updating nodes are deleted from the firmware
+ * Called when all receiver target nodes are deleted from the firmware
  * distribution list
  *
  * This is a callback which can be implemented in the application
@@ -224,7 +224,7 @@ void sl_btmesh_fw_distribution_server_on_all_nodes_deleted(uint16_t elem_index);
  * @param[in] fw_list_index Index of the firmware in the Distributor's FW List
  * @param[in] timeout_base Timeout base
  * @param[in] transfer_mode Transfer Mode to use in the distribution
- * @param[in] node_count Total number of updating nodes which participates in
+ * @param[in] node_count Total number of target nodes which participates in
  *   the firmware distribution
  *
  ******************************************************************************/
@@ -281,7 +281,7 @@ void sl_btmesh_fw_distribution_server_on_distribution_suspended(uint16_t elem_in
  * @param[in] fw_list_index Index of the firmware in the Distributor's FW List
  * @param[in] timeout_base Timeout base
  * @param[in] transfer_mode Transfer Mode to use in the distribution
- * @param[in] node_count Total number of updating nodes which participates in
+ * @param[in] node_count Total number of target nodes which participates in
  *   the firmware distribution
  *
  ******************************************************************************/
@@ -304,8 +304,8 @@ void sl_btmesh_fw_distribution_server_on_distribution_resumed(uint16_t elem_inde
  *
  * @param[in] elem_index Distribution server model element index
  * @param[in] state Distribution state
- * @param[in] num_active_nodes Number of updating nodes which are still active
- * @param[in] node_count Total number of updating nodes
+ * @param[in] num_active_nodes Number of target nodes which are still active
+ * @param[in] node_count Total number of target nodes
  *
  ******************************************************************************/
 void sl_btmesh_fw_distribution_server_on_distribution_state_changed(uint16_t elem_index,
@@ -327,7 +327,7 @@ void sl_btmesh_fw_distribution_server_on_distribution_state_changed(uint16_t ele
  *   of the blocks because in a block some chunks could be retransmitted
  *   multiple times.
  * @param[in] blob_size Size of the BLOB
- * @param[in] node_count Number of updating nodes
+ * @param[in] node_count Number of target nodes
  *
  ******************************************************************************/
 void sl_btmesh_fw_distribution_server_on_distribution_blob_progress_changed(uint16_t elem_index,
@@ -336,10 +336,10 @@ void sl_btmesh_fw_distribution_server_on_distribution_blob_progress_changed(uint
                                                                             uint16_t node_count);
 
 /***************************************************************************//**
- * Called when an Updating Node fails during the distribution
+ * Called when a Target Node fails during the distribution
  *
  * If one node fails during the distribution, it does not mean, that the
- * distribution fails as well. The distribution only fails, when every Updating
+ * distribution fails as well. The distribution only fails, when every Target
  * Node fails.
  *
  * This is a callback which can be implemented in the application
@@ -347,20 +347,20 @@ void sl_btmesh_fw_distribution_server_on_distribution_blob_progress_changed(uint
  *       then the default weak implementation will be an empty function.
  *
  * @param[in] elem_index Distribution server model element index
- * @param[in] server_address Unicast address of the failed Updating Node
- * @param[in] update_phase Update Phase of Firmware Update Server on Updating Node
- * @param[in] update_status Update Status of Firmware Update Server on Updating Node
+ * @param[in] server_address Unicast address of the failed Target Node
+ * @param[in] update_phase Update Phase of Firmware Update Server on Target Node
+ * @param[in] update_status Update Status of Firmware Update Server on Target Node
  *   If the firmware update of the node fails due to Firmware Update Server related
  *   error then this field isn't zero and it has sl_btmesh_fw_update_server_update_status_t
  *   value.
- * @param[in] mbt_status Transfer status of BLOB Transfer server on Updating Node.
+ * @param[in] mbt_status Transfer status of BLOB Transfer server on Target Node.
  *   If the firmware update of a node fails due to BLOB Transfer error then this
  *   field won't be zero.
  * @param[in] progress 0-100, percentage of BLOB Transfer octets
- * @param[in] fw_index Firmware image index on Updating node which is updated
+ * @param[in] fw_index Firmware image index on Target node which is updated
  *   during the distribution
- * @param[in] num_active_nodes Number of updating nodes which are still active
- * @param[in] node_count Total number of updating nodes
+ * @param[in] num_active_nodes Number of target nodes which are still active
+ * @param[in] node_count Total number of target nodes
  *
  ******************************************************************************/
 void sl_btmesh_fw_distribution_server_on_distribution_node_failed(uint16_t elem_index,

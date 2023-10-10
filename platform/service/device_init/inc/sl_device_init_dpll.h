@@ -32,6 +32,10 @@
 
 #include "sl_status.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @addtogroup device_init
  * @{
@@ -66,5 +70,9 @@ sl_status_t sl_device_init_dpll(void);
  * @} device_init_dpll
  * @} device_init
  */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // SL_DEVICE_INIT_DPLL_H

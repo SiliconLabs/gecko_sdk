@@ -516,6 +516,7 @@ static sl_iperf_cli_property_t _iperf_properties[] = {
     .getter = _opt_duration_getter,
     .help   = SL_IPERF_CLI_OPT_DURATION_HELP,
     .flags  = SL_IPERF_CLI_OPT_FLAGS_UDP_MASK
+              | SL_IPERF_CLI_OPT_FLAGS_SRV_MASK
               | SL_IPERF_CLI_OPT_FLAGS_CLNT_MASK
   },
   {

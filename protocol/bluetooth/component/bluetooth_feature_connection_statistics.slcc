@@ -1,0 +1,22 @@
+id: "bluetooth_feature_connection_statistics"
+label: "Connection specific statistics for Bluetooth"
+package: "Bluetooth"
+description: >
+  The component provides functionality to collect connection specific statistics
+  and report them to application upon request. The statistics are also reported
+  upon connection closing.
+category: Bluetooth|Bluetooth LE Controller (Link Layer)|Features with Commands and Events
+quality: "production"
+root_path: "protocol/bluetooth"
+requires:
+  - name: "bluetooth_controller"
+  - name: "bluetooth_feature_connection"
+provides:
+  - name: "bluetooth_feature_connection_statistics"
+template_contribution:
+  - name: component_catalog
+    value: bluetooth_feature_connection_statistics
+  - name: bluetooth_controller_init
+    value:
+      function: "sl_btctrl_init_conn_statistics()"
+    priority: 10

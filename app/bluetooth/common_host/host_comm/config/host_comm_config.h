@@ -55,6 +55,30 @@
 
 // </h> End Receive / Transmit buffer configuration
 
+// <h> Robust
+
+// <e HOST_COMM_ROBUST> Message header
+// <i> Robustify the communication by adding a message header and filter out invalid messages.
+// <i> Note: This configuration should match on the sender and receiver side.
+// <i> Default: Off
+#ifndef HOST_COMM_ROBUST
+#define HOST_COMM_ROBUST             0
+#endif // HOST_COMM_ROBUST
+
+// <q HOST_COMM_ROBUST_CRC> CRC
+// <i> Add payload CRC and perform checking.
+// <i> Note: This configuration should match on the sender and receiver side.
+// <i> Default: On
+#ifndef HOST_COMM_ROBUST_CRC
+#define HOST_COMM_ROBUST_CRC         1
+#endif // HOST_COMM_ROBUST_CRC
+// </e>
+
+// </h> End Robust
+
 // <<< end of configuration section >>>
+
+#define SL_SIMPLE_COM_ROBUST      HOST_COMM_ROBUST
+#define SL_SIMPLE_COM_ROBUST_CRC  HOST_COMM_ROBUST_CRC
 
 #endif // HOST_COMM_CONFIG_H

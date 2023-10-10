@@ -536,6 +536,13 @@ EmberNodeType emberGetNodeType(void);
  */
 EmberNodeId emberGetParentId(void);
 
+/** @brief Get the GSDK, Stack and bootloader versions all at once. The version format
+ * are not all the same. Please refer to the corresponding documentation to handle the information
+ * correctly.
+ * @return EMBER_SUCCESS if successful
+ */
+EmberStatus emberGetVersionInfo(uint16_t *gsdk_version, uint16_t *connect_stack_version, uint32_t *bootloader_version);
+
 /**
  * @}
  *

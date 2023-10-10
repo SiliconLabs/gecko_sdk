@@ -71,8 +71,8 @@ requires:
   - name: component_catalog
 
   - name: mbedtls_platform_dynamic_memory_allocation_config
-    condition: [device_cortexm]
+    condition: [device_cortexm, device]
 
 recommends:
   - id: mbedtls_platform_dynamic_memory_allocation_config_default
-    condition: [device_cortexm]
+    condition: [device_cortexm, device]

@@ -406,14 +406,22 @@ void bluetooth_thread(void *p_arg)
   tid_thread_bluetooth = NULL;
   bluetooth_state_flags = SL_BT_RTOS_STATE_FLAG_KERNEL_STARTED;
 
-  // If we failed to start the stack, we generate a system error event and
-  // deliver it directly to the application with a function call from this
-  // thread.
+  // Generate the right event to indicate the stack is not running
   if (start_status != SL_STATUS_OK) {
+    // We failed to start the stack. Generate a system error event and deliver
+    // it directly to the application with a function call from this thread.
     uint32_t evt_len = sizeof(bluetooth_evt_instance.data.evt_system_error);
     bluetooth_evt_instance.header = sl_bt_evt_system_error_id | (evt_len << 8);
     bluetooth_evt_instance.data.evt_system_error.reason = (uint16_t) start_status;
     bluetooth_evt_instance.data.evt_system_error.data.len = 0;
+    sl_bt_process_event((sl_bt_msg_t*) &bluetooth_evt_instance);
+  } else {
+    // The stack started successfully, so the stopping has been a deliberate
+    // request with the on-demand start feature. Generate the "system stopped"
+    // event and deliver it directly to the application with a function call
+    // from this thread. Note that the "system stopped" event has no
+    // event-specific fields, so only the header needs to be set.
+    bluetooth_evt_instance.header = sl_bt_evt_system_stopped_id;
     sl_bt_process_event((sl_bt_msg_t*) &bluetooth_evt_instance);
   }
 

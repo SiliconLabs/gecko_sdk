@@ -29,4 +29,4 @@ requires:
   - name: "device_has_emu_temp_sensor"
 documentation:
     docset: gecko-platform
-    document: driver/api/group-tempdrv
+    document: platform-driver/tempdrv

@@ -78,13 +78,14 @@ extern "C" {
  *  DMADRV transfer completion callback function.
  *
  * @details
- *  The callback function is called when a transfer is complete.
+ *  The callback function is called when a transfer is complete or failed.
  *
  * @param[in] channel
  *  The DMA channel number.
  *
  * @param[in] sequenceNo
- *  The number of times the callback was called. Useful on long chains of
+ *  0: transfer failed
+ *  Others: the number of times the callback was called. Useful on long chains of
  *  linked transfers or on endless ping-pong type transfers.
  *
  * @param[in] userParam

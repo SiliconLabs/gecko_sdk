@@ -36,17 +36,15 @@
 #include "sl_common.h"
 #include "sl_status.h"
 
-// TODO: move this header in the stack and export it to avoid dependency loop
-
 /// API version used to check compatibility (do not edit when using this header)
-#define SL_WISUN_PARAMS_API_VERSION 0x0001
+#define SL_WISUN_PARAMS_API_VERSION 0x0002
 
 /**************************************************************************//**
  * @addtogroup SL_WISUN_TYPES
  * @{
  *****************************************************************************/
 
-/// Trickle parameters set
+/// Trickle parameter set
 SL_PACK_START(1)
 typedef struct {
   /// Minimum interval size (seconds)
@@ -55,7 +53,9 @@ typedef struct {
   uint16_t imax_s;
   /// Redundancy constant (0 for infinity)
   uint8_t k;
-} sl_wisun_trickle_params_t;
+  /// Reserved, set to zero
+  uint8_t reserved[3];
+} SL_ATTRIBUTE_PACKED sl_wisun_trickle_params_t;
 SL_PACK_END()
 
 /// PAN discovery parameter set
@@ -71,8 +71,10 @@ typedef struct {
   uint8_t eapol_target_min_sens;
   /// If true, allow join state 1 to be skipped using cached information
   /// from the previous connection.
-  bool allow_skip:1;
-} sl_wisun_params_discovery;
+  uint8_t allow_skip;
+  /// Reserved, set to zero
+  uint8_t reserved[2];
+} SL_ATTRIBUTE_PACKED sl_wisun_params_discovery;
 SL_PACK_END()
 
 /// Authentication parameter set
@@ -80,11 +82,12 @@ SL_PACK_START(1)
 typedef struct {
   /// Security protocol trickle timer
   sl_wisun_trickle_params_t sec_prot_trickle;
-  /// Security protocol trickle timer expirations
-  uint8_t sec_prot_trickle_expirations;
+  /// PMK lifetime (minutes)
+  uint32_t pmk_lifetime_m;
+  /// PTK lifetime (minutes)
+  uint32_t ptk_lifetime_m;
   /// Security protocol retry timeout (seconds)
   uint16_t sec_prot_retry_timeout_s;
-
   /// Initial EAPOL-Key first Tx min delay (seconds)
   uint16_t initial_key_min_s;
   /// Initial EAPOL-Key first Tx max delay (seconds)
@@ -95,16 +98,8 @@ typedef struct {
   uint16_t initial_key_retry_max_s;
   /// Initial EAPOL-Key retry exponential backoff max limit (seconds)
   uint16_t initial_key_retry_max_limit_s;
-  /// Initial EAPOL-Key retry limit
-  uint8_t initial_key_retry_limit;
-
   /// Temporary neighbor link minimum timeout (seconds)
   uint16_t temp_min_timeout_s;
-
-  /// PMK lifetime (minutes)
-  uint32_t pmk_lifetime_m;
-  /// PTK lifetime (minutes)
-  uint32_t ptk_lifetime_m;
   /// GTK_REQUEST_IMIN (minutes)
   uint16_t gtk_request_imin_m;
   /// GTK_REQUEST_IMAX (minutes)
@@ -113,10 +108,16 @@ typedef struct {
   uint16_t gtk_max_mismatch_m;
   /// LGTK_MAX_MISMATCH (minutes)
   uint16_t lgtk_max_mismatch_m;
+  /// Security protocol trickle timer expirations
+  uint8_t sec_prot_trickle_expirations;
+  /// Initial EAPOL-Key retry limit
+  uint8_t initial_key_retry_limit;
   /// If true, allow join state 2 to be skipped using cached credentials
   /// from the previous connection.
-  bool allow_skip:1;
-} sl_wisun_params_eapol;
+  uint8_t allow_skip;
+  /// Reserved, set to zero
+  uint8_t reserved[3];
+} SL_ATTRIBUTE_PACKED sl_wisun_params_eapol;
 SL_PACK_END()
 
 /// PAN configuration parameter set
@@ -129,7 +130,7 @@ typedef struct {
 } sl_wisun_params_configuration;
 SL_PACK_END()
 
-/// RPL parameters set
+/// RPL parameter set
 SL_PACK_START(1)
 typedef struct {
   /// RPL first DIS maximum delay (seconds)
@@ -156,21 +157,25 @@ SL_PACK_START(1)
 typedef struct {
   /// MPL trickle timer
   sl_wisun_trickle_params_t trickle;
-  /// MPL trickle timer expirations
-  uint8_t trickle_expirations;
   /// MPL seed set entry lifetime (seconds)
   uint16_t seed_set_entry_lifetime_s;
-} sl_wisun_params_mpl;
+  /// MPL trickle timer expirations
+  uint8_t trickle_expirations;
+  /// Reserved, set to zero
+  uint8_t reserved;
+} SL_ATTRIBUTE_PACKED sl_wisun_params_mpl;
 SL_PACK_END()
 
 /// Misc parameter set
 SL_PACK_START(1)
 typedef struct {
-  /// Border router communication timeout PAN_TIMEOUT
-  uint8_t pan_timeout_m;
   /// Temporary neighbor link minimum timeout
   uint16_t temp_link_min_timeout_s;
-} sl_wisun_params_misc;
+  /// Border router communication timeout PAN_TIMEOUT
+  uint8_t pan_timeout_m;
+  /// Reserved, set to zero
+  uint8_t reserved;
+} SL_ATTRIBUTE_PACKED sl_wisun_params_misc;
 SL_PACK_END()
 
 /// FFN parameter set
@@ -182,14 +187,14 @@ typedef struct {
    * This field allows to store the parameters in an NVM and check on reload
    * that they are compatible with the stack if there was an update.
    */
-  uint16_t version;
+  uint32_t version;
   /// PAN discovery parameter set
   sl_wisun_params_discovery discovery;
   /// PAN configuration parameter set
   sl_wisun_params_configuration configuration;
   /// Authentication parameter set
   sl_wisun_params_eapol eapol;
-  /// RPL parameters set
+  /// RPL parameter set
   sl_wisun_params_rpl rpl;
   /// MPL parameter set
   sl_wisun_params_mpl mpl;
@@ -245,21 +250,21 @@ static const sl_wisun_connection_params_t SL_WISUN_PARAMS_PROFILE_TEST = {
       .imax_s = 120,
       .k = 0,
     },
-    .sec_prot_trickle_expirations = 4,
+    .pmk_lifetime_m = MONTH_TO_MIN(4),
+    .ptk_lifetime_m = MONTH_TO_MIN(2),
     .sec_prot_retry_timeout_s = 450,
     .initial_key_min_s = 2,
     .initial_key_max_s = 3,
     .initial_key_retry_min_s = 180,
     .initial_key_retry_max_s = 420,
     .initial_key_retry_max_limit_s = 420,
-    .initial_key_retry_limit = 2,
     .temp_min_timeout_s = 330,
-    .pmk_lifetime_m = MONTH_TO_MIN(4),
-    .ptk_lifetime_m = MONTH_TO_MIN(2),
     .gtk_request_imin_m = 1,
     .gtk_request_imax_m = 4,
     .gtk_max_mismatch_m = 64,
     .lgtk_max_mismatch_m = 60,
+    .sec_prot_trickle_expirations = 4,
+    .initial_key_retry_limit = 2,
     .allow_skip = true
   },
   .rpl = {
@@ -278,12 +283,12 @@ static const sl_wisun_connection_params_t SL_WISUN_PARAMS_PROFILE_TEST = {
       .imax_s = 10,
       .k = 8,
     },
-    .trickle_expirations = 2,
     .seed_set_entry_lifetime_s = 180,
+    .trickle_expirations = 2,
   },
   .misc = {
-    .pan_timeout_m = 30,
     .temp_link_min_timeout_s = 260,
+    .pan_timeout_m = 30,
   }
 };
 
@@ -322,21 +327,21 @@ static const sl_wisun_connection_params_t SL_WISUN_PARAMS_PROFILE_CERTIF = {
       .imax_s = 120,
       .k = 0,
     },
-    .sec_prot_trickle_expirations = 4,
+    .pmk_lifetime_m = MONTH_TO_MIN(4),
+    .ptk_lifetime_m = MONTH_TO_MIN(2),
     .sec_prot_retry_timeout_s = 450,
     .initial_key_min_s = 3,
     .initial_key_max_s = 30,
     .initial_key_retry_min_s = 180,
     .initial_key_retry_max_s = 420,
     .initial_key_retry_max_limit_s = 420,
-    .initial_key_retry_limit = 2,
     .temp_min_timeout_s = 330,
-    .pmk_lifetime_m = MONTH_TO_MIN(4),
-    .ptk_lifetime_m = MONTH_TO_MIN(2),
     .gtk_request_imin_m = 4,
     .gtk_request_imax_m = 64,
     .gtk_max_mismatch_m = 1,
     .lgtk_max_mismatch_m = 60,
+    .sec_prot_trickle_expirations = 4,
+    .initial_key_retry_limit = 2,
     .allow_skip = false
   },
   .rpl = {
@@ -355,12 +360,12 @@ static const sl_wisun_connection_params_t SL_WISUN_PARAMS_PROFILE_CERTIF = {
       .imax_s = 40,
       .k = 8,
     },
-    .trickle_expirations = 2,
     .seed_set_entry_lifetime_s = 720,
+    .trickle_expirations = 2,
   },
   .misc = {
-    .pan_timeout_m = 30,
     .temp_link_min_timeout_s = 260,
+    .pan_timeout_m = 30,
   }
 };
 
@@ -399,21 +404,21 @@ static const sl_wisun_connection_params_t SL_WISUN_PARAMS_PROFILE_SMALL = {
       .imax_s = 120,
       .k = 0,
     },
-    .sec_prot_trickle_expirations = 4,
+    .pmk_lifetime_m = MONTH_TO_MIN(4),
+    .ptk_lifetime_m = MONTH_TO_MIN(2),
     .sec_prot_retry_timeout_s = 450,
     .initial_key_min_s = 3,
     .initial_key_max_s = 30,
     .initial_key_retry_min_s = 180,
     .initial_key_retry_max_s = 420,
     .initial_key_retry_max_limit_s = 420,
-    .initial_key_retry_limit = 2,
     .temp_min_timeout_s = 330,
-    .pmk_lifetime_m = MONTH_TO_MIN(4),
-    .ptk_lifetime_m = MONTH_TO_MIN(2),
     .gtk_request_imin_m = 1,
     .gtk_request_imax_m = 4,
     .gtk_max_mismatch_m = 64,
     .lgtk_max_mismatch_m = 60,
+    .sec_prot_trickle_expirations = 4,
+    .initial_key_retry_limit = 2,
     .allow_skip = true
   },
   .rpl = {
@@ -432,12 +437,12 @@ static const sl_wisun_connection_params_t SL_WISUN_PARAMS_PROFILE_SMALL = {
       .imax_s = 10,
       .k = 8,
     },
-    .trickle_expirations = 2,
     .seed_set_entry_lifetime_s = 180,
+    .trickle_expirations = 2,
   },
   .misc = {
-    .pan_timeout_m = 30,
     .temp_link_min_timeout_s = 260,
+    .pan_timeout_m = 30,
   }
 };
 
@@ -476,21 +481,21 @@ static const sl_wisun_connection_params_t SL_WISUN_PARAMS_PROFILE_MEDIUM = {
       .imax_s = 120,
       .k = 0,
     },
-    .sec_prot_trickle_expirations = 4,
+    .pmk_lifetime_m = MONTH_TO_MIN(4),
+    .ptk_lifetime_m = MONTH_TO_MIN(2),
     .sec_prot_retry_timeout_s = 450,
     .initial_key_min_s = 3,
     .initial_key_max_s = 30,
     .initial_key_retry_min_s = 180,
     .initial_key_retry_max_s = 420,
     .initial_key_retry_max_limit_s = 720,
-    .initial_key_retry_limit = 4,
     .temp_min_timeout_s = 330,
-    .pmk_lifetime_m = MONTH_TO_MIN(4),
-    .ptk_lifetime_m = MONTH_TO_MIN(2),
     .gtk_request_imin_m = 4,
     .gtk_request_imax_m = 64,
     .gtk_max_mismatch_m = 64,
     .lgtk_max_mismatch_m = 60,
+    .sec_prot_trickle_expirations = 4,
+    .initial_key_retry_limit = 4,
     .allow_skip = true
   },
   .rpl = {
@@ -509,12 +514,12 @@ static const sl_wisun_connection_params_t SL_WISUN_PARAMS_PROFILE_MEDIUM = {
       .imax_s = 32,
       .k = 8,
     },
-    .trickle_expirations = 2,
     .seed_set_entry_lifetime_s = 576,
+    .trickle_expirations = 2,
   },
   .misc = {
-    .pan_timeout_m = 60,
     .temp_link_min_timeout_s = 260,
+    .pan_timeout_m = 60,
   }
 };
 
@@ -553,21 +558,21 @@ static const sl_wisun_connection_params_t SL_WISUN_PARAMS_PROFILE_LARGE = {
       .imax_s = 240,
       .k = 0,
     },
-    .sec_prot_trickle_expirations = 4,
+    .pmk_lifetime_m = MONTH_TO_MIN(4),
+    .ptk_lifetime_m = MONTH_TO_MIN(2),
     .sec_prot_retry_timeout_s = 750,
     .initial_key_min_s = 3,
     .initial_key_max_s = 30,
     .initial_key_retry_min_s = 300,
     .initial_key_retry_max_s = 600,
     .initial_key_retry_max_limit_s = 900,
-    .initial_key_retry_limit = 4,
     .temp_min_timeout_s = 750,
-    .pmk_lifetime_m = MONTH_TO_MIN(4),
-    .ptk_lifetime_m = MONTH_TO_MIN(2),
     .gtk_request_imin_m = 4,
     .gtk_request_imax_m = 64,
     .gtk_max_mismatch_m = 64,
     .lgtk_max_mismatch_m = 60,
+    .sec_prot_trickle_expirations = 4,
+    .initial_key_retry_limit = 4,
     .allow_skip = true
   },
   .rpl = {
@@ -586,12 +591,12 @@ static const sl_wisun_connection_params_t SL_WISUN_PARAMS_PROFILE_LARGE = {
       .imax_s = 40,
       .k = 8,
     },
-    .trickle_expirations = 2,
     .seed_set_entry_lifetime_s = 720,
+    .trickle_expirations = 2,
   },
   .misc = {
-    .pan_timeout_m = 90,
     .temp_link_min_timeout_s = 520,
+    .pan_timeout_m = 90,
   }
 };
 

@@ -157,6 +157,33 @@ EmberStatus emberRemovePsaSecurityKey(void)
 #endif
 
 #ifdef CONNECT_NCP
+// setNcpSecurityKeyPersistent
+EmberStatus emberSetNcpSecurityKeyPersistent(uint8_t *key,
+                                             uint8_t keyLength,
+                                             uint32_t key_id)
+{
+  acquireCommandMutex();
+  uint8_t *apiCommandBuffer = getApiCommandPointer();
+  formatResponseCommand(apiCommandBuffer,
+                        MAX_STACK_API_COMMAND_SIZE,
+                        EMBER_SET_NCP_SECURITY_KEY_PERSISTENT_IPC_COMMAND_ID,
+                        "bw",
+                        key,
+                        keyLength,
+                        key_id);
+  uint8_t *apiCommandData = sendBlockingCommand(apiCommandBuffer);
+
+  EmberStatus status;
+  fetchApiParams(apiCommandData,
+                 "u",
+                 &status);
+  releaseCommandMutex();
+  return status;
+}
+
+#endif
+
+#ifdef CONNECT_NCP
 // setNcpSecurityKey
 EmberStatus emberSetNcpSecurityKey(uint8_t *key,
                                    uint8_t keyLength)
@@ -731,6 +758,31 @@ EmberStatus emberSetIndirectQueueTimeout(uint32_t timeoutMs)
   fetchApiParams(apiCommandData,
                  "u",
                  &status);
+  releaseCommandMutex();
+  return status;
+}
+
+// getVersionInfo
+EmberStatus emberGetVersionInfo(uint16_t* gsdkVersion,
+                                uint16_t* connectStackVersion,
+                                uint32_t* bootloaderVersion)
+{
+  acquireCommandMutex();
+  uint8_t *apiCommandBuffer = getApiCommandPointer();
+  formatResponseCommand(apiCommandBuffer,
+                        MAX_STACK_API_COMMAND_SIZE,
+                        EMBER_GET_VERSION_INFO_IPC_COMMAND_ID,
+                        "");
+  uint8_t *apiCommandData = sendBlockingCommand(apiCommandBuffer);
+
+  EmberStatus status;
+
+  fetchApiParams(apiCommandData,
+                 "uvvw",
+                 &status,
+                 gsdkVersion,
+                 connectStackVersion,
+                 bootloaderVersion);
   releaseCommandMutex();
   return status;
 }

@@ -1014,7 +1014,7 @@ void processPendingCalibrations(void)
         RAIL_CalibrateHFXO(railHandle, &crystalPPMError);
 
         if (isTxStream) {
-          RAIL_StartTxStreamAlt(railHandle, channel, streamMode, antOptions);
+          RAIL_StartTxStreamAlt(railHandle, channel, streamMode, concPhyIdOptions | antOptions);
         } else if (receiveModeEnabled && !calsInTxMode) {
           RAIL_StartRx(railHandle, getLikelyChannel(), NULL);
         }

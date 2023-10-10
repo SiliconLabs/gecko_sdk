@@ -21,6 +21,7 @@
   - name: hardware_board_has_vcom
   - name: hardware_board_has_spiflash
   - name: hardware_board_has_rfswitch
+  - name: hardware_board_has_rfswitch_to_ground
   - name: hardware_board_has_hfxo_freq_39mhz
   - name: hardware_board_has_hfxo
   - name: hardware_board_has_lfxo
@@ -58,7 +59,7 @@
   - name: SL_BOARD_NAME
     value: '"BRD4401C"'
   - name: SL_BOARD_REV
-    value: '"A00"'
+    value: '"A01"'
   - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_2400
   - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_868
   - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_915
@@ -67,7 +68,7 @@
 - tag:
   - board:pn:BRD4401
   - board:variant:C
-  - board:revision:A00
+  - board:revision:A01
   - board:device:efr32zg28b322f1024im68
   - hardware:has:vcom
   - hardware:has:pti

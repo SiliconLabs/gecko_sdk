@@ -46,7 +46,6 @@
 #define APP_SETTINGS_WISUN_DEFAULT_CHAN_PLAN_ID  1
 #define APP_SETTINGS_WISUN_DEFAULT_PHY_MODE_ID  2
 #define APP_SETTINGS_WISUN_DEFAULT_LFN_PROFILE SL_WISUN_LFN_PROFILE_TEST
-#define APP_SETTINGS_WISUN_DEFAULT_DEVICE_TYPE  SL_WISUN_BORDER_ROUTER
 
 #ifndef APP_SETTINGS_APP_DEFAULT_AUTOSTART
 # define APP_SETTINGS_APP_DEFAULT_AUTOSTART  false
@@ -76,14 +75,6 @@ typedef enum
   app_statistics_domain_network    = 0x04,
   app_statistics_domain_regulation = 0x05
 } app_statistics_domain_t;
-
-static const app_enum_t app_settings_wisun_device_type_enum[] =
-{
-  { "FFN", SL_WISUN_ROUTER },
-  { "LFN", SL_WISUN_LFN },
-  { "BR" , SL_WISUN_BORDER_ROUTER},
-  { NULL , 0 }
-};
 
 const char *app_statistics_domain_str[] =
 {
@@ -129,7 +120,6 @@ static const app_settings_wisun_t app_settings_wisun_default = {
   .allowed_channels = APP_SETTINGS_WISUN_DEFAULT_ALLOWED_CHANNELS,
   .trace_filter = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF},
   .regulation = APP_SETTINGS_WISUN_DEFAULT_REGULATION,
-  .device_type = APP_SETTINGS_WISUN_DEFAULT_DEVICE_TYPE,
   .chan_plan_id = APP_SETTINGS_WISUN_DEFAULT_CHAN_PLAN_ID,
   .phy_mode_id = APP_SETTINGS_WISUN_DEFAULT_PHY_MODE_ID,
   .phy_config_type = APP_SETTINGS_WISUN_DEFAULT_PHY_CONFIG_TYPE,
@@ -181,6 +171,7 @@ static const app_enum_t app_settings_wisun_phy_config_type_enum[] =
   { "FAN 1.0", SL_WISUN_PHY_CONFIG_FAN10 },
   { "FAN 1.1", SL_WISUN_PHY_CONFIG_FAN11 },
   { "explicit", SL_WISUN_PHY_CONFIG_EXPLICIT },
+  { "IDs", SL_WISUN_PHY_CONFIG_IDS},
   { NULL, 0 }
 };
 
@@ -370,7 +361,7 @@ const app_settings_entry_t app_settings_entries[] =
     .output_enum_list = app_settings_wisun_phy_config_type_enum,
     .set_handler = NULL,
     .get_handler = app_settings_get_integer,
-    .description = "PHY configuration type (FAN 1.0|FAN 1.1|explicit)"
+    .description = "PHY configuration type (FAN 1.0|FAN 1.1|explicit|IDs)"
   },
   {
     .key = "regulatory_domain",
@@ -931,19 +922,6 @@ const app_settings_entry_t app_settings_entries[] =
     .set_handler = app_settings_set_regulation,
     .get_handler = app_settings_get_integer,
     .description = "Regional regulation [uint8]"
-  },
-  {
-  .key = "device_type",
-  .domain = app_settings_domain_wisun,
-  .value_size = APP_SETTINGS_VALUE_SIZE_UINT8,
-  .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
-  .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
-  .value = &app_settings_wisun.device_type,
-  .input_enum_list = app_settings_wisun_device_type_enum,
-  .output_enum_list = app_settings_wisun_device_type_enum,
-  .set_handler = app_settings_set_integer,
-  .get_handler = app_settings_get_integer,
-  .description = "Device type [uint8]"
   },
 #if RAIL_IEEE802154_SUPPORTS_G_MODESWITCH
   {

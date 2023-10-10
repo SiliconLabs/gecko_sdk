@@ -101,30 +101,33 @@ sl_status_t sl_bt_ead_session_init(sl_bt_ead_key_material_p key_material,
   uint8_t      tmp[SL_BT_EAD_SESSION_KEY_SIZE];
   sl_status_t  result = SL_STATUS_INITIALIZATION;
 
-  assert(key_material != NULL);
+  if (key_material != NULL) {
+    // Make a copy of the session key, first
+    memcpy(tmp, key_material->key, SL_BT_EAD_SESSION_KEY_SIZE);
 
-  // Make a copy of the session key, first
-  memcpy(tmp, key_material->key, SL_BT_EAD_SESSION_KEY_SIZE);
+    // Swap key endianness to make the sli_ccm_[crypto] functions work as expected
+    for (unsigned int t = 0; t < SL_BT_EAD_SESSION_KEY_SIZE; t++) {
+      key_material->key[(SL_BT_EAD_SESSION_KEY_SIZE - 1) - t] = tmp[t];
+    }
 
-  // Swap key endianness to make the sli_ccm_[crypto] functions work as expected
-  for (unsigned int t = 0; t < SL_BT_EAD_SESSION_KEY_SIZE; t++) {
-    key_material->key[(SL_BT_EAD_SESSION_KEY_SIZE - 1) - t] = tmp[t];
+    if (nonce != NULL) {
+      memcpy((void *)nonce->iv,
+             (const void *)key_material->iv,
+             SL_BT_EAD_IV_SIZE);
+
+      result = sl_bt_ead_randomizer_set(randomizer, nonce);
+    } else {
+      result = SL_STATUS_OK;
+    }
+
+    #if (SL_BT_EAD_CORE_ACCELERATOR == SL_BT_EAD_CORE_USE_PSA_ACC)
+    // Prepare key attributes
+    psa_set_key_algorithm(&attributes, PSA_ALG_BLE_CCM);
+    psa_set_key_type(&attributes, PSA_KEY_TYPE_AES);
+    psa_set_key_bits(&attributes, SL_BT_EAD_SESSION_KEY_SIZE * 8);
+    #endif // (SL_BT_EAD_CORE_ACCELERATOR == SL_BT_EAD_CORE_USE_PSA_ACC)
   }
 
-  if (nonce != NULL) {
-    memcpy((void *)nonce->iv,
-           (const void *)key_material->iv,
-           SL_BT_EAD_IV_SIZE);
-
-    result = sl_bt_ead_randomizer_set(randomizer, nonce);
-  }
-
-  #if (SL_BT_EAD_CORE_ACCELERATOR == SL_BT_EAD_CORE_USE_PSA_ACC)
-  // Prepare key attributes
-  psa_set_key_algorithm(&attributes, PSA_ALG_BLE_CCM);
-  psa_set_key_type(&attributes, PSA_KEY_TYPE_AES);
-  psa_set_key_bits(&attributes, SL_BT_EAD_SESSION_KEY_SIZE * 8);
-  #endif // (SL_BT_EAD_CORE_ACCELERATOR == SL_BT_EAD_CORE_USE_PSA_ACC)
   return result;
 }
 

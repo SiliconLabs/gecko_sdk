@@ -26,4 +26,4 @@ requires:
   - name: sl_assert
 documentation:
     docset: gecko-platform
-    document: service/api/group-udelay
+    document: platform-service/udelay

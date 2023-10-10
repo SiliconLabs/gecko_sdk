@@ -8,10 +8,19 @@ description: >
   provisioning. A general callback for handling Provisioning Decorator events is
   also available. This component is prepared for integration into SOC applications.
 
-  This is a No-Code component.
+  This is a No-Code component, it automatically handles retries after failed provisioning attempts.
+  Additionally, the following weak callbacks can be implemented in Low-Code fashion to handle 
+  different stages of the provisioning process:
+  - void sl_btmesh_on_provision_init_status(bool provisioned, uint16_t address, uint32_t iv_index)
+  - void sl_btmesh_on_node_provisioning_started(uint16_t result)
+  - void sl_btmesh_on_node_provisioned(uint16_t address, uint32_t iv_index)
+  - void sl_btmesh_on_node_provisioning_failed(uint16_t result)
 category: "Bluetooth Mesh|Utility"
 quality: "production"
 root_path: "app/btmesh/common/btmesh_provisioning_decorator"
+tag:
+  - No-Code
+
 config_file:
   - path: "config/sl_btmesh_provisioning_decorator_config.h"
 source:

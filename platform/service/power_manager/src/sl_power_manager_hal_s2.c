@@ -85,8 +85,8 @@
 #define HFXO_WAKE_UP_TIME_TABLE_SIZE  10
 #endif
 
-// Defines for hidden DBGSTATUS register and STARTUPDONE flag
-#define DBGSTATUS  RESERVED6[0]
+// Defines for hidden HFXO0 DBGSTATUS register and STARTUPDONE flag
+#define HFXO0_DBGSTATUS  (*(volatile uint32_t *)(HFXO0_BASE + 0x05C))
 #define HFXO_DBGSTATUS_STARTUPDONE                  (0x1UL << 1)                               /**< Startup Done Status                         */
 #define _HFXO_DBGSTATUS_STARTUPDONE_SHIFT           1                                          /**< Shift value for HFXO_STARTUPDONE            */
 #define _HFXO_DBGSTATUS_STARTUPDONE_MASK            0x2UL                                      /**< Bit mask for HFXO_STARTUPDONE               */
@@ -113,6 +113,17 @@
 
 #if !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT)
 // Variables to save the relevant clock registers.
+uint32_t cmu_em01_grpA_clock_register;
+#if defined(_CMU_EM01GRPBCLKCTRL_CLKSEL_MASK)
+uint32_t cmu_em01_grpB_clock_register;
+#endif
+#if defined(_CMU_EM01GRPCCLKCTRL_CLKSEL_MASK)
+uint32_t cmu_em01_grpC_clock_register;
+#endif
+#if defined(_CMU_DPLLREFCLKCTRL_CLKSEL_MASK)
+uint32_t cmu_dpll_ref_clock_register;
+#endif
+
 uint32_t cmu_sys_clock_register;
 
 // Time in ticks required for the general wake-up process.
@@ -149,13 +160,6 @@ static uint32_t hfxo_wakeup_time_tick = 0;
  ******************************************************************************/
 void sli_power_manager_init_hardware(void)
 {
-#if !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT)
-  uint32_t cmu_em01_grpA_clock_register;
-#if defined(CMU_EM01GRPBCLKCTRL_CLKSEL_HFXO)
-  uint32_t cmu_em01_grpB_clock_register;
-#endif
-#endif
-
   // Initializes EMU (voltage scaling in EM2/3)
 #if defined(EMU_VSCALE_EM01_PRESENT)
   EMU_EM01Init_TypeDef em01_init = EMU_EM01INIT_DEFAULT;
@@ -178,9 +182,8 @@ void sli_power_manager_init_hardware(void)
 
   // Get the current HF oscillator for the SYSCLK
   cmu_sys_clock_register = CMU->SYSCLKCTRL & _CMU_SYSCLKCTRL_CLKSEL_MASK;
-  cmu_em01_grpA_clock_register = CMU->EM01GRPACLKCTRL & _CMU_EM01GRPACLKCTRL_CLKSEL_MASK;
-#if defined(CMU_EM01GRPBCLKCTRL_CLKSEL_HFXO)
-  cmu_em01_grpB_clock_register = CMU->EM01GRPBCLKCTRL & _CMU_EM01GRPBCLKCTRL_CLKSEL_MASK;
+#if defined(_CMU_DPLLREFCLKCTRL_CLKSEL_MASK)
+  cmu_dpll_ref_clock_register = CMU->DPLLREFCLKCTRL & _CMU_DPLLREFCLKCTRL_CLKSEL_MASK;
 #endif
 
 #if defined(CMU_CLKEN0_DPLL0)
@@ -192,14 +195,18 @@ void sli_power_manager_init_hardware(void)
   is_dpll_used = ((DPLL0->STATUS & _DPLL_STATUS_ENS_MASK) != 0);
 
   is_hf_x_oscillator_used = ((cmu_sys_clock_register == CMU_SYSCLKCTRL_CLKSEL_HFXO)
-                             || (cmu_em01_grpA_clock_register == CMU_EM01GRPACLKCTRL_CLKSEL_HFXO));
+                             || ((CMU->EM01GRPACLKCTRL & _CMU_EM01GRPACLKCTRL_CLKSEL_MASK) == CMU_EM01GRPACLKCTRL_CLKSEL_HFXO));
 
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
   is_hf_x_oscillator_used |= (CMU->RADIOCLKCTRL & _CMU_RADIOCLKCTRL_EN_MASK) != 0;
 #endif
 
 #if defined(CMU_EM01GRPBCLKCTRL_CLKSEL_HFXO)
-  is_hf_x_oscillator_used |= (cmu_em01_grpB_clock_register == CMU_EM01GRPBCLKCTRL_CLKSEL_HFXO);
+  is_hf_x_oscillator_used |= ((CMU->EM01GRPBCLKCTRL & _CMU_EM01GRPBCLKCTRL_CLKSEL_MASK) == CMU_EM01GRPBCLKCTRL_CLKSEL_HFXO);
+#endif
+
+#if defined(CMU_EM01GRPCCLKCTRL_CLKSEL_HFXO)
+  is_hf_x_oscillator_used |= ((CMU->EM01GRPCCLKCTRL & _CMU_EM01GRPCCLKCTRL_CLKSEL_MASK) == CMU_EM01GRPCCLKCTRL_CLKSEL_HFXO);
 #endif
 
 #if defined(SL_CATALOG_POWER_MANAGER_DEEPSLEEP_BLOCKING_HFXO_RESTORE_PRESENT)
@@ -289,6 +296,15 @@ void sli_power_manager_em23_voltage_scaling_enable_fast_wakeup(bool enable)
  ******************************************************************************/
 void sli_power_manager_save_states(void)
 {
+  // Save HF clock sources
+  cmu_em01_grpA_clock_register = CMU->EM01GRPACLKCTRL & _CMU_EM01GRPACLKCTRL_CLKSEL_MASK;
+#if defined(_CMU_EM01GRPBCLKCTRL_CLKSEL_MASK)
+  cmu_em01_grpB_clock_register = CMU->EM01GRPBCLKCTRL & _CMU_EM01GRPBCLKCTRL_CLKSEL_MASK;
+#endif
+#if defined(_CMU_EM01GRPCCLKCTRL_CLKSEL_MASK)
+  cmu_em01_grpC_clock_register = CMU->EM01GRPCCLKCTRL & _CMU_EM01GRPCCLKCTRL_CLKSEL_MASK;
+#endif
+
   EMU_Save();
 }
 #endif
@@ -305,6 +321,25 @@ void EMU_EM23PresleepHook(void)
     is_entering_deepsleep = false;
 
     CMU->SYSCLKCTRL = (CMU->SYSCLKCTRL & ~_CMU_SYSCLKCTRL_CLKSEL_MASK) | _CMU_SYSCLKCTRL_CLKSEL_FSRCO;
+    // Switch the HF Clocks oscillator's to FSRCO before deepsleep
+    CMU->EM01GRPACLKCTRL = (CMU->EM01GRPACLKCTRL  & ~_CMU_EM01GRPACLKCTRL_CLKSEL_MASK) | _CMU_EM01GRPACLKCTRL_CLKSEL_FSRCO;
+#if defined(_CMU_EM01GRPBCLKCTRL_CLKSEL_MASK)
+    CMU->EM01GRPBCLKCTRL = (CMU->EM01GRPBCLKCTRL  & ~_CMU_EM01GRPBCLKCTRL_CLKSEL_MASK) | _CMU_EM01GRPBCLKCTRL_CLKSEL_FSRCO;
+#endif
+#if defined(_CMU_EM01GRPCCLKCTRL_CLKSEL_MASK)
+    CMU->EM01GRPCCLKCTRL = (CMU->EM01GRPCCLKCTRL  & ~_CMU_EM01GRPCCLKCTRL_CLKSEL_MASK) | _CMU_EM01GRPCCLKCTRL_CLKSEL_FSRCO;
+#endif
+    // Disable DPLLREFCLK before deepsleep
+#if (_DPLL_IPVERSION_IPVERSION_DEFAULT >= 1)
+#if defined(_CMU_DPLLREFCLKCTRL_CLKSEL_MASK)
+    if (is_dpll_used) {
+      DPLL0->EN_CLR = DPLL_EN_EN;
+      while ((DPLL0->EN & _DPLL_EN_DISABLING_MASK) != 0) {
+      }
+      CMU->DPLLREFCLKCTRL = (CMU->DPLLREFCLKCTRL & ~_CMU_DPLLREFCLKCTRL_CLKSEL_MASK) | CMU_DPLLREFCLKCTRL_CLKSEL_DISABLED;
+    }
+#endif
+#endif
 
     SystemCoreClockUpdate();
   }
@@ -332,8 +367,9 @@ void EMU_EM23PostsleepHook(void)
       && sli_sleeptimer_is_power_manager_timer_next_to_expire()) {
     // Check if HFXO is already running and has finished its startup.
     // If yes, don't do the HFXO restore time measurement.
-    if ((HFXO0->STATUS & _HFXO_STATUS_ENS_MASK) != 0
-        && (HFXO0->DBGSTATUS & _HFXO_DBGSTATUS_STARTUPDONE_MASK) != 0) {
+    if (((HFXO0->STATUS & _HFXO_STATUS_ENS_MASK) != 0
+         && (HFXO0_DBGSTATUS & _HFXO_DBGSTATUS_STARTUPDONE_MASK) != 0)
+        || (HFXO0->STATUS & _HFXO_STATUS_RDY_MASK) != 0) {
 #if !defined(SL_CATALOG_POWER_MANAGER_DEEPSLEEP_BLOCKING_HFXO_RESTORE_PRESENT)
       // Force-enable HFXO in case the HFXO on-demand request would be removed
       // before we finish the restore process.
@@ -388,8 +424,9 @@ void sli_power_manager_restore_high_freq_accuracy_clk(void)
   if (!is_hf_x_oscillator_already_started) {
     // Check if HFXO is already running and has finished its startup.
     // If yes, don't do the HFXO restore time measurement.
-    if ((HFXO0->STATUS & _HFXO_STATUS_ENS_MASK) != 0
-        && (HFXO0->DBGSTATUS & _HFXO_DBGSTATUS_STARTUPDONE_MASK) != 0) {
+    if (((HFXO0->STATUS & _HFXO_STATUS_ENS_MASK) != 0
+         && (HFXO0_DBGSTATUS & _HFXO_DBGSTATUS_STARTUPDONE_MASK) != 0)
+        || (HFXO0->STATUS & _HFXO_STATUS_RDY_MASK) != 0) {
 #if !defined(SL_CATALOG_POWER_MANAGER_DEEPSLEEP_BLOCKING_HFXO_RESTORE_PRESENT)
       // Force-enable HFXO in case the HFXO on-demand request would be removed
       // before we finish the restore process.
@@ -462,8 +499,27 @@ void sli_power_manager_restore_states(void)
 {
   EMU_Restore();
 
+  // Restore DPLLREFCLK to what it was before the deepsleep
+#if (_DPLL_IPVERSION_IPVERSION_DEFAULT >= 1)
+#if defined(_CMU_DPLLREFCLKCTRL_CLKSEL_MASK)
+  if (is_dpll_used) {
+    CMU->DPLLREFCLKCTRL = (CMU->DPLLREFCLKCTRL & ~_CMU_DPLLREFCLKCTRL_CLKSEL_MASK) | cmu_dpll_ref_clock_register;
+    DPLL0->EN_SET = DPLL_EN_EN;
+  }
+#endif
+#endif
+
   // Restore SYSCLK to what it was before the deepsleep
   CMU->SYSCLKCTRL = (CMU->SYSCLKCTRL & ~_CMU_SYSCLKCTRL_CLKSEL_MASK) | cmu_sys_clock_register;
+
+  // Restore the HF Clocks to what they were before deepsleep
+  CMU->EM01GRPACLKCTRL = (CMU->EM01GRPACLKCTRL & ~_CMU_EM01GRPACLKCTRL_CLKSEL_MASK) | cmu_em01_grpA_clock_register;
+#if defined(_CMU_EM01GRPBCLKCTRL_CLKSEL_MASK)
+  CMU->EM01GRPBCLKCTRL = (CMU->EM01GRPBCLKCTRL & ~_CMU_EM01GRPBCLKCTRL_CLKSEL_MASK) | cmu_em01_grpB_clock_register;
+#endif
+#if defined(_CMU_EM01GRPCCLKCTRL_CLKSEL_MASK)
+  CMU->EM01GRPCCLKCTRL = (CMU->EM01GRPCCLKCTRL & ~_CMU_EM01GRPCCLKCTRL_CLKSEL_MASK) | cmu_em01_grpC_clock_register;
+#endif
 
   // Remove FORCEEN on HFXO
   if (is_hf_x_oscillator_used) {

@@ -25,6 +25,8 @@
 #else
 #include "sl_system_process_action.h"
 #endif // SL_CATALOG_KERNEL_PRESENT
+#include "sl_cpc.h"
+#include "sl_gsdk_version.h"
 
 void app_init(void)
 {
@@ -32,6 +34,16 @@ void app_init(void)
 
 void app_process_action(void)
 {
+}
+
+/**
+ * The version returned by getting the app version through CPC is a char string
+ * (e.g. "4.3.1").
+ * This function can also be refined to return a user-defined application specific version
+ */
+const char* sl_cpc_secondary_app_version(void)
+{
+  return SL_GSDK_VERSION_STR;
 }
 
 int main(void)

@@ -70,7 +70,7 @@ static void sl_btmesh_firmware_update_client_element_init(uint16_t elem_index)
 
 static void sl_btmesh_firmware_update_client_init(void)
 {
-  sl_btmesh_firmware_update_client_element_init(BTMESH_FW_DISTRIBUTION_SERVER_MAIN);
+  sl_btmesh_firmware_update_client_element_init(BTMESH_FIRMWARE_UPDATE_CLIENT_GROUP_MAIN_ELEM_INDEX);
 }
 
 void sl_btmesh_firmware_update_client_on_event(const sl_btmesh_msg_t *const evt)

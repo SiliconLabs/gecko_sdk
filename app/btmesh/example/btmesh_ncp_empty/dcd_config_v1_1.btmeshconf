@@ -14,6 +14,8 @@
           { "mid": "0x0003", "name": "Health Client" },
           { "mid": "0x0004", "name": "Remote Provisioning Server" },
           { "mid": "0x0005", "name": "Remote Provisioning Client" },
+          { "mid": "0x000e", "name": "SAR Configuration Server" },
+          { "mid": "0x000f", "name": "SAR Configuration Client" },
           { "mid": "0x1000", "name": "Generic OnOff Server" },
           { "mid": "0x1001", "name": "Generic OnOff Client" },
           { "mid": "0x1002", "name": "Generic Level Server" },

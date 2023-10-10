@@ -28,29 +28,29 @@ requires:
 documentation:
   docset: gecko-platform
   document:
-    - page: emlib/api/efr32xg1/group-ldma
+    - page: platform-emlib-efr32xg1/ldma
       condition: [device_sdid_80]
-    - page: emlib/api/efr32xg12/group-ldma
+    - page: platform-emlib-efr32xg12/ldma
       condition: [device_sdid_84]
-    - page: emlib/api/efr32xg13/group-ldma
+    - page: platform-emlib-efr32xg13/ldma
       condition: [device_sdid_89]
-    - page: emlib/api/efr32xg14/group-ldma
+    - page: platform-emlib-efr32xg14/ldma
       condition: [device_sdid_95]
-    - page: emlib/api/efm32gg11/group-ldma
+    - page: platform-emlib-efm32gg11/ldma
       condition: [device_sdid_100]
-    - page: emlib/api/efm32gg12/group-ldma
+    - page: platform-emlib-efm32gg12/ldma
       condition: [device_sdid_106]
-    - page: emlib/api/efr32xg21/group-ldma
+    - page: platform-emlib-efr32xg21/ldma
       condition: [device_sdid_200]
-    - page: emlib/api/efr32xg22/group-ldma
+    - page: platform-emlib-efr32xg22/ldma
       condition: [device_sdid_205]
-    - page: emlib/api/efr32xg23/group-ldma
+    - page: platform-emlib-efr32xg23/ldma
       condition: [device_sdid_210]
-    - page: emlib/api/efr32xg24/group-ldma
+    - page: platform-emlib-efr32xg24/ldma
       condition: [device_sdid_215]
-    - page: emlib/api/efr32xg25/group-ldma
+    - page: platform-emlib-efr32xg25/ldma
       condition: [device_sdid_220]
-    - page: emlib/api/efr32xg27/group-ldma
+    - page: platform-emlib-efr32xg27/ldma
       condition: [device_sdid_230]
-    - page: emlib/api/efr32xg28/group-ldma
+    - page: platform-emlib-efr32xg28/ldma
       condition: [device_sdid_235]

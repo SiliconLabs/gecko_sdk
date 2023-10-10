@@ -28,47 +28,48 @@ requires:
   - name: emlib_syscfg
     condition: [device_has_syscfg]
   - name: enum
+  - name: component_catalog
 
 documentation:
   docset: gecko-platform
   document:
-    - page: emlib/api/efm32g/group-cmu
+    - page: platform-emlib-efm32g/cmu
       condition: [device_sdid_71]
-    - page: emlib/api/efm32gg/group-cmu
+    - page: platform-emlib-efm32gg/cmu
       condition: [device_sdid_72]
-    - page: emlib/api/efm32tg/group-cmu
+    - page: platform-emlib-efm32tg/cmu
       condition: [device_sdid_73]
-    - page: emlib/api/efm32lg/group-cmu
+    - page: platform-emlib-efm32lg/cmu
       condition: [device_sdid_74]
-    - page: emlib/api/efm32zg/group-cmu
+    - page: platform-emlib-efm32zg/cmu
       condition: [device_sdid_76]
-    - page: emlib/api/efm32hg/group-cmu
+    - page: platform-emlib-efm32hg/cmu
       condition: [device_sdid_77]
-    - page: emlib/api/efr32xg1/group-cmu
+    - page: platform-emlib-efr32xg1/cmu
       condition: [device_sdid_80]
-    - page: emlib/api/efr32xg12/group-cmu
+    - page: platform-emlib-efr32xg12/cmu
       condition: [device_sdid_84]
-    - page: emlib/api/efr32xg13/group-cmu
+    - page: platform-emlib-efr32xg13/cmu
       condition: [device_sdid_89]
-    - page: emlib/api/efr32xg14/group-cmu
+    - page: platform-emlib-efr32xg14/cmu
       condition: [device_sdid_95]
-    - page: emlib/api/efm32gg11/group-cmu
+    - page: platform-emlib-efm32gg11/cmu
       condition: [device_sdid_100]
-    - page: emlib/api/efm32tg11/group-cmu
+    - page: platform-emlib-efm32tg11/cmu
       condition: [device_sdid_103]
-    - page: emlib/api/efm32gg12/group-cmu
+    - page: platform-emlib-efm32gg12/cmu
       condition: [device_sdid_106]
-    - page: emlib/api/efr32xg21/group-cmu
+    - page: platform-emlib-efr32xg21/cmu
       condition: [device_sdid_200]
-    - page: emlib/api/efr32xg22/group-cmu
+    - page: platform-emlib-efr32xg22/cmu
       condition: [device_sdid_205]
-    - page: emlib/api/efr32xg23/group-cmu
+    - page: platform-emlib-efr32xg23/cmu
       condition: [device_sdid_210]
-    - page: emlib/api/efr32xg24/group-cmu
+    - page: platform-emlib-efr32xg24/cmu
       condition: [device_sdid_215]
-    - page: emlib/api/efr32xg25/group-cmu
+    - page: platform-emlib-efr32xg25/cmu
       condition: [device_sdid_220]
-    - page: emlib/api/efr32xg27/group-cmu
+    - page: platform-emlib-efr32xg27/cmu
       condition: [device_sdid_230]
-    - page: emlib/api/efr32xg28/group-cmu
+    - page: platform-emlib-efr32xg28/cmu
       condition: [device_sdid_235]

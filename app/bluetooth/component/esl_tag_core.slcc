@@ -86,16 +86,20 @@ requires:
 template_contribution:
   - name: bluetooth_on_event
     value:
-      include: esl_tag_core.h
+      include: esl_tag_internal.h
       function: esl_core_bt_on_event
     priority: -8192
   - name: event_handler
     value:
       event: internal_app_init
-      include: esl_tag_core.h
+      include: esl_tag_internal.h
       handler: esl_core_init
     priority: 8
-
+  - name: event_handler
+    value:
+      event: internal_app_process_action
+      include: esl_tag_internal.h
+      handler: esl_core_step
 validation_library:
   - path: ../../../common/validation/autonumber_common.lua
     name: autonumber_common

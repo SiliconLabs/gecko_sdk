@@ -3,7 +3,7 @@
 - label: BRD2901A
 - package: platform
 - description: Board support for BRD2901A.
-- category: Platform|Board|Starter Kit
+- category: Platform|Board|Thunderboard
 - quality: production
 - requires:
   - name: efr32bg22c224f512im40
@@ -11,8 +11,8 @@
 - provides:
   - name: brd2901a
   - name: hardware_board
-  - name: hardware_board_stk
-  - name: hardware_board_from_stk
+  - name: hardware_board_tb
+  - name: hardware_board_from_tb
   - name: hardware_board_has_vcom
   - name: hardware_board_supports_rf_band_2400
   - name: hardware_board_supports_rf_band_868

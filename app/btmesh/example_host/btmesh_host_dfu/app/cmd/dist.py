@@ -344,14 +344,14 @@ class BtmeshDistCmd(BtmeshCmd):
             type=int,
             default=app_cfg.dist_clt.dist_appkey_index_default,
             help="Appkey index used for the communication between the "
-            "Distributor and Updating Nodes. (default: %(default)s)",
+            "Distributor and Target Nodes. (default: %(default)s)",
         )
         self.dist_start_parser.add_argument(
             "--dist-ttl",
             type=int,
             default=app_cfg.dist_clt.dist_ttl_default,
             help="The TTL for the Distributor to use when communicating with "
-            "the Updating Nodes. (default: %(default)s)",
+            "the Target Nodes. (default: %(default)s)",
         )
         self.add_appkey_index_arg(self.dist_start_parser)
         self.add_ttl_arg(self.dist_start_parser)
@@ -360,7 +360,7 @@ class BtmeshDistCmd(BtmeshCmd):
             type=int,
             default=0,
             help=(
-                "Index of the firmware on updating nodes which shall be updated."
+                "Index of the firmware on target nodes which shall be updated."
                 "(default: %(default)s)"
             ),
         )
@@ -392,7 +392,7 @@ class BtmeshDistCmd(BtmeshCmd):
                 "the default maximum number of additional Firmware Update "
                 "Firmware Metadata Check messages which are sent until the "
                 "corresponding status messages are not received from each "
-                "updating node. "
+                "target node. "
                 "(default: %(default)s)"
             ),
             retry_interval_help=(
@@ -405,14 +405,14 @@ class BtmeshDistCmd(BtmeshCmd):
                 "as well at the beginning of the Distribution. It determines "
                 "the default interval in seconds between Firmware Update "
                 "Firmware Metadata Check messages when the corresponding "
-                "status messages are not received from each updating node. "
+                "status messages are not received from each target node. "
                 "(default: %(default)s)"
             ),
             retry_interval_lpn_help=(
                 "Interval in seconds between Firmware Update Firmware Metadata "
                 "Check messages at the beginning of the Distribution when the "
                 "corresponding status messages are not received from each "
-                "updating node. "
+                "target node. "
                 "Note: Distributor should not be Low Power Node so this argument "
                 "doesn't affect the retransmission of Distribution messages. "
                 "(default: %(default)s)"
@@ -443,11 +443,11 @@ class BtmeshDistCmd(BtmeshCmd):
                 f"be subscribed to specified group address. "
                 f"If it is unassigned address (0) then the FW Distribution Server "
                 f"sends FW Update and BLOB Transfer BT Mesh messages to each "
-                f"updating node one by one to the element address of FW Update "
+                f"target node one by one to the element address of FW Update "
                 f"Server and BLOB Transfer Server models."
             ),
             group_help=(
-                f"Select the app group which contains group address and updating "
+                f"Select the app group which contains group address and target "
                 f"nodes which shall participate in the firmware update. "
                 f"The group address of the app group is used as the distribution "
                 f"group address. For further details see {self.GROUP_ADDR_OPTS} "
@@ -457,12 +457,12 @@ class BtmeshDistCmd(BtmeshCmd):
                 f"{self.NODES_OPTS} option."
             ),
             nodes_help=(
-                f"Select the updating nodes which shall participate in the "
+                f"Select the target nodes which shall participate in the "
                 f"firmware update. The FW Distribution procedure requires the "
                 f"receivers which are the element (unicast) addresses of the "
-                f"updating nodes. Those element addresses shall be selected "
+                f"target nodes. Those element addresses shall be selected "
                 f"where the FW Update Server and BLOB Transfer Server models "
-                f"are located on the updating node. "
+                f"are located on the target node. "
                 f"The {self.NODES_OPTS} option selects nodes only so in order "
                 f"to specify the proper element address the {self.ELEM_OPTS} "
                 f"option shall be used as well. "
@@ -470,14 +470,14 @@ class BtmeshDistCmd(BtmeshCmd):
                 f"{self.ELEM_ADDRS_OPTS} option."
             ),
             elem_help=(
-                f"Select element on the updating nodes where the FW Update Server "
+                f"Select element on the target nodes where the FW Update Server "
                 f"and BLOB Transfer Server models are located by element index. "
                 f"This option is mandatory when {self.NODES_OPTS} or "
                 f"{self.GROUP_OPTS} is used because those selects the nodes only."
             ),
             elem_addrs_help=(
-                f"Select the updating nodes which participate in the firmware "
-                f"update by selecting the element addresses of the updating "
+                f"Select the target nodes which participate in the firmware "
+                f"update by selecting the element addresses of the target "
                 f"nodes with FW Update Server and BLOB Transfer Server models. "
                 f"If {self.ELEM_ADDRS_OPTS} is used then {self.NODES_OPTS} and "
                 f"{self.GROUP_OPTS} and {self.ELEM_OPTS} shall not be used."
@@ -793,7 +793,7 @@ class BtmeshDistCmd(BtmeshCmd):
                     rows.append(rec_info_dict)
                 app_ui.table_info(rows)
         except BGLibExtSyncSignalException:
-            # If an updating node does not respond then the cancellation might
+            # If an target node does not respond then the cancellation might
             # be as long as the distribution client timeout. The distributor is
             # poll interval might delay the detection of completed cancellation.
             client_timeout = btmesh.util.dfu_calc_client_timeout(

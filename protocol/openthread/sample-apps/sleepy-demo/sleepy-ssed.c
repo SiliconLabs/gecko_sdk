@@ -43,8 +43,8 @@
 #define MULTICAST_ADDR "ff03::1"
 #define MULTICAST_PORT 123
 #define RECV_PORT 234
-#define SSED_CSL_PERIOD_SYMBOLS 3125 // units of 10 symbols = 160 us.
-#define SSED_CSL_TIMEOUT_SEC    30   // seconds.
+#define SSED_CSL_PERIOD_SYMBOLS 3125   // 500000 us. (units of 10 symbols = 160 us.)
+#define SSED_CSL_TIMEOUT_SEC    20     // 20 seconds.
 #define FTD_MESSAGE "ftd button"
 #define SSED_MESSAGE "ssed button"
 

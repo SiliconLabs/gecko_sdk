@@ -12,7 +12,7 @@ requires:
   - name: component_catalog
 documentation:
     docset: gecko-platform
-    document: service/api/group-system
+    document: platform-service/system
 description: |
   The System Setup component provides a set of events that can be used by
   other components to register handlers that should be run when the system

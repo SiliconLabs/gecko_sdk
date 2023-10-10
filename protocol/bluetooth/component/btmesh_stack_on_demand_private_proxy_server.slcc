@@ -3,7 +3,7 @@ label: "On-Demand Private Proxy Server Model"
 package: "Btmesh"
 description: "Provides the Bluetooth mesh On-Demand Private Proxy Server model. It is used to support the configuration of the advertising with Private Network Identity type functionality of a node."
 category: "Bluetooth Mesh|Stack|Models|Core"
-quality: "evaluation"
+quality: "production"
 root_path: "protocol/bluetooth"
 
 requires:

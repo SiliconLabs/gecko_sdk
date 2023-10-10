@@ -32,6 +32,10 @@
 
 #include "sl_status.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @addtogroup device_init
  * @{
@@ -73,5 +77,9 @@ sl_status_t sl_device_init_lfxo(void);
  * @} device_init_lfxo
  * @} device_init
  */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // SL_DEVICE_INIT_LFXO_H

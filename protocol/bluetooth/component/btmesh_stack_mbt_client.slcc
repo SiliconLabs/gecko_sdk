@@ -3,7 +3,7 @@ label: "BLOB Transfer Client Model"
 package: "Btmesh"
 description: "Provides Bluetooth mesh BLOB Transfer Client model. It is used to transfer large binary objects to other nodes in the network, either in a unicast or multicast fashion."
 category: "Bluetooth Mesh|Stack|Models|DFU"
-quality: "evaluation"
+quality: "production"
 root_path: "protocol/bluetooth"
 
 requires:

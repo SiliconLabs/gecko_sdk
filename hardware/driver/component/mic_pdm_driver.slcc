@@ -30,4 +30,4 @@ config_file:
     condition: [device_series_2]
 documentation:
     docset: gecko-platform
-    document: hardware-driver/api/group-mic
+    document: platform-hardware-driver/mic

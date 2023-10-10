@@ -22,19 +22,19 @@ requires:
 documentation:
   docset: gecko-platform
   document:
-    - page: emlib/api/efm32g/group-rtc
+    - page: platform-emlib-efm32g/rtc
       condition: [device_sdid_71]
-    - page: emlib/api/efm32gg/group-rtc
+    - page: platform-emlib-efm32gg/rtc
       condition: [device_sdid_72]
-    - page: emlib/api/efm32tg/group-rtc
+    - page: platform-emlib-efm32tg/rtc
       condition: [device_sdid_73]
-    - page: emlib/api/efm32lg/group-rtc
+    - page: platform-emlib-efm32lg/rtc
       condition: [device_sdid_74]
-    - page: emlib/api/efm32zg/group-rtc
+    - page: platform-emlib-efm32zg/rtc
       condition: [device_sdid_76]
-    - page: emlib/api/efm32hg/group-rtc
+    - page: platform-emlib-efm32hg/rtc
       condition: [device_sdid_77]
-    - page: emlib/api/efm32gg11/group-rtc
+    - page: platform-emlib-efm32gg11/rtc
       condition: [device_sdid_100]
-    - page: emlib/api/efm32gg12/group-rtc
+    - page: platform-emlib-efm32gg12/rtc
       condition: [device_sdid_106]

@@ -31,6 +31,10 @@
 #ifndef ERRNO_H
 #define ERRNO_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*******************************************************************************
  * @addtogroup errno Errno
  * @details Errno contains the definition for errno and the defines for
@@ -153,5 +157,9 @@ int *sl_errno(void);
 #define EWOULDBLOCK     EAGAIN  ///< Operation would block
 
 /** @} (end addtogroup errno) */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ERRNO_H

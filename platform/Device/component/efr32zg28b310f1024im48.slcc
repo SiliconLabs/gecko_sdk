@@ -74,6 +74,7 @@
 - provides:
   - name: efr32zg28b310f1024im48
   - name: device
+  - name: device_efx
   - name: device_series_2
   - name: device_sdid_235
   - name: device_generic_family_efr32xg28

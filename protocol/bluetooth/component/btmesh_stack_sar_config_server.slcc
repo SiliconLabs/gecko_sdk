@@ -4,7 +4,7 @@ package: "Btmesh"
 description: "Provides Bluetooth mesh SAR Configuration Server Model.
   This model provides the functionality of configuration of the segmentation and reassembly behavior of a node."
 category: "Bluetooth Mesh|Stack|Models|Core"
-quality: "evaluation"
+quality: "production"
 root_path: "protocol/bluetooth"
 
 requires:

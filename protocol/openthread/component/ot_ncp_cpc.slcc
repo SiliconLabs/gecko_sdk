@@ -12,6 +12,9 @@ requires:
   - name: ot_ncp_vendor_extension
   - name: cpc_secondary
   - name: ot_coex
+  - name: rail_util_ieee802154_fast_channel_switching
+    condition:
+      - "rail_ieee802154_supports_rx_channel_switching"
 # Work around broken TRNG on MG1, MG13, and MG14 parts
   - name: mbedtls_entropy_adc
     condition:

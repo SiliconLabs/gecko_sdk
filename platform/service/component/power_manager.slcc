@@ -21,4 +21,4 @@ recommends:
   - id: power_manager_handler_implementation
 documentation:
   docset: gecko-platform
-  document: service/power_manager/overview
+  document: platform-service-power-manager-overview

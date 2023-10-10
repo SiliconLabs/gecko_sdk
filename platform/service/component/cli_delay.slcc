@@ -24,4 +24,4 @@ template_contribution:
     value: cli_delay
 documentation:
     docset: gecko-platform
-    document: service/api/group-cli-delay
+    document: platform-service/cli-delay

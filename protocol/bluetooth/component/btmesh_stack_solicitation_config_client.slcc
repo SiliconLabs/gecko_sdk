@@ -4,7 +4,7 @@ package: "Btmesh"
 description: "Provides Bluetooth mesh Solicitation PDU RPL Configuration Client model.
   It is used to support the functionality of removing addresses from the solicitation replay protection list of a node that supports the Solicitation PDU RPL Configuration Server model."
 category: "Bluetooth Mesh|Stack|Models|Core"
-quality: "evaluation"
+quality: "production"
 root_path: "protocol/bluetooth"
 
 requires:

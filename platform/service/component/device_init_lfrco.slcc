@@ -42,4 +42,4 @@ template_contribution:
     value: lfrco
 documentation:
   docset: gecko-platform
-  document: service/api/group-device-init-lfrco
+  document: platform-service/device-init-lfrco

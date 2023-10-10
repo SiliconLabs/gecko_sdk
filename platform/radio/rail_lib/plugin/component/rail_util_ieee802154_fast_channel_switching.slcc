@@ -15,6 +15,8 @@ template_contribution:
   - name: rail_util_ieee802154_phy_select_callbacks
     value:
       include: sl_rail_util_ieee802154_fast_channel_switching_config.h
+      radio_config: SL_RAIL_UTIL_IEEE802154_RADIO_CONFIG_2P4_ANTDIV
+      get_phy_select: sl_rail_util_ieee802154_is_fast_channel_switching_phy_selected
     priority: -9010
   - name: component_catalog
     value: rail_util_ieee802154_fast_channel_switching

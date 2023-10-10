@@ -14,9 +14,9 @@
   - name: SL_KIT_NAME
     value: '"PG28-PK2506A"'
   - name: SL_KIT_REV
-    value: '"A01"'
+    value: '"A02"'
 - tag:
   - kit:opn:PG28-PK2506A
   - kit:pn:PK2506
   - kit:variant:A
-  - kit:revision:A01
+  - kit:revision:A02

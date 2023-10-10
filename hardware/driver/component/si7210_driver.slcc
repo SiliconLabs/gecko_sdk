@@ -22,4 +22,4 @@ source:
   - path: src/sl_si7210.c
 documentation:
     docset: gecko-platform
-    document: hardware-driver/api/group-si7210
+    document: platform-hardware-driver/si7210

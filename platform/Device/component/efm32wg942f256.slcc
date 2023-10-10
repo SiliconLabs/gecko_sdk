@@ -74,6 +74,7 @@
 - provides:
   - name: efm32wg942f256
   - name: device
+  - name: device_efx
   - name: device_series_0
   - name: device_sdid_74
   - name: device_family_efm32wg

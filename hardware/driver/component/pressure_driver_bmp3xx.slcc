@@ -19,4 +19,4 @@ source:
   - path: src/sl_pressure_bmp3xx.c
 documentation:
     docset: gecko-platform
-    document: hardware-driver/api/group-bmp3xx
+    document: platform-hardware-driver/bmp3xx

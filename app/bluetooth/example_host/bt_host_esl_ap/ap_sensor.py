@@ -43,6 +43,39 @@ S_ID_PRESENT_AMBIENT_TEMPERATURE                        = 0x004F    #Mesh type: 
 S_ID_SILABS_SENSOR_1                                    = 0xCAFE02FF
 S_ID_SILABS_SENSOR_BUTTON                               = 0xC0DE02FF
 
+class SensorResponseParser():
+    def __init__(self, data: bytes, sensor_info):
+        """ Process and display ESL sensor data
+            input:
+                - data: Event data contains sensor information
+                - sensor_info: ESL tag sensor information
+        """
+        resp_code = data[0] & 0x0F
+        resp_length = data[0] & 0xF0
+
+        if resp_code == TLV_RESPONSE_READ_SENSOR:
+            self.log.info("Sensor data received: 0x" + data.hex())
+            if sensor_info is None:
+                self.log.info("Unknown sensor - raw response data: 0x" + data.hex())
+            elif data[1] < len(sensor_info):
+                sensor_type = sensor_info[data[1]]
+                if resp_length > 1:
+                    if sensor_type in SENSOR_TYPES:
+                        log("Sensor type: " + SENSOR_TYPES[sensor_type].desc)
+                        value = SENSOR_TYPES[sensor_type].from_bytes(data[2:])
+                        log("             " + str(value))
+                    else:
+                        log(f"Sensor type {sensor_type} not supported")
+                else:
+                    self.log.info("No sensor data")
+            else:
+                self.log.info("Invalid sensor type")
+
+    # Logger
+    @property
+    def log(self):
+        return getLogger("SEN")
+
 def sensor_type_voltage(data):
     """ Interpret sensor value based on GATT Specification Supplement:
         Type: Voltage   |   Chapter: 3.236
@@ -165,31 +198,3 @@ SENSOR_TYPES = {
     S_ID_SILABS_SENSOR_BUTTON: SensorType(sensor_type_silabs_button,
                                           "Silabs button")
 }
-
-def process_sensor_data_response(data: bytes, sensor_info):
-    """ Process and display ESL sensor data
-        input:
-            - data: Event data contains sensor information
-            - sensor_info: ESL tag sensor information
-    """
-    resp_code = data[0] & 0x0F
-    resp_length = data[0] & 0xF0
-    logging = getLogger()
-
-    if resp_code == TLV_RESPONSE_READ_SENSOR:
-        logging.info("Sensor data received: " + data.hex())
-        if sensor_info is None:
-            logging.info("Unknown sensor - raw response data: " + data.hex())
-        elif data[1] < len(sensor_info):
-            sensor_type = sensor_info[data[1]]
-            if resp_length > 1:
-                if sensor_type in SENSOR_TYPES:
-                    log("Sensor type: " + SENSOR_TYPES[sensor_type].desc)
-                    value = SENSOR_TYPES[sensor_type].from_bytes(data[2:])
-                    log("             " + str(value))
-                else:
-                    log(f"Sensor type {sensor_type} not supported")
-            else:
-                logging.info("No sensor data")
-        else:
-            logging.info("Invalid sensor type")

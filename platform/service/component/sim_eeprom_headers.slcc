@@ -19,6 +19,6 @@ include:
 template_contribution:
   - name: component_catalog
     value: sim_eeprom_headers
-documentation:
-    docset: gecko-platform
-    document: service/api/group-simeeprom2
+#documentation:
+#    docset: gecko-platform
+#    document: platform-service/simeeprom2

@@ -407,17 +407,6 @@ class Calc_Global_Bobcat(CALC_Global_ocelot):
         self._addModelRegister(model, 'RAC.TXRAMP.TXANARAMPDRVEN', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'RAC.TXRAMP.TXUNMUTEENDRVFF', int, ModelVariableFormat.HEX)
 
-    def _add_SYTRIM_regs(self, model):
-        self._addModelRegister(model, 'RAC.SYTRIM0.SYCHPBIAS', int, ModelVariableFormat.HEX)
-        self._addModelRegister(model, 'RAC.SYTRIM0.SYCHPCURR', int, ModelVariableFormat.HEX)
-        self._addModelRegister(model, 'RAC.SYTRIM0.SYCHPLEVNSRC', int, ModelVariableFormat.HEX)
-        self._addModelRegister(model, 'RAC.SYTRIM0.SYCHPLEVPSRC', int, ModelVariableFormat.HEX)
-        self._addModelRegister(model, 'RAC.SYTRIM0.SYCHPSRCEN', int, ModelVariableFormat.HEX)
-        self._addModelRegister(model, 'RAC.SYTRIM1.SYLODIVLDOTRIMCORE', int, ModelVariableFormat.HEX)
-        self._addModelRegister(model, 'RAC.SYTRIM1.SYLODIVLDOTRIMNDIO', int, ModelVariableFormat.HEX)
-        self._addModelRegister(model, 'RAC.SYTRIM1.SYMMDREPLICA1CURRADJ', int, ModelVariableFormat.HEX)
-        self._addModelRegister(model, 'RAC.SYTRIM1.SYMMDREPLICA2CURRADJ', int, ModelVariableFormat.HEX)
-
     def _add_ADQUAL_regs(self, model):
         self._addModelRegister(model, 'MODEM.ADQUAL8.ADBAAGCTHR', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'MODEM.ADQUAL8.ADBAMODE', int, ModelVariableFormat.HEX)

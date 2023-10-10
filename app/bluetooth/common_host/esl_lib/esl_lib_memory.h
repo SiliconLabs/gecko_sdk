@@ -41,7 +41,7 @@ extern "C" {
 
 #ifdef ESL_LIB_MEMORY_LEAK_CHECK
 #define esl_lib_memory_allocate(size) _esl_lib_malloc(size, __FILE__, __LINE__)
-#define esl_lib_memory_free(ptr) _esl_lib_free(ptr, __FILE__, __LINE__)
+#define esl_lib_memory_free(ptr) do { _esl_lib_free(ptr, __FILE__, __LINE__); ptr = NULL; } while (0)
 // Internal allocator function
 void *_esl_lib_malloc(size_t size, const char *file, uint32_t line);
 // Internal free function
@@ -69,7 +69,7 @@ size_t esl_lib_memory_get_size(void);
 #else // ESL_LIB_MEMORY_LEAK_CHECK
 
 #define esl_lib_memory_allocate(size) malloc(size)
-#define esl_lib_memory_free(ptr) free(ptr)
+#define esl_lib_memory_free(ptr) do { free(ptr); ptr = NULL; } while (0)
 #define esl_lib_memory_log()
 #define esl_lib_memory_get_count() 0
 #define esl_lib_memory_get_size() 0

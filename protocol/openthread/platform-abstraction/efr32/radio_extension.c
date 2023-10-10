@@ -503,7 +503,7 @@ otError otPlatRadioExtensionGetRadioCounters(efr32RadioCounters *aRadioCounters)
     VerifyOrExit(aRadioCounters != NULL, error = OT_ERROR_INVALID_ARGS);
     *aRadioCounters = railDebugCounters;
 #else
-    error = OT+ERROR_NOT_IMPLEMENTED;
+    ExitNow(error = OT_ERROR_NOT_IMPLEMENTED);
 #endif
 
 exit:

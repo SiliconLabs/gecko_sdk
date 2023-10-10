@@ -23,29 +23,29 @@ requires:
 documentation:
   docset: gecko-platform
   document:
-    - page: emlib/api/efm32g/group-leuart
+    - page: platform-emlib-efm32g/leuart
       condition: [device_sdid_71]
-    - page: emlib/api/efm32gg/group-leuart
+    - page: platform-emlib-efm32gg/leuart
       condition: [device_sdid_72]
-    - page: emlib/api/efm32tg/group-leuart
+    - page: platform-emlib-efm32tg/leuart
       condition: [device_sdid_73]
-    - page: emlib/api/efm32lg/group-leuart
+    - page: platform-emlib-efm32lg/leuart
       condition: [device_sdid_74]
-    - page: emlib/api/efm32zg/group-leuart
+    - page: platform-emlib-efm32zg/leuart
       condition: [device_sdid_76]
-    - page: emlib/api/efm32hg/group-leuart
+    - page: platform-emlib-efm32hg/leuart
       condition: [device_sdid_77]
-    - page: emlib/api/efr32xg1/group-leuart
+    - page: platform-emlib-efr32xg1/leuart
       condition: [device_sdid_80]
-    - page: emlib/api/efr32xg12/group-leuart
+    - page: platform-emlib-efr32xg12/leuart
       condition: [device_sdid_84]
-    - page: emlib/api/efr32xg13/group-leuart
+    - page: platform-emlib-efr32xg13/leuart
       condition: [device_sdid_89]
-    - page: emlib/api/efr32xg14/group-leuart
+    - page: platform-emlib-efr32xg14/leuart
       condition: [device_sdid_95]
-    - page: emlib/api/efm32gg11/group-leuart
+    - page: platform-emlib-efm32gg11/leuart
       condition: [device_sdid_100]
-    - page: emlib/api/efm32tg11/group-leuart
+    - page: platform-emlib-efm32tg11/leuart
       condition: [device_sdid_103]
-    - page: emlib/api/efm32gg12/group-leuart
+    - page: platform-emlib-efm32gg12/leuart
       condition: [device_sdid_106]

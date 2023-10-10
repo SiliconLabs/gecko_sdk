@@ -23,4 +23,4 @@ include:
       - path: sl_memory_region.h
 documentation:
   docset: gecko-platform
-  document: common/api/group-linker
+  document: platform-common/linker

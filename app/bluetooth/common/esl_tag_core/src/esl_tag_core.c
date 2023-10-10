@@ -31,6 +31,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 #include "em_core.h"
 #include "em_emu.h"
 #include "gatt_db.h"
@@ -147,6 +148,8 @@ typedef struct {
 typedef struct {
   // Security timeout task handle
   sl_sleeptimer_timer_handle_t watchdog_handle;
+  // Security timeout trigger flag
+  bool watchdog_triggered;
   // PAwR evt_pawr_sync_subevent_report.event_counter backup
   uint16_t request_event;
   // PAwR evt_pawr_sync_subevent_report.subevent field backup
@@ -191,6 +194,7 @@ static esl_struct_t esl_tag = {
 
 static esl_persistent_struct_t esl_tag_persistent = {
   .watchdog_handle        = { 0 },
+  .watchdog_triggered     = false,
   .request_event          = 0,
   .request_subevent       = 0,
   .advertising_set_handle = SL_BT_INVALID_ADVERTISING_SET_HANDLE
@@ -269,43 +273,50 @@ void esl_security_timeout(sl_sleeptimer_timer_handle_t *timer, void *data)
   // suppress compiler warnings
   (void)timer;
   (void)data;
+  esl_tag_persistent.watchdog_triggered = true;
+}
 
-  if (esl_state_unsynchronized == esl_tag.status) {
-    // ESLS d095r13 2.7.3.5 Unsynchronized state watchdog requirement
-    esl_core_unassociate();
-    sl_bt_esl_log(ESL_LOG_COMPONENT_CORE,
-                  ESL_LOG_LEVEL_INFO,
-                  "Unassociated by watchdog timeout.");
-  } else if (esl_state_unassociated == esl_tag.status) {
-    // shutdown after one or two hours of advertising in vain
-    sl_bt_esl_log(ESL_LOG_COMPONENT_CORE,
-                  ESL_LOG_LEVEL_INFO,
-                  "Shutdown by watchdog timeout.");
-    (void)sl_sleeptimer_stop_timer(&esl_tag_persistent.watchdog_handle);
-    EMU_EM4Init_TypeDef em4init;
+void esl_core_step(void)
+{
+  if (esl_tag_persistent.watchdog_triggered) {
+    if (esl_state_unsynchronized == esl_tag.status) {
+      // ESLS d095r13 2.7.3.5 Unsynchronized state watchdog requirement
+      esl_core_unassociate();
+      sl_bt_esl_log(ESL_LOG_COMPONENT_CORE,
+                    ESL_LOG_LEVEL_INFO,
+                    "Unassociated by watchdog timeout.");
+    } else if (esl_state_unassociated == esl_tag.status) {
+      // shutdown after one or two hours of advertising in vain
+      sl_bt_esl_log(ESL_LOG_COMPONENT_CORE,
+                    ESL_LOG_LEVEL_INFO,
+                    "Shutdown by watchdog timeout.");
+      (void)sl_sleeptimer_stop_timer(&esl_tag_persistent.watchdog_handle);
+      EMU_EM4Init_TypeDef em4init;
 
-    esl_core_shutdown_hook();
+      esl_core_shutdown_hook();
 
-    em4init.em4State = emuEM4Shutoff;
-    em4init.retainLfxo = false;
-    em4init.retainLfrco = false;
-    em4init.retainUlfrco = false;
-    em4init.pinRetentionMode = emuPinRetentionDisable;
+      em4init.em4State = emuEM4Shutoff;
+      em4init.retainLfxo = false;
+      em4init.retainLfrco = false;
+      em4init.retainUlfrco = false;
+      em4init.pinRetentionMode = emuPinRetentionDisable;
 
-    EMU_EM4Init(&em4init);
-    CORE_CRITICAL_SECTION(
+      EMU_EM4Init(&em4init);
+      CORE_CRITICAL_SECTION(
 #if defined(_SILICON_LABS_32B_SERIES_2)
-      GPIO_IntClear(GPIO_IntGet());
+        GPIO_IntClear(GPIO_IntGet());
 #endif // defined(_SILICON_LABS_32B_SERIES_2)
-      EMU_EnterEM4S();
-      );
-    NVIC_SystemReset(); // just in case, we should never get here, anyway.
-  } else if (esl_tag.sync_handle != SL_BT_INVALID_SYNC_HANDLE) {
-    // implement ESLS d095r13  2.7.3.3 Synchronized state watchdog requirement
-    sl_bt_sync_close(esl_tag.sync_handle);
-    sl_bt_esl_log(ESL_LOG_COMPONENT_CORE,
-                  ESL_LOG_LEVEL_INFO,
-                  "Unsynchronized by watchdog timeout.");
+        EMU_EnterEM4S();
+        );
+      NVIC_SystemReset(); // just in case, we should never get here, anyway.
+    } else if (esl_tag.sync_handle != SL_BT_INVALID_SYNC_HANDLE) {
+      // implement ESLS d095r13  2.7.3.3 Synchronized state watchdog requirement
+      sl_bt_sync_close(esl_tag.sync_handle);
+      sl_bt_esl_log(ESL_LOG_COMPONENT_CORE,
+                    ESL_LOG_LEVEL_INFO,
+                    "Unsynchronized by watchdog timeout.");
+    }
+    esl_tag_persistent.watchdog_triggered = false;
   }
 }
 
@@ -565,6 +576,7 @@ static void esl_state_connectable_handler(sl_bt_msg_t *evt)
 
       // force-stop security watchdog if running
       (void)sl_sleeptimer_stop_timer(&esl_tag_persistent.watchdog_handle);
+      esl_tag_persistent.watchdog_triggered = false;
       break;
 
     case sl_bt_evt_connection_closed_id:
@@ -901,8 +913,7 @@ static void esl_state_configuring_handler(sl_bt_msg_t *evt)
       } else {
         // set synchronized state if sync exists and Update Complete received
         if (esl_tag.sync_handle != SL_BT_INVALID_SYNC_HANDLE
-            && is_esl_configured_for(ESL_CONFIG_FLAG_UPDATE_COMPLETE)
-            && evt->data.evt_connection_closed.reason == SL_STATUS_BT_CTRL_CONNECTION_TERMINATED_BY_LOCAL_HOST) {
+            && is_esl_configured_for(ESL_CONFIG_FLAG_UPDATE_COMPLETE)) {
           esl_tag.status = esl_state_synchronized;
           sl_bt_esl_log(ESL_LOG_COMPONENT_CORE,
                         ESL_LOG_LEVEL_INFO,

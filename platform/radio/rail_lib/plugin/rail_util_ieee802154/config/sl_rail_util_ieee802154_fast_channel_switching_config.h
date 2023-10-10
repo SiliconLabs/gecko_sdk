@@ -37,6 +37,8 @@
 #error "IEEE.802.15.4 RX channel switching unsupported on this platform!"
 #endif //RAIL_IEEE802154_SUPPORTS_RX_CHANNEL_SWITCHING
 
+#define sl_rail_util_ieee802154_is_fast_channel_switching_phy_selected() SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_ENABLED
+
 // <<< Use Configuration Wizard in Context Menu >>>
 // <h> IEEE802.15.4 Fast Channel Switching Configuration
 // <q SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_ENABLED> Enable fast channel switching

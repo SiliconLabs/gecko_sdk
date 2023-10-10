@@ -31,37 +31,37 @@ requires:
 documentation:
   docset: gecko-platform
   document:
-    - page: emlib/api/efm32g/group-rmu
+    - page: platform-emlib-efm32g/rmu
       condition: [device_sdid_71]
-    - page: emlib/api/efm32gg/group-rmu
+    - page: platform-emlib-efm32gg/rmu
       condition: [device_sdid_72]
-    - page: emlib/api/efm32tg/group-rmu
+    - page: platform-emlib-efm32tg/rmu
       condition: [device_sdid_73]
-    - page: emlib/api/efm32lg/group-rmu
+    - page: platform-emlib-efm32lg/rmu
       condition: [device_sdid_74]
-    - page: emlib/api/efm32zg/group-rmu
+    - page: platform-emlib-efm32zg/rmu
       condition: [device_sdid_76]
-    - page: emlib/api/efm32hg/group-rmu
+    - page: platform-emlib-efm32hg/rmu
       condition: [device_sdid_77]
-    - page: emlib/api/efr32xg1/group-rmu
+    - page: platform-emlib-efr32xg1/rmu
       condition: [device_sdid_80]
-    - page: emlib/api/efr32xg12/group-rmu
+    - page: platform-emlib-efr32xg12/rmu
       condition: [device_sdid_84]
-    - page: emlib/api/efr32xg13/group-rmu
+    - page: platform-emlib-efr32xg13/rmu
       condition: [device_sdid_89]
-    - page: emlib/api/efr32xg14/group-rmu
+    - page: platform-emlib-efr32xg14/rmu
       condition: [device_sdid_95]
-    - page: emlib/api/efr32xg21/group-rmu
+    - page: platform-emlib-efr32xg21/rmu
       condition: [device_sdid_200]
-    - page: emlib/api/efr32xg22/group-rmu
+    - page: platform-emlib-efr32xg22/rmu
       condition: [device_sdid_205]
-    - page: emlib/api/efr32xg23/group-rmu
+    - page: platform-emlib-efr32xg23/rmu
       condition: [device_sdid_210]
-    - page: emlib/api/efr32xg24/group-rmu
+    - page: platform-emlib-efr32xg24/rmu
       condition: [device_sdid_215]
-    - page: emlib/api/efr32xg25/group-rmu
+    - page: platform-emlib-efr32xg25/rmu
       condition: [device_sdid_220]
-    - page: emlib/api/efr32xg27/group-rmu
+    - page: platform-emlib-efr32xg27/rmu
       condition: [device_sdid_230]
-    - page: emlib/api/efr32xg28/group-rmu
+    - page: platform-emlib-efr32xg28/rmu
       condition: [device_sdid_235]

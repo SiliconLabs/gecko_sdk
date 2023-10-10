@@ -49,8 +49,8 @@
 #define ATT_ERR_OFFSET                0x1100
 #define IT_FMT                        ESL_LIB_LOG_HANDLE_FORMAT
 #define TIMEOUT_INIT_MS               10000
-#define TIMEOUT_GATT_MS               1000
-#define TIMEOUT_TRANSFER_MS           60000
+#define TIMEOUT_GATT_MS               2000
+#define TIMEOUT_TRANSFER_BASE_MS      10
 
 typedef enum {
   OTS_STATE_NOT_INITIALIZED,          // Initial state
@@ -113,7 +113,7 @@ static sl_status_t search_image(image_transfer_t *image_transfer,
                                 uint8_t          image_index,
                                 bool             *current_object_selected);
 static void start_requested_operation(image_transfer_t *image_transfer);
-static void remove_transfer(image_transfer_t *image_transfer,
+static void remove_transfer(image_transfer_t **image_transfer,
                             sl_status_t      sc,
                             bool             finish_transfer);
 static void operation_finished(image_transfer_t *image_transfer,
@@ -197,8 +197,8 @@ sl_status_t esl_lib_image_transfer_init(uint8_t                                 
   sl_bt_ots_gattdb_handles_t ots_handles;
   sl_bt_ots_gattdb_handles_t *ots_handle_ptr = NULL;
 
-  esl_lib_log_it_info("Image transfer init, connection handle = %u" APP_LOG_NL,
-                      connection);
+  esl_lib_log_it_debug("Image transfer init, connection handle = %u" APP_LOG_NL,
+                       connection);
 
   // Check for NULLs
   if (handle_out == NULL
@@ -217,14 +217,9 @@ sl_status_t esl_lib_image_transfer_init(uint8_t                                 
   if (transfer == ESL_LIB_IMAGE_TRANSFER_INVALID_HANDLE) {
     return SL_STATUS_ALLOCATION_FAILED;
   } else {
+    memset(transfer, 0, sizeof(*transfer));
     transfer->image_transfer_handle = (esl_lib_image_transfer_handle_t)transfer;
-    transfer->ots_state             = OTS_STATE_NOT_INITIALIZED;
-    transfer->ots_ongoing_command   = OTS_COMMAND_NONE;
-    transfer->transfer_state        = ESL_LIB_IMAGE_TRANSFER_STATE_NOT_INITIALIZED;
-    transfer->result                = SL_STATUS_OK;
-    transfer->ots_write_data        = NULL;
     transfer->connection_handle     = connection;
-    memset(&transfer->ots_current_object_id, 0, sizeof(transfer->ots_current_object_id));
 
     if (gattdb_handles != NULL) {
       memcpy(ots_handles.characteristics.array,
@@ -232,8 +227,8 @@ sl_status_t esl_lib_image_transfer_init(uint8_t                                 
              sizeof(ots_handles.characteristics.array));
       ots_handles.service = ots_service_handle;
       ots_handle_ptr = &ots_handles;
-      esl_lib_log_it_info("Image transfer GATTDB specified, connection handle = %u" APP_LOG_NL,
-                          connection);
+      esl_lib_log_it_debug("Image transfer GATTDB specified, connection handle = %u" APP_LOG_NL,
+                           connection);
     }
 
     // Initialize OTS client
@@ -253,9 +248,9 @@ sl_status_t esl_lib_image_transfer_init(uint8_t                                 
 
       *handle_out = transfer->image_transfer_handle;
 
-      esl_lib_log_it_info(IT_FMT "Image transfer init started, connection handle = %u" APP_LOG_NL,
-                          transfer->image_transfer_handle,
-                          connection);
+      esl_lib_log_it_debug(IT_FMT "Image transfer init started, connection handle = %u" APP_LOG_NL,
+                           transfer->image_transfer_handle,
+                           connection);
       // Start timer
       app_timer_start(&transfer->timer,
                       TIMEOUT_INIT_MS,
@@ -280,9 +275,9 @@ sl_status_t esl_lib_image_transfer_get_type(esl_lib_image_transfer_handle_t hand
   sl_status_t sc;
   image_transfer_t *image_transfer;
 
-  esl_lib_log_it_info(IT_FMT "Get type for image index %u" APP_LOG_NL,
-                      handle,
-                      image_index);
+  esl_lib_log_it_debug(IT_FMT "Get type for image index %u" APP_LOG_NL,
+                       handle,
+                       image_index);
 
   if (handle == ESL_LIB_IMAGE_TRANSFER_INVALID_HANDLE) {
     return SL_STATUS_INVALID_HANDLE;
@@ -323,6 +318,7 @@ sl_status_t esl_lib_image_transfer_get_type(esl_lib_image_transfer_handle_t hand
         // Requested object is selected, move on with reading the type
         sc = sl_bt_ots_client_read_object_type(&image_transfer->ots_client);
         if (sc == SL_STATUS_OK) {
+          (void)app_timer_stop(&image_transfer->timer);
           // Start timer
           app_timer_start(&image_transfer->timer,
                           TIMEOUT_GATT_MS,
@@ -363,9 +359,9 @@ sl_status_t esl_lib_image_transfer_start(esl_lib_image_transfer_handle_t handle,
   sl_status_t sc;
   image_transfer_t *image_transfer;
 
-  esl_lib_log_it_info(IT_FMT "Image transfer for image index %u" APP_LOG_NL,
-                      handle,
-                      image_index);
+  esl_lib_log_it_debug(IT_FMT "Image transfer for image index %u" APP_LOG_NL,
+                       handle,
+                       image_index);
 
   // Check parameters
   if (handle == ESL_LIB_IMAGE_TRANSFER_INVALID_HANDLE) {
@@ -410,9 +406,11 @@ sl_status_t esl_lib_image_transfer_start(esl_lib_image_transfer_handle_t handle,
                              handle,
                              image_index);
       } else {
-        esl_lib_log_it_debug(IT_FMT "Starting Image Transfer for current image, index %u" APP_LOG_NL,
+        esl_lib_log_it_debug(IT_FMT "Starting image transfer for current image, index %u, size %u bytes." APP_LOG_NL,
                              handle,
-                             image_index);
+                             image_index,
+                             (uint32_t)image_size);
+
         // Current object is selected, move on with writing the object.
         sc = sl_bt_ots_client_oacp_write(&image_transfer->ots_client,
                                          (uint32_t)image_offset,
@@ -421,12 +419,15 @@ sl_status_t esl_lib_image_transfer_start(esl_lib_image_transfer_handle_t handle,
                                          L2CAP_CHANNEL_SDU,
                                          L2CAP_CHANNEL_PDU);
         if (sc == SL_STATUS_OK) {
+          (void)app_timer_stop(&image_transfer->timer);
           // Start timer
-          app_timer_start(&image_transfer->timer,
-                          TIMEOUT_TRANSFER_MS,
-                          transfer_timeout,
-                          image_transfer,
-                          false);
+          sc = app_timer_start(&image_transfer->timer,
+                               TIMEOUT_TRANSFER_BASE_MS * image_size,
+                               transfer_timeout,
+                               image_transfer,
+                               false);
+        }
+        if (sc == SL_STATUS_OK) {
           image_transfer->ots_ongoing_command = OTS_COMMAND_WRITE;
           image_transfer->ots_state = OTS_STATE_WRITE;
           set_state(image_transfer,
@@ -458,8 +459,8 @@ sl_status_t esl_lib_image_transfer_abort(esl_lib_image_transfer_handle_t handle)
   sl_status_t sc;
   image_transfer_t *image_transfer;
 
-  esl_lib_log_it_info(IT_FMT "Image transfer abort" APP_LOG_NL,
-                      handle);
+  esl_lib_log_it_debug(IT_FMT "Image transfer abort" APP_LOG_NL,
+                       handle);
 
   if (handle == ESL_LIB_IMAGE_TRANSFER_INVALID_HANDLE) {
     return SL_STATUS_INVALID_HANDLE;
@@ -491,8 +492,8 @@ sl_status_t esl_lib_image_transfer_get_features(esl_lib_image_transfer_handle_t 
   sl_status_t sc = SL_STATUS_OK;
   image_transfer_t *image_transfer;
 
-  esl_lib_log_it_info(IT_FMT "Image transfer get features" APP_LOG_NL,
-                      handle);
+  esl_lib_log_it_debug(IT_FMT "Image transfer get features" APP_LOG_NL,
+                       handle);
   if (handle == ESL_LIB_IMAGE_TRANSFER_INVALID_HANDLE) {
     return SL_STATUS_INVALID_HANDLE;
   }
@@ -523,12 +524,29 @@ void esl_lib_image_transfer_on_bt_event(sl_bt_msg_t *evt)
 {
   sli_bt_ots_client_on_bt_event(evt);
   sli_bt_l2cap_transfer_on_bt_event(evt);
+
+  // Post process any (unsolicited?) boot event
+  if (SL_BT_MSG_ID(evt->header) == sl_bt_evt_system_boot_id) {
+    esl_lib_image_transfer_cleanup();
+  }
 }
 
 void esl_lib_image_transfer_step(void)
 {
   sli_bt_ots_client_step();
   sli_bt_l2cap_transfer_process_action();
+}
+
+void esl_lib_image_transfer_cleanup(void)
+{
+  image_transfer_t *image_transfer;
+  while ((image_transfer = (image_transfer_t *)sl_slist_pop(&image_transfer_list)) != NULL) {
+    (void)app_timer_stop(&image_transfer->timer);
+    remove_transfer(&image_transfer,
+                    SL_STATUS_DELETED,
+                    false);
+  }
+  esl_lib_log_it_debug("Image transfer cleanup complete" APP_LOG_NL);
 }
 
 // -----------------------------------------------------------------------------
@@ -553,6 +571,7 @@ static sl_status_t search_image(image_transfer_t *image_transfer,
                                           &image_transfer->ots_current_object_id);
 
   if (!*current_object_requested) {
+    (void)app_timer_stop(&image_transfer->timer);
     // Check server capabilities to GOTO
     bool goto_supported = (image_transfer->ots_server_features.olcp_features
                            & SL_BT_OTS_OLCP_FEATURE_GO_TO_OP_CODE_SUPPORTED_MASK);
@@ -593,6 +612,10 @@ static sl_status_t search_image(image_transfer_t *image_transfer,
                   ESL_LIB_IMAGE_TRANSFER_STATE_BUSY,
                   SL_STATUS_OK,
                   NULL);
+      } else {
+        esl_lib_log_it_debug(IT_FMT "Write to the currently selected image, index %u" APP_LOG_NL,
+                             image_transfer->image_transfer_handle,
+                             image_index);
       }
     }
   }
@@ -729,6 +752,7 @@ static sl_status_t ots_error_to_sl_status(uint16_t att_error,
 static void start_requested_operation(image_transfer_t *image_transfer)
 {
   sl_status_t sc;
+  (void)app_timer_stop(&image_transfer->timer);
   if (image_transfer->ots_ongoing_command == OTS_COMMAND_OBJECT_TYPE) {
     esl_lib_log_it_debug(IT_FMT "Reading object type of current object" APP_LOG_NL,
                          image_transfer->image_transfer_handle);
@@ -750,8 +774,9 @@ static void start_requested_operation(image_transfer_t *image_transfer)
       operation_finished(image_transfer, sc, false);
     }
   } else if (image_transfer->ots_ongoing_command == OTS_COMMAND_WRITE) {
-    esl_lib_log_it_debug(IT_FMT "Write current object" APP_LOG_NL,
-                         image_transfer->image_transfer_handle);
+    esl_lib_log_it_debug(IT_FMT "Write current object of size %u bytes." APP_LOG_NL,
+                         image_transfer->image_transfer_handle,
+                         image_transfer->ots_write_size);
 
     // Current object is selected, move on with writing the object.
     sc = sl_bt_ots_client_oacp_write(&image_transfer->ots_client,
@@ -763,7 +788,7 @@ static void start_requested_operation(image_transfer_t *image_transfer)
     if (sc == SL_STATUS_OK) {
       // Start timer
       app_timer_start(&image_transfer->timer,
-                      TIMEOUT_TRANSFER_MS,
+                      TIMEOUT_TRANSFER_BASE_MS * image_transfer->ots_write_size,
                       transfer_timeout,
                       image_transfer,
                       false);
@@ -778,25 +803,26 @@ static void start_requested_operation(image_transfer_t *image_transfer)
   }
 }
 
-static void remove_transfer(image_transfer_t *image_transfer,
+static void remove_transfer(image_transfer_t **image_transfer,
                             sl_status_t sc,
                             bool finish_transfer)
 {
+  (void)app_timer_stop(&(*image_transfer)->timer);
   esl_lib_log_it_debug(IT_FMT "Removing transfer" APP_LOG_NL,
-                       image_transfer->image_transfer_handle);
-  sl_slist_remove(&image_transfer_list, &image_transfer->node);
+                       (*image_transfer)->image_transfer_handle);
+  sl_slist_remove(&image_transfer_list, &(*image_transfer)->node);
 
   if (finish_transfer) {
     esl_lib_log_it_debug(IT_FMT "Finishing transfer" APP_LOG_NL,
-                         image_transfer->image_transfer_handle);
-    image_transfer->cb_finish((esl_lib_image_transfer_handle_t)image_transfer,
-                              image_transfer->connection_handle,
-                              sc,
-                              image_transfer->requested_image_index);
+                         (*image_transfer)->image_transfer_handle);
+    (*image_transfer)->cb_finish((esl_lib_image_transfer_handle_t)image_transfer,
+                                 (*image_transfer)->connection_handle,
+                                 sc,
+                                 (*image_transfer)->requested_image_index);
   }
-  set_state(image_transfer, ESL_LIB_IMAGE_TRANSFER_REMOVED, sc, NULL);
+  set_state(*image_transfer, ESL_LIB_IMAGE_TRANSFER_REMOVED, sc, NULL);
   // Remove transfer
-  esl_lib_memory_free(image_transfer);
+  esl_lib_memory_free(*image_transfer);
 }
 
 static void operation_finished(image_transfer_t *image_transfer,
@@ -804,11 +830,11 @@ static void operation_finished(image_transfer_t *image_transfer,
                                bool finish_transfer)
 {
   if (sc ==  SL_STATUS_OK) {
-    esl_lib_log_it_debug(IT_FMT "Operation finished, sc = 0x%04x" APP_LOG_NL,
+    esl_lib_log_it_debug(IT_FMT "OTS operation succeeded, sc = 0x%04x" APP_LOG_NL,
                          image_transfer->image_transfer_handle,
                          sc);
   } else {
-    esl_lib_log_it_error(IT_FMT "Operation finished, sc = 0x%04x" APP_LOG_NL,
+    esl_lib_log_it_error(IT_FMT "OTS operation failed, sc = 0x%04x" APP_LOG_NL,
                          image_transfer->image_transfer_handle,
                          sc);
   }
@@ -872,17 +898,13 @@ static void ots_init(sl_bt_ots_client_handle_t  client,
         esl_lib_log_it_error(IT_FMT "Failed to read features, sc = 0x%04x" APP_LOG_NL,
                              image_transfer->image_transfer_handle,
                              sc);
-        remove_transfer(image_transfer, sc, false);
+        remove_transfer(&image_transfer, sc, false);
       }
     } else {
       esl_lib_log_it_error(IT_FMT "OTS not initialized, sc = 0x%04x" APP_LOG_NL,
                            image_transfer->image_transfer_handle,
                            result);
-      remove_transfer(image_transfer, result, false);
-      set_state(image_transfer,
-                ESL_LIB_IMAGE_TRANSFER_REMOVED,
-                result,
-                NULL);
+      remove_transfer(&image_transfer, result, false);
     }
   }
 }
@@ -915,7 +937,7 @@ static void ots_features(sl_bt_ots_client_handle_t client,
                            image_transfer->image_transfer_handle,
                            status);
       // Error during feature read
-      remove_transfer(image_transfer, status, false);
+      remove_transfer(&image_transfer, status, false);
     }
   }
 }
@@ -1118,10 +1140,10 @@ static void ots_oacp(sl_bt_ots_client_handle_t      client,
   (void)object;
   image_transfer_t *image_transfer = find_image_transfer_by_client(client);
   if (image_transfer != NULL) {
-    // Stop timer
-    app_timer_stop(&image_transfer->timer);
     sl_status_t sc = ots_error_to_sl_status(status, response);
     if (opcode == SL_BT_OTS_OACP_OPCODE_WRITE && sc != SL_STATUS_OK) {
+      // Stop timer
+      app_timer_stop(&image_transfer->timer);
       esl_lib_log_it_error(IT_FMT "OTS OACP Write operation failed, status = 0x%04x, response = 0x%04x, sc = 0x%04x" APP_LOG_NL,
                            image_transfer->image_transfer_handle,
                            status,
@@ -1204,7 +1226,7 @@ static void ots_disconnect(sl_bt_ots_client_handle_t client)
     esl_lib_log_it_debug(IT_FMT "OTS disconnected" APP_LOG_NL,
                          image_transfer->image_transfer_handle);
     sc = SL_STATUS_BT_CTRL_REMOTE_USER_TERMINATED;
-    remove_transfer(image_transfer,
+    remove_transfer(&image_transfer,
                     sc,
                     image_transfer->ots_ongoing_command == OTS_COMMAND_WRITE);
   }
@@ -1217,11 +1239,7 @@ static void init_timeout(app_timer_t *timer,
   esl_lib_log_it_error(IT_FMT "OTS init timeout" APP_LOG_NL,
                        image_transfer->image_transfer_handle);
   // Remove transfer that could not be initialized
-  set_state(image_transfer,
-            ESL_LIB_IMAGE_TRANSFER_REMOVED,
-            SL_STATUS_TIMEOUT,
-            NULL);
-  remove_transfer(image_transfer, SL_STATUS_TIMEOUT, false);
+  remove_transfer(&image_transfer, SL_STATUS_TIMEOUT, false);
 }
 
 static void gatt_timeout(app_timer_t *timer,

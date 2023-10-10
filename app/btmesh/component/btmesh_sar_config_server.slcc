@@ -1,0 +1,44 @@
+id: "btmesh_sar_config_server"
+label: "SAR Configuration Server"
+package: "Btmesh"
+description: >
+  SAR Configuration Server component enables the local and remote configuration of the segmentation and
+  reassembly behavior of a node.
+  This component extends the DCD with SAR Configuration Server model ID and initializes the SAR Configuration
+  Server model in the BT Mesh stack automatically.
+  The local node configuration shall be performed through the SAR Configuration Server BT Mesh API calls.
+  The BT Mesh stack reports in SAR Configuration Server events when the SAR Configuration Transmitter and
+  Receiver states are set by SAR Configuration Client.
+  This component is prepared for integration into SOC applications.
+
+  This is a No-Code component.
+category: "Bluetooth Mesh|Models|SAR"
+quality: "production"
+root_path: "app/btmesh/common/btmesh_sar_config_server"
+tag:
+  - No-Code
+
+config_file:
+  - path: btmesh_sar_config_server.dcd
+    directory: btmeshconf
+source:
+  - path: "sl_btmesh_sar_config_server.c"
+include:
+  - path: ""
+    file_list:
+      - path: "sl_btmesh_sar_config_server.h"
+provides:
+  - name: "btmesh_sar_config_server"
+requires:
+  - name: "app_assert"
+  - name: "btmesh_role_init"
+  - name: "btmesh_stack_sar_config_server"
+
+template_contribution:
+  - name: "btmesh_on_event"
+    value:
+      include: "sl_btmesh_sar_config_server.h"
+      function: "sl_btmesh_sar_config_server_on_event"
+
+validation_helper:
+  - path: "../../script/validation/soc_ncp_compatibility.lua"

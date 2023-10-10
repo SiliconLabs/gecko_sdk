@@ -48,7 +48,6 @@ typedef struct {
   uint8_t chan_plan_id;
   uint8_t phy_mode_id;
   uint8_t phy_config_type;
-  uint8_t device_type;
   uint8_t fec;
   uint8_t rx_phy_mode_ids[SL_WISUN_MAX_PHY_MODE_ID_COUNT];
   uint8_t rx_phy_mode_ids_count;

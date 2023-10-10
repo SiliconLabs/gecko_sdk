@@ -3,7 +3,7 @@
  * @brief Definition of BLOB Transfer Server interface
  *******************************************************************************
  * # License
- * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -71,7 +71,8 @@ extern void sl_btmesh_blob_transfer_server_on_event(sl_btmesh_msg_t const *evt);
  * @retval SL_STATUS_OK In case of success
  * @retval SL_STATUS_INVALID_STATE In case transmission is already ongoing
  ******************************************************************************/
-extern sl_status_t sl_btmesh_blob_transfer_server_start(sl_bt_uuid_64_t const * const blob_id,
+extern sl_status_t sl_btmesh_blob_transfer_server_start(uint16_t elem_index,
+                                                        sl_bt_uuid_64_t const * const blob_id,
                                                         const uint16_t timeout_10s,
                                                         const uint8_t ttl);
 
@@ -88,7 +89,8 @@ extern sl_status_t sl_btmesh_blob_transfer_server_start(sl_bt_uuid_64_t const * 
  * @retval SL_STATUS_OK In case of success
  * @retval SL_STATUS_INVALID_STATE In case state is invalid
  ******************************************************************************/
-extern sl_status_t sl_btmesh_blob_transfer_server_set_pull_mode_parameters(uint16_t pull_mode_retry_interval_ms,
+extern sl_status_t sl_btmesh_blob_transfer_server_set_pull_mode_parameters(uint16_t elem_index,
+                                                                           uint16_t pull_mode_retry_interval_ms,
                                                                            uint16_t pull_mode_retry_count);
 
 /***************************************************************************//**

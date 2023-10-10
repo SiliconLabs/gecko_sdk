@@ -109,6 +109,30 @@ void sleeptimer_hal_set_int(uint8_t local_flag);
 uint16_t sleeptimer_hal_get_clock_accuracy(void);
 
 /*******************************************************************************
+ * Hardware Abstraction Layer to get the capture channel value.
+ *
+ * @note Not supported by all peripherals Sleeptimer can use.
+ *
+ * @return Capture value.
+ ******************************************************************************/
+uint32_t sleeptimer_hal_get_capture(void);
+
+/*******************************************************************************
+ * Hardware Abstraction Layer to reset PRS signal triggered by the associated
+ * peripheral.
+ *
+ * @note Not supported by all peripherals Sleeptimer can use.
+ ******************************************************************************/
+void sleeptimer_hal_reset_prs_signal(void);
+
+/*******************************************************************************
+ * Hardware Abstraction Layer to disable PRS compare and capture channel.
+ *
+ * @note Not supported by all peripherals Sleeptimer can use.
+ ******************************************************************************/
+void sleeptimer_hal_disable_prs_compare_and_capture_channel(void);
+
+/*******************************************************************************
  * Process the timer interrupt.
  *
  * @param flags Internal interrupt flag.

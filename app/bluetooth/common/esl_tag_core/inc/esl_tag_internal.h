@@ -1,4 +1,4 @@
-/***************************************************************************//**
+/*******************************************************************************
  * @file
  * @brief ESL Tag core interface declarations for internal use, only.
  *******************************************************************************
@@ -30,15 +30,16 @@
 #ifndef ESL_TAG_INTERNAL_H
 #define ESL_TAG_INTERNAL_H
 
-/**************************************************************************//**
+/******************************************************************************
  * @addtogroup esl_tag_core
  * @{
  *****************************************************************************/
 #include <stdint.h>
 #include "sl_status.h"
+#include "sl_bt_api.h"
 #include "esl_tag_display_core.h"
 
-/**************************************************************************//**
+/******************************************************************************
  * Get a display width based on display index.
  * @param[in]  display_index Selects the display to get width of [pixels].
  * @param[out] width Returns width if given display exists.
@@ -48,7 +49,7 @@
 extern sl_status_t esl_display_get_width(uint8_t display_index,
                                          uint16_t *width);
 
-/**************************************************************************//**
+/******************************************************************************
  * Get a display height based on display index.
  * @param[in]  display_index Selects the display to get height of [pixels].
  * @param[out] height Returns height if given display exists.
@@ -58,7 +59,7 @@ extern sl_status_t esl_display_get_width(uint8_t display_index,
 extern sl_status_t esl_display_get_height(uint8_t display_index,
                                           uint16_t *height);
 
-/**************************************************************************//**
+/******************************************************************************
  * Get a display type based on display index.
  * @param[in]  display_index The display to get the type of [Assigned Number].
  * @param[out] type Returns type if given display exists.
@@ -68,7 +69,7 @@ extern sl_status_t esl_display_get_height(uint8_t display_index,
 extern sl_status_t esl_display_get_type(uint8_t display_index,
                                         esl_display_type_t *type);
 
-/**************************************************************************//**
+/******************************************************************************
  * Select an image storage OTS object.
  * @param[in] data Pointer to ESL OTS object ID 48 bit value in little endian.
  * @param[in] length Must be sizeof(esl_image_object_id_t)
@@ -78,7 +79,7 @@ extern sl_status_t esl_display_get_type(uint8_t display_index,
 extern sl_status_t esl_image_select_object(void const *data,
                                            uint16_t length);
 
-/**************************************************************************//**
+/******************************************************************************
  * Callback on image chunk received event.
  * @param[in] data Pointer to image chunk data.
  * @param[in] offset Start offset of received chunk.
@@ -92,26 +93,26 @@ extern sl_status_t esl_image_chunk_received(uint8_t const *data,
                                             uint32_t offset,
                                             uint16_t length);
 
-/**************************************************************************//**
+/******************************************************************************
  * Request ESL to return the Synchronized state from a connection if it's
  * already synchronized to the AP's PAwR train.
  * @note: Defined in esl_core but not exposed to the public ESL API
  *****************************************************************************/
 extern sl_status_t esl_core_update_complete(void);
 
-/**************************************************************************//**
+/******************************************************************************
  * Start ESL service advertisement.
  * @note: Defined in esl_core but not exposed to the public ESL API
  *****************************************************************************/
 extern sl_status_t esl_core_start_advertising(void);
 
-/**************************************************************************//**
+/******************************************************************************
  * Purge any pending responses that aren't sent yet.
  * @note: Defined in esl_tag_response.c but not exposed to the public ESL API
  *****************************************************************************/
 extern void esl_core_purge_responses(void);
 
-/**************************************************************************//**
+/******************************************************************************
  * Re-schedule pending commands if there're any.
  * @param[in] uint32_t current_absolute_time New ESL Current Absolute Time value
                                              after the clock drift adjustment.
@@ -120,7 +121,7 @@ extern void esl_core_purge_responses(void);
  *****************************************************************************/
 extern void esl_reschedule_delayed_commands(uint32_t current_absolute_time);
 
-/**************************************************************************//**
+/******************************************************************************
  * Get sync handle.
  * @return The PAwR sync hanle or @ref SL_BT_INVALID_SYNC_HANDLE if ESL is
  *         out of sync.
@@ -129,7 +130,7 @@ extern void esl_reschedule_delayed_commands(uint32_t current_absolute_time);
  *****************************************************************************/
 extern uint16_t esl_core_get_sync_handle(void);
 
-/**************************************************************************//**
+/******************************************************************************
  * Get request event value for PAwR response.
  * @return The most recent PAwR sync request event value.
  * @note: Called by esl core internally on opcodes parsing.
@@ -137,7 +138,7 @@ extern uint16_t esl_core_get_sync_handle(void);
  *****************************************************************************/
 extern uint16_t esl_core_get_request_event(void);
 
-/**************************************************************************//**
+/******************************************************************************
  * Get request subevent value for PAwR response.
  * @return The most recent PAwR sync request subevent value.
  * @note: Called by esl core internally on opcodes parsing.
@@ -145,12 +146,30 @@ extern uint16_t esl_core_get_request_event(void);
  *****************************************************************************/
 extern uint8_t esl_core_get_request_subevent(void);
 
-/**************************************************************************//**
+/******************************************************************************
  * Invalidate entire ESL configuration to prevent later opcode processing.
  * @note: Called by esl core internally on factory reset opcode execution.
  *        The function is defined in esl_tag_core.c
  *****************************************************************************/
 extern void esl_core_invalidate_config(void);
+
+/******************************************************************************
+ * ESL Tag core init function. Initializes additional components also, if any.
+ *****************************************************************************/
+extern void esl_core_init(void);
+
+/******************************************************************************
+ * ESL core's bluetooth stack event handler.
+ * This one runs by the user implementation (usually in app.c) in parallel.
+ *
+ * @param[in] evt Event coming from the Bluetooth stack.
+ *****************************************************************************/
+extern void esl_core_bt_on_event(sl_bt_msg_t *evt);
+
+/******************************************************************************
+ * Cyclic process of ESL Tag Core.
+ *****************************************************************************/
+extern void esl_core_step(void);
 
 /** @} (end addtogroup esl_tag_core) */
 #endif // ESL_TAG_INTERNAL_H

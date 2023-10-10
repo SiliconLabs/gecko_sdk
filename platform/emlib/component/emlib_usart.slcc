@@ -24,41 +24,41 @@ requires:
 documentation:
   docset: gecko-platform
   document:
-    - page: emlib/api/efm32g/group-usart
+    - page: platform-emlib-efm32g/usart
       condition: [device_sdid_71]
-    - page: emlib/api/efm32gg/group-usart
+    - page: platform-emlib-efm32gg/usart
       condition: [device_sdid_72]
-    - page: emlib/api/efm32tg/group-usart
+    - page: platform-emlib-efm32tg/usart
       condition: [device_sdid_73]
-    - page: emlib/api/efm32lg/group-usart
+    - page: platform-emlib-efm32lg/usart
       condition: [device_sdid_74]
-    - page: emlib/api/efm32zg/group-usart
+    - page: platform-emlib-efm32zg/usart
       condition: [device_sdid_76]
-    - page: emlib/api/efm32hg/group-usart
+    - page: platform-emlib-efm32hg/usart
       condition: [device_sdid_77]
-    - page: emlib/api/efr32xg1/group-usart
+    - page: platform-emlib-efr32xg1/usart
       condition: [device_sdid_80]
-    - page: emlib/api/efr32xg12/group-usart
+    - page: platform-emlib-efr32xg12/usart
       condition: [device_sdid_84]
-    - page: emlib/api/efr32xg13/group-usart
+    - page: platform-emlib-efr32xg13/usart
       condition: [device_sdid_89]
-    - page: emlib/api/efr32xg14/group-usart
+    - page: platform-emlib-efr32xg14/usart
       condition: [device_sdid_95]
-    - page: emlib/api/efm32gg11/group-usart
+    - page: platform-emlib-efm32gg11/usart
       condition: [device_sdid_100]
-    - page: emlib/api/efm32tg11/group-usart
+    - page: platform-emlib-efm32tg11/usart
       condition: [device_sdid_103]
-    - page: emlib/api/efm32gg12/group-usart
+    - page: platform-emlib-efm32gg12/usart
       condition: [device_sdid_106]
-    - page: emlib/api/efr32xg21/group-usart
+    - page: platform-emlib-efr32xg21/usart
       condition: [device_sdid_200]
-    - page: emlib/api/efr32xg22/group-usart
+    - page: platform-emlib-efr32xg22/usart
       condition: [device_sdid_205]
-    - page: emlib/api/efr32xg23/group-usart
+    - page: platform-emlib-efr32xg23/usart
       condition: [device_sdid_210]
-    - page: emlib/api/efr32xg24/group-usart
+    - page: platform-emlib-efr32xg24/usart
       condition: [device_sdid_215]
-    - page: emlib/api/efr32xg27/group-usart
+    - page: platform-emlib-efr32xg27/usart
       condition: [device_sdid_230]
-    - page: emlib/api/efr32xg28/group-usart
+    - page: platform-emlib-efr32xg28/usart
       condition: [device_sdid_235]

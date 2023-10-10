@@ -198,7 +198,7 @@ RAIL_ENUM_GENERIC(RAIL_ZWAVE_NodeId_t, uint16_t) {
 #define RAIL_ZWAVE_NODE_ID_NONE      ((RAIL_ZWAVE_NodeId_t) RAIL_ZWAVE_NODE_ID_NONE)
 #define RAIL_ZWAVE_NODE_ID_BROADCAST ((RAIL_ZWAVE_NodeId_t) RAIL_ZWAVE_NODE_ID_BROADCAST)
 #define RAIL_ZWAVE_NODE_ID_DEFAULT   ((RAIL_ZWAVE_NodeId_t) RAIL_ZWAVE_NODE_ID_DEFAULT)
-#endif//DOXYGEN_SHOULD_SKIP_THIS
+#endif //DOXYGEN_SHOULD_SKIP_THIS
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 /** Defines for subPhyID field in RAIL_RxPacketDetails_t */
@@ -206,7 +206,7 @@ RAIL_ENUM_GENERIC(RAIL_ZWAVE_NodeId_t, uint16_t) {
 #define RAIL_ZWAVE_RX_SUBPHY_ID_1     (1U)
 #define RAIL_ZWAVE_RX_SUBPHY_ID_2     (2U)
 #define RAIL_ZWAVE_RX_SUBPHY_ID_3     (3U)
-#endif//DOXYGEN_SHOULD_SKIP_THIS
+#endif //DOXYGEN_SHOULD_SKIP_THIS
 
 /**
  * @enum RAIL_ZWAVE_HomeId_t
@@ -223,7 +223,7 @@ RAIL_ENUM_GENERIC(RAIL_ZWAVE_HomeId_t, uint32_t) {
 // Self-referencing defines minimize compiler complaints when using RAIL_ENUM
 #define RAIL_ZWAVE_HOME_ID_UNKNOWN ((RAIL_ZWAVE_HomeId_t) RAIL_ZWAVE_HOME_ID_UNKNOWN)
 #define RAIL_ZWAVE_HOME_ID_DEFAULT ((RAIL_ZWAVE_HomeId_t) RAIL_ZWAVE_HOME_ID_DEFAULT)
-#endif//DOXYGEN_SHOULD_SKIP_THIS
+#endif //DOXYGEN_SHOULD_SKIP_THIS
 
 /**
  * @enum RAIL_ZWAVE_HomeIdHash_t
@@ -250,7 +250,7 @@ RAIL_ENUM(RAIL_ZWAVE_HomeIdHash_t) {
 #define RAIL_ZWAVE_HOME_ID_HASH_ILLEGAL_3 ((RAIL_ZWAVE_HomeIdHash_t) RAIL_ZWAVE_HOME_ID_HASH_ILLEGAL_3)
 #define RAIL_ZWAVE_HOME_ID_HASH_DONT_CARE ((RAIL_ZWAVE_HomeIdHash_t) RAIL_ZWAVE_HOME_ID_HASH_DONT_CARE)
 #define RAIL_ZWAVE_HOME_ID_HASH_DEFAULT   ((RAIL_ZWAVE_HomeIdHash_t) RAIL_ZWAVE_HOME_ID_HASH_DEFAULT)
-#endif//DOXYGEN_SHOULD_SKIP_THIS
+#endif //DOXYGEN_SHOULD_SKIP_THIS
 
 /**
  * @struct RAIL_ZWAVE_Config_t
@@ -284,6 +284,35 @@ RAIL_ENUM(RAIL_ZWAVE_Baud_t) {
   RAIL_ZWAVE_BAUD_INVALID   /**< Sentinel value for invalid baud rate*/
 };
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+/**
+ * @enum RAIL_ZWAVE_RegionOptions_t
+ * @brief Region Specific Physical
+ */
+
+RAIL_ENUM(RAIL_ZWAVE_RegionOptions_t)
+{
+  /** Bit shift for US Long Range End Devices */
+  RAIL_ZWAVE_REGION_LONG_RANGE_END_SHIFT = 0,
+  /** Bit shift for special low side config, mostly for Japan and Korea */
+  RAIL_ZWAVE_REGION_LOW_SIDE_SHIFT = 1,
+  /** Bit shift for US long range range configurations */
+  RAIL_ZWAVE_REGION_LONG_RANGE_SHIFT = 2,
+};
+
+/**
+ * RAIL_ZWAVE_RegionOptions_t bitmasks
+ */
+/** A value representing US Long Range regions  */
+#define RAIL_ZWAVE_REGION_LONG_RANGE_MASK  (1u << RAIL_ZWAVE_REGION_LONG_RANGE_SHIFT)
+/** A value representing lowside configurations: For Series 2: JP and KR, for Series 1: KR */
+#define RAIL_ZWAVE_REGION_LOW_SIDE_MASK (1u << RAIL_ZWAVE_REGION_LOW_SIDE_SHIFT)
+/** A value representing Long Range End Device region */
+#define RAIL_ZWAVE_REGION_LONG_RANGE_END_MASK (1u << RAIL_ZWAVE_REGION_LONG_RANGE_END_SHIFT)
+/** A value representing No bit to be enabled */
+#define RAIL_ZWAVE_REGION_SPECIFIC_NONE 0u
+#endif // DOXYGEN SHOULD SKIP THIS
+
 /**
  * Sentinel value to indicate that a channel (and thus its frequency)
  * are invalid.
@@ -298,7 +327,7 @@ RAIL_ENUM(RAIL_ZWAVE_Baud_t) {
 #define RAIL_ZWAVE_LR             ((RAIL_ZWAVE_Baud_t) RAIL_ZWAVE_LR)
 #define RAIL_ZWAVE_ENERGY_DETECT  ((RAIL_ZWAVE_Baud_t) RAIL_ZWAVE_ENERGY_DETECT)
 #define RAIL_ZWAVE_INVALID        ((RAIL_ZWAVE_Baud_t) RAIL_ZWAVE_INVALID)
-#endif//DOXYGEN_SHOULD_SKIP_THIS
+#endif //DOXYGEN_SHOULD_SKIP_THIS
 
 /**
  * @enum RAIL_ZWAVE_RegionId_t
@@ -341,7 +370,7 @@ RAIL_ENUM(RAIL_ZWAVE_RegionId_t) {
 #define RAIL_ZWAVE_REGIONID_US_LR2 ((RAIL_ZWAVE_RegionId_t) RAIL_ZWAVE_REGIONID_US_LR2)
 #define RAIL_ZWAVE_REGIONID_US_LR_END_DEVICE ((RAIL_ZWAVE_RegionId_t) RAIL_ZWAVE_REGIONID_US_LR_END_DEVICE)
 #define RAIL_ZWAVE_REGIONID_COUNT ((RAIL_ZWAVE_RegionId_t) RAIL_ZWAVE_REGIONID_COUNT)
-#endif//DOXYGEN_SHOULD_SKIP_THIS
+#endif //DOXYGEN_SHOULD_SKIP_THIS
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 // Largest ACK timeout period based on
@@ -355,7 +384,7 @@ RAIL_ENUM(RAIL_ZWAVE_RegionId_t) {
 #define RAIL_ZWAVE_TIME_IDLE_TO_TX_US        (0U)
 #define RAIL_ZWAVE_TIME_RX_TO_TX_US          (1000U)
 
-#endif//DOXYGEN_SHOULD_SKIP_THIS
+#endif //DOXYGEN_SHOULD_SKIP_THIS
 
 /**
  * Invalid beam TX power value returned when \ref RAIL_ZWAVE_GetLrBeamTxPower
@@ -408,6 +437,7 @@ typedef struct RAIL_ZWAVE_RegionConfig {
   RAIL_TxPower_t maxPower[RAIL_NUM_ZWAVE_CHANNELS];                   /**< The maximum power allowed on the channel*/
   RAIL_ZWAVE_Baud_t baudRate[RAIL_NUM_ZWAVE_CHANNELS];                /**< Channel baud rate index*/
   RAIL_ZWAVE_RegionId_t regionId;                                     /**< Identification number for the region*/
+  RAIL_ZWAVE_RegionOptions_t regionSpecific;                                             /**< Encapsulates region specific data*/
 } RAIL_ZWAVE_RegionConfig_t;
 
 /**

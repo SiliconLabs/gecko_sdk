@@ -3,7 +3,7 @@ label: "Large Composition Data Server Model"
 package: "Btmesh"
 description: "Provides Bluetooth mesh Large Composition Data Server model. This model provides the node an interface for a remote node to query Device Composition Data that is larger than what could fit in a single mesh message. It also provides the interface for a remote node to query the Metadata pages of the node, which provide additional information about the models present on the node, such as the supported list of Sensor Property IDs for a Sensor Server or the supported temperature range for a Light CTL Temperature Server."
 category: "Bluetooth Mesh|Stack|Models|Core"
-quality: "evaluation"
+quality: "production"
 root_path: "protocol/bluetooth"
 
 requires:

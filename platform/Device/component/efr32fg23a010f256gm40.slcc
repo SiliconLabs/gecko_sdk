@@ -73,6 +73,7 @@
 - provides:
   - name: efr32fg23a010f256gm40
   - name: device
+  - name: device_efx
   - name: device_series_2
   - name: device_sdid_210
   - name: device_generic_family_efr32xg23

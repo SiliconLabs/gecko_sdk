@@ -640,6 +640,8 @@ void enableBleAdvertisements(void)
  */
 void sl_bt_on_event(sl_bt_msg_t* evt)
 {
+  halResetWatchdog();
+
   switch (SL_BT_MSG_ID(evt->header)) {
     /* This event indicates that a remote GATT client is attempting to read a value of an
      *  attribute from the local GATT database, where the attribute was defined in the GATT
@@ -684,17 +686,17 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
 
       status = sl_bt_advertiser_create_set(&adv_handle[HANDLE_DEMO]);
       if (status) {
-        sl_zigbee_app_debug_println("sl_bt_advertiser_create_set status 0x%x", status);
+        sl_zigbee_app_debug_println("sl_bt_advertiser_create_set status 0x%02x", status);
       }
 
       status = sl_bt_advertiser_create_set(&adv_handle[HANDLE_IBEACON]);
       if (status) {
-        sl_zigbee_app_debug_println("sl_bt_advertiser_create_set status 0x%x", status);
+        sl_zigbee_app_debug_println("sl_bt_advertiser_create_set status 0x%02x", status);
       }
 
       status = sl_bt_advertiser_create_set(&adv_handle[HANDLE_EDDYSTONE]);
       if (status) {
-        sl_zigbee_app_debug_println("sl_bt_advertiser_create_set status 0x%x", status);
+        sl_zigbee_app_debug_println("sl_bt_advertiser_create_set status 0x%02x", status);
       }
 
       // start advertising
@@ -781,7 +783,7 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
         sl_dmp_ui_bluetooth_connected(false);
       }
       sl_zigbee_app_debug_println(
-        "BLE connection closed, handle=0x%x, reason=0x%2x : [%d] active BLE connection",
+        "BLE connection closed, handle=0x%02x, reason=0x%02x : [%d] active BLE connection",
         conn_evt->connection, conn_evt->reason, activeBleConnections);
     }
     break;
@@ -789,7 +791,7 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
     case sl_bt_evt_scanner_scan_report_id: {
       sl_bt_evt_scanner_scan_report_t *scan_evt =
         (sl_bt_evt_scanner_scan_report_t*) &(evt->data);
-      sl_zigbee_app_debug_print("Scan response, address type=0x%02x, address: ",
+      sl_zigbee_app_debug_print("Scan response, address type=0x%02x",
                                 scan_evt->address_type);
       zb_ble_dmp_print_ble_address(scan_evt->address.addr);
       sl_zigbee_app_debug_println("");
@@ -797,7 +799,7 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
     break;
 #else
     case sl_bt_evt_scanner_legacy_advertisement_report_id: {
-      sl_zigbee_app_debug_print("Scan response, address type=0x%02x, address: ",
+      sl_zigbee_app_debug_print("Scan response, address type=0x%02x",
                                 evt->data.evt_scanner_legacy_advertisement_report.address_type);
       zb_ble_dmp_print_ble_address(evt->data.evt_scanner_legacy_advertisement_report.address.addr);
       sl_zigbee_app_debug_println("");

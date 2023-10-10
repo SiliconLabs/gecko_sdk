@@ -42,6 +42,9 @@
 #include "em_syscfg.h"
 #endif
 #include "em_msc.h"
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include "sl_component_catalog.h"
+#endif
 
 /***************************************************************************//**
  * @addtogroup cmu CMU - Clock Management Unit
@@ -3191,9 +3194,14 @@ void CMU_HFXOCrystalSharingFollowerInit(CMU_PRS_Status_Output_Select_TypeDef prs
       break;
 
     case PRS_Status_select_1:
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+      // Power Manager module requires the HFXO PRS Producer output 1 for its usage.
+      EFM_ASSERT(false);
+#else
       mask      = _HFXO_CTRL_PRSSTATUSSEL1_MASK;
       value     = _HFXO_CTRL_PRSSTATUSSEL1_ENS << _HFXO_CTRL_PRSSTATUSSEL1_SHIFT;
       prsSignal = _PRS_ASYNC_CH_CTRL_SIGSEL_HFXO0LSTATUS1;
+#endif
       break;
 
     default:
@@ -3411,8 +3419,10 @@ void CMU_HFXOCoreBiasCurrentCalibrate(void)
   }
 #endif
 
-  // Making sure HFXO is in steady state
-  EFM_ASSERT((HFXO0->STATUS & (HFXO_STATUS_COREBIASOPTRDY | HFXO_STATUS_RDY | HFXO_STATUS_ENS)) == (HFXO_STATUS_COREBIASOPTRDY | HFXO_STATUS_RDY | HFXO_STATUS_ENS));
+  while ((HFXO0->STATUS & (HFXO_STATUS_COREBIASOPTRDY | HFXO_STATUS_RDY | HFXO_STATUS_ENS))
+         != (HFXO_STATUS_COREBIASOPTRDY | HFXO_STATUS_RDY | HFXO_STATUS_ENS)) {
+    // Making sure HFXO is in steady state
+  }
 
   // Start core bias optimization
   HFXO0->CMD_SET = HFXO_CMD_COREBIASOPT;

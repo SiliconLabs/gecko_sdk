@@ -37,6 +37,10 @@
 
 #include "sl_memory_region.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /***************************************************************************//**
  * @brief
  *   Get size and location of the bootloader storage region.
@@ -47,5 +51,9 @@
 sl_memory_region_t sl_storage_get_bootloader_region(void);
 
 /** @} end linker */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // SL_STORAGE_H

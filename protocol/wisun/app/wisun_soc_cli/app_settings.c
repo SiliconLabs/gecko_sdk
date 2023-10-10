@@ -181,6 +181,7 @@ static const app_enum_t app_settings_wisun_phy_config_type_enum[] =
   { "FAN 1.0", SL_WISUN_PHY_CONFIG_FAN10 },
   { "FAN 1.1", SL_WISUN_PHY_CONFIG_FAN11 },
   { "explicit", SL_WISUN_PHY_CONFIG_EXPLICIT },
+  { "IDs", SL_WISUN_PHY_CONFIG_IDS},
   { NULL, 0 }
 };
 
@@ -414,7 +415,7 @@ const app_settings_entry_t app_settings_entries[] =
     .output_enum_list = app_settings_wisun_phy_config_type_enum,
     .set_handler = NULL,
     .get_handler = app_settings_get_integer,
-    .description = "PHY configuration type (FAN 1.0|FAN 1.1|explicit)"
+    .description = "PHY configuration type (FAN 1.0|FAN 1.1|explicit|IDs)"
   },
   {
     .key = "regulatory_domain",

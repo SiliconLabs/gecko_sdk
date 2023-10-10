@@ -34,9 +34,7 @@ component:
   - id: component_catalog
   - id: mpu
   - id: app_timer
-  - id: iostream_usart
-    instance:
-      - vcom
+  - id: iostream_recommended_stream
   - id: app_log
   - id: dmd_memlcd
   - id: glib
@@ -86,8 +84,6 @@ configuration:
     value: "9200"
   - name: SL_BOARD_ENABLE_VCOM
     value: "1"
-    condition:
-      - iostream_usart
   - name: SL_BOARD_ENABLE_DISPLAY
     value: "1"
     contidtion:

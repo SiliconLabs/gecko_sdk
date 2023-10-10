@@ -33,17 +33,7 @@
 #include "sli_hfxo_manager.h"
 #include "sl_hfxo_manager.h"
 #include "sl_hfxo_manager_config.h"
-#include "sli_sleeptimer.h"
 #include "sl_status.h"
-#if defined(SL_COMPONENT_CATALOG_PRESENT)
-#include "sl_component_catalog.h"
-#endif
-#if defined(SL_CATALOG_SLEEPTIMER_PRESENT) && defined(SYSRTC_PRESENT) \
-  && (SL_SLEEPTIMER_PERIPHERAL == SL_SLEEPTIMER_PERIPHERAL_SYSRTC)
-#define HFXO_MANAGER_SLEEPTIMER_SYSRTC_INTEGRATION_ON
-#include "peripheral_sysrtc.h"
-#endif
-
 #include <stdbool.h>
 
 /*******************************************************************************
@@ -167,7 +157,7 @@ void sli_hfxo_manager_init_hardware(void)
 #if defined(HFXO_MANAGER_SLEEPTIMER_SYSRTC_INTEGRATION_ON)
   HFXO0->IEN_SET = HFXO_IEN_PRSRDY;
   HFXO0->CTRL &= ~(_HFXO_CTRL_DISONDEMANDPRS_MASK & HFXO_CTRL_DISONDEMANDPRS_DEFAULT);
-  HFXO0->CTRL |= HFXO_CTRL_PRSSTATUSSEL0_PRSHWREQ;
+  HFXO0->CTRL |= HFXO_CTRL_PRSSTATUSSEL1_ENS;
 #endif
 }
 
@@ -243,7 +233,7 @@ void sl_hfxo_manager_irq_handler(void)
     HFXO0->IF_CLR = irq_flag & HFXO_IF_PRSRDY;
     HFXO0->CTRL_CLR = HFXO_CTRL_EM23ONDEMAND;
 
-    sli_hfxo_manager_end_startup_measurement();
+    sli_hfxo_manager_retrieve_begining_startup_measurement();
 
     // Notify power manager HFXO is ready
     sli_hfxo_notify_ready_for_power_manager_from_prs();
@@ -252,8 +242,8 @@ void sl_hfxo_manager_irq_handler(void)
     // Update sleep on isr exit flag
     sli_sleeptimer_update_sleep_on_isr_exit(true);
 
-    // Clear interrupt to reset PRS signal
-    sl_sysrtc_clear_group_interrupts(0u, SYSRTC_GRP0_IF_CMP1);
+    // Reset PRS signal through Sleeptimer
+    sli_sleeptimer_reset_prs_signal();
   }
 #endif
 

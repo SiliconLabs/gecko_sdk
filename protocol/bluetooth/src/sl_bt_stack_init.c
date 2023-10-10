@@ -426,6 +426,13 @@ SLI_BT_DECLARE_FEATURE_CONFIG(bt, connection);
 #define SLI_BT_BGAPI_CONNECTION
 #endif
 
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_CONNECTION_STATISTICS_PRESENT)
+SLI_BT_DECLARE_FEATURE(bt, connection_statistics);
+#define SLI_BT_FEATURE_CONNECTION_STATISTICS SLI_BT_USE_FEATURE(bt, connection_statistics),
+#else
+#define SLI_BT_FEATURE_CONNECTION_STATISTICS
+#endif
+
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_USER_POWER_CONTROL_PRESENT) \
   && defined(SL_CATALOG_BLUETOOTH_FEATURE_POWER_CONTROL_PRESENT)
 #error bluetooth_feature_power_control and bluetooth_feature_user_power_control cannot coexist.
@@ -557,6 +564,7 @@ static const struct sli_bt_feature_use bt_used_features[] =
   SLI_BT_FEATURE_CS_TEST
   SLI_BT_FEATURE_L2CAP
   SLI_BT_FEATURE_CONNECTION
+  SLI_BT_FEATURE_CONNECTION_STATISTICS
   SLI_BT_FEATURE_DYNAMIC_GATTDB
   SLI_BT_FEATURE_CTE_RECEIVER
   SLI_BT_FEATURE_CTE_TRANSMITTER
@@ -655,11 +663,23 @@ sl_status_t sli_bt_init_controller_features()
   sl_btctrl_init_scan();
 #endif
 
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_EVEN_SCHEDULING_PRESENT)
+  sl_btctrl_enable_even_connsch();
+#endif
+
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_CONNECTION_PAWR_SCHEDULING_PRESENT)
+  sl_btctrl_enable_pawr_connsch();
+#endif
+
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_CONNECTION_PRESENT)
   sl_btctrl_init_conn();
 #if !defined(SL_CATALOG_BLUETOOTH_CONNECTION_PHY_UPDATE_INCOMPATIBLE_PRESENT)
   sl_btctrl_init_phy();
 #endif
+#endif
+
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_CONNECTION_STATISTICS_PRESENT)
+  sl_btctrl_init_conn_statistics();
 #endif
 
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_POWER_CONTROL_PRESENT)
@@ -771,10 +791,6 @@ sl_status_t sli_bt_init_controller_features()
 #if SL_BT_CONTROLLER_CODED_PHY_SUPPORT == 0
   sl_btctrl_disable_coded_phy();
 #endif
-#endif
-
-#if defined(SL_CATALOG_BLUETOOTH_FEATURE_EVEN_SCHEDULING_PRESENT)
-  sl_btctrl_enable_even_connsch();
 #endif
 
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_WHITELISTING_PRESENT)

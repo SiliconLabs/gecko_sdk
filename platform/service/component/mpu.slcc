@@ -30,4 +30,4 @@ template_contribution:
       priority: -1
 documentation:
     docset: gecko-platform
-    document: service/api/group-mpu
+    document: platform-service/mpu

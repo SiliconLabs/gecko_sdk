@@ -1,0 +1,10 @@
+[
+      {
+        "name": "Distributor",
+        "group": "Main",
+        "location": "0x0000",
+        "sig_models" : [
+          {"mid":"0x1400", "name":"BLOB Transfer Server"}
+        ]
+      }
+]

@@ -35,6 +35,16 @@
 #include "app_sleep.h"
 #include "ncp_host_config.h"
 #include "host_comm_config.h"
+#if defined(HOST_COMM_ROBUST) && HOST_COMM_ROBUST == 1
+#include "host_comm_robust.h"
+#define HOST_COMM_TX    host_comm_robust_tx
+#define HOST_COMM_RX    host_comm_robust_rx
+#define HOST_COMM_PEEK  host_comm_robust_peek
+#else // HOST_COMM_ROBUST
+#define HOST_COMM_TX    host_comm_tx
+#define HOST_COMM_RX    host_comm_rx
+#define HOST_COMM_PEEK  host_comm_peek
+#endif // HOST_COMM_ROBUST
 
 // Default parameter values.
 #define MAX_OPT_LEN                   255
@@ -134,13 +144,12 @@ void ncp_host_tx(uint32_t len, uint8_t* data)
 
 #if  defined(SECURITY) && SECURITY == 1
   if (enable_security) {
-    memset(buf_ncp_out.buf, 0, sizeof(buf_ncp_out.buf));
     security_encrypt((char*)data, (char*)&buf_ncp_out.buf, &len);
-    ret = host_comm_tx(len, buf_ncp_out.buf);
+    ret = HOST_COMM_TX(len, buf_ncp_out.buf);
   } else
 #endif // defined(SECURITY) && SECURITY == 1
   {
-    ret = host_comm_tx(len, data);
+    ret = HOST_COMM_TX(len, data);
   }
   if (ret < 0) {
     host_comm_deinit();
@@ -183,9 +192,12 @@ int32_t ncp_host_peek_timeout(uint32_t len, uint32_t timeout)
   uint32_t timeout_counter = 0;
 
   do {
-    ret = host_comm_peek();
-    timeout_counter++;
-    app_sleep_us(PEEK_US_SLEEP);
+    ret = HOST_COMM_PEEK();
+
+    if (ret < len) {
+      timeout_counter++;
+      app_sleep_us(PEEK_US_SLEEP);
+    }
   } while ((ret < len) && (timeout_counter < timeout));
 
   return ret;
@@ -198,12 +210,13 @@ int32_t ncp_host_peek(void)
 {
   int32_t msg_len;
 
-  msg_len = host_comm_peek();
+  msg_len = HOST_COMM_PEEK();
   if (msg_len) {
     int32_t ret;
     uint8_t msg_header = 0;
+
     // Read first byte
-    ret = host_comm_rx(1, &buf_ncp_raw.buf[0]);
+    ret = HOST_COMM_RX(1, &buf_ncp_raw.buf[0]);
     if (ret < 0) {
       return -1;
     }
@@ -215,7 +228,7 @@ int32_t ncp_host_peek(void)
       if (ret < 0) {
         return -1;
       }
-      ret = host_comm_rx(1, (void*) &buf_ncp_raw.buf[1]);
+      ret = HOST_COMM_RX(1, (void *)&buf_ncp_raw.buf[1]);
       if (ret < 0) {
         return -1;
       }
@@ -224,12 +237,12 @@ int32_t ncp_host_peek(void)
       if (msg_len >= DEFAULT_HOST_BUFLEN - 2) {
         return -1;
       }
-      ret = ncp_host_peek_timeout(msg_len, MSG_RECV_TIMEOUT_COUNT);
+      ret = ncp_host_peek_timeout(msg_len, MSG_RECV_TIMEOUT_COUNT * msg_len);
       if (ret < 0) {
         return -1;
       }
       // Read the rest of the message
-      ret = host_comm_rx(msg_len, (void*) &buf_ncp_raw.buf[2]);
+      ret = HOST_COMM_RX(msg_len, (void *)&buf_ncp_raw.buf[2]);
       if (ret < 0) {
         return -1;
       }
@@ -243,7 +256,6 @@ int32_t ncp_host_peek(void)
       {
         memcpy(buf_ncp_in.buf, buf_ncp_raw.buf, msg_len);
       }
-      memset(buf_ncp_raw.buf, 0, sizeof(buf_ncp_raw.buf));
       buf_ncp_in.len = msg_len;
 #if defined(SECURITY) && SECURITY == 1
       if (enable_security) {
@@ -276,12 +288,12 @@ void ncp_sec_host_command_handler(buf_ncp_host_t *buf)
       security_reset();
       // Wait for the security handshake response (80 bytes length)
       ret = ncp_host_peek_timeout(SEC_BGAPI_RSP_MSG_LEN,
-                                  MSG_RECV_TIMEOUT_COUNT * 10);
+                                  MSG_RECV_TIMEOUT_COUNT * SEC_BGAPI_RSP_MSG_LEN);
       if (ret < 0) {
         return;
       }
       // Read the rest of the message
-      ret = host_comm_rx(SEC_BGAPI_RSP_MSG_LEN, (void *) &response);
+      ret = HOST_COMM_RX(SEC_BGAPI_RSP_MSG_LEN, (void *) &response);
       resp_cmd = (sl_bt_msg_t *)response;
       if (SL_BT_MSG_ID(resp_cmd->header)
           == sl_bt_rsp_user_message_to_target_id) {

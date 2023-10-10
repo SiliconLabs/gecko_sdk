@@ -32,4 +32,4 @@ template_contribution:
     priority: -9545
 documentation:
   docset: gecko-platform
-  document: service/api/group-device-init-usbpll
+  document: platform-service/device-init-usbpll

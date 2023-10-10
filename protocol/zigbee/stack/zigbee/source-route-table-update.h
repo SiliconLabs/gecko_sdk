@@ -91,9 +91,9 @@ void sli_zigbee_incoming_route_record(EmberNodeId source,
                                       EmberMessageBuffer header,
                                       uint8_t relayListIndex);
 
-/** @brief The application can implement this callback to
- * override the sourceroute's closer index. This is added as part of support for Digi's wish to control everything about our source route.
- * This needs to be implemneted by the app, but is not really public. Only exposed to one customer.
+/** @brief The application can implement this callback to override the source route's closer index.
+ * This callback can be consumed by the application to override the source routing information.
+ * This is not recommended and should only be used for testing purposes.
  */
 void emberOverrideFurthurIndexForSourceRouteAddEntryHandler(EmberNodeId id,
                                                             uint8_t* furtherIndex);

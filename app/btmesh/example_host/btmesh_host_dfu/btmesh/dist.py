@@ -223,7 +223,7 @@ class FwDistributionClient(BtmeshComponent):
                 raise BtmeshError(
                     err=BtmeshErrorCode.DIST_SVR_MDL_DOES_NOT_EXIST,
                     message=(
-                        f"The {dist_mdl_id.pretty_name} (0x{dist_mdl_id.value:04X}) "
+                        f"The {dist_mdl_id.pretty_name} (0x{dist_mdl.model_id:04X}) "
                         f"model does not exist on 0x{dist_addr:04X} element."
                     ),
                     dist_addr=dist_addr,
@@ -972,8 +972,8 @@ class FwDistributionClient(BtmeshComponent):
                 "Pull BLOB transfer mode is not recommended with group address "
                 "during distribution because messages sent to group address "
                 "are stored in the friend queues of friend nodes of each "
-                "receiver low power updating node. "
-                "This is problematic during chunk transfer because the updating "
+                "receiver low power target node. "
+                "This is problematic during chunk transfer because the target "
                 "nodes might request different chunks in BLOB Partial Block "
                 "Report messages and the chunks of one Low Power Node might push "
                 "out the chunks of the other node from the friend queues because "
@@ -1216,7 +1216,7 @@ class FwDistributionClient(BtmeshComponent):
                 status=status,
             )
         if phase == FwDistPhase.CANCELING_UPDATE:
-            # The FW update shall cancelled on each updating node which takes
+            # The FW update shall cancelled on each target node which takes
             # some time so wait until the Distributor leaves the canceling
             # update phase.
             while True:

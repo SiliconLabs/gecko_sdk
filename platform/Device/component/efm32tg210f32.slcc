@@ -64,6 +64,7 @@
 - provides:
   - name: efm32tg210f32
   - name: device
+  - name: device_efx
   - name: device_series_0
   - name: device_sdid_73
   - name: device_family_efm32tg

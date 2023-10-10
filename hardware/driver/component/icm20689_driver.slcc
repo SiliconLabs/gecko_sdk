@@ -30,4 +30,4 @@ template_contribution:
     value: icm20689_driver
 documentation:
     docset: gecko-platform
-    document: hardware-driver/api/group-icm20689
+    document: platform-hardware-driver/icm20689

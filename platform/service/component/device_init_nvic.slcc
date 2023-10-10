@@ -31,4 +31,4 @@ template_contribution:
     value: device_init_nvic
 documentation:
   docset: gecko-platform
-  document: service/api/group-device-init-nvic
+  document: platform-service/device-init-nvic

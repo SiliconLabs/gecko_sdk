@@ -44,4 +44,4 @@ template_contribution:
     value: "{{instance}}"
 documentation:
     docset: gecko-platform
-    document: driver/api/group-spidrv
+    document: platform-driver/spidrv

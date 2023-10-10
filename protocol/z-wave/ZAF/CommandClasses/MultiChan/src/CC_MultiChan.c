@@ -11,11 +11,12 @@
 #include <ZAF_Common_interface.h>
 #include "ZAF_CC_Invoker.h"
 #include "zaf_config_api.h"
-#include "zaf_protocol_config.h"
 #include "cc_multi_channel_config_api.h"
 
 //#define DEBUGPRINT
 #include "DebugPrint.h"
+
+extern node_id_t g_nodeID;
 
 /// Header size of ZW_MULTI_CHANNEL_CMD_ENCAP_V2_FRAME, before encapFrame field
 #define CC_MULTICHAN_ENCAP_HEADER_SIZE   4
@@ -72,57 +73,41 @@ static received_frame_status_t CC_MultiChannel_handler(
         cc_multi_channel_config_t const * const p_config = cc_multi_channel_get_config_endpoint(pCmdCap->properties1 & END_POINT_MASK);
         zaf_cc_list_t* pCmdClassList = GetCommandClassList((0 != ZAF_GetNodeID()), SECURITY_KEY_NONE, pCmdCap->properties1 & END_POINT_MASK);
 
-        // Do not advertise certain Command Classes
-        {
-          zpal_radio_region_t region = zpal_radio_get_region();
-          uint8_t command_classes_to_skip = 0;
-          uint8_t* cc_list = pCmdClassList->cc_list;
-
-          /*
-           * List of Command classes to omit:
-           * - Transport Service CC must not be returned (CC:0055.02.00.21.004)
-           * - Security 0 CC is not applicable in Long Range networks
-           */
-          for (uint8_t i = 0; i < pCmdClassList->list_size; ++i) {
-            if (
-              cc_list[i] == COMMAND_CLASS_TRANSPORT_SERVICE_V2 ||
-              (cc_list[i] == COMMAND_CLASS_SECURITY && (
-                region == REGION_US_LR || region == REGION_US_LR_BACKUP ||
-                region == REGION_US_LR_END_DEVICE)
-              )
-            ) {
-              ++command_classes_to_skip;
-            }
-            /* 
-             * If a forbidden CC was found in the list, remove it by skipping it
-             * and overwriting every subsequent element in the list with the
-             * next available entry, shrinking the list by 1 element.
-             */
-            if (command_classes_to_skip > 0 && i + command_classes_to_skip < pCmdClassList->list_size) {
-              cc_list[i] = cc_list[i + command_classes_to_skip];
-            }
-          }
-          if (command_classes_to_skip > 0) {
-            pCmdClassList->list_size -= command_classes_to_skip;
-          }
-        }
-
         if (IS_NULL(pCmdClassList) || IS_NULL(pCmdClassList->cc_list) || (0 == pCmdClassList->list_size) || IS_NULL(p_config))
         {
           return RECEIVED_FRAME_STATUS_FAIL;
         }
-        else
-        {
-          output->frame->ZW_MultiChannelCapabilityReport4byteV4Frame.cmdClass    = COMMAND_CLASS_MULTI_CHANNEL_V4;
-          output->frame->ZW_MultiChannelCapabilityReport4byteV4Frame.cmd         = MULTI_CHANNEL_CAPABILITY_REPORT_V4;
-          output->frame->ZW_MultiChannelCapabilityReport4byteV4Frame.properties1 = pCmdCap->properties1 & END_POINT_MASK;
-          output->frame->ZW_MultiChannelCapabilityReport4byteV4Frame.genericDeviceClass  = p_config->generic_type;
-          output->frame->ZW_MultiChannelCapabilityReport4byteV4Frame.specificDeviceClass = p_config->specific_type;
-          memcpy( &(output->frame->ZW_MultiChannelCapabilityReport4byteV4Frame.commandClass1), pCmdClassList->cc_list, pCmdClassList->list_size);
-          output->length = sizeof(ZW_MULTI_CHANNEL_CAPABILITY_REPORT_1BYTE_V4_FRAME) + pCmdClassList->list_size - 1;
+
+        output->frame->ZW_MultiChannelCapabilityReport4byteV4Frame.cmdClass    = COMMAND_CLASS_MULTI_CHANNEL_V4;
+        output->frame->ZW_MultiChannelCapabilityReport4byteV4Frame.cmd         = MULTI_CHANNEL_CAPABILITY_REPORT_V4;
+        output->frame->ZW_MultiChannelCapabilityReport4byteV4Frame.properties1 = pCmdCap->properties1 & END_POINT_MASK;
+        output->frame->ZW_MultiChannelCapabilityReport4byteV4Frame.genericDeviceClass  = p_config->generic_type;
+        output->frame->ZW_MultiChannelCapabilityReport4byteV4Frame.specificDeviceClass = p_config->specific_type;
+
+        // Copy Command Classes
+        uint8_t* const cc_list_out = &output->frame->ZW_MultiChannelCapabilityReport4byteV4Frame.commandClass1;
+        uint8_t cc_list_out_len = 0;
+
+        /*
+         * List of Command classes to omit:
+         * - Transport Service CC must not be returned (CC:0055.02.00.21.004)
+         * - Security 0 CC is not applicable in Long Range networks
+         */
+        const uint8_t* cc_list = pCmdClassList->cc_list;
+        const bool curr_region_is_lr = (LOWEST_LONG_RANGE_NODE_ID <= g_nodeID);
+
+        for (uint8_t i = 0; i < pCmdClassList->list_size; ++i) {
+          if (
+            cc_list[i] == COMMAND_CLASS_TRANSPORT_SERVICE_V2 ||
+            (cc_list[i] == COMMAND_CLASS_SECURITY && curr_region_is_lr)
+          ) {
+            DPRINTF("Remove unnecessary CC: %d\n", cc_list[i]);
+            continue;
+          }
+          cc_list_out[cc_list_out_len++] = cc_list[i];
         }
 
-
+        output->length = sizeof(ZW_MULTI_CHANNEL_CAPABILITY_REPORT_1BYTE_V4_FRAME) - 1 + cc_list_out_len;
       }
       return RECEIVED_FRAME_STATUS_SUCCESS;
       break;

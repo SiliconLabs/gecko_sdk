@@ -36,6 +36,7 @@
 #include <openssl/ec.h>
 #include <openssl/sha.h>
 #include <openssl/rand.h>
+#include <openssl/bn.h>
 #include "app_log.h"
 
 #include "sl_bt_api.h"

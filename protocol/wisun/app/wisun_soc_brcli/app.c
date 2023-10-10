@@ -204,6 +204,94 @@ uint32_t app_certificate_index;
 
 osThreadId_t app_task_id;
 
+#if RAIL_IEEE802154_SUPPORTS_G_MODESWITCH
+static uint8_t op_mode_to_phy_mode_id(uint8_t op_mode)
+{
+  uint8_t phy_mode_id;
+  switch(op_mode) {
+    case 0x1a:
+      phy_mode_id = 1;
+      break;
+    case 0x1b:
+      phy_mode_id = 2;
+      break;
+    case 0x2:
+      phy_mode_id = 3;
+      break;
+    case 0x2b:
+      phy_mode_id = 4;
+      break;
+    case 0x3:
+      phy_mode_id = 5;
+      break;
+    case 0x4a:
+      phy_mode_id = 6;
+      break;
+    case 0x4b:
+      phy_mode_id = 7;
+      break;
+    case 0x5:
+      phy_mode_id = 8;
+      break;
+    default:
+      printf("[Invalid operating_mode!\r\n]");
+      phy_mode_id = 255;
+  }
+
+  return phy_mode_id;
+}
+
+// return base PhyModeId
+static uint8_t find_base_operating_mode(void)
+{
+  if (app_settings_wisun.phy_config_type == SL_WISUN_PHY_CONFIG_FAN10) {
+    return op_mode_to_phy_mode_id(app_settings_wisun.operating_mode);
+  } else {
+    return app_settings_wisun.phy_mode_id;
+  }
+}
+
+static bool check_base_operating_mode_in_pom_ie(uint8_t phy_mode_id_count, const uint8_t *phy_mode_ids)
+{
+  uint8_t base_mode = find_base_operating_mode();
+  uint8_t i;
+  bool found = false;
+
+  if (base_mode != 255) {
+    for (i = 0; i < phy_mode_id_count; i++) {
+      if (phy_mode_ids[i] == base_mode) {
+        found = true;
+        break;
+      }
+    }
+  }
+
+  return found;
+}
+
+static void add_base_operating_mode_in_pom_ie(uint8_t *phy_mode_id_count_p, uint8_t *phy_mode_id_p)
+{
+  uint8_t base_mode = find_base_operating_mode();
+
+  if (base_mode != 255) {
+    uint8_t temp_phy_mode_ids[15];
+    uint8_t nb;
+
+    // Save previous POM-IE
+    memcpy(temp_phy_mode_ids, phy_mode_id_p, *phy_mode_id_count_p);
+
+    // Add base mode first
+    phy_mode_id_p[0] = base_mode;
+
+    // Restore other modes. Remove last one if POM-IE is full.
+    nb = *phy_mode_id_count_p < 15 ? *phy_mode_id_count_p : 14;
+    memcpy(&phy_mode_id_p[1], temp_phy_mode_ids, nb);
+
+    *phy_mode_id_count_p = nb + 1;
+  }
+}
+#endif
+
 static const app_enum_t app_certificate_index_enum[] =
 {
   { "all", APP_CERTIFICATE_INDEX_ALL },
@@ -475,7 +563,7 @@ static void app_start(sl_wisun_phy_config_type_t phy_config_type)
     }
   }
 
-  ret = sl_wisun_set_device_type((sl_wisun_device_type_t)app_settings_wisun.device_type);
+  ret = sl_wisun_set_device_type((sl_wisun_device_type_t)SL_WISUN_BORDER_ROUTER);
   if (ret != SL_STATUS_OK) {
     printf("[Failed: unable to set device type: %lu]\r\n", ret);
     goto cleanup;
@@ -550,9 +638,9 @@ static void app_start(sl_wisun_phy_config_type_t phy_config_type)
   }
 
 #ifdef WISUN_FAN_CERTIFICATION
-  ret = sl_wisun_br_set_trusted_certificate(SL_WISUN_CERTIFICATE_OPTION_NONE,
-                                            sizeof(WISUN_ALLIANCE_ROOT_CERTIFICATE),
-                                            WISUN_ALLIANCE_ROOT_CERTIFICATE);
+  ret = sl_wisun_set_trusted_certificate(SL_WISUN_CERTIFICATE_OPTION_NONE,
+                                         sizeof(WISUN_ALLIANCE_ROOT_CERTIFICATE),
+                                         WISUN_ALLIANCE_ROOT_CERTIFICATE);
   if (ret != SL_STATUS_OK) {
     printf("[Failed: unable to set trusted certificate: %lu]\r\n", ret);
     goto cleanup;
@@ -564,9 +652,9 @@ static void app_start(sl_wisun_phy_config_type_t phy_config_type)
     printf("[Failed: unable to set device certificate: %lu]\r\n", ret);
     goto cleanup;
   }
-  ret = sl_wisun_set_br_device_private_key(SL_WISUN_CERTIFICATE_OPTION_NONE,
-                                           sizeof(WISUN_ALLIANCE_SERVER_KEY),
-                                           WISUN_ALLIANCE_SERVER_KEY);
+  ret = sl_wisun_set_device_private_key(SL_WISUN_CERTIFICATE_OPTION_NONE,
+                                        sizeof(WISUN_ALLIANCE_SERVER_KEY),
+                                        WISUN_ALLIANCE_SERVER_KEY);
   if (ret != SL_STATUS_OK) {
     printf("[Failed: unable to set device private key: %lu]\r\n", ret);
     goto cleanup;
@@ -642,8 +730,8 @@ static void app_start(sl_wisun_phy_config_type_t phy_config_type)
   app_settings_wisun.phy_config_type = phy_config.type = phy_config_type;
 
   ret = sl_wisun_set_pti_state(app_settings_app.pti_state);
-  if (ret != SL_STATUS_OK) {
-    printf("[Failed to set PTI state]\r\n");
+  if (ret == SL_STATUS_FAIL) {
+    printf("[Failed to set PTI state.]\r\n");
     goto cleanup;
   }
 
@@ -668,6 +756,11 @@ static void app_start(sl_wisun_phy_config_type_t phy_config_type)
       // POM-IE not available
       goto cleanup;
     }
+
+      // Check base mode is inside POM_IE
+      if (!check_base_operating_mode_in_pom_ie(phy_mode_id_count, phy_mode_id_p)) {
+        add_base_operating_mode_in_pom_ie(phy_mode_id_count_p, phy_mode_id_p);
+      }
   } else {
     phy_mode_id_p = app_settings_wisun.rx_phy_mode_ids;
     phy_mode_id_count_p = &app_settings_wisun.rx_phy_mode_ids_count;
@@ -677,7 +770,7 @@ static void app_start(sl_wisun_phy_config_type_t phy_config_type)
                             phy_mode_id_p,
                             app_settings_wisun.rx_mdr_capable);
   if (ret != SL_STATUS_OK) {
-    printf("[Failed: unable to RX PhyModeId list: %lu]\r\n", ret);
+    printf("[Failed: unable to set RX PhyModeId list: %lu]\r\n", ret);
     goto cleanup;
   }
 #else

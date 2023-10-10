@@ -84,7 +84,7 @@ void emberAfInitCallback(void)
   emberAfAllocateEvent(&state_machine_event, &state_machine_handler);
   emberEventControlSetDelayMS(*state_machine_event, STATE_MACHINE_TIMER_MS);
   // CLI info message
-  app_log_info("Switch\n");
+  app_log_info("\nSwitch\n");
 
   // set the default PAN ID, it can be changed with CLI
   sl_set_pan_id(DEFAULT_LIGHT_SWITCH_PAN_ID);

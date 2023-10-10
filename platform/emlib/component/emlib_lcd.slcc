@@ -22,21 +22,21 @@ requires:
 documentation:
   docset: gecko-platform
   document:
-    - page: emlib/api/efm32g/group-lcd
+    - page: platform-emlib-efm32g/lcd
       condition: [device_sdid_71]
-    - page: emlib/api/efm32gg/group-lcd
+    - page: platform-emlib-efm32gg/lcd
       condition: [device_sdid_72]
-    - page: emlib/api/efm32tg/group-lcd
+    - page: platform-emlib-efm32tg/lcd
       condition: [device_sdid_73]
-    - page: emlib/api/efm32lg/group-lcd
+    - page: platform-emlib-efm32lg/lcd
       condition: [device_sdid_74]
-    - page: emlib/api/efm32gg11/group-lcd
+    - page: platform-emlib-efm32gg11/lcd
       condition: [device_sdid_100]
-    - page: emlib/api/efm32tg11/group-lcd
+    - page: platform-emlib-efm32tg11/lcd
       condition: [device_sdid_103]
-    - page: emlib/api/efm32gg12/group-lcd
+    - page: platform-emlib-efm32gg12/lcd
       condition: [device_sdid_106]
-    - page: emlib/api/efr32xg23/group-lcd
+    - page: platform-emlib-efr32xg23/lcd
       condition: [device_sdid_210]
-    - page: emlib/api/efr32xg28/group-lcd
+    - page: platform-emlib-efr32xg28/lcd
       condition: [device_sdid_235]

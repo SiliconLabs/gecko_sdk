@@ -28,12 +28,12 @@
  *
  ******************************************************************************/
 
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include "sl_component_catalog.h"
+#endif
 #include "peripheral_sysrtc.h"
 #include "sl_sleeptimer.h"
 #include "sli_sleeptimer_hal.h"
-#if !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT) && defined(SL_CATALOG_POWER_MANAGER_PRESENT)
-#include "sli_hfxo_manager.h"
-#endif
 #include "em_core.h"
 #include "em_cmu.h"
 #include "em_prs.h"
@@ -65,7 +65,6 @@ void sleeptimer_hal_init_timer(void)
 {
   sl_sysrtc_config_t sysrtc_config = SYSRTC_CONFIG_DEFAULT;
   sl_sysrtc_group_config_t group_config = SYSRTC_GROUP_CONFIG_DEFAULT;
-  const sl_sysrtc_group_channel_compare_config_t group_compare_channel_config = SYSRTC_GROUP_CHANNEL_COMPARE_CONFIG_EARLY_WAKEUP;
 
   CMU_ClockEnable(cmuClock_SYSRTC, true);
 
@@ -76,8 +75,7 @@ void sleeptimer_hal_init_timer(void)
   sl_sysrtc_init(&sysrtc_config);
 
   group_config.compare_channel0_enable = false;
-  group_config.compare_channel1_enable = false;
-  group_config.p_compare_channel1_config = &group_compare_channel_config;
+
   sl_sysrtc_init_group(0u, &group_config);
 
   sl_sysrtc_disable_group_interrupts(0u, _SYSRTC_GRP0_IEN_MASK);
@@ -87,11 +85,34 @@ void sleeptimer_hal_init_timer(void)
 
   NVIC_ClearPendingIRQ(SYSRTC_APP_IRQn);
   NVIC_EnableIRQ(SYSRTC_APP_IRQn);
+}
 
+/*******************************************************************************
+ * Hardware Abstraction Layer to perform initialization related to Power Manager.
+ ******************************************************************************/
+void sli_sleeptimer_hal_power_manager_integration_init(void)
+{
   // Initialize PRS to start HFXO for early wakeup
   CMU_ClockEnable(cmuClock_PRS, true);
   PRS_ConnectSignal(1UL, prsTypeAsync, prsSignalSYSRTC0_GRP0OUT1);
   PRS_ConnectConsumer(1UL, prsTypeAsync, prsConsumerHFXO0_OSCREQ);
+
+  // Set SYSRTC Compare Channel 1
+  SYSRTC0->GRP0_CTRL |= (_SYSRTC_GRP0_CTRL_CMP1CMOA_CMPIF << _SYSRTC_GRP0_CTRL_CMP1CMOA_SHIFT);
+}
+
+/*******************************************************************************
+ * Hardware Abstraction Layer to perform initialization related to HFXO Manager.
+ ******************************************************************************/
+void sli_sleeptimer_hal_hfxo_manager_integration_init(void)
+{
+  // Set PRS signal from HFXO to SYSRTC capture channel
+  CMU_ClockEnable(cmuClock_PRS, true);
+  PRS_ConnectSignal(2UL, prsTypeAsync, prsSignalHFXO0L_STATUS1);
+  PRS_ConnectConsumer(2UL, prsTypeAsync, prsConsumerSYSRTC0_SRC0);
+
+  // Set SYSRTC Capture Channel
+  SYSRTC0->GRP0_CTRL |= (_SYSRTC_GRP0_CTRL_CAP0EDGE_RISING << _SYSRTC_GRP0_CTRL_CAP0EDGE_SHIFT);
 }
 
 /******************************************************************************
@@ -114,7 +135,7 @@ uint32_t sleeptimer_hal_get_compare(void)
  * Sets SYSRTC channel zero's compare value.
  *
  * @note Compare match value is set to the requested value - 1. This is done
- * to compensate for the fact that the BURTC compare match interrupt always
+ * to compensate for the fact that the SYSRTC compare match interrupt always
  * triggers at the end of the requested ticks and that the IRQ handler is
  * executed when current tick count == compare_value + 1.
  *****************************************************************************/
@@ -153,7 +174,7 @@ void sleeptimer_hal_set_compare(uint32_t value)
  * Sets SYSRTC channel one's compare value.
  *
  * @note Compare match value is set to the requested value - 1. This is done
- * to compensate for the fact that the BURTC compare match interrupt always
+ * to compensate for the fact that the SYSRTC compare match interrupt always
  * triggers at the end of the requested ticks and that the IRQ handler is
  * executed when current tick count == compare_value + 1.
  ******************************************************************************/
@@ -174,10 +195,6 @@ void sleeptimer_hal_set_compare_prs_hfxo_startup(int32_t value)
     compare_value = counter + SLEEPTIMER_COMPARE_MIN_DIFF;
   }
 
-#if !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT) && defined(SL_CATALOG_POWER_MANAGER_PRESENT)
-  sli_hfxo_prs_manager_begin_startup_measurement(compare_value);
-#endif
-
   compare_value %= SLEEPTIMER_TMR_WIDTH;
 
   sl_sysrtc_set_group_compare_channel_value(0u, 1u, compare_value - 1);
@@ -186,6 +203,7 @@ void sleeptimer_hal_set_compare_prs_hfxo_startup(int32_t value)
 
   if (cc1_disabled) {
     SYSRTC0->GRP0_CTRL |= SYSRTC_GRP0_CTRL_CMP1EN;
+    SYSRTC0->GRP0_CTRL |= SYSRTC_GRP0_CTRL_CAP0EN;
     cc1_disabled = false;
   }
 }
@@ -324,6 +342,40 @@ __STATIC_INLINE uint32_t get_time_diff(uint32_t a,
 uint16_t sleeptimer_hal_get_clock_accuracy(void)
 {
   return CMU_LF_ClockPrecisionGet(cmuClock_SYSRTC);
+}
+
+/*******************************************************************************
+ * Hardware Abstraction Layer to get the capture channel value.
+ ******************************************************************************/
+uint32_t sleeptimer_hal_get_capture(void)
+{
+  if ((sl_sysrtc_get_group_interrupts(0) & _SYSRTC_GRP0_IF_CAP0_MASK) != 0) {
+    sl_sysrtc_clear_group_interrupts(0, _SYSRTC_GRP0_IF_CAP0_MASK);
+    return sl_sysrtc_get_group_capture_channel_value(0);
+  } else {
+    return 0;
+  }
+}
+
+/*******************************************************************************
+ * Hardware Abstraction Layer to reset PRS signal triggered by the associated
+ * peripheral.
+ ******************************************************************************/
+void sleeptimer_hal_reset_prs_signal(void)
+{
+  sl_sysrtc_clear_group_interrupts(0, SYSRTC_GRP0_IF_CMP1);
+}
+
+/*******************************************************************************
+ * Hardware Abstraction Layer to disable PRS compare and capture channel.
+ ******************************************************************************/
+void sleeptimer_hal_disable_prs_compare_and_capture_channel(void)
+{
+  if (!cc1_disabled) {
+    SYSRTC0->GRP0_CTRL &= ~SYSRTC_GRP0_CTRL_CMP1EN;
+    SYSRTC0->GRP0_CTRL &= ~SYSRTC_GRP0_CTRL_CAP0EN;
+    cc1_disabled = true;
+  }
 }
 
 /***************************************************************************//**

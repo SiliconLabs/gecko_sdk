@@ -35,4 +35,4 @@ template_contribution:
     value: legacy_bootloader_interface
 documentation:
     docset: gecko-platform
-    document: service/api/group-common-bootload
+    document: platform-service/common-bootload

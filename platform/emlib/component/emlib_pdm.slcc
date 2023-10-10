@@ -21,9 +21,9 @@ requires:
 documentation:
   docset: gecko-platform
   document:
-    - page: emlib/api/efm32gg12/group-pdm
+    - page: platform-emlib-efm32gg12/pdm
       condition: [device_sdid_106]
-    - page: emlib/api/efr32xg22/group-pdm
+    - page: platform-emlib-efr32xg22/pdm
       condition: [device_sdid_205]
-    - page: emlib/api/efr32xg27/group-pdm
+    - page: platform-emlib-efr32xg27/pdm
       condition: [device_sdid_230]

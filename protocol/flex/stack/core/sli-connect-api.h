@@ -103,6 +103,10 @@ uint8_t emApiGetMaximumPayloadLength(EmberMacAddressMode srcAddressMode,
 
 EmberStatus emApiSetIndirectQueueTimeout(uint32_t timeoutMs);
 
+EmberStatus emApiGetVersionInfo(uint16_t* gsdkVersion,
+                                uint16_t* connectStackVersion,
+                                uint32_t* bootloaderVersion);
+
 uint32_t emApiStackIdleTimeMs(uint16_t * currentStackTasks);
 
 void emApiTick(void);

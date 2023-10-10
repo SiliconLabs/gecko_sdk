@@ -47,6 +47,9 @@
 #include "sl_cycle_counter.h"
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 /*******************************************************************************
  *******************************   DEFINES   ***********************************
  ******************************************************************************/
@@ -121,3 +124,7 @@ void sli_power_manager_em23_voltage_scaling_enable_fast_wakeup(bool enable);
  * @return Delay for the complete wake-up process with full restore.
  ******************************************************************************/
 uint32_t sli_power_manager_get_wakeup_process_time_overhead(void);
+
+#ifdef __cplusplus
+}
+#endif

@@ -160,9 +160,8 @@ static void receive_ack(sl_cpc_endpoint_t *endpoint,
 
 static void receive_iframe(sl_cpc_endpoint_t *endpoint,
                            sl_cpc_buffer_handle_t *rx_handle,
-                           uint8_t address,
                            uint8_t control,
-                           uint8_t seq);
+                           uint16_t data_length);
 
 static void receive_sframe(sl_cpc_endpoint_t *endpoint,
                            sl_cpc_buffer_handle_t *rx_handle,
@@ -1527,8 +1526,6 @@ static void decode_packet(void)
   uint8_t address;
   uint8_t type;
   uint8_t control;
-  uint8_t seq;
-  uint8_t ack;
   uint16_t hcs;
   uint16_t data_length;
   sl_cpc_buffer_handle_t *rx_handle;
@@ -1557,8 +1554,6 @@ static void decode_packet(void)
   address = sli_cpc_hdlc_get_address(rx_handle->hdlc_header);
   control = sli_cpc_hdlc_get_control(rx_handle->hdlc_header);
   data_length = sli_cpc_hdlc_get_length(rx_handle->hdlc_header);
-  seq = sli_cpc_hdlc_get_seq(control);
-  ack = sli_cpc_hdlc_get_ack(control);
   type = sli_cpc_hdlc_get_frame_type(control);
 
   if (data_length < rx_buffer_payload_len) {
@@ -1577,6 +1572,9 @@ static void decode_packet(void)
     if ((type == SLI_CPC_HDLC_FRAME_TYPE_INFORMATION
          || type == SLI_CPC_HDLC_FRAME_TYPE_SUPERVISORY)
         && rx_handle->reason == SL_CPC_REJECT_NO_ERROR) {
+      // get ack from control byte
+      uint8_t ack = sli_cpc_hdlc_get_ack(control);
+
       // Clean Tx queue
       receive_ack(endpoint, ack);
     }
@@ -1586,9 +1584,45 @@ static void decode_packet(void)
       rx_handle->reason = SL_CPC_REJECT_NO_ERROR;
       sli_cpc_drop_buffer_handle(rx_handle);
       SLI_CPC_DEBUG_TRACE_ENDPOINT_RXD_SUPERVISORY_DROPPED(endpoint);
-    } else if (type == SLI_CPC_HDLC_FRAME_TYPE_INFORMATION) {
+    }
+
+    if (data_length > 0) {
+      uint16_t fcs;
+
+      EFM_ASSERT(rx_handle->data != NULL);
+
+      // make sure the payload is at least 3 bytes (FCS + 1 byte payload)
+      if (data_length <= SLI_CPC_HDLC_FCS_SIZE) {
+        transmit_reject(endpoint, address, endpoint->ack, SL_CPC_REJECT_ERROR);
+
+        sli_cpc_drop_buffer_handle(rx_handle);
+        RELEASE_ENDPOINT(endpoint);
+
+        return;
+      }
+
+      data_length = data_length - SLI_CPC_HDLC_FCS_SIZE;
+      fcs = sli_cpc_hdlc_get_fcs(rx_handle->data, data_length);
+
+      if (!sli_cpc_validate_crc_sw(rx_handle->data, data_length, fcs)) {
+        SLI_CPC_DEBUG_TRACE_CORE_INVALID_PAYLOAD_CHECKSUM();
+
+        if (type == SLI_CPC_HDLC_FRAME_TYPE_INFORMATION) {
+          transmit_reject(endpoint, address, endpoint->ack, SL_CPC_REJECT_CHECKSUM_MISMATCH);
+        } else if (type == SLI_CPC_HDLC_FRAME_TYPE_UNNUMBERED) {
+          SLI_CPC_DEBUG_TRACE_ENDPOINT_RXD_UNNUMBERED_DROPPED(endpoint);
+        }
+
+        sli_cpc_drop_buffer_handle(rx_handle);
+        RELEASE_ENDPOINT(endpoint);
+
+        return;
+      }
+    }
+
+    if (type == SLI_CPC_HDLC_FRAME_TYPE_INFORMATION) {
       SLI_CPC_DEBUG_TRACE_CORE_RXD_VALID_IFRAME();
-      receive_iframe(endpoint, rx_handle, address, control, seq);
+      receive_iframe(endpoint, rx_handle, control, data_length);
     } else if (type == SLI_CPC_HDLC_FRAME_TYPE_SUPERVISORY) {
       receive_sframe(endpoint, rx_handle, control, data_length);
       SLI_CPC_DEBUG_TRACE_CORE_RXD_VALID_SFRAME();
@@ -1831,13 +1865,11 @@ static sl_status_t decrypt_iframe(sl_cpc_endpoint_t *endpoint,
  ******************************************************************************/
 static void receive_iframe(sl_cpc_endpoint_t *endpoint,
                            sl_cpc_buffer_handle_t *rx_handle,
-                           uint8_t address,
                            uint8_t control,
-                           uint8_t seq)
+                           uint16_t data_length)
 {
   sl_status_t status;
-  uint16_t rx_buffer_payload_len;
-  uint16_t fcs;
+  uint8_t seq;
   uint32_t reply_data_length = 0;
   void *reply_data = NULL;
   void *on_write_completed_arg = NULL;
@@ -1846,35 +1878,25 @@ static void receive_iframe(sl_cpc_endpoint_t *endpoint,
   if (endpoint->state == SL_CPC_STATE_CLOSING) {
     // Close endpoint has been called. The Receive side is closed (rx queue cleaned)
     // Endpoint is not yet removed from the list because we need to complete the transmission(s)
-    transmit_reject(endpoint, address, 0, SL_CPC_REJECT_UNREACHABLE_ENDPOINT);
+    transmit_reject(endpoint, endpoint->id, 0, SL_CPC_REJECT_UNREACHABLE_ENDPOINT);
     sli_cpc_drop_buffer_handle(rx_handle);
     return;
   }
 
-  rx_buffer_payload_len = sli_cpc_hdlc_get_length(rx_handle->hdlc_header) - 2;
 #if (SL_CPC_ENDPOINT_SECURITY_ENABLED >= 1)
-  EFM_ASSERT(rx_buffer_payload_len <= SL_CPC_RX_PAYLOAD_MAX_LENGTH + SLI_SECURITY_TAG_LENGTH_BYTES);
+  EFM_ASSERT(data_length <= SL_CPC_RX_PAYLOAD_MAX_LENGTH + SLI_SECURITY_TAG_LENGTH_BYTES);
 #else
-  EFM_ASSERT(rx_buffer_payload_len <= SL_CPC_RX_PAYLOAD_MAX_LENGTH);
+  EFM_ASSERT(data_length <= SL_CPC_RX_PAYLOAD_MAX_LENGTH);
 #endif
-
-  // Validate payload checksum. In case it is invalid, NAK the packet.
-  if (rx_buffer_payload_len > 0) {
-    fcs = sli_cpc_hdlc_get_fcs(rx_handle->data, rx_buffer_payload_len);
-    if (!sli_cpc_validate_crc_sw(rx_handle->data, rx_buffer_payload_len, fcs)) {
-      transmit_reject(endpoint, address, endpoint->ack, SL_CPC_REJECT_CHECKSUM_MISMATCH);
-      SLI_CPC_DEBUG_TRACE_CORE_INVALID_PAYLOAD_CHECKSUM();
-      sli_cpc_drop_buffer_handle(rx_handle);
-      return;
-    }
-  }
 
   if (endpoint->flags & SL_CPC_OPEN_ENDPOINT_FLAG_IFRAME_DISABLE) {
     // iframe disable; drop packet and send reject
-    transmit_reject(endpoint, address, endpoint->ack, SL_CPC_REJECT_ERROR);
+    transmit_reject(endpoint, endpoint->id, endpoint->ack, SL_CPC_REJECT_ERROR);
     sli_cpc_drop_buffer_handle(rx_handle);
     return;
   }
+
+  seq = sli_cpc_hdlc_get_seq(control);
 
   // data received, Push in Rx Queue and send Ack
   if (seq == endpoint->ack) {
@@ -1883,16 +1905,16 @@ static void receive_iframe(sl_cpc_endpoint_t *endpoint,
 #if (!defined(SLI_CPC_DEVICE_UNDER_TEST))
       // Only system endpoint can use poll/final
       if (endpoint->id != 0) {
-        transmit_reject(endpoint, address, endpoint->ack, SL_CPC_REJECT_ERROR);
+        transmit_reject(endpoint, endpoint->id, endpoint->ack, SL_CPC_REJECT_ERROR);
         sli_cpc_drop_buffer_handle(rx_handle);
         return;
       }
 #endif
 
 #if (SL_CPC_ENDPOINT_SECURITY_ENABLED >= 1)
-      sl_status_t ret = decrypt_iframe(endpoint, rx_handle, &rx_buffer_payload_len);
+      sl_status_t ret = decrypt_iframe(endpoint, rx_handle, &data_length);
       if (ret != SL_STATUS_OK) {
-        transmit_reject(endpoint, address, endpoint->ack, SL_CPC_REJECT_SECURITY_ISSUE);
+        transmit_reject(endpoint, endpoint->id, endpoint->ack, SL_CPC_REJECT_SECURITY_ISSUE);
         sli_cpc_drop_buffer_handle(rx_handle);
         return;
       }
@@ -1900,7 +1922,7 @@ static void receive_iframe(sl_cpc_endpoint_t *endpoint,
 
       if (endpoint->poll_final.on_poll != NULL) {
         endpoint->poll_final.on_poll(endpoint->id, (void *)SLI_CPC_HDLC_FRAME_TYPE_INFORMATION,
-                                     rx_handle->data, rx_buffer_payload_len,
+                                     rx_handle->data, data_length,
                                      &reply_data, &reply_data_length, &on_write_completed_arg);
       }
       sli_cpc_free_rx_buffer(rx_handle->data);
@@ -1912,18 +1934,18 @@ static void receive_iframe(sl_cpc_endpoint_t *endpoint,
       sl_status_t ret;
 
 #if (SL_CPC_ENDPOINT_SECURITY_ENABLED >= 1)
-      ret = decrypt_iframe(endpoint, rx_handle, &rx_buffer_payload_len);
+      ret = decrypt_iframe(endpoint, rx_handle, &data_length);
       if (ret != SL_STATUS_OK) {
-        transmit_reject(endpoint, address, endpoint->ack, SL_CPC_REJECT_SECURITY_ISSUE);
+        transmit_reject(endpoint, endpoint->id, endpoint->ack, SL_CPC_REJECT_SECURITY_ISSUE);
         sli_cpc_drop_buffer_handle(rx_handle);
         return;
       }
 #endif
 
-      ret = sli_cpc_push_back_rx_data_in_receive_queue(rx_handle, &endpoint->iframe_receive_queue, rx_buffer_payload_len);
+      ret = sli_cpc_push_back_rx_data_in_receive_queue(rx_handle, &endpoint->iframe_receive_queue, data_length);
 
       if (ret != SL_STATUS_OK) {
-        transmit_reject(endpoint, address, endpoint->ack, SL_CPC_REJECT_OUT_OF_MEMORY);
+        transmit_reject(endpoint, endpoint->id, endpoint->ack, SL_CPC_REJECT_OUT_OF_MEMORY);
         sli_cpc_drop_buffer_handle(rx_handle);
 #if (SL_CPC_ENDPOINT_SECURITY_ENABLED >= 1)
         sli_cpc_security_rollback_decrypt(endpoint);
@@ -1966,7 +1988,7 @@ static void receive_iframe(sl_cpc_endpoint_t *endpoint,
     sli_cpc_drop_buffer_handle(rx_handle);
     SLI_CPC_DEBUG_TRACE_ENDPOINT_RXD_DUPLICATE_DATA_FRAME(endpoint);
   } else {
-    transmit_reject(endpoint, address, endpoint->ack, SL_CPC_REJECT_SEQUENCE_MISMATCH);
+    transmit_reject(endpoint, endpoint->id, endpoint->ack, SL_CPC_REJECT_SEQUENCE_MISMATCH);
     sli_cpc_drop_buffer_handle(rx_handle);
     return;
   }
@@ -2006,7 +2028,7 @@ static void receive_sframe(sl_cpc_endpoint_t *endpoint,
 
     case SLI_CPC_HDLC_REJECT_SUPERVISORY_FUNCTION:
       SLI_CPC_DEBUG_TRACE_ENDPOINT_RXD_SUPERVISORY_PROCESSED(endpoint);
-      EFM_ASSERT((data_length - 2) == SLI_CPC_HDLC_REJECT_PAYLOAD_SIZE);
+      EFM_ASSERT(data_length  == SLI_CPC_HDLC_REJECT_PAYLOAD_SIZE);
       switch (*((sl_cpc_reject_reason_t *)rx_handle->data)) {
         case SL_CPC_REJECT_SEQUENCE_MISMATCH:
           SLI_CPC_DEBUG_TRACE_ENDPOINT_RXD_REJECT_SEQ_MISMATCH(endpoint);
@@ -2080,28 +2102,11 @@ static void receive_uframe(sl_cpc_endpoint_t *endpoint,
                            uint8_t control,
                            uint16_t data_length)
 {
-  uint16_t payload_len = 0;
   uint8_t type;
-  uint16_t fcs;
-
-  if (data_length > SLI_CPC_HDLC_FCS_SIZE) {
-    payload_len = data_length - SLI_CPC_HDLC_FCS_SIZE;
-  }
 
   SLI_CPC_DEBUG_TRACE_ENDPOINT_RXD_UNNUMBERED_FRAME(endpoint);
 
-  if (payload_len > 0) {
-    EFM_ASSERT(rx_handle->data != NULL);
-    fcs = sli_cpc_hdlc_get_fcs(rx_handle->data, payload_len);
-  }
-
   type = sli_cpc_hdlc_get_unumbered_type(control);
-  if (payload_len > 0 && !sli_cpc_validate_crc_sw(rx_handle->data, payload_len, fcs)) {
-    sli_cpc_drop_buffer_handle(rx_handle);
-    SLI_CPC_DEBUG_TRACE_ENDPOINT_RXD_UNNUMBERED_DROPPED(endpoint);
-    SLI_CPC_DEBUG_TRACE_CORE_INVALID_PAYLOAD_CHECKSUM();
-    return;
-  }
 
   if (!(endpoint->flags & SL_CPC_OPEN_ENDPOINT_FLAG_UFRAME_ENABLE)) {
     SLI_CPC_DEBUG_TRACE_ENDPOINT_RXD_UNNUMBERED_DROPPED(endpoint);
@@ -2111,7 +2116,7 @@ static void receive_uframe(sl_cpc_endpoint_t *endpoint,
 
   if ((type == SLI_CPC_HDLC_CONTROL_UNNUMBERED_TYPE_INFORMATION)
       && !(endpoint->flags & SL_CPC_OPEN_ENDPOINT_FLAG_UFRAME_INFORMATION_DISABLE)) {
-    if (sli_cpc_push_back_rx_data_in_receive_queue(rx_handle, &endpoint->uframe_receive_queue, payload_len) != SL_STATUS_OK) {
+    if (sli_cpc_push_back_rx_data_in_receive_queue(rx_handle, &endpoint->uframe_receive_queue, data_length) != SL_STATUS_OK) {
       SLI_CPC_DEBUG_TRACE_ENDPOINT_RXD_UNNUMBERED_DROPPED(endpoint);
       sli_cpc_drop_buffer_handle(rx_handle);
       return;
@@ -2135,7 +2140,7 @@ static void receive_uframe(sl_cpc_endpoint_t *endpoint,
 
       void *on_write_completed_arg;
       endpoint->poll_final.on_poll(endpoint->id, (void *)SLI_CPC_HDLC_FRAME_TYPE_UNNUMBERED,
-                                   rx_handle->data, payload_len,
+                                   rx_handle->data, data_length,
                                    &reply_data, &reply_data_length, &on_write_completed_arg);
       if (reply_data != NULL && reply_data_length > 0) {
         sl_status_t status = write(endpoint, reply_data, reply_data_length, SL_CPC_FLAG_UNNUMBERED_POLL, on_write_completed_arg);

@@ -1,0 +1,56 @@
+id: btmesh_blob_transfer_server_core
+label: BLOB Transfer Server Core
+package: Btmesh
+description: >
+  Provides BT Mesh BLOB (Binary Large OBject) Transfer Server Core API
+  for managing the BLOB Transfer Server instances.
+
+  This component includes only the core functionality. To configure and create
+  instances of BLOB Transfer Server, the BLOB Transfer Server component shall be
+  added to the project.
+
+  This component is prepared for integration into SOC applications.
+category: "Bluetooth Mesh|Models|Transport"
+quality: production
+root_path: app/btmesh/common/btmesh_blob_transfer_server
+config_file:
+  - path: config/sl_btmesh_blob_transfer_server_config.h
+    file_id: btmesh_blob_transfer_server_core_config
+source:
+  - path: sl_btmesh_blob_transfer_server.c
+  - path: sl_btmesh_blob_transfer_server_api.c
+include:
+  - path: ""
+    file_list:
+      - path: sl_btmesh_blob_transfer_server.h
+      - path: sl_btmesh_blob_transfer_server_api.h
+requires:
+  - name: app_assert
+  - name: app_btmesh_util
+  - name: btmesh_provisionee
+  - name: btmesh_stack
+  - name: btmesh_core
+  - name: btmesh_blob_storage
+  - name: btmesh_stack_mbt_server
+  - name: silabs_core_sl_malloc
+provides:
+  - name: btmesh_blob_transfer_server_core
+template_file:
+  - path: sli_btmesh_blob_transfer_server_instances.c.jinja
+  - path: sli_btmesh_blob_transfer_server_instances.h.jinja
+template_contribution:
+  - name: btmesh_on_event
+    value:
+      include: sl_btmesh_blob_transfer_server.h
+      function: sl_btmesh_blob_transfer_server_on_event
+  - name: event_handler
+    value:
+      event: internal_app_process_action
+      include: sl_btmesh_blob_transfer_server.h
+      handler: sl_btmesh_blob_transfer_server_step_handle
+validation_library:
+  - path: ../../../common/validation/autonumber_common.lua
+    name: autonumber_common
+validation_helper:
+  - path: btmesh_blob_transfer_server_validation.lua
+  - path: "../../script/validation/soc_ncp_compatibility.lua"

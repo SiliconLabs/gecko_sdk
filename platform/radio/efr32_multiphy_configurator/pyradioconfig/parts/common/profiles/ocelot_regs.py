@@ -460,6 +460,10 @@ def build_modem_regs_ocelot_shared(model, profile):
     if model.part_family.lower() not in["rainier"]:
         profile.outputs.append(ModelOutput(model.vars.RAC_SYMMDCTRL_SYMMDMODERX, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.SYMMDCTRL.SYMMDMODERX'))
         profile.outputs.append(ModelOutput(model.vars.RAC_IFADCTRIM1_IFADCENNEGRES, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.IFADCTRIM1.IFADCENNEGRES'))
+        profile.outputs.append(ModelOutput(model.vars.RAC_SYTRIM0_SYTRIMCHPREGAMPBIAS, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.SYTRIM0.SYTRIMCHPREGAMPBIAS'))
+        profile.outputs.append(ModelOutput(model.vars.RAC_SYTRIM0_SYTRIMCHPREGAMPBW, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.SYTRIM0.SYTRIMCHPREGAMPBW'))
+        profile.outputs.append(ModelOutput(model.vars.RAC_SYTRIM1_SYTRIMMMDREGAMPBIAS, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.SYTRIM1.SYTRIMMMDREGAMPBIAS'))
+        profile.outputs.append(ModelOutput(model.vars.RAC_SYTRIM1_SYTRIMMMDREGAMPBW, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.SYTRIM1.SYTRIMMMDREGAMPBW'))
 
     if model.part_family.lower() not in ["bobcat","viper","caracal","rainier"]:
         profile.outputs.append(ModelOutput(model.vars.RAC_SYTRIM0_SYCHPCURRRX, '', ModelOutputType.SVD_REG_FIELD,readable_name='RAC.SYTRIM0.SYCHPCURRRX'))

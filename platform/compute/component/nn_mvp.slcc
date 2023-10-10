@@ -38,5 +38,6 @@ requires:
   - name: driver_mvp
   - name: math_mvp
   - name: emlib_common
+    condition: [device_efx]
   - name: status
   - name: device_has_mvp

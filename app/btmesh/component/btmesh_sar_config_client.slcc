@@ -1,0 +1,42 @@
+id: "btmesh_sar_config_client"
+label: "SAR Configuration Client"
+package: "Btmesh"
+description: >
+  SAR Configuration Client component enables the configuration of the lower transport layer on nodes that support
+  the SAR Configuration Server model.
+  This component extends the DCD with SAR Configuration Client model ID and initializes the SAR Configuration
+  Client model in the BT Mesh stack automatically.
+  The node configuration shall be performed through the SAR Configuration Client BT Mesh API calls.
+  This component is prepared for integration into SOC applications.
+
+  This is a No-Code component.
+category: "Bluetooth Mesh|Models|SAR"
+quality: "production"
+root_path: "app/btmesh/common/btmesh_sar_config_client"
+tag:
+  - No-Code
+
+config_file:
+  - path: btmesh_sar_config_client.dcd
+    directory: btmeshconf
+source:
+  - path: "sl_btmesh_sar_config_client.c"
+include:
+  - path: ""
+    file_list:
+      - path: "sl_btmesh_sar_config_client.h"
+provides:
+  - name: "btmesh_sar_config_client"
+requires:
+  - name: "app_assert"
+  - name: "btmesh_role_init"
+  - name: "btmesh_stack_sar_config_client"
+
+template_contribution:
+  - name: "btmesh_on_event"
+    value:
+      include: "sl_btmesh_sar_config_client.h"
+      function: "sl_btmesh_sar_config_client_on_event"
+
+validation_helper:
+  - path: "../../script/validation/soc_ncp_compatibility.lua"

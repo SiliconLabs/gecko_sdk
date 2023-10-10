@@ -84,7 +84,7 @@ void esl_lib_command_list_cleanup(sl_slist_node_t **list)
         sl_slist_remove(list, &cmd->node);
         esl_lib_memory_free(cmd);
       }
+      *list = NULL;
     }
-    *list = NULL;
   }
 }

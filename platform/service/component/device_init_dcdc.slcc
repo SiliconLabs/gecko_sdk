@@ -90,4 +90,4 @@ template_contribution:
     priority: -9800
 documentation:
   docset: gecko-platform
-  document: service/api/group-device-init-dcdc
+  document: platform-service/device-init-dcdc

@@ -18,7 +18,7 @@ category: Services|NVM3
 quality: "production"
 source:
   - path: "platform/emdrv/nvm3/src/nvm3_hal_flash.c"
-    condition: [device]
+    condition: [device_efx]
     unless: [trustzone_nonsecure]
   - path: "platform/emdrv/nvm3/src/nvm3_lock.c"
     unless: [trustzone_nonsecure]
@@ -75,14 +75,15 @@ include:
 provides:
   - name: "nvm3"
   - name: "nvm3_lib"
+    condition: [device]
   - name: "nvm_system"
 requires:
   - name: "emlib_msc"
-    condition: [device]
+    condition: [device_efx]
   - name: "ecode"
 template_contribution:
   - name: component_catalog
     value: nvm3
 documentation:
     docset: gecko-platform
-    document: driver/api/group-nvm3
+    document: platform-driver/nvm3

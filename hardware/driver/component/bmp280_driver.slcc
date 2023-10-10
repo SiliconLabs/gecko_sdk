@@ -27,4 +27,4 @@ template_contribution:
     value: bmp280_driver
 documentation:
     docset: gecko-platform
-    document: hardware-driver/api/group-bmp280
+    document: platform-hardware-driver/bmp280

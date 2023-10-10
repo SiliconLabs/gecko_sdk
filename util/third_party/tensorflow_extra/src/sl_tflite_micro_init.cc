@@ -52,8 +52,8 @@
 #include "em_common.h"
 #include "em_assert.h"
 #include "sl_memory.h"
-#include "malloc.h"
 #include <new>
+
 // Set arena size
 #if (defined(SL_TFLITE_MODEL_RUNTIME_MEMORY_SIZE) && (SL_TFLITE_MICRO_ARENA_SIZE == 0))
 // Use value from model parameters
@@ -124,7 +124,19 @@ bool sl_tflite_micro_estimate_arena_size(const tflite::Model* model, const tflit
   // and we don't want to pollute the stdout with warnings
   sl_tflite_micro_enable_debug_log(false);
 
-  while ((upper_limit - lower_limit) > 128) {
+  // Make sure we find the true upper limit first, doing this will force malloc and sbrk in the nano_libc case
+  // to allocate a large contiguous segment that can be reused.
+  while (upper_limit > lower_limit) {
+    void *buffer = malloc(upper_limit);
+    if (buffer == nullptr) {
+      upper_limit -= 1024;
+    } else {
+      free(buffer);
+      break;
+    }
+  }
+
+  while ((upper_limit > lower_limit) && (upper_limit - lower_limit) > 128) {
     size_t buffer_size = (upper_limit + lower_limit) / 2;
 
     // Allocate buffer
@@ -132,10 +144,8 @@ bool sl_tflite_micro_estimate_arena_size(const tflite::Model* model, const tflit
     uint8_t* buffer_base = sl_tflite_micro_allocate_tensor_arena(buffer_size, &buffer);
 
     if (buffer_base == nullptr) {
-      // If we failed to malloc, then we don't have enough heap memory
-      // So decrease the upper limit by 8k and try again
-      // (This should only happen when we first start this algorithm)
-      upper_limit -= 8 * 1024;
+      // If we failed to allocate buffer, then the current buffer_size is the new upper limit
+      upper_limit = buffer_size;
       continue;
     }
 

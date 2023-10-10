@@ -97,7 +97,6 @@ void sl_iperf_test_udp_server(sl_iperf_test_t * test)
   int32_t r                             = SL_IPERF_NW_API_ERROR;
   sl_iperf_udp_clnt_hdr_t *clnt_hdr     = NULL;
   int32_t pkt_id                        = 0;
-  sl_iperf_ts_ms_t test_start           = 0U;
   sl_iperf_time_t time                  = { 0U };
   static sl_iperf_socket_addr_t mc_addr = { 0U };
 
@@ -105,7 +104,8 @@ void sl_iperf_test_udp_server(sl_iperf_test_t * test)
   sl_iperf_test_set_err_and_stat(test, SL_IPERF_ERR_NONE,
                                  SL_IPERF_TEST_STATUS_QUEUED);
   sl_iperf_test_log_verbose(test, "UDP Server: started.\n");
-  test_start = sl_iperf_get_timestamp_ms();
+
+  test->statistic.ts_start_ms = sl_iperf_get_timestamp_ms();
 
   if (test->conn.buff == NULL || !test->conn.buff_size) {
     sl_iperf_test_log_verbose(test, "UDP Server: connection buffer error.\n");
@@ -155,7 +155,7 @@ void sl_iperf_test_udp_server(sl_iperf_test_t * test)
 
   test->statistic.nbr_rcv_snt_packets = 0U;
 
-  while (sl_iperf_test_check_time(test_start)) {
+  while (sl_iperf_test_check_time(test)) {
     sl_iperf_test_update_status(test);
     r = sl_iperf_socket_recvfrom(test->conn.socket_id, test->conn.buff,
                                  test->conn.buff_size, &test->conn.clnt_addr);
@@ -172,8 +172,6 @@ void sl_iperf_test_udp_server(sl_iperf_test_t * test)
 
     // get current time stamp
     test->statistic.ts_curr_recv_ms = sl_iperf_get_timestamp_ms();
-    // set next start time
-    test_start = test->statistic.ts_curr_recv_ms;
 
     ++test->statistic.nbr_rcv_snt_packets;
     ++test->statistic.nbr_calls;
@@ -236,6 +234,14 @@ void sl_iperf_test_udp_server(sl_iperf_test_t * test)
 
   // calculate total packets
   test->statistic.tot_packets = test->statistic.nbr_rcv_snt_packets + test->statistic.udp_lost_pkt;
+  
+  if (test->conn.run || !test->statistic.tot_packets) {
+    test->statistic.ts_end_ms = sl_iperf_get_timestamp_ms();
+    test->conn.run = false;
+    if (test->statistic.tot_packets) {
+      _iperf_udp_finack(test);
+    }
+  }
 
   // calculate final band width
   sl_iperf_test_calculate_average_bandwidth(test);
@@ -305,20 +311,19 @@ static void _iperf_udp_finack(sl_iperf_test_t * const test)
                                test->conn.buff,
                                SL_IPERF_UDP_SERVER_FIN_ACK_SIZE,
                                &test->conn.clnt_addr) == SL_IPERF_NW_API_ERROR) {
+      
       sl_iperf_test_log_verbose(test, "UDP Server: FINACK send error.\n");
-      return;
+      continue;
     }
+      sl_iperf_delay_ms(1000UL);
+      r = sl_iperf_socket_recvfrom(test->conn.socket_id,
+                                   test->conn.buff,
+                                   test->conn.buff_size,
+                                   &test->conn.clnt_addr);
+      if (r <= 0) {
+        break;
+      }
   }
-
-  sl_iperf_test_log_verbose(test, "UDP Server: Waiting for end of client stream.\n");
-
-  do {
-    sl_iperf_delay_ms(3000UL);
-    r = sl_iperf_socket_recvfrom(test->conn.socket_id,
-                                 test->conn.buff,
-                                 test->conn.buff_size,
-                                 &test->conn.clnt_addr);
-  } while (r > 0L);
 
   sl_iperf_test_log_verbose(test, "UDP Server: FINACK has been sent.\n");
 }

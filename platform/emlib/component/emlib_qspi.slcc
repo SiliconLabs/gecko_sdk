@@ -22,7 +22,7 @@ requires:
 documentation:
   docset: gecko-platform
   document:
-    - page: emlib/api/efm32gg11/group-qspi
+    - page: platform-emlib-efm32gg11/qspi
       condition: [device_sdid_100]
-    - page: emlib/api/efm32gg12/group-qspi
+    - page: platform-emlib-efm32gg12/qspi
       condition: [device_sdid_106]

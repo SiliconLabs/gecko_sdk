@@ -59,6 +59,10 @@
 #include "sl_status.h"
 #include "cmsis_os2.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #if defined(SL_CATALOG_FREERTOS_KERNEL_PRESENT)
 typedef uint8_t sli_task_register_id_t;
 #elif defined(SL_CATALOG_MICRIUMOS_KERNEL_PRESENT)
@@ -96,5 +100,9 @@ sl_status_t sli_osTaskRegisterGetValue(const osThreadId_t thread_id,
 sl_status_t sli_osTaskRegisterSetValue(const osThreadId_t thread_id,
                                        const sli_task_register_id_t reg_id,
                                        const uint32_t value);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // SLI_CMSIS_OS2_EXT_TASK_REGISTER_H

@@ -30,7 +30,6 @@ from collections import UserList
 from typing import Callable, Dict, Iterable, List, Optional, Type, Union
 
 from bgapi.bglib import BGEvent, CommandFailedError
-
 from bgapix.bglibx import (BGLibExt, BGLibExtWaitEventError, EventSelector,
                            EventSelectorComposite)
 from bgapix.slstatus import SlStatus
@@ -251,10 +250,20 @@ class BtmeshCore:
     def dcdif(self, value: DCDIf) -> None:
         self._dcdif = value
 
+    def add_scan_event_filters(self):
+        self.lib.add_event_filter("bt", "scanner", "scan_report")
+        self.lib.add_event_filter("bt", "scanner", "legacy_advertisement_report")
+        self.lib.add_event_filter("bt", "scanner", "extended_advertisement_report")
+
+    def remove_scan_event_filters(self):
+        self.lib.remove_event_filter("bt", "scanner", "scan_report")
+        self.lib.remove_event_filter("bt", "scanner", "legacy_advertisement_report")
+        self.lib.remove_event_filter("bt", "scanner", "extended_advertisement_report")
+
     def add_common_event_filters(self):
         # Filter frequent but non-relevant events to improve performance and
         # improve BG buffer utilization in the BT and BT Mesh stacks
-        self.lib.add_event_filter("bt", "scanner", "scan_report")
+        self.add_scan_event_filters()
         self.lib.add_event_filter("bt", "advertiser", "timeout")
 
     def subscribe(self, event_name: str, handler):

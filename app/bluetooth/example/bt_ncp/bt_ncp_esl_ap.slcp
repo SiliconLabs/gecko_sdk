@@ -18,36 +18,38 @@ filter:
     value: ["Advanced"]
 
 component:
-  - id: bluetooth_stack
-  - id: bluetooth_feature_legacy_advertiser
-  - id: bluetooth_feature_extended_advertiser
-  - id: bluetooth_feature_connection_phy_update
-  - id: bluetooth_feature_periodic_advertiser
-  - id: bluetooth_feature_pawr_advertiser
-  - id: bluetooth_feature_advertiser_past
-  - id: bluetooth_feature_connection
-  - id: bluetooth_feature_gap
-  - id: bluetooth_feature_gatt
-  - id: bluetooth_feature_gatt_server
-  - id: bluetooth_feature_nvm
-  - id: bluetooth_feature_legacy_scanner
-  - id: bluetooth_feature_extended_scanner
-  - id: bluetooth_feature_sm
-  - id: bluetooth_feature_system
-  - id: bluetooth_feature_dynamic_gattdb
-  - id: bluetooth_feature_l2cap
   - id: ncp
+  - id: ncp_sec
+  - id: sl_system
+  - id: device_init
+  - id: bt_post_build
+  - id: bootloader_interface
   - id: uartdrv_usart
     instance:
       - vcom
   - id: mpu
-  - id: bootloader_interface
-  - id: sl_system
-  - id: device_init
-  - id: bt_post_build
+  - id: bluetooth_feature_nvm
 
 requires:
+  - name: bluetooth_stack
+  - name: bluetooth_feature_sm
+  - name: bluetooth_feature_gap
+  - name: bluetooth_feature_gatt
+  - name: bluetooth_feature_l2cap
+  - name: bluetooth_feature_system
+  - name: bluetooth_feature_connection
+  - name: bluetooth_feature_gatt_server
+  - name: bluetooth_feature_dynamic_gattdb
+  - name: bluetooth_feature_legacy_scanner
+  - name: bluetooth_feature_advertiser_past
+  - name: bluetooth_feature_pawr_advertiser
+  - name: bluetooth_feature_extended_scanner
+  - name: bluetooth_feature_legacy_advertiser
+  - name: bluetooth_feature_extended_advertiser
+  - name: bluetooth_feature_periodic_advertiser
+  - name: bluetooth_feature_connection_phy_update
   - name: bluetooth_feature_external_bonding_database
+  - name: bluetooth_feature_use_accurate_api_address_types
 
 source:
   - path: main.c
@@ -75,6 +77,14 @@ configuration:
     value: "2752"
   - name: SL_HEAP_SIZE
     value: "12288"
+  - name: SL_NCP_CMD_BUF_SIZE
+    value: "384"
+  - name: SL_NCP_EVT_BUF_SIZE
+    value: "384"
+  - name: SL_SIMPLE_COM_TX_BUF_SIZE
+    value: "384"
+  - name: SL_SIMPLE_COM_RX_BUF_SIZE
+    value: "768"
   - name: SL_BT_CONFIG_MAX_CONNECTIONS
     value: "8"
   - name: SL_BT_CONFIG_USER_L2CAP_COC_CHANNELS
@@ -103,6 +113,12 @@ configuration:
     value: "1"
   - name: SL_UARTDRV_USART_VCOM_FLOW_CONTROL_TYPE
     value: uartdrvFlowControlHwUart
+    condition:
+      - brd4001a
+  - name: SL_UARTDRV_USART_VCOM_FLOW_CONTROL_TYPE
+    value: uartdrvFlowControlHw
+    unless:
+      - brd4001a
   - name: SL_PSA_KEY_USER_SLOT_COUNT
     value: "0"
     condition:

@@ -77,6 +77,13 @@ void *_esl_lib_malloc(size_t size, const char *file, uint32_t line)
     item->file = (char *)file;
     // Push it to the list
     sl_slist_push(&list, &item->node);
+    if (item->file[8] != 'e') { // event list allocations excluded
+      esl_lib_log_debug(LOG_MODULE, "%8p Size = %zu allocated in %s:%u" APP_LOG_NL,
+                        item->ptr,
+                        item->size,
+                        item->file,
+                        item->line);
+    }
     // Return pointer to the allocated memory
     return data;
   }
@@ -91,6 +98,13 @@ void _esl_lib_free(void *ptr, const char *file, uint32_t line)
   if (item != NULL) {
     // Remove from the list
     sl_slist_remove(&list, &item->node);
+    if (item->file[8] != 'e') { // events excluded
+      esl_lib_log_debug(LOG_MODULE, "%8p Size = %zu freed in %s:%u" APP_LOG_NL,
+                        item->ptr,
+                        item->size,
+                        item->file,
+                        item->line);
+    }
     // Free storage
     free(ptr);
     // Free list item

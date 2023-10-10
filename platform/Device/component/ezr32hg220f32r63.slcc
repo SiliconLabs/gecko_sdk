@@ -62,6 +62,7 @@
 - provides:
   - name: ezr32hg220f32r63
   - name: device
+  - name: device_efx
   - name: device_series_0
   - name: device_sdid_77
   - name: device_family_ezr32hg

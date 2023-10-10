@@ -39,7 +39,11 @@ class ESLCommand():
         self.params = params
         self.response_opcode = []
         self.calculate_expected_response()
-        self.logger = getLogger()
+
+    # Logger
+    @property
+    def log(self):
+        return getLogger("CMD")
 
     def calculate_expected_response(self):
         """ Calculate possible response opcodes """
@@ -81,9 +85,10 @@ class ESLCommand():
         elif (opcode & 0x0F) == TLV_OPCODE_VENDOR_SPECIFIC:
             valid = True
         elif opcode in self.response_opcode:
+            self.log.debug("Expected response received: 0x%02x", opcode)
             valid = True
         if not valid:
-            self.logger.warning("Unexpected response received : 0x%02x!", opcode)
+            self.log.warning("Unexpected response received: %d - expected: %s!", opcode, self.response_opcode)
         return valid
 
     def __str__(self):
@@ -93,6 +98,6 @@ class ESLCommand():
         ret += f"esl_id:      {self.esl_id}\n"
         ret += f"group_id:    {self.group_id}\n"
         ret += f"slot_number: {self.slot_number}\n"
-        ret += f"timestamp:   {self.timestamp}\n"
-        ret += f"params:      {self.params}"
+        ret += f"timestamp:   {dt.fromtimestamp(self.timestamp).strftime('%d/%b %H:%M:%S.%f')[:-3]}\n"
+        ret += f"params:      {self.params.hex()}"
         return ret

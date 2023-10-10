@@ -409,43 +409,77 @@ class RAILAdapter_MultiPhy(RAILAdapter):
           # Register the entry with the current phyConfigEntry
           currentPhyConfigEntryModemConfigEntry.value = newModemConfig
 
-  def _writeBRA(self, phyConfigEntry, model, regs, forceBlockAdd):
-    if len(regs) > 0:
-      address = self._getRegAddress("FRC", "BLOCKRAMADDR")
+  def _writeBRA(self, phyConfigEntry, model, regs):
+    address = self._getRegAddress("FRC", "BLOCKRAMADDR")
+    if phyConfigEntry.bchArray:
+      # Write BLOCKRAMADDR
+      self._loadBchLookupTable(model, regs, address, phyConfigEntry.bchArray)
+    else:
+      # Write the address of the block decoding table to BLOCKRAMADDR when
+      # BLOCKWHITEMODE == BLOCKLOOKUP. Include the register even when the table
+      # is absent for speed with continuous write, and make the potential
+      # future implementation of RAIL_LIB-1138 easier
+      regs.append((address, phyConfigEntry.frameCodingTableEntry.value or 0, "FRC.BLOCKRAMADDR"))
+    regs.sort()
+    return regs
 
-      if not forceBlockAdd:
-        if phyConfigEntry.bchLut is not None:
-          # Write BLOCKRAMADDR
-          self._loadBchLookupTable(model, regs, address, phyConfigEntry.bchLut.var_value)
-        else:
-          regs.append((address, phyConfigEntry.frameCodingTableEntry.value or 0, "FRC.BLOCKRAMADDR"))
+  def _writeCRA(self, regs, fecEnabled):
+    # On Panther, we decided to ALWAYS write the FRC_CONVRAMADDR to HIGH RAM offset 0
+    # On rest of series-2 after Panther, we decided to ALWAYS write the FRC_CONVRAMADDR to FRCRAM offset 0
+    # Since this varies per part it is now owned in the Radio Configurator in series 2+
+    if self.partFamily.lower() in ["dumbo","jumbo","nerio","nixi"]:
+      # Series - 1 point to allocated buffer, or just leave at 0 if not needed.
+      if fecEnabled:
+        convDecodeBuffer = "convDecodeBuffer"
       else:
-        # Write the address of the block decoding table to BLOCKRAMADDR when
-        # BLOCKWHITEMODE == BLOCKLOOKUP. Include the register even when the table
-        # is absent for speed with continuous write, and make the potential
-        # future implementation of RAIL_LIB-1138 easier
-        regs.append((address, phyConfigEntry.frameCodingTableEntry.value or 0, "FRC.BLOCKRAMADDR"))
-      regs.sort()
+        convDecodeBuffer = 0
+
+      # Write the address of the convDecodeBuffer to CONVRAMADDR when
+      # fecEnabled, include even when absent for speed
+      address = self._getRegAddress("FRC", "CONVRAMADDR")
+      regs.append((address, convDecodeBuffer, "FRC.CONVRAMADDR"))
+    regs.sort()
     return regs
 
-  def _writeCRA(self, phyConfigEntry, model, regs, forceConvAdd):
-    if len(regs) > 0:
-      # On rest of series-2 after Panther, we decided to ALWAYS write the FRC_CONVRAMADDR to FRCRAM offset 0
-      # Since this varies per part it is now owned in the Radio Configurator
-      if not hasattr(model.profile.outputs,'FRC_CONVRAMADDR_CONVRAMADDR'):
-        # Series - 1 point to allocated buffer, or just leave at 0 if not needed.
-        if forceConvAdd:
-          convDecodeBuffer = "convDecodeBuffer"
-        else:
-          convDecodeBuffer = 0
+  def _addRailOwnedRegsToConfigEntries(self, refConfigName, phyConfigEntry, model, regs_base, regs_channel):
+    refBaseFecEnabled = False
+    bchArrayChanged = False
+    frameCodeArrayChanged = False
+    # Loop through all base channel configurations that are related to phyConfigEntry via refConfigName
+    for baseChannelConfig in self.mphyConfig.base_channel_configurations.base_channel_configuration:
+      # Check if refConfigName is referenced by or references iterated baseChannelConfig
+      if refConfigName in [baseChannelConfig.name, baseChannelConfig.base_channel_reference]:
+        for channelConfigEntry in baseChannelConfig.channel_config_entries.channel_config_entry:
+          radioConfigModel = channelConfigEntry.radio_configurator_output_model
 
-        # Write the address of the convDecodeBuffer to CONVRAMADDR when
-        # fecEnabled, include even when absent for speed
-        address = self._getRegAddress("FRC", "CONVRAMADDR")
-        regs.append((address, convDecodeBuffer, "FRC.CONVRAMADDR"))
-      regs.sort()
-    return regs
-    
+          # Grab iterated channel config's FEC & BCH/Frame coding parameters
+          chFecEnabled = bool(radioConfigModel.profile.outputs.get_output('fec_enabled').var_value)
+          chBchArray = None
+          if getattr(radioConfigModel.profile.outputs, 'bch_lut_data', None):
+            chBchArray = radioConfigModel.profile.outputs.get_output('bch_lut_data').var_value
+          if getattr(radioConfigModel.profile.outputs, 'frame_coding_array_packed', None):
+            chFrameCodingArray = radioConfigModel.profile.outputs.get_output('frame_coding_array_packed').var_value
+
+          # Check if FEC is enabled on any channel config entry related to refConfigName
+          if chFecEnabled:
+            refBaseFecEnabled = True
+          # Check if BCH array is present & different on any channel config entry related to refConfigName
+          if chBchArray and phyConfigEntry.bchArray and chBchArray != phyConfigEntry.bchArray:
+            bchArrayChanged = True
+          # Check if frame coding array is present & different on any channel config entry related to refConfigName
+          if chFrameCodingArray and phyConfigEntry.arrayTable and chFrameCodingArray != phyConfigEntry.arrayTable:
+            frameCodeArrayChanged = True
+
+    # FRC.CONVRAMADDR is always written to base since it doesn't really need to change phy to phy
+    regs_base = self._writeCRA(regs_base, refBaseFecEnabled)
+    # FRC.BLOCKRAMADDR written to base or channel config depending on whether any change is seen
+    # across related channel configs
+    if bchArrayChanged or frameCodeArrayChanged:
+      regs_channel = self._writeBRA(phyConfigEntry, radioConfigModel, regs_channel)
+    else:
+      regs_base = self._writeBRA(phyConfigEntry, radioConfigModel, regs_base)
+    return regs_base, regs_channel
+
   def _generateModemConfigEntries(self, phyConfigEntry, model, regs):
     if len(regs) > 0:
       # Write the address of the phyInfo structure to SEQ.PHYINFO.ADDRESS
@@ -547,10 +581,10 @@ class RAILAdapter_MultiPhy(RAILAdapter):
       # The ADCDIV will take the place of the deprecated SRC1 field for Ocelot and Margay to resolve
       # the bug causing RAIL_LIB-9898.
       adcDiv = model.vars.adc_vco_div_actual.value
-      data.src1CalcHelper.value = int(adcDiv)
+      data.src1Denominator.value = int(adcDiv)
     else:
-      data.src1CalcHelper.value = int(outputs.get_output('src1_calcDenominator').var_value or 0)
-    data.src2CalcHelper.value = int(outputs.get_output('src2_calcDenominator').var_value or 0)
+      data.src1Denominator.value = int(outputs.get_output('src1_calcDenominator').var_value or 0)
+    data.src2Denominator.value = int(outputs.get_output('src2_calcDenominator').var_value or 0)
 
     modType = model.vars.modulation_type.value
     if hasattr(model.vars.modulation_type.var_enum, 'OFDM') and modType == model.vars.modulation_type.var_enum.OFDM:
@@ -1325,8 +1359,8 @@ class RAILAdapter_MultiPhy(RAILAdapter):
 
     maxConvDecodeBufferSize = 0
     # On Panther, we decided to ALWAYS write the FRC_CONVRAMADDR to HIGH RAM offset 0
-    # On Lynx, we decided to ALWAYS write the FRC_CONVRAMADDR to FRCRAM offset 0
-    if self.partFamily.lower() not in ["panther", "lynx", "leopard"]:
+    # On Lynx+, we decided to ALWAYS write the FRC_CONVRAMADDR to FRCRAM offset 0
+    if self.partFamily.lower() in ["dumbo","jumbo","nerio","nixi"]:
       for multiPhyConfigEntry in railModel.multiPhyConfig.multiPhyConfigEntries._elements:
         for phyConfigEntry in multiPhyConfigEntry.phyConfigEntries._elements:
           if phyConfigEntry.convDecodeBufferSize.value > maxConvDecodeBufferSize:
@@ -1368,7 +1402,7 @@ class RAILAdapter_MultiPhy(RAILAdapter):
     return regs
 
   def _genModeSwitchPhrs(self, radioConfigModel, phyConfigEntry):
-    if radioConfigModel.part_family.lower() in ['sol'] and hasattr(radioConfigModel.profile.outputs, 'wisun_phy_mode_id'):
+    if radioConfigModel.part_family.lower() in ['sol', 'margay'] and hasattr(radioConfigModel.profile.outputs, 'wisun_phy_mode_id'):
       wisun_phy_mode_ids = getattr(radioConfigModel.profile.outputs, 'wisun_phy_mode_id', None)
       wisun_mode_switch_phrs = getattr(radioConfigModel.profile.outputs, 'wisun_mode_switch_phr', None)
       mode_switch_dict = self.railModel.multiPhyConfig.commonStructures.modeSwitchPhyModeIds.value
@@ -1433,51 +1467,6 @@ class RAILAdapter_MultiPhy(RAILAdapter):
     # Create a dict that will be used to avoid duplicates in wisun_modeSwitchPhrs struct
     self.railModel.multiPhyConfig.commonStructures.modeSwitchPhyModeIds.value = OrderedDict()
 
-    forceConvAdd = False
-    forceBlockAdd = False
-    relatedAdds = []
-    # Loop to check for base configs with reference configs and puts them into the relatedAdds list.
-    for baseChannelConfig in self.mphyConfig.base_channel_configurations.base_channel_configuration:
-      for baseChannelConfigCheck in self.mphyConfig.base_channel_configurations.base_channel_configuration:
-        if (baseChannelConfig.base_channel_reference == baseChannelConfigCheck.name) or (baseChannelConfig.name == baseChannelConfigCheck.base_channel_reference):
-          if (not baseChannelConfig in relatedAdds) and (not baseChannelConfigCheck in relatedAdds):
-            relatedAdds.extend([baseChannelConfig, baseChannelConfigCheck])
-          elif (not baseChannelConfig in relatedAdds) and (baseChannelConfigCheck in relatedAdds):
-            relatedAdds.append(baseChannelConfig)
-          elif (baseChannelConfig in relatedAdds) and (not baseChannelConfigCheck in relatedAdds):
-            relatedAdds.append(baseChannelConfigCheck)
-
-      # Used to assign the convDecodeBuffer to the correct configs when writing the CONVRAMADDR
-      referenceAdds = []
-      for configs in relatedAdds:
-        if configs.base_channel_reference:
-          referenceAdds.append(configs.name)
-
-      # Goes through the relatedAdds list and checks each config's fecEnabled.value and frameCodingTableEntry.value
-      # @var forceConvAdd: Boolean flag used to determine whether to send the CONVRAMADDR to the delta add configs
-      #                    when True or to the base config when False. True when the fecEnabled.value differs from
-      #                    the other configs in relatedAdds and False when the fecEnabled.value is the same.
-      #
-      # @var forceBlockAdd: Boolean flag used to determine whether to send the BLOCKRAMADDR to the delta add configs
-      #                     when True or to the base config when False. True when the frameCodingTableEntry.value
-      #                     differs from the other configs in relatedAdds and False when the fecEnabled.value is the same.
-      lastFecEnabled = None
-      lastCodingTable = -1
-      for config in relatedAdds:
-        for _, channelConfigEntryAdds in enumerate(config.channel_config_entries.channel_config_entry):
-          radioConfig = channelConfigEntryAdds.radio_configurator_output_model
-          fecEnable = bool(radioConfig.profile.outputs.get_output('fec_enabled').var_value)
-          codingTable = radioConfig.profile.outputs.get_output('frame_coding_array_packed').var_value
-          if lastFecEnabled == None:
-            lastFecEnabled = fecEnable
-          elif fecEnable != lastFecEnabled and not forceConvAdd:
-            forceConvAdd = True
-          
-          if lastCodingTable == -1:
-            lastCodingTable = codingTable
-          elif codingTable != lastCodingTable and not forceBlockAdd:
-            forceBlockAdd = True
-
     # Go through all base channel configurations (NOTE!, ask Rick to rename!)
     baseConfigAttr = 0
     for baseChannelConfig in self.mphyConfig.base_channel_configurations.base_channel_configuration:
@@ -1490,8 +1479,6 @@ class RAILAdapter_MultiPhy(RAILAdapter):
       # Start off by creating a new instance of multiPhyConfigEntry, use the baseChannelConfig name
       multiPhyConfigEntry = self.railModel.multiPhyConfig.multiPhyConfigEntries.addNewElement(configName)
       # multiPhyConfigEntry.signature.signature.value = 0
-
-      phyConfigEntryList = [] # List to hold the phyConfigEntries
 
       # Now, iterate through all the channel configs and mark the "base" (right now, it's always the first entry)
       for index, channelConfigEntry in enumerate(baseChannelConfig.channel_config_entries.channel_config_entry):
@@ -1566,6 +1553,12 @@ class RAILAdapter_MultiPhy(RAILAdapter):
           phyConfigEntry.synthResolution.value = radioConfigModel.vars.synth_res_actual.value
           phyConfigEntry.fecEnabled.value = bool(radioConfigModel.profile.outputs.get_output('fec_enabled').var_value)
           phyConfigEntry.convDecodeBufferSize.value = radioConfigModel.profile.outputs.get_output('frc_conv_decoder_buffer_size').var_value
+          phyConfigEntry.arrayTable = None
+          if getattr(radioConfigModel.profile.outputs, 'frame_coding_array_packed', None):
+            phyConfigEntry.arrayTable = radioConfigModel.profile.outputs.get_output('frame_coding_array_packed').var_value
+          phyConfigEntry.bchArray = None
+          if getattr(radioConfigModel.profile.outputs, 'bch_lut_data', None):
+            phyConfigEntry.bchArray = radioConfigModel.profile.outputs.get_output('bch_lut_data').var_value
 
           self._generateStackInfo(phyConfigEntry, radioConfigModel)
 
@@ -1582,13 +1575,6 @@ class RAILAdapter_MultiPhy(RAILAdapter):
               phyConfigEntry.entryType.value = int(optional_argument.value)
               break
 
-          # Check if the the phyConfigEntry has a coding table
-          if phyConfigEntry.frameCodingTableEntry.value:
-            hasCodingTable = True
-          # Check if the the phyConfigEntry has a fecEnabled.value
-          if phyConfigEntry.fecEnabled.value:
-            hasFecEnabled = True
-            
           # Check fecEnabled flag and convDecodeBufferSize are correctly configured
           if phyConfigEntry.fecEnabled.value:
             assert phyConfigEntry.convDecodeBufferSize.value > 0, "Incorrect configuration for FEC Enabled"
@@ -1604,13 +1590,13 @@ class RAILAdapter_MultiPhy(RAILAdapter):
             regs_base = self._generateModemConfigEntries(phyConfigEntry, radioConfigModel, regs_base)
           regs_subtract = self._generateModemConfigEntries(phyConfigEntry, radioConfigModel, regs_subtract)
 
-          phyConfigEntry.bchLut = getattr(radioConfigModel.profile.outputs, 'bch_lut_data', None)
-          phyConfigEntryList.append((phyConfigEntry, regs_base, regs_channel))
-
           # Package metadata in a struct for unpacking after optimization
           meta = (configName, phyConfigEntry, multiPhyConfigEntry, channelConfigEntry)
           reference = baseChannelConfig.base_channel_reference
           reference = configName if reference is None else reference
+
+          # Update regs for RAIL owned registers like FRC.CONVRAMADDR (series 1) & FRC.BLOCKRAMADDR
+          regs_base, regs_channel = self._addRailOwnedRegsToConfigEntries(reference, phyConfigEntry, radioConfigModel, regs_base, regs_channel)
 
           if not reference in radio_configs:
             radio_configs[reference] = {
@@ -1624,29 +1610,6 @@ class RAILAdapter_MultiPhy(RAILAdapter):
           self._railModelPopulated = False
           print('Radio configurator had a failure, exiting rail scripts.')
           return
-      for phyConfigEntry, regs_base, regs_channel in phyConfigEntryList:
-        # If forceBlockAdd is True, default writing BLOCKRAMADDR to the delta add config
-        # else write to the base config.
-        if not regs_base:
-          regs_channel = self._writeBRA(phyConfigEntry, radioConfigModel, regs_channel, forceBlockAdd)
-        if forceBlockAdd:
-          regs_channel = self._writeBRA(phyConfigEntry, radioConfigModel, regs_channel, forceBlockAdd)
-        else:
-          regs_base = self._writeBRA(phyConfigEntry, radioConfigModel, regs_base, forceBlockAdd)
-        
-        # Similar situation here: If forceBlockAdd is True, default writing CONVRAMADDR
-        # to the base, else write to channel configs
-        # If there are no register configs in the delta adds, default writing to the base.
-        if not regs_channel:
-          regs_base = self._writeCRA(phyConfigEntry, radioConfigModel, regs_base, False)
-        elif forceConvAdd:
-          if phyConfigEntry.name in referenceAdds:
-            regs_channel = self._writeCRA(phyConfigEntry, radioConfigModel, regs_channel, True)
-          else:
-            regs_channel = self._writeCRA(phyConfigEntry, radioConfigModel, regs_channel, False)
-        else:
-          regs_base = self._writeCRA(phyConfigEntry, radioConfigModel, regs_base, False)
-
 
     # Optimize and write radio configs
     for _, radio_config in radio_configs.items():

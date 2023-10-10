@@ -7,8 +7,8 @@ from jinja2.environment import Environment
 
 
 def to_c_macro(name):
-    macro = re.sub('\W', '_', name)
-    macro = macro + ('_' if macro[0].isdigit() else '')
+    macro = re.sub("\W", "_", name)
+    macro = macro + ("_" if macro[0].isdigit() else "")
     return macro.upper()
 
 
@@ -33,13 +33,29 @@ class VendorModel(object):
         return to_c_macro(self.name)
 
 
+class Source(object):
+    def __init__(self, filename, group):
+        self.filename = filename
+        self.group = group
+
+    def __eq__(self, other):
+        if isinstance(other, Source):
+            return (self.filename, self.group) == (other.filename, other.group)
+        return NotImplemented
+
+    def __neq__(self, other):
+        return not (self == other)
+
+
 class Element(object):
-    def __init__(self, name, location, sig_models=[], vendor_models=[], filenames=[]):
+    def __init__(
+        self, name, location, group=None, sig_models=[], vendor_models=[], sources=[]
+    ):
         self.name = name
         self.location = int(location, 0)
         self.sig_models = [SIGModel(**m) for m in sig_models]
         self.vendor_models = self.check_vendor_models(vendor_models)
-        self.filenames = filenames.copy()
+        self.sources = sources.copy()
 
     def check_vendor_models(self, vendor_models):
         vend_mod = [VendorModel(**m) for m in vendor_models]
@@ -48,18 +64,22 @@ class Element(object):
             while i < len(vend_mod):
                 n = vend_mod[i]
                 if m.name == n.name:
-                    print(f"\nBtMeshGenerator: In element: '{self.name}' ", end='')
+                    print(f"\nBtMeshGenerator: In element: '{self.name}' ", end="")
                     print(f"duplicated vendor model name: '{m.name}' \n")
-                    #exit('Duplicated vendor model name')
+                    # exit('Duplicated vendor model name')
                     return vend_mod
                 elif m.mid == n.mid:
-                    print(f"\nBtMeshGenerator: In element: '{self.name}' ", end='')
+                    print(f"\nBtMeshGenerator: In element: '{self.name}' ", end="")
                     print(f"duplicated vendor model ID (mid): {hex(m.mid)}\n")
-                    #exit('Duplicated vendor model ID')
+                    # exit('Duplicated vendor model ID')
                     return vend_mod
                 else:
                     i += 1
         return vend_mod
+
+    @property
+    def filenames(self):
+        return [source.filename for source in self.sources]
 
     @property
     def num_s(self):
@@ -69,10 +89,28 @@ class Element(object):
     def num_v(self):
         return len(self.vendor_models)
 
-    #TODO: better
+    # TODO: better
     @property
     def macros(self):
-        return [to_c_macro('_'.join([filename, self.name])) for filename in self.filenames]
+        return [
+            to_c_macro("_".join([filename, self.name])) for filename in self.filenames
+        ]
+
+    @property
+    def group_macros(self):
+        # Remove duplicate entries from the list.
+        # If a dcd file contributed to the same element more groups with the same
+        # group name then entries could be duplicated. The group macro name and
+        # value is the same so it can be tolerated.
+        filtered_source_pairs = dict.fromkeys(
+            (s.filename, s.group) for s in self.sources
+        )
+        # Generate group macro for each source which has explicit group name
+        return [
+            to_c_macro("_".join([src_pair[0], "group", src_pair[1], "elem_index"]))
+            for src_pair in filtered_source_pairs.keys()
+            if src_pair[1]
+        ]
 
     def is_mergeable_with(self, other):
         if self.name != other.name:
@@ -90,7 +128,7 @@ class Element(object):
     def merge_with(self, other):
         self.sig_models.extend(other.sig_models)
         self.vendor_models.extend(other.vendor_models)
-        self.filenames.extend(other.filenames)
+        self.sources.extend(other.sources)
 
 
 class DCD(object):
@@ -125,23 +163,53 @@ class DCD(object):
     def add_chunk(self, chunk):
         for e in chunk:
             for element in self.elements:
-                if(element.is_mergeable_with(e)):
+                if element.is_mergeable_with(e):
                     element.merge_with(e)
                     break
             else:
                 self.elements.append(e)
 
+    def validate(self):
+        # The code below is not running when there is only one element because
+        # no cross-checks are necessary.
+        # It is not allowed to have the same group name from the same file
+        # on different elements because the macro value is ambiguous.
+        validation_error_list = []
+        for elem_idx, elem in enumerate(self.elements):
+            for elem_other_idx in range(elem_idx + 1, len(self.elements)):
+                elem_other = self.elements[elem_other_idx]
+                for source in elem.sources:
+                    if source.group is None:
+                        # If group is none then group macro is not generated so
+                        # duplication shall not be checked.
+                        continue
+                    if source in elem_other.sources:
+                        # If any source group is None in other element then the
+                        # equality check is evaluated to false for sure because
+                        # source.group is not None due to previous check.
+                        validation_error = (
+                            f"BtMeshGenerator: Duplicated group ({source.group}) "
+                            f"from same file ({source.filename}.dcd) on different "
+                            f"elements ({elem.name}, {elem_other.name})."
+                        )
+                        validation_error_list.append(validation_error)
+        if validation_error_list:
+            print("\n".join(validation_error_list))
+            exit(-1)
+
 
 def dcd_chunk(filename, elements=[]):
-    return [Element(**e, filenames=[filename]) for e in elements]
+    return [Element(**e, sources=[Source(filename, e.get("group"))]) for e in elements]
 
 
 def dcdgen(dcd):
     dcd.unique_vendor_models = dcd.collect_v_models()
     env = Environment(lstrip_blocks=True, trim_blocks=True, keep_trailing_newline=True)
     env.loader = FileSystemLoader(os.path.dirname(__file__))
-    return (env.get_template("templates/sl_btmesh_dcd.h.template").render(dcd=dcd),
-            env.get_template("templates/sl_btmesh_dcd.c.template").render(dcd=dcd))
+    return (
+        env.get_template("templates/sl_btmesh_dcd.h.template").render(dcd=dcd),
+        env.get_template("templates/sl_btmesh_dcd.c.template").render(dcd=dcd),
+    )
 
 
 if __name__ == "__main__":
@@ -184,7 +252,7 @@ if __name__ == "__main__":
         filename = os.path.splitext(filename)[0]
         with open(dcd_file) as f:
             dcd.add_chunk(dcd_chunk(filename, json.load(f)))
-
+    dcd.validate()
     dcd_h_file, dcd_c_file = dcdgen(dcd)
 
     dcd_c_path = os.path.join(args.output, "sl_btmesh_dcd.c")

@@ -22,31 +22,31 @@ requires:
 documentation:
   docset: gecko-platform
   document:
-    - page: emlib/api/efr32xg1/group-gpcrc
+    - page: platform-emlib-efr32xg1/gpcrc
       condition: [device_sdid_80]
-    - page: emlib/api/efr32xg12/group-gpcrc
+    - page: platform-emlib-efr32xg12/gpcrc
       condition: [device_sdid_84]
-    - page: emlib/api/efr32xg13/group-gpcrc
+    - page: platform-emlib-efr32xg13/gpcrc
       condition: [device_sdid_89]
-    - page: emlib/api/efr32xg14/group-gpcrc
+    - page: platform-emlib-efr32xg14/gpcrc
       condition: [device_sdid_95]
-    - page: emlib/api/efm32gg11/group-gpcrc
+    - page: platform-emlib-efm32gg11/gpcrc
       condition: [device_sdid_100]
-    - page: emlib/api/efm32tg11/group-gpcrc
+    - page: platform-emlib-efm32tg11/gpcrc
       condition: [device_sdid_103]
-    - page: emlib/api/efm32gg12/group-gpcrc
+    - page: platform-emlib-efm32gg12/gpcrc
       condition: [device_sdid_106]
-    - page: emlib/api/efr32xg21/group-gpcrc
+    - page: platform-emlib-efr32xg21/gpcrc
       condition: [device_sdid_200]
-    - page: emlib/api/efr32xg22/group-gpcrc
+    - page: platform-emlib-efr32xg22/gpcrc
       condition: [device_sdid_205]
-    - page: emlib/api/efr32xg23/group-gpcrc
+    - page: platform-emlib-efr32xg23/gpcrc
       condition: [device_sdid_210]
-    - page: emlib/api/efr32xg24/group-gpcrc
+    - page: platform-emlib-efr32xg24/gpcrc
       condition: [device_sdid_215]
-    - page: emlib/api/efr32xg25/group-gpcrc
+    - page: platform-emlib-efr32xg25/gpcrc
       condition: [device_sdid_220]
-    - page: emlib/api/efr32xg27/group-gpcrc
+    - page: platform-emlib-efr32xg27/gpcrc
       condition: [device_sdid_230]
-    - page: emlib/api/efr32xg28/group-gpcrc
+    - page: platform-emlib-efr32xg28/gpcrc
       condition: [device_sdid_235]

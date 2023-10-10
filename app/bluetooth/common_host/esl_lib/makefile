@@ -5,6 +5,12 @@
 PROJECTNAME = esl_lib
 SDK_DIR = ../../../..
 
+# Enable security for ESL C LIB NCP by default
+# It can be disabled by assigning zero value to the SECURITY variable
+# e.g. via command line like 'make SECURITY=0'.
+# If enabled, make sure that openssl is available in your environment.
+SECURITY ?= 1
+
 ifneq (, $(filter $(MAKECMDGOALS), export))
 # Collect all resources when exporting.
 MEMCHECK_DEFAULT = 1
@@ -15,6 +21,18 @@ endif
 # Memory leak check is disabled by default. Enable it like this: make MEMCHECK=1
 MEMCHECK ?= $(MEMCHECK_DEFAULT)
 
+# Security related settings
+ifneq ($(SECURITY), 0)
+  # Suppress OpenSSL 3.0 warnings until proper update is made on ncp_sec
+  override CFLAGS += -DOPENSSL_API_COMPAT=0x10101000L
+  # Override some secure NCP host component default settings
+  override CFLAGS += -DPEEK_US_SLEEP=1
+  override CFLAGS += -DRECV_FUNC_US_SLEEP=1
+  override CFLAGS += -DMSG_RECV_TIMEOUT_MS=2
+endif
+
+# NCP config override
+override CFLAGS += -DDEFAULT_HOST_BUFLEN=16384
 
 ################################################################################
 # Components                                                                   #
@@ -26,7 +44,7 @@ MEMCHECK ?= $(MEMCHECK_DEFAULT)
 include $(SDK_DIR)/app/bluetooth/component_host/toolchain.mk
 include $(SDK_DIR)/app/bluetooth/component_host/app_log.mk
 include $(SDK_DIR)/app/bluetooth/component_host/app_assert.mk
-include $(SDK_DIR)/app/bluetooth/component_host/ncp_host_nothread.mk
+include $(SDK_DIR)/app/bluetooth/component_host/ncp_host_bt.mk
 include $(SDK_DIR)/app/bluetooth/component_host/app_timer.mk
 include $(SDK_DIR)/app/bluetooth/component_host/slist.mk
 include $(SDK_DIR)/app/bluetooth/component_host/app_queue.mk
@@ -180,7 +198,7 @@ $(EXE_DIR)/$(PROJECTNAME): $(OBJS) $(LIBS)
 
 $(PROJECTNAME)_wrapper.py: $(PROJECTNAME).h
 	@echo "Generating Python wrapper"
-	ctypesgen --no-gnu-types -I$(SDK_DIR)/platform/common/inc $(PROJECTNAME).h $(SDK_DIR)/platform/common/inc/sl_status.h -x sl_status_get_string_n -x sl_status_print -o $(PROJECTNAME)_wrapper.py
+	ctypesgen --no-gnu-types --allow-gnu-c --no-macro-warnings -I$(SDK_DIR)/platform/common/inc $(PROJECTNAME).h $(SDK_DIR)/platform/common/inc/sl_status.h -x sl_status_get_string_n -x sl_status_print -o $(PROJECTNAME)_wrapper.py  2> /dev/null
 	@echo "Fixing up Python wrapper"
 	../../script/ctypesgen_wrapper_fix.py $(PROJECTNAME)_wrapper.py -v
 

@@ -71,6 +71,7 @@
 - provides:
   - name: efm32pg28b300f512im68
   - name: device
+  - name: device_efx
   - name: device_series_2
   - name: device_sdid_235
   - name: device_family_efm32pg28

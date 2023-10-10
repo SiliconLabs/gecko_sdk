@@ -33,11 +33,12 @@ component:
   - id: btmesh_provisionee
   - id: btmesh_provisioning_decorator
   - id: btmesh_proxy
+  - id: btmesh_sar_config_server
   - id: btmesh_scene_server
   - id: btmesh_scheduler_server
   - id: btmesh_stack
+  - id: btmesh_target_node
   - id: btmesh_time_server
-  - id: btmesh_updating_node
   - id: btmesh_iv_update
   - id: cli
     instance:

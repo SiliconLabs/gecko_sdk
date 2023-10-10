@@ -25,41 +25,41 @@ requires:
 documentation:
   docset: gecko-platform
   document:
-    - page: emlib/api/efm32g/group-common
+    - page: platform-emlib-efm32g/common
       condition: [device_sdid_71]
-    - page: emlib/api/efm32gg/group-common
+    - page: platform-emlib-efm32gg/common
       condition: [device_sdid_72]
-    - page: emlib/api/efm32tg/group-common
+    - page: platform-emlib-efm32tg/common
       condition: [device_sdid_73]
-    - page: emlib/api/efm32lg/group-common
+    - page: platform-emlib-efm32lg/common
       condition: [device_sdid_74]
-    - page: emlib/api/efm32zg/group-common
+    - page: platform-emlib-efm32zg/common
       condition: [device_sdid_76]
-    - page: emlib/api/efm32hg/group-common
+    - page: platform-emlib-efm32hg/common
       condition: [device_sdid_77]
-    - page: emlib/api/efr32xg1/group-common
+    - page: platform-emlib-efr32xg1/common
       condition: [device_sdid_80]
-    - page: emlib/api/efr32xg12/group-common
+    - page: platform-emlib-efr32xg12/common
       condition: [device_sdid_84]
-    - page: emlib/api/efr32xg13/group-common
+    - page: platform-emlib-efr32xg13/common
       condition: [device_sdid_89]
-    - page: emlib/api/efr32xg14/group-common
+    - page: platform-emlib-efr32xg14/common
       condition: [device_sdid_95]
-    - page: emlib/api/efm32gg11/group-common
+    - page: platform-emlib-efm32gg11/common
       condition: [device_sdid_100]
-    - page: emlib/api/efm32tg11/group-common
+    - page: platform-emlib-efm32tg11/common
       condition: [device_sdid_103]
-    - page: emlib/api/efm32gg12/group-common
+    - page: platform-emlib-efm32gg12/common
       condition: [device_sdid_106]
-    - page: emlib/api/efr32xg21/group-common
+    - page: platform-emlib-efr32xg21/common
       condition: [device_sdid_200]
-    - page: emlib/api/efr32xg22/group-common
+    - page: platform-emlib-efr32xg22/common
       condition: [device_sdid_205]
-    - page: emlib/api/efr32xg23/group-common
+    - page: platform-emlib-efr32xg23/common
       condition: [device_sdid_210]
-    - page: emlib/api/efr32xg24/group-common
+    - page: platform-emlib-efr32xg24/common
       condition: [device_sdid_215]
-    - page: emlib/api/efr32xg27/group-common
+    - page: platform-emlib-efr32xg27/common
       condition: [device_sdid_230]
-    - page: emlib/api/efr32xg28/group-common
+    - page: platform-emlib-efr32xg28/common
       condition: [device_sdid_235]

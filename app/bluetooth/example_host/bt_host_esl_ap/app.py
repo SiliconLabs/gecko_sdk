@@ -72,26 +72,32 @@ def get_ap_config(conn):
         return f"-connection serial -device {conn}"
 
 def main():
+    if sys.version_info[0] < 3 or (sys.version_info[0] == 3 and sys.version_info[1] < 8):
+        raise Exception('Requires at least python 3.8.0')
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('conn', nargs='?', help='Serial or TCP connection parameter')
-    parser.add_argument('--cmd', help='Command line mode', action='store_true')
-    parser.add_argument('--demo', help='Demo mode', action='store_true')
-    parser.add_argument('--stdout', help='Change output to stdout', action='store_true')
-    parser.add_argument('-l', '--log', help='Log level', type=str.upper, choices=ap_logger.LEVELS.keys(), default='INFO')
+    parser.add_argument('-m', '--cmd', help='Start in command line (manual) mode instead of default ESL Profile (auto) mode', action='store_true')
+    parser.add_argument('-d', '--demo', help='Start in manual mode with EFRConnect demo mode enabled', action='store_true')
+    parser.add_argument('-r', '--stdout', help='Redirect logging output from default stderr to stdout', action='store_true')
+    parser.add_argument('-u', '--unsecure', help='Disable encryption for NCP communication', action='store_true')
+    parser.add_argument('-l', '--log', help='Logging level to start with - can be changed later with verbosity command', type=str.upper, choices=ap_logger.LEVELS.keys(), default='INFO')
     args = parser.parse_args()
 
     ap_logger.stdout = args.stdout
-    ap_logger.level = ap_logger.LEVELS[args.log]
+    ap_logger.setLogLevel(ap_logger.LEVELS[args.log])
 
     # Instantiate the ESL application
-    access_point = AccessPoint(get_ap_config(args.conn), args.cmd, args.demo)
+    access_point = AccessPoint(get_ap_config(args.conn), args.unsecure, args.cmd, args.demo)
     cli_processor = CliProcessor(access_point)
     access_point.cli_queue = cli_processor.queue
     try:
         cli_processor.loop()
     except KeyboardInterrupt:
         pass
-    access_point.shutdown()
+    try:
+        access_point.shutdown()
+    except KeyboardInterrupt:
+        pass # avoid crash in case of slow shutdown meets impatient user :)
 
 # Script entry point.
 if __name__ == "__main__":

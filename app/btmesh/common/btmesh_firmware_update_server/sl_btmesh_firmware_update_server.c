@@ -184,7 +184,7 @@ static void btmesh_firmware_update_server_verify_progress_ui_update(app_timer_t 
 
 void sl_btmesh_firmware_update_server_init(void)
 {
-  sl_btmesh_fw_update_server_init(BTMESH_FIRMWARE_UPDATE_SERVER_MAIN,
+  sl_btmesh_fw_update_server_init(BTMESH_FIRMWARE_UPDATE_SERVER_GROUP_MAIN_ELEM_INDEX,
                                   SL_BTMESH_FW_UPDATE_SERVER_NUM_OF_FW_CFG_VAL,
                                   SL_BTMESH_FW_UPDATE_SERVER_METADATA_LENGTH_CFG_VAL);
 
@@ -307,12 +307,12 @@ void sl_btmesh_firmware_update_server_on_event(sl_btmesh_msg_t *evt)
         sl_btmesh_evt_fw_update_server_distributor_self_update_req_t *msg =
           &evt->data.evt_fw_update_server_distributor_self_update_req;
         sl_status_t sc = sli_btmesh_fw_dist_server_get_fw_by_index(
-          BTMESH_FIRMWARE_UPDATE_SERVER_MAIN,
+          BTMESH_FIRMWARE_UPDATE_SERVER_GROUP_MAIN_ELEM_INDEX,
           msg->fw_index,
           &info);
         if (SL_STATUS_OK != sc) {
           sl_btmesh_fw_update_server_distributor_self_update_rsp(
-            BTMESH_FIRMWARE_UPDATE_SERVER_MAIN,
+            BTMESH_FIRMWARE_UPDATE_SERVER_GROUP_MAIN_ELEM_INDEX,
             sl_btmesh_fw_update_server_update_start_response_type_reject_internal_error,
             (uint8_t)firmware_update_server.additional_information);
         } else {
@@ -327,7 +327,7 @@ void sl_btmesh_firmware_update_server_on_event(sl_btmesh_msg_t *evt)
         }
 #else // SL_CATALOG_BTMESH_STACK_FW_DISTRIBUTION_SERVER_PRESENT
         sl_btmesh_fw_update_server_distributor_self_update_rsp(
-          BTMESH_FIRMWARE_UPDATE_SERVER_MAIN,
+          BTMESH_FIRMWARE_UPDATE_SERVER_GROUP_MAIN_ELEM_INDEX,
           sl_btmesh_fw_update_server_update_start_response_type_reject_internal_error,
           (uint8_t)firmware_update_server.additional_information);
 #endif
@@ -345,7 +345,7 @@ void sl_btmesh_firmware_update_server_verify_step_handle(void)
     switch (firmware_update_server.verification_status) {
       case BTMESH_FW_UPDATE_SERVER_VERIFY_SUCCESS:
         // In case of success, accept firmware
-        sl_btmesh_fw_update_server_verify_fw_rsp(BTMESH_FIRMWARE_UPDATE_SERVER_MAIN,
+        sl_btmesh_fw_update_server_verify_fw_rsp(BTMESH_FIRMWARE_UPDATE_SERVER_GROUP_MAIN_ELEM_INDEX,
                                                  !0);
         app_timer_stop(&firmware_update_server.verify_timer);
 #if FW_UPDATE_SERVER_VERIFY_PROGRESS_UI_UPDATE_PERIOD > 0
@@ -355,7 +355,7 @@ void sl_btmesh_firmware_update_server_verify_step_handle(void)
         break;
       case BTMESH_FW_UPDATE_SERVER_VERIFY_ERROR:
         // In case of error, reject firmware
-        sl_btmesh_fw_update_server_verify_fw_rsp(BTMESH_FIRMWARE_UPDATE_SERVER_MAIN,
+        sl_btmesh_fw_update_server_verify_fw_rsp(BTMESH_FIRMWARE_UPDATE_SERVER_GROUP_MAIN_ELEM_INDEX,
                                                  0);
         app_timer_stop(&firmware_update_server.verify_timer);
 #if FW_UPDATE_SERVER_VERIFY_PROGRESS_UI_UPDATE_PERIOD > 0
@@ -398,7 +398,7 @@ void sl_btmesh_firmware_update_server_metadata_check_step_handle(void)
         // In case of success, accept metadata
         if (firmware_update_server.self_update) {
           sl_btmesh_fw_update_server_distributor_self_update_rsp(
-            BTMESH_FIRMWARE_UPDATE_SERVER_MAIN,
+            BTMESH_FIRMWARE_UPDATE_SERVER_GROUP_MAIN_ELEM_INDEX,
             sl_btmesh_fw_update_server_update_start_response_type_accept,
             (uint8_t)firmware_update_server.additional_information);
         } else if (1 == firmware_update_server.metadata_check_state.start_response) {
@@ -427,7 +427,7 @@ void sl_btmesh_firmware_update_server_metadata_check_step_handle(void)
             : sl_btmesh_fw_update_server_update_start_response_type_accept;
 
           sl_btmesh_fw_update_server_update_start_rsp(
-            BTMESH_FIRMWARE_UPDATE_SERVER_MAIN,
+            BTMESH_FIRMWARE_UPDATE_SERVER_GROUP_MAIN_ELEM_INDEX,
             (uint8_t)response,
             (uint8_t)firmware_update_server.additional_information);
           btmesh_firmware_udpate_server_change_state(
@@ -436,7 +436,7 @@ void sl_btmesh_firmware_update_server_metadata_check_step_handle(void)
             : ACTIVE_TRANSFER);
         } else {
           sl_btmesh_fw_update_server_check_fw_metadata_rsp(
-            BTMESH_FIRMWARE_UPDATE_SERVER_MAIN,
+            BTMESH_FIRMWARE_UPDATE_SERVER_GROUP_MAIN_ELEM_INDEX,
             sl_btmesh_fw_update_server_update_start_response_type_accept,
             (uint8_t)firmware_update_server.additional_information,
             firmware_update_server.metadata_fw_index);
@@ -451,17 +451,17 @@ void sl_btmesh_firmware_update_server_metadata_check_step_handle(void)
         // In case of error, reject metadata
         if (firmware_update_server.self_update) {
           sl_btmesh_fw_update_server_distributor_self_update_rsp(
-            BTMESH_FIRMWARE_UPDATE_SERVER_MAIN,
+            BTMESH_FIRMWARE_UPDATE_SERVER_GROUP_MAIN_ELEM_INDEX,
             sl_btmesh_fw_update_server_update_start_response_type_reject_metadata_check_failed,
             (uint8_t)firmware_update_server.additional_information);
         } else if (1 == firmware_update_server.metadata_check_state.start_response) {
           sl_btmesh_fw_update_server_update_start_rsp(
-            BTMESH_FIRMWARE_UPDATE_SERVER_MAIN,
+            BTMESH_FIRMWARE_UPDATE_SERVER_GROUP_MAIN_ELEM_INDEX,
             sl_btmesh_fw_update_server_update_start_response_type_reject_metadata_check_failed,
             (uint8_t)firmware_update_server.additional_information);
         } else {
           sl_btmesh_fw_update_server_check_fw_metadata_rsp(
-            BTMESH_FIRMWARE_UPDATE_SERVER_MAIN,
+            BTMESH_FIRMWARE_UPDATE_SERVER_GROUP_MAIN_ELEM_INDEX,
             sl_btmesh_fw_update_server_update_start_response_type_reject_metadata_check_failed,
             (uint8_t)firmware_update_server.additional_information,
             firmware_update_server.metadata_fw_index);

@@ -28,6 +28,7 @@
  *
  ******************************************************************************/
 
+#include <WinError.h>
 #include "app_timer.h"
 #include "app_log.h"
 
@@ -86,6 +87,15 @@ static void append_app_timer(app_timer_t *timer);
  ******************************************************************************/
 static WINBOOL remove_app_timer(app_timer_t *timer);
 
+/***************************************************************************//**
+ * Check if timer is in the list
+ *
+ * @param[in] timer app_timer reference
+ *
+ * @returns true if the timer is in the list, flase if not
+ ******************************************************************************/
+static bool contains_app_timer(app_timer_t *timer);
+
 // -----------------------------------------------------------------------------
 // Private function definitions
 
@@ -107,9 +117,17 @@ __attribute__((stdcall)) static void app_timer_common_callback(HWND hwnd,
     tmp_timer_ptr = tmp_timer_ptr->next;
   }
   if (NULL == tmp_timer_ptr) {
-    app_log_error("Timer handle not found." APP_LOG_NL);
+    app_log_error("Timer handle %d not found." APP_LOG_NL, timer_id);
+    (void)KillTimer(NULL, timer_id);
+    (void)GetLastError();
   } else {
     tmp_timer_ptr->app_timer_handle.triggered = true;
+    // Delete non-periodic timers
+    if (false == tmp_timer_ptr->periodic) {
+      (void)KillTimer(NULL, timer_id);
+      (void)GetLastError();
+      tmp_timer_ptr->app_timer_handle.timer_id = 0;
+    }
   }
 }
 
@@ -165,6 +183,21 @@ static WINBOOL remove_app_timer(app_timer_t *timer)
   return true;
 }
 
+/***************************************************************************//**
+ * Check if app timer is in the list
+ ******************************************************************************/
+static bool contains_app_timer(app_timer_t *timer)
+{
+  app_timer_t *local_timer = app_timer_head;
+
+  while (NULL != local_timer) {
+    if (timer == local_timer) {
+      return true;
+    }
+    local_timer = local_timer->next;
+  }
+  return false;
+}
 // -----------------------------------------------------------------------------
 // Public function definitions
 
@@ -181,7 +214,6 @@ void app_timer_init(void)
  ******************************************************************************/
 void sli_app_timer_step(void)
 {
-  sl_status_t status = SL_STATUS_FAIL;
   app_timer_t *tmp_timer_ptr = app_timer_head;
 
   MSG msg;
@@ -197,11 +229,11 @@ void sli_app_timer_step(void)
 
   while (NULL != tmp_timer_ptr) {
     if (true == tmp_timer_ptr->app_timer_handle.triggered) {
-      // Delete non-periodic timers
+      // Delete if timer is non-periodic
       if (false == tmp_timer_ptr->periodic) {
-        status = app_timer_stop(tmp_timer_ptr);
+        sl_status_t status = app_timer_stop(tmp_timer_ptr);
         if (SL_STATUS_OK != status) {
-          app_log_error("Failed to stop oneshot timer." APP_LOG_NL);
+          app_log_error("One-shot timer could not be cleared." APP_LOG_NL);
         }
       }
       if (NULL != tmp_timer_ptr->callback) {
@@ -258,31 +290,47 @@ sl_status_t app_timer_start(app_timer_t *timer,
  ******************************************************************************/
 sl_status_t app_timer_stop(app_timer_t *timer)
 {
+  sl_status_t result = SL_STATUS_NULL_POINTER;
   WINBOOL status = false;
   if (timer == NULL) {
-    return SL_STATUS_NULL_POINTER;
+    return result;
   }
 
-  status = KillTimer(NULL, timer->app_timer_handle.timer_id);
-  if (false == status) {
-    DWORD LastError = GetLastError();
-    if (!LastError) {
-      // Special case on Windows
-      // 0 a.k.a ERROR_SUCCESS means that the operation failed successfully.
-      return SL_STATUS_OK;
+  if (contains_app_timer(timer)) {
+    if (timer->app_timer_handle.timer_id != 0) {
+      status = KillTimer(NULL, timer->app_timer_handle.timer_id);
     } else {
-      app_log_error("Stopping timer returned with error code %lu "
-                    APP_LOG_NL, LastError);
-      return SL_STATUS_FAIL;
+      status = true; // Can be stopped already either because it's one-shot and expired or by users
+      result = SL_STATUS_OK;
+    }
+
+    if (false == status) {
+      DWORD LastError = GetLastError();
+      if (!LastError || LastError == ERROR_INVALID_WINDOW_HANDLE) {
+        // Special cases on Windows
+        // 0 a.k.a ERROR_SUCCESS means that the operation failed successfully.
+        // ERROR_INVALID_WINDOW_HANDLE seems normal on some Windows versions if hWnd was passed as NULL
+        result = SL_STATUS_OK;
+      } else {
+        app_log_error("Stopping timer returned with error code %lu "
+                      APP_LOG_NL, LastError);
+        result = SL_STATUS_FAIL;
+      }
+    } else {
+      result = SL_STATUS_OK;
+    }
+
+    if (result == SL_STATUS_OK) {
+      timer->app_timer_handle.timer_id = 0;
+      (void)remove_app_timer(timer);
+    }
+  } else {
+    if (timer->app_timer_handle.timer_id != 0) {
+      (void)KillTimer(NULL, timer->app_timer_handle.timer_id);
+      (void)GetLastError();
+      timer->app_timer_handle.timer_id = 0;
     }
   }
-
-  status = remove_app_timer(timer);
-  if (false == status) {
-    app_log_error("Could not remove timer " APP_LOG_NL);
-    return SL_STATUS_FAIL;
-  } else {
-    return SL_STATUS_OK;
-  }
+  return result;
 }
 /** @} (end addtogroup timer) */

@@ -95,9 +95,6 @@ configuration:
   - name: SL_CPC_USER_ENDPOINT_MAX_COUNT
     value: 0
 
-define:
-  - name: NONCOMPLIANT_ACK_TIMING_WORKAROUND
-
 template_contribution:
   - name: component_catalog
     value: bluetooth_ncp

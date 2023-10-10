@@ -222,6 +222,17 @@ static void setCliInFd(int *maxFd, fd_set *readSet, fd_set *errorSet)
   *maxFd = (*maxFd < pipeReadFd ? pipeReadFd : *maxFd);
 }
 
+#ifdef EZSP_CPC
+extern int sli_zigbee_get_cpc_fd(void);
+static void setCpcFd(int *maxFd, fd_set *readSet, fd_set *errorSet)
+{
+  int cpcFd = sli_zigbee_get_cpc_fd();
+  FD_SET(cpcFd, readSet);
+  FD_SET(cpcFd, errorSet);
+  *maxFd = (*maxFd < cpcFd ? cpcFd : *maxFd);
+}
+#endif // EZSP_CPC
+
 EmberStatus emberAfPluginFileDescriptorDispatchWaitForEvents(uint32_t timeoutMs)
 {
   fd_set readSet;
@@ -279,6 +290,11 @@ EmberStatus emberAfPluginFileDescriptorDispatchWaitForEvents(uint32_t timeoutMs)
   // Set CLI pipe read fd so that we can wake up the host
   // by entering CLI commands.
   setCliInFd(&highestFd, &readSet, &exceptSet);
+#ifdef EZSP_CPC
+  // Set CPC fd so that we can wake up the host when CPC deamon
+  // has packets for the host instead of waiting the tick.
+  setCpcFd(&highestFd, &readSet, &exceptSet);
+#endif // EZSP_CPC
 
   struct timeval timeoutStruct = {
     timeoutMs / 1000,           // seconds

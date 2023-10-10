@@ -119,11 +119,11 @@ void sli_app_timer_step(void)
 
   while (NULL != tmp_timer_ptr) {
     if (true == tmp_timer_ptr->app_timer_handle.triggered) {
-      // Delete non-periodic timers
+      // Delete if timer is non-periodic
       if (false == tmp_timer_ptr->periodic) {
         status = delete_timer(tmp_timer_ptr);
         if (SL_STATUS_OK != status) {
-          app_log_error("Failed to delete timer after stopping it"
+          app_log_error("One-shot timer could not be cleared."
                         APP_LOG_NEW_LINE);
         }
       }

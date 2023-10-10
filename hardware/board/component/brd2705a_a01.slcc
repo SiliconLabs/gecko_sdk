@@ -3,7 +3,7 @@
 - label: BRD2705A rev A01
 - package: platform
 - description: Board support for BRD2705A.
-- category: Platform|Board|Starter Kit
+- category: Platform|Board|Thunderboard
 - quality: production
 - requires:
   - name: efr32zg28b312f1024im48
@@ -12,9 +12,10 @@
   - name: brd2705a_revision
   - name: brd2705a_a01
   - name: hardware_board
-  - name: hardware_board_stk
+  - name: hardware_board_tb
   - name: hardware_board_has_vcom
   - name: hardware_board_has_rfswitch
+  - name: hardware_board_has_rfswitch_to_ground
   - name: hardware_board_has_hfxo_freq_39mhz
   - name: hardware_board_has_hfxo
   - name: hardware_board_has_lfxo

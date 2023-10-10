@@ -651,7 +651,7 @@ sl_btmesh_blob_transfer_client_calculate_block_size_log(uint32_t blob_size,
   //       so the implementation chooses the block_size_log_max to send the BLOB
   //       at least to a subset of servers.
   //       In general this should not happen in case of firmware image transfer
-  //       because the same kind of updating nodes are updated with the same
+  //       because the same kind of target nodes are updated with the same
   //       firmware so their capabilities should match.
   for (block_size_log = block_size_log_max;
        block_size_log_min <= block_size_log;
@@ -933,7 +933,7 @@ static void sl_btmesh_blob_transfer_client_element_init(uint16_t elem_index)
 
 static void sl_btmesh_blob_transfer_client_init(void)
 {
-  sl_btmesh_blob_transfer_client_element_init(BTMESH_BLOB_TRANSFER_CLIENT_MAIN);
+  sl_btmesh_blob_transfer_client_element_init(BTMESH_BLOB_TRANSFER_CLIENT_GROUP_MAIN_ELEM_INDEX);
 }
 
 // Process the return value of MBT procedure BT Mesh stack API calls in retry state
@@ -1315,7 +1315,7 @@ static void handle_query_information_complete(blob_transfer_client_t *const self
         case sl_btmesh_mbt_client_mbt_transfer_mode_both:
         // Push mode shall be the default if both transfer modes are supported
         case sl_btmesh_mbt_client_mbt_transfer_mode_none:
-        // Subset of updating nodes can participate in the BLOB transfer because
+        // Subset of target nodes can participate in the BLOB transfer because
         // neither transfer mode is supported by all nodes (defaults to push)
         // Note: it is not necessary to check the supported_transfer_modes in
         // the event because it must have "both" value otherwise the

@@ -29,43 +29,43 @@ requires:
 documentation:
   docset: gecko-platform
   document:
-    - page: emlib/api/efm32g/group-emu
+    - page: platform-emlib-efm32g/emu
       condition: [device_sdid_71]
-    - page: emlib/api/efm32gg/group-emu
+    - page: platform-emlib-efm32gg/emu
       condition: [device_sdid_72]
-    - page: emlib/api/efm32tg/group-emu
+    - page: platform-emlib-efm32tg/emu
       condition: [device_sdid_73]
-    - page: emlib/api/efm32lg/group-emu
+    - page: platform-emlib-efm32lg/emu
       condition: [device_sdid_74]
-    - page: emlib/api/efm32zg/group-emu
+    - page: platform-emlib-efm32zg/emu
       condition: [device_sdid_76]
-    - page: emlib/api/efm32hg/group-emu
+    - page: platform-emlib-efm32hg/emu
       condition: [device_sdid_77]
-    - page: emlib/api/efr32xg1/group-emu
+    - page: platform-emlib-efr32xg1/emu
       condition: [device_sdid_80]
-    - page: emlib/api/efr32xg12/group-emu
+    - page: platform-emlib-efr32xg12/emu
       condition: [device_sdid_84]
-    - page: emlib/api/efr32xg13/group-emu
+    - page: platform-emlib-efr32xg13/emu
       condition: [device_sdid_89]
-    - page: emlib/api/efr32xg14/group-emu
+    - page: platform-emlib-efr32xg14/emu
       condition: [device_sdid_95]
-    - page: emlib/api/efm32gg11/group-emu
+    - page: platform-emlib-efm32gg11/emu
       condition: [device_sdid_100]
-    - page: emlib/api/efm32tg11/group-emu
+    - page: platform-emlib-efm32tg11/emu
       condition: [device_sdid_103]
-    - page: emlib/api/efm32gg12/group-emu
+    - page: platform-emlib-efm32gg12/emu
       condition: [device_sdid_106]
-    - page: emlib/api/efr32xg21/group-emu
+    - page: platform-emlib-efr32xg21/emu
       condition: [device_sdid_200]
-    - page: emlib/api/efr32xg22/group-emu
+    - page: platform-emlib-efr32xg22/emu
       condition: [device_sdid_205]
-    - page: emlib/api/efr32xg23/group-emu
+    - page: platform-emlib-efr32xg23/emu
       condition: [device_sdid_210]
-    - page: emlib/api/efr32xg24/group-emu
+    - page: platform-emlib-efr32xg24/emu
       condition: [device_sdid_215]
-    - page: emlib/api/efr32xg25/group-emu
+    - page: platform-emlib-efr32xg25/emu
       condition: [device_sdid_220]
-    - page: emlib/api/efr32xg27/group-emu
+    - page: platform-emlib-efr32xg27/emu
       condition: [device_sdid_230]
-    - page: emlib/api/efr32xg28/group-emu
+    - page: platform-emlib-efr32xg28/emu
       condition: [device_sdid_235]

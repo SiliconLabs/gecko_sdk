@@ -31,13 +31,14 @@ requires:
   - name: toolchain_gcc
   - name: cpp_support
   - name: emlib_common
+    condition: [device_efx]
 recommends:
   - id: tensorflow_lite_micro_reference_kernels
     condition: [cortexm0plus]
   - id: tensorflow_lite_micro_reference_kernels
     condition: [cortexm3]
   - id: tensorflow_lite_micro_optimized_kernels
-    condition: [cortexm4]
+    condition: [cortexm4, device_efx]
   - id: tensorflow_lite_micro_optimized_kernels
     condition: [device_compute_basic]
   - id: tensorflow_lite_micro_accelerated_kernels

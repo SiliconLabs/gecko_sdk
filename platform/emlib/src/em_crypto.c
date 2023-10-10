@@ -675,9 +675,9 @@ void CRYPTO_SHA_1(CRYPTO_TypeDef *             crypto,
   /* Check if the buffer pointer is 32-bit aligned, if not read the data into a
      temporary 32-bit aligned buffer then copy the data to the output buffer.*/
   if ((uintptr_t)msgDigest & 0x3) {
-    CRYPTO_DData_TypeDef temp;
-    CRYPTO_DDataRead(&crypto->DDATA0BIG, temp);
-    memcpy(msgDigest, temp, sizeof(CRYPTO_SHA1_Digest_TypeDef));
+    CRYPTO_DData_TypeDef tempDData;
+    CRYPTO_DDataRead(&crypto->DDATA0BIG, tempDData);
+    memcpy(msgDigest, tempDData, sizeof(CRYPTO_SHA1_Digest_TypeDef));
   } else {
     ((uint32_t*)msgDigest)[0] = crypto->DDATA0BIG;
     ((uint32_t*)msgDigest)[1] = crypto->DDATA0BIG;

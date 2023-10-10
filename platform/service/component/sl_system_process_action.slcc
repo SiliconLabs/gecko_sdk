@@ -53,7 +53,7 @@ template_contribution:
     priority: -3970
 documentation:
     docset: gecko-platform
-    document: service/api/group-system
+    document: platform-service/system
 description: |
   System Process Action component provides a function for running the products
   from a super loop:

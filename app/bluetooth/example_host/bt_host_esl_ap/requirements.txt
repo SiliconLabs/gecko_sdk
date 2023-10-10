@@ -5,5 +5,5 @@ colorlog
 intelhex
 bincopy
 qrcode
-ctypesgen
+ctypesgen>=1.1.0
 pyserial

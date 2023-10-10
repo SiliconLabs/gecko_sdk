@@ -30,7 +30,6 @@ from typing import (Callable, ClassVar, Dict, Iterable, List, Optional, Tuple,
                     Union)
 
 from bgapi.bglib import BGEvent, CommandFailedError
-
 from bgapix.bglibx import (BGLibExtRetryParams, BGLibExtWaitEventError,
                            EventParamValues)
 from bgapix.slstatus import SlStatus
@@ -300,11 +299,11 @@ class FwUpdateClient(BtmeshComponent):
     def init(
         self,
         elem_index: int = 0,
-        max_updating_nodes: int = 8,
+        max_target_nodes: int = 8,
         retry_params_default: BtmeshMulticastRetryParams = None,
     ):
         self.lib.btmesh.fw_update_client.init(elem_index)
-        self.lib.btmesh.fw_standalone_updater.init(elem_index, max_updating_nodes)
+        self.lib.btmesh.fw_standalone_updater.init(elem_index, max_target_nodes)
         self.set_retry_params_default(retry_params_default)
 
     def set_retry_params_default(self, retry_params: BtmeshMulticastRetryParams):
@@ -649,7 +648,7 @@ class FwUpdateClient(BtmeshComponent):
                         elem_index=elem_index, retry_params=retry_params_base
                     )
                 state = self._get_fw_standalone_updater_state(elem_index)
-            except (CommandFailedError, BGLibExtWaitEventError, BtmeshError):
+            except (CommandFailedError, BGLibExtWaitEventError, BtmeshError) as e:
                 # The FW Update is terminated abruptly and unexpectedly so the
                 # FW Update shall be terminated in the BT Mesh stack as well in
                 # order to terminate the FW Standalone Updater state machine.

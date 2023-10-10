@@ -24,4 +24,4 @@ template_contribution:
       handler: "GPIOINT_Init"
 documentation:
     docset: gecko-platform
-    document: driver/api/group-gpioint
+    document: platform-driver/gpioint

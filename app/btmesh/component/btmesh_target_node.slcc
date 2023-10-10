@@ -1,0 +1,21 @@
+id: btmesh_target_node
+label: DFU target node
+package: Btmesh
+description: >
+  Wrapper software component for DFU target node role in Bluetooth Mesh applications.
+  This component is prepared for integration into SOC applications.
+category: "Bluetooth Mesh|DFU Roles"
+quality: production
+root_path: app/btmesh
+provides:
+  - name: btmesh_target_node
+requires:
+  - name: btmesh_firmware_update_server
+  - name: btmesh_blob_transfer_server_recommended_instance_target
+conflicts:
+  - name: btmesh_blob_transfer_server_recommended_instance_dist_only
+recommends:
+  - id: btmesh_blob_transfer_server_recommended_instance_target
+
+validation_helper:
+  - path: "script/validation/soc_ncp_compatibility.lua"

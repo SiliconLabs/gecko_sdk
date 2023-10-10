@@ -112,7 +112,7 @@ class Provisioner(BtmeshComponent):
             else:
                 raise BtmeshError(
                     BtmeshErrorCode.PROV_INIT_FAILED,
-                    f"Provisioner initialization failed. ({event.errorcode})",
+                    f"Provisioner initialization failed. ({event.result})",
                     event=event,
                 )
         except CommandFailedError as e:

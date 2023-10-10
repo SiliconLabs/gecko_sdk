@@ -41,4 +41,4 @@ template_contribution:
     value: token_manager
 documentation:
     docset: gecko-platform
-    document: service/api/group-token-manager
+    document: platform-service/token-manager

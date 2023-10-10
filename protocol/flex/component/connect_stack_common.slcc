@@ -30,6 +30,7 @@ requires:
   - name: "rail_lib_multiprotocol"
     condition:
       - "bluetooth_stack"
+  - name: "gsdk_version"
 recommends:
   - id: "connect_stack_common_source"
   - id: "rail_lib_singleprotocol"

@@ -40,6 +40,7 @@ $(SDK_DIR)/app/bluetooth/common_host/ncp_host/config \
 $(SDK_DIR)/app/bluetooth/common_host/system \
 $(SDK_DIR)/app/bluetooth/common_host/tcp \
 $(SDK_DIR)/app/bluetooth/common_host/uart \
+$(SDK_DIR)/app/bluetooth/common/simple_com \
 $(SDK_DIR)/platform/common/inc \
 $(SDK_DIR)/protocol/bluetooth/inc
 
@@ -50,6 +51,8 @@ endif
 override C_SRC += \
 $(SDK_DIR)/app/bluetooth/common_host/app_sleep/app_sleep.c \
 $(foreach OS_i, $(OS), $(SDK_DIR)/app/bluetooth/common_host/host_comm/host_comm_$(OS_i).c) \
+$(SDK_DIR)/app/bluetooth/common_host/host_comm/host_comm_robust.c \
+$(SDK_DIR)/app/bluetooth/common/simple_com/sl_simple_com_robust.c \
 $(SDK_DIR)/app/bluetooth/common_host/ncp_host/ncp_host.c \
 $(foreach OS_i, $(OS), $(SDK_DIR)/app/bluetooth/common_host/tcp/tcp_$(OS_i).c) \
 $(foreach OS_i, $(OS), $(SDK_DIR)/app/bluetooth/common_host/uart/uart_$(OS_i).c) \

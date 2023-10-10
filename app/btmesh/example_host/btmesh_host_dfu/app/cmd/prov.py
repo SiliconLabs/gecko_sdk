@@ -21,6 +21,7 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 import enum
+import functools
 import re
 from typing import Dict, Iterator, List, Optional, Union
 
@@ -29,7 +30,7 @@ from btmesh.db import GapAddrType, GapPhy, Node
 from btmesh.errors import BtmeshError
 from btmesh.prov import (UnprovDeviceBeacon, UnprovDeviceBeaconAddrType,
                          UnprovDeviceBeaconBearer)
-from btmesh.util import ConnectionParamsRange
+from btmesh.util import BtmeshRetryParams, ConnectionParamsRange
 
 from ..btmesh import app_btmesh
 from ..cfg import app_cfg
@@ -37,6 +38,20 @@ from ..ui import app_ui
 from ..util.argparsex import ArgumentParserExt
 from .cmd import BtmeshCmd
 from .scan import scan_cmd
+
+
+def auto_conf_node_failed_handler(f):
+    @functools.wraps(f)
+    def auto_conf_node_wrapper(*args, **kwargs):
+        try:
+            return f(*args, **kwargs)
+        except BtmeshError as e:
+            if app_cfg.conf.auto_conf_strict:
+                raise
+            else:
+                app_ui.error(str(e))
+
+    return auto_conf_node_wrapper
 
 
 class PBArg(enum.Enum):
@@ -369,7 +384,10 @@ class BtmeshProvCmd(BtmeshCmd):
         for uuid in uuids:
             try:
                 node = app_btmesh.prov.provision_adv_device(uuid)
-                app_ui.info(f"The device with {uuid.hex()} UUID is provisioned.")
+                node_str = app_ui.node_str(node)
+                app_ui.info(
+                    f"The {node_str} node with {uuid.hex()} UUID is provisioned."
+                )
                 self._on_node_provisioned(node)
             except BtmeshError as e:
                 app_ui.error(e.message)
@@ -402,7 +420,10 @@ class BtmeshProvCmd(BtmeshCmd):
                     conn_open_timeout_ms=conn_open_timeout_ms,
                     conn_params_range=conn_params_range,
                 )
-                app_ui.info(f"The device with {uuid.hex()} UUID is provisioned.")
+                node_str = app_ui.node_str(node)
+                app_ui.info(
+                    f"The {node_str} node with {uuid.hex()} UUID is provisioned."
+                )
                 self._on_node_provisioned(node)
             except BtmeshError as e:
                 app_ui.error(e.message)
@@ -414,46 +435,163 @@ class BtmeshProvCmd(BtmeshCmd):
         retry_params.retry_max = app_cfg.conf.conf_retry_max_default
         retry_params.retry_interval = app_cfg.conf.conf_retry_interval_default
         retry_params.retry_interval_lpn = app_cfg.conf.conf_retry_interval_lpn_default
+        self.auto_conf_node_dcd(node, retry_params)
+        self.auto_conf_node_default_ttl(node, retry_params)
+        self.auto_conf_node_network_tx(node, retry_params)
+        self.auto_conf_node_sar(node, retry_params)
+
+    @auto_conf_node_failed_handler
+    def auto_conf_node_dcd(self, node: Node, retry_params: BtmeshRetryParams) -> None:
         # Node DCD auto query
         if app_cfg.conf.auto_conf_dcd_query:
             app_btmesh.conf.get_dcd(node, update_db=True, retry_params=retry_params)
-            app_ui.info(
-                f"Node ({node.uuid.hex()}) auto configuration: DCD is queried"
-            )
+            node_str = app_ui.node_str(node)
+            app_ui.info(f"{node_str} auto config: DCD is queried")
+
+    @auto_conf_node_failed_handler
+    def auto_conf_node_default_ttl(
+        self, node: Node, retry_params: BtmeshRetryParams
+    ) -> None:
         # Node Default TTL auto configuration
         if app_cfg.conf.auto_conf_default_ttl:
             ttl = app_cfg.conf.default_ttl_default
-            try:
-                app_btmesh.conf.set_default_ttl(
-                    node, ttl=ttl, retry_params=retry_params
-                )
-                app_ui.info(
-                    f"Node ({node.uuid.hex()}) auto configuration: "
-                    f"Default TTL = {ttl}"
-                )
-            except BtmeshError as e:
-                app_ui.error(str(e))
+            app_btmesh.conf.set_default_ttl(node, ttl=ttl, retry_params=retry_params)
+            node_str = app_ui.node_str(node)
+            app_ui.info(f"{node_str} auto config: Default TTL is set to {ttl}")
+
+    @auto_conf_node_failed_handler
+    def auto_conf_node_network_tx(
+        self, node: Node, retry_params: BtmeshRetryParams
+    ) -> None:
         # Node Network Transmit composite state auto configuration
         if app_cfg.conf.auto_conf_network_tx:
             nettx_cnt = app_cfg.conf.network_tx_count_default
             nettx_int = app_cfg.conf.network_tx_interval_ms_default
-            try:
-                app_btmesh.conf.set_network_transmit(
-                    node,
-                    transmit_count=nettx_cnt,
-                    transmit_interval_ms=nettx_int,
-                    retry_params=retry_params,
-                )
-                app_ui.info(
-                    f"Node ({node.uuid.hex()}) auto configuration: "
-                    f"Network Transmit Count = {nettx_cnt}"
-                )
-                app_ui.info(
-                    f"Node ({node.uuid.hex()}) auto configuration: "
-                    f"Network Transmit Interval = {nettx_int} ms"
-                )
-            except BtmeshError as e:
-                app_ui.error(str(e))
+            app_btmesh.conf.set_network_transmit(
+                node,
+                transmit_count=nettx_cnt,
+                transmit_interval_ms=nettx_int,
+                retry_params=retry_params,
+            )
+            node_str = app_ui.node_str(node)
+            app_ui.info(
+                f"{node_str} auto config: "
+                f"Network Transmit Count is set to {nettx_cnt}"
+            )
+            app_ui.info(
+                f"{node_str} auto config: "
+                f"Network Transmit Interval Step is set to {nettx_int} ms"
+            )
+
+    @auto_conf_node_failed_handler
+    def auto_conf_node_sar(self, node: Node, retry_params: BtmeshRetryParams) -> None:
+        # Node SAR Transmitter and Receiver composite state auto configuration
+        if app_cfg.conf.auto_conf_sar:
+            node_str = app_ui.node_str(node)
+            # Node SAR Transmitter state auto configuration
+            segment_interval_step = app_cfg.conf.sar_tx_segment_interval_step_default
+            unicast_retrans_count = app_cfg.conf.sar_tx_unicast_retrans_count_default
+            unicast_retrans_wo_progress_count = (
+                app_cfg.conf.sar_tx_unicast_retrans_wo_progress_count_default
+            )
+            unicast_retrans_interval_step = (
+                app_cfg.conf.sar_tx_unicast_retrans_interval_step_default
+            )
+            unicast_retrans_interval_increment = (
+                app_cfg.conf.sar_tx_unicast_retrans_interval_increment_default
+            )
+            multicast_retrans_count = (
+                app_cfg.conf.sar_tx_multicast_retrans_count_default
+            )
+            multicast_retrans_interval_step = (
+                app_cfg.conf.sar_tx_multicast_retrans_interval_step_default
+            )
+            sar_tx_status = app_btmesh.conf.set_sar_transmitter(
+                node,
+                segment_interval_step=segment_interval_step,
+                unicast_retrans_count=unicast_retrans_count,
+                unicast_retrans_wo_progress_count=unicast_retrans_wo_progress_count,
+                unicast_retrans_interval_step=unicast_retrans_interval_step,
+                unicast_retrans_interval_increment=unicast_retrans_interval_increment,
+                multicast_retrans_count=multicast_retrans_count,
+                multicast_retrans_interval_step=multicast_retrans_interval_step,
+                retry_params=retry_params,
+            )
+            app_ui.info(
+                f"{node_str} auto config: "
+                f"SAR Transmitter Segment Interval Step is set to "
+                f"is set to {sar_tx_status.segment_interval_step} ms"
+            )
+            app_ui.info(
+                f"{node_str} auto config: "
+                f"SAR Transmitter Unicast Retransmission Count is set to "
+                f"is set to {sar_tx_status.unicast_retrans_count}"
+            )
+            app_ui.info(
+                f"{node_str} auto config: "
+                f"SAR Transmitter Unicast Retransmissions Without Progress Count "
+                f"is set to {sar_tx_status.unicast_retrans_wo_progress_count}"
+            )
+            app_ui.info(
+                f"{node_str} auto config: "
+                f"SAR Transmitter Unicast Retransmissions Interval Step "
+                f"is set to {sar_tx_status.unicast_retrans_interval_step} ms"
+            )
+            app_ui.info(
+                f"{node_str} auto config: "
+                f"SAR Transmitter Unicast Retransmissions Interval Increment "
+                f"is set to {sar_tx_status.unicast_retrans_interval_increment} ms"
+            )
+            app_ui.info(
+                f"{node_str} auto config: "
+                f"SAR Transmitter Multicast Retransmissions Count "
+                f"is set to {sar_tx_status.multicast_retrans_count}"
+            )
+            app_ui.info(
+                f"{node_str} auto config: "
+                f"SAR Transmitter Multicast Retransmissions Interval Step "
+                f"is set to {sar_tx_status.multicast_retrans_interval_step} ms"
+            )
+            # Node SAR Receiver state auto configuration
+            segments_threshold = app_cfg.conf.sar_rx_segments_threshold_default
+            ack_delay_increment = app_cfg.conf.sar_rx_ack_delay_increment_default
+            discard_timeout = app_cfg.conf.sar_rx_discard_timeout_default
+            segment_interval_step = app_cfg.conf.sar_rx_segment_interval_step_default
+            ack_retrans_count = app_cfg.conf.sar_rx_ack_retrans_count_default
+            sar_rx_status = app_btmesh.conf.set_sar_receiver(
+                node,
+                segments_threshold=segments_threshold,
+                ack_delay_increment=ack_delay_increment,
+                discard_timeout=discard_timeout,
+                segment_interval_step=segment_interval_step,
+                ack_retrans_count=ack_retrans_count,
+                retry_params=retry_params,
+            )
+            app_ui.info(
+                f"{node_str} auto config: "
+                f"SAR Receiver Segments Threshold "
+                f"is set to {sar_rx_status.segments_threshold}"
+            )
+            app_ui.info(
+                f"{node_str} auto config: "
+                f"SAR Receiver Acknowledgment Delay Increment "
+                f"is set to {sar_rx_status.ack_delay_increment}"
+            )
+            app_ui.info(
+                f"{node_str} auto config: "
+                f"SAR Receiver Discard Timeout "
+                f"is set to {sar_rx_status.discard_timeout} ms"
+            )
+            app_ui.info(
+                f"{node_str} auto config: "
+                f"SAR Receiver Segment Interval Step "
+                f"is set to {sar_rx_status.segment_interval_step} ms"
+            )
+            app_ui.info(
+                f"{node_str} auto config: "
+                f"SAR Receiver Acknowledgment Retransmissions Count "
+                f"is set to {sar_rx_status.ack_retrans_count}"
+            )
 
 
 prov_cmd = BtmeshProvCmd()

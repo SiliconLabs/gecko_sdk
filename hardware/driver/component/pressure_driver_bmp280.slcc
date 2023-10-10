@@ -19,4 +19,4 @@ source:
   - path: src/sl_pressure_bmp280.c
 documentation:
     docset: gecko-platform
-    document: hardware-driver/api/group-bmp280
+    document: platform-hardware-driver/bmp280

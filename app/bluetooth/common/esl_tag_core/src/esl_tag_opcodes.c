@@ -775,12 +775,10 @@ sl_status_t esl_core_process_opcode(esl_id_t self_id,
         break;
 
       case ESL_TLV_OPCODE_UNASSOCIATE: {
-        esl_basic_state_t basic_state = esl_core_get_basic_state();
-
         // remove any pending delayed command immediately
         esl_core_purge_delayed_commands();
 
-        // Close the connection, if opened
+        // close the connection, if opened
         (void)app_scheduler_add(&esl_core_async_disconnect, 0, 0, NULL);
 
         result = app_scheduler_add_delayed(&esl_delayed_unassociate,
@@ -788,9 +786,16 @@ sl_status_t esl_core_process_opcode(esl_id_t self_id,
                                            NULL, 0, NULL);
         if (result != SL_STATUS_OK) {
           esl_core_set_last_error(ESL_ERROR_INSUFFICIENT_RESOURCES);
-        } else if (needs_response) {
-          result = esl_core_build_response(ESL_TLV_RESPONSE_BASIC_STATE,
-                                           &basic_state);
+        } else {
+          // predict the imminent loss of synchronization
+          esl_core_set_basic_state_bit(ESL_BASIC_STATE_SYNCHRONIZED_BIT,
+                                       ESL_CLEAR);
+
+          if (needs_response) {
+            esl_basic_state_t basic_state = esl_core_get_basic_state();
+            result = esl_core_build_response(ESL_TLV_RESPONSE_BASIC_STATE,
+                                             &basic_state);
+          }
         }
       } break;
 

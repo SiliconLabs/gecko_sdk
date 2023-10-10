@@ -47,7 +47,7 @@ void app_sleep_us(uint64_t usec)
   }
 
   // Convert to 100 nanosec interval, negative value indicates relative time
-  due_time.QuadPart = -(10 * usec);
+  due_time.QuadPart = -((10 * usec) - 1);
 
   timer = CreateWaitableTimer(NULL, TRUE, NULL);
   SetWaitableTimer(timer, &due_time, 0, NULL, NULL, 0);

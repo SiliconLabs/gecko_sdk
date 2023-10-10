@@ -21,4 +21,4 @@ requires:
   - name: "ecode"
 documentation:
     docset: gecko-platform
-    document: driver/api/group-ustimer
+    document: platform-driver/ustimer

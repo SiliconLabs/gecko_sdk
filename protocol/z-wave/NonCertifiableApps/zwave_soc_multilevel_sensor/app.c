@@ -1,5 +1,5 @@
 /**
- * Z-Wave Certified Application Multilevel Sensor
+ * Z-Wave Application Multilevel Sensor
  *
  * @copyright 2018 Silicon Laboratories Inc.
  */

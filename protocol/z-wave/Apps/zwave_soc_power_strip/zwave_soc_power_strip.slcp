@@ -63,7 +63,7 @@ configuration:
   - name: APP_REVISION
     value: 20
   - name: APP_PATCH
-    value: 1
+    value: 2
   - name: CC_MULTI_CHANNEL_IDENTICAL_ENDPOINTS
     value: 0
   - name: ZAF_CONFIG_REQUEST_KEY_S0

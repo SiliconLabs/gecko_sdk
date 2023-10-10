@@ -86,6 +86,7 @@
 - provides:
   - name: wgm160p022kga3
   - name: device
+  - name: device_efx
   - name: device_series_1
   - name: device_sdid_100
   - name: device_generic_family_efr32xg11

@@ -17,4 +17,4 @@ provides:
   - name: sl_common
 documentation:
   docset: gecko-platform
-  document: common/api/group-common
+  document: platform-common/common

@@ -36,7 +36,7 @@ To learn more about programming an SoC application, see [UG472: Silicon Labs Blu
 
 ## Device Firmware Update
 
-Device Firmware Update (DFU) is a new feature introduced in the Bluetooth Mesh Model specification v1.1 that provides a standard way to update device firmware over a Bluetooth mesh network. The example has the Updating node functionality enabled by default that is fulfilled by installing the Firmware Update and BLOB Transfer model components:
+Device Firmware Update (DFU) is a new feature introduced in the Bluetooth Mesh Model specification v1.1 that provides a standard way to update device firmware over a Bluetooth mesh network. The example has the Target node functionality enabled by default that is fulfilled by installing the Firmware Update and BLOB Transfer model components:
 
 - Firmware Update Server
 - BLOB Transfer Server

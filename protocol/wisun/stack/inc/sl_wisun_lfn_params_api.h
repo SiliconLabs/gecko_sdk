@@ -36,10 +36,8 @@
 #include "sl_common.h"
 #include "sl_status.h"
 
-// TODO: move this header in the stack and export it to avoid dependency loop
-
 /// API version used to check compatibility (do not edit when using this header)
-#define SL_WISUN_LFN_PARAMS_API_VERSION 0x0001
+#define SL_WISUN_LFN_PARAMS_API_VERSION 0x0002
 
 /***************************************************************************//**
  * @addtogroup SL_WISUN_TYPES
@@ -55,7 +53,9 @@ typedef struct {
   /// Number of slots for which an LFN shall listen for LPA frames
   /// Specification range [1, 255]
   uint8_t discovery_slots;
-} sl_wisun_lfn_params_connection_t;
+  /// Reserved, set to zero
+  uint8_t reserved[2];
+} SL_ATTRIBUTE_PACKED sl_wisun_lfn_params_connection_t;
 SL_PACK_END()
 
 /// LFN data layer parameters
@@ -72,7 +72,9 @@ typedef struct {
   /// the parent is lost.
   /// Specification range [1, 60]
   uint8_t lfn_maintain_parent_time;
-} sl_wisun_lfn_params_data_layer_t;
+  /// Reserved, set to zero
+  uint8_t reserved[3];
+} SL_ATTRIBUTE_PACKED sl_wisun_lfn_params_data_layer_t;
 SL_PACK_END()
 
 /// LFN network parameters
@@ -84,7 +86,9 @@ typedef struct {
   /// Interval during which an LFN waits for an FFN NA(EARO) response (minutes)
   /// Specification range [30, 120]
   uint8_t lfn_na_wait_duration_m;
-} sl_wisun_lfn_params_network_t;
+  /// Reserved, set to zero
+  uint8_t reserved;
+} SL_ATTRIBUTE_PACKED sl_wisun_lfn_params_network_t;
 SL_PACK_END()
 
 /// LFN power parameters
@@ -101,8 +105,10 @@ typedef struct {
   /// If true, the node limits LFN broadcast interval wakeups to minimum
   /// while still maintaining time synchronization with the parent.
   /// If false, the node wakes up on every LFN broadcast interval.
-  bool broadcast_lts_only:1;
-} sl_wisun_lfn_params_power_t;
+  uint8_t broadcast_lts_only;
+  /// Reserved, set to zero
+  uint8_t reserved[3];
+} SL_ATTRIBUTE_PACKED sl_wisun_lfn_params_power_t;
 SL_PACK_END()
 
 /// LFN parameter set
@@ -114,7 +120,7 @@ typedef struct {
    * This field allows to store the parameters in an NVM and check on reload
    * that they are compatible with the stack if there was an update.
    */
-  uint16_t version;
+  uint32_t version;
   /// LFN connection parameters
   sl_wisun_lfn_params_connection_t connection;
   /// LFN data layer parameters
@@ -142,22 +148,26 @@ static const sl_wisun_lfn_params_t SL_WISUN_PARAMS_LFN_TEST = {
   .version = SL_WISUN_LFN_PARAMS_API_VERSION,
   .connection = {
     .discovery_slot_time_ms = 60,
-    .discovery_slots = 40
+    .discovery_slots = 40,
+    .reserved = { 0 }
   },
   .data_layer = {
     .unicast_interval_ms = SEC_TO_MS(6),
     .unicast_interval_min_ms = SEC_TO_MS(5),
     .unicast_interval_max_ms = SEC_TO_MS(60),
-    .lfn_maintain_parent_time = 5
+    .lfn_maintain_parent_time = 5,
+    .reserved = { 0 }
   },
   .network = {
     .lfn_registration_lifetime_m = HOUR_TO_MIN(36),
-    .lfn_na_wait_duration_m = 30
+    .lfn_na_wait_duration_m = 30,
+    .reserved = 0
   },
   .power = {
     .listening_window_min_us = 5000,
     .window_margin_min_us = 5000,
-    .broadcast_lts_only = 0
+    .broadcast_lts_only = 0,
+    .reserved = { 0 }
   }
 };
 
@@ -166,22 +176,26 @@ static const sl_wisun_lfn_params_t SL_WISUN_PARAMS_LFN_BALANCED = {
   .version = SL_WISUN_LFN_PARAMS_API_VERSION,
   .connection = {
     .discovery_slot_time_ms = 60,
-    .discovery_slots = 40
+    .discovery_slots = 40,
+    .reserved = { 0 }
   },
   .data_layer = {
     .unicast_interval_ms = SEC_TO_MS(60),
     .unicast_interval_min_ms = SEC_TO_MS(30),
     .unicast_interval_max_ms = SEC_TO_MS(300),
-    .lfn_maintain_parent_time = 20
+    .lfn_maintain_parent_time = 20,
+    .reserved = { 0 }
   },
   .network = {
     .lfn_registration_lifetime_m = HOUR_TO_MIN(60),
-    .lfn_na_wait_duration_m = HOUR_TO_MIN(1)
+    .lfn_na_wait_duration_m = HOUR_TO_MIN(1),
+    .reserved = 0
   },
   .power = {
     .listening_window_min_us = 5000,
     .window_margin_min_us = 5000,
-    .broadcast_lts_only = 0
+    .broadcast_lts_only = 0,
+    .reserved = { 0 }
   }
 };
 
@@ -190,22 +204,26 @@ static const sl_wisun_lfn_params_t SL_WISUN_PARAMS_LFN_ECO = {
   .version = SL_WISUN_LFN_PARAMS_API_VERSION,
   .connection = {
     .discovery_slot_time_ms = 60,
-    .discovery_slots = 40
+    .discovery_slots = 40,
+    .reserved = { 0 }
   },
   .data_layer = {
     .unicast_interval_ms = SEC_TO_MS(300),
     .unicast_interval_min_ms = SEC_TO_MS(60),
     .unicast_interval_max_ms = SEC_TO_MS(16776), /// 4.660 hours per spec
-    .lfn_maintain_parent_time = 60
+    .lfn_maintain_parent_time = 60,
+    .reserved = { 0 }
   },
   .network = {
     .lfn_registration_lifetime_m = HOUR_TO_MIN(84),
-    .lfn_na_wait_duration_m = HOUR_TO_MIN(2)
+    .lfn_na_wait_duration_m = HOUR_TO_MIN(2),
+    .reserved = 0
   },
   .power = {
     .listening_window_min_us = 5000,
     .window_margin_min_us = 5000,
-    .broadcast_lts_only = 1
+    .broadcast_lts_only = 1,
+    .reserved = { 0 }
   }
 };
 

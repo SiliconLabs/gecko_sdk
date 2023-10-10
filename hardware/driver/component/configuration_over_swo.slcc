@@ -27,6 +27,6 @@ template_contribution:
     priority: 9999
 documentation:
     docset: gecko-platform
-    document: hardware-driver/api/group-cos
+    document: platform-hardware-driver/cos
 
-    
+

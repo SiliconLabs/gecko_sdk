@@ -22,21 +22,21 @@ requires:
 documentation:
   docset: gecko-platform
   document:
-    - page: emlib/api/efm32gg/group-burtc
+    - page: platform-emlib-efm32gg/burtc
       condition: [device_sdid_72]
-    - page: emlib/api/efm32lg/group-burtc
+    - page: platform-emlib-efm32lg/burtc
       condition: [device_sdid_74]
-    - page: emlib/api/efr32xg21/group-burtc
+    - page: platform-emlib-efr32xg21/burtc
       condition: [device_sdid_200]
-    - page: emlib/api/efr32xg22/group-burtc
+    - page: platform-emlib-efr32xg22/burtc
       condition: [device_sdid_205]
-    - page: emlib/api/efr32xg23/group-burtc
+    - page: platform-emlib-efr32xg23/burtc
       condition: [device_sdid_210]
-    - page: emlib/api/efr32xg24/group-burtc
+    - page: platform-emlib-efr32xg24/burtc
       condition: [device_sdid_215]
-    - page: emlib/api/efr32xg25/group-burtc
+    - page: platform-emlib-efr32xg25/burtc
       condition: [device_sdid_220]
-    - page: emlib/api/efr32xg27/group-burtc
+    - page: platform-emlib-efr32xg27/burtc
       condition: [device_sdid_230]
-    - page: emlib/api/efr32xg28/group-burtc
+    - page: platform-emlib-efr32xg28/burtc
       condition: [device_sdid_235]

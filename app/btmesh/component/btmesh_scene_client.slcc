@@ -8,7 +8,7 @@ description: >
   This component provides a function to recall a scene identified by its number.
   This component is prepared for integration into SOC applications.
 
-  This is a No-Code component.
+  This is a No-Code component, if it is used with other compatible software components (eg.: CTL client).
 category: "Bluetooth Mesh|Models|Time and Scenes"
 quality: "production"
 root_path: "app/btmesh/common/btmesh_scene_client"

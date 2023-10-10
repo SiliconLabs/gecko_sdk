@@ -18,4 +18,4 @@ requires:
   - name: status
 documentation:
   docset: gecko-platform
-  document: common/api/group-stdio
+  document: platform-common/stdio

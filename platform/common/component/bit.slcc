@@ -13,4 +13,4 @@ provides:
   - name: bit
 documentation:
   docset: gecko-platform
-  document: common/api/group-bit
+  document: platform-common/bit

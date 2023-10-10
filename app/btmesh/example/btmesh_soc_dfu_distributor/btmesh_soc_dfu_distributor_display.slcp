@@ -3,7 +3,7 @@ package: Btmesh
 label: Bluetooth Mesh - SoC DFU Distributor
 description: >
   Demonstrates the Firmware Distributor role based on the BT Mesh Model specification.
-  Distributor is responsible for delivering new firmware images to the Updating nodes 
+  Distributor is responsible for delivering new firmware images to the Target nodes 
   and monitoring the progress of the firmware update.
 
 category: Bluetooth Mesh Examples
@@ -24,6 +24,7 @@ component:
   - id: app_log
   - id: bluetooth_feature_system
   - id: bootloader_interface
+  - id: btmesh_blob_transfer_server_recommended_instance_all
   - id: btmesh_distributor
   - id: btmesh_factory_reset
   - id: btmesh_stack_gatt_prov_bearer
@@ -33,8 +34,9 @@ component:
   - id: btmesh_provisionee
   - id: btmesh_provisioning_decorator
   - id: btmesh_proxy
+  - id: btmesh_sar_config_server
   - id: btmesh_stack
-  - id: btmesh_updating_node
+  - id: btmesh_target_node
   - id: btmesh_iv_update
   - id: btmesh_wstk_lcd
   - id: cli

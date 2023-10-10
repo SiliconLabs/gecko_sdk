@@ -23,4 +23,4 @@ requires:
   - name: component_catalog
 documentation:
     docset: gecko-platform
-    document: driver/api/group-button
+    document: platform-driver/button

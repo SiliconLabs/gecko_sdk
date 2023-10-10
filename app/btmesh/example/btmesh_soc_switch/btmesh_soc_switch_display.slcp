@@ -32,9 +32,10 @@ component:
   - id: btmesh_provisionee
   - id: btmesh_provisioning_decorator
   - id: btmesh_proxy
+  - id: btmesh_sar_config_server
   - id: btmesh_scene_client
   - id: btmesh_stack
-  - id: btmesh_updating_node
+  - id: btmesh_target_node
   - id: btmesh_iv_update
   - id: btmesh_wstk_lcd
   - id: cli
@@ -98,15 +99,15 @@ configuration:
     value: "1"
   - name: SL_BOARD_ENABLE_VCOM
     value: "1"
-  - name: SL_BTMESH_BLOB_TRANSFER_SERVER_MAX_BLOCK_SIZE_LOG_CFG_VAL
+  - name: SL_BTMESH_BLOB_TRANSFER_SERVER_DFU_TARGET_MAX_BLOCK_SIZE_LOG_CFG_VAL
     value: "9"
-  - name: SL_BTMESH_BLOB_TRANSFER_SERVER_LPN_MODE_CFG_VAL
+  - name: SL_BTMESH_BLOB_TRANSFER_SERVER_DFU_TARGET_LPN_MODE_CFG_VAL
     value: "1"
-  - name: SL_BTMESH_BLOB_TRANSFER_SERVER_MAX_CHUNK_SIZE_CFG_VAL
+  - name: SL_BTMESH_BLOB_TRANSFER_SERVER_DFU_TARGET_MAX_CHUNK_SIZE_CFG_VAL
     value: "8"
-  - name: SL_BTMESH_BLOB_TRANSFER_SERVER_MAX_CHUNKS_PER_BLOCK_CFG_VAL
+  - name: SL_BTMESH_BLOB_TRANSFER_SERVER_DFU_TARGET_MAX_CHUNKS_PER_BLOCK_CFG_VAL
     value: "64"
-  - name: SL_BTMESH_BLOB_TRANSFER_SERVER_PUSH_MODE_CFG_VAL
+  - name: SL_BTMESH_BLOB_TRANSFER_SERVER_DFU_TARGET_PUSH_MODE_CFG_VAL
     value: "0"
   - name: SL_BTMESH_CONFIG_MAX_PROV_BEARERS
     value: "3"

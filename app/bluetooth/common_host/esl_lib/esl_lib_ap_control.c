@@ -62,10 +62,11 @@
     return sc;                                                             \
   }
 
-#define CHECK_IN_SESSION(sc)                                               \
+#define CHECK_IN_SESSION(sc, ptr)                                          \
   if (sc != SL_STATUS_OK) {                                                \
     esl_lib_log_ap_control_error("AP control error: %04x" APP_LOG_NL, sc); \
     (void)sl_bt_gattdb_abort(session);                                     \
+    esl_lib_memory_free(ptr);                                              \
     return sc;                                                             \
   }
 
@@ -113,8 +114,9 @@ sl_status_t esl_lib_ap_control_cleanup(void)
   if (ap_control.conn_handle != SL_BT_INVALID_CONNECTION_HANDLE) {
     (void)sl_bt_connection_close(ap_control.conn_handle);
   }
-  (void)esl_lib_storage_delete(ap_control.cp_storage);
+  (void)esl_lib_storage_delete(&ap_control.cp_storage);
   (void)esl_lib_ap_control_adv_enable(false);
+  esl_lib_log_ap_control_debug("AP Control cleanup complete" APP_LOG_NL);
   return SL_STATUS_OK;
 }
 
@@ -131,7 +133,7 @@ sl_status_t esl_lib_ap_control_init(void)
   uint16_t service_di;
   uint16_t characteristic;
 
-  esl_lib_log_ap_control_info("Initializing AP Control" APP_LOG_NL);
+  esl_lib_log_ap_control_debug("Initializing AP Control" APP_LOG_NL);
 
   ap_control.conn_handle = SL_BT_INVALID_CONNECTION_HANDLE;
   ap_control.cp_handle   = ESL_LIB_INVALID_CHARACTERISTIC_HANDLE;
@@ -141,11 +143,17 @@ sl_status_t esl_lib_ap_control_init(void)
   sc = esl_lib_storage_create(&ap_control.cp_storage);
   CHECK(sc);
 
-  esl_lib_log_ap_control_debug("Storage created" APP_LOG_NL);
+  esl_lib_log_ap_control_debug("AP control storage created" APP_LOG_NL);
 
   sc = sl_bt_gattdb_new_session(&session);
-  CHECK(sc);
-  esl_lib_log_ap_control_debug("Session created" APP_LOG_NL);
+
+  if (sc != SL_STATUS_OK) {
+    esl_lib_log_ap_control_error("AP control GATT session create failed: %04x" APP_LOG_NL, sc);
+    esl_lib_memory_free(ap_control.cp_storage);
+    return sc;
+  }
+
+  esl_lib_log_ap_control_debug("AP control GATT session created" APP_LOG_NL);
 
   // ESL AP control service
   uint8_t service_uuid[] = ESL_LIB_AP_CONTROL_SERVICE_UUID;
@@ -155,7 +163,7 @@ sl_status_t esl_lib_ap_control_init(void)
                                 16,
                                 service_uuid,
                                 &service_custom);
-  CHECK_IN_SESSION(sc);
+  CHECK_IN_SESSION(sc, ap_control.cp_storage);
 
   // ESL AP control point
   uuid_128 ap_control_cp_uuid = {
@@ -174,7 +182,7 @@ sl_status_t esl_lib_ap_control_init(void)
                                                0,
                                                NULL,
                                                &ap_control.cp_handle);
-  CHECK_IN_SESSION(sc);
+  CHECK_IN_SESSION(sc, ap_control.cp_storage);
 
   // ESL AP Control Image Transfer
   uuid_128 ap_control_it_uuid = {
@@ -193,11 +201,11 @@ sl_status_t esl_lib_ap_control_init(void)
                                                0,
                                                NULL,
                                                &ap_control.it_handle);
-  CHECK_IN_SESSION(sc);
+  CHECK_IN_SESSION(sc, ap_control.cp_storage);
 
   sc = sl_bt_gattdb_start_service(session, service_custom);
-  CHECK_IN_SESSION(sc);
-  esl_lib_log_ap_control_debug("Custom service created" APP_LOG_NL);
+  CHECK_IN_SESSION(sc, ap_control.cp_storage);
+  esl_lib_log_ap_control_debug("AP control custom service created" APP_LOG_NL);
 
   // Generic Access
   uint8_t ga_uuid[] = { 0x00, 0x18 };
@@ -207,7 +215,7 @@ sl_status_t esl_lib_ap_control_init(void)
                                 2,
                                 ga_uuid,
                                 &service_ga);
-  CHECK_IN_SESSION(sc);
+  CHECK_IN_SESSION(sc, ap_control.cp_storage);
 
   // Device Name
   sl_bt_uuid_16_t device_name_uuid = {
@@ -224,7 +232,7 @@ sl_status_t esl_lib_ap_control_init(void)
                                               strlen(ESL_LIB_AP_CONTROL_DEVICE_NAME),
                                               (uint8_t *)ESL_LIB_AP_CONTROL_DEVICE_NAME,
                                               &characteristic);
-  CHECK_IN_SESSION(sc);
+  CHECK_IN_SESSION(sc, ap_control.cp_storage);
 
   // Appearance
   sl_bt_uuid_16_t apperance_uuid = {
@@ -241,11 +249,11 @@ sl_status_t esl_lib_ap_control_init(void)
                                               2,
                                               (uint8_t *)"\x01\x05",
                                               &characteristic);
-  CHECK_IN_SESSION(sc);
+  CHECK_IN_SESSION(sc, ap_control.cp_storage);
 
   sc = sl_bt_gattdb_start_service(session, service_ga);
-  CHECK_IN_SESSION(sc);
-  esl_lib_log_ap_control_debug("Generic Access service created" APP_LOG_NL);
+  CHECK_IN_SESSION(sc, ap_control.cp_storage);
+  esl_lib_log_ap_control_debug("AP control Generic Access Service created" APP_LOG_NL);
 
   // Device Information
   uint8_t di_uuid[] = { 0x0A, 0x18 };
@@ -255,7 +263,7 @@ sl_status_t esl_lib_ap_control_init(void)
                                 2,
                                 di_uuid,
                                 &service_di);
-  CHECK_IN_SESSION(sc);
+  CHECK_IN_SESSION(sc, ap_control.cp_storage);
 
   // Manufacturer Name String
   sl_bt_uuid_16_t mns_uuid = {
@@ -272,12 +280,12 @@ sl_status_t esl_lib_ap_control_init(void)
                                               strlen(ESL_LIB_AP_CONTROL_MANUFACTURER_NAME_STRING),
                                               (uint8_t *)ESL_LIB_AP_CONTROL_MANUFACTURER_NAME_STRING,
                                               &characteristic);
-  CHECK_IN_SESSION(sc);
+  CHECK_IN_SESSION(sc, ap_control.cp_storage);
 
   // System ID
   // Extract unique ID from BT Address.
   sc = sl_bt_system_get_identity_address(&address, &address_type);
-  CHECK_IN_SESSION(sc);
+  CHECK_IN_SESSION(sc, ap_control.cp_storage);
 
   // Pad and reverse unique ID to get System ID.
   system_id[0] = address.addr[5];
@@ -303,20 +311,20 @@ sl_status_t esl_lib_ap_control_init(void)
                                               8,
                                               system_id,
                                               &characteristic);
-  CHECK_IN_SESSION(sc);
+  CHECK_IN_SESSION(sc, ap_control.cp_storage);
 
   sc = sl_bt_gattdb_start_service(session, service_di);
-  CHECK_IN_SESSION(sc);
+  CHECK_IN_SESSION(sc, ap_control.cp_storage);
 
-  esl_lib_log_ap_control_debug("Device Information service created" APP_LOG_NL);
+  esl_lib_log_ap_control_debug("AP control Device Information Service created" APP_LOG_NL);
 
   sc = sl_bt_gattdb_commit(session);
 
   if (sc == SL_STATUS_OK) {
     ap_control.enabled = true;
-    esl_lib_log_ap_control_info("AP control initialized " APP_LOG_NL);
+    esl_lib_log_ap_control_debug("AP control initialized " APP_LOG_NL);
   } else {
-    esl_lib_log_ap_control_error("AP control GATTDB commit failed = %04x" APP_LOG_NL, sc);
+    esl_lib_log_ap_control_error("AP control GATTDB commit failed = 0x%04x" APP_LOG_NL, sc);
   }
 
   return sc;
@@ -326,12 +334,14 @@ sl_status_t esl_lib_ap_control_adv_enable(bool enable)
 {
   sl_status_t sc = SL_STATUS_OK;
 
-  if (!ap_control.enabled) {
-    return SL_STATUS_NOT_INITIALIZED;
+  if (!ap_control.enabled && enable) {
+    sc = esl_lib_ap_control_init();
   }
 
+  CHECK(sc);
+
   if (enable) {
-    esl_lib_log_ap_control_info("Enabling advertising = %d" APP_LOG_NL, enable);
+    esl_lib_log_ap_control_debug("Enabling advertising = %d" APP_LOG_NL, enable);
 
     sc = sl_bt_advertiser_create_set(&ap_control.adv_handle);
     CHECK(sc);
@@ -351,7 +361,7 @@ sl_status_t esl_lib_ap_control_adv_enable(bool enable)
                                        sl_bt_legacy_advertiser_connectable);
     CHECK(sc);
   } else {
-    esl_lib_log_ap_control_info("Disabling advertising = %d" APP_LOG_NL, enable);
+    esl_lib_log_ap_control_debug("Disabling advertising = %d" APP_LOG_NL, enable);
     if (ap_control.adv_handle != SL_BT_INVALID_ADVERTISING_SET_HANDLE) {
       sc = sl_bt_advertiser_stop(ap_control.adv_handle);
       CHECK(sc);
@@ -360,7 +370,7 @@ sl_status_t esl_lib_ap_control_adv_enable(bool enable)
       ap_control.adv_handle = SL_BT_INVALID_ADVERTISING_SET_HANDLE;
     }
   }
-  esl_lib_log_ap_control_info("Advertising = %d" APP_LOG_NL, enable);
+  esl_lib_log_ap_control_debug("Advertising = %d" APP_LOG_NL, enable);
 
   return sc;
 }
@@ -497,8 +507,8 @@ void esl_lib_ap_control_on_bt_event(sl_bt_msg_t *evt)
 
     case sl_bt_evt_connection_opened_id:
       if (evt->data.evt_connection_opened.master == PERIPHERAL_ROLE) {
-        esl_lib_log_ap_control_info("Connection opened as peripheral: %d" APP_LOG_NL,
-                                    evt->data.evt_connection_opened.connection);
+        esl_lib_log_ap_control_debug("Connection opened as peripheral: %d" APP_LOG_NL,
+                                     evt->data.evt_connection_opened.connection);
         if (ap_control.conn_handle != SL_BT_INVALID_CONNECTION_HANDLE) {
           // Close second connection
           esl_lib_log_ap_control_warning("Closing second connection" APP_LOG_NL);
@@ -510,8 +520,8 @@ void esl_lib_ap_control_on_bt_event(sl_bt_msg_t *evt)
           (void)send_event(ESL_LIB_AP_CONTROL_EVT_STATUS,
                            sizeof(ap_control.state),
                            (uint8_t *)&ap_control.state);
-          esl_lib_log_ap_control_info("Connection saved as AP controller: %d" APP_LOG_NL,
-                                      evt->data.evt_connection_opened.connection);
+          esl_lib_log_ap_control_debug("Connection saved as AP controller: %d" APP_LOG_NL,
+                                       evt->data.evt_connection_opened.connection);
         }
       }
       break;
@@ -546,8 +556,8 @@ void esl_lib_ap_control_on_bt_event(sl_bt_msg_t *evt)
 
     case sl_bt_evt_connection_closed_id:
       if (evt->data.evt_connection_closed.connection == ap_control.conn_handle) {
-        esl_lib_log_ap_control_info("Connection closed: %d" APP_LOG_NL,
-                                    ap_control.conn_handle);
+        esl_lib_log_ap_control_debug("Connection closed: %d" APP_LOG_NL,
+                                     ap_control.conn_handle);
         ap_control.conn_handle = SL_BT_INVALID_CONNECTION_HANDLE;
         ap_control.state = ESL_LIB_AP_CONTROL_STATE_DISCONNECTED;
         (void)send_event(ESL_LIB_AP_CONTROL_EVT_STATUS,

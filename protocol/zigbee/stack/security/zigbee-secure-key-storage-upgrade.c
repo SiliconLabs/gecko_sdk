@@ -43,7 +43,6 @@ sl_status_t zb_sec_man_upgrade_link_key_table(void)
   //avoid compiler issues for builds without a key table
   #if (EMBER_KEY_TABLE_SIZE > 0)
   uint8_t i;
-  uint8_t nullKey[EMBER_ENCRYPTION_KEY_SIZE] = { 0xFF };
 
   sl_zb_sec_man_context_t context;
   sl_zb_sec_man_init_context(&context);
@@ -86,9 +85,10 @@ sl_status_t zb_sec_man_upgrade_link_key_table(void)
     }
     //clear out token data; don't have space in bitmask to write that this key
     //now lives in Secure Vault
-    MEMMOVE(&(tok[KEY_ENTRY_KEY_DATA_OFFSET]),
-            &nullKey,
-            EMBER_ENCRYPTION_KEY_SIZE);
+    //Value of an erased token is all 0xFF bytes
+    MEMSET(&(tok[KEY_ENTRY_KEY_DATA_OFFSET]),
+           0xFF,
+           EMBER_ENCRYPTION_KEY_SIZE);
 
     halCommonSetIndexedToken(TOKEN_STACK_KEY_TABLE, i, &tok);
     keys_passed[KEYS_STATUS_LINK]++;
@@ -104,7 +104,6 @@ sl_status_t zb_sec_man_upgrade_gp_proxy_table(void)
   sl_zb_sec_man_context_t context;
   sl_zb_sec_man_init_context(&context);
   context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_GREEN_POWER_PROXY_TABLE_KEY;
-  uint8_t nullKey[EMBER_ENCRYPTION_KEY_SIZE] = { 0xFF };
   sl_status_t vault_import_status;
   uint8_t i;
 
@@ -127,7 +126,8 @@ sl_status_t zb_sec_man_upgrade_gp_proxy_table(void)
       keys_failed[KEYS_STATUS_GP]++;
       continue;
     }
-    MEMMOVE(&tok, &nullKey, EMBER_ENCRYPTION_KEY_SIZE);
+    //erase token by writing all 0xFF to it
+    MEMSET(&tok, 0xFF, EMBER_ENCRYPTION_KEY_SIZE);
     halCommonSetIndexedToken(TOKEN_STACK_GP_PROXY_TABLE, i, &tok);
     keys_passed[KEYS_STATUS_GP]++;
   }
@@ -139,7 +139,6 @@ sl_status_t zb_sec_man_upgrade_gp_sink_table(void)
   sl_zb_sec_man_context_t context;
   sl_zb_sec_man_init_context(&context);
   context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_GREEN_POWER_SINK_TABLE_KEY;
-  uint8_t nullKey[EMBER_ENCRYPTION_KEY_SIZE] = { 0xFF };
   sl_status_t vault_import_status;
   uint8_t i;
 
@@ -161,7 +160,8 @@ sl_status_t zb_sec_man_upgrade_gp_sink_table(void)
       keys_failed[KEYS_STATUS_GP]++;
       continue;
     }
-    MEMMOVE(&tok, &nullKey, EMBER_ENCRYPTION_KEY_SIZE);
+    //erase plaintext token's key data by setting it to all 0xFF
+    MEMSET(&tok, 0xFF, EMBER_ENCRYPTION_KEY_SIZE);
     halCommonSetIndexedToken(TOKEN_STACK_GP_SINK_TABLE, i, &tok);
     keys_passed[KEYS_STATUS_GP]++;
   }
@@ -181,7 +181,6 @@ sl_status_t zb_sec_man_upgrade_nwk_key(uint8_t key_index)
   if (is_key_migrated != SL_STATUS_OK) {
     sl_zb_sec_man_key_t plaintext_key;
     sl_status_t vault_import_status;
-    uint8_t nullKey[EMBER_ENCRYPTION_KEY_SIZE] = { 0xFF };
 
     tokTypeStackKeys tok;
     if (context.key_index == 1) {
@@ -197,8 +196,8 @@ sl_status_t zb_sec_man_upgrade_nwk_key(uint8_t key_index)
       keys_failed[KEYS_STATUS_NETWORK]++;
       return SL_STATUS_FAIL;
     }
-    // "erase" the non-secure vault key
-    MEMMOVE(&tok.networkKey, &nullKey, EMBER_ENCRYPTION_KEY_SIZE);
+    // "erase" the non-secure vault key by setting it to the null token value
+    MEMSET(&tok.networkKey, 0xFF, EMBER_ENCRYPTION_KEY_SIZE);
     //write the cleared token data back to NVM3
     if (context.key_index == 1) {
       sli_zigbee_stack_token_primitive(false, &tok, TOKEN_STACK_ALTERNATE_KEY, TOKEN_STACK_ALTERNATE_KEY_SIZE);
@@ -221,7 +220,6 @@ sl_status_t zb_sec_man_upgrade_tc_link_key(void)
   if (is_key_migrated != SL_STATUS_OK) {
     sl_zb_sec_man_key_t plaintext_key;
     sl_status_t vault_import_status;
-    uint8_t nullKey[EMBER_ENCRYPTION_KEY_SIZE] = { 0xFF };
 
     tokTypeStackTrustCenter tok;
     sli_zigbee_stack_token_primitive(true, &tok, TOKEN_STACK_TRUST_CENTER, TOKEN_STACK_TRUST_CENTER_SIZE);
@@ -234,7 +232,7 @@ sl_status_t zb_sec_man_upgrade_tc_link_key(void)
       return SL_STATUS_FAIL;
     }
     // "erase" the non-secure vault key
-    MEMMOVE(&tok.key, &nullKey, EMBER_ENCRYPTION_KEY_SIZE);
+    MEMSET(&tok.key, 0xFF, EMBER_ENCRYPTION_KEY_SIZE);
     // write cleared token data to NVM3; previous call to import already marked this key as
     // having been migrated away from token
     sli_zigbee_stack_token_primitive(false, &tok, TOKEN_STACK_TRUST_CENTER, TOKEN_STACK_TRUST_CENTER_SIZE);
@@ -255,7 +253,6 @@ sl_status_t zb_sec_man_upgrade_secure_ezsp_key(void)
   if (is_key_migrated != SL_STATUS_OK) {
     sl_zb_sec_man_key_t plaintext_key;
     sl_status_t vault_import_status;
-    uint8_t nullKey[EMBER_ENCRYPTION_KEY_SIZE] = { 0xFF };
 
     tokTypeSecureEzspSecurityKey tok;
     halCommonGetToken(&tok, TOKEN_SECURE_EZSP_SECURITY_KEY);
@@ -268,7 +265,7 @@ sl_status_t zb_sec_man_upgrade_secure_ezsp_key(void)
       return SL_STATUS_FAIL;
     }
     // "erase" the non-secure vault key
-    MEMMOVE(&tok.contents, &nullKey, EMBER_ENCRYPTION_KEY_SIZE);
+    MEMSET(&tok.contents, 0xFF, EMBER_ENCRYPTION_KEY_SIZE);
     halCommonSetToken(TOKEN_SECURE_EZSP_SECURITY_KEY, &tok);
     keys_passed[KEYS_STATUS_OTHER];
   }
@@ -290,7 +287,6 @@ sl_status_t zb_sec_man_upgrade_zll_key(void)
   // move key if it hasn't been moved already.
   if (is_key_migrated_enc != SL_STATUS_OK || is_key_migrated_pre != SL_STATUS_OK) {
     sl_zb_sec_man_key_t plaintext_key;
-    uint8_t nullKey[EMBER_ENCRYPTION_KEY_SIZE] = { 0xFF };
     tokTypeStackZllSecurity zllSecurityToken;
     halCommonGetToken(&zllSecurityToken, TOKEN_STACK_ZLL_SECURITY);
 
@@ -323,10 +319,10 @@ sl_status_t zb_sec_man_upgrade_zll_key(void)
     if (keys_passed[KEYS_STATUS_ZLL] > 0) {
       // "erase" the non-secure key data from token if import was successful
       if (vault_import_status_enc == SL_STATUS_OK) {
-        MEMMOVE(&zllSecurityToken.encryptionKey, &nullKey, EMBER_ENCRYPTION_KEY_SIZE);
+        MEMSET(&zllSecurityToken.encryptionKey, 0xFF, EMBER_ENCRYPTION_KEY_SIZE);
       }
       if (vault_import_status_pre == SL_STATUS_OK) {
-        MEMMOVE(&zllSecurityToken.preconfiguredKey, &nullKey, EMBER_ENCRYPTION_KEY_SIZE);
+        MEMSET(&zllSecurityToken.preconfiguredKey, 0xFF, EMBER_ENCRYPTION_KEY_SIZE);
       }
       halCommonSetToken(TOKEN_STACK_ZLL_SECURITY, &zllSecurityToken);
     }

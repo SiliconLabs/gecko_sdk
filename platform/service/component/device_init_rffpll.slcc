@@ -44,4 +44,4 @@ template_contribution:
     value: rffpll
 documentation:
   docset: gecko-platform
-  document: service/api/group-device-init-rffpll
+  document: platform-service/device-init-rffpll

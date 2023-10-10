@@ -31,21 +31,21 @@ requires:
 documentation:
   docset: gecko-platform
   document:
-    - page: emlib/api/efm32gg/group-opamp
+    - page: platform-emlib-efm32gg/opamp
       condition: [device_sdid_72]
-    - page: emlib/api/efm32tg/group-opamp
+    - page: platform-emlib-efm32tg/opamp
       condition: [device_sdid_73]
-    - page: emlib/api/efm32lg/group-opamp
+    - page: platform-emlib-efm32lg/opamp
       condition: [device_sdid_74]
-    - page: emlib/api/efr32xg12/group-opamp
+    - page: platform-emlib-efr32xg12/opamp
       condition: [device_sdid_84]
-    - page: emlib/api/efr32xg13/group-opamp
+    - page: platform-emlib-efr32xg13/opamp
       condition: [device_sdid_89]
-    - page: emlib/api/efr32xg14/group-opamp
+    - page: platform-emlib-efr32xg14/opamp
       condition: [device_sdid_95]
-    - page: emlib/api/efm32gg11/group-gpio
+    - page: platform-emlib-efm32gg11/gpio
       condition: [device_sdid_100]
-    - page: emlib/api/efm32tg11/group-gpio
+    - page: platform-emlib-efm32tg11/gpio
       condition: [device_sdid_103]
-    - page: emlib/api/efm32gg12/group-gpio
+    - page: platform-emlib-efm32gg12/gpio
       condition: [device_sdid_106]

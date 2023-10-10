@@ -38,6 +38,9 @@
 #include "app_common.h"
 #include "rail_zwave.h"
 
+// Enable start to start TX repeats
+static bool enableTxRepeatStartToStart = false;
+
 #if RAIL_SUPPORTS_CHANNEL_HOPPING
 
 static RAIL_RxChannelHoppingConfigEntry_t channelHoppingEntries[MAX_NUMBER_CHANNELS];
@@ -523,6 +526,21 @@ bool getRxDutyCycleSchedWakeupEnable(RAIL_Time_t *sleepInterval)
 
 #endif
 
+void configTxRepeatStartToStart(sl_cli_command_arg_t *args)
+{
+  char *command = sl_cli_get_command_string(args, 0);
+#if RAIL_SUPPORTS_TX_REPEAT_START_TO_START
+  if (sl_cli_get_argument_uint8(args, 0) > 1) {
+    responsePrintError(command, 0x16, "Value must be 0 or 1");
+  } else {
+    enableTxRepeatStartToStart = !!sl_cli_get_argument_uint8(args, 0);
+  }
+  responsePrint(command, "TxRepeatStartToStart: %u", enableTxRepeatStartToStart);
+#else
+  responsePrintError(command, 0x16, "Start to start TX repeats not supported on this platform");
+#endif
+}
+
 void setNextTxRepeat(sl_cli_command_arg_t *args)
 {
   RAIL_TxRepeatConfig_t repeats = {
@@ -530,6 +548,11 @@ void setNextTxRepeat(sl_cli_command_arg_t *args)
     .repeatOptions = RAIL_TX_REPEAT_OPTIONS_NONE,
     .delayOrHop.delay = RAIL_TRANSITION_TIME_KEEP,
   };
+
+  if (enableTxRepeatStartToStart) {
+    repeats.repeatOptions |= RAIL_TX_REPEAT_OPTION_START_TO_START;
+  }
+
   uint32_t argc = sl_cli_get_argument_count(args);
   char *command = sl_cli_get_command_string(args, 0);
 
@@ -552,7 +575,7 @@ void setNextTxRepeat(sl_cli_command_arg_t *args)
       txChannelHoppingEntries[i].channel = (uint16_t)channel;
       i++;
     }
-    repeats.repeatOptions = RAIL_TX_REPEAT_OPTION_HOP;
+    repeats.repeatOptions |= RAIL_TX_REPEAT_OPTION_HOP;
     repeats.delayOrHop.channelHopping.numberOfChannels = i;
     repeats.delayOrHop.channelHopping.buffer = channelHoppingBuffer;
     repeats.delayOrHop.channelHopping.bufferLength = CHANNEL_HOPPING_BUFFER_SIZE;
@@ -578,6 +601,11 @@ void setNextBleTxRepeat(sl_cli_command_arg_t *args)
     .repeatOptions = RAIL_TX_REPEAT_OPTIONS_NONE,
     .delayOrHop.delay = RAIL_TRANSITION_TIME_KEEP,
   };
+
+  if (enableTxRepeatStartToStart) {
+    repeats.repeatOptions |= RAIL_TX_REPEAT_OPTION_START_TO_START;
+  }
+
   uint32_t argc = sl_cli_get_argument_count(args);
   char *command = sl_cli_get_command_string(args, 0);
 
@@ -617,7 +645,7 @@ void setNextBleTxRepeat(sl_cli_command_arg_t *args)
       txChannelHoppingEntries[i].crcInit          = crcInit;
       i++;
     }
-    repeats.repeatOptions = RAIL_TX_REPEAT_OPTION_HOP;
+    repeats.repeatOptions |= RAIL_TX_REPEAT_OPTION_HOP;
     repeats.delayOrHop.channelHopping.numberOfChannels = i;
     repeats.delayOrHop.channelHopping.buffer = channelHoppingBuffer;
     repeats.delayOrHop.channelHopping.bufferLength = CHANNEL_HOPPING_BUFFER_SIZE;

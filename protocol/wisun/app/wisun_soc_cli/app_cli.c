@@ -213,6 +213,94 @@ static app_socket_entry_t app_socket_entries[APP_MAX_SOCKET_ENTRIES];
 static app_connection_state_t app_connection_state;
 static uint32_t app_connection_tick_count;
 
+#if RAIL_IEEE802154_SUPPORTS_G_MODESWITCH
+static uint8_t op_mode_to_phy_mode_id(uint8_t op_mode)
+{
+  uint8_t phy_mode_id;
+  switch(op_mode) {
+    case 0x1a:
+      phy_mode_id = 1;
+      break;
+    case 0x1b:
+      phy_mode_id = 2;
+      break;
+    case 0x2:
+      phy_mode_id = 3;
+      break;
+    case 0x2b:
+      phy_mode_id = 4;
+      break;
+    case 0x3:
+      phy_mode_id = 5;
+      break;
+    case 0x4a:
+      phy_mode_id = 6;
+      break;
+    case 0x4b:
+      phy_mode_id = 7;
+      break;
+    case 0x5:
+      phy_mode_id = 8;
+      break;
+    default:
+      printf("[Invalid operating_mode!\r\n]");
+      phy_mode_id = 255;
+  }
+
+  return phy_mode_id;
+}
+
+// return base PhyModeId
+static uint8_t find_base_operating_mode(void)
+{
+  if (app_settings_wisun.phy_config_type == SL_WISUN_PHY_CONFIG_FAN10) {
+    return op_mode_to_phy_mode_id(app_settings_wisun.operating_mode);
+  } else {
+    return app_settings_wisun.phy_mode_id;
+  }
+}
+
+static bool check_base_operating_mode_in_pom_ie(uint8_t phy_mode_id_count, const uint8_t *phy_mode_ids)
+{
+  uint8_t base_mode = find_base_operating_mode();
+  uint8_t i;
+  bool found = false;
+
+  if (base_mode != 255) {
+    for (i = 0; i < phy_mode_id_count; i++) {
+      if (phy_mode_ids[i] == base_mode) {
+        found = true;
+        break;
+      }
+    }
+  }
+
+  return found;
+}
+
+static void add_base_operating_mode_in_pom_ie(uint8_t *phy_mode_id_count_p, uint8_t *phy_mode_id_p)
+{
+  uint8_t base_mode = find_base_operating_mode();
+
+  if (base_mode != 255) {
+    uint8_t temp_phy_mode_ids[15];
+    uint8_t nb;
+
+    // Save previous POM-IE
+    memcpy(temp_phy_mode_ids, phy_mode_id_p, *phy_mode_id_count_p);
+
+    // Add base mode first
+    phy_mode_id_p[0] = base_mode;
+
+    // Restore other modes. Remove last one if POM-IE is full.
+    nb = *phy_mode_id_count_p < 15 ? *phy_mode_id_count_p : 14;
+    memcpy(&phy_mode_id_p[1], temp_phy_mode_ids, nb);
+
+    *phy_mode_id_count_p = nb + 1;
+  }
+}
+#endif
+
 static app_socket_entry_t *app_socket_alloc_entry()
 {
   sl_slist_node_t *item;
@@ -841,6 +929,12 @@ static void app_join(sl_wisun_phy_config_type_t phy_config_type)
   }
 
 #if RAIL_IEEE802154_SUPPORTS_G_MODESWITCH
+  if (app_settings_wisun.device_type == SL_WISUN_LFN) {
+    // LFN start can be delayed up to 1 second.
+    // Need to wait radio is up before reading POM-IE
+    sl_sleeptimer_delay_millisecond(1100);
+  }
+
   // Configure POM-IE
   // If PhyModeIds are set by user, send them to the stack, otherwise
   // retrieve the default PhyModeIds from the stack first
@@ -849,6 +943,11 @@ static void app_join(sl_wisun_phy_config_type_t phy_config_type)
     if (sl_wisun_get_pom_ie(&phy_mode_id_count, phy_mode_id, &is_mdr_command_capable) == SL_STATUS_OK) {
       phy_mode_id_p = phy_mode_id;
       phy_mode_id_count_p = &phy_mode_id_count;
+
+      // Check base mode is inside POM_IE
+      if (!check_base_operating_mode_in_pom_ie(phy_mode_id_count, phy_mode_id_p)) {
+        add_base_operating_mode_in_pom_ie(phy_mode_id_count_p, phy_mode_id_p);
+      }
     } else {
       // POM-IE not available
       goto cleanup;
@@ -862,7 +961,7 @@ static void app_join(sl_wisun_phy_config_type_t phy_config_type)
                             phy_mode_id_p,
                             app_settings_wisun.rx_mdr_capable);
   if (ret != SL_STATUS_OK) {
-    printf("[Failed: unable to RX PhyModeId list: %lu]\r\n", ret);
+    printf("[Failed: unable to set RX PhyModeId list: %lu]\r\n", ret);
     goto cleanup;
   }
 #else

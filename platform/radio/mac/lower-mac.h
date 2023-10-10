@@ -277,6 +277,7 @@ void sl_mac_lower_mac_radio_sleep(void);
 void sl_mac_lower_mac_radio_wakeup(void);
 uint32_t sl_mac_get_mac_timer(void);
 bool sl_mac_lower_mac_channel_is_valid(uint8_t mac_index, uint8_t mac_page_chan);
+void sl_mac_lower_mac_force_idle(uint8_t mac_index);
 
 //------------------------------------------------------------------------------
 // New APIs created after the zigbee/flex merge

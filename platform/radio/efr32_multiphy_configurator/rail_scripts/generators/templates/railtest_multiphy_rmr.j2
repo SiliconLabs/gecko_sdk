@@ -4,8 +4,8 @@
   writeRmrStructure {{ rmr_structs.phyInfo }} 0 8{% for byte in (phyInfoEntry.phyInfoData.version|uint32ToBytes) %} {{byte}}{% endfor -%}
   {% for byte in (phyInfoEntry.phyInfoData.freqOffsetFactor_fxp|uint32ToBytes) %} {{byte}}{% endfor -%}
   {{"\n"}}writeRmrStructure {{ rmr_structs.phyInfo }} 20 8{% for byte in (phyInfoEntry.phyInfoData.antDivRxAutoConfig|uint32ToBytes) %} {{byte}}{% endfor -%}
-  {% for byte in (phyInfoEntry.phyInfoData.src1CalcHelper|uint32ToBytes) %} {{byte}}{% endfor -%}
-  {{"\n"}}writeRmrStructure {{ rmr_structs.phyInfo }} 28 8{% for byte in (phyInfoEntry.phyInfoData.src2CalcHelper|uint32ToBytes) %} {{byte}}{% endfor -%}
+  {% for byte in (phyInfoEntry.phyInfoData.src1Denominator|uint32ToBytes) %} {{byte}}{% endfor -%}
+  {{"\n"}}writeRmrStructure {{ rmr_structs.phyInfo }} 28 8{% for byte in (phyInfoEntry.phyInfoData.src2Denominator|uint32ToBytes) %} {{byte}}{% endfor -%}
   {% for byte in ((phyInfoEntry.phyInfoData.txBaudRate|int)|uint32ToBytes) %} {{byte}}{% endfor -%}
   {{"\n"}}writeRmrStructure {{ rmr_structs.phyInfo }} 36 8{% for byte in ((phyInfoEntry.phyInfoData.baudPerSymbol|baudsBits(phyInfoEntry.phyInfoData.bitsPerSymbol))|uint32ToBytes) %} {{byte}}{% endfor -%}
   {% for byte in ((phyInfoEntry.phyInfoData.synthCache|int)|uint32ToBytes) %} {{byte}}{% endfor -%}

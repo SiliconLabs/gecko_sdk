@@ -20,4 +20,4 @@ source:
   - path: src/sl_si70xx.c
 documentation:
     docset: gecko-platform
-    document: hardware-driver/api/group-si70xx
+    document: platform-hardware-driver/si70xx

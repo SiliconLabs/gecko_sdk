@@ -65,6 +65,7 @@ requires:
   - name: driver_mvp
   - name: math
   - name: emlib_common
+    condition: [device_efx]
   - name: status
   - name: device_has_mvp
   - name: component_catalog

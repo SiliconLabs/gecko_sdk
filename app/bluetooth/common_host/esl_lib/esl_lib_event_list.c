@@ -135,6 +135,9 @@ sl_status_t esl_lib_event_list_allocate(esl_lib_evt_type_t event_type,
     case ESL_LIB_EVT_BONDING_DATA:
       size += sizeof(esl_lib_evt_bonding_data_t);
       break;
+    case ESL_LIB_EVT_BONDING_FINISHED:
+      size += sizeof(esl_lib_evt_bonding_finished_t);
+      break;
     case ESL_LIB_EVT_PAWR_STATUS:
       size += sizeof(esl_lib_evt_pawr_status_t);
       break;

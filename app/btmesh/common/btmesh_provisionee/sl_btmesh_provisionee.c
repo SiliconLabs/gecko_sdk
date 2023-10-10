@@ -66,15 +66,13 @@
 #define SL_UNUSED  __attribute__((unused))
 
 #define AUTH_VAL_SIZE_MAX 32
-// Callback has no parameters
-#define NO_CALLBACK_DATA               (void *)NULL
-// Timeout for system reset after node reset event occured
-#define SL_BTMESH_SYSTEM_RESET_TIMEOUT 0
 
 static size_t auth_val_size = AUTH_VAL_SIZE_MAX;
 
 // Timer callback
+#if SL_BTMESH_PROVISIONEE_AUTO_RESET
 static app_timer_t sl_btmesh_system_reset_timer;
+#endif
 
 // -----------------------------------------------------------------------------
 //                          Static Function Declarations
@@ -182,20 +180,21 @@ void sl_btmesh_provisionee_on_event(sl_btmesh_msg_t* evt)
       break;
   #endif
 
+#if SL_BTMESH_PROVISIONEE_AUTO_RESET
     case sl_btmesh_evt_node_reset_id:
   #ifdef SL_CATALOG_BTMESH_FACTORY_RESET_PRESENT
       // Application callback on node reset
       sl_btmesh_factory_reset_on_node_reset();
   #endif // SL_CATALOG_BTMESH_FACTORY_RESET_PRESENT
-      // Reboot after a small delay
+      // Reboot after a delay
       sc = app_timer_start(&sl_btmesh_system_reset_timer,
-                           SL_BTMESH_SYSTEM_RESET_TIMEOUT,
+                           SL_BTMESH_PROVISIONEE_AUTO_RESET_DELAY,
                            on_system_reset_timer,
-                           NO_CALLBACK_DATA,
+                           NULL,
                            false);
       app_assert_status_f(sc, "Failed to start system reset timer after node reset event");
       break;
-
+#endif
     default:
       break;
   }

@@ -113,6 +113,20 @@ sl_status_t sl_bt_system_stop_bluetooth() {
 
 }
 
+sl_status_t sl_bt_system_forcefully_stop_bluetooth() {
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+
+
+    cmd->header=sl_bt_cmd_system_forcefully_stop_bluetooth_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
+
+
+    sl_bt_host_handle_command();
+    return rsp->data.rsp_system_forcefully_stop_bluetooth.result;
+
+}
+
 sl_status_t sl_bt_system_get_version(uint16_t *major,
                                      uint16_t *minor,
                                      uint16_t *patch,
@@ -1979,6 +1993,22 @@ sl_status_t sl_bt_connection_set_data_length(uint8_t connection,
 
     sl_bt_host_handle_command();
     return rsp->data.rsp_connection_set_data_length.result;
+
+}
+
+sl_status_t sl_bt_connection_read_statistics(uint8_t connection, uint8_t reset) {
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+
+    cmd->data.cmd_connection_read_statistics.connection=connection;
+    cmd->data.cmd_connection_read_statistics.reset=reset;
+
+    cmd->header=sl_bt_cmd_connection_read_statistics_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
+
+
+    sl_bt_host_handle_command();
+    return rsp->data.rsp_connection_read_statistics.result;
 
 }
 

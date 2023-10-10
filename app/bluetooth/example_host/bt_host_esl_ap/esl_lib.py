@@ -33,6 +33,7 @@ import sys
 import threading
 import ap_logger
 import esl_lib_wrapper as elw
+from ap_constants import ADDRESS_TYPE_PUBLIC_ADDRESS
 
 SCAN_PHY_1M = 1
 SCAN_PHY_CODED = 4
@@ -94,6 +95,7 @@ def event_factory(evt_code: elw.esl_lib_evt_type_t, evt_data: elw.esl_lib_evt_da
         EventConnectionClosed,
         EventConnectionOpened,
         EventBondingData,
+        EventBondingFinished,
         EventPawrStatus,
         EventPawrResponse,
         EventPawrDataRequest,
@@ -114,8 +116,7 @@ def get_node_id(node_id: elw.esl_lib_node_id_t):
     if node_id.type == elw.ESL_LIB_NODE_ID_TYPE_ADDRESS:
         return Address.from_ctype(node_id.id.address)
     if node_id.type == elw.ESL_LIB_NODE_ID_TYPE_CONNECTION:
-        # Store pointer as an integer
-        return int(node_id.id.connection_handle)
+        return ConnectionHandle(node_id.id.connection_handle)
     if node_id.type == elw.ESL_LIB_NODE_ID_TYPE_PAWR:
         return PAWRSubevent.from_ctype(node_id.id.pawr)
     return None
@@ -128,39 +129,44 @@ class Address():
         self.addr = address
         if address_type is None:
             # use public device address type per default
-            self.addr_type = 0
+            self.address_type = ADDRESS_TYPE_PUBLIC_ADDRESS
         else:
-            self.addr_type = int(address_type)
+            self.address_type = int(address_type)
 
     def __repr__(self) -> str:
-        return ':'.join([f'{b:02X}' for b in iter(reversed(self.addr))])
+        return ':'.join([f'{b:02X}' for b in iter(reversed(self.addr))]) + f', type {self.address_type}'
 
     def __eq__(self, other):
         if other is None:
             return False
         if isinstance(other, Address):
-            return (self.addr == other.addr) and (self.addr_type == other.addr_type)
+            return (self.addr == other.addr) and (self.address_type == other.address_type)
         if len(other) >= 12:
             val_b = bytes.fromhex(other.replace(':', ''))[::-1]
             return val_b == self.addr
         return other == self.addr
 
     def __hash__(self):
-        return hash((self.addr, self.addr_type))
+        return hash((self.addr, self.address_type))
 
     @classmethod
     def from_str(cls, address: str, address_type=None):
         '''Create new address instance from string object'''
-        return cls(bytes.fromhex(address.replace(':', ''))[::-1], address_type)
+        return cls(bytes.fromhex(address.replace(':', ''))[::-1], ADDRESS_TYPE_PUBLIC_ADDRESS if address_type is None else int(address_type))
 
     @classmethod
     def from_ctype(cls, address: elw.esl_lib_address_t):
         '''Create new address instance from ctype object'''
-        return cls(bytes(address.addr), int(address.addr_type))
+        return cls(bytes(address.addr), int(address.address_type))
 
     def to_ctype(self) -> elw.esl_lib_address_t:
         '''Convert to ctype object'''
-        return elw.esl_lib_address_t((ctypes.c_ubyte * 6).from_buffer_copy(self.addr), self.addr_type)
+        return elw.esl_lib_address_t(elw.struct_esl_lib_address_s._fields_[0][1].from_buffer_copy(self.addr), self.address_type)
+
+class ConnectionHandle(int):
+    '''Connection handle representation'''
+    def __repr__(self):
+        return hex(self)
 
 class PAWRSubevent():
     '''Wrapper for esl_lib_pawr_subevent_t'''
@@ -169,7 +175,7 @@ class PAWRSubevent():
         self.subevent = subevent
 
     def __repr__(self) -> str:
-        return f'PAWR {self.handle} subevent {self.subevent}'
+        return f'PAWR 0x{self.handle:08x} subevent {self.subevent}'
 
     @classmethod
     def from_ctype(cls, pawr: elw.esl_lib_pawr_subevent_t):
@@ -226,7 +232,7 @@ class EventTagInfo():
     evt_code = EventType(elw.ESL_LIB_EVT_TAG_INFO)
 
     def __init__(self, evt_data: elw.esl_lib_evt_data_t):
-        self.connection_handle = evt_data.evt_tag_info.connection_handle
+        self.connection_handle = ConnectionHandle(evt_data.evt_tag_info.connection_handle)
         tlv_data = long_array_to_bytes(evt_data.evt_tag_info.tlv_data)
         self.tlv_data = {}
         tlv_position = 0
@@ -239,108 +245,119 @@ class EventTagInfo():
 
     def __repr__(self) -> str:
         tlv_data_str = ', '.join([f'{get_enum("ESL_LIB_DATA_TYPE_", key)}: {value.hex()}' for key, value in self.tlv_data.items()])
-        return f'{self.evt_code}, {self.connection_handle:#x}, {tlv_data_str}'
+        return f'{self.evt_code}, {self.connection_handle}, {tlv_data_str}'
 
 class EventConfigureTagResponse():
     '''Wrapper for esl_lib_evt_configure_tag_response_t'''
     evt_code = EventType(elw.ESL_LIB_EVT_CONFIGURE_TAG_RESPONSE)
 
     def __init__(self, evt_data: elw.esl_lib_evt_data_t):
-        self.connection_handle = evt_data.evt_configure_tag_response.connection_handle
+        self.connection_handle = ConnectionHandle(evt_data.evt_configure_tag_response.connection_handle)
         self.type = evt_data.evt_configure_tag_response.type
         self.status = evt_data.evt_configure_tag_response.status
 
     def __repr__(self) -> str:
         type_str = get_enum('ESL_LIB_DATA_TYPE_', self.type)
         status_str = get_enum('SL_STATUS_', self.status)
-        return f'{self.evt_code}, {self.connection_handle:#x}, {type_str}, {status_str}'
+        return f'{self.evt_code}, {self.connection_handle}, {type_str}, {status_str}'
 
 class EventControlPointResponse():
     '''Wrapper for esl_lib_evt_control_point_response_t'''
     evt_code = EventType(elw.ESL_LIB_EVT_CONTROL_POINT_RESPONSE)
 
     def __init__(self, evt_data: elw.esl_lib_evt_data_t):
-        self.connection_handle = evt_data.evt_control_point_response.connection_handle
+        self.connection_handle = ConnectionHandle(evt_data.evt_control_point_response.connection_handle)
         self.status = evt_data.evt_control_point_response.status
         self.data_sent = array_to_bytes(evt_data.evt_control_point_response.data_sent)
 
     def __repr__(self) -> str:
         status_str = get_enum('SL_STATUS_', self.status)
-        return f'{self.evt_code}, {self.connection_handle:#x}, {status_str}, {self.data_sent.hex()}'
+        return f'{self.evt_code}, {self.connection_handle}, {status_str}, {self.data_sent.hex()}'
 
 class EventControlPointNotification():
     '''Wrapper for esl_lib_evt_control_point_notification_t'''
     evt_code = EventType(elw.ESL_LIB_EVT_CONTROL_POINT_NOTIFICATION)
 
     def __init__(self, evt_data: elw.esl_lib_evt_data_t):
-        self.connection_handle = evt_data.evt_control_point_notification.connection_handle
+        self.connection_handle = ConnectionHandle(evt_data.evt_control_point_notification.connection_handle)
         self.data = array_to_bytes(evt_data.evt_control_point_notification.data)
 
     def __repr__(self) -> str:
-        return f'{self.evt_code}, {self.connection_handle:#x}, {self.data.hex()}'
+        return f'{self.evt_code}, {self.connection_handle}, {self.data.hex()}'
 
 class EventConnectionOpened():
     '''Wrapper for esl_lib_evt_connection_opened_t'''
     evt_code = EventType(elw.ESL_LIB_EVT_CONNECTION_OPENED)
 
     def __init__(self, evt_data: elw.esl_lib_evt_data_t):
-        self.connection_handle = evt_data.evt_connection_opened.connection_handle
+        self.connection_handle = ConnectionHandle(evt_data.evt_connection_opened.connection_handle)
         self.address = Address.from_ctype(evt_data.evt_connection_opened.address)
         self.gattdb_handles = elw.esl_lib_gattdb_handles_t.from_buffer_copy(evt_data.evt_connection_opened.gattdb_handles)
 
     def __repr__(self) -> str:
         gattdb_str = f'[{self.gattdb_handles.services.esl}, {self.gattdb_handles.services.ots}, {self.gattdb_handles.services.dis}]'
-        return f'{self.evt_code}, {self.connection_handle:#x}, {self.address}, {gattdb_str}'
+        return f'{self.evt_code}, {self.connection_handle}, {self.address}, {gattdb_str}'
 
 class EventConnectionClosed():
     '''Wrapper for esl_lib_evt_connection_closed_t'''
     evt_code = EventType(elw.ESL_LIB_EVT_CONNECTION_CLOSED)
 
     def __init__(self, evt_data: elw.esl_lib_evt_data_t):
-        self.connection_handle = evt_data.evt_connection_closed.connection_handle
+        self.connection_handle = ConnectionHandle(evt_data.evt_connection_closed.connection_handle)
         self.address = Address.from_ctype(evt_data.evt_connection_closed.address)
         self.reason = evt_data.evt_connection_closed.reason
 
     def __repr__(self) -> str:
         reason_str = get_enum('SL_STATUS_', self.reason)
-        return f'{self.evt_code}, {self.connection_handle:#x}, {self.address}, {reason_str}'
+        return f'{self.evt_code}, {self.connection_handle}, {self.address}, {reason_str}'
 
 class EventBondingData():
     '''Wrapper for esl_lib_evt_bonding_data_t'''
     evt_code = EventType(elw.ESL_LIB_EVT_BONDING_DATA)
 
     def __init__(self, evt_data: elw.esl_lib_evt_data_t):
-        self.connection_handle = evt_data.evt_bonding_data.connection_handle
+        self.connection_handle = ConnectionHandle(evt_data.evt_bonding_data.connection_handle)
         self.address = Address.from_ctype(evt_data.evt_bonding_data.address)
         self.ltk = bytes(evt_data.evt_bonding_data.ltk)
 
     def __repr__(self) -> str:
-        return f'{self.evt_code}, {self.connection_handle:#x}, {self.address}, {self.ltk.hex()}'
+        return f'{self.evt_code}, {self.connection_handle}, {self.address}, {self.ltk.hex()}'
+
+class EventBondingFinished():
+    '''Wrapper for esl_lib_evt_bonding_finished_t'''
+    evt_code = EventType(elw.ESL_LIB_EVT_BONDING_FINISHED)
+
+    def __init__(self, evt_data: elw.esl_lib_evt_data_t):
+        self.connection_handle = ConnectionHandle(evt_data.evt_bonding_finished.connection_handle)
+        self.address = Address.from_ctype(evt_data.evt_bonding_finished.address)
+
+    def __repr__(self) -> str:
+        return f'{self.evt_code}, {self.connection_handle}, {self.address}'
 
 class EventImageTransferFinished():
     '''Wrapper for esl_lib_evt_image_transfer_finished_t'''
     evt_code = EventType(elw.ESL_LIB_EVT_IMAGE_TRANSFER_FINISHED)
 
     def __init__(self, evt_data: elw.esl_lib_evt_data_t):
-        self.connection_handle = evt_data.evt_image_transfer_finished.connection_handle
+        self.connection_handle = ConnectionHandle(evt_data.evt_image_transfer_finished.connection_handle)
         self.img_index = evt_data.evt_image_transfer_finished.img_index
         self.status = evt_data.evt_image_transfer_finished.status
 
     def __repr__(self) -> str:
         status_str = get_enum('SL_STATUS_', self.status)
-        return f'{self.evt_code}, {self.connection_handle:#x}, {self.img_index}, {status_str}'
+        return f'{self.evt_code}, {self.connection_handle}, {self.img_index}, {status_str}'
 
 class EventImageType():
     '''Wrapper for esl_lib_evt_image_type_t'''
     evt_code = EventType(elw.ESL_LIB_EVT_IMAGE_TYPE)
 
     def __init__(self, evt_data: elw.esl_lib_evt_data_t):
-        self.connection_handle = evt_data.evt_image_type.connection_handle
+        self.connection_handle = ConnectionHandle(evt_data.evt_image_type.connection_handle)
         self.img_index = evt_data.evt_image_type.img_index
         self.type_data = long_array_to_bytes(evt_data.evt_image_type.type_data)
 
     def __repr__(self) -> str:
-        return f'{self.evt_code}, {self.connection_handle:#x}, {self.img_index}, {self.type_data.hex()}'
+        return f'{self.evt_code}, {self.connection_handle}, {self.img_index}, {self.type_data.hex()}'
 
 class EventPawrStatus():
     '''Wrapper for esl_lib_evt_pawr_status_t'''
@@ -394,7 +411,7 @@ class EventError():
         lib_status_str = get_enum('ESL_LIB_STATUS_', self.lib_status)
         sl_status_str = get_enum('SL_STATUS_', self.sl_status)
         try:
-            if isinstance(self.node_id, int):
+            if isinstance(self.node_id, ConnectionHandle) or isinstance(self.node_id, (Address)):
                 # Connection handle node ID type
                 data_str = get_enum('ESL_LIB_CONNECTION_STATE_', self.data)
             elif isinstance(self.node_id, PAWRSubevent):
@@ -439,27 +456,33 @@ class Lib():
         '''Main method of the ESL lib process'''
         ap_logger.stdout = stdout
         ap_logger.level = level
-        logger = ap_logger.getLogger('LIB')
-        logger.debug('started pid: %u', os.getpid())
+        self.log.debug('started pid: %u', os.getpid())
         threading.Thread(target=self._deserialize_command, daemon=True, args=(conn,)).start()
         # Instantiate callback function pointer
         on_event_func = elw.esl_lib_on_event_t(self._on_event)
 
         def log(level:int, module:str, log:str, file:str, line:int, function:str):
             """Logging callback for ESL lib instance"""
+            filter_events = []
             LOG_LEVEL_DICT = {
-                elw.ESL_LIB_LOG_LEVEL_DEBUG: logger.debug,
-                elw.ESL_LIB_LOG_LEVEL_INFO: logger.info,
-                elw.ESL_LIB_LOG_LEVEL_WARNING: logger.warning,
-                elw.ESL_LIB_LOG_LEVEL_ERROR: logger.error,
-                elw.ESL_LIB_LOG_LEVEL_CRITICAL: logger.critical,
+                elw.ESL_LIB_LOG_LEVEL_DEBUG: self.log.debug,
+                elw.ESL_LIB_LOG_LEVEL_INFO: self.log.info,
+                elw.ESL_LIB_LOG_LEVEL_WARNING: self.log.warning,
+                elw.ESL_LIB_LOG_LEVEL_ERROR: self.log.error,
+                elw.ESL_LIB_LOG_LEVEL_CRITICAL: self.log.critical,
             }
-            filter_events = [b"PAwR response, data status = 255", b"Tag found"]
+            if ap_logger.logLevel() > ap_logger.LEVELS["NOTSET"]: # Note: The lowest log level becomes extra verbose, completely flooding the CLI!
+                filter_events = [b"PAwR response, data status = 255", b"Tag found", b"characteristic", b"tag info"]
             if not any(flt in log for flt in filter_events):
-                LOG_LEVEL_DICT[level](f'[{module}] {log.rstrip()} @ {file}:{line} in {function}')
+                LOG_LEVEL_DICT[level]("[%s] %s in %s() @ %d:%s ", module, log.rstrip(), function, line, file)
+
         log_func = elw.esl_lib_log_callback_t(log)
         elw.esl_lib_start(self.config, on_event_func, log_func)
-        logger.debug('terminated pid: %u', os.getpid())
+        self.log.debug('terminated pid: %u', os.getpid())
+
+    @property
+    def log(self):
+        return ap_logger.getLogger('LIB')
 
     def _deserialize_command(self, conn: Connection):
         '''Deserialize command and serialize result'''
@@ -645,14 +668,14 @@ class Lib():
         status = elw.esl_lib_pawr_enable(pawr_handle, enable)
         return (status, )
 
-    def pawr_set_data(self, pawr_handle, subevent: int, payload: bytes):
+    def pawr_set_data(self, pawr_handle, subevent: int, response_slot_max: int, payload: bytes):
         '''Public wrapper for esl_lib_pawr_set_data'''
-        self._serialize_command('_pawr_set_data', (pawr_handle, subevent, payload))
+        self._serialize_command('_pawr_set_data', (pawr_handle, subevent, response_slot_max, payload))
 
-    def _pawr_set_data(self, pawr_handle, subevent: int, payload: bytes):
+    def _pawr_set_data(self, pawr_handle, subevent: int, response_slot_max: int, payload: bytes):
         '''Internal wrapper for esl_lib_pawr_set_data'''
         c_payload = bytes_to_array(payload)
-        status = elw.esl_lib_pawr_set_data(pawr_handle, subevent, array_p(c_payload))
+        status = elw.esl_lib_pawr_set_data(pawr_handle, subevent, response_slot_max, array_p(c_payload))
         return (status, )
 
     def pawr_configure(self,

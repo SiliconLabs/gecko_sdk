@@ -1527,7 +1527,7 @@ static void sl_btmesh_fw_distribution_server_element_init(uint16_t elem_index)
   dist_init(self);
   fw_list_init(self);
 
-  sc = sl_btmesh_fw_dist_server_init(BTMESH_FW_DISTRIBUTION_SERVER_MAIN,
+  sc = sl_btmesh_fw_dist_server_init(BTMESH_FW_DISTRIBUTION_SERVER_GROUP_MAIN_ELEM_INDEX,
                                      SL_BTMESH_FW_DIST_SERVER_MAX_NODE_LIST_SIZE_CFG_VAL,
                                      self->capabilities->max_fw_list_length,
                                      self->capabilities->max_fw_image_size,
@@ -1546,7 +1546,7 @@ static void sl_btmesh_fw_distribution_server_element_init(uint16_t elem_index)
 
 static void sl_btmesh_fw_distribution_server_init(void)
 {
-  sl_btmesh_fw_distribution_server_element_init(BTMESH_FW_DISTRIBUTION_SERVER_MAIN);
+  sl_btmesh_fw_distribution_server_element_init(BTMESH_FW_DISTRIBUTION_SERVER_GROUP_MAIN_ELEM_INDEX);
 }
 
 static void dist_reset_node_counters(fw_dist_server_t *const self)
@@ -2899,7 +2899,7 @@ static void dist_state_transition(fw_dist_server_t *const self,
 
   if (0 != target_state_flags.execute_step) {
     // Execute distribution step to send the state specific BT Mesh messages to
-    // the updating nodes. (Firmware Update Start/Cancel/Get/Apply/Information Get)
+    // the target nodes. (Firmware Update Start/Cancel/Get/Apply/Information Get)
     // The execute distribution check could fail if it called from the wrong state.
     // This could happen if the retry self-transition occurs when the distribution
     // server has just changed state but the distribution server SDK component
@@ -3001,7 +3001,7 @@ sl_btmesh_fw_distribution_server_generate_blob_id(sl_bt_uuid_64_t *blob_id)
   return sc;
 }
 
-// Called when receiver updating node is added to the firmware distribution list
+// Called when receiver target node is added to the firmware distribution list
 SL_WEAK void
 sl_btmesh_fw_distribution_server_on_node_added(uint16_t elem_index,
                                                uint16_t server_address,
@@ -3014,7 +3014,7 @@ sl_btmesh_fw_distribution_server_on_node_added(uint16_t elem_index,
   (void) node_count;
 }
 
-// Called when all receiver updating nodes are deleted from the firmware
+// Called when all receiver target nodes are deleted from the firmware
 // distribution list
 SL_WEAK void
 sl_btmesh_fw_distribution_server_on_all_nodes_deleted(uint16_t elem_index)
@@ -3113,7 +3113,7 @@ sl_btmesh_fw_distribution_server_on_distribution_blob_progress_changed(uint16_t 
   (void) node_count;
 }
 
-// Called when an Updating Node fails during the distribution
+// Called when a Target Node fails during the distribution
 SL_WEAK void
 sl_btmesh_fw_distribution_server_on_distribution_node_failed(uint16_t elem_index,
                                                              uint16_t server_address,
@@ -3323,7 +3323,7 @@ sl_status_t sl_btmesh_fw_distribution_server_set_multicast_threshold(uint16_t el
 
 void sl_btmesh_fw_distribution_server_delete_step_handle(void)
 {
-  uint16_t element_index = 0;
+  uint16_t element_index = BTMESH_FW_DISTRIBUTION_SERVER_GROUP_MAIN_ELEM_INDEX;
   do {
     fw_dist_server_t *self = find_server(element_index);
     SERVER_STATUS_CHECK(self);

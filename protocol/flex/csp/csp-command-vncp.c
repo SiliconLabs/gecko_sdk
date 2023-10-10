@@ -131,6 +131,29 @@ static void RemovePsaSecurityKeyCommandHandler(uint8_t *apiCommandData)
 
 #endif
 
+// setNcpSecurityKeyPersistent
+static void setNcpSecurityKeyPersistentCommandHandler(uint8_t *apiCommandData)
+{
+  uint8_t keyLength;
+  uint32_t key_id;
+  uint8_t *key;
+  fetchApiParams(apiCommandData,
+                 "pw",
+                 &key,
+                 &keyLength,
+                 &key_id);
+  EmberStatus status = emApiSetNcpSecurityKeyPersistent(key,
+                                                        keyLength,
+                                                        key_id);
+  uint8_t *apiCommandBuffer = getApiCommandPointer();
+  uint16_t commandLength = formatResponseCommand(apiCommandBuffer,
+                                                 MAX_STACK_API_COMMAND_SIZE,
+                                                 EMBER_SET_NCP_SECURITY_KEY_PERSISTENT_IPC_COMMAND_ID,
+                                                 "u",
+                                                 status);
+  sendResponse(apiCommandBuffer, commandLength);
+}
+
 // setNcpSecurityKey
 static void setNcpSecurityKeyCommandHandler(uint8_t *apiCommandData)
 {
@@ -596,6 +619,29 @@ static void setIndirectQueueTimeoutCommandHandler(uint8_t *apiCommandData)
                                                  EMBER_SET_INDIRECT_QUEUE_TIMEOUT_IPC_COMMAND_ID,
                                                  "u",
                                                  status);
+  sendResponse(apiCommandBuffer, commandLength);
+}
+
+// getVersionInfo
+static void getVersionInfoCommandHandler(uint8_t *apiCommandData)
+{
+  uint16_t gsdkVersion;
+  uint16_t connectStackVersion;
+  uint32_t bootloaderVersion;
+  fetchApiParams(apiCommandData,
+                 "");
+  EmberStatus status = emApiGetVersionInfo(&gsdkVersion,
+                                           &connectStackVersion,
+                                           &bootloaderVersion);
+  uint8_t *apiCommandBuffer = getApiCommandPointer();
+  uint16_t commandLength = formatResponseCommand(apiCommandBuffer,
+                                                 MAX_STACK_API_COMMAND_SIZE,
+                                                 EMBER_GET_VERSION_INFO_IPC_COMMAND_ID,
+                                                 "uvvw",
+                                                 status,
+                                                 gsdkVersion,
+                                                 connectStackVersion,
+                                                 bootloaderVersion);
   sendResponse(apiCommandBuffer, commandLength);
 }
 
@@ -1321,6 +1367,9 @@ void handleIncomingApiCommand(uint16_t commandId, uint8_t *apiCommandData)
       RemovePsaSecurityKeyCommandHandler(apiCommandData);
       break;
 #endif
+    case EMBER_SET_NCP_SECURITY_KEY_PERSISTENT_IPC_COMMAND_ID:
+      setNcpSecurityKeyPersistentCommandHandler(apiCommandData);
+      break;
     case EMBER_SET_NCP_SECURITY_KEY_IPC_COMMAND_ID:
       setNcpSecurityKeyCommandHandler(apiCommandData);
       break;
@@ -1404,6 +1453,9 @@ void handleIncomingApiCommand(uint16_t commandId, uint8_t *apiCommandData)
       break;
     case EMBER_SET_INDIRECT_QUEUE_TIMEOUT_IPC_COMMAND_ID:
       setIndirectQueueTimeoutCommandHandler(apiCommandData);
+      break;
+    case EMBER_GET_VERSION_INFO_IPC_COMMAND_ID:
+      getVersionInfoCommandHandler(apiCommandData);
       break;
     case EMBER_MESSAGE_SEND_IPC_COMMAND_ID:
       messageSendCommandHandler(apiCommandData);

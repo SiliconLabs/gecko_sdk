@@ -222,6 +222,7 @@ sl_status_t sl_bt_dfu_flash_upload_finish();
 #define sl_bt_cmd_system_hello_id                                    0x00010020
 #define sl_bt_cmd_system_start_bluetooth_id                          0x1c010020
 #define sl_bt_cmd_system_stop_bluetooth_id                           0x1d010020
+#define sl_bt_cmd_system_forcefully_stop_bluetooth_id                0x1e010020
 #define sl_bt_cmd_system_get_version_id                              0x1b010020
 #define sl_bt_cmd_system_reset_id                                    0x01010020
 #define sl_bt_cmd_system_halt_id                                     0x0c010020
@@ -238,6 +239,7 @@ sl_status_t sl_bt_dfu_flash_upload_finish();
 #define sl_bt_rsp_system_hello_id                                    0x00010020
 #define sl_bt_rsp_system_start_bluetooth_id                          0x1c010020
 #define sl_bt_rsp_system_stop_bluetooth_id                           0x1d010020
+#define sl_bt_rsp_system_forcefully_stop_bluetooth_id                0x1e010020
 #define sl_bt_rsp_system_get_version_id                              0x1b010020
 #define sl_bt_rsp_system_reset_id                                    0x01010020
 #define sl_bt_rsp_system_halt_id                                     0x0c010020
@@ -783,6 +785,20 @@ typedef struct sl_bt_evt_system_boot_s sl_bt_evt_system_boot_t;
 /** @} */ // end addtogroup sl_bt_evt_system_boot
 
 /**
+ * @addtogroup sl_bt_evt_system_stopped sl_bt_evt_system_stopped
+ * @{
+ * @brief When the Bluetooth on-demand start component is included in the
+ * application build, this event is triggered when stopping the Bluetooth stack
+ * using commands @ref sl_bt_system_stop_bluetooth or @ref
+ * sl_bt_system_forcefully_stop_bluetooth has completed.
+ */
+
+/** @brief Identifier of the stopped event */
+#define sl_bt_evt_system_stopped_id                                  0x010100a0
+
+/** @} */ // end addtogroup sl_bt_evt_system_stopped
+
+/**
  * @addtogroup sl_bt_evt_system_error sl_bt_evt_system_error
  * @{
  * @brief Indicates that an error has occurred
@@ -966,16 +982,23 @@ sl_status_t sl_bt_system_hello();
 /***************************************************************************//**
  *
  * If the Bluetooth on-demand start component is not included in the application
- * build, the Bluetooth stack is automatically started at UC initialization
- * time. In this configuration, the on-demand start command is not available and
- * the command returns the error SL_STATUS_NOT_AVAILABLE.
+ * build, the Bluetooth stack is automatically started when the device boots up.
+ * In this configuration, the on-demand start command is not available and the
+ * command returns the error SL_STATUS_NOT_AVAILABLE.
  *
  * When the Bluetooth on-demand start component is included in the application
  * build, this command is used by the application to request starting the
  * Bluetooth stack when the application needs it. If the command returns a
  * success result, the stack starts to asynchronously allocate the resources and
- * configure the Bluetooth stack based on the configuration passed at UC
+ * configure the Bluetooth stack based on the configuration passed at
  * initialization time.
+ *
+ * The Bluetooth stack cannot be restarted while it's still stopping after
+ * issuing the command @ref sl_bt_system_stop_bluetooth. If @ref
+ * sl_bt_system_start_bluetooth is called when stopping is still on-going the
+ * command returns the error SL_STATUS_INVALID_STATE. The application must wait
+ * for the @ref sl_bt_evt_system_stopped event before attempting to restart the
+ * stack.
  *
  * Successful start of the stack is indicated by the @ref sl_bt_evt_system_boot
  * event. The configured classes and Bluetooth stack features are available
@@ -986,31 +1009,84 @@ sl_status_t sl_bt_system_hello();
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
+ * @b Events
+ *   - @ref sl_bt_evt_system_boot - Triggered when the Bluetooth stack has
+ *     succesfully started and is ready to accept commands from the application
+ *   - @ref sl_bt_evt_system_error - Triggered if the command to start the
+ *     Bluetooth stack was accepted but the asynchronous starting of the stack
+ *     has failed
+ *
  ******************************************************************************/
 sl_status_t sl_bt_system_start_bluetooth();
 
 /***************************************************************************//**
  *
  * If the Bluetooth on-demand start component is not included in the application
- * build, the Bluetooth stack is automatically started at UC initialization time
- * and never stopped. In this configuration, the stop command is not available
- * and the command returns the error SL_STATUS_NOT_AVAILABLE.
+ * build, the Bluetooth stack is automatically started when the device boots up.
+ * In this configuration, the stop command is not available and the command
+ * returns the error SL_STATUS_NOT_AVAILABLE.
  *
  * When the Bluetooth on-demand start component is included in the application
  * build, this command is used by the application to stop the Bluetooth stack
  * when the application no longer needs it. This command gracefully restores
  * Bluetooth to an idle state by disconnecting any active connections and
- * stopping any on-going advertising and scanning. Any resources that were
- * allocated when the stack was started are freed when the stack is stopped.
- * After this command, the BGAPI classes other than @ref sl_bt_system become
- * unavailable. The application can use the command @ref
- * sl_bt_system_start_bluetooth to continue using Bluetooth later.
+ * stopping any ongoing advertising and scanning. Any resources that were
+ * allocated when the stack was started are freed when the stack has finished
+ * stopping. After this command, the BGAPI classes other than @ref sl_bt_system
+ * become unavailable.
+ *
+ * Stopping the Bluetooth stack with this command is asynchronous and the
+ * completion is indicated by the @ref sl_bt_evt_system_stopped event. The
+ * application can use the command @ref sl_bt_system_start_bluetooth to restart
+ * the stack any time after it has received the @ref sl_bt_evt_system_stopped
+ * event. If the application needs to stop the Bluetooth stack immediately, use
+ * the command @ref sl_bt_system_forcefully_stop_bluetooth. That command can
+ * also be used to immediately complete the asynchronous stopping if the command
+ * @ref sl_bt_system_stop_bluetooth has not completed in expected time period.
  *
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
+ * @b Events
+ *   - @ref sl_bt_evt_system_stopped - Triggered when stopping the Bluetooth
+ *     stack has completed
+ *
  ******************************************************************************/
 sl_status_t sl_bt_system_stop_bluetooth();
+
+/***************************************************************************//**
+ *
+ * If the Bluetooth on-demand start component is not included in the application
+ * build, the Bluetooth stack is automatically started when the device boots up.
+ * In this configuration, the stop command is not available and the command
+ * returns the error SL_STATUS_NOT_AVAILABLE.
+ *
+ * When the Bluetooth on-demand start component is included in the application
+ * build, this command is used by the application to forcefully stop the
+ * Bluetooth stack when the application no longer needs it. This command
+ * immediately stops all active Bluetooth operations such as advertising,
+ * scanning, and connections. Active connections are forcefully closed without
+ * performing the ACL Termination procedure. This can result in the observation
+ * of connection loss or supervision timeout on the remote device. Only use this
+ * command for special cases, for example, when stopping Bluetooth with @ref
+ * sl_bt_system_stop_bluetooth did not complete in expected time period.
+ *
+ * Stopping the Bluetooth stack with this command is immediate and it directly
+ * triggers the @ref sl_bt_evt_system_stopped event. Any resources that were
+ * allocated when the stack was started are freed. After this command, the BGAPI
+ * classes other than @ref sl_bt_system become unavailable. The application can
+ * use the command @ref sl_bt_system_start_bluetooth to continue using Bluetooth
+ * later.
+ *
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ * @b Events
+ *   - @ref sl_bt_evt_system_stopped - Triggered immediately to indicate the
+ *     Bluetooth stack has stopped
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_system_forcefully_stop_bluetooth();
 
 /***************************************************************************//**
  *
@@ -6286,6 +6362,7 @@ sl_status_t sl_bt_pawr_advertiser_stop(uint8_t advertising_set);
 #define sl_bt_cmd_connection_read_remote_used_features_id            0x0d060020
 #define sl_bt_cmd_connection_get_security_status_id                  0x0e060020
 #define sl_bt_cmd_connection_set_data_length_id                      0x11060020
+#define sl_bt_cmd_connection_read_statistics_id                      0x13060020
 #define sl_bt_cmd_connection_close_id                                0x05060020
 #define sl_bt_cmd_connection_forcefully_close_id                     0x0f060020
 #define sl_bt_rsp_connection_set_default_parameters_id               0x00060020
@@ -6305,6 +6382,7 @@ sl_status_t sl_bt_pawr_advertiser_stop(uint8_t advertising_set);
 #define sl_bt_rsp_connection_read_remote_used_features_id            0x0d060020
 #define sl_bt_rsp_connection_get_security_status_id                  0x0e060020
 #define sl_bt_rsp_connection_set_data_length_id                      0x11060020
+#define sl_bt_rsp_connection_read_statistics_id                      0x13060020
 #define sl_bt_rsp_connection_close_id                                0x05060020
 #define sl_bt_rsp_connection_forcefully_close_id                     0x0f060020
 
@@ -6791,10 +6869,97 @@ typedef struct sl_bt_evt_connection_data_length_s sl_bt_evt_connection_data_leng
 /** @} */ // end addtogroup sl_bt_evt_connection_data_length
 
 /**
+ * @addtogroup sl_bt_evt_connection_statistics sl_bt_evt_connection_statistics
+ * @{
+ * @brief Provides the connection statistic values when the application includes
+ * the component bluetooth_feature_connection_statistics
+ *
+ * When the component is included by the application, this event is
+ * automatically triggered to provide the final statistics for the connection
+ * just before the @ref sl_bt_evt_connection_closed event indicates that a
+ * connection has been closed. This event is also triggered when the application
+ * has requested reading the statistics using the command @ref
+ * sl_bt_connection_read_statistics.
+ */
+
+/** @brief Identifier of the statistics event */
+#define sl_bt_evt_connection_statistics_id                           0x0a0600a0
+
+/***************************************************************************//**
+ * @brief Data structure of the statistics event
+ ******************************************************************************/
+PACKSTRUCT( struct sl_bt_evt_connection_statistics_s
+{
+  uint8_t  connection;                       /**< Handle of the connection */
+  int8_t   rssi_min;                         /**< The minimum Received Signal
+                                                  Strength Indicator (RSSI)
+                                                  value measured for packets
+                                                  that have been successfully
+                                                  received on this connection.
+                                                  Units: dBm
+                                                    - Valid value range: -127 to
+                                                      +20
+                                                    - Value 127: information
+                                                      unavailable */
+  int8_t   rssi_max;                         /**< The maximum Received Signal
+                                                  Strength Indicator (RSSI)
+                                                  value measured for packets
+                                                  that have been successfully
+                                                  received on this connection.
+                                                  Units: dBm
+                                                    - Valid value range: -127 to
+                                                      +20
+                                                    - Value 127: information
+                                                      unavailable */
+  uint32_t num_total_connection_events;      /**< The total number of connection
+                                                  events that would have
+                                                  occurred on this connection if
+                                                  no packets were lost. This
+                                                  count therefore includes
+                                                  connection events that were
+                                                  missed due to errors (see @p
+                                                  num_missed_connection_events).
+                                                  In the Peripheral device this
+                                                  count does not include
+                                                  connection events where the
+                                                  Peripheral deliberately did
+                                                  not listen due to Peripheral
+                                                  latency. */
+  uint32_t num_missed_connection_events;     /**< The number of connection
+                                                  events that have been missed
+                                                  on this connection. This
+                                                  includes connection events
+                                                  where the first packet of a
+                                                  connection event was either
+                                                  not received at all or was
+                                                  corrupted so that it was not
+                                                  recognized as belonging to
+                                                  this connection. */
+  uint32_t num_successful_connection_events; /**< The number of connection
+                                                  events that have occurred on
+                                                  this connection without
+                                                  errors. */
+  uint32_t num_crc_errors;                   /**< The number of packets that
+                                                  have been received on this
+                                                  connection with a Cyclic
+                                                  Redundancy Check (CRC) error. */
+});
+
+typedef struct sl_bt_evt_connection_statistics_s sl_bt_evt_connection_statistics_t;
+
+/** @} */ // end addtogroup sl_bt_evt_connection_statistics
+
+/**
  * @addtogroup sl_bt_evt_connection_closed sl_bt_evt_connection_closed
  * @{
  * @brief Indicates that a connection was either closed or that no connection
- * was established from a high duty cycle directed advertising
+ * was established from a high duty cycle directed advertising.
+ *
+ * If the application includes the component
+ * bluetooth_feature_connection_statistics and the connection was successfully
+ * opened, the event @ref sl_bt_evt_connection_statistics is automatically
+ * triggered just before the connection closed event to provide the application
+ * with the final statistic values of the connection.
  */
 
 /** @brief Identifier of the closed event */
@@ -7321,7 +7486,7 @@ sl_status_t sl_bt_connection_set_remote_power_reporting(uint8_t connection,
  *
  * Get the transmit power of the local device on the given connection and PHY.
  * The application must include the LE Power Control feature
- * (bluetooth_feature_power_control) in order to use this command.
+ * (bluetooth_feature_power_control) to use this command.
  *
  * @param[in] connection Handle of the connection
  * @param[in] phy Enum @ref sl_bt_gap_phy_coding_t. The PHY. Values:
@@ -7349,10 +7514,9 @@ sl_status_t sl_bt_connection_get_tx_power(uint8_t connection,
  *
  * Get the transmit power of the remote device on the given connection and PHY.
  * The application must include the LE Power Control feature
- * (bluetooth_feature_power_control) in order to use this command. Transmit
- * power levels are returned in event @ref
- * sl_bt_evt_connection_get_remote_tx_power_completed after the operation
- * completed.
+ * (bluetooth_feature_power_control) to use this command. Transmit power levels
+ * are returned in event @ref sl_bt_evt_connection_get_remote_tx_power_completed
+ * after the operation completed.
  *
  * @param[in] connection Handle of the connection
  * @param[in] phy Enum @ref sl_bt_gap_phy_coding_t. The PHY. Values:
@@ -7372,12 +7536,11 @@ sl_status_t sl_bt_connection_get_remote_tx_power(uint8_t connection,
 
 /***************************************************************************//**
  *
- * Set the transmit power of a connection. The application must include
- * component bluetooth_feature_user_power_control in order to use this command
- * for controlling the transmit power of the connection at application level.
- * This command is unavailable if the standard Bluetooth feature LE power
- * control (component bluetooth_feature_power_control) is used by the
- * application.
+ * Set the connection transmit power. The application must include component
+ * bluetooth_feature_user_power_control to use this command for controlling the
+ * transmit power of the connection at application level. This command is
+ * unavailable if the standard Bluetooth feature LE power control (component
+ * bluetooth_feature_power_control) is used by the application.
  *
  * The actual selected power level is returned from this command. The value may
  * be different than the requested one because of Bluetooth feature restrictions
@@ -7467,6 +7630,27 @@ sl_status_t sl_bt_connection_get_security_status(uint8_t connection,
 sl_status_t sl_bt_connection_set_data_length(uint8_t connection,
                                              uint16_t tx_data_len,
                                              uint16_t tx_time_us);
+
+/***************************************************************************//**
+ *
+ * Read the statistic values collected on the specified connection. The
+ * application must include component bluetooth_feature_connection_statistics to
+ * use this command. If the component is not included in the application, this
+ * command returns the error SL_STATUS_NOT_AVAILABLE. If this command is called
+ * before the connection has opened, the command returns the error
+ * SL_STATUS_NOT_READY.
+ *
+ * @param[in] connection The connection handle
+ * @param[in] reset Reset statistics if parameter value is not zero
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ * @b Events
+ *   - @ref sl_bt_evt_connection_statistics - Triggered to deliver the statistic
+ *     values of the connection at the time the command was issued.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_connection_read_statistics(uint8_t connection, uint8_t reset);
 
 /***************************************************************************//**
  *
@@ -13515,8 +13699,8 @@ typedef struct sl_bt_evt_l2cap_command_rejected_s sl_bt_evt_l2cap_command_reject
  *
  * @b Events
  *   - @ref sl_bt_evt_l2cap_command_rejected - Triggered when the peer device
- *     rejected the connection request. Typically a legacy peer device that does
- *     not support the feature could send this response. When this event is
+ *     rejects the connection request. Typically, a legacy peer device that does
+ *     not support the feature can send this response. When this event is
  *     received under the context of opening a channel using this command, the
  *     stack automatically closes the local channel and the user application
  *     should clean up the resources associated to the channel identifier.
@@ -14694,6 +14878,7 @@ PACKSTRUCT( struct sl_bt_msg {
     sl_bt_evt_connection_remote_tx_power_t                       evt_connection_remote_tx_power; /**< Data field for connection remote_tx_power event*/
     sl_bt_evt_connection_remote_used_features_t                  evt_connection_remote_used_features; /**< Data field for connection remote_used_features event*/
     sl_bt_evt_connection_data_length_t                           evt_connection_data_length; /**< Data field for connection data_length event*/
+    sl_bt_evt_connection_statistics_t                            evt_connection_statistics; /**< Data field for connection statistics event*/
     sl_bt_evt_connection_closed_t                                evt_connection_closed; /**< Data field for connection closed event*/
     sl_bt_evt_gatt_mtu_exchanged_t                               evt_gatt_mtu_exchanged; /**< Data field for gatt mtu_exchanged event*/
     sl_bt_evt_gatt_service_t                                     evt_gatt_service; /**< Data field for gatt service event*/

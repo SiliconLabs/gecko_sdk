@@ -105,6 +105,11 @@ typedef void (*esl_lib_image_transfer_type_callback_t)(esl_lib_image_transfer_ha
 // -----------------------------------------------------------------------------
 // Public functions
 
+/**************************************************************************//**
+ * Clean all imagetransfer data.
+ *****************************************************************************/
+void esl_lib_image_transfer_cleanup(void);
+
 /***************************************************************************//**
  * Initialize ESL AP Image Transfer.
  * @param[in]  connection          Connection handle.

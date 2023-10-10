@@ -1,6 +1,6 @@
 /***************************************************************************//**
  * @file
- * @brief ESL Host Library core component.
+ * @brief ESL host library core component.
  *
  *******************************************************************************
  * # License
@@ -77,10 +77,11 @@ static sl_status_t send_core_error(esl_lib_status_t     lib_status,
                                    sl_status_t          status,
                                    esl_lib_core_state_t data);
 static sl_status_t send_tag_found(uint8_t *addr,
-                                  uint8_t addr_type,
+                                  uint8_t address_type,
                                   int8_t  rssi);
 static sl_status_t send_scan_status(void);
 static bool find_service_in_advertisement(uint8_t *data, uint8_t len);
+static void esl_lib_core_internal_reset(void);
 
 // -----------------------------------------------------------------------------
 // Private variables
@@ -95,6 +96,7 @@ static struct argparse_descriptor_s arg_descriptor[] =
   { "-device", "" },                // empty string as option allows anything
   { "-baud", "115200,921600" },
   { "-handshake", "no,ctsrts,hw" }, // more options can be given where it's needed
+  { "-secure", NULL },               // enable encryption for NCP communication
   { NULL, NULL }
 };
 
@@ -113,11 +115,10 @@ void esl_lib_init(char *config)
   }
 
   // Parse configuration
-  esl_lib_log_core_info("Parsing host library configuration: %s" APP_LOG_NL, config);
+  esl_lib_log_core_debug("Parsing host library configuration: %s" APP_LOG_NL, config);
   parse_config(config, ap_state);
-  esl_lib_log_core_info("AP host library instance started." APP_LOG_NL);
-
   // Initialize NCP connection.
+  esl_lib_log_core_debug("Initializing NCP host" APP_LOG_NL);
   sc = ncp_host_init();
   if (sc == SL_STATUS_INVALID_PARAMETER) {
     esl_lib_log_core_critical("Failed to initialize host library!" APP_LOG_NL);
@@ -127,17 +128,19 @@ void esl_lib_init(char *config)
     esl_lib_log_core_critical("Error initializing host library: 0x%04x" APP_LOG_NL, sc);
     exit(EXIT_FAILURE);
   }
-  esl_lib_log_core_info("NCP host initialised." APP_LOG_NL);
   esl_lib_log_core_info("Resetting NCP target..." APP_LOG_NL);
   // Reset NCP to ensure it gets into a defined state.
   // Once the chip successfully boots, boot event should be received.
   sl_bt_system_reset(sl_bt_system_boot_mode_normal);
 
   // Initialize L2CAP transfer
+  esl_lib_log_core_debug("Init L2CAP transfer layer" APP_LOG_NL);
   sli_bt_l2cap_transfer_init();
 
   // Initialize OTS Client
+  esl_lib_log_core_debug("Prepare OTS client" APP_LOG_NL);
   sli_bt_ots_client_init();
+  esl_lib_log_core_debug("AP host library instance ready" APP_LOG_NL);
 }
 
 void esl_lib_process_action(void)
@@ -150,13 +153,10 @@ void esl_lib_process_action(void)
 
 void esl_lib_deinit(void)
 {
-  // Clean command list
-  esl_lib_command_list_cleanup(&ap_state->command_list);
+  // stop scanning
+  (void)sl_bt_scanner_stop();
 
-  // Cleanup relationship
-  esl_lib_connection_cleanup();
-  esl_lib_pawr_cleanup();
-  esl_lib_ap_control_cleanup();
+  esl_lib_core_internal_reset();
 
   esl_lib_memory_free(ap_state);
 
@@ -173,11 +173,16 @@ sl_status_t esl_lib_core_add_command(esl_lib_command_list_cmd_t *cmd)
 
 void sl_bt_on_event(sl_bt_msg_t *evt)
 {
-  esl_lib_core_on_bt_event(evt);
+  esl_lib_image_transfer_on_bt_event(evt);
   esl_lib_connection_on_bt_event(evt);
   esl_lib_pawr_on_bt_event(evt);
-  esl_lib_image_transfer_on_bt_event(evt);
+  esl_lib_core_on_bt_event(evt);
   esl_lib_ap_control_on_bt_event(evt);
+}
+
+void esl_lib_core_connection_complete()
+{
+  ap_state->command_complete = true;
 }
 
 // -----------------------------------------------------------------------------
@@ -197,21 +202,23 @@ static void esl_lib_core_on_bt_event(sl_bt_msg_t *evt)
     // This event indicates the device has started and the radio is ready.
     // Do not call any stack command before receiving this boot event!
     case sl_bt_evt_system_boot_id:
-      lib_status = ESL_LIB_STATUS_INIT_FAILED;
+      // Do internal LIB reset
+      esl_lib_core_internal_reset();
+      ap_state->scan.enabled     = ESL_LIB_FALSE;
+      ap_state->scan.configured  = ESL_LIB_FALSE;
+      ap_state->command_complete = true;
+      ap_state->core_state       = ESL_LIB_CORE_STATE_IDLE;
+      lib_status                 = ESL_LIB_STATUS_INIT_FAILED;
       // Extract unique ID from BT Address.
       sc = sl_bt_system_get_identity_address(&address, &address_type);
       if (sc != SL_STATUS_OK) {
         lib_critical_error = true;
       }
 
-      esl_lib_log_core_info("Bluetooth %s address: %02X:%02X:%02X:%02X:%02X:%02X" APP_LOG_NL,
-                            address_type ? "static random" : "public device",
-                            address.addr[5],
-                            address.addr[4],
-                            address.addr[3],
-                            address.addr[2],
-                            address.addr[1],
-                            address.addr[0]);
+      esl_lib_log_core_info("Bluetooth " ESL_LIB_LOG_ADDR_FORMAT APP_LOG_NL,
+                            address_type,
+                            address_type ? "random" : "public",
+                            ESL_LIB_LOG_BD_ADDR(address));
 
       // Configure Security Manager to default
       sc = sl_bt_sm_configure(0,
@@ -253,14 +260,8 @@ static void esl_lib_core_on_bt_event(sl_bt_msg_t *evt)
     case sl_bt_evt_scanner_legacy_advertisement_report_id:
       if (find_service_in_advertisement(evt->data.evt_scanner_legacy_advertisement_report.data.data,
                                         evt->data.evt_scanner_legacy_advertisement_report.data.len)) {
-        esl_lib_log_core_debug("Tag found with %s address: %02X:%02X:%02X:%02X:%02X:%02X , RSSI = %d" APP_LOG_NL,
-                               evt->data.evt_scanner_legacy_advertisement_report.address_type ? "static random" : "public device",
-                               evt->data.evt_scanner_legacy_advertisement_report.address.addr[5],
-                               evt->data.evt_scanner_legacy_advertisement_report.address.addr[4],
-                               evt->data.evt_scanner_legacy_advertisement_report.address.addr[3],
-                               evt->data.evt_scanner_legacy_advertisement_report.address.addr[2],
-                               evt->data.evt_scanner_legacy_advertisement_report.address.addr[1],
-                               evt->data.evt_scanner_legacy_advertisement_report.address.addr[0],
+        esl_lib_log_core_debug("Tag found with " ESL_LIB_LOG_ADDR_FORMAT ", RSSI = %d" APP_LOG_NL,
+                               ESL_LIB_LOG_ADDR(evt->data.evt_scanner_legacy_advertisement_report),
                                evt->data.evt_scanner_legacy_advertisement_report.rssi);
         (void)send_tag_found(evt->data.evt_scanner_legacy_advertisement_report.address.addr,
                              evt->data.evt_scanner_legacy_advertisement_report.address_type,
@@ -269,7 +270,7 @@ static void esl_lib_core_on_bt_event(sl_bt_msg_t *evt)
       break;
     case sl_bt_evt_system_resource_exhausted_id:
       lib_status = ESL_LIB_STATUS_RESOURCE_EXCEEDED;
-      esl_lib_log_core_error("Resource exhausted" APP_LOG_NL);
+      esl_lib_log_core_warning("Resource exhausted" APP_LOG_NL);
       (void)send_core_error(lib_status,
                             SL_STATUS_ALLOCATION_FAILED,
                             ap_state->core_state);
@@ -277,6 +278,7 @@ static void esl_lib_core_on_bt_event(sl_bt_msg_t *evt)
     default:
       break;
   }
+
   if (lib_critical_error) {
     esl_lib_log_core_critical("Critical error, exiting..." APP_LOG_NL);
     // Send error
@@ -302,7 +304,7 @@ static void parse_config(char *config, esl_lib_ap_state_t *data)
 
   sc = simple_argparse_init(arg_descriptor, &handle);
   if (sc != SL_STATUS_OK) {
-    esl_lib_log_core_critical("Failed to initialize AP Host Library! sc = 0x%04x" APP_LOG_NL, sc);
+    esl_lib_log_core_critical("Failed to initialize AP host library! sc = 0x%04x" APP_LOG_NL, sc);
     exit(EXIT_FAILURE);
   }
 
@@ -315,9 +317,9 @@ static void parse_config(char *config, esl_lib_ap_state_t *data)
     simple_argparse_deinit(handle);
     exit(EXIT_FAILURE);
   } else {
-    esl_lib_log_core_info("AP Host Library parsed commands: %d" APP_LOG_NL, parsed_count);
+    esl_lib_log_core_debug("AP host library parsed commands: %d" APP_LOG_NL, parsed_count);
     for (size_t i = 0; i < parsed_count; ++i) {
-      esl_lib_log_core_info("%s : %s" APP_LOG_NL, parsed[i].arg, parsed[i].opt);
+      esl_lib_log_core_debug("%s : %s" APP_LOG_NL, parsed[i].arg, parsed[i].opt);
 
       if (strcmp(arg_descriptor[0].arg, parsed[i].arg) == 0) {
         // Connection type
@@ -340,6 +342,10 @@ static void parse_config(char *config, esl_lib_ap_state_t *data)
         if (strcmp("no", parsed[i].opt) == 0) {
           (void)ncp_host_set_option('f', parsed[i].opt);
         }
+      } else if (strcmp(arg_descriptor[4].arg, parsed[i].arg) == 0) {
+        int status = ncp_host_set_option('s', NULL);
+        esl_lib_log_core_debug("Attempt to enable NCP encryption, result status: 0x%04x" APP_LOG_NL,
+                               status);
       }
     }
   }
@@ -349,7 +355,7 @@ static void parse_config(char *config, esl_lib_ap_state_t *data)
     esl_lib_log_core_critical("Failed to deinit arparse, sc = 0x%04x" APP_LOG_NL, sc);
     exit(EXIT_FAILURE);
   }
-  esl_lib_log_core_info("AP Host Library initialized" APP_LOG_NL);
+  esl_lib_log_core_debug("AP host library configured" APP_LOG_NL);
 }
 
 /***************************************************************************//**
@@ -390,7 +396,7 @@ static sl_status_t send_scan_status(void)
   sl_status_t   sc;
   esl_lib_evt_t *lib_evt;
 
-  esl_lib_log_core_info("Scanning = %u" APP_LOG_NL, ap_state->scan.enabled);
+  esl_lib_log_core_debug("Scanning = %u" APP_LOG_NL, ap_state->scan.enabled);
 
   sc = esl_lib_event_list_allocate(ESL_LIB_EVT_SCAN_STATUS,
                                    0,
@@ -411,7 +417,7 @@ static sl_status_t send_scan_status(void)
 }
 
 static sl_status_t send_tag_found(uint8_t *addr,
-                                  uint8_t addr_type,
+                                  uint8_t address_type,
                                   int8_t  rssi)
 {
   sl_status_t   sc;
@@ -423,7 +429,7 @@ static sl_status_t send_tag_found(uint8_t *addr,
   if (sc == SL_STATUS_OK) {
     lib_evt->evt_code = ESL_LIB_EVT_TAG_FOUND;
     lib_evt->data.evt_tag_found.rssi = rssi;
-    lib_evt->data.evt_tag_found.address.addr_type = addr_type;
+    lib_evt->data.evt_tag_found.address.address_type = address_type;
     // Copy address
     memcpy(lib_evt->data.evt_tag_found.address.addr,
            addr,
@@ -456,7 +462,10 @@ static sl_status_t send_core_error(esl_lib_status_t     lib_status,
 static void run_command(esl_lib_command_list_cmd_t *cmd)
 {
   sl_status_t                sc                = SL_STATUS_FAIL;
-  esl_lib_status_t           lib_status        = ESL_LIB_STATUS_NO_ERROR;
+  esl_lib_status_t           lib_status        = ESL_LIB_STATUS_UNKNOWN_COMMAND;
+  esl_lib_node_id_t node_id;
+
+  node_id.type = ESL_LIB_NODE_ID_TYPE_NONE;
 
   if (cmd != NULL) {
     switch (cmd->cmd_code) {
@@ -497,17 +506,6 @@ static void run_command(esl_lib_command_list_cmd_t *cmd)
           lib_status = ESL_LIB_STATUS_NO_ERROR;
         } else {
           esl_lib_log_core_error("Failed to send AP control IT response, sc = 0x%04x" APP_LOG_NL, sc);
-        }
-        ap_state->command_complete = true;
-        break;
-      case ESL_LIB_CMD_AP_CONTROL_INIT_GATTDB:
-        esl_lib_log_core_debug("Command: AP control init GATT DB" APP_LOG_NL);
-        lib_status = ESL_LIB_STATUS_CONTROL_FAILED;
-        sc = esl_lib_ap_control_init();
-        if (sc == SL_STATUS_OK) {
-          lib_status = ESL_LIB_STATUS_NO_ERROR;
-        } else {
-          esl_lib_log_core_error("Failed to initialize AP control GATTDB, sc = 0x%04x" APP_LOG_NL, sc);
         }
         ap_state->command_complete = true;
         break;
@@ -576,13 +574,21 @@ static void run_command(esl_lib_command_list_cmd_t *cmd)
         // Assume that the connect command is failed
         // and try to initiate the connection.
         lib_status = ESL_LIB_STATUS_CONN_FAILED;
-        sc = esl_lib_connection_open(cmd, ESL_LIB_INVALID_HANDLE);
+        node_id.type = ESL_LIB_NODE_ID_TYPE_ADDRESS;
+        node_id.id.address.address_type = cmd->data.cmd_connect.address.address_type;
+        memcpy(node_id.id.address.addr, cmd->data.cmd_connect.address.addr, sizeof(bd_addr));
+        sc = esl_lib_connection_open(cmd);
         if (sc == SL_STATUS_OK) {
           lib_status = ESL_LIB_STATUS_NO_ERROR;
         } else {
-          esl_lib_log_core_error("Failed to open connection, sc = 0x%04x" APP_LOG_NL, sc);
+          esl_lib_log(((sc == SL_STATUS_BT_CTRL_CONNECTION_LIMIT_EXCEEDED) \
+                       ? ESL_LIB_LOG_LEVEL_WARNING : ESL_LIB_LOG_LEVEL_ERROR),
+                      ESL_LIB_LOG_MODULE_CORE,
+                      "Failed to open connection, sc = 0x%04x" APP_LOG_NL, sc);
+          ap_state->command_complete = true;
+          esl_lib_memory_free(ap_state->command);
         }
-        ap_state->command_complete = true;
+        ap_state->command = NULL;
         break;
       default:
         break; // default
@@ -590,14 +596,15 @@ static void run_command(esl_lib_command_list_cmd_t *cmd)
   }
 
   if (sc != SL_STATUS_OK) {
-    esl_lib_node_id_t node_id;
     esl_lib_status_data_t status_data;
     status_data = (esl_lib_status_data_t)ap_state->core_state;
-    node_id.type = ESL_LIB_NODE_ID_TYPE_NONE;
-    esl_lib_log_core_error("Error in BT state machine, lib status = %d, sc = 0x%04x, core status = %d" APP_LOG_NL,
-                           lib_status,
-                           sc,
-                           ap_state->core_state);
+    esl_lib_log(((sc == SL_STATUS_BT_CTRL_CONNECTION_LIMIT_EXCEEDED) \
+                 ? ESL_LIB_LOG_LEVEL_WARNING : ESL_LIB_LOG_LEVEL_ERROR),
+                ESL_LIB_LOG_MODULE_CORE,
+                "State machine failure, lib status = %d, sc = 0x%04x, core status = %d" APP_LOG_NL,
+                lib_status,
+                sc,
+                ap_state->core_state);
     // Send available data in the error message
     (void)esl_lib_event_push_error(lib_status,
                                    &node_id,
@@ -662,4 +669,31 @@ static bool find_service_in_advertisement(uint8_t *data, uint8_t len)
     i = i + ad_field_length + 1;
   }
   return false;
+}
+
+static void esl_lib_core_internal_reset(void)
+{
+  esl_lib_evt_t *last_evt;
+
+  // Clean up current command, if any
+  if (ap_state->command != NULL) {
+    esl_lib_command_list_remove(&ap_state->command_list, ap_state->command);
+    ap_state->command = NULL;
+  }
+
+  // Clean command list
+  esl_lib_command_list_cleanup(&ap_state->command_list);
+  esl_lib_log_core_debug("Command list cleanup complete" APP_LOG_NL);
+
+  // Cleanup relationship
+  esl_lib_image_transfer_cleanup();
+  esl_lib_connection_cleanup();
+  esl_lib_pawr_cleanup();
+  esl_lib_ap_control_cleanup();
+
+  // Cleanup events
+  while ((last_evt = esl_lib_event_list_get_first()) != NULL) {
+    esl_lib_event_list_remove_first();
+  }
+  esl_lib_log_core_debug("Event list cleanup complete" APP_LOG_NL);
 }

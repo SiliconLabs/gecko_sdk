@@ -23,15 +23,15 @@ requires:
 documentation:
   docset: gecko-platform
   document:
-    - page: emlib/api/efm32zg/group-idac
+    - page: platform-emlib-efm32zg/idac
       condition: [device_sdid_76]
-    - page: emlib/api/efm32hg/group-idac
+    - page: platform-emlib-efm32hg/idac
       condition: [device_sdid_77]
-    - page: emlib/api/efr32xg1/group-idac
+    - page: platform-emlib-efr32xg1/idac
       condition: [device_sdid_80]
-    - page: emlib/api/efr32xg12/group-idac
+    - page: platform-emlib-efr32xg12/idac
       condition: [device_sdid_84]
-    - page: emlib/api/efr32xg13/group-idac
+    - page: platform-emlib-efr32xg13/idac
       condition: [device_sdid_89]
-    - page: emlib/api/efr32xg14/group-idac
+    - page: platform-emlib-efr32xg14/idac
       condition: [device_sdid_95]

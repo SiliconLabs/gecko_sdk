@@ -36,6 +36,14 @@
 // <d> 1
 #define SL_BTMESH_PROVISIONEE_LOGGING_CFG_VAL 1
 
+// <q SL_BTMESH_PROVISIONEE_AUTO_RESET> Enable automatic reset on node reset
+// <d> 1
+#define SL_BTMESH_PROVISIONEE_AUTO_RESET 1
+
+// <o SL_BTMESH_PROVISIONEE_AUTO_RESET_DELAY> Delay of automatic reset in ms
+// <d> 0
+#define SL_BTMESH_PROVISIONEE_AUTO_RESET_DELAY 0
+
 // <o SL_BTMESH_PROVISIONEE_AUTO_UNPROV_BEACONING_CFG_VAL> Automatic unprovisioned device beaconing
 // <i> Start unprovisioned device beaconing automatically with the selected bearers after node initialization is complete.
 // <0=> Disable

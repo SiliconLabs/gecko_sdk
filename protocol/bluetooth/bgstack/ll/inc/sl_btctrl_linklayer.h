@@ -174,6 +174,11 @@ void sl_btctrl_enable_pawr_connsch();
 void sl_btctrl_enable_legacy_connsch();
 
 /**
+ * Call to enable connection statistics collection.
+ */
+void sl_btctrl_init_conn_statistics(void);
+
+/**
  * Call to initialize multiprotocol
  * in bluetooth controller
  */

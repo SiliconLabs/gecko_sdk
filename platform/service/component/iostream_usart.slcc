@@ -2,7 +2,7 @@ id: iostream_usart
 label: "IO Stream: USART"
 package: platform
 description: >
-  Instantiate the driver for using IO Stream over the Universal 
+  Instantiate the driver for using IO Stream over the Universal
   Synchronous Asynchronous Receiver Transceiver (USART) peripheral.
 category: Services|IO Stream|Driver
 quality: production
@@ -47,4 +47,4 @@ template_contribution:
       handler: "sl_iostream_usart_{{instance}}_sleep_on_isr_exit"
 documentation:
   docset: gecko-platform
-  document: service/api/group-iostream-usart
+  document: platform-service/iostream-usart

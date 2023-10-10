@@ -76,6 +76,11 @@
 #define SLI_DEVICE_HAS_AES_192
 #define AEAD_ENCRYPT_TAG_FCT    sli_cryptoacc_transparent_aead_encrypt_tag
 #define AEAD_DECRYPT_TAG_FCT    sli_cryptoacc_transparent_aead_decrypt_tag
+#elif defined(SLI_CRYPTOACC_PRESENT_SI91X)
+#include "sli_si91x_crypto_driver_functions.h"
+#define AEAD_IMPLEMENTATION_PRESENT
+#define AEAD_ENCRYPT_TAG_FCT    sl_si91x_crypto_aead_encrypt
+#define AEAD_DECRYPT_TAG_FCT    sl_si91x_crypto_aead_decrypt
 #endif
 
 #if defined(AEAD_IMPLEMENTATION_PRESENT)

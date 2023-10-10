@@ -62,6 +62,7 @@
 - provides:
   - name: efm32g890f128
   - name: device
+  - name: device_efx
   - name: device_series_0
   - name: device_sdid_71
   - name: device_family_efm32g

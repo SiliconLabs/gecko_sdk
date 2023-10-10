@@ -15,4 +15,4 @@ provides:
   - name: sl_string
 documentation:
   docset: gecko-platform
-  document: common/api/group-string
+  document: platform-common/string

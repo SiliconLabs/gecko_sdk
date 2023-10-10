@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<api device_id="5" device_name="btmesh" version="6.1.0">
+<api device_id="5" device_name="btmesh" version="6.2.0">
     <datatypes>
         <datatype base="uint16" name="errorcode" length="2"/>
         <datatype base="int16" name="int16" length="2"/>
@@ -387,6 +387,14 @@
             <returns>
                 <param datatype="errorcode" name="result" type="uint16"/>
                 <param datatype="uint8array" name="uri" type="uint8array"/>
+            </returns>
+        </command>
+        <command index="53" name="set_proxy_service_uuid" >
+            <params>
+                <param datatype="uint16" name="uuid" type="uint16"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
             </returns>
         </command>
         <event index="0" name="initialized">

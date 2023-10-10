@@ -23,41 +23,41 @@ requires:
 documentation:
   docset: gecko-platform
   document:
-    - page: emlib/api/efm32g/group-acmp
+    - page: platform-emlib-efm32g/acmp
       condition: [device_sdid_71]
-    - page: emlib/api/efm32gg/group-acmp
+    - page: platform-emlib-efm32gg/acmp
       condition: [device_sdid_72]
-    - page: emlib/api/efm32tg/group-acmp
+    - page: platform-emlib-efm32tg/acmp
       condition: [device_sdid_73]
-    - page: emlib/api/efm32lg/group-acmp
+    - page: platform-emlib-efm32lg/acmp
       condition: [device_sdid_74]
-    - page: emlib/api/efm32zg/group-acmp
+    - page: platform-emlib-efm32zg/acmp
       condition: [device_sdid_76]
-    - page: emlib/api/efm32hg/group-acmp
+    - page: platform-emlib-efm32hg/acmp
       condition: [device_sdid_77]
-    - page: emlib/api/efr32xg1/group-acmp
+    - page: platform-emlib-efr32xg1/acmp
       condition: [device_sdid_80]
-    - page: emlib/api/efr32xg12/group-acmp
+    - page: platform-emlib-efr32xg12/acmp
       condition: [device_sdid_84]
-    - page: emlib/api/efr32xg13/group-acmp
+    - page: platform-emlib-efr32xg13/acmp
       condition: [device_sdid_89]
-    - page: emlib/api/efr32xg14/group-acmp
+    - page: platform-emlib-efr32xg14/acmp
       condition: [device_sdid_95]
-    - page: emlib/api/efm32gg11/group-acmp
+    - page: platform-emlib-efm32gg11/acmp
       condition: [device_sdid_100]
-    - page: emlib/api/efm32tg11/group-acmp
+    - page: platform-emlib-efm32tg11/acmp
       condition: [device_sdid_103]
-    - page: emlib/api/efm32gg12/group-acmp
+    - page: platform-emlib-efm32gg12/acmp
       condition: [device_sdid_106]
-    - page: emlib/api/efr32xg21/group-acmp
+    - page: platform-emlib-efr32xg21/acmp
       condition: [device_sdid_200]
-    - page: emlib/api/efr32xg23/group-acmp
+    - page: platform-emlib-efr32xg23/acmp
       condition: [device_sdid_210]
-    - page: emlib/api/efr32xg24/group-acmp
+    - page: platform-emlib-efr32xg24/acmp
       condition: [device_sdid_215]
-    - page: emlib/api/efr32xg25/group-acmp
+    - page: platform-emlib-efr32xg25/acmp
       condition: [device_sdid_220]
-    - page: emlib/api/efr32xg27/group-acmp
+    - page: platform-emlib-efr32xg27/acmp
       condition: [device_sdid_230]
-    - page: emlib/api/efr32xg28/group-acmp
+    - page: platform-emlib-efr32xg28/acmp
       condition: [device_sdid_235]

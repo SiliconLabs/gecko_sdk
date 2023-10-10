@@ -106,7 +106,7 @@ sl_status_t esl_lib_storage_clean(esl_lib_storage_handle_t handle);
  *
  * @return Status code.
  *****************************************************************************/
-sl_status_t esl_lib_storage_delete(esl_lib_storage_handle_t handle);
+sl_status_t esl_lib_storage_delete(esl_lib_storage_handle_t *handle);
 
 #ifdef __cplusplus
 };

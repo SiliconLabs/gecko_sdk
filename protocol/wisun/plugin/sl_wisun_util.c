@@ -74,13 +74,13 @@ sl_status_t sl_wisun_util_get_rf_settings(uint8_t *reg_domain, uint8_t *op_class
   sl_wisun_phy_config_t phy_config;
 
   status = sl_wisun_util_get_phy_config(&phy_config);
-  SLI_WISUN_ERROR_CHECK_SET_STATUS(status == SL_STATUS_OK, SL_STATUS_FAIL);
+  SLI_WISUN_ERROR_CHECK_SET_STATUS(status == SL_STATUS_OK, status);
 
   // Check this is a FAN1.0 configuration.
-  SLI_WISUN_ERROR_CHECK_SET_STATUS(phy_config.type == SL_WISUN_PHY_CONFIG_FAN10, SL_STATUS_FAIL);
+  SLI_WISUN_ERROR_CHECK_SET_STATUS(phy_config.type == SL_WISUN_PHY_CONFIG_FAN10, SL_STATUS_INVALID_CONFIGURATION);
 
   // FEC is not handled.
-  SLI_WISUN_ERROR_CHECK_SET_STATUS(!phy_config.config.fan10.fec, SL_STATUS_FAIL);
+  SLI_WISUN_ERROR_CHECK_SET_STATUS(!phy_config.config.fan10.fec, SL_STATUS_INVALID_CONFIGURATION);
 
   *reg_domain = phy_config.config.fan10.reg_domain;
   *op_class = phy_config.config.fan10.op_class;
@@ -112,7 +112,7 @@ sl_status_t sl_wisun_util_get_phy_config(sl_wisun_phy_config_t *phy_config)
   stack_info = channel_config->configs[0].stackInfo;
 
   // Check this is a Wi-SUN configuration.
-  SLI_WISUN_ERROR_CHECK_SET_STATUS(stack_info[0] == RAIL_PTI_PROTOCOL_WISUN, SL_STATUS_FAIL);
+  SLI_WISUN_ERROR_CHECK_SET_STATUS(stack_info[0] == RAIL_PTI_PROTOCOL_WISUN, SL_STATUS_INVALID_CONFIGURATION);
 
   phy_type = GET_PHY_TYPE(stack_info[1]);
   phy_mode = GET_PHY_MODE(stack_info[1]);
@@ -150,7 +150,7 @@ sl_status_t sl_wisun_util_connect(const uint8_t * network_name)
   sl_wisun_phy_config_t phy_config;
 
   status = sl_wisun_util_get_phy_config(&phy_config);
-  SLI_WISUN_ERROR_CHECK_SET_STATUS(status == SL_STATUS_OK, SL_STATUS_FAIL);
+  SLI_WISUN_ERROR_CHECK_SET_STATUS(status == SL_STATUS_OK, status);
 
   status = sl_wisun_join(network_name, &phy_config);
 

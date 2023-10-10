@@ -24,7 +24,7 @@ template_contribution:
     priority: -5000
 documentation:
     docset: gecko-platform
-    document: service/api/group-system
+    document: platform-service/system
 description: |
   System Kernel component provides a function for starting the kernel:
 

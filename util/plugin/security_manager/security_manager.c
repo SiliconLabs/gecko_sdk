@@ -59,11 +59,11 @@ static void sl_sec_man_set_key_attributes(psa_key_id_t *        sl_psa_key_id,
   psa_key_location_t sl_psa_key_location = PSA_KEY_LOCATION_LOCAL_STORAGE;
 
 #if defined(SEMAILBOX_PRESENT)
-  if (SYSTEM_GetSecurityCapability() == securityCapabilityVault) {
+  // Dont wrap keys used for HMAC operation, as opaque keys cannot be used for multi-part HMAC.
+  if (SYSTEM_GetSecurityCapability() == securityCapabilityVault && sl_psa_key_type != PSA_KEY_TYPE_HMAC) {
     sl_psa_key_location = PSA_KEY_LOCATION_SLI_SE_OPAQUE;
   }
 #endif
-
   psa_key_lifetime_t sl_psa_key_lifetime =
     PSA_KEY_LIFETIME_FROM_PERSISTENCE_AND_LOCATION(sl_psa_key_persistence, sl_psa_key_location);
 
@@ -71,7 +71,7 @@ static void sl_sec_man_set_key_attributes(psa_key_id_t *        sl_psa_key_id,
     psa_set_key_id(sl_psa_key_attr, *sl_psa_key_id);
   }
 
-  psa_set_key_usage_flags(sl_psa_key_attr, sl_psa_key_lifetime);
+  psa_set_key_lifetime(sl_psa_key_attr, sl_psa_key_lifetime);
   psa_set_key_usage_flags(sl_psa_key_attr, sl_psa_key_usage);
   psa_set_key_algorithm(sl_psa_key_attr, sl_psa_key_algorithm);
   psa_set_key_type(sl_psa_key_attr, sl_psa_key_type);

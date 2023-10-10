@@ -2,7 +2,7 @@ id: iostream_leuart
 label: "IO Stream: LEUART"
 package: platform
 description: >
-  Instantiate the driver for using IO Stream over the Low 
+  Instantiate the driver for using IO Stream over the Low
   Energy Universal Asynchronous Receiver Transceiver (LEUART) peripheral.
 category: Services|IO Stream|Driver
 quality: production
@@ -46,4 +46,4 @@ template_contribution:
       handler: "sl_iostream_leuart_{{instance}}_sleep_on_isr_exit"
 documentation:
   docset: gecko-platform
-  document: service/api/group-iostream-leuart
+  document: platform-service/iostream-leuart

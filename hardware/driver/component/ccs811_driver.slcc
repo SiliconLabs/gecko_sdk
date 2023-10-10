@@ -26,4 +26,4 @@ config_file:
     file_id: ccs811_config
 documentation:
     docset: gecko-platform
-    document: hardware-driver/api/group-ccs811
+    document: platform-hardware-driver/ccs811

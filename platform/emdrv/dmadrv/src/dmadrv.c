@@ -927,32 +927,41 @@ void LDMA_IRQHandler(void)
 
   /* Check for LDMA error. */
   if ( pending & LDMA_IF_ERROR ) {
-    /* Loop to enable debugger to see what has happened. */
-    while (true) {
-      /* Wait forever. */
-    }
-  }
-
-  /* Iterate over all LDMA channels. */
-  for ( chnum = 0, chmask = 1;
-        chnum < EMDRV_DMADRV_DMA_CH_COUNT;
-        chnum++, chmask <<= 1 ) {
-    if ( pending & chmask ) {
-      /* Clear the interrupt flag. */
+    /* Clear the error flag */
 #if defined (LDMA_HAS_SET_CLEAR)
-      LDMA->IF_CLR = chmask;
+    LDMA->IF_CLR = LDMA_IF_ERROR;
 #else
-      LDMA->IFC = chmask;
+    LDMA->IFC = LDMA_IF_ERROR;
 #endif
 
-      ch = &chTable[chnum];
-      if ( ch->callback != NULL ) {
-        ch->callbackCount++;
-        stop = !ch->callback(chnum, ch->callbackCount, ch->userParam);
+    /* Read the errant channel*/
+    chnum = (LDMA->STATUS & _LDMA_STATUS_CHERROR_MASK) >> _LDMA_STATUS_CHERROR_SHIFT;
+    ch = &chTable[chnum];
+    if ( ch->callback != NULL ) {
+      ch->callback(chnum, 0, ch->userParam);
+    }
+  } else {
+    /* Iterate over all LDMA channels. */
+    for ( chnum = 0, chmask = 1;
+          chnum < EMDRV_DMADRV_DMA_CH_COUNT;
+          chnum++, chmask <<= 1 ) {
+      if ( pending & chmask ) {
+        /* Clear the interrupt flag. */
+#if defined (LDMA_HAS_SET_CLEAR)
+        LDMA->IF_CLR = chmask;
+#else
+        LDMA->IFC = chmask;
+#endif
 
-        if ( (ch->mode == dmaModePingPong) && stop ) {
-          dmaXfer[chnum].desc[0].xfer.link = 0;
-          dmaXfer[chnum].desc[1].xfer.link = 0;
+        ch = &chTable[chnum];
+        if ( ch->callback != NULL ) {
+          ch->callbackCount++;
+          stop = !ch->callback(chnum, ch->callbackCount, ch->userParam);
+
+          if ( (ch->mode == dmaModePingPong) && stop ) {
+            dmaXfer[chnum].desc[0].xfer.link = 0;
+            dmaXfer[chnum].desc[1].xfer.link = 0;
+          }
         }
       }
     }

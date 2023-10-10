@@ -55,16 +55,20 @@ class XbmConverter():
 
     def __init__(self, image=None):
         self.image = image
-        self.logger = getLogger()
         self.DISPLAY_WSTK_PALETTE = (XbmConverter.xbm_white + XbmConverter.xbm_black)
         self.DISPLAY_EPD_PALETTE = (XbmConverter.xbm_white + XbmConverter.xbm_black + XbmConverter.xbm_red)
+
+    # Logger
+    @property
+    def log(self):
+        return getLogger("IMG")
 
     def open(self, img_path):
         """ Open image file """
         try:
             self.image = Image.open(img_path, "r").convert(mode='RGB')
         except:
-            self.logger.error("Cannot open image file: %s!", img_path)
+            self.log.error("Cannot open image file: %s!", img_path)
             self.image = None
     
     def open_frombytes(self, img_bytes):
@@ -72,7 +76,7 @@ class XbmConverter():
         try:
             self.image = Image.open(io.BytesIO(img_bytes)).convert(mode='RGB')
         except:
-            self.logger.error("Cannot open image file: %s!", img_bytes)
+            self.log.error("Cannot open image file: %s!", img_bytes)
             self.image = None
 
     def save_to_xbm(self, out):
@@ -80,7 +84,7 @@ class XbmConverter():
         try:
             self.image.convert('1').save(out, format='xbm')
         except AttributeError:
-            self.logger.error("File conversion failed!")
+            self.log.error("File conversion failed!")
 
     def reverse_bits(self, x):
       """ Reversing MSB->LSB bit order of a bytes class object """

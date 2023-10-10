@@ -17,4 +17,4 @@ config_file:
     file_id: sl_coulomb_counter_config
 documentation:
     docset: gecko-platform
-    document: driver/api/group-coulomb-counter
+    document: platform-driver/coulomb-counter

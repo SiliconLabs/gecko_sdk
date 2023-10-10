@@ -54,7 +54,6 @@ void sl_zigbee_app_framework_force_stop(void)
 void sl_zigbee_app_framework_force_wakeup(void)
 {
   force_sleep = false;
-  sl_power_manager_sleep();
   sli_mac_lower_mac_force_sleep(false);
   sl_zigbee_core_debug_print("Wakeup\n");
 }

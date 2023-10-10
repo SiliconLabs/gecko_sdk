@@ -13,4 +13,4 @@ provides:
   - name: enum
 documentation:
   docset: gecko-platform
-  document: common/api/group-enum
+  document: platform-common/enum

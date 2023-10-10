@@ -278,6 +278,26 @@ uint16_t sleeptimer_hal_get_clock_accuracy(void)
 #endif
 }
 
+/*******************************************************************************
+ * Hardware Abstraction Layer to get the capture channel value.
+ ******************************************************************************/
+uint32_t sleeptimer_hal_get_capture(void)
+{
+  // Invalid for RTCC peripheral
+  EFM_ASSERT(0);
+  return 0;
+}
+
+/*******************************************************************************
+ * Hardware Abstraction Layer to reset PRS signal triggered by the associated
+ * peripheral.
+ ******************************************************************************/
+void sleeptimer_hal_reset_prs_signal(void)
+{
+  // Invalid for RTCC peripheral
+  EFM_ASSERT(0);
+}
+
 /***************************************************************************//**
  * Set lowest energy mode based on a project's configurations and clock source
  *

@@ -3,7 +3,7 @@
 - label: BRD2902A
 - package: platform
 - description: Board support for BRD2902A.
-- category: Platform|Board|Starter Kit
+- category: Platform|Board|Thunderboard
 - quality: production
 - requires:
   - name: bgm240pb22vna
@@ -11,8 +11,8 @@
 - provides:
   - name: brd2902a
   - name: hardware_board
-  - name: hardware_board_stk
-  - name: hardware_board_from_stk
+  - name: hardware_board_tb
+  - name: hardware_board_from_tb
   - name: hardware_board_has_vcom
   - name: hardware_board_has_lfxo
   - name: hardware_board_supports_rf_band_2400

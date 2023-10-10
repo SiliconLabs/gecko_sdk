@@ -1,2 +1,2 @@
-Flex SDK 3.6.1.0
-- RAIL Library: Targeted quality improvements and bug fixes
+Flex SDK 3.6.2.0
+- Targeted quality improvements and bug fixes

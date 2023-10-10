@@ -85,7 +85,7 @@ static void lcd_print_dist_fw_list(uint16_t current_fw_list_length,
  *
  * Update is needed when adding a node, removing nodes, or a node fails.
  *
- * @param[in] num_active_nodes Number of actively updating nodes
+ * @param[in] num_active_nodes Number of active target nodes
  * @param[in] node_count Number of nodes that ever participated in the current
  *                       update
  ******************************************************************************/

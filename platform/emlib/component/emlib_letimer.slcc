@@ -23,39 +23,39 @@ requires:
 documentation:
   docset: gecko-platform
   document:
-    - page: emlib/api/efm32g/group-letimer
+    - page: platform-emlib-efm32g/letimer
       condition: [device_sdid_71]
-    - page: emlib/api/efm32gg/group-letimer
+    - page: platform-emlib-efm32gg/letimer
       condition: [device_sdid_72]
-    - page: emlib/api/efm32tg/group-letimer
+    - page: platform-emlib-efm32tg/letimer
       condition: [device_sdid_73]
-    - page: emlib/api/efm32lg/group-letimer
+    - page: platform-emlib-efm32lg/letimer
       condition: [device_sdid_74]
-    - page: emlib/api/efr32xg1/group-letimer
+    - page: platform-emlib-efr32xg1/letimer
       condition: [device_sdid_80]
-    - page: emlib/api/efr32xg12/group-letimer
+    - page: platform-emlib-efr32xg12/letimer
       condition: [device_sdid_84]
-    - page: emlib/api/efr32xg13/group-letimer
+    - page: platform-emlib-efr32xg13/letimer
       condition: [device_sdid_89]
-    - page: emlib/api/efr32xg14/group-letimer
+    - page: platform-emlib-efr32xg14/letimer
       condition: [device_sdid_95]
-    - page: emlib/api/efm32gg11/group-letimer
+    - page: platform-emlib-efm32gg11/letimer
       condition: [device_sdid_100]
-    - page: emlib/api/efm32tg11/group-letimer
+    - page: platform-emlib-efm32tg11/letimer
       condition: [device_sdid_103]
-    - page: emlib/api/efm32gg12/group-letimer
+    - page: platform-emlib-efm32gg12/letimer
       condition: [device_sdid_106]
-    - page: emlib/api/efr32xg21/group-letimer
+    - page: platform-emlib-efr32xg21/letimer
       condition: [device_sdid_200]
-    - page: emlib/api/efr32xg22/group-letimer
+    - page: platform-emlib-efr32xg22/letimer
       condition: [device_sdid_205]
-    - page: emlib/api/efr32xg23/group-letimer
+    - page: platform-emlib-efr32xg23/letimer
       condition: [device_sdid_210]
-    - page: emlib/api/efr32xg24/group-letimer
+    - page: platform-emlib-efr32xg24/letimer
       condition: [device_sdid_215]
-    - page: emlib/api/efr32xg25/group-letimer
+    - page: platform-emlib-efr32xg25/letimer
       condition: [device_sdid_220]
-    - page: emlib/api/efr32xg27/group-letimer
+    - page: platform-emlib-efr32xg27/letimer
       condition: [device_sdid_230]
-    - page: emlib/api/efr32xg28/group-letimer
+    - page: platform-emlib-efr32xg28/letimer
       condition: [device_sdid_235]

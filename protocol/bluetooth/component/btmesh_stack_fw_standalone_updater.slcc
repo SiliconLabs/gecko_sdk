@@ -3,7 +3,7 @@ label: "Firmware Standalone Updater"
 package: "Btmesh"
 description: "This component provides the Bluetooth mesh Device Firmware Upgrade Standalone Updater functionality. The Standalone Updater role combines the responsibilities of the Initiator and Distributor into one node. The Standalone Updater chooses which nodes to update, and which firmware images to use by itself. It uses the Firmware Update Client model to manage the updates and the BLOB Transfer Client to send the firmware image data to the nodes."
 category: "Bluetooth Mesh|Stack|Models|DFU"
-quality: "evaluation"
+quality: "production"
 root_path: "protocol/bluetooth"
 
 requires:

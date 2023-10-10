@@ -183,6 +183,14 @@ extern "C" {
 #define RAIL_SUPPORTS_TX_TO_TX 0
 #endif
 
+/// Boolean to indicate whether the selected chip supports \ref RAIL_TX_REPEAT_OPTION_START_TO_START.
+/// See also runtime refinement \ref RAIL_SupportsTxRepeatStartToStart().
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG >= 2)
+#define RAIL_SUPPORTS_TX_REPEAT_START_TO_START RAIL_SUPPORTS_TX_TO_TX
+#else
+#define RAIL_SUPPORTS_TX_REPEAT_START_TO_START 0
+#endif
+
 /// Boolean to indicate whether the selected chip supports thermistor measurements.
 /// See also runtime refinement \ref RAIL_SupportsExternalThermistor().
 #if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 2) \

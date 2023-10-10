@@ -42,16 +42,25 @@ extern "C" {
 #include "app_log.h"
 
 #define ESL_LIB_LOG_BUFFER_SIZE      2048
-#define ESL_LIB_LOG_ADDR_FORMAT      " %02X:%02X:%02X:%02X:%02X:%02X type = %d "
-#define ESL_LIB_LOG_HANDLE_FORMAT    "[%p] "
-#define ESL_LIB_LOG_ADDR(address) \
-  (address).addr[5],              \
-  (address).addr[4],              \
-  (address).addr[3],              \
-  (address).addr[2],              \
-  (address).addr[1],              \
-  (address).addr[0],              \
-  (address).addr_type
+#define ESL_LIB_LOG_ADDR_FORMAT      "type %u %s address: %02X:%02X:%02X:%02X:%02X:%02X"
+#define ESL_LIB_LOG_HANDLE_FORMAT    "[0x%p] "
+#define ESL_LIB_LOG_ADDR(_addr)                 \
+  (_addr).address_type,                         \
+  ((_addr).address_type ? "random" : "public"), \
+  (_addr).address.addr[5],                      \
+  (_addr).address.addr[4],                      \
+  (_addr).address.addr[3],                      \
+  (_addr).address.addr[2],                      \
+  (_addr).address.addr[1],                      \
+  (_addr).address.addr[0]
+
+#define ESL_LIB_LOG_BD_ADDR(_bd_addr) \
+  (_bd_addr).addr[5],                 \
+  (_bd_addr).addr[4],                 \
+  (_bd_addr).addr[3],                 \
+  (_bd_addr).addr[2],                 \
+  (_bd_addr).addr[1],                 \
+  (_bd_addr).addr[0]
 
 /// Logging structure type
 typedef struct {

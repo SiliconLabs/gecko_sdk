@@ -31,7 +31,6 @@ from threading import Thread
 from typing import Callable, List, Mapping, Optional, Union
 
 from bgapi.bglib import BGEvent, BGLib, CommandFailedError
-
 from bgapix.slstatus import SlStatus
 
 logger = logging.getLogger(__name__)
@@ -109,9 +108,10 @@ BGLIBX_API = """<?xml version="1.0" encoding="UTF-8"?>
 
 
 class BGLibExtWaitEventError(Exception):
-    def __init__(self, *args, events=[]):
+    def __init__(self, *args, event_selector, events=[]):
         super().__init__(*args)
         self.events = events
+        self.event_selector = event_selector
 
 
 class BGLibExtSyncSignalException(Exception):
@@ -497,7 +497,9 @@ class BGLibExt(BGLib):
         # went wrong so an BGLibExtWaitEventError exception is raised.
         # Some events could be selected so those are added to the exception.
         raise BGLibExtWaitEventError(
-            "Expected final event is missing.", events=selected_events
+            "Expected final event is missing.",
+            event_selector=event_selector,
+            events=selected_events,
         )
 
     def wait_event(
@@ -557,8 +559,8 @@ class BGLibExt(BGLib):
             for retry_cmd_count in range(0, retry_cmd_max + 1):
                 try:
                     # The command return value is not checked because an exception
-                    # is thrown if it is not zero and the retries are maxed
-                    # The arguments shall be packed into the command object
+                    # is raised if it is not zero and the retries are maxed.
+                    # The arguments shall be packed into the command object.
                     response = command(*args)
                     if event_selector is None:
                         # If no event was specified then only the command shall
@@ -712,6 +714,20 @@ class BGLibExt(BGLib):
                     EventSelector.IGNORE != retry_evt_sel.categorize(event)
                     for event in new_events
                 ):
+                    # If the event_selector is stateless and the received event
+                    # means a recoverable error then clear the selected event list.
+                    # Corner case: First command successful and the received
+                    # event means a recoverable error but the next command fails
+                    # with a recoverable error.
+                    # If the event selector is stateless then the selected events
+                    # shall be cleared after an event which indicates recoverable
+                    # error because that event and other preceding events shall
+                    # not be stored otherwise it could cause early retry
+                    # termination due to invalid final event count.
+                    # Note: Only the selected events (event_selector) can be
+                    #       matched by retry_event_selector.
+                    if evt_selector.stateless:
+                        selected_events = EventList()
                     logger.warning("Retry due to recoverable event error.")
                     continue
             # The required events are found which shall be returned

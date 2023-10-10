@@ -45,9 +45,10 @@ provides:
     allow_multiple: true
 requires:
   - name: "spidrv_core"
+  - name: "device_has_usart"
 template_contribution:
   - name: "spidrv_usart_instances"
     value: "{{instance}}"
 documentation:
     docset: gecko-platform
-    document: driver/api/group-spidrv
+    document: platform-driver/spidrv

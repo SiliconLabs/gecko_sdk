@@ -13,4 +13,4 @@ provides:
   - name: status
 documentation:
   docset: gecko-platform
-  document: common/api/group-status
+  document: platform-common/status

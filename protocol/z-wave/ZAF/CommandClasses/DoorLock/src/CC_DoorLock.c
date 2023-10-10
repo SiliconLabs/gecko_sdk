@@ -147,21 +147,23 @@ e_cmd_handler_return_code_t CC_DoorLock_ConfigurationSet_handler(cc_door_lock_co
 {
   DPRINT("Door Lock Configuration Set\n");
 
-  if ((DOOR_OPERATION_CONST == pData->type) &&
-      !(~cc_door_lock_get_supported_inside_handles() & pData->insideDoorHandleMode) && // Fail if non-supported inside handles are set
-      !(~cc_door_lock_get_supported_outside_handles() & pData->outsideDoorHandleMode) &&  // Fail if non-supported outside handles are set
+  // Ignore handles from the incomming frame which aren't supported by the application
+  uint8_t inside_handles_to_set = cc_door_lock_get_supported_inside_handles() & pData->insideDoorHandleMode;
+  uint8_t outside_handles_to_set = cc_door_lock_get_supported_outside_handles() & pData->outsideDoorHandleMode;
+
+  if ((cc_door_lock_get_operation_type() == pData->type) &&
       !(cc_door_lock_get_max_auto_relock_time() < ((pData->autoRelockTime1 << 8) + pData->autoRelockTime2)) && // Fail if non-supported auto-relock time
       !(cc_door_lock_get_max_hold_and_release_time() < ((pData->holdAndReleaseTime1 << 8) + pData->holdAndReleaseTime2)) && // Fail if non-supported hold and release time
       !(~cc_door_lock_get_options_flags() & pData->reservedOptionsFlags )  // Fail if non-supported options flags
      )
   {
-    if (door_lock_data.insideDoorHandleMode == pData->insideDoorHandleMode &&
-        door_lock_data.outsideDoorHandleMode == pData->outsideDoorHandleMode) {
+    if (door_lock_data.insideDoorHandleMode == inside_handles_to_set &&
+        door_lock_data.outsideDoorHandleMode == outside_handles_to_set) {
       // Already at final state
       return E_CMD_HANDLER_RETURN_CODE_NO_CHANGE;
     }
-    door_lock_data.insideDoorHandleMode  = pData->insideDoorHandleMode;
-    door_lock_data.outsideDoorHandleMode = pData->outsideDoorHandleMode;
+    door_lock_data.insideDoorHandleMode  = inside_handles_to_set;
+    door_lock_data.outsideDoorHandleMode = outside_handles_to_set;
 
     SaveStatus();
     return E_CMD_HANDLER_RETURN_CODE_HANDLED;

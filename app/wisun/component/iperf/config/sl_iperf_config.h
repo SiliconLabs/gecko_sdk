@@ -31,8 +31,8 @@
 #define SL_IPERF_CONFIG_H
 
 /**************************************************************************//**
- * @defgroup SL_WISUN_COAP_CONFIG Configuration
- * @ingroup SL_WISUN_COAP
+ * @defgroup SL_IPERF_CONFIG Configuration
+ * @ingroup SL_IPERF
  * @{
  *****************************************************************************/
 
@@ -67,9 +67,9 @@
 // <i> Default value 1000
 #define SL_IPERF_DEFAULT_INTERVAL_MS               1000U
 
-// <o SL_IPERF_MAX_TEST_TIMEOUT_MS> Maximum possible test timeout
-// <i> Default value 30000
-#define SL_IPERF_MAX_TEST_TIMEOUT_MS               30000U
+// <o SL_IPERF_MAX_TEST_TIMEOUT_MS> Maximum possible additional test timeout after duration time
+// <i> Default value 2000
+#define SL_IPERF_MAX_TEST_TIMEOUT_MS               2000U
 // </h>
 
 // <h>iPerf Server configuration

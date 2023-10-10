@@ -154,30 +154,28 @@ void getStatus(sl_cli_command_arg_t *args)
                         counters.rxBeams,
                         counters.dataRequests
                         );
+  responsePrintContinue("Calibrations:%u,"
+                        "TxChannelBusy:%u,"
+                        "TxClear:%u,"
+                        "TxCca:%u,"
+                        "TxRetry:%u,"
+                        "UserTxStarted:%u,"
+                        "PaProtect:%u",
+                        counters.calibrations,
+                        counters.txChannelBusy,
+                        counters.lbtSuccess,
+                        counters.lbtStartCca,
+                        counters.lbtRetry,
+                        counters.userTxStarted,
+                        counters.paProtect
+                        );
+  for (uint32_t subPhyId = 0; subPhyId < SUBPHYID_COUNT; subPhyId++) {
+    responsePrintContinue("SubPhy%u:%u",
+                          subPhyId,
+                          counters.subPhyCount[subPhyId]);
+  }
   // Avoid use of %ll long-long formats due to iffy printf library support
-  responsePrintEnd("Calibrations:%u,"
-                   "TxChannelBusy:%u,"
-                   "TxClear:%u,"
-                   "TxCca:%u,"
-                   "TxRetry:%u,"
-                   "UserTxStarted:%u,"
-                   "PaProtect:%u,"
-                   "SubPhy0:%u,"
-                   "SubPhy1:%u,"
-                   "SubPhy2:%u,"
-                   "SubPhy3:%u,"
-                   "rxRawSourceBytes:0x%x%08x",
-                   counters.calibrations,
-                   counters.txChannelBusy,
-                   counters.lbtSuccess,
-                   counters.lbtStartCca,
-                   counters.lbtRetry,
-                   counters.userTxStarted,
-                   counters.paProtect,
-                   counters.subPhyCount[0],
-                   counters.subPhyCount[1],
-                   counters.subPhyCount[2],
-                   counters.subPhyCount[3],
+  responsePrintEnd("rxRawSourceBytes:0x%x%08x",
                    (uint32_t)(counters.rxRawSourceBytes >> 32),
                    (uint32_t)(counters.rxRawSourceBytes)
                    );
@@ -523,6 +521,10 @@ void printChipFeatures(sl_cli_command_arg_t *args)
                      "RAIL_SUPPORTS_RFSENSE_SELECTIVE_OOK",
                      RAIL_SUPPORTS_RFSENSE_SELECTIVE_OOK ? "Yes" : "No",
                      RAIL_SupportsRfSenseSelectiveOok(railHandle) ? "Yes" : "No");
+  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
+                     "RAIL_SUPPORTS_TX_REPEAT_START_TO_START",
+                     RAIL_SUPPORTS_TX_REPEAT_START_TO_START ? "Yes" : "No",
+                     RAIL_SupportsTxRepeatStartToStart(railHandle) ? "Yes" : "No");
  #ifdef  RAIL_TX_POWER_MODE_2P4GIG_HIGHEST
   if (RAIL_SupportsTxPowerMode(railHandle,
                                RAIL_TX_POWER_MODE_2P4GIG_HIGHEST,

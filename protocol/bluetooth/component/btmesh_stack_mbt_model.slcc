@@ -3,7 +3,7 @@ label: "Bluetooth Mesh BLOB Transfer Model Library"
 package: "Btmesh"
 description: "Provides Bluetooth Mesh Binary Large Object (BLOB) Transfer Model Library. Contains BLOB Transfer Client and Server models."
 category: "Bluetooth Mesh|Stack|DFU"
-quality: "evaluation"
+quality: "production"
 root_path: "protocol/bluetooth"
 include:
   - path: "inc"

@@ -6,14 +6,19 @@ description: >
   specification.
 
   This model is used by the Distributor to receive from the Initiator the
-  firmware update parameters, the set of Updating nodes to update, and the
+  firmware update parameters, the set of Target nodes to update, and the
   firmware image to transfer. This model uses the Firmware Update Client model
   and the BLOB Transfer Client model to manage the firmware update. The Firmware
   Distribution Server can transfer one firmware image at a time.
   This component is prepared for integration into SOC applications.
+
+  This is a No-Code component.
 category: "Bluetooth Mesh|Models|Firmware Update"
 quality: production
 root_path: app/btmesh/common/btmesh_fw_distribution_server
+tag:
+  - No-Code
+
 config_file:
   - path: btmesh_fw_distribution_server.dcd
     directory: btmeshconf

@@ -62,6 +62,7 @@
 - provides:
   - name: efm32pg22c200f128im32
   - name: device
+  - name: device_efx
   - name: device_series_2
   - name: device_sdid_205
   - name: device_family_efm32pg22

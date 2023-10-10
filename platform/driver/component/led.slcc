@@ -2,8 +2,8 @@ id: led
 label: Generic LED API
 package: platform
 description: >
-  This component provides a base LED functionality such as initialize, get and set state. 
-  In addition, an LED driver implementation component such as the Simple LED component 
+  This component provides a base LED functionality such as initialize, get and set state.
+  In addition, an LED driver implementation component such as the Simple LED component
   can be included in the project to implement full LED handling.
 category: Platform|Driver|LED
 quality: production
@@ -22,4 +22,4 @@ requires:
   - name: component_catalog
 documentation:
     docset: gecko-platform
-    document: driver/api/group-led
+    document: platform-driver/led

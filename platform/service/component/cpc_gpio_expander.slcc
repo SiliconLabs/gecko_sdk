@@ -3,12 +3,12 @@ label: CPC GPIO Expander
 package: platform
 description: >
   The Co-Processor Communication (CPC) General Purpose Input/Output (GPIO) Expander is a
-  software component designed to enable a CPC Primary/Host device to utilize a Secondary 
-  device's GPIOs as if they were its own. With the CPC GPIO Expander, the Primary/Host 
-  device can seamlessly integrate with the Secondary device and make use of its GPIO 
-  capabilities. This component is dependent on specific pieces of software on the 
-  Primary/Host device to facilitate this communication. By enabling this communication, 
-  the CPC GPIO Expander expands the capabilities of the Primary/Host device, allowing 
+  software component designed to enable a CPC Primary/Host device to utilize a Secondary
+  device's GPIOs as if they were its own. With the CPC GPIO Expander, the Primary/Host
+  device can seamlessly integrate with the Secondary device and make use of its GPIO
+  capabilities. This component is dependent on specific pieces of software on the
+  Primary/Host device to facilitate this communication. By enabling this communication,
+  the CPC GPIO Expander expands the capabilities of the Primary/Host device, allowing
   it to interface with a wider range of devices and peripherals.
 
 category: Services|Co-Processor Communication|GPIO Expander
@@ -53,4 +53,4 @@ template_contribution:
 
 documentation:
   docset: gecko-platform
-  document: service/api/group-cpc
+  document: platform-cpc/cpc

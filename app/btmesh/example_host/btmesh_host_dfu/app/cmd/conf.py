@@ -181,12 +181,13 @@ class BtmeshConfCmd(BtmeshCmd):
                 "Set configuration states on specified nodes. "
                 "The set subcommand enables the configuration of Configuration "
                 "Server and SAR Configuration Server states on multiple nodes. "
-                "Some configuration messages set multiple related configuration "
-                "states so these states can be set in groups only. "
+                "Some configuration messages set multiple configuration states "
+                "(e.g. composite state) so these states can be set in groups only. "
                 "The set command provides two methods to update these related "
                 "configuration states. "
-                "Each configuration state has default value which is updated "
-                "atomically with others in the same configuration message. "
+                "Each command option has default value which refers to a "
+                "configuration state that is updated atomically with others "
+                "in the same configuration message. "
                 "If some of these states aren't specified then the default "
                 "value is used which can be set in the ini configuration file "
                 "(default behavior). "
@@ -279,8 +280,8 @@ class BtmeshConfCmd(BtmeshCmd):
             "--nw-tx-cnt",
             type=int,
             help=(
-                f"Default network transmit count controls the number of "
-                f"transmissions of Network PDUs that originate from the node. "
+                f"Network Transmit Count controls the number of transmissions of "
+                f"Network PDUs that originate from the node. "
                 f"Valid values range from 1 to 8. "
                 f"Config group: NWTX. "
                 f"(default: {app_cfg.conf.network_tx_count_default})"
@@ -290,11 +291,202 @@ class BtmeshConfCmd(BtmeshCmd):
             "--nw-tx-int",
             type=int,
             help=(
-                f"Default interval in milliseconds between network PDU "
-                f"transmissions which originates from the same nodes. "
+                f"Network Transmit Interval Step in milliseconds between network "
+                f"PDU transmissions which originates from the same nodes. "
                 f"Valid values range from 10 ms to 320 ms, with a resolution of 10 ms. "
                 f"Config group: NWTX. "
                 f"(default: {app_cfg.conf.network_tx_interval_ms_default})"
+            ),
+        )
+        self.conf_set_parser.add_argument(
+            "--sar-tx-seg-int",
+            type=int,
+            help=(
+                f"SAR Transmitter Segment Interval Step controls the interval "
+                f"between transmissions of segments of a segmented message in "
+                f"milliseconds. "
+                f"The value is the range of 10ms to 160ms in 10ms steps, "
+                f"intermediate values are rounded down to the nearest "
+                f"multiple of 10. "
+                f"Default value is 20ms in specification. "
+                f"Config group: SAR_TX. "
+                f"(default: {app_cfg.conf.sar_tx_segment_interval_step_default})"
+            ),
+        )
+        self.conf_set_parser.add_argument(
+            "--sar-tx-uc-retx-cnt",
+            type=int,
+            help=(
+                f"SAR Transmitter Unicast Retransmission Count controls the "
+                f"maximum number of transmissions of segments of segmented "
+                f"messages to a unicast destination. "
+                f"Valid range is 0 - 15, where 0 represents a single transmission. "
+                f"The default value is 2 in specification, resulting in "
+                f"3 transmissions total. "
+                f"Config group: SAR_TX. "
+                f"(default: {app_cfg.conf.sar_tx_unicast_retrans_count_default})"
+            ),
+        )
+        self.conf_set_parser.add_argument(
+            "--sar-tx-uc-retx-wo-prog-cnt",
+            type=int,
+            help=(
+                f"SAR Transmitter Unicast Retransmissions Without Progress Count "
+                f"controls the maximum number of retransmissions of segments of "
+                f"segmented messages to a unicast destination without progress "
+                f"(without marking newly marking any segments acknowledged). "
+                f"Valid range is 0 - 15, where 0 represents a single transmission. "
+                f"The default value is 2 in specification, resulting in "
+                f"3 transmissions. "
+                f"Value of this state should be set to a value greater by two or "
+                f"more than the value of the SAR Receiver Acknowledgement "
+                f"Retransmissions Count on a peer node. "
+                f"This helps prevent the SAR Transmitter from abandoning the "
+                f"SAR prematurely. "
+                f"Config group: SAR_TX. "
+                f"(default: {app_cfg.conf.sar_tx_unicast_retrans_wo_progress_count_default})"
+            ),
+        )
+        self.conf_set_parser.add_argument(
+            "--sar-tx-uc-retx-int-step",
+            type=int,
+            help=(
+                f"SAR Transmitter Unicast Retransmissions Interval Step state "
+                f"controls the minimum interval between retransmissions of "
+                f"segments of a segmented message for a destination that is a "
+                f"unicast address in 25ms steps. "
+                f"Valid range is 25 - 400ms, intermediate values are rounded "
+                f"down to the nearest multiple of 25. "
+                f"Default value is 200ms in specification. "
+                f"Config group: SAR_TX. "
+                f"(default: {app_cfg.conf.sar_tx_unicast_retrans_interval_step_default})"
+            ),
+        )
+        self.conf_set_parser.add_argument(
+            "--sar-tx-uc-retx-int-inc",
+            type=int,
+            help=(
+                f"SAR Transmitter Unicast Retransmissions Interval Increment "
+                f"state controls the incremental component (TTL) of the interval "
+                f"between retransmissions of segments of a segmented message "
+                f"for a destination that is a unicast address in 25ms steps. "
+                f"Valid range is 25 - 400ms, intermediate values are rounded "
+                f"down to the nearest multiple of 25. "
+                f"Default value is 50ms in specification. "
+                f"Config group: SAR_TX. "
+                f"(default: {app_cfg.conf.sar_tx_unicast_retrans_interval_increment_default})"
+            ),
+        )
+        self.conf_set_parser.add_argument(
+            "--sar-tx-mc-retx-cnt",
+            type=int,
+            help=(
+                f"SAR Transmitter Multicast Retransmissions Count state controls "
+                f"the maximum number of transmissions of segments of segmented "
+                f"messages to a group address or a virtual address. "
+                f"Valid range is 0 - 15, where 0 represents a single transmission. "
+                f"The default value is 1 in specification, resulting in "
+                f"2 transmissions. "
+                f"WARNING! The BLOB Transfer procedure has a high-level "
+                f"retransmission logic which detects missing chunks and "
+                f"retransmits the missing ones. "
+                f"It is recommended to disable multicast retransmissions in Lower "
+                f"Transport layer in low noise environment because it slows down "
+                f"the multicast BLOB Transfer significantly. "
+                f"More multicast retransmissions can be beneficial during BLOB "
+                f"Transfer for chunks with many segments in noisy environment "
+                f"because one missing chunk segment leads to the loss of "
+                f"whole BLOB Chunk Transfer access message. "
+                f"Config group: SAR_TX. "
+                f"(default: {app_cfg.conf.sar_tx_multicast_retrans_count_default})"
+            ),
+        )
+        self.conf_set_parser.add_argument(
+            "--sar-tx-mc-retx-int",
+            type=int,
+            help=(
+                f"SAR Transmitter Multicast Retransmissions Interval Step state "
+                f"controls the interval between retransmissions of segments of a "
+                f"segmented message for a destination that is a group address or "
+                f"a virtual address in 25ms steps. "
+                f"Valid range is 25-400ms, intermediate values are rounded down "
+                f"to the nearest multiple of 25. "
+                f"Default values is 100ms in specification. "
+                f"Config group: SAR_TX. "
+                f"(default: {app_cfg.conf.sar_tx_multicast_retrans_interval_step_default})"
+            ),
+        )
+        self.conf_set_parser.add_argument(
+            "--sar-rx-seg-thr",
+            type=int,
+            help=(
+                f"SAR Receiver Segments Threshold state represents the size of a "
+                f"segmented message in number of segments above which the Segment "
+                f"Acknowledgment messages are enabled. "
+                f"Valid range is 0 - 31, the default value is 3 (segments) "
+                f"in specification. "
+                f"Config group: SAR_RX. "
+                f"(default: {app_cfg.conf.sar_rx_segments_threshold_default})"
+            ),
+        )
+        self.conf_set_parser.add_argument(
+            "--sar-rx-ack-delay-inc",
+            type=int,
+            help=(
+                f"Default SAR Receiver Acknowledgment Delay Increment state "
+                f"control the interval between the reception of a new segment "
+                f"of a segmented message for a destination that is a unicast "
+                f"address and the transmission of the Segment Acknowledgment "
+                f"for that message. "
+                f"Formula: acknowledgment delay increment = "
+                f"(SAR Acknowledgment Delay Increment + 1.5) "
+                f"Valid range is 0 - 7, default is 2 in specification resulting "
+                f"in 3.5 segment transmission interval steps. "
+                f"Config group: SAR_RX. "
+                f"(default: {app_cfg.conf.sar_rx_ack_delay_increment_default})"
+            ),
+        )
+        self.conf_set_parser.add_argument(
+            "--sar-rx-discard-timeout",
+            type=int,
+            help=(
+                f"SAR Receiver Discard Timeout state controls the time that the "
+                f"lower transport layer waits after receiving unique segments of "
+                f"a segmented message before discarding that segmented message "
+                f"in 5s steps. "
+                f"Valid range is 5000 - 80000ms, intermediate values are rounded "
+                f"down to the nearest multiple of 5s. "
+                f"The default value is 10000ms in specification. "
+                f"Config group: SAR_RX. "
+                f"(default: {app_cfg.conf.sar_rx_discard_timeout_default})"
+            ),
+        )
+        self.conf_set_parser.add_argument(
+            "--sar-rx-seg-int",
+            type=int,
+            help=(
+                f"SAR Receiver Segment Interval Step state indicates the interval "
+                f"between received segments of a segmented message in milliseconds. "
+                f"This is used to control rate of transmission of Segment "
+                f"Acknowledgment messages. "
+                f"Valid range is 10 - 160ms, intermediate values are rounded "
+                f"down to the nearest multiple of 10. "
+                f"The default value is 20ms in specification. "
+                f"Config group: SAR_RX. "
+                f"(default: {app_cfg.conf.sar_rx_segment_interval_step_default})"
+            ),
+        )
+        self.conf_set_parser.add_argument(
+            "--sar-rx-ack-retx-cnt",
+            type=int,
+            help=(
+                f"SAR Receiver Acknowledgment Retransmissions Count state controls "
+                f"the maximum number of retransmissions of Segment Acknowledgment "
+                f"messages sent by the lower transport layer. "
+                f"Valid range is 0 - 3. The default value is 1 in specification, "
+                f"representing 1 retransmissions or 2 in total. "
+                f"Config group: SAR_RX. "
+                f"(default: {app_cfg.conf.sar_rx_ack_retrans_count_default})"
             ),
         )
         self.add_btmesh_basic_retry_args(
@@ -544,11 +736,13 @@ class BtmeshConfCmd(BtmeshCmd):
         for node in nodes:
             try:
                 self.conf_set_node_default_ttl(node, retry_params, pargs)
+                self.conf_set_node_network_transmit(node, retry_params, update, pargs)
+                self.conf_set_node_sar_transmitter(node, retry_params, update, pargs)
+                self.conf_set_node_sar_receiver(node, retry_params, update, pargs)
                 self.conf_set_node_relay(node, retry_params, update, pargs)
                 self.conf_set_node_proxy(node, retry_params, pargs)
                 self.conf_set_node_friend(node, retry_params, pargs)
                 self.conf_set_node_identity(node, retry_params, pargs)
-                self.conf_set_node_network_transmit(node, retry_params, update, pargs)
             except BtmeshConfigError as e:
                 # The exception is raised when timeout error occurs in order to
                 # skip further configuration operations targeting the same node.
@@ -568,8 +762,10 @@ class BtmeshConfCmd(BtmeshCmd):
         if ttl is None:
             return
         node_str = app_ui.node_str(node)
-        app_btmesh.conf.set_default_ttl(node, ttl=ttl, retry_params=retry_params)
-        app_ui.info(f"Default TTL is set to {ttl} on {node_str} node.")
+        default_ttl_status = app_btmesh.conf.set_default_ttl(
+            node, ttl=ttl, retry_params=retry_params
+        )
+        app_ui.info(f"{node_str} node: Default TTL is set to {default_ttl_status.ttl}.")
 
     @conf_set_node_failed_handler
     def conf_set_node_relay(
@@ -578,7 +774,6 @@ class BtmeshConfCmd(BtmeshCmd):
         relay_raw_state = pargs.relay
         if relay_raw_state is None:
             return
-        node_str = app_ui.node_str(node)
         if relay_raw_state == "on":
             relay_state = RelayState.ENABLED
         else:
@@ -597,58 +792,62 @@ class BtmeshConfCmd(BtmeshCmd):
                 retransmit_interval_ms = relay_status.retransmit_interval_ms
             else:
                 retransmit_interval_ms = app_cfg.conf.relay_retx_interval_ms_default
-        app_btmesh.conf.set_relay(
+        relay_status = app_btmesh.conf.set_relay(
             node,
             state=relay_state,
             retransmit_count=retransmit_count,
             retransmit_interval_ms=retransmit_interval_ms,
         )
-        relay_state_str = relay_state.pretty_name
+        node_str = app_ui.node_str(node)
+        relay_state_str = relay_status.state.pretty_name
         if relay_state == RelayState.ENABLED:
+            app_ui.info(f"{node_str} node: Relay feature is {relay_state_str}.")
             app_ui.info(
-                f"Relay feature is {relay_state_str} with "
-                f"{retransmit_count} retransmit count and "
-                f"{retransmit_interval_ms} ms retransmit interval "
-                f"on {node_str} node."
+                f"{node_str} node: Relay Retransmit Count is set to "
+                f"{relay_status.retransmit_count}."
+            )
+            app_ui.info(
+                f"{node_str} node: Relay Retransmit Interval Steps is set to "
+                f"{relay_status.retransmit_interval_ms}."
             )
         else:
-            app_ui.info(f"Relay feature is {relay_state_str} on {node_str} node.")
+            app_ui.info(f"{node_str} node: Relay feature is {relay_state_str}.")
 
     @conf_set_node_failed_handler
     def conf_set_node_proxy(self, node: Node, retry_params: BtmeshRetryParams, pargs):
         proxy_raw_state = pargs.proxy
         if proxy_raw_state is None:
             return
-        node_str = app_ui.node_str(node)
         if proxy_raw_state == "on":
             proxy_state = GattProxyState.ENABLED
         else:
             proxy_state = GattProxyState.DISABLED
-        app_btmesh.conf.set_gatt_proxy(
+        proxy_status = app_btmesh.conf.set_gatt_proxy(
             node,
             state=proxy_state,
             retry_params=retry_params,
         )
-        proxy_state_str = proxy_state.pretty_name
-        app_ui.info(f"Proxy feature is {proxy_state_str} on {node_str} node.")
+        node_str = app_ui.node_str(node)
+        proxy_state_str = proxy_status.state.pretty_name
+        app_ui.info(f"{node_str} node: Proxy feature is {proxy_state_str}.")
 
     @conf_set_node_failed_handler
     def conf_set_node_friend(self, node: Node, retry_params: BtmeshRetryParams, pargs):
         friend_raw_state = pargs.friend
         if friend_raw_state is None:
             return
-        node_str = app_ui.node_str(node)
         if friend_raw_state == "on":
             friend_state = FriendState.ENABLED
         else:
             friend_state = FriendState.DISABLED
-        app_btmesh.conf.set_friend(
+        friend_status = app_btmesh.conf.set_friend(
             node,
             state=friend_state,
             retry_params=retry_params,
         )
-        friend_state_str = friend_state.pretty_name
-        app_ui.info(f"Friend feature is {friend_state_str} on {node_str} node.")
+        node_str = app_ui.node_str(node)
+        friend_state_str = friend_status.state.pretty_name
+        app_ui.info(f"{node_str} node: Friend feature is {friend_state_str}.")
 
     @conf_set_node_failed_handler
     def conf_set_node_identity(
@@ -657,20 +856,20 @@ class BtmeshConfCmd(BtmeshCmd):
         node_identity_raw_state = pargs.identity
         if node_identity_raw_state is None:
             return
-        node_str = app_ui.node_str(node)
         if node_identity_raw_state == "on":
             node_identity_state = NodeIdentityState.ENABLED
         else:
             node_identity_state = NodeIdentityState.DISABLED
-        app_btmesh.conf.set_node_identity(
+        identity_status = app_btmesh.conf.set_node_identity(
             node,
             netkey_index=self.NETKEY_IDX,
             state=node_identity_state,
             retry_params=retry_params,
         )
-        identity_state_str = node_identity_state.pretty_name
+        node_str = app_ui.node_str(node)
+        identity_state_str = identity_status.state.pretty_name
         app_ui.info(
-            f"Node identity advertising is {identity_state_str} on {node_str} node."
+            f"{node_str} node: Node Identity Advertising is {identity_state_str}."
         )
 
     @conf_set_node_failed_handler
@@ -680,8 +879,9 @@ class BtmeshConfCmd(BtmeshCmd):
         nettx_cnt = pargs.nw_tx_cnt
         nettx_int = pargs.nw_tx_int
         if nettx_cnt is None and nettx_int is None:
+            # Command is called without any Network Transmit options so
+            # it shall not be configured at all.
             return
-        node_str = app_ui.node_str(node)
         if update and (nettx_cnt is None or nettx_int is None):
             nettx_status = app_btmesh.conf.get_network_transmit(
                 node, retry_params=retry_params
@@ -696,15 +896,243 @@ class BtmeshConfCmd(BtmeshCmd):
                 nettx_int = nettx_status.transmit_interval_ms
             else:
                 nettx_int = app_cfg.conf.network_tx_interval_ms_default
-        app_btmesh.conf.set_network_transmit(
+        nettx_status = app_btmesh.conf.set_network_transmit(
             node,
             transmit_count=nettx_cnt,
             transmit_interval_ms=nettx_int,
             retry_params=retry_params,
         )
+        node_str = app_ui.node_str(node)
         app_ui.info(
-            f"Network transmit count is set to {nettx_cnt} and network transmit "
-            f"interval is set to {nettx_int} ms on {node_str} node."
+            f"{node_str} node: "
+            f"Network Transmit Count is set to {nettx_status.transmit_count}."
+        )
+        app_ui.info(
+            f"{node_str} node: "
+            f"Network Transmit Interval Step is set to "
+            f"{nettx_status.transmit_interval_ms} ms."
+        )
+
+    @conf_set_node_failed_handler
+    def conf_set_node_sar_transmitter(
+        self, node: Node, retry_params: BtmeshRetryParams, update: bool, pargs
+    ):
+        segment_interval_step = pargs.sar_tx_seg_int
+        unicast_retrans_count = pargs.sar_tx_uc_retx_cnt
+        unicast_retrans_wo_progress_count = pargs.sar_tx_uc_retx_wo_prog_cnt
+        unicast_retrans_interval_step = pargs.sar_tx_uc_retx_int_step
+        unicast_retrans_interval_increment = pargs.sar_tx_uc_retx_int_inc
+        multicast_retrans_count = pargs.sar_tx_mc_retx_cnt
+        multicast_retrans_interval_step = pargs.sar_tx_mc_retx_int
+        sar_tx_args = (
+            segment_interval_step,
+            unicast_retrans_count,
+            unicast_retrans_wo_progress_count,
+            unicast_retrans_interval_step,
+            unicast_retrans_interval_increment,
+            multicast_retrans_count,
+            multicast_retrans_interval_step,
+        )
+        if all(arg is None for arg in sar_tx_args):
+            # Command is called without any SAR Transmitter options so
+            # it shall not be configured at all.
+            return
+        if update and any(arg is None for arg in sar_tx_args):
+            sar_tx_status = app_btmesh.conf.get_sar_transmitter(
+                node,
+                retry_params=retry_params,
+            )
+        if segment_interval_step is None:
+            if update:
+                segment_interval_step = sar_tx_status.segment_interval_step
+            else:
+                segment_interval_step = (
+                    app_cfg.conf.sar_tx_segment_interval_step_default
+                )
+        if unicast_retrans_count is None:
+            if update:
+                unicast_retrans_count = sar_tx_status.unicast_retrans_count
+            else:
+                unicast_retrans_count = (
+                    app_cfg.conf.sar_tx_unicast_retrans_count_default
+                )
+        if unicast_retrans_wo_progress_count is None:
+            if update:
+                unicast_retrans_wo_progress_count = (
+                    sar_tx_status.unicast_retrans_wo_progress_count
+                )
+            else:
+                unicast_retrans_wo_progress_count = (
+                    app_cfg.conf.sar_tx_unicast_retrans_wo_progress_count_default
+                )
+        if unicast_retrans_interval_step is None:
+            if update:
+                unicast_retrans_interval_step = (
+                    sar_tx_status.unicast_retrans_interval_step
+                )
+            else:
+                unicast_retrans_interval_step = (
+                    app_cfg.conf.sar_tx_unicast_retrans_interval_step_default
+                )
+        if unicast_retrans_interval_increment is None:
+            if update:
+                unicast_retrans_interval_increment = (
+                    sar_tx_status.unicast_retrans_interval_increment
+                )
+            else:
+                unicast_retrans_interval_increment = (
+                    app_cfg.conf.sar_tx_unicast_retrans_interval_increment_default
+                )
+        if multicast_retrans_count is None:
+            if update:
+                multicast_retrans_count = sar_tx_status.multicast_retrans_count
+            else:
+                multicast_retrans_count = (
+                    app_cfg.conf.sar_tx_multicast_retrans_count_default
+                )
+        if multicast_retrans_interval_step is None:
+            if update:
+                multicast_retrans_interval_step = (
+                    sar_tx_status.multicast_retrans_interval_step
+                )
+            else:
+                multicast_retrans_interval_step = (
+                    app_cfg.conf.sar_tx_multicast_retrans_interval_step_default
+                )
+        sar_tx_status = app_btmesh.conf.set_sar_transmitter(
+            node,
+            segment_interval_step=segment_interval_step,
+            unicast_retrans_count=unicast_retrans_count,
+            unicast_retrans_wo_progress_count=unicast_retrans_wo_progress_count,
+            unicast_retrans_interval_step=unicast_retrans_interval_step,
+            unicast_retrans_interval_increment=unicast_retrans_interval_increment,
+            multicast_retrans_count=multicast_retrans_count,
+            multicast_retrans_interval_step=multicast_retrans_interval_step,
+            retry_params=retry_params,
+        )
+        node_str = app_ui.node_str(node)
+        app_ui.info(
+            f"{node_str} node: "
+            f"SAR Transmitter Segment Interval Step is set to "
+            f"{sar_tx_status.segment_interval_step} ms."
+        )
+        app_ui.info(
+            f"{node_str} node: "
+            f"SAR Transmitter Unicast Retransmission Count is set to "
+            f"{sar_tx_status.unicast_retrans_count}."
+        )
+        app_ui.info(
+            f"{node_str} node: "
+            f"SAR Transmitter Unicast Retransmissions Without Progress Count is set to "
+            f"{sar_tx_status.unicast_retrans_wo_progress_count}."
+        )
+        app_ui.info(
+            f"{node_str} node: "
+            f"SAR Transmitter Unicast Retransmissions Interval Step is set to "
+            f"{sar_tx_status.unicast_retrans_interval_step} ms."
+        )
+        app_ui.info(
+            f"{node_str} node: "
+            f"SAR Transmitter Unicast Retransmissions Interval Increment is set to "
+            f"{sar_tx_status.unicast_retrans_interval_increment} ms."
+        )
+        app_ui.info(
+            f"{node_str} node: "
+            f"SAR Transmitter Multicast Retransmissions Count is set to "
+            f"{sar_tx_status.multicast_retrans_count}."
+        )
+        app_ui.info(
+            f"{node_str} node: "
+            f"SAR Transmitter Multicast Retransmissions Interval Step is set to "
+            f"{sar_tx_status.multicast_retrans_interval_step} ms."
+        )
+
+    @conf_set_node_failed_handler
+    def conf_set_node_sar_receiver(
+        self, node: Node, retry_params: BtmeshRetryParams, update: bool, pargs
+    ):
+        segments_threshold = pargs.sar_rx_seg_thr
+        ack_delay_increment = pargs.sar_rx_ack_delay_inc
+        discard_timeout = pargs.sar_rx_discard_timeout
+        segment_interval_step = pargs.sar_rx_seg_int
+        ack_retrans_count = pargs.sar_rx_ack_retx_cnt
+        sar_rx_args = (
+            segments_threshold,
+            ack_delay_increment,
+            discard_timeout,
+            segment_interval_step,
+            ack_retrans_count,
+        )
+        if all(arg is None for arg in sar_rx_args):
+            # Command is called without any SAR Receiver options so
+            # it shall not be configured at all.
+            return
+        if update and any(arg is None for arg in sar_rx_args):
+            sar_rx_status = app_btmesh.conf.get_sar_receiver(
+                node,
+                retry_params=retry_params,
+            )
+        if segments_threshold is None:
+            if update:
+                segments_threshold = sar_rx_status.segments_threshold
+            else:
+                segments_threshold = app_cfg.conf.sar_rx_segments_threshold_default
+        if ack_delay_increment is None:
+            if update:
+                ack_delay_increment = sar_rx_status.ack_delay_increment
+            else:
+                ack_delay_increment = app_cfg.conf.sar_rx_ack_delay_increment_default
+        if discard_timeout is None:
+            if update:
+                discard_timeout = sar_rx_status.discard_timeout
+            else:
+                discard_timeout = app_cfg.conf.sar_rx_discard_timeout_default
+        if segment_interval_step is None:
+            if update:
+                segment_interval_step = sar_rx_status.segment_interval_step
+            else:
+                segment_interval_step = (
+                    app_cfg.conf.sar_rx_segment_interval_step_default
+                )
+        if ack_retrans_count is None:
+            if update:
+                ack_retrans_count = sar_rx_status.ack_retrans_count
+            else:
+                ack_retrans_count = app_cfg.conf.sar_rx_ack_retrans_count_default
+        sar_rx_status = app_btmesh.conf.set_sar_receiver(
+            node,
+            segments_threshold=segments_threshold,
+            ack_delay_increment=ack_delay_increment,
+            discard_timeout=discard_timeout,
+            segment_interval_step=segment_interval_step,
+            ack_retrans_count=ack_retrans_count,
+            retry_params=retry_params,
+        )
+        node_str = app_ui.node_str(node)
+        app_ui.info(
+            f"{node_str} node: "
+            f"SAR Receiver Segments Threshold is set to "
+            f"{sar_rx_status.segments_threshold}."
+        )
+        app_ui.info(
+            f"{node_str} node: "
+            f"SAR Receiver Acknowledgment Delay Increment is set to "
+            f"{sar_rx_status.ack_delay_increment}."
+        )
+        app_ui.info(
+            f"{node_str} node: "
+            f"SAR Receiver Discard Timeout is set to "
+            f"{sar_rx_status.discard_timeout} ms."
+        )
+        app_ui.info(
+            f"{node_str} node: "
+            f"SAR Receiver Segment Interval Step is set to "
+            f"{sar_rx_status.segment_interval_step} ms."
+        )
+        app_ui.info(
+            f"{node_str} node: "
+            f"SAR Receiver Acknowledgment Retransmissions Count is set to "
+            f"{sar_rx_status.ack_retrans_count}."
         )
 
     def conf_ae_cmd(self, pargs):

@@ -1,8 +1,8 @@
 id: efp_driver_core
 package: platform
-label: EFP - Energy Friendly PMIC Core 
+label: EFP - Energy Friendly PMIC Core
 description: >
-  This component contains the core EFP Driver. 
+  This component contains the core EFP Driver.
 category: Platform|Board Drivers
 quality: production
 include:
@@ -35,4 +35,4 @@ template_contribution:
       handler: sl_efp_init_instances
 documentation:
     docset: gecko-platform
-    document: hardware-driver/api/group-sl-efp
+    document: platform-hardware-driver/sl-efp

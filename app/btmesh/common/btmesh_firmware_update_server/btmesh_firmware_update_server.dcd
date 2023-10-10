@@ -1,6 +1,7 @@
 [
       {
         "name": "Main",
+        "group": "Main",
         "location": "0x0000",
         "sig_models" : [
           {"mid":"0x1402", "name":"Firmware Update Server"}

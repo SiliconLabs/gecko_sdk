@@ -32,6 +32,16 @@
 #define SLI_HFXO_MANAGER_H
 
 #include <stdbool.h>
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include "sl_component_catalog.h"
+#endif
+
+#if defined(SL_CATALOG_SLEEPTIMER_PRESENT) && defined(SYSRTC_PRESENT)
+#include "sli_sleeptimer.h"
+#if (SL_SLEEPTIMER_PERIPHERAL == SL_SLEEPTIMER_PERIPHERAL_SYSRTC)
+#define HFXO_MANAGER_SLEEPTIMER_SYSRTC_INTEGRATION_ON
+#endif
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -47,11 +57,13 @@ void sli_hfxo_manager_init_hardware(void);
  ******************************************************************************/
 void sli_hfxo_manager_begin_startup_measurement(void);
 
+#if defined(HFXO_MANAGER_SLEEPTIMER_SYSRTC_INTEGRATION_ON)
 /***************************************************************************//**
- * Function to call when a compare match event produces a PRS signal to
-   start HFXO. Save comapre value.
+ * Function to call when a SYSRTC compare match event produces a PRS signal to
+   start HFXO.
  ******************************************************************************/
-void sli_hfxo_prs_manager_begin_startup_measurement(uint32_t compare_value);
+void sli_hfxo_manager_retrieve_begining_startup_measurement(void);
+#endif
 
 /***************************************************************************//**
  * Function to call just after HFXO becomes ready, to save current tick count

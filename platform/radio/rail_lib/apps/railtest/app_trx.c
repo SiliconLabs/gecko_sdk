@@ -179,7 +179,7 @@ RAIL_RxPacketHandle_t processRxPacket(RAIL_Handle_t railHandle,
   // Read the appended info into our packet structure
   status = RAIL_GetRxPacketDetailsAlt(railHandle, packetHandle, &details);
   if (status == RAIL_STATUS_NO_ERROR) {
-    if (details.subPhyId < RAIL_BLE_RX_SUBPHY_COUNT) {
+    if (details.subPhyId < SUBPHYID_COUNT) {
       counters.subPhyCount[details.subPhyId]++;
     }
   }

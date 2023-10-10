@@ -24,17 +24,17 @@ requires:
 documentation:
   docset: gecko-platform
   document:
-    - page: emlib/api/efr32xg21/group-iadc
+    - page: platform-emlib-efr32xg21/iadc
       condition: [device_sdid_200]
-    - page: emlib/api/efr32xg22/group-iadc
+    - page: platform-emlib-efr32xg22/iadc
       condition: [device_sdid_205]
-    - page: emlib/api/efr32xg23/group-iadc
+    - page: platform-emlib-efr32xg23/iadc
       condition: [device_sdid_210]
-    - page: emlib/api/efr32xg24/group-iadc
+    - page: platform-emlib-efr32xg24/iadc
       condition: [device_sdid_215]
-    - page: emlib/api/efr32xg25/group-iadc
+    - page: platform-emlib-efr32xg25/iadc
       condition: [device_sdid_220]
-    - page: emlib/api/efr32xg27/group-iadc
+    - page: platform-emlib-efr32xg27/iadc
       condition: [device_sdid_230]
-    - page: emlib/api/efr32xg28/group-iadc
+    - page: platform-emlib-efr32xg28/iadc
       condition: [device_sdid_235]

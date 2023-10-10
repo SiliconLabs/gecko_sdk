@@ -5,7 +5,7 @@ description: "Provides Bluetooth mesh Remote Provisioning Server model.
   Remote provisioning allows a provisioner to provision devices located outside of the provisioner's radio range.
   This model provides the functionality of provisioning a remote device over the mesh network and to perform the Node Provisioning Protocol Interface procedures."
 category: "Bluetooth Mesh|Stack|Models|Core"
-quality: "evaluation"
+quality: "production"
 root_path: "protocol/bluetooth"
 include:
   - path: "inc"

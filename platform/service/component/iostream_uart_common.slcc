@@ -32,4 +32,4 @@ requires:
     condition: [hardware_board_has_vcom]
 documentation:
     docset: gecko-platform
-    document: service/api/group-iostream-uart
+    document: platform-service/iostream-uart

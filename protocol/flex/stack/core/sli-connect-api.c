@@ -217,6 +217,15 @@ EmberStatus emberSetIndirectQueueTimeout(uint32_t timeoutMs)
   return emApiSetIndirectQueueTimeout(timeoutMs);
 }
 
+EmberStatus emberGetVersionInfo(uint16_t* gsdkVersion,
+                                uint16_t* connectStackVersion,
+                                uint32_t* bootloaderVersion)
+{
+  return emApiGetVersionInfo(gsdkVersion,
+                             connectStackVersion,
+                             bootloaderVersion);
+}
+
 uint32_t emberStackIdleTimeMs(uint16_t * currentStackTasks)
 {
   return emApiStackIdleTimeMs(currentStackTasks);

@@ -39,4 +39,4 @@ validation_helper:
   - path: platform/service/hfxo_manager/hfxo_manager_validation.lua    
 documentation:
   docset: gecko-platform
-  document: service/api/group-hfxo-manager
+  document: platform-service/hfxo-manager

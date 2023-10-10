@@ -475,5 +475,8 @@ sl_status_t DLL_EXPORT esl_key_lib_get_bind_address_by_ble_address(const db_hand
 sl_status_t DLL_EXPORT esl_key_lib_get_bind_address_by_esl_address(const db_handle_p db_hnd,
                                                                    const esl_address_t esl_address,
                                                                    bd_addr *bind_addr_out);
+#ifdef __cplusplus
+};
+#endif
 
 #endif // ESL_KEY_LIB_H

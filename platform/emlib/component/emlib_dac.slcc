@@ -23,11 +23,11 @@ requires:
 documentation:
   docset: gecko-platform
   document:
-    - page: emlib/api/efm32g/group-dac
+    - page: platform-emlib-efm32g/dac
       condition: [device_sdid_71]
-    - page: emlib/api/efm32gg/group-dac
+    - page: platform-emlib-efm32gg/dac
       condition: [device_sdid_72]
-    - page: emlib/api/efm32tg/group-dac
+    - page: platform-emlib-efm32tg/dac
       condition: [device_sdid_73]
-    - page: emlib/api/efm32lg/group-dac
+    - page: platform-emlib-efm32lg/dac
       condition: [device_sdid_74]

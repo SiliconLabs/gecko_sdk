@@ -39,11 +39,13 @@ include:
       - path: sli_sleeptimer.h
 provides:
   - name: sleeptimer
+    condition: [device]
+  - name: sleeptimer_core
 requires:
   - name: emlib_cmu
-    condition: [device]
+    condition: [device_efx]
   - name: emlib_common
-    condition: [device]
+    condition: [device_efx]
   - name: emlib_core
   - name: emlib_prs
     condition: [device_has_sysrtc]
@@ -78,4 +80,4 @@ validation_helper:
   - path: platform/service/sleeptimer/sleeptimer_peripheral_validation.lua
 documentation:
     docset: gecko-platform
-    document: service/api/group-sleeptimer
+    document: platform-service/sleeptimer

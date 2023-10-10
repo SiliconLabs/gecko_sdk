@@ -1,0 +1,184 @@
+project_name: zwave_soc_led_bulb
+label: Z-Wave - SoC LED Bulb
+category: Z-Wave|Apps
+description: >
+  The Z-Wave LED Bulb application shows an implementation of a remotely controlled color
+  switch. An example is an LED bulb or any other color-capable device. The app supports dimming of
+  an RGB LED.
+
+  This is the EFR32xG28 Explorer Kit specific version of the application.
+package: Z-Wave
+quality: production
+component:
+  - id: emlib_letimer
+  - id: emlib_timer
+  - id: emlib_msc
+  - id: gpiointerrupt
+  - id: zw_role_type_always_on
+  - id: zaf_soc
+  - id: zw_core
+  - id: zw_appshw_ledbulb
+  - id: zw_zaf
+  - id: zw_true_status
+  - id: zw_ota
+  - id: zw_cc_association
+  - id: zw_cc_basic
+  - id: zw_cc_color_switch
+  - id: zw_cc_color_switch_nvm
+  - id: zw_cc_common
+  - id: zw_cc_deviceresetlocally
+  - id: zw_cc_firmwareupdate
+  - id: zw_cc_indicator
+  - id: zw_cc_manufacturerspecific
+  - id: zw_cc_multi_channel_control
+  - id: zw_cc_multilevel_switch_support
+  - id: zw_cc_multilevel_switch_support_nvm
+  - id: zw_cc_powerlevel
+  - id: zw_cc_supervision
+  - id: zw_cc_version
+  - id: zw_cc_zwaveplusinfo
+  - id: sl_system
+  - id: device_init
+  - id: mpu # disable execution from RAM
+  - id: pwm
+    instance: [led1]
+  - id: ZW_MIGRATION_TO_7_19
+source:
+  - path: app.c
+  - path: main.c
+include:
+  - path: .
+    file_list:
+      - path: events.h
+configuration:
+  # Version numbers are equal to ZAF_VERSION_MAJOR, ZAF_VERSION_MINOR, ZAF_VERSION_PATCH
+  - name: APP_VERSION
+    value: 10
+  - name: APP_REVISION
+    value: 20
+  - name: APP_PATCH
+    value: 1
+  - name: ZAF_CONFIG_REQUEST_KEY_S0
+    value: 1
+  - name: ZAF_CONFIG_REQUEST_KEY_S2_UNAUTHENTICATED
+    value: 1
+  - name: ZAF_CONFIG_REQUEST_KEY_S2_AUTHENTICATED
+    value: 1
+  - name: ZAF_CONFIG_GENERIC_TYPE
+    value: GENERIC_TYPE_SWITCH_MULTILEVEL
+  - name: ZAF_CONFIG_SPECIFIC_TYPE
+    value: SPECIFIC_TYPE_COLOR_TUNABLE_MULTILEVEL
+  - name: ZAF_CONFIG_PRODUCT_ID
+    value: 7 # Silicon Labs Z-Wave LED Bulb product ID
+  - name: ZAF_CONFIG_USER_ICON_TYPE
+    value: ICON_TYPE_GENERIC_LIGHT_DIMMER_SWITCH
+  - name: ZAF_CONFIG_INSTALLER_ICON_TYPE
+    value: ICON_TYPE_GENERIC_LIGHT_DIMMER_SWITCH
+  - name: NVM3_DEFAULT_MAX_OBJECT_SIZE
+    value: 1900
+  - name: NVM3_DEFAULT_CACHE_SIZE
+    value: 100
+  - name: SL_BOARD_ENABLE_VCOM
+    value: 1
+  - name: SL_DEVICE_INIT_EMU_EM4_STATE
+    value: emuEM4Hibernate
+  - name: SL_DEVICE_INIT_EMU_EM4_RETAIN_LFRCO
+    value: 1
+  - name: SL_DEVICE_INIT_EMU_EM4_PIN_RETENTION_MODE
+    value: emuPinRetentionLatch
+  - name: SL_IOSTREAM_USART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
+    value: 1
+  - name: SL_IOSTREAM_USART_VCOM_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
+    value: 0    # UART RX shouldn't prevent EM2
+  - name: SL_IOSTREAM_EUSART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
+    value: 1
+  - name: SL_IOSTREAM_EUSART_VCOM_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
+    value: 0    # UART RX shouldn't prevent EM2    
+  - name: configUSE_IDLE_HOOK
+    value: 1
+  - name: configTIMER_TASK_PRIORITY
+    value: 55
+  - name: configMAX_SYSCALL_INTERRUPT_PRIORITY
+    value: 32
+    condition: [device_series_1]
+  - name: configKERNEL_INTERRUPT_PRIORITY
+    value: 224
+    condition: [device_series_1]
+  - name: configMAX_SYSCALL_INTERRUPT_PRIORITY
+    value: 16
+    condition: [device_series_2]
+  - name: configKERNEL_INTERRUPT_PRIORITY
+    value: 112
+    condition: [device_series_2]
+  - name: configTIMER_QUEUE_LENGTH
+    value: 8    
+  - name: SL_DEVICE_INIT_DCDC_BYPASS
+    value: 1 
+  - name: SL_PSA_ITS_USER_MAX_FILES
+    value: 32
+    condition: ["device_series_2", "device_security_vault"]
+  - name: SL_PSA_KEY_USER_SLOT_COUNT
+    value: 14
+    condition: ["device_series_2", "device_security_vault"]
+  - name: SL_SLEEPTIMER_PERIPHERAL
+    value: SL_SLEEPTIMER_PERIPHERAL_BURTC
+    condition: ["device_series_2"]
+  - name: CC_ASSOCIATION_MAX_GROUPS_PER_ENDPOINT
+    value: 1
+  - name: CC_ASSOCIATION_MAX_NODES_IN_GROUP
+    value: 5
+  - name: SL_PSA_ITS_SUPPORT_V1_DRIVER
+    value: 1
+  - name: SL_PSA_ITS_SUPPORT_V2_DRIVER
+    value: 1
+  - name: SL_PSA_ITS_SUPPORT_V3_DRIVER
+    value: 1
+  - name: ZAF_APP_NAME
+    value: '"led_bulb"'
+  - name: SL_RAIL_UTIL_RAIL_POWER_MANAGER_INIT
+    value: 0
+
+define:
+  - name: APP_PROPERTIES_CONFIG_FILE
+    value: <application_properties_config.h>
+  - name: FILE_ID_APPLICATIONDATA # File identifiers for application file system
+    value: "0x00000" # Range: 0x00000 - 0x0FFFF
+
+config_file:
+  # Override LED config
+  - path: ../../platform/SiliconLabs/AppsHw/src/LEDBulb/config/s1/sl_simple_rgb_pwm_led_led_config.h
+    override:
+      file_id: simple_rgb_pwm_led_config
+      component: simple_rgb_pwm_led
+      instance: led
+    condition: ["device_series_1"]
+  - path: ../../platform/SiliconLabs/AppsHw/src/LEDBulb/config/s2/sl_simple_rgb_pwm_led_led_config.h
+    override:
+      file_id: simple_rgb_pwm_led_config
+      component: simple_rgb_pwm_led
+      instance: led
+    condition: ["device_series_2"]
+  - path: LEDBulb.cc_config
+    directory: cc_config
+
+other_file:
+  - path: ../../DevTools/postbuild.sh
+  
+post_build:
+  profile: zwave_soc_led_bulb
+
+tag:
+  - prebuilt_demo
+
+filter:
+  - name: "Wireless Technology"
+    value: ["Z-Wave"]
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "Project Difficulty"
+    value: ["Beginner"]
+
+readme:
+   - path: README.md
+ui_hints:
+   highlight: README.md

@@ -28,4 +28,4 @@ template_contribution:
     value: bmp3xx_driver
 documentation:
     docset: gecko-platform
-    document: hardware-driver/api/group-bmp3xx
+    document: platform-hardware-driver/bmp3xx

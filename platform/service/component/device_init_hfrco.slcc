@@ -58,4 +58,4 @@ template_contribution:
     value: hfrco
 documentation:
   docset: gecko-platform
-  document: service/api/group-device-init-hfrco
+  document: platform-service/device-init-hfrco

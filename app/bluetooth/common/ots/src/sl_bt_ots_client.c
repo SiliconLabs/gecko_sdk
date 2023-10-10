@@ -1027,10 +1027,17 @@ sl_status_t sl_bt_ots_client_abort(sl_bt_ots_client_handle_t client)
 
 void sli_bt_ots_client_init(void)
 {
+  CORE_DECLARE_IRQ_STATE;
+
+  CORE_ENTER_CRITICAL();
   // Clear connection handle table
   memset(connection_handle_table,
          INVALID_CONNECTION_HANDLE,
          sizeof(connection_handle_table));
+  // Clear active clients handle table
+  memset(active_client,
+         0,
+         sizeof(active_client));
   for (uint8_t connection_index = 0; connection_index < SL_BT_CONFIG_MAX_CONNECTIONS; connection_index++) {
     // Read queue
     app_queue_init(&read_queue[connection_index],
@@ -1043,6 +1050,7 @@ void sli_bt_ots_client_init(void)
                    sizeof(write_queue_item_t),
                    (uint8_t *)write_data[connection_index]);
   }
+  CORE_EXIT_CRITICAL();
 }
 
 void sli_bt_ots_client_step(void)
@@ -1142,8 +1150,14 @@ void sli_bt_ots_client_on_bt_event(sl_bt_msg_t *evt)
   uint8_t active_handle_index = 0;
 
   switch (SL_BT_MSG_ID(evt->header)) {
-    case sl_bt_evt_system_boot_id:
-      break;
+    case sl_bt_evt_system_boot_id: {
+      sl_bt_ots_client_t *handle = NULL;
+      while ((handle = (sl_bt_ots_client_t *)sl_slist_pop(&client_list)) != NULL) {
+        // reset status
+        handle->status = CLIENT_STATUS_DISCONNECTED;
+      }
+      sli_bt_ots_client_init();
+    } break;
     case sl_bt_evt_connection_opened_id:
       for (uint8_t i = 0; i < SL_BT_CONFIG_MAX_CONNECTIONS; i++ ) {
         if (connection_handle_table[i] == INVALID_CONNECTION_HANDLE) {
@@ -1173,11 +1187,12 @@ void sli_bt_ots_client_on_bt_event(sl_bt_msg_t *evt)
             // Set status
             handle->status = CLIENT_STATUS_DISCONNECTED;
 
-            // Remove client from the list
-            sl_slist_remove(&client_list, &handle->node);
-
             // Do callback
             CALL_SAFE(handle, on_disconnect, handle);
+
+            // Remove client from the list
+            sl_slist_remove(&client_list, &handle->node);
+            break;
           }
         }
         // Clean index

@@ -2,7 +2,7 @@ id: iostream_rtt
 package: platform
 label: "IO Stream: RTT"
 description: >
-  Instantiate the driver for using IO Stream over the SEGGER 
+  Instantiate the driver for using IO Stream over the SEGGER
   Real-Time Transfer (RTT) peripheral.
 category: Services|IO Stream|Driver
 quality: production
@@ -38,4 +38,4 @@ template_contribution:
       handler: sl_iostream_instance_rtt_info
 documentation:
     docset: gecko-platform
-    document: service/api/group-iostream-rtt
+    document: platform-service/iostream-rtt

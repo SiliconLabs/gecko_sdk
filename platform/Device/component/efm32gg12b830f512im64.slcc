@@ -86,6 +86,7 @@
 - provides:
   - name: efm32gg12b830f512im64
   - name: device
+  - name: device_efx
   - name: device_series_1
   - name: device_sdid_106
   - name: device_family_efm32gg12b

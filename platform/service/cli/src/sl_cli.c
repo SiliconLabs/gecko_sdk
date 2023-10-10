@@ -238,7 +238,7 @@ __WEAK bool sli_cli_tick(sl_cli_handle_t handle)
     {
       c = sli_cli_io_getchar();
     }
-    if (c != EOF) {
+    if ((c != EOF) && ((char)c != '\0')) {
       sli_cli_session_activity_notification(handle);
       newline = sl_cli_input_char(handle, (char)c);
     } else {

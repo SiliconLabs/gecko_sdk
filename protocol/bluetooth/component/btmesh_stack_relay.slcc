@@ -4,9 +4,12 @@ package: "Btmesh"
 description: Provides Bluetooth mesh relay functionality.
   Relay nodes retransmit messages that they receive from other devices. In doing this, they are able to communicate with devices that are not in radio range of the device which originated the message.
   Relay functionality can be enabled or disabled during runtime via node configuration.
+  This is a No-Code component.
 category: "Bluetooth Mesh|Features"
 quality: "production"
 root_path: "protocol/bluetooth"
+tag:
+  - No-Code
 
 requires:
   - name: "btmesh_stack"

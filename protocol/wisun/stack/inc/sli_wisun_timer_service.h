@@ -54,8 +54,6 @@ struct sli_wisun_timer {
     uint64_t period_us;                    // Period in microseconds (0 if not periodic)
     uint64_t expire_time_us;               // Next expiration absolute time in microseconds
     const char *name;                      // Name used in debug traces (can be NULL)
-    // FIXME: remove data ASAP
-    void *data;                            // Courtesy pointer (avoid usage as much as possible)
     ns_list_link_t link;                   // Reserved for ns_list
 };
 
@@ -71,12 +69,14 @@ struct sli_wisun_timer_context {
     const char *name;                                  // Name used in debug traces (can be NULL)
     osMutexId_t mutex;                                 // Protect access to timer_list (r/w)
     ns_list_link_t link;                               // Reserved for ns_list
+#ifdef TIMER_SERVICE_DEBUG
     struct {
         uint64_t signal_us;                            // Date of the pending signal (0 means none)
         uint32_t max_signal_delay_us;
         uint32_t max_cb_duration_us;
         uint64_t max_timer_delay_us;
     } stats;                                           // Data used for monitoring and debug
+#endif
 };
 
 // -----------------------------------------------------------------------------
@@ -117,8 +117,8 @@ void sli_wisun_timer_context_dispatcher(sli_wisun_timer_context_t *ctxt);
  * respectively provided by functions _us, _ms and _s.
  * The function sli_wisun_timer_start_us() provides the most control over timer
  * start.
- * A "start" function cannot be called on an already running timer, in this case
- * the "restart" function must be used.
+ * A "start" function called on an already running timer will implicitely call
+ * the "restart" function instead.
  * User must ensure that the system is not running more than
  * (2^32)*3/4 microseconds (~53 minutes) without a timer expiration.
  *
@@ -193,6 +193,8 @@ bool sli_wisun_timer_is_running(const sli_wisun_timer_t *timer);
 uint64_t sli_wisun_timer_get_remaining_us(const sli_wisun_timer_t *timer);
 uint64_t sli_wisun_timer_get_remaining_ms(const sli_wisun_timer_t *timer);
 uint64_t sli_wisun_timer_get_remaining_s(const sli_wisun_timer_t *timer);
+
+uint64_t sli_wisun_timer_32_to_64_us(uint32_t time_us);
 
 bool sli_wisun_timer_is_infinite(const sli_wisun_timer_t *timer);
 

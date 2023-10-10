@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<api device_id="4" device_name="bt" version="6.1.0">
+<api device_id="4" device_name="bt" version="6.2.0">
     <datatypes>
         <datatype base="uint16" name="errorcode" length="2"/>
         <datatype base="int16" name="int16" length="2"/>
@@ -82,6 +82,12 @@
             </returns>
         </command>
         <command index="29" name="stop_bluetooth" >
+            <params/>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="30" name="forcefully_stop_bluetooth" >
             <params/>
             <returns>
                 <param datatype="errorcode" name="result" type="uint16"/>
@@ -216,6 +222,9 @@
                 <param datatype="uint16" name="hw" type="uint16"/>
                 <param datatype="uint32" name="hash" type="uint32"/>
             </params>
+        </event>
+        <event index="1" name="stopped">
+            <params/>
         </event>
         <event index="6" name="error">
             <params>
@@ -1434,6 +1443,15 @@
                 <param datatype="errorcode" name="result" type="uint16"/>
             </returns>
         </command>
+        <command index="19" name="read_statistics" >
+            <params>
+                <param datatype="uint8" name="connection" type="uint8"/>
+                <param datatype="uint8" name="reset" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
         <command index="5" name="close" >
             <params>
                 <param datatype="uint8" name="connection" type="uint8"/>
@@ -1525,6 +1543,17 @@
                 <param datatype="uint16" name="tx_time_us" type="uint16"/>
                 <param datatype="uint16" name="rx_data_len" type="uint16"/>
                 <param datatype="uint16" name="rx_time_us" type="uint16"/>
+            </params>
+        </event>
+        <event index="10" name="statistics">
+            <params>
+                <param datatype="uint8" name="connection" type="uint8"/>
+                <param datatype="dbm" name="rssi_min" type="int8"/>
+                <param datatype="dbm" name="rssi_max" type="int8"/>
+                <param datatype="uint32" name="num_total_connection_events" type="uint32"/>
+                <param datatype="uint32" name="num_missed_connection_events" type="uint32"/>
+                <param datatype="uint32" name="num_successful_connection_events" type="uint32"/>
+                <param datatype="uint32" name="num_crc_errors" type="uint32"/>
             </params>
         </event>
         <event index="1" name="closed">

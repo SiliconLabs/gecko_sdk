@@ -8,7 +8,7 @@
     <properties key="readmeFiles" value="factory_demo/brd2102a/readme.md"/>
     <properties key="boardCompatibility" value="brd2102a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efm32tg11b.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|MCU Example"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -23,7 +23,7 @@
     <properties key="readmeFiles" value="factory_demo/brd2204a/readme.md"/>
     <properties key="boardCompatibility" value="brd2204a brd2204c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efm32gg11b.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|MCU Example"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -38,7 +38,7 @@
     <properties key="readmeFiles" value="micriumos_canopen/readme.md"/>
     <properties key="boardCompatibility" value="brd2204a brd2204c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efm32gg11b.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|MCU Example"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -53,7 +53,7 @@
     <properties key="readmeFiles" value="micriumos_net/readme.md"/>
     <properties key="boardCompatibility" value="brd2204a brd2204c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efm32gg11b.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|MCU Example"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -68,7 +68,7 @@
     <properties key="readmeFiles" value="micriumos_webmic/readme.md"/>
     <properties key="boardCompatibility" value="brd2204a brd2204c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efm32gg11b.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|MCU Example"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -83,7 +83,7 @@
     <properties key="readmeFiles" value="si72xx_wheeldemo/readme.md"/>
     <properties key="boardCompatibility" value="brd2012a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efm32hg.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|MCU Example"/>
     <properties key="quality" value="PRODUCTION"/>

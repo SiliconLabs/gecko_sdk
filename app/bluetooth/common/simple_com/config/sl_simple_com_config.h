@@ -48,6 +48,21 @@
 // <i> Define the size of the transmit buffer in bytes.
 #define SL_SIMPLE_COM_TX_BUF_SIZE        (260)
 
+// <h> Robust
+// <e SL_SIMPLE_COM_ROBUST> Message header
+// <i> Robustify the communication by adding a message header and filter out invalid messages.
+// <i> Note: This configuration should match on the sender and receiver side.
+// <i> Default: Off
+#define SL_SIMPLE_COM_ROBUST             0
+
+// <q SL_SIMPLE_COM_ROBUST_CRC> CRC
+// <i> Add payload CRC and perform checking.
+// <i> Note: This configuration should match on the sender and receiver side.
+// <i> Default: On
+#define SL_SIMPLE_COM_ROBUST_CRC         1
+// </e>
+// </h>
+
 // <<< end of configuration section >>>
 
 /** @} (end addtogroup simple_com) */

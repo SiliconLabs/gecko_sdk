@@ -74,6 +74,7 @@
 - provides:
   - name: efm32tg11b540f64iq80
   - name: device
+  - name: device_efx
   - name: device_series_1
   - name: device_sdid_103
   - name: device_family_efm32tg11b

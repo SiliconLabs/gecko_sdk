@@ -341,6 +341,14 @@ class CALC_Synth_ocelot(CALC_Synth_lynx):
         # Write the register
         self._reg_write(model.vars.RAC_SYTRIM0_SYCHPCURRTX, sychpcurrtx)
 
+    def calc_sytrim_misc(self, model):
+        # Set statically, these were previously PTE set and forget but were moved to calculator
+        # given calculator ownership of adjacent fields
+        self._reg_write(model.vars.RAC_SYTRIM0_SYTRIMCHPREGAMPBIAS, 0)
+        self._reg_write(model.vars.RAC_SYTRIM0_SYTRIMCHPREGAMPBW, 3)
+        self._reg_write(model.vars.RAC_SYTRIM1_SYTRIMMMDREGAMPBIAS, 1)
+        self._reg_write(model.vars.RAC_SYTRIM1_SYTRIMMMDREGAMPBW, 3)
+
     def calc_adc_clock_config(self, model):
         #This function calculates both the ADC mode (e.g. fullrate, halfrate, etc) as well as the ADC clock divider path
 

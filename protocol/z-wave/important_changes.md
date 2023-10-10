@@ -3,6 +3,12 @@
 The changes described in this file will possibly break the build and/or functionality of an
 existing application. The description serves the purpose of helping to fix the failing build.
 
+# 7.20.2 {#section-7-20-2}
+
+## zwave_soc_led_bulb Moved to NonCertifiableApps
+The zwave_soc_led_bulb (LED Bulb) application is no longer certified, so this application
+is moved from `Apps` to `NonCertifiableApps` folder.
+
 # 7.20.0 {#section-7-20-0}
 
 ## ZAF Application Name
@@ -14,42 +20,42 @@ When multiple Z-Wave devices are connected, this feature can speed up the
 process of identifying which application is flashed on each device.
 
 ## ZAF Job Helper
-This module is no longer recommended to be used in new applications. The main
+This module is no longer recommended for use in new applications. The main
 use case for this module was to transmit different frames for the same event.
 The new applications should leverage the ZAF Transport Queue instead.
 For applications that still wants to use this module it has been moved to its
 own component: `zaf_job_helper.slcc`
 
-## ZAF Transport module
+## ZAF Transport Module
 
-ZW_TransportEndpoint was refactored and many of local data has been removed.
+ZW_TransportEndpoint was refactored and much local data has been removed.
 Functions `Transport_SendRequestEP()` and `Transport_SendResponseEP()`
 were replaced with a common function `ZAF_Transmit()`
-Type of `callback_function` in `ZAF_Transmit(buffer, len, txOptions, callback_function)`
-is now `ZAF_TX_Callback_t`
+The type of `callback_function` in `ZAF_Transmit(buffer, len, txOptions, callback_function)`
+is now `ZAF_TX_Callback_t`.
 Note that `ZAF_Transmit()` does not set `S2_TXOPTION_VERIFY_DELIVERY` by default,
-as it was case with `Transport_SendRequestEP()`. Setting of this flag is possible in
+as it was with `Transport_SendRequestEP()`. This flag can be set in
 `ZAF_Transmit()`, by enabling it in `TransmitSecurityOptions`.
-It is not recommended to use this API directly, applications should use the ZAF 
+It is not recommended to use this API directly. Applications should use the ZAF 
 Transport Queue to ensure that only one frame is sent from the application to 
 the protocol at one time.
 
-### ZAF_Transmit migrated to zaf_transport_tx
+### ZAF_Transmit Migrated to zaf_transport_tx
 In order to ensure a single entry point for frames from the application to the 
 protocol, ZAF_Transmit is not being called directly by Command Classes.
 
 ## ZAF Transport Queue
-This module implements a transport queue in the application level. This queue
+This module implements a transport queue in the ZAF layer. This queue
 ensures that there is only a single entry point for a frame from the 
-application. This adds a new feature to applications, the ability to "send and 
+application. This adds a new feature to the applications, the ability to "send and 
 forget", which means the user only has to send to the queue, and the rest of the 
-process is taken care of. i.e. Send Central Scene Notification and Send Basic 
+process is taken care of, such as Send Central Scene Notification and Send Basic 
 Set in sequence. The queue size is configurable and it can bet set by 
-`ZAF_TRANSPORT_CONFIG_QUEUE_SIZE`, the default is 2.
+`ZAF_TRANSPORT_CONFIG_QUEUE_SIZE`. The default is 2.
 
 
-## ZAF TX Mutex removed
-This module is used to ensure that a shared buffer frame was only used by one
+## ZAF TX Mutex Removed
+This module was used to ensure that a shared buffer frame was only used by one
 module at the same time. It was very relevant for 500 series to reduce the RAM
 usage as no stack was available for the tasks, however it became irrelevant for
 700 series and forward. This module was only being used by the ZW Transport 
@@ -60,12 +66,12 @@ exists.
 ## Merge agi.c/h into CC_AssociationGroupInfo.c/h
 The agi.c/h module does not exist anymore as the contents 
 of the files have been merged into CC_AssociationGroupInfo. This should reduce some complexity
-since data does not have to be passed between the different modules and reduce flash and ram consumption.
+since data does not have to be passed between the different modules, and should reduce flash and ram consumption.
 
-## ZAF Event Helper module removed
-This modules was only used by the event distributor soc to enqueue events into 
-the application event queue therefore this functionality was moved into the 
-event distributor soc.
+## ZAF Event Helper Module Removed
+This module was only used by the event distributor SoC to enqueue events into 
+the application event queue. Therefore this functionality was moved into the 
+event distributor SoC.
 
 The interface changes are listed below:
 
@@ -76,52 +82,52 @@ The interface changes are listed below:
 | `ZAF_EventHelperEventEnqueue`         | `->` | `zaf_event_distributor_enqueue_app_event`            |
 | `ZAF_EventHelperEventEnqueueFromISR`  | `->` | `zaf_event_distributor_enqueue_app_event_from_isr`   |
 
-The functions that still exist takes the same arguments as before. They are 
+The functions that still exist take the same arguments as before. They are 
 defined in `zaf_event_distributor_soc.h`
 
-## Application name configurable
+## Application Name Configurable
 Each application's name is configurable. It can be changed by specifying the
 configuration entry named `ZAF_APP_NAME` in the SLC project description.
-The printing of the application's name, reset reason, and SDK version was moved to ZAF_PrintAppInfo().
+Printing the application's name, reset reason, and SDK version was moved to ZAF_PrintAppInfo().
 
-## Eliminating the config_app.h files
-config_app.h files were eliminated from sample applications, and the content of the headers 
+## Eliminating the config_app.h Files
+config_app.h files were eliminated from sample applications, and the contents of the headers 
 were moved to the project source files. Exceptions to this are version numbers, previously stored in these files.
 Version numbers have been moved to a configurable SLC component.
 The APP_VERSION_MAJOR, APP_VERSION_MINOR, and APP_VERSION_PATCH numbers 
-are now configurable via the zw_version component in the studio GUI. 
+are now configurable via the zw_version component in the Simplicity Studio GUI. 
 Users still get the original Silicon Labs version numbers by default, 
 but it is also possible to change them as described above.
 
-## Common hardware functions
-Each application would implement each own `<App>_hw_init` function and have 
-their own `<App>_hw.h` header. The applications that go to deep sleep also had
+## Common Hardware Functions
+Each application would implement its own `<App>_hw_init` function and have 
+its own `<App>_hw.h` header. The applications that go to deep sleep also had
 their own `<APP>_hw_deep_sleep_wakeup_handler` function. These two common 
-functions have been consolidate in a `app_hw.h` as `app_hw_init` and 
+functions have been consolidated in `app_hw.h` as `app_hw_init` and 
 `app_hw_deep_sleep_wakeup_handler`. `app_hw_init` MUST be implemented by the 
 application while `app_hw_deep_sleep_wakeup_handler` should only be implemented
 by applications that can go into deep sleep.
 
-## Application's source code
+## Application's Source Code
 
-Application's source codes were moved from \<application_name\>.c to app.c file. 
+Each application's source code was moved from \<application_name\>.c to app.c file. 
 The app.h headers were also removed with the function `app_init()`. Because of this 
 the function calls were removed from the main.c file.
 
-## Board indicator moved into ZAF
+## Board Indicator Moved into ZAF
 
-Board indicator LED is initialized in ZAF_Init() and the default idle status is set also in it. 
+Board indicator LED is initialized in ZAF_Init() and the default idle status is also set in it. 
 `Board_IndicateStatus()` is available so it can be used freely in the code.
 
 ## Command Classes
 
-### New version of Command Classes handlers
+### New Version of Command Classes Handlers
 
 New macro `REGISTER_CC_V5()` has been created and can be used to initialize Command Classes.
-This macro requires CC handler that takes only input and output structure as arguments.
-See `CC_BinarySwitch_handler(cc_handler_input_t * input,  cc_handler_output_t * output)` as example.
-This makes possible for CC to exit with status WORKING, without a need to pass duration parameter to Supervision CC,
-or to call Supervision Report directly, as it was the case so far.
+This macro requires a CC handler that takes only input and output structure as arguments.
+See `CC_BinarySwitch_handler(cc_handler_input_t * input,  cc_handler_output_t * output)` as an example.
+This makes it possible for CC to exit with status WORKING, without a need to pass duration parameter to Supervision CC,
+or to call Supervision Report directly, as was the case so far.
 
 `REGISTER_CC_V5()` is supported in all Command Classes that support timed change, and their handlers were updated accordingly.
 List of handlers compatible with `REGISTER_CC_V5()`:
@@ -131,11 +137,11 @@ List of handlers compatible with `REGISTER_CC_V5()`:
  * CC_MultilevelSwitch_handler()
  * CC_MultiChannel_handler()
 
-### Folder structure and private/public headers
+### Folder Structure and Private/Public Headers
 Some command classes have more than two source files and header files. This is 
-because the command class contains a lot of logic therefore splitting into 
+because the command class contains a lot of logic, and therefore splitting into 
 more than one source and one header file makes sense for readability.
-In order to allow interaction between two source files, private header were 
+In order to allow interaction between two source files, private headers were 
 introduced and to avoid confusion a new folder structure is used. The source 
 files and private header are placed in `src` while the public headers are 
 placed in `inc`.
@@ -160,7 +166,7 @@ from `zw_cc_central_scene` component. Values can either be set using Z-Wave Comm
 Configurator, or they are automatically calculated by Command Class.
 
 - Function `cc_central_scene_set_configuration` was removed since this operation is only done internally in the Command Class.
-- `cc_central_scene_get_supported_key_attributes` were made static as it is only used internally.
+- `cc_central_scene_get_supported_key_attributes` were made static as they are only used internally.
 - `cc_central_scene_get_configuration` was removed as obsoleted. Slow refresh value
   is now used only internally in CC_CentralScene.c and can be accessed directly.
 - Refactored function `CommandClassCentralSceneNotificationTransmit()`:
@@ -174,7 +180,7 @@ This includes functions `cc_door_lock_handle_working_state()` and `CC_DoorLock_o
 
 Hardware handling has been moved out of CC Door Lock, leaving the command class with the software logic only.
 
-#### Supervision handling moved to CC
+#### Supervision Handling Moved to CC
 Handling of Supervision Get for Door Lock Operation Set has been moved from application
 to Command Class.
 
@@ -235,7 +241,7 @@ Now this is handled by ZAF. This is done by implementing the weak function
 `zaf_learn_mode_finished`.
 
 ## Application Events Abstracted
-Some sample applications contained events that contained hardware specific name.
+Some sample applications contained events that contained hardware-specific names.
 Those names were based on how the Silicon Labs port would generate those events.
 
 Many events had the BUTTON keyword and it was removed from event names so 
@@ -256,14 +262,14 @@ of renamed events for each application that did **NOT** follow this pattern.
 | `EVENT_APP_BUTTON_UP_ASSOCIATION_GROUP_ADD`     | `->` | `EVENT_APP_ASSOCIATION_GROUP_ADD_START`    |
 | `EVENT_APP_BUTTON_UP_ASSOCIATION_GROUP_REMOVE`  | `->` | `EVENT_APP_ASSOCIATION_GROUP_REMOVE_START` |
 
-## New ZAF responsibilities
-In order to make apps smaller and easier to start with, all implementation common to all apps,
-and that does not require additional configuration from the user, has been moved to ZAF.
+## New ZAF Responsibilities
+In order to make apps smaller and easier to start with, all implementation common to all apps
+that did not require additional configuration from the user has been moved to ZAF.
 
-### Features moved out of apps to ZAF
-All sample application would keep a local pointer to the `AppHandles` passed by 
-the `ApplicationTask`. This parameter is already passed to ZAF in the `ZAF_Init`
-therefore the Applications don't need to keep a local pointer anymore. They 
+### Features Moved Out of Apps to ZAF
+All sample applications would keep a local pointer to the `AppHandles` passed by 
+the `ApplicationTask`. This parameter is already passed to ZAF in the `ZAF_Init`,
+therefore the applications no longer need to keep a local pointer. They 
 should use the functions from `ZAF_Common_interface.h` to retrieve the data 
 needed from the `AppHandles`
 
@@ -275,7 +281,7 @@ The sample applications that support the CC Firmware Update also had to call
 `cc_firmware_update_send_status_report` in `ApplicationTask` after `ZAF_Init`.
 This is not needed anymore because the CC Firmware Update handles it internally.
 
-### New weak function on EVENT_SYSTEM_LEARNMODE_FINISHED
+### New Weak Function on EVENT_SYSTEM_LEARNMODE_FINISHED
 A new weak function was introduced in ZAF, `zaf_learn_mode_finished`. This 
 function can be used by Command Classes that need to execute an action in 
 response to this event. Currently only the Command Class Wake Up utilizes this

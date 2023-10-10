@@ -40,4 +40,4 @@ template_contribution:
     value: memlcd_usart
 documentation:
     docset: gecko-platform
-    document: hardware-driver/api/group-memlcd
+    document: platform-hardware-driver/memlcd

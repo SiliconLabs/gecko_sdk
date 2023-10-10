@@ -27,4 +27,4 @@ template_contribution:
     value: legacy_hal
 documentation:
     docset: gecko-platform
-    document: service/api/group-legacyhal
+    document: platform-service/legacyhal

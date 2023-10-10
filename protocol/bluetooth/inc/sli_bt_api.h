@@ -71,6 +71,7 @@ enum sli_bt_command_id
     sli_bt_system_hello_command_id = 0x00,
     sli_bt_system_start_bluetooth_command_id = 0x1c,
     sli_bt_system_stop_bluetooth_command_id = 0x1d,
+    sli_bt_system_forcefully_stop_bluetooth_command_id = 0x1e,
     sli_bt_system_get_version_command_id = 0x1b,
     sli_bt_system_reset_command_id = 0x01,
     sli_bt_system_halt_command_id = 0x0c,
@@ -165,6 +166,7 @@ enum sli_bt_command_id
     sli_bt_connection_read_remote_used_features_command_id = 0x0d,
     sli_bt_connection_get_security_status_command_id = 0x0e,
     sli_bt_connection_set_data_length_command_id = 0x11,
+    sli_bt_connection_read_statistics_command_id = 0x13,
     sli_bt_connection_close_command_id = 0x05,
     sli_bt_connection_forcefully_close_command_id = 0x0f,
     sli_bt_gatt_set_max_mtu_command_id = 0x00,
@@ -319,6 +321,7 @@ enum sli_bt_response_id
     sli_bt_system_hello_response_id = 0x00,
     sli_bt_system_start_bluetooth_response_id = 0x1c,
     sli_bt_system_stop_bluetooth_response_id = 0x1d,
+    sli_bt_system_forcefully_stop_bluetooth_response_id = 0x1e,
     sli_bt_system_get_version_response_id = 0x1b,
     sli_bt_system_reset_response_id = 0x01,
     sli_bt_system_halt_response_id = 0x0c,
@@ -413,6 +416,7 @@ enum sli_bt_response_id
     sli_bt_connection_read_remote_used_features_response_id = 0x0d,
     sli_bt_connection_get_security_status_response_id = 0x0e,
     sli_bt_connection_set_data_length_response_id = 0x11,
+    sli_bt_connection_read_statistics_response_id = 0x13,
     sli_bt_connection_close_response_id = 0x05,
     sli_bt_connection_forcefully_close_response_id = 0x0f,
     sli_bt_gatt_set_max_mtu_response_id = 0x00,
@@ -564,6 +568,7 @@ enum sli_bt_event_id
     sli_bt_dfu_boot_event_id = 0x00,
     sli_bt_dfu_boot_failure_event_id = 0x01,
     sli_bt_system_boot_event_id = 0x00,
+    sli_bt_system_stopped_event_id = 0x01,
     sli_bt_system_error_event_id = 0x06,
     sli_bt_system_hardware_error_event_id = 0x05,
     sli_bt_system_resource_exhausted_event_id = 0x08,
@@ -599,6 +604,7 @@ enum sli_bt_event_id
     sli_bt_connection_remote_tx_power_event_id = 0x07,
     sli_bt_connection_remote_used_features_event_id = 0x08,
     sli_bt_connection_data_length_event_id = 0x09,
+    sli_bt_connection_statistics_event_id = 0x0a,
     sli_bt_connection_closed_event_id = 0x01,
     sli_bt_gatt_mtu_exchanged_event_id = 0x00,
     sli_bt_gatt_service_event_id = 0x01,
@@ -1479,6 +1485,15 @@ PACKSTRUCT( struct sl_bt_cmd_connection_set_data_length_s
 });
 
 typedef struct sl_bt_cmd_connection_set_data_length_s sl_bt_cmd_connection_set_data_length_t;
+
+
+PACKSTRUCT( struct sl_bt_cmd_connection_read_statistics_s
+{
+    uint8_t connection;
+    uint8_t reset;
+});
+
+typedef struct sl_bt_cmd_connection_read_statistics_s sl_bt_cmd_connection_read_statistics_t;
 
 
 PACKSTRUCT( struct sl_bt_cmd_connection_close_s
@@ -2813,6 +2828,14 @@ PACKSTRUCT( struct sl_bt_rsp_system_stop_bluetooth_s
 typedef struct sl_bt_rsp_system_stop_bluetooth_s sl_bt_rsp_system_stop_bluetooth_t;
 
 
+PACKSTRUCT( struct sl_bt_rsp_system_forcefully_stop_bluetooth_s
+{
+    uint16_t result;
+});
+
+typedef struct sl_bt_rsp_system_forcefully_stop_bluetooth_s sl_bt_rsp_system_forcefully_stop_bluetooth_t;
+
+
 PACKSTRUCT( struct sl_bt_rsp_system_get_version_s
 {
     uint16_t result;
@@ -3594,6 +3617,14 @@ PACKSTRUCT( struct sl_bt_rsp_connection_set_data_length_s
 });
 
 typedef struct sl_bt_rsp_connection_set_data_length_s sl_bt_rsp_connection_set_data_length_t;
+
+
+PACKSTRUCT( struct sl_bt_rsp_connection_read_statistics_s
+{
+    uint16_t result;
+});
+
+typedef struct sl_bt_rsp_connection_read_statistics_s sl_bt_rsp_connection_read_statistics_t;
 
 
 PACKSTRUCT( struct sl_bt_rsp_connection_close_s
@@ -4873,6 +4904,7 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_cmd_connection_read_remote_used_features_t             cmd_connection_read_remote_used_features;
     sl_bt_cmd_connection_get_security_status_t                   cmd_connection_get_security_status;
     sl_bt_cmd_connection_set_data_length_t                       cmd_connection_set_data_length;
+    sl_bt_cmd_connection_read_statistics_t                       cmd_connection_read_statistics;
     sl_bt_cmd_connection_close_t                                 cmd_connection_close;
     sl_bt_cmd_connection_forcefully_close_t                      cmd_connection_forcefully_close;
     sl_bt_cmd_gatt_set_max_mtu_t                                 cmd_gatt_set_max_mtu;
@@ -5010,6 +5042,7 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_rsp_system_hello_t                                     rsp_system_hello;
     sl_bt_rsp_system_start_bluetooth_t                           rsp_system_start_bluetooth;
     sl_bt_rsp_system_stop_bluetooth_t                            rsp_system_stop_bluetooth;
+    sl_bt_rsp_system_forcefully_stop_bluetooth_t                 rsp_system_forcefully_stop_bluetooth;
     sl_bt_rsp_system_get_version_t                               rsp_system_get_version;
     sl_bt_rsp_system_halt_t                                      rsp_system_halt;
     sl_bt_rsp_system_linklayer_configure_t                       rsp_system_linklayer_configure;
@@ -5103,6 +5136,7 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_rsp_connection_read_remote_used_features_t             rsp_connection_read_remote_used_features;
     sl_bt_rsp_connection_get_security_status_t                   rsp_connection_get_security_status;
     sl_bt_rsp_connection_set_data_length_t                       rsp_connection_set_data_length;
+    sl_bt_rsp_connection_read_statistics_t                       rsp_connection_read_statistics;
     sl_bt_rsp_connection_close_t                                 rsp_connection_close;
     sl_bt_rsp_connection_forcefully_close_t                      rsp_connection_forcefully_close;
     sl_bt_rsp_gatt_set_max_mtu_t                                 rsp_gatt_set_max_mtu;
@@ -5283,6 +5317,7 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_evt_connection_remote_tx_power_t                       evt_connection_remote_tx_power;
     sl_bt_evt_connection_remote_used_features_t                  evt_connection_remote_used_features;
     sl_bt_evt_connection_data_length_t                           evt_connection_data_length;
+    sl_bt_evt_connection_statistics_t                            evt_connection_statistics;
     sl_bt_evt_connection_closed_t                                evt_connection_closed;
     sl_bt_evt_gatt_mtu_exchanged_t                               evt_gatt_mtu_exchanged;
     sl_bt_evt_gatt_service_t                                     evt_gatt_service;

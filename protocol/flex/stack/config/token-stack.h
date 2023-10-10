@@ -143,6 +143,7 @@
 #define CREATOR_STACK_LAST_ASSIGNED_ID                       0x0007
 #define CREATOR_STACK_BOOT_COUNTER                           0x0008
 #define CREATOR_STACK_PARENT_LONG_ID                         0x0009
+#define CREATOR_STACK_SECURITY_KEY_ID                        0x000A
 
 /** @} END Creator Codes  */
 
@@ -172,6 +173,7 @@
 #define NVM3KEY_STACK_NODE_DATA                (NVM3KEY_DOMAIN_CONNECT | 0x0003)
 #define NVM3KEY_STACK_SECURITY_KEY             (NVM3KEY_DOMAIN_CONNECT | 0x0004)
 #define NVM3KEY_STACK_NONCE_COUNTER            (NVM3KEY_DOMAIN_CONNECT | 0x0005)
+#define NVM3KEY_STACK_SECURITY_KEY_ID          (NVM3KEY_DOMAIN_CONNECT | 0x009A)
 // This key is used for an indexed token and the subsequent 0x7F keys are also
 // reserved.
 #define NVM3KEY_STACK_CHILD_TABLE              (NVM3KEY_DOMAIN_CONNECT | 0x0010)
@@ -237,6 +239,12 @@ typedef struct {
 } tokTypeStackKey;
 
 /**
+ * @brief Type for TOKEN_STACK_SECURITY_KEY_ID. Used to make sure that Nonce used
+ * for security is not repeated even after unexpected reboot.
+ */
+typedef uint32_t tokTypeStackKeyID;
+
+/**
  * @struct tokTypeStackNodeData
  * @brief Type for TOKEN_STACK_NODE_DATA. Generic information of the node is
  * stored in this token
@@ -292,6 +300,10 @@ DEFINE_BASIC_TOKEN(STACK_NVDATA_VERSION,
 DEFINE_BASIC_TOKEN(STACK_SECURITY_KEY,
                    tokTypeStackKey,
                    { 0, })
+
+DEFINE_BASIC_TOKEN(STACK_SECURITY_KEY_ID,
+                   tokTypeStackKeyID,
+                   0x00000000)
 
 DEFINE_BASIC_TOKEN(STACK_NODE_DATA,
                    tokTypeStackNodeData,

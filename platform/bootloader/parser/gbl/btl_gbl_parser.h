@@ -390,26 +390,6 @@ int32_t gbl_writeProgData(ParserContext_t *context,
                           size_t length,
                           const BootloaderParserCallbacks_t *callbacks);
 
-/***************************************************************************//**
- * Get data from storage and internal input buffer. This function advances the
- * parser state.
- *
- * @param context         GBL parser context
- * @param input           Input data
- * @param outputBuffer    Output data
- * @param outputLength    Output data length
- * @param applySHA        Update SHA256 in the GBL parser context
- * @param decrypt         Decrypt the output data
- *
- * @return Error code
- ******************************************************************************/
-int32_t gbl_getData(ParserContext_t  *context,
-                    GblInputBuffer_t *input,
-                    uint8_t          outputBuffer[],
-                    size_t           outputLength,
-                    bool             applySHA,
-                    bool             decrypt);
-
 /** @} addtogroup GblParser */
 /** @} addtogroup ImageParser */
 /** @} addtogroup Components */

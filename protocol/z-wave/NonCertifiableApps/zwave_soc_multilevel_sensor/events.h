@@ -1,7 +1,7 @@
 /**
  * @file
  *
- * Definitions of events for Multilevel Sensor Certified App.
+ * Definitions of events for Multilevel Sensor App.
  *
  * @copyright 2019 Silicon Laboratories Inc.
  */

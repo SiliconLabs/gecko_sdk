@@ -2,7 +2,7 @@
 - id: si_eb8016a
 - label: SI-EB8016A
 - package: platform
-- description: Kit BSP support for the Expansion Board for Raspberry Pi.
+- description: Kit BSP support for the EXP Board for Raspberry Pi.
 - category: Platform|Board|Kit|Expansion board
 - quality: production
 - requires:

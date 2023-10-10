@@ -37,4 +37,4 @@ template_contribution:
       handler: sl_cli_instances_is_ok_to_sleep
 documentation:
     docset: gecko-platform
-    document: service/cli/overview
+    document: platform-service-cli-overview

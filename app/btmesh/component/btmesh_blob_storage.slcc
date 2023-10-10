@@ -7,9 +7,14 @@ description: >
   size of BLOBs that can be stored on the device. Please check the bootloader
   configuration.
   This component is prepared for integration into SOC applications.
+
+  This is a No-Code component, if it is used with either BLOB transfer Client or Server components.
 category: "Bluetooth Mesh|Utility"
 quality: production
 root_path: app/btmesh/common/btmesh_blob_storage
+tag:
+  - No-Code
+
 config_file:
   - path: config/sl_btmesh_blob_storage_config.h
 source:

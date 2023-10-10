@@ -47,12 +47,23 @@ extern "C" {
 // -----------------------------------------------------------------------------
 // Definitions
 
+///< Max re-send count on PAwR in case of SL_STATUS_BT_CTRL_COMMAND_DISALLOWED
+#define ESL_LIB_PAWR_SET_DATA_RETRY_COUNT_MAX  3
+
+///< Some SL_STATUS_BT_CTRL status codes that aren't defined in sl_status.h yet.
+#ifndef SL_STATUS_BT_CTRL_PAWR_TOO_LATE
+#define SL_STATUS_BT_CTRL_PAWR_TOO_LATE 0x1046
+#endif // SL_STATUS_BT_CTRL_PAWR_TOO_LATE
+
+#ifndef SL_STATUS_BT_CTRL_PAWR_TOO_EARLY
+#define SL_STATUS_BT_CTRL_PAWR_TOO_EARLY 0x1047
+#endif // SL_STATUS_BT_CTRL_PAWR_TOO_EARLY
+
 /// PAwR list item type
 typedef struct {
   sl_slist_node_t            node;             ///< List node pointer
   esl_lib_pawr_state_t       state;            ///< PAwR state
   esl_lib_command_list_cmd_t *command;         ///< Command in progress
-  bool                       command_complete; ///< Finished command
   sl_slist_node_t            *command_list;    ///< Command list
   uint8_t                    pawr_handle;      ///< PAwR handle
   esl_lib_storage_handle_t   storage_handle;   ///< Storage handle

@@ -146,19 +146,6 @@ typedef void(*esl_void_func_p)(void);
                                      ((addr_word & ESL_GROUP_ID_MASK) >> 8))
 
 /**************************************************************************//**
- * ESL Tag core init function. Initializes additional components also, if any.
- *****************************************************************************/
-void esl_core_init(void);
-
-/**************************************************************************//**
- * ESL core's bluetooth stack event handler.
- * This one runs by the user implementation (usually in app.c) in parallel.
- *
- * @param[in] evt Event coming from the Bluetooth stack.
- *****************************************************************************/
-void esl_core_bt_on_event(sl_bt_msg_t *evt);
-
-/**************************************************************************//**
  * ESL Tag internal status getter. Can be used to check whether an action is
  * allowed to process or not.
  * @return @ref esl_state_t actual internal status of the ESL Tag

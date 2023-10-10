@@ -117,4 +117,4 @@ template_contribution:
     value: hfxo
 documentation:
   docset: gecko-platform
-  document: service/api/group-device-init-hfxo
+  document: platform-service/device-init-hfxo

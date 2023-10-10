@@ -3,7 +3,7 @@ label: "Firmware List Cache for Distribution Server Model"
 package: "Btmesh"
 description: "This component provides a simplistic implementation of the Firmware Distribution Server's Firmware List -related platform APIs. The cache stores the Firmware ID's and metadata of received images, but does not actually store any image data, and is not persistent across resets. This component should be used for testing purposes only. The Distributor example provides a proper reference implementation of the Firmware List."
 category: "Bluetooth Mesh|Stack|Models|DFU"
-quality: "evaluation"
+quality: "production"
 root_path: "protocol/bluetooth"
 
 requires:

@@ -45,4 +45,4 @@ validation_helper:
   - path: device_init_validation.lua
 documentation:
   docset: gecko-platform
-  document: service/api/group-device-init
+  document: platform-service/device-init

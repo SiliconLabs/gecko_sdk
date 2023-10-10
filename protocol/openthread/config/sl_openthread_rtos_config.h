@@ -12,7 +12,7 @@
 // <i> Default: 4096
 // <i> Defines the stack size of the OpenThread RTOS stack task. The value is in bytes and
 // <i> and will be word aligned when it is applied at the task creation.
-#define SL_OPENTHREAD_OS_STACK_TASK_SIZE 4096
+#define SL_OPENTHREAD_OS_STACK_TASK_SIZE 4608
 
 // </h>
 // <<< end of configuration section >>>

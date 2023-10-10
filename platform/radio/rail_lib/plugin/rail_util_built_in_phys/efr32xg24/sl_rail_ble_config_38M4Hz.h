@@ -2,8 +2,8 @@
  * @brief RAIL Configuration
  * @details
  *   WARNING: Auto-Generated Radio Config Header  -  DO NOT EDIT
- *   Radio Configurator Version: 2302.4.3
- *   RAIL Adapter Version: 2.4.31
+ *   Radio Configurator Version: 2304.2.1
+ *   RAIL Adapter Version: 2.4.32
  *   RAIL Compatibility: 2.x
  *******************************************************************************
  * # License

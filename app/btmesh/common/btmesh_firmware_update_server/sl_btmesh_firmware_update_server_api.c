@@ -160,7 +160,7 @@ sl_btmesh_fw_update_server_verify_step(void const *data,
         // Verification failed, unmanaged BLOB is not useful any more
         sl_btmesh_blob_storage_invalidate(&blob_id_cache);
       } else {
-        // If the node is a Distributor and an Updating Node as well then the
+        // If the node is a Distributor and a Target Node as well then the
         // BLOB shall not be invalidated because it is part of the firmware list
         // of the Distributor and therefore it can be invalidated by the Initiator
         // only (explicitly)

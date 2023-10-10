@@ -45,6 +45,9 @@
   #include "cryptoacc_management.h"
 #elif defined(SLI_MBEDTLS_DEVICE_S1) && defined(SLI_PSA_DRIVER_FEATURE_TRNG)
   #include "sli_crypto_trng_driver.h"
+#elif defined(SLI_TRNG_DEVICE_SI91X)
+  #include "sl_si91x_psa_trng.h"
+  #include "sl_status.h"
 #endif
 
 // -----------------------------------------------------------------------------
@@ -156,6 +159,10 @@ psa_status_t mbedtls_psa_external_get_random(
     entropy_status = sli_crypto_trng_get_random(&output[offset],
                                                 output_size - offset,
                                                 output_length);
+    #elif defined(SLI_TRNG_DEVICE_SI91X)
+    sl_status_t trng_status;
+    trng_status = sl_si91x_psa_get_random(&output[offset], output_size - offset, output_length);
+    entropy_status = convert_si91x_error_code_to_psa_status(trng_status);
     #endif
 
     *output_length += offset;

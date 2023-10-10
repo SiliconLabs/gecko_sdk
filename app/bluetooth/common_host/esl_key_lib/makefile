@@ -67,7 +67,7 @@ endif
 ################################################################################
 
 .SUFFIXES:				# ignore builtin rules
-.PHONY: all debug release clean clean_export export help
+.PHONY: all debug release clean clean_export clean_keep_sql export help
 
 # Default directories
 OBJ_DIR ?= obj
@@ -88,11 +88,12 @@ CFLAGS_RELEASE ?= -DNDEBUG \
 
 HELP_MESSAGE += \
 "Available build targets for $(PROJECTNAME)\n" \
-"  debug   - default target, optimized for debugging\n" \
-"  release - build with defult compiler optimization\n" \
-"  clean   - remove build directories\n" \
-"  export  - copy all project resources into '$(EXPORT_DIR)' directory\n" \
-"  help    - print this help message\n"
+"  debug          - default target, optimized for debugging\n" \
+"  release        - build with defult compiler optimization\n" \
+"  clean          - remove build directories\n" \
+"  clean_keep_sql - remove build directories but keep sqlite3 files\n" \
+"  export         - copy all project resources into '$(EXPORT_DIR)' directory\n" \
+"  help           - print this help message\n"
 
 ifeq (, $(filter $(UNAME), darwin linux))
 # Enable escape sequence
@@ -157,13 +158,20 @@ $(EXE_DIR)/$(PROJECTNAME): $(OBJS) $(LIBS)
 
 $(PROJECTNAME)_wrapper.py: $(PROJECTNAME).h
 	@echo "Generating Python wrapper"
-	ctypesgen --no-gnu-types $(INCFLAGS) $(PROJECTNAME).h -o $(PROJECTNAME)_wrapper.py
+	ctypesgen --no-gnu-types --allow-gnu-c --no-macro-warnings $(INCFLAGS) $(PROJECTNAME).h -o $(PROJECTNAME)_wrapper.py 2> /dev/null
 	@echo "Fixing up Python wrapper"
 	../../script/ctypesgen_wrapper_fix.py $(PROJECTNAME)_wrapper.py -v
 
 clean: clean_export
 ifeq ($(filter $(MAKECMDGOALS),all debug release export),)
 	rm -rf $(OBJ_DIR) $(EXE_DIR)
+	rm -f $(PROJECTNAME)_wrapper.py
+endif
+
+clean_keep_sql: clean_export
+ifeq ($(filter $(MAKECMDGOALS),all debug release export),)
+	find $(OBJ_DIR) ! \( -type f -and -iname "sqlite3.*" \) -delete || true
+	rm -rf $(EXE_DIR)
 	rm -f $(PROJECTNAME)_wrapper.py
 endif
 

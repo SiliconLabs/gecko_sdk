@@ -42,6 +42,10 @@
 #include "sl_cli.h"
 #endif // SL_CATALOG_CLI_PRESENT
 
+#ifdef SL_CATALOG_SLEEPTIMER_PRESENT
+#include "sl_sleeptimer.h"
+#endif
+
 #include "sl_btmesh_factory_reset.h"
 #include "sl_btmesh_node_reset_handler.h"
 
@@ -67,6 +71,9 @@ void sl_btmesh_initiate_node_reset()
   // Application components node reset handler
   sl_btmesh_app_node_reset_handler();
 
+  // Small delay before reboot
+  sl_sleeptimer_delay_millisecond(100);
+
   // Reboot
   sl_bt_system_reset(0);
 }
@@ -87,6 +94,9 @@ void sl_btmesh_initiate_full_reset()
 
   // Application callback on full reset
   sl_btmesh_factory_reset_on_full_reset();
+
+  // Small delay before reboot
+  sl_sleeptimer_delay_millisecond(100);
 
   // Reboot
   sl_bt_system_reset(0);

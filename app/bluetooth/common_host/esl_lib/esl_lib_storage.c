@@ -162,16 +162,16 @@ sl_status_t esl_lib_storage_clean(esl_lib_storage_handle_t handle)
   return sc;
 }
 
-sl_status_t esl_lib_storage_delete(esl_lib_storage_handle_t handle)
+sl_status_t esl_lib_storage_delete(esl_lib_storage_handle_t *handle)
 {
   sl_status_t sc;
 
   // Clean storage
-  sc = esl_lib_storage_clean(handle);
+  sc = esl_lib_storage_clean(*handle);
 
   if (sc == SL_STATUS_OK) {
     // Free up memory
-    esl_lib_memory_free(handle);
+    esl_lib_memory_free(*handle);
   }
 
   return sc;

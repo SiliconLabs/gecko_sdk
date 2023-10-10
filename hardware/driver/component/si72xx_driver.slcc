@@ -18,4 +18,4 @@ requires:
   - name: i2cspm
 documentation:
     docset: gecko-platform
-    document: hardware-driver/api/group-si72xx
+    document: platform-hardware-driver/si72xx

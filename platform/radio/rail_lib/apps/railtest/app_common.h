@@ -167,6 +167,12 @@ extern "C" {
 #define MAX_NUMBER_CHANNELS 4
 #define CHANNEL_HOPPING_BUFFER_SIZE (200U * MAX_NUMBER_CHANNELS)
 #endif
+#if RAIL_SUPPORTS_OFDM_PA
+#define OFDM_MCS_COUNT (8U)
+#define SUBPHYID_COUNT (OFDM_MCS_COUNT)
+#else //RAIL_SUPPORTS_OFDM_PA
+#define SUBPHYID_COUNT (RAIL_BLE_RX_SUBPHY_COUNT)
+#endif //RAIL_SUPPORTS_OFDM_PA
 
 // Define generic VCOM RX and TX port-pin definitions to use either the USART
 // or the EUSART pins.
@@ -403,7 +409,7 @@ typedef struct Counters{
   uint32_t dataRequests;
   Stats_t rssi;
   uint32_t paProtect;
-  uint32_t subPhyCount[RAIL_BLE_RX_SUBPHY_COUNT];
+  uint32_t subPhyCount[SUBPHYID_COUNT];
   uint64_t rxRawSourceBytes;
 } Counters_t;
 

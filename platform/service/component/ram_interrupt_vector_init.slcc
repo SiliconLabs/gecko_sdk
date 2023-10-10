@@ -25,3 +25,6 @@ template_contribution:
       include: sl_ram_interrupt_vector_init.h
       handler: sl_ram_interrupt_vector_init
       priority: -1
+documentation:
+  docset: gecko-platform
+  document: platform-service/ram-interrupt-vector-init

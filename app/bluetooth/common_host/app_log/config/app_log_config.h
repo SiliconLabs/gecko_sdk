@@ -71,8 +71,9 @@
 
 // <e APP_LOG_ENABLE> Application Logging
 // <i> Enables Logging.
+#ifndef APP_LOG_ENABLE
 #define APP_LOG_ENABLE            1
-
+#endif // APP_LOG_ENABLE
 // <h> General
 
 // <q APP_LOG_TRACE_ENABLE> Trace

@@ -3,9 +3,10 @@
 import os
 import sys
 import argparse
+import re
 
-SECTION_1_ORIG = 'path = os.path.abspath(path)'
-SECTION_1_REPL = 'path = os.path.abspath(os.path.join(os.path.dirname(__file__), path))'
+SECTION_1_ORIG = r'(\w+) \= os\.path\.abspath\((\1)\)'
+SECTION_1_REPL = ' = os.path.abspath(os.path.join(os.path.dirname(__file__), '
 
 SECTION_2_ORIG = 'add_library_search_dirs([])'
 SECTION_2_REPL = 'add_library_search_dirs(["./lib"])'
@@ -47,9 +48,14 @@ def main():
     except FileNotFoundError:
         print("Python wrapper file not found: {:s}".format(pf))
         sys.exit(1)
-    cm = c.replace(SECTION_1_ORIG, SECTION_1_REPL, 1)
-    if cm == c:
+    ret = re.search(SECTION_1_ORIG, c)
+    if ret == None:
         print("'{:s}' not found".format(SECTION_1_ORIG))
+        sys.exit(2)
+    variable = ret.group(0).split()[0]
+    cm = re.sub(SECTION_1_ORIG, variable + SECTION_1_REPL + variable + "))", c)
+    if cm == c:
+        print("'{:s}' could not change".format(SECTION_1_ORIG))
         sys.exit(2)
     c = cm
     cm = c.replace(SECTION_2_ORIG, SECTION_2_REPL, 1)

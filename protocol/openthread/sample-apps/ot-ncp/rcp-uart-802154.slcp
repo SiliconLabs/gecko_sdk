@@ -68,9 +68,6 @@ configuration:
   - name: SL_CPC_USER_ENDPOINT_MAX_COUNT
     value: 0
 
-define:
-  - name: NONCOMPLIANT_ACK_TIMING_WORKAROUND
-
 tag:
   - prebuilt_demo
 

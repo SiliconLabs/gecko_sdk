@@ -65,7 +65,6 @@ typedef enum {
   ESL_LIB_CMD_WRITE_CONTROL_POINT          = 12,  // Write ESL Control Point
   ESL_LIB_CMD_GET_SCAN_STATUS              = 13,  // Get scan status
   ESL_LIB_CMD_GET_PAWR_STATUS              = 14,  // Get PAwR status
-  ESL_LIB_CMD_AP_CONTROL_INIT_GATTDB       = 100, // Initialize AP control GATT DB
   ESL_LIB_CMD_AP_CONTROL_ADV_ENABLE        = 101, // Enable/disable AP control advertising
   ESL_LIB_CMD_AP_CONTROL_CP_RESPONSE       = 102, // Notify AP control control point
   ESL_LIB_CMD_AP_CONTROL_IT_RESPONSE       = 103  // Notify AP control image transfer
@@ -90,8 +89,10 @@ typedef struct {
 
 /// Connect parameters
 typedef struct {
-  esl_lib_address_t    address;  ///< Bluetooth address
-  esl_lib_long_array_t tlv_data; ///< Data containing Connect TLVs
+  esl_lib_address_t    address;         ///< Bluetooth address
+  esl_lib_connection_handle_t conn_hnd; ///< Connection handle
+  uint8_t              retries_left;    ///< Number of remaining retries
+  esl_lib_long_array_t tlv_data;        ///< Data containing Connect TLVs
 } esl_lib_command_list_cmd_connect_t;
 
 /// Write ESL Control Point
@@ -116,9 +117,11 @@ typedef struct {
 
 /// Set PAwR data
 typedef struct {
-  esl_lib_pawr_handle_t pawr_handle; ///< PAwR handle
-  uint8_t               subevent;    ///< Subevent
-  esl_lib_array_t       data;        ///< Payload
+  esl_lib_pawr_handle_t pawr_handle;        ///< PAwR handle
+  uint8_t               subevent;           ///< Subevent
+  uint8_t               response_slot_max;  ///< The number of response slots to be used
+  uint8_t               retry;              ///< retry count for set data
+  esl_lib_array_t       data;               ///< Payload
 } esl_lib_command_list_cmd_pawr_set_data_t;
 
 /// Set PAwR config

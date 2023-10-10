@@ -79,7 +79,7 @@
 #define SL_DEVICE_INIT_LFXO_BOOST          cmuLfxoBoost70
 
 // <o SL_DEVICE_INIT_LFXO_PRECISION> LFXO precision in PPM <0-65535>
-// <i> Default: 500
+// <i> Default: 50
 #define SL_DEVICE_INIT_LFXO_PRECISION      100
 
 // <o SL_DEVICE_INIT_LFXO_TIMEOUT> Startup Timeout Delay

@@ -35,6 +35,3 @@ template_contribution:
     value:
       include: sl_iostream_stdio.h
       handler: sl_iostream_instance_stdio_info
-documentation:
-    docset: gecko-platform
-    document: service/api/group-iostream-stdio

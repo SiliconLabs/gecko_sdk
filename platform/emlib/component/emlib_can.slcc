@@ -23,9 +23,9 @@ requires:
 documentation:
   docset: gecko-platform
   document:
-    - page: emlib/api/efm32gg11/group-can
+    - page: platform-emlib-efm32gg11/can
       condition: [device_sdid_100]
-    - page: emlib/api/efm32tg11/group-can
+    - page: platform-emlib-efm32tg11/can
       condition: [device_sdid_103]
-    - page: emlib/api/efm32gg12/group-can
+    - page: platform-emlib-efm32gg12/can
       condition: [device_sdid_106]

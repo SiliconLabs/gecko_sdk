@@ -25,4 +25,4 @@ config_file:
     file_id: mic_i2s_config
 documentation:
     docset: gecko-platform
-    document: hardware-driver/api/group-mic
+    document: platform-hardware-driver/mic

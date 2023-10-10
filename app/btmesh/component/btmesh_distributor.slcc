@@ -6,9 +6,18 @@ description: >
   This component is prepared for integration into SOC applications.
 category: "Bluetooth Mesh|DFU Roles"
 quality: production
-root_path: app/bluetooth
+root_path: app/btmesh/common/btmesh_distributor
+config_file:
+  - override:
+      file_id: btmesh_blob_transfer_server_dcd
+      component: btmesh_blob_transfer_server
+      instance: dfu_dist
+    path: btmesh_blob_transfer_server_dfu_dist.dcd
+    directory: btmeshconf
+provides:
+  - name: btmesh_distributor
 requires:
   - name: btmesh_fw_distribution_server
-
-validation_helper:
-  - path: "../btmesh/script/validation/soc_ncp_compatibility.lua"
+  - name: btmesh_blob_transfer_server_recommended_instance_dist
+conflicts:
+  - name: btmesh_blob_transfer_server_recommended_instance_target_only

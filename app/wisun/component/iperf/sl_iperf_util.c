@@ -545,7 +545,7 @@ void sl_iperf_test_update_status(sl_iperf_test_t * const test)
   }
 
   // Elapsed time calculation
-  if (test->statistic.ts_end_ms) {
+  if (!test->conn.run) {
     ts_ms_prev = test->statistic.ts_start_ms;
     params.ts_ms_cur = test->statistic.ts_end_ms;
     params.data_bytes_delta = test->statistic.bytes;
@@ -752,10 +752,11 @@ __STATIC_INLINE uint8_t _calc_ind(const uint8_t val)
   return (uint8_t)(val * SL_IPERF_LOG_JSON_INDENT);
 }
 
-bool sl_iperf_test_check_time(const sl_iperf_ts_ms_t test_start_ts)
+bool sl_iperf_test_check_time(const sl_iperf_test_t * const test)
 {
 #if (0U < SL_IPERF_MAX_TEST_TIMEOUT_MS)
-  return (bool)((sl_iperf_get_timestamp_ms() - test_start_ts) < SL_IPERF_MAX_TEST_TIMEOUT_MS);
+  return (bool)((sl_iperf_get_timestamp_ms() - test->statistic.ts_start_ms)
+                 < (test->opt.duration_ms + SL_IPERF_MAX_TEST_TIMEOUT_MS));
 #else
   return true;
 #endif

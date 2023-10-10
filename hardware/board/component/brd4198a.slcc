@@ -57,6 +57,10 @@
     value: '"BRD4198A"'
   - name: SL_BOARD_REV
     value: '"A00"'
+  - name: SL_HADM_ANT_CAL
+    value: '{0}'
+  - name: SL_HADM_ANT_CAL_LEN
+    value: '{1}'
   - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_2400
   - name: HARDWARE_BOARD_SUPPORTS_1_RF_BAND
   - name: HARDWARE_BOARD_DEFAULT_RF_BAND_2400

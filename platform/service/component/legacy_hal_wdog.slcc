@@ -38,4 +38,4 @@ template_contribution:
 
 documentation:
     docset: gecko-platform
-    document: service/api/group-legacyhal
+    document: platform-service/legacyhal

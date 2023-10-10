@@ -185,8 +185,8 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
   RAIL_ASSERT_INVALID_XTAL_FREQUENCY = 66,
   /** Invalid assert, no longer used. */
   RAIL_ASSERT_UNUSED_67 = 67,
-  /** Invalid assert, no longer used. */
-  RAIL_ASSERT_UNUSED_68 = 68,
+  /** Software modem image does not support requested modulation  */
+  RAIL_ASSERT_UNSUPPORTED_SOFTWARE_MODEM_MODULATION = 68,
   /** Failed to disable RTCC synchronization. */
   RAIL_ASSERT_FAILED_RTCC_SYNC_STOP = 69,
   /** Multitimer linked list corrupted. */
@@ -293,7 +293,7 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
 #define RAIL_ASSERT_FAILED_INVALID_CHANNEL_CONFIG              ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_INVALID_CHANNEL_CONFIG)
 #define RAIL_ASSERT_INVALID_XTAL_FREQUENCY                     ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_INVALID_XTAL_FREQUENCY)
 #define RAIL_ASSERT_UNUSED_67                                  ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_UNUSED_67)
-#define RAIL_ASSERT_UNUSED_68                                  ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_UNUSED_68)
+#define RAIL_ASSERT_UNSUPPORTED_SOFTWARE_MODEM_MODULATION      ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_UNSUPPORTED_SOFTWARE_MODEM_MODULATION)
 #define RAIL_ASSERT_FAILED_RTCC_SYNC_STOP                      ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_RTCC_SYNC_STOP)
 #define RAIL_ASSERT_FAILED_MULTITIMER_CORRUPT                  ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_MULTITIMER_CORRUPT)
 #define RAIL_ASSERT_FAILED_TEMPCAL_ERROR                       ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_TEMPCAL_ERROR)
@@ -406,7 +406,7 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
     /*65*/ "Invalid/unsupported channel config",                                       \
     /*66*/ "Radio Calculator configuration HFXO frequency mismatch with chip",         \
     /*67*/ "Invalid assert, no longer used",                                           \
-    /*68*/ "Invalid assert, no longer used",                                           \
+    /*68*/ "Software modem image does not support requested modulation",               \
     /*69*/ "Failed to disable RTCC synchronization",                                   \
     /*70*/ "Multitimer linked list corrupted",                                         \
     /*71*/ "Unable to configure radio for temperature calibration",                    \

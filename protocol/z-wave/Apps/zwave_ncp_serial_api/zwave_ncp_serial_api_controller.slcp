@@ -79,7 +79,7 @@ configuration:
   - name: APP_REVISION
     value: 20
   - name: APP_PATCH
-    value: 1
+    value: 2
   - name: ZAF_CONFIG_GENERIC_TYPE
     value: GENERIC_TYPE_STATIC_CONTROLLER
   - name: ZAF_CONFIG_SPECIFIC_TYPE

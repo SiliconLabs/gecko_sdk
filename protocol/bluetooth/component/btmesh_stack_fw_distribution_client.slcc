@@ -3,7 +3,7 @@ label: "Firmware Distribution Client Model"
 package: "Btmesh"
 description: "Provides Bluetooth mesh Firmware Distribution Client model. It is required for the Initiator role. The model is used to manage firmware images and firmware distributions on a Distributor node. This model uses the BLOB Transfer Client model to upload firmware images to a Distributor node."
 category: "Bluetooth Mesh|Stack|Models|DFU"
-quality: "evaluation"
+quality: "production"
 root_path: "protocol/bluetooth"
 
 requires:

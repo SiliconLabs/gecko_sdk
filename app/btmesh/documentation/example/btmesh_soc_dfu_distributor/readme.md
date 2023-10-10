@@ -1,6 +1,6 @@
 # Bluetooth Mesh - SoC DFU Distributor
 
-Device Firmware Update (DFU) is a feature introduced in the Bluetooth Mesh Model specification v1.1 that provides a standard way to update device firmware over a Bluetooth mesh network. The **Bluetooth Mesh - SoC DFU Distributor** example demonstrates a Bluetooth mesh node playing the DFU Distributor role responsible for delivering new firmware images to the Updating nodes and monitoring the progress of the firmware update. The Distributor acts as an intermediary on behalf of the Initiator so that the Initiator does not always need to be present on the mesh network. Firmware image delivery is performed using the BLOB Transfer models.
+Device Firmware Update (DFU) is a feature introduced in the Bluetooth Mesh Model specification v1.1 that provides a standard way to update device firmware over a Bluetooth mesh network. The **Bluetooth Mesh - SoC DFU Distributor** example demonstrates a Bluetooth mesh node playing the DFU Distributor role responsible for delivering new firmware images to the Target nodes and monitoring the progress of the firmware update. The Distributor acts as an intermediary on behalf of the Initiator so that the Initiator does not always need to be present on the mesh network. Firmware image delivery is performed using the BLOB Transfer models.
 
 
 This example requires one of the Internal Storage or SPI Flash Storage Bootloader variants depending on device memory and board hardware capabilities. The Distributor stores update images in bootloader storage slots and therefore the storage slot size must be big enough to store update images.
@@ -21,7 +21,7 @@ The example has the Distributor functionality enabled by default because the fol
 - Firmware Update Client
 - BLOB Transfer Client
 
-The example also has the Updating node functionality enabled by default because the following components are installed:
+The example also has the Target node functionality enabled by default because the following components are installed:
 
 - Firmware Update Server
 - BLOB Transfer Server

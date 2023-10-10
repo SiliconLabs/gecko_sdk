@@ -99,6 +99,8 @@ typedef enum esl_lib_node_id_type_e {
 typedef enum esl_lib_connection_state_e {
   ESL_LIB_CONNECTION_STATE_OFF,
   ESL_LIB_CONNECTION_STATE_CONNECTING,
+  ESL_LIB_CONNECTION_STATE_RECONNECTING,
+  ESL_LIB_CONNECTION_STATE_CONNECTION_OPENED,
   ESL_LIB_CONNECTION_STATE_APPLYING_LTK,
   ESL_LIB_CONNECTION_STATE_NEW_BOND_REQUIRED,
   ESL_LIB_CONNECTION_STATE_BONDING,
@@ -139,8 +141,13 @@ typedef void *esl_lib_connection_handle_t;
 
 /// Node address type
 typedef struct esl_lib_address_s {
-  uint8_t addr[6];   ///<  @brief Bluetooth address in reverse byte order
-  uint8_t addr_type; ///<  @brief Bluetooth address type
+  union {
+    struct {
+      uint8_t addr[6];  ///<  @brief Bluetooth address in reverse byte order */
+    } address;
+    uint8_t addr[6];    ///<  @brief alternative access to the bd_addr address
+  };
+  uint8_t address_type; ///<  @brief Bluetooth address type
 } esl_lib_address_t;
 
 typedef struct esl_lib_pawr_subevent_s {
@@ -215,6 +222,7 @@ typedef enum esl_lib_evt_type_e {
   ESL_LIB_EVT_CONNECTION_CLOSED,
   ESL_LIB_EVT_CONNECTION_OPENED,
   ESL_LIB_EVT_BONDING_DATA,
+  ESL_LIB_EVT_BONDING_FINISHED,
   ESL_LIB_EVT_PAWR_STATUS,
   ESL_LIB_EVT_PAWR_RESPONSE,
   ESL_LIB_EVT_PAWR_DATA_REQUEST,
@@ -230,6 +238,8 @@ typedef enum esl_lib_evt_type_e {
 /// ESL host library event status codes
 typedef enum esl_lib_status_e {
   ESL_LIB_STATUS_NO_ERROR,
+  ESL_LIB_STATUS_UNSPECIFIED_ERROR,
+  ESL_LIB_STATUS_UNASSOCITED,
   ESL_LIB_STATUS_GATT_TIMEOUT,
   ESL_LIB_STATUS_BONDING_FAILED,
   ESL_LIB_STATUS_FEATURE_NOT_SUPPORTED,
@@ -266,7 +276,8 @@ typedef enum esl_lib_status_e {
   ESL_LIB_STATUS_PAST_INIT_FAILED,
   ESL_LIB_STATUS_CONN_WRITE_CP_FAILED,
   ESL_LIB_STATUS_CONN_TAG_CONFIG_FAILED,
-  ESL_LIB_STATUS_CONTROL_FAILED
+  ESL_LIB_STATUS_CONTROL_FAILED,
+  ESL_LIB_STATUS_UNKNOWN_COMMAND,
 } esl_lib_status_t;
 
 // -------------------------------
@@ -414,6 +425,12 @@ typedef struct esl_lib_evt_bonding_data_s {
   uint8_t                     ltk[ESL_LIB_LTK_SIZE]; ///< LTK data
 } esl_lib_evt_bonding_data_t;
 
+/// Bonding finished event
+typedef struct esl_lib_evt_bonding_finished_s {
+  esl_lib_connection_handle_t connection_handle;     ///< Connection handle
+  esl_lib_address_t           address;               ///< BLE address
+} esl_lib_evt_bonding_finished_t;
+
 /// PAwR status event
 typedef struct esl_lib_evt_pawr_status_s {
   esl_lib_pawr_handle_t       pawr_handle; ///< PAwR handle
@@ -485,6 +502,7 @@ typedef union esl_lib_evt_data_u {
   esl_lib_evt_connection_closed_t          evt_connection_closed;          ///< Connection closed
   esl_lib_evt_connection_opened_t          evt_connection_opened;          ///< Connection opened
   esl_lib_evt_bonding_data_t               evt_bonding_data;               ///< Bonding data
+  esl_lib_evt_bonding_finished_t           evt_bonding_finished;           ///< Bonding finished
   esl_lib_evt_image_transfer_finished_t    evt_image_transfer_finished;    ///< Image transfer finished
   esl_lib_evt_image_type_t                 evt_image_type;                 ///< Image type received
   esl_lib_evt_pawr_status_t                evt_pawr_status;                ///< PAwR status
@@ -678,6 +696,7 @@ sl_status_t esl_lib_pawr_enable(esl_lib_pawr_handle_t pawr_handle,
  *****************************************************************************/
 sl_status_t esl_lib_pawr_set_data(esl_lib_pawr_handle_t pawr_handle,
                                   uint8_t               subevent,
+                                  uint8_t               response_slot_max,
                                   esl_lib_array_t       *payload);
 
 /**************************************************************************//**

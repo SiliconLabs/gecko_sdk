@@ -66,7 +66,7 @@ void emberAfInitCallback(void)
   // Ensure that psa is initialized corretly
   psa_crypto_init();
   // CLI info message
-  app_log_info("MAC Mode Device\n");
+  app_log_info("\nMAC Mode Device\n");
 
   emberNetworkInit();
 

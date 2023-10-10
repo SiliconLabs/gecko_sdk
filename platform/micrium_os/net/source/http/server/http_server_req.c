@@ -667,7 +667,7 @@ void HTTPsReq_Body(HTTPs_INSTANCE *p_instance,
     }
   }
 
-exit:
+  exit:
   return;
 }
 
@@ -790,6 +790,7 @@ static void HTTPsReq_MethodParse(HTTPs_INSTANCE *p_instance,
   CPU_CHAR             *p_request_method_start;
   CPU_CHAR             *p_request_method_end;
   CPU_SIZE_T           len;
+  CPU_SIZE_T           skipped_chars;
   HTTPs_INSTANCE_STATS *p_ctr_stats = DEF_NULL;
   CPU_INT32U           method;
 
@@ -802,20 +803,28 @@ static void HTTPsReq_MethodParse(HTTPs_INSTANCE *p_instance,
     *p_err = HTTPs_ERR_REQ_FORMAT_INVALID;
     return;
   }
-  //                                                               Move the start ptr to the first meaningful char.
+  //                                                               Move the start ptr to the first printable ASCII char.
   p_request_method_start = HTTP_StrGraphSrchFirst(p_conn->RxBufPtr, len);
   if (p_request_method_start == DEF_NULL) {
     *p_err = HTTPs_ERR_REQ_FORMAT_INVALID;
     return;
   }
-  len -= p_request_method_start - p_conn->RxBufPtr;
+
+  skipped_chars = p_request_method_start - p_conn->RxBufPtr;
+  // Disregard illegal, non-printable ASCII characters.
+  // Find the end of method string
+  len -= skipped_chars;
+
   //                                                               Find the end of method string.
   p_request_method_end = Str_Char_N(p_request_method_start, len, ASCII_CHAR_SPACE);
   if (p_request_method_end == DEF_NULL) {
     *p_err = HTTPs_ERR_REQ_FORMAT_INVALID;
     return;
   }
+
+  p_conn->RxBufLenRem -= skipped_chars;                         // Update RxBufLenRem to reflect nbr of skipped chars.
   len = p_request_method_end - p_request_method_start;
+
   //                                                               Try to match the Method str received.
   method = HTTP_Dict_KeyGet(HTTP_Dict_ReqMethod,
                             HTTP_Dict_ReqMethodSize,
@@ -1134,7 +1143,7 @@ static void HTTPsReq_QueryStrParse(HTTPs_INSTANCE *p_instance,
 
   *p_err = HTTPs_ERR_NONE;
 
-exit_update:
+  exit_update:
   p_conn->RxBufLenRem -= len_rd;
   p_conn->RxBufPtr += len_rd;
 
@@ -1272,6 +1281,7 @@ static void HTTPsReq_ProtocolVerParse(HTTPs_INSTANCE *p_instance,
   CPU_CHAR             *p_protocol_ver_end;
   CPU_INT32U           len;
   CPU_INT32U           protocol_ver;
+  CPU_SIZE_T           skipped_chars;
   HTTPs_INSTANCE_STATS *p_ctr_stats = DEF_NULL;
 
 #if (HTTPs_CFG_PERSISTENT_CONN_EN == DEF_DISABLED)
@@ -1290,8 +1300,15 @@ static void HTTPsReq_ProtocolVerParse(HTTPs_INSTANCE *p_instance,
     *p_err = HTTPs_ERR_REQ_FORMAT_INVALID;
     return;
   }
+
+  skipped_chars = p_protocol_ver_start - p_conn->RxBufPtr;
+  // Disregard illegal, non-printable ASCII characters.
+  // Find the end of the request line.
+  len -= skipped_chars;
+
   //                                                               Find the end of the request line.
   p_protocol_ver_end = Str_Str_N(p_protocol_ver_start, STR_CR_LF, len);
+  p_conn->RxBufLenRem -= skipped_chars;                         // Update RxBufLenRem to reflect nbr of skipped chars .
   if (p_protocol_ver_end == DEF_NULL) {                         // If not found, check to get more data.
     if (p_conn->RxBufPtr != p_conn->BufPtr) {
       *p_err = HTTPs_ERR_REQ_MORE_DATA_REQUIRED;
@@ -1400,7 +1417,7 @@ static void HTTPsReq_ProtocolVerParse(HTTPs_INSTANCE *p_instance,
  *                       them to be request-header fields. Unrecognized header fields are treated as
  *                       entity-header fields.
  *
- *                       @note         (3) HTML 4.01 Specification section "17.13 Form submission" explain how user agents submit
+ * @note         (3) HTML 4.01 Specification section "17.13 Form submission" explain how user agents submit
  *                       form data to form processing agents:
  *
  *                           - (a) The content type "application/x-www-form-urlencoded" is the default content type.
@@ -1415,6 +1432,12 @@ static void HTTPsReq_ProtocolVerParse(HTTPs_INSTANCE *p_instance,
  *                       If the user selected a second (image) file "file2.gif", the user agent might construct the parts as follows:
  *
  *                       Content-Type: multipart/form-data; boundary=AaB03x
+ *
+ * @note         (4) RFC 2046 Section "5.1.1 Common Syntax" states the following:
+ *
+ *                  "Boundary delimiters must not appear within the encapsulated material, and must be no longer than 70 characters,
+ *                   not counting the two leading hyphens."
+ *
  *******************************************************************************************************/
 static void HTTPsReq_HdrParse(HTTPs_INSTANCE *p_instance,
                               HTTPs_CONN     *p_conn,
@@ -1561,8 +1584,7 @@ static void HTTPsReq_HdrParse(HTTPs_INSTANCE *p_instance,
                         p_val++;                                // Remove space before boundary val.
                         p_val = HTTP_StrGraphSrchFirst(p_val,
                                                        len);
-                        len = p_field_end - p_val;
-
+                        len = (p_field_end - p_val);
                         if (len > HTTPs_FORM_BOUNDARY_STR_LEN_MAX) {
                           *p_err = HTTPs_ERR_REQ_FORMAT_INVALID;
                           return;
@@ -1619,7 +1641,7 @@ static void HTTPsReq_HdrParse(HTTPs_INSTANCE *p_instance,
                                             p_field_end,
                                             &len);
 
-            len = DEF_MIN(len, p_cfg->HostNameLenMax);
+            len = DEF_MIN(len, p_cfg->HostNameLenMax - 1);
 
             //                                                     Copy host name val in Conn struct.
             (void)Str_Copy_N(p_conn->HostPtr, p_val, len);
@@ -1699,7 +1721,7 @@ static void HTTPsReq_HdrParse(HTTPs_INSTANCE *p_instance,
                 if (p_val != DEF_NULL) {
                   len = p_field_end - p_val;
 
-                  if (len > p_cfg->HdrRxCfgPtr->DataLenMax) {
+                  if (len >= p_cfg->HdrRxCfgPtr->DataLenMax) {
                     HTTPs_ERR_INC(p_ctr_errs->Req_ErrHdrDataLenInv);
                     *p_err = HTTPS_ERR_REQ_HDR_INVALID_VAL_LEN;
                     return;
@@ -1994,7 +2016,7 @@ static CPU_BOOLEAN HTTPsReq_BodyFormAppParse(HTTPs_INSTANCE *p_instance,
 
   *p_err = HTTPs_ERR_NONE;
 
-exit:
+  exit:
   return (done);
 }
 #endif
@@ -2156,7 +2178,7 @@ static CPU_BOOLEAN HTTPsReq_BodyFormMultipartParse(HTTPs_INSTANCE *p_instance,
 
   *p_err = HTTPs_ERR_NONE;
 
-exit:
+  exit:
   return (done);
 }
 #endif
@@ -2246,7 +2268,7 @@ static CPU_CHAR *HTTPsReq_BodyFormMultipartBoundarySrch(CPU_CHAR   *p_boundary,
     goto exit;
   }
 
-exit:
+  exit:
   return (p_boundary_found);
 }
 #endif
@@ -2538,7 +2560,7 @@ static CPU_BOOLEAN HTTPsReq_BodyFormMultipartCtrlParse(HTTPs_INSTANCE *p_instanc
 
   *p_err = HTTPs_ERR_NONE;
 
-exit:
+  exit:
   return (is_file);
 }
 #endif
@@ -2719,7 +2741,7 @@ static CPU_BOOLEAN HTTPsReq_BodyFormMultipartFileWr(HTTPs_INSTANCE *p_instance,
 
   *p_err = HTTPs_ERR_NONE;
 
-exit:
+  exit:
   return (done);
 }
 #endif

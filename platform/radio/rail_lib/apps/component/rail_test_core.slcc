@@ -2020,7 +2020,7 @@ template_contribution:
     value:
       name: configThermalProtection
       handler: configThermalProtection
-      help: " Enable thermal protection, configure temperature threshold and cool down"
+      help: " Enable thermal protection, configure temperature threshold and cool down.\\n                        Threshold and cool down values are respectively set to maximum and minimum."
       argument:
         - type: uint8opt
           help: "Enable protection\\n                               New temperature threshold in Celsius degrees\\n                               New cool down"
@@ -2286,6 +2286,15 @@ template_contribution:
           help: "number of auto-repeated transmits after the first"
         - type: uint32opt
           help: "delayUs inter-transmit or hop delay\\n                    [uint32opt] channel (if hopping)\\n                    repeat delayUs and channel for additional hops."
+
+  - name: cli_command
+    value:
+      name: configTxRepeatStartToStart
+      handler: configTxRepeatStartToStart
+      help: "Set tx repeat option to have tx repeats delaying from start of tx to start of tx."
+      argument:
+        - type: uint8
+          help: "0 to disable, 1 to enable"
 
   - name: cli_command
     value:

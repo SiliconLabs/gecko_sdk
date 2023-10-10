@@ -66,7 +66,7 @@ sl_status_t esl_lib_start(char                   *config,
                           esl_lib_on_event_t     event_handler,
                           esl_lib_log_callback_t log_fn)
 {
-  esl_lib_log_api_info("Requested: Start" APP_LOG_NL);
+  esl_lib_log_api_debug("Requested: Start" APP_LOG_NL);
 
   CHECK_NULL(event_handler);
 
@@ -103,7 +103,7 @@ sl_status_t esl_lib_start(char                   *config,
 
 sl_status_t esl_lib_stop(void)
 {
-  esl_lib_log_api_info("Requested: Stop" APP_LOG_NL);
+  esl_lib_log_api_debug("Requested: Stop" APP_LOG_NL);
 
   run = false;
   return SL_STATUS_OK;
@@ -129,7 +129,7 @@ sl_status_t esl_lib_connect(esl_lib_address_t         address,
   uint8_t  *data_ptr = NULL;
   esl_lib_connect_tlv_t *tlv = NULL;
 
-  esl_lib_log_api_info("Requested: Connect" APP_LOG_NL);
+  esl_lib_log_api_debug("Requested: Connect" APP_LOG_NL);
 
   // Check for NULL key
   if (key_type != ESL_LIB_KEY_TYPE_NO_KEY && key == NULL) {
@@ -175,9 +175,11 @@ sl_status_t esl_lib_connect(esl_lib_address_t         address,
   // Allocate memory for the command
   cmd = (esl_lib_command_list_cmd_t *)esl_lib_memory_allocate(size + tlv_size);
   if (cmd != NULL) {
+    cmd->data.cmd_connect.retries_left = ESL_LIB_CONNECTION_RETRY_COUNT_MAX;
     cmd->cmd_code = ESL_LIB_CMD_CONNECT;
+    cmd->data.cmd_connect.conn_hnd = ESL_LIB_INVALID_HANDLE;
     // Set address and type
-    cmd->data.cmd_connect.address.addr_type = address.addr_type;
+    cmd->data.cmd_connect.address.address_type = address.address_type;
     memcpy(cmd->data.cmd_connect.address.addr,
            address.addr,
            sizeof(address.addr));
@@ -195,9 +197,9 @@ sl_status_t esl_lib_connect(esl_lib_address_t         address,
       tlv->data.len = sizeof(esl_lib_pawr_subevent_t);
       memcpy(tlv->data.data, (uint8_t*)pawr, tlv->data.len);
       data_ptr += sizeof(esl_lib_connect_tlv_t) + tlv->data.len;
+      // Point TLV
+      tlv = (esl_lib_connect_tlv_t *)data_ptr;
     }
-    // Point TLV
-    tlv = (esl_lib_connect_tlv_t *)data_ptr;
 
     // Add identity address
     if (identity != NULL) {
@@ -216,10 +218,9 @@ sl_status_t esl_lib_connect(esl_lib_address_t         address,
       tlv->data.len = sizeof(esl_lib_gattdb_handles_t);
       memcpy(tlv->data.data, (uint8_t*)gattdb, tlv->data.len);
       data_ptr += sizeof(esl_lib_connect_tlv_t) + tlv->data.len;
+      // Point TLV
+      tlv = (esl_lib_connect_tlv_t *)data_ptr;
     }
-
-    // Point TLV
-    tlv = (esl_lib_connect_tlv_t *)data_ptr;
 
     // Add key
     if (key != NULL) {
@@ -257,10 +258,10 @@ sl_status_t esl_lib_close_connection(esl_lib_connection_handle_t connection_hand
   sl_status_t sc = SL_STATUS_INVALID_PARAMETER;
   esl_lib_command_list_cmd_t *cmd;
 
-  esl_lib_log_api_info("Requested: Close connection" APP_LOG_NL);
+  esl_lib_log_api_debug("Requested: Close connection" APP_LOG_NL);
 
   if (!esl_lib_connection_contains(connection_handle)) {
-    return SL_STATUS_NOT_FOUND;
+    return SL_STATUS_BT_CTRL_UNKNOWN_CONNECTION_IDENTIFIER;
   }
 
   size_t size = ESL_LIB_COMMAND_LIST_HEADER_LEN + sizeof(esl_lib_connection_handle_t);
@@ -294,10 +295,10 @@ sl_status_t esl_lib_get_tag_info(esl_lib_connection_handle_t connection_handle)
   sl_status_t sc = SL_STATUS_INVALID_PARAMETER;
   esl_lib_command_list_cmd_t *cmd;
 
-  esl_lib_log_api_info("Requested: Get Tag Info" APP_LOG_NL);
+  esl_lib_log_api_debug("Requested: Get Tag Info" APP_LOG_NL);
 
   if (!esl_lib_connection_contains(connection_handle)) {
-    return SL_STATUS_NOT_FOUND;
+    return SL_STATUS_BT_CTRL_UNKNOWN_CONNECTION_IDENTIFIER;
   }
 
   size_t size = ESL_LIB_COMMAND_LIST_HEADER_LEN + sizeof(esl_lib_connection_handle_t);
@@ -330,14 +331,14 @@ sl_status_t esl_lib_configure_tag(esl_lib_connection_handle_t connection_handle,
   sl_status_t sc = SL_STATUS_INVALID_PARAMETER;
   esl_lib_command_list_cmd_t *cmd;
 
-  esl_lib_log_api_info("Requested: Configure Tag %s response" APP_LOG_NL,
-                       (att_response == ESL_LIB_TRUE) ? "with" : "without");
+  esl_lib_log_api_debug("Requested: Configure Tag %s response" APP_LOG_NL,
+                        (att_response == ESL_LIB_TRUE) ? "with" : "without");
 
   if (tlv_data == NULL) {
     return SL_STATUS_NULL_POINTER;
   }
   if (!esl_lib_connection_contains(connection_handle)) {
-    return SL_STATUS_NOT_FOUND;
+    return SL_STATUS_BT_CTRL_UNKNOWN_CONNECTION_IDENTIFIER;
   }
 
   size_t size = ESL_LIB_COMMAND_LIST_HEADER_LEN
@@ -376,13 +377,13 @@ sl_status_t esl_lib_write_control_point(esl_lib_connection_handle_t connection_h
   sl_status_t sc = SL_STATUS_INVALID_PARAMETER;
   esl_lib_command_list_cmd_t *cmd;
 
-  esl_lib_log_api_info("Requested: Write Control Point" APP_LOG_NL);
-
+  esl_lib_log_api_debug("Requested: Write Control Point %s response" APP_LOG_NL,
+                        (att_response == ESL_LIB_TRUE) ? "with" : "without");
   if (data == NULL) {
     return SL_STATUS_NULL_POINTER;
   }
   if (!esl_lib_connection_contains(connection_handle)) {
-    return SL_STATUS_NOT_FOUND;
+    return SL_STATUS_BT_CTRL_UNKNOWN_CONNECTION_IDENTIFIER;
   }
   size_t size = ESL_LIB_COMMAND_LIST_HEADER_LEN
                 + sizeof(esl_lib_command_list_cmd_write_control_point_t)
@@ -419,7 +420,7 @@ sl_status_t esl_lib_pawr_create(esl_lib_pawr_handle_t *handle_out)
   esl_lib_pawr_t *pawr_ptr = ESL_LIB_INVALID_HANDLE;
   sl_status_t sc = SL_STATUS_NULL_POINTER;
 
-  esl_lib_log_api_info("Requested: PAwR Create" APP_LOG_NL);
+  esl_lib_log_api_debug("Requested: PAwR Create" APP_LOG_NL);
 
   if (handle_out != NULL) {
     // Add the set to the relationships and get the handle
@@ -438,7 +439,7 @@ sl_status_t esl_lib_pawr_remove(esl_lib_pawr_handle_t pawr_handle)
   sl_status_t    sc    = SL_STATUS_INVALID_HANDLE;
   esl_lib_pawr_t *pawr = (esl_lib_pawr_t *)pawr_handle;
 
-  esl_lib_log_api_info("Requested: PAwR Remove" APP_LOG_NL);
+  esl_lib_log_api_debug("Requested: PAwR Remove" APP_LOG_NL);
 
   if (pawr_handle != ESL_LIB_INVALID_HANDLE) {
     // Check if it can be removed
@@ -459,7 +460,7 @@ sl_status_t esl_lib_pawr_enable(esl_lib_pawr_handle_t pawr_handle,
   sl_status_t sc = SL_STATUS_INVALID_HANDLE;
   esl_lib_command_list_cmd_t *cmd;
 
-  esl_lib_log_api_info("Requested: PAwR Enable" APP_LOG_NL);
+  esl_lib_log_api_debug("Requested: PAwR Enable" APP_LOG_NL);
 
   if (pawr_handle != ESL_LIB_INVALID_HANDLE) {
     if (!esl_lib_pawr_contains(pawr_handle)) {
@@ -488,12 +489,13 @@ sl_status_t esl_lib_pawr_enable(esl_lib_pawr_handle_t pawr_handle,
 
 sl_status_t esl_lib_pawr_set_data(esl_lib_pawr_handle_t pawr_handle,
                                   uint8_t               subevent,
+                                  uint8_t               response_slot_max,
                                   esl_lib_array_t       *payload)
 {
   sl_status_t sc = SL_STATUS_INVALID_HANDLE;
   esl_lib_command_list_cmd_t *cmd;
 
-  esl_lib_log_api_info("Requested: PAwR Set Data" APP_LOG_NL);
+  esl_lib_log_api_debug("Requested: PAwR Set Data for subevent %u" APP_LOG_NL, subevent);
 
   if (payload == NULL) {
     return SL_STATUS_NULL_POINTER;
@@ -511,9 +513,11 @@ sl_status_t esl_lib_pawr_set_data(esl_lib_pawr_handle_t pawr_handle,
     if (cmd != NULL) {
       cmd->cmd_code = ESL_LIB_CMD_PAWR_SET_DATA;
       // Copy data
-      cmd->data.cmd_pawr_set_data.pawr_handle = pawr_handle;
-      cmd->data.cmd_pawr_set_data.subevent    = subevent;
-      cmd->data.cmd_pawr_set_data.data.len    = payload->len;
+      cmd->data.cmd_pawr_set_data.pawr_handle       = pawr_handle;
+      cmd->data.cmd_pawr_set_data.subevent          = subevent;
+      cmd->data.cmd_pawr_set_data.response_slot_max = response_slot_max;
+      cmd->data.cmd_pawr_set_data.retry             = ESL_LIB_PAWR_SET_DATA_RETRY_COUNT_MAX;
+      cmd->data.cmd_pawr_set_data.data.len          = payload->len;
       // Copy payload array
       memcpy(cmd->data.cmd_pawr_set_data.data.data,
              payload->data,
@@ -536,7 +540,7 @@ sl_status_t esl_lib_pawr_configure(esl_lib_pawr_handle_t       pawr_handle,
   sl_status_t sc = SL_STATUS_INVALID_HANDLE;
   esl_lib_command_list_cmd_t *cmd;
 
-  esl_lib_log_api_info("Requested: PAwR Configure" APP_LOG_NL);
+  esl_lib_log_api_debug("Requested: PAwR Configure" APP_LOG_NL);
 
   if (pawr_config == NULL) {
     return SL_STATUS_NULL_POINTER;
@@ -575,7 +579,7 @@ sl_status_t esl_lib_get_pawr_status(esl_lib_pawr_handle_t pawr_handle)
   sl_status_t sc;
   esl_lib_command_list_cmd_t *cmd;
 
-  esl_lib_log_api_info("Requested: Get PAwR status" APP_LOG_NL);
+  esl_lib_log_api_debug("Requested: Get PAwR status" APP_LOG_NL);
 
   size_t size = ESL_LIB_COMMAND_LIST_HEADER_LEN + sizeof(esl_lib_pawr_handle_t);
   // Allocate memory for the command
@@ -600,13 +604,13 @@ sl_status_t esl_lib_initiate_past(esl_lib_connection_handle_t connection_handle,
   sl_status_t sc = SL_STATUS_INVALID_HANDLE;
   esl_lib_command_list_cmd_t *cmd;
 
-  esl_lib_log_api_info("Requested: Initiate PAST" APP_LOG_NL);
+  esl_lib_log_api_debug("Requested: Initiate PAST" APP_LOG_NL);
 
   if ((connection_handle != ESL_LIB_INVALID_HANDLE)
       && (pawr_handle != ESL_LIB_INVALID_HANDLE)) {
     if (!esl_lib_connection_contains(connection_handle)
         || !esl_lib_pawr_contains(pawr_handle)) {
-      return SL_STATUS_NOT_FOUND;
+      return SL_STATUS_BT_CTRL_UNKNOWN_CONNECTION_IDENTIFIER;
     }
     size_t size = ESL_LIB_COMMAND_LIST_HEADER_LEN
                   + sizeof(esl_lib_command_list_cmd_initiate_past_t);
@@ -641,11 +645,12 @@ sl_status_t esl_lib_write_image(esl_lib_connection_handle_t connection_handle,
   sl_status_t sc = SL_STATUS_INVALID_HANDLE;
   esl_lib_command_list_cmd_t *cmd;
 
-  esl_lib_log_api_info("Requested: Write Image" APP_LOG_NL);
+  esl_lib_log_api_debug("Requested: Write %u bytes of image data to slot %u " APP_LOG_NL,
+                        (uint32_t)img_size, img_index);
 
   if (connection_handle != ESL_LIB_INVALID_HANDLE) {
     if (!esl_lib_connection_contains(connection_handle)) {
-      return SL_STATUS_NOT_FOUND;
+      return SL_STATUS_BT_CTRL_UNKNOWN_CONNECTION_IDENTIFIER;
     }
     size_t size = ESL_LIB_COMMAND_LIST_HEADER_LEN
                   + sizeof(esl_lib_command_list_cmd_write_image_t);
@@ -691,11 +696,11 @@ sl_status_t esl_lib_get_image_type(esl_lib_connection_handle_t connection_handle
   sl_status_t sc = SL_STATUS_INVALID_HANDLE;
   esl_lib_command_list_cmd_t *cmd;
 
-  esl_lib_log_api_info("Requested: Get Image Type" APP_LOG_NL);
+  esl_lib_log_api_debug("Requested: Get Image Type of index %u" APP_LOG_NL, img_index);
 
   if (connection_handle != ESL_LIB_INVALID_HANDLE) {
     if (!esl_lib_connection_contains(connection_handle)) {
-      return SL_STATUS_NOT_FOUND;
+      return SL_STATUS_BT_CTRL_UNKNOWN_CONNECTION_IDENTIFIER;
     }
     size_t size = ESL_LIB_COMMAND_LIST_HEADER_LEN
                   + sizeof(esl_lib_command_list_cmd_get_image_type_t);
@@ -729,7 +734,7 @@ sl_status_t esl_lib_scan_configure(esl_lib_scan_parameters_t *params)
   sl_status_t sc = SL_STATUS_NULL_POINTER;
   esl_lib_command_list_cmd_t *cmd;
 
-  esl_lib_log_api_info("Requested: Scan configure" APP_LOG_NL);
+  esl_lib_log_api_debug("Requested: Scan configure" APP_LOG_NL);
 
   if (params != NULL) {
     size_t size = ESL_LIB_COMMAND_LIST_HEADER_LEN
@@ -759,7 +764,7 @@ sl_status_t esl_lib_scan_enable(esl_lib_bool_t enable)
   sl_status_t sc;
   esl_lib_command_list_cmd_t *cmd;
 
-  esl_lib_log_api_info("Requested: Scan enable" APP_LOG_NL);
+  esl_lib_log_api_debug("Requested: Scan enable" APP_LOG_NL);
 
   size_t size = ESL_LIB_COMMAND_LIST_HEADER_LEN + sizeof(esl_lib_command_list_cmd_scan_enable_t);
   // Allocate memory for the command
@@ -784,7 +789,7 @@ sl_status_t esl_lib_get_scan_status(void)
   sl_status_t sc;
   esl_lib_command_list_cmd_t *cmd;
 
-  esl_lib_log_api_info("Requested: Get scan status" APP_LOG_NL);
+  esl_lib_log_api_debug("Requested: Get scan status" APP_LOG_NL);
 
   size_t size = ESL_LIB_COMMAND_LIST_HEADER_LEN;
   // Allocate memory for the command
@@ -808,20 +813,10 @@ sl_status_t esl_lib_general_cmd(uint8_t              cmd_code,
   sl_status_t sc;
   esl_lib_command_list_cmd_t *cmd;
 
-  esl_lib_log_api_info("Requested: General CMD" APP_LOG_NL);
+  esl_lib_log_api_debug("Requested: General CMD 0x%02x" APP_LOG_NL, cmd_code);
 
   size_t size = ESL_LIB_COMMAND_LIST_HEADER_LEN;
   switch (cmd_code) {
-    case ESL_LIB_CMD_AP_CONTROL_INIT_GATTDB:
-      // Allocate memory for the command
-      cmd = (esl_lib_command_list_cmd_t *)esl_lib_memory_allocate(size);
-      cmd->cmd_code = cmd_code;
-      // Send command
-      sc = esl_lib_core_add_command(cmd);
-      if (sc != SL_STATUS_OK) {
-        esl_lib_memory_free(cmd);
-      }
-      break;
     case ESL_LIB_CMD_AP_CONTROL_ADV_ENABLE:
     case ESL_LIB_CMD_AP_CONTROL_CP_RESPONSE:
     case ESL_LIB_CMD_AP_CONTROL_IT_RESPONSE:
@@ -874,18 +869,19 @@ static void event_handler_step(void)
 {
   esl_lib_evt_t *last_evt = esl_lib_event_list_get_first();
   if (last_evt != NULL) {
-    if (filter_event(last_evt)) {
-      esl_lib_log_api_debug("EVT found, type = %u" APP_LOG_NL, last_evt->evt_code);
+    const bool log_event = filter_event(last_evt);
+    if (log_event) {
+      esl_lib_log_api_debug("EVT emitted, type = %u" APP_LOG_NL, last_evt->evt_code);
     }
     if (event_handler_cb != NULL) {
-      if (filter_event(last_evt)) {
-        esl_lib_log_api_debug("EVT callback, type = %u" APP_LOG_NL, last_evt->evt_code);
+      if (log_event) {
+        esl_lib_log_api_debug("Calling EVT callback for type %u" APP_LOG_NL, last_evt->evt_code);
       }
       event_handler_cb(last_evt->evt_code, &(last_evt->data));
-      if (filter_event(last_evt)) {
-        esl_lib_log_api_debug("EVT callback, finished type = %u" APP_LOG_NL, last_evt->evt_code);
+      if (log_event) {
+        esl_lib_log_api_debug("EVT callback finished for type %u" APP_LOG_NL, last_evt->evt_code);
       }
-      esl_lib_event_list_remove_first();
     }
+    esl_lib_event_list_remove_first();
   }
 }

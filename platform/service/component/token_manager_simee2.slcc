@@ -20,4 +20,4 @@ template_contribution:
     value: token_manager_simee2
 documentation:
     docset: gecko-platform
-    document: service/api/group-token-manager
+    document: platform-service/token-manager

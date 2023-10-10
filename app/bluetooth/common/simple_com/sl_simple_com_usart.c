@@ -38,6 +38,9 @@
 #include "app_assert.h"
 #include "sl_simple_com.h"
 #include "sl_simple_com_config.h"
+#if defined(SL_SIMPLE_COM_ROBUST) && SL_SIMPLE_COM_ROBUST == 1
+#include "sl_simple_com_robust.h"
+#endif // SL_SIMPLE_COM_ROBUST
 #ifdef EFR32BG1_USART_E202_WORKAROUND
 #include "sl_sleeptimer.h"
 #endif // EFR32BG1_USART_E202_WORKAROUND
@@ -128,7 +131,6 @@ void sl_simple_com_step(void)
       sl_simple_com_os_task_proceed();
     } else {
       // Clear TX buffer
-      memset(tx_buf, 0, sizeof(tx_buf));
       tx_cb_signal.timeout = 0;
       tx_cb_signal.finished = false;
       // Call public callback API
@@ -143,7 +145,7 @@ void sl_simple_com_step(void)
  *
  * Transmits len bytes of data through the UART interface using DMA.
  *
- * @param[out] len Message lenght
+ * @param[out] len Message length
  * @param[out] data Message data
  *****************************************************************************/
 void sl_simple_com_transmit(uint32_t len, uint8_t *data)
@@ -153,7 +155,12 @@ void sl_simple_com_transmit(uint32_t len, uint8_t *data)
   // transmission completes
   app_assert(len <= SL_SIMPLE_COM_TX_BUF_SIZE,
              "TX length is bigger than allocated buffer\n");
+#if defined(SL_SIMPLE_COM_ROBUST) && SL_SIMPLE_COM_ROBUST == 1
+  len = sl_simple_com_robust_pack_data(tx_buf, data, (size_t)len);
+#else // SL_SIMPLE_COM_ROBUST
   memcpy((void *)tx_buf, (void *)data, (size_t)len);
+#endif // SL_SIMPLE_COM_ROBUST
+
   // Transmit data using a non-blocking transmit function
   ec = UARTDRV_Transmit(uartdrv_handle,
                         tx_buf,
@@ -366,14 +373,42 @@ static void receive_cb(UARTDRV_Handle_t handle,
                        UARTDRV_Count_t transferCount)
 {
   (void)handle;
-  // Call public callback API
-  sl_simple_com_receive_cb(ECODE_EMDRV_UARTDRV_OK == transferStatus
-                           ? SL_STATUS_OK : SL_STATUS_FAIL,
-                           transferCount,
-                           data);
-  // Clear RX buffer
-  memset(rx_buf, 0, sizeof(rx_buf));
-  sl_simple_com_os_task_proceed();
+
+#if defined(SL_SIMPLE_COM_ROBUST) && SL_SIMPLE_COM_ROBUST == 1
+  if (transferCount > 0) {
+    sl_simple_com_robust_result_t result = sl_simple_com_robust_unpack_data(data,
+                                                                            transferCount);
+
+    // Call public callback API
+    sl_simple_com_receive_cb((ECODE_EMDRV_UARTDRV_OK == transferStatus
+                              ? SL_STATUS_OK : SL_STATUS_FAIL | result.status),
+                             result.payload_size,
+                             result.payload);
+
+    // Calculate processed data from buf_in_packed. (Payload + overhead)
+    int32_t processed = result.payload_size + sl_simple_com_robust_get_pack_buffer_size(0);
+
+    // Clear processed data from RX buffer
+    memmove(rx_buf, &rx_buf[processed], transferCount - processed);
+    memset(&rx_buf[transferCount - processed],
+           0,
+           sizeof(rx_buf) - (transferCount - processed));
+
+    sl_simple_com_os_task_proceed();
+  } else {
+#else // SL_SIMPLE_COM_ROBUST
+  {
+#endif // SL_SIMPLE_COM_ROBUST
+    // Call public callback API
+    sl_simple_com_receive_cb(ECODE_EMDRV_UARTDRV_OK == transferStatus
+                             ? SL_STATUS_OK : SL_STATUS_FAIL,
+                             transferCount,
+                             data);
+
+    // Clear RX buffer
+    memset(rx_buf, 0, sizeof(rx_buf));
+    sl_simple_com_os_task_proceed();
+  }
 }
 
 /**************************************************************************//**

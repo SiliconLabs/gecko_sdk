@@ -15,4 +15,4 @@ source:
   - path: src/sl_imu_icm20648.c
 documentation:
     docset: gecko-platform
-    document: hardware-driver/api/group-imu
+    document: platform-hardware-driver/imu

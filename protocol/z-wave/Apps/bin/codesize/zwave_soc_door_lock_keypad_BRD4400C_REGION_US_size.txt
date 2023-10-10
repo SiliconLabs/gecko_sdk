@@ -5,39 +5,39 @@ The output of the size tool: (e.g. arm-none-ambi-size.exe)
 
 zwave_soc_door_lock_keypad.out  :
 section                                       size         addr
-.text                                      0x3187c    0x8006000
-_cc_handlers_v3                              0x240    0x803787c
-_zaf_event_distributor_cc_event_handler       0x30    0x8037abc
-_zw_protocol_cmd_handlers                     0x70    0x8037aec
-_zw_protocol_cmd_handlers_lr                  0x30    0x8037b5c
-.ARM.exidx                                     0x8    0x8037b8c
-.copy.table                                    0xc    0x8037b94
-.zero.table                                    0x0    0x8037ba0
+.text                                      0x31ad8    0x8006000
+_cc_handlers_v3                              0x240    0x8037ad8
+_zaf_event_distributor_cc_event_handler       0x30    0x8037d18
+_zw_protocol_cmd_handlers                     0x70    0x8037d48
+_zw_protocol_cmd_handlers_lr                  0x30    0x8037db8
+.ARM.exidx                                     0x8    0x8037de8
+.copy.table                                    0xc    0x8037df0
+.zero.table                                    0x0    0x8037dfc
 .stack                                      0x1000   0x20000000
 .data                                        0x4ec   0x20001000
-.bss                                        0xacc0   0x200014ec
-.heap                                        0x800   0x2000c1b0
-.internal_storage                          0x30000    0x8037ba0
-.zwave_nvm                                     0x0    0x8067ba0
-.nvm                                        0x8000    0x8067ba0
+.bss                                        0xacc8   0x200014ec
+.heap                                        0x800   0x2000c1b8
+.internal_storage                          0x30000    0x8037dfc
+.zwave_nvm                                     0x0    0x8067dfc
+.nvm                                        0x8000    0x8067dfc
 .ARM.attributes                               0x36          0x0
 .comment                                      0x49          0x0
-.debug_frame                                0x7134          0x0
-.debug_info                               0xdcc568          0x0
-.debug_abbrev                              0x17077          0x0
-.debug_loc                                 0x47e5e          0x0
+.debug_frame                                0x7150          0x0
+.debug_info                               0xdcea2e          0x0
+.debug_abbrev                              0x171e9          0x0
+.debug_loc                                 0x480d6          0x0
 .debug_aranges                                0xb8          0x0
-.debug_ranges                               0xb908          0x0
-.debug_line                                0x569a3          0x0
-.debug_str                                 0x92838          0x0
-Total                                     0xf9d6d7
+.debug_ranges                               0xb9f0          0x0
+.debug_line                                0x56eca          0x0
+.debug_str                                 0x929e7          0x0
+Total                                     0xfa09c5
 
 The calculated FLASH and SRAM usage summary:
 ============================================
 FLASH used as program memory:  (Including only the sections: .text, .ARM.exidx, .data, _cc_handlers_v3)
-   204940
+   205544
 FLASH used for storage: (Including only the sections: .zwavenvm, .simee, .nvm, .zwave_nvm)
    32768
 SRAM usage:             (Including only the sections: .data, .bss, .heap (limited to 2048 per sl_memory_config.h), .stack_dummy, .reset_info)
-   51628
+   51636
 

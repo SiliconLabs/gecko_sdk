@@ -13,4 +13,4 @@ provides:
   - name: atomic
 documentation:
   docset: gecko-platform
-  document: common/api/group-atomic
+  document: platform-common/atomic

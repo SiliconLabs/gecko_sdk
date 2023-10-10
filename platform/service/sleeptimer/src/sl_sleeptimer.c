@@ -436,6 +436,15 @@ sl_status_t sl_sleeptimer_stop_timer(sl_sleeptimer_timer_handle_t *handle)
   sl_status_t error;
   bool set_comparator = false;
 
+  // Disable PRS compare and capture channel, if configured for early wakeup
+#if ((SL_SLEEPTIMER_PERIPHERAL == SL_SLEEPTIMER_PERIPHERAL_SYSRTC) \
+  && defined(SL_CATALOG_POWER_MANAGER_PRESENT)                     \
+  && !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT))
+  if (handle->option_flags == (SLI_SLEEPTIMER_POWER_MANAGER_EARLY_WAKEUP_TIMER_FLAG | SLI_SLEEPTIMER_POWER_MANAGER_HF_ACCURACY_CLK_FLAG)) {
+    sleeptimer_hal_disable_prs_compare_and_capture_channel();
+  }
+#endif
+
   if (handle == NULL) {
     return SL_STATUS_NULL_POINTER;
   }
@@ -1569,7 +1578,9 @@ static sl_status_t create_timer(sl_sleeptimer_timer_handle_t *handle,
     }
   }
 
-#if SL_SLEEPTIMER_PERIPHERAL == SL_SLEEPTIMER_PERIPHERAL_SYSRTC
+#if ((SL_SLEEPTIMER_PERIPHERAL == SL_SLEEPTIMER_PERIPHERAL_SYSRTC) \
+  && defined(SL_CATALOG_POWER_MANAGER_PRESENT)                     \
+  && !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT))
   if (option_flags == (SLI_SLEEPTIMER_POWER_MANAGER_EARLY_WAKEUP_TIMER_FLAG | SLI_SLEEPTIMER_POWER_MANAGER_HF_ACCURACY_CLK_FLAG)) {
     HFXO0->CTRL |= HFXO_CTRL_EM23ONDEMAND;
     sleeptimer_hal_set_compare_prs_hfxo_startup(timeout_initial);
@@ -1911,4 +1922,20 @@ uint16_t sl_sleeptimer_get_clock_accuracy(void)
 void sli_sleeptimer_update_sleep_on_isr_exit(bool flag)
 {
   sleep_on_isr_exit = flag;
+}
+
+/*******************************************************************************
+ * Gets the associated peripheral capture channel current value.
+ ******************************************************************************/
+uint32_t sli_sleeptimer_get_capture(void)
+{
+  return sleeptimer_hal_get_capture();
+}
+
+/*******************************************************************************
+ * Resets the PRS signal triggered by the associated peripheral.
+ ******************************************************************************/
+void sli_sleeptimer_reset_prs_signal(void)
+{
+  sleeptimer_hal_reset_prs_signal();
 }

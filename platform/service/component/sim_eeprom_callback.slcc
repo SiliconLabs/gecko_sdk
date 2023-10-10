@@ -14,6 +14,6 @@ source:
 template_contribution:
   - name: component_catalog
     value: sim_eeprom_callback
-documentation:
-    docset: gecko-platform
-    document: service/api/group-simeeprom
+#documentation:
+#    docset: gecko-platform
+#    document: platform-service/simeeprom

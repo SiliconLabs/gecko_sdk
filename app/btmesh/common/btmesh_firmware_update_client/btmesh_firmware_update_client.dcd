@@ -1,6 +1,7 @@
 [
       {
-        "name": "Main",
+        "name": "Distributor",
+        "group": "Main",
         "location": "0x0000",
         "sig_models" : [
           {"mid":"0x1403", "name":"Device Firmware Update Client"}

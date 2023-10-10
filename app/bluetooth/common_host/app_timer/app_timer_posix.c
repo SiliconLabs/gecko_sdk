@@ -156,11 +156,11 @@ void sli_app_timer_step(void)
 
   while (NULL != tmp_timer_ptr) {
     if (true == tmp_timer_ptr->app_timer_handle.triggered) {
-      // Delete non-periodic timers
+      // Delete if timer is non-periodic
       if (false == tmp_timer_ptr->periodic) {
-        status = delete_timer(&(tmp_timer_ptr->app_timer_handle.timer_id));
+        status = app_timer_stop(tmp_timer_ptr);
         if (SL_STATUS_OK != status) {
-          app_log_error("Failed to delete timer after stopping it"
+          app_log_error("One-shot timer could not be cleared."
                         APP_LOG_NL);
         }
       }
@@ -363,15 +363,26 @@ static bool contains_app_timer(app_timer_t *timer)
  ******************************************************************************/
 static void handler(int sig, siginfo_t *si, void *uc)
 {
+  timer_t *timer_id = (timer_t*)(si->si_value.sival_ptr);
   app_timer_t *tmp_timer_ptr = NULL;
 
-  tmp_timer_ptr = find_timer((timer_t*)(si->si_value.sival_ptr));
+  tmp_timer_ptr = find_timer(timer_id);
 
   if (NULL != tmp_timer_ptr) {
     tmp_timer_ptr->app_timer_handle.triggered = true;
+    // Delete if timer is non-periodic
+    if (false == tmp_timer_ptr->periodic) {
+      struct itimerspec ts = { { 0, 0 }, { 0, 0 } };
+      int status = timer_settime(tmp_timer_ptr->app_timer_handle.timer_id, 0, &ts, NULL);
+      int errsv = errno;
+      if (0 != status) {
+        app_log_error("Failed to stop non-periodic timer with error %d" APP_LOG_NL, errsv);
+      }
+    }
   } else {
     app_log_error("Timer was not found with the ID that was expired."
                   APP_LOG_NL);
+    delete_timer(timer_id);
   }
 }
 

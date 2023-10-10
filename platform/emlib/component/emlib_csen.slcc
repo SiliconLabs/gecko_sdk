@@ -23,13 +23,13 @@ requires:
 documentation:
   docset: gecko-platform
   document:
-    - page: emlib/api/efr32xg12/group-csen
+    - page: platform-emlib-efr32xg12/csen
       condition: [device_sdid_84]
-    - page: emlib/api/efr32xg13/group-csen
+    - page: platform-emlib-efr32xg13/csen
       condition: [device_sdid_89]
-    - page: emlib/api/efm32gg11/group-csen
+    - page: platform-emlib-efm32gg11/csen
       condition: [device_sdid_100]
-    - page: emlib/api/efm32tg11/group-csen
+    - page: platform-emlib-efm32tg11/csen
       condition: [device_sdid_103]
-    - page: emlib/api/efm32gg12/group-csen
+    - page: platform-emlib-efm32gg12/csen
       condition: [device_sdid_106]

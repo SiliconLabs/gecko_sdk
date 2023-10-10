@@ -52,7 +52,6 @@ bool sli_bt_hci_handle_coex_command(struct sl_btctrl_hci_message * hcimsg)
       //Invalid parameters or some other error
       sl_btctrl_hci_message_set_response(hcimsg, BT_ERR_INVALID, NULL, 0);
       return true;
-#if 0 //Depends on BG-12346
     case SL_BT_HCI_COEX_GET_PARAMETERS_OPCODE:
       if (length == 0) {
         sl_bt_ll_coex_config_t params;
@@ -63,7 +62,6 @@ bool sli_bt_hci_handle_coex_command(struct sl_btctrl_hci_message * hcimsg)
       //Invalid parameters or some other error
       sl_btctrl_hci_message_set_response(hcimsg, BT_ERR_INVALID, NULL, 0);
       return true;
-#endif
     case SL_BT_HCI_COEX_SET_DIRECTIONAL_PRIORITY_PULSE_OPCODE:
       if (length == sizeof(uint8_t)) {
         uint8_t params;

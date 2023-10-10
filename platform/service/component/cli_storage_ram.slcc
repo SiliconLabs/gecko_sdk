@@ -28,4 +28,4 @@ template_contribution:
     value: "{{instance}}"
 documentation:
     docset: gecko-platform
-    document: service/api/group-cli-storage-ram
+    document: platform-service/cli-storage-ram

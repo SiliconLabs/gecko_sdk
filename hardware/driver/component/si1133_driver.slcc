@@ -20,4 +20,4 @@ source:
   - path: src/sl_si1133.c
 documentation:
     docset: gecko-platform
-    document: hardware-driver/api/group-si1133
+    document: platform-hardware-driver/si1133

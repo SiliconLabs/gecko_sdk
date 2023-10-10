@@ -67,7 +67,7 @@ void emberAfInitCallback(void)
   psa_crypto_init();
 
   // CLI info message
-  app_log_info("Direct Mode Device\n");
+  app_log_info("\nDirect Mode Device\n");
 
   emberNetworkInit();
 

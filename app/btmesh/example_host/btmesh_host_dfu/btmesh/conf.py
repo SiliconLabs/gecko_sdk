@@ -166,6 +166,52 @@ class NetworkTransmitStatus(ConfigStatus):
         )
 
 
+@dataclasses.dataclass
+class SARTransmitterStatus(ConfigStatus):
+    segment_interval_step: int
+    unicast_retrans_count: int
+    unicast_retrans_wo_progress_count: int
+    unicast_retrans_interval_step: int
+    unicast_retrans_interval_increment: int
+    multicast_retrans_count: int
+    multicast_retrans_interval_step: int
+
+    @classmethod
+    def create_from_events(cls, node: Node, events: Iterable[BGEvent]):
+        evt = events[0]
+        return SARTransmitterStatus(
+            node=node,
+            segment_interval_step=evt.segment_interval_step,
+            unicast_retrans_count=evt.unicast_retrans_count,
+            unicast_retrans_wo_progress_count=evt.unicast_retrans_wo_progress_count,
+            unicast_retrans_interval_step=evt.unicast_retrans_interval_step,
+            unicast_retrans_interval_increment=evt.unicast_retrans_interval_increment,
+            multicast_retrans_count=evt.multicast_retrans_count,
+            multicast_retrans_interval_step=evt.multicast_retrans_interval_step,
+        )
+
+
+@dataclasses.dataclass
+class SARReceiverStatus(ConfigStatus):
+    segments_threshold: int
+    ack_delay_increment: int
+    discard_timeout: int
+    segment_interval_step: int
+    ack_retrans_count: int
+
+    @classmethod
+    def create_from_events(cls, node: Node, events: Iterable[BGEvent]):
+        evt = events[0]
+        return SARReceiverStatus(
+            node=node,
+            segments_threshold=evt.segments_threshold,
+            ack_delay_increment=evt.ack_delay_increment,
+            discard_timeout=evt.discard_timeout,
+            segment_interval_step=evt.segment_interval_step,
+            ack_retrans_count=evt.ack_retrans_count,
+        )
+
+
 @enum.unique
 class SilabsConfStatus(util.BtmeshIntEnum):
     SUCCESS = 0x00
@@ -314,6 +360,8 @@ class Configurator(BtmeshComponent):
         self.conf_retry_params_default = conf_retry_params_default
         self.silabs_retry_params_default = silabs_retry_params_default
         self.reset_node_retry_params_default = reset_node_retry_params_default
+        self.sar_conf_svr_status = SlStatus.NOT_SUPPORTED
+        self.sar_conf_clt_status = SlStatus.NOT_SUPPORTED
         self.silabs_conf_svr_fail = False
         self.silabs_conf_clt_fail = False
 
@@ -332,6 +380,30 @@ class Configurator(BtmeshComponent):
     def set_reset_node_retry_params_default(self, retry_params: BtmeshRetryParams):
         if retry_params:
             self.reset_node_retry_params_default = copy.copy(retry_params)
+
+    def sar_conf_svr_init(self):
+        try:
+            self.lib.btmesh.sar_config_server.init()
+        except CommandFailedError as e:
+            self.sar_conf_svr_status = SlStatus.from_int(e.errorcode)
+            # If Btmesh SAR Configuration Server stack class isn't added to the
+            # project then it is assumed to be intentional so no error is reported.
+            if self.sar_conf_svr_status != SlStatus.NOT_SUPPORTED:
+                raise
+        else:
+            self.sar_conf_svr_status = SlStatus.OK
+
+    def sar_conf_clt_init(self):
+        try:
+            self.lib.btmesh.sar_config_client.init()
+        except CommandFailedError as e:
+            self.sar_conf_clt_status = SlStatus.from_int(e.errorcode)
+            # If Btmesh SAR Configuration Client stack class isn't added to the
+            # project then it is assumed to be intentional so no error is reported.
+            if self.sar_conf_clt_status != SlStatus.NOT_SUPPORTED:
+                raise
+        else:
+            self.sar_conf_clt_status = SlStatus.OK
 
     def config_procedure(
         self,
@@ -421,29 +493,40 @@ class Configurator(BtmeshComponent):
         node: Node,
         ttl: int,
         retry_params: BtmeshRetryParams = None,
-    ) -> None:
-        self.config_procedure(
-            "Set Default TTL state",
-            self.lib.btmesh.config_client.set_default_ttl,
-            node,
-            ttl,
-            final_event_name="btmesh_evt_config_client_default_ttl_status",
-            retry_params=retry_params,
-        )
+    ) -> DefaultTTLStatus:
+        if node.uuid == self.db.prov_uuid:
+            self.lib.btmesh.test.set_default_ttl(ttl)
+            default_ttl_status = DefaultTTLStatus(node, ttl)
+        else:
+            events = self.config_procedure(
+                "Set Default TTL state",
+                self.lib.btmesh.config_client.set_default_ttl,
+                node,
+                ttl,
+                final_event_name="btmesh_evt_config_client_default_ttl_status",
+                retry_params=retry_params,
+            )
+            default_ttl_status = DefaultTTLStatus.create_from_events(node, events)
+        return default_ttl_status
 
     def get_default_ttl(
         self,
         node: Node,
         retry_params: BtmeshRetryParams = None,
     ) -> DefaultTTLStatus:
-        events = self.config_procedure(
-            "Get Default TTL state",
-            self.lib.btmesh.config_client.get_default_ttl,
-            node,
-            final_event_name="btmesh_evt_config_client_default_ttl_status",
-            retry_params=retry_params,
-        )
-        return DefaultTTLStatus.create_from_events(node, events)
+        if node.uuid == self.db.prov_uuid:
+            resp = self.lib.btmesh.test.get_default_ttl()
+            default_ttl_status = DefaultTTLStatus(node, ttl=resp.value)
+        else:
+            events = self.config_procedure(
+                "Get Default TTL state",
+                self.lib.btmesh.config_client.get_default_ttl,
+                node,
+                final_event_name="btmesh_evt_config_client_default_ttl_status",
+                retry_params=retry_params,
+            )
+            default_ttl_status = DefaultTTLStatus.create_from_events(node, events)
+        return default_ttl_status
 
     def set_relay(
         self,
@@ -452,7 +535,7 @@ class Configurator(BtmeshComponent):
         retransmit_count: int,
         retransmit_interval_ms: int,
         retry_params: BtmeshRetryParams = None,
-    ) -> None:
+    ) -> RelayStatus:
         proc_name = "Set Relay state"
         events = self.config_procedure(
             proc_name,
@@ -475,6 +558,7 @@ class Configurator(BtmeshComponent):
                 result=result,
                 event=final_evt,
             )
+        return relay_status
 
     def get_relay(
         self,
@@ -495,7 +579,7 @@ class Configurator(BtmeshComponent):
         node: Node,
         state: GattProxyState,
         retry_params: BtmeshRetryParams = None,
-    ) -> None:
+    ) -> GattProxyStatus:
         proc_name = "Set GATT Proxy state"
         events = self.config_procedure(
             proc_name,
@@ -519,6 +603,7 @@ class Configurator(BtmeshComponent):
                 result=result,
                 event=final_evt,
             )
+        return gatt_proxy_status
 
     def get_gatt_proxy(
         self,
@@ -539,7 +624,7 @@ class Configurator(BtmeshComponent):
         node: Node,
         state: FriendState,
         retry_params: BtmeshRetryParams = None,
-    ) -> None:
+    ) -> FriendStatus:
         proc_name = "Set Friend state"
         events = self.config_procedure(
             proc_name,
@@ -560,6 +645,7 @@ class Configurator(BtmeshComponent):
                 result=result,
                 event=final_evt,
             )
+        return friend_status
 
     def get_friend(
         self,
@@ -581,8 +667,8 @@ class Configurator(BtmeshComponent):
         netkey_index: int,
         state: NodeIdentityState,
         retry_params: BtmeshRetryParams = None,
-    ) -> None:
-        self.config_procedure(
+    ) -> NodeIdentityStatus:
+        events = self.config_procedure(
             "Set Node Identity state",
             self.lib.btmesh.config_client.set_identity,
             node,
@@ -591,13 +677,14 @@ class Configurator(BtmeshComponent):
             final_event_name="btmesh_evt_config_client_identity_status",
             retry_params=retry_params,
         )
+        return NodeIdentityStatus.create_from_events(node, events)
 
     def get_node_identity(
         self,
         node: Node,
         netkey_index: int,
         retry_params: BtmeshRetryParams = None,
-    ) -> NodeIdentityState:
+    ) -> NodeIdentityStatus:
         events = self.config_procedure(
             "Get Node Identity state",
             self.lib.btmesh.config_client.get_identity,
@@ -614,30 +701,195 @@ class Configurator(BtmeshComponent):
         transmit_count: int,
         transmit_interval_ms: int,
         retry_params: BtmeshRetryParams = None,
-    ) -> None:
-        self.config_procedure(
-            "Set Network Transmit state",
-            self.lib.btmesh.config_client.set_network_transmit,
-            node,
-            transmit_count,
-            transmit_interval_ms,
-            final_event_name="btmesh_evt_config_client_network_transmit_status",
-            retry_params=retry_params,
-        )
+    ) -> NetworkTransmitStatus:
+        if node.uuid == self.db.prov_uuid:
+            self.lib.btmesh.test.set_nettx(transmit_count, transmit_interval_ms)
+            nettx_status = NetworkTransmitStatus(
+                node,
+                transmit_count=transmit_count,
+                transmit_interval_ms=transmit_interval_ms,
+            )
+        else:
+            events = self.config_procedure(
+                "Set Network Transmit state",
+                self.lib.btmesh.config_client.set_network_transmit,
+                node,
+                transmit_count,
+                transmit_interval_ms,
+                final_event_name="btmesh_evt_config_client_network_transmit_status",
+                retry_params=retry_params,
+            )
+            nettx_status = NetworkTransmitStatus.create_from_events(node, events)
+        return nettx_status
 
     def get_network_transmit(
         self,
         node: Node,
         retry_params: BtmeshRetryParams = None,
     ) -> NetworkTransmitStatus:
-        events = self.config_procedure(
-            "Get Network Transmit state",
-            self.lib.btmesh.config_client.get_network_transmit,
-            node,
-            final_event_name="btmesh_evt_config_client_network_transmit_status",
-            retry_params=retry_params,
-        )
-        return NetworkTransmitStatus.create_from_events(node, events)
+        if node.uuid == self.db.prov_uuid:
+            resp = self.lib.btmesh.test.get_nettx()
+            nettx_status = NetworkTransmitStatus(
+                node,
+                transmit_count=resp.count,
+                transmit_interval_ms=resp.interval,
+            )
+        else:
+            events = self.config_procedure(
+                "Get Network Transmit state",
+                self.lib.btmesh.config_client.get_network_transmit,
+                node,
+                final_event_name="btmesh_evt_config_client_network_transmit_status",
+                retry_params=retry_params,
+            )
+            nettx_status = NetworkTransmitStatus.create_from_events(node, events)
+        return nettx_status
+
+    def set_sar_transmitter(
+        self,
+        node: Node,
+        segment_interval_step: int,
+        unicast_retrans_count: int,
+        unicast_retrans_wo_progress_count: int,
+        unicast_retrans_interval_step: int,
+        unicast_retrans_interval_increment: int,
+        multicast_retrans_count: int,
+        multicast_retrans_interval_step: int,
+        retry_params: BtmeshRetryParams = None,
+    ) -> SARTransmitterStatus:
+        if node.uuid == self.db.prov_uuid:
+            self.lib.btmesh.sar_config_server.set_sar_transmitter(
+                segment_interval_step,
+                unicast_retrans_count,
+                unicast_retrans_wo_progress_count,
+                unicast_retrans_interval_step,
+                unicast_retrans_interval_increment,
+                multicast_retrans_count,
+                multicast_retrans_interval_step,
+            )
+            sar_tx_status = SARTransmitterStatus(
+                node,
+                segment_interval_step=segment_interval_step,
+                unicast_retrans_count=unicast_retrans_count,
+                unicast_retrans_wo_progress_count=unicast_retrans_wo_progress_count,
+                unicast_retrans_interval_step=unicast_retrans_interval_step,
+                unicast_retrans_interval_increment=unicast_retrans_interval_increment,
+                multicast_retrans_count=multicast_retrans_count,
+                multicast_retrans_interval_step=multicast_retrans_interval_step,
+            )
+        else:
+            events = self.config_procedure(
+                "Set SAR Transmitter state",
+                self.lib.btmesh.sar_config_client.set_sar_transmitter,
+                node,
+                segment_interval_step,
+                unicast_retrans_count,
+                unicast_retrans_wo_progress_count,
+                unicast_retrans_interval_step,
+                unicast_retrans_interval_increment,
+                multicast_retrans_count,
+                multicast_retrans_interval_step,
+                final_event_name="btmesh_evt_sar_config_client_sar_transmitter_status",
+                retry_params=retry_params,
+            )
+            sar_tx_status = SARTransmitterStatus.create_from_events(node, events)
+        return sar_tx_status
+
+    def get_sar_transmitter(
+        self,
+        node: Node,
+        retry_params: BtmeshRetryParams = None,
+    ) -> SARTransmitterStatus:
+        if node.uuid == self.db.prov_uuid:
+            resp = self.lib.btmesh.sar_config_server.get_sar_transmitter()
+            sar_tx_status = SARTransmitterStatus(
+                node,
+                segment_interval_step=resp.segment_interval_step,
+                unicast_retrans_count=resp.unicast_retrans_count,
+                unicast_retrans_wo_progress_count=resp.unicast_retrans_wo_progress_count,
+                unicast_retrans_interval_step=resp.unicast_retrans_interval_step,
+                unicast_retrans_interval_increment=resp.unicast_retrans_interval_increment,
+                multicast_retrans_count=resp.multicast_retrans_count,
+                multicast_retrans_interval_step=resp.multicast_retrans_interval_step,
+            )
+        else:
+            events = self.config_procedure(
+                "Get SAR Transmitter state",
+                self.lib.btmesh.sar_config_client.get_sar_transmitter,
+                node,
+                final_event_name="btmesh_evt_sar_config_client_sar_transmitter_status",
+                retry_params=retry_params,
+            )
+            sar_tx_status = SARTransmitterStatus.create_from_events(node, events)
+        return sar_tx_status
+
+    def set_sar_receiver(
+        self,
+        node: Node,
+        segments_threshold: int,
+        ack_delay_increment: int,
+        discard_timeout: int,
+        segment_interval_step: int,
+        ack_retrans_count: int,
+        retry_params: BtmeshRetryParams = None,
+    ) -> SARReceiverStatus:
+        if node.uuid == self.db.prov_uuid:
+            self.lib.btmesh.sar_config_server.set_sar_receiver(
+                segments_threshold,
+                ack_delay_increment,
+                discard_timeout,
+                segment_interval_step,
+                ack_retrans_count,
+            )
+            sar_rx_status = SARReceiverStatus(
+                node,
+                segments_threshold=segments_threshold,
+                ack_delay_increment=ack_delay_increment,
+                discard_timeout=discard_timeout,
+                segment_interval_step=segment_interval_step,
+                ack_retrans_count=ack_retrans_count,
+            )
+        else:
+            events = self.config_procedure(
+                "Set SAR Receiver state",
+                self.lib.btmesh.sar_config_client.set_sar_receiver,
+                node,
+                segments_threshold,
+                ack_delay_increment,
+                discard_timeout,
+                segment_interval_step,
+                ack_retrans_count,
+                final_event_name="btmesh_evt_sar_config_client_sar_receiver_status",
+                retry_params=retry_params,
+            )
+            sar_rx_status = SARReceiverStatus.create_from_events(node, events)
+        return sar_rx_status
+
+    def get_sar_receiver(
+        self,
+        node: Node,
+        retry_params: BtmeshRetryParams = None,
+    ) -> SARReceiverStatus:
+        if node.uuid == self.db.prov_uuid:
+            resp = self.lib.btmesh.sar_config_server.get_sar_receiver()
+            sar_rx_status = SARReceiverStatus(
+                node,
+                segments_threshold=resp.segments_threshold,
+                ack_delay_increment=resp.ack_delay_increment,
+                discard_timeout=resp.discard_timeout,
+                segment_interval_step=resp.segment_interval_step,
+                ack_retrans_count=resp.ack_retrans_count,
+            )
+        else:
+            events = self.config_procedure(
+                "Get SAR Receiver state",
+                self.lib.btmesh.sar_config_client.get_sar_receiver,
+                node,
+                final_event_name="btmesh_evt_sar_config_client_sar_receiver_status",
+                retry_params=retry_params,
+            )
+            sar_rx_status = SARReceiverStatus.create_from_events(node, events)
+        return sar_rx_status
 
     def concat_config_event_bytes(self, attr, events, event_filter=lambda e: True):
         barr = bytearray()

@@ -29,4 +29,4 @@ template_contribution:
     value: "{{instance}}"
 documentation:
     docset: gecko-platform
-    document: service/api/group-cli-storage-nvm3
+    document: platform-service/cli-storage-nvm3

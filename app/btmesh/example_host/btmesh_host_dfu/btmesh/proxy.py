@@ -26,7 +26,6 @@ import logging
 from typing import ClassVar, Dict, Iterable, Iterator, Optional, Tuple
 
 from bgapi.bglib import BGEvent, CommandFailedError
-
 from bgapix.bglibx import BGLibExtWaitEventError
 from bgapix.slstatus import SlStatus
 
@@ -414,6 +413,9 @@ class Proxy(BtmeshComponent):
     ) -> Tuple[str, GapAddrType]:
         bd_addr = 0
         bd_addr_type = GapAddrType.UNKNOWN_VALUE
+        # The gen_scan_reports method can yield deprecated, legacy and extended
+        # advertisement report scanner events.
+        # All these events contain the advertisement data in the data attribute.
         for scan_report in self.gen_scan_reports(max_time=scan_time):
             sc, match = self.lib.btmesh.prov.test_identity(
                 node.prim_addr, self.NETKEY_IDX, scan_report.data
@@ -439,7 +441,7 @@ class Proxy(BtmeshComponent):
             # by the application. (BT Mesh stack processes these internally)
             # The event filter shall be removed temporarily because the Proxy
             # Service Advertisements are available in Bluetooth Scan Reports.
-            self.lib.remove_event_filter("bt", "scanner", "scan_report")
+            self.core.remove_scan_event_filters()
         except CommandFailedError as e:
             # The NOT_FOUND error is raised if the scanning filter is already
             # removed which is not an error in this case
@@ -447,14 +449,18 @@ class Proxy(BtmeshComponent):
                 raise
         try:
             for scan_report in self.lib.gen_events(
-                event_selector="bt_evt_scanner_scan_report",
+                event_selector=[
+                    "bt_evt_scanner_scan_report",
+                    "bt_evt_scanner_legacy_advertisement_report",
+                    "bt_evt_scanner_extended_advertisement_report",
+                ],
                 max_time=max_time,
                 timeout=None,
             ):
                 yield scan_report
         finally:
             # Turn on the event filtering again to spare NCP bandwidth
-            self.lib.add_event_filter("bt", "scanner", "scan_report")
+            self.core.add_scan_event_filters()
 
     @property
     def bt_conns(self) -> Iterator[ConnectionInfo]:

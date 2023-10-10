@@ -22,7 +22,7 @@ requires:
     condition:
       - kernel
   - name: emlib_common
-    condition: [device]
+    condition: [device_efx]
   - name: emlib_core
   - name: sl_assert
   - name: enum
@@ -52,8 +52,7 @@ template_contribution:
       include: sl_iostream_init_instances.h
       handler: sl_iostream_init_instances
     priority: 4
-#validation_helper:
-#  - path: iostream_handle_validation.py
+    
 documentation:
     docset: gecko-platform
-    document: service/api/group-iostream
+    document: platform-service/iostream

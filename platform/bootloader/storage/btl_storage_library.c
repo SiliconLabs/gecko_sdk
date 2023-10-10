@@ -168,7 +168,9 @@ int32_t storage_readSlot(uint32_t slotId,
   }
 
   // Ensure address is within slot
-  if (offset + numBytes > storageLayout.slot[slotId].length) {
+  if ((offset + numBytes > storageLayout.slot[slotId].length) \
+      || (offset > storageLayout.slot[slotId].length)         \
+      || (numBytes > storageLayout.slot[slotId].length)) {
     return BOOTLOADER_ERROR_STORAGE_INVALID_ADDRESS;
   }
 
@@ -189,7 +191,9 @@ int32_t storage_writeSlot(uint32_t slotId,
   }
 
   // Ensure address is within slot
-  if (offset + numBytes > storageLayout.slot[slotId].length) {
+  if ((offset + numBytes > storageLayout.slot[slotId].length) \
+      || (offset > storageLayout.slot[slotId].length)         \
+      || (numBytes > storageLayout.slot[slotId].length)) {
     return BOOTLOADER_ERROR_STORAGE_INVALID_ADDRESS;
   }
 

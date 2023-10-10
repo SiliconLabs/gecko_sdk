@@ -58,12 +58,12 @@ class BtmeshDfuCmd(BtmeshCmd):
             "dfu",
             prog="dfu",
             help=(
-                "Start standalone firmware update procedure on updating nodes "
-                "and query FW information from updating nodes as initiator."
+                "Start standalone firmware update procedure on target nodes "
+                "and query FW information from target nodes as initiator."
             ),
             description=(
-                "Start standalone firmware update procedure on updating nodes "
-                "or query FW information from updating nodes as initiator. "
+                "Start standalone firmware update procedure on target nodes "
+                "or query FW information from target nodes as initiator. "
             ),
             exit_on_error_ext=False,
         )
@@ -139,7 +139,7 @@ class BtmeshDfuCmd(BtmeshCmd):
         self,
         parser: ArgumentParserExt,
         default=0,
-        help="Index of the firmware on updating nodes.",
+        help="Index of the firmware on target nodes.",
     ) -> None:
         parser.add_argument(
             "--fw-idx",
@@ -152,11 +152,11 @@ class BtmeshDfuCmd(BtmeshCmd):
         SUBPARSER_NAME = "info"
         self.dfu_info_parser: ArgumentParserExt = subparsers.add_parser(
             SUBPARSER_NAME,
-            help="Query the FW information from selected Updating Nodes.",
+            help="Query the FW information from selected Target Nodes.",
             description=(
                 "The firmware info command queries the Current Firmware ID and "
                 "Update URI from the specified index of Firmware Information List "
-                "on the selected updating nodes."
+                "on the selected target nodes."
             ),
             exit_on_error_ext=False,
         )
@@ -165,7 +165,7 @@ class BtmeshDfuCmd(BtmeshCmd):
             self.dfu_info_parser,
             help=(
                 "Target firmware index of Firmware Information Query procedure "
-                "on selected Updating Nodes. "
+                "on selected Target Nodes. "
                 "(default: %(default)s)"
             ),
         )
@@ -221,23 +221,23 @@ class BtmeshDfuCmd(BtmeshCmd):
                 f"Group address used for the FW Information Query procedure. "
                 f"The FW Update Server shall be subscribed to the specified group "
                 f"address. If it is unassigned address (0) then the FW Information "
-                f"Get message is sent to each updating node one by one to the "
+                f"Get message is sent to each target node one by one to the "
                 f"element address of the FW Update Server model."
             ),
             group_help=(
-                f"Select the app group which contains group address and updating "
+                f"Select the app group which contains group address and target "
                 f"nodes which shall participate in the FW Information Query "
                 f"procedure. The FW Information Get message is sent to the group "
                 f"address of the app group. "
                 f"For further details see {self.GROUP_ADDR_OPTS} option."
             ),
             nodes_help=(
-                f"Select the updating nodes which shall participate in the "
+                f"Select the target nodes which shall participate in the "
                 f"FW Information Query procedure. The FW Information Query "
                 f"procedure requires the element (unicast) addresses of the "
-                f"updating nodes. "
+                f"target nodes. "
                 f"Those element addresses shall be selected where the FW Update "
-                f"Server model is located on the updating nodes. "
+                f"Server model is located on the target nodes. "
                 f"The {self.NODES_OPTS} options selects nodes only so in order "
                 f"to specify the proper element address the {self.ELEM_OPTS} "
                 f"option shall be used as well. "
@@ -245,15 +245,15 @@ class BtmeshDfuCmd(BtmeshCmd):
                 f"{self.ELEM_ADDRS_OPTS} option."
             ),
             elem_help=(
-                f"Select element on the updating nodes where the FW Update Server "
+                f"Select element on the target nodes where the FW Update Server "
                 f"model is located by element index. "
                 f"This option is mandatory when {self.NODES_OPTS} or "
                 f"{self.GROUP_OPTS} is used because those selects the nodes only."
             ),
             elem_addrs_help=(
-                f"Select the updating nodes which shall participate in the "
+                f"Select the target nodes which shall participate in the "
                 f"FW Information Query procedure by selecting the element "
-                f"addresses of updating nodes with FW Update Server model. "
+                f"addresses of target nodes with FW Update Server model. "
                 f"If {self.ELEM_ADDRS_OPTS} is used then {self.NODES_OPTS} and "
                 f"{self.GROUP_OPTS} and {self.ELEM_OPTS} shall not be used."
             ),
@@ -265,10 +265,10 @@ class BtmeshDfuCmd(BtmeshCmd):
         self.dfu_start_parser: ArgumentParserExt = subparsers.add_parser(
             SUBPARSER_NAME,
             help="Start Firmware Update procedure of specified FW image to the "
-            "selected updating nodes.",
+            "selected target nodes.",
             description=(
                 "Start Firmware Update procedure of specified FW image "
-                "to the selected updating nodes. "
+                "to the selected target nodes. "
                 "The FW update procedure includes the following steps: "
                 "FW metadata check, FW update start, BLOB transfer, "
                 "FW verification, FW application (install) and FW update "
@@ -306,7 +306,7 @@ class BtmeshDfuCmd(BtmeshCmd):
             type=int,
             default=0,
             help=(
-                "Index of the firmware on updating nodes which shall be updated."
+                "Index of the firmware on target nodes which shall be updated."
                 "(default: %(default)s)"
             ),
         )
@@ -334,7 +334,7 @@ class BtmeshDfuCmd(BtmeshCmd):
                 f"Maximum number of additional Firmware Update Firmware Metadata "
                 f"Check messages which are sent until the corresponding Firmware "
                 f"Update status messages are received from the Firmware Update "
-                f"Server model of each selected updating nodes. "
+                f"Server model of each selected target nodes. "
                 f"This configuration option is used during Firmware Compatibility "
                 f"Check (Metadata Check) procedures and it is not used during "
                 f"Standalone Firmware Update procedure. "
@@ -347,7 +347,7 @@ class BtmeshDfuCmd(BtmeshCmd):
                 "Interval in seconds between Firmware Update and BLOB Transfer "
                 "messages when the corresponding status messages are not received "
                 "from the Firmware Update Server or BLOB Transfer Server model "
-                "of each selected updating nodes. "
+                "of each selected target nodes. "
                 "This parameter affects those BLOB Transfers which are initiated "
                 "by the Standalone Firmware Update procedure. "
                 "(default: %(default)s)"
@@ -356,7 +356,7 @@ class BtmeshDfuCmd(BtmeshCmd):
                 "Interval in seconds between Firmware Update and BLOB Transfer "
                 "messages when the corresponding status messages are not received "
                 "from the Firmware Update Server or BLOB Transfer Server model "
-                "of each selected low power updating nodes. "
+                "of each selected low power target nodes. "
                 "This parameter affects those BLOB Transfers which are initiated "
                 "by the Standalone Firmware Update procedure. "
                 "(default: %(default)s)"
@@ -385,11 +385,11 @@ class BtmeshDfuCmd(BtmeshCmd):
                 f"The FW Update Server and BLOB Transfer Server models shall be "
                 f"subscribed to the specified group address. If it is unassigned "
                 f"address (0) then the FW Update and BLOB transfer messages are "
-                f"sent to each updating node one by one to the element address "
+                f"sent to each target node one by one to the element address "
                 f"of the FW Update Server and BLOB Transfer Server models."
             ),
             group_help=(
-                f"Select the app group which contains group address and updating "
+                f"Select the app group which contains group address and target "
                 f"nodes which shall participate in the Firmware Update procedure. "
                 f"The group address of the app group is used as the destination "
                 f"address of FW Update and BLOB Transfer messages. "
@@ -398,12 +398,12 @@ class BtmeshDfuCmd(BtmeshCmd):
                 f"For further details see {self.GROUP_ADDR_OPTS} option."
             ),
             nodes_help=(
-                f"Select the updating nodes which shall participate in the "
+                f"Select the target nodes which shall participate in the "
                 f"firmware update. The FW Update procedure requires the element "
-                f"(unicast) addresses of the updating nodes. "
+                f"(unicast) addresses of the target nodes. "
                 f"Those element addresses shall be selected where the FW Update "
                 f"Server and BLOB Transfer Server models are located on the "
-                f"updating nodes. "
+                f"target nodes. "
                 f"The {self.NODES_OPTS} option selects nodes only so in order "
                 f"to specify the proper element address the {self.ELEM_OPTS} "
                 f"option shall be used as well. "
@@ -411,15 +411,15 @@ class BtmeshDfuCmd(BtmeshCmd):
                 f"{self.ELEM_ADDRS_OPTS} option."
             ),
             elem_help=(
-                f"Select element on the updating nodes where the FW Update Server "
+                f"Select element on the target nodes where the FW Update Server "
                 f"and BLOB Transfer Server models are located by element index. "
                 f"This option is mandatory when {self.NODES_OPTS} or "
                 f"{self.GROUP_OPTS} is used because those selects the nodes only."
             ),
             elem_addrs_help=(
-                f"Select the updating nodes which shall participate in the "
+                f"Select the target nodes which shall participate in the "
                 f"FW Update procedure by selecting the element addresses of "
-                f"updating nodes with FW Update Server and BLOB Transfer "
+                f"target nodes with FW Update Server and BLOB Transfer "
                 f"Server model. "
                 f"If {self.ELEM_ADDRS_OPTS} is used then {self.NODES_OPTS} and "
                 f"{self.GROUP_OPTS} and {self.ELEM_OPTS} shall not be used."
@@ -558,7 +558,7 @@ class BtmeshDfuCmd(BtmeshCmd):
                     rows.append(rec_info_dict)
                 app_ui.table_info(rows)
         except BGLibExtSyncSignalException:
-            # If an updating node does not respond then the cancellation might
+            # If an target node does not respond then the cancellation might
             # be as long as the FW update client timeout.
             client_timeout = round(
                 btmesh.util.dfu_calc_client_timeout(

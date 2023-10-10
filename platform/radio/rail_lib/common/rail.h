@@ -6604,6 +6604,17 @@ bool RAIL_SupportsDirectMode(RAIL_Handle_t railHandle);
 bool RAIL_SupportsDualSyncWords(RAIL_Handle_t railHandle);
 
 /**
+ * Indicate whether this chip supports start to start TX repeats.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if start to start TX repeats are supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref
+ * RAIL_SUPPORTS_TX_REPEAT_START_TO_START.
+ */
+bool RAIL_SupportsTxRepeatStartToStart(RAIL_Handle_t railHandle);
+
+/**
  * Indicate whether this chip supports EFF.
  *
  * @param[in] railHandle A RAIL instance handle.

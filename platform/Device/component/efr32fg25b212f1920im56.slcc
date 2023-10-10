@@ -75,6 +75,7 @@
 - provides:
   - name: efr32fg25b212f1920im56
   - name: device
+  - name: device_efx
   - name: device_series_2
   - name: device_sdid_220
   - name: device_generic_family_efr32xg25

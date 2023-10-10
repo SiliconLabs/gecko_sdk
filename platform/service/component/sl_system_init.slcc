@@ -57,7 +57,7 @@ template_contribution:
     priority: -4960
 documentation:
     docset: gecko-platform
-    document: service/api/group-system
+    document: platform-service/system
 description: |
   System Init component provides a function for initializing the system
   and the products:

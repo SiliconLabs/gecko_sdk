@@ -27,15 +27,15 @@ requires:
 documentation:
   docset: gecko-platform
   document:
-    - page: emlib/api/efm32g/group-dbg
+    - page: platform-emlib-efm32g/dbg
       condition: [device_sdid_71]
-    - page: emlib/api/efm32gg/group-dbg
+    - page: platform-emlib-efm32gg/dbg
       condition: [device_sdid_72]
-    - page: emlib/api/efm32tg/group-dbg
+    - page: platform-emlib-efm32tg/dbg
       condition: [device_sdid_73]
-    - page: emlib/api/efm32lg/group-dbg
+    - page: platform-emlib-efm32lg/dbg
       condition: [device_sdid_74]
-    - page: emlib/api/efm32zg/group-dbg
+    - page: platform-emlib-efm32zg/dbg
       condition: [device_sdid_76]
-    - page: emlib/api/efm32hg/group-dbg
+    - page: platform-emlib-efm32hg/dbg
       condition: [device_sdid_77]

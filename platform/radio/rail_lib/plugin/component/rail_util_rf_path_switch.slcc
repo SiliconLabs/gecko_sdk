@@ -20,20 +20,23 @@ config_file:
   - path: platform/radio/rail_lib/plugin/rail_util_rf_path_switch/config/efr32xg28/sl_rail_util_rf_path_switch_config.h
     file_id: rail_util_rf_path_switch_config
     condition:
-      - device_series_2
       - device_sdid_235 
+  - path: platform/radio/rail_lib/plugin/rail_util_rf_path_switch/config/sl_rail_util_rf_path_switch_config.h
+    file_id: rail_util_rf_path_switch_config
+    condition:
+      - device_series_2
+    unless:
+      - device_sdid_235
 include:
   - path: platform/radio/rail_lib/plugin/rail_util_rf_path_switch
     file_list:
       - path: sl_rail_util_rf_path_switch.h
     condition:
       - device_series_2
-      - device_sdid_235
 source:
   - path: platform/radio/rail_lib/plugin/rail_util_rf_path_switch/sl_rail_util_rf_path_switch.c
     condition:
       - device_series_2
-      - device_sdid_235
 template_contribution:
   - name: event_handler
     value:
@@ -43,9 +46,7 @@ template_contribution:
     priority: 10000
     condition:
       - device_series_2
-      - device_sdid_235
   - name: component_catalog
     value: rail_util_rf_path_switch
     condition:
       - device_series_2
-      - device_sdid_235

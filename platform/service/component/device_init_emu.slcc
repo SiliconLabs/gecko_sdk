@@ -42,4 +42,4 @@ template_contribution:
     priority: -9400
 documentation:
   docset: gecko-platform
-  document: service/api/group-device-init-emu
+  document: platform-service/device-init-emu

@@ -74,6 +74,7 @@
 - provides:
   - name: efr32fg28a122f1024gm68
   - name: device
+  - name: device_efx
   - name: device_series_2
   - name: device_sdid_235
   - name: device_generic_family_efr32xg28
@@ -168,6 +169,7 @@
   - name: device_supports_rail
   - name: device_supports_rail_stack
   - name: device_supports_bluetooth
+  - name: device_supports_bluetooth_coded_phy
   - name: device_supports_connect
   - name: device_supports_wisun
   - name: device_compute_basic

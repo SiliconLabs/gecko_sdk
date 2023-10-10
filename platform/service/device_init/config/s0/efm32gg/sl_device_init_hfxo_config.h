@@ -46,8 +46,8 @@
 #define SL_DEVICE_INIT_HFXO_FREQ           48000000
 
 // <o SL_DEVICE_INIT_HFXO_PRECISION> HFXO precision in PPM <0-65535>
-// <i> Default: 500
-#define SL_DEVICE_INIT_HFXO_PRECISION      500
+// <i> Default: 50
+#define SL_DEVICE_INIT_HFXO_PRECISION      50
 
 // <o SL_DEVICE_INIT_HFXO_BOOST> Boost
 // <0=> 50% boost

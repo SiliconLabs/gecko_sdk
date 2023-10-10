@@ -22,17 +22,17 @@ requires:
 documentation:
   docset: gecko-platform
   document:
-    - page: emlib/api/efr32xg21/group-se
+    - page: platform-emlib-efr32xg21/se
       condition: [device_sdid_200]
-    - page: emlib/api/efr32xg22/group-se
+    - page: platform-emlib-efr32xg22/se
       condition: [device_sdid_205]
-    - page: emlib/api/efr32xg23/group-se
+    - page: platform-emlib-efr32xg23/se
       condition: [device_sdid_210]
-    - page: emlib/api/efr32xg24/group-se
+    - page: platform-emlib-efr32xg24/se
       condition: [device_sdid_215]
-    - page: emlib/api/efr32xg25/group-se
+    - page: platform-emlib-efr32xg25/se
       condition: [device_sdid_220]
-    - page: emlib/api/efr32xg27/group-se
+    - page: platform-emlib-efr32xg27/se
       condition: [device_sdid_230]
-    - page: emlib/api/efr32xg28/group-se
+    - page: platform-emlib-efr32xg28/se
       condition: [device_sdid_235]

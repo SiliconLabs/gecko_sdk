@@ -57,6 +57,7 @@
 #include "sl_btmesh_blob_transfer_server.h"
 #include "sl_btmesh_blob_transfer_server_api.h"
 #include "sl_btmesh_blob_transfer_server_config.h"
+#include "sli_btmesh_blob_transfer_server_instances.h"
 
 // Warning! The app_btmesh_util shall be included after the component configuration
 // header file in order to provide the component specific logging macro.
@@ -70,13 +71,8 @@
 // In high throughput mode the LPN node polls the friend node more frequently
 // to increase the throughput at the expense of power consumption
 // Note: LPN high throughput mode can be active only in LPN mode
-#if defined(SL_CATALOG_BTMESH_LPN_PRESENT)             \
-  && (SL_BTMESH_BLOB_TRANSFER_SERVER_LPN_MODE_CFG_VAL) \
-  && (SL_BTMESH_BLOB_TRANSFER_SERVER_LPN_HIGH_THROUGHPUT_MODE_CFG_VAL)
-#define LPN_HIGH_THROUGHPUT_MODE_ACTIVE   1
-#else
-#define LPN_HIGH_THROUGHPUT_MODE_ACTIVE   0
-#endif
+#define LPN_HIGH_THROUGHPUT_MODE_ACTIVE \
+  SLI_BTMESH_BLOB_TRANSFER_SERVER_LPN_HIGH_THROUGHPUT_MODE_ACTIVE
 
 // Returns the string representation of BLOB ID in a compound literal.
 // WARNING! This macro shall be used as a parameter of log calls only due to the
@@ -89,66 +85,14 @@
 #define blob_lpn_poll_log(...)
 #endif
 
-typedef enum {
-  /// The BLOB server is idle
-  IDLE,
-  /// BLOB server is active
-  ACTIVE,
-  /*************************************************************************//**
-   * @addtogroup activesubstates Active Sub-states
-   * @{
-   ****************************************************************************/
-  /// BLOBs are being erased
-  ACTIVE_ERASING,
-  /// Invalid BLOBs are being erased
-  ACTIVE_ERASING_INVALID,
-  /// Unamanged BLOBs are being erased
-  ACTIVE_ERASING_UNMANAGED,
-  /// Transfer is ongoing
-  ACTIVE_TRANSFER,
-  /** @} end activesubstates */
-  /*************************************************************************//**
-   * @addtogroup idlesubstates Idle Sub-states
-   * @{
-   ****************************************************************************/
-  /// The state machine is either initialized or the transfer is canceled
-  IDLE_INACTIVE,
-  /// The transfer has been completed
-  IDLE_DONE
-  /** @} end idlesubstates */
-} blob_transfer_server_state_t;
+#define assert_not_null(ptr) do { app_assert_s(ptr != NULL); } while (0)
 
-struct {
-#if LPN_HIGH_THROUGHPUT_MODE_ACTIVE
-  /// Handler for the LPN high throughput timer
-  sl_btmesh_lpn_high_throughput_timer_t high_throughput_timer;
-#endif // LPN_HIGH_THROUGHPUT_MODE_ACTIVE
-  /// ID of the BLOB being transferred
-  sl_bt_uuid_64_t blob_id;
-  /// Size of the BLOB being transferred
-  uint32_t blob_size;
-  /// Current progress of the current transfer in bytes
-  uint32_t progress;
-  /// Block size calculated based on the log value received at transfer start
-  uint32_t blob_block_size;
-  /// Buffer for blocks
-  uint8_t * block_buffer;
-  /// State of the current transfer
-  union {
-    struct {
-      uint16_t idle : 1; ///< Idle state
-      uint16_t inactive : 1; ///< Idle/Inactive state
-      uint16_t done : 1; ///< Idle/Done state
-      uint16_t active : 1; ///< Active state
-      uint16_t suspended : 1; ///< Active/Suspended state
-      uint16_t erasing : 1; ///< Active/Erasing state
-      uint16_t erasing_invalid : 1; ///< Active/Erasing Invalid state
-      uint16_t erasing_unmanaged : 1; ///< Active/Erasing Unmanaged state
-      uint16_t transfer : 1; ///< Active/Transfer state
-    };
-    uint16_t raw; ///< raw data for quick access
-  } state;
-} blob_transfer_server;
+#define CHECK_PTR(ptr, ...)  do { \
+    if (ptr == NULL) {            \
+      assert_not_null(ptr);       \
+      return __VA_ARGS__;         \
+    }                             \
+} while (0)
 
 /***************************************************************************//**
  * Handler for state change
@@ -157,7 +101,30 @@ struct {
  *
  * @param state State to transfer into
  ******************************************************************************/
-static void blob_transfer_server_state_change(blob_transfer_server_state_t state);
+static void blob_transfer_server_state_change(sli_btmesh_blob_transfer_server_t *const self,
+                                              sli_btmesh_blob_transfer_server_state_t state);
+
+void sl_btmesh_blob_transfer_server_inst_init(sli_btmesh_blob_transfer_server_t *const self,
+                                              uint32_t max_blob_size)
+{
+  sl_status_t sc;
+  assert_not_null(self);
+
+  sc = sl_btmesh_mbt_server_init(self->config->elem_index,
+                                 self->config->min_block_size_log,
+                                 self->config->max_block_size_log,
+                                 self->config->max_chunks_per_block,
+                                 self->config->max_chunk_size,
+                                 max_blob_size,
+                                 self->config->supported_transfer_modes,
+                                 self->config->pull_mode_chunks_to_request,
+                                 self->config->pull_mode_retry_interval_ms,
+                                 self->config->pull_mode_retry_count);
+  app_assert_status(sc);
+
+  // Initial state is Idle
+  blob_transfer_server_state_change(self, SLI_BTMESH_BLOB_TRANSFER_SERVER_IDLE);
+}
 
 void sl_btmesh_blob_transfer_server_init(void)
 {
@@ -166,47 +133,40 @@ void sl_btmesh_blob_transfer_server_init(void)
     log_warning("No available flash for BLOB Transfer. "
                 "Consider removing the component." NL);
   } else {
-    sl_status_t sc =
-      sl_btmesh_mbt_server_init(BTMESH_BLOB_TRANSFER_SERVER_MAIN,
-                                SL_BTMESH_BLOB_TRANSFER_SERVER_MIN_BLOCK_SIZE_LOG_CFG_VAL,
-                                SL_BTMESH_BLOB_TRANSFER_SERVER_MAX_BLOCK_SIZE_LOG_CFG_VAL,
-                                SL_BTMESH_BLOB_TRANSFER_SERVER_MAX_CHUNKS_PER_BLOCK_CFG_VAL,
-                                SL_BTMESH_BLOB_TRANSFER_SERVER_MAX_CHUNK_SIZE_CFG_VAL,
-                                max_blob_size,
-                                SL_BTMESH_BLOB_TRANSFER_SERVER_PUSH_MODE_CFG_VAL
-                                | (SL_BTMESH_BLOB_TRANSFER_SERVER_PULL_MODE_CFG_VAL << 1),
-                                SL_BTMESH_BLOB_TRANSFER_SERVER_PULL_CHUNK_REQUEST_CNT_CFG_VAL,
-                                SL_BTMESH_BLOB_TRANSFER_SERVER_PULL_RETRY_INTERVAL_MS_CFG_VAL,
-                                SL_BTMESH_BLOB_TRANSFER_SERVER_PULL_RETRY_CNT_CFG_VAL);
-    app_assert_status(sc);
-
-    // Initial state is Idle
-    blob_transfer_server_state_change(IDLE);
+    for (uint16_t inst_idx = 0; inst_idx < SLI_BTMESH_BLOB_TRANSFER_SERVER_COUNT; inst_idx++) {
+      sli_btmesh_blob_transfer_server_t *const self =
+        sli_btmesh_blob_transfer_server_get_by_inst_index(inst_idx);
+      sl_btmesh_blob_transfer_server_inst_init(self, max_blob_size);
+    }
   }
 }
 
-inline sl_status_t sl_btmesh_blob_transfer_server_start(sl_bt_uuid_64_t const *const blob_id,
+inline sl_status_t sl_btmesh_blob_transfer_server_start(uint16_t elem_index,
+                                                        sl_bt_uuid_64_t const *const blob_id,
                                                         const uint16_t timeout_10s,
                                                         const uint8_t ttl)
 {
   // This function essentially wraps the call below
-  return sl_btmesh_mbt_server_start(BTMESH_BLOB_TRANSFER_SERVER_MAIN,
+  return sl_btmesh_mbt_server_start(elem_index,
                                     *blob_id,
                                     timeout_10s,
                                     ttl);
 }
 
-sl_status_t sl_btmesh_blob_transfer_server_set_pull_mode_parameters(uint16_t pull_mode_retry_interval_ms,
+sl_status_t sl_btmesh_blob_transfer_server_set_pull_mode_parameters(uint16_t elem_index,
+                                                                    uint16_t pull_mode_retry_interval_ms,
                                                                     uint16_t pull_mode_retry_count)
 {
   // This function essentially wraps the call below
-  return sl_btmesh_mbt_server_set_pull_mode_parameters(BTMESH_BLOB_TRANSFER_SERVER_MAIN,
+  return sl_btmesh_mbt_server_set_pull_mode_parameters(elem_index,
                                                        pull_mode_retry_interval_ms,
                                                        pull_mode_retry_count);
 }
 
 void sl_btmesh_blob_transfer_server_on_event(sl_btmesh_msg_t const *evt)
 {
+  sli_btmesh_blob_transfer_server_t *self = NULL;
+
   switch (SL_BT_MSG_ID(evt->header)) {
     case sl_btmesh_evt_prov_initialized_id:
     case sl_btmesh_evt_node_provisioned_id:
@@ -220,15 +180,14 @@ void sl_btmesh_blob_transfer_server_on_event(sl_btmesh_msg_t const *evt)
     case sl_btmesh_evt_mbt_server_transfer_start_req_id: {
       sl_btmesh_evt_mbt_server_transfer_start_req_t const *msg =
         &evt->data.evt_mbt_server_transfer_start_req;
+      self = sli_btmesh_blob_transfer_server_get_by_elem_index(msg->elem_index);
+      CHECK_PTR(self);
       // If suspended, there are two cases we can move forward
-      if (blob_transfer_server.state.suspended == 1) {
-        if (0
-            == memcmp(&blob_transfer_server.blob_id,
-                      &msg->blob_id,
-                      sizeof(sl_bt_uuid_64_t))) {
+      if (self->state.suspended == 1) {
+        if (0 == memcmp(&self->blob_id, &msg->blob_id, sizeof(sl_bt_uuid_64_t))) {
           // If it's the same blob, resume.
-          blob_transfer_server.state.suspended = 0;
-          sl_btmesh_mbt_server_transfer_start_rsp(BTMESH_BLOB_TRANSFER_SERVER_MAIN,
+          self->state.suspended = 0;
+          sl_btmesh_mbt_server_transfer_start_rsp(self->config->elem_index,
                                                   sl_btmesh_mbt_server_status_success);
           return;
         }
@@ -238,53 +197,48 @@ void sl_btmesh_blob_transfer_server_on_event(sl_btmesh_msg_t const *evt)
       if (sl_btmesh_blob_storage_is_present(&msg->blob_id)) {
         log_error("BLOB (%s) already present!" NL,
                   BLOB_ID_TO_STRING(&msg->blob_id));
-        sl_btmesh_mbt_server_transfer_start_rsp(BTMESH_BLOB_TRANSFER_SERVER_MAIN,
+        sl_btmesh_mbt_server_transfer_start_rsp(self->config->elem_index,
                                                 sl_btmesh_mbt_server_status_internal_error);
         return;
       }
-      memcpy(&blob_transfer_server.blob_id,
-             &msg->blob_id,
-             sizeof(sl_bt_uuid_64_t));
+      memcpy(&self->blob_id, &msg->blob_id, sizeof(sl_bt_uuid_64_t));
       // Set progress target
-      blob_transfer_server.blob_size = msg->blob_size;
+      self->blob_size = msg->blob_size;
       // Set expected block size
-      blob_transfer_server.blob_block_size = 1 << msg->block_size_log;
-      blob_transfer_server.block_buffer =
-        sl_malloc(blob_transfer_server.blob_block_size);
+      self->blob_block_size = 1 << msg->block_size_log;
+      self->block_buffer = sl_malloc(self->blob_block_size);
       // Check allocation result
-      if (blob_transfer_server.block_buffer == NULL) {
+      if (self->block_buffer == NULL) {
         log_critical("Block buffer allocation failed!" NL);
-        sl_btmesh_mbt_server_transfer_start_rsp(BTMESH_BLOB_TRANSFER_SERVER_MAIN,
+        sl_btmesh_mbt_server_transfer_start_rsp(self->config->elem_index,
                                                 sl_btmesh_mbt_server_status_internal_error);
         // State change
-        blob_transfer_server_state_change(IDLE_INACTIVE);
+        blob_transfer_server_state_change(self, SLI_BTMESH_BLOB_TRANSFER_SERVER_IDLE_INACTIVE);
       } else {
         log_info("BLOB Transfer Start received, id: %s\t"
                  "size: %lu B" NL,
-                 BLOB_ID_TO_STRING(&blob_transfer_server.blob_id),
-                 blob_transfer_server.blob_size);
+                 BLOB_ID_TO_STRING(&self->blob_id),
+                 self->blob_size);
 
         // State change
-        blob_transfer_server_state_change(ACTIVE);
+        blob_transfer_server_state_change(self, SLI_BTMESH_BLOB_TRANSFER_SERVER_ACTIVE);
       }
       break;
     }
     case sl_btmesh_evt_mbt_server_block_start_id: {
-      // If not in Active/Transfer state, ignore message
-      if (blob_transfer_server.state.transfer == 0) {
-        return;
-      }
       sl_btmesh_evt_mbt_server_block_start_t const *msg =
         &evt->data.evt_mbt_server_block_start;
-      // Check whether received block is related to BLOB being received
-      if (memcmp(&msg->blob_id,
-                 &blob_transfer_server.blob_id,
-                 sizeof(sl_bt_uuid_64_t))
-          != 0) {
+      self = sli_btmesh_blob_transfer_server_get_by_elem_index(msg->elem_index);
+      CHECK_PTR(self);
+      // If not in Active/Transfer state, ignore message
+      if (self->state.transfer == 0) {
         return;
       }
-      blob_transfer_server.progress = msg->block_number
-                                      * blob_transfer_server.blob_block_size;
+      // Check whether received block is related to BLOB being received
+      if (memcmp(&msg->blob_id, &self->blob_id, sizeof(sl_bt_uuid_64_t)) != 0) {
+        return;
+      }
+      self->progress = msg->block_number * self->blob_block_size;
 
       log_debug("Block %d start" NL, msg->block_number);
       break;
@@ -292,68 +246,75 @@ void sl_btmesh_blob_transfer_server_on_event(sl_btmesh_msg_t const *evt)
     case sl_btmesh_evt_mbt_server_block_complete_id: {
       sl_btmesh_evt_mbt_server_block_complete_t const *msg =
         &evt->data.evt_mbt_server_block_complete;
+      self = sli_btmesh_blob_transfer_server_get_by_elem_index(msg->elem_index);
+      CHECK_PTR(self);
       // If not in Active/Transfer state, ignore message
-      if (blob_transfer_server.state.transfer == 0) {
+      if (self->state.transfer == 0) {
         return;
       }
 #if SL_BTMESH_BLOB_TRANSFER_PROGRESS_CALLBACK_CFG_VAL
       // User callback for progress at block end
-      sl_btmesh_blob_transfer_server_transfer_progress(&blob_transfer_server.blob_id,
-                                                       SL_PROG_TO_PCT(blob_transfer_server.blob_size,
-                                                                      blob_transfer_server.progress));
+      sl_btmesh_blob_transfer_server_transfer_progress(&self->blob_id,
+                                                       SL_PROG_TO_PCT(self->blob_size,
+                                                                      self->progress));
 #endif // SL_BTMESH_BLOB_TRANSFER_PROGRESS_CALLBACK_CFG_VAL
       // Calculate offset of block to be received; since the last block can be
       // smaller than the rest, use the size received in Transfer Start to
       // calculate offset
-      uint32_t write_offset = blob_transfer_server.blob_block_size
-                              * msg->block_number;
+      uint32_t write_offset = self->blob_block_size * msg->block_number;
       // Write data using wrapper
-      sl_status_t sc =
-        sl_btmesh_blob_storage_write(write_offset,
-                                     msg->block_size,
-                                     blob_transfer_server.block_buffer);
+      sl_status_t sc = sl_btmesh_blob_storage_write(write_offset,
+                                                    msg->block_size,
+                                                    self->block_buffer);
       app_assert_status_f(sc, "Storage writing failed!");
       log_info("Block %d complete (%s), progress %u%%" NL,
                msg->block_number,
-               BLOB_ID_TO_STRING(&blob_transfer_server.blob_id),
+               BLOB_ID_TO_STRING(&self->blob_id),
                // Calculate progress in percent
-               (unsigned) SL_PROG_TO_PCT_INT(blob_transfer_server.blob_size,
-                                             blob_transfer_server.progress));
+               (unsigned) SL_PROG_TO_PCT_INT(self->blob_size,
+                                             self->progress));
 
-      if (blob_transfer_server.progress == blob_transfer_server.blob_size) {
+      if (self->progress == self->blob_size) {
         // State change
-        blob_transfer_server_state_change(IDLE_DONE);
+        blob_transfer_server_state_change(self, SLI_BTMESH_BLOB_TRANSFER_SERVER_IDLE_DONE);
       }
       break;
     }
 #if LPN_HIGH_THROUGHPUT_MODE_ACTIVE
-    case sl_btmesh_evt_mbt_server_partial_block_report_tx_complete_id:
-    {
-      // Start polling after partial block report is sent out, because
-      // the next messages are sent out quickly by the client.
-      sl_btmesh_lpn_high_throughput_register(&blob_transfer_server.high_throughput_timer,
-                                             SL_BTMESH_BLOB_TRANSFER_SERVER_LPN_POLL_DELAY_MS_CFG_VAL,
-                                             SL_BTMESH_LPN_HIGH_THROUGHPUT_SLOWING);
-      blob_lpn_poll_log("Start slowing poll delay %dms (partial block)" NL,
-                        SL_BTMESH_BLOB_TRANSFER_SERVER_LPN_POLL_DELAY_MS_CFG_VAL);
+    case sl_btmesh_evt_mbt_server_partial_block_report_tx_complete_id: {
+      sl_btmesh_evt_mbt_server_partial_block_report_tx_complete_t const *msg =
+        &evt->data.evt_mbt_server_partial_block_report_tx_complete;
+      self = sli_btmesh_blob_transfer_server_get_by_elem_index(msg->elem_index);
+      CHECK_PTR(self);
+      if (self->config->high_throughput_timer != NULL) {
+        // Start polling after partial block report is sent out, because
+        // the next messages are sent out quickly by the client.
+        sl_btmesh_lpn_high_throughput_register(self->config->high_throughput_timer,
+                                               self->config->lpn_poll_delay_ms,
+                                               SL_BTMESH_LPN_HIGH_THROUGHPUT_SLOWING);
+        blob_lpn_poll_log("Start slowing poll delay %dms (partial block)" NL,
+                          self->config->lpn_poll_delay_ms);
+      }
       break;
     }
 #endif // LPN_HIGH_THROUGHPUT_MODE_ACTIVE
     case sl_btmesh_evt_mbt_server_state_changed_id: {
       sl_btmesh_evt_mbt_server_state_changed_t const *msg =
         &evt->data.evt_mbt_server_state_changed;
+      self = sli_btmesh_blob_transfer_server_get_by_elem_index(msg->elem_index);
+      CHECK_PTR(self);
       log_debug("MBT Server state changed to %d" NL, msg->new_state);
       switch (msg->new_state) {
         case sl_btmesh_mbt_server_phase_suspended:
-          blob_transfer_server.state.suspended = 1;
+          self->state.suspended = 1;
           break;
         case sl_btmesh_mbt_server_phase_inactive:
-          if (blob_transfer_server.state.idle == 0) {
+          if (self->state.idle == 0) {
             log_error("BLOB Transfer (%s) aborted" NL,
-                      BLOB_ID_TO_STRING(&blob_transfer_server.blob_id));
+                      BLOB_ID_TO_STRING(&self->blob_id));
             // Notify user that transfer is aborted
-            sl_btmesh_blob_transfer_server_transfer_abort(&blob_transfer_server.blob_id);
-            blob_transfer_server_state_change(IDLE_INACTIVE);
+            sl_btmesh_blob_transfer_server_transfer_abort(&self->blob_id);
+            blob_transfer_server_state_change(self, SLI_BTMESH_BLOB_TRANSFER_SERVER_IDLE_INACTIVE);
           }
 #if LPN_HIGH_THROUGHPUT_MODE_ACTIVE
         // intentional fall-through
@@ -362,18 +323,22 @@ void sl_btmesh_blob_transfer_server_on_event(sl_btmesh_msg_t const *evt)
           // BLOB Transfer Start, BLOB Block Start
           // Note: sl_btmesh_mbt_server_phase_idle means that the expected BLOB ID
           //       is set but the BLOB Transfer Start message is not received yet
-          sl_btmesh_lpn_high_throughput_register(&blob_transfer_server.high_throughput_timer,
-                                                 SL_BTMESH_BLOB_TRANSFER_SERVER_LPN_POLL_DELAY_MS_CFG_VAL,
-                                                 SL_BTMESH_LPN_HIGH_THROUGHPUT_SLOWING);
-          blob_lpn_poll_log("Start slowing poll delay %dms (state change)" NL,
-                            SL_BTMESH_BLOB_TRANSFER_SERVER_LPN_POLL_DELAY_MS_CFG_VAL);
+          if (self->config->high_throughput_timer != NULL) {
+            sl_btmesh_lpn_high_throughput_register(self->config->high_throughput_timer,
+                                                   self->config->lpn_poll_delay_ms,
+                                                   SL_BTMESH_LPN_HIGH_THROUGHPUT_SLOWING);
+            blob_lpn_poll_log("Start slowing poll delay %dms (state change)" NL,
+                              self->config->lpn_poll_delay_ms);
+          }
 #endif // LPN_HIGH_THROUGHPUT_MODE_ACTIVE
           break;
         default:
 #if LPN_HIGH_THROUGHPUT_MODE_ACTIVE
           // If the BLOB transfer is no longer active then the LPN high throughput
           // request shall be unregistered.
-          sl_btmesh_lpn_high_throughput_unregister(&blob_transfer_server.high_throughput_timer);
+          if (self->config->high_throughput_timer != NULL) {
+            sl_btmesh_lpn_high_throughput_unregister(self->config->high_throughput_timer);
+          }
 #endif // LPN_HIGH_THROUGHPUT_MODE_ACTIVE
           break;
       }
@@ -381,43 +346,45 @@ void sl_btmesh_blob_transfer_server_on_event(sl_btmesh_msg_t const *evt)
       break;
     }
     case sl_btmesh_evt_mbt_server_chunk_id: {
+      sl_btmesh_evt_mbt_server_chunk_t const *msg = &evt->data.evt_mbt_server_chunk;
+      self = sli_btmesh_blob_transfer_server_get_by_elem_index(msg->elem_index);
+      CHECK_PTR(self);
       // If not in Active state, ignore message
-      if (blob_transfer_server.state.active == 0) {
+      if (self->state.active == 0) {
         return;
       }
-      sl_btmesh_evt_mbt_server_chunk_t const *msg =
-        &evt->data.evt_mbt_server_chunk;
       // Increment progress
-      blob_transfer_server.progress += msg->data.len;
+      self->progress += msg->data.len;
       // Buffer data according to block offset
-      memcpy(&blob_transfer_server.block_buffer[msg->block_offset],
+      memcpy(&self->block_buffer[msg->block_offset],
              msg->data.data,
              msg->data.len);
       // Calculate progress in percent
-      float prog = SL_PROG_TO_PCT(blob_transfer_server.blob_size,
-                                  blob_transfer_server.progress);
+      float prog = SL_PROG_TO_PCT(self->blob_size, self->progress);
       log_debug("BLOB Transfer (%s) %3d.%02d%%" NL,
-                BLOB_ID_TO_STRING(&blob_transfer_server.blob_id),
+                BLOB_ID_TO_STRING(&self->blob_id),
                 (int)prog,
                 (int)(prog * 100) % 100);
       (void)prog;
       break;
     }
     case sl_btmesh_evt_mbt_server_transfer_cancel_id: {
-      if (blob_transfer_server.state.active == 0) {
-        return;
-      }
       sl_btmesh_evt_mbt_server_transfer_cancel_t const *msg =
         &evt->data.evt_mbt_server_transfer_cancel;
+      self = sli_btmesh_blob_transfer_server_get_by_elem_index(msg->elem_index);
+      CHECK_PTR(self);
+      if (self->state.active == 0) {
+        return;
+      }
       // Compare ID's
       if (0 == memcmp(&msg->blob_id,
-                      &blob_transfer_server.blob_id,
+                      &self->blob_id,
                       sizeof(sl_bt_uuid_64_t))) {
         // State change
-        blob_transfer_server_state_change(IDLE_INACTIVE);
+        blob_transfer_server_state_change(self, SLI_BTMESH_BLOB_TRANSFER_SERVER_IDLE_INACTIVE);
         // Log cancellation
         log_info("BLOB Transfer (%s) Canceled" NL,
-                 BLOB_ID_TO_STRING(&blob_transfer_server.blob_id));
+                 BLOB_ID_TO_STRING(&self->blob_id));
       }
       break;
     }
@@ -427,86 +394,87 @@ void sl_btmesh_blob_transfer_server_on_event(sl_btmesh_msg_t const *evt)
   }
 }
 
-static void blob_transfer_server_state_change(blob_transfer_server_state_t state)
+static void blob_transfer_server_state_change(sli_btmesh_blob_transfer_server_t *const self,
+                                              sli_btmesh_blob_transfer_server_state_t state)
 {
   // Clear state flags
-  blob_transfer_server.state.raw = 0;
+  self->state.raw = 0;
   switch (state) {
-    case IDLE:
+    case SLI_BTMESH_BLOB_TRANSFER_SERVER_IDLE:
     // Idle has an initial state transition to Idle/Inactive: fall through
-    case IDLE_INACTIVE:
-      blob_transfer_server.state.idle = 1;
-      blob_transfer_server.state.inactive = 1;
+    case SLI_BTMESH_BLOB_TRANSFER_SERVER_IDLE_INACTIVE:
+      self->state.idle = 1;
+      self->state.inactive = 1;
       // Set the BLOB ID to Unknown, i.e. 0xFFFFFFFFFFFFFFFF
-      memset(&blob_transfer_server.blob_id, UINT8_MAX, sizeof(sl_bt_uuid_64_t));
+      memset(&self->blob_id, UINT8_MAX, sizeof(sl_bt_uuid_64_t));
       // Set BLOB Size to Unknown, i.e. 0xFFFFFFFF
-      blob_transfer_server.blob_size = UINT32_MAX;
+      self->blob_size = UINT32_MAX;
       // Set progress to Unknown, i.e. 0xFFFFFFFF
-      blob_transfer_server.progress = UINT32_MAX;
-      sl_free(blob_transfer_server.block_buffer);
-      blob_transfer_server.block_buffer = NULL;
+      self->progress = UINT32_MAX;
+      sl_free(self->block_buffer);
+      self->block_buffer = NULL;
       break;
-    case IDLE_DONE: {
-      blob_transfer_server.state.idle = 1;
-      blob_transfer_server.state.done = 1;
+    case SLI_BTMESH_BLOB_TRANSFER_SERVER_IDLE_DONE: {
+      self->state.idle = 1;
+      self->state.done = 1;
       // Log finished transfer
       log_info("BLOB Transfer (%s) Done" NL,
-               BLOB_ID_TO_STRING(&blob_transfer_server.blob_id));
+               BLOB_ID_TO_STRING(&self->blob_id));
       sl_status_t sc = sl_btmesh_blob_storage_verify();
       log_status_critical_f(sc, "BLOB signing failed!" NL);
 #if SL_BTMESH_BLOB_TRANSFER_SERVER_TRANSFER_DONE_CALLBACK_CFG_VAL
       // Notify user that transfer has completed
-      sl_btmesh_blob_transfer_server_transfer_done(&blob_transfer_server.blob_id);
+      sl_btmesh_blob_transfer_server_transfer_done(&self->blob_id);
 #endif // SL_BTMESH_BLOB_TRANSFER_SERVER_TRANSFER_DONE_CALLBACK_CFG_VAL
-      sl_free(blob_transfer_server.block_buffer);
+      sl_free(self->block_buffer);
       break;
     }
-    case ACTIVE:
-    case ACTIVE_TRANSFER: {
+    case SLI_BTMESH_BLOB_TRANSFER_SERVER_ACTIVE:
+    case SLI_BTMESH_BLOB_TRANSFER_SERVER_ACTIVE_TRANSFER: {
       sl_status_t s;
-      blob_transfer_server.state.active = 1;
+      self->state.active = 1;
       // Reset progress
-      blob_transfer_server.progress = 0;
+      self->progress = 0;
 
       // Notify storage wrapper about write start
-      s = sl_btmesh_blob_storage_write_start(&blob_transfer_server.blob_id,
-                                             blob_transfer_server.blob_size);
+      s = sl_btmesh_blob_storage_write_start(&self->blob_id,
+                                             self->blob_size);
 
       if (SL_STATUS_NO_MORE_RESOURCE == s) {
         log_info("No more slots available, attempting erase." NL);
-        blob_transfer_server_state_change(ACTIVE_ERASING);
+        blob_transfer_server_state_change(self, SLI_BTMESH_BLOB_TRANSFER_SERVER_ACTIVE_ERASING);
         break;
       }
 
       switch (s) {
         case SL_STATUS_OK:
-          sl_btmesh_mbt_server_transfer_start_rsp(BTMESH_BLOB_TRANSFER_SERVER_MAIN,
+          sl_btmesh_mbt_server_transfer_start_rsp(self->config->elem_index,
                                                   sl_btmesh_mbt_server_status_success);
 #if SL_BTMESH_BLOB_TRANSFER_START_CALLBACK_CFG_VAL
           // Notify user about transfer start
-          sl_btmesh_blob_transfer_server_transfer_start(&blob_transfer_server.blob_id);
+          sl_btmesh_blob_transfer_server_transfer_start(&self->blob_id);
 #endif // SL_BTMESH_BLOB_TRANSFER_START_CALLBACK_CFG_VAL
-          blob_transfer_server.state.transfer = 1;
+          self->state.transfer = 1;
           break;
 
         default:
-          sl_btmesh_mbt_server_transfer_start_rsp(BTMESH_BLOB_TRANSFER_SERVER_MAIN,
+          sl_btmesh_mbt_server_transfer_start_rsp(self->config->elem_index,
                                                   sl_btmesh_mbt_server_status_internal_error);
-          blob_transfer_server_state_change(IDLE_INACTIVE);
+          blob_transfer_server_state_change(self, SLI_BTMESH_BLOB_TRANSFER_SERVER_IDLE_INACTIVE);
           break;
       }
       break;
-      case ACTIVE_ERASING:
-      case ACTIVE_ERASING_INVALID:
-        blob_transfer_server.state.active = 1;
-        blob_transfer_server.state.erasing = 1;
-        blob_transfer_server.state.erasing_invalid = 1;
+      case SLI_BTMESH_BLOB_TRANSFER_SERVER_ACTIVE_ERASING:
+      case SLI_BTMESH_BLOB_TRANSFER_SERVER_ACTIVE_ERASING_INVALID:
+        self->state.active = 1;
+        self->state.erasing = 1;
+        self->state.erasing_invalid = 1;
         sl_btmesh_blob_storage_delete_invalid_slots_start();
         break;
-      case ACTIVE_ERASING_UNMANAGED:
-        blob_transfer_server.state.active = 1;
-        blob_transfer_server.state.erasing = 1;
-        blob_transfer_server.state.erasing_unmanaged = 1;
+      case SLI_BTMESH_BLOB_TRANSFER_SERVER_ACTIVE_ERASING_UNMANAGED:
+        self->state.active = 1;
+        self->state.erasing = 1;
+        self->state.erasing_unmanaged = 1;
         sl_btmesh_blob_storage_delete_unmanaged_slots_start();
         break;
     }
@@ -515,26 +483,32 @@ static void blob_transfer_server_state_change(blob_transfer_server_state_t state
 
 void sl_btmesh_blob_transfer_server_step_handle(void)
 {
-  if (1 == blob_transfer_server.state.erasing) {
-    switch (sl_btmesh_blob_storage_get_erase_error_code()) {
-      case SL_BTMESH_BLOB_STORAGE_DELETE_SUCCESS:
-        blob_transfer_server_state_change(ACTIVE_TRANSFER);
-        break;
-      case SL_BTMESH_BLOB_STORAGE_DELETE_FAILED:
-      case SL_BTMESH_BLOB_STORAGE_DELETE_INACTIVE:
-        // If the delete failed or the last delete operation didn't find any
-        // invalid or unmanaged slot to delete
-        if (blob_transfer_server.state.erasing_invalid == 1) {
-          blob_transfer_server_state_change(ACTIVE_ERASING_UNMANAGED);
-        } else if (blob_transfer_server.state.erasing_unmanaged == 1) {
-          sl_btmesh_mbt_server_transfer_start_rsp(BTMESH_BLOB_TRANSFER_SERVER_MAIN,
-                                                  sl_btmesh_mbt_server_status_storage_limit);
-          blob_transfer_server_state_change(IDLE_INACTIVE);
-        }
-        break;
-      default:
-        // empty
-        break;
+  for (uint16_t inst_idx = 0; inst_idx < SLI_BTMESH_BLOB_TRANSFER_SERVER_COUNT; inst_idx++) {
+    sli_btmesh_blob_transfer_server_t *const self =
+      sli_btmesh_blob_transfer_server_get_by_inst_index(inst_idx);
+    assert_not_null(self);
+
+    if (1 == self->state.erasing) {
+      switch (sl_btmesh_blob_storage_get_erase_error_code()) {
+        case SL_BTMESH_BLOB_STORAGE_DELETE_SUCCESS:
+          blob_transfer_server_state_change(self, SLI_BTMESH_BLOB_TRANSFER_SERVER_ACTIVE_TRANSFER);
+          break;
+        case SL_BTMESH_BLOB_STORAGE_DELETE_FAILED:
+        case SL_BTMESH_BLOB_STORAGE_DELETE_INACTIVE:
+          // If the delete failed or the last delete operation didn't find any
+          // invalid or unmanaged slot to delete
+          if (self->state.erasing_invalid == 1) {
+            blob_transfer_server_state_change(self, SLI_BTMESH_BLOB_TRANSFER_SERVER_ACTIVE_ERASING_UNMANAGED);
+          } else if (self->state.erasing_unmanaged == 1) {
+            sl_btmesh_mbt_server_transfer_start_rsp(self->config->elem_index,
+                                                    sl_btmesh_mbt_server_status_storage_limit);
+            blob_transfer_server_state_change(self, SLI_BTMESH_BLOB_TRANSFER_SERVER_IDLE_INACTIVE);
+          }
+          break;
+        default:
+          // empty
+          break;
+      }
     }
   }
 }

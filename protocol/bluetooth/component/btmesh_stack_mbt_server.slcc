@@ -3,7 +3,7 @@ label: "BLOB Transfer Server Model"
 package: "Btmesh"
 description: "Provides Bluetooth mesh BLOB Transfer Server model. It is used to receive large binary objects from other nodes in the network."
 category: "Bluetooth Mesh|Stack|Models|DFU"
-quality: "evaluation"
+quality: "production"
 root_path: "protocol/bluetooth"
 
 requires:

@@ -46,4 +46,4 @@ template_contribution:
     value: uartdrv_eusart
 documentation:
     docset: gecko-platform
-    document: driver/api/group-uartdrv
+    document: platform-driver/uartdrv

@@ -15,7 +15,7 @@ filter:
   - name: "Device Type"
     value: ["NCP"]
   - name: "Project Difficulty"
-    value: ["Beginner"]  
+    value: ["Beginner"]
 
 component:
   - id: app_assert
@@ -56,6 +56,7 @@ component:
   - id: btmesh_stack_relay
   - id: btmesh_stack_remote_provisioning_client
   - id: btmesh_stack_remote_provisioning_server
+  - id: btmesh_stack_sar_config_client
   - id: btmesh_stack_sar_config_server
   - id: btmesh_stack_scene_server
   - id: btmesh_stack_scene_client
@@ -127,7 +128,7 @@ configuration:
     value: "4"
   - name: SL_BTMESH_CONFIG_MAX_PROVISIONED_DEVICES
     value: "16"
-  - name: SL_BTMESH_CONFIG_MAX_PROV_BEARERS 
+  - name: SL_BTMESH_CONFIG_MAX_PROV_BEARERS
     value: "3"
   - name: SL_HEAP_SIZE
     value: "0xa000"

@@ -22,6 +22,9 @@ include:
   - path: "protocol/flex/csp"
     file_list:
       - path: "csp-ncp-utilities.h"
+  - path: "protocol/flex/ncp"
+    file_list:
+      - path: "ncp-init.h"
 
 source:
   - path: "protocol/flex/ncp/ncp-common.c"
@@ -30,3 +33,15 @@ source:
 
 define:
   - name: "CONNECT_NCP"
+
+template_contribution:
+  - name: event_handler
+    value:
+      event: stack_init
+      include: ncp/ncp-init.h
+      handler: sli_connect_init_ncp_security
+    priority: -9000
+  - name: event_system
+    value:
+      event_control: "sl_connect_ncp_security_init_event"
+      event_handler: "sli_connect_ncp_key_loader_handler"

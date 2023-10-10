@@ -49,4 +49,4 @@ template_contribution:
     value: lfxo
 documentation:
   docset: gecko-platform
-  document: service/api/group-device-init-lfxo
+  document: platform-service/device-init-lfxo

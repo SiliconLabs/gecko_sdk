@@ -47,6 +47,6 @@
 
 // <<< end of configuration section >>>
 
-#define SL_BT_CONFIG_MAX_CONNECTIONS                                               (4)
+#define SL_BT_CONFIG_MAX_CONNECTIONS                                               (8)
 
 #endif // SL_BT_OTS_CLIENT_CONFIG_H

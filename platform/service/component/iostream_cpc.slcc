@@ -2,9 +2,9 @@ id: iostream_cpc
 package: platform
 label: "IO Stream: CPC"
 description: >
-  Instantiate the driver for using IO Stream over the Co-Processor 
+  Instantiate the driver for using IO Stream over the Co-Processor
   Communication (CPC) protocol. Note that the physical link used
-  to transmit the data can be selected via the configuration of 
+  to transmit the data can be selected via the configuration of
   CPC.
 category: Services|IO Stream|Driver
 quality: production
@@ -47,4 +47,4 @@ template_contribution:
       handler: sl_iostream_instance_cpc_info
 documentation:
     docset: gecko-platform
-    document: service/api/group-iostream-cpc
+    document: platform-service/iostream-cpc

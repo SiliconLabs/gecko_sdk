@@ -2,11 +2,11 @@ id: memlcd_custom
 package: platform
 label: Custom Memory LCD Driver
 description: >
-  This component contains functions that can be redefined to implement a 
-  custom memory LCD interface manually. The "Custom Memory LCD Display" 
+  This component contains functions that can be redefined to implement a
+  custom memory LCD interface manually. The "Custom Memory LCD Display"
   component is required and automatically installed with this component.
-  This component replaces the "Memory LCD  with usart SPI driver" and "Memory 
-  LCD with eusart SPI driver" components that are already fully implemented 
+  This component replaces the "Memory LCD  with usart SPI driver" and "Memory
+  LCD with eusart SPI driver" components that are already fully implemented
   and functionnal.
 category: Platform|Board Drivers|Memory LCD|Peripheral Driver
 quality: production
@@ -33,4 +33,4 @@ template_contribution:
     value: memlcd_custom
 documentation:
     docset: gecko-platform
-    document: hardware-driver/api/group-memlcd_custom
+    document: platform-hardware-driver/memlcd_custom

@@ -45,6 +45,10 @@
 #ifndef OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
 #define OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE   0
 #endif
+// <q>  CSL Scheduling Uncertainty (±10 us units)
+#ifndef SL_OPENTHREAD_CSL_TX_UNCERTAINTY
+#define SL_OPENTHREAD_CSL_TX_UNCERTAINTY            12
+#endif
 // <q>  DUA (Domain Unicast Address)
 #ifndef OPENTHREAD_CONFIG_DUA_ENABLE
 #define OPENTHREAD_CONFIG_DUA_ENABLE                1

@@ -9,18 +9,23 @@ description: >
   This component is prepared for integration into SOC applications.
 
   The Initiator uses this model to retrieve the information about the firmware
-  subsystems installed on the Updating node, and to get the location of the new
-  firmware images. The Initiator receives the list of Updating nodes from the
+  subsystems installed on the Target node, and to get the location of the new
+  firmware images. The Initiator receives the list of Target nodes from the
   higher-layer application.
 
   The Distributor uses this model to start a firmware image transfer to the
-  Updating nodes. The Distributor receives the list of Updating nodes from the
+  Target nodes. The Distributor receives the list of Target nodes from the
   Initiator. The Distributor uses the procedures on the Firmware Update Client
   model with the inputs to these procedures being chosen by the Firmware
   Distribution Server.
+
+  This is a No-Code component.
 category: "Bluetooth Mesh|Models|Firmware Update"
 quality: production
 root_path: app/btmesh/common/btmesh_firmware_update_client
+tag:
+  - No-Code
+
 config_file:
   - path: btmesh_firmware_update_client.dcd
     directory: btmeshconf

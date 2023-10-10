@@ -57,9 +57,10 @@
 // -------------------------------------
 // TRNG
 
-#if defined(SLI_MBEDTLS_DEVICE_HSE)  \
-  || defined(SLI_MBEDTLS_DEVICE_VSE) \
-  || defined(SLI_MBEDTLS_DEVICE_S1_WITH_TRNG)
+#if defined(SLI_MBEDTLS_DEVICE_HSE)           \
+  || defined(SLI_MBEDTLS_DEVICE_VSE)          \
+  || defined(SLI_MBEDTLS_DEVICE_S1_WITH_TRNG) \
+  || defined(SLI_MBEDTLS_DEVICE_SI91X)
   #define SLI_PSA_DRIVER_FEATURE_TRNG
 #endif
 

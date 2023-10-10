@@ -32,7 +32,8 @@ try:
 except ImportError:
     pass
 
-LEVELS = {'DEBUG': logging.DEBUG,
+LEVELS = {'NOTSET': logging.NOTSET,
+          'DEBUG': logging.DEBUG,
           'INFO' : logging.INFO,
           'WARNING' : logging.WARNING,
           'ERROR': logging.ERROR,
@@ -49,10 +50,10 @@ level = logging.INFO
 
 _logger_list = {}
 
-def log(*args, **kwargs):
+def log(*args, _half_indent_log :bool=False, **kwargs):
     ''' Print with 1 tab + 1 whitespace indentation '''
     args = [arg.replace('\n', '\n\t ') if isinstance(arg, str) else arg for arg in args]
-    print('\t', *args, file=sys.stdout if stdout else sys.stderr, **kwargs)
+    print('\t' if not _half_indent_log else 3*' ', *args, file=sys.stdout if stdout else sys.stderr, **kwargs)
 
 class StreamHandler(logging.StreamHandler):
     def __init__(self):
@@ -68,12 +69,29 @@ class StreamHandler(logging.StreamHandler):
         self.setLevel(logging.NOTSET)
 
 def getLogger(name="AP "):
-    if name in _logger_list:
-        return _logger_list[name]
     logger = logging.Logger(name)
     c_handler = StreamHandler()
-    logger.propagate = False
+    logger.propagate = True
     logger.addHandler(c_handler)
     logger.setLevel(level)
     _logger_list[name] = logger
-    return logger
+    return _logger_list[name]
+
+def setLogLevel(new_level: LEVELS):
+    global level
+    global _logger_list
+    level = new_level
+    if level != logging.NOTSET:
+        basic_level = logging.CRITICAL
+    else:
+        basic_level = level
+    logging.basicConfig(force=True, level=basic_level, datefmt='%d/%b %H:%M:%S', format='\r%(asctime)s.%(msecs)03d: %(name)-3.3s - %(levelname)-8s - %(message)s')
+    logging.disable(logging.NOTSET)
+    for logger in _logger_list:
+        logging.Logger(logger).setLevel(level)
+
+def logLevelName():
+    return logging.getLevelName(level)
+
+def logLevel():
+    return level

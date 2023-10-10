@@ -2,15 +2,15 @@ id: cpc_secondary
 label: Secondary Device (Co-Processor)
 package: platform
 description: >
-  Co-Processor Communication (CPC) allows for communication between a Primary 
+  Co-Processor Communication (CPC) allows for communication between a Primary
   and a secondary device using a single physical link. Both devices can have
   multiple endpoints that both produce and consume data and CPC will handle
-  the multiplexing/demultiplexing of the data to the target. CPC also allows 
-  for data encryption, mitigating the risks of transmitting data on an 
+  the multiplexing/demultiplexing of the data to the target. CPC also allows
+  for data encryption, mitigating the risks of transmitting data on an
   unsecured physical data link.
 
-  This component implements the CPC Secondary device, allowing it to communicate 
-  to a Primary device. 
+  This component implements the CPC Secondary device, allowing it to communicate
+  to a Primary device.
 category: Services|Co-Processor Communication|Secondary Device
 quality: production
 root_path: platform/service/cpc
@@ -50,4 +50,4 @@ template_contribution:
 
 documentation:
     docset: gecko-platform
-    document: service/api/group-cpc
+    document: platform-cpc/cpc

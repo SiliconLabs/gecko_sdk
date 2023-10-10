@@ -43,6 +43,13 @@
     {% endfor %}
 {% endfor %}
 
+{% for elem in dcd.elements %}
+    {% set index = loop.index0 %}
+    {% for macro in elem.group_macros %}
+#define {{macro}} {{index}}
+    {% endfor %}
+{% endfor %}
+
 {% for model in dcd.unique_vendor_models %}
 #define {{model.macro_name}}_CID {{ u16tohex(model.cid) }}
 #define {{model.macro_name}}_MID {{ u16tohex(model.mid) }}

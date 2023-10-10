@@ -20,31 +20,31 @@ requires:
 documentation:
   docset: gecko-platform
   document:
-    - page: emlib/api/efr32xg1/group-smu
+    - page: platform-emlib-efr32xg1/smu
       condition: [device_sdid_80]
-    - page: emlib/api/efr32xg12/group-smu
+    - page: platform-emlib-efr32xg12/smu
       condition: [device_sdid_84]
-    - page: emlib/api/efr32xg13/group-smu
+    - page: platform-emlib-efr32xg13/smu
       condition: [device_sdid_89]
-    - page: emlib/api/efr32xg14/group-smu
+    - page: platform-emlib-efr32xg14/smu
       condition: [device_sdid_95]
-    - page: emlib/api/efm32gg11/group-smu
+    - page: platform-emlib-efm32gg11/smu
       condition: [device_sdid_100]
-    - page: emlib/api/efm32tg11/group-smu
+    - page: platform-emlib-efm32tg11/smu
       condition: [device_sdid_103]
-    - page: emlib/api/efm32gg12/group-smu
+    - page: platform-emlib-efm32gg12/smu
       condition: [device_sdid_106]
-    - page: emlib/api/efr32xg21/group-smu
+    - page: platform-emlib-efr32xg21/smu
       condition: [device_sdid_200]
-    - page: emlib/api/efr32xg22/group-smu
+    - page: platform-emlib-efr32xg22/smu
       condition: [device_sdid_205]
-    - page: emlib/api/efr32xg23/group-smu
+    - page: platform-emlib-efr32xg23/smu
       condition: [device_sdid_210]
-    - page: emlib/api/efr32xg24/group-smu
+    - page: platform-emlib-efr32xg24/smu
       condition: [device_sdid_215]
-    - page: emlib/api/efr32xg25/group-smu
+    - page: platform-emlib-efr32xg25/smu
       condition: [device_sdid_220]
-    - page: emlib/api/efr32xg27/group-smu
+    - page: platform-emlib-efr32xg27/smu
       condition: [device_sdid_230]
-    - page: emlib/api/efr32xg28/group-smu
+    - page: platform-emlib-efr32xg28/smu
       condition: [device_sdid_235]

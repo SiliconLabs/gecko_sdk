@@ -91,7 +91,7 @@ void emAfPluginCmsisRtosInitTasks(void)
     0,
     NULL,
     (EMBER_AF_PLUGIN_CMSIS_RTOS_CONNECT_STACK_SIZE * sizeof(void *)) & 0xFFFFFFF8u,
-    EMBER_AF_PLUGIN_CMSIS_RTOS_CONNECT_STACK_PRIO,
+    (osPriority_t)EMBER_AF_PLUGIN_CMSIS_RTOS_CONNECT_STACK_PRIO,
     0,
     0
   };
@@ -114,7 +114,7 @@ void emAfPluginCmsisRtosInitTasks(void)
     0,
     NULL,
     (EMBER_AF_PLUGIN_CMSIS_RTOS_APP_FRAMEWORK_STACK_SIZE * sizeof(void *)) & 0xFFFFFFF8u,
-    EMBER_AF_PLUGIN_CMSIS_RTOS_APP_FRAMEWORK_PRIO,
+    (osPriority_t)EMBER_AF_PLUGIN_CMSIS_RTOS_APP_FRAMEWORK_PRIO,
     0,
     0
   };

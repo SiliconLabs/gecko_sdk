@@ -55,20 +55,6 @@ void sli_zigbee_af_initCallback(uint8_t init_level)
                      halGetResetInfo(),
                      halGetResetString());
 
-#if defined(EXTENDED_RESET_INFO)
-  emberAfCorePrintln("Extended Reset info: 0x%2X (%p)",
-                     halGetExtendedResetInfo(),
-                     halGetExtendedResetString());
-
-  if (halResetWasCrash()) {
-    // We pass port 0 here though this parameter is unused in the legacy HAL
-    // version of the diagnostic code.
-    halPrintCrashSummary(0);
-    halPrintCrashDetails(0);
-    halPrintCrashData(0);
-  }
-#endif // EXTENDED_RESET_INFO
-
   // This will initialize the stack of networks maintained by the framework,
   // including setting the default network.
   sli_zigbee_af_initializeNetworkIndexStack();

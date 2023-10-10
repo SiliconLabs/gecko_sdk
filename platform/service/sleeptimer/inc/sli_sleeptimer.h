@@ -70,6 +70,16 @@ extern "C" {
 #endif
 
 /*******************************************************************************
+ * Hardware Abstraction Layer to perform initialization related to Power Manager.
+ ******************************************************************************/
+__WEAK void sli_sleeptimer_hal_power_manager_integration_init(void);
+
+/*******************************************************************************
+ * Hardware Abstraction Layer to perform initialization related to HFXO Manager.
+ ******************************************************************************/
+__WEAK void sli_sleeptimer_hal_hfxo_manager_integration_init(void);
+
+/*******************************************************************************
  * Hardware Abstraction Layer to get interrupt status.
  *
  * @param local_flag Internal interrupt flag.
@@ -94,7 +104,9 @@ bool sli_sleeptimer_is_power_manager_timer_next_to_expire(void);
  *       lowest possible energy mode is EM1, else lowest energy mode is
  *       determined by clock source.
  ******************************************************************************/
-__WEAK void sli_sleeptimer_set_pm_em_requirement(void);
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+void sli_sleeptimer_set_pm_em_requirement(void);
+#endif
 
 /***************************************************************************//**
  * @brief
@@ -103,6 +115,19 @@ __WEAK void sli_sleeptimer_set_pm_em_requirement(void);
  * @param flag Boolean value update_sleep_on_isr_exit will be set to.
  ******************************************************************************/
 void sli_sleeptimer_update_sleep_on_isr_exit(bool flag);
+
+/*******************************************************************************
+ * Gets the associated peripheral capture channel current value.
+ *
+ * @return Capture value
+ *         0 if capture channel is not valid
+ ******************************************************************************/
+uint32_t sli_sleeptimer_get_capture(void);
+
+/*******************************************************************************
+ * Resets the PRS signal triggered by the associated peripheral.
+ ******************************************************************************/
+void sli_sleeptimer_reset_prs_signal(void);
 
 #ifdef __cplusplus
 }

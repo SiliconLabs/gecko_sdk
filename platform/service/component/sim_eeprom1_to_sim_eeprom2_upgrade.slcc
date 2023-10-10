@@ -28,6 +28,6 @@ define:
 template_contribution:
   - name: component_catalog
     value: sim_eeprom1_to_sim_eeprom2_upgrade
-documentation:
-    docset: gecko-platform
-    document: service/api/group-simeeprom
+#documentation:
+#    docset: gecko-platform
+#    document: platform-service/simeeprom

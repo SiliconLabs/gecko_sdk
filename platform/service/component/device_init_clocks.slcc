@@ -37,4 +37,4 @@ template_contribution:
     condition: [device_series_2]
 documentation:
   docset: gecko-platform
-  document: service/api/group-device-init-clocks
+  document: platform-service/device-init-clocks

@@ -63,6 +63,7 @@
 - provides:
   - name: efr32mg21a020f512im32
   - name: device
+  - name: device_efx
   - name: device_series_2
   - name: device_sdid_200
   - name: device_generic_family_efr32xg21

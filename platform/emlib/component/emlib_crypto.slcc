@@ -23,17 +23,17 @@ requires:
 documentation:
   docset: gecko-platform
   document:
-    - page: emlib/api/efr32xg1/group-crypto
+    - page: platform-emlib-efr32xg1/crypto
       condition: [device_sdid_80]
-    - page: emlib/api/efr32xg12/group-crypto
+    - page: platform-emlib-efr32xg12/crypto
       condition: [device_sdid_84]
-    - page: emlib/api/efr32xg13/group-crypto
+    - page: platform-emlib-efr32xg13/crypto
       condition: [device_sdid_89]
-    - page: emlib/api/efr32xg14/group-crypto
+    - page: platform-emlib-efr32xg14/crypto
       condition: [device_sdid_95]
-    - page: emlib/api/efm32gg11/group-crypto
+    - page: platform-emlib-efm32gg11/crypto
       condition: [device_sdid_100]
-    - page: emlib/api/efm32tg11/group-crypto
+    - page: platform-emlib-efm32tg11/crypto
       condition: [device_sdid_103]
-    - page: emlib/api/efm32gg12/group-crypto
+    - page: platform-emlib-efm32gg12/crypto
       condition: [device_sdid_106]

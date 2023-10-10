@@ -27,6 +27,6 @@ define:
 template_contribution:
   - name: component_catalog
     value: legacy_printf
-documentation:
-    docset: gecko-platform
-    document: service/api/group-legacyprintf
+#documentation:
+#    docset: gecko-platform
+#    document: platform-service/legacyprintf

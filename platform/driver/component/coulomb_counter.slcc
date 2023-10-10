@@ -40,4 +40,4 @@ template_contribution:
     priority: 5000
 documentation:
     docset: gecko-platform
-    document: driver/api/group-coulomb-counter
+    document: platform-driver/coulomb-counter

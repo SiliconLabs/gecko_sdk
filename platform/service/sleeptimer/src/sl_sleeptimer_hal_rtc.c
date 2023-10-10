@@ -305,6 +305,26 @@ uint16_t sleeptimer_hal_get_clock_accuracy(void)
   return CMU_LF_ClockPrecisionGet(cmuClock_LFA);
 }
 
+/*******************************************************************************
+ * Hardware Abstraction Layer to get the capture channel value.
+ ******************************************************************************/
+uint32_t sleeptimer_hal_get_capture(void)
+{
+  // Invalid for RTC peripheral
+  EFM_ASSERT(0);
+  return 0;
+}
+
+/*******************************************************************************
+ * Hardware Abstraction Layer to reset PRS signal triggered by the associated
+ * peripheral.
+ ******************************************************************************/
+void sleeptimer_hal_reset_prs_signal(void)
+{
+  // Invalid for RTC peripheral
+  EFM_ASSERT(0);
+}
+
 /***************************************************************************//**
  * Set lowest energy mode based on a project's configurations and clock source
  *
@@ -312,7 +332,6 @@ uint16_t sleeptimer_hal_get_clock_accuracy(void)
  *       lowest possible energy mode is EM1, else lowest energy mode is
  *       determined by clock source.
  ******************************************************************************/
-
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
 void sli_sleeptimer_set_pm_em_requirement(void)
 {
@@ -327,8 +346,8 @@ void sli_sleeptimer_set_pm_em_requirement(void)
   }
 #else
   switch ((CMU->LFACLKSEL & _CMU_LFACLKSEL_LFA_MASK) >> _CMU_LFACLKSEL_LFA_SHIFT) {
-    case CMU_LFCLKSEL_LFA_LFRCO:
-    case CMU_LFCLKSEL_LFA_LFXO:
+    case CMU_LFACLKSEL_LFA_LFRCO:
+    case CMU_LFACLKSEL_LFA_LFXO:
       sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM2);
       break;
     default:

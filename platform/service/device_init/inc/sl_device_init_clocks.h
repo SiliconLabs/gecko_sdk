@@ -32,6 +32,10 @@
 
 #include "sl_status.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @addtogroup device_init Device Initialization
  * @brief Device Initialization
@@ -109,5 +113,9 @@ sl_status_t sl_device_init_clocks(void);
  * @} device_init_clocks
  * @} device_init
  */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // SL_DEVICE_INIT_CLOCKS_H

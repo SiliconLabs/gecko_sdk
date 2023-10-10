@@ -595,7 +595,6 @@ static void cmd_dequeue(void)
 {
   CORE_DECLARE_IRQ_STATE;
   CORE_ENTER_ATOMIC();
-  memset((void *)cmd.buf, 0, (size_t)cmd.len);
   cmd.len = 0;
   cmd_clr_available();
   CORE_EXIT_ATOMIC();
@@ -627,7 +626,6 @@ static void evt_dequeue(void)
 {
   CORE_DECLARE_IRQ_STATE;
   CORE_ENTER_ATOMIC();
-  memset((void *)evt.buf, 0, sizeof(evt.buf));
   evt.len = 0;
   evt_clr_available();
   CORE_EXIT_ATOMIC();

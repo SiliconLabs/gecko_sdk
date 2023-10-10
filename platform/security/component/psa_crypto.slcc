@@ -47,6 +47,11 @@ provides:
 
 requires:
   - name: device
+    condition: [device_series_0]
+  - name: device
+    condition: [device_series_1]
+  - name: device
+    condition: [device_series_2]
   - name: mbedtls_core
   - name: psa_crypto_config
   - name: psa_crypto_source

@@ -14,9 +14,9 @@
   - name: SL_KIT_NAME
     value: '"XG28-EK2705A"'
   - name: SL_KIT_REV
-    value: '"A00"'
+    value: '"A01"'
 - tag:
   - kit:opn:xG28-EK2705A
   - kit:pn:EK2705
   - kit:variant:A
-  - kit:revision:A00
+  - kit:revision:A01

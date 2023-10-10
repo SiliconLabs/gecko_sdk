@@ -97,13 +97,12 @@ pub_tx_int_ms_default = 0
 #     characters (-/:).
 #   - The SIG model name can be specified by special model name which contains
 #     underscore (_) characters instead of spaces.
-profile_updating_node_sub_mdls = FIRMWARE_UPDATE_SERVER, BLOB_TRANSFER_SERVER
-profile_updating_node_auto_bind = true
-profile_updating_node_help = Configuration for updating nodes.
+profile_target_node_sub_mdls = FIRMWARE_UPDATE_SERVER, BLOB_TRANSFER_SERVER
+profile_target_node_auto_bind = true
+profile_target_node_help = Configuration for target nodes.
 
-profile_distributor_sub_mdls = FIRMWARE_UPDATE_SERVER, BLOB_TRANSFER_SERVER
 profile_distributor_bind_mdls = FIRMWARE_DISTRIBUTION_SERVER, FIRMWARE_UPDATE_CLIENT,
-    BLOB_TRANSFER_CLIENT
+    BLOB_TRANSFER_CLIENT, BLOB_TRANSFER_SERVER
 profile_distributor_auto_bind = true
 profile_distributor_help = Configuration for distributor.
 
@@ -184,6 +183,12 @@ retry_auto_unicast_default = False
 
 
 [conf]
+# If Strict Auto Configuration is turned on and an auto configuration procedure
+# fails with error then an error is raised and the auto configuration is stopped.
+# Otherwise the failing configuration procedure is displayed on the UI and the
+# auto configuration continues.
+auto_conf_strict = true
+
 # Default maximum number of additional Config Node Reset messages which are sent
 # until the Config Node Reset Status message is received from the remote node.
 # Note: it is possible that the Config Node Reset or Config Node Reset Status
@@ -278,6 +283,8 @@ auto_conf_dcd_query = true
 
 # If Default TTL Auto Configuration is true then the Default TTL state is
 # configured on each node immediately upon their provisioning into the network.
+# The local Default TTL state is configured on the Provisioner as well when
+# the network is created.
 auto_conf_default_ttl = true
 
 # Default value of Default TTL determines TTL value used when sending messages.
@@ -297,20 +304,134 @@ relay_retx_count_default = 2
 relay_retx_interval_ms_default = 10
 
 # If Network Transmit Auto Configuration is true then the Network Transmit state
-# is configured on each node immediately upon their provisioning into the network.
+# is configured with the specific network_tx default configuration options on
+# each node immediately upon their provisioning into the network.
+# The local Network Transmit state is configured on the Provisioner as well when
+# the network is created.
 # Network Transmit is a composite state that controls the number and timing of
 # the transmissions of Network PDUs originating from a node.
 auto_conf_network_tx = true
 
-# Default network transmit count controls the number of transmissions of Network
+# Default Network Transmit Count controls the number of transmissions of Network
 # PDUs that originate from the node.
 # Valid values range from 1 to 8.
-network_tx_count_default = 2
+network_tx_count_default = 1
 
 # Default interval in milliseconds between network PDU transmissions which
 # originates from the same nodes.
 # Valid values range from 10 ms to 320 ms, with a resolution of 10 ms.
 network_tx_interval_ms_default = 10
+
+# If Segmentation and Reassembly Auto Configuration is true then the SAR
+# Transmitter and Receiver states are configured with specific sar_tx and
+# sar_rx default configuration options on each node immediately upon their
+# provisioning into the network.
+# The local SAR Transmitter and Receiver states are configured on the Provisioner
+# as well when the network is created.
+# The SAR Transmitter state is a composite state that controls the number and
+# timing of transmissions of segmented messages.
+# The SAR Receiver state is a composite state that controls the number and
+# timing of Segment Acknowledgment transmissions and the discarding of
+# reassembly of a segmented message.
+auto_conf_sar = true
+
+# Default SAR Transmitter Segment Interval Step controls the interval between
+# transmissions of segments of a segmented message in milliseconds.
+# The value is the range of 10ms to 160ms in 10ms steps, intermediate values are
+# rounded down to the nearest multiple of 10.
+# Default value is 20ms in specification.
+sar_tx_segment_interval_step_default = 20
+
+# Default SAR Transmitter Unicast Retransmission Count controls the maximum number
+# of transmissions of segments of segmented messages to a unicast destination.
+# Valid range is 0 - 15, where 0 represents a single transmission.
+# The default value is 2 in specification, resulting in 3 transmissions total.
+sar_tx_unicast_retrans_count_default = 7
+
+# Default SAR Transmitter Unicast Retransmissions Without Progress Count controls
+# the maximum number of retransmissions of segments of segmented messages to a
+# unicast destination without progress (without marking newly marking any
+# segments acknowledged).
+# Valid range is 0 - 15, where 0 represents a single transmission.
+# The default value is 2 in specification, resulting in 3 transmissions.
+# Value of this state should be set to a value greater by two or more than the
+# value of the SAR Receiver Acknowledgement Retransmissions Count on a peer node.
+# This helps prevent the SAR Transmitter from abandoning the SAR prematurely.
+sar_tx_unicast_retrans_wo_progress_count_default = 2
+
+# Default SAR Transmitter Unicast Retransmissions Interval Step state controls
+# the minimum interval between retransmissions of segments of a segmented message
+# for a destination that is a unicast address in 25ms steps.
+# Valid range is 25 - 400ms, intermediate values are rounded down to the nearest
+# multiple of 25. Default value is 200ms in specification.
+sar_tx_unicast_retrans_interval_step_default = 200
+
+# Default SAR Transmitter Unicast Retransmissions Interval Increment state
+# controls the incremental component (TTL) of the interval between retransmissions
+# of segments of a segmented message for a destination that is a unicast address
+# in 25ms steps.
+# Valid range is 25 - 400ms, intermediate values are rounded down to the nearest
+# multiple of 25. Default value is 50ms in specification.
+sar_tx_unicast_retrans_interval_increment_default = 50
+
+# Default SAR Transmitter Multicast Retransmissions Count state controls the
+# maximum number of transmissions of segments of segmented messages to a group
+# address or a virtual address.
+# Valid range is 0 - 15, where 0 represents a single transmission.
+# The default value is 1 in specification, resulting in 2 transmissions.
+# WARNING! The BLOB Transfer procedure has a high-level retransmission logic
+# which detects missing chunks and retransmits the missing ones.
+# It is recommended to disable multicast retransmissions in Lower Transport
+# layer in low noise environment because it slows down the multicast BLOB
+# Transfer significantly, and consequently multicast retransmissions are
+# disabled by default.
+# More multicast retransmissions can be beneficial during BLOB Transfer for
+# chunks with many segments in noisy environment because one missing chunk
+# segment leads to the loss of whole BLOB Chunk Transfer access message.
+sar_tx_multicast_retrans_count_default = 0
+
+# Default SAR Transmitter Multicast Retransmissions Interval Step state controls
+# the interval between retransmissions of segments of a segmented message for a
+# destination that is a group address or a virtual address in 25ms steps.
+# Valid range is 25-400ms, intermediate values are rounded down to the nearest
+# multiple of 25. Default values is 100ms in specification.
+sar_tx_multicast_retrans_interval_step_default = 100
+
+# Default SAR Receiver Segments Threshold state represents the size of a
+# segmented message in number of segments above which the Segment Acknowledgment
+# messages are enabled.
+# Valid range is 0 - 31, the default value is 3 (segments) in specification.
+sar_rx_segments_threshold_default = 3
+
+# Default SAR Receiver Acknowledgment Delay Increment state control the interval
+# between the reception of a new segment of a segmented message for a destination
+# that is a unicast address and the transmission of the Segment Acknowledgment
+# for that message.
+# Formula: acknowledgment delay increment=SAR Acknowledgment Delay Increment+1.5
+# Valid range is 0 - 7, default is 2 in specification resulting in 3.5 segment
+# transmission interval steps.
+sar_rx_ack_delay_increment_default = 2
+
+# Default SAR Receiver Discard Timeout state controls the time that the lower
+# transport layer waits after receiving unique segments of a segmented message
+# before discarding that segmented message in 5s steps.
+# Valid range is 5000 - 80000ms, intermediate values are rounded down to the
+# nearest multiple of 5s. The default value is 10000ms in specification.
+sar_rx_discard_timeout_default = 10000
+
+# Default SAR Receiver Segment Interval Step state indicates the interval between
+# received segments of a segmented message in milliseconds.
+# This is used to control rate of transmission of Segment Acknowledgment messages.
+# Valid range is 10 - 160, intermediate values are rounded down to the nearest
+# multiple of 10. The default value is 20ms in specification.
+sar_rx_segment_interval_step_default = 20
+
+# Default SAR Receiver Acknowledgment Retransmissions Count state controls the
+# maximum number of retransmissions of Segment Acknowledgment messages sent by
+# the lower transport layer.
+# Valid range is 0 - 3. The default value is 1 in specification, representing
+# 1 retransmissions or 2 in total.
+sar_rx_ack_retrans_count_default = 2
 
 
 [dist_clt]
@@ -347,11 +468,11 @@ upload_timeout_base_default = 3
 upload_chunk_size_default = 53
 
 # The default appkey index used for the communication between the Distributor
-# and Updating Nodes.
+# and Target Nodes.
 dist_appkey_index_default = 0
 
 # The default TTL for the Distributor to use when communicating with the
-# Updating Nodes.
+# Target Nodes.
 dist_ttl_default = 5
 
 # The default timeout base used for FW distribution including FW update message
@@ -381,14 +502,14 @@ dist_retry_max_default = 5
 # Transfer Server on the Distributor.
 # This default retry interval is used for Metadata Check Procedure at the
 # beginning of Firmware Distribution procedure between Firmware Update Metadata
-# Check messages sent to the updating nodes.
+# Check messages sent to the target nodes.
 # Note: this default value is used unless a more specific configuration option
 # overrides it. See delete_retry_interval_default parameter in this file.
 dist_retry_interval_default = 1.0
 
 # Default interval in seconds between Firmware Update Firmware Metadata Check
 # messages when the corresponding status messages are not received from
-# the Firmware Update Server model of each selected low power updating nodes.
+# the Firmware Update Server model of each selected low power target nodes.
 # Note: This parameters affects the Firmware Metadata Check at the beginning
 # of the Firmware Distribution procedure.
 dist_retry_interval_lpn_default = 5.0
@@ -438,8 +559,8 @@ ttl_default = 5
 # Server side timeout is (10000 * (timeout_base + 1)) ms.
 timeout_base_default = 3
 
-# Maximum number of updating nodes which can be updated simultaneously
-max_updating_nodes = 8
+# Maximum number of target nodes which can be updated simultaneously
+max_target_nodes = 8
 
 # Default preferred chunk size during BLOB transfer phase of FW Update procedure.
 # The maximum chunk size is limited by the Max Chunk Size capabilities of
@@ -460,7 +581,7 @@ dfu_chunk_size_default = 53
 
 # Default maximum number of additional Firmware Update messages which are sent
 # until the corresponding Firmware Update messages are received from the Firmware
-# Update Server model of each selected updating nodes.
+# Update Server model of each selected target nodes.
 # This configuration option is used during Firmware Information Query and
 # Firmware Metadata Check procedures and it is not used during Standalone
 # Firmware Update procedure.
@@ -470,7 +591,7 @@ dfu_retry_max_default = 5
 
 # Default interval in seconds between Firmware Update and BLOB Transfer messages
 # when the corresponding status messages are not received from the Firmware
-# Update Server or BLOB Transfer Server model of each selected updating nodes.
+# Update Server or BLOB Transfer Server model of each selected target nodes.
 # This parameter affects those BLOB Transfers which are initiated by the
 # Standalone Firmware Update procedure.
 dfu_retry_interval_default = 1.0
@@ -478,7 +599,7 @@ dfu_retry_interval_default = 1.0
 # Default interval in seconds between Firmware Update and BLOB Transfer messages
 # when the corresponding status messages are not received from the Firmware
 # Update Server or BLOB Transfer Server model of each selected low power
-# updating nodes.
+# target nodes.
 # This parameter affects those BLOB Transfers which are initiated by the
 # Standalone Firmware Update procedure.
 dfu_retry_interval_lpn_default = 5.0
@@ -549,109 +670,6 @@ appkey0 = AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 
 # Name of the provisioner node in the BT Mesh database.
 prov_node_name = Provisioner
-
-# If SAR transmitter custom params enable is true then the local SAR transmitter
-# parameters are overridden by the specific sar_tx default configuration options.
-# The default values are set based on the BT Mesh stack default values.
-sar_tx_custom_local_params_enable = true
-
-# Default Segment Interval Step controls the interval between transmissions of
-# segments of a segmented message in milliseconds.
-# The value is the range of 10ms to 160ms in 10ms steps, intermediate values are
-# rounded down to the nearest multiple of 10.
-# Default value is 20ms in specification.
-sar_tx_segment_interval_step_default = 20
-
-# Default SAR Unicast Retransmission Count controls the maximum number of
-# transmissions of segments of segmented messages to a unicast destination.
-# Valid range is 0 - 15, where 0 represents a single transmission.
-# The default value is 2 in specification, resulting in 3 transmissions total.
-sar_tx_unicast_retrans_count_default = 7
-
-# Default SAR Unicast Retransmissions Without Progress Count controls the
-# maximum number of retransmissions of segments of segmented messages to a
-# unicast destination without progress (without marking newly marking any
-# segments acknowledged).
-# Valid range is 0 - 15, where 0 represents a single transmission.
-# The default value is 2 in specification, resulting in 3 transmissions.
-# The value of this state should be set to a value greater by two or more than
-# the value of the SAR Acknowledgement Retransmissions Count on a peer node.
-# This helps prevent the SAR transmitter from abandoning the SAR prematurely.
-sar_tx_unicast_retrans_wo_progress_count_default = 2
-
-# Default SAR Unicast Retransmissions Interval Step state controls the minimum
-#interval between retransmissions of segments of a segmented message for a
-# destination that is a unicast address in 25ms steps.
-# Valid range is 25 - 400ms, intermediate values are rounded down to the nearest
-# multiple of 25. Default value is 200ms in specification.
-sar_tx_unicast_retrans_interval_step_default = 200
-
-# Default SAR Unicast Retransmissions Interval Increment state controls the
-# incremental component of the interval between retransmissions of segments of
-# a segmented message for a destination that is a unicast address in 25ms steps.
-# Valid range is 25 - 400ms, intermediate values are rounded down to the nearest
-# multiple of 25. Default value is 50ms in specification.
-sar_tx_unicast_retrans_interval_increment_default = 50
-
-# Default SAR Multicast Retransmissions Count state controls the maximum number
-# of transmissions of segments of segmented messages to a group address or a
-# virtual address.
-# Valid range is 0 - 15, where 0 represents a single transmission.
-# The default value is 1 in specification, resulting in 2 transmissions.
-# WARNING! The BLOB Transfer procedure has a high-level retransmission logic
-# which detects missing chunks and retransmits the missing ones.
-# It is recommended to disable multicast retransmissions in Lower Transport layer
-# because it slows down the multicast BLOB Transfer significantly,
-# and consequently multicast retransmissions are disabled by default.
-sar_tx_multicast_retrans_count_default = 0
-
-# Default SAR Multicast Retransmissions Interval Step state controls the interval
-# between retransmissions of segments of a segmented message for a destination
-# that is a group address or a virtual address in 25ms steps.
-# Valid range is 25-400ms, intermediate values are rounded down to the nearest
-# multiple of 25. Default values is 100ms in specification.
-sar_tx_multicast_retrans_interval_step_default = 100
-
-# If SAR receiver custom params enable is true then the local SAR receiver
-# parameters are overridden by the specific sar_rx default configuration options.
-# The default values are set based on the BT Mesh stack default values.
-sar_rx_custom_local_params_enable = false
-
-# Default SAR Segments Threshold state represents the size of a segmented
-# message in number of segments above which the Segment Acknowledgment
-# messages are enabled.
-# Valid range is 0 - 31, the default value is 3 (segments) in specification.
-sar_rx_segments_threshold_default = 3
-
-# Default SAR Acknowledgment Delay Increment state control the interval between
-# the reception of a new segment of a segmented message for a destination that
-# is a unicast address and the transmission of the Segment Acknowledgment for
-# that message.
-# Formula: acknowledgment delay increment=SAR Acknowledgment Delay Increment+1.5
-# Valid range is 0 - 7, default is 2 in specification resulting in 3.5 segment
-# transmission interval steps.
-sar_rx_ack_delay_increment_default = 2
-
-# Default SAR Discard Timeout state controls the time that the lower transport
-# layer waits after receiving unique segments of a segmented message before
-# discarding that segmented message in 5s steps.
-# Valid range is 5000 - 80000ms, intermediate values are rounded down to the
-# nearest multiple of 5s. The default value is 10000ms in specification.
-sar_rx_discard_timeout_default = 10000
-
-# Default SAR Receiver Segment Interval Step state indicates the interval between
-# received segments of a segmented message in milliseconds.
-# This is used to control rate of transmission of Segment Acknowledgment messages.
-# Valid range is 10 - 160, intermediate values are rounded down to the nearest
-# multiple of 10. The default value is 20ms in specification.
-sar_rx_segment_interval_step_default = 20
-
-# Default SAR Acknowledgment Retransmissions Count state controls the maximum
-# number of retransmissions of Segment Acknowledgment messages sent by the lower
-# transport layer.
-# Valid range is 0 - 3. The default value is 1 in specification, representing
-# 1 retransmissions or 2 in total.
-sar_rx_ack_retrans_count_default = 2
 
 
 [persistence]
@@ -1094,6 +1112,8 @@ class BtmeshDfuAppConfCfg:
     def __init__(self, section: SectionProxy):
         self.section = section
         sect = section
+        # auto_conf_strict
+        self._auto_conf_strict = sect.getboolean("auto_conf_strict")
         # reset_node_retry_max_default
         self._reset_node_retry_max_default = sect.getint("reset_node_retry_max_default")
         # reset_node_retry_interval_default
@@ -1150,8 +1170,59 @@ class BtmeshDfuAppConfCfg:
         self._network_tx_interval_ms_default = sect.getint(
             "network_tx_interval_ms_default"
         )
+        # auto_conf_sar
+        self._auto_conf_sar = sect.getboolean("auto_conf_sar")
+        # sar_tx_segment_interval_step_default
+        self._sar_tx_segment_interval_step_default = sect.getint(
+            "sar_tx_segment_interval_step_default"
+        )
+        # sar_tx_unicast_retrans_count_default
+        self._sar_tx_unicast_retrans_count_default = sect.getint(
+            "sar_tx_unicast_retrans_count_default"
+        )
+        # sar_tx_unicast_retrans_wo_progress_count_default
+        self._sar_tx_unicast_retrans_wo_progress_count_default = sect.getint(
+            "sar_tx_unicast_retrans_wo_progress_count_default"
+        )
+        # sar_tx_unicast_retrans_interval_step_default
+        self._sar_tx_unicast_retrans_interval_step_default = sect.getint(
+            "sar_tx_unicast_retrans_interval_step_default"
+        )
+        # sar_tx_unicast_retrans_interval_increment_default
+        self._sar_tx_unicast_retrans_interval_increment_default = sect.getint(
+            "sar_tx_unicast_retrans_interval_increment_default"
+        )
+        # sar_tx_multicast_retrans_count_default
+        self._sar_tx_multicast_retrans_count_default = sect.getint(
+            "sar_tx_multicast_retrans_count_default"
+        )
+        # sar_tx_multicast_retrans_interval_step_default
+        self._sar_tx_multicast_retrans_interval_step_default = sect.getint(
+            "sar_tx_multicast_retrans_interval_step_default"
+        )
+        # sar_rx_segments_threshold_default
+        self._sar_rx_segments_threshold_default = sect.getint(
+            "sar_rx_segments_threshold_default"
+        )
+        # sar_rx_ack_delay_increment_default
+        self._sar_rx_ack_delay_increment_default = sect.getint(
+            "sar_rx_ack_delay_increment_default"
+        )
+        # sar_rx_discard_timeout_default
+        self._sar_rx_discard_timeout_default = sect.getint(
+            "sar_rx_discard_timeout_default"
+        )
+        # sar_rx_segment_interval_step_default
+        self._sar_rx_segment_interval_step_default = sect.getint(
+            "sar_rx_segment_interval_step_default"
+        )
+        # sar_rx_ack_retrans_count_default
+        self._sar_rx_ack_retrans_count_default = sect.getint(
+            "sar_rx_ack_retrans_count_default"
+        )
         # Log conf configuration
         sectname = sect.name
+        logger.debug(f"{sectname}:auto_conf_strict: {self.auto_conf_strict}")
         logger.debug(
             f"{sectname}:reset_node_retry_max_default: "
             f"{self.reset_node_retry_max_default}"
@@ -1194,106 +1265,205 @@ class BtmeshDfuAppConfCfg:
             f"{sectname}:silabs_retry_multicast_threshold_default: "
             f"{self.silabs_retry_multicast_threshold_default}"
         )
+        logger.debug(f"{sectname}:auto_conf_dcd_query: {self.auto_conf_dcd_query}")
+        logger.debug(f"{sectname}:auto_conf_default_ttl: {self.auto_conf_default_ttl}")
+        logger.debug(f"{sectname}:default_ttl_default: {self.default_ttl_default}")
         logger.debug(
-            f"{sectname}:auto_conf_dcd_query: " f"{self.auto_conf_dcd_query}"
-        )
-        logger.debug(
-            f"{sectname}:auto_conf_default_ttl: " f"{self.auto_conf_default_ttl}"
-        )
-        logger.debug(f"{sectname}:default_ttl_default: " f"{self.default_ttl_default}")
-        logger.debug(
-            f"{sectname}:relay_retx_count_default: " f"{self.relay_retx_count_default}"
+            f"{sectname}:relay_retx_count_default: {self.relay_retx_count_default}"
         )
         logger.debug(
             f"{sectname}:relay_retx_interval_ms_default: "
             f"{self.relay_retx_interval_ms_default}"
         )
+        logger.debug(f"{sectname}:auto_conf_network_tx: {self.auto_conf_network_tx}")
         logger.debug(
-            f"{sectname}:auto_conf_network_tx: " f"{self.auto_conf_network_tx}"
-        )
-        logger.debug(
-            f"{sectname}:network_tx_count_default: " f"{self.network_tx_count_default}"
+            f"{sectname}:network_tx_count_default: {self.network_tx_count_default}"
         )
         logger.debug(
             f"{sectname}:network_tx_interval_ms_default: "
             f"{self.network_tx_interval_ms_default}"
         )
+        logger.debug(f"{sectname}:auto_conf_sar: {self.auto_conf_sar}")
+        logger.debug(
+            f"{sectname}:sar_tx_segment_interval_step_default: "
+            f"{self.sar_tx_segment_interval_step_default}"
+        )
+        logger.debug(
+            f"{sectname}:sar_tx_unicast_retrans_count_default: "
+            f"{self.sar_tx_unicast_retrans_count_default}"
+        )
+        logger.debug(
+            f"{sectname}:sar_tx_unicast_retrans_wo_progress_count_default: "
+            f"{self.sar_tx_unicast_retrans_wo_progress_count_default}"
+        )
+        logger.debug(
+            f"{sectname}:sar_tx_unicast_retrans_interval_step_default: "
+            f"{self.sar_tx_unicast_retrans_interval_step_default}"
+        )
+        logger.debug(
+            f"{sectname}:sar_tx_unicast_retrans_interval_increment_default: "
+            f"{self.sar_tx_unicast_retrans_interval_increment_default}"
+        )
+        logger.debug(
+            f"{sectname}:sar_tx_multicast_retrans_count_default: "
+            f"{self.sar_tx_multicast_retrans_count_default}"
+        )
+        logger.debug(
+            f"{sectname}:sar_tx_multicast_retrans_interval_step_default: "
+            f"{self.sar_tx_multicast_retrans_interval_step_default}"
+        )
+        logger.debug(
+            f"{sectname}:sar_rx_segments_threshold_default: "
+            f"{self.sar_rx_segments_threshold_default}"
+        )
+        logger.debug(
+            f"{sectname}:sar_rx_ack_delay_increment_default: "
+            f"{self.sar_rx_ack_delay_increment_default}"
+        )
+        logger.debug(
+            f"{sectname}:sar_rx_discard_timeout_default: "
+            f"{self.sar_rx_discard_timeout_default}"
+        )
+        logger.debug(
+            f"{sectname}:sar_rx_segment_interval_step_default: "
+            f"{self.sar_rx_segment_interval_step_default}"
+        )
+        logger.debug(
+            f"{sectname}:sar_rx_ack_retrans_count_default: "
+            f"{self.sar_rx_ack_retrans_count_default}"
+        )
 
     @property
-    def reset_node_retry_max_default(self):
+    def auto_conf_strict(self):
+        return self._auto_conf_strict
+
+    @property
+    def reset_node_retry_max_default(self) -> int:
         return self._reset_node_retry_max_default
 
     @property
-    def reset_node_retry_interval_default(self):
+    def reset_node_retry_interval_default(self) -> float:
         return self._reset_node_retry_interval_default
 
     @property
-    def reset_node_retry_interval_lpn_default(self):
+    def reset_node_retry_interval_lpn_default(self) -> float:
         return self._reset_node_retry_interval_lpn_default
 
     @property
-    def reset_node_local_remove_on_retry_limit(self):
+    def reset_node_local_remove_on_retry_limit(self) -> bool:
         return self._reset_node_local_remove_on_retry_limit
 
     @property
-    def conf_retry_max_default(self):
+    def conf_retry_max_default(self) -> int:
         return self._conf_retry_max_default
 
     @property
-    def conf_retry_interval_default(self):
+    def conf_retry_interval_default(self) -> float:
         return self._conf_retry_interval_default
 
     @property
-    def conf_retry_interval_lpn_default(self):
+    def conf_retry_interval_lpn_default(self) -> float:
         return self._conf_retry_interval_lpn_default
 
     @property
-    def silabs_retry_max_default(self):
+    def silabs_retry_max_default(self) -> int:
         return self._silabs_retry_max_default
 
     @property
-    def silabs_retry_interval_default(self):
+    def silabs_retry_interval_default(self) -> float:
         return self._silabs_retry_interval_default
 
     @property
-    def silabs_retry_interval_lpn_default(self):
+    def silabs_retry_interval_lpn_default(self) -> float:
         return self._silabs_retry_interval_lpn_default
 
     @property
-    def silabs_retry_multicast_threshold_default(self):
+    def silabs_retry_multicast_threshold_default(self) -> int:
         return self._silabs_retry_multicast_threshold_default
 
     @property
-    def auto_conf_dcd_query(self):
+    def auto_conf_dcd_query(self) -> bool:
         return self._auto_conf_dcd_query
 
     @property
-    def auto_conf_default_ttl(self):
+    def auto_conf_default_ttl(self) -> bool:
         return self._auto_conf_default_ttl
 
     @property
-    def default_ttl_default(self):
+    def default_ttl_default(self) -> int:
         return self._default_ttl_default
 
     @property
-    def relay_retx_count_default(self):
+    def relay_retx_count_default(self) -> int:
         return self._relay_retx_count_default
 
     @property
-    def relay_retx_interval_ms_default(self):
+    def relay_retx_interval_ms_default(self) -> int:
         return self._relay_retx_interval_ms_default
 
     @property
-    def auto_conf_network_tx(self):
+    def auto_conf_network_tx(self) -> bool:
         return self._auto_conf_network_tx
 
     @property
-    def network_tx_count_default(self):
+    def network_tx_count_default(self) -> int:
         return self._network_tx_count_default
 
     @property
-    def network_tx_interval_ms_default(self):
+    def network_tx_interval_ms_default(self) -> int:
         return self._network_tx_interval_ms_default
+
+    @property
+    def auto_conf_sar(self) -> bool:
+        return self._auto_conf_sar
+
+    @property
+    def sar_tx_segment_interval_step_default(self) -> int:
+        return self._sar_tx_segment_interval_step_default
+
+    @property
+    def sar_tx_unicast_retrans_count_default(self) -> int:
+        return self._sar_tx_unicast_retrans_count_default
+
+    @property
+    def sar_tx_unicast_retrans_wo_progress_count_default(self) -> int:
+        return self._sar_tx_unicast_retrans_wo_progress_count_default
+
+    @property
+    def sar_tx_unicast_retrans_interval_step_default(self) -> int:
+        return self._sar_tx_unicast_retrans_interval_step_default
+
+    @property
+    def sar_tx_unicast_retrans_interval_increment_default(self) -> int:
+        return self._sar_tx_unicast_retrans_interval_increment_default
+
+    @property
+    def sar_tx_multicast_retrans_count_default(self) -> int:
+        return self._sar_tx_multicast_retrans_count_default
+
+    @property
+    def sar_tx_multicast_retrans_interval_step_default(self) -> int:
+        return self._sar_tx_multicast_retrans_interval_step_default
+
+    @property
+    def sar_rx_segments_threshold_default(self) -> int:
+        return self._sar_rx_segments_threshold_default
+
+    @property
+    def sar_rx_ack_delay_increment_default(self) -> int:
+        return self._sar_rx_ack_delay_increment_default
+
+    @property
+    def sar_rx_discard_timeout_default(self) -> int:
+        return self._sar_rx_discard_timeout_default
+
+    @property
+    def sar_rx_segment_interval_step_default(self) -> int:
+        return self._sar_rx_segment_interval_step_default
+
+    @property
+    def sar_rx_ack_retrans_count_default(self) -> int:
+        return self._sar_rx_ack_retrans_count_default
 
 
 class BtmeshDfuAppFwDistClientCfg:
@@ -1452,8 +1622,8 @@ class BtmeshDfuAppFwUpdateClientCfg:
         self._ttl_default = sect.getint("ttl_default")
         # timeout_base_default
         self._timeout_base_default = sect.getint("timeout_base_default")
-        # max_updating_nodes
-        self._max_updating_nodes = sect.getint("max_updating_nodes")
+        # max_target_nodes
+        self._max_target_nodes = sect.getint("max_target_nodes")
         # dfu_chunk_size_default
         self._dfu_chunk_size_default = sect.getint("dfu_chunk_size_default")
         # dfu_retry_max_default
@@ -1475,7 +1645,7 @@ class BtmeshDfuAppFwUpdateClientCfg:
         logger.debug(f"{sectname}:appkey_index_default: {self.appkey_index_default}")
         logger.debug(f"{sectname}:ttl_default: {self.ttl_default}")
         logger.debug(f"{sectname}:timeout_base_default: {self.timeout_base_default}")
-        logger.debug(f"{sectname}:max_updating_nodes: {self.max_updating_nodes}")
+        logger.debug(f"{sectname}:max_target_nodes: {self.max_target_nodes}")
         logger.debug(
             f"{sectname}:dfu_chunk_size_default: {self.dfu_chunk_size_default}"
         )
@@ -1510,8 +1680,8 @@ class BtmeshDfuAppFwUpdateClientCfg:
         return self._timeout_base_default
 
     @property
-    def max_updating_nodes(self):
-        return self._max_updating_nodes
+    def max_target_nodes(self):
+        return self._max_target_nodes
 
     @property
     def dfu_chunk_size_default(self):
@@ -1617,62 +1787,7 @@ class BtmeshDfuAppNetworkCfg:
         # prov_node_name
         self._prov_node_name = sect.get("prov_node_name")
         btmesh.util.validate_name(self.prov_node_name)
-        # sar_tx_custom_local_params_enable
-        self._sar_tx_custom_local_params_enable = sect.getboolean(
-            "sar_tx_custom_local_params_enable"
-        )
-        # sar_tx_segment_interval_step_default
-        self._sar_tx_segment_interval_step_default = sect.getint(
-            "sar_tx_segment_interval_step_default"
-        )
-        # sar_tx_unicast_retrans_count_default
-        self._sar_tx_unicast_retrans_count_default = sect.getint(
-            "sar_tx_unicast_retrans_count_default"
-        )
-        # sar_tx_unicast_retrans_wo_progress_count_default
-        self._sar_tx_unicast_retrans_wo_progress_count_default = sect.getint(
-            "sar_tx_unicast_retrans_wo_progress_count_default"
-        )
-        # sar_tx_unicast_retrans_interval_step_default
-        self._sar_tx_unicast_retrans_interval_step_default = sect.getint(
-            "sar_tx_unicast_retrans_interval_step_default"
-        )
-        # sar_tx_unicast_retrans_interval_increment_default
-        self._sar_tx_unicast_retrans_interval_increment_default = sect.getint(
-            "sar_tx_unicast_retrans_interval_increment_default"
-        )
-        # sar_tx_multicast_retrans_count_default
-        self._sar_tx_multicast_retrans_count_default = sect.getint(
-            "sar_tx_multicast_retrans_count_default"
-        )
-        # sar_tx_multicast_retrans_interval_step_default
-        self._sar_tx_multicast_retrans_interval_step_default = sect.getint(
-            "sar_tx_multicast_retrans_interval_step_default"
-        )
-        # sar_rx_custom_local_params_enable
-        self._sar_rx_custom_local_params_enable = sect.getboolean(
-            "sar_rx_custom_local_params_enable"
-        )
-        # sar_rx_segments_threshold_default
-        self._sar_rx_segments_threshold_default = sect.getint(
-            "sar_rx_segments_threshold_default"
-        )
-        # sar_rx_ack_delay_increment_default
-        self._sar_rx_ack_delay_increment_default = sect.getint(
-            "sar_rx_ack_delay_increment_default"
-        )
-        # sar_rx_discard_timeout_default
-        self._sar_rx_discard_timeout_default = sect.getint(
-            "sar_rx_discard_timeout_default"
-        )
-        # sar_rx_segment_interval_step_default
-        self._sar_rx_segment_interval_step_default = sect.getint(
-            "sar_rx_segment_interval_step_default"
-        )
-        # sar_rx_ack_retrans_count_default
-        self._sar_rx_ack_retrans_count_default = sect.getint(
-            "sar_rx_ack_retrans_count_default"
-        )
+
         # Log network configuration
         sectname = sect.name
         logger.debug(f"{sectname}:random_netkey: {self.random_netkey}")
@@ -1682,62 +1797,6 @@ class BtmeshDfuAppNetworkCfg:
             logger.debug(f"{sectname}:appkey{idx}: {appkey.hex().upper()}")
         logger.debug(f"{sectname}:appkey_cnt: {self.appkey_cnt}")
         logger.debug(f"{sectname}:prov_node_name: {self.prov_node_name}")
-        logger.debug(
-            f"{sectname}:sar_tx_custom_local_params_enable: "
-            f"{self.sar_tx_custom_local_params_enable}"
-        )
-        logger.debug(
-            f"{sectname}:sar_tx_segment_interval_step_default: "
-            f"{self.sar_tx_segment_interval_step_default}"
-        )
-        logger.debug(
-            f"{sectname}:sar_tx_unicast_retrans_count_default: "
-            f"{self.sar_tx_unicast_retrans_count_default}"
-        )
-        logger.debug(
-            f"{sectname}:sar_tx_unicast_retrans_wo_progress_count_default: "
-            f"{self.sar_tx_unicast_retrans_wo_progress_count_default}"
-        )
-        logger.debug(
-            f"{sectname}:sar_tx_unicast_retrans_interval_step_default: "
-            f"{self.sar_tx_unicast_retrans_interval_step_default}"
-        )
-        logger.debug(
-            f"{sectname}:sar_tx_unicast_retrans_interval_increment_default: "
-            f"{self.sar_tx_unicast_retrans_interval_increment_default}"
-        )
-        logger.debug(
-            f"{sectname}:sar_tx_multicast_retrans_count_default: "
-            f"{self.sar_tx_multicast_retrans_count_default}"
-        )
-        logger.debug(
-            f"{sectname}:sar_tx_multicast_retrans_interval_step_default: "
-            f"{self.sar_tx_multicast_retrans_interval_step_default}"
-        )
-        logger.debug(
-            f"{sectname}:sar_rx_custom_local_params_enable: "
-            f"{self.sar_rx_custom_local_params_enable}"
-        )
-        logger.debug(
-            f"{sectname}:sar_rx_segments_threshold_default: "
-            f"{self.sar_rx_segments_threshold_default}"
-        )
-        logger.debug(
-            f"{sectname}:sar_rx_ack_delay_increment_default: "
-            f"{self.sar_rx_ack_delay_increment_default}"
-        )
-        logger.debug(
-            f"{sectname}:sar_rx_discard_timeout_default: "
-            f"{self.sar_rx_discard_timeout_default}"
-        )
-        logger.debug(
-            f"{sectname}:sar_rx_segment_interval_step_default: "
-            f"{self.sar_rx_segment_interval_step_default}"
-        )
-        logger.debug(
-            f"{sectname}:sar_rx_ack_retrans_count_default: "
-            f"{self.sar_rx_ack_retrans_count_default}"
-        )
 
     @property
     def random_netkey(self) -> bool:
@@ -1762,62 +1821,6 @@ class BtmeshDfuAppNetworkCfg:
     @property
     def prov_node_name(self) -> str:
         return self._prov_node_name
-
-    @property
-    def sar_tx_custom_local_params_enable(self) -> bool:
-        return self._sar_tx_custom_local_params_enable
-
-    @property
-    def sar_tx_segment_interval_step_default(self) -> int:
-        return self._sar_tx_segment_interval_step_default
-
-    @property
-    def sar_tx_unicast_retrans_count_default(self) -> int:
-        return self._sar_tx_unicast_retrans_count_default
-
-    @property
-    def sar_tx_unicast_retrans_wo_progress_count_default(self) -> int:
-        return self._sar_tx_unicast_retrans_wo_progress_count_default
-
-    @property
-    def sar_tx_unicast_retrans_interval_step_default(self) -> int:
-        return self._sar_tx_unicast_retrans_interval_step_default
-
-    @property
-    def sar_tx_unicast_retrans_interval_increment_default(self) -> int:
-        return self._sar_tx_unicast_retrans_interval_increment_default
-
-    @property
-    def sar_tx_multicast_retrans_count_default(self) -> int:
-        return self._sar_tx_multicast_retrans_count_default
-
-    @property
-    def sar_tx_multicast_retrans_interval_step_default(self) -> int:
-        return self._sar_tx_multicast_retrans_interval_step_default
-
-    @property
-    def sar_rx_custom_local_params_enable(self) -> bool:
-        return self._sar_rx_custom_local_params_enable
-
-    @property
-    def sar_rx_segments_threshold_default(self) -> int:
-        return self._sar_rx_segments_threshold_default
-
-    @property
-    def sar_rx_ack_delay_increment_default(self) -> int:
-        return self._sar_rx_ack_delay_increment_default
-
-    @property
-    def sar_rx_discard_timeout_default(self) -> int:
-        return self._sar_rx_discard_timeout_default
-
-    @property
-    def sar_rx_segment_interval_step_default(self) -> int:
-        return self._sar_rx_segment_interval_step_default
-
-    @property
-    def sar_rx_ack_retrans_count_default(self) -> int:
-        return self._sar_rx_ack_retrans_count_default
 
 
 class BtmeshDfuAppPersistenceCfg:

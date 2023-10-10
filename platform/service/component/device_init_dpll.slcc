@@ -57,4 +57,4 @@ template_contribution:
     value: dpll
 documentation:
   docset: gecko-platform
-  document: service/api/group-device-init-dpll
+  document: platform-service/device-init-dpll

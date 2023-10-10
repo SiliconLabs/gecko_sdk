@@ -25,6 +25,7 @@
 #include "app/ezsp-host/cpc/cpc-host.h"
 #include "app/util/ezsp/serial-interface.h"
 #include "app/ezsp-host/ezsp-host-queues.h"
+#include "app/ezsp-host/ezsp-host-io.h"
 #include "sl_cpc.h"
 #include <sys/time.h>
 #include <errno.h>
@@ -50,6 +51,7 @@ volatile sig_atomic_t cpc_secondary_has_reset = false;
 char *zigbee_cpc_instance_name = NULL;
 static cpc_endpoint_t zigbee_cpc_endpoint;
 static uint8_t zigbee_cpc_rx_buffer[SL_CPC_READ_MINIMUM_SIZE];
+static int zigbee_cpc_fd = NULL_FILE_DESCRIPTOR;
 
 //#define CPC_TEST_CODE
 
@@ -131,21 +133,21 @@ EzspStatus ezspInit(void)
   // 2. Open end point
   attempts = 0;
   do {
-    ret = cpc_open_endpoint(zigbee_cpc_handle,
-                            &zigbee_cpc_endpoint,
-                            SL_CPC_ENDPOINT_ZIGBEE,
-                            ZIGBEE_CPC_TRANSMIT_WINDOW);
+    zigbee_cpc_fd = cpc_open_endpoint(zigbee_cpc_handle,
+                                      &zigbee_cpc_endpoint,
+                                      SL_CPC_ENDPOINT_ZIGBEE,
+                                      ZIGBEE_CPC_TRANSMIT_WINDOW);
     attempts++;
-    if ( ret <= 0 ) {
+    if ( zigbee_cpc_fd <= 0 ) {
       sleep(1);
     }
-  } while ((ret <= 0) && (attempts < max_restart_attempts));
+  } while ((zigbee_cpc_fd <= 0) && (attempts < max_restart_attempts));
 
   printf("Connected to CPC daemon, endpoint %d: %s\n",
          SL_CPC_ENDPOINT_ZIGBEE,
-         ret > 0 ? "OK" : "ERROR");
+         zigbee_cpc_fd > 0 ? "OK" : "ERROR");
 
-  if (ret <= 0) {
+  if (zigbee_cpc_fd <= 0) {
     return EZSP_CPC_ERROR_INIT;
   }
   endpoint_was_opened = true;
@@ -307,6 +309,11 @@ WEAK_TEST EzspStatus serialSendCommand(void)
 uint8_t serialGetCommandLength(void)
 {
   return *ezspFrameLengthLocation;
+}
+
+int sli_zigbee_get_cpc_fd(void)
+{
+  return zigbee_cpc_fd;
 }
 
 // Stub for legacy HAL code

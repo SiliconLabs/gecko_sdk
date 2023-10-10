@@ -228,18 +228,18 @@ void *msg_recv_func(void *ptr)
   while (run) {
     int32_t len;
     len = host_comm_pk(handle_ptr);
-    if (len < 0) {
-      // Peek is not supported, read data one by one
-      len = 1;
-    }
+
     if (len > sizeof(buf_in.buf)) {
       // If readable data exceeds the buffer size then
       // read it one by one to avoid overflow
       len = 1;
       app_log_warning("Input buffer size too low, please increase it." APP_LOG_NL);
+    } else if (len < 0) {
+      // Peek is not supported, read data one by one
+      len = 1;
     }
+
     if (len > 0) {
-      memset(&buf_tmp, 0, sizeof(buf_tmp));
       ret = host_comm_input(handle_ptr, len, buf_tmp.buf);
       if (ret <= (sizeof(buf_in.buf) - buf_in.len)) {
         pthread_mutex_lock(&mutex);
@@ -247,8 +247,10 @@ void *msg_recv_func(void *ptr)
         buf_in.len += ret;
         pthread_mutex_unlock(&mutex);
       }
+    } else if (len != 1) {
+      app_sleep_us(RECV_FUNC_US_SLEEP);
     }
-    app_sleep_us(RECV_FUNC_US_SLEEP);
   }
+
   return 0;
 }

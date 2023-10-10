@@ -22,13 +22,13 @@ requires:
 documentation:
   docset: gecko-platform
   document:
-    - page: emlib/api/efm32g/group-ebi
+    - page: platform-emlib-efm32g/ebi
       condition: [device_sdid_71]
-    - page: emlib/api/efm32gg/group-ebi
+    - page: platform-emlib-efm32gg/ebi
       condition: [device_sdid_72]
-    - page: emlib/api/efm32lg/group-ebi
+    - page: platform-emlib-efm32lg/ebi
       condition: [device_sdid_74]
-    - page: emlib/api/efm32gg11/group-ebi
+    - page: platform-emlib-efm32gg11/ebi
       condition: [device_sdid_100]
-    - page: emlib/api/efm32gg12/group-ebi
+    - page: platform-emlib-efm32gg12/ebi
       condition: [device_sdid_106]

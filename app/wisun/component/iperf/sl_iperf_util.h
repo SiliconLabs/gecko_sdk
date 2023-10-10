@@ -314,12 +314,12 @@ void sl_iperf_test_fill_buffer_with_pattern(sl_iperf_test_t * const test);
 /**************************************************************************//**
  * @brief Check test start time stamp
  * @details Elapsed time calculation and comparison with
- * @param test_start_ts Test start time stamp
+ * @param test Test descriptor
  * @return true There is time left, if 'SL_IPERF_MAX_TEST_TIMEOUT_MS' is 0,
  *              always true
  * @return false Time out
  *****************************************************************************/
-bool sl_iperf_test_check_time(const sl_iperf_ts_ms_t test_start_ts);
+bool sl_iperf_test_check_time(const sl_iperf_test_t * const test);
 
 /**************************************************************************//**
  * @brief Calculate data bytes from formatted bandwidth

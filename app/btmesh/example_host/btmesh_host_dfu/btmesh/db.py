@@ -475,6 +475,9 @@ class BtmeshDatabase(StateDictObject):
             raise ValueError(f"Node element address 0x{elem_addr:04X} does not exist.")
         return node
 
+    def get_provisioner(self) -> Node:
+        return self.get_node_by_uuid(self.prov_uuid)
+
     def rename_node(self, node: Node, new_name: str):
         if self.node_name_exist(new_name):
             raise ValueError(

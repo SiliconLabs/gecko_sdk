@@ -15,6 +15,7 @@
   - name: hardware_board_from_stk
   - name: hardware_board_from_pg28-pk2506a
   - name: hardware_board_has_vcom
+  - name: hardware_board_has_segment_lcd
   - name: hardware_board_has_hfxo_freq_39mhz
   - name: hardware_board_has_hfxo
   - name: hardware_board_has_lfxo
@@ -40,11 +41,11 @@
   - name: SL_BOARD_NAME
     value: '"BRD2506A"'
   - name: SL_BOARD_REV
-    value: '"A02"'
+    value: '"A03"'
 - tag:
   - board:pn:BRD2506
   - board:variant:A
-  - board:revision:A02
+  - board:revision:A03
   - board:device:efm32pg28b310f1024im68
   - hardware:has:vcom
   - hardware:has:sensor:si7021

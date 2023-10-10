@@ -3,7 +3,7 @@
 - label: BRD2905A
 - package: platform
 - description: Board support for BRD2905A.
-- category: Platform|Board|Starter Kit
+- category: Platform|Board|Thunderboard
 - quality: production
 - requires:
   - name: bgm240sb22vna
@@ -11,8 +11,8 @@
 - provides:
   - name: brd2905a
   - name: hardware_board
-  - name: hardware_board_stk
-  - name: hardware_board_from_stk
+  - name: hardware_board_tb
+  - name: hardware_board_from_tb
   - name: hardware_board_has_vcom
   - name: hardware_board_has_lfxo
   - name: hardware_board_supports_rf_band_2400

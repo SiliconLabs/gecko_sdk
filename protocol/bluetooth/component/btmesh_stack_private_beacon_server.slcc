@@ -3,7 +3,7 @@ label: "Private Beacon Server Model"
 package: "Btmesh"
 description: "Provides the Bluetooth mesh Private Beacon Server model. It is used to support the configuration of the Mesh Private beacons functionality of a node."
 category: "Bluetooth Mesh|Stack|Models|Core"
-quality: "evaluation"
+quality: "production"
 root_path: "protocol/bluetooth"
 
 requires:

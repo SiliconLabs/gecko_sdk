@@ -3,7 +3,7 @@ label: "Firmware Update Client Model"
 package: "Btmesh"
 description: "Provides Bluetooth mesh Firmware Update Client model. It is used by the Initiator, Distributor and Standalone Updater roles to check the current firmware and manage updates on a node. When used by a Distributor or Standalone Updater, the model uses the BLOB Transfer Client model to send firmware image data to a set of nodes."
 category: "Bluetooth Mesh|Stack|Models|DFU"
-quality: "evaluation"
+quality: "production"
 root_path: "protocol/bluetooth"
 
 requires:

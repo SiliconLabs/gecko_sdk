@@ -9,9 +9,14 @@ description: >
   Callback functions are provided for friendship establishment and termination.
   Friend functionality can be enabled or disabled during runtime via node configuration.
   This component is prepared for integration into SOC applications.
+
+  This is a No-Code component.
 category: "Bluetooth Mesh|Features"
 quality: "production"
 root_path: "app/btmesh/common/btmesh_friend"
+tag:
+  - No-Code
+
 config_file:
   - path: "config/sl_btmesh_friend_config.h"
 source:

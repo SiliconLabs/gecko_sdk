@@ -6,10 +6,15 @@ description: >
   logs stack events. Its main purpose is to log application related stack events.
   Both Bluetooth LE and Bluetooth mesh events are handled by the Event Logging
   component. This component is suitable for use in both NCP and SOC applications.
-  This is a No-Code component.
+
+  This is a No-Code component (UART communication can be enabled/disabled 
+  in the Platform/Board Control software component).
 category: "Bluetooth Mesh|Utility"
 quality: "production"
 root_path: "app/btmesh/common/btmesh_event_log"
+tag:
+  - No-Code
+
 config_file:
   - path: "config/sl_btmesh_event_log_config.h"
 source:

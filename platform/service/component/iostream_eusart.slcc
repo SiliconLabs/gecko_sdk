@@ -2,7 +2,7 @@ id: iostream_eusart
 label: "IO Stream: EUSART"
 package: platform
 description: >
-  Instantiate the driver for using IO Stream over the Enhanced 
+  Instantiate the driver for using IO Stream over the Enhanced
   Universal Synchronous Asynchronous Receiver Transceiver (EUSART) peripheral.
 category: Services|IO Stream|Driver
 quality: production
@@ -40,4 +40,4 @@ template_contribution:
       handler: "sl_iostream_eusart_{{instance}}_sleep_on_isr_exit"
 documentation:
   docset: gecko-platform
-  document: service/api/group-iostream-eusart
+  document: platform-service/iostream-eusart

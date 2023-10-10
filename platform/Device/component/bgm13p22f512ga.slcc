@@ -74,6 +74,7 @@
 - provides:
   - name: bgm13p22f512ga
   - name: device
+  - name: device_efx
   - name: device_series_1
   - name: device_sdid_89
   - name: device_generic_family_efr32xg13

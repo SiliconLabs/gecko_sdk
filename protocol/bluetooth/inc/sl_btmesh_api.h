@@ -155,6 +155,7 @@ extern "C" {
 #define sl_btmesh_cmd_node_get_proxy_solicitation_rpl_status_id          0x32140028
 #define sl_btmesh_cmd_node_set_oob_uri_id                                0x33140028
 #define sl_btmesh_cmd_node_get_oob_uri_id                                0x34140028
+#define sl_btmesh_cmd_node_set_proxy_service_uuid_id                     0x35140028
 #define sl_btmesh_rsp_node_init_id                                       0x00140028
 #define sl_btmesh_rsp_node_set_exportable_keys_id                        0x24140028
 #define sl_btmesh_rsp_node_start_unprov_beaconing_id                     0x01140028
@@ -200,6 +201,7 @@ extern "C" {
 #define sl_btmesh_rsp_node_get_proxy_solicitation_rpl_status_id          0x32140028
 #define sl_btmesh_rsp_node_set_oob_uri_id                                0x33140028
 #define sl_btmesh_rsp_node_get_oob_uri_id                                0x34140028
+#define sl_btmesh_rsp_node_set_proxy_service_uuid_id                     0x35140028
 
 /**
  * @brief Flags for allowed provisioning algorithms during provisioning, which
@@ -1873,6 +1875,25 @@ sl_status_t sl_btmesh_node_set_oob_uri(size_t uri_len, const uint8_t* uri);
 sl_status_t sl_btmesh_node_get_oob_uri(size_t max_uri_size,
                                        size_t *uri_len,
                                        uint8_t *uri);
+
+/***************************************************************************//**
+ * @cond RESTRICTED
+ *
+ * Restricted/experimental API. Contact Silicon Labs sales for more information.
+ *
+ * Set Mesh Proxy Service advertisement UUID.
+ *
+ * This command sets the UUID Mesh Proxy Service advertisement and service. This
+ * setting will take effect next time the Mesh Proxy Service advertisement is
+ * started.
+ *
+ * @param[in] uuid A 16bit uuid for gatt proxy service advertisement.
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ * @endcond
+ ******************************************************************************/
+sl_status_t sl_btmesh_node_set_proxy_service_uuid(uint16_t uuid);
 
 /** @} */ // end addtogroup sl_btmesh_node
 
@@ -12912,8 +12933,8 @@ sl_status_t sl_btmesh_sensor_client_set_setting(uint16_t server_address,
  * @brief The Additional Information value for the firmware update candidate.
  * This value is reported in the Update Server's Metadata Status message, and in
  * the Update Status message if an update is active. This value indicates what
- * will happen to the Updating Node after the new firmware is applied
- * successfully and the node is rebooted.
+ * will happen to the Target Node after the new firmware is applied successfully
+ * and the node is rebooted.
  */
 typedef enum
 {
@@ -16806,8 +16827,8 @@ sl_status_t sl_btmesh_time_client_set_time_role(uint16_t server_address,
  *
  * The Bluetooth Mesh Firmware Distribution Server Model is used to receive new
  * firmware images from the Firmware Distribution Client model and distribute
- * them to Updating Nodes. As a transport layer Bluetooth Mesh BLOB Transfer
- * (MBT) models are in use.
+ * them to Target Nodes. As a transport layer Bluetooth Mesh BLOB Transfer (MBT)
+ * models are in use.
  */
 
 /* Command and Response IDs */
@@ -16914,13 +16935,13 @@ typedef enum
                                                                         for at
                                                                         least
                                                                         one
-                                                                        Updating
+                                                                        Target
                                                                         Node. */
   sl_btmesh_fw_dist_server_dist_step_failed                 = 0x8, /**< (0x8)
                                                                         Distribution
                                                                         failed
                                                                         for all
-                                                                        Updating
+                                                                        Target
                                                                         Nodes. */
   sl_btmesh_fw_dist_server_dist_step_cancelling             = 0x9, /**< (0x9)
                                                                         Cancelling
@@ -16939,7 +16960,7 @@ typedef enum
 
 /**
  * @brief The Update Policy determines whether the Distribution Server will send
- * Update Apply messages to the Updating Nodes immediately, or wait for the
+ * Update Apply messages to the Target Nodes immediately, or wait for the
  * Distribution Client to send it the Distribution Apply message.
  */
 typedef enum
@@ -16969,8 +16990,7 @@ typedef enum
 } sl_btmesh_fw_dist_server_dfu_policy_t;
 
 /**
- * @brief The phase of the Updating Node as determined by the Distribution
- * Server.
+ * @brief The phase of the Target Node as determined by the Distribution Server.
  */
 typedef enum
 {
@@ -17122,7 +17142,7 @@ typedef enum
   sl_btmesh_fw_dist_server_dist_status_receivers_list_empty   = 0x6, /**< (0x6)
                                                                           There
                                                                           are no
-                                                                          Updating
+                                                                          Target
                                                                           Nodes
                                                                           in the
                                                                           Distribution
@@ -17408,8 +17428,8 @@ typedef struct sl_btmesh_evt_fw_dist_server_dist_state_changed_s sl_btmesh_evt_f
 /**
  * @addtogroup sl_btmesh_evt_fw_dist_server_node_failed sl_btmesh_evt_fw_dist_server_node_failed
  * @{
- * @brief Indicates that an Updating Node failed, either due to an error or due
- * to timeout
+ * @brief Indicates that an Target Node failed, either due to an error or due to
+ * timeout
  */
 
 /** @brief Identifier of the node_failed event */
@@ -18192,11 +18212,11 @@ typedef enum
                                                               completed
                                                               successfully for
                                                               at least one
-                                                              Updating Node. */
+                                                              Target Node. */
   sl_btmesh_fw_dist_client_dist_phase_failed      = 0x5, /**< (0x5) Firmware
                                                               distribution
                                                               failed for all
-                                                              Updating Nodes. */
+                                                              Target Nodes. */
   sl_btmesh_fw_dist_client_dist_phase_cancelling  = 0x6, /**< (0x6) Cancelling
                                                               firmware
                                                               distribution. */
@@ -18633,10 +18653,9 @@ sl_status_t sl_btmesh_fw_dist_client_get(uint16_t elem_index, uint16_t dst);
  * @param[in] elem_index Client model element index
  * @param[in] dst Address of the Distributor
  * @param[in] dist_appkey_index Application key to use for the communication
- *   between the Distributor and Updating Nodes
+ *   between the Distributor and Target Nodes
  * @param[in] dist_ttl The time-to-live value for the Distributor to use when
- *   communicating with the Updating Nodes. Valid values: 0, range:[2-127] and
- *   255
+ *   communicating with the Target Nodes. Valid values: 0, range:[2-127] and 255
  * @param[in] dist_timeout_base The Timeout Base value to use in the firmware
  *   image BLOB Transfer
  * @param[in] transfer_mode 1 = use Push Mode, 2 = use Pull Mode (typically for
@@ -18688,7 +18707,7 @@ sl_status_t sl_btmesh_fw_dist_client_cancel_distribution(uint16_t elem_index,
 /***************************************************************************//**
  *
  * Send a Distribution Apply message. This function is used to trigger applying
- * the firmware update on the Updating Nodes. This should only be used if the
+ * the firmware update on the Target Nodes. This should only be used if the
  * Update Policy of the distribution is Verify Only. The response is a
  * Distribution Status message.
  *
@@ -18725,7 +18744,7 @@ sl_status_t sl_btmesh_fw_dist_client_suspend_distribution(uint16_t elem_index,
 
 /***************************************************************************//**
  *
- * Send a Receivers Add message. This function is used to add Updating Nodes to
+ * Send a Receivers Add message. This function is used to add Target Nodes to
  * the Distribution Server's Receivers List. The response is a Receivers Status
  * message.
  *
@@ -19653,7 +19672,7 @@ sl_status_t sl_btmesh_remote_provisioning_server_set_default_bearer(uint8_t bear
  *
  * The Standalone Updater combines the functionality of a local Distribution
  * Server and an external Distribution Client. It uses an Update Client and MBT
- * Client model internally to distribute firmware images to Updating Nodes.
+ * Client model internally to distribute firmware images to Target Nodes.
  *
  * The Standalone Updater is not a model per se. It achieves the same
  * functionality as a Distribution Client controlling a Distribution Server via
@@ -19719,8 +19738,8 @@ typedef struct sl_btmesh_evt_fw_standalone_updater_dist_state_changed_s sl_btmes
 /**
  * @addtogroup sl_btmesh_evt_fw_standalone_updater_node_failed sl_btmesh_evt_fw_standalone_updater_node_failed
  * @{
- * @brief Indicates that an Updating Node failed, either due to an error or due
- * to timeout
+ * @brief Indicates that an Target Node failed, either due to an error or due to
+ * timeout
  */
 
 /** @brief Identifier of the node_failed event */
@@ -19841,8 +19860,8 @@ sl_status_t sl_btmesh_fw_standalone_updater_set_multicast_threshold(uint16_t ele
  * Add a receiver to the distribution
  *
  * @param[in] elem_index Element index
- * @param[in] address Address of the Updating Node
- * @param[in] fw_index Index of the firmware on the Updating Node to update
+ * @param[in] address Address of the Target Node
+ * @param[in] fw_index Index of the firmware on the Target Node to update
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
@@ -19876,9 +19895,9 @@ sl_status_t sl_btmesh_fw_standalone_updater_delete_all_receivers(uint16_t elem_i
  *
  * @param[in] elem_index Element index
  * @param[in] dist_appkey_index Application key index to use when communicating
- *   with the Updating Nodes
+ *   with the Target Nodes
  * @param[in] dist_ttl The time-to-live value to use when communicating with the
- *   Updating Nodes. Valid values: 0, range:[2-127] and 255.
+ *   Target Nodes. Valid values: 0, range:[2-127] and 255.
  * @param[in] dist_timeout_base The Timeout Base value to use in the firmware
  *   image BLOB Transfer and Update Client operations
  * @param[in] transfer_mode 1 = use Push Mode, 2 = use Pull Mode (typically for
@@ -19906,7 +19925,7 @@ sl_status_t sl_btmesh_fw_standalone_updater_start(uint16_t elem_index,
 /***************************************************************************//**
  *
  * Execute the next action for the distribution state machine. Must be repeated
- * by the application if the Updating Nodes do not respond in a timely manner.
+ * by the application if the Target Nodes do not respond in a timely manner.
  * Calling this function sends out the necessary messages to all nodes that have
  * not responded. Note that the distribution step dist_step_transferring_image
  * is executed via the MBT Client API, and thus the command does not need to be

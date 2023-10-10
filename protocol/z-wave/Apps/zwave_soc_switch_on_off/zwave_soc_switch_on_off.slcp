@@ -51,7 +51,7 @@ configuration:
   - name: APP_REVISION
     value: 20
   - name: APP_PATCH
-    value: 1
+    value: 2
   - name: ZAF_CONFIG_REQUEST_KEY_S0
     value: 1
   - name: ZAF_CONFIG_REQUEST_KEY_S2_UNAUTHENTICATED

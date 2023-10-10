@@ -21,13 +21,18 @@ provides:
 
 requires:
   - name: device
+    condition: [device_series_0]
+  - name: device
+    condition: [device_series_1]
+  - name: device
+    condition: [device_series_2]
 
   - name: mbedtls_source
   - name: mbedtls_config
 
   - name: mbedtls_slcrypto
     condition: [device_cortexm]
-
+    
   # Inclusion of source and config components depends on which TZ state we are
   # targeting. For apps that do not make active use of TZ, a dummy state
   # (trustzone_unaware) should be used.

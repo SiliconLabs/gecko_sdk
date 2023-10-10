@@ -41,6 +41,9 @@ CONNECTION_TIMEOUT_SEC = 10
 # Retry count for ESL command opcodes re-sending
 ESL_CMD_MAX_RETRY_COUNT = 3
 
+# Pending count for connection requests: 1 is the minmum ad also the safest value, but auto provisioning will be the slowest
+ESL_CMD_MAX_PENDING_CONNECTION_REQUEST_COUNT = 2
+
 # Tags in a group in automated mode addressing
 ESL_MAX_TAGS_IN_AUTO_GROUP = 16
 

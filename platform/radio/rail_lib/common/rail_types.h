@@ -4906,6 +4906,8 @@ typedef struct RAIL_StateTiming {
 RAIL_ENUM_GENERIC(RAIL_TxRepeatOptions_t, uint16_t) {
   /** Shift position of \ref RAIL_TX_REPEAT_OPTION_HOP bit */
   RAIL_TX_REPEAT_OPTION_HOP_SHIFT = 0,
+  /** Shift position of the \ref RAIL_TX_REPEAT_OPTION_START_TO_START bit */
+  RAIL_TX_REPEAT_OPTION_START_TO_START_SHIFT = 1,
 };
 
 /** A value representing no repeat options enabled. */
@@ -4917,6 +4919,12 @@ RAIL_ENUM_GENERIC(RAIL_TxRepeatOptions_t, uint16_t) {
  * repeated transmit.
  */
 #define RAIL_TX_REPEAT_OPTION_HOP (1U << RAIL_TX_REPEAT_OPTION_HOP_SHIFT)
+
+/**
+ * An option to configure the delay between transmissions to be from start to start
+ * instead of end to start. Delay must be long enough to cover the prior transmit's time.
+ */
+#define RAIL_TX_REPEAT_OPTION_START_TO_START (1 << RAIL_TX_REPEAT_OPTION_START_TO_START_SHIFT)
 
 /// @struct RAIL_TxRepeatConfig_t
 /// @brief A configuration structure for repeated transmits
@@ -4942,7 +4950,8 @@ typedef struct RAIL_TxRepeatConfig {
      * When \ref RAIL_TX_REPEAT_OPTION_HOP is not set, specifies
      * the delay time between each repeated transmit. Specify \ref
      * RAIL_TRANSITION_TIME_KEEP to use the current \ref
-     * RAIL_StateTiming_t::txToTx transition time setting.
+     * RAIL_StateTiming_t::txToTx transition time setting. Delay must
+     * be long enough to cover the prior transmit's time.
      */
     RAIL_TransitionTime_t delay;
     /**
@@ -4950,7 +4959,8 @@ typedef struct RAIL_TxRepeatConfig {
      * the channel hopping configuration to use when hopping between
      * repeated transmits. Per-hop delays are configured within each
      * \ref RAIL_TxChannelHoppingConfigEntry_t::delay rather than
-     * this union's delay field.
+     * this union's delay field. Delay must be long enough to cover
+     * the prior transmit's time.
      */
     RAIL_TxChannelHoppingConfig_t channelHopping;
   } delayOrHop;

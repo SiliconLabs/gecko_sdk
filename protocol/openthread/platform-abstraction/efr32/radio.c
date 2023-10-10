@@ -88,6 +88,11 @@
 #ifdef SL_CATALOG_OT_RCP_GP_INTERFACE_PRESENT
 #include "sl_rcp_gp_interface.h"
 #endif
+
+#ifdef SL_CATALOG_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT
+#include "sl_rail_util_ieee802154_fast_channel_switching_config.h"
+#endif // SL_CATALOG_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT
+
 //------------------------------------------------------------------------------
 // Enums, macros and static variables
 
@@ -171,6 +176,21 @@
 #else
 #define DEVICE_CAPABILITY_MCU_EN        (DEVINFO->SWCAPA1 & _DEVINFO_SWCAPA1_RFMCUEN_MASK)
 #endif
+
+static otRadioCaps sRadioCapabilities = (OT_RADIO_CAPS_ACK_TIMEOUT
+                                         | OT_RADIO_CAPS_CSMA_BACKOFF
+                                         | OT_RADIO_CAPS_ENERGY_SCAN
+                                         | OT_RADIO_CAPS_SLEEP_TO_TX
+#if (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
+                                         | OT_RADIO_CAPS_TRANSMIT_SEC
+    // When scheduled tx is required, we support RAIL_StartScheduledCcaCsmaTx
+    // (delay is indicated in tx frame info set in MAC)
+                                         | OT_RADIO_CAPS_TRANSMIT_TIMING
+    // When scheduled rx is required, we support RAIL_ScheduleRx in our
+    // implementation of otPlatRadioReceiveAt
+                                         | OT_RADIO_CAPS_RECEIVE_TIMING
+#endif
+                                        );
 
 
 // Energy Scan
@@ -256,6 +276,10 @@ static otExtAddress      sExtAddress[RADIO_EXT_ADDR_COUNT];
 static int8_t            sMaxChannelPower[RADIO_INTERFACE_COUNT][SL_MAX_CHANNELS_SUPPORTED];
 static int8_t            sDefaultTxPower[RADIO_INTERFACE_COUNT];
 
+// CSMA config: Should be globally scoped
+RAIL_CsmaConfig_t csmaConfig = RAIL_CSMA_CONFIG_802_15_4_2003_2p4_GHz_OQPSK_CSMA;
+RAIL_CsmaConfig_t cslCsmaConfig = RAIL_CSMA_CONFIG_SINGLE_CCA;
+
 #if OPENTHREAD_CONFIG_MAC_HEADER_IE_SUPPORT
 static otRadioIeInfo sTransmitIeInfo;
 #endif
@@ -279,7 +303,7 @@ efr32RadioCounters railDebugCounters;
 extern uint8_t otNcpPlatGetCurCommandIid(void);
 static uint8_t sRailFilterMask = RADIO_BCAST_PANID_FILTER_MASK;
 
-#ifdef SL_CATALOG_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT
+#if SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_ENABLED
 
 #define FAST_CHANNEL_SWITCHING_SUPPORT 1
 static RAIL_IEEE802154_RxChannelSwitchingCfg_t sChannelSwitchingCfg;
@@ -318,7 +342,7 @@ static uint8_t fastChannelIndex(uint8_t aChannel)
     return INVALID_VALUE;
 }
 
-#endif // SL_CATALOG_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT
+#endif // SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_ENABLED
 
 #else // OPENTHREAD_RADIO && OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE == 1
 #define otNcpPlatGetCurCommandIid() 0
@@ -339,19 +363,11 @@ static const RAIL_StateTiming_t cTimings = {
     100,      // timings.idleToRx
     192 - 10, // timings.txToRx
     100,      // timings.idleToTx
-#if OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2
-    256,      // timings.rxToTx - accommodate enhanced ACKs
-#else
     192,      // timings.rxToTx
-#endif
     0,        // timings.rxSearchTimeout
     0,        // timings.txToRxSearchTimeout
     0         // timings.txToTx
 };
-
-#ifdef NONCOMPLIANT_ACK_TIMING_WORKAROUND
-static RAIL_StateTiming_t gTimings = cTimings;
-#endif
 
 static const RAIL_IEEE802154_Config_t sRailIeee802154Config = {
     NULL, // addresses
@@ -379,8 +395,13 @@ static const RAIL_IEEE802154_Config_t sRailIeee802154Config = {
 
 #if     RADIO_CONFIG_SUBGHZ_SUPPORT
 #define PHY_HEADER_SIZE 2
+// SHR: 4 bytes preamble, 2 bytes SFD
+// 802.15.4 spec describes GFSK SHR to be the same format as SUN O-QPSK
+// except preamble is 32 symbols (4 octets).
+#define SHR_SIZE 6
 #else
 #define PHY_HEADER_SIZE 1
+#define SHR_SIZE 5 // 4 bytes of preamble, 1 byte sync-word
 #endif
 
 // Misc
@@ -624,11 +645,17 @@ static securityMaterial sMacKeys[RADIO_INTERFACE_COUNT];
 static uint32_t      sCslPeriod;
 static uint32_t      sCslSampleTime;
 
-static uint16_t getCslPhase()
+static uint16_t getCslPhase(uint32_t shrTxTime)
 {
-    uint32_t curTime       = otPlatAlarmMicroGetNow();
     uint32_t cslPeriodInUs = sCslPeriod * OT_US_PER_TEN_SYMBOLS;
-    uint32_t diff = ((sCslSampleTime % cslPeriodInUs) - (curTime % cslPeriodInUs) + cslPeriodInUs) % cslPeriodInUs;
+    uint32_t diff;
+
+    if (shrTxTime == 0U)
+    {
+        shrTxTime = otPlatAlarmMicroGetNow();
+    }
+
+    diff = ((sCslSampleTime % cslPeriodInUs) - (shrTxTime % cslPeriodInUs) + cslPeriodInUs) % cslPeriodInUs;
 
     return (uint16_t)(diff / OT_US_PER_TEN_SYMBOLS);
 }
@@ -706,18 +733,6 @@ static otError radioProcessTransmitSecurity(otRadioFrame *aFrame, uint8_t iid)
 
     aFrame->mInfo.mTxInfo.mAesKey = &sMacKeys[iid].keys[keyToUse];
 
-#if defined(_SILICON_LABS_32B_SERIES_2) && (OPENTHREAD_CONFIG_CRYPTO_LIB == OPENTHREAD_CONFIG_CRYPTO_LIB_PSA)
-    otMacKeyMaterial aesKey;
-    size_t aKeyLen;
-
-    otEXPECT_ACTION(otPlatCryptoExportKey(sMacKeys[iid].keys[keyToUse].mKeyMaterial.mKeyRef,
-                          aesKey.mKeyMaterial.mKey.m8,
-                          sizeof(aesKey.mKeyMaterial.mKey.m8),
-                          &aKeyLen) == OT_ERROR_NONE, error = OT_ERROR_SECURITY);
-
-    aFrame->mInfo.mTxInfo.mAesKey = &aesKey;
-#endif
-
     if (!aFrame->mInfo.mTxInfo.mIsHeaderUpdated)
     {
         if (otMacFrameIsAck(aFrame))
@@ -793,7 +808,7 @@ static void RAILCb_Generic(RAIL_Handle_t aRailHandle, RAIL_Events_t aEvents);
 static void efr32PhyStackInit(void);
 
 #if OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2
-static void updateIeInfoTxFrame(void);
+static void updateIeInfoTxFrame(uint32_t shrTxTime);
 #endif
 
 #ifdef SL_CATALOG_RAIL_UTIL_COEX_PRESENT
@@ -993,7 +1008,6 @@ static otError radioScheduleRx(uint8_t aChannel, uint32_t aStart, uint32_t aDura
                                       .endMode = RAIL_TIME_DELAY,
                                       .rxTransitionEndSchedule = 1, // This lets us idle after a scheduled-rx
                                       .hardWindowEnd = 0 };         // This lets us receive a packet near a window-end-event
-
     status = RAIL_ScheduleRx(gRailHandle, aChannel, &rxCfg, &bgRxSchedulerInfo);
     otEXPECT_ACTION(status == RAIL_STATUS_NO_ERROR, error = OT_ERROR_FAILED);
 
@@ -1603,22 +1617,24 @@ otError otPlatRadioTransmit(otInstance *aInstance, otRadioFrame *aFrame)
         setInternalFlag(RADIO_TX_EVENTS, false);
         sTxFrame       = aFrame;
 
-#if OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2
-        uint8_t iid = 0;
-#endif
-
-#if OPENTHREAD_RADIO && OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE == 1
-        iid            = aFrame->mIid;
-#endif
-
         setInternalFlag(FLAG_CURRENT_TX_USE_CSMA, aFrame->mInfo.mTxInfo.mCsmaCaEnabled);
 
 #if OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2
-        updateIeInfoTxFrame();
+#if OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
+        if (sCslPeriod > 0 && sTxFrame->mInfo.mTxInfo.mTxDelay == 0)
+        {
+            // Only called for CSL children (sCslPeriod > 0)
+            // Note: Our SSEDs "schedule" transmissions to their parent in order to know
+            // exactly when in the future the data packets go out so they can calculate
+            // the accurate CSL phase to send to their parent.
+            sTxFrame->mInfo.mTxInfo.mTxDelayBaseTime = RAIL_GetTime();
+            sTxFrame->mInfo.mTxInfo.mTxDelay = 3000; // Chosen after internal certification testing
+        }
+        updateIeInfoTxFrame(sTxFrame->mInfo.mTxInfo.mTxDelayBaseTime + sTxFrame->mInfo.mTxInfo.mTxDelay + 160);
+#endif
         // Note - we need to call this outside of txCurrentPacket as for Series 2,
         // this results in calling the SE interface from a critical section which is not permitted.
-        otEXPECT_ACTION(radioProcessTransmitSecurity(sTxFrame, iid) == OT_ERROR_NONE,
-                        error = OT_ERROR_INVALID_STATE);
+        radioProcessTransmitSecurity(sTxFrame, sTxFrame->mIid);
 #endif // OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2
 
         CORE_DECLARE_IRQ_STATE;
@@ -1637,7 +1653,7 @@ exit:
 }
 
 #if OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2
-void updateIeInfoTxFrame(void)
+void updateIeInfoTxFrame(uint32_t shrTxTime)
 {
     assert(sTxFrame != NULL);
 
@@ -1663,7 +1679,7 @@ void updateIeInfoTxFrame(void)
     // Update IE data in the 802.15.4 header with the newest CSL period / phase
     if (sCslPeriod > 0 && !sTxFrame->mInfo.mTxInfo.mIsHeaderUpdated)
     {
-        otMacFrameSetCslIe(sTxFrame, (uint16_t)sCslPeriod, getCslPhase());
+        otMacFrameSetCslIe(sTxFrame, (uint16_t)sCslPeriod, getCslPhase(shrTxTime));
     }
 #endif // OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
 }
@@ -1674,7 +1690,6 @@ void txCurrentPacket(void)
     assert(getInternalFlag(FLAG_ONGOING_TX_DATA));
     assert(sTxFrame != NULL);
 
-    RAIL_CsmaConfig_t csmaConfig = RAIL_CSMA_CONFIG_802_15_4_2003_2p4_GHz_OQPSK_CSMA;
     RAIL_TxOptions_t  txOptions  = RAIL_TX_OPTIONS_DEFAULT;
     RAIL_Status_t     status = RAIL_STATUS_INVALID_STATE;
     uint8_t           frameLength;
@@ -1755,58 +1770,70 @@ void txCurrentPacket(void)
     }
 #endif
 
-    if (getInternalFlag(FLAG_CURRENT_TX_USE_CSMA))
+    if (sTxFrame->mInfo.mTxInfo.mTxDelay == 0)
     {
+        if (getInternalFlag(FLAG_CURRENT_TX_USE_CSMA))
+        {
 #if RADIO_CONFIG_DMP_SUPPORT
-        // time needed for CSMA/CA
-        txSchedulerInfo.transactionTime += RADIO_TIMING_CSMA_OVERHEAD_US;
+            // time needed for CSMA/CA
+            txSchedulerInfo.transactionTime += RADIO_TIMING_CSMA_OVERHEAD_US;
 #endif
-        csmaConfig.csmaTries    = sTxFrame->mInfo.mTxInfo.mMaxCsmaBackoffs;
-        csmaConfig.ccaThreshold = sCcaThresholdDbm;
+            csmaConfig.csmaTries    = sTxFrame->mInfo.mTxInfo.mMaxCsmaBackoffs;
+            csmaConfig.ccaThreshold = sCcaThresholdDbm;
 
-        status = RAIL_StartCcaCsmaTx(gRailHandle,
-                                     sTxFrame->mChannel,
-                                     txOptions,
-                                     &csmaConfig,
-                                     &txSchedulerInfo);
+            status = RAIL_StartCcaCsmaTx(gRailHandle,
+                                         sTxFrame->mChannel,
+                                         txOptions,
+                                         &csmaConfig,
+                                         &txSchedulerInfo);
+        }
+        else
+        {
+            status = RAIL_StartTx(gRailHandle, sTxFrame->mChannel, txOptions, &txSchedulerInfo);
+        }
+
+        if (status == RAIL_STATUS_NO_ERROR) {
+            (void) handlePhyStackEvent(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_STARTED, 0U);
+        }
     }
     else
     {
+        // For CSL transmitters (FTDs):
+        // mTxDelayBaseTime = rx-timestamp (end of sync word) when we received CSL-sync with IEs
+        // mTxDelay = Delay starting from mTxDelayBaseTime
+        //
+        // For CSL receivers (SSEDs):
+        // mTxDelayBaseTime = timestamp when otPlatRadioTransmit is called
+        // mTxDelay = Chosen value in the future where transmit is scheduled, so we know exactly
+        // when to calculate the phase (we can't do this on-the-fly as the packet is going out
+        // due to platform limitations.  see radioScheduleRx)
+        //
+        // Note that both use single CCA config, overriding any CCA/CSMA configs from the stack
+        //
 #if OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2
-        if (sTxFrame->mInfo.mTxInfo.mTxDelay != 0)
-        {
-            // CSL transmissions don't use CSMA but MAC accounts for CCA time.
-            csmaConfig.ccaThreshold = sCcaThresholdDbm;
+        RAIL_ScheduleTxConfig_t scheduleTxOptions = {
+            .when = sTxFrame->mInfo.mTxInfo.mTxDelayBaseTime + sTxFrame->mInfo.mTxInfo.mTxDelay,
+            .mode = RAIL_TIME_ABSOLUTE,
+            .txDuringRx = RAIL_SCHEDULED_TX_DURING_RX_POSTPONE_TX
+        };
 
-            RAIL_ScheduleTxConfig_t scheduleTxOptions = {
-                .when = sTxFrame->mInfo.mTxInfo.mTxDelayBaseTime + sTxFrame->mInfo.mTxInfo.mTxDelay,
-                .mode = RAIL_TIME_ABSOLUTE,
-                .txDuringRx = RAIL_SCHEDULED_TX_DURING_RX_POSTPONE_TX
-            };
+        // CSL transmissions don't use CSMA but MAC accounts for single CCA time.
+        // cslCsmaConfig is set to RAIL_CSMA_CONFIG_SINGLE_CCA above.
+        status = RAIL_StartScheduledCcaCsmaTx(gRailHandle,
+                                              sTxFrame->mChannel,
+                                              txOptions,
+                                              &scheduleTxOptions,
+                                              &cslCsmaConfig,
+                                              &txSchedulerInfo);
 
-            status = RAIL_StartScheduledCcaCsmaTx(gRailHandle,
-                                                  sTxFrame->mChannel,
-                                                  txOptions,
-                                                  &scheduleTxOptions,
-                                                  &csmaConfig,
-                                                  &txSchedulerInfo);
-            if (status == RAIL_STATUS_NO_ERROR) {
+        if (status == RAIL_STATUS_NO_ERROR) {
 #if RADIO_CONFIG_DEBUG_COUNTERS_SUPPORT
-                railDebugCounters.mRailEventsScheduledTxTriggeredCount++;
+            railDebugCounters.mRailEventsScheduledTxTriggeredCount++;
 #endif
-                (void) handlePhyStackEvent(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_STARTED, 0U);
-            }
+            (void) handlePhyStackEvent(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_STARTED, 0U);
         }
-        else
 #endif
-        {
-            status = RAIL_StartTx(gRailHandle, sTxFrame->mChannel, txOptions, &txSchedulerInfo);
-            if (status == RAIL_STATUS_NO_ERROR) {
-                (void) handlePhyStackEvent(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_STARTED, 0U);
-            }
-        }
     }
-
     if (status == RAIL_STATUS_NO_ERROR)
     {
 #if RADIO_CONFIG_DEBUG_COUNTERS_SUPPORT
@@ -1876,24 +1903,7 @@ otRadioCaps otPlatRadioGetCaps(otInstance *aInstance)
 {
     OT_UNUSED_VARIABLE(aInstance);
 
-    otRadioCaps capabilities = (OT_RADIO_CAPS_ACK_TIMEOUT
-                                | OT_RADIO_CAPS_CSMA_BACKOFF
-                                | OT_RADIO_CAPS_ENERGY_SCAN
-                                | OT_RADIO_CAPS_SLEEP_TO_TX);
-
-#if (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
-    capabilities |= OT_RADIO_CAPS_TRANSMIT_SEC;
-#endif
-
-    // When scheduled tx is required, we support RAIL_StartScheduledCcaCsmaTx
-    // (delay is indicated in tx frame info set in MAC)
-    capabilities |= OT_RADIO_CAPS_TRANSMIT_TIMING;
-
-    // When scheduled rx is required, we support RAIL_ScheduleRx in our
-    // implementation of otPlatRadioReceiveAt
-    capabilities |= OT_RADIO_CAPS_RECEIVE_TIMING;
-
-    return capabilities;
+    return sRadioCapabilities;
 }
 
 bool otPlatRadioGetPromiscuous(otInstance *aInstance)
@@ -2032,15 +2042,29 @@ void otPlatRadioSetMacKey(otInstance *              aInstance,
 
     assert(aPrevKey != NULL && aCurrKey != NULL && aNextKey != NULL);
 
-    CORE_DECLARE_IRQ_STATE;
-    CORE_ENTER_ATOMIC();
-
     sMacKeys[iid].keyId = aKeyId;
     memcpy(&sMacKeys[iid].keys[MAC_KEY_PREV],    aPrevKey, sizeof(otMacKeyMaterial));
     memcpy(&sMacKeys[iid].keys[MAC_KEY_CURRENT], aCurrKey, sizeof(otMacKeyMaterial));
     memcpy(&sMacKeys[iid].keys[MAC_KEY_NEXT],    aNextKey, sizeof(otMacKeyMaterial));
 
-    CORE_EXIT_ATOMIC();
+#if defined(_SILICON_LABS_32B_SERIES_2) && (OPENTHREAD_CONFIG_CRYPTO_LIB == OPENTHREAD_CONFIG_CRYPTO_LIB_PSA)
+    size_t aKeyLen = 0;
+
+    assert(otPlatCryptoExportKey(sMacKeys[iid].keys[MAC_KEY_PREV].mKeyMaterial.mKeyRef,
+                                    sMacKeys[iid].keys[MAC_KEY_PREV].mKeyMaterial.mKey.m8,
+                                        sizeof(sMacKeys[iid].keys[MAC_KEY_PREV]),
+                                            &aKeyLen) == OT_ERROR_NONE);
+
+    assert(otPlatCryptoExportKey(sMacKeys[iid].keys[MAC_KEY_CURRENT].mKeyMaterial.mKeyRef,
+                                    sMacKeys[iid].keys[MAC_KEY_CURRENT].mKeyMaterial.mKey.m8,
+                                        sizeof(sMacKeys[iid].keys[MAC_KEY_CURRENT]),
+                                            &aKeyLen) == OT_ERROR_NONE);
+
+    assert(otPlatCryptoExportKey(sMacKeys[iid].keys[MAC_KEY_NEXT].mKeyMaterial.mKeyRef,
+                                    sMacKeys[iid].keys[MAC_KEY_NEXT].mKeyMaterial.mKey.m8,
+                                        sizeof(sMacKeys[iid].keys[MAC_KEY_NEXT]),
+                                            &aKeyLen) == OT_ERROR_NONE);
+#endif
 }
 
 void otPlatRadioSetMacFrameCounter(otInstance *aInstance, uint32_t aMacFrameCounter)
@@ -2213,15 +2237,7 @@ static bool writeIeee802154EnhancedAck( RAIL_Handle_t       aRailHandle,
     receivedFrame.mLength   = *initialPktReadBytes - PHY_HEADER_SIZE;
     enhAckFrame.mPsdu       = enhAckPsdu + PHY_HEADER_SIZE;
 
-    bool is2015 = otMacFrameIsVersion2015(&receivedFrame);
-#ifdef NONCOMPLIANT_ACK_TIMING_WORKAROUND
-    uint16_t rxToTx = is2015 ? 256 : 192;
-    if (gTimings.rxToTx != rxToTx) {
-        gTimings.rxToTx = rxToTx;
-        RAIL_SetStateTiming(aRailHandle, &gTimings);
-    }
-#endif
-    if (!is2015)
+    if (! otMacFrameIsVersion2015(&receivedFrame))
     {
         return false;
     }
@@ -2293,8 +2309,22 @@ static bool writeIeee802154EnhancedAck( RAIL_Handle_t       aRailHandle,
 #if OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
     if (sCslPeriod > 0)
     {
+        // Calculate time in the future where the SHR is done being sent out
+        uint32_t ackShrDoneTime = // Currently partially received packet's SHR time
+                                  (otPlatAlarmMicroGetNow() - (packetInfoForEnhAck->packetBytes * OT_RADIO_SYMBOL_TIME * 2)
+                                  // PHR of this packet
+                                  + (PHY_HEADER_SIZE * OT_RADIO_SYMBOL_TIME * 2)
+                                  // Received frame's expected time in the PHR
+                                  + (receivedFrame.mLength * OT_RADIO_SYMBOL_TIME * 2)
+                                  // rxToTx turnaround time
+                                  + cTimings.rxToTx
+                                  // PHR time of the ACK
+                                  + (PHY_HEADER_SIZE * OT_RADIO_SYMBOL_TIME * 2)
+                                  // SHR time of the ACK
+                                  + (SHR_SIZE * OT_RADIO_SYMBOL_TIME * 2));
+
         // Update IE data in the 802.15.4 header with the newest CSL period / phase
-        otMacFrameSetCslIe(&enhAckFrame, (uint16_t)sCslPeriod, getCslPhase());
+        otMacFrameSetCslIe(&enhAckFrame, (uint16_t)sCslPeriod, getCslPhase(ackShrDoneTime));
     }
 #endif
 
@@ -2962,6 +2992,7 @@ static bool validatePacketTimestamp(RAIL_RxPacketDetails_t *pPacketDetails, uint
                     rxTimestampValid = false);
 
     // + 1 for the 1-byte PHY header
+    // We would not need this if PHR is not included and we want the MHR
     pPacketDetails->timeReceived.totalPacketBytes = packetLength + 1;
 
     otEXPECT_ACTION((RAIL_GetRxTimeSyncWordEndAlt(gRailHandle, pPacketDetails)
@@ -3143,8 +3174,10 @@ static void processNextRxPacket(otInstance *aInstance)
 #if RADIO_CONFIG_DEBUG_COUNTERS_SUPPORT
                 railDebugCounters.mRailPlatRadioReceiveDoneCbCount++;
 #endif
-                sReceivePacket[index].state = BUFFER_IS_FREE;
             }
+
+            sReceivePacket[index].state = BUFFER_IS_FREE;
+
             otSysEventSignalPending();
         }
 #if SL_OPENTHREAD_RADIO_RX_BUFFER_COUNT > 1
@@ -3200,6 +3233,9 @@ static void processTxComplete(otInstance *aInstance)
         else
 #endif
         {
+            // Clear any internally-set txDelays so future transmits are not affected.
+            sTxFrame->mInfo.mTxInfo.mTxDelayBaseTime = 0;
+            sTxFrame->mInfo.mTxInfo.mTxDelay = 0;
             otPlatRadioTxDone(aInstance, sTxFrame, ackFrame, txStatus);
         }
 

@@ -42,6 +42,11 @@
 // Value for no flag present for the advertiser
 #define PERIODIC_ADVERTISER_FLAG_NONE     0
 
+// Maximum count of PAWR set data call within one burst
+// NOTE: best to align with NCP ESL AP's SL_BT_CONFIG_PAWR_PACKET_REQUEST_COUNT!
+#define PAWR_DATA_MAX_BURST_READ          4
+
+// PAwR handle print formatter alias
 #define PAWR_FMT                          ESL_LIB_LOG_HANDLE_FORMAT
 
 typedef enum {
@@ -61,7 +66,7 @@ static sl_status_t send_pawr_error(esl_lib_pawr_t       *pawr,
                                    esl_lib_status_t     lib_status,
                                    sl_status_t          status,
                                    esl_lib_pawr_state_t data);
-static void run_command(esl_lib_command_list_cmd_t *cmd);
+static sl_status_t run_command(esl_lib_command_list_cmd_t *cmd);
 static sl_status_t send_pawr_status(esl_lib_pawr_t *pawr_ptr);
 
 // -----------------------------------------------------------------------------
@@ -91,12 +96,12 @@ sl_status_t esl_lib_pawr_add(esl_lib_pawr_t **ptr_out)
       // Set handle
       ptr->pawr_handle                  = SL_BT_INVALID_ADVERTISING_SET_HANDLE;
       // Set command parameters
-      ptr->command_complete             = true;
       ptr->command                      = NULL;
       ptr->command_list                 = NULL;
       // Set states
       ptr->enabled                      = ESL_LIB_FALSE;
       ptr->configured                   = ESL_LIB_FALSE;
+      ptr->state                        = ESL_LIB_PAWR_STATE_IDLE;
       // Config default values
       ptr->config.adv_interval.min      = ESL_LIB_PERIODIC_ADV_MIN_INTERVAL_DEFAULT;
       ptr->config.adv_interval.max      = ESL_LIB_PERIODIC_ADV_MAX_INTERVAL_DEFAULT;
@@ -152,7 +157,7 @@ sl_status_t esl_lib_pawr_remove_ptr(esl_lib_pawr_t *ptr)
   }
 
   // Delete storage
-  (void)esl_lib_storage_delete(ptr->storage_handle);
+  (void)esl_lib_storage_delete(&ptr->storage_handle);
   esl_lib_log_pawr_debug(PAWR_FMT "Removed PAwR" APP_LOG_NL, ptr);
   // Delete PAwR data
   esl_lib_memory_free(ptr);
@@ -170,7 +175,7 @@ sl_status_t esl_lib_pawr_remove_handle(uint8_t        pawr,
   if (sc == SL_STATUS_OK) {
     sc = esl_lib_pawr_remove_ptr(ptr);
     if (sc == SL_STATUS_OK) {
-      *ptr_out = ptr;
+      *ptr_out = NULL;
     }
   }
   return sc;
@@ -195,15 +200,16 @@ void esl_lib_pawr_cleanup(void)
   esl_lib_pawr_t *pawr;
   // Clean PAwR list
   while ((pawr = (esl_lib_pawr_t *)sl_slist_pop(&pawr_list)) != NULL) {
+    (void)sl_bt_periodic_advertiser_stop(pawr->pawr_handle);
     esl_lib_command_list_cleanup(&pawr->command_list);
     sl_slist_remove(&pawr_list, &pawr->node);
-    (void)esl_lib_storage_delete(pawr->storage_handle);
+    (void)esl_lib_storage_delete(&pawr->storage_handle);
     if (pawr->command != NULL) {
       esl_lib_memory_free(pawr->command);
     }
     esl_lib_memory_free(pawr);
   }
-  esl_lib_log_pawr_debug("PAwR cleanup" APP_LOG_NL);
+  esl_lib_log_pawr_debug("PAwR cleanup complete" APP_LOG_NL);
 }
 
 sl_status_t esl_lib_pawr_add_command(esl_lib_pawr_t             *pawr,
@@ -223,7 +229,7 @@ sl_status_t esl_lib_pawr_add_command(esl_lib_pawr_t             *pawr,
                            pawr,
                            cmd->cmd_code);
   } else {
-    esl_lib_log_pawr_error(PAWR_FMT "Add command %d failed, sc = %04x" APP_LOG_NL,
+    esl_lib_log_pawr_error(PAWR_FMT "Add command %d failed, sc = 0x%04x" APP_LOG_NL,
                            pawr,
                            cmd->cmd_code,
                            sc);
@@ -234,24 +240,39 @@ sl_status_t esl_lib_pawr_add_command(esl_lib_pawr_t             *pawr,
 void esl_lib_pawr_step(void)
 {
   esl_lib_pawr_t             *pawr;
-  esl_lib_command_list_cmd_t *cmd;
 
   SL_SLIST_FOR_EACH_ENTRY(pawr_list, pawr, esl_lib_pawr_t, node) {
-    if (pawr->command_complete) {
-      // If there is an ongoing but complete command, remove that.
-      if (pawr->command != NULL) {
+    uint8_t burst_count = PAWR_DATA_MAX_BURST_READ;
+    // Move and execute next command.
+    while ((pawr->command = esl_lib_command_list_get(&pawr->command_list)) != NULL
+           && burst_count--) {
+      sl_status_t sc;
+
+      esl_lib_log_pawr_debug(PAWR_FMT "Execute command burst, cmd = %d, cycles left %u" APP_LOG_NL,
+                             pawr,
+                             pawr->command->cmd_code,
+                             burst_count);
+      sc = run_command(pawr->command);
+
+      if (sc == SL_STATUS_TRANSMIT && pawr->command->cmd_code == ESL_LIB_CMD_PAWR_SET_DATA) {
+        esl_lib_log_pawr_debug(PAWR_FMT "BREAK command burst due transmit failure, defer %u cycles" APP_LOG_NL,
+                               pawr,
+                               burst_count);
+        if (pawr->command->data.cmd_pawr_set_data.retry-- != 0) {
+          sl_slist_push(&pawr->command_list, &pawr->command->node); // retry "one step" later, keep command order
+        } else {
+          // Send pawr transmit error event if all retry attempt failed
+          (void)send_pawr_error(pawr,
+                                ESL_LIB_STATUS_PAWR_SET_DATA_FAILED,
+                                sc,
+                                pawr->state);
+          esl_lib_command_list_remove(&pawr->command_list, pawr->command);
+          pawr->command = NULL;
+        }
+        return; // break full PAwR processing cycle anyway, if BT CTRL seems busy
+      } else {
         esl_lib_command_list_remove(&pawr->command_list, pawr->command);
         pawr->command = NULL;
-      }
-      // Move and execute next command.
-      cmd = esl_lib_command_list_get(&pawr->command_list);
-      if (cmd != NULL) {
-        esl_lib_log_pawr_debug(PAWR_FMT "Running next command = %d" APP_LOG_NL,
-                               pawr,
-                               cmd->cmd_code);
-        pawr->command = cmd;
-        pawr->command_complete = false;
-        run_command(pawr->command);
       }
     }
   }
@@ -327,7 +348,7 @@ void esl_lib_pawr_on_bt_event(sl_bt_msg_t *evt)
       break;
   }
   if (sc != SL_STATUS_OK && pawr_ptr != NULL) {
-    esl_lib_log_pawr_error(PAWR_FMT "PAwR error, PAwR handle = %u, sc = %04x" APP_LOG_NL,
+    esl_lib_log_pawr_error(PAWR_FMT "PAwR error, PAwR handle = %u, sc = 0x%04x" APP_LOG_NL,
                            pawr_ptr,
                            pawr_ptr->pawr_handle,
                            sc);
@@ -423,7 +444,7 @@ static sl_status_t send_pawr_error(esl_lib_pawr_t       *pawr,
   return sc;
 }
 
-static void run_command(esl_lib_command_list_cmd_t *cmd)
+static sl_status_t run_command(esl_lib_command_list_cmd_t *cmd)
 {
   sl_status_t          sc                = SL_STATUS_OK;
   esl_lib_pawr_t       *pawr             = NULL;
@@ -476,29 +497,38 @@ static void run_command(esl_lib_command_list_cmd_t *cmd)
           send_pawr_status(pawr);
         }
       }
-      pawr->command_complete = true;
       break;
     case ESL_LIB_CMD_PAWR_SET_DATA:
       lib_status = ESL_LIB_STATUS_PAWR_SET_DATA_FAILED;
       pawr = (esl_lib_pawr_t *)cmd->data.cmd_pawr_set_data.pawr_handle;
-      esl_lib_log_pawr_debug(PAWR_FMT "Set data command, PAwR handle = %u" APP_LOG_NL,
-                             pawr,
-                             pawr->pawr_handle);
+      // is it a retry attempt?
+      uint8_t retry_count = ESL_LIB_PAWR_SET_DATA_RETRY_COUNT_MAX - cmd->data.cmd_pawr_set_data.retry;
+
+      if (retry_count) {
+        esl_lib_log_pawr_warning("Retry set data %d / %d" APP_LOG_NL,
+                                 (retry_count),
+                                 ESL_LIB_PAWR_SET_DATA_RETRY_COUNT_MAX);
+      } else {
+        esl_lib_log_pawr_debug(PAWR_FMT "Set data command, PAwR handle = %u" APP_LOG_NL,
+                               pawr,
+                               pawr->pawr_handle);
+      }
 
       sc = sl_bt_pawr_advertiser_set_subevent_data(pawr->pawr_handle,
                                                    cmd->data.cmd_pawr_set_data.subevent,
                                                    0,
-                                                   pawr->config.response_slot.count,
+                                                   cmd->data.cmd_pawr_set_data.response_slot_max,
                                                    cmd->data.cmd_pawr_set_data.data.len,
                                                    cmd->data.cmd_pawr_set_data.data.data);
 
       if (sc == SL_STATUS_OK) {
-        esl_lib_log_pawr_debug(PAWR_FMT "Set data command succeeded, PAwR handle = %u" APP_LOG_NL,
+        esl_lib_log_pawr_debug(PAWR_FMT "Set data for subevent %u with %u expected responses, PAwR handle = %u" APP_LOG_NL,
                                pawr,
+                               cmd->data.cmd_pawr_set_data.subevent,
+                               cmd->data.cmd_pawr_set_data.response_slot_max,
                                pawr->pawr_handle);
         lib_status = ESL_LIB_STATUS_NO_ERROR;
       }
-      pawr->command_complete = true;
       break;
     case ESL_LIB_CMD_PAWR_CONFIGURE:
       pawr = (esl_lib_pawr_t *)cmd->data.cmd_pawr_config.pawr_handle;
@@ -512,28 +542,33 @@ static void run_command(esl_lib_command_list_cmd_t *cmd)
       lib_status = ESL_LIB_STATUS_NO_ERROR;
       // Set configured
       pawr->configured = ESL_LIB_TRUE;
-      pawr->command_complete = true;
       break;
     case ESL_LIB_CMD_GET_PAWR_STATUS:
       pawr = (esl_lib_pawr_t *)cmd->data.cmd_get_pawr_status;
       send_pawr_status(pawr);
       sc = SL_STATUS_OK;
       lib_status = ESL_LIB_STATUS_NO_ERROR;
-      pawr->command_complete = true;
       break;
     default:
       break;
   }
   if (sc != SL_STATUS_OK && pawr != NULL) {
-    esl_lib_log_pawr_error(PAWR_FMT "Command error, PAwR handle = %u, sc = %04x" APP_LOG_NL,
-                           pawr,
-                           pawr->pawr_handle,
-                           sc);
-
-    // Send connection error if connection is present.
-    (void)send_pawr_error(pawr,
-                          lib_status,
-                          sc,
-                          pawr->state);
+    if (!(pawr->command->cmd_code == ESL_LIB_CMD_PAWR_SET_DATA
+          && (sc == SL_STATUS_BT_CTRL_COMMAND_DISALLOWED
+              || sc == SL_STATUS_BT_CTRL_PAWR_TOO_LATE
+              || sc == SL_STATUS_BT_CTRL_PAWR_TOO_EARLY))) {
+      esl_lib_log_pawr_error(PAWR_FMT "Command error, PAwR handle = %u, sc = 0x%04x" APP_LOG_NL,
+                             pawr,
+                             pawr->pawr_handle,
+                             sc);
+      // Send pawr error event immediately in almost all cases, but various set data issues
+      (void)send_pawr_error(pawr,
+                            lib_status,
+                            sc,
+                            pawr->state);
+    } else {
+      sc = SL_STATUS_TRANSMIT; // Convert to common status code for those set of failures
+    }
   }
+  return sc;
 }
